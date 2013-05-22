@@ -18,13 +18,40 @@ namespace vl
 DataGridItemProvider
 ***********************************************************************/
 
+				void DataGridItemProvider::InvokeOnItemModified(vint start, vint count, vint newCount)
+				{
+					for(vint i=0;i<itemProviderCallbacks.Count();i++)
+					{
+						itemProviderCallbacks[i]->OnItemModified(start, count, newCount);
+					}
+				}
+
+				void DataGridItemProvider::InvokeOnColumnChanged()
+				{
+					for(vint i=0;i<columnItemViewCallbacks.Count();i++)
+					{
+						columnItemViewCallbacks[i]->OnColumnChanged();
+					}
+				}
+
 				DataGridItemProvider::DataGridItemProvider(IDataProvider* _dataProvider)
 					:dataProvider(_dataProvider)
+					,sortingColumn(-1)
+					,sortingColumnAscending(true)
 				{
 				}
 
 				DataGridItemProvider::~DataGridItemProvider()
 				{
+				}
+
+				void DataGridItemProvider::SortByColumn(vint column, bool ascending)
+				{
+					sortingColumn=column;
+					sortingColumnAscending=ascending;
+					dataProvider->SortByColumn(column, ascending);
+					InvokeOnColumnChanged();
+					InvokeOnItemModified(0, dataProvider->GetRowCount(), dataProvider->GetRowCount());
 				}
 
 // ===================== GuiListControl::IItemProvider =====================
@@ -195,7 +222,16 @@ DataGridItemProvider
 
 				GuiListViewColumnHeader::ColumnSortingState DataGridItemProvider::GetSortingState(vint index)
 				{
-					return GuiListViewColumnHeader::NotSorted;
+					if(index==sortingColumn)
+					{
+						return sortingColumnAscending
+							?GuiListViewColumnHeader::Ascending
+							:GuiListViewColumnHeader::Descending;
+					}
+					else
+					{
+						return GuiListViewColumnHeader::NotSorted;
+					}
 				}
 				
 /***********************************************************************
@@ -340,11 +376,33 @@ GuiVirtualDataGrid
 
 			using namespace list;
 
+			void GuiVirtualDataGrid::OnColumnClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiItemEventArgs& arguments)
+			{
+				if(dataProvider->IsColumnSortable(arguments.itemIndex))
+				{
+					switch(itemProvider->GetSortingState(arguments.itemIndex))
+					{
+					case GuiListViewColumnHeader::NotSorted:
+						itemProvider->SortByColumn(arguments.itemIndex, true);
+						break;
+					case GuiListViewColumnHeader::Ascending:
+						itemProvider->SortByColumn(arguments.itemIndex, false);
+						break;
+					case GuiListViewColumnHeader::Descending:
+						itemProvider->SortByColumn(-1);
+						break;
+					}
+				}
+			}
+
 			GuiVirtualDataGrid::GuiVirtualDataGrid(IStyleProvider* _styleProvider, list::IDataProvider* _dataProvider)
 				:GuiVirtualListView(_styleProvider, new DataGridItemProvider(_dataProvider))
 				,dataProvider(_dataProvider)
 			{
+				itemProvider=dynamic_cast<DataGridItemProvider*>(GetItemProvider());
 				ChangeItemStyle(new DatagridContentProvider);
+
+				ColumnClicked.AttachMethod(this, &GuiVirtualDataGrid::OnColumnClicked);
 			}
 
 			GuiVirtualDataGrid::~GuiVirtualDataGrid()
