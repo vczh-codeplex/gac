@@ -190,9 +190,11 @@ TestWindow
 	{
 	protected:
 		Array<vint>			columnSizes;
+		bool				displayAscending;
 	public:
 		DataProvider()
 			:columnSizes(10)
+			,displayAscending(true)
 		{
 			for(vint i=0;i<10;i++)
 			{
@@ -227,6 +229,16 @@ TestWindow
 			columnSizes[column]=value;
 		}
 
+		bool IsColumnSortable(vint column)override
+		{
+			return column==0;
+		}
+
+		void SortByColumn(vint column, bool ascending)override
+		{
+			displayAscending=column==-1?true:ascending;
+		}
+
 		vint GetRowCount()override
 		{
 			return 9;
@@ -234,6 +246,7 @@ TestWindow
 
 		WString GetCellText(vint row, vint column)override
 		{
+			if(!displayAscending) row=GetRowCount()-row-1;
 			if(column==0)
 			{
 				return itow(row+1);

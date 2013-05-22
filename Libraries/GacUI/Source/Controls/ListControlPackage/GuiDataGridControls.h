@@ -46,6 +46,14 @@ Datagrid Interfaces
 					/// <param name="column">The index of the column.</param>
 					/// <param name="value">The new size of the column.</param>
 					virtual void							SetColumnSize(vint column, vint value)=0;
+					/// <summary>Test is a column sortable.</summary>
+					/// <returns>Returns true if this column is sortable.</returns>
+					/// <param name="column">The index of the column.</param>
+					virtual bool							IsColumnSortable(vint column)=0;
+					/// <summary>Set the column sorting state to update the data.</summary>
+					/// <param name="column">The index of the column. Set to -1 means go back to the unsorted state.</param>
+					/// <param name="ascending">Set to true if the data is sorted in ascending order.</param>
+					virtual void							SortByColumn(vint column, bool ascending)=0;
 					
 					/// <summary>Get the number of all rows.</summary>
 					/// <returns>The number of all rows.</returns>
@@ -65,21 +73,27 @@ Datagrid ItemProvider
 				class DataGridItemProvider
 					: public Object
 					, public virtual GuiListControl::IItemProvider
-					, protected virtual GuiListControl::IItemPrimaryTextView
-					, protected virtual ListViewItemStyleProvider::IListViewItemView
-					, protected virtual ListViewColumnItemArranger::IColumnItemView
+					, public virtual GuiListControl::IItemPrimaryTextView
+					, public virtual ListViewItemStyleProvider::IListViewItemView
+					, public virtual ListViewColumnItemArranger::IColumnItemView
 					, public Description<DataGridItemProvider>
 				{
 				protected:
 					IDataProvider*																dataProvider;
 					collections::List<GuiListControl::IItemProviderCallback*>					itemProviderCallbacks;
 					collections::List<ListViewColumnItemArranger::IColumnItemViewCallback*>		columnItemViewCallbacks;
+					vint																		sortingColumn;
+					bool																		sortingColumnAscending;
 
+					void											InvokeOnItemModified(vint start, vint count, vint newCount);
+					void											InvokeOnColumnChanged();
 				public:
 					/// <summary>Create the content provider.</summary>
 					/// <param name="_dataProvider">The data provider for this control.</param>
 					DataGridItemProvider(IDataProvider* _dataProvider);
 					~DataGridItemProvider();
+
+					void											SortByColumn(vint column, bool ascending=true);
 
 					// ===================== GuiListControl::IItemProvider =====================
 
@@ -88,7 +102,6 @@ Datagrid ItemProvider
 					vint											Count()override;
 					IDescriptable*									RequestView(const WString& identifier)override;
 					void											ReleaseView(IDescriptable* view)override;
-				protected:
 
 					// ===================== GuiListControl::IItemPrimaryTextView =====================
 
@@ -174,10 +187,11 @@ DataGrid Control
 			/// <summary>Data grid control in virtual mode.</summary>
 			class GuiVirtualDataGrid : public GuiVirtualListView, public Description<GuiVirtualDataGrid>
 			{
-			public:
-
 			protected:
+				list::DataGridItemProvider*						itemProvider;
 				Ptr<list::IDataProvider>						dataProvider;
+
+				void											OnColumnClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiItemEventArgs& arguments);
 			public:
 				/// <summary>Create a data grid control in virtual mode.</summary>
 				/// <param name="_styleProvider">The style provider for this control.</param>
