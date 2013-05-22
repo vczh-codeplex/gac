@@ -211,7 +211,7 @@ TestWindow
 		{
 			if(column==0)
 			{
-				return L"";
+				return displayAscending?L"Ascending":L"Descending";
 			}
 			else
 			{
