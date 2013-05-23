@@ -244,6 +244,11 @@ TestWindow
 			return 9;
 		}
 
+		Ptr<GuiImageData> GetRowImage(vint row)override
+		{
+			return 0;
+		}
+
 		WString GetCellText(vint row, vint column)override
 		{
 			if(!displayAscending) row=GetRowCount()-row-1;
@@ -255,6 +260,15 @@ TestWindow
 			{
 				return itow(row+1)+L" * "+itow(column)+L" = "+itow((row+1)*column);
 			}
+		}
+
+		list::IDataVisualizerFactory* GetCellDataVisualizerFactory(vint row, vint column)override
+		{
+			return 0;
+		}
+
+		void VisualizeCell(vint row, vint column, list::IDataVisualizer* dataVisualizer)override
+		{
 		}
 	};
 
