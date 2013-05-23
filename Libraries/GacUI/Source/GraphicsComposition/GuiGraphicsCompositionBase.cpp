@@ -550,6 +550,47 @@ GuiGraphicsSite
 			{
 				return GetBoundsInternal(Rect(Point(0, 0), GetMinPreferredClientSize()));
 			}
+
+/***********************************************************************
+Helper Functions
+***********************************************************************/
+
+			void SafeDeleteControl(controls::GuiControl* value)
+			{
+				if(value)
+				{
+					GuiGraphicsComposition* bounds=value->GetBoundsComposition();
+					if(bounds->GetParent())
+					{
+						bounds->GetParent()->RemoveChild(bounds);
+					}
+					delete value;
+				}
+			}
+
+			void SafeDeleteComposition(GuiGraphicsComposition* value)
+			{
+				if(value)
+				{
+					if(value->GetParent())
+					{
+						value->GetParent()->RemoveChild(value);
+					}
+
+					if(value->GetAssociatedControl())
+					{
+						SafeDeleteControl(value->GetAssociatedControl());
+					}
+					else
+					{
+						for(vint i=value->Children().Count()-1;i>=0;i--)
+						{
+							SafeDeleteComposition(value->Children().Get(i));
+						}
+						delete value;
+					}
+				}
+			}
 		}
 	}
 }
