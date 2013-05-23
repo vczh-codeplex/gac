@@ -13,6 +13,32 @@ namespace vl
 			{
 
 				const wchar_t* const IDataProvider::Identifier = L"vl::presentation::controls::list::IDataProvider";
+				
+/***********************************************************************
+ListViewMainColumnDataVisualizer
+***********************************************************************/
+
+				compositions::GuiBoundsComposition* ListViewMainColumnDataVisualizer::CreateBoundsCompositionInternal()
+				{
+					return 0;
+				}
+
+				void ListViewMainColumnDataVisualizer::BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)
+				{
+				}
+				
+/***********************************************************************
+ListViewSubColumnDataVisualizer
+***********************************************************************/
+
+				compositions::GuiBoundsComposition* ListViewSubColumnDataVisualizer::CreateBoundsCompositionInternal()
+				{
+					return 0;
+				}
+
+				void ListViewSubColumnDataVisualizer::BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)
+				{
+				}
 
 /***********************************************************************
 DataGridItemProvider
@@ -134,7 +160,7 @@ DataGridItemProvider
 
 				Ptr<GuiImageData> DataGridItemProvider::GetSmallImage(vint itemIndex)
 				{
-					return 0;
+					return dataProvider->GetRowImage(itemIndex);
 				}
 
 				Ptr<GuiImageData> DataGridItemProvider::GetLargeImage(vint itemIndex)
@@ -235,10 +261,10 @@ DataGridItemProvider
 				}
 				
 /***********************************************************************
-DatagridContentProvider
+DataGridContentProvider
 ***********************************************************************/
 
-				DatagridContentProvider::ItemContent::ItemContent(GuiListControl::IItemProvider* _itemProvider)
+				DataGridContentProvider::ItemContent::ItemContent(GuiListControl::IItemProvider* _itemProvider)
 					:contentComposition(0)
 					,itemProvider(_itemProvider)
 				{
@@ -256,7 +282,7 @@ DatagridContentProvider
 					contentComposition->AddChild(textTable);
 				}
 
-				DatagridContentProvider::ItemContent::~ItemContent()
+				DataGridContentProvider::ItemContent::~ItemContent()
 				{
 					if(columnItemView)
 					{
@@ -264,17 +290,17 @@ DatagridContentProvider
 					}
 				}
 
-				compositions::GuiBoundsComposition* DatagridContentProvider::ItemContent::GetContentComposition()
+				compositions::GuiBoundsComposition* DataGridContentProvider::ItemContent::GetContentComposition()
 				{
 					return contentComposition;
 				}
 
-				compositions::GuiBoundsComposition* DatagridContentProvider::ItemContent::GetBackgroundDecorator()
+				compositions::GuiBoundsComposition* DataGridContentProvider::ItemContent::GetBackgroundDecorator()
 				{
 					return 0;
 				}
 
-				void DatagridContentProvider::ItemContent::UpdateSubItemSize()
+				void DataGridContentProvider::ItemContent::UpdateSubItemSize()
 				{
 					vint columnCount=columnItemView->GetColumnCount();
 					for(vint i=0;i<columnCount;i++)
@@ -284,7 +310,7 @@ DatagridContentProvider
 					textTable->UpdateCellBounds();
 				}
 
-				void DatagridContentProvider::ItemContent::Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, vint itemIndex)
+				void DataGridContentProvider::ItemContent::Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, vint itemIndex)
 				{
 					for(vint i=0;i<textTable->GetColumns();i++)
 					{
@@ -307,7 +333,7 @@ DatagridContentProvider
 					UpdateSubItemSize();
 				}
 
-				void DatagridContentProvider::OnColumnChanged()
+				void DataGridContentProvider::OnColumnChanged()
 				{
 					vint count=listViewItemStyleProvider->GetCreatedItemStyles().Count();
 					for(vint i=0;i<count;i++)
@@ -321,33 +347,33 @@ DatagridContentProvider
 					}
 				}
 
-				DatagridContentProvider::DatagridContentProvider()
+				DataGridContentProvider::DataGridContentProvider()
 					:itemProvider(0)
 					,columnItemView(0)
 					,listViewItemStyleProvider(0)
 				{
 				}
 
-				DatagridContentProvider::~DatagridContentProvider()
+				DataGridContentProvider::~DataGridContentProvider()
 				{
 				}
 
-				GuiListControl::IItemCoordinateTransformer* DatagridContentProvider::CreatePreferredCoordinateTransformer()
+				GuiListControl::IItemCoordinateTransformer* DataGridContentProvider::CreatePreferredCoordinateTransformer()
 				{
 					return new DefaultItemCoordinateTransformer;
 				}
 
-				GuiListControl::IItemArranger* DatagridContentProvider::CreatePreferredArranger()
+				GuiListControl::IItemArranger* DataGridContentProvider::CreatePreferredArranger()
 				{
 					return new ListViewColumnItemArranger;
 				}
 
-				ListViewItemStyleProvider::IListViewItemContent* DatagridContentProvider::CreateItemContent(const FontProperties& font)
+				ListViewItemStyleProvider::IListViewItemContent* DataGridContentProvider::CreateItemContent(const FontProperties& font)
 				{
 					return new ItemContent(itemProvider);
 				}
 
-				void DatagridContentProvider::AttachListControl(GuiListControl* value)
+				void DataGridContentProvider::AttachListControl(GuiListControl* value)
 				{
 					listViewItemStyleProvider=dynamic_cast<ListViewItemStyleProvider*>(value->GetStyleProvider());
 					itemProvider=value->GetItemProvider();
@@ -358,7 +384,7 @@ DatagridContentProvider
 					}
 				}
 
-				void DatagridContentProvider::DetachListControl()
+				void DataGridContentProvider::DetachListControl()
 				{
 					if(columnItemView)
 					{
@@ -400,7 +426,7 @@ GuiVirtualDataGrid
 				,dataProvider(_dataProvider)
 			{
 				itemProvider=dynamic_cast<DataGridItemProvider*>(GetItemProvider());
-				ChangeItemStyle(new DatagridContentProvider);
+				ChangeItemStyle(new DataGridContentProvider);
 
 				ColumnClicked.AttachMethod(this, &GuiVirtualDataGrid::OnColumnClicked);
 			}
