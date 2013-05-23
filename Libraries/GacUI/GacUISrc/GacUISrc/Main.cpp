@@ -288,6 +288,8 @@ TestWindow
 
 			dataGrid=new GuiVirtualDataGrid(GetCurrentTheme()->CreateListViewStyle(), new DataProvider);
 			dataGrid->GetBoundsComposition()->SetAlignmentToParent(Margin(5, 5, 5, 5));
+			dataGrid->SetHorizontalAlwaysVisible(false);
+			dataGrid->SetVerticalAlwaysVisible(false);
 			AddChild(dataGrid);
 		}
 
