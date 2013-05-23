@@ -317,6 +317,15 @@ DataGridItemProvider
 DataGridContentProvider
 ***********************************************************************/
 
+				void DataGridContentProvider::ItemContent::RemoveCells()
+				{
+					for(vint i=0;i<textTable->GetColumns();i++)
+					{
+						GuiCellComposition* cell=textTable->GetSitedCell(0, i);
+						SafeDeleteComposition(cell);
+					}
+				}
+
 				IDataVisualizerFactory* DataGridContentProvider::ItemContent::GetDataVisualizerFactory(vint row, vint column)
 				{
 					IDataVisualizerFactory* factory=dataProvider->GetCellDataVisualizerFactory(row, column);
@@ -357,6 +366,7 @@ DataGridContentProvider
 				DataGridContentProvider::ItemContent::~ItemContent()
 				{
 					dataVisualizers.Resize(0);
+					RemoveCells();
 					if(columnItemView)
 					{
 						itemProvider->ReleaseView(columnItemView);
@@ -413,13 +423,7 @@ DataGridContentProvider
 							IDataVisualizerFactory* factory=GetDataVisualizerFactory(itemIndex, i);
 							dataVisualizers[i]=factory->CreateVisualizer(font, styleProvider);
 						}
-
-						for(vint i=0;i<textTable->GetColumns();i++)
-						{
-							GuiCellComposition* cell=textTable->GetSitedCell(0, i);
-							textTable->RemoveChild(cell);
-							delete cell;
-						}
+						RemoveCells();
 
 						textTable->SetRowsAndColumns(1, columnCount);
 						for(vint i=0;i<columnCount;i++)

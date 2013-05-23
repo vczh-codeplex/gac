@@ -270,6 +270,19 @@ TestWindow
 		void VisualizeCell(vint row, vint column, list::IDataVisualizer* dataVisualizer)override
 		{
 		}
+
+		list::IDataEditorFactory* GetCellDataEditorFactory(vint row, vint column)override
+		{
+			return 0;
+		}
+
+		void BeforeEditCell(vint row, vint column, list::IDataEditor* dataEditor)override
+		{
+		}
+
+		void AfterEditCell(vint row, vint column, list::IDataEditor* dataEditor)override
+		{
+		}
 	};
 
 	class TestWindow : public GuiWindow

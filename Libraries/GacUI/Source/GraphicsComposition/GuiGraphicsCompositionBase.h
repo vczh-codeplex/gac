@@ -240,6 +240,18 @@ Basic Construction
 				Size								GetMinPreferredClientSize()override;
 				Rect								GetPreferredBounds()override;
 			};
+
+/***********************************************************************
+Helper Functions
+***********************************************************************/
+
+			/// <summary>Safely remove and delete a control.</summary>
+			/// <param name="value">The control to delete.</param>
+			extern void								SafeDeleteControl(controls::GuiControl* value);
+
+			/// <summary>Safely remove and delete a composition. If some sub compositions are controls, those controls will be deleted too.</summary>
+			/// <param name="value">The composition to delete.</param>
+			extern void								SafeDeleteComposition(GuiGraphicsComposition* value);
 		}
 	}
 }
