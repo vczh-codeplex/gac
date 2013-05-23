@@ -289,8 +289,6 @@ TestWindow
 			dataGrid=new GuiVirtualDataGrid(GetCurrentTheme()->CreateListViewStyle(), new DataProvider);
 			dataGrid->GetBoundsComposition()->SetAlignmentToParent(Margin(5, 5, 5, 5));
 			AddChild(dataGrid);
-
-			dataGrid->ChangeItemStyle(new list::ListViewDetailContentProvider);
 		}
 
 		~TestWindow()

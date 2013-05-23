@@ -34,8 +34,9 @@ Datagrid Interfaces
 				public:
 					/// <summary>Create a data visualizer.</summary>
 					/// <returns>The created data visualizer.</returns>
+					/// <param name="font">The font for the list view control.</param>
 					/// <param name="styleProvider">The style provider for the list view control.</param>
-					virtual IDataVisualizer*							CreateVisualizer(GuiListViewBase::IStyleProvider* styleProvider)=0;
+					virtual Ptr<IDataVisualizer>						CreateVisualizer(const FontProperties& font, GuiListViewBase::IStyleProvider* styleProvider)=0;
 				};
 
 				/// <summary>The visualizer for each cell in [T:vl.presentation.controls.GuiVirtualDataGrid].</summary>
@@ -127,10 +128,11 @@ Visualizer Extensions
 					class Factory : public Object, public virtual IDataVisualizerFactory, public Description<Factory>
 					{
 					public:
-						IDataVisualizer* CreateVisualizer(GuiListViewBase::IStyleProvider* styleProvider)override
+						Ptr<IDataVisualizer> CreateVisualizer(const FontProperties& font, GuiListViewBase::IStyleProvider* styleProvider)override
 						{
 							TVisualizer* dataVisualizer=new TVisualizer;
 							dataVisualizer->factory=this;
+							dataVisualizer->font=font;
 							dataVisualizer->styleProvider=styleProvider;
 							return dataVisualizer;
 						}
@@ -138,6 +140,7 @@ Visualizer Extensions
 
 				protected:
 					Factory*											factory;
+					FontProperties										font;
 					GuiListViewBase::IStyleProvider*					styleProvider;
 					compositions::GuiBoundsComposition*					boundsComposition;
 
@@ -172,18 +175,23 @@ Visualizer Extensions
 				class ListViewMainColumnDataVisualizer : public DataVisualizerBase<ListViewMainColumnDataVisualizer>
 				{
 				protected:
-					compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal()override;
+					elements::GuiImageFrameElement*						image;
+					elements::GuiSolidLabelElement*						text;
 
+					compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal()override;
 				public:
+
 					void												BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)override;
 				};
 
-				class ListViewSubColumnDataVisualizer : public DataVisualizerBase<ListViewMainColumnDataVisualizer>
+				class ListViewSubColumnDataVisualizer : public DataVisualizerBase<ListViewSubColumnDataVisualizer>
 				{
 				protected:
-					compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal()override;
+					elements::GuiSolidLabelElement*						text;
 
+					compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal()override;
 				public:
+
 					void												BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)override;
 				};
 
@@ -273,12 +281,17 @@ Datagrid ContentProvider
 						compositions::GuiBoundsComposition*				contentComposition;
 						compositions::GuiTableComposition*				textTable;
 
+						DataGridContentProvider*						contentProvider;
 						GuiListControl::IItemProvider*					itemProvider;
+						FontProperties									font;
+
 						ListViewColumnItemArranger::IColumnItemView*	columnItemView;
 						IDataProvider*									dataProvider;
+						collections::Array<Ptr<IDataVisualizer>>		dataVisualizers;
 
+						IDataVisualizerFactory*							GetDataVisualizerFactory(vint row, vint column);
 					public:
-						ItemContent(GuiListControl::IItemProvider* _itemProvider);
+						ItemContent(DataGridContentProvider* _contentProvider, GuiListControl::IItemProvider* _itemProvider, const FontProperties& _font);
 						~ItemContent();
 
 						compositions::GuiBoundsComposition*				GetContentComposition()override;
@@ -291,6 +304,8 @@ Datagrid ContentProvider
 					GuiListControl::IItemProvider*						itemProvider;
 					ListViewColumnItemArranger::IColumnItemView*		columnItemView;
 					ListViewItemStyleProvider*							listViewItemStyleProvider;
+					ListViewMainColumnDataVisualizer::Factory			mainColumnDataVisualizerFactory;
+					ListViewSubColumnDataVisualizer::Factory			subColumnDataVisualizerFactory;
 
 					void												OnColumnChanged()override;
 				public:

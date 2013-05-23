@@ -7,6 +7,7 @@ namespace vl
 		namespace controls
 		{
 			using namespace collections;
+			using namespace elements;
 			using namespace compositions;
 
 			namespace list
@@ -20,11 +21,53 @@ ListViewMainColumnDataVisualizer
 
 				compositions::GuiBoundsComposition* ListViewMainColumnDataVisualizer::CreateBoundsCompositionInternal()
 				{
-					return 0;
+					GuiTableComposition* table=new GuiTableComposition;
+					table->SetRowsAndColumns(3, 2);
+					table->SetRowOption(0, GuiCellOption::PercentageOption(0.5));
+					table->SetRowOption(1, GuiCellOption::MinSizeOption());
+					table->SetRowOption(2, GuiCellOption::PercentageOption(0.5));
+					table->SetColumnOption(0, GuiCellOption::MinSizeOption());
+					table->SetColumnOption(1, GuiCellOption::PercentageOption(1.0));
+					table->SetAlignmentToParent(Margin(0, 0, 0, 0));
+					table->SetCellPadding(2);
+					{
+						GuiCellComposition* cell=new GuiCellComposition;
+						table->AddChild(cell);
+						cell->SetSite(1, 0, 1, 1);
+						cell->SetPreferredMinSize(Size(16, 16));
+
+						image=GuiImageFrameElement::Create();
+						image->SetStretch(true);
+						cell->SetOwnedElement(image);
+					}
+					{
+						GuiCellComposition* cell=new GuiCellComposition;
+						table->AddChild(cell);
+						cell->SetSite(0, 1, 3, 1);
+						cell->SetMargin(Margin(0, 0, 8, 0));
+
+						text=GuiSolidLabelElement::Create();
+						text->SetAlignments(Alignment::Left, Alignment::Center);
+						text->SetFont(font);
+						text->SetColor(styleProvider->GetPrimaryTextColor());
+						text->SetEllipse(true);
+						cell->SetOwnedElement(text);
+					}
+					return table;
 				}
 
 				void ListViewMainColumnDataVisualizer::BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)
 				{
+					Ptr<GuiImageData> imageData=dataProvider->GetRowImage(row);
+					if(imageData)
+					{
+						image->SetImage(imageData->GetImage(), imageData->GetFrameIndex());
+					}
+					else
+					{
+						image->SetImage(0);
+					}
+					text->SetText(dataProvider->GetCellText(row, column));
 				}
 				
 /***********************************************************************
@@ -33,11 +76,21 @@ ListViewSubColumnDataVisualizer
 
 				compositions::GuiBoundsComposition* ListViewSubColumnDataVisualizer::CreateBoundsCompositionInternal()
 				{
-					return 0;
+					text=GuiSolidLabelElement::Create();
+					text->SetAlignments(Alignment::Left, Alignment::Center);
+					text->SetFont(font);
+					text->SetColor(styleProvider->GetSecondaryTextColor());
+					text->SetEllipse(true);
+
+					GuiBoundsComposition* composition=new GuiBoundsComposition;
+					composition->SetMargin(Margin(8, 0, 8, 0));
+					composition->SetOwnedElement(text);
+					return composition;
 				}
 
 				void ListViewSubColumnDataVisualizer::BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)
 				{
+					text->SetText(dataProvider->GetCellText(row, column));
 				}
 
 /***********************************************************************
@@ -264,9 +317,28 @@ DataGridItemProvider
 DataGridContentProvider
 ***********************************************************************/
 
-				DataGridContentProvider::ItemContent::ItemContent(GuiListControl::IItemProvider* _itemProvider)
+				IDataVisualizerFactory* DataGridContentProvider::ItemContent::GetDataVisualizerFactory(vint row, vint column)
+				{
+					IDataVisualizerFactory* factory=dataProvider->GetCellDataVisualizerFactory(row, column);
+					if(factory)
+					{
+						return factory;
+					}
+					else if(column==0)
+					{
+						return &contentProvider->mainColumnDataVisualizerFactory;
+					}
+					else
+					{
+						return &contentProvider->subColumnDataVisualizerFactory;
+					}
+				}
+
+				DataGridContentProvider::ItemContent::ItemContent(DataGridContentProvider* _contentProvider, GuiListControl::IItemProvider* _itemProvider, const FontProperties& _font)
 					:contentComposition(0)
+					,contentProvider(_contentProvider)
 					,itemProvider(_itemProvider)
+					,font(_font)
 				{
 					columnItemView=dynamic_cast<ListViewColumnItemArranger::IColumnItemView*>(itemProvider->RequestView(ListViewColumnItemArranger::IColumnItemView::Identifier));
 					dataProvider=dynamic_cast<IDataProvider*>(itemProvider->RequestView(IDataProvider::Identifier));
@@ -284,6 +356,7 @@ DataGridContentProvider
 
 				DataGridContentProvider::ItemContent::~ItemContent()
 				{
+					dataVisualizers.Resize(0);
 					if(columnItemView)
 					{
 						itemProvider->ReleaseView(columnItemView);
@@ -312,23 +385,60 @@ DataGridContentProvider
 
 				void DataGridContentProvider::ItemContent::Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, vint itemIndex)
 				{
-					for(vint i=0;i<textTable->GetColumns();i++)
+					bool refresh=false;
+					if(dataVisualizers.Count()!=columnItemView->GetColumnCount())
 					{
-						GuiCellComposition* cell=textTable->GetSitedCell(0, i);
-						textTable->RemoveChild(cell);
-						delete cell;
+						refresh=true;
+					}
+					else
+					{
+						for(vint i=0;i<dataVisualizers.Count();i++)
+						{
+							IDataVisualizerFactory* factory=dataVisualizers[i]->GetFactory();
+							if(factory!=GetDataVisualizerFactory(itemIndex, i))
+							{
+								refresh=true;
+								break;
+							}
+						}
 					}
 
-					vint columnCount=columnItemView->GetColumnCount();
-					textTable->SetRowsAndColumns(1, columnCount);
-					for(vint i=0;i<columnCount;i++)
+					if(refresh)
 					{
-						GuiCellComposition* cell=new GuiCellComposition;
-						textTable->AddChild(cell);
-						cell->SetSite(0, i, 1, 1);
-						cell->SetMargin(Margin(8, 0, 8, 0));
+						vint columnCount=columnItemView->GetColumnCount();
 
-						//////////////////////////////
+						dataVisualizers.Resize(columnCount);
+						for(vint i=0;i<dataVisualizers.Count();i++)
+						{
+							IDataVisualizerFactory* factory=GetDataVisualizerFactory(itemIndex, i);
+							dataVisualizers[i]=factory->CreateVisualizer(font, styleProvider);
+						}
+
+						for(vint i=0;i<textTable->GetColumns();i++)
+						{
+							GuiCellComposition* cell=textTable->GetSitedCell(0, i);
+							textTable->RemoveChild(cell);
+							delete cell;
+						}
+
+						textTable->SetRowsAndColumns(1, columnCount);
+						for(vint i=0;i<columnCount;i++)
+						{
+							GuiCellComposition* cell=new GuiCellComposition;
+							textTable->AddChild(cell);
+							cell->SetSite(0, i, 1, 1);
+
+							GuiBoundsComposition* composition=dataVisualizers[i]->GetBoundsComposition();
+							composition->SetAlignmentToParent(Margin(0, 0, 0, 0));
+							cell->AddChild(composition);
+						}
+					}
+
+					for(vint i=0;i<dataVisualizers.Count();i++)
+					{
+						IDataVisualizer* dataVisualizer=dataVisualizers[i].Obj();
+						dataVisualizer->BeforeVisualizerCell(dataProvider, itemIndex, i);
+						dataProvider->VisualizeCell(itemIndex, i, dataVisualizer);
 					}
 					UpdateSubItemSize();
 				}
@@ -370,7 +480,7 @@ DataGridContentProvider
 
 				ListViewItemStyleProvider::IListViewItemContent* DataGridContentProvider::CreateItemContent(const FontProperties& font)
 				{
-					return new ItemContent(itemProvider);
+					return new ItemContent(this, itemProvider, font);
 				}
 
 				void DataGridContentProvider::AttachListControl(GuiListControl* value)
