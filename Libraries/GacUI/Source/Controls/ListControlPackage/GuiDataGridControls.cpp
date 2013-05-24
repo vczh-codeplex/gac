@@ -16,6 +16,43 @@ namespace vl
 				const wchar_t* const IDataProvider::Identifier = L"vl::presentation::controls::list::IDataProvider";
 				
 /***********************************************************************
+DataVisualizerBase
+***********************************************************************/
+
+				DataVisualizerBase::DataVisualizerBase()
+					:factory(0)
+					,styleProvider(0)
+					,boundsComposition(0)
+				{
+				}
+
+				DataVisualizerBase::~DataVisualizerBase()
+				{
+					if(boundsComposition)
+					{
+						SafeDeleteComposition(boundsComposition);
+					}
+				}
+
+				IDataVisualizerFactory* DataVisualizerBase::GetFactory()
+				{
+					return factory;
+				}
+
+				compositions::GuiBoundsComposition* DataVisualizerBase::GetBoundsComposition()
+				{
+					if(!boundsComposition)
+					{
+						boundsComposition=CreateBoundsCompositionInternal();
+					}
+					return boundsComposition;
+				}
+
+				void DataVisualizerBase::BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)
+				{
+				}
+				
+/***********************************************************************
 ListViewMainColumnDataVisualizer
 ***********************************************************************/
 
@@ -314,7 +351,7 @@ DataGridItemProvider
 				}
 				
 /***********************************************************************
-DataGridContentProvider
+DataGridContentProvider::ItemContent
 ***********************************************************************/
 
 				void DataGridContentProvider::ItemContent::RemoveCells()
@@ -328,7 +365,7 @@ DataGridContentProvider
 
 				IDataVisualizerFactory* DataGridContentProvider::ItemContent::GetDataVisualizerFactory(vint row, vint column)
 				{
-					IDataVisualizerFactory* factory=dataProvider->GetCellDataVisualizerFactory(row, column);
+					IDataVisualizerFactory* factory=contentProvider->dataProvider->GetCellDataVisualizerFactory(row, column);
 					if(factory)
 					{
 						return factory;
@@ -343,15 +380,41 @@ DataGridContentProvider
 					}
 				}
 
-				DataGridContentProvider::ItemContent::ItemContent(DataGridContentProvider* _contentProvider, GuiListControl::IItemProvider* _itemProvider, const FontProperties& _font)
+				vint DataGridContentProvider::ItemContent::GetCellColumnIndex(compositions::GuiGraphicsComposition* composition)
+				{
+					for(vint i=0;i<textTable->GetColumns();i++)
+					{
+						GuiCellComposition* cell=textTable->GetSitedCell(0, i);
+						if(composition==cell)
+						{
+							return i;
+						}
+					}
+					return -1;
+				}
+
+				void DataGridContentProvider::ItemContent::OnCellMouseUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
+				{
+					vint index=GetCellColumnIndex(sender);
+					if(index!=-1)
+					{
+						IDataEditorFactory* factory=contentProvider->dataProvider->GetCellDataEditorFactory(currentRow, index);
+						IDataEditor* editor=contentProvider->OpenEditor(true, currentRow, index, factory);
+						if(editor)
+						{
+							GuiCellComposition* cell=dynamic_cast<GuiCellComposition*>(sender);
+							editor->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+							cell->AddChild(editor->GetBoundsComposition());
+						}
+					}
+				}
+
+				DataGridContentProvider::ItemContent::ItemContent(DataGridContentProvider* _contentProvider, const FontProperties& _font)
 					:contentComposition(0)
 					,contentProvider(_contentProvider)
-					,itemProvider(_itemProvider)
 					,font(_font)
+					,currentRow(-1)
 				{
-					columnItemView=dynamic_cast<ListViewColumnItemArranger::IColumnItemView*>(itemProvider->RequestView(ListViewColumnItemArranger::IColumnItemView::Identifier));
-					dataProvider=dynamic_cast<IDataProvider*>(itemProvider->RequestView(IDataProvider::Identifier));
-
 					contentComposition=new GuiBoundsComposition;
 					contentComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 
@@ -367,10 +430,6 @@ DataGridContentProvider
 				{
 					dataVisualizers.Resize(0);
 					RemoveCells();
-					if(columnItemView)
-					{
-						itemProvider->ReleaseView(columnItemView);
-					}
 				}
 
 				compositions::GuiBoundsComposition* DataGridContentProvider::ItemContent::GetContentComposition()
@@ -385,18 +444,19 @@ DataGridContentProvider
 
 				void DataGridContentProvider::ItemContent::UpdateSubItemSize()
 				{
-					vint columnCount=columnItemView->GetColumnCount();
+					vint columnCount=contentProvider->columnItemView->GetColumnCount();
 					for(vint i=0;i<columnCount;i++)
 					{
-						textTable->SetColumnOption(i, GuiCellOption::AbsoluteOption(columnItemView->GetColumnSize(i)));
+						textTable->SetColumnOption(i, GuiCellOption::AbsoluteOption(contentProvider->columnItemView->GetColumnSize(i)));
 					}
 					textTable->UpdateCellBounds();
 				}
 
 				void DataGridContentProvider::ItemContent::Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, vint itemIndex)
 				{
+					currentRow=itemIndex;
 					bool refresh=false;
-					if(dataVisualizers.Count()!=columnItemView->GetColumnCount())
+					if(dataVisualizers.Count()!=contentProvider->columnItemView->GetColumnCount())
 					{
 						refresh=true;
 					}
@@ -415,7 +475,7 @@ DataGridContentProvider
 
 					if(refresh)
 					{
-						vint columnCount=columnItemView->GetColumnCount();
+						vint columnCount=contentProvider->columnItemView->GetColumnCount();
 
 						dataVisualizers.Resize(columnCount);
 						for(vint i=0;i<dataVisualizers.Count();i++)
@@ -431,6 +491,7 @@ DataGridContentProvider
 							GuiCellComposition* cell=new GuiCellComposition;
 							textTable->AddChild(cell);
 							cell->SetSite(0, i, 1, 1);
+							cell->GetEventReceiver()->leftButtonUp.AttachMethod(this, &ItemContent::OnCellMouseUp);
 
 							GuiBoundsComposition* composition=dataVisualizers[i]->GetBoundsComposition();
 							composition->SetAlignmentToParent(Margin(0, 0, 0, 0));
@@ -441,11 +502,15 @@ DataGridContentProvider
 					for(vint i=0;i<dataVisualizers.Count();i++)
 					{
 						IDataVisualizer* dataVisualizer=dataVisualizers[i].Obj();
-						dataVisualizer->BeforeVisualizerCell(dataProvider, itemIndex, i);
-						dataProvider->VisualizeCell(itemIndex, i, dataVisualizer);
+						dataVisualizer->BeforeVisualizerCell(contentProvider->dataProvider, itemIndex, i);
+						contentProvider->dataProvider->VisualizeCell(itemIndex, i, dataVisualizer);
 					}
 					UpdateSubItemSize();
 				}
+				
+/***********************************************************************
+DataGridContentProvider
+***********************************************************************/
 
 				void DataGridContentProvider::OnColumnChanged()
 				{
@@ -461,15 +526,77 @@ DataGridContentProvider
 					}
 				}
 
+				void DataGridContentProvider::OnAttached(GuiListControl::IItemProvider* provider)
+				{
+				}
+
+				void DataGridContentProvider::OnItemModified(vint start, vint count, vint newCount)
+				{
+					if(!currentEditorRequestingSaveData)
+					{
+						CloseEditor(false);
+					}
+				}
+
+				void DataGridContentProvider::RequestSaveData()
+				{
+					if(currentEditor)
+					{
+						currentEditorRequestingSaveData=true;
+						dataProvider->SaveCellData(editingRow, editingColumn, currentEditor.Obj());
+						currentEditorRequestingSaveData=false;
+					}
+				}
+
+				IDataEditor* DataGridContentProvider::OpenEditor(bool saveData, vint row, vint column, IDataEditorFactory* editorFactory)
+				{
+					CloseEditor(saveData);
+					if(editorFactory)
+					{
+						editingRow=row;
+						editingColumn=column;
+						currentEditor=editorFactory->CreateEditor(this);
+						currentEditor->BeforeEditCell(dataProvider, row, column);
+						dataProvider->BeforeEditCell(row, column, currentEditor.Obj());
+					}
+					return currentEditor.Obj();
+				}
+
+				void DataGridContentProvider::CloseEditor(bool saveData)
+				{
+					if(currentEditor)
+					{
+						if(saveData)
+						{
+							RequestSaveData();
+						}
+
+						GuiGraphicsComposition* composition=currentEditor->GetBoundsComposition();
+						if(composition->GetParent())
+						{
+							composition->GetParent()->RemoveChild(composition);
+						}
+
+						editingRow=-1;
+						editingColumn=-1;
+						currentEditor=0;
+					}
+				}
+
 				DataGridContentProvider::DataGridContentProvider()
 					:itemProvider(0)
 					,columnItemView(0)
+					,dataProvider(0)
 					,listViewItemStyleProvider(0)
+					,editingRow(-1)
+					,editingColumn(-1)
+					,currentEditorRequestingSaveData(false)
 				{
 				}
 
 				DataGridContentProvider::~DataGridContentProvider()
 				{
+					CloseEditor(true);
 				}
 
 				GuiListControl::IItemCoordinateTransformer* DataGridContentProvider::CreatePreferredCoordinateTransformer()
@@ -484,27 +611,32 @@ DataGridContentProvider
 
 				ListViewItemStyleProvider::IListViewItemContent* DataGridContentProvider::CreateItemContent(const FontProperties& font)
 				{
-					return new ItemContent(this, itemProvider, font);
+					return new ItemContent(this, font);
 				}
 
 				void DataGridContentProvider::AttachListControl(GuiListControl* value)
 				{
 					listViewItemStyleProvider=dynamic_cast<ListViewItemStyleProvider*>(value->GetStyleProvider());
 					itemProvider=value->GetItemProvider();
+					itemProvider->AttachCallback(this);
 					columnItemView=dynamic_cast<ListViewColumnItemArranger::IColumnItemView*>(itemProvider->RequestView(ListViewColumnItemArranger::IColumnItemView::Identifier));
 					if(columnItemView)
 					{
 						columnItemView->AttachCallback(this);
 					}
+					dataProvider=dynamic_cast<IDataProvider*>(itemProvider->RequestView(IDataProvider::Identifier));
 				}
 
 				void DataGridContentProvider::DetachListControl()
 				{
+					dataProvider=0;
 					if(columnItemView)
 					{
 						columnItemView->DetachCallback(this);
 						itemProvider->ReleaseView(columnItemView);
+						columnItemView=0;
 					}
+					itemProvider->DetachCallback(this);
 					itemProvider=0;
 					listViewItemStyleProvider=0;
 				}
