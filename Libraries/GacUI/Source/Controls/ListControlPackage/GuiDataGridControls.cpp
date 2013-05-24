@@ -510,7 +510,6 @@ DataGridContentProvider::ItemContent
 					if(refresh)
 					{
 						RemoveCellsAndDataVisualizers();
-						
 						vint columnCount=contentProvider->columnItemView->GetColumnCount();
 
 						dataVisualizers.Resize(columnCount);
