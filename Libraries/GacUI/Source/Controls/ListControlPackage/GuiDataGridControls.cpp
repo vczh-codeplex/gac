@@ -363,8 +363,20 @@ DataGridItemProvider
 DataGridContentProvider::ItemContent
 ***********************************************************************/
 
-				void DataGridContentProvider::ItemContent::RemoveCells()
+				void DataGridContentProvider::ItemContent::RemoveCellsAndDataVisualizers()
 				{
+					for(vint i=0;i<dataVisualizers.Count();i++)
+					{
+						IDataVisualizer* visualizer=dataVisualizers[i].Obj();
+						GuiGraphicsComposition* composition=visualizer->GetBoundsComposition();
+						if(composition->GetParent())
+						{
+							composition->GetParent()->RemoveChild(composition);
+						}
+						dataVisualizers[i]=0;
+					}
+					dataVisualizers.Resize(0);
+
 					for(vint i=0;i<textTable->GetColumns();i++)
 					{
 						GuiCellComposition* cell=textTable->GetSitedCell(0, i);
@@ -408,12 +420,12 @@ DataGridContentProvider::ItemContent
 					if(index!=-1)
 					{
 						IDataEditorFactory* factory=contentProvider->dataProvider->GetCellDataEditorFactory(currentRow, index);
-						IDataEditor* editor=contentProvider->OpenEditor(true, currentRow, index, factory);
-						if(editor)
+						currentEditor=contentProvider->OpenEditor(true, currentRow, index, factory);
+						if(currentEditor)
 						{
 							GuiCellComposition* cell=dynamic_cast<GuiCellComposition*>(sender);
-							editor->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-							cell->AddChild(editor->GetBoundsComposition());
+							currentEditor->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+							cell->AddChild(currentEditor->GetBoundsComposition());
 						}
 					}
 				}
@@ -423,6 +435,7 @@ DataGridContentProvider::ItemContent
 					,contentProvider(_contentProvider)
 					,font(_font)
 					,currentRow(-1)
+					,currentEditor(0)
 				{
 					contentComposition=new GuiBoundsComposition;
 					contentComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
@@ -437,8 +450,7 @@ DataGridContentProvider::ItemContent
 
 				DataGridContentProvider::ItemContent::~ItemContent()
 				{
-					dataVisualizers.Resize(0);
-					RemoveCells();
+					RemoveCellsAndDataVisualizers();
 				}
 
 				compositions::GuiBoundsComposition* DataGridContentProvider::ItemContent::GetContentComposition()
@@ -459,6 +471,19 @@ DataGridContentProvider::ItemContent
 						textTable->SetColumnOption(i, GuiCellOption::AbsoluteOption(contentProvider->columnItemView->GetColumnSize(i)));
 					}
 					textTable->UpdateCellBounds();
+				}
+
+				void DataGridContentProvider::ItemContent::NotifyCloseEditor()
+				{
+					if(currentEditor)
+					{
+						GuiGraphicsComposition* composition=currentEditor->GetBoundsComposition();
+						if(composition->GetParent())
+						{
+							composition->GetParent()->RemoveChild(composition);
+						}
+						currentEditor=0;
+					}
 				}
 
 				void DataGridContentProvider::ItemContent::Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, vint itemIndex)
@@ -484,6 +509,8 @@ DataGridContentProvider::ItemContent
 
 					if(refresh)
 					{
+						RemoveCellsAndDataVisualizers();
+						
 						vint columnCount=contentProvider->columnItemView->GetColumnCount();
 
 						dataVisualizers.Resize(columnCount);
@@ -492,7 +519,6 @@ DataGridContentProvider::ItemContent
 							IDataVisualizerFactory* factory=GetDataVisualizerFactory(itemIndex, i);
 							dataVisualizers[i]=factory->CreateVisualizer(font, styleProvider);
 						}
-						RemoveCells();
 
 						textTable->SetRowsAndColumns(1, columnCount);
 						for(vint i=0;i<columnCount;i++)
@@ -515,6 +541,16 @@ DataGridContentProvider::ItemContent
 						contentProvider->dataProvider->VisualizeCell(itemIndex, i, dataVisualizer);
 					}
 					UpdateSubItemSize();
+				}
+
+				void DataGridContentProvider::ItemContent::Uninstall()
+				{
+					if(currentEditor)
+					{
+						contentProvider->CloseEditor(false);
+					}
+					currentRow=-1;
+					currentEditor=0;
 				}
 				
 /***********************************************************************
@@ -544,6 +580,20 @@ DataGridContentProvider
 					if(!currentEditorRequestingSaveData)
 					{
 						CloseEditor(false);
+					}
+				}
+
+				void DataGridContentProvider::NotifyCloseEditor()
+				{
+					vint count=listViewItemStyleProvider->GetCreatedItemStyles().Count();
+					for(vint i=0;i<count;i++)
+					{
+						GuiListControl::IItemStyleController* itemStyleController=listViewItemStyleProvider->GetCreatedItemStyles().Get(i);
+						ItemContent* itemContent=listViewItemStyleProvider->GetItemContent<ItemContent>(itemStyleController);
+						if(itemContent)
+						{
+							itemContent->NotifyCloseEditor();
+						}
 					}
 				}
 
@@ -579,12 +629,7 @@ DataGridContentProvider
 						{
 							RequestSaveData();
 						}
-
-						GuiGraphicsComposition* composition=currentEditor->GetBoundsComposition();
-						if(composition->GetParent())
-						{
-							composition->GetParent()->RemoveChild(composition);
-						}
+						NotifyCloseEditor();
 
 						editingRow=-1;
 						editingColumn=-1;

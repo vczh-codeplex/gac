@@ -166,6 +166,12 @@ ListViewItemStyleProvider::ListViewContentItemStyleController
 				{
 				}
 
+				void ListViewItemStyleProvider::ListViewContentItemStyleController::OnUninstalled()
+				{
+					ListViewItemStyleController::OnInstalled();
+					content->Uninstall();
+				}
+
 				ListViewItemStyleProvider::IListViewItemContent* ListViewItemStyleProvider::ListViewContentItemStyleController::GetItemContent()
 				{
 					return content.Obj();
@@ -315,6 +321,10 @@ ListViewBigIconContentProvider
 					text->SetColor(styleProvider->GetPrimaryTextColor());
 				}
 
+				void ListViewBigIconContentProvider::ItemContent::Uninstall()
+				{
+				}
+
 				ListViewBigIconContentProvider::ListViewBigIconContentProvider(Size _iconSize)
 					:iconSize(_iconSize)
 				{
@@ -420,6 +430,10 @@ ListViewSmallIconContentProvider
 					text->SetColor(styleProvider->GetPrimaryTextColor());
 				}
 
+				void ListViewSmallIconContentProvider::ItemContent::Uninstall()
+				{
+				}
+
 				ListViewSmallIconContentProvider::ListViewSmallIconContentProvider(Size _iconSize)
 					:iconSize(_iconSize)
 				{
@@ -522,6 +536,10 @@ ListViewListContentProvider
 					}
 					text->SetText(view->GetText(itemIndex));
 					text->SetColor(styleProvider->GetPrimaryTextColor());
+				}
+
+				void ListViewListContentProvider::ItemContent::Uninstall()
+				{
 				}
 
 				ListViewListContentProvider::ListViewListContentProvider(Size _iconSize)
@@ -677,6 +695,10 @@ ListViewTileContentProvider
 						dataTexts[i]->SetText(view->GetSubItem(itemIndex, view->GetDataColumn(i)));
 						dataTexts[i]->SetColor(styleProvider->GetSecondaryTextColor());
 					}
+				}
+
+				void ListViewTileContentProvider::ItemContent::Uninstall()
+				{
 				}
 
 				ListViewTileContentProvider::ListViewTileContentProvider(Size _iconSize)
@@ -858,6 +880,10 @@ ListViewInformationContentProvider
 							cell->SetOwnedElement(textData);
 						}
 					}
+				}
+
+				void ListViewInformationContentProvider::ItemContent::Uninstall()
+				{
 				}
 
 				ListViewInformationContentProvider::ListViewInformationContentProvider(Size _iconSize)
@@ -1266,6 +1292,10 @@ ListViewDetailContentProvider
 						cell->SetOwnedElement(subText);
 					}
 					UpdateSubItemSize();
+				}
+
+				void ListViewDetailContentProvider::ItemContent::Uninstall()
+				{
 				}
 
 				void ListViewDetailContentProvider::OnColumnChanged()

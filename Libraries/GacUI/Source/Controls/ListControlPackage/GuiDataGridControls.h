@@ -51,7 +51,7 @@ Datagrid Interfaces
 					/// <returns>The factory object.</returns>
 					virtual IDataVisualizerFactory*						GetFactory()=0;
 
-					/// <summary>Get the composition that renders the data.</summary>
+					/// <summary>Get the composition that renders the data.. The data visualizer should maintain this bounds composition, and delete it when necessary.</summary>
 					/// <returns>The composition.</returns>
 					virtual compositions::GuiBoundsComposition*			GetBoundsComposition()=0;
 
@@ -88,7 +88,7 @@ Datagrid Interfaces
 					/// <returns>The factory object.</returns>
 					virtual IDataEditorFactory*							GetFactory()=0;
 
-					/// <summary>Get the composition that holds the editor for a cell.</summary>
+					/// <summary>Get the composition that holds the editor for a cell. The data editor should maintain this bounds composition, and delete it when necessary.</summary>
 					/// <returns>The composition.</returns>
 					virtual compositions::GuiBoundsComposition*			GetBoundsComposition()=0;
 
@@ -351,8 +351,9 @@ Datagrid ContentProvider
 
 						collections::Array<Ptr<IDataVisualizer>>		dataVisualizers;
 						vint											currentRow;
+						IDataEditor*									currentEditor;
 
-						void											RemoveCells();
+						void											RemoveCellsAndDataVisualizers();
 						IDataVisualizerFactory*							GetDataVisualizerFactory(vint row, vint column);
 						vint											GetCellColumnIndex(compositions::GuiGraphicsComposition* composition);
 						void											OnCellMouseUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
@@ -363,7 +364,9 @@ Datagrid ContentProvider
 						compositions::GuiBoundsComposition*				GetContentComposition()override;
 						compositions::GuiBoundsComposition*				GetBackgroundDecorator()override;
 						void											UpdateSubItemSize();
+						void											NotifyCloseEditor();
 						void											Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, vint itemIndex)override;
+						void											Uninstall()override;
 					};
 
 					Size												iconSize;
@@ -384,6 +387,7 @@ Datagrid ContentProvider
 					void												OnAttached(GuiListControl::IItemProvider* provider)override;
 					void												OnItemModified(vint start, vint count, vint newCount)override;
 
+					void												NotifyCloseEditor();
 					void												RequestSaveData();
 					IDataEditor*										OpenEditor(bool saveData, vint row, vint column, IDataEditorFactory* editorFactory);
 					void												CloseEditor(bool saveData);
