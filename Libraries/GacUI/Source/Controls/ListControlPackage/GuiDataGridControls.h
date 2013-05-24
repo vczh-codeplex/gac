@@ -96,12 +96,6 @@ Datagrid Interfaces
 					/// <param name="row">The row number of the cell.</param>
 					/// <param name="column">The column number of the cell.</param>
 					virtual void										BeforeEditCell(IDataProvider* dataProvider, vint row, vint column)=0;
-
-					/// <summary>Called after editing a cell.</summary>
-					/// <param name="dataProvider">The data provider.</param>
-					/// <param name="row">The row number of the cell.</param>
-					/// <param name="column">The column number of the cell.</param>
-					virtual void										AfterEditCell(IDataProvider* dataProvider, vint row, vint column)=0;
 				};
 
 				/// <summary>The required <see cref="GuiListControl::IItemProvider"/> view for [T:vl.presentation.controls.GuiVirtualDataGrid].</summary>
@@ -162,16 +156,16 @@ Datagrid Interfaces
 					/// <param name="row">The row number of the cell.</param>
 					/// <param name="column">The column number of the cell.</param>
 					virtual IDataEditorFactory*							GetCellDataEditorFactory(vint row, vint column)=0;
-					/// <summary>Called before edit the cell.</summary>
+					/// <summary>Called before editing the cell.</summary>
 					/// <param name="row">The row number of the cell.</param>
 					/// <param name="column">The column number of the cell.</param>
 					/// <param name="dataEditor">The data editor.</param>
 					virtual void										BeforeEditCell(vint row, vint column, IDataEditor* dataEditor)=0;
-					/// <summary>Called after edit the cell.</summary>
+					/// <summary>Called when saving data for the editing cell.</summary>
 					/// <param name="row">The row number of the cell.</param>
 					/// <param name="column">The column number of the cell.</param>
 					/// <param name="dataEditor">The data editor.</param>
-					virtual void										AfterEditCell(vint row, vint column, IDataEditor* dataEditor)=0;
+					virtual void										SaveCellData(vint row, vint column, IDataEditor* dataEditor)=0;
 				};
 
 /***********************************************************************
@@ -182,59 +176,44 @@ DataSource Extensions
 Visualizer Extensions
 ***********************************************************************/
 
-				template<typename TVisualizer>
 				class DataVisualizerBase : public Object, public virtual IDataVisualizer
 				{
-				public:
-					class Factory : public Object, public virtual IDataVisualizerFactory, public Description<Factory>
-					{
-					public:
-						Ptr<IDataVisualizer> CreateVisualizer(const FontProperties& font, GuiListViewBase::IStyleProvider* styleProvider)override
-						{
-							TVisualizer* dataVisualizer=new TVisualizer;
-							dataVisualizer->factory=this;
-							dataVisualizer->font=font;
-							dataVisualizer->styleProvider=styleProvider;
-							return dataVisualizer;
-						}
-					};
-
+					template<typename T>
+					friend class DataVisualizerFactory;
 				protected:
-					Factory*											factory;
+					IDataVisualizerFactory*								factory;
 					FontProperties										font;
 					GuiListViewBase::IStyleProvider*					styleProvider;
 					compositions::GuiBoundsComposition*					boundsComposition;
 
 					virtual compositions::GuiBoundsComposition*			CreateBoundsCompositionInternal()=0;
 				public:
-					DataVisualizerBase()
-						:factory(0)
-						,styleProvider(0)
-						,boundsComposition(0)
-					{
-					}
+					DataVisualizerBase();
+					~DataVisualizerBase();
 
-					IDataVisualizerFactory* GetFactory()override
+					IDataVisualizerFactory*								GetFactory()override;
+					compositions::GuiBoundsComposition*					GetBoundsComposition()override;
+					void												BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)override;
+				};
+				
+				template<typename TVisualizer>
+				class DataVisualizerFactory : public Object, public virtual IDataVisualizerFactory, public Description<DataVisualizerFactory<TVisualizer>>
+				{
+				public:
+					Ptr<IDataVisualizer> CreateVisualizer(const FontProperties& font, GuiListViewBase::IStyleProvider* styleProvider)override
 					{
-						return factory;
-					}
-
-					compositions::GuiBoundsComposition* GetBoundsComposition()override
-					{
-						if(!boundsComposition)
-						{
-							boundsComposition=CreateBoundsCompositionInternal();
-						}
-						return boundsComposition;
-					}
-
-					void BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)override
-					{
+						DataVisualizerBase* dataVisualizer=new TVisualizer;
+						dataVisualizer->factory=this;
+						dataVisualizer->font=font;
+						dataVisualizer->styleProvider=styleProvider;
+						return dataVisualizer;
 					}
 				};
 
-				class ListViewMainColumnDataVisualizer : public DataVisualizerBase<ListViewMainColumnDataVisualizer>
+				class ListViewMainColumnDataVisualizer : public DataVisualizerBase
 				{
+				public:
+					typedef DataVisualizerFactory<ListViewMainColumnDataVisualizer>			Factory;
 				protected:
 					elements::GuiImageFrameElement*						image;
 					elements::GuiSolidLabelElement*						text;
@@ -245,8 +224,10 @@ Visualizer Extensions
 					void												BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)override;
 				};
 
-				class ListViewSubColumnDataVisualizer : public DataVisualizerBase<ListViewSubColumnDataVisualizer>
+				class ListViewSubColumnDataVisualizer : public DataVisualizerBase
 				{
+				public:
+					typedef DataVisualizerFactory<ListViewSubColumnDataVisualizer>			Factory;
 				protected:
 					elements::GuiSolidLabelElement*						text;
 
@@ -333,6 +314,8 @@ Datagrid ContentProvider
 					: public Object
 					, public virtual ListViewItemStyleProvider::IListViewItemContentProvider
 					, protected virtual ListViewColumnItemArranger::IColumnItemViewCallback
+					, protected virtual GuiListControl::IItemProviderCallback
+					, protected virtual IDataEditorCallback
 					, public Description<ListViewDetailContentProvider>
 				{
 				protected:
@@ -343,17 +326,17 @@ Datagrid ContentProvider
 						compositions::GuiTableComposition*				textTable;
 
 						DataGridContentProvider*						contentProvider;
-						GuiListControl::IItemProvider*					itemProvider;
 						FontProperties									font;
 
-						ListViewColumnItemArranger::IColumnItemView*	columnItemView;
-						IDataProvider*									dataProvider;
 						collections::Array<Ptr<IDataVisualizer>>		dataVisualizers;
+						vint											currentRow;
 
 						void											RemoveCells();
 						IDataVisualizerFactory*							GetDataVisualizerFactory(vint row, vint column);
+						vint											GetCellColumnIndex(compositions::GuiGraphicsComposition* composition);
+						void											OnCellMouseUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
 					public:
-						ItemContent(DataGridContentProvider* _contentProvider, GuiListControl::IItemProvider* _itemProvider, const FontProperties& _font);
+						ItemContent(DataGridContentProvider* _contentProvider, const FontProperties& _font);
 						~ItemContent();
 
 						compositions::GuiBoundsComposition*				GetContentComposition()override;
@@ -364,12 +347,25 @@ Datagrid ContentProvider
 
 					Size												iconSize;
 					GuiListControl::IItemProvider*						itemProvider;
+					list::IDataProvider*								dataProvider;
 					ListViewColumnItemArranger::IColumnItemView*		columnItemView;
 					ListViewItemStyleProvider*							listViewItemStyleProvider;
+
 					ListViewMainColumnDataVisualizer::Factory			mainColumnDataVisualizerFactory;
 					ListViewSubColumnDataVisualizer::Factory			subColumnDataVisualizerFactory;
 
+					vint												editingRow;
+					vint												editingColumn;
+					Ptr<IDataEditor>									currentEditor;
+					bool												currentEditorRequestingSaveData;
+
 					void												OnColumnChanged()override;
+					void												OnAttached(GuiListControl::IItemProvider* provider)override;
+					void												OnItemModified(vint start, vint count, vint newCount)override;
+
+					void												RequestSaveData();
+					IDataEditor*										OpenEditor(bool saveData, vint row, vint column, IDataEditorFactory* editorFactory);
+					void												CloseEditor(bool saveData);
 				public:
 					/// <summary>Create the content provider.</summary>
 					DataGridContentProvider();

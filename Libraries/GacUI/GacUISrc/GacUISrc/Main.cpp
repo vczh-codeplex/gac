@@ -280,7 +280,7 @@ TestWindow
 		{
 		}
 
-		void AfterEditCell(vint row, vint column, list::IDataEditor* dataEditor)override
+		void SaveCellData(vint row, vint column, list::IDataEditor* dataEditor)override
 		{
 		}
 	};
