@@ -218,6 +218,8 @@ ListView ItemStyleProvider
 						/// <param name="view">The <see cref="IListViewItemView"/> for the list view control.</param>
 						/// <param name="itemIndex">The index of the item to install.</param>
 						virtual void											Install(GuiListViewBase::IStyleProvider* styleProvider, IListViewItemView* view, vint itemIndex)=0;
+						/// <summary>Called when the item content is uninstalled from the list view control.</summary>
+						virtual void											Uninstall()=0;
 					};
 
 					/// <summary>List view item content provider.</summary>
@@ -251,6 +253,8 @@ ListView ItemStyleProvider
 						/// <param name="provider">The owner item style provider.</param>
 						ListViewContentItemStyleController(ListViewItemStyleProvider* provider);
 						~ListViewContentItemStyleController();
+
+						void									OnUninstalled()override;
 
 						/// <summary>Get the extra item content information.</summary>
 						/// <returns>The extra item content information.</returns>
@@ -328,6 +332,7 @@ ListView ItemContentProvider
 						compositions::GuiBoundsComposition*				GetContentComposition()override;
 						compositions::GuiBoundsComposition*				GetBackgroundDecorator()override;
 						void											Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, vint itemIndex)override;
+						void											Uninstall()override;
 					};
 
 					Size												iconSize;
@@ -362,6 +367,7 @@ ListView ItemContentProvider
 						compositions::GuiBoundsComposition*				GetContentComposition()override;
 						compositions::GuiBoundsComposition*				GetBackgroundDecorator()override;
 						void											Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, vint itemIndex)override;
+						void											Uninstall()override;
 					};
 
 					Size												iconSize;
@@ -396,6 +402,7 @@ ListView ItemContentProvider
 						compositions::GuiBoundsComposition*				GetContentComposition()override;
 						compositions::GuiBoundsComposition*				GetBackgroundDecorator()override;
 						void											Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, vint itemIndex)override;
+						void											Uninstall()override;
 					};
 
 					Size												iconSize;
@@ -436,6 +443,7 @@ ListView ItemContentProvider
 						compositions::GuiBoundsComposition*				GetContentComposition()override;
 						compositions::GuiBoundsComposition*				GetBackgroundDecorator()override;
 						void											Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, vint itemIndex)override;
+						void											Uninstall()override;
 					};
 
 					Size												iconSize;
@@ -477,6 +485,7 @@ ListView ItemContentProvider
 						compositions::GuiBoundsComposition*				GetContentComposition()override;
 						compositions::GuiBoundsComposition*				GetBackgroundDecorator()override;
 						void											Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, vint itemIndex)override;
+						void											Uninstall()override;
 					};
 
 					Size												iconSize;
@@ -623,6 +632,7 @@ ListView ItemContentProvider(Detailed)
 						compositions::GuiBoundsComposition*				GetBackgroundDecorator()override;
 						void											UpdateSubItemSize();
 						void											Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, vint itemIndex)override;
+						void											Uninstall()override;
 					};
 
 					Size												iconSize;
