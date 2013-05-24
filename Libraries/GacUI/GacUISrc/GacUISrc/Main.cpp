@@ -192,6 +192,7 @@ TestWindow
 		list::IDataProviderCommandExecutor*			commandExecutor;
 		Array<vint>									columnSizes;
 		bool										displayAscending;
+		list::DataTextComboBoxEditor::Factory		comboBoxEditorFactory;
 	public:
 		DataProvider()
 			:commandExecutor(0)
@@ -283,11 +284,27 @@ TestWindow
 
 		list::IDataEditorFactory* GetCellDataEditorFactory(vint row, vint column)override
 		{
-			return 0;
+			if(column==0)
+			{
+				return 0;
+			}
+			else
+			{
+				return &comboBoxEditorFactory;
+			}
 		}
 
 		void BeforeEditCell(vint row, vint column, list::IDataEditor* dataEditor)override
 		{
+			list::DataTextComboBoxEditor* editor=dynamic_cast<list::DataTextComboBoxEditor*>(dataEditor);
+			if(editor)
+			{
+				editor->GetTextListControl()->GetItems().Add(new list::TextItem(L"Add (+)"));
+				editor->GetTextListControl()->GetItems().Add(new list::TextItem(L"Sub (-)"));
+				editor->GetTextListControl()->GetItems().Add(new list::TextItem(L"Mul (*)"));
+				editor->GetTextListControl()->GetItems().Add(new list::TextItem(L"Div (/)"));
+				editor->GetComboBoxControl()->SetSelectedIndex(2);
+			}
 		}
 
 		void SaveCellData(vint row, vint column, list::IDataEditor* dataEditor)override
