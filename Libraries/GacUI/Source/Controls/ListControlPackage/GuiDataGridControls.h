@@ -29,6 +29,7 @@ Datagrid Interfaces
 				class IDataEditorCallback;
 				class IDataEditorFactory;
 				class IDataEditor;
+				class IDataProviderCommandExecutor;
 				class IDataProvider;
 
 				/// <summary>The visualizer factory.</summary>
@@ -98,6 +99,20 @@ Datagrid Interfaces
 					virtual void										BeforeEditCell(IDataProvider* dataProvider, vint row, vint column)=0;
 				};
 
+				/// <summary>The command executor for [T:vl.presentation.controls.list.IDataProvider] to send notification.</summary>
+				class IDataProviderCommandExecutor : public virtual IDescriptable, public Description<IDataProviderCommandExecutor>
+				{
+				public:
+					/// <summary>Called when any column is changed (inserted, removed, text changed, etc.).</summary>
+					virtual void										OnDataProviderColumnChanged()=0;
+
+					/// <summary>Called when items in the data provider is modified.</summary>
+					/// <param name="start">The index of the first modified row.</param>
+					/// <param name="count">The number of all modified rows.</param>
+					/// <param name="newCount">The number of new rows. If rows are inserted or removed, newCount may not equals to count.</param>
+					virtual void										OnDataProviderItemModified(vint start, vint count, vint newCount)=0;
+				};
+
 				/// <summary>The required <see cref="GuiListControl::IItemProvider"/> view for [T:vl.presentation.controls.GuiVirtualDataGrid].</summary>
 				class IDataProvider : public virtual IDescriptable, public Description<IDataProvider>
 				{
@@ -105,6 +120,9 @@ Datagrid Interfaces
 					/// <summary>The identifier for this view.</summary>
 					static const wchar_t* const							Identifier;
 					
+					/// <summary>Set the command executor.</summary>
+					/// <param name="value">The command executor.</param>
+					virtual void										SetCommandExecutor(IDataProviderCommandExecutor* value)=0;
 					/// <summary>Get the number of all columns.</summary>
 					/// <returns>The number of all columns.</returns>
 					virtual vint										GetColumnCount()=0;
@@ -252,6 +270,7 @@ Datagrid ItemProvider
 					, public virtual GuiListControl::IItemPrimaryTextView
 					, public virtual ListViewItemStyleProvider::IListViewItemView
 					, public virtual ListViewColumnItemArranger::IColumnItemView
+					, protected virtual IDataProviderCommandExecutor
 					, public Description<DataGridItemProvider>
 				{
 				protected:
@@ -263,6 +282,8 @@ Datagrid ItemProvider
 
 					void												InvokeOnItemModified(vint start, vint count, vint newCount);
 					void												InvokeOnColumnChanged();
+					void												OnDataProviderColumnChanged()override;
+					void												OnDataProviderItemModified(vint start, vint count, vint newCount)override;
 				public:
 					/// <summary>Create the content provider.</summary>
 					/// <param name="_dataProvider">The data provider for this control.</param>
