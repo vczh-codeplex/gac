@@ -1,4 +1,5 @@
 #include "GuiDataGridControls.h"
+#include "..\Styles\GuiThemeStyleFactory.h"
 
 namespace vl
 {
@@ -9,6 +10,7 @@ namespace vl
 			using namespace collections;
 			using namespace elements;
 			using namespace compositions;
+			using namespace theme;
 
 			namespace list
 			{
@@ -93,6 +95,12 @@ ListViewMainColumnDataVisualizer
 					return table;
 				}
 
+				ListViewMainColumnDataVisualizer::ListViewMainColumnDataVisualizer()
+					:image(0)
+					,text(0)
+				{
+				}
+
 				void ListViewMainColumnDataVisualizer::BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)
 				{
 					Ptr<GuiImageData> imageData=dataProvider->GetRowImage(row);
@@ -125,9 +133,82 @@ ListViewSubColumnDataVisualizer
 					return composition;
 				}
 
+				ListViewSubColumnDataVisualizer::ListViewSubColumnDataVisualizer()
+					:text(0)
+				{
+				}
+
 				void ListViewSubColumnDataVisualizer::BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)
 				{
 					text->SetText(dataProvider->GetCellText(row, column));
+				}
+				
+/***********************************************************************
+DataEditorBase
+***********************************************************************/
+
+				DataEditorBase::DataEditorBase()
+					:factory(0)
+					,callback(0)
+					,boundsComposition(0)
+				{
+				}
+
+				DataEditorBase::~DataEditorBase()
+				{
+					if(boundsComposition)
+					{
+						SafeDeleteComposition(boundsComposition);
+					}
+				}
+
+				IDataEditorFactory* DataEditorBase::GetFactory()
+				{
+					return factory;
+				}
+
+				compositions::GuiBoundsComposition* DataEditorBase::GetBoundsComposition()
+				{
+					if(!boundsComposition)
+					{
+						boundsComposition=CreateBoundsCompositionInternal();
+					}
+					return boundsComposition;
+				}
+
+				void DataEditorBase::BeforeEditCell(IDataProvider* dataProvider, vint row, vint column)
+				{
+				}
+				
+/***********************************************************************
+ListViewMainColumnDataVisualizer
+***********************************************************************/
+
+				compositions::GuiBoundsComposition* DataTextComboBoxEditor::CreateBoundsCompositionInternal()
+				{
+					return comboBox->GetBoundsComposition();
+				}
+
+				DataTextComboBoxEditor::DataTextComboBoxEditor()
+				{
+					textList=g::NewTextList();
+					comboBox=g::NewComboBox(textList);
+				}
+
+				void DataTextComboBoxEditor::BeforeEditCell(IDataProvider* dataProvider, vint row, vint column)
+				{
+					DataEditorBase::BeforeEditCell(dataProvider, row, column);
+					textList->GetItems().Clear();
+				}
+
+				GuiComboBoxListControl* DataTextComboBoxEditor::GetComboBoxControl()
+				{
+					return comboBox;
+				}
+
+				GuiTextList* DataTextComboBoxEditor::GetTextListControl()
+				{
+					return textList;
 				}
 
 /***********************************************************************
@@ -419,8 +500,12 @@ DataGridContentProvider::ItemContent
 					vint index=GetCellColumnIndex(sender);
 					if(index!=-1)
 					{
+						if(currentEditor && contentProvider->editingColumn==index)
+						{
+							return;
+						}
 						IDataEditorFactory* factory=contentProvider->dataProvider->GetCellDataEditorFactory(currentRow, index);
-						currentEditor=contentProvider->OpenEditor(true, currentRow, index, factory);
+						currentEditor=contentProvider->OpenEditor(currentRow, index, factory);
 						if(currentEditor)
 						{
 							GuiCellComposition* cell=dynamic_cast<GuiCellComposition*>(sender);
@@ -546,7 +631,7 @@ DataGridContentProvider::ItemContent
 				{
 					if(currentEditor)
 					{
-						contentProvider->CloseEditor(false);
+						contentProvider->CloseEditor();
 					}
 					currentRow=-1;
 					currentEditor=0;
@@ -578,20 +663,23 @@ DataGridContentProvider
 				{
 					if(!currentEditorRequestingSaveData)
 					{
-						CloseEditor(false);
+						CloseEditor();
 					}
 				}
 
 				void DataGridContentProvider::NotifyCloseEditor()
 				{
-					vint count=listViewItemStyleProvider->GetCreatedItemStyles().Count();
-					for(vint i=0;i<count;i++)
+					if(listViewItemStyleProvider)
 					{
-						GuiListControl::IItemStyleController* itemStyleController=listViewItemStyleProvider->GetCreatedItemStyles().Get(i);
-						ItemContent* itemContent=listViewItemStyleProvider->GetItemContent<ItemContent>(itemStyleController);
-						if(itemContent)
+						vint count=listViewItemStyleProvider->GetCreatedItemStyles().Count();
+						for(vint i=0;i<count;i++)
 						{
-							itemContent->NotifyCloseEditor();
+							GuiListControl::IItemStyleController* itemStyleController=listViewItemStyleProvider->GetCreatedItemStyles().Get(i);
+							ItemContent* itemContent=listViewItemStyleProvider->GetItemContent<ItemContent>(itemStyleController);
+							if(itemContent)
+							{
+								itemContent->NotifyCloseEditor();
+							}
 						}
 					}
 				}
@@ -606,9 +694,9 @@ DataGridContentProvider
 					}
 				}
 
-				IDataEditor* DataGridContentProvider::OpenEditor(bool saveData, vint row, vint column, IDataEditorFactory* editorFactory)
+				IDataEditor* DataGridContentProvider::OpenEditor(vint row, vint column, IDataEditorFactory* editorFactory)
 				{
-					CloseEditor(saveData);
+					CloseEditor();
 					if(editorFactory)
 					{
 						editingRow=row;
@@ -620,14 +708,10 @@ DataGridContentProvider
 					return currentEditor.Obj();
 				}
 
-				void DataGridContentProvider::CloseEditor(bool saveData)
+				void DataGridContentProvider::CloseEditor()
 				{
 					if(currentEditor)
 					{
-						if(saveData)
-						{
-							RequestSaveData();
-						}
 						NotifyCloseEditor();
 
 						editingRow=-1;
@@ -649,7 +733,7 @@ DataGridContentProvider
 
 				DataGridContentProvider::~DataGridContentProvider()
 				{
-					CloseEditor(true);
+					CloseEditor();
 				}
 
 				GuiListControl::IItemCoordinateTransformer* DataGridContentProvider::CreatePreferredCoordinateTransformer()

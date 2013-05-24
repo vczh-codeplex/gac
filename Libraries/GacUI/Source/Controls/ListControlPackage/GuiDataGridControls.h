@@ -10,6 +10,8 @@ Interfaces:
 #define VCZH_PRESENTATION_CONTROLS_GUIDATAGRIDCONTROLS
 
 #include "GuiListViewControls.h"
+#include "GuiComboControls.h"
+#include "GuiTextListControls.h"
 
 namespace vl
 {
@@ -228,6 +230,7 @@ Visualizer Extensions
 					}
 				};
 
+				/// <summary>Data visualizer that displays an image and a text. Use ListViewMainColumnDataVisualizer::Factory as the factory class.</summary>
 				class ListViewMainColumnDataVisualizer : public DataVisualizerBase
 				{
 				public:
@@ -238,10 +241,12 @@ Visualizer Extensions
 
 					compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal()override;
 				public:
+					ListViewMainColumnDataVisualizer();
 
 					void												BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)override;
 				};
-
+				
+				/// <summary>Data visualizer that displays a text. Use ListViewSubColumnDataVisualizer::Factory as the factory class.</summary>
 				class ListViewSubColumnDataVisualizer : public DataVisualizerBase
 				{
 				public:
@@ -251,6 +256,7 @@ Visualizer Extensions
 
 					compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal()override;
 				public:
+					ListViewSubColumnDataVisualizer();
 
 					void												BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)override;
 				};
@@ -258,6 +264,56 @@ Visualizer Extensions
 /***********************************************************************
 Editor Extensions
 ***********************************************************************/
+
+				class DataEditorBase : public Object, public virtual IDataEditor
+				{
+					template<typename T>
+					friend class DataEditorFactory;
+				protected:
+					IDataEditorFactory*									factory;
+					IDataEditorCallback*								callback;
+					compositions::GuiBoundsComposition*					boundsComposition;
+
+					virtual compositions::GuiBoundsComposition*			CreateBoundsCompositionInternal()=0;
+				public:
+					DataEditorBase();
+					~DataEditorBase();
+
+					IDataEditorFactory*									GetFactory()override;
+					compositions::GuiBoundsComposition*					GetBoundsComposition()override;
+					void												BeforeEditCell(IDataProvider* dataProvider, vint row, vint column)override;
+				};
+				
+				template<typename TEditor>
+				class DataEditorFactory : public Object, public virtual IDataEditorFactory, public Description<DataEditorFactory<TEditor>>
+				{
+				public:
+					Ptr<IDataEditor> CreateEditor(IDataEditorCallback* callback)override
+					{
+						DataEditorBase* dataEditor=new TEditor;
+						dataEditor->factory=this;
+						dataEditor->callback=callback;
+						return dataEditor;
+					}
+				};
+				
+				/// <summary>Data editor that displays an text combo box. Use DataTextComboBoxEditor::Factory as the factory class.</summary>
+				class DataTextComboBoxEditor : public DataEditorBase
+				{
+				public:
+					typedef DataEditorFactory<DataTextComboBoxEditor>						Factory;
+				protected:
+					GuiComboBoxListControl*								comboBox;
+					GuiTextList*										textList;
+
+					compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal()override;
+				public:
+					DataTextComboBoxEditor();
+
+					void												BeforeEditCell(IDataProvider* dataProvider, vint row, vint column)override;
+					GuiComboBoxListControl*								GetComboBoxControl();
+					GuiTextList*										GetTextListControl();
+				};
 
 /***********************************************************************
 Datagrid ItemProvider
@@ -389,8 +445,8 @@ Datagrid ContentProvider
 
 					void												NotifyCloseEditor();
 					void												RequestSaveData();
-					IDataEditor*										OpenEditor(bool saveData, vint row, vint column, IDataEditorFactory* editorFactory);
-					void												CloseEditor(bool saveData);
+					IDataEditor*										OpenEditor(vint row, vint column, IDataEditorFactory* editorFactory);
+					void												CloseEditor();
 				public:
 					/// <summary>Create the content provider.</summary>
 					DataGridContentProvider();
