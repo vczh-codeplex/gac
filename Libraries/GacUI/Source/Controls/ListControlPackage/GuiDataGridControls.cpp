@@ -150,11 +150,22 @@ DataGridItemProvider
 					}
 				}
 
+				void DataGridItemProvider::OnDataProviderColumnChanged()
+				{
+					InvokeOnColumnChanged();
+				}
+
+				void DataGridItemProvider::OnDataProviderItemModified(vint start, vint count, vint newCount)
+				{
+					InvokeOnItemModified(start, count, newCount);
+				}
+
 				DataGridItemProvider::DataGridItemProvider(IDataProvider* _dataProvider)
 					:dataProvider(_dataProvider)
 					,sortingColumn(-1)
 					,sortingColumnAscending(true)
 				{
+					dataProvider->SetCommandExecutor(this);
 				}
 
 				DataGridItemProvider::~DataGridItemProvider()
@@ -166,8 +177,6 @@ DataGridItemProvider
 					sortingColumn=column;
 					sortingColumnAscending=ascending;
 					dataProvider->SortByColumn(column, ascending);
-					InvokeOnColumnChanged();
-					InvokeOnItemModified(0, dataProvider->GetRowCount(), dataProvider->GetRowCount());
 				}
 
 // ===================== GuiListControl::IItemProvider =====================

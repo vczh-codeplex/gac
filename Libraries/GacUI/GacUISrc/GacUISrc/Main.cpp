@@ -189,17 +189,24 @@ TestWindow
 	class DataProvider : public Object, public virtual list::IDataProvider
 	{
 	protected:
-		Array<vint>			columnSizes;
-		bool				displayAscending;
+		list::IDataProviderCommandExecutor*			commandExecutor;
+		Array<vint>									columnSizes;
+		bool										displayAscending;
 	public:
 		DataProvider()
-			:columnSizes(10)
+			:commandExecutor(0)
+			,columnSizes(10)
 			,displayAscending(true)
 		{
 			for(vint i=0;i<10;i++)
 			{
-				columnSizes[i]=80;
+				columnSizes[i]=100;
 			}
+		}
+
+		void SetCommandExecutor(list::IDataProviderCommandExecutor* value)override
+		{
+			commandExecutor=value;
 		}
 
 		vint GetColumnCount()override
@@ -237,11 +244,14 @@ TestWindow
 		void SortByColumn(vint column, bool ascending)override
 		{
 			displayAscending=column==-1?true:ascending;
+			vint rows=GetRowCount();
+			commandExecutor->OnDataProviderColumnChanged();
+			commandExecutor->OnDataProviderItemModified(0, rows, rows);
 		}
 
 		vint GetRowCount()override
 		{
-			return 9;
+			return 100;
 		}
 
 		Ptr<GuiImageData> GetRowImage(vint row)override
@@ -282,6 +292,7 @@ TestWindow
 
 		void SaveCellData(vint row, vint column, list::IDataEditor* dataEditor)override
 		{
+			commandExecutor->OnDataProviderItemModified(row, 1, 1);
 		}
 	};
 
@@ -295,7 +306,7 @@ TestWindow
 		{
 			SetText(GetApplication()->GetExecutableFolder());
 			GetContainerComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
-			GetContainerComposition()->SetPreferredMinSize(Size(900, 400));
+			GetContainerComposition()->SetPreferredMinSize(Size(1048, 576));
 			ForceCalculateSizeImmediately();
 			MoveToScreenCenter();
 
