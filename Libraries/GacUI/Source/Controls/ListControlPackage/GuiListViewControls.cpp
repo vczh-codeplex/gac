@@ -168,7 +168,7 @@ ListViewItemStyleProvider::ListViewContentItemStyleController
 
 				void ListViewItemStyleProvider::ListViewContentItemStyleController::OnUninstalled()
 				{
-					ListViewItemStyleController::OnInstalled();
+					ListViewItemStyleController::OnUninstalled();
 					content->Uninstall();
 				}
 

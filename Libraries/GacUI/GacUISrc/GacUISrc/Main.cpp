@@ -251,7 +251,7 @@ TestWindow
 
 		vint GetRowCount()override
 		{
-			return 1;
+			return 100;
 		}
 
 		Ptr<GuiImageData> GetRowImage(vint row)override
