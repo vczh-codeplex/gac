@@ -423,7 +423,7 @@ DataGridItemProvider
 
 				GuiMenu* DataGridItemProvider::GetDropdownPopup(vint index)
 				{
-					return 0;
+					return dataProvider->GetColumnPopup(index);
 				}
 
 				GuiListViewColumnHeader::ColumnSortingState DataGridItemProvider::GetSortingState(vint index)
