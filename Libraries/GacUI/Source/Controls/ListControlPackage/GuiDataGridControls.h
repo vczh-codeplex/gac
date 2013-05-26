@@ -140,6 +140,10 @@ Datagrid Interfaces
 					/// <param name="column">The index of the column.</param>
 					/// <param name="value">The new size of the column.</param>
 					virtual void										SetColumnSize(vint column, vint value)=0;
+					/// <summary>Get the popup binded to the column.</summary>
+					/// <returns>The popup binded to the column.</returns>
+					/// <param name="column">The index of the column.</param>
+					virtual GuiMenu*									GetColumnPopup(vint column)=0;
 					/// <summary>Test is a column sortable.</summary>
 					/// <returns>Returns true if this column is sortable.</returns>
 					/// <param name="column">The index of the column.</param>

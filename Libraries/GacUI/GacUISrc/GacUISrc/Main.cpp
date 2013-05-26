@@ -237,6 +237,11 @@ TestWindow
 			columnSizes[column]=value;
 		}
 
+		GuiMenu* GetColumnPopup(vint column)override
+		{
+			return 0;
+		}
+
 		bool IsColumnSortable(vint column)override
 		{
 			return column==0;
