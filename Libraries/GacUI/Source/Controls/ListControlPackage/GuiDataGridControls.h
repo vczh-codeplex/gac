@@ -12,6 +12,7 @@ Interfaces:
 #include "GuiListViewControls.h"
 #include "GuiComboControls.h"
 #include "GuiTextListControls.h"
+#include "..\TextEditorPackage\GuiTextControls.h"
 
 namespace vl
 {
@@ -301,7 +302,23 @@ Editor Extensions
 					}
 				};
 				
-				/// <summary>Data editor that displays an text combo box. Use DataTextComboBoxEditor::Factory as the factory class.</summary>
+				/// <summary>Data editor that displays a text box. Use DataTextBoxEditor::Factory as the factory class.</summary>
+				class DataTextBoxEditor : public DataEditorBase
+				{
+				public:
+					typedef DataEditorFactory<DataTextBoxEditor>							Factory;
+				protected:
+					GuiSinglelineTextBox*								textBox;
+
+					compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal()override;
+				public:
+					DataTextBoxEditor();
+
+					void												BeforeEditCell(IDataProvider* dataProvider, vint row, vint column)override;
+					GuiSinglelineTextBox*								GetTextBox();
+				};
+				
+				/// <summary>Data editor that displays a text combo box. Use DataTextComboBoxEditor::Factory as the factory class.</summary>
 				class DataTextComboBoxEditor : public DataEditorBase
 				{
 				public:

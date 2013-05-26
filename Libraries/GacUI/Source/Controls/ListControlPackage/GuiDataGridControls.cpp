@@ -181,7 +181,32 @@ DataEditorBase
 				}
 				
 /***********************************************************************
-ListViewMainColumnDataVisualizer
+DataTextBoxEditor
+***********************************************************************/
+
+				compositions::GuiBoundsComposition* DataTextBoxEditor::CreateBoundsCompositionInternal()
+				{
+					return textBox->GetBoundsComposition();
+				}
+
+				DataTextBoxEditor::DataTextBoxEditor()
+				{
+					textBox=g::NewTextBox();
+				}
+
+				void DataTextBoxEditor::BeforeEditCell(IDataProvider* dataProvider, vint row, vint column)
+				{
+					DataEditorBase::BeforeEditCell(dataProvider, row, column);
+					textBox->SetText(L"");
+				}
+
+				GuiSinglelineTextBox* DataTextBoxEditor::GetTextBox()
+				{
+					return textBox;
+				}
+				
+/***********************************************************************
+DataTextComboBoxEditor
 ***********************************************************************/
 
 				compositions::GuiBoundsComposition* DataTextComboBoxEditor::CreateBoundsCompositionInternal()
