@@ -129,17 +129,17 @@ Datagrid Interfaces
 					/// <summary>Get the number of all columns.</summary>
 					/// <returns>The number of all columns.</returns>
 					virtual vint										GetColumnCount()=0;
-					/// <summary>Get the text of the column.</summary>
-					/// <returns>The text of the column.</returns>
-					/// <param name="column">The index of the column.</param>
+					/// <summary>Get the text for the column.</summary>
+					/// <returns>The text for the column.</returns>
+					/// <param name="column">The index for the column.</param>
 					virtual WString										GetColumnText(vint column)=0;
-					/// <summary>Get the size of the column.</summary>
-					/// <returns>The size of the column.</returns>
-					/// <param name="column">The index of the column.</param>
+					/// <summary>Get the size for the column.</summary>
+					/// <returns>The size for the column.</returns>
+					/// <param name="column">The index for the column.</param>
 					virtual vint										GetColumnSize(vint column)=0;
-					/// <summary>Set the size of the column.</summary>
-					/// <param name="column">The index of the column.</param>
-					/// <param name="value">The new size of the column.</param>
+					/// <summary>Set the size for the column.</summary>
+					/// <param name="column">The index for the column.</param>
+					/// <param name="value">The new size for the column.</param>
 					virtual void										SetColumnSize(vint column, vint value)=0;
 					/// <summary>Get the popup binded to the column.</summary>
 					/// <returns>The popup binded to the column.</returns>
@@ -161,34 +161,34 @@ Datagrid Interfaces
 					/// <returns>The image.</returns>
 					/// <param name="row">The row number.</param>
 					virtual Ptr<GuiImageData>							GetRowImage(vint row)=0;
-					/// <summary>Get the text of the cell.</summary>
-					/// <returns>The text of the cell.</returns>
-					/// <param name="row">The row number of the cell.</param>
-					/// <param name="column">The column number of the cell.</param>
+					/// <summary>Get the text for the cell.</summary>
+					/// <returns>The text for the cell.</returns>
+					/// <param name="row">The row number for the cell.</param>
+					/// <param name="column">The column number for the cell.</param>
 					virtual WString										GetCellText(vint row, vint column)=0;
 					/// <summary>Get the data visualizer factory that creates data visualizers for visualizing the cell.</summary>
 					/// <returns>The data visualizer factory. The data grid control to use the predefined data visualizer if this function returns null.</returns>
-					/// <param name="row">The row number of the cell.</param>
-					/// <param name="column">The column number of the cell.</param>
+					/// <param name="row">The row number for the cell.</param>
+					/// <param name="column">The column number for the cell.</param>
 					virtual IDataVisualizerFactory*						GetCellDataVisualizerFactory(vint row, vint column)=0;
 					/// <summary>Called before visualizing the cell.</summary>
-					/// <param name="row">The row number of the cell.</param>
-					/// <param name="column">The column number of the cell.</param>
+					/// <param name="row">The row number for the cell.</param>
+					/// <param name="column">The column number for the cell.</param>
 					/// <param name="dataVisualizer">The data visualizer to be updated.</param>
 					virtual void										VisualizeCell(vint row, vint column, IDataVisualizer* dataVisualizer)=0;
 					/// <summary>Get the data editor factory that creates data editors for editing the cell.</summary>
 					/// <returns>The data editor factory. Returns null to disable editing.</returns>
-					/// <param name="row">The row number of the cell.</param>
-					/// <param name="column">The column number of the cell.</param>
+					/// <param name="row">The row number for the cell.</param>
+					/// <param name="column">The column number for the cell.</param>
 					virtual IDataEditorFactory*							GetCellDataEditorFactory(vint row, vint column)=0;
 					/// <summary>Called before editing the cell.</summary>
-					/// <param name="row">The row number of the cell.</param>
-					/// <param name="column">The column number of the cell.</param>
+					/// <param name="row">The row number for the cell.</param>
+					/// <param name="column">The column number for the cell.</param>
 					/// <param name="dataEditor">The data editor.</param>
 					virtual void										BeforeEditCell(vint row, vint column, IDataEditor* dataEditor)=0;
 					/// <summary>Called when saving data for the editing cell.</summary>
-					/// <param name="row">The row number of the cell.</param>
-					/// <param name="column">The column number of the cell.</param>
+					/// <param name="row">The row number for the cell.</param>
+					/// <param name="column">The column number for the cell.</param>
 					/// <param name="dataEditor">The data editor.</param>
 					virtual void										SaveCellData(vint row, vint column, IDataEditor* dataEditor)=0;
 				};
@@ -197,10 +197,109 @@ Datagrid Interfaces
 DataSource Extensions
 ***********************************************************************/
 
+				/// <summary>The command executor for [T:vl.presentation.controls.list.IStructuredDataFilter] to send notification.</summary>
+				class IStructuredDataFilterCommandExecutor : public virtual IDescriptable, public Description<IStructuredDataFilterCommandExecutor>
+				{
+				public:
+					/// <summary>Called when the filter structure or arguments are changed.</summary>
+					virtual void										OnFilterChanged()=0;
+				};
+
+				/// <summary>Structured data filter.</summary>
+				class IStructuredDataFilter : public virtual IDescriptable, public Description<IStructuredDataFilter>
+				{
+				public:
+					/// <summary>Set the command executor.</summary>
+					/// <param name="value">The command executor.</param>
+					virtual void										SetCommandExecutor(IStructuredDataFilterCommandExecutor* value)=0;
+					/// <summary>Filter a row.</summary>
+					/// <returns>Returns true when a row is going to display on the control.</returns>
+					/// <param name="row">The row number.</param>
+					virtual bool										Filter(vint row)=0;
+				};
+
+				/// <summary>Structure data column.</summary>
+				class IStructuredColumnProvider : public virtual IDescriptable, public Description<IStructuredColumnProvider>
+				{
+				public:
+					/// <summary>Get the text for the column.</summary>
+					/// <returns>The text of the column.</returns>
+					virtual WString										GetText()=0;
+					/// <summary>Get the popup binded to the column.</summary>
+					/// <returns>The popup binded to the column.</returns>
+					virtual GuiMenu*									GetPopup()=0;
+					/// <summary>Get the inherent filter for the column.</summary>
+					/// <returns>The inherent filter. Returns null if the column doesn't have a filter.</returns>
+					virtual Ptr<IStructuredDataFilter>					GetInherentFilter()=0;
+					/// <summary>Test is a column sortable.</summary>
+					/// <returns>Returns true if this column is sortable.</returns>
+					virtual bool										IsSortable()=0;
+					/// <summary>Get the order of two rows.</summary>
+					/// <returns>Returns 0 if the order doesn't matter. Returns negative number if row1 needs to put before row2. Returns positive number if row1 needs to put after row2.</returns>
+					/// <param name="row1">The row number of the first row.</param>
+					/// <param name="row2">The row number of the second row.</param>
+					virtual vint										Compare(vint row1, vint row2)=0;
+					
+					/// <summary>Get the text for the cell.</summary>
+					/// <returns>The text for the cell.</returns>
+					/// <param name="row">The row number for the cell.</param>
+					virtual WString										GetCellText(vint row)=0;
+					/// <summary>Get the data visualizer factory that creates data visualizers for visualizing the cell.</summary>
+					/// <returns>The data visualizer factory. The data grid control to use the predefined data visualizer if this function returns null.</returns>
+					/// <param name="row">The row number for the cell.</param>
+					virtual IDataVisualizerFactory*						GetCellDataVisualizerFactory(vint row)=0;
+					/// <summary>Called before visualizing the cell.</summary>
+					/// <param name="row">The row number for the cell.</param>
+					/// <param name="column">The column number for the cell.</param>
+					/// <param name="dataVisualizer">The data visualizer to be updated.</param>
+					virtual void										VisualizeCell(vint row, IDataVisualizer* dataVisualizer)=0;
+					/// <summary>Get the data editor factory that creates data editors for editing the cell.</summary>
+					/// <returns>The data editor factory. Returns null to disable editing.</returns>
+					/// <param name="row">The row number for the cell.</param>
+					virtual IDataEditorFactory*							GetCellDataEditorFactory(vint row)=0;
+					/// <summary>Called before editing the cell.</summary>
+					/// <param name="row">The row number for the cell.</param>
+					/// <param name="dataEditor">The data editor.</param>
+					virtual void										BeforeEditCell(vint row, IDataEditor* dataEditor)=0;
+					/// <summary>Called when saving data for the editing cell.</summary>
+					/// <param name="row">The row number for the cell.</param>
+					/// <param name="dataEditor">The data editor.</param>
+					virtual void										SaveCellData(vint row, IDataEditor* dataEditor)=0;
+				};
+
+				/// <summary>Structured data provider for [T:vl.presentation.controls.GuiVirtualDataGrid].</summary>
+				class IStructuredDataProvider : public virtual IDescriptable, public Description<IStructuredDataProvider>
+				{
+				public:
+					/// <summary>Get the number of all columns.</summary>
+					/// <returns>The number of all columns.</returns>
+					virtual vint										GetColumnCount()=0;
+					/// <summary>Get the number of all rows.</summary>
+					/// <returns>The number of all rows.</returns>
+					virtual vint										GetRowCount()=0;
+					/// <summary>Get the <see cref="IStructuredColumnProvider"/> object for the column.</summary>
+					/// <returns>The <see cref="IStructuredColumnProvider"/> object.</returns>
+					/// <param name="column">The column number.</param>
+					virtual IStructuredColumnProvider*					GetColumn(vint column)=0;
+					/// <summary>Get the image for the row.</summary>
+					/// <returns>The image.</returns>
+					/// <param name="row">The row number.</param>
+					virtual Ptr<GuiImageData>							GetRowImage(vint row)=0;
+				};
+
+/***********************************************************************
+Filter Extensions
+***********************************************************************/
+
+/***********************************************************************
+Structured DataSource Extensions
+***********************************************************************/
+
 /***********************************************************************
 Visualizer Extensions
 ***********************************************************************/
-
+				
+				/// <summary>Base class for all data visualizers.</summary>
 				class DataVisualizerBase : public Object, public virtual IDataVisualizer
 				{
 					template<typename T>
@@ -213,6 +312,7 @@ Visualizer Extensions
 
 					virtual compositions::GuiBoundsComposition*			CreateBoundsCompositionInternal()=0;
 				public:
+					/// <summary>Create the data visualizer.</summary>
 					DataVisualizerBase();
 					~DataVisualizerBase();
 
@@ -246,6 +346,7 @@ Visualizer Extensions
 
 					compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal()override;
 				public:
+					/// <summary>Create the data visualizer.</summary>
 					ListViewMainColumnDataVisualizer();
 
 					void												BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)override;
@@ -261,6 +362,7 @@ Visualizer Extensions
 
 					compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal()override;
 				public:
+					/// <summary>Create the data visualizer.</summary>
 					ListViewSubColumnDataVisualizer();
 
 					void												BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)override;
@@ -269,7 +371,8 @@ Visualizer Extensions
 /***********************************************************************
 Editor Extensions
 ***********************************************************************/
-
+				
+				/// <summary>Base class for all data editors.</summary>
 				class DataEditorBase : public Object, public virtual IDataEditor
 				{
 					template<typename T>
@@ -281,6 +384,7 @@ Editor Extensions
 
 					virtual compositions::GuiBoundsComposition*			CreateBoundsCompositionInternal()=0;
 				public:
+					/// <summary>Create the data editor.</summary>
 					DataEditorBase();
 					~DataEditorBase();
 
@@ -312,6 +416,7 @@ Editor Extensions
 
 					compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal()override;
 				public:
+					/// <summary>Create the data editor.</summary>
 					DataTextBoxEditor();
 
 					void												BeforeEditCell(IDataProvider* dataProvider, vint row, vint column)override;
@@ -329,6 +434,7 @@ Editor Extensions
 
 					compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal()override;
 				public:
+					/// <summary>Create the data editor.</summary>
 					DataTextComboBoxEditor();
 
 					void												BeforeEditCell(IDataProvider* dataProvider, vint row, vint column)override;
