@@ -18,6 +18,116 @@ namespace vl
 				const wchar_t* const IDataProvider::Identifier = L"vl::presentation::controls::list::IDataProvider";
 				
 /***********************************************************************
+StructuredDataFilterBase
+***********************************************************************/
+
+				void StructuredDataFilterBase::InvokeOnFilterChanged()
+				{
+					if(commandExecutor)
+					{
+						commandExecutor->OnFilterChanged();
+					}
+				}
+
+				StructuredDataFilterBase::StructuredDataFilterBase()
+					:commandExecutor(0)
+				{
+				}
+
+				void StructuredDataFilterBase::SetCommandExecutor(IStructuredDataFilterCommandExecutor* value)
+				{
+					commandExecutor=value;
+				}
+				
+/***********************************************************************
+StructuredDataMultipleFilter
+***********************************************************************/
+
+				StructuredDataMultipleFilter::StructuredDataMultipleFilter()
+				{
+				}
+
+				bool StructuredDataMultipleFilter::AddSubFilter(Ptr<IStructuredDataFilter> value)
+				{
+					if(filters.Contains(value.Obj())) return false;
+					filters.Add(value);
+					InvokeOnFilterChanged();
+					return true;
+				}
+
+				bool StructuredDataMultipleFilter::RemoveSubFilter(Ptr<IStructuredDataFilter> value)
+				{
+					if(!filters.Contains(value.Obj())) return false;
+					filters.Remove(value.Obj());
+					InvokeOnFilterChanged();
+					return true;
+				}
+
+				void StructuredDataMultipleFilter::SetCommandExecutor(IStructuredDataFilterCommandExecutor* value)
+				{
+					StructuredDataFilterBase::SetCommandExecutor(value);
+					for(vint i=0;i<filters.Count();i++)
+					{
+						filters[i]->SetCommandExecutor(value);
+					}
+				}
+				
+/***********************************************************************
+StructuredDataAndFilter
+***********************************************************************/
+
+				StructuredDataAndFilter::StructuredDataAndFilter()
+				{
+				}
+
+				bool StructuredDataAndFilter::Filter(vint row)
+				{
+					return From(filters)
+						.All([row](Ptr<IStructuredDataFilter> filter)
+						{
+							return filter->Filter(row);
+						});
+				}
+				
+/***********************************************************************
+StructuredDataOrFilter
+***********************************************************************/
+				
+				StructuredDataOrFilter::StructuredDataOrFilter()
+				{
+				}
+
+				bool StructuredDataOrFilter::Filter(vint row)
+				{
+					return From(filters)
+						.Any([row](Ptr<IStructuredDataFilter> filter)
+						{
+							return filter->Filter(row);
+						});
+				}
+				
+/***********************************************************************
+StructuredDataNotFilter
+***********************************************************************/
+				
+				StructuredDataNotFilter::StructuredDataNotFilter()
+				{
+				}
+
+				bool StructuredDataNotFilter::SetSubFilter(Ptr<IStructuredDataFilter> value)
+				{
+					if(filter==value) return false;
+					filter=value;
+					InvokeOnFilterChanged();
+					return true;
+				}
+
+				bool StructuredDataNotFilter::Filter(vint row)
+				{
+					return filter?true:!filter->Filter(row);
+				}
+				
+/***********************************************************************
 DataVisualizerBase
 ***********************************************************************/
 

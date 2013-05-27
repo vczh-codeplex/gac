@@ -271,6 +271,9 @@ DataSource Extensions
 				class IStructuredDataProvider : public virtual IDescriptable, public Description<IStructuredDataProvider>
 				{
 				public:
+					/// <summary>Set the command executor.</summary>
+					/// <param name="value">The command executor.</param>
+					virtual void										SetCommandExecutor(IDataProviderCommandExecutor* value)=0;
 					/// <summary>Get the number of all columns.</summary>
 					/// <returns>The number of all columns.</returns>
 					virtual vint										GetColumnCount()=0;
@@ -290,6 +293,58 @@ DataSource Extensions
 /***********************************************************************
 Filter Extensions
 ***********************************************************************/
+
+				class StructuredDataFilterBase : public Object, public virtual IStructuredDataFilter, public Description<StructuredDataFilterBase>
+				{
+				protected:
+					IStructuredDataFilterCommandExecutor*				commandExecutor;
+
+					void												InvokeOnFilterChanged();
+				public:
+					StructuredDataFilterBase();
+
+					void												SetCommandExecutor(IStructuredDataFilterCommandExecutor* value)override;
+				};
+
+				class StructuredDataMultipleFilter : public StructuredDataFilterBase, public Description<StructuredDataMultipleFilter>
+				{
+				protected:
+					collections::List<Ptr<IStructuredDataFilter>>		filters;
+
+				public:
+					StructuredDataMultipleFilter();
+
+					bool												AddSubFilter(Ptr<IStructuredDataFilter> value);
+					bool												RemoveSubFilter(Ptr<IStructuredDataFilter> value);
+					void												SetCommandExecutor(IStructuredDataFilterCommandExecutor* value)override;
+				};
+
+				class StructuredDataAndFilter : public StructuredDataMultipleFilter, public Description<StructuredDataAndFilter>
+				{
+				public:
+					StructuredDataAndFilter();
+
+					bool												Filter(vint row)override;
+				};
+
+				class StructuredDataOrFilter : public StructuredDataMultipleFilter, public Description<StructuredDataOrFilter>
+				{
+				public:
+					StructuredDataOrFilter();
+
+					bool												Filter(vint row)override;
+				};
+
+				class StructuredDataNotFilter : public StructuredDataFilterBase, public Description<StructuredDataNotFilter>
+				{
+				protected:
+					Ptr<IStructuredDataFilter>							filter;
+				public:
+					StructuredDataNotFilter();
+
+					bool												SetSubFilter(Ptr<IStructuredDataFilter> value);
+					bool												Filter(vint row)override;
+				};
 
 /***********************************************************************
 Structured DataSource Extensions
