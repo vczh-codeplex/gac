@@ -399,6 +399,39 @@ Sorter Extensions
 Structured DataSource Extensions
 ***********************************************************************/
 
+				/// <summary>A <see cred="IDataProvider"/> wrapper for <see cref="IStructuredDataProvider"/>.</summary>
+				class StructuredDataProvider : public Object, public virtual IDataProvider, public Description<StructuredDataProvider>
+				{
+				protected:
+					Ptr<IStructuredDataProvider>						structuredDataProvider;
+					IDataProviderCommandExecutor*						commandExecutor;
+
+					vint												TranslateRowNumber(vint row);
+				public:
+					/// <summary>Create a data provider from a <see cref="IStructuredDataProvider"/>.</summary>
+					/// <param name="provider">The structured data provider.</param>
+					StructuredDataProvider(Ptr<IStructuredDataProvider> provider);
+					~StructuredDataProvider();
+
+					void												SetCommandExecutor(IDataProviderCommandExecutor* value)override;
+					vint												GetColumnCount()override;
+					WString												GetColumnText(vint column)override;
+					vint												GetColumnSize(vint column)override;
+					void												SetColumnSize(vint column, vint value)override;
+					GuiMenu*											GetColumnPopup(vint column)override;
+					bool												IsColumnSortable(vint column)override;
+					void												SortByColumn(vint column, bool ascending)override;
+					
+					vint												GetRowCount()override;
+					Ptr<GuiImageData>									GetRowImage(vint row)override;
+					WString												GetCellText(vint row, vint column)override;
+					IDataVisualizerFactory*								GetCellDataVisualizerFactory(vint row, vint column)override;
+					void												VisualizeCell(vint row, vint column, IDataVisualizer* dataVisualizer)override;
+					IDataEditorFactory*									GetCellDataEditorFactory(vint row, vint column)override;
+					void												BeforeEditCell(vint row, vint column, IDataEditor* dataEditor)override;
+					void												SaveCellData(vint row, vint column, IDataEditor* dataEditor)override;
+				};
+
 /***********************************************************************
 Visualizer Extensions
 ***********************************************************************/
