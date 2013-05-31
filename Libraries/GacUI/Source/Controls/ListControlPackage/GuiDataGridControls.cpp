@@ -165,6 +165,106 @@ StructuredDataMultipleSorter
 				}
 				
 /***********************************************************************
+StructuredDataProvider
+***********************************************************************/
+
+				vint StructuredDataProvider::TranslateRowNumber(vint row)
+				{
+					return row;
+				}
+
+				StructuredDataProvider::StructuredDataProvider(Ptr<IStructuredDataProvider> provider)
+					:structuredDataProvider(provider)
+					,commandExecutor(0)
+				{
+				}
+
+				StructuredDataProvider::~StructuredDataProvider()
+				{
+				}
+
+				void StructuredDataProvider::SetCommandExecutor(IDataProviderCommandExecutor* value)
+				{
+					commandExecutor=value;
+					structuredDataProvider->SetCommandExecutor(commandExecutor);
+				}
+
+				vint StructuredDataProvider::GetColumnCount()
+				{
+					return structuredDataProvider->GetColumnCount();
+				}
+
+				WString StructuredDataProvider::GetColumnText(vint column)
+				{
+					return structuredDataProvider->GetColumn(column)->GetText();
+				}
+
+				vint StructuredDataProvider::GetColumnSize(vint column)
+				{
+					throw 0;
+				}
+
+				void StructuredDataProvider::SetColumnSize(vint column, vint value)
+				{
+					throw 0;
+				}
+
+				GuiMenu* StructuredDataProvider::GetColumnPopup(vint column)
+				{
+					return structuredDataProvider->GetColumn(column)->GetPopup();
+				}
+
+				bool StructuredDataProvider::IsColumnSortable(vint column)
+				{
+					return structuredDataProvider->GetColumn(column)->GetInherentSorter();
+				}
+
+				void StructuredDataProvider::SortByColumn(vint column, bool ascending)
+				{
+					throw 0;
+				}
+					
+				vint StructuredDataProvider::GetRowCount()
+				{
+					return structuredDataProvider->GetRowCount();
+				}
+
+				Ptr<GuiImageData> StructuredDataProvider::GetRowImage(vint row)
+				{
+					return structuredDataProvider->GetRowImage(TranslateRowNumber(row));
+				}
+
+				WString StructuredDataProvider::GetCellText(vint row, vint column)
+				{
+					return structuredDataProvider->GetColumn(column)->GetCellText(TranslateRowNumber(row));
+				}
+
+				IDataVisualizerFactory* StructuredDataProvider::GetCellDataVisualizerFactory(vint row, vint column)
+				{
+					return structuredDataProvider->GetColumn(column)->GetCellDataVisualizerFactory(TranslateRowNumber(row));
+				}
+
+				void StructuredDataProvider::VisualizeCell(vint row, vint column, IDataVisualizer* dataVisualizer)
+				{
+					return structuredDataProvider->GetColumn(column)->VisualizeCell(TranslateRowNumber(row), dataVisualizer);
+				}
+
+				IDataEditorFactory* StructuredDataProvider::GetCellDataEditorFactory(vint row, vint column)
+				{
+					return structuredDataProvider->GetColumn(column)->GetCellDataEditorFactory(TranslateRowNumber(row));
+				}
+
+				void StructuredDataProvider::BeforeEditCell(vint row, vint column, IDataEditor* dataEditor)
+				{
+					return structuredDataProvider->GetColumn(column)->BeforeEditCell(TranslateRowNumber(row), dataEditor);
+				}
+
+				void StructuredDataProvider::SaveCellData(vint row, vint column, IDataEditor* dataEditor)
+				{
+					return structuredDataProvider->GetColumn(column)->SaveCellData(TranslateRowNumber(row), dataEditor);
+				}
+				
+/***********************************************************************
 DataVisualizerBase
 ***********************************************************************/
 
