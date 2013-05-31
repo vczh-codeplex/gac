@@ -921,6 +921,11 @@ Interface Proxy
 					{
 						INVOKE_INTERFACE_PROXY(Install, styleProvider, view, itemIndex);
 					}
+
+					void Uninstall()override
+					{
+						INVOKE_INTERFACE_PROXY_NOPARAM(Uninstall);
+					}
 				};
 
 				class ListViewItemStyleProvider_IListViewItemContentProvider : public ValueInterfaceRoot, public virtual list::ListViewItemStyleProvider::IListViewItemContentProvider

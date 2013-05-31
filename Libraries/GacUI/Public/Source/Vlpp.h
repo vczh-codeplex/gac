@@ -204,11 +204,11 @@ typedef signed __int64	pos_t;
 		static bool Equals(const Nullable<T>& a, const Nullable<T>& b)
 		{
 			return
-				object
-				?nullable.object
-					?*object==*nullable.object
+				a.object
+				?b.object
+					?*a.object==*b.object
 					:false
-				:nullable.object
+				:b.object
 					?false
 					:true;
 		}
@@ -216,11 +216,11 @@ typedef signed __int64	pos_t;
 		static vint Compare(const Nullable<T>& a, const Nullable<T>& b)
 		{
 			return
-				object
-				?nullable.object
-					?(*object==*nullable.object?0:*object<*nullable.object?-1:1)
+				a.object
+				?b.object
+					?(*a.object==*b.object?0:*a.object<*b.object?-1:1)
 					:1
-				:nullable.object
+				:b.object
 					?-1
 					:0;
 		}
