@@ -218,6 +218,17 @@ DataSource Extensions
 					virtual bool										Filter(vint row)=0;
 				};
 
+				/// <summary>Structured data sorter.</summary>
+				class IStructuredDataSorter : public virtual IDescriptable, public Description<IStructuredDataSorter>
+				{
+				public:
+					/// <summary>Get the order of two rows.</summary>
+					/// <returns>Returns 0 if the order doesn't matter. Returns negative number if row1 needs to put before row2. Returns positive number if row1 needs to put after row2.</returns>
+					/// <param name="row1">The row number of the first row.</param>
+					/// <param name="row2">The row number of the second row.</param>
+					virtual vint										Compare(vint row1, vint row2)=0;
+				};
+
 				/// <summary>Structure data column.</summary>
 				class IStructuredColumnProvider : public virtual IDescriptable, public Description<IStructuredColumnProvider>
 				{
@@ -231,14 +242,9 @@ DataSource Extensions
 					/// <summary>Get the inherent filter for the column.</summary>
 					/// <returns>The inherent filter. Returns null if the column doesn't have a filter.</returns>
 					virtual Ptr<IStructuredDataFilter>					GetInherentFilter()=0;
-					/// <summary>Test is a column sortable.</summary>
-					/// <returns>Returns true if this column is sortable.</returns>
-					virtual bool										IsSortable()=0;
-					/// <summary>Get the order of two rows.</summary>
-					/// <returns>Returns 0 if the order doesn't matter. Returns negative number if row1 needs to put before row2. Returns positive number if row1 needs to put after row2.</returns>
-					/// <param name="row1">The row number of the first row.</param>
-					/// <param name="row2">The row number of the second row.</param>
-					virtual vint										Compare(vint row1, vint row2)=0;
+					/// <summary>Get the inherent sorter for the column.</summary>
+					/// <returns>The inherent sorter. Returns null if the column doesn't have a sorter.</returns>
+					virtual Ptr<IStructuredDataSorter>					GetInherentSorter()=0;
 					
 					/// <summary>Get the text for the cell.</summary>
 					/// <returns>The text for the cell.</returns>
@@ -294,18 +300,21 @@ DataSource Extensions
 Filter Extensions
 ***********************************************************************/
 
+				/// <summary>Base class for <see cref="IStructuredDataFilter"/>.</summary>
 				class StructuredDataFilterBase : public Object, public virtual IStructuredDataFilter, public Description<StructuredDataFilterBase>
 				{
 				protected:
 					IStructuredDataFilterCommandExecutor*				commandExecutor;
 
+					/// <summary>Called when the structure or properties for this filter is changed.</summary>
 					void												InvokeOnFilterChanged();
 				public:
 					StructuredDataFilterBase();
 
 					void												SetCommandExecutor(IStructuredDataFilterCommandExecutor* value)override;
 				};
-
+				
+				/// <summary>Base class for a <see cref="IStructuredDataFilter"/> that contains multiple sub filters.</summary>
 				class StructuredDataMultipleFilter : public StructuredDataFilterBase, public Description<StructuredDataMultipleFilter>
 				{
 				protected:
@@ -314,36 +323,76 @@ Filter Extensions
 				public:
 					StructuredDataMultipleFilter();
 
+					/// <summary>Add a sub filter.</summary>
+					/// <returns>Returns true if this operation succeeded.</returns>
+					/// <param name="value">The sub filter.</param>
 					bool												AddSubFilter(Ptr<IStructuredDataFilter> value);
+					/// <summary>Remove a sub filter.</summary>
+					/// <returns>Returns true if this operation succeeded.</returns>
+					/// <param name="value">The sub filter.</param>
 					bool												RemoveSubFilter(Ptr<IStructuredDataFilter> value);
 					void												SetCommandExecutor(IStructuredDataFilterCommandExecutor* value)override;
 				};
 
+				/// <summary>A filter that keep a row if all sub filters agree.</summary>
 				class StructuredDataAndFilter : public StructuredDataMultipleFilter, public Description<StructuredDataAndFilter>
 				{
 				public:
+					/// <summary>Create the filter.</summary>
 					StructuredDataAndFilter();
 
 					bool												Filter(vint row)override;
 				};
-
+				
+				/// <summary>A filter that keep a row if one of all sub filters agrees.</summary>
 				class StructuredDataOrFilter : public StructuredDataMultipleFilter, public Description<StructuredDataOrFilter>
 				{
 				public:
+					/// <summary>Create the filter.</summary>
 					StructuredDataOrFilter();
 
 					bool												Filter(vint row)override;
 				};
-
+				
+				/// <summary>A filter that keep a row if the sub filter not agrees.</summary>
 				class StructuredDataNotFilter : public StructuredDataFilterBase, public Description<StructuredDataNotFilter>
 				{
 				protected:
 					Ptr<IStructuredDataFilter>							filter;
 				public:
+					/// <summary>Create the filter.</summary>
 					StructuredDataNotFilter();
-
+					
+					/// <summary>Set a sub filter.</summary>
+					/// <returns>Returns true if this operation succeeded.</returns>
+					/// <param name="value">The sub filter.</param>
 					bool												SetSubFilter(Ptr<IStructuredDataFilter> value);
 					bool												Filter(vint row)override;
+				};
+
+/***********************************************************************
+Sorter Extensions
+***********************************************************************/
+				
+				/// <summary>A multi-level <see cref="IStructuredDataSorter"/>.</summary>
+				class StructuredDataMultipleSorter : public Object, public virtual IStructuredDataSorter, public Description<StructuredDataMultipleSorter>
+				{
+				protected:
+					Ptr<IStructuredDataSorter>							leftSorter;
+					Ptr<IStructuredDataSorter>							rightSorter;
+				public:
+					/// <summary>Create the sorter.</summary>
+					StructuredDataMultipleSorter();
+					
+					/// <summary>Set the first sub sorter.</summary>
+					/// <returns>Returns true if this operation succeeded.</returns>
+					/// <param name="value">The sub sorter.</param>
+					bool												SetLeftSorter(Ptr<IStructuredDataSorter> value);
+					/// <summary>Set the second sub sorter.</summary>
+					/// <returns>Returns true if this operation succeeded.</returns>
+					/// <param name="value">The sub sorter.</param>
+					bool												SetRightSorter(Ptr<IStructuredDataSorter> value);
+					vint												Compare(vint row1, vint row2)override;
 				};
 
 /***********************************************************************

@@ -128,6 +128,43 @@ StructuredDataNotFilter
 				}
 				
 /***********************************************************************
+StructuredDataMultipleSorter
+***********************************************************************/
+
+				StructuredDataMultipleSorter::StructuredDataMultipleSorter()
+				{
+				}
+
+				bool StructuredDataMultipleSorter::SetLeftSorter(Ptr<IStructuredDataSorter> value)
+				{
+					if(leftSorter==value) return false;
+					leftSorter=value;
+					return true;
+				}
+
+				bool StructuredDataMultipleSorter::SetRightSorter(Ptr<IStructuredDataSorter> value)
+				{
+					if(rightSorter==value) return false;
+					rightSorter=value;
+					return true;
+				}
+
+				vint StructuredDataMultipleSorter::Compare(vint row1, vint row2)
+				{
+					if(leftSorter)
+					{
+						vint result=leftSorter->Compare(row1, row2);
+						if(result!=0) return result;
+					}
+					if(rightSorter)
+					{
+						vint result=rightSorter->Compare(row1, row2);
+						if(result!=0) return result;
+					}
+					return 0;
+				}
+				
+/***********************************************************************
 DataVisualizerBase
 ***********************************************************************/
 
