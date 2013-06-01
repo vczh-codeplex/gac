@@ -140,7 +140,7 @@ Sorter Extensions
 Structured DataSource Extensions
 ***********************************************************************/
 
-				/// <summary>A <see cred="IDataProvider"/> wrapper for <see cref="IStructuredDataProvider"/>.</summary>
+				/// <summary>An <see cref="IDataProvider"/> wrapper for <see cref="IStructuredDataProvider"/>.</summary>
 				class StructuredDataProvider
 					: public Object
 					, public virtual IDataProvider
@@ -196,7 +196,7 @@ Structured DataSource Extensions
 					void												SaveCellData(vint row, vint column, IDataEditor* dataEditor)override;
 				};
 
-				/// <summary>Base class for <see cred="IStructuredColumnProvider"/>.</summary>
+				/// <summary>Base class for <see cref="IStructuredColumnProvider"/>.</summary>
 				class StructuredColummProviderBase : public Object, public virtual IStructuredColumnProvider, public Description<StructuredColummProviderBase>
 				{
 				protected:
@@ -244,7 +244,7 @@ Structured DataSource Extensions
 					void												SaveCellData(vint row, IDataEditor* dataEditor)override;
 				};
 
-				/// <summary>Base class for <see cred="IStructuredDataProvider"/>.</summary>
+				/// <summary>Base class for <see cref="IStructuredDataProvider"/>.</summary>
 				class StructuredDataProviderBase : public Object, public virtual IStructuredDataProvider, public Description<StructuredDataProviderBase>
 				{
 					typedef collections::List<Ptr<StructuredColummProviderBase>>		ColumnList;
