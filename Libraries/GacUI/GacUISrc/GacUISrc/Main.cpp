@@ -9,6 +9,7 @@
 #include <Windows.h>
 #include <msctf.h>
 
+using namespace vl::stream;
 using namespace vl::collections;
 
 #define GUI_GRAPHICS_RENDERER_DIRECT2D
@@ -195,6 +196,32 @@ TestWindow
 		double		weight;
 		WString		valence;
 		WString		electron;
+
+		static WString Partition(const wchar_t*& reading)
+		{
+			const wchar_t* next=wcschr(reading, L'\t');
+			if(!next)
+			{
+				next=reading+wcslen(reading);
+			}
+			WString text(reading, next-reading);
+			reading=*next?next+1:next;
+			return text;
+		}
+
+		static ElementData Parse(const WString& text)
+		{
+			ElementData data;
+			const wchar_t* reading=text.Buffer();
+			data.order=wtoi(Partition(reading));
+			data.symbol=Partition(reading);
+			data.chinese=Partition(reading);
+			data.weight=wtof(Partition(reading));
+			data.electron=Partition(reading);
+			data.valence=Partition(reading);
+			data.english=Partition(reading);
+			return data;
+		}
 	};
 
 	class DataProvider : public list::StrongTypedDataProvider<ElementData>
@@ -211,6 +238,17 @@ TestWindow
 			AddSortableFieldColumn(L"Weight", &ElementData::weight);
 			AddFieldColumn(L"Valence", &ElementData::valence);
 			AddFieldColumn(L"Electron", &ElementData::electron);
+
+			FileStream fileStream(L"..\\GacUISrcCodepackedTest\\Resources\\Chemical.txt", FileStream::ReadOnly);
+			BomDecoder decoder;
+			DecoderStream decoderStream(fileStream, decoder);
+			StreamReader reader(decoderStream);
+
+			while(!reader.IsEnd())
+			{
+				WString line=reader.ReadLine();
+				elements.Add(ElementData::Parse(line));
+			}
 		}
 
 		void GetRowData(vint row, ElementData& rowData)override
