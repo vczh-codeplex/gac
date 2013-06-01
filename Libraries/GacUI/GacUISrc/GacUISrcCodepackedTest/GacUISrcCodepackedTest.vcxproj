@@ -260,6 +260,7 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="Resources\CalculatorDefinition.txt" />
+    <Text Include="Resources\Chemical.txt" />
     <Text Include="Resources\document.txt" />
     <Text Include="Resources\document2.txt" />
   </ItemGroup>

@@ -186,148 +186,41 @@ TsfTestWindow
 TestWindow
 ***********************************************************************/
 
-	class DataProvider : public Object, public virtual list::IDataProvider
+	struct ElementData
+	{
+		vint		order;
+		WString		symbol;
+		WString		chinese;
+		WString		english;
+		double		weight;
+		WString		valence;
+		WString		electron;
+	};
+
+	class DataProvider : public list::StrongTypedDataProvider<ElementData>
 	{
 	protected:
-		list::IDataProviderCommandExecutor*			commandExecutor;
-		Array<vint>									columnSizes;
-		bool										sorted;
-		bool										displayAscending;
-		list::DataTextComboBoxEditor::Factory		comboBoxEditorFactory;
+		List<ElementData>							elements;
 	public:
 		DataProvider()
-			:commandExecutor(0)
-			,columnSizes(10)
-			,sorted(false)
-			,displayAscending(true)
 		{
-			for(vint i=0;i<10;i++)
-			{
-				columnSizes[i]=100;
-			}
+			AddSortableFieldColumn(L"Order", &ElementData::order);
+			AddFieldColumn(L"Symbol", &ElementData::symbol);
+			AddFieldColumn(L"Chinese", &ElementData::chinese);
+			AddFieldColumn(L"English", &ElementData::english);
+			AddSortableFieldColumn(L"Weight", &ElementData::weight);
+			AddFieldColumn(L"Valence", &ElementData::valence);
+			AddFieldColumn(L"Electron", &ElementData::electron);
 		}
 
-		void SetCommandExecutor(list::IDataProviderCommandExecutor* value)override
+		void GetRowData(vint row, ElementData& rowData)override
 		{
-			commandExecutor=value;
-		}
-
-		vint GetColumnCount()override
-		{
-			return 10;
-		}
-
-		WString GetColumnText(vint column)override
-		{
-			if(column==0)
-			{
-				return displayAscending?L"Ascending":L"Descending";
-			}
-			else
-			{
-				return itow(column);
-			}
-		}
-
-		vint GetColumnSize(vint column)override
-		{
-			return columnSizes[column];
-		}
-
-		void SetColumnSize(vint column, vint value)override
-		{
-			columnSizes[column]=value;
-		}
-
-		GuiMenu* GetColumnPopup(vint column)override
-		{
-			return 0;
-		}
-
-		bool IsColumnSortable(vint column)override
-		{
-			return column==0;
-		}
-
-		void SortByColumn(vint column, bool ascending)override
-		{
-			sorted=column!=-1;
-			displayAscending=!sorted||ascending;
-			vint rows=GetRowCount();
-			commandExecutor->OnDataProviderColumnChanged();
-			commandExecutor->OnDataProviderItemModified(0, rows, rows);
-		}
-
-		vint GetSortedColumn()
-		{
-			return sorted?0:-1;
-		}
-
-		bool IsSortOrderAscending()
-		{
-			return displayAscending;
+			rowData=elements[row];
 		}
 
 		vint GetRowCount()override
 		{
-			return 100;
-		}
-
-		Ptr<GuiImageData> GetRowImage(vint row)override
-		{
-			return 0;
-		}
-
-		WString GetCellText(vint row, vint column)override
-		{
-			if(!displayAscending) row=GetRowCount()-row-1;
-			if(column==0)
-			{
-				return itow(row+1);
-			}
-			else
-			{
-				return itow(row+1)+L" * "+itow(column)+L" = "+itow((row+1)*column);
-			}
-		}
-
-		list::IDataVisualizerFactory* GetCellDataVisualizerFactory(vint row, vint column)override
-		{
-			return 0;
-		}
-
-		void VisualizeCell(vint row, vint column, list::IDataVisualizer* dataVisualizer)override
-		{
-		}
-
-		list::IDataEditorFactory* GetCellDataEditorFactory(vint row, vint column)override
-		{
-			if(column==0)
-			{
-				return 0;
-			}
-			else
-			{
-				return &comboBoxEditorFactory;
-			}
-		}
-
-		void BeforeEditCell(vint row, vint column, list::IDataEditor* dataEditor)override
-		{
-			list::DataTextComboBoxEditor* editor=dynamic_cast<list::DataTextComboBoxEditor*>(dataEditor);
-			if(editor)
-			{
-				editor->GetTextListControl()->GetItems().Add(new list::TextItem(L"Add (+)"));
-				editor->GetTextListControl()->GetItems().Add(new list::TextItem(L"Sub (-)"));
-				editor->GetTextListControl()->GetItems().Add(new list::TextItem(L"Mul (*)"));
-				editor->GetTextListControl()->GetItems().Add(new list::TextItem(L"Div (/)"));
-				editor->GetComboBoxControl()->SetSelectedIndex(2);
-			}
-		}
-
-		void SaveCellData(vint row, vint column, list::IDataEditor* dataEditor)override
-		{
-			commandExecutor->OnDataProviderItemModified(row, 1, 1);
+			return elements.Count();
 		}
 	};
 
