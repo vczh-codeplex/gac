@@ -71,8 +71,8 @@ namespace vl
 OrderBy Quick Sort
 ***********************************************************************/
 
-		template<typename T>
-		void Sort(T* items, vint length, const Func<vint(T, T)>& orderer)
+		template<typename T, typename F>
+		void SortLambda(T* items, vint length, F orderer)
 		{
 			if(length==0) return;
 			vint pivot=0;
@@ -102,8 +102,14 @@ OrderBy Quick Sort
 				}
 			}
 
-			Sort(items, left, orderer);
-			Sort(items+left+1, right, orderer);
+			SortLambda(items, left, orderer);
+			SortLambda(items+left+1, right, orderer);
+		}
+
+		template<typename T>
+		void Sort(T* items, vint length, const Func<vint(T, T)>& orderer)
+		{
+			SortLambda<T, Func<vint(T, T)>>(items, length, orderer);
 		}
 
 /***********************************************************************
@@ -199,7 +205,7 @@ LazyList
 				CopyFrom(*sorted.Obj(), *this);
 				if(sorted->Count()>0)
 				{
-					Sort<T>(&sorted->operator[](0), sorted->Count(), f);
+					SortLambda<T, F>(&sorted->operator[](0), sorted->Count(), f);
 				}
 				return new ContainerEnumerator<T, List<T>>(sorted);
 			}
