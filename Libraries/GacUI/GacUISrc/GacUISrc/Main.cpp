@@ -191,12 +191,14 @@ TestWindow
 	protected:
 		list::IDataProviderCommandExecutor*			commandExecutor;
 		Array<vint>									columnSizes;
+		bool										sorted;
 		bool										displayAscending;
 		list::DataTextComboBoxEditor::Factory		comboBoxEditorFactory;
 	public:
 		DataProvider()
 			:commandExecutor(0)
 			,columnSizes(10)
+			,sorted(false)
 			,displayAscending(true)
 		{
 			for(vint i=0;i<10;i++)
@@ -249,10 +251,21 @@ TestWindow
 
 		void SortByColumn(vint column, bool ascending)override
 		{
-			displayAscending=column==-1?true:ascending;
+			sorted=column!=-1;
+			displayAscending=!sorted||ascending;
 			vint rows=GetRowCount();
 			commandExecutor->OnDataProviderColumnChanged();
 			commandExecutor->OnDataProviderItemModified(0, rows, rows);
+		}
+
+		vint GetSortedColumn()
+		{
+			return sorted?0:-1;
+		}
+
+		bool IsSortOrderAscending()
+		{
+			return displayAscending;
 		}
 
 		vint GetRowCount()override
