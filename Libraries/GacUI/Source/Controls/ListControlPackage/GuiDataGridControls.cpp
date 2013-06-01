@@ -371,6 +371,16 @@ StructuredDataProvider
 					}
 					ReorderRows();
 				}
+
+				vint StructuredDataProvider::GetSortedColumn()
+				{
+					throw 0;
+				}
+
+				bool StructuredDataProvider::IsSortOrderAscending()
+				{
+					throw 0;
+				}
 					
 				vint StructuredDataProvider::GetRowCount()
 				{
@@ -663,8 +673,6 @@ DataGridItemProvider
 
 				DataGridItemProvider::DataGridItemProvider(IDataProvider* _dataProvider)
 					:dataProvider(_dataProvider)
-					,sortingColumn(-1)
-					,sortingColumnAscending(true)
 				{
 					dataProvider->SetCommandExecutor(this);
 				}
@@ -675,8 +683,6 @@ DataGridItemProvider
 
 				void DataGridItemProvider::SortByColumn(vint column, bool ascending)
 				{
-					sortingColumn=column;
-					sortingColumnAscending=ascending;
 					dataProvider->SortByColumn(column, ascending);
 				}
 
@@ -848,9 +854,9 @@ DataGridItemProvider
 
 				GuiListViewColumnHeader::ColumnSortingState DataGridItemProvider::GetSortingState(vint index)
 				{
-					if(index==sortingColumn)
+					if(index==dataProvider->GetSortedColumn())
 					{
-						return sortingColumnAscending
+						return dataProvider->IsSortOrderAscending()
 							?GuiListViewColumnHeader::Ascending
 							:GuiListViewColumnHeader::Descending;
 					}

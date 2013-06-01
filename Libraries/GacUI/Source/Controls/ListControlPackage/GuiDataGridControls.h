@@ -153,6 +153,12 @@ Datagrid Interfaces
 					/// <param name="column">The index of the column. Set to -1 means go back to the unsorted state.</param>
 					/// <param name="ascending">Set to true if the data is sorted in ascending order.</param>
 					virtual void										SortByColumn(vint column, bool ascending)=0;
+					/// <summary>Get the sorted columm. If no column is under a sorted state, it returns -1.</summary>
+					/// <returns>The column number.</returns>
+					virtual vint										GetSortedColumn()=0;
+					/// <summary>Test is the sort order ascending. </summary>
+					/// <returns>Returns true if the sort order is ascending.</returns>
+					virtual bool										IsSortOrderAscending()=0;
 					
 					/// <summary>Get the number of all rows.</summary>
 					/// <returns>The number of all rows.</returns>
@@ -465,6 +471,8 @@ Structured DataSource Extensions
 					GuiMenu*											GetColumnPopup(vint column)override;
 					bool												IsColumnSortable(vint column)override;
 					void												SortByColumn(vint column, bool ascending)override;
+					vint												GetSortedColumn()override;
+					bool												IsSortOrderAscending()override;
 					
 					vint												GetRowCount()override;
 					Ptr<GuiImageData>									GetRowImage(vint row)override;
@@ -641,8 +649,6 @@ Datagrid ItemProvider
 					IDataProvider*																dataProvider;
 					collections::List<GuiListControl::IItemProviderCallback*>					itemProviderCallbacks;
 					collections::List<ListViewColumnItemArranger::IColumnItemViewCallback*>		columnItemViewCallbacks;
-					vint																		sortingColumn;
-					bool																		sortingColumnAscending;
 
 					void												InvokeOnItemModified(vint start, vint count, vint newCount);
 					void												InvokeOnColumnChanged();
