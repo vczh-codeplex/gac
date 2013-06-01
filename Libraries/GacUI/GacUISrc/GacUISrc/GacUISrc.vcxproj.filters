@@ -459,6 +459,12 @@
     <ClCompile Include="..\..\Source\Controls\ListControlPackage\GuiDataGridControls.cpp">
       <Filter>GacUI\Controls\ListControlPackage</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Controls\ListControlPackage\GuiDataGridStructured.cpp">
+      <Filter>GacUI\Controls\ListControlPackage</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Controls\ListControlPackage\GuiDataGridExtensions.cpp">
+      <Filter>GacUI\Controls\ListControlPackage</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Common\Source\Basic.h">
@@ -873,6 +879,15 @@
       <Filter>GacUI\Reflection</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Controls\ListControlPackage\GuiDataGridControls.h">
+      <Filter>GacUI\Controls\ListControlPackage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Controls\ListControlPackage\GuiDataGridInterfaces.h">
+      <Filter>GacUI\Controls\ListControlPackage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Controls\ListControlPackage\GuiDataGridStructured.h">
+      <Filter>GacUI\Controls\ListControlPackage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Controls\ListControlPackage\GuiDataGridExtensions.h">
       <Filter>GacUI\Controls\ListControlPackage</Filter>
     </ClInclude>
   </ItemGroup>
