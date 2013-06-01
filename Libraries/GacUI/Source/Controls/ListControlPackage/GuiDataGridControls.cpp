@@ -369,17 +369,41 @@ StructuredDataProvider
 					{
 						currentSorter=0;
 					}
+					for(vint i=0;i<structuredDataProvider->GetColumnCount();i++)
+					{
+						structuredDataProvider->GetColumn(i)->SetSortingState(
+							i!=column?GuiListViewColumnHeader::NotSorted:
+							ascending?GuiListViewColumnHeader::Ascending:
+							GuiListViewColumnHeader::Descending
+							);
+					}
 					ReorderRows();
 				}
 
 				vint StructuredDataProvider::GetSortedColumn()
 				{
-					throw 0;
+					for(vint i=0;i<structuredDataProvider->GetColumnCount();i++)
+					{
+						GuiListViewColumnHeader::ColumnSortingState state=structuredDataProvider->GetColumn(i)->GetSortingState();
+						if(state!=GuiListViewColumnHeader::NotSorted)
+						{
+							return i;
+						}
+					}
+					return -1;
 				}
 
 				bool StructuredDataProvider::IsSortOrderAscending()
 				{
-					throw 0;
+					for(vint i=0;i<structuredDataProvider->GetColumnCount();i++)
+					{
+						GuiListViewColumnHeader::ColumnSortingState state=structuredDataProvider->GetColumn(i)->GetSortingState();
+						if(state!=GuiListViewColumnHeader::NotSorted)
+						{
+							return state==GuiListViewColumnHeader::Ascending;
+						}
+					}
+					return true;
 				}
 					
 				vint StructuredDataProvider::GetRowCount()

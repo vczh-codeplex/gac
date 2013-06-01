@@ -248,6 +248,12 @@ DataSource Extensions
 					/// <summary>Set the size for the column.</summary>
 					/// <param name="value">The new size for the column.</param>
 					virtual void										SetSize(vint value)=0;
+					/// <summary>Get the sorting state for the column.</summary>
+					/// <returns>The sorting state.</returns>
+					virtual GuiListViewColumnHeader::ColumnSortingState	GetSortingState()=0;
+					/// <summary>Set the sorting state for the column. This state does not affect the row order. The column provider does not have to implement the reordering.</summary>
+					/// <param name="value">The sorting state.</param>
+					virtual void										SetSortingState(GuiListViewColumnHeader::ColumnSortingState value)=0;
 					/// <summary>Get the popup binded to the column.</summary>
 					/// <returns>The popup binded to the column.</returns>
 					virtual GuiMenu*									GetPopup()=0;
