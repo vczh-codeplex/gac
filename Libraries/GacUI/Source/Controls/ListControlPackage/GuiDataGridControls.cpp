@@ -283,6 +283,32 @@ StructuredDataProvider
 
 				void StructuredDataProvider::ReorderRows()
 				{
+					reorderedRows.Clear();
+					vint rowCount=GetRowCount();
+
+					if(currentFilter)
+					{
+						for(vint i=0;i<rowCount;i++)
+						{
+							if(currentFilter->Filter(i))
+							{
+								reorderedRows.Add(i);
+							}
+						}
+					}
+					else
+					{
+						for(vint i=0;i<rowCount;i++)
+						{
+							reorderedRows.Add(i);
+						}
+					}
+
+					if(currentSorter && reorderedRows.Count()>0)
+					{
+						IStructuredDataSorter* sorter=currentSorter.Obj();
+						SortLambda(&reorderedRows[0], reorderedRows.Count(), [sorter](vint a, vint b){return sorter->Compare(a, b);});
+					}
 				}
 
 				vint StructuredDataProvider::TranslateRowNumber(vint row)
