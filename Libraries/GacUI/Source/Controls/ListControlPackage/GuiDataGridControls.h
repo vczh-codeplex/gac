@@ -236,6 +236,12 @@ DataSource Extensions
 					/// <summary>Get the text for the column.</summary>
 					/// <returns>The text of the column.</returns>
 					virtual WString										GetText()=0;
+					/// <summary>Get the size for the column.</summary>
+					/// <returns>The size for the column.</returns>
+					virtual vint										GetSize()=0;
+					/// <summary>Set the size for the column.</summary>
+					/// <param name="value">The new size for the column.</param>
+					virtual void										SetSize(vint value)=0;
 					/// <summary>Get the popup binded to the column.</summary>
 					/// <returns>The popup binded to the column.</returns>
 					virtual GuiMenu*									GetPopup()=0;
@@ -367,6 +373,7 @@ Filter Extensions
 					/// <returns>Returns true if this operation succeeded.</returns>
 					/// <param name="value">The sub filter.</param>
 					bool												SetSubFilter(Ptr<IStructuredDataFilter> value);
+					void												SetCommandExecutor(IStructuredDataFilterCommandExecutor* value)override;
 					bool												Filter(vint row)override;
 				};
 
@@ -394,24 +401,61 @@ Sorter Extensions
 					bool												SetRightSorter(Ptr<IStructuredDataSorter> value);
 					vint												Compare(vint row1, vint row2)override;
 				};
+				
+				/// <summary>A reverse order <see cref="IStructuredDataSorter"/>.</summary>
+				class StructuredDataReverseSorter : public Object, public virtual IStructuredDataSorter, public Description<StructuredDataReverseSorter>
+				{
+				protected:
+					Ptr<IStructuredDataSorter>							sorter;
+				public:
+					/// <summary>Create the sorter.</summary>
+					StructuredDataReverseSorter();
+					
+					/// <summary>Set the sub sorter.</summary>
+					/// <returns>Returns true if this operation succeeded.</returns>
+					/// <param name="value">The sub sorter.</param>
+					bool												SetSubSorter(Ptr<IStructuredDataSorter> value);
+					vint												Compare(vint row1, vint row2)override;
+				};
 
 /***********************************************************************
 Structured DataSource Extensions
 ***********************************************************************/
 
 				/// <summary>A <see cred="IDataProvider"/> wrapper for <see cref="IStructuredDataProvider"/>.</summary>
-				class StructuredDataProvider : public Object, public virtual IDataProvider, public Description<StructuredDataProvider>
+				class StructuredDataProvider
+					: public Object
+					, public virtual IDataProvider
+					, protected virtual IDataProviderCommandExecutor
+					, protected virtual IStructuredDataFilterCommandExecutor
+					, public Description<StructuredDataProvider>
 				{
 				protected:
 					Ptr<IStructuredDataProvider>						structuredDataProvider;
 					IDataProviderCommandExecutor*						commandExecutor;
-
+					Ptr<IStructuredDataFilter>							additionalFilter;
+					Ptr<IStructuredDataFilter>							currentFilter;
+					Ptr<IStructuredDataSorter>							currentSorter;
+					collections::List<vint>								reorderedRows;
+					
+					void												OnDataProviderColumnChanged()override;
+					void												OnDataProviderItemModified(vint start, vint count, vint newCount)override;
+					void												OnFilterChanged()override;
+					void												RebuildFilter();
+					void												ReorderRows();
 					vint												TranslateRowNumber(vint row);
 				public:
 					/// <summary>Create a data provider from a <see cref="IStructuredDataProvider"/>.</summary>
 					/// <param name="provider">The structured data provider.</param>
 					StructuredDataProvider(Ptr<IStructuredDataProvider> provider);
 					~StructuredDataProvider();
+
+					/// <summary>Get the additional filter.</summary>
+					/// <returns>The additional filter.</returns>
+					Ptr<IStructuredDataFilter>							GetAdditionalFilter();
+					/// <summary>Set the additional filter. This filter will be composed with inherent filters of all column to be the final filter.</summary>
+					/// <param name="value">The additional filter.</param>
+					void												SetAdditionalFilter(Ptr<IStructuredDataFilter> value);
 
 					void												SetCommandExecutor(IDataProviderCommandExecutor* value)override;
 					vint												GetColumnCount()override;
