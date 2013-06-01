@@ -239,6 +239,11 @@ StructuredDataProvider
 
 				void StructuredDataProvider::OnFilterChanged()
 				{
+					ReorderRows();
+					if(commandExecutor)
+					{
+						commandExecutor->OnDataProviderColumnChanged();
+					}
 				}
 
 				void StructuredDataProvider::RebuildFilter()
@@ -295,6 +300,11 @@ StructuredDataProvider
 					additionalFilter=value;
 					RebuildFilter();
 					ReorderRows();
+					if(commandExecutor)
+					{
+						commandExecutor->OnDataProviderColumnChanged();
+						commandExecutor->OnDataProviderItemModified(0, GetRowCount(), GetRowCount());
+					}
 				}
 
 				StructuredDataProvider::StructuredDataProvider(Ptr<IStructuredDataProvider> provider)
@@ -378,6 +388,11 @@ StructuredDataProvider
 							);
 					}
 					ReorderRows();
+					if(commandExecutor)
+					{
+						commandExecutor->OnDataProviderColumnChanged();
+						commandExecutor->OnDataProviderItemModified(0, GetRowCount(), GetRowCount());
+					}
 				}
 
 				vint StructuredDataProvider::GetSortedColumn()
@@ -428,7 +443,7 @@ StructuredDataProvider
 
 				void StructuredDataProvider::VisualizeCell(vint row, vint column, IDataVisualizer* dataVisualizer)
 				{
-					return structuredDataProvider->GetColumn(column)->VisualizeCell(TranslateRowNumber(row), dataVisualizer);
+					structuredDataProvider->GetColumn(column)->VisualizeCell(TranslateRowNumber(row), dataVisualizer);
 				}
 
 				IDataEditorFactory* StructuredDataProvider::GetCellDataEditorFactory(vint row, vint column)
@@ -438,12 +453,180 @@ StructuredDataProvider
 
 				void StructuredDataProvider::BeforeEditCell(vint row, vint column, IDataEditor* dataEditor)
 				{
-					return structuredDataProvider->GetColumn(column)->BeforeEditCell(TranslateRowNumber(row), dataEditor);
+					structuredDataProvider->GetColumn(column)->BeforeEditCell(TranslateRowNumber(row), dataEditor);
 				}
 
 				void StructuredDataProvider::SaveCellData(vint row, vint column, IDataEditor* dataEditor)
 				{
-					return structuredDataProvider->GetColumn(column)->SaveCellData(TranslateRowNumber(row), dataEditor);
+					structuredDataProvider->GetColumn(column)->SaveCellData(TranslateRowNumber(row), dataEditor);
+				}
+				
+/***********************************************************************
+StructuredColummProviderBase
+***********************************************************************/
+
+				StructuredColummProviderBase::StructuredColummProviderBase()
+					:commandExecutor(0)
+					,size(0)
+					,sortingState(GuiListViewColumnHeader::NotSorted)
+					,popup(0)
+				{
+				}
+
+				StructuredColummProviderBase::~StructuredColummProviderBase()
+				{
+				}
+					
+				void StructuredColummProviderBase::SetCommandExecutor(IDataProviderCommandExecutor* value)
+				{
+					commandExecutor=value;
+				}
+
+				void StructuredColummProviderBase::SetText(const WString& value)
+				{
+					text=value;
+					if(commandExecutor)
+					{
+						commandExecutor->OnDataProviderColumnChanged();
+					}
+				}
+
+				void StructuredColummProviderBase::SetPopup(GuiMenu* value)
+				{
+					popup=value;
+					if(commandExecutor)
+					{
+						commandExecutor->OnDataProviderColumnChanged();
+					}
+				}
+
+				void StructuredColummProviderBase::SetInherentFilter(Ptr<IStructuredDataFilter> value)
+				{
+					inherentFilter=value;
+					if(commandExecutor)
+					{
+						commandExecutor->OnDataProviderColumnChanged();
+					}
+				}
+
+				void StructuredColummProviderBase::SetInherentSorter(Ptr<IStructuredDataSorter> value)
+				{
+					inherentSorter=value;
+					if(commandExecutor)
+					{
+						commandExecutor->OnDataProviderColumnChanged();
+					}
+				}
+
+				WString StructuredColummProviderBase::GetText()
+				{
+					return text;
+				}
+
+				vint StructuredColummProviderBase::GetSize()
+				{
+					return size;
+				}
+
+				void StructuredColummProviderBase::SetSize(vint value)
+				{
+					size=value;
+				}
+
+				GuiListViewColumnHeader::ColumnSortingState StructuredColummProviderBase::GetSortingState()
+				{
+					return sortingState;
+				}
+
+				void StructuredColummProviderBase::SetSortingState(GuiListViewColumnHeader::ColumnSortingState value)
+				{
+					sortingState=value;
+				}
+
+				GuiMenu* StructuredColummProviderBase::GetPopup()
+				{
+					return popup;
+				}
+
+				Ptr<IStructuredDataFilter> StructuredColummProviderBase::GetInherentFilter()
+				{
+					return inherentFilter;
+				}
+
+				Ptr<IStructuredDataSorter> StructuredColummProviderBase::GetInherentSorter()
+				{
+					return inherentSorter;
+				}
+					
+				IDataVisualizerFactory* StructuredColummProviderBase::GetCellDataVisualizerFactory(vint row)
+				{
+					return 0;
+				}
+
+				void StructuredColummProviderBase::VisualizeCell(vint row, IDataVisualizer* dataVisualizer)
+				{
+				}
+
+				IDataEditorFactory* StructuredColummProviderBase::GetCellDataEditorFactory(vint row)
+				{
+					return 0;
+				}
+
+				void StructuredColummProviderBase::BeforeEditCell(vint row, IDataEditor* dataEditor)
+				{
+				}
+
+				void StructuredColummProviderBase::SaveCellData(vint row, IDataEditor* dataEditor)
+				{
+				}
+				
+/***********************************************************************
+StructuredDataProviderBase
+***********************************************************************/
+
+				bool StructuredDataProviderBase::AddColumn(Ptr<StructuredColummProviderBase> value)
+				{
+					if(columns.Contains(value.Obj())) return false;
+					columns.Add(value);
+					value->SetCommandExecutor(commandExecutor);
+					if(commandExecutor)
+					{
+						commandExecutor->OnDataProviderColumnChanged();
+					}
+					return true;
+				}
+
+				StructuredDataProviderBase::StructuredDataProviderBase()
+					:commandExecutor(0)
+				{
+				}
+
+				StructuredDataProviderBase::~StructuredDataProviderBase()
+				{
+				}
+
+				void StructuredDataProviderBase::SetCommandExecutor(IDataProviderCommandExecutor* value)
+				{
+					commandExecutor=value;
+					FOREACH(Ptr<StructuredColummProviderBase>, column, columns)
+					{
+						column->SetCommandExecutor(commandExecutor);
+					}
+				}
+
+				vint StructuredDataProviderBase::GetColumnCount()
+				{
+					return columns.Count();
+				}
+
+				IStructuredColumnProvider* StructuredDataProviderBase::GetColumn(vint column)
+				{
+					return columns[column].Obj();
+				}
+
+				Ptr<GuiImageData> StructuredDataProviderBase::GetRowImage(vint row)
+				{
+					return 0;
 				}
 				
 /***********************************************************************
@@ -703,6 +886,11 @@ DataGridItemProvider
 
 				DataGridItemProvider::~DataGridItemProvider()
 				{
+				}
+
+				IDataProvider* DataGridItemProvider::GetDataProvider()
+				{
+					return dataProvider;
 				}
 
 				void DataGridItemProvider::SortByColumn(vint column, bool ascending)
@@ -1254,18 +1442,40 @@ GuiVirtualDataGrid
 				}
 			}
 
-			GuiVirtualDataGrid::GuiVirtualDataGrid(IStyleProvider* _styleProvider, list::IDataProvider* _dataProvider)
-				:GuiVirtualListView(_styleProvider, new DataGridItemProvider(_dataProvider))
-				,dataProvider(_dataProvider)
+			void GuiVirtualDataGrid::Initialize()
 			{
 				itemProvider=dynamic_cast<DataGridItemProvider*>(GetItemProvider());
-				ChangeItemStyle(new DataGridContentProvider);
+				dataProvider=itemProvider->GetDataProvider();
+				structuredDataProvider=dataProvider.Cast<StructuredDataProvider>();
 
+				ChangeItemStyle(new DataGridContentProvider);
 				ColumnClicked.AttachMethod(this, &GuiVirtualDataGrid::OnColumnClicked);
+			}
+
+			GuiVirtualDataGrid::GuiVirtualDataGrid(IStyleProvider* _styleProvider, list::IDataProvider* _dataProvider)
+				:GuiVirtualListView(_styleProvider, new DataGridItemProvider(_dataProvider))
+			{
+				Initialize();
+			}
+
+			GuiVirtualDataGrid::GuiVirtualDataGrid(IStyleProvider* _styleProvider, list::IStructuredDataProvider* _dataProvider)
+				:GuiVirtualListView(_styleProvider, new DataGridItemProvider(new StructuredDataProvider(_dataProvider)))
+			{
+				Initialize();
 			}
 
 			GuiVirtualDataGrid::~GuiVirtualDataGrid()
 			{
+			}
+
+			list::IDataProvider* GuiVirtualDataGrid::GetDataProvider()
+			{
+				return dataProvider.Obj();
+			}
+
+			list::StructuredDataProvider* GuiVirtualDataGrid::GetStructuredDataProvider()
+			{
+				return structuredDataProvider.Obj();
 			}
 		}
 	}
