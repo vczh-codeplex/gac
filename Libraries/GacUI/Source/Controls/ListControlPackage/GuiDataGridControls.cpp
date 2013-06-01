@@ -284,7 +284,7 @@ StructuredDataProvider
 				void StructuredDataProvider::ReorderRows()
 				{
 					reorderedRows.Clear();
-					vint rowCount=GetRowCount();
+					vint rowCount=structuredDataProvider->GetRowCount();
 
 					if(currentFilter)
 					{
