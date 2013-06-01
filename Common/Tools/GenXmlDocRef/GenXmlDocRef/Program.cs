@@ -50,7 +50,7 @@ namespace GenXmlDocRef
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine(ex.Message);
+                        Console.WriteLine("{0}: {1}", docItem.Name, ex.Message);
                     }
                 }
 
