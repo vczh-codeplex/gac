@@ -49,15 +49,19 @@ StructuredDataMultipleFilter
 
 				bool StructuredDataMultipleFilter::AddSubFilter(Ptr<IStructuredDataFilter> value)
 				{
+					if(!value) return false;
 					if(filters.Contains(value.Obj())) return false;
 					filters.Add(value);
+					value->SetCommandExecutor(commandExecutor);
 					InvokeOnFilterChanged();
 					return true;
 				}
 
 				bool StructuredDataMultipleFilter::RemoveSubFilter(Ptr<IStructuredDataFilter> value)
 				{
+					if(!value) return false;
 					if(!filters.Contains(value.Obj())) return false;
+					value->SetCommandExecutor(0);
 					filters.Remove(value.Obj());
 					InvokeOnFilterChanged();
 					return true;
@@ -117,9 +121,26 @@ StructuredDataNotFilter
 				bool StructuredDataNotFilter::SetSubFilter(Ptr<IStructuredDataFilter> value)
 				{
 					if(filter==value) return false;
+					if(filter)
+					{
+						filter->SetCommandExecutor(0);
+					}
 					filter=value;
+					if(filter)
+					{
+						filter->SetCommandExecutor(commandExecutor);
+					}
 					InvokeOnFilterChanged();
 					return true;
+				}
+
+				void StructuredDataNotFilter::SetCommandExecutor(IStructuredDataFilterCommandExecutor* value)
+				{
+					StructuredDataFilterBase::SetCommandExecutor(value);
+					if(filter)
+					{
+						filter->SetCommandExecutor(value);
+					}
 				}
 
 				bool StructuredDataNotFilter::Filter(vint row)
@@ -165,18 +186,124 @@ StructuredDataMultipleSorter
 				}
 				
 /***********************************************************************
+StructuredDataReverseSorter
+***********************************************************************/
+
+				StructuredDataReverseSorter::StructuredDataReverseSorter()
+				{
+				}
+
+				bool StructuredDataReverseSorter::SetSubSorter(Ptr<IStructuredDataSorter> value)
+				{
+					if(sorter==value) return false;
+					sorter=value;
+					return true;
+				}
+
+				vint StructuredDataReverseSorter::Compare(vint row1, vint row2)
+				{
+					return sorter?-sorter->Compare(row1, row2):0;
+				}
+				
+/***********************************************************************
 StructuredDataProvider
 ***********************************************************************/
 
+				void StructuredDataProvider::OnDataProviderColumnChanged()
+				{
+					RebuildFilter();
+					ReorderRows();
+					if(commandExecutor)
+					{
+						commandExecutor->OnDataProviderColumnChanged();
+					}
+				}
+
+				void StructuredDataProvider::OnDataProviderItemModified(vint start, vint count, vint newCount)
+				{
+					// optimized for cell editing
+					if(!currentSorter && !currentFilter)
+					{
+						if(count!=newCount)
+						{
+							ReorderRows();
+						}
+						commandExecutor->OnDataProviderItemModified(start, count, newCount);
+					}
+					else
+					{
+						ReorderRows();
+						commandExecutor->OnDataProviderItemModified(0, GetRowCount(), GetRowCount());
+					}
+				}
+
+				void StructuredDataProvider::OnFilterChanged()
+				{
+				}
+
+				void StructuredDataProvider::RebuildFilter()
+				{
+					if(currentFilter)
+					{
+						currentFilter->SetCommandExecutor(0);
+						currentFilter=0;
+					}
+
+					List<Ptr<IStructuredDataFilter>> selectedFilters;
+					CopyFrom(
+						selectedFilters,
+						Range(0, GetColumnCount())
+							.Select([this](vint column){return structuredDataProvider->GetColumn(column)->GetInherentFilter();})
+							.Where([](Ptr<IStructuredDataFilter> filter){return (bool)filter;})
+						);
+					if(additionalFilter)
+					{
+						selectedFilters.Add(additionalFilter);
+					}
+					if(selectedFilters.Count()>0)
+					{
+						Ptr<StructuredDataAndFilter> andFilter=new StructuredDataAndFilter;
+						FOREACH(Ptr<IStructuredDataFilter>, filter, selectedFilters)
+						{
+							andFilter->AddSubFilter(filter);
+						}
+						currentFilter=andFilter;
+					}
+
+					if(currentFilter)
+					{
+						currentFilter->SetCommandExecutor(this);
+					}
+				}
+
+				void StructuredDataProvider::ReorderRows()
+				{
+				}
+
 				vint StructuredDataProvider::TranslateRowNumber(vint row)
 				{
-					return row;
+					return reorderedRows[row];
+				}
+
+				Ptr<IStructuredDataFilter> StructuredDataProvider::GetAdditionalFilter()
+				{
+					return additionalFilter;
+				}
+
+				void StructuredDataProvider::SetAdditionalFilter(Ptr<IStructuredDataFilter> value)
+				{
+					additionalFilter=value;
+					RebuildFilter();
+					ReorderRows();
 				}
 
 				StructuredDataProvider::StructuredDataProvider(Ptr<IStructuredDataProvider> provider)
 					:structuredDataProvider(provider)
 					,commandExecutor(0)
 				{
+					structuredDataProvider->SetCommandExecutor(this);
+					RebuildFilter();
+					ReorderRows();
 				}
 
 				StructuredDataProvider::~StructuredDataProvider()
@@ -186,7 +313,6 @@ StructuredDataProvider
 				void StructuredDataProvider::SetCommandExecutor(IDataProviderCommandExecutor* value)
 				{
 					commandExecutor=value;
-					structuredDataProvider->SetCommandExecutor(commandExecutor);
 				}
 
 				vint StructuredDataProvider::GetColumnCount()
@@ -201,12 +327,12 @@ StructuredDataProvider
 
 				vint StructuredDataProvider::GetColumnSize(vint column)
 				{
-					throw 0;
+					return structuredDataProvider->GetColumn(column)->GetSize();
 				}
 
 				void StructuredDataProvider::SetColumnSize(vint column, vint value)
 				{
-					throw 0;
+					structuredDataProvider->GetColumn(column)->SetSize(value);
 				}
 
 				GuiMenu* StructuredDataProvider::GetColumnPopup(vint column)
@@ -221,12 +347,34 @@ StructuredDataProvider
 
 				void StructuredDataProvider::SortByColumn(vint column, bool ascending)
 				{
-					throw 0;
+					if(0<=column && column<structuredDataProvider->GetColumnCount())
+					{
+						Ptr<IStructuredDataSorter> sorter=structuredDataProvider->GetColumn(column)->GetInherentSorter();
+						if(!sorter)
+						{
+							currentSorter=0;
+						}
+						else if(ascending)
+						{
+							currentSorter=sorter;
+						}
+						else
+						{
+							Ptr<StructuredDataReverseSorter> reverseSorter=new StructuredDataReverseSorter();
+							reverseSorter->SetSubSorter(sorter);
+							currentSorter=reverseSorter;
+						}
+					}
+					else
+					{
+						currentSorter=0;
+					}
+					ReorderRows();
 				}
 					
 				vint StructuredDataProvider::GetRowCount()
 				{
-					return structuredDataProvider->GetRowCount();
+					return reorderedRows.Count();
 				}
 
 				Ptr<GuiImageData> StructuredDataProvider::GetRowImage(vint row)
