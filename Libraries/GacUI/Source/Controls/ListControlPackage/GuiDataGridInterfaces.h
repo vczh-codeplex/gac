@@ -271,7 +271,6 @@ DataSource Extensions
 					virtual IDataVisualizerFactory*						GetCellDataVisualizerFactory(vint row)=0;
 					/// <summary>Called before visualizing the cell.</summary>
 					/// <param name="row">The row number for the cell.</param>
-					/// <param name="column">The column number for the cell.</param>
 					/// <param name="dataVisualizer">The data visualizer to be updated.</param>
 					virtual void										VisualizeCell(vint row, IDataVisualizer* dataVisualizer)=0;
 					/// <summary>Get the data editor factory that creates data editors for editing the cell.</summary>
