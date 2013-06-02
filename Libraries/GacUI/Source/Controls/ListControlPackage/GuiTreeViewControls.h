@@ -281,6 +281,7 @@ GuiVirtualTreeListControl Predefined NodeProvider
 
 			namespace tree
 			{
+				/// <summary>Base type for tree view node data.</summary>
 				class IMemoryNodeData : public virtual IDescriptable, public Description<IMemoryNodeData>
 				{
 				};
