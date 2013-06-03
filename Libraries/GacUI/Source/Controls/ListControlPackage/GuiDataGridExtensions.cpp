@@ -17,15 +17,25 @@ namespace vl
 DataVisualizerBase
 ***********************************************************************/
 
-				DataVisualizerBase::DataVisualizerBase()
+				DataVisualizerBase::DataVisualizerBase(Ptr<IDataVisualizer> _decoratedDataVisualizer)
 					:factory(0)
 					,styleProvider(0)
 					,boundsComposition(0)
+					,decoratedDataVisualizer(_decoratedDataVisualizer)
 				{
 				}
 
 				DataVisualizerBase::~DataVisualizerBase()
 				{
+					if(decoratedDataVisualizer)
+					{
+						GuiBoundsComposition* composition=decoratedDataVisualizer->GetBoundsComposition();
+						if(composition->GetParent())
+						{
+							composition->GetParent()->RemoveChild(composition);
+						}
+						decoratedDataVisualizer=0;
+					}
 					if(boundsComposition)
 					{
 						SafeDeleteComposition(boundsComposition);
@@ -48,6 +58,11 @@ DataVisualizerBase
 
 				void DataVisualizerBase::BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)
 				{
+				}
+
+				IDataVisualizer* DataVisualizerBase::GetDecoratedDataVisualizer()
+				{
+					return decoratedDataVisualizer.Obj();
 				}
 				
 /***********************************************************************
