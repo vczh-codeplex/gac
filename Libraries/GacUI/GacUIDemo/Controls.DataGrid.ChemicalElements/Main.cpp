@@ -164,6 +164,7 @@ struct ElementData
 Column provider for making the radioactive element names red and bold
 ***********************************************************************/
 
+// Inheriting from StrongTypedFieldColumnProvider enable the column provide to read the data from a specified member variable in a class.
 class ElementRadioactiveColumnProvider : public list::StrongTypedFieldColumnProvider<ElementData, WString>
 {
 public:
@@ -177,8 +178,14 @@ public:
 		StrongTypedFieldColumnProvider::VisualizeCell(row, dataVisualizer);
 		ElementData data;
 		dataProvider->GetRowData(row, data);
+
+		// If the displaying element is radioactive
 		if(data.order==43 || data.order==61 || data.order>=83)
 		{
+			// Get the text element from the data visualizer.
+			// The reason that we know there is a ListViewSubColumnDataVisualizer in the data visualizer is that,
+			// we explicitly use this data visualizer for all columns using this column provider
+			// in the constructor of the DataProvider class below.
 			GuiSolidLabelElement* text=dataVisualizer->GetVisualizer<list::ListViewSubColumnDataVisualizer>()->GetTextElement();
 			text->SetColor(Color(255, 0, 0));
 
@@ -392,12 +399,17 @@ public:
 Column provider for showing the electron configuration for both text and graph
 ***********************************************************************/
 
+// Inheriting from StrongTypedColumnProvider but not StrongTypedFieldColumnProvider because
+// we don't directly display the ElementData::electron in the data grid control.
 class ElementElectronColumnProvider : public list::StrongTypedColumnProvider<ElementData, WString>
 {
 protected:
 
 	void GetCellData(const ElementData& rowData, WString& cellData)override
 	{
+		// Here is how to display the text more professional, instead of displaying ElementData::electron directly.
+		// When constructing an ElementData object using ElementData::Parse,
+		// the ecs member will be constructed from ElementData::electron.
 		cellData=rowData.ecs->ToString();
 	}
 public:
@@ -409,6 +421,11 @@ public:
 	void VisualizeCell(vint row, list::IDataVisualizer* dataVisualizer)override
 	{
 		StrongTypedColumnProvider::VisualizeCell(row, dataVisualizer);
+
+		// If we are display this cell using ElementElectronDataVisualizer,
+		// we call ShowGraph to fill the data.
+		// The ShowGraph function is not predefined.
+		// This pattern is very useful for exchanging complext data between column provider and data visualizer.
 		ElementElectronDataVisualizer* eedVisualizer=dataVisualizer->GetVisualizer<ElementElectronDataVisualizer>();
 		if(eedVisualizer)
 		{
@@ -431,34 +448,45 @@ protected:
 public:
 	DataProvider()
 	{
+		// mainFactory will draw a data cell with a border, an image (not used in this demo), and a black text.
 		mainFactory=new list::CellBorderDataVisualizer::Factory(new list::ListViewMainColumnDataVisualizer::Factory);
+		// subFactory will draw a data cell with a border and a gray text. The style of the text can be changed.
 		subFactory=new list::CellBorderDataVisualizer::Factory(new list::ListViewSubColumnDataVisualizer::Factory);
+		// eecFactory draw the "element electron configuration" graph using the data from this data provider.
 		eecFactory=new list::CellBorderDataVisualizer::Factory(new ElementElectronDataVisualizer::Factory);
 
+		// Order column using mainFactory. Clicking this column will sort the data.
 		AddSortableFieldColumn(L"Order", &ElementData::order)
 			->SetVisualizerFactory(mainFactory);
 
+		// Symbol column using subFactory. The ElementRadioactiveColumnProvider will change the text style to be red and bold for radioactive elements
 		AddStrongTypedColumn<WString>(L"Symbol", new ElementRadioactiveColumnProvider(this, &ElementData::symbol))
 			->SetVisualizerFactory(subFactory);
-			
+		
+		// Chinese column as the previous one
 		AddStrongTypedColumn<WString>(L"Chinese", new ElementRadioactiveColumnProvider(this, &ElementData::chinese))
 			->SetVisualizerFactory(subFactory);
-			
+		
+		// English column as the previous one
 		AddStrongTypedColumn<WString>(L"English", new ElementRadioactiveColumnProvider(this, &ElementData::english))
 			->SetVisualizerFactory(subFactory)
 			->SetSize(120);
 
+		// Weight column using subFactory. Clicking this column will sort the data.
 		AddSortableFieldColumn(L"Weight", &ElementData::weight)
 			->SetVisualizerFactory(subFactory);
 
+		// Valence column using subFactory
 		AddFieldColumn(L"Valence", &ElementData::valence)
 			->SetVisualizerFactory(subFactory)
 			->SetSize(100);
 
+		// Electron column using subFactory. The ElementElectronColumnProvider will display the data in ElementData::electron using a professional style.
 		AddStrongTypedColumn<WString>(L"Electron", new ElementElectronColumnProvider(this))
 			->SetVisualizerFactory(subFactory)
 			->SetSize(160);
 
+		// Electron Graph column using eecFactory.
 		AddStrongTypedColumn<WString>(L"Electron Graph", new ElementElectronColumnProvider(this))
 			->SetVisualizerFactory(eecFactory)
 			->SetSize(160);
