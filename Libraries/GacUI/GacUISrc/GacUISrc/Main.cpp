@@ -367,18 +367,110 @@ TestWindow
 	protected:
 		List<vint>									electronCounts;
 		GuiDirect2DElement*							graphElement;
-		GuiSolidLabelElement*						text;
+
+		ComPtr<ID2D1SolidColorBrush>				lineBrush;
+		ComPtr<ID2D1SolidColorBrush>				textBrush;
+		ComPtr<ID2D1PathGeometry>					arcPath;
+		ComPtr<IDWriteTextFormat>					textFormat;
 
 		void OnBeforeRenderTargetChanged(GuiGraphicsComposition* sender, GuiDirect2DElementEventArgs& arguments)
 		{
+			lineBrush=0;
+			arcPath=0;
+			textFormat=0;
 		}
 
 		void OnAfterRenderTargetChanged(GuiGraphicsComposition* sender, GuiDirect2DElementEventArgs& arguments)
 		{
+			{
+				ID2D1SolidColorBrush* brush=0;
+				D2D1::ColorF color(0.5f, 0.5f, 0.5f);
+				HRESULT hr=arguments.rt->CreateSolidColorBrush(color, &brush);
+				if(!FAILED(hr))
+				{
+					lineBrush=brush;
+				}
+			}
+			{
+				ID2D1SolidColorBrush* brush=0;
+				D2D1::ColorF color(1.0f, 1.0f, 1.0f);
+				HRESULT hr=arguments.rt->CreateSolidColorBrush(color, &brush);
+				if(!FAILED(hr))
+				{
+					textBrush=brush;
+				}
+			}
+			{
+				ID2D1PathGeometry* path=0;
+				HRESULT hr=arguments.factoryD2D->CreatePathGeometry(&path);
+				if(!FAILED(hr))
+				{
+					arcPath=path;
+
+					ID2D1GeometrySink* sink=0;
+					hr=path->Open(&sink);
+					if(!FAILED(hr))
+					{
+						sink->BeginFigure(D2D1::Point2F(0, 16), D2D1_FIGURE_BEGIN_HOLLOW);
+						sink->AddArc(D2D1::ArcSegment(
+							D2D1::Point2F(0, 48),
+							D2D1::SizeF(32, 32),
+							0,
+							D2D1_SWEEP_DIRECTION_CLOCKWISE,
+							D2D1_ARC_SIZE_SMALL
+							));
+						sink->EndFigure(D2D1_FIGURE_END_OPEN);
+						sink->Close();
+						sink->Release();
+					}
+				}
+			}
+			{
+				IDWriteTextFormat* format=0;
+				HRESULT hr=arguments.factoryDWrite->CreateTextFormat(
+					font.fontFamily.Buffer(),
+					NULL,
+					(font.bold?DWRITE_FONT_WEIGHT_BOLD:DWRITE_FONT_WEIGHT_NORMAL),
+					(font.italic?DWRITE_FONT_STYLE_ITALIC:DWRITE_FONT_STYLE_NORMAL),
+					DWRITE_FONT_STRETCH_NORMAL,
+					(FLOAT)font.size,
+					L"",
+					&format);
+				if(!FAILED(hr))
+				{
+					textFormat=format;
+				}
+			}
 		}
 
 		void OnRendering(GuiGraphicsComposition* sender, GuiDirect2DElementEventArgs& arguments)
 		{
+			if(lineBrush && textBrush && arcPath && textFormat)
+			{
+				D2D1_MATRIX_3X2_F transform;
+				arguments.rt->GetTransform(&transform);
+
+				vint y=(64-font.size)/2;
+
+				for(vint i=0;i<electronCounts.Count();i++)
+				{
+					arguments.rt->SetTransform(
+						D2D1::Matrix3x2F::Translation((FLOAT)(arguments.bounds.x1+(i+1)*16), (FLOAT)arguments.bounds.y1)
+						);
+					arguments.rt->DrawGeometry(arcPath.Obj(), lineBrush.Obj());
+
+					WString number=itow(electronCounts[i]);
+					arguments.rt->DrawText(
+						number.Buffer(),
+						number.Length(),
+						textFormat.Obj(),
+						D2D1::RectF(0, (FLOAT)y, 0, 0),
+						textBrush.Obj()
+						);
+				}
+
+				arguments.rt->SetTransform(&transform);
+			}
 		}
 
 		GuiBoundsComposition* CreateBoundsCompositionInternal(GuiBoundsComposition* decoratedComposition)override
@@ -388,13 +480,9 @@ TestWindow
 			graphElement->AfterRenderTargetChanged.AttachMethod(this, &ElementElectronDataVisualizer::OnAfterRenderTargetChanged);
 			graphElement->Rendering.AttachMethod(this, &ElementElectronDataVisualizer::OnRendering);
 
-			text=GuiSolidLabelElement::Create();
-			text->SetFont(font);
-
 			GuiBoundsComposition* composition=new GuiBoundsComposition;
 			composition->SetPreferredMinSize(Size(0, 64));
 			composition->SetOwnedElement(graphElement);
-			composition->SetOwnedElement(text);
 			return composition;
 		}
 	public:
@@ -425,7 +513,6 @@ TestWindow
 			}
 
 			CopyFrom(electronCounts, From(counts).Take(counts.IndexOf(0)));
-			text->SetText(From(electronCounts).Aggregate(WString(L""), [](WString a, vint b){return a+L", "+itow(b);}));
 		}
 	};
 
