@@ -37,16 +37,19 @@ Visualizer Extensions
 					FontProperties										font;
 					GuiListViewBase::IStyleProvider*					styleProvider;
 					compositions::GuiBoundsComposition*					boundsComposition;
+					Ptr<IDataVisualizer>								decoratedDataVisualizer;
 
 					virtual compositions::GuiBoundsComposition*			CreateBoundsCompositionInternal()=0;
 				public:
 					/// <summary>Create the data visualizer.</summary>
-					DataVisualizerBase();
+					/// <param name="_decoratedDataVisualizer">The decorated data visualizer inside the current data visualizer.</param>
+					DataVisualizerBase(Ptr<IDataVisualizer> _decoratedDataVisualizer=0);
 					~DataVisualizerBase();
 
 					IDataVisualizerFactory*								GetFactory()override;
 					compositions::GuiBoundsComposition*					GetBoundsComposition()override;
 					void												BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)override;
+					IDataVisualizer*									GetDecoratedDataVisualizer()override;
 				};
 				
 				template<typename TVisualizer>
