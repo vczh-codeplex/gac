@@ -224,6 +224,31 @@ TestWindow
 		}
 	};
 
+	class ElementRadioactiveColumnProvider : public list::StrongTypedFieldColumnProvider<ElementData, WString>
+	{
+	public:
+		ElementRadioactiveColumnProvider(list::StrongTypedDataProvider<ElementData>* dataProvider, WString ElementData::* field)
+			:StrongTypedFieldColumnProvider(dataProvider, field)
+		{
+		}
+
+		void VisualizeCell(vint row, list::IDataVisualizer* dataVisualizer)override
+		{
+			StrongTypedFieldColumnProvider::VisualizeCell(row, dataVisualizer);
+			ElementData data;
+			dataProvider->GetRowData(row, data);
+			if(data.order==43 || data.order==61 || data.order>=83)
+			{
+				GuiSolidLabelElement* text=dataVisualizer->GetVisualizer<list::ListViewSubColumnDataVisualizer>()->GetTextElement();
+				text->SetColor(Color(255, 0, 0));
+
+				FontProperties font=text->GetFont();
+				font.bold=true;
+				text->SetFont(font);
+			}
+		}
+	};
+
 	class DataProvider : public list::StrongTypedDataProvider<ElementData>
 	{
 	protected:
@@ -239,14 +264,15 @@ TestWindow
 			AddSortableFieldColumn(L"Order", &ElementData::order)
 				->SetVisualizerFactory(mainFactory);
 
-			AddFieldColumn(L"Symbol", &ElementData::symbol)
+			AddStrongTypedColumn<WString>(L"Symbol", new ElementRadioactiveColumnProvider(this, &ElementData::symbol))
 				->SetVisualizerFactory(subFactory);
-
-			AddFieldColumn(L"Chinese", &ElementData::chinese)
+			
+			AddStrongTypedColumn<WString>(L"Chinese", new ElementRadioactiveColumnProvider(this, &ElementData::chinese))
 				->SetVisualizerFactory(subFactory);
-
-			AddFieldColumn(L"English", &ElementData::english)
-				->SetVisualizerFactory(subFactory);
+			
+			AddStrongTypedColumn<WString>(L"English", new ElementRadioactiveColumnProvider(this, &ElementData::english))
+				->SetVisualizerFactory(subFactory)
+				->SetSize(100);
 
 			AddSortableFieldColumn(L"Weight", &ElementData::weight)
 				->SetVisualizerFactory(subFactory);

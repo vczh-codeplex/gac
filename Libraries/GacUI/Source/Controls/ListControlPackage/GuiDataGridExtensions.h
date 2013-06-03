@@ -41,7 +41,7 @@ Visualizer Extensions
 					compositions::GuiBoundsComposition*					boundsComposition;
 					Ptr<IDataVisualizer>								decoratedDataVisualizer;
 
-					virtual compositions::GuiBoundsComposition*			CreateBoundsCompositionInternal()=0;
+					virtual compositions::GuiBoundsComposition*			CreateBoundsCompositionInternal(compositions::GuiBoundsComposition* decoratedComposition)=0;
 				public:
 					/// <summary>Create the data visualizer.</summary>
 					/// <param name="_decoratedDataVisualizer">The decorated data visualizer inside the current data visualizer.</param>
@@ -99,12 +99,16 @@ Visualizer Extensions
 					elements::GuiImageFrameElement*						image;
 					elements::GuiSolidLabelElement*						text;
 
-					compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal()override;
+					compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal(compositions::GuiBoundsComposition* decoratedComposition)override;
 				public:
 					/// <summary>Create the data visualizer.</summary>
 					ListViewMainColumnDataVisualizer();
 
 					void												BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)override;
+
+					/// <summary>Get the internal text element.</summary>
+					/// <returns>The text element.</returns>
+					elements::GuiSolidLabelElement*						GetTextElement();
 				};
 				
 				/// <summary>Data visualizer that displays a text. Use ListViewSubColumnDataVisualizer::Factory as the factory class.</summary>
@@ -115,12 +119,16 @@ Visualizer Extensions
 				protected:
 					elements::GuiSolidLabelElement*						text;
 
-					compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal()override;
+					compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal(compositions::GuiBoundsComposition* decoratedComposition)override;
 				public:
 					/// <summary>Create the data visualizer.</summary>
 					ListViewSubColumnDataVisualizer();
 
 					void												BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)override;
+
+					/// <summary>Get the internal text element.</summary>
+					/// <returns>The text element.</returns>
+					elements::GuiSolidLabelElement*						GetTextElement();
 				};
 				
 				/// <summary>Data visualizer that display a cell border out of another data visualizer.</summary>
@@ -130,7 +138,7 @@ Visualizer Extensions
 					typedef DataDecoratableVisualizerFactory<CellBorderDataVisualizer>		Factory;
 				protected:
 
-					compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal()override;
+					compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal(compositions::GuiBoundsComposition* decoratedComposition)override;
 				public:
 					/// <summary>Create the data visualizer.</summary>
 					/// <param name="decoratedDataVisualizer">The decorated data visualizer.</param>

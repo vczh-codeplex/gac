@@ -51,7 +51,12 @@ DataVisualizerBase
 				{
 					if(!boundsComposition)
 					{
-						boundsComposition=CreateBoundsCompositionInternal();
+						GuiBoundsComposition* decoratedComposition=0;
+						if(decoratedDataVisualizer)
+						{
+							decoratedComposition=decoratedDataVisualizer->GetBoundsComposition();
+						}
+						boundsComposition=CreateBoundsCompositionInternal(decoratedComposition);
 					}
 					return boundsComposition;
 				}
@@ -69,7 +74,7 @@ DataVisualizerBase
 ListViewMainColumnDataVisualizer
 ***********************************************************************/
 
-				compositions::GuiBoundsComposition* ListViewMainColumnDataVisualizer::CreateBoundsCompositionInternal()
+				compositions::GuiBoundsComposition* ListViewMainColumnDataVisualizer::CreateBoundsCompositionInternal(compositions::GuiBoundsComposition* decoratedComposition)
 				{
 					GuiTableComposition* table=new GuiTableComposition;
 					table->SetRowsAndColumns(3, 2);
@@ -97,10 +102,6 @@ ListViewMainColumnDataVisualizer
 						cell->SetMargin(Margin(0, 0, 8, 0));
 
 						text=GuiSolidLabelElement::Create();
-						text->SetAlignments(Alignment::Left, Alignment::Center);
-						text->SetFont(font);
-						text->SetColor(styleProvider->GetPrimaryTextColor());
-						text->SetEllipse(true);
 						cell->SetOwnedElement(text);
 					}
 					return table;
@@ -123,24 +124,31 @@ ListViewMainColumnDataVisualizer
 					{
 						image->SetImage(0);
 					}
+
+					text->SetAlignments(Alignment::Left, Alignment::Center);
+					text->SetFont(font);
+					text->SetColor(styleProvider->GetPrimaryTextColor());
+					text->SetEllipse(true);
 					text->SetText(dataProvider->GetCellText(row, column));
+				}
+
+				elements::GuiSolidLabelElement* ListViewMainColumnDataVisualizer::GetTextElement()
+				{
+					return text;
 				}
 				
 /***********************************************************************
 ListViewSubColumnDataVisualizer
 ***********************************************************************/
 
-				compositions::GuiBoundsComposition* ListViewSubColumnDataVisualizer::CreateBoundsCompositionInternal()
+				compositions::GuiBoundsComposition* ListViewSubColumnDataVisualizer::CreateBoundsCompositionInternal(compositions::GuiBoundsComposition* decoratedComposition)
 				{
-					text=GuiSolidLabelElement::Create();
-					text->SetAlignments(Alignment::Left, Alignment::Center);
-					text->SetFont(font);
-					text->SetColor(styleProvider->GetSecondaryTextColor());
-					text->SetEllipse(true);
-
 					GuiBoundsComposition* composition=new GuiBoundsComposition;
 					composition->SetMargin(Margin(8, 0, 8, 0));
+
+					text=GuiSolidLabelElement::Create();
 					composition->SetOwnedElement(text);
+
 					return composition;
 				}
 
@@ -151,18 +159,26 @@ ListViewSubColumnDataVisualizer
 
 				void ListViewSubColumnDataVisualizer::BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)
 				{
+					text->SetAlignments(Alignment::Left, Alignment::Center);
+					text->SetFont(font);
+					text->SetColor(styleProvider->GetSecondaryTextColor());
+					text->SetEllipse(true);
 					text->SetText(dataProvider->GetCellText(row, column));
+				}
+
+				elements::GuiSolidLabelElement* ListViewSubColumnDataVisualizer::GetTextElement()
+				{
+					return text;
 				}
 				
 /***********************************************************************
 CellBorderDataVisualizer
 ***********************************************************************/
 
-				compositions::GuiBoundsComposition* CellBorderDataVisualizer::CreateBoundsCompositionInternal()
+				compositions::GuiBoundsComposition* CellBorderDataVisualizer::CreateBoundsCompositionInternal(compositions::GuiBoundsComposition* decoratedComposition)
 				{
 					GuiBoundsComposition* border1=0;
 					GuiBoundsComposition* border2=0;
-					GuiBoundsComposition* decorated=0;
 					{
 						GuiSolidBorderElement* element=GuiSolidBorderElement::Create();
 						element->SetColor(styleProvider->GetItemSeparatorColor());
@@ -179,14 +195,12 @@ CellBorderDataVisualizer
 						border2->SetOwnedElement(element);
 						border2->SetAlignmentToParent(Margin(0, -1, 0, 0));
 					}
-					{
-						decorated=decoratedDataVisualizer->GetBoundsComposition();
-						decorated->SetAlignmentToParent(Margin(0, 0, 1, 1));
-					}
+					decoratedComposition->SetAlignmentToParent(Margin(0, 0, 1, 1));
+
 					GuiBoundsComposition* composition=new GuiBoundsComposition;
 					composition->AddChild(border1);
 					composition->AddChild(border2);
-					composition->AddChild(decorated);
+					composition->AddChild(decoratedComposition);
 
 					return composition;
 				}

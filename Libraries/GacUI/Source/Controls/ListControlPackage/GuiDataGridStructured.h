@@ -361,22 +361,34 @@ Strong Typed DataSource Extensions
 				protected:
 
 					template<typename TColumn>
-					Ptr<StrongTypedColumnProvider<TRow, TColumn>> AddFieldColumn(const WString& text, TColumn TRow::* field)
+					Ptr<StrongTypedColumnProvider<TRow, TColumn>> AddStrongTypedColumn(const WString& text, Ptr<StrongTypedColumnProvider<TRow, TColumn>> column)
 					{
-						Ptr<StrongTypedFieldColumnProvider<TRow, TColumn>> column=new StrongTypedFieldColumnProvider<TRow, TColumn>(this, field);
 						column->SetText(text);
 						return AddColumn(column)?column:0;
 					}
 
 					template<typename TColumn>
-					Ptr<StrongTypedColumnProvider<TRow, TColumn>> AddSortableFieldColumn(const WString& text, TColumn TRow::* field)
+					Ptr<StrongTypedColumnProvider<TRow, TColumn>> AddSortableStrongTypedColumn(const WString& text, Ptr<StrongTypedColumnProvider<TRow, TColumn>> column)
 					{
-						Ptr<StrongTypedColumnProvider<TRow, TColumn>> column=AddFieldColumn(text, field);
-						if(column)
+						if(AddStrongTypedColumn(text, column))
 						{
 							column->SetInherentSorter(new StrongTypedColumnProvider<TRow, TColumn>::Sorter(column.Obj()));
 						}
 						return column;
+					}
+
+					template<typename TColumn>
+					Ptr<StrongTypedColumnProvider<TRow, TColumn>> AddFieldColumn(const WString& text, TColumn TRow::* field)
+					{
+						Ptr<StrongTypedFieldColumnProvider<TRow, TColumn>> column=new StrongTypedFieldColumnProvider<TRow, TColumn>(this, field);
+						return AddStrongTypedColumn<TColumn>(text, column);
+					}
+
+					template<typename TColumn>
+					Ptr<StrongTypedColumnProvider<TRow, TColumn>> AddSortableFieldColumn(const WString& text, TColumn TRow::* field)
+					{
+						Ptr<StrongTypedFieldColumnProvider<TRow, TColumn>> column=new StrongTypedFieldColumnProvider<TRow, TColumn>(this, field);
+						return AddSortableStrongTypedColumn<TColumn>(text, column);
 					}
 				public:
 					StrongTypedDataProvider()
