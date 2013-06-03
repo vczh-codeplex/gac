@@ -155,6 +155,53 @@ ListViewSubColumnDataVisualizer
 				}
 				
 /***********************************************************************
+CellBorderDataVisualizer
+***********************************************************************/
+
+				compositions::GuiBoundsComposition* CellBorderDataVisualizer::CreateBoundsCompositionInternal()
+				{
+					GuiBoundsComposition* border1=0;
+					GuiBoundsComposition* border2=0;
+					GuiBoundsComposition* decorated=0;
+					{
+						GuiSolidBorderElement* element=GuiSolidBorderElement::Create();
+						element->SetColor(styleProvider->GetItemSeparatorColor());
+
+						border1=new GuiBoundsComposition;
+						border1->SetOwnedElement(element);
+						border1->SetAlignmentToParent(Margin(-1, 0, 0, 0));
+					}
+					{
+						GuiSolidBorderElement* element=GuiSolidBorderElement::Create();
+						element->SetColor(styleProvider->GetItemSeparatorColor());
+
+						border2=new GuiBoundsComposition;
+						border2->SetOwnedElement(element);
+						border2->SetAlignmentToParent(Margin(0, -1, 0, 0));
+					}
+					{
+						decorated=decoratedDataVisualizer->GetBoundsComposition();
+						decorated->SetAlignmentToParent(Margin(0, 0, 1, 1));
+					}
+					GuiBoundsComposition* composition=new GuiBoundsComposition;
+					composition->AddChild(border1);
+					composition->AddChild(border2);
+					composition->AddChild(decorated);
+
+					return composition;
+				}
+
+				CellBorderDataVisualizer::CellBorderDataVisualizer(Ptr<IDataVisualizer> decoratedDataVisualizer)
+					:DataVisualizerBase(decoratedDataVisualizer)
+				{
+				}
+
+				void CellBorderDataVisualizer::BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)
+				{
+					decoratedDataVisualizer->BeforeVisualizerCell(dataProvider, row, column);
+				}
+				
+/***********************************************************************
 DataEditorBase
 ***********************************************************************/
 
