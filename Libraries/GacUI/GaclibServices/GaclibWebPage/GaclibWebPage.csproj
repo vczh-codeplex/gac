@@ -134,6 +134,8 @@
     <Content Include="Content\Demos\Controls.Button.EnableDisable\DXGUI_28.jpg" />
     <Content Include="Content\Demos\Controls.Button.EnableDisable\DXGUI_29.jpg" />
     <Content Include="Content\Demos\Controls.Button.EnableDisable\Main.cpp" />
+    <Content Include="Content\Demos\Controls.DataGrid.ChemicalElements\DXGUI_64.jpg" />
+    <Content Include="Content\Demos\Controls.DataGrid.ChemicalElements\Main.cpp" />
     <Content Include="Content\Demos\Controls.Label.Hyperlink\DXGUI_27.jpg" />
     <Content Include="Content\Demos\Controls.Label.Hyperlink\Main.cpp" />
     <Content Include="Content\Demos\Controls.ListBox.NameEditor\DXGUI_38.jpg" />
@@ -181,6 +183,7 @@
     <Content Include="Content\Demos\Controls.TreeView.FileExplorer\DXGUI_51.jpg" />
     <Content Include="Content\Demos\Controls.TreeView.FileExplorer\DXGUI_52.jpg" />
     <Content Include="Content\Demos\Controls.TreeView.FileExplorer\Main.cpp" />
+    <Content Include="Content\Demos\Demos.Controls.DataGrid.ChemicalElements.jpg" />
     <Content Include="Content\Demos\Demos.Controls.TextBox.AdvancedColorizer.jpg" />
     <Content Include="Content\Demos\Demos.Controls.Tooltip.RichTextAndResource.jpg" />
     <Content Include="Content\Demos\Demos.Persistant.DirectCode.SimpleWindow.jpg" />
