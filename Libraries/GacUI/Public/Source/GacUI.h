@@ -7774,7 +7774,7 @@ ComboBox with GuiListControl
 #endif
 
 /***********************************************************************
-CONTROLS\LISTCONTROLPACKAGE\GUIDATAGRIDCONTROLS.H
+CONTROLS\LISTCONTROLPACKAGE\GUIDATAGRIDINTERFACES.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -7784,8 +7784,8 @@ GacUI::Control System
 Interfaces:
 ***********************************************************************/
 
-#ifndef VCZH_PRESENTATION_CONTROLS_GUIDATAGRIDCONTROLS
-#define VCZH_PRESENTATION_CONTROLS_GUIDATAGRIDCONTROLS
+#ifndef VCZH_PRESENTATION_CONTROLS_GUIDATAGRIDINTERFACES
+#define VCZH_PRESENTATION_CONTROLS_GUIDATAGRIDINTERFACES
 
 
 namespace vl
@@ -7794,13 +7794,13 @@ namespace vl
 	{
 		namespace controls
 		{
+			namespace list
+			{
 
 /***********************************************************************
 Datagrid Interfaces
 ***********************************************************************/
 
-			namespace list
-			{
 				class IDataVisualizerFactory;
 				class IDataVisualizer;
 				class IDataEditorCallback;
@@ -7823,6 +7823,21 @@ Datagrid Interfaces
 					virtual compositions::GuiBoundsComposition*			GetBoundsComposition()=0;
 
 					virtual void										BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)=0;
+
+					virtual IDataVisualizer*							GetDecoratedDataVisualizer()=0;
+
+					template<typename T>
+					T* GetVisualizer()
+					{
+						IDataVisualizer* visualizer=this;
+						while(visualizer)
+						{
+							T* result=dynamic_cast<T*>(visualizer);
+							if(result) return result;
+							visualizer=visualizer->GetDecoratedDataVisualizer();
+						}
+						return 0;
+					};
 				};
 
 				class IDataEditorCallback : public virtual IDescriptable, public Description<IDataEditorCallback>
@@ -7868,6 +7883,8 @@ Datagrid Interfaces
 					virtual GuiMenu*									GetColumnPopup(vint column)=0;
 					virtual bool										IsColumnSortable(vint column)=0;
 					virtual void										SortByColumn(vint column, bool ascending)=0;
+					virtual vint										GetSortedColumn()=0;
+					virtual bool										IsSortOrderAscending()=0;
 					
 					virtual vint										GetRowCount()=0;
 					virtual Ptr<GuiImageData>							GetRowImage(vint row)=0;
@@ -7906,6 +7923,10 @@ DataSource Extensions
 				{
 				public:
 					virtual WString										GetText()=0;
+					virtual vint										GetSize()=0;
+					virtual void										SetSize(vint value)=0;
+					virtual GuiListViewColumnHeader::ColumnSortingState	GetSortingState()=0;
+					virtual void										SetSortingState(GuiListViewColumnHeader::ColumnSortingState value)=0;
 					virtual GuiMenu*									GetPopup()=0;
 					virtual Ptr<IStructuredDataFilter>					GetInherentFilter()=0;
 					virtual Ptr<IStructuredDataSorter>					GetInherentSorter()=0;
@@ -7927,6 +7948,36 @@ DataSource Extensions
 					virtual IStructuredColumnProvider*					GetColumn(vint column)=0;
 					virtual Ptr<GuiImageData>							GetRowImage(vint row)=0;
 				};
+			}
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+CONTROLS\LISTCONTROLPACKAGE\GUIDATAGRIDSTRUCTURED.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+GacUI::Control System
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_CONTROLS_GUIDATASTRUCTURED
+#define VCZH_PRESENTATION_CONTROLS_GUIDATASTRUCTURED
+
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace controls
+		{
+			namespace list
+			{
 
 /***********************************************************************
 Filter Extensions
@@ -7981,6 +8032,7 @@ Filter Extensions
 					StructuredDataNotFilter();
 					
 					bool												SetSubFilter(Ptr<IStructuredDataFilter> value);
+					void												SetCommandExecutor(IStructuredDataFilterCommandExecutor* value)override;
 					bool												Filter(vint row)override;
 				};
 
@@ -8000,10 +8052,277 @@ Sorter Extensions
 					bool												SetRightSorter(Ptr<IStructuredDataSorter> value);
 					vint												Compare(vint row1, vint row2)override;
 				};
+				
+				class StructuredDataReverseSorter : public Object, public virtual IStructuredDataSorter, public Description<StructuredDataReverseSorter>
+				{
+				protected:
+					Ptr<IStructuredDataSorter>							sorter;
+				public:
+					StructuredDataReverseSorter();
+					
+					bool												SetSubSorter(Ptr<IStructuredDataSorter> value);
+					vint												Compare(vint row1, vint row2)override;
+				};
 
 /***********************************************************************
 Structured DataSource Extensions
 ***********************************************************************/
+
+				class StructuredDataProvider
+					: public Object
+					, public virtual IDataProvider
+					, protected virtual IDataProviderCommandExecutor
+					, protected virtual IStructuredDataFilterCommandExecutor
+					, public Description<StructuredDataProvider>
+				{
+				protected:
+					Ptr<IStructuredDataProvider>						structuredDataProvider;
+					IDataProviderCommandExecutor*						commandExecutor;
+					Ptr<IStructuredDataFilter>							additionalFilter;
+					Ptr<IStructuredDataFilter>							currentFilter;
+					Ptr<IStructuredDataSorter>							currentSorter;
+					collections::List<vint>								reorderedRows;
+					
+					void												OnDataProviderColumnChanged()override;
+					void												OnDataProviderItemModified(vint start, vint count, vint newCount)override;
+					void												OnFilterChanged()override;
+					void												RebuildFilter();
+					void												ReorderRows();
+					vint												TranslateRowNumber(vint row);
+				public:
+					StructuredDataProvider(Ptr<IStructuredDataProvider> provider);
+					~StructuredDataProvider();
+					
+					Ptr<IStructuredDataFilter>							GetAdditionalFilter();
+					void												SetAdditionalFilter(Ptr<IStructuredDataFilter> value);
+
+					void												SetCommandExecutor(IDataProviderCommandExecutor* value)override;
+					vint												GetColumnCount()override;
+					WString												GetColumnText(vint column)override;
+					vint												GetColumnSize(vint column)override;
+					void												SetColumnSize(vint column, vint value)override;
+					GuiMenu*											GetColumnPopup(vint column)override;
+					bool												IsColumnSortable(vint column)override;
+					void												SortByColumn(vint column, bool ascending)override;
+					vint												GetSortedColumn()override;
+					bool												IsSortOrderAscending()override;
+					
+					vint												GetRowCount()override;
+					Ptr<GuiImageData>									GetRowImage(vint row)override;
+					WString												GetCellText(vint row, vint column)override;
+					IDataVisualizerFactory*								GetCellDataVisualizerFactory(vint row, vint column)override;
+					void												VisualizeCell(vint row, vint column, IDataVisualizer* dataVisualizer)override;
+					IDataEditorFactory*									GetCellDataEditorFactory(vint row, vint column)override;
+					void												BeforeEditCell(vint row, vint column, IDataEditor* dataEditor)override;
+					void												SaveCellData(vint row, vint column, IDataEditor* dataEditor)override;
+				};
+
+				class StructuredColummProviderBase : public Object, public virtual IStructuredColumnProvider, public Description<StructuredColummProviderBase>
+				{
+				protected:
+					IDataProviderCommandExecutor*						commandExecutor;
+					WString												text;
+					vint												size;
+					GuiListViewColumnHeader::ColumnSortingState			sortingState;
+					GuiMenu*											popup;
+					Ptr<IStructuredDataFilter>							inherentFilter;
+					Ptr<IStructuredDataSorter>							inherentSorter;
+					Ptr<IDataVisualizerFactory>							visualizerFactory;
+					Ptr<IDataEditorFactory>								editorFactory;
+
+				public:
+					StructuredColummProviderBase();
+					~StructuredColummProviderBase();
+					
+					void												SetCommandExecutor(IDataProviderCommandExecutor* value);
+					StructuredColummProviderBase*						SetText(const WString& value);
+					StructuredColummProviderBase*						SetPopup(GuiMenu* value);
+					StructuredColummProviderBase*						SetInherentFilter(Ptr<IStructuredDataFilter> value);
+					StructuredColummProviderBase*						SetInherentSorter(Ptr<IStructuredDataSorter> value);
+					StructuredColummProviderBase*						SetVisualizerFactory(Ptr<IDataVisualizerFactory> value);
+					StructuredColummProviderBase*						SetEditorFactory(Ptr<IDataEditorFactory> value);
+
+					WString												GetText()override;
+					vint												GetSize()override;
+					void												SetSize(vint value)override;
+					GuiListViewColumnHeader::ColumnSortingState			GetSortingState()override;
+					void												SetSortingState(GuiListViewColumnHeader::ColumnSortingState value)override;
+					GuiMenu*											GetPopup()override;
+					Ptr<IStructuredDataFilter>							GetInherentFilter()override;
+					Ptr<IStructuredDataSorter>							GetInherentSorter()override;
+					
+					IDataVisualizerFactory*								GetCellDataVisualizerFactory(vint row)override;
+					void												VisualizeCell(vint row, IDataVisualizer* dataVisualizer)override;
+					IDataEditorFactory*									GetCellDataEditorFactory(vint row)override;
+					void												BeforeEditCell(vint row, IDataEditor* dataEditor)override;
+					void												SaveCellData(vint row, IDataEditor* dataEditor)override;
+				};
+
+				class StructuredDataProviderBase : public Object, public virtual IStructuredDataProvider, public Description<StructuredDataProviderBase>
+				{
+					typedef collections::List<Ptr<StructuredColummProviderBase>>		ColumnList;
+				protected:
+					IDataProviderCommandExecutor*						commandExecutor;
+					ColumnList											columns;
+
+					bool												AddColumn(Ptr<StructuredColummProviderBase> value);
+				public:
+					StructuredDataProviderBase();
+					~StructuredDataProviderBase();
+
+					void												SetCommandExecutor(IDataProviderCommandExecutor* value)override;
+					vint												GetColumnCount()override;
+					IStructuredColumnProvider*							GetColumn(vint column)override;
+					Ptr<GuiImageData>									GetRowImage(vint row)override;
+				};
+
+/***********************************************************************
+Strong Typed DataSource Extensions
+***********************************************************************/
+
+				template<typename TRow>
+				class StrongTypedDataProvider;
+
+				template<typename TRow, typename TColumn>
+				class StrongTypedColumnProvider : public StructuredColummProviderBase
+				{
+				public:
+					class Sorter : public Object, public virtual IStructuredDataSorter
+					{
+					protected:
+						StrongTypedColumnProvider<TRow, TColumn>*			ownerColumn;
+
+					public:
+						Sorter(StrongTypedColumnProvider<TRow, TColumn>* _ownerColumn)
+							:ownerColumn(_ownerColumn)
+						{
+						}
+
+						vint Compare(vint row1, vint row2)
+						{
+							TRow rowData1, rowData2;
+							TColumn cellData1, cellData2;
+							ownerColumn->dataProvider->GetRowData(row1, rowData1);
+							ownerColumn->dataProvider->GetRowData(row2, rowData2);
+							ownerColumn->GetCellData(rowData1, cellData1);
+							ownerColumn->GetCellData(rowData2, cellData2);
+
+							if(cellData1<cellData2) return -1;
+							if(cellData1>cellData2) return 1;
+							return 0;
+						}
+					};
+
+				protected:
+					StrongTypedDataProvider<TRow>*						dataProvider;
+
+					virtual void										GetCellData(const TRow& rowData, TColumn& cellData)=0;
+				public:
+					StrongTypedColumnProvider(StrongTypedDataProvider<TRow>* _dataProvider)
+						:dataProvider(_dataProvider)
+					{
+					}
+
+					WString GetCellText(vint row)override
+					{
+						TRow rowData;
+						TColumn cellData;
+						dataProvider->GetRowData(row, rowData);
+						GetCellData(rowData, cellData);
+						return description::BoxValue<TColumn>(cellData).GetText();
+					}
+				};
+
+				template<typename TRow, typename TColumn>
+				class StrongTypedFieldColumnProvider : public StrongTypedColumnProvider<TRow, TColumn>
+				{
+				protected:
+					TColumn TRow::*										field;
+
+					void GetCellData(const TRow& rowData, TColumn& cellData)override
+					{
+						cellData=rowData.*field;
+					}
+				public:
+					StrongTypedFieldColumnProvider(StrongTypedDataProvider<TRow>* _dataProvider, TColumn TRow::* _field)
+						:StrongTypedColumnProvider(_dataProvider)
+						,field(_field)
+					{
+					}
+				};
+
+				template<typename TRow>
+				class StrongTypedDataProvider : public StructuredDataProviderBase
+				{
+				protected:
+
+					template<typename TColumn>
+					Ptr<StrongTypedColumnProvider<TRow, TColumn>> AddStrongTypedColumn(const WString& text, Ptr<StrongTypedColumnProvider<TRow, TColumn>> column)
+					{
+						column->SetText(text);
+						return AddColumn(column)?column:0;
+					}
+
+					template<typename TColumn>
+					Ptr<StrongTypedColumnProvider<TRow, TColumn>> AddSortableStrongTypedColumn(const WString& text, Ptr<StrongTypedColumnProvider<TRow, TColumn>> column)
+					{
+						if(AddStrongTypedColumn(text, column))
+						{
+							column->SetInherentSorter(new StrongTypedColumnProvider<TRow, TColumn>::Sorter(column.Obj()));
+						}
+						return column;
+					}
+
+					template<typename TColumn>
+					Ptr<StrongTypedColumnProvider<TRow, TColumn>> AddFieldColumn(const WString& text, TColumn TRow::* field)
+					{
+						Ptr<StrongTypedFieldColumnProvider<TRow, TColumn>> column=new StrongTypedFieldColumnProvider<TRow, TColumn>(this, field);
+						return AddStrongTypedColumn<TColumn>(text, column);
+					}
+
+					template<typename TColumn>
+					Ptr<StrongTypedColumnProvider<TRow, TColumn>> AddSortableFieldColumn(const WString& text, TColumn TRow::* field)
+					{
+						Ptr<StrongTypedFieldColumnProvider<TRow, TColumn>> column=new StrongTypedFieldColumnProvider<TRow, TColumn>(this, field);
+						return AddSortableStrongTypedColumn<TColumn>(text, column);
+					}
+				public:
+					StrongTypedDataProvider()
+					{
+					}
+
+					virtual void										GetRowData(vint row, TRow& rowData)=0;
+				};
+			}
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+CONTROLS\LISTCONTROLPACKAGE\GUIDATAGRIDEXTENSIONS.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+GacUI::Control System
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_CONTROLS_GUIDATAEXTENSIONS
+#define VCZH_PRESENTATION_CONTROLS_GUIDATAEXTENSIONS
+
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace controls
+		{
+			namespace list
+			{
 
 /***********************************************************************
 Visualizer Extensions
@@ -8013,20 +8332,24 @@ Visualizer Extensions
 				{
 					template<typename T>
 					friend class DataVisualizerFactory;
+					template<typename T>
+					friend class DataDecoratableVisualizerFactory;
 				protected:
 					IDataVisualizerFactory*								factory;
 					FontProperties										font;
 					GuiListViewBase::IStyleProvider*					styleProvider;
 					compositions::GuiBoundsComposition*					boundsComposition;
+					Ptr<IDataVisualizer>								decoratedDataVisualizer;
 
-					virtual compositions::GuiBoundsComposition*			CreateBoundsCompositionInternal()=0;
+					virtual compositions::GuiBoundsComposition*			CreateBoundsCompositionInternal(compositions::GuiBoundsComposition* decoratedComposition)=0;
 				public:
-					DataVisualizerBase();
+					DataVisualizerBase(Ptr<IDataVisualizer> _decoratedDataVisualizer=0);
 					~DataVisualizerBase();
 
 					IDataVisualizerFactory*								GetFactory()override;
 					compositions::GuiBoundsComposition*					GetBoundsComposition()override;
 					void												BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)override;
+					IDataVisualizer*									GetDecoratedDataVisualizer()override;
 				};
 				
 				template<typename TVisualizer>
@@ -8042,6 +8365,28 @@ Visualizer Extensions
 						return dataVisualizer;
 					}
 				};
+				
+				template<typename TVisualizer>
+				class DataDecoratableVisualizerFactory : public Object, public virtual IDataVisualizerFactory, public Description<DataDecoratableVisualizerFactory<TVisualizer>>
+				{
+				protected:
+					Ptr<IDataVisualizerFactory>							decoratedFactory;
+				public:
+					DataDecoratableVisualizerFactory(Ptr<IDataVisualizerFactory> _decoratedFactory)
+						:decoratedFactory(_decoratedFactory)
+					{
+					}
+
+					Ptr<IDataVisualizer> CreateVisualizer(const FontProperties& font, GuiListViewBase::IStyleProvider* styleProvider)override
+					{
+						Ptr<IDataVisualizer> decoratedDataVisualizer=decoratedFactory->CreateVisualizer(font, styleProvider);
+						DataVisualizerBase* dataVisualizer=new TVisualizer(decoratedDataVisualizer);
+						dataVisualizer->factory=this;
+						dataVisualizer->font=font;
+						dataVisualizer->styleProvider=styleProvider;
+						return dataVisualizer;
+					}
+				};
 
 				class ListViewMainColumnDataVisualizer : public DataVisualizerBase
 				{
@@ -8051,11 +8396,13 @@ Visualizer Extensions
 					elements::GuiImageFrameElement*						image;
 					elements::GuiSolidLabelElement*						text;
 
-					compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal()override;
+					compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal(compositions::GuiBoundsComposition* decoratedComposition)override;
 				public:
 					ListViewMainColumnDataVisualizer();
 
 					void												BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)override;
+
+					elements::GuiSolidLabelElement*						GetTextElement();
 				};
 				
 				class ListViewSubColumnDataVisualizer : public DataVisualizerBase
@@ -8065,9 +8412,24 @@ Visualizer Extensions
 				protected:
 					elements::GuiSolidLabelElement*						text;
 
-					compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal()override;
+					compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal(compositions::GuiBoundsComposition* decoratedComposition)override;
 				public:
 					ListViewSubColumnDataVisualizer();
+
+					void												BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)override;
+
+					elements::GuiSolidLabelElement*						GetTextElement();
+				};
+				
+				class CellBorderDataVisualizer : public DataVisualizerBase
+				{
+				public:
+					typedef DataDecoratableVisualizerFactory<CellBorderDataVisualizer>		Factory;
+				protected:
+
+					compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal(compositions::GuiBoundsComposition* decoratedComposition)override;
+				public:
+					CellBorderDataVisualizer(Ptr<IDataVisualizer> decoratedDataVisualizer);
 
 					void												BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)override;
 				};
@@ -8139,6 +8501,36 @@ Editor Extensions
 					GuiComboBoxListControl*								GetComboBoxControl();
 					GuiTextList*										GetTextListControl();
 				};
+			}
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+CONTROLS\LISTCONTROLPACKAGE\GUIDATAGRIDCONTROLS.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+GacUI::Control System
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_CONTROLS_GUIDATAGRIDCONTROLS
+#define VCZH_PRESENTATION_CONTROLS_GUIDATAGRIDCONTROLS
+
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace controls
+		{
+			namespace list
+			{
 
 /***********************************************************************
 Datagrid ItemProvider
@@ -8157,8 +8549,6 @@ Datagrid ItemProvider
 					IDataProvider*																dataProvider;
 					collections::List<GuiListControl::IItemProviderCallback*>					itemProviderCallbacks;
 					collections::List<ListViewColumnItemArranger::IColumnItemViewCallback*>		columnItemViewCallbacks;
-					vint																		sortingColumn;
-					bool																		sortingColumnAscending;
 
 					void												InvokeOnItemModified(vint start, vint count, vint newCount);
 					void												InvokeOnColumnChanged();
@@ -8168,6 +8558,7 @@ Datagrid ItemProvider
 					DataGridItemProvider(IDataProvider* _dataProvider);
 					~DataGridItemProvider();
 
+					IDataProvider*										GetDataProvider();
 					void												SortByColumn(vint column, bool ascending=true);
 
 					// ===================== GuiListControl::IItemProvider =====================
@@ -8289,11 +8680,17 @@ DataGrid Control
 			protected:
 				list::DataGridItemProvider*								itemProvider;
 				Ptr<list::IDataProvider>								dataProvider;
+				Ptr<list::StructuredDataProvider>						structuredDataProvider;
 
 				void													OnColumnClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiItemEventArgs& arguments);
+				void													Initialize();
 			public:
 				GuiVirtualDataGrid(IStyleProvider* _styleProvider, list::IDataProvider* _dataProvider);
+				GuiVirtualDataGrid(IStyleProvider* _styleProvider, list::IStructuredDataProvider* _dataProvider);
 				~GuiVirtualDataGrid();
+
+				list::IDataProvider*									GetDataProvider();
+				list::StructuredDataProvider*							GetStructuredDataProvider();
 			};
 		}
 	}

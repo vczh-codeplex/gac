@@ -365,17 +365,28 @@ TestWindow
 	public:
 		typedef list::DataVisualizerFactory<ElementElectronDataVisualizer>			Factory;
 	protected:
+		static const vint							GraphHeight		=64;
+		static const vint							GraphWidth		=8;
+		static const vint							GraphHole		=16;
+		static const vint							GraphStep		=20;
+		static const vint							ArcLeft			=16;
+		static const vint							ArcTop			=12;
+		static const vint							ArcRadius		=32;
+		
 		List<vint>									electronCounts;
 		GuiDirect2DElement*							graphElement;
 
 		ComPtr<ID2D1SolidColorBrush>				lineBrush;
 		ComPtr<ID2D1SolidColorBrush>				textBrush;
+		ComPtr<ID2D1SolidColorBrush>				backgroundBrush;
 		ComPtr<ID2D1PathGeometry>					arcPath;
 		ComPtr<IDWriteTextFormat>					textFormat;
 
 		void OnBeforeRenderTargetChanged(GuiGraphicsComposition* sender, GuiDirect2DElementEventArgs& arguments)
 		{
 			lineBrush=0;
+			backgroundBrush=0;
+			textBrush=0;
 			arcPath=0;
 			textFormat=0;
 		}
@@ -393,11 +404,20 @@ TestWindow
 			}
 			{
 				ID2D1SolidColorBrush* brush=0;
-				D2D1::ColorF color(1.0f, 1.0f, 1.0f);
+				D2D1::ColorF color(0.0f, 0.0f, 0.0f);
 				HRESULT hr=arguments.rt->CreateSolidColorBrush(color, &brush);
 				if(!FAILED(hr))
 				{
 					textBrush=brush;
+				}
+			}
+			{
+				ID2D1SolidColorBrush* brush=0;
+				D2D1::ColorF color(1.0f, 1.0f, 1.0f);
+				HRESULT hr=arguments.rt->CreateSolidColorBrush(color, &brush);
+				if(!FAILED(hr))
+				{
+					backgroundBrush=brush;
 				}
 			}
 			{
@@ -411,15 +431,32 @@ TestWindow
 					hr=path->Open(&sink);
 					if(!FAILED(hr))
 					{
-						sink->BeginFigure(D2D1::Point2F(0, 16), D2D1_FIGURE_BEGIN_HOLLOW);
+						D2D_POINT_2F p1=D2D1::Point2F(0, (FLOAT)ArcTop);
+						D2D_POINT_2F p2=D2D1::Point2F((FLOAT)GraphWidth, (FLOAT)(GraphHeight-GraphHole)/2);
+						D2D_POINT_2F p3=D2D1::Point2F((FLOAT)GraphWidth, (FLOAT)(GraphHeight+GraphHole)/2);
+						D2D_POINT_2F p4=D2D1::Point2F(0, (FLOAT)(GraphHeight-ArcTop));
+						D2D_SIZE_F size=D2D1::SizeF((FLOAT)ArcRadius, (FLOAT)ArcRadius);
+
+						sink->BeginFigure(p1, D2D1_FIGURE_BEGIN_HOLLOW);
 						sink->AddArc(D2D1::ArcSegment(
-							D2D1::Point2F(0, 48),
-							D2D1::SizeF(32, 32),
+							p2,
+							size,
 							0,
 							D2D1_SWEEP_DIRECTION_CLOCKWISE,
 							D2D1_ARC_SIZE_SMALL
 							));
 						sink->EndFigure(D2D1_FIGURE_END_OPEN);
+						
+						sink->BeginFigure(p3, D2D1_FIGURE_BEGIN_HOLLOW);
+						sink->AddArc(D2D1::ArcSegment(
+							p4,
+							size,
+							0,
+							D2D1_SWEEP_DIRECTION_CLOCKWISE,
+							D2D1_ARC_SIZE_SMALL
+							));
+						sink->EndFigure(D2D1_FIGURE_END_OPEN);
+
 						sink->Close();
 						sink->Release();
 					}
@@ -439,6 +476,7 @@ TestWindow
 				if(!FAILED(hr))
 				{
 					textFormat=format;
+					format->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 				}
 			}
 		}
@@ -450,21 +488,22 @@ TestWindow
 				D2D1_MATRIX_3X2_F transform;
 				arguments.rt->GetTransform(&transform);
 
-				vint y=(64-font.size)/2;
+				vint y=(GraphHeight-font.size)/2;
 
 				for(vint i=0;i<electronCounts.Count();i++)
 				{
 					arguments.rt->SetTransform(
-						D2D1::Matrix3x2F::Translation((FLOAT)(arguments.bounds.x1+(i+1)*16), (FLOAT)arguments.bounds.y1)
+						D2D1::Matrix3x2F::Translation((FLOAT)(arguments.bounds.x1+ArcLeft+i*GraphStep), (FLOAT)arguments.bounds.y1)
 						);
 					arguments.rt->DrawGeometry(arcPath.Obj(), lineBrush.Obj());
 
+					D2D1_RECT_F rect=D2D1::RectF((FLOAT)(electronCounts[i]<10?5:0), (FLOAT)y, 20, (FLOAT)(y+font.size));
 					WString number=itow(electronCounts[i]);
 					arguments.rt->DrawText(
 						number.Buffer(),
 						number.Length(),
 						textFormat.Obj(),
-						D2D1::RectF(0, (FLOAT)y, 0, 0),
+						rect,
 						textBrush.Obj()
 						);
 				}
@@ -566,7 +605,7 @@ TestWindow
 			
 			AddStrongTypedColumn<WString>(L"English", new ElementRadioactiveColumnProvider(this, &ElementData::english))
 				->SetVisualizerFactory(subFactory)
-				->SetSize(100);
+				->SetSize(120);
 
 			AddSortableFieldColumn(L"Weight", &ElementData::weight)
 				->SetVisualizerFactory(subFactory);
@@ -577,11 +616,11 @@ TestWindow
 
 			AddStrongTypedColumn<WString>(L"Electron", new ElementElectronColumnProvider(this))
 				->SetVisualizerFactory(subFactory)
-				->SetSize(140);
+				->SetSize(160);
 
 			AddStrongTypedColumn<WString>(L"Electron Graph", new ElementElectronColumnProvider(this))
 				->SetVisualizerFactory(eecFactory)
-				->SetSize(140);
+				->SetSize(160);
 
 			FileStream fileStream(L"..\\GacUISrcCodepackedTest\\Resources\\Chemical.txt", FileStream::ReadOnly);
 			BomDecoder decoder;
