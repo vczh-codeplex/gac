@@ -252,10 +252,12 @@ TestWindow
 				->SetVisualizerFactory(subFactory);
 
 			AddFieldColumn(L"Valence", &ElementData::valence)
-				->SetVisualizerFactory(subFactory);
+				->SetVisualizerFactory(subFactory)
+				->SetSize(100);
 
 			AddFieldColumn(L"Electron", &ElementData::electron)
-				->SetVisualizerFactory(subFactory);
+				->SetVisualizerFactory(subFactory)
+				->SetSize(140);
 
 			FileStream fileStream(L"..\\GacUISrcCodepackedTest\\Resources\\Chemical.txt", FileStream::ReadOnly);
 			BomDecoder decoder;
