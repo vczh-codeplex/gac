@@ -501,40 +501,56 @@ StructuredColummProviderBase
 					commandExecutor=value;
 				}
 
-				void StructuredColummProviderBase::SetText(const WString& value)
+				StructuredColummProviderBase* StructuredColummProviderBase::SetText(const WString& value)
 				{
 					text=value;
 					if(commandExecutor)
 					{
 						commandExecutor->OnDataProviderColumnChanged();
 					}
+					return this;
 				}
 
-				void StructuredColummProviderBase::SetPopup(GuiMenu* value)
+				StructuredColummProviderBase* StructuredColummProviderBase::SetPopup(GuiMenu* value)
 				{
 					popup=value;
 					if(commandExecutor)
 					{
 						commandExecutor->OnDataProviderColumnChanged();
 					}
+					return this;
 				}
 
-				void StructuredColummProviderBase::SetInherentFilter(Ptr<IStructuredDataFilter> value)
+				StructuredColummProviderBase* StructuredColummProviderBase::SetInherentFilter(Ptr<IStructuredDataFilter> value)
 				{
 					inherentFilter=value;
 					if(commandExecutor)
 					{
 						commandExecutor->OnDataProviderColumnChanged();
 					}
+					return this;
 				}
 
-				void StructuredColummProviderBase::SetInherentSorter(Ptr<IStructuredDataSorter> value)
+				StructuredColummProviderBase* StructuredColummProviderBase::SetInherentSorter(Ptr<IStructuredDataSorter> value)
 				{
 					inherentSorter=value;
 					if(commandExecutor)
 					{
 						commandExecutor->OnDataProviderColumnChanged();
 					}
+					return this;
+				}
+
+				StructuredColummProviderBase* StructuredColummProviderBase::SetVisualizerFactory(Ptr<IDataVisualizerFactory> value)
+				{
+					visualizerFactory=value;
+					return this;
+				}
+
+				StructuredColummProviderBase* StructuredColummProviderBase::SetEditorFactory(Ptr<IDataEditorFactory> value)
+				{
+					editorFactory=value;
+					return this;
 				}
 
 				WString StructuredColummProviderBase::GetText()
@@ -579,7 +595,7 @@ StructuredColummProviderBase
 					
 				IDataVisualizerFactory* StructuredColummProviderBase::GetCellDataVisualizerFactory(vint row)
 				{
-					return 0;
+					return visualizerFactory.Obj();
 				}
 
 				void StructuredColummProviderBase::VisualizeCell(vint row, IDataVisualizer* dataVisualizer)
@@ -588,7 +604,7 @@ StructuredColummProviderBase
 
 				IDataEditorFactory* StructuredColummProviderBase::GetCellDataEditorFactory(vint row)
 				{
-					return 0;
+					return editorFactory.Obj();
 				}
 
 				void StructuredColummProviderBase::BeforeEditCell(vint row, IDataEditor* dataEditor)
