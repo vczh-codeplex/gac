@@ -11,6 +11,7 @@
 
 using namespace vl::stream;
 using namespace vl::collections;
+using namespace vl::regex;
 
 #define GUI_GRAPHICS_RENDERER_DIRECT2D
 
@@ -224,6 +225,94 @@ TestWindow
 		}
 	};
 
+	struct ElementElectron
+	{
+		static const wchar_t*			RegexEec;
+
+		vint		level;
+		wchar_t		type;
+		vint		typeOrder;
+		vint		count;
+
+		static vint Compare(const ElementElectron& a, const ElementElectron& b)
+		{
+			vint result=0;
+			if(result==0) result=a.level-b.level;
+			if(result==0) result=a.typeOrder-b.typeOrder;
+			if(result==0) result=a.count-b.count;
+			return result;
+		}
+
+		static void Parse(Regex& regexEc, ElementData& data, vint& notationOrder, WString& notationName, List<ElementElectron>& ecs)
+		{
+			if(data.order<=2)
+			{
+				notationOrder=0;
+				notationName=L"";
+			}
+			else if(data.order<=10)
+			{
+				notationOrder=2;
+				notationName=L"[He]";
+			}
+			else if(data.order<=18)
+			{
+				notationOrder=10;
+				notationName=L"[Ne]";
+			}
+			else if(data.order<=36)
+			{
+				notationOrder=18;
+				notationName=L"[Ar]";
+			}
+			else if(data.order<=54)
+			{
+				notationOrder=36;
+				notationName=L"[Kr]";
+			}
+			else if(data.order<=86)
+			{
+				notationOrder=54;
+				notationName=L"[Xe]";
+			}
+			else
+			{
+				notationOrder=86;
+				notationName=L"[Rn]";
+			}
+
+			ecs.Clear();
+			RegexMatch::List matches;
+			regexEc.Search(data.electron, matches);
+			FOREACH(Ptr<RegexMatch>, match, matches)
+			{
+				ElementElectron ec;
+				ec.level=wtoi(match->Groups()[L"level"].Get(0).Value());
+				ec.type=match->Groups()[L"type"].Get(0).Value()[0];
+				ec.count=wtoi(match->Groups()[L"count"].Get(0).Value());
+				ec.typeOrder=-1;
+
+				switch(ec.type)
+				{
+				case L's': ec.typeOrder=0; break;
+				case L'p': ec.typeOrder=1; break;
+				case L'd': ec.typeOrder=2; break;
+				case L'f': ec.typeOrder=3; break;
+				}
+
+				ecs.Add(ec);
+			}
+
+			SortLambda(&ecs[0], ecs.Count(), &Compare);
+		}
+
+		WString ToString()
+		{
+			return itow(level)+type+itow(count);
+		}
+	};
+	const wchar_t* ElementElectron::RegexEec = L"(<level>/d+)(<type>[spdf])(<count>/d+)";
+
 	class ElementRadioactiveColumnProvider : public list::StrongTypedFieldColumnProvider<ElementData, WString>
 	{
 	public:
@@ -246,6 +335,39 @@ TestWindow
 				font.bold=true;
 				text->SetFont(font);
 			}
+		}
+	};
+
+	class ElementElectronColumnProvider : public list::StrongTypedFieldColumnProvider<ElementData, WString>
+	{
+	protected:
+		Regex										regexEc;
+	public:
+		ElementElectronColumnProvider(list::StrongTypedDataProvider<ElementData>* dataProvider)
+			:StrongTypedFieldColumnProvider(dataProvider, &ElementData::electron)
+			,regexEc(ElementElectron::RegexEec)
+		{
+		}
+
+		void VisualizeCell(vint row, list::IDataVisualizer* dataVisualizer)override
+		{
+			StrongTypedFieldColumnProvider::VisualizeCell(row, dataVisualizer);
+			ElementData data;
+			dataProvider->GetRowData(row, data);
+			GuiSolidLabelElement* text=dataVisualizer->GetVisualizer<list::ListViewSubColumnDataVisualizer>()->GetTextElement();
+
+			vint notationOrder;
+			WString notationName;
+			List<ElementElectron> ecs;
+			ElementElectron::Parse(regexEc, data, notationOrder, notationName, ecs);
+			
+			WString ecsLabel=notationName;
+			FOREACH(ElementElectron, ec, ecs)
+			{
+				ecsLabel+=L" "+ec.ToString();
+			}
+
+			text->SetText(ecsLabel);
 		}
 	};
 
@@ -281,7 +403,7 @@ TestWindow
 				->SetVisualizerFactory(subFactory)
 				->SetSize(100);
 
-			AddFieldColumn(L"Electron", &ElementData::electron)
+			AddStrongTypedColumn<WString>(L"Electron", new ElementElectronColumnProvider(this))
 				->SetVisualizerFactory(subFactory)
 				->SetSize(140);
 
