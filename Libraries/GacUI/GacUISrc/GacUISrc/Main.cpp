@@ -6,6 +6,7 @@
 
 #include "..\..\Source\GacUI.h"
 #include "..\..\Source\NativeWindow\Windows\WinNativeWindow.h"
+#include "..\..\Source\GraphicsElement\WindowsDirect2D\GuiGraphicsWindowsDirect2D.h"
 #include <Windows.h>
 #include <msctf.h>
 
@@ -365,11 +366,30 @@ TestWindow
 		typedef list::DataVisualizerFactory<ElementElectronDataVisualizer>			Factory;
 	protected:
 		List<vint>									electronCounts;
+		GuiDirect2DElement*							graphElement;
+
+		void OnBeforeRenderTargetChanged(GuiGraphicsComposition* sender, GuiDirect2DElementEventArgs& arguments)
+		{
+		}
+
+		void OnAfterRenderTargetChanged(GuiGraphicsComposition* sender, GuiDirect2DElementEventArgs& arguments)
+		{
+		}
+
+		void OnRendering(GuiGraphicsComposition* sender, GuiDirect2DElementEventArgs& arguments)
+		{
+		}
 
 		GuiBoundsComposition* CreateBoundsCompositionInternal(GuiBoundsComposition* decoratedComposition)override
 		{
+			graphElement=GuiDirect2DElement::Create();
+			graphElement->BeforeRenderTargetChanged.AttachMethod(this, &ElementElectronDataVisualizer::OnBeforeRenderTargetChanged);
+			graphElement->AfterRenderTargetChanged.AttachMethod(this, &ElementElectronDataVisualizer::OnAfterRenderTargetChanged);
+			graphElement->Rendering.AttachMethod(this, &ElementElectronDataVisualizer::OnRendering);
+
 			GuiBoundsComposition* composition=new GuiBoundsComposition;
-			composition->SetPreferredMinSize(Size(64, 0));
+			composition->SetPreferredMinSize(Size(0, 64));
+			composition->SetOwnedElement(graphElement);
 			return composition;
 		}
 	public:
