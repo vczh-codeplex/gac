@@ -367,6 +367,7 @@ TestWindow
 	protected:
 		List<vint>									electronCounts;
 		GuiDirect2DElement*							graphElement;
+		GuiSolidLabelElement*						text;
 
 		void OnBeforeRenderTargetChanged(GuiGraphicsComposition* sender, GuiDirect2DElementEventArgs& arguments)
 		{
@@ -387,9 +388,13 @@ TestWindow
 			graphElement->AfterRenderTargetChanged.AttachMethod(this, &ElementElectronDataVisualizer::OnAfterRenderTargetChanged);
 			graphElement->Rendering.AttachMethod(this, &ElementElectronDataVisualizer::OnRendering);
 
+			text=GuiSolidLabelElement::Create();
+			text->SetFont(font);
+
 			GuiBoundsComposition* composition=new GuiBoundsComposition;
 			composition->SetPreferredMinSize(Size(0, 64));
 			composition->SetOwnedElement(graphElement);
+			composition->SetOwnedElement(text);
 			return composition;
 		}
 	public:
@@ -404,6 +409,23 @@ TestWindow
 
 		void ShowGraph(list::StrongTypedDataProvider<ElementData>* dataProvider, vint row)
 		{
+			Array<vint> counts;
+			CopyFrom(counts, Range(0, 1).Repeat(10));
+
+			ElementData data;
+			vint order=row+1;
+			while(order>0)
+			{
+				dataProvider->GetRowData(order-1, data);
+				FOREACH(ElementElectron, ec, data.ecs->electrons)
+				{
+					counts[ec.level-1]+=ec.count;
+				}
+				order=data.ecs->nobleGasNotationOrder;
+			}
+
+			CopyFrom(electronCounts, From(counts).Take(counts.IndexOf(0)));
+			text->SetText(From(electronCounts).Aggregate(WString(L""), [](WString a, vint b){return a+L", "+itow(b);}));
 		}
 	};
 
