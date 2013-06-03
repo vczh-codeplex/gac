@@ -359,6 +359,34 @@ TestWindow
 		}
 	};
 
+	class ElementElectronDataVisualizer : public list::DataVisualizerBase
+	{
+	public:
+		typedef list::DataVisualizerFactory<ElementElectronDataVisualizer>			Factory;
+	protected:
+		List<vint>									electronCounts;
+
+		GuiBoundsComposition* CreateBoundsCompositionInternal(GuiBoundsComposition* decoratedComposition)override
+		{
+			GuiBoundsComposition* composition=new GuiBoundsComposition;
+			composition->SetPreferredMinSize(Size(64, 0));
+			return composition;
+		}
+	public:
+		ElementElectronDataVisualizer()
+		{
+		}
+
+		void BeforeVisualizerCell(list::IDataProvider* dataProvider, vint row, vint column)override
+		{
+			electronCounts.Clear();
+		}
+
+		void ShowGraph(list::StrongTypedDataProvider<ElementData>* dataProvider, vint row)
+		{
+		}
+	};
+
 	class ElementElectronColumnProvider : public list::StrongTypedColumnProvider<ElementData, WString>
 	{
 	protected:
@@ -372,6 +400,16 @@ TestWindow
 			:StrongTypedColumnProvider(dataProvider)
 		{
 		}
+
+		void VisualizeCell(vint row, list::IDataVisualizer* dataVisualizer)override
+		{
+			StrongTypedColumnProvider::VisualizeCell(row, dataVisualizer);
+			ElementElectronDataVisualizer* eedVisualizer=dataVisualizer->GetVisualizer<ElementElectronDataVisualizer>();
+			if(eedVisualizer)
+			{
+				eedVisualizer->ShowGraph(dataProvider, row);
+			}
+		}
 	};
 
 	class DataProvider : public list::StrongTypedDataProvider<ElementData>
@@ -380,11 +418,13 @@ TestWindow
 		List<ElementData>							elements;
 		Ptr<list::IDataVisualizerFactory>			mainFactory;
 		Ptr<list::IDataVisualizerFactory>			subFactory;
+		Ptr<list::IDataVisualizerFactory>			eecFactory;
 	public:
 		DataProvider()
 		{
 			mainFactory=new list::CellBorderDataVisualizer::Factory(new list::ListViewMainColumnDataVisualizer::Factory);
 			subFactory=new list::CellBorderDataVisualizer::Factory(new list::ListViewSubColumnDataVisualizer::Factory);
+			eecFactory=new list::CellBorderDataVisualizer::Factory(new ElementElectronDataVisualizer::Factory);
 
 			AddSortableFieldColumn(L"Order", &ElementData::order)
 				->SetVisualizerFactory(mainFactory);
@@ -408,6 +448,10 @@ TestWindow
 
 			AddStrongTypedColumn<WString>(L"Electron", new ElementElectronColumnProvider(this))
 				->SetVisualizerFactory(subFactory)
+				->SetSize(140);
+
+			AddStrongTypedColumn<WString>(L"Electron Graph", new ElementElectronColumnProvider(this))
+				->SetVisualizerFactory(eecFactory)
 				->SetSize(140);
 
 			FileStream fileStream(L"..\\GacUISrcCodepackedTest\\Resources\\Chemical.txt", FileStream::ReadOnly);
