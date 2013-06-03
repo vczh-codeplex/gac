@@ -228,16 +228,34 @@ TestWindow
 	{
 	protected:
 		List<ElementData>							elements;
+		Ptr<list::IDataVisualizerFactory>			mainFactory;
+		Ptr<list::IDataVisualizerFactory>			subFactory;
 	public:
 		DataProvider()
 		{
-			AddSortableFieldColumn(L"Order", &ElementData::order);
-			AddFieldColumn(L"Symbol", &ElementData::symbol);
-			AddFieldColumn(L"Chinese", &ElementData::chinese);
-			AddFieldColumn(L"English", &ElementData::english);
-			AddSortableFieldColumn(L"Weight", &ElementData::weight);
-			AddFieldColumn(L"Valence", &ElementData::valence);
-			AddFieldColumn(L"Electron", &ElementData::electron);
+			mainFactory=new list::CellBorderDataVisualizer::Factory(new list::ListViewMainColumnDataVisualizer::Factory);
+			subFactory=new list::CellBorderDataVisualizer::Factory(new list::ListViewSubColumnDataVisualizer::Factory);
+
+			AddSortableFieldColumn(L"Order", &ElementData::order)
+				->SetVisualizerFactory(mainFactory);
+
+			AddFieldColumn(L"Symbol", &ElementData::symbol)
+				->SetVisualizerFactory(subFactory);
+
+			AddFieldColumn(L"Chinese", &ElementData::chinese)
+				->SetVisualizerFactory(subFactory);
+
+			AddFieldColumn(L"English", &ElementData::english)
+				->SetVisualizerFactory(subFactory);
+
+			AddSortableFieldColumn(L"Weight", &ElementData::weight)
+				->SetVisualizerFactory(subFactory);
+
+			AddFieldColumn(L"Valence", &ElementData::valence)
+				->SetVisualizerFactory(subFactory);
+
+			AddFieldColumn(L"Electron", &ElementData::electron)
+				->SetVisualizerFactory(subFactory);
 
 			FileStream fileStream(L"..\\GacUISrcCodepackedTest\\Resources\\Chemical.txt", FileStream::ReadOnly);
 			BomDecoder decoder;

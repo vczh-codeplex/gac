@@ -32,6 +32,8 @@ Visualizer Extensions
 				{
 					template<typename T>
 					friend class DataVisualizerFactory;
+					template<typename T>
+					friend class DataDecoratableVisualizerFactory;
 				protected:
 					IDataVisualizerFactory*								factory;
 					FontProperties										font;
@@ -59,6 +61,28 @@ Visualizer Extensions
 					Ptr<IDataVisualizer> CreateVisualizer(const FontProperties& font, GuiListViewBase::IStyleProvider* styleProvider)override
 					{
 						DataVisualizerBase* dataVisualizer=new TVisualizer;
+						dataVisualizer->factory=this;
+						dataVisualizer->font=font;
+						dataVisualizer->styleProvider=styleProvider;
+						return dataVisualizer;
+					}
+				};
+				
+				template<typename TVisualizer>
+				class DataDecoratableVisualizerFactory : public Object, public virtual IDataVisualizerFactory, public Description<DataDecoratableVisualizerFactory<TVisualizer>>
+				{
+				protected:
+					Ptr<IDataVisualizerFactory>							decoratedFactory;
+				public:
+					DataDecoratableVisualizerFactory(Ptr<IDataVisualizerFactory> _decoratedFactory)
+						:decoratedFactory(_decoratedFactory)
+					{
+					}
+
+					Ptr<IDataVisualizer> CreateVisualizer(const FontProperties& font, GuiListViewBase::IStyleProvider* styleProvider)override
+					{
+						Ptr<IDataVisualizer> decoratedDataVisualizer=decoratedFactory->CreateVisualizer(font, styleProvider);
+						DataVisualizerBase* dataVisualizer=new TVisualizer(decoratedDataVisualizer);
 						dataVisualizer->factory=this;
 						dataVisualizer->font=font;
 						dataVisualizer->styleProvider=styleProvider;
@@ -95,6 +119,22 @@ Visualizer Extensions
 				public:
 					/// <summary>Create the data visualizer.</summary>
 					ListViewSubColumnDataVisualizer();
+
+					void												BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)override;
+				};
+				
+				/// <summary>Data visualizer that display a cell border out of another data visualizer.</summary>
+				class CellBorderDataVisualizer : public DataVisualizerBase
+				{
+				public:
+					typedef DataDecoratableVisualizerFactory<CellBorderDataVisualizer>		Factory;
+				protected:
+
+					compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal()override;
+				public:
+					/// <summary>Create the data visualizer.</summary>
+					/// <param name="decoratedDataVisualizer">The decorated data visualizer.</param>
+					CellBorderDataVisualizer(Ptr<IDataVisualizer> decoratedDataVisualizer);
 
 					void												BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)override;
 				};
