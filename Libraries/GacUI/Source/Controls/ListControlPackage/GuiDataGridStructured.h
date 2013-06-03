@@ -207,6 +207,8 @@ Structured DataSource Extensions
 					GuiMenu*											popup;
 					Ptr<IStructuredDataFilter>							inherentFilter;
 					Ptr<IStructuredDataSorter>							inherentSorter;
+					Ptr<IDataVisualizerFactory>							visualizerFactory;
+					Ptr<IDataEditorFactory>								editorFactory;
 
 				public:
 					StructuredColummProviderBase();
@@ -217,16 +219,28 @@ Structured DataSource Extensions
 					void												SetCommandExecutor(IDataProviderCommandExecutor* value);
 					/// <summary>Set the text for the column.</summary>
 					/// <param name="value">The text for the column.</param>
-					void												SetText(const WString& value);
+					/// <returns>The current column provider itself.</returns>
+					StructuredColummProviderBase*						SetText(const WString& value);
 					/// <summary>Set the popup for the column.</summary>
 					/// <param name="value">The popup for the column.</param>
-					void												SetPopup(GuiMenu* value);
+					/// <returns>The current column provider itself.</returns>
+					StructuredColummProviderBase*						SetPopup(GuiMenu* value);
 					/// <summary>Set the inherent filter for the column.</summary>
 					/// <param name="value">The filter.</param>
-					void												SetInherentFilter(Ptr<IStructuredDataFilter> value);
+					/// <returns>The current column provider itself.</returns>
+					StructuredColummProviderBase*						SetInherentFilter(Ptr<IStructuredDataFilter> value);
 					/// <summary>Set the inherent sorter for the column.</summary>
 					/// <param name="value">The sorter.</param>
-					void												SetInherentSorter(Ptr<IStructuredDataSorter> value);
+					/// <returns>The current column provider itself.</returns>
+					StructuredColummProviderBase*						SetInherentSorter(Ptr<IStructuredDataSorter> value);
+					/// <summary>Set the visualizer factory for the column.</summary>
+					/// <param name="value">The visualizer factory.</param>
+					/// <returns>The current column provider itself.</returns>
+					StructuredColummProviderBase*						SetVisualizerFactory(Ptr<IDataVisualizerFactory> value);
+					/// <summary>Set the editor factory for the column.</summary>
+					/// <param name="value">The editor factory.</param>
+					/// <returns>The current column provider itself.</returns>
+					StructuredColummProviderBase*						SetEditorFactory(Ptr<IDataEditorFactory> value);
 
 					WString												GetText()override;
 					vint												GetSize()override;
