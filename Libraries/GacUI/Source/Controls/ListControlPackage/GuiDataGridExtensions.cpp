@@ -77,6 +77,7 @@ ListViewMainColumnDataVisualizer
 				compositions::GuiBoundsComposition* ListViewMainColumnDataVisualizer::CreateBoundsCompositionInternal(compositions::GuiBoundsComposition* decoratedComposition)
 				{
 					GuiTableComposition* table=new GuiTableComposition;
+					table->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 					table->SetRowsAndColumns(3, 2);
 					table->SetRowOption(0, GuiCellOption::PercentageOption(0.5));
 					table->SetRowOption(1, GuiCellOption::MinSizeOption());
@@ -144,6 +145,7 @@ ListViewSubColumnDataVisualizer
 				compositions::GuiBoundsComposition* ListViewSubColumnDataVisualizer::CreateBoundsCompositionInternal(compositions::GuiBoundsComposition* decoratedComposition)
 				{
 					GuiBoundsComposition* composition=new GuiBoundsComposition;
+					composition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 					composition->SetMargin(Margin(8, 0, 8, 0));
 
 					text=GuiSolidLabelElement::Create();
@@ -198,6 +200,7 @@ CellBorderDataVisualizer
 					decoratedComposition->SetAlignmentToParent(Margin(0, 0, 1, 1));
 
 					GuiBoundsComposition* composition=new GuiBoundsComposition;
+					composition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 					composition->AddChild(border1);
 					composition->AddChild(border2);
 					composition->AddChild(decoratedComposition);
