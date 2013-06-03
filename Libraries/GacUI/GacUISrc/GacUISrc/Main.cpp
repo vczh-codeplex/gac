@@ -188,43 +188,6 @@ TsfTestWindow
 TestWindow
 ***********************************************************************/
 
-	struct ElementData
-	{
-		vint		order;
-		WString		symbol;
-		WString		chinese;
-		WString		english;
-		double		weight;
-		WString		valence;
-		WString		electron;
-
-		static WString Partition(const wchar_t*& reading)
-		{
-			const wchar_t* next=wcschr(reading, L'\t');
-			if(!next)
-			{
-				next=reading+wcslen(reading);
-			}
-			WString text(reading, next-reading);
-			reading=*next?next+1:next;
-			return text;
-		}
-
-		static ElementData Parse(const WString& text)
-		{
-			ElementData data;
-			const wchar_t* reading=text.Buffer();
-			data.order=wtoi(Partition(reading));
-			data.symbol=Partition(reading);
-			data.chinese=Partition(reading);
-			data.weight=wtof(Partition(reading));
-			data.electron=Partition(reading);
-			data.valence=Partition(reading);
-			data.english=Partition(reading);
-			return data;
-		}
-	};
-
 	struct ElementElectron
 	{
 		static const wchar_t*			RegexEec;
@@ -243,34 +206,34 @@ TestWindow
 			return result;
 		}
 
-		static void Parse(Regex& regexEc, ElementData& data, vint& notationOrder, WString& notationName, List<ElementElectron>& ecs)
+		static void Parse(const Regex& regexEec, vint order, const WString& electron, vint& notationOrder, WString& notationName, List<ElementElectron>& ecs)
 		{
-			if(data.order<=2)
+			if(order<=2)
 			{
 				notationOrder=0;
 				notationName=L"";
 			}
-			else if(data.order<=10)
+			else if(order<=10)
 			{
 				notationOrder=2;
 				notationName=L"[He]";
 			}
-			else if(data.order<=18)
+			else if(order<=18)
 			{
 				notationOrder=10;
 				notationName=L"[Ne]";
 			}
-			else if(data.order<=36)
+			else if(order<=36)
 			{
 				notationOrder=18;
 				notationName=L"[Ar]";
 			}
-			else if(data.order<=54)
+			else if(order<=54)
 			{
 				notationOrder=36;
 				notationName=L"[Kr]";
 			}
-			else if(data.order<=86)
+			else if(order<=86)
 			{
 				notationOrder=54;
 				notationName=L"[Xe]";
@@ -283,7 +246,7 @@ TestWindow
 
 			ecs.Clear();
 			RegexMatch::List matches;
-			regexEc.Search(data.electron, matches);
+			regexEec.Search(electron, matches);
 			FOREACH(Ptr<RegexMatch>, match, matches)
 			{
 				ElementElectron ec;
@@ -313,6 +276,64 @@ TestWindow
 	};
 	const wchar_t* ElementElectron::RegexEec = L"(<level>/d+)(<type>[spdf])(<count>/d+)";
 
+	struct ElementElectronConfiguration
+	{
+		vint										nobleGasNotationOrder;
+		WString										nobleGasNotationName;
+		List<ElementElectron>						electrons;
+
+		WString ToString()
+		{
+			WString ecsLabel=nobleGasNotationName;
+			FOREACH(ElementElectron, ec, electrons)
+			{
+				ecsLabel+=L" "+ec.ToString();
+			}
+			return ecsLabel;
+		}
+	};
+
+	struct ElementData
+	{
+		vint		order;
+		WString		symbol;
+		WString		chinese;
+		WString		english;
+		double		weight;
+		WString		valence;
+		WString		electron;
+		Ptr<ElementElectronConfiguration>			ecs;
+
+		static WString Partition(const wchar_t*& reading)
+		{
+			const wchar_t* next=wcschr(reading, L'\t');
+			if(!next)
+			{
+				next=reading+wcslen(reading);
+			}
+			WString text(reading, next-reading);
+			reading=*next?next+1:next;
+			return text;
+		}
+
+		static ElementData Parse(const WString& text, const Regex& regexEec)
+		{
+			ElementData data;
+			const wchar_t* reading=text.Buffer();
+			data.order=wtoi(Partition(reading));
+			data.symbol=Partition(reading);
+			data.chinese=Partition(reading);
+			data.weight=wtof(Partition(reading));
+			data.electron=Partition(reading);
+			data.valence=Partition(reading);
+			data.english=Partition(reading);
+
+			data.ecs=new ElementElectronConfiguration;
+			ElementElectron::Parse(regexEec, data.order, data.electron, data.ecs->nobleGasNotationOrder, data.ecs->nobleGasNotationName, data.ecs->electrons);
+			return data;
+		}
+	};
+
 	class ElementRadioactiveColumnProvider : public list::StrongTypedFieldColumnProvider<ElementData, WString>
 	{
 	public:
@@ -338,36 +359,18 @@ TestWindow
 		}
 	};
 
-	class ElementElectronColumnProvider : public list::StrongTypedFieldColumnProvider<ElementData, WString>
+	class ElementElectronColumnProvider : public list::StrongTypedColumnProvider<ElementData, WString>
 	{
 	protected:
-		Regex										regexEc;
+
+		void GetCellData(const ElementData& rowData, WString& cellData)override
+		{
+			cellData=rowData.ecs->ToString();
+		}
 	public:
 		ElementElectronColumnProvider(list::StrongTypedDataProvider<ElementData>* dataProvider)
-			:StrongTypedFieldColumnProvider(dataProvider, &ElementData::electron)
-			,regexEc(ElementElectron::RegexEec)
+			:StrongTypedColumnProvider(dataProvider)
 		{
-		}
-
-		void VisualizeCell(vint row, list::IDataVisualizer* dataVisualizer)override
-		{
-			StrongTypedFieldColumnProvider::VisualizeCell(row, dataVisualizer);
-			ElementData data;
-			dataProvider->GetRowData(row, data);
-			GuiSolidLabelElement* text=dataVisualizer->GetVisualizer<list::ListViewSubColumnDataVisualizer>()->GetTextElement();
-
-			vint notationOrder;
-			WString notationName;
-			List<ElementElectron> ecs;
-			ElementElectron::Parse(regexEc, data, notationOrder, notationName, ecs);
-			
-			WString ecsLabel=notationName;
-			FOREACH(ElementElectron, ec, ecs)
-			{
-				ecsLabel+=L" "+ec.ToString();
-			}
-
-			text->SetText(ecsLabel);
 		}
 	};
 
@@ -412,10 +415,11 @@ TestWindow
 			DecoderStream decoderStream(fileStream, decoder);
 			StreamReader reader(decoderStream);
 
+			Regex regexEec(ElementElectron::RegexEec);
 			while(!reader.IsEnd())
 			{
 				WString line=reader.ReadLine();
-				elements.Add(ElementData::Parse(line));
+				elements.Add(ElementData::Parse(line, regexEec));
 			}
 		}
 
