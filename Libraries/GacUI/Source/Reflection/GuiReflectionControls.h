@@ -162,6 +162,16 @@ Type List
 			F(presentation::controls::list::IStructuredDataSorter)\
 			F(presentation::controls::list::IStructuredColumnProvider)\
 			F(presentation::controls::list::IStructuredDataProvider)\
+			F(presentation::controls::list::DataGridContentProvider)\
+			F(presentation::controls::GuiVirtualDataGrid)\
+			F(presentation::controls::list::StructuredDataFilterBase)\
+			F(presentation::controls::list::StructuredDataMultipleFilter)\
+			F(presentation::controls::list::StructuredDataAndFilter)\
+			F(presentation::controls::list::StructuredDataOrFilter)\
+			F(presentation::controls::list::StructuredDataNotFilter)\
+			F(presentation::controls::list::StructuredDataMultipleSorter)\
+			F(presentation::controls::list::StructuredDataReverseSorter)\
+			F(presentation::controls::list::StructuredDataProvider)\
 
 			GUIREFLECTIONCONTROLS_TYPELIST(DECL_TYPE_INFO)
 
