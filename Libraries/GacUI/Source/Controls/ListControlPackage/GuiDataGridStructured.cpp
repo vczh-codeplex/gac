@@ -209,6 +209,7 @@ StructuredDataProvider
 					if(commandExecutor)
 					{
 						commandExecutor->OnDataProviderColumnChanged();
+						commandExecutor->OnDataProviderItemModified(0, GetRowCount(), GetRowCount());
 					}
 				}
 
