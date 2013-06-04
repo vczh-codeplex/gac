@@ -172,6 +172,16 @@ Type List
 			F(presentation::controls::list::StructuredDataMultipleSorter)\
 			F(presentation::controls::list::StructuredDataReverseSorter)\
 			F(presentation::controls::list::StructuredDataProvider)\
+			F(presentation::controls::list::ListViewMainColumnDataVisualizer)\
+			F(presentation::controls::list::ListViewMainColumnDataVisualizer::Factory)\
+			F(presentation::controls::list::ListViewSubColumnDataVisualizer)\
+			F(presentation::controls::list::ListViewSubColumnDataVisualizer::Factory)\
+			F(presentation::controls::list::CellBorderDataVisualizer)\
+			F(presentation::controls::list::CellBorderDataVisualizer::Factory)\
+			F(presentation::controls::list::DataTextBoxEditor)\
+			F(presentation::controls::list::DataTextBoxEditor::Factory)\
+			F(presentation::controls::list::DataTextComboBoxEditor)\
+			F(presentation::controls::list::DataTextComboBoxEditor::Factory)\
 
 			GUIREFLECTIONCONTROLS_TYPELIST(DECL_TYPE_INFO)
 
