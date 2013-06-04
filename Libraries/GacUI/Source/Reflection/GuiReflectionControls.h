@@ -150,6 +150,18 @@ Type List
 			F(presentation::controls::GuiMultilineTextBox)\
 			F(presentation::controls::GuiSinglelineTextBox)\
 			F(presentation::controls::GuiSinglelineTextBox::IStyleProvider)\
+			F(presentation::controls::list::IDataVisualizerFactory)\
+			F(presentation::controls::list::IDataVisualizer)\
+			F(presentation::controls::list::IDataEditorCallback)\
+			F(presentation::controls::list::IDataEditorFactory)\
+			F(presentation::controls::list::IDataEditor)\
+			F(presentation::controls::list::IDataProviderCommandExecutor)\
+			F(presentation::controls::list::IDataProvider)\
+			F(presentation::controls::list::IStructuredDataFilterCommandExecutor)\
+			F(presentation::controls::list::IStructuredDataFilter)\
+			F(presentation::controls::list::IStructuredDataSorter)\
+			F(presentation::controls::list::IStructuredColumnProvider)\
+			F(presentation::controls::list::IStructuredDataProvider)\
 
 			GUIREFLECTIONCONTROLS_TYPELIST(DECL_TYPE_INFO)
 
@@ -1442,9 +1454,385 @@ Interface Proxy
 					{
 					}
 
+					static GuiSinglelineTextBox::IStyleProvider* Create(Ptr<IValueInterfaceProxy> proxy)
+					{
+						return new GuiSinglelineTextBox_IStyleProvider(proxy);
+					}
+
 					compositions::GuiGraphicsComposition* InstallBackground(compositions::GuiBoundsComposition* background)override
 					{
 						return INVOKEGET_INTERFACE_PROXY(InstallBackground, background);
+					}
+				};
+
+				class list_IDataVisualizerFactory : public ValueInterfaceRoot, public virtual list::IDataVisualizerFactory
+				{
+				public:
+					list_IDataVisualizerFactory(Ptr<IValueInterfaceProxy> _proxy)
+						:ValueInterfaceRoot(_proxy)
+					{
+					}
+
+					static Ptr<list::IDataVisualizerFactory> Create(Ptr<IValueInterfaceProxy> _proxy)
+					{
+						return new list_IDataVisualizerFactory(_proxy);
+					}
+
+					Ptr<list::IDataVisualizer> CreateVisualizer(const FontProperties& font, GuiListViewBase::IStyleProvider* styleProvider)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(CreateVisualizer, font, styleProvider);
+					}
+				};
+
+				class list_IDataVisualizer : public ValueInterfaceRoot, public virtual list::IDataVisualizer
+				{
+				public:
+					list_IDataVisualizer(Ptr<IValueInterfaceProxy> _proxy)
+						:ValueInterfaceRoot(_proxy)
+					{
+					}
+
+					static Ptr<list::IDataVisualizer> Create(Ptr<IValueInterfaceProxy> _proxy)
+					{
+						return new list_IDataVisualizer(_proxy);
+					}
+
+					list::IDataVisualizerFactory* GetFactory()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetFactory);
+					}
+
+					compositions::GuiBoundsComposition* GetBoundsComposition()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetBoundsComposition);
+					}
+
+					void BeforeVisualizerCell(list::IDataProvider* dataProvider, vint row, vint column)override
+					{
+						INVOKE_INTERFACE_PROXY(dataProvider, row, column);
+					}
+
+					list::IDataVisualizer* GetDecoratedDataVisualizer()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetDecoratedDataVisualizer);
+					}
+				};
+
+				class list_IDataEditorFactory : public ValueInterfaceRoot, public virtual list::IDataEditorFactory
+				{
+				public:
+					list_IDataEditorFactory(Ptr<IValueInterfaceProxy> _proxy)
+						:ValueInterfaceRoot(_proxy)
+					{
+					}
+
+					static Ptr<list::IDataEditorFactory> Create(Ptr<IValueInterfaceProxy> _proxy)
+					{
+						return new list_IDataEditorFactory(_proxy);
+					}
+
+					Ptr<list::IDataEditor> CreateEditor(list::IDataEditorCallback* callback)
+					{
+						return INVOKEGET_INTERFACE_PROXY(CreateEditor, callback);
+					}
+				};
+
+				class list_IDataEditor : public ValueInterfaceRoot, public virtual list::IDataEditor
+				{
+				public:
+					list_IDataEditor(Ptr<IValueInterfaceProxy> _proxy)
+						:ValueInterfaceRoot(_proxy)
+					{
+					}
+
+					static Ptr<list::IDataEditor> Create(Ptr<IValueInterfaceProxy> _proxy)
+					{
+						return new list_IDataEditor(_proxy);
+					}
+
+					list::IDataEditorFactory* GetFactory()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetFactory);
+					}
+
+					compositions::GuiBoundsComposition* GetBoundsComposition()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetBoundsComposition);
+					}
+
+					void BeforeEditCell(list::IDataProvider* dataProvider, vint row, vint column)override
+					{
+						INVOKE_INTERFACE_PROXY(BeforeEditCell, dataProvider, row, column);
+					}
+				};
+
+				class list_IDataProvider : public ValueInterfaceRoot, public virtual list::IDataProvider
+				{
+				public:
+					list_IDataProvider(Ptr<IValueInterfaceProxy> _proxy)
+						:ValueInterfaceRoot(_proxy)
+					{
+					}
+
+					static Ptr<list::IDataProvider> Create(Ptr<IValueInterfaceProxy> _proxy)
+					{
+						return new list_IDataProvider(_proxy);
+					}
+
+					void SetCommandExecutor(list::IDataProviderCommandExecutor* value)override
+					{
+						INVOKE_INTERFACE_PROXY(SetCommandExecutor, value);
+					}
+
+					vint GetColumnCount()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetColumnCount);
+					}
+
+					WString GetColumnText(vint column)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetColumnText, column);
+					}
+
+					vint GetColumnSize(vint column)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetColumnSize, column);
+					}
+
+					void SetColumnSize(vint column, vint value)override
+					{
+						INVOKE_INTERFACE_PROXY(SetColumnSize, column, value);
+					}
+
+					GuiMenu* GetColumnPopup(vint column)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetColumnPopup, column);
+					}
+
+					bool IsColumnSortable(vint column)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(IsColumnSortable, column);
+					}
+
+					void SortByColumn(vint column, bool ascending)override
+					{
+						INVOKE_INTERFACE_PROXY(SortByColumn, column, ascending);
+					}
+
+					vint GetSortedColumn()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetSortedColumn);
+					}
+
+					bool IsSortOrderAscending()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(IsSortOrderAscending);
+					}
+
+					vint GetRowCount()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetRowCount);
+					}
+
+					Ptr<GuiImageData> GetRowImage(vint row)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetRowImage, row);
+					}
+
+					WString GetCellText(vint row, vint column)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetCellText, row, column);
+					}
+
+					list::IDataVisualizerFactory* GetCellDataVisualizerFactory(vint row, vint column)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetCellDataVisualizerFactory, row, column);
+					}
+
+					void VisualizeCell(vint row, vint column, list::IDataVisualizer* dataVisualizer)override
+					{
+						INVOKE_INTERFACE_PROXY(VisualizeCell, row, column, dataVisualizer);
+					}
+
+					list::IDataEditorFactory* GetCellDataEditorFactory(vint row, vint column)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetCellDataEditorFactory, row, column);
+					}
+
+					void BeforeEditCell(vint row, vint column, list::IDataEditor* dataEditor)override
+					{
+						INVOKE_INTERFACE_PROXY(BeforeEditCell, row, column, dataEditor);
+					}
+
+					void SaveCellData(vint row, vint column, list::IDataEditor* dataEditor)override
+					{
+						INVOKE_INTERFACE_PROXY(SaveCellData, row, column, dataEditor);
+					}
+				};
+
+				class list_IStructuredDataFilter : public ValueInterfaceRoot, public virtual list::IStructuredDataFilter
+				{
+				public:
+					list_IStructuredDataFilter(Ptr<IValueInterfaceProxy> _proxy)
+						:ValueInterfaceRoot(_proxy)
+					{
+					}
+
+					static Ptr<list::IStructuredDataFilter> Create(Ptr<IValueInterfaceProxy> _proxy)
+					{
+						return new list_IStructuredDataFilter(_proxy);
+					}
+
+					void SetCommandExecutor(list::IStructuredDataFilterCommandExecutor* value)override
+					{
+						INVOKE_INTERFACE_PROXY(SetCommandExecutor, value);
+					}
+
+					bool Filter(vint row)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(Filter, row);
+					}
+				};
+
+				class list_IStructuredDataSorter : public ValueInterfaceRoot, public virtual list::IStructuredDataSorter
+				{
+				public:
+					list_IStructuredDataSorter(Ptr<IValueInterfaceProxy> _proxy)
+						:ValueInterfaceRoot(_proxy)
+					{
+					}
+
+					static Ptr<list::IStructuredDataSorter> Create(Ptr<IValueInterfaceProxy> _proxy)
+					{
+						return new list_IStructuredDataSorter(_proxy);
+					}
+
+					vint Compare(vint row1, vint row2)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(Compare, row1, row2);
+					}
+				};
+
+				class list_IStructuredColumnProvider : public ValueInterfaceRoot, public virtual list::IStructuredColumnProvider
+				{
+				public:
+					list_IStructuredColumnProvider(Ptr<IValueInterfaceProxy> _proxy)
+						:ValueInterfaceRoot(_proxy)
+					{
+					}
+
+					static Ptr<list::IStructuredColumnProvider> Create(Ptr<IValueInterfaceProxy> _proxy)
+					{
+						return new list_IStructuredColumnProvider(_proxy);
+					}
+
+					WString GetText()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetText);
+					}
+
+					vint GetSize()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetSize);
+					}
+
+					void SetSize(vint value)override
+					{
+						INVOKE_INTERFACE_PROXY(SetSize, value);
+					}
+
+					GuiListViewColumnHeader::ColumnSortingState GetSortingState()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetSortingState);
+					}
+
+					void SetSortingState(GuiListViewColumnHeader::ColumnSortingState value)override
+					{
+						INVOKE_INTERFACE_PROXY(SetSortingState, value);
+					}
+
+					GuiMenu* GetPopup()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetPopup);
+					}
+
+					Ptr<list::IStructuredDataFilter> GetInherentFilter()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetInherentFilter);
+					}
+
+					Ptr<list::IStructuredDataSorter> GetInherentSorter()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetInherentSorter);
+					}
+
+					WString GetCellText(vint row)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetCellText, row);
+					}
+
+					list::IDataVisualizerFactory* GetCellDataVisualizerFactory(vint row)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetCellDataVisualizerFactory, row);
+					}
+
+					void VisualizeCell(vint row, list::IDataVisualizer* dataVisualizer)override
+					{
+						INVOKE_INTERFACE_PROXY(VisualizeCell, row, dataVisualizer);
+					}
+
+					list::IDataEditorFactory* GetCellDataEditorFactory(vint row)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetCellDataEditorFactory, row);
+					}
+
+					void BeforeEditCell(vint row, list::IDataEditor* dataEditor)override
+					{
+						INVOKE_INTERFACE_PROXY(BeforeEditCell, row, dataEditor);
+					}
+
+					void SaveCellData(vint row, list::IDataEditor* dataEditor)override
+					{
+						INVOKE_INTERFACE_PROXY(SaveCellData, row, dataEditor);
+					}
+				};
+
+				class list_IStructuredDataProvider : public ValueInterfaceRoot, public virtual list::IStructuredDataProvider
+				{
+				public:
+					list_IStructuredDataProvider(Ptr<IValueInterfaceProxy> _proxy)
+						:ValueInterfaceRoot(_proxy)
+					{
+					}
+
+					static Ptr<list::IStructuredDataProvider> Create(Ptr<IValueInterfaceProxy> _proxy)
+					{
+						return new list_IStructuredDataProvider(_proxy);
+					}
+
+					void SetCommandExecutor(list::IDataProviderCommandExecutor* value)
+					{
+						INVOKE_INTERFACE_PROXY(SetCommandExecutor, value);
+					}
+
+					vint GetColumnCount()
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetColumnCount);
+					}
+
+					vint GetRowCount()
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetRowCount);
+					}
+
+					list::IStructuredColumnProvider* GetColumn(vint column)
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetColumn, column);
+					}
+
+					Ptr<GuiImageData> GetRowImage(vint row)
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetRowImage, row);
 					}
 				};
 			}

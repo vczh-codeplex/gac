@@ -1295,6 +1295,130 @@ Type Declaration
 				CLASS_MEMBER_METHOD(InstallBackground, {L"background"})
 			END_CLASS_MEMBER(GuiSinglelineTextBox::IStyleProvider)
 
+			BEGIN_CLASS_MEMBER(IDataVisualizerFactory)
+				CLASS_MEMBER_BASE(IDescriptable)
+				INTERFACE_EXTERNALCTOR(list, IDataVisualizerFactory)
+
+				CLASS_MEMBER_METHOD(CreateVisualizer, {L"font" _ L"styleProvider"})
+			END_CLASS_MEMBER(IDataVisualizerFactory)
+
+			BEGIN_CLASS_MEMBER(IDataVisualizer)
+				CLASS_MEMBER_BASE(IDescriptable)
+				INTERFACE_EXTERNALCTOR(list, IDataVisualizer)
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Factory)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(BoundsComposition)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(DecoratedDataVisualizer)
+
+				CLASS_MEMBER_METHOD(BeforeVisualizerCell, {L"dataProvider" _ L"row" _ L"column"})
+			END_CLASS_MEMBER(IDataVisualizer)
+
+			BEGIN_CLASS_MEMBER(IDataEditorCallback)
+				CLASS_MEMBER_BASE(IDescriptable)
+
+				CLASS_MEMBER_METHOD(RequestSaveData, NO_PARAMETER);
+			END_CLASS_MEMBER(IDataEditorCallback)
+
+			BEGIN_CLASS_MEMBER(IDataEditorFactory)
+				CLASS_MEMBER_BASE(IDescriptable)
+				INTERFACE_EXTERNALCTOR(list, IDataEditorFactory)
+
+				CLASS_MEMBER_METHOD(CreateEditor, {L"callback"})
+			END_CLASS_MEMBER(IDataEditorFactory)
+
+			BEGIN_CLASS_MEMBER(IDataEditor)
+				CLASS_MEMBER_BASE(IDescriptable)
+				INTERFACE_EXTERNALCTOR(list, IDataEditor)
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Factory)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(BoundsComposition)
+
+				CLASS_MEMBER_METHOD(BeforeEditCell, {L"dataProvider" _ L"row" _ L"column"})
+			END_CLASS_MEMBER(IDataEditor)
+
+			BEGIN_CLASS_MEMBER(IDataProviderCommandExecutor)
+				CLASS_MEMBER_BASE(IDescriptable)
+
+				CLASS_MEMBER_METHOD(OnDataProviderColumnChanged, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(OnDataProviderItemModified, {L"start" _ L"count" _ L"newCount"})
+			END_CLASS_MEMBER(IDataProviderCommandExecutor)
+
+			BEGIN_CLASS_MEMBER(IDataProvider)
+				CLASS_MEMBER_BASE(IDescriptable)
+				INTERFACE_EXTERNALCTOR(list, IDataProvider)
+				INTERFACE_IDENTIFIER(IDataProvider)
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ColumnCount)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(SortedColumn)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(RowCount)
+
+				CLASS_MEMBER_METHOD(SetCommandExecutor, {L"value"})
+				CLASS_MEMBER_METHOD(GetColumnText, {L"column"})
+				CLASS_MEMBER_METHOD(GetColumnSize, {L"column"})
+				CLASS_MEMBER_METHOD(SetColumnSize, {L"column" _ L"value"})
+				CLASS_MEMBER_METHOD(GetColumnPopup, {L"column"})
+				CLASS_MEMBER_METHOD(IsColumnSortable, {L"column"})
+				CLASS_MEMBER_METHOD(SortByColumn, {L"column" _ L"ascending"})
+				CLASS_MEMBER_METHOD(IsSortOrderAscending, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(GetCellText, {L"row" _ L"column"})
+				CLASS_MEMBER_METHOD(GetCellDataVisualizerFactory, {L"row" _ L"column"})
+				CLASS_MEMBER_METHOD(VisualizeCell, {L"row" _ L"column" _ L"dataVisualizer"})
+				CLASS_MEMBER_METHOD(GetCellDataEditorFactory, {L"row" _ L"column"})
+				CLASS_MEMBER_METHOD(BeforeEditCell, {L"row" _ L"column" _ L"dataEditor"})
+				CLASS_MEMBER_METHOD(SaveCellData, {L"row" _ L"column" _ L"dataEditor"})
+			END_CLASS_MEMBER(IDataProvider)
+
+			BEGIN_CLASS_MEMBER(IStructuredDataFilterCommandExecutor)
+				CLASS_MEMBER_BASE(IDescriptable)
+
+				CLASS_MEMBER_METHOD(OnFilterChanged, NO_PARAMETER)
+			END_CLASS_MEMBER(IStructuredDataFilterCommandExecutor)
+
+			BEGIN_CLASS_MEMBER(IStructuredDataFilter)
+				CLASS_MEMBER_BASE(IDescriptable)
+				INTERFACE_EXTERNALCTOR(list, IStructuredDataFilter)
+
+				CLASS_MEMBER_METHOD(SetCommandExecutor, {L"value"})
+				CLASS_MEMBER_METHOD(Filter, {L"row"})
+			END_CLASS_MEMBER(IStructuredDataFilter)
+
+			BEGIN_CLASS_MEMBER(IStructuredDataSorter)
+				CLASS_MEMBER_BASE(IDescriptable)
+				INTERFACE_EXTERNALCTOR(list, IStructuredDataSorter)
+
+				CLASS_MEMBER_METHOD(Compare, {L"row1" _ L"row2"})
+			END_CLASS_MEMBER(IStructuredDataSorter)
+
+			BEGIN_CLASS_MEMBER(IStructuredColumnProvider)
+				CLASS_MEMBER_BASE(IDescriptable)
+				INTERFACE_EXTERNALCTOR(list, IStructuredColumnProvider)
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Text)
+				CLASS_MEMBER_PROPERTY_FAST(Size)
+				CLASS_MEMBER_PROPERTY_FAST(SortingState)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Popup)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(InherentFilter)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(InherentSorter)
+				CLASS_MEMBER_METHOD(GetCellText, {L"row"})
+				CLASS_MEMBER_METHOD(GetCellDataVisualizerFactory, {L"row"})
+				CLASS_MEMBER_METHOD(VisualizeCell, {L"row" _ L"dataVisualizer"})
+				CLASS_MEMBER_METHOD(GetCellDataEditorFactory, {L"row"})
+				CLASS_MEMBER_METHOD(BeforeEditCell, {L"row" _ L"dataEditor"})
+				CLASS_MEMBER_METHOD(SaveCellData, {L"row" _ L"dataEditor"})
+			END_CLASS_MEMBER(IStructuredColumnProvider)
+
+			BEGIN_CLASS_MEMBER(IStructuredDataProvider)
+				CLASS_MEMBER_BASE(IDescriptable)
+				INTERFACE_EXTERNALCTOR(list, IStructuredDataProvider)
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ColumnCount)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(RowCount)
+
+				CLASS_MEMBER_METHOD(SetCommandExecutor, {L"value"})
+				CLASS_MEMBER_METHOD(GetColumn, {L"column"})
+				CLASS_MEMBER_METHOD(GetRowImage, {L"row"})
+			END_CLASS_MEMBER(IStructuredDataProvider)
+
 #undef INTERFACE_IDENTIFIER
 #undef CONTROL_CONSTRUCTOR_CONTROLLER
 #undef INTERFACE_EXTERNALCTOR
