@@ -1419,6 +1419,69 @@ Type Declaration
 				CLASS_MEMBER_METHOD(GetRowImage, {L"row"})
 			END_CLASS_MEMBER(IStructuredDataProvider)
 
+			BEGIN_CLASS_MEMBER(DataGridContentProvider)
+				CLASS_MEMBER_BASE(ListViewItemStyleProvider::IListViewItemContentProvider)
+				CLASS_MEMBER_CONSTRUCTOR(DataGridContentProvider*(), NO_PARAMETER)
+			END_CLASS_MEMBER(DataGridContentProvider)
+
+			BEGIN_CLASS_MEMBER(GuiVirtualDataGrid)
+				CLASS_MEMBER_BASE(GuiVirtualListView)
+				CLASS_MEMBER_CONSTRUCTOR(GuiVirtualDataGrid*(GuiVirtualListView::IStyleProvider* _ list::IDataProvider*), {L"styleProvider" _ L"dataProvider"})
+				CLASS_MEMBER_CONSTRUCTOR(GuiVirtualDataGrid*(GuiVirtualListView::IStyleProvider* _ list::IStructuredDataProvider*), {L"styleProvider" _ L"dataProvider"})
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(DataProvider)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(StructuredDataProvider)
+			END_CLASS_MEMBER(GuiVirtualDataGrid)
+
+			BEGIN_CLASS_MEMBER(StructuredDataFilterBase)
+				CLASS_MEMBER_BASE(IStructuredDataFilter)
+			END_CLASS_MEMBER(StructuredDataFilterBase)
+
+			BEGIN_CLASS_MEMBER(StructuredDataMultipleFilter)
+				CLASS_MEMBER_BASE(StructuredDataFilterBase)
+
+				CLASS_MEMBER_METHOD(AddSubFilter, {L"value"})
+				CLASS_MEMBER_METHOD(RemoveSubFilter, {L"value"})
+			END_CLASS_MEMBER(StructuredDataMultipleFilter)
+
+			BEGIN_CLASS_MEMBER(StructuredDataAndFilter)
+				CLASS_MEMBER_BASE(StructuredDataMultipleFilter)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<StructuredDataAndFilter>(), NO_PARAMETER)
+			END_CLASS_MEMBER(StructuredDataAndFilter)
+
+			BEGIN_CLASS_MEMBER(StructuredDataOrFilter)
+				CLASS_MEMBER_BASE(StructuredDataMultipleFilter)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<StructuredDataOrFilter>(), NO_PARAMETER)
+			END_CLASS_MEMBER(StructuredDataOrFilter)
+
+			BEGIN_CLASS_MEMBER(StructuredDataNotFilter)
+				CLASS_MEMBER_BASE(StructuredDataFilterBase)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<StructuredDataNotFilter>(), NO_PARAMETER)
+
+				CLASS_MEMBER_METHOD(SetSubFilter, {L"value"})
+			END_CLASS_MEMBER(StructuredDataNotFilter)
+
+			BEGIN_CLASS_MEMBER(StructuredDataMultipleSorter)
+				CLASS_MEMBER_BASE(IStructuredDataSorter)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<StructuredDataMultipleSorter>(), NO_PARAMETER)
+
+				CLASS_MEMBER_METHOD(SetLeftSorter, {L"value"})
+				CLASS_MEMBER_METHOD(SetRightSorter, {L"value"})
+			END_CLASS_MEMBER(StructuredDataMultipleSorter)
+
+			BEGIN_CLASS_MEMBER(StructuredDataReverseSorter)
+				CLASS_MEMBER_BASE(IStructuredDataSorter)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<StructuredDataReverseSorter>(), NO_PARAMETER)
+				
+				CLASS_MEMBER_METHOD(SetSubSorter, {L"value"})
+			END_CLASS_MEMBER(StructuredDataReverseSorter)
+
+			BEGIN_CLASS_MEMBER(StructuredDataProvider)
+				CLASS_MEMBER_BASE(IDataProvider)
+
+				CLASS_MEMBER_PROPERTY_FAST(AdditionalFilter)
+			END_CLASS_MEMBER(StructuredDataProvider)
+
 #undef INTERFACE_IDENTIFIER
 #undef CONTROL_CONSTRUCTOR_CONTROLLER
 #undef INTERFACE_EXTERNALCTOR
