@@ -17,27 +17,27 @@ Float32		float		0.0f
 Float64		double		0.0
 DateTime				0000-00-00 00:00:00
 Guid					00000000-0000-0000-0000-000000000000
-Void		void		void
+Void		void		<>
 Object		object		null
 
 ========================================================
 Composite Types
 ========================================================
 
-Pair<T, U>							(T..U)					(default(T)..default(U))
-Pair<T, Pair<U, Pair<V, void>>>		(T, U, V)				(default(T), default(U), default(V))
+Pair<T, U>							T..U					default(T)..default(U) // right associative
+Pair<T, Pair<U, Pair<V, void>>>		<T, U, V>, T..U..V..<>	<default(T), default(U), default(V)>
 
-IDelegate<R, (T, U, V)>				func (T, U, V):R
-									func (..(T, U, V)):R
+IDelegate<R, <T, U, V>>				func (T, U, V)->R
+									func (..(T, U, V))->R
 
 IEnumerable<T>						{T}
 
-IMap<TKey, TValue>					{TKey => TValue}
-	: IDelegate<TValue, (TKey)>
-	: IEnumerable<(TKey, TValue)>
+IMap<TKey, TValue>					{TKey : TValue}
+	: IDelegate<TValue, <TKey>>
+	: IEnumerable<TKey..TValue>
 
 IArray<T>							[T]
-	: IDelegate<int, (T)>
+	: IDelegate<int, <T>>
 	: IEnumerable<T>
 
 ========================================================
@@ -48,9 +48,9 @@ default(T)
 new(T)
 
 x:x+1
-(x,y):x+y
-func (int x, int y):int = x+y
-func (int x, int y):int{ return x+y; }
+(x,y)->x+y
+func (int x, int y)->int = x+y
+func (int x, int y)->int{ return x+y; }
 
 // IArray
 array(10) :: int[]
@@ -64,7 +64,7 @@ array(10) :: int[]
 
 // IMap
 {}
-{1=>"a", 2=>"b"}
+{1:"a", 2:"b"}
 
 ========================================================
 Custom Types
@@ -103,16 +103,16 @@ enum Season
 	Winter,
 }
 
-type Box = {int => string};
-type<T> Box = {int => T};
+type Box = {int : string};
+type<T> Box = {int : T};
 
 ========================================================
 Custom Type Constructors
 ========================================================
 
-Point{x=1, y=2}
-Point{}
-DealWithPoint(Point{x=1, y=2});
+Point{x=1, y=2}						{x=1, y=2}
+Point{}								{}
+DealWithPoint(Point{x=1, y=2})		DealWithPoint({x=1, y=2})
 
 ========================================================
 Variables
@@ -127,20 +127,20 @@ Functions
 ========================================================
 
 @Inline
-func Add(int a, int b):int = a+b ;
-func Add(int a, int b):int
+func Add(int a, int b)->int = a+b ;
+func Add(int a, int b)->int
 {
 	return a+b;
 }
 
 func Add(a, b) = a+b ;
-func<T> Add(T a, T b):T
+func<T> Add(T a, T b)->T
 	where Numeric<T>
 {
 	return a+b;
 }
 
-func<T> IsLastNode(Link<T> node):bool
+func<T> IsLastNode(Link<T> node)->bool
 {
 	return node.next==null;
 }
@@ -150,7 +150,7 @@ prop<T> Config
 {
 	get
 	{
-		(config, exists)=globalConfigs.Find(typeof(T));
+		config..exists=globalConfigs.Find(typeof(T));
 		if(!exists)
 		{
 			config=new(T);
@@ -180,34 +180,34 @@ prop<T> bool Link<T>.IsLastNode
 	return this.next==null;
 }
 
-func<T, U> {T}.Map(func U(T)):{U};
-func<T> operator++({T}, {T}):{T};
-func<T> {T}.Filter(func bool(T)):{T};
-func<T> {T}.First():T;
-func<T> {T}.Last():T;
-func<T> {T}.Empty():T;
+func<T, U> {T}.Map(func U(T))->{U};
+func<T> operator++({T}, {T})->{T};
+func<T> {T}.Filter(func bool(T))->{T};
+func<T> {T}.First()->T;
+func<T> {T}.Last()->T;
+func<T> {T}.Empty()->T;
 
-func<T> {T}.Take(int):{T};
-func<T> {T}.TakeWhile(int, func bool(T)):{T};
-func<T> {T}.Drop(int):{T};
-func<T> {T}.DropWhile(int, func bool(T)):{T};
-func<T> {T}.Reverse():{T};
-func<T, U> {U}.Fold(T, func T(T, U)):T;
-func<T, U> {U}.Scan(T, func T(T, U)):{T};
-func<T> {T}.All(func bool(T)):bool;
-func<T> {T}.Any(func bool(T)):bool;
-func<T> {T}.SplitAt(int count):({T} .. {T});
-func<T> {T}.Span(func bool(T)):({T} .. {T});
-func<T> {T}.Break(func bool(T)):({T} .. {T});
-func<T, U> {U}.GroupBy(func T(U)):{(T .. U)};
-func<T, U> {U}.OrderBy(func T(U)):{U};
+func<T> {T}.Take(int)->{T};
+func<T> {T}.TakeWhile(int, func bool(T))->{T};
+func<T> {T}.Drop(int)->{T};
+func<T> {T}.DropWhile(int, func bool(T))->{T};
+func<T> {T}.Reverse()->{T};
+func<T, U> {U}.Fold(T, func T(T, U))->T;
+func<T, U> {U}.Scan(T, func T(T, U))->{T};
+func<T> {T}.All(func bool(T))->bool;
+func<T> {T}.Any(func bool(T))->bool;
+func<T> {T}.SplitAt(int count)->{T} .. {T};
+func<T> {T}.Span(func bool(T))->{T} .. {T};
+func<T> {T}.Break(func bool(T))->{T} .. {T};
+func<T, U> {U}.GroupBy(func T(U))->{T .. U};
+func<T, U> {U}.OrderBy(func T(U))->{U};
 
-func<T> {T}.Sum():T;
-func<T> {T}.Product():T;
-func<T> {T}.Min():T;
-func<T> {T}.Max():T;
-func<T> {{T}}.Flatten():{T};
-func<T, U> {T}.Zip({U}):{(T, U)};
+func<T> {T}.Sum()->T;
+func<T> {T}.Product()->T;
+func<T> {T}.Min()->T;
+func<T> {T}.Max()->T;
+func<T> {{T}}.Flatten()->{T};
+func<T, U> {T}.Zip({U})->{(T, U)};
 
 ========================================================
 Concepts
@@ -215,84 +215,84 @@ Concepts
 
 concept<T> Equlable
 {
-	func AreEqual(T a, T b):bool;
+	func AreEqual(T a, T b)->bool;
 	@Inline
-	func operator==(T a, T b):bool = AreEqual(a, b);
+	func operator==(T a, T b)->bool = AreEqual(a, b);
 	@Inline
-	func operator!=(T a, T b):bool = !AreEqual(a, b);
+	func operator!=(T a, T b)->bool = !AreEqual(a, b);
 }
 
 concept<T> Comparable
 {
-	func Compare(T a, T b):int;
+	func Compare(T a, T b)->int;
 	@Inline
-	func operator<(T a, T b):bool = Compare(a, b)<0;
+	func operator<(T a, T b)->bool = Compare(a, b)<0;
 	@Inline
-	func operator<=(T a, T b):bool = Compare(a, b)<=0;
+	func operator<=(T a, T b)->bool = Compare(a, b)<=0;
 	@Inline
-	func operator>(T a, T b):bool = Compare(a, b)>0;
+	func operator>(T a, T b)->bool = Compare(a, b)>0;
 	@Inline
-	func operator>=(T a, T b):bool = Compare(a, b)>=0;
+	func operator>=(T a, T b)->bool = Compare(a, b)>=0;
 	@Inline
-	func Min(a, b):T = (if (Compare(a, b)<0) a else b);
+	func Min(a, b)->T = (if (Compare(a, b)<0) a else b);
 	@Inline
-	func Max(a, b):T = (if (Compare(a, b)>0) a else b);
+	func Max(a, b)->T = (if (Compare(a, b)>0) a else b);
 }
 
 concept<T> Enumerable
 	where Comparable<T>
 {
-	func Next(T a):T;
-	func Prev(T a):T;
+	func Next(T a)->T;
+	func Prev(T a)->T;
 	prop T LowerBound{get;}
 	prop T UpperBound{get;}
-	func EnumFrom(T a, T b):IEnumerable<T>;
-	func EnumFrom(T a, T b, int step):IEnumerable<T>;
-	func ReverseEnumFrom(T a, T b):IEnumerable<T>;
-	func ReverseEnumFrom(T a, T b, int step):IEnumerable<T>;
+	func EnumFrom(T a, T b)->IEnumerable<T>;
+	func EnumFrom(T a, T b, int step)->IEnumerable<T>;
+	func ReverseEnumFrom(T a, T b)->IEnumerable<T>;
+	func ReverseEnumFrom(T a, T b, int step)->IEnumerable<T>;
 }
 
 concept<T> Bitwise
 	where Comparable<T>
 {
-	func operator &&(T a, T b):T;
-	func operator ||(T a, T b):T;
-	func operator !(T a, T b):T;
+	func operator &&(T a, T b)->T;
+	func operator ||(T a, T b)->T;
+	func operator !(T a, T b)->T;
 }
 
 concept<T> Numeric
 	where Comparable<T>
 {
 	prop T Zero{get;}
-	func operator+(T a, T b):T;
-	func operator+(T a):T;
-	func operator-(T a, T b):T;
-	func operator-(T a):T;
-	func operator*(T a, T b):T;
-	func operator/(T a, T b):T;
-	func Abs(T a):T;
-	func Sign(T a):T;
+	func operator+(T a, T b)->T;
+	func operator+(T a)->T;
+	func operator-(T a, T b)->T;
+	func operator-(T a)->T;
+	func operator*(T a, T b)->T;
+	func operator/(T a, T b)->T;
+	func Abs(T a)->T;
+	func Sign(T a)->T;
 }
 
 concept<T> Integral
 	where Numeric<T>
 {
-	func operator%(T a, T b):T;
-	func Even(T a):bool;
-	func Odd(T a):bool;
-	func Gcd(T a):bool;
-	func Lcm(T a):bool;
-	func operator<<(T a, T b):T;
-	func operator>>(T a, T b):T;
+	func operator%(T a, T b)->T;
+	func Even(T a)->bool;
+	func Odd(T a)->bool;
+	func Gcd(T a)->bool;
+	func Lcm(T a)->bool;
+	func operator<<(T a, T b)->T;
+	func operator>>(T a, T b)->T;
 }
 
 concept<T> Fractional
 	where Numeric<T>
 {
-	func Truncate(T a):T;
-	func Round(T a):T;
-	func Floor(T a):T;
-	func Ceiling(T a):T;
+	func Truncate(T a)->T;
+	func Round(T a)->T;
+	func Floor(T a)->T;
+	func Ceiling(T a)->T;
 }
 
 concept<T> Floating
@@ -301,26 +301,26 @@ concept<T> Floating
 	prop T Pi{get;}
 	prop bool T.IsNan{get;}
 	prop bool T.IsInfinite{get;}
-	func Exp(T a):T;
-	func Sqrt(T a):T;
-	func Log(T a):T;
-	func Sin(T a):T;
-	func Cos(T a):T;
-	func Tan(T a):T;
-	func ASin(T a):T;
-	func ACos(T a):T;
-	func ATan(T a):T;
-	func Sinh(T a):T;
-	func Cosh(T a):T;
-	func Tanh(T a):T;
-	func ASinh(T a):T;
-	func ACosh(T a):T;
-	func ATanh(T a):T;
+	func Exp(T a)->T;
+	func Sqrt(T a)->T;
+	func Log(T a)->T;
+	func Sin(T a)->T;
+	func Cos(T a)->T;
+	func Tan(T a)->T;
+	func ASin(T a)->T;
+	func ACos(T a)->T;
+	func ATan(T a)->T;
+	func Sinh(T a)->T;
+	func Cosh(T a)->T;
+	func Tanh(T a)->T;
+	func ASinh(T a)->T;
+	func ACosh(T a)->T;
+	func ATanh(T a)->T;
 }
 
 concept<T, U> Convertable
 {
-	func Convert(T a):U;
+	func Convert(T a)->U;
 }
 
 concept<T, U> ImplicitlyConvertable
@@ -330,35 +330,35 @@ concept<T, U> ImplicitlyConvertable
 
 concept<T> Printable
 {
-	func T.ToString():string;
+	func T.ToString()->string;
 }
 
 concept<T> Parsable
 {
-	func Parse(string s):T;
+	func Parse(string s)->T;
 }
 
 concept<T> Tuple // predefined
 {
 }
 
-concept<T=>U> Tuplizable // predefined
+concept<T:U> Tuplizable // predefined
 	where Tuple<U>
 {
-	func ToTuple(T value):U;
-	func FromTuple(U tuple):T;
+	func ToTuple(T value)->U;
+	func FromTuple(U tuple)->T;
 }
 
 instance<T> Equlable<T>
 	where Comparable<T>
 {
 	@Inline
-	func AreEqual(T a, T b):bool = Compare(a, b)==0;
+	func AreEqual(T a, T b)->bool = Compare(a, b)==0;
 }
 
-instance<T, U> Comparable<(T..U)>
+instance<T, U> Comparable<T..U>
 {
-	func Compare((T..U) a, (T..U) b):int
+	func Compare(T..U a, T..U b)->int
 	{
 		int result=Compare(a.first, b.first);
 		if(result==0)
@@ -376,14 +376,14 @@ instance<T> Printable
 	where Convertable<T, string>
 {
 	@Inline
-	func T.ToString():string = Convert(this);
+	func T.ToString()->string = Convert(this);
 }
 
 instance<T> Parsable
 	where Convertable<string, T>
 {
 	@Inline
-	func Parse(string s):T = Convert(s);
+	func Parse(string s)->T = Convert(s);
 }
 
 ========================================================
@@ -392,20 +392,20 @@ Interfaces
 
 concept<out T> this.IEnumerator
 {
-	func MoveNext():bool;
+	func MoveNext()->bool;
 	prop T Current{get;}
 }
 
 concept<out T> this.IEnumerable
 {
-	func CreateEnumerator():IEnumerator<T>;
+	func CreateEnumerator()->IEnumerator<T>;
 }
 
 concept<T> this.IReadonlyCollection
 	where this.IEnumerable<T>
 {
 	prop int Count{get;}
-	func Contains(T value):bool;
+	func Contains(T value)->bool;
 }
 
 concept<T> this.IReadonlyArray
@@ -413,7 +413,7 @@ concept<T> this.IReadonlyArray
 	where this.IDelegate<T, (int)>
 {
 	prop T operator[](int index){get;}
-	func IndexOf(T value):int;
+	func IndexOf(T value)->int;
 }
 
 concept<T> this.IArray
@@ -426,16 +426,16 @@ concept<T> this.ICollection
 	where this.IReadonlyCollection<T>
 {
 	func void Clear();
-	func Add(T value):bool;
-	func Remove(T value):bool;
+	func Add(T value)->bool;
+	func Remove(T value)->bool;
 }
 
 concept<T> this.IList
 	where this.ICollection<T>
 	where this.IArray<T>
 {
-	func Insert(T value, int index):int;
-	func RemoveAt(int index):T;
+	func Insert(T value, int index)->int;
+	func RemoveAt(int index)->T;
 }
 
 concept<TKey, TValue> this.IReadonlyMap
@@ -444,15 +444,15 @@ concept<TKey, TValue> this.IReadonlyMap
 {
 	prop IReadonlyCollection<TKey> Keys{get;}
 	prop IReadonlyCollection<TValue> Values{get;}
-	func Find(TKey key):(TValue, bool);
+	func Find(TKey key)->(TValue, bool);
 }
 
 concept<TKey, TValue> this.IMap
 	where this.ICollection<(TKey, TValue)>
 	where this.IReadonlyMap<TKey, TValue>
 {
-	func Set(TKey key, TValue value):bool;
-	func Remove(TKey key):bool;
+	func Set(TKey key, TValue value)->bool;
+	func Remove(TKey key)->bool;
 }
 
 ========================================================
@@ -602,18 +602,18 @@ var one = 1;
 // one :: int
 
 var inc = x:x+1;
-// inc :: func(int):int
+// inc :: func(int)->int
 
 var pinc = x:x+Convert(1);
-// pinc :: type<T> where Numeric<T>, Convertable<int, T> func(T):T
+// pinc :: type<T> where Numeric<T>, Convertable<int, T> func(T)->T
 
 func Apply(f, x, c)
 {
-	foreach(i in (1..c))
+	foreach(i in 1..c)
 		x=f(x);
 	return x;
 }
-// Apply :: type<T> func(func(T):T, T, int):T
+// Apply :: type<T> func(func(T)->T, T, int)->T
 
 var x = Apply(inc, 1, 100);
 // x = 100
@@ -626,7 +626,7 @@ func Filter(xs, p) seq
 	foreach(x in xs)
 	    if (p) yield! x;
 }
-// Filter :: type<T> func({T}, func (T):bool):{T}
+// Filter :: type<T> func({T}, func (T)->bool)->{T}
 
 func Concat(urls, cont) async
 {
@@ -635,7 +635,7 @@ func Concat(urls, cont) async
 		xs.Add(await! DownloadTextAsync(url))
 	cont(xs);
 }
-// Concat :: func({string}, func(IList<string>):void):Task<void>
+// Concat :: func({string}, func(IList<string>)->void)->Task<void>
 
 ========================================================
 Continuations
@@ -644,13 +644,13 @@ Continuations
 concept<M<>> this.Continuation
 {
 	func<T> Nop() : M<T>;
-	func<T> Delay(func ():M<T> body) : M<T>;
+	func<T> Delay(func ()->M<T> body) : M<T>;
 	func<T, U> Combine(M<T> source, M<U> next) : M<U>;
 	func<T> Return(T value) : M<T>;
-	func<T, U> Bind(M<T> source, func (T):M<U> bind) : M<U>;
+	func<T, U> Bind(M<T> source, func (T)->M<U> bind) : M<U>;
 	func<T> Yield(T value) : M<T>;
 	func<T> YieldFrom(M<T> source) : M<T>;
-	func<T> Try(M<T> source, func (Exception):M<T> bind) : M<T>;
+	func<T> Try(M<T> source, func (Exception)->M<T> bind) : M<T>;
 }
 
 ---------------------------------------
