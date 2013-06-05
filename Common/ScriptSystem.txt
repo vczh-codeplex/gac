@@ -213,7 +213,7 @@ func<T, U> {T}.Zip({U})->{(T, U)};
 Concepts
 ========================================================
 
-concept<T> Equlable
+concept<T> Equatable
 {
 	func AreEqual(T a, T b)->bool;
 	@Inline
@@ -349,7 +349,7 @@ concept<T:U> Tuplizable // predefined
 	func FromTuple(U tuple)->T;
 }
 
-instance<T> Equlable<T>
+instance<T> Equatable<T>
 	where Comparable<T>
 {
 	@Inline
