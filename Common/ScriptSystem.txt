@@ -47,7 +47,7 @@ Composite Type Constructors
 default(T)
 new(T)
 
-x:x+1
+x->x+1
 (x,y)->x+y
 func (int x, int y)->int = x+y
 func (int x, int y)->int{ return x+y; }
