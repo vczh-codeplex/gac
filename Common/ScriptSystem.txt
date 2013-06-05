@@ -160,7 +160,7 @@ prop<T> Config
 	}
 	set
 	{
-		globalCOnfigs[typeof(T)]=value;
+		globalConfigs[typeof(T)]=value;
 	}
 }
 
