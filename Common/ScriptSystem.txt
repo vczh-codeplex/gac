@@ -386,6 +386,11 @@ instance<T> Parsable
 	func Parse(string s)->T = Convert(s);
 }
 
+instance<T, U> Convertable<IEnumerable<T>, IEnumerable<U>>
+	where Convertable<T, U>
+{
+}
+
 ========================================================
 Interfaces
 ========================================================
@@ -407,7 +412,7 @@ concept this.IWeakTypedEnumerator
 	prop object WeakTypedCurrent{get;}
 }
 
-concept<out T> this.IEnumerator
+concept<T> this.IEnumerator
 	where this.IWeakTypedEnumerator
 {
 	prop T Current{get;}
@@ -418,7 +423,7 @@ concept this.IWeakTypedEnumerable
 	func CreateWeakTypedEnumerator()->IWeakTypedEnumerator;
 }
 
-concept<out T> this.IEnumerable
+concept<T> this.IEnumerable
 	where this.IWeakTypedEnumerable
 {
 	func CreateEnumerator()->IEnumerator<T>;
