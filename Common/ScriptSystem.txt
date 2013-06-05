@@ -390,13 +390,36 @@ instance<T> Parsable
 Interfaces
 ========================================================
 
-concept<out T> this.IEnumerator
+concept this.IWeakTypedPair
+{
+	prop object WeakTypedFirst{get;}
+	prop object WeakTypedSecond{get;}
+}
+
+concept this.IWeakTypedTuple
+	where this.IWeakTypedEnumerable
+{
+}
+
+concept this.IWeakTypedEnumerator
 {
 	func MoveNext()->bool;
+	prop object WeakTypedCurrent{get;}
+}
+
+concept<out T> this.IEnumerator
+	where this.IWeakTypedEnumerator
+{
 	prop T Current{get;}
 }
 
+concept this.IWeakTypedEnumerable
+{
+	func CreateWeakTypedEnumerator()->IWeakTypedEnumerator;
+}
+
 concept<out T> this.IEnumerable
+	where this.IWeakTypedEnumerable
 {
 	func CreateEnumerator()->IEnumerator<T>;
 }
@@ -680,3 +703,32 @@ instance<T> async.Continuation<Task<T>>
 @ContinuationControlFlow
 @Inline
 func async.await(source, bind) = this.Bind(source, bind);
+
+========================================================
+External Types
+========================================================
+
+@External
+@NotImplemented
+concept<T> this.ExternalPointer
+	where Interface<T>
+{
+	@External
+	func Delete():void
+
+	@External
+	prop T Handle{get;}
+}
+
+@External
+@NotImplemented
+concept<T> this.ExternalReference
+	where Interface<T>
+{
+	@External
+	prop T Handle{get;}
+}
+
+instance<T> Convertable<ExternalReference<T>, ExternalPointer<T>>
+{
+}
