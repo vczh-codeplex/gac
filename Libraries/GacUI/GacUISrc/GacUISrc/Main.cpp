@@ -35,21 +35,81 @@ namespace test
 TestWindow
 ***********************************************************************/
 	
-	template<typename TColumn>
-	class FilePropertiesColumnProvider : public list::StrongTypedColumnProvider<Ptr<FileProperties>, TColumn>
+	class FileNameColumnProvider : public list::StrongTypedColumnProvider<Ptr<FileProperties>, WString>
 	{
 	protected:
-		TColumn (FileProperties::*method)();
 
-		void GetCellData(const Ptr<FileProperties>& rowData, TColumn& cellData)override
+		void GetCellData(const Ptr<FileProperties>& rowData, WString& cellData)override
 		{
-			cellData=(rowData.Obj()->*method)();
+			cellData=rowData->GetDisplayName();
 		}
 	public:
-		FilePropertiesColumnProvider(list::StrongTypedDataProvider<Ptr<FileProperties>>* _dataProvider, TColumn (FileProperties::*_method)())
+		FileNameColumnProvider(list::StrongTypedDataProvider<Ptr<FileProperties>>* _dataProvider)
 			:StrongTypedColumnProvider(_dataProvider)
-			,method(_method)
 		{
+		}
+	};
+	
+	class FileTypeColumnProvider : public list::StrongTypedColumnProvider<Ptr<FileProperties>, WString>
+	{
+	protected:
+
+		void GetCellData(const Ptr<FileProperties>& rowData, WString& cellData)override
+		{
+			cellData=rowData->GetTypeName();
+		}
+	public:
+		FileTypeColumnProvider(list::StrongTypedDataProvider<Ptr<FileProperties>>* _dataProvider)
+			:StrongTypedColumnProvider(_dataProvider)
+		{
+		}
+	};
+	
+	class FileDateColumnProvider : public list::StrongTypedColumnProvider<Ptr<FileProperties>, LONGLONG>
+	{
+	protected:
+
+		void GetCellData(const Ptr<FileProperties>& rowData, LONGLONG& cellData)override
+		{
+			FILETIME ft=rowData->GetLastWriteTime();
+			LARGE_INTEGER li;
+			li.HighPart=ft.dwHighDateTime;
+			li.LowPart=ft.dwLowDateTime;
+			cellData=li.QuadPart;
+		}
+	public:
+		FileDateColumnProvider(list::StrongTypedDataProvider<Ptr<FileProperties>>* _dataProvider)
+			:StrongTypedColumnProvider(_dataProvider)
+		{
+		}
+
+		WString GetCellText(vint row)override
+		{
+			Ptr<FileProperties> rowData;
+			dataProvider->GetRowData(row, rowData);
+			return FileTimeToString(rowData->GetLastWriteTime());
+		}
+	};
+	
+	class FileSizeColumnProvider : public list::StrongTypedColumnProvider<Ptr<FileProperties>, LONGLONG>
+	{
+	protected:
+
+		void GetCellData(const Ptr<FileProperties>& rowData, LONGLONG& cellData)override
+		{
+			cellData=rowData->GetSize().QuadPart;
+		}
+	public:
+		FileSizeColumnProvider(list::StrongTypedDataProvider<Ptr<FileProperties>>* _dataProvider)
+			:StrongTypedColumnProvider(_dataProvider)
+		{
+		}
+
+		WString GetCellText(vint row)override
+		{
+			Ptr<FileProperties> rowData;
+			dataProvider->GetRowData(row, rowData);
+			return FileSizeToString(rowData->GetSize());
 		}
 	};
 
@@ -60,11 +120,17 @@ TestWindow
 	public:
 		DataProvider()
 		{
-			AddSortableStrongTypedColumn<WString>(L"Name", new FilePropertiesColumnProvider<WString>(this, &FileProperties::GetDisplayName))
+			AddSortableStrongTypedColumn<WString>(L"Name", new FileNameColumnProvider(this))
 				->SetSize(240);
 
-			AddSortableStrongTypedColumn<WString>(L"Type", new FilePropertiesColumnProvider<WString>(this, &FileProperties::GetTypeName))
+			AddSortableStrongTypedColumn<LONGLONG>(L"Data modified", new FileDateColumnProvider(this))
+				->SetSize(120);
+
+			AddSortableStrongTypedColumn<WString>(L"Type", new FileTypeColumnProvider(this))
 				->SetSize(160);
+
+			AddSortableStrongTypedColumn<LONGLONG>(L"Size", new FileSizeColumnProvider(this))
+				->SetSize(100);
 
 			List<WString> directories, files;
 			WString path=GetWindowsDirectory();
