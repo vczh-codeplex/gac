@@ -177,10 +177,14 @@ Datagrid Interfaces
 					/// <summary>Get the number of all rows.</summary>
 					/// <returns>The number of all rows.</returns>
 					virtual vint										GetRowCount()=0;
-					/// <summary>Get the image for the row.</summary>
-					/// <returns>The image.</returns>
+					/// <summary>Get the large image for the row.</summary>
+					/// <returns>The large image.</returns>
 					/// <param name="row">The row number.</param>
-					virtual Ptr<GuiImageData>							GetRowImage(vint row)=0;
+					virtual Ptr<GuiImageData>							GetRowLargeImage(vint row)=0;
+					/// <summary>Get the small image for the row.</summary>
+					/// <returns>The small image.</returns>
+					/// <param name="row">The row number.</param>
+					virtual Ptr<GuiImageData>							GetRowSmallImage(vint row)=0;
 					/// <summary>Get the text for the cell.</summary>
 					/// <returns>The text for the cell.</returns>
 					/// <param name="row">The row number for the cell.</param>
@@ -321,10 +325,14 @@ DataSource Extensions
 					/// <returns>The <see cref="IStructuredColumnProvider"/> object.</returns>
 					/// <param name="column">The column number.</param>
 					virtual IStructuredColumnProvider*					GetColumn(vint column)=0;
-					/// <summary>Get the image for the row.</summary>
-					/// <returns>The image.</returns>
+					/// <summary>Get the large image for the row.</summary>
+					/// <returns>The large image.</returns>
 					/// <param name="row">The row number.</param>
-					virtual Ptr<GuiImageData>							GetRowImage(vint row)=0;
+					virtual Ptr<GuiImageData>							GetRowLargeImage(vint row)=0;
+					/// <summary>Get the small image for the row.</summary>
+					/// <returns>The small image.</returns>
+					/// <param name="row">The row number.</param>
+					virtual Ptr<GuiImageData>							GetRowSmallImage(vint row)=0;
 				};
 			}
 		}
