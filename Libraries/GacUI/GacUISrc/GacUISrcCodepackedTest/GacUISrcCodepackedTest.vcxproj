@@ -219,6 +219,7 @@
     <ClCompile Include="..\..\Public\Source\Vlpp.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="SetupBasicWindow.cpp" />
+    <ClCompile Include="SetupDatagridElementsWindow.cpp" />
     <ClCompile Include="SetupDialogWindow.cpp" />
     <ClCompile Include="SetupDocumentElementLayoutWindow.cpp" />
     <ClCompile Include="SetupListControlWindow.cpp" />
