@@ -57,6 +57,15 @@ void SearchDirectoriesAndFiles(const WString& path, List<WString>& directories, 
 	CopyFrom(files, From(files).OrderBy(comparer));
 }
 
+bool IsFileDirectory(const WString& fullPath)
+{
+	// Get file attributes.
+	WIN32_FILE_ATTRIBUTE_DATA info;
+	BOOL result=GetFileAttributesEx(fullPath.Buffer(), GetFileExInfoStandard, &info);
+
+	return (info.dwFileAttributes|FILE_ATTRIBUTE_DIRECTORY)!=0;
+}
+
 Ptr<GuiImageData> GetFileIcon(const WString& fullPath, UINT uFlags)
 {
 	// Use SHGetFileInfo to get the correct icons for the specified directory or file.
@@ -186,15 +195,17 @@ void FileProperties::Load()
 		loaded=true;
 		smallIcon=GetFileIcon(fullPath, SHGFI_SMALLICON | SHGFI_ICON);
 		bigIcon=GetFileIcon(fullPath, SHGFI_LARGEICON | SHGFI_ICON);
+		isDirectory=IsFileDirectory(fullPath);
 		displayName=GetFileDisplayName(fullPath);
 		typeName=GetFileTypeName(fullPath);
 		lastWriteTime=GetFileLastWriteTime(fullPath);
 		size=GetFileSize(fullPath);
 	}
-	}
+}
 
 FileProperties::FileProperties(const WString& _fullPath)
 	:loaded(false)
+	,isDirectory(false)
 	,fullPath(_fullPath)
 {
 }
@@ -209,6 +220,12 @@ Ptr<GuiImageData> FileProperties::GetBigIcon()
 {
 	Load();
 	return bigIcon;
+}
+
+bool FileProperties::IsDirectory()
+{
+	Load();
+	return isDirectory;
 }
 
 WString FileProperties::GetDisplayName()
