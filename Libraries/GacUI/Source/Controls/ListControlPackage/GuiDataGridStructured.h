@@ -187,7 +187,8 @@ Structured DataSource Extensions
 					bool												IsSortOrderAscending()override;
 					
 					vint												GetRowCount()override;
-					Ptr<GuiImageData>									GetRowImage(vint row)override;
+					Ptr<GuiImageData>									GetRowLargeImage(vint row)override;
+					Ptr<GuiImageData>									GetRowSmallImage(vint row)override;
 					WString												GetCellText(vint row, vint column)override;
 					IDataVisualizerFactory*								GetCellDataVisualizerFactory(vint row, vint column)override;
 					void												VisualizeCell(vint row, vint column, IDataVisualizer* dataVisualizer)override;
@@ -277,7 +278,8 @@ Structured DataSource Extensions
 					void												SetCommandExecutor(IDataProviderCommandExecutor* value)override;
 					vint												GetColumnCount()override;
 					IStructuredColumnProvider*							GetColumn(vint column)override;
-					Ptr<GuiImageData>									GetRowImage(vint row)override;
+					Ptr<GuiImageData>									GetRowLargeImage(vint row)override;
+					Ptr<GuiImageData>									GetRowSmallImage(vint row)override;
 				};
 
 /***********************************************************************

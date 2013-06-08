@@ -116,7 +116,7 @@ ListViewMainColumnDataVisualizer
 
 				void ListViewMainColumnDataVisualizer::BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)
 				{
-					Ptr<GuiImageData> imageData=dataProvider->GetRowImage(row);
+					Ptr<GuiImageData> imageData=dataProvider->GetRowSmallImage(row);
 					if(imageData)
 					{
 						image->SetImage(imageData->GetImage(), imageData->GetFrameIndex());

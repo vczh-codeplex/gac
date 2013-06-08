@@ -446,9 +446,14 @@ StructuredDataProvider
 					return reorderedRows.Count();
 				}
 
-				Ptr<GuiImageData> StructuredDataProvider::GetRowImage(vint row)
+				Ptr<GuiImageData> StructuredDataProvider::GetRowLargeImage(vint row)
 				{
-					return structuredDataProvider->GetRowImage(TranslateRowNumber(row));
+					return structuredDataProvider->GetRowLargeImage(TranslateRowNumber(row));
+				}
+
+				Ptr<GuiImageData> StructuredDataProvider::GetRowSmallImage(vint row)
+				{
+					return structuredDataProvider->GetRowSmallImage(TranslateRowNumber(row));
 				}
 
 				WString StructuredDataProvider::GetCellText(vint row, vint column)
@@ -660,7 +665,12 @@ StructuredDataProviderBase
 					return columns[column].Obj();
 				}
 
-				Ptr<GuiImageData> StructuredDataProviderBase::GetRowImage(vint row)
+				Ptr<GuiImageData> StructuredDataProviderBase::GetRowLargeImage(vint row)
+				{
+					return 0;
+				}
+
+				Ptr<GuiImageData> StructuredDataProviderBase::GetRowSmallImage(vint row)
 				{
 					return 0;
 				}

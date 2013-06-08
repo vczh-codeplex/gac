@@ -142,12 +142,12 @@ DataGridItemProvider
 
 				Ptr<GuiImageData> DataGridItemProvider::GetSmallImage(vint itemIndex)
 				{
-					return dataProvider->GetRowImage(itemIndex);
+					return dataProvider->GetRowSmallImage(itemIndex);
 				}
 
 				Ptr<GuiImageData> DataGridItemProvider::GetLargeImage(vint itemIndex)
 				{
-					return 0;
+					return dataProvider->GetRowLargeImage(itemIndex);
 				}
 
 				WString DataGridItemProvider::GetText(vint itemIndex)

@@ -1360,6 +1360,8 @@ Type Declaration
 				CLASS_MEMBER_METHOD(IsColumnSortable, {L"column"})
 				CLASS_MEMBER_METHOD(SortByColumn, {L"column" _ L"ascending"})
 				CLASS_MEMBER_METHOD(IsSortOrderAscending, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(GetRowLargeImage, {L"row" _ L"column"})
+				CLASS_MEMBER_METHOD(GetRowSmallImage, {L"row" _ L"column"})
 				CLASS_MEMBER_METHOD(GetCellText, {L"row" _ L"column"})
 				CLASS_MEMBER_METHOD(GetCellDataVisualizerFactory, {L"row" _ L"column"})
 				CLASS_MEMBER_METHOD(VisualizeCell, {L"row" _ L"column" _ L"dataVisualizer"})
@@ -1416,7 +1418,8 @@ Type Declaration
 
 				CLASS_MEMBER_METHOD(SetCommandExecutor, {L"value"})
 				CLASS_MEMBER_METHOD(GetColumn, {L"column"})
-				CLASS_MEMBER_METHOD(GetRowImage, {L"row"})
+				CLASS_MEMBER_METHOD(GetRowLargeImage, {L"row"})
+				CLASS_MEMBER_METHOD(GetRowSmallImage, {L"row"})
 			END_CLASS_MEMBER(IStructuredDataProvider)
 
 			BEGIN_CLASS_MEMBER(DataGridContentProvider)

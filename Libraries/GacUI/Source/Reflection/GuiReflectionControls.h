@@ -1654,9 +1654,14 @@ Interface Proxy
 						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetRowCount);
 					}
 
-					Ptr<GuiImageData> GetRowImage(vint row)override
+					Ptr<GuiImageData> GetRowLargeImage(vint row)override
 					{
-						return INVOKEGET_INTERFACE_PROXY(GetRowImage, row);
+						return INVOKEGET_INTERFACE_PROXY(GetRowLargeImage, row);
+					}
+
+					Ptr<GuiImageData> GetRowSmallImage(vint row)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetRowSmallImage, row);
 					}
 
 					WString GetCellText(vint row, vint column)override
@@ -1850,9 +1855,14 @@ Interface Proxy
 						return INVOKEGET_INTERFACE_PROXY(GetColumn, column);
 					}
 
-					Ptr<GuiImageData> GetRowImage(vint row)
+					Ptr<GuiImageData> GetRowLargeImage(vint row)
 					{
-						return INVOKEGET_INTERFACE_PROXY(GetRowImage, row);
+						return INVOKEGET_INTERFACE_PROXY(GetRowLargeImage, row);
+					}
+
+					Ptr<GuiImageData> GetRowSmallImage(vint row)
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetRowSmallImage, row);
 					}
 				};
 			}
