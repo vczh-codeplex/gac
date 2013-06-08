@@ -1,3 +1,4 @@
+#include <math.h>
 #include "FileSystemInformation.h"
 
 /***********************************************************************
@@ -63,7 +64,7 @@ bool IsFileDirectory(const WString& fullPath)
 	WIN32_FILE_ATTRIBUTE_DATA info;
 	BOOL result=GetFileAttributesEx(fullPath.Buffer(), GetFileExInfoStandard, &info);
 
-	return (info.dwFileAttributes|FILE_ATTRIBUTE_DIRECTORY)!=0;
+	return (info.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY)!=0;
 }
 
 Ptr<GuiImageData> GetFileIcon(const WString& fullPath, UINT uFlags)
@@ -152,17 +153,17 @@ WString FileSizeToString(LARGE_INTEGER filesize)
 	if(filesize.QuadPart>=1024*1024*1024)
 	{
 		unit=L" GB";
-		size=(double)filesize.QuadPart/(1024*1024*1024);
+		size=ceil((double)filesize.QuadPart/(1024*1024))/1024;
 	}
 	else if(filesize.QuadPart>=1024*1024)
 	{
 		unit=L" MB";
-		size=(double)filesize.QuadPart/(1024*1024);
+		size=ceil((double)filesize.QuadPart/(1024*1024));
 	}
 	else if(filesize.QuadPart>=1024)
 	{
 		unit=L" KB";
-		size=(double)filesize.QuadPart/1024;
+		size=ceil((double)filesize.QuadPart/1024);
 	}
 	else
 	{
