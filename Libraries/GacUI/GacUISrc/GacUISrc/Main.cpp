@@ -34,21 +34,69 @@ namespace test
 /***********************************************************************
 TestWindow
 ***********************************************************************/
-
-	class DataProvider : public list::StrongTypedDataProvider<Point>
+	
+	template<typename TColumn>
+	class FilePropertiesColumnProvider : public list::StrongTypedColumnProvider<Ptr<FileProperties>, TColumn>
 	{
+	protected:
+		TColumn (FileProperties::*method)();
+
+		void GetCellData(const Ptr<FileProperties>& rowData, TColumn& cellData)override
+		{
+			cellData=(rowData.Obj()->*method)();
+		}
+	public:
+		FilePropertiesColumnProvider(list::StrongTypedDataProvider<Ptr<FileProperties>>* _dataProvider, TColumn (FileProperties::*_method)())
+			:StrongTypedColumnProvider(_dataProvider)
+			,method(_method)
+		{
+		}
+	};
+
+	class DataProvider : public list::StrongTypedDataProvider<Ptr<FileProperties>>
+	{
+	protected:
+		List<Ptr<FileProperties>>				fileProperties;
 	public:
 		DataProvider()
 		{
+			AddSortableStrongTypedColumn<WString>(L"Name", new FilePropertiesColumnProvider<WString>(this, &FileProperties::GetDisplayName))
+				->SetSize(240);
+
+			AddSortableStrongTypedColumn<WString>(L"Type", new FilePropertiesColumnProvider<WString>(this, &FileProperties::GetTypeName))
+				->SetSize(160);
+
+			List<WString> directories, files;
+			WString path=GetWindowsDirectory();
+			SearchDirectoriesAndFiles(path, directories, files);
+			FOREACH(WString, fileName, directories)
+			{
+				fileProperties.Add(new FileProperties(path+L"\\"+fileName));
+			}
+			FOREACH(WString, fileName, files)
+			{
+				fileProperties.Add(new FileProperties(path+L"\\"+fileName));
+			}
 		}
 
-		void GetRowData(vint row, Point& rowData)override
+		void GetRowData(vint row, Ptr<FileProperties>& rowData)override
 		{
+			rowData=fileProperties[row];
 		}
 
 		vint GetRowCount()override
 		{
-			return 0;
+			return fileProperties.Count();
+		}
+
+		Ptr<GuiImageData> GetRowLargeImage(vint row)override
+		{
+			return fileProperties[row]->GetBigIcon();
+		}
+
+		Ptr<GuiImageData> GetRowSmallImage(vint row)override
+		{
+			return fileProperties[row]->GetSmallIcon();
 		}
 	};
 
