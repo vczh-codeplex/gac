@@ -81,6 +81,9 @@
     <ClCompile Include="..\..\Public\Source\GacUIWindows.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SetupDatagridElementsWindow.cpp">
+      <Filter>TabPages\ListBoxGroup</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Public\Source\GacUI.h">

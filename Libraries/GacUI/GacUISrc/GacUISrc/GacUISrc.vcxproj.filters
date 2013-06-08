@@ -468,6 +468,9 @@
     <ClCompile Include="TsfTestWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="FileSystemInformation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Common\Source\Basic.h">
@@ -892,6 +895,9 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Controls\ListControlPackage\GuiDataGridExtensions.h">
       <Filter>GacUI\Controls\ListControlPackage</Filter>
+    </ClInclude>
+    <ClInclude Include="FileSystemInformation.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

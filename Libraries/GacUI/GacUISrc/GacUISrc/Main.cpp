@@ -4,11 +4,8 @@
 #include <crtdbg.h>
 #endif
 
-#include "..\..\Source\GacUI.h"
-#include "..\..\Source\NativeWindow\Windows\WinNativeWindow.h"
+#include "FileSystemInformation.h"
 #include "..\..\Source\GraphicsElement\WindowsDirect2D\GuiGraphicsWindowsDirect2D.h"
-#include <Windows.h>
-#include <msctf.h>
 
 using namespace vl::stream;
 using namespace vl::collections;
