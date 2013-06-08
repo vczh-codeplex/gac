@@ -41,12 +41,19 @@ TestWindow
 
 		void GetCellData(const Ptr<FileProperties>& rowData, WString& cellData)override
 		{
-			cellData=rowData->GetDisplayName();
+			cellData=INVLOC.ToUpper(rowData->GetDisplayName());
 		}
 	public:
 		FileNameColumnProvider(list::StrongTypedDataProvider<Ptr<FileProperties>>* _dataProvider)
 			:StrongTypedColumnProvider(_dataProvider)
 		{
+		}
+
+		WString GetCellText(vint row)override
+		{
+			Ptr<FileProperties> rowData;
+			dataProvider->GetRowData(row, rowData);
+			return rowData->GetDisplayName();
 		}
 	};
 	
@@ -65,11 +72,11 @@ TestWindow
 		}
 	};
 	
-	class FileDateColumnProvider : public list::StrongTypedColumnProvider<Ptr<FileProperties>, LONGLONG>
+	class FileDateColumnProvider : public list::StrongTypedColumnProvider<Ptr<FileProperties>, unsigned __int64>
 	{
 	protected:
 
-		void GetCellData(const Ptr<FileProperties>& rowData, LONGLONG& cellData)override
+		void GetCellData(const Ptr<FileProperties>& rowData, unsigned __int64& cellData)override
 		{
 			FILETIME ft=rowData->GetLastWriteTime();
 			LARGE_INTEGER li;
@@ -91,13 +98,20 @@ TestWindow
 		}
 	};
 	
-	class FileSizeColumnProvider : public list::StrongTypedColumnProvider<Ptr<FileProperties>, LONGLONG>
+	class FileSizeColumnProvider : public list::StrongTypedColumnProvider<Ptr<FileProperties>, signed __int64>
 	{
 	protected:
 
-		void GetCellData(const Ptr<FileProperties>& rowData, LONGLONG& cellData)override
+		void GetCellData(const Ptr<FileProperties>& rowData, signed __int64& cellData)override
 		{
-			cellData=rowData->GetSize().QuadPart;
+			if(rowData->IsDirectory())
+			{
+				cellData=-1;
+			}
+			else
+			{
+				cellData=(signed __int64)rowData->GetSize().QuadPart;
+			}
 		}
 	public:
 		FileSizeColumnProvider(list::StrongTypedDataProvider<Ptr<FileProperties>>* _dataProvider)
@@ -109,7 +123,14 @@ TestWindow
 		{
 			Ptr<FileProperties> rowData;
 			dataProvider->GetRowData(row, rowData);
-			return FileSizeToString(rowData->GetSize());
+			if(rowData->IsDirectory())
+			{
+				return L"";
+			}
+			else
+			{
+				return FileSizeToString(rowData->GetSize());
+			}
 		}
 	};
 
@@ -123,13 +144,13 @@ TestWindow
 			AddSortableStrongTypedColumn<WString>(L"Name", new FileNameColumnProvider(this))
 				->SetSize(240);
 
-			AddSortableStrongTypedColumn<LONGLONG>(L"Data modified", new FileDateColumnProvider(this))
+			AddSortableStrongTypedColumn<unsigned __int64>(L"Data modified", new FileDateColumnProvider(this))
 				->SetSize(120);
 
 			AddSortableStrongTypedColumn<WString>(L"Type", new FileTypeColumnProvider(this))
 				->SetSize(160);
 
-			AddSortableStrongTypedColumn<LONGLONG>(L"Size", new FileSizeColumnProvider(this))
+			AddSortableStrongTypedColumn<signed __int64>(L"Size", new FileSizeColumnProvider(this))
 				->SetSize(100);
 
 			List<WString> directories, files;
