@@ -1,8 +1,13 @@
-#include "FileSystemInformation.h"
+#include "..\CommonLibrary\FileSystemInformation.h"
 
-using namespace vl::collections;
 using namespace vl::regex;
+using namespace vl::collections;
 using namespace vl::stream;
+
+int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int CmdShow)
+{
+	return SetupWindowsDirect2DRenderer();
+}
 
 /***********************************************************************
 FileNameColumnProvider
@@ -18,11 +23,13 @@ public:
 
 	void GetCellData(const Ptr<FileProperties>& rowData, WString& cellData)override
 	{
+		// This column will be sorted igoring case, so this function always return a uppder-cased string.
 		cellData=INVLOC.ToUpper(rowData->GetDisplayName());
 	}
 
 	WString GetCellText(vint row)override
 	{
+		// Get the real string.
 		Ptr<FileProperties> rowData;
 		dataProvider->GetRowData(row, rowData);
 		return rowData->GetDisplayName();
@@ -54,6 +61,7 @@ public:
 	{
 		Ptr<FileProperties> rowData;
 		dataProvider->GetRowData(row, rowData);
+		// Display the FILETIME using custom format.
 		return FileTimeToString(rowData->GetLastWriteTime());
 	}
 };
@@ -72,6 +80,7 @@ public:
 
 	void GetCellData(const Ptr<FileProperties>& rowData, signed __int64& cellData)override
 	{
+		// In order to put folders before files when sorting by file size, we define the size of a folder is -1.
 		if(rowData->IsDirectory())
 		{
 			cellData=-1;
@@ -88,10 +97,12 @@ public:
 		dataProvider->GetRowData(row, rowData);
 		if(rowData->IsDirectory())
 		{
+			// Don't display sizes for folders
 			return L"";
 		}
 		else
 		{
+			// Display sizes with custom format for files.
 			return FileSizeToString(rowData->GetSize());
 		}
 	}
@@ -140,15 +151,25 @@ protected:
 					}
 					preventEvent=false;
 				}
+				// If the user checks or unchecks items in the list control,
+				// the filter will notify the data grid control that the filter is changed.
+				// Then the data grid control will start a new filtering action.
 				InvokeOnFilterChanged();
 			}
 		}
 
 		void popup_Opened(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 		{
+			// The first item of the list control inside the column header popup is always "(Select All)".
+			// If there is not item, then we should initialize the list control.
+			// This function will be called everytime when the user open the column header popup.
+			// So when this function is called, the data in the data grid control is ready.
 			if(textList->GetItems().Count()==0)
 			{
+				// Add the first item.
 				textList->GetItems().Add(new list::TextItem(L"(Select All)", true));
+
+				// Find all distinct file types in the data grid control.
 				LazyList<WString> columns=Range(0, dataProvider->GetRowCount())
 					.Select([this](vint i)->WString
 					{
@@ -161,6 +182,7 @@ protected:
 					.Distinct()
 					.OrderBy([](const WString& a, const WString& b){return WString::Compare(a, b);});
 
+				// Add selected file types to the list control.
 				FOREACH(WString, item, columns)
 				{
 					textList->GetItems().Add(new list::TextItem(item, true));
@@ -203,7 +225,9 @@ public:
 		:StrongTypedColumnProvider(_dataProvider)
 	{
 		filter=new FileTypeFilter(this);
+		// Bind a filter for this column.
 		SetInherentFilter(filter);
+		// Display the popup in the column header to control the filter.
 		SetPopup(filter->GetPopup());
 	}
 
@@ -217,12 +241,12 @@ public:
 DataProvider
 ***********************************************************************/
 
-class ExplorerDataProvider : public list::StrongTypedDataProvider<Ptr<FileProperties>>
+class DataProvider : public list::StrongTypedDataProvider<Ptr<FileProperties>>
 {
 protected:
 	List<Ptr<FileProperties>>				fileProperties;
 public:
-	ExplorerDataProvider()
+	DataProvider()
 	{
 		AddSortableStrongTypedColumn<WString>(L"Name", new FileNameColumnProvider(this))
 			->SetSize(240);
@@ -270,12 +294,44 @@ public:
 	}
 };
 
-void SetupDatagridExplorerWindow(GuiControlHost* controlHost, GuiControl* container)
+/***********************************************************************
+FileExplorerWindow
+***********************************************************************/
+
+class FileExplorerWindow : public GuiWindow
 {
-	container->GetBoundsComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
-	GuiVirtualDataGrid* dataGrid=new GuiVirtualDataGrid(GetCurrentTheme()->CreateListViewStyle(), new ExplorerDataProvider);
-	dataGrid->GetBoundsComposition()->SetAlignmentToParent(Margin(5, 5, 5, 5));
-	dataGrid->SetHorizontalAlwaysVisible(false);
-	dataGrid->SetVerticalAlwaysVisible(false);
-	container->GetBoundsComposition()->AddChild(dataGrid->GetBoundsComposition());
+private:
+	GuiVirtualDataGrid*					dataGrid;
+
+public:
+	FileExplorerWindow()
+		:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
+	{
+		this->SetText(L"Controls.DataGrid.FileExplorer");
+
+		dataGrid=new GuiVirtualDataGrid(GetCurrentTheme()->CreateListViewStyle(), new DataProvider);
+		dataGrid->GetBoundsComposition()->SetAlignmentToParent(Margin(5, 5, 5, 5));
+		dataGrid->SetHorizontalAlwaysVisible(false);
+		dataGrid->SetVerticalAlwaysVisible(false);
+		AddChild(dataGrid);
+
+		// set the preferred minimum client size
+		this->GetBoundsComposition()->SetPreferredMinSize(Size(900, 600));
+		// call this to calculate the size immediately if any indirect content in the table changes
+		// so that the window can calcaulte its correct size before calling the MoveToScreenCenter()
+		this->ForceCalculateSizeImmediately();
+		// move to the screen center
+		this->MoveToScreenCenter();
+	}
+};
+
+/***********************************************************************
+GuiMain
+***********************************************************************/
+
+void GuiMain()
+{
+	GuiWindow* window=new FileExplorerWindow;
+	GetApplication()->Run(window);
+	delete window;
 }
