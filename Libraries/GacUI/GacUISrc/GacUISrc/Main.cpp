@@ -128,7 +128,17 @@ TestWindow
 
 			bool FilterData(const Ptr<FileProperties>& rowData, const WString& cellData)
 			{
-				return true;
+				if(textList->GetItems().Count()==0)
+				{
+					return true;
+				}
+				else
+				{
+					return From(textList->GetItems())
+						.Skip(1)
+						.Where([](Ptr<list::TextItem> item){return item->GetChecked();})
+						.Any([=](Ptr<list::TextItem> item){return item->GetText()==cellData;});
+				}
 			}
 
 			void textList_ItemChecked(GuiGraphicsComposition* sender, GuiItemEventArgs& arguments)
@@ -188,6 +198,11 @@ TestWindow
 				popup=g::NewMenu(0);
 				popup->GetContainerComposition()->AddChild(textList->GetBoundsComposition());
 				popup->WindowOpened.AttachMethod(this, &FileTypeFilter::popup_Opened);
+			}
+
+			~FileTypeFilter()
+			{
+				delete popup;
 			}
 
 			GuiMenu* GetPopup()
