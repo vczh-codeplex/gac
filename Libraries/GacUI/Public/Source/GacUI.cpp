@@ -3297,12 +3297,12 @@ DataGridItemProvider
 
 				Ptr<GuiImageData> DataGridItemProvider::GetSmallImage(vint itemIndex)
 				{
-					return dataProvider->GetRowImage(itemIndex);
+					return dataProvider->GetRowSmallImage(itemIndex);
 				}
 
 				Ptr<GuiImageData> DataGridItemProvider::GetLargeImage(vint itemIndex)
 				{
-					return 0;
+					return dataProvider->GetRowLargeImage(itemIndex);
 				}
 
 				WString DataGridItemProvider::GetText(vint itemIndex)
@@ -3919,7 +3919,7 @@ ListViewMainColumnDataVisualizer
 
 				void ListViewMainColumnDataVisualizer::BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)
 				{
-					Ptr<GuiImageData> imageData=dataProvider->GetRowImage(row);
+					Ptr<GuiImageData> imageData=dataProvider->GetRowSmallImage(row);
 					if(imageData)
 					{
 						image->SetImage(imageData->GetImage(), imageData->GetFrameIndex());
@@ -4326,12 +4326,9 @@ StructuredDataProvider
 
 				void StructuredDataProvider::OnDataProviderColumnChanged()
 				{
-					RebuildFilter();
-					ReorderRows();
-					if(commandExecutor)
-					{
-						commandExecutor->OnDataProviderColumnChanged();
-					}
+					vint oldRowCount=GetRowCount();
+					RebuildFilter(true);
+					ReorderRows(true);
 				}
 
 				void StructuredDataProvider::OnDataProviderItemModified(vint start, vint count, vint newCount)
@@ -4341,27 +4338,26 @@ StructuredDataProvider
 					{
 						if(count!=newCount)
 						{
-							ReorderRows();
+							ReorderRows(false);
 						}
 						commandExecutor->OnDataProviderItemModified(start, count, newCount);
 					}
 					else
 					{
-						ReorderRows();
-						commandExecutor->OnDataProviderItemModified(0, GetRowCount(), GetRowCount());
+						ReorderRows(true);
 					}
 				}
 
 				void StructuredDataProvider::OnFilterChanged()
 				{
-					ReorderRows();
+					ReorderRows(true);
 					if(commandExecutor)
 					{
 						commandExecutor->OnDataProviderColumnChanged();
 					}
 				}
 
-				void StructuredDataProvider::RebuildFilter()
+				void StructuredDataProvider::RebuildFilter(bool invokeCallback)
 				{
 					if(currentFilter)
 					{
@@ -4394,10 +4390,16 @@ StructuredDataProvider
 					{
 						currentFilter->SetCommandExecutor(this);
 					}
+
+					if(invokeCallback && commandExecutor)
+					{
+						commandExecutor->OnDataProviderColumnChanged();
+					}
 				}
 
-				void StructuredDataProvider::ReorderRows()
+				void StructuredDataProvider::ReorderRows(bool invokeCallback)
 				{
+					vint oldRowCount=reorderedRows.Count();
 					reorderedRows.Clear();
 					vint rowCount=structuredDataProvider->GetRowCount();
 
@@ -4424,6 +4426,11 @@ StructuredDataProvider
 						IStructuredDataSorter* sorter=currentSorter.Obj();
 						SortLambda(&reorderedRows[0], reorderedRows.Count(), [sorter](vint a, vint b){return sorter->Compare(a, b);});
 					}
+
+					if(invokeCallback && commandExecutor)
+					{
+						commandExecutor->OnDataProviderItemModified(0, oldRowCount, GetRowCount());
+					}
 				}
 
 				vint StructuredDataProvider::TranslateRowNumber(vint row)
@@ -4439,13 +4446,8 @@ StructuredDataProvider
 				void StructuredDataProvider::SetAdditionalFilter(Ptr<IStructuredDataFilter> value)
 				{
 					additionalFilter=value;
-					RebuildFilter();
-					ReorderRows();
-					if(commandExecutor)
-					{
-						commandExecutor->OnDataProviderColumnChanged();
-						commandExecutor->OnDataProviderItemModified(0, GetRowCount(), GetRowCount());
-					}
+					RebuildFilter(true);
+					ReorderRows(true);
 				}
 
 				StructuredDataProvider::StructuredDataProvider(Ptr<IStructuredDataProvider> provider)
@@ -4453,8 +4455,8 @@ StructuredDataProvider
 					,commandExecutor(0)
 				{
 					structuredDataProvider->SetCommandExecutor(this);
-					RebuildFilter();
-					ReorderRows();
+					RebuildFilter(false);
+					ReorderRows(false);
 				}
 
 				StructuredDataProvider::~StructuredDataProvider()
@@ -4528,11 +4530,10 @@ StructuredDataProvider
 							GuiListViewColumnHeader::Descending
 							);
 					}
-					ReorderRows();
+					ReorderRows(true);
 					if(commandExecutor)
 					{
 						commandExecutor->OnDataProviderColumnChanged();
-						commandExecutor->OnDataProviderItemModified(0, GetRowCount(), GetRowCount());
 					}
 				}
 
@@ -4567,9 +4568,14 @@ StructuredDataProvider
 					return reorderedRows.Count();
 				}
 
-				Ptr<GuiImageData> StructuredDataProvider::GetRowImage(vint row)
+				Ptr<GuiImageData> StructuredDataProvider::GetRowLargeImage(vint row)
 				{
-					return structuredDataProvider->GetRowImage(TranslateRowNumber(row));
+					return structuredDataProvider->GetRowLargeImage(TranslateRowNumber(row));
+				}
+
+				Ptr<GuiImageData> StructuredDataProvider::GetRowSmallImage(vint row)
+				{
+					return structuredDataProvider->GetRowSmallImage(TranslateRowNumber(row));
 				}
 
 				WString StructuredDataProvider::GetCellText(vint row, vint column)
@@ -4781,7 +4787,12 @@ StructuredDataProviderBase
 					return columns[column].Obj();
 				}
 
-				Ptr<GuiImageData> StructuredDataProviderBase::GetRowImage(vint row)
+				Ptr<GuiImageData> StructuredDataProviderBase::GetRowLargeImage(vint row)
+				{
+					return 0;
+				}
+
+				Ptr<GuiImageData> StructuredDataProviderBase::GetRowSmallImage(vint row)
 				{
 					return 0;
 				}
@@ -8635,6 +8646,10 @@ TextItemStyleProvider
 					if(index!=-1)
 					{
 						textItemView->SetCheckedSilently(index, style->GetChecked());
+
+						GuiItemEventArgs arguments(style->GetBoundsComposition());
+						arguments.itemIndex=index;
+						listControl->ItemChecked.Execute(arguments);
 					}
 				}
 
@@ -8651,7 +8666,7 @@ TextItemStyleProvider
 
 				void TextItemStyleProvider::AttachListControl(GuiListControl* value)
 				{
-					listControl=value;;
+					listControl=dynamic_cast<GuiVirtualTextList*>(value);
 					textItemView=dynamic_cast<ITextItemView*>(value->GetItemProvider()->RequestView(ITextItemView::Identifier));
 				}
 
@@ -8759,6 +8774,7 @@ TextItemProvider
 				}
 
 				TextItemProvider::TextItemProvider()
+					:listControl(0)
 				{
 				}
 
@@ -8776,6 +8792,10 @@ TextItemProvider
 				{
 					SetCheckedSilently(itemIndex, value);
 					InvokeOnItemModified(itemIndex, 1, 1);
+
+					GuiItemEventArgs arguments;
+					arguments.itemIndex=itemIndex;
+					listControl->ItemChecked.Execute(arguments);
 				}
 
 				IDescriptable* TextItemProvider::RequestView(const WString& identifier)
@@ -8806,6 +8826,8 @@ GuiTextList
 			GuiVirtualTextList::GuiVirtualTextList(IStyleProvider* _styleProvider, list::TextItemStyleProvider::ITextItemStyleProvider* _itemStyleProvider, GuiListControl::IItemProvider* _itemProvider)
 				:GuiSelectableListControl(_styleProvider, _itemProvider)
 			{
+				ItemChecked.SetAssociatedComposition(boundsComposition);
+
 				ChangeItemStyle(_itemStyleProvider);
 				SetArranger(new list::FixedHeightItemArranger);
 			}
@@ -8846,6 +8868,7 @@ GuiTextList
 				:GuiVirtualTextList(_styleProvider, _itemStyleProvider, new list::TextItemProvider)
 			{
 				items=dynamic_cast<list::TextItemProvider*>(itemProvider.Obj());
+				items->listControl=this;
 			}
 
 			GuiTextList::~GuiTextList()
@@ -14790,12 +14813,12 @@ Win7CheckedButtonElements
 								button.bulletCheckElement=GuiSolidLabelElement::Create();
 								{
 									FontProperties font;
-									font.fontFamily=L"Wingdings 2";
+									font.fontFamily=L"Webdings";
 									font.size=16;
 									font.bold=true;
 									button.bulletCheckElement->SetFont(font);
 								}
-								button.bulletCheckElement->SetText(L"P");
+								button.bulletCheckElement->SetText(L"a");
 								button.bulletCheckElement->SetAlignments(Alignment::Center, Alignment::Center);
 
 								GuiBoundsComposition* composition=new GuiBoundsComposition;
@@ -18525,12 +18548,12 @@ Win8CheckedButtonElements
 								button.bulletCheckElement=GuiSolidLabelElement::Create();
 								{
 									FontProperties font;
-									font.fontFamily=L"Wingdings 2";
+									font.fontFamily=L"Webdings";
 									font.size=16;
 									font.bold=true;
 									button.bulletCheckElement->SetFont(font);
 								}
-								button.bulletCheckElement->SetText(L"P");
+								button.bulletCheckElement->SetText(L"a");
 								button.bulletCheckElement->SetAlignments(Alignment::Center, Alignment::Center);
 
 								GuiBoundsComposition* composition=new GuiBoundsComposition;
@@ -30513,6 +30536,8 @@ Type Declaration
 				CLASS_MEMBER_BASE(GuiSelectableListControl)
 				CLASS_MEMBER_CONSTRUCTOR(GuiVirtualTextList*(GuiSelectableListControl::IStyleProvider* _ TextItemStyleProvider::ITextItemStyleProvider* _ GuiListControl::IItemProvider*), {L"styleProvider" _ L"itemStyleProvider" _ L"itemProvider"})
 
+				CLASS_MEMBER_GUIEVENT(ItemChecked)
+
 				CLASS_MEMBER_METHOD(ChangeItemStyle, {L"itemStyleProvider"})
 			END_CLASS_MEMBER(GuiVirtualTextList)
 
@@ -31183,6 +31208,250 @@ Type Declaration
 
 				CLASS_MEMBER_METHOD(InstallBackground, {L"background"})
 			END_CLASS_MEMBER(GuiSinglelineTextBox::IStyleProvider)
+
+			BEGIN_CLASS_MEMBER(IDataVisualizerFactory)
+				CLASS_MEMBER_BASE(IDescriptable)
+				INTERFACE_EXTERNALCTOR(list, IDataVisualizerFactory)
+
+				CLASS_MEMBER_METHOD(CreateVisualizer, {L"font" _ L"styleProvider"})
+			END_CLASS_MEMBER(IDataVisualizerFactory)
+
+			BEGIN_CLASS_MEMBER(IDataVisualizer)
+				CLASS_MEMBER_BASE(IDescriptable)
+				INTERFACE_EXTERNALCTOR(list, IDataVisualizer)
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Factory)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(BoundsComposition)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(DecoratedDataVisualizer)
+
+				CLASS_MEMBER_METHOD(BeforeVisualizerCell, {L"dataProvider" _ L"row" _ L"column"})
+			END_CLASS_MEMBER(IDataVisualizer)
+
+			BEGIN_CLASS_MEMBER(IDataEditorCallback)
+				CLASS_MEMBER_BASE(IDescriptable)
+
+				CLASS_MEMBER_METHOD(RequestSaveData, NO_PARAMETER);
+			END_CLASS_MEMBER(IDataEditorCallback)
+
+			BEGIN_CLASS_MEMBER(IDataEditorFactory)
+				CLASS_MEMBER_BASE(IDescriptable)
+				INTERFACE_EXTERNALCTOR(list, IDataEditorFactory)
+
+				CLASS_MEMBER_METHOD(CreateEditor, {L"callback"})
+			END_CLASS_MEMBER(IDataEditorFactory)
+
+			BEGIN_CLASS_MEMBER(IDataEditor)
+				CLASS_MEMBER_BASE(IDescriptable)
+				INTERFACE_EXTERNALCTOR(list, IDataEditor)
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Factory)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(BoundsComposition)
+
+				CLASS_MEMBER_METHOD(BeforeEditCell, {L"dataProvider" _ L"row" _ L"column"})
+			END_CLASS_MEMBER(IDataEditor)
+
+			BEGIN_CLASS_MEMBER(IDataProviderCommandExecutor)
+				CLASS_MEMBER_BASE(IDescriptable)
+
+				CLASS_MEMBER_METHOD(OnDataProviderColumnChanged, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(OnDataProviderItemModified, {L"start" _ L"count" _ L"newCount"})
+			END_CLASS_MEMBER(IDataProviderCommandExecutor)
+
+			BEGIN_CLASS_MEMBER(IDataProvider)
+				CLASS_MEMBER_BASE(IDescriptable)
+				INTERFACE_EXTERNALCTOR(list, IDataProvider)
+				INTERFACE_IDENTIFIER(IDataProvider)
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ColumnCount)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(SortedColumn)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(RowCount)
+
+				CLASS_MEMBER_METHOD(SetCommandExecutor, {L"value"})
+				CLASS_MEMBER_METHOD(GetColumnText, {L"column"})
+				CLASS_MEMBER_METHOD(GetColumnSize, {L"column"})
+				CLASS_MEMBER_METHOD(SetColumnSize, {L"column" _ L"value"})
+				CLASS_MEMBER_METHOD(GetColumnPopup, {L"column"})
+				CLASS_MEMBER_METHOD(IsColumnSortable, {L"column"})
+				CLASS_MEMBER_METHOD(SortByColumn, {L"column" _ L"ascending"})
+				CLASS_MEMBER_METHOD(IsSortOrderAscending, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(GetRowLargeImage, {L"row" _ L"column"})
+				CLASS_MEMBER_METHOD(GetRowSmallImage, {L"row" _ L"column"})
+				CLASS_MEMBER_METHOD(GetCellText, {L"row" _ L"column"})
+				CLASS_MEMBER_METHOD(GetCellDataVisualizerFactory, {L"row" _ L"column"})
+				CLASS_MEMBER_METHOD(VisualizeCell, {L"row" _ L"column" _ L"dataVisualizer"})
+				CLASS_MEMBER_METHOD(GetCellDataEditorFactory, {L"row" _ L"column"})
+				CLASS_MEMBER_METHOD(BeforeEditCell, {L"row" _ L"column" _ L"dataEditor"})
+				CLASS_MEMBER_METHOD(SaveCellData, {L"row" _ L"column" _ L"dataEditor"})
+			END_CLASS_MEMBER(IDataProvider)
+
+			BEGIN_CLASS_MEMBER(IStructuredDataFilterCommandExecutor)
+				CLASS_MEMBER_BASE(IDescriptable)
+
+				CLASS_MEMBER_METHOD(OnFilterChanged, NO_PARAMETER)
+			END_CLASS_MEMBER(IStructuredDataFilterCommandExecutor)
+
+			BEGIN_CLASS_MEMBER(IStructuredDataFilter)
+				CLASS_MEMBER_BASE(IDescriptable)
+				INTERFACE_EXTERNALCTOR(list, IStructuredDataFilter)
+
+				CLASS_MEMBER_METHOD(SetCommandExecutor, {L"value"})
+				CLASS_MEMBER_METHOD(Filter, {L"row"})
+			END_CLASS_MEMBER(IStructuredDataFilter)
+
+			BEGIN_CLASS_MEMBER(IStructuredDataSorter)
+				CLASS_MEMBER_BASE(IDescriptable)
+				INTERFACE_EXTERNALCTOR(list, IStructuredDataSorter)
+
+				CLASS_MEMBER_METHOD(Compare, {L"row1" _ L"row2"})
+			END_CLASS_MEMBER(IStructuredDataSorter)
+
+			BEGIN_CLASS_MEMBER(IStructuredColumnProvider)
+				CLASS_MEMBER_BASE(IDescriptable)
+				INTERFACE_EXTERNALCTOR(list, IStructuredColumnProvider)
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Text)
+				CLASS_MEMBER_PROPERTY_FAST(Size)
+				CLASS_MEMBER_PROPERTY_FAST(SortingState)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Popup)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(InherentFilter)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(InherentSorter)
+				CLASS_MEMBER_METHOD(GetCellText, {L"row"})
+				CLASS_MEMBER_METHOD(GetCellDataVisualizerFactory, {L"row"})
+				CLASS_MEMBER_METHOD(VisualizeCell, {L"row" _ L"dataVisualizer"})
+				CLASS_MEMBER_METHOD(GetCellDataEditorFactory, {L"row"})
+				CLASS_MEMBER_METHOD(BeforeEditCell, {L"row" _ L"dataEditor"})
+				CLASS_MEMBER_METHOD(SaveCellData, {L"row" _ L"dataEditor"})
+			END_CLASS_MEMBER(IStructuredColumnProvider)
+
+			BEGIN_CLASS_MEMBER(IStructuredDataProvider)
+				CLASS_MEMBER_BASE(IDescriptable)
+				INTERFACE_EXTERNALCTOR(list, IStructuredDataProvider)
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ColumnCount)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(RowCount)
+
+				CLASS_MEMBER_METHOD(SetCommandExecutor, {L"value"})
+				CLASS_MEMBER_METHOD(GetColumn, {L"column"})
+				CLASS_MEMBER_METHOD(GetRowLargeImage, {L"row"})
+				CLASS_MEMBER_METHOD(GetRowSmallImage, {L"row"})
+			END_CLASS_MEMBER(IStructuredDataProvider)
+
+			BEGIN_CLASS_MEMBER(DataGridContentProvider)
+				CLASS_MEMBER_BASE(ListViewItemStyleProvider::IListViewItemContentProvider)
+				CLASS_MEMBER_CONSTRUCTOR(DataGridContentProvider*(), NO_PARAMETER)
+			END_CLASS_MEMBER(DataGridContentProvider)
+
+			BEGIN_CLASS_MEMBER(GuiVirtualDataGrid)
+				CLASS_MEMBER_BASE(GuiVirtualListView)
+				CLASS_MEMBER_CONSTRUCTOR(GuiVirtualDataGrid*(GuiVirtualListView::IStyleProvider* _ list::IDataProvider*), {L"styleProvider" _ L"dataProvider"})
+				CLASS_MEMBER_CONSTRUCTOR(GuiVirtualDataGrid*(GuiVirtualListView::IStyleProvider* _ list::IStructuredDataProvider*), {L"styleProvider" _ L"dataProvider"})
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(DataProvider)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(StructuredDataProvider)
+			END_CLASS_MEMBER(GuiVirtualDataGrid)
+
+			BEGIN_CLASS_MEMBER(StructuredDataFilterBase)
+				CLASS_MEMBER_BASE(IStructuredDataFilter)
+			END_CLASS_MEMBER(StructuredDataFilterBase)
+
+			BEGIN_CLASS_MEMBER(StructuredDataMultipleFilter)
+				CLASS_MEMBER_BASE(StructuredDataFilterBase)
+
+				CLASS_MEMBER_METHOD(AddSubFilter, {L"value"})
+				CLASS_MEMBER_METHOD(RemoveSubFilter, {L"value"})
+			END_CLASS_MEMBER(StructuredDataMultipleFilter)
+
+			BEGIN_CLASS_MEMBER(StructuredDataAndFilter)
+				CLASS_MEMBER_BASE(StructuredDataMultipleFilter)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<StructuredDataAndFilter>(), NO_PARAMETER)
+			END_CLASS_MEMBER(StructuredDataAndFilter)
+
+			BEGIN_CLASS_MEMBER(StructuredDataOrFilter)
+				CLASS_MEMBER_BASE(StructuredDataMultipleFilter)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<StructuredDataOrFilter>(), NO_PARAMETER)
+			END_CLASS_MEMBER(StructuredDataOrFilter)
+
+			BEGIN_CLASS_MEMBER(StructuredDataNotFilter)
+				CLASS_MEMBER_BASE(StructuredDataFilterBase)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<StructuredDataNotFilter>(), NO_PARAMETER)
+
+				CLASS_MEMBER_METHOD(SetSubFilter, {L"value"})
+			END_CLASS_MEMBER(StructuredDataNotFilter)
+
+			BEGIN_CLASS_MEMBER(StructuredDataMultipleSorter)
+				CLASS_MEMBER_BASE(IStructuredDataSorter)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<StructuredDataMultipleSorter>(), NO_PARAMETER)
+
+				CLASS_MEMBER_METHOD(SetLeftSorter, {L"value"})
+				CLASS_MEMBER_METHOD(SetRightSorter, {L"value"})
+			END_CLASS_MEMBER(StructuredDataMultipleSorter)
+
+			BEGIN_CLASS_MEMBER(StructuredDataReverseSorter)
+				CLASS_MEMBER_BASE(IStructuredDataSorter)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<StructuredDataReverseSorter>(), NO_PARAMETER)
+				
+				CLASS_MEMBER_METHOD(SetSubSorter, {L"value"})
+			END_CLASS_MEMBER(StructuredDataReverseSorter)
+
+			BEGIN_CLASS_MEMBER(StructuredDataProvider)
+				CLASS_MEMBER_BASE(IDataProvider)
+
+				CLASS_MEMBER_PROPERTY_FAST(AdditionalFilter)
+			END_CLASS_MEMBER(StructuredDataProvider)
+
+			BEGIN_CLASS_MEMBER(ListViewMainColumnDataVisualizer)
+				CLASS_MEMBER_BASE(IDataVisualizer)
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(TextElement)
+			END_CLASS_MEMBER(ListViewMainColumnDataVisualizer)
+
+			BEGIN_CLASS_MEMBER(ListViewMainColumnDataVisualizer::Factory)
+				CLASS_MEMBER_BASE(IDataVisualizerFactory)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<ListViewMainColumnDataVisualizer::Factory>(), NO_PARAMETER)
+			END_CLASS_MEMBER(ListViewMainColumnDataVisualizer::Factory)
+
+			BEGIN_CLASS_MEMBER(ListViewSubColumnDataVisualizer)
+				CLASS_MEMBER_BASE(IDataVisualizer)
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(TextElement)
+			END_CLASS_MEMBER(ListViewSubColumnDataVisualizer)
+
+			BEGIN_CLASS_MEMBER(ListViewSubColumnDataVisualizer::Factory)
+				CLASS_MEMBER_BASE(IDataVisualizerFactory)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<ListViewSubColumnDataVisualizer::Factory>(), NO_PARAMETER)
+			END_CLASS_MEMBER(ListViewSubColumnDataVisualizer::Factory)
+
+			BEGIN_CLASS_MEMBER(CellBorderDataVisualizer)
+				CLASS_MEMBER_BASE(IDataVisualizer)
+			END_CLASS_MEMBER(CellBorderDataVisualizer)
+
+			BEGIN_CLASS_MEMBER(CellBorderDataVisualizer::Factory)
+				CLASS_MEMBER_BASE(IDataVisualizerFactory)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<CellBorderDataVisualizer::Factory>(Ptr<IDataVisualizerFactory>), {L"decoratedFactory"})
+			END_CLASS_MEMBER(CellBorderDataVisualizer::Factory)
+
+			BEGIN_CLASS_MEMBER(DataTextBoxEditor)
+				CLASS_MEMBER_BASE(IDataEditor)
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(TextBox)
+			END_CLASS_MEMBER(DataTextBoxEditor)
+
+			BEGIN_CLASS_MEMBER(DataTextBoxEditor::Factory)
+				CLASS_MEMBER_BASE(IDataEditorFactory)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<DataTextBoxEditor::Factory>(), NO_PARAMETER)
+			END_CLASS_MEMBER(DataTextBoxEditor::Factory)
+
+			BEGIN_CLASS_MEMBER(DataTextComboBoxEditor)
+				CLASS_MEMBER_BASE(IDataEditor)
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ComboBoxControl)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(TextListControl)
+			END_CLASS_MEMBER(DataTextComboBoxEditor)
+
+			BEGIN_CLASS_MEMBER(DataTextComboBoxEditor::Factory)
+				CLASS_MEMBER_BASE(IDataEditorFactory)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<DataTextComboBoxEditor::Factory>(), NO_PARAMETER)
+			END_CLASS_MEMBER(DataTextComboBoxEditor::Factory)
 
 #undef INTERFACE_IDENTIFIER
 #undef CONTROL_CONSTRUCTOR_CONTROLLER

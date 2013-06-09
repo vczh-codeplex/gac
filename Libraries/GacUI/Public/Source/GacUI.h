@@ -6236,6 +6236,7 @@ namespace vl
 		namespace controls
 		{
 			class GuiVirtualTextList;
+			class GuiTextList;
 
 			namespace list
 			{
@@ -6288,7 +6289,7 @@ TextList Style Provider
 				protected:
 					Ptr<ITextItemStyleProvider>					textItemStyleProvider;
 					ITextItemView*								textItemView;
-					GuiListControl*								listControl;
+					GuiVirtualTextList*							listControl;
 
 					void										OnStyleCheckedChanged(TextItemStyleController* style);
 				public:
@@ -6328,7 +6329,10 @@ TextList Data Source
 
 				class TextItemProvider : public ListProvider<Ptr<TextItem>>, protected TextItemStyleProvider::ITextItemView, public Description<TextItemProvider>
 				{
+					friend class GuiTextList;
 				protected:
+					GuiTextList*								listControl;
+
 					bool										ContainsPrimaryText(vint itemIndex)override;
 					WString										GetPrimaryTextViewText(vint itemIndex)override;
 					WString										GetText(vint itemIndex)override;
@@ -6355,6 +6359,8 @@ TextList Control
 			public:
 				GuiVirtualTextList(IStyleProvider* _styleProvider, list::TextItemStyleProvider::ITextItemStyleProvider* _itemStyleProvider, GuiListControl::IItemProvider* _itemProvider);
 				~GuiVirtualTextList();
+
+				compositions::GuiItemNotifyEvent				ItemChecked;
 				
 				Ptr<GuiListControl::IItemStyleProvider>			SetStyleProvider(Ptr<GuiListControl::IItemStyleProvider> value)override;
 				Ptr<GuiListControl::IItemStyleProvider>			ChangeItemStyle(list::TextItemStyleProvider::ITextItemStyleProvider* itemStyleProvider);
@@ -7887,7 +7893,8 @@ Datagrid Interfaces
 					virtual bool										IsSortOrderAscending()=0;
 					
 					virtual vint										GetRowCount()=0;
-					virtual Ptr<GuiImageData>							GetRowImage(vint row)=0;
+					virtual Ptr<GuiImageData>							GetRowLargeImage(vint row)=0;
+					virtual Ptr<GuiImageData>							GetRowSmallImage(vint row)=0;
 					virtual WString										GetCellText(vint row, vint column)=0;
 					virtual IDataVisualizerFactory*						GetCellDataVisualizerFactory(vint row, vint column)=0;
 					virtual void										VisualizeCell(vint row, vint column, IDataVisualizer* dataVisualizer)=0;
@@ -7946,7 +7953,8 @@ DataSource Extensions
 					virtual vint										GetColumnCount()=0;
 					virtual vint										GetRowCount()=0;
 					virtual IStructuredColumnProvider*					GetColumn(vint column)=0;
-					virtual Ptr<GuiImageData>							GetRowImage(vint row)=0;
+					virtual Ptr<GuiImageData>							GetRowLargeImage(vint row)=0;
+					virtual Ptr<GuiImageData>							GetRowSmallImage(vint row)=0;
 				};
 			}
 		}
@@ -8086,8 +8094,8 @@ Structured DataSource Extensions
 					void												OnDataProviderColumnChanged()override;
 					void												OnDataProviderItemModified(vint start, vint count, vint newCount)override;
 					void												OnFilterChanged()override;
-					void												RebuildFilter();
-					void												ReorderRows();
+					void												RebuildFilter(bool invokeCallback);
+					void												ReorderRows(bool invokeCallback);
 					vint												TranslateRowNumber(vint row);
 				public:
 					StructuredDataProvider(Ptr<IStructuredDataProvider> provider);
@@ -8108,7 +8116,8 @@ Structured DataSource Extensions
 					bool												IsSortOrderAscending()override;
 					
 					vint												GetRowCount()override;
-					Ptr<GuiImageData>									GetRowImage(vint row)override;
+					Ptr<GuiImageData>									GetRowLargeImage(vint row)override;
+					Ptr<GuiImageData>									GetRowSmallImage(vint row)override;
 					WString												GetCellText(vint row, vint column)override;
 					IDataVisualizerFactory*								GetCellDataVisualizerFactory(vint row, vint column)override;
 					void												VisualizeCell(vint row, vint column, IDataVisualizer* dataVisualizer)override;
@@ -8173,7 +8182,8 @@ Structured DataSource Extensions
 					void												SetCommandExecutor(IDataProviderCommandExecutor* value)override;
 					vint												GetColumnCount()override;
 					IStructuredColumnProvider*							GetColumn(vint column)override;
-					Ptr<GuiImageData>									GetRowImage(vint row)override;
+					Ptr<GuiImageData>									GetRowLargeImage(vint row)override;
+					Ptr<GuiImageData>									GetRowSmallImage(vint row)override;
 				};
 
 /***********************************************************************
@@ -8184,17 +8194,44 @@ Strong Typed DataSource Extensions
 				class StrongTypedDataProvider;
 
 				template<typename TRow, typename TColumn>
-				class StrongTypedColumnProvider : public StructuredColummProviderBase
+				class StrongTypedColumnProviderBase : public StructuredColummProviderBase
 				{
 				public:
-					class Sorter : public Object, public virtual IStructuredDataSorter
+					class FilterBase : public StructuredDataFilterBase
 					{
 					protected:
-						StrongTypedColumnProvider<TRow, TColumn>*			ownerColumn;
+						StrongTypedColumnProviderBase<TRow, TColumn>*		ownerColumn;
+						StrongTypedDataProvider<TRow>*						dataProvider;
 
+						virtual bool										FilterData(const TRow& rowData, const TColumn& cellData)=0;
 					public:
-						Sorter(StrongTypedColumnProvider<TRow, TColumn>* _ownerColumn)
+						FilterBase(StrongTypedColumnProviderBase<TRow, TColumn>* _ownerColumn)
 							:ownerColumn(_ownerColumn)
+							,dataProvider(_ownerColumn->dataProvider)
+						{
+						}
+
+						bool Filter(vint row)override
+						{
+							TRow rowData;
+							TColumn cellData;
+							dataProvider->GetRowData(row, rowData);
+							ownerColumn->GetCellData(rowData, cellData);
+							return FilterData(rowData, cellData);
+						}
+					};
+
+					class SorterBase : public Object, public virtual IStructuredDataSorter
+					{
+					protected:
+						StrongTypedColumnProviderBase<TRow, TColumn>*		ownerColumn;
+						StrongTypedDataProvider<TRow>*						dataProvider;
+
+						virtual vint										CompareData(const TRow& rowData1, const TColumn& cellData1, const TRow& rowData2, const TColumn& cellData2)=0;
+					public:
+						SorterBase(StrongTypedColumnProviderBase<TRow, TColumn>* _ownerColumn)
+							:ownerColumn(_ownerColumn)
+							,dataProvider(_ownerColumn->dataProvider)
 						{
 						}
 
@@ -8202,26 +8239,42 @@ Strong Typed DataSource Extensions
 						{
 							TRow rowData1, rowData2;
 							TColumn cellData1, cellData2;
-							ownerColumn->dataProvider->GetRowData(row1, rowData1);
-							ownerColumn->dataProvider->GetRowData(row2, rowData2);
+							dataProvider->GetRowData(row1, rowData1);
+							dataProvider->GetRowData(row2, rowData2);
 							ownerColumn->GetCellData(rowData1, cellData1);
 							ownerColumn->GetCellData(rowData2, cellData2);
+							return CompareData(rowData1, cellData1, rowData2, cellData2);
+						}
+					};
 
+					class Sorter : public SorterBase
+					{
+					protected:
+
+						vint CompareData(const TRow& rowData1, const TColumn& cellData1, const TRow& rowData2, const TColumn& cellData2)override
+						{
 							if(cellData1<cellData2) return -1;
 							if(cellData1>cellData2) return 1;
 							return 0;
+						}
+					public:
+						Sorter(StrongTypedColumnProviderBase<TRow, TColumn>* _ownerColumn)
+							:SorterBase(_ownerColumn)
+						{
 						}
 					};
 
 				protected:
 					StrongTypedDataProvider<TRow>*						dataProvider;
 
-					virtual void										GetCellData(const TRow& rowData, TColumn& cellData)=0;
 				public:
-					StrongTypedColumnProvider(StrongTypedDataProvider<TRow>* _dataProvider)
+					StrongTypedColumnProviderBase(StrongTypedDataProvider<TRow>* _dataProvider)
 						:dataProvider(_dataProvider)
 					{
 					}
+
+					virtual void										GetCellData(const TRow& rowData, TColumn& cellData)=0;
+					virtual WString										GetCellDataText(const TColumn& cellData)=0;
 
 					WString GetCellText(vint row)override
 					{
@@ -8229,8 +8282,23 @@ Strong Typed DataSource Extensions
 						TColumn cellData;
 						dataProvider->GetRowData(row, rowData);
 						GetCellData(rowData, cellData);
-						return description::BoxValue<TColumn>(cellData).GetText();
+						return GetCellDataText(cellData);
 					}
+				};
+
+				template<typename TRow, typename TColumn>
+				class StrongTypedColumnProvider : public StrongTypedColumnProviderBase<TRow, TColumn>
+				{
+				public:
+					StrongTypedColumnProvider(StrongTypedDataProvider<TRow>* _dataProvider)
+						:StrongTypedColumnProviderBase(_dataProvider)
+					{
+					}
+
+					 WString GetCellDataText(const TColumn& cellData)override
+					 {
+						 return description::BoxValue<TColumn>(cellData).GetText();
+					 }
 				};
 
 				template<typename TRow, typename TColumn>
@@ -8239,15 +8307,16 @@ Strong Typed DataSource Extensions
 				protected:
 					TColumn TRow::*										field;
 
-					void GetCellData(const TRow& rowData, TColumn& cellData)override
-					{
-						cellData=rowData.*field;
-					}
 				public:
 					StrongTypedFieldColumnProvider(StrongTypedDataProvider<TRow>* _dataProvider, TColumn TRow::* _field)
 						:StrongTypedColumnProvider(_dataProvider)
 						,field(_field)
 					{
+					}
+
+					void GetCellData(const TRow& rowData, TColumn& cellData)override
+					{
+						cellData=rowData.*field;
 					}
 				};
 
@@ -9829,6 +9898,38 @@ Type List
 			F(presentation::controls::GuiMultilineTextBox)\
 			F(presentation::controls::GuiSinglelineTextBox)\
 			F(presentation::controls::GuiSinglelineTextBox::IStyleProvider)\
+			F(presentation::controls::list::IDataVisualizerFactory)\
+			F(presentation::controls::list::IDataVisualizer)\
+			F(presentation::controls::list::IDataEditorCallback)\
+			F(presentation::controls::list::IDataEditorFactory)\
+			F(presentation::controls::list::IDataEditor)\
+			F(presentation::controls::list::IDataProviderCommandExecutor)\
+			F(presentation::controls::list::IDataProvider)\
+			F(presentation::controls::list::IStructuredDataFilterCommandExecutor)\
+			F(presentation::controls::list::IStructuredDataFilter)\
+			F(presentation::controls::list::IStructuredDataSorter)\
+			F(presentation::controls::list::IStructuredColumnProvider)\
+			F(presentation::controls::list::IStructuredDataProvider)\
+			F(presentation::controls::list::DataGridContentProvider)\
+			F(presentation::controls::GuiVirtualDataGrid)\
+			F(presentation::controls::list::StructuredDataFilterBase)\
+			F(presentation::controls::list::StructuredDataMultipleFilter)\
+			F(presentation::controls::list::StructuredDataAndFilter)\
+			F(presentation::controls::list::StructuredDataOrFilter)\
+			F(presentation::controls::list::StructuredDataNotFilter)\
+			F(presentation::controls::list::StructuredDataMultipleSorter)\
+			F(presentation::controls::list::StructuredDataReverseSorter)\
+			F(presentation::controls::list::StructuredDataProvider)\
+			F(presentation::controls::list::ListViewMainColumnDataVisualizer)\
+			F(presentation::controls::list::ListViewMainColumnDataVisualizer::Factory)\
+			F(presentation::controls::list::ListViewSubColumnDataVisualizer)\
+			F(presentation::controls::list::ListViewSubColumnDataVisualizer::Factory)\
+			F(presentation::controls::list::CellBorderDataVisualizer)\
+			F(presentation::controls::list::CellBorderDataVisualizer::Factory)\
+			F(presentation::controls::list::DataTextBoxEditor)\
+			F(presentation::controls::list::DataTextBoxEditor::Factory)\
+			F(presentation::controls::list::DataTextComboBoxEditor)\
+			F(presentation::controls::list::DataTextComboBoxEditor::Factory)\
 
 			GUIREFLECTIONCONTROLS_TYPELIST(DECL_TYPE_INFO)
 
@@ -11121,9 +11222,395 @@ Interface Proxy
 					{
 					}
 
+					static GuiSinglelineTextBox::IStyleProvider* Create(Ptr<IValueInterfaceProxy> proxy)
+					{
+						return new GuiSinglelineTextBox_IStyleProvider(proxy);
+					}
+
 					compositions::GuiGraphicsComposition* InstallBackground(compositions::GuiBoundsComposition* background)override
 					{
 						return INVOKEGET_INTERFACE_PROXY(InstallBackground, background);
+					}
+				};
+
+				class list_IDataVisualizerFactory : public ValueInterfaceRoot, public virtual list::IDataVisualizerFactory
+				{
+				public:
+					list_IDataVisualizerFactory(Ptr<IValueInterfaceProxy> _proxy)
+						:ValueInterfaceRoot(_proxy)
+					{
+					}
+
+					static Ptr<list::IDataVisualizerFactory> Create(Ptr<IValueInterfaceProxy> _proxy)
+					{
+						return new list_IDataVisualizerFactory(_proxy);
+					}
+
+					Ptr<list::IDataVisualizer> CreateVisualizer(const FontProperties& font, GuiListViewBase::IStyleProvider* styleProvider)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(CreateVisualizer, font, styleProvider);
+					}
+				};
+
+				class list_IDataVisualizer : public ValueInterfaceRoot, public virtual list::IDataVisualizer
+				{
+				public:
+					list_IDataVisualizer(Ptr<IValueInterfaceProxy> _proxy)
+						:ValueInterfaceRoot(_proxy)
+					{
+					}
+
+					static Ptr<list::IDataVisualizer> Create(Ptr<IValueInterfaceProxy> _proxy)
+					{
+						return new list_IDataVisualizer(_proxy);
+					}
+
+					list::IDataVisualizerFactory* GetFactory()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetFactory);
+					}
+
+					compositions::GuiBoundsComposition* GetBoundsComposition()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetBoundsComposition);
+					}
+
+					void BeforeVisualizerCell(list::IDataProvider* dataProvider, vint row, vint column)override
+					{
+						INVOKE_INTERFACE_PROXY(dataProvider, row, column);
+					}
+
+					list::IDataVisualizer* GetDecoratedDataVisualizer()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetDecoratedDataVisualizer);
+					}
+				};
+
+				class list_IDataEditorFactory : public ValueInterfaceRoot, public virtual list::IDataEditorFactory
+				{
+				public:
+					list_IDataEditorFactory(Ptr<IValueInterfaceProxy> _proxy)
+						:ValueInterfaceRoot(_proxy)
+					{
+					}
+
+					static Ptr<list::IDataEditorFactory> Create(Ptr<IValueInterfaceProxy> _proxy)
+					{
+						return new list_IDataEditorFactory(_proxy);
+					}
+
+					Ptr<list::IDataEditor> CreateEditor(list::IDataEditorCallback* callback)
+					{
+						return INVOKEGET_INTERFACE_PROXY(CreateEditor, callback);
+					}
+				};
+
+				class list_IDataEditor : public ValueInterfaceRoot, public virtual list::IDataEditor
+				{
+				public:
+					list_IDataEditor(Ptr<IValueInterfaceProxy> _proxy)
+						:ValueInterfaceRoot(_proxy)
+					{
+					}
+
+					static Ptr<list::IDataEditor> Create(Ptr<IValueInterfaceProxy> _proxy)
+					{
+						return new list_IDataEditor(_proxy);
+					}
+
+					list::IDataEditorFactory* GetFactory()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetFactory);
+					}
+
+					compositions::GuiBoundsComposition* GetBoundsComposition()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetBoundsComposition);
+					}
+
+					void BeforeEditCell(list::IDataProvider* dataProvider, vint row, vint column)override
+					{
+						INVOKE_INTERFACE_PROXY(BeforeEditCell, dataProvider, row, column);
+					}
+				};
+
+				class list_IDataProvider : public ValueInterfaceRoot, public virtual list::IDataProvider
+				{
+				public:
+					list_IDataProvider(Ptr<IValueInterfaceProxy> _proxy)
+						:ValueInterfaceRoot(_proxy)
+					{
+					}
+
+					static Ptr<list::IDataProvider> Create(Ptr<IValueInterfaceProxy> _proxy)
+					{
+						return new list_IDataProvider(_proxy);
+					}
+
+					void SetCommandExecutor(list::IDataProviderCommandExecutor* value)override
+					{
+						INVOKE_INTERFACE_PROXY(SetCommandExecutor, value);
+					}
+
+					vint GetColumnCount()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetColumnCount);
+					}
+
+					WString GetColumnText(vint column)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetColumnText, column);
+					}
+
+					vint GetColumnSize(vint column)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetColumnSize, column);
+					}
+
+					void SetColumnSize(vint column, vint value)override
+					{
+						INVOKE_INTERFACE_PROXY(SetColumnSize, column, value);
+					}
+
+					GuiMenu* GetColumnPopup(vint column)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetColumnPopup, column);
+					}
+
+					bool IsColumnSortable(vint column)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(IsColumnSortable, column);
+					}
+
+					void SortByColumn(vint column, bool ascending)override
+					{
+						INVOKE_INTERFACE_PROXY(SortByColumn, column, ascending);
+					}
+
+					vint GetSortedColumn()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetSortedColumn);
+					}
+
+					bool IsSortOrderAscending()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(IsSortOrderAscending);
+					}
+
+					vint GetRowCount()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetRowCount);
+					}
+
+					Ptr<GuiImageData> GetRowLargeImage(vint row)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetRowLargeImage, row);
+					}
+
+					Ptr<GuiImageData> GetRowSmallImage(vint row)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetRowSmallImage, row);
+					}
+
+					WString GetCellText(vint row, vint column)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetCellText, row, column);
+					}
+
+					list::IDataVisualizerFactory* GetCellDataVisualizerFactory(vint row, vint column)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetCellDataVisualizerFactory, row, column);
+					}
+
+					void VisualizeCell(vint row, vint column, list::IDataVisualizer* dataVisualizer)override
+					{
+						INVOKE_INTERFACE_PROXY(VisualizeCell, row, column, dataVisualizer);
+					}
+
+					list::IDataEditorFactory* GetCellDataEditorFactory(vint row, vint column)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetCellDataEditorFactory, row, column);
+					}
+
+					void BeforeEditCell(vint row, vint column, list::IDataEditor* dataEditor)override
+					{
+						INVOKE_INTERFACE_PROXY(BeforeEditCell, row, column, dataEditor);
+					}
+
+					void SaveCellData(vint row, vint column, list::IDataEditor* dataEditor)override
+					{
+						INVOKE_INTERFACE_PROXY(SaveCellData, row, column, dataEditor);
+					}
+				};
+
+				class list_IStructuredDataFilter : public ValueInterfaceRoot, public virtual list::IStructuredDataFilter
+				{
+				public:
+					list_IStructuredDataFilter(Ptr<IValueInterfaceProxy> _proxy)
+						:ValueInterfaceRoot(_proxy)
+					{
+					}
+
+					static Ptr<list::IStructuredDataFilter> Create(Ptr<IValueInterfaceProxy> _proxy)
+					{
+						return new list_IStructuredDataFilter(_proxy);
+					}
+
+					void SetCommandExecutor(list::IStructuredDataFilterCommandExecutor* value)override
+					{
+						INVOKE_INTERFACE_PROXY(SetCommandExecutor, value);
+					}
+
+					bool Filter(vint row)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(Filter, row);
+					}
+				};
+
+				class list_IStructuredDataSorter : public ValueInterfaceRoot, public virtual list::IStructuredDataSorter
+				{
+				public:
+					list_IStructuredDataSorter(Ptr<IValueInterfaceProxy> _proxy)
+						:ValueInterfaceRoot(_proxy)
+					{
+					}
+
+					static Ptr<list::IStructuredDataSorter> Create(Ptr<IValueInterfaceProxy> _proxy)
+					{
+						return new list_IStructuredDataSorter(_proxy);
+					}
+
+					vint Compare(vint row1, vint row2)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(Compare, row1, row2);
+					}
+				};
+
+				class list_IStructuredColumnProvider : public ValueInterfaceRoot, public virtual list::IStructuredColumnProvider
+				{
+				public:
+					list_IStructuredColumnProvider(Ptr<IValueInterfaceProxy> _proxy)
+						:ValueInterfaceRoot(_proxy)
+					{
+					}
+
+					static Ptr<list::IStructuredColumnProvider> Create(Ptr<IValueInterfaceProxy> _proxy)
+					{
+						return new list_IStructuredColumnProvider(_proxy);
+					}
+
+					WString GetText()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetText);
+					}
+
+					vint GetSize()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetSize);
+					}
+
+					void SetSize(vint value)override
+					{
+						INVOKE_INTERFACE_PROXY(SetSize, value);
+					}
+
+					GuiListViewColumnHeader::ColumnSortingState GetSortingState()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetSortingState);
+					}
+
+					void SetSortingState(GuiListViewColumnHeader::ColumnSortingState value)override
+					{
+						INVOKE_INTERFACE_PROXY(SetSortingState, value);
+					}
+
+					GuiMenu* GetPopup()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetPopup);
+					}
+
+					Ptr<list::IStructuredDataFilter> GetInherentFilter()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetInherentFilter);
+					}
+
+					Ptr<list::IStructuredDataSorter> GetInherentSorter()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetInherentSorter);
+					}
+
+					WString GetCellText(vint row)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetCellText, row);
+					}
+
+					list::IDataVisualizerFactory* GetCellDataVisualizerFactory(vint row)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetCellDataVisualizerFactory, row);
+					}
+
+					void VisualizeCell(vint row, list::IDataVisualizer* dataVisualizer)override
+					{
+						INVOKE_INTERFACE_PROXY(VisualizeCell, row, dataVisualizer);
+					}
+
+					list::IDataEditorFactory* GetCellDataEditorFactory(vint row)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetCellDataEditorFactory, row);
+					}
+
+					void BeforeEditCell(vint row, list::IDataEditor* dataEditor)override
+					{
+						INVOKE_INTERFACE_PROXY(BeforeEditCell, row, dataEditor);
+					}
+
+					void SaveCellData(vint row, list::IDataEditor* dataEditor)override
+					{
+						INVOKE_INTERFACE_PROXY(SaveCellData, row, dataEditor);
+					}
+				};
+
+				class list_IStructuredDataProvider : public ValueInterfaceRoot, public virtual list::IStructuredDataProvider
+				{
+				public:
+					list_IStructuredDataProvider(Ptr<IValueInterfaceProxy> _proxy)
+						:ValueInterfaceRoot(_proxy)
+					{
+					}
+
+					static Ptr<list::IStructuredDataProvider> Create(Ptr<IValueInterfaceProxy> _proxy)
+					{
+						return new list_IStructuredDataProvider(_proxy);
+					}
+
+					void SetCommandExecutor(list::IDataProviderCommandExecutor* value)
+					{
+						INVOKE_INTERFACE_PROXY(SetCommandExecutor, value);
+					}
+
+					vint GetColumnCount()
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetColumnCount);
+					}
+
+					vint GetRowCount()
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetRowCount);
+					}
+
+					list::IStructuredColumnProvider* GetColumn(vint column)
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetColumn, column);
+					}
+
+					Ptr<GuiImageData> GetRowLargeImage(vint row)
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetRowLargeImage, row);
+					}
+
+					Ptr<GuiImageData> GetRowSmallImage(vint row)
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetRowSmallImage, row);
 					}
 				};
 			}
