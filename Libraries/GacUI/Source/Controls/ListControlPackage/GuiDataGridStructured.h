@@ -159,8 +159,8 @@ Structured DataSource Extensions
 					void												OnDataProviderColumnChanged()override;
 					void												OnDataProviderItemModified(vint start, vint count, vint newCount)override;
 					void												OnFilterChanged()override;
-					void												RebuildFilter();
-					void												ReorderRows();
+					void												RebuildFilter(bool invokeCallback);
+					void												ReorderRows(bool invokeCallback);
 					vint												TranslateRowNumber(vint row);
 				public:
 					/// <summary>Create a data provider from a <see cref="IStructuredDataProvider"/>.</summary>
