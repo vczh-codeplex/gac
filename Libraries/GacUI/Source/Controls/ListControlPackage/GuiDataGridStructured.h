@@ -290,17 +290,44 @@ Strong Typed DataSource Extensions
 				class StrongTypedDataProvider;
 
 				template<typename TRow, typename TColumn>
-				class StrongTypedColumnProvider : public StructuredColummProviderBase
+				class StrongTypedColumnProviderBase : public StructuredColummProviderBase
 				{
 				public:
-					class Sorter : public Object, public virtual IStructuredDataSorter
+					class FilterBase : public StructuredDataFilterBase
 					{
 					protected:
-						StrongTypedColumnProvider<TRow, TColumn>*			ownerColumn;
+						StrongTypedColumnProviderBase<TRow, TColumn>*		ownerColumn;
+						StrongTypedDataProvider<TRow>*						dataProvider;
 
+						virtual bool										FilterData(const TRow& rowData, const TColumn& cellData)=0;
 					public:
-						Sorter(StrongTypedColumnProvider<TRow, TColumn>* _ownerColumn)
+						FilterBase(StrongTypedColumnProviderBase<TRow, TColumn>* _ownerColumn)
 							:ownerColumn(_ownerColumn)
+							,dataProvider(_ownerColumn->dataProvider)
+						{
+						}
+
+						bool Filter(vint row)override
+						{
+							TRow rowData;
+							TColumn cellData;
+							dataProvider->GetRowData(row, rowData);
+							ownerColumn->GetCellData(rowData, cellData);
+							return FilterData(rowData, cellData);
+						}
+					};
+
+					class SorterBase : public Object, public virtual IStructuredDataSorter
+					{
+					protected:
+						StrongTypedColumnProviderBase<TRow, TColumn>*		ownerColumn;
+						StrongTypedDataProvider<TRow>*						dataProvider;
+
+						virtual vint										CompareData(const TRow& rowData1, const TColumn& cellData1, const TRow& rowData2, const TColumn& cellData2)=0;
+					public:
+						SorterBase(StrongTypedColumnProviderBase<TRow, TColumn>* _ownerColumn)
+							:ownerColumn(_ownerColumn)
+							,dataProvider(_ownerColumn->dataProvider)
 						{
 						}
 
@@ -308,26 +335,42 @@ Strong Typed DataSource Extensions
 						{
 							TRow rowData1, rowData2;
 							TColumn cellData1, cellData2;
-							ownerColumn->dataProvider->GetRowData(row1, rowData1);
-							ownerColumn->dataProvider->GetRowData(row2, rowData2);
+							dataProvider->GetRowData(row1, rowData1);
+							dataProvider->GetRowData(row2, rowData2);
 							ownerColumn->GetCellData(rowData1, cellData1);
 							ownerColumn->GetCellData(rowData2, cellData2);
+							return CompareData(rowData1, cellData1, rowData2, cellData2);
+						}
+					};
 
+					class Sorter : public SorterBase
+					{
+					protected:
+
+						vint CompareData(const TRow& rowData1, const TColumn& cellData1, const TRow& rowData2, const TColumn& cellData2)override
+						{
 							if(cellData1<cellData2) return -1;
 							if(cellData1>cellData2) return 1;
 							return 0;
+						}
+					public:
+						Sorter(StrongTypedColumnProviderBase<TRow, TColumn>* _ownerColumn)
+							:SorterBase(_ownerColumn)
+						{
 						}
 					};
 
 				protected:
 					StrongTypedDataProvider<TRow>*						dataProvider;
 
-					virtual void										GetCellData(const TRow& rowData, TColumn& cellData)=0;
 				public:
-					StrongTypedColumnProvider(StrongTypedDataProvider<TRow>* _dataProvider)
+					StrongTypedColumnProviderBase(StrongTypedDataProvider<TRow>* _dataProvider)
 						:dataProvider(_dataProvider)
 					{
 					}
+
+					virtual void										GetCellData(const TRow& rowData, TColumn& cellData)=0;
+					virtual WString										GetCellDataText(const TColumn& cellData)=0;
 
 					WString GetCellText(vint row)override
 					{
@@ -335,8 +378,23 @@ Strong Typed DataSource Extensions
 						TColumn cellData;
 						dataProvider->GetRowData(row, rowData);
 						GetCellData(rowData, cellData);
-						return description::BoxValue<TColumn>(cellData).GetText();
+						return GetCellDataText(cellData);
 					}
+				};
+
+				template<typename TRow, typename TColumn>
+				class StrongTypedColumnProvider : public StrongTypedColumnProviderBase<TRow, TColumn>
+				{
+				public:
+					StrongTypedColumnProvider(StrongTypedDataProvider<TRow>* _dataProvider)
+						:StrongTypedColumnProviderBase(_dataProvider)
+					{
+					}
+
+					 WString GetCellDataText(const TColumn& cellData)override
+					 {
+						 return description::BoxValue<TColumn>(cellData).GetText();
+					 }
 				};
 
 				template<typename TRow, typename TColumn>
@@ -345,15 +403,16 @@ Strong Typed DataSource Extensions
 				protected:
 					TColumn TRow::*										field;
 
-					void GetCellData(const TRow& rowData, TColumn& cellData)override
-					{
-						cellData=rowData.*field;
-					}
 				public:
 					StrongTypedFieldColumnProvider(StrongTypedDataProvider<TRow>* _dataProvider, TColumn TRow::* _field)
 						:StrongTypedColumnProvider(_dataProvider)
 						,field(_field)
 					{
+					}
+
+					void GetCellData(const TRow& rowData, TColumn& cellData)override
+					{
+						cellData=rowData.*field;
 					}
 				};
 

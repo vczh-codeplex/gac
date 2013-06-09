@@ -37,16 +37,15 @@ TestWindow
 	
 	class FileNameColumnProvider : public list::StrongTypedColumnProvider<Ptr<FileProperties>, WString>
 	{
-	protected:
-
-		void GetCellData(const Ptr<FileProperties>& rowData, WString& cellData)override
-		{
-			cellData=INVLOC.ToUpper(rowData->GetDisplayName());
-		}
 	public:
 		FileNameColumnProvider(list::StrongTypedDataProvider<Ptr<FileProperties>>* _dataProvider)
 			:StrongTypedColumnProvider(_dataProvider)
 		{
+		}
+
+		void GetCellData(const Ptr<FileProperties>& rowData, WString& cellData)override
+		{
+			cellData=INVLOC.ToUpper(rowData->GetDisplayName());
 		}
 
 		WString GetCellText(vint row)override
@@ -57,24 +56,13 @@ TestWindow
 		}
 	};
 	
-	class FileTypeColumnProvider : public list::StrongTypedColumnProvider<Ptr<FileProperties>, WString>
+	class FileDateColumnProvider : public list::StrongTypedColumnProvider<Ptr<FileProperties>, unsigned __int64>
 	{
-	protected:
-
-		void GetCellData(const Ptr<FileProperties>& rowData, WString& cellData)override
-		{
-			cellData=rowData->GetTypeName();
-		}
 	public:
-		FileTypeColumnProvider(list::StrongTypedDataProvider<Ptr<FileProperties>>* _dataProvider)
+		FileDateColumnProvider(list::StrongTypedDataProvider<Ptr<FileProperties>>* _dataProvider)
 			:StrongTypedColumnProvider(_dataProvider)
 		{
 		}
-	};
-	
-	class FileDateColumnProvider : public list::StrongTypedColumnProvider<Ptr<FileProperties>, unsigned __int64>
-	{
-	protected:
 
 		void GetCellData(const Ptr<FileProperties>& rowData, unsigned __int64& cellData)override
 		{
@@ -83,11 +71,6 @@ TestWindow
 			li.HighPart=ft.dwHighDateTime;
 			li.LowPart=ft.dwLowDateTime;
 			cellData=li.QuadPart;
-		}
-	public:
-		FileDateColumnProvider(list::StrongTypedDataProvider<Ptr<FileProperties>>* _dataProvider)
-			:StrongTypedColumnProvider(_dataProvider)
-		{
 		}
 
 		WString GetCellText(vint row)override
@@ -100,7 +83,11 @@ TestWindow
 	
 	class FileSizeColumnProvider : public list::StrongTypedColumnProvider<Ptr<FileProperties>, signed __int64>
 	{
-	protected:
+	public:
+		FileSizeColumnProvider(list::StrongTypedDataProvider<Ptr<FileProperties>>* _dataProvider)
+			:StrongTypedColumnProvider(_dataProvider)
+		{
+		}
 
 		void GetCellData(const Ptr<FileProperties>& rowData, signed __int64& cellData)override
 		{
@@ -112,11 +99,6 @@ TestWindow
 			{
 				cellData=(signed __int64)rowData->GetSize().QuadPart;
 			}
-		}
-	public:
-		FileSizeColumnProvider(list::StrongTypedDataProvider<Ptr<FileProperties>>* _dataProvider)
-			:StrongTypedColumnProvider(_dataProvider)
-		{
 		}
 
 		WString GetCellText(vint row)override
@@ -131,6 +113,81 @@ TestWindow
 			{
 				return FileSizeToString(rowData->GetSize());
 			}
+		}
+	};
+	
+	class FileTypeColumnProvider : public list::StrongTypedColumnProvider<Ptr<FileProperties>, WString>
+	{
+	protected:
+		class FileTypeFilter : public FilterBase
+		{
+		protected:
+			GuiMenu*							popup;
+			GuiTextList*						textList;
+
+			bool FilterData(const Ptr<FileProperties>& rowData, const WString& cellData)
+			{
+				return true;
+			}
+
+			void popup_Opened(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+			{
+				if(textList->GetItems().Count()==0)
+				{
+					LazyList<WString> columns=Range(0, dataProvider->GetRowCount())
+						.Select([this](vint i)->WString
+						{
+							Ptr<FileProperties> rowData;
+							WString cellData;
+							dataProvider->GetRowData(i, rowData);
+							ownerColumn->GetCellData(rowData, cellData);
+							return cellData;
+						})
+						.Distinct()
+						.OrderBy([](const WString& a, const WString& b){return WString::Compare(a, b);});
+
+					FOREACH(WString, item, columns)
+					{
+						textList->GetItems().Add(new list::TextItem(item, true));
+					}
+				}
+			}
+		public:
+			FileTypeFilter(FileTypeColumnProvider* columnProvider)
+				:FilterBase(columnProvider)
+				,popup(0)
+			{
+				textList=g::NewCheckTextList();
+				textList->SetHorizontalAlwaysVisible(false);
+				textList->SetVerticalAlwaysVisible(false);
+				textList->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				textList->GetBoundsComposition()->SetPreferredMinSize(Size(160, 200));
+
+				popup=g::NewMenu(0);
+				popup->GetContainerComposition()->AddChild(textList->GetBoundsComposition());
+				popup->WindowOpened.AttachMethod(this, &FileTypeFilter::popup_Opened);
+			}
+
+			GuiMenu* GetPopup()
+			{
+				return popup;
+			}
+		};
+	protected:
+		Ptr<FileTypeFilter>						filter;
+
+	public:
+		FileTypeColumnProvider(list::StrongTypedDataProvider<Ptr<FileProperties>>* _dataProvider)
+			:StrongTypedColumnProvider(_dataProvider)
+		{
+			filter=new FileTypeFilter(this);
+			SetInherentFilter(filter);
+			SetPopup(filter->GetPopup());
+		}
+
+		void GetCellData(const Ptr<FileProperties>& rowData, WString& cellData)override
+		{
+			cellData=rowData->GetTypeName();
 		}
 	};
 
