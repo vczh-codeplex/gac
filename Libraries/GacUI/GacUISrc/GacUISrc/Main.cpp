@@ -134,6 +134,7 @@ TestWindow
 			{
 				if(textList->GetItems().Count()==0)
 				{
+					textList->GetItems().Add(new list::TextItem(L"(Select All)", true));
 					LazyList<WString> columns=Range(0, dataProvider->GetRowCount())
 						.Select([this](vint i)->WString
 						{
