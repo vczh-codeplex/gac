@@ -204,13 +204,9 @@ StructuredDataProvider
 
 				void StructuredDataProvider::OnDataProviderColumnChanged()
 				{
-					RebuildFilter();
-					ReorderRows();
-					if(commandExecutor)
-					{
-						commandExecutor->OnDataProviderColumnChanged();
-						commandExecutor->OnDataProviderItemModified(0, GetRowCount(), GetRowCount());
-					}
+					vint oldRowCount=GetRowCount();
+					RebuildFilter(true);
+					ReorderRows(true);
 				}
 
 				void StructuredDataProvider::OnDataProviderItemModified(vint start, vint count, vint newCount)
@@ -220,27 +216,26 @@ StructuredDataProvider
 					{
 						if(count!=newCount)
 						{
-							ReorderRows();
+							ReorderRows(false);
 						}
 						commandExecutor->OnDataProviderItemModified(start, count, newCount);
 					}
 					else
 					{
-						ReorderRows();
-						commandExecutor->OnDataProviderItemModified(0, GetRowCount(), GetRowCount());
+						ReorderRows(true);
 					}
 				}
 
 				void StructuredDataProvider::OnFilterChanged()
 				{
-					ReorderRows();
+					ReorderRows(true);
 					if(commandExecutor)
 					{
 						commandExecutor->OnDataProviderColumnChanged();
 					}
 				}
 
-				void StructuredDataProvider::RebuildFilter()
+				void StructuredDataProvider::RebuildFilter(bool invokeCallback)
 				{
 					if(currentFilter)
 					{
@@ -273,10 +268,16 @@ StructuredDataProvider
 					{
 						currentFilter->SetCommandExecutor(this);
 					}
+
+					if(invokeCallback && commandExecutor)
+					{
+						commandExecutor->OnDataProviderColumnChanged();
+					}
 				}
 
-				void StructuredDataProvider::ReorderRows()
+				void StructuredDataProvider::ReorderRows(bool invokeCallback)
 				{
+					vint oldRowCount=reorderedRows.Count();
 					reorderedRows.Clear();
 					vint rowCount=structuredDataProvider->GetRowCount();
 
@@ -303,6 +304,11 @@ StructuredDataProvider
 						IStructuredDataSorter* sorter=currentSorter.Obj();
 						SortLambda(&reorderedRows[0], reorderedRows.Count(), [sorter](vint a, vint b){return sorter->Compare(a, b);});
 					}
+
+					if(invokeCallback && commandExecutor)
+					{
+						commandExecutor->OnDataProviderItemModified(0, oldRowCount, GetRowCount());
+					}
 				}
 
 				vint StructuredDataProvider::TranslateRowNumber(vint row)
@@ -318,13 +324,8 @@ StructuredDataProvider
 				void StructuredDataProvider::SetAdditionalFilter(Ptr<IStructuredDataFilter> value)
 				{
 					additionalFilter=value;
-					RebuildFilter();
-					ReorderRows();
-					if(commandExecutor)
-					{
-						commandExecutor->OnDataProviderColumnChanged();
-						commandExecutor->OnDataProviderItemModified(0, GetRowCount(), GetRowCount());
-					}
+					RebuildFilter(true);
+					ReorderRows(true);
 				}
 
 				StructuredDataProvider::StructuredDataProvider(Ptr<IStructuredDataProvider> provider)
@@ -332,8 +333,8 @@ StructuredDataProvider
 					,commandExecutor(0)
 				{
 					structuredDataProvider->SetCommandExecutor(this);
-					RebuildFilter();
-					ReorderRows();
+					RebuildFilter(false);
+					ReorderRows(false);
 				}
 
 				StructuredDataProvider::~StructuredDataProvider()
@@ -407,11 +408,10 @@ StructuredDataProvider
 							GuiListViewColumnHeader::Descending
 							);
 					}
-					ReorderRows();
+					ReorderRows(true);
 					if(commandExecutor)
 					{
 						commandExecutor->OnDataProviderColumnChanged();
-						commandExecutor->OnDataProviderItemModified(0, GetRowCount(), GetRowCount());
 					}
 				}
 
