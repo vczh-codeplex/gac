@@ -716,12 +716,12 @@ Win7CheckedButtonElements
 								button.bulletCheckElement=GuiSolidLabelElement::Create();
 								{
 									FontProperties font;
-									font.fontFamily=L"Wingdings 2";
+									font.fontFamily=L"Webdings";
 									font.size=16;
 									font.bold=true;
 									button.bulletCheckElement->SetFont(font);
 								}
-								button.bulletCheckElement->SetText(L"P");
+								button.bulletCheckElement->SetText(L"a");
 								button.bulletCheckElement->SetAlignments(Alignment::Center, Alignment::Center);
 
 								GuiBoundsComposition* composition=new GuiBoundsComposition;

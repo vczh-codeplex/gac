@@ -5,6 +5,7 @@ extern void SetupListDirectionWindow(GuiControlHost* controlHost, GuiControl* co
 extern void SetupListviewWindow(GuiControlHost* controlHost, GuiControl* container);
 extern void SetupTreeviewWindow(GuiControlHost* controlHost, GuiControl* container);
 extern void SetupDatagridElementsWindow(GuiControlHost* controlHost, GuiControl* container);
+extern void SetupDatagridExplorerWindow(GuiControlHost* controlHost, GuiControl* container);
 
 void SetupTabPageListControlWindow(GuiControlHost* controlHost, GuiControl* container)
 {
@@ -35,6 +36,11 @@ void SetupTabPageListControlWindow(GuiControlHost* controlHost, GuiControl* cont
 		GuiTabPage* page=tab->CreatePage();
 		page->SetText(L"Data Grid (Elements)");
 		SetupDatagridElementsWindow(controlHost, page->GetContainer());
+	}
+	{
+		GuiTabPage* page=tab->CreatePage();
+		page->SetText(L"Data Grid (Explorer)");
+		SetupDatagridExplorerWindow(controlHost, page->GetContainer());
 	}
 	container->GetContainerComposition()->AddChild(tab->GetBoundsComposition());
 }

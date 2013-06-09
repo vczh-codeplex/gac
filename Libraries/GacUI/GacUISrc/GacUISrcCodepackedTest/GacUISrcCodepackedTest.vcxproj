@@ -217,9 +217,11 @@
     </ClCompile>
     <ClCompile Include="..\..\Public\Source\GacUIWindows.cpp" />
     <ClCompile Include="..\..\Public\Source\Vlpp.cpp" />
+    <ClCompile Include="FileSystemInformation.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="SetupBasicWindow.cpp" />
     <ClCompile Include="SetupDatagridElementsWindow.cpp" />
+    <ClCompile Include="SetupDatagridExplorerWindow.cpp" />
     <ClCompile Include="SetupDialogWindow.cpp" />
     <ClCompile Include="SetupDocumentElementLayoutWindow.cpp" />
     <ClCompile Include="SetupListControlWindow.cpp" />
@@ -239,6 +241,7 @@
     <ClInclude Include="..\..\Public\Source\GacUI.h" />
     <ClInclude Include="..\..\Public\Source\GacUIWindows.h" />
     <ClInclude Include="..\..\Public\Source\Vlpp.h" />
+    <ClInclude Include="FileSystemInformation.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\BigDoc.png" />
