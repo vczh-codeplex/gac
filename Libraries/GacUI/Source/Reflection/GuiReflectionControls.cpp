@@ -624,6 +624,8 @@ Type Declaration
 				CLASS_MEMBER_BASE(GuiSelectableListControl)
 				CLASS_MEMBER_CONSTRUCTOR(GuiVirtualTextList*(GuiSelectableListControl::IStyleProvider* _ TextItemStyleProvider::ITextItemStyleProvider* _ GuiListControl::IItemProvider*), {L"styleProvider" _ L"itemStyleProvider" _ L"itemProvider"})
 
+				CLASS_MEMBER_GUIEVENT(ItemChecked)
+
 				CLASS_MEMBER_METHOD(ChangeItemStyle, {L"itemStyleProvider"})
 			END_CLASS_MEMBER(GuiVirtualTextList)
 

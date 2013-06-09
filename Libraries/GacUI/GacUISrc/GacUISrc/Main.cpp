@@ -124,10 +124,29 @@ TestWindow
 		protected:
 			GuiMenu*							popup;
 			GuiTextList*						textList;
+			bool								preventEvent;
 
 			bool FilterData(const Ptr<FileProperties>& rowData, const WString& cellData)
 			{
 				return true;
+			}
+
+			void textList_ItemChecked(GuiGraphicsComposition* sender, GuiItemEventArgs& arguments)
+			{
+				if(!preventEvent)
+				{
+					if(arguments.itemIndex==0)
+					{
+						preventEvent=true;
+						bool checked=textList->GetItems()[0]->GetChecked();
+						for(vint i=1;i<textList->GetItems().Count();i++)
+						{
+							textList->GetItems().SetChecked(i, checked);
+						}
+						preventEvent=false;
+					}
+					InvokeOnFilterChanged();
+				}
 			}
 
 			void popup_Opened(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
@@ -157,12 +176,14 @@ TestWindow
 			FileTypeFilter(FileTypeColumnProvider* columnProvider)
 				:FilterBase(columnProvider)
 				,popup(0)
+				,preventEvent(false)
 			{
 				textList=g::NewCheckTextList();
 				textList->SetHorizontalAlwaysVisible(false);
 				textList->SetVerticalAlwaysVisible(false);
 				textList->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 				textList->GetBoundsComposition()->SetPreferredMinSize(Size(160, 200));
+				textList->ItemChecked.AttachMethod(this, &FileTypeFilter::textList_ItemChecked);
 
 				popup=g::NewMenu(0);
 				popup->GetContainerComposition()->AddChild(textList->GetBoundsComposition());
