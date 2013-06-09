@@ -123,6 +123,10 @@ TextItemStyleProvider
 					if(index!=-1)
 					{
 						textItemView->SetCheckedSilently(index, style->GetChecked());
+
+						GuiItemEventArgs arguments(style->GetBoundsComposition());
+						arguments.itemIndex=index;
+						listControl->ItemChecked.Execute(arguments);
 					}
 				}
 
@@ -139,7 +143,7 @@ TextItemStyleProvider
 
 				void TextItemStyleProvider::AttachListControl(GuiListControl* value)
 				{
-					listControl=value;;
+					listControl=dynamic_cast<GuiVirtualTextList*>(value);
 					textItemView=dynamic_cast<ITextItemView*>(value->GetItemProvider()->RequestView(ITextItemView::Identifier));
 				}
 
@@ -247,6 +251,7 @@ TextItemProvider
 				}
 
 				TextItemProvider::TextItemProvider()
+					:listControl(0)
 				{
 				}
 
@@ -264,6 +269,10 @@ TextItemProvider
 				{
 					SetCheckedSilently(itemIndex, value);
 					InvokeOnItemModified(itemIndex, 1, 1);
+
+					GuiItemEventArgs arguments;
+					arguments.itemIndex=itemIndex;
+					listControl->ItemChecked.Execute(arguments);
 				}
 
 				IDescriptable* TextItemProvider::RequestView(const WString& identifier)
@@ -294,6 +303,8 @@ GuiTextList
 			GuiVirtualTextList::GuiVirtualTextList(IStyleProvider* _styleProvider, list::TextItemStyleProvider::ITextItemStyleProvider* _itemStyleProvider, GuiListControl::IItemProvider* _itemProvider)
 				:GuiSelectableListControl(_styleProvider, _itemProvider)
 			{
+				ItemChecked.SetAssociatedComposition(boundsComposition);
+
 				ChangeItemStyle(_itemStyleProvider);
 				SetArranger(new list::FixedHeightItemArranger);
 			}
@@ -334,6 +345,7 @@ GuiTextList
 				:GuiVirtualTextList(_styleProvider, _itemStyleProvider, new list::TextItemProvider)
 			{
 				items=dynamic_cast<list::TextItemProvider*>(itemProvider.Obj());
+				items->listControl=this;
 			}
 
 			GuiTextList::~GuiTextList()
