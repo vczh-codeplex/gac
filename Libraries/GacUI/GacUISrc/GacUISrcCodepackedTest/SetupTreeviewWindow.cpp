@@ -9,6 +9,12 @@ void SetupTreeviewWindow(GuiControlHost* controlHost, GuiControl* container)
 	treeControl->SetHorizontalAlwaysVisible(false);
 	treeControl->SetVerticalAlwaysVisible(false);
 	container->GetBoundsComposition()->AddChild(treeControl->GetBoundsComposition());
+
+	treeControl->NodeLeftButtonDoubleClick.AttachLambda([=](GuiGraphicsComposition* sender, GuiNodeMouseEventArgs& arguments)
+	{
+		Ptr<tree::TreeViewItem> item=treeControl->Nodes()->GetTreeViewData(arguments.node);
+		GetCurrentController()->DialogService()->ShowMessageBox(controlHost->GetNativeWindow(), L"You double clicked "+item->text, L"Tree View Event");
+	});
 		
 	INativeImageService* imageService=GetCurrentController()->ImageService();
 	Ptr<INativeImage> image=imageService->CreateImageFromFile(L"Resources\\SmallDoc.png");
