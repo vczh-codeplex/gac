@@ -326,6 +326,7 @@ typedef signed __int64	pos_t;
 
 		static DateTime		LocalTime();
 		static DateTime		UtcTime();
+		static DateTime		FromDateTime(vint _year, vint _month, vint _day, vint _hour=0, vint _minute=0, vint _second=0, vint _milliseconds=0);
 		static DateTime		FromFileTime(unsigned __int64 filetime);
 
 		DateTime();

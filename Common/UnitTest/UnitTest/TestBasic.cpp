@@ -206,6 +206,7 @@ TEST_CASE(TestLocale)
 
 	List<Locale> locales;
 	Locale::Enumerate(locales);
+	locales.Insert(0, Locale::Invariant());
 	FOREACH(Locale, locale, locales)
 	{
 		writer.WriteLine(L"========================================");
@@ -220,6 +221,35 @@ TEST_CASE(TestLocale)
 		writer.WriteLine(L"[Currency -1] => "+locale.FormatCurrency(L"-1"));
 		writer.WriteLine(L"[Currency 100.2] => "+locale.FormatCurrency(L"100.2"));
 		writer.WriteLine(L"[Currency -100.2] => "+locale.FormatCurrency(L"-100.2"));
+		{
+			writer.WriteString(L"[ShortDayOfWeek]");
+			for(vint i=0;i<=6;i++)
+			{
+				writer.WriteString(L" "+locale.GetShortDayOfWeekName(i));
+			}
+			writer.WriteLine(L"");
+			
+			writer.WriteString(L"[LongDayOfWeek]");
+			for(vint i=0;i<=6;i++)
+			{
+				writer.WriteString(L" "+locale.GetLongDayOfWeekName(i));
+			}
+			writer.WriteLine(L"");
+			
+			writer.WriteString(L"[ShortMonth]");
+			for(vint i=1;i<=12;i++)
+			{
+				writer.WriteString(L" "+locale.GetShortMonthName(i));
+			}
+			writer.WriteLine(L"");
+			
+			writer.WriteString(L"[LongMonth]");
+			for(vint i=1;i<=12;i++)
+			{
+				writer.WriteString(L" "+locale.GetLongMonthName(i));
+			}
+			writer.WriteLine(L"");
+		}
 		{
 			List<WString> formats;
 			locale.GetLongDateFormats(formats);
@@ -261,4 +291,28 @@ TEST_CASE(TestLocale)
 			}
 		}
 	}
+}
+
+TEST_CASE(TestDateTime)
+{
+	// 2000/1/1 is saturday
+	DateTime dt=DateTime::FromDateTime(2000, 1, 1);
+	TEST_ASSERT(dt.year==2000);
+	TEST_ASSERT(dt.month==1);
+	TEST_ASSERT(dt.day==1);
+	TEST_ASSERT(dt.dayOfWeek==6);
+	TEST_ASSERT(dt.hour==0);
+	TEST_ASSERT(dt.minute==0);
+	TEST_ASSERT(dt.second==0);
+	TEST_ASSERT(dt.milliseconds==0);
+
+	dt=DateTime::FromFileTime(dt.filetime);
+	TEST_ASSERT(dt.year==2000);
+	TEST_ASSERT(dt.month==1);
+	TEST_ASSERT(dt.day==1);
+	TEST_ASSERT(dt.dayOfWeek==6);
+	TEST_ASSERT(dt.hour==0);
+	TEST_ASSERT(dt.minute==0);
+	TEST_ASSERT(dt.second==0);
+	TEST_ASSERT(dt.milliseconds==0);
 }
