@@ -63,7 +63,8 @@ DatePicker
 					collections::Array<DateTime>						dateDays;
 					Ptr<GuiSelectableButton::GroupController>			dayMutexController;
 
-					void												DisplayMonth(int year, vint month);
+					void												SetDay(const DateTime& day, vint& index, bool currentMonth);
+					void												DisplayMonth(vint year, vint month);
 					void												SelectDay(vint day);
 				public:
 					StyleController(IStyleProvider* _styleProvider);
