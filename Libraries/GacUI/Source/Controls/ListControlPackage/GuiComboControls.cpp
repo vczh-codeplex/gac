@@ -136,7 +136,7 @@ GuiComboBoxListControl
 				SelectedIndexChanged.SetAssociatedComposition(GetBoundsComposition());
 
 				containedListControl->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-				popup->GetBoundsComposition()->AddChild(containedListControl->GetBoundsComposition());
+				popup->GetContainerComposition()->AddChild(containedListControl->GetBoundsComposition());
 				SetFont(GetFont());
 			}
 

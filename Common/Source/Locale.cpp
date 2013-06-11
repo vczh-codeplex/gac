@@ -129,6 +129,7 @@ Locale
 	{
 		SYSTEMTIME st=DateTimeToSystemTime(date);
 		int length=GetDateFormatEx(localeName.Buffer(), 0, &st, format.Buffer(), NULL, 0, NULL);
+		if(length==0) return L"";
 		Array<wchar_t> buffer(length);
 		GetDateFormatEx(localeName.Buffer(), 0, &st, format.Buffer(), &buffer[0], (int)buffer.Count(), NULL);
 		return &buffer[0];
@@ -138,6 +139,7 @@ Locale
 	{
 		SYSTEMTIME st=DateTimeToSystemTime(time);
 		int length=GetTimeFormatEx(localeName.Buffer(), 0, &st, format.Buffer(), NULL, 0);
+		if(length==0) return L"";
 		Array<wchar_t> buffer(length);
 		GetTimeFormatEx(localeName.Buffer(), 0, &st, format.Buffer(),&buffer[0], (int)buffer.Count());
 		return &buffer[0];
@@ -146,6 +148,7 @@ Locale
 	WString Locale::FormatNumber(const WString& number)
 	{
 		int length=GetNumberFormatEx(localeName.Buffer(), 0, number.Buffer(), NULL, NULL, 0);
+		if(length==0) return L"";
 		Array<wchar_t> buffer(length);
 		GetNumberFormatEx(localeName.Buffer(), 0, number.Buffer(), NULL, &buffer[0], (int)buffer.Count());
 		return &buffer[0];
@@ -154,6 +157,7 @@ Locale
 	WString Locale::FormatCurrency(const WString& currency)
 	{
 		int length=GetCurrencyFormatEx(localeName.Buffer(), 0, currency.Buffer(), NULL, NULL, 0);
+		if(length==0) return L"";
 		Array<wchar_t> buffer(length);
 		GetCurrencyFormatEx(localeName.Buffer(), 0, currency.Buffer(), NULL, &buffer[0], (int)buffer.Count());
 		return &buffer[0];
