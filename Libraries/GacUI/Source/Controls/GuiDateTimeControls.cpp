@@ -119,6 +119,7 @@ GuiDatePicker::StyleController
 
 				DateTime firstDay=DateTime::FromDateTime(year, month, 1);
 				vint showPrev=firstDay.dayOfWeek;
+				if(showPrev==0) showPrev=DaysOfWeek;
 				vint show=count;
 				vint showNext=DaysOfWeek*DayRows-showPrev-show;
 
@@ -165,6 +166,7 @@ GuiDatePicker::StyleController
 				GuiTableComposition* dayTable=0;
 				{
 					listYears=styleProvider->CreateTextList();
+					listYears->SetHorizontalAlwaysVisible(false);
 					for(vint i=YearFirst;i<=YearLast;i++)
 					{
 						listYears->GetItems().Add(new list::TextItem(itow(i)));
@@ -175,6 +177,7 @@ GuiDatePicker::StyleController
 				}
 				{
 					listMonths=styleProvider->CreateTextList();
+					listMonths->SetHorizontalAlwaysVisible(false);
 					comboMonth=new GuiComboBoxListControl(styleProvider->CreateComboBoxStyle(), listMonths);
 					comboMonth->GetBoundsComposition()->SetAlignmentToParent(Margin(2, 0, 0, 0));
 					comboMonth->SelectedIndexChanged.AttachMethod(this, &StyleController::comboYearMonth_SelectedIndexChanged);
