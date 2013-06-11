@@ -281,6 +281,7 @@ GuiDatePicker::StyleController
 
 			GuiDatePicker::StyleController::~StyleController()
 			{
+				delete styleProvider;
 			}
 
 			compositions::GuiBoundsComposition* GuiDatePicker::StyleController::GetBoundsComposition()
