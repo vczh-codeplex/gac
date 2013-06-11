@@ -484,12 +484,12 @@ GuiDateComboBox
 				datePicker->SetFont(value);
 			}
 
-			const DateTime& GuiDateComboBox::GetSelectedData()
+			const DateTime& GuiDateComboBox::GetSelectedDate()
 			{
 				return datePicker->GetDate();
 			}
 
-			void GuiDateComboBox::SetSelectedData(const DateTime& value)
+			void GuiDateComboBox::SetSelectedDate(const DateTime& value)
 			{
 				datePicker->SetDate(value);
 			}

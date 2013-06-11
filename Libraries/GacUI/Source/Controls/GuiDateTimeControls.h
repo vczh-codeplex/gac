@@ -180,10 +180,10 @@ DateComboBox
 				void													SetFont(const FontProperties& value)override;
 				/// <summary>Get the displayed date.</summary>
 				/// <returns>The date.</returns>
-				const DateTime&											GetSelectedData();
+				const DateTime&											GetSelectedDate();
 				/// <summary>Display a date.</summary>
 				/// <param name="value">The date.</param>
-				void													SetSelectedData(const DateTime& value);
+				void													SetSelectedDate(const DateTime& value);
 				/// <summary>Get the date picker control.</summary>
 				/// <returns>The date picker control.</returns>
 				GuiDatePicker*											GetDatePicker();

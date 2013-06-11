@@ -182,6 +182,9 @@ Type List
 			F(presentation::controls::list::TextBoxDataEditor::Factory)\
 			F(presentation::controls::list::TextComboBoxDataEditor)\
 			F(presentation::controls::list::TextComboBoxDataEditor::Factory)\
+			F(presentation::controls::GuiDatePicker)\
+			F(presentation::controls::GuiDatePicker::IStyleProvider)\
+			F(presentation::controls::GuiDateComboBox)\
 
 			GUIREFLECTIONCONTROLS_TYPELIST(DECL_TYPE_INFO)
 
@@ -1863,6 +1866,50 @@ Interface Proxy
 					Ptr<GuiImageData> GetRowSmallImage(vint row)
 					{
 						return INVOKEGET_INTERFACE_PROXY(GetRowSmallImage, row);
+					}
+				};
+
+				class GuiDatePicker_IStyleProvider : public GuiControl_IStyleProvider, public virtual GuiDatePicker::IStyleProvider
+				{
+				public:
+					GuiDatePicker_IStyleProvider(Ptr<IValueInterfaceProxy> _proxy)
+						:GuiControl_IStyleProvider(_proxy)
+					{
+					}
+
+					static GuiDatePicker::IStyleProvider* Create(Ptr<IValueInterfaceProxy> _proxy)
+					{
+						return new GuiDatePicker_IStyleProvider(_proxy);
+					}
+
+					GuiSelectableButton::IStyleController* CreateDateButtonStyle()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(CreateDateButtonStyle);
+					}
+
+					GuiTextList* CreateTextList()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(CreateTextList);
+					}
+
+					GuiComboBoxListControl::IStyleController* CreateComboBoxStyle()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(CreateComboBoxStyle);
+					}
+
+					Color GetBackgroundColor()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetBackgroundColor);
+					}
+
+					Color GetPrimaryTextColor()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetPrimaryTextColor);
+					}
+
+					Color GetSecondaryTextColor()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetSecondaryTextColor);
 					}
 				};
 			}

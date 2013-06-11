@@ -1110,7 +1110,6 @@ Type Declaration
 
 				CLASS_MEMBER_GUIEVENT(PopupOpened)
 				CLASS_MEMBER_GUIEVENT(PopupClosed)
-				CLASS_MEMBER_GUIEVENT(ItemSelecting)
 				CLASS_MEMBER_GUIEVENT(ItemSelected)
 
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(Popup)
@@ -1540,6 +1539,36 @@ Type Declaration
 				CLASS_MEMBER_BASE(IDataEditorFactory)
 				CLASS_MEMBER_CONSTRUCTOR(Ptr<TextComboBoxDataEditor::Factory>(), NO_PARAMETER)
 			END_CLASS_MEMBER(TextComboBoxDataEditor::Factory)
+
+			BEGIN_CLASS_MEMBER(GuiDatePicker)
+				CLASS_MEMBER_BASE(GuiControl)
+				CONTROL_CONSTRUCTOR_PROVIDER(GuiDatePicker)
+
+				CLASS_MEMBER_PROPERTY_EVENT_FAST(Date, DateChanged)
+				CLASS_MEMBER_PROPERTY_EVENT_FAST(DateFormat, DateFormatChanged)
+				CLASS_MEMBER_PROPERTY_EVENT_FAST(DateLocale, DateLocaleChanged)
+			END_CLASS_MEMBER(GuiDatePicker)
+
+			BEGIN_CLASS_MEMBER(GuiDatePicker::IStyleProvider)
+				CLASS_MEMBER_BASE(GuiControl::IStyleProvider)
+				INTERFACE_EXTERNALCTOR(GuiDatePicker, IStyleProvider)
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(BackgroundColor)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(PrimaryTextColor)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(SecondaryTextColor)
+
+				CLASS_MEMBER_METHOD(CreateDateButtonStyle, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(CreateTextList, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(CreateComboBoxStyle, NO_PARAMETER)
+			END_CLASS_MEMBER(GuiDatePicker::IStyleProvider)
+
+			BEGIN_CLASS_MEMBER(GuiDateComboBox)
+				CLASS_MEMBER_BASE(GuiComboBoxBase)
+				CLASS_MEMBER_CONSTRUCTOR(GuiDateComboBox*(GuiDateComboBox::IStyleController* _ GuiDatePicker*), {L"styleController" _ L"datePicker"})
+
+				CLASS_MEMBER_PROPERTY_EVENT_FAST(SelectedDate, SelectedDateChanged)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(DatePicker)
+			END_CLASS_MEMBER(GuiDateComboBox)
 
 #undef INTERFACE_IDENTIFIER
 #undef CONTROL_CONSTRUCTOR_CONTROLLER
