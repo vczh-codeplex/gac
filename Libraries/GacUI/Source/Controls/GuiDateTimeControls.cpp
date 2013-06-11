@@ -63,6 +63,17 @@ GuiDatePicker::StyleController
 				index++;
 			}
 
+			void GuiDatePicker::StyleController::comboYearMonth_SelectedIndexChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				if(!preventComboEvent)
+				{
+					vint year=comboYear->GetSelectedIndex()+YearFirst;
+					vint month=comboMonth->GetSelectedIndex()+1;
+					SetDate(DateTime::FromDateTime(year, month, 1));
+					datePicker->NotifyDateChanged();
+				}
+			}
+
 			void GuiDatePicker::StyleController::buttonDay_SelectedChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				if(!preventButtonEvent)
@@ -78,7 +89,10 @@ GuiDatePicker::StyleController
 							{
 								SetDate(day);
 							}
-							currentDate=day;
+							else
+							{
+								currentDate=day;
+							}
 							datePicker->NotifyDateChanged();
 						}
 					}
@@ -89,8 +103,10 @@ GuiDatePicker::StyleController
 			{
 				if(YearFirst<=year && year<=YearLast && 1<=month && month<=12)
 				{
+					preventComboEvent=true;
 					comboYear->SetSelectedIndex(year-YearFirst);
 					comboMonth->SetSelectedIndex(month-1);
+					preventComboEvent=false;
 				}
 
 				vint yearPrev=year, yearNext=year, monthPrev=month, monthNext=month;
@@ -126,22 +142,23 @@ GuiDatePicker::StyleController
 
 			void GuiDatePicker::StyleController::SelectDay(vint day)
 			{
-				preventButtonEvent=true;
 				for(vint i=0;i<dateDays.Count();i++)
 				{
 					const DateTime& dt=dateDays[i];
 					if(dt.year==currentDate.year && dt.month==currentDate.month && dt.day==day)
 					{
+						preventButtonEvent=true;
 						buttonDays[i]->SetSelected(true);
+						preventButtonEvent=false;
 						break;
 					}
 				}
-				preventButtonEvent=false;
 			}
 
 			GuiDatePicker::StyleController::StyleController(IStyleProvider* _styleProvider)
 				:styleProvider(_styleProvider)
 				,datePicker(0)
+				,preventComboEvent(false)
 				,preventButtonEvent(false)
 			{
 				GuiTableComposition* monthTable=0;
@@ -154,11 +171,13 @@ GuiDatePicker::StyleController
 					}
 					comboYear=new GuiComboBoxListControl(styleProvider->CreateComboBoxStyle(), listYears);
 					comboYear->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 2, 0));
+					comboYear->SelectedIndexChanged.AttachMethod(this, &StyleController::comboYearMonth_SelectedIndexChanged);
 				}
 				{
 					listMonths=styleProvider->CreateTextList();
 					comboMonth=new GuiComboBoxListControl(styleProvider->CreateComboBoxStyle(), listMonths);
 					comboMonth->GetBoundsComposition()->SetAlignmentToParent(Margin(2, 0, 0, 0));
+					comboMonth->SelectedIndexChanged.AttachMethod(this, &StyleController::comboYearMonth_SelectedIndexChanged);
 				}
 				{
 					monthTable=new GuiTableComposition;
