@@ -261,6 +261,7 @@
     <ClCompile Include="..\..\Source\Controls\GuiApplication.cpp" />
     <ClCompile Include="..\..\Source\Controls\GuiBasicControls.cpp" />
     <ClCompile Include="..\..\Source\Controls\GuiContainerControls.cpp" />
+    <ClCompile Include="..\..\Source\Controls\GuiDateTimeControls.cpp" />
     <ClCompile Include="..\..\Source\Controls\GuiWindowControls.cpp" />
     <ClCompile Include="..\..\Source\Controls\ListControlPackage\GuiComboControls.cpp" />
     <ClCompile Include="..\..\Source\Controls\ListControlPackage\GuiDataGridControls.cpp" />
@@ -416,6 +417,7 @@
     <ClInclude Include="..\..\Source\Controls\GuiApplication.h" />
     <ClInclude Include="..\..\Source\Controls\GuiBasicControls.h" />
     <ClInclude Include="..\..\Source\Controls\GuiContainerControls.h" />
+    <ClInclude Include="..\..\Source\Controls\GuiDateTimeControls.h" />
     <ClInclude Include="..\..\Source\Controls\GuiWindowControls.h" />
     <ClInclude Include="..\..\Source\Controls\ListControlPackage\GuiComboControls.h" />
     <ClInclude Include="..\..\Source\Controls\ListControlPackage\GuiDataGridControls.h" />

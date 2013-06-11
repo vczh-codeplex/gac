@@ -1,4 +1,5 @@
 #include "GuiWin8ControlStyles.h"
+#include "GuiWin8ListStyles.h"
 
 namespace vl
 {
@@ -319,6 +320,68 @@ Win8GroupBoxStyle
 				{
 					transferringAnimation->Transfer(Win8GetSystemTextColor(false));
 				}
+			}
+
+/***********************************************************************
+Win8DatePickerStyle
+***********************************************************************/
+
+			Win8DatePickerStyle::Win8DatePickerStyle()
+			{
+			}
+
+			Win8DatePickerStyle::~Win8DatePickerStyle()
+			{
+			}
+
+			void Win8DatePickerStyle::AssociateStyleController(controls::GuiControl::IStyleController* controller)
+			{
+			}
+
+			void Win8DatePickerStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
+			{
+			}
+
+			void Win8DatePickerStyle::SetText(const WString& value)
+			{
+			}
+
+			void Win8DatePickerStyle::SetFont(const FontProperties& value)
+			{
+			}
+
+			void Win8DatePickerStyle::SetVisuallyEnabled(bool value)
+			{
+			}
+
+			controls::GuiSelectableButton::IStyleController* Win8DatePickerStyle::CreateDateButtonStyle()
+			{
+				return new Win8SelectableItemStyle;
+			}
+
+			controls::GuiTextList* Win8DatePickerStyle::CreateTextList()
+			{
+				return new GuiTextList(new Win8MultilineTextBoxProvider, new Win8TextListProvider);
+			}
+
+			controls::GuiComboBoxListControl::IStyleController* Win8DatePickerStyle::CreateComboBoxStyle()
+			{
+				return new Win8DropDownComboBoxStyle;
+			}
+
+			Color Win8DatePickerStyle::GetBackgroundColor()
+			{
+				return Win8GetSystemWindowColor();
+			}
+
+			Color Win8DatePickerStyle::GetPrimaryTextColor()
+			{
+				return Win8GetSystemTextColor(true);
+			}
+
+			Color Win8DatePickerStyle::GetSecondaryTextColor()
+			{
+				return Win8GetSystemTextColor(false);
 			}
 		}
 	}

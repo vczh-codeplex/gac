@@ -182,6 +182,11 @@ namespace vl
 					return new controls::GuiSelectableButton(GetCurrentTheme()->CreateRadioButtonStyle());
 				}
 
+				controls::GuiDatePicker* NewDatePicker()
+				{
+					return new controls::GuiDatePicker(GetCurrentTheme()->CreateDatePickerStyle());
+				}
+
 				controls::GuiScroll* NewHScroll()
 				{
 					return new controls::GuiScroll(GetCurrentTheme()->CreateHScrollStyle());

@@ -126,6 +126,29 @@ Container
 				void										SetFont(const FontProperties& value)override;
 				void										SetVisuallyEnabled(bool value)override;
 			};
+
+			/// <summary>Date Picker (Windows 8)</summary>
+			class Win8DatePickerStyle : public Object, public virtual controls::GuiDatePicker::IStyleProvider, public Description<Win8DatePickerStyle>
+			{
+			public:
+				/// <summary>Create the style.</summary>
+				Win8DatePickerStyle();
+				~Win8DatePickerStyle();
+
+				void													AssociateStyleController(controls::GuiControl::IStyleController* controller)override;
+				void													SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+				void													SetText(const WString& value)override;
+				void													SetFont(const FontProperties& value)override;
+				void													SetVisuallyEnabled(bool value)override;
+
+				controls::GuiSelectableButton::IStyleController*		CreateDateButtonStyle()override;
+				controls::GuiTextList*									CreateTextList()override;
+				controls::GuiComboBoxListControl::IStyleController*		CreateComboBoxStyle()override;
+
+				Color													GetBackgroundColor()override;
+				Color													GetPrimaryTextColor()override;
+				Color													GetSecondaryTextColor()override;
+			};
 		}
 	}
 }

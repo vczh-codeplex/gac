@@ -172,6 +172,11 @@ Win8Theme
 				return new Win8CheckBoxStyle(Win8CheckBoxStyle::RadioButton);
 			}
 
+			controls::GuiDatePicker::IStyleProvider* Win8Theme::CreateDatePickerStyle()
+			{
+				return new Win8DatePickerStyle;
+			}
+
 			controls::GuiScroll::IStyleController* Win8Theme::CreateHScrollStyle()
 			{
 				return new Win8ScrollStyle(common_styles::CommonScrollStyle::Horizontal);
