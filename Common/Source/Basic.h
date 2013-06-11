@@ -335,6 +335,13 @@ typedef signed __int64	pos_t;
 		DateTime			ToUtcTime();
 		DateTime			Forward(unsigned __int64 milliseconds);
 		DateTime			Backward(unsigned __int64 milliseconds);
+
+		bool operator==(const DateTime& value)const { return filetime==value.filetime; }
+		bool operator!=(const DateTime& value)const { return filetime!=value.filetime; }
+		bool operator<(const DateTime& value)const { return filetime<value.filetime; }
+		bool operator<=(const DateTime& value)const { return filetime<=value.filetime; }
+		bool operator>(const DateTime& value)const { return filetime>value.filetime; }
+		bool operator>=(const DateTime& value)const { return filetime>=value.filetime; }
 	};
 
 /***********************************************************************

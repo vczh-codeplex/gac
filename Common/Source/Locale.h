@@ -23,6 +23,13 @@ namespace vl
 		Locale(const WString& _localeName=WString::Empty);
 		~Locale();
 
+		bool operator==(const Locale& value)const { return localeName==value.localeName; }
+		bool operator!=(const Locale& value)const { return localeName!=value.localeName; }
+		bool operator<(const Locale& value)const { return localeName<value.localeName; }
+		bool operator<=(const Locale& value)const { return localeName<=value.localeName; }
+		bool operator>(const Locale& value)const { return localeName>value.localeName; }
+		bool operator>=(const Locale& value)const { return localeName>=value.localeName; }
+
 		static Locale				Invariant();
 		static Locale				SystemDefault();
 		static Locale				UserDefault();

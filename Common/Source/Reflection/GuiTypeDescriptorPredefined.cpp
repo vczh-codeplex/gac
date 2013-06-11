@@ -1,10 +1,12 @@
 #include <limits.h>
 #include <float.h>
 #include "GuiTypeDescriptorMacros.h"
+#include "..\Regex\Regex.h"
 
 namespace vl
 {
 	using namespace collections;
+	using namespace regex;
 
 	namespace reflection
 	{
@@ -136,6 +138,8 @@ TypeName
 			const wchar_t* TypeInfo<bool>::TypeName						= L"system::Boolean";
 			const wchar_t* TypeInfo<wchar_t>::TypeName					= L"system::Char";
 			const wchar_t* TypeInfo<WString>::TypeName					= L"system::String";
+			const wchar_t* TypeInfo<DateTime>::TypeName					= L"system::DateTime";
+			const wchar_t* TypeInfo<Locale>::TypeName					= L"system::Locale";
 			const wchar_t* TypeInfo<IValueEnumerator>::TypeName			= L"system::Enumerator";
 			const wchar_t* TypeInfo<IValueEnumerable>::TypeName			= L"system::Enumerable";
 			const wchar_t* TypeInfo<IValueReadonlyList>::TypeName		= L"system::ReadableList";
@@ -360,6 +364,77 @@ BoolValueSerializer
 			};
 
 /***********************************************************************
+DateTimeValueSerializer
+***********************************************************************/
+
+			class DateTimeValueSerializer : public GeneralValueSeriaizer<DateTime>
+			{
+			protected:
+				Regex				regexDateTime;
+
+				bool Serialize(const DateTime& input, WString& output)override
+				{
+					WString ms=itow(input.milliseconds);
+					while(ms.Length()<3) ms=L"0"+ms;
+
+					output=INVLOC.FormatDate(L"yyyy-MM-dd", input)+L" "+INVLOC.FormatTime(L"HH:mm:ss", input)+L"."+ms;
+					return true;
+				}
+
+				bool Deserialize(const WString& input, DateTime& output)override
+				{
+					Ptr<RegexMatch> match=regexDateTime.Match(input);
+					if(!match) return false;
+					if(!match->Success()) return false;
+					if(match->Result().Start()!=0) return false;
+					if(match->Result().Length()!=input.Length()) return false;
+
+					vint year=wtoi(match->Groups()[L"Y"].Get(0).Value());
+					vint month=wtoi(match->Groups()[L"M"].Get(0).Value());
+					vint day=wtoi(match->Groups()[L"D"].Get(0).Value());
+					vint hour=wtoi(match->Groups()[L"h"].Get(0).Value());
+					vint minute=wtoi(match->Groups()[L"m"].Get(0).Value());
+					vint second=wtoi(match->Groups()[L"s"].Get(0).Value());
+					vint milliseconds=wtoi(match->Groups()[L"ms"].Get(0).Value());
+
+					output=DateTime::FromDateTime(year, month, day, hour, minute, second, milliseconds);
+					return true;
+				}
+			public:
+				DateTimeValueSerializer(ITypeDescriptor* _ownerTypeDescriptor)
+					:GeneralValueSeriaizer(_ownerTypeDescriptor)
+					,regexDateTime(L"(<Y>/d/d/d/d)-(<M>/d/d)-(<D>/d/d) (<h>/d/d):(<m>/d/d):(<s>/d/d).(<ms>/d/d/d)")
+				{
+				}
+			};
+
+/***********************************************************************
+LocaleValueSerializer
+***********************************************************************/
+
+			class LocaleValueSerializer : public GeneralValueSeriaizer<Locale>
+			{
+			protected:
+
+				bool Serialize(const Locale& input, WString& output)override
+				{
+					output=input.GetName();
+					return true;
+				}
+
+				bool Deserialize(const WString& input, Locale& output)override
+				{
+					output=Locale(input);
+					return true;
+				}
+			public:
+				LocaleValueSerializer(ITypeDescriptor* _ownerTypeDescriptor)
+					:GeneralValueSeriaizer(_ownerTypeDescriptor)
+				{
+				}
+			};
+
+/***********************************************************************
 Collections
 ***********************************************************************/
 
@@ -460,6 +535,8 @@ LoadPredefinedTypes
 					AddSerializableType<BoolValueSeriaizer>(manager);
 					AddSerializableType<TypedValueSerializer<wchar_t>>(manager);
 					AddSerializableType<TypedValueSerializer<WString>>(manager);
+					AddSerializableType<DateTimeValueSerializer>(manager);
+					AddSerializableType<LocaleValueSerializer>(manager);
 					ADD_TYPE_INFO(VoidValue)
 					ADD_TYPE_INFO(IDescriptable)
 					ADD_TYPE_INFO(IValueEnumerator)
