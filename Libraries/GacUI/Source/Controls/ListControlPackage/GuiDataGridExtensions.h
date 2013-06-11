@@ -130,8 +130,44 @@ Visualizer Extensions
 					/// <returns>The text element.</returns>
 					elements::GuiSolidLabelElement*						GetTextElement();
 				};
+
+				/// <summary>Data visualizer that displays a hyperlink. Use HyperlinkDataVisualizer::Factory as the factory class.</summary>
+				class HyperlinkDataVisualizer : public ListViewSubColumnDataVisualizer
+				{
+				public:
+					typedef DataVisualizerFactory<HyperlinkDataVisualizer>					Factory;
+				protected:
+
+					void												label_MouseEnter(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+					void												label_MouseLeave(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+					compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal(compositions::GuiBoundsComposition* decoratedComposition)override;
+				public:
+					HyperlinkDataVisualizer();
+
+					void												BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)override;
+				};
+
+				/// <summary>Data visualizer that displays am image. Use ImageDataVisualizer::Factory as the factory class.</summary>
+				class ImageDataVisualizer : public DataVisualizerBase
+				{
+				public:
+					typedef DataVisualizerFactory<ImageDataVisualizer>						Factory;
+				protected:
+					elements::GuiImageFrameElement*						image;
+
+					compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal(compositions::GuiBoundsComposition* decoratedComposition)override;
+				public:
+					/// <summary>Create the data visualizer.</summary>
+					ImageDataVisualizer();
+
+					void												BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)override;
+
+					/// <summary>Get the internal image element.</summary>
+					/// <returns>The image element.</returns>
+					elements::GuiImageFrameElement*						GetImageElement();
+				};
 				
-				/// <summary>Data visualizer that display a cell border out of another data visualizer.</summary>
+				/// <summary>Data visualizer that display a cell border that around another data visualizer. Use CellBorderDataVisualizer::Factory as the factory class.</summary>
 				class CellBorderDataVisualizer : public DataVisualizerBase
 				{
 				public:
@@ -145,6 +181,31 @@ Visualizer Extensions
 					CellBorderDataVisualizer(Ptr<IDataVisualizer> decoratedDataVisualizer);
 
 					void												BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)override;
+				};
+
+				/// <summary>Data visualizer that display two icons (both optional) that beside another data visualizer. Use NotifyIconDataVisualizer::Factory as the factory class.</summary>
+				class NotifyIconDataVisualizer : public DataVisualizerBase
+				{
+				public:
+					typedef DataDecoratableVisualizerFactory<NotifyIconDataVisualizer>		Factory;
+				protected:
+					elements::GuiImageFrameElement*						leftImage;
+					elements::GuiImageFrameElement*						rightImage;
+
+					compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal(compositions::GuiBoundsComposition* decoratedComposition)override;
+				public:
+					/// <summary>Create the data visualizer.</summary>
+					/// <param name="decoratedDataVisualizer">The decorated data visualizer.</param>
+					NotifyIconDataVisualizer(Ptr<IDataVisualizer> decoratedDataVisualizer);
+
+					void												BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)override;
+
+					/// <summary>Get the internal left image element.</summary>
+					/// <returns>The image element.</returns>
+					elements::GuiImageFrameElement*						GetLeftImageElement();
+					/// <summary>Get the internal right image element.</summary>
+					/// <returns>The image element.</returns>
+					elements::GuiImageFrameElement*						GetRightImageElement();
 				};
 
 /***********************************************************************
@@ -185,28 +246,28 @@ Editor Extensions
 					}
 				};
 				
-				/// <summary>Data editor that displays a text box. Use DataTextBoxEditor::Factory as the factory class.</summary>
-				class DataTextBoxEditor : public DataEditorBase
+				/// <summary>Data editor that displays a text box. Use TextBoxDataEditor::Factory as the factory class.</summary>
+				class TextBoxDataEditor : public DataEditorBase
 				{
 				public:
-					typedef DataEditorFactory<DataTextBoxEditor>							Factory;
+					typedef DataEditorFactory<TextBoxDataEditor>							Factory;
 				protected:
 					GuiSinglelineTextBox*								textBox;
 
 					compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal()override;
 				public:
 					/// <summary>Create the data editor.</summary>
-					DataTextBoxEditor();
+					TextBoxDataEditor();
 
 					void												BeforeEditCell(IDataProvider* dataProvider, vint row, vint column)override;
 					GuiSinglelineTextBox*								GetTextBox();
 				};
 				
-				/// <summary>Data editor that displays a text combo box. Use DataTextComboBoxEditor::Factory as the factory class.</summary>
-				class DataTextComboBoxEditor : public DataEditorBase
+				/// <summary>Data editor that displays a text combo box. Use TextComboBoxDataEditor::Factory as the factory class.</summary>
+				class TextComboBoxDataEditor : public DataEditorBase
 				{
 				public:
-					typedef DataEditorFactory<DataTextComboBoxEditor>						Factory;
+					typedef DataEditorFactory<TextComboBoxDataEditor>						Factory;
 				protected:
 					GuiComboBoxListControl*								comboBox;
 					GuiTextList*										textList;
@@ -214,7 +275,7 @@ Editor Extensions
 					compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal()override;
 				public:
 					/// <summary>Create the data editor.</summary>
-					DataTextComboBoxEditor();
+					TextComboBoxDataEditor();
 
 					void												BeforeEditCell(IDataProvider* dataProvider, vint row, vint column)override;
 					GuiComboBoxListControl*								GetComboBoxControl();

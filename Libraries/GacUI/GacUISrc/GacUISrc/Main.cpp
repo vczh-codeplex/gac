@@ -79,6 +79,14 @@ TestWindow
 			dataProvider->GetRowData(row, rowData);
 			return FileTimeToString(rowData->GetLastWriteTime());
 		}
+
+		void VisualizeCell(vint row, list::IDataVisualizer* dataVisualizer)override
+		{
+			StrongTypedColumnProvider::VisualizeCell(row, dataVisualizer);
+			list::NotifyIconDataVisualizer* visualizer=dataVisualizer->GetVisualizer<list::NotifyIconDataVisualizer>();
+			visualizer->GetLeftImageElement()->SetImage(dataProvider->GetRowLargeImage(row)->GetImage());
+			visualizer->GetRightImageElement()->SetImage(dataProvider->GetRowSmallImage(row)->GetImage());
+		}
 	};
 	
 	class FileSizeColumnProvider : public list::StrongTypedColumnProvider<Ptr<FileProperties>, signed __int64>
@@ -113,6 +121,32 @@ TestWindow
 			{
 				return FileSizeToString(rowData->GetSize());
 			}
+		}
+	};
+	
+	class FileImageColumnProvider : public list::StrongTypedColumnProvider<Ptr<FileProperties>, Ptr<GuiImageData>>
+	{
+	public:
+		FileImageColumnProvider(list::StrongTypedDataProvider<Ptr<FileProperties>>* _dataProvider)
+			:StrongTypedColumnProvider(_dataProvider)
+		{
+		}
+
+		void GetCellData(const Ptr<FileProperties>& rowData, Ptr<GuiImageData>& cellData)override
+		{
+			cellData=rowData->GetSmallIcon();
+		}
+
+		WString GetCellText(vint row)override
+		{
+			return L"";
+		}
+
+		void VisualizeCell(vint row, list::IDataVisualizer* dataVisualizer)override
+		{
+			StrongTypedColumnProvider::VisualizeCell(row, dataVisualizer);
+			list::ImageDataVisualizer* visualizer=dataVisualizer->GetVisualizer<list::ImageDataVisualizer>();
+			visualizer->GetImageElement()->SetImage(dataProvider->GetRowLargeImage(row)->GetImage());
 		}
 	};
 	
@@ -236,16 +270,24 @@ TestWindow
 		DataProvider()
 		{
 			AddSortableStrongTypedColumn<WString>(L"Name", new FileNameColumnProvider(this))
+				->SetVisualizerFactory(new list::CellBorderDataVisualizer::Factory(new list::ListViewMainColumnDataVisualizer::Factory))
 				->SetSize(240);
 
 			AddSortableStrongTypedColumn<unsigned __int64>(L"Data modified", new FileDateColumnProvider(this))
-				->SetSize(120);
+				->SetVisualizerFactory(new list::CellBorderDataVisualizer::Factory(new list::NotifyIconDataVisualizer::Factory(new list::ListViewSubColumnDataVisualizer::Factory)))
+				->SetSize(200);
 
 			AddSortableStrongTypedColumn<WString>(L"Type", new FileTypeColumnProvider(this))
+				->SetVisualizerFactory(new list::CellBorderDataVisualizer::Factory(new list::HyperlinkDataVisualizer::Factory))
 				->SetSize(160);
 
 			AddSortableStrongTypedColumn<signed __int64>(L"Size", new FileSizeColumnProvider(this))
+				->SetVisualizerFactory(new list::CellBorderDataVisualizer::Factory(new list::ListViewSubColumnDataVisualizer::Factory))
 				->SetSize(100);
+
+			AddSortableStrongTypedColumn<Ptr<GuiImageData>>(L"Big Icon", new FileImageColumnProvider(this))
+				->SetVisualizerFactory(new list::CellBorderDataVisualizer::Factory(new list::ImageDataVisualizer::Factory))
+				->SetSize(40);
 
 			List<WString> directories, files;
 			WString path=GetWindowsDirectory();

@@ -1518,28 +1518,28 @@ Type Declaration
 				CLASS_MEMBER_CONSTRUCTOR(Ptr<CellBorderDataVisualizer::Factory>(Ptr<IDataVisualizerFactory>), {L"decoratedFactory"})
 			END_CLASS_MEMBER(CellBorderDataVisualizer::Factory)
 
-			BEGIN_CLASS_MEMBER(DataTextBoxEditor)
+			BEGIN_CLASS_MEMBER(TextBoxDataEditor)
 				CLASS_MEMBER_BASE(IDataEditor)
 
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(TextBox)
-			END_CLASS_MEMBER(DataTextBoxEditor)
+			END_CLASS_MEMBER(TextBoxDataEditor)
 
-			BEGIN_CLASS_MEMBER(DataTextBoxEditor::Factory)
+			BEGIN_CLASS_MEMBER(TextBoxDataEditor::Factory)
 				CLASS_MEMBER_BASE(IDataEditorFactory)
-				CLASS_MEMBER_CONSTRUCTOR(Ptr<DataTextBoxEditor::Factory>(), NO_PARAMETER)
-			END_CLASS_MEMBER(DataTextBoxEditor::Factory)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<TextBoxDataEditor::Factory>(), NO_PARAMETER)
+			END_CLASS_MEMBER(TextBoxDataEditor::Factory)
 
-			BEGIN_CLASS_MEMBER(DataTextComboBoxEditor)
+			BEGIN_CLASS_MEMBER(TextComboBoxDataEditor)
 				CLASS_MEMBER_BASE(IDataEditor)
 
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(ComboBoxControl)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(TextListControl)
-			END_CLASS_MEMBER(DataTextComboBoxEditor)
+			END_CLASS_MEMBER(TextComboBoxDataEditor)
 
-			BEGIN_CLASS_MEMBER(DataTextComboBoxEditor::Factory)
+			BEGIN_CLASS_MEMBER(TextComboBoxDataEditor::Factory)
 				CLASS_MEMBER_BASE(IDataEditorFactory)
-				CLASS_MEMBER_CONSTRUCTOR(Ptr<DataTextComboBoxEditor::Factory>(), NO_PARAMETER)
-			END_CLASS_MEMBER(DataTextComboBoxEditor::Factory)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<TextComboBoxDataEditor::Factory>(), NO_PARAMETER)
+			END_CLASS_MEMBER(TextComboBoxDataEditor::Factory)
 
 #undef INTERFACE_IDENTIFIER
 #undef CONTROL_CONSTRUCTOR_CONTROLLER

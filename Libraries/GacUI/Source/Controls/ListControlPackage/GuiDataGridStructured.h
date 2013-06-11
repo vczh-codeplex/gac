@@ -391,10 +391,10 @@ Strong Typed DataSource Extensions
 					{
 					}
 
-					 WString GetCellDataText(const TColumn& cellData)override
-					 {
-						 return description::BoxValue<TColumn>(cellData).GetText();
-					 }
+					WString GetCellDataText(const TColumn& cellData)override
+					{
+						return description::BoxValue<TColumn>(cellData).GetText();
+					}
 				};
 
 				template<typename TRow, typename TColumn>
