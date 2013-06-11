@@ -38,6 +38,7 @@ TestWindow
 	class TestWindow : public GuiWindow
 	{
 	private:
+		GuiDatePicker*						datePicker;
 	public:
 		TestWindow()
 			:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
@@ -47,6 +48,31 @@ TestWindow
 			GetContainerComposition()->SetPreferredMinSize(Size(320, 240));
 			ForceCalculateSizeImmediately();
 			MoveToScreenCenter();
+
+			datePicker=g::NewDatePicker();
+			SetText(datePicker->GetText());
+			datePicker->DateChanged.AttachLambda([=](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+			{
+				SetText(datePicker->GetText());
+			});
+
+			GuiTableComposition* table=new GuiTableComposition;
+			GetBoundsComposition()->AddChild(table);
+			table->SetAlignmentToParent(Margin(0, 0, 0, 0));
+			table->SetRowsAndColumns(3, 3);
+			table->SetRowOption(0, GuiCellOption::PercentageOption(0.5));
+			table->SetRowOption(1, GuiCellOption::MinSizeOption());
+			table->SetRowOption(2, GuiCellOption::PercentageOption(0.5));
+			table->SetColumnOption(0, GuiCellOption::PercentageOption(0.5));
+			table->SetColumnOption(1, GuiCellOption::MinSizeOption());
+			table->SetColumnOption(2, GuiCellOption::PercentageOption(0.5));
+			{
+				GuiCellComposition* cell=new GuiCellComposition;
+				table->AddChild(cell);
+				cell->SetSite(1, 1, 1, 1);
+
+				cell->AddChild(datePicker->GetBoundsComposition());
+			}
 		}
 
 		~TestWindow()

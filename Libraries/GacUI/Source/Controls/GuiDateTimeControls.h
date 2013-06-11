@@ -41,9 +41,30 @@ DatePicker
 				class StyleController : public Object, public virtual GuiControl::IStyleController, public Description<StyleController>
 				{
 				protected:
+					static const vint									DaysOfWeek=7;
+					static const vint									DayRows=6;
+					static const vint									DayRowStart=2;
+					static const vint									YearFirst=1990;
+					static const vint									YearLast=2099;
+
 					IStyleProvider*										styleProvider;
 					GuiDatePicker*										datePicker;
 					DateTime											currentDate;
+					Locale												dateLocale;
+					compositions::GuiTableComposition*					boundsComposition;
+
+					GuiComboBoxListControl*								comboYear;
+					GuiTextList*										listYears;
+					GuiComboBoxListControl*								comboMonth;
+					GuiTextList*										listMonths;
+					collections::Array<elements::GuiSolidLabelElement*>	labelDaysOfWeek;
+					collections::Array<GuiSelectableButton*>			buttonDays;
+					collections::Array<elements::GuiSolidLabelElement*>	labelDays;
+					collections::Array<DateTime>						dateDays;
+					Ptr<GuiSelectableButton::GroupController>			dayMutexController;
+
+					void												DisplayMonth(int year, vint month);
+					void												SelectDay(vint day);
 				public:
 					StyleController(IStyleProvider* _styleProvider);
 					~StyleController();
@@ -56,6 +77,7 @@ DatePicker
 					void												SetVisuallyEnabled(bool value)override;
 					
 					void												SetDatePicker(GuiDatePicker* _datePicker);
+					void												SetDateLocale(const Locale& _dateLocale);
 					const DateTime&										GetDate();
 					void												SetDate(const DateTime& value);
 				};
