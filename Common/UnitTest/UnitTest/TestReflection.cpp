@@ -214,6 +214,21 @@ namespace test
 		WString legals[]={L"a", L"b", L"c"};
 		TestLiteral<WString, sizeof(legals)/sizeof(*legals), 0>(legals, 0, legals);
 	}
+
+	void TestDateTime()
+	{
+		WString legalsText[]={L"2000-01-01 00:00:00.000", L"2012-12-21 13:30:45.123", L"2013-06-11 14:30:00.000"};
+		WString illegalsText[]={L"2000-01-01", L"00:00:00.000", L"2000-01-01 00:00:00"};
+		DateTime legals[]={DateTime::FromDateTime(2000, 1, 1), DateTime::FromDateTime(2012, 12, 21, 13, 30, 45, 123), DateTime::FromDateTime(2013, 6, 11, 14, 30, 0)};
+		TestLiteral<DateTime, sizeof(legalsText)/sizeof(*legalsText), sizeof(illegalsText)/sizeof(*illegalsText)>(legalsText, illegalsText, legals);
+	}
+
+	void TestLocale()
+	{
+		WString legalsText[]={L"zh-CN", L"en-US"};
+		Locale legals[]={Locale(L"zh-CN"), Locale(L"en-US")};
+		TestLiteral<Locale, sizeof(legalsText)/sizeof(*legalsText), 0>(legalsText, 0, legals);
+	}
 }
 using namespace test;
 
@@ -232,6 +247,8 @@ TEST_CASE(TestReflectionPredefinedType)
 	TestFloat<double>();
 	TestBool();
 	TestString();
+	TestDateTime();
+	TestLocale();
 	TEST_ASSERT(ResetGlobalTypeManager());
 }
 

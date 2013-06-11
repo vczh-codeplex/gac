@@ -331,6 +331,8 @@ Predefined Types
 			template<>struct TypeInfo<bool>{static const wchar_t* TypeName;};
 			template<>struct TypeInfo<wchar_t>{static const wchar_t* TypeName;};
 			template<>struct TypeInfo<WString>{static const wchar_t* TypeName;};
+			template<>struct TypeInfo<DateTime>{static const wchar_t* TypeName;};
+			template<>struct TypeInfo<Locale>{static const wchar_t* TypeName;};
 			template<>struct TypeInfo<IValueEnumerator>{static const wchar_t* TypeName;};
 			template<>struct TypeInfo<IValueEnumerable>{static const wchar_t* TypeName;};
 			template<>struct TypeInfo<IValueReadonlyList>{static const wchar_t* TypeName;};

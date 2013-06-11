@@ -12,6 +12,7 @@ XML Representation for Code Generation:
 #include "..\Basic.h"
 #include "..\Pointer.h"
 #include "..\String.h"
+#include "..\Locale.h"
 #include "..\Exception.h"
 #include "..\Function.h"
 #include "..\Collections\List.h"
