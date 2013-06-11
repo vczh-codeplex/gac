@@ -14,8 +14,92 @@ namespace vl
 GuiDatePicker::StyleController
 ***********************************************************************/
 
-			void GuiDatePicker::StyleController::DisplayMonth(int year, vint month)
+			vint GetDayCountForMonth(vint year, vint month)
 			{
+				bool isLeapYear=(year%100==0)?(year%400==0):(year%4==0);
+				switch(month)
+				{
+				case 1:case 3:case 5:case 7:case 8:case 10:case 12:
+					return 31;
+				case 4:case 6:case 9:case 11:
+					return 30;
+				default:
+					return isLeapYear?29:28;
+				}
+			}
+
+			void StepPreviousMonth(vint& year, vint& month)
+			{
+				if(month==1)
+				{
+					year--;
+					month=12;
+				}
+				else
+				{
+					month--;
+				}
+			}
+
+			void StepNextMonth(vint& year, vint& month)
+			{
+				if(month==12)
+				{
+					year++;
+					month=1;
+				}
+				else
+				{
+					month++;
+				}
+			}
+
+			void GuiDatePicker::StyleController::SetDay(const DateTime& day, vint& index, bool currentMonth)
+			{
+				dateDays[index]=day;
+				GuiSolidLabelElement* label=labelDays[index];
+				label->SetText(itow(day.day));
+				label->SetColor(currentMonth?styleProvider->GetPrimaryTextColor():styleProvider->GetSecondaryTextColor());
+				index++;
+			}
+
+			void GuiDatePicker::StyleController::DisplayMonth(vint year, vint month)
+			{
+				if(YearFirst<=year && year<=YearLast && 1<=month && month<=12)
+				{
+					comboYear->SetSelectedIndex(year-YearFirst);
+					comboMonth->SetSelectedIndex(month-1);
+				}
+
+				vint yearPrev=year, yearNext=year, monthPrev=month, monthNext=month;
+				StepPreviousMonth(yearPrev, monthPrev);
+				StepNextMonth(yearNext, monthNext);
+
+				vint countPrev=GetDayCountForMonth(yearPrev, monthPrev);
+				vint count=GetDayCountForMonth(year, month);
+				vint countNext=GetDayCountForMonth(yearNext, monthNext);
+
+				DateTime firstDay=DateTime::FromDateTime(year, month, 1);
+				vint showPrev=firstDay.dayOfWeek;
+				vint show=count;
+				vint showNext=DaysOfWeek*DayRows-showPrev-show;
+
+				vint index=0;
+				for(vint i=0;i<showPrev;i++)
+				{
+					DateTime day=DateTime::FromDateTime(yearPrev, monthPrev, countPrev-(showPrev-i-1));
+					SetDay(day, index, false);
+				}
+				for(vint i=0;i<show;i++)
+				{
+					DateTime day=DateTime::FromDateTime(year, month, i+1);
+					SetDay(day, index, true);
+				}
+				for(vint i=0;i<showNext;i++)
+				{
+					DateTime day=DateTime::FromDateTime(yearNext, month, i+1);
+					SetDay(day, index, false);
+				}
 			}
 
 			void GuiDatePicker::StyleController::SelectDay(vint day)
@@ -35,12 +119,12 @@ GuiDatePicker::StyleController
 						listYears->GetItems().Add(new list::TextItem(itow(i)));
 					}
 					comboYear=new GuiComboBoxListControl(styleProvider->CreateComboBoxStyle(), listYears);
-					comboYear->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 1, 0));
+					comboYear->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 2, 0));
 				}
 				{
 					listMonths=styleProvider->CreateTextList();
 					comboMonth=new GuiComboBoxListControl(styleProvider->CreateComboBoxStyle(), listMonths);
-					comboMonth->GetBoundsComposition()->SetAlignmentToParent(Margin(1, 0, 0, 0));
+					comboMonth->GetBoundsComposition()->SetAlignmentToParent(Margin(2, 0, 0, 0));
 				}
 				{
 					monthTable=new GuiTableComposition;
@@ -66,7 +150,7 @@ GuiDatePicker::StyleController
 				{
 					dayTable=new GuiTableComposition;
 					dayTable->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
-					dayTable->SetCellPadding(2);
+					dayTable->SetCellPadding(4);
 					dayTable->SetRowsAndColumns(DayRows+DayRowStart, DaysOfWeek);
 
 					for(vint i=0;i<DayRowStart;i++)
@@ -116,6 +200,7 @@ GuiDatePicker::StyleController
 
 							GuiSelectableButton* button=new GuiSelectableButton(styleProvider->CreateDateButtonStyle());
 							button->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+							button->SetGroupController(dayMutexController.Obj());
 							cell->AddChild(button->GetBoundsComposition());
 							buttonDays[j*DaysOfWeek+i]=button;
 
@@ -225,7 +310,6 @@ GuiDatePicker
 			{
 				styleController=dynamic_cast<StyleController*>(GetStyleController());
 				styleController->SetDatePicker(this);
-				styleController->SetDate(DateTime::LocalTime());
 
 				dateLocale=Locale::UserDefault();
 				List<WString> formats;
@@ -235,6 +319,7 @@ GuiDatePicker
 					dateFormat=formats[0];
 				}
 				styleController->SetDateLocale(dateLocale);
+				styleController->SetDate(DateTime::LocalTime());
 
 				DateChanged.SetAssociatedComposition(GetBoundsComposition());
 				DateFormatChanged.SetAssociatedComposition(GetBoundsComposition());

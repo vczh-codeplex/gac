@@ -46,8 +46,6 @@ TestWindow
 			SetText(GetApplication()->GetExecutableFolder());
 			GetContainerComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 			GetContainerComposition()->SetPreferredMinSize(Size(320, 240));
-			ForceCalculateSizeImmediately();
-			MoveToScreenCenter();
 
 			datePicker=g::NewDatePicker();
 			SetText(datePicker->GetText());
@@ -71,8 +69,12 @@ TestWindow
 				table->AddChild(cell);
 				cell->SetSite(1, 1, 1, 1);
 
+				datePicker->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 				cell->AddChild(datePicker->GetBoundsComposition());
 			}
+
+			ForceCalculateSizeImmediately();
+			MoveToScreenCenter();
 		}
 
 		~TestWindow()
