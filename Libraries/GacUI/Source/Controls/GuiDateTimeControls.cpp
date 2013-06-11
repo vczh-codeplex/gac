@@ -63,6 +63,28 @@ GuiDatePicker::StyleController
 				index++;
 			}
 
+			void GuiDatePicker::StyleController::buttonDay_SelectedChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				if(!preventButtonEvent)
+				{
+					GuiSelectableButton* button=dynamic_cast<GuiSelectableButton*>(sender->GetRelatedControl());
+					if(button->GetSelected())
+					{
+						vint index=buttonDays.IndexOf(button);
+						if(index!=-1)
+						{
+							DateTime day=dateDays[index];
+							if(day.year!=currentDate.year || day.month!=currentDate.month)
+							{
+								SetDate(day);
+							}
+							currentDate=day;
+							datePicker->NotifyDateChanged();
+						}
+					}
+				}
+			}
+
 			void GuiDatePicker::StyleController::DisplayMonth(vint year, vint month)
 			{
 				if(YearFirst<=year && year<=YearLast && 1<=month && month<=12)
@@ -97,18 +119,30 @@ GuiDatePicker::StyleController
 				}
 				for(vint i=0;i<showNext;i++)
 				{
-					DateTime day=DateTime::FromDateTime(yearNext, month, i+1);
+					DateTime day=DateTime::FromDateTime(yearNext, monthNext, i+1);
 					SetDay(day, index, false);
 				}
 			}
 
 			void GuiDatePicker::StyleController::SelectDay(vint day)
 			{
+				preventButtonEvent=true;
+				for(vint i=0;i<dateDays.Count();i++)
+				{
+					const DateTime& dt=dateDays[i];
+					if(dt.year==currentDate.year && dt.month==currentDate.month && dt.day==day)
+					{
+						buttonDays[i]->SetSelected(true);
+						break;
+					}
+				}
+				preventButtonEvent=false;
 			}
 
 			GuiDatePicker::StyleController::StyleController(IStyleProvider* _styleProvider)
 				:styleProvider(_styleProvider)
 				,datePicker(0)
+				,preventButtonEvent(false)
 			{
 				GuiTableComposition* monthTable=0;
 				GuiTableComposition* dayTable=0;
@@ -201,6 +235,7 @@ GuiDatePicker::StyleController
 							GuiSelectableButton* button=new GuiSelectableButton(styleProvider->CreateDateButtonStyle());
 							button->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 							button->SetGroupController(dayMutexController.Obj());
+							button->SelectedChanged.AttachMethod(this, &StyleController::buttonDay_SelectedChanged);
 							cell->AddChild(button->GetBoundsComposition());
 							buttonDays[j*DaysOfWeek+i]=button;
 
@@ -290,9 +325,12 @@ GuiDatePicker::StyleController
 
 			void GuiDatePicker::StyleController::SetDate(const DateTime& value)
 			{
-				currentDate=value;
-				DisplayMonth(value.year, value.month);
-				SelectDay(value.day);
+				if(currentDate.year!=value.year || currentDate.month!=value.month || currentDate.day!=value.day)
+				{
+					currentDate=value;
+					DisplayMonth(value.year, value.month);
+					SelectDay(value.day);
+				}
 			}
 
 /***********************************************************************
@@ -301,8 +339,8 @@ GuiDatePicker
 
 			void GuiDatePicker::NotifyDateChanged()
 			{
-				DateChanged.Execute(GetNotifyEventArguments());
 				GuiControl::SetText(dateLocale.FormatDate(dateFormat, styleController->GetDate()));
+				DateChanged.Execute(GetNotifyEventArguments());
 			}
 
 			GuiDatePicker::GuiDatePicker(IStyleProvider* _styleProvider)
@@ -319,11 +357,13 @@ GuiDatePicker
 					dateFormat=formats[0];
 				}
 				styleController->SetDateLocale(dateLocale);
-				styleController->SetDate(DateTime::LocalTime());
+				SetDate(DateTime::LocalTime());
 
 				DateChanged.SetAssociatedComposition(GetBoundsComposition());
 				DateFormatChanged.SetAssociatedComposition(GetBoundsComposition());
 				DateLocaleChanged.SetAssociatedComposition(GetBoundsComposition());
+
+				NotifyDateChanged();
 			}
 
 			GuiDatePicker::~GuiDatePicker()
