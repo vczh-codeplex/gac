@@ -178,10 +178,10 @@ Type List
 			F(presentation::controls::list::ListViewSubColumnDataVisualizer::Factory)\
 			F(presentation::controls::list::CellBorderDataVisualizer)\
 			F(presentation::controls::list::CellBorderDataVisualizer::Factory)\
-			F(presentation::controls::list::DataTextBoxEditor)\
-			F(presentation::controls::list::DataTextBoxEditor::Factory)\
-			F(presentation::controls::list::DataTextComboBoxEditor)\
-			F(presentation::controls::list::DataTextComboBoxEditor::Factory)\
+			F(presentation::controls::list::TextBoxDataEditor)\
+			F(presentation::controls::list::TextBoxDataEditor::Factory)\
+			F(presentation::controls::list::TextComboBoxDataEditor)\
+			F(presentation::controls::list::TextComboBoxDataEditor::Factory)\
 
 			GUIREFLECTIONCONTROLS_TYPELIST(DECL_TYPE_INFO)
 
