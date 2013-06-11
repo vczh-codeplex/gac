@@ -97,6 +97,24 @@ DateTime
 		return SystemTimeToDateTime(utcTime);
 	}
 
+	DateTime DateTime::FromDateTime(vint _year, vint _month, vint _day, vint _hour, vint _minute, vint _second, vint _milliseconds)
+	{
+		SYSTEMTIME systemTime;
+		memset(&systemTime, 0, sizeof(systemTime));
+		systemTime.wYear=(WORD)_year;
+		systemTime.wMonth=(WORD)_month;
+		systemTime.wDay=(WORD)_day;
+		systemTime.wHour=(WORD)_hour;
+		systemTime.wMinute=(WORD)_minute;
+		systemTime.wSecond=(WORD)_second;
+		systemTime.wMilliseconds=(WORD)_milliseconds;
+
+		FILETIME fileTime;
+		SystemTimeToFileTime(&systemTime, &fileTime);
+		FileTimeToSystemTime(&fileTime, &systemTime);
+		return SystemTimeToDateTime(systemTime);
+	}
+
 	DateTime DateTime::FromFileTime(unsigned __int64 filetime)
 	{
 		ULARGE_INTEGER largeInteger;

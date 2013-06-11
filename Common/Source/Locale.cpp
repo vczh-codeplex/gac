@@ -159,6 +159,26 @@ Locale
 		return &buffer[0];
 	}
 
+	WString Locale::GetShortDayOfWeekName(vint dayOfWeek)
+	{
+		return FormatDate(L"ddd", DateTime::FromDateTime(2000, 1, 2+dayOfWeek));
+	}
+
+	WString Locale::GetLongDayOfWeekName(vint dayOfWeek)
+	{
+		return FormatDate(L"dddd", DateTime::FromDateTime(2000, 1, 2+dayOfWeek));
+	}
+
+	WString Locale::GetShortMonthName(vint month)
+	{
+		return FormatDate(L"MMM", DateTime::FromDateTime(2000, month, 1));
+	}
+
+	WString Locale::GetLongMonthName(vint month)
+	{
+		return FormatDate(L"MMMM", DateTime::FromDateTime(2000, month, 1));
+	}
+
 	WString Locale::ToFullWidth(const WString& str)
 	{
 		return Transform(localeName, str, LCMAP_FULLWIDTH);

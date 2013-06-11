@@ -35,10 +35,16 @@ namespace vl
 		void						GetYearMonthDateFormats(collections::List<WString>& formats);
 		void						GetLongTimeFormats(collections::List<WString>& formats);
 		void						GetShortTimeFormats(collections::List<WString>& formats);
+
 		WString						FormatDate(const WString& format, DateTime date);
 		WString						FormatTime(const WString& format, DateTime time);
 		WString						FormatNumber(const WString& number);
 		WString						FormatCurrency(const WString& currency);
+
+		WString						GetShortDayOfWeekName(vint dayOfWeek);
+		WString						GetLongDayOfWeekName(vint dayOfWeek);
+		WString						GetShortMonthName(vint month);
+		WString						GetLongMonthName(vint month);
 
 		WString						ToFullWidth(const WString& str);
 		WString						ToHalfWidth(const WString& str);
