@@ -52,6 +52,7 @@ DatePicker
 					DateTime											currentDate;
 					Locale												dateLocale;
 					compositions::GuiTableComposition*					boundsComposition;
+					bool												preventComboEvent;
 					bool												preventButtonEvent;
 
 					GuiComboBoxListControl*								comboYear;
@@ -67,6 +68,7 @@ DatePicker
 					void												SetDay(const DateTime& day, vint& index, bool currentMonth);
 					void												DisplayMonth(vint year, vint month);
 					void												SelectDay(vint day);
+					void												comboYearMonth_SelectedIndexChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 					void												buttonDay_SelectedChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 				public:
 					StyleController(IStyleProvider* _styleProvider);
