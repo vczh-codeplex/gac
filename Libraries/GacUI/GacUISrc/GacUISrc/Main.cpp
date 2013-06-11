@@ -49,6 +49,7 @@ TestWindow
 			GetContainerComposition()->SetPreferredMinSize(Size(320, 240));
 
 			dateComboBox=g::NewDateComboBox();
+			dateComboBox->GetDatePicker()->SetDateLocale(Locale(L"en-US"));
 			dateComboBox->SelectedDateChanged.AttachLambda([=](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 			{
 				SetText(L"GuiDateComboBox: "+dateComboBox->GetText());
@@ -76,16 +77,16 @@ TestWindow
 				table->AddChild(cell);
 				cell->SetSite(1, 1, 1, 1);
 
-				dateComboBox->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-				cell->AddChild(dateComboBox->GetBoundsComposition());
+				datePicker->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				cell->AddChild(datePicker->GetBoundsComposition());
 			}
 			{
 				GuiCellComposition* cell=new GuiCellComposition;
 				table->AddChild(cell);
 				cell->SetSite(2, 1, 1, 1);
 
-				datePicker->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-				cell->AddChild(datePicker->GetBoundsComposition());
+				dateComboBox->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				cell->AddChild(dateComboBox->GetBoundsComposition());
 			}
 
 			ForceCalculateSizeImmediately();

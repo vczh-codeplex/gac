@@ -84,7 +84,7 @@ DatePicker
 					void												SetDatePicker(GuiDatePicker* _datePicker);
 					void												SetDateLocale(const Locale& _dateLocale);
 					const DateTime&										GetDate();
-					void												SetDate(const DateTime& value);
+					void												SetDate(const DateTime& value, bool forceUpdate=false);
 				};
 
 			protected:

@@ -67,10 +67,13 @@ GuiDatePicker::StyleController
 			{
 				if(!preventComboEvent)
 				{
-					vint year=comboYear->GetSelectedIndex()+YearFirst;
-					vint month=comboMonth->GetSelectedIndex()+1;
-					SetDate(DateTime::FromDateTime(year, month, 1));
-					datePicker->NotifyDateChanged();
+					if(comboYear->GetSelectedIndex()!=-1 && comboMonth->GetSelectedIndex()!=-1)
+					{
+						vint year=comboYear->GetSelectedIndex()+YearFirst;
+						vint month=comboMonth->GetSelectedIndex()+1;
+						SetDate(DateTime::FromDateTime(year, month, 1));
+						datePicker->NotifyDateChanged();
+					}
 				}
 			}
 
@@ -339,6 +342,8 @@ GuiDatePicker::StyleController
 				{
 					listMonths->GetItems().Add(new list::TextItem(dateLocale.GetLongMonthName(i)));
 				}
+
+				SetDate(currentDate, true);
 			}
 
 			const DateTime& GuiDatePicker::StyleController::GetDate()
@@ -346,9 +351,9 @@ GuiDatePicker::StyleController
 				return currentDate;
 			}
 
-			void GuiDatePicker::StyleController::SetDate(const DateTime& value)
+			void GuiDatePicker::StyleController::SetDate(const DateTime& value, bool forceUpdate)
 			{
-				if(currentDate.year!=value.year || currentDate.month!=value.month || currentDate.day!=value.day)
+				if(forceUpdate || currentDate.year!=value.year || currentDate.month!=value.month || currentDate.day!=value.day)
 				{
 					currentDate=value;
 					DisplayMonth(value.year, value.month);
@@ -377,14 +382,7 @@ GuiDatePicker
 				styleController=dynamic_cast<StyleController*>(GetStyleController());
 				styleController->SetDatePicker(this);
 
-				dateLocale=Locale::UserDefault();
-				List<WString> formats;
-				dateLocale.GetLongDateFormats(formats);
-				if(formats.Count()>0)
-				{
-					dateFormat=formats[0];
-				}
-				styleController->SetDateLocale(dateLocale);
+				SetDateLocale(Locale::UserDefault());
 				SetDate(DateTime::LocalTime());
 
 				DateChanged.SetAssociatedComposition(GetBoundsComposition());
@@ -428,8 +426,16 @@ GuiDatePicker
 			void GuiDatePicker::SetDateLocale(const Locale& value)
 			{
 				dateLocale=value;
+				List<WString> formats;
+				dateLocale.GetLongDateFormats(formats);
+				if(formats.Count()>0)
+				{
+					dateFormat=formats[0];
+				}
 				styleController->SetDateLocale(dateLocale);
+
 				UpdateText();
+				DateFormatChanged.Execute(GetNotifyEventArguments());
 				DateLocaleChanged.Execute(GetNotifyEventArguments());
 			}
 
@@ -463,8 +469,9 @@ GuiDateComboBox
 				datePicker->DateChanged.AttachMethod(this, &GuiDateComboBox::datePicker_DateChanged);
 
 				datePicker->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-				popup->GetBoundsComposition()->AddChild(datePicker->GetBoundsComposition());
+				popup->GetContainerComposition()->AddChild(datePicker->GetBoundsComposition());
 				SetFont(GetFont());
+				SetText(datePicker->GetText());
 			}
 
 			GuiDateComboBox::~GuiDateComboBox()
