@@ -5011,669 +5011,6 @@ Scroll View
 #endif
 
 /***********************************************************************
-CONTROLS\TEXTEDITORPACKAGE\GUITEXTGENERALOPERATIONS.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-GacUI::Control System
-
-Interfaces:
-***********************************************************************/
-
-#ifndef VCZH_PRESENTATION_CONTROLS_GUITEXTELEMENTOPERATOR
-#define VCZH_PRESENTATION_CONTROLS_GUITEXTELEMENTOPERATOR
-
-
-namespace vl
-{
-	namespace presentation
-	{
-		namespace controls
-		{
-
-/***********************************************************************
-Common Operations
-***********************************************************************/
-
-			class ICommonTextEditCallback : public virtual IDescriptable, public Description<ICommonTextEditCallback>
-			{
-			public:
-				virtual void							Attach(elements::GuiColorizedTextElement* element, SpinLock& elementModifyLock)=0;
-				virtual void							Detach()=0;
-				virtual void							TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)=0;
-			};
-		}
-	}
-}
-
-#endif
-
-/***********************************************************************
-CONTROLS\TEXTEDITORPACKAGE\GUITEXTCOLORIZER.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-GacUI::Control System
-
-Interfaces:
-***********************************************************************/
-
-#ifndef VCZH_PRESENTATION_CONTROLS_GUITEXTCOLORIZER
-#define VCZH_PRESENTATION_CONTROLS_GUITEXTCOLORIZER
-
-
-namespace vl
-{
-	namespace presentation
-	{
-		namespace controls
-		{
-
-/***********************************************************************
-Colorizer
-***********************************************************************/
-			
-			class GuiTextBoxColorizerBase : public Object, public ICommonTextEditCallback
-			{
-			public:
-				typedef collections::Array<elements::text::ColorEntry>			ColorArray;
-			protected:
-				elements::GuiColorizedTextElement*			element;
-				SpinLock*									elementModifyLock;
-				volatile vint								colorizedLineCount;
-				volatile bool								isColorizerRunning;
-				volatile bool								isFinalizing;
-				SpinLock									colorizerRunningEvent;
-
-				static void									ColorizerThreadProc(void* argument);
-
-				void										StartColorizer();
-				void										StopColorizer();
-			public:
-				GuiTextBoxColorizerBase();
-				~GuiTextBoxColorizerBase();
-
-				void										Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock)override;
-				void										Detach()override;
-				void										TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)override;
-				void										RestartColorizer();
-
-				virtual vint								GetLexerStartState()=0;
-				virtual vint								GetContextStartState()=0;
-				virtual void								ColorizeLineWithCRLF(vint lineIndex, const wchar_t* text, unsigned __int32* colors, vint length, vint& lexerState, vint& contextState)=0;
-				virtual const ColorArray&					GetColors()=0;
-			};
-
-			class GuiTextBoxRegexColorizer : public GuiTextBoxColorizerBase
-			{
-			protected:
-				Ptr<regex::RegexLexer>										lexer;
-				Ptr<regex::RegexLexerColorizer>								colorizer;
-				ColorArray													colors;
-
-				elements::text::ColorEntry									defaultColor;
-				collections::List<WString>									tokenRegexes;
-				collections::List<elements::text::ColorEntry>				tokenColors;
-				collections::List<elements::text::ColorEntry>				extraTokenColors;
-
-				static void													ColorizerProc(void* argument, vint start, vint length, vint token);
-			public:
-				GuiTextBoxRegexColorizer();
-				~GuiTextBoxRegexColorizer();
-
-				elements::text::ColorEntry									GetDefaultColor();
-				collections::List<WString>&									GetTokenRegexes();
-				collections::List<elements::text::ColorEntry>&				GetTokenColors();
-				collections::List<elements::text::ColorEntry>&				GetExtraTokenColors();
-				vint														GetExtraTokenIndexStart();
-				
-				bool														SetDefaultColor(elements::text::ColorEntry value);
-				vint														AddToken(const WString& regex, elements::text::ColorEntry color);
-				vint														AddExtraToken(elements::text::ColorEntry color);
-				bool														Setup();
-				virtual void												ColorizeTokenContextSensitive(vint lineIndex, const wchar_t* text, vint start, vint length, vint& token, vint& contextState);
-
-				vint														GetLexerStartState()override;
-				vint														GetContextStartState()override;
-				void														ColorizeLineWithCRLF(vint lineIndex, const wchar_t* text, unsigned __int32* colors, vint length, vint& lexerState, vint& contextState)override;
-				const ColorArray&											GetColors()override;
-			};
-		}
-	}
-}
-
-#endif
-
-/***********************************************************************
-CONTROLS\TEXTEDITORPACKAGE\GUITEXTUNDOREDO.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-GacUI::Control System
-
-Interfaces:
-***********************************************************************/
-
-#ifndef VCZH_PRESENTATION_CONTROLS_GUITEXTUNDOREDO
-#define VCZH_PRESENTATION_CONTROLS_GUITEXTUNDOREDO
-
-
-namespace vl
-{
-	namespace presentation
-	{
-		namespace controls
-		{
-
-			class GuiTextBoxCommonInterface;
-
-/***********************************************************************
-Undo Redo
-***********************************************************************/
-
-			class GuiGeneralUndoRedoProcessor : public Object
-			{
-			protected:
-				class IEditStep : public Interface
-				{
-				public:
-					virtual void							Undo()=0;
-					virtual void							Redo()=0;
-				};
-				friend class collections::ArrayBase<Ptr<IEditStep>>;
-
-			protected:
-				collections::List<Ptr<IEditStep>>			steps;
-				vint										firstFutureStep;
-				vint										savedStep;
-				bool										performingUndoRedo;
-
-				void										PushStep(Ptr<IEditStep> step);
-			public:
-				GuiGeneralUndoRedoProcessor();
-				~GuiGeneralUndoRedoProcessor();
-
-				bool										CanUndo();
-				bool										CanRedo();
-				void										ClearUndoRedo();
-				bool										GetModified();
-				void										NotifyModificationSaved();
-				bool										Undo();
-				bool										Redo();
-			};
-
-			class GuiTextBoxUndoRedoProcessor : public GuiGeneralUndoRedoProcessor, public ICommonTextEditCallback
-			{
-			protected:
-				class EditStep : public Object, public IEditStep
-				{
-				public:
-					GuiTextBoxUndoRedoProcessor*			processor;
-					TextPos									originalStart;
-					TextPos									originalEnd;
-					WString									originalText;
-					TextPos									inputStart;
-					TextPos									inputEnd;
-					WString									inputText;
-					
-					void									Undo();
-					void									Redo();
-				};
-
-				GuiTextBoxCommonInterface*					textBoxCommonInterface;
-			public:
-				GuiTextBoxUndoRedoProcessor(GuiTextBoxCommonInterface* _textBoxCommonInterface);
-				~GuiTextBoxUndoRedoProcessor();
-
-				void										Attach(elements::GuiColorizedTextElement* element, SpinLock& elementModifyLock);
-				void										Detach();
-				void										TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText);
-			};
-		}
-	}
-}
-
-#endif
-
-/***********************************************************************
-CONTROLS\TEXTEDITORPACKAGE\GUITEXTCOMMONINTERFACE.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-GacUI::Control System
-
-Interfaces:
-***********************************************************************/
-
-#ifndef VCZH_PRESENTATION_CONTROLS_GUITEXTCOMMONINTERFACE
-#define VCZH_PRESENTATION_CONTROLS_GUITEXTCOMMONINTERFACE
-
-
-namespace vl
-{
-	namespace presentation
-	{
-		namespace controls
-		{
-
-/***********************************************************************
-Common Interface
-***********************************************************************/
-
-			class GuiTextBoxCommonInterface abstract : public Description<GuiTextBoxCommonInterface>
-			{
-			protected:
-				class ICallback : public virtual IDescriptable, public Description<ICallback>
-				{
-				public:
-					virtual TextPos									GetLeftWord(TextPos pos)=0;
-					virtual TextPos									GetRightWord(TextPos pos)=0;
-					virtual void									GetWord(TextPos pos, TextPos& begin, TextPos& end)=0;
-					virtual vint									GetPageRows()=0;
-					virtual bool									BeforeModify(TextPos start, TextPos end, const WString& originalText, WString& inputText)=0;
-					virtual void									AfterModify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)=0;
-					virtual void									ScrollToView(Point point)=0;
-					virtual vint									GetTextMargin()=0;
-				};
-
-				class DefaultCallback : public Object, public ICallback, public Description<DefaultCallback>
-				{
-				protected:
-					elements::GuiColorizedTextElement*				textElement;
-					compositions::GuiGraphicsComposition*			textComposition;
-					bool											readonly;
-				public:
-					DefaultCallback(elements::GuiColorizedTextElement* _textElement, compositions::GuiGraphicsComposition* _textComposition);
-					~DefaultCallback();
-
-					TextPos											GetLeftWord(TextPos pos)override;
-					TextPos											GetRightWord(TextPos pos)override;
-					void											GetWord(TextPos pos, TextPos& begin, TextPos& end)override;
-					vint											GetPageRows()override;
-					bool											BeforeModify(TextPos start, TextPos end, const WString& originalText, WString& inputText)override;
-				};
-
-			public:
-				class ShortcutCommand
-				{
-				protected:
-					bool											ctrl;
-					bool											shift;
-					vint											key;
-					Func<void()>									action;
-				public:
-					ShortcutCommand(bool _ctrl, bool _shift, vint _key, const Func<void()> _action);
-					ShortcutCommand(bool _ctrl, bool _shift, vint _key, const Func<bool()> _action);
-					~ShortcutCommand();
-
-					bool											IsTheRightKey(bool _ctrl, bool _shift, vint _key);
-					void											Execute();
-				};
-
-			private:
-				elements::GuiColorizedTextElement*					textElement;
-				compositions::GuiGraphicsComposition*				textComposition;
-				GuiControl*											textControl;
-				ICallback*											callback;
-				bool												dragging;
-				bool												readonly;
-				Ptr<GuiTextBoxColorizerBase>						colorizer;
-				Ptr<GuiTextBoxUndoRedoProcessor>					undoRedoProcessor;
-
-				SpinLock											elementModifyLock;
-				collections::List<Ptr<ICommonTextEditCallback>>		textEditCallbacks;
-				collections::List<Ptr<ShortcutCommand>>				shortcutCommands;
-
-				void												UpdateCaretPoint();
-				void												Move(TextPos pos, bool shift);
-				void												Modify(TextPos start, TextPos end, const WString& input);
-				bool												ProcessKey(vint code, bool shift, bool ctrl);
-					
-				void												OnGotFocus(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
-				void												OnLostFocus(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
-				void												OnCaretNotify(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
-
-				void												OnLeftButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
-				void												OnLeftButtonUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
-				void												OnMouseMove(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
-				void												OnKeyDown(compositions::GuiGraphicsComposition* sender, compositions::GuiKeyEventArgs& arguments);
-				void												OnCharInput(compositions::GuiGraphicsComposition* sender, compositions::GuiCharEventArgs& arguments);
-
-			protected:
-
-				void												Install(elements::GuiColorizedTextElement* _textElement, compositions::GuiGraphicsComposition* _textComposition, GuiControl* _textControl);
-				ICallback*											GetCallback();
-				void												SetCallback(ICallback* value);
-				bool												AttachTextEditCallback(Ptr<ICommonTextEditCallback> value);
-				bool												DetachTextEditCallback(Ptr<ICommonTextEditCallback> value);
-				void												AddShortcutCommand(Ptr<ShortcutCommand> shortcutCommand);
-				elements::GuiColorizedTextElement*					GetTextElement();
-				void												UnsafeSetText(const WString& value);
-
-			public:
-				GuiTextBoxCommonInterface();
-				~GuiTextBoxCommonInterface();
-
-				compositions::GuiNotifyEvent						SelectionChanged;
-
-				//================ clipboard operations
-
-				bool												CanCut();
-				bool												CanCopy();
-				bool												CanPaste();
-				bool												Cut();
-				bool												Copy();
-				bool												Paste();
-
-				//================ editing control
-
-				bool												GetReadonly();
-				void												SetReadonly(bool value);
-
-				//================ text operations
-
-				void												SelectAll();
-				void												Select(TextPos begin, TextPos end);
-				WString												GetSelectionText();
-				void												SetSelectionText(const WString& value);
-				
-				WString												GetRowText(vint row);
-				WString												GetFragmentText(TextPos start, TextPos end);
-
-				TextPos												GetCaretBegin();
-				TextPos												GetCaretEnd();
-				TextPos												GetCaretSmall();
-				TextPos												GetCaretLarge();
-
-				//================ position query
-
-				vint												GetRowWidth(vint row);
-				vint												GetRowHeight();
-				vint												GetMaxWidth();
-				vint												GetMaxHeight();
-				TextPos												GetTextPosFromPoint(Point point);
-				Point												GetPointFromTextPos(TextPos pos);
-				Rect												GetRectFromTextPos(TextPos pos);
-				TextPos												GetNearestTextPos(Point point);
-
-				//================ colorizing
-
-				Ptr<GuiTextBoxColorizerBase>						GetColorizer();
-				void												SetColorizer(Ptr<GuiTextBoxColorizerBase> value);
-
-				//================ undo redo control
-
-				bool												CanUndo();
-				bool												CanRedo();
-				void												ClearUndoRedo();
-				bool												GetModified();
-				void												NotifyModificationSaved();
-				bool												Undo();
-				bool												Redo();
-			};
-		}
-	}
-}
-
-#endif
-
-/***********************************************************************
-CONTROLS\TEXTEDITORPACKAGE\GUITEXTCONTROLS.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-GacUI::Control System
-
-Interfaces:
-***********************************************************************/
-
-#ifndef VCZH_PRESENTATION_CONTROLS_GUITEXTCONTROLS
-#define VCZH_PRESENTATION_CONTROLS_GUITEXTCONTROLS
-
-
-namespace vl
-{
-	namespace presentation
-	{
-		namespace controls
-		{
-
-/***********************************************************************
-MultilineTextBox
-***********************************************************************/
-
-			class GuiMultilineTextBox : public GuiScrollView, public GuiTextBoxCommonInterface, public Description<GuiMultilineTextBox>
-			{
-			public:
-				static const vint							TextMargin=3;
-
-				class StyleController : public GuiScrollView::StyleController, public Description<StyleController>
-				{
-				protected:
-					elements::GuiColorizedTextElement*			textElement;
-					compositions::GuiBoundsComposition*			textComposition;
-					GuiMultilineTextBox*						textBox;
-					Ptr<GuiTextBoxCommonInterface::ICallback>	defaultCallback;
-
-				public:
-					StyleController(GuiScrollView::IStyleProvider* styleProvider);
-					~StyleController();
-
-					void									Initialize(GuiMultilineTextBox* control);
-					elements::GuiColorizedTextElement*		GetTextElement();
-					compositions::GuiGraphicsComposition*	GetTextComposition();
-					void									SetViewPosition(Point value);
-					void									SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
-
-					WString									GetText();
-					void									SetText(const WString& value)override;
-					void									SetFont(const FontProperties& value)override;
-					void									SetVisuallyEnabled(bool value)override;
-				};
-
-			protected:
-				class TextElementOperatorCallback : public GuiTextBoxCommonInterface::DefaultCallback, public Description<TextElementOperatorCallback>
-				{
-				protected:
-					GuiMultilineTextBox*					textControl;
-					StyleController*						textController;
-				public:
-					TextElementOperatorCallback(GuiMultilineTextBox* _textControl);
-
-					void									AfterModify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)override;
-					void									ScrollToView(Point point)override;
-					vint									GetTextMargin()override;
-				};
-
-			protected:
-				StyleController*							styleController;
-
-				void										CalculateViewAndSetScroll();
-				void										OnRenderTargetChanged(elements::IGuiGraphicsRenderTarget* renderTarget)override;
-				Size										QueryFullSize()override;
-				void										UpdateView(Rect viewBounds)override;
-				void										OnBoundsMouseButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
-			public:
-				GuiMultilineTextBox(GuiMultilineTextBox::IStyleProvider* styleProvider);
-				~GuiMultilineTextBox();
-
-				const WString&								GetText()override;
-				void										SetText(const WString& value)override;
-				void										SetFont(const FontProperties& value)override;
-			};
-
-/***********************************************************************
-SinglelineTextBox
-***********************************************************************/
-			
-			class GuiSinglelineTextBox : public GuiControl, public GuiTextBoxCommonInterface, public Description<GuiSinglelineTextBox>
-			{
-			public:
-				static const vint							TextMargin=3;
-				
-				class IStyleProvider : public virtual GuiControl::IStyleProvider, public Description<IStyleProvider>
-				{
-				public:
-					virtual compositions::GuiGraphicsComposition*		InstallBackground(compositions::GuiBoundsComposition* background)=0;
-				};
-
-				class StyleController : public Object, public GuiControl::IStyleController, public Description<StyleController>
-				{
-				protected:
-					Ptr<IStyleProvider>							styleProvider;
-					compositions::GuiBoundsComposition*			boundsComposition;
-					compositions::GuiGraphicsComposition*		containerComposition;
-
-					GuiSinglelineTextBox*						textBox;
-					elements::GuiColorizedTextElement*			textElement;
-					compositions::GuiTableComposition*			textCompositionTable;
-					compositions::GuiCellComposition*			textComposition;
-					Ptr<GuiTextBoxCommonInterface::ICallback>	defaultCallback;
-
-				public:
-					StyleController(IStyleProvider* _styleProvider);
-					~StyleController();
-
-					void									SetTextBox(GuiSinglelineTextBox* control);
-					void									RearrangeTextElement();
-					compositions::GuiBoundsComposition*		GetBoundsComposition();
-					compositions::GuiGraphicsComposition*	GetContainerComposition();
-					void									SetFocusableComposition(compositions::GuiGraphicsComposition* value);
-
-					WString									GetText();
-					void									SetText(const WString& value);
-					void									SetFont(const FontProperties& value);
-					void									SetVisuallyEnabled(bool value);
-
-					elements::GuiColorizedTextElement*		GetTextElement();
-					compositions::GuiGraphicsComposition*	GetTextComposition();
-					void									SetViewPosition(Point value);
-				};
-				
-			protected:
-				class TextElementOperatorCallback : public GuiTextBoxCommonInterface::DefaultCallback, public Description<TextElementOperatorCallback>
-				{
-				protected:
-					GuiSinglelineTextBox*					textControl;
-					StyleController*						textController;
-				public:
-					TextElementOperatorCallback(GuiSinglelineTextBox* _textControl);
-
-					bool									BeforeModify(TextPos start, TextPos end, const WString& originalText, WString& inputText)override;
-					void									AfterModify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)override;
-					void									ScrollToView(Point point)override;
-					vint									GetTextMargin()override;
-				};
-			protected:
-				StyleController*							styleController;
-				
-				void										OnRenderTargetChanged(elements::IGuiGraphicsRenderTarget* renderTarget)override;
-				void										OnBoundsMouseButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
-			public:
-				GuiSinglelineTextBox(GuiSinglelineTextBox::IStyleProvider* styleProvider);
-				~GuiSinglelineTextBox();
-
-				const WString&								GetText()override;
-				void										SetText(const WString& value)override;
-				void										SetFont(const FontProperties& value)override;
-				wchar_t										GetPasswordChar();
-				void										SetPasswordChar(wchar_t value);
-			};
-		}
-	}
-}
-
-#endif
-
-/***********************************************************************
-CONTROLS\TEXTEDITORPACKAGE\GUIDOCUMENTVIEWER.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-GacUI::Control System
-
-Interfaces:
-***********************************************************************/
-
-#ifndef VCZH_PRESENTATION_CONTROLS_GUIDOCUMENTVIEWER
-#define VCZH_PRESENTATION_CONTROLS_GUIDOCUMENTVIEWER
-
-
-namespace vl
-{
-	namespace presentation
-	{
-		namespace controls
-		{
-
-/***********************************************************************
-GuiDocumentCommonInterface
-***********************************************************************/
-			
-			class GuiDocumentCommonInterface abstract : public Description<GuiDocumentCommonInterface>
-			{
-			protected:
-				elements::GuiDocumentElement*				documentElement;
-				compositions::GuiBoundsComposition*			documentComposition;
-				vint										activeHyperlinkId;
-				vint										draggingHyperlinkId;
-				bool										dragging;
-				GuiControl*									senderControl;
-
-				void										InstallDocumentViewer(GuiControl* _sender, compositions::GuiGraphicsComposition* _container);
-				void										SetActiveHyperlinkId(vint value);
-				void										OnMouseMove(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
-				void										OnMouseDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
-				void										OnMouseUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
-				void										OnMouseLeave(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
-			public:
-				GuiDocumentCommonInterface();
-				~GuiDocumentCommonInterface();
-
-				compositions::GuiNotifyEvent				ActiveHyperlinkChanged;
-				compositions::GuiNotifyEvent				ActiveHyperlinkExecuted;
-				
-				Ptr<DocumentModel>							GetDocument();
-				void										SetDocument(Ptr<DocumentModel> value);
-				void										NotifyParagraphUpdated(vint index);
-				vint										GetActiveHyperlinkId();
-				WString										GetActiveHyperlinkReference();
-			};
-
-/***********************************************************************
-GuiDocumentViewer
-***********************************************************************/
-			
-			class GuiDocumentViewer : public GuiScrollContainer, public GuiDocumentCommonInterface, public Description<GuiDocumentViewer>
-			{
-			public:
-				GuiDocumentViewer(GuiDocumentViewer::IStyleProvider* styleProvider);
-				~GuiDocumentViewer();
-			};
-
-/***********************************************************************
-GuiDocumentViewer
-***********************************************************************/
-			
-			class GuiDocumentLabel : public GuiControl, public GuiDocumentCommonInterface, public Description<GuiDocumentLabel>
-			{
-			public:
-				GuiDocumentLabel(GuiDocumentLabel::IStyleController* styleController);
-				~GuiDocumentLabel();
-			};
-		}
-	}
-}
-
-#endif
-
-/***********************************************************************
 CONTROLS\LISTCONTROLPACKAGE\GUILISTCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
@@ -7741,7 +7078,6 @@ ComboBox Base
 
 				compositions::GuiNotifyEvent				PopupOpened;
 				compositions::GuiNotifyEvent				PopupClosed;
-				compositions::GuiNotifyEvent				ItemSelecting;
 				compositions::GuiNotifyEvent				ItemSelected;
 
 				void										ShowPopup();
@@ -7772,6 +7108,812 @@ ComboBox with GuiListControl
 				vint										GetSelectedIndex();
 				void										SetSelectedIndex(vint value);
 				GuiListControl::IItemProvider*				GetItemProvider();
+			};
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+CONTROLS\GUIDATETIMECONTROLS.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+GacUI::Control System
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_CONTROLS_GUIDATETIMECONTROLS
+#define VCZH_PRESENTATION_CONTROLS_GUIDATETIMECONTROLS
+
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace controls
+		{
+
+/***********************************************************************
+DatePicker
+***********************************************************************/
+
+			class GuiDatePicker : public GuiControl, public Description<GuiDatePicker>
+			{
+			public:
+				class IStyleProvider : public virtual GuiControl::IStyleProvider, public Description<IStyleProvider>
+				{
+				public:
+					virtual GuiSelectableButton::IStyleController*		CreateDateButtonStyle()=0;
+					virtual GuiTextList*								CreateTextList()=0;
+					virtual GuiComboBoxListControl::IStyleController*	CreateComboBoxStyle()=0;
+
+					virtual Color										GetBackgroundColor()=0;
+					virtual Color										GetPrimaryTextColor()=0;
+					virtual Color										GetSecondaryTextColor()=0;
+				};
+
+				class StyleController : public Object, public virtual GuiControl::IStyleController, public Description<StyleController>
+				{
+				protected:
+					static const vint									DaysOfWeek=7;
+					static const vint									DayRows=6;
+					static const vint									DayRowStart=2;
+					static const vint									YearFirst=1990;
+					static const vint									YearLast=2099;
+
+					IStyleProvider*										styleProvider;
+					GuiDatePicker*										datePicker;
+					DateTime											currentDate;
+					Locale												dateLocale;
+					compositions::GuiTableComposition*					boundsComposition;
+					bool												preventComboEvent;
+					bool												preventButtonEvent;
+
+					GuiComboBoxListControl*								comboYear;
+					GuiTextList*										listYears;
+					GuiComboBoxListControl*								comboMonth;
+					GuiTextList*										listMonths;
+					collections::Array<elements::GuiSolidLabelElement*>	labelDaysOfWeek;
+					collections::Array<GuiSelectableButton*>			buttonDays;
+					collections::Array<elements::GuiSolidLabelElement*>	labelDays;
+					collections::Array<DateTime>						dateDays;
+					Ptr<GuiSelectableButton::GroupController>			dayMutexController;
+
+					void												SetDay(const DateTime& day, vint& index, bool currentMonth);
+					void												DisplayMonth(vint year, vint month);
+					void												SelectDay(vint day);
+					void												comboYearMonth_SelectedIndexChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+					void												buttonDay_SelectedChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				public:
+					StyleController(IStyleProvider* _styleProvider);
+					~StyleController();
+
+					compositions::GuiBoundsComposition*					GetBoundsComposition()override;
+					compositions::GuiGraphicsComposition*				GetContainerComposition()override;
+					void												SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+					void												SetText(const WString& value)override;
+					void												SetFont(const FontProperties& value)override;
+					void												SetVisuallyEnabled(bool value)override;
+					
+					void												SetDatePicker(GuiDatePicker* _datePicker);
+					void												SetDateLocale(const Locale& _dateLocale);
+					const DateTime&										GetDate();
+					void												SetDate(const DateTime& value, bool forceUpdate=false);
+				};
+
+			protected:
+				StyleController*										styleController;
+				WString													dateFormat;
+				Locale													dateLocale;
+
+				void													UpdateText();
+				void													NotifyDateChanged();
+			public:
+				GuiDatePicker(IStyleProvider* _styleProvider);
+				~GuiDatePicker();
+
+				compositions::GuiNotifyEvent							DateChanged;
+				compositions::GuiNotifyEvent							DateFormatChanged;
+				compositions::GuiNotifyEvent							DateLocaleChanged;
+				
+				const DateTime&											GetDate();
+				void													SetDate(const DateTime& value);
+				const WString&											GetDateFormat();
+				void													SetDateFormat(const WString& value);
+				const Locale&											GetDateLocale();
+				void													SetDateLocale(const Locale& value);
+
+				void													SetText(const WString& value)override;
+			};
+
+/***********************************************************************
+DateComboBox
+***********************************************************************/
+			
+			class GuiDateComboBox : public GuiComboBoxBase, public Description<GuiDateComboBox>
+			{
+			protected:
+				GuiDatePicker*											datePicker;
+				
+				void													datePicker_TextChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void													datePicker_DateChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+			public:
+				GuiDateComboBox(IStyleController* _styleController, GuiDatePicker* _datePicker);
+				~GuiDateComboBox();
+				
+				compositions::GuiNotifyEvent							SelectedDateChanged;
+				
+				void													SetFont(const FontProperties& value)override;
+				const DateTime&											GetSelectedDate();
+				void													SetSelectedDate(const DateTime& value);
+				GuiDatePicker*											GetDatePicker();
+			};
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+CONTROLS\TEXTEDITORPACKAGE\GUITEXTGENERALOPERATIONS.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+GacUI::Control System
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_CONTROLS_GUITEXTELEMENTOPERATOR
+#define VCZH_PRESENTATION_CONTROLS_GUITEXTELEMENTOPERATOR
+
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace controls
+		{
+
+/***********************************************************************
+Common Operations
+***********************************************************************/
+
+			class ICommonTextEditCallback : public virtual IDescriptable, public Description<ICommonTextEditCallback>
+			{
+			public:
+				virtual void							Attach(elements::GuiColorizedTextElement* element, SpinLock& elementModifyLock)=0;
+				virtual void							Detach()=0;
+				virtual void							TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)=0;
+			};
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+CONTROLS\TEXTEDITORPACKAGE\GUITEXTCOLORIZER.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+GacUI::Control System
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_CONTROLS_GUITEXTCOLORIZER
+#define VCZH_PRESENTATION_CONTROLS_GUITEXTCOLORIZER
+
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace controls
+		{
+
+/***********************************************************************
+Colorizer
+***********************************************************************/
+			
+			class GuiTextBoxColorizerBase : public Object, public ICommonTextEditCallback
+			{
+			public:
+				typedef collections::Array<elements::text::ColorEntry>			ColorArray;
+			protected:
+				elements::GuiColorizedTextElement*			element;
+				SpinLock*									elementModifyLock;
+				volatile vint								colorizedLineCount;
+				volatile bool								isColorizerRunning;
+				volatile bool								isFinalizing;
+				SpinLock									colorizerRunningEvent;
+
+				static void									ColorizerThreadProc(void* argument);
+
+				void										StartColorizer();
+				void										StopColorizer();
+			public:
+				GuiTextBoxColorizerBase();
+				~GuiTextBoxColorizerBase();
+
+				void										Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock)override;
+				void										Detach()override;
+				void										TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)override;
+				void										RestartColorizer();
+
+				virtual vint								GetLexerStartState()=0;
+				virtual vint								GetContextStartState()=0;
+				virtual void								ColorizeLineWithCRLF(vint lineIndex, const wchar_t* text, unsigned __int32* colors, vint length, vint& lexerState, vint& contextState)=0;
+				virtual const ColorArray&					GetColors()=0;
+			};
+
+			class GuiTextBoxRegexColorizer : public GuiTextBoxColorizerBase
+			{
+			protected:
+				Ptr<regex::RegexLexer>										lexer;
+				Ptr<regex::RegexLexerColorizer>								colorizer;
+				ColorArray													colors;
+
+				elements::text::ColorEntry									defaultColor;
+				collections::List<WString>									tokenRegexes;
+				collections::List<elements::text::ColorEntry>				tokenColors;
+				collections::List<elements::text::ColorEntry>				extraTokenColors;
+
+				static void													ColorizerProc(void* argument, vint start, vint length, vint token);
+			public:
+				GuiTextBoxRegexColorizer();
+				~GuiTextBoxRegexColorizer();
+
+				elements::text::ColorEntry									GetDefaultColor();
+				collections::List<WString>&									GetTokenRegexes();
+				collections::List<elements::text::ColorEntry>&				GetTokenColors();
+				collections::List<elements::text::ColorEntry>&				GetExtraTokenColors();
+				vint														GetExtraTokenIndexStart();
+				
+				bool														SetDefaultColor(elements::text::ColorEntry value);
+				vint														AddToken(const WString& regex, elements::text::ColorEntry color);
+				vint														AddExtraToken(elements::text::ColorEntry color);
+				bool														Setup();
+				virtual void												ColorizeTokenContextSensitive(vint lineIndex, const wchar_t* text, vint start, vint length, vint& token, vint& contextState);
+
+				vint														GetLexerStartState()override;
+				vint														GetContextStartState()override;
+				void														ColorizeLineWithCRLF(vint lineIndex, const wchar_t* text, unsigned __int32* colors, vint length, vint& lexerState, vint& contextState)override;
+				const ColorArray&											GetColors()override;
+			};
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+CONTROLS\TEXTEDITORPACKAGE\GUITEXTUNDOREDO.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+GacUI::Control System
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_CONTROLS_GUITEXTUNDOREDO
+#define VCZH_PRESENTATION_CONTROLS_GUITEXTUNDOREDO
+
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace controls
+		{
+
+			class GuiTextBoxCommonInterface;
+
+/***********************************************************************
+Undo Redo
+***********************************************************************/
+
+			class GuiGeneralUndoRedoProcessor : public Object
+			{
+			protected:
+				class IEditStep : public Interface
+				{
+				public:
+					virtual void							Undo()=0;
+					virtual void							Redo()=0;
+				};
+				friend class collections::ArrayBase<Ptr<IEditStep>>;
+
+			protected:
+				collections::List<Ptr<IEditStep>>			steps;
+				vint										firstFutureStep;
+				vint										savedStep;
+				bool										performingUndoRedo;
+
+				void										PushStep(Ptr<IEditStep> step);
+			public:
+				GuiGeneralUndoRedoProcessor();
+				~GuiGeneralUndoRedoProcessor();
+
+				bool										CanUndo();
+				bool										CanRedo();
+				void										ClearUndoRedo();
+				bool										GetModified();
+				void										NotifyModificationSaved();
+				bool										Undo();
+				bool										Redo();
+			};
+
+			class GuiTextBoxUndoRedoProcessor : public GuiGeneralUndoRedoProcessor, public ICommonTextEditCallback
+			{
+			protected:
+				class EditStep : public Object, public IEditStep
+				{
+				public:
+					GuiTextBoxUndoRedoProcessor*			processor;
+					TextPos									originalStart;
+					TextPos									originalEnd;
+					WString									originalText;
+					TextPos									inputStart;
+					TextPos									inputEnd;
+					WString									inputText;
+					
+					void									Undo();
+					void									Redo();
+				};
+
+				GuiTextBoxCommonInterface*					textBoxCommonInterface;
+			public:
+				GuiTextBoxUndoRedoProcessor(GuiTextBoxCommonInterface* _textBoxCommonInterface);
+				~GuiTextBoxUndoRedoProcessor();
+
+				void										Attach(elements::GuiColorizedTextElement* element, SpinLock& elementModifyLock);
+				void										Detach();
+				void										TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText);
+			};
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+CONTROLS\TEXTEDITORPACKAGE\GUITEXTCOMMONINTERFACE.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+GacUI::Control System
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_CONTROLS_GUITEXTCOMMONINTERFACE
+#define VCZH_PRESENTATION_CONTROLS_GUITEXTCOMMONINTERFACE
+
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace controls
+		{
+
+/***********************************************************************
+Common Interface
+***********************************************************************/
+
+			class GuiTextBoxCommonInterface abstract : public Description<GuiTextBoxCommonInterface>
+			{
+			protected:
+				class ICallback : public virtual IDescriptable, public Description<ICallback>
+				{
+				public:
+					virtual TextPos									GetLeftWord(TextPos pos)=0;
+					virtual TextPos									GetRightWord(TextPos pos)=0;
+					virtual void									GetWord(TextPos pos, TextPos& begin, TextPos& end)=0;
+					virtual vint									GetPageRows()=0;
+					virtual bool									BeforeModify(TextPos start, TextPos end, const WString& originalText, WString& inputText)=0;
+					virtual void									AfterModify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)=0;
+					virtual void									ScrollToView(Point point)=0;
+					virtual vint									GetTextMargin()=0;
+				};
+
+				class DefaultCallback : public Object, public ICallback, public Description<DefaultCallback>
+				{
+				protected:
+					elements::GuiColorizedTextElement*				textElement;
+					compositions::GuiGraphicsComposition*			textComposition;
+					bool											readonly;
+				public:
+					DefaultCallback(elements::GuiColorizedTextElement* _textElement, compositions::GuiGraphicsComposition* _textComposition);
+					~DefaultCallback();
+
+					TextPos											GetLeftWord(TextPos pos)override;
+					TextPos											GetRightWord(TextPos pos)override;
+					void											GetWord(TextPos pos, TextPos& begin, TextPos& end)override;
+					vint											GetPageRows()override;
+					bool											BeforeModify(TextPos start, TextPos end, const WString& originalText, WString& inputText)override;
+				};
+
+			public:
+				class ShortcutCommand
+				{
+				protected:
+					bool											ctrl;
+					bool											shift;
+					vint											key;
+					Func<void()>									action;
+				public:
+					ShortcutCommand(bool _ctrl, bool _shift, vint _key, const Func<void()> _action);
+					ShortcutCommand(bool _ctrl, bool _shift, vint _key, const Func<bool()> _action);
+					~ShortcutCommand();
+
+					bool											IsTheRightKey(bool _ctrl, bool _shift, vint _key);
+					void											Execute();
+				};
+
+			private:
+				elements::GuiColorizedTextElement*					textElement;
+				compositions::GuiGraphicsComposition*				textComposition;
+				GuiControl*											textControl;
+				ICallback*											callback;
+				bool												dragging;
+				bool												readonly;
+				Ptr<GuiTextBoxColorizerBase>						colorizer;
+				Ptr<GuiTextBoxUndoRedoProcessor>					undoRedoProcessor;
+
+				SpinLock											elementModifyLock;
+				collections::List<Ptr<ICommonTextEditCallback>>		textEditCallbacks;
+				collections::List<Ptr<ShortcutCommand>>				shortcutCommands;
+
+				void												UpdateCaretPoint();
+				void												Move(TextPos pos, bool shift);
+				void												Modify(TextPos start, TextPos end, const WString& input);
+				bool												ProcessKey(vint code, bool shift, bool ctrl);
+					
+				void												OnGotFocus(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void												OnLostFocus(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void												OnCaretNotify(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+
+				void												OnLeftButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
+				void												OnLeftButtonUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
+				void												OnMouseMove(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
+				void												OnKeyDown(compositions::GuiGraphicsComposition* sender, compositions::GuiKeyEventArgs& arguments);
+				void												OnCharInput(compositions::GuiGraphicsComposition* sender, compositions::GuiCharEventArgs& arguments);
+
+			protected:
+
+				void												Install(elements::GuiColorizedTextElement* _textElement, compositions::GuiGraphicsComposition* _textComposition, GuiControl* _textControl);
+				ICallback*											GetCallback();
+				void												SetCallback(ICallback* value);
+				bool												AttachTextEditCallback(Ptr<ICommonTextEditCallback> value);
+				bool												DetachTextEditCallback(Ptr<ICommonTextEditCallback> value);
+				void												AddShortcutCommand(Ptr<ShortcutCommand> shortcutCommand);
+				elements::GuiColorizedTextElement*					GetTextElement();
+				void												UnsafeSetText(const WString& value);
+
+			public:
+				GuiTextBoxCommonInterface();
+				~GuiTextBoxCommonInterface();
+
+				compositions::GuiNotifyEvent						SelectionChanged;
+
+				//================ clipboard operations
+
+				bool												CanCut();
+				bool												CanCopy();
+				bool												CanPaste();
+				bool												Cut();
+				bool												Copy();
+				bool												Paste();
+
+				//================ editing control
+
+				bool												GetReadonly();
+				void												SetReadonly(bool value);
+
+				//================ text operations
+
+				void												SelectAll();
+				void												Select(TextPos begin, TextPos end);
+				WString												GetSelectionText();
+				void												SetSelectionText(const WString& value);
+				
+				WString												GetRowText(vint row);
+				WString												GetFragmentText(TextPos start, TextPos end);
+
+				TextPos												GetCaretBegin();
+				TextPos												GetCaretEnd();
+				TextPos												GetCaretSmall();
+				TextPos												GetCaretLarge();
+
+				//================ position query
+
+				vint												GetRowWidth(vint row);
+				vint												GetRowHeight();
+				vint												GetMaxWidth();
+				vint												GetMaxHeight();
+				TextPos												GetTextPosFromPoint(Point point);
+				Point												GetPointFromTextPos(TextPos pos);
+				Rect												GetRectFromTextPos(TextPos pos);
+				TextPos												GetNearestTextPos(Point point);
+
+				//================ colorizing
+
+				Ptr<GuiTextBoxColorizerBase>						GetColorizer();
+				void												SetColorizer(Ptr<GuiTextBoxColorizerBase> value);
+
+				//================ undo redo control
+
+				bool												CanUndo();
+				bool												CanRedo();
+				void												ClearUndoRedo();
+				bool												GetModified();
+				void												NotifyModificationSaved();
+				bool												Undo();
+				bool												Redo();
+			};
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+CONTROLS\TEXTEDITORPACKAGE\GUITEXTCONTROLS.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+GacUI::Control System
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_CONTROLS_GUITEXTCONTROLS
+#define VCZH_PRESENTATION_CONTROLS_GUITEXTCONTROLS
+
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace controls
+		{
+
+/***********************************************************************
+MultilineTextBox
+***********************************************************************/
+
+			class GuiMultilineTextBox : public GuiScrollView, public GuiTextBoxCommonInterface, public Description<GuiMultilineTextBox>
+			{
+			public:
+				static const vint							TextMargin=3;
+
+				class StyleController : public GuiScrollView::StyleController, public Description<StyleController>
+				{
+				protected:
+					elements::GuiColorizedTextElement*			textElement;
+					compositions::GuiBoundsComposition*			textComposition;
+					GuiMultilineTextBox*						textBox;
+					Ptr<GuiTextBoxCommonInterface::ICallback>	defaultCallback;
+
+				public:
+					StyleController(GuiScrollView::IStyleProvider* styleProvider);
+					~StyleController();
+
+					void									Initialize(GuiMultilineTextBox* control);
+					elements::GuiColorizedTextElement*		GetTextElement();
+					compositions::GuiGraphicsComposition*	GetTextComposition();
+					void									SetViewPosition(Point value);
+					void									SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+
+					WString									GetText();
+					void									SetText(const WString& value)override;
+					void									SetFont(const FontProperties& value)override;
+					void									SetVisuallyEnabled(bool value)override;
+				};
+
+			protected:
+				class TextElementOperatorCallback : public GuiTextBoxCommonInterface::DefaultCallback, public Description<TextElementOperatorCallback>
+				{
+				protected:
+					GuiMultilineTextBox*					textControl;
+					StyleController*						textController;
+				public:
+					TextElementOperatorCallback(GuiMultilineTextBox* _textControl);
+
+					void									AfterModify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)override;
+					void									ScrollToView(Point point)override;
+					vint									GetTextMargin()override;
+				};
+
+			protected:
+				StyleController*							styleController;
+
+				void										CalculateViewAndSetScroll();
+				void										OnRenderTargetChanged(elements::IGuiGraphicsRenderTarget* renderTarget)override;
+				Size										QueryFullSize()override;
+				void										UpdateView(Rect viewBounds)override;
+				void										OnBoundsMouseButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
+			public:
+				GuiMultilineTextBox(GuiMultilineTextBox::IStyleProvider* styleProvider);
+				~GuiMultilineTextBox();
+
+				const WString&								GetText()override;
+				void										SetText(const WString& value)override;
+				void										SetFont(const FontProperties& value)override;
+			};
+
+/***********************************************************************
+SinglelineTextBox
+***********************************************************************/
+			
+			class GuiSinglelineTextBox : public GuiControl, public GuiTextBoxCommonInterface, public Description<GuiSinglelineTextBox>
+			{
+			public:
+				static const vint							TextMargin=3;
+				
+				class IStyleProvider : public virtual GuiControl::IStyleProvider, public Description<IStyleProvider>
+				{
+				public:
+					virtual compositions::GuiGraphicsComposition*		InstallBackground(compositions::GuiBoundsComposition* background)=0;
+				};
+
+				class StyleController : public Object, public GuiControl::IStyleController, public Description<StyleController>
+				{
+				protected:
+					Ptr<IStyleProvider>							styleProvider;
+					compositions::GuiBoundsComposition*			boundsComposition;
+					compositions::GuiGraphicsComposition*		containerComposition;
+
+					GuiSinglelineTextBox*						textBox;
+					elements::GuiColorizedTextElement*			textElement;
+					compositions::GuiTableComposition*			textCompositionTable;
+					compositions::GuiCellComposition*			textComposition;
+					Ptr<GuiTextBoxCommonInterface::ICallback>	defaultCallback;
+
+				public:
+					StyleController(IStyleProvider* _styleProvider);
+					~StyleController();
+
+					void									SetTextBox(GuiSinglelineTextBox* control);
+					void									RearrangeTextElement();
+					compositions::GuiBoundsComposition*		GetBoundsComposition();
+					compositions::GuiGraphicsComposition*	GetContainerComposition();
+					void									SetFocusableComposition(compositions::GuiGraphicsComposition* value);
+
+					WString									GetText();
+					void									SetText(const WString& value);
+					void									SetFont(const FontProperties& value);
+					void									SetVisuallyEnabled(bool value);
+
+					elements::GuiColorizedTextElement*		GetTextElement();
+					compositions::GuiGraphicsComposition*	GetTextComposition();
+					void									SetViewPosition(Point value);
+				};
+				
+			protected:
+				class TextElementOperatorCallback : public GuiTextBoxCommonInterface::DefaultCallback, public Description<TextElementOperatorCallback>
+				{
+				protected:
+					GuiSinglelineTextBox*					textControl;
+					StyleController*						textController;
+				public:
+					TextElementOperatorCallback(GuiSinglelineTextBox* _textControl);
+
+					bool									BeforeModify(TextPos start, TextPos end, const WString& originalText, WString& inputText)override;
+					void									AfterModify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)override;
+					void									ScrollToView(Point point)override;
+					vint									GetTextMargin()override;
+				};
+			protected:
+				StyleController*							styleController;
+				
+				void										OnRenderTargetChanged(elements::IGuiGraphicsRenderTarget* renderTarget)override;
+				void										OnBoundsMouseButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
+			public:
+				GuiSinglelineTextBox(GuiSinglelineTextBox::IStyleProvider* styleProvider);
+				~GuiSinglelineTextBox();
+
+				const WString&								GetText()override;
+				void										SetText(const WString& value)override;
+				void										SetFont(const FontProperties& value)override;
+				wchar_t										GetPasswordChar();
+				void										SetPasswordChar(wchar_t value);
+			};
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+CONTROLS\TEXTEDITORPACKAGE\GUIDOCUMENTVIEWER.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+GacUI::Control System
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_CONTROLS_GUIDOCUMENTVIEWER
+#define VCZH_PRESENTATION_CONTROLS_GUIDOCUMENTVIEWER
+
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace controls
+		{
+
+/***********************************************************************
+GuiDocumentCommonInterface
+***********************************************************************/
+			
+			class GuiDocumentCommonInterface abstract : public Description<GuiDocumentCommonInterface>
+			{
+			protected:
+				elements::GuiDocumentElement*				documentElement;
+				compositions::GuiBoundsComposition*			documentComposition;
+				vint										activeHyperlinkId;
+				vint										draggingHyperlinkId;
+				bool										dragging;
+				GuiControl*									senderControl;
+
+				void										InstallDocumentViewer(GuiControl* _sender, compositions::GuiGraphicsComposition* _container);
+				void										SetActiveHyperlinkId(vint value);
+				void										OnMouseMove(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
+				void										OnMouseDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
+				void										OnMouseUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
+				void										OnMouseLeave(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+			public:
+				GuiDocumentCommonInterface();
+				~GuiDocumentCommonInterface();
+
+				compositions::GuiNotifyEvent				ActiveHyperlinkChanged;
+				compositions::GuiNotifyEvent				ActiveHyperlinkExecuted;
+				
+				Ptr<DocumentModel>							GetDocument();
+				void										SetDocument(Ptr<DocumentModel> value);
+				void										NotifyParagraphUpdated(vint index);
+				vint										GetActiveHyperlinkId();
+				WString										GetActiveHyperlinkReference();
+			};
+
+/***********************************************************************
+GuiDocumentViewer
+***********************************************************************/
+			
+			class GuiDocumentViewer : public GuiScrollContainer, public GuiDocumentCommonInterface, public Description<GuiDocumentViewer>
+			{
+			public:
+				GuiDocumentViewer(GuiDocumentViewer::IStyleProvider* styleProvider);
+				~GuiDocumentViewer();
+			};
+
+/***********************************************************************
+GuiDocumentViewer
+***********************************************************************/
+			
+			class GuiDocumentLabel : public GuiControl, public GuiDocumentCommonInterface, public Description<GuiDocumentLabel>
+			{
+			public:
+				GuiDocumentLabel(GuiDocumentLabel::IStyleController* styleController);
+				~GuiDocumentLabel();
 			};
 		}
 	}
@@ -8295,10 +8437,10 @@ Strong Typed DataSource Extensions
 					{
 					}
 
-					 WString GetCellDataText(const TColumn& cellData)override
-					 {
-						 return description::BoxValue<TColumn>(cellData).GetText();
-					 }
+					WString GetCellDataText(const TColumn& cellData)override
+					{
+						return description::BoxValue<TColumn>(cellData).GetText();
+					}
 				};
 
 				template<typename TRow, typename TColumn>
@@ -8489,6 +8631,37 @@ Visualizer Extensions
 
 					elements::GuiSolidLabelElement*						GetTextElement();
 				};
+
+				class HyperlinkDataVisualizer : public ListViewSubColumnDataVisualizer
+				{
+				public:
+					typedef DataVisualizerFactory<HyperlinkDataVisualizer>					Factory;
+				protected:
+
+					void												label_MouseEnter(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+					void												label_MouseLeave(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+					compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal(compositions::GuiBoundsComposition* decoratedComposition)override;
+				public:
+					HyperlinkDataVisualizer();
+
+					void												BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)override;
+				};
+
+				class ImageDataVisualizer : public DataVisualizerBase
+				{
+				public:
+					typedef DataVisualizerFactory<ImageDataVisualizer>						Factory;
+				protected:
+					elements::GuiImageFrameElement*						image;
+
+					compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal(compositions::GuiBoundsComposition* decoratedComposition)override;
+				public:
+					ImageDataVisualizer();
+
+					void												BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)override;
+
+					elements::GuiImageFrameElement*						GetImageElement();
+				};
 				
 				class CellBorderDataVisualizer : public DataVisualizerBase
 				{
@@ -8501,6 +8674,24 @@ Visualizer Extensions
 					CellBorderDataVisualizer(Ptr<IDataVisualizer> decoratedDataVisualizer);
 
 					void												BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)override;
+				};
+
+				class NotifyIconDataVisualizer : public DataVisualizerBase
+				{
+				public:
+					typedef DataDecoratableVisualizerFactory<NotifyIconDataVisualizer>		Factory;
+				protected:
+					elements::GuiImageFrameElement*						leftImage;
+					elements::GuiImageFrameElement*						rightImage;
+
+					compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal(compositions::GuiBoundsComposition* decoratedComposition)override;
+				public:
+					NotifyIconDataVisualizer(Ptr<IDataVisualizer> decoratedDataVisualizer);
+
+					void												BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)override;
+
+					elements::GuiImageFrameElement*						GetLeftImageElement();
+					elements::GuiImageFrameElement*						GetRightImageElement();
 				};
 
 /***********************************************************************
@@ -8539,32 +8730,32 @@ Editor Extensions
 					}
 				};
 				
-				class DataTextBoxEditor : public DataEditorBase
+				class TextBoxDataEditor : public DataEditorBase
 				{
 				public:
-					typedef DataEditorFactory<DataTextBoxEditor>							Factory;
+					typedef DataEditorFactory<TextBoxDataEditor>							Factory;
 				protected:
 					GuiSinglelineTextBox*								textBox;
 
 					compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal()override;
 				public:
-					DataTextBoxEditor();
+					TextBoxDataEditor();
 
 					void												BeforeEditCell(IDataProvider* dataProvider, vint row, vint column)override;
 					GuiSinglelineTextBox*								GetTextBox();
 				};
 				
-				class DataTextComboBoxEditor : public DataEditorBase
+				class TextComboBoxDataEditor : public DataEditorBase
 				{
 				public:
-					typedef DataEditorFactory<DataTextComboBoxEditor>						Factory;
+					typedef DataEditorFactory<TextComboBoxDataEditor>						Factory;
 				protected:
 					GuiComboBoxListControl*								comboBox;
 					GuiTextList*										textList;
 
 					compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal()override;
 				public:
-					DataTextComboBoxEditor();
+					TextComboBoxDataEditor();
 
 					void												BeforeEditCell(IDataProvider* dataProvider, vint row, vint column)override;
 					GuiComboBoxListControl*								GetComboBoxControl();
@@ -9066,6 +9257,7 @@ namespace vl
 				virtual controls::GuiButton::IStyleController*								CreateButtonStyle()=0;
 				virtual controls::GuiSelectableButton::IStyleController*					CreateCheckBoxStyle()=0;
 				virtual controls::GuiSelectableButton::IStyleController*					CreateRadioButtonStyle()=0;
+				virtual controls::GuiDatePicker::IStyleProvider*							CreateDatePickerStyle()=0;
 				
 				virtual controls::GuiScroll::IStyleController*								CreateHScrollStyle()=0;
 				virtual controls::GuiScroll::IStyleController*								CreateVScrollStyle()=0;
@@ -9118,6 +9310,8 @@ namespace vl
 				extern controls::GuiButton*						NewButton();
 				extern controls::GuiSelectableButton*			NewCheckBox();
 				extern controls::GuiSelectableButton*			NewRadioButton();
+				extern controls::GuiDatePicker*					NewDatePicker();
+				extern controls::GuiDateComboBox*				NewDateComboBox();
 
 				extern controls::GuiScroll*						NewHScroll();
 				extern controls::GuiScroll*						NewVScroll();
@@ -9197,6 +9391,7 @@ Theme
 				controls::GuiButton::IStyleController*								CreateButtonStyle()override;
 				controls::GuiSelectableButton::IStyleController*					CreateCheckBoxStyle()override;
 				controls::GuiSelectableButton::IStyleController*					CreateRadioButtonStyle()override;
+				controls::GuiDatePicker::IStyleProvider*							CreateDatePickerStyle()override;
 				
 				controls::GuiScroll::IStyleController*								CreateHScrollStyle()override;
 				controls::GuiScroll::IStyleController*								CreateVScrollStyle()override;
@@ -9279,6 +9474,7 @@ Theme
 				controls::GuiButton::IStyleController*								CreateButtonStyle()override;
 				controls::GuiSelectableButton::IStyleController*					CreateCheckBoxStyle()override;
 				controls::GuiSelectableButton::IStyleController*					CreateRadioButtonStyle()override;
+				controls::GuiDatePicker::IStyleProvider*							CreateDatePickerStyle()override;
 
 				controls::GuiScroll::IStyleController*								CreateHScrollStyle()override;
 				controls::GuiScroll::IStyleController*								CreateVScrollStyle()override;
@@ -9926,10 +10122,13 @@ Type List
 			F(presentation::controls::list::ListViewSubColumnDataVisualizer::Factory)\
 			F(presentation::controls::list::CellBorderDataVisualizer)\
 			F(presentation::controls::list::CellBorderDataVisualizer::Factory)\
-			F(presentation::controls::list::DataTextBoxEditor)\
-			F(presentation::controls::list::DataTextBoxEditor::Factory)\
-			F(presentation::controls::list::DataTextComboBoxEditor)\
-			F(presentation::controls::list::DataTextComboBoxEditor::Factory)\
+			F(presentation::controls::list::TextBoxDataEditor)\
+			F(presentation::controls::list::TextBoxDataEditor::Factory)\
+			F(presentation::controls::list::TextComboBoxDataEditor)\
+			F(presentation::controls::list::TextComboBoxDataEditor::Factory)\
+			F(presentation::controls::GuiDatePicker)\
+			F(presentation::controls::GuiDatePicker::IStyleProvider)\
+			F(presentation::controls::GuiDateComboBox)\
 
 			GUIREFLECTIONCONTROLS_TYPELIST(DECL_TYPE_INFO)
 
@@ -11613,6 +11812,50 @@ Interface Proxy
 						return INVOKEGET_INTERFACE_PROXY(GetRowSmallImage, row);
 					}
 				};
+
+				class GuiDatePicker_IStyleProvider : public GuiControl_IStyleProvider, public virtual GuiDatePicker::IStyleProvider
+				{
+				public:
+					GuiDatePicker_IStyleProvider(Ptr<IValueInterfaceProxy> _proxy)
+						:GuiControl_IStyleProvider(_proxy)
+					{
+					}
+
+					static GuiDatePicker::IStyleProvider* Create(Ptr<IValueInterfaceProxy> _proxy)
+					{
+						return new GuiDatePicker_IStyleProvider(_proxy);
+					}
+
+					GuiSelectableButton::IStyleController* CreateDateButtonStyle()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(CreateDateButtonStyle);
+					}
+
+					GuiTextList* CreateTextList()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(CreateTextList);
+					}
+
+					GuiComboBoxListControl::IStyleController* CreateComboBoxStyle()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(CreateComboBoxStyle);
+					}
+
+					Color GetBackgroundColor()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetBackgroundColor);
+					}
+
+					Color GetPrimaryTextColor()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetPrimaryTextColor);
+					}
+
+					Color GetSecondaryTextColor()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetSecondaryTextColor);
+					}
+				};
 			}
 #pragma warning(pop)
 
@@ -12386,6 +12629,27 @@ Container
 				void										SetFont(const FontProperties& value)override;
 				void										SetVisuallyEnabled(bool value)override;
 			};
+
+			class Win7DatePickerStyle : public Object, public virtual controls::GuiDatePicker::IStyleProvider, public Description<Win7DatePickerStyle>
+			{
+			public:
+				Win7DatePickerStyle();
+				~Win7DatePickerStyle();
+
+				void													AssociateStyleController(controls::GuiControl::IStyleController* controller)override;
+				void													SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+				void													SetText(const WString& value)override;
+				void													SetFont(const FontProperties& value)override;
+				void													SetVisuallyEnabled(bool value)override;
+
+				controls::GuiSelectableButton::IStyleController*		CreateDateButtonStyle()override;
+				controls::GuiTextList*									CreateTextList()override;
+				controls::GuiComboBoxListControl::IStyleController*		CreateComboBoxStyle()override;
+
+				Color													GetBackgroundColor()override;
+				Color													GetPrimaryTextColor()override;
+				Color													GetSecondaryTextColor()override;
+			};
 		}
 	}
 }
@@ -12987,7 +13251,7 @@ ScrollView
 
 				controls::GuiScroll::IStyleController*		CreateHorizontalScrollStyle()override;
 				controls::GuiScroll::IStyleController*		CreateVerticalScrollStyle()override;
-				vint											GetDefaultScrollSize()override;
+				vint										GetDefaultScrollSize()override;
 				compositions::GuiGraphicsComposition*		InstallBackground(compositions::GuiBoundsComposition* boundsComposition)override;
 			};
 
@@ -13607,6 +13871,27 @@ Container
 				void										SetText(const WString& value)override;
 				void										SetFont(const FontProperties& value)override;
 				void										SetVisuallyEnabled(bool value)override;
+			};
+
+			class Win8DatePickerStyle : public Object, public virtual controls::GuiDatePicker::IStyleProvider, public Description<Win8DatePickerStyle>
+			{
+			public:
+				Win8DatePickerStyle();
+				~Win8DatePickerStyle();
+
+				void													AssociateStyleController(controls::GuiControl::IStyleController* controller)override;
+				void													SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+				void													SetText(const WString& value)override;
+				void													SetFont(const FontProperties& value)override;
+				void													SetVisuallyEnabled(bool value)override;
+
+				controls::GuiSelectableButton::IStyleController*		CreateDateButtonStyle()override;
+				controls::GuiTextList*									CreateTextList()override;
+				controls::GuiComboBoxListControl::IStyleController*		CreateComboBoxStyle()override;
+
+				Color													GetBackgroundColor()override;
+				Color													GetPrimaryTextColor()override;
+				Color													GetSecondaryTextColor()override;
 			};
 		}
 	}

@@ -137,6 +137,16 @@
       <cpp src="Main.cpp" />
       <description>This demo shows how to display data in a GuiVirtualDataGrid control using different styles for different cells.</description>
     </demo>
+    <demo name="DataGrid.FileExplorer">
+      <date>2013/6/12</date>
+      <image src="DXGUI_65.jpg" />
+      <image src="DXGUI_66.jpg" />
+      <image src="DXGUI_67.jpg" />
+      <cpp src="Main.cpp" />
+      <cpp src="../CommonLibrary/FileSystemInformation.h" />
+      <cpp src="../CommonLibrary/FileSystemInformation.cpp" />
+      <description>This demo shows use GuiVirtualDataGrid with IStructuredDataProvider to do strong typed sorting and filtering.</description>
+    </demo>
   </category>
   <category name="Template">
     <description>The &quot;Template&quot; category contains demos that show how to build template or skin for each type of controls.</description>

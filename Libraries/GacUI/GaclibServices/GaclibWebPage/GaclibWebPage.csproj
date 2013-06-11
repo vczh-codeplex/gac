@@ -136,6 +136,12 @@
     <Content Include="Content\Demos\Controls.Button.EnableDisable\Main.cpp" />
     <Content Include="Content\Demos\Controls.DataGrid.ChemicalElements\DXGUI_64.jpg" />
     <Content Include="Content\Demos\Controls.DataGrid.ChemicalElements\Main.cpp" />
+    <Content Include="Content\Demos\Controls.DataGrid.FileExplorer\DXGUI_65.jpg" />
+    <Content Include="Content\Demos\Controls.DataGrid.FileExplorer\DXGUI_66.jpg" />
+    <Content Include="Content\Demos\Controls.DataGrid.FileExplorer\DXGUI_67.jpg" />
+    <Content Include="Content\Demos\Controls.DataGrid.FileExplorer\FileSystemInformation.cpp" />
+    <Content Include="Content\Demos\Controls.DataGrid.FileExplorer\FileSystemInformation.h" />
+    <Content Include="Content\Demos\Controls.DataGrid.FileExplorer\Main.cpp" />
     <Content Include="Content\Demos\Controls.Label.Hyperlink\DXGUI_27.jpg" />
     <Content Include="Content\Demos\Controls.Label.Hyperlink\Main.cpp" />
     <Content Include="Content\Demos\Controls.ListBox.NameEditor\DXGUI_38.jpg" />
@@ -184,6 +190,7 @@
     <Content Include="Content\Demos\Controls.TreeView.FileExplorer\DXGUI_52.jpg" />
     <Content Include="Content\Demos\Controls.TreeView.FileExplorer\Main.cpp" />
     <Content Include="Content\Demos\Demos.Controls.DataGrid.ChemicalElements.jpg" />
+    <Content Include="Content\Demos\Demos.Controls.DataGrid.FileExplorer.jpg" />
     <Content Include="Content\Demos\Demos.Controls.TextBox.AdvancedColorizer.jpg" />
     <Content Include="Content\Demos\Demos.Controls.Tooltip.RichTextAndResource.jpg" />
     <Content Include="Content\Demos\Demos.Persistant.DirectCode.SimpleWindow.jpg" />
