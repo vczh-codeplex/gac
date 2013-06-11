@@ -38,6 +38,7 @@ TestWindow
 	class TestWindow : public GuiWindow
 	{
 	private:
+		GuiDateComboBox*					dateComboBox;
 		GuiDatePicker*						datePicker;
 	public:
 		TestWindow()
@@ -47,20 +48,26 @@ TestWindow
 			GetContainerComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 			GetContainerComposition()->SetPreferredMinSize(Size(320, 240));
 
+			dateComboBox=g::NewDateComboBox();
+			dateComboBox->SelectedDateChanged.AttachLambda([=](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+			{
+				SetText(L"GuiDateComboBox: "+dateComboBox->GetText());
+			});
+
 			datePicker=g::NewDatePicker();
-			SetText(datePicker->GetText());
 			datePicker->DateChanged.AttachLambda([=](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 			{
-				SetText(datePicker->GetText());
+				SetText(L"GuiDatePicker: "+datePicker->GetText());
 			});
 
 			GuiTableComposition* table=new GuiTableComposition;
 			GetBoundsComposition()->AddChild(table);
 			table->SetAlignmentToParent(Margin(0, 0, 0, 0));
-			table->SetRowsAndColumns(3, 3);
+			table->SetRowsAndColumns(4, 3);
 			table->SetRowOption(0, GuiCellOption::PercentageOption(0.5));
 			table->SetRowOption(1, GuiCellOption::MinSizeOption());
-			table->SetRowOption(2, GuiCellOption::PercentageOption(0.5));
+			table->SetRowOption(2, GuiCellOption::MinSizeOption());
+			table->SetRowOption(3, GuiCellOption::PercentageOption(0.5));
 			table->SetColumnOption(0, GuiCellOption::PercentageOption(0.5));
 			table->SetColumnOption(1, GuiCellOption::MinSizeOption());
 			table->SetColumnOption(2, GuiCellOption::PercentageOption(0.5));
@@ -68,6 +75,14 @@ TestWindow
 				GuiCellComposition* cell=new GuiCellComposition;
 				table->AddChild(cell);
 				cell->SetSite(1, 1, 1, 1);
+
+				dateComboBox->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				cell->AddChild(dateComboBox->GetBoundsComposition());
+			}
+			{
+				GuiCellComposition* cell=new GuiCellComposition;
+				table->AddChild(cell);
+				cell->SetSite(2, 1, 1, 1);
 
 				datePicker->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 				cell->AddChild(datePicker->GetBoundsComposition());

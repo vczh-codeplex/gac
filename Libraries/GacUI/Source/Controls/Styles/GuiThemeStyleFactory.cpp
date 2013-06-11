@@ -187,6 +187,11 @@ namespace vl
 					return new controls::GuiDatePicker(GetCurrentTheme()->CreateDatePickerStyle());
 				}
 
+				controls::GuiDateComboBox* NewDateComboBox()
+				{
+					return new controls::GuiDateComboBox(GetCurrentTheme()->CreateComboBoxStyle(), NewDatePicker());
+				}
+
 				controls::GuiScroll* NewHScroll()
 				{
 					return new controls::GuiScroll(GetCurrentTheme()->CreateHScrollStyle());

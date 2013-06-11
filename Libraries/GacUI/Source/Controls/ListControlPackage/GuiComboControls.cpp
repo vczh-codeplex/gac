@@ -36,7 +36,6 @@ GuiComboBoxBase
 
 			void GuiComboBoxBase::SelectItem()
 			{
-				ItemSelecting.Execute(GetNotifyEventArguments());
 				styleController->OnItemSelected();
 				ItemSelected.Execute(GetNotifyEventArguments());
 			}
@@ -69,7 +68,6 @@ GuiComboBoxBase
 
 				PopupOpened.SetAssociatedComposition(boundsComposition);
 				PopupClosed.SetAssociatedComposition(boundsComposition);
-				ItemSelecting.SetAssociatedComposition(boundsComposition);
 				ItemSelected.SetAssociatedComposition(boundsComposition);
 
 				Clicked.AttachMethod(this, &GuiComboBoxBase::OnClicked);
@@ -123,6 +121,7 @@ GuiComboBoxListControl
 			void GuiComboBoxListControl::OnListControlSelectionChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				DisplaySelectedContent(GetSelectedIndex());
+				SelectItem();
 				SelectedIndexChanged.Execute(GetNotifyEventArguments());
 			}
 

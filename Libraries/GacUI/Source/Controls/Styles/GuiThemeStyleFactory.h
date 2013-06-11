@@ -269,6 +269,9 @@ namespace vl
 				/// <summary>Create a date picker.</summary>
 				/// <returns>The created control.</returns>
 				extern controls::GuiDatePicker*					NewDatePicker();
+				/// <summary>Create a date combo box.</summary>
+				/// <returns>The created control.</returns>
+				extern controls::GuiDateComboBox*				NewDateComboBox();
 
 				/// <summary>Create a horizontal scroll.</summary>
 				/// <returns>The created control.</returns>

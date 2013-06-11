@@ -91,8 +91,6 @@ ComboBox Base
 				compositions::GuiNotifyEvent				PopupOpened;
 				/// <summary>Popup closed event.</summary>
 				compositions::GuiNotifyEvent				PopupClosed;
-				/// <summary>Item selecting event.</summary>
-				compositions::GuiNotifyEvent				ItemSelecting;
 				/// <summary>Item selected event.</summary>
 				compositions::GuiNotifyEvent				ItemSelected;
 
