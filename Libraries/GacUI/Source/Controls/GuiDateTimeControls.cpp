@@ -360,9 +360,14 @@ GuiDatePicker::StyleController
 GuiDatePicker
 ***********************************************************************/
 
-			void GuiDatePicker::NotifyDateChanged()
+			void GuiDatePicker::UpdateText()
 			{
 				GuiControl::SetText(dateLocale.FormatDate(dateFormat, styleController->GetDate()));
+			}
+
+			void GuiDatePicker::NotifyDateChanged()
+			{
+				UpdateText();
 				DateChanged.Execute(GetNotifyEventArguments());
 			}
 
@@ -411,6 +416,7 @@ GuiDatePicker
 			void GuiDatePicker::SetDateFormat(const WString& value)
 			{
 				dateFormat=value;
+				UpdateText();
 				DateFormatChanged.Execute(GetNotifyEventArguments());
 			}
 
@@ -423,11 +429,67 @@ GuiDatePicker
 			{
 				dateLocale=value;
 				styleController->SetDateLocale(dateLocale);
+				UpdateText();
 				DateLocaleChanged.Execute(GetNotifyEventArguments());
 			}
 
 			void GuiDatePicker::SetText(const WString& value)
 			{
+			}
+
+/***********************************************************************
+GuiDateComboBox
+***********************************************************************/
+
+			void GuiDateComboBox::datePicker_TextChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				SetText(datePicker->GetText());
+			}
+
+			void GuiDateComboBox::datePicker_DateChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				popup->Hide();
+				SelectItem();
+				SelectedDateChanged.Execute(GetNotifyEventArguments());
+			}
+
+			GuiDateComboBox::GuiDateComboBox(IStyleController* _styleController, GuiDatePicker* _datePicker)
+				:GuiComboBoxBase(_styleController)
+				,datePicker(_datePicker)
+			{
+				SelectedDateChanged.SetAssociatedComposition(GetBoundsComposition());
+
+				datePicker->TextChanged.AttachMethod(this, &GuiDateComboBox::datePicker_TextChanged);
+				datePicker->DateChanged.AttachMethod(this, &GuiDateComboBox::datePicker_DateChanged);
+
+				datePicker->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				popup->GetBoundsComposition()->AddChild(datePicker->GetBoundsComposition());
+				SetFont(GetFont());
+			}
+
+			GuiDateComboBox::~GuiDateComboBox()
+			{
+			}
+
+			void GuiDateComboBox::SetFont(const FontProperties& value)
+			{
+				GuiComboBoxBase::SetFont(value);
+				datePicker->SetFont(value);
+			}
+
+			const DateTime& GuiDateComboBox::GetSelectedData()
+			{
+				return datePicker->GetDate();
+			}
+
+			void GuiDateComboBox::SetSelectedData(const DateTime& value)
+			{
+				datePicker->SetDate(value);
+			}
+
+			GuiDatePicker* GuiDateComboBox::GetDatePicker()
+			{
+				return datePicker;
 			}
 		}
 	}

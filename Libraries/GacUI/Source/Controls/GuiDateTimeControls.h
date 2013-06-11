@@ -92,6 +92,7 @@ DatePicker
 				WString													dateFormat;
 				Locale													dateLocale;
 
+				void													UpdateText();
 				void													NotifyDateChanged();
 			public:
 				GuiDatePicker(IStyleProvider* _styleProvider);
@@ -109,6 +110,29 @@ DatePicker
 				void													SetDateLocale(const Locale& value);
 
 				void													SetText(const WString& value)override;
+			};
+
+/***********************************************************************
+DateComboBox
+***********************************************************************/
+
+			class GuiDateComboBox : public GuiComboBoxBase, public Description<GuiDateComboBox>
+			{
+			protected:
+				GuiDatePicker*											datePicker;
+				
+				void													datePicker_TextChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void													datePicker_DateChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+			public:
+				GuiDateComboBox(IStyleController* _styleController, GuiDatePicker* _datePicker);
+				~GuiDateComboBox();
+
+				compositions::GuiNotifyEvent							SelectedDateChanged;
+				
+				void													SetFont(const FontProperties& value)override;
+				const DateTime&											GetSelectedData();
+				void													SetSelectedData(const DateTime& value);
+				GuiDatePicker*											GetDatePicker();
 			};
 		}
 	}
