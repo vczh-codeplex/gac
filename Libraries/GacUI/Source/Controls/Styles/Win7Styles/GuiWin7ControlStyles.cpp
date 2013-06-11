@@ -1,4 +1,5 @@
 #include "GuiWin7ControlStyles.h"
+#include "GuiWin7ListStyles.h"
 
 namespace vl
 {
@@ -331,6 +332,68 @@ Win7GroupBoxStyle
 				{
 					transferringAnimation->Transfer(Win7GetSystemTextColor(false));
 				}
+			}
+
+/***********************************************************************
+Win7DatePickerStyle
+***********************************************************************/
+
+			Win7DatePickerStyle::Win7DatePickerStyle()
+			{
+			}
+
+			Win7DatePickerStyle::~Win7DatePickerStyle()
+			{
+			}
+
+			void Win7DatePickerStyle::AssociateStyleController(controls::GuiControl::IStyleController* controller)
+			{
+			}
+
+			void Win7DatePickerStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
+			{
+			}
+
+			void Win7DatePickerStyle::SetText(const WString& value)
+			{
+			}
+
+			void Win7DatePickerStyle::SetFont(const FontProperties& value)
+			{
+			}
+
+			void Win7DatePickerStyle::SetVisuallyEnabled(bool value)
+			{
+			}
+
+			controls::GuiSelectableButton::IStyleController* Win7DatePickerStyle::CreateDateButtonStyle()
+			{
+				return new Win7SelectableItemStyle;
+			}
+
+			controls::GuiTextList* Win7DatePickerStyle::CreateTextList()
+			{
+				return new GuiTextList(new Win7MultilineTextBoxProvider, new Win7TextListProvider);
+			}
+
+			controls::GuiComboBoxListControl::IStyleController* Win7DatePickerStyle::CreateComboBoxStyle()
+			{
+				return new Win7DropDownComboBoxStyle;
+			}
+
+			Color Win7DatePickerStyle::GetBackgroundColor()
+			{
+				return Win7GetSystemWindowColor();
+			}
+
+			Color Win7DatePickerStyle::GetPrimaryTextColor()
+			{
+				return Win7GetSystemTextColor(true);
+			}
+
+			Color Win7DatePickerStyle::GetSecondaryTextColor()
+			{
+				return Win7GetSystemTextColor(false);
 			}
 		}
 	}

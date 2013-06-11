@@ -12,6 +12,7 @@ Interfaces:
 #include "..\GuiBasicControls.h"
 #include "..\GuiWindowControls.h"
 #include "..\GuiContainerControls.h"
+#include "..\GuiDateTimeControls.h"
 
 #include "..\TextEditorPackage\GuiTextControls.h"
 #include "..\TextEditorPackage\GuiDocumentViewer.h"
@@ -122,6 +123,9 @@ namespace vl
 				/// <summary>Create a style for radio button.</summary>
 				/// <returns>The created style.</returns>
 				virtual controls::GuiSelectableButton::IStyleController*					CreateRadioButtonStyle()=0;
+				/// <summary>Create a style for date picker.</summary>
+				/// <returns>The created style.</returns>
+				virtual controls::GuiDatePicker::IStyleProvider*							CreateDatePickerStyle()=0;
 				
 				/// <summary>Create a style for horizontal scroll.</summary>
 				/// <returns>The created style.</returns>
@@ -262,6 +266,9 @@ namespace vl
 				/// <summary>Create a radio box.</summary>
 				/// <returns>The created control.</returns>
 				extern controls::GuiSelectableButton*			NewRadioButton();
+				/// <summary>Create a date picker.</summary>
+				/// <returns>The created control.</returns>
+				extern controls::GuiDatePicker*					NewDatePicker();
 
 				/// <summary>Create a horizontal scroll.</summary>
 				/// <returns>The created control.</returns>

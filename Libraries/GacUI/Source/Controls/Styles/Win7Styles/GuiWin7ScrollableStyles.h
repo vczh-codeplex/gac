@@ -125,7 +125,7 @@ ScrollView
 
 				controls::GuiScroll::IStyleController*		CreateHorizontalScrollStyle()override;
 				controls::GuiScroll::IStyleController*		CreateVerticalScrollStyle()override;
-				vint											GetDefaultScrollSize()override;
+				vint										GetDefaultScrollSize()override;
 				compositions::GuiGraphicsComposition*		InstallBackground(compositions::GuiBoundsComposition* boundsComposition)override;
 			};
 

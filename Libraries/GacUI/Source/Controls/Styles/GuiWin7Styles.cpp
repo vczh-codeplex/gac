@@ -173,6 +173,11 @@ Win7Theme
 				return new Win7CheckBoxStyle(Win7CheckBoxStyle::RadioButton);
 			}
 
+			controls::GuiDatePicker::IStyleProvider* Win7Theme::CreateDatePickerStyle()
+			{
+				return new Win7DatePickerStyle;
+			}
+
 			controls::GuiScroll::IStyleController* Win7Theme::CreateHScrollStyle()
 			{
 				return new Win7ScrollStyle(Win7ScrollStyle::Horizontal);
