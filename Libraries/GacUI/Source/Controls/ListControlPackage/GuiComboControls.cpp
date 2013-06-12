@@ -20,11 +20,6 @@ GuiComboBoxBase::CommandExecutor
 			{
 			}
 
-			void GuiComboBoxBase::CommandExecutor::ShowPopup()
-			{
-				combo->ShowPopup();
-			}
-
 			void GuiComboBoxBase::CommandExecutor::SelectItem()
 			{
 				combo->SelectItem();
@@ -40,61 +35,17 @@ GuiComboBoxBase
 				ItemSelected.Execute(GetNotifyEventArguments());
 			}
 
-			void GuiComboBoxBase::OnClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
-			{
-				styleController->OnClicked();
-			}
-
-			void GuiComboBoxBase::OnPopupOpened(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
-			{
-				styleController->OnPopupOpened();
-				PopupOpened.Execute(arguments);
-			}
-
-			void GuiComboBoxBase::OnPopupClosed(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
-			{
-				styleController->OnPopupClosed();
-				PopupClosed.Execute(arguments);
-			}
-
 			GuiComboBoxBase::GuiComboBoxBase(IStyleController* _styleController)
-				:GuiButton(_styleController)
+				:GuiMenuButton(_styleController)
 			{
 				commandExecutor=new CommandExecutor(this);
 				styleController=dynamic_cast<IStyleController*>(GetStyleController());
 				styleController->SetCommandExecutor(commandExecutor.Obj());
-				popup=new GuiPopup(styleController->CreatePopupStyle());
-				popup->GetNativeWindow()->SetAlwaysPassFocusToParent(true);
-
-				PopupOpened.SetAssociatedComposition(boundsComposition);
-				PopupClosed.SetAssociatedComposition(boundsComposition);
-				ItemSelected.SetAssociatedComposition(boundsComposition);
-
-				Clicked.AttachMethod(this, &GuiComboBoxBase::OnClicked);
-				popup->WindowOpened.AttachMethod(this, &GuiComboBoxBase::OnPopupOpened);
-				popup->WindowClosed.AttachMethod(this, &GuiComboBoxBase::OnPopupClosed);
+				CreateSubMenu();
 			}
 
 			GuiComboBoxBase::~GuiComboBoxBase()
 			{
-				delete popup;
-			}
-
-			void GuiComboBoxBase::ShowPopup()
-			{
-				Size size=popup->GetBoundsComposition()->GetPreferredMinSize();
-				size.x=GetBoundsComposition()->GetBounds().Width();
-				if(size.y<GetFont().size)
-				{
-					size.y=GetFont().size;
-				}
-				popup->GetBoundsComposition()->SetPreferredMinSize(size);
-				popup->ShowPopup(this, true);
-			}
-
-			GuiPopup* GuiComboBoxBase::GetPopup()
-			{
-				return popup;
 			}
 
 /***********************************************************************
@@ -113,7 +64,7 @@ GuiComboBoxListControl
 					{
 						WString text=primaryTextView->GetPrimaryTextViewText(itemIndex);
 						SetText(text);
-						popup->Hide();
+						GetSubMenu()->Hide();
 					}
 				}
 			}
@@ -136,7 +87,7 @@ GuiComboBoxListControl
 				SelectedIndexChanged.SetAssociatedComposition(GetBoundsComposition());
 
 				containedListControl->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-				popup->GetContainerComposition()->AddChild(containedListControl->GetBoundsComposition());
+				GetSubMenu()->GetContainerComposition()->AddChild(containedListControl->GetBoundsComposition());
 				SetFont(GetFont());
 			}
 
@@ -151,9 +102,9 @@ GuiComboBoxListControl
 			void GuiComboBoxListControl::SetFont(const FontProperties& value)
 			{
 				GuiComboBoxBase::SetFont(value);
-				Size size=popup->GetBoundsComposition()->GetPreferredMinSize();
+				Size size=GetSubMenu()->GetBoundsComposition()->GetPreferredMinSize();
 				size.y=20*value.size;
-				popup->GetBoundsComposition()->SetPreferredMinSize(size);
+				GetSubMenu()->GetBoundsComposition()->SetPreferredMinSize(size);
 			}
 
 			GuiSelectableListControl* GuiComboBoxListControl::GetContainedListControl()

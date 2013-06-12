@@ -589,33 +589,45 @@ Win7DropDownComboBoxStyle
 				return textComposition;
 			}
 
+			GuiMenu::IStyleController* Win7DropDownComboBoxStyle::CreateSubMenuStyleController()
+			{
+				return new Win7MenuStyle;
+			}
+
+			void Win7DropDownComboBoxStyle::SetSubMenuExisting(bool value)
+			{
+			}
+
+			void Win7DropDownComboBoxStyle::SetSubMenuOpening(bool value)
+			{
+				SetSelected(value);
+			}
+
+			GuiButton* Win7DropDownComboBoxStyle::GetSubMenuHost()
+			{
+				return 0;
+			}
+
+			void Win7DropDownComboBoxStyle::SetImage(Ptr<GuiImageData> value)
+			{
+			}
+
+			void Win7DropDownComboBoxStyle::SetShortcutText(const WString& value)
+			{
+			}
+
+			compositions::GuiSubComponentMeasurer::IMeasuringSource* Win7DropDownComboBoxStyle::GetMeasuringSource()
+			{
+				return 0;
+			}
+
 			void Win7DropDownComboBoxStyle::SetCommandExecutor(controls::GuiComboBoxBase::ICommandExecutor* value)
 			{
 				commandExecutor=value;
 			}
 
-			void Win7DropDownComboBoxStyle::OnClicked()
-			{
-				commandExecutor->ShowPopup();
-			}
-
-			void Win7DropDownComboBoxStyle::OnPopupOpened()
-			{
-				SetSelected(true);
-			}
-
-			void Win7DropDownComboBoxStyle::OnPopupClosed()
-			{
-				SetSelected(false);
-			}
-
 			void Win7DropDownComboBoxStyle::OnItemSelected()
 			{
-			}
-
-			controls::GuiWindow::IStyleController* Win7DropDownComboBoxStyle::CreatePopupStyle()
-			{
-				return new Win7WindowStyle;
 			}
 
 /***********************************************************************

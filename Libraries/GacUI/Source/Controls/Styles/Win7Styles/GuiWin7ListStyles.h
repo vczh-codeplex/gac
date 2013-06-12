@@ -170,14 +170,17 @@ ComboBox
 				Win7DropDownComboBoxStyle();
 				~Win7DropDownComboBoxStyle();
 				
-				compositions::GuiGraphicsComposition*			GetContainerComposition()override;
-
-				void											SetCommandExecutor(controls::GuiComboBoxBase::ICommandExecutor* value)override;
-				void											OnClicked()override;
-				void											OnPopupOpened()override;
-				void											OnPopupClosed()override;
-				void											OnItemSelected()override;
-				controls::GuiWindow::IStyleController*			CreatePopupStyle()override;
+				compositions::GuiGraphicsComposition*						GetContainerComposition()override;
+				
+				controls::GuiMenu::IStyleController*						CreateSubMenuStyleController()override;
+				void														SetSubMenuExisting(bool value)override;
+				void														SetSubMenuOpening(bool value)override;
+				controls::GuiButton*										GetSubMenuHost()override;
+				void														SetImage(Ptr<GuiImageData> value)override;
+				void														SetShortcutText(const WString& value)override;
+				compositions::GuiSubComponentMeasurer::IMeasuringSource*	GetMeasuringSource()override;
+				void														SetCommandExecutor(controls::GuiComboBoxBase::ICommandExecutor* value)override;
+				void														OnItemSelected()override;
 			};
 #pragma warning(pop)
 
