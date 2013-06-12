@@ -250,7 +250,7 @@ GuiMenuButton
 			{
 				if(GetVisuallyEnabled())
 				{
-					if(ownerMenuService && ownerMenuService->IsActiveState())
+					if(cascadeAction && ownerMenuService && ownerMenuService->IsActiveState())
 					{
 						OpenSubMenuInternal();
 					}
@@ -283,6 +283,7 @@ GuiMenuButton
 				,subMenu(0)
 				,ownedSubMenu(false)
 				,ownerMenuService(0)
+				,cascadeAction(true)
 			{
 				SubMenuOpeningChanged.SetAssociatedComposition(boundsComposition);
 				ImageChanged.SetAssociatedComposition(boundsComposition);
@@ -423,6 +424,16 @@ GuiMenuButton
 			void GuiMenuButton::SetPreferredMenuClientSize(Size value)
 			{
 				preferredMenuClientSize=value;
+			}
+
+			bool GuiMenuButton::GetCascadeAction()
+			{
+				return cascadeAction;
+			}
+
+			void GuiMenuButton::SetCascadeAction(bool value)
+			{
+				cascadeAction=value;
 			}
 		}
 	}

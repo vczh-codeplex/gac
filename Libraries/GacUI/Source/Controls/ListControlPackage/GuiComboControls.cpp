@@ -53,7 +53,9 @@ GuiComboBoxBase
 				commandExecutor=new CommandExecutor(this);
 				styleController=dynamic_cast<IStyleController*>(GetStyleController());
 				styleController->SetCommandExecutor(commandExecutor.Obj());
+
 				CreateSubMenu();
+				SetCascadeAction(false);
 
 				GetBoundsComposition()->BoundsChanged.AttachMethod(this, &GuiComboBoxBase::OnBoundsChanged);
 			}

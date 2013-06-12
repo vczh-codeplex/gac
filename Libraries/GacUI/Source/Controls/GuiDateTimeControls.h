@@ -128,6 +128,10 @@ DatePicker
 
 				/// <summary>Date changed event.</summary>
 				compositions::GuiNotifyEvent							DateChanged;
+				/// <summary>Date navigated event. Called when the current month is changed.</summary>
+				compositions::GuiNotifyEvent							DateNavigated;
+				/// <summary>Date selected event. Called when a day button is selected.</summary>
+				compositions::GuiNotifyEvent							DateSelected;
 				/// <summary>Date format changed event.</summary>
 				compositions::GuiNotifyEvent							DateFormatChanged;
 				/// <summary>Date locale changed event.</summary>
@@ -164,9 +168,14 @@ DateComboBox
 			{
 			protected:
 				GuiDatePicker*											datePicker;
+				DateTime												selectedDate;
 				
-				void													datePicker_TextChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
-				void													datePicker_DateChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void													UpdateText();
+				void													NotifyUpdateSelectedDate();
+				void													OnSubMenuOpeningChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void													datePicker_DateLocaleChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void													datePicker_DateFormatChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void													datePicker_DateSelected(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 			public:
 				/// <summary>Create a control with a specified style provider.</summary>
 				/// <param name="styleProvider">The style provider.</param>

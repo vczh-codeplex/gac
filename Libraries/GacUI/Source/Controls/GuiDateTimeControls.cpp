@@ -73,6 +73,7 @@ GuiDatePicker::StyleController
 						vint month=comboMonth->GetSelectedIndex()+1;
 						SetDate(DateTime::FromDateTime(year, month, 1));
 						datePicker->NotifyDateChanged();
+						datePicker->DateNavigated.Execute(datePicker->GetNotifyEventArguments());
 					}
 				}
 			}
@@ -97,6 +98,7 @@ GuiDatePicker::StyleController
 								currentDate=day;
 							}
 							datePicker->NotifyDateChanged();
+							datePicker->DateSelected.Execute(datePicker->GetNotifyEventArguments());
 						}
 					}
 				}
@@ -386,6 +388,8 @@ GuiDatePicker
 				SetDate(DateTime::LocalTime());
 
 				DateChanged.SetAssociatedComposition(GetBoundsComposition());
+				DateNavigated.SetAssociatedComposition(GetBoundsComposition());
+				DateSelected.SetAssociatedComposition(GetBoundsComposition());
 				DateFormatChanged.SetAssociatedComposition(GetBoundsComposition());
 				DateLocaleChanged.SetAssociatedComposition(GetBoundsComposition());
 
@@ -447,16 +451,38 @@ GuiDatePicker
 GuiDateComboBox
 ***********************************************************************/
 
-			void GuiDateComboBox::datePicker_TextChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			void GuiDateComboBox::UpdateText()
 			{
-				SetText(datePicker->GetText());
+				SetText(datePicker->GetDateLocale().FormatDate(datePicker->GetDateFormat(), selectedDate));
 			}
 
-			void GuiDateComboBox::datePicker_DateChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			void GuiDateComboBox::NotifyUpdateSelectedDate()
 			{
+				UpdateText();
+				SelectedDateChanged.Execute(GetNotifyEventArguments());
+			}
+
+			void GuiDateComboBox::OnSubMenuOpeningChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				datePicker->SetDate(selectedDate);
+			}
+
+			void GuiDateComboBox::datePicker_DateLocaleChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				UpdateText();
+			}
+
+			void GuiDateComboBox::datePicker_DateFormatChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				UpdateText();
+			}
+
+			void GuiDateComboBox::datePicker_DateSelected(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				selectedDate=datePicker->GetDate();
 				GetSubMenu()->Hide();
 				SelectItem();
-				SelectedDateChanged.Execute(GetNotifyEventArguments());
+				NotifyUpdateSelectedDate();
 			}
 
 			GuiDateComboBox::GuiDateComboBox(IStyleController* _styleController, GuiDatePicker* _datePicker)
@@ -465,11 +491,14 @@ GuiDateComboBox
 			{
 				SelectedDateChanged.SetAssociatedComposition(GetBoundsComposition());
 
-				datePicker->TextChanged.AttachMethod(this, &GuiDateComboBox::datePicker_TextChanged);
-				datePicker->DateChanged.AttachMethod(this, &GuiDateComboBox::datePicker_DateChanged);
-
+				datePicker->DateSelected.AttachMethod(this, &GuiDateComboBox::datePicker_DateSelected);
+				datePicker->DateLocaleChanged.AttachMethod(this, &GuiDateComboBox::datePicker_DateLocaleChanged);
+				datePicker->DateFormatChanged.AttachMethod(this, &GuiDateComboBox::datePicker_DateFormatChanged);
 				datePicker->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 				GetSubMenu()->GetContainerComposition()->AddChild(datePicker->GetBoundsComposition());
+
+				selectedDate=datePicker->GetDate();
+				SubMenuOpeningChanged.AttachMethod(this, &GuiDateComboBox::OnSubMenuOpeningChanged);
 				SetFont(GetFont());
 				SetText(datePicker->GetText());
 			}
@@ -486,12 +515,13 @@ GuiDateComboBox
 
 			const DateTime& GuiDateComboBox::GetSelectedDate()
 			{
-				return datePicker->GetDate();
+				return selectedDate;
 			}
 
 			void GuiDateComboBox::SetSelectedDate(const DateTime& value)
 			{
-				datePicker->SetDate(value);
+				selectedDate=value;
+				NotifyUpdateSelectedDate();
 			}
 
 			GuiDatePicker* GuiDateComboBox::GetDatePicker()
