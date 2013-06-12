@@ -454,7 +454,7 @@ GuiDateComboBox
 
 			void GuiDateComboBox::datePicker_DateChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
-				popup->Hide();
+				GetSubMenu()->Hide();
 				SelectItem();
 				SelectedDateChanged.Execute(GetNotifyEventArguments());
 			}
@@ -469,7 +469,7 @@ GuiDateComboBox
 				datePicker->DateChanged.AttachMethod(this, &GuiDateComboBox::datePicker_DateChanged);
 
 				datePicker->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-				popup->GetContainerComposition()->AddChild(datePicker->GetBoundsComposition());
+				GetSubMenu()->GetContainerComposition()->AddChild(datePicker->GetBoundsComposition());
 				SetFont(GetFont());
 				SetText(datePicker->GetText());
 			}

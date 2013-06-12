@@ -26,37 +26,26 @@ ComboBox Base
 ***********************************************************************/
 
 			/// <summary>The base class of combo box control.</summary>
-			class GuiComboBoxBase : public GuiButton, public Description<GuiComboBoxBase>
+			class GuiComboBoxBase : public GuiMenuButton, public Description<GuiComboBoxBase>
 			{
 			public:
 				/// <summary>A command executor for the combo box to change the control state.</summary>
 				class ICommandExecutor : public virtual IDescriptable, public Description<ICommandExecutor>
 				{
 				public:
-					/// <summary>Notify that a popup is needed to show.</summary>
-					virtual void							ShowPopup()=0;
 					/// <summary>Notify that an item is selected, the combo box should close the popup and show the text of the selected item.</summary>
 					virtual void							SelectItem()=0;
 				};
 				
 				/// <summary>Style controller interface for <see cref="GuiComboBoxBase"/>.</summary>
-				class IStyleController : public virtual GuiButton::IStyleController, public Description<IStyleController>
+				class IStyleController : public virtual GuiMenuButton::IStyleController, public Description<IStyleController>
 				{
 				public:
 					/// <summary>Called when the command executor is changed.</summary>
 					/// <param name="value">The command executor.</param>
 					virtual void							SetCommandExecutor(ICommandExecutor* value)=0;
-					/// <summary>Notify that the combo box is clicked. Generaly a style controller should call <see cref="ICommandExecutor::ShowPopup"/> at this moment.</summary>
-					virtual void							OnClicked()=0;
-					/// <summary>Notify that the popup is opened.</summary>
-					virtual void							OnPopupOpened()=0;
-					/// <summary>Notify that the popup is closed.</summary>
-					virtual void							OnPopupClosed()=0;
 					/// <summary>Notify that an item is selected.</summary>
 					virtual void							OnItemSelected()=0;
-					/// <summary>Create a style controller for the popup.</summary>
-					/// <returns>The created style controller for the popup.</returns>
-					virtual GuiWindow::IStyleController*	CreatePopupStyle()=0;
 				};
 			protected:
 
@@ -69,36 +58,21 @@ ComboBox Base
 					CommandExecutor(GuiComboBoxBase* _combo);
 					~CommandExecutor();
 
-					void									ShowPopup()override;
 					void									SelectItem()override;
 				};
 
 				Ptr<CommandExecutor>						commandExecutor;
 				IStyleController*							styleController;
-				GuiPopup*									popup;
 
 				virtual void								SelectItem();
-				void										OnClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
-				void										OnPopupOpened(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
-				void										OnPopupClosed(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 			public:
 				/// <summary>Create a control with a specified style controller.</summary>
 				/// <param name="_styleController">The style controller.</param>
 				GuiComboBoxBase(IStyleController* _styleController);
 				~GuiComboBoxBase();
 
-				/// <summary>Popup opened event.</summary>
-				compositions::GuiNotifyEvent				PopupOpened;
-				/// <summary>Popup closed event.</summary>
-				compositions::GuiNotifyEvent				PopupClosed;
 				/// <summary>Item selected event.</summary>
 				compositions::GuiNotifyEvent				ItemSelected;
-
-				/// <summary>Show the popup.</summary>
-				void										ShowPopup();
-				/// <summary>Get the popup control.</summary>
-				/// <returns>The popup control.</returns>
-				GuiPopup*									GetPopup();
 			};
 
 /***********************************************************************
