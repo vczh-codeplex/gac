@@ -883,6 +883,7 @@ Type Declaration
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(OwnedSubMenu)
 				CLASS_MEMBER_PROPERTY_GUIEVENT_FAST(SubMenuOpening)
 				CLASS_MEMBER_PROPERTY_FAST(PreferredMenuClientSize)
+				CLASS_MEMBER_PROPERTY_FAST(CascadeAction)
 
 				CLASS_MEMBER_METHOD(IsSubMenuExists, NO_PARAMETER)
 				CLASS_MEMBER_METHOD(CreateSubMenu, {L"subMenuStyleController"})
@@ -1105,35 +1106,24 @@ Type Declaration
 			END_CLASS_MEMBER(TreeViewNodeItemStyleProvider)
 
 			BEGIN_CLASS_MEMBER(GuiComboBoxBase)
-				CLASS_MEMBER_BASE(GuiButton)
+				CLASS_MEMBER_BASE(GuiMenuButton)
 				CONTROL_CONSTRUCTOR_CONTROLLER(GuiComboBoxBase)
 
-				CLASS_MEMBER_GUIEVENT(PopupOpened)
-				CLASS_MEMBER_GUIEVENT(PopupClosed)
 				CLASS_MEMBER_GUIEVENT(ItemSelected)
-
-				CLASS_MEMBER_PROPERTY_READONLY_FAST(Popup)
-
-				CLASS_MEMBER_METHOD(ShowPopup, NO_PARAMETER)
 			END_CLASS_MEMBER(GuiComboBoxBase)
 
 			BEGIN_CLASS_MEMBER(GuiComboBoxBase::ICommandExecutor)
 				CLASS_MEMBER_BASE(IDescriptable)
 				
-				CLASS_MEMBER_METHOD(ShowPopup, NO_PARAMETER)
 				CLASS_MEMBER_METHOD(SelectItem, NO_PARAMETER)
 			END_CLASS_MEMBER(GuiComboBoxBase::ICommandExecutor)
 
 			BEGIN_CLASS_MEMBER(GuiComboBoxBase::IStyleController)
-				CLASS_MEMBER_BASE(GuiButton::IStyleController)
+				CLASS_MEMBER_BASE(GuiMenuButton::IStyleController)
 				INTERFACE_EXTERNALCTOR(GuiComboBoxBase, IStyleController)
 				
 				CLASS_MEMBER_METHOD(SetCommandExecutor, {L"value"})
-				CLASS_MEMBER_METHOD(OnClicked, NO_PARAMETER)
-				CLASS_MEMBER_METHOD(OnPopupOpened, NO_PARAMETER)
-				CLASS_MEMBER_METHOD(OnPopupClosed, NO_PARAMETER)
 				CLASS_MEMBER_METHOD(OnItemSelected, NO_PARAMETER)
-				CLASS_MEMBER_METHOD(CreatePopupStyle, NO_PARAMETER)
 			END_CLASS_MEMBER(GuiComboBoxBase::IStyleController)
 
 			BEGIN_CLASS_MEMBER(GuiComboBoxListControl)
@@ -1547,6 +1537,9 @@ Type Declaration
 				CLASS_MEMBER_PROPERTY_EVENT_FAST(Date, DateChanged)
 				CLASS_MEMBER_PROPERTY_EVENT_FAST(DateFormat, DateFormatChanged)
 				CLASS_MEMBER_PROPERTY_EVENT_FAST(DateLocale, DateLocaleChanged)
+
+				CLASS_MEMBER_GUIEVENT(DateSelected);
+				CLASS_MEMBER_GUIEVENT(DateNavigated);
 			END_CLASS_MEMBER(GuiDatePicker)
 
 			BEGIN_CLASS_MEMBER(GuiDatePicker::IStyleProvider)
