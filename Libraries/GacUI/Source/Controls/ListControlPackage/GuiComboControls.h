@@ -65,6 +65,7 @@ ComboBox Base
 				IStyleController*							styleController;
 
 				virtual void								SelectItem();
+				void										OnBoundsChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 			public:
 				/// <summary>Create a control with a specified style controller.</summary>
 				/// <param name="_styleController">The style controller.</param>
