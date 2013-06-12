@@ -5842,6 +5842,7 @@ MenuButton
 				bool									ownedSubMenu;
 				Size									preferredMenuClientSize;
 				IGuiMenuService*						ownerMenuService;
+				bool									cascadeAction;
 
 				GuiButton*								GetSubMenuHost();
 				void									OpenSubMenuInternal();
@@ -5850,6 +5851,8 @@ MenuButton
 				void									OnSubMenuWindowClosed(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 				void									OnMouseEnter(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 				void									OnClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+
+				virtual IGuiMenuService::Direction		GetSubMenuDirection();
 			public:
 				GuiMenuButton(IStyleController* _styleController);
 				~GuiMenuButton();
@@ -5875,6 +5878,9 @@ MenuButton
 
 				Size									GetPreferredMenuClientSize();
 				void									SetPreferredMenuClientSize(Size value);
+
+				bool									GetCascadeAction();
+				void									SetCascadeAction(bool value);
 			};
 		}
 	}
@@ -7029,25 +7035,20 @@ namespace vl
 ComboBox Base
 ***********************************************************************/
 
-			class GuiComboBoxBase : public GuiButton, public Description<GuiComboBoxBase>
+			class GuiComboBoxBase : public GuiMenuButton, public Description<GuiComboBoxBase>
 			{
 			public:
 				class ICommandExecutor : public virtual IDescriptable, public Description<ICommandExecutor>
 				{
 				public:
-					virtual void							ShowPopup()=0;
 					virtual void							SelectItem()=0;
 				};
 				
-				class IStyleController : public virtual GuiButton::IStyleController, public Description<IStyleController>
+				class IStyleController : public virtual GuiMenuButton::IStyleController, public Description<IStyleController>
 				{
 				public:
 					virtual void							SetCommandExecutor(ICommandExecutor* value)=0;
-					virtual void							OnClicked()=0;
-					virtual void							OnPopupOpened()=0;
-					virtual void							OnPopupClosed()=0;
 					virtual void							OnItemSelected()=0;
-					virtual GuiWindow::IStyleController*	CreatePopupStyle()=0;
 				};
 			protected:
 
@@ -7060,28 +7061,20 @@ ComboBox Base
 					CommandExecutor(GuiComboBoxBase* _combo);
 					~CommandExecutor();
 
-					void									ShowPopup()override;
 					void									SelectItem()override;
 				};
 
 				Ptr<CommandExecutor>						commandExecutor;
 				IStyleController*							styleController;
-				GuiPopup*									popup;
 
+				IGuiMenuService::Direction					GetSubMenuDirection()override;
 				virtual void								SelectItem();
-				void										OnClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
-				void										OnPopupOpened(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
-				void										OnPopupClosed(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void										OnBoundsChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 			public:
 				GuiComboBoxBase(IStyleController* _styleController);
 				~GuiComboBoxBase();
 
-				compositions::GuiNotifyEvent				PopupOpened;
-				compositions::GuiNotifyEvent				PopupClosed;
 				compositions::GuiNotifyEvent				ItemSelected;
-
-				void										ShowPopup();
-				GuiPopup*									GetPopup();
 			};
 
 /***********************************************************************
@@ -7162,7 +7155,7 @@ DatePicker
 					static const vint									DaysOfWeek=7;
 					static const vint									DayRows=6;
 					static const vint									DayRowStart=2;
-					static const vint									YearFirst=1990;
+					static const vint									YearFirst=1900;
 					static const vint									YearLast=2099;
 
 					IStyleProvider*										styleProvider;
@@ -7217,6 +7210,8 @@ DatePicker
 				~GuiDatePicker();
 
 				compositions::GuiNotifyEvent							DateChanged;
+				compositions::GuiNotifyEvent							DateNavigated;
+				compositions::GuiNotifyEvent							DateSelected;
 				compositions::GuiNotifyEvent							DateFormatChanged;
 				compositions::GuiNotifyEvent							DateLocaleChanged;
 				
@@ -7238,9 +7233,14 @@ DateComboBox
 			{
 			protected:
 				GuiDatePicker*											datePicker;
+				DateTime												selectedDate;
 				
-				void													datePicker_TextChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
-				void													datePicker_DateChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void													UpdateText();
+				void													NotifyUpdateSelectedDate();
+				void													OnSubMenuOpeningChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void													datePicker_DateLocaleChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void													datePicker_DateFormatChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void													datePicker_DateSelected(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 			public:
 				GuiDateComboBox(IStyleController* _styleController, GuiDatePicker* _datePicker);
 				~GuiDateComboBox();
@@ -11368,12 +11368,13 @@ Interface Proxy
 					}
 				};
 
-				class GuiComboBoxBase_IStyleController : public virtual GuiButton_IStyleController, public virtual GuiComboBoxBase::IStyleController
+				class GuiComboBoxBase_IStyleController : public virtual GuiMenuButton_IStyleController, public virtual GuiComboBoxBase::IStyleController
 				{
 				public:
 					GuiComboBoxBase_IStyleController(Ptr<IValueInterfaceProxy> _proxy)
 						:GuiControl_IStyleController(_proxy)
 						,GuiButton_IStyleController(_proxy)
+						,GuiMenuButton_IStyleController(_proxy)
 					{
 					}
 
@@ -11387,29 +11388,9 @@ Interface Proxy
 						INVOKE_INTERFACE_PROXY(SetCommandExecutor, value);
 					}
 
-					void OnClicked()override
-					{
-						INVOKE_INTERFACE_PROXY_NOPARAM(OnClicked);
-					}
-
-					void OnPopupOpened()override
-					{
-						INVOKE_INTERFACE_PROXY_NOPARAM(OnPopupOpened);
-					}
-
-					void OnPopupClosed()override
-					{
-						INVOKE_INTERFACE_PROXY_NOPARAM(OnPopupClosed);
-					}
-
 					void OnItemSelected()override
 					{
 						INVOKE_INTERFACE_PROXY_NOPARAM(OnItemSelected);
-					}
-
-					GuiWindow::IStyleController* CreatePopupStyle()override
-					{
-						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(CreatePopupStyle);
 					}
 				};
 
@@ -13489,14 +13470,17 @@ ComboBox
 				Win7DropDownComboBoxStyle();
 				~Win7DropDownComboBoxStyle();
 				
-				compositions::GuiGraphicsComposition*			GetContainerComposition()override;
-
-				void											SetCommandExecutor(controls::GuiComboBoxBase::ICommandExecutor* value)override;
-				void											OnClicked()override;
-				void											OnPopupOpened()override;
-				void											OnPopupClosed()override;
-				void											OnItemSelected()override;
-				controls::GuiWindow::IStyleController*			CreatePopupStyle()override;
+				compositions::GuiGraphicsComposition*						GetContainerComposition()override;
+				
+				controls::GuiMenu::IStyleController*						CreateSubMenuStyleController()override;
+				void														SetSubMenuExisting(bool value)override;
+				void														SetSubMenuOpening(bool value)override;
+				controls::GuiButton*										GetSubMenuHost()override;
+				void														SetImage(Ptr<GuiImageData> value)override;
+				void														SetShortcutText(const WString& value)override;
+				compositions::GuiSubComponentMeasurer::IMeasuringSource*	GetMeasuringSource()override;
+				void														SetCommandExecutor(controls::GuiComboBoxBase::ICommandExecutor* value)override;
+				void														OnItemSelected()override;
 			};
 #pragma warning(pop)
 
@@ -14607,14 +14591,17 @@ ComboBox
 				Win8DropDownComboBoxStyle();
 				~Win8DropDownComboBoxStyle();
 				
-				compositions::GuiGraphicsComposition*			GetContainerComposition()override;
-
-				void											SetCommandExecutor(controls::GuiComboBoxBase::ICommandExecutor* value)override;
-				void											OnClicked()override;
-				void											OnPopupOpened()override;
-				void											OnPopupClosed()override;
-				void											OnItemSelected()override;
-				controls::GuiWindow::IStyleController*			CreatePopupStyle()override;
+				compositions::GuiGraphicsComposition*						GetContainerComposition()override;
+				
+				controls::GuiMenu::IStyleController*						CreateSubMenuStyleController()override;
+				void														SetSubMenuExisting(bool value)override;
+				void														SetSubMenuOpening(bool value)override;
+				controls::GuiButton*										GetSubMenuHost()override;
+				void														SetImage(Ptr<GuiImageData> value)override;
+				void														SetShortcutText(const WString& value)override;
+				compositions::GuiSubComponentMeasurer::IMeasuringSource*	GetMeasuringSource()override;
+				void														SetCommandExecutor(controls::GuiComboBoxBase::ICommandExecutor* value)override;
+				void														OnItemSelected()override;
 			};
 #pragma warning(pop)
 

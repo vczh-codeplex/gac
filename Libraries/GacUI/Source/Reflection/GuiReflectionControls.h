@@ -1424,12 +1424,13 @@ Interface Proxy
 					}
 				};
 
-				class GuiComboBoxBase_IStyleController : public virtual GuiButton_IStyleController, public virtual GuiComboBoxBase::IStyleController
+				class GuiComboBoxBase_IStyleController : public virtual GuiMenuButton_IStyleController, public virtual GuiComboBoxBase::IStyleController
 				{
 				public:
 					GuiComboBoxBase_IStyleController(Ptr<IValueInterfaceProxy> _proxy)
 						:GuiControl_IStyleController(_proxy)
 						,GuiButton_IStyleController(_proxy)
+						,GuiMenuButton_IStyleController(_proxy)
 					{
 					}
 
@@ -1443,29 +1444,9 @@ Interface Proxy
 						INVOKE_INTERFACE_PROXY(SetCommandExecutor, value);
 					}
 
-					void OnClicked()override
-					{
-						INVOKE_INTERFACE_PROXY_NOPARAM(OnClicked);
-					}
-
-					void OnPopupOpened()override
-					{
-						INVOKE_INTERFACE_PROXY_NOPARAM(OnPopupOpened);
-					}
-
-					void OnPopupClosed()override
-					{
-						INVOKE_INTERFACE_PROXY_NOPARAM(OnPopupClosed);
-					}
-
 					void OnItemSelected()override
 					{
 						INVOKE_INTERFACE_PROXY_NOPARAM(OnItemSelected);
-					}
-
-					GuiWindow::IStyleController* CreatePopupStyle()override
-					{
-						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(CreatePopupStyle);
 					}
 				};
 

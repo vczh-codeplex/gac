@@ -1951,6 +1951,7 @@ GuiDatePicker::StyleController
 						vint month=comboMonth->GetSelectedIndex()+1;
 						SetDate(DateTime::FromDateTime(year, month, 1));
 						datePicker->NotifyDateChanged();
+						datePicker->DateNavigated.Execute(datePicker->GetNotifyEventArguments());
 					}
 				}
 			}
@@ -1975,6 +1976,7 @@ GuiDatePicker::StyleController
 								currentDate=day;
 							}
 							datePicker->NotifyDateChanged();
+							datePicker->DateSelected.Execute(datePicker->GetNotifyEventArguments());
 						}
 					}
 				}
@@ -2264,6 +2266,8 @@ GuiDatePicker
 				SetDate(DateTime::LocalTime());
 
 				DateChanged.SetAssociatedComposition(GetBoundsComposition());
+				DateNavigated.SetAssociatedComposition(GetBoundsComposition());
+				DateSelected.SetAssociatedComposition(GetBoundsComposition());
 				DateFormatChanged.SetAssociatedComposition(GetBoundsComposition());
 				DateLocaleChanged.SetAssociatedComposition(GetBoundsComposition());
 
@@ -2325,16 +2329,38 @@ GuiDatePicker
 GuiDateComboBox
 ***********************************************************************/
 
-			void GuiDateComboBox::datePicker_TextChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			void GuiDateComboBox::UpdateText()
 			{
-				SetText(datePicker->GetText());
+				SetText(datePicker->GetDateLocale().FormatDate(datePicker->GetDateFormat(), selectedDate));
 			}
 
-			void GuiDateComboBox::datePicker_DateChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			void GuiDateComboBox::NotifyUpdateSelectedDate()
 			{
-				popup->Hide();
-				SelectItem();
+				UpdateText();
 				SelectedDateChanged.Execute(GetNotifyEventArguments());
+			}
+
+			void GuiDateComboBox::OnSubMenuOpeningChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				datePicker->SetDate(selectedDate);
+			}
+
+			void GuiDateComboBox::datePicker_DateLocaleChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				UpdateText();
+			}
+
+			void GuiDateComboBox::datePicker_DateFormatChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				UpdateText();
+			}
+
+			void GuiDateComboBox::datePicker_DateSelected(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				selectedDate=datePicker->GetDate();
+				GetSubMenu()->Hide();
+				SelectItem();
+				NotifyUpdateSelectedDate();
 			}
 
 			GuiDateComboBox::GuiDateComboBox(IStyleController* _styleController, GuiDatePicker* _datePicker)
@@ -2343,11 +2369,14 @@ GuiDateComboBox
 			{
 				SelectedDateChanged.SetAssociatedComposition(GetBoundsComposition());
 
-				datePicker->TextChanged.AttachMethod(this, &GuiDateComboBox::datePicker_TextChanged);
-				datePicker->DateChanged.AttachMethod(this, &GuiDateComboBox::datePicker_DateChanged);
-
+				datePicker->DateSelected.AttachMethod(this, &GuiDateComboBox::datePicker_DateSelected);
+				datePicker->DateLocaleChanged.AttachMethod(this, &GuiDateComboBox::datePicker_DateLocaleChanged);
+				datePicker->DateFormatChanged.AttachMethod(this, &GuiDateComboBox::datePicker_DateFormatChanged);
 				datePicker->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-				popup->GetContainerComposition()->AddChild(datePicker->GetBoundsComposition());
+				GetSubMenu()->GetContainerComposition()->AddChild(datePicker->GetBoundsComposition());
+
+				selectedDate=datePicker->GetDate();
+				SubMenuOpeningChanged.AttachMethod(this, &GuiDateComboBox::OnSubMenuOpeningChanged);
 				SetFont(GetFont());
 				SetText(datePicker->GetText());
 			}
@@ -2364,12 +2393,13 @@ GuiDateComboBox
 
 			const DateTime& GuiDateComboBox::GetSelectedDate()
 			{
-				return datePicker->GetDate();
+				return selectedDate;
 			}
 
 			void GuiDateComboBox::SetSelectedDate(const DateTime& value)
 			{
-				datePicker->SetDate(value);
+				selectedDate=value;
+				NotifyUpdateSelectedDate();
 			}
 
 			GuiDatePicker* GuiDateComboBox::GetDatePicker()
@@ -3490,11 +3520,6 @@ GuiComboBoxBase::CommandExecutor
 			{
 			}
 
-			void GuiComboBoxBase::CommandExecutor::ShowPopup()
-			{
-				combo->ShowPopup();
-			}
-
 			void GuiComboBoxBase::CommandExecutor::SelectItem()
 			{
 				combo->SelectItem();
@@ -3504,67 +3529,39 @@ GuiComboBoxBase::CommandExecutor
 GuiComboBoxBase
 ***********************************************************************/
 
+			IGuiMenuService::Direction GuiComboBoxBase::GetSubMenuDirection()
+			{
+				return IGuiMenuService::Horizontal;
+			}
+
 			void GuiComboBoxBase::SelectItem()
 			{
 				styleController->OnItemSelected();
 				ItemSelected.Execute(GetNotifyEventArguments());
 			}
 
-			void GuiComboBoxBase::OnClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			void GuiComboBoxBase::OnBoundsChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
-				styleController->OnClicked();
-			}
-
-			void GuiComboBoxBase::OnPopupOpened(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
-			{
-				styleController->OnPopupOpened();
-				PopupOpened.Execute(arguments);
-			}
-
-			void GuiComboBoxBase::OnPopupClosed(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
-			{
-				styleController->OnPopupClosed();
-				PopupClosed.Execute(arguments);
+				Size size=GetPreferredMenuClientSize();
+				size.x=GetBoundsComposition()->GetBounds().Width();
+				SetPreferredMenuClientSize(size);
 			}
 
 			GuiComboBoxBase::GuiComboBoxBase(IStyleController* _styleController)
-				:GuiButton(_styleController)
+				:GuiMenuButton(_styleController)
 			{
 				commandExecutor=new CommandExecutor(this);
 				styleController=dynamic_cast<IStyleController*>(GetStyleController());
 				styleController->SetCommandExecutor(commandExecutor.Obj());
-				popup=new GuiPopup(styleController->CreatePopupStyle());
-				popup->GetNativeWindow()->SetAlwaysPassFocusToParent(true);
 
-				PopupOpened.SetAssociatedComposition(boundsComposition);
-				PopupClosed.SetAssociatedComposition(boundsComposition);
-				ItemSelected.SetAssociatedComposition(boundsComposition);
+				CreateSubMenu();
+				SetCascadeAction(false);
 
-				Clicked.AttachMethod(this, &GuiComboBoxBase::OnClicked);
-				popup->WindowOpened.AttachMethod(this, &GuiComboBoxBase::OnPopupOpened);
-				popup->WindowClosed.AttachMethod(this, &GuiComboBoxBase::OnPopupClosed);
+				GetBoundsComposition()->BoundsChanged.AttachMethod(this, &GuiComboBoxBase::OnBoundsChanged);
 			}
 
 			GuiComboBoxBase::~GuiComboBoxBase()
 			{
-				delete popup;
-			}
-
-			void GuiComboBoxBase::ShowPopup()
-			{
-				Size size=popup->GetBoundsComposition()->GetPreferredMinSize();
-				size.x=GetBoundsComposition()->GetBounds().Width();
-				if(size.y<GetFont().size)
-				{
-					size.y=GetFont().size;
-				}
-				popup->GetBoundsComposition()->SetPreferredMinSize(size);
-				popup->ShowPopup(this, true);
-			}
-
-			GuiPopup* GuiComboBoxBase::GetPopup()
-			{
-				return popup;
 			}
 
 /***********************************************************************
@@ -3583,7 +3580,7 @@ GuiComboBoxListControl
 					{
 						WString text=primaryTextView->GetPrimaryTextViewText(itemIndex);
 						SetText(text);
-						popup->Hide();
+						GetSubMenu()->Hide();
 					}
 				}
 			}
@@ -3606,7 +3603,7 @@ GuiComboBoxListControl
 				SelectedIndexChanged.SetAssociatedComposition(GetBoundsComposition());
 
 				containedListControl->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-				popup->GetContainerComposition()->AddChild(containedListControl->GetBoundsComposition());
+				GetSubMenu()->GetContainerComposition()->AddChild(containedListControl->GetBoundsComposition());
 				SetFont(GetFont());
 			}
 
@@ -3621,9 +3618,9 @@ GuiComboBoxListControl
 			void GuiComboBoxListControl::SetFont(const FontProperties& value)
 			{
 				GuiComboBoxBase::SetFont(value);
-				Size size=popup->GetBoundsComposition()->GetPreferredMinSize();
+				Size size=GetPreferredMenuClientSize();
 				size.y=20*value.size;
-				popup->GetBoundsComposition()->SetPreferredMinSize(size);
+				SetPreferredMenuClientSize(size);
 			}
 
 			GuiSelectableListControl* GuiComboBoxListControl::GetContainedListControl()
@@ -13485,33 +13482,45 @@ Win7DropDownComboBoxStyle
 				return textComposition;
 			}
 
+			GuiMenu::IStyleController* Win7DropDownComboBoxStyle::CreateSubMenuStyleController()
+			{
+				return new Win7MenuStyle;
+			}
+
+			void Win7DropDownComboBoxStyle::SetSubMenuExisting(bool value)
+			{
+			}
+
+			void Win7DropDownComboBoxStyle::SetSubMenuOpening(bool value)
+			{
+				SetSelected(value);
+			}
+
+			GuiButton* Win7DropDownComboBoxStyle::GetSubMenuHost()
+			{
+				return 0;
+			}
+
+			void Win7DropDownComboBoxStyle::SetImage(Ptr<GuiImageData> value)
+			{
+			}
+
+			void Win7DropDownComboBoxStyle::SetShortcutText(const WString& value)
+			{
+			}
+
+			compositions::GuiSubComponentMeasurer::IMeasuringSource* Win7DropDownComboBoxStyle::GetMeasuringSource()
+			{
+				return 0;
+			}
+
 			void Win7DropDownComboBoxStyle::SetCommandExecutor(controls::GuiComboBoxBase::ICommandExecutor* value)
 			{
 				commandExecutor=value;
 			}
 
-			void Win7DropDownComboBoxStyle::OnClicked()
-			{
-				commandExecutor->ShowPopup();
-			}
-
-			void Win7DropDownComboBoxStyle::OnPopupOpened()
-			{
-				SetSelected(true);
-			}
-
-			void Win7DropDownComboBoxStyle::OnPopupClosed()
-			{
-				SetSelected(false);
-			}
-
 			void Win7DropDownComboBoxStyle::OnItemSelected()
 			{
-			}
-
-			controls::GuiWindow::IStyleController* Win7DropDownComboBoxStyle::CreatePopupStyle()
-			{
-				return new Win7WindowStyle;
 			}
 
 /***********************************************************************
@@ -17429,33 +17438,45 @@ Win8DropDownComboBoxStyle
 				return textComposition;
 			}
 
+			GuiMenu::IStyleController* Win8DropDownComboBoxStyle::CreateSubMenuStyleController()
+			{
+				return new Win8MenuStyle;
+			}
+
+			void Win8DropDownComboBoxStyle::SetSubMenuExisting(bool value)
+			{
+			}
+
+			void Win8DropDownComboBoxStyle::SetSubMenuOpening(bool value)
+			{
+				SetSelected(value);
+			}
+
+			GuiButton* Win8DropDownComboBoxStyle::GetSubMenuHost()
+			{
+				return 0;
+			}
+
+			void Win8DropDownComboBoxStyle::SetImage(Ptr<GuiImageData> value)
+			{
+			}
+
+			void Win8DropDownComboBoxStyle::SetShortcutText(const WString& value)
+			{
+			}
+
+			compositions::GuiSubComponentMeasurer::IMeasuringSource* Win8DropDownComboBoxStyle::GetMeasuringSource()
+			{
+				return 0;
+			}
+
 			void Win8DropDownComboBoxStyle::SetCommandExecutor(controls::GuiComboBoxBase::ICommandExecutor* value)
 			{
 				commandExecutor=value;
 			}
 
-			void Win8DropDownComboBoxStyle::OnClicked()
-			{
-				commandExecutor->ShowPopup();
-			}
-
-			void Win8DropDownComboBoxStyle::OnPopupOpened()
-			{
-				SetSelected(true);
-			}
-
-			void Win8DropDownComboBoxStyle::OnPopupClosed()
-			{
-				SetSelected(false);
-			}
-
 			void Win8DropDownComboBoxStyle::OnItemSelected()
 			{
-			}
-
-			controls::GuiWindow::IStyleController* Win8DropDownComboBoxStyle::CreatePopupStyle()
-			{
-				return new Win8WindowStyle;
 			}
 
 /***********************************************************************
@@ -22360,7 +22381,7 @@ GuiMenuButton
 			{
 				if(GetVisuallyEnabled())
 				{
-					if(ownerMenuService && ownerMenuService->IsActiveState())
+					if(cascadeAction && ownerMenuService && ownerMenuService->IsActiveState())
 					{
 						OpenSubMenuInternal();
 					}
@@ -22382,12 +22403,18 @@ GuiMenuButton
 				}
 			}
 
+			IGuiMenuService::Direction GuiMenuButton::GetSubMenuDirection()
+			{
+				return ownerMenuService?ownerMenuService->GetPreferredDirection():IGuiMenuService::Horizontal;
+			}
+
 			GuiMenuButton::GuiMenuButton(IStyleController* _styleController)
 				:GuiButton(_styleController)
 				,styleController(_styleController)
 				,subMenu(0)
 				,ownedSubMenu(false)
 				,ownerMenuService(0)
+				,cascadeAction(true)
 			{
 				SubMenuOpeningChanged.SetAssociatedComposition(boundsComposition);
 				ImageChanged.SetAssociatedComposition(boundsComposition);
@@ -22510,7 +22537,7 @@ GuiMenuButton
 					if(value)
 					{
 						subMenu->SetClientSize(preferredMenuClientSize);
-						IGuiMenuService::Direction direction=ownerMenuService?ownerMenuService->GetPreferredDirection():IGuiMenuService::Horizontal;
+						IGuiMenuService::Direction direction=GetSubMenuDirection();
 						subMenu->ShowPopup(GetSubMenuHost(), direction==IGuiMenuService::Horizontal);
 					}
 					else
@@ -22528,6 +22555,16 @@ GuiMenuButton
 			void GuiMenuButton::SetPreferredMenuClientSize(Size value)
 			{
 				preferredMenuClientSize=value;
+			}
+
+			bool GuiMenuButton::GetCascadeAction()
+			{
+				return cascadeAction;
+			}
+
+			void GuiMenuButton::SetCascadeAction(bool value)
+			{
+				cascadeAction=value;
 			}
 		}
 	}
@@ -31587,6 +31624,7 @@ Type Declaration
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(OwnedSubMenu)
 				CLASS_MEMBER_PROPERTY_GUIEVENT_FAST(SubMenuOpening)
 				CLASS_MEMBER_PROPERTY_FAST(PreferredMenuClientSize)
+				CLASS_MEMBER_PROPERTY_FAST(CascadeAction)
 
 				CLASS_MEMBER_METHOD(IsSubMenuExists, NO_PARAMETER)
 				CLASS_MEMBER_METHOD(CreateSubMenu, {L"subMenuStyleController"})
@@ -31809,35 +31847,24 @@ Type Declaration
 			END_CLASS_MEMBER(TreeViewNodeItemStyleProvider)
 
 			BEGIN_CLASS_MEMBER(GuiComboBoxBase)
-				CLASS_MEMBER_BASE(GuiButton)
+				CLASS_MEMBER_BASE(GuiMenuButton)
 				CONTROL_CONSTRUCTOR_CONTROLLER(GuiComboBoxBase)
 
-				CLASS_MEMBER_GUIEVENT(PopupOpened)
-				CLASS_MEMBER_GUIEVENT(PopupClosed)
 				CLASS_MEMBER_GUIEVENT(ItemSelected)
-
-				CLASS_MEMBER_PROPERTY_READONLY_FAST(Popup)
-
-				CLASS_MEMBER_METHOD(ShowPopup, NO_PARAMETER)
 			END_CLASS_MEMBER(GuiComboBoxBase)
 
 			BEGIN_CLASS_MEMBER(GuiComboBoxBase::ICommandExecutor)
 				CLASS_MEMBER_BASE(IDescriptable)
 				
-				CLASS_MEMBER_METHOD(ShowPopup, NO_PARAMETER)
 				CLASS_MEMBER_METHOD(SelectItem, NO_PARAMETER)
 			END_CLASS_MEMBER(GuiComboBoxBase::ICommandExecutor)
 
 			BEGIN_CLASS_MEMBER(GuiComboBoxBase::IStyleController)
-				CLASS_MEMBER_BASE(GuiButton::IStyleController)
+				CLASS_MEMBER_BASE(GuiMenuButton::IStyleController)
 				INTERFACE_EXTERNALCTOR(GuiComboBoxBase, IStyleController)
 				
 				CLASS_MEMBER_METHOD(SetCommandExecutor, {L"value"})
-				CLASS_MEMBER_METHOD(OnClicked, NO_PARAMETER)
-				CLASS_MEMBER_METHOD(OnPopupOpened, NO_PARAMETER)
-				CLASS_MEMBER_METHOD(OnPopupClosed, NO_PARAMETER)
 				CLASS_MEMBER_METHOD(OnItemSelected, NO_PARAMETER)
-				CLASS_MEMBER_METHOD(CreatePopupStyle, NO_PARAMETER)
 			END_CLASS_MEMBER(GuiComboBoxBase::IStyleController)
 
 			BEGIN_CLASS_MEMBER(GuiComboBoxListControl)
@@ -32251,6 +32278,9 @@ Type Declaration
 				CLASS_MEMBER_PROPERTY_EVENT_FAST(Date, DateChanged)
 				CLASS_MEMBER_PROPERTY_EVENT_FAST(DateFormat, DateFormatChanged)
 				CLASS_MEMBER_PROPERTY_EVENT_FAST(DateLocale, DateLocaleChanged)
+
+				CLASS_MEMBER_GUIEVENT(DateSelected);
+				CLASS_MEMBER_GUIEVENT(DateNavigated);
 			END_CLASS_MEMBER(GuiDatePicker)
 
 			BEGIN_CLASS_MEMBER(GuiDatePicker::IStyleProvider)

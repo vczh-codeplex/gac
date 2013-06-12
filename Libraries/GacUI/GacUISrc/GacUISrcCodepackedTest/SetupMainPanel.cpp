@@ -297,5 +297,10 @@ void SetupMainPanel(GuiControlHost* controlHost, GuiControl* container, GuiCellC
 			comboBox->GetBoundsComposition()->SetBounds(Rect(Point(420, 420), Size(200, 25)));
 			cell->AddChild(comboBox->GetBoundsComposition());
 		}
+		{
+			GuiDateComboBox* comboBox=g::NewDateComboBox();
+			comboBox->GetBoundsComposition()->SetBounds(Rect(Point(420, 455), Size(200, 25)));
+			cell->AddChild(comboBox->GetBoundsComposition());
+		}
 	}
 }
