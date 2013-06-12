@@ -138,14 +138,24 @@
       <description>This demo shows how to display data in a GuiVirtualDataGrid control using different styles for different cells.</description>
     </demo>
     <demo name="DataGrid.FileExplorer">
-      <date>2013/6/12</date>
+      <date>2013/6/11</date>
       <image src="DXGUI_65.jpg" />
       <image src="DXGUI_66.jpg" />
       <image src="DXGUI_67.jpg" />
       <cpp src="Main.cpp" />
       <cpp src="../CommonLibrary/FileSystemInformation.h" />
       <cpp src="../CommonLibrary/FileSystemInformation.cpp" />
-      <description>This demo shows use GuiVirtualDataGrid with IStructuredDataProvider to do strong typed sorting and filtering.</description>
+      <description>This demo shows how to use GuiVirtualDataGrid with IStructuredDataProvider to do strong typed sorting and filtering.</description>
+    </demo>
+    <demo name="DatePicker.DateAndLocale">
+      <date>2013/6/12</date>
+      <image src="DXGUI_68.jpg" />
+      <image src="DXGUI_69.jpg" />
+      <image src="DXGUI_70.jpg" />
+      <image src="DXGUI_71.jpg" />
+      <image src="DXGUI_72.jpg" />
+      <cpp src="Main.cpp" />
+      <description>This demo shows how to use GuiDatePicker and GuiDateComboBox to select a date under different locales and date formats.</description>
     </demo>
   </category>
   <category name="Template">
