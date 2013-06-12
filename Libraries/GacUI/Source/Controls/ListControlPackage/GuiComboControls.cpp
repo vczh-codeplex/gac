@@ -35,6 +35,13 @@ GuiComboBoxBase
 				ItemSelected.Execute(GetNotifyEventArguments());
 			}
 
+			void GuiComboBoxBase::OnBoundsChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				Size size=GetPreferredMenuClientSize();
+				size.x=GetBoundsComposition()->GetBounds().Width();
+				SetPreferredMenuClientSize(size);
+			}
+
 			GuiComboBoxBase::GuiComboBoxBase(IStyleController* _styleController)
 				:GuiMenuButton(_styleController)
 			{
@@ -42,6 +49,8 @@ GuiComboBoxBase
 				styleController=dynamic_cast<IStyleController*>(GetStyleController());
 				styleController->SetCommandExecutor(commandExecutor.Obj());
 				CreateSubMenu();
+
+				GetBoundsComposition()->BoundsChanged.AttachMethod(this, &GuiComboBoxBase::OnBoundsChanged);
 			}
 
 			GuiComboBoxBase::~GuiComboBoxBase()
@@ -102,9 +111,9 @@ GuiComboBoxListControl
 			void GuiComboBoxListControl::SetFont(const FontProperties& value)
 			{
 				GuiComboBoxBase::SetFont(value);
-				Size size=GetSubMenu()->GetBoundsComposition()->GetPreferredMinSize();
+				Size size=GetPreferredMenuClientSize();
 				size.y=20*value.size;
-				GetSubMenu()->GetBoundsComposition()->SetPreferredMinSize(size);
+				SetPreferredMenuClientSize(size);
 			}
 
 			GuiSelectableListControl* GuiComboBoxListControl::GetContainedListControl()
