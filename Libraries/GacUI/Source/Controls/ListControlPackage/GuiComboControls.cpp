@@ -29,6 +29,11 @@ GuiComboBoxBase::CommandExecutor
 GuiComboBoxBase
 ***********************************************************************/
 
+			IGuiMenuService::Direction GuiComboBoxBase::GetSubMenuDirection()
+			{
+				return IGuiMenuService::Horizontal;
+			}
+
 			void GuiComboBoxBase::SelectItem()
 			{
 				styleController->OnItemSelected();

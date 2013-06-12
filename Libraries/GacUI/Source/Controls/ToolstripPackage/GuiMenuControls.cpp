@@ -272,6 +272,11 @@ GuiMenuButton
 				}
 			}
 
+			IGuiMenuService::Direction GuiMenuButton::GetSubMenuDirection()
+			{
+				return ownerMenuService?ownerMenuService->GetPreferredDirection():IGuiMenuService::Horizontal;
+			}
+
 			GuiMenuButton::GuiMenuButton(IStyleController* _styleController)
 				:GuiButton(_styleController)
 				,styleController(_styleController)
@@ -400,7 +405,7 @@ GuiMenuButton
 					if(value)
 					{
 						subMenu->SetClientSize(preferredMenuClientSize);
-						IGuiMenuService::Direction direction=ownerMenuService?ownerMenuService->GetPreferredDirection():IGuiMenuService::Horizontal;
+						IGuiMenuService::Direction direction=GetSubMenuDirection();
 						subMenu->ShowPopup(GetSubMenuHost(), direction==IGuiMenuService::Horizontal);
 					}
 					else
