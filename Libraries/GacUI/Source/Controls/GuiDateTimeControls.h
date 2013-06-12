@@ -59,7 +59,7 @@ DatePicker
 					static const vint									DaysOfWeek=7;
 					static const vint									DayRows=6;
 					static const vint									DayRowStart=2;
-					static const vint									YearFirst=1990;
+					static const vint									YearFirst=1900;
 					static const vint									YearLast=2099;
 
 					IStyleProvider*										styleProvider;
