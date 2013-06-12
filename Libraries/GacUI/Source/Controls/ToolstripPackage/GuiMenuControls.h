@@ -163,6 +163,7 @@ MenuButton
 				bool									ownedSubMenu;
 				Size									preferredMenuClientSize;
 				IGuiMenuService*						ownerMenuService;
+				bool									cascadeAction;
 
 				GuiButton*								GetSubMenuHost();
 				void									OpenSubMenuInternal();
@@ -231,6 +232,13 @@ MenuButton
 				/// <summary>Set the preferred client size for the sub menu.</summary>
 				/// <param name="value">The preferred client size for the sub menu.</param>
 				void									SetPreferredMenuClientSize(Size value);
+
+				/// <summary>Test is cascade action enabled. If the cascade action is enabled, when the mouse enter this menu button, the sub menu will be automatically opened if the parent menu is in an active state (see <see cref="IGuiMenuService::IsActiveState"/>), closing the sub menu will also close the parent menu.</summary>
+				/// <returns>Returns true if cascade action is enabled.</returns>
+				bool									GetCascadeAction();
+				/// <summary>Enable or disable cascade action.</summary>
+				/// <param name="value">Set to true to enable cascade action.</param>
+				void									SetCascadeAction(bool value);
 			};
 		}
 	}
