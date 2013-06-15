@@ -638,8 +638,6 @@ CriticalSection
 		LeaveCriticalSection(&internalData->criticalSection);
 	}
 
-#ifdef VCZH_NO_OLD_OS
-
 /***********************************************************************
 ReaderWriterLock
 ***********************************************************************/
@@ -777,8 +775,6 @@ ConditionVariable
 	{
 		WakeAllConditionVariable(&internalData->variable);
 	}
-
-#endif
 
 /***********************************************************************
 SpinLock
