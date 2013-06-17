@@ -453,6 +453,36 @@ TextComboBoxDataEditor
 				{
 					return textList;
 				}
+				
+/***********************************************************************
+DateComboBoxDataEditor
+***********************************************************************/
+
+				compositions::GuiBoundsComposition* DateComboBoxDataEditor::CreateBoundsCompositionInternal()
+				{
+					return comboBox->GetBoundsComposition();
+				}
+
+				DateComboBoxDataEditor::DateComboBoxDataEditor()
+				{
+					comboBox=g::NewDateComboBox();
+				}
+
+				void DateComboBoxDataEditor::BeforeEditCell(IDataProvider* dataProvider, vint row, vint column)
+				{
+					DataEditorBase::BeforeEditCell(dataProvider, row, column);
+					comboBox->SetSelectedDate(DateTime::LocalTime());
+				}
+
+				GuiDateComboBox* DateComboBoxDataEditor::GetComboBoxControl()
+				{
+					return comboBox;
+				}
+
+				GuiDatePicker* DateComboBoxDataEditor::GetDatePickerControl()
+				{
+					return comboBox->GetDatePicker();
+				}
 			}
 		}
 	}

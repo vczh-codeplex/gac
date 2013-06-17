@@ -1530,6 +1530,18 @@ Type Declaration
 				CLASS_MEMBER_CONSTRUCTOR(Ptr<TextComboBoxDataEditor::Factory>(), NO_PARAMETER)
 			END_CLASS_MEMBER(TextComboBoxDataEditor::Factory)
 
+			BEGIN_CLASS_MEMBER(DateComboBoxDataEditor)
+				CLASS_MEMBER_BASE(IDataEditor)
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ComboBoxControl)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(DatePickerControl)
+			END_CLASS_MEMBER(DateComboBoxDataEditor)
+
+			BEGIN_CLASS_MEMBER(DateComboBoxDataEditor::Factory)
+				CLASS_MEMBER_BASE(IDataEditorFactory)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<DateComboBoxDataEditor::Factory>(), NO_PARAMETER)
+			END_CLASS_MEMBER(DateComboBoxDataEditor::Factory)
+
 			BEGIN_CLASS_MEMBER(GuiDatePicker)
 				CLASS_MEMBER_BASE(GuiControl)
 				CONTROL_CONSTRUCTOR_PROVIDER(GuiDatePicker)

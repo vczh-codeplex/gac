@@ -12,6 +12,7 @@ Interfaces:
 #include "GuiDataGridInterfaces.h"
 #include "GuiComboControls.h"
 #include "GuiTextListControls.h"
+#include "..\GuiDateTimeControls.h"
 #include "..\TextEditorPackage\GuiTextControls.h"
 
 namespace vl
@@ -260,6 +261,9 @@ Editor Extensions
 					TextBoxDataEditor();
 
 					void												BeforeEditCell(IDataProvider* dataProvider, vint row, vint column)override;
+
+					/// <summary>Get the <see cref="GuiSinglelineTextBox"/> editor control.</summary>
+					/// <returns>The control.</returns>
 					GuiSinglelineTextBox*								GetTextBox();
 				};
 				
@@ -278,8 +282,38 @@ Editor Extensions
 					TextComboBoxDataEditor();
 
 					void												BeforeEditCell(IDataProvider* dataProvider, vint row, vint column)override;
+
+					/// <summary>Get the <see cref="GuiComboBoxListControl"/> editor control.</summary>
+					/// <returns>The control.</returns>
 					GuiComboBoxListControl*								GetComboBoxControl();
+
+					/// <summary>Get the <see cref="GuiTextList"/> editor control.</summary>
+					/// <returns>The control.</returns>
 					GuiTextList*										GetTextListControl();
+				};
+				
+				/// <summary>Data editor that displays a date combo box. Use DateComboBoxDataEditor::Factory as the factory class.</summary>
+				class DateComboBoxDataEditor : public DataEditorBase
+				{
+				public:
+					typedef DataEditorFactory<DateComboBoxDataEditor>						Factory;
+				protected:
+					GuiDateComboBox*									comboBox;
+
+					compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal()override;
+				public:
+					/// <summary>Create the data editor.</summary>
+					DateComboBoxDataEditor();
+
+					void												BeforeEditCell(IDataProvider* dataProvider, vint row, vint column)override;
+
+					/// <summary>Get the <see cref="GuiDateComboBox"/> editor control.</summary>
+					/// <returns>The control.</returns>
+					GuiDateComboBox*									GetComboBoxControl();
+
+					/// <summary>Get the <see cref="GuiDatePicker"/> editor control.</summary>
+					/// <returns>The control.</returns>
+					GuiDatePicker*										GetDatePickerControl();
 				};
 			}
 		}
