@@ -176,8 +176,14 @@ Type List
 			F(presentation::controls::list::ListViewMainColumnDataVisualizer::Factory)\
 			F(presentation::controls::list::ListViewSubColumnDataVisualizer)\
 			F(presentation::controls::list::ListViewSubColumnDataVisualizer::Factory)\
+			F(presentation::controls::list::HyperlinkDataVisualizer)\
+			F(presentation::controls::list::HyperlinkDataVisualizer::Factory)\
+			F(presentation::controls::list::ImageDataVisualizer)\
+			F(presentation::controls::list::ImageDataVisualizer::Factory)\
 			F(presentation::controls::list::CellBorderDataVisualizer)\
 			F(presentation::controls::list::CellBorderDataVisualizer::Factory)\
+			F(presentation::controls::list::NotifyIconDataVisualizer)\
+			F(presentation::controls::list::NotifyIconDataVisualizer::Factory)\
 			F(presentation::controls::list::TextBoxDataEditor)\
 			F(presentation::controls::list::TextBoxDataEditor::Factory)\
 			F(presentation::controls::list::TextComboBoxDataEditor)\
