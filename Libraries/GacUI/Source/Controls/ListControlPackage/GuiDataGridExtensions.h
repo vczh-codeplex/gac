@@ -25,7 +25,7 @@ namespace vl
 			{
 
 /***********************************************************************
-Visualizer Extensions
+Extension Bases
 ***********************************************************************/
 				
 				/// <summary>Base class for all data visualizers.</summary>
@@ -90,6 +90,44 @@ Visualizer Extensions
 						return dataVisualizer;
 					}
 				};
+				
+				/// <summary>Base class for all data editors.</summary>
+				class DataEditorBase : public Object, public virtual IDataEditor
+				{
+					template<typename T>
+					friend class DataEditorFactory;
+				protected:
+					IDataEditorFactory*									factory;
+					IDataEditorCallback*								callback;
+					compositions::GuiBoundsComposition*					boundsComposition;
+
+					virtual compositions::GuiBoundsComposition*			CreateBoundsCompositionInternal()=0;
+				public:
+					/// <summary>Create the data editor.</summary>
+					DataEditorBase();
+					~DataEditorBase();
+
+					IDataEditorFactory*									GetFactory()override;
+					compositions::GuiBoundsComposition*					GetBoundsComposition()override;
+					void												BeforeEditCell(IDataProvider* dataProvider, vint row, vint column)override;
+				};
+				
+				template<typename TEditor>
+				class DataEditorFactory : public Object, public virtual IDataEditorFactory, public Description<DataEditorFactory<TEditor>>
+				{
+				public:
+					Ptr<IDataEditor> CreateEditor(IDataEditorCallback* callback)override
+					{
+						DataEditorBase* dataEditor=new TEditor;
+						dataEditor->factory=this;
+						dataEditor->callback=callback;
+						return dataEditor;
+					}
+				};
+
+/***********************************************************************
+Visualizer Extensions
+***********************************************************************/
 
 				/// <summary>Data visualizer that displays an image and a text. Use ListViewMainColumnDataVisualizer::Factory as the factory class.</summary>
 				class ListViewMainColumnDataVisualizer : public DataVisualizerBase
@@ -212,40 +250,6 @@ Visualizer Extensions
 /***********************************************************************
 Editor Extensions
 ***********************************************************************/
-				
-				/// <summary>Base class for all data editors.</summary>
-				class DataEditorBase : public Object, public virtual IDataEditor
-				{
-					template<typename T>
-					friend class DataEditorFactory;
-				protected:
-					IDataEditorFactory*									factory;
-					IDataEditorCallback*								callback;
-					compositions::GuiBoundsComposition*					boundsComposition;
-
-					virtual compositions::GuiBoundsComposition*			CreateBoundsCompositionInternal()=0;
-				public:
-					/// <summary>Create the data editor.</summary>
-					DataEditorBase();
-					~DataEditorBase();
-
-					IDataEditorFactory*									GetFactory()override;
-					compositions::GuiBoundsComposition*					GetBoundsComposition()override;
-					void												BeforeEditCell(IDataProvider* dataProvider, vint row, vint column)override;
-				};
-				
-				template<typename TEditor>
-				class DataEditorFactory : public Object, public virtual IDataEditorFactory, public Description<DataEditorFactory<TEditor>>
-				{
-				public:
-					Ptr<IDataEditor> CreateEditor(IDataEditorCallback* callback)override
-					{
-						DataEditorBase* dataEditor=new TEditor;
-						dataEditor->factory=this;
-						dataEditor->callback=callback;
-						return dataEditor;
-					}
-				};
 				
 				/// <summary>Data editor that displays a text box. Use TextBoxDataEditor::Factory as the factory class.</summary>
 				class TextBoxDataEditor : public DataEditorBase
