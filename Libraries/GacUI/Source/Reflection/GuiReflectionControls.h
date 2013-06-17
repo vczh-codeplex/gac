@@ -182,6 +182,8 @@ Type List
 			F(presentation::controls::list::TextBoxDataEditor::Factory)\
 			F(presentation::controls::list::TextComboBoxDataEditor)\
 			F(presentation::controls::list::TextComboBoxDataEditor::Factory)\
+			F(presentation::controls::list::DateComboBoxDataEditor)\
+			F(presentation::controls::list::DateComboBoxDataEditor::Factory)\
 			F(presentation::controls::GuiDatePicker)\
 			F(presentation::controls::GuiDatePicker::IStyleProvider)\
 			F(presentation::controls::GuiDateComboBox)\
