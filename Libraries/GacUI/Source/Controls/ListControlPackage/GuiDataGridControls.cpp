@@ -641,6 +641,45 @@ GuiVirtualDataGrid
 			{
 				return structuredDataProvider.Obj();
 			}
+
+/***********************************************************************
+StringGridProvider
+***********************************************************************/
+
+			namespace list
+			{
+
+				vint StringGridProvider::GetRowCount()
+				{
+					return items.Count();
+				}
+
+				void StringGridProvider::GetRowData(vint row, Ptr<StringGridItem>& rowData)
+				{
+					rowData=items[row];
+				}
+
+				StringGridProvider::StringGridProvider()
+				{
+				}
+
+				StringGridProvider::~StringGridProvider()
+				{
+				}
+			}
+
+/***********************************************************************
+GuiStringGrid
+***********************************************************************/
+
+			GuiStringGrid::GuiStringGrid(IStyleProvider* _styleProvider)
+				:GuiVirtualDataGrid(_styleProvider, new list::StringGridProvider)
+			{
+			}
+
+			GuiStringGrid::~GuiStringGrid()
+			{
+			}
 		}
 	}
 }

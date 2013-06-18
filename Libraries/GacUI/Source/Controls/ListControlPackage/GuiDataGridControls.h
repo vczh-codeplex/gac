@@ -167,7 +167,7 @@ Datagrid ContentProvider
 			}
 
 /***********************************************************************
-DataGrid Control
+Virtual DataGrid Control
 ***********************************************************************/
 
 			/// <summary>Data grid control in virtual mode.</summary>
@@ -197,6 +197,45 @@ DataGrid Control
 				/// <summary>Get the given structured data provider.</summary>
 				/// <returns>The structured data provider.</returns>
 				list::StructuredDataProvider*							GetStructuredDataProvider();
+			};
+
+/***********************************************************************
+StringGrid Control
+***********************************************************************/
+
+			class GuiStringGrid;
+
+			namespace list
+			{
+				class StringGridItem
+				{
+				public:
+					collections::List<WString>							strings;
+				};
+
+				class StringGridProvider : private StrongTypedDataProvider<Ptr<StringGridItem>>, public Description<StringGridProvider>
+				{
+					friend class GuiStringGrid;
+				protected:
+					collections::List<Ptr<StringGridItem>>				items;
+
+					vint												GetRowCount()override;
+					void												GetRowData(vint row, Ptr<StringGridItem>& rowData)override;
+				public:
+					StringGridProvider();
+					~StringGridProvider();
+				};
+			}
+
+			/// <summary>String grid control in virtual mode.</summary>
+			class GuiStringGrid : public GuiVirtualDataGrid, public Description<GuiStringGrid>
+			{
+			protected:
+			public:
+				/// <summary>Create a string grid control.</summary>
+				/// <param name="_styleProvider">The style provider for this control.</param>
+				GuiStringGrid(IStyleProvider* _styleProvider);
+				~GuiStringGrid();
 			};
 		}
 	}

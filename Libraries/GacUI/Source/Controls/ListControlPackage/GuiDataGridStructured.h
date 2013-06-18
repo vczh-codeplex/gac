@@ -168,6 +168,9 @@ Structured DataSource Extensions
 					StructuredDataProvider(Ptr<IStructuredDataProvider> provider);
 					~StructuredDataProvider();
 					
+					/// <summary>Get the <see cref="IStructuredDataProvider"/> object.</summary>
+					/// <returns>The provider.</returns>
+					Ptr<IStructuredDataProvider>						GetStructuredDataProvider();
 					/// <summary>Get the additional filter.</summary>
 					/// <returns>The additional filter.</returns>
 					Ptr<IStructuredDataFilter>							GetAdditionalFilter();
@@ -189,6 +192,7 @@ Structured DataSource Extensions
 					vint												GetRowCount()override;
 					Ptr<GuiImageData>									GetRowLargeImage(vint row)override;
 					Ptr<GuiImageData>									GetRowSmallImage(vint row)override;
+					vint												GetCellSpan(vint row, vint column)override;
 					WString												GetCellText(vint row, vint column)override;
 					IDataVisualizerFactory*								GetCellDataVisualizerFactory(vint row, vint column)override;
 					void												VisualizeCell(vint row, vint column, IDataVisualizer* dataVisualizer)override;

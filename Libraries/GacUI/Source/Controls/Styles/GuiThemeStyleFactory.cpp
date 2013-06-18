@@ -117,6 +117,11 @@ namespace vl
 					return new controls::GuiTreeView(GetCurrentTheme()->CreateTreeViewStyle());
 				}
 
+				controls::GuiStringGrid* NewStringGrid()
+				{
+					return new controls::GuiStringGrid(GetCurrentTheme()->CreateListViewStyle());
+				}
+
 				controls::GuiToolstripMenu* NewMenu(controls::GuiControl* owner)
 				{
 					return new controls::GuiToolstripMenu(GetCurrentTheme()->CreateMenuStyle(), owner);

@@ -38,56 +38,20 @@ TestWindow
 	class TestWindow : public GuiWindow
 	{
 	private:
-		GuiDateComboBox*					dateComboBox;
-		GuiDatePicker*						datePicker;
+		GuiStringGrid*						stringGrid;
 	public:
 		TestWindow()
 			:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
 		{
 			SetText(GetApplication()->GetExecutableFolder());
 			GetContainerComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
-			GetContainerComposition()->SetPreferredMinSize(Size(320, 240));
+			GetContainerComposition()->SetPreferredMinSize(Size(640, 480));
 
-			dateComboBox=g::NewDateComboBox();
-			dateComboBox->GetDatePicker()->SetDateLocale(Locale(L"en-US"));
-			dateComboBox->SelectedDateChanged.AttachLambda([=](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
-			{
-				SetText(L"GuiDateComboBox: "+dateComboBox->GetText());
-			});
-
-			datePicker=g::NewDatePicker();
-			datePicker->DateChanged.AttachLambda([=](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
-			{
-				SetText(L"GuiDatePicker: "+datePicker->GetText());
-			});
-
-			GuiTableComposition* table=new GuiTableComposition;
-			GetBoundsComposition()->AddChild(table);
-			table->SetAlignmentToParent(Margin(0, 0, 0, 0));
-			table->SetRowsAndColumns(4, 3);
-			table->SetRowOption(0, GuiCellOption::PercentageOption(0.5));
-			table->SetRowOption(1, GuiCellOption::MinSizeOption());
-			table->SetRowOption(2, GuiCellOption::MinSizeOption());
-			table->SetRowOption(3, GuiCellOption::PercentageOption(0.5));
-			table->SetColumnOption(0, GuiCellOption::PercentageOption(0.5));
-			table->SetColumnOption(1, GuiCellOption::MinSizeOption());
-			table->SetColumnOption(2, GuiCellOption::PercentageOption(0.5));
-			{
-				GuiCellComposition* cell=new GuiCellComposition;
-				table->AddChild(cell);
-				cell->SetSite(1, 1, 1, 1);
-
-				datePicker->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-				cell->AddChild(datePicker->GetBoundsComposition());
-			}
-			{
-				GuiCellComposition* cell=new GuiCellComposition;
-				table->AddChild(cell);
-				cell->SetSite(2, 1, 1, 1);
-
-				dateComboBox->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-				cell->AddChild(dateComboBox->GetBoundsComposition());
-			}
+			stringGrid=g::NewStringGrid();
+			stringGrid->GetBoundsComposition()->SetAlignmentToParent(Margin(5, 5, 5, 5));
+			stringGrid->SetVerticalAlwaysVisible(false);
+			stringGrid->SetHorizontalAlwaysVisible(false);
+			AddChild(stringGrid);
 
 			ForceCalculateSizeImmediately();
 			MoveToScreenCenter();
