@@ -316,6 +316,11 @@ StructuredDataProvider
 					return reorderedRows[row];
 				}
 
+				Ptr<IStructuredDataProvider> StructuredDataProvider::GetStructuredDataProvider()
+				{
+					return structuredDataProvider;
+				}
+
 				Ptr<IStructuredDataFilter> StructuredDataProvider::GetAdditionalFilter()
 				{
 					return additionalFilter;
@@ -454,6 +459,11 @@ StructuredDataProvider
 				Ptr<GuiImageData> StructuredDataProvider::GetRowSmallImage(vint row)
 				{
 					return structuredDataProvider->GetRowSmallImage(TranslateRowNumber(row));
+				}
+
+				vint StructuredDataProvider::GetCellSpan(vint row, vint column)
+				{
+					return 1;
 				}
 
 				WString StructuredDataProvider::GetCellText(vint row, vint column)

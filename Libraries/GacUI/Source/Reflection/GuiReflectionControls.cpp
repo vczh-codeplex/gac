@@ -1353,6 +1353,7 @@ Type Declaration
 				CLASS_MEMBER_METHOD(IsSortOrderAscending, NO_PARAMETER)
 				CLASS_MEMBER_METHOD(GetRowLargeImage, {L"row" _ L"column"})
 				CLASS_MEMBER_METHOD(GetRowSmallImage, {L"row" _ L"column"})
+				CLASS_MEMBER_METHOD(GetCellSpan, {L"row" _ L"column"})
 				CLASS_MEMBER_METHOD(GetCellText, {L"row" _ L"column"})
 				CLASS_MEMBER_METHOD(GetCellDataVisualizerFactory, {L"row" _ L"column"})
 				CLASS_MEMBER_METHOD(VisualizeCell, {L"row" _ L"column" _ L"dataVisualizer"})
@@ -1473,6 +1474,7 @@ Type Declaration
 			BEGIN_CLASS_MEMBER(StructuredDataProvider)
 				CLASS_MEMBER_BASE(IDataProvider)
 
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(StructuredDataProvider)
 				CLASS_MEMBER_PROPERTY_FAST(AdditionalFilter)
 			END_CLASS_MEMBER(StructuredDataProvider)
 

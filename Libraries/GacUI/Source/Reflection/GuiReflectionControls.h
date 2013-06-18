@@ -1656,6 +1656,11 @@ Interface Proxy
 						return INVOKEGET_INTERFACE_PROXY(GetRowSmallImage, row);
 					}
 
+					vint GetCellSpan(vint row, vint column)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetCellSpan, row, column);
+					}
+
 					WString GetCellText(vint row, vint column)override
 					{
 						return INVOKEGET_INTERFACE_PROXY(GetCellText, row, column);

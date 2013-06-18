@@ -185,6 +185,11 @@ Datagrid Interfaces
 					/// <returns>The small image.</returns>
 					/// <param name="row">The row number.</param>
 					virtual Ptr<GuiImageData>							GetRowSmallImage(vint row)=0;
+					/// <summary>Get the column span for the cell.</summary>
+					/// <returns>The column span for the cell.</returns>
+					/// <param name="row">The row number for the cell.</param>
+					/// <param name="column">The column number for the cell.</param>
+					virtual vint										GetCellSpan(vint row, vint column)=0;
 					/// <summary>Get the text for the cell.</summary>
 					/// <returns>The text for the cell.</returns>
 					/// <param name="row">The row number for the cell.</param>

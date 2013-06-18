@@ -224,6 +224,9 @@ namespace vl
 				/// <summary>Create a tree view.</summary>
 				/// <returns>The created control.</returns>
 				extern controls::GuiTreeView*					NewTreeView();
+				/// <summary>Create a string grid.</summary>
+				/// <returns>The created control.</returns>
+				extern controls::GuiStringGrid*					NewStringGrid();
 
 				/// <summary>Create a menu.</summary>
 				/// <returns>The created control.</returns>
