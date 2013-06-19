@@ -207,23 +207,56 @@ StringGrid Control
 
 			namespace list
 			{
+				class StringGridProvider;
+
 				class StringGridItem
 				{
 				public:
 					collections::List<WString>							strings;
 				};
 
+				class StringGridColumn : public StrongTypedColumnProviderBase<Ptr<StringGridItem>, WString>
+				{
+				protected:
+					StringGridProvider*									provider;
+
+				public:
+					StringGridColumn(StringGridProvider* _provider);
+					~StringGridColumn();
+
+					void												GetCellData(const Ptr<StringGridItem>& rowData, WString& cellData)override;
+					WString												GetCellDataText(const WString& cellData)override;
+				};
+
 				class StringGridProvider : private StrongTypedDataProvider<Ptr<StringGridItem>>, public Description<StringGridProvider>
 				{
+					friend class StringGridColumn;
 					friend class GuiStringGrid;
 				protected:
 					collections::List<Ptr<StringGridItem>>				items;
 
-					vint												GetRowCount()override;
 					void												GetRowData(vint row, Ptr<StringGridItem>& rowData)override;
 				public:
 					StringGridProvider();
 					~StringGridProvider();
+
+					bool												InsertRow(vint row);
+					vint												AppendRow();
+					bool												MoveRow(vint source, vint target);
+					bool												RemoveRow(vint row);
+					bool												ClearRows();
+					vint												GetRowCount()override;
+					WString												GetGridString(vint row, vint column);
+					bool												SetGridString(vint row, vint column, const WString& value);
+
+					bool												InsertColumn(vint column, const WString& text);
+					vint												AppendColumn(const WString& text);
+					bool												MoveColumn(vint source, vint target);
+					bool												RemoveColumn(vint column);
+					bool												ClearColumns();
+					vint												GetColumnCount()override;
+					WString												GetColumnText(vint column);
+					bool												SetColumnText(vint column, const WString& value);
 				};
 			}
 
@@ -231,11 +264,16 @@ StringGrid Control
 			class GuiStringGrid : public GuiVirtualDataGrid, public Description<GuiStringGrid>
 			{
 			protected:
+				list::StringGridProvider*								grids;
 			public:
 				/// <summary>Create a string grid control.</summary>
 				/// <param name="_styleProvider">The style provider for this control.</param>
 				GuiStringGrid(IStyleProvider* _styleProvider);
 				~GuiStringGrid();
+
+				/// <summary>Get the grid data in this control.</summary>
+				/// <returns>The grid data.</returns>
+				list::StringGridProvider&								Grids();
 			};
 		}
 	}

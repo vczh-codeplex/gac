@@ -635,11 +635,43 @@ StructuredColummProviderBase
 StructuredDataProviderBase
 ***********************************************************************/
 
-				bool StructuredDataProviderBase::AddColumn(Ptr<StructuredColummProviderBase> value)
+				bool StructuredDataProviderBase::InsertColumnInternal(vint column, Ptr<StructuredColummProviderBase> value)
+				{
+					if(column<0 || columns.Count()<column) return false;
+					if(columns.Contains(value.Obj())) return false;
+					columns.Insert(column, value);
+					value->SetCommandExecutor(commandExecutor);
+					if(commandExecutor)
+					{
+						commandExecutor->OnDataProviderColumnChanged();
+					}
+					return true;
+				}
+
+				bool StructuredDataProviderBase::AddColumnInternal(Ptr<StructuredColummProviderBase> value)
+				{
+					return InsertColumnInternal(columns.Count(), value);
+				}
+
+				bool StructuredDataProviderBase::RemoveColumnInternal(Ptr<StructuredColummProviderBase> value)
 				{
 					if(columns.Contains(value.Obj())) return false;
-					columns.Add(value);
-					value->SetCommandExecutor(commandExecutor);
+					value->SetCommandExecutor(0);
+					columns.Remove(value.Obj());
+					if(commandExecutor)
+					{
+						commandExecutor->OnDataProviderColumnChanged();
+					}
+					return true;
+				}
+
+				bool StructuredDataProviderBase::ClearColumnsInternal()
+				{
+					FOREACH(Ptr<StructuredColummProviderBase>, column, columns)
+					{
+						column->SetCommandExecutor(0);
+					}
+					columns.Clear();
 					if(commandExecutor)
 					{
 						commandExecutor->OnDataProviderColumnChanged();
