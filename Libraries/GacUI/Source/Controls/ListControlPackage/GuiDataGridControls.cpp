@@ -642,17 +642,44 @@ GuiVirtualDataGrid
 				return structuredDataProvider.Obj();
 			}
 
+			namespace list
+			{
+
 /***********************************************************************
 StringGridProvider
 ***********************************************************************/
 
-			namespace list
-			{
-
-				vint StringGridProvider::GetRowCount()
+				StringGridColumn::StringGridColumn(StringGridProvider* _provider)
+					:StrongTypedColumnProviderBase(_provider)
+					,provider(_provider)
 				{
-					return items.Count();
 				}
+
+				StringGridColumn::~StringGridColumn()
+				{
+				}
+
+				void StringGridColumn::GetCellData(const Ptr<StringGridItem>& rowData, WString& cellData)
+				{
+					vint index=provider->columns.IndexOf(this);
+					if(0<=index && index<rowData->strings.Count())
+					{
+						cellData=rowData->strings[index];
+					}
+					else
+					{
+						cellData=L"";
+					}
+				}
+
+				WString StringGridColumn::GetCellDataText(const WString& cellData)
+				{
+					return cellData;
+				}
+
+/***********************************************************************
+StringGridProvider
+***********************************************************************/
 
 				void StringGridProvider::GetRowData(vint row, Ptr<StringGridItem>& rowData)
 				{
@@ -666,6 +693,127 @@ StringGridProvider
 				StringGridProvider::~StringGridProvider()
 				{
 				}
+
+				bool StringGridProvider::InsertRow(vint row)
+				{
+					if(row<0 || items.Count()<row) return false;
+					Ptr<StringGridItem> item=new StringGridItem;
+					for(vint i=0;i<columns.Count();i++)
+					{
+						item->strings.Add(L"");
+					}
+					items.Insert(row, item);
+					commandExecutor->OnDataProviderItemModified(row, 0, 1);
+					return true;
+				}
+
+				vint StringGridProvider::AppendRow()
+				{
+					InsertRow(items.Count());
+					return items.Count()-1;
+				}
+
+				bool StringGridProvider::MoveRow(vint source, vint target)
+				{
+					if(source<0 || items.Count()<=source) return false;
+					if(target<0 || items.Count()<=target) return false;
+					Ptr<StringGridItem> item=items[source];
+					items.RemoveAt(source);
+					commandExecutor->OnDataProviderItemModified(source, 1, 0);
+					items.Insert(target, item);
+					commandExecutor->OnDataProviderItemModified(target, 0, 1);
+					return true;
+				}
+
+				bool StringGridProvider::RemoveRow(vint row)
+				{
+					if(row<0 || items.Count()<=row) return false;
+					items.RemoveAt(row);
+					commandExecutor->OnDataProviderItemModified(row, 1, 0);
+					return true;
+				}
+
+				bool StringGridProvider::ClearRows()
+				{
+					vint oldCount=items.Count();
+					items.Clear();
+					commandExecutor->OnDataProviderItemModified(0, oldCount, 0);
+					return true;
+				}
+
+				vint StringGridProvider::GetRowCount()
+				{
+					return items.Count();
+				}
+
+				WString StringGridProvider::GetGridString(vint row, vint column)
+				{
+					if(row<0 || items.Count()<=row) return L"";
+					if(column<0 || columns.Count()<=column) return L"";
+					return items[row]->strings[column];
+				}
+
+				bool StringGridProvider::SetGridString(vint row, vint column, const WString& value)
+				{
+					if(row<0 || items.Count()<=row) return false;
+					if(column<0 || columns.Count()<=column) return false;
+					items[row]->strings[column]=value;
+					commandExecutor->OnDataProviderItemModified(row, 1, 1);
+					return true;
+				}
+
+				bool StringGridProvider::InsertColumn(vint column, const WString& text)
+				{
+					Ptr<StringGridColumn> columnProvider=new StringGridColumn(this);
+					return InsertColumnInternal(column, columnProvider);
+				}
+
+				vint StringGridProvider::AppendColumn(const WString& text)
+				{
+					InsertColumn(columns.Count(), text);
+					return columns.Count()-1;
+				}
+
+				bool StringGridProvider::MoveColumn(vint source, vint target)
+				{
+					if(source<0 || columns.Count()<=source) return false;
+					if(target<0 || columns.Count()<=target) return false;
+					Ptr<StringGridColumn> columnProvider=columns[source].Cast<StringGridColumn>();
+					columns.RemoveAt(source);
+					columns.Insert(target, columnProvider);
+					commandExecutor->OnDataProviderColumnChanged();
+					return true;
+				}
+
+				bool StringGridProvider::RemoveColumn(vint column)
+				{
+					if(column<0 || columns.Count()<=column) return false;
+					Ptr<StringGridColumn> columnProvider=columns[column].Cast<StringGridColumn>();
+					return RemoveColumnInternal(columnProvider);
+				}
+
+				bool StringGridProvider::ClearColumns()
+				{
+					return ClearColumnsInternal();
+				}
+
+				vint StringGridProvider::GetColumnCount()
+				{
+					return columns.Count();
+				}
+
+				WString StringGridProvider::GetColumnText(vint column)
+				{
+					if(column<0 || columns.Count()<=column) return L"";
+					return columns[column]->GetText();
+				}
+
+				bool StringGridProvider::SetColumnText(vint column, const WString& value)
+				{
+					if(column<0 || columns.Count()<=column) return false;
+					columns[column]->SetText(value);
+					return true;
+				}
 			}
 
 /***********************************************************************
@@ -675,10 +823,16 @@ GuiStringGrid
 			GuiStringGrid::GuiStringGrid(IStyleProvider* _styleProvider)
 				:GuiVirtualDataGrid(_styleProvider, new list::StringGridProvider)
 			{
+				grids=dynamic_cast<list::StringGridProvider*>(structuredDataProvider->GetStructuredDataProvider().Obj());
 			}
 
 			GuiStringGrid::~GuiStringGrid()
 			{
+			}
+
+			list::StringGridProvider& GuiStringGrid::Grids()
+			{
+				return *grids;
 			}
 		}
 	}
