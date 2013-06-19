@@ -59,7 +59,7 @@ Datagrid Interfaces
 					/// <param name="dataProvider">The data provider.</param>
 					/// <param name="row">The row number of the cell.</param>
 					/// <param name="column">The column number of the cell.</param>
-					virtual void										BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)=0;
+					virtual void										BeforeVisualizeCell(IDataProvider* dataProvider, vint row, vint column)=0;
 
 					/// <summary>Get the decorated data visualizer inside the current data visualizer.</summary>
 					/// <returns>The decorated data visualizer. Returns null if such a visualizer does not exists.</returns>

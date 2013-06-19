@@ -1301,7 +1301,7 @@ Type Declaration
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(BoundsComposition)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(DecoratedDataVisualizer)
 
-				CLASS_MEMBER_METHOD(BeforeVisualizerCell, {L"dataProvider" _ L"row" _ L"column"})
+				CLASS_MEMBER_METHOD(BeforeVisualizeCell, {L"dataProvider" _ L"row" _ L"column"})
 			END_CLASS_MEMBER(IDataVisualizer)
 
 			BEGIN_CLASS_MEMBER(IDataEditorCallback)

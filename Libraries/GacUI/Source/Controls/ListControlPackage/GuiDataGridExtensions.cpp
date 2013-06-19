@@ -61,7 +61,7 @@ DataVisualizerBase
 					return boundsComposition;
 				}
 
-				void DataVisualizerBase::BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)
+				void DataVisualizerBase::BeforeVisualizeCell(IDataProvider* dataProvider, vint row, vint column)
 				{
 				}
 
@@ -113,7 +113,7 @@ ListViewMainColumnDataVisualizer
 				{
 				}
 
-				void ListViewMainColumnDataVisualizer::BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)
+				void ListViewMainColumnDataVisualizer::BeforeVisualizeCell(IDataProvider* dataProvider, vint row, vint column)
 				{
 					Ptr<GuiImageData> imageData=dataProvider->GetRowSmallImage(row);
 					if(imageData)
@@ -158,7 +158,7 @@ ListViewSubColumnDataVisualizer
 				{
 				}
 
-				void ListViewSubColumnDataVisualizer::BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)
+				void ListViewSubColumnDataVisualizer::BeforeVisualizeCell(IDataProvider* dataProvider, vint row, vint column)
 				{
 					text->SetAlignments(Alignment::Left, Alignment::Center);
 					text->SetFont(font);
@@ -203,9 +203,9 @@ HyperlinkDataVisualizer
 				{
 				}
 
-				void HyperlinkDataVisualizer::BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)
+				void HyperlinkDataVisualizer::BeforeVisualizeCell(IDataProvider* dataProvider, vint row, vint column)
 				{
-					ListViewSubColumnDataVisualizer::BeforeVisualizerCell(dataProvider, row, column);
+					ListViewSubColumnDataVisualizer::BeforeVisualizeCell(dataProvider, row, column);
 					text->SetColor(Color(0, 0, 255));
 				}
 				
@@ -229,7 +229,7 @@ ImageDataVisualizer
 				{
 				}
 
-				void ImageDataVisualizer::BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)
+				void ImageDataVisualizer::BeforeVisualizeCell(IDataProvider* dataProvider, vint row, vint column)
 				{
 					image->SetImage(0, -1);
 					image->SetAlignments(Alignment::Center, Alignment::Center);
@@ -282,9 +282,9 @@ CellBorderDataVisualizer
 				{
 				}
 
-				void CellBorderDataVisualizer::BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)
+				void CellBorderDataVisualizer::BeforeVisualizeCell(IDataProvider* dataProvider, vint row, vint column)
 				{
-					decoratedDataVisualizer->BeforeVisualizerCell(dataProvider, row, column);
+					decoratedDataVisualizer->BeforeVisualizeCell(dataProvider, row, column);
 				}
 				
 /***********************************************************************
@@ -336,9 +336,9 @@ CellBorderDataVisualizer
 				{
 				}
 
-				void NotifyIconDataVisualizer::BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)
+				void NotifyIconDataVisualizer::BeforeVisualizeCell(IDataProvider* dataProvider, vint row, vint column)
 				{
-					decoratedDataVisualizer->BeforeVisualizerCell(dataProvider, row, column);
+					decoratedDataVisualizer->BeforeVisualizeCell(dataProvider, row, column);
 
 					leftImage->SetImage(0, -1);
 					leftImage->SetAlignments(Alignment::Center, Alignment::Center);

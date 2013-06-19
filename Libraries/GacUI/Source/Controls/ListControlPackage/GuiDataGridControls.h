@@ -214,6 +214,18 @@ StringGrid Control
 				public:
 					collections::List<WString>							strings;
 				};
+				
+				/// <summary>Data visualizer that displays a text for <see cref="GuiStringGrid"/>. Use StringGridDataVisualizer::Factory as the factory class.</summary>
+				class StringGridDataVisualizer : public ListViewSubColumnDataVisualizer
+				{
+				public:
+					typedef DataVisualizerFactory<StringGridDataVisualizer>				Factory;
+				public:
+					/// <summary>Create the data visualizer.</summary>
+					StringGridDataVisualizer();
+
+					void												BeforeVisualizeCell(IDataProvider* dataProvider, vint row, vint column)override;
+				};
 
 				class StringGridColumn : public StrongTypedColumnProviderBase<Ptr<StringGridItem>, WString>
 				{
@@ -228,34 +240,83 @@ StringGrid Control
 					WString												GetCellDataText(const WString& cellData)override;
 				};
 
+				/// <summary>Data source for <see cref="GuiStringGrid"/>.</summary>
 				class StringGridProvider : private StrongTypedDataProvider<Ptr<StringGridItem>>, public Description<StringGridProvider>
 				{
 					friend class StringGridColumn;
 					friend class GuiStringGrid;
 				protected:
 					collections::List<Ptr<StringGridItem>>				items;
+					Ptr<IDataVisualizerFactory>							visualizerFactory;
 
 					void												GetRowData(vint row, Ptr<StringGridItem>& rowData)override;
 				public:
 					StringGridProvider();
 					~StringGridProvider();
 
-					bool												InsertRow(vint row);
-					vint												AppendRow();
-					bool												MoveRow(vint source, vint target);
-					bool												RemoveRow(vint row);
-					bool												ClearRows();
 					vint												GetRowCount()override;
+					vint												GetColumnCount()override;
+
+					/// <summary>Insert an empty row.</summary>
+					/// <returns>Returns true if this operation succeeded.</returns>
+					/// <param name="row">The row index.</param>
+					bool												InsertRow(vint row);
+					/// <summary>Add an empty row.</summary>
+					/// <returns>The new row index.</returns>
+					vint												AppendRow();
+					/// <summary>Move a row.</summary>
+					/// <returns>Returns true if this operation succeeded.</returns>
+					/// <param name="source">The old row index.</param>
+					/// <param name="target">The new row index.</param>
+					bool												MoveRow(vint source, vint target);
+					/// <summary>Remove a row.</summary>
+					/// <returns>Returns true if this operation succeeded.</returns>
+					/// <param name="row">The row index.</param>
+					bool												RemoveRow(vint row);
+					/// <summary>Clear all rows.</summary>
+					/// <returns>Returns true if this operation succeeded.</returns>
+					bool												ClearRows();
+					/// <summary>Get the text for a cell.</summary>
+					/// <returns>The text.</returns>
+					/// <param name="row">The row index.</param>
+					/// <param name="column">The column index.</param>
 					WString												GetGridString(vint row, vint column);
+					/// <summary>Set the text for a cell.</summary>
+					/// <returns>Returns true if this operation succeeded.</returns>
+					/// <param name="row">The row index.</param>
+					/// <param name="column">The column index.</param>
+					/// <param name="value">The text.</param>
 					bool												SetGridString(vint row, vint column, const WString& value);
 
+					/// <summary>Insert a column.</summary>
+					/// <returns>Returns true if this operation succeeded.</returns>
+					/// <param name="column">The column index.</param>
+					/// <param name="text">The text.</param>
 					bool												InsertColumn(vint column, const WString& text);
+					/// <summary>Add a column.</summary>
+					/// <returns>The new column index.</returns>
+					/// <param name="text">The text.</param>
 					vint												AppendColumn(const WString& text);
+					/// <summary>Move a column.</summary>
+					/// <returns>Returns true if this operation succeeded.</returns>
+					/// <param name="source">The old column index.</param>
+					/// <param name="target">The new column index.</param>
 					bool												MoveColumn(vint source, vint target);
+					/// <summary>Remove a column.</summary>
+					/// <returns>Returns true if this operation succeeded.</returns>
+					/// <returns>The new column index.</returns>
 					bool												RemoveColumn(vint column);
+					/// <summary>Clear all columns.</summary>
+					/// <returns>Returns true if this operation succeeded.</returns>
 					bool												ClearColumns();
-					vint												GetColumnCount()override;
+					/// <summary>Get the text for a column.</summary>
+					/// <returns>The text.</returns>
+					/// <returns>The new column index.</returns>
 					WString												GetColumnText(vint column);
+					/// <summary>Set the text for a column.</summary>
+					/// <returns>Returns true if this operation succeeded.</returns>
+					/// <returns>The new column index.</returns>
+					/// <param name="value">The text.</param>
 					bool												SetColumnText(vint column, const WString& value);
 				};
 			}

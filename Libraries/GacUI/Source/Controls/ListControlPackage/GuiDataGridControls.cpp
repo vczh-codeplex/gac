@@ -423,7 +423,7 @@ DataGridContentProvider::ItemContent
 					for(vint i=0;i<dataVisualizers.Count();i++)
 					{
 						IDataVisualizer* dataVisualizer=dataVisualizers[i].Obj();
-						dataVisualizer->BeforeVisualizerCell(contentProvider->dataProvider, itemIndex, i);
+						dataVisualizer->BeforeVisualizeCell(contentProvider->dataProvider, itemIndex, i);
 						contentProvider->dataProvider->VisualizeCell(itemIndex, i, dataVisualizer);
 					}
 					UpdateSubItemSize();
@@ -646,6 +646,20 @@ GuiVirtualDataGrid
 			{
 
 /***********************************************************************
+StringGridDataVisualizer
+***********************************************************************/
+
+				StringGridDataVisualizer::StringGridDataVisualizer()
+				{
+				}
+
+				void StringGridDataVisualizer::BeforeVisualizeCell(IDataProvider* dataProvider, vint row, vint column)
+				{
+					ListViewSubColumnDataVisualizer::BeforeVisualizeCell(dataProvider, row, column);
+					text->SetColor(styleProvider->GetPrimaryTextColor());
+				}
+
+/***********************************************************************
 StringGridProvider
 ***********************************************************************/
 
@@ -688,10 +702,21 @@ StringGridProvider
 
 				StringGridProvider::StringGridProvider()
 				{
+					visualizerFactory=new list::CellBorderDataVisualizer::Factory(new list::StringGridDataVisualizer::Factory);
 				}
 
 				StringGridProvider::~StringGridProvider()
 				{
+				}
+
+				vint StringGridProvider::GetRowCount()
+				{
+					return items.Count();
+				}
+
+				vint StringGridProvider::GetColumnCount()
+				{
+					return columns.Count();
 				}
 
 				bool StringGridProvider::InsertRow(vint row)
@@ -741,11 +766,6 @@ StringGridProvider
 					return true;
 				}
 
-				vint StringGridProvider::GetRowCount()
-				{
-					return items.Count();
-				}
-
 				WString StringGridProvider::GetGridString(vint row, vint column)
 				{
 					if(row<0 || items.Count()<=row) return L"";
@@ -765,6 +785,8 @@ StringGridProvider
 				bool StringGridProvider::InsertColumn(vint column, const WString& text)
 				{
 					Ptr<StringGridColumn> columnProvider=new StringGridColumn(this);
+					columnProvider->SetText(text);
+					columnProvider->SetVisualizerFactory(visualizerFactory);
 					return InsertColumnInternal(column, columnProvider);
 				}
 
@@ -795,11 +817,6 @@ StringGridProvider
 				bool StringGridProvider::ClearColumns()
 				{
 					return ClearColumnsInternal();
-				}
-
-				vint StringGridProvider::GetColumnCount()
-				{
-					return columns.Count();
 				}
 
 				WString StringGridProvider::GetColumnText(vint column)
