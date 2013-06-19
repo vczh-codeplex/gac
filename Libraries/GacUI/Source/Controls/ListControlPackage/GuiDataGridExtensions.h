@@ -51,7 +51,7 @@ Extension Bases
 
 					IDataVisualizerFactory*								GetFactory()override;
 					compositions::GuiBoundsComposition*					GetBoundsComposition()override;
-					void												BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)override;
+					void												BeforeVisualizeCell(IDataProvider* dataProvider, vint row, vint column)override;
 					IDataVisualizer*									GetDecoratedDataVisualizer()override;
 				};
 				
@@ -143,7 +143,7 @@ Visualizer Extensions
 					/// <summary>Create the data visualizer.</summary>
 					ListViewMainColumnDataVisualizer();
 
-					void												BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)override;
+					void												BeforeVisualizeCell(IDataProvider* dataProvider, vint row, vint column)override;
 
 					/// <summary>Get the internal text element.</summary>
 					/// <returns>The text element.</returns>
@@ -163,7 +163,7 @@ Visualizer Extensions
 					/// <summary>Create the data visualizer.</summary>
 					ListViewSubColumnDataVisualizer();
 
-					void												BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)override;
+					void												BeforeVisualizeCell(IDataProvider* dataProvider, vint row, vint column)override;
 
 					/// <summary>Get the internal text element.</summary>
 					/// <returns>The text element.</returns>
@@ -183,7 +183,7 @@ Visualizer Extensions
 				public:
 					HyperlinkDataVisualizer();
 
-					void												BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)override;
+					void												BeforeVisualizeCell(IDataProvider* dataProvider, vint row, vint column)override;
 				};
 
 				/// <summary>Data visualizer that displays am image. Use ImageDataVisualizer::Factory as the factory class.</summary>
@@ -199,7 +199,7 @@ Visualizer Extensions
 					/// <summary>Create the data visualizer.</summary>
 					ImageDataVisualizer();
 
-					void												BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)override;
+					void												BeforeVisualizeCell(IDataProvider* dataProvider, vint row, vint column)override;
 
 					/// <summary>Get the internal image element.</summary>
 					/// <returns>The image element.</returns>
@@ -219,7 +219,7 @@ Visualizer Extensions
 					/// <param name="decoratedDataVisualizer">The decorated data visualizer.</param>
 					CellBorderDataVisualizer(Ptr<IDataVisualizer> decoratedDataVisualizer);
 
-					void												BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)override;
+					void												BeforeVisualizeCell(IDataProvider* dataProvider, vint row, vint column)override;
 				};
 
 				/// <summary>Data visualizer that display two icons (both optional) that beside another data visualizer. Use NotifyIconDataVisualizer::Factory as the factory class.</summary>
@@ -237,7 +237,7 @@ Visualizer Extensions
 					/// <param name="decoratedDataVisualizer">The decorated data visualizer.</param>
 					NotifyIconDataVisualizer(Ptr<IDataVisualizer> decoratedDataVisualizer);
 
-					void												BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)override;
+					void												BeforeVisualizeCell(IDataProvider* dataProvider, vint row, vint column)override;
 
 					/// <summary>Get the internal left image element.</summary>
 					/// <returns>The image element.</returns>

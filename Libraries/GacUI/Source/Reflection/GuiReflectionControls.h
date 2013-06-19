@@ -1519,7 +1519,7 @@ Interface Proxy
 						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetBoundsComposition);
 					}
 
-					void BeforeVisualizerCell(list::IDataProvider* dataProvider, vint row, vint column)override
+					void BeforeVisualizeCell(list::IDataProvider* dataProvider, vint row, vint column)override
 					{
 						INVOKE_INTERFACE_PROXY(dataProvider, row, column);
 					}
