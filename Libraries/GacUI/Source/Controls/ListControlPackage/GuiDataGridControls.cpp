@@ -860,17 +860,18 @@ StringGridProvider
 					return true;
 				}
 
-				bool StringGridProvider::InsertColumn(vint column, const WString& text)
+				bool StringGridProvider::InsertColumn(vint column, const WString& text, vint size)
 				{
 					Ptr<StringGridColumn> columnProvider=new StringGridColumn(this);
 					columnProvider->SetText(text);
+					columnProvider->SetSize(size);
 					columnProvider->SetVisualizerFactory(visualizerFactory);
 					return InsertColumnInternal(column, columnProvider);
 				}
 
-				vint StringGridProvider::AppendColumn(const WString& text)
+				vint StringGridProvider::AppendColumn(const WString& text, vint size)
 				{
-					InsertColumn(columns.Count(), text);
+					InsertColumn(columns.Count(), text, size);
 					return columns.Count()-1;
 				}
 
@@ -916,9 +917,8 @@ GuiStringGrid
 ***********************************************************************/
 
 			GuiStringGrid::GuiStringGrid(IStyleProvider* _styleProvider)
-				:GuiVirtualDataGrid(_styleProvider, new list::StringGridProvider)
+				:GuiVirtualDataGrid(_styleProvider, grids=new list::StringGridProvider)
 			{
-				grids=dynamic_cast<list::StringGridProvider*>(structuredDataProvider->GetStructuredDataProvider().Obj());
 			}
 
 			GuiStringGrid::~GuiStringGrid()

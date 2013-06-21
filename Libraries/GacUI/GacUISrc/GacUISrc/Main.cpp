@@ -39,13 +39,35 @@ TestWindow
 	{
 	private:
 		GuiStringGrid*						stringGrid;
+
+		void Initialize()
+		{
+			stringGrid->Grids().AppendColumn(L"File Name", 240);
+			stringGrid->Grids().AppendColumn(L"Data Modified", 120);
+			stringGrid->Grids().AppendColumn(L"Type", 160);
+			stringGrid->Grids().AppendColumn(L"Size", 100);
+
+			WString path=GetWindowsDirectory();
+			List<WString> files, folders;
+			SearchDirectoriesAndFiles(path, folders, files);
+
+			FOREACH(WString, file, files)
+			{
+				WString fullPath=path+L"\\"+file;
+				vint row=stringGrid->Grids().AppendRow();
+				stringGrid->Grids().SetGridString(row, 0, GetFileDisplayName(fullPath));
+				stringGrid->Grids().SetGridString(row, 1, FileTimeToString(GetFileLastWriteTime(fullPath)));
+				stringGrid->Grids().SetGridString(row, 2, GetFileTypeName(fullPath));
+				stringGrid->Grids().SetGridString(row, 3, FileSizeToString(GetFileSize(fullPath)));
+			}
+		}
 	public:
 		TestWindow()
 			:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
 		{
 			SetText(GetApplication()->GetExecutableFolder());
 			GetContainerComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
-			GetContainerComposition()->SetPreferredMinSize(Size(640, 480));
+			GetContainerComposition()->SetPreferredMinSize(Size(800, 600));
 
 			stringGrid=g::NewStringGrid();
 			stringGrid->GetBoundsComposition()->SetAlignmentToParent(Margin(5, 5, 5, 5));
@@ -55,6 +77,7 @@ TestWindow
 
 			ForceCalculateSizeImmediately();
 			MoveToScreenCenter();
+			Initialize();
 		}
 
 		~TestWindow()
