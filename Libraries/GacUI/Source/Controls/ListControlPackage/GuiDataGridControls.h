@@ -142,8 +142,7 @@ Datagrid ContentProvider
 					ListViewMainColumnDataVisualizer::Factory			mainColumnDataVisualizerFactory;
 					ListViewSubColumnDataVisualizer::Factory			subColumnDataVisualizerFactory;
 
-					vint												editingRow;
-					vint												editingColumn;
+					GridPos												currentCell;
 					Ptr<IDataEditor>									currentEditor;
 					bool												currentEditorRequestingSaveData;
 
@@ -154,7 +153,7 @@ Datagrid ContentProvider
 					void												NotifyCloseEditor();
 					void												RequestSaveData();
 					IDataEditor*										OpenEditor(vint row, vint column, IDataEditorFactory* editorFactory);
-					void												CloseEditor();
+					void												CloseEditor(bool forOpenNewEditor);
 				public:
 					/// <summary>Create the content provider.</summary>
 					DataGridContentProvider();
