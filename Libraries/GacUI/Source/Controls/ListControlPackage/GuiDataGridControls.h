@@ -312,11 +312,13 @@ StringGrid Control
 					/// <returns>Returns true if this operation succeeded.</returns>
 					/// <param name="column">The column index.</param>
 					/// <param name="text">The text.</param>
-					bool												InsertColumn(vint column, const WString& text);
+					/// <param name="size">The size.</param>
+					bool												InsertColumn(vint column, const WString& text, vint size=0);
 					/// <summary>Add a column.</summary>
 					/// <returns>The new column index.</returns>
 					/// <param name="text">The text.</param>
-					vint												AppendColumn(const WString& text);
+					/// <param name="size">The size.</param>
+					vint												AppendColumn(const WString& text, vint size=0);
 					/// <summary>Move a column.</summary>
 					/// <returns>Returns true if this operation succeeded.</returns>
 					/// <param name="source">The old column index.</param>
@@ -335,7 +337,7 @@ StringGrid Control
 					WString												GetColumnText(vint column);
 					/// <summary>Set the text for a column.</summary>
 					/// <returns>Returns true if this operation succeeded.</returns>
-					/// <returns>The new column index.</returns>
+					/// <returns>The column index.</returns>
 					/// <param name="value">The text.</param>
 					bool												SetColumnText(vint column, const WString& value);
 				};
