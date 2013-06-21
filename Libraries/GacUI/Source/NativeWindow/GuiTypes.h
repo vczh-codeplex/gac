@@ -83,6 +83,51 @@ TextPos
 		};
 
 /***********************************************************************
+GridPos
+***********************************************************************/
+		
+		/// <summary>
+		/// Represents the cell position in a grid.
+		/// </summary>
+		struct GridPos
+		{
+			/// <summary>
+			/// Row number.
+			/// </summary>
+			vint			row;
+			/// <summary>
+			/// Column number. If a line has 4 characters, there are 5 available column numbers(from 0 to 4) in this line.
+			/// </summary>
+			vint			column;
+
+			GridPos()
+				:row(0) ,column(0)
+			{
+			}
+
+			GridPos(vint _row, vint _column)
+				:row(_row) ,column(_column)
+			{
+			}
+
+			vint Compare(const GridPos& value)const
+			{
+				if(row<value.row) return -1;
+				if(row>value.row) return 1;
+				if(column<value.column) return -1;
+				if(column>value.column) return 1;
+				return 0;
+			}
+
+			bool operator==(const GridPos& value)const {return Compare(value)==0;}
+			bool operator!=(const GridPos& value)const {return Compare(value)!=0;}
+			bool operator<(const GridPos& value)const {return Compare(value)<0;}
+			bool operator<=(const GridPos& value)const {return Compare(value)<=0;}
+			bool operator>(const GridPos& value)const {return Compare(value)>0;}
+			bool operator>=(const GridPos& value)const {return Compare(value)>=0;}
+		};
+
+/***********************************************************************
 Point
 ***********************************************************************/
 		

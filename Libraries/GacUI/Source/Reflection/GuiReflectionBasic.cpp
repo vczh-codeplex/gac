@@ -88,6 +88,11 @@ Type Declaration
 				STRUCT_MEMBER(column)
 			END_STRUCT_MEMBER(TextPos)
 
+			BEGIN_STRUCT_MEMBER(GridPos)
+				STRUCT_MEMBER(row)
+				STRUCT_MEMBER(column)
+			END_STRUCT_MEMBER(GridPos)
+
 			BEGIN_STRUCT_MEMBER(Point)
 				STRUCT_MEMBER(x)
 				STRUCT_MEMBER(y)

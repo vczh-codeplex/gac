@@ -523,7 +523,8 @@ DataGridContentProvider
 				}
 
 				DataGridContentProvider::DataGridContentProvider()
-					:itemProvider(0)
+					:dataGrid(0)
+					,itemProvider(0)
 					,columnItemView(0)
 					,dataProvider(0)
 					,listViewItemStyleProvider(0)
@@ -555,6 +556,7 @@ DataGridContentProvider
 
 				void DataGridContentProvider::AttachListControl(GuiListControl* value)
 				{
+					dataGrid=dynamic_cast<GuiVirtualDataGrid*>(value);
 					listViewItemStyleProvider=dynamic_cast<ListViewItemStyleProvider*>(value->GetStyleProvider());
 					itemProvider=value->GetItemProvider();
 					itemProvider->AttachCallback(this);
@@ -578,6 +580,15 @@ DataGridContentProvider
 					itemProvider->DetachCallback(this);
 					itemProvider=0;
 					listViewItemStyleProvider=0;
+				}
+
+				GridPos DataGridContentProvider::GetSelectedCell()
+				{
+					return GridPos(-1, -1);
+				}
+
+				void DataGridContentProvider::SetSelectedCell(const GridPos& value)
+				{
 				}
 			}
 
@@ -614,6 +625,13 @@ GuiVirtualDataGrid
 
 				ChangeItemStyle(new DataGridContentProvider);
 				ColumnClicked.AttachMethod(this, &GuiVirtualDataGrid::OnColumnClicked);
+
+				SelectedCellChanged.SetAssociatedComposition(GetBoundsComposition());
+			}
+
+			void GuiVirtualDataGrid::NotifySelectedCellChanged()
+			{
+				SelectedCellChanged.Execute(GetNotifyEventArguments());
 			}
 
 			GuiVirtualDataGrid::GuiVirtualDataGrid(IStyleProvider* _styleProvider, list::IDataProvider* _dataProvider)
@@ -624,6 +642,8 @@ GuiVirtualDataGrid
 
 			GuiVirtualDataGrid::GuiVirtualDataGrid(IStyleProvider* _styleProvider, list::IStructuredDataProvider* _dataProvider)
 				:GuiVirtualListView(_styleProvider, new DataGridItemProvider(new StructuredDataProvider(_dataProvider)))
+				,itemProvider(0)
+				,contentProvider(0)
 			{
 				Initialize();
 			}
@@ -640,6 +660,47 @@ GuiVirtualDataGrid
 			list::StructuredDataProvider* GuiVirtualDataGrid::GetStructuredDataProvider()
 			{
 				return structuredDataProvider.Obj();
+			}
+
+			GridPos GuiVirtualDataGrid::GetSelectedCell()
+			{
+				return contentProvider->GetSelectedCell();
+			}
+
+			void GuiVirtualDataGrid::SetSelectedCell(const GridPos& value)
+			{
+				contentProvider->SetSelectedCell(value);
+			}
+
+			Ptr<GuiListControl::IItemStyleProvider> GuiVirtualDataGrid::SetStyleProvider(Ptr<GuiListControl::IItemStyleProvider> value)
+			{
+				Ptr<list::ListViewItemStyleProvider> styleProvider=value.Cast<list::ListViewItemStyleProvider>();
+				if(styleProvider)
+				{
+					list::DataGridContentProvider* dataGridContentProvider=dynamic_cast<list::DataGridContentProvider*>(styleProvider->GetItemContentProvider());
+					if(dataGridContentProvider)
+					{
+						Ptr<GuiListControl::IItemStyleProvider> result=GuiVirtualListView::SetStyleProvider(value);
+						if(result)
+						{
+							contentProvider=dataGridContentProvider;
+							return result;
+						}
+					}
+				}
+				return 0;
+			}
+
+			bool GuiVirtualDataGrid::ChangeItemStyle(Ptr<list::ListViewItemStyleProvider::IListViewItemContentProvider> contentProvider)
+			{
+				if(contentProvider.Cast<list::DataGridContentProvider>())
+				{
+					return GuiVirtualListView::ChangeItemStyle(contentProvider);
+				}
+				else
+				{
+					return false;
+				}
 			}
 
 			namespace list

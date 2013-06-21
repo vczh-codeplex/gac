@@ -275,7 +275,7 @@ ListView ItemStyleProvider
 				public:
 					/// <summary>Create a list view item style provider using an item content provider.</summary>
 					/// <param name="itemContentProvider">The item content provider.</param>
-					ListViewItemStyleProvider(IListViewItemContentProvider* itemContentProvider);
+					ListViewItemStyleProvider(Ptr<IListViewItemContentProvider> itemContentProvider);
 					~ListViewItemStyleProvider();
 
 					void										AttachListControl(GuiListControl* value)override;
@@ -283,6 +283,10 @@ ListView ItemStyleProvider
 					GuiListControl::IItemStyleController*		CreateItemStyle(vint styleId)override;
 					void										DestroyItemStyle(GuiListControl::IItemStyleController* style)override;
 					void										Install(GuiListControl::IItemStyleController* style, vint itemIndex)override;
+
+					/// <summary>Get the item content provider.</summary>
+					/// <returns>The item content provider.</returns>
+					IListViewItemContentProvider*				GetItemContentProvider();
 
 					/// <summary>Get all created item styles.</summary>
 					/// <returns>All created item styles.</returns>
@@ -783,8 +787,9 @@ ListView
 				~GuiVirtualListView();
 				
 				/// <summary>Set the item content provider.</summary>
+				/// <returns>Returns true if this operation succeeded.</returns>
 				/// <param name="itemStyleProvider">The new item content provider.</param>
-				void													ChangeItemStyle(list::ListViewItemStyleProvider::IListViewItemContentProvider* contentProvider);
+				virtual bool											ChangeItemStyle(Ptr<list::ListViewItemStyleProvider::IListViewItemContentProvider> contentProvider);
 			};
 			
 			/// <summary>List view control in virtual mode.</summary>
