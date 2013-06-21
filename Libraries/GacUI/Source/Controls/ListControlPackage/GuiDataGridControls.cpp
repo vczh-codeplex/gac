@@ -302,7 +302,7 @@ DataGridContentProvider::ItemContent
 					vint index=GetCellColumnIndex(sender);
 					if(index!=-1)
 					{
-						if(currentEditor && contentProvider->editingColumn==index)
+						if(currentEditor && contentProvider->currentCell.column==index)
 						{
 							return;
 						}
@@ -433,7 +433,7 @@ DataGridContentProvider::ItemContent
 				{
 					if(currentEditor)
 					{
-						contentProvider->CloseEditor();
+						contentProvider->CloseEditor(false);
 					}
 					currentRow=-1;
 					currentEditor=0;
@@ -465,7 +465,7 @@ DataGridContentProvider
 				{
 					if(!currentEditorRequestingSaveData)
 					{
-						CloseEditor();
+						CloseEditor(false);
 					}
 				}
 
@@ -491,18 +491,18 @@ DataGridContentProvider
 					if(currentEditor)
 					{
 						currentEditorRequestingSaveData=true;
-						dataProvider->SaveCellData(editingRow, editingColumn, currentEditor.Obj());
+						dataProvider->SaveCellData(currentCell.row, currentCell.column, currentEditor.Obj());
 						currentEditorRequestingSaveData=false;
 					}
 				}
 
 				IDataEditor* DataGridContentProvider::OpenEditor(vint row, vint column, IDataEditorFactory* editorFactory)
 				{
-					CloseEditor();
+					CloseEditor(true);
+					currentCell=GridPos(row, column);
+					dataGrid->NotifySelectedCellChanged();
 					if(editorFactory)
 					{
-						editingRow=row;
-						editingColumn=column;
 						currentEditor=editorFactory->CreateEditor(this);
 						currentEditor->BeforeEditCell(dataProvider, row, column);
 						dataProvider->BeforeEditCell(row, column, currentEditor.Obj());
@@ -510,15 +510,20 @@ DataGridContentProvider
 					return currentEditor.Obj();
 				}
 
-				void DataGridContentProvider::CloseEditor()
+				void DataGridContentProvider::CloseEditor(bool forOpenNewEditor)
 				{
-					if(currentEditor)
+					if(currentCell!=GridPos(-1, -1))
 					{
-						NotifyCloseEditor();
-
-						editingRow=-1;
-						editingColumn=-1;
-						currentEditor=0;
+						if(currentEditor)
+						{
+							NotifyCloseEditor();
+							currentEditor=0;
+						}
+						if(!forOpenNewEditor)
+						{
+							currentCell=GridPos(-1, -1);
+							dataGrid->NotifySelectedCellChanged();
+						}
 					}
 				}
 
@@ -528,15 +533,14 @@ DataGridContentProvider
 					,columnItemView(0)
 					,dataProvider(0)
 					,listViewItemStyleProvider(0)
-					,editingRow(-1)
-					,editingColumn(-1)
+					,currentCell(-1, -1)
 					,currentEditorRequestingSaveData(false)
 				{
 				}
 
 				DataGridContentProvider::~DataGridContentProvider()
 				{
-					CloseEditor();
+					CloseEditor(false);
 				}
 
 				GuiListControl::IItemCoordinateTransformer* DataGridContentProvider::CreatePreferredCoordinateTransformer()
@@ -584,11 +588,23 @@ DataGridContentProvider
 
 				GridPos DataGridContentProvider::GetSelectedCell()
 				{
-					return GridPos(-1, -1);
+					return currentCell;
 				}
 
 				void DataGridContentProvider::SetSelectedCell(const GridPos& value)
 				{
+					if(currentCell!=value)
+					{
+						if(value==GridPos(-1, -1))
+						{
+							CloseEditor(false);
+						}
+						else if(0<=value.row && value.row<dataProvider->GetRowCount() && 0<=value.column && value.column<dataProvider->GetColumnCount())
+						{
+							IDataEditorFactory* editorFactory=dataProvider->GetCellDataEditorFactory(value.row, value.column);
+							OpenEditor(value.row, value.column, editorFactory);
+						}
+					}
 				}
 			}
 
@@ -650,6 +666,7 @@ GuiVirtualDataGrid
 
 			GuiVirtualDataGrid::~GuiVirtualDataGrid()
 			{
+				SetSelectedCell(GridPos(-1, -1));
 			}
 
 			list::IDataProvider* GuiVirtualDataGrid::GetDataProvider()
