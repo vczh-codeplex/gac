@@ -694,8 +694,9 @@ Type Declaration
 
 			BEGIN_CLASS_MEMBER(ListViewItemStyleProvider)
 				CLASS_MEMBER_BASE(ListViewItemStyleProviderBase)
-				CLASS_MEMBER_CONSTRUCTOR(Ptr<ListViewItemStyleProvider>(ListViewItemStyleProvider::IListViewItemContentProvider*), {L"itemContentProvider"})
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<ListViewItemStyleProvider>(Ptr<ListViewItemStyleProvider::IListViewItemContentProvider>), {L"itemContentProvider"})
 
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ItemContentProvider)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(CreatedItemStyles)
 
 				CLASS_MEMBER_METHOD(IsItemStyleAttachedToListView, {L"itemStyle"})
@@ -749,27 +750,27 @@ Type Declaration
 
 			BEGIN_CLASS_MEMBER(ListViewBigIconContentProvider)
 				CLASS_MEMBER_BASE(ListViewItemStyleProvider::IListViewItemContentProvider)
-				CLASS_MEMBER_CONSTRUCTOR(ListViewBigIconContentProvider*(Size), {L"iconSize"})
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<ListViewBigIconContentProvider>(Size), {L"iconSize"})
 			END_CLASS_MEMBER(ListViewBigIconContentProvider)
 
 			BEGIN_CLASS_MEMBER(ListViewSmallIconContentProvider)
 				CLASS_MEMBER_BASE(ListViewItemStyleProvider::IListViewItemContentProvider)
-				CLASS_MEMBER_CONSTRUCTOR(ListViewSmallIconContentProvider*(Size), {L"iconSize"})
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<ListViewSmallIconContentProvider>(Size), {L"iconSize"})
 			END_CLASS_MEMBER(ListViewSmallIconContentProvider)
 
 			BEGIN_CLASS_MEMBER(ListViewListContentProvider)
 				CLASS_MEMBER_BASE(ListViewItemStyleProvider::IListViewItemContentProvider)
-				CLASS_MEMBER_CONSTRUCTOR(ListViewListContentProvider*(Size), {L"iconSize"})
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<ListViewListContentProvider>(Size), {L"iconSize"})
 			END_CLASS_MEMBER(ListViewListContentProvider)
 
 			BEGIN_CLASS_MEMBER(ListViewTileContentProvider)
 				CLASS_MEMBER_BASE(ListViewItemStyleProvider::IListViewItemContentProvider)
-				CLASS_MEMBER_CONSTRUCTOR(ListViewTileContentProvider*(Size), {L"iconSize"})
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<ListViewTileContentProvider>(Size), {L"iconSize"})
 			END_CLASS_MEMBER(ListViewTileContentProvider)
 
 			BEGIN_CLASS_MEMBER(ListViewInformationContentProvider)
 				CLASS_MEMBER_BASE(ListViewItemStyleProvider::IListViewItemContentProvider)
-				CLASS_MEMBER_CONSTRUCTOR(ListViewInformationContentProvider*(Size), {L"iconSize"})
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<ListViewInformationContentProvider>(Size), {L"iconSize"})
 			END_CLASS_MEMBER(ListViewInformationContentProvider)
 
 			BEGIN_CLASS_MEMBER(ListViewColumnItemArranger)
@@ -799,7 +800,7 @@ Type Declaration
 
 			BEGIN_CLASS_MEMBER(ListViewDetailContentProvider)
 				CLASS_MEMBER_BASE(ListViewItemStyleProvider::IListViewItemContentProvider)
-				CLASS_MEMBER_CONSTRUCTOR(ListViewDetailContentProvider*(Size), {L"iconSize"})
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<ListViewDetailContentProvider>(Size), {L"iconSize"})
 			END_CLASS_MEMBER(ListViewDetailContentProvider)
 
 			BEGIN_CLASS_MEMBER(ListViewItem)
@@ -1416,13 +1417,15 @@ Type Declaration
 
 			BEGIN_CLASS_MEMBER(DataGridContentProvider)
 				CLASS_MEMBER_BASE(ListViewItemStyleProvider::IListViewItemContentProvider)
-				CLASS_MEMBER_CONSTRUCTOR(DataGridContentProvider*(), NO_PARAMETER)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<DataGridContentProvider>(), NO_PARAMETER)
 			END_CLASS_MEMBER(DataGridContentProvider)
 
 			BEGIN_CLASS_MEMBER(GuiVirtualDataGrid)
 				CLASS_MEMBER_BASE(GuiVirtualListView)
 				CLASS_MEMBER_CONSTRUCTOR(GuiVirtualDataGrid*(GuiVirtualListView::IStyleProvider* _ list::IDataProvider*), {L"styleProvider" _ L"dataProvider"})
 				CLASS_MEMBER_CONSTRUCTOR(GuiVirtualDataGrid*(GuiVirtualListView::IStyleProvider* _ list::IStructuredDataProvider*), {L"styleProvider" _ L"dataProvider"})
+
+				CLASS_MEMBER_PROPERTY_EVENT_FAST(SelectedCell, SelectedCellChanged)
 
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(DataProvider)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(StructuredDataProvider)

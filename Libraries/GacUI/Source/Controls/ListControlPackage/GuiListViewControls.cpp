@@ -188,7 +188,7 @@ ListViewItemStyleProvider
 
 				const wchar_t* const ListViewItemStyleProvider::IListViewItemView::Identifier = L"vl::presentation::controls::list::ListViewItemStyleProvider::IListViewItemView";
 
-				ListViewItemStyleProvider::ListViewItemStyleProvider(IListViewItemContentProvider* itemContentProvider)
+				ListViewItemStyleProvider::ListViewItemStyleProvider(Ptr<IListViewItemContentProvider> itemContentProvider)
 					:listViewItemView(0)
 					,listViewItemContentProvider(itemContentProvider)
 				{
@@ -234,6 +234,11 @@ ListViewItemStyleProvider
 				{
 					ListViewContentItemStyleController* itemStyle=dynamic_cast<ListViewContentItemStyleController*>(style);
 					itemStyle->Install(listViewItemView, itemIndex);
+				}
+
+				ListViewItemStyleProvider::IListViewItemContentProvider* ListViewItemStyleProvider::GetItemContentProvider()
+				{
+					return listViewItemContentProvider.Obj();
 				}
 
 				const ListViewItemStyleProvider::ItemStyleList& ListViewItemStyleProvider::GetCreatedItemStyles()
@@ -1616,13 +1621,14 @@ GuiListView
 			{
 			}
 
-			void GuiVirtualListView::ChangeItemStyle(list::ListViewItemStyleProvider::IListViewItemContentProvider* contentProvider)
+			bool GuiVirtualListView::ChangeItemStyle(Ptr<list::ListViewItemStyleProvider::IListViewItemContentProvider> contentProvider)
 			{
 				SetStyleProvider(0);
 				SetArranger(0);
 				SetCoordinateTransformer(contentProvider->CreatePreferredCoordinateTransformer());
 				SetStyleProvider(new list::ListViewItemStyleProvider(contentProvider));
 				SetArranger(contentProvider->CreatePreferredArranger());
+				return true;
 			}
 
 /***********************************************************************

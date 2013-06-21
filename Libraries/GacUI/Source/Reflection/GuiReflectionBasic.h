@@ -28,6 +28,7 @@ Type List
 			F(presentation::Color)\
 			F(presentation::Alignment)\
 			F(presentation::TextPos)\
+			F(presentation::GridPos)\
 			F(presentation::Point)\
 			F(presentation::Size)\
 			F(presentation::Rect)\

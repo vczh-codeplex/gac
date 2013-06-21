@@ -19,6 +19,8 @@ namespace vl
 	{
 		namespace controls
 		{
+			class GuiVirtualDataGrid;
+
 			namespace list
 			{
 
@@ -131,7 +133,7 @@ Datagrid ContentProvider
 						void											Uninstall()override;
 					};
 
-					Size												iconSize;
+					GuiVirtualDataGrid*									dataGrid;
 					GuiListControl::IItemProvider*						itemProvider;
 					list::IDataProvider*								dataProvider;
 					ListViewColumnItemArranger::IColumnItemView*		columnItemView;
@@ -163,6 +165,9 @@ Datagrid ContentProvider
 					ListViewItemStyleProvider::IListViewItemContent*	CreateItemContent(const FontProperties& font)override;
 					void												AttachListControl(GuiListControl* value)override;
 					void												DetachListControl()override;
+
+					GridPos												GetSelectedCell();
+					void												SetSelectedCell(const GridPos& value);
 				};
 			}
 
@@ -173,13 +178,16 @@ Virtual DataGrid Control
 			/// <summary>Data grid control in virtual mode.</summary>
 			class GuiVirtualDataGrid : public GuiVirtualListView, public Description<GuiVirtualDataGrid>
 			{
+				friend class list::DataGridContentProvider;
 			protected:
 				list::DataGridItemProvider*								itemProvider;
+				list::DataGridContentProvider*							contentProvider;
 				Ptr<list::IDataProvider>								dataProvider;
 				Ptr<list::StructuredDataProvider>						structuredDataProvider;
 
 				void													OnColumnClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiItemEventArgs& arguments);
 				void													Initialize();
+				void													NotifySelectedCellChanged();
 			public:
 				/// <summary>Create a data grid control in virtual mode.</summary>
 				/// <param name="_styleProvider">The style provider for this control.</param>
@@ -191,12 +199,25 @@ Virtual DataGrid Control
 				GuiVirtualDataGrid(IStyleProvider* _styleProvider, list::IStructuredDataProvider* _dataProvider);
 				~GuiVirtualDataGrid();
 
+				/// <summary>Selected cell changed event.</summary>
+				compositions::GuiNotifyEvent							SelectedCellChanged;
+
 				/// <summary>Get the given data provider.</summary>
 				/// <returns>The data provider.</returns>
 				list::IDataProvider*									GetDataProvider();
 				/// <summary>Get the given structured data provider.</summary>
 				/// <returns>The structured data provider.</returns>
 				list::StructuredDataProvider*							GetStructuredDataProvider();
+
+				/// <summary>Get the row index and column index of the selected cell.</summary>
+				/// <returns>The row index and column index of the selected cell.</returns>
+				GridPos													GetSelectedCell();
+				/// <summary>Set the row index and column index of the selected cell.</summary>
+				/// <param name="value">The row index and column index of the selected cell.</param>
+				void													SetSelectedCell(const GridPos& value);
+
+				Ptr<GuiListControl::IItemStyleProvider>					SetStyleProvider(Ptr<GuiListControl::IItemStyleProvider> value)override;
+				bool													ChangeItemStyle(Ptr<list::ListViewItemStyleProvider::IListViewItemContentProvider> contentProvider)override;
 			};
 
 /***********************************************************************

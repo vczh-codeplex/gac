@@ -979,7 +979,7 @@ Interface Proxy
 					{
 					}
 
-					static list::ListViewItemStyleProvider::IListViewItemContentProvider* Create(Ptr<IValueInterfaceProxy> proxy)
+					static Ptr<list::ListViewItemStyleProvider::IListViewItemContentProvider> Create(Ptr<IValueInterfaceProxy> proxy)
 					{
 						return new ListViewItemStyleProvider_IListViewItemContentProvider(proxy);
 					}
