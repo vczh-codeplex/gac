@@ -9,14 +9,14 @@
     <AzureEnableRemoteDesktop>True</AzureEnableRemoteDesktop>
     <AzureEnableWebDeploy>False</AzureEnableWebDeploy>
     <AzureFallbackToDeleteAndRecreateIfUpgradeFails>False</AzureFallbackToDeleteAndRecreateIfUpgradeFails>
-    <AzureHostedServiceLabel>GaclibServicesAsia</AzureHostedServiceLabel>
-    <AzureHostedServiceName>gaclibservicesasia</AzureHostedServiceName>
+    <AzureHostedServiceLabel>gaclibservicesus</AzureHostedServiceLabel>
+    <AzureHostedServiceName>gaclibservicesus</AzureHostedServiceName>
     <AzureEnableIntelliTrace>False</AzureEnableIntelliTrace>
     <AzureEnableProfiling>False</AzureEnableProfiling>
     <AzureServiceConfiguration>Cloud</AzureServiceConfiguration>
     <AzureSolutionConfiguration>Release</AzureSolutionConfiguration>
-    <AzureStorageAccountLabel>gaclibservicesasia</AzureStorageAccountLabel>
-    <AzureStorageAccountName>gaclibservicesasia</AzureStorageAccountName>
+    <AzureStorageAccountLabel>gaclibservicesus</AzureStorageAccountLabel>
+    <AzureStorageAccountName>gaclibservicesus</AzureStorageAccountName>
     <AzureAppendTimestampToDeploymentLabel>True</AzureAppendTimestampToDeploymentLabel>
   </PropertyGroup>
 </Project>
