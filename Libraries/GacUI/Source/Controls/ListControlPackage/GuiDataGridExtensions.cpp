@@ -80,6 +80,47 @@ DataVisualizerBase
 				}
 				
 /***********************************************************************
+DataEditorBase
+***********************************************************************/
+
+				DataEditorBase::DataEditorBase()
+					:factory(0)
+					,callback(0)
+					,boundsComposition(0)
+				{
+				}
+
+				DataEditorBase::~DataEditorBase()
+				{
+					if(boundsComposition)
+					{
+						SafeDeleteComposition(boundsComposition);
+					}
+				}
+
+				IDataEditorFactory* DataEditorBase::GetFactory()
+				{
+					return factory;
+				}
+
+				compositions::GuiBoundsComposition* DataEditorBase::GetBoundsComposition()
+				{
+					if(!boundsComposition)
+					{
+						boundsComposition=CreateBoundsCompositionInternal();
+					}
+					return boundsComposition;
+				}
+
+				void DataEditorBase::BeforeEditCell(IDataProvider* dataProvider, vint row, vint column)
+				{
+				}
+
+				void DataEditorBase::ReinstallEditor()
+				{
+				}
+				
+/***********************************************************************
 ListViewMainColumnDataVisualizer
 ***********************************************************************/
 
@@ -371,43 +412,6 @@ CellBorderDataVisualizer
 				}
 				
 /***********************************************************************
-DataEditorBase
-***********************************************************************/
-
-				DataEditorBase::DataEditorBase()
-					:factory(0)
-					,callback(0)
-					,boundsComposition(0)
-				{
-				}
-
-				DataEditorBase::~DataEditorBase()
-				{
-					if(boundsComposition)
-					{
-						SafeDeleteComposition(boundsComposition);
-					}
-				}
-
-				IDataEditorFactory* DataEditorBase::GetFactory()
-				{
-					return factory;
-				}
-
-				compositions::GuiBoundsComposition* DataEditorBase::GetBoundsComposition()
-				{
-					if(!boundsComposition)
-					{
-						boundsComposition=CreateBoundsCompositionInternal();
-					}
-					return boundsComposition;
-				}
-
-				void DataEditorBase::BeforeEditCell(IDataProvider* dataProvider, vint row, vint column)
-				{
-				}
-				
-/***********************************************************************
 TextBoxDataEditor
 ***********************************************************************/
 
@@ -435,6 +439,11 @@ TextBoxDataEditor
 					{
 						textBox->SetFocus();
 					});
+				}
+
+				void TextBoxDataEditor::ReinstallEditor()
+				{
+					textBox->SetFocus();
 				}
 
 				GuiSinglelineTextBox* TextBoxDataEditor::GetTextBox()

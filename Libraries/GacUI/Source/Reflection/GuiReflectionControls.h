@@ -1581,6 +1581,11 @@ Interface Proxy
 					{
 						INVOKE_INTERFACE_PROXY(BeforeEditCell, dataProvider, row, column);
 					}
+
+					void ReinstallEditor()override
+					{
+						INVOKE_INTERFACE_PROXY_NOPARAMS(ReinstallEditor);
+					}
 				};
 
 				class list_IDataProvider : public ValueInterfaceRoot, public virtual list::IDataProvider

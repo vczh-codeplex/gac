@@ -414,6 +414,22 @@ DataGridContentProvider::ItemContent
 					textTable->UpdateCellBounds();
 				}
 
+				void DataGridContentProvider::ItemContent::ForceSetEditor(vint column, IDataEditor* editor)
+				{
+					currentEditor=editor;
+					if(currentEditor)
+					{
+						GuiCellComposition* cell=textTable->GetSitedCell(0, column);
+						GuiBoundsComposition* editorBounds=currentEditor->GetBoundsComposition();
+						if(editorBounds->GetParent() && editorBounds->GetParent()!=cell)
+						{
+							editorBounds->GetParent()->RemoveChild(editorBounds);
+						}
+						currentEditor->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+						cell->AddChild(currentEditor->GetBoundsComposition());
+					}
+				}
+
 				void DataGridContentProvider::ItemContent::NotifyCloseEditor()
 				{
 					if(currentEditor)
@@ -493,7 +509,14 @@ DataGridContentProvider::ItemContent
 					}
 
 					GridPos selectedCell=contentProvider->GetSelectedCell();
-					NotifySelectCell(itemIndex==selectedCell.row?selectedCell.column:-1);
+					if(selectedCell.row==itemIndex)
+					{
+						NotifySelectCell(selectedCell.column);
+					}
+					else
+					{
+						NotifySelectCell(-1);
+					}
 					UpdateSubItemSize();
 				}
 
@@ -595,6 +618,17 @@ DataGridContentProvider
 						currentEditorRequestingSaveData=true;
 						dataProvider->SaveCellData(currentCell.row, currentCell.column, currentEditor.Obj());
 						currentEditorRequestingSaveData=false;
+						if(currentEditor)
+						{
+							GuiListControl::IItemArranger* arranger=dataGrid->GetArranger();
+							if(!arranger) return;
+							GuiListControl::IItemStyleController* styleController=arranger->GetVisibleStyle(currentCell.row);
+							if(!styleController) return;
+							ItemContent* itemContent=listViewItemStyleProvider->GetItemContent<ItemContent>(styleController);
+							if(!itemContent) return;
+							itemContent->ForceSetEditor(currentCell.column, currentEditor.Obj());
+							currentEditor->ReinstallEditor();
+						}
 					}
 				}
 
@@ -615,16 +649,23 @@ DataGridContentProvider
 
 				void DataGridContentProvider::CloseEditor(bool forOpenNewEditor)
 				{
-					if(currentCell!=GridPos(-1, -1))
+					if(currentEditorRequestingSaveData)
 					{
-						if(currentEditor)
+						NotifyCloseEditor();
+					}
+					else
+					{
+						if(currentCell!=GridPos(-1, -1))
 						{
-							NotifyCloseEditor();
-							currentEditor=0;
-						}
-						if(!forOpenNewEditor)
-						{
-							NotifySelectCell(-1, -1);
+							if(currentEditor)
+							{
+								NotifyCloseEditor();
+								currentEditor=0;
+							}
+							if(!forOpenNewEditor)
+							{
+								NotifySelectCell(-1, -1);
+							}
 						}
 					}
 				}
