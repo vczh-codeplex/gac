@@ -71,13 +71,13 @@ TestWindow
 		void menuInsertColumnBefore_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 		{
 			vint column=stringGrid->GetSelectedCell().column;
-			stringGrid->Grids().InsertColumn(column, L"New Colunn");
+			stringGrid->Grids().InsertColumn(column, L"New Column");
 		}
 
 		void menuInsertColumnAfter_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 		{
 			vint column=stringGrid->GetSelectedCell().column;
-			stringGrid->Grids().InsertColumn(column+1, L"New Colunn");
+			stringGrid->Grids().InsertColumn(column+1, L"New Column");
 		}
 
 		void menuRemoveColumn_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
@@ -91,9 +91,10 @@ TestWindow
 			menuInsertRowBefore->SetEnabled(stringGrid->GetSelectedCell().row!=-1);
 			menuInsertRowAfter->SetEnabled(stringGrid->GetSelectedCell().row!=-1);
 			menuRemoveRow->SetEnabled(stringGrid->GetSelectedCell().row!=-1);
+
 			menuInsertColumnBefore->SetEnabled(stringGrid->GetSelectedCell().column!=-1);
 			menuInsertColumnAfter->SetEnabled(stringGrid->GetSelectedCell().column!=-1);
-			menuRemoveColumn->SetEnabled(stringGrid->GetSelectedCell().column!=-1);
+			menuRemoveColumn->SetEnabled(stringGrid->GetSelectedCell().column!=-1 && stringGrid->Grids().GetColumnCount()>1);
 		}
 
 		void stringGrid_rightButtonUp(GuiGraphicsComposition* sender, GuiMouseEventArgs& arguments)
