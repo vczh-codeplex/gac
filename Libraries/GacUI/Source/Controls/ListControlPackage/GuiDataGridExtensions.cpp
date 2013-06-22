@@ -1,5 +1,6 @@
 #include "GuiDataGridExtensions.h"
 #include "..\Styles\GuiThemeStyleFactory.h"
+#include "..\GuiApplication.h"
 
 namespace vl
 {
@@ -424,6 +425,10 @@ TextBoxDataEditor
 				{
 					DataEditorBase::BeforeEditCell(dataProvider, row, column);
 					textBox->SetText(L"");
+					GetApplication()->InvokeInMainThread([this]()
+					{
+						textBox->SetFocus();
+					});
 				}
 
 				GuiSinglelineTextBox* TextBoxDataEditor::GetTextBox()

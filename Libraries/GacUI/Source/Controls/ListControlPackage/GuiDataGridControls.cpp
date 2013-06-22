@@ -9,6 +9,7 @@ namespace vl
 			namespace list
 			{
 				using namespace compositions;
+				using namespace collections;
 
 				const wchar_t* const IDataProvider::Identifier = L"vl::presentation::controls::list::IDataProvider";
 
@@ -317,19 +318,56 @@ DataGridContentProvider::ItemContent
 					}
 				}
 
+				bool DataGridContentProvider::ItemContent::IsInEditor(compositions::GuiMouseEventArgs& arguments)
+				{
+					if(!contentProvider->currentEditor) return false;
+					GuiGraphicsComposition* editorComposition=contentProvider->currentEditor->GetBoundsComposition();
+					GuiGraphicsComposition* stopComposition=GetContentComposition();
+					GuiGraphicsComposition* currentComposition=arguments.eventSource;
+
+					while(currentComposition)
+					{
+						if(currentComposition==editorComposition)
+						{
+							arguments.handled=true;
+							return true;
+						}
+						else if(currentComposition==stopComposition)
+						{
+							break;
+						}
+						else
+						{
+							currentComposition=currentComposition->GetParent();
+						}
+					}
+					return false;
+				}
+
+				void DataGridContentProvider::ItemContent::OnCellButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
+				{
+					IsInEditor(arguments);
+				}
+
 				void DataGridContentProvider::ItemContent::OnCellLeftButtonUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 				{
-					if(contentProvider->dataGrid->GetVisuallyEnabled())
+					if(!IsInEditor(arguments))
 					{
-						OnCellButtonUp(sender, true);
+						if(contentProvider->dataGrid->GetVisuallyEnabled())
+						{
+							OnCellButtonUp(sender, true);
+						}
 					}
 				}
 
 				void DataGridContentProvider::ItemContent::OnCellRightButtonUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 				{
-					if(contentProvider->dataGrid->GetVisuallyEnabled())
+					if(!IsInEditor(arguments))
 					{
-						OnCellButtonUp(sender, false);
+						if(contentProvider->dataGrid->GetVisuallyEnabled())
+						{
+							OnCellButtonUp(sender, false);
+						}
 					}
 				}
 
@@ -436,6 +474,8 @@ DataGridContentProvider::ItemContent
 							GuiCellComposition* cell=new GuiCellComposition;
 							textTable->AddChild(cell);
 							cell->SetSite(0, i, 1, 1);
+							cell->GetEventReceiver()->leftButtonDown.AttachMethod(this, &ItemContent::OnCellButtonDown);
+							cell->GetEventReceiver()->rightButtonDown.AttachMethod(this, &ItemContent::OnCellButtonDown);
 							cell->GetEventReceiver()->leftButtonUp.AttachMethod(this, &ItemContent::OnCellLeftButtonUp);
 							cell->GetEventReceiver()->rightButtonUp.AttachMethod(this, &ItemContent::OnCellRightButtonUp);
 
@@ -651,20 +691,24 @@ DataGridContentProvider
 					return currentCell;
 				}
 
-				void DataGridContentProvider::SetSelectedCell(const GridPos& value, bool openEditor)
+				bool DataGridContentProvider::SetSelectedCell(const GridPos& value, bool openEditor)
 				{
 					if(currentCell!=value)
 					{
 						if(value==GridPos(-1, -1))
 						{
 							CloseEditor(false);
+							return true;
 						}
 						else if(0<=value.row && value.row<dataProvider->GetRowCount() && 0<=value.column && value.column<dataProvider->GetColumnCount())
 						{
 							IDataEditorFactory* editorFactory=openEditor?dataProvider->GetCellDataEditorFactory(value.row, value.column):0;
 							OpenEditor(value.row, value.column, editorFactory);
+							return true;
 						}
+						return false;
 					}
+					return true;
 				}
 			}
 
@@ -746,7 +790,13 @@ GuiVirtualDataGrid
 
 			void GuiVirtualDataGrid::SetSelectedCell(const GridPos& value)
 			{
-				contentProvider->SetSelectedCell(value, false);
+				if(contentProvider->SetSelectedCell(value, false))
+				{
+					if(0<=value.row && value.row<dataProvider->GetRowCount())
+					{
+						EnsureItemVisible(value.row);
+					}
+				}
 			}
 
 			Ptr<GuiListControl::IItemStyleProvider> GuiVirtualDataGrid::SetStyleProvider(Ptr<GuiListControl::IItemStyleProvider> value)
@@ -832,9 +882,39 @@ StringGridProvider
 					}
 				}
 
+				void StringGridColumn::SetCellData(const Ptr<StringGridItem>& rowData, const WString& cellData)
+				{
+					vint index=provider->columns.IndexOf(this);
+					if(0<=index && index<rowData->strings.Count())
+					{
+						rowData->strings[index]=cellData;
+					}
+				}
+
 				WString StringGridColumn::GetCellDataText(const WString& cellData)
 				{
 					return cellData;
+				}
+
+				void StringGridColumn::BeforeEditCell(vint row, IDataEditor* dataEditor)
+				{
+					TextBoxDataEditor* editor=dynamic_cast<TextBoxDataEditor*>(dataEditor);
+					if(editor)
+					{
+						vint column=provider->columns.IndexOf(this);
+						editor->GetTextBox()->SetText(provider->GetGridString(row, column));
+						editor->GetTextBox()->SelectAll();
+					}
+				}
+
+				void StringGridColumn::SaveCellData(vint row, IDataEditor* dataEditor)
+				{
+					TextBoxDataEditor* editor=dynamic_cast<TextBoxDataEditor*>(dataEditor);
+					if(editor)
+					{
+						vint column=provider->columns.IndexOf(this);
+						provider->SetGridString(row, column, editor->GetTextBox()->GetText());
+					}
 				}
 
 /***********************************************************************
@@ -846,9 +926,28 @@ StringGridProvider
 					rowData=items[row];
 				}
 
+				bool StringGridProvider::GetReadonly()
+				{
+					return readonly;
+				}
+
+				void StringGridProvider::SetReadonly(bool value)
+				{
+					if(readonly!=value)
+					{
+						readonly=value;
+						FOREACH(Ptr<StructuredColummProviderBase>, column, columns)
+						{
+							column->SetEditorFactory(readonly?0:editorFactory);
+						}
+					}
+				}
+
 				StringGridProvider::StringGridProvider()
+					:readonly(false)
 				{
 					visualizerFactory=new list::CellBorderDataVisualizer::Factory(new list::StringGridDataVisualizer::Factory);
+					editorFactory=new list::TextBoxDataEditor::Factory;
 				}
 
 				StringGridProvider::~StringGridProvider()
@@ -934,6 +1033,7 @@ StringGridProvider
 					columnProvider->SetText(text);
 					columnProvider->SetSize(size);
 					columnProvider->SetVisualizerFactory(visualizerFactory);
+					columnProvider->SetEditorFactory(readonly?0:editorFactory);
 					return InsertColumnInternal(column, columnProvider);
 				}
 
@@ -996,6 +1096,17 @@ GuiStringGrid
 			list::StringGridProvider& GuiStringGrid::Grids()
 			{
 				return *grids;
+			}
+
+			bool GuiStringGrid::GetReadonly()
+			{
+				return grids->GetReadonly();
+			}
+
+			void GuiStringGrid::SetReadonly(bool value)
+			{
+				SetSelectedCell(GridPos(-1, -1));
+				grids->SetReadonly(value);
 			}
 		}
 	}

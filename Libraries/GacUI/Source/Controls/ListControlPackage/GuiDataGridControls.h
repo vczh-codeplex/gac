@@ -121,6 +121,8 @@ Datagrid ContentProvider
 						IDataVisualizerFactory*							GetDataVisualizerFactory(vint row, vint column);
 						vint											GetCellColumnIndex(compositions::GuiGraphicsComposition* composition);
 						void											OnCellButtonUp(compositions::GuiGraphicsComposition* sender, bool openEditor);
+						bool											IsInEditor(compositions::GuiMouseEventArgs& arguments);
+						void											OnCellButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
 						void											OnCellLeftButtonUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
 						void											OnCellRightButtonUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
 					public:
@@ -170,7 +172,7 @@ Datagrid ContentProvider
 					void												DetachListControl()override;
 
 					GridPos												GetSelectedCell();
-					void												SetSelectedCell(const GridPos& value, bool openEditor);
+					bool												SetSelectedCell(const GridPos& value, bool openEditor);
 				};
 			}
 
@@ -262,7 +264,11 @@ StringGrid Control
 					~StringGridColumn();
 
 					void												GetCellData(const Ptr<StringGridItem>& rowData, WString& cellData)override;
+					void												SetCellData(const Ptr<StringGridItem>& rowData, const WString& cellData);
 					WString												GetCellDataText(const WString& cellData)override;
+
+					void												BeforeEditCell(vint row, IDataEditor* dataEditor)override;
+					void												SaveCellData(vint row, IDataEditor* dataEditor)override;
 				};
 
 				/// <summary>Data source for <see cref="GuiStringGrid"/>.</summary>
@@ -271,10 +277,14 @@ StringGrid Control
 					friend class StringGridColumn;
 					friend class GuiStringGrid;
 				protected:
+					bool												readonly;
 					collections::List<Ptr<StringGridItem>>				items;
 					Ptr<IDataVisualizerFactory>							visualizerFactory;
+					Ptr<IDataEditorFactory>								editorFactory;
 
 					void												GetRowData(vint row, Ptr<StringGridItem>& rowData)override;
+					bool												GetReadonly();
+					void												SetReadonly(bool value);
 				public:
 					StringGridProvider();
 					~StringGridProvider();
@@ -362,6 +372,13 @@ StringGrid Control
 				/// <summary>Get the grid data in this control.</summary>
 				/// <returns>The grid data.</returns>
 				list::StringGridProvider&								Grids();
+
+				/// <summary>Get the readonly mode.</summary>
+				/// <returns>Returns true if the string grid is readonly.</returns>
+				bool													GetReadonly();
+				/// <summary>Set the readonly mode.</summary>
+				/// <param name="value">Set to true to make the string grid readonly.</param>
+				void													SetReadonly(bool value);
 			};
 		}
 	}
