@@ -481,6 +481,7 @@ Selectable List Control
 				virtual void									OnItemSelectionChanged(vint itemIndex, bool value);
 				virtual void									OnItemSelectionCleared();
 				void											OnItemLeftButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiItemMouseEventArgs& arguments);
+				void											OnItemRightButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiItemMouseEventArgs& arguments);
 
 				void											NormalizeSelectedItemIndexStartEnd();
 				void											SetMultipleItemsSelectedSilently(vint start, vint end, bool selected);
@@ -516,11 +517,14 @@ Selectable List Control
 				/// <param name="value">Set to true to select the item.</param>
 				void											SetSelected(vint itemIndex, bool value);
 				/// <summary>Set the selection status of an item, and affect other selected item according to key status.</summary>
+				/// <returns>Returns true if this operation succeeded.</returns>
 				/// <param name="itemIndex">The index of the item.</param>
 				/// <param name="ctrl">Set to true if the control key is pressing.</param>
 				/// <param name="shift">Set to true if the shift key is pressing.</param>
-				bool											SelectItemsByClick(vint itemIndex, bool ctrl, bool shift);
+				/// <param name="leftMouse">Set to true if clicked by left mouse button, otherwise right mouse button.</param>
+				bool											SelectItemsByClick(vint itemIndex, bool ctrl, bool shift, bool leftButton);
 				/// <summary>Set the selection status using keys.</summary>
+				/// <returns>Returns true if this operation succeeded.</returns>
 				/// <param name="code">The key code that is pressing.</param>
 				/// <param name="ctrl">Set to true if the control key is pressing.</param>
 				/// <param name="shift">Set to true if the shift key is pressing.</param>
