@@ -39,6 +39,43 @@ TestWindow
 	{
 	private:
 		GuiStringGrid*						stringGrid;
+		GuiToolstripMenu*					contextMenu;
+
+		GuiToolstripButton*					menuInsertRowBefore;
+		GuiToolstripButton*					menuInsertRowAfter;
+		GuiToolstripButton*					menuRemoveRow;
+		GuiToolstripButton*					menuInsertColumnBefore;
+		GuiToolstripButton*					menuInsertColumnAfter;
+		GuiToolstripButton*					menuRemoveColumn;
+
+		void menuInsertRowBefore_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+		{
+		}
+
+		void menuInsertRowAfter_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+		{
+		}
+
+		void menuRemoveRow_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+		{
+		}
+
+		void menuInsertColumnBefore_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+		{
+		}
+
+		void menuInsertColumnAfter_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+		{
+		}
+
+		void menuRemoveColumn_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+		{
+		}
+
+		void stringGrid_rightButtonUp(GuiGraphicsComposition* sender, GuiMouseEventArgs& arguments)
+		{
+			contextMenu->ShowPopup(this, Point(arguments.x, arguments.y));
+		}
 
 		void Initialize()
 		{
@@ -74,7 +111,25 @@ TestWindow
 			stringGrid->SetVerticalAlwaysVisible(false);
 			stringGrid->SetHorizontalAlwaysVisible(false);
 			stringGrid->SetMultiSelect(true);
+			stringGrid->GetBoundsComposition()->GetEventReceiver()->rightButtonUp.AttachMethod(this, &TestWindow::stringGrid_rightButtonUp);
 			AddChild(stringGrid);
+
+			contextMenu=g::NewMenu(0);
+			contextMenu->GetBuilder()
+				->Button(0, L"Insert Row Before", &menuInsertRowBefore)
+				->Button(0, L"Insert Row After", &menuInsertRowAfter)
+				->Button(0, L"Remove This Row", &menuRemoveRow)
+				->Splitter()
+				->Button(0, L"Insert Column Before...", &menuInsertColumnBefore)
+				->Button(0, L"Insert Column After...", &menuInsertColumnAfter)
+				->Button(0, L"Remove This Column", &menuRemoveColumn)
+				;
+			menuInsertRowBefore->Clicked.AttachMethod(this, &TestWindow::menuInsertRowBefore_Clicked);
+			menuInsertRowAfter->Clicked.AttachMethod(this, &TestWindow::menuInsertRowAfter_Clicked);
+			menuRemoveRow->Clicked.AttachMethod(this, &TestWindow::menuRemoveRow_Clicked);
+			menuInsertColumnBefore->Clicked.AttachMethod(this, &TestWindow::menuInsertColumnBefore_Clicked);
+			menuInsertColumnAfter->Clicked.AttachMethod(this, &TestWindow::menuInsertColumnAfter_Clicked);
+			menuRemoveColumn->Clicked.AttachMethod(this, &TestWindow::menuRemoveColumn_Clicked);
 
 			ForceCalculateSizeImmediately();
 			MoveToScreenCenter();
@@ -83,6 +138,7 @@ TestWindow
 
 		~TestWindow()
 		{
+			delete contextMenu;
 		}
 	};
 }
