@@ -120,7 +120,9 @@ Datagrid ContentProvider
 						void											RemoveCellsAndDataVisualizers();
 						IDataVisualizerFactory*							GetDataVisualizerFactory(vint row, vint column);
 						vint											GetCellColumnIndex(compositions::GuiGraphicsComposition* composition);
-						void											OnCellMouseUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
+						void											OnCellButtonUp(compositions::GuiGraphicsComposition* sender, bool openEditor);
+						void											OnCellLeftButtonUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
+						void											OnCellRightButtonUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
 					public:
 						ItemContent(DataGridContentProvider* _contentProvider, const FontProperties& _font);
 						~ItemContent();
@@ -166,7 +168,7 @@ Datagrid ContentProvider
 					void												DetachListControl()override;
 
 					GridPos												GetSelectedCell();
-					void												SetSelectedCell(const GridPos& value);
+					void												SetSelectedCell(const GridPos& value, bool openEditor);
 				};
 			}
 

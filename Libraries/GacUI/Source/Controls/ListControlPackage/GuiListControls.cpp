@@ -472,7 +472,15 @@ GuiSelectableListControl
 			{
 				if(GetVisuallyEnabled())
 				{
-					SelectItemsByClick(arguments.itemIndex, arguments.ctrl, arguments.shift);
+					SelectItemsByClick(arguments.itemIndex, arguments.ctrl, arguments.shift, true);
+				}
+			}
+
+			void GuiSelectableListControl::OnItemRightButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiItemMouseEventArgs& arguments)
+			{
+				if(GetVisuallyEnabled())
+				{
+					SelectItemsByClick(arguments.itemIndex, arguments.ctrl, arguments.shift, false);
 				}
 			}
 
@@ -535,6 +543,7 @@ GuiSelectableListControl
 			{
 				SelectionChanged.SetAssociatedComposition(boundsComposition);
 				ItemLeftButtonDown.AttachMethod(this, &GuiSelectableListControl::OnItemLeftButtonDown);
+				ItemRightButtonDown.AttachMethod(this, &GuiSelectableListControl::OnItemRightButtonDown);
 				if(focusableComposition)
 				{
 					focusableComposition->GetEventReceiver()->keyDown.AttachMethod(this, &GuiSelectableListControl::OnKeyDown);
@@ -601,11 +610,18 @@ GuiSelectableListControl
 				}
 			}
 
-			bool GuiSelectableListControl::SelectItemsByClick(vint itemIndex, bool ctrl, bool shift)
+			bool GuiSelectableListControl::SelectItemsByClick(vint itemIndex, bool ctrl, bool shift, bool leftButton)
 			{
 				NormalizeSelectedItemIndexStartEnd();
 				if(0<=itemIndex && itemIndex<itemProvider->Count())
 				{
+					if(!leftButton)
+					{
+						if(selectedItems.Contains(itemIndex))
+						{
+							return true;
+						}
+					}
 					if(!multiSelect)
 					{
 						shift=false;
@@ -694,7 +710,7 @@ GuiSelectableListControl
 					keyDirection=GetCoordinateTransformer()->RealKeyDirectionToVirtualKeyDirection(keyDirection);
 				}
 				vint itemIndex=GetArranger()->FindItem(selectedItemIndexEnd, keyDirection);
-				if(SelectItemsByClick(itemIndex, ctrl, shift))
+				if(SelectItemsByClick(itemIndex, ctrl, shift, true))
 				{
 					return EnsureItemVisible(itemIndex);
 				}

@@ -73,6 +73,7 @@ TestWindow
 			stringGrid->GetBoundsComposition()->SetAlignmentToParent(Margin(5, 5, 5, 5));
 			stringGrid->SetVerticalAlwaysVisible(false);
 			stringGrid->SetHorizontalAlwaysVisible(false);
+			stringGrid->SetMultiSelect(true);
 			AddChild(stringGrid);
 
 			ForceCalculateSizeImmediately();

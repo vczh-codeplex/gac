@@ -297,7 +297,7 @@ DataGridContentProvider::ItemContent
 					return -1;
 				}
 
-				void DataGridContentProvider::ItemContent::OnCellMouseUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
+				void DataGridContentProvider::ItemContent::OnCellButtonUp(compositions::GuiGraphicsComposition* sender, bool openEditor)
 				{
 					vint index=GetCellColumnIndex(sender);
 					if(index!=-1)
@@ -306,7 +306,7 @@ DataGridContentProvider::ItemContent
 						{
 							return;
 						}
-						IDataEditorFactory* factory=contentProvider->dataProvider->GetCellDataEditorFactory(currentRow, index);
+						IDataEditorFactory* factory=openEditor?contentProvider->dataProvider->GetCellDataEditorFactory(currentRow, index):0;
 						currentEditor=contentProvider->OpenEditor(currentRow, index, factory);
 						if(currentEditor)
 						{
@@ -314,6 +314,22 @@ DataGridContentProvider::ItemContent
 							currentEditor->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 							cell->AddChild(currentEditor->GetBoundsComposition());
 						}
+					}
+				}
+
+				void DataGridContentProvider::ItemContent::OnCellLeftButtonUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
+				{
+					if(contentProvider->dataGrid->GetVisuallyEnabled())
+					{
+						OnCellButtonUp(sender, true);
+					}
+				}
+
+				void DataGridContentProvider::ItemContent::OnCellRightButtonUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
+				{
+					if(contentProvider->dataGrid->GetVisuallyEnabled())
+					{
+						OnCellButtonUp(sender, false);
 					}
 				}
 
@@ -412,7 +428,8 @@ DataGridContentProvider::ItemContent
 							GuiCellComposition* cell=new GuiCellComposition;
 							textTable->AddChild(cell);
 							cell->SetSite(0, i, 1, 1);
-							cell->GetEventReceiver()->leftButtonUp.AttachMethod(this, &ItemContent::OnCellMouseUp);
+							cell->GetEventReceiver()->leftButtonUp.AttachMethod(this, &ItemContent::OnCellLeftButtonUp);
+							cell->GetEventReceiver()->rightButtonUp.AttachMethod(this, &ItemContent::OnCellRightButtonUp);
 
 							GuiBoundsComposition* composition=dataVisualizers[i]->GetBoundsComposition();
 							composition->SetAlignmentToParent(Margin(0, 0, 0, 0));
@@ -591,7 +608,7 @@ DataGridContentProvider
 					return currentCell;
 				}
 
-				void DataGridContentProvider::SetSelectedCell(const GridPos& value)
+				void DataGridContentProvider::SetSelectedCell(const GridPos& value, bool openEditor)
 				{
 					if(currentCell!=value)
 					{
@@ -601,7 +618,7 @@ DataGridContentProvider
 						}
 						else if(0<=value.row && value.row<dataProvider->GetRowCount() && 0<=value.column && value.column<dataProvider->GetColumnCount())
 						{
-							IDataEditorFactory* editorFactory=dataProvider->GetCellDataEditorFactory(value.row, value.column);
+							IDataEditorFactory* editorFactory=openEditor?dataProvider->GetCellDataEditorFactory(value.row, value.column):0;
 							OpenEditor(value.row, value.column, editorFactory);
 						}
 					}
@@ -686,7 +703,7 @@ GuiVirtualDataGrid
 
 			void GuiVirtualDataGrid::SetSelectedCell(const GridPos& value)
 			{
-				contentProvider->SetSelectedCell(value);
+				contentProvider->SetSelectedCell(value, false);
 			}
 
 			Ptr<GuiListControl::IItemStyleProvider> GuiVirtualDataGrid::SetStyleProvider(Ptr<GuiListControl::IItemStyleProvider> value)
