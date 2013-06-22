@@ -451,6 +451,9 @@ DataGridContentProvider::ItemContent
 						dataVisualizer->BeforeVisualizeCell(contentProvider->dataProvider, itemIndex, i);
 						contentProvider->dataProvider->VisualizeCell(itemIndex, i, dataVisualizer);
 					}
+
+					GridPos selectedCell=contentProvider->GetSelectedCell();
+					NotifySelectCell(itemIndex==selectedCell.row?selectedCell.column:-1);
 					UpdateSubItemSize();
 				}
 
