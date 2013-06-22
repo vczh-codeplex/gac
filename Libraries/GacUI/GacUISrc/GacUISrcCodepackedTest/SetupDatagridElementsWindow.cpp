@@ -363,7 +363,7 @@ public:
 	{
 	}
 
-	void BeforeVisualizerCell(list::IDataProvider* dataProvider, vint row, vint column)override
+	void BeforeVisualizeCell(list::IDataProvider* dataProvider, vint row, vint column)override
 	{
 		electronCounts.Clear();
 	}

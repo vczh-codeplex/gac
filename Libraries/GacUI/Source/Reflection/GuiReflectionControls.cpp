@@ -1616,6 +1616,32 @@ Type Declaration
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(DatePicker)
 			END_CLASS_MEMBER(GuiDateComboBox)
 
+			BEGIN_CLASS_MEMBER(GuiStringGrid)
+				CLASS_MEMBER_BASE(GuiVirtualDataGrid)
+				CONTROL_CONSTRUCTOR_PROVIDER(GuiStringGrid)
+
+				CLASS_MEMBER_METHOD_RENAME(GetGrids, Grids, NO_PARAMETER)
+				CLASS_MEMBER_PROPERTY_READONLY(Grids, GetGrids)
+			END_CLASS_MEMBER(GuiStringGrid)
+
+			BEGIN_CLASS_MEMBER(StringGridProvider)
+				CLASS_MEMBER_METHOD(InsertRow, {L"row"})
+				CLASS_MEMBER_METHOD(AppendRow, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(MoveRow, {L"source" _ L"target"})
+				CLASS_MEMBER_METHOD(RemoveRow, {L"row"})
+				CLASS_MEMBER_METHOD(ClearRows, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(GetGridString, {L"row" _ L"column"})
+				CLASS_MEMBER_METHOD(SetGridString, {L"row" _ L"column" _ L"value"})
+
+				CLASS_MEMBER_METHOD(InsertColumn, {L"column" _ L"text" _ L"size"})
+				CLASS_MEMBER_METHOD(AppendColumn, {L"text" _ L"size"})
+				CLASS_MEMBER_METHOD(MoveColumn, {L"source" _ L"target"})
+				CLASS_MEMBER_METHOD(RemoveColumn, {L"column"})
+				CLASS_MEMBER_METHOD(ClearColumns, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(GetColumnText, {L"column"})
+				CLASS_MEMBER_METHOD(SetColumnText, {L"column" _ L"value"})
+			END_CLASS_MEMBER(StringGridProvider)
+
 #undef INTERFACE_IDENTIFIER
 #undef CONTROL_CONSTRUCTOR_CONTROLLER
 #undef INTERFACE_EXTERNALCTOR
