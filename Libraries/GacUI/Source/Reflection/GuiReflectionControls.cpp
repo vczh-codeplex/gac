@@ -700,6 +700,8 @@ Type Declaration
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(CreatedItemStyles)
 
 				CLASS_MEMBER_METHOD(IsItemStyleAttachedToListView, {L"itemStyle"})
+				CLASS_MEMBER_METHOD(GetItemContentFromItemStyleController, {L"itemStyleController"})
+				CLASS_MEMBER_METHOD(GetItemStyleControllerFromItemContent, {L"itemContent"})
 				CLASS_MEMBER_EXTERNALMETHOD(GetItemContent, {L"itemStyleController"}, ListViewItemStyleProvider::IListViewItemContent*(ListViewItemStyleProvider::*)(GuiListControl::IItemStyleController*), &ListViewItemStyleProvider_GetItemContent)
 			END_CLASS_MEMBER(ListViewItemStyleProvider)
 

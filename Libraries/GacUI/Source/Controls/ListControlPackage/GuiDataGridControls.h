@@ -114,7 +114,6 @@ Datagrid ContentProvider
 						FontProperties									font;
 
 						collections::Array<Ptr<IDataVisualizer>>		dataVisualizers;
-						vint											currentRow;
 						IDataEditor*									currentEditor;
 
 						void											RemoveCellsAndDataVisualizers();

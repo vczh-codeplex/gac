@@ -8,6 +8,7 @@ namespace vl
 		{
 			using namespace elements;
 			using namespace compositions;
+			using namespace collections;
 
 			namespace list
 			{
@@ -249,6 +250,31 @@ ListViewItemStyleProvider
 				bool ListViewItemStyleProvider::IsItemStyleAttachedToListView(GuiListControl::IItemStyleController* itemStyle)
 				{
 					return itemStyle && itemStyle->GetBoundsComposition()->GetParent();
+				}
+
+				ListViewItemStyleProvider::IListViewItemContent* ListViewItemStyleProvider::GetItemContentFromItemStyleController(GuiListControl::IItemStyleController* itemStyleController)
+				{
+					if(itemStyleController)
+					{
+						ListViewContentItemStyleController* item=dynamic_cast<ListViewContentItemStyleController*>(itemStyleController);
+						if(item)
+						{
+							return item->GetItemContent();
+						}
+					}
+					return 0;
+				}
+
+				GuiListControl::IItemStyleController* ListViewItemStyleProvider::GetItemStyleControllerFromItemContent(IListViewItemContent* itemContent)
+				{
+					FOREACH(GuiListControl::IItemStyleController*, style, itemStyles)
+					{
+						if(GetItemContentFromItemStyleController(style)==itemContent)
+						{
+							return style;
+						}
+					}
+					return 0;
 				}
 				
 /***********************************************************************

@@ -1584,7 +1584,7 @@ Interface Proxy
 
 					void ReinstallEditor()override
 					{
-						INVOKE_INTERFACE_PROXY_NOPARAMS(ReinstallEditor);
+						INVOKE_INTERFACE_PROXY_NOPARAM(ReinstallEditor);
 					}
 				};
 
