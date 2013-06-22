@@ -71,8 +71,6 @@ typedef signed __int64	pos_t;
 #define abstract
 #endif
 
-#define VCZH_NO_OLD_OS
-
 /***********************************************************************
 基础
 ***********************************************************************/
@@ -21974,9 +21972,7 @@ namespace vl
 	class CriticalSection : public Object, public NotCopyable
 	{
 	private:
-#ifdef VCZH_NO_OLD_OS
 		friend class ConditionVariable;
-#endif
 		threading_internal::CriticalSectionData*	internalData;
 	public:
 		CriticalSection();
@@ -21996,8 +21992,6 @@ namespace vl
 			~Scope();
 		};
 	};
-
-#ifdef VCZH_NO_OLD_OS
 
 	class ReaderWriterLock : public Object, public NotCopyable
 	{
@@ -22051,7 +22045,6 @@ namespace vl
 		void										WakeOnePending();
 		void										WakeAllPendings();
 	};
-#endif
 
 /***********************************************************************
 用户模式对象

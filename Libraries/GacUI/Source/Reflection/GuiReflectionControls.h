@@ -193,6 +193,8 @@ Type List
 			F(presentation::controls::GuiDatePicker)\
 			F(presentation::controls::GuiDatePicker::IStyleProvider)\
 			F(presentation::controls::GuiDateComboBox)\
+			F(presentation::controls::GuiStringGrid)\
+			F(presentation::controls::list::StringGridProvider)\
 
 			GUIREFLECTIONCONTROLS_TYPELIST(DECL_TYPE_INFO)
 

@@ -90,6 +90,42 @@ TextPos
 		};
 
 /***********************************************************************
+GridPos
+***********************************************************************/
+		
+		struct GridPos
+		{
+			vint			row;
+			vint			column;
+
+			GridPos()
+				:row(0) ,column(0)
+			{
+			}
+
+			GridPos(vint _row, vint _column)
+				:row(_row) ,column(_column)
+			{
+			}
+
+			vint Compare(const GridPos& value)const
+			{
+				if(row<value.row) return -1;
+				if(row>value.row) return 1;
+				if(column<value.column) return -1;
+				if(column>value.column) return 1;
+				return 0;
+			}
+
+			bool operator==(const GridPos& value)const {return Compare(value)==0;}
+			bool operator!=(const GridPos& value)const {return Compare(value)!=0;}
+			bool operator<(const GridPos& value)const {return Compare(value)<0;}
+			bool operator<=(const GridPos& value)const {return Compare(value)<=0;}
+			bool operator>(const GridPos& value)const {return Compare(value)>0;}
+			bool operator>=(const GridPos& value)const {return Compare(value)>=0;}
+		};
+
+/***********************************************************************
 Point
 ***********************************************************************/
 		
@@ -5303,6 +5339,7 @@ Selectable List Control
 				virtual void									OnItemSelectionChanged(vint itemIndex, bool value);
 				virtual void									OnItemSelectionCleared();
 				void											OnItemLeftButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiItemMouseEventArgs& arguments);
+				void											OnItemRightButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiItemMouseEventArgs& arguments);
 
 				void											NormalizeSelectedItemIndexStartEnd();
 				void											SetMultipleItemsSelectedSilently(vint start, vint end, bool selected);
@@ -5321,7 +5358,7 @@ Selectable List Control
 				const collections::SortedList<vint>&			GetSelectedItems();
 				bool											GetSelected(vint itemIndex);
 				void											SetSelected(vint itemIndex, bool value);
-				bool											SelectItemsByClick(vint itemIndex, bool ctrl, bool shift);
+				bool											SelectItemsByClick(vint itemIndex, bool ctrl, bool shift, bool leftButton);
 				bool											SelectItemsByKey(vint code, bool ctrl, bool shift);
 				void											ClearSelection();
 			};
@@ -6071,7 +6108,7 @@ ListView ItemStyleProvider
 					Ptr<IListViewItemContentProvider>			listViewItemContentProvider;
 					ItemStyleList								itemStyles;
 				public:
-					ListViewItemStyleProvider(IListViewItemContentProvider* itemContentProvider);
+					ListViewItemStyleProvider(Ptr<IListViewItemContentProvider> itemContentProvider);
 					~ListViewItemStyleProvider();
 
 					void										AttachListControl(GuiListControl* value)override;
@@ -6080,22 +6117,18 @@ ListView ItemStyleProvider
 					void										DestroyItemStyle(GuiListControl::IItemStyleController* style)override;
 					void										Install(GuiListControl::IItemStyleController* style, vint itemIndex)override;
 
+					IListViewItemContentProvider*				GetItemContentProvider();
+
 					const ItemStyleList&						GetCreatedItemStyles();
 					bool										IsItemStyleAttachedToListView(GuiListControl::IItemStyleController* itemStyle);
+
+					IListViewItemContent*						GetItemContentFromItemStyleController(GuiListControl::IItemStyleController* itemStyleController);
+					GuiListControl::IItemStyleController*		GetItemStyleControllerFromItemContent(IListViewItemContent* itemContent);
 
 					template<typename T>
 					T* GetItemContent(GuiListControl::IItemStyleController* itemStyleController)
 					{
-						if(itemStyleController)
-						{
-							ListViewContentItemStyleController* item=dynamic_cast<ListViewContentItemStyleController*>(itemStyleController);
-							if(item)
-							{
-								IListViewItemContent* itemContent=item->GetItemContent();
-								return dynamic_cast<T*>(itemContent);
-							}
-						}
-						return 0;
+						return dynamic_cast<T*>(GetItemContentFromItemStyleController(itemStyleController));
 					}
 				};
 			}
@@ -6501,7 +6534,7 @@ ListView
 				GuiVirtualListView(IStyleProvider* _styleProvider, GuiListControl::IItemProvider* _itemProvider);
 				~GuiVirtualListView();
 				
-				void													ChangeItemStyle(list::ListViewItemStyleProvider::IListViewItemContentProvider* contentProvider);
+				virtual bool											ChangeItemStyle(Ptr<list::ListViewItemStyleProvider::IListViewItemContentProvider> contentProvider);
 			};
 			
 			class GuiListView : public GuiVirtualListView, public Description<GuiListView>
@@ -7970,9 +8003,11 @@ Datagrid Interfaces
 
 					virtual compositions::GuiBoundsComposition*			GetBoundsComposition()=0;
 
-					virtual void										BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)=0;
+					virtual void										BeforeVisualizeCell(IDataProvider* dataProvider, vint row, vint column)=0;
 
 					virtual IDataVisualizer*							GetDecoratedDataVisualizer()=0;
+
+					virtual void										SetSelected(bool value)=0;
 
 					template<typename T>
 					T* GetVisualizer()
@@ -8008,6 +8043,8 @@ Datagrid Interfaces
 					virtual compositions::GuiBoundsComposition*			GetBoundsComposition()=0;
 
 					virtual void										BeforeEditCell(IDataProvider* dataProvider, vint row, vint column)=0;
+
+					virtual void										ReinstallEditor()=0;
 				};
 
 				class IDataProviderCommandExecutor : public virtual IDescriptable, public Description<IDataProviderCommandExecutor>
@@ -8037,6 +8074,7 @@ Datagrid Interfaces
 					virtual vint										GetRowCount()=0;
 					virtual Ptr<GuiImageData>							GetRowLargeImage(vint row)=0;
 					virtual Ptr<GuiImageData>							GetRowSmallImage(vint row)=0;
+					virtual vint										GetCellSpan(vint row, vint column)=0;
 					virtual WString										GetCellText(vint row, vint column)=0;
 					virtual IDataVisualizerFactory*						GetCellDataVisualizerFactory(vint row, vint column)=0;
 					virtual void										VisualizeCell(vint row, vint column, IDataVisualizer* dataVisualizer)=0;
@@ -8243,6 +8281,7 @@ Structured DataSource Extensions
 					StructuredDataProvider(Ptr<IStructuredDataProvider> provider);
 					~StructuredDataProvider();
 					
+					Ptr<IStructuredDataProvider>						GetStructuredDataProvider();
 					Ptr<IStructuredDataFilter>							GetAdditionalFilter();
 					void												SetAdditionalFilter(Ptr<IStructuredDataFilter> value);
 
@@ -8260,6 +8299,7 @@ Structured DataSource Extensions
 					vint												GetRowCount()override;
 					Ptr<GuiImageData>									GetRowLargeImage(vint row)override;
 					Ptr<GuiImageData>									GetRowSmallImage(vint row)override;
+					vint												GetCellSpan(vint row, vint column)override;
 					WString												GetCellText(vint row, vint column)override;
 					IDataVisualizerFactory*								GetCellDataVisualizerFactory(vint row, vint column)override;
 					void												VisualizeCell(vint row, vint column, IDataVisualizer* dataVisualizer)override;
@@ -8316,7 +8356,10 @@ Structured DataSource Extensions
 					IDataProviderCommandExecutor*						commandExecutor;
 					ColumnList											columns;
 
-					bool												AddColumn(Ptr<StructuredColummProviderBase> value);
+					bool												InsertColumnInternal(vint column, Ptr<StructuredColummProviderBase> value, bool callback);
+					bool												AddColumnInternal(Ptr<StructuredColummProviderBase> value, bool callback);
+					bool												RemoveColumnInternal(Ptr<StructuredColummProviderBase> value, bool callback);
+					bool												ClearColumnsInternal(bool callback);
 				public:
 					StructuredDataProviderBase();
 					~StructuredDataProviderBase();
@@ -8471,7 +8514,7 @@ Strong Typed DataSource Extensions
 					Ptr<StrongTypedColumnProvider<TRow, TColumn>> AddStrongTypedColumn(const WString& text, Ptr<StrongTypedColumnProvider<TRow, TColumn>> column)
 					{
 						column->SetText(text);
-						return AddColumn(column)?column:0;
+						return AddColumnInternal(column, true)?column:0;
 					}
 
 					template<typename TColumn>
@@ -8536,7 +8579,7 @@ namespace vl
 			{
 
 /***********************************************************************
-Visualizer Extensions
+Extension Bases
 ***********************************************************************/
 				
 				class DataVisualizerBase : public Object, public virtual IDataVisualizer
@@ -8559,8 +8602,9 @@ Visualizer Extensions
 
 					IDataVisualizerFactory*								GetFactory()override;
 					compositions::GuiBoundsComposition*					GetBoundsComposition()override;
-					void												BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)override;
+					void												BeforeVisualizeCell(IDataProvider* dataProvider, vint row, vint column)override;
 					IDataVisualizer*									GetDecoratedDataVisualizer()override;
+					void												SetSelected(bool value)override;
 				};
 				
 				template<typename TVisualizer>
@@ -8598,105 +8642,6 @@ Visualizer Extensions
 						return dataVisualizer;
 					}
 				};
-
-				class ListViewMainColumnDataVisualizer : public DataVisualizerBase
-				{
-				public:
-					typedef DataVisualizerFactory<ListViewMainColumnDataVisualizer>			Factory;
-				protected:
-					elements::GuiImageFrameElement*						image;
-					elements::GuiSolidLabelElement*						text;
-
-					compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal(compositions::GuiBoundsComposition* decoratedComposition)override;
-				public:
-					ListViewMainColumnDataVisualizer();
-
-					void												BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)override;
-
-					elements::GuiSolidLabelElement*						GetTextElement();
-				};
-				
-				class ListViewSubColumnDataVisualizer : public DataVisualizerBase
-				{
-				public:
-					typedef DataVisualizerFactory<ListViewSubColumnDataVisualizer>			Factory;
-				protected:
-					elements::GuiSolidLabelElement*						text;
-
-					compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal(compositions::GuiBoundsComposition* decoratedComposition)override;
-				public:
-					ListViewSubColumnDataVisualizer();
-
-					void												BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)override;
-
-					elements::GuiSolidLabelElement*						GetTextElement();
-				};
-
-				class HyperlinkDataVisualizer : public ListViewSubColumnDataVisualizer
-				{
-				public:
-					typedef DataVisualizerFactory<HyperlinkDataVisualizer>					Factory;
-				protected:
-
-					void												label_MouseEnter(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
-					void												label_MouseLeave(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
-					compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal(compositions::GuiBoundsComposition* decoratedComposition)override;
-				public:
-					HyperlinkDataVisualizer();
-
-					void												BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)override;
-				};
-
-				class ImageDataVisualizer : public DataVisualizerBase
-				{
-				public:
-					typedef DataVisualizerFactory<ImageDataVisualizer>						Factory;
-				protected:
-					elements::GuiImageFrameElement*						image;
-
-					compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal(compositions::GuiBoundsComposition* decoratedComposition)override;
-				public:
-					ImageDataVisualizer();
-
-					void												BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)override;
-
-					elements::GuiImageFrameElement*						GetImageElement();
-				};
-				
-				class CellBorderDataVisualizer : public DataVisualizerBase
-				{
-				public:
-					typedef DataDecoratableVisualizerFactory<CellBorderDataVisualizer>		Factory;
-				protected:
-
-					compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal(compositions::GuiBoundsComposition* decoratedComposition)override;
-				public:
-					CellBorderDataVisualizer(Ptr<IDataVisualizer> decoratedDataVisualizer);
-
-					void												BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)override;
-				};
-
-				class NotifyIconDataVisualizer : public DataVisualizerBase
-				{
-				public:
-					typedef DataDecoratableVisualizerFactory<NotifyIconDataVisualizer>		Factory;
-				protected:
-					elements::GuiImageFrameElement*						leftImage;
-					elements::GuiImageFrameElement*						rightImage;
-
-					compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal(compositions::GuiBoundsComposition* decoratedComposition)override;
-				public:
-					NotifyIconDataVisualizer(Ptr<IDataVisualizer> decoratedDataVisualizer);
-
-					void												BeforeVisualizerCell(IDataProvider* dataProvider, vint row, vint column)override;
-
-					elements::GuiImageFrameElement*						GetLeftImageElement();
-					elements::GuiImageFrameElement*						GetRightImageElement();
-				};
-
-/***********************************************************************
-Editor Extensions
-***********************************************************************/
 				
 				class DataEditorBase : public Object, public virtual IDataEditor
 				{
@@ -8715,6 +8660,7 @@ Editor Extensions
 					IDataEditorFactory*									GetFactory()override;
 					compositions::GuiBoundsComposition*					GetBoundsComposition()override;
 					void												BeforeEditCell(IDataProvider* dataProvider, vint row, vint column)override;
+					void												ReinstallEditor()override;
 				};
 				
 				template<typename TEditor>
@@ -8729,6 +8675,109 @@ Editor Extensions
 						return dataEditor;
 					}
 				};
+
+/***********************************************************************
+Visualizer Extensions
+***********************************************************************/
+
+				class ListViewMainColumnDataVisualizer : public DataVisualizerBase
+				{
+				public:
+					typedef DataVisualizerFactory<ListViewMainColumnDataVisualizer>			Factory;
+				protected:
+					elements::GuiImageFrameElement*						image;
+					elements::GuiSolidLabelElement*						text;
+
+					compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal(compositions::GuiBoundsComposition* decoratedComposition)override;
+				public:
+					ListViewMainColumnDataVisualizer();
+
+					void												BeforeVisualizeCell(IDataProvider* dataProvider, vint row, vint column)override;
+
+					elements::GuiSolidLabelElement*						GetTextElement();
+				};
+				
+				class ListViewSubColumnDataVisualizer : public DataVisualizerBase
+				{
+				public:
+					typedef DataVisualizerFactory<ListViewSubColumnDataVisualizer>			Factory;
+				protected:
+					elements::GuiSolidLabelElement*						text;
+
+					compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal(compositions::GuiBoundsComposition* decoratedComposition)override;
+				public:
+					ListViewSubColumnDataVisualizer();
+
+					void												BeforeVisualizeCell(IDataProvider* dataProvider, vint row, vint column)override;
+
+					elements::GuiSolidLabelElement*						GetTextElement();
+				};
+
+				class HyperlinkDataVisualizer : public ListViewSubColumnDataVisualizer
+				{
+				public:
+					typedef DataVisualizerFactory<HyperlinkDataVisualizer>					Factory;
+				protected:
+
+					void												label_MouseEnter(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+					void												label_MouseLeave(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+					compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal(compositions::GuiBoundsComposition* decoratedComposition)override;
+				public:
+					HyperlinkDataVisualizer();
+
+					void												BeforeVisualizeCell(IDataProvider* dataProvider, vint row, vint column)override;
+				};
+
+				class ImageDataVisualizer : public DataVisualizerBase
+				{
+				public:
+					typedef DataVisualizerFactory<ImageDataVisualizer>						Factory;
+				protected:
+					elements::GuiImageFrameElement*						image;
+
+					compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal(compositions::GuiBoundsComposition* decoratedComposition)override;
+				public:
+					ImageDataVisualizer();
+
+					void												BeforeVisualizeCell(IDataProvider* dataProvider, vint row, vint column)override;
+
+					elements::GuiImageFrameElement*						GetImageElement();
+				};
+				
+				class CellBorderDataVisualizer : public DataVisualizerBase
+				{
+				public:
+					typedef DataDecoratableVisualizerFactory<CellBorderDataVisualizer>		Factory;
+				protected:
+
+					compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal(compositions::GuiBoundsComposition* decoratedComposition)override;
+				public:
+					CellBorderDataVisualizer(Ptr<IDataVisualizer> decoratedDataVisualizer);
+
+					void												BeforeVisualizeCell(IDataProvider* dataProvider, vint row, vint column)override;
+				};
+
+				class NotifyIconDataVisualizer : public DataVisualizerBase
+				{
+				public:
+					typedef DataDecoratableVisualizerFactory<NotifyIconDataVisualizer>		Factory;
+				protected:
+					elements::GuiImageFrameElement*						leftImage;
+					elements::GuiImageFrameElement*						rightImage;
+
+					compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal(compositions::GuiBoundsComposition* decoratedComposition)override;
+				public:
+					NotifyIconDataVisualizer(Ptr<IDataVisualizer> decoratedDataVisualizer);
+
+					void												BeforeVisualizeCell(IDataProvider* dataProvider, vint row, vint column)override;
+
+					elements::GuiImageFrameElement*						GetLeftImageElement();
+					elements::GuiImageFrameElement*						GetRightImageElement();
+				};
+
+/***********************************************************************
+Editor Extensions
+***********************************************************************/
 				
 				class TextBoxDataEditor : public DataEditorBase
 				{
@@ -8737,11 +8786,14 @@ Editor Extensions
 				protected:
 					GuiSinglelineTextBox*								textBox;
 
+					void												OnTextChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 					compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal()override;
 				public:
 					TextBoxDataEditor();
 
 					void												BeforeEditCell(IDataProvider* dataProvider, vint row, vint column)override;
+					void												ReinstallEditor()override;
+
 					GuiSinglelineTextBox*								GetTextBox();
 				};
 				
@@ -8752,14 +8804,36 @@ Editor Extensions
 				protected:
 					GuiComboBoxListControl*								comboBox;
 					GuiTextList*										textList;
-
+					
+					void												OnSelectedIndexChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 					compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal()override;
 				public:
 					TextComboBoxDataEditor();
 
 					void												BeforeEditCell(IDataProvider* dataProvider, vint row, vint column)override;
+
 					GuiComboBoxListControl*								GetComboBoxControl();
+
 					GuiTextList*										GetTextListControl();
+				};
+				
+				class DateComboBoxDataEditor : public DataEditorBase
+				{
+				public:
+					typedef DataEditorFactory<DateComboBoxDataEditor>						Factory;
+				protected:
+					GuiDateComboBox*									comboBox;
+					
+					void												OnSelectedDateChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+					compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal()override;
+				public:
+					DateComboBoxDataEditor();
+
+					void												BeforeEditCell(IDataProvider* dataProvider, vint row, vint column)override;
+
+					GuiDateComboBox*									GetComboBoxControl();
+
+					GuiDatePicker*										GetDatePickerControl();
 				};
 			}
 		}
@@ -8789,6 +8863,8 @@ namespace vl
 	{
 		namespace controls
 		{
+			class GuiVirtualDataGrid;
+
 			namespace list
 			{
 
@@ -8878,13 +8954,16 @@ Datagrid ContentProvider
 						FontProperties									font;
 
 						collections::Array<Ptr<IDataVisualizer>>		dataVisualizers;
-						vint											currentRow;
 						IDataEditor*									currentEditor;
 
 						void											RemoveCellsAndDataVisualizers();
 						IDataVisualizerFactory*							GetDataVisualizerFactory(vint row, vint column);
 						vint											GetCellColumnIndex(compositions::GuiGraphicsComposition* composition);
-						void											OnCellMouseUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
+						void											OnCellButtonUp(compositions::GuiGraphicsComposition* sender, bool openEditor);
+						bool											IsInEditor(compositions::GuiMouseEventArgs& arguments);
+						void											OnCellButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
+						void											OnCellLeftButtonUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
+						void											OnCellRightButtonUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
 					public:
 						ItemContent(DataGridContentProvider* _contentProvider, const FontProperties& _font);
 						~ItemContent();
@@ -8892,12 +8971,14 @@ Datagrid ContentProvider
 						compositions::GuiBoundsComposition*				GetContentComposition()override;
 						compositions::GuiBoundsComposition*				GetBackgroundDecorator()override;
 						void											UpdateSubItemSize();
+						void											ForceSetEditor(vint column, IDataEditor* editor);
 						void											NotifyCloseEditor();
+						void											NotifySelectCell(vint column);
 						void											Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, vint itemIndex)override;
 						void											Uninstall()override;
 					};
 
-					Size												iconSize;
+					GuiVirtualDataGrid*									dataGrid;
 					GuiListControl::IItemProvider*						itemProvider;
 					list::IDataProvider*								dataProvider;
 					ListViewColumnItemArranger::IColumnItemView*		columnItemView;
@@ -8906,19 +8987,20 @@ Datagrid ContentProvider
 					ListViewMainColumnDataVisualizer::Factory			mainColumnDataVisualizerFactory;
 					ListViewSubColumnDataVisualizer::Factory			subColumnDataVisualizerFactory;
 
-					vint												editingRow;
-					vint												editingColumn;
+					GridPos												currentCell;
 					Ptr<IDataEditor>									currentEditor;
 					bool												currentEditorRequestingSaveData;
+					bool												currentEditorOpening;
 
 					void												OnColumnChanged()override;
 					void												OnAttached(GuiListControl::IItemProvider* provider)override;
 					void												OnItemModified(vint start, vint count, vint newCount)override;
 
 					void												NotifyCloseEditor();
+					void												NotifySelectCell(vint row, vint column);
 					void												RequestSaveData();
 					IDataEditor*										OpenEditor(vint row, vint column, IDataEditorFactory* editorFactory);
-					void												CloseEditor();
+					void												CloseEditor(bool forOpenNewEditor);
 				public:
 					DataGridContentProvider();
 					~DataGridContentProvider();
@@ -8928,29 +9010,139 @@ Datagrid ContentProvider
 					ListViewItemStyleProvider::IListViewItemContent*	CreateItemContent(const FontProperties& font)override;
 					void												AttachListControl(GuiListControl* value)override;
 					void												DetachListControl()override;
+
+					GridPos												GetSelectedCell();
+					bool												SetSelectedCell(const GridPos& value, bool openEditor);
 				};
 			}
 
 /***********************************************************************
-DataGrid Control
+Virtual DataGrid Control
 ***********************************************************************/
 
 			class GuiVirtualDataGrid : public GuiVirtualListView, public Description<GuiVirtualDataGrid>
 			{
+				friend class list::DataGridContentProvider;
 			protected:
 				list::DataGridItemProvider*								itemProvider;
+				list::DataGridContentProvider*							contentProvider;
 				Ptr<list::IDataProvider>								dataProvider;
 				Ptr<list::StructuredDataProvider>						structuredDataProvider;
 
 				void													OnColumnClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiItemEventArgs& arguments);
 				void													Initialize();
+				void													NotifySelectedCellChanged();
 			public:
 				GuiVirtualDataGrid(IStyleProvider* _styleProvider, list::IDataProvider* _dataProvider);
 				GuiVirtualDataGrid(IStyleProvider* _styleProvider, list::IStructuredDataProvider* _dataProvider);
 				~GuiVirtualDataGrid();
 
+				compositions::GuiNotifyEvent							SelectedCellChanged;
+
 				list::IDataProvider*									GetDataProvider();
 				list::StructuredDataProvider*							GetStructuredDataProvider();
+
+				GridPos													GetSelectedCell();
+				void													SetSelectedCell(const GridPos& value);
+
+				Ptr<GuiListControl::IItemStyleProvider>					SetStyleProvider(Ptr<GuiListControl::IItemStyleProvider> value)override;
+				bool													ChangeItemStyle(Ptr<list::ListViewItemStyleProvider::IListViewItemContentProvider> contentProvider)override;
+			};
+
+/***********************************************************************
+StringGrid Control
+***********************************************************************/
+
+			class GuiStringGrid;
+
+			namespace list
+			{
+				class StringGridProvider;
+
+				class StringGridItem
+				{
+				public:
+					collections::List<WString>							strings;
+				};
+				
+				class StringGridDataVisualizer : public ListViewSubColumnDataVisualizer
+				{
+				public:
+					typedef DataVisualizerFactory<StringGridDataVisualizer>				Factory;
+				public:
+					StringGridDataVisualizer();
+
+					void												BeforeVisualizeCell(IDataProvider* dataProvider, vint row, vint column)override;
+					void												SetSelected(bool value)override;
+				};
+
+				class StringGridColumn : public StrongTypedColumnProviderBase<Ptr<StringGridItem>, WString>
+				{
+				protected:
+					StringGridProvider*									provider;
+
+				public:
+					StringGridColumn(StringGridProvider* _provider);
+					~StringGridColumn();
+
+					void												GetCellData(const Ptr<StringGridItem>& rowData, WString& cellData)override;
+					void												SetCellData(const Ptr<StringGridItem>& rowData, const WString& cellData);
+					WString												GetCellDataText(const WString& cellData)override;
+
+					void												BeforeEditCell(vint row, IDataEditor* dataEditor)override;
+					void												SaveCellData(vint row, IDataEditor* dataEditor)override;
+				};
+
+				class StringGridProvider : private StrongTypedDataProvider<Ptr<StringGridItem>>, public Description<StringGridProvider>
+				{
+					friend class StringGridColumn;
+					friend class GuiStringGrid;
+				protected:
+					bool												readonly;
+					collections::List<Ptr<StringGridItem>>				items;
+					Ptr<IDataVisualizerFactory>							visualizerFactory;
+					Ptr<IDataEditorFactory>								editorFactory;
+
+					void												GetRowData(vint row, Ptr<StringGridItem>& rowData)override;
+					bool												GetReadonly();
+					void												SetReadonly(bool value);
+				public:
+					StringGridProvider();
+					~StringGridProvider();
+
+					vint												GetRowCount()override;
+					vint												GetColumnCount()override;
+
+					bool												InsertRow(vint row);
+					vint												AppendRow();
+					bool												MoveRow(vint source, vint target);
+					bool												RemoveRow(vint row);
+					bool												ClearRows();
+					WString												GetGridString(vint row, vint column);
+					bool												SetGridString(vint row, vint column, const WString& value);
+
+					bool												InsertColumn(vint column, const WString& text, vint size=0);
+					vint												AppendColumn(const WString& text, vint size=0);
+					bool												MoveColumn(vint source, vint target);
+					bool												RemoveColumn(vint column);
+					bool												ClearColumns();
+					WString												GetColumnText(vint column);
+					bool												SetColumnText(vint column, const WString& value);
+				};
+			}
+
+			class GuiStringGrid : public GuiVirtualDataGrid, public Description<GuiStringGrid>
+			{
+			protected:
+				list::StringGridProvider*								grids;
+			public:
+				GuiStringGrid(IStyleProvider* _styleProvider);
+				~GuiStringGrid();
+
+				list::StringGridProvider&								Grids();
+
+				bool													GetReadonly();
+				void													SetReadonly(bool value);
 			};
 		}
 	}
@@ -9295,6 +9487,7 @@ namespace vl
 				extern controls::GuiListView*					NewListViewTile();
 				extern controls::GuiListView*					NewListViewInformation();
 				extern controls::GuiTreeView*					NewTreeView();
+				extern controls::GuiStringGrid*					NewStringGrid();
 
 				extern controls::GuiToolstripMenu*				NewMenu(controls::GuiControl* owner);
 				extern controls::GuiToolstripMenuBar*			NewMenuBar();
@@ -9554,6 +9747,7 @@ Type List
 			F(presentation::Color)\
 			F(presentation::Alignment)\
 			F(presentation::TextPos)\
+			F(presentation::GridPos)\
 			F(presentation::Point)\
 			F(presentation::Size)\
 			F(presentation::Rect)\
@@ -10120,15 +10314,25 @@ Type List
 			F(presentation::controls::list::ListViewMainColumnDataVisualizer::Factory)\
 			F(presentation::controls::list::ListViewSubColumnDataVisualizer)\
 			F(presentation::controls::list::ListViewSubColumnDataVisualizer::Factory)\
+			F(presentation::controls::list::HyperlinkDataVisualizer)\
+			F(presentation::controls::list::HyperlinkDataVisualizer::Factory)\
+			F(presentation::controls::list::ImageDataVisualizer)\
+			F(presentation::controls::list::ImageDataVisualizer::Factory)\
 			F(presentation::controls::list::CellBorderDataVisualizer)\
 			F(presentation::controls::list::CellBorderDataVisualizer::Factory)\
+			F(presentation::controls::list::NotifyIconDataVisualizer)\
+			F(presentation::controls::list::NotifyIconDataVisualizer::Factory)\
 			F(presentation::controls::list::TextBoxDataEditor)\
 			F(presentation::controls::list::TextBoxDataEditor::Factory)\
 			F(presentation::controls::list::TextComboBoxDataEditor)\
 			F(presentation::controls::list::TextComboBoxDataEditor::Factory)\
+			F(presentation::controls::list::DateComboBoxDataEditor)\
+			F(presentation::controls::list::DateComboBoxDataEditor::Factory)\
 			F(presentation::controls::GuiDatePicker)\
 			F(presentation::controls::GuiDatePicker::IStyleProvider)\
 			F(presentation::controls::GuiDateComboBox)\
+			F(presentation::controls::GuiStringGrid)\
+			F(presentation::controls::list::StringGridProvider)\
 
 			GUIREFLECTIONCONTROLS_TYPELIST(DECL_TYPE_INFO)
 
@@ -10915,7 +11119,7 @@ Interface Proxy
 					{
 					}
 
-					static list::ListViewItemStyleProvider::IListViewItemContentProvider* Create(Ptr<IValueInterfaceProxy> proxy)
+					static Ptr<list::ListViewItemStyleProvider::IListViewItemContentProvider> Create(Ptr<IValueInterfaceProxy> proxy)
 					{
 						return new ListViewItemStyleProvider_IListViewItemContentProvider(proxy);
 					}
@@ -11455,7 +11659,7 @@ Interface Proxy
 						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetBoundsComposition);
 					}
 
-					void BeforeVisualizerCell(list::IDataProvider* dataProvider, vint row, vint column)override
+					void BeforeVisualizeCell(list::IDataProvider* dataProvider, vint row, vint column)override
 					{
 						INVOKE_INTERFACE_PROXY(dataProvider, row, column);
 					}
@@ -11463,6 +11667,11 @@ Interface Proxy
 					list::IDataVisualizer* GetDecoratedDataVisualizer()override
 					{
 						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetDecoratedDataVisualizer);
+					}
+
+					void SetSelected(bool value)override
+					{
+						INVOKE_INTERFACE_PROXY(SetSelected, value);
 					}
 				};
 
@@ -11511,6 +11720,11 @@ Interface Proxy
 					void BeforeEditCell(list::IDataProvider* dataProvider, vint row, vint column)override
 					{
 						INVOKE_INTERFACE_PROXY(BeforeEditCell, dataProvider, row, column);
+					}
+
+					void ReinstallEditor()override
+					{
+						INVOKE_INTERFACE_PROXY_NOPARAM(ReinstallEditor);
 					}
 				};
 
@@ -11590,6 +11804,11 @@ Interface Proxy
 					Ptr<GuiImageData> GetRowSmallImage(vint row)override
 					{
 						return INVOKEGET_INTERFACE_PROXY(GetRowSmallImage, row);
+					}
+
+					vint GetCellSpan(vint row, vint column)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetCellSpan, row, column);
 					}
 
 					WString GetCellText(vint row, vint column)override
