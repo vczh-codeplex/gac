@@ -157,6 +157,13 @@
       <cpp src="Main.cpp" />
       <description>This demo shows how to use GuiDatePicker and GuiDateComboBox to select a date under different locales and date formats.</description>
     </demo>
+    <demo name="DataGrid.TableEditor">
+      <date>2013/6/22</date>
+      <image src="DXGUI_73.jpg" />
+      <image src="DXGUI_74.jpg" />
+      <cpp src="Main.cpp" />
+      <description>This demo shows how to use GuiStringGrid to perform simple table editing.</description>
+    </demo>
   </category>
   <category name="Template">
     <description>The &quot;Template&quot; category contains demos that show how to build template or skin for each type of controls.</description>
