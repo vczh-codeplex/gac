@@ -1277,6 +1277,10 @@ ListViewDetailContentProvider
 				void ListViewDetailContentProvider::ItemContent::UpdateSubItemSize()
 				{
 					vint columnCount=columnItemView->GetColumnCount();
+					if(columnCount>textTable->GetColumns())
+					{
+						columnCount=textTable->GetColumns();
+					}
 					for(vint i=0;i<columnCount;i++)
 					{
 						textTable->SetColumnOption(i, GuiCellOption::AbsoluteOption(columnItemView->GetColumnSize(i)));

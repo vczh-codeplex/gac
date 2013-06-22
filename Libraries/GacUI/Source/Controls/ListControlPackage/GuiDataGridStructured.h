@@ -275,18 +275,18 @@ Structured DataSource Extensions
 					/// <returns>Returns true if this operation succeeded.</returns>
 					/// <param name="column">The column index.</param>
 					/// <param name="value">The column.</param>
-					bool												InsertColumnInternal(vint column, Ptr<StructuredColummProviderBase> value);
+					bool												InsertColumnInternal(vint column, Ptr<StructuredColummProviderBase> value, bool callback);
 					/// <summary>Add a column.</summary>
 					/// <returns>Returns true if this operation succeeded.</returns>
 					/// <param name="value">The column.</param>
-					bool												AddColumnInternal(Ptr<StructuredColummProviderBase> value);
+					bool												AddColumnInternal(Ptr<StructuredColummProviderBase> value, bool callback);
 					/// <summary>Remove a column.</summary>
 					/// <returns>Returns true if this operation succeeded.</returns>
 					/// <param name="value">The column.</param>
-					bool												RemoveColumnInternal(Ptr<StructuredColummProviderBase> value);
+					bool												RemoveColumnInternal(Ptr<StructuredColummProviderBase> value, bool callback);
 					/// <summary>Clear all columns.</summary>
 					/// <returns>Returns true if this operation succeeded.</returns>
-					bool												ClearColumnsInternal();
+					bool												ClearColumnsInternal(bool callback);
 				public:
 					StructuredDataProviderBase();
 					~StructuredDataProviderBase();
@@ -441,7 +441,7 @@ Strong Typed DataSource Extensions
 					Ptr<StrongTypedColumnProvider<TRow, TColumn>> AddStrongTypedColumn(const WString& text, Ptr<StrongTypedColumnProvider<TRow, TColumn>> column)
 					{
 						column->SetText(text);
-						return AddColumnInternal(column)?column:0;
+						return AddColumnInternal(column, true)?column:0;
 					}
 
 					template<typename TColumn>

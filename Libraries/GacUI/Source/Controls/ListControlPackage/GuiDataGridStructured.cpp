@@ -635,44 +635,44 @@ StructuredColummProviderBase
 StructuredDataProviderBase
 ***********************************************************************/
 
-				bool StructuredDataProviderBase::InsertColumnInternal(vint column, Ptr<StructuredColummProviderBase> value)
+				bool StructuredDataProviderBase::InsertColumnInternal(vint column, Ptr<StructuredColummProviderBase> value, bool callback)
 				{
 					if(column<0 || columns.Count()<column) return false;
 					if(columns.Contains(value.Obj())) return false;
 					columns.Insert(column, value);
 					value->SetCommandExecutor(commandExecutor);
-					if(commandExecutor)
+					if(callback && commandExecutor)
 					{
 						commandExecutor->OnDataProviderColumnChanged();
 					}
 					return true;
 				}
 
-				bool StructuredDataProviderBase::AddColumnInternal(Ptr<StructuredColummProviderBase> value)
+				bool StructuredDataProviderBase::AddColumnInternal(Ptr<StructuredColummProviderBase> value, bool callback)
 				{
-					return InsertColumnInternal(columns.Count(), value);
+					return InsertColumnInternal(columns.Count(), value, callback);
 				}
 
-				bool StructuredDataProviderBase::RemoveColumnInternal(Ptr<StructuredColummProviderBase> value)
+				bool StructuredDataProviderBase::RemoveColumnInternal(Ptr<StructuredColummProviderBase> value, bool callback)
 				{
-					if(columns.Contains(value.Obj())) return false;
+					if(!columns.Contains(value.Obj())) return false;
 					value->SetCommandExecutor(0);
 					columns.Remove(value.Obj());
-					if(commandExecutor)
+					if(callback && commandExecutor)
 					{
 						commandExecutor->OnDataProviderColumnChanged();
 					}
 					return true;
 				}
 
-				bool StructuredDataProviderBase::ClearColumnsInternal()
+				bool StructuredDataProviderBase::ClearColumnsInternal(bool callback)
 				{
 					FOREACH(Ptr<StructuredColummProviderBase>, column, columns)
 					{
 						column->SetCommandExecutor(0);
 					}
 					columns.Clear();
-					if(commandExecutor)
+					if(callback && commandExecutor)
 					{
 						commandExecutor->OnDataProviderColumnChanged();
 					}

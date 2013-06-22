@@ -408,6 +408,10 @@ DataGridContentProvider::ItemContent
 				void DataGridContentProvider::ItemContent::UpdateSubItemSize()
 				{
 					vint columnCount=contentProvider->columnItemView->GetColumnCount();
+					if(columnCount>textTable->GetColumns())
+					{
+						columnCount=textTable->GetColumns();
+					}
 					for(vint i=0;i<columnCount;i++)
 					{
 						textTable->SetColumnOption(i, GuiCellOption::AbsoluteOption(contentProvider->columnItemView->GetColumnSize(i)));
@@ -1079,7 +1083,17 @@ StringGridProvider
 					columnProvider->SetSize(size);
 					columnProvider->SetVisualizerFactory(visualizerFactory);
 					columnProvider->SetEditorFactory(readonly?0:editorFactory);
-					return InsertColumnInternal(column, columnProvider);
+					if(!InsertColumnInternal(column, columnProvider, false)) return false;
+
+					FOREACH(Ptr<StringGridItem>, item, items)
+					{
+						item->strings.Insert(column, L"");
+					}
+					if(commandExecutor)
+					{
+						commandExecutor->OnDataProviderColumnChanged();
+					}
+					return true;
 				}
 
 				vint StringGridProvider::AppendColumn(const WString& text, vint size)
@@ -1095,7 +1109,17 @@ StringGridProvider
 					Ptr<StringGridColumn> columnProvider=columns[source].Cast<StringGridColumn>();
 					columns.RemoveAt(source);
 					columns.Insert(target, columnProvider);
-					commandExecutor->OnDataProviderColumnChanged();
+
+					FOREACH(Ptr<StringGridItem>, item, items)
+					{
+						WString text=item->strings[source];
+						item->strings.RemoveAt(source);
+						item->strings.Insert(target, text);
+					}
+					if(commandExecutor)
+					{
+						commandExecutor->OnDataProviderColumnChanged();
+					}
 					return true;
 				}
 
@@ -1103,12 +1127,32 @@ StringGridProvider
 				{
 					if(column<0 || columns.Count()<=column) return false;
 					Ptr<StringGridColumn> columnProvider=columns[column].Cast<StringGridColumn>();
-					return RemoveColumnInternal(columnProvider);
+					if(!RemoveColumnInternal(columnProvider, false)) return false;
+
+					FOREACH(Ptr<StringGridItem>, item, items)
+					{
+						item->strings.RemoveAt(column);
+					}
+					if(commandExecutor)
+					{
+						commandExecutor->OnDataProviderColumnChanged();
+					}
+					return true;
 				}
 
 				bool StringGridProvider::ClearColumns()
 				{
-					return ClearColumnsInternal();
+					if(!ClearColumnsInternal(false)) return false;
+
+					FOREACH(Ptr<StringGridItem>, item, items)
+					{
+						item->strings.Clear();
+					}
+					if(commandExecutor)
+					{
+						commandExecutor->OnDataProviderColumnChanged();
+					}
+					return true;
 				}
 
 				WString StringGridProvider::GetColumnText(vint column)
