@@ -65,6 +65,10 @@ Datagrid Interfaces
 					/// <returns>The decorated data visualizer. Returns null if such a visualizer does not exists.</returns>
 					virtual IDataVisualizer*							GetDecoratedDataVisualizer()=0;
 
+					/// <summary>Set the selected state.</summary>
+					/// <param name="value">Set to true to make this data visualizer looks selected.</param>
+					virtual void										SetSelected(bool value)=0;
+
 					template<typename T>
 					T* GetVisualizer()
 					{

@@ -1528,6 +1528,11 @@ Interface Proxy
 					{
 						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetDecoratedDataVisualizer);
 					}
+
+					void SetSelected(bool value)override
+					{
+						INVOKE_INTERFACE_PROXY(SetSelected, value);
+					}
 				};
 
 				class list_IDataEditorFactory : public ValueInterfaceRoot, public virtual list::IDataEditorFactory

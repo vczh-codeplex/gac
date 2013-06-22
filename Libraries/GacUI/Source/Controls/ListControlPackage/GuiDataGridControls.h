@@ -131,6 +131,7 @@ Datagrid ContentProvider
 						compositions::GuiBoundsComposition*				GetBackgroundDecorator()override;
 						void											UpdateSubItemSize();
 						void											NotifyCloseEditor();
+						void											NotifySelectCell(vint column);
 						void											Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, vint itemIndex)override;
 						void											Uninstall()override;
 					};
@@ -153,6 +154,7 @@ Datagrid ContentProvider
 					void												OnItemModified(vint start, vint count, vint newCount)override;
 
 					void												NotifyCloseEditor();
+					void												NotifySelectCell(vint row, vint column);
 					void												RequestSaveData();
 					IDataEditor*										OpenEditor(vint row, vint column, IDataEditorFactory* editorFactory);
 					void												CloseEditor(bool forOpenNewEditor);
@@ -247,6 +249,7 @@ StringGrid Control
 					StringGridDataVisualizer();
 
 					void												BeforeVisualizeCell(IDataProvider* dataProvider, vint row, vint column)override;
+					void												SetSelected(bool value)override;
 				};
 
 				class StringGridColumn : public StrongTypedColumnProviderBase<Ptr<StringGridItem>, WString>

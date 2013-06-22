@@ -389,6 +389,14 @@ DataGridContentProvider::ItemContent
 					}
 				}
 
+				void DataGridContentProvider::ItemContent::NotifySelectCell(vint column)
+				{
+					for(vint i=0;i<dataVisualizers.Count();i++)
+					{
+						dataVisualizers[i]->SetSelected(i==column);
+					}
+				}
+
 				void DataGridContentProvider::ItemContent::Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, vint itemIndex)
 				{
 					currentRow=itemIndex;
@@ -503,6 +511,40 @@ DataGridContentProvider
 					}
 				}
 
+				void DataGridContentProvider::NotifySelectCell(vint row, vint column)
+				{
+					currentCell=GridPos(row, column);
+					dataGrid->NotifySelectedCellChanged();
+
+					if(listViewItemStyleProvider)
+					{
+						GuiListControl::IItemStyleController* selectedStyleController=0;
+						GuiListControl::IItemArranger* arranger=dataGrid->GetArranger();
+						if(arranger)
+						{
+							selectedStyleController=arranger->GetVisibleStyle(row);
+						}
+						
+						vint count=listViewItemStyleProvider->GetCreatedItemStyles().Count();
+						for(vint i=0;i<count;i++)
+						{
+							GuiListControl::IItemStyleController* itemStyleController=listViewItemStyleProvider->GetCreatedItemStyles().Get(i);
+							ItemContent* itemContent=listViewItemStyleProvider->GetItemContent<ItemContent>(itemStyleController);
+							if(itemContent)
+							{
+								if(itemStyleController==selectedStyleController)
+								{
+									itemContent->NotifySelectCell(column);
+								}
+								else
+								{
+									itemContent->NotifySelectCell(-1);
+								}
+							}
+						}
+					}
+				}
+
 				void DataGridContentProvider::RequestSaveData()
 				{
 					if(currentEditor)
@@ -516,8 +558,7 @@ DataGridContentProvider
 				IDataEditor* DataGridContentProvider::OpenEditor(vint row, vint column, IDataEditorFactory* editorFactory)
 				{
 					CloseEditor(true);
-					currentCell=GridPos(row, column);
-					dataGrid->NotifySelectedCellChanged();
+					NotifySelectCell(row, column);
 					if(editorFactory)
 					{
 						currentEditor=editorFactory->CreateEditor(this);
@@ -538,8 +579,7 @@ DataGridContentProvider
 						}
 						if(!forOpenNewEditor)
 						{
-							currentCell=GridPos(-1, -1);
-							dataGrid->NotifySelectedCellChanged();
+							NotifySelectCell(-1, -1);
 						}
 					}
 				}
@@ -752,6 +792,14 @@ StringGridDataVisualizer
 				{
 					ListViewSubColumnDataVisualizer::BeforeVisualizeCell(dataProvider, row, column);
 					text->SetColor(styleProvider->GetPrimaryTextColor());
+				}
+
+				void StringGridDataVisualizer::SetSelected(bool value)
+				{
+					ListViewSubColumnDataVisualizer::SetSelected(value);
+					FontProperties font=text->GetFont();
+					font.bold=value;
+					text->SetFont(font);
 				}
 
 /***********************************************************************
