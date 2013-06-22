@@ -295,19 +295,19 @@ ListView ItemStyleProvider
 					/// <returns>Returns true if an item style controller is placed in the list view control.</returns>
 					bool										IsItemStyleAttachedToListView(GuiListControl::IItemStyleController* itemStyle);
 
+					/// <summary>Get item content from item style controller.</summary>
+					/// <returns>The item content.</returns>
+					/// <param name="itemStyleController">The item style controller.</param>
+					IListViewItemContent*						GetItemContentFromItemStyleController(GuiListControl::IItemStyleController* itemStyleController);
+					/// <summary>Get item style controller from item content.</summary>
+					/// <returns>The item style controller.</returns>
+					/// <param name="itemContent">The item content.</param>
+					GuiListControl::IItemStyleController*		GetItemStyleControllerFromItemContent(IListViewItemContent* itemContent);
+
 					template<typename T>
 					T* GetItemContent(GuiListControl::IItemStyleController* itemStyleController)
 					{
-						if(itemStyleController)
-						{
-							ListViewContentItemStyleController* item=dynamic_cast<ListViewContentItemStyleController*>(itemStyleController);
-							if(item)
-							{
-								IListViewItemContent* itemContent=item->GetItemContent();
-								return dynamic_cast<T*>(itemContent);
-							}
-						}
-						return 0;
+						return dynamic_cast<T*>(GetItemContentFromItemStyleController(itemStyleController));
 					}
 				};
 			}

@@ -307,6 +307,8 @@ DataGridContentProvider::ItemContent
 						{
 							return;
 						}
+						GuiListControl::IItemStyleController* itemStyle=contentProvider->listViewItemStyleProvider->GetItemStyleControllerFromItemContent(this);
+						vint currentRow=contentProvider->dataGrid->GetArranger()->GetVisibleIndex(itemStyle);
 						IDataEditorFactory* factory=openEditor?contentProvider->dataProvider->GetCellDataEditorFactory(currentRow, index):0;
 						currentEditor=contentProvider->OpenEditor(currentRow, index, factory);
 						if(currentEditor)
@@ -375,7 +377,6 @@ DataGridContentProvider::ItemContent
 					:contentComposition(0)
 					,contentProvider(_contentProvider)
 					,font(_font)
-					,currentRow(-1)
 					,currentEditor(0)
 				{
 					contentComposition=new GuiBoundsComposition;
@@ -453,7 +454,6 @@ DataGridContentProvider::ItemContent
 
 				void DataGridContentProvider::ItemContent::Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, vint itemIndex)
 				{
-					currentRow=itemIndex;
 					bool refresh=false;
 					if(dataVisualizers.Count()!=contentProvider->columnItemView->GetColumnCount())
 					{
@@ -526,7 +526,6 @@ DataGridContentProvider::ItemContent
 					{
 						contentProvider->CloseEditor(false);
 					}
-					currentRow=-1;
 					currentEditor=0;
 				}
 				
