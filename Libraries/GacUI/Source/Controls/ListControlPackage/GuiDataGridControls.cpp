@@ -839,6 +839,8 @@ GuiVirtualDataGrid
 					if(0<=value.row && value.row<dataProvider->GetRowCount())
 					{
 						EnsureItemVisible(value.row);
+						ClearSelection();
+						SetSelected(value.row, true);
 					}
 				}
 			}

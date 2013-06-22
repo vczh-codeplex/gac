@@ -50,26 +50,50 @@ TestWindow
 
 		void menuInsertRowBefore_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 		{
+			vint row=stringGrid->GetSelectedCell().row;
+			stringGrid->Grids().InsertRow(row);
+			stringGrid->SetSelectedCell(GridPos(row, 0));
 		}
 
 		void menuInsertRowAfter_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 		{
+			vint row=stringGrid->GetSelectedCell().row;
+			stringGrid->Grids().InsertRow(row+1);
+			stringGrid->SetSelectedCell(GridPos(row+1, 0));
 		}
 
 		void menuRemoveRow_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 		{
+			vint row=stringGrid->GetSelectedCell().row;
+			stringGrid->Grids().RemoveRow(row);
 		}
 
 		void menuInsertColumnBefore_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 		{
+			vint column=stringGrid->GetSelectedCell().column;
+			stringGrid->Grids().InsertColumn(column, L"New Colunn");
 		}
 
 		void menuInsertColumnAfter_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 		{
+			vint column=stringGrid->GetSelectedCell().column;
+			stringGrid->Grids().InsertColumn(column+1, L"New Colunn");
 		}
 
 		void menuRemoveColumn_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 		{
+			vint column=stringGrid->GetSelectedCell().column;
+			stringGrid->Grids().RemoveColumn(column);
+		}
+
+		void contextMenu_WindowOpened(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+		{
+			menuInsertRowBefore->SetEnabled(stringGrid->GetSelectedCell().row!=-1);
+			menuInsertRowAfter->SetEnabled(stringGrid->GetSelectedCell().row!=-1);
+			menuRemoveRow->SetEnabled(stringGrid->GetSelectedCell().row!=-1);
+			menuInsertColumnBefore->SetEnabled(stringGrid->GetSelectedCell().column!=-1);
+			menuInsertColumnAfter->SetEnabled(stringGrid->GetSelectedCell().column!=-1);
+			menuRemoveColumn->SetEnabled(stringGrid->GetSelectedCell().column!=-1);
 		}
 
 		void stringGrid_rightButtonUp(GuiGraphicsComposition* sender, GuiMouseEventArgs& arguments)
@@ -124,6 +148,7 @@ TestWindow
 				->Button(0, L"Insert Column After...", &menuInsertColumnAfter)
 				->Button(0, L"Remove This Column", &menuRemoveColumn)
 				;
+			contextMenu->WindowOpened.AttachMethod(this, &TestWindow::contextMenu_WindowOpened);
 			menuInsertRowBefore->Clicked.AttachMethod(this, &TestWindow::menuInsertRowBefore_Clicked);
 			menuInsertRowAfter->Clicked.AttachMethod(this, &TestWindow::menuInsertRowAfter_Clicked);
 			menuRemoveRow->Clicked.AttachMethod(this, &TestWindow::menuRemoveRow_Clicked);
