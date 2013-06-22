@@ -59,6 +59,12 @@ GuiGraphicsComposition
 				}
 			}
 
+			bool GuiGraphicsComposition::CanAutoDestroyInternal(DescriptableObject* obj)
+			{
+				GuiGraphicsComposition* value=dynamic_cast<GuiGraphicsComposition*>(obj);
+				return value->parent==0;
+			}
+
 			GuiGraphicsComposition::GuiGraphicsComposition()
 				:parent(0)
 				,visible(true)
@@ -69,6 +75,7 @@ GuiGraphicsComposition
 				,associatedCursor(0)
 				,associatedHitTestResult(INativeWindowListener::NoDecision)
 			{
+				canAutoDestroy=&GuiGraphicsComposition::CanAutoDestroyInternal;
 			}
 
 			GuiGraphicsComposition::~GuiGraphicsComposition()

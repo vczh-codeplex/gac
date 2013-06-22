@@ -120,6 +120,12 @@ GuiControl
 				}
 			}
 
+			bool GuiControl::CanAutoDestroyInternal(DescriptableObject* obj)
+			{
+				GuiControl* value=dynamic_cast<GuiControl*>(obj);
+				return value->parent==0;
+			}
+
 			GuiControl::GuiControl(IStyleController* _styleController)
 				:styleController(_styleController)
 				,boundsComposition(_styleController->GetBoundsComposition())
@@ -143,6 +149,8 @@ GuiControl
 				styleController->SetFont(font);
 				styleController->SetText(text);
 				styleController->SetVisuallyEnabled(isVisuallyEnabled);
+				
+				canAutoDestroy=&GuiControl::CanAutoDestroyInternal;
 			}
 
 			GuiControl::~GuiControl()
