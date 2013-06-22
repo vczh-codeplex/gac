@@ -411,6 +411,11 @@ DataEditorBase
 TextBoxDataEditor
 ***********************************************************************/
 
+				void TextBoxDataEditor::OnTextChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+				{
+					callback->RequestSaveData();
+				}
+
 				compositions::GuiBoundsComposition* TextBoxDataEditor::CreateBoundsCompositionInternal()
 				{
 					return textBox->GetBoundsComposition();
@@ -419,6 +424,7 @@ TextBoxDataEditor
 				TextBoxDataEditor::TextBoxDataEditor()
 				{
 					textBox=g::NewTextBox();
+					textBox->TextChanged.AttachMethod(this, &TextBoxDataEditor::OnTextChanged);
 				}
 
 				void TextBoxDataEditor::BeforeEditCell(IDataProvider* dataProvider, vint row, vint column)
@@ -440,6 +446,11 @@ TextBoxDataEditor
 TextComboBoxDataEditor
 ***********************************************************************/
 
+				void TextComboBoxDataEditor::OnSelectedIndexChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+				{
+					callback->RequestSaveData();
+				}
+
 				compositions::GuiBoundsComposition* TextComboBoxDataEditor::CreateBoundsCompositionInternal()
 				{
 					return comboBox->GetBoundsComposition();
@@ -449,6 +460,7 @@ TextComboBoxDataEditor
 				{
 					textList=g::NewTextList();
 					comboBox=g::NewComboBox(textList);
+					comboBox->SelectedIndexChanged.AttachMethod(this, &TextComboBoxDataEditor::OnSelectedIndexChanged);
 				}
 
 				void TextComboBoxDataEditor::BeforeEditCell(IDataProvider* dataProvider, vint row, vint column)
@@ -471,6 +483,11 @@ TextComboBoxDataEditor
 DateComboBoxDataEditor
 ***********************************************************************/
 
+				void DateComboBoxDataEditor::OnSelectedDateChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+				{
+					callback->RequestSaveData();
+				}
+
 				compositions::GuiBoundsComposition* DateComboBoxDataEditor::CreateBoundsCompositionInternal()
 				{
 					return comboBox->GetBoundsComposition();
@@ -479,6 +496,7 @@ DateComboBoxDataEditor
 				DateComboBoxDataEditor::DateComboBoxDataEditor()
 				{
 					comboBox=g::NewDateComboBox();
+					comboBox->SelectedDateChanged.AttachMethod(this, &DateComboBoxDataEditor::OnSelectedDateChanged);
 				}
 
 				void DateComboBoxDataEditor::BeforeEditCell(IDataProvider* dataProvider, vint row, vint column)

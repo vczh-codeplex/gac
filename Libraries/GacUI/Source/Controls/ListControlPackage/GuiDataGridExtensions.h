@@ -260,6 +260,7 @@ Editor Extensions
 				protected:
 					GuiSinglelineTextBox*								textBox;
 
+					void												OnTextChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 					compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal()override;
 				public:
 					/// <summary>Create the data editor.</summary>
@@ -280,7 +281,8 @@ Editor Extensions
 				protected:
 					GuiComboBoxListControl*								comboBox;
 					GuiTextList*										textList;
-
+					
+					void												OnSelectedIndexChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 					compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal()override;
 				public:
 					/// <summary>Create the data editor.</summary>
@@ -304,7 +306,8 @@ Editor Extensions
 					typedef DataEditorFactory<DateComboBoxDataEditor>						Factory;
 				protected:
 					GuiDateComboBox*									comboBox;
-
+					
+					void												OnSelectedDateChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 					compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal()override;
 				public:
 					/// <summary>Create the data editor.</summary>

@@ -150,6 +150,7 @@ Datagrid ContentProvider
 					GridPos												currentCell;
 					Ptr<IDataEditor>									currentEditor;
 					bool												currentEditorRequestingSaveData;
+					bool												currentEditorOpening;
 
 					void												OnColumnChanged()override;
 					void												OnAttached(GuiListControl::IItemProvider* provider)override;

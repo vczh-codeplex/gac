@@ -590,7 +590,7 @@ DataGridContentProvider
 
 				void DataGridContentProvider::RequestSaveData()
 				{
-					if(currentEditor)
+					if(currentEditor && !currentEditorOpening)
 					{
 						currentEditorRequestingSaveData=true;
 						dataProvider->SaveCellData(currentCell.row, currentCell.column, currentEditor.Obj());
@@ -604,9 +604,11 @@ DataGridContentProvider
 					NotifySelectCell(row, column);
 					if(editorFactory)
 					{
+						currentEditorOpening=true;
 						currentEditor=editorFactory->CreateEditor(this);
 						currentEditor->BeforeEditCell(dataProvider, row, column);
 						dataProvider->BeforeEditCell(row, column, currentEditor.Obj());
+						currentEditorOpening=false;
 					}
 					return currentEditor.Obj();
 				}
@@ -635,6 +637,7 @@ DataGridContentProvider
 					,listViewItemStyleProvider(0)
 					,currentCell(-1, -1)
 					,currentEditorRequestingSaveData(false)
+					,currentEditorOpening(false)
 				{
 				}
 
