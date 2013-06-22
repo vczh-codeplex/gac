@@ -143,8 +143,9 @@ Ptr
 			Dec();
 			if(pointer)
 			{
-				counter=new vint(1);
+				counter=ReferenceCounterOperator<T>::CreateCounter(pointer);
 				reference=pointer;
+				Inc();
 			}
 			else
 			{
