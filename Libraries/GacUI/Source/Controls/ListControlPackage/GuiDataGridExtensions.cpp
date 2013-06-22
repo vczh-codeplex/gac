@@ -69,6 +69,14 @@ DataVisualizerBase
 				{
 					return decoratedDataVisualizer.Obj();
 				}
+
+				void DataVisualizerBase::SetSelected(bool value)
+				{
+					if(decoratedDataVisualizer)
+					{
+						decoratedDataVisualizer->SetSelected(value);
+					}
+				}
 				
 /***********************************************************************
 ListViewMainColumnDataVisualizer

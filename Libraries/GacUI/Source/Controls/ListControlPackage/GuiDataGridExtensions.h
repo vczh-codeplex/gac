@@ -53,6 +53,7 @@ Extension Bases
 					compositions::GuiBoundsComposition*					GetBoundsComposition()override;
 					void												BeforeVisualizeCell(IDataProvider* dataProvider, vint row, vint column)override;
 					IDataVisualizer*									GetDecoratedDataVisualizer()override;
+					void												SetSelected(bool value)override;
 				};
 				
 				template<typename TVisualizer>
