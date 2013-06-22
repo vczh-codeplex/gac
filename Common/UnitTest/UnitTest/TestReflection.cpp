@@ -501,6 +501,33 @@ END_TYPE_INFO_NAMESPACE
 
 #undef TYPE_LIST
 
+TEST_CASE(TestDescriptableObjectReferenceCounterOperator)
+{
+	TEST_ASSERT((!AcceptValue<typename RequiresConvertable<vint, DescriptableObject>::YesNoType>::Result));
+	TEST_ASSERT((AcceptValue<typename RequiresConvertable<DescriptableObject, DescriptableObject>::YesNoType>::Result));
+	TEST_ASSERT((AcceptValue<typename RequiresConvertable<IDescriptable, DescriptableObject>::YesNoType>::Result));
+	TEST_ASSERT((AcceptValue<typename RequiresConvertable<Base, DescriptableObject>::YesNoType>::Result));
+	TEST_ASSERT((AcceptValue<typename RequiresConvertable<Derived, DescriptableObject>::YesNoType>::Result));
+
+	Base* raw=new Base;
+	vint* counter=ReferenceCounterOperator<Base>::CreateCounter(raw);
+	TEST_ASSERT(0==*counter);
+	{
+		Ptr<Base> ptr1=raw;
+		TEST_ASSERT(1==*counter);
+		{
+			Ptr<Base> ptr2=raw;
+			TEST_ASSERT(2==*counter);
+			{
+				Ptr<Base> ptr3=raw;
+				TEST_ASSERT(3==*counter);
+			}
+			TEST_ASSERT(2==*counter);
+		}
+		TEST_ASSERT(1==*counter);
+	}
+}
+
 namespace reflection_test
 {
 	void TestReflectionBuilder()

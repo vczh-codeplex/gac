@@ -12,7 +12,8 @@ DescriptableObject
 ***********************************************************************/
 
 		DescriptableObject::DescriptableObject()
-			:objectSize(0)
+			:referenceCounter(0)
+			,objectSize(0)
 			,typeDescriptor(0)
 		{
 		}
