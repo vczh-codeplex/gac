@@ -80,6 +80,8 @@ Basic Construction
 				
 				virtual void								SetAssociatedControl(controls::GuiControl* control);
 				virtual void								SetAssociatedHost(GuiGraphicsHost* host);
+
+				static bool									CanAutoDestroyInternal(DescriptableObject* obj);
 			public:
 				GuiGraphicsComposition();
 				~GuiGraphicsComposition();
