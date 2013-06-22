@@ -16,6 +16,25 @@ namespace vl
 {
 
 /***********************************************************************
+ReferenceCounterOperator
+***********************************************************************/
+
+	template<typename T, typename Enabled=YesType>
+	struct ReferenceCounterOperator
+	{
+		static __forceinline vint* CreateCounter(T* reference)
+		{
+			return new vint(0);
+		}
+
+		static __forceinline void DeleteReference(vint* counter, T* reference)
+		{
+			delete counter;
+			delete reference;
+		}
+	};
+
+/***********************************************************************
 Ptr
 ***********************************************************************/
 
@@ -42,8 +61,7 @@ Ptr
 			{
 				if(--(*counter)==0)
 				{
-					delete counter;
-					delete reference;
+					ReferenceCounterOperator<T>::DeleteReference(counter, reference);
 					counter=0;
 					reference=0;
 				}
@@ -73,8 +91,9 @@ Ptr
 		{
 			if(pointer)
 			{
-				counter=new vint(1);
+				counter=ReferenceCounterOperator<T>::CreateCounter(pointer);
 				reference=pointer;
+				Inc();
 			}
 			else
 			{

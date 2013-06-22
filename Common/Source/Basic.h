@@ -351,6 +351,45 @@ typedef signed __int64	pos_t;
 	public:
 		virtual ~Interface();
 	};
+
+/***********************************************************************
+¿‡–Õ›Õ»°
+***********************************************************************/
+
+	struct YesType{};
+	struct NoType{};
+
+	template<typename T, typename YesOrNo>
+	struct AcceptType
+	{
+	};
+
+	template<typename T>
+	struct AcceptType<T, YesType>
+	{
+		typedef T Type;
+	};
+
+	template<typename YesOrNo>
+	struct AcceptValue
+	{
+		static const bool Result=false;
+	};
+
+	template<>
+	struct AcceptValue<YesType>
+	{
+		static const bool Result=true;
+	};
+
+	template<typename TFrom, typename TTo>
+	struct RequiresConvertable
+	{
+		static YesType Test(TTo* value);
+		static NoType Test(void* value);
+		
+		typedef decltype(Test((TFrom*)0)) YesNoType;
+	};
 }
 
 #endif

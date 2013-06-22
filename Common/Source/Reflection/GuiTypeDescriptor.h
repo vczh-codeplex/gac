@@ -44,15 +44,20 @@ Attribute
 
 		class DescriptableObject
 		{
+			template<typename T, typename Enabled>
+			friend struct ReferenceCounterOperator;
 			template<typename T>
 			friend class Description;
 			friend class DescriptableValue;
 
 			typedef collections::Dictionary<WString, Ptr<Object>>		InternalPropertyMap;
 		protected:
+			vint									referenceCounter;
 			size_t									objectSize;
 			description::ITypeDescriptor**			typeDescriptor;
 			Ptr<InternalPropertyMap>				internalProperties;
+
+			virtual bool							CanAutoDestroy(){return true;}
 		public:
 			DescriptableObject();
 			virtual ~DescriptableObject();
@@ -99,6 +104,33 @@ Attribute
 		public:
 			~IDescriptable(){}
 		};
+
+/***********************************************************************
+ReferenceCounterOperator
+***********************************************************************/
+	}
+
+	template<typename T>
+	struct ReferenceCounterOperator<T, typename RequiresConvertable<T, reflection::DescriptableObject>::YesNoType>
+	{
+		static __forceinline vint* CreateCounter(T* reference)
+		{
+			reflection::DescriptableObject* obj=reference;
+			return &obj->referenceCounter;
+		}
+
+		static __forceinline void DeleteReference(vint* counter, T* reference)
+		{
+			reflection::DescriptableObject* obj=reference;
+			if(obj->CanAutoDestroy())
+			{
+				delete obj;
+			}
+		}
+	};
+
+	namespace reflection
+	{
 
 /***********************************************************************
 Value
