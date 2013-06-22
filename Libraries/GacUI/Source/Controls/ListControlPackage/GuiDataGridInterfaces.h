@@ -118,6 +118,9 @@ Datagrid Interfaces
 					/// <param name="row">The row number of the cell.</param>
 					/// <param name="column">The column number of the cell.</param>
 					virtual void										BeforeEditCell(IDataProvider* dataProvider, vint row, vint column)=0;
+
+					/// <summary>Called when an editor is reinstalled during editing.</summary>
+					virtual void										ReinstallEditor()=0;
 				};
 
 				/// <summary>The command executor for [T:vl.presentation.controls.list.IDataProvider] to send notification.</summary>

@@ -1327,6 +1327,7 @@ Type Declaration
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(BoundsComposition)
 
 				CLASS_MEMBER_METHOD(BeforeEditCell, {L"dataProvider" _ L"row" _ L"column"})
+				CLASS_MEMBER_METHOD(ReinstallEditor, NO_PARAMETER)
 			END_CLASS_MEMBER(IDataEditor)
 
 			BEGIN_CLASS_MEMBER(IDataProviderCommandExecutor)

@@ -132,6 +132,7 @@ Datagrid ContentProvider
 						compositions::GuiBoundsComposition*				GetContentComposition()override;
 						compositions::GuiBoundsComposition*				GetBackgroundDecorator()override;
 						void											UpdateSubItemSize();
+						void											ForceSetEditor(vint column, IDataEditor* editor);
 						void											NotifyCloseEditor();
 						void											NotifySelectCell(vint column);
 						void											Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, vint itemIndex)override;
