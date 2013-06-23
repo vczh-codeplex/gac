@@ -745,6 +745,32 @@ namespace reflection_test
 			TEST_ASSERT(fx(10)==23);
 		}
 	}
+
+	void TestSharedRawPtrConverting()
+	{
+		Base* b1=new Base;
+		vint* rc=ReferenceCounterOperator<Base>::CreateCounter(b1);
+		TEST_ASSERT(*rc==0);
+
+		Ptr<Base> b2=b1;
+		TEST_ASSERT(*rc==1);
+
+		Value v1=BoxValue(b1);
+		TEST_ASSERT(v1.GetValueType()==Value::RawPtr);
+		TEST_ASSERT(*rc==1);
+
+		Value v2=BoxValue(b2);
+		TEST_ASSERT(v2.GetValueType()==Value::SharedPtr);
+		TEST_ASSERT(*rc==2);
+
+		Base* b3=UnboxValue<Base*>(v2);
+		TEST_ASSERT(b3==b1);
+		TEST_ASSERT(*rc==2);
+
+		Ptr<Base> b4=UnboxValue<Ptr<Base>>(v1);
+		TEST_ASSERT(b4==b1);
+		TEST_ASSERT(*rc==3);
+	}
 }
 using namespace reflection_test;
 
@@ -799,6 +825,17 @@ TEST_CASE(TestReflectionList)
 	TEST_ASSERT(GetGlobalTypeManager()->Load());
 	{
 		TestReflectionList();
+	}
+	TEST_ASSERT(ResetGlobalTypeManager());
+}
+
+TEST_CASE(TestSharedRawPtrConverting)
+{
+	TEST_ASSERT(LoadPredefinedTypes());
+	TEST_ASSERT(GetGlobalTypeManager()->AddTypeLoader(new TestTypeLoader));
+	TEST_ASSERT(GetGlobalTypeManager()->Load());
+	{
+		TestSharedRawPtrConverting();
 	}
 	TEST_ASSERT(ResetGlobalTypeManager());
 }
