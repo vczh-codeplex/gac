@@ -15,7 +15,7 @@ Char		char		'\0'
 String		string		""
 Float32		float		0.0f
 Float64		double		0.0
-DateTime				0000-00-00 00:00:00
+DateTime				0000-00-00 00:00:00.000
 Guid					00000000-0000-0000-0000-000000000000
 Void		void		<>
 Object		object		null
@@ -708,32 +708,3 @@ instance<T> async.Continuation<Task<T>>
 @ContinuationControlFlow
 @Inline
 func async.await(source, bind) = this.Bind(source, bind);
-
-========================================================
-External Types
-========================================================
-
-@External
-@NotImplemented
-concept<T> this.ExternalPointer
-	where Interface<T>
-{
-	@External
-	func Delete():void
-
-	@External
-	prop T Handle{get;}
-}
-
-@External
-@NotImplemented
-concept<T> this.ExternalReference
-	where Interface<T>
-{
-	@External
-	prop T Handle{get;}
-}
-
-instance<T> Convertable<ExternalReference<T>, ExternalPointer<T>>
-{
-}
