@@ -120,10 +120,13 @@ GuiControl
 				}
 			}
 
-			bool GuiControl::CanAutoDestroyInternal(DescriptableObject* obj)
+			void GuiControl::SharedPtrDestructorProc(DescriptableObject* obj)
 			{
 				GuiControl* value=dynamic_cast<GuiControl*>(obj);
-				return value->parent==0;
+				if(value->GetBoundsComposition()->GetParent()==0)
+				{
+					SafeDeleteControl(value);
+				}
 			}
 
 			GuiControl::GuiControl(IStyleController* _styleController)
@@ -150,7 +153,7 @@ GuiControl
 				styleController->SetText(text);
 				styleController->SetVisuallyEnabled(isVisuallyEnabled);
 				
-				canAutoDestroy=&GuiControl::CanAutoDestroyInternal;
+				sharedPtrDestructorProc=&GuiControl::SharedPtrDestructorProc;
 			}
 
 			GuiControl::~GuiControl()

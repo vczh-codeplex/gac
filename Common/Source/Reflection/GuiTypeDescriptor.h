@@ -51,16 +51,14 @@ Attribute
 			friend class DescriptableValue;
 
 			typedef collections::Dictionary<WString, Ptr<Object>>		InternalPropertyMap;
-			typedef bool(*CanAutoDestroyProc)(DescriptableObject* obj);
+			typedef void(*DestructorProc)(DescriptableObject* obj);
 		protected:
 			vint									referenceCounter;
-			CanAutoDestroyProc						canAutoDestroy;
+			DestructorProc							sharedPtrDestructorProc;
 
 			size_t									objectSize;
 			description::ITypeDescriptor**			typeDescriptor;
 			Ptr<InternalPropertyMap>				internalProperties;
-
-			virtual bool							CanAutoDestroy(){return canAutoDestroy?canAutoDestroy(this):true;}
 		public:
 			DescriptableObject();
 			virtual ~DescriptableObject();
@@ -125,7 +123,11 @@ ReferenceCounterOperator
 		static __forceinline void DeleteReference(vint* counter, T* reference)
 		{
 			reflection::DescriptableObject* obj=reference;
-			if(obj->CanAutoDestroy())
+			if(obj->sharedPtrDestructorProc)
+			{
+				obj->sharedPtrDestructorProc(obj);
+			}
+			else
 			{
 				delete obj;
 			}

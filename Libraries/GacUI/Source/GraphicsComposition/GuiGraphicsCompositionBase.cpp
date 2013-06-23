@@ -59,10 +59,13 @@ GuiGraphicsComposition
 				}
 			}
 
-			bool GuiGraphicsComposition::CanAutoDestroyInternal(DescriptableObject* obj)
+			void GuiGraphicsComposition::SharedPtrDestructorProc(DescriptableObject* obj)
 			{
 				GuiGraphicsComposition* value=dynamic_cast<GuiGraphicsComposition*>(obj);
-				return value->parent==0;
+				if(value->parent==0)
+				{
+					SafeDeleteComposition(value);
+				}
 			}
 
 			GuiGraphicsComposition::GuiGraphicsComposition()
@@ -75,7 +78,7 @@ GuiGraphicsComposition
 				,associatedCursor(0)
 				,associatedHitTestResult(INativeWindowListener::NoDecision)
 			{
-				canAutoDestroy=&GuiGraphicsComposition::CanAutoDestroyInternal;
+				sharedPtrDestructorProc=&GuiGraphicsComposition::SharedPtrDestructorProc;
 			}
 
 			GuiGraphicsComposition::~GuiGraphicsComposition()
