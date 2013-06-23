@@ -742,7 +742,15 @@ TypeInfoRetriver Helper Functions (BoxValue, UnboxValue)
 				static Ptr<T> UnboxValue(const Value& value, ITypeDescriptor* typeDescriptor, const WString& valueName)
 				{
 					if(value.IsNull()) return 0;
-					Ptr<T> result=value.GetSharedPtr().Cast<T>();
+					Ptr<T> result;
+					if(value.GetValueType()==Value::SharedPtr)
+					{
+						result=value.GetSharedPtr().Cast<T>();
+					}
+					else if(value.GetValueType()==Value::RawPtr)
+					{
+						result=dynamic_cast<T*>(value.GetRawPtr());
+					}
 					if(!result)
 					{
 						if(!typeDescriptor)

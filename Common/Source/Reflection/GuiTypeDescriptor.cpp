@@ -213,8 +213,6 @@ description::Value
 				case Null:
 					return targetValueType!=Text;
 				case RawPtr:
-					if(targetValueType!=RawPtr) return false;
-					break;
 				case SharedPtr:
 					if(targetValueType!=RawPtr && targetValueType!=SharedPtr) return false;
 					break;
