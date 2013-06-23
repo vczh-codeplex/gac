@@ -13,7 +13,7 @@ DescriptableObject
 
 		DescriptableObject::DescriptableObject()
 			:referenceCounter(0)
-			,canAutoDestroy(0)
+			,sharedPtrDestructorProc(0)
 			,objectSize(0)
 			,typeDescriptor(0)
 		{
