@@ -44,8 +44,8 @@ IArray<T>							[T]
 Composite Type Constructors
 ========================================================
 
-default(T)
-new(T)
+default()::T
+new()::T
 
 x->x+1
 (x,y)->x+y
