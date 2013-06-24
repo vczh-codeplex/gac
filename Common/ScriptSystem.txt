@@ -708,3 +708,30 @@ instance<T> async.Continuation<Task<T>>
 @ContinuationControlFlow
 @Inline
 func async.await(source, bind) = this.Bind(source, bind);
+
+---------------------------------------
+
+func Concat(urls) async
+{
+    var xs = new(IList<string>);
+	foreach(url in urls)
+		xs.Add(await! DownloadTextAsync(url))
+	return xs;
+}
+
+=>
+
+func Concat(urls)
+{
+	var cps = new()::async;
+	var xs = new()::IList<string>;
+	return cps.Combine(
+		cps.ForEach(urls, url->
+			cps.await(
+				DownloadTextAsync(url),
+				_0->{ xs.Add(_0); return cps.Nop(); }
+				)
+			),
+		cps.Return(xs)
+		);
+};
