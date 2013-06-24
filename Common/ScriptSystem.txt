@@ -669,16 +669,34 @@ func Concat(urls, cont) async
 Continuations
 ========================================================
 
+enum LoopBodyFlag
+{
+	Break,
+	Continue,
+	Return,
+	Normal,
+}
+
+struct<T> LoopBodyResult
+{
+	LoopBodyFlag flag;
+	T result;
+}
+
 concept<M<>> this.Continuation
 {
-	func<T> Nop() : M<T>;
-	func<T> Delay(func ()->M<T> body) : M<T>;
-	func<T, U> Combine(M<T> source, M<U> next) : M<U>;
-	func<T> Return(T value) : M<T>;
-	func<T, U> Bind(M<T> source, func (T)->M<U> bind) : M<U>;
-	func<T> Yield(T value) : M<T>;
-	func<T> YieldFrom(M<T> source) : M<T>;
-	func<T> Try(M<T> source, func (Exception)->M<T> bind) : M<T>;
+	func<T>		Nop() : M<T>;
+	func<T>		Delay(func ()->M<T> body) : M<T>;
+	func<T, U>	Combine(M<T> source, M<U> next) : M<U>;
+
+	func<T, U>	ForEach({T} source, func (T)->M<LoopBodyResult<U>> body)->M<U>;
+	func<T>		While(func ()->bool condition, M<LoopBodyResult<T>> body)->M<T>;
+	func<T>		DoWhile(func ()->bool condition, M<LoopBodyResult<T>> body)->M<T>;
+	func<T, U>	Using(T obj, func (T)->M<U> body)->M<U> where T.IDidposable;
+	func<T, U>	Lock(T obj, func (T)->M<U> body)->M<U>;
+	func<T>		Try(M<T> source, func (Exception)->M<T> bind) : M<T>;
+	func<T>		Throw(Exception e)->M<T>;
+	func<T>		Return(T value) : M<T>;
 }
 
 ---------------------------------------
@@ -693,7 +711,7 @@ instance<T> seq.Continuation<{T}>
 
 @ContinuationControlFlow
 @Inline
-func seq.yield(T value) = this.Yield(value);
+func seq.yield(T value) { ... }
 
 ---------------------------------------
 
@@ -707,7 +725,7 @@ instance<T> async.Continuation<Task<T>>
 
 @ContinuationControlFlow
 @Inline
-func async.await(source, bind) = this.Bind(source, bind);
+func async.await(source, bind) { ... }
 
 ---------------------------------------
 
