@@ -547,7 +547,7 @@ f(.. t)
 a.b
 a as Type		// explicit type conversion, invoking Convertable
 
-<continuation-control-flow>! expression
+<continuation-control-flow>! [expression]
 
 <constructors>
 <patterns>
