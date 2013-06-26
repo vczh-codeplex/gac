@@ -685,7 +685,9 @@ instance<T> seq.Continuation<{T}>
 
 @ContinuationControlFlow
 @Inline
-func seq.yield(T value) { ... }
+func<T> seq.yield(T value, func ()->void continuation)
+{
+}
 
 ---------------------------------------
 
@@ -699,7 +701,10 @@ instance<T> async.Continuation<Task<T>>
 
 @ContinuationControlFlow
 @Inline
-func async.await(source, bind) { ... }
+func<T> async.await(Task<T> source, func T->void continuation)
+{
+	source.ContinueWith(task->continuation(task.Result));
+}
 
 ---------------------------------------
 
@@ -734,12 +739,7 @@ type _Find
 	string					url;
 }
 
-instance _Find.Task<string>
-{
-	...
-}
-
-int _Find.RunStateMachine()
+func _Find.RunStateMachine()->int
 {
 	while(true)
 	{
@@ -795,9 +795,77 @@ int _Find.RunStateMachine()
 
 func Find(string src)->Task<string>
 {
-	return _Find
+	var sm = _Find
 	{
-		_state = 0,
-		src = src,
+		_state = 0;
+		src = src;
+	};
+}
+
+---------------------------------------
+
+func<T> IEnumerable<T>.Where(func (T)->bool predicate) seq
+{
+	foreach(s in this)
+		if(predicate(s))
+			yield! s;
+}
+
+=>
+
+type _Where
+{
+	T				_input0;
+	int				_state;
+	IEnumerable<T>	_this;
+
+	IEnumerator<T>	_x0;
+	func (T)->bool	predicate;
+	T				s;
+}
+
+func _Where.RunStateMachine()->int
+{
+	while(true)
+	{
+		switch(this._state)
+		{
+			case 0:
+			{
+				this._x0 = this._this.CreateEnumerator();
+				this._state = 1;
+			}
+			case 1:
+			{
+				if(this._x0.MoveNext())
+				{
+					this.s = this._x0.Current;
+					this._input0 = this.s;
+					this._state = 2;
+					return 0;
+				}
+				else
+				{
+					this._state = 3;
+				}
+			}
+			case 2:
+			{
+				this.state = 1;
+			}
+			case 3:
+			{
+				return -1;
+			}
+		}
+	}
+}
+
+func<T> IEnumerable<T>.Where(func (T)->bool predicate)->IEnumerable<T>
+{
+	var sm = _Where
+	{
+		_state = 0;
+		_this = this;
 	};
 }
