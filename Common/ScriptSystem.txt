@@ -669,34 +669,8 @@ func Concat(urls, cont) async
 Continuations
 ========================================================
 
-enum LoopBodyFlag
+concept<T->M<>> Continuation
 {
-	Break,
-	Continue,
-	Return,
-	Normal,
-}
-
-struct<T> LoopBodyResult
-{
-	LoopBodyFlag flag;
-	T result;
-}
-
-concept<M<>> this.Continuation
-{
-	func<T>		Nop() : M<T>;
-	func<T>		Delay(func ()->M<T> body) : M<T>;
-	func<T, U>	Combine(M<T> source, M<U> next) : M<U>;
-
-	func<T, U>	ForEach({T} source, func (T)->M<LoopBodyResult<U>> body)->M<U>;
-	func<T>		While(func ()->bool condition, M<LoopBodyResult<T>> body)->M<T>;
-	func<T>		DoWhile(func ()->bool condition, M<LoopBodyResult<T>> body)->M<T>;
-	func<T, U>	Using(T obj, func (T)->M<U> body)->M<U> where T.IDidposable;
-	func<T, U>	Lock(T obj, func (T)->M<U> body)->M<U>;
-	func<T>		Try(M<T> source, func (Exception)->M<T> bind) : M<T>;
-	func<T>		Throw(Exception e)->M<T>;
-	func<T>		Return(T value) : M<T>;
 }
 
 ---------------------------------------
@@ -729,27 +703,101 @@ func async.await(source, bind) { ... }
 
 ---------------------------------------
 
-func Concat(urls) async
+func Find(src) async
 {
-    var xs = new(IList<string>);
+    var urls=(await! DownloadAsync(src)).Split("\r\n");
 	foreach(url in urls)
-		xs.Add(await! DownloadTextAsync(url))
-	return xs;
+	{
+		var content=await! DownloadAsync(url);
+		if(content.Length>100)
+		{
+			return content;
+		}
+	}
+	return null;
 }
 
 =>
 
-func Concat(urls)
+type _Find
 {
-	var cps = new()::async;
-	var xs = new()::IList<string>;
-	return cps.Combine(
-		cps.ForEach(urls, url->
-			cps.await(
-				DownloadTextAsync(url),
-				_0->{ xs.Add(_0); return cps.Nop(); }
-				)
-			),
-		cps.Return(xs)
-		);
-};
+	Task<string>			_input0;
+	Task<string>			_input1;
+	string					_output0;
+	string					_output1;
+	string					_result;
+	int						_state;
+	
+	IEnumerator<string>		_x0;
+	string					src;
+	[string]				urls;
+	string					url;
+}
+
+instance _Find.Task<string>
+{
+	...
+}
+
+int _Find.RunStateMachine()
+{
+	while(true)
+	{
+		switch(this._state)
+		{
+			case 0:
+			{
+				this._input0 = DownloadAsync(this.src);
+				this._state = 1;
+				return 0;
+			}
+			case 1:
+			{
+				this.urls = this._output0.Split("\r\n");
+				this._x0 = this.urls.CreateEnumerator();
+				this._state = 2;
+			}
+			case 2:
+			{
+				if(_x0.MoveNext())
+				{
+					this.url = _x0.Current;
+					this._input1 = this..url;
+					this._state = 4;
+					return 1;
+				}
+				else
+				{
+					this._state=3;
+				}
+			}
+			case 3:
+			{
+				this._result = null;
+				return -1;
+			}
+			case 4:
+			{
+				this.content = this._output1;
+				if(this.content.Length>100)
+				{
+					this._result = this._content;
+					return -1;
+				}
+				else
+				{
+					this._state = 2;
+				}
+			}
+		}
+	}
+}
+
+func Find(string src)->Task<string>
+{
+	return _Find
+	{
+		_state = 0,
+		src = src,
+	};
+}
