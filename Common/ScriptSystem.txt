@@ -669,7 +669,7 @@ func Concat(urls, cont) async
 Continuations
 ========================================================
 
-concept<T->M<>> Continuation
+concept<T->U, M<>> Continuation
 {
 }
 
@@ -679,14 +679,54 @@ type seq
 {
 }
 
-instance<T> seq.Continuation<{T}>
+instance Continuation<seq, IEnumerable<>>
 {
+}
+
+type<T> seq_Enumerable
+{	
+}
+
+instance<T> seq_Enumerable.IEnumerable<T>
+{
+	func CreateEnumerator()
+	{
+		return seq_Enumerator{};
+	}
+}
+
+type<T> seq_Enumerator
+{
+	T				current;
+	bool			available;
+	func ()->void	continuation;
+}
+
+instance<T> seq_Enumerator.IEnumerator<T>
+{
+	prop T Current
+	{
+		get
+		{
+			return this.current;
+		}
+	}
+
+	func MoveNext()
+	{
+		this.available=false;
+		this.continuation();
+		return this.available;
+	}
 }
 
 @ContinuationControlFlow
 @Inline
-func<T> seq.yield(T value, func ()->void continuation)
+func<T> seq.yield(seq_Enumerator<T> state, T value, func ()->void continuation)
 {
+	state.current=value;
+	state.available=true;
+	state.continuation=continuation;
 }
 
 ---------------------------------------
@@ -695,15 +735,22 @@ type async
 {
 }
 
-instance<T> async.Continuation<Task<T>>
+instance Continuation<async, Task<>>
 {
 }
 
 @ContinuationControlFlow
 @Inline
-func<T> async.await(Task<T> source, func T->void continuation)
+func<T, U> async.await(FuturePromiseTask<U> task, Task<T> source, func T->void continuation)
 {
 	source.ContinueWith(task->continuation(task.Result));
+}
+
+@ContinuationControlFlow
+@Inline
+func<T> async.exit(FuturePromiseTask<T> task, T source)
+{
+	task.SetResult(source);
 }
 
 ---------------------------------------
@@ -719,7 +766,7 @@ func Find(src) async
 			return content;
 		}
 	}
-	return null;
+	return null; // compiler will find exit!
 }
 
 =>
