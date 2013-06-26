@@ -885,13 +885,14 @@ func _Find.RunStateMachine()
 func Find(string src)->Task<string>
 {
 	var cps = async{};
-	var sm = _Find
-	{
-		_state = 0;
-		src = src;
-	};
 	return cps.CreateCps(controller->
 	{
+		var sm = _Find
+		{
+			_state = 0;
+			src = src;
+		};
+
 		sm._controller=controller;
 		sm.RunStateMachine();
 	});
@@ -963,13 +964,15 @@ func _Where.RunStateMachine()
 
 func<T> IEnumerable<T>.Where(func (T)->bool predicate)->IEnumerable<T>
 {
-	var sm = _Where
-	{
-		_state = 0;
-		_this = this;
-	};
+	var cps = seq{};
 	return cps.CreateCps(controller->
 	{
+		var sm = _Where
+		{
+			_state = 0;
+			_this = this;
+		};
+
 		sm._controller=controller;
 		sm.RunStateMachine();
 	});
