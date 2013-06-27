@@ -576,7 +576,19 @@ type Class
 }
 
 ========================================================
-Multiple Dispatching
+Static Dispatching (pattern matching)
+========================================================
+
+func<T> Length({T} xs)->int; // can be omitted
+func Length({}) = 0;
+func Length({x:xs}) = 1+Length(xs);
+-------------------------------------
+func Length_(r, {}) = r;
+func Length_(r, {x:xs}) = Length_(r+1, xs);
+func Length(xs) = Length_(0, xs);
+
+========================================================
+Dynamic Dispatching
 ========================================================
 
 func DealWith(switch object x) // switch only for reference type
