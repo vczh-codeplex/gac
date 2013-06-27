@@ -489,7 +489,7 @@ if(<pattern> = expression) statement
 	<pattern>					: internal pattern
 	<pattern-element> if expr	: binding with a filter
 
-partial foreach(even if x%2==0 in numbers)
+partial foreach(even if even%2==0 in numbers)
 {
 	Console.WriteLine(even);
 }
