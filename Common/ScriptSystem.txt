@@ -471,8 +471,11 @@ a :: Type		// infer a as type Type
 
 switch(value)
 {
-	case <pattern> : ....
+	case <pattern> : ...
 }
+
+if(<pattern> = expression) statement
+[partial] foreach(<pattern> in xs) statement // PatternMatchingFailedException
 
 ========================================================
 Statments
@@ -491,16 +494,16 @@ throw expression;
 if (condition) statement [else statement]
 while (condition) statement
 do statement while (condition);
-foreach(([type] x | <pattern>) in xs) statement
+foreach([type] x in xs) statement
 
 try statement { catch (Type [ex]) statement } [ finally statement ]
 using ([type] x = T where T.IDisposable) statement
 lock (object) statement
 
-switch(value)
+[partial] switch(value)
 {
 	{ case <pattern> : statement }
-	[ default : statement ]
+	[ default : statement ] // PatternMatchingFailedException
 }
 
 if (x = y) --> (x, success) = y; if(success)
