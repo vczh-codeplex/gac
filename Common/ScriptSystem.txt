@@ -462,11 +462,6 @@ Pattern Matching
 Patterns:
 <a, b, c>
 {a, b, c: d}
-Type a					// infer a as type Type
-a as Type				// cast
-a as Point{x=a, y=b}	// cast
-{x=a, y=b}
-Point{x=a, y=b}
 
 <pattern> = expression; // PatternMatchingFailedException
 
@@ -484,6 +479,11 @@ if(<pattern> = expression) statement
 	set left-value-expr			: reuse the old variable to receive a component
 	case expr					: a component with Equatable<T> that act like a filter
 	constant					: a component with Equatable<T> that act like a filter
+	Type a						: infer a as type Type, new variable
+	a as Type					: cast, new variable
+	a as Point{x=b, y=c}		: cast, new variable
+	{x=a, y=b}					: match struct/type members
+	Point{x=a, y=b}				: match struct/type members
 	// all <pattern-element> above cannot be a <pattern>
 
 	<pattern>					: internal pattern
@@ -498,7 +498,7 @@ partial foreach(even if even%2==0 in numbers)
 Statments
 ========================================================
 
-<variable-declaration> // covered by pattern matching: Type a = b;
+<variable-declaration>
 <pattern> = expression;
 <variable> = expression;
 <invoke-expression>;
