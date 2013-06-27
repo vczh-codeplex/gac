@@ -462,7 +462,7 @@ Pattern Matching
 Patterns:
 <a, b, c>
 {a, b, c: d}
-a :: Type				// infer a as type Type
+Type a					// infer a as type Type
 a as Type				// cast
 a as Point{x=a, y=b}	// cast
 {x=a, y=b}
@@ -498,7 +498,7 @@ partial foreach(even if even%2==0 in numbers)
 Statments
 ========================================================
 
-<variable-declaration>
+<variable-declaration> // covered by pattern matching: Type a = b;
 <pattern> = expression;
 <variable> = expression;
 <invoke-expression>;
