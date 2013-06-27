@@ -477,6 +477,16 @@ switch(value)
 if(<pattern> = expression) statement
 [partial] foreach(<pattern> in xs) statement // PatternMatchingFailedException
 
+<pattern-element>:
+	_							: placeholder
+	id							: new variable to receive a component
+	set left-value expr			: reuse the old variable to receive a component
+	case expr					: a component with Equatable<T> that act like a filter
+	constant					: a component with Equatable<T> that act like a filter
+	<pattern>					: internal pattern
+	<pattern-element> if expr	: binding with a filter
+
+
 ========================================================
 Statments
 ========================================================
