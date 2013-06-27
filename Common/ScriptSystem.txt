@@ -28,24 +28,18 @@ Pair<T, U>							T..U					default(T)..default(U) // right associative
 Pair<T, Pair<U, Pair<V, void>>>		<T, U, V>, T..U..V..<>	<default(T), default(U), default(V)>
 
 IDelegate<R, <T, U, V>>				func (T, U, V)->R
-									func (..(T, U, V))->R
+									func (..<T, U, V>)->R
 
 IEnumerable<T>						{T}
-
 IMap<TKey, TValue>					{TKey : TValue}
-	: IDelegate<TValue, <TKey>>
-	: IEnumerable<TKey..TValue>
-
 IArray<T>							[T]
-	: IDelegate<int, <T>>
-	: IEnumerable<T>
 
 ========================================================
 Composite Type Constructors
 ========================================================
 
 default()::T
-new()::T
+new(args)::T
 
 x->x+1
 (x,y)->x+y
