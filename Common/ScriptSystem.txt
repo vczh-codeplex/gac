@@ -462,12 +462,13 @@ Pattern Matching
 Patterns:
 <a, b, c>
 {a, b, c: d}
-Point{x, y}
-{x, y}
+a :: Type				// infer a as type Type
+a as Type				// cast
+a as Point{x=a, y=b}	// cast
 {x=a, y=b}
-a :: Type		// infer a as type Type
+Point{x=a, y=b}
 
-<pattern> = expression;
+<pattern> = expression; // PatternMatchingFailedException
 
 switch(value)
 {
@@ -480,12 +481,18 @@ if(<pattern> = expression) statement
 <pattern-element>:
 	_							: placeholder
 	id							: new variable to receive a component
-	set left-value expr			: reuse the old variable to receive a component
+	set left-value-expr			: reuse the old variable to receive a component
 	case expr					: a component with Equatable<T> that act like a filter
 	constant					: a component with Equatable<T> that act like a filter
+	// all <pattern-element> above cannot be a <pattern>
+
 	<pattern>					: internal pattern
 	<pattern-element> if expr	: binding with a filter
 
+partial foreach(even if x%2==0 in numbers)
+{
+	Console.WriteLine(even);
+}
 
 ========================================================
 Statments
