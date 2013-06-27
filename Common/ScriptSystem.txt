@@ -144,7 +144,7 @@ prop<T> Config
 {
 	get
 	{
-		config..exists=globalConfigs.Find(typeof(T));
+		<config, exists>=globalConfigs.Find(typeof(T));
 		if(!exists)
 		{
 			config=new(T);
@@ -330,6 +330,7 @@ concept<T> Printable
 concept<T> Parsable
 {
 	func Parse(string s)->T;
+	func TryParse(string s)-><T, bool>
 }
 
 concept<T> Tuple // predefined
@@ -389,36 +390,13 @@ instance<T, U> Convertable<IEnumerable<T>, IEnumerable<U>>
 Interfaces
 ========================================================
 
-concept this.IWeakTypedPair
-{
-	prop object WeakTypedFirst{get;}
-	prop object WeakTypedSecond{get;}
-}
-
-concept this.IWeakTypedTuple
-	where this.IWeakTypedEnumerable
-{
-}
-
-concept this.IWeakTypedEnumerator
-{
-	func MoveNext()->bool;
-	prop object WeakTypedCurrent{get;}
-}
-
 concept<T> this.IEnumerator
-	where this.IWeakTypedEnumerator
 {
 	prop T Current{get;}
-}
-
-concept this.IWeakTypedEnumerable
-{
-	func CreateWeakTypedEnumerator()->IWeakTypedEnumerator;
+	func MoveNext()->bool;
 }
 
 concept<T> this.IEnumerable
-	where this.IWeakTypedEnumerable
 {
 	func CreateEnumerator()->IEnumerator<T>;
 }
@@ -432,7 +410,6 @@ concept<T> this.IReadonlyCollection
 
 concept<T> this.IReadonlyArray
 	where this.IReadonlyCollection<T>
-	where this.IDelegate<T, (int)>
 {
 	prop T operator[](int index){get;}
 	func IndexOf(T value)->int;
@@ -461,20 +438,21 @@ concept<T> this.IList
 }
 
 concept<TKey, TValue> this.IReadonlyMap
-	where this.IReadonlyCollection<(TKey, TValue)>
-	where this.IDelegate<TKey, (TValue)>
+	where this.IReadonlyCollection<<TKey, TValue>>
 {
 	prop IReadonlyCollection<TKey> Keys{get;}
 	prop IReadonlyCollection<TValue> Values{get;}
-	func Find(TKey key)->(TValue, bool);
+	func Find(TKey key)-><TValue, bool>;
 }
 
 concept<TKey, TValue> this.IMap
-	where this.ICollection<(TKey, TValue)>
+	where this.ICollection<<TKey, TValue>>
 	where this.IReadonlyMap<TKey, TValue>
 {
+	func Add(TKey key, TValue value)->void;
 	func Set(TKey key, TValue value)->bool;
 	func Remove(TKey key)->bool;
+	prop TValue operator[](TKey key){get; set;}
 }
 
 ========================================================
@@ -482,7 +460,7 @@ Pattern Matching
 ========================================================
 
 Patterns:
-(a, b, c)
+<a, b, c>
 {a, b, c: d}
 Point{x, y}
 {x, y}
