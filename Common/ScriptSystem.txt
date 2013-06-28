@@ -24,8 +24,8 @@ Object		object		null
 Composite Types
 ========================================================
 
-Pair<T, U>							T..U					default(T)..default(U) // right associative
-Pair<T, Pair<U, Pair<V, void>>>		<T, U, V>, T..U..V..<>	<default(T), default(U), default(V)>
+Pair<T, U>							T..U					default..default // right associative
+Pair<T, Pair<U, Pair<V, void>>>		<T, U, V>, T..U..V..<>	<default, default, default>
 
 IDelegate<R, <T, U, V>>				func (T, U, V)->R
 									func (..<T, U, V>)->R
@@ -38,7 +38,8 @@ IArray<T>							[T]
 Composite Type Constructors
 ========================================================
 
-default()::T
+default::T
+null::T
 new(args)::T
 
 x->x+1
@@ -112,7 +113,7 @@ DealWithPoint(Point{x=1, y=2})		DealWithPoint({x=1, y=2})
 Variables
 ========================================================
 
-int a[ = default(int)];
+int a[ = default];
 int a = 0;
 var a = 0;
 
@@ -144,10 +145,10 @@ prop<T> Config
 {
 	get
 	{
-		<config, exists>=globalConfigs.Find(typeof(T));
+		<config, exists>=globalConfigs.Find<T>();
 		if(!exists)
 		{
-			config=new(T);
+			config=new();
 			globalConfigs[typeof(T)]=config;
 		}
 		return config;
@@ -662,7 +663,7 @@ func Filter(xs, p) seq
 
 func Concat(urls, cont) async
 {
-    var xs = new(IList<string>);
+    var xs = new()::IList<string>;
 	foreach(url in urls)
 		xs.Add(await! DownloadTextAsync(url))
 	cont(xs);
