@@ -29,6 +29,7 @@ Pair<T, Pair<U, Pair<V, void>>>		<T, U, V>, T..U..V..<>	<default, default, defau
 
 IDelegate<R, <T, U, V>>				func (T, U, V)->R
 									func (..<T, U, V>)->R
+									func (T, .. <U, V>)->R
 
 IEnumerable<T>						{T}
 IMap<TKey, TValue>					{TKey : TValue}
@@ -51,6 +52,7 @@ func (int x, int y)->int{ return x+y; }
 array(10) :: int[]
 []
 [1, 2, 3]
+[1, 2, 3, 4, 5].Slice(1, 3) == [2, 3, 4] // reference, not copy
 
 // IEnumerable
 [1, 2, 3] ++ [4, 5, 6]
@@ -463,6 +465,7 @@ Pattern Matching
 Patterns:
 <a, b, c>
 {a, b, c: d}
+[a, b, c: d]
 
 <pattern> = expression; // PatternMatchingFailedException
 
@@ -486,6 +489,7 @@ if(<pattern> = expression) statement
 	{x=a, y=b}					: match struct/type members
 	Point{x=a, y=b}				: match struct/type members
 	// all <pattern-element> above cannot be a <pattern>
+	// variable is not allowed to cover visible-with-the-same-name variables
 
 	<pattern>					: internal pattern
 	<pattern-element> if expr	: binding with a filter
