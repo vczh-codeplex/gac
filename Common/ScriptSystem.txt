@@ -625,7 +625,7 @@ func string.Format_(instance a..b, start) =
 		.Format(b, start + 1);
 
 // functions in the same module can see declarations in the private namespace without naming it.
-func string.Format(args) = this.Format_(args, 0);
+func string.Format(..args) = this.Format_(args, 0);
 
 ========================================================
 Dynamic Dispatching
