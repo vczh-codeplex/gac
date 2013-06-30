@@ -24,8 +24,8 @@ Object		object		null
 Composite Types
 ========================================================
 
-Pair<T, U>							T..U					default..default // right associative
-Pair<T, Pair<U, Pair<V, void>>>		<T, U, V>, T..U..V..<>	<default, default, default>
+Pair<T, U>							T..U						default..default // right associative
+Pair<T, Pair<U, Pair<V, void>>>		<T, U, V>, T..U..V..void	<default, default, default>
 
 IDelegate<R, <T, U, V>>				func (T, U, V)->R
 									func (..<T, U, V>)->R
@@ -261,6 +261,7 @@ concept<T> Numeric
 	where Comparable<T>
 {
 	prop T Zero{get;}
+	prop T One{get;}
 	func operator+(T a, T b)->T;
 	func operator+(T a)->T;
 	func operator-(T a, T b)->T;
@@ -605,12 +606,26 @@ Static Dispatching (pattern matching)
 ========================================================
 
 func<T> Length({T} xs)->int; // can be omitted
-func Length({}) = 0;
-func Length({x:xs}) = 1+Length(xs);
--------------------------------------
 func Length_(r, {}) = r;
 func Length_(r, {x:xs}) = Length_(r+1, xs);
 func Length(xs) = Length_(0, xs);
+
+---------------------------------------
+
+@Private // declarations put in @Private will be put in a nested random generated namespace like namespace private-guid
+func<T> string.Format_(T args, int start)
+	where Tuple<T>;
+
+@Private
+func string.Format_(instance <>, _) = this;
+@Private
+func string.Format_(instance a..b, start) = 
+	message
+		.Replace("{" + start.ToString() + "}", a.ToString())
+		.Format(b, start + 1);
+
+// functions in the same module can see declarations in the private namespace without naming it.
+func string.Format(args) = this.Format_(args, 0);
 
 ========================================================
 Dynamic Dispatching
