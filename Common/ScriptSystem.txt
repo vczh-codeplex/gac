@@ -613,7 +613,7 @@ func Length(xs) = Length_(0, xs);
 ---------------------------------------
 
 @Private // declarations put in @Private will be put in a nested random generated namespace like namespace private-guid
-func<T> string.Format_(T args, int start)
+func<T> string.Format_(switch T args, int start)
 	where Tuple<T>;
 
 @Private
