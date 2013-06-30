@@ -832,7 +832,9 @@ type _Find
 	seq							_builder;
 	FuturePromiseTask<string>	_controller;
 	string						_output0;
+	func string->void			_output0_continuation;
 	string						_output1;
+	func string->void			_output1_continuation;
 	int							_state;
 	
 	IEnumerator<string>			_x0;
@@ -843,6 +845,17 @@ type _Find
 
 func _Find.RunStateMachine()
 {
+	this._output0_continuation = _output->
+	{
+		this._output0 = output;
+		this.RunStateMachine();
+	};
+	this._output1_continuation = _output->
+	{
+		this._output1 = output;
+		this.RunStateMachine();
+	};
+
 	while(true)
 	{
 		switch(this._state)
@@ -851,11 +864,7 @@ func _Find.RunStateMachine()
 			{
 				this._state = 1;
 				var input = DownloadAsync(this.src);
-				_builder.await(this._controller, input, _output->
-				{
-					this._output0 = output;
-					this.RunStateMachine();
-				});
+				_builder.await(this._controller, input, this._output0_continuation);
 				return;
 			}
 			case 1:
@@ -871,11 +880,7 @@ func _Find.RunStateMachine()
 					this.url = _x0.Current;
 					this._state = 4;
 					var input = this.url;
-					_builder.await(this._controller, input, _output->
-					{
-						this._output1 = output;
-						this.RunStateMachine();
-					});
+					_builder.await(this._controller, input, this._output1_continuation);
 					return;
 				}
 				else
@@ -937,6 +942,7 @@ type<T> _Where
 {
 	seq					_builder;
 	seq_Enumerator<T>	_controller;
+	func ()->void		_output_continuation;
 	int					_state;
 	IEnumerable<T>		_this;
 
@@ -947,6 +953,8 @@ type<T> _Where
 
 func _Where.RunStateMachine()
 {
+	this._output_continuation = this.RunStateMachine;
+
 	while(true)
 	{
 		switch(this._state)
@@ -963,10 +971,7 @@ func _Where.RunStateMachine()
 					this.s = this._x0.Current;
 					this._state = 2;
 					var input = this.s;
-					_builder.yield(this._controller, input, ()->
-					{
-						this.RunStateMachine();
-					});
+					_builder.yield(this._controller, input, this._output_continuation);
 					return;
 				}
 				else
