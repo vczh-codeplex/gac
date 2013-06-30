@@ -56,8 +56,7 @@ array(10) :: int[]
 
 // IEnumerable
 [1, 2, 3] ++ [4, 5, 6]
-{1, 2, 3}
-{1, 2, 3 : [4, 5, 6]}		// each expression will be evaluated in MoveNext function
+{1, 2, 3} ++ {4, 5, 6}
 
 // IMap
 {}
@@ -341,7 +340,7 @@ concept<T> Tuple // predefined
 {
 }
 
-concept<T:U> Tuplizable // predefined
+concept<T->U> Tuplizable // predefined
 	where Tuple<U>
 {
 	func ToTuple(T value)->U;
@@ -465,7 +464,6 @@ Pattern Matching
 
 Patterns:
 <a, b, c>
-{a, b, c: d}
 [a, b, c: d]
 
 <pattern> = expression; // PatternMatchingFailedException
@@ -494,6 +492,7 @@ if(<pattern> = expression) statement
 
 	<pattern>					: internal pattern
 	<pattern-element> if expr	: binding with a filter
+	a :: <pattern>				: store values in both a and variables in <pattern>
 
 partial foreach(even if even%2==0 in numbers)
 {
@@ -606,8 +605,8 @@ Static Dispatching (pattern matching)
 ========================================================
 
 func<T> Length({T} xs)->int; // can be omitted
-func Length_(r, {}) = r;
-func Length_(r, {x:xs}) = Length_(r+1, xs);
+func Length_(r, []) = r;
+func Length_(r, [x:xs]) = Length_(r+1, xs);
 func Length(xs) = Length_(0, xs);
 
 ---------------------------------------
