@@ -315,6 +315,22 @@ concept<T> Floating
 	func ATanh(T a)->T;
 }
 
+concept<T> Defaultable
+{
+	prop T Default{get;}
+}
+
+concept<T> Nullable
+{
+	prop T Null{get;}
+}
+
+concept<TType, TArgs> Constructable
+	where Tuple<TArgs>
+{
+	func New(..TArgs args)->TType;
+}
+
 concept<T, U> Convertable
 {
 	func Convert(T a)->U;
@@ -815,7 +831,6 @@ func Find(src) async
 
 type _Find
 {
-	seq							_builder;
 	FuturePromiseTask<string>	_controller;
 	string						_output0;
 	func string->void			_output0_continuation;
@@ -850,7 +865,7 @@ func _Find.RunStateMachine()
 			{
 				this._state = 1;
 				var input = DownloadAsync(this.src);
-				_builder.await(this._controller, input, this._output0_continuation);
+				(null::async).await(this._controller, input, this._output0_continuation);
 				return;
 			}
 			case 1:
@@ -866,7 +881,7 @@ func _Find.RunStateMachine()
 					this.url = _x0.Current;
 					this._state = 4;
 					var input = this.url;
-					_builder.await(this._controller, input, this._output1_continuation);
+					(null::async).await(this._controller, input, this._output1_continuation);
 					return;
 				}
 				else
@@ -885,7 +900,7 @@ func _Find.RunStateMachine()
 				if(this.content.Length>100)
 				{
 					var input = this.content;
-					_builder.exit(this.controller, input);
+					(null::async).exit(this.controller, input);
 					return;
 				}
 				else
@@ -899,8 +914,7 @@ func _Find.RunStateMachine()
 
 func Find(string src)->Task<string>
 {
-	var cps = async{};
-	return cps.CreateCps(controller->
+	return (null::async).CreateCps(controller->
 	{
 		var sm = _Find
 		{
@@ -926,7 +940,6 @@ func<T> IEnumerable<T>.Where(func (T)->bool predicate) seq
 
 type<T> _Where
 {
-	seq					_builder;
 	seq_Enumerator<T>	_controller;
 	func ()->void		_output_continuation;
 	int					_state;
@@ -957,7 +970,7 @@ func _Where.RunStateMachine()
 					this.s = this._x0.Current;
 					this._state = 2;
 					var input = this.s;
-					_builder.yield(this._controller, input, this._output_continuation);
+					(null::seq).yield(this._controller, input, this._output_continuation);
 					return;
 				}
 				else
@@ -979,8 +992,7 @@ func _Where.RunStateMachine()
 
 func<T> IEnumerable<T>.Where(func (T)->bool predicate)->IEnumerable<T>
 {
-	var cps = seq{};
-	return cps.CreateCps(controller->
+	return (null::seq).CreateCps(controller->
 	{
 		var sm = _Where
 		{
