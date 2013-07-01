@@ -692,26 +692,16 @@ func Concat(urls, cont) async
 Continuations
 ========================================================
 
-concept<TBuilder->TController<>, TCps<>> Continuation
-{
-	func<T> TBuilder.CreateCps(func (TController<T>)->void startContinuation)->TCps<T>;
-}
-
----------------------------------------
-
 type seq
 {
 }
 
-instance Continuation<seq, seq_Enumerator<>, IEnumerable<>>
+func<T> seq.CreateCps(func (seq_Enumerator<T>)->void startContinuation)->IEnumerable<T>
 {
-	func<T> TBuilder.CreateCps(func (seq_Enumerator<T>)->void startContinuation)->IEnumerable<T>
+	return seq_Enumerable
 	{
-		return seq_Enumerable
-		{
-			startContinuation = startContinuation,
-		};
-	}
+		startContinuation = startContinuation,
+	};
 }
 
 type<T> seq_Enumerable
@@ -784,14 +774,11 @@ type async
 {
 }
 
-instance Continuation<async, FuturePromiseTask<>, Task<>>
+func<T> async.CreateCps(func (FuturePromiseTask<T>)->void startContinuation)->Task<T>
 {
-	func<T> TBuilder.CreateCps(func (FuturePromiseTask<T>)->void startContinuation)->Task<T>
-	{
-		var task = FuturePromiseTask<T>{};
-		task.onStart = ()->startContinuation(task);
-		return task;
-	}
+	var task = FuturePromiseTask<T>{};
+	task.onStart = ()->startContinuation(task);
+	return task;
 }
 
 @ContinuationControlFlow
