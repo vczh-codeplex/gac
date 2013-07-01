@@ -56,7 +56,21 @@ ParsingGeneralParser
 						errors.Add(new ParsingError(token, L"Internal error when parsing."));
 						return 0;
 					}
-					if(!builder.Run(result))
+					else if(result.transitionType==ParsingState::TransitionResult::SkipToken)
+					{
+						if(result.tableTokenIndex==ParsingTable::TokenFinish)
+						{
+							const RegexToken* token=state.GetToken(state.GetCurrentToken());
+							errors.Add(new ParsingError(token, L"Failed to recover error when reaching the end of the input."));
+							return 0;
+						}
+						else
+						{
+							state.SkipCurrentToken();
+							continue;
+						}
+					}
+					else if(!builder.Run(result))
 					{
 						const RegexToken* token=state.GetToken(state.GetCurrentToken());
 						errors.Add(new ParsingError(token, L"Internal error when building the parsing tree."));
@@ -95,7 +109,7 @@ ParsingStrictParser
 			ParsingState::TransitionResult ParsingStrictParser::OnErrorRecover(ParsingState& state, const regex::RegexToken* currentToken, collections::List<Ptr<ParsingError>>& errors)
 			{
 				const RegexToken* token=state.GetToken(state.GetCurrentToken());
-				errors.Add(new ParsingError(token, (token==0?L"Error happened during parsing when reaching to the end of the input.":L"Error happened during parsing.")));
+				errors.Add(new ParsingError(token, (token==0?L"Error happened during parsing when reaching the end of the input.":L"Error happened during parsing.")));
 				return ParsingState::TransitionResult();
 			}
 
@@ -187,7 +201,7 @@ ParsingAutoRecoverParser
 				}
 				else
 				{
-					return ParsingState::TransitionResult();
+					return ParsingState::TransitionResult(ParsingState::TransitionResult::SkipToken);
 				}
 			}
 
@@ -493,15 +507,14 @@ ParsingStrictParser
 						stateGroup=state.TakeSnapshot();
 					}
 					{
-						ParsingState::TransitionResult result;
+						ParsingState::TransitionResult result(
+							i==0
+							?ParsingState::TransitionResult::AmbiguityBegin
+							:ParsingState::TransitionResult::AmbiguityBranch
+							);
 						if(i==0)
 						{
-							result.transitionType=ParsingState::TransitionResult::AmbiguityBegin;
 							result.ambiguityAffectedStackNodeCount=affectedStackNodeCount;
-						}
-						else
-						{
-							result.transitionType=ParsingState::TransitionResult::AmbiguityBranch;
 						}
 						decisions.Add(result);
 					}
@@ -510,8 +523,7 @@ ParsingStrictParser
 
 						if(i==resolvingFutures.Count()-1)
 						{
-							ParsingState::TransitionResult result;
-							result.transitionType=ParsingState::TransitionResult::AmbiguityEnd;
+							ParsingState::TransitionResult result(ParsingState::TransitionResult::AmbiguityEnd);
 							result.ambiguityNodeType=ambiguityNodeType;
 							decisions.Add(result);
 

@@ -87,6 +87,7 @@ namespace vl
 						AmbiguityBegin,
 						AmbiguityBranch,
 						AmbiguityEnd,
+						SkipToken,
 					};
 
 					TransitionType								transitionType;
@@ -104,8 +105,8 @@ namespace vl
 					vint										instructionCount;
 					Ptr<collections::List<ShiftReduceRange>>	shiftReduceRanges;
 
-					TransitionResult()
-						:transitionType(ExecuteInstructions)
+					TransitionResult(TransitionType _transitionType=ExecuteInstructions)
+						:transitionType(_transitionType)
 						,ambiguityAffectedStackNodeCount(0)
 						,tableTokenIndex(-1)
 						,tableStateSource(-1)
@@ -195,6 +196,7 @@ namespace vl
 				vint										GetCurrentToken();
 				const collections::List<vint>&				GetStateStack();
 				vint										GetCurrentState();
+				void										SkipCurrentToken();
 
 				bool										TestTransitionItemInFuture(vint tableTokenIndex, Future* future, ParsingTable::TransitionItem* item, const collections::IEnumerable<vint>* lookAheadTokens);
 				ParsingTable::TransitionItem*				MatchTokenInFuture(vint tableTokenIndex, Future* future, const collections::IEnumerable<vint>* lookAheadTokens);
