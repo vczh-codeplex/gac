@@ -619,7 +619,11 @@ TEST_CASE(TestAutoRecoverParser)
 	inputs.Add(L"1 2+3)");
 	inputs.Add(L"(1 2+3");
 	inputs.Add(L"()");
-	ParseWithAutoRecover(definition, L"Calculator", L"Exp", inputs);
+	inputs.Add(L"exec");
+	inputs.Add(L"exec (");
+	inputs.Add(L"exec )");
+	inputs.Add(L"exec exec");
+	ParseWithAutoRecover(definition, L"Calculator", L"Exec", inputs);
 }
 
 namespace test
