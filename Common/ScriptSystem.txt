@@ -557,6 +557,7 @@ a op
 
 f(a, b, c)
 f(.. t)
+f(a, b, ..t)
 a.b
 a as Type		// explicit type conversion, invoking Convertable
 
@@ -628,19 +629,39 @@ func Length(xs) = Length_(0, xs);
 ---------------------------------------
 
 @Private // declarations put in @Private will be put in a nested random generated namespace like namespace private-guid
-func<T> string.Format_(switch T args, int start)
+func<T> string.Format_(T args, int start)
 	where Tuple<T>;
 
 @Private
-func string.Format_(instance <>, _) = this;
+func string.Format_(<>, _) = this;
 @Private
-func string.Format_(instance a..b, start) = 
+func string.Format_(a..b, start) = 
 	message
 		.Replace("{" + start.ToString() + "}", a.ToString())
 		.Format(b, start + 1);
 
 // functions in the same module can see declarations in the private namespace without naming it.
 func string.Format(..args) = this.Format_(args, 0);
+
+---------------------------------------
+
+@Private
+func<T> string.Format_(T args, int start)
+	where Tuple<T>;
+
+@Private
+func string.Format_<void>(<>::void, int _)
+{
+	return this;
+}
+
+@Private
+func<A, B> string.Format_<A..B>(a..b::A..B, int start)
+{
+	return message
+		.Replace("{" + start.ToString() + "}", a.ToString())
+		.Format(b, start + 1);
+}
 
 ========================================================
 Dynamic Dispatching
