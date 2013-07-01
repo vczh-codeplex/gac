@@ -289,6 +289,11 @@ ParsingState
 				return stateGroup->currentState;
 			}
 
+			void ParsingState::SkipCurrentToken()
+			{
+				walker->Move();
+			}
+
 			bool ParsingState::TestTransitionItemInFuture(vint tableTokenIndex, Future* future, ParsingTable::TransitionItem* item, const collections::IEnumerable<vint>* lookAheadTokens)
 			{
 				bool passLookAheadTest=true;
@@ -894,6 +899,8 @@ ParsingTreeBuilder
 						}
 					}
 					break;
+				default:
+					return false;
 				}
 				
 				return true;
