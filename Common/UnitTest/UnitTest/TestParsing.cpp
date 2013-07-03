@@ -626,7 +626,7 @@ TEST_CASE(TestAutoRecoverParser)
 	ParseWithAutoRecover(definition, L"Calculator", L"Exec", inputs, false);
 }
 
-TEST_CASE(TestAmbiguousAutoRecoverParser)
+TEST_CASE(TestAutoRecoverAmbiguousParser)
 {
 	Ptr<ParsingDefinition> definition=LoadDefinition(L"AmbiguousExpression");
 	List<WString> inputs;

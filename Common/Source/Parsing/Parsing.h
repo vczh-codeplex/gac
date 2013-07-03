@@ -89,6 +89,13 @@ namespace vl
 				void										BeginParse()override;
 			};
 
+			class ParsingAutoRecoverAmbiguousParser : public ParsingAmbiguousParser
+			{
+			public:
+				ParsingAutoRecoverAmbiguousParser(Ptr<ParsingTable> _table=0);
+				~ParsingAutoRecoverAmbiguousParser();
+			};
+
 /***********************************************************************
 ¸¨Öúº¯Êý
 ***********************************************************************/
