@@ -606,6 +606,19 @@ ParsingStrictParser
 			}
 
 /***********************************************************************
+ParsingAutoRecoverAmbiguousParser
+***********************************************************************/
+
+			ParsingAutoRecoverAmbiguousParser::ParsingAutoRecoverAmbiguousParser(Ptr<ParsingTable> _table)
+				:ParsingAmbiguousParser(_table)
+			{
+			}
+
+			ParsingAutoRecoverAmbiguousParser::~ParsingAutoRecoverAmbiguousParser()
+			{
+			}
+
+/***********************************************************************
 ¸¨Öúº¯Êý
 ***********************************************************************/
 
@@ -632,7 +645,14 @@ ParsingStrictParser
 			{
 				if(table)
 				{
-					return new ParsingAutoRecoverParser(table);
+					if(table->GetAmbiguity())
+					{
+						return new ParsingAutoRecoverAmbiguousParser(table);
+					}
+					else
+					{
+						return new ParsingAutoRecoverParser(table);
+					}
 				}
 				else
 				{
