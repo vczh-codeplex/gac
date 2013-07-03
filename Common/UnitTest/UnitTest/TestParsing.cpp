@@ -629,6 +629,24 @@ TEST_CASE(TestAutoRecoverAmbiguousParser)
 	Ptr<ParsingDefinition> definition=LoadDefinition(L"AmbiguousExpression");
 	List<WString> inputs;
 	inputs.Add(L"");
+	inputs.Add(L"a<");
+	inputs.Add(L"a>");
+	inputs.Add(L"a.");
+	inputs.Add(L"<a");
+	inputs.Add(L">a");
+	inputs.Add(L".a");
+	inputs.Add(L"x.a<");
+	inputs.Add(L"x.a>");
+	inputs.Add(L"x.a.");
+	inputs.Add(L"x.<a");
+	inputs.Add(L"x.>a");
+	inputs.Add(L"x..a");
+	inputs.Add(L"x<,a<");
+	inputs.Add(L"x<,a>");
+	inputs.Add(L"x<,a.");
+	inputs.Add(L"x<,<a");
+	inputs.Add(L"x<,>a");
+	inputs.Add(L"x<,.a");
 	ParseWithAutoRecover(definition, L"AmbiguousExpression", L"Exp", inputs, true);
 }
 
