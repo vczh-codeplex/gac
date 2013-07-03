@@ -508,13 +508,13 @@ TEST_CASE(TestParsingBootstrap)
 
 TEST_CASE(TestParsingTreeCharacterPosition)
 {
-	Ptr<ParsingStrictParser> parser;
+	Ptr<ParsingGeneralParser> parser;
 	{
 		List<Ptr<ParsingError>> errors;
 		Ptr<ParsingDefinition> definition=LoadDefinition(L"Calculator");
 		Ptr<ParsingTable> table=GenerateTable(definition, false, errors);
 		TEST_ASSERT(table);
-		parser=new ParsingStrictParser(table);
+		parser=CreateStrictParser(table);
 	}
 
 	WString input=L"11+22*\r\n33+44";
@@ -575,12 +575,12 @@ TEST_CASE(TestParsingTreeCharacterPosition)
 
 namespace test
 {
-	void ParseWithAutoRecover(Ptr<ParsingDefinition> definition, const WString& name, const WString& rule, List<WString>& inputs)
+	void ParseWithAutoRecover(Ptr<ParsingDefinition> definition, const WString& name, const WString& rule, List<WString>& inputs, bool enableAmbiguity)
 	{
 		List<Ptr<ParsingError>> errors;
-		Ptr<ParsingTable> table=GenerateTable(definition, false, errors);
+		Ptr<ParsingTable> table=GenerateTable(definition, enableAmbiguity, errors);
 		TEST_ASSERT(table);
-		Ptr<ParsingAutoRecoverParser> parser=new ParsingAutoRecoverParser(table);
+		Ptr<ParsingGeneralParser> parser=CreateAutoRecoverParser(table);
 
 		FileStream fileStream(GetPath()+L"Parsing.AutoRecover."+name+L".txt", FileStream::WriteOnly);
 		BomEncoder encoder(BomEncoder::Utf16);
@@ -623,7 +623,14 @@ TEST_CASE(TestAutoRecoverParser)
 	inputs.Add(L"exec (");
 	inputs.Add(L"exec )");
 	inputs.Add(L"exec exec");
-	ParseWithAutoRecover(definition, L"Calculator", L"Exec", inputs);
+	ParseWithAutoRecover(definition, L"Calculator", L"Exec", inputs, false);
+}
+
+TEST_CASE(TestAmbiguousAutoRecoverParser)
+{
+	Ptr<ParsingDefinition> definition=LoadDefinition(L"AmbiguousExpression");
+	List<WString> inputs;
+	ParseWithAutoRecover(definition, L"AmbiguousExpression", L"Exp", inputs, true);
 }
 
 namespace test
