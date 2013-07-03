@@ -217,7 +217,7 @@ ParsingAutoRecoverParser
 			}
 
 /***********************************************************************
-ParsingStrictParser
+ParsingAmbiguousParser
 ***********************************************************************/
 
 			ParsingAmbiguousParser::ParsingAmbiguousParser(Ptr<ParsingTable> _table)
@@ -307,6 +307,11 @@ ParsingStrictParser
 						vint skippedTokenCount=0;
 						vint tokenIndex=(token?table->GetTableTokenIndex(token->token):ParsingTable::TokenFinish);
 						OnErrorRecover(state, tokenIndex, token, futures, previousBegin, previousEnd, insertedTokenCount, skippedTokenCount, errors);
+						if(previousBegin==previousEnd)
+						{
+							break;
+						}
+
 						for(vint i=0;i<insertedTokenCount;i++)
 						{
 							tokens.Add(0);
@@ -318,10 +323,6 @@ ParsingStrictParser
 						if(skippedTokenCount>0)
 						{
 							continue;
-						}
-						else if(previousBegin==previousEnd)
-						{
-							break;
 						}
 					}
 					else
@@ -645,7 +646,44 @@ ParsingAutoRecoverAmbiguousParser
 			{
 				insertedTokenCount=0;
 				skippedTokenCount=0;
-				begin=end;
+				vint oldFutureCount=futures.Count();
+				while(futures.Count()-oldFutureCount<65536 && begin<end)
+				{
+					for(vint i=begin;i<end;i++)
+					{
+						if(state.TestExplore(currentTokenIndex, futures[i]))
+						{
+							return;
+						}
+					}
+					
+					for(vint j=ParsingTable::UserTokenStart;j<table->GetTokenCount();j++)
+					{
+						if(j!=currentTokenIndex)
+						{
+							for(vint i=begin;i<end;i++)
+							{
+								ParsingState::Future* now=futures[i];
+								state.Explore(j, now, futures);
+							}
+						}
+					}
+					if(futures.Count()==end)
+					{
+						for(vint i=begin;i<end;i++)
+						{
+							ParsingState::Future* now=futures[i];
+							state.Explore(ParsingTable::TryReduce, now, futures);
+						}
+					}
+					else
+					{
+						insertedTokenCount++;
+					}
+
+					begin=end;
+					end=futures.Count();
+				}
 			}
 
 			ParsingAutoRecoverAmbiguousParser::ParsingAutoRecoverAmbiguousParser(Ptr<ParsingTable> _table)
