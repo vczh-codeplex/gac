@@ -45,7 +45,7 @@ namespace vl
 			{
 			protected:
 
-				virtual ParsingState::TransitionResult		OnErrorRecover(ParsingState& state, const regex::RegexToken* currentToken, collections::List<Ptr<ParsingError>>& errors);
+				virtual ParsingState::TransitionResult		OnErrorRecover(ParsingState& state, vint currentTokenIndex, const regex::RegexToken* currentToken, collections::List<Ptr<ParsingError>>& errors);
 			public:
 				ParsingStrictParser(Ptr<ParsingTable> _table=0);
 				~ParsingStrictParser();
@@ -59,7 +59,7 @@ namespace vl
 				collections::Array<ParsingState::Future>	recoverFutures;
 				vint										recoveringFutureIndex;
 
-				ParsingState::TransitionResult				OnErrorRecover(ParsingState& state, const regex::RegexToken* currentToken, collections::List<Ptr<ParsingError>>& errors)override;
+				ParsingState::TransitionResult				OnErrorRecover(ParsingState& state, vint currentTokenIndex, const regex::RegexToken* currentToken, collections::List<Ptr<ParsingError>>& errors)override;
 			public:
 				ParsingAutoRecoverParser(Ptr<ParsingTable> _table=0);
 				~ParsingAutoRecoverParser();
@@ -73,6 +73,7 @@ namespace vl
 				DecisionList								decisions;
 				vint										consumedDecisionCount;
 
+				virtual void								OnErrorRecover(ParsingState& state, vint currentTokenIndex, const regex::RegexToken* currentToken, collections::List<ParsingState::Future*>& futures, vint begin, vint end, vint& insertedTokenCount, vint& skippedTokenCount, collections::List<Ptr<ParsingError>>& errors);
 				vint										GetResolvableFutureLevels(collections::List<ParsingState::Future*>& futures, vint begin, vint end);
 				vint										SearchPathForOneStep(ParsingState& state, collections::List<ParsingState::Future*>& futures, collections::List<regex::RegexToken*>& tokens, vint& begin, vint& end, collections::List<Ptr<ParsingError>>& errors);
 				vint										GetConflictReduceCount(collections::List<ParsingState::Future*>& futures);
@@ -91,6 +92,9 @@ namespace vl
 
 			class ParsingAutoRecoverAmbiguousParser : public ParsingAmbiguousParser
 			{
+			protected:
+
+				void										OnErrorRecover(ParsingState& state, vint currentTokenIndex, const regex::RegexToken* currentToken, collections::List<ParsingState::Future*>& futures, vint begin, vint end, vint& insertedTokenCount, vint& skippedTokenCount, collections::List<Ptr<ParsingError>>& errors)override;
 			public:
 				ParsingAutoRecoverAmbiguousParser(Ptr<ParsingTable> _table=0);
 				~ParsingAutoRecoverAmbiguousParser();

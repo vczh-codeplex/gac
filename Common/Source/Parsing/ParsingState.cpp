@@ -601,8 +601,12 @@ ParsingState
 				if(possibilities.Count()>oldPossibilitiesCount)
 				{
 					walker->Move();
+					return regexToken;
 				}
-				return regexToken;
+				else
+				{
+					return 0;
+				}
 			}
 
 			void ParsingState::ExploreTryReduce(collections::List<Future*>& previousFutures, vint start, vint count, collections::List<Future*>& possibilities)
