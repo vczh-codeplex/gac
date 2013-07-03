@@ -562,6 +562,27 @@ ParsingState
 				return result;
 			}
 
+			bool ParsingState::TestExplore(vint tableTokenIndex, Future* previous)
+			{
+				Future fakePrevious;
+				fakePrevious.currentState=stateGroup->currentState;
+				Future* realPrevious=previous?previous:&fakePrevious;
+
+				ParsingTable::TransitionBag* bag=table->GetTransitionBag(realPrevious->currentState, tableTokenIndex).Obj();
+				if(bag)
+				{
+					for(vint i=0;i<bag->transitionItems.Count();i++)
+					{
+						ParsingTable::TransitionItem* item=bag->transitionItems[i].Obj();
+						if(TestTransitionItemInFuture(tableTokenIndex, realPrevious, item, 0))
+						{
+							return true;
+						}
+					}
+				}
+				return false;
+			}
+
 			void ParsingState::Explore(vint tableTokenIndex, Future* previous, collections::List<Future*>& possibilities)
 			{
 				Future fakePrevious;
