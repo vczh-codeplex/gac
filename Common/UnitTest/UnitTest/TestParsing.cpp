@@ -596,10 +596,8 @@ namespace test
 
 			errors.Clear();
 			Ptr<ParsingTreeNode> node=parser->Parse(input, rule, errors);
-			if(node)
-			{
-				Log(node, input, writer);
-			}
+			TEST_ASSERT(node);
+			Log(node, input, writer);
 			writer.WriteLine(L"");
 		}
 	}
@@ -630,6 +628,7 @@ TEST_CASE(TestAutoRecoverAmbiguousParser)
 {
 	Ptr<ParsingDefinition> definition=LoadDefinition(L"AmbiguousExpression");
 	List<WString> inputs;
+	inputs.Add(L"");
 	ParseWithAutoRecover(definition, L"AmbiguousExpression", L"Exp", inputs, true);
 }
 
