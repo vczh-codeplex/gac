@@ -230,10 +230,11 @@ ParsingStrictParser
 			{
 			}
 
-			void ParsingAmbiguousParser::OnErrorRecover(ParsingState& state, vint currentTokenIndex, const regex::RegexToken* currentToken, collections::List<ParsingState::Future*>& futures, vint begin, vint end, vint& insertedTokenCount, vint& skippedTokenCount, collections::List<Ptr<ParsingError>>& errors)
+			void ParsingAmbiguousParser::OnErrorRecover(ParsingState& state, vint currentTokenIndex, const regex::RegexToken* currentToken, collections::List<ParsingState::Future*>& futures, vint& begin, vint& end, vint& insertedTokenCount, vint& skippedTokenCount, collections::List<Ptr<ParsingError>>& errors)
 			{
 				insertedTokenCount=0;
 				skippedTokenCount=0;
+				begin=end;
 			}
 
 			vint ParsingAmbiguousParser::GetResolvableFutureLevels(collections::List<ParsingState::Future*>& futures, vint begin, vint end)
@@ -305,7 +306,7 @@ ParsingStrictParser
 						vint insertedTokenCount=0;
 						vint skippedTokenCount=0;
 						vint tokenIndex=(token?table->GetTableTokenIndex(token->token):ParsingTable::TokenFinish);
-						OnErrorRecover(state, tokenIndex, token, futures, previousBegin, previousEnd-previousBegin, insertedTokenCount, skippedTokenCount, errors);
+						OnErrorRecover(state, tokenIndex, token, futures, previousBegin, previousEnd, insertedTokenCount, skippedTokenCount, errors);
 						for(vint i=0;i<insertedTokenCount;i++)
 						{
 							tokens.Add(0);
@@ -314,20 +315,29 @@ ParsingStrictParser
 						{
 							state.SkipCurrentToken();
 						}
-						token=0;
+						if(skippedTokenCount>0)
+						{
+							continue;
+						}
+						else if(previousBegin==previousEnd)
+						{
+							break;
+						}
 					}
-
-					if(futures.Count()>previousEnd && token)
+					else
 					{
-						tokens.Add(token);
-					}
-					previousBegin=previousEnd;
-					previousEnd=futures.Count();
+						if(futures.Count()>previousEnd && token)
+						{
+							tokens.Add(token);
+						}
+						previousBegin=previousEnd;
+						previousEnd=futures.Count();
 					
-					resolvableFutureLevels=GetResolvableFutureLevels(futures, previousBegin, previousEnd);
-					if(resolvableFutureLevels!=0)
-					{
-						break;
+						resolvableFutureLevels=GetResolvableFutureLevels(futures, previousBegin, previousEnd);
+						if(resolvableFutureLevels!=0)
+						{
+							break;
+						}
 					}
 				}
 
@@ -631,10 +641,11 @@ ParsingStrictParser
 ParsingAutoRecoverAmbiguousParser
 ***********************************************************************/
 
-			void ParsingAutoRecoverAmbiguousParser::OnErrorRecover(ParsingState& state, vint currentTokenIndex, const regex::RegexToken* currentToken, collections::List<ParsingState::Future*>& futures, vint begin, vint end, vint& insertedTokenCount, vint& skippedTokenCount, collections::List<Ptr<ParsingError>>& errors)
+			void ParsingAutoRecoverAmbiguousParser::OnErrorRecover(ParsingState& state, vint currentTokenIndex, const regex::RegexToken* currentToken, collections::List<ParsingState::Future*>& futures, vint& begin, vint& end, vint& insertedTokenCount, vint& skippedTokenCount, collections::List<Ptr<ParsingError>>& errors)
 			{
 				insertedTokenCount=0;
 				skippedTokenCount=0;
+				begin=end;
 			}
 
 			ParsingAutoRecoverAmbiguousParser::ParsingAutoRecoverAmbiguousParser(Ptr<ParsingTable> _table)
