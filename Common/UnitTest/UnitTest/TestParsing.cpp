@@ -400,6 +400,7 @@ TEST_CASE(TestParsingAmbigiousExpression)
 		L"a.b.c",
 		L"a<b",
 		L"a>b",
+		L"a<>",
 		L"a<b>c",
 		L"a<b>.c",
 		L"a<b,c>.d",
