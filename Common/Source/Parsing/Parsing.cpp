@@ -76,7 +76,7 @@ ParsingGeneralParser
 						errors.Add(new ParsingError(token, L"Internal error when building the parsing tree."));
 						return 0;
 					}
-					if(result.tableTokenIndex==ParsingTable::TokenFinish)
+					if(result.tableTokenIndex==ParsingTable::TokenFinish && !builder.GetProcessingAmbiguityBranch())
 					{
 						break;
 					}
@@ -287,55 +287,6 @@ ParsingAmbiguousParser
 				}
 			}
 
-			void ParsingAmbiguousParser::RemoveInconsistenceInputFutures(collections::List<ParsingState::Future*>& futures, vint& begin, vint& end)
-			{
-				List<vint> tokens;
-				{
-					ParsingState::Future* future=futures[begin];
-					while(future)
-					{
-						tokens.Add(future->selectedToken);
-						future=future->previous;
-					}
-				}
-
-				List<vint> selectedFutures;
-				List<vint> tempTokens;
-				selectedFutures.Add(begin);
-				for(vint i=begin+1;i<end;i++)
-				{
-					ParsingState::Future* future=futures[i];
-					while(future)
-					{
-						tempTokens.Add(future->selectedToken);
-						future=future->previous;
-					}
-
-					bool selected=true;
-					for(vint j=0;j<tokens.Count();j++)
-					{
-						if(tokens[j]!=tempTokens[j])
-						{
-							selected=false;
-							break;
-						}
-					}
-					if(selected)
-					{
-						selectedFutures.Add(i);
-					}
-				}
-
-				for(vint i=selectedFutures.Count()-1;i>=0;i--)
-				{
-					vint index=selectedFutures[i];
-					ParsingState::Future* future=futures[index];
-					futures.RemoveAt(index);
-					futures.Add(future);
-				}
-				begin=end-selectedFutures.Count();
-			}
-
 			vint ParsingAmbiguousParser::SearchPathForOneStep(ParsingState& state, collections::List<ParsingState::Future*>& futures, collections::List<regex::RegexToken*>& tokens, vint& begin, vint& end, collections::List<Ptr<ParsingError>>& errors)
 			{
 				futures.Add(state.ExploreCreateRootFuture());
@@ -388,10 +339,6 @@ ParsingAmbiguousParser
 						resolvableFutureLevels=GetResolvableFutureLevels(futures, previousBegin, previousEnd);
 						if(resolvableFutureLevels!=0)
 						{
-							if(errorRecovered)
-							{
-								RemoveInconsistenceInputFutures(futures, previousBegin, previousEnd);
-							}
 							break;
 						}
 					}

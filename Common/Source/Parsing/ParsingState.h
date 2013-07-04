@@ -242,6 +242,7 @@ namespace vl
 
 				void										Reset();
 				bool										Run(const ParsingState::TransitionResult& result);
+				bool										GetProcessingAmbiguityBranch();
 				Ptr<ParsingTreeObject>						GetNode();
 			};
 		}
