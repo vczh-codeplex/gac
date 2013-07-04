@@ -287,12 +287,62 @@ ParsingAmbiguousParser
 				}
 			}
 
+			void ParsingAmbiguousParser::RemoveInconsistenceInputFutures(collections::List<ParsingState::Future*>& futures, vint& begin, vint& end)
+			{
+				List<vint> tokens;
+				{
+					ParsingState::Future* future=futures[begin];
+					while(future)
+					{
+						tokens.Add(future->selectedToken);
+						future=future->previous;
+					}
+				}
+
+				List<vint> selectedFutures;
+				List<vint> tempTokens;
+				selectedFutures.Add(begin);
+				for(vint i=begin+1;i<end;i++)
+				{
+					ParsingState::Future* future=futures[i];
+					while(future)
+					{
+						tempTokens.Add(future->selectedToken);
+						future=future->previous;
+					}
+
+					bool selected=true;
+					for(vint j=0;j<tokens.Count();j++)
+					{
+						if(tokens[j]!=tempTokens[j])
+						{
+							selected=false;
+							break;
+						}
+					}
+					if(selected)
+					{
+						selectedFutures.Add(i);
+					}
+				}
+
+				for(vint i=selectedFutures.Count()-1;i>=0;i--)
+				{
+					vint index=selectedFutures[i];
+					ParsingState::Future* future=futures[index];
+					futures.RemoveAt(index);
+					futures.Add(future);
+				}
+				begin=end-selectedFutures.Count();
+			}
+
 			vint ParsingAmbiguousParser::SearchPathForOneStep(ParsingState& state, collections::List<ParsingState::Future*>& futures, collections::List<regex::RegexToken*>& tokens, vint& begin, vint& end, collections::List<Ptr<ParsingError>>& errors)
 			{
 				futures.Add(state.ExploreCreateRootFuture());
 				vint previousBegin=0;
 				vint previousEnd=1;
 				vint resolvableFutureLevels=0;
+				bool errorRecovered=false;
 
 				while(true)
 				{
@@ -312,6 +362,7 @@ ParsingAmbiguousParser
 							break;
 						}
 
+						errorRecovered=true;
 						for(vint i=0;i<insertedTokenCount;i++)
 						{
 							tokens.Add(0);
@@ -333,10 +384,14 @@ ParsingAmbiguousParser
 						}
 						previousBegin=previousEnd;
 						previousEnd=futures.Count();
-					
+
 						resolvableFutureLevels=GetResolvableFutureLevels(futures, previousBegin, previousEnd);
 						if(resolvableFutureLevels!=0)
 						{
+							if(errorRecovered)
+							{
+								RemoveInconsistenceInputFutures(futures, previousBegin, previousEnd);
+							}
 							break;
 						}
 					}
@@ -653,7 +708,7 @@ ParsingAutoRecoverAmbiguousParser
 					{
 						if(state.TestExplore(currentTokenIndex, futures[i]))
 						{
-							return;
+							goto FINISH_ERROR_RECOVERY;
 						}
 					}
 					
@@ -683,6 +738,12 @@ ParsingAutoRecoverAmbiguousParser
 
 					begin=end;
 					end=futures.Count();
+				}
+
+			FINISH_ERROR_RECOVERY:
+				if(begin==end && currentTokenIndex>=ParsingTable::UserTokenStart)
+				{
+					skippedTokenCount=1;
 				}
 			}
 
