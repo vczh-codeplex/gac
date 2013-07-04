@@ -931,6 +931,11 @@ ParsingTreeBuilder
 				return true;
 			}
 
+			bool ParsingTreeBuilder::GetProcessingAmbiguityBranch()
+			{
+				return processingAmbiguityBranch;
+			}
+
 			Ptr<ParsingTreeObject> ParsingTreeBuilder::GetNode()
 			{
 				if(nodeStack.Count()==0)
