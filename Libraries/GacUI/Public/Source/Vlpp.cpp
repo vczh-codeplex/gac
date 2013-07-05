@@ -2437,13 +2437,27 @@ ParsingGeneralParser
 						errors.Add(new ParsingError(token, L"Internal error when parsing."));
 						return 0;
 					}
-					if(!builder.Run(result))
+					else if(result.transitionType==ParsingState::TransitionResult::SkipToken)
+					{
+						if(result.tableTokenIndex==ParsingTable::TokenFinish)
+						{
+							const RegexToken* token=state.GetToken(state.GetCurrentToken());
+							errors.Add(new ParsingError(token, L"Failed to recover error when reaching the end of the input."));
+							return 0;
+						}
+						else
+						{
+							state.SkipCurrentToken();
+							continue;
+						}
+					}
+					else if(!builder.Run(result))
 					{
 						const RegexToken* token=state.GetToken(state.GetCurrentToken());
 						errors.Add(new ParsingError(token, L"Internal error when building the parsing tree."));
 						return 0;
 					}
-					if(result.tableTokenIndex==ParsingTable::TokenFinish)
+					if(result.tableTokenIndex==ParsingTable::TokenFinish && !builder.GetProcessingAmbiguityBranch())
 					{
 						break;
 					}
@@ -2473,10 +2487,10 @@ ParsingGeneralParser
 ParsingStrictParser
 ***********************************************************************/
 
-			ParsingState::TransitionResult ParsingStrictParser::OnErrorRecover(ParsingState& state, const regex::RegexToken* currentToken, collections::List<Ptr<ParsingError>>& errors)
+			ParsingState::TransitionResult ParsingStrictParser::OnErrorRecover(ParsingState& state, vint currentTokenIndex, const regex::RegexToken* currentToken, collections::List<Ptr<ParsingError>>& errors)
 			{
 				const RegexToken* token=state.GetToken(state.GetCurrentToken());
-				errors.Add(new ParsingError(token, (token==0?L"Error happened during parsing when reaching to the end of the input.":L"Error happened during parsing.")));
+				errors.Add(new ParsingError(token, (token==0?L"Error happened during parsing when reaching the end of the input.":L"Error happened during parsing.")));
 				return ParsingState::TransitionResult();
 			}
 
@@ -2494,8 +2508,9 @@ ParsingStrictParser
 				ParsingState::TransitionResult result=state.ReadToken();
 				if(!result)
 				{
-					const RegexToken* token=state.GetToken(state.GetCurrentToken());
-					result=OnErrorRecover(state, token, errors);
+					const RegexToken* currentToken=state.GetToken(state.GetCurrentToken());
+					vint currentTokenIndex=(currentToken?table->GetTableTokenIndex(currentToken->token):ParsingTable::TokenFinish);
+					result=OnErrorRecover(state, currentTokenIndex, currentToken, errors);
 				}
 				return result;
 			}
@@ -2504,14 +2519,13 @@ ParsingStrictParser
 ParsingAutoRecoverParser
 ***********************************************************************/
 
-			ParsingState::TransitionResult ParsingAutoRecoverParser::OnErrorRecover(ParsingState& state, const regex::RegexToken* currentToken, collections::List<Ptr<ParsingError>>& errors)
+			ParsingState::TransitionResult ParsingAutoRecoverParser::OnErrorRecover(ParsingState& state, vint currentTokenIndex, const regex::RegexToken* currentToken, collections::List<Ptr<ParsingError>>& errors)
 			{
-				vint targetTableTokenIndex=(currentToken?table->GetTableTokenIndex(currentToken->token):ParsingTable::TokenFinish);
 				if(recoveringFutureIndex==-1)
 				{
 					vint processingFutureIndex=-1;
 					vint usedFutureCount=0;
-					while(true)
+					while(processingFutureIndex<recoverFutures.Count())
 					{
 						ParsingState::Future* previous=0;
 						if(processingFutureIndex!=-1)
@@ -2526,7 +2540,7 @@ ParsingAutoRecoverParser
 							ParsingState::Future* now=&recoverFutures[usedFutureCount];
 							if(state.ReadTokenInFuture(currentTableTokenIndex, previous, now, 0))
 							{
-								if(currentTableTokenIndex==targetTableTokenIndex)
+								if(currentTableTokenIndex==currentTokenIndex)
 								{
 									ParsingState::Future* future=previous;
 									while(future->previous)
@@ -2568,7 +2582,7 @@ ParsingAutoRecoverParser
 				}
 				else
 				{
-					return ParsingState::TransitionResult();
+					return ParsingState::TransitionResult(ParsingState::TransitionResult::SkipToken);
 				}
 			}
 
@@ -2584,7 +2598,7 @@ ParsingAutoRecoverParser
 			}
 
 /***********************************************************************
-ParsingStrictParser
+ParsingAmbiguousParser
 ***********************************************************************/
 
 			ParsingAmbiguousParser::ParsingAmbiguousParser(Ptr<ParsingTable> _table)
@@ -2595,6 +2609,13 @@ ParsingStrictParser
 
 			ParsingAmbiguousParser::~ParsingAmbiguousParser()
 			{
+			}
+
+			void ParsingAmbiguousParser::OnErrorRecover(ParsingState& state, vint currentTokenIndex, const regex::RegexToken* currentToken, collections::List<ParsingState::Future*>& futures, vint& begin, vint& end, vint& insertedTokenCount, vint& skippedTokenCount, collections::List<Ptr<ParsingError>>& errors)
+			{
+				insertedTokenCount=0;
+				skippedTokenCount=0;
+				begin=end;
 			}
 
 			vint ParsingAmbiguousParser::GetResolvableFutureLevels(collections::List<ParsingState::Future*>& futures, vint begin, vint end)
@@ -2653,6 +2674,7 @@ ParsingStrictParser
 				vint previousBegin=0;
 				vint previousEnd=1;
 				vint resolvableFutureLevels=0;
+				bool errorRecovered=false;
 
 				while(true)
 				{
@@ -2661,18 +2683,45 @@ ParsingStrictParser
 					{
 						state.ExploreTryReduce(futures, previousBegin, previousEnd-previousBegin, futures);
 					}
+					if(futures.Count()==previousEnd)
+					{
+						vint insertedTokenCount=0;
+						vint skippedTokenCount=0;
+						vint tokenIndex=(token?table->GetTableTokenIndex(token->token):ParsingTable::TokenFinish);
+						OnErrorRecover(state, tokenIndex, token, futures, previousBegin, previousEnd, insertedTokenCount, skippedTokenCount, errors);
+						if(previousBegin==previousEnd)
+						{
+							break;
+						}
 
-					if(futures.Count()>previousEnd && token)
-					{
-						tokens.Add(token);
+						errorRecovered=true;
+						for(vint i=0;i<insertedTokenCount;i++)
+						{
+							tokens.Add(0);
+						}
+						for(vint i=0;i=skippedTokenCount;i++)
+						{
+							state.SkipCurrentToken();
+						}
+						if(skippedTokenCount>0)
+						{
+							continue;
+						}
 					}
-					previousBegin=previousEnd;
-					previousEnd=futures.Count();
-					
-					resolvableFutureLevels=GetResolvableFutureLevels(futures, previousBegin, previousEnd);
-					if(resolvableFutureLevels!=0)
+					else
 					{
-						break;
+						if(futures.Count()>previousEnd && token)
+						{
+							tokens.Add(token);
+						}
+						previousBegin=previousEnd;
+						previousEnd=futures.Count();
+
+						resolvableFutureLevels=GetResolvableFutureLevels(futures, previousBegin, previousEnd);
+						if(resolvableFutureLevels!=0)
+						{
+							break;
+						}
 					}
 				}
 
@@ -2874,15 +2923,14 @@ ParsingStrictParser
 						stateGroup=state.TakeSnapshot();
 					}
 					{
-						ParsingState::TransitionResult result;
+						ParsingState::TransitionResult result(
+							i==0
+							?ParsingState::TransitionResult::AmbiguityBegin
+							:ParsingState::TransitionResult::AmbiguityBranch
+							);
 						if(i==0)
 						{
-							result.transitionType=ParsingState::TransitionResult::AmbiguityBegin;
 							result.ambiguityAffectedStackNodeCount=affectedStackNodeCount;
-						}
-						else
-						{
-							result.transitionType=ParsingState::TransitionResult::AmbiguityBranch;
 						}
 						decisions.Add(result);
 					}
@@ -2891,8 +2939,7 @@ ParsingStrictParser
 
 						if(i==resolvingFutures.Count()-1)
 						{
-							ParsingState::TransitionResult result;
-							result.transitionType=ParsingState::TransitionResult::AmbiguityEnd;
+							ParsingState::TransitionResult result(ParsingState::TransitionResult::AmbiguityEnd);
 							result.ambiguityNodeType=ambiguityNodeType;
 							decisions.Add(result);
 
@@ -2975,6 +3022,69 @@ ParsingStrictParser
 			}
 
 /***********************************************************************
+ParsingAutoRecoverAmbiguousParser
+***********************************************************************/
+
+			void ParsingAutoRecoverAmbiguousParser::OnErrorRecover(ParsingState& state, vint currentTokenIndex, const regex::RegexToken* currentToken, collections::List<ParsingState::Future*>& futures, vint& begin, vint& end, vint& insertedTokenCount, vint& skippedTokenCount, collections::List<Ptr<ParsingError>>& errors)
+			{
+				insertedTokenCount=0;
+				skippedTokenCount=0;
+				vint oldFutureCount=futures.Count();
+				while(futures.Count()-oldFutureCount<65536 && begin<end)
+				{
+					for(vint i=begin;i<end;i++)
+					{
+						if(state.TestExplore(currentTokenIndex, futures[i]))
+						{
+							goto FINISH_ERROR_RECOVERY;
+						}
+					}
+					
+					for(vint j=ParsingTable::UserTokenStart;j<table->GetTokenCount();j++)
+					{
+						if(j!=currentTokenIndex)
+						{
+							for(vint i=begin;i<end;i++)
+							{
+								ParsingState::Future* now=futures[i];
+								state.Explore(j, now, futures);
+							}
+						}
+					}
+					if(futures.Count()==end)
+					{
+						for(vint i=begin;i<end;i++)
+						{
+							ParsingState::Future* now=futures[i];
+							state.Explore(ParsingTable::TryReduce, now, futures);
+						}
+					}
+					else
+					{
+						insertedTokenCount++;
+					}
+
+					begin=end;
+					end=futures.Count();
+				}
+
+			FINISH_ERROR_RECOVERY:
+				if(begin==end && currentTokenIndex>=ParsingTable::UserTokenStart)
+				{
+					skippedTokenCount=1;
+				}
+			}
+
+			ParsingAutoRecoverAmbiguousParser::ParsingAutoRecoverAmbiguousParser(Ptr<ParsingTable> _table)
+				:ParsingAmbiguousParser(_table)
+			{
+			}
+
+			ParsingAutoRecoverAmbiguousParser::~ParsingAutoRecoverAmbiguousParser()
+			{
+			}
+
+/***********************************************************************
 辅助函数
 ***********************************************************************/
 
@@ -3001,7 +3111,14 @@ ParsingStrictParser
 			{
 				if(table)
 				{
-					return new ParsingAutoRecoverParser(table);
+					if(table->GetAmbiguity())
+					{
+						return new ParsingAutoRecoverAmbiguousParser(table);
+					}
+					else
+					{
+						return new ParsingAutoRecoverParser(table);
+					}
 				}
 				else
 				{
@@ -8322,6 +8439,11 @@ ParsingState
 				return stateGroup->currentState;
 			}
 
+			void ParsingState::SkipCurrentToken()
+			{
+				walker->Move();
+			}
+
 			bool ParsingState::TestTransitionItemInFuture(vint tableTokenIndex, Future* future, ParsingTable::TransitionItem* item, const collections::IEnumerable<vint>* lookAheadTokens)
 			{
 				bool passLookAheadTest=true;
@@ -8590,6 +8712,27 @@ ParsingState
 				return result;
 			}
 
+			bool ParsingState::TestExplore(vint tableTokenIndex, Future* previous)
+			{
+				Future fakePrevious;
+				fakePrevious.currentState=stateGroup->currentState;
+				Future* realPrevious=previous?previous:&fakePrevious;
+
+				ParsingTable::TransitionBag* bag=table->GetTransitionBag(realPrevious->currentState, tableTokenIndex).Obj();
+				if(bag)
+				{
+					for(vint i=0;i<bag->transitionItems.Count();i++)
+					{
+						ParsingTable::TransitionItem* item=bag->transitionItems[i].Obj();
+						if(TestTransitionItemInFuture(tableTokenIndex, realPrevious, item, 0))
+						{
+							return true;
+						}
+					}
+				}
+				return false;
+			}
+
 			void ParsingState::Explore(vint tableTokenIndex, Future* previous, collections::List<Future*>& possibilities)
 			{
 				Future fakePrevious;
@@ -8629,8 +8772,12 @@ ParsingState
 				if(possibilities.Count()>oldPossibilitiesCount)
 				{
 					walker->Move();
+					return regexToken;
 				}
-				return regexToken;
+				else
+				{
+					return 0;
+				}
 			}
 
 			void ParsingState::ExploreTryReduce(collections::List<Future*>& previousFutures, vint start, vint count, collections::List<Future*>& possibilities)
@@ -8927,9 +9074,16 @@ ParsingTreeBuilder
 						}
 					}
 					break;
+				default:
+					return false;
 				}
 				
 				return true;
+			}
+
+			bool ParsingTreeBuilder::GetProcessingAmbiguityBranch()
+			{
+				return processingAmbiguityBranch;
 			}
 
 			Ptr<ParsingTreeObject> ParsingTreeBuilder::GetNode()
@@ -11867,7 +12021,9 @@ DescriptableObject
 ***********************************************************************/
 
 		DescriptableObject::DescriptableObject()
-			:objectSize(0)
+			:referenceCounter(0)
+			,sharedPtrDestructorProc(0)
+			,objectSize(0)
 			,typeDescriptor(0)
 		{
 		}
@@ -12066,8 +12222,6 @@ description::Value
 				case Null:
 					return targetValueType!=Text;
 				case RawPtr:
-					if(targetValueType!=RawPtr) return false;
-					break;
 				case SharedPtr:
 					if(targetValueType!=RawPtr && targetValueType!=SharedPtr) return false;
 					break;

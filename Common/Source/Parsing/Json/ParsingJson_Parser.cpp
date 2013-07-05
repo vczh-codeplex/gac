@@ -209,7 +209,7 @@ Parser Function
 			{
 				vl::parsing::tabling::ParsingState state(input, table);
 				state.Reset(L"JRoot");
-				vl::Ptr<vl::parsing::tabling::ParsingStrictParser> parser=new vl::parsing::tabling::ParsingStrictParser;
+				vl::Ptr<vl::parsing::tabling::ParsingGeneralParser> parser=vl::parsing::tabling::CreateStrictParser(table);
 				vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
 				vl::Ptr<vl::parsing::ParsingTreeNode> node=parser->Parse(state, errors);
 				return node;
@@ -219,7 +219,7 @@ Parser Function
 			{
 				vl::parsing::tabling::ParsingState state(input, table);
 				state.Reset(L"JRoot");
-				vl::Ptr<vl::parsing::tabling::ParsingStrictParser> parser=new vl::parsing::tabling::ParsingStrictParser;
+				vl::Ptr<vl::parsing::tabling::ParsingGeneralParser> parser=vl::parsing::tabling::CreateStrictParser(table);
 				vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
 				vl::Ptr<vl::parsing::ParsingTreeNode> node=parser->Parse(state, errors);
 				if(node)

@@ -3101,6 +3101,8 @@ Basic Construction
 				
 				virtual void								SetAssociatedControl(controls::GuiControl* control);
 				virtual void								SetAssociatedHost(GuiGraphicsHost* host);
+
+				static void									SharedPtrDestructorProc(DescriptableObject* obj);
 			public:
 				GuiGraphicsComposition();
 				~GuiGraphicsComposition();
@@ -4026,6 +4028,8 @@ Basic Construction
 				virtual void							OnBeforeReleaseGraphicsHost();
 				virtual void							UpdateVisuallyEnabled();
 				void									SetFocusableComposition(compositions::GuiGraphicsComposition* value);
+
+				static void								SharedPtrDestructorProc(DescriptableObject* obj);
 			public:
 				GuiControl(IStyleController* _styleController);
 				~GuiControl();

@@ -1,9 +1,5 @@
 #include "Dia2.h"
-#include "..\..\..\Source\Stream\Accessor.h"
-#include "..\..\..\Source\Stream\CharFormat.h"
-#include "..\..\..\Source\Stream\FileStream.h"
-#include "..\..\..\Source\Stream\CacheStream.h"
-#include "..\..\..\Source\Collections\Dictionary.h"
+#include "..\..\..\..\Libraries\GacUI\Public\Source\Vlpp.h"
 
 using namespace vl;
 using namespace vl::collections;

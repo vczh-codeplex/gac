@@ -1,7 +1,3 @@
-#include "..\..\..\Source\Console.h"
-#include "..\..\..\Source\Stream\FileStream.h"
-#include "..\..\..\Source\Stream\CharFormat.h"
-#include "..\..\..\Source\Combinator\StringCombinator.h"
 #include "FpmacroRuntime.h"
 #include "FpmacroParser.h"
 
@@ -9,7 +5,6 @@ using namespace vl;
 using namespace vl::console;
 using namespace vl::stream;
 using namespace vl::collections;
-using namespace vl::combinator;
 using namespace vl::parsing;
 using namespace vl::parsing::tabling;
 using namespace fpmacro;

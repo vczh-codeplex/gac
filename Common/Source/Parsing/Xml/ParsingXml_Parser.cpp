@@ -231,7 +231,7 @@ Parser Function
 			{
 				vl::parsing::tabling::ParsingState state(input, table);
 				state.Reset(L"XDocument");
-				vl::Ptr<vl::parsing::tabling::ParsingStrictParser> parser=new vl::parsing::tabling::ParsingStrictParser;
+				vl::Ptr<vl::parsing::tabling::ParsingGeneralParser> parser=vl::parsing::tabling::CreateStrictParser(table);
 				vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
 				vl::Ptr<vl::parsing::ParsingTreeNode> node=parser->Parse(state, errors);
 				return node;
@@ -241,7 +241,7 @@ Parser Function
 			{
 				vl::parsing::tabling::ParsingState state(input, table);
 				state.Reset(L"XDocument");
-				vl::Ptr<vl::parsing::tabling::ParsingStrictParser> parser=new vl::parsing::tabling::ParsingStrictParser;
+				vl::Ptr<vl::parsing::tabling::ParsingGeneralParser> parser=vl::parsing::tabling::CreateStrictParser(table);
 				vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
 				vl::Ptr<vl::parsing::ParsingTreeNode> node=parser->Parse(state, errors);
 				if(node)
@@ -255,7 +255,7 @@ Parser Function
 			{
 				vl::parsing::tabling::ParsingState state(input, table);
 				state.Reset(L"XElement");
-				vl::Ptr<vl::parsing::tabling::ParsingStrictParser> parser=new vl::parsing::tabling::ParsingStrictParser;
+				vl::Ptr<vl::parsing::tabling::ParsingGeneralParser> parser=vl::parsing::tabling::CreateStrictParser(table);
 				vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
 				vl::Ptr<vl::parsing::ParsingTreeNode> node=parser->Parse(state, errors);
 				return node;
@@ -265,7 +265,7 @@ Parser Function
 			{
 				vl::parsing::tabling::ParsingState state(input, table);
 				state.Reset(L"XElement");
-				vl::Ptr<vl::parsing::tabling::ParsingStrictParser> parser=new vl::parsing::tabling::ParsingStrictParser;
+				vl::Ptr<vl::parsing::tabling::ParsingGeneralParser> parser=vl::parsing::tabling::CreateStrictParser(table);
 				vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
 				vl::Ptr<vl::parsing::ParsingTreeNode> node=parser->Parse(state, errors);
 				if(node)
@@ -325,20 +325,20 @@ Table Generation
 				SET_STATE_INFO(7, L"XElement", L"XElement.4", L"<XElement>: \"<\" NAME : name { XAttribute : attributes } ( \"/>\" | \">\"¡ñ { XSubNode : subNodes } \"</\" NAME : closingName \">\" ) as Element\r\n<XElement>: \"<\" NAME : name { XAttribute : attributes } ( \"/>\" | \">\" ¡ñ{ XSubNode : subNodes } \"</\" NAME : closingName \">\" ) as Element")
 				SET_STATE_INFO(8, L"XInstruction", L"XInstruction.3", L"<XInstruction>: \"<?\" NAME : name { XAttribute : attributes } \"?>\" as Instruction¡ñ")
 				SET_STATE_INFO(9, L"XElement", L"XElement.RootEnd", L"$<XElement> ¡ñ")
-				SET_STATE_INFO(10, L"XElement", L"XElement.6", L"<XElement>: \"<\" NAME : name { XAttribute : attributes } ( \"/>\" | \">\" { XSubNode : subNodes } \"</\"¡ñ NAME : closingName \">\" ) as Element")
-				SET_STATE_INFO(11, L"XText", L"XText.1", L"<XText>: NAME : content | EQUAL : content | ATTVALUE : content | TEXT : content as Text¡ñ")
-				SET_STATE_INFO(12, L"XCData", L"XCData.1", L"<XCData>: CDATA : content as CData¡ñ")
-				SET_STATE_INFO(13, L"XComment", L"XComment.1", L"<XComment>: COMMENT : content as Comment¡ñ")
-				SET_STATE_INFO(14, L"XElement", L"XElement.1", L"<XElement>: \"<\"¡ñ NAME : name { XAttribute : attributes } ( \"/>\" | \">\" { XSubNode : subNodes } \"</\" NAME : closingName \">\" ) as Element")
+				SET_STATE_INFO(10, L"XText", L"XText.1", L"<XText>: NAME : content | EQUAL : content | ATTVALUE : content | TEXT : content as Text¡ñ")
+				SET_STATE_INFO(11, L"XCData", L"XCData.1", L"<XCData>: CDATA : content as CData¡ñ")
+				SET_STATE_INFO(12, L"XComment", L"XComment.1", L"<XComment>: COMMENT : content as Comment¡ñ")
+				SET_STATE_INFO(13, L"XElement", L"XElement.1", L"<XElement>: \"<\"¡ñ NAME : name { XAttribute : attributes } ( \"/>\" | \">\" { XSubNode : subNodes } \"</\" NAME : closingName \">\" ) as Element")
+				SET_STATE_INFO(14, L"XElement", L"XElement.6", L"<XElement>: \"<\" NAME : name { XAttribute : attributes } ( \"/>\" | \">\" { XSubNode : subNodes } \"</\"¡ñ NAME : closingName \">\" ) as Element")
 				SET_STATE_INFO(15, L"XSubNode", L"XSubNode.RootEnd", L"$<XSubNode> ¡ñ")
 				SET_STATE_INFO(16, L"XDocument", L"XDocument.RootEnd", L"$<XDocument> ¡ñ")
 				SET_STATE_INFO(17, L"XInstruction", L"XInstruction.RootEnd", L"$<XInstruction> ¡ñ")
 				SET_STATE_INFO(18, L"XInstruction", L"XInstruction.1", L"<XInstruction>: \"<?\"¡ñ NAME : name { XAttribute : attributes } \"?>\" as Instruction")
-				SET_STATE_INFO(19, L"XElement", L"XElement.7", L"<XElement>: \"<\" NAME : name { XAttribute : attributes } ( \"/>\" | \">\" { XSubNode : subNodes } \"</\" NAME : closingName¡ñ \">\" ) as Element")
-				SET_STATE_INFO(20, L"XText", L"XText.RootEnd", L"$<XText> ¡ñ")
-				SET_STATE_INFO(21, L"XCData", L"XCData.RootEnd", L"$<XCData> ¡ñ")
-				SET_STATE_INFO(22, L"XComment", L"XComment.RootEnd", L"$<XComment> ¡ñ")
-				SET_STATE_INFO(23, L"XElement", L"XElement.2", L"<XElement>: \"<\" NAME : name¡ñ { XAttribute : attributes } ( \"/>\" | \">\" { XSubNode : subNodes } \"</\" NAME : closingName \">\" ) as Element\r\n<XElement>: \"<\" NAME : name ¡ñ{ XAttribute : attributes } ( \"/>\" | \">\" { XSubNode : subNodes } \"</\" NAME : closingName \">\" ) as Element")
+				SET_STATE_INFO(19, L"XText", L"XText.RootEnd", L"$<XText> ¡ñ")
+				SET_STATE_INFO(20, L"XCData", L"XCData.RootEnd", L"$<XCData> ¡ñ")
+				SET_STATE_INFO(21, L"XComment", L"XComment.RootEnd", L"$<XComment> ¡ñ")
+				SET_STATE_INFO(22, L"XElement", L"XElement.2", L"<XElement>: \"<\" NAME : name¡ñ { XAttribute : attributes } ( \"/>\" | \">\" { XSubNode : subNodes } \"</\" NAME : closingName \">\" ) as Element\r\n<XElement>: \"<\" NAME : name ¡ñ{ XAttribute : attributes } ( \"/>\" | \">\" { XSubNode : subNodes } \"</\" NAME : closingName \">\" ) as Element")
+				SET_STATE_INFO(23, L"XElement", L"XElement.7", L"<XElement>: \"<\" NAME : name { XAttribute : attributes } ( \"/>\" | \">\" { XSubNode : subNodes } \"</\" NAME : closingName¡ñ \">\" ) as Element")
 				SET_STATE_INFO(24, L"XInstruction", L"XInstruction.2", L"<XInstruction>: \"<?\" NAME : name¡ñ { XAttribute : attributes } \"?>\" as Instruction\r\n<XInstruction>: \"<?\" NAME : name ¡ñ{ XAttribute : attributes } \"?>\" as Instruction")
 				SET_STATE_INFO(25, L"XText", L"XText.RootStart", L"¡ñ $<XText>")
 				SET_STATE_INFO(26, L"XText", L"XText.Start", L"¡¤ <XText>")
@@ -426,9 +426,9 @@ Table Generation
 				BEGIN_TRANSITION_BAG(4, 6)
 
 					BEGIN_TRANSITION_ITEM(6, 6)
-					ITEM_STACK_PATTERN(23)
+					ITEM_STACK_PATTERN(22)
 					ITEM_INSTRUCTION(Create, 0, L"Attribute", L"");
-					ITEM_INSTRUCTION(Reduce, 23, L"", L"");
+					ITEM_INSTRUCTION(Reduce, 22, L"", L"");
 					ITEM_INSTRUCTION(Item, 0, L"attributes", L"");
 					END_TRANSITION_ITEM
 
@@ -437,9 +437,9 @@ Table Generation
 				BEGIN_TRANSITION_BAG(4, 8)
 
 					BEGIN_TRANSITION_ITEM(8, 7)
-					ITEM_STACK_PATTERN(23)
+					ITEM_STACK_PATTERN(22)
 					ITEM_INSTRUCTION(Create, 0, L"Attribute", L"");
-					ITEM_INSTRUCTION(Reduce, 23, L"", L"");
+					ITEM_INSTRUCTION(Reduce, 22, L"", L"");
 					ITEM_INSTRUCTION(Item, 0, L"attributes", L"");
 					END_TRANSITION_ITEM
 
@@ -457,11 +457,11 @@ Table Generation
 					END_TRANSITION_ITEM
 
 					BEGIN_TRANSITION_ITEM(10, 2)
-					ITEM_STACK_PATTERN(23)
+					ITEM_STACK_PATTERN(22)
 					ITEM_INSTRUCTION(Create, 0, L"Attribute", L"");
-					ITEM_INSTRUCTION(Reduce, 23, L"", L"");
+					ITEM_INSTRUCTION(Reduce, 22, L"", L"");
 					ITEM_INSTRUCTION(Item, 0, L"attributes", L"");
-					ITEM_INSTRUCTION(Shift, 23, L"", L"");
+					ITEM_INSTRUCTION(Shift, 22, L"", L"");
 					ITEM_INSTRUCTION(Assign, 0, L"name", L"");
 					END_TRANSITION_ITEM
 
@@ -500,7 +500,7 @@ Table Generation
 
 				BEGIN_TRANSITION_BAG(6, 5)
 
-					BEGIN_TRANSITION_ITEM(5, 10)
+					BEGIN_TRANSITION_ITEM(5, 14)
 					ITEM_STACK_PATTERN(34)
 					ITEM_STACK_PATTERN(7)
 					ITEM_INSTRUCTION(Create, 0, L"Element", L"");
@@ -514,7 +514,7 @@ Table Generation
 
 				BEGIN_TRANSITION_BAG(6, 7)
 
-					BEGIN_TRANSITION_ITEM(7, 14)
+					BEGIN_TRANSITION_ITEM(7, 13)
 					ITEM_STACK_PATTERN(34)
 					ITEM_STACK_PATTERN(7)
 					ITEM_INSTRUCTION(Create, 0, L"Element", L"");
@@ -530,7 +530,7 @@ Table Generation
 
 				BEGIN_TRANSITION_BAG(6, 9)
 
-					BEGIN_TRANSITION_ITEM(9, 11)
+					BEGIN_TRANSITION_ITEM(9, 10)
 					ITEM_STACK_PATTERN(34)
 					ITEM_STACK_PATTERN(7)
 					ITEM_INSTRUCTION(Create, 0, L"Element", L"");
@@ -547,7 +547,7 @@ Table Generation
 
 				BEGIN_TRANSITION_BAG(6, 10)
 
-					BEGIN_TRANSITION_ITEM(10, 11)
+					BEGIN_TRANSITION_ITEM(10, 10)
 					ITEM_STACK_PATTERN(34)
 					ITEM_STACK_PATTERN(7)
 					ITEM_INSTRUCTION(Create, 0, L"Element", L"");
@@ -564,7 +564,7 @@ Table Generation
 
 				BEGIN_TRANSITION_BAG(6, 11)
 
-					BEGIN_TRANSITION_ITEM(11, 11)
+					BEGIN_TRANSITION_ITEM(11, 10)
 					ITEM_STACK_PATTERN(34)
 					ITEM_STACK_PATTERN(7)
 					ITEM_INSTRUCTION(Create, 0, L"Element", L"");
@@ -581,7 +581,7 @@ Table Generation
 
 				BEGIN_TRANSITION_BAG(6, 12)
 
-					BEGIN_TRANSITION_ITEM(12, 13)
+					BEGIN_TRANSITION_ITEM(12, 12)
 					ITEM_STACK_PATTERN(34)
 					ITEM_STACK_PATTERN(7)
 					ITEM_INSTRUCTION(Create, 0, L"Element", L"");
@@ -598,7 +598,7 @@ Table Generation
 
 				BEGIN_TRANSITION_BAG(6, 13)
 
-					BEGIN_TRANSITION_ITEM(13, 12)
+					BEGIN_TRANSITION_ITEM(13, 11)
 					ITEM_STACK_PATTERN(34)
 					ITEM_STACK_PATTERN(7)
 					ITEM_INSTRUCTION(Create, 0, L"Element", L"");
@@ -615,7 +615,7 @@ Table Generation
 
 				BEGIN_TRANSITION_BAG(6, 14)
 
-					BEGIN_TRANSITION_ITEM(14, 11)
+					BEGIN_TRANSITION_ITEM(14, 10)
 					ITEM_STACK_PATTERN(34)
 					ITEM_STACK_PATTERN(7)
 					ITEM_INSTRUCTION(Create, 0, L"Element", L"");
@@ -632,14 +632,14 @@ Table Generation
 
 				BEGIN_TRANSITION_BAG(7, 5)
 
-					BEGIN_TRANSITION_ITEM(5, 10)
+					BEGIN_TRANSITION_ITEM(5, 14)
 					END_TRANSITION_ITEM
 
 				END_TRANSITION_BAG
 
 				BEGIN_TRANSITION_BAG(7, 7)
 
-					BEGIN_TRANSITION_ITEM(7, 14)
+					BEGIN_TRANSITION_ITEM(7, 13)
 					ITEM_INSTRUCTION(Shift, 7, L"", L"");
 					ITEM_INSTRUCTION(Shift, 34, L"", L"");
 					END_TRANSITION_ITEM
@@ -648,7 +648,7 @@ Table Generation
 
 				BEGIN_TRANSITION_BAG(7, 9)
 
-					BEGIN_TRANSITION_ITEM(9, 11)
+					BEGIN_TRANSITION_ITEM(9, 10)
 					ITEM_INSTRUCTION(Shift, 7, L"", L"");
 					ITEM_INSTRUCTION(Shift, 34, L"", L"");
 					ITEM_INSTRUCTION(Assign, 0, L"content", L"");
@@ -658,7 +658,7 @@ Table Generation
 
 				BEGIN_TRANSITION_BAG(7, 10)
 
-					BEGIN_TRANSITION_ITEM(10, 11)
+					BEGIN_TRANSITION_ITEM(10, 10)
 					ITEM_INSTRUCTION(Shift, 7, L"", L"");
 					ITEM_INSTRUCTION(Shift, 34, L"", L"");
 					ITEM_INSTRUCTION(Assign, 0, L"content", L"");
@@ -668,7 +668,7 @@ Table Generation
 
 				BEGIN_TRANSITION_BAG(7, 11)
 
-					BEGIN_TRANSITION_ITEM(11, 11)
+					BEGIN_TRANSITION_ITEM(11, 10)
 					ITEM_INSTRUCTION(Shift, 7, L"", L"");
 					ITEM_INSTRUCTION(Shift, 34, L"", L"");
 					ITEM_INSTRUCTION(Assign, 0, L"content", L"");
@@ -678,7 +678,7 @@ Table Generation
 
 				BEGIN_TRANSITION_BAG(7, 12)
 
-					BEGIN_TRANSITION_ITEM(12, 13)
+					BEGIN_TRANSITION_ITEM(12, 12)
 					ITEM_INSTRUCTION(Shift, 7, L"", L"");
 					ITEM_INSTRUCTION(Shift, 34, L"", L"");
 					ITEM_INSTRUCTION(Assign, 0, L"content", L"");
@@ -688,7 +688,7 @@ Table Generation
 
 				BEGIN_TRANSITION_BAG(7, 13)
 
-					BEGIN_TRANSITION_ITEM(13, 12)
+					BEGIN_TRANSITION_ITEM(13, 11)
 					ITEM_INSTRUCTION(Shift, 7, L"", L"");
 					ITEM_INSTRUCTION(Shift, 34, L"", L"");
 					ITEM_INSTRUCTION(Assign, 0, L"content", L"");
@@ -698,7 +698,7 @@ Table Generation
 
 				BEGIN_TRANSITION_BAG(7, 14)
 
-					BEGIN_TRANSITION_ITEM(14, 11)
+					BEGIN_TRANSITION_ITEM(14, 10)
 					ITEM_INSTRUCTION(Shift, 7, L"", L"");
 					ITEM_INSTRUCTION(Shift, 34, L"", L"");
 					ITEM_INSTRUCTION(Assign, 0, L"content", L"");
@@ -736,7 +736,7 @@ Table Generation
 
 				BEGIN_TRANSITION_BAG(8, 7)
 
-					BEGIN_TRANSITION_ITEM(7, 14)
+					BEGIN_TRANSITION_ITEM(7, 13)
 					ITEM_STACK_PATTERN(47)
 					ITEM_INSTRUCTION(Create, 0, L"Instruction", L"");
 					ITEM_INSTRUCTION(Reduce, 47, L"", L"");
@@ -744,7 +744,7 @@ Table Generation
 					ITEM_INSTRUCTION(Shift, 47, L"", L"");
 					END_TRANSITION_ITEM
 
-					BEGIN_TRANSITION_ITEM(7, 14)
+					BEGIN_TRANSITION_ITEM(7, 13)
 					ITEM_STACK_PATTERN(38)
 					ITEM_INSTRUCTION(Create, 0, L"Instruction", L"");
 					ITEM_INSTRUCTION(Reduce, 38, L"", L"");
@@ -756,7 +756,7 @@ Table Generation
 
 				BEGIN_TRANSITION_BAG(8, 12)
 
-					BEGIN_TRANSITION_ITEM(12, 13)
+					BEGIN_TRANSITION_ITEM(12, 12)
 					ITEM_STACK_PATTERN(47)
 					ITEM_INSTRUCTION(Create, 0, L"Instruction", L"");
 					ITEM_INSTRUCTION(Reduce, 47, L"", L"");
@@ -765,7 +765,7 @@ Table Generation
 					ITEM_INSTRUCTION(Assign, 0, L"content", L"");
 					END_TRANSITION_ITEM
 
-					BEGIN_TRANSITION_ITEM(12, 13)
+					BEGIN_TRANSITION_ITEM(12, 12)
 					ITEM_STACK_PATTERN(38)
 					ITEM_INSTRUCTION(Create, 0, L"Instruction", L"");
 					ITEM_INSTRUCTION(Reduce, 38, L"", L"");
@@ -776,17 +776,9 @@ Table Generation
 
 				END_TRANSITION_BAG
 
-				BEGIN_TRANSITION_BAG(10, 10)
+				BEGIN_TRANSITION_BAG(10, 1)
 
-					BEGIN_TRANSITION_ITEM(10, 19)
-					ITEM_INSTRUCTION(Assign, 0, L"closingName", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(11, 1)
-
-					BEGIN_TRANSITION_ITEM(1, 20)
+					BEGIN_TRANSITION_ITEM(1, 19)
 					ITEM_INSTRUCTION(Create, 0, L"Text", L"");
 					END_TRANSITION_ITEM
 
@@ -799,9 +791,9 @@ Table Generation
 
 				END_TRANSITION_BAG
 
-				BEGIN_TRANSITION_BAG(11, 5)
+				BEGIN_TRANSITION_BAG(10, 5)
 
-					BEGIN_TRANSITION_ITEM(5, 10)
+					BEGIN_TRANSITION_ITEM(5, 14)
 					ITEM_STACK_PATTERN(34)
 					ITEM_STACK_PATTERN(7)
 					ITEM_INSTRUCTION(Create, 0, L"Text", L"");
@@ -813,9 +805,9 @@ Table Generation
 
 				END_TRANSITION_BAG
 
-				BEGIN_TRANSITION_BAG(11, 7)
+				BEGIN_TRANSITION_BAG(10, 7)
 
-					BEGIN_TRANSITION_ITEM(7, 14)
+					BEGIN_TRANSITION_ITEM(7, 13)
 					ITEM_STACK_PATTERN(34)
 					ITEM_STACK_PATTERN(7)
 					ITEM_INSTRUCTION(Create, 0, L"Text", L"");
@@ -829,12 +821,159 @@ Table Generation
 
 				END_TRANSITION_BAG
 
-				BEGIN_TRANSITION_BAG(11, 9)
+				BEGIN_TRANSITION_BAG(10, 9)
 
-					BEGIN_TRANSITION_ITEM(9, 11)
+					BEGIN_TRANSITION_ITEM(9, 10)
 					ITEM_STACK_PATTERN(34)
 					ITEM_STACK_PATTERN(7)
 					ITEM_INSTRUCTION(Create, 0, L"Text", L"");
+					ITEM_INSTRUCTION(Reduce, 34, L"", L"");
+					ITEM_INSTRUCTION(Using, 0, L"", L"");
+					ITEM_INSTRUCTION(Reduce, 7, L"", L"");
+					ITEM_INSTRUCTION(Item, 0, L"subNodes", L"");
+					ITEM_INSTRUCTION(Shift, 7, L"", L"");
+					ITEM_INSTRUCTION(Shift, 34, L"", L"");
+					ITEM_INSTRUCTION(Assign, 0, L"content", L"");
+					END_TRANSITION_ITEM
+
+				END_TRANSITION_BAG
+
+				BEGIN_TRANSITION_BAG(10, 10)
+
+					BEGIN_TRANSITION_ITEM(10, 10)
+					ITEM_STACK_PATTERN(34)
+					ITEM_STACK_PATTERN(7)
+					ITEM_INSTRUCTION(Create, 0, L"Text", L"");
+					ITEM_INSTRUCTION(Reduce, 34, L"", L"");
+					ITEM_INSTRUCTION(Using, 0, L"", L"");
+					ITEM_INSTRUCTION(Reduce, 7, L"", L"");
+					ITEM_INSTRUCTION(Item, 0, L"subNodes", L"");
+					ITEM_INSTRUCTION(Shift, 7, L"", L"");
+					ITEM_INSTRUCTION(Shift, 34, L"", L"");
+					ITEM_INSTRUCTION(Assign, 0, L"content", L"");
+					END_TRANSITION_ITEM
+
+				END_TRANSITION_BAG
+
+				BEGIN_TRANSITION_BAG(10, 11)
+
+					BEGIN_TRANSITION_ITEM(11, 10)
+					ITEM_STACK_PATTERN(34)
+					ITEM_STACK_PATTERN(7)
+					ITEM_INSTRUCTION(Create, 0, L"Text", L"");
+					ITEM_INSTRUCTION(Reduce, 34, L"", L"");
+					ITEM_INSTRUCTION(Using, 0, L"", L"");
+					ITEM_INSTRUCTION(Reduce, 7, L"", L"");
+					ITEM_INSTRUCTION(Item, 0, L"subNodes", L"");
+					ITEM_INSTRUCTION(Shift, 7, L"", L"");
+					ITEM_INSTRUCTION(Shift, 34, L"", L"");
+					ITEM_INSTRUCTION(Assign, 0, L"content", L"");
+					END_TRANSITION_ITEM
+
+				END_TRANSITION_BAG
+
+				BEGIN_TRANSITION_BAG(10, 12)
+
+					BEGIN_TRANSITION_ITEM(12, 12)
+					ITEM_STACK_PATTERN(34)
+					ITEM_STACK_PATTERN(7)
+					ITEM_INSTRUCTION(Create, 0, L"Text", L"");
+					ITEM_INSTRUCTION(Reduce, 34, L"", L"");
+					ITEM_INSTRUCTION(Using, 0, L"", L"");
+					ITEM_INSTRUCTION(Reduce, 7, L"", L"");
+					ITEM_INSTRUCTION(Item, 0, L"subNodes", L"");
+					ITEM_INSTRUCTION(Shift, 7, L"", L"");
+					ITEM_INSTRUCTION(Shift, 34, L"", L"");
+					ITEM_INSTRUCTION(Assign, 0, L"content", L"");
+					END_TRANSITION_ITEM
+
+				END_TRANSITION_BAG
+
+				BEGIN_TRANSITION_BAG(10, 13)
+
+					BEGIN_TRANSITION_ITEM(13, 11)
+					ITEM_STACK_PATTERN(34)
+					ITEM_STACK_PATTERN(7)
+					ITEM_INSTRUCTION(Create, 0, L"Text", L"");
+					ITEM_INSTRUCTION(Reduce, 34, L"", L"");
+					ITEM_INSTRUCTION(Using, 0, L"", L"");
+					ITEM_INSTRUCTION(Reduce, 7, L"", L"");
+					ITEM_INSTRUCTION(Item, 0, L"subNodes", L"");
+					ITEM_INSTRUCTION(Shift, 7, L"", L"");
+					ITEM_INSTRUCTION(Shift, 34, L"", L"");
+					ITEM_INSTRUCTION(Assign, 0, L"content", L"");
+					END_TRANSITION_ITEM
+
+				END_TRANSITION_BAG
+
+				BEGIN_TRANSITION_BAG(10, 14)
+
+					BEGIN_TRANSITION_ITEM(14, 10)
+					ITEM_STACK_PATTERN(34)
+					ITEM_STACK_PATTERN(7)
+					ITEM_INSTRUCTION(Create, 0, L"Text", L"");
+					ITEM_INSTRUCTION(Reduce, 34, L"", L"");
+					ITEM_INSTRUCTION(Using, 0, L"", L"");
+					ITEM_INSTRUCTION(Reduce, 7, L"", L"");
+					ITEM_INSTRUCTION(Item, 0, L"subNodes", L"");
+					ITEM_INSTRUCTION(Shift, 7, L"", L"");
+					ITEM_INSTRUCTION(Shift, 34, L"", L"");
+					ITEM_INSTRUCTION(Assign, 0, L"content", L"");
+					END_TRANSITION_ITEM
+
+				END_TRANSITION_BAG
+
+				BEGIN_TRANSITION_BAG(11, 1)
+
+					BEGIN_TRANSITION_ITEM(1, 20)
+					ITEM_INSTRUCTION(Create, 0, L"CData", L"");
+					END_TRANSITION_ITEM
+
+					BEGIN_TRANSITION_ITEM(1, 15)
+					ITEM_STACK_PATTERN(34)
+					ITEM_INSTRUCTION(Create, 0, L"CData", L"");
+					ITEM_INSTRUCTION(Reduce, 34, L"", L"");
+					ITEM_INSTRUCTION(Using, 0, L"", L"");
+					END_TRANSITION_ITEM
+
+				END_TRANSITION_BAG
+
+				BEGIN_TRANSITION_BAG(11, 5)
+
+					BEGIN_TRANSITION_ITEM(5, 14)
+					ITEM_STACK_PATTERN(34)
+					ITEM_STACK_PATTERN(7)
+					ITEM_INSTRUCTION(Create, 0, L"CData", L"");
+					ITEM_INSTRUCTION(Reduce, 34, L"", L"");
+					ITEM_INSTRUCTION(Using, 0, L"", L"");
+					ITEM_INSTRUCTION(Reduce, 7, L"", L"");
+					ITEM_INSTRUCTION(Item, 0, L"subNodes", L"");
+					END_TRANSITION_ITEM
+
+				END_TRANSITION_BAG
+
+				BEGIN_TRANSITION_BAG(11, 7)
+
+					BEGIN_TRANSITION_ITEM(7, 13)
+					ITEM_STACK_PATTERN(34)
+					ITEM_STACK_PATTERN(7)
+					ITEM_INSTRUCTION(Create, 0, L"CData", L"");
+					ITEM_INSTRUCTION(Reduce, 34, L"", L"");
+					ITEM_INSTRUCTION(Using, 0, L"", L"");
+					ITEM_INSTRUCTION(Reduce, 7, L"", L"");
+					ITEM_INSTRUCTION(Item, 0, L"subNodes", L"");
+					ITEM_INSTRUCTION(Shift, 7, L"", L"");
+					ITEM_INSTRUCTION(Shift, 34, L"", L"");
+					END_TRANSITION_ITEM
+
+				END_TRANSITION_BAG
+
+				BEGIN_TRANSITION_BAG(11, 9)
+
+					BEGIN_TRANSITION_ITEM(9, 10)
+					ITEM_STACK_PATTERN(34)
+					ITEM_STACK_PATTERN(7)
+					ITEM_INSTRUCTION(Create, 0, L"CData", L"");
 					ITEM_INSTRUCTION(Reduce, 34, L"", L"");
 					ITEM_INSTRUCTION(Using, 0, L"", L"");
 					ITEM_INSTRUCTION(Reduce, 7, L"", L"");
@@ -848,10 +987,10 @@ Table Generation
 
 				BEGIN_TRANSITION_BAG(11, 10)
 
-					BEGIN_TRANSITION_ITEM(10, 11)
+					BEGIN_TRANSITION_ITEM(10, 10)
 					ITEM_STACK_PATTERN(34)
 					ITEM_STACK_PATTERN(7)
-					ITEM_INSTRUCTION(Create, 0, L"Text", L"");
+					ITEM_INSTRUCTION(Create, 0, L"CData", L"");
 					ITEM_INSTRUCTION(Reduce, 34, L"", L"");
 					ITEM_INSTRUCTION(Using, 0, L"", L"");
 					ITEM_INSTRUCTION(Reduce, 7, L"", L"");
@@ -865,10 +1004,10 @@ Table Generation
 
 				BEGIN_TRANSITION_BAG(11, 11)
 
-					BEGIN_TRANSITION_ITEM(11, 11)
+					BEGIN_TRANSITION_ITEM(11, 10)
 					ITEM_STACK_PATTERN(34)
 					ITEM_STACK_PATTERN(7)
-					ITEM_INSTRUCTION(Create, 0, L"Text", L"");
+					ITEM_INSTRUCTION(Create, 0, L"CData", L"");
 					ITEM_INSTRUCTION(Reduce, 34, L"", L"");
 					ITEM_INSTRUCTION(Using, 0, L"", L"");
 					ITEM_INSTRUCTION(Reduce, 7, L"", L"");
@@ -882,10 +1021,10 @@ Table Generation
 
 				BEGIN_TRANSITION_BAG(11, 12)
 
-					BEGIN_TRANSITION_ITEM(12, 13)
+					BEGIN_TRANSITION_ITEM(12, 12)
 					ITEM_STACK_PATTERN(34)
 					ITEM_STACK_PATTERN(7)
-					ITEM_INSTRUCTION(Create, 0, L"Text", L"");
+					ITEM_INSTRUCTION(Create, 0, L"CData", L"");
 					ITEM_INSTRUCTION(Reduce, 34, L"", L"");
 					ITEM_INSTRUCTION(Using, 0, L"", L"");
 					ITEM_INSTRUCTION(Reduce, 7, L"", L"");
@@ -899,10 +1038,10 @@ Table Generation
 
 				BEGIN_TRANSITION_BAG(11, 13)
 
-					BEGIN_TRANSITION_ITEM(13, 12)
+					BEGIN_TRANSITION_ITEM(13, 11)
 					ITEM_STACK_PATTERN(34)
 					ITEM_STACK_PATTERN(7)
-					ITEM_INSTRUCTION(Create, 0, L"Text", L"");
+					ITEM_INSTRUCTION(Create, 0, L"CData", L"");
 					ITEM_INSTRUCTION(Reduce, 34, L"", L"");
 					ITEM_INSTRUCTION(Using, 0, L"", L"");
 					ITEM_INSTRUCTION(Reduce, 7, L"", L"");
@@ -916,10 +1055,10 @@ Table Generation
 
 				BEGIN_TRANSITION_BAG(11, 14)
 
-					BEGIN_TRANSITION_ITEM(14, 11)
+					BEGIN_TRANSITION_ITEM(14, 10)
 					ITEM_STACK_PATTERN(34)
 					ITEM_STACK_PATTERN(7)
-					ITEM_INSTRUCTION(Create, 0, L"Text", L"");
+					ITEM_INSTRUCTION(Create, 0, L"CData", L"");
 					ITEM_INSTRUCTION(Reduce, 34, L"", L"");
 					ITEM_INSTRUCTION(Using, 0, L"", L"");
 					ITEM_INSTRUCTION(Reduce, 7, L"", L"");
@@ -934,24 +1073,44 @@ Table Generation
 				BEGIN_TRANSITION_BAG(12, 1)
 
 					BEGIN_TRANSITION_ITEM(1, 21)
-					ITEM_INSTRUCTION(Create, 0, L"CData", L"");
+					ITEM_INSTRUCTION(Create, 0, L"Comment", L"");
 					END_TRANSITION_ITEM
 
 					BEGIN_TRANSITION_ITEM(1, 15)
 					ITEM_STACK_PATTERN(34)
-					ITEM_INSTRUCTION(Create, 0, L"CData", L"");
+					ITEM_INSTRUCTION(Create, 0, L"Comment", L"");
 					ITEM_INSTRUCTION(Reduce, 34, L"", L"");
 					ITEM_INSTRUCTION(Using, 0, L"", L"");
 					END_TRANSITION_ITEM
 
 				END_TRANSITION_BAG
 
+				BEGIN_TRANSITION_BAG(12, 3)
+
+					BEGIN_TRANSITION_ITEM(3, 18)
+					ITEM_STACK_PATTERN(47)
+					ITEM_INSTRUCTION(Create, 0, L"Comment", L"");
+					ITEM_INSTRUCTION(Reduce, 47, L"", L"");
+					ITEM_INSTRUCTION(Item, 0, L"prologs", L"");
+					ITEM_INSTRUCTION(Shift, 47, L"", L"");
+					END_TRANSITION_ITEM
+
+					BEGIN_TRANSITION_ITEM(3, 18)
+					ITEM_STACK_PATTERN(38)
+					ITEM_INSTRUCTION(Create, 0, L"Comment", L"");
+					ITEM_INSTRUCTION(Reduce, 38, L"", L"");
+					ITEM_INSTRUCTION(Item, 0, L"prologs", L"");
+					ITEM_INSTRUCTION(Shift, 47, L"", L"");
+					END_TRANSITION_ITEM
+
+				END_TRANSITION_BAG
+
 				BEGIN_TRANSITION_BAG(12, 5)
 
-					BEGIN_TRANSITION_ITEM(5, 10)
+					BEGIN_TRANSITION_ITEM(5, 14)
 					ITEM_STACK_PATTERN(34)
 					ITEM_STACK_PATTERN(7)
-					ITEM_INSTRUCTION(Create, 0, L"CData", L"");
+					ITEM_INSTRUCTION(Create, 0, L"Comment", L"");
 					ITEM_INSTRUCTION(Reduce, 34, L"", L"");
 					ITEM_INSTRUCTION(Using, 0, L"", L"");
 					ITEM_INSTRUCTION(Reduce, 7, L"", L"");
@@ -962,10 +1121,26 @@ Table Generation
 
 				BEGIN_TRANSITION_BAG(12, 7)
 
-					BEGIN_TRANSITION_ITEM(7, 14)
+					BEGIN_TRANSITION_ITEM(7, 13)
+					ITEM_STACK_PATTERN(47)
+					ITEM_INSTRUCTION(Create, 0, L"Comment", L"");
+					ITEM_INSTRUCTION(Reduce, 47, L"", L"");
+					ITEM_INSTRUCTION(Item, 0, L"prologs", L"");
+					ITEM_INSTRUCTION(Shift, 47, L"", L"");
+					END_TRANSITION_ITEM
+
+					BEGIN_TRANSITION_ITEM(7, 13)
+					ITEM_STACK_PATTERN(38)
+					ITEM_INSTRUCTION(Create, 0, L"Comment", L"");
+					ITEM_INSTRUCTION(Reduce, 38, L"", L"");
+					ITEM_INSTRUCTION(Item, 0, L"prologs", L"");
+					ITEM_INSTRUCTION(Shift, 47, L"", L"");
+					END_TRANSITION_ITEM
+
+					BEGIN_TRANSITION_ITEM(7, 13)
 					ITEM_STACK_PATTERN(34)
 					ITEM_STACK_PATTERN(7)
-					ITEM_INSTRUCTION(Create, 0, L"CData", L"");
+					ITEM_INSTRUCTION(Create, 0, L"Comment", L"");
 					ITEM_INSTRUCTION(Reduce, 34, L"", L"");
 					ITEM_INSTRUCTION(Using, 0, L"", L"");
 					ITEM_INSTRUCTION(Reduce, 7, L"", L"");
@@ -978,10 +1153,10 @@ Table Generation
 
 				BEGIN_TRANSITION_BAG(12, 9)
 
-					BEGIN_TRANSITION_ITEM(9, 11)
+					BEGIN_TRANSITION_ITEM(9, 10)
 					ITEM_STACK_PATTERN(34)
 					ITEM_STACK_PATTERN(7)
-					ITEM_INSTRUCTION(Create, 0, L"CData", L"");
+					ITEM_INSTRUCTION(Create, 0, L"Comment", L"");
 					ITEM_INSTRUCTION(Reduce, 34, L"", L"");
 					ITEM_INSTRUCTION(Using, 0, L"", L"");
 					ITEM_INSTRUCTION(Reduce, 7, L"", L"");
@@ -995,10 +1170,10 @@ Table Generation
 
 				BEGIN_TRANSITION_BAG(12, 10)
 
-					BEGIN_TRANSITION_ITEM(10, 11)
+					BEGIN_TRANSITION_ITEM(10, 10)
 					ITEM_STACK_PATTERN(34)
 					ITEM_STACK_PATTERN(7)
-					ITEM_INSTRUCTION(Create, 0, L"CData", L"");
+					ITEM_INSTRUCTION(Create, 0, L"Comment", L"");
 					ITEM_INSTRUCTION(Reduce, 34, L"", L"");
 					ITEM_INSTRUCTION(Using, 0, L"", L"");
 					ITEM_INSTRUCTION(Reduce, 7, L"", L"");
@@ -1012,10 +1187,10 @@ Table Generation
 
 				BEGIN_TRANSITION_BAG(12, 11)
 
-					BEGIN_TRANSITION_ITEM(11, 11)
+					BEGIN_TRANSITION_ITEM(11, 10)
 					ITEM_STACK_PATTERN(34)
 					ITEM_STACK_PATTERN(7)
-					ITEM_INSTRUCTION(Create, 0, L"CData", L"");
+					ITEM_INSTRUCTION(Create, 0, L"Comment", L"");
 					ITEM_INSTRUCTION(Reduce, 34, L"", L"");
 					ITEM_INSTRUCTION(Using, 0, L"", L"");
 					ITEM_INSTRUCTION(Reduce, 7, L"", L"");
@@ -1029,10 +1204,28 @@ Table Generation
 
 				BEGIN_TRANSITION_BAG(12, 12)
 
-					BEGIN_TRANSITION_ITEM(12, 13)
+					BEGIN_TRANSITION_ITEM(12, 12)
+					ITEM_STACK_PATTERN(47)
+					ITEM_INSTRUCTION(Create, 0, L"Comment", L"");
+					ITEM_INSTRUCTION(Reduce, 47, L"", L"");
+					ITEM_INSTRUCTION(Item, 0, L"prologs", L"");
+					ITEM_INSTRUCTION(Shift, 47, L"", L"");
+					ITEM_INSTRUCTION(Assign, 0, L"content", L"");
+					END_TRANSITION_ITEM
+
+					BEGIN_TRANSITION_ITEM(12, 12)
+					ITEM_STACK_PATTERN(38)
+					ITEM_INSTRUCTION(Create, 0, L"Comment", L"");
+					ITEM_INSTRUCTION(Reduce, 38, L"", L"");
+					ITEM_INSTRUCTION(Item, 0, L"prologs", L"");
+					ITEM_INSTRUCTION(Shift, 47, L"", L"");
+					ITEM_INSTRUCTION(Assign, 0, L"content", L"");
+					END_TRANSITION_ITEM
+
+					BEGIN_TRANSITION_ITEM(12, 12)
 					ITEM_STACK_PATTERN(34)
 					ITEM_STACK_PATTERN(7)
-					ITEM_INSTRUCTION(Create, 0, L"CData", L"");
+					ITEM_INSTRUCTION(Create, 0, L"Comment", L"");
 					ITEM_INSTRUCTION(Reduce, 34, L"", L"");
 					ITEM_INSTRUCTION(Using, 0, L"", L"");
 					ITEM_INSTRUCTION(Reduce, 7, L"", L"");
@@ -1046,10 +1239,10 @@ Table Generation
 
 				BEGIN_TRANSITION_BAG(12, 13)
 
-					BEGIN_TRANSITION_ITEM(13, 12)
+					BEGIN_TRANSITION_ITEM(13, 11)
 					ITEM_STACK_PATTERN(34)
 					ITEM_STACK_PATTERN(7)
-					ITEM_INSTRUCTION(Create, 0, L"CData", L"");
+					ITEM_INSTRUCTION(Create, 0, L"Comment", L"");
 					ITEM_INSTRUCTION(Reduce, 34, L"", L"");
 					ITEM_INSTRUCTION(Using, 0, L"", L"");
 					ITEM_INSTRUCTION(Reduce, 7, L"", L"");
@@ -1063,105 +1256,7 @@ Table Generation
 
 				BEGIN_TRANSITION_BAG(12, 14)
 
-					BEGIN_TRANSITION_ITEM(14, 11)
-					ITEM_STACK_PATTERN(34)
-					ITEM_STACK_PATTERN(7)
-					ITEM_INSTRUCTION(Create, 0, L"CData", L"");
-					ITEM_INSTRUCTION(Reduce, 34, L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"");
-					ITEM_INSTRUCTION(Reduce, 7, L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"subNodes", L"");
-					ITEM_INSTRUCTION(Shift, 7, L"", L"");
-					ITEM_INSTRUCTION(Shift, 34, L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"content", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(13, 1)
-
-					BEGIN_TRANSITION_ITEM(1, 22)
-					ITEM_INSTRUCTION(Create, 0, L"Comment", L"");
-					END_TRANSITION_ITEM
-
-					BEGIN_TRANSITION_ITEM(1, 15)
-					ITEM_STACK_PATTERN(34)
-					ITEM_INSTRUCTION(Create, 0, L"Comment", L"");
-					ITEM_INSTRUCTION(Reduce, 34, L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(13, 3)
-
-					BEGIN_TRANSITION_ITEM(3, 18)
-					ITEM_STACK_PATTERN(47)
-					ITEM_INSTRUCTION(Create, 0, L"Comment", L"");
-					ITEM_INSTRUCTION(Reduce, 47, L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"prologs", L"");
-					ITEM_INSTRUCTION(Shift, 47, L"", L"");
-					END_TRANSITION_ITEM
-
-					BEGIN_TRANSITION_ITEM(3, 18)
-					ITEM_STACK_PATTERN(38)
-					ITEM_INSTRUCTION(Create, 0, L"Comment", L"");
-					ITEM_INSTRUCTION(Reduce, 38, L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"prologs", L"");
-					ITEM_INSTRUCTION(Shift, 47, L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(13, 5)
-
-					BEGIN_TRANSITION_ITEM(5, 10)
-					ITEM_STACK_PATTERN(34)
-					ITEM_STACK_PATTERN(7)
-					ITEM_INSTRUCTION(Create, 0, L"Comment", L"");
-					ITEM_INSTRUCTION(Reduce, 34, L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"");
-					ITEM_INSTRUCTION(Reduce, 7, L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"subNodes", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(13, 7)
-
-					BEGIN_TRANSITION_ITEM(7, 14)
-					ITEM_STACK_PATTERN(47)
-					ITEM_INSTRUCTION(Create, 0, L"Comment", L"");
-					ITEM_INSTRUCTION(Reduce, 47, L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"prologs", L"");
-					ITEM_INSTRUCTION(Shift, 47, L"", L"");
-					END_TRANSITION_ITEM
-
-					BEGIN_TRANSITION_ITEM(7, 14)
-					ITEM_STACK_PATTERN(38)
-					ITEM_INSTRUCTION(Create, 0, L"Comment", L"");
-					ITEM_INSTRUCTION(Reduce, 38, L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"prologs", L"");
-					ITEM_INSTRUCTION(Shift, 47, L"", L"");
-					END_TRANSITION_ITEM
-
-					BEGIN_TRANSITION_ITEM(7, 14)
-					ITEM_STACK_PATTERN(34)
-					ITEM_STACK_PATTERN(7)
-					ITEM_INSTRUCTION(Create, 0, L"Comment", L"");
-					ITEM_INSTRUCTION(Reduce, 34, L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"");
-					ITEM_INSTRUCTION(Reduce, 7, L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"subNodes", L"");
-					ITEM_INSTRUCTION(Shift, 7, L"", L"");
-					ITEM_INSTRUCTION(Shift, 34, L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(13, 9)
-
-					BEGIN_TRANSITION_ITEM(9, 11)
+					BEGIN_TRANSITION_ITEM(14, 10)
 					ITEM_STACK_PATTERN(34)
 					ITEM_STACK_PATTERN(7)
 					ITEM_INSTRUCTION(Create, 0, L"Comment", L"");
@@ -1178,103 +1273,8 @@ Table Generation
 
 				BEGIN_TRANSITION_BAG(13, 10)
 
-					BEGIN_TRANSITION_ITEM(10, 11)
-					ITEM_STACK_PATTERN(34)
-					ITEM_STACK_PATTERN(7)
-					ITEM_INSTRUCTION(Create, 0, L"Comment", L"");
-					ITEM_INSTRUCTION(Reduce, 34, L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"");
-					ITEM_INSTRUCTION(Reduce, 7, L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"subNodes", L"");
-					ITEM_INSTRUCTION(Shift, 7, L"", L"");
-					ITEM_INSTRUCTION(Shift, 34, L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"content", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(13, 11)
-
-					BEGIN_TRANSITION_ITEM(11, 11)
-					ITEM_STACK_PATTERN(34)
-					ITEM_STACK_PATTERN(7)
-					ITEM_INSTRUCTION(Create, 0, L"Comment", L"");
-					ITEM_INSTRUCTION(Reduce, 34, L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"");
-					ITEM_INSTRUCTION(Reduce, 7, L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"subNodes", L"");
-					ITEM_INSTRUCTION(Shift, 7, L"", L"");
-					ITEM_INSTRUCTION(Shift, 34, L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"content", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(13, 12)
-
-					BEGIN_TRANSITION_ITEM(12, 13)
-					ITEM_STACK_PATTERN(47)
-					ITEM_INSTRUCTION(Create, 0, L"Comment", L"");
-					ITEM_INSTRUCTION(Reduce, 47, L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"prologs", L"");
-					ITEM_INSTRUCTION(Shift, 47, L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"content", L"");
-					END_TRANSITION_ITEM
-
-					BEGIN_TRANSITION_ITEM(12, 13)
-					ITEM_STACK_PATTERN(38)
-					ITEM_INSTRUCTION(Create, 0, L"Comment", L"");
-					ITEM_INSTRUCTION(Reduce, 38, L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"prologs", L"");
-					ITEM_INSTRUCTION(Shift, 47, L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"content", L"");
-					END_TRANSITION_ITEM
-
-					BEGIN_TRANSITION_ITEM(12, 13)
-					ITEM_STACK_PATTERN(34)
-					ITEM_STACK_PATTERN(7)
-					ITEM_INSTRUCTION(Create, 0, L"Comment", L"");
-					ITEM_INSTRUCTION(Reduce, 34, L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"");
-					ITEM_INSTRUCTION(Reduce, 7, L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"subNodes", L"");
-					ITEM_INSTRUCTION(Shift, 7, L"", L"");
-					ITEM_INSTRUCTION(Shift, 34, L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"content", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(13, 13)
-
-					BEGIN_TRANSITION_ITEM(13, 12)
-					ITEM_STACK_PATTERN(34)
-					ITEM_STACK_PATTERN(7)
-					ITEM_INSTRUCTION(Create, 0, L"Comment", L"");
-					ITEM_INSTRUCTION(Reduce, 34, L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"");
-					ITEM_INSTRUCTION(Reduce, 7, L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"subNodes", L"");
-					ITEM_INSTRUCTION(Shift, 7, L"", L"");
-					ITEM_INSTRUCTION(Shift, 34, L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"content", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(13, 14)
-
-					BEGIN_TRANSITION_ITEM(14, 11)
-					ITEM_STACK_PATTERN(34)
-					ITEM_STACK_PATTERN(7)
-					ITEM_INSTRUCTION(Create, 0, L"Comment", L"");
-					ITEM_INSTRUCTION(Reduce, 34, L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"");
-					ITEM_INSTRUCTION(Reduce, 7, L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"subNodes", L"");
-					ITEM_INSTRUCTION(Shift, 7, L"", L"");
-					ITEM_INSTRUCTION(Shift, 34, L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"content", L"");
+					BEGIN_TRANSITION_ITEM(10, 22)
+					ITEM_INSTRUCTION(Assign, 0, L"name", L"");
 					END_TRANSITION_ITEM
 
 				END_TRANSITION_BAG
@@ -1282,7 +1282,7 @@ Table Generation
 				BEGIN_TRANSITION_BAG(14, 10)
 
 					BEGIN_TRANSITION_ITEM(10, 23)
-					ITEM_INSTRUCTION(Assign, 0, L"name", L"");
+					ITEM_INSTRUCTION(Assign, 0, L"closingName", L"");
 					END_TRANSITION_ITEM
 
 				END_TRANSITION_BAG
@@ -1295,32 +1295,32 @@ Table Generation
 
 				END_TRANSITION_BAG
 
-				BEGIN_TRANSITION_BAG(19, 8)
-
-					BEGIN_TRANSITION_ITEM(8, 6)
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(23, 6)
+				BEGIN_TRANSITION_BAG(22, 6)
 
 					BEGIN_TRANSITION_ITEM(6, 6)
 					END_TRANSITION_ITEM
 
 				END_TRANSITION_BAG
 
-				BEGIN_TRANSITION_BAG(23, 8)
+				BEGIN_TRANSITION_BAG(22, 8)
 
 					BEGIN_TRANSITION_ITEM(8, 7)
 					END_TRANSITION_ITEM
 
 				END_TRANSITION_BAG
 
-				BEGIN_TRANSITION_BAG(23, 10)
+				BEGIN_TRANSITION_BAG(22, 10)
 
 					BEGIN_TRANSITION_ITEM(10, 2)
-					ITEM_INSTRUCTION(Shift, 23, L"", L"");
+					ITEM_INSTRUCTION(Shift, 22, L"", L"");
 					ITEM_INSTRUCTION(Assign, 0, L"name", L"");
+					END_TRANSITION_ITEM
+
+				END_TRANSITION_BAG
+
+				BEGIN_TRANSITION_BAG(23, 8)
+
+					BEGIN_TRANSITION_ITEM(8, 6)
 					END_TRANSITION_ITEM
 
 				END_TRANSITION_BAG
@@ -1350,7 +1350,7 @@ Table Generation
 
 				BEGIN_TRANSITION_BAG(26, 9)
 
-					BEGIN_TRANSITION_ITEM(9, 11)
+					BEGIN_TRANSITION_ITEM(9, 10)
 					ITEM_INSTRUCTION(Assign, 0, L"content", L"");
 					END_TRANSITION_ITEM
 
@@ -1358,7 +1358,7 @@ Table Generation
 
 				BEGIN_TRANSITION_BAG(26, 10)
 
-					BEGIN_TRANSITION_ITEM(10, 11)
+					BEGIN_TRANSITION_ITEM(10, 10)
 					ITEM_INSTRUCTION(Assign, 0, L"content", L"");
 					END_TRANSITION_ITEM
 
@@ -1366,7 +1366,7 @@ Table Generation
 
 				BEGIN_TRANSITION_BAG(26, 11)
 
-					BEGIN_TRANSITION_ITEM(11, 11)
+					BEGIN_TRANSITION_ITEM(11, 10)
 					ITEM_INSTRUCTION(Assign, 0, L"content", L"");
 					END_TRANSITION_ITEM
 
@@ -1374,7 +1374,7 @@ Table Generation
 
 				BEGIN_TRANSITION_BAG(26, 14)
 
-					BEGIN_TRANSITION_ITEM(14, 11)
+					BEGIN_TRANSITION_ITEM(14, 10)
 					ITEM_INSTRUCTION(Assign, 0, L"content", L"");
 					END_TRANSITION_ITEM
 
@@ -1389,7 +1389,7 @@ Table Generation
 
 				BEGIN_TRANSITION_BAG(28, 13)
 
-					BEGIN_TRANSITION_ITEM(13, 12)
+					BEGIN_TRANSITION_ITEM(13, 11)
 					ITEM_INSTRUCTION(Assign, 0, L"content", L"");
 					END_TRANSITION_ITEM
 
@@ -1404,7 +1404,7 @@ Table Generation
 
 				BEGIN_TRANSITION_BAG(30, 12)
 
-					BEGIN_TRANSITION_ITEM(12, 13)
+					BEGIN_TRANSITION_ITEM(12, 12)
 					ITEM_INSTRUCTION(Assign, 0, L"content", L"");
 					END_TRANSITION_ITEM
 
@@ -1419,7 +1419,7 @@ Table Generation
 
 				BEGIN_TRANSITION_BAG(32, 7)
 
-					BEGIN_TRANSITION_ITEM(7, 14)
+					BEGIN_TRANSITION_ITEM(7, 13)
 					END_TRANSITION_ITEM
 
 				END_TRANSITION_BAG
@@ -1433,7 +1433,7 @@ Table Generation
 
 				BEGIN_TRANSITION_BAG(34, 7)
 
-					BEGIN_TRANSITION_ITEM(7, 14)
+					BEGIN_TRANSITION_ITEM(7, 13)
 					ITEM_INSTRUCTION(Shift, 34, L"", L"");
 					END_TRANSITION_ITEM
 
@@ -1441,7 +1441,7 @@ Table Generation
 
 				BEGIN_TRANSITION_BAG(34, 9)
 
-					BEGIN_TRANSITION_ITEM(9, 11)
+					BEGIN_TRANSITION_ITEM(9, 10)
 					ITEM_INSTRUCTION(Shift, 34, L"", L"");
 					ITEM_INSTRUCTION(Assign, 0, L"content", L"");
 					END_TRANSITION_ITEM
@@ -1450,7 +1450,7 @@ Table Generation
 
 				BEGIN_TRANSITION_BAG(34, 10)
 
-					BEGIN_TRANSITION_ITEM(10, 11)
+					BEGIN_TRANSITION_ITEM(10, 10)
 					ITEM_INSTRUCTION(Shift, 34, L"", L"");
 					ITEM_INSTRUCTION(Assign, 0, L"content", L"");
 					END_TRANSITION_ITEM
@@ -1459,7 +1459,7 @@ Table Generation
 
 				BEGIN_TRANSITION_BAG(34, 11)
 
-					BEGIN_TRANSITION_ITEM(11, 11)
+					BEGIN_TRANSITION_ITEM(11, 10)
 					ITEM_INSTRUCTION(Shift, 34, L"", L"");
 					ITEM_INSTRUCTION(Assign, 0, L"content", L"");
 					END_TRANSITION_ITEM
@@ -1468,7 +1468,7 @@ Table Generation
 
 				BEGIN_TRANSITION_BAG(34, 12)
 
-					BEGIN_TRANSITION_ITEM(12, 13)
+					BEGIN_TRANSITION_ITEM(12, 12)
 					ITEM_INSTRUCTION(Shift, 34, L"", L"");
 					ITEM_INSTRUCTION(Assign, 0, L"content", L"");
 					END_TRANSITION_ITEM
@@ -1477,7 +1477,7 @@ Table Generation
 
 				BEGIN_TRANSITION_BAG(34, 13)
 
-					BEGIN_TRANSITION_ITEM(13, 12)
+					BEGIN_TRANSITION_ITEM(13, 11)
 					ITEM_INSTRUCTION(Shift, 34, L"", L"");
 					ITEM_INSTRUCTION(Assign, 0, L"content", L"");
 					END_TRANSITION_ITEM
@@ -1486,7 +1486,7 @@ Table Generation
 
 				BEGIN_TRANSITION_BAG(34, 14)
 
-					BEGIN_TRANSITION_ITEM(14, 11)
+					BEGIN_TRANSITION_ITEM(14, 10)
 					ITEM_INSTRUCTION(Shift, 34, L"", L"");
 					ITEM_INSTRUCTION(Assign, 0, L"content", L"");
 					END_TRANSITION_ITEM
@@ -1524,7 +1524,7 @@ Table Generation
 
 				BEGIN_TRANSITION_BAG(38, 7)
 
-					BEGIN_TRANSITION_ITEM(7, 14)
+					BEGIN_TRANSITION_ITEM(7, 13)
 					ITEM_INSTRUCTION(Shift, 38, L"", L"");
 					END_TRANSITION_ITEM
 
@@ -1532,7 +1532,7 @@ Table Generation
 
 				BEGIN_TRANSITION_BAG(38, 12)
 
-					BEGIN_TRANSITION_ITEM(12, 13)
+					BEGIN_TRANSITION_ITEM(12, 12)
 					ITEM_INSTRUCTION(Shift, 38, L"", L"");
 					ITEM_INSTRUCTION(Assign, 0, L"content", L"");
 					END_TRANSITION_ITEM

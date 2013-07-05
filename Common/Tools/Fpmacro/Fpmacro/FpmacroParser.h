@@ -9,8 +9,7 @@ Parser::FpmacroParser
 #ifndef FPMACRO_PARSER
 #define FPMACRO_PARSER
 
-#include "..\..\..\Source\Parsing\Parsing.h"
-#include "..\..\..\Source\Parsing\ParsingAutomaton.h"
+#include "..\..\..\..\Libraries\GacUI\Public\Source\Vlpp.h"
 
 namespace fpmacro
 {

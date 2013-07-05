@@ -446,6 +446,15 @@ GuiControl
 				}
 			}
 
+			void GuiControl::SharedPtrDestructorProc(DescriptableObject* obj)
+			{
+				GuiControl* value=dynamic_cast<GuiControl*>(obj);
+				if(value->GetBoundsComposition()->GetParent()==0)
+				{
+					SafeDeleteControl(value);
+				}
+			}
+
 			GuiControl::GuiControl(IStyleController* _styleController)
 				:styleController(_styleController)
 				,boundsComposition(_styleController->GetBoundsComposition())
@@ -469,6 +478,8 @@ GuiControl
 				styleController->SetFont(font);
 				styleController->SetText(text);
 				styleController->SetVisuallyEnabled(isVisuallyEnabled);
+				
+				sharedPtrDestructorProc=&GuiControl::SharedPtrDestructorProc;
 			}
 
 			GuiControl::~GuiControl()
@@ -24307,6 +24318,15 @@ GuiGraphicsComposition
 				}
 			}
 
+			void GuiGraphicsComposition::SharedPtrDestructorProc(DescriptableObject* obj)
+			{
+				GuiGraphicsComposition* value=dynamic_cast<GuiGraphicsComposition*>(obj);
+				if(value->parent==0)
+				{
+					SafeDeleteComposition(value);
+				}
+			}
+
 			GuiGraphicsComposition::GuiGraphicsComposition()
 				:parent(0)
 				,visible(true)
@@ -24317,6 +24337,7 @@ GuiGraphicsComposition
 				,associatedCursor(0)
 				,associatedHitTestResult(INativeWindowListener::NoDecision)
 			{
+				sharedPtrDestructorProc=&GuiGraphicsComposition::SharedPtrDestructorProc;
 			}
 
 			GuiGraphicsComposition::~GuiGraphicsComposition()

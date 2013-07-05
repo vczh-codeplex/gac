@@ -1,14 +1,7 @@
 #ifndef FPMACRO_RUNTIME
 #define FPMACRO_RUNTIME
 
-#include "..\..\..\Source\Basic.h"
-#include "..\..\..\Source\String.h"
-#include "..\..\..\Source\Pointer.h"
-#include "..\..\..\Source\Exception.h"
-#include "..\..\..\Source\Collections\List.h"
-#include "..\..\..\Source\Collections\Dictionary.h"
-#include "..\..\..\Source\Collections\Operation.h"
-#include "..\..\..\Source\Stream\Accessor.h"
+#include "..\..\..\..\Libraries\GacUI\Public\Source\Vlpp.h"
 
 using namespace vl;
 using namespace vl::collections;
