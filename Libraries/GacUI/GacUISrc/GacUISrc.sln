@@ -5,6 +5,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GacUISrc", "GacUISrc\GacUIS
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Public", "Public", "{843780E4-7D2F-4955-B988-88325DFB6B9E}"
 	ProjectSection(SolutionItems) = preProject
+		..\Public\Codegen.bat = ..\Public\Codegen.bat
 		..\Public\CodegenConfig.xml = ..\Public\CodegenConfig.xml
 		..\Public\controls-kuroi.fw.png = ..\Public\controls-kuroi.fw.png
 		..\Public\DownloadGaclibWebsite.bat = ..\Public\DownloadGaclibWebsite.bat

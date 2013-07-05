@@ -1,10 +1,12 @@
 #include <Windows.h>
-#include <iostream>
-#include <string>
 #include "dia2.h"
 #include "diacreate.h"
+#include "..\..\..\..\Libraries\GacUI\Public\Source\Vlpp.h"
 
 #pragma comment(lib, "diaguids.lib")
+
+using namespace vl;
+using namespace vl::console;
 
 namespace dumppdb
 {
@@ -44,22 +46,22 @@ int wmain(int argc, wchar_t* argv[])
 {
 	if(argc==3)
 	{
-		std::wcout<<L"importing "<<argv[1]<<std::endl;
+		Console::WriteLine(WString(L"importing ")+argv[1]);
 		IDiaSymbol* exeSymbol=CreateDiaSymbol(argv[1]);
 		if(exeSymbol)
 		{
-			std::wcout<<L"exporting "<<argv[2]<<std::endl;
+			Console::WriteLine(WString(L"exporting ")+argv[2]);
 			dumppdb::DumpPdbToXml(exeSymbol, argv[2]);
-			std::wcout<<L"exported "<<argv[2]<<std::endl;
+			Console::WriteLine(WString(L"exported ")+argv[2]);
 		}
 		else
 		{
-			std::wcout<<L"Failed to read pdb("<<argv[1]<<L")"<<std::endl;
+			Console::WriteLine(WString(L"Failed to read pdb(")+argv[1]+L")");
 		}
 	}
 	else
 	{
-		std::wcout<<L"PdbDump.exe <pdb-path> <xml-path>"<<std::endl;
+		Console::WriteLine(L"PdbDump.exe <pdb-path> <xml-path>");
 	}
 	return 0;
 }

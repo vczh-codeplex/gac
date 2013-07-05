@@ -1,14 +1,4 @@
-#include "..\..\..\Source\Console.h"
-#include "..\..\..\Source\Pointer.h"
-#include "..\..\..\Source\Stream\FileStream.h"
-#include "..\..\..\Source\Stream\Accessor.h"
-#include "..\..\..\Source\Stream\CharFormat.h"
-#include "..\..\..\Source\Collections\List.h"
-#include "..\..\..\Source\Collections\Dictionary.h"
-#include "..\..\..\Source\Collections\Operation.h"
-#include "..\..\..\Source\Parsing\ParsingAutomaton.h"
-#include "..\..\..\Source\Parsing\Parsing.h"
-
+#include "..\..\..\..\Libraries\GacUI\Public\Source\Vlpp.h"
 #include <windows.h>
 
 using namespace vl;

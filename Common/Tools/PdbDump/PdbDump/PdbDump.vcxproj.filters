@@ -13,139 +13,19 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Common">
-      <UniqueIdentifier>{18d1b2e7-f2b0-45c7-b283-c3e7192c86c1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Common\Basic">
-      <UniqueIdentifier>{7b0d829b-85d7-474a-bb24-aa51e3901a91}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Common\Collections">
-      <UniqueIdentifier>{6aea476d-aed1-46e9-8b23-f40db8b4a51b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Common\Stream">
-      <UniqueIdentifier>{34623508-e06b-494d-b79f-82b974675233}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\Source\Basic.cpp">
-      <Filter>Common\Basic</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Source\Console.cpp">
-      <Filter>Common\Basic</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Source\Exception.cpp">
-      <Filter>Common\Basic</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Source\String.cpp">
-      <Filter>Common\Basic</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Source\Collections\Operation.cpp">
-      <Filter>Common\Collections</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Source\Stream\Accessor.cpp">
-      <Filter>Common\Stream</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Source\Stream\CacheStream.cpp">
-      <Filter>Common\Stream</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Source\Stream\CharFormat.cpp">
-      <Filter>Common\Stream</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Source\Stream\FileStream.cpp">
-      <Filter>Common\Stream</Filter>
-    </ClCompile>
     <ClCompile Include="DumpPDB.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\Libraries\GacUI\Public\Source\Vlpp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\Source\Basic.h">
-      <Filter>Common\Basic</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Console.h">
-      <Filter>Common\Basic</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Exception.h">
-      <Filter>Common\Basic</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Pointer.h">
-      <Filter>Common\Basic</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\String.h">
-      <Filter>Common\Basic</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Collections\Dictionary.h">
-      <Filter>Common\Collections</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Collections\DictionaryWrappers.h">
-      <Filter>Common\Collections</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Collections\Interfaces.h">
-      <Filter>Common\Collections</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Collections\List.h">
-      <Filter>Common\Collections</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Collections\ListWrappers.h">
-      <Filter>Common\Collections</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Collections\Operation.h">
-      <Filter>Common\Collections</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Collections\OperationAggregate.h">
-      <Filter>Common\Collections</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Collections\OperationConcat.h">
-      <Filter>Common\Collections</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Collections\OperationCopyFrom.h">
-      <Filter>Common\Collections</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Collections\OperationEnumerable.h">
-      <Filter>Common\Collections</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Collections\OperationForEach.h">
-      <Filter>Common\Collections</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Collections\OperationPair.h">
-      <Filter>Common\Collections</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Collections\OperationSelect.h">
-      <Filter>Common\Collections</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Collections\OperationSequence.h">
-      <Filter>Common\Collections</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Collections\OperationSet.h">
-      <Filter>Common\Collections</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Collections\OperationString.h">
-      <Filter>Common\Collections</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Collections\OperationWhere.h">
-      <Filter>Common\Collections</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Collections\Pair.h">
-      <Filter>Common\Collections</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Stream\Accessor.h">
-      <Filter>Common\Stream</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Stream\CacheStream.h">
-      <Filter>Common\Stream</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Stream\CharFormat.h">
-      <Filter>Common\Stream</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Stream\FileStream.h">
-      <Filter>Common\Stream</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Stream\Interfaces.h">
-      <Filter>Common\Stream</Filter>
-    </ClInclude>
     <ClInclude Include="cvconst.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -153,6 +33,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="diacreate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Libraries\GacUI\Public\Source\Vlpp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

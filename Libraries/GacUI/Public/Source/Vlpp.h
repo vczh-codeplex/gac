@@ -359,6 +359,45 @@ typedef signed __int64	pos_t;
 	public:
 		virtual ~Interface();
 	};
+
+/***********************************************************************
+类型萃取
+***********************************************************************/
+
+	struct YesType{};
+	struct NoType{};
+
+	template<typename T, typename YesOrNo>
+	struct AcceptType
+	{
+	};
+
+	template<typename T>
+	struct AcceptType<T, YesType>
+	{
+		typedef T Type;
+	};
+
+	template<typename YesOrNo>
+	struct AcceptValue
+	{
+		static const bool Result=false;
+	};
+
+	template<>
+	struct AcceptValue<YesType>
+	{
+		static const bool Result=true;
+	};
+
+	template<typename TFrom, typename TTo>
+	struct RequiresConvertable
+	{
+		static YesType Test(TTo* value);
+		static NoType Test(void* value);
+		
+		typedef decltype(Test((TFrom*)0)) YesNoType;
+	};
 }
 
 #endif
@@ -2201,6 +2240,25 @@ namespace vl
 {
 
 /***********************************************************************
+ReferenceCounterOperator
+***********************************************************************/
+
+	template<typename T, typename Enabled=YesType>
+	struct ReferenceCounterOperator
+	{
+		static __forceinline vint* CreateCounter(T* reference)
+		{
+			return new vint(0);
+		}
+
+		static __forceinline void DeleteReference(vint* counter, T* reference)
+		{
+			delete counter;
+			delete reference;
+		}
+	};
+
+/***********************************************************************
 Ptr
 ***********************************************************************/
 
@@ -2227,8 +2285,7 @@ Ptr
 			{
 				if(--(*counter)==0)
 				{
-					delete counter;
-					delete reference;
+					ReferenceCounterOperator<T>::DeleteReference(counter, reference);
 					counter=0;
 					reference=0;
 				}
@@ -2258,8 +2315,9 @@ Ptr
 		{
 			if(pointer)
 			{
-				counter=new vint(1);
+				counter=ReferenceCounterOperator<T>::CreateCounter(pointer);
 				reference=pointer;
+				Inc();
 			}
 			else
 			{
@@ -2309,8 +2367,9 @@ Ptr
 			Dec();
 			if(pointer)
 			{
-				counter=new vint(1);
+				counter=ReferenceCounterOperator<T>::CreateCounter(pointer);
 				reference=pointer;
+				Inc();
 			}
 			else
 			{
@@ -3973,6 +4032,7 @@ namespace vl
 						AmbiguityBegin,
 						AmbiguityBranch,
 						AmbiguityEnd,
+						SkipToken,
 					};
 
 					TransitionType								transitionType;
@@ -3990,8 +4050,8 @@ namespace vl
 					vint										instructionCount;
 					Ptr<collections::List<ShiftReduceRange>>	shiftReduceRanges;
 
-					TransitionResult()
-						:transitionType(ExecuteInstructions)
+					TransitionResult(TransitionType _transitionType=ExecuteInstructions)
+						:transitionType(_transitionType)
 						,ambiguityAffectedStackNodeCount(0)
 						,tableTokenIndex(-1)
 						,tableStateSource(-1)
@@ -4081,6 +4141,7 @@ namespace vl
 				vint										GetCurrentToken();
 				const collections::List<vint>&				GetStateStack();
 				vint										GetCurrentState();
+				void										SkipCurrentToken();
 
 				bool										TestTransitionItemInFuture(vint tableTokenIndex, Future* future, ParsingTable::TransitionItem* item, const collections::IEnumerable<vint>* lookAheadTokens);
 				ParsingTable::TransitionItem*				MatchTokenInFuture(vint tableTokenIndex, Future* future, const collections::IEnumerable<vint>* lookAheadTokens);
@@ -4093,6 +4154,7 @@ namespace vl
 				TransitionResult							ReadToken(vint tableTokenIndex, regex::RegexToken* regexToken, const collections::IEnumerable<vint>* lookAheadTokens);
 				TransitionResult							ReadToken();
 
+				bool										TestExplore(vint tableTokenIndex, Future* previous);
 				void										Explore(vint tableTokenIndex, Future* previous, collections::List<Future*>& possibilities);
 				regex::RegexToken*							ExploreStep(collections::List<Future*>& previousFutures, vint start, vint count, collections::List<Future*>& possibilities);
 				void										ExploreTryReduce(collections::List<Future*>& previousFutures, vint start, vint count, collections::List<Future*>& possibilities);
@@ -4125,6 +4187,7 @@ namespace vl
 
 				void										Reset();
 				bool										Run(const ParsingState::TransitionResult& result);
+				bool										GetProcessingAmbiguityBranch();
 				Ptr<ParsingTreeObject>						GetNode();
 			};
 		}
@@ -4182,7 +4245,7 @@ namespace vl
 			{
 			protected:
 
-				virtual ParsingState::TransitionResult		OnErrorRecover(ParsingState& state, const regex::RegexToken* currentToken, collections::List<Ptr<ParsingError>>& errors);
+				virtual ParsingState::TransitionResult		OnErrorRecover(ParsingState& state, vint currentTokenIndex, const regex::RegexToken* currentToken, collections::List<Ptr<ParsingError>>& errors);
 			public:
 				ParsingStrictParser(Ptr<ParsingTable> _table=0);
 				~ParsingStrictParser();
@@ -4196,7 +4259,7 @@ namespace vl
 				collections::Array<ParsingState::Future>	recoverFutures;
 				vint										recoveringFutureIndex;
 
-				ParsingState::TransitionResult				OnErrorRecover(ParsingState& state, const regex::RegexToken* currentToken, collections::List<Ptr<ParsingError>>& errors)override;
+				ParsingState::TransitionResult				OnErrorRecover(ParsingState& state, vint currentTokenIndex, const regex::RegexToken* currentToken, collections::List<Ptr<ParsingError>>& errors)override;
 			public:
 				ParsingAutoRecoverParser(Ptr<ParsingTable> _table=0);
 				~ParsingAutoRecoverParser();
@@ -4210,6 +4273,7 @@ namespace vl
 				DecisionList								decisions;
 				vint										consumedDecisionCount;
 
+				virtual void								OnErrorRecover(ParsingState& state, vint currentTokenIndex, const regex::RegexToken* currentToken, collections::List<ParsingState::Future*>& futures, vint& begin, vint& end, vint& insertedTokenCount, vint& skippedTokenCount, collections::List<Ptr<ParsingError>>& errors);
 				vint										GetResolvableFutureLevels(collections::List<ParsingState::Future*>& futures, vint begin, vint end);
 				vint										SearchPathForOneStep(ParsingState& state, collections::List<ParsingState::Future*>& futures, collections::List<regex::RegexToken*>& tokens, vint& begin, vint& end, collections::List<Ptr<ParsingError>>& errors);
 				vint										GetConflictReduceCount(collections::List<ParsingState::Future*>& futures);
@@ -4224,6 +4288,16 @@ namespace vl
 				
 				ParsingState::TransitionResult				ParseStep(ParsingState& state, collections::List<Ptr<ParsingError>>& errors)override;
 				void										BeginParse()override;
+			};
+
+			class ParsingAutoRecoverAmbiguousParser : public ParsingAmbiguousParser
+			{
+			protected:
+
+				void										OnErrorRecover(ParsingState& state, vint currentTokenIndex, const regex::RegexToken* currentToken, collections::List<ParsingState::Future*>& futures, vint& begin, vint& end, vint& insertedTokenCount, vint& skippedTokenCount, collections::List<Ptr<ParsingError>>& errors)override;
+			public:
+				ParsingAutoRecoverAmbiguousParser(Ptr<ParsingTable> _table=0);
+				~ParsingAutoRecoverAmbiguousParser();
 			};
 
 /***********************************************************************
@@ -13154,12 +13228,18 @@ Attribute
 
 		class DescriptableObject
 		{
+			template<typename T, typename Enabled>
+			friend struct ReferenceCounterOperator;
 			template<typename T>
 			friend class Description;
 			friend class DescriptableValue;
 
 			typedef collections::Dictionary<WString, Ptr<Object>>		InternalPropertyMap;
+			typedef void(*DestructorProc)(DescriptableObject* obj);
 		protected:
+			vint									referenceCounter;
+			DestructorProc							sharedPtrDestructorProc;
+
 			size_t									objectSize;
 			description::ITypeDescriptor**			typeDescriptor;
 			Ptr<InternalPropertyMap>				internalProperties;
@@ -13209,6 +13289,37 @@ Attribute
 		public:
 			~IDescriptable(){}
 		};
+
+/***********************************************************************
+ReferenceCounterOperator
+***********************************************************************/
+	}
+
+	template<typename T>
+	struct ReferenceCounterOperator<T, typename RequiresConvertable<T, reflection::DescriptableObject>::YesNoType>
+	{
+		static __forceinline vint* CreateCounter(T* reference)
+		{
+			reflection::DescriptableObject* obj=reference;
+			return &obj->referenceCounter;
+		}
+
+		static __forceinline void DeleteReference(vint* counter, T* reference)
+		{
+			reflection::DescriptableObject* obj=reference;
+			if(obj->sharedPtrDestructorProc)
+			{
+				obj->sharedPtrDestructorProc(obj);
+			}
+			else
+			{
+				delete obj;
+			}
+		}
+	};
+
+	namespace reflection
+	{
 
 /***********************************************************************
 Value
@@ -15124,7 +15235,15 @@ TypeInfoRetriver Helper Functions (BoxValue, UnboxValue)
 				static Ptr<T> UnboxValue(const Value& value, ITypeDescriptor* typeDescriptor, const WString& valueName)
 				{
 					if(value.IsNull()) return 0;
-					Ptr<T> result=value.GetSharedPtr().Cast<T>();
+					Ptr<T> result;
+					if(value.GetValueType()==Value::SharedPtr)
+					{
+						result=value.GetSharedPtr().Cast<T>();
+					}
+					else if(value.GetValueType()==Value::RawPtr)
+					{
+						result=dynamic_cast<T*>(value.GetRawPtr());
+					}
 					if(!result)
 					{
 						if(!typeDescriptor)
