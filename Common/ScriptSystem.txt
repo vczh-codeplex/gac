@@ -209,6 +209,8 @@ func<T, U> {T}.Zip({U})->{(T, U)};
 Concepts
 ========================================================
 
+concepts cannot contain dynamic dispatch function declarations
+
 concept<T> Equatable
 {
 	func AreEqual(T a, T b)->bool;
@@ -409,38 +411,40 @@ instance<T, U> Convertable<IEnumerable<T>, IEnumerable<U>>
 Interfaces
 ========================================================
 
-concept<T> this.IEnumerator
+all functions in interface are switch-case-ing the this argument.
+
+interface<T> IEnumerator
 {
 	prop T Current{get;}
 	func MoveNext()->bool;
 }
 
-concept<T> this.IEnumerable
+interface<T> IEnumerable
 {
 	func CreateEnumerator()->IEnumerator<T>;
 }
 
-concept<T> this.IReadonlyCollection
+interface<T> IReadonlyCollection
 	where this.IEnumerable<T>
 {
 	prop int Count{get;}
 	func Contains(T value)->bool;
 }
 
-concept<T> this.IReadonlyArray
+interface<T> IReadonlyArray
 	where this.IReadonlyCollection<T>
 {
 	prop T operator[](int index){get;}
 	func IndexOf(T value)->int;
 }
 
-concept<T> this.IArray
+interface<T> IArray
 	where this.IReadonlyArray<T>
 {
 	prop T operator[](int index){get; set;}
 }
 
-concept<T> this.ICollection
+interface<T> ICollection
 	where this.IReadonlyCollection<T>
 {
 	func void Clear();
@@ -448,7 +452,7 @@ concept<T> this.ICollection
 	func Remove(T value)->bool;
 }
 
-concept<T> this.IList
+interface<T> IList
 	where this.ICollection<T>
 	where this.IArray<T>
 {
@@ -456,7 +460,7 @@ concept<T> this.IList
 	func RemoveAt(int index)->T;
 }
 
-concept<TKey, TValue> this.IReadonlyMap
+interface<TKey, TValue> IReadonlyMap
 	where this.IReadonlyCollection<<TKey, TValue>>
 {
 	prop IReadonlyCollection<TKey> Keys{get;}
@@ -464,7 +468,7 @@ concept<TKey, TValue> this.IReadonlyMap
 	func Find(TKey key)-><TValue, bool>;
 }
 
-concept<TKey, TValue> this.IMap
+interface<TKey, TValue> IMap
 	where this.ICollection<<TKey, TValue>>
 	where this.IReadonlyMap<TKey, TValue>
 {
@@ -746,7 +750,7 @@ type<T> seq_Enumerable
 	func (seq_Enumerator<T>)->void	startContinuation;
 }
 
-instance<T> seq_Enumerable.IEnumerable<T>
+implement<T> seq_Enumerable.IEnumerable<T>
 {
 	func CreateEnumerator()
 	{
@@ -765,7 +769,7 @@ type<T> seq_Enumerator
 	func ()->void				continuation;
 }
 
-instance<T> seq_Enumerator.IEnumerator<T>
+implement<T> seq_Enumerator.IEnumerator<T>
 {
 	prop T Current
 	{
