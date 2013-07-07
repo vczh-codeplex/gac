@@ -786,9 +786,8 @@ ParsingTreeBuilder
 										Ptr<ParsingTreeNode> value=operationTarget->GetMembers().Values().Get(i);
 										obj->SetMember(name, value);
 									}
-									CopyFrom(obj->GetCreatorRules(), operationTarget->GetCreatorRules());
-									obj->GetCreatorRules().Add(ins.creatorRule);
 									operationTarget=obj;
+									operationTarget->GetCreatorRules().Add(ins.creatorRule);
 									createdObject=0;
 								}
 								break;
