@@ -19,13 +19,15 @@ CreateEpsilonPDAVisitor
 			{
 			public:
 				Ptr<Automaton>						automaton;
+				ParsingDefinitionRuleDefinition*	rule;
 				ParsingDefinitionGrammar*			ruleGrammar;
 				State*								startState;
 				State*								endState;
 				Transition*							result;
 
-				CreateEpsilonPDAVisitor(Ptr<Automaton> _automaton, ParsingDefinitionGrammar* _ruleGrammar, State* _startState, State* _endState)
+				CreateEpsilonPDAVisitor(Ptr<Automaton> _automaton, ParsingDefinitionRuleDefinition* _rule, ParsingDefinitionGrammar* _ruleGrammar, State* _startState, State* _endState)
 					:automaton(_automaton)
+					,rule(_rule)
 					,ruleGrammar(_ruleGrammar)
 					,startState(_startState)
 					,endState(_endState)
@@ -33,16 +35,16 @@ CreateEpsilonPDAVisitor
 				{
 				}
 
-				static Transition* Create(ParsingDefinitionGrammar* grammar, Ptr<Automaton> automaton, ParsingDefinitionGrammar* ruleGrammar, State* startState, State* endState)
+				static Transition* Create(ParsingDefinitionGrammar* grammar, Ptr<Automaton> automaton, ParsingDefinitionRuleDefinition* rule, ParsingDefinitionGrammar* ruleGrammar, State* startState, State* endState)
 				{
-					CreateEpsilonPDAVisitor visitor(automaton, ruleGrammar, startState, endState);
+					CreateEpsilonPDAVisitor visitor(automaton, rule, ruleGrammar, startState, endState);
 					grammar->Accept(&visitor);
 					return visitor.result;
 				}
 
 				Transition* Create(ParsingDefinitionGrammar* grammar, State* startState, State* endState)
 				{
-					return Create(grammar, automaton, ruleGrammar, startState, endState);
+					return Create(grammar, automaton, rule, ruleGrammar, startState, endState);
 				}
 
 				void Visit(ParsingDefinitionPrimitiveGrammar* node)override
@@ -91,6 +93,7 @@ CreateEpsilonPDAVisitor
 					Ptr<Action> action=new Action;
 					action->actionType=Action::Create;
 					action->actionSource=automaton->symbolManager->CacheGetType(node->type.Obj(), 0);
+					action->creatorRule=rule;
 					transition->actions.Add(action);
 				}
 
@@ -110,6 +113,7 @@ CreateEpsilonPDAVisitor
 
 					Ptr<Action> action=new Action;
 					action->actionType=Action::Using;
+					action->creatorRule=rule;
 					transition->actions.Add(action);
 				}
 
@@ -150,7 +154,7 @@ CreateRuleEpsilonPDA
 					automaton->Epsilon(ruleInfo->startState, grammarStartState);
 					automaton->TokenFinish(grammarEndState, ruleInfo->rootRuleEndState);
 					ruleInfo->endStates.Add(grammarEndState);
-					CreateEpsilonPDAVisitor::Create(grammar.Obj(), automaton, grammar.Obj(), grammarStartState, grammarEndState);
+					CreateEpsilonPDAVisitor::Create(grammar.Obj(), automaton, rule.Obj(), grammar.Obj(), grammarStartState, grammarEndState);
 				}
 			}
 

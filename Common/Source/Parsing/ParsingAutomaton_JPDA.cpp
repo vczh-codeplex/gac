@@ -302,6 +302,7 @@ MarkLeftRecursiveInJointPDA
 									newAction->actionType=Action::LeftRecursiveReduce;
 									newAction->actionSource=action->actionSource;
 									newAction->actionTarget=action->actionTarget;
+									newAction->creatorRule=action->creatorRule;
 									newAction->shiftReduceSource=action->shiftReduceSource;
 									newAction->shiftReduceTarget=action->shiftReduceTarget;
 

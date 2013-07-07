@@ -19,6 +19,7 @@ Action
 				:actionType(Create)
 				,actionSource(0)
 				,actionTarget(0)
+				,creatorRule(0)
 				,shiftReduceSource(0)
 				,shiftReduceTarget(0)
 			{

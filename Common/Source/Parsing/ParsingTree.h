@@ -220,9 +220,11 @@ namespace vl
 		protected:
 			typedef collections::Dictionary<WString, Ptr<ParsingTreeNode>>				NodeMap;
 			typedef collections::SortedList<WString>									NameList;
+			typedef collections::List<WString>											RuleList;
 
 			WString								type;
 			NodeMap								members;
+			RuleList							rules;
 
 			const NodeList&			GetSubNodesInternal()override;
 		public:
@@ -238,6 +240,7 @@ namespace vl
 			bool								SetMember(const WString& name, Ptr<ParsingTreeNode> node);
 			bool								RemoveMember(const WString& name);
 			const NameList&						GetMemberNames();
+			RuleList&							GetCreatorRules();
 		};
 
 		class ParsingTreeArray : public ParsingTreeNode
