@@ -3327,6 +3327,170 @@ namespace vl
 #endif
 
 /***********************************************************************
+COLLECTIONS\OPERATIONCOPYFROM.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Data Structure::Operations
+
+***********************************************************************/
+
+#ifndef VCZH_COLLECTIONS_OPERATIONCOPYFROM
+#define VCZH_COLLECTIONS_OPERATIONCOPYFROM
+
+
+namespace vl
+{
+	namespace collections
+	{
+
+/***********************************************************************
+容器复制
+***********************************************************************/
+
+		namespace copyfrom_internal
+		{
+			using namespace randomaccess_internal;
+
+			template<typename Ds, typename Ss, bool DsRA, bool SsRA>
+			struct CopyFromAlgorithm
+			{
+			};
+
+			template<typename Ds, typename Ss>
+			struct CopyFromAlgorithm<Ds, Ss, true, true>
+			{
+				static void Perform(Ds& ds, const Ss& ss, bool append)
+				{
+					vint copyCount=RandomAccess<Ss>::GetCount(ss);
+					vint index=(append?RandomAccess<Ds>::GetCount(ds):0);
+					vint resizeCount=index+copyCount;
+					RandomAccess<Ds>::SetCount(ds, resizeCount);
+					for(vint i=0;i<copyCount;i++)
+					{
+						RandomAccess<Ds>::SetValue(ds, index+i, RandomAccess<Ss>::GetValue(ss, i));
+					}
+				}
+			};
+
+			template<typename Ds, typename Ss>
+			struct CopyFromAlgorithm<Ds, Ss, false, true>
+			{
+				static void Perform(Ds& ds, const Ss& ss, bool append)
+				{
+					if(!append)
+					{
+						ds.Clear();
+					}
+					vint copyCount=RandomAccess<Ss>::GetCount(ss);
+					for(vint i=0;i<copyCount;i++)
+					{
+						RandomAccess<Ds>::AppendValue(ds, RandomAccess<Ss>::GetValue(ss, i));
+					}
+				}
+			};
+
+			template<typename Ds, typename Ss>
+			struct CopyFromAlgorithm<Ds, Ss, true, false>
+			{
+				static void Perform(Ds& ds, const Ss& ss, bool append)
+				{
+					Ptr<IEnumerator<typename Ss::ElementType>> enumerator;
+					vint copyCount=0;
+
+					enumerator=ss.CreateEnumerator();
+					while(enumerator->Next())
+					{
+						copyCount++;
+					}
+
+					vint index=(append?RandomAccess<Ds>::GetCount(ds):0);
+					vint resizeCount=index+copyCount;
+					RandomAccess<Ds>::SetCount(ds, resizeCount);
+
+					enumerator=ss.CreateEnumerator();
+					while(enumerator->Next())
+					{
+						RandomAccess<Ds>::SetValue(ds, index++, enumerator->Current());
+					}
+				}
+			};
+
+			template<typename Ds, typename Ss>
+			struct CopyFromAlgorithm<Ds, Ss, false, false>
+			{
+				static void Perform(Ds& ds, const Ss& ss, bool append)
+				{
+					if(!append)
+					{
+						ds.Clear();
+					}
+					Ptr<IEnumerator<typename Ss::ElementType>> enumerator=ss.CreateEnumerator();
+					while(enumerator->Next())
+					{
+						RandomAccess<Ds>::AppendValue(ds, enumerator->Current());
+					}
+				}
+			};
+
+			template<typename T>
+			struct Slice
+			{
+				const T*	items;
+				vint		count;
+			};
+		}
+
+		namespace randomaccess_internal
+		{
+			template<typename T>
+			struct RandomAccessable<copyfrom_internal::Slice<T>>
+			{
+				static const bool							CanRead = true;
+				static const bool							CanResize = true;
+			};
+		
+			template<typename T>
+			struct RandomAccess<copyfrom_internal::Slice<T>>
+			{
+				static vint GetCount(const copyfrom_internal::Slice<T>& t)
+				{
+					return t.count;
+				}
+
+				static const T& GetValue(const copyfrom_internal::Slice<T>& t, vint index)
+				{
+					return t.items[index];
+				}
+			};
+		}
+
+		template<typename Ds, typename Ss>
+		void CopyFrom(Ds& ds, const Ss& ss, bool append=false)
+		{
+			copyfrom_internal::CopyFromAlgorithm<Ds, Ss, randomaccess_internal::RandomAccessable<Ds>::CanResize, randomaccess_internal::RandomAccessable<Ss>::CanRead>::Perform(ds, ss, append);
+		}
+
+		template<typename Ds, typename S>
+		void CopyFrom(Ds& ds, const S* buffer, vint count, bool append=false)
+		{
+			copyfrom_internal::Slice<S> slice={buffer, count};
+			CopyFrom(ds, slice, append);
+		}
+
+		template<typename Ds, typename S>
+		void CopyFrom(Ds& ds, const S* begin, const S* end, bool append=false)
+		{
+			copyfrom_internal::Slice<S> slice={begin, end-begin};
+			CopyFrom(ds, slice, append);
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
 PARSING\PARSINGTREE.H
 ***********************************************************************/
 /***********************************************************************
@@ -3549,9 +3713,11 @@ namespace vl
 		protected:
 			typedef collections::Dictionary<WString, Ptr<ParsingTreeNode>>				NodeMap;
 			typedef collections::SortedList<WString>									NameList;
+			typedef collections::List<WString>											RuleList;
 
 			WString								type;
 			NodeMap								members;
+			RuleList							rules;
 
 			const NodeList&			GetSubNodesInternal()override;
 		public:
@@ -3567,6 +3733,7 @@ namespace vl
 			bool								SetMember(const WString& name, Ptr<ParsingTreeNode> node);
 			bool								RemoveMember(const WString& name);
 			const NameList&						GetMemberNames();
+			RuleList&							GetCreatorRules();
 		};
 
 		class ParsingTreeArray : public ParsingTreeNode
@@ -3613,6 +3780,7 @@ namespace vl
 		{
 		public:
 			ParsingTextRange					codeRange;
+			collections::List<WString>			creatorRules;
 		};
 
 		class ParsingToken : public ParsingTreeCustomBase
@@ -3812,6 +3980,7 @@ namespace vl
 					vint									stateParameter;
 					WString									nameParameter;
 					WString									value;
+					WString									creatorRule;
 
 					Instruction()
 						:instructionType(Create)
@@ -3819,11 +3988,12 @@ namespace vl
 					{
 					}
 
-					Instruction(InstructionType _instructionType, vint _stateParameter, const WString& _nameParameter, const WString& _value)
+					Instruction(InstructionType _instructionType, vint _stateParameter, const WString& _nameParameter, const WString& _value, const WString& _creatorRule)
 						:instructionType(_instructionType)
 						,stateParameter(_stateParameter)
 						,nameParameter(_nameParameter)
 						,value(_value)
+						,creatorRule(_creatorRule)
 					{
 					}
 				};
@@ -5209,6 +5379,7 @@ namespace vl
 				ActionType											actionType;
 				ParsingSymbol*										actionTarget;
 				ParsingSymbol*										actionSource;
+				definitions::ParsingDefinitionRuleDefinition*		creatorRule;
 
 				// the following two fields record which rule symbol transition generate this shift/reduce action
 				State*												shiftReduceSource;
@@ -5380,170 +5551,6 @@ namespace vl
 			extern Ptr<tabling::ParsingTable>						GenerateTableFromPDA(Ptr<definitions::ParsingDefinition> definition, Ptr<Automaton> jointPDA, bool enableAmbiguity, collections::List<Ptr<ParsingError>>& errors);
 			extern Ptr<tabling::ParsingTable>						GenerateTable(Ptr<definitions::ParsingDefinition> definition, bool enableAmbiguity, collections::List<Ptr<ParsingError>>& errors);
 			extern void												Log(Ptr<Automaton> automaton, stream::TextWriter& writer);
-		}
-	}
-}
-
-#endif
-
-/***********************************************************************
-COLLECTIONS\OPERATIONCOPYFROM.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-Data Structure::Operations
-
-***********************************************************************/
-
-#ifndef VCZH_COLLECTIONS_OPERATIONCOPYFROM
-#define VCZH_COLLECTIONS_OPERATIONCOPYFROM
-
-
-namespace vl
-{
-	namespace collections
-	{
-
-/***********************************************************************
-容器复制
-***********************************************************************/
-
-		namespace copyfrom_internal
-		{
-			using namespace randomaccess_internal;
-
-			template<typename Ds, typename Ss, bool DsRA, bool SsRA>
-			struct CopyFromAlgorithm
-			{
-			};
-
-			template<typename Ds, typename Ss>
-			struct CopyFromAlgorithm<Ds, Ss, true, true>
-			{
-				static void Perform(Ds& ds, const Ss& ss, bool append)
-				{
-					vint copyCount=RandomAccess<Ss>::GetCount(ss);
-					vint index=(append?RandomAccess<Ds>::GetCount(ds):0);
-					vint resizeCount=index+copyCount;
-					RandomAccess<Ds>::SetCount(ds, resizeCount);
-					for(vint i=0;i<copyCount;i++)
-					{
-						RandomAccess<Ds>::SetValue(ds, index+i, RandomAccess<Ss>::GetValue(ss, i));
-					}
-				}
-			};
-
-			template<typename Ds, typename Ss>
-			struct CopyFromAlgorithm<Ds, Ss, false, true>
-			{
-				static void Perform(Ds& ds, const Ss& ss, bool append)
-				{
-					if(!append)
-					{
-						ds.Clear();
-					}
-					vint copyCount=RandomAccess<Ss>::GetCount(ss);
-					for(vint i=0;i<copyCount;i++)
-					{
-						RandomAccess<Ds>::AppendValue(ds, RandomAccess<Ss>::GetValue(ss, i));
-					}
-				}
-			};
-
-			template<typename Ds, typename Ss>
-			struct CopyFromAlgorithm<Ds, Ss, true, false>
-			{
-				static void Perform(Ds& ds, const Ss& ss, bool append)
-				{
-					Ptr<IEnumerator<typename Ss::ElementType>> enumerator;
-					vint copyCount=0;
-
-					enumerator=ss.CreateEnumerator();
-					while(enumerator->Next())
-					{
-						copyCount++;
-					}
-
-					vint index=(append?RandomAccess<Ds>::GetCount(ds):0);
-					vint resizeCount=index+copyCount;
-					RandomAccess<Ds>::SetCount(ds, resizeCount);
-
-					enumerator=ss.CreateEnumerator();
-					while(enumerator->Next())
-					{
-						RandomAccess<Ds>::SetValue(ds, index++, enumerator->Current());
-					}
-				}
-			};
-
-			template<typename Ds, typename Ss>
-			struct CopyFromAlgorithm<Ds, Ss, false, false>
-			{
-				static void Perform(Ds& ds, const Ss& ss, bool append)
-				{
-					if(!append)
-					{
-						ds.Clear();
-					}
-					Ptr<IEnumerator<typename Ss::ElementType>> enumerator=ss.CreateEnumerator();
-					while(enumerator->Next())
-					{
-						RandomAccess<Ds>::AppendValue(ds, enumerator->Current());
-					}
-				}
-			};
-
-			template<typename T>
-			struct Slice
-			{
-				const T*	items;
-				vint		count;
-			};
-		}
-
-		namespace randomaccess_internal
-		{
-			template<typename T>
-			struct RandomAccessable<copyfrom_internal::Slice<T>>
-			{
-				static const bool							CanRead = true;
-				static const bool							CanResize = true;
-			};
-		
-			template<typename T>
-			struct RandomAccess<copyfrom_internal::Slice<T>>
-			{
-				static vint GetCount(const copyfrom_internal::Slice<T>& t)
-				{
-					return t.count;
-				}
-
-				static const T& GetValue(const copyfrom_internal::Slice<T>& t, vint index)
-				{
-					return t.items[index];
-				}
-			};
-		}
-
-		template<typename Ds, typename Ss>
-		void CopyFrom(Ds& ds, const Ss& ss, bool append=false)
-		{
-			copyfrom_internal::CopyFromAlgorithm<Ds, Ss, randomaccess_internal::RandomAccessable<Ds>::CanResize, randomaccess_internal::RandomAccessable<Ss>::CanRead>::Perform(ds, ss, append);
-		}
-
-		template<typename Ds, typename S>
-		void CopyFrom(Ds& ds, const S* buffer, vint count, bool append=false)
-		{
-			copyfrom_internal::Slice<S> slice={buffer, count};
-			CopyFrom(ds, slice, append);
-		}
-
-		template<typename Ds, typename S>
-		void CopyFrom(Ds& ds, const S* begin, const S* end, bool append=false)
-		{
-			copyfrom_internal::Slice<S> slice={begin, end-begin};
-			CopyFrom(ds, slice, append);
 		}
 	}
 }

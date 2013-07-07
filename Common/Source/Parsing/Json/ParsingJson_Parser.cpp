@@ -81,6 +81,7 @@ Parsing Tree Conversion Driver Implementation
 					if(obj->GetType()==L"Literal")
 					{
 						vl::Ptr<JsonLiteral> tree = new JsonLiteral;
+						vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
 						Fill(tree, obj, tokens);
 						Fill(tree.Cast<JsonNode>(), obj, tokens);
 						return tree;
@@ -88,6 +89,7 @@ Parsing Tree Conversion Driver Implementation
 					else if(obj->GetType()==L"String")
 					{
 						vl::Ptr<JsonString> tree = new JsonString;
+						vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
 						Fill(tree, obj, tokens);
 						Fill(tree.Cast<JsonNode>(), obj, tokens);
 						return tree;
@@ -95,6 +97,7 @@ Parsing Tree Conversion Driver Implementation
 					else if(obj->GetType()==L"Number")
 					{
 						vl::Ptr<JsonNumber> tree = new JsonNumber;
+						vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
 						Fill(tree, obj, tokens);
 						Fill(tree.Cast<JsonNode>(), obj, tokens);
 						return tree;
@@ -102,6 +105,7 @@ Parsing Tree Conversion Driver Implementation
 					else if(obj->GetType()==L"Array")
 					{
 						vl::Ptr<JsonArray> tree = new JsonArray;
+						vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
 						Fill(tree, obj, tokens);
 						Fill(tree.Cast<JsonNode>(), obj, tokens);
 						return tree;
@@ -109,6 +113,7 @@ Parsing Tree Conversion Driver Implementation
 					else if(obj->GetType()==L"ObjectField")
 					{
 						vl::Ptr<JsonObjectField> tree = new JsonObjectField;
+						vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
 						Fill(tree, obj, tokens);
 						Fill(tree.Cast<JsonNode>(), obj, tokens);
 						return tree;
@@ -116,6 +121,7 @@ Parsing Tree Conversion Driver Implementation
 					else if(obj->GetType()==L"Object")
 					{
 						vl::Ptr<JsonObject> tree = new JsonObject;
+						vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
 						Fill(tree, obj, tokens);
 						Fill(tree.Cast<JsonNode>(), obj, tokens);
 						return tree;
@@ -246,7 +252,7 @@ Table Generation
 				#define END_TRANSITION_ITEM }
 				#define END_TRANSITION_BAG }
 				#define ITEM_STACK_PATTERN(STATE) item->stackPattern.Add(STATE);
-				#define ITEM_INSTRUCTION(TYPE, STATE, NAME, VALUE) item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::TYPE, STATE, NAME, VALUE));
+				#define ITEM_INSTRUCTION(TYPE, STATE, NAME, VALUE, RULE) item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::TYPE, STATE, NAME, VALUE, RULE));
 				#define BEGIN_LOOK_AHEAD(STATE) {vl::Ptr<vl::parsing::tabling::ParsingTable::LookAheadInfo> lookAheadInfo=new vl::Ptr<vl::parsing::tabling::ParsingTable::LookAheadInfo; item->lookAheads.Add(lookAheadInfo); lookAheadInfo->state=STATE;
 				#define LOOK_AHEAD(TOKEN) lookAheadInfo->tokens.Add(TOKEN);
 				#define END_LOOK_AHEAD }
@@ -322,8 +328,8 @@ Table Generation
 				BEGIN_TRANSITION_BAG(1, 3)
 
 					BEGIN_TRANSITION_ITEM(3, 2)
-					ITEM_INSTRUCTION(Setter, 0, L"value", L"True");
-					ITEM_INSTRUCTION(Create, 0, L"Literal", L"");
+					ITEM_INSTRUCTION(Setter, 0, L"value", L"True", L"");
+					ITEM_INSTRUCTION(Create, 0, L"Literal", L"", L"JLiteral");
 					END_TRANSITION_ITEM
 
 				END_TRANSITION_BAG
@@ -331,8 +337,8 @@ Table Generation
 				BEGIN_TRANSITION_BAG(1, 4)
 
 					BEGIN_TRANSITION_ITEM(4, 2)
-					ITEM_INSTRUCTION(Setter, 0, L"value", L"False");
-					ITEM_INSTRUCTION(Create, 0, L"Literal", L"");
+					ITEM_INSTRUCTION(Setter, 0, L"value", L"False", L"");
+					ITEM_INSTRUCTION(Create, 0, L"Literal", L"", L"JLiteral");
 					END_TRANSITION_ITEM
 
 				END_TRANSITION_BAG
@@ -340,8 +346,8 @@ Table Generation
 				BEGIN_TRANSITION_BAG(1, 5)
 
 					BEGIN_TRANSITION_ITEM(5, 2)
-					ITEM_INSTRUCTION(Setter, 0, L"value", L"Null");
-					ITEM_INSTRUCTION(Create, 0, L"Literal", L"");
+					ITEM_INSTRUCTION(Setter, 0, L"value", L"Null", L"");
+					ITEM_INSTRUCTION(Create, 0, L"Literal", L"", L"JLiteral");
 					END_TRANSITION_ITEM
 
 				END_TRANSITION_BAG
@@ -349,8 +355,8 @@ Table Generation
 				BEGIN_TRANSITION_BAG(1, 12)
 
 					BEGIN_TRANSITION_ITEM(12, 2)
-					ITEM_INSTRUCTION(Assign, 0, L"content", L"");
-					ITEM_INSTRUCTION(Create, 0, L"Number", L"");
+					ITEM_INSTRUCTION(Assign, 0, L"content", L"", L"");
+					ITEM_INSTRUCTION(Create, 0, L"Number", L"", L"JLiteral");
 					END_TRANSITION_ITEM
 
 				END_TRANSITION_BAG
@@ -358,8 +364,8 @@ Table Generation
 				BEGIN_TRANSITION_BAG(1, 13)
 
 					BEGIN_TRANSITION_ITEM(13, 2)
-					ITEM_INSTRUCTION(Assign, 0, L"content", L"");
-					ITEM_INSTRUCTION(Create, 0, L"String", L"");
+					ITEM_INSTRUCTION(Assign, 0, L"content", L"", L"");
+					ITEM_INSTRUCTION(Create, 0, L"String", L"", L"JLiteral");
 					END_TRANSITION_ITEM
 
 				END_TRANSITION_BAG
@@ -372,17 +378,17 @@ Table Generation
 					BEGIN_TRANSITION_ITEM(1, 4)
 					ITEM_STACK_PATTERN(24)
 					ITEM_STACK_PATTERN(16)
-					ITEM_INSTRUCTION(Reduce, 24, L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"");
-					ITEM_INSTRUCTION(Reduce, 16, L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"value", L"");
-					ITEM_INSTRUCTION(Create, 0, L"ObjectField", L"");
+					ITEM_INSTRUCTION(Reduce, 24, L"", L"", L"");
+					ITEM_INSTRUCTION(Using, 0, L"", L"", L"JValue");
+					ITEM_INSTRUCTION(Reduce, 16, L"", L"", L"");
+					ITEM_INSTRUCTION(Assign, 0, L"value", L"", L"");
+					ITEM_INSTRUCTION(Create, 0, L"ObjectField", L"", L"JField");
 					END_TRANSITION_ITEM
 
 					BEGIN_TRANSITION_ITEM(1, 9)
 					ITEM_STACK_PATTERN(24)
-					ITEM_INSTRUCTION(Reduce, 24, L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"");
+					ITEM_INSTRUCTION(Reduce, 24, L"", L"", L"");
+					ITEM_INSTRUCTION(Using, 0, L"", L"", L"JValue");
 					END_TRANSITION_ITEM
 
 				END_TRANSITION_BAG
@@ -393,26 +399,26 @@ Table Generation
 					ITEM_STACK_PATTERN(24)
 					ITEM_STACK_PATTERN(16)
 					ITEM_STACK_PATTERN(14)
-					ITEM_INSTRUCTION(Reduce, 24, L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"");
-					ITEM_INSTRUCTION(Reduce, 16, L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"value", L"");
-					ITEM_INSTRUCTION(Create, 0, L"ObjectField", L"");
-					ITEM_INSTRUCTION(Reduce, 14, L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"fields", L"");
+					ITEM_INSTRUCTION(Reduce, 24, L"", L"", L"");
+					ITEM_INSTRUCTION(Using, 0, L"", L"", L"JValue");
+					ITEM_INSTRUCTION(Reduce, 16, L"", L"", L"");
+					ITEM_INSTRUCTION(Assign, 0, L"value", L"", L"");
+					ITEM_INSTRUCTION(Create, 0, L"ObjectField", L"", L"JField");
+					ITEM_INSTRUCTION(Reduce, 14, L"", L"", L"");
+					ITEM_INSTRUCTION(Item, 0, L"fields", L"", L"");
 					END_TRANSITION_ITEM
 
 					BEGIN_TRANSITION_ITEM(7, 5)
 					ITEM_STACK_PATTERN(24)
 					ITEM_STACK_PATTERN(16)
 					ITEM_STACK_PATTERN(6)
-					ITEM_INSTRUCTION(Reduce, 24, L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"");
-					ITEM_INSTRUCTION(Reduce, 16, L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"value", L"");
-					ITEM_INSTRUCTION(Create, 0, L"ObjectField", L"");
-					ITEM_INSTRUCTION(Reduce, 6, L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"fields", L"");
+					ITEM_INSTRUCTION(Reduce, 24, L"", L"", L"");
+					ITEM_INSTRUCTION(Using, 0, L"", L"", L"JValue");
+					ITEM_INSTRUCTION(Reduce, 16, L"", L"", L"");
+					ITEM_INSTRUCTION(Assign, 0, L"value", L"", L"");
+					ITEM_INSTRUCTION(Create, 0, L"ObjectField", L"", L"JField");
+					ITEM_INSTRUCTION(Reduce, 6, L"", L"", L"");
+					ITEM_INSTRUCTION(Item, 0, L"fields", L"", L"");
 					END_TRANSITION_ITEM
 
 				END_TRANSITION_BAG
@@ -422,19 +428,19 @@ Table Generation
 					BEGIN_TRANSITION_ITEM(9, 7)
 					ITEM_STACK_PATTERN(24)
 					ITEM_STACK_PATTERN(15)
-					ITEM_INSTRUCTION(Reduce, 24, L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"");
-					ITEM_INSTRUCTION(Reduce, 15, L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"items", L"");
+					ITEM_INSTRUCTION(Reduce, 24, L"", L"", L"");
+					ITEM_INSTRUCTION(Using, 0, L"", L"", L"JValue");
+					ITEM_INSTRUCTION(Reduce, 15, L"", L"", L"");
+					ITEM_INSTRUCTION(Item, 0, L"items", L"", L"");
 					END_TRANSITION_ITEM
 
 					BEGIN_TRANSITION_ITEM(9, 7)
 					ITEM_STACK_PATTERN(24)
 					ITEM_STACK_PATTERN(8)
-					ITEM_INSTRUCTION(Reduce, 24, L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"");
-					ITEM_INSTRUCTION(Reduce, 8, L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"items", L"");
+					ITEM_INSTRUCTION(Reduce, 24, L"", L"", L"");
+					ITEM_INSTRUCTION(Using, 0, L"", L"", L"JValue");
+					ITEM_INSTRUCTION(Reduce, 8, L"", L"", L"");
+					ITEM_INSTRUCTION(Item, 0, L"items", L"", L"");
 					END_TRANSITION_ITEM
 
 				END_TRANSITION_BAG
@@ -445,44 +451,44 @@ Table Generation
 					ITEM_STACK_PATTERN(24)
 					ITEM_STACK_PATTERN(16)
 					ITEM_STACK_PATTERN(14)
-					ITEM_INSTRUCTION(Reduce, 24, L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"");
-					ITEM_INSTRUCTION(Reduce, 16, L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"value", L"");
-					ITEM_INSTRUCTION(Create, 0, L"ObjectField", L"");
-					ITEM_INSTRUCTION(Reduce, 14, L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"fields", L"");
+					ITEM_INSTRUCTION(Reduce, 24, L"", L"", L"");
+					ITEM_INSTRUCTION(Using, 0, L"", L"", L"JValue");
+					ITEM_INSTRUCTION(Reduce, 16, L"", L"", L"");
+					ITEM_INSTRUCTION(Assign, 0, L"value", L"", L"");
+					ITEM_INSTRUCTION(Create, 0, L"ObjectField", L"", L"JField");
+					ITEM_INSTRUCTION(Reduce, 14, L"", L"", L"");
+					ITEM_INSTRUCTION(Item, 0, L"fields", L"", L"");
 					END_TRANSITION_ITEM
 
 					BEGIN_TRANSITION_ITEM(10, 6)
 					ITEM_STACK_PATTERN(24)
 					ITEM_STACK_PATTERN(16)
 					ITEM_STACK_PATTERN(6)
-					ITEM_INSTRUCTION(Reduce, 24, L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"");
-					ITEM_INSTRUCTION(Reduce, 16, L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"value", L"");
-					ITEM_INSTRUCTION(Create, 0, L"ObjectField", L"");
-					ITEM_INSTRUCTION(Reduce, 6, L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"fields", L"");
+					ITEM_INSTRUCTION(Reduce, 24, L"", L"", L"");
+					ITEM_INSTRUCTION(Using, 0, L"", L"", L"JValue");
+					ITEM_INSTRUCTION(Reduce, 16, L"", L"", L"");
+					ITEM_INSTRUCTION(Assign, 0, L"value", L"", L"");
+					ITEM_INSTRUCTION(Create, 0, L"ObjectField", L"", L"JField");
+					ITEM_INSTRUCTION(Reduce, 6, L"", L"", L"");
+					ITEM_INSTRUCTION(Item, 0, L"fields", L"", L"");
 					END_TRANSITION_ITEM
 
 					BEGIN_TRANSITION_ITEM(10, 8)
 					ITEM_STACK_PATTERN(24)
 					ITEM_STACK_PATTERN(15)
-					ITEM_INSTRUCTION(Reduce, 24, L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"");
-					ITEM_INSTRUCTION(Reduce, 15, L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"items", L"");
+					ITEM_INSTRUCTION(Reduce, 24, L"", L"", L"");
+					ITEM_INSTRUCTION(Using, 0, L"", L"", L"JValue");
+					ITEM_INSTRUCTION(Reduce, 15, L"", L"", L"");
+					ITEM_INSTRUCTION(Item, 0, L"items", L"", L"");
 					END_TRANSITION_ITEM
 
 					BEGIN_TRANSITION_ITEM(10, 8)
 					ITEM_STACK_PATTERN(24)
 					ITEM_STACK_PATTERN(8)
-					ITEM_INSTRUCTION(Reduce, 24, L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"");
-					ITEM_INSTRUCTION(Reduce, 8, L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"items", L"");
+					ITEM_INSTRUCTION(Reduce, 24, L"", L"", L"");
+					ITEM_INSTRUCTION(Using, 0, L"", L"", L"JValue");
+					ITEM_INSTRUCTION(Reduce, 8, L"", L"", L"");
+					ITEM_INSTRUCTION(Item, 0, L"items", L"", L"");
 					END_TRANSITION_ITEM
 
 				END_TRANSITION_BAG
@@ -490,32 +496,32 @@ Table Generation
 				BEGIN_TRANSITION_BAG(5, 1)
 
 					BEGIN_TRANSITION_ITEM(1, 10)
-					ITEM_INSTRUCTION(Create, 0, L"Object", L"");
+					ITEM_INSTRUCTION(Create, 0, L"Object", L"", L"JObject");
 					END_TRANSITION_ITEM
 
 					BEGIN_TRANSITION_ITEM(1, 11)
 					ITEM_STACK_PATTERN(26)
-					ITEM_INSTRUCTION(Create, 0, L"Object", L"");
-					ITEM_INSTRUCTION(Reduce, 26, L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"");
+					ITEM_INSTRUCTION(Create, 0, L"Object", L"", L"JObject");
+					ITEM_INSTRUCTION(Reduce, 26, L"", L"", L"");
+					ITEM_INSTRUCTION(Using, 0, L"", L"", L"JRoot");
 					END_TRANSITION_ITEM
 
 					BEGIN_TRANSITION_ITEM(1, 4)
 					ITEM_STACK_PATTERN(24)
 					ITEM_STACK_PATTERN(16)
-					ITEM_INSTRUCTION(Create, 0, L"Object", L"");
-					ITEM_INSTRUCTION(Reduce, 24, L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"");
-					ITEM_INSTRUCTION(Reduce, 16, L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"value", L"");
-					ITEM_INSTRUCTION(Create, 0, L"ObjectField", L"");
+					ITEM_INSTRUCTION(Create, 0, L"Object", L"", L"JObject");
+					ITEM_INSTRUCTION(Reduce, 24, L"", L"", L"");
+					ITEM_INSTRUCTION(Using, 0, L"", L"", L"JValue");
+					ITEM_INSTRUCTION(Reduce, 16, L"", L"", L"");
+					ITEM_INSTRUCTION(Assign, 0, L"value", L"", L"");
+					ITEM_INSTRUCTION(Create, 0, L"ObjectField", L"", L"JField");
 					END_TRANSITION_ITEM
 
 					BEGIN_TRANSITION_ITEM(1, 9)
 					ITEM_STACK_PATTERN(24)
-					ITEM_INSTRUCTION(Create, 0, L"Object", L"");
-					ITEM_INSTRUCTION(Reduce, 24, L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"");
+					ITEM_INSTRUCTION(Create, 0, L"Object", L"", L"JObject");
+					ITEM_INSTRUCTION(Reduce, 24, L"", L"", L"");
+					ITEM_INSTRUCTION(Using, 0, L"", L"", L"JValue");
 					END_TRANSITION_ITEM
 
 				END_TRANSITION_BAG
@@ -526,28 +532,28 @@ Table Generation
 					ITEM_STACK_PATTERN(24)
 					ITEM_STACK_PATTERN(16)
 					ITEM_STACK_PATTERN(14)
-					ITEM_INSTRUCTION(Create, 0, L"Object", L"");
-					ITEM_INSTRUCTION(Reduce, 24, L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"");
-					ITEM_INSTRUCTION(Reduce, 16, L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"value", L"");
-					ITEM_INSTRUCTION(Create, 0, L"ObjectField", L"");
-					ITEM_INSTRUCTION(Reduce, 14, L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"fields", L"");
+					ITEM_INSTRUCTION(Create, 0, L"Object", L"", L"JObject");
+					ITEM_INSTRUCTION(Reduce, 24, L"", L"", L"");
+					ITEM_INSTRUCTION(Using, 0, L"", L"", L"JValue");
+					ITEM_INSTRUCTION(Reduce, 16, L"", L"", L"");
+					ITEM_INSTRUCTION(Assign, 0, L"value", L"", L"");
+					ITEM_INSTRUCTION(Create, 0, L"ObjectField", L"", L"JField");
+					ITEM_INSTRUCTION(Reduce, 14, L"", L"", L"");
+					ITEM_INSTRUCTION(Item, 0, L"fields", L"", L"");
 					END_TRANSITION_ITEM
 
 					BEGIN_TRANSITION_ITEM(7, 5)
 					ITEM_STACK_PATTERN(24)
 					ITEM_STACK_PATTERN(16)
 					ITEM_STACK_PATTERN(6)
-					ITEM_INSTRUCTION(Create, 0, L"Object", L"");
-					ITEM_INSTRUCTION(Reduce, 24, L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"");
-					ITEM_INSTRUCTION(Reduce, 16, L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"value", L"");
-					ITEM_INSTRUCTION(Create, 0, L"ObjectField", L"");
-					ITEM_INSTRUCTION(Reduce, 6, L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"fields", L"");
+					ITEM_INSTRUCTION(Create, 0, L"Object", L"", L"JObject");
+					ITEM_INSTRUCTION(Reduce, 24, L"", L"", L"");
+					ITEM_INSTRUCTION(Using, 0, L"", L"", L"JValue");
+					ITEM_INSTRUCTION(Reduce, 16, L"", L"", L"");
+					ITEM_INSTRUCTION(Assign, 0, L"value", L"", L"");
+					ITEM_INSTRUCTION(Create, 0, L"ObjectField", L"", L"JField");
+					ITEM_INSTRUCTION(Reduce, 6, L"", L"", L"");
+					ITEM_INSTRUCTION(Item, 0, L"fields", L"", L"");
 					END_TRANSITION_ITEM
 
 				END_TRANSITION_BAG
@@ -557,21 +563,21 @@ Table Generation
 					BEGIN_TRANSITION_ITEM(9, 7)
 					ITEM_STACK_PATTERN(24)
 					ITEM_STACK_PATTERN(15)
-					ITEM_INSTRUCTION(Create, 0, L"Object", L"");
-					ITEM_INSTRUCTION(Reduce, 24, L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"");
-					ITEM_INSTRUCTION(Reduce, 15, L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"items", L"");
+					ITEM_INSTRUCTION(Create, 0, L"Object", L"", L"JObject");
+					ITEM_INSTRUCTION(Reduce, 24, L"", L"", L"");
+					ITEM_INSTRUCTION(Using, 0, L"", L"", L"JValue");
+					ITEM_INSTRUCTION(Reduce, 15, L"", L"", L"");
+					ITEM_INSTRUCTION(Item, 0, L"items", L"", L"");
 					END_TRANSITION_ITEM
 
 					BEGIN_TRANSITION_ITEM(9, 7)
 					ITEM_STACK_PATTERN(24)
 					ITEM_STACK_PATTERN(8)
-					ITEM_INSTRUCTION(Create, 0, L"Object", L"");
-					ITEM_INSTRUCTION(Reduce, 24, L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"");
-					ITEM_INSTRUCTION(Reduce, 8, L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"items", L"");
+					ITEM_INSTRUCTION(Create, 0, L"Object", L"", L"JObject");
+					ITEM_INSTRUCTION(Reduce, 24, L"", L"", L"");
+					ITEM_INSTRUCTION(Using, 0, L"", L"", L"JValue");
+					ITEM_INSTRUCTION(Reduce, 8, L"", L"", L"");
+					ITEM_INSTRUCTION(Item, 0, L"items", L"", L"");
 					END_TRANSITION_ITEM
 
 				END_TRANSITION_BAG
@@ -582,48 +588,48 @@ Table Generation
 					ITEM_STACK_PATTERN(24)
 					ITEM_STACK_PATTERN(16)
 					ITEM_STACK_PATTERN(14)
-					ITEM_INSTRUCTION(Create, 0, L"Object", L"");
-					ITEM_INSTRUCTION(Reduce, 24, L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"");
-					ITEM_INSTRUCTION(Reduce, 16, L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"value", L"");
-					ITEM_INSTRUCTION(Create, 0, L"ObjectField", L"");
-					ITEM_INSTRUCTION(Reduce, 14, L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"fields", L"");
+					ITEM_INSTRUCTION(Create, 0, L"Object", L"", L"JObject");
+					ITEM_INSTRUCTION(Reduce, 24, L"", L"", L"");
+					ITEM_INSTRUCTION(Using, 0, L"", L"", L"JValue");
+					ITEM_INSTRUCTION(Reduce, 16, L"", L"", L"");
+					ITEM_INSTRUCTION(Assign, 0, L"value", L"", L"");
+					ITEM_INSTRUCTION(Create, 0, L"ObjectField", L"", L"JField");
+					ITEM_INSTRUCTION(Reduce, 14, L"", L"", L"");
+					ITEM_INSTRUCTION(Item, 0, L"fields", L"", L"");
 					END_TRANSITION_ITEM
 
 					BEGIN_TRANSITION_ITEM(10, 6)
 					ITEM_STACK_PATTERN(24)
 					ITEM_STACK_PATTERN(16)
 					ITEM_STACK_PATTERN(6)
-					ITEM_INSTRUCTION(Create, 0, L"Object", L"");
-					ITEM_INSTRUCTION(Reduce, 24, L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"");
-					ITEM_INSTRUCTION(Reduce, 16, L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"value", L"");
-					ITEM_INSTRUCTION(Create, 0, L"ObjectField", L"");
-					ITEM_INSTRUCTION(Reduce, 6, L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"fields", L"");
+					ITEM_INSTRUCTION(Create, 0, L"Object", L"", L"JObject");
+					ITEM_INSTRUCTION(Reduce, 24, L"", L"", L"");
+					ITEM_INSTRUCTION(Using, 0, L"", L"", L"JValue");
+					ITEM_INSTRUCTION(Reduce, 16, L"", L"", L"");
+					ITEM_INSTRUCTION(Assign, 0, L"value", L"", L"");
+					ITEM_INSTRUCTION(Create, 0, L"ObjectField", L"", L"JField");
+					ITEM_INSTRUCTION(Reduce, 6, L"", L"", L"");
+					ITEM_INSTRUCTION(Item, 0, L"fields", L"", L"");
 					END_TRANSITION_ITEM
 
 					BEGIN_TRANSITION_ITEM(10, 8)
 					ITEM_STACK_PATTERN(24)
 					ITEM_STACK_PATTERN(15)
-					ITEM_INSTRUCTION(Create, 0, L"Object", L"");
-					ITEM_INSTRUCTION(Reduce, 24, L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"");
-					ITEM_INSTRUCTION(Reduce, 15, L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"items", L"");
+					ITEM_INSTRUCTION(Create, 0, L"Object", L"", L"JObject");
+					ITEM_INSTRUCTION(Reduce, 24, L"", L"", L"");
+					ITEM_INSTRUCTION(Using, 0, L"", L"", L"JValue");
+					ITEM_INSTRUCTION(Reduce, 15, L"", L"", L"");
+					ITEM_INSTRUCTION(Item, 0, L"items", L"", L"");
 					END_TRANSITION_ITEM
 
 					BEGIN_TRANSITION_ITEM(10, 8)
 					ITEM_STACK_PATTERN(24)
 					ITEM_STACK_PATTERN(8)
-					ITEM_INSTRUCTION(Create, 0, L"Object", L"");
-					ITEM_INSTRUCTION(Reduce, 24, L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"");
-					ITEM_INSTRUCTION(Reduce, 8, L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"items", L"");
+					ITEM_INSTRUCTION(Create, 0, L"Object", L"", L"JObject");
+					ITEM_INSTRUCTION(Reduce, 24, L"", L"", L"");
+					ITEM_INSTRUCTION(Using, 0, L"", L"", L"JValue");
+					ITEM_INSTRUCTION(Reduce, 8, L"", L"", L"");
+					ITEM_INSTRUCTION(Item, 0, L"items", L"", L"");
 					END_TRANSITION_ITEM
 
 				END_TRANSITION_BAG
@@ -631,8 +637,8 @@ Table Generation
 				BEGIN_TRANSITION_BAG(6, 13)
 
 					BEGIN_TRANSITION_ITEM(13, 12)
-					ITEM_INSTRUCTION(Shift, 6, L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"name", L"");
+					ITEM_INSTRUCTION(Shift, 6, L"", L"", L"");
+					ITEM_INSTRUCTION(Assign, 0, L"name", L"", L"");
 					END_TRANSITION_ITEM
 
 				END_TRANSITION_BAG
@@ -640,32 +646,32 @@ Table Generation
 				BEGIN_TRANSITION_BAG(7, 1)
 
 					BEGIN_TRANSITION_ITEM(1, 13)
-					ITEM_INSTRUCTION(Create, 0, L"Array", L"");
+					ITEM_INSTRUCTION(Create, 0, L"Array", L"", L"JArray");
 					END_TRANSITION_ITEM
 
 					BEGIN_TRANSITION_ITEM(1, 11)
 					ITEM_STACK_PATTERN(26)
-					ITEM_INSTRUCTION(Create, 0, L"Array", L"");
-					ITEM_INSTRUCTION(Reduce, 26, L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"");
+					ITEM_INSTRUCTION(Create, 0, L"Array", L"", L"JArray");
+					ITEM_INSTRUCTION(Reduce, 26, L"", L"", L"");
+					ITEM_INSTRUCTION(Using, 0, L"", L"", L"JRoot");
 					END_TRANSITION_ITEM
 
 					BEGIN_TRANSITION_ITEM(1, 4)
 					ITEM_STACK_PATTERN(24)
 					ITEM_STACK_PATTERN(16)
-					ITEM_INSTRUCTION(Create, 0, L"Array", L"");
-					ITEM_INSTRUCTION(Reduce, 24, L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"");
-					ITEM_INSTRUCTION(Reduce, 16, L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"value", L"");
-					ITEM_INSTRUCTION(Create, 0, L"ObjectField", L"");
+					ITEM_INSTRUCTION(Create, 0, L"Array", L"", L"JArray");
+					ITEM_INSTRUCTION(Reduce, 24, L"", L"", L"");
+					ITEM_INSTRUCTION(Using, 0, L"", L"", L"JValue");
+					ITEM_INSTRUCTION(Reduce, 16, L"", L"", L"");
+					ITEM_INSTRUCTION(Assign, 0, L"value", L"", L"");
+					ITEM_INSTRUCTION(Create, 0, L"ObjectField", L"", L"JField");
 					END_TRANSITION_ITEM
 
 					BEGIN_TRANSITION_ITEM(1, 9)
 					ITEM_STACK_PATTERN(24)
-					ITEM_INSTRUCTION(Create, 0, L"Array", L"");
-					ITEM_INSTRUCTION(Reduce, 24, L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"");
+					ITEM_INSTRUCTION(Create, 0, L"Array", L"", L"JArray");
+					ITEM_INSTRUCTION(Reduce, 24, L"", L"", L"");
+					ITEM_INSTRUCTION(Using, 0, L"", L"", L"JValue");
 					END_TRANSITION_ITEM
 
 				END_TRANSITION_BAG
@@ -676,28 +682,28 @@ Table Generation
 					ITEM_STACK_PATTERN(24)
 					ITEM_STACK_PATTERN(16)
 					ITEM_STACK_PATTERN(14)
-					ITEM_INSTRUCTION(Create, 0, L"Array", L"");
-					ITEM_INSTRUCTION(Reduce, 24, L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"");
-					ITEM_INSTRUCTION(Reduce, 16, L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"value", L"");
-					ITEM_INSTRUCTION(Create, 0, L"ObjectField", L"");
-					ITEM_INSTRUCTION(Reduce, 14, L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"fields", L"");
+					ITEM_INSTRUCTION(Create, 0, L"Array", L"", L"JArray");
+					ITEM_INSTRUCTION(Reduce, 24, L"", L"", L"");
+					ITEM_INSTRUCTION(Using, 0, L"", L"", L"JValue");
+					ITEM_INSTRUCTION(Reduce, 16, L"", L"", L"");
+					ITEM_INSTRUCTION(Assign, 0, L"value", L"", L"");
+					ITEM_INSTRUCTION(Create, 0, L"ObjectField", L"", L"JField");
+					ITEM_INSTRUCTION(Reduce, 14, L"", L"", L"");
+					ITEM_INSTRUCTION(Item, 0, L"fields", L"", L"");
 					END_TRANSITION_ITEM
 
 					BEGIN_TRANSITION_ITEM(7, 5)
 					ITEM_STACK_PATTERN(24)
 					ITEM_STACK_PATTERN(16)
 					ITEM_STACK_PATTERN(6)
-					ITEM_INSTRUCTION(Create, 0, L"Array", L"");
-					ITEM_INSTRUCTION(Reduce, 24, L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"");
-					ITEM_INSTRUCTION(Reduce, 16, L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"value", L"");
-					ITEM_INSTRUCTION(Create, 0, L"ObjectField", L"");
-					ITEM_INSTRUCTION(Reduce, 6, L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"fields", L"");
+					ITEM_INSTRUCTION(Create, 0, L"Array", L"", L"JArray");
+					ITEM_INSTRUCTION(Reduce, 24, L"", L"", L"");
+					ITEM_INSTRUCTION(Using, 0, L"", L"", L"JValue");
+					ITEM_INSTRUCTION(Reduce, 16, L"", L"", L"");
+					ITEM_INSTRUCTION(Assign, 0, L"value", L"", L"");
+					ITEM_INSTRUCTION(Create, 0, L"ObjectField", L"", L"JField");
+					ITEM_INSTRUCTION(Reduce, 6, L"", L"", L"");
+					ITEM_INSTRUCTION(Item, 0, L"fields", L"", L"");
 					END_TRANSITION_ITEM
 
 				END_TRANSITION_BAG
@@ -707,21 +713,21 @@ Table Generation
 					BEGIN_TRANSITION_ITEM(9, 7)
 					ITEM_STACK_PATTERN(24)
 					ITEM_STACK_PATTERN(15)
-					ITEM_INSTRUCTION(Create, 0, L"Array", L"");
-					ITEM_INSTRUCTION(Reduce, 24, L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"");
-					ITEM_INSTRUCTION(Reduce, 15, L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"items", L"");
+					ITEM_INSTRUCTION(Create, 0, L"Array", L"", L"JArray");
+					ITEM_INSTRUCTION(Reduce, 24, L"", L"", L"");
+					ITEM_INSTRUCTION(Using, 0, L"", L"", L"JValue");
+					ITEM_INSTRUCTION(Reduce, 15, L"", L"", L"");
+					ITEM_INSTRUCTION(Item, 0, L"items", L"", L"");
 					END_TRANSITION_ITEM
 
 					BEGIN_TRANSITION_ITEM(9, 7)
 					ITEM_STACK_PATTERN(24)
 					ITEM_STACK_PATTERN(8)
-					ITEM_INSTRUCTION(Create, 0, L"Array", L"");
-					ITEM_INSTRUCTION(Reduce, 24, L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"");
-					ITEM_INSTRUCTION(Reduce, 8, L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"items", L"");
+					ITEM_INSTRUCTION(Create, 0, L"Array", L"", L"JArray");
+					ITEM_INSTRUCTION(Reduce, 24, L"", L"", L"");
+					ITEM_INSTRUCTION(Using, 0, L"", L"", L"JValue");
+					ITEM_INSTRUCTION(Reduce, 8, L"", L"", L"");
+					ITEM_INSTRUCTION(Item, 0, L"items", L"", L"");
 					END_TRANSITION_ITEM
 
 				END_TRANSITION_BAG
@@ -732,48 +738,48 @@ Table Generation
 					ITEM_STACK_PATTERN(24)
 					ITEM_STACK_PATTERN(16)
 					ITEM_STACK_PATTERN(14)
-					ITEM_INSTRUCTION(Create, 0, L"Array", L"");
-					ITEM_INSTRUCTION(Reduce, 24, L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"");
-					ITEM_INSTRUCTION(Reduce, 16, L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"value", L"");
-					ITEM_INSTRUCTION(Create, 0, L"ObjectField", L"");
-					ITEM_INSTRUCTION(Reduce, 14, L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"fields", L"");
+					ITEM_INSTRUCTION(Create, 0, L"Array", L"", L"JArray");
+					ITEM_INSTRUCTION(Reduce, 24, L"", L"", L"");
+					ITEM_INSTRUCTION(Using, 0, L"", L"", L"JValue");
+					ITEM_INSTRUCTION(Reduce, 16, L"", L"", L"");
+					ITEM_INSTRUCTION(Assign, 0, L"value", L"", L"");
+					ITEM_INSTRUCTION(Create, 0, L"ObjectField", L"", L"JField");
+					ITEM_INSTRUCTION(Reduce, 14, L"", L"", L"");
+					ITEM_INSTRUCTION(Item, 0, L"fields", L"", L"");
 					END_TRANSITION_ITEM
 
 					BEGIN_TRANSITION_ITEM(10, 6)
 					ITEM_STACK_PATTERN(24)
 					ITEM_STACK_PATTERN(16)
 					ITEM_STACK_PATTERN(6)
-					ITEM_INSTRUCTION(Create, 0, L"Array", L"");
-					ITEM_INSTRUCTION(Reduce, 24, L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"");
-					ITEM_INSTRUCTION(Reduce, 16, L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"value", L"");
-					ITEM_INSTRUCTION(Create, 0, L"ObjectField", L"");
-					ITEM_INSTRUCTION(Reduce, 6, L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"fields", L"");
+					ITEM_INSTRUCTION(Create, 0, L"Array", L"", L"JArray");
+					ITEM_INSTRUCTION(Reduce, 24, L"", L"", L"");
+					ITEM_INSTRUCTION(Using, 0, L"", L"", L"JValue");
+					ITEM_INSTRUCTION(Reduce, 16, L"", L"", L"");
+					ITEM_INSTRUCTION(Assign, 0, L"value", L"", L"");
+					ITEM_INSTRUCTION(Create, 0, L"ObjectField", L"", L"JField");
+					ITEM_INSTRUCTION(Reduce, 6, L"", L"", L"");
+					ITEM_INSTRUCTION(Item, 0, L"fields", L"", L"");
 					END_TRANSITION_ITEM
 
 					BEGIN_TRANSITION_ITEM(10, 8)
 					ITEM_STACK_PATTERN(24)
 					ITEM_STACK_PATTERN(15)
-					ITEM_INSTRUCTION(Create, 0, L"Array", L"");
-					ITEM_INSTRUCTION(Reduce, 24, L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"");
-					ITEM_INSTRUCTION(Reduce, 15, L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"items", L"");
+					ITEM_INSTRUCTION(Create, 0, L"Array", L"", L"JArray");
+					ITEM_INSTRUCTION(Reduce, 24, L"", L"", L"");
+					ITEM_INSTRUCTION(Using, 0, L"", L"", L"JValue");
+					ITEM_INSTRUCTION(Reduce, 15, L"", L"", L"");
+					ITEM_INSTRUCTION(Item, 0, L"items", L"", L"");
 					END_TRANSITION_ITEM
 
 					BEGIN_TRANSITION_ITEM(10, 8)
 					ITEM_STACK_PATTERN(24)
 					ITEM_STACK_PATTERN(8)
-					ITEM_INSTRUCTION(Create, 0, L"Array", L"");
-					ITEM_INSTRUCTION(Reduce, 24, L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"");
-					ITEM_INSTRUCTION(Reduce, 8, L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"items", L"");
+					ITEM_INSTRUCTION(Create, 0, L"Array", L"", L"JArray");
+					ITEM_INSTRUCTION(Reduce, 24, L"", L"", L"");
+					ITEM_INSTRUCTION(Using, 0, L"", L"", L"JValue");
+					ITEM_INSTRUCTION(Reduce, 8, L"", L"", L"");
+					ITEM_INSTRUCTION(Item, 0, L"items", L"", L"");
 					END_TRANSITION_ITEM
 
 				END_TRANSITION_BAG
@@ -781,10 +787,10 @@ Table Generation
 				BEGIN_TRANSITION_BAG(8, 3)
 
 					BEGIN_TRANSITION_ITEM(3, 2)
-					ITEM_INSTRUCTION(Shift, 8, L"", L"");
-					ITEM_INSTRUCTION(Shift, 24, L"", L"");
-					ITEM_INSTRUCTION(Setter, 0, L"value", L"True");
-					ITEM_INSTRUCTION(Create, 0, L"Literal", L"");
+					ITEM_INSTRUCTION(Shift, 8, L"", L"", L"");
+					ITEM_INSTRUCTION(Shift, 24, L"", L"", L"");
+					ITEM_INSTRUCTION(Setter, 0, L"value", L"True", L"");
+					ITEM_INSTRUCTION(Create, 0, L"Literal", L"", L"JLiteral");
 					END_TRANSITION_ITEM
 
 				END_TRANSITION_BAG
@@ -792,10 +798,10 @@ Table Generation
 				BEGIN_TRANSITION_BAG(8, 4)
 
 					BEGIN_TRANSITION_ITEM(4, 2)
-					ITEM_INSTRUCTION(Shift, 8, L"", L"");
-					ITEM_INSTRUCTION(Shift, 24, L"", L"");
-					ITEM_INSTRUCTION(Setter, 0, L"value", L"False");
-					ITEM_INSTRUCTION(Create, 0, L"Literal", L"");
+					ITEM_INSTRUCTION(Shift, 8, L"", L"", L"");
+					ITEM_INSTRUCTION(Shift, 24, L"", L"", L"");
+					ITEM_INSTRUCTION(Setter, 0, L"value", L"False", L"");
+					ITEM_INSTRUCTION(Create, 0, L"Literal", L"", L"JLiteral");
 					END_TRANSITION_ITEM
 
 				END_TRANSITION_BAG
@@ -803,10 +809,10 @@ Table Generation
 				BEGIN_TRANSITION_BAG(8, 5)
 
 					BEGIN_TRANSITION_ITEM(5, 2)
-					ITEM_INSTRUCTION(Shift, 8, L"", L"");
-					ITEM_INSTRUCTION(Shift, 24, L"", L"");
-					ITEM_INSTRUCTION(Setter, 0, L"value", L"Null");
-					ITEM_INSTRUCTION(Create, 0, L"Literal", L"");
+					ITEM_INSTRUCTION(Shift, 8, L"", L"", L"");
+					ITEM_INSTRUCTION(Shift, 24, L"", L"", L"");
+					ITEM_INSTRUCTION(Setter, 0, L"value", L"Null", L"");
+					ITEM_INSTRUCTION(Create, 0, L"Literal", L"", L"JLiteral");
 					END_TRANSITION_ITEM
 
 				END_TRANSITION_BAG
@@ -814,8 +820,8 @@ Table Generation
 				BEGIN_TRANSITION_BAG(8, 6)
 
 					BEGIN_TRANSITION_ITEM(6, 14)
-					ITEM_INSTRUCTION(Shift, 8, L"", L"");
-					ITEM_INSTRUCTION(Shift, 24, L"", L"");
+					ITEM_INSTRUCTION(Shift, 8, L"", L"", L"");
+					ITEM_INSTRUCTION(Shift, 24, L"", L"", L"");
 					END_TRANSITION_ITEM
 
 				END_TRANSITION_BAG
@@ -823,8 +829,8 @@ Table Generation
 				BEGIN_TRANSITION_BAG(8, 8)
 
 					BEGIN_TRANSITION_ITEM(8, 15)
-					ITEM_INSTRUCTION(Shift, 8, L"", L"");
-					ITEM_INSTRUCTION(Shift, 24, L"", L"");
+					ITEM_INSTRUCTION(Shift, 8, L"", L"", L"");
+					ITEM_INSTRUCTION(Shift, 24, L"", L"", L"");
 					END_TRANSITION_ITEM
 
 				END_TRANSITION_BAG
@@ -832,10 +838,10 @@ Table Generation
 				BEGIN_TRANSITION_BAG(8, 12)
 
 					BEGIN_TRANSITION_ITEM(12, 2)
-					ITEM_INSTRUCTION(Shift, 8, L"", L"");
-					ITEM_INSTRUCTION(Shift, 24, L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"content", L"");
-					ITEM_INSTRUCTION(Create, 0, L"Number", L"");
+					ITEM_INSTRUCTION(Shift, 8, L"", L"", L"");
+					ITEM_INSTRUCTION(Shift, 24, L"", L"", L"");
+					ITEM_INSTRUCTION(Assign, 0, L"content", L"", L"");
+					ITEM_INSTRUCTION(Create, 0, L"Number", L"", L"JLiteral");
 					END_TRANSITION_ITEM
 
 				END_TRANSITION_BAG
@@ -843,10 +849,10 @@ Table Generation
 				BEGIN_TRANSITION_BAG(8, 13)
 
 					BEGIN_TRANSITION_ITEM(13, 2)
-					ITEM_INSTRUCTION(Shift, 8, L"", L"");
-					ITEM_INSTRUCTION(Shift, 24, L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"content", L"");
-					ITEM_INSTRUCTION(Create, 0, L"String", L"");
+					ITEM_INSTRUCTION(Shift, 8, L"", L"", L"");
+					ITEM_INSTRUCTION(Shift, 24, L"", L"", L"");
+					ITEM_INSTRUCTION(Assign, 0, L"content", L"", L"");
+					ITEM_INSTRUCTION(Create, 0, L"String", L"", L"JLiteral");
 					END_TRANSITION_ITEM
 
 				END_TRANSITION_BAG
@@ -868,8 +874,8 @@ Table Generation
 				BEGIN_TRANSITION_BAG(14, 13)
 
 					BEGIN_TRANSITION_ITEM(13, 12)
-					ITEM_INSTRUCTION(Shift, 14, L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"name", L"");
+					ITEM_INSTRUCTION(Shift, 14, L"", L"", L"");
+					ITEM_INSTRUCTION(Assign, 0, L"name", L"", L"");
 					END_TRANSITION_ITEM
 
 				END_TRANSITION_BAG
@@ -877,10 +883,10 @@ Table Generation
 				BEGIN_TRANSITION_BAG(15, 3)
 
 					BEGIN_TRANSITION_ITEM(3, 2)
-					ITEM_INSTRUCTION(Shift, 15, L"", L"");
-					ITEM_INSTRUCTION(Shift, 24, L"", L"");
-					ITEM_INSTRUCTION(Setter, 0, L"value", L"True");
-					ITEM_INSTRUCTION(Create, 0, L"Literal", L"");
+					ITEM_INSTRUCTION(Shift, 15, L"", L"", L"");
+					ITEM_INSTRUCTION(Shift, 24, L"", L"", L"");
+					ITEM_INSTRUCTION(Setter, 0, L"value", L"True", L"");
+					ITEM_INSTRUCTION(Create, 0, L"Literal", L"", L"JLiteral");
 					END_TRANSITION_ITEM
 
 				END_TRANSITION_BAG
@@ -888,10 +894,10 @@ Table Generation
 				BEGIN_TRANSITION_BAG(15, 4)
 
 					BEGIN_TRANSITION_ITEM(4, 2)
-					ITEM_INSTRUCTION(Shift, 15, L"", L"");
-					ITEM_INSTRUCTION(Shift, 24, L"", L"");
-					ITEM_INSTRUCTION(Setter, 0, L"value", L"False");
-					ITEM_INSTRUCTION(Create, 0, L"Literal", L"");
+					ITEM_INSTRUCTION(Shift, 15, L"", L"", L"");
+					ITEM_INSTRUCTION(Shift, 24, L"", L"", L"");
+					ITEM_INSTRUCTION(Setter, 0, L"value", L"False", L"");
+					ITEM_INSTRUCTION(Create, 0, L"Literal", L"", L"JLiteral");
 					END_TRANSITION_ITEM
 
 				END_TRANSITION_BAG
@@ -899,10 +905,10 @@ Table Generation
 				BEGIN_TRANSITION_BAG(15, 5)
 
 					BEGIN_TRANSITION_ITEM(5, 2)
-					ITEM_INSTRUCTION(Shift, 15, L"", L"");
-					ITEM_INSTRUCTION(Shift, 24, L"", L"");
-					ITEM_INSTRUCTION(Setter, 0, L"value", L"Null");
-					ITEM_INSTRUCTION(Create, 0, L"Literal", L"");
+					ITEM_INSTRUCTION(Shift, 15, L"", L"", L"");
+					ITEM_INSTRUCTION(Shift, 24, L"", L"", L"");
+					ITEM_INSTRUCTION(Setter, 0, L"value", L"Null", L"");
+					ITEM_INSTRUCTION(Create, 0, L"Literal", L"", L"JLiteral");
 					END_TRANSITION_ITEM
 
 				END_TRANSITION_BAG
@@ -910,8 +916,8 @@ Table Generation
 				BEGIN_TRANSITION_BAG(15, 6)
 
 					BEGIN_TRANSITION_ITEM(6, 14)
-					ITEM_INSTRUCTION(Shift, 15, L"", L"");
-					ITEM_INSTRUCTION(Shift, 24, L"", L"");
+					ITEM_INSTRUCTION(Shift, 15, L"", L"", L"");
+					ITEM_INSTRUCTION(Shift, 24, L"", L"", L"");
 					END_TRANSITION_ITEM
 
 				END_TRANSITION_BAG
@@ -919,8 +925,8 @@ Table Generation
 				BEGIN_TRANSITION_BAG(15, 8)
 
 					BEGIN_TRANSITION_ITEM(8, 15)
-					ITEM_INSTRUCTION(Shift, 15, L"", L"");
-					ITEM_INSTRUCTION(Shift, 24, L"", L"");
+					ITEM_INSTRUCTION(Shift, 15, L"", L"", L"");
+					ITEM_INSTRUCTION(Shift, 24, L"", L"", L"");
 					END_TRANSITION_ITEM
 
 				END_TRANSITION_BAG
@@ -935,10 +941,10 @@ Table Generation
 				BEGIN_TRANSITION_BAG(15, 12)
 
 					BEGIN_TRANSITION_ITEM(12, 2)
-					ITEM_INSTRUCTION(Shift, 15, L"", L"");
-					ITEM_INSTRUCTION(Shift, 24, L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"content", L"");
-					ITEM_INSTRUCTION(Create, 0, L"Number", L"");
+					ITEM_INSTRUCTION(Shift, 15, L"", L"", L"");
+					ITEM_INSTRUCTION(Shift, 24, L"", L"", L"");
+					ITEM_INSTRUCTION(Assign, 0, L"content", L"", L"");
+					ITEM_INSTRUCTION(Create, 0, L"Number", L"", L"JLiteral");
 					END_TRANSITION_ITEM
 
 				END_TRANSITION_BAG
@@ -946,10 +952,10 @@ Table Generation
 				BEGIN_TRANSITION_BAG(15, 13)
 
 					BEGIN_TRANSITION_ITEM(13, 2)
-					ITEM_INSTRUCTION(Shift, 15, L"", L"");
-					ITEM_INSTRUCTION(Shift, 24, L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"content", L"");
-					ITEM_INSTRUCTION(Create, 0, L"String", L"");
+					ITEM_INSTRUCTION(Shift, 15, L"", L"", L"");
+					ITEM_INSTRUCTION(Shift, 24, L"", L"", L"");
+					ITEM_INSTRUCTION(Assign, 0, L"content", L"", L"");
+					ITEM_INSTRUCTION(Create, 0, L"String", L"", L"JLiteral");
 					END_TRANSITION_ITEM
 
 				END_TRANSITION_BAG
@@ -957,10 +963,10 @@ Table Generation
 				BEGIN_TRANSITION_BAG(16, 3)
 
 					BEGIN_TRANSITION_ITEM(3, 2)
-					ITEM_INSTRUCTION(Shift, 16, L"", L"");
-					ITEM_INSTRUCTION(Shift, 24, L"", L"");
-					ITEM_INSTRUCTION(Setter, 0, L"value", L"True");
-					ITEM_INSTRUCTION(Create, 0, L"Literal", L"");
+					ITEM_INSTRUCTION(Shift, 16, L"", L"", L"");
+					ITEM_INSTRUCTION(Shift, 24, L"", L"", L"");
+					ITEM_INSTRUCTION(Setter, 0, L"value", L"True", L"");
+					ITEM_INSTRUCTION(Create, 0, L"Literal", L"", L"JLiteral");
 					END_TRANSITION_ITEM
 
 				END_TRANSITION_BAG
@@ -968,10 +974,10 @@ Table Generation
 				BEGIN_TRANSITION_BAG(16, 4)
 
 					BEGIN_TRANSITION_ITEM(4, 2)
-					ITEM_INSTRUCTION(Shift, 16, L"", L"");
-					ITEM_INSTRUCTION(Shift, 24, L"", L"");
-					ITEM_INSTRUCTION(Setter, 0, L"value", L"False");
-					ITEM_INSTRUCTION(Create, 0, L"Literal", L"");
+					ITEM_INSTRUCTION(Shift, 16, L"", L"", L"");
+					ITEM_INSTRUCTION(Shift, 24, L"", L"", L"");
+					ITEM_INSTRUCTION(Setter, 0, L"value", L"False", L"");
+					ITEM_INSTRUCTION(Create, 0, L"Literal", L"", L"JLiteral");
 					END_TRANSITION_ITEM
 
 				END_TRANSITION_BAG
@@ -979,10 +985,10 @@ Table Generation
 				BEGIN_TRANSITION_BAG(16, 5)
 
 					BEGIN_TRANSITION_ITEM(5, 2)
-					ITEM_INSTRUCTION(Shift, 16, L"", L"");
-					ITEM_INSTRUCTION(Shift, 24, L"", L"");
-					ITEM_INSTRUCTION(Setter, 0, L"value", L"Null");
-					ITEM_INSTRUCTION(Create, 0, L"Literal", L"");
+					ITEM_INSTRUCTION(Shift, 16, L"", L"", L"");
+					ITEM_INSTRUCTION(Shift, 24, L"", L"", L"");
+					ITEM_INSTRUCTION(Setter, 0, L"value", L"Null", L"");
+					ITEM_INSTRUCTION(Create, 0, L"Literal", L"", L"JLiteral");
 					END_TRANSITION_ITEM
 
 				END_TRANSITION_BAG
@@ -990,8 +996,8 @@ Table Generation
 				BEGIN_TRANSITION_BAG(16, 6)
 
 					BEGIN_TRANSITION_ITEM(6, 14)
-					ITEM_INSTRUCTION(Shift, 16, L"", L"");
-					ITEM_INSTRUCTION(Shift, 24, L"", L"");
+					ITEM_INSTRUCTION(Shift, 16, L"", L"", L"");
+					ITEM_INSTRUCTION(Shift, 24, L"", L"", L"");
 					END_TRANSITION_ITEM
 
 				END_TRANSITION_BAG
@@ -999,8 +1005,8 @@ Table Generation
 				BEGIN_TRANSITION_BAG(16, 8)
 
 					BEGIN_TRANSITION_ITEM(8, 15)
-					ITEM_INSTRUCTION(Shift, 16, L"", L"");
-					ITEM_INSTRUCTION(Shift, 24, L"", L"");
+					ITEM_INSTRUCTION(Shift, 16, L"", L"", L"");
+					ITEM_INSTRUCTION(Shift, 24, L"", L"", L"");
 					END_TRANSITION_ITEM
 
 				END_TRANSITION_BAG
@@ -1008,10 +1014,10 @@ Table Generation
 				BEGIN_TRANSITION_BAG(16, 12)
 
 					BEGIN_TRANSITION_ITEM(12, 2)
-					ITEM_INSTRUCTION(Shift, 16, L"", L"");
-					ITEM_INSTRUCTION(Shift, 24, L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"content", L"");
-					ITEM_INSTRUCTION(Create, 0, L"Number", L"");
+					ITEM_INSTRUCTION(Shift, 16, L"", L"", L"");
+					ITEM_INSTRUCTION(Shift, 24, L"", L"", L"");
+					ITEM_INSTRUCTION(Assign, 0, L"content", L"", L"");
+					ITEM_INSTRUCTION(Create, 0, L"Number", L"", L"JLiteral");
 					END_TRANSITION_ITEM
 
 				END_TRANSITION_BAG
@@ -1019,10 +1025,10 @@ Table Generation
 				BEGIN_TRANSITION_BAG(16, 13)
 
 					BEGIN_TRANSITION_ITEM(13, 2)
-					ITEM_INSTRUCTION(Shift, 16, L"", L"");
-					ITEM_INSTRUCTION(Shift, 24, L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"content", L"");
-					ITEM_INSTRUCTION(Create, 0, L"String", L"");
+					ITEM_INSTRUCTION(Shift, 16, L"", L"", L"");
+					ITEM_INSTRUCTION(Shift, 24, L"", L"", L"");
+					ITEM_INSTRUCTION(Assign, 0, L"content", L"", L"");
+					ITEM_INSTRUCTION(Create, 0, L"String", L"", L"JLiteral");
 					END_TRANSITION_ITEM
 
 				END_TRANSITION_BAG
@@ -1037,7 +1043,7 @@ Table Generation
 				BEGIN_TRANSITION_BAG(18, 13)
 
 					BEGIN_TRANSITION_ITEM(13, 12)
-					ITEM_INSTRUCTION(Assign, 0, L"name", L"");
+					ITEM_INSTRUCTION(Assign, 0, L"name", L"", L"");
 					END_TRANSITION_ITEM
 
 				END_TRANSITION_BAG
@@ -1080,9 +1086,9 @@ Table Generation
 				BEGIN_TRANSITION_BAG(24, 3)
 
 					BEGIN_TRANSITION_ITEM(3, 2)
-					ITEM_INSTRUCTION(Shift, 24, L"", L"");
-					ITEM_INSTRUCTION(Setter, 0, L"value", L"True");
-					ITEM_INSTRUCTION(Create, 0, L"Literal", L"");
+					ITEM_INSTRUCTION(Shift, 24, L"", L"", L"");
+					ITEM_INSTRUCTION(Setter, 0, L"value", L"True", L"");
+					ITEM_INSTRUCTION(Create, 0, L"Literal", L"", L"JLiteral");
 					END_TRANSITION_ITEM
 
 				END_TRANSITION_BAG
@@ -1090,9 +1096,9 @@ Table Generation
 				BEGIN_TRANSITION_BAG(24, 4)
 
 					BEGIN_TRANSITION_ITEM(4, 2)
-					ITEM_INSTRUCTION(Shift, 24, L"", L"");
-					ITEM_INSTRUCTION(Setter, 0, L"value", L"False");
-					ITEM_INSTRUCTION(Create, 0, L"Literal", L"");
+					ITEM_INSTRUCTION(Shift, 24, L"", L"", L"");
+					ITEM_INSTRUCTION(Setter, 0, L"value", L"False", L"");
+					ITEM_INSTRUCTION(Create, 0, L"Literal", L"", L"JLiteral");
 					END_TRANSITION_ITEM
 
 				END_TRANSITION_BAG
@@ -1100,9 +1106,9 @@ Table Generation
 				BEGIN_TRANSITION_BAG(24, 5)
 
 					BEGIN_TRANSITION_ITEM(5, 2)
-					ITEM_INSTRUCTION(Shift, 24, L"", L"");
-					ITEM_INSTRUCTION(Setter, 0, L"value", L"Null");
-					ITEM_INSTRUCTION(Create, 0, L"Literal", L"");
+					ITEM_INSTRUCTION(Shift, 24, L"", L"", L"");
+					ITEM_INSTRUCTION(Setter, 0, L"value", L"Null", L"");
+					ITEM_INSTRUCTION(Create, 0, L"Literal", L"", L"JLiteral");
 					END_TRANSITION_ITEM
 
 				END_TRANSITION_BAG
@@ -1110,7 +1116,7 @@ Table Generation
 				BEGIN_TRANSITION_BAG(24, 6)
 
 					BEGIN_TRANSITION_ITEM(6, 14)
-					ITEM_INSTRUCTION(Shift, 24, L"", L"");
+					ITEM_INSTRUCTION(Shift, 24, L"", L"", L"");
 					END_TRANSITION_ITEM
 
 				END_TRANSITION_BAG
@@ -1118,7 +1124,7 @@ Table Generation
 				BEGIN_TRANSITION_BAG(24, 8)
 
 					BEGIN_TRANSITION_ITEM(8, 15)
-					ITEM_INSTRUCTION(Shift, 24, L"", L"");
+					ITEM_INSTRUCTION(Shift, 24, L"", L"", L"");
 					END_TRANSITION_ITEM
 
 				END_TRANSITION_BAG
@@ -1126,9 +1132,9 @@ Table Generation
 				BEGIN_TRANSITION_BAG(24, 12)
 
 					BEGIN_TRANSITION_ITEM(12, 2)
-					ITEM_INSTRUCTION(Shift, 24, L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"content", L"");
-					ITEM_INSTRUCTION(Create, 0, L"Number", L"");
+					ITEM_INSTRUCTION(Shift, 24, L"", L"", L"");
+					ITEM_INSTRUCTION(Assign, 0, L"content", L"", L"");
+					ITEM_INSTRUCTION(Create, 0, L"Number", L"", L"JLiteral");
 					END_TRANSITION_ITEM
 
 				END_TRANSITION_BAG
@@ -1136,9 +1142,9 @@ Table Generation
 				BEGIN_TRANSITION_BAG(24, 13)
 
 					BEGIN_TRANSITION_ITEM(13, 2)
-					ITEM_INSTRUCTION(Shift, 24, L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"content", L"");
-					ITEM_INSTRUCTION(Create, 0, L"String", L"");
+					ITEM_INSTRUCTION(Shift, 24, L"", L"", L"");
+					ITEM_INSTRUCTION(Assign, 0, L"content", L"", L"");
+					ITEM_INSTRUCTION(Create, 0, L"String", L"", L"JLiteral");
 					END_TRANSITION_ITEM
 
 				END_TRANSITION_BAG
@@ -1153,7 +1159,7 @@ Table Generation
 				BEGIN_TRANSITION_BAG(26, 6)
 
 					BEGIN_TRANSITION_ITEM(6, 14)
-					ITEM_INSTRUCTION(Shift, 26, L"", L"");
+					ITEM_INSTRUCTION(Shift, 26, L"", L"", L"");
 					END_TRANSITION_ITEM
 
 				END_TRANSITION_BAG
@@ -1161,7 +1167,7 @@ Table Generation
 				BEGIN_TRANSITION_BAG(26, 8)
 
 					BEGIN_TRANSITION_ITEM(8, 15)
-					ITEM_INSTRUCTION(Shift, 26, L"", L"");
+					ITEM_INSTRUCTION(Shift, 26, L"", L"", L"");
 					END_TRANSITION_ITEM
 
 				END_TRANSITION_BAG

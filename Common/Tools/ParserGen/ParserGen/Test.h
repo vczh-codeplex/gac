@@ -9,8 +9,7 @@ Parser::Test
 #ifndef VCZH_PARSING_XML
 #define VCZH_PARSING_XML
 
-#include "..\..\..\Source\Parsing\Parsing.h"
-#include "..\..\..\Source\Parsing\ParsingAutomaton.h"
+#include "..\..\..\..\Libraries\GacUI\Public\Source\Vlpp.h"
 
 namespace vczh
 {

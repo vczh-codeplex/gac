@@ -59,6 +59,7 @@ Parsing Tree Conversion Driver Implementation
 				if(obj->GetType()==L"NumberExpression")
 				{
 					vl::Ptr<CalNumberExpression> tree = new CalNumberExpression;
+					vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
 					Fill(tree, obj, tokens);
 					Fill(tree.Cast<CalExpression>(), obj, tokens);
 					return tree;
@@ -66,6 +67,7 @@ Parsing Tree Conversion Driver Implementation
 				else if(obj->GetType()==L"BinaryExpression")
 				{
 					vl::Ptr<CalBinaryExpression> tree = new CalBinaryExpression;
+					vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
 					Fill(tree, obj, tokens);
 					Fill(tree.Cast<CalExpression>(), obj, tokens);
 					return tree;
@@ -73,6 +75,7 @@ Parsing Tree Conversion Driver Implementation
 				else if(obj->GetType()==L"FunctionExpression")
 				{
 					vl::Ptr<CalFunctionExpression> tree = new CalFunctionExpression;
+					vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
 					Fill(tree, obj, tokens);
 					Fill(tree.Cast<CalExpression>(), obj, tokens);
 					return tree;
@@ -173,7 +176,7 @@ Table Generation
 			#define END_TRANSITION_ITEM }
 			#define END_TRANSITION_BAG }
 			#define ITEM_STACK_PATTERN(STATE) item->stackPattern.Add(STATE);
-			#define ITEM_INSTRUCTION(TYPE, STATE, NAME, VALUE) item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::TYPE, STATE, NAME, VALUE));
+			#define ITEM_INSTRUCTION(TYPE, STATE, NAME, VALUE, RULE) item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::TYPE, STATE, NAME, VALUE, RULE));
 			#define BEGIN_LOOK_AHEAD(STATE) {vl::Ptr<vl::parsing::tabling::ParsingTable::LookAheadInfo> lookAheadInfo=new vl::Ptr<vl::parsing::tabling::ParsingTable::LookAheadInfo; item->lookAheads.Add(lookAheadInfo); lookAheadInfo->state=STATE;
 			#define LOOK_AHEAD(TOKEN) lookAheadInfo->tokens.Add(TOKEN);
 			#define END_LOOK_AHEAD }
@@ -244,7 +247,7 @@ Table Generation
 			BEGIN_TRANSITION_BAG(1, 4)
 
 				BEGIN_TRANSITION_ITEM(4, 2)
-				ITEM_INSTRUCTION(Assign, 0, L"value", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"value", L"", L"");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
@@ -252,86 +255,86 @@ Table Generation
 			BEGIN_TRANSITION_BAG(2, 1)
 
 				BEGIN_TRANSITION_ITEM(1, 3)
-				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"");
+				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"", L"Number");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(1, 11)
 				ITEM_STACK_PATTERN(19)
 				ITEM_STACK_PATTERN(21)
 				ITEM_STACK_PATTERN(23)
-				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"", L"Number");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Term");
+				ITEM_INSTRUCTION(Reduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Exp");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(1, 11)
 				ITEM_STACK_PATTERN(19)
 				ITEM_STACK_PATTERN(21)
 				ITEM_STACK_PATTERN(10)
-				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 10, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
+				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"", L"Number");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Term");
+				ITEM_INSTRUCTION(Reduce, 10, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(1, 6)
 				ITEM_STACK_PATTERN(19)
 				ITEM_STACK_PATTERN(21)
-				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"", L"Number");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Term");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(1, 11)
 				ITEM_STACK_PATTERN(19)
 				ITEM_STACK_PATTERN(5)
 				ITEM_STACK_PATTERN(23)
-				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 5, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"", L"Number");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Exp");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(1, 11)
 				ITEM_STACK_PATTERN(19)
 				ITEM_STACK_PATTERN(5)
 				ITEM_STACK_PATTERN(10)
-				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 5, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 10, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
+				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"", L"Number");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 10, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(1, 6)
 				ITEM_STACK_PATTERN(19)
 				ITEM_STACK_PATTERN(5)
-				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 5, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
+				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"", L"Number");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(1, 4)
 				ITEM_STACK_PATTERN(19)
-				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"", L"Number");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
@@ -342,68 +345,68 @@ Table Generation
 				ITEM_STACK_PATTERN(19)
 				ITEM_STACK_PATTERN(21)
 				ITEM_STACK_PATTERN(23)
-				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(LeftRecursiveReduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"");
-				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"");
-				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Add");
+				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"", L"Number");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Term");
+				ITEM_INSTRUCTION(Reduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Exp");
+				ITEM_INSTRUCTION(LeftRecursiveReduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"", L"");
+				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"", L"Exp");
+				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Add", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(5, 10)
 				ITEM_STACK_PATTERN(19)
 				ITEM_STACK_PATTERN(21)
 				ITEM_STACK_PATTERN(10)
-				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 10, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(LeftRecursiveReduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"");
-				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"");
-				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Add");
+				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"", L"Number");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Term");
+				ITEM_INSTRUCTION(Reduce, 10, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(LeftRecursiveReduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"", L"");
+				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"", L"Exp");
+				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Add", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(5, 10)
 				ITEM_STACK_PATTERN(19)
 				ITEM_STACK_PATTERN(5)
 				ITEM_STACK_PATTERN(23)
-				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 5, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(LeftRecursiveReduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"");
-				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"");
-				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Add");
+				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"", L"Number");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Exp");
+				ITEM_INSTRUCTION(LeftRecursiveReduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"", L"");
+				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"", L"Exp");
+				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Add", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(5, 10)
 				ITEM_STACK_PATTERN(19)
 				ITEM_STACK_PATTERN(5)
 				ITEM_STACK_PATTERN(10)
-				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 5, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 10, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(LeftRecursiveReduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"");
-				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"");
-				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Add");
+				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"", L"Number");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 10, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(LeftRecursiveReduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"", L"");
+				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"", L"Exp");
+				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Add", L"");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
@@ -414,68 +417,68 @@ Table Generation
 				ITEM_STACK_PATTERN(19)
 				ITEM_STACK_PATTERN(21)
 				ITEM_STACK_PATTERN(23)
-				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(LeftRecursiveReduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"");
-				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"");
-				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Sub");
+				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"", L"Number");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Term");
+				ITEM_INSTRUCTION(Reduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Exp");
+				ITEM_INSTRUCTION(LeftRecursiveReduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"", L"");
+				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"", L"Exp");
+				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Sub", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(6, 10)
 				ITEM_STACK_PATTERN(19)
 				ITEM_STACK_PATTERN(21)
 				ITEM_STACK_PATTERN(10)
-				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 10, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(LeftRecursiveReduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"");
-				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"");
-				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Sub");
+				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"", L"Number");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Term");
+				ITEM_INSTRUCTION(Reduce, 10, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(LeftRecursiveReduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"", L"");
+				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"", L"Exp");
+				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Sub", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(6, 10)
 				ITEM_STACK_PATTERN(19)
 				ITEM_STACK_PATTERN(5)
 				ITEM_STACK_PATTERN(23)
-				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 5, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(LeftRecursiveReduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"");
-				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"");
-				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Sub");
+				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"", L"Number");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Exp");
+				ITEM_INSTRUCTION(LeftRecursiveReduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"", L"");
+				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"", L"Exp");
+				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Sub", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(6, 10)
 				ITEM_STACK_PATTERN(19)
 				ITEM_STACK_PATTERN(5)
 				ITEM_STACK_PATTERN(10)
-				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 5, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 10, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(LeftRecursiveReduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"");
-				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"");
-				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Sub");
+				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"", L"Number");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 10, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(LeftRecursiveReduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"", L"");
+				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"", L"Exp");
+				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Sub", L"");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
@@ -485,29 +488,29 @@ Table Generation
 				BEGIN_TRANSITION_ITEM(7, 5)
 				ITEM_STACK_PATTERN(19)
 				ITEM_STACK_PATTERN(21)
-				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(LeftRecursiveReduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"");
-				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"");
-				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Mul");
+				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"", L"Number");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Term");
+				ITEM_INSTRUCTION(LeftRecursiveReduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"", L"");
+				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"", L"Term");
+				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Mul", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(7, 5)
 				ITEM_STACK_PATTERN(19)
 				ITEM_STACK_PATTERN(5)
-				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 5, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(LeftRecursiveReduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"");
-				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"");
-				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Mul");
+				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"", L"Number");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(LeftRecursiveReduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"", L"");
+				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"", L"Term");
+				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Mul", L"");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
@@ -517,29 +520,29 @@ Table Generation
 				BEGIN_TRANSITION_ITEM(8, 5)
 				ITEM_STACK_PATTERN(19)
 				ITEM_STACK_PATTERN(21)
-				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(LeftRecursiveReduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"");
-				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"");
-				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Div");
+				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"", L"Number");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Term");
+				ITEM_INSTRUCTION(LeftRecursiveReduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"", L"");
+				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"", L"Term");
+				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Div", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(8, 5)
 				ITEM_STACK_PATTERN(19)
 				ITEM_STACK_PATTERN(5)
-				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 5, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(LeftRecursiveReduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"");
-				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"");
-				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Div");
+				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"", L"Number");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(LeftRecursiveReduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"", L"");
+				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"", L"Term");
+				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Div", L"");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
@@ -551,15 +554,15 @@ Table Generation
 				ITEM_STACK_PATTERN(21)
 				ITEM_STACK_PATTERN(23)
 				ITEM_STACK_PATTERN(15)
-				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 15, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"", L"Number");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Term");
+				ITEM_INSTRUCTION(Reduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Exp");
+				ITEM_INSTRUCTION(Reduce, 15, L"", L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(10, 9)
@@ -567,15 +570,15 @@ Table Generation
 				ITEM_STACK_PATTERN(21)
 				ITEM_STACK_PATTERN(23)
 				ITEM_STACK_PATTERN(13)
-				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 13, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"", L"Number");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Term");
+				ITEM_INSTRUCTION(Reduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Exp");
+				ITEM_INSTRUCTION(Reduce, 13, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(10, 7)
@@ -583,15 +586,15 @@ Table Generation
 				ITEM_STACK_PATTERN(21)
 				ITEM_STACK_PATTERN(23)
 				ITEM_STACK_PATTERN(8)
-				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 8, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"", L"Number");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Term");
+				ITEM_INSTRUCTION(Reduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Exp");
+				ITEM_INSTRUCTION(Reduce, 8, L"", L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(10, 7)
@@ -599,15 +602,15 @@ Table Generation
 				ITEM_STACK_PATTERN(21)
 				ITEM_STACK_PATTERN(10)
 				ITEM_STACK_PATTERN(15)
-				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 10, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 15, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"", L"Number");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Term");
+				ITEM_INSTRUCTION(Reduce, 10, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 15, L"", L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(10, 9)
@@ -615,15 +618,15 @@ Table Generation
 				ITEM_STACK_PATTERN(21)
 				ITEM_STACK_PATTERN(10)
 				ITEM_STACK_PATTERN(13)
-				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 10, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 13, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"", L"Number");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Term");
+				ITEM_INSTRUCTION(Reduce, 10, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 13, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(10, 7)
@@ -631,15 +634,15 @@ Table Generation
 				ITEM_STACK_PATTERN(21)
 				ITEM_STACK_PATTERN(10)
 				ITEM_STACK_PATTERN(8)
-				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 10, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 8, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"", L"Number");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Term");
+				ITEM_INSTRUCTION(Reduce, 10, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 8, L"", L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(10, 7)
@@ -647,15 +650,15 @@ Table Generation
 				ITEM_STACK_PATTERN(5)
 				ITEM_STACK_PATTERN(23)
 				ITEM_STACK_PATTERN(15)
-				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 5, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 15, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"", L"Number");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Exp");
+				ITEM_INSTRUCTION(Reduce, 15, L"", L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(10, 9)
@@ -663,15 +666,15 @@ Table Generation
 				ITEM_STACK_PATTERN(5)
 				ITEM_STACK_PATTERN(23)
 				ITEM_STACK_PATTERN(13)
-				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 5, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 13, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"", L"Number");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Exp");
+				ITEM_INSTRUCTION(Reduce, 13, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(10, 7)
@@ -679,15 +682,15 @@ Table Generation
 				ITEM_STACK_PATTERN(5)
 				ITEM_STACK_PATTERN(23)
 				ITEM_STACK_PATTERN(8)
-				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 5, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 8, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"", L"Number");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Exp");
+				ITEM_INSTRUCTION(Reduce, 8, L"", L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(10, 7)
@@ -695,15 +698,15 @@ Table Generation
 				ITEM_STACK_PATTERN(5)
 				ITEM_STACK_PATTERN(10)
 				ITEM_STACK_PATTERN(15)
-				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 5, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 10, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 15, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"", L"Number");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 10, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 15, L"", L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(10, 9)
@@ -711,15 +714,15 @@ Table Generation
 				ITEM_STACK_PATTERN(5)
 				ITEM_STACK_PATTERN(10)
 				ITEM_STACK_PATTERN(13)
-				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 5, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 10, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 13, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"", L"Number");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 10, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 13, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(10, 7)
@@ -727,15 +730,15 @@ Table Generation
 				ITEM_STACK_PATTERN(5)
 				ITEM_STACK_PATTERN(10)
 				ITEM_STACK_PATTERN(8)
-				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 5, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 10, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 8, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"", L"Number");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 10, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 8, L"", L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"", L"");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
@@ -747,15 +750,15 @@ Table Generation
 				ITEM_STACK_PATTERN(21)
 				ITEM_STACK_PATTERN(23)
 				ITEM_STACK_PATTERN(15)
-				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 15, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"", L"Number");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Term");
+				ITEM_INSTRUCTION(Reduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Exp");
+				ITEM_INSTRUCTION(Reduce, 15, L"", L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(11, 8)
@@ -763,15 +766,15 @@ Table Generation
 				ITEM_STACK_PATTERN(21)
 				ITEM_STACK_PATTERN(23)
 				ITEM_STACK_PATTERN(8)
-				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 8, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"", L"Number");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Term");
+				ITEM_INSTRUCTION(Reduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Exp");
+				ITEM_INSTRUCTION(Reduce, 8, L"", L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(11, 8)
@@ -779,15 +782,15 @@ Table Generation
 				ITEM_STACK_PATTERN(21)
 				ITEM_STACK_PATTERN(10)
 				ITEM_STACK_PATTERN(15)
-				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 10, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 15, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"", L"Number");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Term");
+				ITEM_INSTRUCTION(Reduce, 10, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 15, L"", L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(11, 8)
@@ -795,15 +798,15 @@ Table Generation
 				ITEM_STACK_PATTERN(21)
 				ITEM_STACK_PATTERN(10)
 				ITEM_STACK_PATTERN(8)
-				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 10, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 8, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"", L"Number");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Term");
+				ITEM_INSTRUCTION(Reduce, 10, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 8, L"", L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(11, 8)
@@ -811,15 +814,15 @@ Table Generation
 				ITEM_STACK_PATTERN(5)
 				ITEM_STACK_PATTERN(23)
 				ITEM_STACK_PATTERN(15)
-				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 5, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 15, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"", L"Number");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Exp");
+				ITEM_INSTRUCTION(Reduce, 15, L"", L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(11, 8)
@@ -827,15 +830,15 @@ Table Generation
 				ITEM_STACK_PATTERN(5)
 				ITEM_STACK_PATTERN(23)
 				ITEM_STACK_PATTERN(8)
-				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 5, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 8, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"", L"Number");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Exp");
+				ITEM_INSTRUCTION(Reduce, 8, L"", L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(11, 8)
@@ -843,15 +846,15 @@ Table Generation
 				ITEM_STACK_PATTERN(5)
 				ITEM_STACK_PATTERN(10)
 				ITEM_STACK_PATTERN(15)
-				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 5, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 10, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 15, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"", L"Number");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 10, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 15, L"", L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(11, 8)
@@ -859,15 +862,15 @@ Table Generation
 				ITEM_STACK_PATTERN(5)
 				ITEM_STACK_PATTERN(10)
 				ITEM_STACK_PATTERN(8)
-				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 5, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 10, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 8, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Create, 0, L"NumberExpression", L"", L"Number");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 10, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 8, L"", L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"", L"");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
@@ -875,9 +878,9 @@ Table Generation
 			BEGIN_TRANSITION_BAG(5, 3)
 
 				BEGIN_TRANSITION_ITEM(3, 12)
-				ITEM_INSTRUCTION(Shift, 5, L"", L"");
-				ITEM_INSTRUCTION(Shift, 19, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"functionName", L"");
+				ITEM_INSTRUCTION(Shift, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Shift, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"functionName", L"", L"");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
@@ -885,9 +888,9 @@ Table Generation
 			BEGIN_TRANSITION_BAG(5, 4)
 
 				BEGIN_TRANSITION_ITEM(4, 2)
-				ITEM_INSTRUCTION(Shift, 5, L"", L"");
-				ITEM_INSTRUCTION(Shift, 19, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"value", L"");
+				ITEM_INSTRUCTION(Shift, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Shift, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"value", L"", L"");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
@@ -895,7 +898,7 @@ Table Generation
 			BEGIN_TRANSITION_BAG(5, 9)
 
 				BEGIN_TRANSITION_ITEM(9, 13)
-				ITEM_INSTRUCTION(Shift, 5, L"", L"");
+				ITEM_INSTRUCTION(Shift, 5, L"", L"", L"");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
@@ -903,86 +906,86 @@ Table Generation
 			BEGIN_TRANSITION_BAG(7, 1)
 
 				BEGIN_TRANSITION_ITEM(1, 14)
-				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"");
+				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"", L"Call");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(1, 11)
 				ITEM_STACK_PATTERN(19)
 				ITEM_STACK_PATTERN(21)
 				ITEM_STACK_PATTERN(23)
-				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"", L"Call");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Term");
+				ITEM_INSTRUCTION(Reduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Exp");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(1, 11)
 				ITEM_STACK_PATTERN(19)
 				ITEM_STACK_PATTERN(21)
 				ITEM_STACK_PATTERN(10)
-				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 10, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
+				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"", L"Call");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Term");
+				ITEM_INSTRUCTION(Reduce, 10, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(1, 6)
 				ITEM_STACK_PATTERN(19)
 				ITEM_STACK_PATTERN(21)
-				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"", L"Call");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Term");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(1, 11)
 				ITEM_STACK_PATTERN(19)
 				ITEM_STACK_PATTERN(5)
 				ITEM_STACK_PATTERN(23)
-				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 5, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"", L"Call");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Exp");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(1, 11)
 				ITEM_STACK_PATTERN(19)
 				ITEM_STACK_PATTERN(5)
 				ITEM_STACK_PATTERN(10)
-				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 5, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 10, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
+				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"", L"Call");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 10, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(1, 6)
 				ITEM_STACK_PATTERN(19)
 				ITEM_STACK_PATTERN(5)
-				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 5, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
+				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"", L"Call");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(1, 4)
 				ITEM_STACK_PATTERN(19)
-				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"", L"Call");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
@@ -993,68 +996,68 @@ Table Generation
 				ITEM_STACK_PATTERN(19)
 				ITEM_STACK_PATTERN(21)
 				ITEM_STACK_PATTERN(23)
-				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(LeftRecursiveReduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"");
-				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"");
-				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Add");
+				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"", L"Call");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Term");
+				ITEM_INSTRUCTION(Reduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Exp");
+				ITEM_INSTRUCTION(LeftRecursiveReduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"", L"");
+				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"", L"Exp");
+				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Add", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(5, 10)
 				ITEM_STACK_PATTERN(19)
 				ITEM_STACK_PATTERN(21)
 				ITEM_STACK_PATTERN(10)
-				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 10, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(LeftRecursiveReduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"");
-				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"");
-				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Add");
+				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"", L"Call");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Term");
+				ITEM_INSTRUCTION(Reduce, 10, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(LeftRecursiveReduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"", L"");
+				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"", L"Exp");
+				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Add", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(5, 10)
 				ITEM_STACK_PATTERN(19)
 				ITEM_STACK_PATTERN(5)
 				ITEM_STACK_PATTERN(23)
-				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 5, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(LeftRecursiveReduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"");
-				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"");
-				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Add");
+				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"", L"Call");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Exp");
+				ITEM_INSTRUCTION(LeftRecursiveReduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"", L"");
+				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"", L"Exp");
+				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Add", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(5, 10)
 				ITEM_STACK_PATTERN(19)
 				ITEM_STACK_PATTERN(5)
 				ITEM_STACK_PATTERN(10)
-				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 5, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 10, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(LeftRecursiveReduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"");
-				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"");
-				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Add");
+				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"", L"Call");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 10, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(LeftRecursiveReduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"", L"");
+				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"", L"Exp");
+				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Add", L"");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
@@ -1065,68 +1068,68 @@ Table Generation
 				ITEM_STACK_PATTERN(19)
 				ITEM_STACK_PATTERN(21)
 				ITEM_STACK_PATTERN(23)
-				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(LeftRecursiveReduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"");
-				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"");
-				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Sub");
+				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"", L"Call");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Term");
+				ITEM_INSTRUCTION(Reduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Exp");
+				ITEM_INSTRUCTION(LeftRecursiveReduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"", L"");
+				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"", L"Exp");
+				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Sub", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(6, 10)
 				ITEM_STACK_PATTERN(19)
 				ITEM_STACK_PATTERN(21)
 				ITEM_STACK_PATTERN(10)
-				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 10, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(LeftRecursiveReduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"");
-				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"");
-				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Sub");
+				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"", L"Call");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Term");
+				ITEM_INSTRUCTION(Reduce, 10, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(LeftRecursiveReduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"", L"");
+				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"", L"Exp");
+				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Sub", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(6, 10)
 				ITEM_STACK_PATTERN(19)
 				ITEM_STACK_PATTERN(5)
 				ITEM_STACK_PATTERN(23)
-				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 5, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(LeftRecursiveReduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"");
-				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"");
-				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Sub");
+				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"", L"Call");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Exp");
+				ITEM_INSTRUCTION(LeftRecursiveReduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"", L"");
+				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"", L"Exp");
+				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Sub", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(6, 10)
 				ITEM_STACK_PATTERN(19)
 				ITEM_STACK_PATTERN(5)
 				ITEM_STACK_PATTERN(10)
-				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 5, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 10, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(LeftRecursiveReduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"");
-				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"");
-				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Sub");
+				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"", L"Call");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 10, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(LeftRecursiveReduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"", L"");
+				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"", L"Exp");
+				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Sub", L"");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
@@ -1136,29 +1139,29 @@ Table Generation
 				BEGIN_TRANSITION_ITEM(7, 5)
 				ITEM_STACK_PATTERN(19)
 				ITEM_STACK_PATTERN(21)
-				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(LeftRecursiveReduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"");
-				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"");
-				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Mul");
+				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"", L"Call");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Term");
+				ITEM_INSTRUCTION(LeftRecursiveReduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"", L"");
+				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"", L"Term");
+				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Mul", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(7, 5)
 				ITEM_STACK_PATTERN(19)
 				ITEM_STACK_PATTERN(5)
-				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 5, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(LeftRecursiveReduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"");
-				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"");
-				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Mul");
+				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"", L"Call");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(LeftRecursiveReduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"", L"");
+				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"", L"Term");
+				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Mul", L"");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
@@ -1168,29 +1171,29 @@ Table Generation
 				BEGIN_TRANSITION_ITEM(8, 5)
 				ITEM_STACK_PATTERN(19)
 				ITEM_STACK_PATTERN(21)
-				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(LeftRecursiveReduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"");
-				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"");
-				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Div");
+				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"", L"Call");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Term");
+				ITEM_INSTRUCTION(LeftRecursiveReduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"", L"");
+				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"", L"Term");
+				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Div", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(8, 5)
 				ITEM_STACK_PATTERN(19)
 				ITEM_STACK_PATTERN(5)
-				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 5, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(LeftRecursiveReduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"");
-				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"");
-				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Div");
+				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"", L"Call");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(LeftRecursiveReduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"", L"");
+				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"", L"Term");
+				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Div", L"");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
@@ -1202,15 +1205,15 @@ Table Generation
 				ITEM_STACK_PATTERN(21)
 				ITEM_STACK_PATTERN(23)
 				ITEM_STACK_PATTERN(15)
-				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 15, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"", L"Call");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Term");
+				ITEM_INSTRUCTION(Reduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Exp");
+				ITEM_INSTRUCTION(Reduce, 15, L"", L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(10, 9)
@@ -1218,15 +1221,15 @@ Table Generation
 				ITEM_STACK_PATTERN(21)
 				ITEM_STACK_PATTERN(23)
 				ITEM_STACK_PATTERN(13)
-				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 13, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"", L"Call");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Term");
+				ITEM_INSTRUCTION(Reduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Exp");
+				ITEM_INSTRUCTION(Reduce, 13, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(10, 7)
@@ -1234,15 +1237,15 @@ Table Generation
 				ITEM_STACK_PATTERN(21)
 				ITEM_STACK_PATTERN(23)
 				ITEM_STACK_PATTERN(8)
-				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 8, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"", L"Call");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Term");
+				ITEM_INSTRUCTION(Reduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Exp");
+				ITEM_INSTRUCTION(Reduce, 8, L"", L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(10, 7)
@@ -1250,15 +1253,15 @@ Table Generation
 				ITEM_STACK_PATTERN(21)
 				ITEM_STACK_PATTERN(10)
 				ITEM_STACK_PATTERN(15)
-				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 10, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 15, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"", L"Call");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Term");
+				ITEM_INSTRUCTION(Reduce, 10, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 15, L"", L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(10, 9)
@@ -1266,15 +1269,15 @@ Table Generation
 				ITEM_STACK_PATTERN(21)
 				ITEM_STACK_PATTERN(10)
 				ITEM_STACK_PATTERN(13)
-				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 10, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 13, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"", L"Call");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Term");
+				ITEM_INSTRUCTION(Reduce, 10, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 13, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(10, 7)
@@ -1282,15 +1285,15 @@ Table Generation
 				ITEM_STACK_PATTERN(21)
 				ITEM_STACK_PATTERN(10)
 				ITEM_STACK_PATTERN(8)
-				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 10, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 8, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"", L"Call");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Term");
+				ITEM_INSTRUCTION(Reduce, 10, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 8, L"", L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(10, 7)
@@ -1298,15 +1301,15 @@ Table Generation
 				ITEM_STACK_PATTERN(5)
 				ITEM_STACK_PATTERN(23)
 				ITEM_STACK_PATTERN(15)
-				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 5, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 15, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"", L"Call");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Exp");
+				ITEM_INSTRUCTION(Reduce, 15, L"", L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(10, 9)
@@ -1314,15 +1317,15 @@ Table Generation
 				ITEM_STACK_PATTERN(5)
 				ITEM_STACK_PATTERN(23)
 				ITEM_STACK_PATTERN(13)
-				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 5, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 13, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"", L"Call");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Exp");
+				ITEM_INSTRUCTION(Reduce, 13, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(10, 7)
@@ -1330,15 +1333,15 @@ Table Generation
 				ITEM_STACK_PATTERN(5)
 				ITEM_STACK_PATTERN(23)
 				ITEM_STACK_PATTERN(8)
-				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 5, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 8, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"", L"Call");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Exp");
+				ITEM_INSTRUCTION(Reduce, 8, L"", L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(10, 7)
@@ -1346,15 +1349,15 @@ Table Generation
 				ITEM_STACK_PATTERN(5)
 				ITEM_STACK_PATTERN(10)
 				ITEM_STACK_PATTERN(15)
-				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 5, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 10, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 15, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"", L"Call");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 10, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 15, L"", L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(10, 9)
@@ -1362,15 +1365,15 @@ Table Generation
 				ITEM_STACK_PATTERN(5)
 				ITEM_STACK_PATTERN(10)
 				ITEM_STACK_PATTERN(13)
-				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 5, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 10, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 13, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"", L"Call");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 10, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 13, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(10, 7)
@@ -1378,15 +1381,15 @@ Table Generation
 				ITEM_STACK_PATTERN(5)
 				ITEM_STACK_PATTERN(10)
 				ITEM_STACK_PATTERN(8)
-				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 5, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 10, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 8, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"", L"Call");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 10, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 8, L"", L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"", L"");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
@@ -1398,15 +1401,15 @@ Table Generation
 				ITEM_STACK_PATTERN(21)
 				ITEM_STACK_PATTERN(23)
 				ITEM_STACK_PATTERN(15)
-				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 15, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"", L"Call");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Term");
+				ITEM_INSTRUCTION(Reduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Exp");
+				ITEM_INSTRUCTION(Reduce, 15, L"", L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(11, 8)
@@ -1414,15 +1417,15 @@ Table Generation
 				ITEM_STACK_PATTERN(21)
 				ITEM_STACK_PATTERN(23)
 				ITEM_STACK_PATTERN(8)
-				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 8, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"", L"Call");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Term");
+				ITEM_INSTRUCTION(Reduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Exp");
+				ITEM_INSTRUCTION(Reduce, 8, L"", L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(11, 8)
@@ -1430,15 +1433,15 @@ Table Generation
 				ITEM_STACK_PATTERN(21)
 				ITEM_STACK_PATTERN(10)
 				ITEM_STACK_PATTERN(15)
-				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 10, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 15, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"", L"Call");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Term");
+				ITEM_INSTRUCTION(Reduce, 10, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 15, L"", L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(11, 8)
@@ -1446,15 +1449,15 @@ Table Generation
 				ITEM_STACK_PATTERN(21)
 				ITEM_STACK_PATTERN(10)
 				ITEM_STACK_PATTERN(8)
-				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 10, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 8, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"", L"Call");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Term");
+				ITEM_INSTRUCTION(Reduce, 10, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 8, L"", L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(11, 8)
@@ -1462,15 +1465,15 @@ Table Generation
 				ITEM_STACK_PATTERN(5)
 				ITEM_STACK_PATTERN(23)
 				ITEM_STACK_PATTERN(15)
-				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 5, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 15, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"", L"Call");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Exp");
+				ITEM_INSTRUCTION(Reduce, 15, L"", L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(11, 8)
@@ -1478,15 +1481,15 @@ Table Generation
 				ITEM_STACK_PATTERN(5)
 				ITEM_STACK_PATTERN(23)
 				ITEM_STACK_PATTERN(8)
-				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 5, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 8, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"", L"Call");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Exp");
+				ITEM_INSTRUCTION(Reduce, 8, L"", L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(11, 8)
@@ -1494,15 +1497,15 @@ Table Generation
 				ITEM_STACK_PATTERN(5)
 				ITEM_STACK_PATTERN(10)
 				ITEM_STACK_PATTERN(15)
-				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 5, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 10, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 15, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"", L"Call");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 10, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 15, L"", L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(11, 8)
@@ -1510,15 +1513,15 @@ Table Generation
 				ITEM_STACK_PATTERN(5)
 				ITEM_STACK_PATTERN(10)
 				ITEM_STACK_PATTERN(8)
-				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 19, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 5, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 10, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 8, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Create, 0, L"FunctionExpression", L"", L"Call");
+				ITEM_INSTRUCTION(Reduce, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
+				ITEM_INSTRUCTION(Reduce, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 10, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 8, L"", L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"", L"");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
@@ -1526,11 +1529,11 @@ Table Generation
 			BEGIN_TRANSITION_BAG(8, 3)
 
 				BEGIN_TRANSITION_ITEM(3, 12)
-				ITEM_INSTRUCTION(Shift, 8, L"", L"");
-				ITEM_INSTRUCTION(Shift, 23, L"", L"");
-				ITEM_INSTRUCTION(Shift, 21, L"", L"");
-				ITEM_INSTRUCTION(Shift, 19, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"functionName", L"");
+				ITEM_INSTRUCTION(Shift, 8, L"", L"", L"");
+				ITEM_INSTRUCTION(Shift, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Shift, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Shift, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"functionName", L"", L"");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
@@ -1538,11 +1541,11 @@ Table Generation
 			BEGIN_TRANSITION_BAG(8, 4)
 
 				BEGIN_TRANSITION_ITEM(4, 2)
-				ITEM_INSTRUCTION(Shift, 8, L"", L"");
-				ITEM_INSTRUCTION(Shift, 23, L"", L"");
-				ITEM_INSTRUCTION(Shift, 21, L"", L"");
-				ITEM_INSTRUCTION(Shift, 19, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"value", L"");
+				ITEM_INSTRUCTION(Shift, 8, L"", L"", L"");
+				ITEM_INSTRUCTION(Shift, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Shift, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Shift, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"value", L"", L"");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
@@ -1550,9 +1553,9 @@ Table Generation
 			BEGIN_TRANSITION_BAG(8, 9)
 
 				BEGIN_TRANSITION_ITEM(9, 13)
-				ITEM_INSTRUCTION(Shift, 8, L"", L"");
-				ITEM_INSTRUCTION(Shift, 23, L"", L"");
-				ITEM_INSTRUCTION(Shift, 21, L"", L"");
+				ITEM_INSTRUCTION(Shift, 8, L"", L"", L"");
+				ITEM_INSTRUCTION(Shift, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Shift, 21, L"", L"", L"");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
@@ -1565,49 +1568,49 @@ Table Generation
 				BEGIN_TRANSITION_ITEM(1, 11)
 				ITEM_STACK_PATTERN(21)
 				ITEM_STACK_PATTERN(23)
-				ITEM_INSTRUCTION(Reduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Term");
+				ITEM_INSTRUCTION(Reduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Exp");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(1, 11)
 				ITEM_STACK_PATTERN(21)
 				ITEM_STACK_PATTERN(10)
-				ITEM_INSTRUCTION(Reduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 10, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
+				ITEM_INSTRUCTION(Reduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Term");
+				ITEM_INSTRUCTION(Reduce, 10, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(1, 6)
 				ITEM_STACK_PATTERN(21)
-				ITEM_INSTRUCTION(Reduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Term");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(1, 11)
 				ITEM_STACK_PATTERN(5)
 				ITEM_STACK_PATTERN(23)
-				ITEM_INSTRUCTION(Reduce, 5, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Exp");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(1, 11)
 				ITEM_STACK_PATTERN(5)
 				ITEM_STACK_PATTERN(10)
-				ITEM_INSTRUCTION(Reduce, 5, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 10, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
+				ITEM_INSTRUCTION(Reduce, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 10, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(1, 6)
 				ITEM_STACK_PATTERN(5)
-				ITEM_INSTRUCTION(Reduce, 5, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
+				ITEM_INSTRUCTION(Reduce, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
@@ -1617,53 +1620,53 @@ Table Generation
 				BEGIN_TRANSITION_ITEM(5, 10)
 				ITEM_STACK_PATTERN(21)
 				ITEM_STACK_PATTERN(23)
-				ITEM_INSTRUCTION(Reduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(LeftRecursiveReduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"");
-				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"");
-				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Add");
+				ITEM_INSTRUCTION(Reduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Term");
+				ITEM_INSTRUCTION(Reduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Exp");
+				ITEM_INSTRUCTION(LeftRecursiveReduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"", L"");
+				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"", L"Exp");
+				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Add", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(5, 10)
 				ITEM_STACK_PATTERN(21)
 				ITEM_STACK_PATTERN(10)
-				ITEM_INSTRUCTION(Reduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 10, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(LeftRecursiveReduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"");
-				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"");
-				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Add");
+				ITEM_INSTRUCTION(Reduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Term");
+				ITEM_INSTRUCTION(Reduce, 10, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(LeftRecursiveReduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"", L"");
+				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"", L"Exp");
+				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Add", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(5, 10)
 				ITEM_STACK_PATTERN(5)
 				ITEM_STACK_PATTERN(23)
-				ITEM_INSTRUCTION(Reduce, 5, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(LeftRecursiveReduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"");
-				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"");
-				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Add");
+				ITEM_INSTRUCTION(Reduce, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Exp");
+				ITEM_INSTRUCTION(LeftRecursiveReduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"", L"");
+				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"", L"Exp");
+				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Add", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(5, 10)
 				ITEM_STACK_PATTERN(5)
 				ITEM_STACK_PATTERN(10)
-				ITEM_INSTRUCTION(Reduce, 5, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 10, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(LeftRecursiveReduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"");
-				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"");
-				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Add");
+				ITEM_INSTRUCTION(Reduce, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 10, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(LeftRecursiveReduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"", L"");
+				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"", L"Exp");
+				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Add", L"");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
@@ -1673,53 +1676,53 @@ Table Generation
 				BEGIN_TRANSITION_ITEM(6, 10)
 				ITEM_STACK_PATTERN(21)
 				ITEM_STACK_PATTERN(23)
-				ITEM_INSTRUCTION(Reduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(LeftRecursiveReduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"");
-				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"");
-				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Sub");
+				ITEM_INSTRUCTION(Reduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Term");
+				ITEM_INSTRUCTION(Reduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Exp");
+				ITEM_INSTRUCTION(LeftRecursiveReduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"", L"");
+				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"", L"Exp");
+				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Sub", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(6, 10)
 				ITEM_STACK_PATTERN(21)
 				ITEM_STACK_PATTERN(10)
-				ITEM_INSTRUCTION(Reduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 10, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(LeftRecursiveReduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"");
-				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"");
-				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Sub");
+				ITEM_INSTRUCTION(Reduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Term");
+				ITEM_INSTRUCTION(Reduce, 10, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(LeftRecursiveReduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"", L"");
+				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"", L"Exp");
+				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Sub", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(6, 10)
 				ITEM_STACK_PATTERN(5)
 				ITEM_STACK_PATTERN(23)
-				ITEM_INSTRUCTION(Reduce, 5, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(LeftRecursiveReduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"");
-				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"");
-				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Sub");
+				ITEM_INSTRUCTION(Reduce, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Exp");
+				ITEM_INSTRUCTION(LeftRecursiveReduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"", L"");
+				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"", L"Exp");
+				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Sub", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(6, 10)
 				ITEM_STACK_PATTERN(5)
 				ITEM_STACK_PATTERN(10)
-				ITEM_INSTRUCTION(Reduce, 5, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 10, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(LeftRecursiveReduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"");
-				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"");
-				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Sub");
+				ITEM_INSTRUCTION(Reduce, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 10, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(LeftRecursiveReduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"", L"");
+				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"", L"Exp");
+				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Sub", L"");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
@@ -1728,22 +1731,22 @@ Table Generation
 
 				BEGIN_TRANSITION_ITEM(7, 5)
 				ITEM_STACK_PATTERN(21)
-				ITEM_INSTRUCTION(Reduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(LeftRecursiveReduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"");
-				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"");
-				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Mul");
+				ITEM_INSTRUCTION(Reduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Term");
+				ITEM_INSTRUCTION(LeftRecursiveReduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"", L"");
+				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"", L"Term");
+				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Mul", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(7, 5)
 				ITEM_STACK_PATTERN(5)
-				ITEM_INSTRUCTION(Reduce, 5, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(LeftRecursiveReduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"");
-				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"");
-				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Mul");
+				ITEM_INSTRUCTION(Reduce, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(LeftRecursiveReduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"", L"");
+				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"", L"Term");
+				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Mul", L"");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
@@ -1752,22 +1755,22 @@ Table Generation
 
 				BEGIN_TRANSITION_ITEM(8, 5)
 				ITEM_STACK_PATTERN(21)
-				ITEM_INSTRUCTION(Reduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(LeftRecursiveReduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"");
-				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"");
-				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Div");
+				ITEM_INSTRUCTION(Reduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Term");
+				ITEM_INSTRUCTION(LeftRecursiveReduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"", L"");
+				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"", L"Term");
+				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Div", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(8, 5)
 				ITEM_STACK_PATTERN(5)
-				ITEM_INSTRUCTION(Reduce, 5, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(LeftRecursiveReduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"");
-				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"");
-				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Div");
+				ITEM_INSTRUCTION(Reduce, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(LeftRecursiveReduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"firstOperand", L"", L"");
+				ITEM_INSTRUCTION(Create, 0, L"BinaryExpression", L"", L"Term");
+				ITEM_INSTRUCTION(Setter, 0, L"binaryOperator", L"Div", L"");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
@@ -1778,144 +1781,144 @@ Table Generation
 				ITEM_STACK_PATTERN(21)
 				ITEM_STACK_PATTERN(23)
 				ITEM_STACK_PATTERN(15)
-				ITEM_INSTRUCTION(Reduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 15, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Reduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Term");
+				ITEM_INSTRUCTION(Reduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Exp");
+				ITEM_INSTRUCTION(Reduce, 15, L"", L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(10, 9)
 				ITEM_STACK_PATTERN(21)
 				ITEM_STACK_PATTERN(23)
 				ITEM_STACK_PATTERN(13)
-				ITEM_INSTRUCTION(Reduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 13, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Term");
+				ITEM_INSTRUCTION(Reduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Exp");
+				ITEM_INSTRUCTION(Reduce, 13, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(10, 7)
 				ITEM_STACK_PATTERN(21)
 				ITEM_STACK_PATTERN(23)
 				ITEM_STACK_PATTERN(8)
-				ITEM_INSTRUCTION(Reduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 8, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Reduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Term");
+				ITEM_INSTRUCTION(Reduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Exp");
+				ITEM_INSTRUCTION(Reduce, 8, L"", L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(10, 7)
 				ITEM_STACK_PATTERN(21)
 				ITEM_STACK_PATTERN(10)
 				ITEM_STACK_PATTERN(15)
-				ITEM_INSTRUCTION(Reduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 10, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 15, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Reduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Term");
+				ITEM_INSTRUCTION(Reduce, 10, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 15, L"", L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(10, 9)
 				ITEM_STACK_PATTERN(21)
 				ITEM_STACK_PATTERN(10)
 				ITEM_STACK_PATTERN(13)
-				ITEM_INSTRUCTION(Reduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 10, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 13, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Term");
+				ITEM_INSTRUCTION(Reduce, 10, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 13, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(10, 7)
 				ITEM_STACK_PATTERN(21)
 				ITEM_STACK_PATTERN(10)
 				ITEM_STACK_PATTERN(8)
-				ITEM_INSTRUCTION(Reduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 10, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 8, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Reduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Term");
+				ITEM_INSTRUCTION(Reduce, 10, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 8, L"", L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(10, 7)
 				ITEM_STACK_PATTERN(5)
 				ITEM_STACK_PATTERN(23)
 				ITEM_STACK_PATTERN(15)
-				ITEM_INSTRUCTION(Reduce, 5, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 15, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Reduce, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Exp");
+				ITEM_INSTRUCTION(Reduce, 15, L"", L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(10, 9)
 				ITEM_STACK_PATTERN(5)
 				ITEM_STACK_PATTERN(23)
 				ITEM_STACK_PATTERN(13)
-				ITEM_INSTRUCTION(Reduce, 5, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 13, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Exp");
+				ITEM_INSTRUCTION(Reduce, 13, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(10, 7)
 				ITEM_STACK_PATTERN(5)
 				ITEM_STACK_PATTERN(23)
 				ITEM_STACK_PATTERN(8)
-				ITEM_INSTRUCTION(Reduce, 5, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 8, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Reduce, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Exp");
+				ITEM_INSTRUCTION(Reduce, 8, L"", L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(10, 7)
 				ITEM_STACK_PATTERN(5)
 				ITEM_STACK_PATTERN(10)
 				ITEM_STACK_PATTERN(15)
-				ITEM_INSTRUCTION(Reduce, 5, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 10, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 15, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Reduce, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 10, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 15, L"", L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(10, 9)
 				ITEM_STACK_PATTERN(5)
 				ITEM_STACK_PATTERN(10)
 				ITEM_STACK_PATTERN(13)
-				ITEM_INSTRUCTION(Reduce, 5, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 10, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 13, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 10, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 13, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Factor");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(10, 7)
 				ITEM_STACK_PATTERN(5)
 				ITEM_STACK_PATTERN(10)
 				ITEM_STACK_PATTERN(8)
-				ITEM_INSTRUCTION(Reduce, 5, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 10, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 8, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Reduce, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 10, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 8, L"", L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"", L"");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
@@ -1926,96 +1929,96 @@ Table Generation
 				ITEM_STACK_PATTERN(21)
 				ITEM_STACK_PATTERN(23)
 				ITEM_STACK_PATTERN(15)
-				ITEM_INSTRUCTION(Reduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 15, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Reduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Term");
+				ITEM_INSTRUCTION(Reduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Exp");
+				ITEM_INSTRUCTION(Reduce, 15, L"", L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(11, 8)
 				ITEM_STACK_PATTERN(21)
 				ITEM_STACK_PATTERN(23)
 				ITEM_STACK_PATTERN(8)
-				ITEM_INSTRUCTION(Reduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 8, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Reduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Term");
+				ITEM_INSTRUCTION(Reduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Exp");
+				ITEM_INSTRUCTION(Reduce, 8, L"", L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(11, 8)
 				ITEM_STACK_PATTERN(21)
 				ITEM_STACK_PATTERN(10)
 				ITEM_STACK_PATTERN(15)
-				ITEM_INSTRUCTION(Reduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 10, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 15, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Reduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Term");
+				ITEM_INSTRUCTION(Reduce, 10, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 15, L"", L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(11, 8)
 				ITEM_STACK_PATTERN(21)
 				ITEM_STACK_PATTERN(10)
 				ITEM_STACK_PATTERN(8)
-				ITEM_INSTRUCTION(Reduce, 21, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 10, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 8, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Reduce, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Term");
+				ITEM_INSTRUCTION(Reduce, 10, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 8, L"", L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(11, 8)
 				ITEM_STACK_PATTERN(5)
 				ITEM_STACK_PATTERN(23)
 				ITEM_STACK_PATTERN(15)
-				ITEM_INSTRUCTION(Reduce, 5, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 15, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Reduce, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Exp");
+				ITEM_INSTRUCTION(Reduce, 15, L"", L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(11, 8)
 				ITEM_STACK_PATTERN(5)
 				ITEM_STACK_PATTERN(23)
 				ITEM_STACK_PATTERN(8)
-				ITEM_INSTRUCTION(Reduce, 5, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 23, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 8, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Reduce, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"", L"Exp");
+				ITEM_INSTRUCTION(Reduce, 8, L"", L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(11, 8)
 				ITEM_STACK_PATTERN(5)
 				ITEM_STACK_PATTERN(10)
 				ITEM_STACK_PATTERN(15)
-				ITEM_INSTRUCTION(Reduce, 5, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 10, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 15, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Reduce, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 10, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 15, L"", L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(11, 8)
 				ITEM_STACK_PATTERN(5)
 				ITEM_STACK_PATTERN(10)
 				ITEM_STACK_PATTERN(8)
-				ITEM_INSTRUCTION(Reduce, 5, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 10, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"");
-				ITEM_INSTRUCTION(Reduce, 8, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Reduce, 5, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 10, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"secondOperand", L"", L"");
+				ITEM_INSTRUCTION(Reduce, 8, L"", L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"", L"");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
@@ -2023,10 +2026,10 @@ Table Generation
 			BEGIN_TRANSITION_BAG(10, 3)
 
 				BEGIN_TRANSITION_ITEM(3, 12)
-				ITEM_INSTRUCTION(Shift, 10, L"", L"");
-				ITEM_INSTRUCTION(Shift, 21, L"", L"");
-				ITEM_INSTRUCTION(Shift, 19, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"functionName", L"");
+				ITEM_INSTRUCTION(Shift, 10, L"", L"", L"");
+				ITEM_INSTRUCTION(Shift, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Shift, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"functionName", L"", L"");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
@@ -2034,10 +2037,10 @@ Table Generation
 			BEGIN_TRANSITION_BAG(10, 4)
 
 				BEGIN_TRANSITION_ITEM(4, 2)
-				ITEM_INSTRUCTION(Shift, 10, L"", L"");
-				ITEM_INSTRUCTION(Shift, 21, L"", L"");
-				ITEM_INSTRUCTION(Shift, 19, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"value", L"");
+				ITEM_INSTRUCTION(Shift, 10, L"", L"", L"");
+				ITEM_INSTRUCTION(Shift, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Shift, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"value", L"", L"");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
@@ -2045,8 +2048,8 @@ Table Generation
 			BEGIN_TRANSITION_BAG(10, 9)
 
 				BEGIN_TRANSITION_ITEM(9, 13)
-				ITEM_INSTRUCTION(Shift, 10, L"", L"");
-				ITEM_INSTRUCTION(Shift, 21, L"", L"");
+				ITEM_INSTRUCTION(Shift, 10, L"", L"", L"");
+				ITEM_INSTRUCTION(Shift, 21, L"", L"", L"");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
@@ -2061,11 +2064,11 @@ Table Generation
 			BEGIN_TRANSITION_BAG(13, 3)
 
 				BEGIN_TRANSITION_ITEM(3, 12)
-				ITEM_INSTRUCTION(Shift, 13, L"", L"");
-				ITEM_INSTRUCTION(Shift, 23, L"", L"");
-				ITEM_INSTRUCTION(Shift, 21, L"", L"");
-				ITEM_INSTRUCTION(Shift, 19, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"functionName", L"");
+				ITEM_INSTRUCTION(Shift, 13, L"", L"", L"");
+				ITEM_INSTRUCTION(Shift, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Shift, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Shift, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"functionName", L"", L"");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
@@ -2073,11 +2076,11 @@ Table Generation
 			BEGIN_TRANSITION_BAG(13, 4)
 
 				BEGIN_TRANSITION_ITEM(4, 2)
-				ITEM_INSTRUCTION(Shift, 13, L"", L"");
-				ITEM_INSTRUCTION(Shift, 23, L"", L"");
-				ITEM_INSTRUCTION(Shift, 21, L"", L"");
-				ITEM_INSTRUCTION(Shift, 19, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"value", L"");
+				ITEM_INSTRUCTION(Shift, 13, L"", L"", L"");
+				ITEM_INSTRUCTION(Shift, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Shift, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Shift, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"value", L"", L"");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
@@ -2085,9 +2088,9 @@ Table Generation
 			BEGIN_TRANSITION_BAG(13, 9)
 
 				BEGIN_TRANSITION_ITEM(9, 13)
-				ITEM_INSTRUCTION(Shift, 13, L"", L"");
-				ITEM_INSTRUCTION(Shift, 23, L"", L"");
-				ITEM_INSTRUCTION(Shift, 21, L"", L"");
+				ITEM_INSTRUCTION(Shift, 13, L"", L"", L"");
+				ITEM_INSTRUCTION(Shift, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Shift, 21, L"", L"", L"");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
@@ -2095,11 +2098,11 @@ Table Generation
 			BEGIN_TRANSITION_BAG(15, 3)
 
 				BEGIN_TRANSITION_ITEM(3, 12)
-				ITEM_INSTRUCTION(Shift, 15, L"", L"");
-				ITEM_INSTRUCTION(Shift, 23, L"", L"");
-				ITEM_INSTRUCTION(Shift, 21, L"", L"");
-				ITEM_INSTRUCTION(Shift, 19, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"functionName", L"");
+				ITEM_INSTRUCTION(Shift, 15, L"", L"", L"");
+				ITEM_INSTRUCTION(Shift, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Shift, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Shift, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"functionName", L"", L"");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
@@ -2107,11 +2110,11 @@ Table Generation
 			BEGIN_TRANSITION_BAG(15, 4)
 
 				BEGIN_TRANSITION_ITEM(4, 2)
-				ITEM_INSTRUCTION(Shift, 15, L"", L"");
-				ITEM_INSTRUCTION(Shift, 23, L"", L"");
-				ITEM_INSTRUCTION(Shift, 21, L"", L"");
-				ITEM_INSTRUCTION(Shift, 19, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"value", L"");
+				ITEM_INSTRUCTION(Shift, 15, L"", L"", L"");
+				ITEM_INSTRUCTION(Shift, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Shift, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Shift, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"value", L"", L"");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
@@ -2119,9 +2122,9 @@ Table Generation
 			BEGIN_TRANSITION_BAG(15, 9)
 
 				BEGIN_TRANSITION_ITEM(9, 13)
-				ITEM_INSTRUCTION(Shift, 15, L"", L"");
-				ITEM_INSTRUCTION(Shift, 23, L"", L"");
-				ITEM_INSTRUCTION(Shift, 21, L"", L"");
+				ITEM_INSTRUCTION(Shift, 15, L"", L"", L"");
+				ITEM_INSTRUCTION(Shift, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Shift, 21, L"", L"", L"");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
@@ -2143,7 +2146,7 @@ Table Generation
 			BEGIN_TRANSITION_BAG(17, 3)
 
 				BEGIN_TRANSITION_ITEM(3, 12)
-				ITEM_INSTRUCTION(Assign, 0, L"functionName", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"functionName", L"", L"");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
@@ -2158,8 +2161,8 @@ Table Generation
 			BEGIN_TRANSITION_BAG(19, 3)
 
 				BEGIN_TRANSITION_ITEM(3, 12)
-				ITEM_INSTRUCTION(Shift, 19, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"functionName", L"");
+				ITEM_INSTRUCTION(Shift, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"functionName", L"", L"");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
@@ -2167,8 +2170,8 @@ Table Generation
 			BEGIN_TRANSITION_BAG(19, 4)
 
 				BEGIN_TRANSITION_ITEM(4, 2)
-				ITEM_INSTRUCTION(Shift, 19, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"value", L"");
+				ITEM_INSTRUCTION(Shift, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"value", L"", L"");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
@@ -2190,9 +2193,9 @@ Table Generation
 			BEGIN_TRANSITION_BAG(21, 3)
 
 				BEGIN_TRANSITION_ITEM(3, 12)
-				ITEM_INSTRUCTION(Shift, 21, L"", L"");
-				ITEM_INSTRUCTION(Shift, 19, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"functionName", L"");
+				ITEM_INSTRUCTION(Shift, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Shift, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"functionName", L"", L"");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
@@ -2200,9 +2203,9 @@ Table Generation
 			BEGIN_TRANSITION_BAG(21, 4)
 
 				BEGIN_TRANSITION_ITEM(4, 2)
-				ITEM_INSTRUCTION(Shift, 21, L"", L"");
-				ITEM_INSTRUCTION(Shift, 19, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"value", L"");
+				ITEM_INSTRUCTION(Shift, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Shift, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"value", L"", L"");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
@@ -2210,7 +2213,7 @@ Table Generation
 			BEGIN_TRANSITION_BAG(21, 9)
 
 				BEGIN_TRANSITION_ITEM(9, 13)
-				ITEM_INSTRUCTION(Shift, 21, L"", L"");
+				ITEM_INSTRUCTION(Shift, 21, L"", L"", L"");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
@@ -2225,10 +2228,10 @@ Table Generation
 			BEGIN_TRANSITION_BAG(23, 3)
 
 				BEGIN_TRANSITION_ITEM(3, 12)
-				ITEM_INSTRUCTION(Shift, 23, L"", L"");
-				ITEM_INSTRUCTION(Shift, 21, L"", L"");
-				ITEM_INSTRUCTION(Shift, 19, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"functionName", L"");
+				ITEM_INSTRUCTION(Shift, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Shift, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Shift, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"functionName", L"", L"");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
@@ -2236,10 +2239,10 @@ Table Generation
 			BEGIN_TRANSITION_BAG(23, 4)
 
 				BEGIN_TRANSITION_ITEM(4, 2)
-				ITEM_INSTRUCTION(Shift, 23, L"", L"");
-				ITEM_INSTRUCTION(Shift, 21, L"", L"");
-				ITEM_INSTRUCTION(Shift, 19, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"value", L"");
+				ITEM_INSTRUCTION(Shift, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Shift, 21, L"", L"", L"");
+				ITEM_INSTRUCTION(Shift, 19, L"", L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"value", L"", L"");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
@@ -2247,8 +2250,8 @@ Table Generation
 			BEGIN_TRANSITION_BAG(23, 9)
 
 				BEGIN_TRANSITION_ITEM(9, 13)
-				ITEM_INSTRUCTION(Shift, 23, L"", L"");
-				ITEM_INSTRUCTION(Shift, 21, L"", L"");
+				ITEM_INSTRUCTION(Shift, 23, L"", L"", L"");
+				ITEM_INSTRUCTION(Shift, 21, L"", L"", L"");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
