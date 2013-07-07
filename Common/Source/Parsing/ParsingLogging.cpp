@@ -915,7 +915,13 @@ Logger (ParsingTreeNode)
 			{
 				WString oldPrefix=prefix;
 				writer.WriteString(node->GetType());
-				writer.WriteString(L" {");
+				writer.WriteString(L" <");
+				for(vint i=0;i<node->GetCreatorRules().Count();i++)
+				{
+					if(i!=0) writer.WriteString(L", ");
+					writer.WriteString(node->GetCreatorRules()[i]);
+				}
+				writer.WriteString(L"> {");
 				WriteInput(node);
 				writer.WriteLine(L"");
 				prefix+=L"    ";

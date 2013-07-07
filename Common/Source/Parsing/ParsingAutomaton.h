@@ -44,6 +44,7 @@ namespace vl
 				ActionType											actionType;
 				ParsingSymbol*										actionTarget;
 				ParsingSymbol*										actionSource;
+				definitions::ParsingDefinitionRuleDefinition*		creatorRule;
 
 				// the following two fields record which rule symbol transition generate this shift/reduce action
 				State*												shiftReduceSource;

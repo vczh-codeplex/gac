@@ -370,6 +370,11 @@ ParsingTreeObject
 			return members.Keys();
 		}
 
+		ParsingTreeObject::RuleList& ParsingTreeObject::GetCreatorRules()
+		{
+			return rules;
+		}
+
 /***********************************************************************
 ParsingTreeArray
 ***********************************************************************/

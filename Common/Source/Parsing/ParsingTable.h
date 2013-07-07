@@ -104,6 +104,7 @@ namespace vl
 					vint									stateParameter;
 					WString									nameParameter;
 					WString									value;
+					WString									creatorRule;
 
 					Instruction()
 						:instructionType(Create)
@@ -111,11 +112,12 @@ namespace vl
 					{
 					}
 
-					Instruction(InstructionType _instructionType, vint _stateParameter, const WString& _nameParameter, const WString& _value)
+					Instruction(InstructionType _instructionType, vint _stateParameter, const WString& _nameParameter, const WString& _value, const WString& _creatorRule=L"")
 						:instructionType(_instructionType)
 						,stateParameter(_stateParameter)
 						,nameParameter(_nameParameter)
 						,value(_value)
+						,creatorRule(_creatorRule)
 					{
 					}
 				};
