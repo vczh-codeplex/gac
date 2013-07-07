@@ -977,6 +977,9 @@ void WriteNodeConverterClassImplFragment(ParsingSymbolManager* manager, const WS
 		writer.WriteString(L" tree = new ");
 		PrintType(scope, codeClassPrefix, writer);
 		writer.WriteLine(L";");
+		writer.WriteString(prefix);
+		writer.WriteString(L"\t");
+		writer.WriteLine(L"vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());");
 
 		ParsingSymbol* currentType=scope;
 		while(currentType)
@@ -1203,7 +1206,7 @@ void WriteTable(Ptr<ParsingTable> table, const WString& prefix, const WString& c
 	writer.WriteString(prefix);
 	writer.WriteLine(L"\t#define ITEM_STACK_PATTERN(STATE) item->stackPattern.Add(STATE);");
 	writer.WriteString(prefix);
-	writer.WriteLine(L"\t#define ITEM_INSTRUCTION(TYPE, STATE, NAME, VALUE) item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::TYPE, STATE, NAME, VALUE));");
+	writer.WriteLine(L"\t#define ITEM_INSTRUCTION(TYPE, STATE, NAME, VALUE, RULE) item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::TYPE, STATE, NAME, VALUE, RULE));");
 	writer.WriteString(prefix);
 	writer.WriteLine(L"\t#define BEGIN_LOOK_AHEAD(STATE) {vl::Ptr<vl::parsing::tabling::ParsingTable::LookAheadInfo> lookAheadInfo=new vl::Ptr<vl::parsing::tabling::ParsingTable::LookAheadInfo; item->lookAheads.Add(lookAheadInfo); lookAheadInfo->state=STATE;");
 	writer.WriteString(prefix);
@@ -1375,6 +1378,8 @@ void WriteTable(Ptr<ParsingTable> table, const WString& prefix, const WString& c
 						WriteCppString(ins.nameParameter, writer);
 						writer.WriteString(L", ");
 						WriteCppString(ins.value, writer);
+						writer.WriteString(L", ");
+						WriteCppString(ins.creatorRule, writer);
 						writer.WriteLine(L");");
 					}
 

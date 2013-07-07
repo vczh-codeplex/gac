@@ -11,6 +11,7 @@ Classes:
 
 #include "..\Regex\Regex.h"
 #include "..\Stream\Accessor.h"
+#include "..\Collections\OperationCopyFrom.h"
 
 namespace vl
 {
@@ -287,6 +288,7 @@ namespace vl
 		{
 		public:
 			ParsingTextRange					codeRange;
+			collections::List<WString>			creatorRules;
 		};
 
 		class ParsingToken : public ParsingTreeCustomBase

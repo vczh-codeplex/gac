@@ -112,7 +112,7 @@ namespace vl
 					{
 					}
 
-					Instruction(InstructionType _instructionType, vint _stateParameter, const WString& _nameParameter, const WString& _value, const WString& _creatorRule=L"")
+					Instruction(InstructionType _instructionType, vint _stateParameter, const WString& _nameParameter, const WString& _value, const WString& _creatorRule)
 						:instructionType(_instructionType)
 						,stateParameter(_stateParameter)
 						,nameParameter(_nameParameter)
