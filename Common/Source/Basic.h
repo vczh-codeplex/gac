@@ -95,6 +95,92 @@ typedef signed __int64	pos_t;
 
 #define CHECK_FAIL(DESCRIPTION) do{throw Error(DESCRIPTION);}while(0)
 
+/***********************************************************************
+类型计算
+***********************************************************************/
+
+	template<typename T>
+	struct RemoveReference
+	{
+		typedef T			Type;
+	};
+
+	template<typename T>
+	struct RemoveReference<T&>
+	{
+		typedef T			Type;
+	};
+
+	template<typename T>
+	struct RemoveReference<T&&>
+	{
+		typedef T			Type;
+	};
+
+	template<typename T>
+	struct RemoveConst
+	{
+		typedef T			Type;
+	};
+
+	template<typename T>
+	struct RemoveConst<const T>
+	{
+		typedef T			Type;
+	};
+
+	template<typename T>
+	struct RemoveVolatile
+	{
+		typedef T			Type;
+	};
+
+	template<typename T>
+	struct RemoveVolatile<volatile T>
+	{
+		typedef T			Type;
+	};
+
+	template<typename T>
+	struct RemoveCVR
+	{
+		typedef T								Type;
+	};
+
+	template<typename T>
+	struct RemoveCVR<T&>
+	{
+		typedef typename RemoveCVR<T>::Type		Type;
+	};
+
+	template<typename T>
+	struct RemoveCVR<T&&>
+	{
+		typedef typename RemoveCVR<T>::Type		Type;
+	};
+
+	template<typename T>
+	struct RemoveCVR<const T>
+	{
+		typedef typename RemoveCVR<T>::Type		Type;
+	};
+
+	template<typename T>
+	struct RemoveCVR<volatile T>
+	{
+		typedef typename RemoveCVR<T>::Type		Type;
+	};
+
+	template<typename T>
+	typename RemoveReference<T>::Type&& MoveValue(T&& value)
+	{
+		return (typename RemoveReference<T>::Type&&)value;
+	}
+
+/***********************************************************************
+基础
+***********************************************************************/
+
 	class Object
 	{
 	public:
@@ -108,8 +194,38 @@ typedef signed __int64	pos_t;
 		T					object;
 	public:
 		ObjectBox(const T& _object)
+			:object(_object)
+		{
+		}
+
+		ObjectBox(T&& _object)
+			:object(MoveValue(_object))
+		{
+		}
+
+		ObjectBox(const ObjectBox<T>& value)
+			:object(value.object)
+		{
+		}
+
+		ObjectBox(ObjectBox<T>&& value)
+			:object(MoveValue(value.object))
+		{
+		}
+
+		ObjectBox<T>& operator=(const T& _object)
 		{
 			object=_object;
+		}
+
+		ObjectBox<T>& operator=(const ObjectBox<T>& value)
+		{
+			object=value.object;
+		}
+
+		ObjectBox<T>& operator=(ObjectBox<T>&& value)
+		{
+			object=MoveValue(value.object);
 		}
 
 		const T& Unbox()
@@ -131,6 +247,11 @@ typedef signed __int64	pos_t;
 
 		Nullable(const T& value)
 			:object(new T(value))
+		{
+		}
+
+		Nullable(T&& value)
+			:object(new T(MoveValue(value)))
 		{
 		}
 
@@ -167,27 +288,33 @@ typedef signed __int64	pos_t;
 
 		Nullable<T>& operator=(const Nullable<T>& nullable)
 		{
-			if(object)
+			if(this!=&nullable)
 			{
-				delete object;
-				object=0;
-			}
-			if(nullable.object)
-			{
-				object=new T(*nullable.object);
+				if(object)
+				{
+					delete object;
+					object=0;
+				}
+				if(nullable.object)
+				{
+					object=new T(*nullable.object);
+				}
 			}
 			return *this;
 		}
 
 		Nullable<T>& operator=(Nullable<T>&& nullable)
 		{
-			if(object)
+			if(this!=&nullable)
 			{
-				delete object;
-				object=0;
+				if(object)
+				{
+					delete object;
+					object=0;
+				}
+				object=nullable.object;
+				nullable.object=0;
 			}
-			object=nullable.object;
-			nullable.object=0;
 			return *this;
 		}
 

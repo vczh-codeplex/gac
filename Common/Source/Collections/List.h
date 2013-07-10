@@ -41,14 +41,14 @@ namespace vl
 				{
 					for(vint i=0;i<count;i++)
 					{
-						dest[i]=source[i];
+						dest[i]=MoveValue(source[i]);
 					}
 				}
 				else if(dest>source)
 				{
 					for(vint i=count-1;i>=0;i--)
 					{
-						dest[i]=source[i];
+						dest[i]=MoveValue(source[i]);
 					}
 				}
 			}
