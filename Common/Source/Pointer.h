@@ -109,6 +109,15 @@ Ptr
 			Inc();
 		}
 
+		Ptr(Ptr<T>&& pointer)
+		{
+			counter=pointer.counter;
+			reference=pointer.reference;
+
+			pointer.counter=0;
+			pointer.reference=0;
+		}
+
 		template<typename C>
 		Ptr(const Ptr<C>& pointer)
 		{
@@ -163,6 +172,20 @@ Ptr
 				counter=pointer.counter;
 				reference=pointer.reference;
 				Inc();
+			}
+			return *this;
+		}
+
+		Ptr<T>& operator=(Ptr<T>&& pointer)
+		{
+			if(this!=&pointer)
+			{
+				Dec();
+				counter=pointer.counter;
+				reference=pointer.reference;
+				
+				pointer.counter=0;
+				pointer.reference=0;
 			}
 			return *this;
 		}
@@ -335,6 +358,15 @@ ComPtr
 			Inc();
 		}
 
+		ComPtr(ComPtr<T>&& pointer)
+		{
+			counter=pointer.counter;
+			reference=pointer.reference;
+			
+			pointer.counter=0;
+			pointer.reference=0;
+		}
+
 		~ComPtr()
 		{
 			Dec();
@@ -364,6 +396,20 @@ ComPtr
 				counter=pointer.counter;
 				reference=pointer.reference;
 				Inc();
+			}
+			return *this;
+		}
+
+		ComPtr<T>& operator=(ComPtr<T>&& pointer)
+		{
+			if(this!=&pointer)
+			{
+				Dec();
+				counter=pointer.counter;
+				reference=pointer.reference;
+				
+				pointer.counter=0;
+				pointer.reference=0;
 			}
 			return *this;
 		}

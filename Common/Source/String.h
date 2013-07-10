@@ -212,6 +212,21 @@ namespace vl
 			Inc();
 		}
 
+		ObjectString(ObjectString<T>&& string)
+		{
+			buffer=string.buffer;
+			reference=string.reference;
+			start=string.start;
+			length=string.length;
+			realLength=string.realLength;
+			
+			string.buffer=(T*)&zero;
+			string.reference=0;
+			string.start=0;
+			string.length=0;
+			string.realLength=0;
+		}
+
 		~ObjectString()
 		{
 			Dec();
@@ -244,6 +259,26 @@ namespace vl
 				length=string.length;
 				realLength=string.realLength;
 				Inc();
+			}
+			return *this;
+		}
+
+		ObjectString<T>& operator=(ObjectString<T>&& string)
+		{
+			if(this!=&string)
+			{
+				Dec();
+				buffer=string.buffer;
+				reference=string.reference;
+				start=string.start;
+				length=string.length;
+				realLength=string.realLength;
+			
+				string.buffer=(T*)&zero;
+				string.reference=0;
+				string.start=0;
+				string.length=0;
+				string.realLength=0;
 			}
 			return *this;
 		}
