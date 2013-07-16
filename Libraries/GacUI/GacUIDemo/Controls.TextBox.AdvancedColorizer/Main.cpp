@@ -343,7 +343,7 @@ public:
 	TextBoxColorizerWindow()
 		:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
 	{
-		SetText(L"GacUISrc Test Application");
+		SetText(L"Controls.TextBox.AdvancedColorizer");
 		SetClientSize(Size(640, 480));
 
 		textBoxGrammar=g::NewMultilineTextBox();
