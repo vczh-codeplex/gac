@@ -123,10 +123,82 @@ public:
 };
 
 /***********************************************************************
+RepeatingTaskExecutor
+***********************************************************************/
+
+template<typename T>
+class RepeatingTaskExecutor : public Object
+{
+protected:
+	SpinLock								inputLock;
+	T										inputData;
+	volatile bool							inputDataAvailable;
+	SpinLock								executingEvent;
+	volatile bool							executing;
+
+	virtual void							Execute(const T& input)=0;
+
+	void ExecutingProcInternal()
+	{
+		while(true)
+		{
+			bool currentInputDataAvailable;
+			T currentInputData;
+			{
+				SpinLock::Scope scope(inputLock);
+				currentInputData=inputData;
+				currentInputDataAvailable=inputDataAvailable;
+				inputDataAvailable=false;
+			}
+			if(!currentInputDataAvailable)
+			{
+				executing=false;
+				break;
+			}
+			Execute(currentInputData);
+		}
+		executingEvent.Leave();
+	}
+
+	static void ExecutingProc(void* argument)
+	{
+		((RepeatingTaskExecutor<T>*)argument)->ExecutingProcInternal();
+	}
+public:
+	RepeatingTaskExecutor()
+		:inputDataAvailable(false)
+		,executing(false)
+	{
+	}
+
+	~RepeatingTaskExecutor()
+	{
+		executingEvent.Enter();
+		executingEvent.Leave();
+	}
+
+	void SubmitTask(const T& input)
+	{
+		{
+			// copy the text because this is a cross thread accessible data
+			SpinLock::Scope scope(inputLock);
+			inputData=input;
+			inputDataAvailable=true;
+		}
+		if(!executing)
+		{
+			executing=true;
+			executingEvent.Enter();
+			ThreadPoolLite::Queue(&ExecutingProc, this);
+		}
+	}
+};
+
+/***********************************************************************
 GrammarColorizer
 ***********************************************************************/
 
-class GrammarColorizer : public GuiTextBoxRegexColorizer
+class GrammarColorizer : public GuiTextBoxRegexColorizer, public RepeatingTaskExecutor<WString>
 {
 protected:
 	Ptr<ParsingGeneralParser>				grammarParser;
@@ -136,49 +208,23 @@ protected:
 	Ptr<ParsingTreeObject>					parsingTreeNode;
 	Ptr<ParserDecl>							parsingTreeDecl;
 
-	SpinLock								parsingTextLock;
-	WString									parsingText;
-	volatile bool							isParsingRunning;
-	SpinLock								parsingRunningEvent;
-
-	void ParsingProcInternal()
+	void Execute(const WString& input)override
 	{
-		while(true)
+		List<Ptr<ParsingError>> errors;
+		Ptr<ParsingTreeObject> node=grammarParser->Parse(input, L"ParserDecl", errors).Cast<ParsingTreeObject>();
+		Ptr<ParserDecl> decl;
+		if(node)
 		{
-			WString currentParsingText;
-			{
-				SpinLock::Scope scope(parsingTextLock);
-				currentParsingText=parsingText;
-				parsingText=L"";
-			}
-			if(currentParsingText==L"")
-			{
-				isParsingRunning=false;
-				break;
-			}
-
-			List<Ptr<ParsingError>> errors;
-			Ptr<ParsingTreeObject> node=grammarParser->Parse(currentParsingText, L"ParserDecl", errors).Cast<ParsingTreeObject>();
-			Ptr<ParserDecl> decl;
-			if(node)
-			{
-				node->InitializeQueryCache();
-				decl=new ParserDecl(node);
-			}
-			{
-				SpinLock::Scope scope(parsingTreeLock);
-				parsingTreeNode=node;
-				parsingTreeDecl=decl;
-				node=0;
-			}
-			RestartColorizer();
+			node->InitializeQueryCache();
+			decl=new ParserDecl(node);
 		}
-		parsingRunningEvent.Leave();
-	}
-
-	static void ParsingProc(void* argument)
-	{
-		((GrammarColorizer*)argument)->ParsingProcInternal();
+		{
+			SpinLock::Scope scope(parsingTreeLock);
+			parsingTreeNode=node;
+			parsingTreeDecl=decl;
+			node=0;
+		}
+		RestartColorizer();
 	}
 
 	void InitializeColorizer()
@@ -258,8 +304,7 @@ protected:
 	}
 public:
 	GrammarColorizer()
-		:isParsingRunning(false)
-		,finalizing(false)
+		:finalizing(false)
 	{
 		InitializeColorizer();
 		InitializeParser();
@@ -268,23 +313,6 @@ public:
 	~GrammarColorizer()
 	{
 		finalizing=true;
-		parsingRunningEvent.Enter();
-		parsingRunningEvent.Leave();
-	}
-
-	void SubmitCurrentText(const wchar_t* text)
-	{
-		{
-			// copy the text because this is a cross thread accessible data
-			SpinLock::Scope scope(parsingTextLock);
-			parsingText=text;
-		}
-		if(!isParsingRunning)
-		{
-			isParsingRunning=true;
-			parsingRunningEvent.Enter();
-			ThreadPoolLite::Queue(&ParsingProc, this);
-		}
 	}
 
 	void ColorizeTokenContextSensitive(int lineIndex, const wchar_t* text, vint start, vint length, vint& token, int& contextState)override
@@ -354,7 +382,7 @@ protected:
 	void textBoxGrammar_TextChanged(GuiGraphicsComposition* composition, GuiEventArgs& arguments)
 	{
 		WString text=textBoxGrammar->GetText();
-		colorizer->SubmitCurrentText(text.Buffer());
+		colorizer->SubmitTask(text.Buffer());
 	}
 public:
 	TextBoxColorizerWindow()
