@@ -10,6 +10,8 @@
 using namespace vl::stream;
 using namespace vl::collections;
 using namespace vl::regex;
+using namespace vl::parsing;
+using namespace vl::parsing::tabling;
 
 #define GUI_GRAPHICS_RENDERER_DIRECT2D
 
@@ -28,188 +30,412 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	return result;
 }
 
-namespace test
-{
 
 /***********************************************************************
-TestWindow
+SymbolLookup
 ***********************************************************************/
 
-	class TestWindow : public GuiWindow
+class TypeSymbol : public Object
+{
+public:
+	WString									typeName;
+	Dictionary<WString, Ptr<TypeSymbol>>	subTypes;
+	TypeSymbol*								parent;
+
+	TypeSymbol()
+		:parent(0)
 	{
-	private:
-		GuiStringGrid*						stringGrid;
-		GuiToolstripMenu*					contextMenu;
+	}
 
-		GuiToolstripButton*					menuInsertRowBefore;
-		GuiToolstripButton*					menuInsertRowAfter;
-		GuiToolstripButton*					menuRemoveRow;
-		GuiToolstripButton*					menuInsertColumnBefore;
-		GuiToolstripButton*					menuInsertColumnAfter;
-		GuiToolstripButton*					menuRemoveColumn;
-
-		void menuInsertRowBefore_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+	void CollectTypes(Ptr<ParsingTreeArray> types, Dictionary<ParsingTreeNode*, TypeSymbol*>& nodeTypeMap)
+	{
+		if(types)
 		{
-			vint row=stringGrid->GetSelectedCell().row;
-			stringGrid->Grids().InsertRow(row);
-			stringGrid->SetSelectedCell(GridPos(row, 0));
-		}
-
-		void menuInsertRowAfter_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
-		{
-			vint row=stringGrid->GetSelectedCell().row;
-			stringGrid->Grids().InsertRow(row+1);
-			stringGrid->SetSelectedCell(GridPos(row+1, 0));
-		}
-
-		void menuRemoveRow_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
-		{
-			vint row=stringGrid->GetSelectedCell().row;
-			stringGrid->Grids().RemoveRow(row);
-		}
-
-		void menuInsertColumnBefore_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
-		{
-			vint column=stringGrid->GetSelectedCell().column;
-			stringGrid->Grids().InsertColumn(column, L"New Column");
-		}
-
-		void menuInsertColumnAfter_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
-		{
-			vint column=stringGrid->GetSelectedCell().column;
-			stringGrid->Grids().InsertColumn(column+1, L"New Column");
-		}
-
-		void menuRemoveColumn_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
-		{
-			vint column=stringGrid->GetSelectedCell().column;
-			stringGrid->Grids().RemoveColumn(column);
-		}
-
-		void contextMenu_WindowOpened(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
-		{
-			menuInsertRowBefore->SetEnabled(stringGrid->GetSelectedCell().row!=-1);
-			menuInsertRowAfter->SetEnabled(stringGrid->GetSelectedCell().row!=-1);
-			menuRemoveRow->SetEnabled(stringGrid->GetSelectedCell().row!=-1);
-
-			menuInsertColumnBefore->SetEnabled(stringGrid->GetSelectedCell().column!=-1);
-			menuInsertColumnAfter->SetEnabled(stringGrid->GetSelectedCell().column!=-1);
-			menuRemoveColumn->SetEnabled(stringGrid->GetSelectedCell().column!=-1 && stringGrid->Grids().GetColumnCount()>1);
-		}
-
-		void stringGrid_rightButtonUp(GuiGraphicsComposition* sender, GuiMouseEventArgs& arguments)
-		{
-			contextMenu->ShowPopup(this, Point(arguments.x, arguments.y));
-		}
-
-		void Initialize()
-		{
-			stringGrid->Grids().AppendColumn(L"File Name", 240);
-			stringGrid->Grids().AppendColumn(L"Data Modified", 120);
-			stringGrid->Grids().AppendColumn(L"Type", 160);
-			stringGrid->Grids().AppendColumn(L"Size", 100);
-
-			WString path=GetWindowsDirectory();
-			List<WString> files, folders;
-			SearchDirectoriesAndFiles(path, folders, files);
-
-			FOREACH(WString, file, files)
+			for(int i=0;i<types->Count();i++)
 			{
-				WString fullPath=path+L"\\"+file;
-				vint row=stringGrid->Grids().AppendRow();
-				stringGrid->Grids().SetGridString(row, 0, GetFileDisplayName(fullPath));
-				stringGrid->Grids().SetGridString(row, 1, FileTimeToString(GetFileLastWriteTime(fullPath)));
-				stringGrid->Grids().SetGridString(row, 2, GetFileTypeName(fullPath));
-				stringGrid->Grids().SetGridString(row, 3, FileSizeToString(GetFileSize(fullPath)));
+				Ptr<ParsingTreeObject> type=types->GetItem(i).Cast<ParsingTreeObject>();
+				if(type)
+				{
+					Ptr<ParsingTreeToken> name=type->GetMember(L"name").Cast<ParsingTreeToken>();
+					if(name && !subTypes.Keys().Contains(name->GetValue()))
+					{
+						Ptr<TypeSymbol> symbol=new TypeSymbol;
+						symbol->typeName=name->GetValue();
+						symbol->parent=this;
+						subTypes.Add(symbol->typeName, symbol);
+						symbol->CollectTypes(type->GetMember(L"subTypes").Cast<ParsingTreeArray>(), nodeTypeMap);
+						nodeTypeMap.Add(type.Obj(), symbol.Obj());
+					}
+				}
 			}
 		}
-	public:
-		TestWindow()
-			:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
+	}
+};
+
+class ParserDecl : public TypeSymbol
+{
+public:
+	SortedList<WString>							tokens;
+	SortedList<WString>							rules;
+	Dictionary<ParsingTreeNode*, TypeSymbol*>	nodeTypeMap;
+
+	ParserDecl(Ptr<ParsingTreeObject> parserDecl)
+	{
+		nodeTypeMap.Add(parserDecl.Obj(), this);
+		CollectTypes(parserDecl->GetMember(L"types").Cast<ParsingTreeArray>(), nodeTypeMap);
 		{
-			SetText(GetApplication()->GetExecutableFolder());
-			GetContainerComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
-			GetContainerComposition()->SetPreferredMinSize(Size(800, 600));
+			Ptr<ParsingTreeArray> items=parserDecl->GetMember(L"tokens").Cast<ParsingTreeArray>();
+			if(items)
+			{
+				for(int i=0;i<items->Count();i++)
+				{
+					Ptr<ParsingTreeObject> type=items->GetItem(i).Cast<ParsingTreeObject>();
+					if(type)
+					{
+						Ptr<ParsingTreeToken> name=type->GetMember(L"name").Cast<ParsingTreeToken>();
+						if(name)
+						{
+							tokens.Add(name->GetValue());
+						}
+					}
+				}
+			}
+		}
+		{
+			Ptr<ParsingTreeArray> items=parserDecl->GetMember(L"rules").Cast<ParsingTreeArray>();
+			if(items)
+			{
+				for(int i=0;i<items->Count();i++)
+				{
+					Ptr<ParsingTreeObject> type=items->GetItem(i).Cast<ParsingTreeObject>();
+					if(type)
+					{
+						Ptr<ParsingTreeToken> name=type->GetMember(L"name").Cast<ParsingTreeToken>();
+						if(name)
+						{
+							rules.Add(name->GetValue());
+						}
+					}
+				}
+			}
+		}
+	}
+};
 
-			stringGrid=g::NewStringGrid();
-			stringGrid->GetBoundsComposition()->SetAlignmentToParent(Margin(5, 5, 5, 5));
-			stringGrid->SetVerticalAlwaysVisible(false);
-			stringGrid->SetHorizontalAlwaysVisible(false);
-			stringGrid->SetMultiSelect(true);
-			stringGrid->GetBoundsComposition()->GetEventReceiver()->rightButtonUp.AttachMethod(this, &TestWindow::stringGrid_rightButtonUp);
-			AddChild(stringGrid);
+/***********************************************************************
+GrammarColorizer
+***********************************************************************/
 
-			contextMenu=g::NewMenu(0);
-			contextMenu->GetBuilder()
-				->Button(0, L"Insert Row Before", &menuInsertRowBefore)
-				->Button(0, L"Insert Row After", &menuInsertRowAfter)
-				->Button(0, L"Remove This Row", &menuRemoveRow)
-				->Splitter()
-				->Button(0, L"Insert Column Before...", &menuInsertColumnBefore)
-				->Button(0, L"Insert Column After...", &menuInsertColumnAfter)
-				->Button(0, L"Remove This Column", &menuRemoveColumn)
-				;
-			contextMenu->WindowOpened.AttachMethod(this, &TestWindow::contextMenu_WindowOpened);
-			menuInsertRowBefore->Clicked.AttachMethod(this, &TestWindow::menuInsertRowBefore_Clicked);
-			menuInsertRowAfter->Clicked.AttachMethod(this, &TestWindow::menuInsertRowAfter_Clicked);
-			menuRemoveRow->Clicked.AttachMethod(this, &TestWindow::menuRemoveRow_Clicked);
-			menuInsertColumnBefore->Clicked.AttachMethod(this, &TestWindow::menuInsertColumnBefore_Clicked);
-			menuInsertColumnAfter->Clicked.AttachMethod(this, &TestWindow::menuInsertColumnAfter_Clicked);
-			menuRemoveColumn->Clicked.AttachMethod(this, &TestWindow::menuRemoveColumn_Clicked);
+class GrammarColorizer : public GuiTextBoxRegexColorizer
+{
+protected:
+	Ptr<ParsingGeneralParser>				grammarParser;
+	volatile bool							finalizing;
 
-			ForceCalculateSizeImmediately();
-			MoveToScreenCenter();
-			Initialize();
+	SpinLock								parsingTreeLock;
+	Ptr<ParsingTreeObject>					parsingTreeNode;
+	Ptr<ParserDecl>							parsingTreeDecl;
+
+	SpinLock								parsingTextLock;
+	WString									parsingText;
+	volatile bool							isParsingRunning;
+	SpinLock								parsingRunningEvent;
+
+	void ParsingProcInternal()
+	{
+		while(true)
+		{
+			WString currentParsingText;
+			{
+				SpinLock::Scope scope(parsingTextLock);
+				currentParsingText=parsingText;
+				parsingText=L"";
+			}
+			if(currentParsingText==L"")
+			{
+				isParsingRunning=false;
+				break;
+			}
+
+			List<Ptr<ParsingError>> errors;
+			Ptr<ParsingTreeObject> node=grammarParser->Parse(currentParsingText, L"ParserDecl", errors).Cast<ParsingTreeObject>();
+			Ptr<ParserDecl> decl;
+			if(node)
+			{
+				node->InitializeQueryCache();
+				decl=new ParserDecl(node);
+			}
+			{
+				SpinLock::Scope scope(parsingTreeLock);
+				parsingTreeNode=node;
+				parsingTreeDecl=decl;
+				node=0;
+			}
+			RestartColorizer();
+		}
+		parsingRunningEvent.Leave();
+	}
+
+	static void ParsingProc(void* argument)
+	{
+		((GrammarColorizer*)argument)->ParsingProcInternal();
+	}
+
+	void InitializeColorizer()
+	{
+		text::ColorEntry entry=GetCurrentTheme()->GetDefaultTextBoxColorEntry();
+		SetDefaultColor(entry);
+
+		entry.normal.text=Color(163, 21, 21);
+		AddToken(L"\"([^\\\\\"]|\\\\/.)*\"", entry);
+
+		entry.normal.text=Color(0, 0, 255);
+		AddToken(L"class|enum|token|discardtoken|rule|as|with", entry);
+
+		// 2 -- token
+		AddToken(L"[a-zA-Z_]/w*", GetDefaultColor());
+			
+		// 3 -- type name
+		entry.normal.text=Color(43, 145, 175);
+		AddExtraToken(entry);
+			
+		// 4 -- token name
+		entry.normal.text=Color(163, 73, 164);
+		AddExtraToken(entry);
+			
+		// 5 -- rule name
+		entry.normal.text=Color(255, 127, 39);
+		AddExtraToken(entry);
+
+		Setup();
+	}
+
+	void InitializeParser()
+	{
+		grammarParser=CreateBootstrapAutoRecoverParser();
+	}
+
+	TypeSymbol* FindScope(ParsingTreeNode* node)
+	{
+		if(!node) return 0;
+		int index=parsingTreeDecl->nodeTypeMap.Keys().IndexOf(node);
+		return index==-1?FindScope(node->GetParent()):parsingTreeDecl->nodeTypeMap.Values().Get(index);
+	}
+
+	TypeSymbol* FindType(TypeSymbol* scope, const WString& name)
+	{
+		if(!scope) return 0;
+		if(name==L"") return 0;
+		int index=scope->subTypes.Keys().IndexOf(name);
+		if(index!=-1) return scope->subTypes.Values().Get(index).Obj();
+		return FindType(scope->parent, name);
+	}
+
+	TypeSymbol* FindType(TypeSymbol* scope, ParsingTreeObject* object)
+	{
+		if(scope && object)
+		{
+			Ptr<ParsingTreeToken> name=object->GetMember(L"name").Cast<ParsingTreeToken>();
+			if(name)
+			{
+				WString typeName=name->GetValue();
+				if(object->GetType()==L"PrimitiveTypeObj")
+				{
+					return FindType(scope, typeName);
+				}
+				else if(object->GetType()==L"SubTypeObj")
+				{
+					TypeSymbol* type=FindType(scope, object->GetMember(L"parentType").Cast<ParsingTreeObject>().Obj());
+					if(type)
+					{
+						int index=type->subTypes.Keys().IndexOf(typeName);
+						if(index!=-1) return type->subTypes.Values().Get(index).Obj();
+					}
+				}
+			}
+		}
+		return 0;
+	}
+public:
+	GrammarColorizer()
+		:isParsingRunning(false)
+		,finalizing(false)
+	{
+		InitializeColorizer();
+		InitializeParser();
+	}
+
+	~GrammarColorizer()
+	{
+		finalizing=true;
+		parsingRunningEvent.Enter();
+		parsingRunningEvent.Leave();
+	}
+
+	void SubmitCurrentText(const wchar_t* text)
+	{
+		{
+			// copy the text because this is a cross thread accessible data
+			SpinLock::Scope scope(parsingTextLock);
+			parsingText=text;
+		}
+		if(!isParsingRunning)
+		{
+			isParsingRunning=true;
+			parsingRunningEvent.Enter();
+			ThreadPoolLite::Queue(&ParsingProc, this);
+		}
+	}
+
+	void ColorizeTokenContextSensitive(int lineIndex, const wchar_t* text, vint start, vint length, vint& token, int& contextState)override
+	{
+		SpinLock::Scope scope(parsingTreeLock);
+		if(parsingTreeNode && token==2)
+		{
+			ParsingTextPos pos(lineIndex, start);
+			ParsingTreeNode* foundNode=parsingTreeNode->FindDeepestNode(pos);
+			if(foundNode)
+			{
+				ParsingTreeToken* foundToken=dynamic_cast<ParsingTreeToken*>(foundNode);
+				if(foundToken)
+				{
+					ParsingTreeObject* tokenParent=dynamic_cast<ParsingTreeObject*>(foundNode->GetParent());
+					if(tokenParent)
+					{
+						if(tokenParent->GetType()==L"ClassTypeDef" && tokenParent->GetMember(L"name")==foundNode)
+						{
+							token=3;
+						}
+						else if(tokenParent->GetType()==L"TokenDef" && tokenParent->GetMember(L"name")==foundNode)
+						{
+							token=4;
+						}
+						else if(tokenParent->GetType()==L"RuleDef" && tokenParent->GetMember(L"name")==foundNode)
+						{
+							token=5;
+						}
+						else if(tokenParent->GetType()==L"PrimitiveGrammarDef" && tokenParent->GetMember(L"name")==foundNode)
+						{
+							WString name=foundToken->GetValue();
+							if(parsingTreeDecl->tokens.Contains(name))
+							{
+								token=4;
+							}
+							else if(parsingTreeDecl->rules.Contains(name))
+							{
+								token=5;
+							}
+						}
+						else if((tokenParent->GetType()==L"PrimitiveTypeObj" || tokenParent->GetType()==L"SubTypeObj") && tokenParent->GetMember(L"name")==foundNode)
+						{
+							TypeSymbol* scope=FindScope(tokenParent);
+							if(FindType(scope, tokenParent))
+							{
+								token=3;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+};
+
+/***********************************************************************
+TextBoxColorizerWindow
+***********************************************************************/
+
+class TextBoxColorizerWindow : public GuiWindow
+{
+protected:
+	GuiMultilineTextBox*					textBoxGrammar;
+	Ptr<GrammarColorizer>					colorizer;
+
+	void textBoxGrammar_TextChanged(GuiGraphicsComposition* composition, GuiEventArgs& arguments)
+	{
+		WString text=textBoxGrammar->GetText();
+		colorizer->SubmitCurrentText(text.Buffer());
+	}
+public:
+	TextBoxColorizerWindow()
+		:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
+	{
+		SetText(L"GacUISrc Test Application");
+		SetClientSize(Size(640, 480));
+
+		textBoxGrammar=g::NewMultilineTextBox();
+		textBoxGrammar->GetBoundsComposition()->SetAlignmentToParent(Margin(3, 3, 3, 3));
+		GetBoundsComposition()->AddChild(textBoxGrammar->GetBoundsComposition());
+		colorizer=new GrammarColorizer;
+		textBoxGrammar->SetColorizer(colorizer);
+		textBoxGrammar->TextChanged.AttachMethod(this, &TextBoxColorizerWindow::textBoxGrammar_TextChanged);
+
+		{
+			FileStream fileStream(L"..\\GacUISrcCodepackedTest\\Resources\\CalculatorDefinition.txt", FileStream::ReadOnly);
+			BomDecoder decoder;
+			DecoderStream decoderStream(fileStream, decoder);
+			StreamReader reader(decoderStream);
+			textBoxGrammar->SetText(reader.ReadToEnd());
+			textBoxGrammar->Select(TextPos(), TextPos());
 		}
 
-		~TestWindow()
-		{
-			delete contextMenu;
-		}
-	};
-}
-using namespace test;
+		// set the preferred minimum client size
+		this->GetBoundsComposition()->SetPreferredMinSize(Size(640, 480));
+		// call this to calculate the size immediately if any indirect content in the table changes
+		// so that the window can calcaulte its correct size before calling the MoveToScreenCenter()
+		this->ForceCalculateSizeImmediately();
+		// move to the screen center
+		this->MoveToScreenCenter();
+	}
+
+	~TextBoxColorizerWindow()
+	{
+	}
+};
+
+extern void UnitTestInGuiMain();
 
 void GuiMain()
 {
-	TestWindow window;
+	UnitTestInGuiMain();
+	TextBoxColorizerWindow window;
 	GetApplication()->Run(&window);
+}
 
-	// memory leaks test
-	{
+void UnitTestInGuiMain()
+{
 #define ASSERT(x) do{if(!(x))throw 0;}while(0)
 
-		GuiBoundsComposition* bounds=new GuiBoundsComposition;
-		GuiControl* control=new GuiControl(new GuiControl::EmptyStyleController);
-		bounds->AddChild(control->GetBoundsComposition());
+	GuiBoundsComposition* bounds=new GuiBoundsComposition;
+	GuiControl* control=new GuiControl(new GuiControl::EmptyStyleController);
+	bounds->AddChild(control->GetBoundsComposition());
 
-		vint* rc1=ReferenceCounterOperator<GuiBoundsComposition>::CreateCounter(bounds);
-		vint* rc2=ReferenceCounterOperator<GuiControl>::CreateCounter(control);
+	vint* rc1=ReferenceCounterOperator<GuiBoundsComposition>::CreateCounter(bounds);
+	vint* rc2=ReferenceCounterOperator<GuiControl>::CreateCounter(control);
 
-		ASSERT(*rc1==0);
-		Ptr<GuiBoundsComposition> a1=bounds;
-		ASSERT(*rc1==1);
-		Ptr<GuiBoundsComposition> a2=bounds;
-		ASSERT(*rc1==2);
-		Ptr<DescriptableObject> a3=a1.Cast<DescriptableObject>();
-		ASSERT(*rc1==3);
-		Ptr<DescriptableObject> a4=a2;
-		ASSERT(*rc1==4);
+	ASSERT(*rc1==0);
+	Ptr<GuiBoundsComposition> a1=bounds;
+	ASSERT(*rc1==1);
+	Ptr<GuiBoundsComposition> a2=bounds;
+	ASSERT(*rc1==2);
+	Ptr<DescriptableObject> a3=a1.Cast<DescriptableObject>();
+	ASSERT(*rc1==3);
+	Ptr<DescriptableObject> a4=a2;
+	ASSERT(*rc1==4);
 		
-		ASSERT(*rc2==0);
-		Ptr<GuiControl> b1=control;
-		ASSERT(*rc2==1);
-		Ptr<GuiControl> b2=control;
-		ASSERT(*rc2==2);
-		Ptr<DescriptableObject> b3=b1.Cast<DescriptableObject>();
-		ASSERT(*rc2==3);
-		Ptr<DescriptableObject> b4=b2;
-		ASSERT(*rc2==4);
+	ASSERT(*rc2==0);
+	Ptr<GuiControl> b1=control;
+	ASSERT(*rc2==1);
+	Ptr<GuiControl> b2=control;
+	ASSERT(*rc2==2);
+	Ptr<DescriptableObject> b3=b1.Cast<DescriptableObject>();
+	ASSERT(*rc2==3);
+	Ptr<DescriptableObject> b4=b2;
+	ASSERT(*rc2==4);
 
-		b4=b3=b2=b1=0; // not released yet
-		ASSERT(*rc2==0);
-		control->SetText(L"Text");
+	b4=b3=b2=b1=0; // not released yet
+	ASSERT(*rc2==0);
+	control->SetText(L"Text");
 
-		a4=a3=a2=a1=0; // all released
-	}
+	a4=a3=a2=a1=0; // all released
 }
