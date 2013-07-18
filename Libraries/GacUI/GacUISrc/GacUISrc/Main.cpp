@@ -6,12 +6,15 @@
 
 #include "FileSystemInformation.h"
 #include "..\..\Source\GraphicsElement\WindowsDirect2D\GuiGraphicsWindowsDirect2D.h"
+#include "..\..\..\..\Common\Source\Parsing\ParsingDefinitions.h"
+#include "..\..\..\..\Common\Source\Stream\MemoryStream.h"
 
 using namespace vl::stream;
 using namespace vl::collections;
 using namespace vl::regex;
 using namespace vl::parsing;
 using namespace vl::parsing::tabling;
+using namespace vl::parsing::definitions;
 
 #define GUI_GRAPHICS_RENDERER_DIRECT2D
 
@@ -130,13 +133,13 @@ template<typename T>
 class RepeatingTaskExecutor : public Object
 {
 protected:
+	virtual void							Execute(const T& input)=0;
+private:
 	SpinLock								inputLock;
 	T										inputData;
 	volatile bool							inputDataAvailable;
 	SpinLock								executingEvent;
 	volatile bool							executing;
-
-	virtual void							Execute(const T& input)=0;
 
 	void ExecutingProcInternal()
 	{
@@ -202,8 +205,6 @@ class GrammarColorizer : public GuiTextBoxRegexColorizer, public RepeatingTaskEx
 {
 protected:
 	Ptr<ParsingGeneralParser>				grammarParser;
-	volatile bool							finalizing;
-
 	SpinLock								parsingTreeLock;
 	Ptr<ParsingTreeObject>					parsingTreeNode;
 	Ptr<ParserDecl>							parsingTreeDecl;
@@ -304,15 +305,9 @@ protected:
 	}
 public:
 	GrammarColorizer()
-		:finalizing(false)
 	{
 		InitializeColorizer();
 		InitializeParser();
-	}
-
-	~GrammarColorizer()
-	{
-		finalizing=true;
 	}
 
 	void ColorizeTokenContextSensitive(int lineIndex, const wchar_t* text, vint start, vint length, vint& token, int& contextState)override
@@ -376,12 +371,16 @@ TextBoxColorizerWindow
 class TextBoxColorizerWindow : public GuiWindow
 {
 protected:
+	GuiTab*									tabIntellisense;
 	GuiMultilineTextBox*					textBoxGrammar;
-	Ptr<GrammarColorizer>					colorizer;
+	GuiMultilineTextBox*					textBoxEditor;
 
-	void textBoxGrammar_TextChanged(GuiGraphicsComposition* composition, GuiEventArgs& arguments)
+	void textBoxEditor_TextChanged(GuiGraphicsComposition* composition, GuiEventArgs& arguments)
 	{
-		WString text=textBoxGrammar->GetText();
+		GuiMultilineTextBox* textBox=dynamic_cast<GuiMultilineTextBox*>(composition->GetRelatedControl());
+		GrammarColorizer* colorizer=dynamic_cast<GrammarColorizer*>(textBox->GetColorizer().Obj());
+
+		WString text=textBox->GetText();
 		colorizer->SubmitTask(text.Buffer());
 	}
 public:
@@ -389,26 +388,63 @@ public:
 		:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
 	{
 		SetText(L"GacUISrc Test Application");
-		SetClientSize(Size(640, 480));
+		SetClientSize(Size(800, 600));
 
-		textBoxGrammar=g::NewMultilineTextBox();
-		textBoxGrammar->GetBoundsComposition()->SetAlignmentToParent(Margin(3, 3, 3, 3));
-		GetBoundsComposition()->AddChild(textBoxGrammar->GetBoundsComposition());
-		colorizer=new GrammarColorizer;
-		textBoxGrammar->SetColorizer(colorizer);
-		textBoxGrammar->TextChanged.AttachMethod(this, &TextBoxColorizerWindow::textBoxGrammar_TextChanged);
+		tabIntellisense=g::NewTab();
+		tabIntellisense->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+		GetBoundsComposition()->AddChild(tabIntellisense->GetBoundsComposition());
+		{
+			GuiTabPage* page=tabIntellisense->CreatePage();
+			page->SetText(L"Code Editor");
+
+			textBoxEditor=g::NewMultilineTextBox();
+			textBoxEditor->SetHorizontalAlwaysVisible(false);
+			textBoxEditor->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+			page->GetContainer()->GetBoundsComposition()->AddChild(textBoxEditor->GetBoundsComposition());
+			textBoxEditor->SetColorizer(new GrammarColorizer);
+			textBoxEditor->TextChanged.AttachMethod(this, &TextBoxColorizerWindow::textBoxEditor_TextChanged);
 
 		{
 			FileStream fileStream(L"..\\GacUISrcCodepackedTest\\Resources\\CalculatorDefinition.txt", FileStream::ReadOnly);
 			BomDecoder decoder;
 			DecoderStream decoderStream(fileStream, decoder);
 			StreamReader reader(decoderStream);
+				textBoxEditor->SetText(reader.ReadToEnd());
+				textBoxEditor->Select(TextPos(), TextPos());
+			}
+		}
+		{
+			GuiTabPage* page=tabIntellisense->CreatePage();
+			page->SetText(L"Grammar");
+
+			textBoxGrammar=g::NewMultilineTextBox();
+			textBoxGrammar->SetReadonly(true);
+			textBoxGrammar->SetHorizontalAlwaysVisible(false);
+			textBoxGrammar->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+			page->GetContainer()->GetBoundsComposition()->AddChild(textBoxGrammar->GetBoundsComposition());
+			textBoxGrammar->SetColorizer(new GrammarColorizer);
+			textBoxGrammar->TextChanged.AttachMethod(this, &TextBoxColorizerWindow::textBoxEditor_TextChanged);
+
+			{
+				Ptr<ParsingDefinition> def=CreateParserDefinition();
+				MemoryStream stream;
+				{
+					StreamWriter writer(stream);
+					Log(def, writer);
+				}
+				stream.SeekFromBegin(0);
+				StreamReader reader(stream);
 			textBoxGrammar->SetText(reader.ReadToEnd());
 			textBoxGrammar->Select(TextPos(), TextPos());
 		}
+		}
+		{
+			GuiTabPage* page=tabIntellisense->CreatePage();
+			page->SetText(L"Configuration");
+		}
 
-		// set the preferred minimum client size
-		this->GetBoundsComposition()->SetPreferredMinSize(Size(640, 480));
+		// set the preferred minimum client 600
+		this->GetBoundsComposition()->SetPreferredMinSize(Size(800, 480));
 		// call this to calculate the size immediately if any indirect content in the table changes
 		// so that the window can calcaulte its correct size before calling the MoveToScreenCenter()
 		this->ForceCalculateSizeImmediately();
