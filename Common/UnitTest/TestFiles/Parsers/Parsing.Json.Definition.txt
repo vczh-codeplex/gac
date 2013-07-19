@@ -4,11 +4,11 @@ class Node
 
 class Literal:Node
 {
-	enum Value
+	enum Value										@Serializable()
 	{
-		True,
-		False,
-		Null,
+		True										@SerializeAs("True"),
+		False										@SerializeAs("False"),
+		Null										@SerializeAs("Null"),
 	}
 
 	Value value;

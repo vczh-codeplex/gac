@@ -7128,6 +7128,20 @@ namespace vl
 				}
 			}
 
+			void SetArray(List<WString>& target, Ptr<ParsingTreeNode> node)
+			{
+				Ptr<ParsingTreeArray> source=node.Cast<ParsingTreeArray>();
+				if(source)
+				{
+					for(vint i=0;i<source->Count();i++)
+					{
+						WString name;
+						SetName(name, source->GetItem(i));
+						target.Add(name);
+					}
+				}
+			}
+
 			template<typename T>
 			void SetMember(Ptr<T>& target, Ptr<ParsingTreeNode> node)
 			{
@@ -7143,6 +7157,13 @@ namespace vl
 				if(!node)
 				{
 					return 0;
+				}
+				else if(node->GetType()==L"AttributeDef")
+				{
+					Ptr<ParsingDefinitionAttribute> target=new ParsingDefinitionAttribute;
+					SetName(target->name, node->GetMember(L"name"));
+					SetArray(target->arguments, node->GetMember(L"arguments"));
+					return target;
 				}
 				else if(node->GetType()==L"PrimitiveTypeObj")
 				{
@@ -7171,6 +7192,7 @@ namespace vl
 				else if(node->GetType()==L"ClassMemberDef")
 				{
 					Ptr<ParsingDefinitionClassMemberDefinition> target=new ParsingDefinitionClassMemberDefinition;
+					SetArray(target->attributes, node->GetMember(L"attributes"));
 					SetMember(target->type, node->GetMember(L"type"));
 					SetName(target->name, node->GetMember(L"name"));
 					SetName(target->unescapingFunction, node->GetMember(L"unescapingFunction"));
@@ -7179,6 +7201,7 @@ namespace vl
 				else if(node->GetType()==L"ClassTypeDef")
 				{
 					Ptr<ParsingDefinitionClassDefinition> target=new ParsingDefinitionClassDefinition;
+					SetArray(target->attributes, node->GetMember(L"attributes"));
 					SetName(target->ambiguousType, node->GetMember(L"ambiguousType"));
 					SetMember(target->parentType, node->GetMember(L"parentType"));
 					SetName(target->name, node->GetMember(L"name"));
@@ -7189,12 +7212,14 @@ namespace vl
 				else if(node->GetType()==L"EnumMemberDef")
 				{
 					Ptr<ParsingDefinitionEnumMemberDefinition> target=new ParsingDefinitionEnumMemberDefinition;
+					SetArray(target->attributes, node->GetMember(L"attributes"));
 					SetName(target->name, node->GetMember(L"name"));
 					return target;
 				}
 				else if(node->GetType()==L"EnumTypeDef")
 				{
 					Ptr<ParsingDefinitionEnumDefinition> target=new ParsingDefinitionEnumDefinition;
+					SetArray(target->attributes, node->GetMember(L"attributes"));
 					SetName(target->name, node->GetMember(L"name"));
 					SetArray(target->members, node->GetMember(L"members"));
 					return target;
@@ -7268,6 +7293,7 @@ namespace vl
 				else if(node->GetType()==L"TokenDef")
 				{
 					Ptr<ParsingDefinitionTokenDefinition> target=new ParsingDefinitionTokenDefinition;
+					SetArray(target->attributes, node->GetMember(L"attributes"));
 					SetName(target->name, node->GetMember(L"name"));
 					SetText(target->regex, node->GetMember(L"regex"));
 
@@ -7278,6 +7304,7 @@ namespace vl
 				else if(node->GetType()==L"RuleDef")
 				{
 					Ptr<ParsingDefinitionRuleDefinition> target=new ParsingDefinitionRuleDefinition;
+					SetArray(target->attributes, node->GetMember(L"attributes"));
 					SetName(target->name, node->GetMember(L"name"));
 					SetMember(target->type, node->GetMember(L"type"));
 					SetArray(target->grammars, node->GetMember(L"grammars"));
@@ -7333,6 +7360,24 @@ namespace vl
 					}
 				}
 				writer.WriteChar(L'\"');
+			}
+
+			void LogAttributeList(ParsingDefinitionBase* definition, TextWriter& writer)
+			{
+				for(vint i=0;i<definition->attributes.Count();i++)
+				{
+					ParsingDefinitionAttribute* att=definition->attributes[i].Obj();
+					if(i>0) writer.WriteChar(L',');
+					writer.WriteString(L" @");
+					writer.WriteString(att->name);
+					writer.WriteChar(L'(');
+					for(vint j=0;j<att->arguments.Count();j++)
+					{
+						if(j>0) writer.WriteString(L", ");
+						LogString(att->arguments[j], writer);
+					}
+					writer.WriteChar(L')');
+				}
 			}
 
 /***********************************************************************
@@ -7418,6 +7463,7 @@ Logger (ParsingDefinitionTypeDefinition)
 						writer.WriteString(node->unescapingFunction);
 						writer.WriteString(L")");
 					}
+					LogAttributeList(node, writer);
 					writer.WriteLine(L";");
 				}
 
@@ -7437,6 +7483,7 @@ Logger (ParsingDefinitionTypeDefinition)
 						writer.WriteString(L" : ");
 						Log(node->parentType.Obj(), writer);
 					}
+					LogAttributeList(node, writer);
 					writer.WriteLine(L"");
 
 					writer.WriteString(prefix);
@@ -7461,6 +7508,7 @@ Logger (ParsingDefinitionTypeDefinition)
 				{
 					writer.WriteString(prefix);
 					writer.WriteString(node->name);
+					LogAttributeList(node, writer);
 					writer.WriteLine(L",");
 				}
 
@@ -7468,7 +7516,9 @@ Logger (ParsingDefinitionTypeDefinition)
 				{
 					writer.WriteString(prefix);
 					writer.WriteString(L"enum ");
-					writer.WriteLine(node->name);
+					writer.WriteString(node->name);
+					LogAttributeList(node, writer);
+					writer.WriteLine(L"");
 
 					writer.WriteString(prefix);
 					writer.WriteLine(L"{");
@@ -7836,6 +7886,7 @@ Logger (ParsingDefinitionGrammar)
 					writer.WriteString(token->name);
 					writer.WriteString(L" = ");
 					LogString(token->regex, writer);
+					LogAttributeList(token.Obj(), writer);
 					writer.WriteLine(L";");
 				}
 				writer.WriteLine(L"");
@@ -7845,7 +7896,10 @@ Logger (ParsingDefinitionGrammar)
 					writer.WriteString(L"rule ");
 					Log(rule->type.Obj(), writer);
 					writer.WriteString(L" ");
-					writer.WriteLine(rule->name);
+					writer.WriteString(rule->name);
+					LogAttributeList(rule.Obj(), writer);
+					writer.WriteLine(L"");
+
 					FOREACH(Ptr<ParsingDefinitionGrammar>, grammar, rule->grammars)
 					{
 						writer.WriteString(L"        = ");

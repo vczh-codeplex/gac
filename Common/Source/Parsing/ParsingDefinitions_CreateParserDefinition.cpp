@@ -455,6 +455,20 @@ namespace vl
 				}
 			}
 
+			void SetArray(List<WString>& target, Ptr<ParsingTreeNode> node)
+			{
+				Ptr<ParsingTreeArray> source=node.Cast<ParsingTreeArray>();
+				if(source)
+				{
+					for(vint i=0;i<source->Count();i++)
+					{
+						WString name;
+						SetName(name, source->GetItem(i));
+						target.Add(name);
+					}
+				}
+			}
+
 			template<typename T>
 			void SetMember(Ptr<T>& target, Ptr<ParsingTreeNode> node)
 			{
@@ -470,6 +484,13 @@ namespace vl
 				if(!node)
 				{
 					return 0;
+				}
+				else if(node->GetType()==L"AttributeDef")
+				{
+					Ptr<ParsingDefinitionAttribute> target=new ParsingDefinitionAttribute;
+					SetName(target->name, node->GetMember(L"name"));
+					SetArray(target->arguments, node->GetMember(L"arguments"));
+					return target;
 				}
 				else if(node->GetType()==L"PrimitiveTypeObj")
 				{
@@ -498,6 +519,7 @@ namespace vl
 				else if(node->GetType()==L"ClassMemberDef")
 				{
 					Ptr<ParsingDefinitionClassMemberDefinition> target=new ParsingDefinitionClassMemberDefinition;
+					SetArray(target->attributes, node->GetMember(L"attributes"));
 					SetMember(target->type, node->GetMember(L"type"));
 					SetName(target->name, node->GetMember(L"name"));
 					SetName(target->unescapingFunction, node->GetMember(L"unescapingFunction"));
@@ -506,6 +528,7 @@ namespace vl
 				else if(node->GetType()==L"ClassTypeDef")
 				{
 					Ptr<ParsingDefinitionClassDefinition> target=new ParsingDefinitionClassDefinition;
+					SetArray(target->attributes, node->GetMember(L"attributes"));
 					SetName(target->ambiguousType, node->GetMember(L"ambiguousType"));
 					SetMember(target->parentType, node->GetMember(L"parentType"));
 					SetName(target->name, node->GetMember(L"name"));
@@ -516,12 +539,14 @@ namespace vl
 				else if(node->GetType()==L"EnumMemberDef")
 				{
 					Ptr<ParsingDefinitionEnumMemberDefinition> target=new ParsingDefinitionEnumMemberDefinition;
+					SetArray(target->attributes, node->GetMember(L"attributes"));
 					SetName(target->name, node->GetMember(L"name"));
 					return target;
 				}
 				else if(node->GetType()==L"EnumTypeDef")
 				{
 					Ptr<ParsingDefinitionEnumDefinition> target=new ParsingDefinitionEnumDefinition;
+					SetArray(target->attributes, node->GetMember(L"attributes"));
 					SetName(target->name, node->GetMember(L"name"));
 					SetArray(target->members, node->GetMember(L"members"));
 					return target;
@@ -595,6 +620,7 @@ namespace vl
 				else if(node->GetType()==L"TokenDef")
 				{
 					Ptr<ParsingDefinitionTokenDefinition> target=new ParsingDefinitionTokenDefinition;
+					SetArray(target->attributes, node->GetMember(L"attributes"));
 					SetName(target->name, node->GetMember(L"name"));
 					SetText(target->regex, node->GetMember(L"regex"));
 
@@ -605,6 +631,7 @@ namespace vl
 				else if(node->GetType()==L"RuleDef")
 				{
 					Ptr<ParsingDefinitionRuleDefinition> target=new ParsingDefinitionRuleDefinition;
+					SetArray(target->attributes, node->GetMember(L"attributes"));
 					SetName(target->name, node->GetMember(L"name"));
 					SetMember(target->type, node->GetMember(L"type"));
 					SetArray(target->grammars, node->GetMember(L"grammars"));
