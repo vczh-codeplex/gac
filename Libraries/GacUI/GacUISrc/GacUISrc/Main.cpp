@@ -132,8 +132,6 @@ RepeatingTaskExecutor
 template<typename T>
 class RepeatingTaskExecutor : public Object
 {
-protected:
-	virtual void							Execute(const T& input)=0;
 private:
 	SpinLock								inputLock;
 	T										inputData;
@@ -167,6 +165,24 @@ private:
 	{
 		((RepeatingTaskExecutor<T>*)argument)->ExecutingProcInternal();
 	}
+	
+protected:
+	virtual void							Execute(const T& input)=0;
+
+	void SubmitTask(const T& input)
+	{
+		{
+			SpinLock::Scope scope(inputLock);
+			inputData=input;
+			inputDataAvailable=true;
+		}
+		if(!executing)
+		{
+			executing=true;
+			executingEvent.Enter();
+			ThreadPoolLite::Queue(&ExecutingProc, this);
+		}
+	}
 public:
 	RepeatingTaskExecutor()
 		:inputDataAvailable(false)
@@ -178,22 +194,6 @@ public:
 	{
 		executingEvent.Enter();
 		executingEvent.Leave();
-	}
-
-	void SubmitTask(const T& input)
-	{
-		{
-			// copy the text because this is a cross thread accessible data
-			SpinLock::Scope scope(inputLock);
-			inputData=input;
-			inputDataAvailable=true;
-		}
-		if(!executing)
-		{
-			executing=true;
-			executingEvent.Enter();
-			ThreadPoolLite::Queue(&ExecutingProc, this);
-		}
 	}
 };
 
@@ -362,6 +362,11 @@ public:
 			}
 		}
 	}
+
+	void SubmitCode(const WString& code)
+	{
+		SubmitTask(code.Buffer());
+	}
 };
 
 /***********************************************************************
@@ -381,7 +386,7 @@ protected:
 		GrammarColorizer* colorizer=dynamic_cast<GrammarColorizer*>(textBox->GetColorizer().Obj());
 
 		WString text=textBox->GetText();
-		colorizer->SubmitTask(text.Buffer());
+		colorizer->SubmitCode(text);
 	}
 public:
 	TextBoxColorizerWindow()
