@@ -30,6 +30,24 @@ namespace vl
 				writer.WriteChar(L'\"');
 			}
 
+			void LogAttributeList(ParsingDefinitionBase* definition, TextWriter& writer)
+			{
+				for(vint i=0;i<definition->attributes.Count();i++)
+				{
+					ParsingDefinitionAttribute* att=definition->attributes[i].Obj();
+					if(i>0) writer.WriteChar(L',');
+					writer.WriteString(L" @");
+					writer.WriteString(att->name);
+					writer.WriteChar(L'(');
+					for(vint j=0;j<att->arguments.Count();j++)
+					{
+						if(j>0) writer.WriteString(L", ");
+						LogString(att->arguments[j], writer);
+					}
+					writer.WriteChar(L')');
+				}
+			}
+
 /***********************************************************************
 Logger (ParsingDefinitionType)
 ***********************************************************************/
@@ -113,6 +131,7 @@ Logger (ParsingDefinitionTypeDefinition)
 						writer.WriteString(node->unescapingFunction);
 						writer.WriteString(L")");
 					}
+					LogAttributeList(node, writer);
 					writer.WriteLine(L";");
 				}
 
@@ -132,6 +151,7 @@ Logger (ParsingDefinitionTypeDefinition)
 						writer.WriteString(L" : ");
 						Log(node->parentType.Obj(), writer);
 					}
+					LogAttributeList(node, writer);
 					writer.WriteLine(L"");
 
 					writer.WriteString(prefix);
@@ -156,6 +176,7 @@ Logger (ParsingDefinitionTypeDefinition)
 				{
 					writer.WriteString(prefix);
 					writer.WriteString(node->name);
+					LogAttributeList(node, writer);
 					writer.WriteLine(L",");
 				}
 
@@ -163,7 +184,9 @@ Logger (ParsingDefinitionTypeDefinition)
 				{
 					writer.WriteString(prefix);
 					writer.WriteString(L"enum ");
-					writer.WriteLine(node->name);
+					writer.WriteString(node->name);
+					LogAttributeList(node, writer);
+					writer.WriteLine(L"");
 
 					writer.WriteString(prefix);
 					writer.WriteLine(L"{");
@@ -531,6 +554,7 @@ Logger (ParsingDefinitionGrammar)
 					writer.WriteString(token->name);
 					writer.WriteString(L" = ");
 					LogString(token->regex, writer);
+					LogAttributeList(token.Obj(), writer);
 					writer.WriteLine(L";");
 				}
 				writer.WriteLine(L"");
@@ -540,7 +564,10 @@ Logger (ParsingDefinitionGrammar)
 					writer.WriteString(L"rule ");
 					Log(rule->type.Obj(), writer);
 					writer.WriteString(L" ");
-					writer.WriteLine(rule->name);
+					writer.WriteString(rule->name);
+					LogAttributeList(rule.Obj(), writer);
+					writer.WriteLine(L"");
+
 					FOREACH(Ptr<ParsingDefinitionGrammar>, grammar, rule->grammars)
 					{
 						writer.WriteString(L"        = ");
