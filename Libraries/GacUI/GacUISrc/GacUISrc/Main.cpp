@@ -325,7 +325,7 @@ public:
 					ParsingTreeObject* tokenParent=dynamic_cast<ParsingTreeObject*>(foundNode->GetParent());
 					if(tokenParent)
 					{
-						if(tokenParent->GetType()==L"ClassTypeDef" && tokenParent->GetMember(L"name")==foundNode)
+						if((tokenParent->GetType()==L"ClassTypeDef" || tokenParent->GetType()==L"EnumTypeDef") && tokenParent->GetMember(L"name")==foundNode)
 						{
 							token=3;
 						}
