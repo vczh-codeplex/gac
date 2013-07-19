@@ -18,6 +18,16 @@ namespace vl
 
 				definitionWriter
 					.Type(
+						Class(L"AttributeDef")
+							.Member(L"name", TokenType())
+							.Member(L"arguments", TokenType().Array())
+						)
+					.Type(
+						Class(L"DefBase")
+							.Member(L"attributes", Type(L"AttributeDef").Array())
+						)
+					//-------------------------------------
+					.Type(
 						Class(L"TypeObj")
 						)
 
@@ -42,12 +52,12 @@ namespace vl
 						)
 					//-------------------------------------
 					.Type(
-						Class(L"TypeDef")
+						Class(L"TypeDef", Type(L"DefBase"))
 							.Member(L"name", TokenType())
 						)
 
 					.Type(
-						Class(L"ClassMemberDef")
+						Class(L"ClassMemberDef", Type(L"DefBase"))
 							.Member(L"type", Type(L"TypeObj"))
 							.Member(L"name", TokenType())
 							.Member(L"unescapingFunction", TokenType())
@@ -62,7 +72,7 @@ namespace vl
 						)
 
 					.Type(
-						Class(L"EnumMemberDef")
+						Class(L"EnumMemberDef", Type(L"DefBase"))
 							.Member(L"name", TokenType())
 						)
 
@@ -132,7 +142,7 @@ namespace vl
 						)
 					//-------------------------------------
 					.Type(
-						Class(L"TokenDef")
+						Class(L"TokenDef", Type(L"DefBase"))
 							.SubType(
 								Enum(L"DiscardOption")
 									.Member(L"DiscardToken")
@@ -144,7 +154,7 @@ namespace vl
 						)
 
 					.Type(
-						Class(L"RuleDef")
+						Class(L"RuleDef", Type(L"DefBase"))
 							.Member(L"name", TokenType())
 							.Member(L"type", Type(L"TypeObj"))
 							.Member(L"grammars", Type(L"GrammarDef").Array())
@@ -175,14 +185,22 @@ namespace vl
 					.Token(L"ASSIGN",		L"/=")
 					.Token(L"USING",		L"/!")
 					.Token(L"OR",			L"/|")
-					.Token(L"OPTOPEN"	,	L"/[")
-					.Token(L"OPTCLOSE"	,	L"/]")
-					.Token(L"PREOPEN"	,	L"/(")
-					.Token(L"PRECLOSE"	,	L"/)")
+					.Token(L"OPTOPEN",		L"/[")
+					.Token(L"OPTCLOSE",		L"/]")
+					.Token(L"PREOPEN",		L"/(")
+					.Token(L"PRECLOSE",		L"/)")
+					.Token(L"ATT",			L"@")
 
 					.Token(L"NAME",			L"[a-zA-Z_]/w*")
 					.Token(L"STRING",		L"\"([^\"]|\"\")*\"")
 					.Discard(L"SPACE",		L"/s+")
+					//-------------------------------------
+					.Rule(L"Attribute", Type(L"AttributeDef"))
+						.Imply(
+							(Text(L"@") + Rule(L"NAME")[L"name"] + Text(L"(") + Opt(Rule(L"STRING")[L"arguments"] + *(Text(L",") + Rule(L"STRING")[L"arguments"])) + Text(L")"))
+								.As(Type(L"AttributeDef"))
+							)
+						.EndRule()
 					//-------------------------------------
 					.Rule(L"Type", Type(L"TypeObj"))
 						.Imply(
@@ -205,19 +223,34 @@ namespace vl
 					//-------------------------------------
 					.Rule(L"EnumMember", Type(L"EnumMemberDef"))
 						.Imply(
-							(Rule(L"NAME")[L"name"] + Text(L","))
+							(
+								Rule(L"NAME")[L"name"]
+								+ Opt(Rule(L"Attribute")[L"attributes"] + *(Text(L",") + Rule(L"Attribute")[L"attributes"]))
+								+ Text(L",")
+								)
 								.As(Type(L"EnumMemberDef"))
 							)
 						.EndRule()
 					.Rule(L"Enum", Type(L"EnumTypeDef"))
 						.Imply(
-							(Text(L"enum") + Rule(L"NAME")[L"name"] + Text(L"{") + *(Rule(L"EnumMember")[L"members"]) + Text(L"}"))
+							(
+								Text(L"enum") + Rule(L"NAME")[L"name"]
+								+ Opt(Rule(L"Attribute")[L"attributes"] + *(Text(L",") + Rule(L"Attribute")[L"attributes"]))
+								+ Text(L"{")
+								+ *(Rule(L"EnumMember")[L"members"])
+								+ Text(L"}")
+								)
 								.As(Type(L"EnumTypeDef"))
 							)
 						.EndRule()
 					.Rule(L"ClassMember", Type(L"ClassMemberDef"))
 						.Imply(
-							(Rule(L"Type")[L"type"] + Rule(L"NAME")[L"name"] + Opt(Text(L"(") + Rule(L"NAME")[L"unescapingFunction"] + Text(L")")) + Text(L";"))
+							(
+								Rule(L"Type")[L"type"] + Rule(L"NAME")[L"name"]
+								+ Opt(Text(L"(") + Rule(L"NAME")[L"unescapingFunction"] + Text(L")"))
+								+ Opt(Rule(L"Attribute")[L"attributes"] + *(Text(L",") + Rule(L"Attribute")[L"attributes"]))
+								+ Text(L";")
+								)
 								.As(Type(L"ClassMemberDef"))
 							)
 						.EndRule()
@@ -226,7 +259,9 @@ namespace vl
 							(
 								Text(L"class") + Rule(L"NAME")[L"name"]
 								+ Opt(Text(L"ambiguous") + Text(L"(") + Rule(L"NAME")[L"ambiguousType"] + Text(L")"))
-								+ Opt(Text(L":") + Rule(L"Type")[L"parentType"]) + Text(L"{")
+								+ Opt(Text(L":") + Rule(L"Type")[L"parentType"])
+								+ Opt(Rule(L"Attribute")[L"attributes"] + *(Text(L",") + Rule(L"Attribute")[L"attributes"]))
+								+ Text(L"{")
 								+ *(Rule(L"ClassMember")[L"members"] | Rule(L"TypeDecl")[L"subTypes"])
 								+ Text(L"}")
 								)
@@ -303,7 +338,12 @@ namespace vl
 					//------------------------------------
 					.Rule(L"TokenDecl", Type(L"TokenDef"))
 						.Imply(
-							(Text(L"token") + Rule(L"NAME")[L"name"] + Text(L"=") + Rule(L"STRING")[L"regex"] + Text(L";"))
+							(
+								Text(L"token") + Rule(L"NAME")[L"name"]
+								+ Text(L"=") + Rule(L"STRING")[L"regex"]
+								+ Opt(Rule(L"Attribute")[L"attributes"] + *(Text(L",") + Rule(L"Attribute")[L"attributes"]))
+								+ Text(L";")
+								)
 								.As(Type(L"TokenDef"))
 								.Set(L"discard", L"KeepToken")
 							)
@@ -322,7 +362,12 @@ namespace vl
 
 					.Rule(L"RuleDecl", Type(L"RuleDef"))
 						.Imply(
-							(Text(L"rule") + Rule(L"Type")[L"type"] + Rule(L"NAME")[L"name"] + *(Text(L"=") + Rule(L"Grammar")[L"grammars"]) + Text(L";"))
+							(
+								Text(L"rule") + Rule(L"Type")[L"type"] + Rule(L"NAME")[L"name"]
+								+ Opt(Rule(L"Attribute")[L"attributes"] + *(Text(L",") + Rule(L"Attribute")[L"attributes"]))
+								+ *(Text(L"=") + Rule(L"Grammar")[L"grammars"])
+								+ Text(L";")
+								)
 								.As(Type(L"RuleDef"))
 							)
 						.EndRule()

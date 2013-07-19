@@ -1208,7 +1208,7 @@ void WriteTable(Ptr<ParsingTable> table, const WString& prefix, const WString& c
 	writer.WriteString(prefix);
 	writer.WriteLine(L"\t#define ITEM_INSTRUCTION(TYPE, STATE, NAME, VALUE, RULE) item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::TYPE, STATE, NAME, VALUE, RULE));");
 	writer.WriteString(prefix);
-	writer.WriteLine(L"\t#define BEGIN_LOOK_AHEAD(STATE) {vl::Ptr<vl::parsing::tabling::ParsingTable::LookAheadInfo> lookAheadInfo=new vl::Ptr<vl::parsing::tabling::ParsingTable::LookAheadInfo; item->lookAheads.Add(lookAheadInfo); lookAheadInfo->state=STATE;");
+	writer.WriteLine(L"\t#define BEGIN_LOOK_AHEAD(STATE) {vl::Ptr<vl::parsing::tabling::ParsingTable::LookAheadInfo> lookAheadInfo=new vl::parsing::tabling::ParsingTable::LookAheadInfo; item->lookAheads.Add(lookAheadInfo); lookAheadInfo->state=STATE;");
 	writer.WriteString(prefix);
 	writer.WriteLine(L"\t#define LOOK_AHEAD(TOKEN) lookAheadInfo->tokens.Add(TOKEN);");
 	writer.WriteString(prefix);
@@ -1322,13 +1322,13 @@ void WriteTable(Ptr<ParsingTable> table, const WString& prefix, const WString& c
 						writer.WriteString(prefix);
 						writer.WriteString(L"\t\tBEGIN_LOOK_AHEAD(");
 						writer.WriteString(itow(lookAheadInfo->state));
-						writer.WriteString(L" ");
+						writer.WriteString(L") ");
 
 						FOREACH(vint, token, lookAheadInfo->tokens)
 						{
 							writer.WriteString(L"LOOK_AHEAD(");
 							writer.WriteString(itow(token));
-							writer.WriteString(L" ");
+							writer.WriteString(L") ");
 						}
 						writer.WriteLine(L"END_LOOK_AHEAD");
 					}
