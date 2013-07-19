@@ -404,11 +404,11 @@ public:
 			textBoxEditor->SetColorizer(new GrammarColorizer);
 			textBoxEditor->TextChanged.AttachMethod(this, &TextBoxColorizerWindow::textBoxEditor_TextChanged);
 
-		{
-			FileStream fileStream(L"..\\GacUISrcCodepackedTest\\Resources\\CalculatorDefinition.txt", FileStream::ReadOnly);
-			BomDecoder decoder;
-			DecoderStream decoderStream(fileStream, decoder);
-			StreamReader reader(decoderStream);
+			{
+				FileStream fileStream(L"..\\GacUISrcCodepackedTest\\Resources\\CalculatorDefinition.txt", FileStream::ReadOnly);
+				BomDecoder decoder;
+				DecoderStream decoderStream(fileStream, decoder);
+				StreamReader reader(decoderStream);
 				textBoxEditor->SetText(reader.ReadToEnd());
 				textBoxEditor->Select(TextPos(), TextPos());
 			}
@@ -434,9 +434,9 @@ public:
 				}
 				stream.SeekFromBegin(0);
 				StreamReader reader(stream);
-			textBoxGrammar->SetText(reader.ReadToEnd());
-			textBoxGrammar->Select(TextPos(), TextPos());
-		}
+				textBoxGrammar->SetText(reader.ReadToEnd());
+				textBoxGrammar->Select(TextPos(), TextPos());
+			}
 		}
 		{
 			GuiTabPage* page=tabIntellisense->CreatePage();
