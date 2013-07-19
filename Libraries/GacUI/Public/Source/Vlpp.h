@@ -103,6 +103,92 @@ typedef signed __int64	pos_t;
 
 #define CHECK_FAIL(DESCRIPTION) do{throw Error(DESCRIPTION);}while(0)
 
+/***********************************************************************
+类型计算
+***********************************************************************/
+
+	template<typename T>
+	struct RemoveReference
+	{
+		typedef T			Type;
+	};
+
+	template<typename T>
+	struct RemoveReference<T&>
+	{
+		typedef T			Type;
+	};
+
+	template<typename T>
+	struct RemoveReference<T&&>
+	{
+		typedef T			Type;
+	};
+
+	template<typename T>
+	struct RemoveConst
+	{
+		typedef T			Type;
+	};
+
+	template<typename T>
+	struct RemoveConst<const T>
+	{
+		typedef T			Type;
+	};
+
+	template<typename T>
+	struct RemoveVolatile
+	{
+		typedef T			Type;
+	};
+
+	template<typename T>
+	struct RemoveVolatile<volatile T>
+	{
+		typedef T			Type;
+	};
+
+	template<typename T>
+	struct RemoveCVR
+	{
+		typedef T								Type;
+	};
+
+	template<typename T>
+	struct RemoveCVR<T&>
+	{
+		typedef typename RemoveCVR<T>::Type		Type;
+	};
+
+	template<typename T>
+	struct RemoveCVR<T&&>
+	{
+		typedef typename RemoveCVR<T>::Type		Type;
+	};
+
+	template<typename T>
+	struct RemoveCVR<const T>
+	{
+		typedef typename RemoveCVR<T>::Type		Type;
+	};
+
+	template<typename T>
+	struct RemoveCVR<volatile T>
+	{
+		typedef typename RemoveCVR<T>::Type		Type;
+	};
+
+	template<typename T>
+	typename RemoveReference<T>::Type&& MoveValue(T&& value)
+	{
+		return (typename RemoveReference<T>::Type&&)value;
+	}
+
+/***********************************************************************
+基础
+***********************************************************************/
+
 	class Object
 	{
 	public:
@@ -116,8 +202,38 @@ typedef signed __int64	pos_t;
 		T					object;
 	public:
 		ObjectBox(const T& _object)
+			:object(_object)
+		{
+		}
+
+		ObjectBox(T&& _object)
+			:object(MoveValue(_object))
+		{
+		}
+
+		ObjectBox(const ObjectBox<T>& value)
+			:object(value.object)
+		{
+		}
+
+		ObjectBox(ObjectBox<T>&& value)
+			:object(MoveValue(value.object))
+		{
+		}
+
+		ObjectBox<T>& operator=(const T& _object)
 		{
 			object=_object;
+		}
+
+		ObjectBox<T>& operator=(const ObjectBox<T>& value)
+		{
+			object=value.object;
+		}
+
+		ObjectBox<T>& operator=(ObjectBox<T>&& value)
+		{
+			object=MoveValue(value.object);
 		}
 
 		const T& Unbox()
@@ -139,6 +255,11 @@ typedef signed __int64	pos_t;
 
 		Nullable(const T& value)
 			:object(new T(value))
+		{
+		}
+
+		Nullable(T&& value)
+			:object(new T(MoveValue(value)))
 		{
 		}
 
@@ -175,27 +296,33 @@ typedef signed __int64	pos_t;
 
 		Nullable<T>& operator=(const Nullable<T>& nullable)
 		{
-			if(object)
+			if(this!=&nullable)
 			{
-				delete object;
-				object=0;
-			}
-			if(nullable.object)
-			{
-				object=new T(*nullable.object);
+				if(object)
+				{
+					delete object;
+					object=0;
+				}
+				if(nullable.object)
+				{
+					object=new T(*nullable.object);
+				}
 			}
 			return *this;
 		}
 
 		Nullable<T>& operator=(Nullable<T>&& nullable)
 		{
-			if(object)
+			if(this!=&nullable)
 			{
-				delete object;
-				object=0;
+				if(object)
+				{
+					delete object;
+					object=0;
+				}
+				object=nullable.object;
+				nullable.object=0;
 			}
-			object=nullable.object;
-			nullable.object=0;
 			return *this;
 		}
 
@@ -618,6 +745,21 @@ namespace vl
 			Inc();
 		}
 
+		ObjectString(ObjectString<T>&& string)
+		{
+			buffer=string.buffer;
+			reference=string.reference;
+			start=string.start;
+			length=string.length;
+			realLength=string.realLength;
+			
+			string.buffer=(T*)&zero;
+			string.reference=0;
+			string.start=0;
+			string.length=0;
+			string.realLength=0;
+		}
+
 		~ObjectString()
 		{
 			Dec();
@@ -650,6 +792,26 @@ namespace vl
 				length=string.length;
 				realLength=string.realLength;
 				Inc();
+			}
+			return *this;
+		}
+
+		ObjectString<T>& operator=(ObjectString<T>&& string)
+		{
+			if(this!=&string)
+			{
+				Dec();
+				buffer=string.buffer;
+				reference=string.reference;
+				start=string.start;
+				length=string.length;
+				realLength=string.realLength;
+			
+				string.buffer=(T*)&zero;
+				string.reference=0;
+				string.start=0;
+				string.length=0;
+				string.realLength=0;
 			}
 			return *this;
 		}
@@ -1208,14 +1370,14 @@ namespace vl
 				{
 					for(vint i=0;i<count;i++)
 					{
-						dest[i]=source[i];
+						dest[i]=MoveValue(source[i]);
 					}
 				}
 				else if(dest>source)
 				{
 					for(vint i=count-1;i>=0;i--)
 					{
-						dest[i]=source[i];
+						dest[i]=MoveValue(source[i]);
 					}
 				}
 			}
@@ -2333,6 +2495,15 @@ Ptr
 			Inc();
 		}
 
+		Ptr(Ptr<T>&& pointer)
+		{
+			counter=pointer.counter;
+			reference=pointer.reference;
+
+			pointer.counter=0;
+			pointer.reference=0;
+		}
+
 		template<typename C>
 		Ptr(const Ptr<C>& pointer)
 		{
@@ -2387,6 +2558,20 @@ Ptr
 				counter=pointer.counter;
 				reference=pointer.reference;
 				Inc();
+			}
+			return *this;
+		}
+
+		Ptr<T>& operator=(Ptr<T>&& pointer)
+		{
+			if(this!=&pointer)
+			{
+				Dec();
+				counter=pointer.counter;
+				reference=pointer.reference;
+				
+				pointer.counter=0;
+				pointer.reference=0;
 			}
 			return *this;
 		}
@@ -2559,6 +2744,15 @@ ComPtr
 			Inc();
 		}
 
+		ComPtr(ComPtr<T>&& pointer)
+		{
+			counter=pointer.counter;
+			reference=pointer.reference;
+			
+			pointer.counter=0;
+			pointer.reference=0;
+		}
+
 		~ComPtr()
 		{
 			Dec();
@@ -2588,6 +2782,20 @@ ComPtr
 				counter=pointer.counter;
 				reference=pointer.reference;
 				Inc();
+			}
+			return *this;
+		}
+
+		ComPtr<T>& operator=(ComPtr<T>&& pointer)
+		{
+			if(this!=&pointer)
+			{
+				Dec();
+				counter=pointer.counter;
+				reference=pointer.reference;
+				
+				pointer.counter=0;
+				pointer.reference=0;
 			}
 			return *this;
 		}
@@ -4737,6 +4945,24 @@ namespace vl
 		{
 
 /***********************************************************************
+属性标记
+***********************************************************************/
+
+			class ParsingDefinitionAttribute : public ParsingTreeCustomBase
+			{
+			public:
+				WString											name;
+				collections::List<WString>						arguments;
+			};
+
+			class ParsingDefinitionBase : public ParsingTreeCustomBase
+			{
+				typedef collections::List<Ptr<ParsingDefinitionAttribute>>				AttributeList;
+			public:
+				AttributeList									attributes;
+			};
+
+/***********************************************************************
 类型结构
 ***********************************************************************/
 
@@ -4793,7 +5019,7 @@ namespace vl
 			};
 
 /***********************************************************************
-数据结构
+类型定义
 ***********************************************************************/
 
 			class ParsingDefinitionClassMemberDefinition;
@@ -4801,7 +5027,7 @@ namespace vl
 			class ParsingDefinitionEnumMemberDefinition;
 			class ParsingDefinitionEnumDefinition;
 
-			class ParsingDefinitionTypeDefinition : public ParsingTreeCustomBase
+			class ParsingDefinitionTypeDefinition : public ParsingDefinitionBase
 			{
 			public:
 				class IVisitor : public Interface
@@ -4858,6 +5084,10 @@ namespace vl
 				void											Accept(IVisitor* visitor)override;
 			};
 
+/***********************************************************************
+文法规则
+***********************************************************************/
+
 			class ParsingDefinitionPrimitiveGrammar;
 			class ParsingDefinitionTextGrammar;
 			class ParsingDefinitionSequenceGrammar;
@@ -4889,10 +5119,6 @@ namespace vl
 
 				virtual void									Accept(IVisitor* visitor)=0;
 			};
-
-/***********************************************************************
-文法规则
-***********************************************************************/
 
 			class ParsingDefinitionPrimitiveGrammar : public ParsingDefinitionGrammar
 			{
@@ -4984,7 +5210,7 @@ namespace vl
 文法结构
 ***********************************************************************/
 
-			class ParsingDefinitionTokenDefinition : public ParsingTreeCustomBase
+			class ParsingDefinitionTokenDefinition : public ParsingDefinitionBase
 			{
 			public:
 				WString											name;
@@ -4992,7 +5218,7 @@ namespace vl
 				bool											discard;
 			};
 
-			class ParsingDefinitionRuleDefinition : public ParsingTreeCustomBase
+			class ParsingDefinitionRuleDefinition : public ParsingDefinitionBase
 			{
 			public:
 				WString															name;
@@ -5009,7 +5235,27 @@ namespace vl
 			};
 
 /***********************************************************************
-构造器（类型）
+构造器（属性标记）
+***********************************************************************/
+
+			class ParsingDefinitionAttributeWriter : public Object
+			{
+				friend ParsingDefinitionAttributeWriter			Attribute(const WString& name);
+			protected:
+				Ptr<ParsingDefinitionAttribute>					attribute;
+
+				ParsingDefinitionAttributeWriter(const WString& name);
+			public:
+				ParsingDefinitionAttributeWriter(const ParsingDefinitionAttributeWriter& attributeWriter);
+
+				ParsingDefinitionAttributeWriter&				Argument(const WString& argument);
+				Ptr<ParsingDefinitionAttribute>					Attribute()const;
+			};
+
+			extern ParsingDefinitionAttributeWriter				Attribute(const WString& name);
+
+/***********************************************************************
+构造器（类型结构）
 ***********************************************************************/
 
 			class ParsingDefinitionTypeWriter : public Object
@@ -5045,14 +5291,17 @@ namespace vl
 			class ParsingDefinitionClassDefinitionWriter : public ParsingDefinitionTypeDefinitionWriter
 			{
 			protected:
+				Ptr<ParsingDefinitionBase>						currentDefinition;
 				Ptr<ParsingDefinitionClassDefinition>			definition;
 
 			public:
 				ParsingDefinitionClassDefinitionWriter(const WString& name);
 				ParsingDefinitionClassDefinitionWriter(const WString& name, const ParsingDefinitionTypeWriter& parentType);
 
+				ParsingDefinitionClassDefinitionWriter&			AmbiguousType(const WString& ambiguousType);
 				ParsingDefinitionClassDefinitionWriter&			Member(const WString& name, const ParsingDefinitionTypeWriter& type, const WString& unescapingFunction=L"");
 				ParsingDefinitionClassDefinitionWriter&			SubType(const ParsingDefinitionTypeDefinitionWriter& type);
+				ParsingDefinitionClassDefinitionWriter&			Attribute(const ParsingDefinitionAttributeWriter& attribute);
 
 				Ptr<ParsingDefinitionTypeDefinition>			Definition()const override;
 			};
@@ -5063,12 +5312,14 @@ namespace vl
 			class ParsingDefinitionEnumDefinitionWriter : public ParsingDefinitionTypeDefinitionWriter
 			{
 			protected:
+				Ptr<ParsingDefinitionBase>						currentDefinition;
 				Ptr<ParsingDefinitionEnumDefinition>			definition;
 
 			public:
 				ParsingDefinitionEnumDefinitionWriter(const WString& name);
 
 				ParsingDefinitionEnumDefinitionWriter&			Member(const WString& name);
+				ParsingDefinitionEnumDefinitionWriter&			Attribute(const ParsingDefinitionAttributeWriter& attribute);
 
 				Ptr<ParsingDefinitionTypeDefinition>			Definition()const override;
 			};
@@ -5121,6 +5372,7 @@ namespace vl
 				ParsingDefinitionRuleDefinitionWriter(ParsingDefinitionWriter& _owner, Ptr<ParsingDefinitionRuleDefinition> _rule);
 
 				ParsingDefinitionRuleDefinitionWriter&			Imply(const ParsingDefinitionGrammarWriter& grammar);
+				ParsingDefinitionRuleDefinitionWriter&			Attribute(const ParsingDefinitionAttributeWriter& attribute);
 				ParsingDefinitionWriter&						EndRule();
 			};
 

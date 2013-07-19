@@ -116,6 +116,37 @@ ParsingDefinitionGrammar(Visitor)
 ParsingDefinitionTypeWriter
 ***********************************************************************/
 
+			ParsingDefinitionAttributeWriter::ParsingDefinitionAttributeWriter(const WString& name)
+			{
+				attribute=new ParsingDefinitionAttribute;
+				attribute->name=name;
+			}
+
+			ParsingDefinitionAttributeWriter::ParsingDefinitionAttributeWriter(const ParsingDefinitionAttributeWriter& attributeWriter)
+			{
+				attribute=attributeWriter.attribute;
+			}
+
+			ParsingDefinitionAttributeWriter& ParsingDefinitionAttributeWriter::Argument(const WString& argument)
+			{
+				attribute->arguments.Add(argument);
+				return *this;
+			}
+
+			Ptr<ParsingDefinitionAttribute> ParsingDefinitionAttributeWriter::Attribute()const
+			{
+				return attribute;
+			}
+
+			ParsingDefinitionAttributeWriter Attribute(const WString& name)
+			{
+				return ParsingDefinitionAttributeWriter(name);
+			}
+
+/***********************************************************************
+ParsingDefinitionTypeWriter
+***********************************************************************/
+
 			ParsingDefinitionTypeWriter::ParsingDefinitionTypeWriter(Ptr<ParsingDefinitionType> internalType)
 			{
 				type=internalType;
@@ -172,6 +203,7 @@ ParsingDefinitionClassDefinitionWriter
 			{
 				definition=new ParsingDefinitionClassDefinition;
 				definition->name=name;
+				currentDefinition=definition;
 			}
 
 			ParsingDefinitionClassDefinitionWriter::ParsingDefinitionClassDefinitionWriter(const WString& name, const ParsingDefinitionTypeWriter& parentType)
@@ -179,6 +211,13 @@ ParsingDefinitionClassDefinitionWriter
 				definition=new ParsingDefinitionClassDefinition;
 				definition->name=name;
 				definition->parentType=parentType.Type();
+				currentDefinition=definition;
+			}
+
+			ParsingDefinitionClassDefinitionWriter& ParsingDefinitionClassDefinitionWriter::AmbiguousType(const WString& ambiguousType)
+			{
+				definition->ambiguousType=ambiguousType;
+				return *this;
 			}
 
 			ParsingDefinitionClassDefinitionWriter& ParsingDefinitionClassDefinitionWriter::Member(const WString& name, const ParsingDefinitionTypeWriter& type, const WString& unescapingFunction)
@@ -188,12 +227,19 @@ ParsingDefinitionClassDefinitionWriter
 				member->type=type.Type();
 				member->unescapingFunction=unescapingFunction;
 				definition->members.Add(member);
+				currentDefinition=member;
 				return *this;
 			}
 
 			ParsingDefinitionClassDefinitionWriter& ParsingDefinitionClassDefinitionWriter::SubType(const ParsingDefinitionTypeDefinitionWriter& type)
 			{
 				definition->subTypes.Add(type.Definition());
+				return *this;
+			}
+
+			ParsingDefinitionClassDefinitionWriter& ParsingDefinitionClassDefinitionWriter::Attribute(const ParsingDefinitionAttributeWriter& attribute)
+			{
+				currentDefinition->attributes.Add(attribute.Attribute());
 				return *this;
 			}
 
@@ -220,6 +266,7 @@ ParsingDefinitionEnumDefinitionWriter
 			{
 				definition=new ParsingDefinitionEnumDefinition;
 				definition->name=name;
+				currentDefinition=definition;
 			}
 
 			ParsingDefinitionEnumDefinitionWriter& ParsingDefinitionEnumDefinitionWriter::Member(const WString& name)
@@ -227,6 +274,13 @@ ParsingDefinitionEnumDefinitionWriter
 				Ptr<ParsingDefinitionEnumMemberDefinition> member=new ParsingDefinitionEnumMemberDefinition;
 				member->name=name;
 				definition->members.Add(member);
+				currentDefinition=member;
+				return *this;
+			}
+
+			ParsingDefinitionEnumDefinitionWriter& ParsingDefinitionEnumDefinitionWriter::Attribute(const ParsingDefinitionAttributeWriter& attribute)
+			{
+				currentDefinition->attributes.Add(attribute.Attribute());
 				return *this;
 			}
 
@@ -348,6 +402,12 @@ ParsingDefinitionRuleDefinitionWriter
 			ParsingDefinitionRuleDefinitionWriter& ParsingDefinitionRuleDefinitionWriter::Imply(const ParsingDefinitionGrammarWriter& grammar)
 			{
 				rule->grammars.Add(grammar.Grammar());
+				return *this;
+			}
+
+			ParsingDefinitionRuleDefinitionWriter& ParsingDefinitionRuleDefinitionWriter::Attribute(const ParsingDefinitionAttributeWriter& attribute)
+			{
+				rule->attributes.Add(attribute.Attribute());
 				return *this;
 			}
 

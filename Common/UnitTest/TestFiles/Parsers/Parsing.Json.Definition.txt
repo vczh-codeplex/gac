@@ -24,33 +24,33 @@ class Number:Node
 	token content;
 }
 
-class Array:Node
+class Array:Node									@RootNode(), @Entry()
 {
 	Node[] items;
 }
 
 class ObjectField:Node
 {
-	token name(JsonUnescapingString);
+	token name(JsonUnescapingString)				@Intellisense();
 	Node value;
 }
 
-class Object:Node
+class Object:Node									@RootNode(), @Entry()
 {
 	ObjectField[] fields;
 }
 
-token TRUEVALUE = "true";
-token FALSEVALUE = "false";
-token NULLVALUE = "null";
+token TRUEVALUE = "true"							@Colorize("Keyword");
+token FALSEVALUE = "false"							@Colorize("Keyword");
+token NULLVALUE = "null"							@Colorize("Keyword");
 token OBJOPEN = "\{";
 token OBJCLOSE = "\}";
 token ARROPEN = "\[";
 token ARRCLOSE = "\]";
 token COMMA = ",";
 token COLON = ":";
-token NUMBER = "[\-]?\d+(.\d+)?([eE][+\-]?\d+)?";
-token STRING = """([^\\""]|\\[^u]|\\u\d{4})*""";
+token NUMBER = "[\-]?\d+(.\d+)?([eE][+\-]?\d+)?"	@Colorize("Number");
+token STRING = """([^\\""]|\\[^u]|\\u\d{4})*"""		@Colorize("Text");
 
 discardtoken SPACE = "\s+";
 
@@ -80,7 +80,7 @@ rule Node JValue
 	= !JArray
 	;
 
-rule Node JRoot
+rule Node JRoot										@RootNode(), @Entry()
 	= !JObject
 	= !JArray
 	;

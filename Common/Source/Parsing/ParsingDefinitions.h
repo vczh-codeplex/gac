@@ -19,6 +19,24 @@ namespace vl
 		{
 
 /***********************************************************************
+属性标记
+***********************************************************************/
+
+			class ParsingDefinitionAttribute : public ParsingTreeCustomBase
+			{
+			public:
+				WString											name;
+				collections::List<WString>						arguments;
+			};
+
+			class ParsingDefinitionBase : public ParsingTreeCustomBase
+			{
+				typedef collections::List<Ptr<ParsingDefinitionAttribute>>				AttributeList;
+			public:
+				AttributeList									attributes;
+			};
+
+/***********************************************************************
 类型结构
 ***********************************************************************/
 
@@ -75,7 +93,7 @@ namespace vl
 			};
 
 /***********************************************************************
-数据结构
+类型定义
 ***********************************************************************/
 
 			class ParsingDefinitionClassMemberDefinition;
@@ -83,7 +101,7 @@ namespace vl
 			class ParsingDefinitionEnumMemberDefinition;
 			class ParsingDefinitionEnumDefinition;
 
-			class ParsingDefinitionTypeDefinition : public ParsingTreeCustomBase
+			class ParsingDefinitionTypeDefinition : public ParsingDefinitionBase
 			{
 			public:
 				class IVisitor : public Interface
@@ -140,6 +158,10 @@ namespace vl
 				void											Accept(IVisitor* visitor)override;
 			};
 
+/***********************************************************************
+文法规则
+***********************************************************************/
+
 			class ParsingDefinitionPrimitiveGrammar;
 			class ParsingDefinitionTextGrammar;
 			class ParsingDefinitionSequenceGrammar;
@@ -171,10 +193,6 @@ namespace vl
 
 				virtual void									Accept(IVisitor* visitor)=0;
 			};
-
-/***********************************************************************
-文法规则
-***********************************************************************/
 
 			class ParsingDefinitionPrimitiveGrammar : public ParsingDefinitionGrammar
 			{
@@ -266,7 +284,7 @@ namespace vl
 文法结构
 ***********************************************************************/
 
-			class ParsingDefinitionTokenDefinition : public ParsingTreeCustomBase
+			class ParsingDefinitionTokenDefinition : public ParsingDefinitionBase
 			{
 			public:
 				WString											name;
@@ -274,7 +292,7 @@ namespace vl
 				bool											discard;
 			};
 
-			class ParsingDefinitionRuleDefinition : public ParsingTreeCustomBase
+			class ParsingDefinitionRuleDefinition : public ParsingDefinitionBase
 			{
 			public:
 				WString															name;
@@ -291,7 +309,27 @@ namespace vl
 			};
 
 /***********************************************************************
-构造器（类型）
+构造器（属性标记）
+***********************************************************************/
+
+			class ParsingDefinitionAttributeWriter : public Object
+			{
+				friend ParsingDefinitionAttributeWriter			Attribute(const WString& name);
+			protected:
+				Ptr<ParsingDefinitionAttribute>					attribute;
+
+				ParsingDefinitionAttributeWriter(const WString& name);
+			public:
+				ParsingDefinitionAttributeWriter(const ParsingDefinitionAttributeWriter& attributeWriter);
+
+				ParsingDefinitionAttributeWriter&				Argument(const WString& argument);
+				Ptr<ParsingDefinitionAttribute>					Attribute()const;
+			};
+
+			extern ParsingDefinitionAttributeWriter				Attribute(const WString& name);
+
+/***********************************************************************
+构造器（类型结构）
 ***********************************************************************/
 
 			class ParsingDefinitionTypeWriter : public Object
@@ -327,14 +365,17 @@ namespace vl
 			class ParsingDefinitionClassDefinitionWriter : public ParsingDefinitionTypeDefinitionWriter
 			{
 			protected:
+				Ptr<ParsingDefinitionBase>						currentDefinition;
 				Ptr<ParsingDefinitionClassDefinition>			definition;
 
 			public:
 				ParsingDefinitionClassDefinitionWriter(const WString& name);
 				ParsingDefinitionClassDefinitionWriter(const WString& name, const ParsingDefinitionTypeWriter& parentType);
 
+				ParsingDefinitionClassDefinitionWriter&			AmbiguousType(const WString& ambiguousType);
 				ParsingDefinitionClassDefinitionWriter&			Member(const WString& name, const ParsingDefinitionTypeWriter& type, const WString& unescapingFunction=L"");
 				ParsingDefinitionClassDefinitionWriter&			SubType(const ParsingDefinitionTypeDefinitionWriter& type);
+				ParsingDefinitionClassDefinitionWriter&			Attribute(const ParsingDefinitionAttributeWriter& attribute);
 
 				Ptr<ParsingDefinitionTypeDefinition>			Definition()const override;
 			};
@@ -345,12 +386,14 @@ namespace vl
 			class ParsingDefinitionEnumDefinitionWriter : public ParsingDefinitionTypeDefinitionWriter
 			{
 			protected:
+				Ptr<ParsingDefinitionBase>						currentDefinition;
 				Ptr<ParsingDefinitionEnumDefinition>			definition;
 
 			public:
 				ParsingDefinitionEnumDefinitionWriter(const WString& name);
 
 				ParsingDefinitionEnumDefinitionWriter&			Member(const WString& name);
+				ParsingDefinitionEnumDefinitionWriter&			Attribute(const ParsingDefinitionAttributeWriter& attribute);
 
 				Ptr<ParsingDefinitionTypeDefinition>			Definition()const override;
 			};
@@ -403,6 +446,7 @@ namespace vl
 				ParsingDefinitionRuleDefinitionWriter(ParsingDefinitionWriter& _owner, Ptr<ParsingDefinitionRuleDefinition> _rule);
 
 				ParsingDefinitionRuleDefinitionWriter&			Imply(const ParsingDefinitionGrammarWriter& grammar);
+				ParsingDefinitionRuleDefinitionWriter&			Attribute(const ParsingDefinitionAttributeWriter& attribute);
 				ParsingDefinitionWriter&						EndRule();
 			};
 
