@@ -89,6 +89,7 @@ namespace test
 			static vl::Ptr<CalFunctionExpression> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 		};
 
+		extern vl::WString CalGetParserTextBuffer();
 		extern vl::Ptr<vl::parsing::ParsingTreeCustomBase> CalConvertParsingTreeNode(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 		extern vl::Ptr<vl::parsing::tabling::ParsingTable> CalLoadTable();
 

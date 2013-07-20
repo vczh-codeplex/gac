@@ -7,6 +7,105 @@ namespace vl
 		namespace json
 		{
 /***********************************************************************
+ParserText
+***********************************************************************/
+
+const wchar_t parserTextBuffer[] = 
+L"\r\n"L""
+L"\r\n"L"class Node"
+L"\r\n"L"{"
+L"\r\n"L"}"
+L"\r\n"L""
+L"\r\n"L"class Literal:Node"
+L"\r\n"L"{"
+L"\r\n"L"\tenum Value"
+L"\r\n"L"\t{"
+L"\r\n"L"\t\tTrue,"
+L"\r\n"L"\t\tFalse,"
+L"\r\n"L"\t\tNull,"
+L"\r\n"L"\t}"
+L"\r\n"L""
+L"\r\n"L"\tValue value;"
+L"\r\n"L"}"
+L"\r\n"L""
+L"\r\n"L"class String:Node"
+L"\r\n"L"{"
+L"\r\n"L"\ttoken content(JsonUnescapingString);"
+L"\r\n"L"}"
+L"\r\n"L""
+L"\r\n"L"class Number:Node"
+L"\r\n"L"{"
+L"\r\n"L"\ttoken content;"
+L"\r\n"L"}"
+L"\r\n"L""
+L"\r\n"L"class Array:Node"
+L"\r\n"L"{"
+L"\r\n"L"\tNode[] items;"
+L"\r\n"L"}"
+L"\r\n"L""
+L"\r\n"L"class ObjectField:Node"
+L"\r\n"L"{"
+L"\r\n"L"\ttoken name(JsonUnescapingString);"
+L"\r\n"L"\tNode value;"
+L"\r\n"L"}"
+L"\r\n"L""
+L"\r\n"L"class Object:Node"
+L"\r\n"L"{"
+L"\r\n"L"\tObjectField[] fields;"
+L"\r\n"L"}"
+L"\r\n"L""
+L"\r\n"L"token TRUEVALUE = \"true\";"
+L"\r\n"L"token FALSEVALUE = \"false\";"
+L"\r\n"L"token NULLVALUE = \"null\";"
+L"\r\n"L"token OBJOPEN = \"\\{\";"
+L"\r\n"L"token OBJCLOSE = \"\\}\";"
+L"\r\n"L"token ARROPEN = \"\\[\";"
+L"\r\n"L"token ARRCLOSE = \"\\]\";"
+L"\r\n"L"token COMMA = \",\";"
+L"\r\n"L"token COLON = \":\";"
+L"\r\n"L"token NUMBER = \"[\\-]?\\d+(.\\d+)?([eE][+\\-]?\\d+)?\";"
+L"\r\n"L"token STRING = \"\"\"([^\\\\\"\"]|\\\\[^u]|\\\\u\\d{4})*\"\"\";"
+L"\r\n"L""
+L"\r\n"L"discardtoken SPACE = \"\\s+\";"
+L"\r\n"L""
+L"\r\n"L"rule Node JLiteral"
+L"\r\n"L"\t= STRING:content as String"
+L"\r\n"L"\t= NUMBER:content as Number"
+L"\r\n"L"\t= \"true\" as Literal with {value = \"True\"}"
+L"\r\n"L"\t= \"false\" as Literal with {value = \"False\"}"
+L"\r\n"L"\t= \"null\" as Literal with {value = \"Null\"}"
+L"\r\n"L"\t;"
+L"\r\n"L""
+L"\r\n"L"rule ObjectField JField"
+L"\r\n"L"\t= STRING:name \":\" JValue:value as ObjectField"
+L"\r\n"L"\t;"
+L"\r\n"L""
+L"\r\n"L"rule Object JObject"
+L"\r\n"L"\t= \"{\" [JField:fields {\",\" JField:fields} ] \"}\" as Object"
+L"\r\n"L"\t;"
+L"\r\n"L""
+L"\r\n"L"rule Array JArray"
+L"\r\n"L"\t= \"[\" [JValue:items {\",\" JValue:items} ] \"]\" as Array"
+L"\r\n"L"\t;"
+L"\r\n"L""
+L"\r\n"L"rule Node JValue"
+L"\r\n"L"\t= !JLiteral"
+L"\r\n"L"\t= !JObject"
+L"\r\n"L"\t= !JArray"
+L"\r\n"L"\t;"
+L"\r\n"L""
+L"\r\n"L"rule Node JRoot"
+L"\r\n"L"\t= !JObject"
+L"\r\n"L"\t= !JArray"
+L"\r\n"L"\t;"
+;
+
+			vl::WString JsonGetParserTextBuffer()
+			{
+				return parserTextBuffer;
+			}
+
+/***********************************************************************
 Unescaping Function Foward Declarations
 ***********************************************************************/
 
@@ -253,7 +352,7 @@ Table Generation
 				#define END_TRANSITION_BAG }
 				#define ITEM_STACK_PATTERN(STATE) item->stackPattern.Add(STATE);
 				#define ITEM_INSTRUCTION(TYPE, STATE, NAME, VALUE, RULE) item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::TYPE, STATE, NAME, VALUE, RULE));
-				#define BEGIN_LOOK_AHEAD(STATE) {vl::Ptr<vl::parsing::tabling::ParsingTable::LookAheadInfo> lookAheadInfo=new vl::Ptr<vl::parsing::tabling::ParsingTable::LookAheadInfo; item->lookAheads.Add(lookAheadInfo); lookAheadInfo->state=STATE;
+				#define BEGIN_LOOK_AHEAD(STATE) {vl::Ptr<vl::parsing::tabling::ParsingTable::LookAheadInfo> lookAheadInfo=new vl::parsing::tabling::ParsingTable::LookAheadInfo; item->lookAheads.Add(lookAheadInfo); lookAheadInfo->state=STATE;
 				#define LOOK_AHEAD(TOKEN) lookAheadInfo->tokens.Add(TOKEN);
 				#define END_LOOK_AHEAD }
 

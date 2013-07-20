@@ -17,6 +17,7 @@ namespace vl
 	{
 		namespace bootstrap
 		{
+			extern vl::WString BootstrapGetParserTextBuffer();
 			extern vl::Ptr<vl::parsing::tabling::ParsingTable> BootstrapLoadTable();
 
 			extern vl::Ptr<vl::parsing::ParsingTreeNode> BootstrapParseDeclarationAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);

@@ -7,6 +7,88 @@ namespace vl
 		namespace xml
 		{
 /***********************************************************************
+ParserText
+***********************************************************************/
+
+const wchar_t parserTextBuffer[] = 
+L"\r\n"L""
+L"\r\n"L"class Node"
+L"\r\n"L"{"
+L"\r\n"L"}"
+L"\r\n"L""
+L"\r\n"L"class Text : Node"
+L"\r\n"L"{"
+L"\r\n"L"\ttoken content;"
+L"\r\n"L"}"
+L"\r\n"L""
+L"\r\n"L"class CData : Node"
+L"\r\n"L"{"
+L"\r\n"L"\ttoken content (XmlUnescapeCData);"
+L"\r\n"L"}"
+L"\r\n"L""
+L"\r\n"L"class Attribute : Node"
+L"\r\n"L"{"
+L"\r\n"L"\ttoken name;"
+L"\r\n"L"\ttoken value (XmlUnescapeAttributeValue);"
+L"\r\n"L"}"
+L"\r\n"L""
+L"\r\n"L"class Comment : Node"
+L"\r\n"L"{"
+L"\r\n"L"\ttoken content (XmlUnescapeComment);"
+L"\r\n"L"}"
+L"\r\n"L""
+L"\r\n"L"class Element : Node"
+L"\r\n"L"{"
+L"\r\n"L"\ttoken name;"
+L"\r\n"L"\ttoken closingName;"
+L"\r\n"L"\tAttribute[] attributes;"
+L"\r\n"L"\tNode[] subNodes (XmlMergeTextFragment);"
+L"\r\n"L"}"
+L"\r\n"L""
+L"\r\n"L"class Instruction : Node"
+L"\r\n"L"{"
+L"\r\n"L"\ttoken name;"
+L"\r\n"L"\tAttribute[] attributes;"
+L"\r\n"L"}"
+L"\r\n"L""
+L"\r\n"L"class Document : Node"
+L"\r\n"L"{"
+L"\r\n"L"\tNode[] prologs;"
+L"\r\n"L"\tElement rootElement;"
+L"\r\n"L"}"
+L"\r\n"L""
+L"\r\n"L"token INSTRUCTION_OPEN = \"/</?\";"
+L"\r\n"L"token INSTRUCTION_CLOSE = \"/?/>\";"
+L"\r\n"L"token COMPLEX_ELEMENT_OPEN = \"/<//\";"
+L"\r\n"L"token SINGLE_ELEMENT_CLOSE = \"///>\";"
+L"\r\n"L"token ELEMENT_OPEN = \"/<\";"
+L"\r\n"L"token ELEMENT_CLOSE = \"/>\";"
+L"\r\n"L"token EQUAL = \"/=\";"
+L"\r\n"L""
+L"\r\n"L"token NAME = \"[a-zA-Z0-9:._/-]+\";"
+L"\r\n"L"token ATTVALUE = \"\"\"[^<>\"\"]*\"\"|\'[^<>\']*\'\";"
+L"\r\n"L"token COMMENT = \"/</!--([^/->]|-[^/->]|--[^>])*--/>\";"
+L"\r\n"L"token CDATA = \"/</!/[CDATA/[([^/]]|/][^/]]|/]/][^>])*/]/]/>\";"
+L"\r\n"L"token TEXT = \"([^<>=\"\"\' /r/n/ta-zA-Z0-9:._/-])+|\"\"|\'\";"
+L"\r\n"L""
+L"\r\n"L"discardtoken SPACE = \"/s+\";"
+L"\r\n"L""
+L"\r\n"L"rule Attribute XAttribute = NAME:name \"=\" ATTVALUE:value as Attribute;"
+L"\r\n"L"rule Text XText = (NAME:content | EQUAL:content | ATTVALUE:content | TEXT:content) as Text;"
+L"\r\n"L"rule CData XCData = CDATA:content as CData;"
+L"\r\n"L"rule Comment XComment = COMMENT:content as Comment;"
+L"\r\n"L"rule Element XElement = \"<\" NAME:name {XAttribute:attributes} (\"/>\" | \">\" {XSubNode:subNodes} \"</\" NAME:closingName \">\") as Element;"
+L"\r\n"L"rule Node XSubNode = !XText | !XCData | !XComment | !XElement;"
+L"\r\n"L"rule Instruction XInstruction = \"<?\" NAME:name {XAttribute:attributes} \"?>\" as Instruction;"
+L"\r\n"L"rule Document XDocument = {XInstruction:prologs | XComment:prologs} XElement:rootElement as Document;"
+;
+
+			vl::WString XmlGetParserTextBuffer()
+			{
+				return parserTextBuffer;
+			}
+
+/***********************************************************************
 Unescaping Function Foward Declarations
 ***********************************************************************/
 
@@ -300,7 +382,7 @@ Table Generation
 				#define END_TRANSITION_BAG }
 				#define ITEM_STACK_PATTERN(STATE) item->stackPattern.Add(STATE);
 				#define ITEM_INSTRUCTION(TYPE, STATE, NAME, VALUE, RULE) item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::TYPE, STATE, NAME, VALUE, RULE));
-				#define BEGIN_LOOK_AHEAD(STATE) {vl::Ptr<vl::parsing::tabling::ParsingTable::LookAheadInfo> lookAheadInfo=new vl::Ptr<vl::parsing::tabling::ParsingTable::LookAheadInfo; item->lookAheads.Add(lookAheadInfo); lookAheadInfo->state=STATE;
+				#define BEGIN_LOOK_AHEAD(STATE) {vl::Ptr<vl::parsing::tabling::ParsingTable::LookAheadInfo> lookAheadInfo=new vl::parsing::tabling::ParsingTable::LookAheadInfo; item->lookAheads.Add(lookAheadInfo); lookAheadInfo->state=STATE;
 				#define LOOK_AHEAD(TOKEN) lookAheadInfo->tokens.Add(TOKEN);
 				#define END_LOOK_AHEAD }
 
@@ -328,8 +410,8 @@ Table Generation
 				SET_STATE_INFO(3, L"XAttribute", L"XAttribute.2", L"<XAttribute>: NAME : name \"=\"¡ñ ATTVALUE : value as Attribute")
 				SET_STATE_INFO(4, L"XAttribute", L"XAttribute.3", L"<XAttribute>: NAME : name \"=\" ATTVALUE : value as Attribute¡ñ")
 				SET_STATE_INFO(5, L"XAttribute", L"XAttribute.RootEnd", L"$<XAttribute> ¡ñ")
-				SET_STATE_INFO(6, L"XElement", L"XElement.3", L"<XElement>: \"<\" NAME : name { XAttribute : attributes } ( \"/>\" | \">\" { XSubNode : subNodes } \"</\" NAME : closingName \">\" ) as Element¡ñ")
-				SET_STATE_INFO(7, L"XElement", L"XElement.4", L"<XElement>: \"<\" NAME : name { XAttribute : attributes } ( \"/>\" | \">\"¡ñ { XSubNode : subNodes } \"</\" NAME : closingName \">\" ) as Element\r\n<XElement>: \"<\" NAME : name { XAttribute : attributes } ( \"/>\" | \">\" ¡ñ{ XSubNode : subNodes } \"</\" NAME : closingName \">\" ) as Element")
+				SET_STATE_INFO(6, L"XElement", L"XElement.2", L"<XElement>: \"<\" NAME : name { XAttribute : attributes } ( \"/>\" | \">\" { XSubNode : subNodes } \"</\" NAME : closingName \">\" ) as Element¡ñ")
+				SET_STATE_INFO(7, L"XElement", L"XElement.3", L"<XElement>: \"<\" NAME : name { XAttribute : attributes } ( \"/>\" | \">\"¡ñ { XSubNode : subNodes } \"</\" NAME : closingName \">\" ) as Element\r\n<XElement>: \"<\" NAME : name { XAttribute : attributes } ( \"/>\" | \">\" ¡ñ{ XSubNode : subNodes } \"</\" NAME : closingName \">\" ) as Element")
 				SET_STATE_INFO(8, L"XInstruction", L"XInstruction.3", L"<XInstruction>: \"<?\" NAME : name { XAttribute : attributes } \"?>\" as Instruction¡ñ")
 				SET_STATE_INFO(9, L"XElement", L"XElement.RootEnd", L"$<XElement> ¡ñ")
 				SET_STATE_INFO(10, L"XText", L"XText.1", L"<XText>: NAME : content | EQUAL : content | ATTVALUE : content | TEXT : content as Text¡ñ")
@@ -344,7 +426,7 @@ Table Generation
 				SET_STATE_INFO(19, L"XText", L"XText.RootEnd", L"$<XText> ¡ñ")
 				SET_STATE_INFO(20, L"XCData", L"XCData.RootEnd", L"$<XCData> ¡ñ")
 				SET_STATE_INFO(21, L"XComment", L"XComment.RootEnd", L"$<XComment> ¡ñ")
-				SET_STATE_INFO(22, L"XElement", L"XElement.2", L"<XElement>: \"<\" NAME : name¡ñ { XAttribute : attributes } ( \"/>\" | \">\" { XSubNode : subNodes } \"</\" NAME : closingName \">\" ) as Element\r\n<XElement>: \"<\" NAME : name ¡ñ{ XAttribute : attributes } ( \"/>\" | \">\" { XSubNode : subNodes } \"</\" NAME : closingName \">\" ) as Element")
+				SET_STATE_INFO(22, L"XElement", L"XElement.4", L"<XElement>: \"<\" NAME : name ¡ñ{ XAttribute : attributes } ( \"/>\" | \">\" { XSubNode : subNodes } \"</\" NAME : closingName \">\" ) as Element\r\n<XElement>: \"<\" NAME : name¡ñ { XAttribute : attributes } ( \"/>\" | \">\" { XSubNode : subNodes } \"</\" NAME : closingName \">\" ) as Element")
 				SET_STATE_INFO(23, L"XElement", L"XElement.7", L"<XElement>: \"<\" NAME : name { XAttribute : attributes } ( \"/>\" | \">\" { XSubNode : subNodes } \"</\" NAME : closingName¡ñ \">\" ) as Element")
 				SET_STATE_INFO(24, L"XInstruction", L"XInstruction.2", L"<XInstruction>: \"<?\" NAME : name¡ñ { XAttribute : attributes } \"?>\" as Instruction\r\n<XInstruction>: \"<?\" NAME : name ¡ñ{ XAttribute : attributes } \"?>\" as Instruction")
 				SET_STATE_INFO(25, L"XText", L"XText.RootStart", L"¡ñ $<XText>")

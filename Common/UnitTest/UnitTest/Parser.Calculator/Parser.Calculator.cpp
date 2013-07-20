@@ -5,6 +5,81 @@ namespace test
 	namespace parser
 	{
 /***********************************************************************
+ParserText
+***********************************************************************/
+
+const wchar_t parserTextBuffer[] = 
+L"\r\n"L""
+L"\r\n"L"class Expression"
+L"\r\n"L"{"
+L"\r\n"L"}"
+L"\r\n"L""
+L"\r\n"L"class NumberExpression : Expression"
+L"\r\n"L"{"
+L"\r\n"L"    token value;"
+L"\r\n"L"}"
+L"\r\n"L""
+L"\r\n"L"class BinaryExpression : Expression"
+L"\r\n"L"{"
+L"\r\n"L"    enum BinaryOperator"
+L"\r\n"L"    {"
+L"\r\n"L"        Add,"
+L"\r\n"L"        Sub,"
+L"\r\n"L"        Mul,"
+L"\r\n"L"        Div,"
+L"\r\n"L"    }"
+L"\r\n"L""
+L"\r\n"L"    Expression firstOperand;"
+L"\r\n"L"    Expression secondOperand;"
+L"\r\n"L"    BinaryOperator binaryOperator;"
+L"\r\n"L"}"
+L"\r\n"L""
+L"\r\n"L"class FunctionExpression : Expression"
+L"\r\n"L"{"
+L"\r\n"L"    token functionName;"
+L"\r\n"L"    Expression[] arguments;"
+L"\r\n"L"}"
+L"\r\n"L""
+L"\r\n"L"token NAME = \"[a-zA-Z_]/w*\";"
+L"\r\n"L"token NUMBER = \"/d+(./d+)?\";"
+L"\r\n"L"token ADD = \"/+\";"
+L"\r\n"L"token SUB = \"-\";"
+L"\r\n"L"token MUL = \"/*\";"
+L"\r\n"L"token DIV = \"//\";"
+L"\r\n"L"token LEFT = \"/(\";"
+L"\r\n"L"token RIGHT = \"/)\";"
+L"\r\n"L"token COMMA = \",\";"
+L"\r\n"L"discardtoken SPACE = \"/s+\";"
+L"\r\n"L""
+L"\r\n"L"rule NumberExpression Number"
+L"\r\n"L"        = NUMBER : value as NumberExpression"
+L"\r\n"L"        ;"
+L"\r\n"L"rule FunctionExpression Call"
+L"\r\n"L"        = NAME : functionName \"(\" [ Exp : arguments { \",\" Exp : arguments } ] \")\" as FunctionExpression"
+L"\r\n"L"        ;"
+L"\r\n"L"rule Expression Factor"
+L"\r\n"L"        = !Number | !Call"
+L"\r\n"L"        = \"(\" !Exp \")\""
+L"\r\n"L"        ;"
+L"\r\n"L"rule Expression Term"
+L"\r\n"L"        = !Factor"
+L"\r\n"L"        = Term : firstOperand \"*\" Factor : secondOperand as BinaryExpression with { binaryOperator = \"Mul\" }"
+L"\r\n"L"        = Term : firstOperand \"/\" Factor : secondOperand as BinaryExpression with { binaryOperator = \"Div\" }"
+L"\r\n"L"        ;"
+L"\r\n"L"rule Expression Exp"
+L"\r\n"L"        = !Term"
+L"\r\n"L"        = Exp : firstOperand \"+\" Term : secondOperand as BinaryExpression with { binaryOperator = \"Add\" }"
+L"\r\n"L"        = Exp : firstOperand \"-\" Term : secondOperand as BinaryExpression with { binaryOperator = \"Sub\" }"
+L"\r\n"L"        ;"
+L"\r\n"L""
+;
+
+		vl::WString CalGetParserTextBuffer()
+		{
+			return parserTextBuffer;
+		}
+
+/***********************************************************************
 Unescaping Function Foward Declarations
 ***********************************************************************/
 
@@ -177,7 +252,7 @@ Table Generation
 			#define END_TRANSITION_BAG }
 			#define ITEM_STACK_PATTERN(STATE) item->stackPattern.Add(STATE);
 			#define ITEM_INSTRUCTION(TYPE, STATE, NAME, VALUE, RULE) item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::TYPE, STATE, NAME, VALUE, RULE));
-			#define BEGIN_LOOK_AHEAD(STATE) {vl::Ptr<vl::parsing::tabling::ParsingTable::LookAheadInfo> lookAheadInfo=new vl::Ptr<vl::parsing::tabling::ParsingTable::LookAheadInfo; item->lookAheads.Add(lookAheadInfo); lookAheadInfo->state=STATE;
+			#define BEGIN_LOOK_AHEAD(STATE) {vl::Ptr<vl::parsing::tabling::ParsingTable::LookAheadInfo> lookAheadInfo=new vl::parsing::tabling::ParsingTable::LookAheadInfo; item->lookAheads.Add(lookAheadInfo); lookAheadInfo->state=STATE;
 			#define LOOK_AHEAD(TOKEN) lookAheadInfo->tokens.Add(TOKEN);
 			#define END_LOOK_AHEAD }
 
@@ -201,7 +276,7 @@ Table Generation
 			SET_STATE_INFO(2, L"Number", L"Number.1", L"<Number>: NUMBER : value as NumberExpression¡ñ")
 			SET_STATE_INFO(3, L"Number", L"Number.RootEnd", L"$<Number> ¡ñ")
 			SET_STATE_INFO(4, L"Factor", L"Factor.RootEnd", L"$<Factor> ¡ñ")
-			SET_STATE_INFO(5, L"Term", L"Term.3", L"<Term>: Term : firstOperand \"*\"¡ñ Factor : secondOperand as BinaryExpression with { binaryOperator = \"Mul\" }\r\n<Term>: Term : firstOperand \"/\"¡ñ Factor : secondOperand as BinaryExpression with { binaryOperator = \"Div\" }")
+			SET_STATE_INFO(5, L"Term", L"Term.2", L"<Term>: Term : firstOperand \"/\"¡ñ Factor : secondOperand as BinaryExpression with { binaryOperator = \"Div\" }\r\n<Term>: Term : firstOperand \"*\"¡ñ Factor : secondOperand as BinaryExpression with { binaryOperator = \"Mul\" }")
 			SET_STATE_INFO(6, L"Term", L"Term.RootEnd", L"$<Term> ¡ñ")
 			SET_STATE_INFO(7, L"Call", L"Call.4", L"<Call>: NAME : functionName \"(\" [ Exp : arguments { \",\" Exp : arguments } ] \")\" as FunctionExpression¡ñ")
 			SET_STATE_INFO(8, L"Call", L"Call.5", L"<Call>: NAME : functionName \"(\" [ Exp : arguments { \",\"¡ñ Exp : arguments } ] \")\" as FunctionExpression")
@@ -224,9 +299,9 @@ Table Generation
 			SET_STATE_INFO(25, L"Call", L"Call.3", L"<Call>: NAME : functionName \"(\" [ Exp : arguments¡ñ { \",\" Exp : arguments } ] \")\" as FunctionExpression\r\n<Call>: NAME : functionName \"(\" [ Exp : arguments ¡ñ{ \",\" Exp : arguments } ] \")\" as FunctionExpression")
 			SET_STATE_INFO(26, L"Call", L"Call.6", L"<Call>: NAME : functionName \"(\" [ Exp : arguments { \",\" Exp : arguments } ] \")\" as FunctionExpression¡ñ")
 			SET_STATE_INFO(27, L"Factor", L"Factor.3", L"<Factor>: \"(\" !Exp¡ñ \")\"")
-			SET_STATE_INFO(28, L"Term", L"Term.1", L"<Term>: !Factor¡ñ\r\n<Term>: Term : firstOperand \"*\" Factor : secondOperand as BinaryExpression with { binaryOperator = \"Mul\" }¡ñ\r\n<Term>: Term : firstOperand \"/\" Factor : secondOperand as BinaryExpression with { binaryOperator = \"Div\" }¡ñ")
-			SET_STATE_INFO(29, L"Term", L"Term.2", L"<Term>: Term : firstOperand¡ñ \"*\" Factor : secondOperand as BinaryExpression with { binaryOperator = \"Mul\" }\r\n<Term>: Term : firstOperand¡ñ \"/\" Factor : secondOperand as BinaryExpression with { binaryOperator = \"Div\" }")
-			SET_STATE_INFO(30, L"Term", L"Term.4", L"<Term>: Term : firstOperand \"*\" Factor : secondOperand as BinaryExpression¡ñ with { binaryOperator = \"Mul\" }\r\n<Term>: Term : firstOperand \"/\" Factor : secondOperand as BinaryExpression¡ñ with { binaryOperator = \"Div\" }")
+			SET_STATE_INFO(28, L"Term", L"Term.1", L"<Term>: Term : firstOperand¡ñ \"/\" Factor : secondOperand as BinaryExpression with { binaryOperator = \"Div\" }\r\n<Term>: Term : firstOperand¡ñ \"*\" Factor : secondOperand as BinaryExpression with { binaryOperator = \"Mul\" }")
+			SET_STATE_INFO(29, L"Term", L"Term.3", L"<Term>: Term : firstOperand \"/\" Factor : secondOperand as BinaryExpression¡ñ with { binaryOperator = \"Div\" }\r\n<Term>: Term : firstOperand \"*\" Factor : secondOperand as BinaryExpression¡ñ with { binaryOperator = \"Mul\" }")
+			SET_STATE_INFO(30, L"Term", L"Term.4", L"<Term>: Term : firstOperand \"/\" Factor : secondOperand as BinaryExpression with { binaryOperator = \"Div\" }¡ñ\r\n<Term>: !Factor¡ñ\r\n<Term>: Term : firstOperand \"*\" Factor : secondOperand as BinaryExpression with { binaryOperator = \"Mul\" }¡ñ")
 			SET_STATE_INFO(31, L"Exp", L"Exp.1", L"<Exp>: !Term¡ñ\r\n<Exp>: Exp : firstOperand \"+\" Term : secondOperand as BinaryExpression with { binaryOperator = \"Add\" }¡ñ\r\n<Exp>: Exp : firstOperand \"-\" Term : secondOperand as BinaryExpression with { binaryOperator = \"Sub\" }¡ñ")
 			SET_STATE_INFO(32, L"Exp", L"Exp.2", L"<Exp>: Exp : firstOperand¡ñ \"+\" Term : secondOperand as BinaryExpression with { binaryOperator = \"Add\" }\r\n<Exp>: Exp : firstOperand¡ñ \"-\" Term : secondOperand as BinaryExpression with { binaryOperator = \"Sub\" }")
 			SET_STATE_INFO(33, L"Exp", L"Exp.4", L"<Exp>: Exp : firstOperand \"+\" Term : secondOperand as BinaryExpression¡ñ with { binaryOperator = \"Add\" }\r\n<Exp>: Exp : firstOperand \"-\" Term : secondOperand as BinaryExpression¡ñ with { binaryOperator = \"Sub\" }")
