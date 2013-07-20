@@ -129,6 +129,7 @@ namespace vl
 				static vl::Ptr<JsonObject> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 			};
 
+			extern vl::WString JsonGetParserTextBuffer();
 			extern vl::Ptr<vl::parsing::ParsingTreeCustomBase> JsonConvertParsingTreeNode(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 			extern vl::Ptr<vl::parsing::tabling::ParsingTable> JsonLoadTable();
 

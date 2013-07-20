@@ -677,6 +677,11 @@ void WriteHeaderFile(const WString& name, Ptr<ParsingDefinition> definition, Ptr
 		PrintTypeDefinitions(definition->types, prefix, 0, &manager, config.codeClassPrefix, writer);
 	}
 
+	writer.WriteString(prefix);
+	writer.WriteString(L"extern vl::WString ");
+	writer.WriteString(config.codeClassPrefix);
+	writer.WriteLine(L"GetParserTextBuffer();");
+
 	if(config.parsingTree)
 	{
 		writer.WriteString(prefix);
@@ -807,6 +812,24 @@ void WriteUnescapingFunctionForwardDeclarations(Ptr<ParsingDefinition> definitio
 		}
 		writer.WriteLine(L"");
 	}
+}
+
+void WriteGetParserTextBuffer(ParsingSymbolManager* manager, const WString& prefix, const WString& codeClassPrefix, TextWriter& writer)
+{
+	writer.WriteString(prefix);
+	writer.WriteString(L"vl::WString ");
+	writer.WriteString(codeClassPrefix);
+	writer.WriteLine(L"GetParserTextBuffer()");
+
+	writer.WriteString(prefix);
+	writer.WriteLine(L"{");
+
+	writer.WriteString(prefix);
+	writer.WriteLine(L"\treturn parserTextBuffer;");
+
+	writer.WriteString(prefix);
+	writer.WriteLine(L"}");
+	writer.WriteLine(L"");
 }
 
 void WriteConvertImpl(ParsingSymbolManager* manager, const WString& prefix, const WString& codeClassPrefix, TextWriter& writer)
@@ -1444,25 +1467,11 @@ void WriteTable(const WString& parserCode, bool enableAmbiguity, const WString& 
 	writer.WriteLine(L"{");
 
 	writer.WriteString(prefix+L"    ");
-	writer.WriteLine(L"vl::WString grammar = ");
-	{
-		StringReader reader(parserCode);
-		while(!reader.IsEnd())
-		{
-			writer.WriteString(L"L\"\\r\\n\"");
-			WString line=reader.ReadLine();
-			WriteCppString(line, writer);
-			writer.WriteLine(L"");
-		}
-	}
-	writer.WriteLine(L";");
-
-	writer.WriteString(prefix+L"    ");
 	writer.WriteLine(L"vl::Ptr<vl::parsing::tabling::ParsingGeneralParser> parser=vl::parsing::tabling::CreateBootstrapStrictParser();");
 	writer.WriteString(prefix+L"    ");
 	writer.WriteLine(L"vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;");
 	writer.WriteString(prefix+L"    ");
-	writer.WriteLine(L"vl::Ptr<vl::parsing::ParsingTreeNode> definitionNode=parser->Parse(grammar, L\"ParserDecl\", errors);");
+	writer.WriteLine(L"vl::Ptr<vl::parsing::ParsingTreeNode> definitionNode=parser->Parse(parserTextBuffer, L\"ParserDecl\", errors);");
 	writer.WriteString(prefix+L"    ");
 	writer.WriteLine(L"vl::Ptr<vl::parsing::definitions::ParsingDefinition> definition=vl::parsing::definitions::DeserializeDefinition(definitionNode);");
 	writer.WriteString(prefix+L"    ");
@@ -1473,6 +1482,26 @@ void WriteTable(const WString& parserCode, bool enableAmbiguity, const WString& 
 	writer.WriteString(prefix);
 	writer.WriteLine(L"}");
 	writer.WriteLine(L"");
+}
+
+/***********************************************************************
+Grammar Text Generation
+***********************************************************************/
+
+void WriteParserText(const WString& parserText, TextWriter& writer)
+{
+	writer.WriteLine(L"const wchar_t parserTextBuffer[] = ");
+	{
+		StringReader reader(parserText);
+		while(!reader.IsEnd())
+		{
+			writer.WriteString(L"L\"\\r\\n\"");
+			WString line=reader.ReadLine();
+			WriteCppString(line, writer);
+			writer.WriteLine(L"");
+		}
+	}
+	writer.WriteLine(L";");
 }
 
 /***********************************************************************
@@ -1571,6 +1600,14 @@ void WriteCppFile(const WString& name, const WString& parserCode, Ptr<ParsingDef
 		List<Ptr<ParsingError>> errors;
 		ValidateDefinition(definition, &manager, errors);
 	}
+
+	writer.WriteLine(L"/***********************************************************************");
+	writer.WriteLine(L"ParserText");
+	writer.WriteLine(L"***********************************************************************/");
+	writer.WriteLine(L"");
+	WriteParserText(parserCode, writer);
+	writer.WriteLine(L"");
+	WriteGetParserTextBuffer(&manager, prefix, config.codeClassPrefix, writer);
 
 	if(config.parsingTree)
 	{
@@ -1731,6 +1768,14 @@ int wmain(int argc, wchar_t* argv[])
 				if(codeGrammar==L"<bootstrap-grammar>")
 				{
 					definition=CreateParserDefinition();
+					MemoryStream bootstrapStream;
+					{
+						StreamWriter bootstrapWriter(bootstrapStream);
+						Log(definition, bootstrapWriter);
+					}
+					bootstrapStream.SeekFromBegin(0);
+					StreamReader bootstrapReader(bootstrapStream);
+					codeGrammar=bootstrapReader.ReadToEnd();
 				}
 				else
 				{
