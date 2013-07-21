@@ -1,9 +1,12 @@
 include:"..\Parsing.h"
+include:"..\ParsingDefinitions.h"
+include:"..\ParsingAutomaton.h"
 namespace:vl.parsing.xml
 classPrefix:Xml
 guard:VCZH_PARSING_XML_PARSINGXML_PARSER
 parser:ParseDocument(XDocument)
 parser:ParseElement(XElement)
+parsertext:enabled
 grammar:
 
 class Node

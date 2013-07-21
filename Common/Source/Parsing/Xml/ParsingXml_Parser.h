@@ -10,6 +10,8 @@ Parser::ParsingXml_Parser
 #define VCZH_PARSING_XML_PARSINGXML_PARSER
 
 #include "..\Parsing.h"
+#include "..\ParsingDefinitions.h"
+#include "..\ParsingAutomaton.h"
 
 namespace vl
 {

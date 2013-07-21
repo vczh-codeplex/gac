@@ -298,8 +298,9 @@ namespace test
 			text=reader.ReadToEnd();
 		}
 
-		Ptr<ParsingTable> table=BootstrapLoadTable();
-		Ptr<ParsingStrictParser> parser=new ParsingStrictParser(table);
+		//Ptr<ParsingTable> table=BootstrapLoadTable();
+		//Ptr<ParsingStrictParser> parser=new ParsingStrictParser(table);
+		Ptr<ParsingGeneralParser> parser=CreateBootstrapStrictParser();
 		TEST_ASSERT(parser);
 
 		List<Ptr<ParsingError>> errors;
