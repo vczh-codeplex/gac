@@ -7,6 +7,8 @@ Parser::Parser.Calculator
 ***********************************************************************/
 
 #include "..\..\..\Source\Parsing\Parsing.h"
+#include "..\..\..\Source\Parsing\ParsingDefinitions.h"
+#include "..\..\..\Source\Parsing\ParsingAutomaton.h"
 
 namespace test
 {
