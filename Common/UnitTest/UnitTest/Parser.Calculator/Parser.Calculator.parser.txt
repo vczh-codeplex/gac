@@ -1,7 +1,10 @@
 include:"..\..\..\Source\Parsing\Parsing.h"
+include:"..\..\..\Source\Parsing\ParsingDefinitions.h"
+include:"..\..\..\Source\Parsing\ParsingAutomaton.h"
 namespace:test.parser
 classPrefix:Cal
 parser:ParseExpression(Exp)
+parsertext:enabled
 grammar:
 
 class Expression
