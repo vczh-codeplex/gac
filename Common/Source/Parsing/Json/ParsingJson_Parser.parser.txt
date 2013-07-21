@@ -1,8 +1,11 @@
 include:"..\Parsing.h"
+include:"..\ParsingDefinitions.h"
+include:"..\ParsingAutomaton.h"
 namespace:vl.parsing.json
 classPrefix:Json
 guard:VCZH_PARSING_JSON_PARSINGJSON_PARSER
 parser:Parse(JRoot)
+parsertext:enabled
 grammar:
 
 class Node

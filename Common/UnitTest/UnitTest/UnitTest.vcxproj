@@ -152,7 +152,10 @@
     <ClCompile Include="..\..\Source\Exception.cpp" />
     <ClCompile Include="..\..\Source\GlobalStorage.cpp" />
     <ClCompile Include="..\..\Source\Locale.cpp" />
-    <ClCompile Include="..\..\Source\Parsing\Bootstrap\ParsingBootstrap_Parser.cpp" />
+    <ClCompile Include="..\..\Source\Parsing\Bootstrap\ParsingBootstrap_Parser.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\Source\Parsing\Json\ParsingJson.cpp" />
     <ClCompile Include="..\..\Source\Parsing\Json\ParsingJson_Parser.cpp" />
     <ClCompile Include="..\..\Source\Parsing\Parsing.cpp" />
@@ -231,7 +234,10 @@
     <ClInclude Include="..\..\Source\GlobalStorage.h" />
     <ClInclude Include="..\..\Source\Lazy.h" />
     <ClInclude Include="..\..\Source\Locale.h" />
-    <ClInclude Include="..\..\Source\Parsing\Bootstrap\ParsingBootstrap_Parser.h" />
+    <ClInclude Include="..\..\Source\Parsing\Bootstrap\ParsingBootstrap_Parser.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="..\..\Source\Parsing\Json\ParsingJson.h" />
     <ClInclude Include="..\..\Source\Parsing\Json\ParsingJson_Parser.h" />
     <ClInclude Include="..\..\Source\Parsing\Parsing.h" />
