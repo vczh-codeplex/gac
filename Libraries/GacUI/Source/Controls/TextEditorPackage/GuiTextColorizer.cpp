@@ -151,10 +151,10 @@ GuiTextBoxRegexColorizer
 			struct GuiTextBoxRegexColorizerProcData
 			{
 				GuiTextBoxRegexColorizer*		colorizer;
-				vint								lineIndex;
+				vint							lineIndex;
 				const wchar_t*					text;
 				unsigned __int32*				colors;
-				vint								contextState;
+				vint							contextState;
 			};
 
 			void GuiTextBoxRegexColorizer::ColorizerProc(void* argument, vint start, vint length, vint token)
@@ -248,11 +248,20 @@ GuiTextBoxRegexColorizer
 				}
 			}
 
-			bool GuiTextBoxRegexColorizer::Setup()
+			void GuiTextBoxRegexColorizer::ClearTokens()
+			{
+				tokenRegexes.Clear();
+				tokenColors.Clear();
+				extraTokenColors.Clear();
+				lexer=0;
+			}
+
+			void GuiTextBoxRegexColorizer::Setup()
 			{
 				if(lexer || tokenRegexes.Count()==0)
 				{
-					return false;
+					colors.Resize(1);
+					colors[0]=defaultColor;
 				}
 				else
 				{
@@ -268,7 +277,6 @@ GuiTextBoxRegexColorizer
 						colors[i+1+tokenColors.Count()]=extraTokenColors[i];
 					}
 					colorizer=new regex::RegexLexerColorizer(lexer->Colorize());
-					return true;
 				}
 			}
 
@@ -288,6 +296,7 @@ GuiTextBoxRegexColorizer
 
 			void GuiTextBoxRegexColorizer::ColorizeLineWithCRLF(vint lineIndex, const wchar_t* text, unsigned __int32* colors, vint length, vint& lexerState, vint& contextState)
 			{
+				memset(colors, 0, sizeof(*colors)*length);
 				if(lexer)
 				{
 					GuiTextBoxRegexColorizerProcData data;
@@ -297,7 +306,6 @@ GuiTextBoxRegexColorizer
 					data.colors=colors;
 					data.contextState=contextState;
 
-					memset(colors, 0, sizeof(*colors)*length);
 					colorizer->Reset(lexerState);
 					colorizer->Colorize(text, length, &GuiTextBoxRegexColorizer::ColorizerProc, &data);
 

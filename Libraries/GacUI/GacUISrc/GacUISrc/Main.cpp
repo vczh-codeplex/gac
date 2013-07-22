@@ -33,6 +33,103 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	return result;
 }
 
+/***********************************************************************
+GrammarColorizer
+***********************************************************************/
+
+class GrammarColorizer abstract : public GuiTextBoxRegexColorizer, public RepeatingTaskExecutor<WString>
+{
+private:
+	Ptr<ParsingGeneralParser>				grammarParser;
+	WString									grammarRule;
+	SpinLock								parsingTreeLock;
+	Ptr<ParsingTreeObject>					parsingTreeNode;
+
+	Dictionary<WString, text::ColorEntry>	colorSettings;
+
+protected:
+	virtual void OnParsingFinished()
+	{
+	}
+
+	void Initialize(Ptr<ParsingGeneralParser> _grammarParser, const WString& _grammarRule)
+	{
+		grammarParser=_grammarParser;
+		grammarRule=_grammarRule;
+		BeginSetColors();
+	}
+
+	void Execute(const WString& input)override
+	{
+		List<Ptr<ParsingError>> errors;
+		Ptr<ParsingTreeObject> node=grammarParser->Parse(input, grammarRule, errors).Cast<ParsingTreeObject>();
+		if(node)
+		{
+			node->InitializeQueryCache();
+
+			SpinLock::Scope scope(parsingTreeLock);
+			parsingTreeNode=node;
+		}
+		if(node)
+		{
+			OnParsingFinished();
+		}
+		node=0;
+		RestartColorizer();
+	}
+public:
+	GrammarColorizer()
+	{
+	}
+
+	GrammarColorizer(Ptr<ParsingGeneralParser> _grammarParser, const WString& _grammarRule)
+	{
+		Initialize(_grammarParser, _grammarRule);
+	}
+
+	Ptr<ParsingTreeObject> ThreadSafeGetTreeNode()
+	{
+		parsingTreeLock.Enter();
+		return parsingTreeNode;
+	}
+
+	void ThreadSafeReturnTreeNode()
+	{
+		parsingTreeLock.Leave();
+	}
+
+	void SubmitCode(const WString& code)
+	{
+		SubmitTask(code.Buffer());
+	}
+
+	void BeginSetColors()
+	{
+		ClearTokens();
+		colorSettings.Clear();
+		text::ColorEntry entry=GetCurrentTheme()->GetDefaultTextBoxColorEntry();
+		SetDefaultColor(entry);
+		colorSettings.Add(L"Default", entry);
+	}
+
+	void SetColor(const WString& name, const text::ColorEntry& entry)
+	{
+		colorSettings.Set(name, entry);
+	}
+
+	void SetColor(const WString& name, const Color& color)
+	{
+		text::ColorEntry entry=GetDefaultColor();
+		entry.normal.text=color;
+		SetColor(name, entry);
+	}
+
+	void EndSetColors()
+	{
+		Setup();
+	}
+};
+
 
 /***********************************************************************
 SymbolLookup
@@ -129,74 +226,6 @@ public:
 GrammarColorizer
 ***********************************************************************/
 
-class GrammarColorizer abstract : public GuiTextBoxRegexColorizer, public RepeatingTaskExecutor<WString>
-{
-private:
-	Ptr<ParsingGeneralParser>				grammarParser;
-	WString									grammarRule;
-	SpinLock								parsingTreeLock;
-	Ptr<ParsingTreeObject>					parsingTreeNode;
-
-protected:
-	virtual void OnParsingFinished()
-	{
-	}
-
-	void Initialize(Ptr<ParsingGeneralParser> _grammarParser, const WString& _grammarRule)
-	{
-		grammarParser=_grammarParser;
-		grammarRule=_grammarRule;
-	}
-
-	void Execute(const WString& input)override
-	{
-		List<Ptr<ParsingError>> errors;
-		Ptr<ParsingTreeObject> node=grammarParser->Parse(input, grammarRule, errors).Cast<ParsingTreeObject>();
-		if(node)
-		{
-			node->InitializeQueryCache();
-
-			SpinLock::Scope scope(parsingTreeLock);
-			parsingTreeNode=node;
-		}
-		if(node)
-		{
-			OnParsingFinished();
-		}
-		node=0;
-		RestartColorizer();
-	}
-public:
-	GrammarColorizer()
-	{
-	}
-
-	GrammarColorizer(Ptr<ParsingGeneralParser> _grammarParser, const WString& _grammarRule)
-	{
-		Initialize(_grammarParser, _grammarRule);
-	}
-
-	Ptr<ParsingTreeObject> ThreadSafeGetTreeNode()
-	{
-		parsingTreeLock.Enter();
-		return parsingTreeNode;
-	}
-
-	void ThreadSafeReturnTreeNode()
-	{
-		parsingTreeLock.Leave();
-	}
-
-	void SubmitCode(const WString& code)
-	{
-		SubmitTask(code.Buffer());
-	}
-};
-
-/***********************************************************************
-GrammarColorizer
-***********************************************************************/
-
 class ParserGrammarColorizer : public GrammarColorizer
 {
 protected:
@@ -210,35 +239,6 @@ protected:
 			parsingTreeDecl=new ParserDecl(node);
 		}
 		ThreadSafeReturnTreeNode();
-	}
-
-	void InitializeColorizer()
-	{
-		text::ColorEntry entry=GetCurrentTheme()->GetDefaultTextBoxColorEntry();
-		SetDefaultColor(entry);
-
-		entry.normal.text=Color(163, 21, 21);
-		AddToken(L"\"([^\\\\\"]|\\\\/.)*\"", entry);
-
-		entry.normal.text=Color(0, 0, 255);
-		AddToken(L"class|enum|token|discardtoken|rule|as|with", entry);
-
-		// 2 -- token
-		AddToken(L"[a-zA-Z_]/w*", GetDefaultColor());
-			
-		// 3 -- type name
-		entry.normal.text=Color(43, 145, 175);
-		AddExtraToken(entry);
-			
-		// 4 -- token name
-		entry.normal.text=Color(163, 73, 164);
-		AddExtraToken(entry);
-			
-		// 5 -- rule name
-		entry.normal.text=Color(255, 127, 39);
-		AddExtraToken(entry);
-
-		Setup();
 	}
 
 	TypeSymbol* FindScope(ParsingTreeNode* node)
@@ -286,62 +286,93 @@ public:
 	ParserGrammarColorizer()
 		:GrammarColorizer(CreateBootstrapAutoRecoverParser(), L"ParserDecl")
 	{
-		InitializeColorizer();
+		SetColor(L"Keyword", Color(0, 0, 255));
+		SetColor(L"Text", Color(163, 21, 21));
+		SetColor(L"Type", Color(43, 145, 175));
+		SetColor(L"Token", Color(163, 73, 164));
+		SetColor(L"Rule", Color(255, 127, 39));
+		EndSetColors();
+
+		//text::ColorEntry entry=GetCurrentTheme()->GetDefaultTextBoxColorEntry();
+		//SetDefaultColor(entry);
+
+		//entry.normal.text=Color(163, 21, 21);
+		//AddToken(L"\"([^\\\\\"]|\\\\/.)*\"", entry);
+
+		//entry.normal.text=Color(0, 0, 255);
+		//AddToken(L"class|enum|token|discardtoken|rule|as|with", entry);
+
+		//// 2 -- token
+		//AddToken(L"[a-zA-Z_]/w*", GetDefaultColor());
+		//	
+		//// 3 -- type name
+		//entry.normal.text=Color(43, 145, 175);
+		//AddExtraToken(entry);
+		//	
+		//// 4 -- token name
+		//entry.normal.text=Color(163, 73, 164);
+		//AddExtraToken(entry);
+		//	
+		//// 5 -- rule name
+		//entry.normal.text=Color(255, 127, 39);
+		//AddExtraToken(entry);
+
+		//Setup();
 	}
 
-	void ColorizeTokenContextSensitive(int lineIndex, const wchar_t* text, vint start, vint length, vint& token, int& contextState)override
-	{
-		Ptr<ParsingTreeObject> node=ThreadSafeGetTreeNode();
-		if(node && token==2)
-		{
-			ParsingTextPos pos(lineIndex, start);
-			ParsingTreeNode* foundNode=node->FindDeepestNode(pos);
-			if(foundNode)
-			{
-				ParsingTreeToken* foundToken=dynamic_cast<ParsingTreeToken*>(foundNode);
-				if(foundToken)
-				{
-					ParsingTreeObject* tokenParent=dynamic_cast<ParsingTreeObject*>(foundNode->GetParent());
-					if(tokenParent)
-					{
-						if((tokenParent->GetType()==L"ClassTypeDef" || tokenParent->GetType()==L"EnumTypeDef") && tokenParent->GetMember(L"name")==foundNode)
-						{
-							token=3;
-						}
-						else if(tokenParent->GetType()==L"TokenDef" && tokenParent->GetMember(L"name")==foundNode)
-						{
-							token=4;
-						}
-						else if(tokenParent->GetType()==L"RuleDef" && tokenParent->GetMember(L"name")==foundNode)
-						{
-							token=5;
-						}
-						else if(tokenParent->GetType()==L"PrimitiveGrammarDef" && tokenParent->GetMember(L"name")==foundNode)
-						{
-							WString name=foundToken->GetValue();
-							if(parsingTreeDecl->tokens.Contains(name))
-							{
-								token=4;
-							}
-							else if(parsingTreeDecl->rules.Contains(name))
-							{
-								token=5;
-							}
-						}
-						else if((tokenParent->GetType()==L"PrimitiveTypeObj" || tokenParent->GetType()==L"SubTypeObj") && tokenParent->GetMember(L"name")==foundNode)
-						{
-							TypeSymbol* scope=FindScope(tokenParent);
-							if(FindType(scope, tokenParent))
-							{
-								token=3;
-							}
-						}
-					}
-				}
-			}
-		}
-		ThreadSafeReturnTreeNode();
-	}
+	//void ColorizeTokenContextSensitive(int lineIndex, const wchar_t* text, vint start, vint length, vint& token, int& contextState)override
+	//{
+	//	Ptr<ParsingTreeObject> node=ThreadSafeGetTreeNode();
+	//	if(node && token==2)
+	//	{
+	//		ParsingTextPos pos(lineIndex, start);
+	//		ParsingTreeNode* foundNode=node->FindDeepestNode(pos);
+	//		if(foundNode)
+	//		{
+	//			ParsingTreeToken* foundToken=dynamic_cast<ParsingTreeToken*>(foundNode);
+	//			if(foundToken)
+	//			{
+	//				ParsingTreeObject* tokenParent=dynamic_cast<ParsingTreeObject*>(foundNode->GetParent());
+	//				if(tokenParent)
+	//				{
+	//					if((tokenParent->GetType()==L"ClassTypeDef" || tokenParent->GetType()==L"EnumTypeDef") && tokenParent->GetMember(L"name")==foundNode)
+	//					{
+	//						token=3;
+	//					}
+	//					else if(tokenParent->GetType()==L"TokenDef" && tokenParent->GetMember(L"name")==foundNode)
+	//					{
+	//						token=4;
+	//					}
+	//					else if(tokenParent->GetType()==L"RuleDef" && tokenParent->GetMember(L"name")==foundNode)
+	//					{
+	//						token=5;
+	//					}
+	//					else if(tokenParent->GetType()==L"PrimitiveGrammarDef" && tokenParent->GetMember(L"name")==foundNode)
+	//					{
+	//						WString name=foundToken->GetValue();
+	//						if(parsingTreeDecl->tokens.Contains(name))
+	//						{
+	//							token=4;
+	//						}
+	//						else if(parsingTreeDecl->rules.Contains(name))
+	//						{
+	//							token=5;
+	//						}
+	//					}
+	//					else if((tokenParent->GetType()==L"PrimitiveTypeObj" || tokenParent->GetType()==L"SubTypeObj") && tokenParent->GetMember(L"name")==foundNode)
+	//					{
+	//						TypeSymbol* scope=FindScope(tokenParent);
+	//						if(FindType(scope, tokenParent))
+	//						{
+	//							token=3;
+	//						}
+	//					}
+	//				}
+	//			}
+	//		}
+	//	}
+	//	ThreadSafeReturnTreeNode();
+	//}
 };
 
 /***********************************************************************
