@@ -129,31 +129,87 @@ public:
 GrammarColorizer
 ***********************************************************************/
 
-class GrammarColorizer : public GuiTextBoxRegexColorizer, public RepeatingTaskExecutor<WString>
+class GrammarColorizer abstract : public GuiTextBoxRegexColorizer, public RepeatingTaskExecutor<WString>
 {
-protected:
+private:
 	Ptr<ParsingGeneralParser>				grammarParser;
+	WString									grammarRule;
 	SpinLock								parsingTreeLock;
 	Ptr<ParsingTreeObject>					parsingTreeNode;
-	Ptr<ParserDecl>							parsingTreeDecl;
+
+protected:
+	virtual void OnParsingFinished()
+	{
+	}
+
+	void Initialize(Ptr<ParsingGeneralParser> _grammarParser, const WString& _grammarRule)
+	{
+		grammarParser=_grammarParser;
+		grammarRule=_grammarRule;
+	}
 
 	void Execute(const WString& input)override
 	{
 		List<Ptr<ParsingError>> errors;
-		Ptr<ParsingTreeObject> node=grammarParser->Parse(input, L"ParserDecl", errors).Cast<ParsingTreeObject>();
-		Ptr<ParserDecl> decl;
+		Ptr<ParsingTreeObject> node=grammarParser->Parse(input, grammarRule, errors).Cast<ParsingTreeObject>();
 		if(node)
 		{
 			node->InitializeQueryCache();
-			decl=new ParserDecl(node);
-		}
-		{
+
 			SpinLock::Scope scope(parsingTreeLock);
 			parsingTreeNode=node;
-			parsingTreeDecl=decl;
-			node=0;
 		}
+		if(node)
+		{
+			OnParsingFinished();
+		}
+		node=0;
 		RestartColorizer();
+	}
+public:
+	GrammarColorizer()
+	{
+	}
+
+	GrammarColorizer(Ptr<ParsingGeneralParser> _grammarParser, const WString& _grammarRule)
+	{
+		Initialize(_grammarParser, _grammarRule);
+	}
+
+	Ptr<ParsingTreeObject> ThreadSafeGetTreeNode()
+	{
+		parsingTreeLock.Enter();
+		return parsingTreeNode;
+	}
+
+	void ThreadSafeReturnTreeNode()
+	{
+		parsingTreeLock.Leave();
+	}
+
+	void SubmitCode(const WString& code)
+	{
+		SubmitTask(code.Buffer());
+	}
+};
+
+/***********************************************************************
+GrammarColorizer
+***********************************************************************/
+
+class ParserGrammarColorizer : public GrammarColorizer
+{
+protected:
+	Ptr<ParserDecl>							parsingTreeDecl;
+	
+	void OnParsingFinished()override
+	{
+		Ptr<ParsingTreeObject> node=ThreadSafeGetTreeNode();
+		if(node)
+		{
+			parsingTreeDecl=new ParserDecl(node);
+		}
+		ThreadSafeReturnTreeNode();
 	}
 
 	void InitializeColorizer()
@@ -183,11 +239,6 @@ protected:
 		AddExtraToken(entry);
 
 		Setup();
-	}
-
-	void InitializeParser()
-	{
-		grammarParser=CreateBootstrapAutoRecoverParser();
 	}
 
 	TypeSymbol* FindScope(ParsingTreeNode* node)
@@ -232,19 +283,19 @@ protected:
 		return 0;
 	}
 public:
-	GrammarColorizer()
+	ParserGrammarColorizer()
+		:GrammarColorizer(CreateBootstrapAutoRecoverParser(), L"ParserDecl")
 	{
 		InitializeColorizer();
-		InitializeParser();
 	}
 
 	void ColorizeTokenContextSensitive(int lineIndex, const wchar_t* text, vint start, vint length, vint& token, int& contextState)override
 	{
-		SpinLock::Scope scope(parsingTreeLock);
-		if(parsingTreeNode && token==2)
+		Ptr<ParsingTreeObject> node=ThreadSafeGetTreeNode();
+		if(node && token==2)
 		{
 			ParsingTextPos pos(lineIndex, start);
-			ParsingTreeNode* foundNode=parsingTreeNode->FindDeepestNode(pos);
+			ParsingTreeNode* foundNode=node->FindDeepestNode(pos);
 			if(foundNode)
 			{
 				ParsingTreeToken* foundToken=dynamic_cast<ParsingTreeToken*>(foundNode);
@@ -289,11 +340,7 @@ public:
 				}
 			}
 		}
-	}
-
-	void SubmitCode(const WString& code)
-	{
-		SubmitTask(code.Buffer());
+		ThreadSafeReturnTreeNode();
 	}
 };
 
@@ -334,7 +381,7 @@ public:
 			textBoxEditor->SetHorizontalAlwaysVisible(false);
 			textBoxEditor->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 			page->GetContainer()->GetBoundsComposition()->AddChild(textBoxEditor->GetBoundsComposition());
-			textBoxEditor->SetColorizer(new GrammarColorizer);
+			textBoxEditor->SetColorizer(new ParserGrammarColorizer);
 			textBoxEditor->TextChanged.AttachMethod(this, &TextBoxColorizerWindow::textBoxEditor_TextChanged);
 
 			{
@@ -355,7 +402,7 @@ public:
 			textBoxGrammar->SetHorizontalAlwaysVisible(false);
 			textBoxGrammar->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 			page->GetContainer()->GetBoundsComposition()->AddChild(textBoxGrammar->GetBoundsComposition());
-			textBoxGrammar->SetColorizer(new GrammarColorizer);
+			textBoxGrammar->SetColorizer(new ParserGrammarColorizer);
 			textBoxGrammar->TextChanged.AttachMethod(this, &TextBoxColorizerWindow::textBoxEditor_TextChanged);
 
 			{
