@@ -185,7 +185,7 @@ GenerateTable
 						tokenCount++;
 					}
 				}
-				Ptr<ParsingTable> table=new ParsingTable(tokenCount, discardTokenCount, stateCount, definition->rules.Count());
+				Ptr<ParsingTable> table=new ParsingTable(0, 0, tokenCount, discardTokenCount, stateCount, definition->rules.Count());
 
 				FOREACH(ParsingSymbol*, symbol, tokenIds.Keys())
 				{

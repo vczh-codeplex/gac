@@ -158,10 +158,12 @@ ParsingTable::TransitionItem
 ParsingTable
 ***********************************************************************/
 
-			ParsingTable::ParsingTable(vint _tokenCount, vint discardTokenCount, vint _stateCount, vint _ruleCount)
+			ParsingTable::ParsingTable(vint _attributeInfoCount, vint _treeFieldInfoCount, vint _tokenCount, vint discardTokenCount, vint _stateCount, vint _ruleCount)
 				:ambiguity(false)
 				,tokenCount(_tokenCount+UserTokenStart)
 				,stateCount(_stateCount)
+				,attributeInfos(_attributeInfoCount)
+				,treeFieldInfos(_treeFieldInfoCount)
 				,tokenInfos(_tokenCount+UserTokenStart)
 				,discardTokenInfos(discardTokenCount)
 				,stateInfos(_stateCount)
@@ -182,6 +184,44 @@ ParsingTable
 			void ParsingTable::SetAmbiguity(bool value)
 			{
 				ambiguity=value;
+			}
+
+			vint ParsingTable::GetAttributeInfoCount()
+			{
+				return attributeInfos.Count();
+			}
+
+			Ptr<ParsingTable::AttributeInfoList> ParsingTable::GetAttributeInfo(vint index)
+			{
+				return attributeInfos[index];
+			}
+
+			void ParsingTable::SetAttributeInfo(vint index, Ptr<AttributeInfoList> info)
+			{
+				attributeInfos[index]=info;
+			}
+
+			vint ParsingTable::GetTreeFieldInfoCount()
+			{
+				return treeFieldInfos.Count();
+			}
+
+			const ParsingTable::TreeFieldInfo& ParsingTable::GetTreeFieldInfo(vint index)
+			{
+				return treeFieldInfos[index];
+			}
+
+			const ParsingTable::TreeFieldInfo& ParsingTable::GetAttributeInfo(const WString& type, const WString& field)
+			{
+				Pair<WString, WString> key(type, field);
+				vint index=treeFieldInfoMap.Keys().IndexOf(key);
+				if(index==-1) return *(const TreeFieldInfo*)0;
+				return treeFieldInfos[treeFieldInfoMap.Values().Get(index)];
+			}
+
+			void ParsingTable::SetTreeFieldInfo(vint index, const TreeFieldInfo& info)
+			{
+				treeFieldInfos[index]=info;
 			}
 
 			vint ParsingTable::GetTokenCount()
@@ -298,6 +338,13 @@ ParsingTable
 				{
 					StateInfo& info=stateInfos[i];
 					info.ruleAmbiguousType=ruleInfos[ruleMap[info.ruleName]].ambiguousType;
+				}
+
+				treeFieldInfoMap.Clear();
+				FOREACH_INDEXER(TreeFieldInfo, info, index, treeFieldInfos)
+				{
+					Pair<WString, WString> key(info.type, info.field);
+					treeFieldInfoMap.Add(key, index);
 				}
 			}
 
