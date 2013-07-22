@@ -437,6 +437,18 @@ namespace vl
 
 			class ParsingDefinitionWriter;
 
+			class ParsingDefinitionTokenDefinitionWriter : public Object
+			{
+			protected:
+				Ptr<ParsingDefinitionTokenDefinition>			token;
+				ParsingDefinitionWriter&						owner;
+			public:
+				ParsingDefinitionTokenDefinitionWriter(ParsingDefinitionWriter& _owner, Ptr<ParsingDefinitionTokenDefinition> _token);
+
+				ParsingDefinitionTokenDefinitionWriter&			Attribute(const ParsingDefinitionAttributeWriter& attribute);
+				ParsingDefinitionWriter&						EndToken();
+			};
+
 			class ParsingDefinitionRuleDefinitionWriter : public Object
 			{
 			protected:
@@ -460,6 +472,7 @@ namespace vl
 
 				ParsingDefinitionWriter&						Type(const ParsingDefinitionTypeDefinitionWriter& type);
 				ParsingDefinitionWriter&						Token(const WString& name, const WString& regex);
+				ParsingDefinitionTokenDefinitionWriter			TokenAtt(const WString& name, const WString& regex);
 				ParsingDefinitionWriter&						Discard(const WString& name, const WString& regex);
 				ParsingDefinitionRuleDefinitionWriter			Rule(const WString& name, const ParsingDefinitionTypeWriter& type);
 

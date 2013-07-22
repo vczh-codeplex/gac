@@ -390,6 +390,27 @@ ParsingDefinitionGrammarWriter
 			}
 
 /***********************************************************************
+ParsingDefinitionTokenDefinitionWriter
+***********************************************************************/
+
+			ParsingDefinitionTokenDefinitionWriter::ParsingDefinitionTokenDefinitionWriter(ParsingDefinitionWriter& _owner, Ptr<ParsingDefinitionTokenDefinition> _token)
+				:owner(_owner)
+				,token(_token)
+			{
+			}
+
+			ParsingDefinitionTokenDefinitionWriter& ParsingDefinitionTokenDefinitionWriter::Attribute(const ParsingDefinitionAttributeWriter& attribute)
+			{
+				token->attributes.Add(attribute.Attribute());
+				return *this;
+			}
+
+			ParsingDefinitionWriter& ParsingDefinitionTokenDefinitionWriter::EndToken()
+			{
+				return owner;
+			}
+
+/***********************************************************************
 ParsingDefinitionRuleDefinitionWriter
 ***********************************************************************/
 
@@ -433,12 +454,17 @@ ParsingDefinitionWriter
 
 			ParsingDefinitionWriter& ParsingDefinitionWriter::Token(const WString& name, const WString& regex)
 			{
+				return TokenAtt(name, regex).EndToken();
+			}
+
+			ParsingDefinitionTokenDefinitionWriter ParsingDefinitionWriter::TokenAtt(const WString& name, const WString& regex)
+			{
 				Ptr<ParsingDefinitionTokenDefinition> token=new ParsingDefinitionTokenDefinition;
 				token->name=name;
 				token->regex=regex;
 				token->discard=false;
 				definition->tokens.Add(token);
-				return *this;
+				return ParsingDefinitionTokenDefinitionWriter(*this, token);
 			}
 
 			ParsingDefinitionWriter& ParsingDefinitionWriter::Discard(const WString& name, const WString& regex)
