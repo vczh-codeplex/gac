@@ -763,6 +763,7 @@ namespace vl
 					FOREACH(Ptr<ParsingTable::AttributeInfo>, att, atts->attributes)
 					{
 						writer.WriteString(prefix);
+						writer.WriteString(L"@");
 						writer.WriteString(att->name);
 						writer.WriteString(L"(");
 						for(vint i=0;i<att->arguments.Count();i++)
