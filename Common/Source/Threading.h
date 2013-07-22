@@ -269,6 +269,78 @@ namespace vl
 			~Scope();
 		};
 	};
+
+/***********************************************************************
+RepeatingTaskExecutor
+***********************************************************************/
+
+	template<typename T>
+	class RepeatingTaskExecutor : public Object
+	{
+	private:
+		SpinLock								inputLock;
+		T										inputData;
+		volatile bool							inputDataAvailable;
+		SpinLock								executingEvent;
+		volatile bool							executing;
+
+		void ExecutingProcInternal()
+		{
+			while(true)
+			{
+				bool currentInputDataAvailable;
+				T currentInputData;
+				{
+					SpinLock::Scope scope(inputLock);
+					currentInputData=inputData;
+					currentInputDataAvailable=inputDataAvailable;
+					inputDataAvailable=false;
+				}
+				if(!currentInputDataAvailable)
+				{
+					executing=false;
+					break;
+				}
+				Execute(currentInputData);
+			}
+			executingEvent.Leave();
+		}
+
+		static void ExecutingProc(void* argument)
+		{
+			((RepeatingTaskExecutor<T>*)argument)->ExecutingProcInternal();
+		}
+	
+	protected:
+		virtual void							Execute(const T& input)=0;
+
+		void SubmitTask(const T& input)
+		{
+			{
+				SpinLock::Scope scope(inputLock);
+				inputData=input;
+				inputDataAvailable=true;
+			}
+			if(!executing)
+			{
+				executing=true;
+				executingEvent.Enter();
+				ThreadPoolLite::Queue(&ExecutingProc, this);
+			}
+		}
+	public:
+		RepeatingTaskExecutor()
+			:inputDataAvailable(false)
+			,executing(false)
+		{
+		}
+
+		~RepeatingTaskExecutor()
+		{
+			executingEvent.Enter();
+			executingEvent.Leave();
+		}
+	};
 }
 
 #endif
