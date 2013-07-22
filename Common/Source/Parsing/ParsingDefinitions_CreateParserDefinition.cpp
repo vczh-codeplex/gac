@@ -20,6 +20,7 @@ namespace vl
 					.Type(
 						Class(L"AttributeDef")
 							.Member(L"name", TokenType())
+								.Attribute(Attribute(L"Color").Argument(L"Attribute"))
 							.Member(L"arguments", TokenType().Array())
 						)
 					.Type(
