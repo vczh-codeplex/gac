@@ -215,17 +215,14 @@ ParsingSymbol
 ParsingSymbolManager
 ***********************************************************************/
 
-			ParsingSymbol* ParsingSymbolManager::TryAddSubSymbol(Ptr<ParsingSymbol> subSymbol, ParsingSymbol* parentSymbol)
+			bool ParsingSymbolManager::TryAddSubSymbol(Ptr<ParsingSymbol> subSymbol, ParsingSymbol* parentSymbol)
 			{
 				if(parentSymbol->AddSubSymbol(subSymbol.Obj()))
 				{
 					createdSymbols.Add(subSymbol);
-					return subSymbol.Obj();
+					return true;
 				}
-				else
-				{
-					return 0;
-				}
+				return false;
 			}
 
 			ParsingSymbolManager::ParsingSymbolManager()
@@ -267,17 +264,18 @@ ParsingSymbolManager
 				}
 			}
 
-			ParsingSymbol* ParsingSymbolManager::AddClass(const WString& name, ParsingSymbol* baseType, ParsingSymbol* parentType)
+			ParsingSymbol* ParsingSymbolManager::AddClass(definitions::ParsingDefinitionClassDefinition* classDef, ParsingSymbol* baseType, ParsingSymbol* parentType)
 			{
 				if((!baseType || baseType->GetType()==ParsingSymbol::ClassType) && (!parentType || parentType->IsType()))
 				{
-					ParsingSymbol* symbol=new ParsingSymbol(this, ParsingSymbol::ClassType, name, baseType, L"");
-					return TryAddSubSymbol(symbol, parentType?parentType:globalSymbol);
+					ParsingSymbol* symbol=new ParsingSymbol(this, ParsingSymbol::ClassType, classDef->name, baseType, L"");
+					if(TryAddSubSymbol(symbol, parentType?parentType:globalSymbol))
+					{
+						symbolClassDefinitionCache.Add(symbol, classDef);
+						return symbol;
+					}
 				}
-				else
-				{
-					return 0;
-				}
+				return 0;
 			}
 
 			ParsingSymbol* ParsingSymbolManager::AddField(const WString& name, ParsingSymbol* classType, ParsingSymbol* fieldType)
@@ -285,12 +283,12 @@ ParsingSymbolManager
 				if(classType && classType->GetType()==ParsingSymbol::ClassType && fieldType && fieldType->IsType())
 				{
 					ParsingSymbol* symbol=new ParsingSymbol(this, ParsingSymbol::ClassField, name, fieldType, L"");
-					return TryAddSubSymbol(symbol, classType);
+					if(TryAddSubSymbol(symbol, classType))
+					{
+						return symbol;
+					}
 				}
-				else
-				{
-					return 0;
-				}
+				return 0;
 			}
 
 			ParsingSymbol* ParsingSymbolManager::AddEnum(const WString& name, ParsingSymbol* parentType)
@@ -298,12 +296,12 @@ ParsingSymbolManager
 				if(!parentType || parentType->GetType()==ParsingSymbol::ClassType)
 				{
 					ParsingSymbol* symbol=new ParsingSymbol(this, ParsingSymbol::EnumType, name, 0, L"");
-					return TryAddSubSymbol(symbol, parentType?parentType:globalSymbol);
+					if(TryAddSubSymbol(symbol, parentType?parentType:globalSymbol))
+					{
+						return symbol;
+					}
 				}
-				else
-				{
-					return 0;
-				}
+				return 0;
 			}
 
 			ParsingSymbol* ParsingSymbolManager::AddEnumItem(const WString& name, ParsingSymbol* enumType)
@@ -311,18 +309,22 @@ ParsingSymbolManager
 				if(enumType && enumType->GetType()==ParsingSymbol::EnumType)
 				{
 					ParsingSymbol* symbol=new ParsingSymbol(this, ParsingSymbol::EnumItem, name, enumType, L"");
-					return TryAddSubSymbol(symbol, enumType);
+					if(TryAddSubSymbol(symbol, enumType))
+					{
+						return symbol;
+					}
 				}
-				else
-				{
-					return 0;
-				}
+				return 0;
 			}
 
 			ParsingSymbol* ParsingSymbolManager::AddTokenDefinition(const WString& name, const WString& regex)
 			{
 				ParsingSymbol* symbol=new ParsingSymbol(this, ParsingSymbol::TokenDef, name, tokenTypeSymbol, regex);
-				return TryAddSubSymbol(symbol, globalSymbol);
+				if(TryAddSubSymbol(symbol, globalSymbol))
+				{
+					return symbol;
+				}
+				return 0;
 			}
 
 			ParsingSymbol* ParsingSymbolManager::AddRuleDefinition(const WString& name, ParsingSymbol* ruleType)
@@ -330,12 +332,18 @@ ParsingSymbolManager
 				if(ruleType && ruleType->IsType())
 				{
 					ParsingSymbol* symbol=new ParsingSymbol(this, ParsingSymbol::RuleDef, name, ruleType, L"");
-					return TryAddSubSymbol(symbol, globalSymbol);
+					if(TryAddSubSymbol(symbol, globalSymbol))
+					{
+						return symbol;
+					}
 				}
-				else
-				{
-					return 0;
-				}
+				return 0;
+			}
+
+			ParsingSymbolManager::ClassDefinition* ParsingSymbolManager::CacheGetClassDefinition(ParsingSymbol* type)
+			{
+				vint index=symbolClassDefinitionCache.Keys().IndexOf(type);
+				return index==-1?0:symbolClassDefinitionCache.Values().Get(index);
 			}
 
 			ParsingSymbol* ParsingSymbolManager::CacheGetType(definitions::ParsingDefinitionType* type, ParsingSymbol* scope)
@@ -571,7 +579,7 @@ PrepareSymbols
 						{
 							baseType=FindType(node->parentType.Obj(), manager, scope, errors);
 						}
-						ParsingSymbol* classType=manager->AddClass(node->name, baseType, (scope->GetType()==ParsingSymbol::Global?0:scope));
+						ParsingSymbol* classType=manager->AddClass(node, baseType, (scope->GetType()==ParsingSymbol::Global?0:scope));
 						if(classType)
 						{
 							PrepareSymbolsTypeDefinitionVisitor visitor(manager, classType, errors);

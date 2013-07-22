@@ -54,6 +54,24 @@ namespace vl
 					collections::List<Ptr<AttributeInfo>>	attributes;
 				};
 
+				class TreeTypeInfo
+				{
+				public:
+					WString									type;
+					vint									attributeIndex;
+
+					TreeTypeInfo()
+						:attributeIndex(-1)
+					{
+					}
+
+					TreeTypeInfo(const WString& _type, vint _attributeIndex)
+						:type(_type)
+						,attributeIndex(_attributeIndex)
+					{
+					}
+				};
+
 				class TreeFieldInfo
 				{
 				public:
@@ -244,16 +262,18 @@ namespace vl
 				vint																tokenCount;
 				vint																stateCount;
 				collections::Array<Ptr<AttributeInfoList>>							attributeInfos;
+				collections::Array<TreeTypeInfo>									treeTypeInfos;
 				collections::Array<TreeFieldInfo>									treeFieldInfos;
 				collections::Array<TokenInfo>										tokenInfos;
 				collections::Array<TokenInfo>										discardTokenInfos;
 				collections::Array<StateInfo>										stateInfos;
 				collections::Array<RuleInfo>										ruleInfos;
 				collections::Dictionary<WString, vint>								ruleMap;
+				collections::Dictionary<WString, vint>								treeTypeInfoMap;
 				collections::Dictionary<collections::Pair<WString, WString>, vint>	treeFieldInfoMap;
 
 			public:
-				ParsingTable(vint _attributeInfoCount, vint _treeFieldInfoCount, vint _tokenCount, vint _discardTokenCount, vint _stateCount, vint _ruleCount);
+				ParsingTable(vint _attributeInfoCount, vint _treeTypeInfoCount, vint _treeFieldInfoCount, vint _tokenCount, vint _discardTokenCount, vint _stateCount, vint _ruleCount);
 				~ParsingTable();
 
 				bool										GetAmbiguity();
@@ -262,6 +282,11 @@ namespace vl
 				vint										GetAttributeInfoCount();
 				Ptr<AttributeInfoList>						GetAttributeInfo(vint index);
 				void										SetAttributeInfo(vint index, Ptr<AttributeInfoList> info);
+
+				vint										GetTreeTypeInfoCount();
+				const TreeTypeInfo&							GetTreeTypeInfo(vint index);
+				const TreeTypeInfo&							GetTreeTypeInfo(const WString& type);
+				void										SetTreeTypeInfo(vint index, const TreeTypeInfo& info);
 
 				vint										GetTreeFieldInfoCount();
 				const TreeFieldInfo&						GetTreeFieldInfo(vint index);
