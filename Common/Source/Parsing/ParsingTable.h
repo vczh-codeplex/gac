@@ -290,7 +290,7 @@ namespace vl
 
 				vint										GetTreeFieldInfoCount();
 				const TreeFieldInfo&						GetTreeFieldInfo(vint index);
-				const TreeFieldInfo&						GetAttributeInfo(const WString& type, const WString& field);
+				const TreeFieldInfo&						GetTreeFieldInfo(const WString& type, const WString& field);
 				void										SetTreeFieldInfo(vint index, const TreeFieldInfo& info);
 
 				vint										GetTokenCount();

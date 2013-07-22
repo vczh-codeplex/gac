@@ -234,7 +234,7 @@ ParsingTable
 				return treeFieldInfos[index];
 			}
 
-			const ParsingTable::TreeFieldInfo& ParsingTable::GetAttributeInfo(const WString& type, const WString& field)
+			const ParsingTable::TreeFieldInfo& ParsingTable::GetTreeFieldInfo(const WString& type, const WString& field)
 			{
 				Pair<WString, WString> key(type, field);
 				vint index=treeFieldInfoMap.Keys().IndexOf(key);

@@ -48,9 +48,9 @@ namespace vl
 				}
 			}
 
-/***********************************************************************
-Logger (ParsingDefinitionType)
-***********************************************************************/
+			/***********************************************************************
+			Logger (ParsingDefinitionType)
+			***********************************************************************/
 
 			class ParsingDefinitionTypeLogger : public Object, public ParsingDefinitionType::IVisitor
 			{
@@ -97,9 +97,9 @@ Logger (ParsingDefinitionType)
 				ParsingDefinitionTypeLogger::LogInternal(type, writer);
 			}
 
-/***********************************************************************
-Logger (ParsingDefinitionTypeDefinition)
-***********************************************************************/
+			/***********************************************************************
+			Logger (ParsingDefinitionTypeDefinition)
+			***********************************************************************/
 
 			class ParsingDefinitionTypeDefinitionLogger : public Object, public ParsingDefinitionTypeDefinition::IVisitor
 			{
@@ -206,9 +206,9 @@ Logger (ParsingDefinitionTypeDefinition)
 				ParsingDefinitionTypeDefinitionLogger::LogInternal(definition, prefix, writer);
 			}
 
-/***********************************************************************
-Logger (ParsingDefinitionGrammar)
-***********************************************************************/
+			/***********************************************************************
+			Logger (ParsingDefinitionGrammar)
+			***********************************************************************/
 
 #define PRIORITY_NONE			0
 #define PRIORITY_CREATE			1
@@ -394,9 +394,9 @@ Logger (ParsingDefinitionGrammar)
 #undef PRIORITY_USE
 #undef PRIORITY_ASSIGN
 
-/***********************************************************************
-FindAppropriateGrammarState
-***********************************************************************/
+			/***********************************************************************
+			FindAppropriateGrammarState
+			***********************************************************************/
 
 			class FindAppropriateGrammarStateVisitor : public Object, public ParsingDefinitionGrammar::IVisitor
 			{
@@ -491,9 +491,9 @@ FindAppropriateGrammarState
 				}
 			};
 
-/***********************************************************************
-Logger (ParsingDefinitionGrammar)
-***********************************************************************/
+			/***********************************************************************
+			Logger (ParsingDefinitionGrammar)
+			***********************************************************************/
 
 			WString TypeToString(ParsingDefinitionType* type)
 			{
@@ -540,7 +540,7 @@ Logger (ParsingDefinitionGrammar)
 					Log(type.Obj(), L"", writer);
 					writer.WriteLine(L"");
 				}
-				
+
 				FOREACH(Ptr<ParsingDefinitionTokenDefinition>, token, definition->tokens)
 				{
 					if(token->discard)
@@ -558,7 +558,7 @@ Logger (ParsingDefinitionGrammar)
 					writer.WriteLine(L";");
 				}
 				writer.WriteLine(L"");
-				
+
 				FOREACH(Ptr<ParsingDefinitionRuleDefinition>, rule, definition->rules)
 				{
 					writer.WriteString(L"rule ");
@@ -581,9 +581,9 @@ Logger (ParsingDefinitionGrammar)
 
 		namespace analyzing
 		{
-/***********************************************************************
-Logger (Automaton)
-***********************************************************************/
+			/***********************************************************************
+			Logger (Automaton)
+			***********************************************************************/
 
 			void LogTransitionSymbol(ParsingSymbol* symbol, stream::TextWriter& writer)
 			{
@@ -751,9 +751,29 @@ Logger (Automaton)
 
 		namespace tabling
 		{
-/***********************************************************************
-Logger (ParsingTable)
-***********************************************************************/
+			/***********************************************************************
+			Logger (ParsingTable)
+			***********************************************************************/
+
+			void LogAttributeList(Ptr<ParsingTable> table, vint attributeIndex, const WString& prefix, stream::TextWriter& writer)
+			{
+				if(attributeIndex!=-1)
+				{
+					Ptr<ParsingTable::AttributeInfoList> atts=table->GetAttributeInfo(attributeIndex);
+					FOREACH(Ptr<ParsingTable::AttributeInfo>, att, atts->attributes)
+					{
+						writer.WriteString(prefix);
+						writer.WriteString(att->name);
+						writer.WriteString(L"(");
+						for(vint i=0;i<att->arguments.Count();i++)
+						{
+							if(i>0) writer.WriteString(L", ");
+							definitions::LogString(att->arguments[i], writer);
+						}
+						writer.WriteLine(L")");
+					}
+				}
+			}
 
 			void Log(Ptr<ParsingTable> table, stream::TextWriter& writer)
 			{
@@ -777,7 +797,7 @@ Logger (ParsingTable)
 						itow(column)+L": "+table->GetTokenInfo(column).name+L"\r\n  "+table->GetTokenInfo(column).regex;
 					stringTable[column+1]=content;
 				}
-				
+
 				for(vint row=0; row<table->GetStateCount();row++)
 				{
 					for(vint column=0;column<table->GetTokenCount();column++)
@@ -844,7 +864,7 @@ Logger (ParsingTable)
 						}
 					}
 				}
-				
+
 				writer.WriteLine(L"Target-State : Stack-Pattern ...");
 				writer.WriteLine(L"> Look-Ahead ...");
 				writer.WriteLine(L"C: Create");
@@ -875,15 +895,59 @@ Logger (ParsingTable)
 					writer.WriteChar(L']');
 					writer.WriteLine(L"");
 				}
-				writer.WriteLine(L"");
 
 				writer.WriteMonospacedEnglishTable(stringTable, rows, columns);
+				writer.WriteLine(L"");
+
+				writer.WriteLine(L"Metadata(Tokens):");
+				for(vint i=0;i<table->GetTokenCount();i++)
+				{
+					const ParsingTable::TokenInfo& info=table->GetTokenInfo(i);
+					writer.WriteString(L"    ");
+					writer.WriteString(info.name);
+					writer.WriteString(L"=");
+					writer.WriteLine(info.regex);
+					LogAttributeList(table, info.attributeIndex, L"        ", writer);
+				}
+				writer.WriteLine(L"");
+
+				writer.WriteLine(L"Metadata(Rules):");
+				for(vint i=0;i<table->GetRuleCount();i++)
+				{
+					const ParsingTable::RuleInfo& info=table->GetRuleInfo(i);
+					writer.WriteString(L"    ");
+					writer.WriteString(info.name);
+					LogAttributeList(table, info.attributeIndex, L"        ", writer);
+				}
+				writer.WriteLine(L"");
+
+				writer.WriteLine(L"Metadata(Classes):");
+				for(vint i=0;i<table->GetTreeTypeInfoCount();i++)
+				{
+					const ParsingTable::TreeTypeInfo& info=table->GetTreeTypeInfo(i);
+					writer.WriteString(L"    ");
+					writer.WriteString(info.type);
+					LogAttributeList(table, info.attributeIndex, L"        ", writer);
+				}
+				writer.WriteLine(L"");
+
+				writer.WriteLine(L"Metadata(Class Members):");
+				for(vint i=0;i<table->GetTreeFieldInfoCount();i++)
+				{
+					const ParsingTable::TreeFieldInfo& info=table->GetTreeFieldInfo(i);
+					writer.WriteString(L"    ");
+					writer.WriteString(info.type);
+					writer.WriteString(L".");
+					writer.WriteString(info.field);
+					LogAttributeList(table, info.attributeIndex, L"        ", writer);
+				}
+				writer.WriteLine(L"");
 			}
 		}
 
-/***********************************************************************
-Logger (ParsingTreeNode)
-***********************************************************************/
+		/***********************************************************************
+		Logger (ParsingTreeNode)
+		***********************************************************************/
 
 		class LogParsingTreeNodeVisitor : public Object, public ParsingTreeNode::IVisitor
 		{
