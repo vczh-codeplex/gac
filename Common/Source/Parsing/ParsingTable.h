@@ -30,19 +30,69 @@ namespace vl
 				static const vint							TryReduce=2;
 				static const vint							UserTokenStart=3;
 
+				class AttributeInfo : public Object
+				{
+				public:
+					WString									name;
+					collections::List<WString>				arguments;
+
+					AttributeInfo(const WString& _name)
+						:name(_name)
+					{
+					}
+
+					AttributeInfo* Argument(const WString& argument)
+					{
+						arguments.Add(argument);
+						return this;
+					}
+				};
+
+				class AttributeInfoList : public Object
+				{
+				public:
+					collections::List<Ptr<AttributeInfo>>	attributes;
+				};
+
+				class TreeFieldInfo
+				{
+				public:
+					WString									type;
+					WString									field;
+					vint									attributeIndex;
+
+					TreeFieldInfo()
+						:attributeIndex(-1)
+					{
+					}
+
+					TreeFieldInfo(const WString& _type, const WString& _field, vint _attributeIndex)
+						:type(_type)
+						,field(_field)
+						,attributeIndex(_attributeIndex)
+					{
+					}
+				};
+
 				class TokenInfo
 				{
 				public:
 					WString									name;
 					WString									regex;
 					vint									regexTokenIndex;
+					vint									attributeIndex;
 
-					TokenInfo():regexTokenIndex(-1){}
+					TokenInfo()
+						:regexTokenIndex(-1)
+						,attributeIndex(-1)
+					{
+					}
 
-					TokenInfo(const WString& _name, const WString& _regex)
+					TokenInfo(const WString& _name, const WString& _regex, vint _attributeIndex)
 						:name(_name)
 						,regex(_regex)
 						,regexTokenIndex(-1)
+						,attributeIndex(_attributeIndex)
 					{
 					}
 				};
@@ -56,7 +106,9 @@ namespace vl
 
 					WString									ruleAmbiguousType;		// filled in Initialize()
 
-					StateInfo(){}
+					StateInfo()
+					{
+					}
 
 					StateInfo(const WString& _ruleName, const WString& _stateName, const WString& _stateExpression)
 						:ruleName(_ruleName)
@@ -73,14 +125,20 @@ namespace vl
 					WString									type;
 					WString									ambiguousType;
 					vint									rootStartState;
+					vint									attributeIndex;
 
-					RuleInfo(){}
+					RuleInfo()
+						:rootStartState(-1)
+						,attributeIndex(-1)
+					{
+					}
 
-					RuleInfo(const WString& _name, const WString& _type, const WString& _ambiguousType, vint _rootStartState)
+					RuleInfo(const WString& _name, const WString& _type, const WString& _ambiguousType, vint _rootStartState, vint _attributeIndex)
 						:name(_name)
 						,type(_type)
 						,ambiguousType(_ambiguousType)
 						,rootStartState(_rootStartState)
+						,attributeIndex(_attributeIndex)
 					{
 					}
 				};
@@ -180,23 +238,35 @@ namespace vl
 				};
 
 			protected:
-				bool										ambiguity;
-				Ptr<regex::RegexLexer>						lexer;
-				collections::Array<Ptr<TransitionBag>>		transitionBags;
-				vint										tokenCount;
-				vint										stateCount;
-				collections::Array<TokenInfo>				tokenInfos;
-				collections::Array<TokenInfo>				discardTokenInfos;
-				collections::Array<StateInfo>				stateInfos;
-				collections::Array<RuleInfo>				ruleInfos;
-				collections::Dictionary<WString, vint>		ruleMap;
+				bool																ambiguity;
+				Ptr<regex::RegexLexer>												lexer;
+				collections::Array<Ptr<TransitionBag>>								transitionBags;
+				vint																tokenCount;
+				vint																stateCount;
+				collections::Array<Ptr<AttributeInfoList>>							attributeInfos;
+				collections::Array<TreeFieldInfo>									treeFieldInfos;
+				collections::Array<TokenInfo>										tokenInfos;
+				collections::Array<TokenInfo>										discardTokenInfos;
+				collections::Array<StateInfo>										stateInfos;
+				collections::Array<RuleInfo>										ruleInfos;
+				collections::Dictionary<WString, vint>								ruleMap;
+				collections::Dictionary<collections::Pair<WString, WString>, vint>	treeFieldInfoMap;
 
 			public:
-				ParsingTable(vint _tokenCount, vint _discardTokenCount, vint _stateCount, vint _ruleCount);
+				ParsingTable(vint _attributeInfoCount, vint _treeFieldInfoCount, vint _tokenCount, vint _discardTokenCount, vint _stateCount, vint _ruleCount);
 				~ParsingTable();
 
 				bool										GetAmbiguity();
 				void										SetAmbiguity(bool value);
+
+				vint										GetAttributeInfoCount();
+				Ptr<AttributeInfoList>						GetAttributeInfo(vint index);
+				void										SetAttributeInfo(vint index, Ptr<AttributeInfoList> info);
+
+				vint										GetTreeFieldInfoCount();
+				const TreeFieldInfo&						GetTreeFieldInfo(vint index);
+				const TreeFieldInfo&						GetAttributeInfo(const WString& type, const WString& field);
+				void										SetTreeFieldInfo(vint index, const TreeFieldInfo& info);
 
 				vint										GetTokenCount();
 				const TokenInfo&							GetTokenInfo(vint token);
