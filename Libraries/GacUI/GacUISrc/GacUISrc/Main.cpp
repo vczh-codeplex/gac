@@ -40,9 +40,8 @@ GrammarColorizer
 class GrammarColorizer abstract : public GuiTextBoxRegexColorizer, public RepeatingTaskExecutor<WString>
 {
 	typedef Pair<WString, WString>								FieldDesc;
-	typedef Pair<WString, vint>									SemanticColorDesc;
 	typedef Dictionary<FieldDesc, vint>							FieldContextColors;
-	typedef Dictionary<FieldDesc, SemanticColorDesc>			FieldSemanticColors;
+	typedef Dictionary<FieldDesc, WString>						FieldSemanticColors;
 private:
 	Ptr<ParsingGeneralParser>				grammarParser;
 	WString									grammarRule;
@@ -80,7 +79,7 @@ private:
 
 	Ptr<ParsingTable::AttributeInfo> GetSemanticColorAttribute(vint index)
 	{
-		return GetAttribute(index, L"SemanticColor", 2);
+		return GetAttribute(index, L"SemanticColor", 1);
 	}
 
 	text::ColorEntry GetColor(const WString& name)
@@ -208,7 +207,7 @@ public:
 			if(!tokenColors.Contains(color))
 			{
 				vint tokenId=AddExtraToken(colorSettings.Values().Get(index));
-				colorIndices.Set(color, tokenId);
+				colorIndices.Set(color, tokenId+colorContext.Count());
 			}
 		}
 
@@ -223,16 +222,13 @@ public:
 					vint index=colorIndices.Keys().IndexOf(att->arguments[0]);
 					if(index!=-1)
 					{
-						fieldContextColors.Add(FieldDesc(fieldInfo.type, fieldInfo.field), index);
+						fieldContextColors.Add(FieldDesc(fieldInfo.type, fieldInfo.field), colorIndices.Values().Get(index));
 					}
 				}
 				else if(Ptr<ParsingTable::AttributeInfo> att=GetSemanticColorAttribute(fieldInfo.attributeIndex))
 				{
-					vint index=colorIndices.Keys().IndexOf(att->arguments[1]);
-					if(index!=-1 || att->arguments[1]==L"*")
-					{
-						fieldSemanticColors.Add(FieldDesc(fieldInfo.type, fieldInfo.field), SemanticColorDesc(att->arguments[0], index));
-					}
+					FieldDesc key(fieldInfo.type, fieldInfo.field);
+					fieldSemanticColors.Add(key, att->arguments[0]);
 				}
 			}
 		}
@@ -268,42 +264,9 @@ public:
 			index=fieldSemanticColors.Keys().IndexOf(key);
 			if(index!=-1)
 			{
-				const SemanticColorDesc& color=fieldSemanticColors.Values().Get(index);
+				const WString& category=fieldSemanticColors.Values().Get(index);
 				return;
 			}
-
-						//if((tokenParent->GetType()==L"ClassTypeDef" || tokenParent->GetType()==L"EnumTypeDef") && tokenParent->GetMember(L"name")==foundNode)
-						//{
-						//	token=3;
-						//}
-						//else if(tokenParent->GetType()==L"TokenDef" && tokenParent->GetMember(L"name")==foundNode)
-						//{
-						//	token=4;
-						//}
-						//else if(tokenParent->GetType()==L"RuleDef" && tokenParent->GetMember(L"name")==foundNode)
-						//{
-						//	token=5;
-						//}
-						//else if(tokenParent->GetType()==L"PrimitiveGrammarDef" && tokenParent->GetMember(L"name")==foundNode)
-						//{
-						//	WString name=foundToken->GetValue();
-						//	if(parsingTreeDecl->tokens.Contains(name))
-						//	{
-						//		token=4;
-						//	}
-						//	else if(parsingTreeDecl->rules.Contains(name))
-						//	{
-						//		token=5;
-						//	}
-						//}
-						//else if((tokenParent->GetType()==L"PrimitiveTypeObj" || tokenParent->GetType()==L"SubTypeObj") && tokenParent->GetMember(L"name")==foundNode)
-						//{
-						//	TypeSymbol* scope=FindScope(tokenParent);
-						//	if(FindType(scope, tokenParent))
-						//	{
-						//		token=3;
-						//	}
-						//}
 		}
 	}
 };
