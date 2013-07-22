@@ -166,14 +166,21 @@ GenerateTable
 				find all class types
 				***********************************************************************/
 				List<ParsingSymbol*> types;
+				Dictionary<WString, vint> typeAtts;
+				Dictionary<Pair<WString, WString>, vint> treeFieldAtts;
 				Dictionary<ParsingSymbol*, Ptr<List<ParsingSymbol*>>> childTypes;
 
+				// find all class types
 				CollectType(manager->GetGlobal(), types);
 				FOREACH(ParsingSymbol*, type, types)
 				{
+					Ptr<ParsingTable::AttributeInfoList> typeAtt=new ParsingTable::AttributeInfoList;
 					ParsingSymbol* parent=type;
 					while(parent)
 					{
+						ParsingDefinitionClassDefinition* classDef=manager->CacheGetClassDefinition(parent);
+						CollectAttributeInfo(typeAtt, classDef->attributes);
+
 						Ptr<List<ParsingSymbol*>> children;
 						vint index=childTypes.Keys().IndexOf(parent);
 						if(index==-1)
@@ -189,22 +196,7 @@ GenerateTable
 						children->Add(type);
 						parent=parent->GetDescriptorSymbol();
 					}
-				}
 
-				// find all class fields
-				Dictionary<WString, vint> typeAtts;
-				Dictionary<Pair<WString, WString>, vint> treeFieldAtts;
-				for(vint i=0;i<childTypes.Count();i++)
-				{
-					ParsingSymbol* type=childTypes.Keys().Get(i);
-					List<ParsingSymbol*>& children=*childTypes.Values().Get(i).Obj();
-
-					Ptr<ParsingTable::AttributeInfoList> typeAtt=new ParsingTable::AttributeInfoList;
-					FOREACH(ParsingSymbol*, child, children)
-					{
-						ParsingDefinitionClassDefinition* classDef=manager->CacheGetClassDefinition(child);
-						CollectAttributeInfo(typeAtt, classDef->attributes);
-					}
 					if(typeAtt->attributes.Count()>0)
 					{
 						typeAtts.Add(GetTypeFullName(type), atts.Count());
@@ -214,6 +206,13 @@ GenerateTable
 					{
 						typeAtts.Add(GetTypeFullName(type), -1);
 					}
+				}
+
+				// find all class fields
+				for(vint i=0;i<childTypes.Count();i++)
+				{
+					ParsingSymbol* type=childTypes.Keys().Get(i);
+					List<ParsingSymbol*>& children=*childTypes.Values().Get(i).Obj();
 					
 					ParsingDefinitionClassDefinition* classDef=manager->CacheGetClassDefinition(type);
 					List<vint> fieldAtts;
