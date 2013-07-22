@@ -52,6 +52,8 @@ namespace vl
 				{
 				public:
 					collections::List<Ptr<AttributeInfo>>	attributes;
+
+					Ptr<AttributeInfo> FindFirst(const WString& name);
 				};
 
 				class TreeTypeInfo
