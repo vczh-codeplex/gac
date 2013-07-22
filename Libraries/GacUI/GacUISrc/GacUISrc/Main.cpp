@@ -92,6 +92,10 @@ protected:
 	{
 	}
 
+	virtual void OnSemanticColorize(ParsingTreeToken* foundToken, ParsingTreeObject* tokenParent, const WString& type, const WString& field, const WString& category, vint& token)
+	{
+	}
+
 	void Initialize(Ptr<ParsingGeneralParser> _grammarParser, const WString& _grammarRule)
 	{
 		grammarParser=_grammarParser;
@@ -141,6 +145,12 @@ public:
 	void SubmitCode(const WString& code)
 	{
 		SubmitTask(code.Buffer());
+	}
+
+	vint GetTokenId(const WString& token)
+	{
+		vint index=colorIndices.Keys().IndexOf(token);
+		return index==-1?-1:colorIndices.Values().Get(index);
 	}
 
 	void BeginSetColors()
@@ -265,6 +275,7 @@ public:
 			if(index!=-1)
 			{
 				const WString& category=fieldSemanticColors.Values().Get(index);
+				OnSemanticColorize(foundToken, tokenParent, type, field, category, token);
 				return;
 			}
 		}
@@ -371,16 +382,9 @@ class ParserGrammarColorizer : public GrammarColorizer
 {
 protected:
 	Ptr<ParserDecl>							parsingTreeDecl;
-
-	void OnParsingFinished()override
-	{
-		Ptr<ParsingTreeObject> node=ThreadSafeGetTreeNode();
-		if(node)
-		{
-			parsingTreeDecl=new ParserDecl(node);
-		}
-		ThreadSafeReturnTreeNode();
-	}
+	vint									tokenIdType;
+	vint									tokenIdToken;
+	vint									tokenIdRule;
 
 	TypeSymbol* FindScope(ParsingTreeNode* node)
 	{
@@ -423,6 +427,40 @@ protected:
 		}
 		return 0;
 	}
+
+	void OnParsingFinished()override
+	{
+		Ptr<ParsingTreeObject> node=ThreadSafeGetTreeNode();
+		if(node)
+		{
+			parsingTreeDecl=new ParserDecl(node);
+		}
+		ThreadSafeReturnTreeNode();
+	}
+
+	void OnSemanticColorize(ParsingTreeToken* foundToken, ParsingTreeObject* tokenParent, const WString& type, const WString& field, const WString& category, vint& token)override
+	{
+		if(category==L"Type")
+		{
+			TypeSymbol* scope=FindScope(tokenParent);
+			if(FindType(scope, tokenParent))
+			{
+				token=tokenIdType;
+			}
+		}
+		else if(category==L"Grammar")
+		{
+			WString name=foundToken->GetValue();
+			if(parsingTreeDecl->tokens.Contains(name))
+			{
+				token=tokenIdToken;
+			}
+			else if(parsingTreeDecl->rules.Contains(name))
+			{
+				token=tokenIdRule;
+			}
+		}
+	}
 public:
 	ParserGrammarColorizer()
 		:GrammarColorizer(CreateBootstrapAutoRecoverParser(), L"ParserDecl")
@@ -434,61 +472,11 @@ public:
 		SetColor(L"Token", Color(163, 73, 164));
 		SetColor(L"Rule", Color(255, 127, 39));
 		EndSetColors();
-	}
 
-	//void ColorizeTokenContextSensitive(int lineIndex, const wchar_t* text, vint start, vint length, vint& token, int& contextState)override
-	//{
-	//	Ptr<ParsingTreeObject> node=ThreadSafeGetTreeNode();
-	//	if(node && token==2)
-	//	{
-	//		ParsingTextPos pos(lineIndex, start);
-	//		ParsingTreeNode* foundNode=node->FindDeepestNode(pos);
-	//		if(foundNode)
-	//		{
-	//			ParsingTreeToken* foundToken=dynamic_cast<ParsingTreeToken*>(foundNode);
-	//			if(foundToken)
-	//			{
-	//				ParsingTreeObject* tokenParent=dynamic_cast<ParsingTreeObject*>(foundNode->GetParent());
-	//				if(tokenParent)
-	//				{
-	//					if((tokenParent->GetType()==L"ClassTypeDef" || tokenParent->GetType()==L"EnumTypeDef") && tokenParent->GetMember(L"name")==foundNode)
-	//					{
-	//						token=3;
-	//					}
-	//					else if(tokenParent->GetType()==L"TokenDef" && tokenParent->GetMember(L"name")==foundNode)
-	//					{
-	//						token=4;
-	//					}
-	//					else if(tokenParent->GetType()==L"RuleDef" && tokenParent->GetMember(L"name")==foundNode)
-	//					{
-	//						token=5;
-	//					}
-	//					else if(tokenParent->GetType()==L"PrimitiveGrammarDef" && tokenParent->GetMember(L"name")==foundNode)
-	//					{
-	//						WString name=foundToken->GetValue();
-	//						if(parsingTreeDecl->tokens.Contains(name))
-	//						{
-	//							token=4;
-	//						}
-	//						else if(parsingTreeDecl->rules.Contains(name))
-	//						{
-	//							token=5;
-	//						}
-	//					}
-	//					else if((tokenParent->GetType()==L"PrimitiveTypeObj" || tokenParent->GetType()==L"SubTypeObj") && tokenParent->GetMember(L"name")==foundNode)
-	//					{
-	//						TypeSymbol* scope=FindScope(tokenParent);
-	//						if(FindType(scope, tokenParent))
-	//						{
-	//							token=3;
-	//						}
-	//					}
-	//				}
-	//			}
-	//		}
-	//	}
-	//	ThreadSafeReturnTreeNode();
-	//}
+		tokenIdType=GetTokenId(L"Type");
+		tokenIdToken=GetTokenId(L"Token");
+		tokenIdRule=GetTokenId(L"Rule");
+	}
 };
 
 /***********************************************************************
