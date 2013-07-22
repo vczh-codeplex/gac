@@ -27,6 +27,11 @@ ParsingGeneralParser
 			{
 			}
 
+			Ptr<ParsingTable> ParsingGeneralParser::GetTable()
+			{
+				return table;
+			}
+
 			void ParsingGeneralParser::BeginParse()
 			{
 			}

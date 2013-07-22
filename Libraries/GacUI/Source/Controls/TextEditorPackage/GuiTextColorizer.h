@@ -115,8 +115,10 @@ Colorizer
 				/// <returns>Returns the extra token index of this token. The token index for this token is regex-token-count + extra-token-index Returns -1 if this operation failed.</returns>
 				/// <param name="color">The color for this token type.</param>
 				vint														AddExtraToken(elements::text::ColorEntry color);
+				/// <summary>Clear all token color settings.</summary>
+				void														ClearTokens();
 				/// <summary>Setup the colorizer. After that, the colorizer cannot be changed.</summary>
-				bool														Setup();
+				void														Setup();
 				/// <summary>Callback function to set context sensitive state and change token accordingly.</summary>
 				/// <param name="lineIndex">Line index.</param>
 				/// <param name="text">Text buffer.</param>
