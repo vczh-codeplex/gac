@@ -158,11 +158,12 @@ ParsingTable::TransitionItem
 ParsingTable
 ***********************************************************************/
 
-			ParsingTable::ParsingTable(vint _attributeInfoCount, vint _treeFieldInfoCount, vint _tokenCount, vint discardTokenCount, vint _stateCount, vint _ruleCount)
+			ParsingTable::ParsingTable(vint _attributeInfoCount, vint _treeTypeInfoCount, vint _treeFieldInfoCount, vint _tokenCount, vint discardTokenCount, vint _stateCount, vint _ruleCount)
 				:ambiguity(false)
 				,tokenCount(_tokenCount+UserTokenStart)
 				,stateCount(_stateCount)
 				,attributeInfos(_attributeInfoCount)
+				,treeTypeInfos(_treeTypeInfoCount)
 				,treeFieldInfos(_treeFieldInfoCount)
 				,tokenInfos(_tokenCount+UserTokenStart)
 				,discardTokenInfos(discardTokenCount)
@@ -199,6 +200,28 @@ ParsingTable
 			void ParsingTable::SetAttributeInfo(vint index, Ptr<AttributeInfoList> info)
 			{
 				attributeInfos[index]=info;
+			}
+
+			vint ParsingTable::GetTreeTypeInfoCount()
+			{
+				return treeTypeInfos.Count();
+			}
+
+			const ParsingTable::TreeTypeInfo& ParsingTable::GetTreeTypeInfo(vint index)
+			{
+				return treeTypeInfos[index];
+			}
+
+			const ParsingTable::TreeTypeInfo& ParsingTable::GetTreeTypeInfo(const WString& type)
+			{
+				vint index=treeTypeInfoMap.Keys().IndexOf(type);
+				if(index==-1) return *(const TreeTypeInfo*)0;
+				return treeTypeInfos[treeTypeInfoMap.Values().Get(index)];
+			}
+
+			void ParsingTable::SetTreeTypeInfo(vint index, const TreeTypeInfo& info)
+			{
+				treeTypeInfos[index]=info;
 			}
 
 			vint ParsingTable::GetTreeFieldInfoCount()
@@ -338,6 +361,12 @@ ParsingTable
 				{
 					StateInfo& info=stateInfos[i];
 					info.ruleAmbiguousType=ruleInfos[ruleMap[info.ruleName]].ambiguousType;
+				}
+
+				treeTypeInfoMap.Clear();
+				FOREACH_INDEXER(TreeTypeInfo, info, index, treeTypeInfos)
+				{
+					treeTypeInfoMap.Add(info.type, index);
 				}
 
 				treeFieldInfoMap.Clear();

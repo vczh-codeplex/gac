@@ -124,6 +124,19 @@ CreateLookAhead
 CollectAttribute
 ***********************************************************************/
 
+			void CollectType(ParsingSymbol* symbol, List<ParsingSymbol*>& types)
+			{
+				if(symbol->GetType()==ParsingSymbol::ClassType)
+				{
+					types.Add(symbol);
+				}
+				vint count=symbol->GetSubSymbolCount();
+				for(vint i=0;i<count;i++)
+				{
+					CollectType(symbol->GetSubSymbol(i), types);
+				}
+			}
+
 			void CollectAttributeInfo(Ptr<ParsingTable::AttributeInfoList> att, List<Ptr<definitions::ParsingDefinitionAttribute>>& atts)
 			{
 				FOREACH(Ptr<definitions::ParsingDefinitionAttribute>, datt, atts)
@@ -145,10 +158,143 @@ CollectAttribute
 GenerateTable
 ***********************************************************************/
 
-			Ptr<tabling::ParsingTable> GenerateTableFromPDA(Ptr<definitions::ParsingDefinition> definition, Ptr<Automaton> jointPDA, bool enableAmbiguity, collections::List<Ptr<ParsingError>>& errors)
+			Ptr<tabling::ParsingTable> GenerateTableFromPDA(Ptr<definitions::ParsingDefinition> definition, ParsingSymbolManager* manager, Ptr<Automaton> jointPDA, bool enableAmbiguity, collections::List<Ptr<ParsingError>>& errors)
 			{
+				List<Ptr<ParsingTable::AttributeInfoList>> atts;
+
+				/***********************************************************************
+				find all class types
+				***********************************************************************/
+				List<ParsingSymbol*> types;
+				Dictionary<ParsingSymbol*, Ptr<List<ParsingSymbol*>>> childTypes;
+
+				CollectType(manager->GetGlobal(), types);
+				FOREACH(ParsingSymbol*, type, types)
+				{
+					ParsingSymbol* parent=type;
+					while(parent)
+					{
+						Ptr<List<ParsingSymbol*>> children;
+						vint index=childTypes.Keys().IndexOf(parent);
+						if(index==-1)
+						{
+							children=new List<ParsingSymbol*>;
+							childTypes.Add(parent, children);
+						}
+						else
+						{
+							children=childTypes.Values().Get(index);
+						}
+
+						children->Add(type);
+						parent=parent->GetDescriptorSymbol();
+					}
+				}
+
+				// find all class fields
+				Dictionary<WString, vint> typeAtts;
+				Dictionary<Pair<WString, WString>, vint> treeFieldAtts;
+				for(vint i=0;i<childTypes.Count();i++)
+				{
+					ParsingSymbol* type=childTypes.Keys().Get(i);
+					List<ParsingSymbol*>& children=*childTypes.Values().Get(i).Obj();
+
+					Ptr<ParsingTable::AttributeInfoList> typeAtt=new ParsingTable::AttributeInfoList;
+					FOREACH(ParsingSymbol*, child, children)
+					{
+						ParsingDefinitionClassDefinition* classDef=manager->CacheGetClassDefinition(child);
+						CollectAttributeInfo(typeAtt, classDef->attributes);
+					}
+					if(typeAtt->attributes.Count()>0)
+					{
+						typeAtts.Add(GetTypeFullName(type), atts.Count());
+						atts.Add(typeAtt);
+					}
+					else
+					{
+						typeAtts.Add(GetTypeFullName(type), -1);
+					}
+					
+					ParsingDefinitionClassDefinition* classDef=manager->CacheGetClassDefinition(type);
+					List<vint> fieldAtts;
+					FOREACH_INDEXER(Ptr<ParsingDefinitionClassMemberDefinition>, field, index, classDef->members)
+					{
+						if(field->attributes.Count()>0)
+						{
+							fieldAtts.Add(atts.Count());
+							atts.Add(CreateAttributeInfo(field->attributes));
+						}
+						else
+						{
+							fieldAtts.Add(-1);
+						}
+					}
+
+					FOREACH(ParsingSymbol*, child, children)
+					{
+						WString type=GetTypeFullName(child);
+						FOREACH_INDEXER(Ptr<ParsingDefinitionClassMemberDefinition>, field, index, classDef->members)
+						{
+							treeFieldAtts.Add(Pair<WString, WString>(type, field->name), fieldAtts[index]);
+						}
+					}
+				}
+				
+				/***********************************************************************
+				find all tokens
+				***********************************************************************/
+				vint tokenCount=0;
+				vint discardTokenCount=0;
 				Dictionary<ParsingSymbol*, vint> tokenIds;
 				List<WString> discardTokens;
+
+				Dictionary<WString, vint> tokenAtts;
+				Dictionary<WString, vint> ruleAtts;
+
+				FOREACH(Ptr<ParsingDefinitionTokenDefinition>, token, definition->tokens)
+				{
+					if(token->attributes.Count()>0)
+					{
+						tokenAtts.Add(token->name, atts.Count());
+						atts.Add(CreateAttributeInfo(token->attributes));
+					}
+					else
+					{
+						tokenAtts.Add(token->name, -1);
+					}
+
+					if(token->discard)
+					{
+						discardTokens.Add(token->name);
+						discardTokenCount++;
+					}
+					else
+					{
+						ParsingSymbol* tokenSymbol=jointPDA->symbolManager->GetGlobal()->GetSubSymbolByName(token->name);
+						tokenIds.Add(tokenSymbol, tokenIds.Count()+ParsingTable::UserTokenStart);
+						tokenCount++;
+					}
+				}
+				
+				/***********************************************************************
+				find all rules
+				***********************************************************************/
+				FOREACH(Ptr<ParsingDefinitionRuleDefinition>, rule, definition->rules)
+				{
+					if(rule->attributes.Count()>0)
+					{
+						ruleAtts.Add(rule->name, atts.Count());
+						atts.Add(CreateAttributeInfo(rule->attributes));
+					}
+					else
+					{
+						ruleAtts.Add(rule->name, -1);
+					}
+				}
+				
+				/***********************************************************************
+				find all available states
+				***********************************************************************/
 				List<State*> stateIds;
 				vint availableStateCount=0;
 				{
@@ -187,61 +333,39 @@ GenerateTable
 						stateIds.Add(state.Obj());
 					}
 				}
-
-				vint tokenCount=0;
-				vint discardTokenCount=0;
 				vint stateCount=stateIds.Count();
 
-				Dictionary<WString, vint> tokenAtts;
-				Dictionary<WString, vint> ruleAtts;
-				Dictionary<Pair<WString, WString>, vint> treeFieldAtts;
-				List<Ptr<ParsingTable::AttributeInfoList>> atts;
-				List<Ptr<ParsingTable::TreeFieldInfo>> treeFields;
+				Ptr<ParsingTable> table=new ParsingTable(atts.Count(), typeAtts.Count(), treeFieldAtts.Count(), tokenCount, discardTokenCount, stateCount, definition->rules.Count());
 
-				FOREACH(Ptr<ParsingDefinitionRuleDefinition>, rule, definition->rules)
-				{
-					if(rule->attributes.Count()>0)
-					{
-						ruleAtts.Add(rule->name, atts.Count());
-						atts.Add(CreateAttributeInfo(rule->attributes));
-					}
-					else
-					{
-						ruleAtts.Add(rule->name, -1);
-					}
-				}
-
-				FOREACH(Ptr<ParsingDefinitionTokenDefinition>, token, definition->tokens)
-				{
-					if(token->attributes.Count()>0)
-					{
-						tokenAtts.Add(token->name, atts.Count());
-						atts.Add(CreateAttributeInfo(token->attributes));
-					}
-					else
-					{
-						tokenAtts.Add(token->name, -1);
-					}
-
-					if(token->discard)
-					{
-						discardTokens.Add(token->name);
-						discardTokenCount++;
-					}
-					else
-					{
-						ParsingSymbol* tokenSymbol=jointPDA->symbolManager->GetGlobal()->GetSubSymbolByName(token->name);
-						tokenIds.Add(tokenSymbol, tokenIds.Count()+ParsingTable::UserTokenStart);
-						tokenCount++;
-					}
-				}
-				Ptr<ParsingTable> table=new ParsingTable(atts.Count(), treeFields.Count(), tokenCount, discardTokenCount, stateCount, definition->rules.Count());
-
+				/***********************************************************************
+				fill attribute infos
+				***********************************************************************/
 				FOREACH_INDEXER(Ptr<ParsingTable::AttributeInfoList>, att, index, atts)
 				{
 					table->SetAttributeInfo(index, att);
 				}
 
+				/***********************************************************************
+				fill tree type infos
+				***********************************************************************/
+				typedef Pair<WString, vint> TreeTypeAttsPair;
+				FOREACH_INDEXER(TreeTypeAttsPair, type, index, typeAtts)
+				{
+					table->SetTreeTypeInfo(index, ParsingTable::TreeTypeInfo(type.key, type.value));
+				}
+
+				/***********************************************************************
+				fill tree field infos
+				***********************************************************************/
+				typedef Pair<Pair<WString, WString>, vint> TreeFieldAttsPair;
+				FOREACH_INDEXER(TreeFieldAttsPair, field, index, treeFieldAtts)
+				{
+					table->SetTreeFieldInfo(index, ParsingTable::TreeFieldInfo(field.key.key, field.key.value, field.value));
+				}
+
+				/***********************************************************************
+				fill token infos
+				***********************************************************************/
 				FOREACH(ParsingSymbol*, symbol, tokenIds.Keys())
 				{
 					ParsingTable::TokenInfo info;
@@ -264,6 +388,9 @@ GenerateTable
 					table->SetDiscardTokenInfo(i, info);
 				}
 
+				/***********************************************************************
+				fill rule infos
+				***********************************************************************/
 				FOREACH_INDEXER(ParsingDefinitionRuleDefinition*, rule, i, jointPDA->ruleInfos.Keys())
 				{
 					Ptr<RuleInfo> pdaRuleInfo=jointPDA->ruleInfos[rule];
@@ -291,6 +418,9 @@ GenerateTable
 					table->SetRuleInfo(i, info);
 				}
 
+				/***********************************************************************
+				fill state infos
+				***********************************************************************/
 				FOREACH_INDEXER(State*, state, i, stateIds)
 				{
 					ParsingTable::StateInfo info;
@@ -300,6 +430,9 @@ GenerateTable
 					table->SetStateInfo(i, info);
 				}
 
+				/***********************************************************************
+				fill transition table
+				***********************************************************************/
 				FOREACH_INDEXER(State*, state, stateIndex, stateIds)
 				{
 					// if this state is not necessary, stop building the table
@@ -399,6 +532,9 @@ GenerateTable
 					}
 				}
 
+				/***********************************************************************
+				check conflict and build look ahead table
+				***********************************************************************/
 				for(vint i=0;i<table->GetStateCount();i++)
 				{
 					for(vint j=0;j<table->GetTokenCount();j++)
@@ -429,7 +565,10 @@ GenerateTable
 						}
 					}
 				}
-				
+
+				/***********************************************************************
+				initialize table
+				***********************************************************************/
 				if(errors.Count()>0)
 				{
 					table->SetAmbiguity(true);
@@ -453,7 +592,7 @@ GenerateTable
 					MarkLeftRecursiveInJointPDA(jointPDA, errors);
 					if(errors.Count()==0)
 					{
-						Ptr<ParsingTable> table=GenerateTableFromPDA(definition, jointPDA, enableAmbiguity, errors);
+						Ptr<ParsingTable> table=GenerateTableFromPDA(definition, &symbolManager, jointPDA, enableAmbiguity, errors);
 						if(enableAmbiguity || errors.Count()==0)
 						{
 							return table;

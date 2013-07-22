@@ -113,10 +113,11 @@ namespace vl
 
 			class ParsingSymbolManager : public Object
 			{
-
-				typedef collections::List<Ptr<ParsingSymbol>>												ParsingSymbolList;
-				typedef collections::Dictionary<DefinitionTypeScopePair, ParsingSymbol*>					DefinitionTypeSymbolMap;
-				typedef collections::Dictionary<definitions::ParsingDefinitionGrammar*, ParsingSymbol*>		DefinitionGrammarSymbolMap;
+				typedef definitions::ParsingDefinitionClassDefinition												ClassDefinition;
+				typedef collections::List<Ptr<ParsingSymbol>>														ParsingSymbolList;
+				typedef collections::Dictionary<DefinitionTypeScopePair, ParsingSymbol*>							DefinitionTypeSymbolMap;
+				typedef collections::Dictionary<definitions::ParsingDefinitionGrammar*, ParsingSymbol*>				DefinitionGrammarSymbolMap;
+				typedef collections::Dictionary<ParsingSymbol*, ClassDefinition*>									SymbolClassDefinitionMap;
 			protected:
 				ParsingSymbol*					globalSymbol;
 				ParsingSymbol*					tokenTypeSymbol;
@@ -124,8 +125,9 @@ namespace vl
 				DefinitionTypeSymbolMap			definitionTypeSymbolCache;
 				DefinitionGrammarSymbolMap		definitionGrammarSymbolCache;
 				DefinitionGrammarSymbolMap		definitionGrammarTypeCache;
+				SymbolClassDefinitionMap		symbolClassDefinitionCache;
 
-				ParsingSymbol*					TryAddSubSymbol(Ptr<ParsingSymbol> subSymbol, ParsingSymbol* parentSymbol);
+				bool							TryAddSubSymbol(Ptr<ParsingSymbol> subSymbol, ParsingSymbol* parentSymbol);
 			public:
 				ParsingSymbolManager();
 				~ParsingSymbolManager();
@@ -134,13 +136,14 @@ namespace vl
 				ParsingSymbol*					GetTokenType();
 				ParsingSymbol*					GetArrayType(ParsingSymbol* elementType);
 
-				ParsingSymbol*					AddClass(const WString& name, ParsingSymbol* baseType, ParsingSymbol* parentType=0);
+				ParsingSymbol*					AddClass(definitions::ParsingDefinitionClassDefinition* classDef, ParsingSymbol* baseType, ParsingSymbol* parentType=0);
 				ParsingSymbol*					AddField(const WString& name, ParsingSymbol* classType, ParsingSymbol* fieldType);
 				ParsingSymbol*					AddEnum(const WString& name, ParsingSymbol* parentType=0);
 				ParsingSymbol*					AddEnumItem(const WString& name, ParsingSymbol* enumType);
 				ParsingSymbol*					AddTokenDefinition(const WString& name, const WString& regex);
 				ParsingSymbol*					AddRuleDefinition(const WString& name, ParsingSymbol* ruleType);
 
+				ClassDefinition*				CacheGetClassDefinition(ParsingSymbol* type);
 				ParsingSymbol*					CacheGetType(definitions::ParsingDefinitionType* type, ParsingSymbol* scope);
 				bool							CacheSetType(definitions::ParsingDefinitionType* type, ParsingSymbol* scope, ParsingSymbol* symbol);
 				ParsingSymbol*					CacheGetSymbol(definitions::ParsingDefinitionGrammar* grammar);

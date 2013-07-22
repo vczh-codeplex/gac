@@ -82,7 +82,7 @@ namespace test
 		LogParsingData(jointPDA, L"Parsing."+name+L".JPDA-Marked.txt", L"Compacted Joint PDA", errors);
 		TEST_ASSERT(errors.Count()==0);
 
-		Ptr<ParsingTable> table=GenerateTableFromPDA(definition, jointPDA, enableAmbiguity, errors);
+		Ptr<ParsingTable> table=GenerateTableFromPDA(definition, &symbolManager, jointPDA, enableAmbiguity, errors);
 		LogParsingData(table, L"Parsing."+name+L".Table.txt", L"Table", errors);
 		if(!enableAmbiguity)
 		{
