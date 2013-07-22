@@ -11,6 +11,22 @@ namespace vl
 			using namespace regex;
 
 /***********************************************************************
+ParsingTable::AttributeInfoList
+***********************************************************************/
+
+			Ptr<ParsingTable::AttributeInfo> ParsingTable::AttributeInfoList::FindFirst(const WString& name)
+			{
+				for(vint i=0;i<attributes.Count();i++)
+				{
+					if(attributes[i]->name==name)
+					{
+						return attributes[i];
+					}
+				}
+				return 0;
+			}
+
+/***********************************************************************
 ParsingTable::LookAheadInfo
 ***********************************************************************/
 

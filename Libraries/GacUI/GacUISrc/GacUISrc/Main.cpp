@@ -46,7 +46,26 @@ private:
 	Ptr<ParsingTreeObject>					parsingTreeNode;
 
 	Dictionary<WString, text::ColorEntry>	colorSettings;
+	Dictionary<WString, vint>				colorIndices;
 
+	Ptr<ParsingTable::AttributeInfo> GetColorAttribute(vint index)
+	{
+		if(index!=-1)
+		{
+			Ptr<ParsingTable::AttributeInfo> att=grammarParser->GetTable()->GetAttributeInfo(index)->FindFirst(L"Color");
+			if(att && att->arguments.Count()==1)
+			{
+				return att;
+			}
+		}
+		return 0;
+	}
+
+	text::ColorEntry GetColor(const WString& name)
+	{
+		vint index=colorSettings.Keys().IndexOf(name);
+		return index==-1?GetDefaultColor():colorSettings.Values().Get(index);
+	}
 protected:
 	virtual void OnParsingFinished()
 	{
@@ -126,6 +145,38 @@ public:
 
 	void EndSetColors()
 	{
+		SortedList<WString> tokenColors;
+		Ptr<ParsingTable> table=grammarParser->GetTable();
+		colorIndices.Clear();
+
+		// Prepare tokens
+		{
+			vint tokenCount=table->GetTokenCount();
+			for(vint token=ParsingTable::UserTokenStart;token<tokenCount;token++)
+			{
+				const ParsingTable::TokenInfo& tokenInfo=table->GetTokenInfo(token);
+				if(Ptr<ParsingTable::AttributeInfo> att=GetColorAttribute(tokenInfo.attributeIndex))
+				{
+					tokenColors.Add(att->arguments[0]);
+					vint tokenId=AddToken(tokenInfo.regex, GetColor(att->arguments[0]));
+					colorIndices.Set(att->arguments[0], tokenId);
+				}
+				else
+				{
+					AddToken(tokenInfo.regex, GetDefaultColor());
+				}
+			}
+		}
+
+		// Prepare extra tokens
+		FOREACH_INDEXER(WString, color, index, colorSettings.Keys())
+		{
+			if(!tokenColors.Contains(color))
+			{
+				vint tokenId=AddExtraToken(colorSettings.Values().Get(index));
+				colorIndices.Set(color, tokenId);
+			}
+		}
 		Setup();
 	}
 };
@@ -287,7 +338,7 @@ public:
 		:GrammarColorizer(CreateBootstrapAutoRecoverParser(), L"ParserDecl")
 	{
 		SetColor(L"Keyword", Color(0, 0, 255));
-		SetColor(L"Text", Color(163, 21, 21));
+		SetColor(L"String", Color(163, 21, 21));
 		SetColor(L"Type", Color(43, 145, 175));
 		SetColor(L"Token", Color(163, 73, 164));
 		SetColor(L"Rule", Color(255, 127, 39));
