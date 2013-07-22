@@ -916,7 +916,7 @@ namespace vl
 				{
 					const ParsingTable::RuleInfo& info=table->GetRuleInfo(i);
 					writer.WriteString(L"    ");
-					writer.WriteString(info.name);
+					writer.WriteLine(info.name);
 					LogAttributeList(table, info.attributeIndex, L"        ", writer);
 				}
 				writer.WriteLine(L"");
@@ -926,7 +926,7 @@ namespace vl
 				{
 					const ParsingTable::TreeTypeInfo& info=table->GetTreeTypeInfo(i);
 					writer.WriteString(L"    ");
-					writer.WriteString(info.type);
+					writer.WriteLine(info.type);
 					LogAttributeList(table, info.attributeIndex, L"        ", writer);
 				}
 				writer.WriteLine(L"");
@@ -938,7 +938,7 @@ namespace vl
 					writer.WriteString(L"    ");
 					writer.WriteString(info.type);
 					writer.WriteString(L".");
-					writer.WriteString(info.field);
+					writer.WriteLine(info.field);
 					LogAttributeList(table, info.attributeIndex, L"        ", writer);
 				}
 				writer.WriteLine(L"");
