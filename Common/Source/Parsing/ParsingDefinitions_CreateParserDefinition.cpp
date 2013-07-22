@@ -34,6 +34,7 @@ namespace vl
 					.Type(
 						Class(L"PrimitiveTypeObj", Type(L"TypeObj"))
 							.Member(L"name", TokenType())
+								.Attribute(Attribute(L"SemanticColor").Argument(L"Type"))
 						)
 
 					.Type(
@@ -44,6 +45,7 @@ namespace vl
 						Class(L"SubTypeObj", Type(L"TypeObj"))
 							.Member(L"parentType", Type(L"TypeObj"))
 							.Member(L"name", TokenType())
+								.Attribute(Attribute(L"SemanticColor").Argument(L"Type"))
 						)
 
 					.Type(
@@ -54,6 +56,7 @@ namespace vl
 					.Type(
 						Class(L"TypeDef", Type(L"DefBase"))
 							.Member(L"name", TokenType())
+								.Attribute(Attribute(L"Color").Argument(L"Type"))
 						)
 
 					.Type(
@@ -88,6 +91,7 @@ namespace vl
 					.Type(
 						Class(L"PrimitiveGrammarDef", Type(L"GrammarDef"))
 							.Member(L"name", TokenType())
+								.Attribute(Attribute(L"SemanticColor").Argument(L"Grammar"))
 						)
 
 					.Type(
@@ -149,6 +153,7 @@ namespace vl
 									.Member(L"KeepToken")
 								)
 							.Member(L"name", TokenType())
+								.Attribute(Attribute(L"Color").Argument(L"Token"))
 							.Member(L"regex", TokenType())
 							.Member(L"discard", Type(L"DiscardOption"))
 						)
@@ -156,6 +161,7 @@ namespace vl
 					.Type(
 						Class(L"RuleDef", Type(L"DefBase"))
 							.Member(L"name", TokenType())
+								.Attribute(Attribute(L"Color").Argument(L"Rule"))
 							.Member(L"type", Type(L"TypeObj"))
 							.Member(L"grammars", Type(L"GrammarDef").Array())
 						)
@@ -167,14 +173,30 @@ namespace vl
 							.Member(L"rules", Type(L"RuleDef").Array())
 						)
 					//-------------------------------------
-					.Token(L"CLASS",		L"class")
-					.Token(L"AMBIGUOUS",	L"ambiguous")
-					.Token(L"ENUM",			L"enum")
-					.Token(L"TOKEN",		L"token")
-					.Token(L"DISCARDTOKEN",	L"discardtoken")
-					.Token(L"RULE",			L"rule")
-					.Token(L"AS",			L"as")
-					.Token(L"WITH",			L"with")
+					.TokenAtt(L"CLASS",		L"class")
+						.Attribute(Attribute(L"Color").Argument(L"Keyword"))
+						.EndToken()
+					.TokenAtt(L"AMBIGUOUS",	L"ambiguous")
+						.Attribute(Attribute(L"Color").Argument(L"Keyword"))
+						.EndToken()
+					.TokenAtt(L"ENUM",			L"enum")
+						.Attribute(Attribute(L"Color").Argument(L"Keyword"))
+						.EndToken()
+					.TokenAtt(L"TOKEN",		L"token")
+						.Attribute(Attribute(L"Color").Argument(L"Keyword"))
+						.EndToken()
+					.TokenAtt(L"DISCARDTOKEN",	L"discardtoken")
+						.Attribute(Attribute(L"Color").Argument(L"Keyword"))
+						.EndToken()
+					.TokenAtt(L"RULE",			L"rule")
+						.Attribute(Attribute(L"Color").Argument(L"Keyword"))
+						.EndToken()
+					.TokenAtt(L"AS",			L"as")
+						.Attribute(Attribute(L"Color").Argument(L"Keyword"))
+						.EndToken()
+					.TokenAtt(L"WITH",			L"with")
+						.Attribute(Attribute(L"Color").Argument(L"Keyword"))
+						.EndToken()
 
 					.Token(L"OPEN",			L"/{")
 					.Token(L"CLOSE",		L"/}")
@@ -189,10 +211,16 @@ namespace vl
 					.Token(L"OPTCLOSE",		L"/]")
 					.Token(L"PREOPEN",		L"/(")
 					.Token(L"PRECLOSE",		L"/)")
-					.Token(L"ATT",			L"@")
+					.TokenAtt(L"ATT",			L"@")
+						.Attribute(Attribute(L"Color").Argument(L"Attribute"))
+						.EndToken()
 
-					.Token(L"NAME",			L"[a-zA-Z_]/w*")
-					.Token(L"STRING",		L"\"([^\"]|\"\")*\"")
+					.TokenAtt(L"NAME",			L"[a-zA-Z_]/w*")
+						.Attribute(Attribute(L"ContextColor").Argument(L"Default"))
+						.EndToken()
+					.TokenAtt(L"STRING",		L"\"([^\"]|\"\")*\"")
+						.Attribute(Attribute(L"Color").Argument(L"String"))
+						.EndToken()
 					.Discard(L"SPACE",		L"/s+")
 					//-------------------------------------
 					.Rule(L"Attribute", Type(L"AttributeDef"))
