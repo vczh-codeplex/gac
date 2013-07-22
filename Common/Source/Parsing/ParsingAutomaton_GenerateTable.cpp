@@ -121,6 +121,27 @@ CreateLookAhead
 			}
 
 /***********************************************************************
+CollectAttribute
+***********************************************************************/
+
+			void CollectAttributeInfo(Ptr<ParsingTable::AttributeInfoList> att, List<Ptr<definitions::ParsingDefinitionAttribute>>& atts)
+			{
+				FOREACH(Ptr<definitions::ParsingDefinitionAttribute>, datt, atts)
+				{
+					Ptr<ParsingTable::AttributeInfo> tatt=new ParsingTable::AttributeInfo(datt->name);
+					CopyFrom(tatt->arguments, datt->arguments);
+					att->attributes.Add(tatt);
+				}
+			}
+
+			Ptr<ParsingTable::AttributeInfoList> CreateAttributeInfo(List<Ptr<definitions::ParsingDefinitionAttribute>>& atts)
+			{
+				Ptr<ParsingTable::AttributeInfoList> att=new ParsingTable::AttributeInfoList;
+				CollectAttributeInfo(att, atts);
+				return att;
+			}
+
+/***********************************************************************
 GenerateTable
 ***********************************************************************/
 
@@ -171,8 +192,37 @@ GenerateTable
 				vint discardTokenCount=0;
 				vint stateCount=stateIds.Count();
 
+				Dictionary<WString, vint> tokenAtts;
+				Dictionary<WString, vint> ruleAtts;
+				Dictionary<Pair<WString, WString>, vint> treeFieldAtts;
+				List<Ptr<ParsingTable::AttributeInfoList>> atts;
+				List<Ptr<ParsingTable::TreeFieldInfo>> treeFields;
+
+				FOREACH(Ptr<ParsingDefinitionRuleDefinition>, rule, definition->rules)
+				{
+					if(rule->attributes.Count()>0)
+					{
+						ruleAtts.Add(rule->name, atts.Count());
+						atts.Add(CreateAttributeInfo(rule->attributes));
+					}
+					else
+					{
+						ruleAtts.Add(rule->name, -1);
+					}
+				}
+
 				FOREACH(Ptr<ParsingDefinitionTokenDefinition>, token, definition->tokens)
 				{
+					if(token->attributes.Count()>0)
+					{
+						tokenAtts.Add(token->name, atts.Count());
+						atts.Add(CreateAttributeInfo(token->attributes));
+					}
+					else
+					{
+						tokenAtts.Add(token->name, -1);
+					}
+
 					if(token->discard)
 					{
 						discardTokens.Add(token->name);
@@ -185,13 +235,19 @@ GenerateTable
 						tokenCount++;
 					}
 				}
-				Ptr<ParsingTable> table=new ParsingTable(0, 0, tokenCount, discardTokenCount, stateCount, definition->rules.Count());
+				Ptr<ParsingTable> table=new ParsingTable(atts.Count(), treeFields.Count(), tokenCount, discardTokenCount, stateCount, definition->rules.Count());
+
+				FOREACH_INDEXER(Ptr<ParsingTable::AttributeInfoList>, att, index, atts)
+				{
+					table->SetAttributeInfo(index, att);
+				}
 
 				FOREACH(ParsingSymbol*, symbol, tokenIds.Keys())
 				{
 					ParsingTable::TokenInfo info;
 					info.name=symbol->GetName();
 					info.regex=symbol->GetDescriptorString();
+					info.attributeIndex=tokenAtts[info.name];
 
 					vint id=tokenIds[symbol];
 					table->SetTokenInfo(id, info);
@@ -204,6 +260,7 @@ GenerateTable
 					ParsingTable::TokenInfo info;
 					info.name=symbol->GetName();
 					info.regex=symbol->GetDescriptorString();
+					info.attributeIndex=tokenAtts[info.name];
 					table->SetDiscardTokenInfo(i, info);
 				}
 
@@ -214,6 +271,7 @@ GenerateTable
 					info.name=rule->name;
 					info.type=TypeToString(rule->type.Obj());
 					info.rootStartState=stateIds.IndexOf(pdaRuleInfo->rootRuleStartState);
+					info.attributeIndex=ruleAtts[info.name];
 					
 					if(Ptr<ParsingDefinitionPrimitiveType> classType=rule->type.Cast<ParsingDefinitionPrimitiveType>())
 					{
