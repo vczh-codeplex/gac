@@ -39,6 +39,10 @@ GrammarColorizer
 
 class GrammarColorizer abstract : public GuiTextBoxRegexColorizer, public RepeatingTaskExecutor<WString>
 {
+	typedef Pair<WString, WString>								FieldDesc;
+	typedef Pair<WString, vint>									SemanticColorDesc;
+	typedef Dictionary<FieldDesc, vint>							FieldContextColors;
+	typedef Dictionary<FieldDesc, SemanticColorDesc>			FieldSemanticColors;
 private:
 	Ptr<ParsingGeneralParser>				grammarParser;
 	WString									grammarRule;
@@ -47,18 +51,36 @@ private:
 
 	Dictionary<WString, text::ColorEntry>	colorSettings;
 	Dictionary<WString, vint>				colorIndices;
+	List<bool>								colorContext;
+	FieldContextColors						fieldContextColors;
+	FieldSemanticColors						fieldSemanticColors;
 
-	Ptr<ParsingTable::AttributeInfo> GetColorAttribute(vint index)
+	Ptr<ParsingTable::AttributeInfo> GetAttribute(vint index, const WString& name, vint argumentCount)
 	{
 		if(index!=-1)
 		{
-			Ptr<ParsingTable::AttributeInfo> att=grammarParser->GetTable()->GetAttributeInfo(index)->FindFirst(L"Color");
-			if(att && att->arguments.Count()==1)
+			Ptr<ParsingTable::AttributeInfo> att=grammarParser->GetTable()->GetAttributeInfo(index)->FindFirst(name);
+			if(att && att->arguments.Count()==argumentCount)
 			{
 				return att;
 			}
 		}
 		return 0;
+	}
+
+	Ptr<ParsingTable::AttributeInfo> GetColorAttribute(vint index)
+	{
+		return GetAttribute(index, L"Color", 1);
+	}
+
+	Ptr<ParsingTable::AttributeInfo> GetContextColorAttribute(vint index)
+	{
+		return GetAttribute(index, L"ContextColor", 1);
+	}
+
+	Ptr<ParsingTable::AttributeInfo> GetSemanticColorAttribute(vint index)
+	{
+		return GetAttribute(index, L"SemanticColor", 2);
 	}
 
 	text::ColorEntry GetColor(const WString& name)
@@ -148,8 +170,11 @@ public:
 		SortedList<WString> tokenColors;
 		Ptr<ParsingTable> table=grammarParser->GetTable();
 		colorIndices.Clear();
+		colorContext.Clear();
+		fieldContextColors.Clear();
+		fieldSemanticColors.Clear();
 
-		// Prepare tokens
+		// prepare tokens
 		{
 			vint tokenCount=table->GetTokenCount();
 			for(vint token=ParsingTable::UserTokenStart;token<tokenCount;token++)
@@ -160,15 +185,24 @@ public:
 					tokenColors.Add(att->arguments[0]);
 					vint tokenId=AddToken(tokenInfo.regex, GetColor(att->arguments[0]));
 					colorIndices.Set(att->arguments[0], tokenId);
+					colorContext.Add(false);
+				}
+				else if(Ptr<ParsingTable::AttributeInfo> att=GetContextColorAttribute(tokenInfo.attributeIndex))
+				{
+					tokenColors.Add(att->arguments[0]);
+					vint tokenId=AddToken(tokenInfo.regex, GetColor(att->arguments[0]));
+					colorIndices.Set(att->arguments[0], tokenId);
+					colorContext.Add(true);
 				}
 				else
 				{
 					AddToken(tokenInfo.regex, GetDefaultColor());
+					colorContext.Add(false);
 				}
 			}
 		}
 
-		// Prepare extra tokens
+		// prepare extra tokens
 		FOREACH_INDEXER(WString, color, index, colorSettings.Keys())
 		{
 			if(!tokenColors.Contains(color))
@@ -177,7 +211,100 @@ public:
 				colorIndices.Set(color, tokenId);
 			}
 		}
+
+		// prepare fields
+		{
+			vint fieldCount=table->GetTreeFieldInfoCount();
+			for(vint field=0;field<fieldCount;field++)
+			{
+				const ParsingTable::TreeFieldInfo& fieldInfo=table->GetTreeFieldInfo(field);
+				if(Ptr<ParsingTable::AttributeInfo> att=GetColorAttribute(fieldInfo.attributeIndex))
+				{
+					vint index=colorIndices.Keys().IndexOf(att->arguments[0]);
+					if(index!=-1)
+					{
+						fieldContextColors.Add(FieldDesc(fieldInfo.type, fieldInfo.field), index);
+					}
+				}
+				else if(Ptr<ParsingTable::AttributeInfo> att=GetSemanticColorAttribute(fieldInfo.attributeIndex))
+				{
+					vint index=colorIndices.Keys().IndexOf(att->arguments[1]);
+					if(index!=-1 || att->arguments[1]==L"*")
+					{
+						fieldSemanticColors.Add(FieldDesc(fieldInfo.type, fieldInfo.field), SemanticColorDesc(att->arguments[0], index));
+					}
+				}
+			}
+		}
 		Setup();
+	}
+
+	void ColorizeTokenContextSensitive(int lineIndex, const wchar_t* text, vint start, vint length, vint& token, int& contextState)override
+	{
+		SpinLock::Scope scope(parsingTreeLock);
+		if(parsingTreeNode && token!=-1 && colorContext[token])
+		{
+			ParsingTextPos pos(lineIndex, start);
+			ParsingTreeNode* foundNode=parsingTreeNode->FindDeepestNode(pos);
+			if(!foundNode) return;
+			ParsingTreeToken* foundToken=dynamic_cast<ParsingTreeToken*>(foundNode);
+			if(!foundToken) return;
+			ParsingTreeObject* tokenParent=dynamic_cast<ParsingTreeObject*>(foundNode->GetParent());
+			if(!tokenParent) return;
+			vint index=tokenParent->GetMembers().Values().IndexOf(foundNode);
+			if(index==-1) return;
+
+			WString type=tokenParent->GetType();
+			WString field=tokenParent->GetMembers().Keys().Get(index);
+			FieldDesc key(type, field);
+
+			index=fieldContextColors.Keys().IndexOf(key);
+			if(index!=-1)
+			{
+				token=fieldContextColors.Values().Get(index);
+				return;
+			}
+
+			index=fieldSemanticColors.Keys().IndexOf(key);
+			if(index!=-1)
+			{
+				const SemanticColorDesc& color=fieldSemanticColors.Values().Get(index);
+				return;
+			}
+
+						//if((tokenParent->GetType()==L"ClassTypeDef" || tokenParent->GetType()==L"EnumTypeDef") && tokenParent->GetMember(L"name")==foundNode)
+						//{
+						//	token=3;
+						//}
+						//else if(tokenParent->GetType()==L"TokenDef" && tokenParent->GetMember(L"name")==foundNode)
+						//{
+						//	token=4;
+						//}
+						//else if(tokenParent->GetType()==L"RuleDef" && tokenParent->GetMember(L"name")==foundNode)
+						//{
+						//	token=5;
+						//}
+						//else if(tokenParent->GetType()==L"PrimitiveGrammarDef" && tokenParent->GetMember(L"name")==foundNode)
+						//{
+						//	WString name=foundToken->GetValue();
+						//	if(parsingTreeDecl->tokens.Contains(name))
+						//	{
+						//		token=4;
+						//	}
+						//	else if(parsingTreeDecl->rules.Contains(name))
+						//	{
+						//		token=5;
+						//	}
+						//}
+						//else if((tokenParent->GetType()==L"PrimitiveTypeObj" || tokenParent->GetType()==L"SubTypeObj") && tokenParent->GetMember(L"name")==foundNode)
+						//{
+						//	TypeSymbol* scope=FindScope(tokenParent);
+						//	if(FindType(scope, tokenParent))
+						//	{
+						//		token=3;
+						//	}
+						//}
+		}
 	}
 };
 
@@ -281,7 +408,7 @@ class ParserGrammarColorizer : public GrammarColorizer
 {
 protected:
 	Ptr<ParserDecl>							parsingTreeDecl;
-	
+
 	void OnParsingFinished()override
 	{
 		Ptr<ParsingTreeObject> node=ThreadSafeGetTreeNode();
@@ -338,37 +465,12 @@ public:
 		:GrammarColorizer(CreateBootstrapAutoRecoverParser(), L"ParserDecl")
 	{
 		SetColor(L"Keyword", Color(0, 0, 255));
+		SetColor(L"Attribute", Color(0, 0, 255));
 		SetColor(L"String", Color(163, 21, 21));
 		SetColor(L"Type", Color(43, 145, 175));
 		SetColor(L"Token", Color(163, 73, 164));
 		SetColor(L"Rule", Color(255, 127, 39));
 		EndSetColors();
-
-		//text::ColorEntry entry=GetCurrentTheme()->GetDefaultTextBoxColorEntry();
-		//SetDefaultColor(entry);
-
-		//entry.normal.text=Color(163, 21, 21);
-		//AddToken(L"\"([^\\\\\"]|\\\\/.)*\"", entry);
-
-		//entry.normal.text=Color(0, 0, 255);
-		//AddToken(L"class|enum|token|discardtoken|rule|as|with", entry);
-
-		//// 2 -- token
-		//AddToken(L"[a-zA-Z_]/w*", GetDefaultColor());
-		//	
-		//// 3 -- type name
-		//entry.normal.text=Color(43, 145, 175);
-		//AddExtraToken(entry);
-		//	
-		//// 4 -- token name
-		//entry.normal.text=Color(163, 73, 164);
-		//AddExtraToken(entry);
-		//	
-		//// 5 -- rule name
-		//entry.normal.text=Color(255, 127, 39);
-		//AddExtraToken(entry);
-
-		//Setup();
 	}
 
 	//void ColorizeTokenContextSensitive(int lineIndex, const wchar_t* text, vint start, vint length, vint& token, int& contextState)override
@@ -548,7 +650,7 @@ void UnitTestInGuiMain()
 	ASSERT(*rc1==3);
 	Ptr<DescriptableObject> a4=a2;
 	ASSERT(*rc1==4);
-		
+
 	ASSERT(*rc2==0);
 	Ptr<GuiControl> b1=control;
 	ASSERT(*rc2==1);
