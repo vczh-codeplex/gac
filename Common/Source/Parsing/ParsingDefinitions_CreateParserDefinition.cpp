@@ -394,9 +394,8 @@ namespace vl
 				return definitionWriter.Definition();
 			}
 
-			WString DeserializeString(Ptr<ParsingTreeToken> token)
+			WString DeserializeString(const WString& value)
 			{
-				const WString& value=token->GetValue();
 				if(value.Length()>=2 && value[0]==L'"' && value[value.Length()-1]==L'"')
 				{
 					Array<wchar_t> chars(value.Length());
@@ -422,6 +421,12 @@ namespace vl
 					return &chars[0];
 				}
 				return L"";
+			}
+
+			WString DeserializeString(Ptr<ParsingTreeToken> token)
+			{
+				const WString& value=token->GetValue();
+				return DeserializeString(value);
 			}
 
 			void SetName(WString& target, Ptr<ParsingTreeNode> node)
@@ -490,6 +495,10 @@ namespace vl
 					Ptr<ParsingDefinitionAttribute> target=new ParsingDefinitionAttribute;
 					SetName(target->name, node->GetMember(L"name"));
 					SetArray(target->arguments, node->GetMember(L"arguments"));
+					for(vint i=0;i<target->arguments.Count();i++)
+					{
+						target->arguments[i]=DeserializeString(target->arguments[i]);
+					}
 					return target;
 				}
 				else if(node->GetType()==L"PrimitiveTypeObj")
