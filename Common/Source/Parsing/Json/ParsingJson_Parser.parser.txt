@@ -41,7 +41,7 @@ class Array:Node
 
 class ObjectField:Node
 {
-	token name(JsonUnescapingString);
+	token name(JsonUnescapingString)				@Color("AttName");
 	Node value;
 }
 
@@ -50,17 +50,17 @@ class Object:Node
 	ObjectField[] fields;
 }
 
-token TRUEVALUE = "true";
-token FALSEVALUE = "false";
-token NULLVALUE = "null";
-token OBJOPEN = "\{";
-token OBJCLOSE = "\}";
-token ARROPEN = "\[";
-token ARRCLOSE = "\]";
+token TRUEVALUE = "true"							@Color("Keyword");
+token FALSEVALUE = "false"							@Color("Keyword");
+token NULLVALUE = "null"							@Color("Keyword");
+token OBJOPEN = "\{"								@Color("Boundary");
+token OBJCLOSE = "\}"								@Color("Boundary");
+token ARROPEN = "\["								@Color("Boundary");
+token ARRCLOSE = "\]"								@Color("Boundary");
 token COMMA = ",";
 token COLON = ":";
-token NUMBER = "[\-]?\d+(.\d+)?([eE][+\-]?\d+)?";
-token STRING = """([^\\""]|\\[^u]|\\u\d{4})*""";
+token NUMBER = "[\-]?\d+(.\d+)?([eE][+\-]?\d+)?"	@Color("Number");
+token STRING = """([^\\""]|\\[^u]|\\u\d{4})*"""		@ContextColor("String");
 
 discardtoken SPACE = "\s+";
 
