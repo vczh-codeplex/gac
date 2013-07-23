@@ -1,36 +1,18 @@
-#if _DEBUG
-#define _CRTDBG_MAP_ALLOC
-#include <stdlib.h>
-#include <crtdbg.h>
-#endif
+#include "..\..\Public\Source\GacUI.h"
+#include "..\..\Public\Source\Vlpp.h"
+#include <Windows.h>
 
-#include "FileSystemInformation.h"
-#include "..\..\Source\GraphicsElement\WindowsDirect2D\GuiGraphicsWindowsDirect2D.h"
-#include "..\..\..\..\Common\Source\Parsing\ParsingDefinitions.h"
-#include "..\..\..\..\Common\Source\Stream\MemoryStream.h"
-
-using namespace vl::stream;
+using namespace vl;
 using namespace vl::collections;
+using namespace vl::stream;
 using namespace vl::regex;
 using namespace vl::parsing;
 using namespace vl::parsing::tabling;
 using namespace vl::parsing::definitions;
 
-#define GUI_GRAPHICS_RENDERER_DIRECT2D
-
 int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int CmdShow)
 {
-#ifdef GUI_GRAPHICS_RENDERER_GDI
-	int result=SetupWindowsGDIRenderer();
-#endif
-#ifdef GUI_GRAPHICS_RENDERER_DIRECT2D
-	int result=SetupWindowsDirect2DRenderer();
-#endif
-
-#if _DEBUG
-	_CrtDumpMemoryLeaks();
-#endif
-	return result;
+	return SetupWindowsDirect2DRenderer();
 }
 
 /***********************************************************************
@@ -325,7 +307,7 @@ protected:
 	{
 		if(radioGrammar->GetSelected())
 		{
-			SwitchLanguage(L"..\\GacUISrcCodepackedTest\\Resources\\CalculatorDefinition.txt", new ParserGrammarColorizer, CreateParserDefinition());
+			SwitchLanguage(L"..\\Resources\\CalculatorDefinition.txt", new ParserGrammarColorizer, CreateParserDefinition());
 		}
 	}
 
@@ -333,7 +315,7 @@ protected:
 	{
 		if(radioXml->GetSelected())
 		{
-			SwitchLanguage(L"..\\GacUISrcCodepackedTest\\Resources\\XmlResource.xml", new XmlGrammarColorizer, xml::XmlGetParserTextBuffer());
+			SwitchLanguage(L"..\\Resources\\XmlResource.xml", new XmlGrammarColorizer, xml::XmlGetParserTextBuffer());
 		}
 	}
 
@@ -341,7 +323,7 @@ protected:
 	{
 		if(radioJson->GetSelected())
 		{
-			SwitchLanguage(L"..\\GacUISrcCodepackedTest\\Resources\\JsonSample.txt", new JsonGrammarColorizer, json::JsonGetParserTextBuffer());
+			SwitchLanguage(L"..\\Resources\\JsonSample.txt", new JsonGrammarColorizer, json::JsonGetParserTextBuffer());
 		}
 	}
 
@@ -357,7 +339,7 @@ public:
 	TextBoxColorizerWindow()
 		:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
 	{
-		SetText(L"GacUISrc Test Application");
+		SetText(L"Controls.TextBox.ContextColorizer");
 		SetClientSize(Size(800, 600));
 
 		GuiSelectableButton::MutexGroupController* controller=new GuiSelectableButton::MutexGroupController;
@@ -462,49 +444,13 @@ public:
 	}
 };
 
-extern void UnitTestInGuiMain();
+/***********************************************************************
+GuiMain
+***********************************************************************/
 
 void GuiMain()
 {
-	UnitTestInGuiMain();
-	TextBoxColorizerWindow window;
-	GetApplication()->Run(&window);
-}
-
-void UnitTestInGuiMain()
-{
-#define ASSERT(x) do{if(!(x))throw 0;}while(0)
-
-	GuiBoundsComposition* bounds=new GuiBoundsComposition;
-	GuiControl* control=new GuiControl(new GuiControl::EmptyStyleController);
-	bounds->AddChild(control->GetBoundsComposition());
-
-	vint* rc1=ReferenceCounterOperator<GuiBoundsComposition>::CreateCounter(bounds);
-	vint* rc2=ReferenceCounterOperator<GuiControl>::CreateCounter(control);
-
-	ASSERT(*rc1==0);
-	Ptr<GuiBoundsComposition> a1=bounds;
-	ASSERT(*rc1==1);
-	Ptr<GuiBoundsComposition> a2=bounds;
-	ASSERT(*rc1==2);
-	Ptr<DescriptableObject> a3=a1.Cast<DescriptableObject>();
-	ASSERT(*rc1==3);
-	Ptr<DescriptableObject> a4=a2;
-	ASSERT(*rc1==4);
-
-	ASSERT(*rc2==0);
-	Ptr<GuiControl> b1=control;
-	ASSERT(*rc2==1);
-	Ptr<GuiControl> b2=control;
-	ASSERT(*rc2==2);
-	Ptr<DescriptableObject> b3=b1.Cast<DescriptableObject>();
-	ASSERT(*rc2==3);
-	Ptr<DescriptableObject> b4=b2;
-	ASSERT(*rc2==4);
-
-	b4=b3=b2=b1=0; // not released yet
-	ASSERT(*rc2==0);
-	control->SetText(L"Text");
-
-	a4=a3=a2=a1=0; // all released
+	GuiWindow* window=new TextBoxColorizerWindow();
+	GetApplication()->Run(window);
+	delete window;
 }

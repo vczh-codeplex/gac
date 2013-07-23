@@ -106,10 +106,10 @@ public:
 };
 
 /***********************************************************************
-GrammarColorizer
+ParserGrammarColorizer
 ***********************************************************************/
 
-class GrammarColorizer : public GuiTextBoxRegexColorizer
+class ParserGrammarColorizer : public GuiTextBoxRegexColorizer
 {
 protected:
 	Ptr<ParsingGeneralParser>				grammarParser;
@@ -161,7 +161,7 @@ protected:
 
 	static void ParsingProc(void* argument)
 	{
-		((GrammarColorizer*)argument)->ParsingProcInternal();
+		((ParserGrammarColorizer*)argument)->ParsingProcInternal();
 	}
 
 	void InitializeColorizer()
@@ -240,7 +240,7 @@ protected:
 		return 0;
 	}
 public:
-	GrammarColorizer()
+	ParserGrammarColorizer()
 		:isParsingRunning(false)
 		,finalizing(false)
 	{
@@ -248,7 +248,7 @@ public:
 		InitializeParser();
 	}
 
-	~GrammarColorizer()
+	~ParserGrammarColorizer()
 	{
 		finalizing=true;
 		parsingRunningEvent.Enter();
@@ -332,7 +332,7 @@ class TextBoxColorizerWindow : public GuiWindow
 {
 protected:
 	GuiMultilineTextBox*					textBoxGrammar;
-	Ptr<GrammarColorizer>					colorizer;
+	Ptr<ParserGrammarColorizer>				colorizer;
 
 	void textBoxGrammar_TextChanged(GuiGraphicsComposition* composition, GuiEventArgs& arguments)
 	{
@@ -349,7 +349,7 @@ public:
 		textBoxGrammar=g::NewMultilineTextBox();
 		textBoxGrammar->GetBoundsComposition()->SetAlignmentToParent(Margin(3, 3, 3, 3));
 		GetBoundsComposition()->AddChild(textBoxGrammar->GetBoundsComposition());
-		colorizer=new GrammarColorizer;
+		colorizer=new ParserGrammarColorizer;
 		textBoxGrammar->SetColorizer(colorizer);
 		textBoxGrammar->TextChanged.AttachMethod(this, &TextBoxColorizerWindow::textBoxGrammar_TextChanged);
 
