@@ -2413,10 +2413,10 @@ ReferenceCounterOperator
 			return new vint(0);
 		}
 
-		static __forceinline void DeleteReference(vint* counter, T* reference)
+		static __forceinline void DeleteReference(vint* counter, void* reference)
 		{
 			delete counter;
-			delete reference;
+			delete (T*)reference;
 		}
 	};
 
@@ -2430,8 +2430,12 @@ Ptr
 		 template<typename X>
 		 friend class Ptr;
 	protected:
+		typedef void		(*Destructor)(vint*, void*);
+
 		vint*				counter;
 		T*					reference;
+		void*				originalReference;
+		Destructor			originalDestructor;
 
 		void Inc()
 		{
@@ -2447,9 +2451,11 @@ Ptr
 			{
 				if(--(*counter)==0)
 				{
-					ReferenceCounterOperator<T>::DeleteReference(counter, reference);
+					originalDestructor(counter, originalReference);
 					counter=0;
 					reference=0;
+					originalReference=0;
+					originalDestructor=0;
 				}
 			}
 		}
@@ -2459,65 +2465,76 @@ Ptr
 			return counter;
 		}
 
-		Ptr(vint* _counter, T* _reference)
+		Ptr(vint* _counter, T* _reference, void* _originalReference, Destructor _originalDestructor)
 			:counter(_counter)
 			,reference(_reference)
+			,originalReference(_originalReference)
+			,originalDestructor(_originalDestructor)
 		{
 			Inc();
 		}
 	public:
 
 		Ptr()
+			:counter(0)
+			,reference(0)
+			,originalReference(0)
+			,originalDestructor(0)
 		{
-			counter=0;
-			reference=0;
 		}
 
 		Ptr(T* pointer)
+			:counter(0)
+			,reference(0)
+			,originalReference(0)
+			,originalDestructor(0)
 		{
 			if(pointer)
 			{
 				counter=ReferenceCounterOperator<T>::CreateCounter(pointer);
 				reference=pointer;
+				originalReference=pointer;
+				originalDestructor=&ReferenceCounterOperator<T>::DeleteReference;
 				Inc();
-			}
-			else
-			{
-				counter=0;
-				reference=0;
 			}
 		}
 
 		Ptr(const Ptr<T>& pointer)
+			:counter(pointer.counter)
+			,reference(pointer.reference)
+			,originalReference(pointer.originalReference)
+			,originalDestructor(pointer.originalDestructor)
 		{
-			counter=pointer.counter;
-			reference=pointer.reference;
 			Inc();
 		}
 
 		Ptr(Ptr<T>&& pointer)
+			:counter(pointer.counter)
+			,reference(pointer.reference)
+			,originalReference(pointer.originalReference)
+			,originalDestructor(pointer.originalDestructor)
 		{
-			counter=pointer.counter;
-			reference=pointer.reference;
-
 			pointer.counter=0;
 			pointer.reference=0;
+			pointer.originalReference=0;
+			pointer.originalDestructor=0;
 		}
 
 		template<typename C>
 		Ptr(const Ptr<C>& pointer)
+			:counter(0)
+			,reference(0)
+			,originalReference(0)
+			,originalDestructor(0)
 		{
 			T* converted=pointer.Obj();
 			if(converted)
 			{
 				counter=pointer.Counter();
 				reference=converted;
+				originalReference=pointer.originalReference;
+				originalDestructor=pointer.originalDestructor;
 				Inc();
-			}
-			else
-			{
-				counter=0;
-				reference=0;
 			}
 		}
 
@@ -2530,7 +2547,7 @@ Ptr
 		Ptr<C> Cast()const
 		{
 			C* converted=dynamic_cast<C*>(reference);
-			return Ptr<C>((converted?counter:0), converted);
+			return Ptr<C>((converted?counter:0), converted, originalReference, originalDestructor);
 		}
 
 		Ptr<T>& operator=(T* pointer)
@@ -2540,12 +2557,16 @@ Ptr
 			{
 				counter=ReferenceCounterOperator<T>::CreateCounter(pointer);
 				reference=pointer;
+				originalReference=pointer;
+				originalDestructor=&ReferenceCounterOperator<T>::DeleteReference;
 				Inc();
 			}
 			else
 			{
 				counter=0;
 				reference=0;
+				originalReference=0;
+				originalDestructor=0;
 			}
 			return *this;
 		}
@@ -2557,6 +2578,8 @@ Ptr
 				Dec();
 				counter=pointer.counter;
 				reference=pointer.reference;
+				originalReference=pointer.originalReference;
+				originalDestructor=pointer.originalDestructor;
 				Inc();
 			}
 			return *this;
@@ -2569,9 +2592,13 @@ Ptr
 				Dec();
 				counter=pointer.counter;
 				reference=pointer.reference;
+				originalReference=pointer.originalReference;
+				originalDestructor=pointer.originalDestructor;
 				
 				pointer.counter=0;
 				pointer.reference=0;
+				pointer.originalReference=0;
+				pointer.originalDestructor=0;
 			}
 			return *this;
 		}
@@ -2583,14 +2610,18 @@ Ptr
 			Dec();
 			if(converted)
 			{
-				counter=pointer.Counter();
+				counter=pointer.counter;
 				reference=converted;
+				originalReference=pointer.originalReference;
+				originalDestructor=pointer.originalDestructor;
 				Inc();
 			}
 			else
 			{
 				counter=0;
 				reference=0;
+				originalReference=0;
+				originalDestructor=0;
 			}
 			return *this;
 		}
@@ -13679,9 +13710,9 @@ ReferenceCounterOperator
 			return &obj->referenceCounter;
 		}
 
-		static __forceinline void DeleteReference(vint* counter, T* reference)
+		static __forceinline void DeleteReference(vint* counter, void* reference)
 		{
-			reflection::DescriptableObject* obj=reference;
+			reflection::DescriptableObject* obj=(T*)reference;
 			if(obj->sharedPtrDestructorProc)
 			{
 				obj->sharedPtrDestructorProc(obj);

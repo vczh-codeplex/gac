@@ -120,9 +120,9 @@ ReferenceCounterOperator
 			return &obj->referenceCounter;
 		}
 
-		static __forceinline void DeleteReference(vint* counter, T* reference)
+		static __forceinline void DeleteReference(vint* counter, void* reference)
 		{
-			reflection::DescriptableObject* obj=reference;
+			reflection::DescriptableObject* obj=(T*)reference;
 			if(obj->sharedPtrDestructorProc)
 			{
 				obj->sharedPtrDestructorProc(obj);
