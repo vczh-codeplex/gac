@@ -410,6 +410,11 @@ GrammarColorizer
 				Initialize(_grammarParser, _grammarRule);
 			}
 
+			GrammarColorizer::~GrammarColorizer()
+			{
+				EnsureTaskFinished();
+			}
+
 			Ptr<parsing::ParsingTreeObject> GrammarColorizer::ThreadSafeGetTreeNode()
 			{
 				parsingTreeLock.Enter();
