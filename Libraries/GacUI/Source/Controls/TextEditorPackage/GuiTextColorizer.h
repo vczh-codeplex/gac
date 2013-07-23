@@ -19,7 +19,7 @@ namespace vl
 		{
 
 /***********************************************************************
-Colorizer
+GuiTextBoxColorizerBase
 ***********************************************************************/
 			
 			/// <summary>The base class of text box colorizer.</summary>
@@ -66,6 +66,10 @@ Colorizer
 				/// <returns>The supported colors ordered by their indices.</returns>
 				virtual const ColorArray&					GetColors()=0;
 			};
+
+/***********************************************************************
+GuiTextBoxRegexColorizer
+***********************************************************************/
 
 			/// <summary>Regex based colorizer.</summary>
 			class GuiTextBoxRegexColorizer : public GuiTextBoxColorizerBase
@@ -132,6 +136,56 @@ Colorizer
 				vint														GetContextStartState()override;
 				void														ColorizeLineWithCRLF(vint lineIndex, const wchar_t* text, unsigned __int32* colors, vint length, vint& lexerState, vint& contextState)override;
 				const ColorArray&											GetColors()override;
+			};
+
+/***********************************************************************
+GrammarColorizer
+***********************************************************************/
+
+			class GrammarColorizer abstract : public GuiTextBoxRegexColorizer, public RepeatingTaskExecutor<WString>
+			{
+				typedef collections::Pair<WString, WString>					FieldDesc;
+				typedef collections::Dictionary<FieldDesc, vint>			FieldContextColors;
+				typedef collections::Dictionary<FieldDesc, vint>			FieldSemanticColors;
+				typedef elements::text::ColorEntry							ColorEntry;
+			private:
+				Ptr<parsing::tabling::ParsingGeneralParser>					grammarParser;
+				WString														grammarRule;
+				SpinLock													parsingTreeLock;
+				Ptr<parsing::ParsingTreeObject>								parsingTreeNode;
+
+				collections::Dictionary<WString, ColorEntry>				colorSettings;
+				collections::Dictionary<WString, vint>						colorIndices;
+				collections::List<bool>										colorContext;
+				FieldContextColors											fieldContextColors;
+				FieldSemanticColors											fieldSemanticColors;
+				collections::Dictionary<WString, vint>						semanticIndices;
+
+				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetAttribute(vint index, const WString& name, vint argumentCount);
+				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetColorAttribute(vint index);
+				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetContextColorAttribute(vint index);
+				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetSemanticColorAttribute(vint index);
+				ColorEntry													GetColor(const WString& name);
+			protected:
+				virtual void												OnParsingFinished();
+				virtual void												OnSemanticColorize(parsing::ParsingTreeToken* foundToken, parsing::ParsingTreeObject* tokenParent, const WString& type, const WString& field, vint semantic, vint& token);
+
+				void														Initialize(Ptr<parsing::tabling::ParsingGeneralParser> _grammarParser, const WString& _grammarRule);
+				void														Execute(const WString& input)override;
+			public:
+				GrammarColorizer();
+				GrammarColorizer(Ptr<parsing::tabling::ParsingGeneralParser> _grammarParser, const WString& _grammarRule);
+
+				Ptr<parsing::ParsingTreeObject>								ThreadSafeGetTreeNode();
+				void														ThreadSafeReturnTreeNode();
+				void														SubmitCode(const WString& code);
+				vint														GetTokenId(const WString& token);
+				vint														GetSemanticId(const WString& semantic);
+				void														BeginSetColors();
+				void														SetColor(const WString& name, const ColorEntry& entry);
+				void														SetColor(const WString& name, const Color& color);
+				void														EndSetColors();
+				void														ColorizeTokenContextSensitive(int lineIndex, const wchar_t* text, vint start, vint length, vint& token, int& contextState)override;
 			};
 		}
 	}
