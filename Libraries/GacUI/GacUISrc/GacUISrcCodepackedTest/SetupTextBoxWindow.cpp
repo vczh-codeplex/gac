@@ -6,300 +6,314 @@ using namespace vl::parsing::tabling;
 using namespace vl::parsing::definitions;
 using namespace vl::collections;
 
+namespace colorization
+{
+
 /***********************************************************************
 XmlGrammarColorizer
 ***********************************************************************/
 
-class XmlGrammarColorizer : public GrammarColorizer
-{
-public:
-	XmlGrammarColorizer()
-		:GrammarColorizer(CreateAutoRecoverParser(xml::XmlLoadTable()), L"XDocument")
+	class XmlGrammarColorizer : public GrammarColorizer
 	{
-		SetColor(L"Boundary", Color(0, 0, 255));
-		SetColor(L"Comment", Color(0, 128, 0));
-		SetColor(L"TagName", Color(163, 21, 21));
-		SetColor(L"AttName", Color(255, 0, 0));
-		SetColor(L"AttValue", Color(128, 0, 255));
-		EndSetColors();
-	}
-};
+	public:
+		XmlGrammarColorizer()
+			:GrammarColorizer(CreateAutoRecoverParser(xml::XmlLoadTable()), L"XDocument")
+		{
+			SetColor(L"Boundary", Color(0, 0, 255));
+			SetColor(L"Comment", Color(0, 128, 0));
+			SetColor(L"TagName", Color(163, 21, 21));
+			SetColor(L"AttName", Color(255, 0, 0));
+			SetColor(L"AttValue", Color(128, 0, 255));
+			EndSetColors();
+		}
+	};
 
 /***********************************************************************
 JsonGrammarColorizer
 ***********************************************************************/
 
-class JsonGrammarColorizer : public GrammarColorizer
-{
-public:
-	JsonGrammarColorizer()
-		:GrammarColorizer(CreateAutoRecoverParser(json::JsonLoadTable()), L"JRoot")
+	class JsonGrammarColorizer : public GrammarColorizer
 	{
-		SetColor(L"Boundary", Color(255, 0, 0));
-		SetColor(L"Keyword", Color(0, 0, 255));
-		SetColor(L"AttName", Color(64, 64, 64));
-		SetColor(L"Number", Color(128, 0, 255));
-		SetColor(L"String", Color(163, 21, 2));
-		EndSetColors();
-	}
-};
+	public:
+		JsonGrammarColorizer()
+			:GrammarColorizer(CreateAutoRecoverParser(json::JsonLoadTable()), L"JRoot")
+		{
+			SetColor(L"Boundary", Color(255, 0, 0));
+			SetColor(L"Keyword", Color(0, 0, 255));
+			SetColor(L"AttName", Color(64, 64, 64));
+			SetColor(L"Number", Color(128, 0, 255));
+			SetColor(L"String", Color(163, 21, 2));
+			EndSetColors();
+		}
+	};
 
 /***********************************************************************
 SymbolLookup
 ***********************************************************************/
 
-class TypeSymbol : public Object
-{
-public:
-	WString									typeName;
-	Dictionary<WString, Ptr<TypeSymbol>>	subTypes;
-	TypeSymbol*								parent;
-
-	TypeSymbol()
-		:parent(0)
+	class TypeSymbol : public Object
 	{
-	}
+	public:
+		WString									typeName;
+		Dictionary<WString, Ptr<TypeSymbol>>	subTypes;
+		TypeSymbol*								parent;
 
-	void CollectTypes(Ptr<ParsingTreeArray> types, Dictionary<ParsingTreeNode*, TypeSymbol*>& nodeTypeMap)
-	{
-		if(types)
+		TypeSymbol()
+			:parent(0)
 		{
-			for(int i=0;i<types->Count();i++)
-			{
-				Ptr<ParsingTreeObject> type=types->GetItem(i).Cast<ParsingTreeObject>();
-				if(type)
-				{
-					Ptr<ParsingTreeToken> name=type->GetMember(L"name").Cast<ParsingTreeToken>();
-					if(name && !subTypes.Keys().Contains(name->GetValue()))
-					{
-						Ptr<TypeSymbol> symbol=new TypeSymbol;
-						symbol->typeName=name->GetValue();
-						symbol->parent=this;
-						subTypes.Add(symbol->typeName, symbol);
-						symbol->CollectTypes(type->GetMember(L"subTypes").Cast<ParsingTreeArray>(), nodeTypeMap);
-						nodeTypeMap.Add(type.Obj(), symbol.Obj());
-					}
-				}
-			}
 		}
-	}
-};
 
-class ParserDecl : public TypeSymbol
-{
-public:
-	SortedList<WString>							tokens;
-	SortedList<WString>							rules;
-	Dictionary<ParsingTreeNode*, TypeSymbol*>	nodeTypeMap;
-
-	ParserDecl(Ptr<ParsingTreeObject> parserDecl)
-	{
-		nodeTypeMap.Add(parserDecl.Obj(), this);
-		CollectTypes(parserDecl->GetMember(L"types").Cast<ParsingTreeArray>(), nodeTypeMap);
+		void CollectTypes(Ptr<ParsingTreeArray> types, Dictionary<ParsingTreeNode*, TypeSymbol*>& nodeTypeMap)
 		{
-			Ptr<ParsingTreeArray> items=parserDecl->GetMember(L"tokens").Cast<ParsingTreeArray>();
-			if(items)
+			if(types)
 			{
-				for(int i=0;i<items->Count();i++)
+				for(int i=0;i<types->Count();i++)
 				{
-					Ptr<ParsingTreeObject> type=items->GetItem(i).Cast<ParsingTreeObject>();
+					Ptr<ParsingTreeObject> type=types->GetItem(i).Cast<ParsingTreeObject>();
 					if(type)
 					{
 						Ptr<ParsingTreeToken> name=type->GetMember(L"name").Cast<ParsingTreeToken>();
-						if(name)
+						if(name && !subTypes.Keys().Contains(name->GetValue()))
 						{
-							tokens.Add(name->GetValue());
+							Ptr<TypeSymbol> symbol=new TypeSymbol;
+							symbol->typeName=name->GetValue();
+							symbol->parent=this;
+							subTypes.Add(symbol->typeName, symbol);
+							symbol->CollectTypes(type->GetMember(L"subTypes").Cast<ParsingTreeArray>(), nodeTypeMap);
+							nodeTypeMap.Add(type.Obj(), symbol.Obj());
 						}
 					}
 				}
 			}
 		}
+	};
+
+	class ParserDecl : public TypeSymbol
+	{
+	public:
+		SortedList<WString>							tokens;
+		SortedList<WString>							rules;
+		Dictionary<ParsingTreeNode*, TypeSymbol*>	nodeTypeMap;
+
+		ParserDecl(Ptr<ParsingTreeObject> parserDecl)
 		{
-			Ptr<ParsingTreeArray> items=parserDecl->GetMember(L"rules").Cast<ParsingTreeArray>();
-			if(items)
+			nodeTypeMap.Add(parserDecl.Obj(), this);
+			CollectTypes(parserDecl->GetMember(L"types").Cast<ParsingTreeArray>(), nodeTypeMap);
 			{
-				for(int i=0;i<items->Count();i++)
+				Ptr<ParsingTreeArray> items=parserDecl->GetMember(L"tokens").Cast<ParsingTreeArray>();
+				if(items)
 				{
-					Ptr<ParsingTreeObject> type=items->GetItem(i).Cast<ParsingTreeObject>();
-					if(type)
+					for(int i=0;i<items->Count();i++)
 					{
-						Ptr<ParsingTreeToken> name=type->GetMember(L"name").Cast<ParsingTreeToken>();
-						if(name)
+						Ptr<ParsingTreeObject> type=items->GetItem(i).Cast<ParsingTreeObject>();
+						if(type)
 						{
-							rules.Add(name->GetValue());
+							Ptr<ParsingTreeToken> name=type->GetMember(L"name").Cast<ParsingTreeToken>();
+							if(name)
+							{
+								tokens.Add(name->GetValue());
+							}
+						}
+					}
+				}
+			}
+			{
+				Ptr<ParsingTreeArray> items=parserDecl->GetMember(L"rules").Cast<ParsingTreeArray>();
+				if(items)
+				{
+					for(int i=0;i<items->Count();i++)
+					{
+						Ptr<ParsingTreeObject> type=items->GetItem(i).Cast<ParsingTreeObject>();
+						if(type)
+						{
+							Ptr<ParsingTreeToken> name=type->GetMember(L"name").Cast<ParsingTreeToken>();
+							if(name)
+							{
+								rules.Add(name->GetValue());
+							}
 						}
 					}
 				}
 			}
 		}
-	}
-};
+	};
 
 /***********************************************************************
 ParserGrammarColorizer
 ***********************************************************************/
 
-class ParserGrammarColorizer : public GrammarColorizer
-{
-protected:
-	Ptr<ParserDecl>							parsingTreeDecl;
-	vint									tokenIdType;
-	vint									tokenIdToken;
-	vint									tokenIdRule;
-	vint									semanticType;
-	vint									semanticGrammar;
-
-	TypeSymbol* FindScope(ParsingTreeNode* node)
+	class ParserGrammarColorizer : public GrammarColorizer
 	{
-		if(!node) return 0;
-		int index=parsingTreeDecl->nodeTypeMap.Keys().IndexOf(node);
-		return index==-1?FindScope(node->GetParent()):parsingTreeDecl->nodeTypeMap.Values().Get(index);
-	}
+	protected:
+		Ptr<ParserDecl>							parsingTreeDecl;
+		vint									tokenIdType;
+		vint									tokenIdToken;
+		vint									tokenIdRule;
+		vint									semanticType;
+		vint									semanticGrammar;
 
-	TypeSymbol* FindType(TypeSymbol* scope, const WString& name)
-	{
-		if(!scope) return 0;
-		if(name==L"") return 0;
-		int index=scope->subTypes.Keys().IndexOf(name);
-		if(index!=-1) return scope->subTypes.Values().Get(index).Obj();
-		return FindType(scope->parent, name);
-	}
-
-	TypeSymbol* FindType(TypeSymbol* scope, ParsingTreeObject* object)
-	{
-		if(scope && object)
+		TypeSymbol* FindScope(ParsingTreeNode* node)
 		{
-			Ptr<ParsingTreeToken> name=object->GetMember(L"name").Cast<ParsingTreeToken>();
-			if(name)
+			if(!node) return 0;
+			int index=parsingTreeDecl->nodeTypeMap.Keys().IndexOf(node);
+			return index==-1?FindScope(node->GetParent()):parsingTreeDecl->nodeTypeMap.Values().Get(index);
+		}
+
+		TypeSymbol* FindType(TypeSymbol* scope, const WString& name)
+		{
+			if(!scope) return 0;
+			if(name==L"") return 0;
+			int index=scope->subTypes.Keys().IndexOf(name);
+			if(index!=-1) return scope->subTypes.Values().Get(index).Obj();
+			return FindType(scope->parent, name);
+		}
+
+		TypeSymbol* FindType(TypeSymbol* scope, ParsingTreeObject* object)
+		{
+			if(scope && object)
 			{
-				WString typeName=name->GetValue();
-				if(object->GetType()==L"PrimitiveTypeObj")
+				Ptr<ParsingTreeToken> name=object->GetMember(L"name").Cast<ParsingTreeToken>();
+				if(name)
 				{
-					return FindType(scope, typeName);
-				}
-				else if(object->GetType()==L"SubTypeObj")
-				{
-					TypeSymbol* type=FindType(scope, object->GetMember(L"parentType").Cast<ParsingTreeObject>().Obj());
-					if(type)
+					WString typeName=name->GetValue();
+					if(object->GetType()==L"PrimitiveTypeObj")
 					{
-						int index=type->subTypes.Keys().IndexOf(typeName);
-						if(index!=-1) return type->subTypes.Values().Get(index).Obj();
+						return FindType(scope, typeName);
+					}
+					else if(object->GetType()==L"SubTypeObj")
+					{
+						TypeSymbol* type=FindType(scope, object->GetMember(L"parentType").Cast<ParsingTreeObject>().Obj());
+						if(type)
+						{
+							int index=type->subTypes.Keys().IndexOf(typeName);
+							if(index!=-1) return type->subTypes.Values().Get(index).Obj();
+						}
 					}
 				}
 			}
+			return 0;
 		}
-		return 0;
-	}
 
-	void OnParsingFinished()override
-	{
-		Ptr<ParsingTreeObject> node=ThreadSafeGetTreeNode();
-		if(node)
+		void OnParsingFinished()override
 		{
-			parsingTreeDecl=new ParserDecl(node);
-		}
-		ThreadSafeReturnTreeNode();
-	}
-
-	void OnSemanticColorize(ParsingTreeToken* foundToken, ParsingTreeObject* tokenParent, const WString& type, const WString& field, vint semantic, vint& token)override
-	{
-		if(semantic==semanticType)
-		{
-			TypeSymbol* scope=FindScope(tokenParent);
-			if(FindType(scope, tokenParent))
+			Ptr<ParsingTreeObject> node=ThreadSafeGetTreeNode();
+			if(node)
 			{
-				token=tokenIdType;
+				parsingTreeDecl=new ParserDecl(node);
+			}
+			ThreadSafeReturnTreeNode();
+		}
+
+		void OnSemanticColorize(ParsingTreeToken* foundToken, ParsingTreeObject* tokenParent, const WString& type, const WString& field, vint semantic, vint& token)override
+		{
+			if(semantic==semanticType)
+			{
+				TypeSymbol* scope=FindScope(tokenParent);
+				if(FindType(scope, tokenParent))
+				{
+					token=tokenIdType;
+				}
+			}
+			else if(semantic==semanticGrammar)
+			{
+				WString name=foundToken->GetValue();
+				if(parsingTreeDecl->tokens.Contains(name))
+				{
+					token=tokenIdToken;
+				}
+				else if(parsingTreeDecl->rules.Contains(name))
+				{
+					token=tokenIdRule;
+				}
 			}
 		}
-		else if(semantic==semanticGrammar)
+	public:
+		ParserGrammarColorizer()
+			:GrammarColorizer(CreateBootstrapAutoRecoverParser(), L"ParserDecl")
 		{
-			WString name=foundToken->GetValue();
-			if(parsingTreeDecl->tokens.Contains(name))
-			{
-				token=tokenIdToken;
-			}
-			else if(parsingTreeDecl->rules.Contains(name))
-			{
-				token=tokenIdRule;
-			}
+			SetColor(L"Keyword", Color(0, 0, 255));
+			SetColor(L"Attribute", Color(0, 0, 255));
+			SetColor(L"String", Color(163, 21, 21));
+			SetColor(L"Type", Color(43, 145, 175));
+			SetColor(L"Token", Color(163, 73, 164));
+			SetColor(L"Rule", Color(255, 127, 39));
+			EndSetColors();
+
+			tokenIdType=GetTokenId(L"Type");
+			tokenIdToken=GetTokenId(L"Token");
+			tokenIdRule=GetTokenId(L"Rule");
+			semanticType=GetSemanticId(L"Type");
+			semanticGrammar=GetSemanticId(L"Grammar");
 		}
-	}
-public:
-	ParserGrammarColorizer()
-		:GrammarColorizer(CreateBootstrapAutoRecoverParser(), L"ParserDecl")
-	{
-		SetColor(L"Keyword", Color(0, 0, 255));
-		SetColor(L"Attribute", Color(0, 0, 255));
-		SetColor(L"String", Color(163, 21, 21));
-		SetColor(L"Type", Color(43, 145, 175));
-		SetColor(L"Token", Color(163, 73, 164));
-		SetColor(L"Rule", Color(255, 127, 39));
-		EndSetColors();
 
-		tokenIdType=GetTokenId(L"Type");
-		tokenIdToken=GetTokenId(L"Token");
-		tokenIdRule=GetTokenId(L"Rule");
-		semanticType=GetSemanticId(L"Type");
-		semanticGrammar=GetSemanticId(L"Grammar");
-	}
-
-	~ParserGrammarColorizer()
-	{
-		EnsureTaskFinished();
-	}
-};
+		~ParserGrammarColorizer()
+		{
+			EnsureTaskFinished();
+		}
+	};
 
 /***********************************************************************
-TextBoxColorizerWindow
+Event Handlers
 ***********************************************************************/
 
-void radioColorizer_SwitchLanguage(const WString& sampleCodePath, GrammarColorizer* colorizer, GuiMultilineTextBox* textBox)
-{
-	textBox->SetColorizer(colorizer);
-	FileStream fileStream(sampleCodePath, FileStream::ReadOnly);
-	BomDecoder decoder;
-	DecoderStream decoderStream(fileStream, decoder);
-	StreamReader reader(decoderStream);
-	textBox->SetText(L"");
-	textBox->SetText(reader.ReadToEnd());
-	textBox->Select(TextPos(), TextPos());
-}
-
-void radioGrammar_SelectedChanged(GuiSelectableButton* radio, GuiMultilineTextBox* textBox)
-{
-	if(radio->GetSelected())
+	void textBox_TextChanged(GuiGraphicsComposition* composition, GuiEventArgs& arguments)
 	{
-		radioColorizer_SwitchLanguage(L"Resources\\CalculatorDefinition.txt", new ParserGrammarColorizer, textBox);
+		GuiMultilineTextBox* textBox=dynamic_cast<GuiMultilineTextBox*>(composition->GetRelatedControl());
+		GrammarColorizer* colorizer=dynamic_cast<GrammarColorizer*>(textBox->GetColorizer().Obj());
+
+		WString text=textBox->GetText();
+		colorizer->SubmitCode(text);
+	}
+
+	void textBox_SwitchLanguage(const WString& sampleCodePath, GrammarColorizer* colorizer, GuiMultilineTextBox* textBox)
+	{
+		textBox->SetColorizer(colorizer);
+		FileStream fileStream(sampleCodePath, FileStream::ReadOnly);
+		BomDecoder decoder;
+		DecoderStream decoderStream(fileStream, decoder);
+		StreamReader reader(decoderStream);
+		textBox->SetText(L"");
+		textBox->SetText(reader.ReadToEnd());
+		textBox->Select(TextPos(), TextPos());
+	}
+
+	void radioGrammar_SelectedChanged(GuiSelectableButton* radio, GuiMultilineTextBox* textBox)
+	{
+		if(radio->GetSelected())
+		{
+			textBox_SwitchLanguage(L"Resources\\CalculatorDefinition.txt", new ParserGrammarColorizer, textBox);
+		}
+	}
+
+	void radioXml_SelectedChanged(GuiSelectableButton* radio, GuiMultilineTextBox* textBox)
+	{
+		if(radio->GetSelected())
+		{
+			textBox_SwitchLanguage(L"Resources\\XmlResource.xml", new XmlGrammarColorizer, textBox);
+		}
+	}
+
+	void radioJson_SelectedChanged(GuiSelectableButton* radio, GuiMultilineTextBox* textBox)
+	{
+		if(radio->GetSelected())
+		{
+			textBox_SwitchLanguage(L"Resources\\JsonSample.txt", new JsonGrammarColorizer, textBox);
+		}
 	}
 }
 
-void radioXml_SelectedChanged(GuiSelectableButton* radio, GuiMultilineTextBox* textBox)
-{
-	if(radio->GetSelected())
-	{
-		radioColorizer_SwitchLanguage(L"Resources\\XmlResource.xml", new XmlGrammarColorizer, textBox);
-	}
-}
-
-void radioJson_SelectedChanged(GuiSelectableButton* radio, GuiMultilineTextBox* textBox)
-{
-	if(radio->GetSelected())
-	{
-		radioColorizer_SwitchLanguage(L"Resources\\JsonSample.txt", new JsonGrammarColorizer, textBox);
-	}
-}
+using namespace colorization;
 
 void SetupTextBoxWindow(GuiControlHost* controlHost, GuiControl* container)
 {
 	container->GetBoundsComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
-
-	GuiSelectableButton::MutexGroupController* controller=new GuiSelectableButton::MutexGroupController;
-	controlHost->AddComponent(controller);
-	GuiMultilineTextBox* textBox=g::NewMultilineTextBox();
-
+	
+	GuiMultilineTextBox* textBox=0;
 	GuiSelectableButton* radioGrammar=0;
 	GuiSelectableButton* radioXml=0;
 	GuiSelectableButton* radioJson=0;
+	GuiSelectableButton::MutexGroupController* controller=new GuiSelectableButton::MutexGroupController;
+	controlHost->AddComponent(controller);
 
 	GuiTableComposition* table=new GuiTableComposition;
 	table->SetAlignmentToParent(Margin(0, 0, 0, 0));
@@ -318,8 +332,9 @@ void SetupTextBoxWindow(GuiControlHost* controlHost, GuiControl* container)
 		table->AddChild(cell);
 		cell->SetSite(1, 0, 1, 4);
 
-		GuiMultilineTextBox* textBox=g::NewMultilineTextBox();
+		textBox=g::NewMultilineTextBox();
 		textBox->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+		textBox->TextChanged.AttachFunction(&textBox_TextChanged);
 		cell->AddChild(textBox->GetBoundsComposition());
 	}
 	{
