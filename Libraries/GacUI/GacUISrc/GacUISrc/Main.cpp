@@ -34,6 +34,44 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 }
 
 /***********************************************************************
+XmlGrammarColorizer
+***********************************************************************/
+
+class XmlGrammarColorizer : public GrammarColorizer
+{
+public:
+	XmlGrammarColorizer()
+		:GrammarColorizer(CreateAutoRecoverParser(xml::XmlLoadTable()), L"XDocument")
+	{
+		SetColor(L"Boundary", Color(0, 0, 255));
+		SetColor(L"Comment", Color(0, 128, 0));
+		SetColor(L"TagName", Color(163, 21, 21));
+		SetColor(L"AttName", Color(255, 0, 0));
+		SetColor(L"AttValue", Color(128, 0, 255));
+		EndSetColors();
+	}
+};
+
+/***********************************************************************
+JsonGrammarColorizer
+***********************************************************************/
+
+class JsonGrammarColorizer : public GrammarColorizer
+{
+public:
+	JsonGrammarColorizer()
+		:GrammarColorizer(CreateAutoRecoverParser(json::JsonLoadTable()), L"JRoot")
+	{
+		SetColor(L"Boundary", Color(0, 128, 0));
+		SetColor(L"Keyword", Color(0, 0, 255));
+		SetColor(L"AttName", Color(255, 0, 0));
+		SetColor(L"Number", Color(128, 0, 255));
+		SetColor(L"String", Color(163, 21, 2));
+		EndSetColors();
+	}
+};
+
+/***********************************************************************
 SymbolLookup
 ***********************************************************************/
 
@@ -239,25 +277,6 @@ public:
 };
 
 /***********************************************************************
-XmlGrammarColorizer
-***********************************************************************/
-
-class XmlGrammarColorizer : public GrammarColorizer
-{
-public:
-	XmlGrammarColorizer()
-		:GrammarColorizer(CreateAutoRecoverParser(xml::XmlLoadTable()), L"XDocument")
-	{
-		SetColor(L"Boundary", Color(0, 0, 255));
-		SetColor(L"Comment", Color(0, 128, 0));
-		SetColor(L"TagName", Color(163, 21, 21));
-		SetColor(L"AttName", Color(255, 0, 0));
-		SetColor(L"AttValue", Color(128, 0, 255));
-		EndSetColors();
-	}
-};
-
-/***********************************************************************
 TextBoxColorizerWindow
 ***********************************************************************/
 
@@ -323,6 +342,7 @@ protected:
 	{
 		if(radioJson->GetSelected())
 		{
+			SwitchLanguage(L"..\\GacUISrcCodepackedTest\\Resources\\XmlResource.xml", new JsonGrammarColorizer, json::JsonGetParserTextBuffer());
 		}
 	}
 
