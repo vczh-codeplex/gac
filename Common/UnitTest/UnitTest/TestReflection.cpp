@@ -287,7 +287,7 @@ namespace test
 		Size size;
 	};
 
-	class Base : public Description<Base>
+	class Base : public Object, public Description<Base>
 	{
 	public:
 		vint a;
@@ -771,6 +771,24 @@ namespace reflection_test
 		TEST_ASSERT(b4==b1);
 		TEST_ASSERT(*rc==3);
 	}
+
+	void TestSharedRawPtrDestructing()
+	{
+		{
+			Ptr<Base> b=new Base;
+			Ptr<Object> o=b;
+			b=0;
+			o=0;
+		}
+		{
+			//Base* b=new Base;
+			//vint* rc=ReferenceCounterOperator<Base>::CreateCounter(b);
+			//TEST_ASSERT(*rc==0);
+
+			//Ptr<Object> o=b;
+			//TEST_ASSERT(*rc==1);
+		}
+	}
 }
 using namespace reflection_test;
 
@@ -836,6 +854,17 @@ TEST_CASE(TestSharedRawPtrConverting)
 	TEST_ASSERT(GetGlobalTypeManager()->Load());
 	{
 		TestSharedRawPtrConverting();
+	}
+	TEST_ASSERT(ResetGlobalTypeManager());
+}
+
+TEST_CASE(TestSharedRawPtrDestructing)
+{
+	TEST_ASSERT(LoadPredefinedTypes());
+	TEST_ASSERT(GetGlobalTypeManager()->AddTypeLoader(new TestTypeLoader));
+	TEST_ASSERT(GetGlobalTypeManager()->Load());
+	{
+		TestSharedRawPtrDestructing();
 	}
 	TEST_ASSERT(ResetGlobalTypeManager());
 }
