@@ -62,9 +62,9 @@ public:
 	JsonGrammarColorizer()
 		:GrammarColorizer(CreateAutoRecoverParser(json::JsonLoadTable()), L"JRoot")
 	{
-		SetColor(L"Boundary", Color(0, 128, 0));
+		SetColor(L"Boundary", Color(255, 0, 0));
 		SetColor(L"Keyword", Color(0, 0, 255));
-		SetColor(L"AttName", Color(255, 0, 0));
+		SetColor(L"AttName", Color(64, 64, 64));
 		SetColor(L"Number", Color(128, 0, 255));
 		SetColor(L"String", Color(163, 21, 2));
 		EndSetColors();
@@ -342,7 +342,7 @@ protected:
 	{
 		if(radioJson->GetSelected())
 		{
-			SwitchLanguage(L"..\\GacUISrcCodepackedTest\\Resources\\XmlResource.xml", new JsonGrammarColorizer, json::JsonGetParserTextBuffer());
+			SwitchLanguage(L"..\\GacUISrcCodepackedTest\\Resources\\JsonSample.txt", new JsonGrammarColorizer, json::JsonGetParserTextBuffer());
 		}
 	}
 

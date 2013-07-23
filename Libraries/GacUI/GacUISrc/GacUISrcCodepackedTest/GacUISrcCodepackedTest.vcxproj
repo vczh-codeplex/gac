@@ -267,6 +267,7 @@
     <Text Include="Resources\Chemical.txt" />
     <Text Include="Resources\document.txt" />
     <Text Include="Resources\document2.txt" />
+    <Text Include="Resources\JsonSample.txt" />
   </ItemGroup>
   <ItemGroup>
     <Xml Include="Resources\document.xml" />
