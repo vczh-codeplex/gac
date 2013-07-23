@@ -11,27 +11,27 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{6698C71D-0D4E-4031-846A-8698F9C9D658}</ProjectGuid>
+    <ProjectGuid>{00583C2B-BEDD-4582-B9AD-DC26F2A7CB34}</ProjectGuid>
     <SccProjectName>SAK</SccProjectName>
     <SccAuxPath>SAK</SccAuxPath>
     <SccLocalPath>SAK</SccLocalPath>
     <SccProvider>SAK</SccProvider>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>GacUIStaticLibrary</RootNamespace>
+    <RootNamespace>ControlsTextBoxContextColorizer</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v110</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v110</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v110</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -43,14 +43,19 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -65,7 +70,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -75,47 +80,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <None Include="..\Resources\_Copy.png" />
-    <None Include="..\Resources\_Cut.png" />
-    <None Include="..\Resources\_Delete.png" />
-    <None Include="..\Resources\_New.png" />
-    <None Include="..\Resources\_Open.png" />
-    <None Include="..\Resources\_Paste.png" />
-    <None Include="..\Resources\_Print.png" />
-    <None Include="..\Resources\_Redo.png" />
-    <None Include="..\Resources\_Save.png" />
-    <None Include="..\Resources\_SaveAs.png" />
-    <None Include="..\Resources\_Undo.png" />
-    <None Include="ReadMe.txt" />
+    <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\Public\Source\GacUI.cpp">
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/bigobj %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/bigobj %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
-    <ClCompile Include="..\..\Public\Source\GacUIWindows.cpp" />
-    <ClCompile Include="..\..\Public\Source\Vlpp.cpp" />
-    <ClCompile Include="..\CommonLibrary\FileSystemInformation.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\..\Public\Source\GacUI.h" />
-    <ClInclude Include="..\..\Public\Source\GacUIWindows.h" />
-    <ClInclude Include="..\..\Public\Source\Vlpp.h" />
-    <ClInclude Include="..\CommonLibrary\FileSystemInformation.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="..\Resources\BigDoc.png" />
-    <Image Include="..\Resources\Gif.gif" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="..\Resources\CalculatorDefinition.txt" />
-    <Text Include="..\Resources\Chemical.txt" />
-    <Text Include="..\Resources\JsonSample.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <Xml Include="..\Resources\document2.xml" />
-    <Xml Include="..\Resources\XmlDoc.xml" />
-    <Xml Include="..\Resources\XmlResource.xml" />
+    <ProjectReference Include="..\GacUIStaticLibrary\GacUIStaticLibrary.vcxproj">
+      <Project>{6698c71d-0d4e-4031-846a-8698f9c9d658}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -4114,19 +4114,89 @@ namespace vl
 				static const vint							TryReduce=2;
 				static const vint							UserTokenStart=3;
 
+				class AttributeInfo : public Object
+				{
+				public:
+					WString									name;
+					collections::List<WString>				arguments;
+
+					AttributeInfo(const WString& _name)
+						:name(_name)
+					{
+					}
+
+					AttributeInfo* Argument(const WString& argument)
+					{
+						arguments.Add(argument);
+						return this;
+					}
+				};
+
+				class AttributeInfoList : public Object
+				{
+				public:
+					collections::List<Ptr<AttributeInfo>>	attributes;
+
+					Ptr<AttributeInfo> FindFirst(const WString& name);
+				};
+
+				class TreeTypeInfo
+				{
+				public:
+					WString									type;
+					vint									attributeIndex;
+
+					TreeTypeInfo()
+						:attributeIndex(-1)
+					{
+					}
+
+					TreeTypeInfo(const WString& _type, vint _attributeIndex)
+						:type(_type)
+						,attributeIndex(_attributeIndex)
+					{
+					}
+				};
+
+				class TreeFieldInfo
+				{
+				public:
+					WString									type;
+					WString									field;
+					vint									attributeIndex;
+
+					TreeFieldInfo()
+						:attributeIndex(-1)
+					{
+					}
+
+					TreeFieldInfo(const WString& _type, const WString& _field, vint _attributeIndex)
+						:type(_type)
+						,field(_field)
+						,attributeIndex(_attributeIndex)
+					{
+					}
+				};
+
 				class TokenInfo
 				{
 				public:
 					WString									name;
 					WString									regex;
 					vint									regexTokenIndex;
+					vint									attributeIndex;
 
-					TokenInfo():regexTokenIndex(-1){}
+					TokenInfo()
+						:regexTokenIndex(-1)
+						,attributeIndex(-1)
+					{
+					}
 
-					TokenInfo(const WString& _name, const WString& _regex)
+					TokenInfo(const WString& _name, const WString& _regex, vint _attributeIndex)
 						:name(_name)
 						,regex(_regex)
 						,regexTokenIndex(-1)
+						,attributeIndex(_attributeIndex)
 					{
 					}
 				};
@@ -4140,7 +4210,9 @@ namespace vl
 
 					WString									ruleAmbiguousType;		// filled in Initialize()
 
-					StateInfo(){}
+					StateInfo()
+					{
+					}
 
 					StateInfo(const WString& _ruleName, const WString& _stateName, const WString& _stateExpression)
 						:ruleName(_ruleName)
@@ -4157,14 +4229,20 @@ namespace vl
 					WString									type;
 					WString									ambiguousType;
 					vint									rootStartState;
+					vint									attributeIndex;
 
-					RuleInfo(){}
+					RuleInfo()
+						:rootStartState(-1)
+						,attributeIndex(-1)
+					{
+					}
 
-					RuleInfo(const WString& _name, const WString& _type, const WString& _ambiguousType, vint _rootStartState)
+					RuleInfo(const WString& _name, const WString& _type, const WString& _ambiguousType, vint _rootStartState, vint _attributeIndex)
 						:name(_name)
 						,type(_type)
 						,ambiguousType(_ambiguousType)
 						,rootStartState(_rootStartState)
+						,attributeIndex(_attributeIndex)
 					{
 					}
 				};
@@ -4264,23 +4342,42 @@ namespace vl
 				};
 
 			protected:
-				bool										ambiguity;
-				Ptr<regex::RegexLexer>						lexer;
-				collections::Array<Ptr<TransitionBag>>		transitionBags;
-				vint										tokenCount;
-				vint										stateCount;
-				collections::Array<TokenInfo>				tokenInfos;
-				collections::Array<TokenInfo>				discardTokenInfos;
-				collections::Array<StateInfo>				stateInfos;
-				collections::Array<RuleInfo>				ruleInfos;
-				collections::Dictionary<WString, vint>		ruleMap;
+				bool																ambiguity;
+				Ptr<regex::RegexLexer>												lexer;
+				collections::Array<Ptr<TransitionBag>>								transitionBags;
+				vint																tokenCount;
+				vint																stateCount;
+				collections::Array<Ptr<AttributeInfoList>>							attributeInfos;
+				collections::Array<TreeTypeInfo>									treeTypeInfos;
+				collections::Array<TreeFieldInfo>									treeFieldInfos;
+				collections::Array<TokenInfo>										tokenInfos;
+				collections::Array<TokenInfo>										discardTokenInfos;
+				collections::Array<StateInfo>										stateInfos;
+				collections::Array<RuleInfo>										ruleInfos;
+				collections::Dictionary<WString, vint>								ruleMap;
+				collections::Dictionary<WString, vint>								treeTypeInfoMap;
+				collections::Dictionary<collections::Pair<WString, WString>, vint>	treeFieldInfoMap;
 
 			public:
-				ParsingTable(vint _tokenCount, vint _discardTokenCount, vint _stateCount, vint _ruleCount);
+				ParsingTable(vint _attributeInfoCount, vint _treeTypeInfoCount, vint _treeFieldInfoCount, vint _tokenCount, vint _discardTokenCount, vint _stateCount, vint _ruleCount);
 				~ParsingTable();
 
 				bool										GetAmbiguity();
 				void										SetAmbiguity(bool value);
+
+				vint										GetAttributeInfoCount();
+				Ptr<AttributeInfoList>						GetAttributeInfo(vint index);
+				void										SetAttributeInfo(vint index, Ptr<AttributeInfoList> info);
+
+				vint										GetTreeTypeInfoCount();
+				const TreeTypeInfo&							GetTreeTypeInfo(vint index);
+				const TreeTypeInfo&							GetTreeTypeInfo(const WString& type);
+				void										SetTreeTypeInfo(vint index, const TreeTypeInfo& info);
+
+				vint										GetTreeFieldInfoCount();
+				const TreeFieldInfo&						GetTreeFieldInfo(vint index);
+				const TreeFieldInfo&						GetTreeFieldInfo(const WString& type, const WString& field);
+				void										SetTreeFieldInfo(vint index, const TreeFieldInfo& info);
 
 				vint										GetTokenCount();
 				const TokenInfo&							GetTokenInfo(vint token);
@@ -4609,8 +4706,9 @@ namespace vl
 				ParsingGeneralParser(Ptr<ParsingTable> _table);
 				~ParsingGeneralParser();
 				
-				virtual ParsingState::TransitionResult		ParseStep(ParsingState& state, collections::List<Ptr<ParsingError>>& errors)=0;
+				Ptr<ParsingTable>							GetTable();
 				virtual void								BeginParse();
+				virtual ParsingState::TransitionResult		ParseStep(ParsingState& state, collections::List<Ptr<ParsingError>>& errors)=0;
 				Ptr<ParsingTreeNode>						Parse(ParsingState& state, collections::List<Ptr<ParsingError>>& errors);
 				Ptr<ParsingTreeNode>						Parse(const WString& input, const WString& rule, collections::List<Ptr<ParsingError>>& errors);
 			};
@@ -4687,236 +4785,6 @@ namespace vl
 			extern Ptr<ParsingGeneralParser>				CreateBootstrapStrictParser();
 			extern Ptr<ParsingGeneralParser>				CreateBootstrapAutoRecoverParser();
 		}
-	}
-}
-
-#endif
-
-/***********************************************************************
-PARSING\JSON\PARSINGJSON_PARSER.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-Parser::ParsingJson_Parser
-
-本文件使用Vczh Parsing Generator工具自动生成
-***********************************************************************/
-
-#ifndef VCZH_PARSING_JSON_PARSINGJSON_PARSER
-#define VCZH_PARSING_JSON_PARSINGJSON_PARSER
-
-
-namespace vl
-{
-	namespace parsing
-	{
-		namespace json
-		{
-			struct JsonParserTokenIndex abstract
-			{
-				static const vl::vint TRUEVALUE = 0;
-				static const vl::vint FALSEVALUE = 1;
-				static const vl::vint NULLVALUE = 2;
-				static const vl::vint OBJOPEN = 3;
-				static const vl::vint OBJCLOSE = 4;
-				static const vl::vint ARROPEN = 5;
-				static const vl::vint ARRCLOSE = 6;
-				static const vl::vint COMMA = 7;
-				static const vl::vint COLON = 8;
-				static const vl::vint NUMBER = 9;
-				static const vl::vint STRING = 10;
-				static const vl::vint SPACE = 11;
-			};
-			class JsonNode;
-			class JsonLiteral;
-			class JsonString;
-			class JsonNumber;
-			class JsonArray;
-			class JsonObjectField;
-			class JsonObject;
-
-			class JsonNode abstract : public vl::parsing::ParsingTreeCustomBase
-			{
-			public:
-				class IVisitor : public vl::Interface
-				{
-				public:
-					virtual void Visit(JsonLiteral* node)=0;
-					virtual void Visit(JsonString* node)=0;
-					virtual void Visit(JsonNumber* node)=0;
-					virtual void Visit(JsonArray* node)=0;
-					virtual void Visit(JsonObjectField* node)=0;
-					virtual void Visit(JsonObject* node)=0;
-				};
-
-				virtual void Accept(JsonNode::IVisitor* visitor)=0;
-
-			};
-
-			class JsonLiteral : public JsonNode
-			{
-			public:
-				struct JsonValue abstract
-				{
-					enum Type
-					{
-						True,
-						False,
-						Null,
-					};
-				};
-
-				JsonValue::Type value;
-
-				void Accept(JsonNode::IVisitor* visitor)override;
-
-				static vl::Ptr<JsonLiteral> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
-			};
-
-			class JsonString : public JsonNode
-			{
-			public:
-				vl::parsing::ParsingToken content;
-
-				void Accept(JsonNode::IVisitor* visitor)override;
-
-				static vl::Ptr<JsonString> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
-			};
-
-			class JsonNumber : public JsonNode
-			{
-			public:
-				vl::parsing::ParsingToken content;
-
-				void Accept(JsonNode::IVisitor* visitor)override;
-
-				static vl::Ptr<JsonNumber> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
-			};
-
-			class JsonArray : public JsonNode
-			{
-			public:
-				vl::collections::List<vl::Ptr<JsonNode>> items;
-
-				void Accept(JsonNode::IVisitor* visitor)override;
-
-				static vl::Ptr<JsonArray> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
-			};
-
-			class JsonObjectField : public JsonNode
-			{
-			public:
-				vl::parsing::ParsingToken name;
-				vl::Ptr<JsonNode> value;
-
-				void Accept(JsonNode::IVisitor* visitor)override;
-
-				static vl::Ptr<JsonObjectField> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
-			};
-
-			class JsonObject : public JsonNode
-			{
-			public:
-				vl::collections::List<vl::Ptr<JsonObjectField>> fields;
-
-				void Accept(JsonNode::IVisitor* visitor)override;
-
-				static vl::Ptr<JsonObject> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
-			};
-
-			extern vl::Ptr<vl::parsing::ParsingTreeCustomBase> JsonConvertParsingTreeNode(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
-			extern vl::Ptr<vl::parsing::tabling::ParsingTable> JsonLoadTable();
-
-			extern vl::Ptr<vl::parsing::ParsingTreeNode> JsonParseAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
-			extern vl::Ptr<JsonNode> JsonParse(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
-
-		}
-	}
-}
-#endif
-
-/***********************************************************************
-PARSING\JSON\PARSINGJSON.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-Parser::ParsingJson_Parser
-
-***********************************************************************/
-
-#ifndef VCZH_PARSING_JSON_PARSINGJSON
-#define VCZH_PARSING_JSON_PARSINGJSON
-
-
-namespace vl
-{
-	namespace parsing
-	{
-		namespace json
-		{
-			extern void						JsonEscapeString(const WString& text, stream::TextWriter& writer);
-			extern void						JsonUnescapeString(const WString& text, stream::TextWriter& writer);
-			extern void						JsonPrint(Ptr<JsonNode> node, stream::TextWriter& writer);
-			extern WString					JsonToString(Ptr<JsonNode> node);
-		}
-	}
-}
-
-#endif
-
-/***********************************************************************
-STREAM\MEMORYSTREAM.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-Stream::MemoryStream
-
-Interfaces:
-	MemoryStream					：内存流
-***********************************************************************/
-
-#ifndef VCZH_STREAM_MEMORYSTREAM
-#define VCZH_STREAM_MEMORYSTREAM
-
-
-namespace vl
-{
-	namespace stream
-	{
-		class MemoryStream : public Object, public virtual IStream
-		{
-		protected:
-			vint					block;
-			char*					buffer;
-			vint					size;
-			vint					position;
-			vint					capacity;
-
-			void					PrepareSpace(vint totalSpace);
-		public:
-			MemoryStream(vint _block=65536);
-			~MemoryStream();
-
-			bool					CanRead()const;
-			bool					CanWrite()const;
-			bool					CanSeek()const;
-			bool					CanPeek()const;
-			bool					IsLimited()const;
-			bool					IsAvailable()const;
-			void					Close();
-			pos_t					Position()const;
-			pos_t					Size()const;
-			void					Seek(pos_t _size);
-			void					SeekFromBegin(pos_t _size);
-			void					SeekFromEnd(pos_t _size);
-			vint					Read(void* _buffer, vint _size);
-			vint					Write(void* _buffer, vint _size);
-			vint					Peek(void* _buffer, vint _size);
-			void*					GetInternalBuffer();
-		};
 	}
 }
 
@@ -5363,6 +5231,18 @@ namespace vl
 
 			class ParsingDefinitionWriter;
 
+			class ParsingDefinitionTokenDefinitionWriter : public Object
+			{
+			protected:
+				Ptr<ParsingDefinitionTokenDefinition>			token;
+				ParsingDefinitionWriter&						owner;
+			public:
+				ParsingDefinitionTokenDefinitionWriter(ParsingDefinitionWriter& _owner, Ptr<ParsingDefinitionTokenDefinition> _token);
+
+				ParsingDefinitionTokenDefinitionWriter&			Attribute(const ParsingDefinitionAttributeWriter& attribute);
+				ParsingDefinitionWriter&						EndToken();
+			};
+
 			class ParsingDefinitionRuleDefinitionWriter : public Object
 			{
 			protected:
@@ -5386,6 +5266,7 @@ namespace vl
 
 				ParsingDefinitionWriter&						Type(const ParsingDefinitionTypeDefinitionWriter& type);
 				ParsingDefinitionWriter&						Token(const WString& name, const WString& regex);
+				ParsingDefinitionTokenDefinitionWriter			TokenAtt(const WString& name, const WString& regex);
 				ParsingDefinitionWriter&						Discard(const WString& name, const WString& regex);
 				ParsingDefinitionRuleDefinitionWriter			Rule(const WString& name, const ParsingDefinitionTypeWriter& type);
 
@@ -5531,10 +5412,11 @@ namespace vl
 
 			class ParsingSymbolManager : public Object
 			{
-
-				typedef collections::List<Ptr<ParsingSymbol>>												ParsingSymbolList;
-				typedef collections::Dictionary<DefinitionTypeScopePair, ParsingSymbol*>					DefinitionTypeSymbolMap;
-				typedef collections::Dictionary<definitions::ParsingDefinitionGrammar*, ParsingSymbol*>		DefinitionGrammarSymbolMap;
+				typedef definitions::ParsingDefinitionClassDefinition												ClassDefinition;
+				typedef collections::List<Ptr<ParsingSymbol>>														ParsingSymbolList;
+				typedef collections::Dictionary<DefinitionTypeScopePair, ParsingSymbol*>							DefinitionTypeSymbolMap;
+				typedef collections::Dictionary<definitions::ParsingDefinitionGrammar*, ParsingSymbol*>				DefinitionGrammarSymbolMap;
+				typedef collections::Dictionary<ParsingSymbol*, ClassDefinition*>									SymbolClassDefinitionMap;
 			protected:
 				ParsingSymbol*					globalSymbol;
 				ParsingSymbol*					tokenTypeSymbol;
@@ -5542,8 +5424,9 @@ namespace vl
 				DefinitionTypeSymbolMap			definitionTypeSymbolCache;
 				DefinitionGrammarSymbolMap		definitionGrammarSymbolCache;
 				DefinitionGrammarSymbolMap		definitionGrammarTypeCache;
+				SymbolClassDefinitionMap		symbolClassDefinitionCache;
 
-				ParsingSymbol*					TryAddSubSymbol(Ptr<ParsingSymbol> subSymbol, ParsingSymbol* parentSymbol);
+				bool							TryAddSubSymbol(Ptr<ParsingSymbol> subSymbol, ParsingSymbol* parentSymbol);
 			public:
 				ParsingSymbolManager();
 				~ParsingSymbolManager();
@@ -5552,13 +5435,14 @@ namespace vl
 				ParsingSymbol*					GetTokenType();
 				ParsingSymbol*					GetArrayType(ParsingSymbol* elementType);
 
-				ParsingSymbol*					AddClass(const WString& name, ParsingSymbol* baseType, ParsingSymbol* parentType=0);
+				ParsingSymbol*					AddClass(definitions::ParsingDefinitionClassDefinition* classDef, ParsingSymbol* baseType, ParsingSymbol* parentType=0);
 				ParsingSymbol*					AddField(const WString& name, ParsingSymbol* classType, ParsingSymbol* fieldType);
 				ParsingSymbol*					AddEnum(const WString& name, ParsingSymbol* parentType=0);
 				ParsingSymbol*					AddEnumItem(const WString& name, ParsingSymbol* enumType);
 				ParsingSymbol*					AddTokenDefinition(const WString& name, const WString& regex);
 				ParsingSymbol*					AddRuleDefinition(const WString& name, ParsingSymbol* ruleType);
 
+				ClassDefinition*				CacheGetClassDefinition(ParsingSymbol* type);
 				ParsingSymbol*					CacheGetType(definitions::ParsingDefinitionType* type, ParsingSymbol* scope);
 				bool							CacheSetType(definitions::ParsingDefinitionType* type, ParsingSymbol* scope, ParsingSymbol* symbol);
 				ParsingSymbol*					CacheGetSymbol(definitions::ParsingDefinitionGrammar* grammar);
@@ -5800,10 +5684,241 @@ namespace vl
 ***********************************************************************/
 
 			extern WString											GetTypeNameForCreateInstruction(ParsingSymbol* type);
-			extern Ptr<tabling::ParsingTable>						GenerateTableFromPDA(Ptr<definitions::ParsingDefinition> definition, Ptr<Automaton> jointPDA, bool enableAmbiguity, collections::List<Ptr<ParsingError>>& errors);
+			extern Ptr<tabling::ParsingTable>						GenerateTableFromPDA(Ptr<definitions::ParsingDefinition> definition, ParsingSymbolManager* manager, Ptr<Automaton> jointPDA, bool enableAmbiguity, collections::List<Ptr<ParsingError>>& errors);
 			extern Ptr<tabling::ParsingTable>						GenerateTable(Ptr<definitions::ParsingDefinition> definition, bool enableAmbiguity, collections::List<Ptr<ParsingError>>& errors);
 			extern void												Log(Ptr<Automaton> automaton, stream::TextWriter& writer);
 		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+PARSING\JSON\PARSINGJSON_PARSER.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Parser::ParsingJson_Parser
+
+本文件使用Vczh Parsing Generator工具自动生成
+***********************************************************************/
+
+#ifndef VCZH_PARSING_JSON_PARSINGJSON_PARSER
+#define VCZH_PARSING_JSON_PARSINGJSON_PARSER
+
+
+namespace vl
+{
+	namespace parsing
+	{
+		namespace json
+		{
+			struct JsonParserTokenIndex abstract
+			{
+				static const vl::vint TRUEVALUE = 0;
+				static const vl::vint FALSEVALUE = 1;
+				static const vl::vint NULLVALUE = 2;
+				static const vl::vint OBJOPEN = 3;
+				static const vl::vint OBJCLOSE = 4;
+				static const vl::vint ARROPEN = 5;
+				static const vl::vint ARRCLOSE = 6;
+				static const vl::vint COMMA = 7;
+				static const vl::vint COLON = 8;
+				static const vl::vint NUMBER = 9;
+				static const vl::vint STRING = 10;
+				static const vl::vint SPACE = 11;
+			};
+			class JsonNode;
+			class JsonLiteral;
+			class JsonString;
+			class JsonNumber;
+			class JsonArray;
+			class JsonObjectField;
+			class JsonObject;
+
+			class JsonNode abstract : public vl::parsing::ParsingTreeCustomBase
+			{
+			public:
+				class IVisitor : public vl::Interface
+				{
+				public:
+					virtual void Visit(JsonLiteral* node)=0;
+					virtual void Visit(JsonString* node)=0;
+					virtual void Visit(JsonNumber* node)=0;
+					virtual void Visit(JsonArray* node)=0;
+					virtual void Visit(JsonObjectField* node)=0;
+					virtual void Visit(JsonObject* node)=0;
+				};
+
+				virtual void Accept(JsonNode::IVisitor* visitor)=0;
+
+			};
+
+			class JsonLiteral : public JsonNode
+			{
+			public:
+				struct JsonValue abstract
+				{
+					enum Type
+					{
+						True,
+						False,
+						Null,
+					};
+				};
+
+				JsonValue::Type value;
+
+				void Accept(JsonNode::IVisitor* visitor)override;
+
+				static vl::Ptr<JsonLiteral> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
+			};
+
+			class JsonString : public JsonNode
+			{
+			public:
+				vl::parsing::ParsingToken content;
+
+				void Accept(JsonNode::IVisitor* visitor)override;
+
+				static vl::Ptr<JsonString> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
+			};
+
+			class JsonNumber : public JsonNode
+			{
+			public:
+				vl::parsing::ParsingToken content;
+
+				void Accept(JsonNode::IVisitor* visitor)override;
+
+				static vl::Ptr<JsonNumber> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
+			};
+
+			class JsonArray : public JsonNode
+			{
+			public:
+				vl::collections::List<vl::Ptr<JsonNode>> items;
+
+				void Accept(JsonNode::IVisitor* visitor)override;
+
+				static vl::Ptr<JsonArray> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
+			};
+
+			class JsonObjectField : public JsonNode
+			{
+			public:
+				vl::parsing::ParsingToken name;
+				vl::Ptr<JsonNode> value;
+
+				void Accept(JsonNode::IVisitor* visitor)override;
+
+				static vl::Ptr<JsonObjectField> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
+			};
+
+			class JsonObject : public JsonNode
+			{
+			public:
+				vl::collections::List<vl::Ptr<JsonObjectField>> fields;
+
+				void Accept(JsonNode::IVisitor* visitor)override;
+
+				static vl::Ptr<JsonObject> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
+			};
+
+			extern vl::WString JsonGetParserTextBuffer();
+			extern vl::Ptr<vl::parsing::ParsingTreeCustomBase> JsonConvertParsingTreeNode(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
+			extern vl::Ptr<vl::parsing::tabling::ParsingTable> JsonLoadTable();
+
+			extern vl::Ptr<vl::parsing::ParsingTreeNode> JsonParseAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
+			extern vl::Ptr<JsonNode> JsonParse(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
+
+		}
+	}
+}
+#endif
+
+/***********************************************************************
+PARSING\JSON\PARSINGJSON.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Parser::ParsingJson_Parser
+
+***********************************************************************/
+
+#ifndef VCZH_PARSING_JSON_PARSINGJSON
+#define VCZH_PARSING_JSON_PARSINGJSON
+
+
+namespace vl
+{
+	namespace parsing
+	{
+		namespace json
+		{
+			extern void						JsonEscapeString(const WString& text, stream::TextWriter& writer);
+			extern void						JsonUnescapeString(const WString& text, stream::TextWriter& writer);
+			extern void						JsonPrint(Ptr<JsonNode> node, stream::TextWriter& writer);
+			extern WString					JsonToString(Ptr<JsonNode> node);
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+STREAM\MEMORYSTREAM.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Stream::MemoryStream
+
+Interfaces:
+	MemoryStream					：内存流
+***********************************************************************/
+
+#ifndef VCZH_STREAM_MEMORYSTREAM
+#define VCZH_STREAM_MEMORYSTREAM
+
+
+namespace vl
+{
+	namespace stream
+	{
+		class MemoryStream : public Object, public virtual IStream
+		{
+		protected:
+			vint					block;
+			char*					buffer;
+			vint					size;
+			vint					position;
+			vint					capacity;
+
+			void					PrepareSpace(vint totalSpace);
+		public:
+			MemoryStream(vint _block=65536);
+			~MemoryStream();
+
+			bool					CanRead()const;
+			bool					CanWrite()const;
+			bool					CanSeek()const;
+			bool					CanPeek()const;
+			bool					IsLimited()const;
+			bool					IsAvailable()const;
+			void					Close();
+			pos_t					Position()const;
+			pos_t					Size()const;
+			void					Seek(pos_t _size);
+			void					SeekFromBegin(pos_t _size);
+			void					SeekFromEnd(pos_t _size);
+			vint					Read(void* _buffer, vint _size);
+			vint					Write(void* _buffer, vint _size);
+			vint					Peek(void* _buffer, vint _size);
+			void*					GetInternalBuffer();
+		};
 	}
 }
 
@@ -13369,6 +13484,7 @@ namespace vl
 				static vl::Ptr<XmlDocument> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 			};
 
+			extern vl::WString XmlGetParserTextBuffer();
 			extern vl::Ptr<vl::parsing::ParsingTreeCustomBase> XmlConvertParsingTreeNode(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 			extern vl::Ptr<vl::parsing::tabling::ParsingTable> XmlLoadTable();
 
@@ -22451,6 +22567,83 @@ namespace vl
 			Scope(SpinLock& _spinLock);
 			~Scope();
 		};
+	};
+
+/***********************************************************************
+RepeatingTaskExecutor
+***********************************************************************/
+
+	template<typename T>
+	class RepeatingTaskExecutor : public Object
+	{
+	private:
+		SpinLock								inputLock;
+		T										inputData;
+		volatile bool							inputDataAvailable;
+		SpinLock								executingEvent;
+		volatile bool							executing;
+
+		void ExecutingProcInternal()
+		{
+			while(true)
+			{
+				bool currentInputDataAvailable;
+				T currentInputData;
+				{
+					SpinLock::Scope scope(inputLock);
+					currentInputData=inputData;
+					currentInputDataAvailable=inputDataAvailable;
+					inputDataAvailable=false;
+				}
+				if(!currentInputDataAvailable)
+				{
+					executing=false;
+					break;
+				}
+				Execute(currentInputData);
+			}
+			executingEvent.Leave();
+		}
+
+		static void ExecutingProc(void* argument)
+		{
+			((RepeatingTaskExecutor<T>*)argument)->ExecutingProcInternal();
+		}
+	
+	protected:
+		virtual void							Execute(const T& input)=0;
+
+		void SubmitTask(const T& input)
+		{
+			{
+				SpinLock::Scope scope(inputLock);
+				inputData=input;
+				inputDataAvailable=true;
+			}
+			if(!executing)
+			{
+				executing=true;
+				executingEvent.Enter();
+				ThreadPoolLite::Queue(&ExecutingProc, this);
+			}
+		}
+	public:
+		RepeatingTaskExecutor()
+			:inputDataAvailable(false)
+			,executing(false)
+		{
+		}
+
+		~RepeatingTaskExecutor()
+		{
+			EnsureTaskFinished();
+		}
+
+		void EnsureTaskFinished()
+		{
+			executingEvent.Enter();
+			executingEvent.Leave();
+		}
 	};
 }
 
