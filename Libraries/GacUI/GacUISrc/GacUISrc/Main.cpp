@@ -41,7 +41,7 @@ class GrammarColorizer abstract : public GuiTextBoxRegexColorizer, public Repeat
 {
 	typedef Pair<WString, WString>								FieldDesc;
 	typedef Dictionary<FieldDesc, vint>							FieldContextColors;
-	typedef Dictionary<FieldDesc, WString>						FieldSemanticColors;
+	typedef Dictionary<FieldDesc, vint>							FieldSemanticColors;
 private:
 	Ptr<ParsingGeneralParser>				grammarParser;
 	WString									grammarRule;
@@ -53,6 +53,7 @@ private:
 	List<bool>								colorContext;
 	FieldContextColors						fieldContextColors;
 	FieldSemanticColors						fieldSemanticColors;
+	Dictionary<WString, vint>				semanticIndices;
 
 	Ptr<ParsingTable::AttributeInfo> GetAttribute(vint index, const WString& name, vint argumentCount)
 	{
@@ -92,7 +93,7 @@ protected:
 	{
 	}
 
-	virtual void OnSemanticColorize(ParsingTreeToken* foundToken, ParsingTreeObject* tokenParent, const WString& type, const WString& field, const WString& category, vint& token)
+	virtual void OnSemanticColorize(ParsingTreeToken* foundToken, ParsingTreeObject* tokenParent, const WString& type, const WString& field, vint semantic, vint& token)
 	{
 	}
 
@@ -153,6 +154,12 @@ public:
 		return index==-1?-1:colorIndices.Values().Get(index);
 	}
 
+	vint GetSemanticId(const WString& semantic)
+	{
+		vint index=semanticIndices.Keys().IndexOf(semantic);
+		return index==-1?-1:semanticIndices.Values().Get(index);
+	}
+
 	void BeginSetColors()
 	{
 		ClearTokens();
@@ -182,6 +189,7 @@ public:
 		colorContext.Clear();
 		fieldContextColors.Clear();
 		fieldSemanticColors.Clear();
+		semanticIndices.Clear();
 
 		// prepare tokens
 		{
@@ -238,7 +246,18 @@ public:
 				else if(Ptr<ParsingTable::AttributeInfo> att=GetSemanticColorAttribute(fieldInfo.attributeIndex))
 				{
 					FieldDesc key(fieldInfo.type, fieldInfo.field);
-					fieldSemanticColors.Add(key, att->arguments[0]);
+					vint semantic=-1;
+					vint index=semanticIndices.Keys().IndexOf(att->arguments[0]);
+					if(index==-1)
+					{
+						semantic=semanticIndices.Count();
+						semanticIndices.Add(att->arguments[0], semantic);
+					}
+					else
+					{
+						semantic=semanticIndices.Values().Get(index);
+					}
+					fieldSemanticColors.Add(key, semantic);
 				}
 			}
 		}
@@ -274,8 +293,8 @@ public:
 			index=fieldSemanticColors.Keys().IndexOf(key);
 			if(index!=-1)
 			{
-				const WString& category=fieldSemanticColors.Values().Get(index);
-				OnSemanticColorize(foundToken, tokenParent, type, field, category, token);
+				vint semantic=fieldSemanticColors.Values().Get(index);
+				OnSemanticColorize(foundToken, tokenParent, type, field, semantic, token);
 				return;
 			}
 		}
@@ -385,6 +404,8 @@ protected:
 	vint									tokenIdType;
 	vint									tokenIdToken;
 	vint									tokenIdRule;
+	vint									semanticType;
+	vint									semanticGrammar;
 
 	TypeSymbol* FindScope(ParsingTreeNode* node)
 	{
@@ -438,9 +459,9 @@ protected:
 		ThreadSafeReturnTreeNode();
 	}
 
-	void OnSemanticColorize(ParsingTreeToken* foundToken, ParsingTreeObject* tokenParent, const WString& type, const WString& field, const WString& category, vint& token)override
+	void OnSemanticColorize(ParsingTreeToken* foundToken, ParsingTreeObject* tokenParent, const WString& type, const WString& field, vint semantic, vint& token)override
 	{
-		if(category==L"Type")
+		if(semantic==semanticType)
 		{
 			TypeSymbol* scope=FindScope(tokenParent);
 			if(FindType(scope, tokenParent))
@@ -448,7 +469,7 @@ protected:
 				token=tokenIdType;
 			}
 		}
-		else if(category==L"Grammar")
+		else if(semantic==semanticGrammar)
 		{
 			WString name=foundToken->GetValue();
 			if(parsingTreeDecl->tokens.Contains(name))
@@ -476,6 +497,8 @@ public:
 		tokenIdType=GetTokenId(L"Type");
 		tokenIdToken=GetTokenId(L"Token");
 		tokenIdRule=GetTokenId(L"Rule");
+		semanticType=GetSemanticId(L"Type");
+		semanticGrammar=GetSemanticId(L"Grammar");
 	}
 };
 
