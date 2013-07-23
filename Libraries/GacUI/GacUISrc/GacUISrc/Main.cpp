@@ -125,7 +125,7 @@ public:
 };
 
 /***********************************************************************
-GrammarColorizer
+ParserGrammarColorizer
 ***********************************************************************/
 
 class ParserGrammarColorizer : public GrammarColorizer
@@ -231,6 +231,30 @@ public:
 		semanticType=GetSemanticId(L"Type");
 		semanticGrammar=GetSemanticId(L"Grammar");
 	}
+
+	~ParserGrammarColorizer()
+	{
+		EnsureTaskFinished();
+	}
+};
+
+/***********************************************************************
+XmlGrammarColorizer
+***********************************************************************/
+
+class XmlGrammarColorizer : public GrammarColorizer
+{
+public:
+	XmlGrammarColorizer()
+		:GrammarColorizer(CreateAutoRecoverParser(xml::XmlLoadTable()), L"XDocument")
+	{
+		SetColor(L"Boundary", Color(0, 0, 255));
+		SetColor(L"Comment", Color(0, 128, 0));
+		SetColor(L"TagName", Color(163, 21, 21));
+		SetColor(L"AttName", Color(255, 0, 0));
+		SetColor(L"AttValue", Color(128, 0, 255));
+		EndSetColors();
+	}
 };
 
 /***********************************************************************
@@ -291,6 +315,7 @@ protected:
 	{
 		if(radioXml->GetSelected())
 		{
+			SwitchLanguage(L"..\\GacUISrcCodepackedTest\\Resources\\XmlResource.xml", new XmlGrammarColorizer, xml::XmlGetParserTextBuffer());
 		}
 	}
 

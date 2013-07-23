@@ -337,6 +337,11 @@ RepeatingTaskExecutor
 
 		~RepeatingTaskExecutor()
 		{
+			EnsureTaskFinished();
+		}
+
+		void EnsureTaskFinished()
+		{
 			executingEvent.Enter();
 			executingEvent.Leave();
 		}

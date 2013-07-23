@@ -175,6 +175,7 @@ GrammarColorizer
 			public:
 				GrammarColorizer();
 				GrammarColorizer(Ptr<parsing::tabling::ParsingGeneralParser> _grammarParser, const WString& _grammarRule);
+				~GrammarColorizer();
 
 				Ptr<parsing::ParsingTreeObject>								ThreadSafeGetTreeNode();
 				void														ThreadSafeReturnTreeNode();
