@@ -25,8 +25,8 @@ class CData : Node
 
 class Attribute : Node
 {
-	token name;
-	token value (XmlUnescapeAttributeValue);
+	token name									@Color("AttName");
+	token value (XmlUnescapeAttributeValue)		@Color("AttValue");
 }
 
 class Comment : Node
@@ -36,15 +36,15 @@ class Comment : Node
 
 class Element : Node
 {
-	token name;
-	token closingName;
+	token name									@Color("TagName");
+	token closingName							@Color("TagName");
 	Attribute[] attributes;
 	Node[] subNodes (XmlMergeTextFragment);
 }
 
 class Instruction : Node
 {
-	token name;
+	token name									@Color("TagName");
 	Attribute[] attributes;
 }
 
@@ -54,17 +54,17 @@ class Document : Node
 	Element rootElement;
 }
 
-token INSTRUCTION_OPEN = "/</?";
-token INSTRUCTION_CLOSE = "/?/>";
-token COMPLEX_ELEMENT_OPEN = "/<//";
-token SINGLE_ELEMENT_CLOSE = "///>";
-token ELEMENT_OPEN = "/<";
-token ELEMENT_CLOSE = "/>";
+token INSTRUCTION_OPEN = "/</?"			@Color("Boundary");
+token INSTRUCTION_CLOSE = "/?/>"		@Color("Boundary");
+token COMPLEX_ELEMENT_OPEN = "/<//"		@Color("Boundary");
+token SINGLE_ELEMENT_CLOSE = "///>"		@Color("Boundary");
+token ELEMENT_OPEN = "/<"				@Color("Boundary");
+token ELEMENT_CLOSE = "/>"				@Color("Boundary");
 token EQUAL = "/=";
 
-token NAME = "[a-zA-Z0-9:._/-]+";
-token ATTVALUE = """[^<>""]*""|'[^<>']*'";
-token COMMENT = "/</!--([^/->]|-[^/->]|--[^>])*--/>";
+token NAME = "[a-zA-Z0-9:._/-]+"								@ContextColor("Default");
+token ATTVALUE = """[^<>""]*""|'[^<>']*'"						@ContextColor("Default");
+token COMMENT = "/</!--([^/->]|-[^/->]|--[^>])*--/>"			@Color("Comment");
 token CDATA = "/</!/[CDATA/[([^/]]|/][^/]]|/]/][^>])*/]/]/>";
 token TEXT = "([^<>=""' /r/n/ta-zA-Z0-9:._/-])+|""|'";
 
