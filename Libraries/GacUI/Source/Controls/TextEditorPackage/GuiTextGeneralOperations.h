@@ -28,6 +28,7 @@ Common Operations
 				virtual void							Attach(elements::GuiColorizedTextElement* element, SpinLock& elementModifyLock)=0;
 				virtual void							Detach()=0;
 				virtual void							TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)=0;
+				virtual void							TextEditFinished()=0;
 			};
 		}
 	}

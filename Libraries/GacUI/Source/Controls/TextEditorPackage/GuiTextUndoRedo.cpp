@@ -151,6 +151,10 @@ GuiTextBoxUndoRedoProcessor
 				step->inputText=inputText;
 				PushStep(step);
 			}
+
+			void GuiTextBoxUndoRedoProcessor::TextEditFinished()
+			{
+			}
 		}
 	}
 }
