@@ -7327,6 +7327,7 @@ Common Operations
 				virtual void							Attach(elements::GuiColorizedTextElement* element, SpinLock& elementModifyLock)=0;
 				virtual void							Detach()=0;
 				virtual void							TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)=0;
+				virtual void							TextEditFinished()=0;
 			};
 		}
 	}
@@ -7375,7 +7376,8 @@ GuiTextBoxColorizerBase
 				static void									ColorizerThreadProc(void* argument);
 
 				void										StartColorizer();
-				void										StopColorizer();
+				void										StopColorizer(bool forever);
+				void										StopColorizerForever();
 			public:
 				GuiTextBoxColorizerBase();
 				~GuiTextBoxColorizerBase();
@@ -7383,6 +7385,7 @@ GuiTextBoxColorizerBase
 				void										Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock)override;
 				void										Detach()override;
 				void										TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)override;
+				void										TextEditFinished()override;
 				void										RestartColorizer();
 
 				virtual vint								GetLexerStartState()=0;
@@ -7432,10 +7435,10 @@ GuiTextBoxRegexColorizer
 			};
 
 /***********************************************************************
-GrammarColorizer
+GuiGrammarColorizer
 ***********************************************************************/
 
-			class GrammarColorizer abstract : public GuiTextBoxRegexColorizer, public RepeatingTaskExecutor<WString>
+			class GuiGrammarColorizer abstract : public GuiTextBoxRegexColorizer, public RepeatingTaskExecutor<WString>
 			{
 				typedef collections::Pair<WString, WString>					FieldDesc;
 				typedef collections::Dictionary<FieldDesc, vint>			FieldContextColors;
@@ -7460,15 +7463,19 @@ GrammarColorizer
 				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetSemanticColorAttribute(vint index);
 				ColorEntry													GetColor(const WString& name);
 			protected:
+				void														Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock)override;
+				void														Detach()override;
+				void														TextEditFinished()override;
+
 				virtual void												OnParsingFinished();
 				virtual void												OnSemanticColorize(parsing::ParsingTreeToken* foundToken, parsing::ParsingTreeObject* tokenParent, const WString& type, const WString& field, vint semantic, vint& token);
 
 				void														Initialize(Ptr<parsing::tabling::ParsingGeneralParser> _grammarParser, const WString& _grammarRule);
 				void														Execute(const WString& input)override;
 			public:
-				GrammarColorizer();
-				GrammarColorizer(Ptr<parsing::tabling::ParsingGeneralParser> _grammarParser, const WString& _grammarRule);
-				~GrammarColorizer();
+				GuiGrammarColorizer();
+				GuiGrammarColorizer(Ptr<parsing::tabling::ParsingGeneralParser> _grammarParser, const WString& _grammarRule);
+				~GuiGrammarColorizer();
 
 				Ptr<parsing::ParsingTreeObject>								ThreadSafeGetTreeNode();
 				void														ThreadSafeReturnTreeNode();
@@ -7569,9 +7576,10 @@ Undo Redo
 				GuiTextBoxUndoRedoProcessor(GuiTextBoxCommonInterface* _textBoxCommonInterface);
 				~GuiTextBoxUndoRedoProcessor();
 
-				void										Attach(elements::GuiColorizedTextElement* element, SpinLock& elementModifyLock);
-				void										Detach();
-				void										TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText);
+				void										Attach(elements::GuiColorizedTextElement* element, SpinLock& elementModifyLock)override;
+				void										Detach()override;
+				void										TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)override;
+				void										TextEditFinished()override;
 			};
 		}
 	}

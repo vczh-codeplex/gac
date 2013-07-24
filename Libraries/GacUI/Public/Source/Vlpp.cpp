@@ -1701,6 +1701,7 @@ ParsingAutoRecoverParser
 							previous=&recoverFutures[processingFutureIndex];
 						}
 						processingFutureIndex++;
+						if(previous && previous->currentState==-1) continue;
 
 						vint currentTableTokenIndex=0;
 						while(currentTableTokenIndex<table->GetTokenCount() && usedFutureCount<recoverFutures.Count())

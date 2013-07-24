@@ -141,10 +141,11 @@ GuiTextBoxRegexColorizer
 			};
 
 /***********************************************************************
-GrammarColorizer
+GuiGrammarColorizer
 ***********************************************************************/
 
-			class GrammarColorizer abstract : public GuiTextBoxRegexColorizer, public RepeatingTaskExecutor<WString>
+			/// <summary>Grammar based colorizer.</summary>
+			class GuiGrammarColorizer abstract : public GuiTextBoxRegexColorizer, public RepeatingTaskExecutor<WString>
 			{
 				typedef collections::Pair<WString, WString>					FieldDesc;
 				typedef collections::Dictionary<FieldDesc, vint>			FieldContextColors;
@@ -173,24 +174,58 @@ GrammarColorizer
 				void														Detach()override;
 				void														TextEditFinished()override;
 
+				/// <summary>Callback when a parsing task is finished. <see cref="ThreadSafeGetTreeNode"/> and <see cref="ThreadSafeReturnTreeNode"/> can be used to get the new syntax tree.</summary>
 				virtual void												OnParsingFinished();
+				/// <summary>Callbakc when a @SemanticColor attribute in a grammar is activated during colorizing to determine a color for the token.</summary>
+				/// <param name="foundToken">Token syntax tree for the colorizing token.</param>
+				/// <param name="tokenParent">The object syntax tree parent of the token.</param>
+				/// <param name="type">Type of the parent.</param>
+				/// <param name="field">Field of the parent that contains the token.</param>
+				/// <param name="semantic">Semantic id that comes from the argument in the @SemanticColor attribute. Name-id mapping can be retrived using <see cref="GetSemanticId"/>.</param>
+				/// <param name="token">Output argument for the result color. Name-id mapping can be retrived using <see cref="GetTokenId"/>.</param>
 				virtual void												OnSemanticColorize(parsing::ParsingTreeToken* foundToken, parsing::ParsingTreeObject* tokenParent, const WString& type, const WString& field, vint semantic, vint& token);
 
+				/// <summary>Initialize the colorizer.</summary>
+				/// <param name="_grammarParser">Parser generated from a grammar.</param>
+				/// <param name="_grammarRule"></param>
 				void														Initialize(Ptr<parsing::tabling::ParsingGeneralParser> _grammarParser, const WString& _grammarRule);
 				void														Execute(const WString& input)override;
 			public:
-				GrammarColorizer();
-				GrammarColorizer(Ptr<parsing::tabling::ParsingGeneralParser> _grammarParser, const WString& _grammarRule);
-				~GrammarColorizer();
+				/// <summary>Create the colorizer without grammar. <see cref="Initialize"/> should be called in the constructor.</summary>
+				GuiGrammarColorizer();
+				/// <summary>Create the colorizer with a specified grammar and start rule.</summary>
+				/// <param name="_grammarParser">Parser generated from a grammar.</param>
+				/// <param name="_grammarRule"></param>
+				GuiGrammarColorizer(Ptr<parsing::tabling::ParsingGeneralParser> _grammarParser, const WString& _grammarRule);
+				~GuiGrammarColorizer();
 
+				/// <summary>Get the parsed syntax tree and block all threads when calling this function.</summary>
+				/// <returns>The parsed syntax tree.</returns>
 				Ptr<parsing::ParsingTreeObject>								ThreadSafeGetTreeNode();
+				/// <summary>Unblock all threads that calling <see cref="ThreadSafeGetTreeNode"/>.</summary>
 				void														ThreadSafeReturnTreeNode();
+				/// <summary>Submit a new code for parsing. Usually this function does not need to be called.</summary>
+				/// <param name="code">The text of the text box.</param>
 				void														SubmitCode(const WString& code);
+				/// <summary>Get the id for a token name.</summary>
+				/// <returns>The id.</returns>
+				/// <param name="token">The name of the token.</param>
 				vint														GetTokenId(const WString& token);
+				/// <summary>Get the id for a semantic name.</summary>
+				/// <returns>The id.</returns>
+				/// <param name="token">The name of the semantic.</param>
 				vint														GetSemanticId(const WString& semantic);
+				/// <summary>Reset all color settings.</summary>
 				void														BeginSetColors();
+				/// <summary>Set a color for a token theme name (@Color or @ContextColor("theme-name") in the grammar).</summary>
+				/// <param name="name">The token theme name.</param>
+				/// <param name="entry">The color.</param>
 				void														SetColor(const WString& name, const ColorEntry& entry);
+				/// <summary>Set a color for a token theme name (@Color or @ContextColor("theme-name") in the grammar).</summary>
+				/// <param name="name">The token theme name.</param>
+				/// <param name="entry">The color.</param>
 				void														SetColor(const WString& name, const Color& color);
+				/// <summary>Submit all color settings.</summary>
 				void														EndSetColors();
 				void														ColorizeTokenContextSensitive(int lineIndex, const wchar_t* text, vint start, vint length, vint& token, int& contextState)override;
 			};

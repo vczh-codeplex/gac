@@ -346,10 +346,10 @@ GuiTextBoxRegexColorizer
 			}
 
 /***********************************************************************
-GrammarColorizer
+GuiGrammarColorizer
 ***********************************************************************/
 
-			Ptr<parsing::tabling::ParsingTable::AttributeInfo> GrammarColorizer::GetAttribute(vint index, const WString& name, vint argumentCount)
+			Ptr<parsing::tabling::ParsingTable::AttributeInfo> GuiGrammarColorizer::GetAttribute(vint index, const WString& name, vint argumentCount)
 			{
 				if(index!=-1)
 				{
@@ -362,28 +362,28 @@ GrammarColorizer
 				return 0;
 			}
 
-			Ptr<parsing::tabling::ParsingTable::AttributeInfo> GrammarColorizer::GetColorAttribute(vint index)
+			Ptr<parsing::tabling::ParsingTable::AttributeInfo> GuiGrammarColorizer::GetColorAttribute(vint index)
 			{
 				return GetAttribute(index, L"Color", 1);
 			}
 
-			Ptr<parsing::tabling::ParsingTable::AttributeInfo> GrammarColorizer::GetContextColorAttribute(vint index)
+			Ptr<parsing::tabling::ParsingTable::AttributeInfo> GuiGrammarColorizer::GetContextColorAttribute(vint index)
 			{
 				return GetAttribute(index, L"ContextColor", 1);
 			}
 
-			Ptr<parsing::tabling::ParsingTable::AttributeInfo> GrammarColorizer::GetSemanticColorAttribute(vint index)
+			Ptr<parsing::tabling::ParsingTable::AttributeInfo> GuiGrammarColorizer::GetSemanticColorAttribute(vint index)
 			{
 				return GetAttribute(index, L"SemanticColor", 1);
 			}
 
-			ColorEntry GrammarColorizer::GetColor(const WString& name)
+			ColorEntry GuiGrammarColorizer::GetColor(const WString& name)
 			{
 				vint index=colorSettings.Keys().IndexOf(name);
 				return index==-1?GetDefaultColor():colorSettings.Values().Get(index);
 			}
 
-			void GrammarColorizer::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock)
+			void GuiGrammarColorizer::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock)
 			{
 				GuiTextBoxRegexColorizer::Attach(_element, _elementModifyLock);
 				if(element && elementModifyLock)
@@ -394,7 +394,7 @@ GrammarColorizer
 				}
 			}
 
-			void GrammarColorizer::Detach()
+			void GuiGrammarColorizer::Detach()
 			{
 				GuiTextBoxRegexColorizer::Detach();
 				if(element && elementModifyLock)
@@ -404,7 +404,7 @@ GrammarColorizer
 				}
 			}
 
-			void GrammarColorizer::TextEditFinished()
+			void GuiGrammarColorizer::TextEditFinished()
 			{
 				GuiTextBoxRegexColorizer::TextEditFinished();
 				if(element && elementModifyLock)
@@ -415,22 +415,22 @@ GrammarColorizer
 				}
 			}
 
-			void GrammarColorizer::OnParsingFinished()
+			void GuiGrammarColorizer::OnParsingFinished()
 			{
 			}
 
-			void GrammarColorizer::OnSemanticColorize(parsing::ParsingTreeToken* foundToken, parsing::ParsingTreeObject* tokenParent, const WString& type, const WString& field, vint semantic, vint& token)
+			void GuiGrammarColorizer::OnSemanticColorize(parsing::ParsingTreeToken* foundToken, parsing::ParsingTreeObject* tokenParent, const WString& type, const WString& field, vint semantic, vint& token)
 			{
 			}
 
-			void GrammarColorizer::Initialize(Ptr<parsing::tabling::ParsingGeneralParser> _grammarParser, const WString& _grammarRule)
+			void GuiGrammarColorizer::Initialize(Ptr<parsing::tabling::ParsingGeneralParser> _grammarParser, const WString& _grammarRule)
 			{
 				grammarParser=_grammarParser;
 				grammarRule=_grammarRule;
 				BeginSetColors();
 			}
 
-			void GrammarColorizer::Execute(const WString& input)
+			void GuiGrammarColorizer::Execute(const WString& input)
 			{
 				List<Ptr<ParsingError>> errors;
 				Ptr<ParsingTreeObject> node=grammarParser->Parse(input, grammarRule, errors).Cast<ParsingTreeObject>();
@@ -449,50 +449,50 @@ GrammarColorizer
 				RestartColorizer();
 			}
 
-			GrammarColorizer::GrammarColorizer()
+			GuiGrammarColorizer::GuiGrammarColorizer()
 			{
 			}
 
-			GrammarColorizer::GrammarColorizer(Ptr<parsing::tabling::ParsingGeneralParser> _grammarParser, const WString& _grammarRule)
+			GuiGrammarColorizer::GuiGrammarColorizer(Ptr<parsing::tabling::ParsingGeneralParser> _grammarParser, const WString& _grammarRule)
 			{
 				Initialize(_grammarParser, _grammarRule);
 			}
 
-			GrammarColorizer::~GrammarColorizer()
+			GuiGrammarColorizer::~GuiGrammarColorizer()
 			{
 				EnsureTaskFinished();
 				StopColorizerForever();
 			}
 
-			Ptr<parsing::ParsingTreeObject> GrammarColorizer::ThreadSafeGetTreeNode()
+			Ptr<parsing::ParsingTreeObject> GuiGrammarColorizer::ThreadSafeGetTreeNode()
 			{
 				parsingTreeLock.Enter();
 				return parsingTreeNode;
 			}
 
-			void GrammarColorizer::ThreadSafeReturnTreeNode()
+			void GuiGrammarColorizer::ThreadSafeReturnTreeNode()
 			{
 				parsingTreeLock.Leave();
 			}
 
-			void GrammarColorizer::SubmitCode(const WString& code)
+			void GuiGrammarColorizer::SubmitCode(const WString& code)
 			{
 				SubmitTask(code.Buffer());
 			}
 
-			vint GrammarColorizer::GetTokenId(const WString& token)
+			vint GuiGrammarColorizer::GetTokenId(const WString& token)
 			{
 				vint index=colorIndices.Keys().IndexOf(token);
 				return index==-1?-1:colorIndices.Values().Get(index);
 			}
 
-			vint GrammarColorizer::GetSemanticId(const WString& semantic)
+			vint GuiGrammarColorizer::GetSemanticId(const WString& semantic)
 			{
 				vint index=semanticIndices.Keys().IndexOf(semantic);
 				return index==-1?-1:semanticIndices.Values().Get(index);
 			}
 
-			void GrammarColorizer::BeginSetColors()
+			void GuiGrammarColorizer::BeginSetColors()
 			{
 				ClearTokens();
 				colorSettings.Clear();
@@ -501,19 +501,19 @@ GrammarColorizer
 				colorSettings.Add(L"Default", entry);
 			}
 
-			void GrammarColorizer::SetColor(const WString& name, const ColorEntry& entry)
+			void GuiGrammarColorizer::SetColor(const WString& name, const ColorEntry& entry)
 			{
 				colorSettings.Set(name, entry);
 			}
 
-			void GrammarColorizer::SetColor(const WString& name, const Color& color)
+			void GuiGrammarColorizer::SetColor(const WString& name, const Color& color)
 			{
 				text::ColorEntry entry=GetDefaultColor();
 				entry.normal.text=color;
 				SetColor(name, entry);
 			}
 
-			void GrammarColorizer::EndSetColors()
+			void GuiGrammarColorizer::EndSetColors()
 			{
 				SortedList<WString> tokenColors;
 				Ptr<ParsingTable> table=grammarParser->GetTable();
@@ -596,7 +596,7 @@ GrammarColorizer
 				Setup();
 			}
 
-			void GrammarColorizer::ColorizeTokenContextSensitive(int lineIndex, const wchar_t* text, vint start, vint length, vint& token, int& contextState)
+			void GuiGrammarColorizer::ColorizeTokenContextSensitive(int lineIndex, const wchar_t* text, vint start, vint length, vint& token, int& contextState)
 			{
 				SpinLock::Scope scope(parsingTreeLock);
 				if(parsingTreeNode && token!=-1 && colorContext[token])
