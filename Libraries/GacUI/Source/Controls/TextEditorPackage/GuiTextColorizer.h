@@ -38,7 +38,8 @@ GuiTextBoxColorizerBase
 				static void									ColorizerThreadProc(void* argument);
 
 				void										StartColorizer();
-				void										StopColorizer();
+				void										StopColorizer(bool forever);
+				void										StopColorizerForever();
 			public:
 				GuiTextBoxColorizerBase();
 				~GuiTextBoxColorizerBase();

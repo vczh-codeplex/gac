@@ -83,13 +83,21 @@ GuiTextBoxColorizerBase
 				}
 			}
 
-			void GuiTextBoxColorizerBase::StopColorizer()
+			void GuiTextBoxColorizerBase::StopColorizer(bool forever)
 			{
 				isFinalizing=true;
 				colorizerRunningEvent.Enter();
 				colorizerRunningEvent.Leave();
 				colorizedLineCount=0;
-				isFinalizing=false;
+				if(!forever)
+				{
+					isFinalizing=false;
+				}
+			}
+
+			void GuiTextBoxColorizerBase::StopColorizerForever()
+			{
+				StopColorizer(true);
 			}
 
 			GuiTextBoxColorizerBase::GuiTextBoxColorizerBase()
@@ -103,7 +111,7 @@ GuiTextBoxColorizerBase
 
 			GuiTextBoxColorizerBase::~GuiTextBoxColorizerBase()
 			{
-				StopColorizer();
+				StopColorizerForever();
 			}
 
 			void GuiTextBoxColorizerBase::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock)
@@ -121,7 +129,7 @@ GuiTextBoxColorizerBase
 			{
 				if(element && elementModifyLock)
 				{
-					StopColorizer();
+					StopColorizer(false);
 					SpinLock::Scope scope(*elementModifyLock);
 					element=0;
 					elementModifyLock=0;
@@ -179,6 +187,7 @@ GuiTextBoxRegexColorizer
 
 			GuiTextBoxRegexColorizer::~GuiTextBoxRegexColorizer()
 			{
+				StopColorizerForever();
 			}
 
 			elements::text::ColorEntry GuiTextBoxRegexColorizer::GetDefaultColor()
@@ -413,6 +422,7 @@ GrammarColorizer
 			GrammarColorizer::~GrammarColorizer()
 			{
 				EnsureTaskFinished();
+				StopColorizerForever();
 			}
 
 			Ptr<parsing::ParsingTreeObject> GrammarColorizer::ThreadSafeGetTreeNode()

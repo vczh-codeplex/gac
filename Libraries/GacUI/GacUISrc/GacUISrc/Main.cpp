@@ -273,6 +273,7 @@ public:
 	~ParserGrammarColorizer()
 	{
 		EnsureTaskFinished();
+		StopColorizerForever();
 	}
 };
 
