@@ -150,11 +150,18 @@ GuiTextBoxColorizerBase
 				}
 			}
 
+			void GuiTextBoxColorizerBase::TextEditFinished()
+			{
+			}
+
 			void GuiTextBoxColorizerBase::RestartColorizer()
 			{
-				SpinLock::Scope scope(*elementModifyLock);
-				colorizedLineCount=0;
-				StartColorizer();
+				if(element && elementModifyLock)
+				{
+					SpinLock::Scope scope(*elementModifyLock);
+					colorizedLineCount=0;
+					StartColorizer();
+				}
 			}
 
 /***********************************************************************
@@ -374,6 +381,38 @@ GrammarColorizer
 			{
 				vint index=colorSettings.Keys().IndexOf(name);
 				return index==-1?GetDefaultColor():colorSettings.Values().Get(index);
+			}
+
+			void GrammarColorizer::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock)
+			{
+				GuiTextBoxRegexColorizer::Attach(_element, _elementModifyLock);
+				if(element && elementModifyLock)
+				{
+					SpinLock::Scope scope(*elementModifyLock);
+					WString text=element->GetLines().GetText();
+					SubmitTask(text.Buffer());
+				}
+			}
+
+			void GrammarColorizer::Detach()
+			{
+				GuiTextBoxRegexColorizer::Detach();
+				if(element && elementModifyLock)
+				{
+					EnsureTaskFinished();
+					StopColorizer(false);
+				}
+			}
+
+			void GrammarColorizer::TextEditFinished()
+			{
+				GuiTextBoxRegexColorizer::TextEditFinished();
+				if(element && elementModifyLock)
+				{
+					SpinLock::Scope scope(*elementModifyLock);
+					WString text=element->GetLines().GetText();
+					SubmitTask(text.Buffer());
+				}
 			}
 
 			void GrammarColorizer::OnParsingFinished()

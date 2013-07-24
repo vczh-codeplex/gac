@@ -47,6 +47,7 @@ GuiTextBoxColorizerBase
 				void										Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock)override;
 				void										Detach()override;
 				void										TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)override;
+				void										TextEditFinished()override;
 				void										RestartColorizer();
 
 				/// <summary>Get the lexical analyzer start state for the first line.</summary>
@@ -168,6 +169,10 @@ GrammarColorizer
 				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetSemanticColorAttribute(vint index);
 				ColorEntry													GetColor(const WString& name);
 			protected:
+				void														Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock)override;
+				void														Detach()override;
+				void														TextEditFinished()override;
+
 				virtual void												OnParsingFinished();
 				virtual void												OnSemanticColorize(parsing::ParsingTreeToken* foundToken, parsing::ParsingTreeObject* tokenParent, const WString& type, const WString& field, vint semantic, vint& token);
 

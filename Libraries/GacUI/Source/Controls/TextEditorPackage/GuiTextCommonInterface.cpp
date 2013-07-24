@@ -183,7 +183,11 @@ GuiTextBoxCommonInterface
 						textEditCallbacks[i]->TextEditNotify(originalStart, originalEnd, originalText, start, end, inputText);
 					}
 					Move(end, false);
-
+					
+					for(vint i=0;i<textEditCallbacks.Count();i++)
+					{
+						textEditCallbacks[i]->TextEditFinished();
+					}
 					textControl->TextChanged.Execute(textControl->GetNotifyEventArguments());
 				}
 			}
