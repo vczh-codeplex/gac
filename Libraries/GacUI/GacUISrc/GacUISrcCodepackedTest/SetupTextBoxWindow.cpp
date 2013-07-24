@@ -13,11 +13,11 @@ namespace colorization
 XmlGrammarColorizer
 ***********************************************************************/
 
-	class XmlGrammarColorizer : public GrammarColorizer
+	class XmlGrammarColorizer : public GuiGrammarColorizer
 	{
 	public:
 		XmlGrammarColorizer()
-			:GrammarColorizer(CreateAutoRecoverParser(xml::XmlLoadTable()), L"XDocument")
+			:GuiGrammarColorizer(CreateAutoRecoverParser(xml::XmlLoadTable()), L"XDocument")
 		{
 			SetColor(L"Boundary", Color(0, 0, 255));
 			SetColor(L"Comment", Color(0, 128, 0));
@@ -32,11 +32,11 @@ XmlGrammarColorizer
 JsonGrammarColorizer
 ***********************************************************************/
 
-	class JsonGrammarColorizer : public GrammarColorizer
+	class JsonGrammarColorizer : public GuiGrammarColorizer
 	{
 	public:
 		JsonGrammarColorizer()
-			:GrammarColorizer(CreateAutoRecoverParser(json::JsonLoadTable()), L"JRoot")
+			:GuiGrammarColorizer(CreateAutoRecoverParser(json::JsonLoadTable()), L"JRoot")
 		{
 			SetColor(L"Boundary", Color(255, 0, 0));
 			SetColor(L"Keyword", Color(0, 0, 255));
@@ -142,7 +142,7 @@ SymbolLookup
 ParserGrammarColorizer
 ***********************************************************************/
 
-	class ParserGrammarColorizer : public GrammarColorizer
+	class ParserGrammarColorizer : public GuiGrammarColorizer
 	{
 	protected:
 		Ptr<ParserDecl>							parsingTreeDecl;
@@ -229,7 +229,7 @@ ParserGrammarColorizer
 		}
 	public:
 		ParserGrammarColorizer()
-			:GrammarColorizer(CreateBootstrapAutoRecoverParser(), L"ParserDecl")
+			:GuiGrammarColorizer(CreateBootstrapAutoRecoverParser(), L"ParserDecl")
 		{
 			SetColor(L"Keyword", Color(0, 0, 255));
 			SetColor(L"Attribute", Color(0, 0, 255));
@@ -256,23 +256,13 @@ ParserGrammarColorizer
 Event Handlers
 ***********************************************************************/
 
-	void textBox_TextChanged(GuiGraphicsComposition* composition, GuiEventArgs& arguments)
-	{
-		GuiMultilineTextBox* textBox=dynamic_cast<GuiMultilineTextBox*>(composition->GetRelatedControl());
-		GrammarColorizer* colorizer=dynamic_cast<GrammarColorizer*>(textBox->GetColorizer().Obj());
-
-		WString text=textBox->GetText();
-		colorizer->SubmitCode(text);
-	}
-
-	void textBox_SwitchLanguage(const WString& sampleCodePath, GrammarColorizer* colorizer, GuiMultilineTextBox* textBox)
+	void textBox_SwitchLanguage(const WString& sampleCodePath, GuiGrammarColorizer* colorizer, GuiMultilineTextBox* textBox)
 	{
 		textBox->SetColorizer(colorizer);
 		FileStream fileStream(sampleCodePath, FileStream::ReadOnly);
 		BomDecoder decoder;
 		DecoderStream decoderStream(fileStream, decoder);
 		StreamReader reader(decoderStream);
-		textBox->SetText(L"");
 		textBox->SetText(reader.ReadToEnd());
 		textBox->Select(TextPos(), TextPos());
 	}
@@ -334,7 +324,6 @@ void SetupTextBoxWindow(GuiControlHost* controlHost, GuiControl* container)
 
 		textBox=g::NewMultilineTextBox();
 		textBox->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-		textBox->TextChanged.AttachFunction(&textBox_TextChanged);
 		cell->AddChild(textBox->GetBoundsComposition());
 	}
 	{
