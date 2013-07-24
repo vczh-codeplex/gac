@@ -155,6 +155,8 @@
     <ClCompile Include="..\..\Source\Parsing\Bootstrap\ParsingBootstrap_Parser.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\Source\Parsing\Json\ParsingJson.cpp" />
     <ClCompile Include="..\..\Source\Parsing\Json\ParsingJson_Parser.cpp" />
@@ -237,6 +239,8 @@
     <ClInclude Include="..\..\Source\Parsing\Bootstrap\ParsingBootstrap_Parser.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="..\..\Source\Parsing\Json\ParsingJson.h" />
     <ClInclude Include="..\..\Source\Parsing\Json\ParsingJson_Parser.h" />
