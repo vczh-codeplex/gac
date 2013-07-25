@@ -19,11 +19,11 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 XmlGrammarColorizer
 ***********************************************************************/
 
-class XmlGrammarColorizer : public GrammarColorizer
+class XmlGrammarColorizer : public GuiGrammarColorizer
 {
 public:
 	XmlGrammarColorizer()
-		:GrammarColorizer(CreateAutoRecoverParser(xml::XmlLoadTable()), L"XDocument")
+		:GuiGrammarColorizer(CreateAutoRecoverParser(xml::XmlLoadTable()), L"XDocument")
 	{
 		SetColor(L"Boundary", Color(0, 0, 255));
 		SetColor(L"Comment", Color(0, 128, 0));
@@ -38,11 +38,11 @@ public:
 JsonGrammarColorizer
 ***********************************************************************/
 
-class JsonGrammarColorizer : public GrammarColorizer
+class JsonGrammarColorizer : public GuiGrammarColorizer
 {
 public:
 	JsonGrammarColorizer()
-		:GrammarColorizer(CreateAutoRecoverParser(json::JsonLoadTable()), L"JRoot")
+		:GuiGrammarColorizer(CreateAutoRecoverParser(json::JsonLoadTable()), L"JRoot")
 	{
 		SetColor(L"Boundary", Color(255, 0, 0));
 		SetColor(L"Keyword", Color(0, 0, 255));
@@ -148,7 +148,7 @@ public:
 ParserGrammarColorizer
 ***********************************************************************/
 
-class ParserGrammarColorizer : public GrammarColorizer
+class ParserGrammarColorizer : public GuiGrammarColorizer
 {
 protected:
 	Ptr<ParserDecl>							parsingTreeDecl;
@@ -235,7 +235,7 @@ protected:
 	}
 public:
 	ParserGrammarColorizer()
-		:GrammarColorizer(CreateBootstrapAutoRecoverParser(), L"ParserDecl")
+		:GuiGrammarColorizer(CreateBootstrapAutoRecoverParser(), L"ParserDecl")
 	{
 		SetColor(L"Keyword", Color(0, 0, 255));
 		SetColor(L"Attribute", Color(0, 0, 255));
@@ -272,7 +272,7 @@ protected:
 	GuiMultilineTextBox*					textBoxGrammar;
 	GuiMultilineTextBox*					textBoxEditor;
 
-	void SwitchLanguage(const WString& sampleCodePath, GrammarColorizer* colorizer, const WString& grammarCode)
+	void SwitchLanguage(const WString& sampleCodePath, GuiGrammarColorizer* colorizer, const WString& grammarCode)
 	{
 		{
 			textBoxEditor->SetColorizer(colorizer);
@@ -280,18 +280,16 @@ protected:
 			BomDecoder decoder;
 			DecoderStream decoderStream(fileStream, decoder);
 			StreamReader reader(decoderStream);
-			textBoxEditor->SetText(L"");
 			textBoxEditor->SetText(reader.ReadToEnd());
 			textBoxEditor->Select(TextPos(), TextPos());
 		}
 		{
-			textBoxGrammar->SetText(L"");
 			textBoxGrammar->SetText(grammarCode);
 			textBoxGrammar->Select(TextPos(), TextPos());
 		}
 	}
 
-	void SwitchLanguage(const WString& sampleCodePath, GrammarColorizer* colorizer, Ptr<ParsingDefinition> definition)
+	void SwitchLanguage(const WString& sampleCodePath, GuiGrammarColorizer* colorizer, Ptr<ParsingDefinition> definition)
 	{
 		MemoryStream stream;
 		{
@@ -325,15 +323,6 @@ protected:
 		{
 			SwitchLanguage(L"..\\Resources\\JsonSample.txt", new JsonGrammarColorizer, json::JsonGetParserTextBuffer());
 		}
-	}
-
-	void textBoxEditor_TextChanged(GuiGraphicsComposition* composition, GuiEventArgs& arguments)
-	{
-		GuiMultilineTextBox* textBox=dynamic_cast<GuiMultilineTextBox*>(composition->GetRelatedControl());
-		GrammarColorizer* colorizer=dynamic_cast<GrammarColorizer*>(textBox->GetColorizer().Obj());
-
-		WString text=textBox->GetText();
-		colorizer->SubmitCode(text);
 	}
 public:
 	TextBoxColorizerWindow()
@@ -409,7 +398,6 @@ public:
 				textBoxEditor->SetHorizontalAlwaysVisible(false);
 				textBoxEditor->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 				page->GetContainer()->GetBoundsComposition()->AddChild(textBoxEditor->GetBoundsComposition());
-				textBoxEditor->TextChanged.AttachMethod(this, &TextBoxColorizerWindow::textBoxEditor_TextChanged);
 			}
 			{
 				GuiTabPage* page=tabIntellisense->CreatePage();
@@ -420,7 +408,6 @@ public:
 				textBoxGrammar->SetHorizontalAlwaysVisible(false);
 				textBoxGrammar->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 				page->GetContainer()->GetBoundsComposition()->AddChild(textBoxGrammar->GetBoundsComposition());
-				textBoxGrammar->TextChanged.AttachMethod(this, &TextBoxColorizerWindow::textBoxEditor_TextChanged);
 				textBoxGrammar->SetColorizer(new ParserGrammarColorizer);
 			}
 			{
