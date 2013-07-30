@@ -167,13 +167,20 @@ ParsingAutoRecoverParser
 							{
 								if(currentTableTokenIndex==currentTokenIndex)
 								{
-									ParsingState::Future* future=previous;
-									while(future->previous)
+									if(previous)
 									{
-										future->previous->next=future;
-										future=future->previous;
+										ParsingState::Future* future=previous;
+										while(future->previous)
+										{
+											future->previous->next=future;
+											future=future->previous;
+										}
+										recoveringFutureIndex=future-&recoverFutures[0];
 									}
-									recoveringFutureIndex=future-&recoverFutures[0];
+									else
+									{
+										recoveringFutureIndex=0;
+									}
 									goto FOUND_ERROR_RECOVER_SOLUTION;
 								}
 								else

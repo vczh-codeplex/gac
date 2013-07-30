@@ -392,13 +392,20 @@ protected:
 	void SwitchLanguage(const WString& sampleCodePath, GuiGrammarColorizer* colorizer, const WString& grammarCode)
 	{
 		{
-			textBoxEditor->SetColorizer(colorizer);
+			// clear the colorizer first in order to prevent the previous colorizer from parsing code in another language
+			// which always wastes time in error recovering
+			textBoxEditor->SetColorizer(0);
+
+			// paste the code in another language
 			FileStream fileStream(sampleCodePath, FileStream::ReadOnly);
 			BomDecoder decoder;
 			DecoderStream decoderStream(fileStream, decoder);
 			StreamReader reader(decoderStream);
 			textBoxEditor->SetText(reader.ReadToEnd());
 			textBoxEditor->Select(TextPos(), TextPos());
+
+			// set the new colorizer that fit the language
+			textBoxEditor->SetColorizer(colorizer);
 		}
 		{
 			textBoxGrammar->SetText(grammarCode);
