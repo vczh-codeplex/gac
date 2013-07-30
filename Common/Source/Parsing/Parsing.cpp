@@ -149,7 +149,7 @@ ParsingAutoRecoverParser
 				{
 					vint processingFutureIndex=-1;
 					vint usedFutureCount=0;
-					while(processingFutureIndex<recoverFutures.Count())
+					while(processingFutureIndex<usedFutureCount)
 					{
 						ParsingState::Future* previous=0;
 						if(processingFutureIndex!=-1)

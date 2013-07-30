@@ -343,12 +343,6 @@ public:
 		{
 			vint oldCount=items.Count();
 			items.Clear();
-			{
-				ColorItem item;
-				item.name=L"(Default)";
-				item.color=colorizer->GetDefaultColor().normal.text;
-				items.Add(item);
-			}
 			FOREACH(WString, name, colorizer->GetColorNames())
 			{
 				ColorItem item;
