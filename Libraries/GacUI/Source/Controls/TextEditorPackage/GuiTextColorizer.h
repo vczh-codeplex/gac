@@ -168,7 +168,6 @@ GuiGrammarColorizer
 				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetColorAttribute(vint index);
 				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetContextColorAttribute(vint index);
 				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetSemanticColorAttribute(vint index);
-				ColorEntry													GetColor(const WString& name);
 			protected:
 				void														Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock)override;
 				void														Detach()override;
@@ -217,6 +216,13 @@ GuiGrammarColorizer
 				vint														GetSemanticId(const WString& semantic);
 				/// <summary>Reset all color settings.</summary>
 				void														BeginSetColors();
+				/// <summary>Get all color names.</summary>
+				/// <returns>All color names.</returns>
+				const collections::SortedList<WString>&						GetColorNames();
+				/// <summary>Get the color for a token theme name (@Color or @ContextColor("theme-name") in the grammar).</summary>
+				/// <returns>The color.</returns>
+				/// <param name="name">The token theme name.</param>
+				ColorEntry													GetColor(const WString& name);
 				/// <summary>Set a color for a token theme name (@Color or @ContextColor("theme-name") in the grammar).</summary>
 				/// <param name="name">The token theme name.</param>
 				/// <param name="entry">The color.</param>

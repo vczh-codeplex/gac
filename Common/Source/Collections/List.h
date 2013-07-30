@@ -339,6 +339,7 @@ namespace vl
 				buffer[index]=item;
 			}
 
+			using ArrayBase<T>::operator[];
 			T& operator[](vint index)
 			{
 				CHECK_ERROR(index>=0 && index<count, L"Array<T, K>::operator[](vint)#参数index越界。");
@@ -415,7 +416,8 @@ namespace vl
 				buffer[index]=item;
 				return true;
 			}
-
+			
+			using ListBase<T, K>::operator[];
 			T& operator[](vint index)
 			{
 				CHECK_ERROR(index>=0 && index<count, L"List<T, K>::operator[](vint)#参数index越界。");
