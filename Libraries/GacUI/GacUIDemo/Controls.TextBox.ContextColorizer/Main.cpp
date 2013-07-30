@@ -259,6 +259,96 @@ public:
 };
 
 /***********************************************************************
+ColorizerConfigurationGrid
+***********************************************************************/
+
+class ColorizerConfigurationGrid : public GuiVirtualDataGrid
+{
+public:
+	struct ColorItem
+	{
+		WString								name;
+		Color								color;
+	};
+
+	class ColorColumnProvider : public list::StrongTypedFieldColumnProvider<ColorItem, Color>
+	{
+	public:
+		ColorColumnProvider(list::StrongTypedDataProvider<ColorItem>* _dataProvider)
+			:list::StrongTypedFieldColumnProvider<ColorItem, Color>(_dataProvider, &ColorItem::color)
+		{
+		}
+
+		void VisualizeCell(vint row, list::IDataVisualizer* dataVisualizer)override
+		{
+			list::StrongTypedFieldColumnProvider<ColorItem, Color>::VisualizeCell(row, dataVisualizer);
+			list::ListViewSubColumnDataVisualizer* visualizer=dataVisualizer->GetVisualizer<list::ListViewSubColumnDataVisualizer>();
+			if(visualizer)
+			{
+				ColorItem rowData;
+				Color cellData;
+				dataProvider->GetRowData(row, rowData);
+				GetCellData(rowData, cellData);
+				visualizer->GetTextElement()->SetColor(cellData);
+			}
+		}
+	};
+
+	class ColorItemProvider : public list::StrongTypedDataProvider<ColorItem>
+	{
+	protected:
+		List<ColorItem>						items;
+	public:
+		ColorItemProvider()
+		{
+			AddSortableFieldColumn(L"Configuration", &ColorItem::name)
+				->SetVisualizerFactory(new list::CellBorderDataVisualizer::Factory(new list::ListViewMainColumnDataVisualizer::Factory))
+				->SetSize(160);
+			AddStrongTypedColumn<Color>(L"Color", new ColorColumnProvider(this))
+				->SetVisualizerFactory(new list::CellBorderDataVisualizer::Factory(new list::ListViewSubColumnDataVisualizer::Factory))
+				->SetSize(120);
+		}
+
+		vint GetRowCount()override
+		{
+			return items.Count();
+		}
+
+		void GetRowData(vint row, ColorItem& rowData)override
+		{
+			rowData=items[row];
+		}
+
+		void ReadConfigurationFromColorizer(GuiGrammarColorizer* colorizer)
+		{
+			vint oldCount=items.Count();
+			items.Clear();
+			FOREACH(WString, name, colorizer->GetColorNames())
+			{
+				ColorItem item;
+				item.name=name;
+				item.color=colorizer->GetColor(name).normal.text;
+				items.Add(item);
+			}
+			commandExecutor->OnDataProviderItemModified(0, oldCount, items.Count());
+		}
+	};
+
+protected:
+	ColorItemProvider*						dataProvider;
+public:
+	ColorizerConfigurationGrid()
+		:GuiVirtualDataGrid(GetCurrentTheme()->CreateListViewStyle(), dataProvider=new ColorItemProvider)
+	{
+	}
+
+	ColorItemProvider* GetDataProvider()
+	{
+		return dataProvider;
+	}
+};
+
+/***********************************************************************
 TextBoxColorizerWindow
 ***********************************************************************/
 
@@ -271,22 +361,31 @@ protected:
 	GuiTab*									tabIntellisense;
 	GuiMultilineTextBox*					textBoxGrammar;
 	GuiMultilineTextBox*					textBoxEditor;
+	ColorizerConfigurationGrid*				gridConfiguration;
 
 	void SwitchLanguage(const WString& sampleCodePath, GuiGrammarColorizer* colorizer, const WString& grammarCode)
 	{
 		{
-			textBoxEditor->SetColorizer(colorizer);
+			// clear the colorizer first in order to prevent the previous colorizer from parsing code in another language
+			// which always wastes time in error recovering
+			textBoxEditor->SetColorizer(0);
+
+			// paste the code in another language
 			FileStream fileStream(sampleCodePath, FileStream::ReadOnly);
 			BomDecoder decoder;
 			DecoderStream decoderStream(fileStream, decoder);
 			StreamReader reader(decoderStream);
 			textBoxEditor->SetText(reader.ReadToEnd());
 			textBoxEditor->Select(TextPos(), TextPos());
+
+			// set the new colorizer that fit the language
+			textBoxEditor->SetColorizer(colorizer);
 		}
 		{
 			textBoxGrammar->SetText(grammarCode);
 			textBoxGrammar->Select(TextPos(), TextPos());
 		}
+		gridConfiguration->GetDataProvider()->ReadConfigurationFromColorizer(colorizer);
 	}
 
 	void SwitchLanguage(const WString& sampleCodePath, GuiGrammarColorizer* colorizer, Ptr<ParsingDefinition> definition)
@@ -413,6 +512,12 @@ public:
 			{
 				GuiTabPage* page=tabIntellisense->CreatePage();
 				page->SetText(L"Configuration");
+
+				gridConfiguration=new ColorizerConfigurationGrid;
+				gridConfiguration->SetVerticalAlwaysVisible(false);
+				gridConfiguration->SetHorizontalAlwaysVisible(false);
+				gridConfiguration->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				page->GetContainer()->GetBoundsComposition()->AddChild(gridConfiguration->GetBoundsComposition());
 			}
 		}
 		radioGrammar->SetSelected(true);

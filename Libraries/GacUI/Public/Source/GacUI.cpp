@@ -21466,12 +21466,6 @@ GuiGrammarColorizer
 				return GetAttribute(index, L"SemanticColor", 1);
 			}
 
-			ColorEntry GuiGrammarColorizer::GetColor(const WString& name)
-			{
-				vint index=colorSettings.Keys().IndexOf(name);
-				return index==-1?GetDefaultColor():colorSettings.Values().Get(index);
-			}
-
 			void GuiGrammarColorizer::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock)
 			{
 				GuiTextBoxRegexColorizer::Attach(_element, _elementModifyLock);
@@ -21588,6 +21582,17 @@ GuiGrammarColorizer
 				text::ColorEntry entry=GetCurrentTheme()->GetDefaultTextBoxColorEntry();
 				SetDefaultColor(entry);
 				colorSettings.Add(L"Default", entry);
+			}
+
+			const collections::SortedList<WString>& GuiGrammarColorizer::GetColorNames()
+			{
+				return colorSettings.Keys();
+			}
+
+			GuiGrammarColorizer::ColorEntry GuiGrammarColorizer::GetColor(const WString& name)
+			{
+				vint index=colorSettings.Keys().IndexOf(name);
+				return index==-1?GetDefaultColor():colorSettings.Values().Get(index);
 			}
 
 			void GuiGrammarColorizer::SetColor(const WString& name, const ColorEntry& entry)
