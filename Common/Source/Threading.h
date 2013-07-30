@@ -295,11 +295,11 @@ RepeatingTaskExecutor
 					currentInputData=inputData;
 					currentInputDataAvailable=inputDataAvailable;
 					inputDataAvailable=false;
-				}
-				if(!currentInputDataAvailable)
-				{
-					executing=false;
-					break;
+					if(!currentInputDataAvailable)
+					{
+						executing=false;
+						break;
+					}
 				}
 				Execute(currentInputData);
 			}
