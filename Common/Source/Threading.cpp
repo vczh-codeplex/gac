@@ -207,7 +207,7 @@ Thread
 			{
 				return thread;
 			}
-			else if(deleteAfterStopped)
+			else
 			{
 				delete thread;
 			}
