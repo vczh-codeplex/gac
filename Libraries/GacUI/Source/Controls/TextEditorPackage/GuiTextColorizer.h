@@ -141,22 +141,52 @@ GuiTextBoxRegexColorizer
 			};
 
 /***********************************************************************
-GuiGrammarColorizer
+RepeatingParsingExecutor
 ***********************************************************************/
 
-			/// <summary>Grammar based colorizer.</summary>
-			class GuiGrammarColorizer abstract : public GuiTextBoxRegexColorizer, public RepeatingTaskExecutor<WString>
+			/// <summary>Repeating parsing executor.</summary>
+			class RepeatingParsingExecutor : public RepeatingTaskExecutor<WString>
 			{
-				typedef collections::Pair<WString, WString>					FieldDesc;
-				typedef collections::Dictionary<FieldDesc, vint>			FieldContextColors;
-				typedef collections::Dictionary<FieldDesc, vint>			FieldSemanticColors;
-				typedef elements::text::ColorEntry							ColorEntry;
 			private:
 				Ptr<parsing::tabling::ParsingGeneralParser>					grammarParser;
 				WString														grammarRule;
 				SpinLock													parsingTreeLock;
 				Ptr<parsing::ParsingTreeObject>								parsingTreeNode;
 
+			protected:
+				/// <summary>Callback when a parsing task is finished. <see cref="ThreadSafeGetTreeNode"/> and <see cref="ThreadSafeReturnTreeNode"/> can be used to get the new syntax tree.</summary>
+				virtual void												OnParsingFinished();
+
+				/// <summary>Initialize the parsing executor.</summary>
+				/// <param name="_grammarParser">Parser generated from a grammar.</param>
+				/// <param name="_grammarRule"></param>
+				void														Initialize(Ptr<parsing::tabling::ParsingGeneralParser> _grammarParser, const WString& _grammarRule);
+				void														Execute(const WString& input)override;
+			public:
+				RepeatingParsingExecutor();
+				~RepeatingParsingExecutor();
+				
+				/// <summary>Get the parsed syntax tree and block all threads when calling this function.</summary>
+				/// <returns>The parsed syntax tree.</returns>
+				Ptr<parsing::ParsingTreeObject>								ThreadSafeGetTreeNode();
+				/// <summary>Unblock all threads that calling <see cref="ThreadSafeGetTreeNode"/>.</summary>
+				void														ThreadSafeReturnTreeNode();
+				/// <summary>Get the internal parser that parse the text.</summary>
+				Ptr<parsing::tabling::ParsingGeneralParser>					GetParser();
+			};
+
+/***********************************************************************
+GuiGrammarColorizer
+***********************************************************************/
+
+			/// <summary>Grammar based colorizer.</summary>
+			class GuiGrammarColorizer abstract : public GuiTextBoxRegexColorizer, public RepeatingParsingExecutor
+			{
+				typedef collections::Pair<WString, WString>					FieldDesc;
+				typedef collections::Dictionary<FieldDesc, vint>			FieldContextColors;
+				typedef collections::Dictionary<FieldDesc, vint>			FieldSemanticColors;
+				typedef elements::text::ColorEntry							ColorEntry;
+			private:
 				collections::Dictionary<WString, ColorEntry>				colorSettings;
 				collections::Dictionary<WString, vint>						colorIndices;
 				collections::List<bool>										colorContext;
@@ -173,8 +203,6 @@ GuiGrammarColorizer
 				void														Detach()override;
 				void														TextEditFinished()override;
 
-				/// <summary>Callback when a parsing task is finished. <see cref="ThreadSafeGetTreeNode"/> and <see cref="ThreadSafeReturnTreeNode"/> can be used to get the new syntax tree.</summary>
-				virtual void												OnParsingFinished();
 				/// <summary>Callbakc when a @SemanticColor attribute in a grammar is activated during colorizing to determine a color for the token.</summary>
 				/// <param name="foundToken">Token syntax tree for the colorizing token.</param>
 				/// <param name="tokenParent">The object syntax tree parent of the token.</param>
@@ -184,10 +212,6 @@ GuiGrammarColorizer
 				/// <param name="token">Output argument for the result color. Name-id mapping can be retrived using <see cref="GetTokenId"/>.</param>
 				virtual void												OnSemanticColorize(parsing::ParsingTreeToken* foundToken, parsing::ParsingTreeObject* tokenParent, const WString& type, const WString& field, vint semantic, vint& token);
 
-				/// <summary>Initialize the colorizer.</summary>
-				/// <param name="_grammarParser">Parser generated from a grammar.</param>
-				/// <param name="_grammarRule"></param>
-				void														Initialize(Ptr<parsing::tabling::ParsingGeneralParser> _grammarParser, const WString& _grammarRule);
 				void														Execute(const WString& input)override;
 			public:
 				/// <summary>Create the colorizer without grammar. <see cref="Initialize"/> should be called in the constructor.</summary>
@@ -198,11 +222,6 @@ GuiGrammarColorizer
 				GuiGrammarColorizer(Ptr<parsing::tabling::ParsingGeneralParser> _grammarParser, const WString& _grammarRule);
 				~GuiGrammarColorizer();
 
-				/// <summary>Get the parsed syntax tree and block all threads when calling this function.</summary>
-				/// <returns>The parsed syntax tree.</returns>
-				Ptr<parsing::ParsingTreeObject>								ThreadSafeGetTreeNode();
-				/// <summary>Unblock all threads that calling <see cref="ThreadSafeGetTreeNode"/>.</summary>
-				void														ThreadSafeReturnTreeNode();
 				/// <summary>Submit a new code for parsing. Usually this function does not need to be called.</summary>
 				/// <param name="code">The text of the text box.</param>
 				void														SubmitCode(const WString& code);

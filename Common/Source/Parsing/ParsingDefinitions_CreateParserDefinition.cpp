@@ -383,12 +383,6 @@ namespace vl
 							)
 						.EndRule()
 
-					.Rule(L"RuleFragmentDecl", Type(L"GrammarDef"))
-						.Imply(
-							Text(L"=") + !Rule(L"Grammar") + Text(L";")
-							)
-						.EndRule()
-
 					.Rule(L"RuleDecl", Type(L"RuleDef"))
 						.Imply(
 							(
