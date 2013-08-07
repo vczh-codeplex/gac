@@ -36,6 +36,7 @@ namespace vl
 						Class(L"PrimitiveTypeObj", Type(L"TypeObj"))
 							.Member(L"name", TokenType())
 								.Attribute(Attribute(L"SemanticColor").Argument(L"Type"))
+								.Attribute(Attribute(L"AutoComplete").Argument(L"Type"))
 						)
 
 					.Type(
@@ -47,6 +48,7 @@ namespace vl
 							.Member(L"parentType", Type(L"TypeObj"))
 							.Member(L"name", TokenType())
 								.Attribute(Attribute(L"SemanticColor").Argument(L"Type"))
+								.Attribute(Attribute(L"AutoComplete").Argument(L"SubType"))
 						)
 
 					.Type(
@@ -70,6 +72,7 @@ namespace vl
 					.Type(
 						Class(L"ClassTypeDef", Type(L"TypeDef"))								
 							.Member(L"ambiguousType", TokenType())
+								.Attribute(Attribute(L"AutoComplete").Argument(L"Type"))
 							.Member(L"parentType", Type(L"TypeObj"))
 							.Member(L"members", Type(L"ClassMemberDef").Array())
 							.Member(L"subTypes", Type(L"TypeDef").Array())
@@ -93,11 +96,13 @@ namespace vl
 						Class(L"PrimitiveGrammarDef", Type(L"GrammarDef"))
 							.Member(L"name", TokenType())
 								.Attribute(Attribute(L"SemanticColor").Argument(L"Grammar"))
+								.Attribute(Attribute(L"AutoComplete").Argument(L"Grammar"))
 						)
 
 					.Type(
 						Class(L"TextGrammarDef", Type(L"GrammarDef"))
 							.Member(L"text", TokenType())
+								.Attribute(Attribute(L"AutoComplete").Argument(L"Text"))
 						)
 
 					.Type(
@@ -132,6 +137,7 @@ namespace vl
 						Class(L"AssignGrammarDef", Type(L"GrammarDef"))
 							.Member(L"grammar", Type(L"GrammarDef"))
 							.Member(L"memberName", TokenType())
+								.Attribute(Attribute(L"AutoComplete").Argument(L"Field"))
 						)
 
 					.Type(
@@ -143,7 +149,9 @@ namespace vl
 						Class(L"SetterGrammarDef", Type(L"GrammarDef"))
 							.Member(L"grammar", Type(L"GrammarDef"))
 							.Member(L"memberName", TokenType())
+								.Attribute(Attribute(L"AutoComplete").Argument(L"EnumField"))
 							.Member(L"value", TokenType())
+								.Attribute(Attribute(L"AutoComplete").Argument(L"EnumValue"))
 						)
 					//-------------------------------------
 					.Type(
