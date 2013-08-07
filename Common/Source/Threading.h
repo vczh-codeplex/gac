@@ -314,20 +314,6 @@ RepeatingTaskExecutor
 	protected:
 		virtual void							Execute(const T& input)=0;
 
-		void SubmitTask(const T& input)
-		{
-			{
-				SpinLock::Scope scope(inputLock);
-				inputData=input;
-				inputDataAvailable=true;
-			}
-			if(!executing)
-			{
-				executing=true;
-				executingEvent.Enter();
-				ThreadPoolLite::Queue(&ExecutingProc, this);
-			}
-		}
 	public:
 		RepeatingTaskExecutor()
 			:inputDataAvailable(false)
@@ -344,6 +330,21 @@ RepeatingTaskExecutor
 		{
 			executingEvent.Enter();
 			executingEvent.Leave();
+		}
+
+		void SubmitTask(const T& input)
+		{
+			{
+				SpinLock::Scope scope(inputLock);
+				inputData=input;
+				inputDataAvailable=true;
+			}
+			if(!executing)
+			{
+				executing=true;
+				executingEvent.Enter();
+				ThreadPoolLite::Queue(&ExecutingProc, this);
+			}
 		}
 	};
 }
