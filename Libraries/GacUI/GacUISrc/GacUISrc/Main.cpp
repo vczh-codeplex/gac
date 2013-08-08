@@ -244,17 +244,24 @@ public:
 TextBoxColorizerWindow
 ***********************************************************************/
 
-class TextBoxColorizerWindow : public GuiWindow
+class AutoCompleteWindow : public GuiWindow
 {
 protected:
 	GuiTab*									tabIntellisense;
-	GuiMultilineTextBox*					textBoxGrammar;
-	GuiMultilineTextBox*					textBoxScope;
 	GuiMultilineTextBox*					textBoxEditor;
+	GuiMultilineTextBox*					textBoxScope;
+	GuiMultilineTextBox*					textBoxGrammar;
 	Ptr<RepeatingParsingExecutor>			parsingExecutor;
 
+	void textBoxEditor_SelectionChanged(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+	{
+		Ptr<ParsingTreeNode> node=parsingExecutor->ThreadSafeGetTreeNode();
+		TextPos beginPos=textBoxEditor->GetCaretSmall();
+		TextPos endPos=textBoxEditor->GetCaretLarge();
+		parsingExecutor->ThreadSafeReturnTreeNode();
+	}
 public:
-	TextBoxColorizerWindow()
+	AutoCompleteWindow()
 		:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
 	{
 		SetText(L"GacUISrc Test Application");
@@ -290,6 +297,7 @@ public:
 				ParserGrammarColorizer* colorizer=new ParserGrammarColorizer;
 				parsingExecutor=colorizer->GetParsingExecutor();
 				textBoxEditor->SetColorizer(colorizer);
+				textBoxEditor->SelectionChanged.AttachMethod(this, &AutoCompleteWindow::textBoxEditor_SelectionChanged);
 			}
 			{
 				GuiCellComposition* cell=new GuiCellComposition;
@@ -348,7 +356,7 @@ public:
 		this->MoveToScreenCenter();
 	}
 
-	~TextBoxColorizerWindow()
+	~AutoCompleteWindow()
 	{
 	}
 };
@@ -358,7 +366,7 @@ extern void UnitTestInGuiMain();
 void GuiMain()
 {
 	UnitTestInGuiMain();
-	TextBoxColorizerWindow window;
+	AutoCompleteWindow window;
 	GetApplication()->Run(&window);
 }
 
