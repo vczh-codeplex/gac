@@ -256,8 +256,38 @@ protected:
 	void textBoxEditor_SelectionChanged(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 	{
 		Ptr<ParsingTreeNode> node=parsingExecutor->ThreadSafeGetTreeNode();
-		TextPos beginPos=textBoxEditor->GetCaretSmall();
+		TextPos startPos=textBoxEditor->GetCaretSmall();
 		TextPos endPos=textBoxEditor->GetCaretLarge();
+		ParsingTextPos start(startPos.row, startPos.column);
+		ParsingTextPos end(endPos.row, endPos.column);
+		ParsingTextRange range(start, end);
+		ParsingTreeNode* found=node->FindDeepestNode(range);
+
+		if(found)
+		{
+			while(found->GetParent())
+			{
+				if(dynamic_cast<ParsingTreeObject*>(found))
+				{
+					break;
+				}
+				else
+				{
+					found=found->GetParent();
+				}
+			}
+			
+			start=found->GetCodeRange().start;
+			end=found->GetCodeRange().end;
+			startPos=TextPos(start.row, start.column);
+			endPos=TextPos(end.row, end.column+1);
+			textBoxScope->SetText(textBoxEditor->GetFragmentText(startPos, endPos));
+			textBoxScope->Select(TextPos(), TextPos());
+		}
+		else
+		{
+			textBoxScope->SetText(L"");
+		}
 		parsingExecutor->ThreadSafeReturnTreeNode();
 	}
 public:

@@ -377,6 +377,9 @@ RepeatingParsingExecutor
 
 			RepeatingParsingExecutor::~RepeatingParsingExecutor()
 			{
+				EnsureTaskFinished();
+				SpinLock::Scope scope(parsingTreeLock);
+				parsingTreeNode=0;
 			}
 
 			Ptr<parsing::ParsingTreeObject> RepeatingParsingExecutor::ThreadSafeGetTreeNode()
