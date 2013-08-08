@@ -201,6 +201,7 @@ ParserGrammarColorizer
 			{
 				parsingTreeDecl=new ParserDecl(node);
 			}
+			node=0;
 			ThreadSafeReturnTreeNode();
 		}
 

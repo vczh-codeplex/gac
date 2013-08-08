@@ -678,6 +678,7 @@ GuiGrammarColorizer
 					}
 				}
 			EXIT_COLORIZING:
+				node=0;
 				parsingExecutor->ThreadSafeReturnTreeNode();
 			}
 
