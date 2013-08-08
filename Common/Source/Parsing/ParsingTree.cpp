@@ -484,19 +484,19 @@ ParsingTreeArray
 			return false;
 		}
 
-		bool ParsingTreeArray::RemoveItem(Ptr<ParsingTreeNode> node)
+		bool ParsingTreeArray::RemoveItem(ParsingTreeNode* node)
 		{
-			return RemoveItem(items.IndexOf(node.Obj()));
+			return RemoveItem(items.IndexOf(node));
 		}
 
-		vint ParsingTreeArray::IndexOfItem(Ptr<ParsingTreeNode> node)
+		vint ParsingTreeArray::IndexOfItem(ParsingTreeNode* node)
 		{
-			return items.IndexOf(node.Obj());
+			return items.IndexOf(node);
 		}
 
-		bool ParsingTreeArray::ContainsItem(Ptr<ParsingTreeNode> node)
+		bool ParsingTreeArray::ContainsItem(ParsingTreeNode* node)
 		{
-			return items.Contains(node.Obj());
+			return items.Contains(node);
 		}
 
 		vint ParsingTreeArray::Count()

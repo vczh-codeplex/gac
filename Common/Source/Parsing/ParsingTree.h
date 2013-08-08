@@ -267,9 +267,9 @@ namespace vl
 			bool								AddItem(Ptr<ParsingTreeNode> node);
 			bool								InsertItem(vint index, Ptr<ParsingTreeNode> node);
 			bool								RemoveItem(vint index);
-			bool								RemoveItem(Ptr<ParsingTreeNode> node);
-			vint								IndexOfItem(Ptr<ParsingTreeNode> node);
-			bool								ContainsItem(Ptr<ParsingTreeNode> node);
+			bool								RemoveItem(ParsingTreeNode* node);
+			vint								IndexOfItem(ParsingTreeNode* node);
+			bool								ContainsItem(ParsingTreeNode* node);
 			vint								Count();
 			bool								Clear();
 		};
