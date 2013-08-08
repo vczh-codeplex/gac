@@ -251,7 +251,6 @@ protected:
 	GuiMultilineTextBox*					textBoxGrammar;
 	GuiMultilineTextBox*					textBoxScope;
 	GuiMultilineTextBox*					textBoxEditor;
-	ParserGrammarColorizer*					colorizer;
 	Ptr<RepeatingParsingExecutor>			parsingExecutor;
 
 public:
@@ -287,6 +286,10 @@ public:
 				textBoxEditor->SetHorizontalAlwaysVisible(false);
 				textBoxEditor->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 				cell->AddChild(textBoxEditor->GetBoundsComposition());
+
+				ParserGrammarColorizer* colorizer=new ParserGrammarColorizer;
+				parsingExecutor=colorizer->GetParsingExecutor();
+				textBoxEditor->SetColorizer(colorizer);
 			}
 			{
 				GuiCellComposition* cell=new GuiCellComposition;
@@ -316,34 +319,24 @@ public:
 			textBoxGrammar->SetColorizer(new ParserGrammarColorizer);
 		}
 		{
-			WString grammarCode;
+			FileStream fileStream(L"..\\GacUISrcCodepackedTest\\Resources\\CalculatorDefinition.txt", FileStream::ReadOnly);
+			BomDecoder decoder;
+			DecoderStream decoderStream(fileStream, decoder);
+			StreamReader reader(decoderStream);
+			textBoxEditor->SetText(reader.ReadToEnd());
+			textBoxEditor->Select(TextPos(), TextPos());
+		}
+		{
+			Ptr<ParsingDefinition> definition=CreateParserDefinition();
+			MemoryStream stream;
 			{
-				Ptr<ParsingDefinition> definition=CreateParserDefinition();
-				MemoryStream stream;
-				{
-					StreamWriter writer(stream);
-					Log(definition, writer);
-				}
-				stream.SeekFromBegin(0);
-				StreamReader reader(stream);
-				grammarCode=reader.ReadToEnd();
+				StreamWriter writer(stream);
+				Log(definition, writer);
 			}
-			colorizer=new ParserGrammarColorizer;
-			parsingExecutor=colorizer->GetParsingExecutor();
-
-			{
-				FileStream fileStream(L"..\\GacUISrcCodepackedTest\\Resources\\CalculatorDefinition.txt", FileStream::ReadOnly);
-				BomDecoder decoder;
-				DecoderStream decoderStream(fileStream, decoder);
-				StreamReader reader(decoderStream);
-				textBoxEditor->SetText(reader.ReadToEnd());
-				textBoxEditor->Select(TextPos(), TextPos());
-				textBoxEditor->SetColorizer(colorizer);
-			}
-			{
-				textBoxGrammar->SetText(grammarCode);
-				textBoxGrammar->Select(TextPos(), TextPos());
-			}
+			stream.SeekFromBegin(0);
+			StreamReader reader(stream);
+			textBoxGrammar->SetText(reader.ReadToEnd());
+			textBoxGrammar->Select(TextPos(), TextPos());
 		}
 
 		// set the preferred minimum client 600
