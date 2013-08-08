@@ -177,9 +177,7 @@ namespace vl
 
 					.Type(
 						Class(L"ParserDef")
-							.Member(L"types", Type(L"TypeDef").Array())
-							.Member(L"tokens", Type(L"TokenDef").Array())
-							.Member(L"rules", Type(L"RuleDef").Array())
+							.Member(L"definitions", Type(L"DefBase").Array())
 						)
 					//-------------------------------------
 					.TokenAtt(L"CLASS",		L"class")
@@ -407,14 +405,14 @@ namespace vl
 						.Imply(
 							(
 								*(
-									Rule(L"TypeDecl")[L"types"] |
-									Rule(L"TokenDecl")[L"tokens"] |
-									Rule(L"RuleDecl")[L"rules"]
+									Rule(L"TypeDecl")[L"definitions"] |
+									Rule(L"TokenDecl")[L"definitions"] |
+									Rule(L"RuleDecl")[L"definitions"]
 									)
 								+(
-									Rule(L"TypeDecl")[L"types"] |
-									Rule(L"TokenDecl")[L"tokens"] |
-									Rule(L"RuleDecl")[L"rules"]
+									Rule(L"TypeDecl")[L"definitions"] |
+									Rule(L"TokenDecl")[L"definitions"] |
+									Rule(L"RuleDecl")[L"definitions"]
 									)
 								)
 								.As(Type(L"ParserDef"))
@@ -680,9 +678,28 @@ namespace vl
 				else if(node->GetType()==L"ParserDef")
 				{
 					Ptr<ParsingDefinition> target=new ParsingDefinition;
-					SetArray(target->types, node->GetMember(L"types"));
-					SetArray(target->tokens, node->GetMember(L"tokens"));
-					SetArray(target->rules, node->GetMember(L"rules"));
+					Ptr<ParsingTreeArray> defs=node->GetMember(L"definitions").Cast<ParsingTreeArray>();
+					if(defs)
+					{
+						vint count=defs->Count();
+						for(vint i=0;i<count;i++)
+						{
+							Ptr<ParsingTreeObject> def=defs->GetItem(i).Cast<ParsingTreeObject>();
+							Ptr<ParsingTreeCustomBase> defObject=Deserialize(def);
+							if(Ptr<ParsingDefinitionTypeDefinition> defType=defObject.Cast<ParsingDefinitionTypeDefinition>())
+							{
+								target->types.Add(defType);
+							}
+							else if(Ptr<ParsingDefinitionTokenDefinition> defToken=defObject.Cast<ParsingDefinitionTokenDefinition>())
+							{
+								target->tokens.Add(defToken);
+							}
+							else if(Ptr<ParsingDefinitionRuleDefinition> defRule=defObject.Cast<ParsingDefinitionRuleDefinition>())
+							{
+								target->rules.Add(defRule);
+							}
+						}
+					}
 					return target;
 				}
 				else
