@@ -181,15 +181,15 @@ protected:
 		return 0;
 	}
 
-	void OnParsingFinished(bool generatedNewNode)override
+	void OnParsingFinished(bool generatedNewNode, RepeatingParsingExecutor* parsingExecutor)override
 	{
 		if(generatedNewNode)
 		{
-			Ptr<ParsingTreeObject> node=ThreadSafeGetTreeNode();
+			Ptr<ParsingTreeObject> node=parsingExecutor->ThreadSafeGetTreeNode();
 			parsingTreeDecl=new ParserDecl(node);
-			ThreadSafeReturnTreeNode();
+			parsingExecutor->ThreadSafeReturnTreeNode();
 		}
-		GuiGrammarColorizer::OnParsingFinished(generatedNewNode);
+		GuiGrammarColorizer::OnParsingFinished(generatedNewNode, parsingExecutor);
 	}
 
 	void OnSemanticColorize(ParsingTreeToken* foundToken, ParsingTreeObject* tokenParent, const WString& type, const WString& field, vint semantic, vint& token)override
@@ -251,42 +251,9 @@ protected:
 	GuiMultilineTextBox*					textBoxGrammar;
 	GuiMultilineTextBox*					textBoxScope;
 	GuiMultilineTextBox*					textBoxEditor;
+	ParserGrammarColorizer*					colorizer;
+	Ptr<RepeatingParsingExecutor>			parsingExecutor;
 
-	void SwitchLanguage(const WString& sampleCodePath, GuiGrammarColorizer* colorizer, const WString& grammarCode)
-	{
-		{
-			// clear the colorizer first in order to prevent the previous colorizer from parsing code in another language
-			// which always wastes time in error recovering
-			textBoxEditor->SetColorizer(0);
-
-			// paste the code in another language
-			FileStream fileStream(sampleCodePath, FileStream::ReadOnly);
-			BomDecoder decoder;
-			DecoderStream decoderStream(fileStream, decoder);
-			StreamReader reader(decoderStream);
-			textBoxEditor->SetText(reader.ReadToEnd());
-			textBoxEditor->Select(TextPos(), TextPos());
-
-			// set the new colorizer that fit the language
-			textBoxEditor->SetColorizer(colorizer);
-		}
-		{
-			textBoxGrammar->SetText(grammarCode);
-			textBoxGrammar->Select(TextPos(), TextPos());
-		}
-	}
-
-	void SwitchLanguage(const WString& sampleCodePath, GuiGrammarColorizer* colorizer, Ptr<ParsingDefinition> definition)
-	{
-		MemoryStream stream;
-		{
-			StreamWriter writer(stream);
-			Log(definition, writer);
-		}
-		stream.SeekFromBegin(0);
-		StreamReader reader(stream);
-		SwitchLanguage(sampleCodePath, colorizer, reader.ReadToEnd());
-	}
 public:
 	TextBoxColorizerWindow()
 		:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
@@ -348,7 +315,36 @@ public:
 			page->GetContainer()->GetBoundsComposition()->AddChild(textBoxGrammar->GetBoundsComposition());
 			textBoxGrammar->SetColorizer(new ParserGrammarColorizer);
 		}
-		SwitchLanguage(L"..\\GacUISrcCodepackedTest\\Resources\\CalculatorDefinition.txt", new ParserGrammarColorizer, CreateParserDefinition());
+		{
+			WString grammarCode;
+			{
+				Ptr<ParsingDefinition> definition=CreateParserDefinition();
+				MemoryStream stream;
+				{
+					StreamWriter writer(stream);
+					Log(definition, writer);
+				}
+				stream.SeekFromBegin(0);
+				StreamReader reader(stream);
+				grammarCode=reader.ReadToEnd();
+			}
+			colorizer=new ParserGrammarColorizer;
+			parsingExecutor=colorizer->GetParsingExecutor();
+
+			{
+				FileStream fileStream(L"..\\GacUISrcCodepackedTest\\Resources\\CalculatorDefinition.txt", FileStream::ReadOnly);
+				BomDecoder decoder;
+				DecoderStream decoderStream(fileStream, decoder);
+				StreamReader reader(decoderStream);
+				textBoxEditor->SetText(reader.ReadToEnd());
+				textBoxEditor->Select(TextPos(), TextPos());
+				textBoxEditor->SetColorizer(colorizer);
+			}
+			{
+				textBoxGrammar->SetText(grammarCode);
+				textBoxGrammar->Select(TextPos(), TextPos());
+			}
+		}
 
 		// set the preferred minimum client 600
 		this->GetBoundsComposition()->SetPreferredMinSize(Size(800, 600));
