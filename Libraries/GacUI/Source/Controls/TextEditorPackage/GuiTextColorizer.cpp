@@ -365,7 +365,7 @@ RepeatingParsingExecutor
 				node=0;
 				FOREACH(ICallback*, callback, callbacks)
 				{
-					callback->OnParsingFinished(generatedNewNode);
+					callback->OnParsingFinished(generatedNewNode, this);
 				}
 			}
 
@@ -473,7 +473,7 @@ GuiGrammarColorizer
 				}
 			}
 
-			void GuiGrammarColorizer::OnParsingFinished(bool generatedNewNode)
+			void GuiGrammarColorizer::OnParsingFinished(bool generatedNewNode, RepeatingParsingExecutor* parsingExecutor)
 			{
 				RestartColorizer();
 			}
@@ -678,19 +678,9 @@ GuiGrammarColorizer
 				parsingExecutor->ThreadSafeReturnTreeNode();
 			}
 
-			Ptr<parsing::ParsingTreeObject> GuiGrammarColorizer::ThreadSafeGetTreeNode()
+			Ptr<RepeatingParsingExecutor> GuiGrammarColorizer::GetParsingExecutor()
 			{
-				return parsingExecutor->ThreadSafeGetTreeNode();
-			}
-
-			void GuiGrammarColorizer::ThreadSafeReturnTreeNode()
-			{
-				parsingExecutor->ThreadSafeReturnTreeNode();
-			}
-
-			Ptr<parsing::tabling::ParsingGeneralParser> GuiGrammarColorizer::GetParser()
-			{
-				return parsingExecutor->GetParser();
+				return parsingExecutor;
 			}
 		}
 	}

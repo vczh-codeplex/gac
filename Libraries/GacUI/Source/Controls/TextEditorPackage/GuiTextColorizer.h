@@ -153,7 +153,9 @@ RepeatingParsingExecutor
 				{
 				public:
 					/// <summary>Callback when a parsing task is finished. <see cref="RepeatingParsingExecutor::ThreadSafeGetTreeNode"/> and <see cref="RepeatingParsingExecutor::ThreadSafeReturnTreeNode"/> can be used to get the new syntax tree.</summary>
-					virtual void											OnParsingFinished(bool generatedNewNode)=0;
+					/// <param name="generatedNewNode">True indicates the parsing succeeded. Otherwise failed.</param>
+					/// <param name="parsingExecutor">The parsing executor that parses the input.</param>
+					virtual void											OnParsingFinished(bool generatedNewNode, RepeatingParsingExecutor* parsingExecutor)=0;
 				};
 			private:
 				Ptr<parsing::tabling::ParsingGeneralParser>					grammarParser;
@@ -218,7 +220,7 @@ GuiGrammarColorizer
 				void														Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock)override;
 				void														Detach()override;
 				void														TextEditFinished()override;
-				void														OnParsingFinished(bool generatedNewNode)override;
+				void														OnParsingFinished(bool generatedNewNode, RepeatingParsingExecutor* parsingExecutor)override;
 
 				/// <summary>Called when a @SemanticColor attribute in a grammar is activated during colorizing to determine a color for the token.</summary>
 				/// <param name="foundToken">Token syntax tree for the colorizing token.</param>
@@ -272,14 +274,10 @@ GuiGrammarColorizer
 				/// <summary>Submit all color settings.</summary>
 				void														EndSetColors();
 				void														ColorizeTokenContextSensitive(int lineIndex, const wchar_t* text, vint start, vint length, vint& token, int& contextState)override;
-								
-				/// <summary>Get the parsed syntax tree and block all threads when calling this function.</summary>
-				/// <returns>The parsed syntax tree.</returns>
-				Ptr<parsing::ParsingTreeObject>								ThreadSafeGetTreeNode();
-				/// <summary>Unblock all threads that calling <see cref="ThreadSafeGetTreeNode"/>.</summary>
-				void														ThreadSafeReturnTreeNode();
-				/// <summary>Get the internal parser that parse the text.</summary>
-				Ptr<parsing::tabling::ParsingGeneralParser>					GetParser();
+
+				/// <summary>Get the internal parsing executor.</summary>
+				/// <returns>The parsing executor.</returns>
+				Ptr<RepeatingParsingExecutor>								GetParsingExecutor();
 			};
 		}
 	}
