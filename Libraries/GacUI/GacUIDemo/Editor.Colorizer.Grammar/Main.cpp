@@ -223,107 +223,13 @@ public:
 };
 
 /***********************************************************************
-ColorizerConfigurationGrid
-***********************************************************************/
-
-class ColorizerConfigurationGrid : public GuiVirtualDataGrid
-{
-public:
-	struct ColorItem
-	{
-		WString								name;
-		Color								color;
-	};
-
-	class ColorColumnProvider : public list::StrongTypedFieldColumnProvider<ColorItem, Color>
-	{
-	public:
-		ColorColumnProvider(list::StrongTypedDataProvider<ColorItem>* _dataProvider)
-			:list::StrongTypedFieldColumnProvider<ColorItem, Color>(_dataProvider, &ColorItem::color)
-		{
-		}
-
-		void VisualizeCell(vint row, list::IDataVisualizer* dataVisualizer)override
-		{
-			list::StrongTypedFieldColumnProvider<ColorItem, Color>::VisualizeCell(row, dataVisualizer);
-			list::ListViewSubColumnDataVisualizer* visualizer=dataVisualizer->GetVisualizer<list::ListViewSubColumnDataVisualizer>();
-			if(visualizer)
-			{
-				ColorItem rowData;
-				Color cellData;
-				dataProvider->GetRowData(row, rowData);
-				GetCellData(rowData, cellData);
-				visualizer->GetTextElement()->SetColor(cellData);
-			}
-		}
-	};
-
-	class ColorItemProvider : public list::StrongTypedDataProvider<ColorItem>
-	{
-	protected:
-		List<ColorItem>						items;
-	public:
-		ColorItemProvider()
-		{
-			AddSortableFieldColumn(L"Configuration", &ColorItem::name)
-				->SetVisualizerFactory(new list::CellBorderDataVisualizer::Factory(new list::ListViewMainColumnDataVisualizer::Factory))
-				->SetSize(160);
-			AddStrongTypedColumn<Color>(L"Color", new ColorColumnProvider(this))
-				->SetVisualizerFactory(new list::CellBorderDataVisualizer::Factory(new list::ListViewSubColumnDataVisualizer::Factory))
-				->SetSize(120);
-		}
-
-		vint GetRowCount()override
-		{
-			return items.Count();
-		}
-
-		void GetRowData(vint row, ColorItem& rowData)override
-		{
-			rowData=items[row];
-		}
-
-		void ReadConfigurationFromColorizer(GuiGrammarColorizer* colorizer)
-		{
-			vint oldCount=items.Count();
-			items.Clear();
-			FOREACH(WString, name, colorizer->GetColorNames())
-			{
-				ColorItem item;
-				item.name=name;
-				item.color=colorizer->GetColor(name).normal.text;
-				items.Add(item);
-			}
-			commandExecutor->OnDataProviderItemModified(0, oldCount, items.Count());
-		}
-	};
-
-protected:
-	ColorItemProvider*						dataProvider;
-public:
-	ColorizerConfigurationGrid()
-		:GuiVirtualDataGrid(GetCurrentTheme()->CreateListViewStyle(), dataProvider=new ColorItemProvider)
-	{
-	}
-
-	ColorItemProvider* GetDataProvider()
-	{
-		return dataProvider;
-	}
-};
-
-/***********************************************************************
 TextBoxColorizerWindow
 ***********************************************************************/
 
 class TextBoxColorizerWindow : public GuiWindow
 {
 protected:
-	GuiTab*									tabIntellisense;
 	GuiMultilineTextBox*					textBoxEditor;
-	GuiMultilineTextBox*					textBoxGrammar;
-	GuiGrammarColorizer*					colorizer;
-	ColorizerConfigurationGrid*				gridConfiguration;
 
 public:
 	TextBoxColorizerWindow()
@@ -332,48 +238,13 @@ public:
 		SetText(L"Editor.Colorizer.Grammar");
 		SetClientSize(Size(800, 600));
 
-		GuiSelectableButton::MutexGroupController* controller=new GuiSelectableButton::MutexGroupController;
-		AddComponent(controller);
+		textBoxEditor=g::NewMultilineTextBox();
+		textBoxEditor->SetVerticalAlwaysVisible(false);
+		textBoxEditor->SetHorizontalAlwaysVisible(false);
+		textBoxEditor->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+		textBoxEditor->SetColorizer(new ParserGrammarColorizer);
+		this->GetBoundsComposition()->AddChild(textBoxEditor->GetBoundsComposition());
 
-		tabIntellisense=g::NewTab();
-		tabIntellisense->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-		GetBoundsComposition()->AddChild(tabIntellisense->GetBoundsComposition());
-		{
-			GuiTabPage* page=tabIntellisense->CreatePage();
-			page->SetText(L"Code Editor");
-
-			textBoxEditor=g::NewMultilineTextBox();
-			textBoxEditor->SetVerticalAlwaysVisible(false);
-			textBoxEditor->SetHorizontalAlwaysVisible(false);
-			textBoxEditor->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-			page->GetContainer()->GetBoundsComposition()->AddChild(textBoxEditor->GetBoundsComposition());
-
-			colorizer=new ParserGrammarColorizer;
-			textBoxEditor->SetColorizer(colorizer);
-		}
-		{
-			GuiTabPage* page=tabIntellisense->CreatePage();
-			page->SetText(L"Grammar");
-
-			textBoxGrammar=g::NewMultilineTextBox();
-			textBoxGrammar->SetReadonly(true);
-			textBoxGrammar->SetVerticalAlwaysVisible(false);
-			textBoxGrammar->SetHorizontalAlwaysVisible(false);
-			textBoxGrammar->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-			page->GetContainer()->GetBoundsComposition()->AddChild(textBoxGrammar->GetBoundsComposition());
-			textBoxGrammar->SetColorizer(new ParserGrammarColorizer);
-		}
-		{
-			GuiTabPage* page=tabIntellisense->CreatePage();
-			page->SetText(L"Configuration");
-
-			gridConfiguration=new ColorizerConfigurationGrid;
-			gridConfiguration->SetVerticalAlwaysVisible(false);
-			gridConfiguration->SetHorizontalAlwaysVisible(false);
-			gridConfiguration->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-			page->GetContainer()->GetBoundsComposition()->AddChild(gridConfiguration->GetBoundsComposition());
-			gridConfiguration->GetDataProvider()->ReadConfigurationFromColorizer(colorizer);
-		}
 		{
 			FileStream fileStream(L"..\\Resources\\CalculatorDefinition.txt", FileStream::ReadOnly);
 			BomDecoder decoder;
@@ -381,18 +252,6 @@ public:
 			StreamReader reader(decoderStream);
 			textBoxEditor->SetText(reader.ReadToEnd());
 			textBoxEditor->Select(TextPos(), TextPos());
-		}
-		{
-			Ptr<ParsingDefinition> definition=CreateParserDefinition();
-			MemoryStream stream;
-			{
-				StreamWriter writer(stream);
-				Log(definition, writer);
-			}
-			stream.SeekFromBegin(0);
-			StreamReader reader(stream);
-			textBoxGrammar->SetText(reader.ReadToEnd());
-			textBoxGrammar->Select(TextPos(), TextPos());
 		}
 
 		// set the preferred minimum client 600
