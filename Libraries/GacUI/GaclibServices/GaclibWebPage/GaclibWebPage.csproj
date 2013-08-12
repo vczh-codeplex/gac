@@ -204,6 +204,9 @@
     <Content Include="Content\Demos\Demos.Controls.DatePicker.DateAndLocale.jpg" />
     <Content Include="Content\Demos\Demos.Controls.TextBox.AdvancedColorizer.jpg" />
     <Content Include="Content\Demos\Demos.Controls.Tooltip.RichTextAndResource.jpg" />
+    <Content Include="Content\Demos\Demos.Editor.Colorizer.Grammar.jpg" />
+    <Content Include="Content\Demos\Demos.Editor.Colorizer.Json.jpg" />
+    <Content Include="Content\Demos\Demos.Editor.Colorizer.Xml.jpg" />
     <Content Include="Content\Demos\Demos.Persistant.DirectCode.SimpleWindow.jpg" />
     <Content Include="Content\Demos\Demos.Rendering.TextLayout.RichText.jpg" />
     <Content Include="Content\Demos\Demos.Controls.Button.CheckAndRadio.jpg" />
@@ -224,7 +227,15 @@
     <Content Include="Content\Demos\Demos.Rendering.RawAPI.Direct2D.jpg" />
     <Content Include="Content\Demos\Demos.Rendering.RawAPI.GDI.jpg" />
     <Content Include="Content\Demos\Demos.Template.Window.CustomizedBorder.jpg" />
-    <Content Include="Content\Demos\Index.xml" />
+    <Content Include="Content\Demos\Editor.Colorizer.Grammar\DXGUI_75.jpg" />
+    <Content Include="Content\Demos\Editor.Colorizer.Grammar\Main.cpp" />
+    <Content Include="Content\Demos\Editor.Colorizer.Json\DXGUI_76.jpg" />
+    <Content Include="Content\Demos\Editor.Colorizer.Json\Main.cpp" />
+    <Content Include="Content\Demos\Editor.Colorizer.Xml\DXGUI_77.jpg" />
+    <Content Include="Content\Demos\Editor.Colorizer.Xml\Main.cpp" />
+    <Content Include="Content\Demos\Index.xml">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="Content\Demos\Persistant.DirectCode.SimpleWindow\DXGUI_62.jpg" />
     <Content Include="Content\Demos\Persistant.DirectCode.SimpleWindow\DXGUI_63.jpg" />
     <Content Include="Content\Demos\Persistant.DirectCode.SimpleWindow\Main.cpp" />
