@@ -16,44 +16,6 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 }
 
 /***********************************************************************
-XmlGrammarColorizer
-***********************************************************************/
-
-class XmlGrammarColorizer : public GuiGrammarColorizer
-{
-public:
-	XmlGrammarColorizer()
-		:GuiGrammarColorizer(CreateAutoRecoverParser(xml::XmlLoadTable()), L"XDocument")
-	{
-		SetColor(L"Boundary", Color(0, 0, 255));
-		SetColor(L"Comment", Color(0, 128, 0));
-		SetColor(L"TagName", Color(163, 21, 21));
-		SetColor(L"AttName", Color(255, 0, 0));
-		SetColor(L"AttValue", Color(128, 0, 255));
-		EndSetColors();
-	}
-};
-
-/***********************************************************************
-JsonGrammarColorizer
-***********************************************************************/
-
-class JsonGrammarColorizer : public GuiGrammarColorizer
-{
-public:
-	JsonGrammarColorizer()
-		:GuiGrammarColorizer(CreateAutoRecoverParser(json::JsonLoadTable()), L"JRoot")
-	{
-		SetColor(L"Boundary", Color(255, 0, 0));
-		SetColor(L"Keyword", Color(0, 0, 255));
-		SetColor(L"AttName", Color(64, 64, 64));
-		SetColor(L"Number", Color(128, 0, 255));
-		SetColor(L"String", Color(163, 21, 2));
-		EndSetColors();
-	}
-};
-
-/***********************************************************************
 SymbolLookup
 ***********************************************************************/
 
@@ -357,175 +319,84 @@ TextBoxColorizerWindow
 class TextBoxColorizerWindow : public GuiWindow
 {
 protected:
-	GuiSelectableButton*					radioGrammar;
-	GuiSelectableButton*					radioXml;
-	GuiSelectableButton*					radioJson;
 	GuiTab*									tabIntellisense;
-	GuiMultilineTextBox*					textBoxGrammar;
 	GuiMultilineTextBox*					textBoxEditor;
+	GuiMultilineTextBox*					textBoxGrammar;
+	GuiGrammarColorizer*					colorizer;
 	ColorizerConfigurationGrid*				gridConfiguration;
 
-	void SwitchLanguage(const WString& sampleCodePath, GuiGrammarColorizer* colorizer, const WString& grammarCode)
-	{
-		{
-			// clear the colorizer first in order to prevent the previous colorizer from parsing code in another language
-			// which always wastes time in error recovering
-			textBoxEditor->SetColorizer(0);
-
-			// paste the code in another language
-			FileStream fileStream(sampleCodePath, FileStream::ReadOnly);
-			BomDecoder decoder;
-			DecoderStream decoderStream(fileStream, decoder);
-			StreamReader reader(decoderStream);
-			textBoxEditor->SetText(reader.ReadToEnd());
-			textBoxEditor->Select(TextPos(), TextPos());
-
-			// set the new colorizer that fit the language
-			textBoxEditor->SetColorizer(colorizer);
-		}
-		{
-			textBoxGrammar->SetText(grammarCode);
-			textBoxGrammar->Select(TextPos(), TextPos());
-		}
-		gridConfiguration->GetDataProvider()->ReadConfigurationFromColorizer(colorizer);
-	}
-
-	void SwitchLanguage(const WString& sampleCodePath, GuiGrammarColorizer* colorizer, Ptr<ParsingDefinition> definition)
-	{
-		MemoryStream stream;
-		{
-			StreamWriter writer(stream);
-			Log(definition, writer);
-		}
-		stream.SeekFromBegin(0);
-		StreamReader reader(stream);
-		SwitchLanguage(sampleCodePath, colorizer, reader.ReadToEnd());
-	}
-
-	void radioGrammar_SelectedChanged(GuiGraphicsComposition* composition, GuiEventArgs& arguments)
-	{
-		if(radioGrammar->GetSelected())
-		{
-			SwitchLanguage(L"..\\Resources\\CalculatorDefinition.txt", new ParserGrammarColorizer, CreateParserDefinition());
-		}
-	}
-
-	void radioXml_SelectedChanged(GuiGraphicsComposition* composition, GuiEventArgs& arguments)
-	{
-		if(radioXml->GetSelected())
-		{
-			SwitchLanguage(L"..\\Resources\\XmlResource.xml", new XmlGrammarColorizer, xml::XmlGetParserTextBuffer());
-		}
-	}
-
-	void radioJson_SelectedChanged(GuiGraphicsComposition* composition, GuiEventArgs& arguments)
-	{
-		if(radioJson->GetSelected())
-		{
-			SwitchLanguage(L"..\\Resources\\JsonSample.txt", new JsonGrammarColorizer, json::JsonGetParserTextBuffer());
-		}
-	}
 public:
 	TextBoxColorizerWindow()
 		:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
 	{
-		SetText(L"Controls.TextBox.ContextColorizer");
+		SetText(L"Editor.Colorizer.Grammar");
 		SetClientSize(Size(800, 600));
 
 		GuiSelectableButton::MutexGroupController* controller=new GuiSelectableButton::MutexGroupController;
 		AddComponent(controller);
 
-		GuiTableComposition* table=new GuiTableComposition;
-		table->SetAlignmentToParent(Margin(0, 0, 0, 0));
-		GetBoundsComposition()->AddChild(table);
-
-		table->SetCellPadding(5);
-		table->SetRowsAndColumns(2, 4);
-		table->SetRowOption(0, GuiCellOption::MinSizeOption());
-		table->SetRowOption(1, GuiCellOption::PercentageOption(1.0));
-		table->SetColumnOption(0, GuiCellOption::MinSizeOption());
-		table->SetColumnOption(1, GuiCellOption::MinSizeOption());
-		table->SetColumnOption(2, GuiCellOption::MinSizeOption());
-		table->SetColumnOption(3, GuiCellOption::PercentageOption(1.0));
+		tabIntellisense=g::NewTab();
+		tabIntellisense->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+		GetBoundsComposition()->AddChild(tabIntellisense->GetBoundsComposition());
 		{
-			GuiCellComposition* cell=new GuiCellComposition;
-			table->AddChild(cell);
-			cell->SetSite(0, 0, 1, 1);
+			GuiTabPage* page=tabIntellisense->CreatePage();
+			page->SetText(L"Code Editor");
 
-			radioGrammar=g::NewRadioButton();
-			radioGrammar->SetGroupController(controller);
-			radioGrammar->SetText(L"Grammar");
-			radioGrammar->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-			radioGrammar->SelectedChanged.AttachMethod(this, &TextBoxColorizerWindow::radioGrammar_SelectedChanged);
-			cell->AddChild(radioGrammar->GetBoundsComposition());
+			textBoxEditor=g::NewMultilineTextBox();
+			textBoxEditor->SetVerticalAlwaysVisible(false);
+			textBoxEditor->SetHorizontalAlwaysVisible(false);
+			textBoxEditor->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+			page->GetContainer()->GetBoundsComposition()->AddChild(textBoxEditor->GetBoundsComposition());
+
+			colorizer=new ParserGrammarColorizer;
+			textBoxEditor->SetColorizer(colorizer);
 		}
 		{
-			GuiCellComposition* cell=new GuiCellComposition;
-			table->AddChild(cell);
-			cell->SetSite(0, 1, 1, 1);
+			GuiTabPage* page=tabIntellisense->CreatePage();
+			page->SetText(L"Grammar");
 
-			radioXml=g::NewRadioButton();
-			radioXml->SetGroupController(controller);
-			radioXml->SetText(L"Xml");
-			radioXml->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-			radioXml->SelectedChanged.AttachMethod(this, &TextBoxColorizerWindow::radioXml_SelectedChanged);
-			cell->AddChild(radioXml->GetBoundsComposition());
+			textBoxGrammar=g::NewMultilineTextBox();
+			textBoxGrammar->SetReadonly(true);
+			textBoxGrammar->SetVerticalAlwaysVisible(false);
+			textBoxGrammar->SetHorizontalAlwaysVisible(false);
+			textBoxGrammar->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+			page->GetContainer()->GetBoundsComposition()->AddChild(textBoxGrammar->GetBoundsComposition());
+			textBoxGrammar->SetColorizer(new ParserGrammarColorizer);
 		}
 		{
-			GuiCellComposition* cell=new GuiCellComposition;
-			table->AddChild(cell);
-			cell->SetSite(0, 2, 1, 1);
+			GuiTabPage* page=tabIntellisense->CreatePage();
+			page->SetText(L"Configuration");
 
-			radioJson=g::NewRadioButton();
-			radioJson->SetGroupController(controller);
-			radioJson->SetText(L"Json");
-			radioJson->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-			radioJson->SelectedChanged.AttachMethod(this, &TextBoxColorizerWindow::radioJson_SelectedChanged);
-			cell->AddChild(radioJson->GetBoundsComposition());
+			gridConfiguration=new ColorizerConfigurationGrid;
+			gridConfiguration->SetVerticalAlwaysVisible(false);
+			gridConfiguration->SetHorizontalAlwaysVisible(false);
+			gridConfiguration->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+			page->GetContainer()->GetBoundsComposition()->AddChild(gridConfiguration->GetBoundsComposition());
+			gridConfiguration->GetDataProvider()->ReadConfigurationFromColorizer(colorizer);
 		}
 		{
-			GuiCellComposition* cell=new GuiCellComposition;
-			table->AddChild(cell);
-			cell->SetSite(1, 0, 1, 4);
-
-			tabIntellisense=g::NewTab();
-			tabIntellisense->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-			cell->AddChild(tabIntellisense->GetBoundsComposition());
+			FileStream fileStream(L"..\\Resources\\CalculatorDefinition.txt", FileStream::ReadOnly);
+			BomDecoder decoder;
+			DecoderStream decoderStream(fileStream, decoder);
+			StreamReader reader(decoderStream);
+			textBoxEditor->SetText(reader.ReadToEnd());
+			textBoxEditor->Select(TextPos(), TextPos());
+		}
+		{
+			Ptr<ParsingDefinition> definition=CreateParserDefinition();
+			MemoryStream stream;
 			{
-				GuiTabPage* page=tabIntellisense->CreatePage();
-				page->SetText(L"Code Editor");
-
-				textBoxEditor=g::NewMultilineTextBox();
-				textBoxEditor->SetHorizontalAlwaysVisible(false);
-				textBoxEditor->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-				page->GetContainer()->GetBoundsComposition()->AddChild(textBoxEditor->GetBoundsComposition());
+				StreamWriter writer(stream);
+				Log(definition, writer);
 			}
-			{
-				GuiTabPage* page=tabIntellisense->CreatePage();
-				page->SetText(L"Grammar");
-
-				textBoxGrammar=g::NewMultilineTextBox();
-				textBoxGrammar->SetReadonly(true);
-				textBoxGrammar->SetHorizontalAlwaysVisible(false);
-				textBoxGrammar->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-				page->GetContainer()->GetBoundsComposition()->AddChild(textBoxGrammar->GetBoundsComposition());
-				textBoxGrammar->SetColorizer(new ParserGrammarColorizer);
-			}
-			{
-				GuiTabPage* page=tabIntellisense->CreatePage();
-				page->SetText(L"Configuration");
-
-				gridConfiguration=new ColorizerConfigurationGrid;
-				gridConfiguration->SetVerticalAlwaysVisible(false);
-				gridConfiguration->SetHorizontalAlwaysVisible(false);
-				gridConfiguration->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-				page->GetContainer()->GetBoundsComposition()->AddChild(gridConfiguration->GetBoundsComposition());
-			}
+			stream.SeekFromBegin(0);
+			StreamReader reader(stream);
+			textBoxGrammar->SetText(reader.ReadToEnd());
+			textBoxGrammar->Select(TextPos(), TextPos());
 		}
-		radioGrammar->SetSelected(true);
 
 		// set the preferred minimum client 600
-		this->GetBoundsComposition()->SetPreferredMinSize(Size(800, 480));
+		this->GetBoundsComposition()->SetPreferredMinSize(Size(800, 600));
 		// call this to calculate the size immediately if any indirect content in the table changes
 		// so that the window can calcaulte its correct size before calling the MoveToScreenCenter()
 		this->ForceCalculateSizeImmediately();
@@ -544,7 +415,6 @@ GuiMain
 
 void GuiMain()
 {
-	GuiWindow* window=new TextBoxColorizerWindow();
-	GetApplication()->Run(window);
-	delete window;
+	TextBoxColorizerWindow window;
+	GetApplication()->Run(&window);
 }
