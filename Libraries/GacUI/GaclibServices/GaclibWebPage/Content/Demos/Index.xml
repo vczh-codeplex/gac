@@ -164,6 +164,16 @@
       <cpp src="Main.cpp" />
       <description>This demo shows how to use GuiStringGrid to perform simple table editing.</description>
     </demo>
+    <demo name="TextBox.ContextColorizer">
+      <date>2013/8/13</date>
+      <image src="DXGUI_78.jpg" />
+      <image src="DXGUI_79.jpg" />
+      <image src="DXGUI_80.jpg" />
+      <image src="DXGUI_81.jpg" />
+      <image src="DXGUI_82.jpg" />
+      <cpp src="Main.cpp" />
+      <description>This demo shows how to build a code editor with switchable context sensitive colorizing based on GuiMultilineTextBox and GuiGrammarColorizer in a simpler way.</description>
+    </demo>
   </category>
   <category name="Template">
     <description>The &quot;Template&quot; category contains demos that show how to build template or skin for each type of controls.</description>

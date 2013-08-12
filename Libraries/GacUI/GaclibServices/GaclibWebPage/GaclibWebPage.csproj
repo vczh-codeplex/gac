@@ -183,6 +183,12 @@
     <Content Include="Content\Demos\Controls.TextBox.Colorizer\DXGUI_36.jpg" />
     <Content Include="Content\Demos\Controls.TextBox.Colorizer\DXGUI_37.jpg" />
     <Content Include="Content\Demos\Controls.TextBox.Colorizer\Main.cpp" />
+    <Content Include="Content\Demos\Controls.TextBox.ContextColorizer\DXGUI_78.jpg" />
+    <Content Include="Content\Demos\Controls.TextBox.ContextColorizer\DXGUI_79.jpg" />
+    <Content Include="Content\Demos\Controls.TextBox.ContextColorizer\DXGUI_80.jpg" />
+    <Content Include="Content\Demos\Controls.TextBox.ContextColorizer\DXGUI_81.jpg" />
+    <Content Include="Content\Demos\Controls.TextBox.ContextColorizer\DXGUI_82.jpg" />
+    <Content Include="Content\Demos\Controls.TextBox.ContextColorizer\Main.cpp" />
     <Content Include="Content\Demos\Controls.TextBox.Editor\DXGUI_34.jpg" />
     <Content Include="Content\Demos\Controls.TextBox.Editor\Main.cpp" />
     <Content Include="Content\Demos\Controls.Toolstrip.TextEditor\DXGUI_53.jpg" />
@@ -203,6 +209,7 @@
     <Content Include="Content\Demos\Demos.Controls.DataGrid.TableEditor.jpg" />
     <Content Include="Content\Demos\Demos.Controls.DatePicker.DateAndLocale.jpg" />
     <Content Include="Content\Demos\Demos.Controls.TextBox.AdvancedColorizer.jpg" />
+    <Content Include="Content\Demos\Demos.Controls.TextBox.ContextColorizer.jpg" />
     <Content Include="Content\Demos\Demos.Controls.Tooltip.RichTextAndResource.jpg" />
     <Content Include="Content\Demos\Demos.Editor.Colorizer.Grammar.jpg" />
     <Content Include="Content\Demos\Demos.Editor.Colorizer.Json.jpg" />
