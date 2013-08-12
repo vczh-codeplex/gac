@@ -4000,9 +4000,9 @@ namespace vl
 			bool								AddItem(Ptr<ParsingTreeNode> node);
 			bool								InsertItem(vint index, Ptr<ParsingTreeNode> node);
 			bool								RemoveItem(vint index);
-			bool								RemoveItem(Ptr<ParsingTreeNode> node);
-			vint								IndexOfItem(Ptr<ParsingTreeNode> node);
-			bool								ContainsItem(Ptr<ParsingTreeNode> node);
+			bool								RemoveItem(ParsingTreeNode* node);
+			vint								IndexOfItem(ParsingTreeNode* node);
+			bool								ContainsItem(ParsingTreeNode* node);
 			vint								Count();
 			bool								Clear();
 		};
@@ -22627,11 +22627,11 @@ RepeatingTaskExecutor
 					currentInputData=inputData;
 					currentInputDataAvailable=inputDataAvailable;
 					inputDataAvailable=false;
-				}
-				if(!currentInputDataAvailable)
-				{
-					executing=false;
-					break;
+					if(!currentInputDataAvailable)
+					{
+						executing=false;
+						break;
+					}
 				}
 				Execute(currentInputData);
 			}
@@ -22646,20 +22646,6 @@ RepeatingTaskExecutor
 	protected:
 		virtual void							Execute(const T& input)=0;
 
-		void SubmitTask(const T& input)
-		{
-			{
-				SpinLock::Scope scope(inputLock);
-				inputData=input;
-				inputDataAvailable=true;
-			}
-			if(!executing)
-			{
-				executing=true;
-				executingEvent.Enter();
-				ThreadPoolLite::Queue(&ExecutingProc, this);
-			}
-		}
 	public:
 		RepeatingTaskExecutor()
 			:inputDataAvailable(false)
@@ -22676,6 +22662,21 @@ RepeatingTaskExecutor
 		{
 			executingEvent.Enter();
 			executingEvent.Leave();
+		}
+
+		void SubmitTask(const T& input)
+		{
+			{
+				SpinLock::Scope scope(inputLock);
+				inputData=input;
+				inputDataAvailable=true;
+			}
+			if(!executing)
+			{
+				executing=true;
+				executingEvent.Enter();
+				ThreadPoolLite::Queue(&ExecutingProc, this);
+			}
 		}
 	};
 }

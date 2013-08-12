@@ -21435,6 +21435,73 @@ GuiTextBoxRegexColorizer
 			}
 
 /***********************************************************************
+RepeatingParsingExecutor
+***********************************************************************/
+
+			void RepeatingParsingExecutor::Execute(const WString& input)
+			{
+				List<Ptr<ParsingError>> errors;
+				Ptr<ParsingTreeObject> node=grammarParser->Parse(input, grammarRule, errors).Cast<ParsingTreeObject>();
+				if(node)
+				{
+					node->InitializeQueryCache();
+
+					SpinLock::Scope scope(parsingTreeLock);
+					parsingTreeNode=node;
+				}
+
+				bool generatedNewNode=node;
+				node=0;
+				FOREACH(ICallback*, callback, callbacks)
+				{
+					callback->OnParsingFinished(generatedNewNode, this);
+				}
+			}
+
+			RepeatingParsingExecutor::RepeatingParsingExecutor(Ptr<parsing::tabling::ParsingGeneralParser> _grammarParser, const WString& _grammarRule)
+				:grammarParser(_grammarParser)
+				,grammarRule(_grammarRule)
+			{
+			}
+
+			RepeatingParsingExecutor::~RepeatingParsingExecutor()
+			{
+				EnsureTaskFinished();
+				SpinLock::Scope scope(parsingTreeLock);
+				parsingTreeNode=0;
+			}
+
+			Ptr<parsing::ParsingTreeObject> RepeatingParsingExecutor::ThreadSafeGetTreeNode()
+			{
+				parsingTreeLock.Enter();
+				return parsingTreeNode;
+			}
+
+			void RepeatingParsingExecutor::ThreadSafeReturnTreeNode()
+			{
+				parsingTreeLock.Leave();
+			}
+
+			Ptr<parsing::tabling::ParsingGeneralParser> RepeatingParsingExecutor::GetParser()
+			{
+				return grammarParser;
+			}
+
+			bool RepeatingParsingExecutor::AttachCallback(ICallback* value)
+			{
+				if(callbacks.Contains(value)) return false;
+				callbacks.Add(value);
+				return true;
+			}
+
+			bool RepeatingParsingExecutor::DetachCallback(ICallback* value)
+			{
+				if(!callbacks.Contains(value)) return false;
+				callbacks.Remove(value);
+				return true;
+			}
+
+/***********************************************************************
 GuiGrammarColorizer
 ***********************************************************************/
 
@@ -21442,7 +21509,7 @@ GuiGrammarColorizer
 			{
 				if(index!=-1)
 				{
-					Ptr<ParsingTable::AttributeInfo> att=grammarParser->GetTable()->GetAttributeInfo(index)->FindFirst(name);
+					Ptr<ParsingTable::AttributeInfo> att=parsingExecutor->GetParser()->GetTable()->GetAttributeInfo(index)->FindFirst(name);
 					if(att && att->arguments.Count()==argumentCount)
 					{
 						return att;
@@ -21473,7 +21540,7 @@ GuiGrammarColorizer
 				{
 					SpinLock::Scope scope(*elementModifyLock);
 					WString text=element->GetLines().GetText();
-					SubmitTask(text.Buffer());
+					parsingExecutor->SubmitTask(text.Buffer());
 				}
 			}
 
@@ -21482,7 +21549,7 @@ GuiGrammarColorizer
 				GuiTextBoxRegexColorizer::Detach();
 				if(element && elementModifyLock)
 				{
-					EnsureTaskFinished();
+					parsingExecutor->EnsureTaskFinished();
 					StopColorizer(false);
 				}
 			}
@@ -21494,73 +21561,48 @@ GuiGrammarColorizer
 				{
 					SpinLock::Scope scope(*elementModifyLock);
 					WString text=element->GetLines().GetText();
-					SubmitTask(text.Buffer());
+					parsingExecutor->SubmitTask(text.Buffer());
 				}
 			}
 
-			void GuiGrammarColorizer::OnParsingFinished()
+			void GuiGrammarColorizer::OnParsingFinished(bool generatedNewNode, RepeatingParsingExecutor* parsingExecutor)
 			{
+				RestartColorizer();
 			}
 
 			void GuiGrammarColorizer::OnSemanticColorize(parsing::ParsingTreeToken* foundToken, parsing::ParsingTreeObject* tokenParent, const WString& type, const WString& field, vint semantic, vint& token)
 			{
 			}
 
-			void GuiGrammarColorizer::Initialize(Ptr<parsing::tabling::ParsingGeneralParser> _grammarParser, const WString& _grammarRule)
+			void GuiGrammarColorizer::EnsureColorizerFinished()
 			{
-				grammarParser=_grammarParser;
-				grammarRule=_grammarRule;
+				parsingExecutor->EnsureTaskFinished();
+				StopColorizerForever();
+			}
+
+			GuiGrammarColorizer::GuiGrammarColorizer(Ptr<RepeatingParsingExecutor> _parsingExecutor)
+				:parsingExecutor(_parsingExecutor)
+			{
+				parsingExecutor->AttachCallback(this);
 				BeginSetColors();
 			}
 
-			void GuiGrammarColorizer::Execute(const WString& input)
-			{
-				List<Ptr<ParsingError>> errors;
-				Ptr<ParsingTreeObject> node=grammarParser->Parse(input, grammarRule, errors).Cast<ParsingTreeObject>();
-				if(node)
-				{
-					node->InitializeQueryCache();
-
-					SpinLock::Scope scope(parsingTreeLock);
-					parsingTreeNode=node;
-				}
-				if(node)
-				{
-					OnParsingFinished();
-				}
-				node=0;
-				RestartColorizer();
-			}
-
-			GuiGrammarColorizer::GuiGrammarColorizer()
-			{
-			}
-
 			GuiGrammarColorizer::GuiGrammarColorizer(Ptr<parsing::tabling::ParsingGeneralParser> _grammarParser, const WString& _grammarRule)
+				:parsingExecutor(new RepeatingParsingExecutor(_grammarParser, _grammarRule))
 			{
-				Initialize(_grammarParser, _grammarRule);
+				parsingExecutor->AttachCallback(this);
+				BeginSetColors();
 			}
 
 			GuiGrammarColorizer::~GuiGrammarColorizer()
 			{
-				EnsureTaskFinished();
-				StopColorizerForever();
-			}
-
-			Ptr<parsing::ParsingTreeObject> GuiGrammarColorizer::ThreadSafeGetTreeNode()
-			{
-				parsingTreeLock.Enter();
-				return parsingTreeNode;
-			}
-
-			void GuiGrammarColorizer::ThreadSafeReturnTreeNode()
-			{
-				parsingTreeLock.Leave();
+				EnsureColorizerFinished();
+				parsingExecutor->DetachCallback(this);
 			}
 
 			void GuiGrammarColorizer::SubmitCode(const WString& code)
 			{
-				SubmitTask(code.Buffer());
+				parsingExecutor->SubmitTask(code.Buffer());
 			}
 
 			vint GuiGrammarColorizer::GetTokenId(const WString& token)
@@ -21610,7 +21652,7 @@ GuiGrammarColorizer
 			void GuiGrammarColorizer::EndSetColors()
 			{
 				SortedList<WString> tokenColors;
-				Ptr<ParsingTable> table=grammarParser->GetTable();
+				Ptr<ParsingTable> table=parsingExecutor->GetParser()->GetTable();
 				colorIndices.Clear();
 				colorContext.Clear();
 				fieldContextColors.Clear();
@@ -21692,18 +21734,18 @@ GuiGrammarColorizer
 
 			void GuiGrammarColorizer::ColorizeTokenContextSensitive(int lineIndex, const wchar_t* text, vint start, vint length, vint& token, int& contextState)
 			{
-				SpinLock::Scope scope(parsingTreeLock);
-				if(parsingTreeNode && token!=-1 && colorContext[token])
+				Ptr<ParsingTreeNode> node=parsingExecutor->ThreadSafeGetTreeNode();
+				if(node && token!=-1 && colorContext[token])
 				{
 					ParsingTextPos pos(lineIndex, start);
-					ParsingTreeNode* foundNode=parsingTreeNode->FindDeepestNode(pos);
-					if(!foundNode) return;
+					ParsingTreeNode* foundNode=node->FindDeepestNode(pos);
+					if(!foundNode) goto EXIT_COLORIZING;
 					ParsingTreeToken* foundToken=dynamic_cast<ParsingTreeToken*>(foundNode);
-					if(!foundToken) return;
+					if(!foundToken) goto EXIT_COLORIZING;
 					ParsingTreeObject* tokenParent=dynamic_cast<ParsingTreeObject*>(foundNode->GetParent());
-					if(!tokenParent) return;
+					if(!tokenParent) goto EXIT_COLORIZING;
 					vint index=tokenParent->GetMembers().Values().IndexOf(foundNode);
-					if(index==-1) return;
+					if(index==-1) goto EXIT_COLORIZING;
 
 					WString type=tokenParent->GetType();
 					WString field=tokenParent->GetMembers().Keys().Get(index);
@@ -21713,7 +21755,7 @@ GuiGrammarColorizer
 					if(index!=-1)
 					{
 						token=fieldContextColors.Values().Get(index);
-						return;
+						goto EXIT_COLORIZING;
 					}
 
 					index=fieldSemanticColors.Keys().IndexOf(key);
@@ -21721,9 +21763,17 @@ GuiGrammarColorizer
 					{
 						vint semantic=fieldSemanticColors.Values().Get(index);
 						OnSemanticColorize(foundToken, tokenParent, type, field, semantic, token);
-						return;
+						goto EXIT_COLORIZING;
 					}
 				}
+			EXIT_COLORIZING:
+				node=0;
+				parsingExecutor->ThreadSafeReturnTreeNode();
+			}
+
+			Ptr<RepeatingParsingExecutor> GuiGrammarColorizer::GetParsingExecutor()
+			{
+				return parsingExecutor;
 			}
 		}
 	}

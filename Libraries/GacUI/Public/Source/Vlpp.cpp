@@ -6109,6 +6109,7 @@ namespace vl
 						Class(L"PrimitiveTypeObj", Type(L"TypeObj"))
 							.Member(L"name", TokenType())
 								.Attribute(Attribute(L"SemanticColor").Argument(L"Type"))
+								.Attribute(Attribute(L"AutoComplete").Argument(L"Type"))
 						)
 
 					.Type(
@@ -6120,6 +6121,7 @@ namespace vl
 							.Member(L"parentType", Type(L"TypeObj"))
 							.Member(L"name", TokenType())
 								.Attribute(Attribute(L"SemanticColor").Argument(L"Type"))
+								.Attribute(Attribute(L"AutoComplete").Argument(L"SubType"))
 						)
 
 					.Type(
@@ -6143,6 +6145,7 @@ namespace vl
 					.Type(
 						Class(L"ClassTypeDef", Type(L"TypeDef"))								
 							.Member(L"ambiguousType", TokenType())
+								.Attribute(Attribute(L"AutoComplete").Argument(L"Type"))
 							.Member(L"parentType", Type(L"TypeObj"))
 							.Member(L"members", Type(L"ClassMemberDef").Array())
 							.Member(L"subTypes", Type(L"TypeDef").Array())
@@ -6166,11 +6169,13 @@ namespace vl
 						Class(L"PrimitiveGrammarDef", Type(L"GrammarDef"))
 							.Member(L"name", TokenType())
 								.Attribute(Attribute(L"SemanticColor").Argument(L"Grammar"))
+								.Attribute(Attribute(L"AutoComplete").Argument(L"Grammar"))
 						)
 
 					.Type(
 						Class(L"TextGrammarDef", Type(L"GrammarDef"))
 							.Member(L"text", TokenType())
+								.Attribute(Attribute(L"AutoComplete").Argument(L"Text"))
 						)
 
 					.Type(
@@ -6205,6 +6210,7 @@ namespace vl
 						Class(L"AssignGrammarDef", Type(L"GrammarDef"))
 							.Member(L"grammar", Type(L"GrammarDef"))
 							.Member(L"memberName", TokenType())
+								.Attribute(Attribute(L"AutoComplete").Argument(L"Field"))
 						)
 
 					.Type(
@@ -6216,7 +6222,9 @@ namespace vl
 						Class(L"SetterGrammarDef", Type(L"GrammarDef"))
 							.Member(L"grammar", Type(L"GrammarDef"))
 							.Member(L"memberName", TokenType())
+								.Attribute(Attribute(L"AutoComplete").Argument(L"EnumField"))
 							.Member(L"value", TokenType())
+								.Attribute(Attribute(L"AutoComplete").Argument(L"EnumValue"))
 						)
 					//-------------------------------------
 					.Type(
@@ -6242,9 +6250,7 @@ namespace vl
 
 					.Type(
 						Class(L"ParserDef")
-							.Member(L"types", Type(L"TypeDef").Array())
-							.Member(L"tokens", Type(L"TokenDef").Array())
-							.Member(L"rules", Type(L"RuleDef").Array())
+							.Member(L"definitions", Type(L"DefBase").Array())
 						)
 					//-------------------------------------
 					.TokenAtt(L"CLASS",		L"class")
@@ -6456,12 +6462,6 @@ namespace vl
 							)
 						.EndRule()
 
-					.Rule(L"RuleFragmentDecl", Type(L"GrammarDef"))
-						.Imply(
-							Text(L"=") + !Rule(L"Grammar") + Text(L";")
-							)
-						.EndRule()
-
 					.Rule(L"RuleDecl", Type(L"RuleDef"))
 						.Imply(
 							(
@@ -6478,14 +6478,14 @@ namespace vl
 						.Imply(
 							(
 								*(
-									Rule(L"TypeDecl")[L"types"] |
-									Rule(L"TokenDecl")[L"tokens"] |
-									Rule(L"RuleDecl")[L"rules"]
+									Rule(L"TypeDecl")[L"definitions"] |
+									Rule(L"TokenDecl")[L"definitions"] |
+									Rule(L"RuleDecl")[L"definitions"]
 									)
 								+(
-									Rule(L"TypeDecl")[L"types"] |
-									Rule(L"TokenDecl")[L"tokens"] |
-									Rule(L"RuleDecl")[L"rules"]
+									Rule(L"TypeDecl")[L"definitions"] |
+									Rule(L"TokenDecl")[L"definitions"] |
+									Rule(L"RuleDecl")[L"definitions"]
 									)
 								)
 								.As(Type(L"ParserDef"))
@@ -6751,9 +6751,28 @@ namespace vl
 				else if(node->GetType()==L"ParserDef")
 				{
 					Ptr<ParsingDefinition> target=new ParsingDefinition;
-					SetArray(target->types, node->GetMember(L"types"));
-					SetArray(target->tokens, node->GetMember(L"tokens"));
-					SetArray(target->rules, node->GetMember(L"rules"));
+					Ptr<ParsingTreeArray> defs=node->GetMember(L"definitions").Cast<ParsingTreeArray>();
+					if(defs)
+					{
+						vint count=defs->Count();
+						for(vint i=0;i<count;i++)
+						{
+							Ptr<ParsingTreeObject> def=defs->GetItem(i).Cast<ParsingTreeObject>();
+							Ptr<ParsingTreeCustomBase> defObject=Deserialize(def);
+							if(Ptr<ParsingDefinitionTypeDefinition> defType=defObject.Cast<ParsingDefinitionTypeDefinition>())
+							{
+								target->types.Add(defType);
+							}
+							else if(Ptr<ParsingDefinitionTokenDefinition> defToken=defObject.Cast<ParsingDefinitionTokenDefinition>())
+							{
+								target->tokens.Add(defToken);
+							}
+							else if(Ptr<ParsingDefinitionRuleDefinition> defRule=defObject.Cast<ParsingDefinitionRuleDefinition>())
+							{
+								target->rules.Add(defRule);
+							}
+						}
+					}
 					return target;
 				}
 				else
@@ -9686,19 +9705,19 @@ ParsingTreeArray
 			return false;
 		}
 
-		bool ParsingTreeArray::RemoveItem(Ptr<ParsingTreeNode> node)
+		bool ParsingTreeArray::RemoveItem(ParsingTreeNode* node)
 		{
-			return RemoveItem(items.IndexOf(node.Obj()));
+			return RemoveItem(items.IndexOf(node));
 		}
 
-		vint ParsingTreeArray::IndexOfItem(Ptr<ParsingTreeNode> node)
+		vint ParsingTreeArray::IndexOfItem(ParsingTreeNode* node)
 		{
-			return items.IndexOf(node.Obj());
+			return items.IndexOf(node);
 		}
 
-		bool ParsingTreeArray::ContainsItem(Ptr<ParsingTreeNode> node)
+		bool ParsingTreeArray::ContainsItem(ParsingTreeNode* node)
 		{
-			return items.Contains(node.Obj());
+			return items.Contains(node);
 		}
 
 		vint ParsingTreeArray::Count()
@@ -19714,7 +19733,7 @@ Thread
 			{
 				return thread;
 			}
-			else if(deleteAfterStopped)
+			else
 			{
 				delete thread;
 			}
