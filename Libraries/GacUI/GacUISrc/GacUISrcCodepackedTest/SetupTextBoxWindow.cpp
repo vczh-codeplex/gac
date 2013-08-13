@@ -63,7 +63,7 @@ SymbolLookup
 		{
 		}
 
-		void CollectTypes(Ptr<ParsingTreeArray> types, Dictionary<ParsingTreeNode*, TypeSymbol*>& nodeTypeMap)
+		void CollectSubTypes(Ptr<ParsingTreeArray> types, Dictionary<ParsingTreeNode*, TypeSymbol*>& nodeTypeMap)
 		{
 			if(types)
 			{
@@ -72,18 +72,23 @@ SymbolLookup
 					Ptr<ParsingTreeObject> type=types->GetItem(i).Cast<ParsingTreeObject>();
 					if(type)
 					{
-						Ptr<ParsingTreeToken> name=type->GetMember(L"name").Cast<ParsingTreeToken>();
-						if(name && !subTypes.Keys().Contains(name->GetValue()))
-						{
-							Ptr<TypeSymbol> symbol=new TypeSymbol;
-							symbol->typeName=name->GetValue();
-							symbol->parent=this;
-							subTypes.Add(symbol->typeName, symbol);
-							symbol->CollectTypes(type->GetMember(L"subTypes").Cast<ParsingTreeArray>(), nodeTypeMap);
-							nodeTypeMap.Add(type.Obj(), symbol.Obj());
-						}
+						CollectSubType(type, nodeTypeMap);
 					}
 				}
+			}
+		}
+
+		void CollectSubType(Ptr<ParsingTreeObject> type, Dictionary<ParsingTreeNode*, TypeSymbol*>& nodeTypeMap)
+		{
+			Ptr<ParsingTreeToken> name=type->GetMember(L"name").Cast<ParsingTreeToken>();
+			if(name && !subTypes.Keys().Contains(name->GetValue()))
+			{
+				Ptr<TypeSymbol> symbol=new TypeSymbol;
+				symbol->typeName=name->GetValue();
+				symbol->parent=this;
+				subTypes.Add(symbol->typeName, symbol);
+				symbol->CollectSubTypes(type->GetMember(L"subTypes").Cast<ParsingTreeArray>(), nodeTypeMap);
+				nodeTypeMap.Add(type.Obj(), symbol.Obj());
 			}
 		}
 	};
@@ -98,39 +103,34 @@ SymbolLookup
 		ParserDecl(Ptr<ParsingTreeObject> parserDecl)
 		{
 			nodeTypeMap.Add(parserDecl.Obj(), this);
-			CollectTypes(parserDecl->GetMember(L"types").Cast<ParsingTreeArray>(), nodeTypeMap);
+			Ptr<ParsingTreeArray> defs=parserDecl->GetMember(L"definitions").Cast<ParsingTreeArray>();
+			if(defs)
 			{
-				Ptr<ParsingTreeArray> items=parserDecl->GetMember(L"tokens").Cast<ParsingTreeArray>();
-				if(items)
+				vint count=defs->Count();
+				for(vint i=0;i<count;i++)
 				{
-					for(int i=0;i<items->Count();i++)
+					Ptr<ParsingTreeObject> defObject=defs->GetItem(i).Cast<ParsingTreeObject>();
+					if(defObject)
 					{
-						Ptr<ParsingTreeObject> type=items->GetItem(i).Cast<ParsingTreeObject>();
-						if(type)
+						if(defObject->GetType()==L"TokenDef")
 						{
-							Ptr<ParsingTreeToken> name=type->GetMember(L"name").Cast<ParsingTreeToken>();
+							Ptr<ParsingTreeToken> name=defObject->GetMember(L"name").Cast<ParsingTreeToken>();
 							if(name)
 							{
 								tokens.Add(name->GetValue());
 							}
 						}
-					}
-				}
-			}
-			{
-				Ptr<ParsingTreeArray> items=parserDecl->GetMember(L"rules").Cast<ParsingTreeArray>();
-				if(items)
-				{
-					for(int i=0;i<items->Count();i++)
-					{
-						Ptr<ParsingTreeObject> type=items->GetItem(i).Cast<ParsingTreeObject>();
-						if(type)
+						else if(defObject->GetType()==L"RuleDef")
 						{
-							Ptr<ParsingTreeToken> name=type->GetMember(L"name").Cast<ParsingTreeToken>();
+							Ptr<ParsingTreeToken> name=defObject->GetMember(L"name").Cast<ParsingTreeToken>();
 							if(name)
 							{
 								rules.Add(name->GetValue());
 							}
+						}
+						else
+						{
+							CollectSubType(defObject, nodeTypeMap);
 						}
 					}
 				}
@@ -194,15 +194,16 @@ ParserGrammarColorizer
 			return 0;
 		}
 
-		void OnParsingFinished()override
+		void OnParsingFinished(bool generatedNewNode, RepeatingParsingExecutor* parsingExecutor)override
 		{
-			Ptr<ParsingTreeObject> node=ThreadSafeGetTreeNode();
-			if(node)
+			if(generatedNewNode)
 			{
+				Ptr<ParsingTreeObject> node=parsingExecutor->ThreadSafeGetTreeNode();
 				parsingTreeDecl=new ParserDecl(node);
+				node=0;
+				parsingExecutor->ThreadSafeReturnTreeNode();
 			}
-			node=0;
-			ThreadSafeReturnTreeNode();
+			GuiGrammarColorizer::OnParsingFinished(generatedNewNode, parsingExecutor);
 		}
 
 		void OnSemanticColorize(ParsingTreeToken* foundToken, ParsingTreeObject* tokenParent, const WString& type, const WString& field, vint semantic, vint& token)override
@@ -249,7 +250,7 @@ ParserGrammarColorizer
 
 		~ParserGrammarColorizer()
 		{
-			EnsureTaskFinished();
+			EnsureColorizerFinished();
 		}
 	};
 
