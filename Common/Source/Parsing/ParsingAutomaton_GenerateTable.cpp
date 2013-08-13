@@ -477,13 +477,11 @@ GenerateTable
 								{
 									ins.instructionType=ParsingTable::Instruction::Create;
 									ins.nameParameter=GetTypeNameForCreateInstruction(action->actionSource);
-									ins.creatorRule=action->creatorRule->name;
 								}
 								break;
 							case Action::Using:
 								{
 									ins.instructionType=ParsingTable::Instruction::Using;
-									ins.creatorRule=action->creatorRule->name;
 								}
 								break;
 							case Action::Assign:
@@ -526,6 +524,7 @@ GenerateTable
 								}
 								break;
 							}
+							ins.creatorRule=action->creatorRule->name;
 							item->instructions.Add(ins);
 						}
 					}

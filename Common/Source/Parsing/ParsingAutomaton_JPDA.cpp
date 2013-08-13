@@ -97,6 +97,7 @@ CreateJointPDAFromNondeterministicPDA
 									action->actionType=Action::Shift;
 									action->shiftReduceSource=newSource;
 									action->shiftReduceTarget=newTarget;
+									action->creatorRule=shiftTransition->source->ownerRule;
 									shiftTransition->actions.Add(action);
 								}
 
@@ -107,6 +108,7 @@ CreateJointPDAFromNondeterministicPDA
 									action->actionType=Action::Reduce;
 									action->shiftReduceSource=newSource;
 									action->shiftReduceTarget=newTarget;
+									action->creatorRule=reduceTransition->source->ownerRule;
 									reduceTransition->actions.Add(action);
 									CopyFrom(reduceTransition->actions, oldTransition->actions, true);
 								}
@@ -305,6 +307,7 @@ MarkLeftRecursiveInJointPDA
 									newAction->creatorRule=action->creatorRule;
 									newAction->shiftReduceSource=action->shiftReduceSource;
 									newAction->shiftReduceTarget=action->shiftReduceTarget;
+									newAction->creatorRule=shift.key->ownerRule;
 
 									transition->actions[i]=newAction;
 								}

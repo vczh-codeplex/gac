@@ -104,6 +104,7 @@ CreateEpsilonPDAVisitor
 					Ptr<Action> action=new Action;
 					action->actionType=Action::Assign;
 					action->actionSource=automaton->symbolManager->CacheGetSymbol(node);
+					action->creatorRule=rule;
 					transition->actions.Add(action);
 				}
 
@@ -127,6 +128,7 @@ CreateEpsilonPDAVisitor
 					action->actionType=Action::Setter;
 					action->actionSource=automaton->symbolManager->CacheGetSymbol(node);
 					action->actionTarget=action->actionSource->GetDescriptorSymbol()->GetSubSymbolByName(node->value);
+					action->creatorRule=rule;
 					transition->actions.Add(action);
 				}
 			};

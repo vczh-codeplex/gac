@@ -253,6 +253,38 @@ protected:
 	GuiMultilineTextBox*					textBoxScope;
 	GuiMultilineTextBox*					textBoxGrammar;
 	Ptr<RepeatingParsingExecutor>			parsingExecutor;
+	SortedList<WString>						leftRecursiveRules;
+
+	void CollectLeftRecursiveRules(SortedList<WString>& rules)
+	{
+		Ptr<ParsingGeneralParser> parser=parsingExecutor->GetParser();
+		Ptr<ParsingTable> table=parser->GetTable();
+		vint stateCount=table->GetStateCount();
+		vint tokenCount=table->GetTokenCount();
+		for(vint i=0;i<stateCount;i++)
+		{
+			for(vint j=0;j<tokenCount;j++)
+			{
+				Ptr<ParsingTable::TransitionBag> bag=table->GetTransitionBag(i, j);
+				if(bag)
+				{
+					FOREACH(Ptr<ParsingTable::TransitionItem>, item, bag->transitionItems)
+					{
+						FOREACH(ParsingTable::Instruction, ins, item->instructions)
+						{
+							if(ins.instructionType==ParsingTable::Instruction::LeftRecursiveReduce)
+							{
+								if(!rules.Contains(ins.creatorRule))
+								{
+									rules.Add(ins.creatorRule);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 
 	void textBoxEditor_SelectionChanged(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 	{
@@ -328,6 +360,7 @@ public:
 
 				ParserGrammarColorizer* colorizer=new ParserGrammarColorizer;
 				parsingExecutor=colorizer->GetParsingExecutor();
+				CollectLeftRecursiveRules(leftRecursiveRules);
 				textBoxEditor->SetColorizer(colorizer);
 				textBoxEditor->SelectionChanged.AttachMethod(this, &AutoCompleteWindow::textBoxEditor_SelectionChanged);
 			}
