@@ -253,17 +253,17 @@ protected:
 	protected:
 		void Execute(AutoCompleteWindow* const& input)override
 		{
-			WString selectedMessage;
+			WString selectedMessage, selectedCode, selectedRule, selectedTree;
+			TextPos startPos=GUI_VALUE(input->textBoxEditor->GetCaretSmall());
+			TextPos endPos=GUI_VALUE(input->textBoxEditor->GetCaretLarge());
+			ParsingTextPos start(startPos.row, startPos.column);
+			ParsingTextPos end(endPos.row, endPos.column);
+			ParsingTextRange range(start, end);
 			Ptr<ParsingTreeNode> node=input->parsingExecutor->ThreadSafeGetTreeNode();
+			ParsingTreeObject* selected=0;
 			if(node)
 			{
-				TextPos startPos=GUI_VALUE(input->textBoxEditor->GetCaretSmall());
-				TextPos endPos=GUI_VALUE(input->textBoxEditor->GetCaretLarge());
-				ParsingTextPos start(startPos.row, startPos.column);
-				ParsingTextPos end(endPos.row, endPos.column);
-				ParsingTextRange range(start, end);
 				ParsingTreeNode* found=node->FindDeepestNode(range);
-				ParsingTreeObject* selected=0;
 
 				if(!selected)
 				{
@@ -313,9 +313,8 @@ protected:
 					end=selected->GetCodeRange().end;
 					startPos=TextPos(start.row, start.column);
 					endPos=TextPos(end.row, end.column+1);
-					WString selectedCode=GUI_VALUE(input->textBoxEditor->GetFragmentText(startPos, endPos));
-					WString selectedRule=selected->GetCreatorRules()[selected->GetCreatorRules().Count()-1];
-					WString selectedTree;
+					selectedRule=selected->GetCreatorRules()[selected->GetCreatorRules().Count()-1];
+					selectedTree;
 
 					{
 						MemoryStream stream;
@@ -327,20 +326,23 @@ protected:
 						StreamReader reader(stream);
 						selectedTree=reader.ReadToEnd();
 					}
-
-					selectedMessage
-						=L"================RULE================\r\n"
-						+selectedRule+L"\r\n"
-						+L"================CODE================\r\n"
-						+selectedCode+L"\r\n"
-						+L"================TREE================\r\n"
-						+selectedTree;
-						;
 				}
 				node=0;
 			}
 			input->parsingExecutor->ThreadSafeReturnTreeNode();
 
+			if(selected)
+			{
+				selectedCode=GUI_VALUE(input->textBoxEditor->GetFragmentText(startPos, endPos));
+				selectedMessage
+					=L"================RULE================\r\n"
+					+selectedRule+L"\r\n"
+					+L"================CODE================\r\n"
+					+selectedCode+L"\r\n"
+					+L"================TREE================\r\n"
+					+selectedTree;
+					;
+			}
 			GUI_RUN(
 			{
 				input->textBoxScope->SetText(selectedMessage);
