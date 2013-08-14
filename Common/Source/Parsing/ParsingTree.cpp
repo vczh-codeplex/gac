@@ -153,7 +153,16 @@ ParsingTreeNode
 			ClearQueryCache();
 			if(&subNodes)
 			{
-				CopyFrom(cachedOrderedSubNodes, collections::From(subNodes).OrderBy(&CompareTextRange));
+				ParsingTextRange emptyRange;
+				CopyFrom(
+					cachedOrderedSubNodes,
+					From(subNodes)
+						.Where([=](Ptr<ParsingTreeNode> node)
+						{
+							return node->GetCodeRange()!=emptyRange;
+						})
+						.OrderBy(&CompareTextRange)
+					);
 				FOREACH(Ptr<ParsingTreeNode>, node, cachedOrderedSubNodes)
 				{
 					node->InitializeQueryCache();
@@ -201,7 +210,7 @@ ParsingTreeNode
 					}
 					else
 					{
-						return cachedOrderedSubNodes[selected].Obj();
+						return selectedNode;
 					}
 				}
 			}

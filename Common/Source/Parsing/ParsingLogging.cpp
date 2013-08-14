@@ -48,9 +48,9 @@ namespace vl
 				}
 			}
 
-			/***********************************************************************
-			Logger (ParsingDefinitionType)
-			***********************************************************************/
+/***********************************************************************
+Logger (ParsingDefinitionType)
+***********************************************************************/
 
 			class ParsingDefinitionTypeLogger : public Object, public ParsingDefinitionType::IVisitor
 			{
@@ -97,9 +97,9 @@ namespace vl
 				ParsingDefinitionTypeLogger::LogInternal(type, writer);
 			}
 
-			/***********************************************************************
-			Logger (ParsingDefinitionTypeDefinition)
-			***********************************************************************/
+/***********************************************************************
+Logger (ParsingDefinitionTypeDefinition)
+***********************************************************************/
 
 			class ParsingDefinitionTypeDefinitionLogger : public Object, public ParsingDefinitionTypeDefinition::IVisitor
 			{
@@ -206,9 +206,9 @@ namespace vl
 				ParsingDefinitionTypeDefinitionLogger::LogInternal(definition, prefix, writer);
 			}
 
-			/***********************************************************************
-			Logger (ParsingDefinitionGrammar)
-			***********************************************************************/
+/***********************************************************************
+Logger (ParsingDefinitionGrammar)
+***********************************************************************/
 
 #define PRIORITY_NONE			0
 #define PRIORITY_CREATE			1
@@ -394,9 +394,9 @@ namespace vl
 #undef PRIORITY_USE
 #undef PRIORITY_ASSIGN
 
-			/***********************************************************************
-			FindAppropriateGrammarState
-			***********************************************************************/
+/***********************************************************************
+FindAppropriateGrammarState
+***********************************************************************/
 
 			class FindAppropriateGrammarStateVisitor : public Object, public ParsingDefinitionGrammar::IVisitor
 			{
@@ -491,9 +491,9 @@ namespace vl
 				}
 			};
 
-			/***********************************************************************
-			Logger (ParsingDefinitionGrammar)
-			***********************************************************************/
+/***********************************************************************
+Logger (ParsingDefinitionGrammar)
+***********************************************************************/
 
 			WString TypeToString(ParsingDefinitionType* type)
 			{
@@ -581,9 +581,9 @@ namespace vl
 
 		namespace analyzing
 		{
-			/***********************************************************************
-			Logger (Automaton)
-			***********************************************************************/
+/***********************************************************************
+Logger (Automaton)
+***********************************************************************/
 
 			void LogTransitionSymbol(ParsingSymbol* symbol, stream::TextWriter& writer)
 			{
@@ -751,9 +751,9 @@ namespace vl
 
 		namespace tabling
 		{
-			/***********************************************************************
-			Logger (ParsingTable)
-			***********************************************************************/
+/***********************************************************************
+Logger (ParsingTable)
+***********************************************************************/
 
 			void LogAttributeList(Ptr<ParsingTable> table, vint attributeIndex, const WString& prefix, stream::TextWriter& writer)
 			{
@@ -946,9 +946,9 @@ namespace vl
 			}
 		}
 
-		/***********************************************************************
-		Logger (ParsingTreeNode)
-		***********************************************************************/
+/***********************************************************************
+Logger (ParsingTreeNode)
+***********************************************************************/
 
 		class LogParsingTreeNodeVisitor : public Object, public ParsingTreeNode::IVisitor
 		{
@@ -1050,7 +1050,7 @@ namespace vl
 			}
 		};
 
-		void Log(Ptr<ParsingTreeNode> node, const WString& originalInput, stream::TextWriter& writer, const WString& prefix)
+		void Log(ParsingTreeNode* node, const WString& originalInput, stream::TextWriter& writer, const WString& prefix)
 		{
 			writer.WriteString(prefix);
 			LogParsingTreeNodeVisitor visitor(writer, originalInput, prefix);

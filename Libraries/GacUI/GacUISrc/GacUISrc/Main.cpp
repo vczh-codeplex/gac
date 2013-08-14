@@ -295,26 +295,80 @@ protected:
 		ParsingTextPos end(endPos.row, endPos.column);
 		ParsingTextRange range(start, end);
 		ParsingTreeNode* found=node->FindDeepestNode(range);
+		ParsingTreeObject* selected=0;
 
-		if(found)
+		if(!selected)
 		{
-			while(found->GetParent())
+			ParsingTreeObject* lrec=0;
+			ParsingTreeNode* current=found;
+			while(current)
 			{
-				if(dynamic_cast<ParsingTreeObject*>(found))
+				ParsingTreeObject* obj=dynamic_cast<ParsingTreeObject*>(current);
+				if(obj)
 				{
+					FOREACH(WString, rule, obj->GetCreatorRules())
+					{
+						if(leftRecursiveRules.Contains(rule))
+						{
+							lrec=obj;
+							break;
+						}
+					}
+					if(obj && lrec && lrec!=obj)
+					{
+						selected=lrec;
+						break;
+					}
+				}
+				current=current->GetParent();
+			}
+		}
+
+		if(!selected)
+		{
+			ParsingTreeNode* current=found;
+			while(current)
+			{
+				ParsingTreeObject* obj=dynamic_cast<ParsingTreeObject*>(current);
+				if(obj)
+				{
+					selected=obj;
 					break;
 				}
-				else
-				{
-					found=found->GetParent();
-				}
+				current=current->GetParent();
 			}
-			
-			start=found->GetCodeRange().start;
-			end=found->GetCodeRange().end;
+		}
+
+		if(selected)
+		{
+			start=selected->GetCodeRange().start;
+			end=selected->GetCodeRange().end;
 			startPos=TextPos(start.row, start.column);
 			endPos=TextPos(end.row, end.column+1);
-			textBoxScope->SetText(textBoxEditor->GetFragmentText(startPos, endPos));
+			WString selectedCode=textBoxEditor->GetFragmentText(startPos, endPos);
+			WString selectedRule=selected->GetCreatorRules()[selected->GetCreatorRules().Count()-1];
+			WString selectedTree;
+
+			{
+				MemoryStream stream;
+				{
+					StreamWriter writer(stream);
+					Log(selected, L"", writer);
+				}
+				stream.SeekFromBegin(0);
+				StreamReader reader(stream);
+				selectedTree=reader.ReadToEnd();
+			}
+
+			WString selectedMessage
+				=L"================RULE================\r\n"
+				+selectedRule+L"\r\n"
+				+L"================CODE================\r\n"
+				+selectedCode+L"\r\n"
+				+L"================TREE================\r\n"
+				+selectedTree;
+				;
+			textBoxScope->SetText(selectedMessage);
 			textBoxScope->Select(TextPos(), TextPos());
 		}
 		else
