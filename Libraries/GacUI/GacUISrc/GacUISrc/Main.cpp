@@ -245,7 +245,7 @@ public:
 TextBoxColorizerWindow
 ***********************************************************************/
 
-class AutoCompleteWindow : public GuiWindow
+class AutoCompleteWindow : public GuiWindow, protected RepeatingParsingExecutor::ICallback
 {
 protected:
 	GuiTab*									tabIntellisense;
@@ -286,7 +286,7 @@ protected:
 		}
 	}
 
-	void textBoxEditor_SelectionChanged(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+	void UpdateScopeInfo()
 	{
 		Ptr<ParsingTreeNode> node=parsingExecutor->ThreadSafeGetTreeNode();
 		TextPos startPos=textBoxEditor->GetCaretSmall();
@@ -378,6 +378,16 @@ protected:
 		node=0;
 		parsingExecutor->ThreadSafeReturnTreeNode();
 	}
+
+	void OnParsingFinished(bool generatedNewNode, RepeatingParsingExecutor* parsingExecutor)override
+	{
+		UpdateScopeInfo();
+	}
+
+	void textBoxEditor_SelectionChanged(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+	{
+		UpdateScopeInfo();
+	}
 public:
 	AutoCompleteWindow()
 		:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
@@ -410,13 +420,8 @@ public:
 				textBoxEditor->SetVerticalAlwaysVisible(false);
 				textBoxEditor->SetHorizontalAlwaysVisible(false);
 				textBoxEditor->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-				cell->AddChild(textBoxEditor->GetBoundsComposition());
-
-				ParserGrammarColorizer* colorizer=new ParserGrammarColorizer;
-				parsingExecutor=colorizer->GetParsingExecutor();
-				CollectLeftRecursiveRules(leftRecursiveRules);
-				textBoxEditor->SetColorizer(colorizer);
 				textBoxEditor->SelectionChanged.AttachMethod(this, &AutoCompleteWindow::textBoxEditor_SelectionChanged);
+				cell->AddChild(textBoxEditor->GetBoundsComposition());
 			}
 			{
 				GuiCellComposition* cell=new GuiCellComposition;
@@ -446,6 +451,12 @@ public:
 			textBoxGrammar->SetColorizer(new ParserGrammarColorizer);
 		}
 		{
+			ParserGrammarColorizer* colorizer=new ParserGrammarColorizer;
+			parsingExecutor=colorizer->GetParsingExecutor();
+			parsingExecutor->AttachCallback(this);
+			CollectLeftRecursiveRules(leftRecursiveRules);
+			textBoxEditor->SetColorizer(colorizer);
+
 			FileStream fileStream(L"..\\GacUISrcCodepackedTest\\Resources\\CalculatorDefinition.txt", FileStream::ReadOnly);
 			BomDecoder decoder;
 			DecoderStream decoderStream(fileStream, decoder);
