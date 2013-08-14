@@ -382,7 +382,10 @@ protected:
 
 	void OnParsingFinished(bool generatedNewNode, RepeatingParsingExecutor* parsingExecutor)override
 	{
-		UpdateScopeInfo();
+		if(generatedNewNode)
+		{
+			UpdateScopeInfo();
+		}
 	}
 
 	void textBoxEditor_SelectionChanged(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
