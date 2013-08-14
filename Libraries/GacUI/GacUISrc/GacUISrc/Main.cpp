@@ -248,12 +248,114 @@ TextBoxColorizerWindow
 class AutoCompleteWindow : public GuiWindow, protected RepeatingParsingExecutor::ICallback
 {
 protected:
+	class AutoCompleteExecutor : public RepeatingTaskExecutor<AutoCompleteWindow*>
+	{
+	protected:
+		void Execute(AutoCompleteWindow* const& input)override
+		{
+			WString selectedMessage;
+			Ptr<ParsingTreeNode> node=input->parsingExecutor->ThreadSafeGetTreeNode();
+			if(node)
+			{
+				TextPos startPos=GUI_VALUE(input->textBoxEditor->GetCaretSmall());
+				TextPos endPos=GUI_VALUE(input->textBoxEditor->GetCaretLarge());
+				ParsingTextPos start(startPos.row, startPos.column);
+				ParsingTextPos end(endPos.row, endPos.column);
+				ParsingTextRange range(start, end);
+				ParsingTreeNode* found=node->FindDeepestNode(range);
+				ParsingTreeObject* selected=0;
+
+				if(!selected)
+				{
+					ParsingTreeObject* lrec=0;
+					ParsingTreeNode* current=found;
+					while(current)
+					{
+						ParsingTreeObject* obj=dynamic_cast<ParsingTreeObject*>(current);
+						if(obj)
+						{
+							FOREACH(WString, rule, obj->GetCreatorRules())
+							{
+								if(input->leftRecursiveRules.Contains(rule))
+								{
+									lrec=obj;
+									break;
+								}
+							}
+							if(obj && lrec && lrec!=obj)
+							{
+								selected=lrec;
+								break;
+							}
+						}
+						current=current->GetParent();
+					}
+				}
+
+				if(!selected)
+				{
+					ParsingTreeNode* current=found;
+					while(current)
+					{
+						ParsingTreeObject* obj=dynamic_cast<ParsingTreeObject*>(current);
+						if(obj)
+						{
+							selected=obj;
+							break;
+						}
+						current=current->GetParent();
+					}
+				}
+
+				if(selected)
+				{
+					start=selected->GetCodeRange().start;
+					end=selected->GetCodeRange().end;
+					startPos=TextPos(start.row, start.column);
+					endPos=TextPos(end.row, end.column+1);
+					WString selectedCode=GUI_VALUE(input->textBoxEditor->GetFragmentText(startPos, endPos));
+					WString selectedRule=selected->GetCreatorRules()[selected->GetCreatorRules().Count()-1];
+					WString selectedTree;
+
+					{
+						MemoryStream stream;
+						{
+							StreamWriter writer(stream);
+							Log(selected, L"", writer);
+						}
+						stream.SeekFromBegin(0);
+						StreamReader reader(stream);
+						selectedTree=reader.ReadToEnd();
+					}
+
+					selectedMessage
+						=L"================RULE================\r\n"
+						+selectedRule+L"\r\n"
+						+L"================CODE================\r\n"
+						+selectedCode+L"\r\n"
+						+L"================TREE================\r\n"
+						+selectedTree;
+						;
+				}
+				node=0;
+			}
+			input->parsingExecutor->ThreadSafeReturnTreeNode();
+
+			GUI_RUN(
+			{
+				input->textBoxScope->SetText(selectedMessage);
+				input->textBoxScope->Select(TextPos(), TextPos());
+			});
+		}
+	};
+protected:
 	GuiTab*									tabIntellisense;
 	GuiMultilineTextBox*					textBoxEditor;
 	GuiMultilineTextBox*					textBoxScope;
 	GuiMultilineTextBox*					textBoxGrammar;
 	Ptr<RepeatingParsingExecutor>			parsingExecutor;
 	SortedList<WString>						leftRecursiveRules;
+	Ptr<AutoCompleteExecutor>				autoCompleteExecutor;
 
 	void CollectLeftRecursiveRules(SortedList<WString>& rules)
 	{
@@ -286,111 +388,14 @@ protected:
 		}
 	}
 
-	void UpdateScopeInfo()
-	{
-		Ptr<ParsingTreeNode> node=parsingExecutor->ThreadSafeGetTreeNode();
-		TextPos startPos=textBoxEditor->GetCaretSmall();
-		TextPos endPos=textBoxEditor->GetCaretLarge();
-		ParsingTextPos start(startPos.row, startPos.column);
-		ParsingTextPos end(endPos.row, endPos.column);
-		ParsingTextRange range(start, end);
-		ParsingTreeNode* found=node->FindDeepestNode(range);
-		ParsingTreeObject* selected=0;
-		WString selectedMessage;
-
-		if(!selected)
-		{
-			ParsingTreeObject* lrec=0;
-			ParsingTreeNode* current=found;
-			while(current)
-			{
-				ParsingTreeObject* obj=dynamic_cast<ParsingTreeObject*>(current);
-				if(obj)
-				{
-					FOREACH(WString, rule, obj->GetCreatorRules())
-					{
-						if(leftRecursiveRules.Contains(rule))
-						{
-							lrec=obj;
-							break;
-						}
-					}
-					if(obj && lrec && lrec!=obj)
-					{
-						selected=lrec;
-						break;
-					}
-				}
-				current=current->GetParent();
-			}
-		}
-
-		if(!selected)
-		{
-			ParsingTreeNode* current=found;
-			while(current)
-			{
-				ParsingTreeObject* obj=dynamic_cast<ParsingTreeObject*>(current);
-				if(obj)
-				{
-					selected=obj;
-					break;
-				}
-				current=current->GetParent();
-			}
-		}
-
-		if(selected)
-		{
-			start=selected->GetCodeRange().start;
-			end=selected->GetCodeRange().end;
-			startPos=TextPos(start.row, start.column);
-			endPos=TextPos(end.row, end.column+1);
-			WString selectedCode=textBoxEditor->GetFragmentText(startPos, endPos);
-			WString selectedRule=selected->GetCreatorRules()[selected->GetCreatorRules().Count()-1];
-			WString selectedTree;
-
-			{
-				MemoryStream stream;
-				{
-					StreamWriter writer(stream);
-					Log(selected, L"", writer);
-				}
-				stream.SeekFromBegin(0);
-				StreamReader reader(stream);
-				selectedTree=reader.ReadToEnd();
-			}
-
-			selectedMessage
-				=L"================RULE================\r\n"
-				+selectedRule+L"\r\n"
-				+L"================CODE================\r\n"
-				+selectedCode+L"\r\n"
-				+L"================TREE================\r\n"
-				+selectedTree;
-				;
-		}
-		node=0;
-		parsingExecutor->ThreadSafeReturnTreeNode();
-
-		GetApplication()->InvokeInMainThread([=]()
-		{
-			textBoxScope->SetText(selectedMessage);
-			textBoxScope->Select(TextPos(), TextPos());
-		});
-	}
-
 	void OnParsingFinished(bool generatedNewNode, RepeatingParsingExecutor* parsingExecutor)override
 	{
-		if(generatedNewNode)
-		{
-			UpdateScopeInfo();
-		}
+		autoCompleteExecutor->SubmitTask(this);
 	}
 
 	void textBoxEditor_SelectionChanged(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 	{
-		UpdateScopeInfo();
+		autoCompleteExecutor->SubmitTask(this);
 	}
 public:
 	AutoCompleteWindow()
@@ -398,9 +403,7 @@ public:
 	{
 		SetText(L"GacUISrc Test Application");
 		SetClientSize(Size(800, 600));
-
-		GuiSelectableButton::MutexGroupController* controller=new GuiSelectableButton::MutexGroupController;
-		AddComponent(controller);
+		autoCompleteExecutor=new AutoCompleteExecutor;
 
 		tabIntellisense=g::NewTab();
 		tabIntellisense->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));

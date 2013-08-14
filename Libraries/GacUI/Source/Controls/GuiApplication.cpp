@@ -268,6 +268,21 @@ GuiApplication
 				return GetCurrentController()->AsyncService()->DelayExecuteInMainThread(proc, milliseconds);
 			}
 
+			void GuiApplication::RunGuiTask(const Func<void()>& proc)
+			{
+				if(IsInMainThread())
+				{
+					return proc();
+				}
+				else
+				{
+					InvokeInMainThreadAndWait([&proc]()
+					{
+						proc();
+					});
+				}
+			}
+
 /***********************************************************************
 Helpers
 ***********************************************************************/
