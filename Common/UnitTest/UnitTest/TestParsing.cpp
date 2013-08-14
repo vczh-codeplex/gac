@@ -278,7 +278,7 @@ namespace test
 				{
 					originalInput=input;
 				}
-				Log(node, originalInput, writer);
+				Log(node.Obj(), originalInput, writer);
 			}
 		}
 		TEST_ASSERT(status==Closed);
@@ -599,7 +599,7 @@ namespace test
 			errors.Clear();
 			Ptr<ParsingTreeNode> node=parser->Parse(input, rule, errors);
 			TEST_ASSERT(node);
-			Log(node, input, writer);
+			Log(node.Obj(), input, writer);
 			writer.WriteLine(L"");
 		}
 	}
