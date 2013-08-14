@@ -106,6 +106,20 @@ namespace vl
 				/// <param name="proc">The specified function.</param>
 				/// <param name="milliseconds">Time to delay.</param>
 				Ptr<INativeDelay>								DelayExecuteInMainThread(const Func<void()>& proc, vint milliseconds);
+				/// <summary>Run the specified function in the main thread. If the caller is in the main thread, then run the specified function directly.</summary>
+				/// <param name="proc">The specified function.</param>
+				void											RunGuiTask(const Func<void()>& proc);
+
+				template<typename T>
+				T RunGuiValue(const Func<T()>& proc)
+				{
+					T result;
+					RunGuiTask([&result, &proc]()
+					{
+						result=proc();
+					});
+					return result;
+				}
 
 				template<typename T>
 				void InvokeLambdaInMainThread(const T& proc)
@@ -128,5 +142,8 @@ namespace vl
 }
 
 extern void GuiApplicationMain();
+
+#define GUI_VALUE(x) vl::presentation::controls::GetApplication()->RunGuiValue(LAMBDA([&](){return (x);}))
+#define GUI_RUN(x) vl::presentation::controls::GetApplication()->RunGuiTask([=](){x})
 
 #endif
