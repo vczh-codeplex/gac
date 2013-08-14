@@ -296,6 +296,7 @@ protected:
 		ParsingTextRange range(start, end);
 		ParsingTreeNode* found=node->FindDeepestNode(range);
 		ParsingTreeObject* selected=0;
+		WString selectedMessage;
 
 		if(!selected)
 		{
@@ -360,7 +361,7 @@ protected:
 				selectedTree=reader.ReadToEnd();
 			}
 
-			WString selectedMessage
+			selectedMessage
 				=L"================RULE================\r\n"
 				+selectedRule+L"\r\n"
 				+L"================CODE================\r\n"
@@ -368,15 +369,15 @@ protected:
 				+L"================TREE================\r\n"
 				+selectedTree;
 				;
-			textBoxScope->SetText(selectedMessage);
-			textBoxScope->Select(TextPos(), TextPos());
-		}
-		else
-		{
-			textBoxScope->SetText(L"");
 		}
 		node=0;
 		parsingExecutor->ThreadSafeReturnTreeNode();
+
+		GetApplication()->InvokeInMainThread([=]()
+		{
+			textBoxScope->SetText(selectedMessage);
+			textBoxScope->Select(TextPos(), TextPos());
+		});
 	}
 
 	void OnParsingFinished(bool generatedNewNode, RepeatingParsingExecutor* parsingExecutor)override
