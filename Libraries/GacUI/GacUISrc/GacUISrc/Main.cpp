@@ -411,10 +411,11 @@ public:
 
 			GuiTableComposition* table=new GuiTableComposition;
 			table->SetAlignmentToParent(Margin(0, 0, 0, 0));
-			table->SetRowsAndColumns(1, 2);
+			table->SetRowsAndColumns(1, 3);
 			table->SetRowOption(0, GuiCellOption::PercentageOption(1.0));
 			table->SetColumnOption(0, GuiCellOption::PercentageOption(1.0));
-			table->SetColumnOption(1, GuiCellOption::MinSizeOption());
+			table->SetColumnOption(1, GuiCellOption::AbsoluteOption(5));
+			table->SetColumnOption(2, GuiCellOption::AbsoluteOption(300));
 			{
 				GuiCellComposition* cell=new GuiCellComposition;
 				table->AddChild(cell);
@@ -430,13 +431,12 @@ public:
 			{
 				GuiCellComposition* cell=new GuiCellComposition;
 				table->AddChild(cell);
-				cell->SetSite(0, 1, 1, 1);
+				cell->SetSite(0, 2, 1, 1);
 
 				textBoxScope=g::NewMultilineTextBox();
 				textBoxScope->SetVerticalAlwaysVisible(false);
 				textBoxScope->SetHorizontalAlwaysVisible(false);
-				textBoxScope->GetBoundsComposition()->SetAlignmentToParent(Margin(5, 0, 0, 0));
-				textBoxScope->GetBoundsComposition()->SetPreferredMinSize(Size(300, 0));
+				textBoxScope->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 				textBoxScope->SetReadonly(true);
 				cell->AddChild(textBoxScope->GetBoundsComposition());
 			}
