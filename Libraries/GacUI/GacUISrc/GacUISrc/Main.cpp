@@ -126,6 +126,19 @@ public:
 };
 
 /***********************************************************************
+ParserGrammarExecutor
+***********************************************************************/
+
+class ParserGrammarExecutor : public RepeatingParsingExecutor
+{
+public:
+	ParserGrammarExecutor()
+		:RepeatingParsingExecutor(CreateBootstrapAutoRecoverParser(), L"ParserDecl")
+	{
+	}
+};
+
+/***********************************************************************
 ParserGrammarColorizer
 ***********************************************************************/
 
@@ -217,8 +230,8 @@ protected:
 		}
 	}
 public:
-	ParserGrammarColorizer()
-		:GuiGrammarColorizer(CreateBootstrapAutoRecoverParser(), L"ParserDecl")
+	ParserGrammarColorizer(Ptr<ParserGrammarExecutor> executor)
+		:GuiGrammarColorizer(executor)
 	{
 		SetColor(L"Keyword", Color(0, 0, 255));
 		SetColor(L"Attribute", Color(0, 0, 255));
@@ -242,119 +255,27 @@ public:
 };
 
 /***********************************************************************
-TextBoxColorizerWindow
+ParserGrammarAutoComplete
 ***********************************************************************/
 
-class AutoCompleteWindow : public GuiWindow, protected RepeatingParsingExecutor::ICallback
+class ParserGrammarAutoComplete : public GuiGrammarAutoComplete
 {
 protected:
-	GuiTab*									tabIntellisense;
-	GuiMultilineTextBox*					textBoxEditor;
 	GuiMultilineTextBox*					textBoxScope;
-	GuiMultilineTextBox*					textBoxGrammar;
-	Ptr<RepeatingParsingExecutor>			parsingExecutor;
-	SortedList<WString>						leftRecursiveRules;
 
-	void CollectLeftRecursiveRules(SortedList<WString>& rules)
+	void OnSelectingFinished()override
 	{
-		Ptr<ParsingGeneralParser> parser=parsingExecutor->GetParser();
-		Ptr<ParsingTable> table=parser->GetTable();
-		vint stateCount=table->GetStateCount();
-		vint tokenCount=table->GetTokenCount();
-		for(vint i=0;i<stateCount;i++)
-		{
-			for(vint j=0;j<tokenCount;j++)
-			{
-				Ptr<ParsingTable::TransitionBag> bag=table->GetTransitionBag(i, j);
-				if(bag)
-				{
-					FOREACH(Ptr<ParsingTable::TransitionItem>, item, bag->transitionItems)
-					{
-						FOREACH(ParsingTable::Instruction, ins, item->instructions)
-						{
-							if(ins.instructionType==ParsingTable::Instruction::LeftRecursiveReduce)
-							{
-								if(!rules.Contains(ins.creatorRule))
-								{
-									rules.Add(ins.creatorRule);
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-
-	void UpdateScopeInfo()
-	{
-		Ptr<ParsingTreeNode> node=parsingExecutor->ThreadSafeGetTreeNode();
-		TextPos startPos=textBoxEditor->GetCaretSmall();
-		TextPos endPos=textBoxEditor->GetCaretLarge();
-		ParsingTextPos start(startPos.row, startPos.column);
-		ParsingTextPos end(endPos.row, endPos.column);
-		ParsingTextRange range(start, end);
-		ParsingTreeNode* found=node->FindDeepestNode(range);
-		ParsingTreeObject* selected=0;
+		Context context=GetCodeContext();
 		WString selectedMessage;
-
-		if(!selected)
+		Ptr<ParsingTreeNode> node=GetParsingExecutor()->ThreadSafeGetTreeNode();
+		if(node.Obj()==context.selectedRoot)
 		{
-			ParsingTreeObject* lrec=0;
-			ParsingTreeNode* current=found;
-			while(current)
-			{
-				ParsingTreeObject* obj=dynamic_cast<ParsingTreeObject*>(current);
-				if(obj)
-				{
-					FOREACH(WString, rule, obj->GetCreatorRules())
-					{
-						if(leftRecursiveRules.Contains(rule))
-						{
-							lrec=obj;
-							break;
-						}
-					}
-					if(obj && lrec && lrec!=obj)
-					{
-						selected=lrec;
-						break;
-					}
-				}
-				current=current->GetParent();
-			}
-		}
-
-		if(!selected)
-		{
-			ParsingTreeNode* current=found;
-			while(current)
-			{
-				ParsingTreeObject* obj=dynamic_cast<ParsingTreeObject*>(current);
-				if(obj)
-				{
-					selected=obj;
-					break;
-				}
-				current=current->GetParent();
-			}
-		}
-
-		if(selected)
-		{
-			start=selected->GetCodeRange().start;
-			end=selected->GetCodeRange().end;
-			startPos=TextPos(start.row, start.column);
-			endPos=TextPos(end.row, end.column+1);
-			WString selectedCode=textBoxEditor->GetFragmentText(startPos, endPos);
-			WString selectedRule=selected->GetCreatorRules()[selected->GetCreatorRules().Count()-1];
 			WString selectedTree;
-
 			{
 				MemoryStream stream;
 				{
 					StreamWriter writer(stream);
-					Log(selected, L"", writer);
+					Log(context.selectedNode, L"", writer);
 				}
 				stream.SeekFromBegin(0);
 				StreamReader reader(stream);
@@ -363,31 +284,51 @@ protected:
 
 			selectedMessage
 				=L"================RULE================\r\n"
-				+selectedRule+L"\r\n"
+				+context.selectedRule+L"\r\n"
 				+L"================CODE================\r\n"
-				+selectedCode+L"\r\n"
+				+context.selectedCode+L"\r\n"
 				+L"================TREE================\r\n"
 				+selectedTree;
 				;
-			textBoxScope->SetText(selectedMessage);
-			textBoxScope->Select(TextPos(), TextPos());
 		}
 		node=0;
-		parsingExecutor->ThreadSafeReturnTreeNode();
-	}
+		GetParsingExecutor()->ThreadSafeReturnTreeNode();
 
-	void OnParsingFinished(bool generatedNewNode, RepeatingParsingExecutor* parsingExecutor)override
-	{
-		GetApplication()->InvokeInMainThread([=]()
+		GUI_RUN(
 		{
-			UpdateScopeInfo();
+			textBoxScope->SetText(selectedMessage);
+			textBoxScope->Select(TextPos(), TextPos());
 		});
 	}
-
-	void textBoxEditor_SelectionChanged(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+public:
+	ParserGrammarAutoComplete(Ptr<ParserGrammarExecutor> executor, GuiMultilineTextBox* _textBoxScope)
+		:GuiGrammarAutoComplete(executor)
+		,textBoxScope(_textBoxScope)
 	{
-		UpdateScopeInfo();
 	}
+
+	~ParserGrammarAutoComplete()
+	{
+		EnsureAutoCompleteFinished();
+	}
+};
+
+/***********************************************************************
+TextBoxColorizerWindow
+***********************************************************************/
+
+class AutoCompleteWindow : public GuiWindow
+{
+protected:
+	GuiTab*									tabIntellisense;
+	GuiMultilineTextBox*					textBoxEditor;
+	GuiMultilineTextBox*					textBoxScope;
+	GuiMultilineTextBox*					textBoxGrammar;
+
+	Ptr<ParserGrammarColorizer>				colorizer;
+	Ptr<ParserGrammarAutoComplete>			autoComplete;
+	Ptr<ParserGrammarExecutor>				executor;
+
 public:
 	AutoCompleteWindow()
 		:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
@@ -421,7 +362,6 @@ public:
 				textBoxEditor->SetVerticalAlwaysVisible(false);
 				textBoxEditor->SetHorizontalAlwaysVisible(false);
 				textBoxEditor->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-				textBoxEditor->SelectionChanged.AttachMethod(this, &AutoCompleteWindow::textBoxEditor_SelectionChanged);
 				cell->AddChild(textBoxEditor->GetBoundsComposition());
 			}
 			{
@@ -448,14 +388,15 @@ public:
 			textBoxGrammar->SetHorizontalAlwaysVisible(false);
 			textBoxGrammar->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 			page->GetContainer()->GetBoundsComposition()->AddChild(textBoxGrammar->GetBoundsComposition());
-			textBoxGrammar->SetColorizer(new ParserGrammarColorizer);
+			textBoxGrammar->SetColorizer(new ParserGrammarColorizer(new ParserGrammarExecutor));
 		}
 		{
-			ParserGrammarColorizer* colorizer=new ParserGrammarColorizer;
-			parsingExecutor=colorizer->GetParsingExecutor();
-			parsingExecutor->AttachCallback(this);
-			CollectLeftRecursiveRules(leftRecursiveRules);
+			executor=new ParserGrammarExecutor;
+			colorizer=new ParserGrammarColorizer(executor);
+			autoComplete=new ParserGrammarAutoComplete(executor, textBoxScope);
+
 			textBoxEditor->SetColorizer(colorizer);
+			textBoxEditor->SetAutoComplete(autoComplete);
 
 			FileStream fileStream(L"..\\GacUISrcCodepackedTest\\Resources\\CalculatorDefinition.txt", FileStream::ReadOnly);
 			BomDecoder decoder;
