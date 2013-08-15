@@ -11,6 +11,7 @@ Interfaces:
 
 #include "GuiTextGeneralOperations.h"
 #include "GuiTextColorizer.h"
+#include "GuiTextAutoComplete.h"
 #include "GuiTextUndoRedo.h"
 
 namespace vl
@@ -83,6 +84,7 @@ Common Interface
 				bool												dragging;
 				bool												readonly;
 				Ptr<GuiTextBoxColorizerBase>						colorizer;
+				Ptr<GuiTextBoxAutoCompleteBase>						autoComplete;
 				Ptr<GuiTextBoxUndoRedoProcessor>					undoRedoProcessor;
 
 				SpinLock											elementModifyLock;
@@ -230,6 +232,15 @@ Common Interface
 				/// <summary>Set the current colorizer.</summary>
 				/// <param name="value">The current colorizer.</param>
 				void												SetColorizer(Ptr<GuiTextBoxColorizerBase> value);
+
+				//================ auto complete
+
+				/// <summary>Get the current auto complete controller.</summary>
+				/// <returns>The current auto complete controller.</returns>
+				Ptr<GuiTextBoxAutoCompleteBase>						GetAutoComplete();
+				/// <summary>Set the current auto complete controller.</summary>
+				/// <param name="value">The current auto complete controller.</param>
+				void												SetAutoComplete(Ptr<GuiTextBoxAutoCompleteBase> value);
 
 				//================ undo redo control
 

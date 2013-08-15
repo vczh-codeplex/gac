@@ -153,8 +153,14 @@ GuiTextBoxCommonInterface
 				callback->ScrollToView(viewPoint);
 				UpdateCaretPoint();
 
-				if(oldBegin!=textElement->GetCaretBegin() || oldEnd!=textElement->GetCaretEnd())
+				TextPos newBegin=textElement->GetCaretBegin();
+				TextPos newEnd=textElement->GetCaretEnd();
+				if(oldBegin!=newBegin || oldEnd!=newEnd)
 				{
+					for(vint i=0;i<textEditCallbacks.Count();i++)
+					{
+						textEditCallbacks[i]->TextCaretChanged(oldBegin, oldEnd, newBegin, newEnd);
+					}
 					SelectionChanged.Execute(textControl->GetNotifyEventArguments());
 				}
 			}
@@ -761,6 +767,26 @@ GuiTextBoxCommonInterface
 				{
 					AttachTextEditCallback(colorizer);
 					GetTextElement()->SetColors(colorizer->GetColors());
+				}
+			}
+
+			//================ auto complete
+
+			Ptr<GuiTextBoxAutoCompleteBase> GuiTextBoxCommonInterface::GetAutoComplete()
+			{
+				return autoComplete;
+			}
+
+			void GuiTextBoxCommonInterface::SetAutoComplete(Ptr<GuiTextBoxAutoCompleteBase> value)
+			{
+				if(autoComplete)
+				{
+					DetachTextEditCallback(autoComplete);
+				}
+				autoComplete=value;
+				if(autoComplete)
+				{
+					AttachTextEditCallback(autoComplete);
 				}
 			}
 

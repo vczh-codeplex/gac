@@ -474,6 +474,9 @@
     <ClCompile Include="..\..\Source\Controls\GuiDateTimeControls.cpp">
       <Filter>GacUI\Controls</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Controls\TextEditorPackage\GuiTextAutoComplete.cpp">
+      <Filter>GacUI\Controls\TextEditorPackage</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Common\Source\Basic.h">
@@ -904,6 +907,9 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Controls\GuiDateTimeControls.h">
       <Filter>GacUI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Controls\TextEditorPackage\GuiTextAutoComplete.h">
+      <Filter>GacUI\Controls\TextEditorPackage</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
