@@ -312,6 +312,7 @@ ParsingTreeObject
 		Ptr<ParsingTreeNode> ParsingTreeObject::Clone()
 		{
 			Ptr<ParsingTreeObject> clone=new ParsingTreeObject(type, codeRange);
+			CopyFrom(clone->rules, rules);
 			for(vint i=0;i<members.Count();i++)
 			{
 				WString name=members.Keys().Get(i);
