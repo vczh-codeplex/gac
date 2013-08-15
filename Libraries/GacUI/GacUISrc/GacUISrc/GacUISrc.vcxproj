@@ -292,6 +292,7 @@
     <ClCompile Include="..\..\Source\Controls\Styles\Win8Styles\GuiWin8TabStyles.cpp" />
     <ClCompile Include="..\..\Source\Controls\Styles\Win8Styles\GuiWin8ToolstripStyles.cpp" />
     <ClCompile Include="..\..\Source\Controls\TextEditorPackage\GuiDocumentViewer.cpp" />
+    <ClCompile Include="..\..\Source\Controls\TextEditorPackage\GuiTextAutoComplete.cpp" />
     <ClCompile Include="..\..\Source\Controls\TextEditorPackage\GuiTextColorizer.cpp" />
     <ClCompile Include="..\..\Source\Controls\TextEditorPackage\GuiTextCommonInterface.cpp" />
     <ClCompile Include="..\..\Source\Controls\TextEditorPackage\GuiTextControls.cpp" />
@@ -449,6 +450,7 @@
     <ClInclude Include="..\..\Source\Controls\Styles\Win8Styles\GuiWin8TabStyles.h" />
     <ClInclude Include="..\..\Source\Controls\Styles\Win8Styles\GuiWin8ToolstripStyles.h" />
     <ClInclude Include="..\..\Source\Controls\TextEditorPackage\GuiDocumentViewer.h" />
+    <ClInclude Include="..\..\Source\Controls\TextEditorPackage\GuiTextAutoComplete.h" />
     <ClInclude Include="..\..\Source\Controls\TextEditorPackage\GuiTextColorizer.h" />
     <ClInclude Include="..\..\Source\Controls\TextEditorPackage\GuiTextCommonInterface.h" />
     <ClInclude Include="..\..\Source\Controls\TextEditorPackage\GuiTextControls.h" />

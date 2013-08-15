@@ -152,6 +152,10 @@ GuiTextBoxUndoRedoProcessor
 				PushStep(step);
 			}
 
+			void GuiTextBoxUndoRedoProcessor::TextCaretChanged(TextPos oldBegin, TextPos oldEnd, TextPos newBegin, TextPos newEnd)
+			{
+			}
+
 			void GuiTextBoxUndoRedoProcessor::TextEditFinished()
 			{
 			}
