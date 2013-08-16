@@ -21,15 +21,13 @@ RepeatingParsingExecutor
 			{
 				List<Ptr<ParsingError>> errors;
 				Ptr<ParsingTreeObject> node=grammarParser->Parse(input, grammarRule, errors).Cast<ParsingTreeObject>();
+				if(node)
+				{
+					node->InitializeQueryCache();
+				}
 				FOREACH(ICallback*, callback, callbacks)
 				{
-					Ptr<ParsingTreeObject> clonedNode;
-					if(node)
-					{
-						clonedNode=node->Clone().Cast<ParsingTreeObject>();
-						clonedNode->InitializeQueryCache();
-					}
-					callback->OnParsingFinishedAsync(clonedNode, input.Buffer());
+					callback->OnParsingFinishedAsync(node, input);
 				}
 			}
 

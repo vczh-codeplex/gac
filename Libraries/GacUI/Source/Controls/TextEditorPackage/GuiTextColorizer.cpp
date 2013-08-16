@@ -377,7 +377,7 @@ GuiGrammarColorizer
 				{
 					SpinLock::Scope scope(*elementModifyLock);
 					WString text=element->GetLines().GetText();
-					parsingExecutor->SubmitTask(text.Buffer());
+					parsingExecutor->SubmitTask(text);
 				}
 			}
 
@@ -398,7 +398,7 @@ GuiGrammarColorizer
 				{
 					SpinLock::Scope scope(*elementModifyLock);
 					WString text=element->GetLines().GetText();
-					parsingExecutor->SubmitTask(text.Buffer());
+					parsingExecutor->SubmitTask(text);
 				}
 			}
 
@@ -436,7 +436,7 @@ GuiGrammarColorizer
 
 			void GuiGrammarColorizer::SubmitCode(const WString& code)
 			{
-				parsingExecutor->SubmitTask(code.Buffer());
+				parsingExecutor->SubmitTask(code);
 			}
 
 			vint GuiGrammarColorizer::GetTokenId(const WString& token)

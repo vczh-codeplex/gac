@@ -244,7 +244,7 @@ GuiGrammarAutoComplete
 					{
 						newContext.contextNodeCode=newContext.rootCode.Sub(start.index, end.index-start.index+1);
 					}
-					newContext.contextNodeRule=selectedNode->GetCreatorRules()[selectedNode->GetCreatorRules().Count()-1].Buffer();
+					newContext.contextNodeRule=selectedNode->GetCreatorRules()[selectedNode->GetCreatorRules().Count()-1];
 				}
 
 				{
