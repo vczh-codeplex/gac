@@ -4795,6 +4795,18 @@ namespace vl
 				bool											InvokeInMainThreadAndWait(const Func<void()>& proc, vint milliseconds=-1);
 				Ptr<INativeDelay>								DelayExecute(const Func<void()>& proc, vint milliseconds);
 				Ptr<INativeDelay>								DelayExecuteInMainThread(const Func<void()>& proc, vint milliseconds);
+				void											RunGuiTask(const Func<void()>& proc);
+
+				template<typename T>
+				T RunGuiValue(const Func<T()>& proc)
+				{
+					T result;
+					RunGuiTask([&result, &proc]()
+					{
+						result=proc();
+					});
+					return result;
+				}
 
 				template<typename T>
 				void InvokeLambdaInMainThread(const T& proc)
@@ -4815,6 +4827,9 @@ namespace vl
 }
 
 extern void GuiApplicationMain();
+
+#define GUI_VALUE(x) vl::presentation::controls::GetApplication()->RunGuiValue(LAMBDA([&](){return (x);}))
+#define GUI_RUN(x) vl::presentation::controls::GetApplication()->RunGuiTask([=](){x})
 
 #endif
 
@@ -7327,7 +7342,42 @@ Common Operations
 				virtual void							Attach(elements::GuiColorizedTextElement* element, SpinLock& elementModifyLock)=0;
 				virtual void							Detach()=0;
 				virtual void							TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)=0;
+				virtual void							TextCaretChanged(TextPos oldBegin, TextPos oldEnd, TextPos newBegin, TextPos newEnd)=0;
 				virtual void							TextEditFinished()=0;
+			};
+
+/***********************************************************************
+RepeatingParsingExecutor
+***********************************************************************/
+
+			class RepeatingParsingExecutor : public RepeatingTaskExecutor<WString>
+			{
+			public:
+				class ICallback : public virtual Interface
+				{
+				public:
+					virtual void											OnParsingFinishedAsync(Ptr<parsing::ParsingTreeObject> node, const WString& code)=0;
+				};
+			private:
+				Ptr<parsing::tabling::ParsingGeneralParser>					grammarParser;
+				WString														grammarRule;
+				collections::List<ICallback*>								callbacks;
+
+			protected:
+
+				void														Execute(const WString& input)override;
+			public:
+				RepeatingParsingExecutor(Ptr<parsing::tabling::ParsingGeneralParser> _grammarParser, const WString& _grammarRule);
+				~RepeatingParsingExecutor();
+				
+				Ptr<parsing::tabling::ParsingGeneralParser>					GetParser();
+				bool														AttachCallback(ICallback* value);
+				bool														DetachCallback(ICallback* value);
+
+				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetAttribute(vint index, const WString& name, vint argumentCount);
+				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetColorAttribute(vint index);
+				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetContextColorAttribute(vint index);
+				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetSemanticColorAttribute(vint index);
 			};
 		}
 	}
@@ -7385,6 +7435,7 @@ GuiTextBoxColorizerBase
 				void										Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock)override;
 				void										Detach()override;
 				void										TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)override;
+				void										TextCaretChanged(TextPos oldBegin, TextPos oldEnd, TextPos newBegin, TextPos newEnd)override;
 				void										TextEditFinished()override;
 				void										RestartColorizer();
 
@@ -7435,39 +7486,6 @@ GuiTextBoxRegexColorizer
 			};
 
 /***********************************************************************
-RepeatingParsingExecutor
-***********************************************************************/
-
-			class RepeatingParsingExecutor : public RepeatingTaskExecutor<WString>
-			{
-			public:
-				class ICallback : public virtual Interface
-				{
-				public:
-					virtual void											OnParsingFinished(bool generatedNewNode, RepeatingParsingExecutor* parsingExecutor)=0;
-				};
-			private:
-				Ptr<parsing::tabling::ParsingGeneralParser>					grammarParser;
-				WString														grammarRule;
-				SpinLock													parsingTreeLock;
-				Ptr<parsing::ParsingTreeObject>								parsingTreeNode;
-				collections::List<ICallback*>								callbacks;
-
-			protected:
-
-				void														Execute(const WString& input)override;
-			public:
-				RepeatingParsingExecutor(Ptr<parsing::tabling::ParsingGeneralParser> _grammarParser, const WString& _grammarRule);
-				~RepeatingParsingExecutor();
-				
-				Ptr<parsing::ParsingTreeObject>								ThreadSafeGetTreeNode();
-				void														ThreadSafeReturnTreeNode();
-				Ptr<parsing::tabling::ParsingGeneralParser>					GetParser();
-				bool														AttachCallback(ICallback* value);
-				bool														DetachCallback(ICallback* value);
-			};
-
-/***********************************************************************
 GuiGrammarColorizer
 ***********************************************************************/
 
@@ -7486,16 +7504,16 @@ GuiGrammarColorizer
 				FieldSemanticColors											fieldSemanticColors;
 				collections::Dictionary<WString, vint>						semanticIndices;
 
-				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetAttribute(vint index, const WString& name, vint argumentCount);
-				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetColorAttribute(vint index);
-				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetContextColorAttribute(vint index);
-				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetSemanticColorAttribute(vint index);
+				SpinLock													parsingTreeLock;
+				Ptr<parsing::ParsingTreeObject>								parsingTreeNode;
 
+				void														OnParsingFinishedAsync(Ptr<parsing::ParsingTreeObject> node, const WString& code)override;
 			protected:
+				virtual void												OnContextFinishedAsync(Ptr<parsing::ParsingTreeObject> node);
+
 				void														Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock)override;
 				void														Detach()override;
 				void														TextEditFinished()override;
-				void														OnParsingFinished(bool generatedNewNode, RepeatingParsingExecutor* parsingExecutor)override;
 
 				virtual void												OnSemanticColorize(parsing::ParsingTreeToken* foundToken, parsing::ParsingTreeObject* tokenParent, const WString& type, const WString& field, vint semantic, vint& token);
 
@@ -7517,6 +7535,103 @@ GuiGrammarColorizer
 				void														ColorizeTokenContextSensitive(int lineIndex, const wchar_t* text, vint start, vint length, vint& token, int& contextState)override;
 
 				Ptr<RepeatingParsingExecutor>								GetParsingExecutor();
+			};
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+CONTROLS\TEXTEDITORPACKAGE\GUITEXTAUTOCOMPLETE.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+GacUI::Control System
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_CONTROLS_GUITEXTAUTOCOMPLETE
+#define VCZH_PRESENTATION_CONTROLS_GUITEXTAUTOCOMPLETE
+
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace controls
+		{
+
+/***********************************************************************
+GuiTextBoxAutoCompleteBase
+***********************************************************************/
+			
+			class GuiTextBoxAutoCompleteBase : public Object, public ICommonTextEditCallback
+			{
+			protected:
+				elements::GuiColorizedTextElement*			element;
+				SpinLock*									elementModifyLock;
+
+			public:
+				GuiTextBoxAutoCompleteBase();
+				~GuiTextBoxAutoCompleteBase();
+
+				void										Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock)override;
+				void										Detach()override;
+				void										TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)override;
+				void										TextCaretChanged(TextPos oldBegin, TextPos oldEnd, TextPos newBegin, TextPos newEnd)override;
+				void										TextEditFinished()override;
+			};
+
+/***********************************************************************
+GuiGrammarAutoComplete
+***********************************************************************/
+			
+			class GuiGrammarAutoComplete : public GuiTextBoxAutoCompleteBase, private RepeatingParsingExecutor::ICallback
+			{
+			public:
+				struct Context
+				{
+					Ptr<parsing::ParsingTreeObject>			root;
+					WString									rootCode;
+					parsing::ParsingTreeObject*				contextNode;
+					WString									contextNodeCode;
+					WString									contextNodeRule;
+
+					Context()
+						:contextNode(0)
+					{
+					}
+				};
+			private:
+				Ptr<RepeatingParsingExecutor>				parsingExecutor;
+				collections::SortedList<WString>			leftRecursiveRules;
+				bool										editing;
+
+				SpinLock									contextLock;
+				Context										context;
+				
+				void										Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock)override;
+				void										Detach()override;
+				void										TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)override;
+				void										TextCaretChanged(TextPos oldBegin, TextPos oldEnd, TextPos newBegin, TextPos newEnd)override;
+				void										TextEditFinished()override;
+				void										OnParsingFinishedAsync(Ptr<parsing::ParsingTreeObject> node, const WString& code)override;
+				void										CollectLeftRecursiveRules();
+				void										UpdateScopeInfoAsync(Ptr<parsing::ParsingTreeObject> parsingTreeNode, const WString& code);
+			protected:
+
+				virtual void								OnContextFinishedAsync(Context& context);
+
+				void										EnsureAutoCompleteFinished();
+			public:
+				GuiGrammarAutoComplete(Ptr<RepeatingParsingExecutor> _parsingExecutor);
+				GuiGrammarAutoComplete(Ptr<parsing::tabling::ParsingGeneralParser> _grammarParser, const WString& _grammarRule);
+				~GuiGrammarAutoComplete();
+
+				Ptr<RepeatingParsingExecutor>				GetParsingExecutor();
 			};
 		}
 	}
@@ -7609,6 +7724,7 @@ Undo Redo
 				void										Attach(elements::GuiColorizedTextElement* element, SpinLock& elementModifyLock)override;
 				void										Detach()override;
 				void										TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)override;
+				void										TextCaretChanged(TextPos oldBegin, TextPos oldEnd, TextPos newBegin, TextPos newEnd)override;
 				void										TextEditFinished()override;
 			};
 		}
@@ -7701,6 +7817,7 @@ Common Interface
 				bool												dragging;
 				bool												readonly;
 				Ptr<GuiTextBoxColorizerBase>						colorizer;
+				Ptr<GuiTextBoxAutoCompleteBase>						autoComplete;
 				Ptr<GuiTextBoxUndoRedoProcessor>					undoRedoProcessor;
 
 				SpinLock											elementModifyLock;
@@ -7783,6 +7900,11 @@ Common Interface
 
 				Ptr<GuiTextBoxColorizerBase>						GetColorizer();
 				void												SetColorizer(Ptr<GuiTextBoxColorizerBase> value);
+
+				//================ auto complete
+
+				Ptr<GuiTextBoxAutoCompleteBase>						GetAutoComplete();
+				void												SetAutoComplete(Ptr<GuiTextBoxAutoCompleteBase> value);
 
 				//================ undo redo control
 

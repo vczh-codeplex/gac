@@ -162,16 +162,9 @@ protected:
 		return 0;
 	}
 
-	void OnParsingFinished(bool generatedNewNode, RepeatingParsingExecutor* parsingExecutor)override
+	void OnContextFinishedAsync(Ptr<parsing::ParsingTreeObject> node)override
 	{
-		if(generatedNewNode)
-		{
-			Ptr<ParsingTreeObject> node=parsingExecutor->ThreadSafeGetTreeNode();
-			parsingTreeDecl=new ParserDecl(node);
-			node=0;
-			parsingExecutor->ThreadSafeReturnTreeNode();
-		}
-		GuiGrammarColorizer::OnParsingFinished(generatedNewNode, parsingExecutor);
+		parsingTreeDecl=new ParserDecl(node);
 	}
 
 	void OnSemanticColorize(ParsingTreeToken* foundToken, ParsingTreeObject* tokenParent, const WString& type, const WString& field, vint semantic, vint& token)override

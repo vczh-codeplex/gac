@@ -410,6 +410,8 @@ GuiGrammarColorizer
 			{
 				parsingExecutor->EnsureTaskFinished();
 				StopColorizerForever();
+				SpinLock::Scope scope(parsingTreeLock);
+				parsingTreeNode=0;
 			}
 
 			GuiGrammarColorizer::GuiGrammarColorizer(Ptr<RepeatingParsingExecutor> _parsingExecutor)

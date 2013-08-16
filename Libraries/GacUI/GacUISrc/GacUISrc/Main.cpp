@@ -279,7 +279,7 @@ protected:
 			+selectedTree;
 			;
 
-		GUI_RUN(
+		GetApplication()->InvokeInMainThread([=]()
 		{
 			textBoxScope->SetText(selectedMessage);
 			textBoxScope->Select(TextPos(), TextPos());

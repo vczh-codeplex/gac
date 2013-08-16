@@ -4209,6 +4209,7 @@ CreateEpsilonPDAVisitor
 					Ptr<Action> action=new Action;
 					action->actionType=Action::Assign;
 					action->actionSource=automaton->symbolManager->CacheGetSymbol(node);
+					action->creatorRule=rule;
 					transition->actions.Add(action);
 				}
 
@@ -4232,6 +4233,7 @@ CreateEpsilonPDAVisitor
 					action->actionType=Action::Setter;
 					action->actionSource=automaton->symbolManager->CacheGetSymbol(node);
 					action->actionTarget=action->actionSource->GetDescriptorSymbol()->GetSubSymbolByName(node->value);
+					action->creatorRule=rule;
 					transition->actions.Add(action);
 				}
 			};
@@ -4760,13 +4762,11 @@ GenerateTable
 								{
 									ins.instructionType=ParsingTable::Instruction::Create;
 									ins.nameParameter=GetTypeNameForCreateInstruction(action->actionSource);
-									ins.creatorRule=action->creatorRule->name;
 								}
 								break;
 							case Action::Using:
 								{
 									ins.instructionType=ParsingTable::Instruction::Using;
-									ins.creatorRule=action->creatorRule->name;
 								}
 								break;
 							case Action::Assign:
@@ -4809,6 +4809,7 @@ GenerateTable
 								}
 								break;
 							}
+							ins.creatorRule=action->creatorRule->name;
 							item->instructions.Add(ins);
 						}
 					}
@@ -4987,6 +4988,7 @@ CreateJointPDAFromNondeterministicPDA
 									action->actionType=Action::Shift;
 									action->shiftReduceSource=newSource;
 									action->shiftReduceTarget=newTarget;
+									action->creatorRule=shiftTransition->source->ownerRule;
 									shiftTransition->actions.Add(action);
 								}
 
@@ -4997,6 +4999,7 @@ CreateJointPDAFromNondeterministicPDA
 									action->actionType=Action::Reduce;
 									action->shiftReduceSource=newSource;
 									action->shiftReduceTarget=newTarget;
+									action->creatorRule=reduceTransition->source->ownerRule;
 									reduceTransition->actions.Add(action);
 									CopyFrom(reduceTransition->actions, oldTransition->actions, true);
 								}
@@ -5195,6 +5198,7 @@ MarkLeftRecursiveInJointPDA
 									newAction->creatorRule=action->creatorRule;
 									newAction->shiftReduceSource=action->shiftReduceSource;
 									newAction->shiftReduceTarget=action->shiftReduceTarget;
+									newAction->creatorRule=shift.key->ownerRule;
 
 									transition->actions[i]=newAction;
 								}
@@ -6837,9 +6841,9 @@ namespace vl
 				}
 			}
 
-			/***********************************************************************
-			Logger (ParsingDefinitionType)
-			***********************************************************************/
+/***********************************************************************
+Logger (ParsingDefinitionType)
+***********************************************************************/
 
 			class ParsingDefinitionTypeLogger : public Object, public ParsingDefinitionType::IVisitor
 			{
@@ -6886,9 +6890,9 @@ namespace vl
 				ParsingDefinitionTypeLogger::LogInternal(type, writer);
 			}
 
-			/***********************************************************************
-			Logger (ParsingDefinitionTypeDefinition)
-			***********************************************************************/
+/***********************************************************************
+Logger (ParsingDefinitionTypeDefinition)
+***********************************************************************/
 
 			class ParsingDefinitionTypeDefinitionLogger : public Object, public ParsingDefinitionTypeDefinition::IVisitor
 			{
@@ -6995,9 +6999,9 @@ namespace vl
 				ParsingDefinitionTypeDefinitionLogger::LogInternal(definition, prefix, writer);
 			}
 
-			/***********************************************************************
-			Logger (ParsingDefinitionGrammar)
-			***********************************************************************/
+/***********************************************************************
+Logger (ParsingDefinitionGrammar)
+***********************************************************************/
 
 #define PRIORITY_NONE			0
 #define PRIORITY_CREATE			1
@@ -7183,9 +7187,9 @@ namespace vl
 #undef PRIORITY_USE
 #undef PRIORITY_ASSIGN
 
-			/***********************************************************************
-			FindAppropriateGrammarState
-			***********************************************************************/
+/***********************************************************************
+FindAppropriateGrammarState
+***********************************************************************/
 
 			class FindAppropriateGrammarStateVisitor : public Object, public ParsingDefinitionGrammar::IVisitor
 			{
@@ -7280,9 +7284,9 @@ namespace vl
 				}
 			};
 
-			/***********************************************************************
-			Logger (ParsingDefinitionGrammar)
-			***********************************************************************/
+/***********************************************************************
+Logger (ParsingDefinitionGrammar)
+***********************************************************************/
 
 			WString TypeToString(ParsingDefinitionType* type)
 			{
@@ -7370,9 +7374,9 @@ namespace vl
 
 		namespace analyzing
 		{
-			/***********************************************************************
-			Logger (Automaton)
-			***********************************************************************/
+/***********************************************************************
+Logger (Automaton)
+***********************************************************************/
 
 			void LogTransitionSymbol(ParsingSymbol* symbol, stream::TextWriter& writer)
 			{
@@ -7540,9 +7544,9 @@ namespace vl
 
 		namespace tabling
 		{
-			/***********************************************************************
-			Logger (ParsingTable)
-			***********************************************************************/
+/***********************************************************************
+Logger (ParsingTable)
+***********************************************************************/
 
 			void LogAttributeList(Ptr<ParsingTable> table, vint attributeIndex, const WString& prefix, stream::TextWriter& writer)
 			{
@@ -7735,9 +7739,9 @@ namespace vl
 			}
 		}
 
-		/***********************************************************************
-		Logger (ParsingTreeNode)
-		***********************************************************************/
+/***********************************************************************
+Logger (ParsingTreeNode)
+***********************************************************************/
 
 		class LogParsingTreeNodeVisitor : public Object, public ParsingTreeNode::IVisitor
 		{
@@ -7839,7 +7843,7 @@ namespace vl
 			}
 		};
 
-		void Log(Ptr<ParsingTreeNode> node, const WString& originalInput, stream::TextWriter& writer, const WString& prefix)
+		void Log(ParsingTreeNode* node, const WString& originalInput, stream::TextWriter& writer, const WString& prefix)
 		{
 			writer.WriteString(prefix);
 			LogParsingTreeNodeVisitor visitor(writer, originalInput, prefix);
@@ -9374,7 +9378,16 @@ ParsingTreeNode
 			ClearQueryCache();
 			if(&subNodes)
 			{
-				CopyFrom(cachedOrderedSubNodes, collections::From(subNodes).OrderBy(&CompareTextRange));
+				ParsingTextRange emptyRange;
+				CopyFrom(
+					cachedOrderedSubNodes,
+					From(subNodes)
+						.Where([=](Ptr<ParsingTreeNode> node)
+						{
+							return node->GetCodeRange()!=emptyRange;
+						})
+						.OrderBy(&CompareTextRange)
+					);
 				FOREACH(Ptr<ParsingTreeNode>, node, cachedOrderedSubNodes)
 				{
 					node->InitializeQueryCache();
@@ -9422,7 +9435,7 @@ ParsingTreeNode
 					}
 					else
 					{
-						return cachedOrderedSubNodes[selected].Obj();
+						return selectedNode;
 					}
 				}
 			}
@@ -9524,6 +9537,7 @@ ParsingTreeObject
 		Ptr<ParsingTreeNode> ParsingTreeObject::Clone()
 		{
 			Ptr<ParsingTreeObject> clone=new ParsingTreeObject(type, codeRange);
+			CopyFrom(clone->rules, rules);
 			for(vint i=0;i<members.Count();i++)
 			{
 				WString name=members.Keys().Get(i);

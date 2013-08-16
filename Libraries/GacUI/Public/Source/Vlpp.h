@@ -4011,7 +4011,7 @@ namespace vl
 辅助函数
 ***********************************************************************/
 
-		extern void								Log(Ptr<ParsingTreeNode> node, const WString& originalInput, stream::TextWriter& writer, const WString& prefix=L"");
+		extern void								Log(ParsingTreeNode* node, const WString& originalInput, stream::TextWriter& writer, const WString& prefix=L"");
 
 /***********************************************************************
 语法树基础设施
@@ -22625,6 +22625,7 @@ RepeatingTaskExecutor
 				{
 					SpinLock::Scope scope(inputLock);
 					currentInputData=inputData;
+					inputData=T();
 					currentInputDataAvailable=inputDataAvailable;
 					inputDataAvailable=false;
 					if(!currentInputDataAvailable)
