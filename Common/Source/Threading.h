@@ -293,6 +293,7 @@ RepeatingTaskExecutor
 				{
 					SpinLock::Scope scope(inputLock);
 					currentInputData=inputData;
+					inputData=T();
 					currentInputDataAvailable=inputDataAvailable;
 					inputDataAvailable=false;
 					if(!currentInputDataAvailable)

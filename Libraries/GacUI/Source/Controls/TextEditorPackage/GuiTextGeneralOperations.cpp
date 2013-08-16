@@ -21,19 +21,15 @@ RepeatingParsingExecutor
 			{
 				List<Ptr<ParsingError>> errors;
 				Ptr<ParsingTreeObject> node=grammarParser->Parse(input, grammarRule, errors).Cast<ParsingTreeObject>();
-				if(node)
-				{
-					node->InitializeQueryCache();
-
-					SpinLock::Scope scope(parsingTreeLock);
-					parsingTreeNode=node;
-				}
-
-				bool generatedNewNode=node;
-				node=0;
 				FOREACH(ICallback*, callback, callbacks)
 				{
-					callback->OnParsingFinished(generatedNewNode, this);
+					Ptr<ParsingTreeObject> clonedNode;
+					if(node)
+					{
+						clonedNode=node->Clone().Cast<ParsingTreeObject>();
+						clonedNode->InitializeQueryCache();
+					}
+					callback->OnParsingFinishedAsync(clonedNode, input.Buffer());
 				}
 			}
 
@@ -46,19 +42,6 @@ RepeatingParsingExecutor
 			RepeatingParsingExecutor::~RepeatingParsingExecutor()
 			{
 				EnsureTaskFinished();
-				SpinLock::Scope scope(parsingTreeLock);
-				parsingTreeNode=0;
-			}
-
-			Ptr<parsing::ParsingTreeObject> RepeatingParsingExecutor::ThreadSafeGetTreeNode()
-			{
-				parsingTreeLock.Enter();
-				return parsingTreeNode;
-			}
-
-			void RepeatingParsingExecutor::ThreadSafeReturnTreeNode()
-			{
-				parsingTreeLock.Leave();
 			}
 
 			Ptr<parsing::tabling::ParsingGeneralParser> RepeatingParsingExecutor::GetParser()
@@ -78,6 +61,34 @@ RepeatingParsingExecutor
 				if(!callbacks.Contains(value)) return false;
 				callbacks.Remove(value);
 				return true;
+			}
+
+			Ptr<parsing::tabling::ParsingTable::AttributeInfo> RepeatingParsingExecutor::GetAttribute(vint index, const WString& name, vint argumentCount)
+			{
+				if(index!=-1)
+				{
+					Ptr<ParsingTable::AttributeInfo> att=grammarParser->GetTable()->GetAttributeInfo(index)->FindFirst(name);
+					if(att && att->arguments.Count()==argumentCount)
+					{
+						return att;
+					}
+				}
+				return 0;
+			}
+
+			Ptr<parsing::tabling::ParsingTable::AttributeInfo> RepeatingParsingExecutor::GetColorAttribute(vint index)
+			{
+				return GetAttribute(index, L"Color", 1);
+			}
+
+			Ptr<parsing::tabling::ParsingTable::AttributeInfo> RepeatingParsingExecutor::GetContextColorAttribute(vint index)
+			{
+				return GetAttribute(index, L"ContextColor", 1);
+			}
+
+			Ptr<parsing::tabling::ParsingTable::AttributeInfo> RepeatingParsingExecutor::GetSemanticColorAttribute(vint index)
+			{
+				return GetAttribute(index, L"SemanticColor", 1);
 			}
 		}
 	}

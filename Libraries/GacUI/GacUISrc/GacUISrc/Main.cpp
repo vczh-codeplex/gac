@@ -194,16 +194,9 @@ protected:
 		return 0;
 	}
 
-	void OnParsingFinished(bool generatedNewNode, RepeatingParsingExecutor* parsingExecutor)override
+	void OnContextFinishedAsync(Ptr<parsing::ParsingTreeObject> node)override
 	{
-		if(generatedNewNode)
-		{
-			Ptr<ParsingTreeObject> node=parsingExecutor->ThreadSafeGetTreeNode();
-			parsingTreeDecl=new ParserDecl(node);
-			node=0;
-			parsingExecutor->ThreadSafeReturnTreeNode();
-		}
-		GuiGrammarColorizer::OnParsingFinished(generatedNewNode, parsingExecutor);
+		parsingTreeDecl=new ParserDecl(node);
 	}
 
 	void OnSemanticColorize(ParsingTreeToken* foundToken, ParsingTreeObject* tokenParent, const WString& type, const WString& field, vint semantic, vint& token)override
@@ -263,36 +256,28 @@ class ParserGrammarAutoComplete : public GuiGrammarAutoComplete
 protected:
 	GuiMultilineTextBox*					textBoxScope;
 
-	void OnSelectingFinished()override
+	void OnContextFinishedAsync(Context& context)override
 	{
-		Context context=GetCodeContext();
-		WString selectedMessage;
-		Ptr<ParsingTreeNode> node=GetParsingExecutor()->ThreadSafeGetTreeNode();
-		if(node.Obj()==context.selectedRoot)
+		WString selectedTree;
 		{
-			WString selectedTree;
+			MemoryStream stream;
 			{
-				MemoryStream stream;
-				{
-					StreamWriter writer(stream);
-					Log(context.selectedNode, L"", writer);
-				}
-				stream.SeekFromBegin(0);
-				StreamReader reader(stream);
-				selectedTree=reader.ReadToEnd();
+				StreamWriter writer(stream);
+				Log(context.contextNode, L"", writer);
 			}
-
-			selectedMessage
-				=L"================RULE================\r\n"
-				+context.selectedRule+L"\r\n"
-				+L"================CODE================\r\n"
-				+context.selectedCode+L"\r\n"
-				+L"================TREE================\r\n"
-				+selectedTree;
-				;
+			stream.SeekFromBegin(0);
+			StreamReader reader(stream);
+			selectedTree=reader.ReadToEnd();
 		}
-		node=0;
-		GetParsingExecutor()->ThreadSafeReturnTreeNode();
+
+		WString selectedMessage
+			=L"================RULE================\r\n"
+			+context.contextNodeRule+L"\r\n"
+			+L"================CODE================\r\n"
+			+context.contextNodeCode+L"\r\n"
+			+L"================TREE================\r\n"
+			+selectedTree;
+			;
 
 		GUI_RUN(
 		{
