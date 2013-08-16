@@ -15,6 +15,8 @@ Macros:
 #ifndef VCZH_BASIC
 #define VCZH_BASIC
 
+#include <intrin.h>
+
 namespace vl
 {
 
@@ -47,6 +49,8 @@ typedef signed __int64	pos_t;
 #define UITOW_S		_ui64tow_s
 #define UI64TOA_S	_ui64toa_s
 #define UI64TOW_S	_ui64tow_s
+#define INCRC(x)	(_InterlockedIncrement64(x))
+#define DECRC(x)	(_InterlockedDecrement64(x))
 #else
 #define ITOA_S		_itoa_s
 #define ITOW_S		_itow_s
@@ -56,6 +60,8 @@ typedef signed __int64	pos_t;
 #define UITOW_S		_ui64tow_s
 #define UI64TOA_S	_ui64toa_s
 #define UI64TOW_S	_ui64tow_s
+#define INCRC(x)	(_InterlockedIncrement((volatile long*)(x)))
+#define DECRC(x)	(_InterlockedDecrement((volatile long*)(x)))
 #endif
 
 #ifndef _MSC_VER
