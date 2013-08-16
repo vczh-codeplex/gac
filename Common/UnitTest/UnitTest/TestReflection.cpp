@@ -510,7 +510,7 @@ TEST_CASE(TestDescriptableObjectReferenceCounterOperator)
 	TEST_ASSERT((AcceptValue<typename RequiresConvertable<Derived, DescriptableObject>::YesNoType>::Result));
 
 	Base* raw=new Base;
-	vint* counter=ReferenceCounterOperator<Base>::CreateCounter(raw);
+	volatile vint* counter=ReferenceCounterOperator<Base>::CreateCounter(raw);
 	TEST_ASSERT(0==*counter);
 	{
 		Ptr<Base> ptr1=raw;
@@ -749,7 +749,7 @@ namespace reflection_test
 	void TestSharedRawPtrConverting()
 	{
 		Base* b1=new Base;
-		vint* rc=ReferenceCounterOperator<Base>::CreateCounter(b1);
+		volatile vint* rc=ReferenceCounterOperator<Base>::CreateCounter(b1);
 		TEST_ASSERT(*rc==0);
 
 		Ptr<Base> b2=b1;
@@ -782,7 +782,7 @@ namespace reflection_test
 		}
 		{
 			//Base* b=new Base;
-			//vint* rc=ReferenceCounterOperator<Base>::CreateCounter(b);
+			//volatile vint* rc=ReferenceCounterOperator<Base>::CreateCounter(b);
 			//TEST_ASSERT(*rc==0);
 
 			//Ptr<Object> o=b;

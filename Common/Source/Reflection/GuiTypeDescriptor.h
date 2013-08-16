@@ -53,7 +53,7 @@ Attribute
 			typedef collections::Dictionary<WString, Ptr<Object>>		InternalPropertyMap;
 			typedef void(*DestructorProc)(DescriptableObject* obj);
 		protected:
-			vint									referenceCounter;
+			volatile vint							referenceCounter;
 			DestructorProc							sharedPtrDestructorProc;
 
 			size_t									objectSize;
@@ -114,13 +114,13 @@ ReferenceCounterOperator
 	template<typename T>
 	struct ReferenceCounterOperator<T, typename RequiresConvertable<T, reflection::DescriptableObject>::YesNoType>
 	{
-		static __forceinline vint* CreateCounter(T* reference)
+		static __forceinline volatile vint* CreateCounter(T* reference)
 		{
 			reflection::DescriptableObject* obj=reference;
 			return &obj->referenceCounter;
 		}
 
-		static __forceinline void DeleteReference(vint* counter, void* reference)
+		static __forceinline void DeleteReference(volatile vint* counter, void* reference)
 		{
 			reflection::DescriptableObject* obj=(T*)reference;
 			if(obj->sharedPtrDestructorProc)

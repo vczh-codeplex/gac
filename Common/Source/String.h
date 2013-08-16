@@ -23,7 +23,7 @@ namespace vl
 		static const T	zero=0;
 
 		mutable T*					buffer;
-		mutable vint*				reference;
+		mutable volatile vint*		counter;
 		mutable vint				start;
 		mutable vint				length;
 		mutable vint				realLength;
@@ -73,20 +73,20 @@ namespace vl
 
 		void Inc()const
 		{
-			if(reference)
+			if(counter)
 			{
-				(*reference)++;
+				INCRC(counter);
 			}
 		}
 
 		void Dec()const
 		{
-			if(reference)
+			if(counter)
 			{
-				if(--(*reference)==0)
+				if(DECRC(counter)==0)
 				{
 					delete[] buffer;
-					delete reference;
+					delete counter;
 				}
 			}
 		}
@@ -96,7 +96,7 @@ namespace vl
 			if(_length<=0)
 			{
 				buffer=(T*)&zero;
-				reference=0;
+				counter=0;
 				start=0;
 				length=0;
 				realLength=0;
@@ -104,7 +104,7 @@ namespace vl
 			else
 			{
 				buffer=string.buffer;
-				reference=string.reference;
+				counter=string.counter;
 				start=string.start+_start;
 				length=_length;
 				realLength=string.realLength;
@@ -117,14 +117,14 @@ namespace vl
 			if(index==0 && count==dest.length && source.length==0)
 			{
 				buffer=(T*)&zero;
-				reference=0;
+				counter=0;
 				start=0;
 				length=0;
 				realLength=0;
 			}
 			else
 			{
-				reference=new vint(1);
+				counter=new vint(1);
 				start=0;
 				length=dest.length-count+source.length;
 				realLength=length;
@@ -141,7 +141,7 @@ namespace vl
 		ObjectString()
 		{
 			buffer=(T*)&zero;
-			reference=0;
+			counter=0;
 			start=0;
 			length=0;
 			realLength=0;
@@ -149,7 +149,7 @@ namespace vl
 
 		ObjectString(const T& _char)
 		{
-			reference=new vint(1);
+			counter=new vint(1);
 			start=0;
 			length=1;
 			buffer=new T[2];
@@ -163,7 +163,7 @@ namespace vl
 			if(_length<=0)
 			{
 				buffer=(T*)&zero;
-				reference=0;
+				counter=0;
 				start=0;
 				length=0;
 				realLength=0;
@@ -173,7 +173,7 @@ namespace vl
 				buffer=new T[_length+1];
 				memcpy(buffer, _buffer, _length*sizeof(T));
 				buffer[_length]=0;
-				reference=new vint(1);
+				counter=new vint(1);
 				start=0;
 				length=_length;
 				realLength=_length;
@@ -185,7 +185,7 @@ namespace vl
 			CHECK_ERROR(_buffer!=0, L"ObjectString<T>::ObjectString(const T*, bool)#不能用空指针构造字符串。");
 			if(copy)
 			{
-				reference=new vint(1);
+				counter=new vint(1);
 				start=0;
 				length=CalculateLength(_buffer);
 				buffer=new T[length+1];
@@ -195,7 +195,7 @@ namespace vl
 			else
 			{
 				buffer=(T*)_buffer;
-				reference=0;
+				counter=0;
 				start=0;
 				length=CalculateLength(_buffer);
 				realLength=length;
@@ -205,7 +205,7 @@ namespace vl
 		ObjectString(const ObjectString<T>& string)
 		{
 			buffer=string.buffer;
-			reference=string.reference;
+			counter=string.counter;
 			start=string.start;
 			length=string.length;
 			realLength=string.realLength;
@@ -215,13 +215,13 @@ namespace vl
 		ObjectString(ObjectString<T>&& string)
 		{
 			buffer=string.buffer;
-			reference=string.reference;
+			counter=string.counter;
 			start=string.start;
 			length=string.length;
 			realLength=string.realLength;
 			
 			string.buffer=(T*)&zero;
-			string.reference=0;
+			string.counter=0;
 			string.start=0;
 			string.length=0;
 			string.realLength=0;
@@ -241,7 +241,7 @@ namespace vl
 				newBuffer[length]=0;
 				Dec();
 				buffer=newBuffer;
-				reference=new vint(1);
+				counter=new vint(1);
 				start=0;
 				realLength=length;
 			}
@@ -254,7 +254,7 @@ namespace vl
 			{
 				Dec();
 				buffer=string.buffer;
-				reference=string.reference;
+				counter=string.counter;
 				start=string.start;
 				length=string.length;
 				realLength=string.realLength;
@@ -269,13 +269,13 @@ namespace vl
 			{
 				Dec();
 				buffer=string.buffer;
-				reference=string.reference;
+				counter=string.counter;
 				start=string.start;
 				length=string.length;
 				realLength=string.realLength;
 			
 				string.buffer=(T*)&zero;
-				string.reference=0;
+				string.counter=0;
 				string.start=0;
 				string.length=0;
 				string.realLength=0;
