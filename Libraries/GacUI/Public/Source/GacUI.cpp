@@ -21369,6 +21369,8 @@ GuiGrammarAutoComplete
 			void GuiGrammarAutoComplete::EnsureAutoCompleteFinished()
 			{
 				parsingExecutor->EnsureTaskFinished();
+				SpinLock::Scope scope(contextLock);
+				context=Context();
 			}
 
 			GuiGrammarAutoComplete::GuiGrammarAutoComplete(Ptr<RepeatingParsingExecutor> _parsingExecutor)
@@ -21813,6 +21815,8 @@ GuiGrammarColorizer
 			{
 				parsingExecutor->EnsureTaskFinished();
 				StopColorizerForever();
+				SpinLock::Scope scope(parsingTreeLock);
+				parsingTreeNode=0;
 			}
 
 			GuiGrammarColorizer::GuiGrammarColorizer(Ptr<RepeatingParsingExecutor> _parsingExecutor)
