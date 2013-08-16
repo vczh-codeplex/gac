@@ -161,16 +161,17 @@ GuiGrammarColorizer
 				FieldSemanticColors											fieldSemanticColors;
 				collections::Dictionary<WString, vint>						semanticIndices;
 
-				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetAttribute(vint index, const WString& name, vint argumentCount);
-				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetColorAttribute(vint index);
-				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetContextColorAttribute(vint index);
-				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetSemanticColorAttribute(vint index);
+				SpinLock													parsingTreeLock;
+				Ptr<parsing::ParsingTreeObject>								parsingTreeNode;
 
+				void														OnParsingFinishedAsync(Ptr<parsing::ParsingTreeObject> node, const WString& code)override;
 			protected:
+				/// <summary>Called when the node is parsed successfully before restarting colorizing.</summary>
+				virtual void												OnContextFinishedAsync(Ptr<parsing::ParsingTreeObject> node);
+
 				void														Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock)override;
 				void														Detach()override;
 				void														TextEditFinished()override;
-				void														OnParsingFinished(bool generatedNewNode, RepeatingParsingExecutor* parsingExecutor)override;
 
 				/// <summary>Called when a @SemanticColor attribute in a grammar is activated during colorizing to determine a color for the token.</summary>
 				/// <param name="foundToken">Token syntax tree for the colorizing token.</param>

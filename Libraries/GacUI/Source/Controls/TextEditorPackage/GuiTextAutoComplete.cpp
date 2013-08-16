@@ -64,6 +64,68 @@ GuiTextBoxAutoCompleteBase
 GuiGrammarAutoComplete
 ***********************************************************************/
 
+			void GuiGrammarAutoComplete::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock)
+			{
+				GuiTextBoxAutoCompleteBase::Attach(_element, _elementModifyLock);
+				if(element && elementModifyLock)
+				{
+				}
+			}
+
+			void GuiGrammarAutoComplete::Detach()
+			{
+				GuiTextBoxAutoCompleteBase::Detach();
+				if(element && elementModifyLock)
+				{
+					EnsureAutoCompleteFinished();
+				}
+			}
+
+			void GuiGrammarAutoComplete::TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)
+			{
+				GuiTextBoxAutoCompleteBase::TextEditNotify(originalStart, originalEnd, originalText, inputStart, inputEnd, inputText);
+				if(element && elementModifyLock)
+				{
+					editing=true;
+				}
+			}
+
+			void GuiGrammarAutoComplete::TextCaretChanged(TextPos oldBegin, TextPos oldEnd, TextPos newBegin, TextPos newEnd)
+			{
+				GuiTextBoxAutoCompleteBase::TextCaretChanged(oldBegin, oldEnd, newBegin, newEnd);
+				if(element && elementModifyLock && !editing)
+				{
+					SpinLock::Scope scope(contextLock);
+					if(context.root)
+					{
+						GetApplication()->InvokeAsync([=]()
+						{
+							UpdateScopeInfoAsync(0, L"");
+						});
+					}
+				}
+			}
+
+			void GuiGrammarAutoComplete::TextEditFinished()
+			{
+				GuiTextBoxAutoCompleteBase::TextEditFinished();
+				if(element && elementModifyLock)
+				{
+					editing=false;
+				}
+			}
+
+			void GuiGrammarAutoComplete::OnParsingFinishedAsync(Ptr<parsing::ParsingTreeObject> node, const WString& code)
+			{
+				if(element && elementModifyLock)
+				{
+					GetApplication()->InvokeInMainThread([=]()
+					{
+						UpdateScopeInfoAsync(node, code);
+					});
+				}
+			}
+
 			void GuiGrammarAutoComplete::CollectLeftRecursiveRules()
 			{
 				leftRecursiveRules.Clear();
@@ -96,27 +158,41 @@ GuiGrammarAutoComplete
 				}
 			}
 
-			void GuiGrammarAutoComplete::UpdateScopeInfo()
+			void GuiGrammarAutoComplete::UpdateScopeInfoAsync(Ptr<parsing::ParsingTreeObject> parsingTreeNode, const WString& code)
 			{
-				Ptr<ParsingTreeNode> node=parsingExecutor->ThreadSafeGetTreeNode();
-				TextPos startPos=element->GetCaretBegin();
-				TextPos endPos=element->GetCaretEnd();
-				if(startPos>endPos)
+				Context newContext;
+				if(parsingTreeNode)
 				{
-					TextPos temp=startPos;
-					startPos=endPos;
-					endPos=temp;
+					newContext.root=parsingTreeNode;
+					newContext.rootCode=code;
 				}
+				else
+				{
+					SpinLock::Scope scope(contextLock);
+					newContext.root=context.root;
+					newContext.rootCode=context.rootCode;
+				}
+
+				TextPos startPos, endPos;
+				{
+					SpinLock::Scope scope(*elementModifyLock);
+					startPos=element->GetCaretBegin();
+					endPos=element->GetCaretEnd();
+					if(startPos>endPos)
+					{
+						TextPos temp=startPos;
+						startPos=endPos;
+						endPos=temp;
+					}
+				}
+
 				ParsingTextPos start(startPos.row, startPos.column);
 				ParsingTextPos end(endPos.row, endPos.column);
 				ParsingTextRange range(start, end);
-				ParsingTreeNode* found=node->FindDeepestNode(range);
+				ParsingTreeNode* found=newContext.root->FindDeepestNode(range);
+				ParsingTreeObject* selectedNode=0;
 
-				ParsingTreeObject* _selectedRoot=dynamic_cast<ParsingTreeObject*>(node.Obj());
-				ParsingTreeObject* _selectedNode=0;
-				WString _selectedCode, _selectedRule;
-
-				if(!_selectedNode)
+				if(!selectedNode)
 				{
 					ParsingTreeObject* lrec=0;
 					ParsingTreeNode* current=found;
@@ -135,7 +211,7 @@ GuiGrammarAutoComplete
 							}
 							if(obj && lrec && lrec!=obj)
 							{
-								_selectedNode=lrec;
+								selectedNode=lrec;
 								break;
 							}
 						}
@@ -143,7 +219,7 @@ GuiGrammarAutoComplete
 					}
 				}
 
-				if(!_selectedNode)
+				if(!selectedNode)
 				{
 					ParsingTreeNode* current=found;
 					while(current)
@@ -151,92 +227,35 @@ GuiGrammarAutoComplete
 						ParsingTreeObject* obj=dynamic_cast<ParsingTreeObject*>(current);
 						if(obj)
 						{
-							_selectedNode=obj;
+							selectedNode=obj;
 							break;
 						}
 						current=current->GetParent();
 					}
 				}
 
-				if(_selectedNode)
+				if(selectedNode)
 				{
-					start=_selectedNode->GetCodeRange().start;
-					end=_selectedNode->GetCodeRange().end;
-					startPos=TextPos(start.row, start.column);
-					endPos=TextPos(end.row, end.column+1);
-					_selectedCode=element->GetLines().GetText(startPos, endPos);
-					_selectedRule=_selectedNode->GetCreatorRules()[_selectedNode->GetCreatorRules().Count()-1].Buffer();
-				}
-				node=0;
-				parsingExecutor->ThreadSafeReturnTreeNode();
+					start=selectedNode->GetCodeRange().start;
+					end=selectedNode->GetCodeRange().end;
 
-				{
-					SpinLock::Scope scope(selectedNodeLock);
-					context.selectedRoot=_selectedRoot;
-					context.selectedNode=_selectedNode;
-					context.selectedCode=_selectedCode;
-					context.selectedRule=_selectedRule;
+					newContext.contextNode=selectedNode;
+					newContext.contextNodeCode=newContext.rootCode.Sub(start.index, end.index-start.index+1);
+					newContext.contextNodeRule=selectedNode->GetCreatorRules()[selectedNode->GetCreatorRules().Count()-1].Buffer();
 				}
 
-				GetApplication()->InvokeAsync([=]()
 				{
-					OnSelectingFinished();
-				});
-			}
-
-			void GuiGrammarAutoComplete::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock)
-			{
-				GuiTextBoxAutoCompleteBase::Attach(_element, _elementModifyLock);
-				if(element && elementModifyLock)
-				{
-				}
-			}
-
-			void GuiGrammarAutoComplete::Detach()
-			{
-				GuiTextBoxAutoCompleteBase::Detach();
-				if(element && elementModifyLock)
-				{
-					EnsureAutoCompleteFinished();
-				}
-			}
-
-			void GuiGrammarAutoComplete::TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)
-			{
-				GuiTextBoxAutoCompleteBase::TextEditNotify(originalStart, originalEnd, originalText, inputStart, inputEnd, inputText);
-				if(element && elementModifyLock)
-				{
-					editing=true;
-				}
-			}
-
-			void GuiGrammarAutoComplete::TextCaretChanged(TextPos oldBegin, TextPos oldEnd, TextPos newBegin, TextPos newEnd)
-			{
-				GuiTextBoxAutoCompleteBase::TextCaretChanged(oldBegin, oldEnd, newBegin, newEnd);
-				if(element && elementModifyLock)
-				{
-					UpdateScopeInfo();
-				}
-			}
-
-			void GuiGrammarAutoComplete::TextEditFinished()
-			{
-				GuiTextBoxAutoCompleteBase::TextEditFinished();
-				if(element && elementModifyLock)
-				{
-					editing=false;
-				}
-			}
-
-			void GuiGrammarAutoComplete::OnParsingFinished(bool generatedNewNode, RepeatingParsingExecutor* parsingExecutor)
-			{
-				if(element && elementModifyLock)
-				{
-					GetApplication()->InvokeInMainThread([=]()
+					SpinLock::Scope scope(contextLock);
+					context=newContext;
+					if(context.root && context.contextNode)
 					{
-						UpdateScopeInfo();
-					});
+						OnContextFinishedAsync(context);
+					}
 				}
+			}
+
+			void GuiGrammarAutoComplete::OnContextFinishedAsync(Context& context)
+			{
 			}
 
 			void GuiGrammarAutoComplete::EnsureAutoCompleteFinished()
@@ -264,19 +283,6 @@ GuiGrammarAutoComplete
 			{
 				EnsureAutoCompleteFinished();
 				parsingExecutor->DetachCallback(this);
-			}
-
-			GuiGrammarAutoComplete::Context GuiGrammarAutoComplete::GetCodeContext()
-			{
-				SpinLock::Scope scope(selectedNodeLock);
-				Context result;
-
-				result.selectedRoot=context.selectedRoot;
-				result.selectedNode=context.selectedNode;
-				result.selectedCode=context.selectedCode.Buffer();
-				result.selectedRule=context.selectedRule.Buffer();
-
-				return result;
 			}
 
 			Ptr<RepeatingParsingExecutor> GuiGrammarAutoComplete::GetParsingExecutor()

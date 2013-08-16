@@ -44,16 +44,14 @@ RepeatingParsingExecutor
 				class ICallback : public virtual Interface
 				{
 				public:
-					/// <summary>Callback when a parsing task is finished. <see cref="RepeatingParsingExecutor::ThreadSafeGetTreeNode"/> and <see cref="RepeatingParsingExecutor::ThreadSafeReturnTreeNode"/> can be used to get the new syntax tree.</summary>
+					/// <summary>Callback when a parsing task is finished.</summary>
 					/// <param name="generatedNewNode">True indicates the parsing succeeded. Otherwise failed.</param>
 					/// <param name="parsingExecutor">The parsing executor that parses the input.</param>
-					virtual void											OnParsingFinished(bool generatedNewNode, RepeatingParsingExecutor* parsingExecutor)=0;
+					virtual void											OnParsingFinishedAsync(Ptr<parsing::ParsingTreeObject> node, const WString& code)=0;
 				};
 			private:
 				Ptr<parsing::tabling::ParsingGeneralParser>					grammarParser;
 				WString														grammarRule;
-				SpinLock													parsingTreeLock;
-				Ptr<parsing::ParsingTreeObject>								parsingTreeNode;
 				collections::List<ICallback*>								callbacks;
 
 			protected:
@@ -66,11 +64,6 @@ RepeatingParsingExecutor
 				RepeatingParsingExecutor(Ptr<parsing::tabling::ParsingGeneralParser> _grammarParser, const WString& _grammarRule);
 				~RepeatingParsingExecutor();
 				
-				/// <summary>Get the parsed syntax tree and block all threads when calling this function.</summary>
-				/// <returns>The parsed syntax tree.</returns>
-				Ptr<parsing::ParsingTreeObject>								ThreadSafeGetTreeNode();
-				/// <summary>Unblock all threads that calling <see cref="ThreadSafeGetTreeNode"/>.</summary>
-				void														ThreadSafeReturnTreeNode();
 				/// <summary>Get the internal parser that parse the text.</summary>
 				Ptr<parsing::tabling::ParsingGeneralParser>					GetParser();
 				/// <summary>Detach callback.</summary>
@@ -81,6 +74,11 @@ RepeatingParsingExecutor
 				/// <returns>Returns true if this operation succeeded.</returns>
 				/// <param name="value">The callback.</param>
 				bool														DetachCallback(ICallback* value);
+
+				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetAttribute(vint index, const WString& name, vint argumentCount);
+				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetColorAttribute(vint index);
+				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetContextColorAttribute(vint index);
+				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetSemanticColorAttribute(vint index);
 			};
 		}
 	}
