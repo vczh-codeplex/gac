@@ -21349,7 +21349,7 @@ GuiGrammarAutoComplete
 					{
 						newContext.contextNodeCode=newContext.rootCode.Sub(start.index, end.index-start.index+1);
 					}
-					newContext.contextNodeRule=selectedNode->GetCreatorRules()[selectedNode->GetCreatorRules().Count()-1].Buffer();
+					newContext.contextNodeRule=selectedNode->GetCreatorRules()[selectedNode->GetCreatorRules().Count()-1];
 				}
 
 				{
@@ -21782,7 +21782,7 @@ GuiGrammarColorizer
 				{
 					SpinLock::Scope scope(*elementModifyLock);
 					WString text=element->GetLines().GetText();
-					parsingExecutor->SubmitTask(text.Buffer());
+					parsingExecutor->SubmitTask(text);
 				}
 			}
 
@@ -21803,7 +21803,7 @@ GuiGrammarColorizer
 				{
 					SpinLock::Scope scope(*elementModifyLock);
 					WString text=element->GetLines().GetText();
-					parsingExecutor->SubmitTask(text.Buffer());
+					parsingExecutor->SubmitTask(text);
 				}
 			}
 
@@ -21841,7 +21841,7 @@ GuiGrammarColorizer
 
 			void GuiGrammarColorizer::SubmitCode(const WString& code)
 			{
-				parsingExecutor->SubmitTask(code.Buffer());
+				parsingExecutor->SubmitTask(code);
 			}
 
 			vint GuiGrammarColorizer::GetTokenId(const WString& token)
@@ -23349,15 +23349,13 @@ RepeatingParsingExecutor
 			{
 				List<Ptr<ParsingError>> errors;
 				Ptr<ParsingTreeObject> node=grammarParser->Parse(input, grammarRule, errors).Cast<ParsingTreeObject>();
+				if(node)
+				{
+					node->InitializeQueryCache();
+				}
 				FOREACH(ICallback*, callback, callbacks)
 				{
-					Ptr<ParsingTreeObject> clonedNode;
-					if(node)
-					{
-						clonedNode=node->Clone().Cast<ParsingTreeObject>();
-						clonedNode->InitializeQueryCache();
-					}
-					callback->OnParsingFinishedAsync(clonedNode, input.Buffer());
+					callback->OnParsingFinishedAsync(node, input);
 				}
 			}
 
