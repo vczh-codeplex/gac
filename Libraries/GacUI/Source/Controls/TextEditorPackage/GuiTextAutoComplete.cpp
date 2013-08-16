@@ -240,7 +240,10 @@ GuiGrammarAutoComplete
 					end=selectedNode->GetCodeRange().end;
 
 					newContext.contextNode=selectedNode;
-					newContext.contextNodeCode=newContext.rootCode.Sub(start.index, end.index-start.index+1);
+					if(start.index>=0 && end.index>=0)
+					{
+						newContext.contextNodeCode=newContext.rootCode.Sub(start.index, end.index-start.index+1);
+					}
 					newContext.contextNodeRule=selectedNode->GetCreatorRules()[selectedNode->GetCreatorRules().Count()-1].Buffer();
 				}
 
@@ -261,6 +264,8 @@ GuiGrammarAutoComplete
 			void GuiGrammarAutoComplete::EnsureAutoCompleteFinished()
 			{
 				parsingExecutor->EnsureTaskFinished();
+				SpinLock::Scope scope(contextLock);
+				context=Context();
 			}
 
 			GuiGrammarAutoComplete::GuiGrammarAutoComplete(Ptr<RepeatingParsingExecutor> _parsingExecutor)
