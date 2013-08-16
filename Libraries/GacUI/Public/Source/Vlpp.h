@@ -23,6 +23,8 @@ Macros:
 #ifndef VCZH_BASIC
 #define VCZH_BASIC
 
+#include <intrin.h>
+
 namespace vl
 {
 
@@ -55,6 +57,8 @@ typedef signed __int64	pos_t;
 #define UITOW_S		_ui64tow_s
 #define UI64TOA_S	_ui64toa_s
 #define UI64TOW_S	_ui64tow_s
+#define INCRC(x)	(_InterlockedIncrement64(x))
+#define DECRC(x)	(_InterlockedDecrement64(x))
 #else
 #define ITOA_S		_itoa_s
 #define ITOW_S		_itow_s
@@ -64,6 +68,8 @@ typedef signed __int64	pos_t;
 #define UITOW_S		_ui64tow_s
 #define UI64TOA_S	_ui64toa_s
 #define UI64TOW_S	_ui64tow_s
+#define INCRC(x)	(_InterlockedIncrement((volatile long*)(x)))
+#define DECRC(x)	(_InterlockedDecrement((volatile long*)(x)))
 #endif
 
 #ifndef _MSC_VER
@@ -556,7 +562,7 @@ namespace vl
 		static const T	zero=0;
 
 		mutable T*					buffer;
-		mutable vint*				reference;
+		mutable volatile vint*		counter;
 		mutable vint				start;
 		mutable vint				length;
 		mutable vint				realLength;
@@ -606,20 +612,20 @@ namespace vl
 
 		void Inc()const
 		{
-			if(reference)
+			if(counter)
 			{
-				(*reference)++;
+				INCRC(counter);
 			}
 		}
 
 		void Dec()const
 		{
-			if(reference)
+			if(counter)
 			{
-				if(--(*reference)==0)
+				if(DECRC(counter)==0)
 				{
 					delete[] buffer;
-					delete reference;
+					delete counter;
 				}
 			}
 		}
@@ -629,7 +635,7 @@ namespace vl
 			if(_length<=0)
 			{
 				buffer=(T*)&zero;
-				reference=0;
+				counter=0;
 				start=0;
 				length=0;
 				realLength=0;
@@ -637,7 +643,7 @@ namespace vl
 			else
 			{
 				buffer=string.buffer;
-				reference=string.reference;
+				counter=string.counter;
 				start=string.start+_start;
 				length=_length;
 				realLength=string.realLength;
@@ -650,14 +656,14 @@ namespace vl
 			if(index==0 && count==dest.length && source.length==0)
 			{
 				buffer=(T*)&zero;
-				reference=0;
+				counter=0;
 				start=0;
 				length=0;
 				realLength=0;
 			}
 			else
 			{
-				reference=new vint(1);
+				counter=new vint(1);
 				start=0;
 				length=dest.length-count+source.length;
 				realLength=length;
@@ -674,7 +680,7 @@ namespace vl
 		ObjectString()
 		{
 			buffer=(T*)&zero;
-			reference=0;
+			counter=0;
 			start=0;
 			length=0;
 			realLength=0;
@@ -682,7 +688,7 @@ namespace vl
 
 		ObjectString(const T& _char)
 		{
-			reference=new vint(1);
+			counter=new vint(1);
 			start=0;
 			length=1;
 			buffer=new T[2];
@@ -696,7 +702,7 @@ namespace vl
 			if(_length<=0)
 			{
 				buffer=(T*)&zero;
-				reference=0;
+				counter=0;
 				start=0;
 				length=0;
 				realLength=0;
@@ -706,7 +712,7 @@ namespace vl
 				buffer=new T[_length+1];
 				memcpy(buffer, _buffer, _length*sizeof(T));
 				buffer[_length]=0;
-				reference=new vint(1);
+				counter=new vint(1);
 				start=0;
 				length=_length;
 				realLength=_length;
@@ -718,7 +724,7 @@ namespace vl
 			CHECK_ERROR(_buffer!=0, L"ObjectString<T>::ObjectString(const T*, bool)#不能用空指针构造字符串。");
 			if(copy)
 			{
-				reference=new vint(1);
+				counter=new vint(1);
 				start=0;
 				length=CalculateLength(_buffer);
 				buffer=new T[length+1];
@@ -728,7 +734,7 @@ namespace vl
 			else
 			{
 				buffer=(T*)_buffer;
-				reference=0;
+				counter=0;
 				start=0;
 				length=CalculateLength(_buffer);
 				realLength=length;
@@ -738,7 +744,7 @@ namespace vl
 		ObjectString(const ObjectString<T>& string)
 		{
 			buffer=string.buffer;
-			reference=string.reference;
+			counter=string.counter;
 			start=string.start;
 			length=string.length;
 			realLength=string.realLength;
@@ -748,13 +754,13 @@ namespace vl
 		ObjectString(ObjectString<T>&& string)
 		{
 			buffer=string.buffer;
-			reference=string.reference;
+			counter=string.counter;
 			start=string.start;
 			length=string.length;
 			realLength=string.realLength;
 			
 			string.buffer=(T*)&zero;
-			string.reference=0;
+			string.counter=0;
 			string.start=0;
 			string.length=0;
 			string.realLength=0;
@@ -774,7 +780,7 @@ namespace vl
 				newBuffer[length]=0;
 				Dec();
 				buffer=newBuffer;
-				reference=new vint(1);
+				counter=new vint(1);
 				start=0;
 				realLength=length;
 			}
@@ -787,7 +793,7 @@ namespace vl
 			{
 				Dec();
 				buffer=string.buffer;
-				reference=string.reference;
+				counter=string.counter;
 				start=string.start;
 				length=string.length;
 				realLength=string.realLength;
@@ -802,13 +808,13 @@ namespace vl
 			{
 				Dec();
 				buffer=string.buffer;
-				reference=string.reference;
+				counter=string.counter;
 				start=string.start;
 				length=string.length;
 				realLength=string.realLength;
 			
 				string.buffer=(T*)&zero;
-				string.reference=0;
+				string.counter=0;
 				string.start=0;
 				string.length=0;
 				string.realLength=0;
@@ -2410,12 +2416,12 @@ ReferenceCounterOperator
 	template<typename T, typename Enabled=YesType>
 	struct ReferenceCounterOperator
 	{
-		static __forceinline vint* CreateCounter(T* reference)
+		static __forceinline volatile vint* CreateCounter(T* reference)
 		{
 			return new vint(0);
 		}
 
-		static __forceinline void DeleteReference(vint* counter, void* reference)
+		static __forceinline void DeleteReference(volatile vint* counter, void* reference)
 		{
 			delete counter;
 			delete (T*)reference;
@@ -2432,9 +2438,9 @@ Ptr
 		 template<typename X>
 		 friend class Ptr;
 	protected:
-		typedef void		(*Destructor)(vint*, void*);
+		typedef void		(*Destructor)(volatile vint*, void*);
 
-		vint*				counter;
+		volatile vint*		counter;
 		T*					reference;
 		void*				originalReference;
 		Destructor			originalDestructor;
@@ -2443,7 +2449,7 @@ Ptr
 		{
 			if(counter)
 			{
-				(*counter)++;
+				INCRC(counter);
 			}
 		}
 
@@ -2451,7 +2457,7 @@ Ptr
 		{
 			if(counter)
 			{
-				if(--(*counter)==0)
+				if(DECRC(counter)==0)
 				{
 					originalDestructor(counter, originalReference);
 					counter=0;
@@ -2462,12 +2468,12 @@ Ptr
 			}
 		}
 
-		vint* Counter()const
+		volatile vint* Counter()const
 		{
 			return counter;
 		}
 
-		Ptr(vint* _counter, T* _reference, void* _originalReference, Destructor _originalDestructor)
+		Ptr(volatile vint* _counter, T* _reference, void* _originalReference, Destructor _originalDestructor)
 			:counter(_counter)
 			,reference(_reference)
 			,originalReference(_originalReference)
@@ -2712,14 +2718,14 @@ ComPtr
 	class ComPtr
 	{
 	protected:
-		vint*				counter;
+		volatile vint*		counter;
 		T*					reference;
 
 		void Inc()
 		{
 			if(counter)
 			{
-				(*counter)++;
+				INCRC(counter);
 			}
 		}
 
@@ -2727,7 +2733,7 @@ ComPtr
 		{
 			if(counter)
 			{
-				if(--(*counter)==0)
+				if(DECRC(counter)==0)
 				{
 					delete counter;
 					reference->Release();
@@ -2737,12 +2743,12 @@ ComPtr
 			}
 		}
 
-		vint* Counter()const
+		volatile vint* Counter()const
 		{
 			return counter;
 		}
 
-		ComPtr(vint* _counter, T* _reference)
+		ComPtr(volatile vint* _counter, T* _reference)
 			:counter(_counter)
 			,reference(_reference)
 		{
@@ -2760,7 +2766,7 @@ ComPtr
 		{
 			if(pointer)
 			{
-				counter=new vint(1);
+				counter=new volatile vint(1);
 				reference=pointer;
 			}
 			else
@@ -13645,7 +13651,7 @@ Attribute
 			typedef collections::Dictionary<WString, Ptr<Object>>		InternalPropertyMap;
 			typedef void(*DestructorProc)(DescriptableObject* obj);
 		protected:
-			vint									referenceCounter;
+			volatile vint							referenceCounter;
 			DestructorProc							sharedPtrDestructorProc;
 
 			size_t									objectSize;
@@ -13706,13 +13712,13 @@ ReferenceCounterOperator
 	template<typename T>
 	struct ReferenceCounterOperator<T, typename RequiresConvertable<T, reflection::DescriptableObject>::YesNoType>
 	{
-		static __forceinline vint* CreateCounter(T* reference)
+		static __forceinline volatile vint* CreateCounter(T* reference)
 		{
 			reflection::DescriptableObject* obj=reference;
 			return &obj->referenceCounter;
 		}
 
-		static __forceinline void DeleteReference(vint* counter, void* reference)
+		static __forceinline void DeleteReference(volatile vint* counter, void* reference)
 		{
 			reflection::DescriptableObject* obj=(T*)reference;
 			if(obj->sharedPtrDestructorProc)
