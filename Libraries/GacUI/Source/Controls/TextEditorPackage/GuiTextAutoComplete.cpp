@@ -100,7 +100,7 @@ GuiGrammarAutoComplete
 					{
 						GetApplication()->InvokeAsync([=]()
 						{
-							UpdateScopeInfoAsync(0, L"");
+							SubmitTask(TaskArgumentType(context.root, context.rootCode));
 						});
 					}
 				}
@@ -121,7 +121,7 @@ GuiGrammarAutoComplete
 				{
 					GetApplication()->InvokeInMainThread([=]()
 					{
-						UpdateScopeInfoAsync(node, code);
+						SubmitTask(TaskArgumentType(node, code));
 					});
 				}
 			}
@@ -158,20 +158,11 @@ GuiGrammarAutoComplete
 				}
 			}
 
-			void GuiGrammarAutoComplete::UpdateScopeInfoAsync(Ptr<parsing::ParsingTreeObject> parsingTreeNode, const WString& code)
+			void GuiGrammarAutoComplete::Execute(const TaskArgumentType& input)
 			{
 				Context newContext;
-				if(parsingTreeNode)
-				{
-					newContext.root=parsingTreeNode;
-					newContext.rootCode=code;
-				}
-				else
-				{
-					SpinLock::Scope scope(contextLock);
-					newContext.root=context.root;
-					newContext.rootCode=context.rootCode;
-				}
+				newContext.root=input.key;
+				newContext.rootCode=input.value;
 
 				TextPos startPos, endPos;
 				{

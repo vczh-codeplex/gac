@@ -45,8 +45,12 @@ GuiGrammarAutoComplete
 ***********************************************************************/
 			
 			/// <summary>Grammar based auto complete controller.</summary>
-			class GuiGrammarAutoComplete : public GuiTextBoxAutoCompleteBase, private RepeatingParsingExecutor::ICallback
+			class GuiGrammarAutoComplete
+				: public GuiTextBoxAutoCompleteBase
+				, private RepeatingParsingExecutor::ICallback
+				, private RepeatingTaskExecutor<collections::Pair<Ptr<parsing::ParsingTreeObject>, WString>>
 			{
+				typedef collections::Pair<Ptr<parsing::ParsingTreeObject>, WString>			TaskArgumentType;
 			public:
 				struct Context
 				{
@@ -76,7 +80,7 @@ GuiGrammarAutoComplete
 				void										TextEditFinished()override;
 				void										OnParsingFinishedAsync(Ptr<parsing::ParsingTreeObject> node, const WString& code)override;
 				void										CollectLeftRecursiveRules();
-				void										UpdateScopeInfoAsync(Ptr<parsing::ParsingTreeObject> parsingTreeNode, const WString& code);
+				void										Execute(const TaskArgumentType& input)override;
 			protected:
 
 				/// <summary>Called when the context of the code is selected.</summary>
