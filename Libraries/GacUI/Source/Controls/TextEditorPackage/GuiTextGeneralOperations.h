@@ -97,11 +97,16 @@ RepeatingParsingExecutor
 					/// <param name="generatedNewNode">True indicates the parsing succeeded. Otherwise failed.</param>
 					/// <param name="parsingExecutor">The parsing executor that parses the input.</param>
 					virtual void											OnParsingFinishedAsync(const RepeatingParsingOutput& output)=0;
+					/// <summary>Callback when <see cref="RepeatingParsingExecutor"/> requires enabling or disabling automatically repeating calling to the SubmitTask function.</summary>
+					/// <param name="enabled">Set to true to require an automatically repeating calling to the SubmitTask function</param>
+					virtual void											RequireAutoSubmitTask(bool enabled)=0;
 				};
 			private:
 				Ptr<parsing::tabling::ParsingGeneralParser>					grammarParser;
 				WString														grammarRule;
 				collections::List<ICallback*>								callbacks;
+				collections::List<ICallback*>								activatedCallbacks;
+				ICallback*													autoPushingCallback;
 
 			protected:
 
@@ -123,6 +128,14 @@ RepeatingParsingExecutor
 				/// <returns>Returns true if this operation succeeded.</returns>
 				/// <param name="value">The callback.</param>
 				bool														DetachCallback(ICallback* value);
+				/// <summary>Activate a callback. Activating a callback means that the callback owner has an ability to watch a text box modification, e.g., an attached <see cref="ICommonTextEditCallback"/> that is also an <see cref="ICallback"/>. The <see cref="RepeatingParsingExecutor"/> may require one of the activated callback to push code for parsing automatically via a call to <see cref="ICallback::RequireAutoSubmitTask"/>.</summary>
+				/// <returns>Returns true if this operation succeeded.</returns>
+				/// <param name="value">The callback.</param>
+				bool														ActivateCallback(ICallback* value);
+				/// <summary>Deactivate a callback. See <see cref="ActivateCallback"/> for deatils.</summary>
+				/// <returns>Returns true if this operation succeeded.</returns>
+				/// <param name="value">The callback.</param>
+				bool														DeactivateCallback(ICallback* value);
 
 				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetAttribute(vint index, const WString& name, vint argumentCount);
 				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetColorAttribute(vint index);

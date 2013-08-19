@@ -39,6 +39,7 @@ RepeatingParsingExecutor
 			RepeatingParsingExecutor::RepeatingParsingExecutor(Ptr<parsing::tabling::ParsingGeneralParser> _grammarParser, const WString& _grammarRule)
 				:grammarParser(_grammarParser)
 				,grammarRule(_grammarRule)
+				,autoPushingCallback(0)
 			{
 			}
 
@@ -54,6 +55,7 @@ RepeatingParsingExecutor
 
 			bool RepeatingParsingExecutor::AttachCallback(ICallback* value)
 			{
+				if(!value) return false;
 				if(callbacks.Contains(value)) return false;
 				callbacks.Add(value);
 				return true;
@@ -61,8 +63,45 @@ RepeatingParsingExecutor
 
 			bool RepeatingParsingExecutor::DetachCallback(ICallback* value)
 			{
+				if(!value) return false;
 				if(!callbacks.Contains(value)) return false;
+				DeactivateCallback(value);
 				callbacks.Remove(value);
+				return true;
+			}
+
+			bool RepeatingParsingExecutor::ActivateCallback(ICallback* value)
+			{
+				if(!value) return false;
+				if(!callbacks.Contains(value)) return false;
+				if(activatedCallbacks.Contains(value)) return false;
+				activatedCallbacks.Add(value);
+
+				if(!autoPushingCallback)
+				{
+					autoPushingCallback=value;
+					autoPushingCallback->RequireAutoSubmitTask(true);
+				}
+				return true;
+			}
+
+			bool RepeatingParsingExecutor::DeactivateCallback(ICallback* value)
+			{
+				if(!value) return false;
+				if(!callbacks.Contains(value)) return false;
+				if(!activatedCallbacks.Contains(value)) return false;
+
+				if(autoPushingCallback==value)
+				{
+					autoPushingCallback->RequireAutoSubmitTask(false);
+					autoPushingCallback=0;
+				}
+				activatedCallbacks.Remove(value);
+				if(!autoPushingCallback && activatedCallbacks.Count()>0)
+				{
+					autoPushingCallback=activatedCallbacks[0];
+					autoPushingCallback->RequireAutoSubmitTask(true);
+				}
 				return true;
 			}
 

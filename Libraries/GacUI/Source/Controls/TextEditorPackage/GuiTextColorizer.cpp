@@ -369,6 +369,11 @@ GuiGrammarColorizer
 				RestartColorizer();
 			}
 
+			void GuiGrammarColorizer::RequireAutoSubmitTask(bool enabled)
+			{
+				autoPushing=enabled;
+			}
+
 			void GuiGrammarColorizer::OnContextFinishedAsync(Ptr<parsing::ParsingTreeObject> node)
 			{
 			}
@@ -376,7 +381,8 @@ GuiGrammarColorizer
 			void GuiGrammarColorizer::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, vuint editVersion)
 			{
 				GuiTextBoxRegexColorizer::Attach(_element, _elementModifyLock, editVersion);
-				if(element && elementModifyLock)
+				parsingExecutor->ActivateCallback(this);
+				if(element && elementModifyLock && autoPushing)
 				{
 					SpinLock::Scope scope(*elementModifyLock);
 					RepeatingParsingInput input;
@@ -389,6 +395,7 @@ GuiGrammarColorizer
 			void GuiGrammarColorizer::Detach()
 			{
 				GuiTextBoxRegexColorizer::Detach();
+				parsingExecutor->DeactivateCallback(this);
 				if(element && elementModifyLock)
 				{
 					parsingExecutor->EnsureTaskFinished();
@@ -399,7 +406,7 @@ GuiGrammarColorizer
 			void GuiGrammarColorizer::TextEditFinished(vuint editVersion)
 			{
 				GuiTextBoxRegexColorizer::TextEditFinished(editVersion);
-				if(element && elementModifyLock)
+				if(element && elementModifyLock && autoPushing)
 				{
 					SpinLock::Scope scope(*elementModifyLock);
 					RepeatingParsingInput input;
@@ -423,6 +430,7 @@ GuiGrammarColorizer
 
 			GuiGrammarColorizer::GuiGrammarColorizer(Ptr<RepeatingParsingExecutor> _parsingExecutor)
 				:parsingExecutor(_parsingExecutor)
+				,autoPushing(false)
 			{
 				parsingExecutor->AttachCallback(this);
 				BeginSetColors();
@@ -430,6 +438,7 @@ GuiGrammarColorizer
 
 			GuiGrammarColorizer::GuiGrammarColorizer(Ptr<parsing::tabling::ParsingGeneralParser> _grammarParser, const WString& _grammarRule)
 				:parsingExecutor(new RepeatingParsingExecutor(_grammarParser, _grammarRule))
+				,autoPushing(false)
 			{
 				parsingExecutor->AttachCallback(this);
 				BeginSetColors();
