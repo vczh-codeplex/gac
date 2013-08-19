@@ -25,9 +25,13 @@ RepeatingParsingExecutor
 				{
 					node->InitializeQueryCache();
 				}
+
+				RepeatingParsingResult result;
+				result.node=node;
+				result.code=input;
 				FOREACH(ICallback*, callback, callbacks)
 				{
-					callback->OnParsingFinishedAsync(node, input);
+					callback->OnParsingFinishedAsync(result);
 				}
 			}
 

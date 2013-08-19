@@ -48,11 +48,11 @@ GuiTextBoxAutoCompleteBase
 				}
 			}
 
-			void GuiTextBoxAutoCompleteBase::TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)
+			void GuiTextBoxAutoCompleteBase::TextEditNotify(const TextEditNotifyStruct& arguments)
 			{
 			}
 
-			void GuiTextBoxAutoCompleteBase::TextCaretChanged(TextPos oldBegin, TextPos oldEnd, TextPos newBegin, TextPos newEnd)
+			void GuiTextBoxAutoCompleteBase::TextCaretChanged(const TextCaretChangedStruct& arguments)
 			{
 			}
 
@@ -81,26 +81,26 @@ GuiGrammarAutoComplete
 				}
 			}
 
-			void GuiGrammarAutoComplete::TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)
+			void GuiGrammarAutoComplete::TextEditNotify(const TextEditNotifyStruct& arguments)
 			{
-				GuiTextBoxAutoCompleteBase::TextEditNotify(originalStart, originalEnd, originalText, inputStart, inputEnd, inputText);
+				GuiTextBoxAutoCompleteBase::TextEditNotify(arguments);
 				if(element && elementModifyLock)
 				{
 					editing=true;
 				}
 			}
 
-			void GuiGrammarAutoComplete::TextCaretChanged(TextPos oldBegin, TextPos oldEnd, TextPos newBegin, TextPos newEnd)
+			void GuiGrammarAutoComplete::TextCaretChanged(const TextCaretChangedStruct& arguments)
 			{
-				GuiTextBoxAutoCompleteBase::TextCaretChanged(oldBegin, oldEnd, newBegin, newEnd);
+				GuiTextBoxAutoCompleteBase::TextCaretChanged(arguments);
 				if(element && elementModifyLock && !editing)
 				{
 					SpinLock::Scope scope(contextLock);
-					if(context.root)
+					if(context.input.node)
 					{
 						GetApplication()->InvokeAsync([=]()
 						{
-							SubmitTask(TaskArgumentType(context.root, context.rootCode));
+							SubmitTask(context.input);
 						});
 					}
 				}
@@ -115,13 +115,13 @@ GuiGrammarAutoComplete
 				}
 			}
 
-			void GuiGrammarAutoComplete::OnParsingFinishedAsync(Ptr<parsing::ParsingTreeObject> node, const WString& code)
+			void GuiGrammarAutoComplete::OnParsingFinishedAsync(const RepeatingParsingResult& arguments)
 			{
 				if(element && elementModifyLock)
 				{
 					GetApplication()->InvokeInMainThread([=]()
 					{
-						SubmitTask(TaskArgumentType(node, code));
+						SubmitTask(arguments);
 					});
 				}
 			}
@@ -158,11 +158,10 @@ GuiGrammarAutoComplete
 				}
 			}
 
-			void GuiGrammarAutoComplete::Execute(const TaskArgumentType& input)
+			void GuiGrammarAutoComplete::Execute(const RepeatingParsingResult& input)
 			{
 				Context newContext;
-				newContext.root=input.key;
-				newContext.rootCode=input.value;
+				newContext.input=input;
 
 				TextPos startPos, endPos;
 				{
@@ -180,7 +179,7 @@ GuiGrammarAutoComplete
 				ParsingTextPos start(startPos.row, startPos.column);
 				ParsingTextPos end(endPos.row, endPos.column);
 				ParsingTextRange range(start, end);
-				ParsingTreeNode* found=newContext.root->FindDeepestNode(range);
+				ParsingTreeNode* found=newContext.input.node->FindDeepestNode(range);
 				ParsingTreeObject* selectedNode=0;
 
 				if(!selectedNode)
@@ -233,7 +232,7 @@ GuiGrammarAutoComplete
 					newContext.contextNode=selectedNode;
 					if(start.index>=0 && end.index>=0)
 					{
-						newContext.contextNodeCode=newContext.rootCode.Sub(start.index, end.index-start.index+1);
+						newContext.contextNodeCode=newContext.input.code.Sub(start.index, end.index-start.index+1);
 					}
 					newContext.contextNodeRule=selectedNode->GetCreatorRules()[selectedNode->GetCreatorRules().Count()-1];
 				}
@@ -241,14 +240,14 @@ GuiGrammarAutoComplete
 				{
 					SpinLock::Scope scope(contextLock);
 					context=newContext;
-					if(context.root && context.contextNode)
+					if(context.input.node && context.contextNode)
 					{
 						OnContextFinishedAsync(context);
 					}
 				}
 			}
 
-			void GuiGrammarAutoComplete::OnContextFinishedAsync(Context& context)
+			void GuiGrammarAutoComplete::OnContextFinishedAsync(const Context& context)
 			{
 			}
 

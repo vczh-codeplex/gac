@@ -256,7 +256,7 @@ class ParserGrammarAutoComplete : public GuiGrammarAutoComplete
 protected:
 	GuiMultilineTextBox*					textBoxScope;
 
-	void OnContextFinishedAsync(Context& context)override
+	void OnContextFinishedAsync(const Context& context)override
 	{
 		WString selectedTree;
 		{

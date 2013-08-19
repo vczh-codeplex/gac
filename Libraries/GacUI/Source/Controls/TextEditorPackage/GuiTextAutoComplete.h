@@ -35,8 +35,8 @@ GuiTextBoxAutoCompleteBase
 
 				void										Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock)override;
 				void										Detach()override;
-				void										TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)override;
-				void										TextCaretChanged(TextPos oldBegin, TextPos oldEnd, TextPos newBegin, TextPos newEnd)override;
+				void										TextEditNotify(const TextEditNotifyStruct& arguments)override;
+				void										TextCaretChanged(const TextCaretChangedStruct& arguments)override;
 				void										TextEditFinished()override;
 			};
 
@@ -48,14 +48,12 @@ GuiGrammarAutoComplete
 			class GuiGrammarAutoComplete
 				: public GuiTextBoxAutoCompleteBase
 				, private RepeatingParsingExecutor::ICallback
-				, private RepeatingTaskExecutor<collections::Pair<Ptr<parsing::ParsingTreeObject>, WString>>
+				, private RepeatingTaskExecutor<RepeatingParsingResult>
 			{
-				typedef collections::Pair<Ptr<parsing::ParsingTreeObject>, WString>			TaskArgumentType;
 			public:
 				struct Context
 				{
-					Ptr<parsing::ParsingTreeObject>			root;
-					WString									rootCode;
+					RepeatingParsingResult					input;
 					parsing::ParsingTreeObject*				contextNode;
 					WString									contextNodeCode;
 					WString									contextNodeRule;
@@ -75,16 +73,16 @@ GuiGrammarAutoComplete
 				
 				void										Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock)override;
 				void										Detach()override;
-				void										TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)override;
-				void										TextCaretChanged(TextPos oldBegin, TextPos oldEnd, TextPos newBegin, TextPos newEnd)override;
+				void										TextEditNotify(const TextEditNotifyStruct& arguments)override;
+				void										TextCaretChanged(const TextCaretChangedStruct& arguments)override;
 				void										TextEditFinished()override;
-				void										OnParsingFinishedAsync(Ptr<parsing::ParsingTreeObject> node, const WString& code)override;
+				void										OnParsingFinishedAsync(const RepeatingParsingResult& result)override;
 				void										CollectLeftRecursiveRules();
-				void										Execute(const TaskArgumentType& input)override;
+				void										Execute(const RepeatingParsingResult& input)override;
 			protected:
 
 				/// <summary>Called when the context of the code is selected.</summary>
-				virtual void								OnContextFinishedAsync(Context& context);
+				virtual void								OnContextFinishedAsync(const Context& context);
 
 				/// <summary>Call this function in the derived class's destructor when it overrided <see cref="OnContextFinishedAsync"/>.</summary>
 				void										EnsureAutoCompleteFinished();
