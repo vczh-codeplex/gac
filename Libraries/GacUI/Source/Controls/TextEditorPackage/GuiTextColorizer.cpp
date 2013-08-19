@@ -114,7 +114,7 @@ GuiTextBoxColorizerBase
 				StopColorizerForever();
 			}
 
-			void GuiTextBoxColorizerBase::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock)
+			void GuiTextBoxColorizerBase::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, vuint editVersion)
 			{
 				if(_element)
 				{
@@ -157,7 +157,7 @@ GuiTextBoxColorizerBase
 			{
 			}
 
-			void GuiTextBoxColorizerBase::TextEditFinished()
+			void GuiTextBoxColorizerBase::TextEditFinished(vuint editVersion)
 			{
 			}
 
@@ -356,11 +356,11 @@ GuiTextBoxRegexColorizer
 GuiGrammarColorizer
 ***********************************************************************/
 
-			void GuiGrammarColorizer::OnParsingFinishedAsync(const RepeatingParsingResult& result)
+			void GuiGrammarColorizer::OnParsingFinishedAsync(const RepeatingParsingOutput& output)
 			{
 				{
 					SpinLock::Scope scope(parsingTreeLock);
-					parsingTreeNode=result.node;
+					parsingTreeNode=output.node;
 					if(parsingTreeNode)
 					{
 						OnContextFinishedAsync(parsingTreeNode);
@@ -373,14 +373,16 @@ GuiGrammarColorizer
 			{
 			}
 
-			void GuiGrammarColorizer::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock)
+			void GuiGrammarColorizer::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, vuint editVersion)
 			{
-				GuiTextBoxRegexColorizer::Attach(_element, _elementModifyLock);
+				GuiTextBoxRegexColorizer::Attach(_element, _elementModifyLock, editVersion);
 				if(element && elementModifyLock)
 				{
 					SpinLock::Scope scope(*elementModifyLock);
-					WString text=element->GetLines().GetText();
-					parsingExecutor->SubmitTask(text);
+					RepeatingParsingInput input;
+					input.editVersion=editVersion;
+					input.code=element->GetLines().GetText();
+					parsingExecutor->SubmitTask(input);
 				}
 			}
 
@@ -394,14 +396,16 @@ GuiGrammarColorizer
 				}
 			}
 
-			void GuiGrammarColorizer::TextEditFinished()
+			void GuiGrammarColorizer::TextEditFinished(vuint editVersion)
 			{
-				GuiTextBoxRegexColorizer::TextEditFinished();
+				GuiTextBoxRegexColorizer::TextEditFinished(editVersion);
 				if(element && elementModifyLock)
 				{
 					SpinLock::Scope scope(*elementModifyLock);
-					WString text=element->GetLines().GetText();
-					parsingExecutor->SubmitTask(text);
+					RepeatingParsingInput input;
+					input.editVersion=editVersion;
+					input.code=element->GetLines().GetText();
+					parsingExecutor->SubmitTask(input);
 				}
 			}
 
@@ -435,11 +439,6 @@ GuiGrammarColorizer
 			{
 				EnsureColorizerFinished();
 				parsingExecutor->DetachCallback(this);
-			}
-
-			void GuiGrammarColorizer::SubmitCode(const WString& code)
-			{
-				parsingExecutor->SubmitTask(code);
 			}
 
 			vint GuiGrammarColorizer::GetTokenId(const WString& token)
