@@ -101,6 +101,29 @@ RepeatingParsingExecutor
 					/// <param name="enabled">Set to true to require an automatically repeating calling to the SubmitTask function</param>
 					virtual void											RequireAutoSubmitTask(bool enabled)=0;
 				};
+
+				/// <summary>A base class for implementing a callback.</summary>
+				class CallbackBase : public virtual ICallback, public virtual ICommonTextEditCallback
+				{
+				private:
+					bool													callbackAutoPushing;
+					elements::GuiColorizedTextElement*						callbackElement;
+					SpinLock*												callbackElementModifyLock;
+
+				protected:
+					Ptr<RepeatingParsingExecutor>							parsingExecutor;
+
+				public:
+					CallbackBase(Ptr<RepeatingParsingExecutor> _parsingExecutor);
+					~CallbackBase();
+
+					void													RequireAutoSubmitTask(bool enabled)override;
+					void													Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, vuint editVersion)override;
+					void													Detach()override;
+					void													TextEditNotify(const TextEditNotifyStruct& arguments)override;
+					void													TextCaretChanged(const TextCaretChangedStruct& arguments)override;
+					void													TextEditFinished(vuint editVersion)override;
+				};
 			private:
 				Ptr<parsing::tabling::ParsingGeneralParser>					grammarParser;
 				WString														grammarRule;

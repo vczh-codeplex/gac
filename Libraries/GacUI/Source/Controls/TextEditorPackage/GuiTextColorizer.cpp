@@ -369,11 +369,6 @@ GuiGrammarColorizer
 				RestartColorizer();
 			}
 
-			void GuiGrammarColorizer::RequireAutoSubmitTask(bool enabled)
-			{
-				autoPushing=enabled;
-			}
-
 			void GuiGrammarColorizer::OnContextFinishedAsync(Ptr<parsing::ParsingTreeObject> node)
 			{
 			}
@@ -381,21 +376,13 @@ GuiGrammarColorizer
 			void GuiGrammarColorizer::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, vuint editVersion)
 			{
 				GuiTextBoxRegexColorizer::Attach(_element, _elementModifyLock, editVersion);
-				parsingExecutor->ActivateCallback(this);
-				if(element && elementModifyLock && autoPushing)
-				{
-					SpinLock::Scope scope(*elementModifyLock);
-					RepeatingParsingInput input;
-					input.editVersion=editVersion;
-					input.code=element->GetLines().GetText();
-					parsingExecutor->SubmitTask(input);
-				}
+				RepeatingParsingExecutor::CallbackBase::Attach(_element, _elementModifyLock, editVersion);
 			}
 
 			void GuiGrammarColorizer::Detach()
 			{
 				GuiTextBoxRegexColorizer::Detach();
-				parsingExecutor->DeactivateCallback(this);
+				RepeatingParsingExecutor::CallbackBase::Detach();
 				if(element && elementModifyLock)
 				{
 					parsingExecutor->EnsureTaskFinished();
@@ -403,17 +390,22 @@ GuiGrammarColorizer
 				}
 			}
 
+			void GuiGrammarColorizer::TextEditNotify(const TextEditNotifyStruct& arguments)
+			{
+				GuiTextBoxRegexColorizer::TextEditNotify(arguments);
+				RepeatingParsingExecutor::CallbackBase::TextEditNotify(arguments);
+			}
+
+			void GuiGrammarColorizer::TextCaretChanged(const TextCaretChangedStruct& arguments)
+			{
+				GuiTextBoxRegexColorizer::TextCaretChanged(arguments);
+				RepeatingParsingExecutor::CallbackBase::TextCaretChanged(arguments);
+			}
+
 			void GuiGrammarColorizer::TextEditFinished(vuint editVersion)
 			{
 				GuiTextBoxRegexColorizer::TextEditFinished(editVersion);
-				if(element && elementModifyLock && autoPushing)
-				{
-					SpinLock::Scope scope(*elementModifyLock);
-					RepeatingParsingInput input;
-					input.editVersion=editVersion;
-					input.code=element->GetLines().GetText();
-					parsingExecutor->SubmitTask(input);
-				}
+				RepeatingParsingExecutor::CallbackBase::TextEditFinished(editVersion);
 			}
 
 			void GuiGrammarColorizer::OnSemanticColorize(parsing::ParsingTreeToken* foundToken, parsing::ParsingTreeObject* tokenParent, const WString& type, const WString& field, vint semantic, vint& token)
@@ -429,16 +421,14 @@ GuiGrammarColorizer
 			}
 
 			GuiGrammarColorizer::GuiGrammarColorizer(Ptr<RepeatingParsingExecutor> _parsingExecutor)
-				:parsingExecutor(_parsingExecutor)
-				,autoPushing(false)
+				:RepeatingParsingExecutor::CallbackBase(_parsingExecutor)
 			{
 				parsingExecutor->AttachCallback(this);
 				BeginSetColors();
 			}
 
 			GuiGrammarColorizer::GuiGrammarColorizer(Ptr<parsing::tabling::ParsingGeneralParser> _grammarParser, const WString& _grammarRule)
-				:parsingExecutor(new RepeatingParsingExecutor(_grammarParser, _grammarRule))
-				,autoPushing(false)
+				:RepeatingParsingExecutor::CallbackBase(new RepeatingParsingExecutor(_grammarParser, _grammarRule))
 			{
 				parsingExecutor->AttachCallback(this);
 				BeginSetColors();

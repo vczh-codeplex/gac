@@ -23,7 +23,7 @@ GuiTextBoxColorizerBase
 ***********************************************************************/
 			
 			/// <summary>The base class of text box colorizer.</summary>
-			class GuiTextBoxColorizerBase : public Object, public ICommonTextEditCallback
+			class GuiTextBoxColorizerBase : public Object, public virtual ICommonTextEditCallback
 			{
 			public:
 				typedef collections::Array<elements::text::ColorEntry>			ColorArray;
@@ -146,15 +146,13 @@ GuiGrammarColorizer
 ***********************************************************************/
 
 			/// <summary>Grammar based colorizer.</summary>
-			class GuiGrammarColorizer abstract : public GuiTextBoxRegexColorizer, private RepeatingParsingExecutor::ICallback
+			class GuiGrammarColorizer abstract : public GuiTextBoxRegexColorizer, private RepeatingParsingExecutor::CallbackBase
 			{
 				typedef collections::Pair<WString, WString>					FieldDesc;
 				typedef collections::Dictionary<FieldDesc, vint>			FieldContextColors;
 				typedef collections::Dictionary<FieldDesc, vint>			FieldSemanticColors;
 				typedef elements::text::ColorEntry							ColorEntry;
 			private:
-				Ptr<RepeatingParsingExecutor>								parsingExecutor;
-				bool														autoPushing;
 				collections::Dictionary<WString, ColorEntry>				colorSettings;
 				collections::Dictionary<WString, vint>						colorIndices;
 				collections::List<bool>										colorContext;
@@ -166,13 +164,14 @@ GuiGrammarColorizer
 				Ptr<parsing::ParsingTreeObject>								parsingTreeNode;
 
 				void														OnParsingFinishedAsync(const RepeatingParsingOutput& output)override;
-				void														RequireAutoSubmitTask(bool enabled)override;
 			protected:
 				/// <summary>Called when the node is parsed successfully before restarting colorizing.</summary>
 				virtual void												OnContextFinishedAsync(Ptr<parsing::ParsingTreeObject> node);
 
 				void														Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, vuint editVersion)override;
 				void														Detach()override;
+				void														TextEditNotify(const TextEditNotifyStruct& arguments)override;
+				void														TextCaretChanged(const TextCaretChangedStruct& arguments)override;
 				void														TextEditFinished(vuint editVersion)override;
 
 				/// <summary>Called when a @SemanticColor attribute in a grammar is activated during colorizing to determine a color for the token.</summary>

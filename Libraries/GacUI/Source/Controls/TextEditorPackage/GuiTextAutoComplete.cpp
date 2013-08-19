@@ -67,21 +67,13 @@ GuiGrammarAutoComplete
 			void GuiGrammarAutoComplete::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, vuint editVersion)
 			{
 				GuiTextBoxAutoCompleteBase::Attach(_element, _elementModifyLock, editVersion);
-				parsingExecutor->ActivateCallback(this);
-				if(element && elementModifyLock && autoPushing)
-				{
-					SpinLock::Scope scope(*elementModifyLock);
-					RepeatingParsingInput input;
-					input.editVersion=editVersion;
-					input.code=element->GetLines().GetText();
-					parsingExecutor->SubmitTask(input);
-				}
+				RepeatingParsingExecutor::CallbackBase::Attach(_element, _elementModifyLock, editVersion);
 			}
 
 			void GuiGrammarAutoComplete::Detach()
 			{
 				GuiTextBoxAutoCompleteBase::Detach();
-				parsingExecutor->DeactivateCallback(this);
+				RepeatingParsingExecutor::CallbackBase::Detach();
 				if(element && elementModifyLock)
 				{
 					EnsureAutoCompleteFinished();
@@ -91,6 +83,7 @@ GuiGrammarAutoComplete
 			void GuiGrammarAutoComplete::TextEditNotify(const TextEditNotifyStruct& arguments)
 			{
 				GuiTextBoxAutoCompleteBase::TextEditNotify(arguments);
+				RepeatingParsingExecutor::CallbackBase::TextEditNotify(arguments);
 				if(element && elementModifyLock)
 				{
 					editing=true;
@@ -100,6 +93,7 @@ GuiGrammarAutoComplete
 			void GuiGrammarAutoComplete::TextCaretChanged(const TextCaretChangedStruct& arguments)
 			{
 				GuiTextBoxAutoCompleteBase::TextCaretChanged(arguments);
+				RepeatingParsingExecutor::CallbackBase::TextCaretChanged(arguments);
 				if(element && elementModifyLock && !editing)
 				{
 					SpinLock::Scope scope(contextLock);
@@ -116,16 +110,9 @@ GuiGrammarAutoComplete
 			void GuiGrammarAutoComplete::TextEditFinished(vuint editVersion)
 			{
 				GuiTextBoxAutoCompleteBase::TextEditFinished(editVersion);
+				RepeatingParsingExecutor::CallbackBase::TextEditFinished(editVersion);
 				if(element && elementModifyLock)
 				{
-					if(autoPushing)
-					{
-						SpinLock::Scope scope(*elementModifyLock);
-						RepeatingParsingInput input;
-						input.editVersion=editVersion;
-						input.code=element->GetLines().GetText();
-						parsingExecutor->SubmitTask(input);
-					}
 					editing=false;
 				}
 			}
@@ -139,11 +126,6 @@ GuiGrammarAutoComplete
 						SubmitTask(arguments);
 					});
 				}
-			}
-
-			void GuiGrammarAutoComplete::RequireAutoSubmitTask(bool enabled)
-			{
-				autoPushing=enabled;
 			}
 
 			void GuiGrammarAutoComplete::CollectLeftRecursiveRules()
@@ -279,8 +261,7 @@ GuiGrammarAutoComplete
 			}
 
 			GuiGrammarAutoComplete::GuiGrammarAutoComplete(Ptr<RepeatingParsingExecutor> _parsingExecutor)
-				:parsingExecutor(_parsingExecutor)
-				,autoPushing(false)
+				:RepeatingParsingExecutor::CallbackBase(_parsingExecutor)
 				,editing(false)
 			{
 				CollectLeftRecursiveRules();
@@ -288,8 +269,7 @@ GuiGrammarAutoComplete
 			}
 
 			GuiGrammarAutoComplete::GuiGrammarAutoComplete(Ptr<parsing::tabling::ParsingGeneralParser> _grammarParser, const WString& _grammarRule)
-				:parsingExecutor(new RepeatingParsingExecutor(_grammarParser, _grammarRule))
-				,autoPushing(false)
+				:RepeatingParsingExecutor::CallbackBase(new RepeatingParsingExecutor(_grammarParser, _grammarRule))
 				,editing(false)
 			{
 				CollectLeftRecursiveRules();
