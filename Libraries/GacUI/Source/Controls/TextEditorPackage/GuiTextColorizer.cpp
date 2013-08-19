@@ -136,12 +136,15 @@ GuiTextBoxColorizerBase
 				}
 			}
 
-			void GuiTextBoxColorizerBase::TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)
+			void GuiTextBoxColorizerBase::TextEditNotify(const TextEditNotifyStruct& arguments)
 			{
 				if(element && elementModifyLock)
 				{
 					SpinLock::Scope scope(*elementModifyLock);
-					vint line=originalStart.row<originalEnd.row?originalStart.row:originalEnd.row;
+					vint line
+						=arguments.originalStart.row<arguments.originalEnd.row
+						?arguments.originalStart.row
+						:arguments.originalEnd.row;
 					if(colorizedLineCount>line)
 					{
 						colorizedLineCount=line;
@@ -150,7 +153,7 @@ GuiTextBoxColorizerBase
 				}
 			}
 
-			void GuiTextBoxColorizerBase::TextCaretChanged(TextPos oldBegin, TextPos oldEnd, TextPos newBegin, TextPos newEnd)
+			void GuiTextBoxColorizerBase::TextCaretChanged(const TextCaretChangedStruct& arguments)
 			{
 			}
 
@@ -353,11 +356,11 @@ GuiTextBoxRegexColorizer
 GuiGrammarColorizer
 ***********************************************************************/
 
-			void GuiGrammarColorizer::OnParsingFinishedAsync(Ptr<parsing::ParsingTreeObject> node, const WString& code)
+			void GuiGrammarColorizer::OnParsingFinishedAsync(const RepeatingParsingResult& result)
 			{
 				{
 					SpinLock::Scope scope(parsingTreeLock);
-					parsingTreeNode=node;
+					parsingTreeNode=result.node;
 					if(parsingTreeNode)
 					{
 						OnContextFinishedAsync(parsingTreeNode);

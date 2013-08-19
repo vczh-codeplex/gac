@@ -157,9 +157,14 @@ GuiTextBoxCommonInterface
 				TextPos newEnd=textElement->GetCaretEnd();
 				if(oldBegin!=newBegin || oldEnd!=newEnd)
 				{
+					ICommonTextEditCallback::TextCaretChangedStruct arguments;
+					arguments.oldBegin=oldBegin;
+					arguments.oldEnd=oldEnd;
+					arguments.newBegin=newBegin;
+					arguments.newEnd=newEnd;
 					for(vint i=0;i<textEditCallbacks.Count();i++)
 					{
-						textEditCallbacks[i]->TextCaretChanged(oldBegin, oldEnd, newBegin, newEnd);
+						textEditCallbacks[i]->TextCaretChanged(arguments);
 					}
 					SelectionChanged.Execute(textControl->GetNotifyEventArguments());
 				}
@@ -184,9 +189,17 @@ GuiTextBoxCommonInterface
 						end=textElement->GetLines().Modify(start, end, inputText);
 					}
 					callback->AfterModify(originalStart, originalEnd, originalText, start, end, inputText);
+					
+					ICommonTextEditCallback::TextEditNotifyStruct arguments;
+					arguments.originalStart=originalStart;
+					arguments.originalEnd=originalEnd;
+					arguments.originalText=originalText;
+					arguments.inputStart=start;
+					arguments.inputEnd=end;
+					arguments.inputText=inputText;
 					for(vint i=0;i<textEditCallbacks.Count();i++)
 					{
-						textEditCallbacks[i]->TextEditNotify(originalStart, originalEnd, originalText, start, end, inputText);
+						textEditCallbacks[i]->TextEditNotify(arguments);
 					}
 					Move(end, false);
 					

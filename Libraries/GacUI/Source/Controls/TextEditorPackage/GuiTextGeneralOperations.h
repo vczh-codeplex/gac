@@ -25,16 +25,41 @@ Common Operations
 			class ICommonTextEditCallback : public virtual IDescriptable, public Description<ICommonTextEditCallback>
 			{
 			public:
+				struct TextEditNotifyStruct
+				{
+					TextPos								originalStart;
+					TextPos								originalEnd;
+					WString								originalText;
+					TextPos								inputStart;
+					TextPos								inputEnd;
+					WString								inputText;
+				};
+
+				struct TextCaretChangedStruct
+				{
+					TextPos								oldBegin;
+					TextPos								oldEnd;
+					TextPos								newBegin;
+					TextPos								newEnd;
+				};
+
 				virtual void							Attach(elements::GuiColorizedTextElement* element, SpinLock& elementModifyLock)=0;
 				virtual void							Detach()=0;
-				virtual void							TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)=0;
-				virtual void							TextCaretChanged(TextPos oldBegin, TextPos oldEnd, TextPos newBegin, TextPos newEnd)=0;
+				virtual void							TextEditNotify(const TextEditNotifyStruct& arguments)=0;
+				virtual void							TextCaretChanged(const TextCaretChangedStruct& arguments)=0;
 				virtual void							TextEditFinished()=0;
 			};
 
 /***********************************************************************
 RepeatingParsingExecutor
 ***********************************************************************/
+
+			/// <summary>A data structure storing the parsing result for text box control.</summary>
+			struct RepeatingParsingResult
+			{
+				Ptr<parsing::ParsingTreeObject>			node;
+				WString									code;
+			};
 
 			/// <summary>Repeating parsing executor.</summary>
 			class RepeatingParsingExecutor : public RepeatingTaskExecutor<WString>
@@ -47,7 +72,7 @@ RepeatingParsingExecutor
 					/// <summary>Callback when a parsing task is finished.</summary>
 					/// <param name="generatedNewNode">True indicates the parsing succeeded. Otherwise failed.</param>
 					/// <param name="parsingExecutor">The parsing executor that parses the input.</param>
-					virtual void											OnParsingFinishedAsync(Ptr<parsing::ParsingTreeObject> node, const WString& code)=0;
+					virtual void											OnParsingFinishedAsync(const RepeatingParsingResult& result)=0;
 				};
 			private:
 				Ptr<parsing::tabling::ParsingGeneralParser>					grammarParser;

@@ -62,12 +62,7 @@ Undo Redo
 				{
 				public:
 					GuiTextBoxUndoRedoProcessor*			processor;
-					TextPos									originalStart;
-					TextPos									originalEnd;
-					WString									originalText;
-					TextPos									inputStart;
-					TextPos									inputEnd;
-					WString									inputText;
+					TextEditNotifyStruct					arguments;
 					
 					void									Undo();
 					void									Redo();
@@ -80,8 +75,8 @@ Undo Redo
 
 				void										Attach(elements::GuiColorizedTextElement* element, SpinLock& elementModifyLock)override;
 				void										Detach()override;
-				void										TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)override;
-				void										TextCaretChanged(TextPos oldBegin, TextPos oldEnd, TextPos newBegin, TextPos newEnd)override;
+				void										TextEditNotify(const TextEditNotifyStruct& arguments)override;
+				void										TextCaretChanged(const TextCaretChangedStruct& arguments)override;
 				void										TextEditFinished()override;
 			};
 		}

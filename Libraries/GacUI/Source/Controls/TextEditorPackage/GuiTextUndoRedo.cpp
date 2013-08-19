@@ -105,16 +105,16 @@ GuiTextBoxUndoRedoProcessor::EditStep
 
 			void GuiTextBoxUndoRedoProcessor::EditStep::Undo()
 			{
-				processor->textBoxCommonInterface->Select(inputStart, inputEnd);
-				processor->textBoxCommonInterface->SetSelectionText(originalText);
-				processor->textBoxCommonInterface->Select(originalStart, originalEnd);
+				processor->textBoxCommonInterface->Select(arguments.inputStart, arguments.inputEnd);
+				processor->textBoxCommonInterface->SetSelectionText(arguments.originalText);
+				processor->textBoxCommonInterface->Select(arguments.originalStart, arguments.originalEnd);
 			}
 
 			void GuiTextBoxUndoRedoProcessor::EditStep::Redo()
 			{
-				processor->textBoxCommonInterface->Select(originalStart, originalEnd);
-				processor->textBoxCommonInterface->SetSelectionText(inputText);
-				processor->textBoxCommonInterface->Select(inputStart, inputEnd);
+				processor->textBoxCommonInterface->Select(arguments.originalStart, arguments.originalEnd);
+				processor->textBoxCommonInterface->SetSelectionText(arguments.inputText);
+				processor->textBoxCommonInterface->Select(arguments.inputStart, arguments.inputEnd);
 			}
 
 /***********************************************************************
@@ -139,20 +139,15 @@ GuiTextBoxUndoRedoProcessor
 				ClearUndoRedo();
 			}
 
-			void GuiTextBoxUndoRedoProcessor::TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)
+			void GuiTextBoxUndoRedoProcessor::TextEditNotify(const TextEditNotifyStruct& arguments)
 			{
 				Ptr<EditStep> step=new EditStep;
 				step->processor=this;
-				step->originalStart=originalStart;
-				step->originalEnd=originalEnd;
-				step->originalText=originalText;
-				step->inputStart=inputStart;
-				step->inputEnd=inputEnd;
-				step->inputText=inputText;
+				step->arguments=arguments;
 				PushStep(step);
 			}
 
-			void GuiTextBoxUndoRedoProcessor::TextCaretChanged(TextPos oldBegin, TextPos oldEnd, TextPos newBegin, TextPos newEnd)
+			void GuiTextBoxUndoRedoProcessor::TextCaretChanged(const TextCaretChangedStruct& arguments)
 			{
 			}
 

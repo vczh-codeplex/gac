@@ -46,8 +46,8 @@ GuiTextBoxColorizerBase
 
 				void										Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock)override;
 				void										Detach()override;
-				void										TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)override;
-				void										TextCaretChanged(TextPos oldBegin, TextPos oldEnd, TextPos newBegin, TextPos newEnd)override;
+				void										TextEditNotify(const TextEditNotifyStruct& arguments)override;
+				void										TextCaretChanged(const TextCaretChangedStruct& arguments)override;
 				void										TextEditFinished()override;
 				void										RestartColorizer();
 
@@ -164,7 +164,7 @@ GuiGrammarColorizer
 				SpinLock													parsingTreeLock;
 				Ptr<parsing::ParsingTreeObject>								parsingTreeNode;
 
-				void														OnParsingFinishedAsync(Ptr<parsing::ParsingTreeObject> node, const WString& code)override;
+				void														OnParsingFinishedAsync(const RepeatingParsingResult& result)override;
 			protected:
 				/// <summary>Called when the node is parsed successfully before restarting colorizing.</summary>
 				virtual void												OnContextFinishedAsync(Ptr<parsing::ParsingTreeObject> node);
