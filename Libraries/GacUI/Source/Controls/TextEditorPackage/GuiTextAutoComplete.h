@@ -23,7 +23,7 @@ GuiTextBoxAutoCompleteBase
 ***********************************************************************/
 			
 			/// <summary>The base class of text box auto complete controller.</summary>
-			class GuiTextBoxAutoCompleteBase : public Object, public ICommonTextEditCallback
+			class GuiTextBoxAutoCompleteBase : public Object, public virtual ICommonTextEditCallback
 			{
 			protected:
 				elements::GuiColorizedTextElement*			element;
@@ -47,7 +47,7 @@ GuiGrammarAutoComplete
 			/// <summary>Grammar based auto complete controller.</summary>
 			class GuiGrammarAutoComplete
 				: public GuiTextBoxAutoCompleteBase
-				, private RepeatingParsingExecutor::ICallback
+				, private RepeatingParsingExecutor::CallbackBase
 				, private RepeatingTaskExecutor<RepeatingParsingOutput>
 			{
 			public:
@@ -64,8 +64,6 @@ GuiGrammarAutoComplete
 					}
 				};
 			private:
-				Ptr<RepeatingParsingExecutor>				parsingExecutor;
-				bool										autoPushing;
 				collections::SortedList<WString>			leftRecursiveRules;
 				bool										editing;
 
@@ -78,7 +76,6 @@ GuiGrammarAutoComplete
 				void										TextCaretChanged(const TextCaretChangedStruct& arguments)override;
 				void										TextEditFinished(vuint editVersion)override;
 				void										OnParsingFinishedAsync(const RepeatingParsingOutput& output)override;
-				void										RequireAutoSubmitTask(bool enabled)override;
 				void										CollectLeftRecursiveRules();
 				void										Execute(const RepeatingParsingOutput& input)override;
 			protected:

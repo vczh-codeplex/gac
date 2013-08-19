@@ -14,6 +14,79 @@ namespace vl
 			using namespace collections;
 
 /***********************************************************************
+RepeatingParsingExecutor::CallbackBase
+***********************************************************************/
+
+			RepeatingParsingExecutor::CallbackBase::CallbackBase(Ptr<RepeatingParsingExecutor> _parsingExecutor)
+				:parsingExecutor(_parsingExecutor)
+				,callbackAutoPushing(false)
+				,callbackElement(0)
+				,callbackElementModifyLock(0)
+			{
+			}
+
+			RepeatingParsingExecutor::CallbackBase::~CallbackBase()
+			{
+			}
+
+			void RepeatingParsingExecutor::CallbackBase::RequireAutoSubmitTask(bool enabled)
+			{
+				callbackAutoPushing=enabled;
+			}
+
+			void RepeatingParsingExecutor::CallbackBase::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, vuint editVersion)
+			{
+				if(_element)
+				{
+					SpinLock::Scope scope(_elementModifyLock);
+					callbackElement=_element;
+					callbackElementModifyLock=&_elementModifyLock;
+				}
+				
+				parsingExecutor->ActivateCallback(this);
+				if(callbackElement && callbackElementModifyLock && callbackAutoPushing)
+				{
+					SpinLock::Scope scope(*callbackElementModifyLock);
+					RepeatingParsingInput input;
+					input.editVersion=editVersion;
+					input.code=callbackElement->GetLines().GetText();
+					parsingExecutor->SubmitTask(input);
+				}
+			}
+
+			void RepeatingParsingExecutor::CallbackBase::Detach()
+			{
+				if(callbackElement && callbackElementModifyLock)
+				{
+					SpinLock::Scope scope(*callbackElementModifyLock);
+					callbackElement=0;
+					callbackElementModifyLock=0;
+				}
+				
+				parsingExecutor->DeactivateCallback(this);
+			}
+
+			void RepeatingParsingExecutor::CallbackBase::TextEditNotify(const TextEditNotifyStruct& arguments)
+			{
+			}
+
+			void RepeatingParsingExecutor::CallbackBase::TextCaretChanged(const TextCaretChangedStruct& arguments)
+			{
+			}
+
+			void RepeatingParsingExecutor::CallbackBase::TextEditFinished(vuint editVersion)
+			{
+				if(callbackElement && callbackElementModifyLock && callbackAutoPushing)
+				{
+					SpinLock::Scope scope(*callbackElementModifyLock);
+					RepeatingParsingInput input;
+					input.editVersion=editVersion;
+					input.code=callbackElement->GetLines().GetText();
+					parsingExecutor->SubmitTask(input);
+				}
+			}
+
+/***********************************************************************
 RepeatingParsingExecutor
 ***********************************************************************/
 
