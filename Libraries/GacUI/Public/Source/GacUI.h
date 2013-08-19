@@ -7339,33 +7339,105 @@ Common Operations
 			class ICommonTextEditCallback : public virtual IDescriptable, public Description<ICommonTextEditCallback>
 			{
 			public:
-				virtual void							Attach(elements::GuiColorizedTextElement* element, SpinLock& elementModifyLock)=0;
+				struct TextEditNotifyStruct
+				{
+					TextPos								originalStart;
+					TextPos								originalEnd;
+					WString								originalText;
+					TextPos								inputStart;
+					TextPos								inputEnd;
+					WString								inputText;
+					vuint								editVersion;
+
+					TextEditNotifyStruct()
+						:editVersion(0)
+					{
+					}
+				};
+
+				struct TextCaretChangedStruct
+				{
+					TextPos								oldBegin;
+					TextPos								oldEnd;
+					TextPos								newBegin;
+					TextPos								newEnd;
+				};
+
+				virtual void							Attach(elements::GuiColorizedTextElement* element, SpinLock& elementModifyLock, vuint editVersion)=0;
 				virtual void							Detach()=0;
-				virtual void							TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)=0;
-				virtual void							TextCaretChanged(TextPos oldBegin, TextPos oldEnd, TextPos newBegin, TextPos newEnd)=0;
-				virtual void							TextEditFinished()=0;
+				virtual void							TextEditNotify(const TextEditNotifyStruct& arguments)=0;
+				virtual void							TextCaretChanged(const TextCaretChangedStruct& arguments)=0;
+				virtual void							TextEditFinished(vuint editVersion)=0;
 			};
 
 /***********************************************************************
 RepeatingParsingExecutor
 ***********************************************************************/
 
-			class RepeatingParsingExecutor : public RepeatingTaskExecutor<WString>
+			struct RepeatingParsingInput
+			{
+				vint									editVersion;
+				WString									code;
+
+				RepeatingParsingInput()
+					:editVersion(0)
+				{
+				}
+			};
+
+			struct RepeatingParsingOutput
+			{
+				Ptr<parsing::ParsingTreeObject>			node;
+				vint									editVersion;
+				WString									code;
+
+				RepeatingParsingOutput()
+					:editVersion(0)
+				{
+				}
+			};
+
+			class RepeatingParsingExecutor : public RepeatingTaskExecutor<RepeatingParsingInput>
 			{
 			public:
 				class ICallback : public virtual Interface
 				{
 				public:
-					virtual void											OnParsingFinishedAsync(Ptr<parsing::ParsingTreeObject> node, const WString& code)=0;
+					virtual void											OnParsingFinishedAsync(const RepeatingParsingOutput& output)=0;
+					virtual void											RequireAutoSubmitTask(bool enabled)=0;
+				};
+
+				class CallbackBase : public virtual ICallback, public virtual ICommonTextEditCallback
+				{
+				private:
+					bool													callbackAutoPushing;
+					elements::GuiColorizedTextElement*						callbackElement;
+					SpinLock*												callbackElementModifyLock;
+
+				protected:
+					Ptr<RepeatingParsingExecutor>							parsingExecutor;
+
+				public:
+					CallbackBase(Ptr<RepeatingParsingExecutor> _parsingExecutor);
+					~CallbackBase();
+
+					void													RequireAutoSubmitTask(bool enabled)override;
+					void													Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, vuint editVersion)override;
+					void													Detach()override;
+					void													TextEditNotify(const TextEditNotifyStruct& arguments)override;
+					void													TextCaretChanged(const TextCaretChangedStruct& arguments)override;
+					void													TextEditFinished(vuint editVersion)override;
 				};
 			private:
 				Ptr<parsing::tabling::ParsingGeneralParser>					grammarParser;
 				WString														grammarRule;
 				collections::List<ICallback*>								callbacks;
+				collections::List<ICallback*>								activatedCallbacks;
+				ICallback*													autoPushingCallback;
 
 			protected:
 
-				void														Execute(const WString& input)override;
+				void														Execute(const RepeatingParsingInput& input)override;
 			public:
 				RepeatingParsingExecutor(Ptr<parsing::tabling::ParsingGeneralParser> _grammarParser, const WString& _grammarRule);
 				~RepeatingParsingExecutor();
@@ -7373,6 +7445,8 @@ RepeatingParsingExecutor
 				Ptr<parsing::tabling::ParsingGeneralParser>					GetParser();
 				bool														AttachCallback(ICallback* value);
 				bool														DetachCallback(ICallback* value);
+				bool														ActivateCallback(ICallback* value);
+				bool														DeactivateCallback(ICallback* value);
 
 				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetAttribute(vint index, const WString& name, vint argumentCount);
 				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetColorAttribute(vint index);
@@ -7411,7 +7485,7 @@ namespace vl
 GuiTextBoxColorizerBase
 ***********************************************************************/
 			
-			class GuiTextBoxColorizerBase : public Object, public ICommonTextEditCallback
+			class GuiTextBoxColorizerBase : public Object, public virtual ICommonTextEditCallback
 			{
 			public:
 				typedef collections::Array<elements::text::ColorEntry>			ColorArray;
@@ -7432,11 +7506,11 @@ GuiTextBoxColorizerBase
 				GuiTextBoxColorizerBase();
 				~GuiTextBoxColorizerBase();
 
-				void										Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock)override;
+				void										Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, vuint editVersion)override;
 				void										Detach()override;
-				void										TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)override;
-				void										TextCaretChanged(TextPos oldBegin, TextPos oldEnd, TextPos newBegin, TextPos newEnd)override;
-				void										TextEditFinished()override;
+				void										TextEditNotify(const TextEditNotifyStruct& arguments)override;
+				void										TextCaretChanged(const TextCaretChangedStruct& arguments)override;
+				void										TextEditFinished(vuint editVersion)override;
 				void										RestartColorizer();
 
 				virtual vint								GetLexerStartState()=0;
@@ -7489,14 +7563,13 @@ GuiTextBoxRegexColorizer
 GuiGrammarColorizer
 ***********************************************************************/
 
-			class GuiGrammarColorizer abstract : public GuiTextBoxRegexColorizer, private RepeatingParsingExecutor::ICallback
+			class GuiGrammarColorizer abstract : public GuiTextBoxRegexColorizer, private RepeatingParsingExecutor::CallbackBase
 			{
 				typedef collections::Pair<WString, WString>					FieldDesc;
 				typedef collections::Dictionary<FieldDesc, vint>			FieldContextColors;
 				typedef collections::Dictionary<FieldDesc, vint>			FieldSemanticColors;
 				typedef elements::text::ColorEntry							ColorEntry;
 			private:
-				Ptr<RepeatingParsingExecutor>								parsingExecutor;
 				collections::Dictionary<WString, ColorEntry>				colorSettings;
 				collections::Dictionary<WString, vint>						colorIndices;
 				collections::List<bool>										colorContext;
@@ -7507,13 +7580,15 @@ GuiGrammarColorizer
 				SpinLock													parsingTreeLock;
 				Ptr<parsing::ParsingTreeObject>								parsingTreeNode;
 
-				void														OnParsingFinishedAsync(Ptr<parsing::ParsingTreeObject> node, const WString& code)override;
+				void														OnParsingFinishedAsync(const RepeatingParsingOutput& output)override;
 			protected:
 				virtual void												OnContextFinishedAsync(Ptr<parsing::ParsingTreeObject> node);
 
-				void														Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock)override;
+				void														Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, vuint editVersion)override;
 				void														Detach()override;
-				void														TextEditFinished()override;
+				void														TextEditNotify(const TextEditNotifyStruct& arguments)override;
+				void														TextCaretChanged(const TextCaretChangedStruct& arguments)override;
+				void														TextEditFinished(vuint editVersion)override;
 
 				virtual void												OnSemanticColorize(parsing::ParsingTreeToken* foundToken, parsing::ParsingTreeObject* tokenParent, const WString& type, const WString& field, vint semantic, vint& token);
 
@@ -7523,7 +7598,6 @@ GuiGrammarColorizer
 				GuiGrammarColorizer(Ptr<parsing::tabling::ParsingGeneralParser> _grammarParser, const WString& _grammarRule);
 				~GuiGrammarColorizer();
 
-				void														SubmitCode(const WString& code);
 				vint														GetTokenId(const WString& token);
 				vint														GetSemanticId(const WString& semantic);
 				void														BeginSetColors();
@@ -7568,7 +7642,7 @@ namespace vl
 GuiTextBoxAutoCompleteBase
 ***********************************************************************/
 			
-			class GuiTextBoxAutoCompleteBase : public Object, public ICommonTextEditCallback
+			class GuiTextBoxAutoCompleteBase : public Object, public virtual ICommonTextEditCallback
 			{
 			protected:
 				elements::GuiColorizedTextElement*			element;
@@ -7578,24 +7652,26 @@ GuiTextBoxAutoCompleteBase
 				GuiTextBoxAutoCompleteBase();
 				~GuiTextBoxAutoCompleteBase();
 
-				void										Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock)override;
+				void										Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, vuint editVersion)override;
 				void										Detach()override;
-				void										TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)override;
-				void										TextCaretChanged(TextPos oldBegin, TextPos oldEnd, TextPos newBegin, TextPos newEnd)override;
-				void										TextEditFinished()override;
+				void										TextEditNotify(const TextEditNotifyStruct& arguments)override;
+				void										TextCaretChanged(const TextCaretChangedStruct& arguments)override;
+				void										TextEditFinished(vuint editVersion)override;
 			};
 
 /***********************************************************************
 GuiGrammarAutoComplete
 ***********************************************************************/
 			
-			class GuiGrammarAutoComplete : public GuiTextBoxAutoCompleteBase, private RepeatingParsingExecutor::ICallback
+			class GuiGrammarAutoComplete
+				: public GuiTextBoxAutoCompleteBase
+				, private RepeatingParsingExecutor::CallbackBase
+				, private RepeatingTaskExecutor<RepeatingParsingOutput>
 			{
 			public:
 				struct Context
 				{
-					Ptr<parsing::ParsingTreeObject>			root;
-					WString									rootCode;
+					RepeatingParsingOutput					input;
 					parsing::ParsingTreeObject*				contextNode;
 					WString									contextNodeCode;
 					WString									contextNodeRule;
@@ -7606,24 +7682,23 @@ GuiGrammarAutoComplete
 					}
 				};
 			private:
-				Ptr<RepeatingParsingExecutor>				parsingExecutor;
 				collections::SortedList<WString>			leftRecursiveRules;
 				bool										editing;
 
 				SpinLock									contextLock;
 				Context										context;
 				
-				void										Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock)override;
+				void										Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, vuint editVersion)override;
 				void										Detach()override;
-				void										TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)override;
-				void										TextCaretChanged(TextPos oldBegin, TextPos oldEnd, TextPos newBegin, TextPos newEnd)override;
-				void										TextEditFinished()override;
-				void										OnParsingFinishedAsync(Ptr<parsing::ParsingTreeObject> node, const WString& code)override;
+				void										TextEditNotify(const TextEditNotifyStruct& arguments)override;
+				void										TextCaretChanged(const TextCaretChangedStruct& arguments)override;
+				void										TextEditFinished(vuint editVersion)override;
+				void										OnParsingFinishedAsync(const RepeatingParsingOutput& output)override;
 				void										CollectLeftRecursiveRules();
-				void										UpdateScopeInfoAsync(Ptr<parsing::ParsingTreeObject> parsingTreeNode, const WString& code);
+				void										Execute(const RepeatingParsingOutput& input)override;
 			protected:
 
-				virtual void								OnContextFinishedAsync(Context& context);
+				virtual void								OnContextFinishedAsync(const Context& context);
 
 				void										EnsureAutoCompleteFinished();
 			public:
@@ -7705,12 +7780,7 @@ Undo Redo
 				{
 				public:
 					GuiTextBoxUndoRedoProcessor*			processor;
-					TextPos									originalStart;
-					TextPos									originalEnd;
-					WString									originalText;
-					TextPos									inputStart;
-					TextPos									inputEnd;
-					WString									inputText;
+					TextEditNotifyStruct					arguments;
 					
 					void									Undo();
 					void									Redo();
@@ -7721,11 +7791,11 @@ Undo Redo
 				GuiTextBoxUndoRedoProcessor(GuiTextBoxCommonInterface* _textBoxCommonInterface);
 				~GuiTextBoxUndoRedoProcessor();
 
-				void										Attach(elements::GuiColorizedTextElement* element, SpinLock& elementModifyLock)override;
+				void										Attach(elements::GuiColorizedTextElement* element, SpinLock& elementModifyLock, vuint editVersion)override;
 				void										Detach()override;
-				void										TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)override;
-				void										TextCaretChanged(TextPos oldBegin, TextPos oldEnd, TextPos newBegin, TextPos newEnd)override;
-				void										TextEditFinished()override;
+				void										TextEditNotify(const TextEditNotifyStruct& arguments)override;
+				void										TextCaretChanged(const TextCaretChangedStruct& arguments)override;
+				void										TextEditFinished(vuint editVersion)override;
 			};
 		}
 	}
@@ -7812,6 +7882,7 @@ Common Interface
 			private:
 				elements::GuiColorizedTextElement*					textElement;
 				compositions::GuiGraphicsComposition*				textComposition;
+				vuint												editVersion;
 				GuiControl*											textControl;
 				ICallback*											callback;
 				bool												dragging;
@@ -7908,6 +7979,7 @@ Common Interface
 
 				//================ undo redo control
 
+				vuint												GetEditVersion();
 				bool												CanUndo();
 				bool												CanRedo();
 				void												ClearUndoRedo();
