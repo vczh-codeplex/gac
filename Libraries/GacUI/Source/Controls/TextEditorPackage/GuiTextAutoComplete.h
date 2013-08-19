@@ -33,11 +33,11 @@ GuiTextBoxAutoCompleteBase
 				GuiTextBoxAutoCompleteBase();
 				~GuiTextBoxAutoCompleteBase();
 
-				void										Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock)override;
+				void										Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, vuint editVersion)override;
 				void										Detach()override;
 				void										TextEditNotify(const TextEditNotifyStruct& arguments)override;
 				void										TextCaretChanged(const TextCaretChangedStruct& arguments)override;
-				void										TextEditFinished()override;
+				void										TextEditFinished(vuint editVersion)override;
 			};
 
 /***********************************************************************
@@ -48,12 +48,12 @@ GuiGrammarAutoComplete
 			class GuiGrammarAutoComplete
 				: public GuiTextBoxAutoCompleteBase
 				, private RepeatingParsingExecutor::ICallback
-				, private RepeatingTaskExecutor<RepeatingParsingResult>
+				, private RepeatingTaskExecutor<RepeatingParsingOutput>
 			{
 			public:
 				struct Context
 				{
-					RepeatingParsingResult					input;
+					RepeatingParsingOutput					input;
 					parsing::ParsingTreeObject*				contextNode;
 					WString									contextNodeCode;
 					WString									contextNodeRule;
@@ -71,14 +71,14 @@ GuiGrammarAutoComplete
 				SpinLock									contextLock;
 				Context										context;
 				
-				void										Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock)override;
+				void										Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, vuint editVersion)override;
 				void										Detach()override;
 				void										TextEditNotify(const TextEditNotifyStruct& arguments)override;
 				void										TextCaretChanged(const TextCaretChangedStruct& arguments)override;
-				void										TextEditFinished()override;
-				void										OnParsingFinishedAsync(const RepeatingParsingResult& result)override;
+				void										TextEditFinished(vuint editVersion)override;
+				void										OnParsingFinishedAsync(const RepeatingParsingOutput& output)override;
 				void										CollectLeftRecursiveRules();
-				void										Execute(const RepeatingParsingResult& input)override;
+				void										Execute(const RepeatingParsingOutput& input)override;
 			protected:
 
 				/// <summary>Called when the context of the code is selected.</summary>

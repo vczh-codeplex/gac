@@ -28,7 +28,7 @@ GuiTextBoxAutoCompleteBase
 			{
 			}
 
-			void GuiTextBoxAutoCompleteBase::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock)
+			void GuiTextBoxAutoCompleteBase::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, vuint editVersion)
 			{
 				if(_element)
 				{
@@ -56,7 +56,7 @@ GuiTextBoxAutoCompleteBase
 			{
 			}
 
-			void GuiTextBoxAutoCompleteBase::TextEditFinished()
+			void GuiTextBoxAutoCompleteBase::TextEditFinished(vuint editVersion)
 			{
 			}
 
@@ -64,9 +64,9 @@ GuiTextBoxAutoCompleteBase
 GuiGrammarAutoComplete
 ***********************************************************************/
 
-			void GuiGrammarAutoComplete::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock)
+			void GuiGrammarAutoComplete::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, vuint editVersion)
 			{
-				GuiTextBoxAutoCompleteBase::Attach(_element, _elementModifyLock);
+				GuiTextBoxAutoCompleteBase::Attach(_element, _elementModifyLock, editVersion);
 				if(element && elementModifyLock)
 				{
 				}
@@ -106,16 +106,16 @@ GuiGrammarAutoComplete
 				}
 			}
 
-			void GuiGrammarAutoComplete::TextEditFinished()
+			void GuiGrammarAutoComplete::TextEditFinished(vuint editVersion)
 			{
-				GuiTextBoxAutoCompleteBase::TextEditFinished();
+				GuiTextBoxAutoCompleteBase::TextEditFinished(editVersion);
 				if(element && elementModifyLock)
 				{
 					editing=false;
 				}
 			}
 
-			void GuiGrammarAutoComplete::OnParsingFinishedAsync(const RepeatingParsingResult& arguments)
+			void GuiGrammarAutoComplete::OnParsingFinishedAsync(const RepeatingParsingOutput& arguments)
 			{
 				if(element && elementModifyLock)
 				{
@@ -158,7 +158,7 @@ GuiGrammarAutoComplete
 				}
 			}
 
-			void GuiGrammarAutoComplete::Execute(const RepeatingParsingResult& input)
+			void GuiGrammarAutoComplete::Execute(const RepeatingParsingOutput& input)
 			{
 				Context newContext;
 				newContext.input=input;

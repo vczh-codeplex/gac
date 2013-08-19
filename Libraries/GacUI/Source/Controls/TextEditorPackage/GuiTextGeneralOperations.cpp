@@ -17,18 +17,19 @@ namespace vl
 RepeatingParsingExecutor
 ***********************************************************************/
 
-			void RepeatingParsingExecutor::Execute(const WString& input)
+			void RepeatingParsingExecutor::Execute(const RepeatingParsingInput& input)
 			{
 				List<Ptr<ParsingError>> errors;
-				Ptr<ParsingTreeObject> node=grammarParser->Parse(input, grammarRule, errors).Cast<ParsingTreeObject>();
+				Ptr<ParsingTreeObject> node=grammarParser->Parse(input.code, grammarRule, errors).Cast<ParsingTreeObject>();
 				if(node)
 				{
 					node->InitializeQueryCache();
 				}
 
-				RepeatingParsingResult result;
+				RepeatingParsingOutput result;
 				result.node=node;
-				result.code=input;
+				result.editVersion=input.editVersion;
+				result.code=input.code;
 				FOREACH(ICallback*, callback, callbacks)
 				{
 					callback->OnParsingFinishedAsync(result);

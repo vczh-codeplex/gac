@@ -190,6 +190,7 @@ GuiTextBoxCommonInterface
 					}
 					callback->AfterModify(originalStart, originalEnd, originalText, start, end, inputText);
 					
+					editVersion++;
 					ICommonTextEditCallback::TextEditNotifyStruct arguments;
 					arguments.originalStart=originalStart;
 					arguments.originalEnd=originalEnd;
@@ -197,16 +198,19 @@ GuiTextBoxCommonInterface
 					arguments.inputStart=start;
 					arguments.inputEnd=end;
 					arguments.inputText=inputText;
+					arguments.editVersion=editVersion;
 					for(vint i=0;i<textEditCallbacks.Count();i++)
 					{
 						textEditCallbacks[i]->TextEditNotify(arguments);
 					}
+
 					Move(end, false);
 					
 					for(vint i=0;i<textEditCallbacks.Count();i++)
 					{
-						textEditCallbacks[i]->TextEditFinished();
+						textEditCallbacks[i]->TextEditFinished(editVersion);
 					}
+
 					textControl->TextChanged.Execute(textControl->GetNotifyEventArguments());
 				}
 			}
@@ -463,7 +467,7 @@ GuiTextBoxCommonInterface
 
 				for(vint i=0;i<textEditCallbacks.Count();i++)
 				{
-					textEditCallbacks[i]->Attach(textElement, elementModifyLock);
+					textEditCallbacks[i]->Attach(textElement, elementModifyLock, editVersion);
 				}
 			}
 			
@@ -488,7 +492,7 @@ GuiTextBoxCommonInterface
 					textEditCallbacks.Add(value);
 					if(textElement)
 					{
-						value->Attach(textElement, elementModifyLock);
+						value->Attach(textElement, elementModifyLock, editVersion);
 					}
 					return true;
 				}
@@ -534,6 +538,7 @@ GuiTextBoxCommonInterface
 			GuiTextBoxCommonInterface::GuiTextBoxCommonInterface()
 				:textElement(0)
 				,textComposition(0)
+				,editVersion(0)
 				,textControl(0)
 				,callback(0)
 				,dragging(false)
@@ -804,6 +809,11 @@ GuiTextBoxCommonInterface
 			}
 
 			//================ undo redo control
+
+			vuint GuiTextBoxCommonInterface::GetEditVersion()
+			{
+				return editVersion;
+			}
 
 			bool GuiTextBoxCommonInterface::CanUndo()
 			{

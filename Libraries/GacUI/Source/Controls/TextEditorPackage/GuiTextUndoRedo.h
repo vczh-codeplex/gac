@@ -73,11 +73,11 @@ Undo Redo
 				GuiTextBoxUndoRedoProcessor(GuiTextBoxCommonInterface* _textBoxCommonInterface);
 				~GuiTextBoxUndoRedoProcessor();
 
-				void										Attach(elements::GuiColorizedTextElement* element, SpinLock& elementModifyLock)override;
+				void										Attach(elements::GuiColorizedTextElement* element, SpinLock& elementModifyLock, vuint editVersion)override;
 				void										Detach()override;
 				void										TextEditNotify(const TextEditNotifyStruct& arguments)override;
 				void										TextCaretChanged(const TextCaretChangedStruct& arguments)override;
-				void										TextEditFinished()override;
+				void										TextEditFinished(vuint editVersion)override;
 			};
 		}
 	}

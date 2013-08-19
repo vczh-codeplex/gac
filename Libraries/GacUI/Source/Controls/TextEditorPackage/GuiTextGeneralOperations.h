@@ -33,6 +33,12 @@ Common Operations
 					TextPos								inputStart;
 					TextPos								inputEnd;
 					WString								inputText;
+					vuint								editVersion;
+
+					TextEditNotifyStruct()
+						:editVersion(0)
+					{
+					}
 				};
 
 				struct TextCaretChangedStruct
@@ -43,26 +49,44 @@ Common Operations
 					TextPos								newEnd;
 				};
 
-				virtual void							Attach(elements::GuiColorizedTextElement* element, SpinLock& elementModifyLock)=0;
+				virtual void							Attach(elements::GuiColorizedTextElement* element, SpinLock& elementModifyLock, vuint editVersion)=0;
 				virtual void							Detach()=0;
 				virtual void							TextEditNotify(const TextEditNotifyStruct& arguments)=0;
 				virtual void							TextCaretChanged(const TextCaretChangedStruct& arguments)=0;
-				virtual void							TextEditFinished()=0;
+				virtual void							TextEditFinished(vuint editVersion)=0;
 			};
 
 /***********************************************************************
 RepeatingParsingExecutor
 ***********************************************************************/
 
+			/// <summary>A data structure storing the parsing input for text box control.</summary>
+			struct RepeatingParsingInput
+			{
+				vint									editVersion;
+				WString									code;
+
+				RepeatingParsingInput()
+					:editVersion(0)
+				{
+				}
+			};
+
 			/// <summary>A data structure storing the parsing result for text box control.</summary>
-			struct RepeatingParsingResult
+			struct RepeatingParsingOutput
 			{
 				Ptr<parsing::ParsingTreeObject>			node;
+				vint									editVersion;
 				WString									code;
+
+				RepeatingParsingOutput()
+					:editVersion(0)
+				{
+				}
 			};
 
 			/// <summary>Repeating parsing executor.</summary>
-			class RepeatingParsingExecutor : public RepeatingTaskExecutor<WString>
+			class RepeatingParsingExecutor : public RepeatingTaskExecutor<RepeatingParsingInput>
 			{
 			public:
 				/// <summary>Callback.</summary>
@@ -72,7 +96,7 @@ RepeatingParsingExecutor
 					/// <summary>Callback when a parsing task is finished.</summary>
 					/// <param name="generatedNewNode">True indicates the parsing succeeded. Otherwise failed.</param>
 					/// <param name="parsingExecutor">The parsing executor that parses the input.</param>
-					virtual void											OnParsingFinishedAsync(const RepeatingParsingResult& result)=0;
+					virtual void											OnParsingFinishedAsync(const RepeatingParsingOutput& output)=0;
 				};
 			private:
 				Ptr<parsing::tabling::ParsingGeneralParser>					grammarParser;
@@ -81,7 +105,7 @@ RepeatingParsingExecutor
 
 			protected:
 
-				void														Execute(const WString& input)override;
+				void														Execute(const RepeatingParsingInput& input)override;
 			public:
 				/// <summary>Initialize the parsing executor.</summary>
 				/// <param name="_grammarParser">Parser generated from a grammar.</param>

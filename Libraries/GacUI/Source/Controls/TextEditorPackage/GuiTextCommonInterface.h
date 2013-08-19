@@ -79,6 +79,7 @@ Common Interface
 			private:
 				elements::GuiColorizedTextElement*					textElement;
 				compositions::GuiGraphicsComposition*				textComposition;
+				vuint												editVersion;
 				GuiControl*											textControl;
 				ICallback*											callback;
 				bool												dragging;
@@ -244,6 +245,9 @@ Common Interface
 
 				//================ undo redo control
 
+				/// <summary>Get the current edit version. When the control is modified, the edit version increased. Calling <see cref="NotifyModificationSaved"/> will not reset the edit version.</summary>
+				/// <returns>The current edit version.</returns>
+				vuint												GetEditVersion();
 				/// <summary>Test can undo.</summary>
 				/// <returns>Returns true if this action can be performed.</returns>
 				bool												CanUndo();

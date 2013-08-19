@@ -44,11 +44,11 @@ GuiTextBoxColorizerBase
 				GuiTextBoxColorizerBase();
 				~GuiTextBoxColorizerBase();
 
-				void										Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock)override;
+				void										Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, vuint editVersion)override;
 				void										Detach()override;
 				void										TextEditNotify(const TextEditNotifyStruct& arguments)override;
 				void										TextCaretChanged(const TextCaretChangedStruct& arguments)override;
-				void										TextEditFinished()override;
+				void										TextEditFinished(vuint editVersion)override;
 				void										RestartColorizer();
 
 				/// <summary>Get the lexical analyzer start state for the first line.</summary>
@@ -164,14 +164,14 @@ GuiGrammarColorizer
 				SpinLock													parsingTreeLock;
 				Ptr<parsing::ParsingTreeObject>								parsingTreeNode;
 
-				void														OnParsingFinishedAsync(const RepeatingParsingResult& result)override;
+				void														OnParsingFinishedAsync(const RepeatingParsingOutput& output)override;
 			protected:
 				/// <summary>Called when the node is parsed successfully before restarting colorizing.</summary>
 				virtual void												OnContextFinishedAsync(Ptr<parsing::ParsingTreeObject> node);
 
-				void														Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock)override;
+				void														Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, vuint editVersion)override;
 				void														Detach()override;
-				void														TextEditFinished()override;
+				void														TextEditFinished(vuint editVersion)override;
 
 				/// <summary>Called when a @SemanticColor attribute in a grammar is activated during colorizing to determine a color for the token.</summary>
 				/// <param name="foundToken">Token syntax tree for the colorizing token.</param>
@@ -194,9 +194,6 @@ GuiGrammarColorizer
 				GuiGrammarColorizer(Ptr<parsing::tabling::ParsingGeneralParser> _grammarParser, const WString& _grammarRule);
 				~GuiGrammarColorizer();
 
-				/// <summary>Submit a new code for parsing. Usually this function does not need to be called.</summary>
-				/// <param name="code">The text of the text box.</param>
-				void														SubmitCode(const WString& code);
 				/// <summary>Get the id for a token name.</summary>
 				/// <returns>The id.</returns>
 				/// <param name="token">The name of the token.</param>
