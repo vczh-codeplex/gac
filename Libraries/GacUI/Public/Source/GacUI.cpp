@@ -21133,7 +21133,7 @@ GuiTextBoxAutoCompleteBase
 			{
 			}
 
-			void GuiTextBoxAutoCompleteBase::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock)
+			void GuiTextBoxAutoCompleteBase::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, vuint editVersion)
 			{
 				if(_element)
 				{
@@ -21153,15 +21153,15 @@ GuiTextBoxAutoCompleteBase
 				}
 			}
 
-			void GuiTextBoxAutoCompleteBase::TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)
+			void GuiTextBoxAutoCompleteBase::TextEditNotify(const TextEditNotifyStruct& arguments)
 			{
 			}
 
-			void GuiTextBoxAutoCompleteBase::TextCaretChanged(TextPos oldBegin, TextPos oldEnd, TextPos newBegin, TextPos newEnd)
+			void GuiTextBoxAutoCompleteBase::TextCaretChanged(const TextCaretChangedStruct& arguments)
 			{
 			}
 
-			void GuiTextBoxAutoCompleteBase::TextEditFinished()
+			void GuiTextBoxAutoCompleteBase::TextEditFinished(vuint editVersion)
 			{
 			}
 
@@ -21169,64 +21169,66 @@ GuiTextBoxAutoCompleteBase
 GuiGrammarAutoComplete
 ***********************************************************************/
 
-			void GuiGrammarAutoComplete::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock)
+			void GuiGrammarAutoComplete::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, vuint editVersion)
 			{
-				GuiTextBoxAutoCompleteBase::Attach(_element, _elementModifyLock);
-				if(element && elementModifyLock)
-				{
-				}
+				GuiTextBoxAutoCompleteBase::Attach(_element, _elementModifyLock, editVersion);
+				RepeatingParsingExecutor::CallbackBase::Attach(_element, _elementModifyLock, editVersion);
 			}
 
 			void GuiGrammarAutoComplete::Detach()
 			{
 				GuiTextBoxAutoCompleteBase::Detach();
+				RepeatingParsingExecutor::CallbackBase::Detach();
 				if(element && elementModifyLock)
 				{
 					EnsureAutoCompleteFinished();
 				}
 			}
 
-			void GuiGrammarAutoComplete::TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)
+			void GuiGrammarAutoComplete::TextEditNotify(const TextEditNotifyStruct& arguments)
 			{
-				GuiTextBoxAutoCompleteBase::TextEditNotify(originalStart, originalEnd, originalText, inputStart, inputEnd, inputText);
+				GuiTextBoxAutoCompleteBase::TextEditNotify(arguments);
+				RepeatingParsingExecutor::CallbackBase::TextEditNotify(arguments);
 				if(element && elementModifyLock)
 				{
 					editing=true;
 				}
 			}
 
-			void GuiGrammarAutoComplete::TextCaretChanged(TextPos oldBegin, TextPos oldEnd, TextPos newBegin, TextPos newEnd)
+			void GuiGrammarAutoComplete::TextCaretChanged(const TextCaretChangedStruct& arguments)
 			{
-				GuiTextBoxAutoCompleteBase::TextCaretChanged(oldBegin, oldEnd, newBegin, newEnd);
+				GuiTextBoxAutoCompleteBase::TextCaretChanged(arguments);
+				RepeatingParsingExecutor::CallbackBase::TextCaretChanged(arguments);
 				if(element && elementModifyLock && !editing)
 				{
 					SpinLock::Scope scope(contextLock);
-					if(context.root)
+					if(context.input.node)
 					{
 						GetApplication()->InvokeAsync([=]()
 						{
-							UpdateScopeInfoAsync(0, L"");
+							SubmitTask(context.input);
 						});
 					}
 				}
 			}
 
-			void GuiGrammarAutoComplete::TextEditFinished()
+			void GuiGrammarAutoComplete::TextEditFinished(vuint editVersion)
 			{
-				GuiTextBoxAutoCompleteBase::TextEditFinished();
+				GuiTextBoxAutoCompleteBase::TextEditFinished(editVersion);
+				RepeatingParsingExecutor::CallbackBase::TextEditFinished(editVersion);
 				if(element && elementModifyLock)
 				{
 					editing=false;
 				}
 			}
 
-			void GuiGrammarAutoComplete::OnParsingFinishedAsync(Ptr<parsing::ParsingTreeObject> node, const WString& code)
+			void GuiGrammarAutoComplete::OnParsingFinishedAsync(const RepeatingParsingOutput& arguments)
 			{
 				if(element && elementModifyLock)
 				{
 					GetApplication()->InvokeInMainThread([=]()
 					{
-						UpdateScopeInfoAsync(node, code);
+						SubmitTask(arguments);
 					});
 				}
 			}
@@ -21263,20 +21265,10 @@ GuiGrammarAutoComplete
 				}
 			}
 
-			void GuiGrammarAutoComplete::UpdateScopeInfoAsync(Ptr<parsing::ParsingTreeObject> parsingTreeNode, const WString& code)
+			void GuiGrammarAutoComplete::Execute(const RepeatingParsingOutput& input)
 			{
 				Context newContext;
-				if(parsingTreeNode)
-				{
-					newContext.root=parsingTreeNode;
-					newContext.rootCode=code;
-				}
-				else
-				{
-					SpinLock::Scope scope(contextLock);
-					newContext.root=context.root;
-					newContext.rootCode=context.rootCode;
-				}
+				newContext.input=input;
 
 				TextPos startPos, endPos;
 				{
@@ -21294,7 +21286,7 @@ GuiGrammarAutoComplete
 				ParsingTextPos start(startPos.row, startPos.column);
 				ParsingTextPos end(endPos.row, endPos.column);
 				ParsingTextRange range(start, end);
-				ParsingTreeNode* found=newContext.root->FindDeepestNode(range);
+				ParsingTreeNode* found=newContext.input.node->FindDeepestNode(range);
 				ParsingTreeObject* selectedNode=0;
 
 				if(!selectedNode)
@@ -21347,7 +21339,7 @@ GuiGrammarAutoComplete
 					newContext.contextNode=selectedNode;
 					if(start.index>=0 && end.index>=0)
 					{
-						newContext.contextNodeCode=newContext.rootCode.Sub(start.index, end.index-start.index+1);
+						newContext.contextNodeCode=newContext.input.code.Sub(start.index, end.index-start.index+1);
 					}
 					newContext.contextNodeRule=selectedNode->GetCreatorRules()[selectedNode->GetCreatorRules().Count()-1];
 				}
@@ -21355,14 +21347,14 @@ GuiGrammarAutoComplete
 				{
 					SpinLock::Scope scope(contextLock);
 					context=newContext;
-					if(context.root && context.contextNode)
+					if(context.input.node && context.contextNode)
 					{
 						OnContextFinishedAsync(context);
 					}
 				}
 			}
 
-			void GuiGrammarAutoComplete::OnContextFinishedAsync(Context& context)
+			void GuiGrammarAutoComplete::OnContextFinishedAsync(const Context& context)
 			{
 			}
 
@@ -21374,7 +21366,7 @@ GuiGrammarAutoComplete
 			}
 
 			GuiGrammarAutoComplete::GuiGrammarAutoComplete(Ptr<RepeatingParsingExecutor> _parsingExecutor)
-				:parsingExecutor(_parsingExecutor)
+				:RepeatingParsingExecutor::CallbackBase(_parsingExecutor)
 				,editing(false)
 			{
 				CollectLeftRecursiveRules();
@@ -21382,7 +21374,7 @@ GuiGrammarAutoComplete
 			}
 
 			GuiGrammarAutoComplete::GuiGrammarAutoComplete(Ptr<parsing::tabling::ParsingGeneralParser> _grammarParser, const WString& _grammarRule)
-				:parsingExecutor(new RepeatingParsingExecutor(_grammarParser, _grammarRule))
+				:RepeatingParsingExecutor::CallbackBase(new RepeatingParsingExecutor(_grammarParser, _grammarRule))
 				,editing(false)
 			{
 				CollectLeftRecursiveRules();
@@ -21519,7 +21511,7 @@ GuiTextBoxColorizerBase
 				StopColorizerForever();
 			}
 
-			void GuiTextBoxColorizerBase::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock)
+			void GuiTextBoxColorizerBase::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, vuint editVersion)
 			{
 				if(_element)
 				{
@@ -21541,12 +21533,15 @@ GuiTextBoxColorizerBase
 				}
 			}
 
-			void GuiTextBoxColorizerBase::TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)
+			void GuiTextBoxColorizerBase::TextEditNotify(const TextEditNotifyStruct& arguments)
 			{
 				if(element && elementModifyLock)
 				{
 					SpinLock::Scope scope(*elementModifyLock);
-					vint line=originalStart.row<originalEnd.row?originalStart.row:originalEnd.row;
+					vint line
+						=arguments.originalStart.row<arguments.originalEnd.row
+						?arguments.originalStart.row
+						:arguments.originalEnd.row;
 					if(colorizedLineCount>line)
 					{
 						colorizedLineCount=line;
@@ -21555,11 +21550,11 @@ GuiTextBoxColorizerBase
 				}
 			}
 
-			void GuiTextBoxColorizerBase::TextCaretChanged(TextPos oldBegin, TextPos oldEnd, TextPos newBegin, TextPos newEnd)
+			void GuiTextBoxColorizerBase::TextCaretChanged(const TextCaretChangedStruct& arguments)
 			{
 			}
 
-			void GuiTextBoxColorizerBase::TextEditFinished()
+			void GuiTextBoxColorizerBase::TextEditFinished(vuint editVersion)
 			{
 			}
 
@@ -21758,11 +21753,11 @@ GuiTextBoxRegexColorizer
 GuiGrammarColorizer
 ***********************************************************************/
 
-			void GuiGrammarColorizer::OnParsingFinishedAsync(Ptr<parsing::ParsingTreeObject> node, const WString& code)
+			void GuiGrammarColorizer::OnParsingFinishedAsync(const RepeatingParsingOutput& output)
 			{
 				{
 					SpinLock::Scope scope(parsingTreeLock);
-					parsingTreeNode=node;
+					parsingTreeNode=output.node;
 					if(parsingTreeNode)
 					{
 						OnContextFinishedAsync(parsingTreeNode);
@@ -21775,20 +21770,16 @@ GuiGrammarColorizer
 			{
 			}
 
-			void GuiGrammarColorizer::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock)
+			void GuiGrammarColorizer::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, vuint editVersion)
 			{
-				GuiTextBoxRegexColorizer::Attach(_element, _elementModifyLock);
-				if(element && elementModifyLock)
-				{
-					SpinLock::Scope scope(*elementModifyLock);
-					WString text=element->GetLines().GetText();
-					parsingExecutor->SubmitTask(text);
-				}
+				GuiTextBoxRegexColorizer::Attach(_element, _elementModifyLock, editVersion);
+				RepeatingParsingExecutor::CallbackBase::Attach(_element, _elementModifyLock, editVersion);
 			}
 
 			void GuiGrammarColorizer::Detach()
 			{
 				GuiTextBoxRegexColorizer::Detach();
+				RepeatingParsingExecutor::CallbackBase::Detach();
 				if(element && elementModifyLock)
 				{
 					parsingExecutor->EnsureTaskFinished();
@@ -21796,15 +21787,22 @@ GuiGrammarColorizer
 				}
 			}
 
-			void GuiGrammarColorizer::TextEditFinished()
+			void GuiGrammarColorizer::TextEditNotify(const TextEditNotifyStruct& arguments)
 			{
-				GuiTextBoxRegexColorizer::TextEditFinished();
-				if(element && elementModifyLock)
-				{
-					SpinLock::Scope scope(*elementModifyLock);
-					WString text=element->GetLines().GetText();
-					parsingExecutor->SubmitTask(text);
-				}
+				GuiTextBoxRegexColorizer::TextEditNotify(arguments);
+				RepeatingParsingExecutor::CallbackBase::TextEditNotify(arguments);
+			}
+
+			void GuiGrammarColorizer::TextCaretChanged(const TextCaretChangedStruct& arguments)
+			{
+				GuiTextBoxRegexColorizer::TextCaretChanged(arguments);
+				RepeatingParsingExecutor::CallbackBase::TextCaretChanged(arguments);
+			}
+
+			void GuiGrammarColorizer::TextEditFinished(vuint editVersion)
+			{
+				GuiTextBoxRegexColorizer::TextEditFinished(editVersion);
+				RepeatingParsingExecutor::CallbackBase::TextEditFinished(editVersion);
 			}
 
 			void GuiGrammarColorizer::OnSemanticColorize(parsing::ParsingTreeToken* foundToken, parsing::ParsingTreeObject* tokenParent, const WString& type, const WString& field, vint semantic, vint& token)
@@ -21820,14 +21818,14 @@ GuiGrammarColorizer
 			}
 
 			GuiGrammarColorizer::GuiGrammarColorizer(Ptr<RepeatingParsingExecutor> _parsingExecutor)
-				:parsingExecutor(_parsingExecutor)
+				:RepeatingParsingExecutor::CallbackBase(_parsingExecutor)
 			{
 				parsingExecutor->AttachCallback(this);
 				BeginSetColors();
 			}
 
 			GuiGrammarColorizer::GuiGrammarColorizer(Ptr<parsing::tabling::ParsingGeneralParser> _grammarParser, const WString& _grammarRule)
-				:parsingExecutor(new RepeatingParsingExecutor(_grammarParser, _grammarRule))
+				:RepeatingParsingExecutor::CallbackBase(new RepeatingParsingExecutor(_grammarParser, _grammarRule))
 			{
 				parsingExecutor->AttachCallback(this);
 				BeginSetColors();
@@ -21837,11 +21835,6 @@ GuiGrammarColorizer
 			{
 				EnsureColorizerFinished();
 				parsingExecutor->DetachCallback(this);
-			}
-
-			void GuiGrammarColorizer::SubmitCode(const WString& code)
-			{
-				parsingExecutor->SubmitTask(code);
 			}
 
 			vint GuiGrammarColorizer::GetTokenId(const WString& token)
@@ -22176,9 +22169,14 @@ GuiTextBoxCommonInterface
 				TextPos newEnd=textElement->GetCaretEnd();
 				if(oldBegin!=newBegin || oldEnd!=newEnd)
 				{
+					ICommonTextEditCallback::TextCaretChangedStruct arguments;
+					arguments.oldBegin=oldBegin;
+					arguments.oldEnd=oldEnd;
+					arguments.newBegin=newBegin;
+					arguments.newEnd=newEnd;
 					for(vint i=0;i<textEditCallbacks.Count();i++)
 					{
-						textEditCallbacks[i]->TextCaretChanged(oldBegin, oldEnd, newBegin, newEnd);
+						textEditCallbacks[i]->TextCaretChanged(arguments);
 					}
 					SelectionChanged.Execute(textControl->GetNotifyEventArguments());
 				}
@@ -22203,16 +22201,28 @@ GuiTextBoxCommonInterface
 						end=textElement->GetLines().Modify(start, end, inputText);
 					}
 					callback->AfterModify(originalStart, originalEnd, originalText, start, end, inputText);
+					
+					editVersion++;
+					ICommonTextEditCallback::TextEditNotifyStruct arguments;
+					arguments.originalStart=originalStart;
+					arguments.originalEnd=originalEnd;
+					arguments.originalText=originalText;
+					arguments.inputStart=start;
+					arguments.inputEnd=end;
+					arguments.inputText=inputText;
+					arguments.editVersion=editVersion;
 					for(vint i=0;i<textEditCallbacks.Count();i++)
 					{
-						textEditCallbacks[i]->TextEditNotify(originalStart, originalEnd, originalText, start, end, inputText);
+						textEditCallbacks[i]->TextEditNotify(arguments);
 					}
+
 					Move(end, false);
 					
 					for(vint i=0;i<textEditCallbacks.Count();i++)
 					{
-						textEditCallbacks[i]->TextEditFinished();
+						textEditCallbacks[i]->TextEditFinished(editVersion);
 					}
+
 					textControl->TextChanged.Execute(textControl->GetNotifyEventArguments());
 				}
 			}
@@ -22469,7 +22479,7 @@ GuiTextBoxCommonInterface
 
 				for(vint i=0;i<textEditCallbacks.Count();i++)
 				{
-					textEditCallbacks[i]->Attach(textElement, elementModifyLock);
+					textEditCallbacks[i]->Attach(textElement, elementModifyLock, editVersion);
 				}
 			}
 			
@@ -22494,7 +22504,7 @@ GuiTextBoxCommonInterface
 					textEditCallbacks.Add(value);
 					if(textElement)
 					{
-						value->Attach(textElement, elementModifyLock);
+						value->Attach(textElement, elementModifyLock, editVersion);
 					}
 					return true;
 				}
@@ -22540,6 +22550,7 @@ GuiTextBoxCommonInterface
 			GuiTextBoxCommonInterface::GuiTextBoxCommonInterface()
 				:textElement(0)
 				,textComposition(0)
+				,editVersion(0)
 				,textControl(0)
 				,callback(0)
 				,dragging(false)
@@ -22810,6 +22821,11 @@ GuiTextBoxCommonInterface
 			}
 
 			//================ undo redo control
+
+			vuint GuiTextBoxCommonInterface::GetEditVersion()
+			{
+				return editVersion;
+			}
 
 			bool GuiTextBoxCommonInterface::CanUndo()
 			{
@@ -23342,26 +23358,105 @@ namespace vl
 			using namespace collections;
 
 /***********************************************************************
+RepeatingParsingExecutor::CallbackBase
+***********************************************************************/
+
+			RepeatingParsingExecutor::CallbackBase::CallbackBase(Ptr<RepeatingParsingExecutor> _parsingExecutor)
+				:parsingExecutor(_parsingExecutor)
+				,callbackAutoPushing(false)
+				,callbackElement(0)
+				,callbackElementModifyLock(0)
+			{
+			}
+
+			RepeatingParsingExecutor::CallbackBase::~CallbackBase()
+			{
+			}
+
+			void RepeatingParsingExecutor::CallbackBase::RequireAutoSubmitTask(bool enabled)
+			{
+				callbackAutoPushing=enabled;
+			}
+
+			void RepeatingParsingExecutor::CallbackBase::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, vuint editVersion)
+			{
+				if(_element)
+				{
+					SpinLock::Scope scope(_elementModifyLock);
+					callbackElement=_element;
+					callbackElementModifyLock=&_elementModifyLock;
+				}
+				
+				parsingExecutor->ActivateCallback(this);
+				if(callbackElement && callbackElementModifyLock && callbackAutoPushing)
+				{
+					SpinLock::Scope scope(*callbackElementModifyLock);
+					RepeatingParsingInput input;
+					input.editVersion=editVersion;
+					input.code=callbackElement->GetLines().GetText();
+					parsingExecutor->SubmitTask(input);
+				}
+			}
+
+			void RepeatingParsingExecutor::CallbackBase::Detach()
+			{
+				if(callbackElement && callbackElementModifyLock)
+				{
+					SpinLock::Scope scope(*callbackElementModifyLock);
+					callbackElement=0;
+					callbackElementModifyLock=0;
+				}
+				
+				parsingExecutor->DeactivateCallback(this);
+			}
+
+			void RepeatingParsingExecutor::CallbackBase::TextEditNotify(const TextEditNotifyStruct& arguments)
+			{
+			}
+
+			void RepeatingParsingExecutor::CallbackBase::TextCaretChanged(const TextCaretChangedStruct& arguments)
+			{
+			}
+
+			void RepeatingParsingExecutor::CallbackBase::TextEditFinished(vuint editVersion)
+			{
+				if(callbackElement && callbackElementModifyLock && callbackAutoPushing)
+				{
+					SpinLock::Scope scope(*callbackElementModifyLock);
+					RepeatingParsingInput input;
+					input.editVersion=editVersion;
+					input.code=callbackElement->GetLines().GetText();
+					parsingExecutor->SubmitTask(input);
+				}
+			}
+
+/***********************************************************************
 RepeatingParsingExecutor
 ***********************************************************************/
 
-			void RepeatingParsingExecutor::Execute(const WString& input)
+			void RepeatingParsingExecutor::Execute(const RepeatingParsingInput& input)
 			{
 				List<Ptr<ParsingError>> errors;
-				Ptr<ParsingTreeObject> node=grammarParser->Parse(input, grammarRule, errors).Cast<ParsingTreeObject>();
+				Ptr<ParsingTreeObject> node=grammarParser->Parse(input.code, grammarRule, errors).Cast<ParsingTreeObject>();
 				if(node)
 				{
 					node->InitializeQueryCache();
 				}
+
+				RepeatingParsingOutput result;
+				result.node=node;
+				result.editVersion=input.editVersion;
+				result.code=input.code;
 				FOREACH(ICallback*, callback, callbacks)
 				{
-					callback->OnParsingFinishedAsync(node, input);
+					callback->OnParsingFinishedAsync(result);
 				}
 			}
 
 			RepeatingParsingExecutor::RepeatingParsingExecutor(Ptr<parsing::tabling::ParsingGeneralParser> _grammarParser, const WString& _grammarRule)
 				:grammarParser(_grammarParser)
 				,grammarRule(_grammarRule)
+				,autoPushingCallback(0)
 			{
 			}
 
@@ -23377,6 +23472,7 @@ RepeatingParsingExecutor
 
 			bool RepeatingParsingExecutor::AttachCallback(ICallback* value)
 			{
+				if(!value) return false;
 				if(callbacks.Contains(value)) return false;
 				callbacks.Add(value);
 				return true;
@@ -23384,8 +23480,45 @@ RepeatingParsingExecutor
 
 			bool RepeatingParsingExecutor::DetachCallback(ICallback* value)
 			{
+				if(!value) return false;
 				if(!callbacks.Contains(value)) return false;
+				DeactivateCallback(value);
 				callbacks.Remove(value);
+				return true;
+			}
+
+			bool RepeatingParsingExecutor::ActivateCallback(ICallback* value)
+			{
+				if(!value) return false;
+				if(!callbacks.Contains(value)) return false;
+				if(activatedCallbacks.Contains(value)) return false;
+				activatedCallbacks.Add(value);
+
+				if(!autoPushingCallback)
+				{
+					autoPushingCallback=value;
+					autoPushingCallback->RequireAutoSubmitTask(true);
+				}
+				return true;
+			}
+
+			bool RepeatingParsingExecutor::DeactivateCallback(ICallback* value)
+			{
+				if(!value) return false;
+				if(!callbacks.Contains(value)) return false;
+				if(!activatedCallbacks.Contains(value)) return false;
+
+				if(autoPushingCallback==value)
+				{
+					autoPushingCallback->RequireAutoSubmitTask(false);
+					autoPushingCallback=0;
+				}
+				activatedCallbacks.Remove(value);
+				if(!autoPushingCallback && activatedCallbacks.Count()>0)
+				{
+					autoPushingCallback=activatedCallbacks[0];
+					autoPushingCallback->RequireAutoSubmitTask(true);
+				}
 				return true;
 			}
 
@@ -23528,16 +23661,16 @@ GuiTextBoxUndoRedoProcessor::EditStep
 
 			void GuiTextBoxUndoRedoProcessor::EditStep::Undo()
 			{
-				processor->textBoxCommonInterface->Select(inputStart, inputEnd);
-				processor->textBoxCommonInterface->SetSelectionText(originalText);
-				processor->textBoxCommonInterface->Select(originalStart, originalEnd);
+				processor->textBoxCommonInterface->Select(arguments.inputStart, arguments.inputEnd);
+				processor->textBoxCommonInterface->SetSelectionText(arguments.originalText);
+				processor->textBoxCommonInterface->Select(arguments.originalStart, arguments.originalEnd);
 			}
 
 			void GuiTextBoxUndoRedoProcessor::EditStep::Redo()
 			{
-				processor->textBoxCommonInterface->Select(originalStart, originalEnd);
-				processor->textBoxCommonInterface->SetSelectionText(inputText);
-				processor->textBoxCommonInterface->Select(inputStart, inputEnd);
+				processor->textBoxCommonInterface->Select(arguments.originalStart, arguments.originalEnd);
+				processor->textBoxCommonInterface->SetSelectionText(arguments.inputText);
+				processor->textBoxCommonInterface->Select(arguments.inputStart, arguments.inputEnd);
 			}
 
 /***********************************************************************
@@ -23553,7 +23686,7 @@ GuiTextBoxUndoRedoProcessor
 			{
 			}
 
-			void GuiTextBoxUndoRedoProcessor::Attach(elements::GuiColorizedTextElement* element, SpinLock& elementModifyLock)
+			void GuiTextBoxUndoRedoProcessor::Attach(elements::GuiColorizedTextElement* element, SpinLock& elementModifyLock, vuint editVersion)
 			{
 			}
 
@@ -23562,24 +23695,19 @@ GuiTextBoxUndoRedoProcessor
 				ClearUndoRedo();
 			}
 
-			void GuiTextBoxUndoRedoProcessor::TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)
+			void GuiTextBoxUndoRedoProcessor::TextEditNotify(const TextEditNotifyStruct& arguments)
 			{
 				Ptr<EditStep> step=new EditStep;
 				step->processor=this;
-				step->originalStart=originalStart;
-				step->originalEnd=originalEnd;
-				step->originalText=originalText;
-				step->inputStart=inputStart;
-				step->inputEnd=inputEnd;
-				step->inputText=inputText;
+				step->arguments=arguments;
 				PushStep(step);
 			}
 
-			void GuiTextBoxUndoRedoProcessor::TextCaretChanged(TextPos oldBegin, TextPos oldEnd, TextPos newBegin, TextPos newEnd)
+			void GuiTextBoxUndoRedoProcessor::TextCaretChanged(const TextCaretChangedStruct& arguments)
 			{
 			}
 
-			void GuiTextBoxUndoRedoProcessor::TextEditFinished()
+			void GuiTextBoxUndoRedoProcessor::TextEditFinished(vuint editVersion)
 			{
 			}
 		}
@@ -33435,6 +33563,7 @@ Type Declaration
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(MaxWidth)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(MaxHeight)
 				CLASS_MEMBER_PROPERTY_FAST(Colorizer)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(EditVersion)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(Modified)
 
 				CLASS_MEMBER_METHOD(CanCut, NO_PARAMETER)
@@ -33480,6 +33609,7 @@ Type Declaration
 
 				CLASS_MEMBER_METHOD(AddToken, {L"regex" _ L"color"})
 				CLASS_MEMBER_METHOD(AddExtraToken, {L"color"})
+				CLASS_MEMBER_METHOD(ClearTokens, NO_PARAMETER)
 				CLASS_MEMBER_METHOD(Setup, NO_PARAMETER)
 			END_CLASS_MEMBER(GuiTextBoxRegexColorizer)
 
