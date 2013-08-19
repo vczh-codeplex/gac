@@ -65,6 +65,7 @@ GuiGrammarAutoComplete
 				};
 			private:
 				Ptr<RepeatingParsingExecutor>				parsingExecutor;
+				bool										autoPushing;
 				collections::SortedList<WString>			leftRecursiveRules;
 				bool										editing;
 
@@ -77,6 +78,7 @@ GuiGrammarAutoComplete
 				void										TextCaretChanged(const TextCaretChangedStruct& arguments)override;
 				void										TextEditFinished(vuint editVersion)override;
 				void										OnParsingFinishedAsync(const RepeatingParsingOutput& output)override;
+				void										RequireAutoSubmitTask(bool enabled)override;
 				void										CollectLeftRecursiveRules();
 				void										Execute(const RepeatingParsingOutput& input)override;
 			protected:

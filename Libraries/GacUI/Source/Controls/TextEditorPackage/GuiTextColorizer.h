@@ -154,6 +154,7 @@ GuiGrammarColorizer
 				typedef elements::text::ColorEntry							ColorEntry;
 			private:
 				Ptr<RepeatingParsingExecutor>								parsingExecutor;
+				bool														autoPushing;
 				collections::Dictionary<WString, ColorEntry>				colorSettings;
 				collections::Dictionary<WString, vint>						colorIndices;
 				collections::List<bool>										colorContext;
@@ -165,6 +166,7 @@ GuiGrammarColorizer
 				Ptr<parsing::ParsingTreeObject>								parsingTreeNode;
 
 				void														OnParsingFinishedAsync(const RepeatingParsingOutput& output)override;
+				void														RequireAutoSubmitTask(bool enabled)override;
 			protected:
 				/// <summary>Called when the node is parsed successfully before restarting colorizing.</summary>
 				virtual void												OnContextFinishedAsync(Ptr<parsing::ParsingTreeObject> node);

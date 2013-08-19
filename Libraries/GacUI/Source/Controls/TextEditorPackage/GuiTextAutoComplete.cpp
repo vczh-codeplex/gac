@@ -67,14 +67,21 @@ GuiGrammarAutoComplete
 			void GuiGrammarAutoComplete::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, vuint editVersion)
 			{
 				GuiTextBoxAutoCompleteBase::Attach(_element, _elementModifyLock, editVersion);
-				if(element && elementModifyLock)
+				parsingExecutor->ActivateCallback(this);
+				if(element && elementModifyLock && autoPushing)
 				{
+					SpinLock::Scope scope(*elementModifyLock);
+					RepeatingParsingInput input;
+					input.editVersion=editVersion;
+					input.code=element->GetLines().GetText();
+					parsingExecutor->SubmitTask(input);
 				}
 			}
 
 			void GuiGrammarAutoComplete::Detach()
 			{
 				GuiTextBoxAutoCompleteBase::Detach();
+				parsingExecutor->DeactivateCallback(this);
 				if(element && elementModifyLock)
 				{
 					EnsureAutoCompleteFinished();
@@ -111,6 +118,14 @@ GuiGrammarAutoComplete
 				GuiTextBoxAutoCompleteBase::TextEditFinished(editVersion);
 				if(element && elementModifyLock)
 				{
+					if(autoPushing)
+					{
+						SpinLock::Scope scope(*elementModifyLock);
+						RepeatingParsingInput input;
+						input.editVersion=editVersion;
+						input.code=element->GetLines().GetText();
+						parsingExecutor->SubmitTask(input);
+					}
 					editing=false;
 				}
 			}
@@ -124,6 +139,11 @@ GuiGrammarAutoComplete
 						SubmitTask(arguments);
 					});
 				}
+			}
+
+			void GuiGrammarAutoComplete::RequireAutoSubmitTask(bool enabled)
+			{
+				autoPushing=enabled;
 			}
 
 			void GuiGrammarAutoComplete::CollectLeftRecursiveRules()
@@ -260,6 +280,7 @@ GuiGrammarAutoComplete
 
 			GuiGrammarAutoComplete::GuiGrammarAutoComplete(Ptr<RepeatingParsingExecutor> _parsingExecutor)
 				:parsingExecutor(_parsingExecutor)
+				,autoPushing(false)
 				,editing(false)
 			{
 				CollectLeftRecursiveRules();
@@ -268,6 +289,7 @@ GuiGrammarAutoComplete
 
 			GuiGrammarAutoComplete::GuiGrammarAutoComplete(Ptr<parsing::tabling::ParsingGeneralParser> _grammarParser, const WString& _grammarRule)
 				:parsingExecutor(new RepeatingParsingExecutor(_grammarParser, _grammarRule))
+				,autoPushing(false)
 				,editing(false)
 			{
 				CollectLeftRecursiveRules();
