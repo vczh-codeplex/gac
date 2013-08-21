@@ -67,6 +67,9 @@ GuiGrammarAutoComplete
 				collections::SortedList<WString>			leftRecursiveRules;
 				bool										editing;
 
+				SpinLock									editTraceLock;
+				collections::List<TextEditNotifyStruct>		editTrace;
+
 				SpinLock									contextLock;
 				Context										context;
 				
@@ -77,7 +80,12 @@ GuiGrammarAutoComplete
 				void										TextEditFinished(vuint editVersion)override;
 				void										OnParsingFinishedAsync(const RepeatingParsingOutput& output)override;
 				void										CollectLeftRecursiveRules();
+
+				vint										UnsafeGetEditTraceIndex(vuint editVersion);
+				void										ExecuteRefresh(Context& newContext);
+				void										ExecuteEdit(Context& newContext);
 				void										Execute(const RepeatingParsingOutput& input)override;
+				void										PostList(const Context& newContext);
 			protected:
 
 				/// <summary>Called when the context of the code is selected.</summary>
