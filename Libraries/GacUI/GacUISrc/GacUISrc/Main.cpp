@@ -263,7 +263,7 @@ protected:
 			MemoryStream stream;
 			{
 				StreamWriter writer(stream);
-				Log(context.contextNode, L"", writer);
+				Log(context.node, L"", writer);
 			}
 			stream.SeekFromBegin(0);
 			StreamReader reader(stream);
@@ -272,9 +272,9 @@ protected:
 
 		WString selectedMessage
 			=L"================RULE================\r\n"
-			+context.contextNodeRule+L"\r\n"
+			+context.rule+L"\r\n"
 			+L"================CODE================\r\n"
-			+context.contextNodeCode+L"\r\n"
+			+context.code+L"\r\n"
 			+L"================TREE================\r\n"
 			+selectedTree;
 			;
