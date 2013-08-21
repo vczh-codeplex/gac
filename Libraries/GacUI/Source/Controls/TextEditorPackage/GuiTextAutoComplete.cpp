@@ -98,37 +98,41 @@ GuiGrammarAutoComplete
 				RepeatingParsingExecutor::CallbackBase::TextCaretChanged(arguments);
 				if(element && elementModifyLock)
 				{
+					if(!editing)
+					{
+						SpinLock::Scope scope(editTraceLock);
+						TextEditNotifyStruct trace;
+						trace.editVersion=arguments.editVersion;
+						trace.originalStart=arguments.oldBegin;
+						trace.originalEnd=arguments.oldEnd;
+						trace.inputStart=arguments.newBegin;
+						trace.inputEnd=arguments.newEnd;
+						if(trace.originalStart>trace.originalEnd)
+						{
+							TextPos temp=trace.originalStart;
+							trace.originalStart=trace.originalEnd;
+							trace.originalEnd=temp;
+						}
+						if(trace.inputStart>trace.inputEnd)
+						{
+							TextPos temp=trace.inputStart;
+							trace.inputStart=trace.inputEnd;
+							trace.inputEnd=temp;
+						}
+						editTrace.Add(trace);
+					}
+
 					SpinLock::Scope scope(contextLock);
 					if(context.input.node)
 					{
 						if(editing)
 						{
-							SubmitTask(RepeatingParsingOutput());
+							RepeatingParsingOutput input;
+							input.editVersion=context.input.editVersion;
+							SubmitTask(input);
 						}
 						else if(context.input.editVersion=arguments.editVersion)
 						{
-							{
-								SpinLock::Scope scope(editTraceLock);
-								TextEditNotifyStruct trace;
-								trace.editVersion=arguments.editVersion;
-								trace.originalStart=arguments.oldBegin;
-								trace.originalEnd=arguments.oldEnd;
-								trace.inputStart=arguments.newBegin;
-								trace.inputEnd=arguments.newEnd;
-								if(trace.originalStart>trace.originalEnd)
-								{
-									TextPos temp=trace.originalStart;
-									trace.originalStart=trace.originalEnd;
-									trace.originalEnd=temp;
-								}
-								if(trace.inputStart>trace.inputEnd)
-								{
-									TextPos temp=trace.inputStart;
-									trace.inputStart=trace.inputEnd;
-									trace.inputEnd=temp;
-								}
-								editTrace.Add(trace);
-							}
 							SubmitTask(context.input);
 						}
 					}
@@ -302,7 +306,14 @@ GuiGrammarAutoComplete
 				List<TextEditNotifyStruct> usedTrace;
 				{
 					SpinLock::Scope scope(editTraceLock);
-					CopyFrom(usedTrace, editTrace);
+					CopyFrom(
+						usedTrace,
+						From(editTrace)
+							.Where([](const TextEditNotifyStruct& value)
+							{
+								return value.originalText!=L"" || value.inputText!=L"";
+							})
+						);
 				}
 
 				if(usedTrace.Count()>0)
@@ -313,6 +324,13 @@ GuiGrammarAutoComplete
 
 			void GuiGrammarAutoComplete::Execute(const RepeatingParsingOutput& input)
 			{
+				{
+					SpinLock::Scope scope(contextLock);
+					if(input.editVersion<context.input.editVersion)
+					{
+						return;
+					}
+				}
 				Context newContext;
 
 				if(input.node)
