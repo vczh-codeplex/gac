@@ -250,12 +250,14 @@ GuiGrammarAutoComplete
 					start=selectedNode->GetCodeRange().start;
 					end=selectedNode->GetCodeRange().end;
 
-					newContext.contextNode=selectedNode;
+					newContext.node=selectedNode;
 					if(start.index>=0 && end.index>=0)
 					{
-						newContext.contextNodeCode=newContext.input.code.Sub(start.index, end.index-start.index+1);
+						newContext.code=newContext.input.code.Sub(start.index, end.index-start.index+1);
 					}
-					newContext.contextNodeRule=selectedNode->GetCreatorRules()[selectedNode->GetCreatorRules().Count()-1];
+					newContext.rule=selectedNode->GetCreatorRules()[selectedNode->GetCreatorRules().Count()-1];
+					newContext.originalRange=selectedNode->GetCodeRange();
+					newContext.modifiedRange=selectedNode->GetCodeRange();
 				}
 			}
 
@@ -288,13 +290,16 @@ GuiGrammarAutoComplete
 						SpinLock::Scope scope(contextLock);
 						newContext=context;
 					}
-					ExecuteEdit(newContext);
+					if(newContext.node)
+					{
+						ExecuteEdit(newContext);
+					}
 				}
 
 				{
 					SpinLock::Scope scope(contextLock);
 					context=newContext;
-					if(context.input.node && context.contextNode)
+					if(context.input.node && context.node)
 					{
 						OnContextFinishedAsync(context);
 					}
