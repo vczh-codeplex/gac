@@ -200,17 +200,22 @@ ParsingTreeNode
 				{
 					vint selected=(start+end)/2;
 					ParsingTreeNode* selectedNode=cachedOrderedSubNodes[selected].Obj();
-					if(range.end<selectedNode->codeRange.start)
+					const ParsingTextRange& selectedRange=selectedNode->codeRange;
+					if(range.end<selectedRange.start)
 					{
 						end=selected-1;
 					}
-					else if(range.start>selectedNode->codeRange.end)
+					else if(range.start>selectedRange.end)
 					{
 						start=selected+1;
 					}
-					else
+					else if(selectedRange.start<=range.start && range.end<=selectedRange.end)
 					{
 						return selectedNode;
+					}
+					else
+					{
+						return this;
 					}
 				}
 			}
