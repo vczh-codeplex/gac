@@ -87,6 +87,8 @@ GuiGrammarAutoComplete
 				if(element && elementModifyLock)
 				{
 					editing=true;
+					SpinLock::Scope scope(editTraceLock);
+					editTrace.Add(arguments);
 				}
 			}
 
@@ -94,15 +96,12 @@ GuiGrammarAutoComplete
 			{
 				GuiTextBoxAutoCompleteBase::TextCaretChanged(arguments);
 				RepeatingParsingExecutor::CallbackBase::TextCaretChanged(arguments);
-				if(element && elementModifyLock && !editing)
+				if(element && elementModifyLock && editing)
 				{
 					SpinLock::Scope scope(contextLock);
 					if(context.input.node)
 					{
-						GetApplication()->InvokeAsync([=]()
-						{
-							SubmitTask(context.input);
-						});
+						SubmitTask(RepeatingParsingOutput());
 					}
 				}
 			}
@@ -160,22 +159,42 @@ GuiGrammarAutoComplete
 				}
 			}
 
-			void GuiGrammarAutoComplete::Execute(const RepeatingParsingOutput& input)
+			vint GuiGrammarAutoComplete::UnsafeGetEditTraceIndex(vuint editVersion)
 			{
-				Context newContext;
-				newContext.input=input;
+				vint start=0;
+				vint end=editTrace.Count()-1;
+				while(start<=end)
+				{
+					vint middle=(start+end)/2;
+					TextEditNotifyStruct& trace=editTrace[middle];
 
+					if(editVersion<trace.editVersion)
+					{
+						end=middle-1;
+					}
+					else if(editVersion>trace.editVersion)
+					{
+						start=middle+1;
+					}
+					else
+					{
+						return middle;
+					}
+				}
+				return -1;
+			}
+
+			void GuiGrammarAutoComplete::ExecuteRefresh(Context& newContext)
+			{
 				TextPos startPos, endPos;
 				{
-					SpinLock::Scope scope(*elementModifyLock);
-					startPos=element->GetCaretBegin();
-					endPos=element->GetCaretEnd();
-					if(startPos>endPos)
-					{
-						TextPos temp=startPos;
-						startPos=endPos;
-						endPos=temp;
-					}
+					SpinLock::Scope scope(editTraceLock);
+					vint traceIndex=UnsafeGetEditTraceIndex(newContext.input.editVersion);
+					if(traceIndex==-1) return;
+
+					TextEditNotifyStruct& trace=editTrace[traceIndex];
+					startPos=trace.inputStart;
+					endPos=trace.inputEnd;
 				}
 
 				ParsingTextPos start(startPos.row, startPos.column);
@@ -238,6 +257,39 @@ GuiGrammarAutoComplete
 					}
 					newContext.contextNodeRule=selectedNode->GetCreatorRules()[selectedNode->GetCreatorRules().Count()-1];
 				}
+			}
+
+			void GuiGrammarAutoComplete::ExecuteEdit(Context& newContext)
+			{
+				List<TextEditNotifyStruct> usedTrace;
+				{
+					SpinLock::Scope scope(editTraceLock);
+					CopyFrom(usedTrace, editTrace);
+				}
+
+				if(usedTrace.Count()>0)
+				{
+					newContext.input.editVersion=usedTrace[usedTrace.Count()-1].editVersion;
+				}
+			}
+
+			void GuiGrammarAutoComplete::Execute(const RepeatingParsingOutput& input)
+			{
+				Context newContext;
+
+				if(input.node)
+				{
+					newContext.input=input;
+					ExecuteRefresh(newContext);
+				}
+				else
+				{
+					{
+						SpinLock::Scope scope(contextLock);
+						newContext=context;
+					}
+					ExecuteEdit(newContext);
+				}
 
 				{
 					SpinLock::Scope scope(contextLock);
@@ -247,6 +299,19 @@ GuiGrammarAutoComplete
 						OnContextFinishedAsync(context);
 					}
 				}
+				GetApplication()->InvokeInMainThread([=]()
+				{
+					PostList(newContext);
+				});
+			}
+
+			void GuiGrammarAutoComplete::PostList(const Context& newContext)
+			{
+				SpinLock::Scope scope(editTraceLock);
+				vint traceIndex=UnsafeGetEditTraceIndex(newContext.input.editVersion);
+				if(traceIndex==-1) return;
+
+				editTrace.RemoveRange(0, traceIndex+1);
 			}
 
 			void GuiGrammarAutoComplete::OnContextFinishedAsync(const Context& context)
