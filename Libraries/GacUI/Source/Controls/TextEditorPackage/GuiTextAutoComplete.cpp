@@ -217,6 +217,10 @@ GuiGrammarAutoComplete
 							{
 								middle++;
 							}
+							else
+							{
+								break;
+							}
 						}
 						return middle;
 					}
