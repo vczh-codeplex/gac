@@ -96,12 +96,41 @@ GuiGrammarAutoComplete
 			{
 				GuiTextBoxAutoCompleteBase::TextCaretChanged(arguments);
 				RepeatingParsingExecutor::CallbackBase::TextCaretChanged(arguments);
-				if(element && elementModifyLock && editing)
+				if(element && elementModifyLock)
 				{
 					SpinLock::Scope scope(contextLock);
 					if(context.input.node)
 					{
-						SubmitTask(RepeatingParsingOutput());
+						if(editing)
+						{
+							SubmitTask(RepeatingParsingOutput());
+						}
+						else if(context.input.editVersion=arguments.editVersion)
+						{
+							{
+								SpinLock::Scope scope(editTraceLock);
+								TextEditNotifyStruct trace;
+								trace.editVersion=arguments.editVersion;
+								trace.originalStart=arguments.oldBegin;
+								trace.originalEnd=arguments.oldEnd;
+								trace.inputStart=arguments.newBegin;
+								trace.inputEnd=arguments.newEnd;
+								if(trace.originalStart>trace.originalEnd)
+								{
+									TextPos temp=trace.originalStart;
+									trace.originalStart=trace.originalEnd;
+									trace.originalEnd=temp;
+								}
+								if(trace.inputStart>trace.inputEnd)
+								{
+									TextPos temp=trace.inputStart;
+									trace.inputStart=trace.inputEnd;
+									trace.inputEnd=temp;
+								}
+								editTrace.Add(trace);
+							}
+							SubmitTask(context.input);
+						}
 					}
 				}
 			}
@@ -178,6 +207,13 @@ GuiGrammarAutoComplete
 					}
 					else
 					{
+						while(middle<editTrace.Count()-1)
+						{
+							if(editTrace[middle+1].editVersion==editTrace[middle].editVersion)
+							{
+								middle++;
+							}
+						}
 						return middle;
 					}
 				}

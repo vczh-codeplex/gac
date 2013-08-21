@@ -162,6 +162,7 @@ GuiTextBoxCommonInterface
 					arguments.oldEnd=oldEnd;
 					arguments.newBegin=newBegin;
 					arguments.newEnd=newEnd;
+					arguments.editVersion=editVersion;
 					for(vint i=0;i<textEditCallbacks.Count();i++)
 					{
 						textEditCallbacks[i]->TextCaretChanged(arguments);

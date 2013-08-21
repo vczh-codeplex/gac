@@ -47,6 +47,12 @@ Common Operations
 					TextPos								oldEnd;
 					TextPos								newBegin;
 					TextPos								newEnd;
+					vuint								editVersion;
+
+					TextCaretChangedStruct()
+						:editVersion(0)
+					{
+					}
 				};
 
 				virtual void							Attach(elements::GuiColorizedTextElement* element, SpinLock& elementModifyLock, vuint editVersion)=0;
