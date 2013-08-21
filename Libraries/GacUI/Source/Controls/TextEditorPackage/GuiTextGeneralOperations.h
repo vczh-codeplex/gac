@@ -63,7 +63,9 @@ RepeatingParsingExecutor
 			/// <summary>A data structure storing the parsing input for text box control.</summary>
 			struct RepeatingParsingInput
 			{
+				/// <summary>The text box edit version of the code.</summary>
 				vint									editVersion;
+				/// <summary>The code.</summary>
 				WString									code;
 
 				RepeatingParsingInput()
@@ -75,8 +77,11 @@ RepeatingParsingExecutor
 			/// <summary>A data structure storing the parsing result for text box control.</summary>
 			struct RepeatingParsingOutput
 			{
+				/// <summary>The parsed syntax tree.</summary>
 				Ptr<parsing::ParsingTreeObject>			node;
+				/// <summary>The text box edit version of the code.</summary>
 				vint									editVersion;
+				/// <summary>The code.</summary>
 				WString									code;
 
 				RepeatingParsingOutput()
