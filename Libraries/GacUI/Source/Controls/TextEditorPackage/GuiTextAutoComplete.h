@@ -51,11 +51,16 @@ GuiGrammarAutoComplete
 				, private RepeatingTaskExecutor<RepeatingParsingOutput>
 			{
 			public:
+				/// <summary>The analysed data from an input code.</summary>
 				struct Context
 				{
+					/// <summary>The input data.</summary>
 					RepeatingParsingOutput					input;
+					/// <summary>The selected context in the syntax tree.</summary>
 					parsing::ParsingTreeObject*				contextNode;
+					/// <summary>The code of the selected context.</summary>
 					WString									contextNodeCode;
+					/// <summary>The rule name that can parse the code of the selected context.</summary>
 					WString									contextNodeRule;
 
 					Context()
@@ -89,6 +94,7 @@ GuiGrammarAutoComplete
 			protected:
 
 				/// <summary>Called when the context of the code is selected.</summary>
+				/// <param name="context">The selected context.</param>
 				virtual void								OnContextFinishedAsync(const Context& context);
 
 				/// <summary>Call this function in the derived class's destructor when it overrided <see cref="OnContextFinishedAsync"/>.</summary>
