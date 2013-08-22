@@ -72,6 +72,7 @@ namespace vl
 					.Type(
 						Class(L"ClassTypeDef", Type(L"TypeDef"))								
 							.Member(L"ambiguousType", TokenType())
+								.Attribute(Attribute(L"SemanticColor").Argument(L"Type"))
 								.Attribute(Attribute(L"AutoCompleteType").Argument(L"Type"))
 							.Member(L"parentType", Type(L"TypeObj"))
 							.Member(L"members", Type(L"ClassMemberDef").Array())
