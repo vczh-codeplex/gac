@@ -185,8 +185,8 @@ GuiTextBoxCommonInterface
 				WString inputText=input;
 				if(callback->BeforeModify(start, end, originalText, inputText))
 				{
+					SPIN_LOCK(elementModifyLock)
 					{
-						SpinLock::Scope scope(elementModifyLock);
 						end=textElement->GetLines().Modify(start, end, inputText);
 					}
 					callback->AfterModify(originalStart, originalEnd, originalText, start, end, inputText);

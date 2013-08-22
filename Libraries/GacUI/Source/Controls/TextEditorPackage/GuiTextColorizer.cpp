@@ -32,8 +32,8 @@ GuiTextBoxColorizerBase
 					vint lexerState=-1;
 					vint contextState=-1;
 
+					SPIN_LOCK(*colorizer->elementModifyLock)
 					{
-						SpinLock::Scope scope(*colorizer->elementModifyLock);
 						if(colorizer->colorizedLineCount>=colorizer->element->GetLines().GetCount())
 						{
 							colorizer->isColorizerRunning=false;
@@ -54,8 +54,8 @@ GuiTextBoxColorizerBase
 
 					colorizer->ColorizeLineWithCRLF(lineIndex, text, colors, length+2, lexerState, contextState);
 
+					SPIN_LOCK(*colorizer->elementModifyLock)
 					{
-						SpinLock::Scope scope(*colorizer->elementModifyLock);
 						if(lineIndex<colorizer->colorizedLineCount && lineIndex<colorizer->element->GetLines().GetCount())
 						{
 							TextLine& line=colorizer->element->GetLines().GetLine(lineIndex);
@@ -118,10 +118,12 @@ GuiTextBoxColorizerBase
 			{
 				if(_element)
 				{
-					SpinLock::Scope scope(_elementModifyLock);
-					element=_element;
-					elementModifyLock=&_elementModifyLock;
-					StartColorizer();
+					SPIN_LOCK(_elementModifyLock)
+					{
+						element=_element;
+						elementModifyLock=&_elementModifyLock;
+						StartColorizer();
+					}
 				}
 			}
 
@@ -130,9 +132,11 @@ GuiTextBoxColorizerBase
 				if(element && elementModifyLock)
 				{
 					StopColorizer(false);
-					SpinLock::Scope scope(*elementModifyLock);
-					element=0;
-					elementModifyLock=0;
+					SPIN_LOCK(*elementModifyLock)
+					{
+						element=0;
+						elementModifyLock=0;
+					}
 				}
 			}
 
@@ -140,16 +144,18 @@ GuiTextBoxColorizerBase
 			{
 				if(element && elementModifyLock)
 				{
-					SpinLock::Scope scope(*elementModifyLock);
-					vint line
-						=arguments.originalStart.row<arguments.originalEnd.row
-						?arguments.originalStart.row
-						:arguments.originalEnd.row;
-					if(colorizedLineCount>line)
+					SPIN_LOCK(*elementModifyLock)
 					{
-						colorizedLineCount=line;
+						vint line
+							=arguments.originalStart.row<arguments.originalEnd.row
+							?arguments.originalStart.row
+							:arguments.originalEnd.row;
+						if(colorizedLineCount>line)
+						{
+							colorizedLineCount=line;
+						}
+						StartColorizer();
 					}
-					StartColorizer();
 				}
 			}
 
@@ -165,9 +171,11 @@ GuiTextBoxColorizerBase
 			{
 				if(element && elementModifyLock)
 				{
-					SpinLock::Scope scope(*elementModifyLock);
-					colorizedLineCount=0;
-					StartColorizer();
+					SPIN_LOCK(*elementModifyLock)
+					{
+						colorizedLineCount=0;
+						StartColorizer();
+					}
 				}
 			}
 
@@ -358,8 +366,8 @@ GuiGrammarColorizer
 
 			void GuiGrammarColorizer::OnParsingFinishedAsync(const RepeatingParsingOutput& output)
 			{
+				SPIN_LOCK(parsingTreeLock)
 				{
-					SpinLock::Scope scope(parsingTreeLock);
 					parsingTreeNode=output.node;
 					if(parsingTreeNode)
 					{
@@ -416,8 +424,10 @@ GuiGrammarColorizer
 			{
 				parsingExecutor->EnsureTaskFinished();
 				StopColorizerForever();
-				SpinLock::Scope scope(parsingTreeLock);
-				parsingTreeNode=0;
+				SPIN_LOCK(parsingTreeLock)
+				{
+					parsingTreeNode=0;
+				}
 			}
 
 			GuiGrammarColorizer::GuiGrammarColorizer(Ptr<RepeatingParsingExecutor> _parsingExecutor)
@@ -569,37 +579,39 @@ GuiGrammarColorizer
 
 			void GuiGrammarColorizer::ColorizeTokenContextSensitive(int lineIndex, const wchar_t* text, vint start, vint length, vint& token, int& contextState)
 			{
-				SpinLock::Scope scope(parsingTreeLock);
-				ParsingTreeObject* node=parsingTreeNode.Obj();
-				if(node && token!=-1 && colorContext[token])
+				SPIN_LOCK(parsingTreeLock)
 				{
-					ParsingTextPos pos(lineIndex, start);
-					ParsingTreeNode* foundNode=node->FindDeepestNode(pos);
-					if(!foundNode) return;
-					ParsingTreeToken* foundToken=dynamic_cast<ParsingTreeToken*>(foundNode);
-					if(!foundToken) return;
-					ParsingTreeObject* tokenParent=dynamic_cast<ParsingTreeObject*>(foundNode->GetParent());
-					if(!tokenParent) return;
-					vint index=tokenParent->GetMembers().Values().IndexOf(foundNode);
-					if(index==-1) return;
-
-					WString type=tokenParent->GetType();
-					WString field=tokenParent->GetMembers().Keys().Get(index);
-					FieldDesc key(type, field);
-
-					index=fieldContextColors.Keys().IndexOf(key);
-					if(index!=-1)
+					ParsingTreeObject* node=parsingTreeNode.Obj();
+					if(node && token!=-1 && colorContext[token])
 					{
-						token=fieldContextColors.Values().Get(index);
-						return;
-					}
+						ParsingTextPos pos(lineIndex, start);
+						ParsingTreeNode* foundNode=node->FindDeepestNode(pos);
+						if(!foundNode) return;
+						ParsingTreeToken* foundToken=dynamic_cast<ParsingTreeToken*>(foundNode);
+						if(!foundToken) return;
+						ParsingTreeObject* tokenParent=dynamic_cast<ParsingTreeObject*>(foundNode->GetParent());
+						if(!tokenParent) return;
+						vint index=tokenParent->GetMembers().Values().IndexOf(foundNode);
+						if(index==-1) return;
 
-					index=fieldSemanticColors.Keys().IndexOf(key);
-					if(index!=-1)
-					{
-						vint semantic=fieldSemanticColors.Values().Get(index);
-						OnSemanticColorize(foundToken, tokenParent, type, field, semantic, token);
-						return;
+						WString type=tokenParent->GetType();
+						WString field=tokenParent->GetMembers().Keys().Get(index);
+						FieldDesc key(type, field);
+
+						index=fieldContextColors.Keys().IndexOf(key);
+						if(index!=-1)
+						{
+							token=fieldContextColors.Values().Get(index);
+							return;
+						}
+
+						index=fieldSemanticColors.Keys().IndexOf(key);
+						if(index!=-1)
+						{
+							vint semantic=fieldSemanticColors.Values().Get(index);
+							OnSemanticColorize(foundToken, tokenParent, type, field, semantic, token);
+							return;
+						}
 					}
 				}
 			}

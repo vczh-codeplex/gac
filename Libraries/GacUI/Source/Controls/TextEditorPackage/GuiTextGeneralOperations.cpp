@@ -38,19 +38,23 @@ RepeatingParsingExecutor::CallbackBase
 			{
 				if(_element)
 				{
-					SpinLock::Scope scope(_elementModifyLock);
-					callbackElement=_element;
-					callbackElementModifyLock=&_elementModifyLock;
+					SPIN_LOCK(_elementModifyLock)
+					{
+						callbackElement=_element;
+						callbackElementModifyLock=&_elementModifyLock;
+					}
 				}
 				
 				parsingExecutor->ActivateCallback(this);
 				if(callbackElement && callbackElementModifyLock && callbackAutoPushing)
 				{
-					SpinLock::Scope scope(*callbackElementModifyLock);
-					RepeatingParsingInput input;
-					input.editVersion=editVersion;
-					input.code=callbackElement->GetLines().GetText();
-					parsingExecutor->SubmitTask(input);
+					SPIN_LOCK(*callbackElementModifyLock)
+					{
+						RepeatingParsingInput input;
+						input.editVersion=editVersion;
+						input.code=callbackElement->GetLines().GetText();
+						parsingExecutor->SubmitTask(input);
+					}
 				}
 			}
 
@@ -58,9 +62,11 @@ RepeatingParsingExecutor::CallbackBase
 			{
 				if(callbackElement && callbackElementModifyLock)
 				{
-					SpinLock::Scope scope(*callbackElementModifyLock);
-					callbackElement=0;
-					callbackElementModifyLock=0;
+					SPIN_LOCK(*callbackElementModifyLock)
+					{
+						callbackElement=0;
+						callbackElementModifyLock=0;
+					}
 				}
 				
 				parsingExecutor->DeactivateCallback(this);
@@ -78,11 +84,13 @@ RepeatingParsingExecutor::CallbackBase
 			{
 				if(callbackElement && callbackElementModifyLock && callbackAutoPushing)
 				{
-					SpinLock::Scope scope(*callbackElementModifyLock);
-					RepeatingParsingInput input;
-					input.editVersion=editVersion;
-					input.code=callbackElement->GetLines().GetText();
-					parsingExecutor->SubmitTask(input);
+					SPIN_LOCK(*callbackElementModifyLock)
+					{
+						RepeatingParsingInput input;
+						input.editVersion=editVersion;
+						input.code=callbackElement->GetLines().GetText();
+						parsingExecutor->SubmitTask(input);
+					}
 				}
 			}
 
