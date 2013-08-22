@@ -239,6 +239,25 @@ ParsingTreeNode
 			return result;
 		}
 
+		Ptr<ParsingTreeNode> ParsingTreeNode::TryGetPtr(Ptr<ParsingTreeNode> root)
+		{
+			if(this==root.Obj())
+			{
+				return root;
+			}
+			else if(parent)
+			{
+				FOREACH(Ptr<ParsingTreeNode>, node, parent->cachedOrderedSubNodes)
+				{
+					if(this==node.Obj())
+					{
+						return node;
+					}
+				}
+			}
+			return 0;
+		}
+
 /***********************************************************************
 ParsingTreeToken
 ***********************************************************************/

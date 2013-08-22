@@ -56,19 +56,18 @@ GuiGrammarAutoComplete
 				{
 					/// <summary>The input data.</summary>
 					RepeatingParsingOutput					input;
-					/// <summary>The selected context in the syntax tree.</summary>
-					parsing::ParsingTreeObject*				node;
-					/// <summary>The code of the selected context.</summary>
-					WString									code;
 					/// <summary>The rule name that can parse the code of the selected context.</summary>
 					WString									rule;
 					/// <summary>Range of the original context in the input.</summary>
 					parsing::ParsingTextRange				originalRange;
-					/// <summary>Range of the modified context in the input.</summary>
-					parsing::ParsingTextRange				modifiedRange;
+					/// <summary>The original context in the syntax tree.</summary>
+					Ptr<parsing::ParsingTreeObject>			originalNode;
+					/// <summary>The modified context in the syntax tree.</summary>
+					Ptr<parsing::ParsingTreeObject>			modifiedNode;
+					/// <summary>The modified code of the selected context.</summary>
+					WString									modifiedCode;
 
 					Context()
-						:node(0)
 					{
 					}
 				};
