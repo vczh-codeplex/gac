@@ -294,14 +294,14 @@ GuiGrammarAutoComplete
 					start=selectedNode->GetCodeRange().start;
 					end=selectedNode->GetCodeRange().end;
 
-					newContext.node=selectedNode;
+					newContext.originalNode=selectedNode->TryGetPtr(newContext.input.node).Cast<ParsingTreeObject>();
+					newContext.modifiedNode=newContext.originalNode;
 					if(start.index>=0 && end.index>=0)
 					{
-						newContext.code=newContext.input.code.Sub(start.index, end.index-start.index+1);
+						newContext.modifiedCode=newContext.input.code.Sub(start.index, end.index-start.index+1);
 					}
 					newContext.rule=selectedNode->GetCreatorRules()[selectedNode->GetCreatorRules().Count()-1];
 					newContext.originalRange=selectedNode->GetCodeRange();
-					newContext.modifiedRange=selectedNode->GetCodeRange();
 				}
 			}
 
@@ -348,7 +348,7 @@ GuiGrammarAutoComplete
 						SpinLock::Scope scope(contextLock);
 						newContext=context;
 					}
-					if(newContext.node)
+					if(newContext.originalNode)
 					{
 						ExecuteEdit(newContext);
 					}
@@ -357,7 +357,7 @@ GuiGrammarAutoComplete
 				{
 					SpinLock::Scope scope(contextLock);
 					context=newContext;
-					if(context.input.node && context.node)
+					if(context.input.node && context.originalNode)
 					{
 						OnContextFinishedAsync(context);
 					}
