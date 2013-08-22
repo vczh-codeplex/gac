@@ -220,7 +220,7 @@ ParsingAutoRecoverParser
 
 			ParsingAutoRecoverParser::ParsingAutoRecoverParser(Ptr<ParsingTable> _table)
 				:ParsingStrictParser(_table)
-				,recoverFutures(65536)
+				,recoverFutures(1024)
 				,recoveringFutureIndex(-1)
 			{
 			}
