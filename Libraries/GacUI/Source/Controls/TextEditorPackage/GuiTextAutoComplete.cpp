@@ -435,7 +435,7 @@ GuiGrammarAutoComplete
 						
 						newContext.modifiedCode=lines.GetText();
 						List<Ptr<ParsingError>> errors;
-						Ptr<ParsingTreeNode> parsedNode=parsingExecutor->GetParser()->Parse(newContext.modifiedCode, newContext.rule, errors);
+						Ptr<ParsingTreeNode> parsedNode=grammarParser->Parse(newContext.modifiedCode, newContext.rule, errors);
 						newContext.modifiedNode=parsedNode.Cast<ParsingTreeObject>();
 					}
 				}
@@ -531,22 +531,26 @@ GuiGrammarAutoComplete
 				}
 			}
 
+			void GuiGrammarAutoComplete::Initialize()
+			{
+				grammarParser=CreateAutoRecoverParser(parsingExecutor->GetParser()->GetTable());
+				CollectLeftRecursiveRules();
+				PrepareAutoCompleteMetadata();
+				parsingExecutor->AttachCallback(this);
+			}
+
 			GuiGrammarAutoComplete::GuiGrammarAutoComplete(Ptr<RepeatingParsingExecutor> _parsingExecutor)
 				:RepeatingParsingExecutor::CallbackBase(_parsingExecutor)
 				,editing(false)
 			{
-				CollectLeftRecursiveRules();
-				PrepareAutoCompleteMetadata();
-				parsingExecutor->AttachCallback(this);
+				Initialize();
 			}
 
 			GuiGrammarAutoComplete::GuiGrammarAutoComplete(Ptr<parsing::tabling::ParsingGeneralParser> _grammarParser, const WString& _grammarRule)
 				:RepeatingParsingExecutor::CallbackBase(new RepeatingParsingExecutor(_grammarParser, _grammarRule))
 				,editing(false)
 			{
-				CollectLeftRecursiveRules();
-				PrepareAutoCompleteMetadata();
-				parsingExecutor->AttachCallback(this);
+				Initialize();
 			}
 
 			GuiGrammarAutoComplete::~GuiGrammarAutoComplete()
