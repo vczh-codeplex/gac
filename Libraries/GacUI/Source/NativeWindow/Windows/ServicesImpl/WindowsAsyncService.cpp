@@ -58,11 +58,8 @@ WindowsAsyncService::DelayItem
 						executeTime=DateTime::LocalTime().Forward(milliseconds);
 						return true;
 					}
-					else
-					{
-						return false;
-					}
 				}
+				return false;
 			}
 
 			bool WindowsAsyncService::DelayItem::Cancel()
@@ -77,8 +74,8 @@ WindowsAsyncService::DelayItem
 							return true;
 						}
 					}
-					return false;
 				}
+				return false;
 			}
 
 /***********************************************************************
@@ -190,6 +187,7 @@ WindowsAsyncService
 					delayItems.Add(delay);
 					return delay;
 				}
+				return 0;
 			}
 
 			Ptr<INativeDelay> WindowsAsyncService::DelayExecuteInMainThread(const Func<void()>& proc, vint milliseconds)
@@ -200,6 +198,7 @@ WindowsAsyncService
 					delayItems.Add(delay);
 					return delay;
 				}
+				return 0;
 			}
 		}
 	}
