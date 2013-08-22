@@ -93,6 +93,7 @@ GuiGrammarAutoComplete
 				void										ExecuteRefresh(Context& newContext);
 				bool										NormalizeTextPos(Context& newContext, elements::text::TextLines& lines, TextPos& pos);
 				void										ExecuteEdit(Context& newContext);
+				void										ExecuteCalculateList(Context& newContext);
 				void										Execute(const RepeatingParsingOutput& input)override;
 				void										PostList(const Context& newContext);
 			protected:

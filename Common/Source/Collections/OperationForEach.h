@@ -81,10 +81,6 @@ IEnumerable<T>Ö§³Ö
 ForEachºê
 ***********************************************************************/
 
-#define SCOPE_VARIABLE(TYPE, VARIABLE, VALUE)\
-		if(bool __scope_variable_flag__=true)\
-			for(TYPE VARIABLE = VALUE;__scope_variable_flag__;__scope_variable_flag__=false)
-
 #define FOREACH(TYPE, VARIABLE, COLLECTION)\
 		SCOPE_VARIABLE(const ForEachIterator<TYPE>&, __foreach_iterator__, CreateForEachIterator(COLLECTION))\
 		for(TYPE VARIABLE;__foreach_iterator__.Next(VARIABLE);)

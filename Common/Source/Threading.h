@@ -270,6 +270,11 @@ namespace vl
 		};
 	};
 
+#define SPIN_LOCK(LOCK) SCOPE_VARIABLE(SpinLock::Scope, scope, LOCK)
+#define CS_LOCK(LOCK) SCOPE_VARIABLE(CriticalSection::Scope, scope, LOCK)
+#define READER_LOCK(LOCK) SCOPE_VARIABLE(ReaderWriterLock::ReaderScope, scope, LOCK)
+#define WRITER_LOCK(LOCK) SCOPE_VARIABLE(ReaderWriterLock::WriterScope, scope, LOCK)
+
 /***********************************************************************
 RepeatingTaskExecutor
 ***********************************************************************/
