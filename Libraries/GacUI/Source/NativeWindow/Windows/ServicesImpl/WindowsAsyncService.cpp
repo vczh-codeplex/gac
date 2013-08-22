@@ -181,24 +181,24 @@ WindowsAsyncService
 
 			Ptr<INativeDelay> WindowsAsyncService::DelayExecute(const Func<void()>& proc, vint milliseconds)
 			{
+				Ptr<DelayItem> delay;
 				SPIN_LOCK(taskListLock)
 				{
-					Ptr<DelayItem> delay=new DelayItem(this, proc, false, milliseconds);
+					delay=new DelayItem(this, proc, false, milliseconds);
 					delayItems.Add(delay);
-					return delay;
 				}
-				return 0;
+				return delay;
 			}
 
 			Ptr<INativeDelay> WindowsAsyncService::DelayExecuteInMainThread(const Func<void()>& proc, vint milliseconds)
 			{
+				Ptr<DelayItem> delay;
 				SPIN_LOCK(taskListLock)
 				{
-					Ptr<DelayItem> delay=new DelayItem(this, proc, true, milliseconds);
+					delay=new DelayItem(this, proc, true, milliseconds);
 					delayItems.Add(delay);
-					return delay;
 				}
-				return 0;
+				return delay;
 			}
 		}
 	}
