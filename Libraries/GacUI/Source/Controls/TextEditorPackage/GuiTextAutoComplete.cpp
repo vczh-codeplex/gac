@@ -305,6 +305,30 @@ GuiGrammarAutoComplete
 				}
 			}
 
+			bool GuiGrammarAutoComplete::NormalizeTextPos(Context& newContext, elements::text::TextLines& lines, TextPos& pos)
+			{
+				TextPos start(newContext.originalRange.start.row, newContext.originalRange.start.column);
+				TextPos end
+					=lines.GetCount()<=1
+					?TextPos(start.row, start.column+lines.GetLine(0).dataLength)
+					:TextPos(start.row+lines.GetCount()-1, lines.GetLine(lines.GetCount()-1).dataLength)
+					;
+
+				if(start<=pos && pos<=end)
+				{
+					pos.row-=start.row;
+					if(pos.row==0)
+					{
+						pos.column-=start.column;
+					}
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+
 			void GuiGrammarAutoComplete::ExecuteEdit(Context& newContext)
 			{
 				List<TextEditNotifyStruct> usedTrace;
@@ -313,11 +337,51 @@ GuiGrammarAutoComplete
 					CopyFrom(
 						usedTrace,
 						From(editTrace)
-							.Where([](const TextEditNotifyStruct& value)
+							.Where([&newContext](const TextEditNotifyStruct& value)
 							{
-								return value.originalText!=L"" || value.inputText!=L"";
+								return (value.originalText!=L"" || value.inputText!=L"") && value.editVersion>newContext.input.editVersion;
 							})
 						);
+				}
+
+				bool failed=false;
+				if(usedTrace.Count()>0)
+				{
+					if(usedTrace[0].editVersion!=newContext.input.editVersion++)
+					{
+						failed=true;
+					}
+					else
+					{
+						text::TextLines lines;
+						lines.SetText(newContext.modifiedCode);
+						FOREACH(TextEditNotifyStruct, trace, usedTrace)
+						{
+							TextPos start=trace.originalStart;
+							TextPos end=trace.originalEnd;
+							if(NormalizeTextPos(newContext, lines, start) && NormalizeTextPos(newContext, lines, end))
+							{
+								lines.Modify(start, end, trace.inputText);
+							}
+							else
+							{
+								failed=true;
+								break;
+							}
+						}
+						
+						newContext.modifiedCode=lines.GetText();
+						List<Ptr<ParsingError>> errors;
+						Ptr<ParsingTreeNode> parsedNode=parsingExecutor->GetParser()->Parse(newContext.modifiedCode, newContext.rule, errors);
+						newContext.modifiedNode=parsedNode.Cast<ParsingTreeObject>();
+					}
+				}
+
+				if(failed)
+				{
+					newContext.originalNode=0;
+					newContext.modifiedNode=0;
+					newContext.modifiedCode=L"";
 				}
 
 				if(usedTrace.Count()>0)
