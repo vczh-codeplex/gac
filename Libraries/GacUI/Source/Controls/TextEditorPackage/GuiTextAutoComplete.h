@@ -50,6 +50,8 @@ GuiGrammarAutoComplete
 				, private RepeatingParsingExecutor::CallbackBase
 				, private RepeatingTaskExecutor<RepeatingParsingOutput>
 			{
+				typedef collections::Pair<WString, WString>					FieldDesc;
+				typedef collections::Dictionary<FieldDesc, vint>			FieldAutoCompleteTypes;
 			public:
 				/// <summary>The analysed data from an input code.</summary>
 				struct Context
@@ -66,13 +68,20 @@ GuiGrammarAutoComplete
 					Ptr<parsing::ParsingTreeObject>			modifiedNode;
 					/// <summary>The modified code of the selected context.</summary>
 					WString									modifiedCode;
+					/// <summary>The edit version of modified code.</summary>
+					vuint									modifiedEditVersion;
 
 					Context()
+						:modifiedEditVersion(0)
 					{
 					}
 				};
 			private:
 				collections::SortedList<WString>			leftRecursiveRules;
+				collections::Dictionary<WString, vint>		autoCompleteTypes;
+				FieldAutoCompleteTypes						fieldAutoCompleteTypes;
+				collections::List<bool>						autoCompleteCandidates;
+				collections::List<bool>						autoCompleteTokens;
 				bool										editing;
 
 				SpinLock									editTraceLock;
@@ -88,6 +97,7 @@ GuiGrammarAutoComplete
 				void										TextEditFinished(vuint editVersion)override;
 				void										OnParsingFinishedAsync(const RepeatingParsingOutput& output)override;
 				void										CollectLeftRecursiveRules();
+				void										PrepareAutoCompleteMetadata();
 
 				vint										UnsafeGetEditTraceIndex(vuint editVersion);
 				void										ExecuteRefresh(Context& newContext);

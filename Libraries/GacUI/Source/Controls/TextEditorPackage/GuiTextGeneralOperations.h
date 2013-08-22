@@ -175,6 +175,9 @@ RepeatingParsingExecutor
 				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetColorAttribute(vint index);
 				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetContextColorAttribute(vint index);
 				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetSemanticColorAttribute(vint index);
+				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetAutoCompleteCandidateAttribute(vint index);
+				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetAutoCompleteTokenAttribute(vint index);
+				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetAutoCompleteTypeAttribute(vint index);
 			};
 		}
 	}
