@@ -304,11 +304,12 @@ RepeatingTaskExecutor
 					if(!currentInputDataAvailable)
 					{
 						executing=false;
-						break;
+						goto FINISH_EXECUTING;
 					}
 				}
 				Execute(currentInputData);
 			}
+		FINISH_EXECUTING:
 			executingEvent.Leave();
 		}
 

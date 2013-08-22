@@ -37,7 +37,7 @@ GuiTextBoxColorizerBase
 						if(colorizer->colorizedLineCount>=colorizer->element->GetLines().GetCount())
 						{
 							colorizer->isColorizerRunning=false;
-							break;
+							goto CANCEL_COLORIZING;
 						}
 
 						lineIndex=colorizer->colorizedLineCount++;
@@ -70,6 +70,7 @@ GuiTextBoxColorizerBase
 						delete[] colors;
 					}
 				}
+			CANCEL_COLORIZING:
 				colorizer->colorizerRunningEvent.Leave();
 			}
 
