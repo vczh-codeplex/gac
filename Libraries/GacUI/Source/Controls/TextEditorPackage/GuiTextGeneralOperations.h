@@ -70,7 +70,7 @@ RepeatingParsingExecutor
 			struct RepeatingParsingInput
 			{
 				/// <summary>The text box edit version of the code.</summary>
-				vint									editVersion;
+				vuint									editVersion;
 				/// <summary>The code.</summary>
 				WString									code;
 
@@ -86,7 +86,7 @@ RepeatingParsingExecutor
 				/// <summary>The parsed syntax tree.</summary>
 				Ptr<parsing::ParsingTreeObject>			node;
 				/// <summary>The text box edit version of the code.</summary>
-				vint									editVersion;
+				vuint									editVersion;
 				/// <summary>The code.</summary>
 				WString									code;
 

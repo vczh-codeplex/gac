@@ -91,6 +91,7 @@ GuiGrammarAutoComplete
 
 				vint										UnsafeGetEditTraceIndex(vuint editVersion);
 				void										ExecuteRefresh(Context& newContext);
+				bool										NormalizeTextPos(Context& newContext, elements::text::TextLines& lines, TextPos& pos);
 				void										ExecuteEdit(Context& newContext);
 				void										Execute(const RepeatingParsingOutput& input)override;
 				void										PostList(const Context& newContext);
