@@ -124,6 +124,11 @@ GuiGrammarAutoComplete
 				GuiGrammarAutoComplete(Ptr<parsing::tabling::ParsingGeneralParser> _grammarParser, const WString& _grammarRule);
 				~GuiGrammarAutoComplete();
 
+				/// <summary>Get the id for a auto complete type.</summary>
+				/// <returns>The id.</returns>
+				/// <param name="token">The name of the auto complete type.</param>
+				vint										GetAutoCompleteTypeId(const WString& type);
+
 				/// <summary>Get the internal parsing executor.</summary>
 				/// <returns>The parsing executor.</returns>
 				Ptr<RepeatingParsingExecutor>				GetParsingExecutor();

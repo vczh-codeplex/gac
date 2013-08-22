@@ -555,6 +555,12 @@ GuiGrammarAutoComplete
 				parsingExecutor->DetachCallback(this);
 			}
 
+			vint GuiGrammarAutoComplete::GetAutoCompleteTypeId(const WString& type)
+			{
+				vint index=autoCompleteTypes.Keys().IndexOf(type);
+				return index==-1?-1:autoCompleteTypes.Values().Get(index);
+			}
+
 			Ptr<RepeatingParsingExecutor> GuiGrammarAutoComplete::GetParsingExecutor()
 			{
 				return parsingExecutor;
