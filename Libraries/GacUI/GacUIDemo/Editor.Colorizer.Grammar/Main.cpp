@@ -136,26 +136,37 @@ protected:
 		return FindType(scope->parent, name);
 	}
 
-	TypeSymbol* FindType(TypeSymbol* scope, ParsingTreeObject* object)
+	TypeSymbol* FindType(TypeSymbol* scope, ParsingTreeObject* object, ParsingTreeToken* foundToken)
 	{
 		if(scope && object)
 		{
-			Ptr<ParsingTreeToken> name=object->GetMember(L"name").Cast<ParsingTreeToken>();
-			if(name)
+			if(!foundToken)
 			{
-				WString typeName=name->GetValue();
+				foundToken=object->GetMember(L"name").Cast<ParsingTreeToken>().Obj();
+			}
+			if(object->GetMember(L"name")==foundToken)
+			{
+				WString typeName=foundToken->GetValue();
 				if(object->GetType()==L"PrimitiveTypeObj")
 				{
 					return FindType(scope, typeName);
 				}
 				else if(object->GetType()==L"SubTypeObj")
 				{
-					TypeSymbol* type=FindType(scope, object->GetMember(L"parentType").Cast<ParsingTreeObject>().Obj());
+					TypeSymbol* type=FindType(scope, object->GetMember(L"parentType").Cast<ParsingTreeObject>().Obj(), 0);
 					if(type)
 					{
 						int index=type->subTypes.Keys().IndexOf(typeName);
 						if(index!=-1) return type->subTypes.Values().Get(index).Obj();
 					}
+				}
+			}
+			else if(object->GetMember(L"ambiguousType")==foundToken)
+			{
+				WString typeName=foundToken->GetValue();
+				if(object->GetType()==L"ClassTypeDef")
+				{
+					return FindType(scope, typeName);
 				}
 			}
 		}
@@ -172,7 +183,7 @@ protected:
 		if(semantic==semanticType)
 		{
 			TypeSymbol* scope=FindScope(tokenParent);
-			if(FindType(scope, tokenParent))
+			if(FindType(scope, tokenParent, foundToken))
 			{
 				token=tokenIdType;
 			}
