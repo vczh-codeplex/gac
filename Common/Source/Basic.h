@@ -101,6 +101,10 @@ typedef signed __int64	pos_t;
 
 #define CHECK_FAIL(DESCRIPTION) do{throw Error(DESCRIPTION);}while(0)
 
+#define SCOPE_VARIABLE(TYPE, VARIABLE, VALUE)\
+	if(bool __scope_variable_flag__=true)\
+		for(TYPE VARIABLE = VALUE;__scope_variable_flag__;__scope_variable_flag__=false)
+
 /***********************************************************************
 ¿‡–Õº∆À„
 ***********************************************************************/
