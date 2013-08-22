@@ -204,6 +204,50 @@ GuiGrammarAutoComplete
 
 			void GuiGrammarAutoComplete::PrepareAutoCompleteMetadata()
 			{
+				Ptr<ParsingTable> table=parsingExecutor->GetParser()->GetTable();
+				autoCompleteCandidates.Clear();
+				autoCompleteTokens.Clear();
+				autoCompleteTypes.Clear();
+				fieldAutoCompleteTypes.Clear();
+
+				// prepare tokens
+				{
+					vint tokenCount=table->GetTokenCount();
+					for(vint token=ParsingTable::UserTokenStart;token<tokenCount;token++)
+					{
+						const ParsingTable::TokenInfo& tokenInfo=table->GetTokenInfo(token);
+						autoCompleteCandidates.Add(parsingExecutor->GetAutoCompleteCandidateAttribute(tokenInfo.attributeIndex));
+						autoCompleteTokens.Add(parsingExecutor->GetAutoCompleteTokenAttribute(tokenInfo.attributeIndex));
+					}
+				}
+
+				// prepare fields
+				{
+					vint fieldCount=table->GetTreeFieldInfoCount();
+
+					for(vint field=0;field<fieldCount;field++)
+					{
+						const ParsingTable::TreeFieldInfo& fieldInfo=table->GetTreeFieldInfo(field);
+						if(Ptr<ParsingTable::AttributeInfo> att=parsingExecutor->GetAutoCompleteTypeAttribute(fieldInfo.attributeIndex))
+						{
+							vint index=autoCompleteTypes.Keys().IndexOf(att->arguments[0]);
+							if(index==-1)
+							{
+								autoCompleteTypes.Add(att->arguments[0], autoCompleteTypes.Count());
+							}
+						}
+					}
+
+					for(vint field=0;field<fieldCount;field++)
+					{
+						const ParsingTable::TreeFieldInfo& fieldInfo=table->GetTreeFieldInfo(field);
+						if(Ptr<ParsingTable::AttributeInfo> att=parsingExecutor->GetAutoCompleteTypeAttribute(fieldInfo.attributeIndex))
+						{
+							vint index=autoCompleteTypes.Keys().IndexOf(att->arguments[0]);
+							fieldAutoCompleteTypes.Add(FieldDesc(fieldInfo.type, fieldInfo.field), autoCompleteTypes.Values().Get(index));
+						}
+					}
+				}
 			}
 
 			vint GuiGrammarAutoComplete::UnsafeGetEditTraceIndex(vuint editVersion)
@@ -492,6 +536,7 @@ GuiGrammarAutoComplete
 				,editing(false)
 			{
 				CollectLeftRecursiveRules();
+				PrepareAutoCompleteMetadata();
 				parsingExecutor->AttachCallback(this);
 			}
 
@@ -500,6 +545,7 @@ GuiGrammarAutoComplete
 				,editing(false)
 			{
 				CollectLeftRecursiveRules();
+				PrepareAutoCompleteMetadata();
 				parsingExecutor->AttachCallback(this);
 			}
 
