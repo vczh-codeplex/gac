@@ -347,7 +347,7 @@ GuiGrammarAutoComplete
 				bool failed=false;
 				if(usedTrace.Count()>0)
 				{
-					if(usedTrace[0].editVersion!=newContext.input.editVersion++)
+					if(usedTrace[0].editVersion!=newContext.input.editVersion+1)
 					{
 						failed=true;
 					}
