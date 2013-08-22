@@ -295,8 +295,8 @@ RepeatingTaskExecutor
 			{
 				bool currentInputDataAvailable;
 				T currentInputData;
+				SPIN_LOCK(inputLock)
 				{
-					SpinLock::Scope scope(inputLock);
 					currentInputData=inputData;
 					inputData=T();
 					currentInputDataAvailable=inputDataAvailable;
@@ -340,8 +340,8 @@ RepeatingTaskExecutor
 
 		void SubmitTask(const T& input)
 		{
+			SPIN_LOCK(inputLock)
 			{
-				SpinLock::Scope scope(inputLock);
 				inputData=input;
 				inputDataAvailable=true;
 			}
