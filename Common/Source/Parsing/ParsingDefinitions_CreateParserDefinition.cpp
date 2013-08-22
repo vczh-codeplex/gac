@@ -36,7 +36,7 @@ namespace vl
 						Class(L"PrimitiveTypeObj", Type(L"TypeObj"))
 							.Member(L"name", TokenType())
 								.Attribute(Attribute(L"SemanticColor").Argument(L"Type"))
-								.Attribute(Attribute(L"AutoComplete").Argument(L"Type"))
+								.Attribute(Attribute(L"AutoCompleteType").Argument(L"Type"))
 						)
 
 					.Type(
@@ -48,7 +48,7 @@ namespace vl
 							.Member(L"parentType", Type(L"TypeObj"))
 							.Member(L"name", TokenType())
 								.Attribute(Attribute(L"SemanticColor").Argument(L"Type"))
-								.Attribute(Attribute(L"AutoComplete").Argument(L"SubType"))
+								.Attribute(Attribute(L"AutoCompleteType").Argument(L"SubType"))
 						)
 
 					.Type(
@@ -72,7 +72,7 @@ namespace vl
 					.Type(
 						Class(L"ClassTypeDef", Type(L"TypeDef"))								
 							.Member(L"ambiguousType", TokenType())
-								.Attribute(Attribute(L"AutoComplete").Argument(L"Type"))
+								.Attribute(Attribute(L"AutoCompleteType").Argument(L"Type"))
 							.Member(L"parentType", Type(L"TypeObj"))
 							.Member(L"members", Type(L"ClassMemberDef").Array())
 							.Member(L"subTypes", Type(L"TypeDef").Array())
@@ -96,13 +96,13 @@ namespace vl
 						Class(L"PrimitiveGrammarDef", Type(L"GrammarDef"))
 							.Member(L"name", TokenType())
 								.Attribute(Attribute(L"SemanticColor").Argument(L"Grammar"))
-								.Attribute(Attribute(L"AutoComplete").Argument(L"Grammar"))
+								.Attribute(Attribute(L"AutoCompleteType").Argument(L"Grammar"))
 						)
 
 					.Type(
 						Class(L"TextGrammarDef", Type(L"GrammarDef"))
 							.Member(L"text", TokenType())
-								.Attribute(Attribute(L"AutoComplete").Argument(L"Text"))
+								.Attribute(Attribute(L"AutoCompleteType").Argument(L"Text"))
 						)
 
 					.Type(
@@ -137,7 +137,7 @@ namespace vl
 						Class(L"AssignGrammarDef", Type(L"GrammarDef"))
 							.Member(L"grammar", Type(L"GrammarDef"))
 							.Member(L"memberName", TokenType())
-								.Attribute(Attribute(L"AutoComplete").Argument(L"Field"))
+								.Attribute(Attribute(L"AutoCompleteType").Argument(L"Field"))
 						)
 
 					.Type(
@@ -149,9 +149,9 @@ namespace vl
 						Class(L"SetterGrammarDef", Type(L"GrammarDef"))
 							.Member(L"grammar", Type(L"GrammarDef"))
 							.Member(L"memberName", TokenType())
-								.Attribute(Attribute(L"AutoComplete").Argument(L"EnumField"))
+								.Attribute(Attribute(L"AutoCompleteType").Argument(L"EnumField"))
 							.Member(L"value", TokenType())
-								.Attribute(Attribute(L"AutoComplete").Argument(L"EnumValue"))
+								.Attribute(Attribute(L"AutoCompleteType").Argument(L"EnumValue"))
 						)
 					//-------------------------------------
 					.Type(
@@ -182,27 +182,35 @@ namespace vl
 					//-------------------------------------
 					.TokenAtt(L"CLASS",		L"class")
 						.Attribute(Attribute(L"Color").Argument(L"Keyword"))
+						.Attribute(Attribute(L"AutoCompleteCandidate"))
 						.EndToken()
 					.TokenAtt(L"AMBIGUOUS",	L"ambiguous")
 						.Attribute(Attribute(L"Color").Argument(L"Keyword"))
+						.Attribute(Attribute(L"AutoCompleteCandidate"))
 						.EndToken()
 					.TokenAtt(L"ENUM",			L"enum")
 						.Attribute(Attribute(L"Color").Argument(L"Keyword"))
+						.Attribute(Attribute(L"AutoCompleteCandidate"))
 						.EndToken()
 					.TokenAtt(L"TOKEN",		L"token")
 						.Attribute(Attribute(L"Color").Argument(L"Keyword"))
+						.Attribute(Attribute(L"AutoCompleteCandidate"))
 						.EndToken()
 					.TokenAtt(L"DISCARDTOKEN",	L"discardtoken")
 						.Attribute(Attribute(L"Color").Argument(L"Keyword"))
+						.Attribute(Attribute(L"AutoCompleteCandidate"))
 						.EndToken()
 					.TokenAtt(L"RULE",			L"rule")
 						.Attribute(Attribute(L"Color").Argument(L"Keyword"))
+						.Attribute(Attribute(L"AutoCompleteCandidate"))
 						.EndToken()
 					.TokenAtt(L"AS",			L"as")
 						.Attribute(Attribute(L"Color").Argument(L"Keyword"))
+						.Attribute(Attribute(L"AutoCompleteCandidate"))
 						.EndToken()
 					.TokenAtt(L"WITH",			L"with")
 						.Attribute(Attribute(L"Color").Argument(L"Keyword"))
+						.Attribute(Attribute(L"AutoCompleteCandidate"))
 						.EndToken()
 
 					.Token(L"OPEN",			L"/{")
@@ -224,9 +232,11 @@ namespace vl
 
 					.TokenAtt(L"NAME",			L"[a-zA-Z_]/w*")
 						.Attribute(Attribute(L"ContextColor").Argument(L"Default"))
+						.Attribute(Attribute(L"AutoCompleteToken"))
 						.EndToken()
 					.TokenAtt(L"STRING",		L"\"([^\"]|\"\")*\"")
 						.Attribute(Attribute(L"Color").Argument(L"String"))
+						.Attribute(Attribute(L"AutoCompleteToken"))
 						.EndToken()
 					.Discard(L"SPACE",		L"/s+")
 					//-------------------------------------

@@ -202,6 +202,10 @@ GuiGrammarAutoComplete
 				}
 			}
 
+			void GuiGrammarAutoComplete::PrepareAutoCompleteMetadata()
+			{
+			}
+
 			vint GuiGrammarAutoComplete::UnsafeGetEditTraceIndex(vuint editVersion)
 			{
 				vint start=0;
@@ -306,14 +310,15 @@ GuiGrammarAutoComplete
 					start=selectedNode->GetCodeRange().start;
 					end=selectedNode->GetCodeRange().end;
 
+					newContext.rule=selectedNode->GetCreatorRules()[selectedNode->GetCreatorRules().Count()-1];
+					newContext.originalRange=selectedNode->GetCodeRange();
 					newContext.originalNode=selectedNode->TryGetPtr(newContext.input.node).Cast<ParsingTreeObject>();
 					newContext.modifiedNode=newContext.originalNode;
+					newContext.modifiedEditVersion=newContext.input.editVersion;
 					if(start.index>=0 && end.index>=0)
 					{
 						newContext.modifiedCode=newContext.input.code.Sub(start.index, end.index-start.index+1);
 					}
-					newContext.rule=selectedNode->GetCreatorRules()[selectedNode->GetCreatorRules().Count()-1];
-					newContext.originalRange=selectedNode->GetCodeRange();
 				}
 			}
 
@@ -352,7 +357,7 @@ GuiGrammarAutoComplete
 							From(editTrace)
 								.Where([&newContext](const TextEditNotifyStruct& value)
 								{
-									return (value.originalText!=L"" || value.inputText!=L"") && value.editVersion>newContext.input.editVersion;
+									return (value.originalText!=L"" || value.inputText!=L"") && value.editVersion>newContext.modifiedEditVersion;
 								})
 							);
 					}
@@ -361,7 +366,7 @@ GuiGrammarAutoComplete
 				bool failed=false;
 				if(usedTrace.Count()>0)
 				{
-					if(usedTrace[0].editVersion!=newContext.input.editVersion+1)
+					if(usedTrace[0].editVersion!=newContext.modifiedEditVersion+1)
 					{
 						failed=true;
 					}
@@ -400,7 +405,7 @@ GuiGrammarAutoComplete
 
 				if(usedTrace.Count()>0)
 				{
-					newContext.input.editVersion=usedTrace[usedTrace.Count()-1].editVersion;
+					newContext.modifiedEditVersion=usedTrace[usedTrace.Count()-1].editVersion;
 				}
 			}
 
