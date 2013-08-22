@@ -77,6 +77,7 @@ GuiGrammarAutoComplete
 					}
 				};
 			private:
+				Ptr<parsing::tabling::ParsingGeneralParser>	grammarParser;
 				collections::SortedList<WString>			leftRecursiveRules;
 				collections::Dictionary<WString, vint>		autoCompleteTypes;
 				FieldAutoCompleteTypes						fieldAutoCompleteTypes;
@@ -106,6 +107,8 @@ GuiGrammarAutoComplete
 				void										ExecuteCalculateList(Context& newContext);
 				void										Execute(const RepeatingParsingOutput& input)override;
 				void										PostList(const Context& newContext);
+
+				void										Initialize();
 			protected:
 
 				/// <summary>Called when the context of the code is selected.</summary>
