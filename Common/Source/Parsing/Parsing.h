@@ -34,8 +34,10 @@ namespace vl
 				Ptr<ParsingTable>							GetTable();
 				virtual void								BeginParse();
 				virtual ParsingState::TransitionResult		ParseStep(ParsingState& state, collections::List<Ptr<ParsingError>>& errors)=0;
+				bool										Parse(ParsingState& state, ParsingTransitionProcessor& processor, collections::List<Ptr<ParsingError>>& errors);
 				Ptr<ParsingTreeNode>						Parse(ParsingState& state, collections::List<Ptr<ParsingError>>& errors);
 				Ptr<ParsingTreeNode>						Parse(const WString& input, const WString& rule, collections::List<Ptr<ParsingError>>& errors);
+				bool										Parse(const WString& input, const WString& rule, collections::List<ParsingState::TransitionResult>& transitions, collections::List<Ptr<ParsingError>>& errors);
 			};
 
 /***********************************************************************

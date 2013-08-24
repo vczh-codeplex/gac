@@ -949,6 +949,53 @@ ParsingTreeBuilder
 					return 0;
 				}
 			}
+
+/***********************************************************************
+ParsingTransitionCollector
+***********************************************************************/
+
+			ParsingTransitionCollector::ParsingTransitionCollector(TransitionResultList& _transitions)
+				:processingAmbiguityBranch(false)
+				,transitions(_transitions)
+			{
+			}
+
+			ParsingTransitionCollector::~ParsingTransitionCollector()
+			{
+			}
+
+			void ParsingTransitionCollector::Reset()
+			{
+				processingAmbiguityBranch=false;
+				transitions.Clear();
+			}
+
+			bool ParsingTransitionCollector::Run(const ParsingState::TransitionResult& result)
+			{
+				switch(result.transitionType)
+				{
+				case ParsingState::TransitionResult::AmbiguityBegin:
+					if(processingAmbiguityBranch) return false;
+					processingAmbiguityBranch=true;
+					break;
+				case ParsingState::TransitionResult::AmbiguityBranch:
+					if(!processingAmbiguityBranch) return false;
+					break;
+				case ParsingState::TransitionResult::AmbiguityEnd:
+					if(!processingAmbiguityBranch) return false;
+					break;
+				default:
+					return false;
+				}
+
+				transitions.Add(result);
+				return true;
+			}
+
+			bool ParsingTransitionCollector::GetProcessingAmbiguityBranch()
+			{
+				return processingAmbiguityBranch;
+			}
 		}
 	}
 }

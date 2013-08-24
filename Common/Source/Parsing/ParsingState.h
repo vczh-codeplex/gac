@@ -223,7 +223,15 @@ namespace vl
 Óï·¨Ê÷Éú³ÉÆ÷
 ***********************************************************************/
 
-			class ParsingTreeBuilder : public Object
+			class ParsingTransitionProcessor : public Object
+			{
+			public:
+				virtual void								Reset()=0;
+				virtual bool								Run(const ParsingState::TransitionResult& result)=0;
+				virtual bool								GetProcessingAmbiguityBranch()=0;
+			};
+
+			class ParsingTreeBuilder : public ParsingTransitionProcessor
 			{
 			protected:
 				Ptr<ParsingTreeNode>						createdObject;
@@ -240,10 +248,25 @@ namespace vl
 				ParsingTreeBuilder();
 				~ParsingTreeBuilder();
 
-				void										Reset();
-				bool										Run(const ParsingState::TransitionResult& result);
-				bool										GetProcessingAmbiguityBranch();
+				void										Reset()override;
+				bool										Run(const ParsingState::TransitionResult& result)override;
+				bool										GetProcessingAmbiguityBranch()override;
 				Ptr<ParsingTreeObject>						GetNode();
+			};
+
+			class ParsingTransitionCollector : public ParsingTransitionProcessor
+			{
+				typedef collections::List<ParsingState::TransitionResult>		TransitionResultList;
+			protected:
+				bool										processingAmbiguityBranch;
+				TransitionResultList&						transitions;
+			public:
+				ParsingTransitionCollector(TransitionResultList& _transitions);
+				~ParsingTransitionCollector();
+
+				void										Reset()override;
+				bool										Run(const ParsingState::TransitionResult& result)override;
+				bool										GetProcessingAmbiguityBranch()override;
 			};
 		}
 	}
