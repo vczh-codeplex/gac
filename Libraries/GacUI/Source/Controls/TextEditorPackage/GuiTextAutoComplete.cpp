@@ -362,6 +362,7 @@ GuiGrammarAutoComplete
 					newContext.rule=selectedNode->GetCreatorRules()[selectedNode->GetCreatorRules().Count()-1];
 					newContext.originalRange=selectedNode->GetCodeRange();
 					newContext.originalNode=selectedNode->TryGetPtr(newContext.input.node).Cast<ParsingTreeObject>();
+					newContext.modifiedNode=newContext.originalNode;
 					newContext.modifiedEditVersion=newContext.input.editVersion;
 					if(start.index>=0 && end.index>=0)
 					{
@@ -438,6 +439,9 @@ GuiGrammarAutoComplete
 						}
 						
 						newContext.modifiedCode=lines.GetText();
+						List<Ptr<ParsingError>> errors;
+						Ptr<ParsingTreeNode> parsedNode=grammarParser->Parse(newContext.modifiedCode, newContext.rule, errors);
+						newContext.modifiedNode=parsedNode.Cast<ParsingTreeObject>();
 					}
 				}
 
@@ -449,9 +453,14 @@ GuiGrammarAutoComplete
 
 			void GuiGrammarAutoComplete::ExecuteCalculateList(Context& newContext)
 			{
-				List<Ptr<ParsingError>> errors;
-				Ptr<ParsingTreeNode> parsedNode=grammarParser->Parse(newContext.modifiedCode, newContext.rule, errors);
-				newContext.modifiedNode=parsedNode.Cast<ParsingTreeObject>();
+				if(newContext.modifiedNode)
+				{
+					List<ParsingState::TransitionResult> transitions;
+					List<Ptr<ParsingError>> errors;
+					if(grammarParser->Parse(newContext.modifiedCode, newContext.rule, transitions, errors))
+					{
+					}
+				}
 			}
 
 			void GuiGrammarAutoComplete::Execute(const RepeatingParsingOutput& input)

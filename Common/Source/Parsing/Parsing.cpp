@@ -36,11 +36,10 @@ ParsingGeneralParser
 			{
 			}
 
-			Ptr<ParsingTreeNode> ParsingGeneralParser::Parse(ParsingState& state, collections::List<Ptr<ParsingError>>& errors)
+			bool ParsingGeneralParser::Parse(ParsingState& state, ParsingTransitionProcessor& processor, collections::List<Ptr<ParsingError>>& errors)
 			{
 				BeginParse();
-				ParsingTreeBuilder builder;
-				builder.Reset();
+				processor.Reset();
 
 				for(vint i=0;i<state.GetTokens().Count();i++)
 				{
@@ -51,7 +50,6 @@ ParsingGeneralParser
 					}
 				}
 
-				ParsingState::TransitionResult result;
 				while(true)
 				{
 					ParsingState::TransitionResult result=ParseStep(state, errors);
@@ -59,7 +57,7 @@ ParsingGeneralParser
 					{
 						const RegexToken* token=state.GetToken(state.GetCurrentToken());
 						errors.Add(new ParsingError(token, L"Internal error when parsing."));
-						return 0;
+						return false;
 					}
 					else if(result.transitionType==ParsingState::TransitionResult::SkipToken)
 					{
@@ -67,7 +65,7 @@ ParsingGeneralParser
 						{
 							const RegexToken* token=state.GetToken(state.GetCurrentToken());
 							errors.Add(new ParsingError(token, L"Failed to recover error when reaching the end of the input."));
-							return 0;
+							return false;
 						}
 						else
 						{
@@ -75,17 +73,25 @@ ParsingGeneralParser
 							continue;
 						}
 					}
-					else if(!builder.Run(result))
+					else if(!processor.Run(result))
 					{
 						const RegexToken* token=state.GetToken(state.GetCurrentToken());
 						errors.Add(new ParsingError(token, L"Internal error when building the parsing tree."));
-						return 0;
+						return false;
 					}
-					if(result.tableTokenIndex==ParsingTable::TokenFinish && !builder.GetProcessingAmbiguityBranch())
+					if(result.tableTokenIndex==ParsingTable::TokenFinish && !processor.GetProcessingAmbiguityBranch())
 					{
 						break;
 					}
 				}
+
+				return true;
+			}
+
+			Ptr<ParsingTreeNode> ParsingGeneralParser::Parse(ParsingState& state, collections::List<Ptr<ParsingError>>& errors)
+			{
+				ParsingTreeBuilder builder;
+				Parse(state, builder, errors);
 
 				Ptr<ParsingTreeNode> node=builder.GetNode();
 				if(!node)
@@ -105,6 +111,19 @@ ParsingGeneralParser
 					return 0;
 				}
 				return Parse(state, errors);
+			}
+
+			bool ParsingGeneralParser::Parse(const WString& input, const WString& rule, collections::List<ParsingState::TransitionResult>& transitions, collections::List<Ptr<ParsingError>>& errors)
+			{
+				ParsingState state(input, table);
+				if(state.Reset(rule)==-1)
+				{
+					errors.Add(new ParsingError(L"Rule \""+rule+L"\" does not exist."));
+					return 0;
+				}
+
+				ParsingTransitionCollector collector(transitions);
+				return Parse(state, collector, errors);
 			}
 
 /***********************************************************************
