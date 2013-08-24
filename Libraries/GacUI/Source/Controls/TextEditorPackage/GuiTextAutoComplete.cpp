@@ -108,18 +108,24 @@ GuiGrammarAutoComplete
 					{
 						SPIN_LOCK(editTraceLock)
 						{
+							// if the current caret changing is not caused by editing
+							// queue a fake TextEditNotifyStruct
+							// a fake struct can be detected by (trace.originalText==L"" && trace.inputText==L"")
 							TextEditNotifyStruct trace;
 							trace.editVersion=arguments.editVersion;
 							trace.originalStart=arguments.oldBegin;
 							trace.originalEnd=arguments.oldEnd;
 							trace.inputStart=arguments.newBegin;
 							trace.inputEnd=arguments.newEnd;
+
+							// ensure trace.originalStart<=trace.originalEnd
 							if(trace.originalStart>trace.originalEnd)
 							{
 								TextPos temp=trace.originalStart;
 								trace.originalStart=trace.originalEnd;
 								trace.originalEnd=temp;
 							}
+							// ensure trace.inputStart<=trace.inputEnd
 							if(trace.inputStart>trace.inputEnd)
 							{
 								TextPos temp=trace.inputStart;
@@ -136,12 +142,16 @@ GuiGrammarAutoComplete
 						{
 							if(editing)
 							{
+								// if the current caret changing is caused by editing
+								// submit a task with valid editVersion and invalid node and code
 								RepeatingParsingOutput input;
 								input.editVersion=context.input.editVersion;
 								SubmitTask(input);
 							}
 							else if(context.input.editVersion=arguments.editVersion)
 							{
+								// if the current caret changing is not caused by editing
+								// submit a task with the previous input
 								SubmitTask(context.input);
 							}
 						}
@@ -165,6 +175,7 @@ GuiGrammarAutoComplete
 				{
 					GetApplication()->InvokeInMainThread([=]()
 					{
+						// submit a task if the RepeatingParsingExecutor notices a new parsing result
 						SubmitTask(arguments);
 					});
 				}
@@ -252,6 +263,9 @@ GuiGrammarAutoComplete
 
 			vint GuiGrammarAutoComplete::UnsafeGetEditTraceIndex(vuint editVersion)
 			{
+				// get the index of the latest TextEditNotifyStruct of a specified edit version
+				// this function should be called inside SPIN_LOCK(editTraceLock)
+				// perform a binary search
 				vint start=0;
 				vint end=editTrace.Count()-1;
 				while(start<=end)
@@ -269,6 +283,7 @@ GuiGrammarAutoComplete
 					}
 					else
 					{
+						// if multiple TextEditNotifyStruct is found, choose the latest one
 						while(middle<editTrace.Count()-1)
 						{
 							if(editTrace[middle+1].editVersion==editTrace[middle].editVersion)
@@ -288,6 +303,8 @@ GuiGrammarAutoComplete
 
 			void GuiGrammarAutoComplete::ExecuteRefresh(Context& newContext)
 			{
+				// process the input of a task is submitted not by text editing
+				// find the text selection by the edit version of the input
 				TextPos startPos, endPos;
 				{
 					SPIN_LOCK(editTraceLock)
@@ -301,12 +318,14 @@ GuiGrammarAutoComplete
 					}
 				}
 
+				// locate the deepest node using the text selection
 				ParsingTextPos start(startPos.row, startPos.column);
 				ParsingTextPos end(endPos.row, endPos.column);
 				ParsingTextRange range(start, end);
 				ParsingTreeNode* found=newContext.input.node->FindDeepestNode(range);
 				ParsingTreeObject* selectedNode=0;
 
+				// if the location failed, choose the root node
 				if(!found)
 				{
 					found=newContext.input.node.Obj();
@@ -314,6 +333,8 @@ GuiGrammarAutoComplete
 
 				if(!selectedNode)
 				{
+					// from the deepest node, traverse towards the root node
+					// find the deepest node whose created rule is a left recursive rule and whose parent is not
 					ParsingTreeObject* lrec=0;
 					ParsingTreeNode* current=found;
 					while(current)
@@ -341,6 +362,8 @@ GuiGrammarAutoComplete
 
 				if(!selectedNode)
 				{
+					// if there is no left recursive rule that creates the deepest node and all indirect parents
+					// choose the deepest ParsingTreeObject
 					ParsingTreeNode* current=found;
 					while(current)
 					{
@@ -356,14 +379,18 @@ GuiGrammarAutoComplete
 
 				if(selectedNode)
 				{
+					// get the code range of the selected node
 					start=selectedNode->GetCodeRange().start;
 					end=selectedNode->GetCodeRange().end;
 
+					// get all properties from the selected node
 					newContext.rule=selectedNode->GetCreatorRules()[selectedNode->GetCreatorRules().Count()-1];
 					newContext.originalRange=selectedNode->GetCodeRange();
 					newContext.originalNode=selectedNode->TryGetPtr(newContext.input.node).Cast<ParsingTreeObject>();
 					newContext.modifiedNode=newContext.originalNode;
 					newContext.modifiedEditVersion=newContext.input.editVersion;
+
+					// get the corresponding code of the selected node
 					if(start.index>=0 && end.index>=0)
 					{
 						newContext.modifiedCode=newContext.input.code.Sub(start.index, end.index-start.index+1).Buffer();
@@ -373,7 +400,10 @@ GuiGrammarAutoComplete
 
 			bool GuiGrammarAutoComplete::NormalizeTextPos(Context& newContext, elements::text::TextLines& lines, TextPos& pos)
 			{
+				// get the start position
 				TextPos start(newContext.originalRange.start.row, newContext.originalRange.start.column);
+
+				// get the end position of the end of lines
 				TextPos end
 					=lines.GetCount()<=1
 					?TextPos(start.row, start.column+lines.GetLine(0).dataLength)
@@ -382,6 +412,8 @@ GuiGrammarAutoComplete
 
 				if(start<=pos && pos<=end)
 				{
+					// if the pos is inside the range
+					// normalize the pos to a new coordinate that the beginning position of lines is (row=0, column=0)
 					pos.row-=start.row;
 					if(pos.row==0)
 					{
@@ -397,6 +429,9 @@ GuiGrammarAutoComplete
 
 			void GuiGrammarAutoComplete::ExecuteEdit(Context& newContext)
 			{
+				// process the input of a task is submitted by text editing
+				// this function make an approximiation to the context if the RepeatingParsingExecutor is not fast enough
+				// copy all TextEditNotifyStruct that is caused by a text editing before (and including) the edit version of the input
 				List<TextEditNotifyStruct> usedTrace;
 				{
 					SPIN_LOCK(editTraceLock)
@@ -412,27 +447,34 @@ GuiGrammarAutoComplete
 					}
 				}
 
+				// apply all modification to get the new modifiedCode
 				bool failed=false;
 				if(usedTrace.Count()>0)
 				{
 					if(usedTrace[0].editVersion!=newContext.modifiedEditVersion+1)
 					{
+						// failed if any TextEditNotifyStruct is missing 
 						failed=true;
 					}
 					else
 					{
+						// initialize a TextLines with the latest modifiedCode
 						text::TextLines lines;
 						lines.SetText(newContext.modifiedCode);
 						FOREACH(TextEditNotifyStruct, trace, usedTrace)
 						{
+							// apply a modification to lines
 							TextPos start=trace.originalStart;
 							TextPos end=trace.originalEnd;
+
+							// only if the modification is meaningful
 							if(NormalizeTextPos(newContext, lines, start) && NormalizeTextPos(newContext, lines, end))
 							{
 								lines.Modify(start, end, trace.inputText);
 							}
 							else
 							{
+								// otherwise, failed
 								failed=true;
 								break;
 							}
@@ -447,25 +489,36 @@ GuiGrammarAutoComplete
 
 				if(failed)
 				{
+					// clear originalNode to notify that the current context goes wrong
 					newContext.originalNode=0;
 				}
 
 				if(usedTrace.Count()>0)
 				{
+					// update the edit version
 					newContext.modifiedEditVersion=usedTrace[usedTrace.Count()-1].editVersion;
 				}
 			}
 
 			void GuiGrammarAutoComplete::ExecuteCalculateList(Context& newContext)
 			{
+				// calcuate the content of the auto complete list
+				// it is sad that, because the parser's algorithm is too complex
+				// we need to reparse and track the internal state of the PDA(push-down automaton) here.
+				// initialize the PDA
 				ParsingState state(newContext.modifiedCode, grammarParser->GetTable());
 				state.Reset(newContext.rule);
 
+				// prepare to get all transitions
 				List<ParsingState::TransitionResult> transitions;
 				ParsingTransitionCollector collector(transitions);
 				List<Ptr<ParsingError>> errors;
+
+				// reparse and get all transitions during parsing
 				if(grammarParser->Parse(state, collector, errors))
 				{
+					// if modifiedNode is not prepared (the task is submitted because of text editing)
+					// use the transition to build the syntax tree
 					if(!newContext.modifiedNode)
 					{
 						ParsingTreeBuilder builder;
@@ -486,6 +539,8 @@ GuiGrammarAutoComplete
 						}
 					}
 
+					// find all possible token before the current caret using the PDA
+					// to collect all keywords that can be put into the auto complete list
 					if(newContext.modifiedNode)
 					{
 					}
