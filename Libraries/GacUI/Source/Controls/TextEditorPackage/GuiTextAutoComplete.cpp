@@ -307,6 +307,11 @@ GuiGrammarAutoComplete
 				ParsingTreeNode* found=newContext.input.node->FindDeepestNode(range);
 				ParsingTreeObject* selectedNode=0;
 
+				if(!found)
+				{
+					found=newContext.input.node.Obj();
+				}
+
 				if(!selectedNode)
 				{
 					ParsingTreeObject* lrec=0;
@@ -493,13 +498,10 @@ GuiGrammarAutoComplete
 				SPIN_LOCK(contextLock)
 				{
 					context=newContext;
-					if(context.input.node && context.originalNode)
-					{
-						OnContextFinishedAsync(context);
-					}
 				}
-				if(newContext.originalNode)
+				if(newContext.modifiedNode)
 				{
+					OnContextFinishedAsync(context);
 					GetApplication()->InvokeInMainThread([=]()
 					{
 						PostList(newContext);
