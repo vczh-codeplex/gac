@@ -984,6 +984,8 @@ ParsingTransitionCollector
 				case ParsingState::TransitionResult::AmbiguityEnd:
 					if(!processingAmbiguityBranch) return false;
 					break;
+				case ParsingState::TransitionResult::ExecuteInstructions:
+					break;
 				default:
 					return false;
 				}
