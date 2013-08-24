@@ -455,9 +455,13 @@ GuiGrammarAutoComplete
 			{
 				if(newContext.modifiedNode)
 				{
+					ParsingState state(newContext.modifiedCode, grammarParser->GetTable());
+					state.Reset(newContext.rule);
+
 					List<ParsingState::TransitionResult> transitions;
+					ParsingTransitionCollector collector(transitions);
 					List<Ptr<ParsingError>> errors;
-					if(grammarParser->Parse(newContext.modifiedCode, newContext.rule, transitions, errors))
+					if(grammarParser->Parse(state, collector, errors))
 					{
 					}
 				}
