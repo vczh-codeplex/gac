@@ -366,7 +366,7 @@ GuiGrammarAutoComplete
 					newContext.modifiedEditVersion=newContext.input.editVersion;
 					if(start.index>=0 && end.index>=0)
 					{
-						newContext.modifiedCode=newContext.input.code.Sub(start.index, end.index-start.index+1);
+						newContext.modifiedCode=newContext.input.code.Sub(start.index, end.index-start.index+1).Buffer();
 					}
 				}
 			}
@@ -438,11 +438,16 @@ GuiGrammarAutoComplete
 							}
 						}
 						
-						newContext.modifiedCode=lines.GetText();
-						List<Ptr<ParsingError>> errors;
-						Ptr<ParsingTreeNode> parsedNode=grammarParser->Parse(newContext.modifiedCode, newContext.rule, errors);
-						newContext.modifiedNode=parsedNode.Cast<ParsingTreeObject>();
+						if(!failed)
+						{
+							newContext.modifiedCode=lines.GetText();
+						}
 					}
+				}
+
+				if(failed)
+				{
+					newContext.originalNode=0;
 				}
 
 				if(usedTrace.Count()>0)
@@ -453,15 +458,35 @@ GuiGrammarAutoComplete
 
 			void GuiGrammarAutoComplete::ExecuteCalculateList(Context& newContext)
 			{
-				if(newContext.modifiedNode)
-				{
-					ParsingState state(newContext.modifiedCode, grammarParser->GetTable());
-					state.Reset(newContext.rule);
+				ParsingState state(newContext.modifiedCode, grammarParser->GetTable());
+				state.Reset(newContext.rule);
 
-					List<ParsingState::TransitionResult> transitions;
-					ParsingTransitionCollector collector(transitions);
-					List<Ptr<ParsingError>> errors;
-					if(grammarParser->Parse(state, collector, errors))
+				List<ParsingState::TransitionResult> transitions;
+				ParsingTransitionCollector collector(transitions);
+				List<Ptr<ParsingError>> errors;
+				if(grammarParser->Parse(state, collector, errors))
+				{
+					if(!newContext.modifiedNode)
+					{
+						ParsingTreeBuilder builder;
+						builder.Reset();
+						bool succeeded=true;
+						FOREACH(ParsingState::TransitionResult, transition, transitions)
+						{
+							if(!(succeeded=builder.Run(transition)))
+							{
+								break;
+							}
+						}
+
+						if(succeeded)
+						{
+							Ptr<ParsingTreeNode> parsedNode=builder.GetNode();
+							newContext.modifiedNode=parsedNode.Cast<ParsingTreeObject>();
+						}
+					}
+
+					if(newContext.modifiedNode)
 					{
 					}
 				}
@@ -488,6 +513,7 @@ GuiGrammarAutoComplete
 					SPIN_LOCK(contextLock)
 					{
 						newContext=context;
+						newContext.modifiedNode=0;
 					}
 					if(newContext.originalNode)
 					{
