@@ -500,13 +500,22 @@ GuiGrammarAutoComplete
 				}
 			}
 
+			void GuiGrammarAutoComplete::DeleteFutures(collections::List<parsing::tabling::ParsingState::Future*>& futures)
+			{
+				FOREACH(ParsingState::Future*, future, futures)
+				{
+					delete future;
+				}
+			}
+
 			vint GuiGrammarAutoComplete::TraverseTransitions(
 				parsing::tabling::ParsingState& state,
 				collections::List<parsing::tabling::ParsingState::TransitionResult>& transitions,
 				vint firstTransitionIndex,
 				TextPos stopPosition,
-				collections::List<parsing::tabling::ParsingState::Future*>& futures,
-				collections::SortedList<vint>& tableTokenIndices
+				collections::List<parsing::tabling::ParsingState::Future*>& nonRecoveryFutures,
+				collections::List<parsing::tabling::ParsingState::Future*>& recoveryFutures,
+				vint ambiguityRecursiveLevel
 				)
 			{
 				vint index=firstTransitionIndex;
@@ -516,16 +525,63 @@ GuiGrammarAutoComplete
 					switch(transition.transitionType)
 					{
 					case ParsingState::TransitionResult::AmbiguityBegin:
+						{
+							List<ParsingState::Future*> accumulatedNonRecoveryFutures, accumulatedRecoveryFutures;
+							Ptr<ParsingState::StateGroup> stateGroup=state.TakeSnapshot();
+							while(transitions[index].transitionType!=ParsingState::TransitionResult::AmbiguityEnd)
+							{
+								if(transitions[index].transitionType==ParsingState::TransitionResult::AmbiguityBranch)
+								{
+									state.RestoreSnapshot(stateGroup);
+								}
+								List<ParsingState::Future*> newNonRecoveryFutures, newRecoveryFutures;
+								newNonRecoveryFutures.Add(nonRecoveryFutures[0]->Clone());
+								if(recoveryFutures.Count()>0)
+								{
+									newRecoveryFutures.Add(recoveryFutures[0]->Clone());
+								}
+								index=TraverseTransitions(state, transitions, index+1, stopPosition, nonRecoveryFutures, newRecoveryFutures, ambiguityRecursiveLevel+1);
+								CopyFrom(accumulatedNonRecoveryFutures, newNonRecoveryFutures, true);
+								CopyFrom(accumulatedRecoveryFutures, newRecoveryFutures, true);
+							}
+
+							DeleteFutures(nonRecoveryFutures);
+							DeleteFutures(recoveryFutures);
+							CopyFrom(nonRecoveryFutures, accumulatedNonRecoveryFutures);
+							CopyFrom(recoveryFutures, accumulatedRecoveryFutures);
+						}
 						break;
 					case ParsingState::TransitionResult::AmbiguityBranch:
-						break;
 					case ParsingState::TransitionResult::AmbiguityEnd:
-						break;
+						return index;
 					case ParsingState::TransitionResult::ExecuteInstructions:
+						{
+							ParsingState::Future* currentFuture=
+								recoveryFutures.Count()>0
+								?recoveryFutures[0]
+								:nonRecoveryFutures[0];
+
+							vint tableTokenIndex=transition.tableTokenIndex;
+							List<ParsingState::Future*> possibilities;
+							state.Explore(tableTokenIndex, currentFuture, possibilities);
+
+							if(transition.token)
+							{
+								DeleteFutures(nonRecoveryFutures);
+								DeleteFutures(recoveryFutures);
+								CopyFrom(nonRecoveryFutures, possibilities);
+							}
+							else
+							{
+								DeleteFutures(recoveryFutures);
+								CopyFrom(recoveryFutures, possibilities);
+							}
+						}
 						break;
 					}
 					index++;
 				}
+				return index;
 			}
 
 			void GuiGrammarAutoComplete::SearchValidInputToken(
@@ -550,15 +606,12 @@ GuiGrammarAutoComplete
 				}
 
 				state.Reset(newContext.rule);
-				List<ParsingState::Future*> futures;
-				futures.Add(state.ExploreCreateRootFuture());
-				TraverseTransitions(state, transitions, 0, stopPosition, futures, tableTokenIndices);
-
-				FOREACH(ParsingState::Future*, future, futures)
-				{
-					delete future;
-				}
-				futures.Clear();
+				List<ParsingState::Future*> nonRecoveryFutures, recoveryFutures;
+				nonRecoveryFutures.Add(state.ExploreCreateRootFuture());
+				TraverseTransitions(state, transitions, 0, stopPosition, nonRecoveryFutures, recoveryFutures, 0);
+				
+				DeleteFutures(nonRecoveryFutures);
+				DeleteFutures(recoveryFutures);
 			}
 
 			void GuiGrammarAutoComplete::ExecuteCalculateList(Context& newContext)
