@@ -570,6 +570,41 @@ GuiGrammarAutoComplete
 						return index;
 					case ParsingState::TransitionResult::ExecuteInstructions:
 						{
+							// test does the token reach the stop position
+							if(transition.token)
+							{
+								if(TextPos(transition.token->rowEnd, transition.token->columnEnd)>stopPosition)
+								{
+									// skip all unnecessary transitions
+									vint ambiguityLevel=0;
+									while(index<transitions.Count())
+									{
+										switch(transition.transitionType)
+										{
+										case ParsingState::TransitionResult::AmbiguityBegin:
+											ambiguityLevel++;
+											break;
+										case ParsingState::TransitionResult::AmbiguityBranch:
+											if(ambiguityLevel==0)
+											{
+												return index;
+											}
+											break;
+										case ParsingState::TransitionResult::AmbiguityEnd:
+											if(ambiguityLevel==0)
+											{
+												return index;
+											}
+											ambiguityLevel--;
+											break;
+										}
+										index++;
+									}
+
+									// stop the traversing
+									return index;
+								}
+							}
 							// traverse the PDA using the token specified in the current transition
 							vint tableTokenIndex=transition.tableTokenIndex;
 							List<ParsingState::Future*> possibilities;
@@ -596,6 +631,27 @@ GuiGrammarAutoComplete
 								bool duplicated=false;
 								FOREACH(ParsingState::Future*, future, selectedPossibilities)
 								{
+									if(
+										candidateFuture->currentState==future->currentState &&
+										candidateFuture->reduceStateCount==future->reduceStateCount &&
+										candidateFuture->shiftStates.Count()==future->shiftStates.Count()
+										)
+									{
+										bool same=true;
+										for(vint j=0;j<future->shiftStates.Count();j++)
+										{
+											if(candidateFuture->shiftStates[i]!=future->shiftStates[i])
+											{
+												same=false;
+												break;
+											}
+										}
+
+										if(duplicated=same)
+										{
+											break;
+										}
+									}
 								}
 
 								if(duplicated)
@@ -609,7 +665,7 @@ GuiGrammarAutoComplete
 							}
 
 							// step forward
-							if(transition.token)
+							if(transition.token || transition.tableTokenIndex==ParsingTable::TokenBegin)
 							{
 								DeleteFutures(nonRecoveryFutures);
 								DeleteFutures(recoveryFutures);
@@ -647,6 +703,12 @@ GuiGrammarAutoComplete
 					else
 					{
 						stopPosition=editTrace[index].inputStart;
+					}
+					
+					stopPosition.row-=newContext.originalRange.start.row;
+					if(stopPosition.row==0)
+					{
+						stopPosition.column-=newContext.originalRange.start.column;
 					}
 				}
 
