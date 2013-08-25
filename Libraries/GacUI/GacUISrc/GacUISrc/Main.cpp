@@ -281,8 +281,21 @@ protected:
 			selectedTree=reader.ReadToEnd();
 		}
 
+		WString candidateMessage;
+		if(context.autoComplete)
+		{
+			Ptr<ParsingTable> table=GetParsingExecutor()->GetParser()->GetTable();
+			FOREACH(vint, token, context.autoComplete->candidates)
+			{
+				const ParsingTable::TokenInfo& tokenInfo=table->GetTokenInfo(token+ParsingTable::UserTokenStart);
+				candidateMessage+=tokenInfo.name+L": "+tokenInfo.regex+L"\r\n";
+			}
+		}
+
 		WString selectedMessage
-			=L"================RULE================\r\n"
+			=L"================CANDIDATE-TOKENS================\r\n"
+			+candidateMessage
+			+L"================RULE================\r\n"
 			+context.rule+L"\r\n"
 			+L"================CODE================\r\n"
 			+context.modifiedCode+L"\r\n"

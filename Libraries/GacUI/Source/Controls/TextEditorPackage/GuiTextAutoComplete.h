@@ -53,6 +53,13 @@ GuiGrammarAutoComplete
 				typedef collections::Pair<WString, WString>					FieldDesc;
 				typedef collections::Dictionary<FieldDesc, vint>			FieldAutoCompleteTypes;
 			public:
+				/// <summary>The auto complete list data.</summary>
+				struct AutoCompleteData
+				{
+					/// <summary>Available candidate tokens (in lexer token index).</summary>
+					collections::List<vint>					candidates;
+				};
+
 				/// <summary>The analysed data from an input code.</summary>
 				struct Context
 				{
@@ -70,6 +77,8 @@ GuiGrammarAutoComplete
 					WString									modifiedCode;
 					/// <summary>The edit version of modified code.</summary>
 					vuint									modifiedEditVersion;
+					/// <summary>The analysed auto complete list data.</summary>
+					Ptr<AutoCompleteData>					autoComplete;
 
 					Context()
 						:modifiedEditVersion(0)

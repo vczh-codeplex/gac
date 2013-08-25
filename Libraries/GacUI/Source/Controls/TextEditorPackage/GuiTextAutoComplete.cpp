@@ -610,7 +610,25 @@ GuiGrammarAutoComplete
 				List<ParsingState::Future*> nonRecoveryFutures, recoveryFutures;
 				nonRecoveryFutures.Add(state.ExploreCreateRootFuture());
 				TraverseTransitions(state, transitions, 0, stopPosition, nonRecoveryFutures, recoveryFutures, 0);
-				
+
+				List<ParsingState::Future*> possibilities;
+				FOREACH(ParsingState::Future*, future, nonRecoveryFutures)
+				{
+					vint count=state.GetTable()->GetTokenCount();
+					for(vint i=0;i<count;i++)
+					{
+						state.Explore(i, future, possibilities);
+					}
+				}
+				FOREACH(ParsingState::Future*, future, possibilities)
+				{
+					if(!tableTokenIndices.Contains(future->selectedToken))
+					{
+						tableTokenIndices.Add(future->selectedToken);
+					}
+				}
+
+				DeleteFutures(possibilities);
 				DeleteFutures(nonRecoveryFutures);
 				DeleteFutures(recoveryFutures);
 			}
@@ -660,6 +678,20 @@ GuiGrammarAutoComplete
 						// to collect all keywords that can be put into the auto complete list
 						SortedList<vint> tableTokenIndices;
 						SearchValidInputToken(state, transitions, newContext, tableTokenIndices);
+
+						Ptr<AutoCompleteData> autoComplete=new AutoCompleteData;
+						FOREACH(vint, token, tableTokenIndices)
+						{
+							vint regexToken=token-ParsingTable::UserTokenStart;
+							if(regexToken>=0)
+							{
+								if(autoCompleteCandidates[regexToken])
+								{
+									autoComplete->candidates.Add(regexToken);
+								}
+							}
+						}
+						newContext.autoComplete=autoComplete;
 					}
 				}
 			}
@@ -686,6 +718,7 @@ GuiGrammarAutoComplete
 					{
 						newContext=context;
 						newContext.modifiedNode=0;
+						newContext.autoComplete=0;
 					}
 					if(newContext.originalNode)
 					{
