@@ -713,31 +713,11 @@ GuiGrammarAutoComplete
 			void GuiGrammarAutoComplete::SearchValidInputToken(
 				parsing::tabling::ParsingState& state,
 				collections::List<parsing::tabling::ParsingState::TransitionResult>& transitions,
+				TextPos stopPosition,
 				Context& newContext,
 				collections::SortedList<vint>& tableTokenIndices
 				)
 			{
-				// calculate the stop position for PDA traversing
-				TextPos stopPosition;
-				SPIN_LOCK(editTraceLock)
-				{
-					vint index=UnsafeGetEditTraceIndex(newContext.modifiedEditVersion);
-					if(index==-1)
-					{
-						return;
-					}
-					else
-					{
-						stopPosition=editTrace[index].inputStart;
-					}
-					
-					stopPosition.row-=newContext.originalRange.start.row;
-					if(stopPosition.row==0)
-					{
-						stopPosition.column-=newContext.originalRange.start.column;
-					}
-				}
-
 				// initialize the PDA state
 				state.Reset(newContext.rule);
 				List<ParsingState::Future*> nonRecoveryFutures, recoveryFutures;
@@ -815,12 +795,36 @@ GuiGrammarAutoComplete
 
 					if(newContext.modifiedNode)
 					{
-						// find all possible token before the current caret using the PDA
-						// to collect all keywords that can be put into the auto complete list
-						SortedList<vint> tableTokenIndices;
-						SearchValidInputToken(state, transitions, newContext, tableTokenIndices);
+						// get the latest text editing trace
+						TextEditNotifyStruct trace;
+						SPIN_LOCK(editTraceLock)
+						{
+							vint index=UnsafeGetEditTraceIndex(newContext.modifiedEditVersion);
+							if(index==-1)
+							{
+								return;
+							}
+							else
+							{
+								trace=editTrace[index];
+							}
+						}
+						
+						// calculate the stop position for PDA traversing
+						TextPos stopPosition;
+						stopPosition=trace.inputStart;
+						stopPosition.row-=newContext.originalRange.start.row;
+						if(stopPosition.row==0)
+						{
+							stopPosition.column-=newContext.originalRange.start.column;
+						}
 
+						// find all possible token before the current caret using the PDA
 						Ptr<AutoCompleteData> autoComplete=new AutoCompleteData;
+						SortedList<vint> tableTokenIndices;
+						SearchValidInputToken(state, transitions, stopPosition, newContext, tableTokenIndices);
+
+						// collect all keywords that can be put into the auto complete list
 						FOREACH(vint, token, tableTokenIndices)
 						{
 							vint regexToken=token-ParsingTable::UserTokenStart;
@@ -832,6 +836,59 @@ GuiGrammarAutoComplete
 								}
 							}
 						}
+
+						// collect all auto complete types
+						{
+						
+						// calculate the start position for PDA traversing
+							TextPos startPos;
+							startPos=trace.inputStart;
+							if(newContext.modifiedNode!=newContext.originalNode)
+							{
+								startPos.row-=newContext.originalRange.start.row;
+								if(startPos.row==0)
+								{
+									startPos.column-=newContext.originalRange.start.column;
+								}
+							}
+						
+							// calculate the end position for PDA traversing
+							TextPos endPos;
+							endPos=trace.inputEnd;
+							if(newContext.modifiedNode!=newContext.originalNode)
+							{
+								endPos.row-=newContext.originalRange.start.row;
+								if(endPos.row==0)
+								{
+									endPos.column-=newContext.originalRange.start.column;
+								}
+							}
+
+							ParsingTextRange range(ParsingTextPos(startPos.row, startPos.column), ParsingTextPos(endPos.row, endPos.column));
+							ParsingTreeNode* foundNode=newContext.modifiedNode->FindDeepestNode(range);
+							if(!foundNode) goto FINISH_COLLECTING_AUTO_COMPLETE_TYPES;
+							ParsingTreeToken* foundToken=dynamic_cast<ParsingTreeToken*>(foundNode);
+							if(!foundToken) goto FINISH_COLLECTING_AUTO_COMPLETE_TYPES;
+							ParsingTreeObject* tokenParent=dynamic_cast<ParsingTreeObject*>(foundNode->GetParent());
+							if(!tokenParent) goto FINISH_COLLECTING_AUTO_COMPLETE_TYPES;
+							vint index=tokenParent->GetMembers().Values().IndexOf(foundNode);
+							if(index==-1) goto FINISH_COLLECTING_AUTO_COMPLETE_TYPES;
+
+							WString type=tokenParent->GetType();
+							WString field=tokenParent->GetMembers().Keys().Get(index);
+							FieldDesc key(type, field);
+
+							index=fieldAutoCompleteTypes.Keys().IndexOf(key);
+							if(index!=-1)
+							{
+								vint type=fieldAutoCompleteTypes.Values().Get(index);
+								autoComplete->types.Add(type);
+							}
+
+							autoComplete->token=foundToken->TryGetPtr(newContext.modifiedNode).Cast<ParsingTreeToken>();
+						}
+			FINISH_COLLECTING_AUTO_COMPLETE_TYPES:
+
 						newContext.autoComplete=autoComplete;
 					}
 				}
@@ -895,6 +952,18 @@ GuiGrammarAutoComplete
 
 					editTrace.RemoveRange(0, traceIndex+1);
 				}
+			}
+
+			WString GuiGrammarAutoComplete::GetAutoCompleteTypeName(vint id)
+			{
+				for(vint i=0;i<autoCompleteTypes.Count();i++)
+				{
+					if(autoCompleteTypes.Values()[i]==id)
+					{
+						return autoCompleteTypes.Keys()[i];
+					}
+				}
+				return L"";
 			}
 
 			void GuiGrammarAutoComplete::OnContextFinishedAsync(const Context& context)
