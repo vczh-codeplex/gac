@@ -10,6 +10,7 @@ namespace vl
 			using namespace elements;
 			using namespace elements::text;
 			using namespace compositions;
+			using namespace regex;
 			using namespace parsing;
 			using namespace parsing::tabling;
 			using namespace collections;
@@ -301,6 +302,17 @@ GuiGrammarAutoComplete
 				return -1;
 			}
 
+			TextPos GuiGrammarAutoComplete::ChooseCorrectTextPos(TextPos pos, const regex::RegexTokens& tokens)
+			{
+				RegexToken lastToken;
+				lastToken.reading=0;
+
+				FOREACH(RegexToken, token, tokens)
+				{
+				}
+				return pos;
+			}
+
 			void GuiGrammarAutoComplete::ExecuteRefresh(Context& newContext)
 			{
 				// process the input of a task is submitted not by text editing
@@ -316,6 +328,10 @@ GuiGrammarAutoComplete
 						startPos=trace.inputStart;
 						endPos=trace.inputEnd;
 					}
+
+					const RegexLexer& lexer=grammarParser->GetTable()->GetLexer();
+					RegexTokens tokens=lexer.Parse(newContext.input.code);
+					startPos=ChooseCorrectTextPos(startPos, tokens);
 				}
 
 				// locate the deepest node using the text selection
@@ -327,6 +343,10 @@ GuiGrammarAutoComplete
 
 				// if the location failed, choose the root node
 				if(!found)
+				{
+					found=newContext.input.node.Obj(0);
+				}
+				if(startPos==TextPos(0, 0))
 				{
 					found=newContext.input.node.Obj();
 				}

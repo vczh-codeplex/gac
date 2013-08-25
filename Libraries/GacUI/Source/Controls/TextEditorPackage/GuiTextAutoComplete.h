@@ -110,6 +110,7 @@ GuiGrammarAutoComplete
 				void										PrepareAutoCompleteMetadata();
 
 				vint										UnsafeGetEditTraceIndex(vuint editVersion);
+				TextPos										ChooseCorrectTextPos(TextPos pos, const regex::RegexTokens& tokens);
 				void										ExecuteRefresh(Context& newContext);
 				bool										NormalizeTextPos(Context& newContext, elements::text::TextLines& lines, TextPos& pos);
 				void										ExecuteEdit(Context& newContext);
