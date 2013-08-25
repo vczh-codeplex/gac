@@ -104,13 +104,15 @@ GuiGrammarAutoComplete
 				void										ExecuteRefresh(Context& newContext);
 				bool										NormalizeTextPos(Context& newContext, elements::text::TextLines& lines, TextPos& pos);
 				void										ExecuteEdit(Context& newContext);
+				void										DeleteFutures(collections::List<parsing::tabling::ParsingState::Future*>& futures);
 				vint										TraverseTransitions(
 																parsing::tabling::ParsingState& state,
 																collections::List<parsing::tabling::ParsingState::TransitionResult>& transitions,
 																vint firstTransitionIndex,
 																TextPos stopPosition,
-																collections::List<parsing::tabling::ParsingState::Future*>& futures,
-																collections::SortedList<vint>& tableTokenIndices
+																collections::List<parsing::tabling::ParsingState::Future*>& nonRecoveryFutures,
+																collections::List<parsing::tabling::ParsingState::Future*>& recoveryFutures,
+																vint ambiguityRecursiveLevel
 																);
 				void										SearchValidInputToken(
 																parsing::tabling::ParsingState& state,

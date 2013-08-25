@@ -156,6 +156,18 @@ namespace vl
 						,next(0)
 					{
 					}
+
+					Future* Clone()
+					{
+						Future* future=new Future;
+						future->currentState=currentState;
+						future->reduceStateCount=reduceStateCount;
+						CopyFrom(future->shiftStates, shiftStates);
+						future->selectedToken=selectedToken;
+						future->selectedItem=selectedItem;
+						future->previous=previous;
+						return future;
+					}
 				};
 
 				struct StateGroup
