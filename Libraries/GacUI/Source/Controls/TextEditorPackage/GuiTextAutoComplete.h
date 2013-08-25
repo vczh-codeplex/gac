@@ -104,6 +104,20 @@ GuiGrammarAutoComplete
 				void										ExecuteRefresh(Context& newContext);
 				bool										NormalizeTextPos(Context& newContext, elements::text::TextLines& lines, TextPos& pos);
 				void										ExecuteEdit(Context& newContext);
+				vint										TraverseTransitions(
+																parsing::tabling::ParsingState& state,
+																collections::List<parsing::tabling::ParsingState::TransitionResult>& transitions,
+																vint firstTransitionIndex,
+																TextPos stopPosition,
+																collections::List<parsing::tabling::ParsingState::Future*>& futures,
+																collections::SortedList<vint>& tableTokenIndices
+																);
+				void										SearchValidInputToken(
+																parsing::tabling::ParsingState& state,
+																collections::List<parsing::tabling::ParsingState::TransitionResult>& transitions,
+																Context& newContext,
+																collections::SortedList<vint>& tableTokenIndices
+																);
 				void										ExecuteCalculateList(Context& newContext);
 				void										Execute(const RepeatingParsingOutput& input)override;
 				void										PostList(const Context& newContext);

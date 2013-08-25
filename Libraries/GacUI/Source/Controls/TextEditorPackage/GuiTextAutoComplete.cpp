@@ -500,6 +500,67 @@ GuiGrammarAutoComplete
 				}
 			}
 
+			vint GuiGrammarAutoComplete::TraverseTransitions(
+				parsing::tabling::ParsingState& state,
+				collections::List<parsing::tabling::ParsingState::TransitionResult>& transitions,
+				vint firstTransitionIndex,
+				TextPos stopPosition,
+				collections::List<parsing::tabling::ParsingState::Future*>& futures,
+				collections::SortedList<vint>& tableTokenIndices
+				)
+			{
+				vint index=firstTransitionIndex;
+				while(index<transitions.Count())
+				{
+					ParsingState::TransitionResult& transition=transitions[index];
+					switch(transition.transitionType)
+					{
+					case ParsingState::TransitionResult::AmbiguityBegin:
+						break;
+					case ParsingState::TransitionResult::AmbiguityBranch:
+						break;
+					case ParsingState::TransitionResult::AmbiguityEnd:
+						break;
+					case ParsingState::TransitionResult::ExecuteInstructions:
+						break;
+					}
+					index++;
+				}
+			}
+
+			void GuiGrammarAutoComplete::SearchValidInputToken(
+				parsing::tabling::ParsingState& state,
+				collections::List<parsing::tabling::ParsingState::TransitionResult>& transitions,
+				Context& newContext,
+				collections::SortedList<vint>& tableTokenIndices
+				)
+			{
+				TextPos stopPosition;
+				SPIN_LOCK(editTraceLock)
+				{
+					vint index=UnsafeGetEditTraceIndex(newContext.modifiedEditVersion);
+					if(index==-1)
+					{
+						stopPosition=editTrace[index].inputStart;
+					}
+					else
+					{
+						return;
+					}
+				}
+
+				state.Reset(newContext.rule);
+				List<ParsingState::Future*> futures;
+				futures.Add(state.ExploreCreateRootFuture());
+				TraverseTransitions(state, transitions, 0, stopPosition, futures, tableTokenIndices);
+
+				FOREACH(ParsingState::Future*, future, futures)
+				{
+					delete future;
+				}
+				futures.Clear();
+			}
+
 			void GuiGrammarAutoComplete::ExecuteCalculateList(Context& newContext)
 			{
 				// calcuate the content of the auto complete list
@@ -539,10 +600,12 @@ GuiGrammarAutoComplete
 						}
 					}
 
-					// find all possible token before the current caret using the PDA
-					// to collect all keywords that can be put into the auto complete list
 					if(newContext.modifiedNode)
 					{
+						// find all possible token before the current caret using the PDA
+						// to collect all keywords that can be put into the auto complete list
+						SortedList<vint> tableTokenIndices;
+						SearchValidInputToken(state, transitions, newContext, tableTokenIndices);
 					}
 				}
 			}
