@@ -304,11 +304,21 @@ GuiGrammarAutoComplete
 
 			TextPos GuiGrammarAutoComplete::ChooseCorrectTextPos(TextPos pos, const regex::RegexTokens& tokens)
 			{
+				Ptr<ParsingTable> table=grammarParser->GetTable();
 				RegexToken lastToken;
 				lastToken.reading=0;
 
 				FOREACH(RegexToken, token, tokens)
 				{
+					if(TextPos(token.rowEnd, token.columnEnd)>pos)
+					{
+						if(table->GetTableTokenIndex(token.token)!=-1 && lastToken.reading)
+						{
+							pos=TextPos(lastToken.rowStart, lastToken.columnStart);
+						}
+						break;
+					}
+					lastToken=token;
 				}
 				return pos;
 			}
@@ -342,11 +352,7 @@ GuiGrammarAutoComplete
 				ParsingTreeObject* selectedNode=0;
 
 				// if the location failed, choose the root node
-				if(!found)
-				{
-					found=newContext.input.node.Obj(0);
-				}
-				if(startPos==TextPos(0, 0))
+				if(!found || startPos==TextPos(0, 0))
 				{
 					found=newContext.input.node.Obj();
 				}
