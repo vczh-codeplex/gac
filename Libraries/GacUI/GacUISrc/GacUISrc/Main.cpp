@@ -290,6 +290,15 @@ protected:
 				const ParsingTable::TokenInfo& tokenInfo=table->GetTokenInfo(token+ParsingTable::UserTokenStart);
 				candidateTokenMessage+=tokenInfo.name+L": "+tokenInfo.regex+L"\r\n";
 			}
+
+			if(context.autoComplete->token)
+			{
+				candidateTypeMessage+=L"editing: "+context.autoComplete->token->GetValue()+L"\r\n";
+				FOREACH(vint, type, context.autoComplete->types)
+				{
+					candidateTypeMessage+=L"type: "+GetAutoCompleteTypeName(type)+L"\r\n";
+				}
+			}
 		}
 
 		WString selectedMessage

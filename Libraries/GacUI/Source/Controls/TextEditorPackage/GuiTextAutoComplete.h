@@ -58,6 +58,10 @@ GuiGrammarAutoComplete
 				{
 					/// <summary>Available candidate tokens (in lexer token index).</summary>
 					collections::List<vint>					candidates;
+					/// <summary>Available auto complete types.</summary>
+					collections::List<vint>					types;
+					/// <summary>Auto complete token node.</summary>
+					Ptr<parsing::ParsingTreeToken>			token;
 				};
 
 				/// <summary>The analysed data from an input code.</summary>
@@ -127,6 +131,7 @@ GuiGrammarAutoComplete
 				void										SearchValidInputToken(
 																parsing::tabling::ParsingState& state,
 																collections::List<parsing::tabling::ParsingState::TransitionResult>& transitions,
+																TextPos stopPosition,
 																Context& newContext,
 																collections::SortedList<vint>& tableTokenIndices
 																);
@@ -136,6 +141,8 @@ GuiGrammarAutoComplete
 
 				void										Initialize();
 			protected:
+				
+				WString										GetAutoCompleteTypeName(vint id);
 
 				/// <summary>Called when the context of the code is selected.</summary>
 				/// <param name="context">The selected context.</param>
