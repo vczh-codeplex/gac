@@ -506,6 +506,7 @@ GuiGrammarAutoComplete
 				{
 					delete future;
 				}
+				futures.Clear();
 			}
 
 			vint GuiGrammarAutoComplete::TraverseTransitions(
@@ -597,11 +598,11 @@ GuiGrammarAutoComplete
 					vint index=UnsafeGetEditTraceIndex(newContext.modifiedEditVersion);
 					if(index==-1)
 					{
-						stopPosition=editTrace[index].inputStart;
+						return;
 					}
 					else
 					{
-						return;
+						stopPosition=editTrace[index].inputStart;
 					}
 				}
 
