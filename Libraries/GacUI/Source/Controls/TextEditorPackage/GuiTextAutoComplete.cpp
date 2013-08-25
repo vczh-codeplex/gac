@@ -502,6 +502,7 @@ GuiGrammarAutoComplete
 
 			void GuiGrammarAutoComplete::DeleteFutures(collections::List<parsing::tabling::ParsingState::Future*>& futures)
 			{
+				// delete all futures and clear the list
 				FOREACH(ParsingState::Future*, future, futures)
 				{
 					delete future;
@@ -527,25 +528,37 @@ GuiGrammarAutoComplete
 					{
 					case ParsingState::TransitionResult::AmbiguityBegin:
 						{
+							// take the snapshop that needs to be restored to parse different ambiguity branches
 							List<ParsingState::Future*> accumulatedNonRecoveryFutures, accumulatedRecoveryFutures;
 							Ptr<ParsingState::StateGroup> stateGroup=state.TakeSnapshot();
+							
+							// recursively explore all ambiguity branches
 							while(transitions[index].transitionType!=ParsingState::TransitionResult::AmbiguityEnd)
 							{
+								// restore shapshot if necessary
 								if(transitions[index].transitionType==ParsingState::TransitionResult::AmbiguityBranch)
 								{
 									state.RestoreSnapshot(stateGroup);
 								}
+
+								// copy futures when the AmbiguityBegin is reached
 								List<ParsingState::Future*> newNonRecoveryFutures, newRecoveryFutures;
-								newNonRecoveryFutures.Add(nonRecoveryFutures[0]->Clone());
-								if(recoveryFutures.Count()>0)
+								FOREACH(ParsingState::Future*, future, nonRecoveryFutures)
 								{
-									newRecoveryFutures.Add(recoveryFutures[0]->Clone());
+									newNonRecoveryFutures.Add(future->Clone());
 								}
+								FOREACH(ParsingState::Future*, future, recoveryFutures)
+								{
+									newRecoveryFutures.Add(future->Clone());
+								}
+
+								// traverse a branch
 								index=TraverseTransitions(state, transitions, index+1, stopPosition, nonRecoveryFutures, newRecoveryFutures, ambiguityRecursiveLevel+1);
 								CopyFrom(accumulatedNonRecoveryFutures, newNonRecoveryFutures, true);
 								CopyFrom(accumulatedRecoveryFutures, newRecoveryFutures, true);
 							}
 
+							// copy futures to accumulated future list
 							DeleteFutures(nonRecoveryFutures);
 							DeleteFutures(recoveryFutures);
 							CopyFrom(nonRecoveryFutures, accumulatedNonRecoveryFutures);
@@ -557,25 +570,55 @@ GuiGrammarAutoComplete
 						return index;
 					case ParsingState::TransitionResult::ExecuteInstructions:
 						{
-							ParsingState::Future* currentFuture=
-								recoveryFutures.Count()>0
-								?recoveryFutures[0]
-								:nonRecoveryFutures[0];
-
+							// traverse the PDA using the token specified in the current transition
 							vint tableTokenIndex=transition.tableTokenIndex;
 							List<ParsingState::Future*> possibilities;
-							state.Explore(tableTokenIndex, currentFuture, possibilities);
+							if(recoveryFutures.Count()>0)
+							{
+								FOREACH(ParsingState::Future*, future, recoveryFutures)
+								{
+									state.Explore(tableTokenIndex, future, possibilities);
+								}
+							}
+							else
+							{
+								FOREACH(ParsingState::Future*, future, nonRecoveryFutures)
+								{
+									state.Explore(tableTokenIndex, future, possibilities);
+								}
+							}
 
+							// delete duplicated futures
+							List<ParsingState::Future*> selectedPossibilities;
+							for(vint i=0;i<possibilities.Count();i++)
+							{
+								ParsingState::Future* candidateFuture=possibilities[i];
+								bool duplicated=false;
+								FOREACH(ParsingState::Future*, future, selectedPossibilities)
+								{
+								}
+
+								if(duplicated)
+								{
+									delete candidateFuture;
+								}
+								else
+								{
+									selectedPossibilities.Add(candidateFuture);
+								}
+							}
+
+							// step forward
 							if(transition.token)
 							{
 								DeleteFutures(nonRecoveryFutures);
 								DeleteFutures(recoveryFutures);
-								CopyFrom(nonRecoveryFutures, possibilities);
+								CopyFrom(nonRecoveryFutures, selectedPossibilities);
 							}
 							else
 							{
 								DeleteFutures(recoveryFutures);
-								CopyFrom(recoveryFutures, possibilities);
+								CopyFrom(recoveryFutures, selectedPossibilities);
 							}
 						}
 						break;
@@ -592,6 +635,7 @@ GuiGrammarAutoComplete
 				collections::SortedList<vint>& tableTokenIndices
 				)
 			{
+				// calculate the stop position for PDA traversing
 				TextPos stopPosition;
 				SPIN_LOCK(editTraceLock)
 				{
@@ -606,11 +650,17 @@ GuiGrammarAutoComplete
 					}
 				}
 
+				// initialize the PDA state
 				state.Reset(newContext.rule);
 				List<ParsingState::Future*> nonRecoveryFutures, recoveryFutures;
 				nonRecoveryFutures.Add(state.ExploreCreateRootFuture());
+
+				// traverse the PDA until it reach the stop position
+				// nonRecoveryFutures store the state when the last token (existing) is reached
+				// recoveryFutures store the state when the last token (inserted by error recovery) is reached
 				TraverseTransitions(state, transitions, 0, stopPosition, nonRecoveryFutures, recoveryFutures, 0);
 
+				// explore all possibilities from the last token before the stop position
 				List<ParsingState::Future*> possibilities;
 				FOREACH(ParsingState::Future*, future, nonRecoveryFutures)
 				{
@@ -620,6 +670,8 @@ GuiGrammarAutoComplete
 						state.Explore(i, future, possibilities);
 					}
 				}
+
+				// get all possible tokens that marked using @AutoCompleteCandidate
 				FOREACH(ParsingState::Future*, future, possibilities)
 				{
 					if(!tableTokenIndices.Contains(future->selectedToken))
@@ -628,6 +680,7 @@ GuiGrammarAutoComplete
 					}
 				}
 
+				// release all data
 				DeleteFutures(possibilities);
 				DeleteFutures(nonRecoveryFutures);
 				DeleteFutures(recoveryFutures);
