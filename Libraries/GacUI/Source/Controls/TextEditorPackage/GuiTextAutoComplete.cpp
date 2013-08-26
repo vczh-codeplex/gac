@@ -105,36 +105,32 @@ GuiGrammarAutoComplete
 				RepeatingParsingExecutor::CallbackBase::TextCaretChanged(arguments);
 				if(element && elementModifyLock)
 				{
-					if(!editing)
+					SPIN_LOCK(editTraceLock)
 					{
-						SPIN_LOCK(editTraceLock)
-						{
-							// if the current caret changing is not caused by editing
-							// queue a fake TextEditNotifyStruct
-							// a fake struct can be detected by (trace.originalText==L"" && trace.inputText==L"")
-							TextEditNotifyStruct trace;
-							trace.editVersion=arguments.editVersion;
-							trace.originalStart=arguments.oldBegin;
-							trace.originalEnd=arguments.oldEnd;
-							trace.inputStart=arguments.newBegin;
-							trace.inputEnd=arguments.newEnd;
+						// queue a fake TextEditNotifyStruct
+						// a fake struct can be detected by (trace.originalText==L"" && trace.inputText==L"")
+						TextEditNotifyStruct trace;
+						trace.editVersion=arguments.editVersion;
+						trace.originalStart=arguments.oldBegin;
+						trace.originalEnd=arguments.oldEnd;
+						trace.inputStart=arguments.newBegin;
+						trace.inputEnd=arguments.newEnd;
 
-							// ensure trace.originalStart<=trace.originalEnd
-							if(trace.originalStart>trace.originalEnd)
-							{
-								TextPos temp=trace.originalStart;
-								trace.originalStart=trace.originalEnd;
-								trace.originalEnd=temp;
-							}
-							// ensure trace.inputStart<=trace.inputEnd
-							if(trace.inputStart>trace.inputEnd)
-							{
-								TextPos temp=trace.inputStart;
-								trace.inputStart=trace.inputEnd;
-								trace.inputEnd=temp;
-							}
-							editTrace.Add(trace);
+						// ensure trace.originalStart<=trace.originalEnd
+						if(trace.originalStart>trace.originalEnd)
+						{
+							TextPos temp=trace.originalStart;
+							trace.originalStart=trace.originalEnd;
+							trace.originalEnd=temp;
 						}
+						// ensure trace.inputStart<=trace.inputEnd
+						if(trace.inputStart>trace.inputEnd)
+						{
+							TextPos temp=trace.inputStart;
+							trace.inputStart=trace.inputEnd;
+							trace.inputEnd=temp;
+						}
+						editTrace.Add(trace);
 					}
 
 					SPIN_LOCK(contextLock)
@@ -537,10 +533,10 @@ GuiGrammarAutoComplete
 				futures.Clear();
 			}
 
-			void GuiGrammarAutoComplete::TraverseTransitions(
+			regex::RegexToken* GuiGrammarAutoComplete::TraverseTransitions(
 				parsing::tabling::ParsingState& state,
 				parsing::tabling::ParsingTransitionCollector& transitionCollector,
-				TextPos& stopPosition,
+				TextPos stopPosition,
 				collections::List<parsing::tabling::ParsingState::Future*>& nonRecoveryFutures,
 				collections::List<parsing::tabling::ParsingState::Future*>& recoveryFutures
 				)
@@ -569,10 +565,8 @@ GuiGrammarAutoComplete
 								// we treat "class| Name" as editing the first token
 								if(TextPos(transition.token->rowEnd, transition.token->columnEnd+1)>=stopPosition)
 								{
-									// update the stopPosition to the beginning of the token
-									stopPosition=TextPos(transition.token->rowStart, transition.token->columnStart);
-									// stop the traversing
-									return;
+									// stop the traversing and return the editing token
+									return transition.token;
 								}
 							}
 
@@ -651,12 +645,13 @@ GuiGrammarAutoComplete
 						break;
 					}
 				}
+				return 0;
 			}
 
-			void GuiGrammarAutoComplete::SearchValidInputToken(
+			regex::RegexToken* GuiGrammarAutoComplete::SearchValidInputToken(
 				parsing::tabling::ParsingState& state,
 				parsing::tabling::ParsingTransitionCollector& transitionCollector,
-				TextPos& stopPosition,
+				TextPos stopPosition,
 				Context& newContext,
 				collections::SortedList<vint>& tableTokenIndices
 				)
@@ -669,7 +664,7 @@ GuiGrammarAutoComplete
 				// traverse the PDA until it reach the stop position
 				// nonRecoveryFutures store the state when the last token (existing) is reached
 				// recoveryFutures store the state when the last token (inserted by error recovery) is reached
-				TraverseTransitions(state, transitionCollector, stopPosition, nonRecoveryFutures, recoveryFutures);
+				RegexToken* token=TraverseTransitions(state, transitionCollector, stopPosition, nonRecoveryFutures, recoveryFutures);
 
 				// explore all possibilities from the last token before the stop position
 				List<ParsingState::Future*> possibilities;
@@ -695,6 +690,9 @@ GuiGrammarAutoComplete
 				DeleteFutures(possibilities);
 				DeleteFutures(nonRecoveryFutures);
 				DeleteFutures(recoveryFutures);
+
+				// return the editing token
+				return token;
 			}
 
 			TextPos GuiGrammarAutoComplete::GlobalTextPosToModifiedTextPos(Context& newContext, TextPos pos)
@@ -778,7 +776,7 @@ GuiGrammarAutoComplete
 						// find all possible token before the current caret using the PDA
 						Ptr<AutoCompleteData> autoComplete=new AutoCompleteData;
 						SortedList<vint> tableTokenIndices;
-						SearchValidInputToken(state, collector, stopPosition, newContext, tableTokenIndices);
+						RegexToken* editingToken=SearchValidInputToken(state, collector, stopPosition, newContext, tableTokenIndices);
 
 						// collect all keywords that can be put into the auto complete list
 						FOREACH(vint, token, tableTokenIndices)
@@ -796,41 +794,57 @@ GuiGrammarAutoComplete
 
 						// collect all auto complete types
 						{
+							// calculate the arranged stopPosition
+							if(editingToken)
+							{
+								TextPos tokenPos(editingToken->rowStart, editingToken->columnStart);
+								if(tokenPos<stopPosition)
+								{
+									stopPosition=tokenPos;
+								}
+							}
+
 							// calculate the start/end position for PDA traversing
-							TextPos startPos=ModifiedTextPosToGlobalTextPos(newContext, stopPosition);
-							TextPos endPos=trace.inputEnd;
-							if(newContext.modifiedNode!=newContext.originalNode)
+							TextPos startPos, endPos;
 							{
-								startPos=GlobalTextPosToModifiedTextPos(newContext, startPos);
-								endPos=GlobalTextPosToModifiedTextPos(newContext, endPos);
-							}
-							if(endPos.column>0)
-							{
-								endPos.column--;
-							}
-
-							ParsingTextRange range(ParsingTextPos(startPos.row, startPos.column), ParsingTextPos(endPos.row, endPos.column));
-							ParsingTreeNode* foundNode=newContext.modifiedNode->FindDeepestNode(range);
-							if(!foundNode) goto FINISH_COLLECTING_AUTO_COMPLETE_TYPES;
-							ParsingTreeToken* foundToken=dynamic_cast<ParsingTreeToken*>(foundNode);
-							if(!foundToken) goto FINISH_COLLECTING_AUTO_COMPLETE_TYPES;
-							ParsingTreeObject* tokenParent=dynamic_cast<ParsingTreeObject*>(foundNode->GetParent());
-							if(!tokenParent) goto FINISH_COLLECTING_AUTO_COMPLETE_TYPES;
-							vint index=tokenParent->GetMembers().Values().IndexOf(foundNode);
-							if(index==-1) goto FINISH_COLLECTING_AUTO_COMPLETE_TYPES;
-
-							WString type=tokenParent->GetType();
-							WString field=tokenParent->GetMembers().Keys().Get(index);
-							FieldDesc key(type, field);
-
-							index=fieldAutoCompleteTypes.Keys().IndexOf(key);
-							if(index!=-1)
-							{
-								vint type=fieldAutoCompleteTypes.Values().Get(index);
-								autoComplete->types.Add(type);
+								startPos=ModifiedTextPosToGlobalTextPos(newContext, stopPosition);
+								endPos=trace.inputEnd;
+								if(newContext.modifiedNode!=newContext.originalNode)
+								{
+									startPos=GlobalTextPosToModifiedTextPos(newContext, startPos);
+									endPos=GlobalTextPosToModifiedTextPos(newContext, endPos);
+								}
+								if(startPos<endPos && endPos.column>0)
+								{
+									endPos.column--;
+								}
 							}
 
-							autoComplete->token=foundToken->TryGetPtr(newContext.modifiedNode).Cast<ParsingTreeToken>();
+							// calculate the auto complete type
+							if(editingToken && autoCompleteTokens[editingToken->token])
+							{
+								ParsingTextRange range(ParsingTextPos(startPos.row, startPos.column), ParsingTextPos(endPos.row, endPos.column));
+								ParsingTreeNode* foundNode=newContext.modifiedNode->FindDeepestNode(range);
+								if(!foundNode) goto FINISH_COLLECTING_AUTO_COMPLETE_TYPES;
+								ParsingTreeToken* foundToken=dynamic_cast<ParsingTreeToken*>(foundNode);
+								if(!foundToken) goto FINISH_COLLECTING_AUTO_COMPLETE_TYPES;
+								ParsingTreeObject* tokenParent=dynamic_cast<ParsingTreeObject*>(foundNode->GetParent());
+								if(!tokenParent) goto FINISH_COLLECTING_AUTO_COMPLETE_TYPES;
+								vint index=tokenParent->GetMembers().Values().IndexOf(foundNode);
+								if(index==-1) goto FINISH_COLLECTING_AUTO_COMPLETE_TYPES;
+
+								WString type=tokenParent->GetType();
+								WString field=tokenParent->GetMembers().Keys().Get(index);
+								FieldDesc key(type, field);
+
+								index=fieldAutoCompleteTypes.Keys().IndexOf(key);
+								if(index!=-1)
+								{
+									vint type=fieldAutoCompleteTypes.Values().Get(index);
+									autoComplete->types.Add(type);
+								}
+								autoComplete->token=foundToken->TryGetPtr(newContext.modifiedNode).Cast<ParsingTreeToken>();
+							}
 						}
 			FINISH_COLLECTING_AUTO_COMPLETE_TYPES:
 
