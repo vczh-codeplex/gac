@@ -216,12 +216,17 @@ RepeatingParsingExecutor
 
 			Ptr<parsing::tabling::ParsingTable::AttributeInfo> RepeatingParsingExecutor::GetAutoCompleteCandidateAttribute(vint index)
 			{
-				return GetAttribute(index, L"AutoCompleteCandidate", 0);
+				return GetAttribute(index, L"AutoCompleteCandidate", 1);
 			}
 
 			Ptr<parsing::tabling::ParsingTable::AttributeInfo> RepeatingParsingExecutor::GetAutoCompleteTokenAttribute(vint index)
 			{
 				return GetAttribute(index, L"AutoCompleteToken", 0);
+			}
+
+			Ptr<parsing::tabling::ParsingTable::AttributeInfo> RepeatingParsingExecutor::GetAutoCompleteEndlessTokenAttribute(vint index)
+			{
+				return GetAttribute(index, L"AutoCompleteEndlessToken", 0);
 			}
 
 			Ptr<parsing::tabling::ParsingTable::AttributeInfo> RepeatingParsingExecutor::GetAutoCompleteTypeAttribute(vint index)
