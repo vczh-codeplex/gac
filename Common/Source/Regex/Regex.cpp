@@ -630,6 +630,23 @@ RegexLexerWalker
 			return state;
 		}
 
+		bool RegexLexerWalker::IsClosedToken(const wchar_t* input, vint length)const
+		{
+			vint state=pure->GetStartState();
+			for(vint i=0;i<length;i++)
+			{
+				state=pure->Transit(input[i], state);
+				if(state==-1) return true;
+				if(pure->IsDeadState(state)) return true;
+			}
+			return false;
+		}
+
+		bool RegexLexerWalker::IsClosedToken(const WString& input)const
+		{
+			return IsClosedToken(input.Buffer(), input.Length());
+		}
+
 /***********************************************************************
 RegexLexerColorizer
 ***********************************************************************/

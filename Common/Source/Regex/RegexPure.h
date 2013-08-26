@@ -44,6 +44,7 @@ namespace vl
 			vint				GetStartState();
 			vint				Transit(wchar_t input, vint state);
 			bool				IsFinalState(vint state);
+			bool				IsDeadState(vint state);
 
 			void				PrepareForRelatedFinalStateTable();
 			vint				GetRelatedFinalState(vint state);

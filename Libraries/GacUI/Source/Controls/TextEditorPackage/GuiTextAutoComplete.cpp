@@ -217,40 +217,15 @@ GuiGrammarAutoComplete
 				autoCompleteTypes.Clear();
 				autoCompleteCandidates.Clear();
 				autoCompleteTokens.Clear();
-				autoCompleteEndlessTokens.Clear();
 
 				// prepare tokens
 				{
-					Dictionary<WString, vint> tokenMap;
-					Dictionary<WString, WString> tokenParents;
-
 					vint tokenCount=table->GetTokenCount();
 					for(vint token=ParsingTable::UserTokenStart;token<tokenCount;token++)
 					{
 						const ParsingTable::TokenInfo& tokenInfo=table->GetTokenInfo(token);
-						Ptr<ParsingTable::AttributeInfo> attCandidate=parsingExecutor->GetAutoCompleteCandidateAttribute(tokenInfo.attributeIndex);
-						autoCompleteCandidates.Add(attCandidate);
+						autoCompleteCandidates.Add(parsingExecutor->GetAutoCompleteCandidateAttribute(tokenInfo.attributeIndex));
 						autoCompleteTokens.Add(parsingExecutor->GetAutoCompleteTokenAttribute(tokenInfo.attributeIndex));
-						autoCompleteEndlessTokens.Add(parsingExecutor->GetAutoCompleteEndlessTokenAttribute(tokenInfo.attributeIndex));
-
-						tokenMap.Add(tokenInfo.name, token-ParsingTable::UserTokenStart);
-						if(attCandidate)
-						{
-							tokenParents.Add(tokenInfo.name, attCandidate->arguments[0]);
-						}
-					}
-
-					for(vint i=0;i<tokenParents.Count();i++)
-					{
-						WString token=tokenParents.Keys()[i];
-						WString parent=tokenParents.Values()[i];
-						vint index=tokenMap.Keys().IndexOf(parent);
-						if(index!=-1)
-						{
-							vint tokenIndex=tokenMap[token];
-							vint parentIndex=tokenMap.Values()[index];
-							autoCompleteEndlessTokens[tokenIndex]|=autoCompleteEndlessTokens[parentIndex];
-						}
 					}
 				}
 
@@ -589,10 +564,22 @@ GuiGrammarAutoComplete
 							{
 								// we treat "A|B" as editing A if token A is endless, otherwise treated as editing B
 								TextPos tokenEnd(transition.token->rowEnd, transition.token->columnEnd+1);
-								if(tokenEnd>stopPosition || (tokenEnd==stopPosition && autoCompleteEndlessTokens[transition.token->token]))
+
+								// if the caret is not at the end of the token
+								if(tokenEnd>stopPosition)
 								{
 									// stop the traversing and return the editing token
 									return transition.token;
+								}
+								else if(tokenEnd==stopPosition)
+								{
+									// if the caret is at the end of the token, and it is a closed token
+									// e.g. identifier is not a closed token, string is a closed token
+									if(!grammarParser->GetTable()->GetLexer().Walk().IsClosedToken(transition.token->reading, transition.token->length))
+									{
+										// stop the traversing and return the editing token
+										return transition.token;
+									}
 								}
 							}
 
