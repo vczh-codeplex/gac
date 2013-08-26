@@ -144,6 +144,19 @@ PureInterpretor
 			return 0<=state && state<stateCount && finalState[state];
 		}
 
+		bool PureInterpretor::IsDeadState(vint state)
+		{
+			if(state==-1) return true;
+			for(vint i=0;i<charSetCount;i++)
+			{
+				if(transition[state][i]!=-1)
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+
 		void PureInterpretor::PrepareForRelatedFinalStateTable()
 		{
 			if(!relatedFinalState)

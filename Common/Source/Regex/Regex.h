@@ -160,6 +160,8 @@ namespace vl
 			vint										GetRelatedToken(vint state)const;
 			void										Walk(wchar_t input, vint& state, vint& token, bool& finalState, bool& previousTokenStop)const;
 			vint										Walk(wchar_t input, vint state)const;
+			bool										IsClosedToken(const wchar_t* input, vint length)const;
+			bool										IsClosedToken(const WString& input)const;
 		};
 
 		class RegexLexerColorizer : public Object
