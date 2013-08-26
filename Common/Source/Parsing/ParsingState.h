@@ -263,22 +263,31 @@ namespace vl
 				void										Reset()override;
 				bool										Run(const ParsingState::TransitionResult& result)override;
 				bool										GetProcessingAmbiguityBranch()override;
-				Ptr<ParsingTreeObject>						GetNode();
+				Ptr<ParsingTreeObject>						GetNode()const;
 			};
 
 			class ParsingTransitionCollector : public ParsingTransitionProcessor
 			{
 				typedef collections::List<ParsingState::TransitionResult>		TransitionResultList;
 			protected:
-				bool										processingAmbiguityBranch;
-				TransitionResultList&						transitions;
+				vint										ambiguityBegin;
+				TransitionResultList						transitions;
+
+				collections::Dictionary<vint, vint>			ambiguityBeginToEnds;
+				collections::Group<vint, vint>				ambiguityBeginToBranches;
+				collections::Dictionary<vint, vint>			ambiguityBranchToBegins;
 			public:
-				ParsingTransitionCollector(TransitionResultList& _transitions);
+				ParsingTransitionCollector();
 				~ParsingTransitionCollector();
 
 				void										Reset()override;
 				bool										Run(const ParsingState::TransitionResult& result)override;
 				bool										GetProcessingAmbiguityBranch()override;
+
+				const TransitionResultList&					GetTransitions()const;
+				vint										GetAmbiguityEndFromBegin(vint transitionIndex)const;
+				const collections::List<vint>&				GetAmbiguityBranchesFromBegin(vint transitionIndex)const;
+				vint										GetAmbiguityBeginFromBranch(vint transitionIndex)const;
 			};
 		}
 	}
