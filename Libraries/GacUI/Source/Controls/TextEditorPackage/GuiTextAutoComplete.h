@@ -123,17 +123,17 @@ GuiGrammarAutoComplete
 				void										ExecuteEdit(Context& newContext);
 
 				void										DeleteFutures(collections::List<parsing::tabling::ParsingState::Future*>& futures);
-				void										TraverseTransitions(
+				regex::RegexToken*							TraverseTransitions(
 																parsing::tabling::ParsingState& state,
 																parsing::tabling::ParsingTransitionCollector& transitionCollector,
-																TextPos& stopPosition,
+																TextPos stopPosition,
 																collections::List<parsing::tabling::ParsingState::Future*>& nonRecoveryFutures,
 																collections::List<parsing::tabling::ParsingState::Future*>& recoveryFutures
 																);
-				void										SearchValidInputToken(
+				regex::RegexToken*							SearchValidInputToken(
 																parsing::tabling::ParsingState& state,
 																parsing::tabling::ParsingTransitionCollector& transitionCollector,
-																TextPos& stopPosition,
+																TextPos stopPosition,
 																Context& newContext,
 																collections::SortedList<vint>& tableTokenIndices
 																);
