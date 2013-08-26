@@ -98,6 +98,7 @@ GuiGrammarAutoComplete
 				FieldAutoCompleteTypes						fieldAutoCompleteTypes;
 				collections::List<bool>						autoCompleteCandidates;
 				collections::List<bool>						autoCompleteTokens;
+				collections::List<bool>						autoCompleteEndlessTokens;
 				bool										editing;
 
 				SpinLock									editTraceLock;

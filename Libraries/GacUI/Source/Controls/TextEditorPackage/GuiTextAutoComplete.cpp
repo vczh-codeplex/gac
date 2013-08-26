@@ -213,19 +213,44 @@ GuiGrammarAutoComplete
 			void GuiGrammarAutoComplete::PrepareAutoCompleteMetadata()
 			{
 				Ptr<ParsingTable> table=parsingExecutor->GetParser()->GetTable();
+				fieldAutoCompleteTypes.Clear();
+				autoCompleteTypes.Clear();
 				autoCompleteCandidates.Clear();
 				autoCompleteTokens.Clear();
-				autoCompleteTypes.Clear();
-				fieldAutoCompleteTypes.Clear();
+				autoCompleteEndlessTokens.Clear();
 
 				// prepare tokens
 				{
+					Dictionary<WString, vint> tokenMap;
+					Dictionary<WString, WString> tokenParents;
+
 					vint tokenCount=table->GetTokenCount();
 					for(vint token=ParsingTable::UserTokenStart;token<tokenCount;token++)
 					{
 						const ParsingTable::TokenInfo& tokenInfo=table->GetTokenInfo(token);
-						autoCompleteCandidates.Add(parsingExecutor->GetAutoCompleteCandidateAttribute(tokenInfo.attributeIndex));
+						Ptr<ParsingTable::AttributeInfo> attCandidate=parsingExecutor->GetAutoCompleteCandidateAttribute(tokenInfo.attributeIndex);
+						autoCompleteCandidates.Add(attCandidate);
 						autoCompleteTokens.Add(parsingExecutor->GetAutoCompleteTokenAttribute(tokenInfo.attributeIndex));
+						autoCompleteEndlessTokens.Add(parsingExecutor->GetAutoCompleteEndlessTokenAttribute(tokenInfo.attributeIndex));
+
+						tokenMap.Add(tokenInfo.name, token-ParsingTable::UserTokenStart);
+						if(attCandidate)
+						{
+							tokenParents.Add(tokenInfo.name, attCandidate->arguments[0]);
+						}
+					}
+
+					for(vint i=0;i<tokenParents.Count();i++)
+					{
+						WString token=tokenParents.Keys()[i];
+						WString parent=tokenParents.Values()[i];
+						vint index=tokenMap.Keys().IndexOf(parent);
+						if(index!=-1)
+						{
+							vint tokenIndex=tokenMap[token];
+							vint parentIndex=tokenMap.Values()[index];
+							autoCompleteEndlessTokens[tokenIndex]|=autoCompleteEndlessTokens[parentIndex];
+						}
 					}
 				}
 
@@ -562,8 +587,9 @@ GuiGrammarAutoComplete
 							// test does the token reach the stop position
 							if(transition.token)
 							{
-								// we treat "class| Name" as editing the first token
-								if(TextPos(transition.token->rowEnd, transition.token->columnEnd+1)>=stopPosition)
+								// we treat "A|B" as editing A if token A is endless, otherwise treated as editing B
+								TextPos tokenEnd(transition.token->rowEnd, transition.token->columnEnd+1);
+								if(tokenEnd>stopPosition || (tokenEnd==stopPosition && autoCompleteEndlessTokens[transition.token->token]))
 								{
 									// stop the traversing and return the editing token
 									return transition.token;
