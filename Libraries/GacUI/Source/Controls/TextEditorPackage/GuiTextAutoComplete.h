@@ -58,6 +58,8 @@ GuiGrammarAutoComplete
 				{
 					/// <summary>Available candidate tokens (in lexer token index).</summary>
 					collections::List<vint>					candidates;
+					/// <summary>Available candidate tokens (in lexer token index) that marked with @AutoCompleteCandidate().</summary>
+					collections::List<vint>					shownCandidates;
 					/// <summary>Available auto complete types.</summary>
 					collections::List<vint>					types;
 					/// <summary>Auto complete token node.</summary>
