@@ -540,7 +540,7 @@ GuiGrammarAutoComplete
 			void GuiGrammarAutoComplete::TraverseTransitions(
 				parsing::tabling::ParsingState& state,
 				parsing::tabling::ParsingTransitionCollector& transitionCollector,
-				TextPos stopPosition,
+				TextPos& stopPosition,
 				collections::List<parsing::tabling::ParsingState::Future*>& nonRecoveryFutures,
 				collections::List<parsing::tabling::ParsingState::Future*>& recoveryFutures
 				)
@@ -569,6 +569,8 @@ GuiGrammarAutoComplete
 								// we treat "class| Name" as editing the first token
 								if(TextPos(transition.token->rowEnd, transition.token->columnEnd+1)>=stopPosition)
 								{
+									// update the stopPosition to the beginning of the token
+									stopPosition=TextPos(transition.token->rowStart, transition.token->columnStart);
 									// stop the traversing
 									return;
 								}
@@ -654,7 +656,7 @@ GuiGrammarAutoComplete
 			void GuiGrammarAutoComplete::SearchValidInputToken(
 				parsing::tabling::ParsingState& state,
 				parsing::tabling::ParsingTransitionCollector& transitionCollector,
-				TextPos stopPosition,
+				TextPos& stopPosition,
 				Context& newContext,
 				collections::SortedList<vint>& tableTokenIndices
 				)
@@ -693,6 +695,26 @@ GuiGrammarAutoComplete
 				DeleteFutures(possibilities);
 				DeleteFutures(nonRecoveryFutures);
 				DeleteFutures(recoveryFutures);
+			}
+
+			TextPos GuiGrammarAutoComplete::GlobalTextPosToModifiedTextPos(Context& newContext, TextPos pos)
+			{
+				pos.row-=newContext.originalRange.start.row;
+				if(pos.row==0)
+				{
+					pos.column-=newContext.originalRange.start.column;
+				}
+				return pos;
+			}
+
+			TextPos GuiGrammarAutoComplete::ModifiedTextPosToGlobalTextPos(Context& newContext, TextPos pos)
+			{
+				if(pos.row==0)
+				{
+					pos.column+=newContext.originalRange.start.column;
+				}
+				pos.row+=newContext.originalRange.start.row;
+				return pos;
 			}
 
 			void GuiGrammarAutoComplete::ExecuteCalculateList(Context& newContext)
@@ -751,13 +773,7 @@ GuiGrammarAutoComplete
 						}
 						
 						// calculate the stop position for PDA traversing
-						TextPos stopPosition;
-						stopPosition=trace.inputStart;
-						stopPosition.row-=newContext.originalRange.start.row;
-						if(stopPosition.row==0)
-						{
-							stopPosition.column-=newContext.originalRange.start.column;
-						}
+						TextPos stopPosition=GlobalTextPosToModifiedTextPos(newContext, trace.inputStart);
 
 						// find all possible token before the current caret using the PDA
 						Ptr<AutoCompleteData> autoComplete=new AutoCompleteData;
@@ -779,29 +795,17 @@ GuiGrammarAutoComplete
 
 						// collect all auto complete types
 						{
-						
-							// calculate the start position for PDA traversing
-							TextPos startPos;
-							startPos=trace.inputStart;
+							// calculate the start/end position for PDA traversing
+							TextPos startPos=ModifiedTextPosToGlobalTextPos(newContext, stopPosition);
+							TextPos endPos=trace.inputEnd;
 							if(newContext.modifiedNode!=newContext.originalNode)
 							{
-								startPos.row-=newContext.originalRange.start.row;
-								if(startPos.row==0)
-								{
-									startPos.column-=newContext.originalRange.start.column;
-								}
+								startPos=GlobalTextPosToModifiedTextPos(newContext, startPos);
+								endPos=GlobalTextPosToModifiedTextPos(newContext, endPos);
 							}
-						
-							// calculate the end position for PDA traversing
-							TextPos endPos;
-							endPos=trace.inputEnd;
-							if(newContext.modifiedNode!=newContext.originalNode)
+							if(endPos.column>0)
 							{
-								endPos.row-=newContext.originalRange.start.row;
-								if(endPos.row==0)
-								{
-									endPos.column-=newContext.originalRange.start.column;
-								}
+								endPos.column--;
 							}
 
 							ParsingTextRange range(ParsingTextPos(startPos.row, startPos.column), ParsingTextPos(endPos.row, endPos.column));
