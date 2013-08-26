@@ -116,27 +116,32 @@ GuiGrammarAutoComplete
 				vint										UnsafeGetEditTraceIndex(vuint editVersion);
 				TextPos										ChooseCorrectTextPos(TextPos pos, const regex::RegexTokens& tokens);
 				void										ExecuteRefresh(Context& newContext);
+
 				bool										NormalizeTextPos(Context& newContext, elements::text::TextLines& lines, TextPos& pos);
 				void										ExecuteEdit(Context& newContext);
+
 				void										DeleteFutures(collections::List<parsing::tabling::ParsingState::Future*>& futures);
 				void										TraverseTransitions(
 																parsing::tabling::ParsingState& state,
 																parsing::tabling::ParsingTransitionCollector& transitionCollector,
-																TextPos stopPosition,
+																TextPos& stopPosition,
 																collections::List<parsing::tabling::ParsingState::Future*>& nonRecoveryFutures,
 																collections::List<parsing::tabling::ParsingState::Future*>& recoveryFutures
 																);
 				void										SearchValidInputToken(
 																parsing::tabling::ParsingState& state,
 																parsing::tabling::ParsingTransitionCollector& transitionCollector,
-																TextPos stopPosition,
+																TextPos& stopPosition,
 																Context& newContext,
 																collections::SortedList<vint>& tableTokenIndices
 																);
+
+				TextPos										GlobalTextPosToModifiedTextPos(Context& newContext, TextPos pos);
+				TextPos										ModifiedTextPosToGlobalTextPos(Context& newContext, TextPos pos);
 				void										ExecuteCalculateList(Context& newContext);
+
 				void										Execute(const RepeatingParsingOutput& input)override;
 				void										PostList(const Context& newContext);
-
 				void										Initialize();
 			protected:
 				
