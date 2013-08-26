@@ -288,7 +288,11 @@ protected:
 			FOREACH(vint, token, context.autoComplete->candidates)
 			{
 				const ParsingTable::TokenInfo& tokenInfo=table->GetTokenInfo(token+ParsingTable::UserTokenStart);
-				candidateTokenMessage+=tokenInfo.name+L": "+tokenInfo.regex+L"\r\n";
+				candidateTokenMessage+=tokenInfo.name
+					+(context.autoComplete->shownCandidates.Contains(token)?L"[SHOWN]":L"")
+					+L": "
+					+tokenInfo.regex
+					+L"\r\n";
 			}
 
 			if(context.autoComplete->token)

@@ -786,9 +786,10 @@ GuiGrammarAutoComplete
 							vint regexToken=token-ParsingTable::UserTokenStart;
 							if(regexToken>=0)
 							{
+								autoComplete->candidates.Add(regexToken);
 								if(autoCompleteCandidates[regexToken])
 								{
-									autoComplete->candidates.Add(regexToken);
+									autoComplete->shownCandidates.Add(regexToken);
 								}
 							}
 						}
