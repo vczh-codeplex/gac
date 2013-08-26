@@ -310,7 +310,8 @@ GuiGrammarAutoComplete
 
 				FOREACH(RegexToken, token, tokens)
 				{
-					if(TextPos(token.rowEnd, token.columnEnd)>pos)
+					// we treat "class| Name" as editing the first token
+					if(TextPos(token.rowEnd, token.columnEnd+1)>=pos)
 					{
 						if(table->GetTableTokenIndex(token.token)!=-1 && lastToken.reading)
 						{
@@ -565,7 +566,8 @@ GuiGrammarAutoComplete
 							// test does the token reach the stop position
 							if(transition.token)
 							{
-								if(TextPos(transition.token->rowEnd, transition.token->columnEnd)>stopPosition)
+								// we treat "class| Name" as editing the first token
+								if(TextPos(transition.token->rowEnd, transition.token->columnEnd+1)>=stopPosition)
 								{
 									// stop the traversing
 									return;
