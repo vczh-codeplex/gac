@@ -113,19 +113,6 @@ ParsingGeneralParser
 				return Parse(state, errors);
 			}
 
-			bool ParsingGeneralParser::Parse(const WString& input, const WString& rule, collections::List<ParsingState::TransitionResult>& transitions, collections::List<Ptr<ParsingError>>& errors)
-			{
-				ParsingState state(input, table);
-				if(state.Reset(rule)==-1)
-				{
-					errors.Add(new ParsingError(L"Rule \""+rule+L"\" does not exist."));
-					return 0;
-				}
-
-				ParsingTransitionCollector collector(transitions);
-				return Parse(state, collector, errors);
-			}
-
 /***********************************************************************
 ParsingStrictParser
 ***********************************************************************/

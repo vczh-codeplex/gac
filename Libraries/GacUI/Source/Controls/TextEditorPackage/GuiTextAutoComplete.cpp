@@ -536,64 +536,30 @@ GuiGrammarAutoComplete
 				futures.Clear();
 			}
 
-			vint GuiGrammarAutoComplete::TraverseTransitions(
+			void GuiGrammarAutoComplete::TraverseTransitions(
 				parsing::tabling::ParsingState& state,
-				collections::List<parsing::tabling::ParsingState::TransitionResult>& transitions,
-				vint firstTransitionIndex,
+				parsing::tabling::ParsingTransitionCollector& transitionCollector,
 				TextPos stopPosition,
 				collections::List<parsing::tabling::ParsingState::Future*>& nonRecoveryFutures,
-				collections::List<parsing::tabling::ParsingState::Future*>& recoveryFutures,
-				vint ambiguityRecursiveLevel
+				collections::List<parsing::tabling::ParsingState::Future*>& recoveryFutures
 				)
 			{
-				vint index=firstTransitionIndex;
-				while(index<transitions.Count())
+				const List<ParsingState::TransitionResult>& transitions=transitionCollector.GetTransitions();
+				for(vint index=0;index<transitions.Count();index++)
 				{
-					ParsingState::TransitionResult& transition=transitions[index];
+					const ParsingState::TransitionResult& transition=transitions[index];
 					switch(transition.transitionType)
 					{
 					case ParsingState::TransitionResult::AmbiguityBegin:
-						{
-							// take the snapshop that needs to be restored to parse different ambiguity branches
-							List<ParsingState::Future*> accumulatedNonRecoveryFutures, accumulatedRecoveryFutures;
-							Ptr<ParsingState::StateGroup> stateGroup=state.TakeSnapshot();
-							
-							// recursively explore all ambiguity branches
-							while(transitions[index].transitionType!=ParsingState::TransitionResult::AmbiguityEnd)
-							{
-								// restore shapshot if necessary
-								if(transitions[index].transitionType==ParsingState::TransitionResult::AmbiguityBranch)
-								{
-									state.RestoreSnapshot(stateGroup);
-								}
-
-								// copy futures when the AmbiguityBegin is reached
-								List<ParsingState::Future*> newNonRecoveryFutures, newRecoveryFutures;
-								FOREACH(ParsingState::Future*, future, nonRecoveryFutures)
-								{
-									newNonRecoveryFutures.Add(future->Clone());
-								}
-								FOREACH(ParsingState::Future*, future, recoveryFutures)
-								{
-									newRecoveryFutures.Add(future->Clone());
-								}
-
-								// traverse a branch
-								index=TraverseTransitions(state, transitions, index+1, stopPosition, nonRecoveryFutures, newRecoveryFutures, ambiguityRecursiveLevel+1);
-								CopyFrom(accumulatedNonRecoveryFutures, newNonRecoveryFutures, true);
-								CopyFrom(accumulatedRecoveryFutures, newRecoveryFutures, true);
-							}
-
-							// copy futures to accumulated future list
-							DeleteFutures(nonRecoveryFutures);
-							DeleteFutures(recoveryFutures);
-							CopyFrom(nonRecoveryFutures, accumulatedNonRecoveryFutures);
-							CopyFrom(recoveryFutures, accumulatedRecoveryFutures);
-						}
 						break;
 					case ParsingState::TransitionResult::AmbiguityBranch:
+						// ambiguity branches are not nested
+						// tokens in different braches are the same
+						// so we only need to run one branch, and skip the others
+						index=transitionCollector.GetAmbiguityEndFromBegin(transitionCollector.GetAmbiguityBeginFromBranch(index));
+						break;
 					case ParsingState::TransitionResult::AmbiguityEnd:
-						return index;
+						break;
 					case ParsingState::TransitionResult::ExecuteInstructions:
 						{
 							// test does the token reach the stop position
@@ -601,36 +567,11 @@ GuiGrammarAutoComplete
 							{
 								if(TextPos(transition.token->rowEnd, transition.token->columnEnd)>stopPosition)
 								{
-									// skip all unnecessary transitions
-									vint ambiguityLevel=0;
-									while(index<transitions.Count())
-									{
-										switch(transition.transitionType)
-										{
-										case ParsingState::TransitionResult::AmbiguityBegin:
-											ambiguityLevel++;
-											break;
-										case ParsingState::TransitionResult::AmbiguityBranch:
-											if(ambiguityLevel==0)
-											{
-												return index;
-											}
-											break;
-										case ParsingState::TransitionResult::AmbiguityEnd:
-											if(ambiguityLevel==0)
-											{
-												return index;
-											}
-											ambiguityLevel--;
-											break;
-										}
-										index++;
-									}
-
 									// stop the traversing
-									return index;
+									return;
 								}
 							}
+
 							// traverse the PDA using the token specified in the current transition
 							vint tableTokenIndex=transition.tableTokenIndex;
 							List<ParsingState::Future*> possibilities;
@@ -705,14 +646,12 @@ GuiGrammarAutoComplete
 						}
 						break;
 					}
-					index++;
 				}
-				return index;
 			}
 
 			void GuiGrammarAutoComplete::SearchValidInputToken(
 				parsing::tabling::ParsingState& state,
-				collections::List<parsing::tabling::ParsingState::TransitionResult>& transitions,
+				parsing::tabling::ParsingTransitionCollector& transitionCollector,
 				TextPos stopPosition,
 				Context& newContext,
 				collections::SortedList<vint>& tableTokenIndices
@@ -726,7 +665,7 @@ GuiGrammarAutoComplete
 				// traverse the PDA until it reach the stop position
 				// nonRecoveryFutures store the state when the last token (existing) is reached
 				// recoveryFutures store the state when the last token (inserted by error recovery) is reached
-				TraverseTransitions(state, transitions, 0, stopPosition, nonRecoveryFutures, recoveryFutures, 0);
+				TraverseTransitions(state, transitionCollector, stopPosition, nonRecoveryFutures, recoveryFutures);
 
 				// explore all possibilities from the last token before the stop position
 				List<ParsingState::Future*> possibilities;
@@ -764,8 +703,7 @@ GuiGrammarAutoComplete
 				state.Reset(newContext.rule);
 
 				// prepare to get all transitions
-				List<ParsingState::TransitionResult> transitions;
-				ParsingTransitionCollector collector(transitions);
+				ParsingTransitionCollector collector;
 				List<Ptr<ParsingError>> errors;
 
 				// reparse and get all transitions during parsing
@@ -778,7 +716,7 @@ GuiGrammarAutoComplete
 						ParsingTreeBuilder builder;
 						builder.Reset();
 						bool succeeded=true;
-						FOREACH(ParsingState::TransitionResult, transition, transitions)
+						FOREACH(ParsingState::TransitionResult, transition, collector.GetTransitions())
 						{
 							if(!(succeeded=builder.Run(transition)))
 							{
@@ -822,7 +760,7 @@ GuiGrammarAutoComplete
 						// find all possible token before the current caret using the PDA
 						Ptr<AutoCompleteData> autoComplete=new AutoCompleteData;
 						SortedList<vint> tableTokenIndices;
-						SearchValidInputToken(state, transitions, stopPosition, newContext, tableTokenIndices);
+						SearchValidInputToken(state, collector, stopPosition, newContext, tableTokenIndices);
 
 						// collect all keywords that can be put into the auto complete list
 						FOREACH(vint, token, tableTokenIndices)
@@ -840,7 +778,7 @@ GuiGrammarAutoComplete
 						// collect all auto complete types
 						{
 						
-						// calculate the start position for PDA traversing
+							// calculate the start position for PDA traversing
 							TextPos startPos;
 							startPos=trace.inputStart;
 							if(newContext.modifiedNode!=newContext.originalNode)

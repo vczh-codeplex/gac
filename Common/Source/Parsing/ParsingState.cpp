@@ -938,7 +938,7 @@ ParsingTreeBuilder
 				return processingAmbiguityBranch;
 			}
 
-			Ptr<ParsingTreeObject> ParsingTreeBuilder::GetNode()
+			Ptr<ParsingTreeObject> ParsingTreeBuilder::GetNode()const
 			{
 				if(nodeStack.Count()==0)
 				{
@@ -954,9 +954,8 @@ ParsingTreeBuilder
 ParsingTransitionCollector
 ***********************************************************************/
 
-			ParsingTransitionCollector::ParsingTransitionCollector(TransitionResultList& _transitions)
-				:processingAmbiguityBranch(false)
-				,transitions(_transitions)
+			ParsingTransitionCollector::ParsingTransitionCollector()
+				:ambiguityBegin(-1)
 			{
 			}
 
@@ -966,23 +965,35 @@ ParsingTransitionCollector
 
 			void ParsingTransitionCollector::Reset()
 			{
-				processingAmbiguityBranch=false;
+				ambiguityBegin=-1;
 				transitions.Clear();
+				ambiguityBeginToEnds.Clear();
+				ambiguityBeginToBranches.Clear();
+				ambiguityBranchToBegins.Clear();
 			}
 
 			bool ParsingTransitionCollector::Run(const ParsingState::TransitionResult& result)
 			{
+				vint index=transitions.Count();
 				switch(result.transitionType)
 				{
 				case ParsingState::TransitionResult::AmbiguityBegin:
-					if(processingAmbiguityBranch) return false;
-					processingAmbiguityBranch=true;
+					if(ambiguityBegin!=-1) return false;
+					ambiguityBegin=index;
 					break;
 				case ParsingState::TransitionResult::AmbiguityBranch:
-					if(!processingAmbiguityBranch) return false;
+					{
+						if(ambiguityBegin==-1) return false;
+						ambiguityBeginToBranches.Add(ambiguityBegin, index);
+						ambiguityBranchToBegins.Add(index, ambiguityBegin);
+					}
 					break;
 				case ParsingState::TransitionResult::AmbiguityEnd:
-					if(!processingAmbiguityBranch) return false;
+					{
+						if(ambiguityBegin==-1) return false;
+						ambiguityBeginToEnds.Add(ambiguityBegin, index);
+						ambiguityBegin=-1;
+					}
 					break;
 				case ParsingState::TransitionResult::ExecuteInstructions:
 					break;
@@ -996,7 +1007,30 @@ ParsingTransitionCollector
 
 			bool ParsingTransitionCollector::GetProcessingAmbiguityBranch()
 			{
-				return processingAmbiguityBranch;
+				return ambiguityBegin!=-1;
+			}
+
+			const ParsingTransitionCollector::TransitionResultList& ParsingTransitionCollector::GetTransitions()const
+			{
+				return transitions;
+			}
+
+			vint ParsingTransitionCollector::GetAmbiguityEndFromBegin(vint transitionIndex)const
+			{
+				vint index=ambiguityBeginToEnds.Keys().IndexOf(transitionIndex);
+				return index==-1?-1:ambiguityBeginToEnds.Values()[index];
+			}
+
+			const collections::List<vint>& ParsingTransitionCollector::GetAmbiguityBranchesFromBegin(vint transitionIndex)const
+			{
+				vint index=ambiguityBeginToBranches.Keys().IndexOf(transitionIndex);
+				return index==-1?*(collections::List<vint>*)0:ambiguityBeginToBranches.GetByIndex(index);
+			}
+
+			vint ParsingTransitionCollector::GetAmbiguityBeginFromBranch(vint transitionIndex)const
+			{
+				vint index=ambiguityBranchToBegins.Keys().IndexOf(transitionIndex);
+				return index==-1?-1:ambiguityBranchToBegins.Values()[index];
 			}
 		}
 	}
