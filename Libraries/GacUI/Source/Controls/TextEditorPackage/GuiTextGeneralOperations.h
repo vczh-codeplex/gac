@@ -177,7 +177,29 @@ RepeatingParsingExecutor
 				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetSemanticColorAttribute(vint index);
 				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetAutoCompleteCandidateAttribute(vint index);
 				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetAutoCompleteTokenAttribute(vint index);
+				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetAutoCompleteEndlessTokenAttribute(vint index);
 				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetAutoCompleteTypeAttribute(vint index);
+
+				/*
+				@Color(ColorName)
+					field:	color of the token field when the token type is marked with @ContextColor
+					token:	color of the token
+				@ContextColor(DefaultColor)
+					token:	color of the token, and it may be changed if the token field is marked with @Color or @SemanticColor
+				@SemanticColor(Type)
+					field:	invoke a callback to get the color of the token field when the token type is marked with @ContextColor
+
+				@AutoCompleteCandidate(ParentTokenName)
+					token:	when the token can be available after the editing caret, than it will be in the auto complete list.
+							the parent token named after ParentTokenName should be contain this token (e.g., keywords' parent is identifier)
+				@AutoCompleteToken()
+					token:	when the token is editing, an auto complete list will appear if possible
+				@AutoCompleteEndlessToken()
+					token:	when the token does not have an clear end (e.g. identifier is endless, string is not endless, brace is not endless)
+							if a token's parent token is endless, then the token itself is endless too
+				@AutoCompleteType(Type)
+					field:	invoke a callback to get the auto complete list items when the token type is marked with @AutoCompleteToken
+				*/
 			};
 		}
 	}
