@@ -367,18 +367,15 @@ GuiGrammarColorizer
 
 			void GuiGrammarColorizer::OnParsingFinishedAsync(const RepeatingParsingOutput& output)
 			{
-				SPIN_LOCK(parsingTreeLock)
+				SPIN_LOCK(contextLock)
 				{
-					parsingTreeNode=output.node;
-					if(parsingTreeNode)
-					{
-						OnContextFinishedAsync(parsingTreeNode);
-					}
+					context=output;
+					OnContextFinishedAsync(context);
 				}
 				RestartColorizer();
 			}
 
-			void GuiGrammarColorizer::OnContextFinishedAsync(Ptr<parsing::ParsingTreeObject> node)
+			void GuiGrammarColorizer::OnContextFinishedAsync(const RepeatingParsingOutput& context)
 			{
 			}
 
@@ -417,7 +414,7 @@ GuiGrammarColorizer
 				RepeatingParsingExecutor::CallbackBase::TextEditFinished(editVersion);
 			}
 
-			void GuiGrammarColorizer::OnSemanticColorize(parsing::ParsingTreeToken* foundToken, parsing::ParsingTreeObject* tokenParent, const WString& type, const WString& field, vint semantic, vint& token)
+			void GuiGrammarColorizer::OnSemanticColorize(parsing::ParsingTreeToken* foundToken, parsing::ParsingTreeObject* tokenParent, const WString& type, const WString& field, vint semantic, vint& token, Ptr<Object> semanticContext)
 			{
 			}
 
@@ -425,9 +422,9 @@ GuiGrammarColorizer
 			{
 				parsingExecutor->EnsureTaskFinished();
 				StopColorizerForever();
-				SPIN_LOCK(parsingTreeLock)
+				SPIN_LOCK(contextLock)
 				{
-					parsingTreeNode=0;
+					context=RepeatingParsingOutput();
 				}
 			}
 
@@ -580,9 +577,9 @@ GuiGrammarColorizer
 
 			void GuiGrammarColorizer::ColorizeTokenContextSensitive(int lineIndex, const wchar_t* text, vint start, vint length, vint& token, int& contextState)
 			{
-				SPIN_LOCK(parsingTreeLock)
+				SPIN_LOCK(contextLock)
 				{
-					ParsingTreeObject* node=parsingTreeNode.Obj();
+					ParsingTreeObject* node=context.node.Obj();
 					if(node && token!=-1 && colorContext[token])
 					{
 						ParsingTextPos pos(lineIndex, start);
@@ -610,7 +607,7 @@ GuiGrammarColorizer
 						if(index!=-1)
 						{
 							vint semantic=fieldSemanticColors.Values().Get(index);
-							OnSemanticColorize(foundToken, tokenParent, type, field, semantic, token);
+							OnSemanticColorize(foundToken, tokenParent, type, field, semantic, token, context.semanticContext);
 							return;
 						}
 					}

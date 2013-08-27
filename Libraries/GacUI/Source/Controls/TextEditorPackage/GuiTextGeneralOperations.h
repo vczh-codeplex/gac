@@ -89,6 +89,8 @@ RepeatingParsingExecutor
 				vuint									editVersion;
 				/// <summary>The code.</summary>
 				WString									code;
+				/// <summary>The result from semantic analyzing.</summary>
+				Ptr<Object>								semanticContext;
 
 				RepeatingParsingOutput()
 					:editVersion(0)
@@ -105,8 +107,7 @@ RepeatingParsingExecutor
 				{
 				public:
 					/// <summary>Callback when a parsing task is finished.</summary>
-					/// <param name="generatedNewNode">True indicates the parsing succeeded. Otherwise failed.</param>
-					/// <param name="parsingExecutor">The parsing executor that parses the input.</param>
+					/// <param name="output">the result of the parsing.</param>
 					virtual void											OnParsingFinishedAsync(const RepeatingParsingOutput& output)=0;
 					/// <summary>Callback when <see cref="RepeatingParsingExecutor"/> requires enabling or disabling automatically repeating calling to the SubmitTask function.</summary>
 					/// <param name="enabled">Set to true to require an automatically repeating calling to the SubmitTask function</param>
@@ -145,6 +146,10 @@ RepeatingParsingExecutor
 			protected:
 
 				void														Execute(const RepeatingParsingInput& input)override;
+
+				/// <summary>Called when semantic analyzing is needed. The function can fill the "semanticContext" field in the output parameter for storing the result.</summary>
+				/// <param name="context">The parsing result.</param>
+				virtual void												OnContextFinishedAsync(RepeatingParsingOutput& context);
 			public:
 				/// <summary>Initialize the parsing executor.</summary>
 				/// <param name="_grammarParser">Parser generated from a grammar.</param>

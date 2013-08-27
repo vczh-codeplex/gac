@@ -111,10 +111,18 @@ RepeatingParsingExecutor
 				result.node=node;
 				result.editVersion=input.editVersion;
 				result.code=input.code;
-				FOREACH(ICallback*, callback, callbacks)
+				if(node)
 				{
-					callback->OnParsingFinishedAsync(result);
+					OnContextFinishedAsync(result);
+					FOREACH(ICallback*, callback, callbacks)
+					{
+						callback->OnParsingFinishedAsync(result);
+					}
 				}
+			}
+
+			void RepeatingParsingExecutor::OnContextFinishedAsync(RepeatingParsingOutput& context)
+			{
 			}
 
 			RepeatingParsingExecutor::RepeatingParsingExecutor(Ptr<parsing::tabling::ParsingGeneralParser> _grammarParser, const WString& _grammarRule)
