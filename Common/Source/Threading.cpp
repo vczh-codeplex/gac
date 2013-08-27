@@ -169,6 +169,29 @@ Thread
 			{
 			}
 		};
+
+		class LambdaThread : public Thread
+		{
+		private:
+			Func<void()>				procedure;
+			bool						deleteAfterStopped;
+
+		protected:
+			void Run()
+			{
+				procedure();
+				if(deleteAfterStopped)
+				{
+					delete this;
+				}
+			}
+		public:
+			LambdaThread(const Func<void()>& _procedure, bool _deleteAfterStopped)
+				:procedure(_procedure)
+				,deleteAfterStopped(_deleteAfterStopped)
+			{
+			}
+		};
 	}
 
 	void InternalThreadProc(Thread* thread)
@@ -211,6 +234,20 @@ Thread
 			{
 				delete thread;
 			}
+		}
+		return 0;
+	}
+
+	Thread* Thread::CreateAndStart(const Func<void()>& procedure, bool deleteAfterStopped)
+	{
+		Thread* thread=new LambdaThread(procedure, deleteAfterStopped);
+		if(thread->Start())
+		{
+			return thread;
+		}
+		else
+		{
+			delete thread;
 		}
 		return 0;
 	}
