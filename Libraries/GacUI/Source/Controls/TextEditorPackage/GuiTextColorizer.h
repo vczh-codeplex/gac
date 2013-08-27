@@ -160,13 +160,14 @@ GuiGrammarColorizer
 				FieldSemanticColors											fieldSemanticColors;
 				collections::Dictionary<WString, vint>						semanticIndices;
 
-				SpinLock													parsingTreeLock;
-				Ptr<parsing::ParsingTreeObject>								parsingTreeNode;
+				SpinLock													contextLock;
+				RepeatingParsingOutput										context;
 
 				void														OnParsingFinishedAsync(const RepeatingParsingOutput& output)override;
 			protected:
 				/// <summary>Called when the node is parsed successfully before restarting colorizing.</summary>
-				virtual void												OnContextFinishedAsync(Ptr<parsing::ParsingTreeObject> node);
+				/// <param name="context">The result of the parsing.</param>
+				virtual void												OnContextFinishedAsync(const RepeatingParsingOutput& context);
 
 				void														Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, vuint editVersion)override;
 				void														Detach()override;
@@ -181,7 +182,8 @@ GuiGrammarColorizer
 				/// <param name="field">Field of the parent that contains the token.</param>
 				/// <param name="semantic">Semantic id that comes from the argument in the @SemanticColor attribute. Name-id mapping can be retrived using <see cref="GetSemanticId"/>.</param>
 				/// <param name="token">Output argument for the result color. Name-id mapping can be retrived using <see cref="GetTokenId"/>.</param>
-				virtual void												OnSemanticColorize(parsing::ParsingTreeToken* foundToken, parsing::ParsingTreeObject* tokenParent, const WString& type, const WString& field, vint semantic, vint& token);
+				/// <param name="semanticContext">The semantic context of the node.</param>
+				virtual void												OnSemanticColorize(parsing::ParsingTreeToken* foundToken, parsing::ParsingTreeObject* tokenParent, const WString& type, const WString& field, vint semantic, vint& token, Ptr<Object> semanticContext);
 
 				/// <summary>Call this function in the derived class's destructor when it overrided <see cref="OnSemanticColorize"/>.</summary>
 				void														EnsureColorizerFinished();

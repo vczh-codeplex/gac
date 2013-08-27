@@ -123,40 +123,12 @@ public:
 			}
 		}
 	}
-};
-
-/***********************************************************************
-ParserGrammarExecutor
-***********************************************************************/
-
-class ParserGrammarExecutor : public RepeatingParsingExecutor
-{
-public:
-	ParserGrammarExecutor()
-		:RepeatingParsingExecutor(CreateBootstrapAutoRecoverParser(), L"ParserDecl")
-	{
-	}
-};
-
-/***********************************************************************
-ParserGrammarColorizer
-***********************************************************************/
-
-class ParserGrammarColorizer : public GuiGrammarColorizer
-{
-protected:
-	Ptr<ParserDecl>							parsingTreeDecl;
-	vint									tokenIdType;
-	vint									tokenIdToken;
-	vint									tokenIdRule;
-	vint									semanticType;
-	vint									semanticGrammar;
 
 	TypeSymbol* FindScope(ParsingTreeNode* node)
 	{
 		if(!node) return 0;
-		int index=parsingTreeDecl->nodeTypeMap.Keys().IndexOf(node);
-		return index==-1?FindScope(node->GetParent()):parsingTreeDecl->nodeTypeMap.Values().Get(index);
+		int index=nodeTypeMap.Keys().IndexOf(node);
+		return index==-1?FindScope(node->GetParent()):nodeTypeMap.Values().Get(index);
 	}
 
 	TypeSymbol* FindType(TypeSymbol* scope, const WString& name)
@@ -204,32 +176,64 @@ protected:
 		}
 		return 0;
 	}
+};
 
-	void OnContextFinishedAsync(Ptr<parsing::ParsingTreeObject> node)override
+/***********************************************************************
+ParserGrammarExecutor
+***********************************************************************/
+
+class ParserGrammarExecutor : public RepeatingParsingExecutor
+{
+protected:
+
+	void OnContextFinishedAsync(RepeatingParsingOutput& context)override
 	{
-		parsingTreeDecl=new ParserDecl(node);
+		context.semanticContext=new ParserDecl(context.node);
 	}
-
-	void OnSemanticColorize(ParsingTreeToken* foundToken, ParsingTreeObject* tokenParent, const WString& type, const WString& field, vint semantic, vint& token)override
+public:
+	ParserGrammarExecutor()
+		:RepeatingParsingExecutor(CreateBootstrapAutoRecoverParser(), L"ParserDecl")
 	{
-		if(semantic==semanticType)
+	}
+};
+
+/***********************************************************************
+ParserGrammarColorizer
+***********************************************************************/
+
+class ParserGrammarColorizer : public GuiGrammarColorizer
+{
+protected:
+	vint									tokenIdType;
+	vint									tokenIdToken;
+	vint									tokenIdRule;
+	vint									semanticType;
+	vint									semanticGrammar;
+
+	void OnSemanticColorize(ParsingTreeToken* foundToken, ParsingTreeObject* tokenParent, const WString& type, const WString& field, vint semantic, vint& token, Ptr<Object> semanticContext)override
+	{
+		Ptr<ParserDecl> parserDecl=semanticContext.Cast<ParserDecl>();
+		if(parserDecl)
 		{
-			TypeSymbol* scope=FindScope(tokenParent);
-			if(FindType(scope, tokenParent, foundToken))
+			if(semantic==semanticType)
 			{
-				token=tokenIdType;
+				TypeSymbol* scope=parserDecl->FindScope(tokenParent);
+				if(parserDecl->FindType(scope, tokenParent, foundToken))
+				{
+					token=tokenIdType;
+				}
 			}
-		}
-		else if(semantic==semanticGrammar)
-		{
-			WString name=foundToken->GetValue();
-			if(parsingTreeDecl->tokens.Contains(name))
+			else if(semantic==semanticGrammar)
 			{
-				token=tokenIdToken;
-			}
-			else if(parsingTreeDecl->rules.Contains(name))
-			{
-				token=tokenIdRule;
+				WString name=foundToken->GetValue();
+				if(parserDecl->tokens.Contains(name))
+				{
+					token=tokenIdToken;
+				}
+				else if(parserDecl->rules.Contains(name))
+				{
+					token=tokenIdRule;
+				}
 			}
 		}
 	}
