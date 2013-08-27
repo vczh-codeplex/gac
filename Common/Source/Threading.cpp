@@ -573,17 +573,15 @@ ThreadPoolLite
 
 		DWORD WINAPI ThreadPoolQueueProc(void* argument)
 		{
-			ThreadPoolQueueProcArgument* proc=(ThreadPoolQueueProcArgument*)argument;
+			Ptr<ThreadPoolQueueProcArgument> proc=(ThreadPoolQueueProcArgument*)argument;
 			proc->proc(proc->argument);
-			delete proc;
 			return 0;
 		}
 
 		DWORD WINAPI ThreadPoolQueueFunc(void* argument)
 		{
-			Func<void()>* proc=(Func<void()>*)argument;
-			(*proc)();
-			delete proc;
+			Ptr<Func<void()>> proc=(Func<void()>*)argument;
+			(*proc.Obj())();
 			return 0;
 		}
 
