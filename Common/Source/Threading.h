@@ -83,6 +83,7 @@ namespace vl
 		~Thread();
 
 		static Thread*								CreateAndStart(ThreadProcedure procedure, void* argument=0, bool deleteAfterStopped=true);
+		static Thread*								CreateAndStart(const Func<void()>& procedure, bool deleteAfterStopped=true);
 		static void									Sleep(vint ms);
 		static vint									GetCPUCount();
 		static vint									GetCurrentThreadId();
