@@ -35,6 +35,21 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 }
 
 /***********************************************************************
+Symbol
+***********************************************************************/
+
+class ParsingScopeSymbol;
+class ParsingScope;
+
+class ParsingScopeSymbol : public Object
+{
+};
+
+class ParsingScope : public Object
+{
+};
+
+/***********************************************************************
 SymbolLookup
 ***********************************************************************/
 
