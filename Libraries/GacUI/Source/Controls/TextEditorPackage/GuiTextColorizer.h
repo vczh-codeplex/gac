@@ -152,6 +152,25 @@ GuiGrammarColorizer
 				typedef collections::Dictionary<FieldDesc, vint>			FieldContextColors;
 				typedef collections::Dictionary<FieldDesc, vint>			FieldSemanticColors;
 				typedef elements::text::ColorEntry							ColorEntry;
+			public:
+				/// <summary>Context for doing semantic colorizing.</summary>
+				struct SemanticColorizeContext
+				{
+					/// <summary>Token syntax tree for the colorizing token.</summary>
+					parsing::ParsingTreeToken*								foundToken;
+					/// <summary>The object syntax tree parent of the token.</summary>
+					parsing::ParsingTreeObject*								tokenParent;
+					/// <summary>Type of the parent.</summary>
+					WString													type;
+					/// <summary>Field of the parent that contains the token.</summary>
+					WString													field;
+					/// <summary>Semantic id that comes from the argument in the @SemanticColor attribute. Name-id mapping can be retrived using <see cref="GetSemanticId"/>.</summary>
+					vint													semantic;
+					/// <summary>Output argument for the result color. Name-id mapping can be retrived using <see cref="GetTokenId"/>.</summary>
+					vint													token;
+					/// <summary>The semantic context of the node.</summary>
+					Ptr<Object>												semanticContext;
+				};
 			private:
 				collections::Dictionary<WString, ColorEntry>				colorSettings;
 				collections::Dictionary<WString, vint>						colorIndices;
@@ -176,14 +195,8 @@ GuiGrammarColorizer
 				void														TextEditFinished(vuint editVersion)override;
 
 				/// <summary>Called when a @SemanticColor attribute in a grammar is activated during colorizing to determine a color for the token.</summary>
-				/// <param name="foundToken">Token syntax tree for the colorizing token.</param>
-				/// <param name="tokenParent">The object syntax tree parent of the token.</param>
-				/// <param name="type">Type of the parent.</param>
-				/// <param name="field">Field of the parent that contains the token.</param>
-				/// <param name="semantic">Semantic id that comes from the argument in the @SemanticColor attribute. Name-id mapping can be retrived using <see cref="GetSemanticId"/>.</param>
-				/// <param name="token">Output argument for the result color. Name-id mapping can be retrived using <see cref="GetTokenId"/>.</param>
-				/// <param name="semanticContext">The semantic context of the node.</param>
-				virtual void												OnSemanticColorize(parsing::ParsingTreeToken* foundToken, parsing::ParsingTreeObject* tokenParent, const WString& type, const WString& field, vint semantic, vint& token, Ptr<Object> semanticContext);
+				/// <param name="context">Context for doing semantic colorizing.</param>
+				virtual void												OnSemanticColorize(SemanticColorizeContext& context);
 
 				/// <summary>Call this function in the derived class's destructor when it overrided <see cref="OnSemanticColorize"/>.</summary>
 				void														EnsureColorizerFinished();

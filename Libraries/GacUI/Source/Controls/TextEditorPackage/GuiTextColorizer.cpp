@@ -414,7 +414,7 @@ GuiGrammarColorizer
 				RepeatingParsingExecutor::CallbackBase::TextEditFinished(editVersion);
 			}
 
-			void GuiGrammarColorizer::OnSemanticColorize(parsing::ParsingTreeToken* foundToken, parsing::ParsingTreeObject* tokenParent, const WString& type, const WString& field, vint semantic, vint& token, Ptr<Object> semanticContext)
+			void GuiGrammarColorizer::OnSemanticColorize(SemanticColorizeContext& context)
 			{
 			}
 
@@ -606,8 +606,16 @@ GuiGrammarColorizer
 						index=fieldSemanticColors.Keys().IndexOf(key);
 						if(index!=-1)
 						{
-							vint semantic=fieldSemanticColors.Values().Get(index);
-							OnSemanticColorize(foundToken, tokenParent, type, field, semantic, token, context.semanticContext);
+							SemanticColorizeContext scContext;
+							scContext.foundToken=foundToken;
+							scContext.tokenParent=tokenParent;
+							scContext.type=type;
+							scContext.field=field;
+							scContext.semantic=fieldSemanticColors.Values().Get(index);
+							scContext.token=token;
+							scContext.semanticContext=context.semanticContext;
+							OnSemanticColorize(scContext);
+							token=scContext.token;
 							return;
 						}
 					}
