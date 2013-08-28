@@ -165,12 +165,12 @@ const ParsingScope::SymbolList& ParsingScope::GetSymbolsRecursively(const WStrin
 	ParsingScope* scope=this;
 	while(scope)
 	{
-		const SymbolList& symbols=GetSymbols(name);
+		const SymbolList& symbols=scope->GetSymbols(name);
 		if(symbols.Count()>0) return symbols;
 
 		if(scope->ownerSymbol)
 		{
-			scope=scope->ownerSymbol->scope.Obj();
+			scope=scope->ownerSymbol->GetParentScope();
 		}
 		else
 		{
@@ -509,10 +509,18 @@ protected:
 					ParsingTreeObject* type=context.tokenParent;
 					while(type)
 					{
-						names.Add(type->GetMember(L"name").Cast<ParsingTreeToken>()->GetValue());
+						if(type->GetType()==L"PrimitiveTypeObj")
+						{
+							names.Add(type->GetMember(L"name").Cast<ParsingTreeToken>()->GetValue());
+						}
 						if(type->GetType()==L"SubTypeObj")
 						{
-							type=dynamic_cast<ParsingTreeObject*>(type->GetParent());
+							names.Add(type->GetMember(L"name").Cast<ParsingTreeToken>()->GetValue());
+							type=dynamic_cast<ParsingTreeObject*>(type->GetMember(L"parentType").Obj());
+						}
+						else
+						{
+							break;
 						}
 					}
 				}
@@ -527,6 +535,10 @@ protected:
 						if(symbols.Count()>0)
 						{
 							type=symbols[0].Cast<TypeSymbol>();
+						}
+						else
+						{
+							type=0;
 						}
 					}
 					else if(i==names.Count()-1)
