@@ -62,6 +62,7 @@ public:
 	bool									RemoveSymbol(Ptr<ParsingScopeSymbol> value);
 	const SortedList<WString>&				GetSymbolNames();
 	const SymbolList&						GetSymbols(const WString& name);
+	const SymbolList&						GetSymbolsRecursively(const WString& name);
 };
 
 class ParsingScopeSymbol : public Object
@@ -99,6 +100,8 @@ public:
 
 	void									InitializeQueryCache();
 	void									ClearQueryCache();
+	ParsingScopeSymbol*						GetSymbolFromNode(ParsingTreeObject* node);
+	ParsingScope*							GetScopeFromNode(ParsingTreeNode* node);
 };
 
 /***********************************************************************
@@ -155,6 +158,26 @@ const ParsingScope::SymbolList& ParsingScope::GetSymbols(const WString& name)
 	return index==-1
 		?emptySymbolList
 		:symbols.GetByIndex(index);
+}
+
+const ParsingScope::SymbolList& ParsingScope::GetSymbolsRecursively(const WString& name)
+{
+	ParsingScope* scope=this;
+	while(scope)
+	{
+		const SymbolList& symbols=GetSymbols(name);
+		if(symbols.Count()>0) return symbols;
+
+		if(scope->ownerSymbol)
+		{
+			scope=scope->ownerSymbol->scope.Obj();
+		}
+		else
+		{
+			break;
+		}
+	}
+	return emptySymbolList;
 }
 
 /***********************************************************************
@@ -253,6 +276,30 @@ void ParsingScopeRoot::ClearQueryCache()
 	nodeSymbols.Clear();
 }
 
+ParsingScopeSymbol* ParsingScopeRoot::GetSymbolFromNode(ParsingTreeObject* node)
+{
+	vint index=nodeSymbols.Keys().IndexOf(node);
+	return index==-1?0:nodeSymbols.Values()[index];
+}
+
+ParsingScope* ParsingScopeRoot::GetScopeFromNode(ParsingTreeNode* node)
+{
+	while(node)
+	{
+		ParsingTreeObject* obj=dynamic_cast<ParsingTreeObject*>(node);
+		if(obj)
+		{
+			ParsingScopeSymbol* symbol=GetSymbolFromNode(obj);
+			if(symbol && symbol->GetScope())
+			{
+				return symbol->GetScope();
+			}
+		}
+		node=node->GetParent();
+	}
+	return 0;
+}
+
 /***********************************************************************
 SymbolLookup
 ***********************************************************************/
@@ -305,7 +352,10 @@ public:
 		{
 			FOREACH(Ptr<ParsingTreeNode>, node, members->GetItems())
 			{
-				GetScope()->AddSymbol(new EnumFieldSymbol(node));
+				if(Ptr<ParsingTreeObject> obj=node.Cast<ParsingTreeObject>())
+				{
+					GetScope()->AddSymbol(new EnumFieldSymbol(obj));
+				}
 			}
 		}
 	}
@@ -322,7 +372,10 @@ public:
 		{
 			FOREACH(Ptr<ParsingTreeNode>, node, members->GetItems())
 			{
-				GetScope()->AddSymbol(new ClassFieldSymbol(node));
+				if(Ptr<ParsingTreeObject> obj=node.Cast<ParsingTreeObject>())
+				{
+					GetScope()->AddSymbol(new ClassFieldSymbol(obj));
+				}
 			}
 		}
 		if(Ptr<ParsingTreeArray> members=node->GetMember(L"subTypes").Cast<ParsingTreeArray>())
@@ -332,11 +385,17 @@ public:
 				Ptr<ParsingTreeObject> type=node.Cast<ParsingTreeObject>();
 				if(type->GetType()==L"EnumTypeDef")
 				{
-					GetScope()->AddSymbol(new EnumSymbol(node));
+					if(Ptr<ParsingTreeObject> obj=node.Cast<ParsingTreeObject>())
+					{
+						GetScope()->AddSymbol(new EnumSymbol(obj));
+					}
 				}
 				else if(type->GetType()==L"ClassTypeDef")
 				{
-					GetScope()->AddSymbol(new ClassSymbol(node));
+					if(Ptr<ParsingTreeObject> obj=node.Cast<ParsingTreeObject>())
+					{
+						GetScope()->AddSymbol(new ClassSymbol(obj));
+					}
 				}
 			}
 		}
@@ -375,76 +434,35 @@ public:
 				Ptr<ParsingTreeObject> type=node.Cast<ParsingTreeObject>();
 				if(type->GetType()==L"EnumTypeDef")
 				{
-					GetScope()->AddSymbol(new EnumSymbol(node));
+					if(Ptr<ParsingTreeObject> obj=node.Cast<ParsingTreeObject>())
+					{
+						GetScope()->AddSymbol(new EnumSymbol(obj));
+					}
 				}
 				else if(type->GetType()==L"ClassTypeDef")
 				{
-					GetScope()->AddSymbol(new ClassSymbol(node));
+					if(Ptr<ParsingTreeObject> obj=node.Cast<ParsingTreeObject>())
+					{
+						GetScope()->AddSymbol(new ClassSymbol(obj));
+					}
 				}
 				else if(type->GetType()==L"TokenDef")
 				{
-					GetScope()->AddSymbol(new TokenSymbol(node));
+					if(Ptr<ParsingTreeObject> obj=node.Cast<ParsingTreeObject>())
+					{
+						GetScope()->AddSymbol(new TokenSymbol(obj));
+					}
 				}
 				else if(type->GetType()==L"RuleDef")
 				{
-					GetScope()->AddSymbol(new RuleSymbol(node));
+					if(Ptr<ParsingTreeObject> obj=node.Cast<ParsingTreeObject>())
+					{
+						GetScope()->AddSymbol(new RuleSymbol(obj));
+					}
 				}
 			}
 		}
 		InitializeQueryCache();
-	}
-
-	TypeSymbol* FindScope(ParsingTreeNode* node)
-	{
-		if(!node) return 0;
-		int index=nodeTypeMap.Keys().IndexOf(node);
-		return index==-1?FindScope(node->GetParent()):nodeTypeMap.Values().Get(index);
-	}
-
-	TypeSymbol* FindType(TypeSymbol* scope, const WString& name)
-	{
-		if(!scope) return 0;
-		if(name==L"") return 0;
-		int index=scope->subTypes.Keys().IndexOf(name);
-		if(index!=-1) return scope->subTypes.Values().Get(index).Obj();
-		return FindType(scope->parent, name);
-	}
-
-	TypeSymbol* FindType(TypeSymbol* scope, ParsingTreeObject* object, ParsingTreeToken* foundToken)
-	{
-		if(scope && object)
-		{
-			if(!foundToken)
-			{
-				foundToken=object->GetMember(L"name").Cast<ParsingTreeToken>().Obj();
-			}
-			if(object->GetMember(L"name")==foundToken)
-			{
-				WString typeName=foundToken->GetValue();
-				if(object->GetType()==L"PrimitiveTypeObj")
-				{
-					return FindType(scope, typeName);
-				}
-				else if(object->GetType()==L"SubTypeObj")
-				{
-					TypeSymbol* type=FindType(scope, object->GetMember(L"parentType").Cast<ParsingTreeObject>().Obj(), 0);
-					if(type)
-					{
-						int index=type->subTypes.Keys().IndexOf(typeName);
-						if(index!=-1) return type->subTypes.Values().Get(index).Obj();
-					}
-				}
-			}
-			else if(object->GetMember(L"ambiguousType")==foundToken)
-			{
-				WString typeName=foundToken->GetValue();
-				if(object->GetType()==L"ClassTypeDef")
-				{
-					return FindType(scope, typeName);
-				}
-			}
-		}
-		return 0;
 	}
 };
 
@@ -486,8 +504,46 @@ protected:
 		{
 			if(context.semantic==semanticType)
 			{
-				TypeSymbol* scope=parserDef->FindScope(context.tokenParent);
-				if(parserDecl->FindType(scope, context.tokenParent, context.foundToken))
+				List<WString> names;
+				{
+					ParsingTreeObject* type=context.tokenParent;
+					while(type)
+					{
+						names.Add(type->GetMember(L"name").Cast<ParsingTreeToken>()->GetValue());
+						if(type->GetType()==L"SubTypeObj")
+						{
+							type=dynamic_cast<ParsingTreeObject*>(type->GetParent());
+						}
+					}
+				}
+
+				ParsingScope* scope=parserDef->GetScopeFromNode(context.foundToken);
+				Ptr<TypeSymbol> type=0;
+				for(vint i=names.Count()-1;i>=0;i--)
+				{
+					if(type)
+					{
+						const List<Ptr<ParsingScopeSymbol>>& symbols=type->GetScope()->GetSymbols(names[i]);
+						if(symbols.Count()>0)
+						{
+							type=symbols[0].Cast<TypeSymbol>();
+						}
+					}
+					else if(i==names.Count()-1)
+					{
+						const List<Ptr<ParsingScopeSymbol>>& symbols=scope->GetSymbolsRecursively(names[i]);
+						if(symbols.Count()>0)
+						{
+							type=symbols[0].Cast<TypeSymbol>();
+						}
+					}
+					else
+					{
+						break;
+					}
+				}
+
+				if(type)
 				{
 					context.token=tokenIdType;
 				}
@@ -495,13 +551,19 @@ protected:
 			else if(context.semantic==semanticGrammar)
 			{
 				WString name=context.foundToken->GetValue();
-				if(parserDef->tokens.Contains(name))
+				const List<Ptr<ParsingScopeSymbol>>& symbols=parserDef->GetScope()->GetSymbols(name);
+				FOREACH(Ptr<ParsingScopeSymbol>, symbol, symbols)
 				{
-					context.token=tokenIdToken;
-				}
-				else if(parserDecl->rules.Contains(name))
-				{
-					context.token=tokenIdRule;
+					if(symbol.Cast<TokenSymbol>())
+					{
+						context.token=tokenIdToken;
+						break;
+					}
+					else if(symbol.Cast<RuleSymbol>())
+					{
+						context.token=tokenIdRule;
+						break;
+					}
 				}
 			}
 		}
