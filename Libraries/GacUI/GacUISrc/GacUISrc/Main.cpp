@@ -210,29 +210,29 @@ protected:
 	vint									semanticType;
 	vint									semanticGrammar;
 
-	void OnSemanticColorize(ParsingTreeToken* foundToken, ParsingTreeObject* tokenParent, const WString& type, const WString& field, vint semantic, vint& token, Ptr<Object> semanticContext)override
+	void OnSemanticColorize(SemanticColorizeContext& context)override
 	{
-		Ptr<ParserDecl> parserDecl=semanticContext.Cast<ParserDecl>();
+		Ptr<ParserDecl> parserDecl=context.semanticContext.Cast<ParserDecl>();
 		if(parserDecl)
 		{
-			if(semantic==semanticType)
+			if(context.semantic==semanticType)
 			{
-				TypeSymbol* scope=parserDecl->FindScope(tokenParent);
-				if(parserDecl->FindType(scope, tokenParent, foundToken))
+				TypeSymbol* scope=parserDecl->FindScope(context.tokenParent);
+				if(parserDecl->FindType(scope, context.tokenParent, context.foundToken))
 				{
-					token=tokenIdType;
+					context.token=tokenIdType;
 				}
 			}
-			else if(semantic==semanticGrammar)
+			else if(context.semantic==semanticGrammar)
 			{
-				WString name=foundToken->GetValue();
+				WString name=context.foundToken->GetValue();
 				if(parserDecl->tokens.Contains(name))
 				{
-					token=tokenIdToken;
+					context.token=tokenIdToken;
 				}
 				else if(parserDecl->rules.Contains(name))
 				{
-					token=tokenIdRule;
+					context.token=tokenIdRule;
 				}
 			}
 		}
@@ -273,17 +273,17 @@ protected:
 
 	void OnContextFinishedAsync(const Context& context)override
 	{
-		WString selectedTree;
-		{
-			MemoryStream stream;
-			{
-				StreamWriter writer(stream);
-				Log(context.modifiedNode.Obj(), L"", writer);
-			}
-			stream.SeekFromBegin(0);
-			StreamReader reader(stream);
-			selectedTree=reader.ReadToEnd();
-		}
+		//WString selectedTree;
+		//{
+		//	MemoryStream stream;
+		//	{
+		//		StreamWriter writer(stream);
+		//		Log(context.modifiedNode.Obj(), L"", writer);
+		//	}
+		//	stream.SeekFromBegin(0);
+		//	StreamReader reader(stream);
+		//	selectedTree=reader.ReadToEnd();
+		//}
 
 		WString candidateTokenMessage, candidateTypeMessage;
 		if(context.autoComplete)
@@ -318,8 +318,8 @@ protected:
 			+context.rule+L"\r\n"
 			+L"================CODE================\r\n"
 			+context.modifiedCode+L"\r\n"
-			+L"================TREE================\r\n"
-			+selectedTree;
+			//+L"================TREE================\r\n"
+			//+selectedTree;
 			;
 
 		GetApplication()->InvokeInMainThread([=]()
