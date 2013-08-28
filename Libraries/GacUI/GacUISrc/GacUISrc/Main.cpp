@@ -38,16 +38,143 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 Symbol
 ***********************************************************************/
 
-class ParsingScopeSymbol;
 class ParsingScope;
-
-class ParsingScopeSymbol : public Object
-{
-};
+class ParsingScopeSymbol;
 
 class ParsingScope : public Object
 {
+	typedef List<Ptr<ParsingScopeSymbol>>				SymbolList;
+	typedef Group<WString, Ptr<ParsingScopeSymbol>>		SymbolGroup;
+
+	friend class ParsingScopeSymbol;
+protected:
+	static const SymbolList					emptySymbolList;
+
+	ParsingScopeSymbol*						ownerSymbol;
+	SymbolGroup								symbols;
+
+public:
+	ParsingScope(ParsingScopeSymbol* _ownerSymbol);
+	~ParsingScope();
+
+	ParsingScopeSymbol*						GetOwnerSymbol();
+	bool									AddSymbol(Ptr<ParsingScopeSymbol> value);
+	bool									RemoveSymbol(Ptr<ParsingScopeSymbol> value);
+	const SymbolList&						GetSymbol(const WString& name);
 };
+
+class ParsingScopeSymbol : public Object
+{
+	friend class ParsingScope;
+protected:
+	ParsingScope*							parentScope;
+	WString									name;
+	Ptr<ParsingScope>						scope;
+
+public:
+	ParsingScopeSymbol(const WString& _name);
+	~ParsingScopeSymbol();
+
+	ParsingScope*							GetParentScope();
+	const WString&							GetName();
+	bool									CreateScope();
+	bool									DestroyScope();
+	ParsingScope*							GetScope();
+};
+
+/***********************************************************************
+ParsingScope
+***********************************************************************/
+
+const ParsingScope::SymbolList ParsingScope::emptySymbolList;
+
+ParsingScope::ParsingScope(ParsingScopeSymbol* _ownerSymbol)
+	:ownerSymbol(_ownerSymbol)
+{
+}
+
+ParsingScope::~ParsingScope()
+{
+}
+
+ParsingScopeSymbol* ParsingScope::GetOwnerSymbol()
+{
+	return ownerSymbol;
+}
+
+bool ParsingScope::AddSymbol(Ptr<ParsingScopeSymbol> value)
+{
+	if(!value) return false;
+	if(value->parentScope) return false;
+	symbols.Add(value->GetName(), value);
+	value->parentScope=this;
+	return true;
+}
+
+bool ParsingScope::RemoveSymbol(Ptr<ParsingScopeSymbol> value)
+{
+	if(!value) return false;
+	if(value->parentScope!=this) return false;
+	vint index=symbols.Keys().IndexOf(value->GetName());
+	if(index==-1) return false;
+	const SymbolList& values=symbols.GetByIndex(index);
+	index=values.IndexOf(value.Obj());
+	if(index==-1) return false;
+	symbols.Remove(value->GetName(), value.Obj());
+	value->parentScope=0;
+	return true;
+}
+
+const ParsingScope::SymbolList& ParsingScope::GetSymbol(const WString& name)
+{
+	vint index=symbols.Keys().IndexOf(name);
+	return index==-1
+		?emptySymbolList
+		:symbols.GetByIndex(index);
+}
+
+/***********************************************************************
+ParsingScopeSymbol
+***********************************************************************/
+
+ParsingScopeSymbol::ParsingScopeSymbol(const WString& _name)
+	:parentScope(0)
+	,name(_name)
+{
+}
+
+ParsingScopeSymbol::~ParsingScopeSymbol()
+{
+}
+
+ParsingScope* ParsingScopeSymbol::GetParentScope()
+{
+	return parentScope;
+}
+
+const WString& ParsingScopeSymbol::GetName()
+{
+	return name;
+}
+
+bool ParsingScopeSymbol::CreateScope()
+{
+	if(scope) return false;
+	scope=new ParsingScope(this);
+	return true;
+}
+
+bool ParsingScopeSymbol::DestroyScope()
+{
+	if(!scope) return false;
+	scope=0;
+	return true;
+}
+
+ParsingScope* ParsingScopeSymbol::GetScope()
+{
+	return scope.Obj();
+}
 
 /***********************************************************************
 SymbolLookup
