@@ -100,13 +100,19 @@ false
 	"z" : 3
 }
 
+int[]{1, 2, 3}
+int[string]{ "x" : 1, "y" : 2, "z" : 3 }
+
 Point { x : 1, y : 2 }
 { x : 1, y : 2 }
+
+Class(100) [{ ... }]
+Class { ... }
 
 (x) => x+1
 func (x : int) : int { return x+1; }
 
-interface IDerived
+new IDerived
 {
     func Do(x : string)
 	{
