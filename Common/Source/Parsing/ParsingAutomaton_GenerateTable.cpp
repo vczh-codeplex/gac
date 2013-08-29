@@ -401,17 +401,13 @@ GenerateTable
 					
 					if(Ptr<ParsingDefinitionPrimitiveType> classType=rule->type.Cast<ParsingDefinitionPrimitiveType>())
 					{
-						FOREACH(Ptr<ParsingDefinitionTypeDefinition>, typeDef, definition->types)
+						ParsingSymbol* ruleSymbol=manager->GetGlobal()->GetSubSymbolByName(rule->name);
+						ParsingSymbol* ruleType=ruleSymbol->GetDescriptorSymbol();
+						ParsingDefinitionClassDefinition* ruleTypeDef=manager->CacheGetClassDefinition(ruleType);
+						if(ruleTypeDef && ruleTypeDef->ambiguousType)
 						{
-							if(typeDef->name==classType->name)
-							{
-								Ptr<ParsingDefinitionClassDefinition> classDef=typeDef.Cast<ParsingDefinitionClassDefinition>();
-								if(classDef->ambiguousType!=L"")
-								{
-									info.ambiguousType=classDef->ambiguousType;
-									break;
-								}
-							}
+							ParsingSymbol* ambiguousType=manager->CacheGetType(ruleTypeDef->ambiguousType.Obj(), ruleType->GetParentSymbol());
+							info.ambiguousType=GetTypeFullName(ambiguousType);
 						}
 					}
 					table->SetRuleInfo(i, info);

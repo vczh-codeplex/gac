@@ -231,9 +231,6 @@
     <ClCompile Include="..\..\Source\Parsing\ParsingAutomaton_MergeStates.cpp">
       <Filter>Common\Parsing</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Parsing\Bootstrap\ParsingBootstrap_Parser.cpp">
-      <Filter>Common\Parsing\Bootstrap</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Source\Basic.h">
@@ -418,9 +415,6 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Reflection\GuiTypeDescriptorBuilder_Gen.h">
       <Filter>Common\Reflection</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Parsing\Bootstrap\ParsingBootstrap_Parser.h">
-      <Filter>Common\Parsing\Bootstrap</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -71,9 +71,7 @@ namespace vl
 
 					.Type(
 						Class(L"ClassTypeDef", Type(L"TypeDef"))								
-							.Member(L"ambiguousType", TokenType())
-								.Attribute(Attribute(L"SemanticColor").Argument(L"Type"))
-								.Attribute(Attribute(L"AutoCompleteType").Argument(L"Type"))
+							.Member(L"ambiguousType", Type(L"TypeObj"))
 							.Member(L"parentType", Type(L"TypeObj"))
 							.Member(L"members", Type(L"ClassMemberDef").Array())
 							.Member(L"subTypes", Type(L"TypeDef").Array())
@@ -304,7 +302,7 @@ namespace vl
 						.Imply(
 							(
 								Text(L"class") + Rule(L"NAME")[L"name"]
-								+ Opt(Text(L"ambiguous") + Text(L"(") + Rule(L"NAME")[L"ambiguousType"] + Text(L")"))
+								+ Opt(Text(L"ambiguous") + Text(L"(") + Rule(L"Type")[L"ambiguousType"] + Text(L")"))
 								+ Opt(Text(L":") + Rule(L"Type")[L"parentType"])
 								+ Opt(Rule(L"Attribute")[L"attributes"] + *(Text(L",") + Rule(L"Attribute")[L"attributes"]))
 								+ Text(L"{")
@@ -578,7 +576,7 @@ namespace vl
 				{
 					Ptr<ParsingDefinitionClassDefinition> target=new ParsingDefinitionClassDefinition;
 					SetArray(target->attributes, node->GetMember(L"attributes"));
-					SetName(target->ambiguousType, node->GetMember(L"ambiguousType"));
+					SetMember(target->ambiguousType, node->GetMember(L"ambiguousType"));
 					SetMember(target->parentType, node->GetMember(L"parentType"));
 					SetName(target->name, node->GetMember(L"name"));
 					SetArray(target->members, node->GetMember(L"members"));

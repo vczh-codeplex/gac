@@ -118,6 +118,7 @@ namespace vl
 				typedef collections::Dictionary<DefinitionTypeScopePair, ParsingSymbol*>							DefinitionTypeSymbolMap;
 				typedef collections::Dictionary<definitions::ParsingDefinitionGrammar*, ParsingSymbol*>				DefinitionGrammarSymbolMap;
 				typedef collections::Dictionary<ParsingSymbol*, ClassDefinition*>									SymbolClassDefinitionMap;
+				typedef collections::Dictionary<ClassDefinition*, ParsingSymbol*>									ClassDefinitionSymbolMap;
 			protected:
 				ParsingSymbol*					globalSymbol;
 				ParsingSymbol*					tokenTypeSymbol;
@@ -126,6 +127,7 @@ namespace vl
 				DefinitionGrammarSymbolMap		definitionGrammarSymbolCache;
 				DefinitionGrammarSymbolMap		definitionGrammarTypeCache;
 				SymbolClassDefinitionMap		symbolClassDefinitionCache;
+				ClassDefinitionSymbolMap		classDefinitionSymbolCache;
 
 				bool							TryAddSubSymbol(Ptr<ParsingSymbol> subSymbol, ParsingSymbol* parentSymbol);
 			public:
@@ -144,6 +146,7 @@ namespace vl
 				ParsingSymbol*					AddRuleDefinition(const WString& name, ParsingSymbol* ruleType);
 
 				ClassDefinition*				CacheGetClassDefinition(ParsingSymbol* type);
+				ParsingSymbol*					CacheGetClassType(ClassDefinition* type);
 				ParsingSymbol*					CacheGetType(definitions::ParsingDefinitionType* type, ParsingSymbol* scope);
 				bool							CacheSetType(definitions::ParsingDefinitionType* type, ParsingSymbol* scope, ParsingSymbol* symbol);
 				ParsingSymbol*					CacheGetSymbol(definitions::ParsingDefinitionGrammar* grammar);

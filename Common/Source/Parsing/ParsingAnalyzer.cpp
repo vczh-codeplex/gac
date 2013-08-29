@@ -272,6 +272,7 @@ ParsingSymbolManager
 					if(TryAddSubSymbol(symbol, parentType?parentType:globalSymbol))
 					{
 						symbolClassDefinitionCache.Add(symbol, classDef);
+						classDefinitionSymbolCache.Add(classDef, symbol);
 						return symbol;
 					}
 				}
@@ -344,6 +345,12 @@ ParsingSymbolManager
 			{
 				vint index=symbolClassDefinitionCache.Keys().IndexOf(type);
 				return index==-1?0:symbolClassDefinitionCache.Values().Get(index);
+			}
+
+			ParsingSymbol* ParsingSymbolManager::CacheGetClassType(ClassDefinition* type)
+			{
+				vint index=classDefinitionSymbolCache.Keys().IndexOf(type);
+				return index==-1?0:classDefinitionSymbolCache.Values().Get(index);
 			}
 
 			ParsingSymbol* ParsingSymbolManager::CacheGetType(definitions::ParsingDefinitionType* type, ParsingSymbol* scope)
@@ -1273,49 +1280,64 @@ ResolveRuleSymbols
 ResolveSymbols
 ***********************************************************************/
 
+			void ResolveTypeSymbols(Ptr<ParsingDefinitionTypeDefinition> type, ParsingSymbolManager* manager, ParsingSymbol* scope, collections::List<Ptr<ParsingError>>& errors)
+			{
+				if(Ptr<ParsingDefinitionClassDefinition> node=type.Cast<ParsingDefinitionClassDefinition>())
+				{
+					if(node->ambiguousType)
+					{
+						ParsingSymbol* ambigiousType=FindType(node->ambiguousType.Obj(), manager, scope, errors);
+						WString ambiguousTypeText=TypeToString(node->ambiguousType.Obj());
+						if(!ambigiousType)
+						{
+							errors.Add(new ParsingError(node.Obj(), L"Ambiguous type \""+ambiguousTypeText+L"\" for type \""+node->name+L"\" does not exist."));
+						}
+						else if(ambigiousType->GetType()!=ParsingSymbol::ClassType)
+						{
+							errors.Add(new ParsingError(node.Obj(), L"Ambiguous type \""+ambiguousTypeText+L"\" for type \""+node->name+L"\" is not a type."));
+						}
+						else if(ambigiousType->GetDescriptorSymbol()!=manager->GetGlobal()->GetSubSymbolByName(node->name))
+						{
+							errors.Add(new ParsingError(node.Obj(), L"Ambiguous type \""+ambiguousTypeText+L"\" for type \""+node->name+L"\" does not inherit from \""+node->name+L"\"."));
+						}
+						else
+						{
+							bool correct=false;
+							if(ambigiousType->GetSubSymbolCount()==1)
+							{
+								ParsingSymbol* field=ambigiousType->GetSubSymbol(0);
+								if(field->GetName()==L"items" && field->GetType()==ParsingSymbol::ClassField)
+								{
+									ParsingSymbol* fieldType=field->GetDescriptorSymbol();
+									if(fieldType->GetType()==ParsingSymbol::ArrayType && fieldType->GetDescriptorSymbol()==ambigiousType->GetDescriptorSymbol())
+									{
+										correct=true;
+									}
+								}
+							}
+							if(!correct)
+							{
+								errors.Add(new ParsingError(node.Obj(), L"Ambiguous type \""+ambiguousTypeText+L"\" for type \""+node->name+L"\" can only contains one field called \"item\" which should be an array of \""+node->name+L"\"."));
+							}
+						}
+					}
+
+					ParsingSymbol* classType=manager->CacheGetClassType(node.Obj());
+					if(classType)
+					{
+						FOREACH(Ptr<ParsingDefinitionTypeDefinition>, subType, node->subTypes)
+						{
+							ResolveTypeSymbols(subType, manager, classType, errors);
+						}
+					}
+				}
+			}
+
 			void ResolveSymbols(Ptr<definitions::ParsingDefinition> definition, ParsingSymbolManager* manager, collections::List<Ptr<ParsingError>>& errors)
 			{
 				FOREACH(Ptr<ParsingDefinitionTypeDefinition>, type, definition->types)
 				{
-					if(Ptr<ParsingDefinitionClassDefinition> node=type.Cast<ParsingDefinitionClassDefinition>())
-					{
-						if(node->ambiguousType!=L"")
-						{
-							ParsingSymbol* ambigiousType=manager->GetGlobal()->GetSubSymbolByName(node->ambiguousType);
-							if(!ambigiousType)
-							{
-								errors.Add(new ParsingError(node.Obj(), L"Ambiguous type \""+node->ambiguousType+L"\" for type \""+node->name+L"\" does not exist."));
-							}
-							else if(ambigiousType->GetType()!=ParsingSymbol::ClassType)
-							{
-								errors.Add(new ParsingError(node.Obj(), L"Ambiguous type \""+node->ambiguousType+L"\" for type \""+node->name+L"\" is not a type."));
-							}
-							else if(ambigiousType->GetDescriptorSymbol()!=manager->GetGlobal()->GetSubSymbolByName(node->name))
-							{
-								errors.Add(new ParsingError(node.Obj(), L"Ambiguous type \""+node->ambiguousType+L"\" for type \""+node->name+L"\" does not inherit from \""+node->name+L"\"."));
-							}
-							else
-							{
-								bool correct=false;
-								if(ambigiousType->GetSubSymbolCount()==1)
-								{
-									ParsingSymbol* field=ambigiousType->GetSubSymbol(0);
-									if(field->GetName()==L"items" && field->GetType()==ParsingSymbol::ClassField)
-									{
-										ParsingSymbol* fieldType=field->GetDescriptorSymbol();
-										if(fieldType->GetType()==ParsingSymbol::ArrayType && fieldType->GetDescriptorSymbol()==ambigiousType->GetDescriptorSymbol())
-										{
-											correct=true;
-										}
-									}
-								}
-								if(!correct)
-								{
-									errors.Add(new ParsingError(node.Obj(), L"Ambiguous type \""+node->ambiguousType+L"\" for type \""+node->name+L"\" can only contains one field called \"item\" which should be an array of \""+node->name+L"\"."));
-								}
-							}
-						}
-					}
+					ResolveTypeSymbols(type, manager, manager->GetGlobal(), errors);
 				}
 
 				FOREACH(Ptr<ParsingDefinitionRuleDefinition>, rule, definition->rules)
