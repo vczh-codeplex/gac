@@ -154,10 +154,11 @@ public:
 	}
 };
 
-class ParserDefScope : public ParsingScopeRoot
+class ParserDefSymbol : public ParsingScopeSymbol
 {
 public:
-	ParserDefScope(Ptr<ParsingTreeObject> node)
+	ParserDefSymbol(Ptr<ParsingTreeObject> node)
+		:ParsingScopeSymbol(L"")
 	{
 		SetNode(node.Obj());
 		CreateScope();
@@ -196,7 +197,6 @@ public:
 				}
 			}
 		}
-		InitializeQueryCache();
 	}
 };
 
@@ -210,7 +210,8 @@ protected:
 
 	void OnContextFinishedAsync(RepeatingParsingOutput& context)override
 	{
-		context.semanticContext=new ParserDefScope(context.node);
+		context.symbol=new ParserDefSymbol(context.node);
+		context.finder=new ParsingScopeFinder(context.symbol.Obj());
 	}
 public:
 	ParserGrammarExecutor()
@@ -232,84 +233,81 @@ protected:
 	vint									semanticType;
 	vint									semanticGrammar;
 
-	void OnSemanticColorize(SemanticColorizeContext& context)override
+	void OnSemanticColorize(SemanticColorizeContext& context, const RepeatingParsingOutput& input)override
 	{
-		if(Ptr<ParserDefScope> parserDef=context.semanticContext.Cast<ParserDefScope>())
+		if(context.semantic==semanticType)
 		{
-			if(context.semantic==semanticType)
+			List<WString> names;
 			{
-				List<WString> names;
+				ParsingTreeObject* type=context.tokenParent;
+				while(type)
 				{
-					ParsingTreeObject* type=context.tokenParent;
-					while(type)
+					if(type->GetType()==L"PrimitiveTypeObj")
 					{
-						if(type->GetType()==L"PrimitiveTypeObj")
-						{
-							names.Add(type->GetMember(L"name").Cast<ParsingTreeToken>()->GetValue());
-						}
-						if(type->GetType()==L"SubTypeObj")
-						{
-							names.Add(type->GetMember(L"name").Cast<ParsingTreeToken>()->GetValue());
-							type=dynamic_cast<ParsingTreeObject*>(type->GetMember(L"parentType").Obj());
-						}
-						else
-						{
-							break;
-						}
+						names.Add(type->GetMember(L"name").Cast<ParsingTreeToken>()->GetValue());
 					}
-				}
-
-				ParsingScope* scope=parserDef->GetScopeFromNode(context.foundToken);
-				Ptr<TypeSymbol> type=0;
-				for(vint i=names.Count()-1;i>=0;i--)
-				{
-					if(type)
+					if(type->GetType()==L"SubTypeObj")
 					{
-						const List<Ptr<ParsingScopeSymbol>>& symbols=type->GetScope()->GetSymbols(names[i]);
-						if(symbols.Count()>0)
-						{
-							type=symbols[0].Cast<TypeSymbol>();
-						}
-						else
-						{
-							type=0;
-						}
-					}
-					else if(i==names.Count()-1)
-					{
-						const List<Ptr<ParsingScopeSymbol>>& symbols=scope->GetSymbolsRecursively(names[i]);
-						if(symbols.Count()>0)
-						{
-							type=symbols[0].Cast<TypeSymbol>();
-						}
+						names.Add(type->GetMember(L"name").Cast<ParsingTreeToken>()->GetValue());
+						type=dynamic_cast<ParsingTreeObject*>(type->GetMember(L"parentType").Obj());
 					}
 					else
 					{
 						break;
 					}
 				}
+			}
 
+			ParsingScope* scope=input.finder->GetScopeFromNode(context.foundToken);
+			Ptr<TypeSymbol> type=0;
+			for(vint i=names.Count()-1;i>=0;i--)
+			{
 				if(type)
 				{
-					context.token=tokenIdType;
+					const List<Ptr<ParsingScopeSymbol>>& symbols=type->GetScope()->GetSymbols(names[i]);
+					if(symbols.Count()>0)
+					{
+						type=symbols[0].Cast<TypeSymbol>();
+					}
+					else
+					{
+						type=0;
+					}
+				}
+				else if(i==names.Count()-1)
+				{
+					const List<Ptr<ParsingScopeSymbol>>& symbols=input.finder->GetSymbolsRecursively(scope, names[i]);
+					if(symbols.Count()>0)
+					{
+						type=symbols[0].Cast<TypeSymbol>();
+					}
+				}
+				else
+				{
+					break;
 				}
 			}
-			else if(context.semantic==semanticGrammar)
+
+			if(type)
 			{
-				WString name=context.foundToken->GetValue();
-				const List<Ptr<ParsingScopeSymbol>>& symbols=parserDef->GetScope()->GetSymbols(name);
-				FOREACH(Ptr<ParsingScopeSymbol>, symbol, symbols)
+				context.token=tokenIdType;
+			}
+		}
+		else if(context.semantic==semanticGrammar)
+		{
+			WString name=context.foundToken->GetValue();
+			const List<Ptr<ParsingScopeSymbol>>& symbols=input.symbol->GetScope()->GetSymbols(name);
+			FOREACH(Ptr<ParsingScopeSymbol>, symbol, symbols)
+			{
+				if(symbol.Cast<TokenSymbol>())
 				{
-					if(symbol.Cast<TokenSymbol>())
-					{
-						context.token=tokenIdToken;
-						break;
-					}
-					else if(symbol.Cast<RuleSymbol>())
-					{
-						context.token=tokenIdRule;
-						break;
-					}
+					context.token=tokenIdToken;
+					break;
+				}
+				else if(symbol.Cast<RuleSymbol>())
+				{
+					context.token=tokenIdRule;
+					break;
 				}
 			}
 		}

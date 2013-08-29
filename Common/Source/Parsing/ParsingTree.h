@@ -383,6 +383,7 @@ namespace vl
 
 		class ParsingScope;
 		class ParsingScopeSymbol;
+		class ParsingScopeFinder;
 
 		class ParsingScope : public Object
 		{
@@ -391,6 +392,7 @@ namespace vl
 			typedef collections::Group<WString, Ptr<ParsingScopeSymbol>>		SymbolGroup;
 
 			friend class ParsingScopeSymbol;
+			friend class ParsingScopeFinder;
 		protected:
 			static const SymbolList					emptySymbolList;
 
@@ -406,7 +408,6 @@ namespace vl
 			bool									RemoveSymbol(Ptr<ParsingScopeSymbol> value);
 			const SymbolKeyList&					GetSymbolNames();
 			const SymbolList&						GetSymbols(const WString& name);
-			const SymbolList&						GetSymbolsRecursively(const WString& name);
 		};
 
 		class ParsingScopeSymbol : public Object
@@ -431,21 +432,20 @@ namespace vl
 			ParsingScope*							GetScope();
 		};
 
-		class ParsingScopeRoot : public ParsingScopeSymbol
+		class ParsingScopeFinder : public Object
 		{
 			typedef collections::Dictionary<ParsingTreeObject*, ParsingScopeSymbol*>			NodeSymbolMap;
 		protected:
 			NodeSymbolMap							nodeSymbols;
 
-			void									InitializeQueryCacheInternal(ParsingScopeSymbol* symbol);
+			void									InitializeQueryCache(ParsingScopeSymbol* symbol);
 		public:
-			ParsingScopeRoot();
-			~ParsingScopeRoot();
+			ParsingScopeFinder(ParsingScopeSymbol* rootSymbol);
+			~ParsingScopeFinder();
 
-			void									InitializeQueryCache();
-			void									ClearQueryCache();
 			ParsingScopeSymbol*						GetSymbolFromNode(ParsingTreeObject* node);
 			ParsingScope*							GetScopeFromNode(ParsingTreeNode* node);
+			const ParsingScope::SymbolList&			GetSymbolsRecursively(ParsingScope* scope, const WString& name);
 		};
 	}
 }

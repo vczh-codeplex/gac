@@ -414,7 +414,7 @@ GuiGrammarColorizer
 				RepeatingParsingExecutor::CallbackBase::TextEditFinished(editVersion);
 			}
 
-			void GuiGrammarColorizer::OnSemanticColorize(SemanticColorizeContext& context)
+			void GuiGrammarColorizer::OnSemanticColorize(SemanticColorizeContext& context, const RepeatingParsingOutput& input)
 			{
 			}
 
@@ -613,8 +613,7 @@ GuiGrammarColorizer
 							scContext.field=field;
 							scContext.semantic=fieldSemanticColors.Values().Get(index);
 							scContext.token=token;
-							scContext.semanticContext=context.semanticContext;
-							OnSemanticColorize(scContext);
+							OnSemanticColorize(scContext, context);
 							token=scContext.token;
 							return;
 						}

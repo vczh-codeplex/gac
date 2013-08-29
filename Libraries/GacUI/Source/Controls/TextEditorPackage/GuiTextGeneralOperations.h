@@ -115,8 +115,10 @@ RepeatingParsingExecutor
 				vuint									editVersion;
 				/// <summary>The code.</summary>
 				WString									code;
-				/// <summary>The result from semantic analyzing.</summary>
-				Ptr<Object>								semanticContext;
+				/// <summary>The root symbol from semantic analyzing.</summary>
+				Ptr<parsing::ParsingScopeSymbol>		symbol;
+				/// <summary>The finder for the root symbol from semantic analyzing.</summary>
+				Ptr<parsing::ParsingScopeFinder>		finder;
 
 				RepeatingParsingOutput()
 					:editVersion(0)
