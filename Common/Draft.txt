@@ -1,7 +1,167 @@
 ========================================================
-parse intel manual 2A and 2B to get binary code table
-x86 and x64 assembler
-intermediate code
-enriched C language
-design a language for Calculation, AsyncIO, Server and GUI programming
+Primitive Types
 ========================================================
+
+void				system.Void
+interface			system.Interface
+object				system.Object
+uint8				system.UInt8
+uint16				system.UInt16
+uint32				system.UInt32				(uint)
+uint64				system.UInt64
+int8				system.Int8
+int16				system.Int16
+int32				system.Int32				(int)
+int64				system.Int64
+float				system.Single
+double				system.Double
+bool				system.Boolean
+char				system.Char
+string				system.String
+					system.DateTime
+					system.Locale
+					system.Enumerator
+					system.Enumerable			dynamic{}
+					system.ReadableList			const dynamic[]
+					system.List					dynamic[]
+					system.ReadableDictionary	const dynamic[dynamic]
+					system.Dictionary			dynamic[dynamic]
+					system.InterfaceProxy
+					system.Function				func dynamic
+dynamic
+
+========================================================
+Composite Types
+========================================================
+
+T{}					system.Enumerable<T>
+T[]					system.List<T>
+const T[]			system.ReadableList<T>
+T[U]				system.Dictionary<U, T>
+const T[U]			system.ReadableDictionary<U, T>
+func R(T1, T2)		system.Function<R, T1, T2>
+
+ClassType*			raw pointer
+CLassType			shared pointer
+
+========================================================
+Definitions
+========================================================
+
+struct Point
+{
+	x : int,
+	y : int
+}
+
+enum Season
+{
+	Spring,
+	Summer,
+	Autumn,
+	Winter
+}
+
+func Sum(xs : int{}) : int
+{
+	result : int = 0;
+	for(x in xs)
+	{
+		result = result + x;
+	}
+	return x;
+}
+
+[extern []] interface IDerived : IBase1, IBase2
+{
+	func Do(x : string)
+	ctor (proxy : system.InterfaceProxy)
+}
+
+[static] func Sin(x : double) : double;
+
+namespace system
+{
+}
+
+========================================================
+Constructors
+========================================================
+
+0
+1.0
+"fuck"
+true
+false
+
+[]
+[1, 2, 3]
+{
+	"x" : 1,
+	"y" : 2,
+	"z" : 3
+}
+
+Point { x : 1, y : 2 }
+{ x : 1, y : 2 }
+
+(x) => x+1
+func (x : int) : int { return x+1; }
+
+interface IDerived
+{
+    func Do(x : string)
+	{
+		Print(x);
+	}
+}
+
+========================================================
+Expressions
+========================================================
+
+Unary:
+	+
+	-
+	~
+	!
+Binary:
+	* / %
+	+ -
+	<< >>
+	< <= > >=
+	== !=
+	&
+	^
+	|
+	&&
+	||
+
+a[b]
+a(b, c)
+a.b
+(a)
+(Type)a
+
+========================================================
+Statements
+========================================================
+
+a = b;
+a : Type = b;
+var a = b;
+
+<function-call-expression>;
+
+delete [exp];
+return [exp];
+break;
+continue;
+
+if (exp) statement [else statement]
+try if(x [: Type] = exp) statement [else statement]
+while (exp) statement
+do statement while (exp);
+for(x [: Type] in xs) statement
+for(x [: Type] in a to b) statement
+try statement [catch(ex [: string])] statement [finally statement]
