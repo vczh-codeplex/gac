@@ -1580,11 +1580,10 @@ ParsingGeneralParser
 			{
 			}
 
-			Ptr<ParsingTreeNode> ParsingGeneralParser::Parse(ParsingState& state, collections::List<Ptr<ParsingError>>& errors)
+			bool ParsingGeneralParser::Parse(ParsingState& state, ParsingTransitionProcessor& processor, collections::List<Ptr<ParsingError>>& errors)
 			{
 				BeginParse();
-				ParsingTreeBuilder builder;
-				builder.Reset();
+				processor.Reset();
 
 				for(vint i=0;i<state.GetTokens().Count();i++)
 				{
@@ -1595,7 +1594,6 @@ ParsingGeneralParser
 					}
 				}
 
-				ParsingState::TransitionResult result;
 				while(true)
 				{
 					ParsingState::TransitionResult result=ParseStep(state, errors);
@@ -1603,7 +1601,7 @@ ParsingGeneralParser
 					{
 						const RegexToken* token=state.GetToken(state.GetCurrentToken());
 						errors.Add(new ParsingError(token, L"Internal error when parsing."));
-						return 0;
+						return false;
 					}
 					else if(result.transitionType==ParsingState::TransitionResult::SkipToken)
 					{
@@ -1611,7 +1609,7 @@ ParsingGeneralParser
 						{
 							const RegexToken* token=state.GetToken(state.GetCurrentToken());
 							errors.Add(new ParsingError(token, L"Failed to recover error when reaching the end of the input."));
-							return 0;
+							return false;
 						}
 						else
 						{
@@ -1619,17 +1617,25 @@ ParsingGeneralParser
 							continue;
 						}
 					}
-					else if(!builder.Run(result))
+					else if(!processor.Run(result))
 					{
 						const RegexToken* token=state.GetToken(state.GetCurrentToken());
 						errors.Add(new ParsingError(token, L"Internal error when building the parsing tree."));
-						return 0;
+						return false;
 					}
-					if(result.tableTokenIndex==ParsingTable::TokenFinish && !builder.GetProcessingAmbiguityBranch())
+					if(result.tableTokenIndex==ParsingTable::TokenFinish && !processor.GetProcessingAmbiguityBranch())
 					{
 						break;
 					}
 				}
+
+				return true;
+			}
+
+			Ptr<ParsingTreeNode> ParsingGeneralParser::Parse(ParsingState& state, collections::List<Ptr<ParsingError>>& errors)
+			{
+				ParsingTreeBuilder builder;
+				Parse(state, builder, errors);
 
 				Ptr<ParsingTreeNode> node=builder.GetNode();
 				if(!node)
@@ -1764,7 +1770,7 @@ ParsingAutoRecoverParser
 
 			ParsingAutoRecoverParser::ParsingAutoRecoverParser(Ptr<ParsingTable> _table)
 				:ParsingStrictParser(_table)
-				,recoverFutures(65536)
+				,recoverFutures(1024)
 				,recoveringFutureIndex(-1)
 			{
 			}
@@ -2322,6 +2328,141 @@ ParsingAutoRecoverAmbiguousParser
 }
 
 /***********************************************************************
+反射
+***********************************************************************/
+
+#ifndef VCZH_DEBUG_NO_REFLECTION
+
+
+namespace vl
+{
+	namespace reflection
+	{
+		namespace description
+		{
+			using namespace parsing;
+
+			PARSINGREFLECTION_TYPELIST(IMPL_TYPE_INFO)
+
+/***********************************************************************
+Type Declaration
+***********************************************************************/
+
+#define _ ,
+
+			BEGIN_STRUCT_MEMBER(ParsingTextPos)
+				STRUCT_MEMBER(index)
+				STRUCT_MEMBER(row)
+				STRUCT_MEMBER(column)
+			END_STRUCT_MEMBER(ParsingTextPos)
+
+			BEGIN_STRUCT_MEMBER(ParsingTextRange)
+				STRUCT_MEMBER(start)
+				STRUCT_MEMBER(end)
+			END_STRUCT_MEMBER(ParsingTextRange)
+
+			BEGIN_CLASS_MEMBER(ParsingTreeNode)
+				CLASS_MEMBER_PROPERTY_FAST(CodeRange)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Parent)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(SubNodes)
+
+				CLASS_MEMBER_METHOD(Clone, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(InitializeQueryCache, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(ClearQueryCache, NO_PARAMETER)
+				CLASS_MEMBER_METHOD_OVERLOAD(FindSubNode, {L"position"}, ParsingTreeNode*(ParsingTreeNode::*)(const ParsingTextPos&))
+				CLASS_MEMBER_METHOD_OVERLOAD(FindSubNode, {L"range"}, ParsingTreeNode*(ParsingTreeNode::*)(const ParsingTextRange&))
+				CLASS_MEMBER_METHOD_OVERLOAD(FindDeepestNode, {L"position"}, ParsingTreeNode*(ParsingTreeNode::*)(const ParsingTextPos&))
+				CLASS_MEMBER_METHOD_OVERLOAD(FindDeepestNode, {L"range"}, ParsingTreeNode*(ParsingTreeNode::*)(const ParsingTextRange&))
+			END_CLASS_MEMBER(ParsingTreeNode)
+
+			BEGIN_CLASS_MEMBER(ParsingTreeToken)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<ParsingTreeToken>(const WString&, vint), {L"value" _ L"tokenIndex"})
+
+				CLASS_MEMBER_PROPERTY_FAST(TokenIndex)
+				CLASS_MEMBER_PROPERTY_FAST(Value)
+			END_CLASS_MEMBER(ParsingTreeToken)
+
+			BEGIN_CLASS_MEMBER(ParsingTreeObject)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<ParsingTreeObject>(const WString&), {L"type"})
+
+				CLASS_MEMBER_PROPERTY_FAST(Type)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Members)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(MemberNames)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(CreatorRules)
+
+				CLASS_MEMBER_METHOD(GetMember, {L"name"})
+				CLASS_MEMBER_METHOD(SetMember, {L"name" _ L"node"})
+			END_CLASS_MEMBER(ParsingTreeObject)
+
+			BEGIN_CLASS_MEMBER(ParsingTreeArray)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<ParsingTreeObject>(const WString&), {L"elementType"})
+
+				CLASS_MEMBER_PROPERTY_FAST(ElementType)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Items)
+
+				CLASS_MEMBER_METHOD(GetItem, {L"index"})
+				CLASS_MEMBER_METHOD(SetItem, {L"index" _ L"node"})
+				CLASS_MEMBER_METHOD(AddItem, {L"node"})
+				CLASS_MEMBER_METHOD(InsertItem, {L"index" _ L"node"})
+				CLASS_MEMBER_METHOD_OVERLOAD(RemoveItem, {L"index"}, bool(ParsingTreeArray::*)(vint))
+				CLASS_MEMBER_METHOD_OVERLOAD(RemoveItem, {L"node"}, bool(ParsingTreeArray::*)(ParsingTreeNode*))
+				CLASS_MEMBER_METHOD(IndexOfItem, {L"node"})
+				CLASS_MEMBER_METHOD(ContainsItem, {L"node"})
+				CLASS_MEMBER_METHOD(Clone, NO_PARAMETER)
+
+				CLASS_MEMBER_METHOD_RENAME(GetCount, Count, NO_PARAMETER)
+				CLASS_MEMBER_PROPERTY_READONLY(Count, GetCount)
+			END_CLASS_MEMBER(ParsingTreeArray)
+#undef _
+		}
+	}
+}
+
+#endif
+
+namespace vl
+{
+	namespace reflection
+	{
+		namespace description
+		{
+
+/***********************************************************************
+Type Loader
+***********************************************************************/
+			
+#ifndef VCZH_DEBUG_NO_REFLECTION
+			class ParsingTypeLoader : public Object, public ITypeLoader
+			{
+			public:
+				void Load(ITypeManager* manager)
+				{
+					PARSINGREFLECTION_TYPELIST(ADD_TYPE_INFO)
+				}
+
+				void Unload(ITypeManager* manager)
+				{
+				}
+			};
+#endif
+
+			bool LoadParsingTypes()
+			{
+#ifndef VCZH_DEBUG_NO_REFLECTION
+				ITypeManager* manager=GetGlobalTypeManager();
+				if(manager)
+				{
+					Ptr<ITypeLoader> loader=new ParsingTypeLoader;
+					return manager->AddTypeLoader(loader);
+				}
+#endif
+				return false;
+			}
+		}
+	}
+}
+
+/***********************************************************************
 Parsing\ParsingAnalyzer.cpp
 ***********************************************************************/
 
@@ -2595,6 +2736,7 @@ ParsingSymbolManager
 					if(TryAddSubSymbol(symbol, parentType?parentType:globalSymbol))
 					{
 						symbolClassDefinitionCache.Add(symbol, classDef);
+						classDefinitionSymbolCache.Add(classDef, symbol);
 						return symbol;
 					}
 				}
@@ -2667,6 +2809,12 @@ ParsingSymbolManager
 			{
 				vint index=symbolClassDefinitionCache.Keys().IndexOf(type);
 				return index==-1?0:symbolClassDefinitionCache.Values().Get(index);
+			}
+
+			ParsingSymbol* ParsingSymbolManager::CacheGetClassType(ClassDefinition* type)
+			{
+				vint index=classDefinitionSymbolCache.Keys().IndexOf(type);
+				return index==-1?0:classDefinitionSymbolCache.Values().Get(index);
 			}
 
 			ParsingSymbol* ParsingSymbolManager::CacheGetType(definitions::ParsingDefinitionType* type, ParsingSymbol* scope)
@@ -3596,49 +3744,64 @@ ResolveRuleSymbols
 ResolveSymbols
 ***********************************************************************/
 
+			void ResolveTypeSymbols(Ptr<ParsingDefinitionTypeDefinition> type, ParsingSymbolManager* manager, ParsingSymbol* scope, collections::List<Ptr<ParsingError>>& errors)
+			{
+				if(Ptr<ParsingDefinitionClassDefinition> node=type.Cast<ParsingDefinitionClassDefinition>())
+				{
+					if(node->ambiguousType)
+					{
+						ParsingSymbol* ambigiousType=FindType(node->ambiguousType.Obj(), manager, scope, errors);
+						WString ambiguousTypeText=TypeToString(node->ambiguousType.Obj());
+						if(!ambigiousType)
+						{
+							errors.Add(new ParsingError(node.Obj(), L"Ambiguous type \""+ambiguousTypeText+L"\" for type \""+node->name+L"\" does not exist."));
+						}
+						else if(ambigiousType->GetType()!=ParsingSymbol::ClassType)
+						{
+							errors.Add(new ParsingError(node.Obj(), L"Ambiguous type \""+ambiguousTypeText+L"\" for type \""+node->name+L"\" is not a type."));
+						}
+						else if(ambigiousType->GetDescriptorSymbol()!=manager->GetGlobal()->GetSubSymbolByName(node->name))
+						{
+							errors.Add(new ParsingError(node.Obj(), L"Ambiguous type \""+ambiguousTypeText+L"\" for type \""+node->name+L"\" does not inherit from \""+node->name+L"\"."));
+						}
+						else
+						{
+							bool correct=false;
+							if(ambigiousType->GetSubSymbolCount()==1)
+							{
+								ParsingSymbol* field=ambigiousType->GetSubSymbol(0);
+								if(field->GetName()==L"items" && field->GetType()==ParsingSymbol::ClassField)
+								{
+									ParsingSymbol* fieldType=field->GetDescriptorSymbol();
+									if(fieldType->GetType()==ParsingSymbol::ArrayType && fieldType->GetDescriptorSymbol()==ambigiousType->GetDescriptorSymbol())
+									{
+										correct=true;
+									}
+								}
+							}
+							if(!correct)
+							{
+								errors.Add(new ParsingError(node.Obj(), L"Ambiguous type \""+ambiguousTypeText+L"\" for type \""+node->name+L"\" can only contains one field called \"item\" which should be an array of \""+node->name+L"\"."));
+							}
+						}
+					}
+
+					ParsingSymbol* classType=manager->CacheGetClassType(node.Obj());
+					if(classType)
+					{
+						FOREACH(Ptr<ParsingDefinitionTypeDefinition>, subType, node->subTypes)
+						{
+							ResolveTypeSymbols(subType, manager, classType, errors);
+						}
+					}
+				}
+			}
+
 			void ResolveSymbols(Ptr<definitions::ParsingDefinition> definition, ParsingSymbolManager* manager, collections::List<Ptr<ParsingError>>& errors)
 			{
 				FOREACH(Ptr<ParsingDefinitionTypeDefinition>, type, definition->types)
 				{
-					if(Ptr<ParsingDefinitionClassDefinition> node=type.Cast<ParsingDefinitionClassDefinition>())
-					{
-						if(node->ambiguousType!=L"")
-						{
-							ParsingSymbol* ambigiousType=manager->GetGlobal()->GetSubSymbolByName(node->ambiguousType);
-							if(!ambigiousType)
-							{
-								errors.Add(new ParsingError(node.Obj(), L"Ambiguous type \""+node->ambiguousType+L"\" for type \""+node->name+L"\" does not exist."));
-							}
-							else if(ambigiousType->GetType()!=ParsingSymbol::ClassType)
-							{
-								errors.Add(new ParsingError(node.Obj(), L"Ambiguous type \""+node->ambiguousType+L"\" for type \""+node->name+L"\" is not a type."));
-							}
-							else if(ambigiousType->GetDescriptorSymbol()!=manager->GetGlobal()->GetSubSymbolByName(node->name))
-							{
-								errors.Add(new ParsingError(node.Obj(), L"Ambiguous type \""+node->ambiguousType+L"\" for type \""+node->name+L"\" does not inherit from \""+node->name+L"\"."));
-							}
-							else
-							{
-								bool correct=false;
-								if(ambigiousType->GetSubSymbolCount()==1)
-								{
-									ParsingSymbol* field=ambigiousType->GetSubSymbol(0);
-									if(field->GetName()==L"items" && field->GetType()==ParsingSymbol::ClassField)
-									{
-										ParsingSymbol* fieldType=field->GetDescriptorSymbol();
-										if(fieldType->GetType()==ParsingSymbol::ArrayType && fieldType->GetDescriptorSymbol()==ambigiousType->GetDescriptorSymbol())
-										{
-											correct=true;
-										}
-									}
-								}
-								if(!correct)
-								{
-									errors.Add(new ParsingError(node.Obj(), L"Ambiguous type \""+node->ambiguousType+L"\" for type \""+node->name+L"\" can only contains one field called \"item\" which should be an array of \""+node->name+L"\"."));
-								}
-							}
-						}
-					}
+					ResolveTypeSymbols(type, manager, manager->GetGlobal(), errors);
 				}
 
 				FOREACH(Ptr<ParsingDefinitionRuleDefinition>, rule, definition->rules)
@@ -4686,17 +4849,13 @@ GenerateTable
 					
 					if(Ptr<ParsingDefinitionPrimitiveType> classType=rule->type.Cast<ParsingDefinitionPrimitiveType>())
 					{
-						FOREACH(Ptr<ParsingDefinitionTypeDefinition>, typeDef, definition->types)
+						ParsingSymbol* ruleSymbol=manager->GetGlobal()->GetSubSymbolByName(rule->name);
+						ParsingSymbol* ruleType=ruleSymbol->GetDescriptorSymbol();
+						ParsingDefinitionClassDefinition* ruleTypeDef=manager->CacheGetClassDefinition(ruleType);
+						if(ruleTypeDef && ruleTypeDef->ambiguousType)
 						{
-							if(typeDef->name==classType->name)
-							{
-								Ptr<ParsingDefinitionClassDefinition> classDef=typeDef.Cast<ParsingDefinitionClassDefinition>();
-								if(classDef->ambiguousType!=L"")
-								{
-									info.ambiguousType=classDef->ambiguousType;
-									break;
-								}
-							}
+							ParsingSymbol* ambiguousType=manager->CacheGetType(ruleTypeDef->ambiguousType.Obj(), ruleType->GetParentSymbol());
+							info.ambiguousType=GetTypeFullName(ambiguousType);
 						}
 					}
 					table->SetRuleInfo(i, info);
@@ -5793,9 +5952,9 @@ ParsingDefinitionClassDefinitionWriter
 				currentDefinition=definition;
 			}
 
-			ParsingDefinitionClassDefinitionWriter& ParsingDefinitionClassDefinitionWriter::AmbiguousType(const WString& ambiguousType)
+			ParsingDefinitionClassDefinitionWriter& ParsingDefinitionClassDefinitionWriter::AmbiguousType(const ParsingDefinitionTypeWriter& ambiguousType)
 			{
-				definition->ambiguousType=ambiguousType;
+				definition->ambiguousType=ambiguousType.Type();
 				return *this;
 			}
 
@@ -6113,7 +6272,7 @@ namespace vl
 						Class(L"PrimitiveTypeObj", Type(L"TypeObj"))
 							.Member(L"name", TokenType())
 								.Attribute(Attribute(L"SemanticColor").Argument(L"Type"))
-								.Attribute(Attribute(L"AutoComplete").Argument(L"Type"))
+								.Attribute(Attribute(L"AutoCompleteType").Argument(L"Type"))
 						)
 
 					.Type(
@@ -6125,7 +6284,7 @@ namespace vl
 							.Member(L"parentType", Type(L"TypeObj"))
 							.Member(L"name", TokenType())
 								.Attribute(Attribute(L"SemanticColor").Argument(L"Type"))
-								.Attribute(Attribute(L"AutoComplete").Argument(L"SubType"))
+								.Attribute(Attribute(L"AutoCompleteType").Argument(L"SubType"))
 						)
 
 					.Type(
@@ -6148,8 +6307,7 @@ namespace vl
 
 					.Type(
 						Class(L"ClassTypeDef", Type(L"TypeDef"))								
-							.Member(L"ambiguousType", TokenType())
-								.Attribute(Attribute(L"AutoComplete").Argument(L"Type"))
+							.Member(L"ambiguousType", Type(L"TypeObj"))
 							.Member(L"parentType", Type(L"TypeObj"))
 							.Member(L"members", Type(L"ClassMemberDef").Array())
 							.Member(L"subTypes", Type(L"TypeDef").Array())
@@ -6173,13 +6331,13 @@ namespace vl
 						Class(L"PrimitiveGrammarDef", Type(L"GrammarDef"))
 							.Member(L"name", TokenType())
 								.Attribute(Attribute(L"SemanticColor").Argument(L"Grammar"))
-								.Attribute(Attribute(L"AutoComplete").Argument(L"Grammar"))
+								.Attribute(Attribute(L"AutoCompleteType").Argument(L"Grammar"))
 						)
 
 					.Type(
 						Class(L"TextGrammarDef", Type(L"GrammarDef"))
 							.Member(L"text", TokenType())
-								.Attribute(Attribute(L"AutoComplete").Argument(L"Text"))
+								.Attribute(Attribute(L"AutoCompleteType").Argument(L"Text"))
 						)
 
 					.Type(
@@ -6214,7 +6372,7 @@ namespace vl
 						Class(L"AssignGrammarDef", Type(L"GrammarDef"))
 							.Member(L"grammar", Type(L"GrammarDef"))
 							.Member(L"memberName", TokenType())
-								.Attribute(Attribute(L"AutoComplete").Argument(L"Field"))
+								.Attribute(Attribute(L"AutoCompleteType").Argument(L"Field"))
 						)
 
 					.Type(
@@ -6226,9 +6384,9 @@ namespace vl
 						Class(L"SetterGrammarDef", Type(L"GrammarDef"))
 							.Member(L"grammar", Type(L"GrammarDef"))
 							.Member(L"memberName", TokenType())
-								.Attribute(Attribute(L"AutoComplete").Argument(L"EnumField"))
+								.Attribute(Attribute(L"AutoCompleteType").Argument(L"EnumField"))
 							.Member(L"value", TokenType())
-								.Attribute(Attribute(L"AutoComplete").Argument(L"EnumValue"))
+								.Attribute(Attribute(L"AutoCompleteType").Argument(L"EnumValue"))
 						)
 					//-------------------------------------
 					.Type(
@@ -6259,27 +6417,35 @@ namespace vl
 					//-------------------------------------
 					.TokenAtt(L"CLASS",		L"class")
 						.Attribute(Attribute(L"Color").Argument(L"Keyword"))
+						.Attribute(Attribute(L"AutoCompleteCandidate"))
 						.EndToken()
 					.TokenAtt(L"AMBIGUOUS",	L"ambiguous")
 						.Attribute(Attribute(L"Color").Argument(L"Keyword"))
+						.Attribute(Attribute(L"AutoCompleteCandidate"))
 						.EndToken()
 					.TokenAtt(L"ENUM",			L"enum")
 						.Attribute(Attribute(L"Color").Argument(L"Keyword"))
+						.Attribute(Attribute(L"AutoCompleteCandidate"))
 						.EndToken()
 					.TokenAtt(L"TOKEN",		L"token")
 						.Attribute(Attribute(L"Color").Argument(L"Keyword"))
+						.Attribute(Attribute(L"AutoCompleteCandidate"))
 						.EndToken()
 					.TokenAtt(L"DISCARDTOKEN",	L"discardtoken")
 						.Attribute(Attribute(L"Color").Argument(L"Keyword"))
+						.Attribute(Attribute(L"AutoCompleteCandidate"))
 						.EndToken()
 					.TokenAtt(L"RULE",			L"rule")
 						.Attribute(Attribute(L"Color").Argument(L"Keyword"))
+						.Attribute(Attribute(L"AutoCompleteCandidate"))
 						.EndToken()
 					.TokenAtt(L"AS",			L"as")
 						.Attribute(Attribute(L"Color").Argument(L"Keyword"))
+						.Attribute(Attribute(L"AutoCompleteCandidate"))
 						.EndToken()
 					.TokenAtt(L"WITH",			L"with")
 						.Attribute(Attribute(L"Color").Argument(L"Keyword"))
+						.Attribute(Attribute(L"AutoCompleteCandidate"))
 						.EndToken()
 
 					.Token(L"OPEN",			L"/{")
@@ -6301,9 +6467,11 @@ namespace vl
 
 					.TokenAtt(L"NAME",			L"[a-zA-Z_]/w*")
 						.Attribute(Attribute(L"ContextColor").Argument(L"Default"))
+						.Attribute(Attribute(L"AutoCompleteToken"))
 						.EndToken()
 					.TokenAtt(L"STRING",		L"\"([^\"]|\"\")*\"")
 						.Attribute(Attribute(L"Color").Argument(L"String"))
+						.Attribute(Attribute(L"AutoCompleteToken"))
 						.EndToken()
 					.Discard(L"SPACE",		L"/s+")
 					//-------------------------------------
@@ -6370,7 +6538,7 @@ namespace vl
 						.Imply(
 							(
 								Text(L"class") + Rule(L"NAME")[L"name"]
-								+ Opt(Text(L"ambiguous") + Text(L"(") + Rule(L"NAME")[L"ambiguousType"] + Text(L")"))
+								+ Opt(Text(L"ambiguous") + Text(L"(") + Rule(L"Type")[L"ambiguousType"] + Text(L")"))
 								+ Opt(Text(L":") + Rule(L"Type")[L"parentType"])
 								+ Opt(Rule(L"Attribute")[L"attributes"] + *(Text(L",") + Rule(L"Attribute")[L"attributes"]))
 								+ Text(L"{")
@@ -6644,7 +6812,7 @@ namespace vl
 				{
 					Ptr<ParsingDefinitionClassDefinition> target=new ParsingDefinitionClassDefinition;
 					SetArray(target->attributes, node->GetMember(L"attributes"));
-					SetName(target->ambiguousType, node->GetMember(L"ambiguousType"));
+					SetMember(target->ambiguousType, node->GetMember(L"ambiguousType"));
 					SetMember(target->parentType, node->GetMember(L"parentType"));
 					SetName(target->name, node->GetMember(L"name"));
 					SetArray(target->members, node->GetMember(L"members"));
@@ -6933,10 +7101,10 @@ Logger (ParsingDefinitionTypeDefinition)
 					writer.WriteString(prefix);
 					writer.WriteString(L"class ");
 					writer.WriteString(node->name);
-					if(node->ambiguousType!=L"")
+					if(node->ambiguousType)
 					{
 						writer.WriteString(L" ambiguous(");
-						writer.WriteString(node->ambiguousType);
+						Log(node->ambiguousType.Obj(), writer);
 						writer.WriteString(L")");
 					}
 					if(node->parentType)
@@ -8793,7 +8961,7 @@ ParsingTreeBuilder
 				return processingAmbiguityBranch;
 			}
 
-			Ptr<ParsingTreeObject> ParsingTreeBuilder::GetNode()
+			Ptr<ParsingTreeObject> ParsingTreeBuilder::GetNode()const
 			{
 				if(nodeStack.Count()==0)
 				{
@@ -8803,6 +8971,89 @@ ParsingTreeBuilder
 				{
 					return 0;
 				}
+			}
+
+/***********************************************************************
+ParsingTransitionCollector
+***********************************************************************/
+
+			ParsingTransitionCollector::ParsingTransitionCollector()
+				:ambiguityBegin(-1)
+			{
+			}
+
+			ParsingTransitionCollector::~ParsingTransitionCollector()
+			{
+			}
+
+			void ParsingTransitionCollector::Reset()
+			{
+				ambiguityBegin=-1;
+				transitions.Clear();
+				ambiguityBeginToEnds.Clear();
+				ambiguityBeginToBranches.Clear();
+				ambiguityBranchToBegins.Clear();
+			}
+
+			bool ParsingTransitionCollector::Run(const ParsingState::TransitionResult& result)
+			{
+				vint index=transitions.Count();
+				switch(result.transitionType)
+				{
+				case ParsingState::TransitionResult::AmbiguityBegin:
+					if(ambiguityBegin!=-1) return false;
+					ambiguityBegin=index;
+					break;
+				case ParsingState::TransitionResult::AmbiguityBranch:
+					{
+						if(ambiguityBegin==-1) return false;
+						ambiguityBeginToBranches.Add(ambiguityBegin, index);
+						ambiguityBranchToBegins.Add(index, ambiguityBegin);
+					}
+					break;
+				case ParsingState::TransitionResult::AmbiguityEnd:
+					{
+						if(ambiguityBegin==-1) return false;
+						ambiguityBeginToEnds.Add(ambiguityBegin, index);
+						ambiguityBegin=-1;
+					}
+					break;
+				case ParsingState::TransitionResult::ExecuteInstructions:
+					break;
+				default:
+					return false;
+				}
+
+				transitions.Add(result);
+				return true;
+			}
+
+			bool ParsingTransitionCollector::GetProcessingAmbiguityBranch()
+			{
+				return ambiguityBegin!=-1;
+			}
+
+			const ParsingTransitionCollector::TransitionResultList& ParsingTransitionCollector::GetTransitions()const
+			{
+				return transitions;
+			}
+
+			vint ParsingTransitionCollector::GetAmbiguityEndFromBegin(vint transitionIndex)const
+			{
+				vint index=ambiguityBeginToEnds.Keys().IndexOf(transitionIndex);
+				return index==-1?-1:ambiguityBeginToEnds.Values()[index];
+			}
+
+			const collections::List<vint>& ParsingTransitionCollector::GetAmbiguityBranchesFromBegin(vint transitionIndex)const
+			{
+				vint index=ambiguityBeginToBranches.Keys().IndexOf(transitionIndex);
+				return index==-1?*(collections::List<vint>*)0:ambiguityBeginToBranches.GetByIndex(index);
+			}
+
+			vint ParsingTransitionCollector::GetAmbiguityBeginFromBranch(vint transitionIndex)const
+			{
+				vint index=ambiguityBranchToBegins.Keys().IndexOf(transitionIndex);
+				return index==-1?-1:ambiguityBranchToBegins.Values()[index];
 			}
 		}
 	}
@@ -9425,17 +9676,22 @@ ParsingTreeNode
 				{
 					vint selected=(start+end)/2;
 					ParsingTreeNode* selectedNode=cachedOrderedSubNodes[selected].Obj();
-					if(range.end<selectedNode->codeRange.start)
+					const ParsingTextRange& selectedRange=selectedNode->codeRange;
+					if(range.end<selectedRange.start)
 					{
 						end=selected-1;
 					}
-					else if(range.start>selectedNode->codeRange.end)
+					else if(range.start>selectedRange.end)
 					{
 						start=selected+1;
 					}
-					else
+					else if(selectedRange.start<=range.start && range.end<=selectedRange.end)
 					{
 						return selectedNode;
+					}
+					else
+					{
+						return this;
 					}
 				}
 			}
@@ -9796,6 +10052,202 @@ ParsingError
 
 		ParsingError::~ParsingError()
 		{
+		}
+
+/***********************************************************************
+ParsingScope
+***********************************************************************/
+
+		const ParsingScope::SymbolList ParsingScope::emptySymbolList;
+
+		ParsingScope::ParsingScope(ParsingScopeSymbol* _ownerSymbol)
+			:ownerSymbol(_ownerSymbol)
+		{
+		}
+
+		ParsingScope::~ParsingScope()
+		{
+		}
+
+		ParsingScopeSymbol* ParsingScope::GetOwnerSymbol()
+		{
+			return ownerSymbol;
+		}
+
+		bool ParsingScope::AddSymbol(Ptr<ParsingScopeSymbol> value)
+		{
+			if(!value) return false;
+			if(value->parentScope) return false;
+			symbols.Add(value->GetName(), value);
+			value->parentScope=this;
+			return true;
+		}
+
+		bool ParsingScope::RemoveSymbol(Ptr<ParsingScopeSymbol> value)
+		{
+			if(!value) return false;
+			if(value->parentScope!=this) return false;
+			vint index=symbols.Keys().IndexOf(value->GetName());
+			if(index==-1) return false;
+			const SymbolList& values=symbols.GetByIndex(index);
+			index=values.IndexOf(value.Obj());
+			if(index==-1) return false;
+			symbols.Remove(value->GetName(), value.Obj());
+			value->parentScope=0;
+			return true;
+		}
+
+		const ParsingScope::SymbolKeyList& ParsingScope::GetSymbolNames()
+		{
+			return symbols.Keys();
+		}
+
+		const ParsingScope::SymbolList& ParsingScope::GetSymbols(const WString& name)
+		{
+			vint index=symbols.Keys().IndexOf(name);
+			return index==-1
+				?emptySymbolList
+				:symbols.GetByIndex(index);
+		}
+
+		const ParsingScope::SymbolList& ParsingScope::GetSymbolsRecursively(const WString& name)
+		{
+			ParsingScope* scope=this;
+			while(scope)
+			{
+				const SymbolList& symbols=scope->GetSymbols(name);
+				if(symbols.Count()>0) return symbols;
+
+				if(scope->ownerSymbol)
+				{
+					scope=scope->ownerSymbol->GetParentScope();
+				}
+				else
+				{
+					break;
+				}
+			}
+			return emptySymbolList;
+		}
+
+/***********************************************************************
+ParsingScopeSymbol
+***********************************************************************/
+
+		ParsingScopeSymbol::ParsingScopeSymbol(const WString& _name)
+			:parentScope(0)
+			,name(_name)
+		{
+		}
+
+		ParsingScopeSymbol::~ParsingScopeSymbol()
+		{
+		}
+
+		ParsingScope* ParsingScopeSymbol::GetParentScope()
+		{
+			return parentScope;
+		}
+
+		const WString& ParsingScopeSymbol::GetName()
+		{
+			return name;
+		}
+
+		ParsingTreeObject* ParsingScopeSymbol::GetNode()
+		{
+			return node;
+		}
+
+		void ParsingScopeSymbol::SetNode(ParsingTreeObject* value)
+		{
+			node=value;
+		}
+
+		bool ParsingScopeSymbol::CreateScope()
+		{
+			if(scope) return false;
+			scope=new ParsingScope(this);
+			return true;
+		}
+
+		bool ParsingScopeSymbol::DestroyScope()
+		{
+			if(!scope) return false;
+			scope=0;
+			return true;
+		}
+
+		ParsingScope* ParsingScopeSymbol::GetScope()
+		{
+			return scope.Obj();
+		}
+
+/***********************************************************************
+ParsingScopeRoot
+***********************************************************************/
+
+		void ParsingScopeRoot::InitializeQueryCacheInternal(ParsingScopeSymbol* symbol)
+		{
+			if(symbol->GetNode())
+			{
+				nodeSymbols.Add(symbol->GetNode(), symbol);
+			}
+			if(symbol->GetScope())
+			{
+				ParsingScope* scope=symbol->GetScope();
+				FOREACH(WString, name, scope->GetSymbolNames())
+				{
+					FOREACH(Ptr<ParsingScopeSymbol>, subSymbol, scope->GetSymbols(name))
+					{
+						InitializeQueryCacheInternal(subSymbol.Obj());
+					}
+				}
+			}
+		}
+
+		ParsingScopeRoot::ParsingScopeRoot()
+			:ParsingScopeSymbol(L"")
+		{
+		}
+
+		ParsingScopeRoot::~ParsingScopeRoot()
+		{
+		}
+
+		void ParsingScopeRoot::InitializeQueryCache()
+		{
+			ClearQueryCache();
+			InitializeQueryCacheInternal(this);
+		}
+
+		void ParsingScopeRoot::ClearQueryCache()
+		{
+			nodeSymbols.Clear();
+		}
+
+		ParsingScopeSymbol* ParsingScopeRoot::GetSymbolFromNode(ParsingTreeObject* node)
+		{
+			vint index=nodeSymbols.Keys().IndexOf(node);
+			return index==-1?0:nodeSymbols.Values()[index];
+		}
+
+		ParsingScope* ParsingScopeRoot::GetScopeFromNode(ParsingTreeNode* node)
+		{
+			while(node)
+			{
+				ParsingTreeObject* obj=dynamic_cast<ParsingTreeObject*>(node);
+				if(obj)
+				{
+					ParsingScopeSymbol* symbol=GetSymbolFromNode(obj);
+					if(symbol && symbol->GetScope())
+					{
+						return symbol->GetScope();
+					}
+				}
+				node=node->GetParent();
+			}
+			return 0;
 		}
 	}
 }
@@ -13699,6 +14151,23 @@ RegexLexerWalker
 			return state;
 		}
 
+		bool RegexLexerWalker::IsClosedToken(const wchar_t* input, vint length)const
+		{
+			vint state=pure->GetStartState();
+			for(vint i=0;i<length;i++)
+			{
+				state=pure->Transit(input[i], state);
+				if(state==-1) return true;
+				if(pure->IsDeadState(state)) return true;
+			}
+			return false;
+		}
+
+		bool RegexLexerWalker::IsClosedToken(const WString& input)const
+		{
+			return IsClosedToken(input.Buffer(), input.Length());
+		}
+
 /***********************************************************************
 RegexLexerColorizer
 ***********************************************************************/
@@ -16145,6 +16614,19 @@ PureInterpretor
 		bool PureInterpretor::IsFinalState(vint state)
 		{
 			return 0<=state && state<stateCount && finalState[state];
+		}
+
+		bool PureInterpretor::IsDeadState(vint state)
+		{
+			if(state==-1) return true;
+			for(vint i=0;i<charSetCount;i++)
+			{
+				if(transition[state][i]!=-1)
+				{
+					return false;
+				}
+			}
+			return true;
 		}
 
 		void PureInterpretor::PrepareForRelatedFinalStateTable()
@@ -19708,6 +20190,29 @@ Thread
 			{
 			}
 		};
+
+		class LambdaThread : public Thread
+		{
+		private:
+			Func<void()>				procedure;
+			bool						deleteAfterStopped;
+
+		protected:
+			void Run()
+			{
+				procedure();
+				if(deleteAfterStopped)
+				{
+					delete this;
+				}
+			}
+		public:
+			LambdaThread(const Func<void()>& _procedure, bool _deleteAfterStopped)
+				:procedure(_procedure)
+				,deleteAfterStopped(_deleteAfterStopped)
+			{
+			}
+		};
 	}
 
 	void InternalThreadProc(Thread* thread)
@@ -19750,6 +20255,20 @@ Thread
 			{
 				delete thread;
 			}
+		}
+		return 0;
+	}
+
+	Thread* Thread::CreateAndStart(const Func<void()>& procedure, bool deleteAfterStopped)
+	{
+		Thread* thread=new LambdaThread(procedure, deleteAfterStopped);
+		if(thread->Start())
+		{
+			return thread;
+		}
+		else
+		{
+			delete thread;
 		}
 		return 0;
 	}
@@ -20075,17 +20594,15 @@ ThreadPoolLite
 
 		DWORD WINAPI ThreadPoolQueueProc(void* argument)
 		{
-			ThreadPoolQueueProcArgument* proc=(ThreadPoolQueueProcArgument*)argument;
+			Ptr<ThreadPoolQueueProcArgument> proc=(ThreadPoolQueueProcArgument*)argument;
 			proc->proc(proc->argument);
-			delete proc;
 			return 0;
 		}
 
 		DWORD WINAPI ThreadPoolQueueFunc(void* argument)
 		{
-			Func<void()>* proc=(Func<void()>*)argument;
-			(*proc)();
-			delete proc;
+			Ptr<Func<void()>> proc=(Func<void()>*)argument;
+			(*proc.Obj())();
 			return 0;
 		}
 
