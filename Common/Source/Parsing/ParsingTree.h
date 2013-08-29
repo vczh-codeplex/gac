@@ -376,6 +376,77 @@ namespace vl
 				return false;
 			}
 		};
+
+/***********************************************************************
+·ûºÅ±í
+***********************************************************************/
+
+		class ParsingScope;
+		class ParsingScopeSymbol;
+
+		class ParsingScope : public Object
+		{
+			typedef collections::SortedList<WString>							SymbolKeyList;
+			typedef collections::List<Ptr<ParsingScopeSymbol>>					SymbolList;
+			typedef collections::Group<WString, Ptr<ParsingScopeSymbol>>		SymbolGroup;
+
+			friend class ParsingScopeSymbol;
+		protected:
+			static const SymbolList					emptySymbolList;
+
+			ParsingScopeSymbol*						ownerSymbol;
+			SymbolGroup								symbols;
+
+		public:
+			ParsingScope(ParsingScopeSymbol* _ownerSymbol);
+			~ParsingScope();
+
+			ParsingScopeSymbol*						GetOwnerSymbol();
+			bool									AddSymbol(Ptr<ParsingScopeSymbol> value);
+			bool									RemoveSymbol(Ptr<ParsingScopeSymbol> value);
+			const SymbolKeyList&					GetSymbolNames();
+			const SymbolList&						GetSymbols(const WString& name);
+			const SymbolList&						GetSymbolsRecursively(const WString& name);
+		};
+
+		class ParsingScopeSymbol : public Object
+		{
+			friend class ParsingScope;
+		protected:
+			ParsingScope*							parentScope;
+			WString									name;
+			ParsingTreeObject*						node;
+			Ptr<ParsingScope>						scope;
+
+		public:
+			ParsingScopeSymbol(const WString& _name);
+			~ParsingScopeSymbol();
+
+			ParsingScope*							GetParentScope();
+			const WString&							GetName();
+			ParsingTreeObject*						GetNode();
+			void									SetNode(ParsingTreeObject* value);
+			bool									CreateScope();
+			bool									DestroyScope();
+			ParsingScope*							GetScope();
+		};
+
+		class ParsingScopeRoot : public ParsingScopeSymbol
+		{
+			typedef collections::Dictionary<ParsingTreeObject*, ParsingScopeSymbol*>			NodeSymbolMap;
+		protected:
+			NodeSymbolMap							nodeSymbols;
+
+			void									InitializeQueryCacheInternal(ParsingScopeSymbol* symbol);
+		public:
+			ParsingScopeRoot();
+			~ParsingScopeRoot();
+
+			void									InitializeQueryCache();
+			void									ClearQueryCache();
+			ParsingScopeSymbol*						GetSymbolFromNode(ParsingTreeObject* node);
+			ParsingScope*							GetScopeFromNode(ParsingTreeNode* node);
+		};
 	}
 }
 
