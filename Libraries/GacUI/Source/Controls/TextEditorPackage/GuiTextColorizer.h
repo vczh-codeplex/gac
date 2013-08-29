@@ -168,8 +168,6 @@ GuiGrammarColorizer
 					vint													semantic;
 					/// <summary>Output argument for the result color. Name-id mapping can be retrived using <see cref="GetTokenId"/>.</summary>
 					vint													token;
-					/// <summary>The semantic context of the node.</summary>
-					Ptr<Object>												semanticContext;
 				};
 			private:
 				collections::Dictionary<WString, ColorEntry>				colorSettings;
@@ -196,7 +194,8 @@ GuiGrammarColorizer
 
 				/// <summary>Called when a @SemanticColor attribute in a grammar is activated during colorizing to determine a color for the token.</summary>
 				/// <param name="context">Context for doing semantic colorizing.</param>
-				virtual void												OnSemanticColorize(SemanticColorizeContext& context);
+				/// <param name="input">The corressponding result from the <see cref="RepeatingParsingExecutor"/>.</param>
+				virtual void												OnSemanticColorize(SemanticColorizeContext& context, const RepeatingParsingOutput& input);
 
 				/// <summary>Call this function in the derived class's destructor when it overrided <see cref="OnSemanticColorize"/>.</summary>
 				void														EnsureColorizerFinished();
