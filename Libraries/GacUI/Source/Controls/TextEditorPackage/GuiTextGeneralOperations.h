@@ -21,18 +21,27 @@ namespace vl
 /***********************************************************************
 Common Operations
 ***********************************************************************/
-
+			
+			/// <summary>An text edit callback for text box controls.</summary>
 			class ICommonTextEditCallback : public virtual IDescriptable, public Description<ICommonTextEditCallback>
 			{
 			public:
+				/// <summary>Callback data for text editing.</summary>
 				struct TextEditNotifyStruct
 				{
+					/// <summary>The start position of the selection before replacing.</summary>
 					TextPos								originalStart;
+					/// <summary>The end position of the selection before replacing.</summary>
 					TextPos								originalEnd;
+					/// <summary>The text of the selection before replacing.</summary>
 					WString								originalText;
+					/// <summary>The start position of the selection after replacing.</summary>
 					TextPos								inputStart;
+					/// <summary>The end position of the selection after replacing</summary>
 					TextPos								inputEnd;
+					/// <summary>The text of the selection after replacing</summary>
 					WString								inputText;
+					/// <summary>The created edit version.</summary>
 					vuint								editVersion;
 
 					TextEditNotifyStruct()
@@ -40,13 +49,19 @@ Common Operations
 					{
 					}
 				};
-
+				
+				/// <summary>Callback data for text caret changing.</summary>
 				struct TextCaretChangedStruct
 				{
+					/// <summary>The start position of the selection before caret changing.</summary>
 					TextPos								oldBegin;
+					/// <summary>The end position of the selection before caret changing.</summary>
 					TextPos								oldEnd;
+					/// <summary>The start position of the selection after caret changing.</summary>
 					TextPos								newBegin;
+					/// <summary>The end position of the selection after caret changing.</summary>
 					TextPos								newEnd;
+					/// <summary>The current edit version.</summary>
 					vuint								editVersion;
 
 					TextCaretChangedStruct()
@@ -55,10 +70,21 @@ Common Operations
 					}
 				};
 
+				/// <summary>Called when the callback is attached to a text box control.</summary>
+				/// <param name="element">The element that used in the text box control.</param>
+				/// <param name="elementModifyLock">The lock that pretect the element.</param>
+				/// <param name="editVersion">The current edit version.</param>
 				virtual void							Attach(elements::GuiColorizedTextElement* element, SpinLock& elementModifyLock, vuint editVersion)=0;
+				/// <summary>Called when the callback is detached from a text box control.</summary>
 				virtual void							Detach()=0;
+				/// <summary>Called after the text is edited and before the caret is changed.</summary>
+				/// <param name="arguments">The data for this callback.</param>
 				virtual void							TextEditNotify(const TextEditNotifyStruct& arguments)=0;
+				/// <summary>Called after the caret is changed.</summary>
+				/// <param name="arguments">The data for this callback.</param>
 				virtual void							TextCaretChanged(const TextCaretChangedStruct& arguments)=0;
+				/// <summary>Called after the text is edited and after the caret is changed.</summary>
+				/// <param name="editVersion">The current edit version.</param>
 				virtual void							TextEditFinished(vuint editVersion)=0;
 			};
 

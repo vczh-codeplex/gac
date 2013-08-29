@@ -2393,27 +2393,28 @@ WindowsAsyncService::DelayItem
 
 			bool WindowsAsyncService::DelayItem::Delay(vint milliseconds)
 			{
-				SpinLock::Scope scope(service->taskListLock);
-				if(status==INativeDelay::Pending)
+				SPIN_LOCK(service->taskListLock)
 				{
-					executeTime=DateTime::LocalTime().Forward(milliseconds);
-					return true;
+					if(status==INativeDelay::Pending)
+					{
+						executeTime=DateTime::LocalTime().Forward(milliseconds);
+						return true;
+					}
 				}
-				else
-				{
-					return false;
-				}
+				return false;
 			}
 
 			bool WindowsAsyncService::DelayItem::Cancel()
 			{
-				SpinLock::Scope scope(service->taskListLock);
-				if(status==INativeDelay::Pending)
+				SPIN_LOCK(service->taskListLock)
 				{
-					if(service->delayItems.Remove(this))
+					if(status==INativeDelay::Pending)
 					{
-						status=INativeDelay::Canceled;
-						return true;
+						if(service->delayItems.Remove(this))
+						{
+							status=INativeDelay::Canceled;
+							return true;
+						}
 					}
 				}
 				return false;
@@ -2437,8 +2438,9 @@ WindowsAsyncService
 				DateTime now=DateTime::LocalTime();
 				Array<TaskItem> items;
 				List<Ptr<DelayItem>> executableDelayItems;
+
+				SPIN_LOCK(taskListLock)
 				{
-					SpinLock::Scope scope(taskListLock);
 					CopyFrom(items, taskItems);
 					taskItems.RemoveRange(0, items.Count());
 					for(vint i=delayItems.Count()-1;i>=0;i--)
@@ -2452,6 +2454,7 @@ WindowsAsyncService
 						}
 					}
 				}
+
 				FOREACH(TaskItem, item, items)
 				{
 					item.proc();
@@ -2490,20 +2493,24 @@ WindowsAsyncService
 
 			void WindowsAsyncService::InvokeInMainThread(const Func<void()>& proc)
 			{
-				SpinLock::Scope scope(taskListLock);
-				TaskItem item(0, proc);
-				taskItems.Add(item);
+				SPIN_LOCK(taskListLock)
+				{
+					TaskItem item(0, proc);
+					taskItems.Add(item);
+				}
 			}
 
 			bool WindowsAsyncService::InvokeInMainThreadAndWait(const Func<void()>& proc, vint milliseconds)
 			{
 				Semaphore semaphore;
 				semaphore.Create(0, 1);
+
+				SPIN_LOCK(taskListLock)
 				{
-					SpinLock::Scope scope(taskListLock);
 					TaskItem item(&semaphore, proc);
 					taskItems.Add(item);
 				}
+
 				if(milliseconds<0)
 				{
 					return semaphore.Wait();
@@ -2516,17 +2523,23 @@ WindowsAsyncService
 
 			Ptr<INativeDelay> WindowsAsyncService::DelayExecute(const Func<void()>& proc, vint milliseconds)
 			{
-				SpinLock::Scope scope(taskListLock);
-				Ptr<DelayItem> delay=new DelayItem(this, proc, false, milliseconds);
-				delayItems.Add(delay);
+				Ptr<DelayItem> delay;
+				SPIN_LOCK(taskListLock)
+				{
+					delay=new DelayItem(this, proc, false, milliseconds);
+					delayItems.Add(delay);
+				}
 				return delay;
 			}
 
 			Ptr<INativeDelay> WindowsAsyncService::DelayExecuteInMainThread(const Func<void()>& proc, vint milliseconds)
 			{
-				SpinLock::Scope scope(taskListLock);
-				Ptr<DelayItem> delay=new DelayItem(this, proc, true, milliseconds);
-				delayItems.Add(delay);
+				Ptr<DelayItem> delay;
+				SPIN_LOCK(taskListLock)
+				{
+					delay=new DelayItem(this, proc, true, milliseconds);
+					delayItems.Add(delay);
+				}
 				return delay;
 			}
 		}
