@@ -5,9 +5,9 @@
 #include "..\..\Source\Stream\CharFormat.h"
 #include "..\..\Source\Collections\Operation.h"
 
-#include <limits>
 
 using namespace vl;
+#include <limits>
 using namespace vl::collections;
 using namespace vl::reflection;
 using namespace vl::reflection::description;
@@ -601,7 +601,6 @@ namespace reflection_test
 	void TestReflectionEnum()
 	{
 		{
-
 			Value base=Value::Create(L"test::Base");
 			TEST_ASSERT(UnboxValue<Season>(base.GetProperty(L"season"))==Spring);
 
@@ -748,6 +747,28 @@ namespace reflection_test
 
 	void TestReflectionDictionary()
 	{
+		Value map=Value::Create(L"system::Dictionary");
+		map.Invoke(L"Set", (Value::xs(), 1, 1));
+		map.Invoke(L"Set", (Value::xs(), 2, 4));
+		map.Invoke(L"Set", (Value::xs(), 3, 9));
+
+		TEST_ASSERT(3==UnboxValue<vint>(map.GetProperty(L"Count")));
+		TEST_ASSERT(1==UnboxValue<vint>(map.GetProperty(L"Keys").Invoke(L"Get", (Value::xs(), 0))));
+		TEST_ASSERT(2==UnboxValue<vint>(map.GetProperty(L"Keys").Invoke(L"Get", (Value::xs(), 1))));
+		TEST_ASSERT(3==UnboxValue<vint>(map.GetProperty(L"Keys").Invoke(L"Get", (Value::xs(), 2))));
+		TEST_ASSERT(1==UnboxValue<vint>(map.GetProperty(L"Values").Invoke(L"Get", (Value::xs(), 0))));
+		TEST_ASSERT(4==UnboxValue<vint>(map.GetProperty(L"Values").Invoke(L"Get", (Value::xs(), 1))));
+		TEST_ASSERT(9==UnboxValue<vint>(map.GetProperty(L"Values").Invoke(L"Get", (Value::xs(), 2))));
+
+		map.Invoke(L"Remove", (Value::xs(), 2));
+		TEST_ASSERT(2==UnboxValue<vint>(map.GetProperty(L"Count")));
+		TEST_ASSERT(1==UnboxValue<vint>(map.GetProperty(L"Keys").Invoke(L"Get", (Value::xs(), 0))));
+		TEST_ASSERT(3==UnboxValue<vint>(map.GetProperty(L"Keys").Invoke(L"Get", (Value::xs(), 1))));
+		TEST_ASSERT(1==UnboxValue<vint>(map.GetProperty(L"Values").Invoke(L"Get", (Value::xs(), 0))));
+		TEST_ASSERT(9==UnboxValue<vint>(map.GetProperty(L"Values").Invoke(L"Get", (Value::xs(), 1))));
+
+		map.Invoke(L"Clear", Value::xs());
+		TEST_ASSERT(0==UnboxValue<vint>(map.GetProperty(L"Count")));
 	}
 
 	void TestSharedRawPtrConverting()
