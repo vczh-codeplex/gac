@@ -1,5 +1,6 @@
 #include "ParsingTree.h"
 #include "..\Collections\Operation.h"
+#include "..\Collections\OperationForEach.h"
 
 namespace vl
 {
@@ -595,6 +596,202 @@ ParsingError
 
 		ParsingError::~ParsingError()
 		{
+		}
+
+/***********************************************************************
+ParsingScope
+***********************************************************************/
+
+		const ParsingScope::SymbolList ParsingScope::emptySymbolList;
+
+		ParsingScope::ParsingScope(ParsingScopeSymbol* _ownerSymbol)
+			:ownerSymbol(_ownerSymbol)
+		{
+		}
+
+		ParsingScope::~ParsingScope()
+		{
+		}
+
+		ParsingScopeSymbol* ParsingScope::GetOwnerSymbol()
+		{
+			return ownerSymbol;
+		}
+
+		bool ParsingScope::AddSymbol(Ptr<ParsingScopeSymbol> value)
+		{
+			if(!value) return false;
+			if(value->parentScope) return false;
+			symbols.Add(value->GetName(), value);
+			value->parentScope=this;
+			return true;
+		}
+
+		bool ParsingScope::RemoveSymbol(Ptr<ParsingScopeSymbol> value)
+		{
+			if(!value) return false;
+			if(value->parentScope!=this) return false;
+			vint index=symbols.Keys().IndexOf(value->GetName());
+			if(index==-1) return false;
+			const SymbolList& values=symbols.GetByIndex(index);
+			index=values.IndexOf(value.Obj());
+			if(index==-1) return false;
+			symbols.Remove(value->GetName(), value.Obj());
+			value->parentScope=0;
+			return true;
+		}
+
+		const ParsingScope::SymbolKeyList& ParsingScope::GetSymbolNames()
+		{
+			return symbols.Keys();
+		}
+
+		const ParsingScope::SymbolList& ParsingScope::GetSymbols(const WString& name)
+		{
+			vint index=symbols.Keys().IndexOf(name);
+			return index==-1
+				?emptySymbolList
+				:symbols.GetByIndex(index);
+		}
+
+		const ParsingScope::SymbolList& ParsingScope::GetSymbolsRecursively(const WString& name)
+		{
+			ParsingScope* scope=this;
+			while(scope)
+			{
+				const SymbolList& symbols=scope->GetSymbols(name);
+				if(symbols.Count()>0) return symbols;
+
+				if(scope->ownerSymbol)
+				{
+					scope=scope->ownerSymbol->GetParentScope();
+				}
+				else
+				{
+					break;
+				}
+			}
+			return emptySymbolList;
+		}
+
+/***********************************************************************
+ParsingScopeSymbol
+***********************************************************************/
+
+		ParsingScopeSymbol::ParsingScopeSymbol(const WString& _name)
+			:parentScope(0)
+			,name(_name)
+		{
+		}
+
+		ParsingScopeSymbol::~ParsingScopeSymbol()
+		{
+		}
+
+		ParsingScope* ParsingScopeSymbol::GetParentScope()
+		{
+			return parentScope;
+		}
+
+		const WString& ParsingScopeSymbol::GetName()
+		{
+			return name;
+		}
+
+		ParsingTreeObject* ParsingScopeSymbol::GetNode()
+		{
+			return node;
+		}
+
+		void ParsingScopeSymbol::SetNode(ParsingTreeObject* value)
+		{
+			node=value;
+		}
+
+		bool ParsingScopeSymbol::CreateScope()
+		{
+			if(scope) return false;
+			scope=new ParsingScope(this);
+			return true;
+		}
+
+		bool ParsingScopeSymbol::DestroyScope()
+		{
+			if(!scope) return false;
+			scope=0;
+			return true;
+		}
+
+		ParsingScope* ParsingScopeSymbol::GetScope()
+		{
+			return scope.Obj();
+		}
+
+/***********************************************************************
+ParsingScopeRoot
+***********************************************************************/
+
+		void ParsingScopeRoot::InitializeQueryCacheInternal(ParsingScopeSymbol* symbol)
+		{
+			if(symbol->GetNode())
+			{
+				nodeSymbols.Add(symbol->GetNode(), symbol);
+			}
+			if(symbol->GetScope())
+			{
+				ParsingScope* scope=symbol->GetScope();
+				FOREACH(WString, name, scope->GetSymbolNames())
+				{
+					FOREACH(Ptr<ParsingScopeSymbol>, subSymbol, scope->GetSymbols(name))
+					{
+						InitializeQueryCacheInternal(subSymbol.Obj());
+					}
+				}
+			}
+		}
+
+		ParsingScopeRoot::ParsingScopeRoot()
+			:ParsingScopeSymbol(L"")
+		{
+		}
+
+		ParsingScopeRoot::~ParsingScopeRoot()
+		{
+		}
+
+		void ParsingScopeRoot::InitializeQueryCache()
+		{
+			ClearQueryCache();
+			InitializeQueryCacheInternal(this);
+		}
+
+		void ParsingScopeRoot::ClearQueryCache()
+		{
+			nodeSymbols.Clear();
+		}
+
+		ParsingScopeSymbol* ParsingScopeRoot::GetSymbolFromNode(ParsingTreeObject* node)
+		{
+			vint index=nodeSymbols.Keys().IndexOf(node);
+			return index==-1?0:nodeSymbols.Values()[index];
+		}
+
+		ParsingScope* ParsingScopeRoot::GetScopeFromNode(ParsingTreeNode* node)
+		{
+			while(node)
+			{
+				ParsingTreeObject* obj=dynamic_cast<ParsingTreeObject*>(node);
+				if(obj)
+				{
+					ParsingScopeSymbol* symbol=GetSymbolFromNode(obj);
+					if(symbol && symbol->GetScope())
+					{
+						return symbol->GetScope();
+					}
+				}
+				node=node->GetParent();
+			}
+			return 0;
 		}
 	}
 }
