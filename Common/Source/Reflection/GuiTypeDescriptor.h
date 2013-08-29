@@ -163,12 +163,18 @@ Value
 				Value(DescriptableObject* value);
 				Value(Ptr<DescriptableObject> value);
 				Value(const WString& value, ITypeDescriptor* associatedTypeDescriptor);
+
+				vint							Compare(const Value& a, const Value& b)const;
 			public:
 				Value();
 				Value(const Value& value);
 				Value&							operator=(const Value& value);
-				bool							operator==(const Value& value)const;
-				bool							operator!=(const Value& value)const;
+				bool							operator==(const Value& value)const { return Compare(*this, value)==0; }
+				bool							operator!=(const Value& value)const { return Compare(*this, value)!=0; }
+				bool							operator<(const Value& value)const { return Compare(*this, value)<0; }
+				bool							operator<=(const Value& value)const { return Compare(*this, value)<=0; }
+				bool							operator>(const Value& value)const { return Compare(*this, value)>0; }
+				bool							operator>=(const Value& value)const { return Compare(*this, value)>=0; }
 
 				ValueType						GetValueType()const;
 				DescriptableObject*				GetRawPtr()const;
@@ -503,6 +509,10 @@ Collections
 				virtual void					Set(const Value& key, const Value& value)=0;
 				virtual bool					Remove(const Value& key)=0;
 				virtual void					Clear()=0;
+
+				static Ptr<IValueDictionary>	Create();
+				static Ptr<IValueDictionary>	Create(Ptr<IValueReadonlyDictionary> values);
+				static Ptr<IValueDictionary>	Create(collections::LazyList<collections::Pair<Value, Value>> values);
 			};
 
 /***********************************************************************

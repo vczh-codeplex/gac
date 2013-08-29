@@ -489,6 +489,8 @@ Collections
 
 			BEGIN_CLASS_MEMBER(IValueDictionary)
 				CLASS_MEMBER_BASE(IValueReadonlyDictionary)
+				CLASS_MEMBER_EXTERNALCTOR(Ptr<IValueDictionary>(), NO_PARAMETER, (Ptr<IValueDictionary>(*)())&IValueDictionary::Create)
+				CLASS_MEMBER_EXTERNALCTOR(Ptr<IValueDictionary>(Ptr<IValueReadonlyDictionary>), {L"values"}, (Ptr<IValueDictionary>(*)(Ptr<IValueReadonlyDictionary>))&IValueDictionary::Create)
 				CLASS_MEMBER_METHOD(Set, {L"key" _ L"value"})
 				CLASS_MEMBER_METHOD(Remove, {L"key"})
 				CLASS_MEMBER_METHOD(Clear, NO_PARAMETER)
