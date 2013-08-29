@@ -409,7 +409,7 @@ GuiGrammarAutoComplete
 					// get all properties from the selected node
 					newContext.rule=selectedNode->GetCreatorRules()[selectedNode->GetCreatorRules().Count()-1];
 					newContext.originalRange=selectedNode->GetCodeRange();
-					newContext.originalNode=selectedNode->TryGetPtr(newContext.input.node).Cast<ParsingTreeObject>();
+					newContext.originalNode=dynamic_cast<ParsingTreeObject*>(selectedNode);
 					newContext.modifiedNode=newContext.originalNode;
 					newContext.modifiedEditVersion=newContext.input.editVersion;
 
@@ -856,7 +856,7 @@ GuiGrammarAutoComplete
 									vint type=fieldAutoCompleteTypes.Values().Get(index);
 									autoComplete->types.Add(type);
 								}
-								autoComplete->token=foundToken->TryGetPtr(newContext.modifiedNode).Cast<ParsingTreeToken>();
+								autoComplete->token=dynamic_cast<ParsingTreeToken*>(foundToken);
 							}
 						}
 			FINISH_COLLECTING_AUTO_COMPLETE_TYPES:

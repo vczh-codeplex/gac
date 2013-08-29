@@ -580,7 +580,7 @@ Collection Wrappers
 
 				Ptr<IValueEnumerator> CreateEnumerator()override
 				{
-					return new ValueEnumeratorWrapper<Ptr<IEnumerator<ElementType>>>(wrapperPointer->CreateEnumerator());
+					return new ValueEnumeratorWrapper<Ptr<collections::IEnumerator<ElementType>>>(wrapperPointer->CreateEnumerator());
 				}
 
 				vint GetCount()override

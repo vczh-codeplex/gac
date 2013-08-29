@@ -782,3 +782,139 @@ ParsingAutoRecoverAmbiguousParser
 		}
 	}
 }
+
+/***********************************************************************
+∑¥…‰
+***********************************************************************/
+
+#ifndef VCZH_DEBUG_NO_REFLECTION
+
+#include "..\Reflection\GuiTypeDescriptorMacros.h"
+
+namespace vl
+{
+	namespace reflection
+	{
+		namespace description
+		{
+			using namespace parsing;
+
+			PARSINGREFLECTION_TYPELIST(IMPL_TYPE_INFO)
+
+/***********************************************************************
+Type Declaration
+***********************************************************************/
+
+#define _ ,
+
+			BEGIN_STRUCT_MEMBER(ParsingTextPos)
+				STRUCT_MEMBER(index)
+				STRUCT_MEMBER(row)
+				STRUCT_MEMBER(column)
+			END_STRUCT_MEMBER(ParsingTextPos)
+
+			BEGIN_STRUCT_MEMBER(ParsingTextRange)
+				STRUCT_MEMBER(start)
+				STRUCT_MEMBER(end)
+			END_STRUCT_MEMBER(ParsingTextRange)
+
+			BEGIN_CLASS_MEMBER(ParsingTreeNode)
+				CLASS_MEMBER_PROPERTY_FAST(CodeRange)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Parent)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(SubNodes)
+
+				CLASS_MEMBER_METHOD(Clone, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(InitializeQueryCache, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(ClearQueryCache, NO_PARAMETER)
+				CLASS_MEMBER_METHOD_OVERLOAD(FindSubNode, {L"position"}, ParsingTreeNode*(ParsingTreeNode::*)(const ParsingTextPos&))
+				CLASS_MEMBER_METHOD_OVERLOAD(FindSubNode, {L"range"}, ParsingTreeNode*(ParsingTreeNode::*)(const ParsingTextRange&))
+				CLASS_MEMBER_METHOD_OVERLOAD(FindDeepestNode, {L"position"}, ParsingTreeNode*(ParsingTreeNode::*)(const ParsingTextPos&))
+				CLASS_MEMBER_METHOD_OVERLOAD(FindDeepestNode, {L"range"}, ParsingTreeNode*(ParsingTreeNode::*)(const ParsingTextRange&))
+			END_CLASS_MEMBER(ParsingTreeNode)
+
+			BEGIN_CLASS_MEMBER(ParsingTreeToken)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<ParsingTreeToken>(const WString&, vint), {L"value" _ L"tokenIndex"})
+
+				CLASS_MEMBER_PROPERTY_FAST(TokenIndex)
+				CLASS_MEMBER_PROPERTY_FAST(Value)
+			END_CLASS_MEMBER(ParsingTreeToken)
+
+			BEGIN_CLASS_MEMBER(ParsingTreeObject)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<ParsingTreeObject>(const WString&), {L"type"})
+
+				CLASS_MEMBER_PROPERTY_FAST(Type)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Members)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(MemberNames)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(CreatorRules)
+
+				CLASS_MEMBER_METHOD(GetMember, {L"name"})
+				CLASS_MEMBER_METHOD(SetMember, {L"name" _ L"node"})
+			END_CLASS_MEMBER(ParsingTreeObject)
+
+			BEGIN_CLASS_MEMBER(ParsingTreeArray)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<ParsingTreeObject>(const WString&), {L"elementType"})
+
+				CLASS_MEMBER_PROPERTY_FAST(ElementType)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Items)
+
+				CLASS_MEMBER_METHOD(GetItem, {L"index"})
+				CLASS_MEMBER_METHOD(SetItem, {L"index" _ L"node"})
+				CLASS_MEMBER_METHOD(AddItem, {L"node"})
+				CLASS_MEMBER_METHOD(InsertItem, {L"index" _ L"node"})
+				CLASS_MEMBER_METHOD_OVERLOAD(RemoveItem, {L"index"}, bool(ParsingTreeArray::*)(vint))
+				CLASS_MEMBER_METHOD_OVERLOAD(RemoveItem, {L"node"}, bool(ParsingTreeArray::*)(ParsingTreeNode*))
+				CLASS_MEMBER_METHOD(IndexOfItem, {L"node"})
+				CLASS_MEMBER_METHOD(ContainsItem, {L"node"})
+				CLASS_MEMBER_METHOD(Clone, NO_PARAMETER)
+
+				CLASS_MEMBER_METHOD_RENAME(GetCount, Count, NO_PARAMETER)
+				CLASS_MEMBER_PROPERTY_READONLY(Count, GetCount)
+			END_CLASS_MEMBER(ParsingTreeArray)
+#undef _
+		}
+	}
+}
+
+#endif
+
+namespace vl
+{
+	namespace reflection
+	{
+		namespace description
+		{
+
+/***********************************************************************
+Type Loader
+***********************************************************************/
+			
+#ifndef VCZH_DEBUG_NO_REFLECTION
+			class ParsingTypeLoader : public Object, public ITypeLoader
+			{
+			public:
+				void Load(ITypeManager* manager)
+				{
+					PARSINGREFLECTION_TYPELIST(ADD_TYPE_INFO)
+				}
+
+				void Unload(ITypeManager* manager)
+				{
+				}
+			};
+#endif
+
+			bool LoadParsingTypes()
+			{
+#ifndef VCZH_DEBUG_NO_REFLECTION
+				ITypeManager* manager=GetGlobalTypeManager();
+				if(manager)
+				{
+					Ptr<ITypeLoader> loader=new ParsingTypeLoader;
+					return manager->AddTypeLoader(loader);
+				}
+#endif
+				return false;
+			}
+		}
+	}
+}

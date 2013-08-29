@@ -114,4 +114,44 @@ namespace vl
 	}
 }
 
+/***********************************************************************
+∑¥…‰
+***********************************************************************/
+
+#ifndef VCZH_DEBUG_NO_REFLECTION
+
+#include "..\Reflection\GuiTypeDescriptorMacros.h"
+
+namespace vl
+{
+	namespace reflection
+	{
+		namespace description
+		{
+#define PARSINGREFLECTION_TYPELIST(F)\
+			F(parsing::ParsingTextPos)\
+			F(parsing::ParsingTextRange)\
+			F(parsing::ParsingTreeNode)\
+			F(parsing::ParsingTreeToken)\
+			F(parsing::ParsingTreeObject)\
+			F(parsing::ParsingTreeArray)\
+
+			PARSINGREFLECTION_TYPELIST(DECL_TYPE_INFO)
+		}
+	}
+}
+
+#endif
+
+namespace vl
+{
+	namespace reflection
+	{
+		namespace description
+		{
+			extern bool								LoadParsingTypes();
+		}
+	}
+}
+
 #endif
