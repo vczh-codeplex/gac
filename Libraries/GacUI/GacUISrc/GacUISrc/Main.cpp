@@ -613,6 +613,13 @@ class ParserGrammarAutoComplete : public GuiGrammarAutoComplete
 {
 protected:
 	GuiMultilineTextBox*					textBoxScope;
+	vint									autoCompleteType;
+	vint									autoCompleteSubType;
+	vint									autoCompleteGrammar;
+	vint									autoCompleteText;
+	vint									autoCompleteField;
+	vint									autoCompleteEnumValue;
+	vint									autoCompleteEnumField;
 
 	void OnContextFinishedAsync(const Context& context)override
 	{
@@ -676,6 +683,13 @@ public:
 		:GuiGrammarAutoComplete(executor)
 		,textBoxScope(_textBoxScope)
 	{
+		autoCompleteType=GetAutoCompleteTypeId(L"Type");
+		autoCompleteSubType=GetAutoCompleteTypeId(L"SubType");
+		autoCompleteGrammar=GetAutoCompleteTypeId(L"Grammar");
+		autoCompleteText=GetAutoCompleteTypeId(L"Text");
+		autoCompleteField=GetAutoCompleteTypeId(L"Field");
+		autoCompleteEnumValue=GetAutoCompleteTypeId(L"EnumValue");
+		autoCompleteEnumField=GetAutoCompleteTypeId(L"EnumField");
 	}
 
 	~ParserGrammarAutoComplete()
