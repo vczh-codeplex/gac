@@ -312,6 +312,7 @@ Helpers
 				}
 
 				description::LoadPredefinedTypes();
+				description::LoadParsingTypes();
 				description::LoadGuiBasicTypes();
 				description::LoadGuiElementTypes();
 				description::LoadGuiCompositionTypes();

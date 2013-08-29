@@ -12,6 +12,7 @@ Classes:
 #include "..\Regex\Regex.h"
 #include "..\Stream\Accessor.h"
 #include "..\Collections\OperationCopyFrom.h"
+#include "..\Reflection\GuiTypeDescriptor.h"
 
 namespace vl
 {
@@ -130,7 +131,7 @@ namespace vl
 		class ParsingTreeObject;
 		class ParsingTreeArray;
 
-		class ParsingTreeNode : public Object
+		class ParsingTreeNode : public Object, public reflection::Description<ParsingTreeNode>
 		{
 		public:
 			class IVisitor : public Interface
@@ -195,10 +196,9 @@ namespace vl
 			ParsingTreeNode*					FindSubNode(const ParsingTextRange& range);
 			ParsingTreeNode*					FindDeepestNode(const ParsingTextPos& position);
 			ParsingTreeNode*					FindDeepestNode(const ParsingTextRange& range);
-			Ptr<ParsingTreeNode>				TryGetPtr(Ptr<ParsingTreeNode> root);
 		};
 
-		class ParsingTreeToken : public ParsingTreeNode
+		class ParsingTreeToken : public ParsingTreeNode, public reflection::Description<ParsingTreeToken>
 		{
 		protected:
 			WString								value;
@@ -217,7 +217,7 @@ namespace vl
 			void								SetValue(const WString& _value);
 		};
 
-		class ParsingTreeObject : public ParsingTreeNode
+		class ParsingTreeObject : public ParsingTreeNode, public reflection::Description<ParsingTreeObject>
 		{
 		protected:
 			typedef collections::Dictionary<WString, Ptr<ParsingTreeNode>>				NodeMap;
@@ -245,7 +245,7 @@ namespace vl
 			RuleList&							GetCreatorRules();
 		};
 
-		class ParsingTreeArray : public ParsingTreeNode
+		class ParsingTreeArray : public ParsingTreeNode, public reflection::Description<ParsingTreeArray>
 		{
 		protected:
 			typedef collections::List<Ptr<ParsingTreeNode>>								NodeArray;
