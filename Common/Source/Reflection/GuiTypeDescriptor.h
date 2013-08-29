@@ -448,6 +448,8 @@ Collections
 			{
 			public:
 				virtual Ptr<IValueEnumerator>	CreateEnumerator()=0;
+
+				static Ptr<IValueEnumerable>	Create(collections::LazyList<Value> values);
 			};
 
 			class IValueReadonlyList : public virtual IValueEnumerable, public Description<IValueReadonlyList>
@@ -548,7 +550,6 @@ Collection Wrappers
 			protected:
 				typedef typename trait_helper::RemovePtr<T>::Type		ContainerType;
 				typedef typename ContainerType::ElementType				ElementType;
-				typedef typename KeyType<ElementType>::Type				ElementKeyType;
 
 				T								wrapperPointer;
 			public:
@@ -574,16 +575,15 @@ Collection Wrappers
 			};
 
 			template<typename T>
-			class ValueReadonlyListWrapper : public Object, public virtual IValueReadonlyList
+			class ValueEnumerableWrapper : public Object, public virtual IValueEnumerable
 			{
 			protected:
 				typedef typename trait_helper::RemovePtr<T>::Type		ContainerType;
 				typedef typename ContainerType::ElementType				ElementType;
-				typedef typename KeyType<ElementType>::Type				ElementKeyType;
 
 				T								wrapperPointer;
 			public:
-				ValueReadonlyListWrapper(const T& _wrapperPointer)
+				ValueEnumerableWrapper(const T& _wrapperPointer)
 					:wrapperPointer(_wrapperPointer)
 				{
 				}
@@ -591,6 +591,21 @@ Collection Wrappers
 				Ptr<IValueEnumerator> CreateEnumerator()override
 				{
 					return new ValueEnumeratorWrapper<Ptr<collections::IEnumerator<ElementType>>>(wrapperPointer->CreateEnumerator());
+				}
+			};
+
+			template<typename T>
+			class ValueReadonlyListWrapper : public ValueEnumerableWrapper<T>, public virtual IValueReadonlyList
+			{
+			protected:
+				typedef typename trait_helper::RemovePtr<T>::Type		ContainerType;
+				typedef typename ContainerType::ElementType				ElementType;
+				typedef typename KeyType<ElementType>::Type				ElementKeyType;
+
+			public:
+				ValueReadonlyListWrapper(const T& _wrapperPointer)
+					:ValueEnumerableWrapper(_wrapperPointer)
+				{
 				}
 
 				vint GetCount()override
