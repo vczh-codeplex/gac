@@ -19,90 +19,184 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 SymbolLookup
 ***********************************************************************/
 
-class TypeSymbol : public Object
+class GrammarSymbol : public ParsingScopeSymbol
 {
 public:
-	WString									typeName;
-	Dictionary<WString, Ptr<TypeSymbol>>	subTypes;
-	TypeSymbol*								parent;
+	GrammarSymbol(Ptr<ParsingTreeObject> node)
+		:ParsingScopeSymbol(node->GetMember(L"name").Cast<ParsingTreeToken>()->GetValue())
+	{
+		SetNode(node.Obj());
+	}
+};
 
-	TypeSymbol()
-		:parent(0)
+class EnumFieldSymbol : public GrammarSymbol
+{
+public:
+	EnumFieldSymbol(Ptr<ParsingTreeObject> node)
+		:GrammarSymbol(node)
 	{
 	}
+};
 
-	void CollectSubTypes(Ptr<ParsingTreeArray> types, Dictionary<ParsingTreeNode*, TypeSymbol*>& nodeTypeMap)
+class ClassFieldSymbol : public GrammarSymbol
+{
+public:
+	ClassFieldSymbol(Ptr<ParsingTreeObject> node)
+		:GrammarSymbol(node)
 	{
-		if(types)
+	}
+};
+
+class TypeSymbol : public GrammarSymbol
+{
+public:
+	TypeSymbol(Ptr<ParsingTreeObject> node)
+		:GrammarSymbol(node)
+	{
+	}
+};
+
+class EnumSymbol : public TypeSymbol
+{
+public:
+	EnumSymbol(Ptr<ParsingTreeObject> node)
+		:TypeSymbol(node)
+	{
+		CreateScope();
+		if(Ptr<ParsingTreeArray> members=node->GetMember(L"members").Cast<ParsingTreeArray>())
 		{
-			for(int i=0;i<types->Count();i++)
+			FOREACH(Ptr<ParsingTreeNode>, node, members->GetItems())
 			{
-				Ptr<ParsingTreeObject> type=types->GetItem(i).Cast<ParsingTreeObject>();
-				if(type)
+				if(Ptr<ParsingTreeObject> obj=node.Cast<ParsingTreeObject>())
 				{
-					CollectSubType(type, nodeTypeMap);
+					GetScope()->AddSymbol(new EnumFieldSymbol(obj));
 				}
 			}
-		}
-	}
-
-	void CollectSubType(Ptr<ParsingTreeObject> type, Dictionary<ParsingTreeNode*, TypeSymbol*>& nodeTypeMap)
-	{
-		Ptr<ParsingTreeToken> name=type->GetMember(L"name").Cast<ParsingTreeToken>();
-		if(name && !subTypes.Keys().Contains(name->GetValue()))
-		{
-			Ptr<TypeSymbol> symbol=new TypeSymbol;
-			symbol->typeName=name->GetValue();
-			symbol->parent=this;
-			subTypes.Add(symbol->typeName, symbol);
-			symbol->CollectSubTypes(type->GetMember(L"subTypes").Cast<ParsingTreeArray>(), nodeTypeMap);
-			nodeTypeMap.Add(type.Obj(), symbol.Obj());
 		}
 	}
 };
 
-class ParserDecl : public TypeSymbol
+class ClassSymbol : public TypeSymbol
 {
 public:
-	SortedList<WString>							tokens;
-	SortedList<WString>							rules;
-	Dictionary<ParsingTreeNode*, TypeSymbol*>	nodeTypeMap;
-
-	ParserDecl(Ptr<ParsingTreeObject> parserDecl)
+	ClassSymbol(Ptr<ParsingTreeObject> node)
+		:TypeSymbol(node)
 	{
-		nodeTypeMap.Add(parserDecl.Obj(), this);
-		Ptr<ParsingTreeArray> defs=parserDecl->GetMember(L"definitions").Cast<ParsingTreeArray>();
-		if(defs)
+		CreateScope();
+		if(Ptr<ParsingTreeArray> members=node->GetMember(L"members").Cast<ParsingTreeArray>())
 		{
-			vint count=defs->Count();
-			for(vint i=0;i<count;i++)
+			FOREACH(Ptr<ParsingTreeNode>, node, members->GetItems())
 			{
-				Ptr<ParsingTreeObject> defObject=defs->GetItem(i).Cast<ParsingTreeObject>();
-				if(defObject)
+				if(Ptr<ParsingTreeObject> obj=node.Cast<ParsingTreeObject>())
 				{
-					if(defObject->GetType()==L"TokenDef")
+					GetScope()->AddSymbol(new ClassFieldSymbol(obj));
+				}
+			}
+		}
+		if(Ptr<ParsingTreeArray> members=node->GetMember(L"subTypes").Cast<ParsingTreeArray>())
+		{
+			FOREACH(Ptr<ParsingTreeNode>, node, members->GetItems())
+			{
+				Ptr<ParsingTreeObject> type=node.Cast<ParsingTreeObject>();
+				if(type->GetType()==L"EnumTypeDef")
+				{
+					if(Ptr<ParsingTreeObject> obj=node.Cast<ParsingTreeObject>())
 					{
-						Ptr<ParsingTreeToken> name=defObject->GetMember(L"name").Cast<ParsingTreeToken>();
-						if(name)
-						{
-							tokens.Add(name->GetValue());
-						}
+						GetScope()->AddSymbol(new EnumSymbol(obj));
 					}
-					else if(defObject->GetType()==L"RuleDef")
+				}
+				else if(type->GetType()==L"ClassTypeDef")
+				{
+					if(Ptr<ParsingTreeObject> obj=node.Cast<ParsingTreeObject>())
 					{
-						Ptr<ParsingTreeToken> name=defObject->GetMember(L"name").Cast<ParsingTreeToken>();
-						if(name)
-						{
-							rules.Add(name->GetValue());
-						}
-					}
-					else
-					{
-						CollectSubType(defObject, nodeTypeMap);
+						GetScope()->AddSymbol(new ClassSymbol(obj));
 					}
 				}
 			}
 		}
+	}
+};
+
+class TokenSymbol : public GrammarSymbol
+{
+public:
+	TokenSymbol(Ptr<ParsingTreeObject> node)
+		:GrammarSymbol(node)
+	{
+	}
+};
+
+class RuleSymbol : public GrammarSymbol
+{
+public:
+	RuleSymbol(Ptr<ParsingTreeObject> node)
+		:GrammarSymbol(node)
+	{
+	}
+};
+
+class ParserDefScope : public ParsingScopeRoot
+{
+public:
+	ParserDefScope(Ptr<ParsingTreeObject> node)
+	{
+		SetNode(node.Obj());
+		CreateScope();
+		if(Ptr<ParsingTreeArray> members=node->GetMember(L"definitions").Cast<ParsingTreeArray>())
+		{
+			FOREACH(Ptr<ParsingTreeNode>, node, members->GetItems())
+			{
+				Ptr<ParsingTreeObject> type=node.Cast<ParsingTreeObject>();
+				if(type->GetType()==L"EnumTypeDef")
+				{
+					if(Ptr<ParsingTreeObject> obj=node.Cast<ParsingTreeObject>())
+					{
+						GetScope()->AddSymbol(new EnumSymbol(obj));
+					}
+				}
+				else if(type->GetType()==L"ClassTypeDef")
+				{
+					if(Ptr<ParsingTreeObject> obj=node.Cast<ParsingTreeObject>())
+					{
+						GetScope()->AddSymbol(new ClassSymbol(obj));
+					}
+				}
+				else if(type->GetType()==L"TokenDef")
+				{
+					if(Ptr<ParsingTreeObject> obj=node.Cast<ParsingTreeObject>())
+					{
+						GetScope()->AddSymbol(new TokenSymbol(obj));
+					}
+				}
+				else if(type->GetType()==L"RuleDef")
+				{
+					if(Ptr<ParsingTreeObject> obj=node.Cast<ParsingTreeObject>())
+					{
+						GetScope()->AddSymbol(new RuleSymbol(obj));
+					}
+				}
+			}
+		}
+		InitializeQueryCache();
+	}
+};
+
+/***********************************************************************
+ParserGrammarExecutor
+***********************************************************************/
+
+class ParserGrammarExecutor : public RepeatingParsingExecutor
+{
+protected:
+
+	void OnContextFinishedAsync(RepeatingParsingOutput& context)override
+	{
+		context.semanticContext=new ParserDefScope(context.node);
+	}
+public:
+	ParserGrammarExecutor()
+		:RepeatingParsingExecutor(CreateBootstrapAutoRecoverParser(), L"ParserDecl")
+	{
 	}
 };
 
@@ -113,97 +207,97 @@ ParserGrammarColorizer
 class ParserGrammarColorizer : public GuiGrammarColorizer
 {
 protected:
-	Ptr<ParserDecl>							parsingTreeDecl;
 	vint									tokenIdType;
 	vint									tokenIdToken;
 	vint									tokenIdRule;
 	vint									semanticType;
 	vint									semanticGrammar;
 
-	TypeSymbol* FindScope(ParsingTreeNode* node)
+	void OnSemanticColorize(SemanticColorizeContext& context)override
 	{
-		if(!node) return 0;
-		int index=parsingTreeDecl->nodeTypeMap.Keys().IndexOf(node);
-		return index==-1?FindScope(node->GetParent()):parsingTreeDecl->nodeTypeMap.Values().Get(index);
-	}
-
-	TypeSymbol* FindType(TypeSymbol* scope, const WString& name)
-	{
-		if(!scope) return 0;
-		if(name==L"") return 0;
-		int index=scope->subTypes.Keys().IndexOf(name);
-		if(index!=-1) return scope->subTypes.Values().Get(index).Obj();
-		return FindType(scope->parent, name);
-	}
-
-	TypeSymbol* FindType(TypeSymbol* scope, ParsingTreeObject* object, ParsingTreeToken* foundToken)
-	{
-		if(scope && object)
+		if(Ptr<ParserDefScope> parserDef=context.semanticContext.Cast<ParserDefScope>())
 		{
-			if(!foundToken)
+			if(context.semantic==semanticType)
 			{
-				foundToken=object->GetMember(L"name").Cast<ParsingTreeToken>().Obj();
-			}
-			if(object->GetMember(L"name")==foundToken)
-			{
-				WString typeName=foundToken->GetValue();
-				if(object->GetType()==L"PrimitiveTypeObj")
+				List<WString> names;
 				{
-					return FindType(scope, typeName);
-				}
-				else if(object->GetType()==L"SubTypeObj")
-				{
-					TypeSymbol* type=FindType(scope, object->GetMember(L"parentType").Cast<ParsingTreeObject>().Obj(), 0);
-					if(type)
+					ParsingTreeObject* type=context.tokenParent;
+					while(type)
 					{
-						int index=type->subTypes.Keys().IndexOf(typeName);
-						if(index!=-1) return type->subTypes.Values().Get(index).Obj();
+						if(type->GetType()==L"PrimitiveTypeObj")
+						{
+							names.Add(type->GetMember(L"name").Cast<ParsingTreeToken>()->GetValue());
+						}
+						if(type->GetType()==L"SubTypeObj")
+						{
+							names.Add(type->GetMember(L"name").Cast<ParsingTreeToken>()->GetValue());
+							type=dynamic_cast<ParsingTreeObject*>(type->GetMember(L"parentType").Obj());
+						}
+						else
+						{
+							break;
+						}
 					}
 				}
-			}
-			else if(object->GetMember(L"ambiguousType")==foundToken)
-			{
-				WString typeName=foundToken->GetValue();
-				if(object->GetType()==L"ClassTypeDef")
+
+				ParsingScope* scope=parserDef->GetScopeFromNode(context.foundToken);
+				Ptr<TypeSymbol> type=0;
+				for(vint i=names.Count()-1;i>=0;i--)
 				{
-					return FindType(scope, typeName);
+					if(type)
+					{
+						const List<Ptr<ParsingScopeSymbol>>& symbols=type->GetScope()->GetSymbols(names[i]);
+						if(symbols.Count()>0)
+						{
+							type=symbols[0].Cast<TypeSymbol>();
+						}
+						else
+						{
+							type=0;
+						}
+					}
+					else if(i==names.Count()-1)
+					{
+						const List<Ptr<ParsingScopeSymbol>>& symbols=scope->GetSymbolsRecursively(names[i]);
+						if(symbols.Count()>0)
+						{
+							type=symbols[0].Cast<TypeSymbol>();
+						}
+					}
+					else
+					{
+						break;
+					}
+				}
+
+				if(type)
+				{
+					context.token=tokenIdType;
 				}
 			}
-		}
-		return 0;
-	}
-
-	void OnContextFinishedAsync(Ptr<parsing::ParsingTreeObject> node)override
-	{
-		parsingTreeDecl=new ParserDecl(node);
-	}
-
-	void OnSemanticColorize(ParsingTreeToken* foundToken, ParsingTreeObject* tokenParent, const WString& type, const WString& field, vint semantic, vint& token)override
-	{
-		if(semantic==semanticType)
-		{
-			TypeSymbol* scope=FindScope(tokenParent);
-			if(FindType(scope, tokenParent, foundToken))
+			else if(context.semantic==semanticGrammar)
 			{
-				token=tokenIdType;
-			}
-		}
-		else if(semantic==semanticGrammar)
-		{
-			WString name=foundToken->GetValue();
-			if(parsingTreeDecl->tokens.Contains(name))
-			{
-				token=tokenIdToken;
-			}
-			else if(parsingTreeDecl->rules.Contains(name))
-			{
-				token=tokenIdRule;
+				WString name=context.foundToken->GetValue();
+				const List<Ptr<ParsingScopeSymbol>>& symbols=parserDef->GetScope()->GetSymbols(name);
+				FOREACH(Ptr<ParsingScopeSymbol>, symbol, symbols)
+				{
+					if(symbol.Cast<TokenSymbol>())
+					{
+						context.token=tokenIdToken;
+						break;
+					}
+					else if(symbol.Cast<RuleSymbol>())
+					{
+						context.token=tokenIdRule;
+						break;
+					}
+				}
 			}
 		}
 	}
 public:
-	ParserGrammarColorizer()
-		:GuiGrammarColorizer(CreateBootstrapAutoRecoverParser(), L"ParserDecl")
+	ParserGrammarColorizer(Ptr<ParserGrammarExecutor> executor)
+		:GuiGrammarColorizer(executor)
 	{
 		SetColor(L"Keyword", Color(0, 0, 255));
 		SetColor(L"Attribute", Color(0, 0, 255));
@@ -246,7 +340,7 @@ public:
 		textBoxEditor->SetVerticalAlwaysVisible(false);
 		textBoxEditor->SetHorizontalAlwaysVisible(false);
 		textBoxEditor->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-		textBoxEditor->SetColorizer(new ParserGrammarColorizer);
+		textBoxEditor->SetColorizer(new ParserGrammarColorizer(new ParserGrammarExecutor));
 		this->GetBoundsComposition()->AddChild(textBoxEditor->GetBoundsComposition());
 
 		{
