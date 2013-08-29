@@ -591,7 +591,7 @@ namespace reflection_test
 			TEST_ASSERT(d->a==30);
 			TEST_ASSERT(d->GetB()==40);
 		
-			Value derived2=Value::Create(L"test::Derived", (Value::xs(), 10, 20));
+			Value derived2=Value::InvokeStatic(L"test::Derived", L"Create", (Value::xs(), 10, 20));
 			derived2.Invoke(L"Reset", (Value::xs(), derived));
 			TEST_ASSERT(UnboxValue<vint>(derived2.GetProperty(L"a"))==30);
 			TEST_ASSERT(UnboxValue<vint>(derived2.GetProperty(L"b"))==40);
@@ -746,6 +746,10 @@ namespace reflection_test
 		}
 	}
 
+	void TestReflectionDictionary()
+	{
+	}
+
 	void TestSharedRawPtrConverting()
 	{
 		Base* b1=new Base;
@@ -843,6 +847,17 @@ TEST_CASE(TestReflectionList)
 	TEST_ASSERT(GetGlobalTypeManager()->Load());
 	{
 		TestReflectionList();
+	}
+	TEST_ASSERT(ResetGlobalTypeManager());
+}
+
+TEST_CASE(TestReflectionDictionary)
+{
+	TEST_ASSERT(LoadPredefinedTypes());
+	TEST_ASSERT(GetGlobalTypeManager()->AddTypeLoader(new TestTypeLoader));
+	TEST_ASSERT(GetGlobalTypeManager()->Load());
+	{
+		TestReflectionDictionary();
 	}
 	TEST_ASSERT(ResetGlobalTypeManager());
 }

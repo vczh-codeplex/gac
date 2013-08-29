@@ -74,11 +74,9 @@ func Sum(xs : int{}) : int
 
 [extern []] interface IDerived : IBase1, IBase2
 {
-	func Do(x : string)
+	[static] func Do(x : string)
 	ctor (proxy : system.InterfaceProxy)
 }
-
-[static] func Sin(x : double) : double;
 
 namespace system
 {
