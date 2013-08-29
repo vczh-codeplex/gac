@@ -214,9 +214,9 @@ ParsingDefinitionClassDefinitionWriter
 				currentDefinition=definition;
 			}
 
-			ParsingDefinitionClassDefinitionWriter& ParsingDefinitionClassDefinitionWriter::AmbiguousType(const WString& ambiguousType)
+			ParsingDefinitionClassDefinitionWriter& ParsingDefinitionClassDefinitionWriter::AmbiguousType(const ParsingDefinitionTypeWriter& ambiguousType)
 			{
-				definition->ambiguousType=ambiguousType;
+				definition->ambiguousType=ambiguousType.Type();
 				return *this;
 			}
 

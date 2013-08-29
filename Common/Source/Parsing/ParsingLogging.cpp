@@ -140,10 +140,10 @@ Logger (ParsingDefinitionTypeDefinition)
 					writer.WriteString(prefix);
 					writer.WriteString(L"class ");
 					writer.WriteString(node->name);
-					if(node->ambiguousType!=L"")
+					if(node->ambiguousType)
 					{
 						writer.WriteString(L" ambiguous(");
-						writer.WriteString(node->ambiguousType);
+						Log(node->ambiguousType.Obj(), writer);
 						writer.WriteString(L")");
 					}
 					if(node->parentType)

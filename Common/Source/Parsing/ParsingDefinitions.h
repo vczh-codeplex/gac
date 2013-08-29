@@ -133,7 +133,7 @@ namespace vl
 				typedef collections::List<Ptr<ParsingDefinitionClassMemberDefinition>>	MemberList;
 				typedef collections::List<Ptr<ParsingDefinitionTypeDefinition>>			TypeList;
 
-				WString											ambiguousType;
+				Ptr<ParsingDefinitionType>						ambiguousType;
 				Ptr<ParsingDefinitionType>						parentType;
 				MemberList										members;
 				TypeList										subTypes;
@@ -372,7 +372,7 @@ namespace vl
 				ParsingDefinitionClassDefinitionWriter(const WString& name);
 				ParsingDefinitionClassDefinitionWriter(const WString& name, const ParsingDefinitionTypeWriter& parentType);
 
-				ParsingDefinitionClassDefinitionWriter&			AmbiguousType(const WString& ambiguousType);
+				ParsingDefinitionClassDefinitionWriter&			AmbiguousType(const ParsingDefinitionTypeWriter& ambiguousType);
 				ParsingDefinitionClassDefinitionWriter&			Member(const WString& name, const ParsingDefinitionTypeWriter& type, const WString& unescapingFunction=L"");
 				ParsingDefinitionClassDefinitionWriter&			SubType(const ParsingDefinitionTypeDefinitionWriter& type);
 				ParsingDefinitionClassDefinitionWriter&			Attribute(const ParsingDefinitionAttributeWriter& attribute);
