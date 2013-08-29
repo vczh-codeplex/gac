@@ -103,6 +103,29 @@ description::Value
 			{
 			}
 
+			vint Value::Compare(const Value& a, const Value& b)const
+			{
+				ValueType va=a.valueType;
+				ValueType vb=b.valueType;
+				if(va==vb)
+				{
+					switch(va)
+					{
+					case Text:
+						return WString::Compare(a.text, b.text);
+					case RawPtr:
+					case SharedPtr:
+						return (vint)a.rawPtr-(vint)b.rawPtr;
+					default:
+						return 0;
+					}
+				}
+				else
+				{
+					return (vint)va-(vint)vb;
+				}
+			}
+
 			Value::Value()
 				:valueType(Null)
 				,rawPtr(0)
@@ -127,26 +150,6 @@ description::Value
 				text=value.text;
 				typeDescriptor=value.typeDescriptor;
 				return *this;
-			}
-
-			bool Value::operator==(const Value& value)const
-			{
-				switch(valueType)
-				{
-				case Null:
-					return value.IsNull();
-				case Text:
-					return GetTypeDescriptor()==value.GetTypeDescriptor() && GetText()==value.GetText();
-				case RawPtr:
-				case SharedPtr:
-					return GetRawPtr()==value.GetRawPtr();
-				}
-				return false;
-			}
-
-			bool Value::operator!=(const Value& value)const
-			{
-				return !(*this==value);
 			}
 
 			Value::ValueType Value::GetValueType()const
@@ -891,6 +894,30 @@ IValueList
 				Ptr<List<Value>> list=new List<Value>;
 				CopyFrom(*list.Obj(), values);
 				return new ValueListWrapper<Ptr<List<Value>>>(list);
+			}
+
+/***********************************************************************
+IValueDictionary
+***********************************************************************/
+
+			Ptr<IValueDictionary> IValueDictionary::Create()
+			{
+				Ptr<Dictionary<Value, Value>> dictionary=new Dictionary<Value, Value>;
+				return new ValueDictionaryWrapper<Ptr<Dictionary<Value, Value>>>(dictionary);
+			}
+
+			Ptr<IValueDictionary> IValueDictionary::Create(Ptr<IValueReadonlyDictionary> values)
+			{
+				Ptr<Dictionary<Value, Value>> dictionary=new Dictionary<Value, Value>;
+				CopyFrom(*dictionary.Obj(), values->GetLazyList<Value, Value>());
+				return new ValueDictionaryWrapper<Ptr<Dictionary<Value, Value>>>(dictionary);
+			}
+
+			Ptr<IValueDictionary> IValueDictionary::Create(collections::LazyList<collections::Pair<Value, Value>> values)
+			{
+				Ptr<Dictionary<Value, Value>> dictionary=new Dictionary<Value, Value>;
+				CopyFrom(*dictionary.Obj(), values);
+				return new ValueDictionaryWrapper<Ptr<Dictionary<Value, Value>>>(dictionary);
 			}
 		}
 	}
