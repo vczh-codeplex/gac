@@ -262,25 +262,9 @@ protected:
 			Ptr<TypeSymbol> type=0;
 			for(vint i=names.Count()-1;i>=0;i--)
 			{
-				if(type)
+				if(type || i==names.Count()-1)
 				{
-					const List<Ptr<ParsingScopeSymbol>>& symbols=type->GetScope()->GetSymbols(names[i]);
-					if(symbols.Count()>0)
-					{
-						type=symbols[0].Cast<TypeSymbol>();
-					}
-					else
-					{
-						type=0;
-					}
-				}
-				else if(i==names.Count()-1)
-				{
-					const List<Ptr<ParsingScopeSymbol>>& symbols=input.finder->GetSymbolsRecursively(scope, names[i]);
-					if(symbols.Count()>0)
-					{
-						type=symbols[0].Cast<TypeSymbol>();
-					}
+					type=input.finder->GetSymbols(type->GetScope(), names[i]).First(0).Cast<TypeSymbol>();
 				}
 				else
 				{
