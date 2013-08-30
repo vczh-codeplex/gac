@@ -262,9 +262,17 @@ protected:
 			Ptr<TypeSymbol> type=0;
 			for(vint i=names.Count()-1;i>=0;i--)
 			{
-				if(type || i==names.Count()-1)
+				if(type)
 				{
-					type=input.finder->GetSymbols(type->GetScope(), names[i]).First(0).Cast<TypeSymbol>();
+					type=input.finder->GetSymbols(type->GetScope(), names[i])
+						.First(0)
+						.Cast<TypeSymbol>();
+				}
+				else if(i==names.Count()-1)
+				{
+					type=input.finder->GetSymbolsRecursively(scope, names[i])
+						.First(0)
+						.Cast<TypeSymbol>();
 				}
 				else
 				{
