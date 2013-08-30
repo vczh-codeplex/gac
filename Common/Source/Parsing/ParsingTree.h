@@ -385,7 +385,7 @@ namespace vl
 		class ParsingScopeSymbol;
 		class ParsingScopeFinder;
 
-		class ParsingScope : public Object
+		class ParsingScope : public Object, public reflection::Description<ParsingScope>
 		{
 			typedef collections::SortedList<WString>							SymbolKeyList;
 			typedef collections::List<Ptr<ParsingScopeSymbol>>					SymbolList;
@@ -410,7 +410,7 @@ namespace vl
 			const SymbolList&						GetSymbols(const WString& name);
 		};
 
-		class ParsingScopeSymbol : public Object
+		class ParsingScopeSymbol : public Object, public reflection::Description<ParsingScopeSymbol>
 		{
 			friend class ParsingScope;
 		protected:
@@ -432,20 +432,66 @@ namespace vl
 			ParsingScope*							GetScope();
 		};
 
-		class ParsingScopeFinder : public Object
+		class ParsingScopeFinder : public Object, public reflection::Description<ParsingScopeFinder>
 		{
 			typedef collections::Dictionary<ParsingTreeObject*, ParsingScopeSymbol*>			NodeSymbolMap;
+			typedef collections::LazyList<Ptr<ParsingScopeSymbol>>								LazySymbolList;
+		public:
+			class SymbolMapper : public Object, public reflection::Description<SymbolMapper>
+			{
+			public:
+				virtual ParsingTreeNode*			ParentNode(ParsingTreeNode* node)=0;
+				virtual ParsingTreeNode*			Node(ParsingTreeNode* node)=0;
+				virtual ParsingScope*				ParentScope(ParsingScopeSymbol* symbol)=0;
+				virtual ParsingScopeSymbol*			Symbol(ParsingScopeSymbol* symbol)=0;
+			};
+
+			class DirectSymbolMapper : public SymbolMapper, public reflection::Description<DirectSymbolMapper>
+			{
+			public:
+				DirectSymbolMapper();
+				~DirectSymbolMapper();
+
+				ParsingTreeNode*					ParentNode(ParsingTreeNode* node)override;
+				ParsingTreeNode*					Node(ParsingTreeNode* node)override;
+				ParsingScope*						ParentScope(ParsingScopeSymbol* symbol)override;
+				ParsingScopeSymbol*					Symbol(ParsingScopeSymbol* symbol)override;
+			};
 		protected:
 			NodeSymbolMap							nodeSymbols;
+			Ptr<SymbolMapper>						symbolMapper;
 
 			void									InitializeQueryCache(ParsingScopeSymbol* symbol);
 		public:
-			ParsingScopeFinder(ParsingScopeSymbol* rootSymbol);
+			ParsingScopeFinder(ParsingScopeSymbol* rootSymbol, Ptr<SymbolMapper> _symbolMapper=new DirectSymbolMapper);
 			~ParsingScopeFinder();
+
+			ParsingTreeNode*						ParentNode(ParsingTreeNode* node);
+			ParsingTreeNode*						ParentNode(Ptr<ParsingTreeNode> node);
+			ParsingTreeNode*						Node(ParsingTreeNode* node);
+			Ptr<ParsingTreeNode>					Node(Ptr<ParsingTreeNode> node);
+			ParsingScope*							ParentScope(ParsingScopeSymbol* symbol);
+			ParsingScope*							ParentScope(Ptr<ParsingScopeSymbol> symbol);
+			ParsingScopeSymbol*						Symbol(ParsingScopeSymbol* symbol);
+			Ptr<ParsingScopeSymbol>					Symbol(Ptr<ParsingScopeSymbol> symbol);
+			LazySymbolList							Symbols(const ParsingScope::SymbolList& symbols);
+
+			template<typename T>
+			T* Obj(T* node)
+			{
+				return dynamic_cast<T*>(Node(node));
+			}
+
+			template<typename T>
+			Ptr<T> Obj(Ptr<T> node)
+			{
+				return Node(node).Cast<T>();
+			}
 
 			ParsingScopeSymbol*						GetSymbolFromNode(ParsingTreeObject* node);
 			ParsingScope*							GetScopeFromNode(ParsingTreeNode* node);
-			const ParsingScope::SymbolList&			GetSymbolsRecursively(ParsingScope* scope, const WString& name);
+			LazySymbolList							GetSymbols(ParsingScope* scope, const WString& name);
+			LazySymbolList							GetSymbolsRecursively(ParsingScope* scope, const WString& name);
 		};
 	}
 }

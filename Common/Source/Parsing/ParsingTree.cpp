@@ -689,21 +689,105 @@ ParsingScopeSymbol
 		}
 
 /***********************************************************************
+ParsingScopeFinder::DirectSymbolMapper
+***********************************************************************/
+
+		ParsingScopeFinder::DirectSymbolMapper::DirectSymbolMapper()
+		{
+		}
+
+		ParsingScopeFinder::DirectSymbolMapper::~DirectSymbolMapper()
+		{
+		}
+
+		ParsingTreeNode* ParsingScopeFinder::DirectSymbolMapper::ParentNode(ParsingTreeNode* node)
+		{
+			return node->GetParent();
+		}
+
+		ParsingTreeNode* ParsingScopeFinder::DirectSymbolMapper::Node(ParsingTreeNode* node)
+		{
+			return node;
+		}
+
+		ParsingScope* ParsingScopeFinder::DirectSymbolMapper::ParentScope(ParsingScopeSymbol* symbol)
+		{
+			return symbol->GetParentScope();
+		}
+
+		ParsingScopeSymbol* ParsingScopeFinder::DirectSymbolMapper::Symbol(ParsingScopeSymbol* symbol)
+		{
+			return symbol;
+		}
+
+/***********************************************************************
+ParsingScopeFinder::Traversal Functions
+***********************************************************************/
+
+		ParsingTreeNode* ParsingScopeFinder::ParentNode(ParsingTreeNode* node)
+		{
+			return symbolMapper->ParentNode(node);
+		}
+
+		ParsingTreeNode* ParsingScopeFinder::ParentNode(Ptr<ParsingTreeNode> node)
+		{
+			return symbolMapper->ParentNode(node.Obj());
+		}
+
+		ParsingTreeNode* ParsingScopeFinder::Node(ParsingTreeNode* node)
+		{
+			return symbolMapper->Node(node);
+		}
+
+		Ptr<ParsingTreeNode> ParsingScopeFinder::Node(Ptr<ParsingTreeNode> node)
+		{
+			return symbolMapper->Node(node.Obj());
+		}
+
+		ParsingScope* ParsingScopeFinder::ParentScope(ParsingScopeSymbol* symbol)
+		{
+			return symbolMapper->ParentScope(symbol);
+		}
+
+		ParsingScope* ParsingScopeFinder::ParentScope(Ptr<ParsingScopeSymbol> symbol)
+		{
+			return symbolMapper->ParentScope(symbol.Obj());
+		}
+
+		ParsingScopeSymbol* ParsingScopeFinder::Symbol(ParsingScopeSymbol* symbol)
+		{
+			return symbolMapper->Symbol(symbol);
+		}
+
+		Ptr<ParsingScopeSymbol> ParsingScopeFinder::Symbol(Ptr<ParsingScopeSymbol> symbol)
+		{
+			return symbolMapper->Symbol(symbol.Obj());
+		}
+
+		ParsingScopeFinder::LazySymbolList ParsingScopeFinder::Symbols(const ParsingScope::SymbolList& symbols)
+		{
+			return From(symbols).Select([this](Ptr<ParsingScopeSymbol> symbol)
+			{
+				return Symbol(symbol);
+			});
+		}
+
+/***********************************************************************
 ParsingScopeFinder
 ***********************************************************************/
 
 		void ParsingScopeFinder::InitializeQueryCache(ParsingScopeSymbol* symbol)
 		{
-			if(symbol->GetNode())
+			if(ParsingTreeObject* obj=Obj(symbol->GetNode()))
 			{
-				nodeSymbols.Add(symbol->GetNode(), symbol);
+				nodeSymbols.Add(obj, symbol);
 			}
 			if(symbol->GetScope())
 			{
 				ParsingScope* scope=symbol->GetScope();
 				FOREACH(WString, name, scope->GetSymbolNames())
 				{
-					FOREACH(Ptr<ParsingScopeSymbol>, subSymbol, scope->GetSymbols(name))
+					FOREACH(Ptr<ParsingScopeSymbol>, subSymbol, Symbols(scope->GetSymbols(name)))
 					{
 						InitializeQueryCache(subSymbol.Obj());
 					}
@@ -711,7 +795,8 @@ ParsingScopeFinder
 			}
 		}
 
-		ParsingScopeFinder::ParsingScopeFinder(ParsingScopeSymbol* rootSymbol)
+		ParsingScopeFinder::ParsingScopeFinder(ParsingScopeSymbol* rootSymbol, Ptr<SymbolMapper> _symbolMapper)
+			:symbolMapper(_symbolMapper)
 		{
 			InitializeQueryCache(rootSymbol);
 		}
@@ -739,21 +824,26 @@ ParsingScopeFinder
 						return symbol->GetScope();
 					}
 				}
-				node=node->GetParent();
+				node=ParentNode(node);
 			}
 			return 0;
 		}
 
-		const ParsingScope::SymbolList& ParsingScopeFinder::GetSymbolsRecursively(ParsingScope* scope, const WString& name)
+		ParsingScopeFinder::LazySymbolList ParsingScopeFinder::GetSymbols(ParsingScope* scope, const WString& name)
+		{
+			return Symbols(scope->GetSymbols(name));
+		}
+
+		ParsingScopeFinder::LazySymbolList ParsingScopeFinder::GetSymbolsRecursively(ParsingScope* scope, const WString& name)
 		{
 			while(scope)
 			{
 				const ParsingScope::SymbolList& symbols=scope->GetSymbols(name);
-				if(symbols.Count()>0) return symbols;
+				if(symbols.Count()>0) return Symbols(symbols);
 
 				if(scope->ownerSymbol)
 				{
-					scope=scope->ownerSymbol->GetParentScope();
+					scope=ParentScope(scope->ownerSymbol);
 				}
 				else
 				{
