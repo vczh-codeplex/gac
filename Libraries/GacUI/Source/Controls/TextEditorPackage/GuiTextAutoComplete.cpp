@@ -210,54 +210,6 @@ GuiGrammarAutoComplete
 				}
 			}
 
-			void GuiGrammarAutoComplete::PrepareAutoCompleteMetadata()
-			{
-				Ptr<ParsingTable> table=parsingExecutor->GetParser()->GetTable();
-				fieldAutoCompleteTypes.Clear();
-				autoCompleteTypes.Clear();
-				autoCompleteCandidates.Clear();
-				autoCompleteTokens.Clear();
-
-				// prepare tokens
-				{
-					vint tokenCount=table->GetTokenCount();
-					for(vint token=ParsingTable::UserTokenStart;token<tokenCount;token++)
-					{
-						const ParsingTable::TokenInfo& tokenInfo=table->GetTokenInfo(token);
-						autoCompleteCandidates.Add(parsingExecutor->GetAutoCompleteCandidateAttribute(tokenInfo.attributeIndex));
-						autoCompleteTokens.Add(parsingExecutor->GetAutoCompleteTokenAttribute(tokenInfo.attributeIndex));
-					}
-				}
-
-				// prepare fields
-				{
-					vint fieldCount=table->GetTreeFieldInfoCount();
-
-					for(vint field=0;field<fieldCount;field++)
-					{
-						const ParsingTable::TreeFieldInfo& fieldInfo=table->GetTreeFieldInfo(field);
-						if(Ptr<ParsingTable::AttributeInfo> att=parsingExecutor->GetAutoCompleteTypeAttribute(fieldInfo.attributeIndex))
-						{
-							vint index=autoCompleteTypes.Keys().IndexOf(att->arguments[0]);
-							if(index==-1)
-							{
-								autoCompleteTypes.Add(att->arguments[0], autoCompleteTypes.Count());
-							}
-						}
-					}
-
-					for(vint field=0;field<fieldCount;field++)
-					{
-						const ParsingTable::TreeFieldInfo& fieldInfo=table->GetTreeFieldInfo(field);
-						if(Ptr<ParsingTable::AttributeInfo> att=parsingExecutor->GetAutoCompleteTypeAttribute(fieldInfo.attributeIndex))
-						{
-							vint index=autoCompleteTypes.Keys().IndexOf(att->arguments[0]);
-							fieldAutoCompleteTypes.Add(FieldDesc(fieldInfo.type, fieldInfo.field), autoCompleteTypes.Values().Get(index));
-						}
-					}
-				}
-			}
-
 			vint GuiGrammarAutoComplete::UnsafeGetEditTraceIndex(vuint editVersion)
 			{
 				// get the index of the latest TextEditNotifyStruct of a specified edit version
@@ -798,7 +750,7 @@ GuiGrammarAutoComplete
 							if(regexToken>=0)
 							{
 								autoComplete->candidates.Add(regexToken);
-								if(autoCompleteCandidates[regexToken])
+								if(parsingExecutor->GetTokenMetaData(regexToken).isCandidate)
 								{
 									autoComplete->shownCandidates.Add(regexToken);
 								}
@@ -834,7 +786,7 @@ GuiGrammarAutoComplete
 							}
 
 							// calculate the auto complete type
-							if(editingToken && autoCompleteTokens[editingToken->token])
+							if(editingToken && parsingExecutor->GetTokenMetaData(editingToken->token).hasAutoComplete)
 							{
 								ParsingTextRange range(ParsingTextPos(startPos.row, startPos.column), ParsingTextPos(endPos.row, endPos.column));
 								ParsingTreeNode* foundNode=newContext.modifiedNode->FindDeepestNode(range);
@@ -848,13 +800,11 @@ GuiGrammarAutoComplete
 
 								WString type=tokenParent->GetType();
 								WString field=tokenParent->GetMembers().Keys().Get(index);
-								FieldDesc key(type, field);
 
-								index=fieldAutoCompleteTypes.Keys().IndexOf(key);
-								if(index!=-1)
+								Ptr<List<vint>> semantics=parsingExecutor->GetFieldMetaData(type, field).semantics;
+								if(semantics)
 								{
-									vint type=fieldAutoCompleteTypes.Values().Get(index);
-									autoComplete->types.Add(type);
+									CopyFrom(autoComplete->semantics, *semantics.Obj());
 								}
 								autoComplete->token=dynamic_cast<ParsingTreeToken*>(foundToken);
 							}
@@ -926,18 +876,6 @@ GuiGrammarAutoComplete
 				}
 			}
 
-			WString GuiGrammarAutoComplete::GetAutoCompleteTypeName(vint id)
-			{
-				for(vint i=0;i<autoCompleteTypes.Count();i++)
-				{
-					if(autoCompleteTypes.Values()[i]==id)
-					{
-						return autoCompleteTypes.Keys()[i];
-					}
-				}
-				return L"";
-			}
-
 			void GuiGrammarAutoComplete::OnContextFinishedAsync(const Context& context)
 			{
 			}
@@ -955,7 +893,6 @@ GuiGrammarAutoComplete
 			{
 				grammarParser=CreateAutoRecoverParser(parsingExecutor->GetParser()->GetTable());
 				CollectLeftRecursiveRules();
-				PrepareAutoCompleteMetadata();
 				parsingExecutor->AttachCallback(this);
 			}
 
@@ -977,12 +914,6 @@ GuiGrammarAutoComplete
 			{
 				EnsureAutoCompleteFinished();
 				parsingExecutor->DetachCallback(this);
-			}
-
-			vint GuiGrammarAutoComplete::GetAutoCompleteTypeId(const WString& type)
-			{
-				vint index=autoCompleteTypes.Keys().IndexOf(type);
-				return index==-1?-1:autoCompleteTypes.Values().Get(index);
 			}
 
 			Ptr<RepeatingParsingExecutor> GuiGrammarAutoComplete::GetParsingExecutor()

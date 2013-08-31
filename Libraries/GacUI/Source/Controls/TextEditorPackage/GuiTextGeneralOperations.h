@@ -164,6 +164,22 @@ RepeatingParsingExecutor
 					void													TextCaretChanged(const TextCaretChangedStruct& arguments)override;
 					void													TextEditFinished(vuint editVersion)override;
 				};
+
+				struct TokenMetaData
+				{
+					vint													tableTokenIndex;
+					vint													lexerTokenIndex;
+					vint													defaultColorIndex;
+					bool													hasContextColor;
+					bool													hasAutoComplete;
+					bool													isCandidate;
+				};
+
+				struct FieldMetaData
+				{
+					vint													colorIndex;
+					Ptr<collections::List<vint>>							semantics;
+				};
 			private:
 				Ptr<parsing::tabling::ParsingGeneralParser>					grammarParser;
 				WString														grammarRule;
@@ -171,9 +187,16 @@ RepeatingParsingExecutor
 				collections::List<ICallback*>								activatedCallbacks;
 				ICallback*													autoPushingCallback;
 
+				typedef collections::Pair<WString, WString>					FieldDesc;
+				collections::Dictionary<WString, vint>						tokenIndexMap;
+				collections::SortedList<WString>							semanticIndexMap;
+				collections::Dictionary<vint, TokenMetaData>				tokenMetaDatas;
+				collections::Dictionary<FieldDesc, FieldMetaData>			fieldMetaDatas;
+
 			protected:
 
 				void														Execute(const RepeatingParsingInput& input)override;
+				void														PrepareMetaData();
 
 				/// <summary>Called when semantic analyzing is needed. The function can fill the "semanticContext" field in the output parameter for storing the result.</summary>
 				/// <param name="context">The parsing result.</param>
@@ -204,29 +227,31 @@ RepeatingParsingExecutor
 				/// <param name="value">The callback.</param>
 				bool														DeactivateCallback(ICallback* value);
 
+				vint														GetTokenIndex(const WString& tokenName);
+				vint														GetSemanticId(const WString& name);
+				WString														GetSemanticName(vint id);
+				const TokenMetaData&										GetTokenMetaData(vint regexTokenIndex);
+				const FieldMetaData&										GetFieldMetaData(const WString& type, const WString& field);
+
 				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetAttribute(vint index, const WString& name, vint argumentCount);
 				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetColorAttribute(vint index);
 				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetContextColorAttribute(vint index);
-				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetSemanticColorAttribute(vint index);
-				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetAutoCompleteCandidateAttribute(vint index);
-				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetAutoCompleteTokenAttribute(vint index);
-				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetAutoCompleteTypeAttribute(vint index);
+				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetSemanticAttribute(vint index);
+				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetCandidateAttribute(vint index);
+				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetAutoCompleteAttribute(vint index);
 
 				/*
 				@Color(ColorName)
 					field:	color of the token field when the token type is marked with @ContextColor
 					token:	color of the token
-				@ContextColor(DefaultColor)
-					token:	color of the token, and it may be changed if the token field is marked with @Color or @SemanticColor
-				@SemanticColor(Type)
-					field:	invoke a callback to get the color of the token field when the token type is marked with @ContextColor
-
-				@AutoCompleteCandidate()
+				@ContextColor()
+					token:	the color of the token may be changed if the token field is marked with @Color or @Semantic
+				@Semantic(Type1, Type2, ...)
+					field:	After resolved symbols for this field, only types of symbols that specified in the arguments are acceptable.
+				@Candidate()
 					token:	when the token can be available after the editing caret, than it will be in the auto complete list.
-				@AutoCompleteToken()
+				@AutoComplete()
 					token:	when the token is editing, an auto complete list will appear if possible
-				@AutoCompleteType(Type)
-					field:	invoke a callback to get the auto complete list items when the token type is marked with @AutoCompleteToken
 				*/
 			};
 		}
