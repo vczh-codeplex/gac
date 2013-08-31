@@ -121,6 +121,126 @@ RepeatingParsingExecutor
 				}
 			}
 
+			void RepeatingParsingExecutor::PrepareMetaData()
+			{
+				Ptr<ParsingTable> table=grammarParser->GetTable();
+				tokenIndexMap.Clear();
+				semanticIndexMap.Clear();
+				tokenMetaDatas.Clear();
+				fieldMetaDatas.Clear();
+
+				Dictionary<vint, Ptr<ParsingTable::AttributeInfo>> tokenColorAtts, tokenContextColorAtts, tokenCandidateAtts, tokenAutoCompleteAtts;
+				Dictionary<FieldDesc, Ptr<ParsingTable::AttributeInfo>> fieldColorAtts, fieldSemanticAtts;
+
+				{
+					vint tokenCount=table->GetTokenCount();
+					for(vint token=ParsingTable::UserTokenStart;token<tokenCount;token++)
+					{
+						const ParsingTable::TokenInfo& tokenInfo=table->GetTokenInfo(token);
+						vint tokenIndex=token-ParsingTable::UserTokenStart;
+						tokenIndexMap.Add(tokenInfo.name, tokenIndex);
+
+						if(Ptr<ParsingTable::AttributeInfo> att=GetColorAttribute(tokenInfo.attributeIndex))
+						{
+							tokenColorAtts.Add(tokenIndex, att);
+						}
+						if(Ptr<ParsingTable::AttributeInfo> att=GetContextColorAttribute(tokenInfo.attributeIndex))
+						{
+							tokenContextColorAtts.Add(tokenIndex, att);
+						}
+						if(Ptr<ParsingTable::AttributeInfo> att=GetCandidateAttribute(tokenInfo.attributeIndex))
+						{
+							tokenCandidateAtts.Add(tokenIndex, att);
+						}
+						if(Ptr<ParsingTable::AttributeInfo> att=GetAutoCompleteAttribute(tokenInfo.attributeIndex))
+						{
+							tokenAutoCompleteAtts.Add(tokenIndex, att);
+						}
+					}
+				}
+				{
+					vint fieldCount=table->GetTreeFieldInfoCount();
+					for(vint field=0;field<fieldCount;field++)
+					{
+						const ParsingTable::TreeFieldInfo& fieldInfo=table->GetTreeFieldInfo(field);
+						FieldDesc fieldDesc(fieldInfo.type, fieldInfo.field);
+
+						if(Ptr<ParsingTable::AttributeInfo> att=GetColorAttribute(fieldInfo.attributeIndex))
+						{
+							fieldColorAtts.Add(fieldDesc, att);
+						}
+						if(Ptr<ParsingTable::AttributeInfo> att=GetSemanticAttribute(fieldInfo.attributeIndex))
+						{
+							fieldSemanticAtts.Add(fieldDesc, att);
+						}
+					}
+				}
+
+				FOREACH(Ptr<ParsingTable::AttributeInfo>, att, 
+					From(tokenColorAtts.Values())
+						.Concat(tokenContextColorAtts.Values())
+						.Concat(fieldColorAtts.Values())
+						.Concat(fieldSemanticAtts.Values())
+					)
+				{
+					FOREACH(WString, argument, att->arguments)
+					{
+						if(!semanticIndexMap.Contains(argument))
+						{
+							semanticIndexMap.Add(argument);
+						}
+					}
+				}
+
+				vint index=0;
+				FOREACH(vint, tokenIndex, tokenIndexMap.Values())
+				{
+					TokenMetaData md;
+					md.tableTokenIndex=tokenIndex+ParsingTable::UserTokenStart;
+					md.lexerTokenIndex=tokenIndex;
+					md.defaultColorIndex=-1;
+					md.hasContextColor=false;
+					md.hasAutoComplete=false;
+					md.isCandidate=false;
+
+					if((index=tokenColorAtts.Keys().Contains(tokenIndex))!=-1)
+					{
+						md.defaultColorIndex=semanticIndexMap.IndexOf(tokenColorAtts.Values()[index]->arguments[0]);
+					}
+					md.hasContextColor=tokenContextColorAtts.Keys().Contains(tokenIndex);
+					md.hasAutoComplete=tokenAutoCompleteAtts.Keys().Contains(tokenIndex);
+					md.isCandidate=tokenCandidateAtts.Keys().Contains(tokenIndex);
+
+					tokenMetaDatas.Add(tokenIndex, md);
+				}
+				{
+					vint fieldCount=table->GetTreeFieldInfoCount();
+					for(vint field=0;field<fieldCount;field++)
+					{
+						const ParsingTable::TreeFieldInfo& fieldInfo=table->GetTreeFieldInfo(field);
+						FieldDesc fieldDesc(fieldInfo.type, fieldInfo.field);
+
+						FieldMetaData md;
+						md.colorIndex=-1;
+
+						if((index=fieldColorAtts.Keys().Contains(fieldDesc))!=-1)
+						{
+							md.colorIndex=semanticIndexMap.IndexOf(fieldColorAtts.Values()[index]->arguments[0]);
+						}
+						if((index=fieldSemanticAtts.Keys().Contains(fieldDesc))!=-1)
+						{
+							md.semantics=new List<vint>;
+							FOREACH(WString, argument, fieldSemanticAtts.Values()[index]->arguments)
+							{
+								md.semantics->Add(semanticIndexMap.IndexOf(argument));
+							}
+						}
+
+						fieldMetaDatas.Add(fieldDesc, md);
+					}
+				}
+			}
+
 			void RepeatingParsingExecutor::OnContextFinishedAsync(RepeatingParsingOutput& context)
 			{
 			}
@@ -130,6 +250,7 @@ RepeatingParsingExecutor
 				,grammarRule(_grammarRule)
 				,autoPushingCallback(0)
 			{
+				PrepareMetaData();
 			}
 
 			RepeatingParsingExecutor::~RepeatingParsingExecutor()
@@ -194,12 +315,38 @@ RepeatingParsingExecutor
 				return true;
 			}
 
+			vint RepeatingParsingExecutor::GetTokenIndex(const WString& tokenName)
+			{
+				vint index=tokenIndexMap.Keys().IndexOf(tokenName);
+				return index==-1?-1:tokenIndexMap.Values()[index];
+			}
+
+			vint RepeatingParsingExecutor::GetSemanticId(const WString& name)
+			{
+				return semanticIndexMap.IndexOf(name);
+			}
+
+			WString RepeatingParsingExecutor::GetSemanticName(vint id)
+			{
+				return 0<=id&&id<semanticIndexMap.Count()?semanticIndexMap[id]:L"";
+			}
+
+			const RepeatingParsingExecutor::TokenMetaData& RepeatingParsingExecutor::GetTokenMetaData(vint regexTokenIndex)
+			{
+				return tokenMetaDatas[regexTokenIndex];
+			}
+
+			const RepeatingParsingExecutor::FieldMetaData& RepeatingParsingExecutor::GetFieldMetaData(const WString& type, const WString& field)
+			{
+				return fieldMetaDatas[FieldDesc(type, field)];
+			}
+
 			Ptr<parsing::tabling::ParsingTable::AttributeInfo> RepeatingParsingExecutor::GetAttribute(vint index, const WString& name, vint argumentCount)
 			{
 				if(index!=-1)
 				{
 					Ptr<ParsingTable::AttributeInfo> att=grammarParser->GetTable()->GetAttributeInfo(index)->FindFirst(name);
-					if(att && att->arguments.Count()==argumentCount)
+					if(att && (argumentCount==-1 || att->arguments.Count()==argumentCount))
 					{
 						return att;
 					}
@@ -214,27 +361,22 @@ RepeatingParsingExecutor
 
 			Ptr<parsing::tabling::ParsingTable::AttributeInfo> RepeatingParsingExecutor::GetContextColorAttribute(vint index)
 			{
-				return GetAttribute(index, L"ContextColor", 1);
+				return GetAttribute(index, L"ContextColor", 0);
 			}
 
-			Ptr<parsing::tabling::ParsingTable::AttributeInfo> RepeatingParsingExecutor::GetSemanticColorAttribute(vint index)
+			Ptr<parsing::tabling::ParsingTable::AttributeInfo> RepeatingParsingExecutor::GetSemanticAttribute(vint index)
 			{
-				return GetAttribute(index, L"SemanticColor", 1);
+				return GetAttribute(index, L"Semantic", -1);
 			}
 
-			Ptr<parsing::tabling::ParsingTable::AttributeInfo> RepeatingParsingExecutor::GetAutoCompleteCandidateAttribute(vint index)
+			Ptr<parsing::tabling::ParsingTable::AttributeInfo> RepeatingParsingExecutor::GetCandidateAttribute(vint index)
 			{
-				return GetAttribute(index, L"AutoCompleteCandidate", 0);
+				return GetAttribute(index, L"Candidate", 0);
 			}
 
-			Ptr<parsing::tabling::ParsingTable::AttributeInfo> RepeatingParsingExecutor::GetAutoCompleteTokenAttribute(vint index)
+			Ptr<parsing::tabling::ParsingTable::AttributeInfo> RepeatingParsingExecutor::GetAutoCompleteAttribute(vint index)
 			{
-				return GetAttribute(index, L"AutoCompleteToken", 0);
-			}
-
-			Ptr<parsing::tabling::ParsingTable::AttributeInfo> RepeatingParsingExecutor::GetAutoCompleteTypeAttribute(vint index)
-			{
-				return GetAttribute(index, L"AutoCompleteType", 1);
+				return GetAttribute(index, L"AutoComplete", 0);
 			}
 		}
 	}

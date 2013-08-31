@@ -448,18 +448,6 @@ GuiGrammarColorizer
 				parsingExecutor->DetachCallback(this);
 			}
 
-			vint GuiGrammarColorizer::GetTokenId(const WString& token)
-			{
-				vint index=colorIndices.Keys().IndexOf(token);
-				return index==-1?-1:colorIndices.Values().Get(index);
-			}
-
-			vint GuiGrammarColorizer::GetSemanticId(const WString& semantic)
-			{
-				vint index=semanticIndices.Keys().IndexOf(semantic);
-				return index==-1?-1:semanticIndices.Values().Get(index);
-			}
-
 			void GuiGrammarColorizer::BeginSetColors()
 			{
 				ClearTokens();
@@ -496,79 +484,36 @@ GuiGrammarColorizer
 			{
 				SortedList<WString> tokenColors;
 				Ptr<ParsingTable> table=parsingExecutor->GetParser()->GetTable();
-				colorIndices.Clear();
-				colorContext.Clear();
-				fieldContextColors.Clear();
-				fieldSemanticColors.Clear();
-				semanticIndices.Clear();
+				semanticColorMap.Clear();
 
-				// prepare tokens
+				vint tokenCount=table->GetTokenCount();
+				for(vint token=ParsingTable::UserTokenStart;token<tokenCount;token++)
 				{
-					vint tokenCount=table->GetTokenCount();
-					for(vint token=ParsingTable::UserTokenStart;token<tokenCount;token++)
+					const ParsingTable::TokenInfo& tokenInfo=table->GetTokenInfo(token);
+					const RepeatingParsingExecutor::TokenMetaData& md=parsingExecutor->GetTokenMetaData(token-ParsingTable::UserTokenStart);
+					if(md.defaultColorIndex==-1)
 					{
-						const ParsingTable::TokenInfo& tokenInfo=table->GetTokenInfo(token);
-						if(Ptr<ParsingTable::AttributeInfo> att=parsingExecutor->GetColorAttribute(tokenInfo.attributeIndex))
-						{
-							tokenColors.Add(att->arguments[0]);
-							vint tokenId=AddToken(tokenInfo.regex, GetColor(att->arguments[0]));
-							colorIndices.Set(att->arguments[0], tokenId);
-							colorContext.Add(false);
-						}
-						else if(Ptr<ParsingTable::AttributeInfo> att=parsingExecutor->GetContextColorAttribute(tokenInfo.attributeIndex))
-						{
-							tokenColors.Add(att->arguments[0]);
-							vint tokenId=AddToken(tokenInfo.regex, GetColor(att->arguments[0]));
-							colorIndices.Set(att->arguments[0], tokenId);
-							colorContext.Add(true);
-						}
-						else
-						{
-							AddToken(tokenInfo.regex, GetDefaultColor());
-							colorContext.Add(false);
-						}
+						AddToken(tokenInfo.regex, GetDefaultColor());
+					}
+					else
+					{
+						WString name=parsingExecutor->GetSemanticName(md.defaultColorIndex);
+						vint color=AddToken(tokenInfo.regex, GetColor(name));
+						semanticColorMap.Set(md.defaultColorIndex, color);
+						tokenColors.Add(name);
 					}
 				}
 
-				// prepare extra tokens
 				FOREACH_INDEXER(WString, color, index, colorSettings.Keys())
 				{
 					if(!tokenColors.Contains(color))
 					{
-						vint tokenId=AddExtraToken(colorSettings.Values().Get(index));
-						colorIndices.Set(color, tokenId+colorContext.Count());
-					}
-				}
-
-				// prepare fields
-				{
-					vint fieldCount=table->GetTreeFieldInfoCount();
-					for(vint field=0;field<fieldCount;field++)
-					{
-						const ParsingTable::TreeFieldInfo& fieldInfo=table->GetTreeFieldInfo(field);
-						if(Ptr<ParsingTable::AttributeInfo> att=parsingExecutor->GetColorAttribute(fieldInfo.attributeIndex))
+						vint semanticId=parsingExecutor->GetSemanticId(color);
+						if(semanticId!=-1)
 						{
-							vint index=colorIndices.Keys().IndexOf(att->arguments[0]);
-							if(index!=-1)
-							{
-								fieldContextColors.Add(FieldDesc(fieldInfo.type, fieldInfo.field), colorIndices.Values().Get(index));
-							}
-						}
-						else if(Ptr<ParsingTable::AttributeInfo> att=parsingExecutor->GetSemanticColorAttribute(fieldInfo.attributeIndex))
-						{
-							FieldDesc key(fieldInfo.type, fieldInfo.field);
-							vint semantic=-1;
-							vint index=semanticIndices.Keys().IndexOf(att->arguments[0]);
-							if(index==-1)
-							{
-								semantic=semanticIndices.Count();
-								semanticIndices.Add(att->arguments[0], semantic);
-							}
-							else
-							{
-								semantic=semanticIndices.Values().Get(index);
-							}
-							fieldSemanticColors.Add(key, semantic);
+							vint tokenId=AddExtraToken(colorSettings.Values().Get(index));
+							vint color=tokenId+tokenCount-ParsingTable::UserTokenStart;
+							semanticColorMap.Set(semanticId, color);
 						}
 					}
 				}
@@ -580,7 +525,7 @@ GuiGrammarColorizer
 				SPIN_LOCK(contextLock)
 				{
 					ParsingTreeObject* node=context.node.Obj();
-					if(node && token!=-1 && colorContext[token])
+					if(node && token!=-1 && parsingExecutor->GetTokenMetaData(token).hasContextColor)
 					{
 						ParsingTextPos pos(lineIndex, start);
 						ParsingTreeNode* foundNode=node->FindDeepestNode(pos);
@@ -594,28 +539,31 @@ GuiGrammarColorizer
 
 						WString type=tokenParent->GetType();
 						WString field=tokenParent->GetMembers().Keys().Get(index);
-						FieldDesc key(type, field);
+						const RepeatingParsingExecutor::FieldMetaData& md=parsingExecutor->GetFieldMetaData(type, field);
 
-						index=fieldContextColors.Keys().IndexOf(key);
-						if(index!=-1)
-						{
-							token=fieldContextColors.Values().Get(index);
-							return;
-						}
-
-						index=fieldSemanticColors.Keys().IndexOf(key);
-						if(index!=-1)
+						vint semantic=md.colorIndex;
+						if(md.semantics)
 						{
 							SemanticColorizeContext scContext;
 							scContext.foundToken=foundToken;
 							scContext.tokenParent=tokenParent;
 							scContext.type=type;
 							scContext.field=field;
-							scContext.semantic=fieldSemanticColors.Values().Get(index);
-							scContext.token=token;
+							scContext.semantic=-1;
 							OnSemanticColorize(scContext, context);
-							token=scContext.token;
-							return;
+							if(md.semantics->Contains(scContext.semantic))
+							{
+								semantic=scContext.semantic;
+							}
+						}
+
+						if(semantic!=-1)
+						{
+							index=semanticColorMap.Keys().IndexOf(semantic);
+							if(index!=-1)
+							{
+								token=semanticColorMap.Values()[index];
+							}
 						}
 					}
 				}

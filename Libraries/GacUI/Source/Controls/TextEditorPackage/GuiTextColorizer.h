@@ -164,18 +164,12 @@ GuiGrammarColorizer
 					WString													type;
 					/// <summary>Field of the parent that contains the token.</summary>
 					WString													field;
-					/// <summary>Semantic id that comes from the argument in the @SemanticColor attribute. Name-id mapping can be retrived using <see cref="GetSemanticId"/>.</summary>
+					/// <summary>Output semantic id that comes from one the argument in the @Semantic attribute.</summary>
 					vint													semantic;
-					/// <summary>Output argument for the result color. Name-id mapping can be retrived using <see cref="GetTokenId"/>.</summary>
-					vint													token;
 				};
 			private:
 				collections::Dictionary<WString, ColorEntry>				colorSettings;
-				collections::Dictionary<WString, vint>						colorIndices;
-				collections::List<bool>										colorContext;
-				FieldContextColors											fieldContextColors;
-				FieldSemanticColors											fieldSemanticColors;
-				collections::Dictionary<WString, vint>						semanticIndices;
+				collections::Dictionary<vint, vint>							semanticColorMap;
 
 				SpinLock													contextLock;
 				RepeatingParsingOutput										context;
@@ -209,14 +203,6 @@ GuiGrammarColorizer
 				GuiGrammarColorizer(Ptr<parsing::tabling::ParsingGeneralParser> _grammarParser, const WString& _grammarRule);
 				~GuiGrammarColorizer();
 
-				/// <summary>Get the id for a token name.</summary>
-				/// <returns>The id.</returns>
-				/// <param name="token">The name of the token.</param>
-				vint														GetTokenId(const WString& token);
-				/// <summary>Get the id for a semantic name.</summary>
-				/// <returns>The id.</returns>
-				/// <param name="token">The name of the semantic.</param>
-				vint														GetSemanticId(const WString& semantic);
 				/// <summary>Reset all color settings.</summary>
 				void														BeginSetColors();
 				/// <summary>Get all color names.</summary>

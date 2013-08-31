@@ -227,81 +227,66 @@ ParserGrammarColorizer
 class ParserGrammarColorizer : public GuiGrammarColorizer
 {
 protected:
-	vint									tokenIdType;
-	vint									tokenIdToken;
-	vint									tokenIdRule;
-	vint									semanticType;
-	vint									semanticGrammar;
 
 	void OnSemanticColorize(SemanticColorizeContext& context, const RepeatingParsingOutput& input)override
 	{
-		if(context.semantic==semanticType)
+		List<WString> names;
 		{
-			List<WString> names;
+			ParsingTreeObject* type=context.tokenParent;
+			while(type)
 			{
-				ParsingTreeObject* type=context.tokenParent;
-				while(type)
+				if(type->GetType()==L"PrimitiveTypeObj")
 				{
-					if(type->GetType()==L"PrimitiveTypeObj")
-					{
-						names.Add(type->GetMember(L"name").Cast<ParsingTreeToken>()->GetValue());
-					}
-					if(type->GetType()==L"SubTypeObj")
-					{
-						names.Add(type->GetMember(L"name").Cast<ParsingTreeToken>()->GetValue());
-						type=dynamic_cast<ParsingTreeObject*>(type->GetMember(L"parentType").Obj());
-					}
-					else
-					{
-						break;
-					}
+					names.Add(type->GetMember(L"name").Cast<ParsingTreeToken>()->GetValue());
 				}
-			}
-
-			ParsingScope* scope=input.finder->GetScopeFromNode(context.foundToken);
-			Ptr<TypeSymbol> type=0;
-			for(vint i=names.Count()-1;i>=0;i--)
-			{
-				if(type)
+				if(type->GetType()==L"SubTypeObj")
 				{
-					type=input.finder->GetSymbols(type->GetScope(), names[i])
-						.First(0)
-						.Cast<TypeSymbol>();
-				}
-				else if(i==names.Count()-1)
-				{
-					type=input.finder->GetSymbolsRecursively(scope, names[i])
-						.First(0)
-						.Cast<TypeSymbol>();
+					names.Add(type->GetMember(L"name").Cast<ParsingTreeToken>()->GetValue());
+					type=dynamic_cast<ParsingTreeObject*>(type->GetMember(L"parentType").Obj());
 				}
 				else
 				{
 					break;
 				}
 			}
+		}
 
+		if(names.Count()==0)
+		{
+			names.Add(context.foundToken->GetValue());
+		}
+
+		ParsingScope* scope=input.finder->GetScopeFromNode(context.foundToken);
+		Ptr<ParsingScopeSymbol> type=0;
+		for(vint i=names.Count()-1;i>=0;i--)
+		{
 			if(type)
 			{
-				context.token=tokenIdType;
+				type=input.finder->GetSymbols(type->GetScope(), names[i])
+					.First(0);
+			}
+			else if(i==names.Count()-1)
+			{
+				type=input.finder->GetSymbolsRecursively(scope, names[i])
+					.First(0);
+			}
+			else
+			{
+				break;
 			}
 		}
-		else if(context.semantic==semanticGrammar)
+
+		if(type.Cast<TypeSymbol>())
 		{
-			WString name=context.foundToken->GetValue();
-			const List<Ptr<ParsingScopeSymbol>>& symbols=input.symbol->GetScope()->GetSymbols(name);
-			FOREACH(Ptr<ParsingScopeSymbol>, symbol, symbols)
-			{
-				if(symbol.Cast<TokenSymbol>())
-				{
-					context.token=tokenIdToken;
-					break;
-				}
-				else if(symbol.Cast<RuleSymbol>())
-				{
-					context.token=tokenIdRule;
-					break;
-				}
-			}
+			context.semantic=GetParsingExecutor()->GetSemanticId(L"Type");
+		}
+		else if(type.Cast<TokenSymbol>())
+		{
+			context.semantic=GetParsingExecutor()->GetSemanticId(L"Token");
+		}
+		else if(type.Cast<RuleSymbol>())
+		{
+			context.semantic=GetParsingExecutor()->GetSemanticId(L"Rule");
 		}
 	}
 public:
@@ -315,12 +300,6 @@ public:
 		SetColor(L"Token", Color(163, 73, 164));
 		SetColor(L"Rule", Color(255, 127, 39));
 		EndSetColors();
-
-		tokenIdType=GetTokenId(L"Type");
-		tokenIdToken=GetTokenId(L"Token");
-		tokenIdRule=GetTokenId(L"Rule");
-		semanticType=GetSemanticId(L"Type");
-		semanticGrammar=GetSemanticId(L"Grammar");
 	}
 
 	~ParserGrammarColorizer()
@@ -337,13 +316,6 @@ class ParserGrammarAutoComplete : public GuiGrammarAutoComplete
 {
 protected:
 	GuiMultilineTextBox*					textBoxScope;
-	vint									autoCompleteType;
-	vint									autoCompleteSubType;
-	vint									autoCompleteGrammar;
-	vint									autoCompleteText;
-	vint									autoCompleteField;
-	vint									autoCompleteEnumValue;
-	vint									autoCompleteEnumField;
 
 	void OnContextFinishedAsync(const Context& context)override
 	{
@@ -376,9 +348,9 @@ protected:
 			if(context.autoComplete->token)
 			{
 				candidateTypeMessage+=L"editing: "+context.autoComplete->token->GetValue()+L"\r\n";
-				FOREACH(vint, type, context.autoComplete->types)
+				FOREACH(vint, type, context.autoComplete->semantics)
 				{
-					candidateTypeMessage+=L"type: "+GetAutoCompleteTypeName(type)+L"\r\n";
+					candidateTypeMessage+=L"type: "+GetParsingExecutor()->GetSemanticName(type)+L"\r\n";
 				}
 			}
 		}
@@ -407,13 +379,6 @@ public:
 		:GuiGrammarAutoComplete(executor)
 		,textBoxScope(_textBoxScope)
 	{
-		autoCompleteType=GetAutoCompleteTypeId(L"Type");
-		autoCompleteSubType=GetAutoCompleteTypeId(L"SubType");
-		autoCompleteGrammar=GetAutoCompleteTypeId(L"Grammar");
-		autoCompleteText=GetAutoCompleteTypeId(L"Text");
-		autoCompleteField=GetAutoCompleteTypeId(L"Field");
-		autoCompleteEnumValue=GetAutoCompleteTypeId(L"EnumValue");
-		autoCompleteEnumField=GetAutoCompleteTypeId(L"EnumField");
 	}
 
 	~ParserGrammarAutoComplete()

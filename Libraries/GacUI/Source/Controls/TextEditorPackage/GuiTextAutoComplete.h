@@ -50,8 +50,6 @@ GuiGrammarAutoComplete
 				, private RepeatingParsingExecutor::CallbackBase
 				, private RepeatingTaskExecutor<RepeatingParsingOutput>
 			{
-				typedef collections::Pair<WString, WString>					FieldDesc;
-				typedef collections::Dictionary<FieldDesc, vint>			FieldAutoCompleteTypes;
 			public:
 				/// <summary>The auto complete list data.</summary>
 				struct AutoCompleteData
@@ -61,7 +59,7 @@ GuiGrammarAutoComplete
 					/// <summary>Available candidate tokens (in lexer token index) that marked with @AutoCompleteCandidate().</summary>
 					collections::List<vint>					shownCandidates;
 					/// <summary>Available auto complete types.</summary>
-					collections::List<vint>					types;
+					collections::List<vint>					semantics;
 					/// <summary>Auto complete token node.</summary>
 					Ptr<parsing::ParsingTreeToken>			token;
 				};
@@ -94,10 +92,6 @@ GuiGrammarAutoComplete
 			private:
 				Ptr<parsing::tabling::ParsingGeneralParser>	grammarParser;
 				collections::SortedList<WString>			leftRecursiveRules;
-				collections::Dictionary<WString, vint>		autoCompleteTypes;
-				FieldAutoCompleteTypes						fieldAutoCompleteTypes;
-				collections::List<bool>						autoCompleteCandidates;
-				collections::List<bool>						autoCompleteTokens;
 				bool										editing;
 
 				SpinLock									editTraceLock;
@@ -113,7 +107,6 @@ GuiGrammarAutoComplete
 				void										TextEditFinished(vuint editVersion)override;
 				void										OnParsingFinishedAsync(const RepeatingParsingOutput& output)override;
 				void										CollectLeftRecursiveRules();
-				void										PrepareAutoCompleteMetadata();
 
 				vint										UnsafeGetEditTraceIndex(vuint editVersion);
 				TextPos										ChooseCorrectTextPos(TextPos pos, const regex::RegexTokens& tokens);
@@ -146,8 +139,6 @@ GuiGrammarAutoComplete
 				void										PostList(const Context& newContext);
 				void										Initialize();
 			protected:
-				
-				WString										GetAutoCompleteTypeName(vint id);
 
 				/// <summary>Called when the context of the code is selected.</summary>
 				/// <param name="context">The selected context.</param>
@@ -164,11 +155,6 @@ GuiGrammarAutoComplete
 				/// <param name="_grammarRule"></param>
 				GuiGrammarAutoComplete(Ptr<parsing::tabling::ParsingGeneralParser> _grammarParser, const WString& _grammarRule);
 				~GuiGrammarAutoComplete();
-
-				/// <summary>Get the id for a auto complete type.</summary>
-				/// <returns>The id.</returns>
-				/// <param name="token">The name of the auto complete type.</param>
-				vint										GetAutoCompleteTypeId(const WString& type);
 
 				/// <summary>Get the internal parsing executor.</summary>
 				/// <returns>The parsing executor.</returns>
