@@ -200,6 +200,7 @@ GuiControlHost
 
 				host=new GuiGraphicsHost;
 				host->GetMainComposition()->AddChild(GetStyleController()->GetBoundsComposition());
+				sharedPtrDestructorProc=0;
 			}
 
 			GuiControlHost::~GuiControlHost()
