@@ -546,6 +546,6 @@ extern void UnitTestInGuiMain();
 void GuiMain()
 {
 	UnitTestInGuiMain();
-	AutoCompleteWindow window;
-	GetApplication()->Run(&window);
+	Ptr<AutoCompleteWindow> window=new AutoCompleteWindow();
+	GetApplication()->Run(window.Obj());
 }
