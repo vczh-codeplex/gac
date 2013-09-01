@@ -206,6 +206,7 @@ namespace vl
 				WString										GetParsingRule();
 				vint										GetParsingRuleStartState();
 				vint										GetCurrentToken();
+				vint										GetCurrentTableTokenIndex();
 				const collections::List<vint>&				GetStateStack();
 				vint										GetCurrentState();
 				void										SkipCurrentToken();
