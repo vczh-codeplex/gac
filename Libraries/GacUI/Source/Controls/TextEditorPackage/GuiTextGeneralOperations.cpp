@@ -203,7 +203,7 @@ RepeatingParsingExecutor
 					md.hasAutoComplete=false;
 					md.isCandidate=false;
 
-					if((index=tokenColorAtts.Keys().Contains(tokenIndex))!=-1)
+					if((index=tokenColorAtts.Keys().IndexOf(tokenIndex))!=-1)
 					{
 						md.defaultColorIndex=semanticIndexMap.IndexOf(tokenColorAtts.Values()[index]->arguments[0]);
 					}
@@ -223,11 +223,11 @@ RepeatingParsingExecutor
 						FieldMetaData md;
 						md.colorIndex=-1;
 
-						if((index=fieldColorAtts.Keys().Contains(fieldDesc))!=-1)
+						if((index=fieldColorAtts.Keys().IndexOf(fieldDesc))!=-1)
 						{
 							md.colorIndex=semanticIndexMap.IndexOf(fieldColorAtts.Values()[index]->arguments[0]);
 						}
-						if((index=fieldSemanticAtts.Keys().Contains(fieldDesc))!=-1)
+						if((index=fieldSemanticAtts.Keys().IndexOf(fieldDesc))!=-1)
 						{
 							md.semantics=new List<vint>;
 							FOREACH(WString, argument, fieldSemanticAtts.Values()[index]->arguments)
