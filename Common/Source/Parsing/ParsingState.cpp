@@ -279,6 +279,11 @@ ParsingState
 					:walker->GetTokenIndexInStream();
 			}
 
+			vint ParsingState::GetCurrentTableTokenIndex()
+			{
+				return walker->GetTableTokenIndex();
+			}
+
 			const collections::List<vint>& ParsingState::GetStateStack()
 			{
 				return stateGroup->stateStack;

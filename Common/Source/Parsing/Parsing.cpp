@@ -61,7 +61,7 @@ ParsingGeneralParser
 					}
 					else if(result.transitionType==ParsingState::TransitionResult::SkipToken)
 					{
-						if(result.tableTokenIndex==ParsingTable::TokenFinish)
+						if(state.GetCurrentTableTokenIndex()==ParsingTable::TokenFinish)
 						{
 							const RegexToken* token=state.GetToken(state.GetCurrentToken());
 							errors.Add(new ParsingError(token, L"Failed to recover error when reaching the end of the input."));
