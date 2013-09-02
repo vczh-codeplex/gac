@@ -247,7 +247,13 @@ protected:
 	{
 		if(Ptr<ParsingScopeSymbol> symbol=FindReferencedSymbols(context.tokenParent, input.finder.Obj()).First(0))
 		{
-			context.semantic=symbol->GetSemanticId();
+			vint semanticId=From(symbol->GetSemanticIds())
+				.Intersect(*context.acceptableSemanticIds.Obj())
+				.First(-1);
+			if(semanticId!=-1)
+			{
+				context.semanticId=semanticId;
+			}
 		}
 	}
 public:
@@ -278,7 +284,7 @@ class ParserGrammarAutoComplete : public GuiGrammarAutoComplete
 protected:
 	GuiMultilineTextBox*					textBoxScope;
 
-	void OnContextFinishedAsync(const Context& context)override
+	void LogResult(Context& context)
 	{
 		//WString selectedTree;
 		//{
@@ -334,6 +340,11 @@ protected:
 			textBoxScope->SetText(selectedMessage);
 			textBoxScope->Select(TextPos(), TextPos());
 		});
+	}
+
+	void OnContextFinishedAsync(Context& context)override
+	{
+		LogResult(context);
 	}
 public:
 	ParserGrammarAutoComplete(Ptr<ParserGrammarExecutor> executor, GuiMultilineTextBox* _textBoxScope)

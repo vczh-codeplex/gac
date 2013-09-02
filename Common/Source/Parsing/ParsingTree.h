@@ -416,7 +416,7 @@ namespace vl
 		protected:
 			ParsingScope*							parentScope;
 			WString									name;
-			vint									semanticId;
+			collections::List<vint>					semanticIds;
 			ParsingTreeObject*						node;
 			Ptr<ParsingScope>						scope;
 
@@ -426,7 +426,7 @@ namespace vl
 
 			ParsingScope*							GetParentScope();
 			const WString&							GetName();
-			vint									GetSemanticId();
+			const collections::List<vint>&			GetSemanticIds();
 			ParsingTreeObject*						GetNode();
 			void									SetNode(ParsingTreeObject* value);
 			bool									CreateScope();

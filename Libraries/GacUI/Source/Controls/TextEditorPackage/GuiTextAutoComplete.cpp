@@ -876,7 +876,7 @@ GuiGrammarAutoComplete
 				}
 			}
 
-			void GuiGrammarAutoComplete::OnContextFinishedAsync(const Context& context)
+			void GuiGrammarAutoComplete::OnContextFinishedAsync(Context& context)
 			{
 			}
 

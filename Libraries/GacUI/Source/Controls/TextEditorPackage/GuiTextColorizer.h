@@ -164,8 +164,10 @@ GuiGrammarColorizer
 					WString													type;
 					/// <summary>Field of the parent that contains the token.</summary>
 					WString													field;
+					/// <summary>All acceptable semantic ids.</summary>
+					Ptr<collections::List<vint>>							acceptableSemanticIds;
 					/// <summary>Output semantic id that comes from one the argument in the @Semantic attribute.</summary>
-					vint													semantic;
+					vint													semanticId;
 				};
 			private:
 				collections::Dictionary<WString, ColorEntry>				colorSettings;
