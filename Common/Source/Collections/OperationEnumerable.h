@@ -209,6 +209,24 @@ namespace vl
 			}
 			return 0;
 		}
+
+		template<typename T>
+		struct SortedListOperations
+		{
+			static bool Contains(const SortedList<T>& items, const T& item)
+			{
+				return items.Contains(item);
+			}
+		};
+
+		template<typename T>
+		struct SortedListOperations<Ptr<T>>
+		{
+			static bool Contains(const SortedList<Ptr<T>>& items, const Ptr<T>& item)
+			{
+				return items.Contains(item.Obj());
+			}
+		};
 	}
 }
 

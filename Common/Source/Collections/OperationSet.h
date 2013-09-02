@@ -68,7 +68,7 @@ Intersect/Except
 			{
 				while(enumerator->Next())
 				{
-					if(reference.Contains(enumerator->Current())==Intersect)
+					if(SortedListOperations<T>::Contains(reference, enumerator->Current())==Intersect)
 					{
 						index++;
 						return true;
