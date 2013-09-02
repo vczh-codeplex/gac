@@ -512,7 +512,9 @@ namespace vl
 			ParsingScopeSymbol*						GetSymbolFromNode(ParsingTreeObject* node);
 			ParsingScope*							GetScopeFromNode(ParsingTreeNode* node);
 			LazySymbolList							GetSymbols(ParsingScope* scope, const WString& name);
+			LazySymbolList							GetSymbols(ParsingScope* scope);
 			LazySymbolList							GetSymbolsRecursively(ParsingScope* scope, const WString& name);
+			LazySymbolList							GetSymbolsRecursively(ParsingScope* scope);
 		};
 	}
 }

@@ -903,6 +903,15 @@ ParsingScopeFinder
 			return Symbols(scope->GetSymbols(name));
 		}
 
+		ParsingScopeFinder::LazySymbolList ParsingScopeFinder::GetSymbols(ParsingScope* scope)
+		{
+			return From(scope->GetSymbolNames())
+				.SelectMany([=](const WString& name)
+				{
+					return Symbols(scope->GetSymbols(name));
+				});
+		}
+
 		ParsingScopeFinder::LazySymbolList ParsingScopeFinder::GetSymbolsRecursively(ParsingScope* scope, const WString& name)
 		{
 			while(scope)
@@ -927,6 +936,25 @@ ParsingScopeFinder
 			{
 				return ParsingScope::emptySymbolList;
 			}
+		}
+
+		ParsingScopeFinder::LazySymbolList ParsingScopeFinder::GetSymbolsRecursively(ParsingScope* scope)
+		{
+			LazySymbolList result;
+			while(scope)
+			{
+				result=result.Concat(GetSymbols(scope));
+
+				if(scope->ownerSymbol)
+				{
+					scope=ParentScope(scope->ownerSymbol);
+				}
+				else
+				{
+					break;
+				}
+			}
+			return result;
 		}
 	}
 }
