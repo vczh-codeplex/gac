@@ -218,22 +218,39 @@ LazyList<Ptr<ParsingScopeSymbol>> FindReferencedSymbols(ParsingTreeObject* obj, 
 
 LazyList<Ptr<ParsingScopeSymbol>> FindPossibleSymbols(ParsingTreeObject* obj, const WString& field, ParsingScopeFinder* finder)
 {
+	ParsingScope* scope=finder->GetScopeFromNode(obj);
 	if(obj->GetType()==L"PrimitiveTypeObj")
 	{
 		if(field==L"name")
 		{
+			return finder->GetSymbolsRecursively(scope);
 		}
 	}
 	else if(obj->GetType()==L"SubTypeObj")
 	{
 		if(field==L"name")
 		{
+			if(Ptr<ParsingTreeObject> parentType=obj->GetMember(L"parentType").Cast<ParsingTreeObject>())
+			{
+				WString name=obj->GetMember(L"name").Cast<ParsingTreeToken>()->GetValue();
+				LazyList<Ptr<ParsingScopeSymbol>> types=FindReferencedSymbols(parentType.Obj(), finder);
+				return types
+					.Where([](Ptr<ParsingScopeSymbol> type)
+					{
+						return type->GetScope()!=0;
+					})
+					.SelectMany([=](Ptr<ParsingScopeSymbol> type)
+					{
+						return finder->GetSymbols(type->GetScope());
+					});
+			}
 		}
 	}
 	else if(obj->GetType()==L"PrimitiveGrammarDef")
 	{
 		if(field==L"name")
 		{
+			return finder->GetSymbolsRecursively(scope);
 		}
 	}
 	else if(obj->GetType()==L"TextGrammarDef")
@@ -376,7 +393,6 @@ protected:
 					{
 						candidateSymbolMessage
 							+=symbol->GetName()
-							+(From(symbol->GetSemanticIds()).Intersect(*context.autoComplete->acceptableSemanticIds.Obj()).First(-1)!=-1?L"[SHOWN]":L"")
 							+L"\r\n";
 					}
 				}
@@ -422,6 +438,15 @@ protected:
 				{
 					newFinder=new ParsingScopeFinder(new ParsingScopeFinder::IndirectSymbolMapper(originalSymbol, replacedSymbol.Obj(), originalNode, replacedNode));
 					newFinder->InitializeQueryCache(replacedSymbol.Obj());
+					LazyList<Ptr<ParsingScopeSymbol>> symbols=FindPossibleSymbols(context.autoComplete->tokenParent, context.autoComplete->field, newFinder.Obj());
+					CopyFrom(
+						context.autoComplete->candidateSymbols,
+						From(symbols)
+							.Where([&context](Ptr<ParsingScopeSymbol> symbol)
+							{
+								return From(symbol->GetSemanticIds()).Intersect(*context.autoComplete->acceptableSemanticIds.Obj()).First(-1)!=-1;
+							})
+						);
 				}
 			}
 		}
