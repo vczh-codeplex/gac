@@ -900,11 +900,13 @@ ParsingScopeFinder
 
 		ParsingScopeFinder::LazySymbolList ParsingScopeFinder::GetSymbols(ParsingScope* scope, const WString& name)
 		{
+			if(!scope) return LazySymbolList();
 			return Symbols(scope->GetSymbols(name));
 		}
 
 		ParsingScopeFinder::LazySymbolList ParsingScopeFinder::GetSymbols(ParsingScope* scope)
 		{
+			if(!scope) return LazySymbolList();
 			return From(scope->GetSymbolNames())
 				.SelectMany([=](const WString& name)
 				{
@@ -914,6 +916,7 @@ ParsingScopeFinder
 
 		ParsingScopeFinder::LazySymbolList ParsingScopeFinder::GetSymbolsRecursively(ParsingScope* scope, const WString& name)
 		{
+			if(!scope) return LazySymbolList();
 			while(scope)
 			{
 				const ParsingScope::SymbolList& symbols=scope->GetSymbols(name);
@@ -940,6 +943,7 @@ ParsingScopeFinder
 
 		ParsingScopeFinder::LazySymbolList ParsingScopeFinder::GetSymbolsRecursively(ParsingScope* scope)
 		{
+			if(!scope) return LazySymbolList();
 			LazySymbolList result;
 			while(scope)
 			{
