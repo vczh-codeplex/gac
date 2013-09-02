@@ -352,19 +352,20 @@ PtrTypeList SearchGrammarTypes(ParsingTreeObject* obj, ParsingScopeFinder* finde
 LazyList<Ptr<ParsingScopeSymbol>> DetermineGrammarTypes(ParsingTreeObject* obj, ParsingScopeFinder* finder)
 {
 	PtrTypeList selectedTypes;
+	ParsingTreeObject* currentObj=obj;
 	ParsingTreeObject* lastObj=0;
-	while(obj)
+	while(currentObj)
 	{
-		if(obj->GetType()==L"SequenceGrammarDef")
+		if(currentObj->GetType()==L"SequenceGrammarDef")
 		{
-			ParsingTreeObject* first=dynamic_cast<ParsingTreeObject*>(finder->Node(obj->GetMember(L"first").Obj()));
-			ParsingTreeObject* second=dynamic_cast<ParsingTreeObject*>(finder->Node(obj->GetMember(L"second").Obj()));
+			ParsingTreeObject* first=dynamic_cast<ParsingTreeObject*>(finder->Node(currentObj->GetMember(L"first").Obj()));
+			ParsingTreeObject* second=dynamic_cast<ParsingTreeObject*>(finder->Node(currentObj->GetMember(L"second").Obj()));
 			PtrTypeList alternativeTypes=lastObj==first?SearchGrammarTypes(second, finder):SearchGrammarTypes(first, finder);
 			selectedTypes=IntersectTypes(selectedTypes, alternativeTypes);
 		}
-		else if(obj->GetType()==L"CreateGrammarDef")
+		else if(currentObj->GetType()==L"CreateGrammarDef")
 		{
-			Ptr<ParsingScopeSymbol> type=FindReferencedSymbols(finder->Node(obj->GetMember(L"type")).Cast<ParsingTreeObject>().Obj(), finder)
+			Ptr<ParsingScopeSymbol> type=FindReferencedSymbols(finder->Node(currentObj->GetMember(L"type")).Cast<ParsingTreeObject>().Obj(), finder)
 				.Where([](Ptr<ParsingScopeSymbol> symbol)
 				{
 					return symbol.Cast<TypeSymbol>();
@@ -377,14 +378,14 @@ LazyList<Ptr<ParsingScopeSymbol>> DetermineGrammarTypes(ParsingTreeObject* obj, 
 				selectedTypes=types;
 			}
 		}
-		else if(obj->GetType()==L"AssignGrammarDef" || obj->GetType()==L"SetterGrammarDef")
+		else if(currentObj->GetType()==L"AssignGrammarDef" || currentObj->GetType()==L"SetterGrammarDef")
 		{
-			ParsingTreeObject* grammar=dynamic_cast<ParsingTreeObject*>(finder->Node(obj->GetMember(L"grammar").Obj()));
+			ParsingTreeObject* grammar=dynamic_cast<ParsingTreeObject*>(finder->Node(currentObj->GetMember(L"grammar").Obj()));
 			PtrTypeList alternativeTypes=SearchGrammarTypes(grammar, finder);
 			selectedTypes=IntersectTypes(selectedTypes, alternativeTypes);
 		}
-		lastObj=obj;
-		obj=dynamic_cast<ParsingTreeObject*>(finder->ParentNode(obj));
+		lastObj=currentObj;
+		currentObj=dynamic_cast<ParsingTreeObject*>(finder->ParentNode(currentObj));
 	}
 
 	return selectedTypes?selectedTypes:SearchAllTypes(obj, finder);
