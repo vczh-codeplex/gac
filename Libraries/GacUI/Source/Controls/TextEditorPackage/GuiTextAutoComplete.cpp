@@ -838,7 +838,7 @@ GuiGrammarAutoComplete
 				{
 					context=newContext;
 				}
-				if(newContext.modifiedNode && newContext.autoComplete)
+				if(newContext.modifiedNode)
 				{
 					OnContextFinishedAsync(context);
 					GetApplication()->InvokeInMainThread([=]()

@@ -534,11 +534,14 @@ GuiGrammarColorizer
 							const RepeatingParsingExecutor::FieldMetaData& md=parsingExecutor->GetFieldMetaData(scContext.type, scContext.field);
 							vint semantic=md.colorIndex;
 							scContext.semanticId=-1;
-							OnSemanticColorize(scContext, context);
 
-							if(md.semantics->Contains(scContext.semanticId))
+							if(scContext.acceptableSemanticIds)
 							{
-								semantic=scContext.semanticId;
+								OnSemanticColorize(scContext, context);
+								if(md.semantics->Contains(scContext.semanticId))
+								{
+									semantic=scContext.semanticId;
+								}
 							}
 
 							if(semantic!=-1)
