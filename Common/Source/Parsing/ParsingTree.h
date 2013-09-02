@@ -416,15 +416,17 @@ namespace vl
 		protected:
 			ParsingScope*							parentScope;
 			WString									name;
+			vint									semanticId;
 			ParsingTreeObject*						node;
 			Ptr<ParsingScope>						scope;
 
 		public:
-			ParsingScopeSymbol(const WString& _name);
+			ParsingScopeSymbol(const WString& _name=L"", vint _semanticId=-1);
 			~ParsingScopeSymbol();
 
 			ParsingScope*							GetParentScope();
 			const WString&							GetName();
+			vint									GetSemanticId();
 			ParsingTreeObject*						GetNode();
 			void									SetNode(ParsingTreeObject* value);
 			bool									CreateScope();
@@ -461,9 +463,8 @@ namespace vl
 			NodeSymbolMap							nodeSymbols;
 			Ptr<SymbolMapper>						symbolMapper;
 
-			void									InitializeQueryCache(ParsingScopeSymbol* symbol);
 		public:
-			ParsingScopeFinder(ParsingScopeSymbol* rootSymbol, Ptr<SymbolMapper> _symbolMapper=new DirectSymbolMapper);
+			ParsingScopeFinder(Ptr<SymbolMapper> _symbolMapper=new DirectSymbolMapper);
 			~ParsingScopeFinder();
 
 			ParsingTreeNode*						ParentNode(ParsingTreeNode* node);
@@ -487,7 +488,8 @@ namespace vl
 			{
 				return Node(node).Cast<T>();
 			}
-
+			
+			void									InitializeQueryCache(ParsingScopeSymbol* symbol);
 			ParsingScopeSymbol*						GetSymbolFromNode(ParsingTreeObject* node);
 			ParsingScope*							GetScopeFromNode(ParsingTreeNode* node);
 			LazySymbolList							GetSymbols(ParsingScope* scope, const WString& name);

@@ -639,9 +639,10 @@ ParsingScope
 ParsingScopeSymbol
 ***********************************************************************/
 
-		ParsingScopeSymbol::ParsingScopeSymbol(const WString& _name)
+		ParsingScopeSymbol::ParsingScopeSymbol(const WString& _name, vint _semanticId)
 			:parentScope(0)
 			,name(_name)
+			,semanticId(_semanticId)
 		{
 		}
 
@@ -657,6 +658,11 @@ ParsingScopeSymbol
 		const WString& ParsingScopeSymbol::GetName()
 		{
 			return name;
+		}
+
+		vint ParsingScopeSymbol::GetSemanticId()
+		{
+			return semanticId;
 		}
 
 		ParsingTreeObject* ParsingScopeSymbol::GetNode()
@@ -795,10 +801,9 @@ ParsingScopeFinder
 			}
 		}
 
-		ParsingScopeFinder::ParsingScopeFinder(ParsingScopeSymbol* rootSymbol, Ptr<SymbolMapper> _symbolMapper)
+		ParsingScopeFinder::ParsingScopeFinder( Ptr<SymbolMapper> _symbolMapper)
 			:symbolMapper(_symbolMapper)
 		{
-			InitializeQueryCache(rootSymbol);
 		}
 
 		ParsingScopeFinder::~ParsingScopeFinder()
