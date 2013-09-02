@@ -30,6 +30,18 @@ namespace vl
 				writer.WriteChar(L'\"');
 			}
 
+			WString SerializeString(const WString& value)
+			{
+				MemoryStream stream;
+				{
+					StreamWriter writer(stream);
+					LogString(value, writer);
+				}
+				stream.SeekFromBegin(0);
+				StreamReader reader(stream);
+				return reader.ReadToEnd();
+			}
+
 			void LogAttributeList(ParsingDefinitionBase* definition, TextWriter& writer)
 			{
 				for(vint i=0;i<definition->attributes.Count();i++)

@@ -488,6 +488,8 @@ namespace vl
 			extern WString										GrammarStateToString(ParsingDefinitionGrammar* grammar, ParsingDefinitionGrammar* stateNode, bool beforeNode);
 			extern ParsingDefinitionGrammar*					FindAppropriateGrammarState(ParsingDefinitionGrammar* grammar, ParsingDefinitionGrammar* stateNode, bool beforeNode);
 			extern void											Log(Ptr<ParsingDefinition> definition, stream::TextWriter& writer);
+			extern WString										DeserializeString(const WString& value);
+			extern WString										SerializeString(const WString& value);
 
 /***********************************************************************
 вт╬ы

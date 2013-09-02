@@ -9,10 +9,12 @@
 #include "..\..\Source\Reflection\GuiReflectionBasic.h"
 #include "..\..\..\..\Common\Source\Parsing\ParsingDefinitions.h"
 #include "..\..\..\..\Common\Source\Stream\MemoryStream.h"
+#include "..\..\..\..\Common\Source\Regex\RegexExpression.h"
 
 using namespace vl::stream;
 using namespace vl::collections;
 using namespace vl::regex;
+using namespace vl::regex_internal;
 using namespace vl::parsing;
 using namespace vl::parsing::tabling;
 using namespace vl::parsing::definitions;
@@ -81,11 +83,15 @@ public:
 class EnumSymbol : public TypeSymbol
 {
 public:
+	WString literalString;
+
 	EnumSymbol(Ptr<ParsingTreeObject> node, RepeatingParsingExecutor* executor, ParsingScopeFinder* finder)
 		:TypeSymbol(node, executor, finder)
 	{
 		CreateScope();
 		CreateSubSymbols(this, node, L"members", executor, finder);
+		WString value=finder->Node(node->GetMember(L"name")).Cast<ParsingTreeToken>()->GetValue();
+		literalString=SerializeString(value);
 	}
 };
 
@@ -104,10 +110,19 @@ public:
 class TokenSymbol : public GrammarSymbol
 {
 public:
+	WString literalString;
+
 	TokenSymbol(Ptr<ParsingTreeObject> node, RepeatingParsingExecutor* executor, ParsingScopeFinder* finder)
 		:GrammarSymbol(node, executor, finder, L"Token")
 	{
 		CreateScope();
+		WString value=finder->Node(node->GetMember(L"regex")).Cast<ParsingTreeToken>()->GetValue();
+		WString regex=DeserializeString(value);
+		if(IsRegexEscapedListeralString(regex))
+		{
+			literalString=SerializeString(UnescapeTextForRegex(regex));
+			semanticIds.Add(executor->GetSemanticId(L"Literal"));
+		}
 	}
 };
 
@@ -400,6 +415,11 @@ LazyList<Ptr<ParsingScopeSymbol>> FindPossibleSymbols(ParsingTreeObject* obj, co
 	{
 		if(field==L"text")
 		{
+			return From(finder->GetSymbolsRecursively(scope))
+				.Where([](Ptr<ParsingScopeSymbol> symbol)
+				{
+					return symbol.Cast<TokenSymbol>();
+				});
 		}
 	}
 	else if(obj->GetType()==L"AssignGrammarDef")
@@ -530,18 +550,6 @@ protected:
 
 	void LogResult(Context& context)
 	{
-		//WString selectedTree;
-		//{
-		//	MemoryStream stream;
-		//	{
-		//		StreamWriter writer(stream);
-		//		Log(context.modifiedNode.Obj(), L"", writer);
-		//	}
-		//	stream.SeekFromBegin(0);
-		//	StreamReader reader(stream);
-		//	selectedTree=reader.ReadToEnd();
-		//}
-
 		WString candidateTokenMessage, candidateTypeMessage, candidateSymbolMessage;
 		if(context.autoComplete)
 		{
@@ -591,8 +599,6 @@ protected:
 			+context.rule+L"\r\n"
 			+L"================CODE================\r\n"
 			+context.modifiedCode+L"\r\n"
-			//+L"================TREE================\r\n"
-			//+selectedTree;
 			;
 
 		GetApplication()->InvokeInMainThread([=]()
