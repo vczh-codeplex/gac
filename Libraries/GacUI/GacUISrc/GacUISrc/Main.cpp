@@ -181,6 +181,39 @@ Ptr<ParsingScopeSymbol> CreateScopeFromNode(Ptr<ParsingTreeObject> obj, Repeatin
 	}
 }
 
+LazyList<Ptr<ParsingScopeSymbol>> FindReferencedSymbols(ParsingTreeObject* obj, ParsingScopeFinder* finder)
+{
+	ParsingScope* scope=finder->GetScopeFromNode(obj);
+	if(obj->GetType()==L"PrimitiveTypeObj")
+	{
+		WString name=obj->GetMember(L"name").Cast<ParsingTreeToken>()->GetValue();
+		return finder->GetSymbolsRecursively(scope, name);
+	}
+	else if(obj->GetType()==L"SubTypeObj")
+	{
+		if(Ptr<ParsingTreeObject> parentType=obj->GetMember(L"parentType").Cast<ParsingTreeObject>())
+		{
+			WString name=obj->GetMember(L"name").Cast<ParsingTreeToken>()->GetValue();
+			LazyList<Ptr<ParsingScopeSymbol>> types=FindReferencedSymbols(parentType.Obj(), finder);
+			return types
+				.Where([](Ptr<ParsingScopeSymbol> type)
+				{
+					return type->GetScope()!=0;
+				})
+				.SelectMany([=](Ptr<ParsingScopeSymbol> type)
+				{
+					return finder->GetSymbols(type->GetScope(), name);
+				});
+		}
+	}
+	else if(obj->GetType()==L"PrimitiveGrammarDef")
+	{
+		WString name=obj->GetMember(L"name").Cast<ParsingTreeToken>()->GetValue();
+		return finder->GetSymbolsRecursively(scope, name);
+	}
+	return LazyList<Ptr<ParsingScopeSymbol>>();
+}
+
 /***********************************************************************
 ParserGrammarExecutor
 ***********************************************************************/
@@ -212,63 +245,9 @@ protected:
 
 	void OnSemanticColorize(SemanticColorizeContext& context, const RepeatingParsingOutput& input)override
 	{
-		List<WString> names;
+		if(Ptr<ParsingScopeSymbol> symbol=FindReferencedSymbols(context.tokenParent, input.finder.Obj()).First(0))
 		{
-			ParsingTreeObject* type=context.tokenParent;
-			while(type)
-			{
-				if(type->GetType()==L"PrimitiveTypeObj")
-				{
-					names.Add(type->GetMember(L"name").Cast<ParsingTreeToken>()->GetValue());
-				}
-				if(type->GetType()==L"SubTypeObj")
-				{
-					names.Add(type->GetMember(L"name").Cast<ParsingTreeToken>()->GetValue());
-					type=dynamic_cast<ParsingTreeObject*>(type->GetMember(L"parentType").Obj());
-				}
-				else
-				{
-					break;
-				}
-			}
-		}
-
-		if(names.Count()==0)
-		{
-			names.Add(context.foundToken->GetValue());
-		}
-
-		ParsingScope* scope=input.finder->GetScopeFromNode(context.foundToken);
-		Ptr<ParsingScopeSymbol> type=0;
-		for(vint i=names.Count()-1;i>=0;i--)
-		{
-			if(type)
-			{
-				type=input.finder->GetSymbols(type->GetScope(), names[i])
-					.First(0);
-			}
-			else if(i==names.Count()-1)
-			{
-				type=input.finder->GetSymbolsRecursively(scope, names[i])
-					.First(0);
-			}
-			else
-			{
-				break;
-			}
-		}
-
-		if(type.Cast<TypeSymbol>())
-		{
-			context.semantic=GetParsingExecutor()->GetSemanticId(L"Type");
-		}
-		else if(type.Cast<TokenSymbol>())
-		{
-			context.semantic=GetParsingExecutor()->GetSemanticId(L"Token");
-		}
-		else if(type.Cast<RuleSymbol>())
-		{
-			context.semantic=GetParsingExecutor()->GetSemanticId(L"Rule");
+			context.semantic=symbol->GetSemanticId();
 		}
 	}
 public:
