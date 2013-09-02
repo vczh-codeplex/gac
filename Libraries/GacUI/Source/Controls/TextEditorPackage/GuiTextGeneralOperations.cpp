@@ -1,4 +1,5 @@
 #include "GuiTextGeneralOperations.h"
+#include "..\..\..\..\..\Common\Source\Regex\RegexExpression.h"
 
 namespace vl
 {
@@ -12,6 +13,7 @@ namespace vl
 			using namespace parsing;
 			using namespace parsing::tabling;
 			using namespace collections;
+			using namespace regex_internal;
 
 /***********************************************************************
 RepeatingParsingExecutor::CallbackBase
@@ -209,7 +211,18 @@ RepeatingParsingExecutor
 					}
 					md.hasContextColor=tokenContextColorAtts.Keys().Contains(tokenIndex);
 					md.hasAutoComplete=tokenAutoCompleteAtts.Keys().Contains(tokenIndex);
-					md.isCandidate=tokenCandidateAtts.Keys().Contains(tokenIndex);
+					if(md.isCandidate=tokenCandidateAtts.Keys().Contains(tokenIndex))
+					{
+						const ParsingTable::TokenInfo& tokenInfo=table->GetTokenInfo(md.tableTokenIndex);
+						if(IsRegexEscapedListeralString(tokenInfo.regex))
+						{
+							md.unescapedRegexText=UnescapeTextForRegex(tokenInfo.regex);
+						}
+						else
+						{
+							md.isCandidate=false;
+						}
+					}
 
 					tokenMetaDatas.Add(tokenIndex, md);
 				}

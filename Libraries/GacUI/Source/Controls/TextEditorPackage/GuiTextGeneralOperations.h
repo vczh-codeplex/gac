@@ -173,6 +173,7 @@ RepeatingParsingExecutor
 					bool													hasContextColor;
 					bool													hasAutoComplete;
 					bool													isCandidate;
+					WString													unescapedRegexText;
 				};
 
 				struct FieldMetaData
@@ -272,6 +273,12 @@ ParsingContext
 				/// <summary>All acceptable semantic ids.</summary>
 				Ptr<collections::List<vint>>							acceptableSemanticIds;
 				
+				ParsingContext()
+					:foundToken(0)
+					,tokenParent(0)
+				{
+				}
+
 				static bool												RetriveContext(ParsingContext& output, parsing::ParsingTreeNode* foundNode, RepeatingParsingExecutor* executor);
 				static bool												RetriveContext(ParsingContext& output, parsing::ParsingTextPos pos, parsing::ParsingTreeObject* rootNode, RepeatingParsingExecutor* executor);
 				static bool												RetriveContext(ParsingContext& output, parsing::ParsingTextRange range, parsing::ParsingTreeObject* rootNode, RepeatingParsingExecutor* executor);

@@ -739,11 +739,26 @@ GuiGrammarAutoComplete
 						TextPos stopPosition=GlobalTextPosToModifiedTextPos(newContext, trace.inputStart);
 
 						// find all possible token before the current caret using the PDA
+						Ptr<AutoCompleteData> autoComplete=new AutoCompleteData;
 						SortedList<vint> tableTokenIndices;
 						RegexToken* editingToken=SearchValidInputToken(state, collector, stopPosition, newContext, tableTokenIndices);
 
 						// collect all auto complete types
 						{
+							// collect all keywords that can be put into the auto complete list
+							FOREACH(vint, token, tableTokenIndices)
+							{
+								vint regexToken=token-ParsingTable::UserTokenStart;
+								if(regexToken>=0)
+								{
+									autoComplete->candidates.Add(regexToken);
+									if(parsingExecutor->GetTokenMetaData(regexToken).isCandidate)
+									{
+										autoComplete->shownCandidates.Add(regexToken);
+									}
+								}
+							}
+
 							// calculate the arranged stopPosition
 							if(editingToken)
 							{
@@ -773,28 +788,11 @@ GuiGrammarAutoComplete
 							// calculate the auto complete type
 							if(editingToken && parsingExecutor->GetTokenMetaData(editingToken->token).hasAutoComplete)
 							{
-								Ptr<AutoCompleteData> autoComplete=new AutoCompleteData;
 								ParsingTextRange range(ParsingTextPos(startPos.row, startPos.column), ParsingTextPos(endPos.row, endPos.column));
-								if(AutoCompleteData::RetriveContext(*autoComplete.Obj(), range, newContext.modifiedNode.Obj(), parsingExecutor.Obj()))
-								{
-									// collect all keywords that can be put into the auto complete list
-									FOREACH(vint, token, tableTokenIndices)
-									{
-										vint regexToken=token-ParsingTable::UserTokenStart;
-										if(regexToken>=0)
-										{
-											autoComplete->candidates.Add(regexToken);
-											if(parsingExecutor->GetTokenMetaData(regexToken).isCandidate)
-											{
-												autoComplete->shownCandidates.Add(regexToken);
-											}
-										}
-									}
-
-									newContext.autoComplete=autoComplete;
-								}
+								AutoCompleteData::RetriveContext(*autoComplete.Obj(), range, newContext.modifiedNode.Obj(), parsingExecutor.Obj());
 							}
 						}
+						newContext.autoComplete=autoComplete;
 					}
 				}
 			}
