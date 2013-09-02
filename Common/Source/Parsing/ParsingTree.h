@@ -417,7 +417,7 @@ namespace vl
 			ParsingScope*							parentScope;
 			WString									name;
 			collections::List<vint>					semanticIds;
-			ParsingTreeObject*						node;
+			Ptr<ParsingTreeObject>					node;
 			Ptr<ParsingScope>						scope;
 
 		public:
@@ -427,8 +427,8 @@ namespace vl
 			ParsingScope*							GetParentScope();
 			const WString&							GetName();
 			const collections::List<vint>&			GetSemanticIds();
-			ParsingTreeObject*						GetNode();
-			void									SetNode(ParsingTreeObject* value);
+			Ptr<ParsingTreeObject>					GetNode();
+			void									SetNode(Ptr<ParsingTreeObject> value);
 			bool									CreateScope();
 			bool									DestroyScope();
 			ParsingScope*							GetScope();
@@ -459,10 +459,29 @@ namespace vl
 				ParsingScope*						ParentScope(ParsingScopeSymbol* symbol)override;
 				ParsingScopeSymbol*					Symbol(ParsingScopeSymbol* symbol)override;
 			};
+
+			class IndirectSymbolMapper  : public SymbolMapper, public reflection::Description<IndirectSymbolMapper>
+			{
+			protected:
+				ParsingScopeSymbol*					originalSymbol;
+				ParsingScopeSymbol*					replacedSymbol;
+				ParsingTreeNode*					originalNode;
+				ParsingTreeNode*					replacedNode;
+			public:
+				IndirectSymbolMapper(ParsingScopeSymbol* _originalSymbol, ParsingScopeSymbol* _replacedSymbol, ParsingTreeNode* _originalNode, ParsingTreeNode* _replacedNode);
+				~IndirectSymbolMapper();
+
+				ParsingTreeNode*					ParentNode(ParsingTreeNode* node)override;
+				ParsingTreeNode*					Node(ParsingTreeNode* node)override;
+				ParsingScope*						ParentScope(ParsingScopeSymbol* symbol)override;
+				ParsingScopeSymbol*					Symbol(ParsingScopeSymbol* symbol)override;
+			};
 		protected:
 			NodeSymbolMap							nodeSymbols;
 			Ptr<SymbolMapper>						symbolMapper;
+			ParsingScopeFinder*						previousFinder;
 
+			void									InitializeQueryCacheInternal(ParsingScopeSymbol* symbol);
 		public:
 			ParsingScopeFinder(Ptr<SymbolMapper> _symbolMapper=new DirectSymbolMapper);
 			~ParsingScopeFinder();
@@ -489,7 +508,7 @@ namespace vl
 				return Node(node).Cast<T>();
 			}
 			
-			void									InitializeQueryCache(ParsingScopeSymbol* symbol);
+			void									InitializeQueryCache(ParsingScopeSymbol* symbol, ParsingScopeFinder* _previousFinder=0);
 			ParsingScopeSymbol*						GetSymbolFromNode(ParsingTreeObject* node);
 			ParsingScope*							GetScopeFromNode(ParsingTreeNode* node);
 			LazySymbolList							GetSymbols(ParsingScope* scope, const WString& name);

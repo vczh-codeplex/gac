@@ -668,12 +668,12 @@ ParsingScopeSymbol
 			return semanticIds;
 		}
 
-		ParsingTreeObject* ParsingScopeSymbol::GetNode()
+		Ptr<ParsingTreeObject> ParsingScopeSymbol::GetNode()
 		{
 			return node;
 		}
 
-		void ParsingScopeSymbol::SetNode(ParsingTreeObject* value)
+		void ParsingScopeSymbol::SetNode(Ptr<ParsingTreeObject> value)
 		{
 			node=value;
 		}
@@ -727,6 +727,42 @@ ParsingScopeFinder::DirectSymbolMapper
 		ParsingScopeSymbol* ParsingScopeFinder::DirectSymbolMapper::Symbol(ParsingScopeSymbol* symbol)
 		{
 			return symbol;
+		}
+
+/***********************************************************************
+ParsingScopeFinder::IndirectSymbolMapper
+***********************************************************************/
+
+		ParsingScopeFinder::IndirectSymbolMapper::IndirectSymbolMapper(ParsingScopeSymbol* _originalSymbol, ParsingScopeSymbol* _replacedSymbol, ParsingTreeNode* _originalNode, ParsingTreeNode* _replacedNode)
+			:originalSymbol(_originalSymbol)
+			,replacedSymbol(_replacedSymbol)
+			,originalNode(_originalNode)
+			,replacedNode(_replacedNode)
+		{
+		}
+
+		ParsingScopeFinder::IndirectSymbolMapper::~IndirectSymbolMapper()
+		{
+		}
+
+		ParsingTreeNode* ParsingScopeFinder::IndirectSymbolMapper::ParentNode(ParsingTreeNode* node)
+		{
+			return (node==replacedNode?originalNode:node)->GetParent();
+		}
+
+		ParsingTreeNode* ParsingScopeFinder::IndirectSymbolMapper::Node(ParsingTreeNode* node)
+		{
+			return node==originalNode?replacedNode:node;
+		}
+
+		ParsingScope* ParsingScopeFinder::IndirectSymbolMapper::ParentScope(ParsingScopeSymbol* symbol)
+		{
+			return (symbol==replacedSymbol?originalSymbol:symbol)->GetParentScope();
+		}
+
+		ParsingScopeSymbol* ParsingScopeFinder::IndirectSymbolMapper::Symbol(ParsingScopeSymbol* symbol)
+		{
+			return symbol==originalSymbol?replacedSymbol:symbol;
 		}
 
 /***********************************************************************
@@ -785,9 +821,9 @@ ParsingScopeFinder::Traversal Functions
 ParsingScopeFinder
 ***********************************************************************/
 
-		void ParsingScopeFinder::InitializeQueryCache(ParsingScopeSymbol* symbol)
+		void ParsingScopeFinder::InitializeQueryCacheInternal(ParsingScopeSymbol* symbol)
 		{
-			if(ParsingTreeObject* obj=Obj(symbol->GetNode()))
+			if(ParsingTreeObject* obj=Obj(symbol->GetNode().Obj()))
 			{
 				nodeSymbols.Add(obj, symbol);
 			}
@@ -798,7 +834,7 @@ ParsingScopeFinder
 				{
 					FOREACH(Ptr<ParsingScopeSymbol>, subSymbol, Symbols(scope->GetSymbols(name)))
 					{
-						InitializeQueryCache(subSymbol.Obj());
+						InitializeQueryCacheInternal(subSymbol.Obj());
 					}
 				}
 			}
@@ -806,6 +842,7 @@ ParsingScopeFinder
 
 		ParsingScopeFinder::ParsingScopeFinder( Ptr<SymbolMapper> _symbolMapper)
 			:symbolMapper(_symbolMapper)
+			,previousFinder(0)
 		{
 		}
 
@@ -813,10 +850,27 @@ ParsingScopeFinder
 		{
 		}
 
+		void ParsingScopeFinder::InitializeQueryCache(ParsingScopeSymbol* symbol, ParsingScopeFinder* _previousFinder)
+		{
+			previousFinder=_previousFinder;
+			InitializeQueryCacheInternal(symbol);
+		}
+
 		ParsingScopeSymbol* ParsingScopeFinder::GetSymbolFromNode(ParsingTreeObject* node)
 		{
 			vint index=nodeSymbols.Keys().IndexOf(node);
-			return index==-1?0:nodeSymbols.Values()[index];
+			if(index!=-1)
+			{
+				return nodeSymbols.Values()[index];
+			}
+			else if(previousFinder)
+			{
+				return previousFinder->GetSymbolFromNode(node);
+			}
+			else
+			{
+				return 0;
+			}
 		}
 
 		ParsingScope* ParsingScopeFinder::GetScopeFromNode(ParsingTreeNode* node)
@@ -834,7 +888,14 @@ ParsingScopeFinder
 				}
 				node=ParentNode(node);
 			}
-			return 0;
+			if(previousFinder)
+			{
+				return previousFinder->GetScopeFromNode(node);
+			}
+			else
+			{
+				return 0;
+			}
 		}
 
 		ParsingScopeFinder::LazySymbolList ParsingScopeFinder::GetSymbols(ParsingScope* scope, const WString& name)
@@ -858,7 +919,14 @@ ParsingScopeFinder
 					break;
 				}
 			}
-			return ParsingScope::emptySymbolList;
+			if(previousFinder)
+			{
+				return previousFinder->GetSymbols(scope, name);
+			}
+			else
+			{
+				return ParsingScope::emptySymbolList;
+			}
 		}
 	}
 }
