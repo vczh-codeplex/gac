@@ -378,6 +378,45 @@ RepeatingParsingExecutor
 			{
 				return GetAttribute(index, L"AutoComplete", 0);
 			}
+
+/***********************************************************************
+ParsingContext
+***********************************************************************/
+
+			bool ParsingContext::RetriveContext(ParsingContext& output, parsing::ParsingTreeNode* foundNode, RepeatingParsingExecutor* executor)
+			{
+				ParsingTreeToken* foundToken=dynamic_cast<ParsingTreeToken*>(foundNode);
+				if(!foundToken) return false;
+				ParsingTreeObject* tokenParent=dynamic_cast<ParsingTreeObject*>(foundNode->GetParent());
+				if(!tokenParent) return false;
+				vint index=tokenParent->GetMembers().Values().IndexOf(foundNode);
+				if(index==-1) return false;
+
+				WString type=tokenParent->GetType();
+				WString field=tokenParent->GetMembers().Keys().Get(index);
+				const RepeatingParsingExecutor::FieldMetaData& md=executor->GetFieldMetaData(type, field);
+
+				output.foundToken=foundToken;
+				output.tokenParent=tokenParent;
+				output.type=type;
+				output.field=field;
+				output.acceptableSemanticIds=md.semantics;
+				return true;
+			}
+
+			bool ParsingContext::RetriveContext(ParsingContext& output, parsing::ParsingTextPos pos, parsing::ParsingTreeObject* rootNode, RepeatingParsingExecutor* executor)
+			{
+				ParsingTreeNode* foundNode=rootNode->FindDeepestNode(pos);
+				if(!foundNode) return false;
+				return RetriveContext(output, foundNode, executor);
+			}
+
+			bool ParsingContext::RetriveContext(ParsingContext& output, parsing::ParsingTextRange range, ParsingTreeObject* rootNode, RepeatingParsingExecutor* executor)
+			{
+				ParsingTreeNode* foundNode=rootNode->FindDeepestNode(range);
+				if(!foundNode) return false;
+				return RetriveContext(output, foundNode, executor);
+			}
 		}
 	}
 }

@@ -53,16 +53,12 @@ GuiGrammarAutoComplete
 				typedef collections::List<Ptr<parsing::ParsingScopeSymbol>>		ParsingScopeSymbolList;
 			public:
 				/// <summary>The auto complete list data.</summary>
-				struct AutoCompleteData
+				struct AutoCompleteData : ParsingContext
 				{
 					/// <summary>Available candidate tokens (in lexer token index).</summary>
 					collections::List<vint>							candidates;
 					/// <summary>Available candidate tokens (in lexer token index) that marked with @AutoCompleteCandidate().</summary>
 					collections::List<vint>							shownCandidates;
-					/// <summary>Available auto complete types.</summary>
-					collections::List<vint>							semantics;
-					/// <summary>Auto complete token node.</summary>
-					Ptr<parsing::ParsingTreeToken>					token;
 					/// <summary>Candidate symbols.</summary>
 					ParsingScopeSymbolList							candidateSymbols;
 				};

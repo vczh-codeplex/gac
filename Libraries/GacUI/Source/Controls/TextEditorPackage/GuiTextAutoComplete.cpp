@@ -739,23 +739,8 @@ GuiGrammarAutoComplete
 						TextPos stopPosition=GlobalTextPosToModifiedTextPos(newContext, trace.inputStart);
 
 						// find all possible token before the current caret using the PDA
-						Ptr<AutoCompleteData> autoComplete=new AutoCompleteData;
 						SortedList<vint> tableTokenIndices;
 						RegexToken* editingToken=SearchValidInputToken(state, collector, stopPosition, newContext, tableTokenIndices);
-
-						// collect all keywords that can be put into the auto complete list
-						FOREACH(vint, token, tableTokenIndices)
-						{
-							vint regexToken=token-ParsingTable::UserTokenStart;
-							if(regexToken>=0)
-							{
-								autoComplete->candidates.Add(regexToken);
-								if(parsingExecutor->GetTokenMetaData(regexToken).isCandidate)
-								{
-									autoComplete->shownCandidates.Add(regexToken);
-								}
-							}
-						}
 
 						// collect all auto complete types
 						{
@@ -788,30 +773,28 @@ GuiGrammarAutoComplete
 							// calculate the auto complete type
 							if(editingToken && parsingExecutor->GetTokenMetaData(editingToken->token).hasAutoComplete)
 							{
+								Ptr<AutoCompleteData> autoComplete=new AutoCompleteData;
 								ParsingTextRange range(ParsingTextPos(startPos.row, startPos.column), ParsingTextPos(endPos.row, endPos.column));
-								ParsingTreeNode* foundNode=newContext.modifiedNode->FindDeepestNode(range);
-								if(!foundNode) goto FINISH_COLLECTING_AUTO_COMPLETE_TYPES;
-								ParsingTreeToken* foundToken=dynamic_cast<ParsingTreeToken*>(foundNode);
-								if(!foundToken) goto FINISH_COLLECTING_AUTO_COMPLETE_TYPES;
-								ParsingTreeObject* tokenParent=dynamic_cast<ParsingTreeObject*>(foundNode->GetParent());
-								if(!tokenParent) goto FINISH_COLLECTING_AUTO_COMPLETE_TYPES;
-								vint index=tokenParent->GetMembers().Values().IndexOf(foundNode);
-								if(index==-1) goto FINISH_COLLECTING_AUTO_COMPLETE_TYPES;
-
-								WString type=tokenParent->GetType();
-								WString field=tokenParent->GetMembers().Keys().Get(index);
-
-								Ptr<List<vint>> semantics=parsingExecutor->GetFieldMetaData(type, field).semantics;
-								if(semantics)
+								if(AutoCompleteData::RetriveContext(*autoComplete.Obj(), range, newContext.modifiedNode.Obj(), parsingExecutor.Obj()))
 								{
-									CopyFrom(autoComplete->semantics, *semantics.Obj());
+									// collect all keywords that can be put into the auto complete list
+									FOREACH(vint, token, tableTokenIndices)
+									{
+										vint regexToken=token-ParsingTable::UserTokenStart;
+										if(regexToken>=0)
+										{
+											autoComplete->candidates.Add(regexToken);
+											if(parsingExecutor->GetTokenMetaData(regexToken).isCandidate)
+											{
+												autoComplete->shownCandidates.Add(regexToken);
+											}
+										}
+									}
+
+									newContext.autoComplete=autoComplete;
 								}
-								autoComplete->token=dynamic_cast<ParsingTreeToken*>(foundToken);
 							}
 						}
-			FINISH_COLLECTING_AUTO_COMPLETE_TYPES:
-
-						newContext.autoComplete=autoComplete;
 					}
 				}
 			}
@@ -855,7 +838,7 @@ GuiGrammarAutoComplete
 				{
 					context=newContext;
 				}
-				if(newContext.modifiedNode)
+				if(newContext.modifiedNode && newContext.autoComplete)
 				{
 					OnContextFinishedAsync(context);
 					GetApplication()->InvokeInMainThread([=]()

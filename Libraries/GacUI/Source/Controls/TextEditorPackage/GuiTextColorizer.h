@@ -154,18 +154,8 @@ GuiGrammarColorizer
 				typedef elements::text::ColorEntry							ColorEntry;
 			public:
 				/// <summary>Context for doing semantic colorizing.</summary>
-				struct SemanticColorizeContext
+				struct SemanticColorizeContext : ParsingContext
 				{
-					/// <summary>Token syntax tree for the colorizing token.</summary>
-					parsing::ParsingTreeToken*								foundToken;
-					/// <summary>The object syntax tree parent of the token.</summary>
-					parsing::ParsingTreeObject*								tokenParent;
-					/// <summary>Type of the parent.</summary>
-					WString													type;
-					/// <summary>Field of the parent that contains the token.</summary>
-					WString													field;
-					/// <summary>All acceptable semantic ids.</summary>
-					Ptr<collections::List<vint>>							acceptableSemanticIds;
 					/// <summary>Output semantic id that comes from one the argument in the @Semantic attribute.</summary>
 					vint													semanticId;
 				};
