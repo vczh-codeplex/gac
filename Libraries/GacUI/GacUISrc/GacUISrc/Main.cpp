@@ -38,7 +38,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 SymbolLookup
 ***********************************************************************/
 
-Ptr<ParsingScopeSymbol> CreateScopeFromNode(Ptr<ParsingTreeObject> obj, RepeatingParsingExecutor* executor, ParsingScopeFinder* finder);
+Ptr<ParsingScopeSymbol> CreateSymbolFromNode(Ptr<ParsingTreeObject> obj, RepeatingParsingExecutor* executor, ParsingScopeFinder* finder);
 void CreateSubSymbols(ParsingScopeSymbol* symbol, Ptr<ParsingTreeObject> node, const WString& memberName, RepeatingParsingExecutor* executor, ParsingScopeFinder* finder);
 
 class GrammarSymbol : public ParsingScopeSymbol
@@ -47,7 +47,7 @@ public:
 	GrammarSymbol(Ptr<ParsingTreeObject> node, RepeatingParsingExecutor* executor, ParsingScopeFinder* finder, const WString& semantic)
 		:ParsingScopeSymbol(finder->Node(node->GetMember(L"name")).Cast<ParsingTreeToken>()->GetValue(), executor->GetSemanticId(semantic))
 	{
-		SetNode(node.Obj());
+		SetNode(node);
 	}
 };
 
@@ -107,6 +107,7 @@ public:
 	TokenSymbol(Ptr<ParsingTreeObject> node, RepeatingParsingExecutor* executor, ParsingScopeFinder* finder)
 		:GrammarSymbol(node, executor, finder, L"Token")
 	{
+		CreateScope();
 	}
 };
 
@@ -116,6 +117,7 @@ public:
 	RuleSymbol(Ptr<ParsingTreeObject> node, RepeatingParsingExecutor* executor, ParsingScopeFinder* finder)
 		:GrammarSymbol(node, executor, finder, L"Rule")
 	{
+		CreateScope();
 	}
 };
 
@@ -139,13 +141,13 @@ void CreateSubSymbols(ParsingScopeSymbol* symbol, Ptr<ParsingTreeObject> node, c
 		{
 			if(Ptr<ParsingTreeObject> obj=finder->Node(node).Cast<ParsingTreeObject>())
 			{
-				symbol->GetScope()->AddSymbol(CreateScopeFromNode(obj, executor, finder));
+				symbol->GetScope()->AddSymbol(CreateSymbolFromNode(obj, executor, finder));
 			}
 		}
 	}
 }
 
-Ptr<ParsingScopeSymbol> CreateScopeFromNode(Ptr<ParsingTreeObject> obj, RepeatingParsingExecutor* executor, ParsingScopeFinder* finder)
+Ptr<ParsingScopeSymbol> CreateSymbolFromNode(Ptr<ParsingTreeObject> obj, RepeatingParsingExecutor* executor, ParsingScopeFinder* finder)
 {
 	if(obj->GetType()==L"EnumMemberDef")
 	{
@@ -225,7 +227,7 @@ protected:
 	void OnContextFinishedAsync(RepeatingParsingOutput& context)override
 	{
 		context.finder=new ParsingScopeFinder();
-		context.symbol=CreateScopeFromNode(context.node, this, context.finder.Obj());
+		context.symbol=CreateSymbolFromNode(context.node, this, context.finder.Obj());
 		context.finder->InitializeQueryCache(context.symbol.Obj());
 	}
 public:
@@ -298,7 +300,7 @@ protected:
 		//	selectedTree=reader.ReadToEnd();
 		//}
 
-		WString candidateTokenMessage, candidateTypeMessage;
+		WString candidateTokenMessage, candidateTypeMessage, candidateSymbolMessage;
 		if(context.autoComplete)
 		{
 			Ptr<ParsingTable> table=GetParsingExecutor()->GetParser()->GetTable();
@@ -323,6 +325,11 @@ protected:
 					}
 				}
 			}
+
+			FOREACH(Ptr<ParsingScopeSymbol>, symbol, context.autoComplete->candidateSymbols)
+			{
+				candidateSymbolMessage+=symbol->GetName()+L"\r\n";
+			}
 		}
 
 		WString selectedMessage
@@ -330,6 +337,8 @@ protected:
 			+candidateTokenMessage
 			+L"================CANDIDATE-TYPES================\r\n"
 			+candidateTypeMessage
+			+L"================CANDIDATE-SYMBOLS================\r\n"
+			+candidateSymbolMessage
 			+L"================RULE================\r\n"
 			+context.rule+L"\r\n"
 			+L"================CODE================\r\n"
@@ -347,6 +356,24 @@ protected:
 
 	void OnContextFinishedAsync(Context& context)override
 	{
+		if(context.autoComplete && context.autoComplete->acceptableSemanticIds)
+		{
+			ParsingTreeNode* originalNode=context.originalNode.Obj();
+			ParsingTreeNode* replacedNode=context.modifiedNode.Obj();
+			ParsingScope* originalScope=context.input.finder->GetScopeFromNode(originalNode);
+			if(originalScope)
+			{
+				ParsingScopeSymbol* originalSymbol=originalScope->GetOwnerSymbol();
+				Ptr<ParsingScopeFinder> newFinder=new ParsingScopeFinder(new ParsingScopeFinder::IndirectSymbolMapper(0, 0, originalNode, replacedNode));
+				Ptr<ParsingScopeSymbol> replacedSymbol=CreateSymbolFromNode(newFinder->Obj(originalSymbol->GetNode()), GetParsingExecutor().Obj(), newFinder.Obj());
+				
+				if(replacedSymbol)
+				{
+					newFinder=new ParsingScopeFinder(new ParsingScopeFinder::IndirectSymbolMapper(originalSymbol, replacedSymbol.Obj(), originalNode, replacedNode));
+					newFinder->InitializeQueryCache(replacedSymbol.Obj());
+				}
+			}
+		}
 		LogResult(context);
 	}
 public:
