@@ -528,42 +528,26 @@ GuiGrammarColorizer
 					if(node && token!=-1 && parsingExecutor->GetTokenMetaData(token).hasContextColor)
 					{
 						ParsingTextPos pos(lineIndex, start);
-						ParsingTreeNode* foundNode=node->FindDeepestNode(pos);
-						if(!foundNode) return;
-						ParsingTreeToken* foundToken=dynamic_cast<ParsingTreeToken*>(foundNode);
-						if(!foundToken) return;
-						ParsingTreeObject* tokenParent=dynamic_cast<ParsingTreeObject*>(foundNode->GetParent());
-						if(!tokenParent) return;
-						vint index=tokenParent->GetMembers().Values().IndexOf(foundNode);
-						if(index==-1) return;
-
-						WString type=tokenParent->GetType();
-						WString field=tokenParent->GetMembers().Keys().Get(index);
-						const RepeatingParsingExecutor::FieldMetaData& md=parsingExecutor->GetFieldMetaData(type, field);
-
-						vint semantic=md.colorIndex;
-						if(md.semantics)
+						SemanticColorizeContext scContext;
+						if(SemanticColorizeContext::RetriveContext(scContext, pos, node, parsingExecutor.Obj()))
 						{
-							SemanticColorizeContext scContext;
-							scContext.foundToken=foundToken;
-							scContext.tokenParent=tokenParent;
-							scContext.type=type;
-							scContext.field=field;
-							scContext.acceptableSemanticIds=md.semantics;
+							const RepeatingParsingExecutor::FieldMetaData& md=parsingExecutor->GetFieldMetaData(scContext.type, scContext.field);
+							vint semantic=md.colorIndex;
 							scContext.semanticId=-1;
 							OnSemanticColorize(scContext, context);
+
 							if(md.semantics->Contains(scContext.semanticId))
 							{
 								semantic=scContext.semanticId;
 							}
-						}
 
-						if(semantic!=-1)
-						{
-							index=semanticColorMap.Keys().IndexOf(semantic);
-							if(index!=-1)
+							if(semantic!=-1)
 							{
-								token=semanticColorMap.Values()[index];
+								vint index=semanticColorMap.Keys().IndexOf(semantic);
+								if(index!=-1)
+								{
+									token=semanticColorMap.Values()[index];
+								}
 							}
 						}
 					}

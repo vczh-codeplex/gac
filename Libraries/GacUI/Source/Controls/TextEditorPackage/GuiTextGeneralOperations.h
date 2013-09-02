@@ -254,6 +254,28 @@ RepeatingParsingExecutor
 					token:	when the token is editing, an auto complete list will appear if possible
 				*/
 			};
+
+/***********************************************************************
+ParsingContext
+***********************************************************************/
+
+			struct ParsingContext
+			{
+				/// <summary>Token syntax tree for the selected token.</summary>
+				parsing::ParsingTreeToken*								foundToken;
+				/// <summary>The object syntax tree parent of the token.</summary>
+				parsing::ParsingTreeObject*								tokenParent;
+				/// <summary>Type of the parent.</summary>
+				WString													type;
+				/// <summary>Field of the parent that contains the token.</summary>
+				WString													field;
+				/// <summary>All acceptable semantic ids.</summary>
+				Ptr<collections::List<vint>>							acceptableSemanticIds;
+				
+				static bool												RetriveContext(ParsingContext& output, parsing::ParsingTreeNode* foundNode, RepeatingParsingExecutor* executor);
+				static bool												RetriveContext(ParsingContext& output, parsing::ParsingTextPos pos, parsing::ParsingTreeObject* rootNode, RepeatingParsingExecutor* executor);
+				static bool												RetriveContext(ParsingContext& output, parsing::ParsingTextRange range, parsing::ParsingTreeObject* rootNode, RepeatingParsingExecutor* executor);
+			};
 		}
 	}
 }

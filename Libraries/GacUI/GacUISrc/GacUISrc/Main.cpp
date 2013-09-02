@@ -299,26 +299,23 @@ protected:
 		//}
 
 		WString candidateTokenMessage, candidateTypeMessage;
-		if(context.autoComplete)
+		Ptr<ParsingTable> table=GetParsingExecutor()->GetParser()->GetTable();
+		FOREACH(vint, token, context.autoComplete->candidates)
 		{
-			Ptr<ParsingTable> table=GetParsingExecutor()->GetParser()->GetTable();
-			FOREACH(vint, token, context.autoComplete->candidates)
-			{
-				const ParsingTable::TokenInfo& tokenInfo=table->GetTokenInfo(token+ParsingTable::UserTokenStart);
-				candidateTokenMessage+=tokenInfo.name
-					+(context.autoComplete->shownCandidates.Contains(token)?L"[SHOWN]":L"")
-					+L": "
-					+tokenInfo.regex
-					+L"\r\n";
-			}
+			const ParsingTable::TokenInfo& tokenInfo=table->GetTokenInfo(token+ParsingTable::UserTokenStart);
+			candidateTokenMessage+=tokenInfo.name
+				+(context.autoComplete->shownCandidates.Contains(token)?L"[SHOWN]":L"")
+				+L": "
+				+tokenInfo.regex
+				+L"\r\n";
+		}
 
-			if(context.autoComplete->token)
+		if(context.autoComplete->foundToken)
+		{
+			candidateTypeMessage+=L"editing: "+context.autoComplete->foundToken->GetValue()+L"\r\n";
+			FOREACH(vint, type, *context.autoComplete->acceptableSemanticIds.Obj())
 			{
-				candidateTypeMessage+=L"editing: "+context.autoComplete->token->GetValue()+L"\r\n";
-				FOREACH(vint, type, context.autoComplete->semantics)
-				{
-					candidateTypeMessage+=L"type: "+GetParsingExecutor()->GetSemanticName(type)+L"\r\n";
-				}
+				candidateTypeMessage+=L"type: "+GetParsingExecutor()->GetSemanticName(type)+L"\r\n";
 			}
 		}
 
