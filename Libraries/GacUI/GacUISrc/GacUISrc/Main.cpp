@@ -216,6 +216,50 @@ LazyList<Ptr<ParsingScopeSymbol>> FindReferencedSymbols(ParsingTreeObject* obj, 
 	return LazyList<Ptr<ParsingScopeSymbol>>();
 }
 
+LazyList<Ptr<ParsingScopeSymbol>> FindPossibleSymbols(ParsingTreeObject* obj, const WString& field, ParsingScopeFinder* finder)
+{
+	if(obj->GetType()==L"PrimitiveTypeObj")
+	{
+		if(field==L"name")
+		{
+		}
+	}
+	else if(obj->GetType()==L"SubTypeObj")
+	{
+		if(field==L"name")
+		{
+		}
+	}
+	else if(obj->GetType()==L"PrimitiveGrammarDef")
+	{
+		if(field==L"name")
+		{
+		}
+	}
+	else if(obj->GetType()==L"TextGrammarDef")
+	{
+		if(field==L"text")
+		{
+		}
+	}
+	else if(obj->GetType()==L"AssignGrammarDef")
+	{
+		if(field==L"memberName")
+		{
+		}
+	}
+	else if(obj->GetType()==L"SetterGrammarDef")
+	{
+		if(field==L"name")
+		{
+		}
+		else if(field==L"value")
+		{
+		}
+	}
+	return LazyList<Ptr<ParsingScopeSymbol>>();
+}
+
 /***********************************************************************
 ParserGrammarExecutor
 ***********************************************************************/
@@ -307,7 +351,8 @@ protected:
 			FOREACH(vint, token, context.autoComplete->candidates)
 			{
 				const ParsingTable::TokenInfo& tokenInfo=table->GetTokenInfo(token+ParsingTable::UserTokenStart);
-				candidateTokenMessage+=tokenInfo.name
+				candidateTokenMessage
+					+=tokenInfo.name
 					+(context.autoComplete->shownCandidates.Contains(token)?L"[SHOWN]":L"")
 					+L": "
 					+tokenInfo.regex
@@ -321,14 +366,20 @@ protected:
 				{
 					FOREACH(vint, type, *context.autoComplete->acceptableSemanticIds.Obj())
 					{
-						candidateTypeMessage+=L"type: "+GetParsingExecutor()->GetSemanticName(type)+L"\r\n";
+						candidateTypeMessage
+							+=L"type: "
+							+GetParsingExecutor()->GetSemanticName(type)
+							+L"\r\n";
+					}
+
+					FOREACH(Ptr<ParsingScopeSymbol>, symbol, context.autoComplete->candidateSymbols)
+					{
+						candidateSymbolMessage
+							+=symbol->GetName()
+							+(From(symbol->GetSemanticIds()).Intersect(*context.autoComplete->acceptableSemanticIds.Obj()).First(-1)!=-1?L"[SHOWN]":L"")
+							+L"\r\n";
 					}
 				}
-			}
-
-			FOREACH(Ptr<ParsingScopeSymbol>, symbol, context.autoComplete->candidateSymbols)
-			{
-				candidateSymbolMessage+=symbol->GetName()+L"\r\n";
 			}
 		}
 
