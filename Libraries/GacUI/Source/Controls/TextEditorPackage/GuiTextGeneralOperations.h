@@ -198,7 +198,7 @@ RepeatingParsingExecutor
 				void														Execute(const RepeatingParsingInput& input)override;
 				void														PrepareMetaData();
 
-				/// <summary>Called when semantic analyzing is needed. The function can fill the "semanticContext" field in the output parameter for storing the result.</summary>
+				/// <summary>Called when semantic analyzing is needed. It is encouraged to set the "symbol" and "finder" fields in "context" argument.</summary>
 				/// <param name="context">The parsing result.</param>
 				virtual void												OnContextFinishedAsync(RepeatingParsingOutput& context);
 			public:

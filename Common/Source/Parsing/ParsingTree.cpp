@@ -642,8 +642,11 @@ ParsingScopeSymbol
 		ParsingScopeSymbol::ParsingScopeSymbol(const WString& _name, vint _semanticId)
 			:parentScope(0)
 			,name(_name)
-			,semanticId(_semanticId)
 		{
+			if(_semanticId!=-1)
+			{
+				semanticIds.Add(_semanticId);
+			}
 		}
 
 		ParsingScopeSymbol::~ParsingScopeSymbol()
@@ -660,9 +663,9 @@ ParsingScopeSymbol
 			return name;
 		}
 
-		vint ParsingScopeSymbol::GetSemanticId()
+		const collections::List<vint>& ParsingScopeSymbol::GetSemanticIds()
 		{
-			return semanticId;
+			return semanticIds;
 		}
 
 		ParsingTreeObject* ParsingScopeSymbol::GetNode()

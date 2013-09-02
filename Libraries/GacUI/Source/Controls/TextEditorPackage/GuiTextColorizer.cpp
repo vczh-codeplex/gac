@@ -549,11 +549,12 @@ GuiGrammarColorizer
 							scContext.tokenParent=tokenParent;
 							scContext.type=type;
 							scContext.field=field;
-							scContext.semantic=-1;
+							scContext.acceptableSemanticIds=md.semantics;
+							scContext.semanticId=-1;
 							OnSemanticColorize(scContext, context);
-							if(md.semantics->Contains(scContext.semantic))
+							if(md.semantics->Contains(scContext.semanticId))
 							{
-								semantic=scContext.semantic;
+								semantic=scContext.semanticId;
 							}
 						}
 

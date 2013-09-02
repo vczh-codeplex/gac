@@ -26,18 +26,18 @@ GuiTextBoxAutoCompleteBase
 			class GuiTextBoxAutoCompleteBase : public Object, public virtual ICommonTextEditCallback
 			{
 			protected:
-				elements::GuiColorizedTextElement*			element;
-				SpinLock*									elementModifyLock;
+				elements::GuiColorizedTextElement*					element;
+				SpinLock*											elementModifyLock;
 
 			public:
 				GuiTextBoxAutoCompleteBase();
 				~GuiTextBoxAutoCompleteBase();
 
-				void										Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, vuint editVersion)override;
-				void										Detach()override;
-				void										TextEditNotify(const TextEditNotifyStruct& arguments)override;
-				void										TextCaretChanged(const TextCaretChangedStruct& arguments)override;
-				void										TextEditFinished(vuint editVersion)override;
+				void												Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, vuint editVersion)override;
+				void												Detach()override;
+				void												TextEditNotify(const TextEditNotifyStruct& arguments)override;
+				void												TextCaretChanged(const TextCaretChangedStruct& arguments)override;
+				void												TextEditFinished(vuint editVersion)override;
 			};
 
 /***********************************************************************
@@ -50,39 +50,42 @@ GuiGrammarAutoComplete
 				, private RepeatingParsingExecutor::CallbackBase
 				, private RepeatingTaskExecutor<RepeatingParsingOutput>
 			{
+				typedef collections::List<Ptr<parsing::ParsingScopeSymbol>>		ParsingScopeSymbolList;
 			public:
 				/// <summary>The auto complete list data.</summary>
 				struct AutoCompleteData
 				{
 					/// <summary>Available candidate tokens (in lexer token index).</summary>
-					collections::List<vint>					candidates;
+					collections::List<vint>							candidates;
 					/// <summary>Available candidate tokens (in lexer token index) that marked with @AutoCompleteCandidate().</summary>
-					collections::List<vint>					shownCandidates;
+					collections::List<vint>							shownCandidates;
 					/// <summary>Available auto complete types.</summary>
-					collections::List<vint>					semantics;
+					collections::List<vint>							semantics;
 					/// <summary>Auto complete token node.</summary>
-					Ptr<parsing::ParsingTreeToken>			token;
+					Ptr<parsing::ParsingTreeToken>					token;
+					/// <summary>Candidate symbols.</summary>
+					ParsingScopeSymbolList							candidateSymbols;
 				};
 
 				/// <summary>The analysed data from an input code.</summary>
 				struct Context
 				{
 					/// <summary>The input data.</summary>
-					RepeatingParsingOutput					input;
+					RepeatingParsingOutput							input;
 					/// <summary>The rule name that can parse the code of the selected context.</summary>
-					WString									rule;
+					WString											rule;
 					/// <summary>Range of the original context in the input.</summary>
-					parsing::ParsingTextRange				originalRange;
+					parsing::ParsingTextRange						originalRange;
 					/// <summary>The original context in the syntax tree.</summary>
-					Ptr<parsing::ParsingTreeObject>			originalNode;
+					Ptr<parsing::ParsingTreeObject>					originalNode;
 					/// <summary>The modified context in the syntax tree.</summary>
-					Ptr<parsing::ParsingTreeObject>			modifiedNode;
+					Ptr<parsing::ParsingTreeObject>					modifiedNode;
 					/// <summary>The modified code of the selected context.</summary>
-					WString									modifiedCode;
+					WString											modifiedCode;
 					/// <summary>The edit version of modified code.</summary>
-					vuint									modifiedEditVersion;
+					vuint											modifiedEditVersion;
 					/// <summary>The analysed auto complete list data.</summary>
-					Ptr<AutoCompleteData>					autoComplete;
+					Ptr<AutoCompleteData>							autoComplete;
 
 					Context()
 						:modifiedEditVersion(0)
@@ -90,62 +93,62 @@ GuiGrammarAutoComplete
 					}
 				};
 			private:
-				Ptr<parsing::tabling::ParsingGeneralParser>	grammarParser;
-				collections::SortedList<WString>			leftRecursiveRules;
-				bool										editing;
+				Ptr<parsing::tabling::ParsingGeneralParser>			grammarParser;
+				collections::SortedList<WString>					leftRecursiveRules;
+				bool												editing;
 
-				SpinLock									editTraceLock;
-				collections::List<TextEditNotifyStruct>		editTrace;
+				SpinLock											editTraceLock;
+				collections::List<TextEditNotifyStruct>				editTrace;
 
-				SpinLock									contextLock;
-				Context										context;
+				SpinLock											contextLock;
+				Context												context;
 				
-				void										Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, vuint editVersion)override;
-				void										Detach()override;
-				void										TextEditNotify(const TextEditNotifyStruct& arguments)override;
-				void										TextCaretChanged(const TextCaretChangedStruct& arguments)override;
-				void										TextEditFinished(vuint editVersion)override;
-				void										OnParsingFinishedAsync(const RepeatingParsingOutput& output)override;
-				void										CollectLeftRecursiveRules();
+				void												Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, vuint editVersion)override;
+				void												Detach()override;
+				void												TextEditNotify(const TextEditNotifyStruct& arguments)override;
+				void												TextCaretChanged(const TextCaretChangedStruct& arguments)override;
+				void												TextEditFinished(vuint editVersion)override;
+				void												OnParsingFinishedAsync(const RepeatingParsingOutput& output)override;
+				void												CollectLeftRecursiveRules();
 
-				vint										UnsafeGetEditTraceIndex(vuint editVersion);
-				TextPos										ChooseCorrectTextPos(TextPos pos, const regex::RegexTokens& tokens);
-				void										ExecuteRefresh(Context& newContext);
+				vint												UnsafeGetEditTraceIndex(vuint editVersion);
+				TextPos												ChooseCorrectTextPos(TextPos pos, const regex::RegexTokens& tokens);
+				void												ExecuteRefresh(Context& newContext);
 
-				bool										NormalizeTextPos(Context& newContext, elements::text::TextLines& lines, TextPos& pos);
-				void										ExecuteEdit(Context& newContext);
+				bool												NormalizeTextPos(Context& newContext, elements::text::TextLines& lines, TextPos& pos);
+				void												ExecuteEdit(Context& newContext);
 
-				void										DeleteFutures(collections::List<parsing::tabling::ParsingState::Future*>& futures);
-				regex::RegexToken*							TraverseTransitions(
-																parsing::tabling::ParsingState& state,
-																parsing::tabling::ParsingTransitionCollector& transitionCollector,
-																TextPos stopPosition,
-																collections::List<parsing::tabling::ParsingState::Future*>& nonRecoveryFutures,
-																collections::List<parsing::tabling::ParsingState::Future*>& recoveryFutures
-																);
-				regex::RegexToken*							SearchValidInputToken(
-																parsing::tabling::ParsingState& state,
-																parsing::tabling::ParsingTransitionCollector& transitionCollector,
-																TextPos stopPosition,
-																Context& newContext,
-																collections::SortedList<vint>& tableTokenIndices
-																);
+				void												DeleteFutures(collections::List<parsing::tabling::ParsingState::Future*>& futures);
+				regex::RegexToken*									TraverseTransitions(
+																		parsing::tabling::ParsingState& state,
+																		parsing::tabling::ParsingTransitionCollector& transitionCollector,
+																		TextPos stopPosition,
+																		collections::List<parsing::tabling::ParsingState::Future*>& nonRecoveryFutures,
+																		collections::List<parsing::tabling::ParsingState::Future*>& recoveryFutures
+																		);
+				regex::RegexToken*									SearchValidInputToken(
+																		parsing::tabling::ParsingState& state,
+																		parsing::tabling::ParsingTransitionCollector& transitionCollector,
+																		TextPos stopPosition,
+																		Context& newContext,
+																		collections::SortedList<vint>& tableTokenIndices
+																		);
 
-				TextPos										GlobalTextPosToModifiedTextPos(Context& newContext, TextPos pos);
-				TextPos										ModifiedTextPosToGlobalTextPos(Context& newContext, TextPos pos);
-				void										ExecuteCalculateList(Context& newContext);
+				TextPos												GlobalTextPosToModifiedTextPos(Context& newContext, TextPos pos);
+				TextPos												ModifiedTextPosToGlobalTextPos(Context& newContext, TextPos pos);
+				void												ExecuteCalculateList(Context& newContext);
 
-				void										Execute(const RepeatingParsingOutput& input)override;
-				void										PostList(const Context& newContext);
-				void										Initialize();
+				void												Execute(const RepeatingParsingOutput& input)override;
+				void												PostList(const Context& newContext);
+				void												Initialize();
 			protected:
 
-				/// <summary>Called when the context of the code is selected.</summary>
+				/// <summary>Called when the context of the code is selected. It is encouraged to set the "candidateSymbols" field in "context.autoComplete".</summary>
 				/// <param name="context">The selected context.</param>
-				virtual void								OnContextFinishedAsync(const Context& context);
+				virtual void										OnContextFinishedAsync(Context& context);
 
 				/// <summary>Call this function in the derived class's destructor when it overrided <see cref="OnContextFinishedAsync"/>.</summary>
-				void										EnsureAutoCompleteFinished();
+				void												EnsureAutoCompleteFinished();
 			public:
 				/// <summary>Create the auto complete controller with a created parsing executor.</summary>
 				/// <param name="_parsingExecutor">The parsing executor.</param>
@@ -158,7 +161,7 @@ GuiGrammarAutoComplete
 
 				/// <summary>Get the internal parsing executor.</summary>
 				/// <returns>The parsing executor.</returns>
-				Ptr<RepeatingParsingExecutor>				GetParsingExecutor();
+				Ptr<RepeatingParsingExecutor>						GetParsingExecutor();
 			};
 		}
 	}
