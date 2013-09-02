@@ -198,10 +198,6 @@ LazyList<Ptr<ParsingScopeSymbol>> FindReferencedSymbols(ParsingTreeObject* obj, 
 			WString name=obj->GetMember(L"name").Cast<ParsingTreeToken>()->GetValue();
 			LazyList<Ptr<ParsingScopeSymbol>> types=FindReferencedSymbols(parentType.Obj(), finder);
 			return types
-				.Where([](Ptr<ParsingScopeSymbol> type)
-				{
-					return type->GetScope()!=0;
-				})
 				.SelectMany([=](Ptr<ParsingScopeSymbol> type)
 				{
 					return finder->GetSymbols(type->GetScope(), name);
@@ -253,10 +249,6 @@ PtrTypeList SearchAllTypes(ParsingTreeObject* obj, ParsingScopeFinder* finder)
 			*allTypes.Obj(),
 			From(*allTypes.Obj())
 				.Skip(last)
-				.Where([](Ptr<ParsingScopeSymbol> symbol)
-				{
-					return symbol->GetScope()!=0;
-				})
 				.SelectMany([=](Ptr<ParsingScopeSymbol> symbol)
 				{
 					return finder->GetSymbols(symbol->GetScope());
@@ -358,6 +350,12 @@ LazyList<Ptr<ParsingScopeSymbol>> DetermineGrammarTypes(ParsingTreeObject* obj, 
 				selectedTypes=types;
 			}
 		}
+		else if(obj->GetType()==L"AssignGrammarDef" || obj->GetType()==L"SetterGrammarDef")
+		{
+			ParsingTreeObject* grammar=dynamic_cast<ParsingTreeObject*>(finder->Node(obj->GetMember(L"grammar").Obj()));
+			PtrTypeList alternativeTypes=SearchGrammarTypes(grammar, finder);
+			selectedTypes=IntersectTypes(selectedTypes, alternativeTypes);
+		}
 		lastObj=obj;
 		obj=dynamic_cast<ParsingTreeObject*>(finder->ParentNode(obj));
 	}
@@ -384,10 +382,6 @@ LazyList<Ptr<ParsingScopeSymbol>> FindPossibleSymbols(ParsingTreeObject* obj, co
 				WString name=obj->GetMember(L"name").Cast<ParsingTreeToken>()->GetValue();
 				LazyList<Ptr<ParsingScopeSymbol>> types=FindReferencedSymbols(parentType.Obj(), finder);
 				return types
-					.Where([](Ptr<ParsingScopeSymbol> type)
-					{
-						return type->GetScope()!=0;
-					})
 					.SelectMany([=](Ptr<ParsingScopeSymbol> type)
 					{
 						return finder->GetSymbols(type->GetScope());
@@ -425,7 +419,7 @@ LazyList<Ptr<ParsingScopeSymbol>> FindPossibleSymbols(ParsingTreeObject* obj, co
 	}
 	else if(obj->GetType()==L"SetterGrammarDef")
 	{
-		if(field==L"name")
+		if(field==L"memberName")
 		{
 			return DetermineGrammarTypes(obj, finder)
 				.SelectMany([=](Ptr<ParsingScopeSymbol> type)
@@ -439,6 +433,26 @@ LazyList<Ptr<ParsingScopeSymbol>> FindPossibleSymbols(ParsingTreeObject* obj, co
 		}
 		else if(field==L"value")
 		{
+			WString memberName=finder->Node(obj->GetMember(L"memberName")).Cast<ParsingTreeToken>()->GetValue();
+			Ptr<ParsingScopeSymbol> field=FindPossibleSymbols(obj, L"memberName", finder)
+				.Where([=](Ptr<ParsingScopeSymbol> type)
+				{
+					return type->GetName()==memberName;
+				})
+				.First(0);
+			if(field)
+			{
+				Ptr<ParsingTreeObject> type=finder->Node(field->GetNode()->GetMember(L"type")).Cast<ParsingTreeObject>();
+				return FindReferencedSymbols(type.Obj(), finder)
+					.SelectMany([=](Ptr<ParsingScopeSymbol> type)
+					{
+						return finder->GetSymbols(type->GetScope());
+					})
+					.Where([](Ptr<ParsingScopeSymbol> type)
+					{
+						return type.Cast<EnumFieldSymbol>();
+					});
+			}
 		}
 	}
 	return LazyList<Ptr<ParsingScopeSymbol>>();
@@ -604,7 +618,7 @@ protected:
 				if(replacedSymbol)
 				{
 					newFinder=new ParsingScopeFinder(new ParsingScopeFinder::IndirectSymbolMapper(originalSymbol, replacedSymbol.Obj(), originalNode, replacedNode));
-					newFinder->InitializeQueryCache(replacedSymbol.Obj());
+					newFinder->InitializeQueryCache(replacedSymbol.Obj(), context.input.finder.Obj());
 					LazyList<Ptr<ParsingScopeSymbol>> symbols=FindPossibleSymbols(context.autoComplete->tokenParent, context.autoComplete->field, newFinder.Obj());
 					CopyFrom(
 						context.autoComplete->candidateSymbols,
