@@ -55,10 +55,19 @@ public:
 
 class EnumFieldSymbol : public GrammarSymbol
 {
+protected:
+	WString GetDisplayInternal(vint semanticId)
+	{
+		return literalString;
+	}
 public:
+	WString literalString;
+
 	EnumFieldSymbol(Ptr<ParsingTreeObject> node, RepeatingParsingExecutor* executor, ParsingScopeFinder* finder)
 		:GrammarSymbol(node, executor, finder, L"EnumValue")
 	{
+		WString value=finder->Node(node->GetMember(L"name")).Cast<ParsingTreeToken>()->GetValue();
+		literalString=SerializeString(value);
 	}
 };
 
@@ -83,15 +92,11 @@ public:
 class EnumSymbol : public TypeSymbol
 {
 public:
-	WString literalString;
-
 	EnumSymbol(Ptr<ParsingTreeObject> node, RepeatingParsingExecutor* executor, ParsingScopeFinder* finder)
 		:TypeSymbol(node, executor, finder)
 	{
 		CreateScope();
 		CreateSubSymbols(this, node, L"members", executor, finder);
-		WString value=finder->Node(node->GetMember(L"name")).Cast<ParsingTreeToken>()->GetValue();
-		literalString=SerializeString(value);
 	}
 };
 
@@ -109,11 +114,18 @@ public:
 
 class TokenSymbol : public GrammarSymbol
 {
+protected:
+	WString GetDisplayInternal(vint semanticId)
+	{
+		return semanticId==literalId?literalString:ParsingScopeSymbol::GetDisplayInternal(semanticId);
+	}
 public:
+	vint literalId;
 	WString literalString;
 
 	TokenSymbol(Ptr<ParsingTreeObject> node, RepeatingParsingExecutor* executor, ParsingScopeFinder* finder)
 		:GrammarSymbol(node, executor, finder, L"Token")
+		,literalId(-1)
 	{
 		CreateScope();
 		WString value=finder->Node(node->GetMember(L"regex")).Cast<ParsingTreeToken>()->GetValue();
@@ -121,7 +133,7 @@ public:
 		if(IsRegexEscapedListeralString(regex))
 		{
 			literalString=SerializeString(UnescapeTextForRegex(regex));
-			semanticIds.Add(executor->GetSemanticId(L"Literal"));
+			AddSemanticId(literalId=executor->GetSemanticId(L"Literal"));
 		}
 	}
 };

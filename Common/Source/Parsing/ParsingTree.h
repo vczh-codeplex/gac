@@ -420,6 +420,7 @@ namespace vl
 			Ptr<ParsingTreeObject>					node;
 			Ptr<ParsingScope>						scope;
 
+			virtual WString							GetDisplayInternal(vint semanticId);
 		public:
 			ParsingScopeSymbol(const WString& _name=L"", vint _semanticId=-1);
 			~ParsingScopeSymbol();
@@ -427,11 +428,13 @@ namespace vl
 			ParsingScope*							GetParentScope();
 			const WString&							GetName();
 			const collections::List<vint>&			GetSemanticIds();
+			bool									AddSemanticId(vint semanticId);
 			Ptr<ParsingTreeObject>					GetNode();
 			void									SetNode(Ptr<ParsingTreeObject> value);
 			bool									CreateScope();
 			bool									DestroyScope();
 			ParsingScope*							GetScope();
+			WString									GetDisplay(vint semanticId);
 		};
 
 		class ParsingScopeFinder : public Object, public reflection::Description<ParsingScopeFinder>
