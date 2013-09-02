@@ -600,12 +600,43 @@ protected:
 			}
 		}
 
+		WString candidateListMessage;
+		if(context.autoComplete)
+		{
+			SortedList<WString> items;
+			FOREACH(vint, token, context.autoComplete->shownCandidates)
+			{
+				items.Add(GetParsingExecutor()->GetTokenMetaData(token).unescapedRegexText);
+			}
+
+			if(context.autoComplete->acceptableSemanticIds)
+			{
+				FOREACH(Ptr<ParsingScopeSymbol>, symbol, context.autoComplete->candidateSymbols)
+				{
+					vint semanticId=From(*context.autoComplete->acceptableSemanticIds.Obj())
+						.Intersect(symbol->GetSemanticIds())
+						.First(-1);
+					if(semanticId!=-1)
+					{
+						items.Add(symbol->GetDisplay(semanticId));
+					}
+				}
+			}
+
+			FOREACH(WString, item, items)
+			{
+				candidateListMessage+=item+L"\r\n";
+			}
+		}
+
 		WString selectedMessage
-			=L"================CANDIDATE-TOKENS================\r\n"
+			=L"================LIST================\r\n"
+			+candidateListMessage
+			+L"================TOKENS================\r\n"
 			+candidateTokenMessage
-			+L"================CANDIDATE-TYPES================\r\n"
+			+L"================TYPES================\r\n"
 			+candidateTypeMessage
-			+L"================CANDIDATE-SYMBOLS================\r\n"
+			+L"================SYMBOLS================\r\n"
 			+candidateSymbolMessage
 			+L"================RULE================\r\n"
 			+context.rule+L"\r\n"
