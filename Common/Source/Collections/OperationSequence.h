@@ -257,7 +257,7 @@ Distinct
 				while(enumerator->Next())
 				{
 					const T& current=enumerator->Current();
-					if(!distinct.Contains(current))
+					if(!SortedListOperations<T>::Contains(distinct, current))
 					{
 						lastValue=current;
 						distinct.Add(current);
