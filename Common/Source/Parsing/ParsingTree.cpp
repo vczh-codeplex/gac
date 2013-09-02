@@ -639,6 +639,11 @@ ParsingScope
 ParsingScopeSymbol
 ***********************************************************************/
 
+		WString ParsingScopeSymbol::GetDisplayInternal(vint semanticId)
+		{
+			return name;
+		}
+
 		ParsingScopeSymbol::ParsingScopeSymbol(const WString& _name, vint _semanticId)
 			:parentScope(0)
 			,name(_name)
@@ -668,6 +673,13 @@ ParsingScopeSymbol
 			return semanticIds;
 		}
 
+		bool ParsingScopeSymbol::AddSemanticId(vint semanticId)
+		{
+			if(semanticId==-1 || semanticIds.Contains(semanticId)) return false;
+			semanticIds.Add(semanticId);
+			return true;
+		}
+
 		Ptr<ParsingTreeObject> ParsingScopeSymbol::GetNode()
 		{
 			return node;
@@ -695,6 +707,11 @@ ParsingScopeSymbol
 		ParsingScope* ParsingScopeSymbol::GetScope()
 		{
 			return scope.Obj();
+		}
+
+		WString ParsingScopeSymbol::GetDisplay(vint semanticId)
+		{
+			return semanticIds.Contains(semanticId)?GetDisplayInternal(semanticId):L"";
 		}
 
 /***********************************************************************
