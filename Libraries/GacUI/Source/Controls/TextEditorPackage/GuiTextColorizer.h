@@ -178,7 +178,7 @@ GuiGrammarColorizer
 				void														TextCaretChanged(const TextCaretChangedStruct& arguments)override;
 				void														TextEditFinished(vuint editVersion)override;
 
-				/// <summary>Called when a @SemanticColor attribute in a grammar is activated during colorizing to determine a color for the token.</summary>
+				/// <summary>Called when a @SemanticColor attribute in a grammar is activated during colorizing to determine a color for the token. If there is a <see cref="ILanguageProvider"/> binded to the <see cref="RepeatingParsingExecutor"/>, this function can be automatically done.</summary>
 				/// <param name="context">Context for doing semantic colorizing.</param>
 				/// <param name="input">The corressponding result from the <see cref="RepeatingParsingExecutor"/>.</param>
 				virtual void												OnSemanticColorize(SemanticColorizeContext& context, const RepeatingParsingOutput& input);

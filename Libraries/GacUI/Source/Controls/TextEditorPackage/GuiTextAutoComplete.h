@@ -139,7 +139,7 @@ GuiGrammarAutoComplete
 				void												Initialize();
 			protected:
 
-				/// <summary>Called when the context of the code is selected. It is encouraged to set the "candidateSymbols" field in "context.autoComplete".</summary>
+				/// <summary>Called when the context of the code is selected. It is encouraged to set the "candidateSymbols" field in "context.autoComplete". If there is a <see cref="ILanguageProvider"/> binded to the <see cref="RepeatingParsingExecutor"/>, this function can be automatically done.</summary>
 				/// <param name="context">The selected context.</param>
 				virtual void										OnContextFinishedAsync(Context& context);
 

@@ -416,6 +416,20 @@ GuiGrammarColorizer
 
 			void GuiGrammarColorizer::OnSemanticColorize(SemanticColorizeContext& context, const RepeatingParsingOutput& input)
 			{
+				Ptr<ILanguageProvider> languageProvider=parsingExecutor->GetLanguageProvider();
+				if(languageProvider)
+				{
+					if(Ptr<ParsingScopeSymbol> symbol=languageProvider->FindReferencedSymbols(context.tokenParent, input.finder.Obj()).First(0))
+					{
+						vint semanticId=From(symbol->GetSemanticIds())
+							.Intersect(*context.acceptableSemanticIds.Obj())
+							.First(-1);
+						if(semanticId!=-1)
+						{
+							context.semanticId=semanticId;
+						}
+					}
+				}
 			}
 
 			void GuiGrammarColorizer::EnsureColorizerFinished()
