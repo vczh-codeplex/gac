@@ -614,12 +614,12 @@ protected:
 			{
 				FOREACH(Ptr<ParsingScopeSymbol>, symbol, context.autoComplete->candidateSymbols)
 				{
-					vint semanticId=From(*context.autoComplete->acceptableSemanticIds.Obj())
-						.Intersect(symbol->GetSemanticIds())
-						.First(-1);
-					if(semanticId!=-1)
+					FOREACH(vint, semanticId, symbol->GetSemanticIds())
 					{
-						items.Add(symbol->GetDisplay(semanticId));
+						if(context.autoComplete->acceptableSemanticIds->Contains(semanticId))
+						{
+							items.Add(symbol->GetDisplay(semanticId));
+						}
 					}
 				}
 			}
