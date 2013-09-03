@@ -859,6 +859,37 @@ GuiGrammarAutoComplete
 
 			void GuiGrammarAutoComplete::OnContextFinishedAsync(Context& context)
 			{
+				Ptr<ILanguageProvider> languageProvider=parsingExecutor->GetLanguageProvider();
+				if(languageProvider)
+				{
+					if(context.autoComplete && context.autoComplete->acceptableSemanticIds)
+					{
+						ParsingTreeNode* originalNode=context.originalNode.Obj();
+						ParsingTreeNode* replacedNode=context.modifiedNode.Obj();
+						ParsingScope* originalScope=context.input.finder->GetScopeFromNode(originalNode);
+						if(originalScope)
+						{
+							ParsingScopeSymbol* originalSymbol=originalScope->GetOwnerSymbol();
+							Ptr<ParsingScopeFinder> newFinder=new ParsingScopeFinder(new ParsingScopeFinder::IndirectSymbolMapper(0, 0, originalNode, replacedNode));
+							Ptr<ParsingScopeSymbol> replacedSymbol=languageProvider->CreateSymbolFromNode(newFinder->Obj(originalSymbol->GetNode()), GetParsingExecutor().Obj(), newFinder.Obj());
+				
+							if(replacedSymbol)
+							{
+								newFinder=new ParsingScopeFinder(new ParsingScopeFinder::IndirectSymbolMapper(originalSymbol, replacedSymbol.Obj(), originalNode, replacedNode));
+								newFinder->InitializeQueryCache(replacedSymbol.Obj(), context.input.finder.Obj());
+								LazyList<Ptr<ParsingScopeSymbol>> symbols=languageProvider->FindPossibleSymbols(context.autoComplete->tokenParent, context.autoComplete->field, newFinder.Obj());
+								CopyFrom(
+									context.autoComplete->candidateSymbols,
+									From(symbols)
+										.Where([&context](Ptr<ParsingScopeSymbol> symbol)
+										{
+											return From(symbol->GetSemanticIds()).Intersect(*context.autoComplete->acceptableSemanticIds.Obj()).First(-1)!=-1;
+										})
+									);
+							}
+						}
+					}
+				}
 			}
 
 			void GuiGrammarAutoComplete::EnsureAutoCompleteFinished()

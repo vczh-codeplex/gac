@@ -495,6 +495,25 @@ LazyList<Ptr<ParsingScopeSymbol>> FindPossibleSymbols(ParsingTreeObject* obj, co
 ParserGrammarExecutor
 ***********************************************************************/
 
+class GrammarLanguageProvider : public Object, public ILanguageProvider
+{
+public:
+	Ptr<ParsingScopeSymbol> CreateSymbolFromNode(Ptr<ParsingTreeObject> obj, RepeatingParsingExecutor* executor, ParsingScopeFinder* finder)
+	{
+		return ::CreateSymbolFromNode(obj, executor, finder);
+	}
+
+	LazyList<Ptr<ParsingScopeSymbol>> FindReferencedSymbols(ParsingTreeObject* obj, parsing::ParsingScopeFinder* finder)
+	{
+		return ::FindReferencedSymbols(obj, finder);
+	}
+
+	LazyList<Ptr<ParsingScopeSymbol>> FindPossibleSymbols(ParsingTreeObject* obj, const WString& field, ParsingScopeFinder* finder)
+	{
+		return ::FindPossibleSymbols(obj, field, finder);
+	}
+};
+
 class ParserGrammarExecutor : public RepeatingParsingExecutor
 {
 protected:
@@ -507,7 +526,7 @@ protected:
 	}
 public:
 	ParserGrammarExecutor()
-		:RepeatingParsingExecutor(CreateBootstrapAutoRecoverParser(), L"ParserDecl")
+		:RepeatingParsingExecutor(CreateBootstrapAutoRecoverParser(), L"ParserDecl", new GrammarLanguageProvider)
 	{
 	}
 };
@@ -518,21 +537,6 @@ ParserGrammarColorizer
 
 class ParserGrammarColorizer : public GuiGrammarColorizer
 {
-protected:
-
-	void OnSemanticColorize(SemanticColorizeContext& context, const RepeatingParsingOutput& input)override
-	{
-		if(Ptr<ParsingScopeSymbol> symbol=FindReferencedSymbols(context.tokenParent, input.finder.Obj()).First(0))
-		{
-			vint semanticId=From(symbol->GetSemanticIds())
-				.Intersect(*context.acceptableSemanticIds.Obj())
-				.First(-1);
-			if(semanticId!=-1)
-			{
-				context.semanticId=semanticId;
-			}
-		}
-	}
 public:
 	ParserGrammarColorizer(Ptr<ParserGrammarExecutor> executor)
 		:GuiGrammarColorizer(executor)
@@ -544,11 +548,6 @@ public:
 		SetColor(L"Token", Color(163, 73, 164));
 		SetColor(L"Rule", Color(255, 127, 39));
 		EndSetColors();
-	}
-
-	~ParserGrammarColorizer()
-	{
-		EnsureColorizerFinished();
 	}
 };
 
@@ -654,33 +653,7 @@ protected:
 
 	void OnContextFinishedAsync(Context& context)override
 	{
-		if(context.autoComplete && context.autoComplete->acceptableSemanticIds)
-		{
-			ParsingTreeNode* originalNode=context.originalNode.Obj();
-			ParsingTreeNode* replacedNode=context.modifiedNode.Obj();
-			ParsingScope* originalScope=context.input.finder->GetScopeFromNode(originalNode);
-			if(originalScope)
-			{
-				ParsingScopeSymbol* originalSymbol=originalScope->GetOwnerSymbol();
-				Ptr<ParsingScopeFinder> newFinder=new ParsingScopeFinder(new ParsingScopeFinder::IndirectSymbolMapper(0, 0, originalNode, replacedNode));
-				Ptr<ParsingScopeSymbol> replacedSymbol=CreateSymbolFromNode(newFinder->Obj(originalSymbol->GetNode()), GetParsingExecutor().Obj(), newFinder.Obj());
-				
-				if(replacedSymbol)
-				{
-					newFinder=new ParsingScopeFinder(new ParsingScopeFinder::IndirectSymbolMapper(originalSymbol, replacedSymbol.Obj(), originalNode, replacedNode));
-					newFinder->InitializeQueryCache(replacedSymbol.Obj(), context.input.finder.Obj());
-					LazyList<Ptr<ParsingScopeSymbol>> symbols=FindPossibleSymbols(context.autoComplete->tokenParent, context.autoComplete->field, newFinder.Obj());
-					CopyFrom(
-						context.autoComplete->candidateSymbols,
-						From(symbols)
-							.Where([&context](Ptr<ParsingScopeSymbol> symbol)
-							{
-								return From(symbol->GetSemanticIds()).Intersect(*context.autoComplete->acceptableSemanticIds.Obj()).First(-1)!=-1;
-							})
-						);
-				}
-			}
-		}
+		GuiGrammarAutoComplete::OnContextFinishedAsync(context);
 		LogResult(context);
 	}
 public:

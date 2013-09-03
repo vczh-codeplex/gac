@@ -256,11 +256,18 @@ RepeatingParsingExecutor
 
 			void RepeatingParsingExecutor::OnContextFinishedAsync(RepeatingParsingOutput& context)
 			{
+				if(languageProvider)
+				{
+					context.finder=new ParsingScopeFinder();
+					context.symbol=languageProvider->CreateSymbolFromNode(context.node, this, context.finder.Obj());
+					context.finder->InitializeQueryCache(context.symbol.Obj());
+				}
 			}
 
-			RepeatingParsingExecutor::RepeatingParsingExecutor(Ptr<parsing::tabling::ParsingGeneralParser> _grammarParser, const WString& _grammarRule)
+			RepeatingParsingExecutor::RepeatingParsingExecutor(Ptr<parsing::tabling::ParsingGeneralParser> _grammarParser, const WString& _grammarRule, Ptr<ILanguageProvider> _languageProvider)
 				:grammarParser(_grammarParser)
 				,grammarRule(_grammarRule)
+				,languageProvider(_languageProvider)
 				,autoPushingCallback(0)
 			{
 				PrepareMetaData();
@@ -326,6 +333,11 @@ RepeatingParsingExecutor
 					autoPushingCallback->RequireAutoSubmitTask(true);
 				}
 				return true;
+			}
+
+			Ptr<ILanguageProvider> RepeatingParsingExecutor::GetLanguageProvider()
+			{
+				return languageProvider;
 			}
 
 			vint RepeatingParsingExecutor::GetTokenIndex(const WString& tokenName)

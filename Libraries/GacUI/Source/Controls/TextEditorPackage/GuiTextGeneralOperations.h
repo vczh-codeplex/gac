@@ -126,6 +126,33 @@ RepeatingParsingExecutor
 				}
 			};
 
+			class RepeatingParsingExecutor;
+
+			/// <summary>Language semantic metadata provider for text box that editing code.</summary>
+			class ILanguageProvider : public IDescriptable, public Description<ILanguageProvider>
+			{
+			public:
+				/// <summary>Create a symbol from a node.</summary>
+				/// <param name="obj">The node.</param>
+				/// <param name="executor">The executor storing metadatas for a grammar.</param>
+				/// <param name="finder">The finder for traversing nodes and symbols.</param>
+				/// <returns>The created symbol.</returns>
+				virtual Ptr<parsing::ParsingScopeSymbol>							CreateSymbolFromNode(Ptr<parsing::ParsingTreeObject> obj, RepeatingParsingExecutor* executor, parsing::ParsingScopeFinder* finder)=0;
+				
+				/// <summary>Get all referenced symbols (in most cases, one) for a node.</summary>
+				/// <param name="obj">The node.</param>
+				/// <param name="finder">The finder for traversing nodes and symbols.</param>
+				/// <returns>All referenced symbols.</returns>
+				virtual collections::LazyList<Ptr<parsing::ParsingScopeSymbol>>		FindReferencedSymbols(parsing::ParsingTreeObject* obj, parsing::ParsingScopeFinder* finder)=0;
+				
+				/// <summary>Get all possible symbols for a specified field of a node.</summary>
+				/// <param name="obj">The node.</param>
+				/// <param name="field">The field name.</param>
+				/// <param name="finder">The finder for traversing nodes and symbols.</param>
+				/// <returns>All possible symbols.</returns>
+				virtual collections::LazyList<Ptr<parsing::ParsingScopeSymbol>>		FindPossibleSymbols(parsing::ParsingTreeObject* obj, const WString& field, parsing::ParsingScopeFinder* finder)=0;
+			};
+
 			/// <summary>Repeating parsing executor.</summary>
 			class RepeatingParsingExecutor : public RepeatingTaskExecutor<RepeatingParsingInput>
 			{
@@ -184,6 +211,7 @@ RepeatingParsingExecutor
 			private:
 				Ptr<parsing::tabling::ParsingGeneralParser>					grammarParser;
 				WString														grammarRule;
+				Ptr<ILanguageProvider>										languageProvider;
 				collections::List<ICallback*>								callbacks;
 				collections::List<ICallback*>								activatedCallbacks;
 				ICallback*													autoPushingCallback;
@@ -205,8 +233,9 @@ RepeatingParsingExecutor
 			public:
 				/// <summary>Initialize the parsing executor.</summary>
 				/// <param name="_grammarParser">Parser generated from a grammar.</param>
-				/// <param name="_grammarRule"></param>
-				RepeatingParsingExecutor(Ptr<parsing::tabling::ParsingGeneralParser> _grammarParser, const WString& _grammarRule);
+				/// <param name="_grammarRule">The rule name to parse a complete code.</param>
+				/// <param name="_languageProvider">The language provider to create semantic metadats, it can be null.</param>
+				RepeatingParsingExecutor(Ptr<parsing::tabling::ParsingGeneralParser> _grammarParser, const WString& _grammarRule, Ptr<ILanguageProvider> _languageProvider=0);
 				~RepeatingParsingExecutor();
 				
 				/// <summary>Get the internal parser that parse the text.</summary>
@@ -227,6 +256,9 @@ RepeatingParsingExecutor
 				/// <returns>Returns true if this operation succeeded.</returns>
 				/// <param name="value">The callback.</param>
 				bool														DeactivateCallback(ICallback* value);
+				/// <summary>Get the language provider.</summary>
+				/// <returns>The language provider.</returns>
+				Ptr<ILanguageProvider>										GetLanguageProvider();
 
 				vint														GetTokenIndex(const WString& tokenName);
 				vint														GetSemanticId(const WString& name);
