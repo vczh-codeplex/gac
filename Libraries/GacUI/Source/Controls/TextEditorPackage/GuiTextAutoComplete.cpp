@@ -864,12 +864,19 @@ GuiGrammarAutoComplete
 				{
 					if(context.autoComplete && context.autoComplete->acceptableSemanticIds)
 					{
-						ParsingTreeNode* originalNode=context.originalNode.Obj();
-						ParsingTreeNode* replacedNode=context.modifiedNode.Obj();
-						ParsingScope* originalScope=context.input.finder->GetScopeFromNode(originalNode);
-						if(originalScope)
+						ParsingTreeObject* originalNode=context.originalNode.Obj();
+						ParsingTreeObject* replacedNode=context.modifiedNode.Obj();
+						ParsingScopeSymbol* originalSymbol=0;
 						{
-							ParsingScopeSymbol* originalSymbol=originalScope->GetOwnerSymbol();
+							ParsingTreeNode* originalSymbolNode=originalNode;
+							while(originalSymbolNode && !originalSymbol)
+							{
+								originalSymbol=context.input.finder->GetSymbolFromNode(dynamic_cast<ParsingTreeObject*>(originalSymbolNode));
+								originalSymbolNode=originalSymbolNode->GetParent();
+							}
+						}
+						if(originalSymbol)
+						{
 							Ptr<ParsingScopeFinder> newFinder=new ParsingScopeFinder(new ParsingScopeFinder::IndirectSymbolMapper(0, 0, originalNode, replacedNode));
 							Ptr<ParsingScopeSymbol> replacedSymbol=languageProvider->CreateSymbolFromNode(newFinder->Obj(originalSymbol->GetNode()), GetParsingExecutor().Obj(), newFinder.Obj());
 				

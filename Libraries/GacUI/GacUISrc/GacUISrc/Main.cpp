@@ -127,7 +127,6 @@ public:
 		:GrammarSymbol(node, executor, finder, L"Token")
 		,literalId(-1)
 	{
-		CreateScope();
 		WString value=finder->Node(node->GetMember(L"regex")).Cast<ParsingTreeToken>()->GetValue();
 		WString regex=DeserializeString(value);
 		if(IsRegexEscapedListeralString(regex))
@@ -144,7 +143,6 @@ public:
 	RuleSymbol(Ptr<ParsingTreeObject> node, RepeatingParsingExecutor* executor, ParsingScopeFinder* finder)
 		:GrammarSymbol(node, executor, finder, L"Rule")
 	{
-		CreateScope();
 	}
 };
 
