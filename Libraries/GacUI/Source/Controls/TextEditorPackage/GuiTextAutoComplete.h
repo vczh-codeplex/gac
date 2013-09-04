@@ -61,6 +61,8 @@ GuiGrammarAutoComplete
 					collections::List<vint>							shownCandidates;
 					/// <summary>Candidate symbols.</summary>
 					ParsingScopeSymbolList							candidateSymbols;
+					/// <summary>The start position of the editing token in global coordination.</summary>
+					TextPos											startPosition;
 				};
 
 				/// <summary>The analysed data from an input code.</summary>
