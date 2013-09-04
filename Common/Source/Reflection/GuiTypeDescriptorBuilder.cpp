@@ -455,6 +455,27 @@ EventInfoImpl
 				}
 			}
 
+			void EventInfoImpl::Invoke(const Value& thisObject, Value& arguments)
+			{
+				if(thisObject.IsNull())
+				{
+					throw ArgumentNullException(L"thisObject");
+				}
+				else if(!thisObject.CanConvertTo(ownerTypeDescriptor, Value::RawPtr))
+				{
+					throw ArgumentTypeMismtatchException(L"thisObject", ownerTypeDescriptor, Value::RawPtr, thisObject);
+				}
+				DescriptableObject* rawThisObject=thisObject.GetRawPtr();
+				if(rawThisObject)
+				{
+					InvokeInternal(rawThisObject, arguments);
+				}
+				else
+				{
+					return;
+				}
+			}
+
 /***********************************************************************
 PropertyInfoImpl
 ***********************************************************************/

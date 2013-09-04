@@ -90,6 +90,19 @@ GuiEventInfoImpl
 					}
 				}
 
+				void InvokeInternal(DescriptableObject* thisObject, Value& arguments)override
+				{
+					if(thisObject)
+					{
+						GuiGraphicsEvent<T>* eventObject=eventRetriver(thisObject, false);
+						if(eventObject)
+						{
+							T* value=UnboxValue<T*>(arguments, Description<T>::GetAssociatedTypeDescriptor());
+							eventObject->Execute(*value);
+						}
+					}
+				}
+
 				Ptr<ITypeInfo> GetHandlerTypeInternal()override
 				{
 					return TypeInfoRetriver<Func<void(GuiGraphicsComposition*, T*)>>::CreateTypeInfo();
