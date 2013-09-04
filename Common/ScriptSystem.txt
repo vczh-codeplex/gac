@@ -209,7 +209,7 @@ func<T, U> {T}.Zip({U})->{(T, U)};
 Concepts
 ========================================================
 
-concepts cannot contain dynamic dispatch function declarations
+// if a concept include a dynamic dispatch switch function, instances should have case functions.
 
 concept<T> Equatable
 {

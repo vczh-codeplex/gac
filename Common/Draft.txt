@@ -21,11 +21,11 @@ string				system.String
 					system.DateTime
 					system.Locale
 					system.Enumerator
-					system.Enumerable			dynamic{}
+					system.Enumerable			{dynamic}
 					system.ReadableList			const [dynamic]
 					system.List					[dynamic]
-					system.ReadableDictionary	const [dynamic:dynamic]
-					system.Dictionary			[dynamic:dynamic]
+					system.ReadableDictionary	const {dynamic:dynamic}
+					system.Dictionary			{dynamic:dynamic}
 					system.InterfaceProxy
 					system.Function				func dynamic
 dynamic
@@ -37,8 +37,8 @@ Composite Types
 {T}					system.Enumerable<T>
 [T]					system.List<T>
 const [T]			system.ReadableList<T>
-[U:T]				system.Dictionary<U, T>
-const [U:T]			system.ReadableDictionary<U, T>
+{U:T}				system.Dictionary<U, T>
+const {U:T}			system.ReadableDictionary<U, T>
 func (T1, T2):R		system.Function<R, T1, T2>
 func (T1, T2)		system.Function<void, T1, T2>
 
@@ -78,7 +78,7 @@ func Sum(xs : {int}) : int
 	[static] func Do(x : string);
 	ctor (proxy : system.InterfaceProxy);
 	event Clicked : func (GuiGraphicsComposition*, GuiEventArgs*);
-	prop Text : string {getter GetText, setter SetText}
+	prop Text : string {get GetText, set SetText}
 }
 
 namespace system
@@ -95,6 +95,7 @@ Constructors
 true
 false
 
+{}
 []
 [1, 2, 3]
 {
@@ -102,9 +103,6 @@ false
 	"y" : 2,
 	"z" : 3
 }
-
-int[]{1, 2, 3}
-int[string]{ "x" : 1, "y" : 2, "z" : 3 }
 
 Point { x : 1, y : 2 }
 { x : 1, y : 2 }
@@ -119,7 +117,8 @@ Class
 	obj1, obj2, obj3 ...
 }
 
-(x) => x+1
+x => x+1
+(x) => { return x+1; }
 func (x : int) : int { return x+1; }
 
 new IDerived
@@ -156,6 +155,7 @@ a(b, c)
 a.b
 (a)
 (Type)a
+cast a
 this
 
 ========================================================
