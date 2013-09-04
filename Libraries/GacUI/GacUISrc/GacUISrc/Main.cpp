@@ -490,7 +490,7 @@ LazyList<Ptr<ParsingScopeSymbol>> FindPossibleSymbols(ParsingTreeObject* obj, co
 }
 
 /***********************************************************************
-ParserGrammarExecutor
+GrammarLanguageProvider
 ***********************************************************************/
 
 class GrammarLanguageProvider : public Object, public ILanguageProvider
@@ -511,6 +511,10 @@ public:
 		return ::FindPossibleSymbols(obj, field, finder);
 	}
 };
+
+/***********************************************************************
+ParserGrammarExecutor
+***********************************************************************/
 
 class ParserGrammarExecutor : public RepeatingParsingExecutor
 {
@@ -555,115 +559,10 @@ ParserGrammarAutoComplete
 
 class ParserGrammarAutoComplete : public GuiGrammarAutoComplete
 {
-protected:
-	GuiMultilineTextBox*					textBoxScope;
-
-	void LogResult(Context& context)
-	{
-		WString candidateTokenMessage, candidateTypeMessage, candidateSymbolMessage;
-		if(context.autoComplete)
-		{
-			Ptr<ParsingTable> table=GetParsingExecutor()->GetParser()->GetTable();
-			FOREACH(vint, token, context.autoComplete->candidates)
-			{
-				const ParsingTable::TokenInfo& tokenInfo=table->GetTokenInfo(token+ParsingTable::UserTokenStart);
-				candidateTokenMessage
-					+=tokenInfo.name
-					+(context.autoComplete->shownCandidates.Contains(token)?L"[SHOWN]":L"")
-					+L": "
-					+tokenInfo.regex
-					+L"\r\n";
-			}
-
-			if(context.autoComplete->foundToken)
-			{
-				candidateTypeMessage+=L"editing: "+context.autoComplete->foundToken->GetValue()+L"\r\n";
-				if(context.autoComplete->acceptableSemanticIds)
-				{
-					FOREACH(vint, type, *context.autoComplete->acceptableSemanticIds.Obj())
-					{
-						candidateTypeMessage
-							+=L"type: "
-							+GetParsingExecutor()->GetSemanticName(type)
-							+L"\r\n";
-					}
-
-					FOREACH(Ptr<ParsingScopeSymbol>, symbol, context.autoComplete->candidateSymbols)
-					{
-						candidateSymbolMessage
-							+=symbol->GetName()
-							+L"\r\n";
-					}
-				}
-			}
-		}
-
-		WString candidateListMessage;
-		if(context.autoComplete)
-		{
-			SortedList<WString> items;
-			FOREACH(vint, token, context.autoComplete->shownCandidates)
-			{
-				items.Add(GetParsingExecutor()->GetTokenMetaData(token).unescapedRegexText);
-			}
-
-			if(context.autoComplete->acceptableSemanticIds)
-			{
-				FOREACH(Ptr<ParsingScopeSymbol>, symbol, context.autoComplete->candidateSymbols)
-				{
-					FOREACH(vint, semanticId, symbol->GetSemanticIds())
-					{
-						if(context.autoComplete->acceptableSemanticIds->Contains(semanticId))
-						{
-							items.Add(symbol->GetDisplay(semanticId));
-						}
-					}
-				}
-			}
-
-			FOREACH(WString, item, items)
-			{
-				candidateListMessage+=item+L"\r\n";
-			}
-		}
-
-		WString selectedMessage
-			=L"================LIST================\r\n"
-			+candidateListMessage
-			+L"================TOKENS================\r\n"
-			+candidateTokenMessage
-			+L"================TYPES================\r\n"
-			+candidateTypeMessage
-			+L"================SYMBOLS================\r\n"
-			+candidateSymbolMessage
-			+L"================RULE================\r\n"
-			+context.rule+L"\r\n"
-			+L"================CODE================\r\n"
-			+context.modifiedCode+L"\r\n"
-			;
-
-		GetApplication()->InvokeInMainThread([=]()
-		{
-			textBoxScope->SetText(selectedMessage);
-			textBoxScope->Select(TextPos(), TextPos());
-		});
-	}
-
-	void OnContextFinishedAsync(Context& context)override
-	{
-		GuiGrammarAutoComplete::OnContextFinishedAsync(context);
-		LogResult(context);
-	}
 public:
-	ParserGrammarAutoComplete(Ptr<ParserGrammarExecutor> executor, GuiMultilineTextBox* _textBoxScope)
+	ParserGrammarAutoComplete(Ptr<ParserGrammarExecutor> executor)
 		:GuiGrammarAutoComplete(executor)
-		,textBoxScope(_textBoxScope)
 	{
-	}
-
-	~ParserGrammarAutoComplete()
-	{
-		EnsureAutoCompleteFinished();
 	}
 };
 
@@ -674,10 +573,7 @@ TextBoxColorizerWindow
 class AutoCompleteWindow : public GuiWindow
 {
 protected:
-	GuiTab*									tabIntellisense;
 	GuiMultilineTextBox*					textBoxEditor;
-	GuiMultilineTextBox*					textBoxScope;
-	GuiMultilineTextBox*					textBoxGrammar;
 
 	Ptr<ParserGrammarColorizer>				colorizer;
 	Ptr<ParserGrammarAutoComplete>			autoComplete;
@@ -692,62 +588,17 @@ public:
 
 		GuiSelectableButton::MutexGroupController* controller=new GuiSelectableButton::MutexGroupController;
 		AddComponent(controller);
+			
+		textBoxEditor=g::NewMultilineTextBox();
+		textBoxEditor->SetVerticalAlwaysVisible(false);
+		textBoxEditor->SetHorizontalAlwaysVisible(false);
+		textBoxEditor->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+		GetBoundsComposition()->AddChild(textBoxEditor->GetBoundsComposition());
 
-		tabIntellisense=g::NewTab();
-		tabIntellisense->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-		GetBoundsComposition()->AddChild(tabIntellisense->GetBoundsComposition());
-		{
-			GuiTabPage* page=tabIntellisense->CreatePage();
-			page->SetText(L"Code Editor");
-
-			GuiTableComposition* table=new GuiTableComposition;
-			table->SetAlignmentToParent(Margin(0, 0, 0, 0));
-			table->SetRowsAndColumns(1, 3);
-			table->SetRowOption(0, GuiCellOption::PercentageOption(1.0));
-			table->SetColumnOption(0, GuiCellOption::PercentageOption(1.0));
-			table->SetColumnOption(1, GuiCellOption::AbsoluteOption(5));
-			table->SetColumnOption(2, GuiCellOption::AbsoluteOption(300));
-			{
-				GuiCellComposition* cell=new GuiCellComposition;
-				table->AddChild(cell);
-				cell->SetSite(0, 0, 1, 1);
-
-				textBoxEditor=g::NewMultilineTextBox();
-				textBoxEditor->SetVerticalAlwaysVisible(false);
-				textBoxEditor->SetHorizontalAlwaysVisible(false);
-				textBoxEditor->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-				cell->AddChild(textBoxEditor->GetBoundsComposition());
-			}
-			{
-				GuiCellComposition* cell=new GuiCellComposition;
-				table->AddChild(cell);
-				cell->SetSite(0, 2, 1, 1);
-
-				textBoxScope=g::NewMultilineTextBox();
-				textBoxScope->SetVerticalAlwaysVisible(false);
-				textBoxScope->SetHorizontalAlwaysVisible(false);
-				textBoxScope->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-				textBoxScope->SetReadonly(true);
-				cell->AddChild(textBoxScope->GetBoundsComposition());
-			}
-			page->GetContainer()->GetBoundsComposition()->AddChild(table);
-		}
-		{
-			GuiTabPage* page=tabIntellisense->CreatePage();
-			page->SetText(L"Grammar");
-
-			textBoxGrammar=g::NewMultilineTextBox();
-			textBoxGrammar->SetReadonly(true);
-			textBoxGrammar->SetVerticalAlwaysVisible(false);
-			textBoxGrammar->SetHorizontalAlwaysVisible(false);
-			textBoxGrammar->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-			page->GetContainer()->GetBoundsComposition()->AddChild(textBoxGrammar->GetBoundsComposition());
-			textBoxGrammar->SetColorizer(new ParserGrammarColorizer(new ParserGrammarExecutor));
-		}
 		{
 			executor=new ParserGrammarExecutor;
 			colorizer=new ParserGrammarColorizer(executor);
-			autoComplete=new ParserGrammarAutoComplete(executor, textBoxScope);
+			autoComplete=new ParserGrammarAutoComplete(executor);
 
 			textBoxEditor->SetColorizer(colorizer);
 			textBoxEditor->SetAutoComplete(autoComplete);
@@ -758,18 +609,6 @@ public:
 			StreamReader reader(decoderStream);
 			textBoxEditor->SetText(reader.ReadToEnd());
 			textBoxEditor->Select(TextPos(), TextPos());
-		}
-		{
-			Ptr<ParsingDefinition> definition=CreateParserDefinition();
-			MemoryStream stream;
-			{
-				StreamWriter writer(stream);
-				Log(definition, writer);
-			}
-			stream.SeekFromBegin(0);
-			StreamReader reader(stream);
-			textBoxGrammar->SetText(reader.ReadToEnd());
-			textBoxGrammar->Select(TextPos(), TextPos());
 		}
 
 		// set the preferred minimum client 600
