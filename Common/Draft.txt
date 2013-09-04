@@ -156,6 +156,7 @@ a(b, c)
 a.b
 (a)
 (Type)a
+this
 
 ========================================================
 Statements
@@ -166,6 +167,7 @@ a : Type = b;
 var a = b;
 
 <function-call-expression>;
+raise this.Clicked(composition, args);
 
 delete exp;
 return [exp];
