@@ -315,6 +315,7 @@ ITypeDescriptor (event)
 				virtual vint					GetObservingPropertyCount()=0;
 				virtual IPropertyInfo*			GetObservingProperty(vint index)=0;
 				virtual Ptr<IEventHandler>		Attach(const Value& thisObject, Ptr<IValueFunctionProxy> handler)=0;
+				virtual void					Invoke(const Value& thisObject, Value& arguments)=0;
 			};
 
 /***********************************************************************

@@ -160,6 +160,7 @@ EventInfoImpl
 
 				virtual void							AttachInternal(DescriptableObject* thisObject, IEventHandler* eventHandler)=0;
 				virtual void							DetachInternal(DescriptableObject* thisObject, IEventHandler* eventHandler)=0;
+				virtual void							InvokeInternal(DescriptableObject* thisObject, Value& eventHandler)=0;
 				virtual Ptr<ITypeInfo>					GetHandlerTypeInternal()=0;
 
 				void									AddEventHandler(DescriptableObject* thisObject, Ptr<IEventHandler> eventHandler);
@@ -174,6 +175,7 @@ EventInfoImpl
 				vint									GetObservingPropertyCount()override;
 				IPropertyInfo*							GetObservingProperty(vint index)override;
 				Ptr<IEventHandler>						Attach(const Value& thisObject, Ptr<IValueFunctionProxy> handler)override;
+				void									Invoke(const Value& thisObject, Value& arguments)override;
 			};
 
 /***********************************************************************
