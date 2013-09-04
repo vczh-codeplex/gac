@@ -773,6 +773,7 @@ GuiGrammarAutoComplete
 							TextPos startPos, endPos;
 							{
 								startPos=ModifiedTextPosToGlobalTextPos(newContext, stopPosition);
+								autoComplete->startPosition=startPos;
 								endPos=trace.inputEnd;
 								if(newContext.modifiedNode!=newContext.originalNode)
 								{
