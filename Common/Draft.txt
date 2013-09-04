@@ -22,10 +22,10 @@ string				system.String
 					system.Locale
 					system.Enumerator
 					system.Enumerable			dynamic{}
-					system.ReadableList			const dynamic[]
-					system.List					dynamic[]
-					system.ReadableDictionary	const dynamic[dynamic]
-					system.Dictionary			dynamic[dynamic]
+					system.ReadableList			const [dynamic]
+					system.List					[dynamic]
+					system.ReadableDictionary	const [dynamic:dynamic]
+					system.Dictionary			[dynamic:dynamic]
 					system.InterfaceProxy
 					system.Function				func dynamic
 dynamic
@@ -34,12 +34,13 @@ dynamic
 Composite Types
 ========================================================
 
-T{}					system.Enumerable<T>
-T[]					system.List<T>
-const T[]			system.ReadableList<T>
-T[U]				system.Dictionary<U, T>
-const T[U]			system.ReadableDictionary<U, T>
-func R(T1, T2)		system.Function<R, T1, T2>
+{T}					system.Enumerable<T>
+[T]					system.List<T>
+const [T]			system.ReadableList<T>
+[U:T]				system.Dictionary<U, T>
+const [U:T]			system.ReadableDictionary<U, T>
+func (T1, T2):R		system.Function<R, T1, T2>
+func (T1, T2)		system.Function<void, T1, T2>
 
 ClassType*			raw pointer
 CLassType			shared pointer
@@ -62,7 +63,7 @@ enum Season
 	Winter
 }
 
-func Sum(xs : int{}) : int
+func Sum(xs : {int}) : int
 {
 	result : int = 0;
 	for(x in xs)
@@ -74,8 +75,10 @@ func Sum(xs : int{}) : int
 
 [extern []] interface IDerived : IBase1, IBase2
 {
-	[static] func Do(x : string)
-	ctor (proxy : system.InterfaceProxy)
+	[static] func Do(x : string);
+	ctor (proxy : system.InterfaceProxy);
+	event Clicked : func (GuiGraphicsComposition*, GuiEventArgs*);
+	prop Text : string {getter GetText, setter SetText}
 }
 
 namespace system
@@ -107,7 +110,14 @@ Point { x : 1, y : 2 }
 { x : 1, y : 2 }
 
 Class(100) [{ ... }]
-Class { ... }
+Class
+{
+	A : 0,
+	B.C.D : 1,
+	.Do("fuck"),
+
+	obj1, obj2, obj3 ...
+}
 
 (x) => x+1
 func (x : int) : int { return x+1; }
@@ -157,7 +167,7 @@ var a = b;
 
 <function-call-expression>;
 
-delete [exp];
+delete exp;
 return [exp];
 break;
 continue;
