@@ -629,6 +629,13 @@ extern void UnitTestInGuiMain();
 
 void GuiMain()
 {
+	{
+		FileStream fileStream(L"Reflection.txt", FileStream::WriteOnly);
+		BomEncoder encoder(BomEncoder::Utf16);
+		EncoderStream encoderStream(fileStream, encoder);
+		StreamWriter writer(encoderStream);
+		description::LogTypeManager(writer);
+	}
 	UnitTestInGuiMain();
 	Ptr<AutoCompleteWindow> window=new AutoCompleteWindow();
 	GetApplication()->Run(window.Obj());

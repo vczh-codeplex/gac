@@ -9,6 +9,8 @@ namespace vl
 			using namespace collections;
 			using namespace parsing;
 			using namespace parsing::tabling;
+			using namespace parsing::definitions;
+			using namespace parsing::analyzing;
 			using namespace parsing::xml;
 			using namespace stream;
 			using namespace list;
@@ -54,8 +56,15 @@ External Functions
 				return thisObject->GetItems().GetColumns();
 			}
 
-			Ptr<RepeatingParsingExecutor> CreateRepeatingParsingExecutor(const WString& grammar, const WString& rule, Ptr<ILanguageProvider> provider)
+			Ptr<RepeatingParsingExecutor> CreateRepeatingParsingExecutor(const WString& grammar, bool enableAmbiguity, const WString& rule, Ptr<ILanguageProvider> provider)
 			{
+			    Ptr<ParsingGeneralParser> parser=CreateBootstrapStrictParser();
+			    List<Ptr<ParsingError>> errors;
+			    Ptr<ParsingTreeNode> definitionNode=parser->Parse(grammar, L"ParserDecl", errors);
+			    Ptr<ParsingDefinition> definition=DeserializeDefinition(definitionNode);
+			    Ptr<ParsingTable> table=GenerateTable(definition, enableAmbiguity, errors);
+				Ptr<ParsingGeneralParser> grammarParser=CreateAutoRecoverParser(table);
+				return new RepeatingParsingExecutor(grammarParser, rule, provider);
 			}
 
 /***********************************************************************
@@ -1261,7 +1270,7 @@ Type Declaration
 			END_CLASS_MEMBER(ILanguageProvider)
 
 			BEGIN_CLASS_MEMBER(RepeatingParsingExecutor)
-				CLASS_MEMBER_EXTERNALCTOR(Ptr<RepeatingParsingExecutor>(const WString&, const WString&, Ptr<ILanguageProvider>), {L"grammar" _ L"rule" _ L"provider"}, &CreateRepeatingParsingExecutor)
+				CLASS_MEMBER_EXTERNALCTOR(Ptr<RepeatingParsingExecutor>(const WString&, bool, const WString&, Ptr<ILanguageProvider>), {L"grammar" _ L"enableAmbiguity" _ L"rule" _ L"provider"}, &CreateRepeatingParsingExecutor)
 				
 				CLASS_MEMBER_METHOD(GetTokenIndex, {L"tokenName"})
 				CLASS_MEMBER_METHOD(GetSemanticId, {L"name"})
