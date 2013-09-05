@@ -352,6 +352,7 @@ Predefined Types
 			template<>struct TypeInfo<IPropertyInfo>{static const wchar_t* TypeName;};
 			template<>struct TypeInfo<IParameterInfo>{static const wchar_t* TypeName;};
 			template<>struct TypeInfo<IMethodInfo>{static const wchar_t* TypeName;};
+			template<>struct TypeInfo<IMethodGroupInfo>{static const wchar_t* TypeName;};
 			template<>struct TypeInfo<ITypeDescriptor>{static const wchar_t* TypeName;};
 
 			template<>
