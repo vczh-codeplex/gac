@@ -54,6 +54,10 @@ External Functions
 				return thisObject->GetItems().GetColumns();
 			}
 
+			Ptr<RepeatingParsingExecutor> CreateRepeatingParsingExecutor(const WString& grammar, const WString& rule, Ptr<ILanguageProvider> provider)
+			{
+			}
+
 /***********************************************************************
 Type Declaration
 ***********************************************************************/
@@ -1220,6 +1224,7 @@ Type Declaration
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(MaxWidth)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(MaxHeight)
 				CLASS_MEMBER_PROPERTY_FAST(Colorizer)
+				CLASS_MEMBER_PROPERTY_FAST(AutoComplete)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(EditVersion)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(Modified)
 
@@ -1246,6 +1251,23 @@ Type Declaration
 				CLASS_MEMBER_METHOD(Redo, NO_PARAMETER)
 			END_CLASS_MEMBER(GuiTextBoxCommonInterface)
 
+			BEGIN_CLASS_MEMBER(ILanguageProvider)
+				CLASS_MEMBER_BASE(IDescriptable)
+				INTERFACE_EXTERNALCTOR(controls, ILanguageProvider)
+
+				CLASS_MEMBER_METHOD(CreateSymbolFromNode, {L"obj" _ L"executor" _ L"finder"})
+				CLASS_MEMBER_METHOD(FindReferencedSymbols, {L"obj" _  L"finder"})
+				CLASS_MEMBER_METHOD(FindPossibleSymbols, {L"obj" _ L"field" _ L"finder"})
+			END_CLASS_MEMBER(ILanguageProvider)
+
+			BEGIN_CLASS_MEMBER(RepeatingParsingExecutor)
+				CLASS_MEMBER_EXTERNALCTOR(Ptr<RepeatingParsingExecutor>(const WString&, const WString&, Ptr<ILanguageProvider>), {L"grammar" _ L"rule" _ L"provider"}, &CreateRepeatingParsingExecutor)
+				
+				CLASS_MEMBER_METHOD(GetTokenIndex, {L"tokenName"})
+				CLASS_MEMBER_METHOD(GetSemanticId, {L"name"})
+				CLASS_MEMBER_METHOD(GetSemanticName, {L"id"})
+			END_CLASS_MEMBER(RepeatingParsingExecutor)
+
 			BEGIN_CLASS_MEMBER(GuiTextBoxColorizerBase)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(LexerStartState)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(ContextStartState)
@@ -1269,6 +1291,30 @@ Type Declaration
 				CLASS_MEMBER_METHOD(ClearTokens, NO_PARAMETER)
 				CLASS_MEMBER_METHOD(Setup, NO_PARAMETER)
 			END_CLASS_MEMBER(GuiTextBoxRegexColorizer)
+
+			BEGIN_CLASS_MEMBER(GuiGrammarColorizer)
+				CLASS_MEMBER_BASE(GuiTextBoxRegexColorizer)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<GuiGrammarColorizer>(Ptr<RepeatingParsingExecutor>), {L"parsingExecutor"})
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ParsingExecutor)
+
+				CLASS_MEMBER_METHOD(BeginSetColors, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(GetColorNames, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(GetColor, {L"name"})
+				CLASS_MEMBER_METHOD_OVERLOAD(SetColor, {L"name" _ L"color"}, void(GuiGrammarColorizer::*)(const WString&, const ColorEntry&))
+				CLASS_MEMBER_METHOD_OVERLOAD(SetColor, {L"name" _ L"color"}, void(GuiGrammarColorizer::*)(const WString&, const Color&))
+				CLASS_MEMBER_METHOD(EndSetColors, NO_PARAMETER)
+			END_CLASS_MEMBER(GuiGrammarColorizer)
+
+			BEGIN_CLASS_MEMBER(GuiTextBoxAutoCompleteBase)
+			END_CLASS_MEMBER(GuiTextBoxAutoCompleteBase)
+
+			BEGIN_CLASS_MEMBER(GuiGrammarAutoComplete)
+				CLASS_MEMBER_BASE(GuiTextBoxAutoCompleteBase)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<GuiGrammarAutoComplete>(Ptr<RepeatingParsingExecutor>), {L"parsingExecutor"})
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ParsingExecutor)
+			END_CLASS_MEMBER(GuiGrammarAutoComplete)
 
 			BEGIN_CLASS_MEMBER(GuiMultilineTextBox)
 				CLASS_MEMBER_BASE(GuiScrollView)
