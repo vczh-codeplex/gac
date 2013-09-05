@@ -21,14 +21,13 @@ string				system.String
 					system.DateTime
 					system.Locale
 					system.Enumerator
-					system.Enumerable			{dynamic}
-					system.ReadableList			const [dynamic]
-					system.List					[dynamic]
-					system.ReadableDictionary	const {dynamic:dynamic}
-					system.Dictionary			{dynamic:dynamic}
+					system.Enumerable
+					system.ReadableList
+					system.List
+					system.ReadableDictionary
+					system.Dictionary
 					system.InterfaceProxy
-					system.Function				func dynamic
-dynamic
+					system.Function
 
 ========================================================
 Composite Types
@@ -49,13 +48,15 @@ CLassType			shared pointer
 Definitions
 ========================================================
 
+extern <definition>
+
 struct Point
 {
 	x : int,
 	y : int
 }
 
-enum Season
+(enum|flags) Season
 {
 	Spring,
 	Summer,
@@ -63,7 +64,7 @@ enum Season
 	Winter
 }
 
-func Sum(xs : {int}) : int
+func Sum(xs : {int}) : int // compiled as a static method in <current-namespace>::$GlobalFunctions class
 {
 	result : int = 0;
 	for(x in xs)
@@ -73,13 +74,25 @@ func Sum(xs : {int}) : int
 	return x;
 }
 
-[extern []] interface IDerived : IBase1, IBase2
+interface Link
 {
-	[static] func Do(x : string);
-	ctor (proxy : system.InterfaceProxy);
-	event Clicked : func (GuiGraphicsComposition*, GuiEventArgs*);
-	prop Text : string {get GetText, set SetText}
+	data : object,
+	next : Link
 }
+
+extern interface IDerived : IBase1, IBase2
+{
+	data : int,
+	ctor (proxy : system.InterfaceProxy);
+	func Do(x : string);
+	static func Do(x : string);
+	prop Text : string {get GetText, set SetText}
+	event Clicked : func (GuiGraphicsComposition*, GuiEventArgs*);
+}
+
+// extern interface inherits extern interface
+// interface inherits interface
+// interface inherits extern interface with ctor(system.InterfaceProxy)
 
 namespace system
 {
@@ -94,6 +107,7 @@ Constructors
 "fuck"
 true
 false
+null
 
 {}
 []
@@ -121,7 +135,7 @@ x => x+1
 (x) => { return x+1; }
 func (x : int) : int { return x+1; }
 
-new IDerived
+new IDerived // requires ctor(system.InterfaceProxy)
 {
     func Do(x : string)
 	{
@@ -136,27 +150,40 @@ Expressions
 Unary:
 	+
 	-
-	~
-	!
+	bnot
+	not
+	typeof Type // Type to system::TypeDescriptor
+	typeid a // Value to system::TypeDescriptor
+	cast a [to Type]
 Binary:
-	* / %
-	+ -
-	<< >>
-	< <= > >=
-	== !=
-	&
-	^
-	|
-	&&
-	||
+	* / \ %
+	+ - & // & for string concatenation
+	shl shr
+	band bor bxor // integers and flags
+
+	< <= > >= == <>
+	xor
+	and
+	or
 
 a[b]
 a(b, c)
 a.b
 (a)
-(Type)a
-cast a
-this
+this // used in functions in classes
+
+// casting from or to object is implicit
+// casting between numbers is implicit
+// casting between string and non-interfaces calls system::ValueSerializer
+// boolean operation returns bool even if arguments are objects
+// signed and unsigned intergers are not allowed to do calculation
+// result of interger operations is int64 or uint64
+
+legal casting:
+	numbers <--> numbers
+	string <--> non-interfaces
+	interfaces <--> interfaces // in inheriting relations
+	object <--> everything // implicit
 
 ========================================================
 Statements
