@@ -4,7 +4,7 @@ Primitive Types
 
 void				system.Void
 interface			system.Interface
-object				system.Object
+object				system.Object				// similar to dynamic in C#
 uint8				system.UInt8
 uint16				system.UInt16
 uint32				system.UInt32				(uint)
@@ -184,6 +184,7 @@ legal casting:
 	string <--> non-interfaces
 	interfaces <--> interfaces // in inheriting relations
 	object <--> everything // implicit
+	null --> interfaces, void
 
 ========================================================
 Statements
