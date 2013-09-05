@@ -159,7 +159,8 @@ TypeName
 			const wchar_t* TypeInfo<IPropertyInfo>::TypeName			= L"system::reflection::PropertyInfo";
 			const wchar_t* TypeInfo<IParameterInfo>::TypeName			= L"system::reflection::ParameterInfo";
 			const wchar_t* TypeInfo<IMethodInfo>::TypeName				= L"system::reflection::MethodInfo";
-			const wchar_t* TypeInfo<ITypeDescriptor>::TypeName			= L"system::reflection::Type";
+			const wchar_t* TypeInfo<IMethodGroupInfo>::TypeName			= L"system::reflection::MethodGroupInfo";
+			const wchar_t* TypeInfo<ITypeDescriptor>::TypeName			= L"system::reflection::TypeDescriptor";
 
 /***********************************************************************
 TypedValueSerializerProvider
@@ -519,33 +520,137 @@ Collections
 			END_CLASS_MEMBER(IValueFunctionProxy)
 
 			BEGIN_CLASS_MEMBER(IValueSerializer)
+				CLASS_MEMBER_BASE(IDescriptable)
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(OwnerTypeDescriptor)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(CandidateCount)
+
+				CLASS_MEMBER_METHOD(Validate, {L"text"})
+				CLASS_MEMBER_METHOD(Parse, {L"input" _ L"output"})
+				CLASS_MEMBER_METHOD(HasCandidate, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(GetCandidate, {L"index"})
+				CLASS_MEMBER_METHOD(CanMergeCandidate, NO_PARAMETER)
 			END_CLASS_MEMBER(IValueSerializer)
 
 			BEGIN_CLASS_MEMBER(ITypeInfo)
+				CLASS_MEMBER_BASE(IDescriptable)
+				
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Decorator)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ElementType)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(TypeDescriptor)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(GenericArgumentCount)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(TypeFriendlyName)
+				
+				CLASS_MEMBER_METHOD(GetGenericArgument, {L"index"})
 			END_CLASS_MEMBER(ITypeInfo)
 
 			BEGIN_ENUM_ITEM(ITypeInfo::Decorator)
+				ENUM_ITEM_NAMESPACE(ITypeInfo)
+
+				ENUM_NAMESPACE_ITEM(RawPtr)
+				ENUM_NAMESPACE_ITEM(SharedPtr)
+				ENUM_NAMESPACE_ITEM(TypeDescriptor)
+				ENUM_NAMESPACE_ITEM(Generic)
 			END_ENUM_ITEM(ITypeInfo::Decorator)
 
 			BEGIN_CLASS_MEMBER(IMemberInfo)
+				CLASS_MEMBER_BASE(IDescriptable)
+				
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(OwnerTypeDescriptor)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Name)
 			END_CLASS_MEMBER(IMemberInfo)
 
 			BEGIN_CLASS_MEMBER(IEventHandler)
+				CLASS_MEMBER_BASE(IDescriptable)
+				
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(OwnerEvent)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(OwnerObject)
+				
+				CLASS_MEMBER_METHOD(IsAttached, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(Detach, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(Invoke, {L"thisObject" _ L"arguments"})
 			END_CLASS_MEMBER(IEventHandler)
 
 			BEGIN_CLASS_MEMBER(IEventInfo)
+				CLASS_MEMBER_BASE(IMemberInfo)
+				
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(HandlerType)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ObservingPropertyCount)
+				
+				CLASS_MEMBER_METHOD(GetObservingProperty, {L"index"})
+				CLASS_MEMBER_METHOD(Attach, {L"thisObject" _ L"handler"})
+				CLASS_MEMBER_METHOD(Invoke, {L"thisObject" _ L"arguments"})
 			END_CLASS_MEMBER(IEventInfo)
 
 			BEGIN_CLASS_MEMBER(IPropertyInfo)
+				CLASS_MEMBER_BASE(IMemberInfo)
+				
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Return)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Getter)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Setter)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ValueChangedEvent)
+				
+				CLASS_MEMBER_METHOD(IsReadable, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(IsWritable, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(GetValue, {L"thisObject"})
+				CLASS_MEMBER_METHOD(SetValue, {L"thisObject" _ L"newValue"})
 			END_CLASS_MEMBER(IPropertyInfo)
 
 			BEGIN_CLASS_MEMBER(IParameterInfo)
+				CLASS_MEMBER_BASE(IMemberInfo)
+				
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Type)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(OwnerMethod)
 			END_CLASS_MEMBER(IParameterInfo)
 
 			BEGIN_CLASS_MEMBER(IMethodInfo)
+				CLASS_MEMBER_BASE(IMemberInfo)
+			
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(OwnerMethodGroup)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(OwnerProperty)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ParameterCount)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Return)
+				
+				CLASS_MEMBER_METHOD(GetParameter, {L"index"})
+				CLASS_MEMBER_METHOD(IsStatic, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(CheckArguments, {L"arguments"})
+				CLASS_MEMBER_METHOD(Invoke, {L"thisObject" _ L"arguments"})
+				CLASS_MEMBER_BASE(IMemberInfo)
 			END_CLASS_MEMBER(IMethodInfo)
 
+			BEGIN_CLASS_MEMBER(IMethodGroupInfo)
+				CLASS_MEMBER_BASE(IMemberInfo)
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(MethodCount)
+				
+				CLASS_MEMBER_METHOD(GetMethod, {L"index"})
+			END_CLASS_MEMBER(IMethodGroupInfo)
+
 			BEGIN_CLASS_MEMBER(ITypeDescriptor)
+				CLASS_MEMBER_BASE(IDescriptable)
+				
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(TypeName)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ValueSerializer)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(BaseTypeDescriptorCount)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(PropertyCount)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(EventCount)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(MethodGroupCount)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ConstructorGroup)
+				
+				CLASS_MEMBER_METHOD(GetBaseTypeDescriptor, {L"index"})
+				CLASS_MEMBER_METHOD(CanConvertTo, {L"targetType"})
+				CLASS_MEMBER_METHOD(GetProperty, {L"index"})
+				CLASS_MEMBER_METHOD(IsPropertyExists, {L"name" _ L"inheritable"})
+				CLASS_MEMBER_METHOD(GetPropertyByName, {L"name" _ L"inheritable"})
+				CLASS_MEMBER_METHOD(GetProperty, {L"index"})
+				CLASS_MEMBER_METHOD(IsPropertyExists, {L"name" _ L"inheritable"})
+				CLASS_MEMBER_METHOD(GetPropertyByName, {L"name" _ L"inheritable"})
+				CLASS_MEMBER_METHOD(GetEvent, {L"index"})
+				CLASS_MEMBER_METHOD(IsEventExists, {L"name" _ L"inheritable"})
+				CLASS_MEMBER_METHOD(GetEventByName, {L"name" _ L"inheritable"})
+				CLASS_MEMBER_METHOD(GetMethodGroup, {L"index"})
+				CLASS_MEMBER_METHOD(IsMethodGroupExists, {L"name" _ L"inheritable"})
+				CLASS_MEMBER_METHOD(GetMethodGroupByName, {L"name" _ L"inheritable"})
 			END_CLASS_MEMBER(ITypeDescriptor)
 #undef _
 
