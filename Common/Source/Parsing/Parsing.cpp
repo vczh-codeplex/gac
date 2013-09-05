@@ -870,6 +870,53 @@ Type Declaration
 				CLASS_MEMBER_METHOD_RENAME(GetCount, Count, NO_PARAMETER)
 				CLASS_MEMBER_PROPERTY_READONLY(Count, GetCount)
 			END_CLASS_MEMBER(ParsingTreeArray)
+
+			BEGIN_CLASS_MEMBER(ParsingScope)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<ParsingScope>(ParsingScopeSymbol*), {L"ownerSymbol"})
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(OwnerSymbol)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(SymbolNames)
+
+				CLASS_MEMBER_METHOD(AddSymbol, {L"value"})
+				CLASS_MEMBER_METHOD(RemoveSymbol, {L"value"})
+				CLASS_MEMBER_METHOD(GetSymbols, {L"name"})
+			END_CLASS_MEMBER(ParsingScope)
+
+			BEGIN_CLASS_MEMBER(ParsingScopeSymbol)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<ParsingScopeSymbol>(const WString&, vint), {L"name" _ L"semanticId"})
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ParentScope)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Name)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(SemanticIds)
+				CLASS_MEMBER_PROPERTY_FAST(Node)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Scope)
+
+				CLASS_MEMBER_METHOD(AddSemanticId, {L"semanticId"})
+				CLASS_MEMBER_METHOD(CreateScope, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(DestroyScope, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(GetDisplay, {L"semanticId"})
+			END_CLASS_MEMBER(ParsingScopeSymbol)
+
+			typedef collections::LazyList<Ptr<ParsingScopeSymbol>> LazySymbolList;
+
+			BEGIN_CLASS_MEMBER(ParsingScopeFinder)
+				CLASS_MEMBER_METHOD_OVERLOAD(ParentNode, {L"node"}, ParsingTreeNode*(ParsingScopeFinder::*)(ParsingTreeNode*))
+				CLASS_MEMBER_METHOD_OVERLOAD(ParentNode, {L"node"}, ParsingTreeNode*(ParsingScopeFinder::*)(Ptr<ParsingTreeNode>))
+				CLASS_MEMBER_METHOD_OVERLOAD(Node, {L"node"}, ParsingTreeNode*(ParsingScopeFinder::*)(ParsingTreeNode*))
+				CLASS_MEMBER_METHOD_OVERLOAD(Node, {L"node"}, Ptr<ParsingTreeNode>(ParsingScopeFinder::*)(Ptr<ParsingTreeNode>))
+				CLASS_MEMBER_METHOD_OVERLOAD(ParentScope, {L"symbol"}, ParsingScope*(ParsingScopeFinder::*)(ParsingScopeSymbol*))
+				CLASS_MEMBER_METHOD_OVERLOAD(ParentScope, {L"symbol"}, ParsingScope*(ParsingScopeFinder::*)(Ptr<ParsingScopeSymbol>))
+				CLASS_MEMBER_METHOD_OVERLOAD(Symbol, {L"symbol"}, ParsingScopeSymbol*(ParsingScopeFinder::*)(ParsingScopeSymbol*))
+				CLASS_MEMBER_METHOD_OVERLOAD(Symbol, {L"symbol"}, Ptr<ParsingScopeSymbol>(ParsingScopeFinder::*)(Ptr<ParsingScopeSymbol>))
+				CLASS_MEMBER_METHOD(Symbols, {L"symbols"})
+
+				CLASS_MEMBER_METHOD(GetSymbolFromNode, {L"node"})
+				CLASS_MEMBER_METHOD(GetScopeFromNode, {L"node"})
+				CLASS_MEMBER_METHOD_OVERLOAD(GetSymbols, {L"scope" _ L"name"}, LazySymbolList(ParsingScopeFinder::*)(ParsingScope*, const WString&))
+				CLASS_MEMBER_METHOD_OVERLOAD(GetSymbols, {L"scope"}, LazySymbolList(ParsingScopeFinder::*)(ParsingScope*))
+				CLASS_MEMBER_METHOD_OVERLOAD(GetSymbolsRecursively, {L"scope" _ L"name"}, LazySymbolList(ParsingScopeFinder::*)(ParsingScope*, const WString&))
+				CLASS_MEMBER_METHOD_OVERLOAD(GetSymbolsRecursively, {L"scope"}, LazySymbolList(ParsingScopeFinder::*)(ParsingScope*))
+			END_CLASS_MEMBER(ParsingScopeFinder)
 #undef _
 		}
 	}

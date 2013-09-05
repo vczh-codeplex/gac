@@ -447,10 +447,82 @@ Collections
 
 			class IValueEnumerable : public virtual IDescriptable, public Description<IValueEnumerable>
 			{
+			private:
+				template<typename T>
+				class TypedEnumerator : public Object, public collections::IEnumerator<T>
+				{
+				private:
+					Ptr<IValueEnumerable>		enumerable;
+					Ptr<IValueEnumerator>		enumerator;
+					vint						index;
+					T							value;
+
+				public:
+					TypedEnumerator(Ptr<IValueEnumerable> _enumerable, vint _index, const T& _value)
+						:enumerable(_enumerable)
+						,index(_index)
+						,value(_value)
+					{
+						enumerator=enumerable->CreateEnumerator();
+						vint current=-1;
+						while(current++<index)
+						{
+							enumerator->Next();
+						}
+					}
+
+					TypedEnumerator(Ptr<IValueEnumerable> _enumerable)
+						:enumerable(_enumerable)
+						,index(-1)
+					{
+						Reset();
+					}
+
+					collections::IEnumerator<T>* Clone()const override
+					{
+						return new TypedEnumerable<T>(enumerable, index, value);
+					}
+
+					const T& Current()const override
+					{
+						return value;
+					}
+
+					vint Index()const override
+					{
+						return index;
+					}
+
+					bool Next() override
+					{
+						if(enumerator->Next())
+						{
+							index++;
+							value=UnboxValue<T>(enumerator->GetCurrent());
+							return true;
+						}
+						else
+						{
+							return false;
+						}
+					}
+
+					void Reset() override
+					{
+						index=-1;
+						enumerator=enumerable->CreateEnumerator();
+					}
+				};
 			public:
 				virtual Ptr<IValueEnumerator>	CreateEnumerator()=0;
 
 				static Ptr<IValueEnumerable>	Create(collections::LazyList<Value> values);
+
+				template<typename T>
+				static collections::LazyList<T> GetLazyList(Ptr<IValueEnumerator> value)
+				{
+					return collections:::LazyList<T>(new TypedEnumerator<T>(value));
+				}
 			};
 
 			class IValueReadonlyList : public virtual IValueEnumerable, public Description<IValueReadonlyList>
