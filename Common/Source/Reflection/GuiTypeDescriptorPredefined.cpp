@@ -140,6 +140,7 @@ TypeName
 			const wchar_t* TypeInfo<WString>::TypeName					= L"system::String";
 			const wchar_t* TypeInfo<DateTime>::TypeName					= L"system::DateTime";
 			const wchar_t* TypeInfo<Locale>::TypeName					= L"system::Locale";
+
 			const wchar_t* TypeInfo<IValueEnumerator>::TypeName			= L"system::Enumerator";
 			const wchar_t* TypeInfo<IValueEnumerable>::TypeName			= L"system::Enumerable";
 			const wchar_t* TypeInfo<IValueReadonlyList>::TypeName		= L"system::ReadableList";
@@ -148,6 +149,17 @@ TypeName
 			const wchar_t* TypeInfo<IValueDictionary>::TypeName			= L"system::Dictionary";
 			const wchar_t* TypeInfo<IValueInterfaceProxy>::TypeName		= L"system::InterfaceProxy";
 			const wchar_t* TypeInfo<IValueFunctionProxy>::TypeName		= L"system::Function";
+
+			const wchar_t* TypeInfo<IValueSerializer>::TypeName			= L"system::reflection::ValueSerializer";
+			const wchar_t* TypeInfo<ITypeInfo>::TypeName				= L"system::reflection::TypeInfo";
+			const wchar_t* TypeInfo<ITypeInfo::Decorator>::TypeName		= L"system::reflection::TypeInfo::Decorator";
+			const wchar_t* TypeInfo<IMemberInfo>::TypeName				= L"system::reflection::MemberInfo";
+			const wchar_t* TypeInfo<IEventHandler>::TypeName			= L"system::reflection::EventHandler";
+			const wchar_t* TypeInfo<IEventInfo>::TypeName				= L"system::reflection::EventInfo";
+			const wchar_t* TypeInfo<IPropertyInfo>::TypeName			= L"system::reflection::PropertyInfo";
+			const wchar_t* TypeInfo<IParameterInfo>::TypeName			= L"system::reflection::ParameterInfo";
+			const wchar_t* TypeInfo<IMethodInfo>::TypeName				= L"system::reflection::MethodInfo";
+			const wchar_t* TypeInfo<ITypeDescriptor>::TypeName			= L"system::reflection::Type";
 
 /***********************************************************************
 TypedValueSerializerProvider
@@ -506,6 +518,35 @@ Collections
 				CLASS_MEMBER_METHOD(Invoke, {L"arguments"})
 			END_CLASS_MEMBER(IValueFunctionProxy)
 
+			BEGIN_CLASS_MEMBER(IValueSerializer)
+			END_CLASS_MEMBER(IValueSerializer)
+
+			BEGIN_CLASS_MEMBER(ITypeInfo)
+			END_CLASS_MEMBER(ITypeInfo)
+
+			BEGIN_ENUM_ITEM(ITypeInfo::Decorator)
+			END_ENUM_ITEM(ITypeInfo::Decorator)
+
+			BEGIN_CLASS_MEMBER(IMemberInfo)
+			END_CLASS_MEMBER(IMemberInfo)
+
+			BEGIN_CLASS_MEMBER(IEventHandler)
+			END_CLASS_MEMBER(IEventHandler)
+
+			BEGIN_CLASS_MEMBER(IEventInfo)
+			END_CLASS_MEMBER(IEventInfo)
+
+			BEGIN_CLASS_MEMBER(IPropertyInfo)
+			END_CLASS_MEMBER(IPropertyInfo)
+
+			BEGIN_CLASS_MEMBER(IParameterInfo)
+			END_CLASS_MEMBER(IParameterInfo)
+
+			BEGIN_CLASS_MEMBER(IMethodInfo)
+			END_CLASS_MEMBER(IMethodInfo)
+
+			BEGIN_CLASS_MEMBER(ITypeDescriptor)
+			END_CLASS_MEMBER(ITypeDescriptor)
 #undef _
 
 /***********************************************************************
@@ -541,6 +582,7 @@ LoadPredefinedTypes
 					AddSerializableType<LocaleValueSerializer>(manager);
 					ADD_TYPE_INFO(VoidValue)
 					ADD_TYPE_INFO(IDescriptable)
+
 					ADD_TYPE_INFO(IValueEnumerator)
 					ADD_TYPE_INFO(IValueEnumerable)
 					ADD_TYPE_INFO(IValueReadonlyList)
@@ -549,6 +591,17 @@ LoadPredefinedTypes
 					ADD_TYPE_INFO(IValueDictionary)
 					ADD_TYPE_INFO(IValueInterfaceProxy)
 					ADD_TYPE_INFO(IValueFunctionProxy)
+
+					ADD_TYPE_INFO(IValueSerializer)
+					ADD_TYPE_INFO(ITypeInfo)
+					ADD_TYPE_INFO(ITypeInfo::Decorator)
+					ADD_TYPE_INFO(IMemberInfo)
+					ADD_TYPE_INFO(IEventHandler)
+					ADD_TYPE_INFO(IEventInfo)
+					ADD_TYPE_INFO(IPropertyInfo)
+					ADD_TYPE_INFO(IParameterInfo)
+					ADD_TYPE_INFO(IMethodInfo)
+					ADD_TYPE_INFO(ITypeDescriptor)
 				}
 
 				void Unload(ITypeManager* manager)override

@@ -145,7 +145,7 @@ Class
 			};
 
 #define CLASS_MEMBER_BASE(TYPENAME)\
-			AddBaseType(GetTypeDescriptor<TYPENAME>());
+			AddBaseType(description::GetTypeDescriptor<TYPENAME>());
 
 /***********************************************************************
 Field

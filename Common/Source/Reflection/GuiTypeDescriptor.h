@@ -239,7 +239,7 @@ Value
 				};
 			};
 
-			class IValueSerializer : public Interface
+			class IValueSerializer : public virtual IDescriptable, public Description<IValueSerializer>
 			{
 			public:
 				virtual ITypeDescriptor*		GetOwnerTypeDescriptor()=0;
@@ -264,7 +264,7 @@ Value
 ITypeDescriptor (type)
 ***********************************************************************/
 
-			class ITypeInfo : public virtual Interface
+			class ITypeInfo : public virtual IDescriptable, public Description<ITypeInfo>
 			{
 			public:
 				enum Decorator
@@ -287,7 +287,7 @@ ITypeDescriptor (type)
 ITypeDescriptor (basic)
 ***********************************************************************/
 
-			class IMemberInfo : public virtual Interface
+			class IMemberInfo : public virtual IDescriptable, public Description<IMemberInfo>
 			{
 			public:
 				virtual ITypeDescriptor*		GetOwnerTypeDescriptor()=0;
@@ -298,7 +298,7 @@ ITypeDescriptor (basic)
 ITypeDescriptor (event)
 ***********************************************************************/
 
-			class IEventHandler : public virtual Interface
+			class IEventHandler : public virtual IDescriptable, public Description<IEventHandler>
 			{
 			public:
 				virtual IEventInfo*				GetOwnerEvent()=0;
@@ -308,7 +308,7 @@ ITypeDescriptor (event)
 				virtual void					Invoke(const Value& thisObject, Value& arguments)=0;
 			};
 
-			class IEventInfo : public IMemberInfo
+			class IEventInfo : public virtual IMemberInfo, public Description<IEventInfo>
 			{
 			public:
 				virtual ITypeInfo*				GetHandlerType()=0;
@@ -322,7 +322,7 @@ ITypeDescriptor (event)
 ITypeDescriptor (property)
 ***********************************************************************/
 
-			class IPropertyInfo : public IMemberInfo
+			class IPropertyInfo : public virtual IMemberInfo, public Description<IPropertyInfo>
 			{
 			public:
 				virtual bool					IsReadable()=0;
@@ -339,14 +339,14 @@ ITypeDescriptor (property)
 ITypeDescriptor (method)
 ***********************************************************************/
 
-			class IParameterInfo : public IMemberInfo
+			class IParameterInfo : public virtual IMemberInfo, public Description<IParameterInfo>
 			{
 			public:
 				virtual ITypeInfo*				GetType()=0;
 				virtual IMethodInfo*			GetOwnerMethod()=0;
 			};
 
-			class IMethodInfo : public IMemberInfo
+			class IMethodInfo : public virtual IMemberInfo, public Description<IMethodInfo>
 			{
 			public:
 				virtual IMethodGroupInfo*		GetOwnerMethodGroup()=0;
@@ -359,7 +359,7 @@ ITypeDescriptor (method)
 				virtual Value					Invoke(const Value& thisObject, collections::Array<Value>& arguments)=0;
 			};
 
-			class IMethodGroupInfo : public IMemberInfo
+			class IMethodGroupInfo : public virtual IMemberInfo, public Description<IMethodGroupInfo>
 			{
 			public:
 				virtual vint					GetMethodCount()=0;
@@ -370,7 +370,7 @@ ITypeDescriptor (method)
 ITypeDescriptor
 ***********************************************************************/
 
-			class ITypeDescriptor : public virtual Interface
+			class ITypeDescriptor : public virtual IDescriptable, public Description<ITypeDescriptor>
 			{
 			public:
 				virtual const WString&			GetTypeName()=0;
