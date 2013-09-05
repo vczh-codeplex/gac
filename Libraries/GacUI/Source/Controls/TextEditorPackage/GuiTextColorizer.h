@@ -146,7 +146,7 @@ GuiGrammarColorizer
 ***********************************************************************/
 
 			/// <summary>Grammar based colorizer.</summary>
-			class GuiGrammarColorizer abstract : public GuiTextBoxRegexColorizer, private RepeatingParsingExecutor::CallbackBase
+			class GuiGrammarColorizer : public GuiTextBoxRegexColorizer, private RepeatingParsingExecutor::CallbackBase
 			{
 				typedef collections::Pair<WString, WString>					FieldDesc;
 				typedef collections::Dictionary<FieldDesc, vint>			FieldContextColors;

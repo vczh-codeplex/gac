@@ -154,7 +154,7 @@ RepeatingParsingExecutor
 			};
 
 			/// <summary>Repeating parsing executor.</summary>
-			class RepeatingParsingExecutor : public RepeatingTaskExecutor<RepeatingParsingInput>
+			class RepeatingParsingExecutor : public RepeatingTaskExecutor<RepeatingParsingInput>, public Description<RepeatingParsingExecutor>
 			{
 			public:
 				/// <summary>Callback.</summary>
