@@ -333,6 +333,7 @@ Predefined Types
 			template<>struct TypeInfo<WString>{static const wchar_t* TypeName;};
 			template<>struct TypeInfo<DateTime>{static const wchar_t* TypeName;};
 			template<>struct TypeInfo<Locale>{static const wchar_t* TypeName;};
+
 			template<>struct TypeInfo<IValueEnumerator>{static const wchar_t* TypeName;};
 			template<>struct TypeInfo<IValueEnumerable>{static const wchar_t* TypeName;};
 			template<>struct TypeInfo<IValueReadonlyList>{static const wchar_t* TypeName;};
@@ -341,6 +342,17 @@ Predefined Types
 			template<>struct TypeInfo<IValueDictionary>{static const wchar_t* TypeName;};
 			template<>struct TypeInfo<IValueInterfaceProxy>{static const wchar_t* TypeName;};
 			template<>struct TypeInfo<IValueFunctionProxy>{static const wchar_t* TypeName;};
+
+			template<>struct TypeInfo<IValueSerializer>{static const wchar_t* TypeName;};
+			template<>struct TypeInfo<ITypeInfo>{static const wchar_t* TypeName;};
+			template<>struct TypeInfo<ITypeInfo::Decorator>{static const wchar_t* TypeName;};
+			template<>struct TypeInfo<IMemberInfo>{static const wchar_t* TypeName;};
+			template<>struct TypeInfo<IEventHandler>{static const wchar_t* TypeName;};
+			template<>struct TypeInfo<IEventInfo>{static const wchar_t* TypeName;};
+			template<>struct TypeInfo<IPropertyInfo>{static const wchar_t* TypeName;};
+			template<>struct TypeInfo<IParameterInfo>{static const wchar_t* TypeName;};
+			template<>struct TypeInfo<IMethodInfo>{static const wchar_t* TypeName;};
+			template<>struct TypeInfo<ITypeDescriptor>{static const wchar_t* TypeName;};
 
 			template<>
 			struct TypedValueSerializerProvider<unsigned __int8>
