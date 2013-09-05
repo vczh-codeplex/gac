@@ -471,6 +471,19 @@ Helper Functions
 				return value.GetTypeDescriptor();
 			}
 
+			Value IValueSerializer_Parse(IValueSerializer* serializer, const WString& input)
+			{
+				Value value;
+				if(serializer->Parse(input, value))
+				{
+					return value;
+				}
+				else
+				{
+					return Value();
+				}
+			}
+
 /***********************************************************************
 Collections
 ***********************************************************************/
@@ -550,7 +563,7 @@ Collections
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(CandidateCount)
 
 				CLASS_MEMBER_METHOD(Validate, {L"text"})
-				CLASS_MEMBER_METHOD(Parse, {L"input" _ L"output"})
+				CLASS_MEMBER_EXTERNALMETHOD(Parse, {L"input"}, Value(IValueSerializer::*)(const WString&), &IValueSerializer_Parse)
 				CLASS_MEMBER_METHOD(HasCandidate, NO_PARAMETER)
 				CLASS_MEMBER_METHOD(GetCandidate, {L"index"})
 				CLASS_MEMBER_METHOD(CanMergeCandidate, NO_PARAMETER)
