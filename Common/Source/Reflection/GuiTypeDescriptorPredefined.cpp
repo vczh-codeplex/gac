@@ -448,6 +448,30 @@ LocaleValueSerializer
 			};
 
 /***********************************************************************
+Helper Functions
+***********************************************************************/
+
+			vint ITypeDescriptor_GetTypeDescriptorCount()
+			{
+				return GetGlobalTypeManager()->GetTypeDescriptorCount();
+			}
+
+			ITypeDescriptor* ITypeDescriptor_GetTypeDescriptor(vint index)
+			{
+				return GetGlobalTypeManager()->GetTypeDescriptor(index);
+			}
+
+			ITypeDescriptor* ITypeDescriptor_GetTypeDescriptor(const WString& name)
+			{
+				return GetGlobalTypeManager()->GetTypeDescriptor(name);
+			}
+
+			ITypeDescriptor* ITypeDescriptor_GetTypeDescriptor(const Value& value)
+			{
+				return value.GetTypeDescriptor();
+			}
+
+/***********************************************************************
 Collections
 ***********************************************************************/
 
@@ -651,6 +675,11 @@ Collections
 				CLASS_MEMBER_METHOD(GetMethodGroup, {L"index"})
 				CLASS_MEMBER_METHOD(IsMethodGroupExists, {L"name" _ L"inheritable"})
 				CLASS_MEMBER_METHOD(GetMethodGroupByName, {L"name" _ L"inheritable"})
+
+				CLASS_MEMBER_STATIC_EXTERNALMETHOD(GetTypeDescriptorCount, NO_PARAMETER, vint(*)(), &ITypeDescriptor_GetTypeDescriptorCount)
+				CLASS_MEMBER_STATIC_EXTERNALMETHOD(GetTypeDescriptor, {L"index"}, ITypeDescriptor*(*)(vint), &ITypeDescriptor_GetTypeDescriptor)
+				CLASS_MEMBER_STATIC_EXTERNALMETHOD(GetTypeDescriptor, {L"name"}, ITypeDescriptor*(*)(const WString&), &ITypeDescriptor_GetTypeDescriptor)
+				CLASS_MEMBER_STATIC_EXTERNALMETHOD(GetTypeDescriptor, {L"value"}, ITypeDescriptor*(*)(const Value&), &ITypeDescriptor_GetTypeDescriptor)
 			END_CLASS_MEMBER(ITypeDescriptor)
 #undef _
 
@@ -706,6 +735,7 @@ LoadPredefinedTypes
 					ADD_TYPE_INFO(IPropertyInfo)
 					ADD_TYPE_INFO(IParameterInfo)
 					ADD_TYPE_INFO(IMethodInfo)
+					ADD_TYPE_INFO(IMethodGroupInfo)
 					ADD_TYPE_INFO(ITypeDescriptor)
 				}
 
