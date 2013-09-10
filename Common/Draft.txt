@@ -3,7 +3,7 @@ Primitive Types
 ========================================================
 
 void				system.Void
-interface			system.Interface
+					system.Interface
 object				system.Object				// similar to dynamic in C#
 uint8				system.UInt8
 uint16				system.UInt16
@@ -42,7 +42,7 @@ func (T1, T2):R		system.Function<R, T1, T2>
 func (T1, T2)		system.Function<void, T1, T2>
 
 ClassType*			raw pointer
-CLassType			shared pointer
+ClassType			shared pointer
 
 ========================================================
 Definitions
@@ -52,8 +52,8 @@ extern <definition>
 
 struct Point
 {
-	x : int,
-	y : int
+	x : int;
+	y : int;
 }
 
 (enum|flags) Season
@@ -76,17 +76,16 @@ func Sum(xs : {int}) : int // compiled as a static method in <current-namespace>
 
 interface Link
 {
-	data : object,
-	next : Link
+	prop Data : string;
+	prop Next : Link;
 }
 
-extern interface IDerived : IBase1, IBase2
+interface IDerived : IBase1, IBase2
 {
-	data : int,
 	ctor (proxy : system.InterfaceProxy);
 	func Do(x : string);
 	static func Do(x : string);
-	prop Text : string {get GetText, set SetText}
+	prop Text : string {get GetText; set SetText;}
 	event Clicked : func (GuiGraphicsComposition*, GuiEventArgs*);
 }
 
@@ -131,8 +130,8 @@ Class
 	obj1, obj2, obj3 ...
 }
 
-x => x+1
-(x) => { return x+1; }
+x -> x+1
+(x) -> { return x+1; }
 func (x : int) : int { return x+1; }
 
 new IDerived // requires ctor(system.InterfaceProxy)
@@ -157,20 +156,23 @@ Unary:
 	cast a [to Type]
 Binary:
 	* / \ %
-	+ - & // & for string concatenation
+	+ - ++ // += for string concatenation
 	shl shr
-	band bor bxor // integers and flags
-
+	^ // integers and flags
+	&
+	|
 	< <= > >= == <>
-	xor
-	and
-	or
+	^^
+	&&
+	||
 
 a[b]
 a(b, c)
 a.b
 (a)
 this // used in functions in classes
+
+var handler = attach this.Clicked((a,b)->{});
 
 // casting from or to object is implicit
 // casting between numbers is implicit
@@ -195,12 +197,14 @@ a : Type = b;
 var a = b;
 
 <function-call-expression>;
+detach handler; // event handler
 raise this.Clicked(composition, args);
 
 delete exp;
 return [exp];
 break;
 continue;
+throw exception;
 
 if (exp) statement [else statement]
 try if(x [: Type] = exp) statement [else statement]
