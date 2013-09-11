@@ -876,7 +876,7 @@ GuiGrammarAutoComplete
 			void GuiGrammarAutoComplete::PostList(const Context& newContext)
 			{
 				bool openList=true;
-				bool keepListState=false;
+				bool keepListState=true;
 				Ptr<AutoCompleteData> autoComplete=newContext.autoComplete;
 
 				// if failed to get the auto complete list, close
@@ -884,9 +884,12 @@ GuiGrammarAutoComplete
 				{
 					openList=false;
 				}
-				if(autoComplete->shownCandidates.Count()+autoComplete->candidateSymbols.Count()==0)
+				if(openList)
 				{
-					openList;
+					if(autoComplete->shownCandidates.Count()+autoComplete->candidateSymbols.Count()==0)
+					{
+						openList=false;
+					}
 				}
 				
 				TextPos startPosition, endPosition;
@@ -897,18 +900,23 @@ GuiGrammarAutoComplete
 						// if the edit version is invalid, close
 						vint traceIndex=UnsafeGetEditTraceIndex(newContext.input.editVersion);
 						if(traceIndex==-1) openList=false;
+						// an edit version has two trace at most, for text change and caret change, here we peak the text change
+						if(traceIndex>0 && editTrace[traceIndex-1].editVersion==context.input.editVersion)
+						{
+							traceIndex--;
+						}
 
 						// if the edit position goes before the start position of the auto complete, close
 						if(openList)
 						{
 							startPosition=autoComplete->startPosition;
 							endPosition=editTrace[editTrace.Count()-1].inputEnd;
-							for(vint i=traceIndex+1;i<editTrace.Count();i++)
+							for(vint i=traceIndex;i<editTrace.Count();i++)
 							{
 								TextEditNotifyStruct& trace=editTrace[i];
 								if(trace.originalText!=L"" || trace.inputText!=L"")
 								{
-									keepListState=true;
+									keepListState=false;
 								}
 								if(trace.inputStart<startPosition)
 								{
@@ -918,7 +926,10 @@ GuiGrammarAutoComplete
 							}
 						}
 
-						editTrace.RemoveRange(0, traceIndex+1);
+						if(traceIndex>0)
+						{
+							editTrace.RemoveRange(0, traceIndex);
+						}
 					}
 				}
 
