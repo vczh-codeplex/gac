@@ -1,5 +1,6 @@
 #include "GuiTextAutoComplete.h"
 #include "..\GuiApplication.h"
+#include "..\Styles\GuiThemeStyleFactory.h"
 
 namespace vl
 {
@@ -21,15 +22,21 @@ GuiTextBoxAutoCompleteBase
 
 			bool GuiTextBoxAutoCompleteBase::IsListOpening()
 			{
-				return true;
+				return autoCompletePopup->GetOpening();
 			}
 
 			void GuiTextBoxAutoCompleteBase::OpenList(TextPos startPosition)
 			{
+				if(element && elementModifyLock)
+				{
+					Rect bounds=element->GetLines().GetRectFromTextPos(startPosition);
+					autoCompletePopup->ShowPopup(ownerControl, bounds, true);
+				}
 			}
 
 			void GuiTextBoxAutoCompleteBase::CloseList()
 			{
+				autoCompletePopup->Close();
 			}
 
 			void GuiTextBoxAutoCompleteBase::SetListContent(const collections::SortedList<WString>& items)
@@ -43,19 +50,37 @@ GuiTextBoxAutoCompleteBase
 							return INVLOC.Compare(a, b, Locale::IgnoreCase);
 						})
 					);
+
+				autoCompleteList->GetItems().Clear();
+				CopyFrom(
+					autoCompleteList->GetItems(),
+					From(sortedItems)
+						.Select([](const WString& item)
+						{
+							return new list::TextItem(item);
+						})
+					);
+				autoCompleteList->GetBoundsComposition()->SetPreferredMinSize(Size(200, 200));
 			}
 
 			GuiTextBoxAutoCompleteBase::GuiTextBoxAutoCompleteBase()
 				:element(0)
 				,elementModifyLock(0)
+				,ownerControl(0)
 			{
+				autoCompleteList=new GuiTextList(theme::GetCurrentTheme()->CreateTextListStyle(), theme::GetCurrentTheme()->CreateTextListItemStyle());
+				autoCompleteList->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+
+				autoCompletePopup=new GuiPopup(theme::GetCurrentTheme()->CreateMenuStyle());
+				autoCompletePopup->AddChild(autoCompleteList);
 			}
 
 			GuiTextBoxAutoCompleteBase::~GuiTextBoxAutoCompleteBase()
 			{
+				delete autoCompletePopup;
 			}
 
-			void GuiTextBoxAutoCompleteBase::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, vuint editVersion)
+			void GuiTextBoxAutoCompleteBase::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, GuiControl* _ownerControl, vuint editVersion)
 			{
 				if(_element)
 				{
@@ -63,6 +88,7 @@ GuiTextBoxAutoCompleteBase
 					{
 						element=_element;
 						elementModifyLock=&_elementModifyLock;
+						ownerControl=_ownerControl;
 					}
 				}
 			}
@@ -95,10 +121,10 @@ GuiTextBoxAutoCompleteBase
 GuiGrammarAutoComplete
 ***********************************************************************/
 
-			void GuiGrammarAutoComplete::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, vuint editVersion)
+			void GuiGrammarAutoComplete::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, GuiControl* _ownerControl, vuint editVersion)
 			{
-				GuiTextBoxAutoCompleteBase::Attach(_element, _elementModifyLock, editVersion);
-				RepeatingParsingExecutor::CallbackBase::Attach(_element, _elementModifyLock, editVersion);
+				GuiTextBoxAutoCompleteBase::Attach(_element, _elementModifyLock, _ownerControl, editVersion);
+				RepeatingParsingExecutor::CallbackBase::Attach(_element, _elementModifyLock, _ownerControl, editVersion);
 			}
 
 			void GuiGrammarAutoComplete::Detach()

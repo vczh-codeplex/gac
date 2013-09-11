@@ -73,8 +73,9 @@ Common Operations
 				/// <summary>Called when the callback is attached to a text box control.</summary>
 				/// <param name="element">The element that used in the text box control.</param>
 				/// <param name="elementModifyLock">The lock that pretect the element.</param>
+				/// <param name="ownerControl">The owner control of this element.</param>
 				/// <param name="editVersion">The current edit version.</param>
-				virtual void							Attach(elements::GuiColorizedTextElement* element, SpinLock& elementModifyLock, vuint editVersion)=0;
+				virtual void							Attach(elements::GuiColorizedTextElement* element, SpinLock& elementModifyLock, GuiControl* ownerControl, vuint editVersion)=0;
 				/// <summary>Called when the callback is detached from a text box control.</summary>
 				virtual void							Detach()=0;
 				/// <summary>Called after the text is edited and before the caret is changed.</summary>
@@ -185,7 +186,7 @@ RepeatingParsingExecutor
 					~CallbackBase();
 
 					void													RequireAutoSubmitTask(bool enabled)override;
-					void													Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, vuint editVersion)override;
+					void													Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, GuiControl* _ownerControl, vuint editVersion)override;
 					void													Detach()override;
 					void													TextEditNotify(const TextEditNotifyStruct& arguments)override;
 					void													TextCaretChanged(const TextCaretChangedStruct& arguments)override;

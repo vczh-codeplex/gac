@@ -10,6 +10,8 @@ Interfaces:
 #define VCZH_PRESENTATION_CONTROLS_GUITEXTAUTOCOMPLETE
 
 #include "GuiTextGeneralOperations.h"
+#include "..\ListControlPackage\GuiTextListControls.h"
+#include "..\GuiWindowControls.h"
 
 namespace vl
 {
@@ -28,6 +30,9 @@ GuiTextBoxAutoCompleteBase
 			protected:
 				elements::GuiColorizedTextElement*					element;
 				SpinLock*											elementModifyLock;
+				GuiControl*											ownerControl;
+				GuiPopup*											autoCompletePopup;
+				GuiTextList*										autoCompleteList;
 
 				/// <summary>Get the list state.</summary>
 				/// <returns>Returns true if the list is visible.</returns>
@@ -44,7 +49,7 @@ GuiTextBoxAutoCompleteBase
 				GuiTextBoxAutoCompleteBase();
 				~GuiTextBoxAutoCompleteBase();
 
-				void												Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, vuint editVersion)override;
+				void												Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, GuiControl* _ownerControl, vuint editVersion)override;
 				void												Detach()override;
 				void												TextEditNotify(const TextEditNotifyStruct& arguments)override;
 				void												TextCaretChanged(const TextCaretChangedStruct& arguments)override;
@@ -112,7 +117,7 @@ GuiGrammarAutoComplete
 				SpinLock											contextLock;
 				Context												context;
 				
-				void												Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, vuint editVersion)override;
+				void												Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, GuiControl* _ownerControl, vuint editVersion)override;
 				void												Detach()override;
 				void												TextEditNotify(const TextEditNotifyStruct& arguments)override;
 				void												TextCaretChanged(const TextCaretChangedStruct& arguments)override;
