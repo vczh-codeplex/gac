@@ -29,6 +29,17 @@ GuiTextBoxAutoCompleteBase
 				elements::GuiColorizedTextElement*					element;
 				SpinLock*											elementModifyLock;
 
+				/// <summary>Get the list state.</summary>
+				/// <returns>Returns true if the list is visible.</returns>
+				bool												IsListOpening();
+				/// <summary>Notify the list to be visible.</summary>
+				/// <param name="startPosition">The text position to show the list.</param>
+				void												OpenList(TextPos startPosition);
+				/// <summary>Notify the list to be invisible.</summary>
+				void												CloseList();
+				/// <summary>Set the content of the list.</summary>
+				/// <param name="list">The content of the list.</param>
+				void												SetListContent(const collections::SortedList<WString>& items);
 			public:
 				GuiTextBoxAutoCompleteBase();
 				~GuiTextBoxAutoCompleteBase();
