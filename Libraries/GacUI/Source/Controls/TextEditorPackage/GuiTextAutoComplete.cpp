@@ -19,6 +19,32 @@ namespace vl
 GuiTextBoxAutoCompleteBase
 ***********************************************************************/
 
+			bool GuiTextBoxAutoCompleteBase::IsListOpening()
+			{
+				return true;
+			}
+
+			void GuiTextBoxAutoCompleteBase::OpenList(TextPos startPosition)
+			{
+			}
+
+			void GuiTextBoxAutoCompleteBase::CloseList()
+			{
+			}
+
+			void GuiTextBoxAutoCompleteBase::SetListContent(const collections::SortedList<WString>& items)
+			{
+				List<WString> sortedItems;
+				CopyFrom(
+					sortedItems,
+					From(items)
+						.OrderBy([](const WString& a, const WString& b)
+						{
+							return INVLOC.Compare(a, b, Locale::IgnoreCase);
+						})
+					);
+			}
+
 			GuiTextBoxAutoCompleteBase::GuiTextBoxAutoCompleteBase()
 				:element(0)
 				,elementModifyLock(0)
@@ -849,12 +875,105 @@ GuiGrammarAutoComplete
 
 			void GuiGrammarAutoComplete::PostList(const Context& newContext)
 			{
-				SPIN_LOCK(editTraceLock)
-				{
-					vint traceIndex=UnsafeGetEditTraceIndex(newContext.input.editVersion);
-					if(traceIndex==-1) return;
+				bool openList=true;
+				bool keepListState=false;
+				Ptr<AutoCompleteData> autoComplete=newContext.autoComplete;
 
-					editTrace.RemoveRange(0, traceIndex+1);
+				// if failed to get the auto complete list, close
+				if(!autoComplete)
+				{
+					openList=false;
+				}
+				if(autoComplete->shownCandidates.Count()+autoComplete->candidateSymbols.Count()==0)
+				{
+					openList;
+				}
+				
+				TextPos startPosition, endPosition;
+				if(openList)
+				{
+					SPIN_LOCK(editTraceLock)
+					{
+						// if the edit version is invalid, close
+						vint traceIndex=UnsafeGetEditTraceIndex(newContext.input.editVersion);
+						if(traceIndex==-1) openList=false;
+
+						// if the edit position goes before the start position of the auto complete, close
+						if(openList)
+						{
+							startPosition=autoComplete->startPosition;
+							endPosition=editTrace[editTrace.Count()-1].inputEnd;
+							for(vint i=traceIndex+1;i<editTrace.Count();i++)
+							{
+								TextEditNotifyStruct& trace=editTrace[i];
+								if(trace.originalText!=L"" || trace.inputText!=L"")
+								{
+									keepListState=true;
+								}
+								if(trace.inputStart<startPosition)
+								{
+									openList=false;
+									break;
+								}
+							}
+						}
+
+						editTrace.RemoveRange(0, traceIndex+1);
+					}
+				}
+
+				// if the input text from the start position to the current position crosses a token, close
+				if(openList && element)
+				{
+					WString editingText=element->GetLines().GetText(startPosition, endPosition);
+					if(grammarParser->GetTable()->GetLexer().Walk().IsClosedToken(editingText))
+					{
+						openList=false;
+					}
+				}
+
+				// calculate the content of the list
+				if((!keepListState && openList) || IsListOpening())
+				{
+					SortedList<WString> items;
+					FOREACH(vint, token, autoComplete->shownCandidates)
+					{
+						WString literal=parsingExecutor->GetTokenMetaData(token).unescapedRegexText;
+						if(!items.Contains(literal))
+						{
+							items.Add(literal);
+						}
+					}
+					if(autoComplete->acceptableSemanticIds)
+					{
+						FOREACH(Ptr<ParsingScopeSymbol>, symbol, autoComplete->candidateSymbols)
+						{
+							FOREACH(vint, semanticId, symbol->GetSemanticIds())
+							{
+								if(autoComplete->acceptableSemanticIds->Contains(semanticId))
+								{
+									WString literal=symbol->GetDisplay(semanticId);
+									if(!items.Contains(literal))
+									{
+										items.Add(literal);
+									}
+								}
+							}
+						}
+					}
+					SetListContent(items);
+				}
+
+				if(!keepListState)
+				{
+					if(openList)
+					{
+						OpenList(startPosition);
+					}
+					else
+					{
+						CloseList();
+					}
 				}
 			}
 
