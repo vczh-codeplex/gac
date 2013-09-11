@@ -906,7 +906,7 @@ GuiGrammarAutoComplete
 							traceIndex--;
 						}
 
-						// if the edit position goes before the start position of the auto complete, close
+						// scan all traces from the calculation's edit version until now
 						if(openList)
 						{
 							startPosition=autoComplete->startPosition;
@@ -914,10 +914,12 @@ GuiGrammarAutoComplete
 							for(vint i=traceIndex;i<editTrace.Count();i++)
 							{
 								TextEditNotifyStruct& trace=editTrace[i];
+								// if there are no text change trace until now, don't change the list
 								if(trace.originalText!=L"" || trace.inputText!=L"")
 								{
 									keepListState=false;
 								}
+								// if the edit position goes before the start position of the auto complete, close
 								if(trace.inputStart<startPosition)
 								{
 									openList=false;
@@ -947,6 +949,7 @@ GuiGrammarAutoComplete
 				if((!keepListState && openList) || IsListOpening())
 				{
 					SortedList<WString> items;
+					// copy all candidate keywords
 					FOREACH(vint, token, autoComplete->shownCandidates)
 					{
 						WString literal=parsingExecutor->GetTokenMetaData(token).unescapedRegexText;
@@ -955,6 +958,7 @@ GuiGrammarAutoComplete
 							items.Add(literal);
 						}
 					}
+					// copy all candidate symbols
 					if(autoComplete->acceptableSemanticIds)
 					{
 						FOREACH(Ptr<ParsingScopeSymbol>, symbol, autoComplete->candidateSymbols)
@@ -963,6 +967,8 @@ GuiGrammarAutoComplete
 							{
 								if(autoComplete->acceptableSemanticIds->Contains(semanticId))
 								{
+									// add all acceptable display of a symbol
+									// because a symbol can has multiple representation in different places
 									WString literal=symbol->GetDisplay(semanticId);
 									if(!items.Contains(literal))
 									{
@@ -972,9 +978,11 @@ GuiGrammarAutoComplete
 							}
 						}
 					}
+					// fill the list
 					SetListContent(items);
 				}
 
+				// set the list state
 				if(!keepListState)
 				{
 					if(openList)
