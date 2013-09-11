@@ -741,6 +741,7 @@ GuiGrammarAutoComplete
 						{
 							Ptr<ParsingTreeNode> parsedNode=builder.GetNode();
 							newContext.modifiedNode=parsedNode.Cast<ParsingTreeObject>();
+							newContext.modifiedNode->InitializeQueryCache();
 						}
 					}
 
