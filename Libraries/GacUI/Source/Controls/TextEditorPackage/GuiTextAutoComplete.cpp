@@ -914,7 +914,7 @@ GuiGrammarAutoComplete
 			void GuiGrammarAutoComplete::PostList(const Context& newContext)
 			{
 				bool openList=true;
-				bool keepListState=true;
+				bool keepListState=false;
 				Ptr<AutoCompleteData> autoComplete=newContext.autoComplete;
 
 				// if failed to get the auto complete list, close
@@ -947,6 +947,7 @@ GuiGrammarAutoComplete
 						// scan all traces from the calculation's edit version until now
 						if(openList)
 						{
+							keepListState=true;
 							startPosition=autoComplete->startPosition;
 							endPosition=editTrace[editTrace.Count()-1].inputEnd;
 							for(vint i=traceIndex;i<editTrace.Count();i++)
