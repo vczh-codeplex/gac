@@ -37,8 +37,8 @@ GuiTextBoxAutoCompleteBase
 					vint py=compositionBounds.y1-controlBounds.y1;
 					bounds.x1+=px;
 					bounds.x2+=px;
-					bounds.y1+=py;
-					bounds.y2+=py;
+					bounds.y1+=py+5;
+					bounds.y2+=py+5;
 					autoCompletePopup->ShowPopup(ownerControl, bounds, true);
 				}
 			}
