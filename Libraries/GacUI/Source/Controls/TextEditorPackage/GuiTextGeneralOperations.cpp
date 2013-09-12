@@ -36,7 +36,7 @@ RepeatingParsingExecutor::CallbackBase
 				callbackAutoPushing=enabled;
 			}
 
-			void RepeatingParsingExecutor::CallbackBase::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, GuiControl* _ownerControl, vuint editVersion)
+			void RepeatingParsingExecutor::CallbackBase::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, compositions::GuiGraphicsComposition* _ownerComposition, vuint editVersion)
 			{
 				if(_element)
 				{

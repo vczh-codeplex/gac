@@ -130,7 +130,7 @@ GuiTextBoxUndoRedoProcessor
 			{
 			}
 
-			void GuiTextBoxUndoRedoProcessor::Attach(elements::GuiColorizedTextElement* element, SpinLock& elementModifyLock, GuiControl* _ownerControl, vuint editVersion)
+			void GuiTextBoxUndoRedoProcessor::Attach(elements::GuiColorizedTextElement* element, SpinLock& elementModifyLock, compositions::GuiGraphicsComposition* _ownerComposition, vuint editVersion)
 			{
 			}
 

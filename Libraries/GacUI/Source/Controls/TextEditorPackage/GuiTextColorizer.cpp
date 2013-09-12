@@ -115,7 +115,7 @@ GuiTextBoxColorizerBase
 				StopColorizerForever();
 			}
 
-			void GuiTextBoxColorizerBase::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, GuiControl* _ownerControl, vuint editVersion)
+			void GuiTextBoxColorizerBase::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, compositions::GuiGraphicsComposition* _ownerComposition, vuint editVersion)
 			{
 				if(_element)
 				{
@@ -379,10 +379,10 @@ GuiGrammarColorizer
 			{
 			}
 
-			void GuiGrammarColorizer::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, GuiControl* _ownerControl, vuint editVersion)
+			void GuiGrammarColorizer::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, compositions::GuiGraphicsComposition* _ownerComposition, vuint editVersion)
 			{
-				GuiTextBoxRegexColorizer::Attach(_element, _elementModifyLock, _ownerControl, editVersion);
-				RepeatingParsingExecutor::CallbackBase::Attach(_element, _elementModifyLock, _ownerControl, editVersion);
+				GuiTextBoxRegexColorizer::Attach(_element, _elementModifyLock, _ownerComposition, editVersion);
+				RepeatingParsingExecutor::CallbackBase::Attach(_element, _elementModifyLock, _ownerComposition, editVersion);
 			}
 
 			void GuiGrammarColorizer::Detach()

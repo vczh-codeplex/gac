@@ -30,6 +30,15 @@ GuiTextBoxAutoCompleteBase
 				if(element && elementModifyLock)
 				{
 					Rect bounds=element->GetLines().GetRectFromTextPos(startPosition);
+					GuiControl* ownerControl=ownerComposition->GetRelatedControl();
+					Rect compositionBounds=ownerComposition->GetGlobalBounds();
+					Rect controlBounds=ownerControl->GetBoundsComposition()->GetGlobalBounds();
+					vint px=compositionBounds.x1-controlBounds.x1;
+					vint py=compositionBounds.y1-controlBounds.y1;
+					bounds.x1+=px;
+					bounds.x2+=px;
+					bounds.y1+=py;
+					bounds.y2+=py;
 					autoCompletePopup->ShowPopup(ownerControl, bounds, true);
 				}
 			}
@@ -66,10 +75,12 @@ GuiTextBoxAutoCompleteBase
 			GuiTextBoxAutoCompleteBase::GuiTextBoxAutoCompleteBase()
 				:element(0)
 				,elementModifyLock(0)
-				,ownerControl(0)
+				,ownerComposition(0)
 			{
 				autoCompleteList=new GuiTextList(theme::GetCurrentTheme()->CreateTextListStyle(), theme::GetCurrentTheme()->CreateTextListItemStyle());
 				autoCompleteList->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				autoCompleteList->SetHorizontalAlwaysVisible(false);
+				autoCompleteList->SetVerticalAlwaysVisible(false);
 
 				autoCompletePopup=new GuiPopup(theme::GetCurrentTheme()->CreateMenuStyle());
 				autoCompletePopup->AddChild(autoCompleteList);
@@ -80,7 +91,7 @@ GuiTextBoxAutoCompleteBase
 				delete autoCompletePopup;
 			}
 
-			void GuiTextBoxAutoCompleteBase::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, GuiControl* _ownerControl, vuint editVersion)
+			void GuiTextBoxAutoCompleteBase::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, compositions::GuiGraphicsComposition* _ownerComposition, vuint editVersion)
 			{
 				if(_element)
 				{
@@ -88,7 +99,7 @@ GuiTextBoxAutoCompleteBase
 					{
 						element=_element;
 						elementModifyLock=&_elementModifyLock;
-						ownerControl=_ownerControl;
+						ownerComposition=_ownerComposition;
 					}
 				}
 			}
@@ -121,10 +132,10 @@ GuiTextBoxAutoCompleteBase
 GuiGrammarAutoComplete
 ***********************************************************************/
 
-			void GuiGrammarAutoComplete::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, GuiControl* _ownerControl, vuint editVersion)
+			void GuiGrammarAutoComplete::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, compositions::GuiGraphicsComposition* _ownerComposition, vuint editVersion)
 			{
-				GuiTextBoxAutoCompleteBase::Attach(_element, _elementModifyLock, _ownerControl, editVersion);
-				RepeatingParsingExecutor::CallbackBase::Attach(_element, _elementModifyLock, _ownerControl, editVersion);
+				GuiTextBoxAutoCompleteBase::Attach(_element, _elementModifyLock, _ownerComposition, editVersion);
+				RepeatingParsingExecutor::CallbackBase::Attach(_element, _elementModifyLock, _ownerComposition, editVersion);
 			}
 
 			void GuiGrammarAutoComplete::Detach()

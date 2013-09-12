@@ -44,7 +44,7 @@ GuiTextBoxColorizerBase
 				GuiTextBoxColorizerBase();
 				~GuiTextBoxColorizerBase();
 
-				void										Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, GuiControl* _ownerControl, vuint editVersion)override;
+				void										Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, compositions::GuiGraphicsComposition* _ownerComposition, vuint editVersion)override;
 				void										Detach()override;
 				void										TextEditNotify(const TextEditNotifyStruct& arguments)override;
 				void										TextCaretChanged(const TextCaretChangedStruct& arguments)override;
@@ -172,7 +172,7 @@ GuiGrammarColorizer
 				/// <param name="context">The result of the parsing.</param>
 				virtual void												OnContextFinishedAsync(const RepeatingParsingOutput& context);
 
-				void														Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, GuiControl* _ownerControl, vuint editVersion)override;
+				void														Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, compositions::GuiGraphicsComposition* _ownerComposition, vuint editVersion)override;
 				void														Detach()override;
 				void														TextEditNotify(const TextEditNotifyStruct& arguments)override;
 				void														TextCaretChanged(const TextCaretChangedStruct& arguments)override;
