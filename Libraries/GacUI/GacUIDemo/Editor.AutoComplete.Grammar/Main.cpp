@@ -555,6 +555,10 @@ class TextBoxAutoCompleteWindow : public GuiWindow
 protected:
 	GuiMultilineTextBox*					textBoxEditor;
 
+	Ptr<ParserGrammarColorizer>				colorizer;
+	Ptr<ParserGrammarAutoComplete>			autoComplete;
+	Ptr<ParserGrammarExecutor>				executor;
+
 public:
 	TextBoxAutoCompleteWindow()
 		:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
@@ -566,10 +570,16 @@ public:
 		textBoxEditor->SetVerticalAlwaysVisible(false);
 		textBoxEditor->SetHorizontalAlwaysVisible(false);
 		textBoxEditor->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-		textBoxEditor->SetColorizer(new ParserGrammarColorizer(new ParserGrammarExecutor));
 		this->GetBoundsComposition()->AddChild(textBoxEditor->GetBoundsComposition());
 
 		{
+			executor=new ParserGrammarExecutor;
+			colorizer=new ParserGrammarColorizer(executor);
+			autoComplete=new ParserGrammarAutoComplete(executor);
+
+			textBoxEditor->SetColorizer(colorizer);
+			textBoxEditor->SetAutoComplete(autoComplete);
+
 			FileStream fileStream(L"..\\Resources\\CalculatorDefinition.txt", FileStream::ReadOnly);
 			BomDecoder decoder;
 			DecoderStream decoderStream(fileStream, decoder);
