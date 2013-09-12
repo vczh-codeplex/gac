@@ -30,7 +30,7 @@ GuiTextBoxAutoCompleteBase
 			protected:
 				elements::GuiColorizedTextElement*					element;
 				SpinLock*											elementModifyLock;
-				GuiControl*											ownerControl;
+				compositions::GuiGraphicsComposition*				ownerComposition;
 				GuiPopup*											autoCompletePopup;
 				GuiTextList*										autoCompleteList;
 
@@ -49,7 +49,7 @@ GuiTextBoxAutoCompleteBase
 				GuiTextBoxAutoCompleteBase();
 				~GuiTextBoxAutoCompleteBase();
 
-				void												Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, GuiControl* _ownerControl, vuint editVersion)override;
+				void												Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, compositions::GuiGraphicsComposition* _ownerComposition, vuint editVersion)override;
 				void												Detach()override;
 				void												TextEditNotify(const TextEditNotifyStruct& arguments)override;
 				void												TextCaretChanged(const TextCaretChangedStruct& arguments)override;
@@ -117,7 +117,7 @@ GuiGrammarAutoComplete
 				SpinLock											contextLock;
 				Context												context;
 				
-				void												Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, GuiControl* _ownerControl, vuint editVersion)override;
+				void												Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, compositions::GuiGraphicsComposition* _ownerComposition, vuint editVersion)override;
 				void												Detach()override;
 				void												TextEditNotify(const TextEditNotifyStruct& arguments)override;
 				void												TextCaretChanged(const TextCaretChangedStruct& arguments)override;

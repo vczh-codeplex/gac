@@ -468,7 +468,7 @@ GuiTextBoxCommonInterface
 
 				for(vint i=0;i<textEditCallbacks.Count();i++)
 				{
-					textEditCallbacks[i]->Attach(textElement, elementModifyLock, textControl ,editVersion);
+					textEditCallbacks[i]->Attach(textElement, elementModifyLock, textComposition ,editVersion);
 				}
 			}
 			
@@ -493,7 +493,7 @@ GuiTextBoxCommonInterface
 					textEditCallbacks.Add(value);
 					if(textElement)
 					{
-						value->Attach(textElement, elementModifyLock, textControl, editVersion);
+						value->Attach(textElement, elementModifyLock, textComposition, editVersion);
 					}
 					return true;
 				}
