@@ -4697,6 +4697,7 @@ Window
 
 				bool									IsClippedByScreen(Point location);
 				void									ShowPopup(Point location);
+				void									ShowPopup(GuiControl* control, Rect bounds, bool preferredTopBottomSide);
 				void									ShowPopup(GuiControl* control, Point location);
 				void									ShowPopup(GuiControl* control, bool preferredTopBottomSide);
 			};
@@ -7369,7 +7370,7 @@ Common Operations
 					}
 				};
 
-				virtual void							Attach(elements::GuiColorizedTextElement* element, SpinLock& elementModifyLock, vuint editVersion)=0;
+				virtual void							Attach(elements::GuiColorizedTextElement* element, SpinLock& elementModifyLock, compositions::GuiGraphicsComposition* ownerComposition, vuint editVersion)=0;
 				virtual void							Detach()=0;
 				virtual void							TextEditNotify(const TextEditNotifyStruct& arguments)=0;
 				virtual void							TextCaretChanged(const TextCaretChangedStruct& arguments)=0;
@@ -7396,7 +7397,8 @@ RepeatingParsingExecutor
 				Ptr<parsing::ParsingTreeObject>			node;
 				vuint									editVersion;
 				WString									code;
-				Ptr<Object>								semanticContext;
+				Ptr<parsing::ParsingScopeSymbol>		symbol;
+				Ptr<parsing::ParsingScopeFinder>		finder;
 
 				RepeatingParsingOutput()
 					:editVersion(0)
@@ -7404,7 +7406,19 @@ RepeatingParsingExecutor
 				}
 			};
 
-			class RepeatingParsingExecutor : public RepeatingTaskExecutor<RepeatingParsingInput>
+			class RepeatingParsingExecutor;
+
+			class ILanguageProvider : public IDescriptable, public Description<ILanguageProvider>
+			{
+			public:
+				virtual Ptr<parsing::ParsingScopeSymbol>							CreateSymbolFromNode(Ptr<parsing::ParsingTreeObject> obj, RepeatingParsingExecutor* executor, parsing::ParsingScopeFinder* finder)=0;
+				
+				virtual collections::LazyList<Ptr<parsing::ParsingScopeSymbol>>		FindReferencedSymbols(parsing::ParsingTreeObject* obj, parsing::ParsingScopeFinder* finder)=0;
+				
+				virtual collections::LazyList<Ptr<parsing::ParsingScopeSymbol>>		FindPossibleSymbols(parsing::ParsingTreeObject* obj, const WString& field, parsing::ParsingScopeFinder* finder)=0;
+			};
+
+			class RepeatingParsingExecutor : public RepeatingTaskExecutor<RepeatingParsingInput>, public Description<RepeatingParsingExecutor>
 			{
 			public:
 				class ICallback : public virtual Interface
@@ -7429,26 +7443,51 @@ RepeatingParsingExecutor
 					~CallbackBase();
 
 					void													RequireAutoSubmitTask(bool enabled)override;
-					void													Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, vuint editVersion)override;
+					void													Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, compositions::GuiGraphicsComposition* _ownerComposition, vuint editVersion)override;
 					void													Detach()override;
 					void													TextEditNotify(const TextEditNotifyStruct& arguments)override;
 					void													TextCaretChanged(const TextCaretChangedStruct& arguments)override;
 					void													TextEditFinished(vuint editVersion)override;
 				};
+
+				struct TokenMetaData
+				{
+					vint													tableTokenIndex;
+					vint													lexerTokenIndex;
+					vint													defaultColorIndex;
+					bool													hasContextColor;
+					bool													hasAutoComplete;
+					bool													isCandidate;
+					WString													unescapedRegexText;
+				};
+
+				struct FieldMetaData
+				{
+					vint													colorIndex;
+					Ptr<collections::List<vint>>							semantics;
+				};
 			private:
 				Ptr<parsing::tabling::ParsingGeneralParser>					grammarParser;
 				WString														grammarRule;
+				Ptr<ILanguageProvider>										languageProvider;
 				collections::List<ICallback*>								callbacks;
 				collections::List<ICallback*>								activatedCallbacks;
 				ICallback*													autoPushingCallback;
 
+				typedef collections::Pair<WString, WString>					FieldDesc;
+				collections::Dictionary<WString, vint>						tokenIndexMap;
+				collections::SortedList<WString>							semanticIndexMap;
+				collections::Dictionary<vint, TokenMetaData>				tokenMetaDatas;
+				collections::Dictionary<FieldDesc, FieldMetaData>			fieldMetaDatas;
+
 			protected:
 
 				void														Execute(const RepeatingParsingInput& input)override;
+				void														PrepareMetaData();
 
 				virtual void												OnContextFinishedAsync(RepeatingParsingOutput& context);
 			public:
-				RepeatingParsingExecutor(Ptr<parsing::tabling::ParsingGeneralParser> _grammarParser, const WString& _grammarRule);
+				RepeatingParsingExecutor(Ptr<parsing::tabling::ParsingGeneralParser> _grammarParser, const WString& _grammarRule, Ptr<ILanguageProvider> _languageProvider=0);
 				~RepeatingParsingExecutor();
 				
 				Ptr<parsing::tabling::ParsingGeneralParser>					GetParser();
@@ -7456,31 +7495,57 @@ RepeatingParsingExecutor
 				bool														DetachCallback(ICallback* value);
 				bool														ActivateCallback(ICallback* value);
 				bool														DeactivateCallback(ICallback* value);
+				Ptr<ILanguageProvider>										GetLanguageProvider();
+
+				vint														GetTokenIndex(const WString& tokenName);
+				vint														GetSemanticId(const WString& name);
+				WString														GetSemanticName(vint id);
+				const TokenMetaData&										GetTokenMetaData(vint regexTokenIndex);
+				const FieldMetaData&										GetFieldMetaData(const WString& type, const WString& field);
 
 				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetAttribute(vint index, const WString& name, vint argumentCount);
 				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetColorAttribute(vint index);
 				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetContextColorAttribute(vint index);
-				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetSemanticColorAttribute(vint index);
-				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetAutoCompleteCandidateAttribute(vint index);
-				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetAutoCompleteTokenAttribute(vint index);
-				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetAutoCompleteTypeAttribute(vint index);
+				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetSemanticAttribute(vint index);
+				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetCandidateAttribute(vint index);
+				Ptr<parsing::tabling::ParsingTable::AttributeInfo>			GetAutoCompleteAttribute(vint index);
 
 				/*
 				@Color(ColorName)
 					field:	color of the token field when the token type is marked with @ContextColor
 					token:	color of the token
-				@ContextColor(DefaultColor)
-					token:	color of the token, and it may be changed if the token field is marked with @Color or @SemanticColor
-				@SemanticColor(Type)
-					field:	invoke a callback to get the color of the token field when the token type is marked with @ContextColor
-
-				@AutoCompleteCandidate()
+				@ContextColor()
+					token:	the color of the token may be changed if the token field is marked with @Color or @Semantic
+				@Semantic(Type1, Type2, ...)
+					field:	After resolved symbols for this field, only types of symbols that specified in the arguments are acceptable.
+				@Candidate()
 					token:	when the token can be available after the editing caret, than it will be in the auto complete list.
-				@AutoCompleteToken()
+				@AutoComplete()
 					token:	when the token is editing, an auto complete list will appear if possible
-				@AutoCompleteType(Type)
-					field:	invoke a callback to get the auto complete list items when the token type is marked with @AutoCompleteToken
 				*/
+			};
+
+/***********************************************************************
+ParsingContext
+***********************************************************************/
+
+			struct ParsingContext
+			{
+				parsing::ParsingTreeToken*								foundToken;
+				parsing::ParsingTreeObject*								tokenParent;
+				WString													type;
+				WString													field;
+				Ptr<collections::List<vint>>							acceptableSemanticIds;
+				
+				ParsingContext()
+					:foundToken(0)
+					,tokenParent(0)
+				{
+				}
+
+				static bool												RetriveContext(ParsingContext& output, parsing::ParsingTreeNode* foundNode, RepeatingParsingExecutor* executor);
+				static bool												RetriveContext(ParsingContext& output, parsing::ParsingTextPos pos, parsing::ParsingTreeObject* rootNode, RepeatingParsingExecutor* executor);
+				static bool												RetriveContext(ParsingContext& output, parsing::ParsingTextRange range, parsing::ParsingTreeObject* rootNode, RepeatingParsingExecutor* executor);
 			};
 		}
 	}
@@ -7535,7 +7600,7 @@ GuiTextBoxColorizerBase
 				GuiTextBoxColorizerBase();
 				~GuiTextBoxColorizerBase();
 
-				void										Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, vuint editVersion)override;
+				void										Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, compositions::GuiGraphicsComposition* _ownerComposition, vuint editVersion)override;
 				void										Detach()override;
 				void										TextEditNotify(const TextEditNotifyStruct& arguments)override;
 				void										TextCaretChanged(const TextCaretChangedStruct& arguments)override;
@@ -7592,30 +7657,20 @@ GuiTextBoxRegexColorizer
 GuiGrammarColorizer
 ***********************************************************************/
 
-			class GuiGrammarColorizer abstract : public GuiTextBoxRegexColorizer, private RepeatingParsingExecutor::CallbackBase
+			class GuiGrammarColorizer : public GuiTextBoxRegexColorizer, private RepeatingParsingExecutor::CallbackBase
 			{
 				typedef collections::Pair<WString, WString>					FieldDesc;
 				typedef collections::Dictionary<FieldDesc, vint>			FieldContextColors;
 				typedef collections::Dictionary<FieldDesc, vint>			FieldSemanticColors;
 				typedef elements::text::ColorEntry							ColorEntry;
 			public:
-				struct SemanticColorizeContext
+				struct SemanticColorizeContext : ParsingContext
 				{
-					parsing::ParsingTreeToken*								foundToken;
-					parsing::ParsingTreeObject*								tokenParent;
-					WString													type;
-					WString													field;
-					vint													semantic;
-					vint													token;
-					Ptr<Object>												semanticContext;
+					vint													semanticId;
 				};
 			private:
 				collections::Dictionary<WString, ColorEntry>				colorSettings;
-				collections::Dictionary<WString, vint>						colorIndices;
-				collections::List<bool>										colorContext;
-				FieldContextColors											fieldContextColors;
-				FieldSemanticColors											fieldSemanticColors;
-				collections::Dictionary<WString, vint>						semanticIndices;
+				collections::Dictionary<vint, vint>							semanticColorMap;
 
 				SpinLock													contextLock;
 				RepeatingParsingOutput										context;
@@ -7624,13 +7679,13 @@ GuiGrammarColorizer
 			protected:
 				virtual void												OnContextFinishedAsync(const RepeatingParsingOutput& context);
 
-				void														Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, vuint editVersion)override;
+				void														Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, compositions::GuiGraphicsComposition* _ownerComposition, vuint editVersion)override;
 				void														Detach()override;
 				void														TextEditNotify(const TextEditNotifyStruct& arguments)override;
 				void														TextCaretChanged(const TextCaretChangedStruct& arguments)override;
 				void														TextEditFinished(vuint editVersion)override;
 
-				virtual void												OnSemanticColorize(SemanticColorizeContext& context);
+				virtual void												OnSemanticColorize(SemanticColorizeContext& context, const RepeatingParsingOutput& input);
 
 				void														EnsureColorizerFinished();
 			public:
@@ -7638,8 +7693,6 @@ GuiGrammarColorizer
 				GuiGrammarColorizer(Ptr<parsing::tabling::ParsingGeneralParser> _grammarParser, const WString& _grammarRule);
 				~GuiGrammarColorizer();
 
-				vint														GetTokenId(const WString& token);
-				vint														GetSemanticId(const WString& semantic);
 				void														BeginSetColors();
 				const collections::SortedList<WString>&						GetColorNames();
 				ColorEntry													GetColor(const WString& name);
@@ -7685,18 +7738,25 @@ GuiTextBoxAutoCompleteBase
 			class GuiTextBoxAutoCompleteBase : public Object, public virtual ICommonTextEditCallback
 			{
 			protected:
-				elements::GuiColorizedTextElement*			element;
-				SpinLock*									elementModifyLock;
+				elements::GuiColorizedTextElement*					element;
+				SpinLock*											elementModifyLock;
+				compositions::GuiGraphicsComposition*				ownerComposition;
+				GuiPopup*											autoCompletePopup;
+				GuiTextList*										autoCompleteList;
 
+				bool												IsListOpening();
+				void												OpenList(TextPos startPosition);
+				void												CloseList();
+				void												SetListContent(const collections::SortedList<WString>& items);
 			public:
 				GuiTextBoxAutoCompleteBase();
 				~GuiTextBoxAutoCompleteBase();
 
-				void										Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, vuint editVersion)override;
-				void										Detach()override;
-				void										TextEditNotify(const TextEditNotifyStruct& arguments)override;
-				void										TextCaretChanged(const TextCaretChangedStruct& arguments)override;
-				void										TextEditFinished(vuint editVersion)override;
+				void												Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, compositions::GuiGraphicsComposition* _ownerComposition, vuint editVersion)override;
+				void												Detach()override;
+				void												TextEditNotify(const TextEditNotifyStruct& arguments)override;
+				void												TextCaretChanged(const TextCaretChangedStruct& arguments)override;
+				void												TextEditFinished(vuint editVersion)override;
 			};
 
 /***********************************************************************
@@ -7708,27 +7768,26 @@ GuiGrammarAutoComplete
 				, private RepeatingParsingExecutor::CallbackBase
 				, private RepeatingTaskExecutor<RepeatingParsingOutput>
 			{
-				typedef collections::Pair<WString, WString>					FieldDesc;
-				typedef collections::Dictionary<FieldDesc, vint>			FieldAutoCompleteTypes;
+				typedef collections::List<Ptr<parsing::ParsingScopeSymbol>>		ParsingScopeSymbolList;
 			public:
-				struct AutoCompleteData
+				struct AutoCompleteData : ParsingContext
 				{
-					collections::List<vint>					candidates;
-					collections::List<vint>					shownCandidates;
-					collections::List<vint>					types;
-					Ptr<parsing::ParsingTreeToken>			token;
+					collections::List<vint>							candidates;
+					collections::List<vint>							shownCandidates;
+					ParsingScopeSymbolList							candidateSymbols;
+					TextPos											startPosition;
 				};
 
 				struct Context
 				{
-					RepeatingParsingOutput					input;
-					WString									rule;
-					parsing::ParsingTextRange				originalRange;
-					Ptr<parsing::ParsingTreeObject>			originalNode;
-					Ptr<parsing::ParsingTreeObject>			modifiedNode;
-					WString									modifiedCode;
-					vuint									modifiedEditVersion;
-					Ptr<AutoCompleteData>					autoComplete;
+					RepeatingParsingOutput							input;
+					WString											rule;
+					parsing::ParsingTextRange						originalRange;
+					Ptr<parsing::ParsingTreeObject>					originalNode;
+					Ptr<parsing::ParsingTreeObject>					modifiedNode;
+					WString											modifiedCode;
+					vuint											modifiedEditVersion;
+					Ptr<AutoCompleteData>							autoComplete;
 
 					Context()
 						:modifiedEditVersion(0)
@@ -7736,74 +7795,65 @@ GuiGrammarAutoComplete
 					}
 				};
 			private:
-				Ptr<parsing::tabling::ParsingGeneralParser>	grammarParser;
-				collections::SortedList<WString>			leftRecursiveRules;
-				collections::Dictionary<WString, vint>		autoCompleteTypes;
-				FieldAutoCompleteTypes						fieldAutoCompleteTypes;
-				collections::List<bool>						autoCompleteCandidates;
-				collections::List<bool>						autoCompleteTokens;
-				bool										editing;
+				Ptr<parsing::tabling::ParsingGeneralParser>			grammarParser;
+				collections::SortedList<WString>					leftRecursiveRules;
+				bool												editing;
 
-				SpinLock									editTraceLock;
-				collections::List<TextEditNotifyStruct>		editTrace;
+				SpinLock											editTraceLock;
+				collections::List<TextEditNotifyStruct>				editTrace;
 
-				SpinLock									contextLock;
-				Context										context;
+				SpinLock											contextLock;
+				Context												context;
 				
-				void										Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, vuint editVersion)override;
-				void										Detach()override;
-				void										TextEditNotify(const TextEditNotifyStruct& arguments)override;
-				void										TextCaretChanged(const TextCaretChangedStruct& arguments)override;
-				void										TextEditFinished(vuint editVersion)override;
-				void										OnParsingFinishedAsync(const RepeatingParsingOutput& output)override;
-				void										CollectLeftRecursiveRules();
-				void										PrepareAutoCompleteMetadata();
+				void												Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, compositions::GuiGraphicsComposition* _ownerComposition, vuint editVersion)override;
+				void												Detach()override;
+				void												TextEditNotify(const TextEditNotifyStruct& arguments)override;
+				void												TextCaretChanged(const TextCaretChangedStruct& arguments)override;
+				void												TextEditFinished(vuint editVersion)override;
+				void												OnParsingFinishedAsync(const RepeatingParsingOutput& output)override;
+				void												CollectLeftRecursiveRules();
 
-				vint										UnsafeGetEditTraceIndex(vuint editVersion);
-				TextPos										ChooseCorrectTextPos(TextPos pos, const regex::RegexTokens& tokens);
-				void										ExecuteRefresh(Context& newContext);
+				vint												UnsafeGetEditTraceIndex(vuint editVersion);
+				TextPos												ChooseCorrectTextPos(TextPos pos, const regex::RegexTokens& tokens);
+				void												ExecuteRefresh(Context& newContext);
 
-				bool										NormalizeTextPos(Context& newContext, elements::text::TextLines& lines, TextPos& pos);
-				void										ExecuteEdit(Context& newContext);
+				bool												NormalizeTextPos(Context& newContext, elements::text::TextLines& lines, TextPos& pos);
+				void												ExecuteEdit(Context& newContext);
 
-				void										DeleteFutures(collections::List<parsing::tabling::ParsingState::Future*>& futures);
-				regex::RegexToken*							TraverseTransitions(
-																parsing::tabling::ParsingState& state,
-																parsing::tabling::ParsingTransitionCollector& transitionCollector,
-																TextPos stopPosition,
-																collections::List<parsing::tabling::ParsingState::Future*>& nonRecoveryFutures,
-																collections::List<parsing::tabling::ParsingState::Future*>& recoveryFutures
-																);
-				regex::RegexToken*							SearchValidInputToken(
-																parsing::tabling::ParsingState& state,
-																parsing::tabling::ParsingTransitionCollector& transitionCollector,
-																TextPos stopPosition,
-																Context& newContext,
-																collections::SortedList<vint>& tableTokenIndices
-																);
+				void												DeleteFutures(collections::List<parsing::tabling::ParsingState::Future*>& futures);
+				regex::RegexToken*									TraverseTransitions(
+																		parsing::tabling::ParsingState& state,
+																		parsing::tabling::ParsingTransitionCollector& transitionCollector,
+																		TextPos stopPosition,
+																		collections::List<parsing::tabling::ParsingState::Future*>& nonRecoveryFutures,
+																		collections::List<parsing::tabling::ParsingState::Future*>& recoveryFutures
+																		);
+				regex::RegexToken*									SearchValidInputToken(
+																		parsing::tabling::ParsingState& state,
+																		parsing::tabling::ParsingTransitionCollector& transitionCollector,
+																		TextPos stopPosition,
+																		Context& newContext,
+																		collections::SortedList<vint>& tableTokenIndices
+																		);
 
-				TextPos										GlobalTextPosToModifiedTextPos(Context& newContext, TextPos pos);
-				TextPos										ModifiedTextPosToGlobalTextPos(Context& newContext, TextPos pos);
-				void										ExecuteCalculateList(Context& newContext);
+				TextPos												GlobalTextPosToModifiedTextPos(Context& newContext, TextPos pos);
+				TextPos												ModifiedTextPosToGlobalTextPos(Context& newContext, TextPos pos);
+				void												ExecuteCalculateList(Context& newContext);
 
-				void										Execute(const RepeatingParsingOutput& input)override;
-				void										PostList(const Context& newContext);
-				void										Initialize();
+				void												Execute(const RepeatingParsingOutput& input)override;
+				void												PostList(const Context& newContext);
+				void												Initialize();
 			protected:
-				
-				WString										GetAutoCompleteTypeName(vint id);
 
-				virtual void								OnContextFinishedAsync(const Context& context);
+				virtual void										OnContextFinishedAsync(Context& context);
 
-				void										EnsureAutoCompleteFinished();
+				void												EnsureAutoCompleteFinished();
 			public:
 				GuiGrammarAutoComplete(Ptr<RepeatingParsingExecutor> _parsingExecutor);
 				GuiGrammarAutoComplete(Ptr<parsing::tabling::ParsingGeneralParser> _grammarParser, const WString& _grammarRule);
 				~GuiGrammarAutoComplete();
 
-				vint										GetAutoCompleteTypeId(const WString& type);
-
-				Ptr<RepeatingParsingExecutor>				GetParsingExecutor();
+				Ptr<RepeatingParsingExecutor>						GetParsingExecutor();
 			};
 		}
 	}
@@ -7888,7 +7938,7 @@ Undo Redo
 				GuiTextBoxUndoRedoProcessor(GuiTextBoxCommonInterface* _textBoxCommonInterface);
 				~GuiTextBoxUndoRedoProcessor();
 
-				void										Attach(elements::GuiColorizedTextElement* element, SpinLock& elementModifyLock, vuint editVersion)override;
+				void										Attach(elements::GuiColorizedTextElement* element, SpinLock& elementModifyLock, compositions::GuiGraphicsComposition* _ownerComposition, vuint editVersion)override;
 				void										Detach()override;
 				void										TextEditNotify(const TextEditNotifyStruct& arguments)override;
 				void										TextCaretChanged(const TextCaretChangedStruct& arguments)override;
@@ -10672,8 +10722,13 @@ Type List
 			F(presentation::controls::GuiDocumentViewer)\
 			F(presentation::controls::GuiDocumentLabel)\
 			F(presentation::controls::GuiTextBoxCommonInterface)\
+			F(presentation::controls::ILanguageProvider)\
+			F(presentation::controls::RepeatingParsingExecutor)\
 			F(presentation::controls::GuiTextBoxColorizerBase)\
 			F(presentation::controls::GuiTextBoxRegexColorizer)\
+			F(presentation::controls::GuiGrammarColorizer)\
+			F(presentation::controls::GuiTextBoxAutoCompleteBase)\
+			F(presentation::controls::GuiGrammarAutoComplete)\
 			F(presentation::controls::GuiMultilineTextBox)\
 			F(presentation::controls::GuiSinglelineTextBox)\
 			F(presentation::controls::GuiSinglelineTextBox::IStyleProvider)\
@@ -12445,6 +12500,35 @@ Interface Proxy
 						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetSecondaryTextColor);
 					}
 				};
+
+				class controls_ILanguageProvider : public ValueInterfaceRoot, public virtual ILanguageProvider
+				{
+				public:
+					controls_ILanguageProvider(Ptr<IValueInterfaceProxy> _proxy)
+						:ValueInterfaceRoot(_proxy)
+					{
+					}
+
+					static Ptr<ILanguageProvider> Create(Ptr<IValueInterfaceProxy> _proxy)
+					{
+						return new controls_ILanguageProvider(_proxy);
+					}
+
+					Ptr<parsing::ParsingScopeSymbol> CreateSymbolFromNode(Ptr<parsing::ParsingTreeObject> obj, RepeatingParsingExecutor* executor, parsing::ParsingScopeFinder* finder)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(CreateSymbolFromNode, obj, executor, finder);
+					}
+
+					collections::LazyList<Ptr<parsing::ParsingScopeSymbol>> FindReferencedSymbols(parsing::ParsingTreeObject* obj, parsing::ParsingScopeFinder* finder)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(FindReferencedSymbols, obj, finder);
+					}
+
+					collections::LazyList<Ptr<parsing::ParsingScopeSymbol>> FindPossibleSymbols(parsing::ParsingTreeObject* obj, const WString& field, parsing::ParsingScopeFinder* finder)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(FindPossibleSymbols, obj, field, finder);
+					}
+				};
 			}
 #pragma warning(pop)
 
@@ -12551,6 +12635,19 @@ GuiEventInfoImpl
 									eventObject->Detach(handler);
 								}
 							}
+						}
+					}
+				}
+
+				void InvokeInternal(DescriptableObject* thisObject, Value& arguments)override
+				{
+					if(thisObject)
+					{
+						GuiGraphicsEvent<T>* eventObject=eventRetriver(thisObject, false);
+						if(eventObject)
+						{
+							T* value=UnboxValue<T*>(arguments, Description<T>::GetAssociatedTypeDescriptor());
+							eventObject->Execute(*value);
 						}
 					}
 				}
