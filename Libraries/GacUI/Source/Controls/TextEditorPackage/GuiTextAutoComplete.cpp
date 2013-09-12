@@ -991,7 +991,7 @@ GuiGrammarAutoComplete
 					FOREACH(vint, token, autoComplete->shownCandidates)
 					{
 						WString literal=parsingExecutor->GetTokenMetaData(token).unescapedRegexText;
-						if(!items.Contains(literal))
+						if(literal!=L"" && !items.Contains(literal))
 						{
 							items.Add(literal);
 						}
@@ -1008,7 +1008,7 @@ GuiGrammarAutoComplete
 									// add all acceptable display of a symbol
 									// because a symbol can has multiple representation in different places
 									WString literal=symbol->GetDisplay(semanticId);
-									if(!items.Contains(literal))
+									if(literal!=L"" && !items.Contains(literal))
 									{
 										items.Add(literal);
 									}
