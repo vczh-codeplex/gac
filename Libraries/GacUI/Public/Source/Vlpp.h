@@ -9242,6 +9242,24 @@ namespace vl
 			}
 			return 0;
 		}
+
+		template<typename T>
+		struct SortedListOperations
+		{
+			static bool Contains(const SortedList<T>& items, const T& item)
+			{
+				return items.Contains(item);
+			}
+		};
+
+		template<typename T>
+		struct SortedListOperations<Ptr<T>>
+		{
+			static bool Contains(const SortedList<Ptr<T>>& items, const Ptr<T>& item)
+			{
+				return items.Contains(item.Obj());
+			}
+		};
 	}
 }
 
@@ -9776,7 +9794,7 @@ Distinct
 				while(enumerator->Next())
 				{
 					const T& current=enumerator->Current();
-					if(!distinct.Contains(current))
+					if(!SortedListOperations<T>::Contains(distinct, current))
 					{
 						lastValue=current;
 						distinct.Add(current);
@@ -10019,7 +10037,7 @@ Intersect/Except
 			{
 				while(enumerator->Next())
 				{
-					if(reference.Contains(enumerator->Current())==Intersect)
+					if(SortedListOperations<T>::Contains(reference, enumerator->Current())==Intersect)
 					{
 						index++;
 						return true;
@@ -10771,12 +10789,18 @@ Value
 				Value(DescriptableObject* value);
 				Value(Ptr<DescriptableObject> value);
 				Value(const WString& value, ITypeDescriptor* associatedTypeDescriptor);
+
+				vint							Compare(const Value& a, const Value& b)const;
 			public:
 				Value();
 				Value(const Value& value);
 				Value&							operator=(const Value& value);
-				bool							operator==(const Value& value)const;
-				bool							operator!=(const Value& value)const;
+				bool							operator==(const Value& value)const { return Compare(*this, value)==0; }
+				bool							operator!=(const Value& value)const { return Compare(*this, value)!=0; }
+				bool							operator<(const Value& value)const { return Compare(*this, value)<0; }
+				bool							operator<=(const Value& value)const { return Compare(*this, value)<=0; }
+				bool							operator>(const Value& value)const { return Compare(*this, value)>0; }
+				bool							operator>=(const Value& value)const { return Compare(*this, value)>=0; }
 
 				ValueType						GetValueType()const;
 				DescriptableObject*				GetRawPtr()const;
@@ -10841,7 +10865,7 @@ Value
 				};
 			};
 
-			class IValueSerializer : public Interface
+			class IValueSerializer : public virtual IDescriptable, public Description<IValueSerializer>
 			{
 			public:
 				virtual ITypeDescriptor*		GetOwnerTypeDescriptor()=0;
@@ -10866,7 +10890,7 @@ Value
 ITypeDescriptor (type)
 ***********************************************************************/
 
-			class ITypeInfo : public virtual Interface
+			class ITypeInfo : public virtual IDescriptable, public Description<ITypeInfo>
 			{
 			public:
 				enum Decorator
@@ -10889,7 +10913,7 @@ ITypeDescriptor (type)
 ITypeDescriptor (basic)
 ***********************************************************************/
 
-			class IMemberInfo : public virtual Interface
+			class IMemberInfo : public virtual IDescriptable, public Description<IMemberInfo>
 			{
 			public:
 				virtual ITypeDescriptor*		GetOwnerTypeDescriptor()=0;
@@ -10900,7 +10924,7 @@ ITypeDescriptor (basic)
 ITypeDescriptor (event)
 ***********************************************************************/
 
-			class IEventHandler : public virtual Interface
+			class IEventHandler : public virtual IDescriptable, public Description<IEventHandler>
 			{
 			public:
 				virtual IEventInfo*				GetOwnerEvent()=0;
@@ -10910,20 +10934,21 @@ ITypeDescriptor (event)
 				virtual void					Invoke(const Value& thisObject, Value& arguments)=0;
 			};
 
-			class IEventInfo : public IMemberInfo
+			class IEventInfo : public virtual IMemberInfo, public Description<IEventInfo>
 			{
 			public:
 				virtual ITypeInfo*				GetHandlerType()=0;
 				virtual vint					GetObservingPropertyCount()=0;
 				virtual IPropertyInfo*			GetObservingProperty(vint index)=0;
 				virtual Ptr<IEventHandler>		Attach(const Value& thisObject, Ptr<IValueFunctionProxy> handler)=0;
+				virtual void					Invoke(const Value& thisObject, Value& arguments)=0;
 			};
 
 /***********************************************************************
 ITypeDescriptor (property)
 ***********************************************************************/
 
-			class IPropertyInfo : public IMemberInfo
+			class IPropertyInfo : public virtual IMemberInfo, public Description<IPropertyInfo>
 			{
 			public:
 				virtual bool					IsReadable()=0;
@@ -10940,14 +10965,14 @@ ITypeDescriptor (property)
 ITypeDescriptor (method)
 ***********************************************************************/
 
-			class IParameterInfo : public IMemberInfo
+			class IParameterInfo : public virtual IMemberInfo, public Description<IParameterInfo>
 			{
 			public:
 				virtual ITypeInfo*				GetType()=0;
 				virtual IMethodInfo*			GetOwnerMethod()=0;
 			};
 
-			class IMethodInfo : public IMemberInfo
+			class IMethodInfo : public virtual IMemberInfo, public Description<IMethodInfo>
 			{
 			public:
 				virtual IMethodGroupInfo*		GetOwnerMethodGroup()=0;
@@ -10960,7 +10985,7 @@ ITypeDescriptor (method)
 				virtual Value					Invoke(const Value& thisObject, collections::Array<Value>& arguments)=0;
 			};
 
-			class IMethodGroupInfo : public IMemberInfo
+			class IMethodGroupInfo : public virtual IMemberInfo, public Description<IMethodGroupInfo>
 			{
 			public:
 				virtual vint					GetMethodCount()=0;
@@ -10971,7 +10996,7 @@ ITypeDescriptor (method)
 ITypeDescriptor
 ***********************************************************************/
 
-			class ITypeDescriptor : public virtual Interface
+			class ITypeDescriptor : public virtual IDescriptable, public Description<ITypeDescriptor>
 			{
 			public:
 				virtual const WString&			GetTypeName()=0;
@@ -11048,8 +11073,82 @@ Collections
 
 			class IValueEnumerable : public virtual IDescriptable, public Description<IValueEnumerable>
 			{
+			private:
+				template<typename T>
+				class TypedEnumerator : public Object, public collections::IEnumerator<T>
+				{
+				private:
+					Ptr<IValueEnumerable>		enumerable;
+					Ptr<IValueEnumerator>		enumerator;
+					vint						index;
+					T							value;
+
+				public:
+					TypedEnumerator(Ptr<IValueEnumerable> _enumerable, vint _index, const T& _value)
+						:enumerable(_enumerable)
+						,index(_index)
+						,value(_value)
+					{
+						enumerator=enumerable->CreateEnumerator();
+						vint current=-1;
+						while(current++<index)
+						{
+							enumerator->Next();
+						}
+					}
+
+					TypedEnumerator(Ptr<IValueEnumerable> _enumerable)
+						:enumerable(_enumerable)
+						,index(-1)
+					{
+						Reset();
+					}
+
+					collections::IEnumerator<T>* Clone()const override
+					{
+						return new TypedEnumerable<T>(enumerable, index, value);
+					}
+
+					const T& Current()const override
+					{
+						return value;
+					}
+
+					vint Index()const override
+					{
+						return index;
+					}
+
+					bool Next() override
+					{
+						if(enumerator->Next())
+						{
+							index++;
+							value=UnboxValue<T>(enumerator->GetCurrent());
+							return true;
+						}
+						else
+						{
+							return false;
+						}
+					}
+
+					void Reset() override
+					{
+						index=-1;
+						enumerator=enumerable->CreateEnumerator();
+					}
+				};
 			public:
 				virtual Ptr<IValueEnumerator>	CreateEnumerator()=0;
+
+				static Ptr<IValueEnumerable>	Create(collections::LazyList<Value> values);
+
+				template<typename T>
+				static collections::LazyList<T> GetLazyList(Ptr<IValueEnumerator> value)
+				{
+					return collections:::LazyList<T>(new TypedEnumerator<T>(value));
+				}
 			};
 
 			class IValueReadonlyList : public virtual IValueEnumerable, public Description<IValueReadonlyList>
@@ -11111,6 +11210,10 @@ Collections
 				virtual void					Set(const Value& key, const Value& value)=0;
 				virtual bool					Remove(const Value& key)=0;
 				virtual void					Clear()=0;
+
+				static Ptr<IValueDictionary>	Create();
+				static Ptr<IValueDictionary>	Create(Ptr<IValueReadonlyDictionary> values);
+				static Ptr<IValueDictionary>	Create(collections::LazyList<collections::Pair<Value, Value>> values);
 			};
 
 /***********************************************************************
@@ -11146,7 +11249,6 @@ Collection Wrappers
 			protected:
 				typedef typename trait_helper::RemovePtr<T>::Type		ContainerType;
 				typedef typename ContainerType::ElementType				ElementType;
-				typedef typename KeyType<ElementType>::Type				ElementKeyType;
 
 				T								wrapperPointer;
 			public:
@@ -11172,16 +11274,15 @@ Collection Wrappers
 			};
 
 			template<typename T>
-			class ValueReadonlyListWrapper : public Object, public virtual IValueReadonlyList
+			class ValueEnumerableWrapper : public Object, public virtual IValueEnumerable
 			{
 			protected:
 				typedef typename trait_helper::RemovePtr<T>::Type		ContainerType;
 				typedef typename ContainerType::ElementType				ElementType;
-				typedef typename KeyType<ElementType>::Type				ElementKeyType;
 
 				T								wrapperPointer;
 			public:
-				ValueReadonlyListWrapper(const T& _wrapperPointer)
+				ValueEnumerableWrapper(const T& _wrapperPointer)
 					:wrapperPointer(_wrapperPointer)
 				{
 				}
@@ -11189,6 +11290,21 @@ Collection Wrappers
 				Ptr<IValueEnumerator> CreateEnumerator()override
 				{
 					return new ValueEnumeratorWrapper<Ptr<collections::IEnumerator<ElementType>>>(wrapperPointer->CreateEnumerator());
+				}
+			};
+
+			template<typename T>
+			class ValueReadonlyListWrapper : public ValueEnumerableWrapper<T>, public virtual IValueReadonlyList
+			{
+			protected:
+				typedef typename trait_helper::RemovePtr<T>::Type		ContainerType;
+				typedef typename ContainerType::ElementType				ElementType;
+				typedef typename KeyType<ElementType>::Type				ElementKeyType;
+
+			public:
+				ValueReadonlyListWrapper(const T& _wrapperPointer)
+					:ValueEnumerableWrapper(_wrapperPointer)
+				{
 				}
 
 				vint GetCount()override
@@ -11856,14 +11972,16 @@ namespace vl
 
 		class ParsingScope;
 		class ParsingScopeSymbol;
+		class ParsingScopeFinder;
 
-		class ParsingScope : public Object
+		class ParsingScope : public Object, public reflection::Description<ParsingScope>
 		{
 			typedef collections::SortedList<WString>							SymbolKeyList;
 			typedef collections::List<Ptr<ParsingScopeSymbol>>					SymbolList;
 			typedef collections::Group<WString, Ptr<ParsingScopeSymbol>>		SymbolGroup;
 
 			friend class ParsingScopeSymbol;
+			friend class ParsingScopeFinder;
 		protected:
 			static const SymbolList					emptySymbolList;
 
@@ -11879,46 +11997,116 @@ namespace vl
 			bool									RemoveSymbol(Ptr<ParsingScopeSymbol> value);
 			const SymbolKeyList&					GetSymbolNames();
 			const SymbolList&						GetSymbols(const WString& name);
-			const SymbolList&						GetSymbolsRecursively(const WString& name);
 		};
 
-		class ParsingScopeSymbol : public Object
+		class ParsingScopeSymbol : public Object, public reflection::Description<ParsingScopeSymbol>
 		{
 			friend class ParsingScope;
 		protected:
 			ParsingScope*							parentScope;
 			WString									name;
-			ParsingTreeObject*						node;
+			collections::List<vint>					semanticIds;
+			Ptr<ParsingTreeObject>					node;
 			Ptr<ParsingScope>						scope;
 
+			virtual WString							GetDisplayInternal(vint semanticId);
 		public:
-			ParsingScopeSymbol(const WString& _name);
+			ParsingScopeSymbol(const WString& _name=L"", vint _semanticId=-1);
 			~ParsingScopeSymbol();
 
 			ParsingScope*							GetParentScope();
 			const WString&							GetName();
-			ParsingTreeObject*						GetNode();
-			void									SetNode(ParsingTreeObject* value);
+			const collections::List<vint>&			GetSemanticIds();
+			bool									AddSemanticId(vint semanticId);
+			Ptr<ParsingTreeObject>					GetNode();
+			void									SetNode(Ptr<ParsingTreeObject> value);
 			bool									CreateScope();
 			bool									DestroyScope();
 			ParsingScope*							GetScope();
+			WString									GetDisplay(vint semanticId);
 		};
 
-		class ParsingScopeRoot : public ParsingScopeSymbol
+		class ParsingScopeFinder : public Object, public reflection::Description<ParsingScopeFinder>
 		{
 			typedef collections::Dictionary<ParsingTreeObject*, ParsingScopeSymbol*>			NodeSymbolMap;
+			typedef collections::LazyList<Ptr<ParsingScopeSymbol>>								LazySymbolList;
+		public:
+			class SymbolMapper : public Object, public reflection::Description<SymbolMapper>
+			{
+			public:
+				virtual ParsingTreeNode*			ParentNode(ParsingTreeNode* node)=0;
+				virtual ParsingTreeNode*			Node(ParsingTreeNode* node)=0;
+				virtual ParsingScope*				ParentScope(ParsingScopeSymbol* symbol)=0;
+				virtual ParsingScopeSymbol*			Symbol(ParsingScopeSymbol* symbol)=0;
+			};
+
+			class DirectSymbolMapper : public SymbolMapper, public reflection::Description<DirectSymbolMapper>
+			{
+			public:
+				DirectSymbolMapper();
+				~DirectSymbolMapper();
+
+				ParsingTreeNode*					ParentNode(ParsingTreeNode* node)override;
+				ParsingTreeNode*					Node(ParsingTreeNode* node)override;
+				ParsingScope*						ParentScope(ParsingScopeSymbol* symbol)override;
+				ParsingScopeSymbol*					Symbol(ParsingScopeSymbol* symbol)override;
+			};
+
+			class IndirectSymbolMapper  : public SymbolMapper, public reflection::Description<IndirectSymbolMapper>
+			{
+			protected:
+				ParsingScopeSymbol*					originalSymbol;
+				ParsingScopeSymbol*					replacedSymbol;
+				ParsingTreeNode*					originalNode;
+				ParsingTreeNode*					replacedNode;
+			public:
+				IndirectSymbolMapper(ParsingScopeSymbol* _originalSymbol, ParsingScopeSymbol* _replacedSymbol, ParsingTreeNode* _originalNode, ParsingTreeNode* _replacedNode);
+				~IndirectSymbolMapper();
+
+				ParsingTreeNode*					ParentNode(ParsingTreeNode* node)override;
+				ParsingTreeNode*					Node(ParsingTreeNode* node)override;
+				ParsingScope*						ParentScope(ParsingScopeSymbol* symbol)override;
+				ParsingScopeSymbol*					Symbol(ParsingScopeSymbol* symbol)override;
+			};
 		protected:
 			NodeSymbolMap							nodeSymbols;
+			Ptr<SymbolMapper>						symbolMapper;
+			ParsingScopeFinder*						previousFinder;
 
 			void									InitializeQueryCacheInternal(ParsingScopeSymbol* symbol);
 		public:
-			ParsingScopeRoot();
-			~ParsingScopeRoot();
+			ParsingScopeFinder(Ptr<SymbolMapper> _symbolMapper=new DirectSymbolMapper);
+			~ParsingScopeFinder();
 
-			void									InitializeQueryCache();
-			void									ClearQueryCache();
+			ParsingTreeNode*						ParentNode(ParsingTreeNode* node);
+			ParsingTreeNode*						ParentNode(Ptr<ParsingTreeNode> node);
+			ParsingTreeNode*						Node(ParsingTreeNode* node);
+			Ptr<ParsingTreeNode>					Node(Ptr<ParsingTreeNode> node);
+			ParsingScope*							ParentScope(ParsingScopeSymbol* symbol);
+			ParsingScope*							ParentScope(Ptr<ParsingScopeSymbol> symbol);
+			ParsingScopeSymbol*						Symbol(ParsingScopeSymbol* symbol);
+			Ptr<ParsingScopeSymbol>					Symbol(Ptr<ParsingScopeSymbol> symbol);
+			LazySymbolList							Symbols(const ParsingScope::SymbolList& symbols);
+
+			template<typename T>
+			T* Obj(T* node)
+			{
+				return dynamic_cast<T*>(Node(node));
+			}
+
+			template<typename T>
+			Ptr<T> Obj(Ptr<T> node)
+			{
+				return Node(node).Cast<T>();
+			}
+			
+			void									InitializeQueryCache(ParsingScopeSymbol* symbol, ParsingScopeFinder* _previousFinder=0);
 			ParsingScopeSymbol*						GetSymbolFromNode(ParsingTreeObject* node);
 			ParsingScope*							GetScopeFromNode(ParsingTreeNode* node);
+			LazySymbolList							GetSymbols(ParsingScope* scope, const WString& name);
+			LazySymbolList							GetSymbols(ParsingScope* scope);
+			LazySymbolList							GetSymbolsRecursively(ParsingScope* scope, const WString& name);
+			LazySymbolList							GetSymbolsRecursively(ParsingScope* scope);
 		};
 	}
 }
@@ -12471,6 +12659,7 @@ namespace vl
 				WString										GetParsingRule();
 				vint										GetParsingRuleStartState();
 				vint										GetCurrentToken();
+				vint										GetCurrentTableTokenIndex();
 				const collections::List<vint>&				GetStateStack();
 				vint										GetCurrentState();
 				void										SkipCurrentToken();
@@ -12897,6 +13086,7 @@ Predefined Types
 			template<>struct TypeInfo<WString>{static const wchar_t* TypeName;};
 			template<>struct TypeInfo<DateTime>{static const wchar_t* TypeName;};
 			template<>struct TypeInfo<Locale>{static const wchar_t* TypeName;};
+
 			template<>struct TypeInfo<IValueEnumerator>{static const wchar_t* TypeName;};
 			template<>struct TypeInfo<IValueEnumerable>{static const wchar_t* TypeName;};
 			template<>struct TypeInfo<IValueReadonlyList>{static const wchar_t* TypeName;};
@@ -12905,6 +13095,18 @@ Predefined Types
 			template<>struct TypeInfo<IValueDictionary>{static const wchar_t* TypeName;};
 			template<>struct TypeInfo<IValueInterfaceProxy>{static const wchar_t* TypeName;};
 			template<>struct TypeInfo<IValueFunctionProxy>{static const wchar_t* TypeName;};
+
+			template<>struct TypeInfo<IValueSerializer>{static const wchar_t* TypeName;};
+			template<>struct TypeInfo<ITypeInfo>{static const wchar_t* TypeName;};
+			template<>struct TypeInfo<ITypeInfo::Decorator>{static const wchar_t* TypeName;};
+			template<>struct TypeInfo<IMemberInfo>{static const wchar_t* TypeName;};
+			template<>struct TypeInfo<IEventHandler>{static const wchar_t* TypeName;};
+			template<>struct TypeInfo<IEventInfo>{static const wchar_t* TypeName;};
+			template<>struct TypeInfo<IPropertyInfo>{static const wchar_t* TypeName;};
+			template<>struct TypeInfo<IParameterInfo>{static const wchar_t* TypeName;};
+			template<>struct TypeInfo<IMethodInfo>{static const wchar_t* TypeName;};
+			template<>struct TypeInfo<IMethodGroupInfo>{static const wchar_t* TypeName;};
+			template<>struct TypeInfo<ITypeDescriptor>{static const wchar_t* TypeName;};
 
 			template<>
 			struct TypedValueSerializerProvider<unsigned __int8>
@@ -13165,6 +13367,7 @@ EventInfoImpl
 
 				virtual void							AttachInternal(DescriptableObject* thisObject, IEventHandler* eventHandler)=0;
 				virtual void							DetachInternal(DescriptableObject* thisObject, IEventHandler* eventHandler)=0;
+				virtual void							InvokeInternal(DescriptableObject* thisObject, Value& eventHandler)=0;
 				virtual Ptr<ITypeInfo>					GetHandlerTypeInternal()=0;
 
 				void									AddEventHandler(DescriptableObject* thisObject, Ptr<IEventHandler> eventHandler);
@@ -13179,6 +13382,7 @@ EventInfoImpl
 				vint									GetObservingPropertyCount()override;
 				IPropertyInfo*							GetObservingProperty(vint index)override;
 				Ptr<IEventHandler>						Attach(const Value& thisObject, Ptr<IValueFunctionProxy> handler)override;
+				void									Invoke(const Value& thisObject, Value& arguments)override;
 			};
 
 /***********************************************************************
@@ -13300,10 +13504,11 @@ TypeFlagTester
 			{
 				NonGenericType			=0,
 				FunctionType			=1<<0,
-				ReadonlyListType		=1<<1,
-				ListType				=1<<2,
-				ReadonlyDictionaryType	=1<<3,
-				DictionaryType			=1<<4,
+				EnumerableType			=1<<1,
+				ReadonlyListType		=1<<2,
+				ListType				=1<<3,
+				ReadonlyDictionaryType	=1<<4,
+				DictionaryType			=1<<5,
 			};
 
 			template<typename T>
@@ -13333,6 +13538,17 @@ TypeFlagTester
 				static char Inherit(const void* source){}
 
 				static const TypeFlags									Result=sizeof(Inherit(((ValueRetriver<TDerived>*)0)->pointer))==sizeof(void*)?TypeFlags::FunctionType:TypeFlags::NonGenericType;
+			};
+
+			template<typename TDerived>
+			struct TypeFlagTester<TDerived, TypeFlags::EnumerableType>
+			{
+				template<typename T>
+				static void* Inherit(const collections::LazyList<T>* source){}
+				static char Inherit(void* source){}
+				static char Inherit(const void* source){}
+
+				static const TypeFlags									Result=sizeof(Inherit(((ValueRetriver<TDerived>*)0)->pointer))==sizeof(void*)?TypeFlags::EnumerableType:TypeFlags::NonGenericType;
 			};
 
 			template<typename TDerived>
@@ -13396,6 +13612,18 @@ TypeFlagSelector
 			};
 
 			template<typename T>
+			struct TypeFlagSelectorCase<T, (TypeFlags)((vint)TypeFlags::EnumerableType|(vint)TypeFlags::ReadonlyListType)>
+			{
+				static const  TypeFlags									Result=TypeFlags::EnumerableType;
+			};
+
+			template<typename T>
+			struct TypeFlagSelectorCase<T, (TypeFlags)((vint)TypeFlags::EnumerableType|(vint)TypeFlags::ListType|(vint)TypeFlags::ReadonlyListType)>
+			{
+				static const  TypeFlags									Result=TypeFlags::EnumerableType;
+			};
+
+			template<typename T>
 			struct TypeFlagSelectorCase<T, (TypeFlags)((vint)TypeFlags::ListType|(vint)TypeFlags::ReadonlyListType)>
 			{
 				static const  TypeFlags									Result=TypeFlags::ListType;
@@ -13427,6 +13655,7 @@ TypeFlagSelector
 					T, 
 					(TypeFlags)
 					( (vint)TypeFlagTester<T, TypeFlags::FunctionType>::Result
+					| (vint)TypeFlagTester<T, TypeFlags::EnumerableType>::Result
 					| (vint)TypeFlagTester<T, TypeFlags::ReadonlyListType>::Result
 					| (vint)TypeFlagTester<T, TypeFlags::ListType>::Result
 					| (vint)TypeFlagTester<T, TypeFlags::ReadonlyDictionaryType>::Result
@@ -13576,6 +13805,35 @@ TypeInfoRetriver
 				static Ptr<ITypeInfo> CreateTypeInfo()
 				{
 					return TypeInfoRetriver<T>::CreateTypeInfo();
+				}
+			};
+
+			template<typename T>
+			struct DetailTypeInfoRetriver<T, TypeFlags::EnumerableType>
+			{
+				typedef DetailTypeInfoRetriver<T, TypeFlags::NonGenericType>	UpLevelRetriver;
+
+				static const ITypeInfo::Decorator								Decorator=UpLevelRetriver::Decorator;
+				typedef IValueEnumerable										Type;
+				typedef typename UpLevelRetriver::TempValueType					TempValueType;
+				typedef typename UpLevelRetriver::ResultReferenceType			ResultReferenceType;
+				typedef typename UpLevelRetriver::ResultNonReferenceType		ResultNonReferenceType;
+
+				static Ptr<ITypeInfo> CreateTypeInfo()
+				{
+					typedef typename DetailTypeInfoRetriver<T, TypeFlags::NonGenericType>::Type		ContainerType;
+					typedef typename ContainerType::ElementType										ElementType;
+
+					Ptr<TypeInfoImpl> arrayType=new TypeInfoImpl(ITypeInfo::TypeDescriptor);
+					arrayType->SetTypeDescriptor(Description<IValueEnumerable>::GetAssociatedTypeDescriptor());
+
+					Ptr<TypeInfoImpl> genericType=new TypeInfoImpl(ITypeInfo::Generic);
+					genericType->SetElementType(arrayType);
+					genericType->AddGenericArgument(TypeInfoRetriver<ElementType>::CreateTypeInfo());
+
+					Ptr<TypeInfoImpl> type=new TypeInfoImpl(ITypeInfo::SharedPtr);
+					type->SetElementType(genericType);
+					return type;
 				}
 			};
 
@@ -13857,6 +14115,29 @@ TypeInfoRetriver Helper Functions (UnboxParameter)
 			};
 
 			template<typename T>
+			struct ParameterAccessor<collections::LazyList<T>, TypeFlags::EnumerableType>
+			{
+				static Value BoxParameter(collections::LazyList<T>& object, ITypeDescriptor* typeDescriptor)
+				{
+					Ptr<IValueEnumerable> result=IValueEnumerable::Create(
+						collections::From(object)
+							.Select([](const T& item)
+							{
+								return BoxValue<T>(item);
+							})
+						);
+					return BoxValue<Ptr<IValueEnumerable>>(result, Description<IValueEnumerable>::GetAssociatedTypeDescriptor());
+				}
+
+				static void UnboxParameter(const Value& value, collections::LazyList<T>& result, ITypeDescriptor* typeDescriptor, const WString& valueName)
+				{
+					typedef typename T::ElementType ElementType;
+					Ptr<IValueEnumerable> listProxy=UnboxValue<Ptr<IValueEnumerable>>(value, typeDescriptor, valueName);
+					result=IValueEnumerable::GetLazyList(listProxy);
+				}
+			};
+
+			template<typename T>
 			struct ParameterAccessor<T, TypeFlags::ReadonlyListType>
 			{
 				static Value BoxParameter(T& object, ITypeDescriptor* typeDescriptor)
@@ -13887,7 +14168,7 @@ TypeInfoRetriver Helper Functions (UnboxParameter)
 				{
 					typedef typename T::ElementType ElementType;
 					Ptr<IValueList> listProxy=UnboxValue<Ptr<IValueList>>(value, typeDescriptor, valueName);
-					LazyList<ElementType> lazyList=listProxy->GetLazyList<ElementType>();
+					collections::LazyList<ElementType> lazyList=listProxy->GetLazyList<ElementType>();
 					collections::CopyFrom(result, lazyList);
 				}
 			};
@@ -13909,7 +14190,7 @@ TypeInfoRetriver Helper Functions (UnboxParameter)
 					typedef typename ValueContainer::ElementType		ValueType;
 
 					Ptr<IValueReadonlyDictionary> dictionaryProxy=UnboxValue<Ptr<IValueReadonlyDictionary>>(value, typeDescriptor, valueName);
-					LazyList<Pair<KeyType, ValueType>> lazyList=dictionaryProxy->GetLazyList<KeyType, ValueType>();
+					collections::LazyList<Pair<KeyType, ValueType>> lazyList=dictionaryProxy->GetLazyList<KeyType, ValueType>();
 					collections::CopyFrom(result, lazyList);
 				}
 			};
@@ -13931,7 +14212,7 @@ TypeInfoRetriver Helper Functions (UnboxParameter)
 					typedef typename ValueContainer::ElementType		ValueType;
 
 					Ptr<IValueDictionary> dictionaryProxy=UnboxValue<Ptr<IValueDictionary>>(value, typeDescriptor, valueName);
-					LazyList<Pair<KeyType, ValueType>> lazyList=dictionaryProxy->GetLazyList<KeyType, ValueType>();
+					collections::LazyList<Pair<KeyType, ValueType>> lazyList=dictionaryProxy->GetLazyList<KeyType, ValueType>();
 					collections::CopyFrom(result, lazyList);
 				}
 			};
@@ -19573,7 +19854,7 @@ Class
 			};
 
 #define CLASS_MEMBER_BASE(TYPENAME)\
-			AddBaseType(GetTypeDescriptor<TYPENAME>());
+			AddBaseType(description::GetTypeDescriptor<TYPENAME>());
 
 /***********************************************************************
 Field
@@ -19883,6 +20164,9 @@ namespace vl
 			F(parsing::ParsingTreeToken)\
 			F(parsing::ParsingTreeObject)\
 			F(parsing::ParsingTreeArray)\
+			F(parsing::ParsingScope)\
+			F(parsing::ParsingScopeSymbol)\
+			F(parsing::ParsingScopeFinder)\
 
 			PARSINGREFLECTION_TYPELIST(DECL_TYPE_INFO)
 		}
@@ -20396,6 +20680,8 @@ namespace vl
 			extern WString										GrammarStateToString(ParsingDefinitionGrammar* grammar, ParsingDefinitionGrammar* stateNode, bool beforeNode);
 			extern ParsingDefinitionGrammar*					FindAppropriateGrammarState(ParsingDefinitionGrammar* grammar, ParsingDefinitionGrammar* stateNode, bool beforeNode);
 			extern void											Log(Ptr<ParsingDefinition> definition, stream::TextWriter& writer);
+			extern WString										DeserializeString(const WString& value);
+			extern WString										SerializeString(const WString& value);
 
 /***********************************************************************
 自举

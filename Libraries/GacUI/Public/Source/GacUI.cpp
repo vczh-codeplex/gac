@@ -2640,6 +2640,7 @@ GuiControlHost
 
 				host=new GuiGraphicsHost;
 				host->GetMainComposition()->AddChild(GetStyleController()->GetBoundsComposition());
+				sharedPtrDestructorProc=0;
 			}
 
 			GuiControlHost::~GuiControlHost()
@@ -3378,6 +3379,56 @@ GuiPopup
 					ShowDeactivated();
 				}
 			}
+			
+			void GuiPopup::ShowPopup(GuiControl* control, Rect bounds, bool preferredTopBottomSide)
+			{
+				INativeWindow* window=GetNativeWindow();
+				if(window)
+				{
+					Point locations[4];
+					Size size=window->GetBounds().GetSize();
+
+					GuiControlHost* controlHost=control->GetBoundsComposition()->GetRelatedControlHost();
+					if(controlHost)
+					{
+						INativeWindow* controlWindow=controlHost->GetNativeWindow();
+						if(controlWindow)
+						{
+							Point controlClientOffset=controlWindow->GetClientBoundsInScreen().LeftTop();
+							bounds.x1+=controlClientOffset.x;
+							bounds.x2+=controlClientOffset.x;
+							bounds.y1+=controlClientOffset.y;
+							bounds.y2+=controlClientOffset.y;
+
+							if(preferredTopBottomSide)
+							{
+								locations[0]=Point(bounds.x1, bounds.y2);
+								locations[1]=Point(bounds.x2-size.x, bounds.y2);
+								locations[2]=Point(bounds.x1, bounds.y1-size.y);
+								locations[3]=Point(bounds.x2-size.x, bounds.y1-size.y);
+							}
+							else
+							{
+								locations[0]=Point(bounds.x2, bounds.y1);
+								locations[1]=Point(bounds.x2, bounds.y2-size.y);
+								locations[2]=Point(bounds.x1-size.x, bounds.y1);
+								locations[3]=Point(bounds.x1-size.x, bounds.y2-size.y);
+							}
+
+							window->SetParent(controlWindow);
+							for(vint i=0;i<4;i++)
+							{
+								if(!IsClippedByScreen(locations[i]))
+								{
+									ShowPopup(locations[i]);
+									return;
+								}
+							}
+							ShowPopup(locations[0]);
+						}
+					}
+				}
+			}
 
 			void GuiPopup::ShowPopup(GuiControl* control, Point location)
 			{
@@ -3409,49 +3460,9 @@ GuiPopup
 				INativeWindow* window=GetNativeWindow();
 				if(window)
 				{
-					Point locations[4];
 					Size size=window->GetBounds().GetSize();
 					Rect controlBounds=control->GetBoundsComposition()->GetGlobalBounds();
-
-					GuiControlHost* controlHost=control->GetBoundsComposition()->GetRelatedControlHost();
-					if(controlHost)
-					{
-						INativeWindow* controlWindow=controlHost->GetNativeWindow();
-						if(controlWindow)
-						{
-							Point controlClientOffset=controlWindow->GetClientBoundsInScreen().LeftTop();
-							controlBounds.x1+=controlClientOffset.x;
-							controlBounds.x2+=controlClientOffset.x;
-							controlBounds.y1+=controlClientOffset.y;
-							controlBounds.y2+=controlClientOffset.y;
-
-							if(preferredTopBottomSide)
-							{
-								locations[0]=Point(controlBounds.x1, controlBounds.y2);
-								locations[1]=Point(controlBounds.x2-size.x, controlBounds.y2);
-								locations[2]=Point(controlBounds.x1, controlBounds.y1-size.y);
-								locations[3]=Point(controlBounds.x2-size.x, controlBounds.y1-size.y);
-							}
-							else
-							{
-								locations[0]=Point(controlBounds.x2, controlBounds.y1);
-								locations[1]=Point(controlBounds.x2, controlBounds.y2-size.y);
-								locations[2]=Point(controlBounds.x1-size.x, controlBounds.y1);
-								locations[3]=Point(controlBounds.x1-size.x, controlBounds.y2-size.y);
-							}
-
-							window->SetParent(controlWindow);
-							for(vint i=0;i<4;i++)
-							{
-								if(!IsClippedByScreen(locations[i]))
-								{
-									ShowPopup(locations[i]);
-									return;
-								}
-							}
-							ShowPopup(locations[0]);
-						}
-					}
+					ShowPopup(control, controlBounds, preferredTopBottomSide);
 				}
 			}
 
@@ -21125,17 +21136,78 @@ namespace vl
 GuiTextBoxAutoCompleteBase
 ***********************************************************************/
 
+			bool GuiTextBoxAutoCompleteBase::IsListOpening()
+			{
+				return autoCompletePopup->GetOpening();
+			}
+
+			void GuiTextBoxAutoCompleteBase::OpenList(TextPos startPosition)
+			{
+				if(element && elementModifyLock)
+				{
+					Rect bounds=element->GetLines().GetRectFromTextPos(startPosition);
+					GuiControl* ownerControl=ownerComposition->GetRelatedControl();
+					Rect compositionBounds=ownerComposition->GetGlobalBounds();
+					Rect controlBounds=ownerControl->GetBoundsComposition()->GetGlobalBounds();
+					vint px=compositionBounds.x1-controlBounds.x1;
+					vint py=compositionBounds.y1-controlBounds.y1;
+					bounds.x1+=px;
+					bounds.x2+=px;
+					bounds.y1+=py+5;
+					bounds.y2+=py+5;
+					autoCompletePopup->ShowPopup(ownerControl, bounds, true);
+				}
+			}
+
+			void GuiTextBoxAutoCompleteBase::CloseList()
+			{
+				autoCompletePopup->Close();
+			}
+
+			void GuiTextBoxAutoCompleteBase::SetListContent(const collections::SortedList<WString>& items)
+			{
+				List<WString> sortedItems;
+				CopyFrom(
+					sortedItems,
+					From(items)
+						.OrderBy([](const WString& a, const WString& b)
+						{
+							return INVLOC.Compare(a, b, Locale::IgnoreCase);
+						})
+					);
+
+				autoCompleteList->GetItems().Clear();
+				CopyFrom(
+					autoCompleteList->GetItems(),
+					From(sortedItems)
+						.Select([](const WString& item)
+						{
+							return new list::TextItem(item);
+						})
+					);
+				autoCompleteList->GetBoundsComposition()->SetPreferredMinSize(Size(200, 200));
+			}
+
 			GuiTextBoxAutoCompleteBase::GuiTextBoxAutoCompleteBase()
 				:element(0)
 				,elementModifyLock(0)
+				,ownerComposition(0)
 			{
+				autoCompleteList=new GuiTextList(theme::GetCurrentTheme()->CreateTextListStyle(), theme::GetCurrentTheme()->CreateTextListItemStyle());
+				autoCompleteList->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				autoCompleteList->SetHorizontalAlwaysVisible(false);
+				autoCompleteList->SetVerticalAlwaysVisible(false);
+
+				autoCompletePopup=new GuiPopup(theme::GetCurrentTheme()->CreateMenuStyle());
+				autoCompletePopup->AddChild(autoCompleteList);
 			}
 
 			GuiTextBoxAutoCompleteBase::~GuiTextBoxAutoCompleteBase()
 			{
+				delete autoCompletePopup;
 			}
 
-			void GuiTextBoxAutoCompleteBase::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, vuint editVersion)
+			void GuiTextBoxAutoCompleteBase::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, compositions::GuiGraphicsComposition* _ownerComposition, vuint editVersion)
 			{
 				if(_element)
 				{
@@ -21143,6 +21215,7 @@ GuiTextBoxAutoCompleteBase
 					{
 						element=_element;
 						elementModifyLock=&_elementModifyLock;
+						ownerComposition=_ownerComposition;
 					}
 				}
 			}
@@ -21175,10 +21248,10 @@ GuiTextBoxAutoCompleteBase
 GuiGrammarAutoComplete
 ***********************************************************************/
 
-			void GuiGrammarAutoComplete::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, vuint editVersion)
+			void GuiGrammarAutoComplete::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, compositions::GuiGraphicsComposition* _ownerComposition, vuint editVersion)
 			{
-				GuiTextBoxAutoCompleteBase::Attach(_element, _elementModifyLock, editVersion);
-				RepeatingParsingExecutor::CallbackBase::Attach(_element, _elementModifyLock, editVersion);
+				GuiTextBoxAutoCompleteBase::Attach(_element, _elementModifyLock, _ownerComposition, editVersion);
+				RepeatingParsingExecutor::CallbackBase::Attach(_element, _elementModifyLock, _ownerComposition, editVersion);
 			}
 
 			void GuiGrammarAutoComplete::Detach()
@@ -21311,54 +21384,6 @@ GuiGrammarAutoComplete
 									}
 								}
 							}
-						}
-					}
-				}
-			}
-
-			void GuiGrammarAutoComplete::PrepareAutoCompleteMetadata()
-			{
-				Ptr<ParsingTable> table=parsingExecutor->GetParser()->GetTable();
-				fieldAutoCompleteTypes.Clear();
-				autoCompleteTypes.Clear();
-				autoCompleteCandidates.Clear();
-				autoCompleteTokens.Clear();
-
-				// prepare tokens
-				{
-					vint tokenCount=table->GetTokenCount();
-					for(vint token=ParsingTable::UserTokenStart;token<tokenCount;token++)
-					{
-						const ParsingTable::TokenInfo& tokenInfo=table->GetTokenInfo(token);
-						autoCompleteCandidates.Add(parsingExecutor->GetAutoCompleteCandidateAttribute(tokenInfo.attributeIndex));
-						autoCompleteTokens.Add(parsingExecutor->GetAutoCompleteTokenAttribute(tokenInfo.attributeIndex));
-					}
-				}
-
-				// prepare fields
-				{
-					vint fieldCount=table->GetTreeFieldInfoCount();
-
-					for(vint field=0;field<fieldCount;field++)
-					{
-						const ParsingTable::TreeFieldInfo& fieldInfo=table->GetTreeFieldInfo(field);
-						if(Ptr<ParsingTable::AttributeInfo> att=parsingExecutor->GetAutoCompleteTypeAttribute(fieldInfo.attributeIndex))
-						{
-							vint index=autoCompleteTypes.Keys().IndexOf(att->arguments[0]);
-							if(index==-1)
-							{
-								autoCompleteTypes.Add(att->arguments[0], autoCompleteTypes.Count());
-							}
-						}
-					}
-
-					for(vint field=0;field<fieldCount;field++)
-					{
-						const ParsingTable::TreeFieldInfo& fieldInfo=table->GetTreeFieldInfo(field);
-						if(Ptr<ParsingTable::AttributeInfo> att=parsingExecutor->GetAutoCompleteTypeAttribute(fieldInfo.attributeIndex))
-						{
-							vint index=autoCompleteTypes.Keys().IndexOf(att->arguments[0]);
-							fieldAutoCompleteTypes.Add(FieldDesc(fieldInfo.type, fieldInfo.field), autoCompleteTypes.Values().Get(index));
 						}
 					}
 				}
@@ -21869,6 +21894,7 @@ GuiGrammarAutoComplete
 						{
 							Ptr<ParsingTreeNode> parsedNode=builder.GetNode();
 							newContext.modifiedNode=parsedNode.Cast<ParsingTreeObject>();
+							newContext.modifiedNode->InitializeQueryCache();
 						}
 					}
 
@@ -21897,22 +21923,22 @@ GuiGrammarAutoComplete
 						SortedList<vint> tableTokenIndices;
 						RegexToken* editingToken=SearchValidInputToken(state, collector, stopPosition, newContext, tableTokenIndices);
 
-						// collect all keywords that can be put into the auto complete list
-						FOREACH(vint, token, tableTokenIndices)
-						{
-							vint regexToken=token-ParsingTable::UserTokenStart;
-							if(regexToken>=0)
-							{
-								autoComplete->candidates.Add(regexToken);
-								if(autoCompleteCandidates[regexToken])
-								{
-									autoComplete->shownCandidates.Add(regexToken);
-								}
-							}
-						}
-
 						// collect all auto complete types
 						{
+							// collect all keywords that can be put into the auto complete list
+							FOREACH(vint, token, tableTokenIndices)
+							{
+								vint regexToken=token-ParsingTable::UserTokenStart;
+								if(regexToken>=0)
+								{
+									autoComplete->candidates.Add(regexToken);
+									if(parsingExecutor->GetTokenMetaData(regexToken).isCandidate)
+									{
+										autoComplete->shownCandidates.Add(regexToken);
+									}
+								}
+							}
+
 							// calculate the arranged stopPosition
 							if(editingToken)
 							{
@@ -21927,6 +21953,7 @@ GuiGrammarAutoComplete
 							TextPos startPos, endPos;
 							{
 								startPos=ModifiedTextPosToGlobalTextPos(newContext, stopPosition);
+								autoComplete->startPosition=startPos;
 								endPos=trace.inputEnd;
 								if(newContext.modifiedNode!=newContext.originalNode)
 								{
@@ -21940,33 +21967,12 @@ GuiGrammarAutoComplete
 							}
 
 							// calculate the auto complete type
-							if(editingToken && autoCompleteTokens[editingToken->token])
+							if(editingToken && parsingExecutor->GetTokenMetaData(editingToken->token).hasAutoComplete)
 							{
 								ParsingTextRange range(ParsingTextPos(startPos.row, startPos.column), ParsingTextPos(endPos.row, endPos.column));
-								ParsingTreeNode* foundNode=newContext.modifiedNode->FindDeepestNode(range);
-								if(!foundNode) goto FINISH_COLLECTING_AUTO_COMPLETE_TYPES;
-								ParsingTreeToken* foundToken=dynamic_cast<ParsingTreeToken*>(foundNode);
-								if(!foundToken) goto FINISH_COLLECTING_AUTO_COMPLETE_TYPES;
-								ParsingTreeObject* tokenParent=dynamic_cast<ParsingTreeObject*>(foundNode->GetParent());
-								if(!tokenParent) goto FINISH_COLLECTING_AUTO_COMPLETE_TYPES;
-								vint index=tokenParent->GetMembers().Values().IndexOf(foundNode);
-								if(index==-1) goto FINISH_COLLECTING_AUTO_COMPLETE_TYPES;
-
-								WString type=tokenParent->GetType();
-								WString field=tokenParent->GetMembers().Keys().Get(index);
-								FieldDesc key(type, field);
-
-								index=fieldAutoCompleteTypes.Keys().IndexOf(key);
-								if(index!=-1)
-								{
-									vint type=fieldAutoCompleteTypes.Values().Get(index);
-									autoComplete->types.Add(type);
-								}
-								autoComplete->token=dynamic_cast<ParsingTreeToken*>(foundToken);
+								AutoCompleteData::RetriveContext(*autoComplete.Obj(), range, newContext.modifiedNode.Obj(), parsingExecutor.Obj());
 							}
 						}
-			FINISH_COLLECTING_AUTO_COMPLETE_TYPES:
-
 						newContext.autoComplete=autoComplete;
 					}
 				}
@@ -22023,29 +22029,167 @@ GuiGrammarAutoComplete
 
 			void GuiGrammarAutoComplete::PostList(const Context& newContext)
 			{
-				SPIN_LOCK(editTraceLock)
-				{
-					vint traceIndex=UnsafeGetEditTraceIndex(newContext.input.editVersion);
-					if(traceIndex==-1) return;
+				bool openList=true;
+				bool keepListState=true;
+				Ptr<AutoCompleteData> autoComplete=newContext.autoComplete;
 
-					editTrace.RemoveRange(0, traceIndex+1);
+				// if failed to get the auto complete list, close
+				if(!autoComplete)
+				{
+					openList=false;
 				}
-			}
-
-			WString GuiGrammarAutoComplete::GetAutoCompleteTypeName(vint id)
-			{
-				for(vint i=0;i<autoCompleteTypes.Count();i++)
+				if(openList)
 				{
-					if(autoCompleteTypes.Values()[i]==id)
+					if(autoComplete->shownCandidates.Count()+autoComplete->candidateSymbols.Count()==0)
 					{
-						return autoCompleteTypes.Keys()[i];
+						openList=false;
 					}
 				}
-				return L"";
+				
+				TextPos startPosition, endPosition;
+				if(openList)
+				{
+					SPIN_LOCK(editTraceLock)
+					{
+						// if the edit version is invalid, close
+						vint traceIndex=UnsafeGetEditTraceIndex(newContext.input.editVersion);
+						if(traceIndex==-1) openList=false;
+						// an edit version has two trace at most, for text change and caret change, here we peak the text change
+						if(traceIndex>0 && editTrace[traceIndex-1].editVersion==context.input.editVersion)
+						{
+							traceIndex--;
+						}
+
+						// scan all traces from the calculation's edit version until now
+						if(openList)
+						{
+							startPosition=autoComplete->startPosition;
+							endPosition=editTrace[editTrace.Count()-1].inputEnd;
+							for(vint i=traceIndex;i<editTrace.Count();i++)
+							{
+								TextEditNotifyStruct& trace=editTrace[i];
+								// if there are no text change trace until now, don't change the list
+								if(trace.originalText!=L"" || trace.inputText!=L"")
+								{
+									keepListState=false;
+								}
+								// if the edit position goes before the start position of the auto complete, close
+								if(trace.inputStart<startPosition)
+								{
+									openList=false;
+									break;
+								}
+							}
+						}
+
+						if(traceIndex>0)
+						{
+							editTrace.RemoveRange(0, traceIndex);
+						}
+					}
+				}
+
+				// if the input text from the start position to the current position crosses a token, close
+				if(openList && element)
+				{
+					WString editingText=element->GetLines().GetText(startPosition, endPosition);
+					if(grammarParser->GetTable()->GetLexer().Walk().IsClosedToken(editingText))
+					{
+						openList=false;
+					}
+				}
+
+				// calculate the content of the list
+				if((!keepListState && openList) || IsListOpening())
+				{
+					SortedList<WString> items;
+					// copy all candidate keywords
+					FOREACH(vint, token, autoComplete->shownCandidates)
+					{
+						WString literal=parsingExecutor->GetTokenMetaData(token).unescapedRegexText;
+						if(literal!=L"" && !items.Contains(literal))
+						{
+							items.Add(literal);
+						}
+					}
+					// copy all candidate symbols
+					if(autoComplete->acceptableSemanticIds)
+					{
+						FOREACH(Ptr<ParsingScopeSymbol>, symbol, autoComplete->candidateSymbols)
+						{
+							FOREACH(vint, semanticId, symbol->GetSemanticIds())
+							{
+								if(autoComplete->acceptableSemanticIds->Contains(semanticId))
+								{
+									// add all acceptable display of a symbol
+									// because a symbol can has multiple representation in different places
+									WString literal=symbol->GetDisplay(semanticId);
+									if(literal!=L"" && !items.Contains(literal))
+									{
+										items.Add(literal);
+									}
+								}
+							}
+						}
+					}
+					// fill the list
+					SetListContent(items);
+				}
+
+				// set the list state
+				if(!keepListState)
+				{
+					if(openList)
+					{
+						OpenList(startPosition);
+					}
+					else
+					{
+						CloseList();
+					}
+				}
 			}
 
-			void GuiGrammarAutoComplete::OnContextFinishedAsync(const Context& context)
+			void GuiGrammarAutoComplete::OnContextFinishedAsync(Context& context)
 			{
+				Ptr<ILanguageProvider> languageProvider=parsingExecutor->GetLanguageProvider();
+				if(languageProvider)
+				{
+					if(context.autoComplete && context.autoComplete->acceptableSemanticIds)
+					{
+						ParsingTreeObject* originalNode=context.originalNode.Obj();
+						ParsingTreeObject* replacedNode=context.modifiedNode.Obj();
+						ParsingScopeSymbol* originalSymbol=0;
+						{
+							ParsingTreeNode* originalSymbolNode=originalNode;
+							while(originalSymbolNode && !originalSymbol)
+							{
+								originalSymbol=context.input.finder->GetSymbolFromNode(dynamic_cast<ParsingTreeObject*>(originalSymbolNode));
+								originalSymbolNode=originalSymbolNode->GetParent();
+							}
+						}
+						if(originalSymbol)
+						{
+							Ptr<ParsingScopeFinder> newFinder=new ParsingScopeFinder(new ParsingScopeFinder::IndirectSymbolMapper(0, 0, originalNode, replacedNode));
+							Ptr<ParsingScopeSymbol> replacedSymbol=languageProvider->CreateSymbolFromNode(newFinder->Obj(originalSymbol->GetNode()), GetParsingExecutor().Obj(), newFinder.Obj());
+				
+							if(replacedSymbol)
+							{
+								newFinder=new ParsingScopeFinder(new ParsingScopeFinder::IndirectSymbolMapper(originalSymbol, replacedSymbol.Obj(), originalNode, replacedNode));
+								newFinder->InitializeQueryCache(replacedSymbol.Obj(), context.input.finder.Obj());
+								LazyList<Ptr<ParsingScopeSymbol>> symbols=languageProvider->FindPossibleSymbols(context.autoComplete->tokenParent, context.autoComplete->field, newFinder.Obj());
+								CopyFrom(
+									context.autoComplete->candidateSymbols,
+									From(symbols)
+										.Where([&context](Ptr<ParsingScopeSymbol> symbol)
+										{
+											return From(symbol->GetSemanticIds()).Intersect(*context.autoComplete->acceptableSemanticIds.Obj()).First(-1)!=-1;
+										})
+									);
+							}
+						}
+					}
+				}
 			}
 
 			void GuiGrammarAutoComplete::EnsureAutoCompleteFinished()
@@ -22061,7 +22205,6 @@ GuiGrammarAutoComplete
 			{
 				grammarParser=CreateAutoRecoverParser(parsingExecutor->GetParser()->GetTable());
 				CollectLeftRecursiveRules();
-				PrepareAutoCompleteMetadata();
 				parsingExecutor->AttachCallback(this);
 			}
 
@@ -22083,12 +22226,6 @@ GuiGrammarAutoComplete
 			{
 				EnsureAutoCompleteFinished();
 				parsingExecutor->DetachCallback(this);
-			}
-
-			vint GuiGrammarAutoComplete::GetAutoCompleteTypeId(const WString& type)
-			{
-				vint index=autoCompleteTypes.Keys().IndexOf(type);
-				return index==-1?-1:autoCompleteTypes.Values().Get(index);
 			}
 
 			Ptr<RepeatingParsingExecutor> GuiGrammarAutoComplete::GetParsingExecutor()
@@ -22216,7 +22353,7 @@ GuiTextBoxColorizerBase
 				StopColorizerForever();
 			}
 
-			void GuiTextBoxColorizerBase::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, vuint editVersion)
+			void GuiTextBoxColorizerBase::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, compositions::GuiGraphicsComposition* _ownerComposition, vuint editVersion)
 			{
 				if(_element)
 				{
@@ -22480,10 +22617,10 @@ GuiGrammarColorizer
 			{
 			}
 
-			void GuiGrammarColorizer::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, vuint editVersion)
+			void GuiGrammarColorizer::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, compositions::GuiGraphicsComposition* _ownerComposition, vuint editVersion)
 			{
-				GuiTextBoxRegexColorizer::Attach(_element, _elementModifyLock, editVersion);
-				RepeatingParsingExecutor::CallbackBase::Attach(_element, _elementModifyLock, editVersion);
+				GuiTextBoxRegexColorizer::Attach(_element, _elementModifyLock, _ownerComposition, editVersion);
+				RepeatingParsingExecutor::CallbackBase::Attach(_element, _elementModifyLock, _ownerComposition, editVersion);
 			}
 
 			void GuiGrammarColorizer::Detach()
@@ -22515,8 +22652,22 @@ GuiGrammarColorizer
 				RepeatingParsingExecutor::CallbackBase::TextEditFinished(editVersion);
 			}
 
-			void GuiGrammarColorizer::OnSemanticColorize(SemanticColorizeContext& context)
+			void GuiGrammarColorizer::OnSemanticColorize(SemanticColorizeContext& context, const RepeatingParsingOutput& input)
 			{
+				Ptr<ILanguageProvider> languageProvider=parsingExecutor->GetLanguageProvider();
+				if(languageProvider)
+				{
+					if(Ptr<ParsingScopeSymbol> symbol=languageProvider->FindReferencedSymbols(context.tokenParent, input.finder.Obj()).First(0))
+					{
+						vint semanticId=From(symbol->GetSemanticIds())
+							.Intersect(*context.acceptableSemanticIds.Obj())
+							.First(-1);
+						if(semanticId!=-1)
+						{
+							context.semanticId=semanticId;
+						}
+					}
+				}
 			}
 
 			void GuiGrammarColorizer::EnsureColorizerFinished()
@@ -22547,18 +22698,6 @@ GuiGrammarColorizer
 			{
 				EnsureColorizerFinished();
 				parsingExecutor->DetachCallback(this);
-			}
-
-			vint GuiGrammarColorizer::GetTokenId(const WString& token)
-			{
-				vint index=colorIndices.Keys().IndexOf(token);
-				return index==-1?-1:colorIndices.Values().Get(index);
-			}
-
-			vint GuiGrammarColorizer::GetSemanticId(const WString& semantic)
-			{
-				vint index=semanticIndices.Keys().IndexOf(semantic);
-				return index==-1?-1:semanticIndices.Values().Get(index);
 			}
 
 			void GuiGrammarColorizer::BeginSetColors()
@@ -22597,79 +22736,36 @@ GuiGrammarColorizer
 			{
 				SortedList<WString> tokenColors;
 				Ptr<ParsingTable> table=parsingExecutor->GetParser()->GetTable();
-				colorIndices.Clear();
-				colorContext.Clear();
-				fieldContextColors.Clear();
-				fieldSemanticColors.Clear();
-				semanticIndices.Clear();
+				semanticColorMap.Clear();
 
-				// prepare tokens
+				vint tokenCount=table->GetTokenCount();
+				for(vint token=ParsingTable::UserTokenStart;token<tokenCount;token++)
 				{
-					vint tokenCount=table->GetTokenCount();
-					for(vint token=ParsingTable::UserTokenStart;token<tokenCount;token++)
+					const ParsingTable::TokenInfo& tokenInfo=table->GetTokenInfo(token);
+					const RepeatingParsingExecutor::TokenMetaData& md=parsingExecutor->GetTokenMetaData(token-ParsingTable::UserTokenStart);
+					if(md.defaultColorIndex==-1)
 					{
-						const ParsingTable::TokenInfo& tokenInfo=table->GetTokenInfo(token);
-						if(Ptr<ParsingTable::AttributeInfo> att=parsingExecutor->GetColorAttribute(tokenInfo.attributeIndex))
-						{
-							tokenColors.Add(att->arguments[0]);
-							vint tokenId=AddToken(tokenInfo.regex, GetColor(att->arguments[0]));
-							colorIndices.Set(att->arguments[0], tokenId);
-							colorContext.Add(false);
-						}
-						else if(Ptr<ParsingTable::AttributeInfo> att=parsingExecutor->GetContextColorAttribute(tokenInfo.attributeIndex))
-						{
-							tokenColors.Add(att->arguments[0]);
-							vint tokenId=AddToken(tokenInfo.regex, GetColor(att->arguments[0]));
-							colorIndices.Set(att->arguments[0], tokenId);
-							colorContext.Add(true);
-						}
-						else
-						{
-							AddToken(tokenInfo.regex, GetDefaultColor());
-							colorContext.Add(false);
-						}
+						AddToken(tokenInfo.regex, GetDefaultColor());
+					}
+					else
+					{
+						WString name=parsingExecutor->GetSemanticName(md.defaultColorIndex);
+						vint color=AddToken(tokenInfo.regex, GetColor(name));
+						semanticColorMap.Set(md.defaultColorIndex, color);
+						tokenColors.Add(name);
 					}
 				}
 
-				// prepare extra tokens
 				FOREACH_INDEXER(WString, color, index, colorSettings.Keys())
 				{
 					if(!tokenColors.Contains(color))
 					{
-						vint tokenId=AddExtraToken(colorSettings.Values().Get(index));
-						colorIndices.Set(color, tokenId+colorContext.Count());
-					}
-				}
-
-				// prepare fields
-				{
-					vint fieldCount=table->GetTreeFieldInfoCount();
-					for(vint field=0;field<fieldCount;field++)
-					{
-						const ParsingTable::TreeFieldInfo& fieldInfo=table->GetTreeFieldInfo(field);
-						if(Ptr<ParsingTable::AttributeInfo> att=parsingExecutor->GetColorAttribute(fieldInfo.attributeIndex))
+						vint semanticId=parsingExecutor->GetSemanticId(color);
+						if(semanticId!=-1)
 						{
-							vint index=colorIndices.Keys().IndexOf(att->arguments[0]);
-							if(index!=-1)
-							{
-								fieldContextColors.Add(FieldDesc(fieldInfo.type, fieldInfo.field), colorIndices.Values().Get(index));
-							}
-						}
-						else if(Ptr<ParsingTable::AttributeInfo> att=parsingExecutor->GetSemanticColorAttribute(fieldInfo.attributeIndex))
-						{
-							FieldDesc key(fieldInfo.type, fieldInfo.field);
-							vint semantic=-1;
-							vint index=semanticIndices.Keys().IndexOf(att->arguments[0]);
-							if(index==-1)
-							{
-								semantic=semanticIndices.Count();
-								semanticIndices.Add(att->arguments[0], semantic);
-							}
-							else
-							{
-								semantic=semanticIndices.Values().Get(index);
-							}
-							fieldSemanticColors.Add(key, semantic);
+							vint tokenId=AddExtraToken(colorSettings.Values().Get(index));
+							vint color=tokenId+tokenCount-ParsingTable::UserTokenStart;
+							semanticColorMap.Set(semanticId, color);
 						}
 					}
 				}
@@ -22681,43 +22777,33 @@ GuiGrammarColorizer
 				SPIN_LOCK(contextLock)
 				{
 					ParsingTreeObject* node=context.node.Obj();
-					if(node && token!=-1 && colorContext[token])
+					if(node && token!=-1 && parsingExecutor->GetTokenMetaData(token).hasContextColor)
 					{
 						ParsingTextPos pos(lineIndex, start);
-						ParsingTreeNode* foundNode=node->FindDeepestNode(pos);
-						if(!foundNode) return;
-						ParsingTreeToken* foundToken=dynamic_cast<ParsingTreeToken*>(foundNode);
-						if(!foundToken) return;
-						ParsingTreeObject* tokenParent=dynamic_cast<ParsingTreeObject*>(foundNode->GetParent());
-						if(!tokenParent) return;
-						vint index=tokenParent->GetMembers().Values().IndexOf(foundNode);
-						if(index==-1) return;
-
-						WString type=tokenParent->GetType();
-						WString field=tokenParent->GetMembers().Keys().Get(index);
-						FieldDesc key(type, field);
-
-						index=fieldContextColors.Keys().IndexOf(key);
-						if(index!=-1)
+						SemanticColorizeContext scContext;
+						if(SemanticColorizeContext::RetriveContext(scContext, pos, node, parsingExecutor.Obj()))
 						{
-							token=fieldContextColors.Values().Get(index);
-							return;
-						}
+							const RepeatingParsingExecutor::FieldMetaData& md=parsingExecutor->GetFieldMetaData(scContext.type, scContext.field);
+							vint semantic=md.colorIndex;
+							scContext.semanticId=-1;
 
-						index=fieldSemanticColors.Keys().IndexOf(key);
-						if(index!=-1)
-						{
-							SemanticColorizeContext scContext;
-							scContext.foundToken=foundToken;
-							scContext.tokenParent=tokenParent;
-							scContext.type=type;
-							scContext.field=field;
-							scContext.semantic=fieldSemanticColors.Values().Get(index);
-							scContext.token=token;
-							scContext.semanticContext=context.semanticContext;
-							OnSemanticColorize(scContext);
-							token=scContext.token;
-							return;
+							if(scContext.acceptableSemanticIds)
+							{
+								OnSemanticColorize(scContext, context);
+								if(md.semantics->Contains(scContext.semanticId))
+								{
+									semantic=scContext.semanticId;
+								}
+							}
+
+							if(semantic!=-1)
+							{
+								vint index=semanticColorMap.Keys().IndexOf(semantic);
+								if(index!=-1)
+								{
+									token=semanticColorMap.Values()[index];
+								}
+							}
 						}
 					}
 				}
@@ -23202,7 +23288,7 @@ GuiTextBoxCommonInterface
 
 				for(vint i=0;i<textEditCallbacks.Count();i++)
 				{
-					textEditCallbacks[i]->Attach(textElement, elementModifyLock, editVersion);
+					textEditCallbacks[i]->Attach(textElement, elementModifyLock, textComposition ,editVersion);
 				}
 			}
 			
@@ -23227,7 +23313,7 @@ GuiTextBoxCommonInterface
 					textEditCallbacks.Add(value);
 					if(textElement)
 					{
-						value->Attach(textElement, elementModifyLock, editVersion);
+						value->Attach(textElement, elementModifyLock, textComposition, editVersion);
 					}
 					return true;
 				}
@@ -24079,6 +24165,7 @@ namespace vl
 			using namespace parsing;
 			using namespace parsing::tabling;
 			using namespace collections;
+			using namespace regex_internal;
 
 /***********************************************************************
 RepeatingParsingExecutor::CallbackBase
@@ -24101,7 +24188,7 @@ RepeatingParsingExecutor::CallbackBase
 				callbackAutoPushing=enabled;
 			}
 
-			void RepeatingParsingExecutor::CallbackBase::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, vuint editVersion)
+			void RepeatingParsingExecutor::CallbackBase::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, compositions::GuiGraphicsComposition* _ownerComposition, vuint editVersion)
 			{
 				if(_element)
 				{
@@ -24188,15 +24275,154 @@ RepeatingParsingExecutor
 				}
 			}
 
-			void RepeatingParsingExecutor::OnContextFinishedAsync(RepeatingParsingOutput& context)
+			void RepeatingParsingExecutor::PrepareMetaData()
 			{
+				Ptr<ParsingTable> table=grammarParser->GetTable();
+				tokenIndexMap.Clear();
+				semanticIndexMap.Clear();
+				tokenMetaDatas.Clear();
+				fieldMetaDatas.Clear();
+
+				Dictionary<vint, Ptr<ParsingTable::AttributeInfo>> tokenColorAtts, tokenContextColorAtts, tokenCandidateAtts, tokenAutoCompleteAtts;
+				Dictionary<FieldDesc, Ptr<ParsingTable::AttributeInfo>> fieldColorAtts, fieldSemanticAtts;
+
+				{
+					vint tokenCount=table->GetTokenCount();
+					for(vint token=ParsingTable::UserTokenStart;token<tokenCount;token++)
+					{
+						const ParsingTable::TokenInfo& tokenInfo=table->GetTokenInfo(token);
+						vint tokenIndex=token-ParsingTable::UserTokenStart;
+						tokenIndexMap.Add(tokenInfo.name, tokenIndex);
+
+						if(Ptr<ParsingTable::AttributeInfo> att=GetColorAttribute(tokenInfo.attributeIndex))
+						{
+							tokenColorAtts.Add(tokenIndex, att);
+						}
+						if(Ptr<ParsingTable::AttributeInfo> att=GetContextColorAttribute(tokenInfo.attributeIndex))
+						{
+							tokenContextColorAtts.Add(tokenIndex, att);
+						}
+						if(Ptr<ParsingTable::AttributeInfo> att=GetCandidateAttribute(tokenInfo.attributeIndex))
+						{
+							tokenCandidateAtts.Add(tokenIndex, att);
+						}
+						if(Ptr<ParsingTable::AttributeInfo> att=GetAutoCompleteAttribute(tokenInfo.attributeIndex))
+						{
+							tokenAutoCompleteAtts.Add(tokenIndex, att);
+						}
+					}
+				}
+				{
+					vint fieldCount=table->GetTreeFieldInfoCount();
+					for(vint field=0;field<fieldCount;field++)
+					{
+						const ParsingTable::TreeFieldInfo& fieldInfo=table->GetTreeFieldInfo(field);
+						FieldDesc fieldDesc(fieldInfo.type, fieldInfo.field);
+
+						if(Ptr<ParsingTable::AttributeInfo> att=GetColorAttribute(fieldInfo.attributeIndex))
+						{
+							fieldColorAtts.Add(fieldDesc, att);
+						}
+						if(Ptr<ParsingTable::AttributeInfo> att=GetSemanticAttribute(fieldInfo.attributeIndex))
+						{
+							fieldSemanticAtts.Add(fieldDesc, att);
+						}
+					}
+				}
+
+				FOREACH(Ptr<ParsingTable::AttributeInfo>, att, 
+					From(tokenColorAtts.Values())
+						.Concat(tokenContextColorAtts.Values())
+						.Concat(fieldColorAtts.Values())
+						.Concat(fieldSemanticAtts.Values())
+					)
+				{
+					FOREACH(WString, argument, att->arguments)
+					{
+						if(!semanticIndexMap.Contains(argument))
+						{
+							semanticIndexMap.Add(argument);
+						}
+					}
+				}
+
+				vint index=0;
+				FOREACH(vint, tokenIndex, tokenIndexMap.Values())
+				{
+					TokenMetaData md;
+					md.tableTokenIndex=tokenIndex+ParsingTable::UserTokenStart;
+					md.lexerTokenIndex=tokenIndex;
+					md.defaultColorIndex=-1;
+					md.hasContextColor=false;
+					md.hasAutoComplete=false;
+					md.isCandidate=false;
+
+					if((index=tokenColorAtts.Keys().IndexOf(tokenIndex))!=-1)
+					{
+						md.defaultColorIndex=semanticIndexMap.IndexOf(tokenColorAtts.Values()[index]->arguments[0]);
+					}
+					md.hasContextColor=tokenContextColorAtts.Keys().Contains(tokenIndex);
+					md.hasAutoComplete=tokenAutoCompleteAtts.Keys().Contains(tokenIndex);
+					if(md.isCandidate=tokenCandidateAtts.Keys().Contains(tokenIndex))
+					{
+						const ParsingTable::TokenInfo& tokenInfo=table->GetTokenInfo(md.tableTokenIndex);
+						if(IsRegexEscapedListeralString(tokenInfo.regex))
+						{
+							md.unescapedRegexText=UnescapeTextForRegex(tokenInfo.regex);
+						}
+						else
+						{
+							md.isCandidate=false;
+						}
+					}
+
+					tokenMetaDatas.Add(tokenIndex, md);
+				}
+				{
+					vint fieldCount=table->GetTreeFieldInfoCount();
+					for(vint field=0;field<fieldCount;field++)
+					{
+						const ParsingTable::TreeFieldInfo& fieldInfo=table->GetTreeFieldInfo(field);
+						FieldDesc fieldDesc(fieldInfo.type, fieldInfo.field);
+
+						FieldMetaData md;
+						md.colorIndex=-1;
+
+						if((index=fieldColorAtts.Keys().IndexOf(fieldDesc))!=-1)
+						{
+							md.colorIndex=semanticIndexMap.IndexOf(fieldColorAtts.Values()[index]->arguments[0]);
+						}
+						if((index=fieldSemanticAtts.Keys().IndexOf(fieldDesc))!=-1)
+						{
+							md.semantics=new List<vint>;
+							FOREACH(WString, argument, fieldSemanticAtts.Values()[index]->arguments)
+							{
+								md.semantics->Add(semanticIndexMap.IndexOf(argument));
+							}
+						}
+
+						fieldMetaDatas.Add(fieldDesc, md);
+					}
+				}
 			}
 
-			RepeatingParsingExecutor::RepeatingParsingExecutor(Ptr<parsing::tabling::ParsingGeneralParser> _grammarParser, const WString& _grammarRule)
+			void RepeatingParsingExecutor::OnContextFinishedAsync(RepeatingParsingOutput& context)
+			{
+				if(languageProvider)
+				{
+					context.finder=new ParsingScopeFinder();
+					context.symbol=languageProvider->CreateSymbolFromNode(context.node, this, context.finder.Obj());
+					context.finder->InitializeQueryCache(context.symbol.Obj());
+				}
+			}
+
+			RepeatingParsingExecutor::RepeatingParsingExecutor(Ptr<parsing::tabling::ParsingGeneralParser> _grammarParser, const WString& _grammarRule, Ptr<ILanguageProvider> _languageProvider)
 				:grammarParser(_grammarParser)
 				,grammarRule(_grammarRule)
+				,languageProvider(_languageProvider)
 				,autoPushingCallback(0)
 			{
+				PrepareMetaData();
 			}
 
 			RepeatingParsingExecutor::~RepeatingParsingExecutor()
@@ -24261,12 +24487,43 @@ RepeatingParsingExecutor
 				return true;
 			}
 
+			Ptr<ILanguageProvider> RepeatingParsingExecutor::GetLanguageProvider()
+			{
+				return languageProvider;
+			}
+
+			vint RepeatingParsingExecutor::GetTokenIndex(const WString& tokenName)
+			{
+				vint index=tokenIndexMap.Keys().IndexOf(tokenName);
+				return index==-1?-1:tokenIndexMap.Values()[index];
+			}
+
+			vint RepeatingParsingExecutor::GetSemanticId(const WString& name)
+			{
+				return semanticIndexMap.IndexOf(name);
+			}
+
+			WString RepeatingParsingExecutor::GetSemanticName(vint id)
+			{
+				return 0<=id&&id<semanticIndexMap.Count()?semanticIndexMap[id]:L"";
+			}
+
+			const RepeatingParsingExecutor::TokenMetaData& RepeatingParsingExecutor::GetTokenMetaData(vint regexTokenIndex)
+			{
+				return tokenMetaDatas[regexTokenIndex];
+			}
+
+			const RepeatingParsingExecutor::FieldMetaData& RepeatingParsingExecutor::GetFieldMetaData(const WString& type, const WString& field)
+			{
+				return fieldMetaDatas[FieldDesc(type, field)];
+			}
+
 			Ptr<parsing::tabling::ParsingTable::AttributeInfo> RepeatingParsingExecutor::GetAttribute(vint index, const WString& name, vint argumentCount)
 			{
 				if(index!=-1)
 				{
 					Ptr<ParsingTable::AttributeInfo> att=grammarParser->GetTable()->GetAttributeInfo(index)->FindFirst(name);
-					if(att && att->arguments.Count()==argumentCount)
+					if(att && (argumentCount==-1 || att->arguments.Count()==argumentCount))
 					{
 						return att;
 					}
@@ -24281,27 +24538,61 @@ RepeatingParsingExecutor
 
 			Ptr<parsing::tabling::ParsingTable::AttributeInfo> RepeatingParsingExecutor::GetContextColorAttribute(vint index)
 			{
-				return GetAttribute(index, L"ContextColor", 1);
+				return GetAttribute(index, L"ContextColor", 0);
 			}
 
-			Ptr<parsing::tabling::ParsingTable::AttributeInfo> RepeatingParsingExecutor::GetSemanticColorAttribute(vint index)
+			Ptr<parsing::tabling::ParsingTable::AttributeInfo> RepeatingParsingExecutor::GetSemanticAttribute(vint index)
 			{
-				return GetAttribute(index, L"SemanticColor", 1);
+				return GetAttribute(index, L"Semantic", -1);
 			}
 
-			Ptr<parsing::tabling::ParsingTable::AttributeInfo> RepeatingParsingExecutor::GetAutoCompleteCandidateAttribute(vint index)
+			Ptr<parsing::tabling::ParsingTable::AttributeInfo> RepeatingParsingExecutor::GetCandidateAttribute(vint index)
 			{
-				return GetAttribute(index, L"AutoCompleteCandidate", 0);
+				return GetAttribute(index, L"Candidate", 0);
 			}
 
-			Ptr<parsing::tabling::ParsingTable::AttributeInfo> RepeatingParsingExecutor::GetAutoCompleteTokenAttribute(vint index)
+			Ptr<parsing::tabling::ParsingTable::AttributeInfo> RepeatingParsingExecutor::GetAutoCompleteAttribute(vint index)
 			{
-				return GetAttribute(index, L"AutoCompleteToken", 0);
+				return GetAttribute(index, L"AutoComplete", 0);
 			}
 
-			Ptr<parsing::tabling::ParsingTable::AttributeInfo> RepeatingParsingExecutor::GetAutoCompleteTypeAttribute(vint index)
+/***********************************************************************
+ParsingContext
+***********************************************************************/
+
+			bool ParsingContext::RetriveContext(ParsingContext& output, parsing::ParsingTreeNode* foundNode, RepeatingParsingExecutor* executor)
 			{
-				return GetAttribute(index, L"AutoCompleteType", 1);
+				ParsingTreeToken* foundToken=dynamic_cast<ParsingTreeToken*>(foundNode);
+				if(!foundToken) return false;
+				ParsingTreeObject* tokenParent=dynamic_cast<ParsingTreeObject*>(foundNode->GetParent());
+				if(!tokenParent) return false;
+				vint index=tokenParent->GetMembers().Values().IndexOf(foundNode);
+				if(index==-1) return false;
+
+				WString type=tokenParent->GetType();
+				WString field=tokenParent->GetMembers().Keys().Get(index);
+				const RepeatingParsingExecutor::FieldMetaData& md=executor->GetFieldMetaData(type, field);
+
+				output.foundToken=foundToken;
+				output.tokenParent=tokenParent;
+				output.type=type;
+				output.field=field;
+				output.acceptableSemanticIds=md.semantics;
+				return true;
+			}
+
+			bool ParsingContext::RetriveContext(ParsingContext& output, parsing::ParsingTextPos pos, parsing::ParsingTreeObject* rootNode, RepeatingParsingExecutor* executor)
+			{
+				ParsingTreeNode* foundNode=rootNode->FindDeepestNode(pos);
+				if(!foundNode) return false;
+				return RetriveContext(output, foundNode, executor);
+			}
+
+			bool ParsingContext::RetriveContext(ParsingContext& output, parsing::ParsingTextRange range, ParsingTreeObject* rootNode, RepeatingParsingExecutor* executor)
+			{
+				ParsingTreeNode* foundNode=rootNode->FindDeepestNode(range);
+				if(!foundNode) return false;
+				return RetriveContext(output, foundNode, executor);
 			}
 		}
 	}
@@ -24440,7 +24731,7 @@ GuiTextBoxUndoRedoProcessor
 			{
 			}
 
-			void GuiTextBoxUndoRedoProcessor::Attach(elements::GuiColorizedTextElement* element, SpinLock& elementModifyLock, vuint editVersion)
+			void GuiTextBoxUndoRedoProcessor::Attach(elements::GuiColorizedTextElement* element, SpinLock& elementModifyLock, compositions::GuiGraphicsComposition* _ownerComposition, vuint editVersion)
 			{
 			}
 
@@ -33106,6 +33397,8 @@ namespace vl
 			using namespace collections;
 			using namespace parsing;
 			using namespace parsing::tabling;
+			using namespace parsing::definitions;
+			using namespace parsing::analyzing;
 			using namespace parsing::xml;
 			using namespace stream;
 			using namespace list;
@@ -33149,6 +33442,17 @@ External Functions
 			ListViewColumns& GuiListView_GetColumns(GuiListView* thisObject)
 			{
 				return thisObject->GetItems().GetColumns();
+			}
+
+			Ptr<RepeatingParsingExecutor> CreateRepeatingParsingExecutor(const WString& grammar, bool enableAmbiguity, const WString& rule, Ptr<ILanguageProvider> provider)
+			{
+			    Ptr<ParsingGeneralParser> parser=CreateBootstrapStrictParser();
+			    List<Ptr<ParsingError>> errors;
+			    Ptr<ParsingTreeNode> definitionNode=parser->Parse(grammar, L"ParserDecl", errors);
+			    Ptr<ParsingDefinition> definition=DeserializeDefinition(definitionNode);
+			    Ptr<ParsingTable> table=GenerateTable(definition, enableAmbiguity, errors);
+				Ptr<ParsingGeneralParser> grammarParser=CreateAutoRecoverParser(table);
+				return new RepeatingParsingExecutor(grammarParser, rule, provider);
 			}
 
 /***********************************************************************
@@ -34317,6 +34621,7 @@ Type Declaration
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(MaxWidth)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(MaxHeight)
 				CLASS_MEMBER_PROPERTY_FAST(Colorizer)
+				CLASS_MEMBER_PROPERTY_FAST(AutoComplete)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(EditVersion)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(Modified)
 
@@ -34343,6 +34648,23 @@ Type Declaration
 				CLASS_MEMBER_METHOD(Redo, NO_PARAMETER)
 			END_CLASS_MEMBER(GuiTextBoxCommonInterface)
 
+			BEGIN_CLASS_MEMBER(ILanguageProvider)
+				CLASS_MEMBER_BASE(IDescriptable)
+				INTERFACE_EXTERNALCTOR(controls, ILanguageProvider)
+
+				CLASS_MEMBER_METHOD(CreateSymbolFromNode, {L"obj" _ L"executor" _ L"finder"})
+				CLASS_MEMBER_METHOD(FindReferencedSymbols, {L"obj" _  L"finder"})
+				CLASS_MEMBER_METHOD(FindPossibleSymbols, {L"obj" _ L"field" _ L"finder"})
+			END_CLASS_MEMBER(ILanguageProvider)
+
+			BEGIN_CLASS_MEMBER(RepeatingParsingExecutor)
+				CLASS_MEMBER_EXTERNALCTOR(Ptr<RepeatingParsingExecutor>(const WString&, bool, const WString&, Ptr<ILanguageProvider>), {L"grammar" _ L"enableAmbiguity" _ L"rule" _ L"provider"}, &CreateRepeatingParsingExecutor)
+				
+				CLASS_MEMBER_METHOD(GetTokenIndex, {L"tokenName"})
+				CLASS_MEMBER_METHOD(GetSemanticId, {L"name"})
+				CLASS_MEMBER_METHOD(GetSemanticName, {L"id"})
+			END_CLASS_MEMBER(RepeatingParsingExecutor)
+
 			BEGIN_CLASS_MEMBER(GuiTextBoxColorizerBase)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(LexerStartState)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(ContextStartState)
@@ -34366,6 +34688,30 @@ Type Declaration
 				CLASS_MEMBER_METHOD(ClearTokens, NO_PARAMETER)
 				CLASS_MEMBER_METHOD(Setup, NO_PARAMETER)
 			END_CLASS_MEMBER(GuiTextBoxRegexColorizer)
+
+			BEGIN_CLASS_MEMBER(GuiGrammarColorizer)
+				CLASS_MEMBER_BASE(GuiTextBoxRegexColorizer)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<GuiGrammarColorizer>(Ptr<RepeatingParsingExecutor>), {L"parsingExecutor"})
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ParsingExecutor)
+
+				CLASS_MEMBER_METHOD(BeginSetColors, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(GetColorNames, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(GetColor, {L"name"})
+				CLASS_MEMBER_METHOD_OVERLOAD(SetColor, {L"name" _ L"color"}, void(GuiGrammarColorizer::*)(const WString&, const ColorEntry&))
+				CLASS_MEMBER_METHOD_OVERLOAD(SetColor, {L"name" _ L"color"}, void(GuiGrammarColorizer::*)(const WString&, const Color&))
+				CLASS_MEMBER_METHOD(EndSetColors, NO_PARAMETER)
+			END_CLASS_MEMBER(GuiGrammarColorizer)
+
+			BEGIN_CLASS_MEMBER(GuiTextBoxAutoCompleteBase)
+			END_CLASS_MEMBER(GuiTextBoxAutoCompleteBase)
+
+			BEGIN_CLASS_MEMBER(GuiGrammarAutoComplete)
+				CLASS_MEMBER_BASE(GuiTextBoxAutoCompleteBase)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<GuiGrammarAutoComplete>(Ptr<RepeatingParsingExecutor>), {L"parsingExecutor"})
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ParsingExecutor)
+			END_CLASS_MEMBER(GuiGrammarAutoComplete)
 
 			BEGIN_CLASS_MEMBER(GuiMultilineTextBox)
 				CLASS_MEMBER_BASE(GuiScrollView)

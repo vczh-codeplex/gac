@@ -1605,7 +1605,7 @@ ParsingGeneralParser
 					}
 					else if(result.transitionType==ParsingState::TransitionResult::SkipToken)
 					{
-						if(result.tableTokenIndex==ParsingTable::TokenFinish)
+						if(state.GetCurrentTableTokenIndex()==ParsingTable::TokenFinish)
 						{
 							const RegexToken* token=state.GetToken(state.GetCurrentToken());
 							errors.Add(new ParsingError(token, L"Failed to recover error when reaching the end of the input."));
@@ -2413,6 +2413,53 @@ Type Declaration
 				CLASS_MEMBER_METHOD_RENAME(GetCount, Count, NO_PARAMETER)
 				CLASS_MEMBER_PROPERTY_READONLY(Count, GetCount)
 			END_CLASS_MEMBER(ParsingTreeArray)
+
+			BEGIN_CLASS_MEMBER(ParsingScope)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<ParsingScope>(ParsingScopeSymbol*), {L"ownerSymbol"})
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(OwnerSymbol)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(SymbolNames)
+
+				CLASS_MEMBER_METHOD(AddSymbol, {L"value"})
+				CLASS_MEMBER_METHOD(RemoveSymbol, {L"value"})
+				CLASS_MEMBER_METHOD(GetSymbols, {L"name"})
+			END_CLASS_MEMBER(ParsingScope)
+
+			BEGIN_CLASS_MEMBER(ParsingScopeSymbol)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<ParsingScopeSymbol>(const WString&, vint), {L"name" _ L"semanticId"})
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ParentScope)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Name)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(SemanticIds)
+				CLASS_MEMBER_PROPERTY_FAST(Node)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Scope)
+
+				CLASS_MEMBER_METHOD(AddSemanticId, {L"semanticId"})
+				CLASS_MEMBER_METHOD(CreateScope, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(DestroyScope, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(GetDisplay, {L"semanticId"})
+			END_CLASS_MEMBER(ParsingScopeSymbol)
+
+			typedef collections::LazyList<Ptr<ParsingScopeSymbol>> LazySymbolList;
+
+			BEGIN_CLASS_MEMBER(ParsingScopeFinder)
+				CLASS_MEMBER_METHOD_OVERLOAD(ParentNode, {L"node"}, ParsingTreeNode*(ParsingScopeFinder::*)(ParsingTreeNode*))
+				CLASS_MEMBER_METHOD_OVERLOAD(ParentNode, {L"node"}, ParsingTreeNode*(ParsingScopeFinder::*)(Ptr<ParsingTreeNode>))
+				CLASS_MEMBER_METHOD_OVERLOAD(Node, {L"node"}, ParsingTreeNode*(ParsingScopeFinder::*)(ParsingTreeNode*))
+				CLASS_MEMBER_METHOD_OVERLOAD(Node, {L"node"}, Ptr<ParsingTreeNode>(ParsingScopeFinder::*)(Ptr<ParsingTreeNode>))
+				CLASS_MEMBER_METHOD_OVERLOAD(ParentScope, {L"symbol"}, ParsingScope*(ParsingScopeFinder::*)(ParsingScopeSymbol*))
+				CLASS_MEMBER_METHOD_OVERLOAD(ParentScope, {L"symbol"}, ParsingScope*(ParsingScopeFinder::*)(Ptr<ParsingScopeSymbol>))
+				CLASS_MEMBER_METHOD_OVERLOAD(Symbol, {L"symbol"}, ParsingScopeSymbol*(ParsingScopeFinder::*)(ParsingScopeSymbol*))
+				CLASS_MEMBER_METHOD_OVERLOAD(Symbol, {L"symbol"}, Ptr<ParsingScopeSymbol>(ParsingScopeFinder::*)(Ptr<ParsingScopeSymbol>))
+				CLASS_MEMBER_METHOD(Symbols, {L"symbols"})
+
+				CLASS_MEMBER_METHOD(GetSymbolFromNode, {L"node"})
+				CLASS_MEMBER_METHOD(GetScopeFromNode, {L"node"})
+				CLASS_MEMBER_METHOD_OVERLOAD(GetSymbols, {L"scope" _ L"name"}, LazySymbolList(ParsingScopeFinder::*)(ParsingScope*, const WString&))
+				CLASS_MEMBER_METHOD_OVERLOAD(GetSymbols, {L"scope"}, LazySymbolList(ParsingScopeFinder::*)(ParsingScope*))
+				CLASS_MEMBER_METHOD_OVERLOAD(GetSymbolsRecursively, {L"scope" _ L"name"}, LazySymbolList(ParsingScopeFinder::*)(ParsingScope*, const WString&))
+				CLASS_MEMBER_METHOD_OVERLOAD(GetSymbolsRecursively, {L"scope"}, LazySymbolList(ParsingScopeFinder::*)(ParsingScope*))
+			END_CLASS_MEMBER(ParsingScopeFinder)
 #undef _
 		}
 	}
@@ -6271,8 +6318,7 @@ namespace vl
 					.Type(
 						Class(L"PrimitiveTypeObj", Type(L"TypeObj"))
 							.Member(L"name", TokenType())
-								.Attribute(Attribute(L"SemanticColor").Argument(L"Type"))
-								.Attribute(Attribute(L"AutoCompleteType").Argument(L"Type"))
+								.Attribute(Attribute(L"Semantic").Argument(L"Type"))
 						)
 
 					.Type(
@@ -6283,8 +6329,7 @@ namespace vl
 						Class(L"SubTypeObj", Type(L"TypeObj"))
 							.Member(L"parentType", Type(L"TypeObj"))
 							.Member(L"name", TokenType())
-								.Attribute(Attribute(L"SemanticColor").Argument(L"Type"))
-								.Attribute(Attribute(L"AutoCompleteType").Argument(L"SubType"))
+								.Attribute(Attribute(L"Semantic").Argument(L"Type"))
 						)
 
 					.Type(
@@ -6330,14 +6375,13 @@ namespace vl
 					.Type(
 						Class(L"PrimitiveGrammarDef", Type(L"GrammarDef"))
 							.Member(L"name", TokenType())
-								.Attribute(Attribute(L"SemanticColor").Argument(L"Grammar"))
-								.Attribute(Attribute(L"AutoCompleteType").Argument(L"Grammar"))
+								.Attribute(Attribute(L"Semantic").Argument(L"Token").Argument(L"Rule"))
 						)
 
 					.Type(
 						Class(L"TextGrammarDef", Type(L"GrammarDef"))
 							.Member(L"text", TokenType())
-								.Attribute(Attribute(L"AutoCompleteType").Argument(L"Text"))
+								.Attribute(Attribute(L"Semantic").Argument(L"Literal"))
 						)
 
 					.Type(
@@ -6372,7 +6416,7 @@ namespace vl
 						Class(L"AssignGrammarDef", Type(L"GrammarDef"))
 							.Member(L"grammar", Type(L"GrammarDef"))
 							.Member(L"memberName", TokenType())
-								.Attribute(Attribute(L"AutoCompleteType").Argument(L"Field"))
+								.Attribute(Attribute(L"Semantic").Argument(L"Field"))
 						)
 
 					.Type(
@@ -6384,9 +6428,9 @@ namespace vl
 						Class(L"SetterGrammarDef", Type(L"GrammarDef"))
 							.Member(L"grammar", Type(L"GrammarDef"))
 							.Member(L"memberName", TokenType())
-								.Attribute(Attribute(L"AutoCompleteType").Argument(L"EnumField"))
+								.Attribute(Attribute(L"Semantic").Argument(L"Field"))
 							.Member(L"value", TokenType())
-								.Attribute(Attribute(L"AutoCompleteType").Argument(L"EnumValue"))
+								.Attribute(Attribute(L"Semantic").Argument(L"EnumValue"))
 						)
 					//-------------------------------------
 					.Type(
@@ -6417,35 +6461,35 @@ namespace vl
 					//-------------------------------------
 					.TokenAtt(L"CLASS",		L"class")
 						.Attribute(Attribute(L"Color").Argument(L"Keyword"))
-						.Attribute(Attribute(L"AutoCompleteCandidate"))
+						.Attribute(Attribute(L"Candidate"))
 						.EndToken()
 					.TokenAtt(L"AMBIGUOUS",	L"ambiguous")
 						.Attribute(Attribute(L"Color").Argument(L"Keyword"))
-						.Attribute(Attribute(L"AutoCompleteCandidate"))
+						.Attribute(Attribute(L"Candidate"))
 						.EndToken()
 					.TokenAtt(L"ENUM",			L"enum")
 						.Attribute(Attribute(L"Color").Argument(L"Keyword"))
-						.Attribute(Attribute(L"AutoCompleteCandidate"))
+						.Attribute(Attribute(L"Candidate"))
 						.EndToken()
 					.TokenAtt(L"TOKEN",		L"token")
 						.Attribute(Attribute(L"Color").Argument(L"Keyword"))
-						.Attribute(Attribute(L"AutoCompleteCandidate"))
+						.Attribute(Attribute(L"Candidate"))
 						.EndToken()
 					.TokenAtt(L"DISCARDTOKEN",	L"discardtoken")
 						.Attribute(Attribute(L"Color").Argument(L"Keyword"))
-						.Attribute(Attribute(L"AutoCompleteCandidate"))
+						.Attribute(Attribute(L"Candidate"))
 						.EndToken()
 					.TokenAtt(L"RULE",			L"rule")
 						.Attribute(Attribute(L"Color").Argument(L"Keyword"))
-						.Attribute(Attribute(L"AutoCompleteCandidate"))
+						.Attribute(Attribute(L"Candidate"))
 						.EndToken()
 					.TokenAtt(L"AS",			L"as")
 						.Attribute(Attribute(L"Color").Argument(L"Keyword"))
-						.Attribute(Attribute(L"AutoCompleteCandidate"))
+						.Attribute(Attribute(L"Candidate"))
 						.EndToken()
 					.TokenAtt(L"WITH",			L"with")
 						.Attribute(Attribute(L"Color").Argument(L"Keyword"))
-						.Attribute(Attribute(L"AutoCompleteCandidate"))
+						.Attribute(Attribute(L"Candidate"))
 						.EndToken()
 
 					.Token(L"OPEN",			L"/{")
@@ -6466,12 +6510,13 @@ namespace vl
 						.EndToken()
 
 					.TokenAtt(L"NAME",			L"[a-zA-Z_]/w*")
-						.Attribute(Attribute(L"ContextColor").Argument(L"Default"))
-						.Attribute(Attribute(L"AutoCompleteToken"))
+						.Attribute(Attribute(L"Color").Argument(L"Default"))
+						.Attribute(Attribute(L"ContextColor"))
+						.Attribute(Attribute(L"AutoComplete"))
 						.EndToken()
 					.TokenAtt(L"STRING",		L"\"([^\"]|\"\")*\"")
 						.Attribute(Attribute(L"Color").Argument(L"String"))
-						.Attribute(Attribute(L"AutoCompleteToken"))
+						.Attribute(Attribute(L"AutoComplete"))
 						.EndToken()
 					.Discard(L"SPACE",		L"/s+")
 					//-------------------------------------
@@ -6989,6 +7034,18 @@ namespace vl
 					}
 				}
 				writer.WriteChar(L'\"');
+			}
+
+			WString SerializeString(const WString& value)
+			{
+				MemoryStream stream;
+				{
+					StreamWriter writer(stream);
+					LogString(value, writer);
+				}
+				stream.SeekFromBegin(0);
+				StreamReader reader(stream);
+				return reader.ReadToEnd();
 			}
 
 			void LogAttributeList(ParsingDefinitionBase* definition, TextWriter& writer)
@@ -8300,6 +8357,11 @@ ParsingState
 				return walker->GetTableTokenIndex()==ParsingTable::TokenFinish
 					?tokens.Count()
 					:walker->GetTokenIndexInStream();
+			}
+
+			vint ParsingState::GetCurrentTableTokenIndex()
+			{
+				return walker->GetTableTokenIndex();
 			}
 
 			const collections::List<vint>& ParsingState::GetStateStack()
@@ -10110,34 +10172,23 @@ ParsingScope
 				:symbols.GetByIndex(index);
 		}
 
-		const ParsingScope::SymbolList& ParsingScope::GetSymbolsRecursively(const WString& name)
-		{
-			ParsingScope* scope=this;
-			while(scope)
-			{
-				const SymbolList& symbols=scope->GetSymbols(name);
-				if(symbols.Count()>0) return symbols;
-
-				if(scope->ownerSymbol)
-				{
-					scope=scope->ownerSymbol->GetParentScope();
-				}
-				else
-				{
-					break;
-				}
-			}
-			return emptySymbolList;
-		}
-
 /***********************************************************************
 ParsingScopeSymbol
 ***********************************************************************/
 
-		ParsingScopeSymbol::ParsingScopeSymbol(const WString& _name)
+		WString ParsingScopeSymbol::GetDisplayInternal(vint semanticId)
+		{
+			return name;
+		}
+
+		ParsingScopeSymbol::ParsingScopeSymbol(const WString& _name, vint _semanticId)
 			:parentScope(0)
 			,name(_name)
 		{
+			if(_semanticId!=-1)
+			{
+				semanticIds.Add(_semanticId);
+			}
 		}
 
 		ParsingScopeSymbol::~ParsingScopeSymbol()
@@ -10154,12 +10205,24 @@ ParsingScopeSymbol
 			return name;
 		}
 
-		ParsingTreeObject* ParsingScopeSymbol::GetNode()
+		const collections::List<vint>& ParsingScopeSymbol::GetSemanticIds()
+		{
+			return semanticIds;
+		}
+
+		bool ParsingScopeSymbol::AddSemanticId(vint semanticId)
+		{
+			if(semanticId==-1 || semanticIds.Contains(semanticId)) return false;
+			semanticIds.Add(semanticId);
+			return true;
+		}
+
+		Ptr<ParsingTreeObject> ParsingScopeSymbol::GetNode()
 		{
 			return node;
 		}
 
-		void ParsingScopeSymbol::SetNode(ParsingTreeObject* value)
+		void ParsingScopeSymbol::SetNode(Ptr<ParsingTreeObject> value)
 		{
 			node=value;
 		}
@@ -10183,22 +10246,147 @@ ParsingScopeSymbol
 			return scope.Obj();
 		}
 
+		WString ParsingScopeSymbol::GetDisplay(vint semanticId)
+		{
+			return semanticIds.Contains(semanticId)?GetDisplayInternal(semanticId):L"";
+		}
+
 /***********************************************************************
-ParsingScopeRoot
+ParsingScopeFinder::DirectSymbolMapper
 ***********************************************************************/
 
-		void ParsingScopeRoot::InitializeQueryCacheInternal(ParsingScopeSymbol* symbol)
+		ParsingScopeFinder::DirectSymbolMapper::DirectSymbolMapper()
 		{
-			if(symbol->GetNode())
+		}
+
+		ParsingScopeFinder::DirectSymbolMapper::~DirectSymbolMapper()
+		{
+		}
+
+		ParsingTreeNode* ParsingScopeFinder::DirectSymbolMapper::ParentNode(ParsingTreeNode* node)
+		{
+			return node->GetParent();
+		}
+
+		ParsingTreeNode* ParsingScopeFinder::DirectSymbolMapper::Node(ParsingTreeNode* node)
+		{
+			return node;
+		}
+
+		ParsingScope* ParsingScopeFinder::DirectSymbolMapper::ParentScope(ParsingScopeSymbol* symbol)
+		{
+			return symbol->GetParentScope();
+		}
+
+		ParsingScopeSymbol* ParsingScopeFinder::DirectSymbolMapper::Symbol(ParsingScopeSymbol* symbol)
+		{
+			return symbol;
+		}
+
+/***********************************************************************
+ParsingScopeFinder::IndirectSymbolMapper
+***********************************************************************/
+
+		ParsingScopeFinder::IndirectSymbolMapper::IndirectSymbolMapper(ParsingScopeSymbol* _originalSymbol, ParsingScopeSymbol* _replacedSymbol, ParsingTreeNode* _originalNode, ParsingTreeNode* _replacedNode)
+			:originalSymbol(_originalSymbol)
+			,replacedSymbol(_replacedSymbol)
+			,originalNode(_originalNode)
+			,replacedNode(_replacedNode)
+		{
+		}
+
+		ParsingScopeFinder::IndirectSymbolMapper::~IndirectSymbolMapper()
+		{
+		}
+
+		ParsingTreeNode* ParsingScopeFinder::IndirectSymbolMapper::ParentNode(ParsingTreeNode* node)
+		{
+			return (node==replacedNode?originalNode:node)->GetParent();
+		}
+
+		ParsingTreeNode* ParsingScopeFinder::IndirectSymbolMapper::Node(ParsingTreeNode* node)
+		{
+			return node==originalNode?replacedNode:node;
+		}
+
+		ParsingScope* ParsingScopeFinder::IndirectSymbolMapper::ParentScope(ParsingScopeSymbol* symbol)
+		{
+			return (symbol==replacedSymbol?originalSymbol:symbol)->GetParentScope();
+		}
+
+		ParsingScopeSymbol* ParsingScopeFinder::IndirectSymbolMapper::Symbol(ParsingScopeSymbol* symbol)
+		{
+			return symbol==originalSymbol?replacedSymbol:symbol;
+		}
+
+/***********************************************************************
+ParsingScopeFinder::Traversal Functions
+***********************************************************************/
+
+		ParsingTreeNode* ParsingScopeFinder::ParentNode(ParsingTreeNode* node)
+		{
+			return symbolMapper->ParentNode(node);
+		}
+
+		ParsingTreeNode* ParsingScopeFinder::ParentNode(Ptr<ParsingTreeNode> node)
+		{
+			return symbolMapper->ParentNode(node.Obj());
+		}
+
+		ParsingTreeNode* ParsingScopeFinder::Node(ParsingTreeNode* node)
+		{
+			return symbolMapper->Node(node);
+		}
+
+		Ptr<ParsingTreeNode> ParsingScopeFinder::Node(Ptr<ParsingTreeNode> node)
+		{
+			return symbolMapper->Node(node.Obj());
+		}
+
+		ParsingScope* ParsingScopeFinder::ParentScope(ParsingScopeSymbol* symbol)
+		{
+			return symbolMapper->ParentScope(symbol);
+		}
+
+		ParsingScope* ParsingScopeFinder::ParentScope(Ptr<ParsingScopeSymbol> symbol)
+		{
+			return symbolMapper->ParentScope(symbol.Obj());
+		}
+
+		ParsingScopeSymbol* ParsingScopeFinder::Symbol(ParsingScopeSymbol* symbol)
+		{
+			return symbolMapper->Symbol(symbol);
+		}
+
+		Ptr<ParsingScopeSymbol> ParsingScopeFinder::Symbol(Ptr<ParsingScopeSymbol> symbol)
+		{
+			return symbolMapper->Symbol(symbol.Obj());
+		}
+
+		ParsingScopeFinder::LazySymbolList ParsingScopeFinder::Symbols(const ParsingScope::SymbolList& symbols)
+		{
+			return From(symbols).Select([this](Ptr<ParsingScopeSymbol> symbol)
 			{
-				nodeSymbols.Add(symbol->GetNode(), symbol);
+				return Symbol(symbol);
+			});
+		}
+
+/***********************************************************************
+ParsingScopeFinder
+***********************************************************************/
+
+		void ParsingScopeFinder::InitializeQueryCacheInternal(ParsingScopeSymbol* symbol)
+		{
+			if(ParsingTreeObject* obj=Obj(symbol->GetNode().Obj()))
+			{
+				nodeSymbols.Add(obj, symbol);
 			}
 			if(symbol->GetScope())
 			{
 				ParsingScope* scope=symbol->GetScope();
 				FOREACH(WString, name, scope->GetSymbolNames())
 				{
-					FOREACH(Ptr<ParsingScopeSymbol>, subSymbol, scope->GetSymbols(name))
+					FOREACH(Ptr<ParsingScopeSymbol>, subSymbol, Symbols(scope->GetSymbols(name)))
 					{
 						InitializeQueryCacheInternal(subSymbol.Obj());
 					}
@@ -10206,33 +10394,40 @@ ParsingScopeRoot
 			}
 		}
 
-		ParsingScopeRoot::ParsingScopeRoot()
-			:ParsingScopeSymbol(L"")
+		ParsingScopeFinder::ParsingScopeFinder( Ptr<SymbolMapper> _symbolMapper)
+			:symbolMapper(_symbolMapper)
+			,previousFinder(0)
 		{
 		}
 
-		ParsingScopeRoot::~ParsingScopeRoot()
+		ParsingScopeFinder::~ParsingScopeFinder()
 		{
 		}
 
-		void ParsingScopeRoot::InitializeQueryCache()
+		void ParsingScopeFinder::InitializeQueryCache(ParsingScopeSymbol* symbol, ParsingScopeFinder* _previousFinder)
 		{
-			ClearQueryCache();
-			InitializeQueryCacheInternal(this);
+			previousFinder=_previousFinder;
+			InitializeQueryCacheInternal(symbol);
 		}
 
-		void ParsingScopeRoot::ClearQueryCache()
-		{
-			nodeSymbols.Clear();
-		}
-
-		ParsingScopeSymbol* ParsingScopeRoot::GetSymbolFromNode(ParsingTreeObject* node)
+		ParsingScopeSymbol* ParsingScopeFinder::GetSymbolFromNode(ParsingTreeObject* node)
 		{
 			vint index=nodeSymbols.Keys().IndexOf(node);
-			return index==-1?0:nodeSymbols.Values()[index];
+			if(index!=-1)
+			{
+				return nodeSymbols.Values()[index];
+			}
+			else if(previousFinder)
+			{
+				return previousFinder->GetSymbolFromNode(node);
+			}
+			else
+			{
+				return 0;
+			}
 		}
 
-		ParsingScope* ParsingScopeRoot::GetScopeFromNode(ParsingTreeNode* node)
+		ParsingScope* ParsingScopeFinder::GetScopeFromNode(ParsingTreeNode* node)
 		{
 			while(node)
 			{
@@ -10245,9 +10440,79 @@ ParsingScopeRoot
 						return symbol->GetScope();
 					}
 				}
-				node=node->GetParent();
+				node=ParentNode(node);
 			}
-			return 0;
+			if(previousFinder)
+			{
+				return previousFinder->GetScopeFromNode(node);
+			}
+			else
+			{
+				return 0;
+			}
+		}
+
+		ParsingScopeFinder::LazySymbolList ParsingScopeFinder::GetSymbols(ParsingScope* scope, const WString& name)
+		{
+			if(!scope) return LazySymbolList();
+			return Symbols(scope->GetSymbols(name));
+		}
+
+		ParsingScopeFinder::LazySymbolList ParsingScopeFinder::GetSymbols(ParsingScope* scope)
+		{
+			if(!scope) return LazySymbolList();
+			return From(scope->GetSymbolNames())
+				.SelectMany([=](const WString& name)
+				{
+					return Symbols(scope->GetSymbols(name));
+				});
+		}
+
+		ParsingScopeFinder::LazySymbolList ParsingScopeFinder::GetSymbolsRecursively(ParsingScope* scope, const WString& name)
+		{
+			if(!scope) return LazySymbolList();
+			while(scope)
+			{
+				const ParsingScope::SymbolList& symbols=scope->GetSymbols(name);
+				if(symbols.Count()>0) return Symbols(symbols);
+
+				if(scope->ownerSymbol)
+				{
+					scope=ParentScope(scope->ownerSymbol);
+				}
+				else
+				{
+					break;
+				}
+			}
+			if(previousFinder)
+			{
+				return previousFinder->GetSymbols(scope, name);
+			}
+			else
+			{
+				return ParsingScope::emptySymbolList;
+			}
+		}
+
+		ParsingScopeFinder::LazySymbolList ParsingScopeFinder::GetSymbolsRecursively(ParsingScope* scope)
+		{
+			if(!scope) return LazySymbolList();
+			LazySymbolList result;
+			while(scope)
+			{
+				result=result.Concat(GetSymbols(scope));
+
+				if(scope->ownerSymbol)
+				{
+					scope=ParentScope(scope->ownerSymbol);
+				}
+				else
+				{
+					break;
+				}
+			}
+			return result;
 		}
 	}
 }
@@ -11198,6 +11463,29 @@ description::Value
 			{
 			}
 
+			vint Value::Compare(const Value& a, const Value& b)const
+			{
+				ValueType va=a.valueType;
+				ValueType vb=b.valueType;
+				if(va==vb)
+				{
+					switch(va)
+					{
+					case Text:
+						return WString::Compare(a.text, b.text);
+					case RawPtr:
+					case SharedPtr:
+						return (vint)a.rawPtr-(vint)b.rawPtr;
+					default:
+						return 0;
+					}
+				}
+				else
+				{
+					return (vint)va-(vint)vb;
+				}
+			}
+
 			Value::Value()
 				:valueType(Null)
 				,rawPtr(0)
@@ -11222,26 +11510,6 @@ description::Value
 				text=value.text;
 				typeDescriptor=value.typeDescriptor;
 				return *this;
-			}
-
-			bool Value::operator==(const Value& value)const
-			{
-				switch(valueType)
-				{
-				case Null:
-					return value.IsNull();
-				case Text:
-					return GetTypeDescriptor()==value.GetTypeDescriptor() && GetText()==value.GetText();
-				case RawPtr:
-				case SharedPtr:
-					return GetRawPtr()==value.GetRawPtr();
-				}
-				return false;
-			}
-
-			bool Value::operator!=(const Value& value)const
-			{
-				return !(*this==value);
 			}
 
 			Value::ValueType Value::GetValueType()const
@@ -11965,6 +12233,16 @@ LogTypeManager
 			}
 
 /***********************************************************************
+IValueEnumerable
+***********************************************************************/
+
+			Ptr<IValueEnumerable> IValueEnumerable::Create(collections::LazyList<Value> values)
+			{
+				Ptr<IEnumerable<Value>> enumerable=new LazyList<Value>(values);
+				return new ValueEnumerableWrapper<Ptr<IEnumerable<Value>>>(enumerable);
+			}
+
+/***********************************************************************
 IValueList
 ***********************************************************************/
 
@@ -11986,6 +12264,30 @@ IValueList
 				Ptr<List<Value>> list=new List<Value>;
 				CopyFrom(*list.Obj(), values);
 				return new ValueListWrapper<Ptr<List<Value>>>(list);
+			}
+
+/***********************************************************************
+IValueDictionary
+***********************************************************************/
+
+			Ptr<IValueDictionary> IValueDictionary::Create()
+			{
+				Ptr<Dictionary<Value, Value>> dictionary=new Dictionary<Value, Value>;
+				return new ValueDictionaryWrapper<Ptr<Dictionary<Value, Value>>>(dictionary);
+			}
+
+			Ptr<IValueDictionary> IValueDictionary::Create(Ptr<IValueReadonlyDictionary> values)
+			{
+				Ptr<Dictionary<Value, Value>> dictionary=new Dictionary<Value, Value>;
+				CopyFrom(*dictionary.Obj(), values->GetLazyList<Value, Value>());
+				return new ValueDictionaryWrapper<Ptr<Dictionary<Value, Value>>>(dictionary);
+			}
+
+			Ptr<IValueDictionary> IValueDictionary::Create(collections::LazyList<collections::Pair<Value, Value>> values)
+			{
+				Ptr<Dictionary<Value, Value>> dictionary=new Dictionary<Value, Value>;
+				CopyFrom(*dictionary.Obj(), values);
+				return new ValueDictionaryWrapper<Ptr<Dictionary<Value, Value>>>(dictionary);
 			}
 		}
 	}
@@ -12447,6 +12749,27 @@ EventInfoImpl
 				else
 				{
 					return 0;
+				}
+			}
+
+			void EventInfoImpl::Invoke(const Value& thisObject, Value& arguments)
+			{
+				if(thisObject.IsNull())
+				{
+					throw ArgumentNullException(L"thisObject");
+				}
+				else if(!thisObject.CanConvertTo(ownerTypeDescriptor, Value::RawPtr))
+				{
+					throw ArgumentTypeMismtatchException(L"thisObject", ownerTypeDescriptor, Value::RawPtr, thisObject);
+				}
+				DescriptableObject* rawThisObject=thisObject.GetRawPtr();
+				if(rawThisObject)
+				{
+					InvokeInternal(rawThisObject, arguments);
+				}
+				else
+				{
+					return;
 				}
 			}
 
@@ -13093,6 +13416,7 @@ TypeName
 			const wchar_t* TypeInfo<WString>::TypeName					= L"system::String";
 			const wchar_t* TypeInfo<DateTime>::TypeName					= L"system::DateTime";
 			const wchar_t* TypeInfo<Locale>::TypeName					= L"system::Locale";
+
 			const wchar_t* TypeInfo<IValueEnumerator>::TypeName			= L"system::Enumerator";
 			const wchar_t* TypeInfo<IValueEnumerable>::TypeName			= L"system::Enumerable";
 			const wchar_t* TypeInfo<IValueReadonlyList>::TypeName		= L"system::ReadableList";
@@ -13101,6 +13425,18 @@ TypeName
 			const wchar_t* TypeInfo<IValueDictionary>::TypeName			= L"system::Dictionary";
 			const wchar_t* TypeInfo<IValueInterfaceProxy>::TypeName		= L"system::InterfaceProxy";
 			const wchar_t* TypeInfo<IValueFunctionProxy>::TypeName		= L"system::Function";
+
+			const wchar_t* TypeInfo<IValueSerializer>::TypeName			= L"system::reflection::ValueSerializer";
+			const wchar_t* TypeInfo<ITypeInfo>::TypeName				= L"system::reflection::TypeInfo";
+			const wchar_t* TypeInfo<ITypeInfo::Decorator>::TypeName		= L"system::reflection::TypeInfo::Decorator";
+			const wchar_t* TypeInfo<IMemberInfo>::TypeName				= L"system::reflection::MemberInfo";
+			const wchar_t* TypeInfo<IEventHandler>::TypeName			= L"system::reflection::EventHandler";
+			const wchar_t* TypeInfo<IEventInfo>::TypeName				= L"system::reflection::EventInfo";
+			const wchar_t* TypeInfo<IPropertyInfo>::TypeName			= L"system::reflection::PropertyInfo";
+			const wchar_t* TypeInfo<IParameterInfo>::TypeName			= L"system::reflection::ParameterInfo";
+			const wchar_t* TypeInfo<IMethodInfo>::TypeName				= L"system::reflection::MethodInfo";
+			const wchar_t* TypeInfo<IMethodGroupInfo>::TypeName			= L"system::reflection::MethodGroupInfo";
+			const wchar_t* TypeInfo<ITypeDescriptor>::TypeName			= L"system::reflection::TypeDescriptor";
 
 /***********************************************************************
 TypedValueSerializerProvider
@@ -13388,6 +13724,43 @@ LocaleValueSerializer
 			};
 
 /***********************************************************************
+Helper Functions
+***********************************************************************/
+
+			vint ITypeDescriptor_GetTypeDescriptorCount()
+			{
+				return GetGlobalTypeManager()->GetTypeDescriptorCount();
+			}
+
+			ITypeDescriptor* ITypeDescriptor_GetTypeDescriptor(vint index)
+			{
+				return GetGlobalTypeManager()->GetTypeDescriptor(index);
+			}
+
+			ITypeDescriptor* ITypeDescriptor_GetTypeDescriptor(const WString& name)
+			{
+				return GetGlobalTypeManager()->GetTypeDescriptor(name);
+			}
+
+			ITypeDescriptor* ITypeDescriptor_GetTypeDescriptor(const Value& value)
+			{
+				return value.GetTypeDescriptor();
+			}
+
+			Value IValueSerializer_Parse(IValueSerializer* serializer, const WString& input)
+			{
+				Value value;
+				if(serializer->Parse(input, value))
+				{
+					return value;
+				}
+				else
+				{
+					return Value();
+				}
+			}
+
+/***********************************************************************
 Collections
 ***********************************************************************/
 
@@ -13442,6 +13815,8 @@ Collections
 
 			BEGIN_CLASS_MEMBER(IValueDictionary)
 				CLASS_MEMBER_BASE(IValueReadonlyDictionary)
+				CLASS_MEMBER_EXTERNALCTOR(Ptr<IValueDictionary>(), NO_PARAMETER, (Ptr<IValueDictionary>(*)())&IValueDictionary::Create)
+				CLASS_MEMBER_EXTERNALCTOR(Ptr<IValueDictionary>(Ptr<IValueReadonlyDictionary>), {L"values"}, (Ptr<IValueDictionary>(*)(Ptr<IValueReadonlyDictionary>))&IValueDictionary::Create)
 				CLASS_MEMBER_METHOD(Set, {L"key" _ L"value"})
 				CLASS_MEMBER_METHOD(Remove, {L"key"})
 				CLASS_MEMBER_METHOD(Clear, NO_PARAMETER)
@@ -13457,6 +13832,144 @@ Collections
 				CLASS_MEMBER_METHOD(Invoke, {L"arguments"})
 			END_CLASS_MEMBER(IValueFunctionProxy)
 
+			BEGIN_CLASS_MEMBER(IValueSerializer)
+				CLASS_MEMBER_BASE(IDescriptable)
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(OwnerTypeDescriptor)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(CandidateCount)
+
+				CLASS_MEMBER_METHOD(Validate, {L"text"})
+				CLASS_MEMBER_EXTERNALMETHOD(Parse, {L"input"}, Value(IValueSerializer::*)(const WString&), &IValueSerializer_Parse)
+				CLASS_MEMBER_METHOD(HasCandidate, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(GetCandidate, {L"index"})
+				CLASS_MEMBER_METHOD(CanMergeCandidate, NO_PARAMETER)
+			END_CLASS_MEMBER(IValueSerializer)
+
+			BEGIN_CLASS_MEMBER(ITypeInfo)
+				CLASS_MEMBER_BASE(IDescriptable)
+				
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Decorator)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ElementType)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(TypeDescriptor)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(GenericArgumentCount)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(TypeFriendlyName)
+				
+				CLASS_MEMBER_METHOD(GetGenericArgument, {L"index"})
+			END_CLASS_MEMBER(ITypeInfo)
+
+			BEGIN_ENUM_ITEM(ITypeInfo::Decorator)
+				ENUM_ITEM_NAMESPACE(ITypeInfo)
+
+				ENUM_NAMESPACE_ITEM(RawPtr)
+				ENUM_NAMESPACE_ITEM(SharedPtr)
+				ENUM_NAMESPACE_ITEM(TypeDescriptor)
+				ENUM_NAMESPACE_ITEM(Generic)
+			END_ENUM_ITEM(ITypeInfo::Decorator)
+
+			BEGIN_CLASS_MEMBER(IMemberInfo)
+				CLASS_MEMBER_BASE(IDescriptable)
+				
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(OwnerTypeDescriptor)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Name)
+			END_CLASS_MEMBER(IMemberInfo)
+
+			BEGIN_CLASS_MEMBER(IEventHandler)
+				CLASS_MEMBER_BASE(IDescriptable)
+				
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(OwnerEvent)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(OwnerObject)
+				
+				CLASS_MEMBER_METHOD(IsAttached, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(Detach, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(Invoke, {L"thisObject" _ L"arguments"})
+			END_CLASS_MEMBER(IEventHandler)
+
+			BEGIN_CLASS_MEMBER(IEventInfo)
+				CLASS_MEMBER_BASE(IMemberInfo)
+				
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(HandlerType)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ObservingPropertyCount)
+				
+				CLASS_MEMBER_METHOD(GetObservingProperty, {L"index"})
+				CLASS_MEMBER_METHOD(Attach, {L"thisObject" _ L"handler"})
+				CLASS_MEMBER_METHOD(Invoke, {L"thisObject" _ L"arguments"})
+			END_CLASS_MEMBER(IEventInfo)
+
+			BEGIN_CLASS_MEMBER(IPropertyInfo)
+				CLASS_MEMBER_BASE(IMemberInfo)
+				
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Return)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Getter)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Setter)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ValueChangedEvent)
+				
+				CLASS_MEMBER_METHOD(IsReadable, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(IsWritable, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(GetValue, {L"thisObject"})
+				CLASS_MEMBER_METHOD(SetValue, {L"thisObject" _ L"newValue"})
+			END_CLASS_MEMBER(IPropertyInfo)
+
+			BEGIN_CLASS_MEMBER(IParameterInfo)
+				CLASS_MEMBER_BASE(IMemberInfo)
+				
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Type)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(OwnerMethod)
+			END_CLASS_MEMBER(IParameterInfo)
+
+			BEGIN_CLASS_MEMBER(IMethodInfo)
+				CLASS_MEMBER_BASE(IMemberInfo)
+			
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(OwnerMethodGroup)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(OwnerProperty)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ParameterCount)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Return)
+				
+				CLASS_MEMBER_METHOD(GetParameter, {L"index"})
+				CLASS_MEMBER_METHOD(IsStatic, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(CheckArguments, {L"arguments"})
+				CLASS_MEMBER_METHOD(Invoke, {L"thisObject" _ L"arguments"})
+				CLASS_MEMBER_BASE(IMemberInfo)
+			END_CLASS_MEMBER(IMethodInfo)
+
+			BEGIN_CLASS_MEMBER(IMethodGroupInfo)
+				CLASS_MEMBER_BASE(IMemberInfo)
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(MethodCount)
+				
+				CLASS_MEMBER_METHOD(GetMethod, {L"index"})
+			END_CLASS_MEMBER(IMethodGroupInfo)
+
+			BEGIN_CLASS_MEMBER(ITypeDescriptor)
+				CLASS_MEMBER_BASE(IDescriptable)
+				
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(TypeName)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ValueSerializer)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(BaseTypeDescriptorCount)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(PropertyCount)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(EventCount)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(MethodGroupCount)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ConstructorGroup)
+				
+				CLASS_MEMBER_METHOD(GetBaseTypeDescriptor, {L"index"})
+				CLASS_MEMBER_METHOD(CanConvertTo, {L"targetType"})
+				CLASS_MEMBER_METHOD(GetProperty, {L"index"})
+				CLASS_MEMBER_METHOD(IsPropertyExists, {L"name" _ L"inheritable"})
+				CLASS_MEMBER_METHOD(GetPropertyByName, {L"name" _ L"inheritable"})
+				CLASS_MEMBER_METHOD(GetProperty, {L"index"})
+				CLASS_MEMBER_METHOD(IsPropertyExists, {L"name" _ L"inheritable"})
+				CLASS_MEMBER_METHOD(GetPropertyByName, {L"name" _ L"inheritable"})
+				CLASS_MEMBER_METHOD(GetEvent, {L"index"})
+				CLASS_MEMBER_METHOD(IsEventExists, {L"name" _ L"inheritable"})
+				CLASS_MEMBER_METHOD(GetEventByName, {L"name" _ L"inheritable"})
+				CLASS_MEMBER_METHOD(GetMethodGroup, {L"index"})
+				CLASS_MEMBER_METHOD(IsMethodGroupExists, {L"name" _ L"inheritable"})
+				CLASS_MEMBER_METHOD(GetMethodGroupByName, {L"name" _ L"inheritable"})
+
+				CLASS_MEMBER_STATIC_EXTERNALMETHOD(GetTypeDescriptorCount, NO_PARAMETER, vint(*)(), &ITypeDescriptor_GetTypeDescriptorCount)
+				CLASS_MEMBER_STATIC_EXTERNALMETHOD(GetTypeDescriptor, {L"index"}, ITypeDescriptor*(*)(vint), &ITypeDescriptor_GetTypeDescriptor)
+				CLASS_MEMBER_STATIC_EXTERNALMETHOD(GetTypeDescriptor, {L"name"}, ITypeDescriptor*(*)(const WString&), &ITypeDescriptor_GetTypeDescriptor)
+				CLASS_MEMBER_STATIC_EXTERNALMETHOD(GetTypeDescriptor, {L"value"}, ITypeDescriptor*(*)(const Value&), &ITypeDescriptor_GetTypeDescriptor)
+			END_CLASS_MEMBER(ITypeDescriptor)
 #undef _
 
 /***********************************************************************
@@ -13492,6 +14005,7 @@ LoadPredefinedTypes
 					AddSerializableType<LocaleValueSerializer>(manager);
 					ADD_TYPE_INFO(VoidValue)
 					ADD_TYPE_INFO(IDescriptable)
+
 					ADD_TYPE_INFO(IValueEnumerator)
 					ADD_TYPE_INFO(IValueEnumerable)
 					ADD_TYPE_INFO(IValueReadonlyList)
@@ -13500,6 +14014,18 @@ LoadPredefinedTypes
 					ADD_TYPE_INFO(IValueDictionary)
 					ADD_TYPE_INFO(IValueInterfaceProxy)
 					ADD_TYPE_INFO(IValueFunctionProxy)
+
+					ADD_TYPE_INFO(IValueSerializer)
+					ADD_TYPE_INFO(ITypeInfo)
+					ADD_TYPE_INFO(ITypeInfo::Decorator)
+					ADD_TYPE_INFO(IMemberInfo)
+					ADD_TYPE_INFO(IEventHandler)
+					ADD_TYPE_INFO(IEventInfo)
+					ADD_TYPE_INFO(IPropertyInfo)
+					ADD_TYPE_INFO(IParameterInfo)
+					ADD_TYPE_INFO(IMethodInfo)
+					ADD_TYPE_INFO(IMethodGroupInfo)
+					ADD_TYPE_INFO(ITypeDescriptor)
 				}
 
 				void Unload(ITypeManager* manager)override

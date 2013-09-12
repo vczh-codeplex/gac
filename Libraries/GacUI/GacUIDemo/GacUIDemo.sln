@@ -74,9 +74,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Editor.Colorizer.Json", "Ed
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Editor.Colorizer.Grammar", "Editor.Colorizer.Grammar\Editor.Colorizer.Grammar.vcxproj", "{728C31C9-EBEC-4C01-8658-DC1BA60BE40F}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Editor.AutoComplete.Grammar", "Editor.AutoComplete.Grammar\Editor.AutoComplete.Grammar.vcxproj", "{35F9BA10-1A66-4120-8E0E-749979249C8D}"
+EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 31
+		SccNumberOfProjects = 32
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = https://tfs.codeplex.com/tfs/tfs02
 		SccLocalPath0 = .
@@ -198,6 +200,10 @@ Global
 		SccProjectTopLevelParentUniqueName30 = GacUIDemo.sln
 		SccProjectName30 = Editor.Colorizer.Grammar
 		SccLocalPath30 = Editor.Colorizer.Grammar
+		SccProjectUniqueName31 = Editor.AutoComplete.Grammar\\Editor.AutoComplete.Grammar.vcxproj
+		SccProjectTopLevelParentUniqueName31 = GacUIDemo.sln
+		SccProjectName31 = Editor.AutoComplete.Grammar
+		SccLocalPath31 = Editor.AutoComplete.Grammar
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -324,6 +330,10 @@ Global
 		{728C31C9-EBEC-4C01-8658-DC1BA60BE40F}.Debug|Win32.Build.0 = Debug|Win32
 		{728C31C9-EBEC-4C01-8658-DC1BA60BE40F}.Release|Win32.ActiveCfg = Release|Win32
 		{728C31C9-EBEC-4C01-8658-DC1BA60BE40F}.Release|Win32.Build.0 = Release|Win32
+		{35F9BA10-1A66-4120-8E0E-749979249C8D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{35F9BA10-1A66-4120-8E0E-749979249C8D}.Debug|Win32.Build.0 = Debug|Win32
+		{35F9BA10-1A66-4120-8E0E-749979249C8D}.Release|Win32.ActiveCfg = Release|Win32
+		{35F9BA10-1A66-4120-8E0E-749979249C8D}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -357,5 +367,6 @@ Global
 		{D5B762A4-3BDB-4D7C-8EB4-533B2BAE6EB6} = {EBECB34C-801E-43D7-9FDF-EDE249CF053D}
 		{46F8C4C0-3B85-412F-B1A9-F9CD63AA9BB4} = {EBECB34C-801E-43D7-9FDF-EDE249CF053D}
 		{728C31C9-EBEC-4C01-8658-DC1BA60BE40F} = {EBECB34C-801E-43D7-9FDF-EDE249CF053D}
+		{35F9BA10-1A66-4120-8E0E-749979249C8D} = {EBECB34C-801E-43D7-9FDF-EDE249CF053D}
 	EndGlobalSection
 EndGlobal
