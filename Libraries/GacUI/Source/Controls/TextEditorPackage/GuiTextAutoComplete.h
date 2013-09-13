@@ -34,6 +34,16 @@ GuiTextBoxAutoCompleteBase
 				GuiPopup*											autoCompletePopup;
 				GuiTextList*										autoCompleteList;
 
+			public:
+				GuiTextBoxAutoCompleteBase();
+				~GuiTextBoxAutoCompleteBase();
+
+				void												Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, compositions::GuiGraphicsComposition* _ownerComposition, vuint editVersion)override;
+				void												Detach()override;
+				void												TextEditNotify(const TextEditNotifyStruct& arguments)override;
+				void												TextCaretChanged(const TextCaretChangedStruct& arguments)override;
+				void												TextEditFinished(vuint editVersion)override;
+
 				/// <summary>Get the list state.</summary>
 				/// <returns>Returns true if the list is visible.</returns>
 				bool												IsListOpening();
@@ -45,15 +55,6 @@ GuiTextBoxAutoCompleteBase
 				/// <summary>Set the content of the list.</summary>
 				/// <param name="list">The content of the list.</param>
 				void												SetListContent(const collections::SortedList<WString>& items);
-			public:
-				GuiTextBoxAutoCompleteBase();
-				~GuiTextBoxAutoCompleteBase();
-
-				void												Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, compositions::GuiGraphicsComposition* _ownerComposition, vuint editVersion)override;
-				void												Detach()override;
-				void												TextEditNotify(const TextEditNotifyStruct& arguments)override;
-				void												TextCaretChanged(const TextCaretChangedStruct& arguments)override;
-				void												TextEditFinished(vuint editVersion)override;
 			};
 
 /***********************************************************************

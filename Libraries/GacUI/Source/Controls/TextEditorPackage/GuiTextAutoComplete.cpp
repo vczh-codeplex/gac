@@ -20,58 +20,6 @@ namespace vl
 GuiTextBoxAutoCompleteBase
 ***********************************************************************/
 
-			bool GuiTextBoxAutoCompleteBase::IsListOpening()
-			{
-				return autoCompletePopup->GetOpening();
-			}
-
-			void GuiTextBoxAutoCompleteBase::OpenList(TextPos startPosition)
-			{
-				if(element && elementModifyLock)
-				{
-					Rect bounds=element->GetLines().GetRectFromTextPos(startPosition);
-					GuiControl* ownerControl=ownerComposition->GetRelatedControl();
-					Rect compositionBounds=ownerComposition->GetGlobalBounds();
-					Rect controlBounds=ownerControl->GetBoundsComposition()->GetGlobalBounds();
-					vint px=compositionBounds.x1-controlBounds.x1;
-					vint py=compositionBounds.y1-controlBounds.y1;
-					bounds.x1+=px;
-					bounds.x2+=px;
-					bounds.y1+=py+5;
-					bounds.y2+=py+5;
-					autoCompletePopup->ShowPopup(ownerControl, bounds, true);
-				}
-			}
-
-			void GuiTextBoxAutoCompleteBase::CloseList()
-			{
-				autoCompletePopup->Close();
-			}
-
-			void GuiTextBoxAutoCompleteBase::SetListContent(const collections::SortedList<WString>& items)
-			{
-				List<WString> sortedItems;
-				CopyFrom(
-					sortedItems,
-					From(items)
-						.OrderBy([](const WString& a, const WString& b)
-						{
-							return INVLOC.Compare(a, b, Locale::IgnoreCase);
-						})
-					);
-
-				autoCompleteList->GetItems().Clear();
-				CopyFrom(
-					autoCompleteList->GetItems(),
-					From(sortedItems)
-						.Select([](const WString& item)
-						{
-							return new list::TextItem(item);
-						})
-					);
-				autoCompleteList->GetBoundsComposition()->SetPreferredMinSize(Size(200, 200));
-			}
-
 			GuiTextBoxAutoCompleteBase::GuiTextBoxAutoCompleteBase()
 				:element(0)
 				,elementModifyLock(0)
@@ -126,6 +74,59 @@ GuiTextBoxAutoCompleteBase
 
 			void GuiTextBoxAutoCompleteBase::TextEditFinished(vuint editVersion)
 			{
+			}
+
+			bool GuiTextBoxAutoCompleteBase::IsListOpening()
+			{
+				return autoCompletePopup->GetOpening();
+			}
+
+			void GuiTextBoxAutoCompleteBase::OpenList(TextPos startPosition)
+			{
+				if(element && elementModifyLock)
+				{
+					Rect bounds=element->GetLines().GetRectFromTextPos(startPosition);
+					Point viewPosition=element->GetViewPosition();
+					GuiControl* ownerControl=ownerComposition->GetRelatedControl();
+					Rect compositionBounds=ownerComposition->GetGlobalBounds();
+					Rect controlBounds=ownerControl->GetBoundsComposition()->GetGlobalBounds();
+					vint px=compositionBounds.x1-controlBounds.x1-viewPosition.x;
+					vint py=compositionBounds.y1-controlBounds.y1-viewPosition.y;
+					bounds.x1+=px;
+					bounds.x2+=px;
+					bounds.y1+=py+5;
+					bounds.y2+=py+5;
+					autoCompletePopup->ShowPopup(ownerControl, bounds, true);
+				}
+			}
+
+			void GuiTextBoxAutoCompleteBase::CloseList()
+			{
+				autoCompletePopup->Close();
+			}
+
+			void GuiTextBoxAutoCompleteBase::SetListContent(const collections::SortedList<WString>& items)
+			{
+				List<WString> sortedItems;
+				CopyFrom(
+					sortedItems,
+					From(items)
+						.OrderBy([](const WString& a, const WString& b)
+						{
+							return INVLOC.Compare(a, b, Locale::IgnoreCase);
+						})
+					);
+
+				autoCompleteList->GetItems().Clear();
+				CopyFrom(
+					autoCompleteList->GetItems(),
+					From(sortedItems)
+						.Select([](const WString& item)
+						{
+							return new list::TextItem(item);
+						})
+					);
+				autoCompleteList->GetBoundsComposition()->SetPreferredMinSize(Size(200, 200));
 			}
 
 /***********************************************************************
@@ -959,7 +960,7 @@ GuiGrammarAutoComplete
 									keepListState=false;
 								}
 								// if the edit position goes before the start position of the auto complete, close
-								if(trace.inputStart<startPosition)
+								if(trace.inputEnd<=startPosition)
 								{
 									openList=false;
 									break;
