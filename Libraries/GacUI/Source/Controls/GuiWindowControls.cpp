@@ -954,11 +954,12 @@ GuiPopup
 						INativeWindow* controlWindow=controlHost->GetNativeWindow();
 						if(controlWindow)
 						{
-							Point controlClientOffset=controlWindow->GetClientBoundsInScreen().LeftTop();
-							bounds.x1+=controlClientOffset.x;
-							bounds.x2+=controlClientOffset.x;
-							bounds.y1+=controlClientOffset.y;
-							bounds.y2+=controlClientOffset.y;
+							Point controlClientOffset=control->GetBoundsComposition()->GetGlobalBounds().LeftTop();
+							Point controlWindowOffset=controlWindow->GetClientBoundsInScreen().LeftTop();
+							bounds.x1+=controlClientOffset.x+controlWindowOffset.x;
+							bounds.x2+=controlClientOffset.x+controlWindowOffset.x;
+							bounds.y1+=controlClientOffset.y+controlWindowOffset.y;
+							bounds.y2+=controlClientOffset.y+controlWindowOffset.y;
 
 							if(preferredTopBottomSide)
 							{
@@ -1021,8 +1022,8 @@ GuiPopup
 				if(window)
 				{
 					Size size=window->GetBounds().GetSize();
-					Rect controlBounds=control->GetBoundsComposition()->GetGlobalBounds();
-					ShowPopup(control, controlBounds, preferredTopBottomSide);
+					Rect bounds(Point(0, 0), control->GetBoundsComposition()->GetBounds().GetSize());
+					ShowPopup(control, bounds, preferredTopBottomSide);
 				}
 			}
 

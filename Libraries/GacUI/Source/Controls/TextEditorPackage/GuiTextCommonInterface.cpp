@@ -230,6 +230,15 @@ GuiTextBoxCommonInterface
 				TextPos end=textElement->GetCaretEnd();
 				switch(code)
 				{
+				case VKEY_ESCAPE:
+					if(autoComplete)
+					{
+						if(autoComplete->IsListOpening())
+						{
+							autoComplete->CloseList();
+						}
+					}
+					return true;
 				case VKEY_UP:
 					{
 						end.row--;
