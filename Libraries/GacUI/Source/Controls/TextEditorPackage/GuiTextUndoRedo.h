@@ -68,9 +68,9 @@ Undo Redo
 					void									Redo();
 				};
 
-				GuiTextBoxCommonInterface*					textBoxCommonInterface;
+				compositions::GuiGraphicsComposition*		ownerComposition;
 			public:
-				GuiTextBoxUndoRedoProcessor(GuiTextBoxCommonInterface* _textBoxCommonInterface);
+				GuiTextBoxUndoRedoProcessor();
 				~GuiTextBoxUndoRedoProcessor();
 
 				void										Attach(elements::GuiColorizedTextElement* element, SpinLock& elementModifyLock, compositions::GuiGraphicsComposition* _ownerComposition, vuint editVersion)override;

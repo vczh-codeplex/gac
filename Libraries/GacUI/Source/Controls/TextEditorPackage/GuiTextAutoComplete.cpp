@@ -85,6 +85,7 @@ GuiTextBoxAutoCompleteBase
 			{
 				if(element && elementModifyLock)
 				{
+					autoCompleteStartPosition=startPosition;
 					Rect bounds=element->GetLines().GetRectFromTextPos(startPosition);
 					Point viewPosition=element->GetViewPosition();
 					GuiControl* ownerControl=ownerComposition->GetRelatedControl();
@@ -107,6 +108,10 @@ GuiTextBoxAutoCompleteBase
 
 			void GuiTextBoxAutoCompleteBase::SetListContent(const collections::SortedList<WString>& items)
 			{
+				if(items.Count()==0)
+				{
+					CloseList();
+				}
 				List<WString> sortedItems;
 				CopyFrom(
 					sortedItems,
@@ -127,6 +132,60 @@ GuiTextBoxAutoCompleteBase
 						})
 					);
 				autoCompleteList->GetBoundsComposition()->SetPreferredMinSize(Size(200, 200));
+			}
+
+			TextPos GuiTextBoxAutoCompleteBase::GetListStartPosition()
+			{
+				return autoCompleteStartPosition;
+			}
+
+			bool GuiTextBoxAutoCompleteBase::SelectPreviousListItem()
+			{
+				if(!IsListOpening()) return false;
+				if(autoCompleteList->GetSelectedItems().Count()==0)
+				{
+					autoCompleteList->SetSelected(0, true);
+				}
+				else
+				{
+					vint index=autoCompleteList->GetSelectedItems()[0];
+					if(index>0) index--;
+					autoCompleteList->SetSelected(index, true);
+				}
+				return true;
+			}
+
+			bool GuiTextBoxAutoCompleteBase::SelectNextListItem()
+			{
+				if(!IsListOpening()) return false;
+				if(autoCompleteList->GetSelectedItems().Count()==0)
+				{
+					autoCompleteList->SetSelected(0, true);
+				}
+				else
+				{
+					vint index=autoCompleteList->GetSelectedItems()[0];
+					if(index<autoCompleteList->GetItems().Count()-1) index++;
+					autoCompleteList->SetSelected(index, true);
+				}
+				return true;
+			}
+
+			bool GuiTextBoxAutoCompleteBase::ApplySelectedListItem()
+			{
+				if(!IsListOpening()) return false;
+				if(!ownerComposition) return false;
+				if(autoCompleteList->GetSelectedItems().Count()==0) return false;
+				GuiTextBoxCommonInterface* ci=dynamic_cast<GuiTextBoxCommonInterface*>(ownerComposition->GetRelatedControl());
+				if(!ci) return false;
+
+				vint index=autoCompleteList->GetSelectedItems()[0];
+				WString selectedItem=autoCompleteList->GetItems()[index]->GetText();
+				TextPos begin=autoCompleteStartPosition;
+				TextPos end=ci->GetCaretEnd();
+				ci->Select(begin, end);
+				ci->SetSelectionText(selectedItem);
+				return true;
 			}
 
 /***********************************************************************

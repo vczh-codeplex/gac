@@ -554,7 +554,7 @@ GuiTextBoxCommonInterface
 				,dragging(false)
 				,readonly(false)
 			{
-				undoRedoProcessor=new GuiTextBoxUndoRedoProcessor(this);
+				undoRedoProcessor=new GuiTextBoxUndoRedoProcessor;
 				AttachTextEditCallback(undoRedoProcessor);
 
 				AddShortcutCommand(new ShortcutCommand(true, false, 'Z', Func<bool()>(this, &GuiTextBoxCommonInterface::Undo)));

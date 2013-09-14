@@ -105,24 +105,32 @@ GuiTextBoxUndoRedoProcessor::EditStep
 
 			void GuiTextBoxUndoRedoProcessor::EditStep::Undo()
 			{
-				processor->textBoxCommonInterface->Select(arguments.inputStart, arguments.inputEnd);
-				processor->textBoxCommonInterface->SetSelectionText(arguments.originalText);
-				processor->textBoxCommonInterface->Select(arguments.originalStart, arguments.originalEnd);
+				GuiTextBoxCommonInterface* ci=dynamic_cast<GuiTextBoxCommonInterface*>(processor->ownerComposition->GetRelatedControl());
+				if(ci)
+				{
+					ci->Select(arguments.inputStart, arguments.inputEnd);
+					ci->SetSelectionText(arguments.originalText);
+					ci->Select(arguments.originalStart, arguments.originalEnd);
+				}
 			}
 
 			void GuiTextBoxUndoRedoProcessor::EditStep::Redo()
 			{
-				processor->textBoxCommonInterface->Select(arguments.originalStart, arguments.originalEnd);
-				processor->textBoxCommonInterface->SetSelectionText(arguments.inputText);
-				processor->textBoxCommonInterface->Select(arguments.inputStart, arguments.inputEnd);
+				GuiTextBoxCommonInterface* ci=dynamic_cast<GuiTextBoxCommonInterface*>(processor->ownerComposition->GetRelatedControl());
+				if(ci)
+				{
+					ci->Select(arguments.originalStart, arguments.originalEnd);
+					ci->SetSelectionText(arguments.inputText);
+					ci->Select(arguments.inputStart, arguments.inputEnd);
+				}
 			}
 
 /***********************************************************************
 GuiTextBoxUndoRedoProcessor
 ***********************************************************************/
 
-			GuiTextBoxUndoRedoProcessor::GuiTextBoxUndoRedoProcessor(GuiTextBoxCommonInterface* _textBoxCommonInterface)
-				:textBoxCommonInterface(_textBoxCommonInterface)
+			GuiTextBoxUndoRedoProcessor::GuiTextBoxUndoRedoProcessor()
+				:ownerComposition(0)
 			{
 			}
 
@@ -132,6 +140,7 @@ GuiTextBoxUndoRedoProcessor
 
 			void GuiTextBoxUndoRedoProcessor::Attach(elements::GuiColorizedTextElement* element, SpinLock& elementModifyLock, compositions::GuiGraphicsComposition* _ownerComposition, vuint editVersion)
 			{
+				ownerComposition=_ownerComposition;
 			}
 
 			void GuiTextBoxUndoRedoProcessor::Detach()
