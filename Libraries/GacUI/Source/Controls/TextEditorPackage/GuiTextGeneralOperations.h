@@ -26,6 +26,29 @@ Common Operations
 			class ICommonTextEditCallback : public virtual IDescriptable, public Description<ICommonTextEditCallback>
 			{
 			public:
+				/// <summary>Callback data for text editing preview.</summary>
+				struct TextEditPreviewStruct
+				{
+					/// <summary>The start position of the selection before replacing.</summary>
+					TextPos								originalStart;
+					/// <summary>The end position of the selection before replacing.</summary>
+					TextPos								originalEnd;
+					/// <summary>The text of the selection before replacing.</summary>
+					WString								originalText;
+					/// <summary>The text of the selection after replacing. This field can be modified.</summary>
+					WString								inputText;
+					/// <summary>The base edit version.</summary>
+					vuint								editVersion;
+					/// <summary>True if this modification is raised by the keyboard.</summary>
+					bool								keyInput;
+
+					TextEditPreviewStruct()
+						:editVersion(0)
+						,keyInput(false)
+					{
+					}
+				};
+
 				/// <summary>Callback data for text editing.</summary>
 				struct TextEditNotifyStruct
 				{
@@ -37,9 +60,9 @@ Common Operations
 					WString								originalText;
 					/// <summary>The start position of the selection after replacing.</summary>
 					TextPos								inputStart;
-					/// <summary>The end position of the selection after replacing</summary>
+					/// <summary>The end position of the selection after replacing.</summary>
 					TextPos								inputEnd;
-					/// <summary>The text of the selection after replacing</summary>
+					/// <summary>The text of the selection after replacing.</summary>
 					WString								inputText;
 					/// <summary>The created edit version.</summary>
 					vuint								editVersion;
@@ -81,6 +104,9 @@ Common Operations
 				virtual void							Attach(elements::GuiColorizedTextElement* element, SpinLock& elementModifyLock, compositions::GuiGraphicsComposition* ownerComposition, vuint editVersion)=0;
 				/// <summary>Called when the callback is detached from a text box control.</summary>
 				virtual void							Detach()=0;
+				/// <summary>Called before the text is edited.</summary>
+				/// <param name="arguments">The data for this callback.</param>
+				virtual void							TextEditPreview(TextEditPreviewStruct& arguments)=0;
 				/// <summary>Called after the text is edited and before the caret is changed.</summary>
 				/// <param name="arguments">The data for this callback.</param>
 				virtual void							TextEditNotify(const TextEditNotifyStruct& arguments)=0;
@@ -191,6 +217,7 @@ RepeatingParsingExecutor
 					void													RequireAutoSubmitTask(bool enabled)override;
 					void													Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, compositions::GuiGraphicsComposition* _ownerComposition, vuint editVersion)override;
 					void													Detach()override;
+					void													TextEditPreview(TextEditPreviewStruct& arguments)override;
 					void													TextEditNotify(const TextEditNotifyStruct& arguments)override;
 					void													TextCaretChanged(const TextCaretChangedStruct& arguments)override;
 					void													TextEditFinished(vuint editVersion)override;

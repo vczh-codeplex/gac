@@ -74,6 +74,10 @@ RepeatingParsingExecutor::CallbackBase
 				parsingExecutor->DeactivateCallback(this);
 			}
 
+			void RepeatingParsingExecutor::CallbackBase::TextEditPreview(TextEditPreviewStruct& arguments)
+			{
+			}
+
 			void RepeatingParsingExecutor::CallbackBase::TextEditNotify(const TextEditNotifyStruct& arguments)
 			{
 			}

@@ -141,6 +141,10 @@ GuiTextBoxColorizerBase
 				}
 			}
 
+			void GuiTextBoxColorizerBase::TextEditPreview(TextEditPreviewStruct& arguments)
+			{
+			}
+
 			void GuiTextBoxColorizerBase::TextEditNotify(const TextEditNotifyStruct& arguments)
 			{
 				if(element && elementModifyLock)
@@ -394,6 +398,12 @@ GuiGrammarColorizer
 					parsingExecutor->EnsureTaskFinished();
 					StopColorizer(false);
 				}
+			}
+
+			void GuiGrammarColorizer::TextEditPreview(TextEditPreviewStruct& arguments)
+			{
+				GuiTextBoxRegexColorizer::TextEditPreview(arguments);
+				RepeatingParsingExecutor::CallbackBase::TextEditPreview(arguments);
 			}
 
 			void GuiGrammarColorizer::TextEditNotify(const TextEditNotifyStruct& arguments)

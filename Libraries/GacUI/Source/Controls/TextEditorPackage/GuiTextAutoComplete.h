@@ -41,6 +41,7 @@ GuiTextBoxAutoCompleteBase
 
 				void												Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, compositions::GuiGraphicsComposition* _ownerComposition, vuint editVersion)override;
 				void												Detach()override;
+				void												TextEditPreview(TextEditPreviewStruct& arguments)override;
 				void												TextEditNotify(const TextEditNotifyStruct& arguments)override;
 				void												TextCaretChanged(const TextCaretChangedStruct& arguments)override;
 				void												TextEditFinished(vuint editVersion)override;
@@ -133,6 +134,7 @@ GuiGrammarAutoComplete
 				
 				void												Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, compositions::GuiGraphicsComposition* _ownerComposition, vuint editVersion)override;
 				void												Detach()override;
+				void												TextEditPreview(TextEditPreviewStruct& arguments)override;
 				void												TextEditNotify(const TextEditNotifyStruct& arguments)override;
 				void												TextCaretChanged(const TextCaretChangedStruct& arguments)override;
 				void												TextEditFinished(vuint editVersion)override;
