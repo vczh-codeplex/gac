@@ -70,6 +70,15 @@ GuiTextBoxAutoCompleteBase
 
 			void GuiTextBoxAutoCompleteBase::TextEditNotify(const TextEditNotifyStruct& arguments)
 			{
+				if(element && elementModifyLock)
+				{
+					if(IsListOpening())
+					{
+						TextPos begin=GetListStartPosition();
+						TextPos end=arguments.inputEnd;
+						WString editingText=element->GetLines().GetText(begin, end);
+					}
+				}
 			}
 
 			void GuiTextBoxAutoCompleteBase::TextCaretChanged(const TextCaretChangedStruct& arguments)
@@ -258,13 +267,6 @@ GuiGrammarAutoComplete
 					SPIN_LOCK(editTraceLock)
 					{
 						editTrace.Add(arguments);
-					}
-
-					if(IsListOpening())
-					{
-						TextPos begin=GetListStartPosition();
-						TextPos end=arguments.inputEnd;
-						WString editingText=element->GetLines().GetText(begin, end);
 					}
 				}
 			}
