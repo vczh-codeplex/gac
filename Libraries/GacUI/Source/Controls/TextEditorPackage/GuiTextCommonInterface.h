@@ -91,6 +91,7 @@ Common Interface
 				SpinLock											elementModifyLock;
 				collections::List<Ptr<ICommonTextEditCallback>>		textEditCallbacks;
 				collections::List<Ptr<ShortcutCommand>>				shortcutCommands;
+				bool												preventEnterDueToAutoComplete;
 
 				void												UpdateCaretPoint();
 				void												Move(TextPos pos, bool shift);

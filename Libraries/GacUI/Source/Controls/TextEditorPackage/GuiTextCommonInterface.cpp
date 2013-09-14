@@ -231,21 +231,38 @@ GuiTextBoxCommonInterface
 				switch(code)
 				{
 				case VKEY_ESCAPE:
-					if(autoComplete)
+					if(autoComplete && autoComplete->IsListOpening() && !shift && !ctrl)
 					{
-						if(autoComplete->IsListOpening())
-						{
-							autoComplete->CloseList();
-						}
+						autoComplete->CloseList();
 					}
 					return true;
+				case VKEY_RETURN:
+					if(autoComplete && autoComplete->IsListOpening() && !shift && !ctrl)
+					{
+						if(autoComplete->ApplySelectedListItem())
+						{
+							preventEnterDueToAutoComplete=true;
+							return true;
+						}
+					}
+					break;
 				case VKEY_UP:
+					if(autoComplete && autoComplete->IsListOpening() && !shift && !ctrl)
+					{
+						autoComplete->SelectPreviousListItem();
+					}
+					else
 					{
 						end.row--;
 						Move(end, shift);
 					}
 					return true;
 				case VKEY_DOWN:
+					if(autoComplete && autoComplete->IsListOpening() && !shift && !ctrl)
+					{
+						autoComplete->SelectNextListItem();
+					}
+					else
 					{
 						end.row++;
 						Move(end, shift);
@@ -448,6 +465,14 @@ GuiTextBoxCommonInterface
 
 			void GuiTextBoxCommonInterface::OnCharInput(compositions::GuiGraphicsComposition* sender, compositions::GuiCharEventArgs& arguments)
 			{
+				if(preventEnterDueToAutoComplete)
+				{
+					preventEnterDueToAutoComplete=false;
+					if(arguments.code==VKEY_RETURN)
+					{
+						return;
+					}
+				}
 				if(textControl->GetVisuallyEnabled() && arguments.compositionSource==arguments.eventSource)
 				{
 					if(!readonly && arguments.code!=VKEY_ESCAPE && arguments.code!=VKEY_BACK && !arguments.ctrl)
@@ -553,6 +578,7 @@ GuiTextBoxCommonInterface
 				,callback(0)
 				,dragging(false)
 				,readonly(false)
+				,preventEnterDueToAutoComplete(false)
 			{
 				undoRedoProcessor=new GuiTextBoxUndoRedoProcessor;
 				AttachTextEditCallback(undoRedoProcessor);
