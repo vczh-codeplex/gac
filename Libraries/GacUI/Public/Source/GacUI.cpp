@@ -3394,11 +3394,12 @@ GuiPopup
 						INativeWindow* controlWindow=controlHost->GetNativeWindow();
 						if(controlWindow)
 						{
-							Point controlClientOffset=controlWindow->GetClientBoundsInScreen().LeftTop();
-							bounds.x1+=controlClientOffset.x;
-							bounds.x2+=controlClientOffset.x;
-							bounds.y1+=controlClientOffset.y;
-							bounds.y2+=controlClientOffset.y;
+							Point controlClientOffset=control->GetBoundsComposition()->GetGlobalBounds().LeftTop();
+							Point controlWindowOffset=controlWindow->GetClientBoundsInScreen().LeftTop();
+							bounds.x1+=controlClientOffset.x+controlWindowOffset.x;
+							bounds.x2+=controlClientOffset.x+controlWindowOffset.x;
+							bounds.y1+=controlClientOffset.y+controlWindowOffset.y;
+							bounds.y2+=controlClientOffset.y+controlWindowOffset.y;
 
 							if(preferredTopBottomSide)
 							{
@@ -3461,8 +3462,8 @@ GuiPopup
 				if(window)
 				{
 					Size size=window->GetBounds().GetSize();
-					Rect controlBounds=control->GetBoundsComposition()->GetGlobalBounds();
-					ShowPopup(control, controlBounds, preferredTopBottomSide);
+					Rect bounds(Point(0, 0), control->GetBoundsComposition()->GetBounds().GetSize());
+					ShowPopup(control, bounds, preferredTopBottomSide);
 				}
 			}
 
@@ -21136,56 +21137,16 @@ namespace vl
 GuiTextBoxAutoCompleteBase
 ***********************************************************************/
 
-			bool GuiTextBoxAutoCompleteBase::IsListOpening()
+			bool GuiTextBoxAutoCompleteBase::IsPrefix(const WString& prefix, const WString& candidate)
 			{
-				return autoCompletePopup->GetOpening();
-			}
-
-			void GuiTextBoxAutoCompleteBase::OpenList(TextPos startPosition)
-			{
-				if(element && elementModifyLock)
+				if(candidate.Length()>=prefix.Length())
 				{
-					Rect bounds=element->GetLines().GetRectFromTextPos(startPosition);
-					GuiControl* ownerControl=ownerComposition->GetRelatedControl();
-					Rect compositionBounds=ownerComposition->GetGlobalBounds();
-					Rect controlBounds=ownerControl->GetBoundsComposition()->GetGlobalBounds();
-					vint px=compositionBounds.x1-controlBounds.x1;
-					vint py=compositionBounds.y1-controlBounds.y1;
-					bounds.x1+=px;
-					bounds.x2+=px;
-					bounds.y1+=py+5;
-					bounds.y2+=py+5;
-					autoCompletePopup->ShowPopup(ownerControl, bounds, true);
+					if(INVLOC.Compare(prefix, candidate.Sub(0, prefix.Length()), Locale::IgnoreCase)==0)
+					{
+						return true;
+					}
 				}
-			}
-
-			void GuiTextBoxAutoCompleteBase::CloseList()
-			{
-				autoCompletePopup->Close();
-			}
-
-			void GuiTextBoxAutoCompleteBase::SetListContent(const collections::SortedList<WString>& items)
-			{
-				List<WString> sortedItems;
-				CopyFrom(
-					sortedItems,
-					From(items)
-						.OrderBy([](const WString& a, const WString& b)
-						{
-							return INVLOC.Compare(a, b, Locale::IgnoreCase);
-						})
-					);
-
-				autoCompleteList->GetItems().Clear();
-				CopyFrom(
-					autoCompleteList->GetItems(),
-					From(sortedItems)
-						.Select([](const WString& item)
-						{
-							return new list::TextItem(item);
-						})
-					);
-				autoCompleteList->GetBoundsComposition()->SetPreferredMinSize(Size(200, 200));
+				return false;
 			}
 
 			GuiTextBoxAutoCompleteBase::GuiTextBoxAutoCompleteBase()
@@ -21232,8 +21193,22 @@ GuiTextBoxAutoCompleteBase
 				}
 			}
 
+			void GuiTextBoxAutoCompleteBase::TextEditPreview(TextEditPreviewStruct& arguments)
+			{
+			}
+
 			void GuiTextBoxAutoCompleteBase::TextEditNotify(const TextEditNotifyStruct& arguments)
 			{
+				if(element && elementModifyLock)
+				{
+					if(IsListOpening())
+					{
+						TextPos begin=GetListStartPosition();
+						TextPos end=arguments.inputEnd;
+						WString editingText=element->GetLines().GetText(begin, end);
+						HighlightList(editingText);
+					}
+				}
 			}
 
 			void GuiTextBoxAutoCompleteBase::TextCaretChanged(const TextCaretChangedStruct& arguments)
@@ -21242,6 +21217,176 @@ GuiTextBoxAutoCompleteBase
 
 			void GuiTextBoxAutoCompleteBase::TextEditFinished(vuint editVersion)
 			{
+			}
+
+			bool GuiTextBoxAutoCompleteBase::IsListOpening()
+			{
+				return autoCompletePopup->GetOpening();
+			}
+
+			void GuiTextBoxAutoCompleteBase::OpenList(TextPos startPosition)
+			{
+				if(element && elementModifyLock)
+				{
+					autoCompleteStartPosition=startPosition;
+					Rect bounds=element->GetLines().GetRectFromTextPos(startPosition);
+					Point viewPosition=element->GetViewPosition();
+					GuiControl* ownerControl=ownerComposition->GetRelatedControl();
+					Rect compositionBounds=ownerComposition->GetGlobalBounds();
+					Rect controlBounds=ownerControl->GetBoundsComposition()->GetGlobalBounds();
+					vint px=compositionBounds.x1-controlBounds.x1-viewPosition.x;
+					vint py=compositionBounds.y1-controlBounds.y1-viewPosition.y;
+					bounds.x1+=px;
+					bounds.x2+=px;
+					bounds.y1+=py+5;
+					bounds.y2+=py+5;
+					autoCompletePopup->ShowPopup(ownerControl, bounds, true);
+				}
+			}
+
+			void GuiTextBoxAutoCompleteBase::CloseList()
+			{
+				autoCompletePopup->Close();
+			}
+
+			void GuiTextBoxAutoCompleteBase::SetListContent(const collections::SortedList<WString>& items)
+			{
+				if(items.Count()==0)
+				{
+					CloseList();
+				}
+				List<WString> sortedItems;
+				CopyFrom(
+					sortedItems,
+					From(items)
+						.OrderBy([](const WString& a, const WString& b)
+						{
+							return INVLOC.Compare(a, b, Locale::IgnoreCase);
+						})
+					);
+
+				autoCompleteList->GetItems().Clear();
+				CopyFrom(
+					autoCompleteList->GetItems(),
+					From(sortedItems)
+						.Select([](const WString& item)
+						{
+							return new list::TextItem(item);
+						})
+					);
+				autoCompleteList->GetBoundsComposition()->SetPreferredMinSize(Size(200, 200));
+			}
+
+			TextPos GuiTextBoxAutoCompleteBase::GetListStartPosition()
+			{
+				return autoCompleteStartPosition;
+			}
+
+			bool GuiTextBoxAutoCompleteBase::SelectPreviousListItem()
+			{
+				if(!IsListOpening()) return false;
+				if(autoCompleteList->GetSelectedItems().Count()==0)
+				{
+					autoCompleteList->SetSelected(0, true);
+				}
+				else
+				{
+					vint index=autoCompleteList->GetSelectedItems()[0];
+					if(index>0) index--;
+					autoCompleteList->SetSelected(index, true);
+				}
+				return true;
+			}
+
+			bool GuiTextBoxAutoCompleteBase::SelectNextListItem()
+			{
+				if(!IsListOpening()) return false;
+				if(autoCompleteList->GetSelectedItems().Count()==0)
+				{
+					autoCompleteList->SetSelected(0, true);
+				}
+				else
+				{
+					vint index=autoCompleteList->GetSelectedItems()[0];
+					if(index<autoCompleteList->GetItems().Count()-1) index++;
+					autoCompleteList->SetSelected(index, true);
+				}
+				return true;
+			}
+
+			bool GuiTextBoxAutoCompleteBase::ApplySelectedListItem()
+			{
+				if(!IsListOpening()) return false;
+				if(!ownerComposition) return false;
+				if(autoCompleteList->GetSelectedItems().Count()==0) return false;
+				GuiTextBoxCommonInterface* ci=dynamic_cast<GuiTextBoxCommonInterface*>(ownerComposition->GetRelatedControl());
+				if(!ci) return false;
+
+				vint index=autoCompleteList->GetSelectedItems()[0];
+				WString selectedItem=autoCompleteList->GetItems()[index]->GetText();
+				TextPos begin=autoCompleteStartPosition;
+				TextPos end=ci->GetCaretEnd();
+				ci->Select(begin, end);
+				ci->SetSelectionText(selectedItem);
+				CloseList();
+				return true;
+			}
+
+			WString GuiTextBoxAutoCompleteBase::GetSelectedListItem()
+			{
+				if(!IsListOpening()) return L"";
+				if(autoCompleteList->GetSelectedItems().Count()==0) return L"";
+				vint index=autoCompleteList->GetSelectedItems()[0];
+				return autoCompleteList->GetItems()[index]->GetText();
+			}
+
+			void GuiTextBoxAutoCompleteBase::HighlightList(const WString& editingText)
+			{
+				if(IsListOpening())
+				{
+					vint first=0;
+					vint last=autoCompleteList->GetItems().Count()-1;
+					vint selected=-1;
+
+					while(first<=last)
+					{
+						vint middle=(first+last)/2;
+						WString text=autoCompleteList->GetItems()[middle]->GetText();
+						if(IsPrefix(editingText, text))
+						{
+							selected=middle;
+							break;
+						}
+
+						vint result=INVLOC.Compare(editingText, text, Locale::IgnoreCase);
+						if(result<=0)
+						{
+							last=middle-1;
+						}
+						else
+						{
+							first=middle+1;
+						}
+					}
+
+					while(selected>0)
+					{
+						WString text=autoCompleteList->GetItems()[selected-1]->GetText();
+						if(IsPrefix(editingText, text))
+						{
+							selected--;
+						}
+						else
+						{
+							break;
+						}
+					}
+
+					if(selected!=-1)
+					{
+						autoCompleteList->SetSelected(selected, true);
+					}
+				}
 			}
 
 /***********************************************************************
@@ -21261,6 +21406,33 @@ GuiGrammarAutoComplete
 				if(element && elementModifyLock)
 				{
 					EnsureAutoCompleteFinished();
+				}
+			}
+
+			void GuiGrammarAutoComplete::TextEditPreview(TextEditPreviewStruct& arguments)
+			{
+				GuiTextBoxAutoCompleteBase::TextEditPreview(arguments);
+				RepeatingParsingExecutor::CallbackBase::TextEditPreview(arguments);
+
+				if(element && elementModifyLock)
+				{
+					if(IsListOpening() && arguments.keyInput && arguments.originalText==L"" && arguments.inputText!=L"")
+					{
+						WString selectedItem=GetSelectedListItem();
+						if(selectedItem!=L"")
+						{
+							TextPos begin=GetListStartPosition();
+							TextPos end=arguments.originalStart;
+							WString editingText=element->GetLines().GetText(begin, end);
+							editingText+=arguments.inputText;
+							if(grammarParser->GetTable()->GetLexer().Walk().IsClosedToken(editingText))
+							{
+								arguments.originalStart=begin;
+								arguments.inputText=selectedItem+arguments.inputText;
+								CloseList();
+							}
+						}
+					}
 				}
 			}
 
@@ -21988,11 +22160,13 @@ GuiGrammarAutoComplete
 					}
 				}
 				Context newContext;
+				bool byGlobalCorrection=false;
 
 				if(input.node)
 				{
 					newContext.input=input;
 					ExecuteRefresh(newContext);
+					byGlobalCorrection=true;
 				}
 				else
 				{
@@ -22022,15 +22196,15 @@ GuiGrammarAutoComplete
 					OnContextFinishedAsync(context);
 					GetApplication()->InvokeInMainThread([=]()
 					{
-						PostList(newContext);
+						PostList(newContext, byGlobalCorrection);
 					});
 				}
 			}
 
-			void GuiGrammarAutoComplete::PostList(const Context& newContext)
+			void GuiGrammarAutoComplete::PostList(const Context& newContext, bool byGlobalCorrection)
 			{
-				bool openList=true;
-				bool keepListState=true;
+				bool openList=true;			// true: make the list visible
+				bool keepListState=false;	// true: don't change the list visibility
 				Ptr<AutoCompleteData> autoComplete=newContext.autoComplete;
 
 				// if failed to get the auto complete list, close
@@ -22047,22 +22221,36 @@ GuiGrammarAutoComplete
 				}
 				
 				TextPos startPosition, endPosition;
+				WString editingText;
 				if(openList)
 				{
 					SPIN_LOCK(editTraceLock)
 					{
-						// if the edit version is invalid, close
-						vint traceIndex=UnsafeGetEditTraceIndex(newContext.input.editVersion);
-						if(traceIndex==-1) openList=false;
+						// if the edit version is invalid, cancel
+						vint traceIndex=UnsafeGetEditTraceIndex(newContext.modifiedEditVersion);
+						if(traceIndex==-1)
+						{
+							return;
+						}
 						// an edit version has two trace at most, for text change and caret change, here we peak the text change
-						if(traceIndex>0 && editTrace[traceIndex-1].editVersion==context.input.editVersion)
+						if(traceIndex>0 && editTrace[traceIndex-1].editVersion==context.modifiedEditVersion)
 						{
 							traceIndex--;
+						}
+						// if the edit version is not created by keyboard input, close
+						if(traceIndex>=0)
+						{
+							TextEditNotifyStruct& trace=editTrace[traceIndex];
+							if(!trace.keyInput)
+							{
+								openList=false;
+							}
 						}
 
 						// scan all traces from the calculation's edit version until now
 						if(openList)
 						{
+							keepListState=true;
 							startPosition=autoComplete->startPosition;
 							endPosition=editTrace[editTrace.Count()-1].inputEnd;
 							for(vint i=traceIndex;i<editTrace.Count();i++)
@@ -22073,8 +22261,8 @@ GuiGrammarAutoComplete
 								{
 									keepListState=false;
 								}
-								// if the edit position goes before the start position of the auto complete, close
-								if(trace.inputStart<startPosition)
+								// if the edit position goes before the start position of the auto complete, refresh
+								if(trace.inputEnd<=startPosition)
 								{
 									openList=false;
 									break;
@@ -22089,10 +22277,16 @@ GuiGrammarAutoComplete
 					}
 				}
 
+				// if there is a global correction send to the UI thread but the list is not opening, cancel
+				if(byGlobalCorrection && !IsListOpening())
+				{
+					return;
+				}
+
 				// if the input text from the start position to the current position crosses a token, close
 				if(openList && element)
 				{
-					WString editingText=element->GetLines().GetText(startPosition, endPosition);
+					editingText=element->GetLines().GetText(startPosition, endPosition);
 					if(grammarParser->GetTable()->GetLexer().Walk().IsClosedToken(editingText))
 					{
 						openList=false;
@@ -22147,6 +22341,11 @@ GuiGrammarAutoComplete
 					{
 						CloseList();
 					}
+				}
+
+				if(IsListOpening())
+				{
+					HighlightList(editingText);
 				}
 			}
 
@@ -22377,6 +22576,10 @@ GuiTextBoxColorizerBase
 						elementModifyLock=0;
 					}
 				}
+			}
+
+			void GuiTextBoxColorizerBase::TextEditPreview(TextEditPreviewStruct& arguments)
+			{
 			}
 
 			void GuiTextBoxColorizerBase::TextEditNotify(const TextEditNotifyStruct& arguments)
@@ -22632,6 +22835,12 @@ GuiGrammarColorizer
 					parsingExecutor->EnsureTaskFinished();
 					StopColorizer(false);
 				}
+			}
+
+			void GuiGrammarColorizer::TextEditPreview(TextEditPreviewStruct& arguments)
+			{
+				GuiTextBoxRegexColorizer::TextEditPreview(arguments);
+				RepeatingParsingExecutor::CallbackBase::TextEditPreview(arguments);
 			}
 
 			void GuiGrammarColorizer::TextEditNotify(const TextEditNotifyStruct& arguments)
@@ -22991,7 +23200,7 @@ GuiTextBoxCommonInterface
 				}
 			}
 
-			void GuiTextBoxCommonInterface::Modify(TextPos start, TextPos end, const WString& input)
+			void GuiTextBoxCommonInterface::Modify(TextPos start, TextPos end, const WString& input, bool asKeyInput)
 			{
 				if(start>end)
 				{
@@ -23005,6 +23214,30 @@ GuiTextBoxCommonInterface
 				WString inputText=input;
 				if(callback->BeforeModify(start, end, originalText, inputText))
 				{
+					{
+						ICommonTextEditCallback::TextEditPreviewStruct arguments;
+						arguments.originalStart=originalStart;
+						arguments.originalEnd=originalEnd;
+						arguments.originalText=originalText;
+						arguments.inputText=inputText;
+						arguments.editVersion=editVersion;
+						arguments.keyInput=asKeyInput;
+						for(vint i=0;i<textEditCallbacks.Count();i++)
+						{
+							textEditCallbacks[i]->TextEditPreview(arguments);
+						}
+						
+						inputText=arguments.inputText;
+						if(originalStart!=arguments.originalStart || originalEnd!=arguments.originalEnd)
+						{
+							originalStart=arguments.originalStart;
+							originalEnd=arguments.originalEnd;
+							originalText=textElement->GetLines().GetText(originalStart, originalEnd);
+							start=originalStart;
+							end=originalEnd;
+						}
+					}
+
 					SPIN_LOCK(elementModifyLock)
 					{
 						end=textElement->GetLines().Modify(start, end, inputText);
@@ -23012,17 +23245,20 @@ GuiTextBoxCommonInterface
 					callback->AfterModify(originalStart, originalEnd, originalText, start, end, inputText);
 					
 					editVersion++;
-					ICommonTextEditCallback::TextEditNotifyStruct arguments;
-					arguments.originalStart=originalStart;
-					arguments.originalEnd=originalEnd;
-					arguments.originalText=originalText;
-					arguments.inputStart=start;
-					arguments.inputEnd=end;
-					arguments.inputText=inputText;
-					arguments.editVersion=editVersion;
-					for(vint i=0;i<textEditCallbacks.Count();i++)
 					{
-						textEditCallbacks[i]->TextEditNotify(arguments);
+						ICommonTextEditCallback::TextEditNotifyStruct arguments;
+						arguments.originalStart=originalStart;
+						arguments.originalEnd=originalEnd;
+						arguments.originalText=originalText;
+						arguments.inputStart=start;
+						arguments.inputEnd=end;
+						arguments.inputText=inputText;
+						arguments.editVersion=editVersion;
+						arguments.keyInput=asKeyInput;
+						for(vint i=0;i<textEditCallbacks.Count();i++)
+						{
+							textEditCallbacks[i]->TextEditNotify(arguments);
+						}
 					}
 
 					Move(end, false);
@@ -23050,13 +23286,39 @@ GuiTextBoxCommonInterface
 				TextPos end=textElement->GetCaretEnd();
 				switch(code)
 				{
+				case VKEY_ESCAPE:
+					if(autoComplete && autoComplete->IsListOpening() && !shift && !ctrl)
+					{
+						autoComplete->CloseList();
+					}
+					return true;
+				case VKEY_RETURN:
+					if(autoComplete && autoComplete->IsListOpening() && !shift && !ctrl)
+					{
+						if(autoComplete->ApplySelectedListItem())
+						{
+							preventEnterDueToAutoComplete=true;
+							return true;
+						}
+					}
+					break;
 				case VKEY_UP:
+					if(autoComplete && autoComplete->IsListOpening() && !shift && !ctrl)
+					{
+						autoComplete->SelectPreviousListItem();
+					}
+					else
 					{
 						end.row--;
 						Move(end, shift);
 					}
 					return true;
 				case VKEY_DOWN:
+					if(autoComplete && autoComplete->IsListOpening() && !shift && !ctrl)
+					{
+						autoComplete->SelectNextListItem();
+					}
+					else
 					{
 						end.row++;
 						Move(end, shift);
@@ -23165,7 +23427,7 @@ GuiTextBoxCommonInterface
 							{
 								ProcessKey(VKEY_LEFT, true, false);
 							}
-							SetSelectionText(L"");
+							SetSelectionText(L"", true);
 						}
 						return true;
 					}
@@ -23189,7 +23451,7 @@ GuiTextBoxCommonInterface
 							{
 								ProcessKey(VKEY_RIGHT, true, false);
 							}
-							SetSelectionText(L"");
+							SetSelectionText(L"", true);
 						}
 						return true;
 					}
@@ -23259,11 +23521,19 @@ GuiTextBoxCommonInterface
 
 			void GuiTextBoxCommonInterface::OnCharInput(compositions::GuiGraphicsComposition* sender, compositions::GuiCharEventArgs& arguments)
 			{
+				if(preventEnterDueToAutoComplete)
+				{
+					preventEnterDueToAutoComplete=false;
+					if(arguments.code==VKEY_RETURN)
+					{
+						return;
+					}
+				}
 				if(textControl->GetVisuallyEnabled() && arguments.compositionSource==arguments.eventSource)
 				{
 					if(!readonly && arguments.code!=VKEY_ESCAPE && arguments.code!=VKEY_BACK && !arguments.ctrl)
 					{
-						SetSelectionText(WString(arguments.code));
+						SetSelectionText(WString(arguments.code), true);
 					}
 				}
 			}
@@ -23352,7 +23622,7 @@ GuiTextBoxCommonInterface
 						end.row=textElement->GetLines().GetCount()-1;
 						end.column=textElement->GetLines().GetLine(end.row).dataLength;
 					}
-					Modify(TextPos(), end, value);
+					Modify(TextPos(), end, value, false);
 				}
 			}
 
@@ -23364,8 +23634,9 @@ GuiTextBoxCommonInterface
 				,callback(0)
 				,dragging(false)
 				,readonly(false)
+				,preventEnterDueToAutoComplete(false)
 			{
-				undoRedoProcessor=new GuiTextBoxUndoRedoProcessor(this);
+				undoRedoProcessor=new GuiTextBoxUndoRedoProcessor;
 				AttachTextEditCallback(undoRedoProcessor);
 
 				AddShortcutCommand(new ShortcutCommand(true, false, 'Z', Func<bool()>(this, &GuiTextBoxCommonInterface::Undo)));
@@ -23487,9 +23758,9 @@ GuiTextBoxCommonInterface
 				return textElement->GetLines().GetText(selectionBegin, selectionEnd);
 			}
 
-			void GuiTextBoxCommonInterface::SetSelectionText(const WString& value)
+			void GuiTextBoxCommonInterface::SetSelectionText(const WString& value, bool asKeyInput)
 			{
-				Modify(textElement->GetCaretBegin(), textElement->GetCaretEnd(), value);
+				Modify(textElement->GetCaretBegin(), textElement->GetCaretEnd(), value, asKeyInput);
 			}
 
 			WString GuiTextBoxCommonInterface::GetRowText(vint row)
@@ -24226,6 +24497,10 @@ RepeatingParsingExecutor::CallbackBase
 				parsingExecutor->DeactivateCallback(this);
 			}
 
+			void RepeatingParsingExecutor::CallbackBase::TextEditPreview(TextEditPreviewStruct& arguments)
+			{
+			}
+
 			void RepeatingParsingExecutor::CallbackBase::TextEditNotify(const TextEditNotifyStruct& arguments)
 			{
 			}
@@ -24706,24 +24981,32 @@ GuiTextBoxUndoRedoProcessor::EditStep
 
 			void GuiTextBoxUndoRedoProcessor::EditStep::Undo()
 			{
-				processor->textBoxCommonInterface->Select(arguments.inputStart, arguments.inputEnd);
-				processor->textBoxCommonInterface->SetSelectionText(arguments.originalText);
-				processor->textBoxCommonInterface->Select(arguments.originalStart, arguments.originalEnd);
+				GuiTextBoxCommonInterface* ci=dynamic_cast<GuiTextBoxCommonInterface*>(processor->ownerComposition->GetRelatedControl());
+				if(ci)
+				{
+					ci->Select(arguments.inputStart, arguments.inputEnd);
+					ci->SetSelectionText(arguments.originalText);
+					ci->Select(arguments.originalStart, arguments.originalEnd);
+				}
 			}
 
 			void GuiTextBoxUndoRedoProcessor::EditStep::Redo()
 			{
-				processor->textBoxCommonInterface->Select(arguments.originalStart, arguments.originalEnd);
-				processor->textBoxCommonInterface->SetSelectionText(arguments.inputText);
-				processor->textBoxCommonInterface->Select(arguments.inputStart, arguments.inputEnd);
+				GuiTextBoxCommonInterface* ci=dynamic_cast<GuiTextBoxCommonInterface*>(processor->ownerComposition->GetRelatedControl());
+				if(ci)
+				{
+					ci->Select(arguments.originalStart, arguments.originalEnd);
+					ci->SetSelectionText(arguments.inputText);
+					ci->Select(arguments.inputStart, arguments.inputEnd);
+				}
 			}
 
 /***********************************************************************
 GuiTextBoxUndoRedoProcessor
 ***********************************************************************/
 
-			GuiTextBoxUndoRedoProcessor::GuiTextBoxUndoRedoProcessor(GuiTextBoxCommonInterface* _textBoxCommonInterface)
-				:textBoxCommonInterface(_textBoxCommonInterface)
+			GuiTextBoxUndoRedoProcessor::GuiTextBoxUndoRedoProcessor()
+				:ownerComposition(0)
 			{
 			}
 
@@ -24733,11 +25016,16 @@ GuiTextBoxUndoRedoProcessor
 
 			void GuiTextBoxUndoRedoProcessor::Attach(elements::GuiColorizedTextElement* element, SpinLock& elementModifyLock, compositions::GuiGraphicsComposition* _ownerComposition, vuint editVersion)
 			{
+				ownerComposition=_ownerComposition;
 			}
 
 			void GuiTextBoxUndoRedoProcessor::Detach()
 			{
 				ClearUndoRedo();
+			}
+
+			void GuiTextBoxUndoRedoProcessor::TextEditPreview(TextEditPreviewStruct& arguments)
+			{
 			}
 
 			void GuiTextBoxUndoRedoProcessor::TextEditNotify(const TextEditNotifyStruct& arguments)

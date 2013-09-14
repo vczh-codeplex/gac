@@ -7340,6 +7340,22 @@ Common Operations
 			class ICommonTextEditCallback : public virtual IDescriptable, public Description<ICommonTextEditCallback>
 			{
 			public:
+				struct TextEditPreviewStruct
+				{
+					TextPos								originalStart;
+					TextPos								originalEnd;
+					WString								originalText;
+					WString								inputText;
+					vuint								editVersion;
+					bool								keyInput;
+
+					TextEditPreviewStruct()
+						:editVersion(0)
+						,keyInput(false)
+					{
+					}
+				};
+
 				struct TextEditNotifyStruct
 				{
 					TextPos								originalStart;
@@ -7349,9 +7365,11 @@ Common Operations
 					TextPos								inputEnd;
 					WString								inputText;
 					vuint								editVersion;
+					bool								keyInput;
 
 					TextEditNotifyStruct()
 						:editVersion(0)
+						,keyInput(false)
 					{
 					}
 				};
@@ -7372,6 +7390,7 @@ Common Operations
 
 				virtual void							Attach(elements::GuiColorizedTextElement* element, SpinLock& elementModifyLock, compositions::GuiGraphicsComposition* ownerComposition, vuint editVersion)=0;
 				virtual void							Detach()=0;
+				virtual void							TextEditPreview(TextEditPreviewStruct& arguments)=0;
 				virtual void							TextEditNotify(const TextEditNotifyStruct& arguments)=0;
 				virtual void							TextCaretChanged(const TextCaretChangedStruct& arguments)=0;
 				virtual void							TextEditFinished(vuint editVersion)=0;
@@ -7445,6 +7464,7 @@ RepeatingParsingExecutor
 					void													RequireAutoSubmitTask(bool enabled)override;
 					void													Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, compositions::GuiGraphicsComposition* _ownerComposition, vuint editVersion)override;
 					void													Detach()override;
+					void													TextEditPreview(TextEditPreviewStruct& arguments)override;
 					void													TextEditNotify(const TextEditNotifyStruct& arguments)override;
 					void													TextCaretChanged(const TextCaretChangedStruct& arguments)override;
 					void													TextEditFinished(vuint editVersion)override;
@@ -7602,6 +7622,7 @@ GuiTextBoxColorizerBase
 
 				void										Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, compositions::GuiGraphicsComposition* _ownerComposition, vuint editVersion)override;
 				void										Detach()override;
+				void										TextEditPreview(TextEditPreviewStruct& arguments)override;
 				void										TextEditNotify(const TextEditNotifyStruct& arguments)override;
 				void										TextCaretChanged(const TextCaretChangedStruct& arguments)override;
 				void										TextEditFinished(vuint editVersion)override;
@@ -7681,6 +7702,7 @@ GuiGrammarColorizer
 
 				void														Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, compositions::GuiGraphicsComposition* _ownerComposition, vuint editVersion)override;
 				void														Detach()override;
+				void														TextEditPreview(TextEditPreviewStruct& arguments)override;
 				void														TextEditNotify(const TextEditNotifyStruct& arguments)override;
 				void														TextCaretChanged(const TextCaretChangedStruct& arguments)override;
 				void														TextEditFinished(vuint editVersion)override;
@@ -7743,20 +7765,30 @@ GuiTextBoxAutoCompleteBase
 				compositions::GuiGraphicsComposition*				ownerComposition;
 				GuiPopup*											autoCompletePopup;
 				GuiTextList*										autoCompleteList;
+				TextPos												autoCompleteStartPosition;
 
-				bool												IsListOpening();
-				void												OpenList(TextPos startPosition);
-				void												CloseList();
-				void												SetListContent(const collections::SortedList<WString>& items);
+				bool												IsPrefix(const WString& prefix, const WString& candidate);
 			public:
 				GuiTextBoxAutoCompleteBase();
 				~GuiTextBoxAutoCompleteBase();
 
 				void												Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, compositions::GuiGraphicsComposition* _ownerComposition, vuint editVersion)override;
 				void												Detach()override;
+				void												TextEditPreview(TextEditPreviewStruct& arguments)override;
 				void												TextEditNotify(const TextEditNotifyStruct& arguments)override;
 				void												TextCaretChanged(const TextCaretChangedStruct& arguments)override;
 				void												TextEditFinished(vuint editVersion)override;
+
+				bool												IsListOpening();
+				void												OpenList(TextPos startPosition);
+				void												CloseList();
+				void												SetListContent(const collections::SortedList<WString>& items);
+				TextPos												GetListStartPosition();
+				bool												SelectPreviousListItem();
+				bool												SelectNextListItem();
+				bool												ApplySelectedListItem();
+				WString												GetSelectedListItem();
+				void												HighlightList(const WString& editingText);
 			};
 
 /***********************************************************************
@@ -7807,6 +7839,7 @@ GuiGrammarAutoComplete
 				
 				void												Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, compositions::GuiGraphicsComposition* _ownerComposition, vuint editVersion)override;
 				void												Detach()override;
+				void												TextEditPreview(TextEditPreviewStruct& arguments)override;
 				void												TextEditNotify(const TextEditNotifyStruct& arguments)override;
 				void												TextCaretChanged(const TextCaretChangedStruct& arguments)override;
 				void												TextEditFinished(vuint editVersion)override;
@@ -7841,7 +7874,7 @@ GuiGrammarAutoComplete
 				void												ExecuteCalculateList(Context& newContext);
 
 				void												Execute(const RepeatingParsingOutput& input)override;
-				void												PostList(const Context& newContext);
+				void												PostList(const Context& newContext, bool byGlobalCorrection);
 				void												Initialize();
 			protected:
 
@@ -7933,13 +7966,14 @@ Undo Redo
 					void									Redo();
 				};
 
-				GuiTextBoxCommonInterface*					textBoxCommonInterface;
+				compositions::GuiGraphicsComposition*		ownerComposition;
 			public:
-				GuiTextBoxUndoRedoProcessor(GuiTextBoxCommonInterface* _textBoxCommonInterface);
+				GuiTextBoxUndoRedoProcessor();
 				~GuiTextBoxUndoRedoProcessor();
 
 				void										Attach(elements::GuiColorizedTextElement* element, SpinLock& elementModifyLock, compositions::GuiGraphicsComposition* _ownerComposition, vuint editVersion)override;
 				void										Detach()override;
+				void										TextEditPreview(TextEditPreviewStruct& arguments)override;
 				void										TextEditNotify(const TextEditNotifyStruct& arguments)override;
 				void										TextCaretChanged(const TextCaretChangedStruct& arguments)override;
 				void										TextEditFinished(vuint editVersion)override;
@@ -8041,10 +8075,11 @@ Common Interface
 				SpinLock											elementModifyLock;
 				collections::List<Ptr<ICommonTextEditCallback>>		textEditCallbacks;
 				collections::List<Ptr<ShortcutCommand>>				shortcutCommands;
+				bool												preventEnterDueToAutoComplete;
 
 				void												UpdateCaretPoint();
 				void												Move(TextPos pos, bool shift);
-				void												Modify(TextPos start, TextPos end, const WString& input);
+				void												Modify(TextPos start, TextPos end, const WString& input, bool asKeyInput);
 				bool												ProcessKey(vint code, bool shift, bool ctrl);
 					
 				void												OnGotFocus(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
@@ -8093,7 +8128,7 @@ Common Interface
 				void												SelectAll();
 				void												Select(TextPos begin, TextPos end);
 				WString												GetSelectionText();
-				void												SetSelectionText(const WString& value);
+				void												SetSelectionText(const WString& value, bool asKeyInput=false);
 				
 				WString												GetRowText(vint row);
 				WString												GetFragmentText(TextPos start, TextPos end);
