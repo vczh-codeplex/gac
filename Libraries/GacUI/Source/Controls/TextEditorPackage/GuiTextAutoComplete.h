@@ -33,6 +33,7 @@ GuiTextBoxAutoCompleteBase
 				compositions::GuiGraphicsComposition*				ownerComposition;
 				GuiPopup*											autoCompletePopup;
 				GuiTextList*										autoCompleteList;
+				TextPos												autoCompleteStartPosition;
 
 			public:
 				GuiTextBoxAutoCompleteBase();
@@ -55,6 +56,18 @@ GuiTextBoxAutoCompleteBase
 				/// <summary>Set the content of the list.</summary>
 				/// <param name="list">The content of the list.</param>
 				void												SetListContent(const collections::SortedList<WString>& items);
+				/// <summary>Get the last start position when the list is opened.</summary>
+				/// <returns>The start position.</returns>
+				TextPos												GetListStartPosition();
+				/// <summary>Select the previous item.</summary>
+				/// <returns>Returns true if this operation succeeded.</returns>
+				bool												SelectPreviousListItem();
+				/// <summary>Select the next item.</summary>
+				/// <returns>Returns true if this operation succeeded.</returns>
+				bool												SelectNextListItem();
+				/// <summary>Apply the selected item into the text box.</summary>
+				/// <returns>Returns true if this operation succeeded.</returns>
+				bool												ApplySelectedListItem();
 			};
 
 /***********************************************************************
