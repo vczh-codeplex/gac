@@ -35,6 +35,8 @@ GuiTextBoxAutoCompleteBase
 				GuiTextList*										autoCompleteList;
 				TextPos												autoCompleteStartPosition;
 
+				bool												IsPrefix(const WString& prefix, const WString& candidate);
+				void												HighlightList(const WString& editingText);
 			public:
 				GuiTextBoxAutoCompleteBase();
 				~GuiTextBoxAutoCompleteBase();
