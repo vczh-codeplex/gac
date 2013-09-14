@@ -235,5 +235,11 @@
       <cpp src="Main.cpp" />
       <description>This demo shows how to build a context sensitive colorizer for XML.</description>
     </demo>
+    <demo name="AutoComplete.Grammar">
+      <date>2013/9/14</date>
+      <image src="DXGUI_83.jpg" />
+      <cpp src="Main.cpp" />
+      <description>This demo shows how to build an editor with auto complete for GacUI embedded EBNF grammar.</description>
+    </demo>
   </category>
 </demos>

@@ -211,6 +211,7 @@
     <Content Include="Content\Demos\Demos.Controls.TextBox.AdvancedColorizer.jpg" />
     <Content Include="Content\Demos\Demos.Controls.TextBox.ContextColorizer.jpg" />
     <Content Include="Content\Demos\Demos.Controls.Tooltip.RichTextAndResource.jpg" />
+    <Content Include="Content\Demos\Demos.Editor.AutoComplete.Grammar.jpg" />
     <Content Include="Content\Demos\Demos.Editor.Colorizer.Grammar.jpg" />
     <Content Include="Content\Demos\Demos.Editor.Colorizer.Json.jpg" />
     <Content Include="Content\Demos\Demos.Editor.Colorizer.Xml.jpg" />
@@ -234,6 +235,8 @@
     <Content Include="Content\Demos\Demos.Rendering.RawAPI.Direct2D.jpg" />
     <Content Include="Content\Demos\Demos.Rendering.RawAPI.GDI.jpg" />
     <Content Include="Content\Demos\Demos.Template.Window.CustomizedBorder.jpg" />
+    <Content Include="Content\Demos\Editor.AutoComplete.Grammar\DXGUI_83.jpg" />
+    <Content Include="Content\Demos\Editor.AutoComplete.Grammar\Main.cpp" />
     <Content Include="Content\Demos\Editor.Colorizer.Grammar\DXGUI_75.jpg" />
     <Content Include="Content\Demos\Editor.Colorizer.Grammar\Main.cpp" />
     <Content Include="Content\Demos\Editor.Colorizer.Json\DXGUI_76.jpg" />
