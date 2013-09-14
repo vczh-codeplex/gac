@@ -29,9 +29,9 @@ Common Operations
 				/// <summary>Callback data for text editing preview.</summary>
 				struct TextEditPreviewStruct
 				{
-					/// <summary>The start position of the selection before replacing.</summary>
+					/// <summary>The start position of the selection before replacing. This field can be modified.</summary>
 					TextPos								originalStart;
-					/// <summary>The end position of the selection before replacing.</summary>
+					/// <summary>The end position of the selection before replacing. This field can be modified.</summary>
 					TextPos								originalEnd;
 					/// <summary>The text of the selection before replacing.</summary>
 					WString								originalText;

@@ -69,6 +69,9 @@ GuiTextBoxAutoCompleteBase
 				/// <summary>Apply the selected item into the text box.</summary>
 				/// <returns>Returns true if this operation succeeded.</returns>
 				bool												ApplySelectedListItem();
+				/// <summary>Get the selected item.</summary>
+				/// <returns>The text of the selected item. Returns empty if there is no selected item.</returns>
+				WString												GetSelectedListItem();
 			};
 
 /***********************************************************************

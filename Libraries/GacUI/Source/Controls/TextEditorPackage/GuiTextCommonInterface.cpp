@@ -197,7 +197,16 @@ GuiTextBoxCommonInterface
 						{
 							textEditCallbacks[i]->TextEditPreview(arguments);
 						}
+						
 						inputText=arguments.inputText;
+						if(originalStart!=arguments.originalStart || originalEnd!=arguments.originalEnd)
+						{
+							originalStart=arguments.originalStart;
+							originalEnd=arguments.originalEnd;
+							originalText=textElement->GetLines().GetText(originalStart, originalEnd);
+							start=originalStart;
+							end=originalEnd;
+						}
 					}
 
 					SPIN_LOCK(elementModifyLock)
