@@ -244,11 +244,11 @@ GuiTextBoxAutoCompleteBase
 						vint result=INVLOC.Compare(editingText, text, Locale::IgnoreCase);
 						if(result<=0)
 						{
-							first=middle+1;
+							last=middle-1;
 						}
 						else
 						{
-							last=middle-1;
+							first=middle+1;
 						}
 					}
 
