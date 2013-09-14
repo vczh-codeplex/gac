@@ -193,6 +193,14 @@ GuiTextBoxAutoCompleteBase
 				return true;
 			}
 
+			WString GuiTextBoxAutoCompleteBase::GetSelectedListItem()
+			{
+				if(!IsListOpening()) return L"";
+				if(autoCompleteList->GetSelectedItems().Count()==0) return L"";
+				vint index=autoCompleteList->GetSelectedItems()[0];
+				return autoCompleteList->GetItems()[index]->GetText();
+			}
+
 /***********************************************************************
 GuiGrammarAutoComplete
 ***********************************************************************/
@@ -217,6 +225,24 @@ GuiGrammarAutoComplete
 			{
 				GuiTextBoxAutoCompleteBase::TextEditPreview(arguments);
 				RepeatingParsingExecutor::CallbackBase::TextEditPreview(arguments);
+
+				if(IsListOpening() && arguments.keyInput && arguments.originalText==L"" && arguments.inputText!=L"")
+				{
+					WString selectedItem=GetSelectedListItem();
+					if(selectedItem!=L"")
+					{
+						TextPos begin=GetListStartPosition();
+						TextPos end=arguments.originalStart;
+						WString editingText=element->GetLines().GetText(begin, end);
+						editingText+=arguments.inputText;
+						if(grammarParser->GetTable()->GetLexer().Walk().IsClosedToken(editingText))
+						{
+							arguments.originalStart=begin;
+							arguments.inputText=selectedItem+arguments.inputText;
+							CloseList();
+						}
+					}
+				}
 			}
 
 			void GuiGrammarAutoComplete::TextEditNotify(const TextEditNotifyStruct& arguments)
