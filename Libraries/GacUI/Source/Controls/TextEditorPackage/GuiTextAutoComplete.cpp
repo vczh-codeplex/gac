@@ -226,20 +226,23 @@ GuiGrammarAutoComplete
 				GuiTextBoxAutoCompleteBase::TextEditPreview(arguments);
 				RepeatingParsingExecutor::CallbackBase::TextEditPreview(arguments);
 
-				if(IsListOpening() && arguments.keyInput && arguments.originalText==L"" && arguments.inputText!=L"")
+				if(element && elementModifyLock)
 				{
-					WString selectedItem=GetSelectedListItem();
-					if(selectedItem!=L"")
+					if(IsListOpening() && arguments.keyInput && arguments.originalText==L"" && arguments.inputText!=L"")
 					{
-						TextPos begin=GetListStartPosition();
-						TextPos end=arguments.originalStart;
-						WString editingText=element->GetLines().GetText(begin, end);
-						editingText+=arguments.inputText;
-						if(grammarParser->GetTable()->GetLexer().Walk().IsClosedToken(editingText))
+						WString selectedItem=GetSelectedListItem();
+						if(selectedItem!=L"")
 						{
-							arguments.originalStart=begin;
-							arguments.inputText=selectedItem+arguments.inputText;
-							CloseList();
+							TextPos begin=GetListStartPosition();
+							TextPos end=arguments.originalStart;
+							WString editingText=element->GetLines().GetText(begin, end);
+							editingText+=arguments.inputText;
+							if(grammarParser->GetTable()->GetLexer().Walk().IsClosedToken(editingText))
+							{
+								arguments.originalStart=begin;
+								arguments.inputText=selectedItem+arguments.inputText;
+								CloseList();
+							}
 						}
 					}
 				}
@@ -255,6 +258,13 @@ GuiGrammarAutoComplete
 					SPIN_LOCK(editTraceLock)
 					{
 						editTrace.Add(arguments);
+					}
+
+					if(IsListOpening())
+					{
+						TextPos begin=GetListStartPosition();
+						TextPos end=arguments.inputEnd;
+						WString editingText=element->GetLines().GetText(begin, end);
 					}
 				}
 			}
