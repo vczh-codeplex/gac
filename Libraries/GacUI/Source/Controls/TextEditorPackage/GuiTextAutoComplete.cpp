@@ -914,8 +914,8 @@ GuiGrammarAutoComplete
 
 			void GuiGrammarAutoComplete::PostList(const Context& newContext)
 			{
-				bool openList=true;
-				bool keepListState=false;
+				bool openList=true;			// true: make the list visible
+				bool keepListState=false;	// true: don't change the list visibility
 				Ptr<AutoCompleteData> autoComplete=newContext.autoComplete;
 
 				// if failed to get the auto complete list, close
@@ -959,7 +959,7 @@ GuiGrammarAutoComplete
 								{
 									keepListState=false;
 								}
-								// if the edit position goes before the start position of the auto complete, close
+								// if the edit position goes before the start position of the auto complete, refresh
 								if(trace.inputEnd<=startPosition)
 								{
 									openList=false;
