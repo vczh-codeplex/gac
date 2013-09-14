@@ -185,6 +185,7 @@ GuiTextBoxAutoCompleteBase
 				TextPos end=ci->GetCaretEnd();
 				ci->Select(begin, end);
 				ci->SetSelectionText(selectedItem);
+				CloseList();
 				return true;
 			}
 
