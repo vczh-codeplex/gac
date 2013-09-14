@@ -167,7 +167,7 @@ GuiGrammarAutoComplete
 				void												ExecuteCalculateList(Context& newContext);
 
 				void												Execute(const RepeatingParsingOutput& input)override;
-				void												PostList(const Context& newContext);
+				void												PostList(const Context& newContext, bool byGlobalCorrection);
 				void												Initialize();
 			protected:
 

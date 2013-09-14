@@ -95,7 +95,7 @@ Common Interface
 
 				void												UpdateCaretPoint();
 				void												Move(TextPos pos, bool shift);
-				void												Modify(TextPos start, TextPos end, const WString& input);
+				void												Modify(TextPos start, TextPos end, const WString& input, bool asKeyInput);
 				bool												ProcessKey(vint code, bool shift, bool ctrl);
 					
 				void												OnGotFocus(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
@@ -169,7 +169,8 @@ Common Interface
 				WString												GetSelectionText();
 				/// <summary>Set the selected text.</summary>
 				/// <param name="value">The selected text.</param>
-				void												SetSelectionText(const WString& value);
+				/// <param name="asKeyInput">Set to true to let to text box treat this changing as input by the keyboard.</param>
+				void												SetSelectionText(const WString& value, bool asKeyInput=false);
 				
 				/// <summary>Get the text from a specified row number.</summary>
 				/// <returns>The text from a specified row number.</returns>

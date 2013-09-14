@@ -171,7 +171,7 @@ GuiTextBoxCommonInterface
 				}
 			}
 
-			void GuiTextBoxCommonInterface::Modify(TextPos start, TextPos end, const WString& input)
+			void GuiTextBoxCommonInterface::Modify(TextPos start, TextPos end, const WString& input, bool asKeyInput)
 			{
 				if(start>end)
 				{
@@ -200,6 +200,7 @@ GuiTextBoxCommonInterface
 					arguments.inputEnd=end;
 					arguments.inputText=inputText;
 					arguments.editVersion=editVersion;
+					arguments.keyInput=asKeyInput;
 					for(vint i=0;i<textEditCallbacks.Count();i++)
 					{
 						textEditCallbacks[i]->TextEditNotify(arguments);
@@ -477,7 +478,7 @@ GuiTextBoxCommonInterface
 				{
 					if(!readonly && arguments.code!=VKEY_ESCAPE && arguments.code!=VKEY_BACK && !arguments.ctrl)
 					{
-						SetSelectionText(WString(arguments.code));
+						SetSelectionText(WString(arguments.code), true);
 					}
 				}
 			}
@@ -566,7 +567,7 @@ GuiTextBoxCommonInterface
 						end.row=textElement->GetLines().GetCount()-1;
 						end.column=textElement->GetLines().GetLine(end.row).dataLength;
 					}
-					Modify(TextPos(), end, value);
+					Modify(TextPos(), end, value, false);
 				}
 			}
 
@@ -702,9 +703,9 @@ GuiTextBoxCommonInterface
 				return textElement->GetLines().GetText(selectionBegin, selectionEnd);
 			}
 
-			void GuiTextBoxCommonInterface::SetSelectionText(const WString& value)
+			void GuiTextBoxCommonInterface::SetSelectionText(const WString& value, bool asKeyInput)
 			{
-				Modify(textElement->GetCaretBegin(), textElement->GetCaretEnd(), value);
+				Modify(textElement->GetCaretBegin(), textElement->GetCaretEnd(), value, asKeyInput);
 			}
 
 			WString GuiTextBoxCommonInterface::GetRowText(vint row)

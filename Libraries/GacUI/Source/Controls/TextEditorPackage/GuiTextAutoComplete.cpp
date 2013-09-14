@@ -933,11 +933,13 @@ GuiGrammarAutoComplete
 					}
 				}
 				Context newContext;
+				bool byGlobalCorrection=false;
 
 				if(input.node)
 				{
 					newContext.input=input;
 					ExecuteRefresh(newContext);
+					byGlobalCorrection=true;
 				}
 				else
 				{
@@ -967,13 +969,17 @@ GuiGrammarAutoComplete
 					OnContextFinishedAsync(context);
 					GetApplication()->InvokeInMainThread([=]()
 					{
-						PostList(newContext);
+						PostList(newContext, byGlobalCorrection);
 					});
 				}
 			}
 
-			void GuiGrammarAutoComplete::PostList(const Context& newContext)
+			void GuiGrammarAutoComplete::PostList(const Context& newContext, bool byGlobalCorrection)
 			{
+				if(byGlobalCorrection && !IsListOpening())
+				{
+					return;
+				}
 				bool openList=true;			// true: make the list visible
 				bool keepListState=false;	// true: don't change the list visibility
 				Ptr<AutoCompleteData> autoComplete=newContext.autoComplete;
@@ -1003,6 +1009,15 @@ GuiGrammarAutoComplete
 						if(traceIndex>0 && editTrace[traceIndex-1].editVersion==context.input.editVersion)
 						{
 							traceIndex--;
+						}
+						// if the edit version is not created by keyboard input, close
+						if(traceIndex>=0)
+						{
+							TextEditNotifyStruct& trace=editTrace[traceIndex];
+							if(!trace.keyInput)
+							{
+								openList=false;
+							}
 						}
 
 						// scan all traces from the calculation's edit version until now

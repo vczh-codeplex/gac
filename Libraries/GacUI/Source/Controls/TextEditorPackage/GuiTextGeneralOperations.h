@@ -43,9 +43,12 @@ Common Operations
 					WString								inputText;
 					/// <summary>The created edit version.</summary>
 					vuint								editVersion;
+					/// <summary>True if this modification is raised by the keyboard.</summary>
+					bool								keyInput;
 
 					TextEditNotifyStruct()
 						:editVersion(0)
+						,keyInput(false)
 					{
 					}
 				};
