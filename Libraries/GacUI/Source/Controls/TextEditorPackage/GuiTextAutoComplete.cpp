@@ -32,52 +32,6 @@ GuiTextBoxAutoCompleteBase
 				return false;
 			}
 
-			void GuiTextBoxAutoCompleteBase::HighlightList(const WString& editingText)
-			{
-				vint first=0;
-				vint last=autoCompleteList->GetItems().Count()-1;
-				vint selected=-1;
-
-				while(first<=last)
-				{
-					vint middle=(first+last)/2;
-					WString text=autoCompleteList->GetItems()[middle]->GetText();
-					if(IsPrefix(editingText, text))
-					{
-						selected=middle;
-						break;
-					}
-
-					vint result=INVLOC.Compare(editingText, text, Locale::IgnoreCase);
-					if(result<=0)
-					{
-						first=middle+1;
-					}
-					else
-					{
-						last=middle-1;
-					}
-				}
-
-				while(selected>0)
-				{
-					WString text=autoCompleteList->GetItems()[selected-1]->GetText();
-					if(IsPrefix(editingText, text))
-					{
-						selected--;
-					}
-					else
-					{
-						break;
-					}
-				}
-
-				if(selected!=-1)
-				{
-					autoCompleteList->SetSelected(selected, true);
-				}
-			}
-
 			GuiTextBoxAutoCompleteBase::GuiTextBoxAutoCompleteBase()
 				:element(0)
 				,elementModifyLock(0)
@@ -267,6 +221,55 @@ GuiTextBoxAutoCompleteBase
 				if(autoCompleteList->GetSelectedItems().Count()==0) return L"";
 				vint index=autoCompleteList->GetSelectedItems()[0];
 				return autoCompleteList->GetItems()[index]->GetText();
+			}
+
+			void GuiTextBoxAutoCompleteBase::HighlightList(const WString& editingText)
+			{
+				if(IsListOpening())
+				{
+					vint first=0;
+					vint last=autoCompleteList->GetItems().Count()-1;
+					vint selected=-1;
+
+					while(first<=last)
+					{
+						vint middle=(first+last)/2;
+						WString text=autoCompleteList->GetItems()[middle]->GetText();
+						if(IsPrefix(editingText, text))
+						{
+							selected=middle;
+							break;
+						}
+
+						vint result=INVLOC.Compare(editingText, text, Locale::IgnoreCase);
+						if(result<=0)
+						{
+							first=middle+1;
+						}
+						else
+						{
+							last=middle-1;
+						}
+					}
+
+					while(selected>0)
+					{
+						WString text=autoCompleteList->GetItems()[selected-1]->GetText();
+						if(IsPrefix(editingText, text))
+						{
+							selected--;
+						}
+						else
+						{
+							break;
+						}
+					}
+
+					if(selected!=-1)
+					{
+						autoCompleteList->SetSelected(selected, true);
+					}
+				}
 			}
 
 /***********************************************************************
@@ -1101,6 +1104,7 @@ GuiGrammarAutoComplete
 				}
 				
 				TextPos startPosition, endPosition;
+				WString editingText;
 				if(openList)
 				{
 					SPIN_LOCK(editTraceLock)
@@ -1165,7 +1169,7 @@ GuiGrammarAutoComplete
 				// if the input text from the start position to the current position crosses a token, close
 				if(openList && element)
 				{
-					WString editingText=element->GetLines().GetText(startPosition, endPosition);
+					editingText=element->GetLines().GetText(startPosition, endPosition);
 					if(grammarParser->GetTable()->GetLexer().Walk().IsClosedToken(editingText))
 					{
 						openList=false;
@@ -1220,6 +1224,11 @@ GuiGrammarAutoComplete
 					{
 						CloseList();
 					}
+				}
+
+				if(IsListOpening())
+				{
+					HighlightList(editingText);
 				}
 			}
 

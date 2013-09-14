@@ -36,7 +36,6 @@ GuiTextBoxAutoCompleteBase
 				TextPos												autoCompleteStartPosition;
 
 				bool												IsPrefix(const WString& prefix, const WString& candidate);
-				void												HighlightList(const WString& editingText);
 			public:
 				GuiTextBoxAutoCompleteBase();
 				~GuiTextBoxAutoCompleteBase();
@@ -74,6 +73,9 @@ GuiTextBoxAutoCompleteBase
 				/// <summary>Get the selected item.</summary>
 				/// <returns>The text of the selected item. Returns empty if there is no selected item.</returns>
 				WString												GetSelectedListItem();
+				/// <summary>Highlight a candidate item in the list.</summary>
+				/// <param name="editingText">The text to match an item.</param>
+				void												HighlightList(const WString& editingText);
 			};
 
 /***********************************************************************
