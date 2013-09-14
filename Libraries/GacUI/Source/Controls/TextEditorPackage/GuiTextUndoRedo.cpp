@@ -148,6 +148,10 @@ GuiTextBoxUndoRedoProcessor
 				ClearUndoRedo();
 			}
 
+			void GuiTextBoxUndoRedoProcessor::TextEditPreview(TextEditPreviewStruct& arguments)
+			{
+			}
+
 			void GuiTextBoxUndoRedoProcessor::TextEditNotify(const TextEditNotifyStruct& arguments)
 			{
 				Ptr<EditStep> step=new EditStep;

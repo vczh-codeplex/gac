@@ -185,6 +185,21 @@ GuiTextBoxCommonInterface
 				WString inputText=input;
 				if(callback->BeforeModify(start, end, originalText, inputText))
 				{
+					{
+						ICommonTextEditCallback::TextEditPreviewStruct arguments;
+						arguments.originalStart=originalStart;
+						arguments.originalEnd=originalEnd;
+						arguments.originalText=originalText;
+						arguments.inputText=inputText;
+						arguments.editVersion=editVersion;
+						arguments.keyInput=asKeyInput;
+						for(vint i=0;i<textEditCallbacks.Count();i++)
+						{
+							textEditCallbacks[i]->TextEditPreview(arguments);
+						}
+						inputText=arguments.inputText;
+					}
+
 					SPIN_LOCK(elementModifyLock)
 					{
 						end=textElement->GetLines().Modify(start, end, inputText);
@@ -192,18 +207,20 @@ GuiTextBoxCommonInterface
 					callback->AfterModify(originalStart, originalEnd, originalText, start, end, inputText);
 					
 					editVersion++;
-					ICommonTextEditCallback::TextEditNotifyStruct arguments;
-					arguments.originalStart=originalStart;
-					arguments.originalEnd=originalEnd;
-					arguments.originalText=originalText;
-					arguments.inputStart=start;
-					arguments.inputEnd=end;
-					arguments.inputText=inputText;
-					arguments.editVersion=editVersion;
-					arguments.keyInput=asKeyInput;
-					for(vint i=0;i<textEditCallbacks.Count();i++)
 					{
-						textEditCallbacks[i]->TextEditNotify(arguments);
+						ICommonTextEditCallback::TextEditNotifyStruct arguments;
+						arguments.originalStart=originalStart;
+						arguments.originalEnd=originalEnd;
+						arguments.originalText=originalText;
+						arguments.inputStart=start;
+						arguments.inputEnd=end;
+						arguments.inputText=inputText;
+						arguments.editVersion=editVersion;
+						arguments.keyInput=asKeyInput;
+						for(vint i=0;i<textEditCallbacks.Count();i++)
+						{
+							textEditCallbacks[i]->TextEditNotify(arguments);
+						}
 					}
 
 					Move(end, false);

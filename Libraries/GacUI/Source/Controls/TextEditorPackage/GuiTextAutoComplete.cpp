@@ -64,6 +64,10 @@ GuiTextBoxAutoCompleteBase
 				}
 			}
 
+			void GuiTextBoxAutoCompleteBase::TextEditPreview(TextEditPreviewStruct& arguments)
+			{
+			}
+
 			void GuiTextBoxAutoCompleteBase::TextEditNotify(const TextEditNotifyStruct& arguments)
 			{
 			}
@@ -207,6 +211,12 @@ GuiGrammarAutoComplete
 				{
 					EnsureAutoCompleteFinished();
 				}
+			}
+
+			void GuiGrammarAutoComplete::TextEditPreview(TextEditPreviewStruct& arguments)
+			{
+				GuiTextBoxAutoCompleteBase::TextEditPreview(arguments);
+				RepeatingParsingExecutor::CallbackBase::TextEditPreview(arguments);
 			}
 
 			void GuiGrammarAutoComplete::TextEditNotify(const TextEditNotifyStruct& arguments)
@@ -998,9 +1008,12 @@ GuiGrammarAutoComplete
 				{
 					SPIN_LOCK(editTraceLock)
 					{
-						// if the edit version is invalid, close
+						// if the edit version is invalid, cancel
 						vint traceIndex=UnsafeGetEditTraceIndex(newContext.modifiedEditVersion);
-						if(traceIndex==-1) openList=false;
+						if(traceIndex==-1)
+						{
+							return;
+						}
 						// an edit version has two trace at most, for text change and caret change, here we peak the text change
 						if(traceIndex>0 && editTrace[traceIndex-1].editVersion==context.modifiedEditVersion)
 						{
