@@ -372,7 +372,7 @@ GuiTextBoxCommonInterface
 							{
 								ProcessKey(VKEY_LEFT, true, false);
 							}
-							SetSelectionText(L"");
+							SetSelectionText(L"", true);
 						}
 						return true;
 					}
@@ -396,7 +396,7 @@ GuiTextBoxCommonInterface
 							{
 								ProcessKey(VKEY_RIGHT, true, false);
 							}
-							SetSelectionText(L"");
+							SetSelectionText(L"", true);
 						}
 						return true;
 					}
