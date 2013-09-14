@@ -976,10 +976,6 @@ GuiGrammarAutoComplete
 
 			void GuiGrammarAutoComplete::PostList(const Context& newContext, bool byGlobalCorrection)
 			{
-				if(byGlobalCorrection && !IsListOpening())
-				{
-					return;
-				}
 				bool openList=true;			// true: make the list visible
 				bool keepListState=false;	// true: don't change the list visibility
 				Ptr<AutoCompleteData> autoComplete=newContext.autoComplete;
@@ -1003,10 +999,10 @@ GuiGrammarAutoComplete
 					SPIN_LOCK(editTraceLock)
 					{
 						// if the edit version is invalid, close
-						vint traceIndex=UnsafeGetEditTraceIndex(newContext.input.editVersion);
+						vint traceIndex=UnsafeGetEditTraceIndex(newContext.modifiedEditVersion);
 						if(traceIndex==-1) openList=false;
 						// an edit version has two trace at most, for text change and caret change, here we peak the text change
-						if(traceIndex>0 && editTrace[traceIndex-1].editVersion==context.input.editVersion)
+						if(traceIndex>0 && editTrace[traceIndex-1].editVersion==context.modifiedEditVersion)
 						{
 							traceIndex--;
 						}
@@ -1048,6 +1044,12 @@ GuiGrammarAutoComplete
 							editTrace.RemoveRange(0, traceIndex);
 						}
 					}
+				}
+
+				// if there is a global correction send to the UI thread but the list is not opening, cancel
+				if(byGlobalCorrection && !IsListOpening())
+				{
+					return;
 				}
 
 				// if the input text from the start position to the current position crosses a token, close
