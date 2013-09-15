@@ -169,8 +169,10 @@ Common Interface
 				WString												GetSelectionText();
 				/// <summary>Set the selected text.</summary>
 				/// <param name="value">The selected text.</param>
-				/// <param name="asKeyInput">Set to true to let to text box treat this changing as input by the keyboard.</param>
-				void												SetSelectionText(const WString& value, bool asKeyInput=false);
+				void												SetSelectionText(const WString& value);
+				/// <summary>Set the selected text and let to text box treat this changing as input by the keyboard.</summary>
+				/// <param name="value">The selected text.</param>
+				void												SetSelectionTextAsKeyInput(const WString& value);
 				
 				/// <summary>Get the text from a specified row number.</summary>
 				/// <returns>The text from a specified row number.</returns>
