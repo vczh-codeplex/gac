@@ -310,28 +310,38 @@ Visitor Pattern Implementation
 Parser Function
 ***********************************************************************/
 
-			vl::Ptr<vl::parsing::ParsingTreeNode> JsonParseAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)
+			vl::Ptr<vl::parsing::ParsingTreeNode> JsonParseAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors)
 			{
 				vl::parsing::tabling::ParsingState state(input, table);
 				state.Reset(L"JRoot");
 				vl::Ptr<vl::parsing::tabling::ParsingGeneralParser> parser=vl::parsing::tabling::CreateStrictParser(table);
-				vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
 				vl::Ptr<vl::parsing::ParsingTreeNode> node=parser->Parse(state, errors);
 				return node;
 			}
 
-			vl::Ptr<JsonNode> JsonParse(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)
+			vl::Ptr<vl::parsing::ParsingTreeNode> JsonParseAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)
+			{
+				vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
+				return JsonParseAsParsingTreeNode(input, table, errors);
+			}
+
+			vl::Ptr<JsonNode> JsonParse(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors)
 			{
 				vl::parsing::tabling::ParsingState state(input, table);
 				state.Reset(L"JRoot");
 				vl::Ptr<vl::parsing::tabling::ParsingGeneralParser> parser=vl::parsing::tabling::CreateStrictParser(table);
-				vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
 				vl::Ptr<vl::parsing::ParsingTreeNode> node=parser->Parse(state, errors);
-				if(node)
+				if(node && errors.Count()==0)
 				{
 					return JsonConvertParsingTreeNode(node, state.GetTokens()).Cast<JsonNode>();
 				}
 				return 0;
+			}
+
+			vl::Ptr<JsonNode> JsonParse(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)
+			{
+				vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
+				return JsonParse(input, table, errors);
 			}
 
 /***********************************************************************
