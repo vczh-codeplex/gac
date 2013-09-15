@@ -908,6 +908,10 @@ TEST_CASE(TestRegexCapture)
 void TestRegexLexer1Validation(List<RegexToken>& tokens)
 {
 	TEST_ASSERT(tokens.Count()==9);
+	for(vint i=0;i<tokens.Count();i++)
+	{
+		TEST_ASSERT(tokens[i].completeToken==true);
+	}
 	//[vczh]
 	TEST_ASSERT(tokens[0].start==0);
 	TEST_ASSERT(tokens[0].length==4);
@@ -1005,6 +1009,10 @@ TEST_CASE(TestRegexLexer1)
 void TestRegexLexer2Validation(List<RegexToken>& tokens)
 {
 	TEST_ASSERT(tokens.Count()==19);
+	for(vint i=0;i<tokens.Count();i++)
+	{
+		TEST_ASSERT(tokens[i].completeToken==true);
+	}
 	//[12345]
 	TEST_ASSERT(tokens[0].start==0);
 	TEST_ASSERT(tokens[0].length==5);
@@ -1316,6 +1324,49 @@ TEST_CASE(TestRegexLexer4)
 			TEST_ASSERT(tokens[0].rowEnd==0);
 			TEST_ASSERT(tokens[0].columnEnd==1);
 		}
+	}
+}
+
+void TestRegexLexer5Validation(List<RegexToken>& tokens)
+{
+	TEST_ASSERT(tokens.Count()==2);
+	//[123]
+	TEST_ASSERT(tokens[0].start==0);
+	TEST_ASSERT(tokens[0].length==3);
+	TEST_ASSERT(tokens[0].token==0);
+	TEST_ASSERT(tokens[0].rowStart==0);
+	TEST_ASSERT(tokens[0].columnStart==0);
+	TEST_ASSERT(tokens[0].rowEnd==0);
+	TEST_ASSERT(tokens[0].columnEnd==2);
+	TEST_ASSERT(tokens[0].completeToken==true);
+	//["456]
+	TEST_ASSERT(tokens[1].start==3);
+	TEST_ASSERT(tokens[1].length==4);
+	TEST_ASSERT(tokens[1].token==1);
+	TEST_ASSERT(tokens[1].rowStart==0);
+	TEST_ASSERT(tokens[1].columnStart==3);
+	TEST_ASSERT(tokens[1].rowEnd==0);
+	TEST_ASSERT(tokens[1].columnEnd==6);
+	TEST_ASSERT(tokens[1].completeToken==false);
+}
+
+TEST_CASE(TestRegexLexer5)
+{
+	List<WString> codes;
+	codes.Add(L"/d+");
+	codes.Add(L"\"[^\"]*\"");
+	RegexLexer lexer(codes);
+
+	WString input=L"123\"456";
+	{
+		List<RegexToken> tokens;
+		CopyFrom(tokens, lexer.Parse(input));
+		TestRegexLexer5Validation(tokens);
+	}
+	{
+		List<RegexToken> tokens;
+		lexer.Parse(input).ReadToEnd(tokens);
+		TestRegexLexer5Validation(tokens);
 	}
 }
 
