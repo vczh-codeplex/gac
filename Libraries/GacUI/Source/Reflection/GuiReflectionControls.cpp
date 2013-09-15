@@ -1245,6 +1245,7 @@ Type Declaration
 				CLASS_MEMBER_METHOD(Paste, NO_PARAMETER)
 				CLASS_MEMBER_METHOD(SelectAll, NO_PARAMETER)
 				CLASS_MEMBER_METHOD(Select, {L"begin" _ L"end"})
+				CLASS_MEMBER_METHOD(SetSelectionTextAsKeyInput, {L"value"})
 				CLASS_MEMBER_METHOD(GetRowText, {L"row"})
 				CLASS_MEMBER_METHOD(GetFragmentText, {L"start" _ L"end"})
 				CLASS_MEMBER_METHOD(GetRowWidth, {L"row"})

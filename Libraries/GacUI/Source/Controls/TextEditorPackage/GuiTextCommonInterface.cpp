@@ -398,7 +398,7 @@ GuiTextBoxCommonInterface
 							{
 								ProcessKey(VKEY_LEFT, true, false);
 							}
-							SetSelectionText(L"", true);
+							SetSelectionTextAsKeyInput(L"");
 						}
 						return true;
 					}
@@ -422,7 +422,7 @@ GuiTextBoxCommonInterface
 							{
 								ProcessKey(VKEY_RIGHT, true, false);
 							}
-							SetSelectionText(L"", true);
+							SetSelectionTextAsKeyInput(L"");
 						}
 						return true;
 					}
@@ -504,7 +504,7 @@ GuiTextBoxCommonInterface
 				{
 					if(!readonly && arguments.code!=VKEY_ESCAPE && arguments.code!=VKEY_BACK && !arguments.ctrl)
 					{
-						SetSelectionText(WString(arguments.code), true);
+						SetSelectionTextAsKeyInput(WString(arguments.code));
 					}
 				}
 			}
@@ -729,9 +729,14 @@ GuiTextBoxCommonInterface
 				return textElement->GetLines().GetText(selectionBegin, selectionEnd);
 			}
 
-			void GuiTextBoxCommonInterface::SetSelectionText(const WString& value, bool asKeyInput)
+			void GuiTextBoxCommonInterface::SetSelectionText(const WString& value)
 			{
-				Modify(textElement->GetCaretBegin(), textElement->GetCaretEnd(), value, asKeyInput);
+				Modify(textElement->GetCaretBegin(), textElement->GetCaretEnd(), value, false);
+			}
+
+			void GuiTextBoxCommonInterface::SetSelectionTextAsKeyInput(const WString& value)
+			{
+				Modify(textElement->GetCaretBegin(), textElement->GetCaretEnd(), value, true);
 			}
 
 			WString GuiTextBoxCommonInterface::GetRowText(vint row)
