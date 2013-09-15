@@ -118,6 +118,7 @@ namespace vl
 			vint										token;
 			const wchar_t*								reading;
 			vint										codeIndex;
+			bool										completeToken;
 
 			vint										rowStart;
 			vint										columnStart;

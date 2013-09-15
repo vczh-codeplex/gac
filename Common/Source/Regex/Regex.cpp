@@ -440,6 +440,7 @@ RegexTokens
 					token.start=0;
 					token.length=0;
 					token.token=-2;
+					token.completeToken=true;
 				}
 				token.rowStart=rowStart;
 				token.columnStart=columnStart;
@@ -451,10 +452,28 @@ RegexTokens
 				while(*reading)
 				{
 					vint id=-1;
+					bool completeToken=true;
 					if(!pure->MatchHead(reading, start, result))
 					{
 						result.start=reading-start;
-						result.length=1;
+
+						if(id==-1 && result.terminateState!=-1)
+						{
+							vint state=pure->GetRelatedFinalState(result.terminateState);
+							if(state!=-1)
+							{
+								id=stateTokens[state];
+							}
+						}
+
+						if(id==-1)
+						{
+							result.length=1;
+						}
+						else
+						{
+							completeToken=false;
+						}
 					}
 					else
 					{
@@ -465,6 +484,7 @@ RegexTokens
 						token.start=result.start;
 						token.length=result.length;
 						token.token=id;
+						token.completeToken=completeToken;
 					}
 					else if(token.token==id && id==-1)
 					{
@@ -478,6 +498,7 @@ RegexTokens
 						cacheToken.length=result.length;
 						cacheToken.codeIndex=codeIndex;
 						cacheToken.token=id;
+						cacheToken.completeToken=completeToken;
 					}
 					reading+=result.length;
 					if(cacheAvailable)
@@ -854,6 +875,7 @@ RegexLexer
 
 		RegexTokens RegexLexer::Parse(const WString& code, vint codeIndex)const
 		{
+			pure->PrepareForRelatedFinalStateTable();
 			return RegexTokens(pure, stateTokens, code, codeIndex);
 		}
 

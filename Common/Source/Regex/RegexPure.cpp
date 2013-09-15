@@ -88,14 +88,19 @@ PureInterpretor
 			result.start=input-start;
 			result.length=-1;
 			result.finalState=-1;
+			result.terminateState=-1;
 
 			vint currentState=startState;
+			vint terminateState=-1;
+			vint terminateLength=-1;
 			const wchar_t* read=input;
 			while(currentState!=-1)
 			{
+				terminateState=currentState;
+				terminateLength=read-input;
 				if(finalState[currentState])
 				{
-					result.length=read-input;
+					result.length=terminateLength;
 					result.finalState=currentState;
 				}
 				if(!*read)break;
@@ -103,7 +108,19 @@ PureInterpretor
 				currentState=transition[currentState][charIndex];
 			}
 
-			return result.finalState!=-1;
+			if(result.finalState==-1)
+			{
+				if(terminateLength>0)
+				{
+					result.terminateState=terminateState;
+				}
+				result.length=terminateLength;
+				return false;
+			}
+			else
+			{
+				return true;
+			}
 		}
 
 		bool PureInterpretor::Match(const wchar_t* input, const wchar_t* start, PureResult& result)

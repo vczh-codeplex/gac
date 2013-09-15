@@ -22,6 +22,7 @@ namespace vl
 			vint				start;
 			vint				length;
 			vint				finalState;
+			vint				terminateState;
 		};
 
 		class PureInterpretor : public Object
