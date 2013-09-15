@@ -73,7 +73,7 @@ Ptr<ParsingTable> CreateTable(Ptr<ParsingDefinition> definition, StreamWriter& w
 	LogParsingData(jointPDA, L"Marked Joint PDA", writer);
 	CheckError;
 
-	Ptr<ParsingTable> table=GenerateTableFromPDA(definition, jointPDA, ambiguity, errors);
+	Ptr<ParsingTable> table=GenerateTableFromPDA(definition, &symbolManager, jointPDA, ambiguity, errors);
 	LogParsingData(table, L"Table", writer);
 	if(!ambiguity)
 	{
@@ -105,7 +105,7 @@ public:
 
 	CodegenConfig()
 		:parsingTree(true)
-		,parserText(false)
+		,parserText(true)
 		,ambiguity(false)
 	{
 	}
@@ -165,8 +165,7 @@ public:
 			}
 			else if((match=regexParserText.Match(line)) && match->Success())
 			{
-				WString value=match->Groups().Get(L"value").Get(0).Value();
-				parserText=value==L"enabled";
+				// always enable parser text
 			}
 			else if((match=regexAmbiguity.Match(line)) && match->Success())
 			{
@@ -706,11 +705,25 @@ void WriteHeaderFile(const WString& name, Ptr<ParsingDefinition> definition, Ptr
 				writer.WriteString(L"extern vl::Ptr<vl::parsing::ParsingTreeNode> ");
 				writer.WriteString(config.codeClassPrefix);
 				writer.WriteString(name);
+				writer.WriteLine(L"AsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);");
+				
+				writer.WriteString(prefix);
+				writer.WriteString(L"extern vl::Ptr<vl::parsing::ParsingTreeNode> ");
+				writer.WriteString(config.codeClassPrefix);
+				writer.WriteString(name);
 				writer.WriteLine(L"AsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);");
 			}
 			if(config.parsingTree)
 			{
 				ParsingSymbol* type=rule->GetDescriptorSymbol();
+				writer.WriteString(prefix);
+				writer.WriteString(L"extern ");
+				PrintTypeForValue(type, config.codeClassPrefix, writer);
+				writer.WriteString(L" ");
+				writer.WriteString(config.codeClassPrefix);
+				writer.WriteString(name);
+				writer.WriteLine(L"(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);");
+				
 				writer.WriteString(prefix);
 				writer.WriteString(L"extern ");
 				PrintTypeForValue(type, config.codeClassPrefix, writer);
@@ -1520,7 +1533,7 @@ void WriteParserFunctions(ParsingSymbolManager* manager, const WString& prefix, 
 				writer.WriteString(L"vl::Ptr<vl::parsing::ParsingTreeNode> ");
 				writer.WriteString(config.codeClassPrefix);
 				writer.WriteString(name);
-				writer.WriteLine(L"AsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)");
+				writer.WriteLine(L"AsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors)");
 				writer.WriteString(prefix);
 				writer.WriteLine(L"{");
 			
@@ -1533,12 +1546,32 @@ void WriteParserFunctions(ParsingSymbolManager* manager, const WString& prefix, 
 				writer.WriteString(prefix);
 				writer.WriteLine(L"\tvl::Ptr<vl::parsing::tabling::ParsingGeneralParser> parser=vl::parsing::tabling::CreateStrictParser(table);");
 				writer.WriteString(prefix);
-				writer.WriteLine(L"\tvl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;");
-				writer.WriteString(prefix);
 				writer.WriteLine(L"\tvl::Ptr<vl::parsing::ParsingTreeNode> node=parser->Parse(state, errors);");
 
 				writer.WriteString(prefix);
 				writer.WriteLine(L"\treturn node;");
+				writer.WriteString(prefix);
+				writer.WriteLine(L"}");
+				writer.WriteLine(L"");
+
+				//--------------------------------------------------------
+				
+				writer.WriteString(prefix);
+				writer.WriteString(L"vl::Ptr<vl::parsing::ParsingTreeNode> ");
+				writer.WriteString(config.codeClassPrefix);
+				writer.WriteString(name);
+				writer.WriteLine(L"AsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)");
+				writer.WriteString(prefix);
+				writer.WriteLine(L"{");
+
+				writer.WriteString(prefix);
+				writer.WriteLine(L"\tvl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;");
+				writer.WriteString(prefix);
+				writer.WriteString(L"\treturn ");
+				writer.WriteString(config.codeClassPrefix);
+				writer.WriteString(name);
+				writer.WriteLine(L"AsParsingTreeNode(input, table, errors);");
+
 				writer.WriteString(prefix);
 				writer.WriteLine(L"}");
 				writer.WriteLine(L"");
@@ -1551,7 +1584,7 @@ void WriteParserFunctions(ParsingSymbolManager* manager, const WString& prefix, 
 				writer.WriteString(L" ");
 				writer.WriteString(config.codeClassPrefix);
 				writer.WriteString(name);
-				writer.WriteLine(L"(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)");
+				writer.WriteLine(L"(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors)");
 				writer.WriteString(prefix);
 				writer.WriteLine(L"{");
 			
@@ -1564,12 +1597,10 @@ void WriteParserFunctions(ParsingSymbolManager* manager, const WString& prefix, 
 				writer.WriteString(prefix);
 				writer.WriteLine(L"\tvl::Ptr<vl::parsing::tabling::ParsingGeneralParser> parser=vl::parsing::tabling::CreateStrictParser(table);");
 				writer.WriteString(prefix);
-				writer.WriteLine(L"\tvl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;");
-				writer.WriteString(prefix);
 				writer.WriteLine(L"\tvl::Ptr<vl::parsing::ParsingTreeNode> node=parser->Parse(state, errors);");
 
 				writer.WriteString(prefix);
-				writer.WriteLine(L"\tif(node)");
+				writer.WriteLine(L"\tif(node && errors.Count()==0)");
 				writer.WriteString(prefix);
 				writer.WriteLine(L"\t{");
 				writer.WriteString(prefix);
@@ -1583,6 +1614,28 @@ void WriteParserFunctions(ParsingSymbolManager* manager, const WString& prefix, 
 			
 				writer.WriteString(prefix);
 				writer.WriteLine(L"\treturn 0;");
+				writer.WriteString(prefix);
+				writer.WriteLine(L"}");
+				writer.WriteLine(L"");
+
+				//--------------------------------------------------------
+
+				writer.WriteString(prefix);
+				PrintTypeForValue(type, config.codeClassPrefix, writer);
+				writer.WriteString(L" ");
+				writer.WriteString(config.codeClassPrefix);
+				writer.WriteString(name);
+				writer.WriteLine(L"(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)");
+				writer.WriteString(prefix);
+				writer.WriteLine(L"{");
+
+				writer.WriteString(prefix);
+				writer.WriteLine(L"\tvl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;");
+				writer.WriteString(prefix);
+				writer.WriteString(L"\treturn ");
+				writer.WriteString(config.codeClassPrefix);
+				writer.WriteString(name);
+				writer.WriteLine(L"(input, table, errors);");
 				writer.WriteString(prefix);
 				writer.WriteLine(L"}");
 				writer.WriteLine(L"");

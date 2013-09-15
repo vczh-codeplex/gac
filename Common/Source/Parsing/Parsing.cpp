@@ -44,7 +44,7 @@ ParsingGeneralParser
 				for(vint i=0;i<state.GetTokens().Count();i++)
 				{
 					const RegexToken* token=&state.GetTokens().Get(i);
-					if(token->token==-1)
+					if(token->token==-1 || !token->completeToken)
 					{
 						errors.Add(new ParsingError(token, L"Unrecognizable token: \""+WString(token->reading, token->length)+L"\"."));
 					}

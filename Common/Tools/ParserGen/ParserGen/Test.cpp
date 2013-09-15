@@ -276,73 +276,9 @@ Parsing Tree Conversion Driver Implementation
 
 				vl::Ptr<vl::parsing::ParsingTreeCustomBase> ConvertClass(vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)override
 				{
-					if(obj->GetType()==L"Element")
-					{
-						vl::Ptr<XmlElement> tree = new XmlElement;
-						vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
-						Fill(tree, obj, tokens);
-						Fill(tree.Cast<XmlNode>(), obj, tokens);
-						return tree;
-					}
-					else if(obj->GetType()==L"Text")
-					{
-						vl::Ptr<XmlText> tree = new XmlText;
-						vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
-						Fill(tree, obj, tokens);
-						Fill(tree.Cast<XmlNode>(), obj, tokens);
-						return tree;
-					}
-					else if(obj->GetType()==L"Document")
-					{
-						vl::Ptr<XmlDocument> tree = new XmlDocument;
-						vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
-						Fill(tree, obj, tokens);
-						Fill(tree.Cast<XmlNode>(), obj, tokens);
-						return tree;
-					}
-					else if(obj->GetType()==L"FirstClass.SecondClassChild")
-					{
-						vl::Ptr<XmlFirstClass::XmlSecondClassChild> tree = new XmlFirstClass::XmlSecondClassChild;
-						vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
-						Fill(tree, obj, tokens);
-						Fill(tree.Cast<XmlFirstClass::XmlSecondClass>(), obj, tokens);
-						return tree;
-					}
-					else if(obj->GetType()==L"Comment")
+					if(obj->GetType()==L"Comment")
 					{
 						vl::Ptr<XmlComment> tree = new XmlComment;
-						vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
-						Fill(tree, obj, tokens);
-						Fill(tree.Cast<XmlNode>(), obj, tokens);
-						return tree;
-					}
-					else if(obj->GetType()==L"Instruction")
-					{
-						vl::Ptr<XmlInstruction> tree = new XmlInstruction;
-						vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
-						Fill(tree, obj, tokens);
-						Fill(tree.Cast<XmlNode>(), obj, tokens);
-						return tree;
-					}
-					else if(obj->GetType()==L"Attribute")
-					{
-						vl::Ptr<XmlAttribute> tree = new XmlAttribute;
-						vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
-						Fill(tree, obj, tokens);
-						Fill(tree.Cast<XmlNode>(), obj, tokens);
-						return tree;
-					}
-					else if(obj->GetType()==L"ThirdClassChild")
-					{
-						vl::Ptr<XmlThirdClassChild> tree = new XmlThirdClassChild;
-						vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
-						Fill(tree, obj, tokens);
-						Fill(tree.Cast<XmlFirstClass::XmlSecondClass::XmlThirdClass>(), obj, tokens);
-						return tree;
-					}
-					else if(obj->GetType()==L"CData")
-					{
-						vl::Ptr<XmlCData> tree = new XmlCData;
 						vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
 						Fill(tree, obj, tokens);
 						Fill(tree.Cast<XmlNode>(), obj, tokens);
@@ -356,9 +292,73 @@ Parsing Tree Conversion Driver Implementation
 						Fill(tree.Cast<XmlFirstClass>(), obj, tokens);
 						return tree;
 					}
+					else if(obj->GetType()==L"Instruction")
+					{
+						vl::Ptr<XmlInstruction> tree = new XmlInstruction;
+						vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
+						Fill(tree, obj, tokens);
+						Fill(tree.Cast<XmlNode>(), obj, tokens);
+						return tree;
+					}
+					else if(obj->GetType()==L"Document")
+					{
+						vl::Ptr<XmlDocument> tree = new XmlDocument;
+						vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
+						Fill(tree, obj, tokens);
+						Fill(tree.Cast<XmlNode>(), obj, tokens);
+						return tree;
+					}
+					else if(obj->GetType()==L"ThirdClassChild")
+					{
+						vl::Ptr<XmlThirdClassChild> tree = new XmlThirdClassChild;
+						vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
+						Fill(tree, obj, tokens);
+						Fill(tree.Cast<XmlFirstClass::XmlSecondClass::XmlThirdClass>(), obj, tokens);
+						return tree;
+					}
+					else if(obj->GetType()==L"FirstClass.SecondClassChild")
+					{
+						vl::Ptr<XmlFirstClass::XmlSecondClassChild> tree = new XmlFirstClass::XmlSecondClassChild;
+						vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
+						Fill(tree, obj, tokens);
+						Fill(tree.Cast<XmlFirstClass::XmlSecondClass>(), obj, tokens);
+						return tree;
+					}
 					else if(obj->GetType()==L"AmbiguousNode")
 					{
 						vl::Ptr<XmlAmbiguousNode> tree = new XmlAmbiguousNode;
+						vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
+						Fill(tree, obj, tokens);
+						Fill(tree.Cast<XmlNode>(), obj, tokens);
+						return tree;
+					}
+					else if(obj->GetType()==L"CData")
+					{
+						vl::Ptr<XmlCData> tree = new XmlCData;
+						vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
+						Fill(tree, obj, tokens);
+						Fill(tree.Cast<XmlNode>(), obj, tokens);
+						return tree;
+					}
+					else if(obj->GetType()==L"Text")
+					{
+						vl::Ptr<XmlText> tree = new XmlText;
+						vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
+						Fill(tree, obj, tokens);
+						Fill(tree.Cast<XmlNode>(), obj, tokens);
+						return tree;
+					}
+					else if(obj->GetType()==L"Attribute")
+					{
+						vl::Ptr<XmlAttribute> tree = new XmlAttribute;
+						vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
+						Fill(tree, obj, tokens);
+						Fill(tree.Cast<XmlNode>(), obj, tokens);
+						return tree;
+					}
+					else if(obj->GetType()==L"Element")
+					{
+						vl::Ptr<XmlElement> tree = new XmlElement;
 						vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
 						Fill(tree, obj, tokens);
 						Fill(tree.Cast<XmlNode>(), obj, tokens);
@@ -381,49 +381,9 @@ Parsing Tree Conversion Driver Implementation
 Parsing Tree Conversion Implementation
 ***********************************************************************/
 
-			vl::Ptr<XmlElement> XmlElement::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
-			{
-				return XmlConvertParsingTreeNode(node, tokens).Cast<XmlElement>();
-			}
-
-			vl::Ptr<XmlText> XmlText::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
-			{
-				return XmlConvertParsingTreeNode(node, tokens).Cast<XmlText>();
-			}
-
-			vl::Ptr<XmlDocument> XmlDocument::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
-			{
-				return XmlConvertParsingTreeNode(node, tokens).Cast<XmlDocument>();
-			}
-
-			vl::Ptr<XmlFirstClass::XmlSecondClassChild> XmlFirstClass::XmlSecondClassChild::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
-			{
-				return XmlConvertParsingTreeNode(node, tokens).Cast<XmlFirstClass::XmlSecondClassChild>();
-			}
-
 			vl::Ptr<XmlComment> XmlComment::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
 			{
 				return XmlConvertParsingTreeNode(node, tokens).Cast<XmlComment>();
-			}
-
-			vl::Ptr<XmlInstruction> XmlInstruction::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
-			{
-				return XmlConvertParsingTreeNode(node, tokens).Cast<XmlInstruction>();
-			}
-
-			vl::Ptr<XmlAttribute> XmlAttribute::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
-			{
-				return XmlConvertParsingTreeNode(node, tokens).Cast<XmlAttribute>();
-			}
-
-			vl::Ptr<XmlThirdClassChild> XmlThirdClassChild::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
-			{
-				return XmlConvertParsingTreeNode(node, tokens).Cast<XmlThirdClassChild>();
-			}
-
-			vl::Ptr<XmlCData> XmlCData::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
-			{
-				return XmlConvertParsingTreeNode(node, tokens).Cast<XmlCData>();
 			}
 
 			vl::Ptr<XmlFirstClassChild> XmlFirstClassChild::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
@@ -431,9 +391,49 @@ Parsing Tree Conversion Implementation
 				return XmlConvertParsingTreeNode(node, tokens).Cast<XmlFirstClassChild>();
 			}
 
+			vl::Ptr<XmlInstruction> XmlInstruction::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
+			{
+				return XmlConvertParsingTreeNode(node, tokens).Cast<XmlInstruction>();
+			}
+
+			vl::Ptr<XmlDocument> XmlDocument::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
+			{
+				return XmlConvertParsingTreeNode(node, tokens).Cast<XmlDocument>();
+			}
+
+			vl::Ptr<XmlThirdClassChild> XmlThirdClassChild::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
+			{
+				return XmlConvertParsingTreeNode(node, tokens).Cast<XmlThirdClassChild>();
+			}
+
+			vl::Ptr<XmlFirstClass::XmlSecondClassChild> XmlFirstClass::XmlSecondClassChild::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
+			{
+				return XmlConvertParsingTreeNode(node, tokens).Cast<XmlFirstClass::XmlSecondClassChild>();
+			}
+
 			vl::Ptr<XmlAmbiguousNode> XmlAmbiguousNode::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
 			{
 				return XmlConvertParsingTreeNode(node, tokens).Cast<XmlAmbiguousNode>();
+			}
+
+			vl::Ptr<XmlCData> XmlCData::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
+			{
+				return XmlConvertParsingTreeNode(node, tokens).Cast<XmlCData>();
+			}
+
+			vl::Ptr<XmlText> XmlText::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
+			{
+				return XmlConvertParsingTreeNode(node, tokens).Cast<XmlText>();
+			}
+
+			vl::Ptr<XmlAttribute> XmlAttribute::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
+			{
+				return XmlConvertParsingTreeNode(node, tokens).Cast<XmlAttribute>();
+			}
+
+			vl::Ptr<XmlElement> XmlElement::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
+			{
+				return XmlConvertParsingTreeNode(node, tokens).Cast<XmlElement>();
 			}
 
 /***********************************************************************
@@ -499,52 +499,72 @@ Visitor Pattern Implementation
 Parser Function
 ***********************************************************************/
 
-			vl::Ptr<vl::parsing::ParsingTreeNode> XmlParseDocumentAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)
+			vl::Ptr<vl::parsing::ParsingTreeNode> XmlParseDocumentAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors)
 			{
 				vl::parsing::tabling::ParsingState state(input, table);
 				state.Reset(L"XDocument");
 				vl::Ptr<vl::parsing::tabling::ParsingGeneralParser> parser=vl::parsing::tabling::CreateStrictParser(table);
-				vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
 				vl::Ptr<vl::parsing::ParsingTreeNode> node=parser->Parse(state, errors);
 				return node;
 			}
 
-			vl::Ptr<XmlDocument> XmlParseDocument(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)
+			vl::Ptr<vl::parsing::ParsingTreeNode> XmlParseDocumentAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)
+			{
+				vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
+				return XmlParseDocumentAsParsingTreeNode(input, table, errors);
+			}
+
+			vl::Ptr<XmlDocument> XmlParseDocument(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors)
 			{
 				vl::parsing::tabling::ParsingState state(input, table);
 				state.Reset(L"XDocument");
 				vl::Ptr<vl::parsing::tabling::ParsingGeneralParser> parser=vl::parsing::tabling::CreateStrictParser(table);
-				vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
 				vl::Ptr<vl::parsing::ParsingTreeNode> node=parser->Parse(state, errors);
-				if(node)
+				if(node && errors.Count()==0)
 				{
 					return XmlConvertParsingTreeNode(node, state.GetTokens()).Cast<XmlDocument>();
 				}
 				return 0;
 			}
 
-			vl::Ptr<vl::parsing::ParsingTreeNode> XmlParseElementAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)
+			vl::Ptr<XmlDocument> XmlParseDocument(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)
+			{
+				vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
+				return XmlParseDocument(input, table, errors);
+			}
+
+			vl::Ptr<vl::parsing::ParsingTreeNode> XmlParseElementAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors)
 			{
 				vl::parsing::tabling::ParsingState state(input, table);
 				state.Reset(L"XElement");
 				vl::Ptr<vl::parsing::tabling::ParsingGeneralParser> parser=vl::parsing::tabling::CreateStrictParser(table);
-				vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
 				vl::Ptr<vl::parsing::ParsingTreeNode> node=parser->Parse(state, errors);
 				return node;
 			}
 
-			vl::Ptr<XmlElement> XmlParseElement(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)
+			vl::Ptr<vl::parsing::ParsingTreeNode> XmlParseElementAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)
+			{
+				vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
+				return XmlParseElementAsParsingTreeNode(input, table, errors);
+			}
+
+			vl::Ptr<XmlElement> XmlParseElement(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors)
 			{
 				vl::parsing::tabling::ParsingState state(input, table);
 				state.Reset(L"XElement");
 				vl::Ptr<vl::parsing::tabling::ParsingGeneralParser> parser=vl::parsing::tabling::CreateStrictParser(table);
-				vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
 				vl::Ptr<vl::parsing::ParsingTreeNode> node=parser->Parse(state, errors);
-				if(node)
+				if(node && errors.Count()==0)
 				{
 					return XmlConvertParsingTreeNode(node, state.GetTokens()).Cast<XmlElement>();
 				}
 				return 0;
+			}
+
+			vl::Ptr<XmlElement> XmlParseElement(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)
+			{
+				vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
+				return XmlParseElement(input, table, errors);
 			}
 
 /***********************************************************************
@@ -553,1186 +573,12 @@ Table Generation
 
 			vl::Ptr<vl::parsing::tabling::ParsingTable> XmlLoadTable()
 			{
-				vl::Ptr<vl::parsing::tabling::ParsingTable> table=new vl::parsing::tabling::ParsingTable(15-vl::parsing::tabling::ParsingTable::UserTokenStart, 1, 49, 8);
-				#define SET_TOKEN_INFO(INDEX, NAME, REGEX) table->SetTokenInfo(INDEX, vl::parsing::tabling::ParsingTable::TokenInfo(NAME, REGEX));
-				#define SET_DISCARD_TOKEN_INFO(INDEX, NAME, REGEX) table->SetDiscardTokenInfo(INDEX, vl::parsing::tabling::ParsingTable::TokenInfo(NAME, REGEX));
-				#define SET_STATE_INFO(INDEX, RULE, STATE, EXPR) table->SetStateInfo(INDEX, vl::parsing::tabling::ParsingTable::StateInfo(RULE, STATE, EXPR));
-				#define SET_RULE_INFO(INDEX, NAME, TYPE, STARTSTATE) table->SetRuleInfo(INDEX, vl::parsing::tabling::ParsingTable::RuleInfo(NAME, TYPE, L"", STARTSTATE));
-				#define SET_AMBIGUOUS_RULE_INFO(INDEX, NAME, TYPE, AMBIGUOUSTYPE, STARTSTATE) table->SetRuleInfo(INDEX, vl::parsing::tabling::ParsingTable::RuleInfo(NAME, TYPE, AMBIGUOUSTYPE, STARTSTATE));
-				#define BEGIN_TRANSITION_BAG(STATE, TOKEN) {vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag; table->SetTransitionBag(STATE, TOKEN, bag);
-				#define BEGIN_TRANSITION_ITEM(TOKEN, TARGETSTATE) {vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(TOKEN, TARGETSTATE); bag->transitionItems.Add(item);
-				#define END_TRANSITION_ITEM }
-				#define END_TRANSITION_BAG }
-				#define ITEM_STACK_PATTERN(STATE) item->stackPattern.Add(STATE);
-				#define ITEM_INSTRUCTION(TYPE, STATE, NAME, VALUE, RULE) item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::TYPE, STATE, NAME, VALUE, RULE));
-				#define BEGIN_LOOK_AHEAD(STATE) {vl::Ptr<vl::parsing::tabling::ParsingTable::LookAheadInfo> lookAheadInfo=new vl::parsing::tabling::ParsingTable::LookAheadInfo; item->lookAheads.Add(lookAheadInfo); lookAheadInfo->state=STATE;
-				#define LOOK_AHEAD(TOKEN) lookAheadInfo->tokens.Add(TOKEN);
-				#define END_LOOK_AHEAD }
-
-				SET_TOKEN_INFO(0, L"", L"")
-				SET_TOKEN_INFO(1, L"", L"")
-				SET_TOKEN_INFO(2, L"", L"")
-				SET_TOKEN_INFO(3, L"INSTRUCTION_OPEN", L"/</?")
-				SET_TOKEN_INFO(4, L"INSTRUCTION_CLOSE", L"/?/>")
-				SET_TOKEN_INFO(5, L"COMPLEX_ELEMENT_OPEN", L"/<//")
-				SET_TOKEN_INFO(6, L"SINGLE_ELEMENT_CLOSE", L"///>")
-				SET_TOKEN_INFO(7, L"ELEMENT_OPEN", L"/<")
-				SET_TOKEN_INFO(8, L"ELEMENT_CLOSE", L"/>")
-				SET_TOKEN_INFO(9, L"EQUAL", L"/=")
-				SET_TOKEN_INFO(10, L"NAME", L"[a-zA-Z0-9:_/-]+")
-				SET_TOKEN_INFO(11, L"ATTVALUE", L"\"([^\"&]|&/l+;)*\"")
-				SET_TOKEN_INFO(12, L"COMMENT", L"/</!--[^>]*/>")
-				SET_TOKEN_INFO(13, L"CDATA", L"/</!/[CDATA/[([^/]]|/][^/]]|/]/][^>])*/]/]/>")
-				SET_TOKEN_INFO(14, L"TEXT", L"([^<>\"& /r/n/ta-zA-Z0-9:_/-]|&/l+;)+")
-
-				SET_DISCARD_TOKEN_INFO(0, L"SPACE", L"/s+")
-
-				SET_STATE_INFO(0, L"XSubNode", L"XSubNode.RootStart", L"¡ñ $<XSubNode>")
-				SET_STATE_INFO(1, L"XSubNode", L"XSubNode.Start", L"¡¤ <XSubNode>")
-				SET_STATE_INFO(2, L"XText", L"XText.1", L"<XText>: NAME : content | EQUAL : content | TEXT : content as Text¡ñ")
-				SET_STATE_INFO(3, L"XCData", L"XCData.1", L"<XCData>: CDATA : content as CData¡ñ")
-				SET_STATE_INFO(4, L"XComment", L"XComment.1", L"<XComment>: COMMENT : content as Comment¡ñ")
-				SET_STATE_INFO(5, L"XElement", L"XElement.1", L"<XElement>: \"<\"¡ñ NAME : name { XAttribute : attributes } ( \"/>\" | \">\" { XSubNode : subNodes } \"</\" NAME : closingName \">\" ) as Element")
-				SET_STATE_INFO(6, L"XSubNode", L"XSubNode.RootEnd", L"$<XSubNode> ¡ñ")
-				SET_STATE_INFO(7, L"XElement", L"XElement.6", L"<XElement>: \"<\" NAME : name { XAttribute : attributes } ( \"/>\" | \">\" { XSubNode : subNodes } \"</\"¡ñ NAME : closingName \">\" ) as Element")
-				SET_STATE_INFO(8, L"XText", L"XText.RootEnd", L"$<XText> ¡ñ")
-				SET_STATE_INFO(9, L"XCData", L"XCData.RootEnd", L"$<XCData> ¡ñ")
-				SET_STATE_INFO(10, L"XInstruction", L"XInstruction.1", L"<XInstruction>: \"<?\"¡ñ NAME : name { XAttribute : attributes } \"?>\" as Instruction")
-				SET_STATE_INFO(11, L"XComment", L"XComment.RootEnd", L"$<XComment> ¡ñ")
-				SET_STATE_INFO(12, L"XElement", L"XElement.2", L"<XElement>: \"<\" NAME : name¡ñ { XAttribute : attributes } ( \"/>\" | \">\" { XSubNode : subNodes } \"</\" NAME : closingName \">\" ) as Element\r\n<XElement>: \"<\" NAME : name ¡ñ{ XAttribute : attributes } ( \"/>\" | \">\" { XSubNode : subNodes } \"</\" NAME : closingName \">\" ) as Element")
-				SET_STATE_INFO(13, L"XElement", L"XElement.7", L"<XElement>: \"<\" NAME : name { XAttribute : attributes } ( \"/>\" | \">\" { XSubNode : subNodes } \"</\" NAME : closingName¡ñ \">\" ) as Element")
-				SET_STATE_INFO(14, L"XInstruction", L"XInstruction.2", L"<XInstruction>: \"<?\" NAME : name¡ñ { XAttribute : attributes } \"?>\" as Instruction\r\n<XInstruction>: \"<?\" NAME : name ¡ñ{ XAttribute : attributes } \"?>\" as Instruction")
-				SET_STATE_INFO(15, L"XElement", L"XElement.4", L"<XElement>: \"<\" NAME : name { XAttribute : attributes } ( \"/>\" | \">\"¡ñ { XSubNode : subNodes } \"</\" NAME : closingName \">\" ) as Element\r\n<XElement>: \"<\" NAME : name { XAttribute : attributes } ( \"/>\" | \">\" ¡ñ{ XSubNode : subNodes } \"</\" NAME : closingName \">\" ) as Element")
-				SET_STATE_INFO(16, L"XElement", L"XElement.3", L"<XElement>: \"<\" NAME : name { XAttribute : attributes } ( \"/>\" | \">\" { XSubNode : subNodes } \"</\" NAME : closingName \">\" ) as Element¡ñ")
-				SET_STATE_INFO(17, L"XAttribute", L"XAttribute.1", L"<XAttribute>: NAME : name¡ñ \"=\" ATTVALUE : value as Attribute")
-				SET_STATE_INFO(18, L"XInstruction", L"XInstruction.3", L"<XInstruction>: \"<?\" NAME : name { XAttribute : attributes } \"?>\" as Instruction¡ñ")
-				SET_STATE_INFO(19, L"XDocument", L"XDocument.RootEnd", L"$<XDocument> ¡ñ")
-				SET_STATE_INFO(20, L"XElement", L"XElement.RootEnd", L"$<XElement> ¡ñ")
-				SET_STATE_INFO(21, L"XAttribute", L"XAttribute.2", L"<XAttribute>: NAME : name \"=\"¡ñ ATTVALUE : value as Attribute")
-				SET_STATE_INFO(22, L"XInstruction", L"XInstruction.RootEnd", L"$<XInstruction> ¡ñ")
-				SET_STATE_INFO(23, L"XAttribute", L"XAttribute.3", L"<XAttribute>: NAME : name \"=\" ATTVALUE : value as Attribute¡ñ")
-				SET_STATE_INFO(24, L"XAttribute", L"XAttribute.RootEnd", L"$<XAttribute> ¡ñ")
-				SET_STATE_INFO(25, L"XDocument", L"XDocument.RootStart", L"¡ñ $<XDocument>")
-				SET_STATE_INFO(26, L"XDocument", L"XDocument.Start", L"¡¤ <XDocument>")
-				SET_STATE_INFO(27, L"XAttribute", L"XAttribute.RootStart", L"¡ñ $<XAttribute>")
-				SET_STATE_INFO(28, L"XAttribute", L"XAttribute.Start", L"¡¤ <XAttribute>")
-				SET_STATE_INFO(29, L"XText", L"XText.RootStart", L"¡ñ $<XText>")
-				SET_STATE_INFO(30, L"XText", L"XText.Start", L"¡¤ <XText>")
-				SET_STATE_INFO(31, L"XComment", L"XComment.RootStart", L"¡ñ $<XComment>")
-				SET_STATE_INFO(32, L"XComment", L"XComment.Start", L"¡¤ <XComment>")
-				SET_STATE_INFO(33, L"XElement", L"XElement.RootStart", L"¡ñ $<XElement>")
-				SET_STATE_INFO(34, L"XElement", L"XElement.Start", L"¡¤ <XElement>")
-				SET_STATE_INFO(35, L"XInstruction", L"XInstruction.RootStart", L"¡ñ $<XInstruction>")
-				SET_STATE_INFO(36, L"XInstruction", L"XInstruction.Start", L"¡¤ <XInstruction>")
-				SET_STATE_INFO(37, L"XCData", L"XCData.RootStart", L"¡ñ $<XCData>")
-				SET_STATE_INFO(38, L"XCData", L"XCData.Start", L"¡¤ <XCData>")
-				SET_STATE_INFO(39, L"XSubNode", L"XSubNode.1", L"<XSubNode>: !XText | !XCData | !XComment | !XElement¡ñ")
-				SET_STATE_INFO(40, L"XDocument", L"XDocument.1", L"<XDocument>: { XInstruction : instructions | XComment : comments } XElement : rootElement as Document¡ñ")
-				SET_STATE_INFO(41, L"XDocument", L"XDocument.2", L"<XDocument>: ¡ñ{ XInstruction : instructions | XComment : comments } XElement : rootElement as Document")
-				SET_STATE_INFO(42, L"XDocument", L"XDocument.3", L"<XDocument>: { XInstruction : instructions | XComment : comments } XElement : rootElement as Document¡ñ")
-				SET_STATE_INFO(43, L"XAttribute", L"XAttribute.4", L"<XAttribute>: NAME : name \"=\" ATTVALUE : value as Attribute¡ñ")
-				SET_STATE_INFO(44, L"XText", L"XText.2", L"<XText>: NAME : content | EQUAL : content | TEXT : content as Text¡ñ")
-				SET_STATE_INFO(45, L"XComment", L"XComment.2", L"<XComment>: COMMENT : content as Comment¡ñ")
-				SET_STATE_INFO(46, L"XElement", L"XElement.5", L"<XElement>: \"<\" NAME : name { XAttribute : attributes } ( \"/>\" | \">\" { XSubNode : subNodes } \"</\" NAME : closingName \">\" ) as Element¡ñ")
-				SET_STATE_INFO(47, L"XInstruction", L"XInstruction.4", L"<XInstruction>: \"<?\" NAME : name { XAttribute : attributes } \"?>\" as Instruction¡ñ")
-				SET_STATE_INFO(48, L"XCData", L"XCData.2", L"<XCData>: CDATA : content as CData¡ñ")
-
-				SET_AMBIGUOUS_RULE_INFO(0, L"XSubNode", L"Node", L"AmbiguousNode", 0)
-				SET_RULE_INFO(1, L"XDocument", L"Document", 25)
-				SET_RULE_INFO(2, L"XAttribute", L"Attribute", 27)
-				SET_RULE_INFO(3, L"XText", L"Text", 29)
-				SET_RULE_INFO(4, L"XComment", L"Comment", 31)
-				SET_RULE_INFO(5, L"XElement", L"Element", 33)
-				SET_RULE_INFO(6, L"XInstruction", L"Instruction", 35)
-				SET_RULE_INFO(7, L"XCData", L"CData", 37)
-
-				BEGIN_TRANSITION_BAG(0, 0)
-
-					BEGIN_TRANSITION_ITEM(0, 1)
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(1, 7)
-
-					BEGIN_TRANSITION_ITEM(7, 5)
-					ITEM_INSTRUCTION(Shift, 1, L"", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(1, 9)
-
-					BEGIN_TRANSITION_ITEM(9, 2)
-					ITEM_INSTRUCTION(Shift, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"content", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(1, 10)
-
-					BEGIN_TRANSITION_ITEM(10, 2)
-					ITEM_INSTRUCTION(Shift, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"content", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(1, 12)
-
-					BEGIN_TRANSITION_ITEM(12, 4)
-					ITEM_INSTRUCTION(Shift, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"content", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(1, 13)
-
-					BEGIN_TRANSITION_ITEM(13, 3)
-					ITEM_INSTRUCTION(Shift, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"content", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(1, 14)
-
-					BEGIN_TRANSITION_ITEM(14, 2)
-					ITEM_INSTRUCTION(Shift, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"content", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(2, 1)
-
-					BEGIN_TRANSITION_ITEM(1, 8)
-					ITEM_INSTRUCTION(Create, 0, L"Text", L"", L"XText");
-					END_TRANSITION_ITEM
-
-					BEGIN_TRANSITION_ITEM(1, 6)
-					ITEM_STACK_PATTERN(1)
-					ITEM_INSTRUCTION(Create, 0, L"Text", L"", L"XText");
-					ITEM_INSTRUCTION(Reduce, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"", L"XSubNode");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(2, 5)
-
-					BEGIN_TRANSITION_ITEM(5, 7)
-					ITEM_STACK_PATTERN(1)
-					ITEM_STACK_PATTERN(15)
-					ITEM_INSTRUCTION(Create, 0, L"Text", L"", L"XText");
-					ITEM_INSTRUCTION(Reduce, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"", L"XSubNode");
-					ITEM_INSTRUCTION(Reduce, 15, L"", L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"subNodes", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(2, 7)
-
-					BEGIN_TRANSITION_ITEM(7, 5)
-					ITEM_STACK_PATTERN(1)
-					ITEM_STACK_PATTERN(15)
-					ITEM_INSTRUCTION(Create, 0, L"Text", L"", L"XText");
-					ITEM_INSTRUCTION(Reduce, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"", L"XSubNode");
-					ITEM_INSTRUCTION(Reduce, 15, L"", L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"subNodes", L"", L"");
-					ITEM_INSTRUCTION(Shift, 15, L"", L"", L"");
-					ITEM_INSTRUCTION(Shift, 1, L"", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(2, 9)
-
-					BEGIN_TRANSITION_ITEM(9, 2)
-					ITEM_STACK_PATTERN(1)
-					ITEM_STACK_PATTERN(15)
-					ITEM_INSTRUCTION(Create, 0, L"Text", L"", L"XText");
-					ITEM_INSTRUCTION(Reduce, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"", L"XSubNode");
-					ITEM_INSTRUCTION(Reduce, 15, L"", L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"subNodes", L"", L"");
-					ITEM_INSTRUCTION(Shift, 15, L"", L"", L"");
-					ITEM_INSTRUCTION(Shift, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"content", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(2, 10)
-
-					BEGIN_TRANSITION_ITEM(10, 2)
-					ITEM_STACK_PATTERN(1)
-					ITEM_STACK_PATTERN(15)
-					ITEM_INSTRUCTION(Create, 0, L"Text", L"", L"XText");
-					ITEM_INSTRUCTION(Reduce, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"", L"XSubNode");
-					ITEM_INSTRUCTION(Reduce, 15, L"", L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"subNodes", L"", L"");
-					ITEM_INSTRUCTION(Shift, 15, L"", L"", L"");
-					ITEM_INSTRUCTION(Shift, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"content", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(2, 12)
-
-					BEGIN_TRANSITION_ITEM(12, 4)
-					ITEM_STACK_PATTERN(1)
-					ITEM_STACK_PATTERN(15)
-					ITEM_INSTRUCTION(Create, 0, L"Text", L"", L"XText");
-					ITEM_INSTRUCTION(Reduce, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"", L"XSubNode");
-					ITEM_INSTRUCTION(Reduce, 15, L"", L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"subNodes", L"", L"");
-					ITEM_INSTRUCTION(Shift, 15, L"", L"", L"");
-					ITEM_INSTRUCTION(Shift, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"content", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(2, 13)
-
-					BEGIN_TRANSITION_ITEM(13, 3)
-					ITEM_STACK_PATTERN(1)
-					ITEM_STACK_PATTERN(15)
-					ITEM_INSTRUCTION(Create, 0, L"Text", L"", L"XText");
-					ITEM_INSTRUCTION(Reduce, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"", L"XSubNode");
-					ITEM_INSTRUCTION(Reduce, 15, L"", L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"subNodes", L"", L"");
-					ITEM_INSTRUCTION(Shift, 15, L"", L"", L"");
-					ITEM_INSTRUCTION(Shift, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"content", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(2, 14)
-
-					BEGIN_TRANSITION_ITEM(14, 2)
-					ITEM_STACK_PATTERN(1)
-					ITEM_STACK_PATTERN(15)
-					ITEM_INSTRUCTION(Create, 0, L"Text", L"", L"XText");
-					ITEM_INSTRUCTION(Reduce, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"", L"XSubNode");
-					ITEM_INSTRUCTION(Reduce, 15, L"", L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"subNodes", L"", L"");
-					ITEM_INSTRUCTION(Shift, 15, L"", L"", L"");
-					ITEM_INSTRUCTION(Shift, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"content", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(3, 1)
-
-					BEGIN_TRANSITION_ITEM(1, 9)
-					ITEM_INSTRUCTION(Create, 0, L"CData", L"", L"XCData");
-					END_TRANSITION_ITEM
-
-					BEGIN_TRANSITION_ITEM(1, 6)
-					ITEM_STACK_PATTERN(1)
-					ITEM_INSTRUCTION(Create, 0, L"CData", L"", L"XCData");
-					ITEM_INSTRUCTION(Reduce, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"", L"XSubNode");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(3, 5)
-
-					BEGIN_TRANSITION_ITEM(5, 7)
-					ITEM_STACK_PATTERN(1)
-					ITEM_STACK_PATTERN(15)
-					ITEM_INSTRUCTION(Create, 0, L"CData", L"", L"XCData");
-					ITEM_INSTRUCTION(Reduce, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"", L"XSubNode");
-					ITEM_INSTRUCTION(Reduce, 15, L"", L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"subNodes", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(3, 7)
-
-					BEGIN_TRANSITION_ITEM(7, 5)
-					ITEM_STACK_PATTERN(1)
-					ITEM_STACK_PATTERN(15)
-					ITEM_INSTRUCTION(Create, 0, L"CData", L"", L"XCData");
-					ITEM_INSTRUCTION(Reduce, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"", L"XSubNode");
-					ITEM_INSTRUCTION(Reduce, 15, L"", L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"subNodes", L"", L"");
-					ITEM_INSTRUCTION(Shift, 15, L"", L"", L"");
-					ITEM_INSTRUCTION(Shift, 1, L"", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(3, 9)
-
-					BEGIN_TRANSITION_ITEM(9, 2)
-					ITEM_STACK_PATTERN(1)
-					ITEM_STACK_PATTERN(15)
-					ITEM_INSTRUCTION(Create, 0, L"CData", L"", L"XCData");
-					ITEM_INSTRUCTION(Reduce, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"", L"XSubNode");
-					ITEM_INSTRUCTION(Reduce, 15, L"", L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"subNodes", L"", L"");
-					ITEM_INSTRUCTION(Shift, 15, L"", L"", L"");
-					ITEM_INSTRUCTION(Shift, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"content", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(3, 10)
-
-					BEGIN_TRANSITION_ITEM(10, 2)
-					ITEM_STACK_PATTERN(1)
-					ITEM_STACK_PATTERN(15)
-					ITEM_INSTRUCTION(Create, 0, L"CData", L"", L"XCData");
-					ITEM_INSTRUCTION(Reduce, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"", L"XSubNode");
-					ITEM_INSTRUCTION(Reduce, 15, L"", L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"subNodes", L"", L"");
-					ITEM_INSTRUCTION(Shift, 15, L"", L"", L"");
-					ITEM_INSTRUCTION(Shift, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"content", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(3, 12)
-
-					BEGIN_TRANSITION_ITEM(12, 4)
-					ITEM_STACK_PATTERN(1)
-					ITEM_STACK_PATTERN(15)
-					ITEM_INSTRUCTION(Create, 0, L"CData", L"", L"XCData");
-					ITEM_INSTRUCTION(Reduce, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"", L"XSubNode");
-					ITEM_INSTRUCTION(Reduce, 15, L"", L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"subNodes", L"", L"");
-					ITEM_INSTRUCTION(Shift, 15, L"", L"", L"");
-					ITEM_INSTRUCTION(Shift, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"content", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(3, 13)
-
-					BEGIN_TRANSITION_ITEM(13, 3)
-					ITEM_STACK_PATTERN(1)
-					ITEM_STACK_PATTERN(15)
-					ITEM_INSTRUCTION(Create, 0, L"CData", L"", L"XCData");
-					ITEM_INSTRUCTION(Reduce, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"", L"XSubNode");
-					ITEM_INSTRUCTION(Reduce, 15, L"", L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"subNodes", L"", L"");
-					ITEM_INSTRUCTION(Shift, 15, L"", L"", L"");
-					ITEM_INSTRUCTION(Shift, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"content", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(3, 14)
-
-					BEGIN_TRANSITION_ITEM(14, 2)
-					ITEM_STACK_PATTERN(1)
-					ITEM_STACK_PATTERN(15)
-					ITEM_INSTRUCTION(Create, 0, L"CData", L"", L"XCData");
-					ITEM_INSTRUCTION(Reduce, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"", L"XSubNode");
-					ITEM_INSTRUCTION(Reduce, 15, L"", L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"subNodes", L"", L"");
-					ITEM_INSTRUCTION(Shift, 15, L"", L"", L"");
-					ITEM_INSTRUCTION(Shift, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"content", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(4, 1)
-
-					BEGIN_TRANSITION_ITEM(1, 11)
-					ITEM_INSTRUCTION(Create, 0, L"Comment", L"", L"XComment");
-					END_TRANSITION_ITEM
-
-					BEGIN_TRANSITION_ITEM(1, 6)
-					ITEM_STACK_PATTERN(1)
-					ITEM_INSTRUCTION(Create, 0, L"Comment", L"", L"XComment");
-					ITEM_INSTRUCTION(Reduce, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"", L"XSubNode");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(4, 3)
-
-					BEGIN_TRANSITION_ITEM(3, 10)
-					ITEM_STACK_PATTERN(41)
-					ITEM_INSTRUCTION(Create, 0, L"Comment", L"", L"XComment");
-					ITEM_INSTRUCTION(Reduce, 41, L"", L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"comments", L"", L"");
-					ITEM_INSTRUCTION(Shift, 41, L"", L"", L"");
-					END_TRANSITION_ITEM
-
-					BEGIN_TRANSITION_ITEM(3, 10)
-					ITEM_STACK_PATTERN(26)
-					ITEM_INSTRUCTION(Create, 0, L"Comment", L"", L"XComment");
-					ITEM_INSTRUCTION(Reduce, 26, L"", L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"comments", L"", L"");
-					ITEM_INSTRUCTION(Shift, 41, L"", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(4, 5)
-
-					BEGIN_TRANSITION_ITEM(5, 7)
-					ITEM_STACK_PATTERN(1)
-					ITEM_STACK_PATTERN(15)
-					ITEM_INSTRUCTION(Create, 0, L"Comment", L"", L"XComment");
-					ITEM_INSTRUCTION(Reduce, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"", L"XSubNode");
-					ITEM_INSTRUCTION(Reduce, 15, L"", L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"subNodes", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(4, 7)
-
-					BEGIN_TRANSITION_ITEM(7, 5)
-					ITEM_STACK_PATTERN(41)
-					ITEM_INSTRUCTION(Create, 0, L"Comment", L"", L"XComment");
-					ITEM_INSTRUCTION(Reduce, 41, L"", L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"comments", L"", L"");
-					ITEM_INSTRUCTION(Shift, 41, L"", L"", L"");
-					END_TRANSITION_ITEM
-
-					BEGIN_TRANSITION_ITEM(7, 5)
-					ITEM_STACK_PATTERN(26)
-					ITEM_INSTRUCTION(Create, 0, L"Comment", L"", L"XComment");
-					ITEM_INSTRUCTION(Reduce, 26, L"", L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"comments", L"", L"");
-					ITEM_INSTRUCTION(Shift, 41, L"", L"", L"");
-					END_TRANSITION_ITEM
-
-					BEGIN_TRANSITION_ITEM(7, 5)
-					ITEM_STACK_PATTERN(1)
-					ITEM_STACK_PATTERN(15)
-					ITEM_INSTRUCTION(Create, 0, L"Comment", L"", L"XComment");
-					ITEM_INSTRUCTION(Reduce, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"", L"XSubNode");
-					ITEM_INSTRUCTION(Reduce, 15, L"", L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"subNodes", L"", L"");
-					ITEM_INSTRUCTION(Shift, 15, L"", L"", L"");
-					ITEM_INSTRUCTION(Shift, 1, L"", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(4, 9)
-
-					BEGIN_TRANSITION_ITEM(9, 2)
-					ITEM_STACK_PATTERN(1)
-					ITEM_STACK_PATTERN(15)
-					ITEM_INSTRUCTION(Create, 0, L"Comment", L"", L"XComment");
-					ITEM_INSTRUCTION(Reduce, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"", L"XSubNode");
-					ITEM_INSTRUCTION(Reduce, 15, L"", L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"subNodes", L"", L"");
-					ITEM_INSTRUCTION(Shift, 15, L"", L"", L"");
-					ITEM_INSTRUCTION(Shift, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"content", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(4, 10)
-
-					BEGIN_TRANSITION_ITEM(10, 2)
-					ITEM_STACK_PATTERN(1)
-					ITEM_STACK_PATTERN(15)
-					ITEM_INSTRUCTION(Create, 0, L"Comment", L"", L"XComment");
-					ITEM_INSTRUCTION(Reduce, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"", L"XSubNode");
-					ITEM_INSTRUCTION(Reduce, 15, L"", L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"subNodes", L"", L"");
-					ITEM_INSTRUCTION(Shift, 15, L"", L"", L"");
-					ITEM_INSTRUCTION(Shift, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"content", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(4, 12)
-
-					BEGIN_TRANSITION_ITEM(12, 4)
-					ITEM_STACK_PATTERN(41)
-					ITEM_INSTRUCTION(Create, 0, L"Comment", L"", L"XComment");
-					ITEM_INSTRUCTION(Reduce, 41, L"", L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"comments", L"", L"");
-					ITEM_INSTRUCTION(Shift, 41, L"", L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"content", L"", L"");
-					END_TRANSITION_ITEM
-
-					BEGIN_TRANSITION_ITEM(12, 4)
-					ITEM_STACK_PATTERN(26)
-					ITEM_INSTRUCTION(Create, 0, L"Comment", L"", L"XComment");
-					ITEM_INSTRUCTION(Reduce, 26, L"", L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"comments", L"", L"");
-					ITEM_INSTRUCTION(Shift, 41, L"", L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"content", L"", L"");
-					END_TRANSITION_ITEM
-
-					BEGIN_TRANSITION_ITEM(12, 4)
-					ITEM_STACK_PATTERN(1)
-					ITEM_STACK_PATTERN(15)
-					ITEM_INSTRUCTION(Create, 0, L"Comment", L"", L"XComment");
-					ITEM_INSTRUCTION(Reduce, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"", L"XSubNode");
-					ITEM_INSTRUCTION(Reduce, 15, L"", L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"subNodes", L"", L"");
-					ITEM_INSTRUCTION(Shift, 15, L"", L"", L"");
-					ITEM_INSTRUCTION(Shift, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"content", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(4, 13)
-
-					BEGIN_TRANSITION_ITEM(13, 3)
-					ITEM_STACK_PATTERN(1)
-					ITEM_STACK_PATTERN(15)
-					ITEM_INSTRUCTION(Create, 0, L"Comment", L"", L"XComment");
-					ITEM_INSTRUCTION(Reduce, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"", L"XSubNode");
-					ITEM_INSTRUCTION(Reduce, 15, L"", L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"subNodes", L"", L"");
-					ITEM_INSTRUCTION(Shift, 15, L"", L"", L"");
-					ITEM_INSTRUCTION(Shift, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"content", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(4, 14)
-
-					BEGIN_TRANSITION_ITEM(14, 2)
-					ITEM_STACK_PATTERN(1)
-					ITEM_STACK_PATTERN(15)
-					ITEM_INSTRUCTION(Create, 0, L"Comment", L"", L"XComment");
-					ITEM_INSTRUCTION(Reduce, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"", L"XSubNode");
-					ITEM_INSTRUCTION(Reduce, 15, L"", L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"subNodes", L"", L"");
-					ITEM_INSTRUCTION(Shift, 15, L"", L"", L"");
-					ITEM_INSTRUCTION(Shift, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"content", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(5, 10)
-
-					BEGIN_TRANSITION_ITEM(10, 12)
-					ITEM_INSTRUCTION(Assign, 0, L"name", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(7, 10)
-
-					BEGIN_TRANSITION_ITEM(10, 13)
-					ITEM_INSTRUCTION(Assign, 0, L"closingName", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(10, 10)
-
-					BEGIN_TRANSITION_ITEM(10, 14)
-					ITEM_INSTRUCTION(Assign, 0, L"name", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(12, 6)
-
-					BEGIN_TRANSITION_ITEM(6, 16)
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(12, 8)
-
-					BEGIN_TRANSITION_ITEM(8, 15)
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(12, 10)
-
-					BEGIN_TRANSITION_ITEM(10, 17)
-					ITEM_INSTRUCTION(Shift, 12, L"", L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"name", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(13, 8)
-
-					BEGIN_TRANSITION_ITEM(8, 16)
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(14, 4)
-
-					BEGIN_TRANSITION_ITEM(4, 18)
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(14, 10)
-
-					BEGIN_TRANSITION_ITEM(10, 17)
-					ITEM_INSTRUCTION(Shift, 14, L"", L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"name", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(15, 5)
-
-					BEGIN_TRANSITION_ITEM(5, 7)
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(15, 7)
-
-					BEGIN_TRANSITION_ITEM(7, 5)
-					ITEM_INSTRUCTION(Shift, 15, L"", L"", L"");
-					ITEM_INSTRUCTION(Shift, 1, L"", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(15, 9)
-
-					BEGIN_TRANSITION_ITEM(9, 2)
-					ITEM_INSTRUCTION(Shift, 15, L"", L"", L"");
-					ITEM_INSTRUCTION(Shift, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"content", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(15, 10)
-
-					BEGIN_TRANSITION_ITEM(10, 2)
-					ITEM_INSTRUCTION(Shift, 15, L"", L"", L"");
-					ITEM_INSTRUCTION(Shift, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"content", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(15, 12)
-
-					BEGIN_TRANSITION_ITEM(12, 4)
-					ITEM_INSTRUCTION(Shift, 15, L"", L"", L"");
-					ITEM_INSTRUCTION(Shift, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"content", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(15, 13)
-
-					BEGIN_TRANSITION_ITEM(13, 3)
-					ITEM_INSTRUCTION(Shift, 15, L"", L"", L"");
-					ITEM_INSTRUCTION(Shift, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"content", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(15, 14)
-
-					BEGIN_TRANSITION_ITEM(14, 2)
-					ITEM_INSTRUCTION(Shift, 15, L"", L"", L"");
-					ITEM_INSTRUCTION(Shift, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"content", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(16, 1)
-
-					BEGIN_TRANSITION_ITEM(1, 20)
-					ITEM_INSTRUCTION(Create, 0, L"Element", L"", L"XElement");
-					END_TRANSITION_ITEM
-
-					BEGIN_TRANSITION_ITEM(1, 19)
-					ITEM_STACK_PATTERN(41)
-					ITEM_INSTRUCTION(Create, 0, L"Element", L"", L"XElement");
-					ITEM_INSTRUCTION(Reduce, 41, L"", L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"rootElement", L"", L"");
-					ITEM_INSTRUCTION(Create, 0, L"Document", L"", L"XDocument");
-					END_TRANSITION_ITEM
-
-					BEGIN_TRANSITION_ITEM(1, 19)
-					ITEM_STACK_PATTERN(26)
-					ITEM_INSTRUCTION(Create, 0, L"Element", L"", L"XElement");
-					ITEM_INSTRUCTION(Reduce, 26, L"", L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"rootElement", L"", L"");
-					ITEM_INSTRUCTION(Create, 0, L"Document", L"", L"XDocument");
-					END_TRANSITION_ITEM
-
-					BEGIN_TRANSITION_ITEM(1, 6)
-					ITEM_STACK_PATTERN(1)
-					ITEM_INSTRUCTION(Create, 0, L"Element", L"", L"XElement");
-					ITEM_INSTRUCTION(Reduce, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"", L"XSubNode");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(16, 5)
-
-					BEGIN_TRANSITION_ITEM(5, 7)
-					ITEM_STACK_PATTERN(1)
-					ITEM_STACK_PATTERN(15)
-					ITEM_INSTRUCTION(Create, 0, L"Element", L"", L"XElement");
-					ITEM_INSTRUCTION(Reduce, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"", L"XSubNode");
-					ITEM_INSTRUCTION(Reduce, 15, L"", L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"subNodes", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(16, 7)
-
-					BEGIN_TRANSITION_ITEM(7, 5)
-					ITEM_STACK_PATTERN(1)
-					ITEM_STACK_PATTERN(15)
-					ITEM_INSTRUCTION(Create, 0, L"Element", L"", L"XElement");
-					ITEM_INSTRUCTION(Reduce, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"", L"XSubNode");
-					ITEM_INSTRUCTION(Reduce, 15, L"", L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"subNodes", L"", L"");
-					ITEM_INSTRUCTION(Shift, 15, L"", L"", L"");
-					ITEM_INSTRUCTION(Shift, 1, L"", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(16, 9)
-
-					BEGIN_TRANSITION_ITEM(9, 2)
-					ITEM_STACK_PATTERN(1)
-					ITEM_STACK_PATTERN(15)
-					ITEM_INSTRUCTION(Create, 0, L"Element", L"", L"XElement");
-					ITEM_INSTRUCTION(Reduce, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"", L"XSubNode");
-					ITEM_INSTRUCTION(Reduce, 15, L"", L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"subNodes", L"", L"");
-					ITEM_INSTRUCTION(Shift, 15, L"", L"", L"");
-					ITEM_INSTRUCTION(Shift, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"content", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(16, 10)
-
-					BEGIN_TRANSITION_ITEM(10, 2)
-					ITEM_STACK_PATTERN(1)
-					ITEM_STACK_PATTERN(15)
-					ITEM_INSTRUCTION(Create, 0, L"Element", L"", L"XElement");
-					ITEM_INSTRUCTION(Reduce, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"", L"XSubNode");
-					ITEM_INSTRUCTION(Reduce, 15, L"", L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"subNodes", L"", L"");
-					ITEM_INSTRUCTION(Shift, 15, L"", L"", L"");
-					ITEM_INSTRUCTION(Shift, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"content", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(16, 12)
-
-					BEGIN_TRANSITION_ITEM(12, 4)
-					ITEM_STACK_PATTERN(1)
-					ITEM_STACK_PATTERN(15)
-					ITEM_INSTRUCTION(Create, 0, L"Element", L"", L"XElement");
-					ITEM_INSTRUCTION(Reduce, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"", L"XSubNode");
-					ITEM_INSTRUCTION(Reduce, 15, L"", L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"subNodes", L"", L"");
-					ITEM_INSTRUCTION(Shift, 15, L"", L"", L"");
-					ITEM_INSTRUCTION(Shift, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"content", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(16, 13)
-
-					BEGIN_TRANSITION_ITEM(13, 3)
-					ITEM_STACK_PATTERN(1)
-					ITEM_STACK_PATTERN(15)
-					ITEM_INSTRUCTION(Create, 0, L"Element", L"", L"XElement");
-					ITEM_INSTRUCTION(Reduce, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"", L"XSubNode");
-					ITEM_INSTRUCTION(Reduce, 15, L"", L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"subNodes", L"", L"");
-					ITEM_INSTRUCTION(Shift, 15, L"", L"", L"");
-					ITEM_INSTRUCTION(Shift, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"content", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(16, 14)
-
-					BEGIN_TRANSITION_ITEM(14, 2)
-					ITEM_STACK_PATTERN(1)
-					ITEM_STACK_PATTERN(15)
-					ITEM_INSTRUCTION(Create, 0, L"Element", L"", L"XElement");
-					ITEM_INSTRUCTION(Reduce, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Using, 0, L"", L"", L"XSubNode");
-					ITEM_INSTRUCTION(Reduce, 15, L"", L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"subNodes", L"", L"");
-					ITEM_INSTRUCTION(Shift, 15, L"", L"", L"");
-					ITEM_INSTRUCTION(Shift, 1, L"", L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"content", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(17, 9)
-
-					BEGIN_TRANSITION_ITEM(9, 21)
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(18, 1)
-
-					BEGIN_TRANSITION_ITEM(1, 22)
-					ITEM_INSTRUCTION(Create, 0, L"Instruction", L"", L"XInstruction");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(18, 3)
-
-					BEGIN_TRANSITION_ITEM(3, 10)
-					ITEM_STACK_PATTERN(41)
-					ITEM_INSTRUCTION(Create, 0, L"Instruction", L"", L"XInstruction");
-					ITEM_INSTRUCTION(Reduce, 41, L"", L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"instructions", L"", L"");
-					ITEM_INSTRUCTION(Shift, 41, L"", L"", L"");
-					END_TRANSITION_ITEM
-
-					BEGIN_TRANSITION_ITEM(3, 10)
-					ITEM_STACK_PATTERN(26)
-					ITEM_INSTRUCTION(Create, 0, L"Instruction", L"", L"XInstruction");
-					ITEM_INSTRUCTION(Reduce, 26, L"", L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"instructions", L"", L"");
-					ITEM_INSTRUCTION(Shift, 41, L"", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(18, 7)
-
-					BEGIN_TRANSITION_ITEM(7, 5)
-					ITEM_STACK_PATTERN(41)
-					ITEM_INSTRUCTION(Create, 0, L"Instruction", L"", L"XInstruction");
-					ITEM_INSTRUCTION(Reduce, 41, L"", L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"instructions", L"", L"");
-					ITEM_INSTRUCTION(Shift, 41, L"", L"", L"");
-					END_TRANSITION_ITEM
-
-					BEGIN_TRANSITION_ITEM(7, 5)
-					ITEM_STACK_PATTERN(26)
-					ITEM_INSTRUCTION(Create, 0, L"Instruction", L"", L"XInstruction");
-					ITEM_INSTRUCTION(Reduce, 26, L"", L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"instructions", L"", L"");
-					ITEM_INSTRUCTION(Shift, 41, L"", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(18, 12)
-
-					BEGIN_TRANSITION_ITEM(12, 4)
-					ITEM_STACK_PATTERN(41)
-					ITEM_INSTRUCTION(Create, 0, L"Instruction", L"", L"XInstruction");
-					ITEM_INSTRUCTION(Reduce, 41, L"", L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"instructions", L"", L"");
-					ITEM_INSTRUCTION(Shift, 41, L"", L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"content", L"", L"");
-					END_TRANSITION_ITEM
-
-					BEGIN_TRANSITION_ITEM(12, 4)
-					ITEM_STACK_PATTERN(26)
-					ITEM_INSTRUCTION(Create, 0, L"Instruction", L"", L"XInstruction");
-					ITEM_INSTRUCTION(Reduce, 26, L"", L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"instructions", L"", L"");
-					ITEM_INSTRUCTION(Shift, 41, L"", L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"content", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(21, 11)
-
-					BEGIN_TRANSITION_ITEM(11, 23)
-					ITEM_INSTRUCTION(Assign, 0, L"value", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(23, 1)
-
-					BEGIN_TRANSITION_ITEM(1, 24)
-					ITEM_INSTRUCTION(Create, 0, L"Attribute", L"", L"XAttribute");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(23, 4)
-
-					BEGIN_TRANSITION_ITEM(4, 18)
-					ITEM_STACK_PATTERN(14)
-					ITEM_INSTRUCTION(Create, 0, L"Attribute", L"", L"XAttribute");
-					ITEM_INSTRUCTION(Reduce, 14, L"", L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"attributes", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(23, 6)
-
-					BEGIN_TRANSITION_ITEM(6, 16)
-					ITEM_STACK_PATTERN(12)
-					ITEM_INSTRUCTION(Create, 0, L"Attribute", L"", L"XAttribute");
-					ITEM_INSTRUCTION(Reduce, 12, L"", L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"attributes", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(23, 8)
-
-					BEGIN_TRANSITION_ITEM(8, 15)
-					ITEM_STACK_PATTERN(12)
-					ITEM_INSTRUCTION(Create, 0, L"Attribute", L"", L"XAttribute");
-					ITEM_INSTRUCTION(Reduce, 12, L"", L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"attributes", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(23, 10)
-
-					BEGIN_TRANSITION_ITEM(10, 17)
-					ITEM_STACK_PATTERN(14)
-					ITEM_INSTRUCTION(Create, 0, L"Attribute", L"", L"XAttribute");
-					ITEM_INSTRUCTION(Reduce, 14, L"", L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"attributes", L"", L"");
-					ITEM_INSTRUCTION(Shift, 14, L"", L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"name", L"", L"");
-					END_TRANSITION_ITEM
-
-					BEGIN_TRANSITION_ITEM(10, 17)
-					ITEM_STACK_PATTERN(12)
-					ITEM_INSTRUCTION(Create, 0, L"Attribute", L"", L"XAttribute");
-					ITEM_INSTRUCTION(Reduce, 12, L"", L"", L"");
-					ITEM_INSTRUCTION(Item, 0, L"attributes", L"", L"");
-					ITEM_INSTRUCTION(Shift, 12, L"", L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"name", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(25, 0)
-
-					BEGIN_TRANSITION_ITEM(0, 26)
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(26, 3)
-
-					BEGIN_TRANSITION_ITEM(3, 10)
-					ITEM_INSTRUCTION(Shift, 26, L"", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(26, 7)
-
-					BEGIN_TRANSITION_ITEM(7, 5)
-					ITEM_INSTRUCTION(Shift, 26, L"", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(26, 12)
-
-					BEGIN_TRANSITION_ITEM(12, 4)
-					ITEM_INSTRUCTION(Shift, 26, L"", L"", L"");
-					ITEM_INSTRUCTION(Assign, 0, L"content", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(27, 0)
-
-					BEGIN_TRANSITION_ITEM(0, 28)
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(28, 10)
-
-					BEGIN_TRANSITION_ITEM(10, 17)
-					ITEM_INSTRUCTION(Assign, 0, L"name", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(29, 0)
-
-					BEGIN_TRANSITION_ITEM(0, 30)
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(30, 9)
-
-					BEGIN_TRANSITION_ITEM(9, 2)
-					ITEM_INSTRUCTION(Assign, 0, L"content", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(30, 10)
-
-					BEGIN_TRANSITION_ITEM(10, 2)
-					ITEM_INSTRUCTION(Assign, 0, L"content", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(30, 14)
-
-					BEGIN_TRANSITION_ITEM(14, 2)
-					ITEM_INSTRUCTION(Assign, 0, L"content", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(31, 0)
-
-					BEGIN_TRANSITION_ITEM(0, 32)
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(32, 12)
-
-					BEGIN_TRANSITION_ITEM(12, 4)
-					ITEM_INSTRUCTION(Assign, 0, L"content", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(33, 0)
-
-					BEGIN_TRANSITION_ITEM(0, 34)
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(34, 7)
-
-					BEGIN_TRANSITION_ITEM(7, 5)
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(35, 0)
-
-					BEGIN_TRANSITION_ITEM(0, 36)
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(36, 3)
-
-					BEGIN_TRANSITION_ITEM(3, 10)
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(37, 0)
-
-					BEGIN_TRANSITION_ITEM(0, 38)
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				BEGIN_TRANSITION_BAG(38, 13)
-
-					BEGIN_TRANSITION_ITEM(13, 3)
-					ITEM_INSTRUCTION(Assign, 0, L"content", L"", L"");
-					END_TRANSITION_ITEM
-
-				END_TRANSITION_BAG
-
-				table->Initialize();
-				return table;
-
-				#undef SET_TOKEN_INFO
-				#undef SET_DISCARD_TOKEN_INFO
-				#undef SET_STATE_INFO
-				#undef SET_RULE_INFO
-				#undef SET_AMBIGUOUS_RULE_INFO
-				#undef BEGIN_TRANSITION_BAG
-				#undef BEGIN_TRANSITION_ITEM
-				#undef END_TRANSITION_ITEM
-				#undef END_TRANSITION_BAG
-				#undef ITEM_STACK_PATTERN
-				#undef ITEM_INSTRUCTION
-				#undef BEGIN_LOOK_AHEAD
-				#undef LOOK_AHEAD
-				#undef END_LOOK_AHEAD
+			    vl::Ptr<vl::parsing::tabling::ParsingGeneralParser> parser=vl::parsing::tabling::CreateBootstrapStrictParser();
+			    vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
+			    vl::Ptr<vl::parsing::ParsingTreeNode> definitionNode=parser->Parse(parserTextBuffer, L"ParserDecl", errors);
+			    vl::Ptr<vl::parsing::definitions::ParsingDefinition> definition=vl::parsing::definitions::DeserializeDefinition(definitionNode);
+			    vl::Ptr<vl::parsing::tabling::ParsingTable> table=vl::parsing::analyzing::GenerateTable(definition, false, errors);
+			    return table;
 			}
 
 		}
