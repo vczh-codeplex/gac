@@ -1317,6 +1317,17 @@ Type Declaration
 			END_CLASS_MEMBER(GuiGrammarColorizer)
 
 			BEGIN_CLASS_MEMBER(GuiTextBoxAutoCompleteBase)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ListStartPosition)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(SelectedListItem)
+
+				CLASS_MEMBER_METHOD(IsListOpening, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(OpenList, {L"startPosition"})
+				CLASS_MEMBER_METHOD(CloseList, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(SetListContent, {L"items"})
+				CLASS_MEMBER_METHOD(SelectPreviousListItem, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(SelectNextListItem, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(ApplySelectedListItem, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(HighlightList, {L"editingText"})
 			END_CLASS_MEMBER(GuiTextBoxAutoCompleteBase)
 
 			BEGIN_CLASS_MEMBER(GuiGrammarAutoComplete)
