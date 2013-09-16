@@ -282,7 +282,7 @@ Rich Content Document (model)
 
 			/// <summary>Save a document model to an xml.</summary>
 			/// <returns>The saved xml document.</returns>
-			Ptr<parsing::xml::XmlDocument>	SaveToXml();
+			Ptr<parsing::xml::XmlDocument>	SaveToXml(bool persistMetadata);
 		};
 
 /***********************************************************************
