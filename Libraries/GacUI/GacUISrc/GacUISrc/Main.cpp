@@ -51,19 +51,8 @@ public:
 		AddChild(viewer);
 
 		{
-			WString folder=L"..\\GacUISrcCodepackedTest\\Resources\\";
-			WString path=folder+L"XmlDoc.xml";
-			Ptr<XmlDocument> xml;
-			{
-				FileStream fileStream(path, FileStream::ReadOnly);
-				BomDecoder decoder;
-				DecoderStream decoderStream(fileStream, decoder);
-				StreamReader reader(decoderStream);
-				WString xmlText=reader.ReadToEnd();
-				Ptr<ParsingTable> table=XmlLoadTable();
-				xml=XmlParseDocument(xmlText, table);
-			}
-			Ptr<DocumentModel> document=DocumentModel::LoadFromXml(xml, folder);
+			Ptr<GuiResource> resource=GuiResource::LoadFromXml(L"..\\GacUISrcCodepackedTest\\Resources\\XmlResource.xml");
+			Ptr<DocumentModel> document=resource->GetValueByPath(L"XmlDoc.xml").Cast<DocumentModel>();
 			viewer->SetDocument(document);
 		}
 
