@@ -917,7 +917,7 @@ DocumentModel
 			return LoadFromXml(xml, resolver);
 		}
 
-		Ptr<parsing::xml::XmlDocument> DocumentModel::SaveToXml()
+		Ptr<parsing::xml::XmlDocument> DocumentModel::SaveToXml(bool persistMetadata)
 		{
 			SerializeRunVisitor visitor;
 			Ptr<XmlDocument> xml=new XmlDocument;
@@ -950,6 +950,7 @@ DocumentModel
 					}
 				}
 			}
+			if(persistMetadata)
 			{
 				Ptr<XmlElement> stylesElement=new XmlElement;
 				stylesElement->name.value=L"Styles";
@@ -995,6 +996,17 @@ DocumentModel
 							XmlElementWriter(styleElement).Element(L"antialias").Text(L"vertical");
 						}
 					}
+				}
+			}
+			if(persistMetadata)
+			{
+				Ptr<XmlElement> templatesElement=new XmlElement;
+				templatesElement->name.value=L"Templates";
+				doc->subNodes.Add(templatesElement);
+
+				FOREACH(Ptr<XmlElement>, element, templates.Values())
+				{
+					templatesElement->subNodes.Add(element);
 				}
 			}
 			return xml;
