@@ -268,6 +268,7 @@ GuiTextBoxAutoCompleteBase
 					if(selected!=-1)
 					{
 						autoCompleteList->SetSelected(selected, true);
+						autoCompleteList->EnsureItemVisible(selected);
 					}
 				}
 			}
