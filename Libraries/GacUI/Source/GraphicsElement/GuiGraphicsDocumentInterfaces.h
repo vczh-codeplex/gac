@@ -93,7 +93,7 @@ Layout Engine
 				virtual void								SetMaxWidth(vint value)=0;
 				/// <summary>Get the horizontal alignment for this paragraph.</summary>
 				/// <returns>The alignment.</returns>
-				virtual Alignment						GetParagraphAlignment()=0;
+				virtual Alignment							GetParagraphAlignment()=0;
 				/// <summary>Set the horizontal alignment for this paragraph.</summary>
 				/// <param name="value">The alignment.</param>
 				virtual void								SetParagraphAlignment(Alignment value)=0;
