@@ -698,7 +698,7 @@ Uniscribe Operations (UniscribeParagraph)
 
 				List<Ptr<UniscribeLine>>		lines;
 				vint							lastAvailableWidth;
-				Alignment					paragraphAlignment;
+				Alignment						paragraphAlignment;
 				Rect							bounds;
 
 				UniscribeParagraph()
