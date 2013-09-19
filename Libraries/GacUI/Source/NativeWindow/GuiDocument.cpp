@@ -178,25 +178,13 @@ document_serialization_visitors::DeserializeNodeVisitor
 					}
 				};
 
-				struct StyleStackItem
-				{
-					Pair<FontProperties, Color>		normalStyle;
-					Pair<FontProperties, Color>		activeStyle;
-					vint							hyperlinkId;
-
-					StyleStackItem()
-						:hyperlinkId(DocumentRun::NullHyperlinkId)
-					{
-					}
-				};
-
-				List<StyleStackItem>				styleStack;
 				Ptr<DocumentModel>					model;
 				Ptr<DocumentContainerRun>			container;
 				vint								paragraphIndex;
 				Ptr<DocumentResolver>				resolver;
 				Ptr<TemplateInfo>					templateInfo;
 				Regex								regexAttributeApply;
+				vint								hyperlinkId;
 
 				DeserializeNodeVisitor(Ptr<DocumentModel> _model, Ptr<DocumentParagraphRun> _paragraph, vint _paragraphIndex, Ptr<DocumentResolver> _resolver)
 					:model(_model)
@@ -204,11 +192,8 @@ document_serialization_visitors::DeserializeNodeVisitor
 					,paragraphIndex(_paragraphIndex)
 					,resolver(_resolver)
 					,regexAttributeApply(L"/{@(<value>[^{}]+)/}")
+					,hyperlinkId(DocumentRun::NullHyperlinkId)
 				{
-					StyleStackItem item;
-					item.normalStyle=Pair<FontProperties, Color>(GetCurrentController()->ResourceService()->GetDefaultFont(), Color());
-					item.activeStyle=item.normalStyle;
-					styleStack.Add(item);
 				}
 
 				WString TranslateAttribute(const WString& value)
@@ -241,31 +226,10 @@ document_serialization_visitors::DeserializeNodeVisitor
 
 				void PrintText(const WString& text)
 				{
-					if(!line)
-					{
-						line=new DocumentLine;
-						paragraph->lines.Add(line);
-					}
-					Ptr<DocumentTextRun> run;
-					const StyleStackItem& item=styleStack[styleStack.Count()-1];
-					if(item.hyperlinkId==DocumentRun::NullHyperlinkId || item.normalStyle==item.activeStyle)
-					{
-						run=new DocumentTextRun;
-					}
-					else
-					{
-						Ptr<DocumentHyperlinkTextRun> hyperlink=new DocumentHyperlinkTextRun;
-						hyperlink->normalStyle=item.normalStyle.key;
-						hyperlink->normalColor=item.normalStyle.value;
-						hyperlink->activeStyle=item.activeStyle.key;
-						hyperlink->activeColor=item.activeStyle.value;
-						run=hyperlink;
-					}
-					run->hyperlinkId=item.hyperlinkId;
-					run->style=item.normalStyle.key;
-					run->color=item.normalStyle.value;
+					Ptr<DocumentTextRun> run=new DocumentTextRun;
 					run->text=text;
-					line->runs.Add(run);
+					run->hyperlinkId=hyperlinkId;
+					container->runs.Add(run);
 				}
 
 				void Visit(XmlText* node)override
@@ -288,10 +252,11 @@ document_serialization_visitors::DeserializeNodeVisitor
 
 				void Visit(XmlElement* node)override
 				{
+					Ptr<DocumentContainerRun> createdContainer;
+					vint createdHyperlinkId=DocumentRun::NullHyperlinkId;
 					if(node->name.value==L"br")
 					{
-						if(!line) PrintText(L"");
-						line=0;
+						PrintText(L"\r\n");
 					}
 					else if(node->name.value==L"sp")
 					{
@@ -303,15 +268,10 @@ document_serialization_visitors::DeserializeNodeVisitor
 					}
 					else if(node->name.value==L"img")
 					{
-						if(!line)
-						{
-							line=new DocumentLine;
-							paragraph->lines.Add(line);
-						}
 						Ptr<DocumentImageRun> run=new DocumentImageRun;
 						if(Ptr<XmlAttribute> source=XmlGetAttribute(node, L"source"))
 						{
-							run->hyperlinkId=styleStack[styleStack.Count()-1].hyperlinkId;
+							run->hyperlinkId=hyperlinkId;
 							run->source=TranslateAttribute(source->value.value);
 							Pair<vint, vint> index=INVLOC.FindFirst(run->source, L"://", Locale::IgnoreCase);
 							if(index.key!=-1)
@@ -346,161 +306,123 @@ document_serialization_visitors::DeserializeNodeVisitor
 									run->frameIndex=wtoi(TranslateAttribute(att->value.value));
 								}
 							}
-							line->runs.Add(run);
+							container->runs.Add(run);
 						}
 					}
 					else if(node->name.value==L"font")
 					{
-						auto style=styleStack[styleStack.Count()-1];
+						Ptr<DocumentStylePropertiesRun> run=new DocumentStylePropertiesRun();
+						Ptr<DocumentStyleProperties> sp=new DocumentStyleProperties;
+						run->style=sp;
+
 						FOREACH(Ptr<XmlAttribute>, att, node->attributes)
 						{
 							if(att->name.value==L"face")
 							{
-								style.normalStyle.key.fontFamily=TranslateAttribute(att->value.value);
-								style.activeStyle.key.fontFamily=TranslateAttribute(att->value.value);
+								sp->face=TranslateAttribute(att->value.value);
 							}
 							else if(att->name.value==L"size")
 							{
-								style.normalStyle.key.size=wtoi(TranslateAttribute(att->value.value));
-								style.activeStyle.key.size=wtoi(TranslateAttribute(att->value.value));
+								sp->size=wtoi(TranslateAttribute(att->value.value));
 							}
 							else if(att->name.value==L"color")
 							{
-								style.normalStyle.value=Color::Parse(TranslateAttribute(att->value.value));
-								style.activeStyle.value=Color::Parse(TranslateAttribute(att->value.value));
+								sp->color=Color::Parse(TranslateAttribute(att->value.value));
 							}
 						}
-						styleStack.Add(style);
-						FOREACH(Ptr<XmlNode>, sub, node->subNodes)
-						{
-							sub->Accept(this);
-						}
-						styleStack.RemoveAt(styleStack.Count()-1);
+						container->runs.Add(run);
 					}
 					else if(node->name.value==L"b")
 					{
-						auto style=styleStack[styleStack.Count()-1];
-						style.normalStyle.key.bold=true;
-						style.activeStyle.key.bold=true;
-						styleStack.Add(style);
-						FOREACH(Ptr<XmlNode>, sub, node->subNodes)
-						{
-							sub->Accept(this);
-						}
-						styleStack.RemoveAt(styleStack.Count()-1);
+						Ptr<DocumentStylePropertiesRun> run=new DocumentStylePropertiesRun();
+						run->style=new DocumentStyleProperties;
+						run->style->bold=true;
+						container->runs.Add(run);
+						createdContainer=run;
 					}
 					else if(node->name.value==L"i")
 					{
-						auto style=styleStack[styleStack.Count()-1];
-						style.normalStyle.key.italic=true;
-						style.activeStyle.key.italic=true;
-						styleStack.Add(style);
-						FOREACH(Ptr<XmlNode>, sub, node->subNodes)
-						{
-							sub->Accept(this);
-						}
-						styleStack.RemoveAt(styleStack.Count()-1);
+						Ptr<DocumentStylePropertiesRun> run=new DocumentStylePropertiesRun();
+						run->style=new DocumentStyleProperties;
+						run->style->italic=true;
+						container->runs.Add(run);
+						createdContainer=run;
 					}
 					else if(node->name.value==L"u")
 					{
-						auto style=styleStack[styleStack.Count()-1];
-						style.normalStyle.key.underline=true;
-						style.activeStyle.key.underline=true;
-						styleStack.Add(style);
-						FOREACH(Ptr<XmlNode>, sub, node->subNodes)
-						{
-							sub->Accept(this);
-						}
-						styleStack.RemoveAt(styleStack.Count()-1);
+						Ptr<DocumentStylePropertiesRun> run=new DocumentStylePropertiesRun();
+						run->style=new DocumentStyleProperties;
+						run->style->underline=true;
+						container->runs.Add(run);
+						createdContainer=run;
 					}
 					else if(node->name.value==L"s")
 					{
-						auto style=styleStack[styleStack.Count()-1];
-						style.normalStyle.key.strikeline=true;
-						style.activeStyle.key.strikeline=true;
-						styleStack.Add(style);
-						FOREACH(Ptr<XmlNode>, sub, node->subNodes)
-						{
-							sub->Accept(this);
-						}
-						styleStack.RemoveAt(styleStack.Count()-1);
+						Ptr<DocumentStylePropertiesRun> run=new DocumentStylePropertiesRun();
+						run->style=new DocumentStyleProperties;
+						run->style->strikeline=true;
+						container->runs.Add(run);
+						createdContainer=run;
 					}
 					else if(node->name.value==L"ha")
 					{
-						auto style=styleStack[styleStack.Count()-1];
-						style.normalStyle.key.antialias=true;
-						style.normalStyle.key.verticalAntialias=false;
-						style.activeStyle.key.antialias=true;
-						style.activeStyle.key.verticalAntialias=false;
-						styleStack.Add(style);
-						FOREACH(Ptr<XmlNode>, sub, node->subNodes)
-						{
-							sub->Accept(this);
-						}
-						styleStack.RemoveAt(styleStack.Count()-1);
+						Ptr<DocumentStylePropertiesRun> run=new DocumentStylePropertiesRun();
+						run->style=new DocumentStyleProperties;
+						run->style->antialias=true;
+						run->style->verticalAntialias=false;
+						container->runs.Add(run);
+						createdContainer=run;
 					}
 					else if(node->name.value==L"va")
 					{
-						auto style=styleStack[styleStack.Count()-1];
-						style.normalStyle.key.antialias=true;
-						style.normalStyle.key.verticalAntialias=true;
-						style.activeStyle.key.antialias=true;
-						style.activeStyle.key.verticalAntialias=true;
-						styleStack.Add(style);
-						FOREACH(Ptr<XmlNode>, sub, node->subNodes)
-						{
-							sub->Accept(this);
-						}
-						styleStack.RemoveAt(styleStack.Count()-1);
+						Ptr<DocumentStylePropertiesRun> run=new DocumentStylePropertiesRun();
+						run->style=new DocumentStyleProperties;
+						run->style->antialias=true;
+						run->style->verticalAntialias=true;
+						container->runs.Add(run);
+						createdContainer=run;
 					}
 					else if(node->name.value==L"na")
 					{
-						auto style=styleStack[styleStack.Count()-1];
-						style.normalStyle.key.antialias=false;
-						style.normalStyle.key.verticalAntialias=false;
-						style.activeStyle.key.antialias=false;
-						style.activeStyle.key.verticalAntialias=false;
-						styleStack.Add(style);
-						FOREACH(Ptr<XmlNode>, sub, node->subNodes)
-						{
-							sub->Accept(this);
-						}
-						styleStack.RemoveAt(styleStack.Count()-1);
+						Ptr<DocumentStylePropertiesRun> run=new DocumentStylePropertiesRun();
+						run->style=new DocumentStyleProperties;
+						run->style->antialias=false;
+						run->style->verticalAntialias=false;
+						container->runs.Add(run);
+						createdContainer=run;
 					}
 					else if(node->name.value==L"div")
 					{
-						auto style=styleStack[styleStack.Count()-1];
-						WString styleName;
 						if(Ptr<XmlAttribute> att=XmlGetAttribute(node, L"style"))
 						{
-							styleName=TranslateAttribute(att->value.value);
+							WString styleName=TranslateAttribute(att->value.value);
+							
+							Ptr<DocumentStyleApplicationRun> run=new DocumentStyleApplicationRun;
+							run->styleName=styleName;
+							container->runs.Add(run);
+							createdContainer=run;
 						}
-						style.normalStyle=model->GetStyle(styleName, style.normalStyle);
-						style.activeStyle=model->GetStyle(styleName, style.activeStyle);
-						styleStack.Add(style);
-						FOREACH(Ptr<XmlNode>, sub, node->subNodes)
+						else
 						{
-							sub->Accept(this);
+							createdContainer=container;
 						}
-						styleStack.RemoveAt(styleStack.Count()-1);
 					}
 					else if(node->name.value==L"a")
 					{
-						auto style=styleStack[styleStack.Count()-1];
-						WString normalStyle=L"#NormalLink";
-						WString activeStyle=L"#ActiveLink";
+						Ptr<DocumentHyperlinkTextRun> run=new DocumentHyperlinkTextRun;
+						run->normalStyleName=L"#NormalLink";
+						run->activeStyleName=L"#ActiveLink";
 						if(Ptr<XmlAttribute> att=XmlGetAttribute(node, L"normal"))
 						{
-							normalStyle=TranslateAttribute(att->value.value);
+							run->normalStyleName=TranslateAttribute(att->value.value);
 						}
 						if(Ptr<XmlAttribute> att=XmlGetAttribute(node, L"active"))
 						{
-							activeStyle=TranslateAttribute(att->value.value);
+							run->activeStyleName=TranslateAttribute(att->value.value);
 						}
-						style.normalStyle=model->GetStyle(normalStyle, style.normalStyle);
-						style.activeStyle=model->GetStyle(activeStyle, style.activeStyle);
-						style.hyperlinkId=model->hyperlinkInfos.Count();
-						styleStack.Add(style);
+						container->runs.Add(run);
+						createdContainer=run;
+						createdHyperlinkId=model->hyperlinkInfos.Count();
 
 						WString href;
 						if(Ptr<XmlAttribute> att=XmlGetAttribute(node, L"href"))
@@ -511,26 +433,28 @@ document_serialization_visitors::DeserializeNodeVisitor
 							DocumentModel::HyperlinkInfo info;
 							info.paragraphIndex=paragraphIndex;
 							info.reference=href;
-							model->hyperlinkInfos.Add(style.hyperlinkId, info);
+							model->hyperlinkInfos.Add(createdHyperlinkId, info);
 						}
-						FOREACH(Ptr<XmlNode>, sub, node->subNodes)
-						{
-							sub->Accept(this);
-						}
-
-						styleStack.RemoveAt(styleStack.Count()-1);
 					}
 					else if(node->name.value==L"template-content")
 					{
 						if(templateInfo && templateInfo->contentElement)
 						{
+							Ptr<DocumentTemplateContentRun> run=new DocumentTemplateContentRun;
+							container->runs.Add(run);
+
+							Ptr<DocumentContainerRun> oldContainer=container;
+							container=run;
 							Ptr<TemplateInfo> info=templateInfo;
 							templateInfo=0;
+
 							FOREACH(Ptr<XmlNode>, sub, info->contentElement->subNodes)
 							{
 								sub->Accept(this);
 							}
+
 							templateInfo=info;
+							container=oldContainer;
 						}
 					}
 					else
@@ -546,7 +470,7 @@ document_serialization_visitors::DeserializeNodeVisitor
 						else
 						{
 							Ptr<TemplateInfo> newInfo=new TemplateInfo;
-							newInfo->templateElement=model->templates.Values().Get(index).Obj();
+							newInfo->templateElement=model->templates.Values().Get(index)->templateDescription.Obj();
 							newInfo->contentElement=node;
 							FOREACH(Ptr<XmlAttribute>, att, newInfo->contentElement->attributes)
 							{
@@ -561,6 +485,26 @@ document_serialization_visitors::DeserializeNodeVisitor
 							}
 							templateInfo=info;
 						}
+					}
+
+					if(createdContainer)
+					{
+						Ptr<DocumentContainerRun> oldContainer=container;
+						vint oldHyperlinkId=hyperlinkId;
+
+						container=createdContainer;
+						if(createdHyperlinkId!=DocumentRun::NullHyperlinkId)
+						{
+							hyperlinkId=createdHyperlinkId;
+						}
+
+						FOREACH(Ptr<XmlNode>, subNode, node->subNodes)
+						{
+							subNode->Accept(this);
+						}
+
+						hyperlinkId=oldHyperlinkId;
+						container=oldContainer;
 					}
 				}
 
