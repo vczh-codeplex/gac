@@ -477,6 +477,9 @@
     <ClCompile Include="..\..\Source\Controls\TextEditorPackage\GuiTextAutoComplete.cpp">
       <Filter>GacUI\Controls\TextEditorPackage</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\NativeWindow\GuiDocument.cpp">
+      <Filter>GacUI\NativeWindow</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Common\Source\Basic.h">
@@ -910,6 +913,9 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Controls\TextEditorPackage\GuiTextAutoComplete.h">
       <Filter>GacUI\Controls\TextEditorPackage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\NativeWindow\GuiDocument.h">
+      <Filter>GacUI\NativeWindow</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -318,6 +318,7 @@
     <ClCompile Include="..\..\Source\GraphicsElement\WindowsGDI\GuiGraphicsLayoutProviderWindowsGDI.cpp" />
     <ClCompile Include="..\..\Source\GraphicsElement\WindowsGDI\GuiGraphicsRenderersWindowsGDI.cpp" />
     <ClCompile Include="..\..\Source\GraphicsElement\WindowsGDI\GuiGraphicsWindowsGDI.cpp" />
+    <ClCompile Include="..\..\Source\NativeWindow\GuiDocument.cpp" />
     <ClCompile Include="..\..\Source\NativeWindow\GuiNativeWindow.cpp" />
     <ClCompile Include="..\..\Source\NativeWindow\GuiResource.cpp" />
     <ClCompile Include="..\..\Source\NativeWindow\Windows\Direct2D\WinDirect2DApplication.cpp" />
@@ -480,6 +481,7 @@
     <ClInclude Include="..\..\Source\GraphicsElement\WindowsGDI\GuiGraphicsLayoutProviderWindowsGDI.h" />
     <ClInclude Include="..\..\Source\GraphicsElement\WindowsGDI\GuiGraphicsRenderersWindowsGDI.h" />
     <ClInclude Include="..\..\Source\GraphicsElement\WindowsGDI\GuiGraphicsWindowsGDI.h" />
+    <ClInclude Include="..\..\Source\NativeWindow\GuiDocument.h" />
     <ClInclude Include="..\..\Source\NativeWindow\GuiNativeWindow.h" />
     <ClInclude Include="..\..\Source\NativeWindow\GuiResource.h" />
     <ClInclude Include="..\..\Source\NativeWindow\GuiTypes.h" />
