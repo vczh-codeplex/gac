@@ -85,7 +85,7 @@ document_serialization_visitors::SerializeRunVisitor
 						if(run->text!=L"")
 						{
 							XmlElementWriter writer(container);
-							Font(run, writer);
+							writer.Text(run->text);
 						}
 					}
 				}
@@ -970,7 +970,7 @@ DocumentModel
 				content->name.value=L"Content";
 				doc->subNodes.Add(content);
 				
-				SerializeRunVisitor visitor(content);
+				SerializeRunVisitor visitor(this, content);
 				FOREACH(Ptr<DocumentParagraphRun>, p, paragraphs)
 				{
 					p->Accept(&visitor);
