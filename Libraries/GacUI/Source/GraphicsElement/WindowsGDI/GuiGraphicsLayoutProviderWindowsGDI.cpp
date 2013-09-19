@@ -471,8 +471,18 @@ Uniscribe Operations (UniscribeTextRun)
 					vint nextCluster=0;
 					SearchGlyphCluster(fragment.start, fragment.length, cluster, nextCluster);
 
-					vint clusterStart=nextCluster>cluster?cluster:nextCluster;
-					vint clusterCount=nextCluster>cluster?nextCluster-cluster:cluster-nextCluster;
+					vint clusterStart=0;
+					vint clusterCount=0;
+					if(scriptItem->a.fRTL)
+					{
+						clusterStart=nextCluster;
+						clusterCount=cluster-nextCluster;
+					}
+					else
+					{
+						clusterStart=cluster;
+						clusterCount=nextCluster-cluster;
+					}
 
 					HRESULT hr=ScriptTextOut(
 						dc->GetHandle(),
