@@ -558,6 +558,7 @@ document_serialization_visitors::DeserializeNodeVisitor
 						{
 							run->activeStyleName=TranslateAttribute(att->value.value);
 						}
+						run->styleName=run->normalStyleName;
 						container->runs.Add(run);
 						createdContainer=run;
 
