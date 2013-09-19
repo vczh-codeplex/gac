@@ -461,6 +461,7 @@ Uniscribe Operations (UniscribeTextRun)
 					dc->SetTextColor(RGB(fontColor.r, fontColor.g, fontColor.b));
 
 					RunFragmentBounds fragment=fragmentBounds[fragmentBoundsIndex];
+					if(fragment.length==0) return;
 					RECT rect;
 					rect.left=(int)(fragment.bounds.Left()+offsetX);
 					rect.top=(int)(fragment.bounds.Top()+offsetY);
@@ -943,7 +944,14 @@ Uniscribe Operations (UniscribeParagraph)
 										}
 
 										UniscribeRun::RunFragmentBounds fragmentBounds;
-										fragmentBounds.start=start;
+										if(run->scriptItem->a.fRTL)
+										{
+											fragmentBounds.start=run->length-start-length;
+										}
+										else
+										{
+											fragmentBounds.start=start;
+										}
 										fragmentBounds.length=length;
 										fragmentBounds.bounds=Rect(
 											Point(cx, cy+maxHeight-run->SumHeight()),
