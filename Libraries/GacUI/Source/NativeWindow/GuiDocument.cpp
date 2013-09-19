@@ -757,7 +757,10 @@ DocumentModel
 				styles.Add(L"#Default", style);
 			}
 			{
+				Ptr<DocumentStyleProperties> sp=new DocumentStyleProperties;
+
 				Ptr<DocumentStyle> style=new DocumentStyle;
+				style->styles=sp;
 				styles.Add(L"#Context", style);
 			}
 			{
