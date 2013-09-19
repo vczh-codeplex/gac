@@ -993,7 +993,10 @@ Visitors
 
 					void Visit(DocumentHyperlinkTextRun* run)override
 					{
+						vint oldHyperlinkId=hyperlinkId;
+						hyperlinkId=run->hyperlinkId;
 						VisitContainer(run);
+						hyperlinkId=oldHyperlinkId;
 					}
 
 					void Visit(DocumentImageRun* run)override
