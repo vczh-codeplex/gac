@@ -97,10 +97,8 @@ Rich Content Document (run)
 				virtual void				Visit(DocumentParagraphRun* run)=0;
 			};
 			
-			/// <summary>Id for hyperlink. Set to -1 to make this run not a hyperlink</summary>
-			vint							hyperlinkId;
 
-			DocumentRun():hyperlinkId(NullHyperlinkId){}
+			DocumentRun():{}
 
 			/// <summary>Accept a <see cref="IVisitor"/> and trigger the selected visit operation.</summary>
 			/// <param name="visitor">The visitor.</param>
@@ -122,8 +120,10 @@ Rich Content Document (run)
 		public:
 			/// <summary>Run text.</summary>
 			WString							text;
+			/// <summary>Id for hyperlink.</summary>
+			vint							hyperlinkId;
 
-			DocumentTextRun(){}
+			DocumentTextRun():hyperlinkId(NullHyperlinkId){}
 
 			void							Accept(IVisitor* visitor)override{visitor->Visit(this);}
 		};
@@ -175,8 +175,10 @@ Rich Content Document (run)
 			Size							size;
 			/// <summary>Baseline of the inline object.</summary>
 			vint							baseline;
+			/// <summary>Id for hyperlink.</summary>
+			vint							hyperlinkId;
 
-			DocumentInlineObjectRun():baseline(-1){}
+			DocumentInlineObjectRun():baseline(-1), hyperlinkId(NullHyperlinkId){}
 		};
 				
 		/// <summary>Pepresents a image run.</summary>
