@@ -317,10 +317,20 @@ Uniscribe Operations (UniscribeTextRun)
 				void SearchGlyphCluster(vint charStart, vint charLength, vint& cluster, vint& nextCluster)
 				{
 					cluster=wholeGlyph.charCluster[charStart];
-					nextCluster
-						=charStart+charLength==length
-						?wholeGlyph.glyphs.Count()
-						:wholeGlyph.charCluster[charStart+charLength];
+					if(scriptItem->a.fRTL)
+					{
+						nextCluster
+							=charStart+charLength==length
+							?0
+							:wholeGlyph.charCluster[charStart+charLength];
+					}
+					else
+					{
+						nextCluster
+							=charStart+charLength==length
+							?wholeGlyph.glyphs.Count()
+							:wholeGlyph.charCluster[charStart+charLength];
+					}
 				}
 
 				bool BuildUniscribeData(WinDC* dc)override
@@ -361,9 +371,19 @@ Uniscribe Operations (UniscribeTextRun)
 					vint nextCluster=0;
 					SearchGlyphCluster(charStart, charLength, cluster, nextCluster);
 					vint width=0;
-					for(vint i=cluster;i<nextCluster;i++)
+					if(scriptItem->a.fRTL)
 					{
-						width+=wholeGlyph.glyphAdvances[i];
+						for(vint i=cluster;i>nextCluster;i--)
+						{
+							width+=wholeGlyph.glyphAdvances[i];
+						}
+					}
+					else
+					{
+						for(vint i=cluster;i<nextCluster;i++)
+						{
+							width+=wholeGlyph.glyphAdvances[i];
+						}
 					}
 					return width;
 				}
@@ -451,6 +471,9 @@ Uniscribe Operations (UniscribeTextRun)
 					vint nextCluster=0;
 					SearchGlyphCluster(fragment.start, fragment.length, cluster, nextCluster);
 
+					vint clusterStart=nextCluster>cluster?cluster:nextCluster;
+					vint clusterCount=nextCluster>cluster?nextCluster-cluster:cluster-nextCluster;
+
 					HRESULT hr=ScriptTextOut(
 						dc->GetHandle(),
 						&scriptCache,
@@ -461,11 +484,11 @@ Uniscribe Operations (UniscribeTextRun)
 						&wholeGlyph.sa,
 						NULL,
 						0,
-						&wholeGlyph.glyphs[cluster],
-						(int)(nextCluster-cluster),
-						&wholeGlyph.glyphAdvances[cluster],
+						&wholeGlyph.glyphs[clusterStart],
+						(int)(clusterCount),
+						&wholeGlyph.glyphAdvances[clusterStart],
 						NULL,
-						&wholeGlyph.glyphOffsets[cluster]
+						&wholeGlyph.glyphOffsets[clusterStart]
 						);
 				}
 			};
