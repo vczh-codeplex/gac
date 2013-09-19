@@ -993,10 +993,14 @@ Visitors
 
 					void Visit(DocumentHyperlinkTextRun* run)override
 					{
+						RawStylePair style=styles[styles.Count()-1];
+						style=model->GetStyle(run->styleName, style);
+						styles.Add(style);
 						vint oldHyperlinkId=hyperlinkId;
 						hyperlinkId=run->hyperlinkId;
 						VisitContainer(run);
 						hyperlinkId=oldHyperlinkId;
+						styles.RemoveAt(styles.Count()-1);
 					}
 
 					void Visit(DocumentImageRun* run)override
