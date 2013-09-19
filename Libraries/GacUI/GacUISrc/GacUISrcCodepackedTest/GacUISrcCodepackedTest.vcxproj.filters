@@ -189,4 +189,15 @@
       <Filter>Resource Files</Filter>
     </Xml>
   </ItemGroup>
+  <ItemGroup>
+    <Font Include="Resources\aldhabi.ttf">
+      <Filter>Resource Files</Filter>
+    </Font>
+    <Font Include="Resources\GentiumPlus-R.ttf">
+      <Filter>Resource Files</Filter>
+    </Font>
+    <Font Include="Resources\GentiumPlus-I.ttf">
+      <Filter>Resource Files</Filter>
+    </Font>
+  </ItemGroup>
 </Project>

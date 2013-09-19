@@ -275,6 +275,11 @@
     <Xml Include="Resources\XmlDoc.xml" />
     <Xml Include="Resources\XmlResource.xml" />
   </ItemGroup>
+  <ItemGroup>
+    <Font Include="Resources\aldhabi.ttf" />
+    <Font Include="Resources\GentiumPlus-I.ttf" />
+    <Font Include="Resources\GentiumPlus-R.ttf" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
