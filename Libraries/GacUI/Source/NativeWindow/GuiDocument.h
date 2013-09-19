@@ -18,11 +18,47 @@ namespace vl
 		using namespace reflection;
 
 		class DocumentTextRun;
+		class DocumentStylePropertiesRun;
+		class DocumentStyleApplicationRun;
 		class DocumentHyperlinkTextRun;
 		class DocumentImageRun;
+		class DocumentTemplateApplicationRun;
+		class DocumentTemplateContentRun;
+		class DocumentParagraphRun;
 
 /***********************************************************************
-Rich Content Document (model)
+Rich Content Document (style)
+***********************************************************************/
+
+		/// <summary>Represents a text style.</summary>
+		class DocumentStyleProperties : public Object, public Description<DocumentStyleProperties>
+		{
+		public:
+			/// <summary>Parent style name, could be #Default, #Context, #NormalLink, #ActiveLink or style name of others</summary>
+			WString							parentStyleName;
+
+			/// <summary>Font face.</summary>
+			Nullable<WString>				face;
+			/// <summary>Font size.</summary>
+			Nullable<vint>					size;
+			/// <summary>Font color.</summary>
+			Nullable<Color>					color;
+			/// <summary>Bold.</summary>
+			Nullable<bool>					bold;
+			/// <summary>Italic.</summary>
+			Nullable<bool>					italic;
+			/// <summary>Underline.</summary>
+			Nullable<bool>					underline;
+			/// <summary>Strikeline.</summary>
+			Nullable<bool>					strikeline;
+			/// <summary>Antialias.</summary>
+			Nullable<bool>					antialias;
+			/// <summary>Vertical antialias.</summary>
+			Nullable<bool>					verticalAntialias;
+		};
+
+/***********************************************************************
+Rich Content Document (run)
 ***********************************************************************/
 
 		/// <summary>Pepresents a logical run of a rich content document.</summary>
@@ -38,12 +74,27 @@ Rich Content Document (model)
 				/// <summary>Visit operation for <see cref="DocumentTextRun"/>.</summary>
 				/// <param name="run">The run object.</param>
 				virtual void				Visit(DocumentTextRun* run)=0;
+				/// <summary>Visit operation for <see cref="DocumentStylePropertiesRun"/>.</summary>
+				/// <param name="run">The run object.</param>
+				virtual void				Visit(DocumentStylePropertiesRun* run)=0;
+				/// <summary>Visit operation for <see cref="DocumentStyleApplicationRun"/>.</summary>
+				/// <param name="run">The run object.</param>
+				virtual void				Visit(DocumentStyleApplicationRun* run)=0;
 				/// <summary>Visit operation for <see cref="DocumentHyperlinkTextRun"/>.</summary>
 				/// <param name="run">The run object.</param>
 				virtual void				Visit(DocumentHyperlinkTextRun* run)=0;
 				/// <summary>Visit operation for <see cref="DocumentImageRun"/>.</summary>
 				/// <param name="run">The run object.</param>
 				virtual void				Visit(DocumentImageRun* run)=0;
+				/// <summary>Visit operation for <see cref="DocumentTemplateApplicationRun"/>.</summary>
+				/// <param name="run">The run object.</param>
+				virtual void				Visit(DocumentTemplateApplicationRun* run)=0;
+				/// <summary>Visit operation for <see cref="DocumentTemplateContentRun"/>.</summary>
+				/// <param name="run">The run object.</param>
+				virtual void				Visit(DocumentTemplateContentRun* run)=0;
+				/// <summary>Visit operation for <see cref="DocumentParagraphRun"/>.</summary>
+				/// <param name="run">The run object.</param>
+				virtual void				Visit(DocumentParagraphRun* run)=0;
 			};
 			
 			/// <summary>Id for hyperlink. Set to -1 to make this run not a hyperlink</summary>
@@ -55,15 +106,20 @@ Rich Content Document (model)
 			/// <param name="visitor">The visitor.</param>
 			virtual void					Accept(IVisitor* visitor)=0;
 		};
-				
+		
+		/// <summary>Pepresents a container run.</summary>
+		class DocumentContainerRun : public DocumentRun, public Description<DocumentContainerRun>
+		{
+			typedef collections::List<Ptr<DocumentRun>>			RunList;
+		public:
+			/// <summary>Sub runs.</summary>
+			RunList							runs;
+		};
+
 		/// <summary>Pepresents a text run.</summary>
 		class DocumentTextRun : public DocumentRun, public Description<DocumentTextRun>
 		{
 		public:
-			/// <summary>Run font and style.</summary>
-			FontProperties					style;
-			/// <summary>Run color.</summary>
-			Color							color;
 			/// <summary>Run text.</summary>
 			WString							text;
 
@@ -71,19 +127,40 @@ Rich Content Document (model)
 
 			void							Accept(IVisitor* visitor)override{visitor->Visit(this);}
 		};
-		
-		/// <summary>Pepresents a hyperlink text run.</summary>
-		class DocumentHyperlinkTextRun : public DocumentTextRun, public Description<DocumentHyperlinkTextRun>
+				
+		/// <summary>Pepresents a style properties run.</summary>
+		class DocumentStylePropertiesRun : public DocumentContainerRun, public Description<DocumentStylePropertiesRun>
 		{
 		public:
-			/// <summary>Run font and style.</summary>
-			FontProperties					normalStyle;
-			/// <summary>Run color.</summary>
-			Color							normalColor;
-			/// <summary>Run font and style.</summary>
-			FontProperties					activeStyle;
-			/// <summary>Run color.</summary>
-			Color							activeColor;
+			/// <summary>Style properties.</summary>
+			Ptr<DocumentStyleProperties>	style;
+
+			DocumentStylePropertiesRun(){}
+
+			void							Accept(IVisitor* visitor)override{visitor->Visit(this);}
+		};
+				
+		/// <summary>Pepresents a style application run.</summary>
+		class DocumentStyleApplicationRun : public DocumentContainerRun, public Description<DocumentStyleApplicationRun>
+		{
+		public:
+			/// <summary>Style name.</summary>
+			WString							styleName;
+
+			DocumentStyleApplicationRun(){}
+
+			void							Accept(IVisitor* visitor)override{visitor->Visit(this);}
+		};
+		
+		/// <summary>Pepresents a hyperlink text run.</summary>
+		class DocumentHyperlinkTextRun : public DocumentStyleApplicationRun, public Description<DocumentHyperlinkTextRun>
+		{
+		public:
+			/// <summary>Style name for normal state.</summary>
+			WString							normalStyleName;
+
+			/// <summary>Style name for active state.</summary>
+			WString							activeStyleName;
 
 			DocumentHyperlinkTextRun(){}
 
@@ -117,31 +194,43 @@ Rich Content Document (model)
 
 			void							Accept(IVisitor* visitor)override{visitor->Visit(this);}
 		};
-
-		//--------------------------------------------------------------------------
-
-		/// <summary>Represents a logical line of a rich content document.</summary>
-		class DocumentLine : public Object, public Description<DocumentLine>
+				
+		/// <summary>Pepresents a template application run.</summary>
+		class DocumentTemplateApplicationRun : public DocumentContainerRun, public Description<DocumentStyleApplicationRun>
 		{
-			typedef collections::List<Ptr<DocumentRun>>			RunList;
 		public:
-			/// <summary>All runs in this paragraph.</summary>
-			RunList							runs;
+			/// <summary>Template name.</summary>
+			WString							templateName;
+
+			DocumentTemplateApplicationRun(){}
+
+			void							Accept(IVisitor* visitor)override{visitor->Visit(this);}
+		};
+				
+		/// <summary>Pepresents a template content run in a <see cref="DocumentTemplateApplicationRun"/>.</summary>
+		class DocumentTemplateContentRun : public DocumentContainerRun, public Description<DocumentTemplateContentRun>
+		{
+		public:
+			DocumentTemplateContentRun(){}
+
+			void							Accept(IVisitor* visitor)override{visitor->Visit(this);}
+		};
+				
+		/// <summary>Pepresents a paragraph run.</summary>
+		class DocumentParagraphRun : public DocumentContainerRun, public Description<DocumentTemplateContentRun>
+		{
+		public:
+			/// <summary>Paragraph alignment.</summary>
+			Alignment						alignment;
+
+			DocumentParagraphRun():alignment(Alignment::Left){}
+
+			void							Accept(IVisitor* visitor)override{visitor->Visit(this);}
 		};
 
-		/// <summary>Represents a logical paragraph of a rich content document.</summary>
-		class DocumentParagraph : public Object, public Description<DocumentParagraph>
-		{
-			typedef collections::List<Ptr<DocumentLine>>		LineList;
-		public:
-			/// <summary>All lines in this paragraph.</summary>
-			LineList						lines;
-
-			/// <summary>Horizontal alignment of this paragraph.</summary>
-			Alignment					alignment;
-
-			DocumentParagraph():alignment(Alignment::Left){}
-		};
+/***********************************************************************
+Rich Content Document (resolver)
+***********************************************************************/
 
 		/// <summary>Represents a symbol resolver for loading a document model.</summary>
 		class DocumentResolver : public Object
@@ -165,33 +254,29 @@ Rich Content Document (model)
 			Ptr<INativeImage>				ResolveImage(const WString& protocol, const WString& path);
 		};
 
-		//--------------------------------------------------------------------------
+/***********************************************************************
+Rich Content Document (model)
+***********************************************************************/
 
 		/// <summary>Represents a text style.</summary>
-		class DocumentStyle : public Object
+		class DocumentStyle : public Object, public Description<DocumentStyle>
 		{
 		public:
 			/// <summary>Parent style name, could be #Default, #Context, #NormalLink, #ActiveLink or style name of others</summary>
 			WString							parentStyleName;
 
-			/// <summary>Font face.</summary>
-			Nullable<WString>				face;
-			/// <summary>Font size.</summary>
-			Nullable<vint>					size;
-			/// <summary>Font color.</summary>
-			Nullable<Color>					color;
-			/// <summary>Bold.</summary>
-			Nullable<bool>					bold;
-			/// <summary>Italic.</summary>
-			Nullable<bool>					italic;
-			/// <summary>Underline.</summary>
-			Nullable<bool>					underline;
-			/// <summary>Strikeline.</summary>
-			Nullable<bool>					strikeline;
-			/// <summary>Antialias.</summary>
-			Nullable<bool>					antialias;
-			/// <summary>Vertical antialias.</summary>
-			Nullable<bool>					verticalAntialias;
+			/// <summary>Properties of this style.</summary>
+			Ptr<DocumentStyleProperties>	styles;
+
+			/// <summary>Resolved properties of this style using parent styles.</summary>
+			Ptr<DocumentStyleProperties>	resolvedStyles;
+		};
+
+		/// <summary>Represents a template.</summary>
+		class DocumentTemplate : public Object, public Description<DocumentTemplate>
+		{
+		public:
+			Ptr<parsing::xml::XmlElement>	templateDescription;
 		};
 
 		/// <summary>Represents a rich content document model.</summary>
@@ -213,14 +298,13 @@ Rich Content Document (model)
 				}
 			};
 		private:
-			typedef collections::List<Ptr<DocumentParagraph>>							ParagraphList;
-			typedef collections::Dictionary<WString, Ptr<DocumentStyle>>				StyleMap;
-			typedef collections::Dictionary<WString, Ptr<parsing::xml::XmlElement>>		TemplateMap;
+			typedef collections::List<Ptr<DocumentParagraphRun>>						ParagraphList;
 			typedef collections::Pair<FontProperties, Color>							RawStylePair;
+			typedef collections::Dictionary<WString, Ptr<DocumentStyle>>				StyleMap;
+			typedef collections::Dictionary<WString, Ptr<DocumentTemplate>>				TemplateMap;
 			typedef collections::Dictionary<vint, HyperlinkInfo>						HyperlinkMap;
 		public:
-
-			/// <summary>All paragraphs in this document.</summary>
+			/// <summary>All paragraphs.</summary>
 			ParagraphList					paragraphs;
 			/// <summary>All available styles. These will not be persistant.</summary>
 			StyleMap						styles;

@@ -192,16 +192,15 @@ document_serialization_visitors::DeserializeNodeVisitor
 
 				List<StyleStackItem>				styleStack;
 				Ptr<DocumentModel>					model;
-				Ptr<DocumentParagraph>				paragraph;
+				Ptr<DocumentContainerRun>			container;
 				vint								paragraphIndex;
-				Ptr<DocumentLine>					line;
 				Ptr<DocumentResolver>				resolver;
 				Ptr<TemplateInfo>					templateInfo;
 				Regex								regexAttributeApply;
 
-				DeserializeNodeVisitor(Ptr<DocumentModel> _model, Ptr<DocumentParagraph> _paragraph, vint _paragraphIndex, Ptr<DocumentResolver> _resolver)
+				DeserializeNodeVisitor(Ptr<DocumentModel> _model, Ptr<DocumentParagraphRun> _paragraph, vint _paragraphIndex, Ptr<DocumentResolver> _resolver)
 					:model(_model)
-					,paragraph(_paragraph)
+					,container(_paragraph)
 					,paragraphIndex(_paragraphIndex)
 					,resolver(_resolver)
 					,regexAttributeApply(L"/{@(<value>[^{}]+)/}")
@@ -594,29 +593,61 @@ document_serialization_visitors::ActivateHyperlinkVisitor
 				{
 				}
 
+				void VisitContainer(DocumentContainerRun* run)
+				{
+					FOREACH(Ptr<DocumentRun>, subRun, run->runs)
+					{
+						subRun->Accept(this);
+					}
+				}
+
 				void Visit(DocumentTextRun* run)override
 				{
 				}
 
+				void Visit(DocumentStylePropertiesRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentStyleApplicationRun* run)override
+				{
+					VisitContainer(run);
+				}
+
 				void Visit(DocumentHyperlinkTextRun* run)override
 				{
+					VisitContainer(run);
 					if(run->hyperlinkId==hyperlinkId)
 					{
 						if(active)
 						{
-							run->style=run->activeStyle;
-							run->color=run->activeColor;
+							run->styleName=run->activeStyleName;
 						}
 						else
 						{
-							run->style=run->normalStyle;
-							run->color=run->normalColor;
+							run->styleName=run->normalStyleName;
 						}
 					}
 				}
 
 				void Visit(DocumentImageRun* run)override
 				{
+				}
+
+				void Visit(DocumentTemplateApplicationRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentTemplateContentRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentParagraphRun* run)override
+				{
+					VisitContainer(run);
 				}
 			};
 		}
@@ -630,16 +661,19 @@ DocumentModel
 		{
 			{
 				FontProperties font=GetCurrentController()->ResourceService()->GetDefaultFont();
+				Ptr<DocumentStyleProperties> sp=new DocumentStyleProperties;
+				sp->face=font.fontFamily;
+				sp->size=font.size;
+				sp->color=Color();
+				sp->bold=font.bold;
+				sp->italic=font.italic;
+				sp->underline=font.underline;
+				sp->strikeline=font.strikeline;
+				sp->antialias=font.antialias;
+				sp->verticalAntialias=font.verticalAntialias;
+
 				Ptr<DocumentStyle> style=new DocumentStyle;
-				style->face=font.fontFamily;
-				style->size=font.size;
-				style->color=Color();
-				style->bold=font.bold;
-				style->italic=font.italic;
-				style->underline=font.underline;
-				style->strikeline=font.strikeline;
-				style->antialias=font.antialias;
-				style->verticalAntialias=font.verticalAntialias;
+				style->styles=sp;
 				styles.Add(L"#Default", style);
 			}
 			{
@@ -647,64 +681,81 @@ DocumentModel
 				styles.Add(L"#Context", style);
 			}
 			{
+				Ptr<DocumentStyleProperties> sp=new DocumentStyleProperties;
+				sp->parentStyleName=L"#Context";
+				sp->color=Color(0, 0, 255);
+				sp->underline=true;
+
 				Ptr<DocumentStyle> style=new DocumentStyle;
-				style->parentStyleName=L"#Context";
-				style->color=Color(0, 0, 255);
-				style->underline=true;
+				style->styles=sp;
 				styles.Add(L"#NormalLink", style);
 			}
 			{
+				Ptr<DocumentStyleProperties> sp=new DocumentStyleProperties;
+				sp->parentStyleName=L"#Context";
+				sp->color=Color(0, 0, 255);
+				sp->underline=true;
+
 				Ptr<DocumentStyle> style=new DocumentStyle;
-				style->parentStyleName=L"#Context";
-				style->color=Color(0, 0, 255);
-				style->underline=true;
+				style->styles=sp;
 				styles.Add(L"#ActiveLink", style);
 			}
 		}
 
 		DocumentModel::RawStylePair DocumentModel::GetStyle(const WString& styleName, const RawStylePair& context)
 		{
-			DocumentStyle result;
-			Ptr<DocumentStyle> currentStyle;
-			WString currentName=styleName;
-			while(true)
+			Ptr<DocumentStyle> selectedStyle;
 			{
-				vint index=styles.Keys().IndexOf(currentName);
-				if(index==-1) break;
-				currentStyle=styles.Values().Get(index);
-				currentName=currentStyle->parentStyleName;
-
-				if(!result.face && currentStyle->face) result.face=currentStyle->face;
-				if(!result.size && currentStyle->size) result.size=currentStyle->size;
-				if(!result.color && currentStyle->color) result.color=currentStyle->color;
-				if(!result.bold && currentStyle->bold) result.bold=currentStyle->bold;
-				if(!result.italic && currentStyle->italic) result.italic=currentStyle->italic;
-				if(!result.underline && currentStyle->underline) result.underline=currentStyle->underline;
-				if(!result.strikeline && currentStyle->strikeline) result.strikeline=currentStyle->strikeline;
-				if(!result.antialias && currentStyle->antialias) result.antialias=currentStyle->antialias;
-				if(!result.verticalAntialias && currentStyle->verticalAntialias) result.verticalAntialias=currentStyle->verticalAntialias;
+				vint index=styles.Keys().IndexOf(styleName);
+				if(index!=-1)
+				{
+					selectedStyle=styles.Values()[index];
+				}
+				else
+				{
+					selectedStyle=styles[L"#Default"];
+				}
 			}
 
-			if(!result.face) result.face=context.key.fontFamily;
-			if(!result.size) result.size=context.key.size;
-			if(!result.color) result.color=context.value;
-			if(!result.bold) result.bold=context.key.bold;
-			if(!result.italic) result.italic=context.key.italic;
-			if(!result.underline) result.underline=context.key.underline;
-			if(!result.strikeline) result.strikeline=context.key.strikeline;
-			if(!result.antialias) result.antialias=context.key.antialias;
-			if(!result.verticalAntialias) result.verticalAntialias=context.key.verticalAntialias;
+			if(!selectedStyle->resolvedStyles)
+			{
+				Ptr<DocumentStyleProperties> sp=new DocumentStyleProperties;
+				selectedStyle->resolvedStyles=sp;
 
+				Ptr<DocumentStyle> currentStyle;
+				WString currentName=styleName;
+				while(true)
+				{
+					vint index=styles.Keys().IndexOf(currentName);
+					if(index==-1) break;
+					currentStyle=styles.Values().Get(index);
+					currentName=currentStyle->parentStyleName;
+					Ptr<DocumentStyleProperties> csp=currentStyle->styles;
+
+					if(!sp->face				&& csp->face)				sp->face				=csp->face;
+					if(!sp->size				&& csp->size)				sp->size				=csp->size;
+					if(!sp->color				&& csp->color)				sp->color				=csp->color;
+					if(!sp->bold				&& csp->bold)				sp->bold				=csp->bold;
+					if(!sp->italic				&& csp->italic)				sp->italic				=csp->italic;
+					if(!sp->underline			&& csp->underline)			sp->underline			=csp->underline;
+					if(!sp->strikeline			&& csp->strikeline)			sp->strikeline			=csp->strikeline;
+					if(!sp->antialias			&& csp->antialias)			sp->antialias			=csp->antialias;
+					if(!sp->verticalAntialias	&& csp->verticalAntialias)	sp->verticalAntialias	=csp->verticalAntialias;
+				}
+			}
+
+			Ptr<DocumentStyleProperties> sp=selectedStyle->resolvedStyles;
 			FontProperties font;
-			font.fontFamily=result.face.Value();
-			font.size=result.size.Value();
-			font.bold=result.bold.Value();
-			font.italic=result.italic.Value();
-			font.underline=result.underline.Value();
-			font.strikeline=result.strikeline.Value();
-			font.antialias=result.antialias.Value();
-			font.verticalAntialias=result.verticalAntialias.Value();
-			return RawStylePair(font, result.color.Value());
+			font.fontFamily			=sp->face				?sp->face.Value()				:context.key.fontFamily;
+			font.size				=sp->size				?sp->size.Value()				:context.key.size;
+			font.bold				=sp->bold				?sp->bold.Value()				:context.key.bold;
+			font.italic				=sp->italic				?sp->italic.Value()				:context.key.italic;
+			font.underline			=sp->underline			?sp->underline.Value()			:context.key.underline;
+			font.strikeline			=sp->strikeline			?sp->strikeline.Value()			:context.key.strikeline;
+			font.antialias			=sp->antialias			?sp->antialias.Value()			:context.key.antialias;
+			font.verticalAntialias	=sp->verticalAntialias	?sp->verticalAntialias.Value()	:context.key.verticalAntialias;
+			Color color				=sp->color				?sp->color.Value()				:context.value;
+			return RawStylePair(font, color);
 		}
 
 		vint DocumentModel::ActivateHyperlink(vint hyperlinkId, bool active)
@@ -715,15 +766,9 @@ DocumentModel
 				vint paragraphIndex=hyperlinkInfos.Values().Get(index).paragraphIndex;
 				if(0<=paragraphIndex && paragraphIndex<paragraphs.Count())
 				{
-					Ptr<DocumentParagraph> paragraph=paragraphs[paragraphIndex];
+					Ptr<DocumentParagraphRun> paragraph=paragraphs[paragraphIndex];
 					ActivateHyperlinkVisitor visitor(hyperlinkId, active);
-					FOREACH(Ptr<DocumentLine>, line, paragraph->lines)
-					{
-						FOREACH(Ptr<DocumentRun>, run, line->runs)
-						{
-							run->Accept(&visitor);
-						}
-					}
+					paragraph->Accept(&visitor);
 					return paragraphIndex;
 				}
 			}
@@ -749,53 +794,56 @@ DocumentModel
 							style->parentStyleName=parent->value.value;
 						}
 
+						Ptr<DocumentStyleProperties> sp=new DocumentStyleProperties;
+						style->styles=sp;
+
 						FOREACH(Ptr<XmlElement>, att, XmlGetElements(styleElement))
 						{
 							if(att->name.value==L"face")
 							{
-								style->face=XmlGetValue(att);
+								sp->face=XmlGetValue(att);
 							}
 							else if(att->name.value==L"size")
 							{
-								style->size=wtoi(XmlGetValue(att));
+								sp->size=wtoi(XmlGetValue(att));
 							}
 							else if(att->name.value==L"color")
 							{
-								style->color=Color::Parse(XmlGetValue(att));
+								sp->color=Color::Parse(XmlGetValue(att));
 							}
 							else if(att->name.value==L"b")
 							{
-								style->bold=XmlGetValue(att)==L"true";
+								sp->bold=XmlGetValue(att)==L"true";
 							}
 							else if(att->name.value==L"i")
 							{
-								style->italic=XmlGetValue(att)==L"true";
+								sp->italic=XmlGetValue(att)==L"true";
 							}
 							else if(att->name.value==L"u")
 							{
-								style->underline=XmlGetValue(att)==L"true";
+								sp->underline=XmlGetValue(att)==L"true";
 							}
 							else if(att->name.value==L"s")
 							{
-								style->strikeline=XmlGetValue(att)==L"true";
+								sp->strikeline=XmlGetValue(att)==L"true";
 							}
 							else if(att->name.value==L"antialias")
 							{
 								WString value=XmlGetValue(att);
 								if(value==L"horizontal" || value==L"default")
 								{
-									style->antialias=true;
-									style->verticalAntialias=false;
+									sp->antialias=true;
+									sp->verticalAntialias=false;
 								}
 								else if(value==L"no")
 								{
-									style->antialias=false;
-									style->verticalAntialias=false;
+									sp->antialias=false;
+									sp->verticalAntialias=false;
 								}
 								else if(value==L"vertical")
 								{
-									style->antialias=true;
-									style->verticalAntialias=true;
+									sp->antialias=true;
+									sp->verticalAntialias=true;
 								}
 							}
 						}
@@ -805,16 +853,18 @@ DocumentModel
 				{
 					FOREACH(Ptr<XmlElement>, templateElement, XmlGetElements(styles, L"Template"))
 					if(Ptr<XmlAttribute> name=XmlGetAttribute(templateElement, L"name"))
-					if(!model->styles.Keys().Contains(name->value.value))
+					if(!model->templates.Keys().Contains(name->value.value))
 					{
-						model->templates.Add(name->value.value, templateElement);
+						Ptr<DocumentTemplate> tp=new DocumentTemplate;
+						tp->templateDescription=templateElement;
+						model->templates.Add(name->value.value, tp);
 					}
 				}
 				if(Ptr<XmlElement> content=XmlGetElement(xml->rootElement, L"Content"))
 				{
 					FOREACH_INDEXER(Ptr<XmlElement>, p, i, XmlGetElements(content, L"p"))
 					{
-						Ptr<DocumentParagraph> paragraph=new DocumentParagraph;
+						Ptr<DocumentParagraphRun> paragraph=new DocumentParagraphRun;
 						if(Ptr<XmlAttribute> att=XmlGetAttribute(p, L"align"))
 						{
 							if(att->value.value==L"Left")
