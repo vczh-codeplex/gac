@@ -34,9 +34,6 @@ Rich Content Document (style)
 		class DocumentStyleProperties : public Object, public Description<DocumentStyleProperties>
 		{
 		public:
-			/// <summary>Parent style name, could be #Default, #Context, #NormalLink, #ActiveLink or style name of others</summary>
-			WString							parentStyleName;
-
 			/// <summary>Font face.</summary>
 			Nullable<WString>				face;
 			/// <summary>Font size.</summary>
