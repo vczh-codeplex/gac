@@ -98,7 +98,7 @@ Rich Content Document (run)
 			};
 			
 
-			DocumentRun():{}
+			DocumentRun(){}
 
 			/// <summary>Accept a <see cref="IVisitor"/> and trigger the selected visit operation.</summary>
 			/// <param name="visitor">The visitor.</param>
@@ -120,10 +120,8 @@ Rich Content Document (run)
 		public:
 			/// <summary>Run text.</summary>
 			WString							text;
-			/// <summary>Id for hyperlink.</summary>
-			vint							hyperlinkId;
 
-			DocumentTextRun():hyperlinkId(NullHyperlinkId){}
+			DocumentTextRun(){}
 
 			void							Accept(IVisitor* visitor)override{visitor->Visit(this);}
 		};
@@ -158,11 +156,12 @@ Rich Content Document (run)
 		public:
 			/// <summary>Style name for normal state.</summary>
 			WString							normalStyleName;
-
 			/// <summary>Style name for active state.</summary>
 			WString							activeStyleName;
+			/// <summary>Id for hyperlink.</summary>
+			vint							hyperlinkId;
 
-			DocumentHyperlinkTextRun(){}
+			DocumentHyperlinkTextRun():hyperlinkId(NullHyperlinkId){}
 
 			void							Accept(IVisitor* visitor)override{visitor->Visit(this);}
 		};
@@ -175,10 +174,8 @@ Rich Content Document (run)
 			Size							size;
 			/// <summary>Baseline of the inline object.</summary>
 			vint							baseline;
-			/// <summary>Id for hyperlink.</summary>
-			vint							hyperlinkId;
 
-			DocumentInlineObjectRun():baseline(-1), hyperlinkId(NullHyperlinkId){}
+			DocumentInlineObjectRun():baseline(-1){}
 		};
 				
 		/// <summary>Pepresents a image run.</summary>
@@ -200,9 +197,12 @@ Rich Content Document (run)
 		/// <summary>Pepresents a template application run.</summary>
 		class DocumentTemplateApplicationRun : public DocumentContainerRun, public Description<DocumentStyleApplicationRun>
 		{
+			typedef collections::Dictionary<WString, WString>		AttributeMap;
 		public:
 			/// <summary>Template name.</summary>
 			WString							templateName;
+			/// <summary>Template attributes.</summary>
+			AttributeMap					attributes;
 
 			DocumentTemplateApplicationRun(){}
 
