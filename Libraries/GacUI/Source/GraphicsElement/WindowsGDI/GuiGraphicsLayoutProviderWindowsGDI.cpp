@@ -1031,18 +1031,12 @@ Uniscribe Operations (UniscribeParagraph)
 					vint offsetY=0;
 					FOREACH(Ptr<UniscribeLine>, line, lines)
 					{
-						FOREACH(Ptr<UniscribeRun>, run, line->scriptRuns)
+						FOREACH(Ptr<UniscribeFragment>, fragment, line->documentFragments)
 						{
-							if(Ptr<UniscribeTextRun> textRun=run.Cast<UniscribeTextRun>())
+							vint size=fragment->fontStyle.size/3;
+							if(size>offsetY)
 							{
-								for(vint i=0;i<textRun->wholeGlyph.glyphOffsets.Count();i++)
-								{
-									GOFFSET offset=textRun->wholeGlyph.glyphOffsets[i];
-									if(offset.dv>offsetY)
-									{
-										offsetY=offset.dv;
-									}
-								}
+								offsetY=size;
 							}
 						}
 					}
