@@ -317,6 +317,7 @@ Rich Content Document (model)
 			
 			DocumentModel();
 
+			RawStylePair					GetStyle(Ptr<DocumentStyleProperties> sp, const RawStylePair& context);
 			RawStylePair					GetStyle(const WString& styleName, const RawStylePair& context);
 			vint							ActivateHyperlink(vint hyperlinkId, bool active);
 
@@ -334,7 +335,7 @@ Rich Content Document (model)
 
 			/// <summary>Save a document model to an xml.</summary>
 			/// <returns>The saved xml document.</returns>
-			Ptr<parsing::xml::XmlDocument>	SaveToXml(bool persistMetadata);
+			Ptr<parsing::xml::XmlDocument>	SaveToXml();
 		};
 	}
 }
