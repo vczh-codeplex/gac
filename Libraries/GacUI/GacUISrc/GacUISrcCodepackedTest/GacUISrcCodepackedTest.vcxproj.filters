@@ -188,6 +188,9 @@
     <Xml Include="Resources\XmlResource.xml">
       <Filter>Resource Files</Filter>
     </Xml>
+    <Xml Include="Resources\XmlDocComplexScript.xml">
+      <Filter>Resource Files</Filter>
+    </Xml>
   </ItemGroup>
   <ItemGroup>
     <Font Include="Resources\aldhabi.ttf">

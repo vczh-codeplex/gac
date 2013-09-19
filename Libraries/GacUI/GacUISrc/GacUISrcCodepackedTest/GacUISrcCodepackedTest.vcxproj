@@ -273,6 +273,7 @@
     <Xml Include="Resources\document.xml" />
     <Xml Include="Resources\document2.xml" />
     <Xml Include="Resources\XmlDoc.xml" />
+    <Xml Include="Resources\XmlDocComplexScript.xml" />
     <Xml Include="Resources\XmlResource.xml" />
   </ItemGroup>
   <ItemGroup>
