@@ -389,6 +389,8 @@ document_serialization_visitors::DeserializeNodeVisitor
 					Ptr<DocumentContainerRun> createdContainer;
 					Ptr<TemplateInfo> createdTemplateInfo;
 					bool useTemplateInfo=false;
+					XmlElement* subNodeContainer=node;
+
 					if(node->name.value==L"br")
 					{
 						PrintText(L"\r\n");
@@ -465,6 +467,7 @@ document_serialization_visitors::DeserializeNodeVisitor
 							}
 						}
 						container->runs.Add(run);
+						createdContainer=run;
 					}
 					else if(node->name.value==L"b")
 					{
@@ -570,6 +573,13 @@ document_serialization_visitors::DeserializeNodeVisitor
 							model->hyperlinkInfos.Add(run->hyperlinkId, info);
 						}
 					}
+					else if(node->name.value==L"p")
+					{
+						FOREACH(Ptr<XmlNode>, sub, node->subNodes)
+						{
+							sub->Accept(this);
+						}
+					}
 					else if(node->name.value==L"template-content")
 					{
 						if(templateInfo && templateInfo->contentElement)
@@ -579,6 +589,10 @@ document_serialization_visitors::DeserializeNodeVisitor
 							createdContainer=run;
 							createdTemplateInfo=0;
 							useTemplateInfo=true;
+							if(templateInfo)
+							{
+								subNodeContainer=templateInfo->contentElement;
+							}
 						}
 					}
 					else
@@ -607,6 +621,7 @@ document_serialization_visitors::DeserializeNodeVisitor
 							createdTemplateInfo->templateElement=model->templates.Values().Get(index)->templateDescription.Obj();
 							createdTemplateInfo->contentElement=node;
 							useTemplateInfo=true;
+							subNodeContainer=createdTemplateInfo->templateElement;
 						}
 					}
 
@@ -619,7 +634,7 @@ document_serialization_visitors::DeserializeNodeVisitor
 						{
 							templateInfo=createdTemplateInfo;
 						}
-						FOREACH(Ptr<XmlNode>, subNode, node->subNodes)
+						FOREACH(Ptr<XmlNode>, subNode, subNodeContainer->subNodes)
 						{
 							subNode->Accept(this);
 						}
@@ -746,21 +761,21 @@ DocumentModel
 			}
 			{
 				Ptr<DocumentStyleProperties> sp=new DocumentStyleProperties;
-				sp->parentStyleName=L"#Context";
 				sp->color=Color(0, 0, 255);
 				sp->underline=true;
 
 				Ptr<DocumentStyle> style=new DocumentStyle;
+				style->parentStyleName=L"#Context";
 				style->styles=sp;
 				styles.Add(L"#NormalLink", style);
 			}
 			{
 				Ptr<DocumentStyleProperties> sp=new DocumentStyleProperties;
-				sp->parentStyleName=L"#Context";
 				sp->color=Color(0, 0, 255);
 				sp->underline=true;
 
 				Ptr<DocumentStyle> style=new DocumentStyle;
+				style->parentStyleName=L"#Context";
 				style->styles=sp;
 				styles.Add(L"#ActiveLink", style);
 			}

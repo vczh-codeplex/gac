@@ -970,6 +970,7 @@ Visitors
 								paragraph->SetInteractionId(start, length, hyperlinkId);
 							}
 						}
+						start+=length;
 					}
 
 					void Visit(DocumentStylePropertiesRun* run)override
@@ -1014,6 +1015,7 @@ Visitors
 						{
 							paragraph->SetInteractionId(start, length, hyperlinkId);
 						}
+						start+=length;
 					}
 
 					void Visit(DocumentTemplateApplicationRun* run)override
