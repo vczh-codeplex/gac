@@ -766,6 +766,21 @@ DocumentModel
 			}
 		}
 
+		DocumentModel::RawStylePair DocumentModel::GetStyle(Ptr<DocumentStyleProperties> sp, const RawStylePair& context)
+		{
+			FontProperties font;
+			font.fontFamily			=sp->face				?sp->face.Value()				:context.key.fontFamily;
+			font.size				=sp->size				?sp->size.Value()				:context.key.size;
+			font.bold				=sp->bold				?sp->bold.Value()				:context.key.bold;
+			font.italic				=sp->italic				?sp->italic.Value()				:context.key.italic;
+			font.underline			=sp->underline			?sp->underline.Value()			:context.key.underline;
+			font.strikeline			=sp->strikeline			?sp->strikeline.Value()			:context.key.strikeline;
+			font.antialias			=sp->antialias			?sp->antialias.Value()			:context.key.antialias;
+			font.verticalAntialias	=sp->verticalAntialias	?sp->verticalAntialias.Value()	:context.key.verticalAntialias;
+			Color color				=sp->color				?sp->color.Value()				:context.value;
+			return RawStylePair(font, color);
+		}
+
 		DocumentModel::RawStylePair DocumentModel::GetStyle(const WString& styleName, const RawStylePair& context)
 		{
 			Ptr<DocumentStyle> selectedStyle;
@@ -809,17 +824,7 @@ DocumentModel
 			}
 
 			Ptr<DocumentStyleProperties> sp=selectedStyle->resolvedStyles;
-			FontProperties font;
-			font.fontFamily			=sp->face				?sp->face.Value()				:context.key.fontFamily;
-			font.size				=sp->size				?sp->size.Value()				:context.key.size;
-			font.bold				=sp->bold				?sp->bold.Value()				:context.key.bold;
-			font.italic				=sp->italic				?sp->italic.Value()				:context.key.italic;
-			font.underline			=sp->underline			?sp->underline.Value()			:context.key.underline;
-			font.strikeline			=sp->strikeline			?sp->strikeline.Value()			:context.key.strikeline;
-			font.antialias			=sp->antialias			?sp->antialias.Value()			:context.key.antialias;
-			font.verticalAntialias	=sp->verticalAntialias	?sp->verticalAntialias.Value()	:context.key.verticalAntialias;
-			Color color				=sp->color				?sp->color.Value()				:context.value;
-			return RawStylePair(font, color);
+			return GetStyle(sp, context);
 		}
 
 		vint DocumentModel::ActivateHyperlink(vint hyperlinkId, bool active)
@@ -959,7 +964,7 @@ DocumentModel
 			return LoadFromXml(xml, resolver);
 		}
 
-		Ptr<parsing::xml::XmlDocument> DocumentModel::SaveToXml(bool persistMetadata)
+		Ptr<parsing::xml::XmlDocument> DocumentModel::SaveToXml()
 		{
 			Ptr<XmlDocument> xml=new XmlDocument;
 			Ptr<XmlElement> doc=new XmlElement;
@@ -976,7 +981,6 @@ DocumentModel
 					p->Accept(&visitor);
 				}
 			}
-			if(persistMetadata)
 			{
 				Ptr<XmlElement> stylesElement=new XmlElement;
 				stylesElement->name.value=L"Styles";
@@ -1025,7 +1029,6 @@ DocumentModel
 					}
 				}
 			}
-			if(persistMetadata)
 			{
 				Ptr<XmlElement> templatesElement=new XmlElement;
 				templatesElement->name.value=L"Templates";

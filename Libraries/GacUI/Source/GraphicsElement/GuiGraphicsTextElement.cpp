@@ -848,43 +848,105 @@ Visitors
 				class ExtractTextVisitor : public Object, public DocumentRun::IVisitor
 				{
 				public:
-					WString						text;
+					stream::StreamWriter&				writer;
+
+					ExtractTextVisitor(stream::StreamWriter& _writer)
+						:writer(_writer)
+					{
+					}
+
+					void VisitContainer(DocumentContainerRun* run)
+					{
+						FOREACH(Ptr<DocumentRun>, subRun, run->runs)
+						{
+							subRun->Accept(this);
+						}
+					}
 
 					void Visit(DocumentTextRun* run)override
 					{
-						text=run->text;
+						writer.WriteString(run->text);
+					}
+
+					void Visit(DocumentStylePropertiesRun* run)override
+					{
+						VisitContainer(run);
+					}
+
+					void Visit(DocumentStyleApplicationRun* run)override
+					{
+						VisitContainer(run);
 					}
 
 					void Visit(DocumentHyperlinkTextRun* run)override
 					{
-						Visit(static_cast<DocumentTextRun*>(run));
+						VisitContainer(run);
 					}
 
 					void Visit(DocumentImageRun* run)override
 					{
-						text=L"[Image]";
+						writer.WriteString(L"[Image]");
 					}
 
-					static WString ExtractText(DocumentRun* run)
+					void Visit(DocumentTemplateApplicationRun* run)override
 					{
-						ExtractTextVisitor visitor;
-						run->Accept(&visitor);
-						return visitor.text;
+						VisitContainer(run);
+					}
+
+					void Visit(DocumentTemplateContentRun* run)override
+					{
+						VisitContainer(run);
+					}
+
+					void Visit(DocumentParagraphRun* run)override
+					{
+						VisitContainer(run);
+					}
+
+					static WString ExtractText(Ptr<DocumentParagraphRun> run)
+					{
+						stream::MemoryStream stream;
+						{
+							stream::StreamWriter writer(stream);
+							ExtractTextVisitor visitor(writer);
+							run->Accept(&visitor);
+						}
+
+						stream.SeekFromBegin(0);
+						stream::StreamReader reader(stream);
+						return reader.ReadToEnd();
 					}
 				};
 
 				class SetPropertiesVisitor : public Object, public DocumentRun::IVisitor
 				{
+					typedef collections::Pair<FontProperties, Color>			RawStylePair;
 				public:
 					vint						start;
 					vint						length;
+					vint						hyperlinkId;
+					List<RawStylePair>			styles;
+					DocumentModel*				model;
 					IGuiGraphicsParagraph*		paragraph;
 
-					SetPropertiesVisitor(vint _start, IGuiGraphicsParagraph* _paragraph)
-						:start(_start)
+					SetPropertiesVisitor(DocumentModel* _model, IGuiGraphicsParagraph* _paragraph)
+						:start(0)
 						,length(0)
+						,hyperlinkId(DocumentRun::NullHyperlinkId)
+						,model(_model)
 						,paragraph(_paragraph)
 					{
+						RawStylePair style;
+						style=model->GetStyle(L"#Default", style);
+						styles.Add(style);
+					}
+
+					void VisitContainer(DocumentContainerRun* run)
+					{
+						FOREACH(Ptr<DocumentRun>, subRun, run->runs)
+						{
+							subRun->Accept(this);
+						}
 					}
 
 					void Visit(DocumentTextRun* run)override
@@ -892,26 +954,45 @@ Visitors
 						length=run->text.Length();
 						if(length>0)
 						{
-							paragraph->SetFont(start, length, run->style.fontFamily);
-							paragraph->SetSize(start, length, run->style.size);
-							paragraph->SetColor(start, length, run->color);
+							RawStylePair style=styles[styles.Count()-1];
+							paragraph->SetFont(start, length, style.key.fontFamily);
+							paragraph->SetSize(start, length, style.key.size);
+							paragraph->SetColor(start, length, style.value);
 							paragraph->SetStyle(start, length, 
 								(IGuiGraphicsParagraph::TextStyle)
-								( (run->style.bold?IGuiGraphicsParagraph::Bold:0)
-								| (run->style.italic?IGuiGraphicsParagraph::Italic:0)
-								| (run->style.underline?IGuiGraphicsParagraph::Underline:0)
-								| (run->style.strikeline?IGuiGraphicsParagraph::Strikeline:0)
+								( (style.key.bold?IGuiGraphicsParagraph::Bold:0)
+								| (style.key.italic?IGuiGraphicsParagraph::Italic:0)
+								| (style.key.underline?IGuiGraphicsParagraph::Underline:0)
+								| (style.key.strikeline?IGuiGraphicsParagraph::Strikeline:0)
 								));
-							if(run->hyperlinkId!=DocumentRun::NullHyperlinkId)
+							if(hyperlinkId!=DocumentRun::NullHyperlinkId)
 							{
-								paragraph->SetInteractionId(start, length, run->hyperlinkId);
+								paragraph->SetInteractionId(start, length, hyperlinkId);
 							}
 						}
 					}
 
+					void Visit(DocumentStylePropertiesRun* run)override
+					{
+						RawStylePair style=styles[styles.Count()-1];
+						style=model->GetStyle(run->style, style);
+						styles.Add(style);
+						VisitContainer(run);
+						styles.RemoveAt(styles.Count()-1);
+					}
+
+					void Visit(DocumentStyleApplicationRun* run)override
+					{
+						RawStylePair style=styles[styles.Count()-1];
+						style=model->GetStyle(run->styleName, style);
+						styles.Add(style);
+						VisitContainer(run);
+						styles.RemoveAt(styles.Count()-1);
+					}
+
 					void Visit(DocumentHyperlinkTextRun* run)override
 					{
-						Visit(static_cast<DocumentTextRun*>(run));
+						VisitContainer(run);
 					}
 
 					void Visit(DocumentImageRun* run)override
@@ -929,15 +1010,30 @@ Visitors
 						element->SetStretch(true);
 
 						paragraph->SetInlineObject(start, length, properties, element);
-						if(run->hyperlinkId!=DocumentRun::NullHyperlinkId)
+						if(hyperlinkId!=DocumentRun::NullHyperlinkId)
 						{
-							paragraph->SetInteractionId(start, length, run->hyperlinkId);
+							paragraph->SetInteractionId(start, length, hyperlinkId);
 						}
 					}
 
-					static vint SetProperty(vint start, IGuiGraphicsParagraph* paragraph, DocumentRun* run)
+					void Visit(DocumentTemplateApplicationRun* run)override
 					{
-						SetPropertiesVisitor visitor(start, paragraph);
+						VisitContainer(run);
+					}
+
+					void Visit(DocumentTemplateContentRun* run)override
+					{
+						VisitContainer(run);
+					}
+
+					void Visit(DocumentParagraphRun* run)override
+					{
+						VisitContainer(run);
+					}
+
+					static vint SetProperty(DocumentModel* model, IGuiGraphicsParagraph* paragraph, Ptr<DocumentParagraphRun> run)
+					{
+						SetPropertiesVisitor visitor(model, paragraph);
 						run->Accept(&visitor);
 						return visitor.length;
 					}
@@ -1004,50 +1100,20 @@ GuiDocumentElement::GuiDocumentElementRenderer
 						}
 						else
 						{
-							Ptr<DocumentParagraph> paragraph=element->document->paragraphs[i];
+							Ptr<DocumentParagraphRun> paragraph=element->document->paragraphs[i];
 							Ptr<ParagraphCache> cache=paragraphCaches[i];
 							if(!cache)
 							{
 								cache=new ParagraphCache;
+								cache->fullText=ExtractTextVisitor::ExtractText(paragraph);
 								paragraphCaches[i]=cache;
-
-								stream::MemoryStream stream;
-								{
-									stream::StreamWriter writer(stream);
-									FOREACH_INDEXER(Ptr<DocumentLine>, line, lineIndex, paragraph->lines)
-									{
-										FOREACH(Ptr<DocumentRun>, run, line->runs)
-										{
-											WString text=ExtractTextVisitor::ExtractText(run.Obj());
-											writer.WriteString(text);
-										}
-										if(lineIndex<paragraph->lines.Count()-1)
-										{
-											writer.WriteString(L"\r\n");
-										}
-									}
-								}
-								{
-									stream.SeekFromBegin(0);
-									stream::StreamReader reader(stream);
-									cache->fullText=reader.ReadToEnd();
-								}
 							}
 
 							if(!cache->graphicsParagraph)
 							{
 								cache->graphicsParagraph=layoutProvider->CreateParagraph(cache->fullText, renderTarget);
 								cache->graphicsParagraph->SetParagraphAlignment(paragraph->alignment);
-								vint start=0;
-								FOREACH(Ptr<DocumentLine>, line, paragraph->lines)
-								{
-									FOREACH(Ptr<DocumentRun>, run, line->runs)
-									{
-										vint length=SetPropertiesVisitor::SetProperty(start, cache->graphicsParagraph.Obj(), run.Obj());
-										start+=length;
-									}
-									start+=2;
-								}
+								SetPropertiesVisitor::SetProperty(element->document.Obj(), cache->graphicsParagraph.Obj(), paragraph);
 							}
 							if(cache->graphicsParagraph->GetMaxWidth()!=maxWidth)
 							{
