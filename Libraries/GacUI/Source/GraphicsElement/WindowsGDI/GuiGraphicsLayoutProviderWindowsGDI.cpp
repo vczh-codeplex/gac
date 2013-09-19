@@ -574,7 +574,7 @@ Uniscribe Operations (UniscribeLine)
 				Array<int>						runLogicalToVisual;
 				Rect							bounds;
 
-				void CLearUniscribeData()
+				void ClearUniscribeData()
 				{
 					scriptItems.Resize(0);
 					scriptRuns.Clear();
@@ -585,7 +585,7 @@ Uniscribe Operations (UniscribeLine)
 				bool BuildUniscribeData(WinDC* dc)
 				{
 					lineText=L"";
-					CLearUniscribeData();
+					ClearUniscribeData();
 					vint current=0;
 					FOREACH(Ptr<UniscribeFragment>, fragment, documentFragments)
 					{
@@ -718,7 +718,7 @@ Uniscribe Operations (UniscribeLine)
 					}
 					return true;
 		BUILD_UNISCRIBE_DATA_FAILED:
-					CLearUniscribeData();
+					ClearUniscribeData();
 					return false;
 				}
 
