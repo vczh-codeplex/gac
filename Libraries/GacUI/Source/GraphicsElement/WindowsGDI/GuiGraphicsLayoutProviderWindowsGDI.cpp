@@ -408,13 +408,27 @@ Uniscribe Operations (UniscribeTextRun)
 							}
 						}
 
-						vint nextCluster
-							=i+clusterLength==length
-							?wholeGlyph.glyphs.Count()
-							:wholeGlyph.charCluster[i+clusterLength];
-						for(vint j=cluster;j<nextCluster;j++)
+						if(scriptItem->a.fRTL)
 						{
-							width+=wholeGlyph.glyphAdvances[j];
+							vint nextCluster
+								=i+clusterLength==length
+								?0
+								:wholeGlyph.charCluster[i+clusterLength];
+							for(vint j=cluster;j>nextCluster;j--)
+							{
+								width+=wholeGlyph.glyphAdvances[j];
+							}
+						}
+						else
+						{
+							vint nextCluster
+								=i+clusterLength==length
+								?wholeGlyph.glyphs.Count()
+								:wholeGlyph.charCluster[i+clusterLength];
+							for(vint j=cluster;j<nextCluster;j++)
+							{
+								width+=wholeGlyph.glyphAdvances[j];
+							}
 						}
 						i+=clusterLength;
 					}
