@@ -1027,7 +1027,26 @@ Uniscribe Operations (UniscribeParagraph)
 						if(maxX<bounds.Right()) maxX=bounds.Right();
 						if(maxY<bounds.Bottom()) maxY=bounds.Bottom();
 					}
-					bounds=Rect(minX, minY, maxX, maxY);
+
+					vint offsetY=0;
+					FOREACH(Ptr<UniscribeLine>, line, lines)
+					{
+						FOREACH(Ptr<UniscribeRun>, run, line->scriptRuns)
+						{
+							if(Ptr<UniscribeTextRun> textRun=run.Cast<UniscribeTextRun>())
+							{
+								for(vint i=0;i<textRun->wholeGlyph.glyphOffsets.Count();i++)
+								{
+									GOFFSET offset=textRun->wholeGlyph.glyphOffsets[i];
+									if(offset.dv>offsetY)
+									{
+										offsetY=offset.dv;
+									}
+								}
+							}
+						}
+					}
+					bounds=Rect(minX, minY, maxX, maxY+offsetY);
 				}
 
 				void Render(WinDC* dc, vint offsetX, vint offsetY)
