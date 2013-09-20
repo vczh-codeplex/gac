@@ -128,6 +128,7 @@ UniscribeTextRun
 				SCRIPT_CACHE					scriptCache;
 				vint							advance;
 				UniscribeGlyphData				wholeGlyph;
+				HFONT							fallbackFont;
 
 				UniscribeTextRun();
 				~UniscribeTextRun();

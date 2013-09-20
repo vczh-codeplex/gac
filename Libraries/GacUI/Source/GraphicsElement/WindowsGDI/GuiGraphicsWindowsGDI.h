@@ -107,7 +107,6 @@ OS Supporting
 				virtual void								SetBindedRenderTarget(INativeWindow* window, IWindowsGDIRenderTarget* renderTarget)=0;
 				virtual IWICImagingFactory*					GetWICImagingFactory()=0;
 				virtual IWICBitmap*							GetWICBitmap(INativeImageFrame* frame)=0;
-				virtual IMLangCodePages*					GetMLangCodePages()=0;
 				virtual IMLangFontLink2*					GetMLangFontLink()=0;
 			};
 

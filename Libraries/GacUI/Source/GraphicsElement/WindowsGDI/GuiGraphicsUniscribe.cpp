@@ -335,6 +335,7 @@ UniscribeTextRun
 			UniscribeTextRun::UniscribeTextRun()
 				:scriptCache(0)
 				,advance(0)
+				,fallbackFont(0)
 			{
 			}
 
@@ -349,6 +350,11 @@ UniscribeTextRun
 				{
 					ScriptFreeCache(&scriptCache);
 					scriptCache=0;
+				}
+				if(fallbackFont)
+				{
+					GetWindowsGDIObjectProvider()->GetMLangFontLink()->ReleaseFont(fallbackFont);
+					fallbackFont=0;
 				}
 				advance=0;
 				wholeGlyph.ClearUniscribeData(0, 0);
@@ -387,8 +393,33 @@ UniscribeTextRun
 
 				if(breakings.Count()==1 && !breakingAvailabilities[0])
 				{
-					IMLangCodePages* cp=GetWindowsGDIObjectProvider()->GetMLangCodePages();
 					IMLangFontLink2* fl=GetWindowsGDIObjectProvider()->GetMLangFontLink();
+
+					HRESULT hr=S_OK;
+					DWORD codePages=0;
+					long charProcessed=0;
+					HFONT linkedFont=0;
+					if((hr=fl->GetStrCodePages(runText, length, 0, &codePages, &charProcessed))==S_OK)
+					{
+						if((hr=fl->MapFont(dc->GetHandle(), codePages, 0, &linkedFont))==S_OK)
+						{
+							fallbackFont=linkedFont;
+						}
+					}
+
+					if(fallbackFont)
+					{
+						HFONT oldFont=(HFONT)SelectObject(dc->GetHandle(), fallbackFont);
+						breakings.Clear();
+						breakingAvailabilities.Clear();
+						bool result=wholeGlyph.BuildUniscribeData(dc, &scriptItem->scriptItem, scriptCache, runText, length, breakings, breakingAvailabilities);
+						SelectObject(dc->GetHandle(), oldFont);
+
+						if(!result)
+						{
+							goto BUILD_UNISCRIBE_DATA_FAILED;
+						}
+					}
 				}
 
 				return true;
@@ -489,7 +520,15 @@ UniscribeTextRun
 			void UniscribeTextRun::Render(WinDC* dc, vint fragmentBoundsIndex, vint offsetX, vint offsetY)
 			{
 				Color fontColor=documentFragment->fontColor;
-				dc->SetFont(documentFragment->fontObject);
+				HFONT oldFont=0;
+				if(fallbackFont)
+				{
+					oldFont=(HFONT)SelectObject(dc->GetHandle(), fallbackFont);
+				}
+				else
+				{
+					dc->SetFont(documentFragment->fontObject);
+				}
 				dc->SetTextColor(RGB(fontColor.r, fontColor.g, fontColor.b));
 
 				RunFragmentBounds fragment=fragmentBounds[fragmentBoundsIndex];
@@ -533,6 +572,11 @@ UniscribeTextRun
 					NULL,
 					&wholeGlyph.glyphOffsets[clusterStart]
 					);
+
+				if(fallbackFont)
+				{
+					SelectObject(dc->GetHandle(), oldFont);
+				}
 			}
 
 /***********************************************************************
