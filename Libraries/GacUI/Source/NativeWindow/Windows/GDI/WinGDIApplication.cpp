@@ -124,21 +124,17 @@ OS Supporting
 			class WinGDIApplicationGDIObjectProvider : public IWindowsGDIObjectProvider
 			{
 			protected:
-				IMLangCodePages*				mLangCodePages;
 				IMLangFontLink2*				mLangFontLink;
 
 			public:
 				WinGDIApplicationGDIObjectProvider()
-					:mLangCodePages(0)
-					,mLangFontLink(0)
+					:mLangFontLink(0)
 				{
-					CoCreateInstance(CLSID_CMultiLanguage, NULL, CLSCTX_INPROC_SERVER, IID_IMLangCodePages, (void**)&mLangCodePages);
 					CoCreateInstance(CLSID_CMultiLanguage, NULL, CLSCTX_INPROC_SERVER, IID_IMLangFontLink2, (void**)&mLangFontLink);
 				}
 
 				~WinGDIApplicationGDIObjectProvider()
 				{
-					mLangCodePages->Release();
 					mLangFontLink->Release();
 				}
 
@@ -165,11 +161,6 @@ OS Supporting
 				IWICBitmap* GetWICBitmap(INativeImageFrame* frame)override
 				{
 					return vl::presentation::windows::GetWICBitmap(frame);
-				}
-
-				IMLangCodePages* GetMLangCodePages()override
-				{
-					return mLangCodePages;
 				}
 
 				IMLangFontLink2* GetMLangFontLink()override
