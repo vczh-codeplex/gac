@@ -335,7 +335,7 @@ UniscribeTextRun
 			UniscribeTextRun::UniscribeTextRun()
 				:scriptCache(0)
 				,advance(0)
-				,fallbackFont(0)
+				,fallbackFontHandle(0)
 			{
 			}
 
@@ -351,10 +351,15 @@ UniscribeTextRun
 					ScriptFreeCache(&scriptCache);
 					scriptCache=0;
 				}
-				if(fallbackFont)
+				if(fallbackFontHandle)
 				{
-					GetWindowsGDIObjectProvider()->GetMLangFontLink()->ReleaseFont(fallbackFont);
-					fallbackFont=0;
+					GetWindowsGDIObjectProvider()->GetMLangFontLink()->ReleaseFont(fallbackFontHandle);
+					fallbackFontHandle=0;
+				}
+				if(fallbackFontObject)
+				{
+					GetWindowsGDIResourceManager()->DestroyGdiFont(fallbackFontStyle);
+					fallbackFontObject=0;
 				}
 				advance=0;
 				wholeGlyph.ClearUniscribeData(0, 0);
@@ -401,15 +406,68 @@ UniscribeTextRun
 					HFONT linkedFont=0;
 					if((hr=fl->GetStrCodePages(runText, length, 0, &codePages, &charProcessed))==S_OK)
 					{
+						List<WString> fontNames;
+						DWORD sourceCodePages=codePages;
+						while(sourceCodePages)
+						{
+							UINT codePageId=0;
+							DWORD tempCodePages=0;	
+							fl->CodePagesToCodePage(sourceCodePages, 0, &codePageId);
+							fl->CodePageToCodePages(codePageId, &tempCodePages);
+							sourceCodePages&=~tempCodePages;
+
+							SCRIPT_ID sid=0;
+							fl->CodePageToScriptID(codePageId, &sid);
+
+							UINT fontInfoCount=0;
+							fl->GetScriptFontInfo(sid, SCRIPTCONTF_FIXED_FONT|SCRIPTCONTF_PROPORTIONAL_FONT, &fontInfoCount, NULL);
+							if(fontInfoCount>0)
+							{
+								Array<SCRIPTFONTINFO> fontInfos(fontInfoCount);
+								fl->GetScriptFontInfo(sid, SCRIPTCONTF_FIXED_FONT|SCRIPTCONTF_PROPORTIONAL_FONT, &fontInfoCount, &fontInfos[0]);
+								for(vint i=0;i<fontInfos.Count();i++)
+								{
+									fontNames.Add(fontInfos[i].wszFont);
+								}
+							}
+						}
+
+						FontProperties fontProperties=documentFragment->fontStyle;
+						FOREACH(WString, fontName, fontNames)
+						{
+							fontProperties.fontFamily=fontName;
+							Ptr<WinFont> font=GetWindowsGDIResourceManager()->CreateGdiFont(fontProperties);
+							dc->SetFont(font);
+							breakings.Clear();
+							breakingAvailabilities.Clear();
+							if(wholeGlyph.BuildUniscribeData(dc, &scriptItem->scriptItem, scriptCache, runText, length, breakings, breakingAvailabilities))
+							{
+								if(breakings.Count()>1 || breakingAvailabilities[0])
+								{
+									fallbackFontStyle=fontProperties;
+									fallbackFontObject=font;
+									break;
+								}
+								else
+								{
+									GetWindowsGDIResourceManager()->DestroyGdiFont(fontProperties);
+								}
+							}
+						}
+
 						if((hr=fl->MapFont(dc->GetHandle(), codePages, 0, &linkedFont))==S_OK)
 						{
-							fallbackFont=linkedFont;
+							fallbackFontHandle=linkedFont;
+						}
+						else if((hr=fl->MapFont(dc->GetHandle(), 0, *runText, &linkedFont))==S_OK)
+						{
+							fallbackFontHandle=linkedFont;
 						}
 					}
 
-					if(fallbackFont)
+					if(fallbackFontHandle)
 					{
-						HFONT oldFont=(HFONT)SelectObject(dc->GetHandle(), fallbackFont);
+						HFONT oldFont=(HFONT)SelectObject(dc->GetHandle(), fallbackFontHandle);
 						breakings.Clear();
 						breakingAvailabilities.Clear();
 						bool result=wholeGlyph.BuildUniscribeData(dc, &scriptItem->scriptItem, scriptCache, runText, length, breakings, breakingAvailabilities);
@@ -521,9 +579,13 @@ UniscribeTextRun
 			{
 				Color fontColor=documentFragment->fontColor;
 				HFONT oldFont=0;
-				if(fallbackFont)
+				if(fallbackFontHandle)
 				{
-					oldFont=(HFONT)SelectObject(dc->GetHandle(), fallbackFont);
+					oldFont=(HFONT)SelectObject(dc->GetHandle(), fallbackFontHandle);
+				}
+				else if(fallbackFontObject)
+				{
+					dc->SetFont(fallbackFontObject);
 				}
 				else
 				{
@@ -573,7 +635,7 @@ UniscribeTextRun
 					&wholeGlyph.glyphOffsets[clusterStart]
 					);
 
-				if(fallbackFont)
+				if(fallbackFontHandle)
 				{
 					SelectObject(dc->GetHandle(), oldFont);
 				}
