@@ -60,7 +60,7 @@ UniscribeGlyphData
 				memset(&sa, 0, sizeof(sa));
 			}
 			
-			bool UniscribeGlyphData::BuildUniscribeData(WinDC* dc, SCRIPT_ITEM* scriptItem, SCRIPT_CACHE& scriptCache, const wchar_t* runText, vint length, List<vint>& breakings)
+			bool UniscribeGlyphData::BuildUniscribeData(WinDC* dc, SCRIPT_ITEM* scriptItem, SCRIPT_CACHE& scriptCache, const wchar_t* runText, vint length, List<vint>& breakings, List<bool>& breakingAvailabilities)
 			{
 				vint glyphCount=glyphs.Count();
 				bool resizeGlyphData=false;
@@ -70,9 +70,9 @@ UniscribeGlyphData
 					resizeGlyphData=true;
 				}
 				sa=scriptItem->a;
+				WinDC* dcParameter=0;
 				{
 					// generate shape information
-					WinDC* dcParameter=0;
 					if(resizeGlyphData)
 					{
 						glyphs.Resize(glyphCount);
@@ -139,6 +139,20 @@ UniscribeGlyphData
 				}
 
 				{
+					SCRIPT_FONTPROPERTIES fp;
+					memset(&fp, 0, sizeof(fp));
+					fp.cBytes=sizeof(fp);
+					HRESULT hr=ScriptGetFontProperties(
+							(dcParameter?dcParameter->GetHandle():NULL),
+							&scriptCache,
+							&fp
+							);
+					WORD invalidGlyph=fp.wgDefault;
+					if(hr!=S_OK)
+					{
+						invalidGlyph=0;
+					}
+
 					// generate breaking information
 					breakings.Add(0);
 					vint charIndex=0;
@@ -171,7 +185,7 @@ UniscribeGlyphData
 						bool available=true;
 						for(vint i=0;i<glyphCount;i++)
 						{
-							if(glyphs[i+glyphIndex]==0)
+							if(glyphs[i+glyphIndex]==invalidGlyph)
 							{
 								available=false;
 							}
@@ -180,11 +194,13 @@ UniscribeGlyphData
 						if(charIndex==0)
 						{
 							lastGlyphAvailable=available;
+							breakingAvailabilities.Add(available);
 						}
 						else if(lastGlyphAvailable!=available)
 						{
 							breakings.Add(charIndex);
 							lastGlyphAvailable=available;
+							breakingAvailabilities.Add(available);
 						}
 
 						charIndex=nextCharIndex;
@@ -362,13 +378,14 @@ UniscribeTextRun
 				ClearUniscribeData();
 
 				dc->SetFont(documentFragment->fontObject);
-				if(!wholeGlyph.BuildUniscribeData(dc, &scriptItem->scriptItem, scriptCache, runText, length, breakings))
+				List<bool> breakingAvailabilities;
+				if(!wholeGlyph.BuildUniscribeData(dc, &scriptItem->scriptItem, scriptCache, runText, length, breakings, breakingAvailabilities))
 				{
 					goto BUILD_UNISCRIBE_DATA_FAILED;
 				}
 				advance=wholeGlyph.runAbc.abcA+wholeGlyph.runAbc.abcB+wholeGlyph.runAbc.abcC;
 
-				if(breakings.Count()==1 && wholeGlyph.glyphs[0]==0)
+				if(breakings.Count()==1 && !breakingAvailabilities[0])
 				{
 					int a=0;
 				}
