@@ -553,7 +553,7 @@ UniscribeTextRun
 					{
 						vint nextCluster
 							=i+clusterLength==length
-							?0
+							?-1
 							:wholeGlyph.charCluster[i+clusterLength];
 						for(vint j=cluster;j>nextCluster;j--)
 						{
