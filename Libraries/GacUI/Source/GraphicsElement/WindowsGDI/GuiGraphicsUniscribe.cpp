@@ -179,6 +179,53 @@ UniscribeGlyphData
 			}
 
 /***********************************************************************
+UniscribeItem
+***********************************************************************/
+
+			UniscribeItem::UniscribeItem()
+				:start(0)
+				,length(0)
+				,itemText(0)
+			{
+			}
+
+			UniscribeItem::~UniscribeItem()
+			{
+			}
+
+			void UniscribeItem::ClearUniscribeData()
+			{
+				charLogattrs.Resize(0);
+			}
+
+			bool UniscribeItem::BuildUniscribeData()
+			{
+				// generate break information
+				charLogattrs.Resize(length);
+
+				HRESULT hr=ScriptBreak(
+					itemText,
+					(int)length,
+					&scriptItem.a,
+					&charLogattrs[0]
+					);
+				if(hr!=0)
+				{
+					goto BUILD_UNISCRIBE_DATA_FAILED;
+				}
+
+				return true;
+	BUILD_UNISCRIBE_DATA_FAILED:
+				ClearUniscribeData();
+				return false;
+			}
+
+			bool UniscribeItem::IsRightToLeft()
+			{
+				return scriptItem.a.fRTL;
+			}
+
+/***********************************************************************
 UniscribeRun
 ***********************************************************************/
 
@@ -187,6 +234,7 @@ UniscribeRun
 				,scriptItem(0)
 				,start(0)
 				,length(0)
+				,runText(0)
 			{
 			}
 
@@ -231,7 +279,6 @@ UniscribeTextRun
 					ScriptFreeCache(&scriptCache);
 					scriptCache=0;
 				}
-				charLogattrs.Resize(0);
 				advance=0;
 				wholeGlyph.ClearUniscribeData(0, 0);
 			}
@@ -239,7 +286,7 @@ UniscribeTextRun
 			void UniscribeTextRun::SearchGlyphCluster(vint charStart, vint charLength, vint& cluster, vint& nextCluster)
 			{
 				cluster=wholeGlyph.charCluster[charStart];
-				if(scriptItem->a.fRTL)
+				if(scriptItem->IsRightToLeft())
 				{
 					nextCluster
 						=charStart+charLength==length
@@ -258,24 +305,9 @@ UniscribeTextRun
 			bool UniscribeTextRun::BuildUniscribeData(WinDC* dc)
 			{
 				ClearUniscribeData();
-				{
-					// generate break information
-					charLogattrs.Resize(length);
-
-					HRESULT hr=ScriptBreak(
-						runText,
-						(int)length,
-						&scriptItem->a,
-						&charLogattrs[0]
-						);
-					if(hr!=0)
-					{
-						goto BUILD_UNISCRIBE_DATA_FAILED;
-					}
-				}
 
 				dc->SetFont(documentFragment->fontObject);
-				if(!wholeGlyph.BuildUniscribeData(dc, scriptItem, scriptCache, runText, length))
+				if(!wholeGlyph.BuildUniscribeData(dc, &scriptItem->scriptItem, scriptCache, runText, length))
 				{
 					goto BUILD_UNISCRIBE_DATA_FAILED;
 				}
@@ -293,7 +325,7 @@ UniscribeTextRun
 				vint nextCluster=0;
 				SearchGlyphCluster(charStart, charLength, cluster, nextCluster);
 				vint width=0;
-				if(scriptItem->a.fRTL)
+				if(scriptItem->IsRightToLeft())
 				{
 					for(vint i=cluster;i>nextCluster;i--)
 					{
@@ -322,7 +354,7 @@ UniscribeTextRun
 				charAdvances=0;
 				for(vint i=tempStart;i<=length;)
 				{
-					if(i==length || charLogattrs[i].fSoftBreak==TRUE)
+					if(i==length || scriptItem->charLogattrs[i+(start-scriptItem->start)].fSoftBreak==TRUE)
 					{
 						if(width<=maxWidth || (firstRun && charLength==0))
 						{
@@ -350,7 +382,7 @@ UniscribeTextRun
 						}
 					}
 
-					if(scriptItem->a.fRTL)
+					if(scriptItem->IsRightToLeft())
 					{
 						vint nextCluster
 							=i+clusterLength==length
@@ -396,7 +428,7 @@ UniscribeTextRun
 
 				vint clusterStart=0;
 				vint clusterCount=0;
-				if(scriptItem->a.fRTL)
+				if(scriptItem->IsRightToLeft())
 				{
 					clusterStart=nextCluster;
 					clusterCount=cluster-nextCluster;
@@ -478,7 +510,7 @@ UniscribeLine
 
 			void UniscribeLine::ClearUniscribeData()
 			{
-				scriptItems.Resize(0);
+				scriptItems.Clear();
 				scriptRuns.Clear();
 				runVisualToLogical.Resize(0);
 				runLogicalToVisual.Resize(0);
@@ -505,22 +537,38 @@ UniscribeLine
 						ScriptApplyDigitSubstitution(&sds, &sc, &ss);
 
 						// itemize a line
-						scriptItems.Resize(lineText.Length()+2);
+						Array<SCRIPT_ITEM> items(lineText.Length()+2);
 						int scriptItemCount=0;
 						HRESULT hr=ScriptItemize(
 							lineText.Buffer(),
 							(int)lineText.Length(),
-							(int)(scriptItems.Count()-1),
+							(int)(items.Count()-1),
 							&sc,
 							&ss,
-							&scriptItems[0],
+							&items[0],
 							&scriptItemCount
 							);
 						if(hr!=0)
 						{
 							goto BUILD_UNISCRIBE_DATA_FAILED;
 						}
-						scriptItems.Resize(scriptItemCount+1);
+
+						items.Resize(scriptItemCount+1);
+						for(vint i=0;i<scriptItemCount;i++)
+						{
+							SCRIPT_ITEM item=items[i];
+							Ptr<UniscribeItem> scriptItem=new UniscribeItem;
+							scriptItem->start=item.iCharPos;
+							scriptItem->length=items[i+1].iCharPos-item.iCharPos;
+							scriptItem->itemText=lineText.Buffer()+item.iCharPos;
+							scriptItem->scriptItem=item;
+
+							if(!scriptItem->BuildUniscribeData())
+							{
+								goto BUILD_UNISCRIBE_DATA_FAILED;
+							}
+							scriptItems.Add(scriptItem);
+						}
 					}
 					{
 						// use item and document fragment information to produce runs
@@ -528,17 +576,15 @@ UniscribeLine
 						// characters in each run contains the same style
 						vint fragmentIndex=0;
 						vint fragmentStart=0;
-						for(vint i=0;i<scriptItems.Count()-1;i++)
+						for(vint i=0;i<scriptItems.Count();i++)
 						{
-							SCRIPT_ITEM* scriptItem=&scriptItems[i];
-							vint start=scriptItem[0].iCharPos;
-							vint length=scriptItem[1].iCharPos-scriptItem[0].iCharPos;
-							vint currentStart=start;
+							Ptr<UniscribeItem> scriptItem=scriptItems[i];
+							vint currentStart=scriptItem->start;
 
-							while(currentStart<start+length)
+							while(currentStart<scriptItem->start+scriptItem->length)
 							{
 								UniscribeFragment* fragment=0;
-								vint itemRemainLength=length-(currentStart-start);
+								vint itemRemainLength=scriptItem->length-(currentStart-scriptItem->start);
 								vint fragmentRemainLength=0;
 								while(true)
 								{
@@ -569,7 +615,7 @@ UniscribeLine
 												{
 													Ptr<UniscribeElementRun> run=new UniscribeElementRun;
 													run->documentFragment=fragment;
-													run->scriptItem=scriptItem;
+													run->scriptItem=scriptItem.Obj();
 													run->start=currentStart;
 													run->length=elementLength;
 													run->runText=lineText.Buffer()+currentStart;
@@ -588,7 +634,7 @@ UniscribeLine
 								{
 									Ptr<UniscribeTextRun> run=new UniscribeTextRun;
 									run->documentFragment=fragment;
-									run->scriptItem=scriptItem;
+									run->scriptItem=scriptItem.Obj();
 									run->start=currentStart;
 									run->length=shortLength;
 									run->runText=lineText.Buffer()+currentStart;
@@ -613,7 +659,7 @@ UniscribeLine
 						runLogicalToVisual.Resize(scriptRuns.Count());
 						for(vint i=0;i<scriptRuns.Count();i++)
 						{
-							levels[i]=scriptRuns[i]->scriptItem->a.s.uBidiLevel;
+							levels[i]=scriptRuns[i]->scriptItem->scriptItem.a.s.uBidiLevel;
 						}
 						ScriptLayout((int)levels.Count(), &levels[0], &runVisualToLogical[0], &runLogicalToVisual[0]);
 					}
@@ -834,7 +880,7 @@ UniscribeParagraph
 									}
 
 									UniscribeRun::RunFragmentBounds fragmentBounds;
-									if(run->scriptItem->a.fRTL)
+									if(run->scriptItem->IsRightToLeft())
 									{
 										fragmentBounds.start=run->length-start-length;
 									}
