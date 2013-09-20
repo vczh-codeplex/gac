@@ -121,32 +121,60 @@ namespace vl
 OS Supporting
 ***********************************************************************/
 
-			class WinDirect2DApplicationGDIObjectProvider : public IWindowsGDIObjectProvider
+			class WinGDIApplicationGDIObjectProvider : public IWindowsGDIObjectProvider
 			{
+			protected:
+				IMLangCodePages*				mLangCodePages;
+				IMLangFontLink2*				mLangFontLink;
+
 			public:
-				windows::WinDC* GetNativeWindowDC(INativeWindow* window)
+				WinGDIApplicationGDIObjectProvider()
+					:mLangCodePages(0)
+					,mLangFontLink(0)
+				{
+					CoCreateInstance(CLSID_CMultiLanguage, NULL, CLSCTX_INPROC_SERVER, IID_IMLangCodePages, (void**)&mLangCodePages);
+					CoCreateInstance(CLSID_CMultiLanguage, NULL, CLSCTX_INPROC_SERVER, IID_IMLangFontLink2, (void**)&mLangFontLink);
+				}
+
+				~WinGDIApplicationGDIObjectProvider()
+				{
+					mLangCodePages->Release();
+					mLangFontLink->Release();
+				}
+
+				windows::WinDC* GetNativeWindowDC(INativeWindow* window)override
 				{
 					return vl::presentation::windows::GetNativeWindowDC(window);
 				}
 
-				IWindowsGDIRenderTarget* GetBindedRenderTarget(INativeWindow* window)
+				IWindowsGDIRenderTarget* GetBindedRenderTarget(INativeWindow* window)override
 				{
 					return dynamic_cast<IWindowsGDIRenderTarget*>(vl::presentation::windows::GetWindowsForm(window)->GetGraphicsHandler());
 				}
 
-				void SetBindedRenderTarget(INativeWindow* window, IWindowsGDIRenderTarget* renderTarget)
+				void SetBindedRenderTarget(INativeWindow* window, IWindowsGDIRenderTarget* renderTarget)override
 				{
 					vl::presentation::windows::GetWindowsForm(window)->SetGraphicsHandler(renderTarget);
 				}
 
-				IWICImagingFactory* GetWICImagingFactory()
+				IWICImagingFactory* GetWICImagingFactory()override
 				{
 					return vl::presentation::windows::GetWICImagingFactory();
 				}
 
-				IWICBitmap* GetWICBitmap(INativeImageFrame* frame)
+				IWICBitmap* GetWICBitmap(INativeImageFrame* frame)override
 				{
 					return vl::presentation::windows::GetWICBitmap(frame);
+				}
+
+				IMLangCodePages* GetMLangCodePages()override
+				{
+					return mLangCodePages;
+				}
+
+				IMLangFontLink2* GetMLangFontLink()override
+				{
+					return mLangFontLink;
 				}
 			};
 		}
@@ -161,7 +189,6 @@ using namespace vl::presentation::elements_windows_gdi;
 int WinMainGDI(HINSTANCE hInstance, void(*RendererMain)())
 {
 	EnableCrossKernelCrashing();
-	CoInitializeEx(NULL, COINIT_MULTITHREADED);
 	// create controller
 	INativeController* controller=CreateWindowsNativeController(hInstance);
 	SetCurrentController(controller);
@@ -183,8 +210,9 @@ int WinMainGDI(HINSTANCE hInstance, void(*RendererMain)())
 
 int SetupWindowsGDIRenderer()
 {
+	CoInitializeEx(NULL, COINIT_MULTITHREADED);
 	HINSTANCE hInstance=(HINSTANCE)GetModuleHandle(NULL);
-	WinDirect2DApplicationGDIObjectProvider objectProvider;
+	WinGDIApplicationGDIObjectProvider objectProvider;
 	SetWindowsGDIObjectProvider(&objectProvider);
 	return WinMainGDI(hInstance, &RendererMainGDI);
 }

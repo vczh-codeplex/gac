@@ -387,7 +387,8 @@ UniscribeTextRun
 
 				if(breakings.Count()==1 && !breakingAvailabilities[0])
 				{
-					int a=0;
+					IMLangCodePages* cp=GetWindowsGDIObjectProvider()->GetMLangCodePages();
+					IMLangFontLink2* fl=GetWindowsGDIObjectProvider()->GetMLangFontLink();
 				}
 
 				return true;

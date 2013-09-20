@@ -10,6 +10,7 @@ Interfaces:
 #define VCZH_PRESENTATION_ELEMENTS_GUIGRAPHICSWINDOWSGDI
 
 #include <wincodec.h>
+#include <MLang.h>
 #include "..\..\NativeWindow\Windows\GDI\WinGDI.h"
 #include "..\GuiGraphicsElement.h"
 #include "..\GuiGraphicsTextElement.h"
@@ -106,6 +107,8 @@ OS Supporting
 				virtual void								SetBindedRenderTarget(INativeWindow* window, IWindowsGDIRenderTarget* renderTarget)=0;
 				virtual IWICImagingFactory*					GetWICImagingFactory()=0;
 				virtual IWICBitmap*							GetWICBitmap(INativeImageFrame* frame)=0;
+				virtual IMLangCodePages*					GetMLangCodePages()=0;
+				virtual IMLangFontLink2*					GetMLangFontLink()=0;
 			};
 
 			extern IWindowsGDIObjectProvider*				GetWindowsGDIObjectProvider();
