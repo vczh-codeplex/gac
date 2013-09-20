@@ -60,7 +60,7 @@ UniscribeGlyphData
 				memset(&sa, 0, sizeof(sa));
 			}
 			
-			bool UniscribeGlyphData::BuildUniscribeData(WinDC* dc, SCRIPT_ITEM* scriptItem, SCRIPT_CACHE& scriptCache, const wchar_t* runText, vint length)
+			bool UniscribeGlyphData::BuildUniscribeData(WinDC* dc, SCRIPT_ITEM* scriptItem, SCRIPT_CACHE& scriptCache, const wchar_t* runText, vint length, List<vint>& breakings)
 			{
 				vint glyphCount=glyphs.Count();
 				bool resizeGlyphData=false;
@@ -137,6 +137,61 @@ UniscribeGlyphData
 						glyphVisattrs.Resize(glyphCount);
 					}
 				}
+
+				{
+					// generate breaking information
+					breakings.Add(0);
+					vint charIndex=0;
+					bool lastGlyphAvailable=false;
+					while(charIndex<length)
+					{
+						vint glyphIndex=charCluster[charIndex];
+						vint nextCharIndex=charIndex;
+						while(nextCharIndex<length && charCluster[nextCharIndex]==glyphIndex)
+						{
+							nextCharIndex++;
+						}
+
+						vint glyphCount=0;
+						if(nextCharIndex==length)
+						{
+							glyphCount=glyphs.Count()-glyphIndex;
+						}
+						else
+						{
+							glyphCount=charCluster[nextCharIndex]-glyphIndex;
+						}
+
+						if(scriptItem->a.fRTL)
+						{
+							glyphCount=-glyphCount;
+							glyphIndex-=glyphCount-1;
+						}
+
+						bool available=true;
+						for(vint i=0;i<glyphCount;i++)
+						{
+							if(glyphs[i+glyphIndex]==0)
+							{
+								available=false;
+							}
+						}
+
+						if(charIndex==0)
+						{
+							lastGlyphAvailable=available;
+						}
+						else if(lastGlyphAvailable!=available)
+						{
+							breakings.Add(charIndex);
+							lastGlyphAvailable=available;
+						}
+
+						charIndex=nextCharIndex;
+					}
+				}
+
+				if(breakings.Count()==1)
 				{
 					// generate place information
 					WinDC* dcParameter=0;
@@ -302,16 +357,21 @@ UniscribeTextRun
 				}
 			}
 
-			bool UniscribeTextRun::BuildUniscribeData(WinDC* dc)
+			bool UniscribeTextRun::BuildUniscribeData(WinDC* dc, List<vint>& breakings)
 			{
 				ClearUniscribeData();
 
 				dc->SetFont(documentFragment->fontObject);
-				if(!wholeGlyph.BuildUniscribeData(dc, &scriptItem->scriptItem, scriptCache, runText, length))
+				if(!wholeGlyph.BuildUniscribeData(dc, &scriptItem->scriptItem, scriptCache, runText, length, breakings))
 				{
 					goto BUILD_UNISCRIBE_DATA_FAILED;
 				}
 				advance=wholeGlyph.runAbc.abcA+wholeGlyph.runAbc.abcB+wholeGlyph.runAbc.abcC;
+
+				if(breakings.Count()==1 && wholeGlyph.glyphs[0]==0)
+				{
+					int a=0;
+				}
 
 				return true;
 	BUILD_UNISCRIBE_DATA_FAILED:
@@ -469,8 +529,9 @@ UniscribeElementRun
 			{
 			}
 
-			bool UniscribeElementRun::BuildUniscribeData(WinDC* dc)
+			bool UniscribeElementRun::BuildUniscribeData(WinDC* dc, List<vint>& breakings)
 			{
+				breakings.Add(0);
 				return true;
 			}
 
@@ -643,12 +704,37 @@ UniscribeLine
 						}
 
 						// for each run, generate shape information
-						FOREACH(Ptr<UniscribeRun>, run, scriptRuns)
+						vint runIndex=0;
+						while(runIndex<scriptRuns.Count())
 						{
-							if(!run->BuildUniscribeData(dc))
+							Ptr<UniscribeRun> run=scriptRuns[runIndex];
+							List<vint> breakings;
+							if(!run->BuildUniscribeData(dc, breakings))
 							{
 								goto BUILD_UNISCRIBE_DATA_FAILED;
 							}
+							else if(breakings.Count()>1)
+							{
+								if(Ptr<UniscribeTextRun> textRun=run.Cast<UniscribeTextRun>())
+								{
+									scriptRuns.RemoveAt(runIndex);
+									for(vint i=0;i<breakings.Count();i++)
+									{
+										vint start=breakings[i];
+										vint length=i==breakings.Count()-1?textRun->length-start:breakings[i+1]-start;
+
+										Ptr<UniscribeTextRun> newRun=new UniscribeTextRun;
+										newRun->documentFragment=run->documentFragment;
+										newRun->scriptItem=run->scriptItem;
+										newRun->start=start+run->start;
+										newRun->length=length;
+										newRun->runText=run->runText+newRun->start-run->start;
+										scriptRuns.Insert(runIndex+i, newRun);
+									}
+									continue;
+								}
+							}
+							runIndex++;
 						}
 					}
 				}
