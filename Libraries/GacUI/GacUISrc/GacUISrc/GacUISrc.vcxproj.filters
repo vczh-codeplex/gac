@@ -480,6 +480,9 @@
     <ClCompile Include="..\..\Source\NativeWindow\GuiDocument.cpp">
       <Filter>GacUI\NativeWindow</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\GraphicsElement\WindowsGDI\GuiGraphicsUniscribe.cpp">
+      <Filter>GacUI\GraphicsElement\WindowsGDI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Common\Source\Basic.h">
@@ -916,6 +919,9 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\NativeWindow\GuiDocument.h">
       <Filter>GacUI\NativeWindow</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\GraphicsElement\WindowsGDI\GuiGraphicsUniscribe.h">
+      <Filter>GacUI\GraphicsElement\WindowsGDI</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
