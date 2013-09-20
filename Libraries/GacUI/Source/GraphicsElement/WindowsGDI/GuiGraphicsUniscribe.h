@@ -62,7 +62,7 @@ UniscribeGlyphData
 				UniscribeGlyphData();
 
 				void							ClearUniscribeData(vint glyphCount, vint length);
-				bool							BuildUniscribeData(WinDC* dc, SCRIPT_ITEM* scriptItem, SCRIPT_CACHE& scriptCache, const wchar_t* runText, vint length, List<vint>& breakings);
+				bool							BuildUniscribeData(WinDC* dc, SCRIPT_ITEM* scriptItem, SCRIPT_CACHE& scriptCache, const wchar_t* runText, vint length, List<vint>& breakings, List<bool>& breakingAvailabilities);
 			};
 
 /***********************************************************************
