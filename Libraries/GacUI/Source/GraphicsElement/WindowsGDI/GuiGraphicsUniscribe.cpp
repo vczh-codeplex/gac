@@ -714,8 +714,9 @@ UniscribeLine
 						if(startRun<lastRun || (startRun==lastRun && startRunOffset<lastRunOffset))
 						{
 							// calculate the max line height in this range;
+							vint availableLastRun=lastRun<scriptRuns.Count()-1?lastRun:scriptRuns.Count()-1;
 							vint maxHeight=0;
-							for(vint i=startRun;i<=lastRun && i<scriptRuns.Count();i++)
+							for(vint i=startRun;i<=availableLastRun;i++)
 							{
 								if(i==lastRun && lastRunOffset==0)
 								{
@@ -728,13 +729,24 @@ UniscribeLine
 								}
 							}
 
+							// determine the rendering order for all runs inside this range
+							Array<BYTE> levels(availableLastRun-startRun+1);
+							Array<vint> runVisualToLogical(levels.Count());
+							Array<vint> runLogicalToVisual(levels.Count());
+							for(vint i=startRun;i<=availableLastRun;i++)
+							{
+								levels[i-startRun]=scriptRuns[i]->scriptItem->scriptItem.a.s.uBidiLevel;
+							}
+							ScriptLayout((int)levels.Count(), &levels[0], &runVisualToLogical[0], &runLogicalToVisual[0]);
+
 							// render all runs inside this range
 							vint startRunFragmentCount=-1;
-							for(vint i=startRun;i<=lastRun && i<scriptRuns.Count();i++)
+							for(vint i=startRun;i<=availableLastRun;i++)
 							{
-								UniscribeRun* run=scriptRuns[i].Obj();
-								vint start=i==startRun?startRunOffset:0;
-								vint end=i==lastRun?lastRunOffset:run->length;
+								vint runIndex=runVisualToLogical[i-startRun]+startRun;
+								UniscribeRun* run=scriptRuns[runIndex].Obj();
+								vint start=runIndex==startRun?startRunOffset:0;
+								vint end=runIndex==lastRun?lastRunOffset:run->length;
 								vint length=end-start;
 
 								if(startRunFragmentCount==-1)
@@ -743,14 +755,7 @@ UniscribeLine
 								}
 
 								UniscribeRun::RunFragmentBounds fragmentBounds;
-								if(run->scriptItem->IsRightToLeft())
-								{
-									fragmentBounds.start=run->length-start-length;
-								}
-								else
-								{
-									fragmentBounds.start=start;
-								}
+								fragmentBounds.start=start;
 								fragmentBounds.length=length;
 								fragmentBounds.bounds=Rect(
 									Point(cx, cy+maxHeight-run->SumHeight()),
@@ -761,6 +766,7 @@ UniscribeLine
 								cx+=run->SumWidth(start, length);
 							}
 
+							// adjust alignment
 							vint cxOffset=0;
 							switch(alignment)
 							{
@@ -771,9 +777,11 @@ UniscribeLine
 								cxOffset=availableWidth-cx;
 								break;
 							}
+
+							// shift all bounds using alignment
 							if(cxOffset!=0)
 							{
-								for(vint i=startRun;i<=lastRun && i<scriptRuns.Count();i++)
+								for(vint i=startRun;i<=availableLastRun;i++)
 								{
 									UniscribeRun* run=scriptRuns[i].Obj();
 									for(vint j=(i==startRun?startRunFragmentCount:0);j<run->fragmentBounds.Count();j++)
