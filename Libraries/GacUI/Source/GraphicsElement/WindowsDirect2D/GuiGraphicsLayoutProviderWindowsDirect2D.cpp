@@ -491,6 +491,31 @@ WindowsDirect2DParagraph
 						defaultTextColor,
 						D2D1_DRAW_TEXT_OPTIONS_NO_SNAP);
 				}
+
+				bool GetCaret(vint comparingCaret, CaretRelativePosition position, vint& newCaret)override
+				{
+					throw 0;
+				}
+
+				bool GetCaretBounds(vint caret, Rect& front, Rect& back)override
+				{
+					throw 0;
+				}
+
+				bool GetCaretFromPoint(Point point, vint& caret)override
+				{
+					throw 0;
+				}
+
+				bool GetCaretFromTextPos(vint textPos, vint& front, vint& back)override
+				{
+					throw 0;
+				}
+
+				bool IsValidCaret(vint caret)override
+				{
+					throw 0;
+				}
 			};
 
 /***********************************************************************

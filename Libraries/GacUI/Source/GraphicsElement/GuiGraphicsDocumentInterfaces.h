@@ -57,6 +57,23 @@ Layout Engine
 					Alone,
 				};
 
+				/// <summary>Caret relative position.</summary>
+				enum CaretRelativePosition
+				{
+					/// <summary>[T:vl.presentation.elements.IGuiGraphicsParagraph.CaretRelativePosition]The first caret position.</summary>
+					CaretFirst,
+					/// <summary>[T:vl.presentation.elements.IGuiGraphicsParagraph.CaretRelativePosition]The last caret position.</summary>
+					CaretLast,
+					/// <summary>[T:vl.presentation.elements.IGuiGraphicsParagraph.CaretRelativePosition]The relative left caret position.</summary>
+					CaretMoveLeft,
+					/// <summary>[T:vl.presentation.elements.IGuiGraphicsParagraph.CaretRelativePosition]The relative right caret position.</summary>
+					CaretMoveRight,
+					/// <summary>[T:vl.presentation.elements.IGuiGraphicsParagraph.CaretRelativePosition]The relative up caret position.</summary>
+					CaretMoveUp,
+					/// <summary>[T:vl.presentation.elements.IGuiGraphicsParagraph.CaretRelativePosition]The relative down caret position.</summary>
+					CaretMoveDown,
+				};
+
 				/// <summary>Inline object properties.</summary>
 				struct InlineObjectProperties
 				{
@@ -155,6 +172,34 @@ Layout Engine
 				/// <summary>Render the graphics element using a specified bounds.</summary>
 				/// <param name="bounds">Bounds to decide the size and position of the binded graphics element.</param>
 				virtual void								Render(Rect bounds)=0;
+
+				/// <summary>Get a new caret from the old caret with a relative position.</summary>
+				/// <returns>Returns true if this operation succeeded.</returns>
+				/// <param name="comparingCaret">The caret to compare. If the position is CaretFirst or CaretLast, this argument is ignored.</param>
+				/// <param name="position">The relative position.</param>
+				/// <param name="newCaret">Receive the new caret.</param>
+				virtual bool								GetCaret(vint comparingCaret, CaretRelativePosition position, vint& newCaret)=0;
+				/// <summary>Get the bounds of the two sides of a caret.</summary>
+				/// <returns>Returns true if this operation succeeded.</returns>
+				/// <param name="caret">The caret.</param>
+				/// <param name="front">The bounds of the front side, which is the logical character before this caret.</param>
+				/// <param name="back">The bounds of the back side, which is the logical character after this caret.</param>
+				virtual bool								GetCaretBounds(vint caret, Rect& front, Rect& back)=0;
+				/// <summary>Get the caret from a specified position.</summary>
+				/// <returns>Returns true if this operation succeeded.</returns>
+				/// <param name="point">The point.</param>
+				/// <param name="caret">The caret.</param>
+				virtual bool								GetCaretFromPoint(Point point, vint& caret)=0;
+				/// <summary>Get the pair of carets from a text position.</summary>
+				/// <returns>Returns true if this operation succeeded.</returns>
+				/// <param name="textPos">The caret to compare. If the position is CaretFirst or CaretLast, this argument is ignored.</param>
+				/// <param name="front">The nearest caret of the front side, which is before the text position.</param>
+				/// <param name="back">The nearest caret of the back side, which is after the text position.</param>
+				virtual bool								GetCaretFromTextPos(vint textPos, vint& front, vint& back)=0;
+				/// <summary>Test is the caret valid.</summary>
+				/// <returns>Returns true if the caret is valid.</returns>
+				/// <param name="caret">The caret to test.</param>
+				virtual bool								IsValidCaret(vint caret)=0;
 			};
 
 			/// <summary>Renderer awared rich text document layout engine provider interface.</summary>

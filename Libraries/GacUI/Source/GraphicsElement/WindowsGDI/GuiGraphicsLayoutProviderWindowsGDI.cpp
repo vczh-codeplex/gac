@@ -205,6 +205,31 @@ WindowsGDIParagraph
 				{
 					paragraph->Render(renderTarget->GetDC(), bounds.Left(), bounds.Top());
 				}
+
+				bool GetCaret(vint comparingCaret, CaretRelativePosition position, vint& newCaret)override
+				{
+					throw 0;
+				}
+
+				bool GetCaretBounds(vint caret, Rect& front, Rect& back)override
+				{
+					throw 0;
+				}
+
+				bool GetCaretFromPoint(Point point, vint& caret)override
+				{
+					throw 0;
+				}
+
+				bool GetCaretFromTextPos(vint textPos, vint& front, vint& back)override
+				{
+					throw 0;
+				}
+
+				bool IsValidCaret(vint caret)override
+				{
+					throw 0;
+				}
 			};
 
 /***********************************************************************
