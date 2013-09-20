@@ -66,6 +66,27 @@ UniscribeGlyphData
 			};
 
 /***********************************************************************
+UniscribeItem
+***********************************************************************/
+
+			class UniscribeItem : public Object
+			{
+			public:
+				SCRIPT_ITEM						scriptItem;
+				vint							start;
+				vint							length;
+				const wchar_t*					itemText;
+				Array<SCRIPT_LOGATTR>			charLogattrs;
+
+				UniscribeItem();
+				~UniscribeItem();
+
+				void							ClearUniscribeData();
+				bool							BuildUniscribeData();
+				bool							IsRightToLeft();
+			};
+
+/***********************************************************************
 UniscribeRun
 ***********************************************************************/
 
@@ -80,7 +101,7 @@ UniscribeRun
 				};
 
 				UniscribeFragment*				documentFragment;
-				SCRIPT_ITEM*					scriptItem;
+				UniscribeItem*					scriptItem;
 				vint							start;
 				vint							length;
 				const wchar_t*					runText;
@@ -105,7 +126,6 @@ UniscribeTextRun
 			{
 			public:
 				SCRIPT_CACHE					scriptCache;
-				Array<SCRIPT_LOGATTR>			charLogattrs;
 				vint							advance;
 				UniscribeGlyphData				wholeGlyph;
 
@@ -151,7 +171,7 @@ UniscribeLine
 				List<Ptr<UniscribeFragment>>	documentFragments;
 
 				WString							lineText;
-				Array<SCRIPT_ITEM>				scriptItems;
+				List<Ptr<UniscribeItem>>		scriptItems;
 				List<Ptr<UniscribeRun>>			scriptRuns;
 				Array<int>						runVisualToLogical;
 				Array<int>						runLogicalToVisual;
