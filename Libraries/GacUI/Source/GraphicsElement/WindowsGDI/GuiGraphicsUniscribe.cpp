@@ -512,8 +512,6 @@ UniscribeLine
 			{
 				scriptItems.Clear();
 				scriptRuns.Clear();
-				runVisualToLogical.Resize(0);
-				runLogicalToVisual.Resize(0);
 			}
 
 			bool UniscribeLine::BuildUniscribeData(WinDC* dc)
@@ -652,22 +650,168 @@ UniscribeLine
 								goto BUILD_UNISCRIBE_DATA_FAILED;
 							}
 						}
-
-						// layout runs if there are RTL text
-						Array<BYTE> levels(scriptRuns.Count());
-						runVisualToLogical.Resize(scriptRuns.Count());
-						runLogicalToVisual.Resize(scriptRuns.Count());
-						for(vint i=0;i<scriptRuns.Count();i++)
-						{
-							levels[i]=scriptRuns[i]->scriptItem->scriptItem.a.s.uBidiLevel;
-						}
-						ScriptLayout((int)levels.Count(), &levels[0], &runVisualToLogical[0], &runLogicalToVisual[0]);
 					}
 				}
 				return true;
 	BUILD_UNISCRIBE_DATA_FAILED:
 				ClearUniscribeData();
 				return false;
+			}
+
+			void UniscribeLine::Layout(vint availableWidth, Alignment alignment, vint top, vint& totalHeight)
+			{
+				vint cx=0;
+				vint cy=top;
+				if(scriptRuns.Count()==0)
+				{
+					// if this line doesn't contains any run, skip and render a blank line
+					vint height=documentFragments[0]->fontStyle.size;
+					bounds=Rect(Point(cx, cy), Size(0, height));
+					cy+=height;
+				}
+				else
+				{
+					FOREACH(Ptr<UniscribeRun>, run, scriptRuns)
+					{
+						run->fragmentBounds.Clear();
+					}
+
+					// render this line into lines with auto line wrapping
+					vint startRun=0;
+					vint startRunOffset=0;
+					vint lastRun=0;
+					vint lastRunOffset=0;
+					vint currentWidth=0;
+
+					while(startRun<scriptRuns.Count())
+					{
+						vint currentWidth=0;
+						bool firstRun=true;
+						// search for a range to fit in the given width
+						for(vint i=startRun;i<scriptRuns.Count();i++)
+						{
+							vint charLength=0;
+							vint charAdvances=0;
+							UniscribeRun* run=scriptRuns[i].Obj();
+							run->SearchForLineBreak(lastRunOffset, availableWidth-currentWidth, firstRun, charLength, charAdvances);
+							firstRun=false;
+
+							if(charLength==run->length-lastRunOffset)
+							{
+								lastRun=i+1;
+								lastRunOffset=0;
+								currentWidth+=charAdvances;
+							}
+							else
+							{
+								lastRun=i;
+								lastRunOffset=lastRunOffset+charLength;
+								break;
+							}
+						}
+
+						// if the range is empty, than this should be the end of line, ignore it
+						if(startRun<lastRun || (startRun==lastRun && startRunOffset<lastRunOffset))
+						{
+							// calculate the max line height in this range;
+							vint maxHeight=0;
+							for(vint i=startRun;i<=lastRun && i<scriptRuns.Count();i++)
+							{
+								if(i==lastRun && lastRunOffset==0)
+								{
+									break;
+								}
+								vint size=scriptRuns[i]->SumHeight();
+								if(maxHeight<size)
+								{
+									maxHeight=size;
+								}
+							}
+
+							// render all runs inside this range
+							vint startRunFragmentCount=-1;
+							for(vint i=startRun;i<=lastRun && i<scriptRuns.Count();i++)
+							{
+								UniscribeRun* run=scriptRuns[i].Obj();
+								vint start=i==startRun?startRunOffset:0;
+								vint end=i==lastRun?lastRunOffset:run->length;
+								vint length=end-start;
+
+								if(startRunFragmentCount==-1)
+								{
+									startRunFragmentCount=run->fragmentBounds.Count();
+								}
+
+								UniscribeRun::RunFragmentBounds fragmentBounds;
+								if(run->scriptItem->IsRightToLeft())
+								{
+									fragmentBounds.start=run->length-start-length;
+								}
+								else
+								{
+									fragmentBounds.start=start;
+								}
+								fragmentBounds.length=length;
+								fragmentBounds.bounds=Rect(
+									Point(cx, cy+maxHeight-run->SumHeight()),
+									Size(run->SumWidth(start, length), run->SumHeight())
+									);
+								run->fragmentBounds.Add(fragmentBounds);
+
+								cx+=run->SumWidth(start, length);
+							}
+
+							vint cxOffset=0;
+							switch(alignment)
+							{
+							case Alignment::Center:
+								cxOffset=(availableWidth-cx)/2;
+								break;
+							case Alignment::Right:
+								cxOffset=availableWidth-cx;
+								break;
+							}
+							if(cxOffset!=0)
+							{
+								for(vint i=startRun;i<=lastRun && i<scriptRuns.Count();i++)
+								{
+									UniscribeRun* run=scriptRuns[i].Obj();
+									for(vint j=(i==startRun?startRunFragmentCount:0);j<run->fragmentBounds.Count();j++)
+									{
+										UniscribeRun::RunFragmentBounds& fragmentBounds=run->fragmentBounds[j];
+										fragmentBounds.bounds.x1+=cxOffset;
+										fragmentBounds.bounds.x2+=cxOffset;
+									}
+								}
+							}
+
+							cx=0;
+							cy+=(vint)(maxHeight*1.5);
+						}
+
+						startRun=lastRun;
+						startRunOffset=lastRunOffset;
+					}
+
+					// calculate line bounds
+					vint minX=0;
+					vint minY=0;
+					vint maxX=0;
+					vint maxY=0;
+					FOREACH(Ptr<UniscribeRun>, run, scriptRuns)
+					{
+						FOREACH(UniscribeRun::RunFragmentBounds, fragmentBounds, run->fragmentBounds)
+						{
+							Rect bounds=fragmentBounds.bounds;
+							if(minX>bounds.Left()) minX=bounds.Left();
+							if(minY>bounds.Top()) minX=bounds.Top();
+							if(maxX<bounds.Right()) maxX=bounds.Right();
+							if(maxY<bounds.Bottom()) maxY=bounds.Bottom();
+						}
+					}
+					bounds=Rect(minX, minY, maxX, maxY);
+				}
+				totalHeight=cy;
 			}
 
 			void UniscribeLine::Render(WinDC* dc, vint offsetX, vint offsetY)
@@ -795,159 +939,12 @@ UniscribeParagraph
 				lastAvailableWidth=availableWidth;
 				paragraphAlignment=alignment;
 
-				vint cx=0;
 				vint cy=0;
 				FOREACH(Ptr<UniscribeLine>, line, lines)
 				{
-					if(line->scriptRuns.Count()==0)
-					{
-						// if this line doesn't contains any run, skip and render a blank line
-						vint height=line->documentFragments[0]->fontStyle.size;
-						line->bounds=Rect(Point(cx, cy), Size(0, height));
-						cy+=height;
-					}
-					else
-					{
-						FOREACH(Ptr<UniscribeRun>, run, line->scriptRuns)
-						{
-							run->fragmentBounds.Clear();
-						}
-
-						// render this line into lines with auto line wrapping
-						vint startRun=0;
-						vint startRunOffset=0;
-						vint lastRun=0;
-						vint lastRunOffset=0;
-						vint currentWidth=0;
-
-						while(startRun<line->scriptRuns.Count())
-						{
-							vint currentWidth=0;
-							bool firstRun=true;
-							// search for a range to fit in the given width
-							for(vint i=startRun;i<line->scriptRuns.Count();i++)
-							{
-								vint charLength=0;
-								vint charAdvances=0;
-								UniscribeRun* run=line->scriptRuns[line->runVisualToLogical[i]].Obj();
-								run->SearchForLineBreak(lastRunOffset, availableWidth-currentWidth, firstRun, charLength, charAdvances);
-								firstRun=false;
-
-								if(charLength==run->length-lastRunOffset)
-								{
-									lastRun=i+1;
-									lastRunOffset=0;
-									currentWidth+=charAdvances;
-								}
-								else
-								{
-									lastRun=i;
-									lastRunOffset=lastRunOffset+charLength;
-									break;
-								}
-							}
-
-							// if the range is empty, than this should be the end of line, ignore it
-							if(startRun<lastRun || (startRun==lastRun && startRunOffset<lastRunOffset))
-							{
-								// calculate the max line height in this range;
-								vint maxHeight=0;
-								for(vint i=startRun;i<=lastRun && i<line->scriptRuns.Count();i++)
-								{
-									if(i==lastRun && lastRunOffset==0)
-									{
-										break;
-									}
-									vint size=line->scriptRuns[line->runVisualToLogical[i]]->SumHeight();
-									if(maxHeight<size)
-									{
-										maxHeight=size;
-									}
-								}
-
-								// render all runs inside this range
-								vint startRunFragmentCount=-1;
-								for(vint i=startRun;i<=lastRun && i<line->scriptRuns.Count();i++)
-								{
-									UniscribeRun* run=line->scriptRuns[line->runVisualToLogical[i]].Obj();
-									vint start=i==startRun?startRunOffset:0;
-									vint end=i==lastRun?lastRunOffset:run->length;
-									vint length=end-start;
-
-									if(startRunFragmentCount==-1)
-									{
-										startRunFragmentCount=run->fragmentBounds.Count();
-									}
-
-									UniscribeRun::RunFragmentBounds fragmentBounds;
-									if(run->scriptItem->IsRightToLeft())
-									{
-										fragmentBounds.start=run->length-start-length;
-									}
-									else
-									{
-										fragmentBounds.start=start;
-									}
-									fragmentBounds.length=length;
-									fragmentBounds.bounds=Rect(
-										Point(cx, cy+maxHeight-run->SumHeight()),
-										Size(run->SumWidth(start, length), run->SumHeight())
-										);
-									run->fragmentBounds.Add(fragmentBounds);
-
-									cx+=run->SumWidth(start, length);
-								}
-
-								vint cxOffset=0;
-								switch(alignment)
-								{
-								case Alignment::Center:
-									cxOffset=(availableWidth-cx)/2;
-									break;
-								case Alignment::Right:
-									cxOffset=availableWidth-cx;
-									break;
-								}
-								if(cxOffset!=0)
-								{
-									for(vint i=startRun;i<=lastRun && i<line->scriptRuns.Count();i++)
-									{
-										UniscribeRun* run=line->scriptRuns[line->runVisualToLogical[i]].Obj();
-										for(vint j=(i==startRun?startRunFragmentCount:0);j<run->fragmentBounds.Count();j++)
-										{
-											UniscribeRun::RunFragmentBounds& fragmentBounds=run->fragmentBounds[j];
-											fragmentBounds.bounds.x1+=cxOffset;
-											fragmentBounds.bounds.x2+=cxOffset;
-										}
-									}
-								}
-
-								cx=0;
-								cy+=(vint)(maxHeight*1.5);
-							}
-
-							startRun=lastRun;
-							startRunOffset=lastRunOffset;
-						}
-
-						// calculate line bounds
-						vint minX=0;
-						vint minY=0;
-						vint maxX=0;
-						vint maxY=0;
-						FOREACH(Ptr<UniscribeRun>, run, line->scriptRuns)
-						{
-							FOREACH(UniscribeRun::RunFragmentBounds, fragmentBounds, run->fragmentBounds)
-							{
-								Rect bounds=fragmentBounds.bounds;
-								if(minX>bounds.Left()) minX=bounds.Left();
-								if(minY>bounds.Top()) minX=bounds.Top();
-								if(maxX<bounds.Right()) maxX=bounds.Right();
-								if(maxY<bounds.Bottom()) maxY=bounds.Bottom();
-							}
-						}
-						line->bounds=Rect(minX, minY, maxX, maxY);
-					}
+					vint totalHeight=0;
+					line->Layout(availableWidth, alignment, cy, totalHeight);
+					cy+=totalHeight;
 				}
 
 				// calculate paragraph bounds

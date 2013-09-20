@@ -173,12 +173,11 @@ UniscribeLine
 				WString							lineText;
 				List<Ptr<UniscribeItem>>		scriptItems;
 				List<Ptr<UniscribeRun>>			scriptRuns;
-				Array<int>						runVisualToLogical;
-				Array<int>						runLogicalToVisual;
 				Rect							bounds;
 
 				void							ClearUniscribeData();
 				bool							BuildUniscribeData(WinDC* dc);
+				void							Layout(vint availableWidth, Alignment alignment, vint top, vint& totalHeight);
 				void							Render(WinDC* dc, vint offsetX, vint offsetY);
 			};
 
