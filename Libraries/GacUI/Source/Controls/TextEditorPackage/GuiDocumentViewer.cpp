@@ -46,40 +46,50 @@ GuiDocumentViewer
 
 			void GuiDocumentCommonInterface::OnMouseMove(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 			{
-				vint id=documentElement->GetHyperlinkIdFromPoint(Point(arguments.x, arguments.y));
-				if(dragging && id!=draggingHyperlinkId)
+				if(senderControl->GetVisuallyEnabled())
 				{
-					id=DocumentRun::NullHyperlinkId;
-				}
-				SetActiveHyperlinkId(id);
-				if(id==DocumentRun::NullHyperlinkId)
-				{
-					documentComposition->SetAssociatedCursor(0);
-				}
-				else
-				{
-					INativeCursor* cursor=GetCurrentController()->ResourceService()->GetSystemCursor(INativeCursor::Hand);
-					documentComposition->SetAssociatedCursor(cursor);
+					vint id=documentElement->GetHyperlinkIdFromPoint(Point(arguments.x, arguments.y));
+					if(dragging && id!=draggingHyperlinkId)
+					{
+						id=DocumentRun::NullHyperlinkId;
+					}
+					SetActiveHyperlinkId(id);
+					if(id==DocumentRun::NullHyperlinkId)
+					{
+						documentComposition->SetAssociatedCursor(0);
+					}
+					else
+					{
+						INativeCursor* cursor=GetCurrentController()->ResourceService()->GetSystemCursor(INativeCursor::Hand);
+						documentComposition->SetAssociatedCursor(cursor);
+					}
 				}
 			}
 
 			void GuiDocumentCommonInterface::OnMouseDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 			{
-				vint id=documentElement->GetHyperlinkIdFromPoint(Point(arguments.x, arguments.y));
-				draggingHyperlinkId=id;
-				SetActiveHyperlinkId(id);
-				dragging=true;
+				if(senderControl->GetVisuallyEnabled())
+				{
+					senderControl->SetFocus();
+					vint id=documentElement->GetHyperlinkIdFromPoint(Point(arguments.x, arguments.y));
+					draggingHyperlinkId=id;
+					SetActiveHyperlinkId(id);
+					dragging=true;
+				}
 			}
 
 			void GuiDocumentCommonInterface::OnMouseUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 			{
-				dragging=false;
-				vint id=documentElement->GetHyperlinkIdFromPoint(Point(arguments.x, arguments.y));
-				if(id==draggingHyperlinkId && id!=DocumentRun::NullHyperlinkId)
+				if(senderControl->GetVisuallyEnabled())
 				{
-					ActiveHyperlinkExecuted.Execute(senderControl->GetNotifyEventArguments());
+					dragging=false;
+					vint id=documentElement->GetHyperlinkIdFromPoint(Point(arguments.x, arguments.y));
+					if(id==draggingHyperlinkId && id!=DocumentRun::NullHyperlinkId)
+					{
+						ActiveHyperlinkExecuted.Execute(senderControl->GetNotifyEventArguments());
+					}
+					draggingHyperlinkId=DocumentRun::NullHyperlinkId;
 				}
-				draggingHyperlinkId=DocumentRun::NullHyperlinkId;
 			}
 
 			void GuiDocumentCommonInterface::OnMouseLeave(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
@@ -93,6 +103,7 @@ GuiDocumentViewer
 				,activeHyperlinkId(DocumentRun::NullHyperlinkId)
 				,draggingHyperlinkId(DocumentRun::NullHyperlinkId)
 				,dragging(false)
+				,editMode(ViewOnly)
 				,senderControl(0)
 			{
 			}
@@ -132,6 +143,16 @@ GuiDocumentViewer
 				return document->hyperlinkInfos.Values().Get(index).reference;
 			}
 
+			GuiDocumentCommonInterface::EditMode GuiDocumentCommonInterface::GetEditMode()
+			{
+				return editMode;
+			}
+
+			void GuiDocumentCommonInterface::SetEditMode(EditMode value)
+			{
+				editMode=value;
+			}
+
 /***********************************************************************
 GuiDocumentViewer
 ***********************************************************************/
@@ -142,6 +163,7 @@ GuiDocumentViewer
 				SetExtendToFullWidth(true);
 				SetHorizontalAlwaysVisible(false);
 				InstallDocumentViewer(this, GetContainerComposition());
+				SetFocusableComposition(GetBoundsComposition());
 			}
 
 			GuiDocumentViewer::~GuiDocumentViewer()
@@ -157,6 +179,7 @@ GuiDocumentLabel
 			{
 				GetContainerComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 				InstallDocumentViewer(this, GetContainerComposition());
+				SetFocusableComposition(GetBoundsComposition());
 			}
 
 			GuiDocumentLabel::~GuiDocumentLabel()

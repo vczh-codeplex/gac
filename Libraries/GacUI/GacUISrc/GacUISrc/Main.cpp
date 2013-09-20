@@ -48,6 +48,7 @@ public:
 
 		viewer=g::NewDocumentViewer();
 		viewer->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+		viewer->SetEditMode(GuiDocumentViewer::Selectable);
 		AddChild(viewer);
 
 		{
