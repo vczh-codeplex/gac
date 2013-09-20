@@ -62,7 +62,7 @@ UniscribeGlyphData
 				UniscribeGlyphData();
 
 				void							ClearUniscribeData(vint glyphCount, vint length);
-				bool							BuildUniscribeData(WinDC* dc, SCRIPT_ITEM* scriptItem, SCRIPT_CACHE& scriptCache, const wchar_t* runText, vint length);
+				bool							BuildUniscribeData(WinDC* dc, SCRIPT_ITEM* scriptItem, SCRIPT_CACHE& scriptCache, const wchar_t* runText, vint length, List<vint>& breakings);
 			};
 
 /***********************************************************************
@@ -110,7 +110,7 @@ UniscribeRun
 				UniscribeRun();
 				~UniscribeRun();
 
-				virtual bool					BuildUniscribeData(WinDC* dc)=0;
+				virtual bool					BuildUniscribeData(WinDC* dc, List<vint>& breakings)=0;
 				virtual vint					SumWidth(vint charStart, vint charLength)=0;
 				virtual vint					SumHeight()=0;
 				virtual void					SearchForLineBreak(vint tempStart, vint maxWidth, bool firstRun, vint& charLength, vint& charAdvances)=0;
@@ -134,7 +134,7 @@ UniscribeTextRun
 
 				void							ClearUniscribeData();
 				void							SearchGlyphCluster(vint charStart, vint charLength, vint& cluster, vint& nextCluster);
-				bool							BuildUniscribeData(WinDC* dc)override;
+				bool							BuildUniscribeData(WinDC* dc, List<vint>& breakings)override;
 				vint							SumWidth(vint charStart, vint charLength)override;
 				vint							SumHeight()override;
 				void							SearchForLineBreak(vint tempStart, vint maxWidth, bool firstRun, vint& charLength, vint& charAdvances)override;
@@ -154,7 +154,7 @@ UniscribeElementRun
 				UniscribeElementRun();
 				~UniscribeElementRun();
 
-				bool							BuildUniscribeData(WinDC* dc)override;
+				bool							BuildUniscribeData(WinDC* dc, List<vint>& breakings)override;
 				vint							SumWidth(vint charStart, vint charLength)override;
 				vint							SumHeight()override;
 				void							SearchForLineBreak(vint tempStart, vint maxWidth, bool firstRun, vint& charLength, vint& charAdvances)override;
