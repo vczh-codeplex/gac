@@ -25,12 +25,24 @@ GuiDocumentCommonInterface
 			/// <summary>Document displayer control common interface for displaying <see cref="DocumentModel"/>.</summary>
 			class GuiDocumentCommonInterface abstract : public Description<GuiDocumentCommonInterface>
 			{
+			public:
+				/// <summary>Represents the edit mode.</summary>
+				enum EditMode
+				{
+					/// <summary>[T:vl.presentation.controls.GuiDocumentCommonInterface.EditMode]View the rich text only.</summary>
+					ViewOnly,
+					/// <summary>[T:vl.presentation.controls.GuiDocumentCommonInterface.EditMode]The rich text is selectable.</summary>
+					Selectable,
+					/// <summary>[T:vl.presentation.controls.GuiDocumentCommonInterface.EditMode]The rich text is editable.</summary>
+					Editable,
+				};
 			protected:
 				elements::GuiDocumentElement*				documentElement;
 				compositions::GuiBoundsComposition*			documentComposition;
 				vint										activeHyperlinkId;
 				vint										draggingHyperlinkId;
 				bool										dragging;
+				EditMode									editMode;
 				GuiControl*									senderControl;
 
 				void										InstallDocumentViewer(GuiControl* _sender, compositions::GuiGraphicsComposition* _container);
@@ -63,6 +75,12 @@ GuiDocumentCommonInterface
 				/// <summary>Get the href attribute of the active hyperlink.</summary>
 				/// <returns>The href attribute of the active hyperlink.</returns>
 				WString										GetActiveHyperlinkReference();
+				/// <summary>Get the edit mode of this control.</summary>
+				/// <returns>The edit mode.</returns>
+				EditMode									GetEditMode();
+				/// <summary>Set the edit mode of this control.</summary>
+				/// <param name="value">The edit mode.</param>
+				void										SetEditMode(EditMode value);
 			};
 
 /***********************************************************************
