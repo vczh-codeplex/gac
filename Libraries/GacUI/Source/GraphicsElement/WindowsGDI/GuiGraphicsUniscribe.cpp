@@ -372,7 +372,7 @@ UniscribeTextRun
 				{
 					nextCluster
 						=charStart+charLength==length
-						?0
+						?-1
 						:wholeGlyph.charCluster[charStart+charLength];
 				}
 				else
@@ -609,7 +609,7 @@ UniscribeTextRun
 				vint clusterCount=0;
 				if(scriptItem->IsRightToLeft())
 				{
-					clusterStart=nextCluster;
+					clusterStart=nextCluster+1;
 					clusterCount=cluster-nextCluster;
 				}
 				else
