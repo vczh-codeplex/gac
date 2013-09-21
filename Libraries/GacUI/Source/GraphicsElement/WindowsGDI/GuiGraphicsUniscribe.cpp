@@ -1585,6 +1585,36 @@ UniscribeParagraph
 				}
 				return false;
 			}
+
+			vint UniscribeParagraph::GetCaret(vint comparingCaret, IGuiGraphicsParagraph::CaretRelativePosition position)
+			{
+				throw 0;
+			}
+
+			Rect UniscribeParagraph::GetCaretBounds(vint caret, bool frontSide)
+			{
+				throw 0;
+			}
+
+			vint UniscribeParagraph::GetCaretFromPoint(Point point)
+			{
+				throw 0;
+			}
+
+			vint UniscribeParagraph::GetNearestCaretFromTextPos(vint textPos, bool frontSide)
+			{
+				throw 0;
+			}
+
+			bool UniscribeParagraph::IsValidCaret(vint caret)
+			{
+				throw 0;
+			}
+
+			bool UniscribeParagraph::IsValidTextPos(vint textPos)
+			{
+				throw 0;
+			}
 		}
 	}
 }
