@@ -249,6 +249,47 @@ UniscribeGlyphData
 				return false;
 			}
 
+			void UniscribeGlyphData::BuildUniscribeData(SCRIPT_STRING_ANALYSIS ssa, SCRIPT_ITEM* scriptItem)
+			{
+				int length=*ScriptString_pcOutChars(ssa);
+				ClearUniscribeData(length, length);
+				sa=scriptItem->a;
+				{
+					const SIZE* size=ScriptString_pSize(ssa);
+					runAbc.abcA=0;
+					runAbc.abcB=size->cx;
+					runAbc.abcC=0;
+				}
+				memset(&glyphs[0], 0, sizeof(glyphs[0])*glyphs.Count());
+				memset(&glyphVisattrs[0], 0, sizeof(glyphVisattrs[0])*glyphVisattrs.Count());
+				memset(&glyphAdvances[0], 0, sizeof(glyphAdvances[0])*glyphAdvances.Count());
+				memset(&glyphOffsets[0], 0, sizeof(glyphOffsets[0])*glyphOffsets.Count());
+				memset(&charCluster[0], 0, sizeof(charCluster[0])*charCluster.Count());
+
+				for(vint i=0;i<charCluster.Count();i++)
+				{
+					charCluster[i]=i;
+				}
+				ScriptStringGetLogicalWidths(ssa, &glyphAdvances[0]);
+				if(sa.fRTL)
+				{
+					for(vint i=0;i<charCluster.Count()/2;i++)
+					{
+						vint j=charCluster.Count()-1-i;
+						{
+							WORD t=charCluster[i];
+							charCluster[i]=charCluster[j];
+							charCluster[j]=t;
+						}
+						{
+							int t=glyphAdvances[i];
+							glyphAdvances[i]=glyphAdvances[j];
+							glyphAdvances[j]=t;
+						}
+					}
+				}
+			}
+
 /***********************************************************************
 UniscribeItem
 ***********************************************************************/
@@ -335,7 +376,7 @@ UniscribeTextRun
 			UniscribeTextRun::UniscribeTextRun()
 				:scriptCache(0)
 				,advance(0)
-				,fallbackFontHandle(0)
+				,ssa(0)
 			{
 			}
 
@@ -351,15 +392,10 @@ UniscribeTextRun
 					ScriptFreeCache(&scriptCache);
 					scriptCache=0;
 				}
-				if(fallbackFontHandle)
+				if(ssa)
 				{
-					GetWindowsGDIObjectProvider()->GetMLangFontLink()->ReleaseFont(fallbackFontHandle);
-					fallbackFontHandle=0;
-				}
-				if(fallbackFontObject)
-				{
-					GetWindowsGDIResourceManager()->DestroyGdiFont(fallbackFontStyle);
-					fallbackFontObject=0;
+					ScriptStringFree(&ssa);
+					ssa=0;
 				}
 				advance=0;
 				wholeGlyph.ClearUniscribeData(0, 0);
@@ -394,91 +430,37 @@ UniscribeTextRun
 				{
 					goto BUILD_UNISCRIBE_DATA_FAILED;
 				}
-				advance=wholeGlyph.runAbc.abcA+wholeGlyph.runAbc.abcB+wholeGlyph.runAbc.abcC;
 
 				if(breakings.Count()==1 && !breakingAvailabilities[0])
 				{
-					IMLangFontLink2* fl=GetWindowsGDIObjectProvider()->GetMLangFontLink();
-
-					HRESULT hr=S_OK;
-					DWORD codePages=0;
-					long charProcessed=0;
-					HFONT linkedFont=0;
-					if((hr=fl->GetStrCodePages(runText, length, 0, &codePages, &charProcessed))==S_OK)
+					BYTE charClass=0;
+					HRESULT hr=ScriptStringAnalyse(
+						dc->GetHandle(),
+						runText,
+						length,
+						(int)(1.5*length+16),
+						-1,
+						SSA_FALLBACK|SSA_GLYPHS|SSA_LINK|(scriptItem->IsRightToLeft()?SSA_RTL:0),
+						0,
+						NULL,
+						NULL,
+						NULL,
+						NULL,
+						&charClass,
+						&ssa
+						);
+					hr=E_FAIL;
+					if(hr==S_OK)
 					{
-						List<WString> fontNames;
-						DWORD sourceCodePages=codePages;
-						while(sourceCodePages)
-						{
-							UINT codePageId=0;
-							DWORD tempCodePages=0;	
-							fl->CodePagesToCodePage(sourceCodePages, 0, &codePageId);
-							fl->CodePageToCodePages(codePageId, &tempCodePages);
-							sourceCodePages&=~tempCodePages;
-
-							SCRIPT_ID sid=0;
-							fl->CodePageToScriptID(codePageId, &sid);
-
-							UINT fontInfoCount=0;
-							fl->GetScriptFontInfo(sid, SCRIPTCONTF_FIXED_FONT|SCRIPTCONTF_PROPORTIONAL_FONT, &fontInfoCount, NULL);
-							if(fontInfoCount>0)
-							{
-								Array<SCRIPTFONTINFO> fontInfos(fontInfoCount);
-								fl->GetScriptFontInfo(sid, SCRIPTCONTF_FIXED_FONT|SCRIPTCONTF_PROPORTIONAL_FONT, &fontInfoCount, &fontInfos[0]);
-								for(vint i=0;i<fontInfos.Count();i++)
-								{
-									fontNames.Add(fontInfos[i].wszFont);
-								}
-							}
-						}
-
-						FontProperties fontProperties=documentFragment->fontStyle;
-						FOREACH(WString, fontName, fontNames)
-						{
-							fontProperties.fontFamily=fontName;
-							Ptr<WinFont> font=GetWindowsGDIResourceManager()->CreateGdiFont(fontProperties);
-							dc->SetFont(font);
-							breakings.Clear();
-							breakingAvailabilities.Clear();
-							if(wholeGlyph.BuildUniscribeData(dc, &scriptItem->scriptItem, scriptCache, runText, length, breakings, breakingAvailabilities))
-							{
-								if(breakings.Count()>1 || breakingAvailabilities[0])
-								{
-									fallbackFontStyle=fontProperties;
-									fallbackFontObject=font;
-									break;
-								}
-								else
-								{
-									GetWindowsGDIResourceManager()->DestroyGdiFont(fontProperties);
-								}
-							}
-						}
-
-						if((hr=fl->MapFont(dc->GetHandle(), codePages, 0, &linkedFont))==S_OK)
-						{
-							fallbackFontHandle=linkedFont;
-						}
-						else if((hr=fl->MapFont(dc->GetHandle(), 0, *runText, &linkedFont))==S_OK)
-						{
-							fallbackFontHandle=linkedFont;
-						}
+						wholeGlyph.BuildUniscribeData(ssa, &scriptItem->scriptItem);
 					}
-
-					if(fallbackFontHandle)
+					else if(ssa)
 					{
-						HFONT oldFont=(HFONT)SelectObject(dc->GetHandle(), fallbackFontHandle);
-						breakings.Clear();
-						breakingAvailabilities.Clear();
-						bool result=wholeGlyph.BuildUniscribeData(dc, &scriptItem->scriptItem, scriptCache, runText, length, breakings, breakingAvailabilities);
-						SelectObject(dc->GetHandle(), oldFont);
-
-						if(!result)
-						{
-							goto BUILD_UNISCRIBE_DATA_FAILED;
-						}
+						ScriptStringFree(&ssa);
+						ssa=0;
 					}
 				}
+				advance=wholeGlyph.runAbc.abcA+wholeGlyph.runAbc.abcB+wholeGlyph.runAbc.abcC;
 
 				return true;
 	BUILD_UNISCRIBE_DATA_FAILED:
@@ -579,18 +561,7 @@ UniscribeTextRun
 			{
 				Color fontColor=documentFragment->fontColor;
 				HFONT oldFont=0;
-				if(fallbackFontHandle)
-				{
-					oldFont=(HFONT)SelectObject(dc->GetHandle(), fallbackFontHandle);
-				}
-				else if(fallbackFontObject)
-				{
-					dc->SetFont(fallbackFontObject);
-				}
-				else
-				{
-					dc->SetFont(documentFragment->fontObject);
-				}
+				dc->SetFont(documentFragment->fontObject);
 				dc->SetTextColor(RGB(fontColor.r, fontColor.g, fontColor.b));
 
 				RunFragmentBounds fragment=fragmentBounds[fragmentBoundsIndex];
@@ -600,44 +571,79 @@ UniscribeTextRun
 				rect.top=(int)(fragment.bounds.Top()+offsetY);
 				rect.right=(int)(fragment.bounds.Right()+offsetX);
 				rect.bottom=(int)(fragment.bounds.Bottom()+offsetY);
-			
-				vint cluster=0;
-				vint nextCluster=0;
-				SearchGlyphCluster(fragment.start, fragment.length, cluster, nextCluster);
 
-				vint clusterStart=0;
-				vint clusterCount=0;
-				if(scriptItem->IsRightToLeft())
+				if(ssa)
 				{
-					clusterStart=nextCluster+1;
-					clusterCount=cluster-nextCluster;
+					SCRIPT_STRING_ANALYSIS tempSsa=0;
+					BYTE charClass=0;
+					HRESULT hr=ScriptStringAnalyse(
+						dc->GetHandle(),
+						runText,
+						length,
+						(int)(1.5*length+16),
+						-1,
+						SSA_FALLBACK|SSA_GLYPHS|SSA_LINK|(scriptItem->IsRightToLeft()?SSA_RTL:0),
+						0,
+						NULL,
+						NULL,
+						NULL,
+						NULL,
+						&charClass,
+						&tempSsa
+						);
+					if(hr=S_OK)
+					{
+						hr=ScriptStringOut(
+							tempSsa,
+							rect.left,
+							rect.top,
+							0,
+							NULL,
+							1,
+							0,
+							FALSE
+							);
+					}
+					if(tempSsa)
+					{
+						ScriptStringFree(&tempSsa);
+					}
 				}
 				else
 				{
-					clusterStart=cluster;
-					clusterCount=nextCluster-cluster;
-				}
+					vint cluster=0;
+					vint nextCluster=0;
+					SearchGlyphCluster(fragment.start, fragment.length, cluster, nextCluster);
 
-				HRESULT hr=ScriptTextOut(
-					dc->GetHandle(),
-					&scriptCache,
-					rect.left,
-					rect.top,
-					0,
-					&rect,
-					&wholeGlyph.sa,
-					NULL,
-					0,
-					&wholeGlyph.glyphs[clusterStart],
-					(int)(clusterCount),
-					&wholeGlyph.glyphAdvances[clusterStart],
-					NULL,
-					&wholeGlyph.glyphOffsets[clusterStart]
-					);
+					vint clusterStart=0;
+					vint clusterCount=0;
+					if(scriptItem->IsRightToLeft())
+					{
+						clusterStart=nextCluster+1;
+						clusterCount=cluster-nextCluster;
+					}
+					else
+					{
+						clusterStart=cluster;
+						clusterCount=nextCluster-cluster;
+					}
 
-				if(fallbackFontHandle)
-				{
-					SelectObject(dc->GetHandle(), oldFont);
+					HRESULT hr=ScriptTextOut(
+						dc->GetHandle(),
+						&scriptCache,
+						rect.left,
+						rect.top,
+						0,
+						&rect,
+						&wholeGlyph.sa,
+						NULL,
+						0,
+						&wholeGlyph.glyphs[clusterStart],
+						(int)(clusterCount),
+						&wholeGlyph.glyphAdvances[clusterStart],
+						NULL,
+						&wholeGlyph.glyphOffsets[clusterStart]
+						);
 				}
 			}
 

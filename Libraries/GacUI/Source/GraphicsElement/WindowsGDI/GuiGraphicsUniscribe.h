@@ -65,6 +65,7 @@ UniscribeGlyphData
 
 				void							ClearUniscribeData(vint glyphCount, vint length);
 				bool							BuildUniscribeData(WinDC* dc, SCRIPT_ITEM* scriptItem, SCRIPT_CACHE& scriptCache, const wchar_t* runText, vint length, List<vint>& breakings, List<bool>& breakingAvailabilities);
+				void							BuildUniscribeData(SCRIPT_STRING_ANALYSIS ssa, SCRIPT_ITEM* scriptItem);
 			};
 
 /***********************************************************************
@@ -136,9 +137,7 @@ UniscribeTextRun
 				vint							advance;
 				UniscribeGlyphData				wholeGlyph;
 				//***************************** Uniscribe Data (Font Fallback)
-				HFONT							fallbackFontHandle;
-				FontProperties					fallbackFontStyle;
-				Ptr<WinFont>					fallbackFontObject;
+				SCRIPT_STRING_ANALYSIS			ssa;
 
 				UniscribeTextRun();
 				~UniscribeTextRun();
