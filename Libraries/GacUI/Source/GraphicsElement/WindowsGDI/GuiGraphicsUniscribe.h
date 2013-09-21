@@ -251,6 +251,13 @@ UniscribeParagraph
 				Ptr<IGuiGraphicsElement>		ResetInlineObject(vint start, vint length);
 				bool							SetInteractionId(vint start, vint length, vint value);
 				bool							HitTestPoint(Point point, vint& start, vint& length, vint& interactionId);
+
+				vint							GetCaret(vint comparingCaret, IGuiGraphicsParagraph::CaretRelativePosition position);
+				Rect							GetCaretBounds(vint caret, bool frontSide);
+				vint							GetCaretFromPoint(Point point);
+				vint							GetNearestCaretFromTextPos(vint textPos, bool frontSide);
+				bool							IsValidCaret(vint caret);
+				bool							IsValidTextPos(vint textPos);
 			};
 		}
 	}

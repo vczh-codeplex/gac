@@ -208,32 +208,32 @@ WindowsGDIParagraph
 
 				vint GetCaret(vint comparingCaret, CaretRelativePosition position)override
 				{
-					throw 0;
+					return paragraph->GetCaret(comparingCaret, position);
 				}
 
 				Rect GetCaretBounds(vint caret, bool frontSide)override
 				{
-					throw 0;
+					return paragraph->GetCaretBounds(caret, frontSide);
 				}
 
 				vint GetCaretFromPoint(Point point)override
 				{
-					throw 0;
+					return paragraph->GetCaretFromPoint(point);
 				}
 
 				vint GetNearestCaretFromTextPos(vint textPos, bool frontSide)override
 				{
-					throw 0;
+					return paragraph->GetNearestCaretFromTextPos(textPos, frontSide);
 				}
 
 				bool IsValidCaret(vint caret)override
 				{
-					throw 0;
+					return paragraph->IsValidCaret(caret);
 				}
 
-				bool IsValidTextPos(vint textPos)
+				bool IsValidTextPos(vint textPos)override
 				{
-					throw 0;
+					return paragraph->IsValidTextPos(textPos);
 				}
 			};
 
