@@ -206,27 +206,32 @@ WindowsGDIParagraph
 					paragraph->Render(renderTarget->GetDC(), bounds.Left(), bounds.Top());
 				}
 
-				bool GetCaret(vint comparingCaret, CaretRelativePosition position, vint& newCaret)override
+				vint GetCaret(vint comparingCaret, CaretRelativePosition position)override
 				{
 					throw 0;
 				}
 
-				bool GetCaretBounds(vint caret, Rect& front, Rect& back)override
+				Rect GetCaretBounds(vint caret, bool frontSide)override
 				{
 					throw 0;
 				}
 
-				bool GetCaretFromPoint(Point point, vint& caret)override
+				vint GetCaretFromPoint(Point point)override
 				{
 					throw 0;
 				}
 
-				bool GetCaretFromTextPos(vint textPos, vint& front, vint& back)override
+				vint GetNearestCaretFromTextPos(vint textPos, bool frontSide)override
 				{
 					throw 0;
 				}
 
 				bool IsValidCaret(vint caret)override
+				{
+					throw 0;
+				}
+
+				bool IsValidTextPos(vint textPos)
 				{
 					throw 0;
 				}

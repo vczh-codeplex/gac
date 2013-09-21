@@ -64,6 +64,10 @@ Layout Engine
 					CaretFirst,
 					/// <summary>[T:vl.presentation.elements.IGuiGraphicsParagraph.CaretRelativePosition]The last caret position.</summary>
 					CaretLast,
+					/// <summary>[T:vl.presentation.elements.IGuiGraphicsParagraph.CaretRelativePosition]The first caret position of the current line.</summary>
+					CaretLineFirst,
+					/// <summary>[T:vl.presentation.elements.IGuiGraphicsParagraph.CaretRelativePosition]The last caret position of the current line.</summary>
+					CaretLineLast,
 					/// <summary>[T:vl.presentation.elements.IGuiGraphicsParagraph.CaretRelativePosition]The relative left caret position.</summary>
 					CaretMoveLeft,
 					/// <summary>[T:vl.presentation.elements.IGuiGraphicsParagraph.CaretRelativePosition]The relative right caret position.</summary>
@@ -174,32 +178,32 @@ Layout Engine
 				virtual void								Render(Rect bounds)=0;
 
 				/// <summary>Get a new caret from the old caret with a relative position.</summary>
-				/// <returns>Returns true if this operation succeeded.</returns>
+				/// <returns>The new caret. Returns -1 if failed.</returns>
 				/// <param name="comparingCaret">The caret to compare. If the position is CaretFirst or CaretLast, this argument is ignored.</param>
 				/// <param name="position">The relative position.</param>
-				/// <param name="newCaret">Receive the new caret.</param>
-				virtual bool								GetCaret(vint comparingCaret, CaretRelativePosition position, vint& newCaret)=0;
-				/// <summary>Get the bounds of the two sides of a caret.</summary>
-				/// <returns>Returns true if this operation succeeded.</returns>
+				virtual vint								GetCaret(vint comparingCaret, CaretRelativePosition position)=0;
+				/// <summary>Get the bounds of the caret.</summary>
+				/// <returns>The bounds whose width is 0. Returns an empty Rect value if failed.</returns>
 				/// <param name="caret">The caret.</param>
-				/// <param name="front">The bounds of the front side, which is the logical character before this caret.</param>
-				/// <param name="back">The bounds of the back side, which is the logical character after this caret.</param>
-				virtual bool								GetCaretBounds(vint caret, Rect& front, Rect& back)=0;
+				/// <param name="frontSide">Set to true to get the bounds of the front side, otherwise the back side. If only one side is valid, this argument is ignored.</param>
+				virtual Rect								GetCaretBounds(vint caret, bool frontSide)=0;
 				/// <summary>Get the caret from a specified position.</summary>
-				/// <returns>Returns true if this operation succeeded.</returns>
+				/// <returns>The caret. Returns -1 if failed.</returns>
 				/// <param name="point">The point.</param>
-				/// <param name="caret">The caret.</param>
-				virtual bool								GetCaretFromPoint(Point point, vint& caret)=0;
-				/// <summary>Get the pair of carets from a text position.</summary>
-				/// <returns>Returns true if this operation succeeded.</returns>
+				virtual vint								GetCaretFromPoint(Point point)=0;
+				/// <summary>Get the nearest caret from a text position.</summary>
+				/// <returns>The caret. Returns -1 if failed. If the text position is a caret, then the result will be the text position itself without considering the frontSide argument.</returns>
 				/// <param name="textPos">The caret to compare. If the position is CaretFirst or CaretLast, this argument is ignored.</param>
-				/// <param name="front">The nearest caret of the front side, which is before the text position.</param>
-				/// <param name="back">The nearest caret of the back side, which is after the text position.</param>
-				virtual bool								GetCaretFromTextPos(vint textPos, vint& front, vint& back)=0;
+				/// <param name="frontSide">Set to true to search in front of the text position, otherwise the opposite position.</param>
+				virtual vint								GetNearestCaretFromTextPos(vint textPos, bool frontSide)=0;
 				/// <summary>Test is the caret valid.</summary>
 				/// <returns>Returns true if the caret is valid.</returns>
 				/// <param name="caret">The caret to test.</param>
 				virtual bool								IsValidCaret(vint caret)=0;
+				/// <summary>Test is the text position valid.</summary>
+				/// <returns>Returns true if the text position is valid.</returns>
+				/// <param name="textPos">The text position to test.</param>
+				virtual bool								IsValidTextPos(vint textPos)=0;
 			};
 
 			/// <summary>Renderer awared rich text document layout engine provider interface.</summary>
