@@ -690,6 +690,21 @@ UniscribeElementRun
 			}
 
 /***********************************************************************
+UniscribeVirtualLine
+***********************************************************************/
+
+			UniscribeVirtualLine::UniscribeVirtualLine()
+				:start(0)
+				,length(0)
+				,runText(0)
+				,firstRunIndex(-1)
+				,firstRunBoundsIndex(-1)
+				,lastRunIndex(-1)
+				,lastRunBoundsIndex(-1)
+			{
+			}
+
+/***********************************************************************
 UniscribeLine
 ***********************************************************************/
 
@@ -697,6 +712,7 @@ UniscribeLine
 			{
 				scriptItems.Clear();
 				scriptRuns.Clear();
+				virtualLines.Clear();
 			}
 
 			bool UniscribeLine::BuildUniscribeData(WinDC* dc)
@@ -872,6 +888,7 @@ UniscribeLine
 			{
 				vint cx=0;
 				vint cy=top;
+				virtualLines.Clear();
 				if(scriptRuns.Count()==0)
 				{
 					// if this line doesn't contains any run, skip and render a blank line
@@ -1001,6 +1018,47 @@ UniscribeLine
 										fragmentBounds.bounds.x2+=cxOffset;
 									}
 								}
+							}
+
+							// create a virtual line
+							{
+								Ptr<UniscribeVirtualLine> virtualLine=new UniscribeVirtualLine;
+								virtualLine->firstRunIndex=startRun;
+								virtualLine->firstRunBoundsIndex=startRunFragmentCount;
+								virtualLine->lastRunIndex=availableLastRun;
+								virtualLine->lastRunBoundsIndex=scriptRuns[availableLastRun]->fragmentBounds.Count()-1;
+
+								UniscribeRun* firstRun=scriptRuns[virtualLine->firstRunIndex].Obj();
+								UniscribeRun* lastRun=scriptRuns[virtualLine->lastRunIndex].Obj();
+								UniscribeRun::RunFragmentBounds& firstBounds=firstRun->fragmentBounds[virtualLine->firstRunBoundsIndex];
+								UniscribeRun::RunFragmentBounds& lastBounds=lastRun->fragmentBounds[virtualLine->lastRunBoundsIndex];
+								
+								virtualLine->start=firstRun->start+firstBounds.start;
+								virtualLine->length=lastRun->start+lastBounds.start+lastBounds.length-virtualLine->start;
+								virtualLine->runText=lineText.Buffer()+virtualLine->start;
+
+								bool updateBounds=false;
+								for(vint i=startRun;i<=availableLastRun;i++)
+								{
+									UniscribeRun* run=scriptRuns[i].Obj();
+									for(vint j=(i==startRun?startRunFragmentCount:0);j<run->fragmentBounds.Count();j++)
+									{
+										UniscribeRun::RunFragmentBounds& fragmentBounds=run->fragmentBounds[j];
+										if(updateBounds)
+										{
+											if(virtualLine->bounds.x1>fragmentBounds.bounds.x1) virtualLine->bounds.x1=fragmentBounds.bounds.x1;
+											if(virtualLine->bounds.x2<fragmentBounds.bounds.x2) virtualLine->bounds.x2=fragmentBounds.bounds.x2;
+											if(virtualLine->bounds.y1>fragmentBounds.bounds.y1) virtualLine->bounds.y1=fragmentBounds.bounds.y1;
+											if(virtualLine->bounds.y2<fragmentBounds.bounds.y2) virtualLine->bounds.y2=fragmentBounds.bounds.y2;
+										}
+										else
+										{
+											virtualLine->bounds=fragmentBounds.bounds;
+											updateBounds=true;
+										}
+									}
+								}
+								virtualLines.Add(virtualLine);
 							}
 
 							cx=0;

@@ -29,12 +29,13 @@ UniscribeFragment
 
 			struct UniscribeFragment
 			{
+				//***************************** Document Data (Text)
 				FontProperties									fontStyle;
 				Color											fontColor;
 				WString											text;
 				Ptr<WinFont>									fontObject;
 				vint											interactionId;
-
+				//***************************** Document Data (Element)
 				Ptr<IGuiGraphicsElement>						element;
 				IGuiGraphicsParagraph::InlineObjectProperties	inlineObjectProperties;
 				List<Ptr<UniscribeFragment>>					cachedTextFragment;
@@ -51,6 +52,7 @@ UniscribeGlyphData
 
 			struct UniscribeGlyphData
 			{
+				//***************************** Uniscribe Data
 				Array<WORD>						glyphs;
 				Array<SCRIPT_VISATTR>			glyphVisattrs;
 				Array<int>						glyphAdvances;
@@ -72,6 +74,7 @@ UniscribeItem
 			class UniscribeItem : public Object
 			{
 			public:
+				//***************************** Uniscribe Data
 				SCRIPT_ITEM						scriptItem;
 				vint							start;
 				vint							length;
@@ -99,12 +102,15 @@ UniscribeRun
 					vint						length;
 					Rect						bounds;
 				};
-
+				
+				//***************************** Document Data
 				UniscribeFragment*				documentFragment;
 				UniscribeItem*					scriptItem;
+				//***************************** Uniscribe Data
 				vint							start;
 				vint							length;
 				const wchar_t*					runText;
+				//***************************** Layout Data
 				List<RunFragmentBounds>			fragmentBounds;
 
 				UniscribeRun();
@@ -125,10 +131,11 @@ UniscribeTextRun
 			class UniscribeTextRun : public UniscribeRun
 			{
 			public:
+				//***************************** Uniscribe Data
 				SCRIPT_CACHE					scriptCache;
 				vint							advance;
 				UniscribeGlyphData				wholeGlyph;
-
+				//***************************** Uniscribe Data (Font Fallback)
 				HFONT							fallbackFontHandle;
 				FontProperties					fallbackFontStyle;
 				Ptr<WinFont>					fallbackFontObject;
@@ -152,6 +159,7 @@ UniscribeElementRun
 			class UniscribeElementRun : public UniscribeRun
 			{
 			public:
+				//***************************** Document Data
 				Ptr<IGuiGraphicsElement>						element;
 				IGuiGraphicsParagraph::InlineObjectProperties	properties;
 
@@ -166,17 +174,41 @@ UniscribeElementRun
 			};
 
 /***********************************************************************
+UniscribeVirtualLine
+***********************************************************************/
+
+			class UniscribeVirtualLine : Object
+			{
+			public:
+				//***************************** Document Data
+				vint							start;
+				vint							length;
+				const wchar_t*					runText;
+				//***************************** Layout Data
+				vint							firstRunIndex;
+				vint							firstRunBoundsIndex;
+				vint							lastRunIndex;
+				vint							lastRunBoundsIndex;
+				Rect							bounds;
+
+				UniscribeVirtualLine();
+			};
+
+/***********************************************************************
 UniscribeLine
 ***********************************************************************/
 
 			class UniscribeLine : public Object
 			{
 			public:
+				//***************************** Document Data
 				List<Ptr<UniscribeFragment>>	documentFragments;
-
+				//***************************** Uniscribe Data
 				WString							lineText;
 				List<Ptr<UniscribeItem>>		scriptItems;
 				List<Ptr<UniscribeRun>>			scriptRuns;
+				//***************************** Layout Data
+				List<Ptr<UniscribeVirtualLine>>	virtualLines;
 				Rect							bounds;
 
 				void							ClearUniscribeData();
@@ -192,12 +224,14 @@ UniscribeParagraph
 			class UniscribeParagraph : public Object
 			{
 			public:
+				//***************************** Document Data
 				List<Ptr<UniscribeFragment>>	documentFragments;
-				bool							built;
-
-				List<Ptr<UniscribeLine>>		lines;
-				vint							lastAvailableWidth;
 				Alignment						paragraphAlignment;
+				bool							built;
+				//***************************** Uniscribe Data
+				List<Ptr<UniscribeLine>>		lines;
+				//***************************** Layout Data
+				vint							lastAvailableWidth;
 				Rect							bounds;
 
 				UniscribeParagraph();
