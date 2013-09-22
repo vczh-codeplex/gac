@@ -903,7 +903,7 @@ UniscribeLine
 				if(scriptRuns.Count()==0)
 				{
 					// if this line doesn't contains any run, skip and render a blank line
-					vint height=documentFragments[0]->fontStyle.size;
+					vint height=(vint)(documentFragments[0]->fontStyle.size*1.5);
 					bounds=Rect(Point(cx, cy), Size(0, height));
 					cy+=height;
 				}
@@ -1128,6 +1128,10 @@ UniscribeParagraph
 				ClearUniscribeData();
 			}
 
+/***********************************************************************
+UniscribeParagraph (Initialization)
+***********************************************************************/
+
 			void UniscribeParagraph::ClearUniscribeData()
 			{
 				FOREACH(Ptr<UniscribeFragment>, fragment, documentFragments)
@@ -1236,9 +1240,7 @@ UniscribeParagraph
 				vint cy=0;
 				FOREACH(Ptr<UniscribeLine>, line, lines)
 				{
-					vint totalHeight=0;
-					line->Layout(availableWidth, alignment, cy, totalHeight);
-					cy+=totalHeight;
+					line->Layout(availableWidth, alignment, cy, cy);
 				}
 
 				// calculate paragraph bounds
@@ -1277,6 +1279,10 @@ UniscribeParagraph
 					line->Render(dc, offsetX, offsetY);
 				}
 			}
+
+/***********************************************************************
+UniscribeParagraph (Format)
+***********************************************************************/
 
 			void UniscribeParagraph::SearchFragment(vint start, vint length, vint& fs, vint& ss, vint& fe, vint& se)
 			{
@@ -1598,6 +1604,10 @@ UniscribeParagraph
 				return false;
 			}
 
+/***********************************************************************
+UniscribeParagraph (Caret Helper)
+***********************************************************************/
+
 			void UniscribeParagraph::GetLineIndexFromTextPos(vint textPos, vint& frontLine, vint& backLine)
 			{
 				frontLine=-1;
@@ -1795,6 +1805,10 @@ UniscribeParagraph
 				}
 				return -1;
 			}
+
+/***********************************************************************
+UniscribeParagraph (Caret)
+***********************************************************************/
 
 			vint UniscribeParagraph::GetCaret(vint comparingCaret, IGuiGraphicsParagraph::CaretRelativePosition position, bool preferFrontSide)
 			{
