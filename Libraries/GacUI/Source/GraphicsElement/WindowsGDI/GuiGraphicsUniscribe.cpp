@@ -1692,31 +1692,261 @@ UniscribeParagraph
 				}
 			}
 
-			vint UniscribeParagraph::GetCaret(vint comparingCaret, IGuiGraphicsParagraph::CaretRelativePosition position)
+			void UniscribeParagraph::GetItemIndexFromTextPos(vint textPos, vint lineIndex, vint& frontItem, vint& backItem)
+			{
+				frontItem=-1;
+				backItem=-1;
+				if(!IsValidTextPos(textPos)) return;
+				if(lineIndex<0 || lineIndex>=lines.Count()) return;
+
+				Ptr<UniscribeLine> line=lines[lineIndex];
+				vint start=0;
+				vint end=line->virtualLines.Count()-1;
+				while(start<=end)
+				{
+					vint middle=(start+end)/2;
+					Ptr<UniscribeItem> item=line->scriptItems[middle];
+					vint lineStart=item->start;
+					vint lineEnd=item->start+item->length;
+					if(textPos<lineStart)
+					{
+						end=middle-1;
+					}
+					else if(textPos>lineEnd)
+					{
+						start=middle+1;
+					}
+					else if(textPos==lineStart)
+					{
+						frontItem=middle==0?0:middle-1;
+						backItem=middle;
+						return;
+					}
+					else if(textPos==lineEnd)
+					{
+						frontItem=middle;
+						backItem=middle==line->virtualLines.Count()-1?middle:middle+1;
+						return;
+					}
+					else
+					{
+						frontItem=middle;
+						backItem=middle;
+						return;
+					}
+				}
+			}
+
+			Rect UniscribeParagraph::GetCaretBoundsWithLine(vint caret, vint lineIndex, vint virtualLineIndex, bool frontSide)
 			{
 				throw 0;
+			}
+
+			vint UniscribeParagraph::GetCaretFromXWithLine(vint x, vint lineIndex, vint virtualLineIndex)
+			{
+				throw 0;
+			}
+
+			vint UniscribeParagraph::GetLineIndexFromY(vint y)
+			{
+				vint start=0;
+				vint end=lines.Count()-1;
+				while(start<=end)
+				{
+					vint middle=(start+end)/2;
+					Ptr<UniscribeLine> line=lines[middle];
+					if(y<line->bounds.y1)
+					{
+						end=middle-1;
+					}
+					else if(y>=line->bounds.y2)
+					{
+						start=middle+1;
+					}
+					else
+					{
+						return middle;
+					}
+				}
+				return -1;
+			}
+
+			vint UniscribeParagraph::GetVirtualLineIndexFromY(vint y, vint lineIndex)
+			{
+				Ptr<UniscribeLine> line=lines[lineIndex];
+				vint start=0;
+				vint end=line->virtualLines.Count()-1;
+				while(start<=end)
+				{
+					vint middle=(start+end)/2;
+					Ptr<UniscribeVirtualLine> vline=line->virtualLines[middle];
+					if(y<vline->bounds.y1)
+					{
+						end=middle-1;
+					}
+					else if(y>=vline->bounds.y2)
+					{
+						start=middle+1;
+					}
+					else
+					{
+						return middle;
+					}
+				}
+				return -1;
+			}
+
+			vint UniscribeParagraph::GetCaret(vint comparingCaret, IGuiGraphicsParagraph::CaretRelativePosition position, bool preferFrontSide)
+			{
+				if(position==IGuiGraphicsParagraph::CaretFirst) return 0;
+				if(position==IGuiGraphicsParagraph::CaretLast) return paragraphText.Length();
+				if(!IsValidCaret(comparingCaret)) return -1;
+
+				if(position==IGuiGraphicsParagraph::CaretMoveLeft)
+				{
+					return comparingCaret==0?0:GetNearestCaretFromTextPos(comparingCaret-1, true);
+				}
+				if(position==IGuiGraphicsParagraph::CaretMoveRight)
+				{
+					return comparingCaret==paragraphText.Length()?paragraphText.Length():GetNearestCaretFromTextPos(comparingCaret+1, false);
+				}
+
+				vint frontLine=0;
+				vint backLine=0;
+				GetLineIndexFromTextPos(comparingCaret, frontLine, backLine);
+
+				vint frontVirtualLine=0;
+				vint backVirtualLine=0;
+				GetVirtualLineIndexFromTextPos(comparingCaret, frontLine, frontVirtualLine, backVirtualLine);
+				vint virtualLineIndex=preferFrontSide?frontVirtualLine:backVirtualLine;
+
+				Ptr<UniscribeLine> line=lines[frontLine];
+				Ptr<UniscribeVirtualLine> virtualLine=line->virtualLines[virtualLineIndex];
+
+				switch(position)
+				{
+				case IGuiGraphicsParagraph::CaretLineFirst:
+					return line->start+virtualLine->start;
+				case IGuiGraphicsParagraph::CaretLineLast:
+					return line->start+virtualLine->start+virtualLine->length;
+				case IGuiGraphicsParagraph::CaretMoveUp:
+					{
+						if(frontLine==0 && virtualLineIndex==0) return comparingCaret;
+						Rect bounds=GetCaretBoundsWithLine(comparingCaret, frontLine, virtualLineIndex, preferFrontSide);
+						if(bounds.Height()!=0)
+						{
+							if(virtualLineIndex==0)
+							{
+								frontLine--;
+								virtualLineIndex=lines[frontLine]->virtualLines.Count()-1;
+							}
+							else
+							{
+								virtualLineIndex--;
+							}
+							return GetCaretFromXWithLine(bounds.x1, frontLine, virtualLineIndex);
+						}
+					}
+					break;
+				case IGuiGraphicsParagraph::CaretMoveDown:
+					{
+						if(frontLine==lines.Count()-1 && virtualLineIndex==line->virtualLines.Count()-1) return comparingCaret;
+						Rect bounds=GetCaretBoundsWithLine(comparingCaret, frontLine, virtualLineIndex, preferFrontSide);
+						if(bounds.Height()!=0)
+						{
+							if(virtualLineIndex==line->virtualLines.Count()-1)
+							{
+								frontLine++;
+								virtualLineIndex=0;
+							}
+							else
+							{
+								virtualLineIndex++;
+							}
+							return GetCaretFromXWithLine(bounds.x1, frontLine, virtualLineIndex);
+						}
+					}
+					break;
+				}
+				throw -1;
 			}
 
 			Rect UniscribeParagraph::GetCaretBounds(vint caret, bool frontSide)
 			{
-				throw 0;
+				if(!IsValidCaret(caret)) return Rect();
+
+				vint frontLine=0;
+				vint backLine=0;
+				GetLineIndexFromTextPos(caret, frontLine, backLine);
+
+				vint frontVirtualLine=0;
+				vint backVirtualLine=0;
+				GetVirtualLineIndexFromTextPos(caret, frontLine, frontVirtualLine, backVirtualLine);
+				vint virtualLineIndex=frontSide?frontVirtualLine:backVirtualLine;
+
+				return GetCaretBoundsWithLine(caret, frontLine, virtualLineIndex, frontSide);
 			}
 
 			vint UniscribeParagraph::GetCaretFromPoint(Point point)
 			{
-				throw 0;
+				vint lineIndex=GetLineIndexFromY(point.y);
+				if(lineIndex==-1) return -1;
+
+				vint virtualLineIndex=GetVirtualLineIndexFromY(point.y, lineIndex);
+				if(virtualLineIndex==-1) return -1;
+
+				return GetCaretFromXWithLine(point.x, lineIndex, virtualLineIndex);
 			}
 
 			vint UniscribeParagraph::GetNearestCaretFromTextPos(vint textPos, bool frontSide)
 			{
-				throw 0;
+				if(!IsValidTextPos(textPos)) return -1;
+				vint frontLine=0;
+				vint backLine=0;
+				GetLineIndexFromTextPos(textPos, frontLine, backLine);
+				if(frontLine==-1 || backLine==-1) return -1;
+				if(frontLine!=backLine)
+				{
+					return frontSide?textPos-1:textPos+1;
+				}
+
+				vint frontItem=-1;
+				vint backItem=-1;
+				GetItemIndexFromTextPos(textPos, frontLine, frontItem, backItem);
+				if(frontItem==-1 || backItem==-1) return -1;
+				if(frontItem!=backItem) return textPos;
+				
+				Ptr<UniscribeLine> line=lines[frontLine];
+				Ptr<UniscribeItem> item=line->scriptItems[frontItem];
+				vint lineTextPos=textPos-line->start;
+				if(lineTextPos==item->start) return textPos;
+				if(lineTextPos==item->start+item->length) return textPos;
+
+				vint itemTextPos=lineTextPos-item->start;
+				if(item->charLogattrs[itemTextPos].fCharStop) return textPos;
+
+				if(frontSide)
+				{
+					for(vint i=itemTextPos-1;i>=0;i--)
+					{
+						if(item->charLogattrs[i].fCharStop) return i+line->start+item->start;
+					}
+					return line->start+item->start;
+				}
+				else
+				{
+					for(vint i=itemTextPos+1;i<item->length;i++)
+					{
+						if(item->charLogattrs[i].fCharStop) return i+line->start+item->start;
+					}
+					return line->start+item->start+item->length;
+				}
 			}
 
 			bool UniscribeParagraph::IsValidCaret(vint caret)
 			{
-				return IsValidTextPos(caret)
-					&& GetNearestCaretFromTextPos(caret, true)==caret
-					&& GetNearestCaretFromTextPos(caret, false)==caret;
+				if(!IsValidTextPos(caret)) return false;
+				return GetNearestCaretFromTextPos(caret, true)==caret;
 			}
 
 			bool UniscribeParagraph::IsValidTextPos(vint textPos)
