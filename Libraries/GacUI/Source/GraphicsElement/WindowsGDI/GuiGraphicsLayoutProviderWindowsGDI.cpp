@@ -31,13 +31,13 @@ WindowsGDIParagraph
 					,renderTarget(dynamic_cast<IWindowsGDIRenderTarget*>(_renderTarget))
 				{
 					paragraph=new UniscribeParagraph;
-					{
-						Ptr<UniscribeFragment> fragment=new UniscribeFragment;
-						fragment->text=_text;
-						fragment->fontColor=Color(0, 0, 0);
-						fragment->fontStyle=GetCurrentController()->ResourceService()->GetDefaultFont();
-						paragraph->documentFragments.Add(fragment);
-					}
+					paragraph->paragraphText=text;
+
+					Ptr<UniscribeFragment> fragment=new UniscribeFragment;
+					fragment->text=_text;
+					fragment->fontColor=Color(0, 0, 0);
+					fragment->fontStyle=GetCurrentController()->ResourceService()->GetDefaultFont();
+					paragraph->documentFragments.Add(fragment);
 				}
 
 				~WindowsGDIParagraph()

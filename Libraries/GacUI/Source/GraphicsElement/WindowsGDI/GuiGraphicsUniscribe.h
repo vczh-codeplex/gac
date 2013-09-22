@@ -202,13 +202,16 @@ UniscribeLine
 			public:
 				//***************************** Document Data
 				List<Ptr<UniscribeFragment>>	documentFragments;
-				//***************************** Uniscribe Data
+				vint							start;
 				WString							lineText;
+				//***************************** Uniscribe Data
 				List<Ptr<UniscribeItem>>		scriptItems;
 				List<Ptr<UniscribeRun>>			scriptRuns;
 				//***************************** Layout Data
 				List<Ptr<UniscribeVirtualLine>>	virtualLines;
 				Rect							bounds;
+
+				UniscribeLine();
 
 				void							ClearUniscribeData();
 				bool							BuildUniscribeData(WinDC* dc);
@@ -226,6 +229,7 @@ UniscribeParagraph
 				//***************************** Document Data
 				List<Ptr<UniscribeFragment>>	documentFragments;
 				Alignment						paragraphAlignment;
+				WString							paragraphText;
 				bool							built;
 				//***************************** Uniscribe Data
 				List<Ptr<UniscribeLine>>		lines;
@@ -252,6 +256,8 @@ UniscribeParagraph
 				bool							SetInteractionId(vint start, vint length, vint value);
 				bool							HitTestPoint(Point point, vint& start, vint& length, vint& interactionId);
 
+				void							GetLineIndexFromTextPos(vint textPos, vint& frontLine, vint& backLine);
+				void							GetVirtualLineIndexFromTextPos(vint textPos, vint lineIndex, vint& frontLine, vint& backLine);
 				vint							GetCaret(vint comparingCaret, IGuiGraphicsParagraph::CaretRelativePosition position);
 				Rect							GetCaretBounds(vint caret, bool frontSide);
 				vint							GetCaretFromPoint(Point point);
