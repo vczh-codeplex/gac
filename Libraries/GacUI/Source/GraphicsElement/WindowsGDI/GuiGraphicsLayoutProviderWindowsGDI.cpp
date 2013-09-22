@@ -206,9 +206,9 @@ WindowsGDIParagraph
 					paragraph->Render(renderTarget->GetDC(), bounds.Left(), bounds.Top());
 				}
 
-				vint GetCaret(vint comparingCaret, CaretRelativePosition position)override
+				vint GetCaret(vint comparingCaret, CaretRelativePosition position, bool preferFrontSide)override
 				{
-					return paragraph->GetCaret(comparingCaret, position);
+					return paragraph->GetCaret(comparingCaret, position, preferFrontSide);
 				}
 
 				Rect GetCaretBounds(vint caret, bool frontSide)override
