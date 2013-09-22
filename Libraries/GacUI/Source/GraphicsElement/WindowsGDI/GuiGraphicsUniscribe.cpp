@@ -714,6 +714,11 @@ UniscribeVirtualLine
 UniscribeLine
 ***********************************************************************/
 
+			UniscribeLine::UniscribeLine()
+				:start(0)
+			{
+			}
+
 			void UniscribeLine::ClearUniscribeData()
 			{
 				scriptItems.Clear();
@@ -1209,6 +1214,13 @@ UniscribeParagraph
 					{
 						line->BuildUniscribeData(dc);
 					}
+
+					vint lineStart=0;
+					FOREACH(Ptr<UniscribeLine>, line, lines)
+					{
+						line->start=lineStart;
+						lineStart+=line->lineText.Length()+2;
+					}
 				}
 			}
 
@@ -1586,6 +1598,100 @@ UniscribeParagraph
 				return false;
 			}
 
+			void UniscribeParagraph::GetLineIndexFromTextPos(vint textPos, vint& frontLine, vint& backLine)
+			{
+				frontLine=-1;
+				backLine=-1;
+				if(!IsValidTextPos(textPos)) return;
+
+				vint start=0;
+				vint end=lines.Count()-1;
+				while(start<=end)
+				{
+					vint middle=(start+end)/2;
+					Ptr<UniscribeLine> line=lines[middle];
+					vint lineStart=line->start;
+					vint lineEnd=line->start+line->lineText.Length();
+					if(textPos<lineStart)
+					{
+						if(textPos==lineStart-1)
+						{
+							frontLine=middle-1;
+							backLine=middle;
+							return;
+						}
+						else
+						{
+							end=middle-1;
+						}
+					}
+					else if(textPos>lineEnd)
+					{
+						if(textPos==lineEnd+1)
+						{
+							frontLine=middle;
+							backLine=middle+1;
+							return;
+						}
+						else
+						{
+							start=middle+1;
+						}
+					}
+					else
+					{
+						frontLine=middle;
+						backLine=middle;
+						return;
+					}
+				}
+			}
+
+			void UniscribeParagraph::GetVirtualLineIndexFromTextPos(vint textPos, vint lineIndex, vint& frontLine, vint& backLine)
+			{
+				frontLine=-1;
+				backLine=-1;
+				if(!IsValidTextPos(textPos)) return;
+				if(lineIndex<0 || lineIndex>=lines.Count()) return;
+
+				Ptr<UniscribeLine> line=lines[lineIndex];
+				vint start=0;
+				vint end=line->virtualLines.Count()-1;
+				while(start<=end)
+				{
+					vint middle=(start+end)/2;
+					Ptr<UniscribeVirtualLine> vline=line->virtualLines[middle];
+					vint lineStart=vline->start;
+					vint lineEnd=vline->start+vline->length;
+					if(textPos<lineStart)
+					{
+						end=middle-1;
+					}
+					else if(textPos>lineEnd)
+					{
+						start=middle+1;
+					}
+					else if(textPos==lineStart)
+					{
+						frontLine=middle==0?0:middle-1;
+						backLine=middle;
+						return;
+					}
+					else if(textPos==lineEnd)
+					{
+						frontLine=middle;
+						backLine=middle==line->virtualLines.Count()-1?middle:middle+1;
+						return;
+					}
+					else
+					{
+						frontLine=middle;
+						backLine=middle;
+						return;
+					}
+				}
+			}
+
 			vint UniscribeParagraph::GetCaret(vint comparingCaret, IGuiGraphicsParagraph::CaretRelativePosition position)
 			{
 				throw 0;
@@ -1608,12 +1714,14 @@ UniscribeParagraph
 
 			bool UniscribeParagraph::IsValidCaret(vint caret)
 			{
-				throw 0;
+				return IsValidTextPos(caret)
+					&& GetNearestCaretFromTextPos(caret, true)==caret
+					&& GetNearestCaretFromTextPos(caret, false)==caret;
 			}
 
 			bool UniscribeParagraph::IsValidTextPos(vint textPos)
 			{
-				throw 0;
+				return 0<=textPos && textPos<=paragraphText.Length();
 			}
 		}
 	}
