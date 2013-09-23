@@ -1076,6 +1076,7 @@ GuiDocumentElement::GuiDocumentElementRenderer
 
 			Ptr<GuiDocumentElement::GuiDocumentElementRenderer::ParagraphCache> GuiDocumentElement::GuiDocumentElementRenderer::EnsureAndGetCache(vint paragraphIndex)
 			{
+				if(paragraphIndex<0 || paragraphIndex>=paragraphCaches.Count()) return 0;
 				Ptr<DocumentParagraphRun> paragraph=element->document->paragraphs[paragraphIndex];
 				Ptr<ParagraphCache> cache=paragraphCaches[paragraphIndex];
 				if(!cache)
@@ -1268,6 +1269,97 @@ GuiDocumentElement::GuiDocumentElementRenderer
 				}
 			}
 
+			TextPos GuiDocumentElement::GuiDocumentElementRenderer::CalculateCaret(TextPos comparingCaret, IGuiGraphicsParagraph::CaretRelativePosition position)
+			{
+				Ptr<ParagraphCache> cache=EnsureAndGetCache(comparingCaret.row);
+				if(cache)
+				{
+					switch(position)
+					{
+					case IGuiGraphicsParagraph::CaretFirst:
+						{
+							vint caret=cache->graphicsParagraph->GetCaret(0, IGuiGraphicsParagraph::CaretFirst, false);
+							return TextPos(comparingCaret.row, caret);
+						}
+					case IGuiGraphicsParagraph::CaretLast:
+						{
+							vint caret=cache->graphicsParagraph->GetCaret(0, IGuiGraphicsParagraph::CaretLast, true);
+							return TextPos(comparingCaret.row, caret);
+						}
+					case IGuiGraphicsParagraph::CaretLineFirst:
+						{
+							vint caret=cache->graphicsParagraph->GetCaret(comparingCaret.column, IGuiGraphicsParagraph::CaretLineFirst, false);
+							return TextPos(comparingCaret.row, caret);
+						}
+					case IGuiGraphicsParagraph::CaretLineLast:
+						{
+							vint caret=cache->graphicsParagraph->GetCaret(comparingCaret.column, IGuiGraphicsParagraph::CaretLineLast, true);
+							return TextPos(comparingCaret.row, caret);
+						}
+					case IGuiGraphicsParagraph::CaretMoveUp:
+						{
+							vint caret=cache->graphicsParagraph->GetCaret(comparingCaret.column, IGuiGraphicsParagraph::CaretLineLast, false);
+							if(caret==comparingCaret.column && comparingCaret.row>0)
+							{
+								Rect caretBounds=cache->graphicsParagraph->GetCaretBounds(comparingCaret.column, true);
+								Ptr<ParagraphCache> anotherCache=EnsureAndGetCache(comparingCaret.row-1);
+								vint height=anotherCache->graphicsParagraph->GetHeight();
+								caret=anotherCache->graphicsParagraph->GetCaretFromPoint(Point(caretBounds.x1, height));
+								return TextPos(comparingCaret.row-1, caret);
+							}
+							else
+							{
+								return TextPos(comparingCaret.row, caret);
+							}
+						}
+					case IGuiGraphicsParagraph::CaretMoveDown:
+						{
+							vint caret=cache->graphicsParagraph->GetCaret(comparingCaret.column, IGuiGraphicsParagraph::CaretLineLast, true);
+							if(caret==comparingCaret.column && comparingCaret.row<paragraphCaches.Count()-1)
+							{
+								Rect caretBounds=cache->graphicsParagraph->GetCaretBounds(comparingCaret.column, true);
+								Ptr<ParagraphCache> anotherCache=EnsureAndGetCache(comparingCaret.row+1);
+								caret=anotherCache->graphicsParagraph->GetCaretFromPoint(Point(caretBounds.x1, 0));
+								return TextPos(comparingCaret.row+1, caret);
+							}
+							else
+							{
+								return TextPos(comparingCaret.row, caret);
+							}
+						}
+					case IGuiGraphicsParagraph::CaretMoveLeft:
+						{
+							vint caret=cache->graphicsParagraph->GetCaret(comparingCaret.column, IGuiGraphicsParagraph::CaretMoveLeft, false);
+							if(caret==comparingCaret.column && comparingCaret.row>0)
+							{
+								Ptr<ParagraphCache> anotherCache=EnsureAndGetCache(comparingCaret.row-1);
+								caret=anotherCache->graphicsParagraph->GetCaret(0, IGuiGraphicsParagraph::CaretLast, true);
+								return TextPos(comparingCaret.row-1, caret);
+							}
+							else
+							{
+								return TextPos(comparingCaret.row, caret);
+							}
+						}
+					case IGuiGraphicsParagraph::CaretMoveRight:
+						{
+							vint caret=cache->graphicsParagraph->GetCaret(comparingCaret.column, IGuiGraphicsParagraph::CaretLineLast, true);
+							if(caret==comparingCaret.column && comparingCaret.row<paragraphCaches.Count()-1)
+							{
+								Ptr<ParagraphCache> anotherCache=EnsureAndGetCache(comparingCaret.row+1);
+								caret=anotherCache->graphicsParagraph->GetCaret(0, IGuiGraphicsParagraph::CaretFirst, false);
+								return TextPos(comparingCaret.row+1, caret);
+							}
+							else
+							{
+								return TextPos(comparingCaret.row, caret);
+							}
+						}
+					}
+				}
+				return comparingCaret;
+			}
+
 /***********************************************************************
 GuiDocumentElement
 ***********************************************************************/
@@ -1362,6 +1454,20 @@ GuiDocumentElement
 			{
 				caretColor=value;
 				UpdateCaret();
+			}
+
+			TextPos GuiDocumentElement::CalculateCaret(TextPos comparingCaret, IGuiGraphicsParagraph::CaretRelativePosition position)
+			{
+				Ptr<GuiDocumentElementRenderer> elementRenderer=renderer.Cast<GuiDocumentElementRenderer>();
+				if(elementRenderer)
+				{
+					TextPos caret=elementRenderer->CalculateCaret(comparingCaret, position);
+					return caret.column==-1?comparingCaret:caret;
+				}
+				else
+				{
+					return comparingCaret;
+				}
 			}
 			
 			void GuiDocumentElement::NotifyParagraphUpdated(vint index)
