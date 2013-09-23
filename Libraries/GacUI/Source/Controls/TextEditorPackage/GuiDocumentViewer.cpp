@@ -13,6 +13,46 @@ namespace vl
 GuiDocumentViewer
 ***********************************************************************/
 
+			bool GuiDocumentCommonInterface::ProcessKey(vint code, bool shift, bool ctrl)
+			{
+				switch(code)
+				{
+				case VKEY_UP:
+					{
+					}
+					break;
+				case VKEY_DOWN:
+					{
+					}
+					break;
+				case VKEY_LEFT:
+					{
+					}
+					break;
+				case VKEY_RIGHT:
+					{
+					}
+					break;
+				case VKEY_HOME:
+					{
+					}
+					break;
+				case VKEY_END:
+					{
+					}
+					break;
+				case VKEY_PRIOR:
+					{
+					}
+					break;
+				case VKEY_NEXT:
+					{
+					}
+					break;
+				}
+				return false;
+			}
+
 			void GuiDocumentCommonInterface::InstallDocumentViewer(GuiControl* _sender, compositions::GuiGraphicsComposition* _container)
 			{
 				senderControl=_sender;
@@ -32,6 +72,7 @@ GuiDocumentViewer
 				_sender->GetFocusableComposition()->GetEventReceiver()->caretNotify.AttachMethod(this, &GuiDocumentCommonInterface::OnCaretNotify);
 				_sender->GetFocusableComposition()->GetEventReceiver()->gotFocus.AttachMethod(this, &GuiDocumentCommonInterface::OnGotFocus);
 				_sender->GetFocusableComposition()->GetEventReceiver()->lostFocus.AttachMethod(this, &GuiDocumentCommonInterface::OnLostFocus);
+				_sender->GetFocusableComposition()->GetEventReceiver()->keyDown.AttachMethod(this, &GuiDocumentCommonInterface::OnKeyDown);
 
 				ActiveHyperlinkChanged.SetAssociatedComposition(_sender->GetBoundsComposition());
 				ActiveHyperlinkExecuted.SetAssociatedComposition(_sender->GetBoundsComposition());
@@ -50,23 +91,43 @@ GuiDocumentViewer
 
 			void GuiDocumentCommonInterface::OnCaretNotify(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
-				if(editMode!=ViewOnly)
+				if(senderControl->GetVisuallyEnabled())
 				{
-					documentElement->SetCaretVisible(!documentElement->GetCaretVisible());
+					if(editMode!=ViewOnly)
+					{
+						documentElement->SetCaretVisible(!documentElement->GetCaretVisible());
+					}
 				}
 			}
 
 			void GuiDocumentCommonInterface::OnGotFocus(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
-				if(editMode!=ViewOnly)
+				if(senderControl->GetVisuallyEnabled())
 				{
-					documentElement->SetCaretVisible(true);
+					if(editMode!=ViewOnly)
+					{
+						documentElement->SetCaretVisible(true);
+					}
 				}
 			}
 
 			void GuiDocumentCommonInterface::OnLostFocus(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
-				documentElement->SetCaretVisible(false);
+				if(senderControl->GetVisuallyEnabled())
+				{
+					documentElement->SetCaretVisible(false);
+				}
+			}
+
+			void GuiDocumentCommonInterface::OnKeyDown(compositions::GuiGraphicsComposition* sender, compositions::GuiKeyEventArgs& arguments)
+			{
+				if(senderControl->GetVisuallyEnabled())
+				{
+					if(ProcessKey(arguments.code, arguments.shift, arguments.ctrl))
+					{
+						arguments.handled=true;
+					}
+				}
 			}
 
 			void GuiDocumentCommonInterface::OnMouseMove(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
