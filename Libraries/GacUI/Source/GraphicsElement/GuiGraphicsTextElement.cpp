@@ -1298,7 +1298,7 @@ GuiDocumentElement::GuiDocumentElementRenderer
 						}
 					case IGuiGraphicsParagraph::CaretMoveUp:
 						{
-							vint caret=cache->graphicsParagraph->GetCaret(comparingCaret.column, IGuiGraphicsParagraph::CaretLineLast, false);
+							vint caret=cache->graphicsParagraph->GetCaret(comparingCaret.column, IGuiGraphicsParagraph::CaretMoveUp, false);
 							if(caret==comparingCaret.column && comparingCaret.row>0)
 							{
 								Rect caretBounds=cache->graphicsParagraph->GetCaretBounds(comparingCaret.column, true);
@@ -1314,7 +1314,7 @@ GuiDocumentElement::GuiDocumentElementRenderer
 						}
 					case IGuiGraphicsParagraph::CaretMoveDown:
 						{
-							vint caret=cache->graphicsParagraph->GetCaret(comparingCaret.column, IGuiGraphicsParagraph::CaretLineLast, true);
+							vint caret=cache->graphicsParagraph->GetCaret(comparingCaret.column, IGuiGraphicsParagraph::CaretMoveDown, true);
 							if(caret==comparingCaret.column && comparingCaret.row<paragraphCaches.Count()-1)
 							{
 								Rect caretBounds=cache->graphicsParagraph->GetCaretBounds(comparingCaret.column, true);

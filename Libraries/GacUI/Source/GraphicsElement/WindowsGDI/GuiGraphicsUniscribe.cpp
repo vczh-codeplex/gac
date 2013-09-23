@@ -1921,30 +1921,36 @@ UniscribeParagraph (Caret Helper)
 						{
 							vint x2=bounds.bounds.x2-accumulatedWidth;
 							vint x1=x2-glyphWidth;
-							vint d1=x-x1;
-							vint d2=x2-x;
-							if(d1<=d2)
+							if(x1<=x && x<x2)
 							{
-								return line->start+run->start+newLastRunChar;
-							}
-							else
-							{
-								return line->start+run->start+lastRunChar;
+								vint d1=x-x1;
+								vint d2=x2-x;
+								if(d1<=d2)
+								{
+									return line->start+run->start+newLastRunChar;
+								}
+								else
+								{
+									return line->start+run->start+lastRunChar;
+								}
 							}
 						}
 						else
 						{
 							vint x1=bounds.bounds.x1+accumulatedWidth;
 							vint x2=x1+glyphWidth;
-							vint d1=x-x1;
-							vint d2=x2-x;
-							if(d1<=d2)
+							if(x1<=x && x<x2)
 							{
-								return line->start+run->start+lastRunChar;
-							}
-							else
-							{
-								return line->start+run->start+newLastRunChar;
+								vint d1=x-x1;
+								vint d2=x2-x;
+								if(d1<=d2)
+								{
+									return line->start+run->start+lastRunChar;
+								}
+								else
+								{
+									return line->start+run->start+newLastRunChar;
+								}
 							}
 						}
 
@@ -1958,7 +1964,10 @@ UniscribeParagraph (Caret Helper)
 			vint UniscribeParagraph::GetCaretFromXWithLine(vint x, vint lineIndex, vint virtualLineIndex)
 			{
 				Ptr<UniscribeLine> line=lines[lineIndex];
+				if(line->virtualLines.Count()==0) return line->start;
 				Ptr<UniscribeVirtualLine> virtualLine=line->virtualLines[virtualLineIndex];
+				if(x<virtualLine->bounds.x1) return line->start+virtualLine->start;
+				if(x>=virtualLine->bounds.x2) return line->start+virtualLine->start+virtualLine->length;
 
 				for(vint i=virtualLine->firstRunIndex;i<=virtualLine->lastRunIndex;i++)
 				{
@@ -2028,6 +2037,9 @@ UniscribeParagraph (Caret Helper)
 			vint UniscribeParagraph::GetVirtualLineIndexFromY(vint y, vint lineIndex)
 			{
 				Ptr<UniscribeLine> line=lines[lineIndex];
+				if(y<line->bounds.y1) return 0;
+				if(y>=line->bounds.y2) return line->virtualLines.Count()-1;
+
 				vint start=0;
 				vint end=line->virtualLines.Count()-1;
 				while(start<=end)
@@ -2073,13 +2085,23 @@ UniscribeParagraph (Caret)
 				vint backLine=0;
 				GetLineIndexFromTextPos(comparingCaret, frontLine, backLine);
 
+				Ptr<UniscribeLine> line=lines[frontLine];
+				if(line->virtualLines.Count()==0)
+				{
+					switch(position)
+					{
+					case IGuiGraphicsParagraph::CaretLineFirst:
+					case IGuiGraphicsParagraph::CaretLineLast:
+						return line->start;
+					}
+				}
+
 				vint frontVirtualLine=0;
 				vint backVirtualLine=0;
 				GetVirtualLineIndexFromTextPos(comparingCaret, frontLine, frontVirtualLine, backVirtualLine);
 				vint virtualLineIndex=preferFrontSide?frontVirtualLine:backVirtualLine;
 
-				Ptr<UniscribeLine> line=lines[frontLine];
-				Ptr<UniscribeVirtualLine> virtualLine=line->virtualLines[virtualLineIndex];
+				Ptr<UniscribeVirtualLine> virtualLine=virtualLineIndex==-1?0:line->virtualLines[virtualLineIndex];
 
 				switch(position)
 				{
@@ -2089,11 +2111,11 @@ UniscribeParagraph (Caret)
 					return line->start+virtualLine->start+virtualLine->length;
 				case IGuiGraphicsParagraph::CaretMoveUp:
 					{
-						if(frontLine==0 && virtualLineIndex==0) return comparingCaret;
+						if(frontLine==0 && virtualLineIndex<=0) return comparingCaret;
 						Rect bounds=GetCaretBoundsWithLine(comparingCaret, frontLine, virtualLineIndex, preferFrontSide);
 						if(bounds.Height()!=0)
 						{
-							if(virtualLineIndex==0)
+							if(virtualLineIndex<=0)
 							{
 								frontLine--;
 								virtualLineIndex=lines[frontLine]->virtualLines.Count()-1;
@@ -2126,7 +2148,7 @@ UniscribeParagraph (Caret)
 					}
 					break;
 				}
-				throw -1;
+				return -1;
 			}
 
 			Rect UniscribeParagraph::GetCaretBounds(vint caret, bool frontSide)
@@ -2149,6 +2171,9 @@ UniscribeParagraph (Caret)
 			{
 				vint lineIndex=GetLineIndexFromY(point.y);
 				if(lineIndex==-1) return -1;
+
+				Ptr<UniscribeLine> line=lines[lineIndex];
+				if(line->virtualLines.Count()==0) return 0;
 
 				vint virtualLineIndex=GetVirtualLineIndexFromY(point.y, lineIndex);
 				if(virtualLineIndex==-1) return -1;
