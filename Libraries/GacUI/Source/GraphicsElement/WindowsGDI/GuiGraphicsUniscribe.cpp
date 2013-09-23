@@ -1711,7 +1711,7 @@ UniscribeParagraph (Caret Helper)
 
 				Ptr<UniscribeLine> line=lines[lineIndex];
 				vint start=0;
-				vint end=line->virtualLines.Count()-1;
+				vint end=line->scriptItems.Count()-1;
 				while(start<=end)
 				{
 					vint middle=(start+end)/2;
@@ -1735,7 +1735,7 @@ UniscribeParagraph (Caret Helper)
 					else if(textPos==lineEnd)
 					{
 						frontItem=middle;
-						backItem=middle==line->virtualLines.Count()-1?middle:middle+1;
+						backItem=middle==line->scriptItems.Count()-1?middle:middle+1;
 						return;
 					}
 					else
