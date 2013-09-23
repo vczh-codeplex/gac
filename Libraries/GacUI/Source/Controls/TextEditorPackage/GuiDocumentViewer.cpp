@@ -13,32 +13,63 @@ namespace vl
 GuiDocumentViewer
 ***********************************************************************/
 
+			void GuiDocumentCommonInterface::Move(TextPos caret, bool shift)
+			{
+				TextPos begin=documentElement->GetCaretBegin();
+				TextPos end=documentElement->GetCaretEnd();
+				
+				TextPos newBegin=shift?begin:caret;
+				TextPos newEnd=caret;
+				documentElement->SetCaret(newBegin, newEnd, end<caret);
+			}
+
 			bool GuiDocumentCommonInterface::ProcessKey(vint code, bool shift, bool ctrl)
 			{
+				TextPos currentCaret=documentElement->GetCaretEnd();
 				switch(code)
 				{
 				case VKEY_UP:
 					{
+						TextPos newCaret=documentElement->CalculateCaret(currentCaret, IGuiGraphicsParagraph::CaretMoveUp);
+						Move(newCaret, shift);
 					}
 					break;
 				case VKEY_DOWN:
 					{
+						TextPos newCaret=documentElement->CalculateCaret(currentCaret, IGuiGraphicsParagraph::CaretMoveDown);
+						Move(newCaret, shift);
 					}
 					break;
 				case VKEY_LEFT:
 					{
+						TextPos newCaret=documentElement->CalculateCaret(currentCaret, IGuiGraphicsParagraph::CaretMoveLeft);
+						Move(newCaret, shift);
 					}
 					break;
 				case VKEY_RIGHT:
 					{
+						TextPos newCaret=documentElement->CalculateCaret(currentCaret, IGuiGraphicsParagraph::CaretMoveRight);
+						Move(newCaret, shift);
 					}
 					break;
 				case VKEY_HOME:
 					{
+						TextPos newCaret=documentElement->CalculateCaret(currentCaret, IGuiGraphicsParagraph::CaretLineFirst);
+						if(newCaret==currentCaret)
+						{
+							newCaret=documentElement->CalculateCaret(currentCaret, IGuiGraphicsParagraph::CaretFirst);
+						}
+						Move(newCaret, shift);
 					}
 					break;
 				case VKEY_END:
 					{
+						TextPos newCaret=documentElement->CalculateCaret(currentCaret, IGuiGraphicsParagraph::CaretLineLast);
+						if(newCaret==currentCaret)
+						{
+							newCaret=documentElement->CalculateCaret(currentCaret, IGuiGraphicsParagraph::CaretLast);
+						}
+						Move(newCaret, shift);
 					}
 					break;
 				case VKEY_PRIOR:
