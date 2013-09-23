@@ -1749,7 +1749,112 @@ UniscribeParagraph (Caret Helper)
 
 			Rect UniscribeParagraph::GetCaretBoundsWithLine(vint caret, vint lineIndex, vint virtualLineIndex, bool frontSide)
 			{
-				throw 0;
+				Ptr<UniscribeLine> line=lines[lineIndex];
+				Ptr<UniscribeVirtualLine> virtualLine=line->virtualLines[virtualLineIndex];
+
+				for(vint i=virtualLine->firstRunIndex;i<=virtualLine->lastRunIndex;i++)
+				{
+					Ptr<UniscribeRun> run=line->scriptRuns[i];
+					if(Ptr<UniscribeTextRun> textRun=run.Cast<UniscribeTextRun>())
+					{
+						vint firstBounds=i==virtualLine->firstRunIndex?virtualLine->firstRunBoundsIndex:0;
+						vint lastBounds=i==virtualLine->lastRunIndex?virtualLine->lastRunBoundsIndex:run->fragmentBounds.Count()-1;
+					
+						for(vint j=firstBounds;j<=lastBounds;j++)
+						{
+							UniscribeRun::RunFragmentBounds& bounds=run->fragmentBounds[j];
+						}
+					}
+				}
+
+				return Rect();
+			}
+
+			vint UniscribeParagraph::GetCaretFromXWithTextRunBounds(vint x, vint lineIndex, vint runIndex, vint runBoundsIndex)
+			{
+				Ptr<UniscribeLine> line=lines[lineIndex];
+				Ptr<UniscribeTextRun> run=line->scriptRuns[runIndex].Cast<UniscribeTextRun>();
+				UniscribeRun::RunFragmentBounds& bounds=run->fragmentBounds[runBoundsIndex];
+				
+				vint accumulatedWidth=0;
+				vint lastRunChar=bounds.start;
+				for(vint i=0;i<=bounds.length;i++)
+				{
+					vint charIndex=bounds.start+i;
+					vint newLastRunChar=lastRunChar;
+					if(i>0)
+					{
+						if(i==bounds.length)
+						{
+							newLastRunChar=charIndex;
+						}
+						else
+						{
+							WORD cluster1=run->wholeGlyph.charCluster[charIndex-1];
+							WORD cluster2=run->wholeGlyph.charCluster[charIndex];
+							if(cluster1!=cluster2)
+							{
+								newLastRunChar=charIndex;
+							}
+						}
+					}
+
+					if(newLastRunChar!=lastRunChar)
+					{
+						WORD glyph1=0;
+						WORD glyph2=0;
+						if(run->scriptItem->scriptItem.a.fRTL)
+						{
+							glyph2=run->wholeGlyph.charCluster[lastRunChar]+1;
+							glyph1=newLastRunChar==run->length?0:run->wholeGlyph.charCluster[newLastRunChar]+1;
+						}
+						else
+						{
+							glyph1=run->wholeGlyph.charCluster[lastRunChar];
+							glyph2=newLastRunChar==run->length?run->wholeGlyph.glyphs.Count():run->wholeGlyph.charCluster[newLastRunChar];
+						}
+
+						vint glyphWidth=0;
+						for(WORD g=glyph1;g<glyph2;g++)
+						{
+							glyphWidth+=run->wholeGlyph.glyphAdvances[g];
+						}
+
+						if(run->scriptItem->scriptItem.a.fRTL)
+						{
+							vint x2=bounds.bounds.x2-accumulatedWidth;
+							vint x1=x2-glyphWidth;
+							vint d1=x-x1;
+							vint d2=x2-x;
+							if(d1<=d2)
+							{
+								return line->start+run->start+newLastRunChar;
+							}
+							else
+							{
+								return line->start+run->start+lastRunChar;
+							}
+						}
+						else
+						{
+							vint x1=bounds.bounds.x1+accumulatedWidth;
+							vint x2=x1+glyphWidth;
+							vint d1=x-x1;
+							vint d2=x2-x;
+							if(d1<=d2)
+							{
+								return line->start+run->start+lastRunChar;
+							}
+							else
+							{
+								return line->start+run->start+newLastRunChar;
+							}
+						}
+
+						accumulatedWidth=glyphWidth;
+					}
+				}
+				return -1;
 			}
 
 			vint UniscribeParagraph::GetCaretFromXWithLine(vint x, vint lineIndex, vint virtualLineIndex)
@@ -1770,80 +1875,7 @@ UniscribeParagraph (Caret Helper)
 							UniscribeRun::RunFragmentBounds& bounds=run->fragmentBounds[j];
 							if(bounds.bounds.x1<=x && x<bounds.bounds.x2)
 							{
-								vint accumulatedWidth=0;
-								vint lastRunChar=bounds.start;
-								for(vint k=0;k<=bounds.length;k++)
-								{
-									vint charIndex=bounds.start+k;
-									vint newLastRunChar=lastRunChar;
-									if(k>0)
-									{
-										if(k==bounds.length)
-										{
-											newLastRunChar=charIndex;
-										}
-										else
-										{
-											WORD cluster1=textRun->wholeGlyph.charCluster[charIndex-1];
-											WORD cluster2=textRun->wholeGlyph.charCluster[charIndex];
-											if(cluster1!=cluster2)
-											{
-												newLastRunChar=charIndex;
-											}
-										}
-									}
-
-									if(newLastRunChar!=lastRunChar)
-									{
-										WORD glyph1=0;
-										WORD glyph2=0;
-										if(run->scriptItem->scriptItem.a.fRTL)
-										{
-											glyph2=textRun->wholeGlyph.charCluster[lastRunChar]+1;
-											glyph1=newLastRunChar==run->length?0:textRun->wholeGlyph.charCluster[newLastRunChar]+1;
-										}
-										else
-										{
-											glyph1=textRun->wholeGlyph.charCluster[lastRunChar];
-											glyph2=newLastRunChar==run->length?textRun->wholeGlyph.glyphs.Count():textRun->wholeGlyph.charCluster[newLastRunChar];
-										}
-
-										vint glyphWidth=0;
-										for(WORD g=glyph1;g<glyph2;g++)
-										{
-											glyphWidth+=textRun->wholeGlyph.glyphAdvances[g];
-										}
-
-										if(run->scriptItem->scriptItem.a.fRTL)
-										{
-											vint x2=bounds.bounds.x2-accumulatedWidth;
-											vint x1=x2-glyphWidth;
-											if(x-x1<=x2-x)
-											{
-												return line->start+run->start+newLastRunChar;
-											}
-											else
-											{
-												return line->start+run->start+lastRunChar;
-											}
-										}
-										else
-										{
-											vint x1=bounds.bounds.x1+accumulatedWidth;
-											vint x2=x1+glyphWidth;
-											if(x-x1<=x2-x)
-											{
-												return line->start+run->start+lastRunChar;
-											}
-											else
-											{
-												return line->start+run->start+newLastRunChar;
-											}
-										}
-
-										accumulatedWidth=glyphWidth;
-									}
-								}
+								return GetCaretFromXWithTextRunBounds(x, lineIndex, i, j);
 							}
 						}
 					}
