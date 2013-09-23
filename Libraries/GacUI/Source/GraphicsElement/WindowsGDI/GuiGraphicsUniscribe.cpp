@@ -1998,6 +1998,9 @@ UniscribeParagraph (Caret Helper)
 
 			vint UniscribeParagraph::GetLineIndexFromY(vint y)
 			{
+				if(y<lines[0]->bounds.y1) return 0;
+				if(y>=lines[lines.Count()-1]->bounds.y2) return lines.Count()-1;
+
 				vint start=0;
 				vint end=lines.Count()-1;
 				while(start<=end)

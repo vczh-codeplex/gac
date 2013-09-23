@@ -1074,11 +1074,38 @@ GuiDocumentElement::GuiDocumentElementRenderer
 				}
 			}
 
+			Ptr<GuiDocumentElement::GuiDocumentElementRenderer::ParagraphCache> GuiDocumentElement::GuiDocumentElementRenderer::EnsureAndGetCache(vint paragraphIndex)
+			{
+				Ptr<DocumentParagraphRun> paragraph=element->document->paragraphs[paragraphIndex];
+				Ptr<ParagraphCache> cache=paragraphCaches[paragraphIndex];
+				if(!cache)
+				{
+					cache=new ParagraphCache;
+					cache->fullText=ExtractTextVisitor::ExtractText(paragraph);
+					paragraphCaches[paragraphIndex]=cache;
+				}
+
+				if(!cache->graphicsParagraph)
+				{
+					cache->graphicsParagraph=layoutProvider->CreateParagraph(cache->fullText, renderTarget);
+					cache->graphicsParagraph->SetParagraphAlignment(paragraph->alignment);
+					SetPropertiesVisitor::SetProperty(element->document.Obj(), cache->graphicsParagraph.Obj(), paragraph);
+				}
+				if(cache->graphicsParagraph->GetMaxWidth()!=lastMaxWidth)
+				{
+					cache->graphicsParagraph->SetMaxWidth(lastMaxWidth);
+				}
+
+				return cache;
+			}
+
 			GuiDocumentElement::GuiDocumentElementRenderer::GuiDocumentElementRenderer()
 				:paragraphDistance(0)
 				,lastMaxWidth(-1)
 				,cachedTotalHeight(0)
 				,layoutProvider(GetGuiGraphicsResourceManager()->GetLayoutProvider())
+				,lastCaret(-1, -1)
+				,lastCaretFrontSide(false)
 			{
 			}
 
@@ -1094,6 +1121,8 @@ GuiDocumentElement::GuiDocumentElementRenderer
 					vint y1=clipper.Top()-bounds.Top();
 					vint y2=y1+clipper.Height();
 					vint y=0;
+
+					lastMaxWidth=maxWidth;
 
 					for(vint i=0;i<paragraphHeights.Count();i++)
 					{
@@ -1111,29 +1140,19 @@ GuiDocumentElement::GuiDocumentElementRenderer
 						{
 							Ptr<DocumentParagraphRun> paragraph=element->document->paragraphs[i];
 							Ptr<ParagraphCache> cache=paragraphCaches[i];
-							if(!cache)
+							bool created=cache && cache->graphicsParagraph;
+							cache=EnsureAndGetCache(i);
+							if(!created && i==lastCaret.row)
 							{
-								cache=new ParagraphCache;
-								cache->fullText=ExtractTextVisitor::ExtractText(paragraph);
-								paragraphCaches[i]=cache;
+								cache->graphicsParagraph->OpenCaret(lastCaret.column, lastCaretColor, lastCaretFrontSide);
 							}
 
-							if(!cache->graphicsParagraph)
+							vint height=cache->graphicsParagraph->GetHeight();
+							if(paragraphHeight!=height)
 							{
-								cache->graphicsParagraph=layoutProvider->CreateParagraph(cache->fullText, renderTarget);
-								cache->graphicsParagraph->SetParagraphAlignment(paragraph->alignment);
-								SetPropertiesVisitor::SetProperty(element->document.Obj(), cache->graphicsParagraph.Obj(), paragraph);
-							}
-							if(cache->graphicsParagraph->GetMaxWidth()!=maxWidth)
-							{
-								cache->graphicsParagraph->SetMaxWidth(maxWidth);
-								vint height=cache->graphicsParagraph->GetHeight();
-								if(paragraphHeight!=height)
-								{
-									cachedTotalHeight+=height-paragraphHeight;
-									paragraphHeight=height;
-									paragraphHeights[i]=paragraphHeight;
-								}
+								cachedTotalHeight+=height-paragraphHeight;
+								paragraphHeight=height;
+								paragraphHeights[i]=paragraphHeight;
 							}
 
 							cache->graphicsParagraph->Render(Rect(Point(cx, cy+y), Size(maxWidth, paragraphHeight)));
@@ -1142,7 +1161,6 @@ GuiDocumentElement::GuiDocumentElementRenderer
 						y+=paragraphHeight+paragraphDistance;
 					}
 
-					lastMaxWidth=maxWidth;
 					minSize=Size(0, cachedTotalHeight);
 				}
 				renderTarget->PopClipper();
@@ -1221,11 +1239,58 @@ GuiDocumentElement::GuiDocumentElementRenderer
 				return DocumentRun::NullHyperlinkId;
 			}
 
+			void GuiDocumentElement::GuiDocumentElementRenderer::OpenCaret(TextPos caret, Color color, bool frontSide)
+			{
+				CloseCaret();
+				lastCaret=caret;
+				lastCaretColor=color;
+				lastCaretFrontSide=frontSide;
+
+				Ptr<ParagraphCache> cache=paragraphCaches[lastCaret.row];
+				if(cache && cache->graphicsParagraph)
+				{
+					cache->graphicsParagraph->OpenCaret(lastCaret.column, lastCaretColor, lastCaretFrontSide);
+				}
+			}
+
+			void GuiDocumentElement::GuiDocumentElementRenderer::CloseCaret()
+			{
+				if(lastCaret!=TextPos(-1, -1))
+				{
+					if(0<=lastCaret.row && lastCaret.row<paragraphCaches.Count())
+					{
+						Ptr<ParagraphCache> cache=paragraphCaches[lastCaret.row];
+						if(cache && cache->graphicsParagraph)
+						{
+							cache->graphicsParagraph->CloseCaret();
+						}
+					}
+				}
+			}
+
 /***********************************************************************
 GuiDocumentElement
 ***********************************************************************/
 
+			void GuiDocumentElement::UpdateCaret()
+			{
+				Ptr<GuiDocumentElementRenderer> elementRenderer=renderer.Cast<GuiDocumentElementRenderer>();
+				if(elementRenderer)
+				{
+					if(caretVisible)
+					{
+						elementRenderer->OpenCaret(caretEnd, caretColor, caretFrontSide);
+					}
+					else
+					{
+						elementRenderer->CloseCaret();
+					}
+				}
+			}
+
 			GuiDocumentElement::GuiDocumentElement()
+				:caretVisible(false)
+				,caretFrontSide(false)
 			{
 			}
 
@@ -1244,7 +1309,59 @@ GuiDocumentElement
 				if(renderer)
 				{
 					renderer->OnElementStateChanged();
+					SetCaret(TextPos(), TextPos(), false);
 				}
+			}
+
+			TextPos GuiDocumentElement::GetCaretBegin()
+			{
+				return caretBegin;
+			}
+
+			TextPos GuiDocumentElement::GetCaretEnd()
+			{
+				return caretEnd;
+			}
+
+			void GuiDocumentElement::SetCaret(TextPos begin, TextPos end, bool frontSide)
+			{
+				caretBegin=begin;
+				caretEnd=end;
+				if(caretBegin<caretEnd)
+				{
+					caretFrontSide=true;
+				}
+				else if(caretBegin>caretEnd)
+				{
+					caretFrontSide=false;
+				}
+				else
+				{
+					caretFrontSide=frontSide;
+				}
+				UpdateCaret();
+			}
+
+			bool GuiDocumentElement::GetCaretVisible()
+			{
+				return caretVisible;
+			}
+
+			void GuiDocumentElement::SetCaretVisible(bool value)
+			{
+				caretVisible=value;
+				UpdateCaret();
+			}
+
+			Color GuiDocumentElement::GetCaretColor()
+			{
+				return caretColor;
+			}
+
+			void GuiDocumentElement::SetCaretColor(Color value)
+			{
+				caretColor=value;
+				UpdateCaret();
 			}
 			
 			void GuiDocumentElement::NotifyParagraphUpdated(vint index)

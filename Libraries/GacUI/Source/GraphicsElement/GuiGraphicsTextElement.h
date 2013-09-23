@@ -595,9 +595,14 @@ Rich Content Document (element)
 					ParagraphCacheArray						paragraphCaches;
 					collections::Array<vint>				paragraphHeights;
 
+					TextPos									lastCaret;
+					Color									lastCaretColor;
+					bool									lastCaretFrontSide;
+
 					void									InitializeInternal();
 					void									FinalizeInternal();
 					void									RenderTargetChangedInternal(IGuiGraphicsRenderTarget* oldRenderTarget, IGuiGraphicsRenderTarget* newRenderTarget);
+					Ptr<ParagraphCache>						EnsureAndGetCache(vint paragraphIndex);
 				public:
 					GuiDocumentElementRenderer();
 
@@ -606,10 +611,19 @@ Rich Content Document (element)
 
 					void									NotifyParagraphUpdated(vint index);
 					vint									GetHyperlinkIdFromPoint(Point point);
+					void									OpenCaret(TextPos caret, Color color, bool frontSide);
+					void									CloseCaret();
 				};
 
 			protected:
 				Ptr<DocumentModel>							document;
+				TextPos										caretBegin;
+				TextPos										caretEnd;
+				bool										caretVisible;
+				bool										caretFrontSide;
+				Color										caretColor;
+
+				void										UpdateCaret();
 
 				GuiDocumentElement();
 			public:
@@ -621,6 +635,45 @@ Rich Content Document (element)
 				/// <summary>Set the document. When a document is set to this element, modifying the document without invoking <see cref="NotifyParagraphUpdated"/> will lead to undefined behavior.</summary>
 				/// <param name="value">The document.</param>
 				void										SetDocument(Ptr<DocumentModel> value);
+				/// <summary>
+				/// Get the begin position of the selection area.
+				/// </summary>
+				/// <returns>The begin position of the selection area.</returns>
+				TextPos										GetCaretBegin();
+				/// <summary>
+				/// Get the end position of the selection area.
+				/// </summary>
+				/// <returns>The end position of the selection area.</returns>
+				TextPos										GetCaretEnd();
+				/// <summary>
+				/// Set the end position of the selection area.
+				/// </summary>
+				/// <param name="begin">The begin position of the selection area.</param>
+				/// <param name="end">The end position of the selection area.</param>
+				/// <param name="frontSide">Set to true to show the caret for the character before it. This argument is ignored if begin and end are the same.</param>
+				void										SetCaret(TextPos begin, TextPos end, bool frontSide);
+				/// <summary>
+				/// Get the caret visibility.
+				/// </summary>
+				/// <returns>Returns true if characters in the selection range will be rendered using <see cref="text::ColorEntry::selectedFocused"/> or <see cref="text::ColorEntry::selectedUnfocused"/>.</returns>
+				bool										GetCaretVisible();
+				/// <summary>
+				/// Set the caret visibility.
+				/// </summary>
+				/// <param name="value">True if characters in the selection range will be rendered using <see cref="text::ColorEntry::selectedFocused"/> or <see cref="text::ColorEntry::selectedUnfocused"/>.</param>
+				void										SetCaretVisible(bool value);
+				/// <summary>
+				/// Get the color of the caret.
+				/// </summary>
+				/// <returns>The color of the caret.</returns>
+				Color										GetCaretColor();
+				/// <summary>
+				/// Set the color of the caret.
+				/// </summary>
+				/// <param name="value">The color of the caret.</param>
+				void										SetCaretColor(Color value);
+
+				/// <summary>Get the caret.</summary>
 				/// <summary>Notify that a specified paragraph is updated.</summary>
 				/// <param name="index">The paragraph index.</param>
 				void										NotifyParagraphUpdated(vint index);
