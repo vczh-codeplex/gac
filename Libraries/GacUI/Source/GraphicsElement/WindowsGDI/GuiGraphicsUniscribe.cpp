@@ -1840,7 +1840,8 @@ UniscribeParagraph (Caret Helper)
 											{
 												glyphWidth+=textRun->wholeGlyph.glyphAdvances[g];
 											}
-											accumulatedWidth=glyphWidth;
+											accumulatedWidth+=glyphWidth;
+											lastRunChar=newLastRunChar;
 
 											if(line->start+run->start+lastRunChar==caret)
 											{
@@ -1947,7 +1948,8 @@ UniscribeParagraph (Caret Helper)
 							}
 						}
 
-						accumulatedWidth=glyphWidth;
+						lastRunChar=newLastRunChar;
+						accumulatedWidth+=glyphWidth;
 					}
 				}
 				return -1;
