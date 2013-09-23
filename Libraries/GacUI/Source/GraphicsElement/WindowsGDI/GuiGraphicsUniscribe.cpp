@@ -1671,8 +1671,8 @@ UniscribeParagraph (Caret Helper)
 				{
 					vint middle=(start+end)/2;
 					Ptr<UniscribeVirtualLine> vline=line->virtualLines[middle];
-					vint lineStart=vline->start;
-					vint lineEnd=vline->start+vline->length;
+					vint lineStart=line->start+vline->start;
+					vint lineEnd=line->start+vline->start+vline->length;
 					if(textPos<lineStart)
 					{
 						end=middle-1;
@@ -1716,8 +1716,8 @@ UniscribeParagraph (Caret Helper)
 				{
 					vint middle=(start+end)/2;
 					Ptr<UniscribeItem> item=line->scriptItems[middle];
-					vint lineStart=item->start;
-					vint lineEnd=item->start+item->length;
+					vint lineStart=line->start+item->start;
+					vint lineEnd=line->start+item->start+item->length;
 					if(textPos<lineStart)
 					{
 						end=middle-1;
@@ -2168,13 +2168,18 @@ UniscribeParagraph (Caret)
 					return frontSide?textPos-1:textPos+1;
 				}
 
+				Ptr<UniscribeLine> line=lines[frontLine];
+				if(textPos==line->start || textPos==line->start+line->lineText.Length())
+				{
+					return textPos;
+				}
+
 				vint frontItem=-1;
 				vint backItem=-1;
 				GetItemIndexFromTextPos(textPos, frontLine, frontItem, backItem);
 				if(frontItem==-1 || backItem==-1) return -1;
 				if(frontItem!=backItem) return textPos;
 				
-				Ptr<UniscribeLine> line=lines[frontLine];
 				Ptr<UniscribeItem> item=line->scriptItems[frontItem];
 				vint lineTextPos=textPos-line->start;
 				if(lineTextPos==item->start) return textPos;
