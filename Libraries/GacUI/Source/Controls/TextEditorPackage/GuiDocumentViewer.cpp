@@ -21,6 +21,7 @@ GuiDocumentViewer
 				TextPos newBegin=shift?begin:caret;
 				TextPos newEnd=caret;
 				documentElement->SetCaret(newBegin, newEnd, end<caret);
+				documentElement->SetCaretVisible(true);
 			}
 
 			bool GuiDocumentCommonInterface::ProcessKey(vint code, bool shift, bool ctrl)

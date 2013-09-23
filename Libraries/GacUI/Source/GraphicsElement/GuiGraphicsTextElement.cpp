@@ -1343,7 +1343,7 @@ GuiDocumentElement::GuiDocumentElementRenderer
 						}
 					case IGuiGraphicsParagraph::CaretMoveRight:
 						{
-							vint caret=cache->graphicsParagraph->GetCaret(comparingCaret.column, IGuiGraphicsParagraph::CaretLineLast, true);
+							vint caret=cache->graphicsParagraph->GetCaret(comparingCaret.column, IGuiGraphicsParagraph::CaretMoveRight, true);
 							if(caret==comparingCaret.column && comparingCaret.row<paragraphCaches.Count()-1)
 							{
 								Ptr<ParagraphCache> anotherCache=EnsureAndGetCache(comparingCaret.row+1);
