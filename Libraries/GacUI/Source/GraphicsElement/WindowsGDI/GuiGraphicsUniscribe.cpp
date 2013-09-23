@@ -1769,7 +1769,7 @@ UniscribeParagraph (Caret Helper)
 								vint boundsStart=line->start+run->start+bounds.start;
 								if(boundsStart==caret)
 								{
-									if(i==virtualLine->firstRunIndex && j==virtualLine->firstRunBoundsIndex)
+									if(!frontSide || i==virtualLine->firstRunIndex && j==virtualLine->firstRunBoundsIndex)
 									{
 										if(run->scriptItem->scriptItem.a.fRTL)
 										{
@@ -1783,7 +1783,7 @@ UniscribeParagraph (Caret Helper)
 								}
 								else if(caret==boundsStart+bounds.length)
 								{
-									if(i==virtualLine->lastRunIndex && j==virtualLine->lastRunBoundsIndex)
+									if(frontSide || i==virtualLine->lastRunIndex && j==virtualLine->lastRunBoundsIndex)
 									{
 										if(run->scriptItem->scriptItem.a.fRTL)
 										{
