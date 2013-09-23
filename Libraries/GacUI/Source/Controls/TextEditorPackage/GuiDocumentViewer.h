@@ -47,6 +47,7 @@ GuiDocumentCommonInterface
 
 				void										InstallDocumentViewer(GuiControl* _sender, compositions::GuiGraphicsComposition* _container);
 				void										SetActiveHyperlinkId(vint value);
+				void										OnCaretNotify(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 				void										OnMouseMove(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
 				void										OnMouseDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
 				void										OnMouseUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
