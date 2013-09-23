@@ -24,11 +24,18 @@ WindowsGDIParagraph
 				WString								text;
 				IWindowsGDIRenderTarget*			renderTarget;
 
+				vint								caret;
+				Color								caretColor;
+				bool								caretFrontSide;
+				Ptr<WinPen>							caretPen;
+
 			public:
 				WindowsGDIParagraph(IGuiGraphicsLayoutProvider* _provider, const WString& _text, IGuiGraphicsRenderTarget* _renderTarget)
 					:provider(_provider)
 					,text(_text)
 					,renderTarget(dynamic_cast<IWindowsGDIRenderTarget*>(_renderTarget))
+					,caret(-1)
+					,caretFrontSide(false)
 				{
 					paragraph=new UniscribeParagraph;
 					paragraph->paragraphText=text;
@@ -42,6 +49,7 @@ WindowsGDIParagraph
 
 				~WindowsGDIParagraph()
 				{
+					CloseCaret();
 				}
 
 				IGuiGraphicsLayoutProvider* GetProvider()override
@@ -201,9 +209,43 @@ WindowsGDIParagraph
 					return paragraph->bounds.Height();
 				}
 
+				bool OpenCaret(vint _caret, Color _color, bool _frontSide)override
+				{
+					if(!IsValidCaret(_caret)) return false;
+					if(caret!=-1) CloseCaret();
+					caret=_caret;
+					caretColor=_color;
+					caretFrontSide=_frontSide;
+					caretPen=GetWindowsGDIResourceManager()->CreateGdiPen(caretColor);
+					return true;
+				}
+
+				bool CloseCaret()override
+				{
+					if(caret==-1) return false;
+					caret=-1;
+					GetWindowsGDIResourceManager()->DestroyGdiPen(caretColor);
+					caretPen=0;
+					return true;
+				}
+
 				void Render(Rect bounds)override
 				{
 					paragraph->Render(renderTarget->GetDC(), bounds.Left(), bounds.Top());
+					if(caret!=-1)
+					{
+						Rect caretBounds=GetCaretBounds(caret, caretFrontSide);
+						vint x=caretBounds.x1+bounds.x1;
+						vint y1=caretBounds.y1+bounds.y1;
+						vint y2=y1+caretBounds.Height();
+
+						WinDC* dc=renderTarget->GetDC();
+						dc->SetPen(caretPen);
+						dc->MoveTo(x-1, y1);
+						dc->LineTo(x-1, y2);
+						dc->MoveTo(x, y1);
+						dc->LineTo(x, y2);
+					}
 				}
 
 				vint GetCaret(vint comparingCaret, CaretRelativePosition position, bool preferFrontSide)override

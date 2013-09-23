@@ -173,6 +173,15 @@ Layout Engine
 				/// <summary>Get the layouted height of the text. The result depends on rich styled text and the two important properties that can be set using <see cref="SetWrapLine"/> and <see cref="SetMaxWidth"/>.</summary>
 				/// <returns>The layouted height.</returns>
 				virtual vint								GetHeight()=0;
+				/// <summary>Make the caret visible so that it will be rendered in the paragraph.</summary>
+				/// <returns>Returns true if this operation succeeded.</returns>
+				/// <param name="caret">The caret.</param>
+				/// <param name="color">The color of the caret.</param>
+				/// <param name="frontSide">Set to true to display the caret for the character before it.</param>
+				virtual bool								OpenCaret(vint caret, Color color, bool frontSide)=0;
+				/// <summary>Make the caret invisible.</summary>
+				/// <returns>Returns true if this operation succeeded.</returns>
+				virtual bool								CloseCaret()=0;
 				/// <summary>Render the graphics element using a specified bounds.</summary>
 				/// <param name="bounds">Bounds to decide the size and position of the binded graphics element.</param>
 				virtual void								Render(Rect bounds)=0;

@@ -483,6 +483,16 @@ WindowsDirect2DParagraph
 					return (vint)metrics.height;
 				}
 
+				bool OpenCaret(vint caret, Color color, bool frontSide)override
+				{
+					throw 0;
+				}
+
+				bool CloseCaret()override
+				{
+					throw 0;
+				}
+
 				void Render(Rect bounds)override
 				{
 					renderTarget->GetDirect2DRenderTarget()->DrawTextLayout(
