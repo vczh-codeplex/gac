@@ -77,7 +77,7 @@ UniscribeItem
 			public:
 				//***************************** Uniscribe Data
 				SCRIPT_ITEM						scriptItem;
-				vint							start;
+				vint							start;			// start from line
 				vint							length;
 				const wchar_t*					itemText;
 				Array<SCRIPT_LOGATTR>			charLogattrs;
@@ -99,7 +99,7 @@ UniscribeRun
 			public:
 				struct RunFragmentBounds
 				{
-					vint						start;
+					vint						start;			// start from run
 					vint						length;
 					Rect						bounds;
 				};
@@ -108,7 +108,7 @@ UniscribeRun
 				UniscribeFragment*				documentFragment;
 				UniscribeItem*					scriptItem;
 				//***************************** Uniscribe Data
-				vint							start;
+				vint							start;			// start from line
 				vint							length;
 				const wchar_t*					runText;
 				//***************************** Layout Data
@@ -180,7 +180,7 @@ UniscribeVirtualLine
 			{
 			public:
 				//***************************** Document Data
-				vint							start;
+				vint							start;			// start from line
 				vint							length;
 				const wchar_t*					runText;
 				//***************************** Layout Data
@@ -202,7 +202,7 @@ UniscribeLine
 			public:
 				//***************************** Document Data
 				List<Ptr<UniscribeFragment>>	documentFragments;
-				vint							start;
+				vint							start;			// start from paragraph
 				WString							lineText;
 				//***************************** Uniscribe Data
 				List<Ptr<UniscribeItem>>		scriptItems;
