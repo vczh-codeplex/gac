@@ -30,6 +30,8 @@ GuiDocumentViewer
 				documentComposition->GetEventReceiver()->mouseLeave.AttachMethod(this, &GuiDocumentCommonInterface::OnMouseLeave);
 
 				_sender->GetFocusableComposition()->GetEventReceiver()->caretNotify.AttachMethod(this, &GuiDocumentCommonInterface::OnCaretNotify);
+				_sender->GetFocusableComposition()->GetEventReceiver()->gotFocus.AttachMethod(this, &GuiDocumentCommonInterface::OnGotFocus);
+				_sender->GetFocusableComposition()->GetEventReceiver()->lostFocus.AttachMethod(this, &GuiDocumentCommonInterface::OnLostFocus);
 
 				ActiveHyperlinkChanged.SetAssociatedComposition(_sender->GetBoundsComposition());
 				ActiveHyperlinkExecuted.SetAssociatedComposition(_sender->GetBoundsComposition());
@@ -52,6 +54,19 @@ GuiDocumentViewer
 				{
 					documentElement->SetCaretVisible(!documentElement->GetCaretVisible());
 				}
+			}
+
+			void GuiDocumentCommonInterface::OnGotFocus(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				if(editMode!=ViewOnly)
+				{
+					documentElement->SetCaretVisible(true);
+				}
+			}
+
+			void GuiDocumentCommonInterface::OnLostFocus(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				documentElement->SetCaretVisible(false);
 			}
 
 			void GuiDocumentCommonInterface::OnMouseMove(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
