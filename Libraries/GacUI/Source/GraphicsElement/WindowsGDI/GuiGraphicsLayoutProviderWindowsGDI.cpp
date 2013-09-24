@@ -248,7 +248,7 @@ WindowsGDIParagraph
 					}
 				}
 
-				vint GetCaret(vint comparingCaret, CaretRelativePosition position, bool preferFrontSide)override
+				vint GetCaret(vint comparingCaret, CaretRelativePosition position, bool& preferFrontSide)override
 				{
 					return paragraph->GetCaret(comparingCaret, position, preferFrontSide);
 				}

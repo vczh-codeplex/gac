@@ -613,7 +613,7 @@ Rich Content Document (element)
 					vint									GetHyperlinkIdFromPoint(Point point);
 					void									OpenCaret(TextPos caret, Color color, bool frontSide);
 					void									CloseCaret();
-					TextPos									CalculateCaret(TextPos comparingCaret, IGuiGraphicsParagraph::CaretRelativePosition position);
+					TextPos									CalculateCaret(TextPos comparingCaret, IGuiGraphicsParagraph::CaretRelativePosition position, bool& preferFrontSide);
 				};
 
 			protected:
@@ -677,8 +677,9 @@ Rich Content Document (element)
 				/// <summary>Calculate a caret using a specified comparing caret and a relative position.</summary>
 				/// <returns>The calculated caret.</returns>
 				/// <param name="comparingCaret">The comparing caret.</param>
-				/// <param name="position">The relative position,</param>
-				TextPos										CalculateCaret(TextPos comparingCaret, IGuiGraphicsParagraph::CaretRelativePosition position);
+				/// <param name="position">The relative position.</param>
+				/// <param name="preferFrontSide">Retrive the suggested side for the new caret. If the return caret equals compareCaret, this output is ignored.</param>
+				TextPos										CalculateCaret(TextPos comparingCaret, IGuiGraphicsParagraph::CaretRelativePosition position, bool& preferFrontSide);
 
 				/// <summary>Get the caret.</summary>
 				/// <summary>Notify that a specified paragraph is updated.</summary>

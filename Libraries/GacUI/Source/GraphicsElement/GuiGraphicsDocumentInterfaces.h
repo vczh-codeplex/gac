@@ -190,8 +190,8 @@ Layout Engine
 				/// <returns>The new caret. Returns -1 if failed.</returns>
 				/// <param name="comparingCaret">The caret to compare. If the position is CaretFirst or CaretLast, this argument is ignored.</param>
 				/// <param name="position">The relative position.</param>
-				/// <param name="preferFrontSide">Only for CaretMoveUp and CaretMoveDown. Set to true to make the caret prefer to get closer to the character before it.</param>
-				virtual vint								GetCaret(vint comparingCaret, CaretRelativePosition position, bool preferFrontSide)=0;
+				/// <param name="preferFrontSide">Only for CaretMoveUp and CaretMoveDown. Set to true to make the caret prefer to get closer to the character before it. After this function is called, this argument stored the suggested side for displaying the new caret.</param>
+				virtual vint								GetCaret(vint comparingCaret, CaretRelativePosition position, bool& preferFrontSide)=0;
 				/// <summary>Get the bounds of the caret.</summary>
 				/// <returns>The bounds whose width is 0. Returns an empty Rect value if failed.</returns>
 				/// <param name="caret">The caret.</param>

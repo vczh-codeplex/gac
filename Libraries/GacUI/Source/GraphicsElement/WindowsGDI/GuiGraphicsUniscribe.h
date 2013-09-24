@@ -265,7 +265,7 @@ UniscribeParagraph
 				vint							GetLineIndexFromY(vint y);
 				vint							GetVirtualLineIndexFromY(vint y, vint lineIndex);
 
-				vint							GetCaret(vint comparingCaret, IGuiGraphicsParagraph::CaretRelativePosition position, bool preferFrontSide);
+				vint							GetCaret(vint comparingCaret, IGuiGraphicsParagraph::CaretRelativePosition position, bool& preferFrontSide);
 				Rect							GetCaretBounds(vint caret, bool frontSide);
 				vint							GetCaretFromPoint(Point point);
 				vint							GetNearestCaretFromTextPos(vint textPos, bool frontSide);

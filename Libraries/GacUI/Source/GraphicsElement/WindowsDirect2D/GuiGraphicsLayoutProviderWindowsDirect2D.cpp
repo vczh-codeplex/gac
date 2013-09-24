@@ -502,7 +502,7 @@ WindowsDirect2DParagraph
 						D2D1_DRAW_TEXT_OPTIONS_NO_SNAP);
 				}
 
-				vint GetCaret(vint comparingCaret, CaretRelativePosition position, bool preferFrontSide)override
+				vint GetCaret(vint comparingCaret, CaretRelativePosition position, bool& preferFrontSide)override
 				{
 					throw 0;
 				}
