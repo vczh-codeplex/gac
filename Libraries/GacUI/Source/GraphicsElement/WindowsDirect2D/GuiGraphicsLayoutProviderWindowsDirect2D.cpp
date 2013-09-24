@@ -18,11 +18,11 @@ WindowsDirect2DElementInlineObject
 			class WindowsDirect2DElementInlineObject : public IDWriteInlineObject
 			{
 			protected:
-				vint													counter;
+				vint												counter;
 				IGuiGraphicsParagraph::InlineObjectProperties		properties;
 				Ptr<IGuiGraphicsElement>							element;
-				vint													start;
-				vint													length;
+				vint												start;
+				vint												length;
 
 			public:
 				WindowsDirect2DElementInlineObject(
@@ -162,6 +162,7 @@ WindowsDirect2DParagraph
 				ID2D1SolidColorBrush*				defaultTextColor;
 				IDWriteFactory*						dwriteFactory;
 				IWindowsDirect2DRenderTarget*		renderTarget;
+				WString								paragraphText;
 				ComPtr<IDWriteTextLayout>			textLayout;
 				bool								wrapLine;
 				vint								maxWidth;
@@ -169,14 +170,33 @@ WindowsDirect2DParagraph
 				InlineElementMap					inlineElements;
 				InteractionIdMap					interactionIds;
 
+				vint								caret;
+				Color								caretColor;
+				bool								caretFrontSide;
+				ID2D1SolidColorBrush*				caretBrush;
+
+				bool								formatDataAvailable;
+
+				void PrepareFormatData()
+				{
+					if(!formatDataAvailable)
+					{
+						formatDataAvailable=true;
+					}
+				}
 			public:
 				WindowsDirect2DParagraph(IGuiGraphicsLayoutProvider* _provider, const WString& _text, IGuiGraphicsRenderTarget* _renderTarget)
 					:provider(_provider)
 					,dwriteFactory(GetWindowsDirect2DObjectProvider()->GetDirectWriteFactory())
 					,renderTarget(dynamic_cast<IWindowsDirect2DRenderTarget*>(_renderTarget))
+					,paragraphText(_text)
 					,textLayout(0)
 					,wrapLine(true)
 					,maxWidth(-1)
+					,caret(-1)
+					,caretFrontSide(false)
+					,caretBrush(0)
+					,formatDataAvailable(false)
 				{
 					FontProperties defaultFont=GetCurrentController()->ResourceService()->GetDefaultFont();
 					Direct2DTextFormatPackage* package=GetWindowsDirect2DResourceManager()->CreateDirect2DTextFormat(defaultFont);
@@ -203,6 +223,7 @@ WindowsDirect2DParagraph
 
 				~WindowsDirect2DParagraph()
 				{
+					CloseCaret();
 					FOREACH(Color, color, usedColors)
 					{
 						renderTarget->DestroyDirect2DBrush(color);
@@ -230,6 +251,7 @@ WindowsDirect2DParagraph
 					{
 						wrapLine=value;
 						textLayout->SetWordWrapping(value?DWRITE_WORD_WRAPPING_WRAP:DWRITE_WORD_WRAPPING_NO_WRAP);
+						formatDataAvailable=false;
 					}
 				}
 
@@ -244,6 +266,7 @@ WindowsDirect2DParagraph
 					{
 						maxWidth=value;
 						textLayout->SetMaxWidth(value==-1?65536:(FLOAT)value);
+						formatDataAvailable=false;
 					}
 				}
 
@@ -264,6 +287,7 @@ WindowsDirect2DParagraph
 
 				void SetParagraphAlignment(Alignment value)override
 				{
+					formatDataAvailable=false;
 					switch(value)
 					{
 					case Alignment::Left:
@@ -281,6 +305,8 @@ WindowsDirect2DParagraph
 				bool SetFont(vint start, vint length, const WString& value)override
 				{
 					if(length==0) return true;
+					formatDataAvailable=false;
+
 					DWRITE_TEXT_RANGE range;
 					range.startPosition=(int)start;
 					range.length=(int)length;
@@ -291,6 +317,8 @@ WindowsDirect2DParagraph
 				bool SetSize(vint start, vint length, vint value)override
 				{
 					if(length==0) return true;
+					formatDataAvailable=false;
+
 					DWRITE_TEXT_RANGE range;
 					range.startPosition=(int)start;
 					range.length=(int)length;
@@ -301,6 +329,8 @@ WindowsDirect2DParagraph
 				bool SetStyle(vint start, vint length, TextStyle value)override
 				{
 					if(length==0) return true;
+					formatDataAvailable=false;
+
 					DWRITE_TEXT_RANGE range;
 					range.startPosition=(int)start;
 					range.length=(int)length;
@@ -321,6 +351,8 @@ WindowsDirect2DParagraph
 				bool SetColor(vint start, vint length, Color value)override
 				{
 					if(length==0) return true;
+					formatDataAvailable=false;
+
 					ID2D1SolidColorBrush* brush=renderTarget->CreateDirect2DBrush(value);
 					usedColors.Add(value);
 
@@ -345,6 +377,8 @@ WindowsDirect2DParagraph
 							return false;
 						}
 					}
+					formatDataAvailable=false;
+
 					ComPtr<WindowsDirect2DElementInlineObject> inlineObject=new WindowsDirect2DElementInlineObject(properties, value, start, length);
 					DWRITE_TEXT_RANGE range;
 					range.startPosition=(int)start;
@@ -380,6 +414,7 @@ WindowsDirect2DParagraph
 							HRESULT hr=textLayout->SetInlineObject(NULL, range);
 							if(!FAILED(hr))
 							{
+								formatDataAvailable=false;
 								inlineElements.Remove(element);
 								return true;
 							}
@@ -445,6 +480,7 @@ WindowsDirect2DParagraph
 					vint begin=SearchInInteractionIdMap(start);
 					vint end=SearchInInteractionIdMap(start+length-1);
 					if(begin==-1 || end==-1) return false;
+					formatDataAvailable=false;
 
 					vint offset=CutInteractionIdMap(start, begin);
 					begin+=offset;
@@ -483,14 +519,24 @@ WindowsDirect2DParagraph
 					return (vint)metrics.height;
 				}
 
-				bool OpenCaret(vint caret, Color color, bool frontSide)override
+				bool OpenCaret(vint _caret, Color _color, bool _frontSide)override
 				{
-					throw 0;
+					if(!IsValidCaret(_caret)) return false;
+					if(caret!=-1) CloseCaret();
+					caret=_caret;
+					caretColor=_color;
+					caretFrontSide=_frontSide;
+					caretBrush=renderTarget->CreateDirect2DBrush(caretColor);
+					return true;
 				}
 
 				bool CloseCaret()override
 				{
-					throw 0;
+					if(caret==-1) return false;
+					caret=-1;
+					renderTarget->DestroyDirect2DBrush(caretColor);
+					caretBrush=0;
+					return true;
 				}
 
 				void Render(Rect bounds)override
@@ -500,36 +546,60 @@ WindowsDirect2DParagraph
 						textLayout.Obj(),
 						defaultTextColor,
 						D2D1_DRAW_TEXT_OPTIONS_NO_SNAP);
+
+					if(caret!=-1)
+					{
+						Rect caretBounds=GetCaretBounds(caret, caretFrontSide);
+						vint x=caretBounds.x1+bounds.x1;
+						vint y1=caretBounds.y1+bounds.y1;
+						vint y2=y1+caretBounds.Height();
+
+						renderTarget->GetDirect2DRenderTarget()->DrawLine(
+							D2D1::Point2F((FLOAT)x-0.5f, (FLOAT)y1+0.5f),
+							D2D1::Point2F((FLOAT)x-0.5f, (FLOAT)y2+0.5f),
+							caretBrush
+							);
+						renderTarget->GetDirect2DRenderTarget()->DrawLine(
+							D2D1::Point2F((FLOAT)x+0.5f, (FLOAT)y1+0.5f),
+							D2D1::Point2F((FLOAT)x+0.5f, (FLOAT)y2+0.5f),
+							caretBrush
+							);
+					}
 				}
 
 				vint GetCaret(vint comparingCaret, CaretRelativePosition position, bool& preferFrontSide)override
 				{
+					PrepareFormatData();
 					throw 0;
 				}
 
 				Rect GetCaretBounds(vint caret, bool frontSide)override
 				{
+					PrepareFormatData();
 					throw 0;
 				}
 
 				vint GetCaretFromPoint(Point point)override
 				{
+					PrepareFormatData();
 					throw 0;
 				}
 
 				vint GetNearestCaretFromTextPos(vint textPos, bool frontSide)override
 				{
+					PrepareFormatData();
 					throw 0;
 				}
 
 				bool IsValidCaret(vint caret)override
 				{
+					PrepareFormatData();
 					throw 0;
 				}
 
 				bool IsValidTextPos(vint textPos)
 				{
-					throw 0;
+					return 0<=textPos && textPos<=paragraphText.Length();
 				}
 			};
 
