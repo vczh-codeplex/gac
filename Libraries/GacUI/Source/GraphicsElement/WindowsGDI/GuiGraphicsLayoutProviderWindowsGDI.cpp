@@ -29,6 +29,14 @@ WindowsGDIParagraph
 				bool								caretFrontSide;
 				Ptr<WinPen>							caretPen;
 
+				void PrepareUniscribeData()
+				{
+					if(paragraph->BuildUniscribeData(renderTarget->GetDC()))
+					{
+						vint width=paragraph->lastAvailableWidth==-1?65536:paragraph->lastAvailableWidth;
+						paragraph->Layout(width, paragraph->paragraphAlignment);
+					}
+				}
 			public:
 				WindowsGDIParagraph(IGuiGraphicsLayoutProvider* _provider, const WString& _text, IGuiGraphicsRenderTarget* _renderTarget)
 					:provider(_provider)
@@ -201,11 +209,7 @@ WindowsGDIParagraph
 
 				vint GetHeight()override
 				{
-					paragraph->BuildUniscribeData(renderTarget->GetDC());
-					if(paragraph->lastAvailableWidth==-1)
-					{
-						paragraph->Layout(65536, paragraph->paragraphAlignment);
-					}
+					PrepareUniscribeData();
 					return paragraph->bounds.Height();
 				}
 
@@ -231,6 +235,7 @@ WindowsGDIParagraph
 
 				void Render(Rect bounds)override
 				{
+					PrepareUniscribeData();
 					paragraph->Render(renderTarget->GetDC(), bounds.Left(), bounds.Top());
 					if(caret!=-1)
 					{
@@ -250,31 +255,37 @@ WindowsGDIParagraph
 
 				vint GetCaret(vint comparingCaret, CaretRelativePosition position, bool& preferFrontSide)override
 				{
+					PrepareUniscribeData();
 					return paragraph->GetCaret(comparingCaret, position, preferFrontSide);
 				}
 
 				Rect GetCaretBounds(vint caret, bool frontSide)override
 				{
+					PrepareUniscribeData();
 					return paragraph->GetCaretBounds(caret, frontSide);
 				}
 
 				vint GetCaretFromPoint(Point point)override
 				{
+					PrepareUniscribeData();
 					return paragraph->GetCaretFromPoint(point);
 				}
 
 				vint GetNearestCaretFromTextPos(vint textPos, bool frontSide)override
 				{
+					PrepareUniscribeData();
 					return paragraph->GetNearestCaretFromTextPos(textPos, frontSide);
 				}
 
 				bool IsValidCaret(vint caret)override
 				{
+					PrepareUniscribeData();
 					return paragraph->IsValidCaret(caret);
 				}
 
 				bool IsValidTextPos(vint textPos)override
 				{
+					PrepareUniscribeData();
 					return paragraph->IsValidTextPos(textPos);
 				}
 			};

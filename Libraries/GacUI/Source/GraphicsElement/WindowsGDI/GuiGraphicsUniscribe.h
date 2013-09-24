@@ -241,7 +241,7 @@ UniscribeParagraph
 				~UniscribeParagraph();
 
 				void							ClearUniscribeData();
-				void							BuildUniscribeData(WinDC* dc);
+				bool							BuildUniscribeData(WinDC* dc);
 				void							Layout(vint availableWidth, Alignment alignment);
 				void							Render(WinDC* dc, vint offsetX, vint offsetY);
 

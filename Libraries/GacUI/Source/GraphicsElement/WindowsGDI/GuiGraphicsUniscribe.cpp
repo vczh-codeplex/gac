@@ -1143,89 +1143,90 @@ UniscribeParagraph (Initialization)
 				lastAvailableWidth=-1;
 			}
 
-			void UniscribeParagraph::BuildUniscribeData(WinDC* dc)
+			bool UniscribeParagraph::BuildUniscribeData(WinDC* dc)
 			{
-				if(!built)
+				if(built) return false;
+
+				built=true;
+				ClearUniscribeData();
+				Dictionary<WString, Ptr<WinFont>> fonts;
+				FOREACH(Ptr<UniscribeFragment>, fragment, documentFragments)
 				{
-					built=true;
-					ClearUniscribeData();
-					Dictionary<WString, Ptr<WinFont>> fonts;
-					FOREACH(Ptr<UniscribeFragment>, fragment, documentFragments)
+					if(!fragment->fontObject)
 					{
-						if(!fragment->fontObject)
+						WString fragmentFingerPrint=fragment->GetFingerprint();
+						vint index=fonts.Keys().IndexOf(fragmentFingerPrint);
+						if(index==-1)
 						{
-							WString fragmentFingerPrint=fragment->GetFingerprint();
-							vint index=fonts.Keys().IndexOf(fragmentFingerPrint);
-							if(index==-1)
-							{
-								fragment->fontObject=GetWindowsGDIResourceManager()->CreateGdiFont(fragment->fontStyle);
-								fonts.Add(fragmentFingerPrint, fragment->fontObject);
-							}
-							else
-							{
-								fragment->fontObject=fonts.Values().Get(index);
-							}
+							fragment->fontObject=GetWindowsGDIResourceManager()->CreateGdiFont(fragment->fontStyle);
+							fonts.Add(fragmentFingerPrint, fragment->fontObject);
+						}
+						else
+						{
+							fragment->fontObject=fonts.Values().Get(index);
 						}
 					}
+				}
+				{
+					Regex regexLine(L"\r\n");
+					Ptr<UniscribeLine> line;
+					FOREACH(Ptr<UniscribeFragment>, fragment, documentFragments)
 					{
-						Regex regexLine(L"\r\n");
-						Ptr<UniscribeLine> line;
-						FOREACH(Ptr<UniscribeFragment>, fragment, documentFragments)
+						if(fragment->element)
 						{
-							if(fragment->element)
+							if(!line)
 							{
+								line=new UniscribeLine;
+								lines.Add(line);
+							}
+							line->documentFragments.Add(fragment);
+						}
+						else
+						{
+							RegexMatch::List textLines;
+							regexLine.Split(fragment->text, true, textLines);
+
+							for(vint i=0;i<textLines.Count();i++)
+							{
+								WString text=textLines[i]->Result().Value();
+								if(i>0)
+								{
+									line=0;
+								}
 								if(!line)
 								{
 									line=new UniscribeLine;
 									lines.Add(line);
 								}
-								line->documentFragments.Add(fragment);
-							}
-							else
-							{
-								RegexMatch::List textLines;
-								regexLine.Split(fragment->text, true, textLines);
 
-								for(vint i=0;i<textLines.Count();i++)
+								if(textLines.Count()==1)
 								{
-									WString text=textLines[i]->Result().Value();
-									if(i>0)
-									{
-										line=0;
-									}
-									if(!line)
-									{
-										line=new UniscribeLine;
-										lines.Add(line);
-									}
-
-									if(textLines.Count()==1)
-									{
-										line->documentFragments.Add(fragment);
-									}
-									else
-									{
-										Ptr<UniscribeFragment> runFragment=fragment->Copy();
-										runFragment->text=text;
-										line->documentFragments.Add(runFragment);
-									}
+									line->documentFragments.Add(fragment);
+								}
+								else
+								{
+									Ptr<UniscribeFragment> runFragment=fragment->Copy();
+									runFragment->text=text;
+									line->documentFragments.Add(runFragment);
 								}
 							}
 						}
 					}
-
-					FOREACH(Ptr<UniscribeLine>, line, lines)
-					{
-						line->BuildUniscribeData(dc);
-					}
-
-					vint lineStart=0;
-					FOREACH(Ptr<UniscribeLine>, line, lines)
-					{
-						line->start=lineStart;
-						lineStart+=line->lineText.Length()+2;
-					}
 				}
+
+				FOREACH(Ptr<UniscribeLine>, line, lines)
+				{
+					line->BuildUniscribeData(dc);
+				}
+
+				vint lineStart=0;
+				FOREACH(Ptr<UniscribeLine>, line, lines)
+				{
+					line->start=lineStart;
+					lineStart+=line->lineText.Length()+2;
+				}
+
+				return true;
 			}
 
 			void UniscribeParagraph::Layout(vint availableWidth, Alignment alignment)
