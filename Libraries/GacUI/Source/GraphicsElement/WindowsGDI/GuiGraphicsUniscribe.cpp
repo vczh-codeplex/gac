@@ -2124,6 +2124,7 @@ UniscribeParagraph (Caret)
 							{
 								virtualLineIndex--;
 							}
+							preferFrontSide=true;
 							return GetCaretFromXWithLine(bounds.x1, frontLine, virtualLineIndex);
 						}
 					}
@@ -2143,6 +2144,7 @@ UniscribeParagraph (Caret)
 							{
 								virtualLineIndex++;
 							}
+							preferFrontSide=false;
 							return GetCaretFromXWithLine(bounds.x1, frontLine, virtualLineIndex);
 						}
 					}
