@@ -634,6 +634,19 @@ WindowsDirect2DParagraph (Caret)
 					if(position==CaretFirst) return 0;
 					if(position==CaretLast) return paragraphText.Length();
 					if(!IsValidCaret(comparingCaret)) return -1;
+
+					if(position==CaretMoveLeft)
+					{
+						if(comparingCaret==0) return 0;
+						return hitTestMetrics[charHitTestMap[comparingCaret-1]].textPosition;
+					}
+					if(position==CaretMoveRight)
+					{
+						if(comparingCaret==paragraphText.Length()) return paragraphText.Length();
+						vint index=charHitTestMap[comparingCaret];
+						if(index==hitTestMetrics.Count()-1) return paragraphText.Length();
+						return hitTestMetrics[index+1].textPosition;
+					}
 					throw 0;
 				}
 
@@ -641,6 +654,8 @@ WindowsDirect2DParagraph (Caret)
 				{
 					PrepareFormatData();
 					if(!IsValidCaret(caret)) return Rect();
+
+					if(paragraphText.Length()==0) return Rect(Point(0, 0), Size(0, GetHeight()));
 
 					if(caret==0)
 					{
