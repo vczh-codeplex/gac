@@ -45,7 +45,7 @@ GuiDocumentCommonInterface
 				EditMode									editMode;
 				GuiControl*									senderControl;
 
-				void										Move(TextPos caret, bool shift);
+				void										Move(TextPos caret, bool shift, bool frontSide);
 				bool										ProcessKey(vint code, bool shift, bool ctrl);
 				void										InstallDocumentViewer(GuiControl* _sender, compositions::GuiGraphicsComposition* _container);
 				void										SetActiveHyperlinkId(vint value);

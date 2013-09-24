@@ -2066,7 +2066,7 @@ UniscribeParagraph (Caret Helper)
 UniscribeParagraph (Caret)
 ***********************************************************************/
 
-			vint UniscribeParagraph::GetCaret(vint comparingCaret, IGuiGraphicsParagraph::CaretRelativePosition position, bool preferFrontSide)
+			vint UniscribeParagraph::GetCaret(vint comparingCaret, IGuiGraphicsParagraph::CaretRelativePosition position, bool& preferFrontSide)
 			{
 				if(position==IGuiGraphicsParagraph::CaretFirst) return 0;
 				if(position==IGuiGraphicsParagraph::CaretLast) return paragraphText.Length();
