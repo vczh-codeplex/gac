@@ -1278,31 +1278,26 @@ GuiDocumentElement::GuiDocumentElementRenderer
 					{
 					case IGuiGraphicsParagraph::CaretFirst:
 						{
-							preferFrontSide=false;
 							vint caret=cache->graphicsParagraph->GetCaret(0, IGuiGraphicsParagraph::CaretFirst, preferFrontSide);
 							return TextPos(comparingCaret.row, caret);
 						}
 					case IGuiGraphicsParagraph::CaretLast:
 						{
-							preferFrontSide=true;
 							vint caret=cache->graphicsParagraph->GetCaret(0, IGuiGraphicsParagraph::CaretLast, preferFrontSide);
 							return TextPos(comparingCaret.row, caret);
 						}
 					case IGuiGraphicsParagraph::CaretLineFirst:
 						{
-							preferFrontSide=false;
 							vint caret=cache->graphicsParagraph->GetCaret(comparingCaret.column, IGuiGraphicsParagraph::CaretLineFirst, preferFrontSide);
 							return TextPos(comparingCaret.row, caret);
 						}
 					case IGuiGraphicsParagraph::CaretLineLast:
 						{
-							preferFrontSide=true;
 							vint caret=cache->graphicsParagraph->GetCaret(comparingCaret.column, IGuiGraphicsParagraph::CaretLineLast, preferFrontSide);
 							return TextPos(comparingCaret.row, caret);
 						}
 					case IGuiGraphicsParagraph::CaretMoveUp:
 						{
-							preferFrontSide=false;
 							vint caret=cache->graphicsParagraph->GetCaret(comparingCaret.column, IGuiGraphicsParagraph::CaretMoveUp, preferFrontSide);
 							if(caret==comparingCaret.column && comparingCaret.row>0)
 							{
@@ -1310,7 +1305,6 @@ GuiDocumentElement::GuiDocumentElementRenderer
 								Ptr<ParagraphCache> anotherCache=EnsureAndGetCache(comparingCaret.row-1);
 								vint height=anotherCache->graphicsParagraph->GetHeight();
 								caret=anotherCache->graphicsParagraph->GetCaretFromPoint(Point(caretBounds.x1, height));
-								preferFrontSide=false;
 								return TextPos(comparingCaret.row-1, caret);
 							}
 							else
@@ -1320,14 +1314,12 @@ GuiDocumentElement::GuiDocumentElementRenderer
 						}
 					case IGuiGraphicsParagraph::CaretMoveDown:
 						{
-							preferFrontSide=true;
 							vint caret=cache->graphicsParagraph->GetCaret(comparingCaret.column, IGuiGraphicsParagraph::CaretMoveDown, preferFrontSide);
 							if(caret==comparingCaret.column && comparingCaret.row<paragraphCaches.Count()-1)
 							{
 								Rect caretBounds=cache->graphicsParagraph->GetCaretBounds(comparingCaret.column, true);
 								Ptr<ParagraphCache> anotherCache=EnsureAndGetCache(comparingCaret.row+1);
 								caret=anotherCache->graphicsParagraph->GetCaretFromPoint(Point(caretBounds.x1, 0));
-								preferFrontSide=true;
 								return TextPos(comparingCaret.row+1, caret);
 							}
 							else
@@ -1337,12 +1329,10 @@ GuiDocumentElement::GuiDocumentElementRenderer
 						}
 					case IGuiGraphicsParagraph::CaretMoveLeft:
 						{
-							preferFrontSide=false;
 							vint caret=cache->graphicsParagraph->GetCaret(comparingCaret.column, IGuiGraphicsParagraph::CaretMoveLeft, preferFrontSide);
 							if(caret==comparingCaret.column && comparingCaret.row>0)
 							{
 								Ptr<ParagraphCache> anotherCache=EnsureAndGetCache(comparingCaret.row-1);
-								preferFrontSide=true;
 								caret=anotherCache->graphicsParagraph->GetCaret(0, IGuiGraphicsParagraph::CaretLast, preferFrontSide);
 								return TextPos(comparingCaret.row-1, caret);
 							}
@@ -1353,12 +1343,10 @@ GuiDocumentElement::GuiDocumentElementRenderer
 						}
 					case IGuiGraphicsParagraph::CaretMoveRight:
 						{
-							preferFrontSide=true;
 							vint caret=cache->graphicsParagraph->GetCaret(comparingCaret.column, IGuiGraphicsParagraph::CaretMoveRight, preferFrontSide);
 							if(caret==comparingCaret.column && comparingCaret.row<paragraphCaches.Count()-1)
 							{
 								Ptr<ParagraphCache> anotherCache=EnsureAndGetCache(comparingCaret.row+1);
-								preferFrontSide=false;
 								caret=anotherCache->graphicsParagraph->GetCaret(0, IGuiGraphicsParagraph::CaretFirst, preferFrontSide);
 								return TextPos(comparingCaret.row+1, caret);
 							}
@@ -1425,6 +1413,11 @@ GuiDocumentElement
 			TextPos GuiDocumentElement::GetCaretEnd()
 			{
 				return caretEnd;
+			}
+
+			bool GuiDocumentElement::IsCaretEndPreferFrontSide()
+			{
+				return caretFrontSide;
 			}
 
 			void GuiDocumentElement::SetCaret(TextPos begin, TextPos end, bool frontSide)

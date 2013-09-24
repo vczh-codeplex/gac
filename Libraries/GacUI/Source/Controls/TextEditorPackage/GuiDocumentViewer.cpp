@@ -20,14 +20,14 @@ GuiDocumentViewer
 				
 				TextPos newBegin=shift?begin:caret;
 				TextPos newEnd=caret;
-				documentElement->SetCaret(newBegin, newEnd, end<caret);
+				documentElement->SetCaret(newBegin, newEnd, frontSide);
 				documentElement->SetCaretVisible(true);
 			}
 
 			bool GuiDocumentCommonInterface::ProcessKey(vint code, bool shift, bool ctrl)
 			{
 				TextPos currentCaret=documentElement->GetCaretEnd();
-				bool frontSide=false;
+				bool frontSide=documentElement->IsCaretEndPreferFrontSide();
 				switch(code)
 				{
 				case VKEY_UP:

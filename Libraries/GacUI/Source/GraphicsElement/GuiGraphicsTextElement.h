@@ -647,6 +647,11 @@ Rich Content Document (element)
 				/// <returns>The end position of the selection area.</returns>
 				TextPos										GetCaretEnd();
 				/// <summary>
+				/// Get the prefer side for the caret.
+				/// </summary>
+				/// <returns>Returns true if the caret is rendered for the front side.</returns>
+				bool										IsCaretEndPreferFrontSide();
+				/// <summary>
 				/// Set the end position of the selection area.
 				/// </summary>
 				/// <param name="begin">The begin position of the selection area.</param>
@@ -678,7 +683,7 @@ Rich Content Document (element)
 				/// <returns>The calculated caret.</returns>
 				/// <param name="comparingCaret">The comparing caret.</param>
 				/// <param name="position">The relative position.</param>
-				/// <param name="preferFrontSide">Retrive the suggested side for the new caret. If the return caret equals compareCaret, this output is ignored.</param>
+				/// <param name="preferFrontSide">Specify the side for the comparingCaret. Retrive the suggested side for the new caret. If the return caret equals compareCaret, this output is ignored.</param>
 				TextPos										CalculateCaret(TextPos comparingCaret, IGuiGraphicsParagraph::CaretRelativePosition position, bool& preferFrontSide);
 
 				/// <summary>Get the caret.</summary>
