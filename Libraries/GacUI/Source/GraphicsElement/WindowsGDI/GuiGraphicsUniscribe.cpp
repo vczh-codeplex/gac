@@ -987,7 +987,7 @@ UniscribeLine
 								vint end=runIndex==lastRun?lastRunOffset:run->length;
 								vint length=end-start;
 
-								if(startRunFragmentCount==-1)
+								if(runIndex==startRun)
 								{
 									startRunFragmentCount=run->fragmentBounds.Count();
 								}
