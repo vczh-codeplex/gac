@@ -689,7 +689,22 @@ WindowsDirect2DParagraph (Caret)
 				{
 					PrepareFormatData();
 					if(!IsValidTextPos(textPos)) return -1;
-					throw 0;
+					if(textPos==0 || textPos==paragraphText.Length()) return textPos;
+				
+					vint index=charHitTestMap[textPos];
+					DWRITE_HIT_TEST_METRICS& hitTest=hitTestMetrics[index];
+					if(hitTest.textPosition==textPos)
+					{
+						return textPos;
+					}
+					else if(frontSide)
+					{
+						return hitTest.textPosition;
+					}
+					else
+					{
+						return hitTest.textPosition+hitTest.length;
+					}
 				}
 
 				bool IsValidCaret(vint caret)override
