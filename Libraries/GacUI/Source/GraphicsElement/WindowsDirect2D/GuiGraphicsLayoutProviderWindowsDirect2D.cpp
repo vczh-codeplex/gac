@@ -176,12 +176,61 @@ WindowsDirect2DParagraph
 				ID2D1SolidColorBrush*				caretBrush;
 
 				bool								formatDataAvailable;
+				Array<DWRITE_LINE_METRICS>			lineMetrics;
+				Array<DWRITE_CLUSTER_METRICS>		clusterMetrics;
+				Array<DWRITE_HIT_TEST_METRICS>		hitTestMetrics;
+				Array<vint>							charHitTestMap;
+
+/***********************************************************************
+WindowsDirect2DParagraph (Initialization)
+***********************************************************************/
 
 				void PrepareFormatData()
 				{
 					if(!formatDataAvailable)
 					{
 						formatDataAvailable=true;
+						{
+							UINT32 lineCount=0;
+							textLayout->GetLineMetrics(NULL, 0, &lineCount);
+							lineMetrics.Resize(lineCount);
+							if(lineCount>0)
+							{
+								textLayout->GetLineMetrics(&lineMetrics[0], lineCount, &lineCount);
+							}
+						}
+						{
+							UINT32 clusterCount=0;
+							textLayout->GetClusterMetrics(NULL, 0, &clusterCount);
+							clusterMetrics.Resize(clusterCount);
+							if(clusterCount>0)
+							{
+								textLayout->GetClusterMetrics(&clusterMetrics[0], clusterCount, &clusterCount);
+							}
+						}
+						{
+							vint textPos=0;
+							hitTestMetrics.Resize(clusterMetrics.Count());
+							for(vint i=0;i<hitTestMetrics.Count();i++)
+							{
+								FLOAT x=0;
+								FLOAT y=0;
+								DWRITE_HIT_TEST_METRICS& metrics=hitTestMetrics[i];
+								textLayout->HitTestTextPosition(textPos, FALSE, &x, &y, &metrics);
+								textPos+=metrics.length;
+							}
+						}
+						{
+							charHitTestMap.Resize(paragraphText.Length());
+							for(vint i=0;i<hitTestMetrics.Count();i++)
+							{
+								DWRITE_HIT_TEST_METRICS& metrics=hitTestMetrics[i];
+								for(UINT32 j=0;j<metrics.length;j++)
+								{
+									charHitTestMap[metrics.textPosition+j]=i;
+								}
+							}
+						}
 					}
 				}
 			public:
@@ -239,6 +288,10 @@ WindowsDirect2DParagraph
 				{
 					return renderTarget;
 				}
+
+/***********************************************************************
+WindowsDirect2DParagraph (Formatting)
+***********************************************************************/
 
 				bool GetWrapLine()override
 				{
@@ -519,6 +572,10 @@ WindowsDirect2DParagraph
 					return (vint)metrics.height;
 				}
 
+/***********************************************************************
+WindowsDirect2DParagraph (Rendering)
+***********************************************************************/
+
 				bool OpenCaret(vint _caret, Color _color, bool _frontSide)override
 				{
 					if(!IsValidCaret(_caret)) return false;
@@ -567,16 +624,59 @@ WindowsDirect2DParagraph
 					}
 				}
 
+/***********************************************************************
+WindowsDirect2DParagraph (Caret)
+***********************************************************************/
+
 				vint GetCaret(vint comparingCaret, CaretRelativePosition position, bool& preferFrontSide)override
 				{
 					PrepareFormatData();
+					if(position==CaretFirst) return 0;
+					if(position==CaretLast) return paragraphText.Length();
+					if(!IsValidCaret(comparingCaret)) return -1;
 					throw 0;
 				}
 
 				Rect GetCaretBounds(vint caret, bool frontSide)override
 				{
 					PrepareFormatData();
-					throw 0;
+					if(!IsValidCaret(caret)) return Rect();
+
+					if(caret==0)
+					{
+						frontSide=false;
+					}
+					else if(caret==paragraphText.Length())
+					{
+						frontSide=true;
+					}
+					if(frontSide)
+					{
+						caret--;
+					}
+
+					vint index=charHitTestMap[caret];
+					DWRITE_HIT_TEST_METRICS& hitTest=hitTestMetrics[index];
+					DWRITE_CLUSTER_METRICS& cluster=clusterMetrics[index];
+					if(cluster.isRightToLeft)
+					{
+						frontSide=!frontSide;
+					}
+
+					if(frontSide)
+					{
+						return Rect(
+							Point((vint)(hitTest.left+hitTest.width), (vint)hitTest.top),
+							Size(0, (vint)hitTest.height)
+							);
+					}
+					else
+					{
+						return Rect(
+							Point((vint)hitTest.left, (vint)hitTest.top),
+							Size(0, (vint)hitTest.height)
+							);
+					}
 				}
 
 				vint GetCaretFromPoint(Point point)override
@@ -588,13 +688,17 @@ WindowsDirect2DParagraph
 				vint GetNearestCaretFromTextPos(vint textPos, bool frontSide)override
 				{
 					PrepareFormatData();
+					if(!IsValidTextPos(textPos)) return -1;
 					throw 0;
 				}
 
 				bool IsValidCaret(vint caret)override
 				{
 					PrepareFormatData();
-					throw 0;
+					if(!IsValidTextPos(caret)) return false;
+					if(caret==0 || caret==paragraphText.Length()) return true;
+					if(hitTestMetrics[charHitTestMap[caret]].textPosition==caret) return true;
+					return false;
 				}
 
 				bool IsValidTextPos(vint textPos)

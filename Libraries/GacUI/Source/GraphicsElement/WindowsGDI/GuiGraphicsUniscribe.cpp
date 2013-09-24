@@ -1282,7 +1282,7 @@ UniscribeParagraph (Initialization)
 			}
 
 /***********************************************************************
-UniscribeParagraph (Format)
+UniscribeParagraph (Formatting)
 ***********************************************************************/
 
 			void UniscribeParagraph::SearchFragment(vint start, vint length, vint& fs, vint& ss, vint& fe, vint& se)
