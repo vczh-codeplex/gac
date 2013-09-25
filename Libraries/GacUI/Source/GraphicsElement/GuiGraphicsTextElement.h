@@ -625,6 +625,7 @@ Rich Content Document (element)
 					void									SetSelection(TextPos begin, TextPos end);
 					TextPos									CalculateCaret(TextPos comparingCaret, IGuiGraphicsParagraph::CaretRelativePosition position, bool& preferFrontSide);
 					TextPos									CalculateCaretFromPoint(Point point);
+					Rect									GetCaretBounds(TextPos caret, bool frontSide);
 				};
 
 			protected:
@@ -700,6 +701,11 @@ Rich Content Document (element)
 				/// <returns>The calculated caret.</returns>
 				/// <param name="point">The specified point.</param>
 				TextPos										CalculateCaretFromPoint(Point point);
+				/// <summary>Get the bounds of a caret.</summary>
+				/// <returns>The bounds.</returns>
+				/// <param name="caret">The caret.</param>
+				/// <param name="frontSide">Set to true to get the bounds for the character before it.</param>
+				Rect										GetCaretBounds(TextPos caret, bool frontSide);
 
 				/// <summary>Get the caret.</summary>
 				/// <summary>Notify that a specified paragraph is updated.</summary>

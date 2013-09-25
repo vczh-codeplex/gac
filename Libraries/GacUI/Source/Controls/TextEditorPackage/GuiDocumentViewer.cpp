@@ -22,6 +22,14 @@ GuiDocumentViewer
 				TextPos newEnd=caret;
 				documentElement->SetCaret(newBegin, newEnd, frontSide);
 				documentElement->SetCaretVisible(true);
+
+				Rect bounds=documentElement->GetCaretBounds(newEnd, frontSide);
+				if(bounds!=Rect())
+				{
+					bounds.x1-=5;
+					bounds.x2+=5;
+					EnsureRectVisible(bounds);
+				}
 			}
 
 			bool GuiDocumentCommonInterface::ProcessKey(vint code, bool shift, bool ctrl)
@@ -257,6 +265,10 @@ GuiDocumentViewer
 				SetActiveHyperlinkId(DocumentRun::NullHyperlinkId);
 			}
 
+			void GuiDocumentCommonInterface::EnsureRectVisible(Rect bounds)
+			{
+			}
+
 			GuiDocumentCommonInterface::GuiDocumentCommonInterface()
 				:documentElement(0)
 				,documentComposition(0)
@@ -325,6 +337,22 @@ GuiDocumentViewer
 /***********************************************************************
 GuiDocumentViewer
 ***********************************************************************/
+
+			void GuiDocumentViewer::EnsureRectVisible(Rect bounds)
+			{
+				Rect viewBounds=GetViewBounds();
+				vint offset=0;
+				if(bounds.y1<viewBounds.y1)
+				{
+					offset=bounds.y1-viewBounds.y1;
+				}
+				else if(bounds.y2>viewBounds.y2)
+				{
+					offset=bounds.y2-viewBounds.y2;
+				}
+
+				GetVerticalScroll()->SetPosition(viewBounds.y1+offset);
+			}
 
 			GuiDocumentViewer::GuiDocumentViewer(GuiDocumentViewer::IStyleProvider* styleProvider)
 				:GuiScrollContainer(styleProvider)
