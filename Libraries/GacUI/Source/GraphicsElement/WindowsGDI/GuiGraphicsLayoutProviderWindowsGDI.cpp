@@ -249,7 +249,8 @@ WindowsGDIParagraph
 				void Render(Rect bounds)override
 				{
 					PrepareUniscribeData();
-					paragraph->Render(renderTarget->GetDC(), bounds.Left(), bounds.Top());
+					paragraph->Render(renderTarget->GetDC(), bounds.Left(), bounds.Top(), true);
+					paragraph->Render(renderTarget->GetDC(), bounds.Left(), bounds.Top(), false);
 					if(caret!=-1)
 					{
 						Rect caretBounds=GetCaretBounds(caret, caretFrontSide);
