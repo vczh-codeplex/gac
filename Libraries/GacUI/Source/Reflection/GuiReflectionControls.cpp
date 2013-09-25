@@ -1198,6 +1198,7 @@ Type Declaration
 
 			BEGIN_CLASS_MEMBER(GuiDocumentCommonInterface)
 				CLASS_MEMBER_PROPERTY_FAST(Document)
+				CLASS_MEMBER_PROPERTY_FAST(EditMode)
 
 				CLASS_MEMBER_GUIEVENT(ActiveHyperlinkChanged)
 				CLASS_MEMBER_GUIEVENT(ActiveHyperlinkExecuted)
@@ -1207,6 +1208,13 @@ Type Declaration
 
 				CLASS_MEMBER_METHOD(NotifyParagraphUpdated, {L"index"})
 			END_CLASS_MEMBER(GuiDocumentCommonInterface)
+
+			BEGIN_ENUM_ITEM(GuiDocumentCommonInterface::EditMode)
+				ENUM_ITEM_NAMESPACE(GuiDocumentCommonInterface)
+				ENUM_NAMESPACE_ITEM(ViewOnly)
+				ENUM_NAMESPACE_ITEM(Selectable)
+				ENUM_NAMESPACE_ITEM(Editable)
+			END_ENUM_ITEM(GuiDocumentCommonInterface::EditMode)
 
 			BEGIN_CLASS_MEMBER(GuiDocumentViewer)
 				CLASS_MEMBER_BASE(GuiScrollContainer)

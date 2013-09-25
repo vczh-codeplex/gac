@@ -33,6 +33,22 @@ Type Declaration
 
 #define _ ,
 
+			BEGIN_CLASS_MEMBER(IGuiGraphicsParagraph)
+				CLASS_MEMBER_BASE(IDescriptable)
+			END_CLASS_MEMBER(IGuiGraphicsParagraph)
+
+			BEGIN_ENUM_ITEM(IGuiGraphicsParagraph::CaretRelativePosition)
+				ENUM_ITEM_NAMESPACE(IGuiGraphicsParagraph)
+				ENUM_NAMESPACE_ITEM(CaretFirst)
+				ENUM_NAMESPACE_ITEM(CaretLast)
+				ENUM_NAMESPACE_ITEM(CaretLineFirst)
+				ENUM_NAMESPACE_ITEM(CaretLineLast)
+				ENUM_NAMESPACE_ITEM(CaretMoveLeft)
+				ENUM_NAMESPACE_ITEM(CaretMoveRight)
+				ENUM_NAMESPACE_ITEM(CaretMoveUp)
+				ENUM_NAMESPACE_ITEM(CaretMoveDown)
+			END_ENUM_ITEM(IGuiGraphicsParagraph::CaretRelativePosition)
+
 			BEGIN_ENUM_ITEM(ElementShape)
 				ENUM_CLASS_ITEM(Rectangle)
 				ENUM_CLASS_ITEM(Ellipse)
@@ -211,6 +227,16 @@ Type Declaration
 				CLASS_MEMBER_EXTERNALCTOR(Ptr<GuiDocumentElement>(), NO_PARAMETER, &Element_Constructor<GuiDocumentElement>)
 
 				CLASS_MEMBER_PROPERTY_FAST(Document)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(CaretBegin)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(CaretEnd)
+				CLASS_MEMBER_PROPERTY_FAST(CaretVisible)
+				CLASS_MEMBER_PROPERTY_FAST(CaretColor)
+
+				CLASS_MEMBER_METHOD(IsCaretEndPreferFrontSide, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(SetCaret, {L"begin" _ L"end" _ L"frontSide"})
+				CLASS_MEMBER_METHOD(CalculateCaret, {L"comparingCaret" _ L"position" _ L"preferFrontSide"})
+				CLASS_MEMBER_METHOD(GetCaretBounds, {L"caret" _ L"frontSide"})
+				CLASS_MEMBER_METHOD(SetCaret, {L"point"})
 				CLASS_MEMBER_METHOD(NotifyParagraphUpdated, {L"index"})
 				CLASS_MEMBER_METHOD(GetHyperlinkIdFromPoint, {L"point"})
 				CLASS_MEMBER_METHOD(ActivateHyperlink, {L"hyperlinkId" _ L"active"})

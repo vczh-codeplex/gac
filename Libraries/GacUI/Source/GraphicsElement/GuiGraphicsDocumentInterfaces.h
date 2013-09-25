@@ -28,7 +28,7 @@ Layout Engine
 			class IGuiGraphicsLayoutProvider;
 
 			/// <summary>Represents a paragraph of a layouted rich text content.</summary>
-			class IGuiGraphicsParagraph : public Interface
+			class IGuiGraphicsParagraph : public IDescriptable, public Description<IGuiGraphicsParagraph>
 			{
 			public:
 				static const vint		NullInteractionId = -1;
@@ -223,7 +223,7 @@ Layout Engine
 			};
 
 			/// <summary>Renderer awared rich text document layout engine provider interface.</summary>
-			class IGuiGraphicsLayoutProvider : public Interface
+			class IGuiGraphicsLayoutProvider : public IDescriptable, public Description<IGuiGraphicsLayoutProvider>
 			{
 			public:
 				/// <summary>Create a paragraph with internal renderer device dependent objects initialized.</summary>
