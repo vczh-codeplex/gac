@@ -122,7 +122,7 @@ UniscribeRun
 				virtual vint					SumWidth(vint charStart, vint charLength)=0;
 				virtual vint					SumHeight()=0;
 				virtual void					SearchForLineBreak(vint tempStart, vint maxWidth, bool firstRun, vint& charLength, vint& charAdvances)=0;
-				virtual void					Render(WinDC* dc, vint fragmentBoundsIndex, vint offsetX, vint offsetY)=0;
+				virtual void					Render(WinDC* dc, vint fragmentBoundsIndex, vint offsetX, vint offsetY, bool renderBackground)=0;
 				virtual bool					HitTestPoint(Point point, vint& start, vint& length, vint& interactionId);
 			};
 
@@ -138,7 +138,7 @@ UniscribeTextRun
 				vint							advance;
 				UniscribeGlyphData				wholeGlyph;
 				//***************************** Uniscribe Data (Font Fallback)
-				SCRIPT_STRING_ANALYSIS			ssa;
+				//SCRIPT_STRING_ANALYSIS		ssa;
 
 				UniscribeTextRun();
 				~UniscribeTextRun();
@@ -149,7 +149,7 @@ UniscribeTextRun
 				vint							SumWidth(vint charStart, vint charLength)override;
 				vint							SumHeight()override;
 				void							SearchForLineBreak(vint tempStart, vint maxWidth, bool firstRun, vint& charLength, vint& charAdvances)override;
-				void							Render(WinDC* dc, vint fragmentBoundsIndex, vint offsetX, vint offsetY)override;
+				void							Render(WinDC* dc, vint fragmentBoundsIndex, vint offsetX, vint offsetY, bool renderBackground)override;
 			};
 
 /***********************************************************************
@@ -170,7 +170,7 @@ UniscribeElementRun
 				vint							SumWidth(vint charStart, vint charLength)override;
 				vint							SumHeight()override;
 				void							SearchForLineBreak(vint tempStart, vint maxWidth, bool firstRun, vint& charLength, vint& charAdvances)override;
-				void							Render(WinDC* dc, vint fragmentBoundsIndex, vint offsetX, vint offsetY)override;
+				void							Render(WinDC* dc, vint fragmentBoundsIndex, vint offsetX, vint offsetY, bool renderBackground)override;
 			};
 
 /***********************************************************************
@@ -217,7 +217,7 @@ UniscribeLine
 				void							ClearUniscribeData();
 				bool							BuildUniscribeData(WinDC* dc);
 				void							Layout(vint availableWidth, Alignment alignment, vint top, vint& totalHeight);
-				void							Render(WinDC* dc, vint offsetX, vint offsetY);
+				void							Render(WinDC* dc, vint offsetX, vint offsetY, bool renderBackground);
 			};
 
 /***********************************************************************
@@ -244,7 +244,7 @@ UniscribeParagraph
 				void							ClearUniscribeData();
 				bool							BuildUniscribeData(WinDC* dc);
 				void							Layout(vint availableWidth, Alignment alignment);
-				void							Render(WinDC* dc, vint offsetX, vint offsetY);
+				void							Render(WinDC* dc, vint offsetX, vint offsetY, bool renderBackground);
 
 				void							SearchFragment(vint start, vint length, vint& fs, vint& ss, vint& fe, vint& se);
 				bool							CutFragment(vint fs, vint ss, vint fe, vint se, vint& f1, vint& f2);

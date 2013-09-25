@@ -376,7 +376,7 @@ UniscribeTextRun
 			UniscribeTextRun::UniscribeTextRun()
 				:scriptCache(0)
 				,advance(0)
-				,ssa(0)
+				//,ssa(0)
 			{
 			}
 
@@ -392,11 +392,11 @@ UniscribeTextRun
 					ScriptFreeCache(&scriptCache);
 					scriptCache=0;
 				}
-				if(ssa)
-				{
-					ScriptStringFree(&ssa);
-					ssa=0;
-				}
+				//if(ssa)
+				//{
+				//	ScriptStringFree(&ssa);
+				//	ssa=0;
+				//}
 				advance=0;
 				wholeGlyph.ClearUniscribeData(0, 0);
 			}
@@ -431,35 +431,34 @@ UniscribeTextRun
 					goto BUILD_UNISCRIBE_DATA_FAILED;
 				}
 
-				if(breakings.Count()==1 && !breakingAvailabilities[0])
-				{
-					BYTE charClass=0;
-					HRESULT hr=ScriptStringAnalyse(
-						dc->GetHandle(),
-						runText,
-						length,
-						(int)(1.5*length+16),
-						-1,
-						SSA_FALLBACK|SSA_GLYPHS|SSA_LINK|(scriptItem->IsRightToLeft()?SSA_RTL:0),
-						0,
-						NULL,
-						NULL,
-						NULL,
-						NULL,
-						&charClass,
-						&ssa
-						);
-					hr=E_FAIL;
-					if(hr==S_OK)
-					{
-						wholeGlyph.BuildUniscribeData(ssa, &scriptItem->scriptItem);
-					}
-					else if(ssa)
-					{
-						ScriptStringFree(&ssa);
-						ssa=0;
-					}
-				}
+				//if(breakings.Count()==1 && !breakingAvailabilities[0])
+				//{
+				//	BYTE charClass=0;
+				//	HRESULT hr=ScriptStringAnalyse(
+				//		dc->GetHandle(),
+				//		runText,
+				//		length,
+				//		(int)(1.5*length+16),
+				//		-1,
+				//		SSA_FALLBACK|SSA_GLYPHS|SSA_LINK|(scriptItem->IsRightToLeft()?SSA_RTL:0),
+				//		0,
+				//		NULL,
+				//		NULL,
+				//		NULL,
+				//		NULL,
+				//		&charClass,
+				//		&ssa
+				//		);
+				//	if(hr==S_OK)
+				//	{
+				//		wholeGlyph.BuildUniscribeData(ssa, &scriptItem->scriptItem);
+				//	}
+				//	else if(ssa)
+				//	{
+				//		ScriptStringFree(&ssa);
+				//		ssa=0;
+				//	}
+				//}
 				advance=wholeGlyph.runAbc.abcA+wholeGlyph.runAbc.abcB+wholeGlyph.runAbc.abcC;
 
 				return true;
@@ -557,93 +556,107 @@ UniscribeTextRun
 				}
 			}
 
-			void UniscribeTextRun::Render(WinDC* dc, vint fragmentBoundsIndex, vint offsetX, vint offsetY)
+			void UniscribeTextRun::Render(WinDC* dc, vint fragmentBoundsIndex, vint offsetX, vint offsetY, bool renderBackground)
 			{
-				Color fontColor=documentFragment->fontColor;
-				HFONT oldFont=0;
-				dc->SetFont(documentFragment->fontObject);
-				dc->SetTextColor(RGB(fontColor.r, fontColor.g, fontColor.b));
-
-				RunFragmentBounds fragment=fragmentBounds[fragmentBoundsIndex];
+				RunFragmentBounds& fragment=fragmentBounds[fragmentBoundsIndex];
 				if(fragment.length==0) return;
 				RECT rect;
 				rect.left=(int)(fragment.bounds.Left()+offsetX);
 				rect.top=(int)(fragment.bounds.Top()+offsetY);
-				rect.right=(int)(fragment.bounds.Right()+offsetX);
-				rect.bottom=(int)(fragment.bounds.Bottom()+offsetY);
+				rect.right=(int)(rect.left+fragment.bounds.Width());
+				rect.bottom=(int)(rect.top+fragment.bounds.Height()*1.5);
 
-				if(ssa)
+				if(renderBackground)
 				{
-					SCRIPT_STRING_ANALYSIS tempSsa=0;
-					BYTE charClass=0;
-					HRESULT hr=ScriptStringAnalyse(
-						dc->GetHandle(),
-						runText,
-						length,
-						(int)(1.5*length+16),
-						-1,
-						SSA_FALLBACK|SSA_GLYPHS|SSA_LINK|(scriptItem->IsRightToLeft()?SSA_RTL:0),
-						0,
-						NULL,
-						NULL,
-						NULL,
-						NULL,
-						&charClass,
-						&tempSsa
-						);
-					if(hr=S_OK)
+					Color backgroundColor=documentFragment->backgroundColor;
+
+					if(backgroundColor.a>0)
 					{
-						hr=ScriptStringOut(
-							tempSsa,
-							rect.left,
-							rect.top,
-							0,
-							NULL,
-							1,
-							0,
-							FALSE
-							);
-					}
-					if(tempSsa)
-					{
-						ScriptStringFree(&tempSsa);
+						Ptr<WinBrush> brush=new WinBrush(RGB(backgroundColor.r, backgroundColor.g, backgroundColor.b));
+						dc->SetBrush(brush);
+						dc->FillRect(rect);
 					}
 				}
 				else
 				{
-					vint cluster=0;
-					vint nextCluster=0;
-					SearchGlyphCluster(fragment.start, fragment.length, cluster, nextCluster);
+					Color fontColor=documentFragment->fontColor;
+					HFONT oldFont=0;
+					dc->SetFont(documentFragment->fontObject);
+					dc->SetTextColor(RGB(fontColor.r, fontColor.g, fontColor.b));
 
-					vint clusterStart=0;
-					vint clusterCount=0;
-					if(scriptItem->IsRightToLeft())
+					//if(ssa)
+					//{
+					//	SCRIPT_STRING_ANALYSIS tempSsa=0;
+					//	BYTE charClass=0;
+					//	HRESULT hr=ScriptStringAnalyse(
+					//		dc->GetHandle(),
+					//		runText,
+					//		length,
+					//		(int)(1.5*length+16),
+					//		-1,
+					//		SSA_FALLBACK|SSA_GLYPHS|SSA_LINK|(scriptItem->IsRightToLeft()?SSA_RTL:0),
+					//		0,
+					//		NULL,
+					//		NULL,
+					//		NULL,
+					//		NULL,
+					//		&charClass,
+					//		&tempSsa
+					//		);
+					//	if(hr=S_OK)
+					//	{
+					//		hr=ScriptStringOut(
+					//			tempSsa,
+					//			rect.left,
+					//			rect.top,
+					//			0,
+					//			NULL,
+					//			1,
+					//			0,
+					//			FALSE
+					//			);
+					//	}
+					//	if(tempSsa)
+					//	{
+					//		ScriptStringFree(&tempSsa);
+					//	}
+					//}
+					//else
 					{
-						clusterStart=nextCluster+1;
-						clusterCount=cluster-nextCluster;
-					}
-					else
-					{
-						clusterStart=cluster;
-						clusterCount=nextCluster-cluster;
-					}
+						vint cluster=0;
+						vint nextCluster=0;
+						SearchGlyphCluster(fragment.start, fragment.length, cluster, nextCluster);
 
-					HRESULT hr=ScriptTextOut(
-						dc->GetHandle(),
-						&scriptCache,
-						rect.left,
-						rect.top,
-						0,
-						&rect,
-						&wholeGlyph.sa,
-						NULL,
-						0,
-						&wholeGlyph.glyphs[clusterStart],
-						(int)(clusterCount),
-						&wholeGlyph.glyphAdvances[clusterStart],
-						NULL,
-						&wholeGlyph.glyphOffsets[clusterStart]
-						);
+						vint clusterStart=0;
+						vint clusterCount=0;
+						if(scriptItem->IsRightToLeft())
+						{
+							clusterStart=nextCluster+1;
+							clusterCount=cluster-nextCluster;
+						}
+						else
+						{
+							clusterStart=cluster;
+							clusterCount=nextCluster-cluster;
+						}
+
+						HRESULT hr=ScriptTextOut(
+							dc->GetHandle(),
+							&scriptCache,
+							rect.left,
+							rect.top,
+							0,
+							&rect,
+							&wholeGlyph.sa,
+							NULL,
+							0,
+							&wholeGlyph.glyphs[clusterStart],
+							(int)(clusterCount),
+							&wholeGlyph.glyphAdvances[clusterStart],
+							NULL,
+							&wholeGlyph.glyphOffsets[clusterStart]
+							);
+					}
 				}
 			}
 
@@ -681,17 +694,38 @@ UniscribeElementRun
 				charAdvances=properties.size.x;
 			}
 
-			void UniscribeElementRun::Render(WinDC* dc, vint fragmentBoundsIndex, vint offsetX, vint offsetY)
+			void UniscribeElementRun::Render(WinDC* dc, vint fragmentBoundsIndex, vint offsetX, vint offsetY, bool renderBackground)
 			{
-				Rect bounds=fragmentBounds[fragmentBoundsIndex].bounds;
-				bounds.x1+=offsetX;
-				bounds.x2+=offsetX;
-				bounds.y1+=offsetY;
-				bounds.y2+=offsetY;
-				IGuiGraphicsRenderer* renderer=element->GetRenderer();
-				if(renderer)
+				RunFragmentBounds& fragment=fragmentBounds[fragmentBoundsIndex];
+				if(renderBackground)
 				{
-					renderer->Render(bounds);
+					RECT rect;
+					rect.left=(int)(fragment.bounds.Left()+offsetX)-2;
+					rect.top=(int)(fragment.bounds.Top()+offsetY)-2;
+					rect.right=(int)(fragment.bounds.Right()+offsetX)+2;
+					rect.bottom=(int)(fragment.bounds.Bottom()+offsetY)+2;
+
+					Color backgroundColor=documentFragment->backgroundColor;
+
+					if(backgroundColor.a>0)
+					{
+						Ptr<WinBrush> brush=new WinBrush(RGB(backgroundColor.r, backgroundColor.g, backgroundColor.b));
+						dc->SetBrush(brush);
+						dc->FillRect(rect);
+					}
+				}
+				else
+				{
+					Rect bounds=fragment.bounds;
+					bounds.x1+=offsetX;
+					bounds.x2+=offsetX;
+					bounds.y1+=offsetY;
+					bounds.y2+=offsetY;
+					IGuiGraphicsRenderer* renderer=element->GetRenderer();
+					if(renderer)
+					{
+						renderer->Render(bounds);
+					}
 				}
 			}
 
@@ -1101,13 +1135,13 @@ UniscribeLine
 				totalHeight=cy;
 			}
 
-			void UniscribeLine::Render(WinDC* dc, vint offsetX, vint offsetY)
+			void UniscribeLine::Render(WinDC* dc, vint offsetX, vint offsetY, bool renderBackground)
 			{
 				FOREACH(Ptr<UniscribeRun>, run, scriptRuns)
 				{
 					for(vint i=0;i<run->fragmentBounds.Count();i++)
 					{
-						run->Render(dc, i, offsetX, offsetY);
+						run->Render(dc, i, offsetX, offsetY, renderBackground);
 					}
 				}
 			}
@@ -1273,11 +1307,11 @@ UniscribeParagraph (Initialization)
 				bounds=Rect(minX, minY, maxX, maxY+offsetY);
 			}
 
-			void UniscribeParagraph::Render(WinDC* dc, vint offsetX, vint offsetY)
+			void UniscribeParagraph::Render(WinDC* dc, vint offsetX, vint offsetY, bool renderBackground)
 			{
 				FOREACH(Ptr<UniscribeLine>, line, lines)
 				{
-					line->Render(dc, offsetX, offsetY);
+					line->Render(dc, offsetX, offsetY, renderBackground);
 				}
 			}
 
