@@ -200,6 +200,7 @@ UniscribeTextRun
 
 				void							ClearUniscribeData();
 				void							SearchSingleGlyphCluster(vint charStart, vint& charLength, vint& cluster, vint& nextCluster);
+				void							SearchSingleChar(vint charStart, vint& charLength, vint& cluster, vint& nextCluster);
 				void							SearchGlyphCluster(vint charStart, vint charLength, vint& cluster, vint& nextCluster);
 				bool							BuildUniscribeData(WinDC* dc, List<vint>& breakings)override;
 				vint							SumWidth(vint charStart, vint charLength)override;
