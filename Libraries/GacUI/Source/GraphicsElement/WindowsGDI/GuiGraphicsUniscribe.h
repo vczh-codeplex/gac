@@ -164,7 +164,8 @@ UniscribeRun
 				UniscribeFragment*				documentFragment;
 				UniscribeItem*					scriptItem;
 				//***************************** Uniscribe Data
-				vint							start;			// start from line
+				vint							startFromLine;
+				vint							startFromFragment;
 				vint							length;
 				const wchar_t*					runText;
 				//***************************** Layout Data
@@ -192,8 +193,6 @@ UniscribeTextRun
 				SCRIPT_CACHE					scriptCache;
 				vint							advance;
 				UniscribeGlyphData				wholeGlyph;
-				//***************************** Uniscribe Data (Font Fallback)
-				//SCRIPT_STRING_ANALYSIS		ssa;
 
 				UniscribeTextRun();
 				~UniscribeTextRun();

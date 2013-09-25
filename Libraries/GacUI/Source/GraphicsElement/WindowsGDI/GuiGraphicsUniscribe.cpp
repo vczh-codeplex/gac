@@ -435,7 +435,8 @@ UniscribeRun
 			UniscribeRun::UniscribeRun()
 				:documentFragment(0)
 				,scriptItem(0)
-				,start(0)
+				,startFromLine(0)
+				,startFromFragment(0)
 				,length(0)
 				,runText(0)
 			{
@@ -451,7 +452,7 @@ UniscribeRun
 				{
 					if(fragmentBounds[i].bounds.Contains(point))
 					{
-						start=this->start;
+						start=this->startFromLine;
 						length=this->length;
 						interactionId=this->documentFragment->interactionId;
 						return true;
@@ -467,7 +468,6 @@ UniscribeTextRun
 			UniscribeTextRun::UniscribeTextRun()
 				:scriptCache(0)
 				,advance(0)
-				//,ssa(0)
 			{
 			}
 
@@ -483,11 +483,6 @@ UniscribeTextRun
 					ScriptFreeCache(&scriptCache);
 					scriptCache=0;
 				}
-				//if(ssa)
-				//{
-				//	ScriptStringFree(&ssa);
-				//	ssa=0;
-				//}
 				advance=0;
 				wholeGlyph.ClearUniscribeData(0, 0);
 			}
@@ -524,31 +519,6 @@ UniscribeTextRun
 
 				//if(breakings.Count()==1 && !breakingAvailabilities[0])
 				//{
-				//	BYTE charClass=0;
-				//	HRESULT hr=ScriptStringAnalyse(
-				//		dc->GetHandle(),
-				//		runText,
-				//		length,
-				//		(int)(1.5*length+16),
-				//		-1,
-				//		SSA_FALLBACK|SSA_GLYPHS|SSA_LINK|(scriptItem->IsRightToLeft()?SSA_RTL:0),
-				//		0,
-				//		NULL,
-				//		NULL,
-				//		NULL,
-				//		NULL,
-				//		&charClass,
-				//		&ssa
-				//		);
-				//	if(hr==S_OK)
-				//	{
-				//		wholeGlyph.BuildUniscribeData(ssa, &scriptItem->scriptItem);
-				//	}
-				//	else if(ssa)
-				//	{
-				//		ScriptStringFree(&ssa);
-				//		ssa=0;
-				//	}
 				//}
 				advance=wholeGlyph.runAbc.abcA+wholeGlyph.runAbc.abcB+wholeGlyph.runAbc.abcC;
 
@@ -593,7 +563,7 @@ UniscribeTextRun
 				charAdvances=0;
 				for(vint i=tempStart;i<=length;)
 				{
-					if(i==length || scriptItem->charLogattrs[i+(start-scriptItem->start)].fSoftBreak==TRUE)
+					if(i==length || scriptItem->charLogattrs[i+(startFromLine-scriptItem->start)].fSoftBreak==TRUE)
 					{
 						if(width<=maxWidth || (firstRun && charLength==0))
 						{
@@ -659,14 +629,14 @@ UniscribeTextRun
 
 				if(renderBackground)
 				{
-					Color backgroundColor=documentFragment->backgroundColor;
+					//Color backgroundColor=documentFragment->backgroundColor;
 
-					if(backgroundColor.a>0)
-					{
-						Ptr<WinBrush> brush=new WinBrush(RGB(backgroundColor.r, backgroundColor.g, backgroundColor.b));
-						dc->SetBrush(brush);
-						dc->FillRect(rect);
-					}
+					//if(backgroundColor.a>0)
+					//{
+					//	Ptr<WinBrush> brush=new WinBrush(RGB(backgroundColor.r, backgroundColor.g, backgroundColor.b));
+					//	dc->SetBrush(brush);
+					//	dc->FillRect(rect);
+					//}
 				}
 				else
 				{
@@ -675,79 +645,39 @@ UniscribeTextRun
 					dc->SetFont(documentFragment->fontObject);
 					dc->SetTextColor(RGB(fontColor.r, fontColor.g, fontColor.b));
 
-					//if(ssa)
-					//{
-					//	SCRIPT_STRING_ANALYSIS tempSsa=0;
-					//	BYTE charClass=0;
-					//	HRESULT hr=ScriptStringAnalyse(
-					//		dc->GetHandle(),
-					//		runText,
-					//		length,
-					//		(int)(1.5*length+16),
-					//		-1,
-					//		SSA_FALLBACK|SSA_GLYPHS|SSA_LINK|(scriptItem->IsRightToLeft()?SSA_RTL:0),
-					//		0,
-					//		NULL,
-					//		NULL,
-					//		NULL,
-					//		NULL,
-					//		&charClass,
-					//		&tempSsa
-					//		);
-					//	if(hr=S_OK)
-					//	{
-					//		hr=ScriptStringOut(
-					//			tempSsa,
-					//			rect.left,
-					//			rect.top,
-					//			0,
-					//			NULL,
-					//			1,
-					//			0,
-					//			FALSE
-					//			);
-					//	}
-					//	if(tempSsa)
-					//	{
-					//		ScriptStringFree(&tempSsa);
-					//	}
-					//}
-					//else
+					vint cluster=0;
+					vint nextCluster=0;
+					SearchGlyphCluster(fragment.start, fragment.length, cluster, nextCluster);
+
+					vint clusterStart=0;
+					vint clusterCount=0;
+					if(scriptItem->IsRightToLeft())
 					{
-						vint cluster=0;
-						vint nextCluster=0;
-						SearchGlyphCluster(fragment.start, fragment.length, cluster, nextCluster);
-
-						vint clusterStart=0;
-						vint clusterCount=0;
-						if(scriptItem->IsRightToLeft())
-						{
-							clusterStart=nextCluster+1;
-							clusterCount=cluster-nextCluster;
-						}
-						else
-						{
-							clusterStart=cluster;
-							clusterCount=nextCluster-cluster;
-						}
-
-						HRESULT hr=ScriptTextOut(
-							dc->GetHandle(),
-							&scriptCache,
-							rect.left,
-							rect.top,
-							0,
-							&rect,
-							&wholeGlyph.sa,
-							NULL,
-							0,
-							&wholeGlyph.glyphs[clusterStart],
-							(int)(clusterCount),
-							&wholeGlyph.glyphAdvances[clusterStart],
-							NULL,
-							&wholeGlyph.glyphOffsets[clusterStart]
-							);
+						clusterStart=nextCluster+1;
+						clusterCount=cluster-nextCluster;
 					}
+					else
+					{
+						clusterStart=cluster;
+						clusterCount=nextCluster-cluster;
+					}
+
+					HRESULT hr=ScriptTextOut(
+						dc->GetHandle(),
+						&scriptCache,
+						rect.left,
+						rect.top,
+						0,
+						&rect,
+						&wholeGlyph.sa,
+						NULL,
+						0,
+						&wholeGlyph.glyphs[clusterStart],
+						(int)(clusterCount),
+						&wholeGlyph.glyphAdvances[clusterStart],
+						NULL,
+						&wholeGlyph.glyphOffsets[clusterStart]
+						);
 				}
 			}
 
@@ -951,7 +881,7 @@ UniscribeLine
 													Ptr<UniscribeElementRun> run=new UniscribeElementRun;
 													run->documentFragment=fragment;
 													run->scriptItem=scriptItem.Obj();
-													run->start=currentStart;
+													run->startFromLine=currentStart;
 													run->length=elementLength;
 													run->runText=lineText.Buffer()+currentStart;
 													run->element=elementFragment->element;
@@ -970,7 +900,7 @@ UniscribeLine
 									Ptr<UniscribeTextRun> run=new UniscribeTextRun;
 									run->documentFragment=fragment;
 									run->scriptItem=scriptItem.Obj();
-									run->start=currentStart;
+									run->startFromLine=currentStart;
 									run->length=shortLength;
 									run->runText=lineText.Buffer()+currentStart;
 									scriptRuns.Add(run);
@@ -1002,9 +932,10 @@ UniscribeLine
 										Ptr<UniscribeTextRun> newRun=new UniscribeTextRun;
 										newRun->documentFragment=run->documentFragment;
 										newRun->scriptItem=run->scriptItem;
-										newRun->start=start+run->start;
+										newRun->startFromLine=start+run->startFromLine;
+										newRun->startFromFragment=start+run->startFromFragment;
 										newRun->length=length;
-										newRun->runText=run->runText+newRun->start-run->start;
+										newRun->runText=run->runText+newRun->startFromLine-run->startFromLine;
 										scriptRuns.Insert(runIndex+i, newRun);
 									}
 									continue;
@@ -1169,8 +1100,8 @@ UniscribeLine
 								UniscribeRun::RunFragmentBounds& firstBounds=firstRun->fragmentBounds[virtualLine->firstRunBoundsIndex];
 								UniscribeRun::RunFragmentBounds& lastBounds=lastRun->fragmentBounds[virtualLine->lastRunBoundsIndex];
 								
-								virtualLine->start=firstRun->start+firstBounds.start;
-								virtualLine->length=lastRun->start+lastBounds.start+lastBounds.length-virtualLine->start;
+								virtualLine->start=firstRun->startFromLine+firstBounds.start;
+								virtualLine->length=lastRun->startFromLine+lastBounds.start+lastBounds.length-virtualLine->start;
 								virtualLine->runText=lineText.Buffer()+virtualLine->start;
 
 								bool updateBounds=false;
@@ -1909,7 +1840,7 @@ UniscribeParagraph (Caret Helper)
 							for(vint j=firstBounds;j<=lastBounds;j++)
 							{
 								UniscribeRun::RunFragmentBounds& bounds=run->fragmentBounds[j];
-								vint boundsStart=line->start+run->start+bounds.start;
+								vint boundsStart=line->start+run->startFromLine+bounds.start;
 								if(boundsStart==caret)
 								{
 									if(!frontSide || i==virtualLine->firstRunIndex && j==virtualLine->firstRunBoundsIndex)
@@ -1986,7 +1917,7 @@ UniscribeParagraph (Caret Helper)
 											accumulatedWidth+=glyphWidth;
 											lastRunChar=newLastRunChar;
 
-											if(line->start+run->start+lastRunChar==caret)
+											if(line->start+run->startFromLine+lastRunChar==caret)
 											{
 												vint x=0;
 												if(run->scriptItem->scriptItem.a.fRTL)
@@ -2070,11 +2001,11 @@ UniscribeParagraph (Caret Helper)
 								vint d2=x2-x;
 								if(d1<=d2)
 								{
-									return line->start+run->start+newLastRunChar;
+									return line->start+run->startFromLine+newLastRunChar;
 								}
 								else
 								{
-									return line->start+run->start+lastRunChar;
+									return line->start+run->startFromLine+lastRunChar;
 								}
 							}
 						}
@@ -2088,11 +2019,11 @@ UniscribeParagraph (Caret Helper)
 								vint d2=x2-x;
 								if(d1<=d2)
 								{
-									return line->start+run->start+lastRunChar;
+									return line->start+run->startFromLine+lastRunChar;
 								}
 								else
 								{
-									return line->start+run->start+newLastRunChar;
+									return line->start+run->startFromLine+newLastRunChar;
 								}
 							}
 						}
@@ -2138,11 +2069,11 @@ UniscribeParagraph (Caret Helper)
 							vint d2=bounds.x2-x;
 							if(d1<=d2)
 							{
-								return line->start+run->start;
+								return line->start+run->startFromLine;
 							}
 							else
 							{
-								return line->start+run->start+run->length;
+								return line->start+run->startFromLine+run->length;
 							}
 						}
 					}
