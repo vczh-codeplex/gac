@@ -153,6 +153,19 @@ WindowsGDIParagraph
 					}
 				}
 
+				bool SetBackgroundColor(vint start, vint length, Color value)override
+				{
+					if(length==0) return true;
+					if(0<=start && start<text.Length() && length>=0 && 0<=start+length && start+length<=text.Length())
+					{
+						return paragraph->SetBackgroundColor(start, length, value);
+					}
+					else
+					{
+						return false;
+					}
+				}
+
 				bool SetInlineObject(vint start, vint length, const InlineObjectProperties& properties, Ptr<IGuiGraphicsElement> value)override
 				{
 					if(length==0) return true;

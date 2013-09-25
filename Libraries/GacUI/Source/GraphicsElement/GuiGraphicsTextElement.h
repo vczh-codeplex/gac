@@ -582,8 +582,16 @@ Rich Content Document (element)
 				protected:
 					struct ParagraphCache
 					{
-						WString							fullText;
-						Ptr<IGuiGraphicsParagraph>		graphicsParagraph;
+						WString								fullText;
+						Ptr<IGuiGraphicsParagraph>			graphicsParagraph;
+						vint								selectionBegin;
+						vint								selectionEnd;
+
+						ParagraphCache()
+							:selectionBegin(-1)
+							,selectionEnd(-1)
+						{
+						}
 					};
 
 					typedef collections::Array<Ptr<ParagraphCache>>		ParagraphCacheArray;
@@ -602,7 +610,7 @@ Rich Content Document (element)
 					void									InitializeInternal();
 					void									FinalizeInternal();
 					void									RenderTargetChangedInternal(IGuiGraphicsRenderTarget* oldRenderTarget, IGuiGraphicsRenderTarget* newRenderTarget);
-					Ptr<ParagraphCache>						EnsureAndGetCache(vint paragraphIndex);
+					Ptr<ParagraphCache>						EnsureAndGetCache(vint paragraphIndex, bool createParagraph);
 					bool									GetParagraphIndexFromPoint(Point point, vint& top, vint& index);
 				public:
 					GuiDocumentElementRenderer();
@@ -614,6 +622,7 @@ Rich Content Document (element)
 					vint									GetHyperlinkIdFromPoint(Point point);
 					void									OpenCaret(TextPos caret, Color color, bool frontSide);
 					void									CloseCaret();
+					void									SetSelection(TextPos begin, TextPos end);
 					TextPos									CalculateCaret(TextPos comparingCaret, IGuiGraphicsParagraph::CaretRelativePosition position, bool& preferFrontSide);
 					TextPos									CalculateCaretFromPoint(Point point);
 				};

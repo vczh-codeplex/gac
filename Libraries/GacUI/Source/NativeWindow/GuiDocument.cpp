@@ -119,6 +119,10 @@ document_serialization_visitors::SerializeRunVisitor
 							{
 								writer.Attribute(L"color", sp->color.Value().ToString());
 							}
+							if(sp->backgroundColor)
+							{
+								writer.Attribute(L"bkcolor", sp->color.Value().ToString());
+							}
 							container=element;
 						}
 						if(sp->bold)
@@ -465,6 +469,10 @@ document_serialization_visitors::DeserializeNodeVisitor
 							{
 								sp->color=Color::Parse(TranslateAttribute(att->value.value));
 							}
+							else if(att->name.value==L"bkcolor")
+							{
+								sp->backgroundColor=Color::Parse(TranslateAttribute(att->value.value));
+							}
 						}
 						container->runs.Add(run);
 						createdContainer=run;
@@ -737,6 +745,12 @@ document_serialization_visitors::ActivateHyperlinkVisitor
 DocumentModel
 ***********************************************************************/
 
+		const wchar_t* DocumentModel::DefaultStyleName		= L"#Default";
+		const wchar_t* DocumentModel::SelectionStyleName	= L"#Selection";
+		const wchar_t* DocumentModel::ContextStyleName		= L"#Context";
+		const wchar_t* DocumentModel::NormalLinkStyleName	= L"#NormalLink";
+		const wchar_t* DocumentModel::ActiveLinkStyleName	= L"#ActiveLink";
+
 		DocumentModel::DocumentModel()
 		{
 			{
@@ -745,6 +759,7 @@ DocumentModel
 				sp->face=font.fontFamily;
 				sp->size=font.size;
 				sp->color=Color();
+				sp->backgroundColor=Color(0, 0, 0, 0);
 				sp->bold=font.bold;
 				sp->italic=font.italic;
 				sp->underline=font.underline;
@@ -755,6 +770,15 @@ DocumentModel
 				Ptr<DocumentStyle> style=new DocumentStyle;
 				style->styles=sp;
 				styles.Add(L"#Default", style);
+			}
+			{
+				Ptr<DocumentStyleProperties> sp=new DocumentStyleProperties;
+				sp->color=Color(255, 255, 255);
+				sp->backgroundColor=Color(51, 153, 255);
+
+				Ptr<DocumentStyle> style=new DocumentStyle;
+				style->styles=sp;
+				styles.Add(L"#Selection", style);
 			}
 			{
 				Ptr<DocumentStyleProperties> sp=new DocumentStyleProperties;
@@ -785,22 +809,23 @@ DocumentModel
 			}
 		}
 
-		DocumentModel::RawStylePair DocumentModel::GetStyle(Ptr<DocumentStyleProperties> sp, const RawStylePair& context)
+		DocumentModel::ResolvedStyle DocumentModel::GetStyle(Ptr<DocumentStyleProperties> sp, const ResolvedStyle& context)
 		{
 			FontProperties font;
-			font.fontFamily			=sp->face				?sp->face.Value()				:context.key.fontFamily;
-			font.size				=sp->size				?sp->size.Value()				:context.key.size;
-			font.bold				=sp->bold				?sp->bold.Value()				:context.key.bold;
-			font.italic				=sp->italic				?sp->italic.Value()				:context.key.italic;
-			font.underline			=sp->underline			?sp->underline.Value()			:context.key.underline;
-			font.strikeline			=sp->strikeline			?sp->strikeline.Value()			:context.key.strikeline;
-			font.antialias			=sp->antialias			?sp->antialias.Value()			:context.key.antialias;
-			font.verticalAntialias	=sp->verticalAntialias	?sp->verticalAntialias.Value()	:context.key.verticalAntialias;
-			Color color				=sp->color				?sp->color.Value()				:context.value;
-			return RawStylePair(font, color);
+			font.fontFamily			=sp->face				?sp->face.Value()				:context.style.fontFamily;
+			font.size				=sp->size				?sp->size.Value()				:context.style.size;
+			font.bold				=sp->bold				?sp->bold.Value()				:context.style.bold;
+			font.italic				=sp->italic				?sp->italic.Value()				:context.style.italic;
+			font.underline			=sp->underline			?sp->underline.Value()			:context.style.underline;
+			font.strikeline			=sp->strikeline			?sp->strikeline.Value()			:context.style.strikeline;
+			font.antialias			=sp->antialias			?sp->antialias.Value()			:context.style.antialias;
+			font.verticalAntialias	=sp->verticalAntialias	?sp->verticalAntialias.Value()	:context.style.verticalAntialias;
+			Color color				=sp->color				?sp->color.Value()				:context.color;
+			Color backgroundColor	=sp->backgroundColor	?sp->backgroundColor.Value()	:context.backgroundColor;
+			return ResolvedStyle(font, color, backgroundColor);
 		}
 
-		DocumentModel::RawStylePair DocumentModel::GetStyle(const WString& styleName, const RawStylePair& context)
+		DocumentModel::ResolvedStyle DocumentModel::GetStyle(const WString& styleName, const ResolvedStyle& context)
 		{
 			Ptr<DocumentStyle> selectedStyle;
 			{
@@ -833,6 +858,7 @@ DocumentModel
 					if(!sp->face				&& csp->face)				sp->face				=csp->face;
 					if(!sp->size				&& csp->size)				sp->size				=csp->size;
 					if(!sp->color				&& csp->color)				sp->color				=csp->color;
+					if(!sp->backgroundColor		&& csp->backgroundColor)	sp->backgroundColor		=csp->backgroundColor;
 					if(!sp->bold				&& csp->bold)				sp->bold				=csp->bold;
 					if(!sp->italic				&& csp->italic)				sp->italic				=csp->italic;
 					if(!sp->underline			&& csp->underline)			sp->underline			=csp->underline;
@@ -898,6 +924,10 @@ DocumentModel
 							else if(att->name.value==L"color")
 							{
 								sp->color=Color::Parse(XmlGetValue(att));
+							}
+							else if(att->name.value==L"bkcolor")
+							{
+								sp->backgroundColor=Color::Parse(XmlGetValue(att));
 							}
 							else if(att->name.value==L"b")
 							{
@@ -1022,13 +1052,14 @@ DocumentModel
 						XmlElementWriter(styleElement).Attribute(L"parent", style->parentStyleName);
 					}
 
-					if(sp->face)		XmlElementWriter(styleElement).Element(L"face").Text(		sp->face.Value()						);
-					if(sp->size)		XmlElementWriter(styleElement).Element(L"size").Text(itow(	sp->size.Value()						));
-					if(sp->color)		XmlElementWriter(styleElement).Element(L"color").Text(		sp->color.Value().ToString()			);
-					if(sp->bold)		XmlElementWriter(styleElement).Element(L"bold").Text(		sp->bold.Value()?L"true":L"false"		);
-					if(sp->italic)		XmlElementWriter(styleElement).Element(L"italic").Text(		sp->italic.Value()?L"true":L"false"		);
-					if(sp->underline)	XmlElementWriter(styleElement).Element(L"underline").Text(	sp->underline.Value()?L"true":L"false"	);
-					if(sp->strikeline)	XmlElementWriter(styleElement).Element(L"strikeline").Text(	sp->strikeline.Value()?L"true":L"false"	);
+					if(sp->face)				XmlElementWriter(styleElement).Element(L"face").Text(		sp->face.Value()						);
+					if(sp->size)				XmlElementWriter(styleElement).Element(L"size").Text(itow(	sp->size.Value()						));
+					if(sp->color)				XmlElementWriter(styleElement).Element(L"color").Text(		sp->color.Value().ToString()			);
+					if(sp->backgroundColor)		XmlElementWriter(styleElement).Element(L"bkcolor").Text(	sp->color.Value().ToString()			);
+					if(sp->bold)				XmlElementWriter(styleElement).Element(L"bold").Text(		sp->bold.Value()?L"true":L"false"		);
+					if(sp->italic)				XmlElementWriter(styleElement).Element(L"italic").Text(		sp->italic.Value()?L"true":L"false"		);
+					if(sp->underline)			XmlElementWriter(styleElement).Element(L"underline").Text(	sp->underline.Value()?L"true":L"false"	);
+					if(sp->strikeline)			XmlElementWriter(styleElement).Element(L"strikeline").Text(	sp->strikeline.Value()?L"true":L"false"	);
 					if(sp->antialias && sp->verticalAntialias)
 					{
 						bool h=sp->antialias;

@@ -32,6 +32,7 @@ UniscribeFragment
 				//***************************** Document Data (Text)
 				FontProperties									fontStyle;
 				Color											fontColor;
+				Color											backgroundColor;
 				WString											text;
 				Ptr<WinFont>									fontObject;
 				vint											interactionId;
@@ -251,6 +252,7 @@ UniscribeParagraph
 				bool							SetSize(vint start, vint length, vint value);
 				bool							SetStyle(vint start, vint length, bool bold, bool italic, bool underline, bool strikeline);
 				bool							SetColor(vint start, vint length, Color value);
+				bool							SetBackgroundColor(vint start, vint length, Color value);
 				bool							SetInlineObject(vint start, vint length, const IGuiGraphicsParagraph::InlineObjectProperties& properties, Ptr<IGuiGraphicsElement> value);
 				Ptr<IGuiGraphicsElement>		ResetInlineObject(vint start, vint length);
 				bool							SetInteractionId(vint start, vint length, vint value);
