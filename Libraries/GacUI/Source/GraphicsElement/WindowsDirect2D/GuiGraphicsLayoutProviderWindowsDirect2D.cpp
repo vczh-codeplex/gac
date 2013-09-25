@@ -743,47 +743,51 @@ WindowsDirect2DParagraph (Caret)
 					vint lineStart=lineStarts[lineIndex];
 					vint lineEnd=lineStart+line.length-line.newlineLength;
 
-					if(position==CaretMoveLeft)
+					switch(position)
 					{
-						if(comparingCaret==0)
+					case CaretLineFirst:
+						return lineStarts[lineIndex];
+					case CaretLineLast:
+						return lineStarts[lineIndex]+line.length-line.newlineLength;
+					case CaretMoveLeft:
 						{
-							return 0;
-						}
-						else if(comparingCaret==lineStart)
-						{
-							vint offset=lineMetrics[lineIndex-1].newlineLength;
-							if(offset>0)
+							if(comparingCaret==0)
 							{
-								return lineStart-offset;
+								return 0;
+							}
+							else if(comparingCaret==lineStart)
+							{
+								vint offset=lineMetrics[lineIndex-1].newlineLength;
+								if(offset>0)
+								{
+									return lineStart-offset;
+								}
+							}
+							return hitTestMetrics[charHitTestMap[comparingCaret-1]].textPosition;
+						}
+					case CaretMoveRight:
+						{
+							if(comparingCaret==paragraphText.Length())
+							{
+								return paragraphText.Length();
+							}
+							else if(comparingCaret==lineEnd && line.newlineLength!=0)
+							{
+								return lineEnd+line.newlineLength;
+							}
+							else
+							{
+								vint index=charHitTestMap[comparingCaret];
+								if(index==hitTestMetrics.Count()-1) return paragraphText.Length();
+								return hitTestMetrics[index+1].textPosition;
 							}
 						}
-						return hitTestMetrics[charHitTestMap[comparingCaret-1]].textPosition;
-					}
-					if(position==CaretMoveRight)
-					{
-						if(comparingCaret==paragraphText.Length())
+					case CaretMoveUp:
 						{
-							return paragraphText.Length();
 						}
-						else if(comparingCaret==lineEnd && line.newlineLength!=0)
+					case CaretMoveDown:
 						{
-							return lineEnd+line.newlineLength;
 						}
-						else
-						{
-							vint index=charHitTestMap[comparingCaret];
-							if(index==hitTestMetrics.Count()-1) return paragraphText.Length();
-							return hitTestMetrics[index+1].textPosition;
-						}
-					}
-
-					if(position==CaretLineFirst)
-					{
-						return lineStarts[lineIndex];
-					}
-					if(position==CaretLineLast)
-					{
-						return lineStarts[lineIndex]+line.length-line.newlineLength;
 					}
 					throw 0;
 				}
