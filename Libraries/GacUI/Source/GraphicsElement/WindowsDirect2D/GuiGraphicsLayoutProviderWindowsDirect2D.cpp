@@ -435,6 +435,7 @@ WindowsDirect2DParagraph (Formatting)
 
 				bool SetBackgroundColor(vint start, vint length, Color value)override
 				{
+					return true;
 				}
 
 				bool SetInlineObject(vint start, vint length, const InlineObjectProperties& properties, Ptr<IGuiGraphicsElement> value)override
