@@ -712,6 +712,7 @@ WindowsDirect2DParagraph (Caret Helper)
 
 				vint GetLineIndexFromY(vint y)
 				{
+					if(paragraphText.Length()==0) return 0;
 					FLOAT minY=0;
 					FLOAT maxY=0;
 					{
@@ -756,7 +757,33 @@ WindowsDirect2DParagraph (Caret Helper)
 
 				vint GetCaretFromXWithLine(vint x, vint lineIndex)
 				{
-					throw 0;
+					DWRITE_LINE_METRICS& line=lineMetrics[lineIndex];
+					vint lineStart=lineStarts[lineIndex];
+					vint lineEnd=lineStart+line.length-line.newlineLength;
+
+					for(vint i=lineStart;i<lineEnd;)
+					{
+						vint index=charHitTestMap[i];
+						DWRITE_HIT_TEST_METRICS& hitTest=hitTestMetrics[index];
+						FLOAT minX=hitTest.left;
+						FLOAT maxX=minX+hitTest.width;
+						if(minX<=x && x<maxX)
+						{
+							DWRITE_CLUSTER_METRICS& cluster=clusterMetrics[index];
+							FLOAT d1=x-minX;
+							FLOAT d2=maxX-x;
+							if(d1<=d2)
+							{
+								return cluster.isRightToLeft?index+hitTest.length:index;
+							}
+							else
+							{
+								return cluster.isRightToLeft?index:index+hitTest.length;
+							}
+						}
+						i+=hitTest.length;
+					}
+					return lineStart;
 				}
 
 /***********************************************************************
