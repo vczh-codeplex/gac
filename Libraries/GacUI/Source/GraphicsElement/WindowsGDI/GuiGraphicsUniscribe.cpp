@@ -1510,6 +1510,25 @@ UniscribeParagraph (Formatting)
 				}
 			}
 
+			bool UniscribeParagraph::SetBackgroundColor(vint start, vint length, Color value)
+			{
+				vint fs, ss, fe, se, f1, f2;
+				SearchFragment(start, length, fs, ss, fe, se);
+				if(CutFragment(fs, ss, fe, se, f1, f2))
+				{
+					for(vint i=f1;i<=f2;i++)
+					{
+						documentFragments[i]->backgroundColor=value;
+					}
+					built=false;
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+
 			bool UniscribeParagraph::SetInlineObject(vint start, vint length, const IGuiGraphicsParagraph::InlineObjectProperties& properties, Ptr<IGuiGraphicsElement> value)
 			{
 				vint fs, ss, fe, se, f1, f2;

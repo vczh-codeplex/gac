@@ -40,6 +40,8 @@ Rich Content Document (style)
 			Nullable<vint>					size;
 			/// <summary>Font color.</summary>
 			Nullable<Color>					color;
+			/// <summary>Font color.</summary>
+			Nullable<Color>					backgroundColor;
 			/// <summary>Bold.</summary>
 			Nullable<bool>					bold;
 			/// <summary>Italic.</summary>
@@ -282,7 +284,12 @@ Rich Content Document (model)
 		class DocumentModel : public Object, public Description<DocumentModel>
 		{
 		public:
-
+			static const wchar_t*			DefaultStyleName;
+			static const wchar_t*			SelectionStyleName;
+			static const wchar_t*			ContextStyleName;
+			static const wchar_t*			NormalLinkStyleName;
+			static const wchar_t*			ActiveLinkStyleName;
+		public:
 			/// <summary>Store some necessary internal information for a hyperlink.</summary>
 			struct HyperlinkInfo
 			{
@@ -296,9 +303,30 @@ Rich Content Document (model)
 				{
 				}
 			};
+
+			/// <summary>Represents a resolved style.</summary>
+			struct ResolvedStyle
+			{
+				/// <summary>The style of the text.</summary>
+				FontProperties				style;
+				/// <summary>The color of the text.</summary>
+				Color						color;
+				/// <summary>The background color of the text.</summary>
+				Color						backgroundColor;
+
+				ResolvedStyle()
+				{
+				}
+
+				ResolvedStyle(const FontProperties& _style, Color _color, Color _backgroundColor)
+					:style(_style)
+					,color(_color)
+					,backgroundColor(_backgroundColor)
+				{
+				}
+			};
 		private:
 			typedef collections::List<Ptr<DocumentParagraphRun>>						ParagraphList;
-			typedef collections::Pair<FontProperties, Color>							RawStylePair;
 			typedef collections::Dictionary<WString, Ptr<DocumentStyle>>				StyleMap;
 			typedef collections::Dictionary<WString, Ptr<DocumentTemplate>>				TemplateMap;
 			typedef collections::Dictionary<vint, HyperlinkInfo>						HyperlinkMap;
@@ -314,8 +342,8 @@ Rich Content Document (model)
 			
 			DocumentModel();
 
-			RawStylePair					GetStyle(Ptr<DocumentStyleProperties> sp, const RawStylePair& context);
-			RawStylePair					GetStyle(const WString& styleName, const RawStylePair& context);
+			ResolvedStyle					GetStyle(Ptr<DocumentStyleProperties> sp, const ResolvedStyle& context);
+			ResolvedStyle					GetStyle(const WString& styleName, const ResolvedStyle& context);
 			vint							ActivateHyperlink(vint hyperlinkId, bool active);
 
 			/// <summary>Load a document model from an xml.</summary>

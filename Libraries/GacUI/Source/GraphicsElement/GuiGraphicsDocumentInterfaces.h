@@ -143,6 +143,12 @@ Layout Engine
 				/// <param name="value">The color.</param>
 				/// <returns>Returns true if this operation succeeded.</returns>
 				virtual bool								SetColor(vint start, vint length, Color value)=0;
+				/// <summary>Replace the background color within the specified range.</summary>
+				/// <param name="start">The position of the first character of the specified range.</param>
+				/// <param name="length">The length of the specified range by character.</param>
+				/// <param name="value">The background color.</param>
+				/// <returns>Returns true if this operation succeeded.</returns>
+				virtual bool								SetBackgroundColor(vint start, vint length, Color value)=0;
 				/// <summary>Bind an <see cref="IGuiGraphicsElement"/> to a range of text.</summary>
 				/// <param name="start">The position of the first character of the specified range.</param>
 				/// <param name="length">The length of the specified range by character.</param>

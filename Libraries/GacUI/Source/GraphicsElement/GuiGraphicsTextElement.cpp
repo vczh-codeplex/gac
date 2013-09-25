@@ -920,24 +920,28 @@ Visitors
 
 				class SetPropertiesVisitor : public Object, public DocumentRun::IVisitor
 				{
-					typedef collections::Pair<FontProperties, Color>			RawStylePair;
+					typedef DocumentModel::ResolvedStyle			ResolvedStyle;
 				public:
 					vint						start;
 					vint						length;
+					vint						selectionBegin;
+					vint						selectionEnd;
 					vint						hyperlinkId;
-					List<RawStylePair>			styles;
+					List<ResolvedStyle>			styles;
 					DocumentModel*				model;
 					IGuiGraphicsParagraph*		paragraph;
 
-					SetPropertiesVisitor(DocumentModel* _model, IGuiGraphicsParagraph* _paragraph)
+					SetPropertiesVisitor(DocumentModel* _model, IGuiGraphicsParagraph* _paragraph, vint _selectionBegin, vint _selectionEnd)
 						:start(0)
 						,length(0)
 						,hyperlinkId(DocumentRun::NullHyperlinkId)
 						,model(_model)
 						,paragraph(_paragraph)
+						,selectionBegin(_selectionBegin)
+						,selectionEnd(_selectionEnd)
 					{
-						RawStylePair style;
-						style=model->GetStyle(L"#Default", style);
+						ResolvedStyle style;
+						style=model->GetStyle(DocumentModel::DefaultStyleName, style);
 						styles.Add(style);
 					}
 
@@ -954,16 +958,17 @@ Visitors
 						length=run->text.Length();
 						if(length>0)
 						{
-							RawStylePair style=styles[styles.Count()-1];
-							paragraph->SetFont(start, length, style.key.fontFamily);
-							paragraph->SetSize(start, length, style.key.size);
-							paragraph->SetColor(start, length, style.value);
+							ResolvedStyle style=styles[styles.Count()-1];
+							paragraph->SetFont(start, length, style.style.fontFamily);
+							paragraph->SetSize(start, length, style.style.size);
+							paragraph->SetColor(start, length, style.color);
+							paragraph->SetBackgroundColor(start, length, style.backgroundColor);
 							paragraph->SetStyle(start, length, 
 								(IGuiGraphicsParagraph::TextStyle)
-								( (style.key.bold?IGuiGraphicsParagraph::Bold:0)
-								| (style.key.italic?IGuiGraphicsParagraph::Italic:0)
-								| (style.key.underline?IGuiGraphicsParagraph::Underline:0)
-								| (style.key.strikeline?IGuiGraphicsParagraph::Strikeline:0)
+								( (style.style.bold?IGuiGraphicsParagraph::Bold:0)
+								| (style.style.italic?IGuiGraphicsParagraph::Italic:0)
+								| (style.style.underline?IGuiGraphicsParagraph::Underline:0)
+								| (style.style.strikeline?IGuiGraphicsParagraph::Strikeline:0)
 								));
 							if(hyperlinkId!=DocumentRun::NullHyperlinkId)
 							{
@@ -975,7 +980,7 @@ Visitors
 
 					void Visit(DocumentStylePropertiesRun* run)override
 					{
-						RawStylePair style=styles[styles.Count()-1];
+						ResolvedStyle style=styles[styles.Count()-1];
 						style=model->GetStyle(run->style, style);
 						styles.Add(style);
 						VisitContainer(run);
@@ -984,7 +989,7 @@ Visitors
 
 					void Visit(DocumentStyleApplicationRun* run)override
 					{
-						RawStylePair style=styles[styles.Count()-1];
+						ResolvedStyle style=styles[styles.Count()-1];
 						style=model->GetStyle(run->styleName, style);
 						styles.Add(style);
 						VisitContainer(run);
@@ -993,7 +998,7 @@ Visitors
 
 					void Visit(DocumentHyperlinkTextRun* run)override
 					{
-						RawStylePair style=styles[styles.Count()-1];
+						ResolvedStyle style=styles[styles.Count()-1];
 						style=model->GetStyle(run->styleName, style);
 						styles.Add(style);
 						vint oldHyperlinkId=hyperlinkId;
@@ -1040,9 +1045,9 @@ Visitors
 						VisitContainer(run);
 					}
 
-					static vint SetProperty(DocumentModel* model, IGuiGraphicsParagraph* paragraph, Ptr<DocumentParagraphRun> run)
+					static vint SetProperty(DocumentModel* model, IGuiGraphicsParagraph* paragraph, Ptr<DocumentParagraphRun> run, vint selectionBegin, vint selectionEnd)
 					{
-						SetPropertiesVisitor visitor(model, paragraph);
+						SetPropertiesVisitor visitor(model, paragraph, selectionBegin, selectionEnd);
 						run->Accept(&visitor);
 						return visitor.length;
 					}
@@ -1074,7 +1079,7 @@ GuiDocumentElement::GuiDocumentElementRenderer
 				}
 			}
 
-			Ptr<GuiDocumentElement::GuiDocumentElementRenderer::ParagraphCache> GuiDocumentElement::GuiDocumentElementRenderer::EnsureAndGetCache(vint paragraphIndex)
+			Ptr<GuiDocumentElement::GuiDocumentElementRenderer::ParagraphCache> GuiDocumentElement::GuiDocumentElementRenderer::EnsureAndGetCache(vint paragraphIndex, bool createParagraph)
 			{
 				if(paragraphIndex<0 || paragraphIndex>=paragraphCaches.Count()) return 0;
 				Ptr<DocumentParagraphRun> paragraph=element->document->paragraphs[paragraphIndex];
@@ -1086,15 +1091,18 @@ GuiDocumentElement::GuiDocumentElementRenderer
 					paragraphCaches[paragraphIndex]=cache;
 				}
 
-				if(!cache->graphicsParagraph)
+				if(createParagraph)
 				{
-					cache->graphicsParagraph=layoutProvider->CreateParagraph(cache->fullText, renderTarget);
-					cache->graphicsParagraph->SetParagraphAlignment(paragraph->alignment);
-					SetPropertiesVisitor::SetProperty(element->document.Obj(), cache->graphicsParagraph.Obj(), paragraph);
-				}
-				if(cache->graphicsParagraph->GetMaxWidth()!=lastMaxWidth)
-				{
-					cache->graphicsParagraph->SetMaxWidth(lastMaxWidth);
+					if(!cache->graphicsParagraph)
+					{
+						cache->graphicsParagraph=layoutProvider->CreateParagraph(cache->fullText, renderTarget);
+						cache->graphicsParagraph->SetParagraphAlignment(paragraph->alignment);
+						SetPropertiesVisitor::SetProperty(element->document.Obj(), cache->graphicsParagraph.Obj(), paragraph, cache->selectionBegin, cache->selectionEnd);
+					}
+					if(cache->graphicsParagraph->GetMaxWidth()!=lastMaxWidth)
+					{
+						cache->graphicsParagraph->SetMaxWidth(lastMaxWidth);
+					}
 				}
 
 				return cache;
@@ -1167,7 +1175,7 @@ GuiDocumentElement::GuiDocumentElementRenderer
 							Ptr<DocumentParagraphRun> paragraph=element->document->paragraphs[i];
 							Ptr<ParagraphCache> cache=paragraphCaches[i];
 							bool created=cache && cache->graphicsParagraph;
-							cache=EnsureAndGetCache(i);
+							cache=EnsureAndGetCache(i, true);
 							if(!created && i==lastCaret.row)
 							{
 								cache->graphicsParagraph->OpenCaret(lastCaret.column, lastCaretColor, lastCaretFrontSide);
@@ -1282,9 +1290,54 @@ GuiDocumentElement::GuiDocumentElementRenderer
 				}
 			}
 
+			void GuiDocumentElement::GuiDocumentElementRenderer::SetSelection(TextPos begin, TextPos end)
+			{
+				if(begin>end)
+				{
+					TextPos t=begin;
+					begin=end;
+					end=t;
+				}
+				if(begin==end)
+				{
+					begin=TextPos(-1, -1);
+					end=TextPos(-1, -1);
+				}
+
+				for(vint i=0;i<paragraphCaches.Count();i++)
+				{
+					if(begin.row<=i && i<=end.row)
+					{
+						Ptr<ParagraphCache> cache=EnsureAndGetCache(i, false);
+						vint newBegin=i==begin.row?begin.column:0;
+						vint newEnd=i==end.row?end.column:cache->fullText.Length();
+
+						if(cache->selectionBegin!=newBegin || cache->selectionEnd!=newEnd)
+						{
+							cache->selectionBegin=newBegin;
+							cache->selectionEnd=newEnd;
+							NotifyParagraphUpdated(i);
+						}
+					}
+					else
+					{
+						Ptr<ParagraphCache> cache=paragraphCaches[i];
+						if(cache)
+						{
+							if(cache->selectionBegin!=-1 || cache->selectionEnd!=-1)
+							{
+								cache->selectionBegin=-1;
+								cache->selectionEnd=-1;
+								NotifyParagraphUpdated(i);
+							}
+						}
+					}
+				}
+			}
+
 			TextPos GuiDocumentElement::GuiDocumentElementRenderer::CalculateCaret(TextPos comparingCaret, IGuiGraphicsParagraph::CaretRelativePosition position, bool& preferFrontSide)
 			{
-				Ptr<ParagraphCache> cache=EnsureAndGetCache(comparingCaret.row);
+				Ptr<ParagraphCache> cache=EnsureAndGetCache(comparingCaret.row, true);
 				if(cache)
 				{
 					switch(position)
@@ -1319,7 +1372,7 @@ GuiDocumentElement::GuiDocumentElementRenderer
 							if(caret==comparingCaret.column && comparingCaret.row>0)
 							{
 								Rect caretBounds=cache->graphicsParagraph->GetCaretBounds(comparingCaret.column, preferFrontSide);
-								Ptr<ParagraphCache> anotherCache=EnsureAndGetCache(comparingCaret.row-1);
+								Ptr<ParagraphCache> anotherCache=EnsureAndGetCache(comparingCaret.row-1, true);
 								vint height=anotherCache->graphicsParagraph->GetHeight();
 								caret=anotherCache->graphicsParagraph->GetCaretFromPoint(Point(caretBounds.x1, height));
 								return TextPos(comparingCaret.row-1, caret);
@@ -1335,7 +1388,7 @@ GuiDocumentElement::GuiDocumentElementRenderer
 							if(caret==comparingCaret.column && comparingCaret.row<paragraphCaches.Count()-1)
 							{
 								Rect caretBounds=cache->graphicsParagraph->GetCaretBounds(comparingCaret.column, preferFrontSide);
-								Ptr<ParagraphCache> anotherCache=EnsureAndGetCache(comparingCaret.row+1);
+								Ptr<ParagraphCache> anotherCache=EnsureAndGetCache(comparingCaret.row+1, true);
 								caret=anotherCache->graphicsParagraph->GetCaretFromPoint(Point(caretBounds.x1, 0));
 								return TextPos(comparingCaret.row+1, caret);
 							}
@@ -1350,7 +1403,7 @@ GuiDocumentElement::GuiDocumentElementRenderer
 							vint caret=cache->graphicsParagraph->GetCaret(comparingCaret.column, IGuiGraphicsParagraph::CaretMoveLeft, preferFrontSide);
 							if(caret==comparingCaret.column && comparingCaret.row>0)
 							{
-								Ptr<ParagraphCache> anotherCache=EnsureAndGetCache(comparingCaret.row-1);
+								Ptr<ParagraphCache> anotherCache=EnsureAndGetCache(comparingCaret.row-1, true);
 								caret=anotherCache->graphicsParagraph->GetCaret(0, IGuiGraphicsParagraph::CaretLast, preferFrontSide);
 								return TextPos(comparingCaret.row-1, caret);
 							}
@@ -1365,7 +1418,7 @@ GuiDocumentElement::GuiDocumentElementRenderer
 							vint caret=cache->graphicsParagraph->GetCaret(comparingCaret.column, IGuiGraphicsParagraph::CaretMoveRight, preferFrontSide);
 							if(caret==comparingCaret.column && comparingCaret.row<paragraphCaches.Count()-1)
 							{
-								Ptr<ParagraphCache> anotherCache=EnsureAndGetCache(comparingCaret.row+1);
+								Ptr<ParagraphCache> anotherCache=EnsureAndGetCache(comparingCaret.row+1, true);
 								caret=anotherCache->graphicsParagraph->GetCaret(0, IGuiGraphicsParagraph::CaretFirst, preferFrontSide);
 								return TextPos(comparingCaret.row+1, caret);
 							}
@@ -1385,7 +1438,7 @@ GuiDocumentElement::GuiDocumentElementRenderer
 				vint index=-1;
 				if(GetParagraphIndexFromPoint(point, top, index))
 				{
-					Ptr<ParagraphCache> cache=EnsureAndGetCache(index);
+					Ptr<ParagraphCache> cache=EnsureAndGetCache(index, true);
 					Point paragraphPoint(point.x, point.y-top);
 					vint caret=cache->graphicsParagraph->GetCaretFromPoint(paragraphPoint);
 					return TextPos(index, caret);
@@ -1402,6 +1455,7 @@ GuiDocumentElement
 				Ptr<GuiDocumentElementRenderer> elementRenderer=renderer.Cast<GuiDocumentElementRenderer>();
 				if(elementRenderer)
 				{
+					elementRenderer->SetSelection(caretBegin, caretEnd);
 					if(caretVisible)
 					{
 						elementRenderer->OpenCaret(caretEnd, caretColor, caretFrontSide);
