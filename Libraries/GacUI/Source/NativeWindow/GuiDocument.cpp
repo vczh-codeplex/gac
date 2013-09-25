@@ -773,7 +773,7 @@ DocumentModel
 			}
 			{
 				Ptr<DocumentStyleProperties> sp=new DocumentStyleProperties;
-				sp->color=Color(255, 255, 255);
+				sp->color=Color(51, 153, 255);
 				sp->backgroundColor=Color(51, 153, 255);
 
 				Ptr<DocumentStyle> style=new DocumentStyle;
