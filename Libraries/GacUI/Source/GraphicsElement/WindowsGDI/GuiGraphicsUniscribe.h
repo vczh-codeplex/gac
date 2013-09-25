@@ -24,16 +24,68 @@ namespace vl
 			using namespace windows;
 
 /***********************************************************************
+UniscribeColor
+***********************************************************************/
+
+			struct UniscribeColorRange
+			{
+				vint							start;
+				vint							end;
+
+				UniscribeColorRange(){}
+				UniscribeColorRange(vint _start, vint _end):start(_start),end(_end){}
+
+				bool operator==(const UniscribeColorRange& range) const { return start==range.start; }
+				bool operator!=(const UniscribeColorRange& range) const { return start!=range.start; }
+				bool operator<(const UniscribeColorRange& range) const { return start<range.start; }
+				bool operator<=(const UniscribeColorRange& range) const { return start<=range.start; }
+				bool operator>(const UniscribeColorRange& range) const { return start>range.start; }
+				bool operator>=(const UniscribeColorRange& range) const { return start>=range.start; }
+			};
+
+			struct UniscribeColor
+			{
+				Color							fontColor;
+				Color							backgroundColor;
+
+				UniscribeColor(){}
+				UniscribeColor(Color _fontColor, Color _backgroundColor):fontColor(_fontColor),backgroundColor(_backgroundColor){}
+
+				bool operator==(const UniscribeColor& color) const { return fontColor==color.fontColor && backgroundColor==color.backgroundColor; }
+				bool operator!=(const UniscribeColor& color) const { return fontColor!=color.fontColor || backgroundColor!=color.backgroundColor; }
+			};
+		}
+	}
+
+	template<>
+	struct POD<presentation::elements_windows_gdi::UniscribeColorRange>
+	{
+		static const bool Result=true;
+	};
+
+	template<>
+	struct POD<presentation::elements_windows_gdi::UniscribeColor>
+	{
+		static const bool Result=true;
+	};
+
+	namespace presentation
+	{
+		namespace elements_windows_gdi
+		{
+
+/***********************************************************************
 UniscribeFragment
 ***********************************************************************/
 
 			struct UniscribeFragment
 			{
+				typedef Dictionary<UniscribeColorRange, UniscribeColor>		ColorRangeMap;
+
 				//***************************** Document Data (Text)
+				ColorRangeMap									colors;
 				FontProperties									fontStyle;
-				Color											fontColor;
-				Color											backgroundColor;
-				WString											text;
+				const WString									text;
 				Ptr<WinFont>									fontObject;
 				vint											interactionId;
 				//***************************** Document Data (Element)
@@ -41,10 +93,13 @@ UniscribeFragment
 				IGuiGraphicsParagraph::InlineObjectProperties	inlineObjectProperties;
 				List<Ptr<UniscribeFragment>>					cachedTextFragment;
 
-				UniscribeFragment();
+				UniscribeFragment(const WString& _text);
 
 				WString							GetFingerprint();
-				Ptr<UniscribeFragment>			Copy();
+				void							CutColors(vint start, vint length);
+				void							UpdateOverlappedColors(vint start, vint length, Color UniscribeColor::* colorField, Color color);
+				void							DefragmentColors();
+				Ptr<UniscribeFragment>			Copy(vint start, vint length);
 			};
 
 /***********************************************************************
@@ -248,6 +303,8 @@ UniscribeParagraph
 
 				void							SearchFragment(vint start, vint length, vint& fs, vint& ss, vint& fe, vint& se);
 				bool							CutFragment(vint fs, vint ss, vint fe, vint se, vint& f1, vint& f2);
+				void							CutFragmentColors(vint fs, vint ss, vint fe, vint se, Color UniscribeColor::* colorField, Color color);
+
 				bool							SetFont(vint start, vint length, const WString& value);
 				bool							SetSize(vint start, vint length, vint value);
 				bool							SetStyle(vint start, vint length, bool bold, bool italic, bool underline, bool strikeline);

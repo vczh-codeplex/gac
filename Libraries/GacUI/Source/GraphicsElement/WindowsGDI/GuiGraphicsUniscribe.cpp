@@ -14,9 +14,11 @@ namespace vl
 UniscribeFragment
 ***********************************************************************/
 
-			UniscribeFragment::UniscribeFragment()
+			UniscribeFragment::UniscribeFragment(const WString& _text)
 				:interactionId(-1)
+				,text(_text)
 			{
+				colors.Add(UniscribeColorRange(0, text.Length()), UniscribeColor(Color(0, 0, 0), Color(0, 0, 0, 0)));
 			}
 
 			WString UniscribeFragment::GetFingerprint()
@@ -30,13 +32,102 @@ UniscribeFragment
 					;
 			}
 
-			Ptr<UniscribeFragment> UniscribeFragment::Copy()
+			void UniscribeFragment::CutColors(vint start, vint length)
 			{
-				Ptr<UniscribeFragment> fragment=new UniscribeFragment;
+				vint end=start+length;
+				for(vint i=colors.Count()-1;i>=0;i--)
+				{
+					UniscribeColorRange key=colors.Keys()[i];
+					if(key.start<end && start<key.end)
+					{
+						UniscribeColor value=colors.Values()[i];
+
+						vint s1=key.start;
+						vint s2=key.start>start?key.start:start;
+						vint s3=key.end<end?key.end:end;
+						vint s4=key.end;
+
+						colors.Remove(key);
+						if(s1<s2)
+						{
+							colors.Add(UniscribeColorRange(s1, s2), value);
+						}
+						if(s2<s3)
+						{
+							colors.Add(UniscribeColorRange(s2, s3), value);
+						}
+						if(s3<s4)
+						{
+							colors.Add(UniscribeColorRange(s3, s4), value);
+						}
+					}
+				}
+			}
+
+			void UniscribeFragment::UpdateOverlappedColors(vint start, vint length, Color UniscribeColor::* colorField, Color color)
+			{
+				vint end=start+length;
+				for(vint i=colors.Count()-1;i>=0;i--)
+				{
+					UniscribeColorRange key=colors.Keys()[i];
+					if(key.start<end && start<key.end)
+					{
+						UniscribeColor value=colors.Values()[i];
+						value.*colorField=color;
+						colors.Set(key, value);
+					}
+				}
+			}
+
+			void UniscribeFragment::DefragmentColors()
+			{
+				vint lastIndex=-1;
+				UniscribeColor lastColor;
+				for(vint i=colors.Count()-1;i>=-1;i--)
+				{
+					if(lastIndex==-1)
+					{
+						lastIndex=i;
+						lastColor=colors.Values()[i];
+					}
+					else if(i==-1 || colors.Values()[i]!=lastColor)
+					{
+						if(lastIndex-i>0)
+						{
+							vint start=colors.Keys()[i+1].start;
+							vint end=colors.Keys()[lastIndex].end;
+							UniscribeColorRange key(start, end);
+
+							for(vint j=lastIndex;i>i;j++)
+							{
+								colors.Remove(colors.Keys()[j]);
+							}
+							colors.Add(key, lastColor);
+						}
+						lastIndex=i;
+						lastColor=colors.Values()[i];
+					}
+				}
+			}
+
+			Ptr<UniscribeFragment> UniscribeFragment::Copy(vint start, vint length)
+			{
+				vint end=start+length;
+				Ptr<UniscribeFragment> fragment=new UniscribeFragment(text.Sub(start, length));
 				fragment->fontStyle=fontStyle;
-				fragment->fontColor=fontColor;
-				fragment->text=text;
 				fragment->fontObject=fontObject;
+
+				fragment->colors.Clear();
+				CutColors(start, length);
+				for(vint i=0;i<colors.Count();i++)
+				{
+					UniscribeColorRange key=colors.Keys()[i];
+					if(key.start<end && start<key.end)
+					{
+						UniscribeColor value=colors.Values()[i];
+						fragment->colors.Add(UniscribeColorRange(key.start-start, key.end-end), value);
+					}
+				}
 				return fragment;
 			}
 
@@ -705,7 +796,7 @@ UniscribeElementRun
 					rect.right=(int)(fragment.bounds.Right()+offsetX)+2;
 					rect.bottom=(int)(fragment.bounds.Bottom()+offsetY)+2;
 
-					Color backgroundColor=documentFragment->backgroundColor;
+					Color backgroundColor=documentFragment->colors.Values()[0].backgroundColor;
 
 					if(backgroundColor.a>0)
 					{
@@ -1222,7 +1313,8 @@ UniscribeParagraph (Initialization)
 
 							for(vint i=0;i<textLines.Count();i++)
 							{
-								WString text=textLines[i]->Result().Value();
+								RegexString rs=textLines[i]->Result();
+								WString text=rs.Value();
 								if(i>0)
 								{
 									line=0;
@@ -1239,8 +1331,7 @@ UniscribeParagraph (Initialization)
 								}
 								else
 								{
-									Ptr<UniscribeFragment> runFragment=fragment->Copy();
-									runFragment->text=text;
+									Ptr<UniscribeFragment> runFragment=fragment->Copy(rs.Start(), rs.Length());
 									line->documentFragments.Add(runFragment);
 								}
 							}
@@ -1316,7 +1407,7 @@ UniscribeParagraph (Initialization)
 			}
 
 /***********************************************************************
-UniscribeParagraph (Formatting)
+UniscribeParagraph (Formatting Helper)
 ***********************************************************************/
 
 			void UniscribeParagraph::SearchFragment(vint start, vint length, vint& fs, vint& ss, vint& fe, vint& se)
@@ -1387,11 +1478,10 @@ UniscribeParagraph (Formatting)
 						else
 						{
 							f1=f2=fs;
-							Ptr<UniscribeFragment> rightFragment=fragment->Copy();
-
-							fragment->text=fragment->text.Sub(0, se);
-
-							rightFragment->text=rightFragment->text.Sub(se, length-se);
+							Ptr<UniscribeFragment> leftFragment=fragment->Copy(0, se);
+							Ptr<UniscribeFragment> rightFragment=fragment->Copy(se, length-se);
+							documentFragments.RemoveAt(fs);
+							documentFragments.Insert(fs, leftFragment);
 							documentFragments.Insert(fs+1, rightFragment);
 						}
 					}
@@ -1401,26 +1491,22 @@ UniscribeParagraph (Formatting)
 						{
 							f1=fs+1;
 							f2=fs+1;
-							Ptr<UniscribeFragment> leftFragment=fragment->Copy();
-
-							leftFragment->text=leftFragment->text.Sub(0, ss);
+							Ptr<UniscribeFragment> leftFragment=fragment->Copy(0, ss);
+							Ptr<UniscribeFragment> rightFragment=fragment->Copy(ss, length-ss);
+							documentFragments.RemoveAt(fs);
 							documentFragments.Insert(fs, leftFragment);
-								
-							fragment->text=fragment->text.Sub(ss, length-ss);
+							documentFragments.Insert(fs+1, rightFragment);
 						}
 						else
 						{
 							f1=fs+1;
 							f2=fs+1;
-							Ptr<UniscribeFragment> leftFragment=fragment->Copy();
-							Ptr<UniscribeFragment> rightFragment=fragment->Copy();
-
-							leftFragment->text=leftFragment->text.Sub(0, ss);
+							Ptr<UniscribeFragment> leftFragment=fragment->Copy(0, ss);
+							Ptr<UniscribeFragment> middleFragment=fragment->Copy(ss, se-ss);
+							Ptr<UniscribeFragment> rightFragment=fragment->Copy(se, length-se);
+							documentFragments.RemoveAt(fs);
 							documentFragments.Insert(fs, leftFragment);
-								
-							fragment->text=fragment->text.Sub(ss, se-ss);
-
-							rightFragment->text=rightFragment->text.Sub(se, length-se);
+							documentFragments.Insert(fs+1, middleFragment);
 							documentFragments.Insert(fs+2, rightFragment);
 						}
 					}
@@ -1438,12 +1524,11 @@ UniscribeParagraph (Formatting)
 						f1=fs+1;
 						fe++;
 						vint length=fragmentStart->text.Length();
-						Ptr<UniscribeFragment> leftFragment=fragmentStart->Copy();
-
-						leftFragment->text=leftFragment->text.Sub(0, ss);
+						Ptr<UniscribeFragment> leftFragment=fragmentStart->Copy(0, ss);
+						Ptr<UniscribeFragment> rightFragment=fragmentStart->Copy(ss, length-ss);
+						documentFragments.RemoveAt(fs);
 						documentFragments.Insert(fs, leftFragment);
-								
-						fragmentStart->text=fragmentStart->text.Sub(ss, length-ss);
+						documentFragments.Insert(fs+1, rightFragment);
 					}
 					if(se==fragmentEnd->text.Length())
 					{
@@ -1454,16 +1539,33 @@ UniscribeParagraph (Formatting)
 						f2=fe;
 						fe++;
 						vint length=fragmentEnd->text.Length();
-						Ptr<UniscribeFragment> rightFragment=fragmentEnd->Copy();
-
-						fragmentEnd->text=fragmentEnd->text.Sub(0, se);
-
-						rightFragment->text=rightFragment->text.Sub(se, length-se);
-						documentFragments.Insert(fe, rightFragment);
+						Ptr<UniscribeFragment> leftFragment=fragmentStart->Copy(0, se);
+						Ptr<UniscribeFragment> rightFragment=fragmentEnd->Copy(se, length-se);
+						documentFragments.RemoveAt(fe);
+						documentFragments.Insert(fe, leftFragment);
+						documentFragments.Insert(fe+1, rightFragment);
 					}
 				}
 				return true;
 			}
+
+			void UniscribeParagraph::CutFragmentColors(vint fs, vint ss, vint fe, vint se, Color UniscribeColor::* colorField, Color color)
+			{
+				for(vint f=fs;f<=fe;f++)
+				{
+					Ptr<UniscribeFragment> fragment=documentFragments[f];
+					vint start=f==fs?ss:0;
+					vint end=f==fe?se:fragment->text.Length();
+
+					fragment->CutColors(start, end-start);
+					fragment->UpdateOverlappedColors(start, end-start, colorField, color);
+					fragment->DefragmentColors();
+				}
+			}
+
+/***********************************************************************
+UniscribeParagraph (Formatting)
+***********************************************************************/
 
 			bool UniscribeParagraph::SetFont(vint start, vint length, const WString& value)
 			{
@@ -1529,38 +1631,20 @@ UniscribeParagraph (Formatting)
 			{
 				vint fs, ss, fe, se, f1, f2;
 				SearchFragment(start, length, fs, ss, fe, se);
-				if(CutFragment(fs, ss, fe, se, f1, f2))
-				{
-					for(vint i=f1;i<=f2;i++)
-					{
-						documentFragments[i]->fontColor=value;
-					}
-					built=false;
-					return true;
-				}
-				else
-				{
-					return false;
-				}
+				if(fs==-1 || ss==-1 || fe==-1 || se==-1) return false;
+
+				CutFragmentColors(fs, ss, fe, se, &UniscribeColor::fontColor, value);
+				return true;
 			}
 
 			bool UniscribeParagraph::SetBackgroundColor(vint start, vint length, Color value)
 			{
 				vint fs, ss, fe, se, f1, f2;
 				SearchFragment(start, length, fs, ss, fe, se);
-				if(CutFragment(fs, ss, fe, se, f1, f2))
-				{
-					for(vint i=f1;i<=f2;i++)
-					{
-						documentFragments[i]->backgroundColor=value;
-					}
-					built=false;
-					return true;
-				}
-				else
-				{
-					return false;
-				}
+				if(fs==-1 || ss==-1 || fe==-1 || se==-1) return false;
+
+				CutFragmentColors(fs, ss, fe, se, &UniscribeColor::backgroundColor, value);
+				return true;
 			}
 
 			bool UniscribeParagraph::SetInlineObject(vint start, vint length, const IGuiGraphicsParagraph::InlineObjectProperties& properties, Ptr<IGuiGraphicsElement> value)
@@ -1569,10 +1653,15 @@ UniscribeParagraph (Formatting)
 				SearchFragment(start, length, fs, ss, fe, se);
 				if(CutFragment(fs, ss, fe, se, f1, f2))
 				{
-					Ptr<UniscribeFragment> elementFragment=new UniscribeFragment;
+					WString text;
 					for(vint i=f1;i<=f2;i++)
 					{
-						elementFragment->text+=documentFragments[f1]->text;
+						text+=documentFragments[f1]->text;
+					}
+					Ptr<UniscribeFragment> elementFragment=new UniscribeFragment(text);
+
+					for(vint i=f1;i<=f2;i++)
+					{
 						elementFragment->cachedTextFragment.Add(documentFragments[f1]);
 						documentFragments.RemoveAt(f1);
 					}
