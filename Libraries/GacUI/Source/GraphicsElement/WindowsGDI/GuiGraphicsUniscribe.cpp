@@ -88,7 +88,10 @@ UniscribeFragment
 					if(lastIndex==-1)
 					{
 						lastIndex=i;
-						lastColor=colors.Values()[i];
+						if(i!=-1)
+						{
+							lastColor=colors.Values()[i];
+						}
 					}
 					else if(i==-1 || colors.Values()[i]!=lastColor)
 					{
@@ -98,14 +101,17 @@ UniscribeFragment
 							vint end=colors.Keys()[lastIndex].end;
 							UniscribeColorRange key(start, end);
 
-							for(vint j=lastIndex;i>i;j++)
+							for(vint j=lastIndex;j>i;j--)
 							{
 								colors.Remove(colors.Keys()[j]);
 							}
 							colors.Add(key, lastColor);
 						}
 						lastIndex=i;
-						lastColor=colors.Values()[i];
+						if(i!=-1)
+						{
+							lastColor=colors.Values()[i];
+						}
 					}
 				}
 			}
@@ -137,19 +143,22 @@ UniscribeFragment
 			Ptr<UniscribeFragment> UniscribeFragment::Copy(vint start, vint length)
 			{
 				vint end=start+length;
-				Ptr<UniscribeFragment> fragment=new UniscribeFragment(text.Sub(start, length));
+				Ptr<UniscribeFragment> fragment=new UniscribeFragment(length==0?L"":text.Sub(start, length));
 				fragment->fontStyle=fontStyle;
 				fragment->fontObject=fontObject;
 
-				fragment->colors.Clear();
-				CutColors(start, length);
-				for(vint i=0;i<colors.Count();i++)
+				if(length!=0)
 				{
-					UniscribeColorRange key=colors.Keys()[i];
-					if(key.start<end && start<key.end)
+					fragment->colors.Clear();
+					CutColors(start, length);
+					for(vint i=0;i<colors.Count();i++)
 					{
-						UniscribeColor value=colors.Values()[i];
-						fragment->colors.Add(UniscribeColorRange(key.start-start, key.end-end), value);
+						UniscribeColorRange key=colors.Keys()[i];
+						if(key.start<end && start<key.end)
+						{
+							UniscribeColor value=colors.Values()[i];
+							fragment->colors.Add(UniscribeColorRange(key.start-start, key.end-start), value);
+						}
 					}
 				}
 				return fragment;
@@ -523,6 +532,7 @@ UniscribeTextRun
 					}
 					nextChar++;
 				}
+				charLength=nextChar-charStart;
 				SearchGlyphCluster(charStart, charLength, cluster, nextCluster);
 			}
 
@@ -661,11 +671,11 @@ UniscribeTextRun
 				RunFragmentBounds& fragment=fragmentBounds[fragmentBoundsIndex];
 				if(fragment.length==0) return;
 
-				vint startFromFragment=0;
+				vint startFromFragmentBounds=0;
 				vint accumulatedWidth=0;
-				while(startFromFragment<fragment.length)
+				while(startFromFragmentBounds<fragment.length)
 				{
-					vint charIndex=fragment.startFromRun+startFromFragment;
+					vint charIndex=fragment.startFromRun+startFromFragmentBounds;
 					vint charLength=0;
 					vint cluster=0;
 					vint nextCluster=0;
@@ -741,7 +751,7 @@ UniscribeTextRun
 						);
 					}
 
-					startFromFragment+=charLength;
+					startFromFragmentBounds+=charLength;
 					accumulatedWidth+=clusterWidth;
 				}
 			}
