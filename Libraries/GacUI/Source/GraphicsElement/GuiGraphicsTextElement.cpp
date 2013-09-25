@@ -953,26 +953,58 @@ Visitors
 						}
 					}
 
+					void ApplyStyle(vint start, vint length, vint hyperlinkedId, const ResolvedStyle& style)
+					{
+						paragraph->SetFont(start, length, style.style.fontFamily);
+						paragraph->SetSize(start, length, style.style.size);
+						paragraph->SetColor(start, length, style.color);
+						paragraph->SetBackgroundColor(start, length, style.backgroundColor);
+						paragraph->SetStyle(start, length, 
+							(IGuiGraphicsParagraph::TextStyle)
+							( (style.style.bold?IGuiGraphicsParagraph::Bold:0)
+							| (style.style.italic?IGuiGraphicsParagraph::Italic:0)
+							| (style.style.underline?IGuiGraphicsParagraph::Underline:0)
+							| (style.style.strikeline?IGuiGraphicsParagraph::Strikeline:0)
+							));
+						if(hyperlinkId!=DocumentRun::NullHyperlinkId)
+						{
+							paragraph->SetInteractionId(start, length, hyperlinkId);
+						}
+					}
+
 					void Visit(DocumentTextRun* run)override
 					{
 						length=run->text.Length();
 						if(length>0)
 						{
 							ResolvedStyle style=styles[styles.Count()-1];
-							paragraph->SetFont(start, length, style.style.fontFamily);
-							paragraph->SetSize(start, length, style.style.size);
-							paragraph->SetColor(start, length, style.color);
-							paragraph->SetBackgroundColor(start, length, style.backgroundColor);
-							paragraph->SetStyle(start, length, 
-								(IGuiGraphicsParagraph::TextStyle)
-								( (style.style.bold?IGuiGraphicsParagraph::Bold:0)
-								| (style.style.italic?IGuiGraphicsParagraph::Italic:0)
-								| (style.style.underline?IGuiGraphicsParagraph::Underline:0)
-								| (style.style.strikeline?IGuiGraphicsParagraph::Strikeline:0)
-								));
-							if(hyperlinkId!=DocumentRun::NullHyperlinkId)
+
+							vint styleStart=start;
+							vint styleEnd=styleStart+length;
+							if(styleStart<selectionEnd && selectionBegin<styleEnd)
 							{
-								paragraph->SetInteractionId(start, length, hyperlinkId);
+								vint s1=styleStart;
+								vint s2=styleStart>selectionBegin?styleStart:selectionBegin;
+								vint s3=selectionEnd<styleEnd?selectionEnd:styleEnd;
+								vint s4=styleEnd;
+
+								if(s1<s2)
+								{
+									ApplyStyle(s1, s2-s1, hyperlinkId, style);
+								}
+								if(s2<s3)
+								{
+									ResolvedStyle selectionStyle=model->GetStyle(DocumentModel::SelectionStyleName, style);
+									ApplyStyle(s2, s3-s2, hyperlinkId, selectionStyle);
+								}
+								if(s3<s4)
+								{
+									ApplyStyle(s3, s4-s3, hyperlinkId, style);
+								}
+							}
+							else
+							{
+								ApplyStyle(start, length, hyperlinkId, style);
 							}
 						}
 						start+=length;
