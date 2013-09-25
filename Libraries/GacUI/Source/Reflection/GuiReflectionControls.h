@@ -142,6 +142,7 @@ Type List
 			F(presentation::controls::GuiToolstripToolbar)\
 			F(presentation::controls::GuiToolstripButton)\
 			F(presentation::controls::GuiDocumentCommonInterface)\
+			F(presentation::controls::GuiDocumentCommonInterface::EditMode)\
 			F(presentation::controls::GuiDocumentViewer)\
 			F(presentation::controls::GuiDocumentLabel)\
 			F(presentation::controls::GuiTextBoxCommonInterface)\
