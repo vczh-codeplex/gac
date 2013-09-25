@@ -26,8 +26,10 @@ GuiDocumentViewer
 				Rect bounds=documentElement->GetCaretBounds(newEnd, frontSide);
 				if(bounds!=Rect())
 				{
-					bounds.x1-=5;
-					bounds.x2+=5;
+					bounds.x1-=15;
+					bounds.y1-=15;
+					bounds.x2+=15;
+					bounds.y2+=15;
 					EnsureRectVisible(bounds);
 				}
 			}

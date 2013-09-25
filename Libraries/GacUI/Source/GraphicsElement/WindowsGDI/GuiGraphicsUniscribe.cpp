@@ -555,6 +555,10 @@ UniscribeTextRun
 			void UniscribeTextRun::SearchGlyphCluster(vint charStart, vint charLength, vint& cluster, vint& nextCluster)
 			{
 				cluster=wholeGlyph.charCluster[charStart];
+				if(charStart+charLength>length)
+				{
+					charLength=length-charStart;
+				}
 				if(scriptItem->IsRightToLeft())
 				{
 					nextCluster
