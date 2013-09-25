@@ -681,47 +681,82 @@ WindowsDirect2DParagraph (Caret Helper)
 					}
 				}
 
-				void CorrectCaretSide(vint caret, bool& frontSide)
+				Pair<FLOAT, FLOAT> GetLineYRange(vint lineIndex)
 				{
-					if(caret==0)
+					if(paragraphText.Length()==0)
 					{
-						frontSide=false;
-					}
-					else if(caret==paragraphText.Length())
-					{
-						frontSide=true;
+						return Pair<FLOAT, FLOAT>(0, (FLOAT)GetHeight());
 					}
 					else
 					{
-						vint frontLineIndex=-1;
-						vint backLineIndex=-1;
-						GetLineIndexFromTextPos(caret, frontLineIndex, backLineIndex);
-						if(frontLineIndex==backLineIndex)
+						FLOAT minY=0;
+						FLOAT maxY=0;
+						if(lineStarts[lineIndex]==paragraphText.Length())
 						{
-							DWRITE_LINE_METRICS& line=lineMetrics[frontLineIndex];
-							vint lineStart=lineStarts[frontLineIndex];
-							vint lineEnd=lineStart+line.length-line.newlineLength;
-							if(caret==lineStart)
-							{
-								frontSide=false;
-							}
-							else if(caret==lineEnd)
-							{
-								frontSide=true;
-							}
+							vint offset=lineMetrics[lineIndex-1].newlineLength;
+							vint index=charHitTestMap[lineStarts[lineIndex]-offset];
+							DWRITE_HIT_TEST_METRICS& hitTest=hitTestMetrics[index];
+							minY=hitTest.top+hitTest.height;
+							maxY=(FLOAT)GetHeight();
 						}
+						else
+						{
+							vint index=charHitTestMap[lineStarts[lineIndex]];
+							DWRITE_HIT_TEST_METRICS& hitTest=hitTestMetrics[index];
+							minY=hitTest.top;
+							maxY=minY+hitTest.height;
+						}
+						return Pair<FLOAT, FLOAT>(minY, maxY);
 					}
 				}
 
-				vint GetCaretHitTestIndex(vint caret, bool& frontSide)
+				vint GetLineIndexFromY(vint y)
 				{
-					CorrectCaretSide(caret, frontSide);
-					if(frontSide)
+					FLOAT minY=0;
+					FLOAT maxY=0;
 					{
-						caret--;
+						minY=hitTestMetrics[0].top;
+						DWRITE_HIT_TEST_METRICS& hitTest=hitTestMetrics[hitTestMetrics.Count()-1];
+						maxY=hitTest.top+hitTest.height;
 					}
 
-					return charHitTestMap[caret];
+					if(y<minY)
+					{
+						return 0;
+					}
+					else if(y>=maxY)
+					{
+						return lineMetrics.Count()-1;
+					}
+
+					vint start=0;
+					vint end=lineMetrics.Count()-1;
+					while(start<=end)
+					{
+						vint middle=(start+end)/2;
+						Pair<FLOAT, FLOAT> yRange=GetLineYRange(middle);
+						minY=yRange.key;
+						maxY=yRange.value;
+
+						if(y<minY)
+						{
+							end=middle-1;
+						}
+						else if(y>=maxY)
+						{
+							start=middle+1;
+						}
+						else
+						{
+							return middle;
+						}
+					}
+					return -1;
+				}
+
+				vint GetCaretFromXWithLine(vint x, vint lineIndex)
+				{
+					throw 0;
 				}
 
 /***********************************************************************
@@ -784,12 +819,32 @@ WindowsDirect2DParagraph (Caret)
 						}
 					case CaretMoveUp:
 						{
+							if(lineIndex==0)
+							{
+								return comparingCaret;
+							}
+							else
+							{
+								Rect bounds=GetCaretBounds(comparingCaret, preferFrontSide);
+								preferFrontSide=true;
+								return GetCaretFromXWithLine(bounds.x1, lineIndex-1);
+							}
 						}
 					case CaretMoveDown:
 						{
+							if(lineIndex==lineMetrics.Count()-1)
+							{
+								return comparingCaret;
+							}
+							else
+							{
+								Rect bounds=GetCaretBounds(comparingCaret, preferFrontSide);
+								preferFrontSide=false;
+								return GetCaretFromXWithLine(bounds.x1, lineIndex+1);
+							}
 						}
 					}
-					throw 0;
+					return -1;
 				}
 
 				Rect GetCaretBounds(vint caret, bool frontSide)override
@@ -798,34 +853,65 @@ WindowsDirect2DParagraph (Caret)
 					if(!IsValidCaret(caret)) return Rect();
 					if(paragraphText.Length()==0) return Rect(Point(0, 0), Size(0, GetHeight()));
 
-					vint index=GetCaretHitTestIndex(caret, frontSide);
-					DWRITE_HIT_TEST_METRICS& hitTest=hitTestMetrics[index];
-					DWRITE_CLUSTER_METRICS& cluster=clusterMetrics[index];
-					if(cluster.isRightToLeft)
-					{
-						frontSide=!frontSide;
-					}
+					vint frontLineIndex=-1;
+					vint backLineIndex=-1;
+					GetLineIndexFromTextPos(caret, frontLineIndex, backLineIndex);
+					vint lineIndex=frontSide?frontLineIndex:backLineIndex;
 
-					if(frontSide)
+					Pair<FLOAT, FLOAT> lineYRange=GetLineYRange(lineIndex);
+					DWRITE_LINE_METRICS& line=lineMetrics[lineIndex];
+					if(line.length-line.newlineLength==0)
 					{
-						return Rect(
-							Point((vint)(hitTest.left+hitTest.width), (vint)hitTest.top),
-							Size(0, (vint)hitTest.height)
-							);
+						return Rect(0, (vint)lineYRange.key, 0, (vint)lineYRange.value);
 					}
 					else
 					{
-						return Rect(
-							Point((vint)hitTest.left, (vint)hitTest.top),
-							Size(0, (vint)hitTest.height)
-							);
+						vint lineStart=lineStarts[lineIndex];
+						vint lineEnd=lineStart+line.length-line.newlineLength;
+						if(caret==lineStart)
+						{
+							frontSide=false;
+						}
+						else if(caret==lineEnd)
+						{
+							frontSide=true;
+						}
+						if(frontSide)
+						{
+							caret--;
+						}
+
+						vint index=charHitTestMap[caret];
+						DWRITE_HIT_TEST_METRICS& hitTest=hitTestMetrics[index];
+						DWRITE_CLUSTER_METRICS& cluster=clusterMetrics[index];
+						if(cluster.isRightToLeft)
+						{
+							frontSide=!frontSide;
+						}
+
+						if(frontSide)
+						{
+							return Rect(
+								Point((vint)(hitTest.left+hitTest.width), (vint)hitTest.top),
+								Size(0, (vint)hitTest.height)
+								);
+						}
+						else
+						{
+							return Rect(
+								Point((vint)hitTest.left, (vint)hitTest.top),
+								Size(0, (vint)hitTest.height)
+								);
+						}
 					}
 				}
 
 				vint GetCaretFromPoint(Point point)override
 				{
 					PrepareFormatData();
-					throw 0;
+					vint lineIndex=GetLineIndexFromY(point.y);
+					vint caret=GetCaretFromXWithLine(point.x, lineIndex);
+					return caret;
 				}
 
 				vint GetNearestCaretFromTextPos(vint textPos, bool frontSide)override
