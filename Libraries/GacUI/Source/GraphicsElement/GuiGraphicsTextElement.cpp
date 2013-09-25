@@ -1127,6 +1127,13 @@ GuiDocumentElement::GuiDocumentElementRenderer
 					{
 						cache->graphicsParagraph->SetMaxWidth(lastMaxWidth);
 					}
+
+					vint paragraphHeight=paragraphHeights[paragraphIndex];
+					vint height=cache->graphicsParagraph->GetHeight();
+					if(paragraphHeight!=height)
+					{
+						paragraphHeights[paragraphIndex]=height;
+					}
 				}
 
 				return cache;
@@ -1210,7 +1217,6 @@ GuiDocumentElement::GuiDocumentElementRenderer
 							{
 								cachedTotalHeight+=height-paragraphHeight;
 								paragraphHeight=height;
-								paragraphHeights[i]=paragraphHeight;
 							}
 
 							cache->graphicsParagraph->Render(Rect(Point(cx, cy+y), Size(maxWidth, paragraphHeight)));
@@ -1470,6 +1476,28 @@ GuiDocumentElement::GuiDocumentElementRenderer
 				return lastCaret;
 			}
 
+			Rect GuiDocumentElement::GuiDocumentElementRenderer::GetCaretBounds(TextPos caret, bool frontSide)
+			{
+				Ptr<ParagraphCache> cache=EnsureAndGetCache(caret.row, true);
+				if(cache)
+				{
+					Rect bounds=cache->graphicsParagraph->GetCaretBounds(caret.column, frontSide);
+					if(bounds!=Rect())
+					{
+						vint y=0;
+						for(vint i=0;i<caret.row;i++)
+						{
+							y+=paragraphHeights[i];
+						}
+
+						bounds.y1+=y;
+						bounds.y2+=y;
+						return bounds;
+					}
+				}
+				return Rect();
+			}
+
 /***********************************************************************
 GuiDocumentElement
 ***********************************************************************/
@@ -1591,12 +1619,24 @@ GuiDocumentElement
 				Ptr<GuiDocumentElementRenderer> elementRenderer=renderer.Cast<GuiDocumentElementRenderer>();
 				if(elementRenderer)
 				{
-					TextPos caret=elementRenderer->CalculateCaretFromPoint(point);
-					return caret;
+					return elementRenderer->CalculateCaretFromPoint(point);
 				}
 				else
 				{
 					return TextPos(0, 0);
+				}
+			}
+
+			Rect GuiDocumentElement::GetCaretBounds(TextPos caret, bool frontSide)
+			{
+				Ptr<GuiDocumentElementRenderer> elementRenderer=renderer.Cast<GuiDocumentElementRenderer>();
+				if(elementRenderer)
+				{
+					return elementRenderer->GetCaretBounds(caret, frontSide);
+				}
+				else
+				{
+					return Rect();
 				}
 			}
 			
