@@ -957,8 +957,6 @@ Visitors
 					{
 						paragraph->SetFont(start, length, style.style.fontFamily);
 						paragraph->SetSize(start, length, style.style.size);
-						paragraph->SetColor(start, length, style.color);
-						paragraph->SetBackgroundColor(start, length, style.backgroundColor);
 						paragraph->SetStyle(start, length, 
 							(IGuiGraphicsParagraph::TextStyle)
 							( (style.style.bold?IGuiGraphicsParagraph::Bold:0)
@@ -972,39 +970,33 @@ Visitors
 						}
 					}
 
+					void ApplyColor(vint start, vint length, vint hyperlinkedId, const ResolvedStyle& style)
+					{
+						paragraph->SetColor(start, length, style.color);
+						paragraph->SetBackgroundColor(start, length, style.backgroundColor);
+					}
+
 					void Visit(DocumentTextRun* run)override
 					{
 						length=run->text.Length();
 						if(length>0)
 						{
 							ResolvedStyle style=styles[styles.Count()-1];
+							ApplyStyle(start, length, hyperlinkId, style);
+							ApplyColor(start, length, hyperlinkId, style);
 
 							vint styleStart=start;
 							vint styleEnd=styleStart+length;
 							if(styleStart<selectionEnd && selectionBegin<styleEnd)
 							{
-								vint s1=styleStart;
 								vint s2=styleStart>selectionBegin?styleStart:selectionBegin;
 								vint s3=selectionEnd<styleEnd?selectionEnd:styleEnd;
-								vint s4=styleEnd;
 
-								if(s1<s2)
-								{
-									ApplyStyle(s1, s2-s1, hyperlinkId, style);
-								}
 								if(s2<s3)
 								{
 									ResolvedStyle selectionStyle=model->GetStyle(DocumentModel::SelectionStyleName, style);
-									ApplyStyle(s2, s3-s2, hyperlinkId, selectionStyle);
+									ApplyColor(s2, s3-s2, hyperlinkId, selectionStyle);
 								}
-								if(s3<s4)
-								{
-									ApplyStyle(s3, s4-s3, hyperlinkId, style);
-								}
-							}
-							else
-							{
-								ApplyStyle(start, length, hyperlinkId, style);
 							}
 						}
 						start+=length;
