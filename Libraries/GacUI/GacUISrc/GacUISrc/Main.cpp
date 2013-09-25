@@ -17,7 +17,7 @@ using namespace vl::parsing;
 using namespace vl::parsing::tabling;
 using namespace vl::parsing::xml;
 
-#define GUI_GRAPHICS_RENDERER_GDI
+#define GUI_GRAPHICS_RENDERER_DIRECT2D
 
 int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int CmdShow)
 {

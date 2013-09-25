@@ -155,36 +155,178 @@ WindowsDirect2DParagraph
 
 			class WindowsDirect2DParagraph : public Object, public IGuiGraphicsParagraph
 			{
-				typedef Dictionary<IGuiGraphicsElement*, ComPtr<WindowsDirect2DElementInlineObject>>		InlineElementMap;
-				typedef Dictionary<Pair<vint, vint>, vint>													InteractionIdMap;
 			protected:
-				IGuiGraphicsLayoutProvider*			provider;
-				ID2D1SolidColorBrush*				defaultTextColor;
-				IDWriteFactory*						dwriteFactory;
-				IWindowsDirect2DRenderTarget*		renderTarget;
-				WString								paragraphText;
-				ComPtr<IDWriteTextLayout>			textLayout;
-				bool								wrapLine;
-				vint								maxWidth;
-				List<Color>							usedColors;
-				InlineElementMap					inlineElements;
-				InteractionIdMap					interactionIds;
+				struct TextRange
+				{
+					vint								start;
+					vint								end;
 
-				vint								caret;
-				Color								caretColor;
-				bool								caretFrontSide;
-				ID2D1SolidColorBrush*				caretBrush;
+					TextRange(){}
+					TextRange(vint _start, vint _end):start(_start),end(_end){}
 
-				bool								formatDataAvailable;
-				Array<DWRITE_LINE_METRICS>			lineMetrics;
-				Array<vint>							lineStarts;
-				Array<FLOAT>						lineTops;
-				Array<DWRITE_CLUSTER_METRICS>		clusterMetrics;
-				Array<DWRITE_HIT_TEST_METRICS>		hitTestMetrics;
-				Array<vint>							charHitTestMap;
+					bool operator==(const TextRange& range) const { return start==range.start; }
+					bool operator!=(const TextRange& range) const { return start!=range.start; }
+					bool operator<(const TextRange& range) const { return start<range.start; }
+					bool operator<=(const TextRange& range) const { return start<=range.start; }
+					bool operator>(const TextRange& range) const { return start>range.start; }
+					bool operator>=(const TextRange& range) const { return start>=range.start; }
+				};
+
+				typedef Dictionary<IGuiGraphicsElement*, ComPtr<WindowsDirect2DElementInlineObject>>	InlineElementMap;
+				typedef Dictionary<TextRange, vint>														InteractionIdMap;
+				typedef Dictionary<TextRange, Color>													ColorMap;
+			protected:
+				IGuiGraphicsLayoutProvider*				provider;
+				ID2D1SolidColorBrush*					defaultTextColor;
+				IDWriteFactory*							dwriteFactory;
+				IWindowsDirect2DRenderTarget*			renderTarget;
+				WString									paragraphText;
+				ComPtr<IDWriteTextLayout>				textLayout;
+				bool									wrapLine;
+				vint									maxWidth;
+				List<Color>								usedColors;
+				InlineElementMap						inlineElements;
+				InteractionIdMap						interactionIds;
+				ColorMap								backgroundColors;
+
+				vint									caret;
+				Color									caretColor;
+				bool									caretFrontSide;
+				ID2D1SolidColorBrush*					caretBrush;
+
+				bool									formatDataAvailable;
+				Array<DWRITE_LINE_METRICS>				lineMetrics;
+				Array<vint>								lineStarts;
+				Array<FLOAT>							lineTops;
+				Array<DWRITE_CLUSTER_METRICS>			clusterMetrics;
+				Array<DWRITE_HIT_TEST_METRICS>			hitTestMetrics;
+				Array<vint>								charHitTestMap;
 
 /***********************************************************************
-WindowsDirect2DParagraph (Initialization)
+WindowsDirect2DParagraph (Ranges)
+***********************************************************************/
+
+				template<typename T>
+				void CutMap(Dictionary<TextRange, T>& map, vint start, vint length)
+				{
+					vint end=start+length;
+					for(vint i=map.Count()-1;i>=0;i--)
+					{
+						TextRange key=map.Keys()[i];
+						if(key.start<end && start<key.end)
+						{
+							T value=map.Values()[i];
+
+							vint s1=key.start;
+							vint s2=key.start>start?key.start:start;
+							vint s3=key.end<end?key.end:end;
+							vint s4=key.end;
+
+							map.Remove(key);
+							if(s1<s2)
+							{
+								map.Add(TextRange(s1, s2), value);
+							}
+							if(s2<s3)
+							{
+								map.Add(TextRange(s2, s3), value);
+							}
+							if(s3<s4)
+							{
+								map.Add(TextRange(s3, s4), value);
+							}
+						}
+					}
+				}
+				
+				template<typename T>
+				void UpdateOverlappedMap(Dictionary<TextRange, T>& map, vint start, vint length, const T& value)
+				{
+					vint end=start+length;
+					for(vint i=map.Count()-1;i>=0;i--)
+					{
+						TextRange key=map.Keys()[i];
+						if(key.start<end && start<key.end)
+						{
+							map.Set(key, value);
+						}
+					}
+				}
+				
+				template<typename T>
+				void DefragmentMap(Dictionary<TextRange, T>& map)
+				{
+					vint lastIndex=-1;
+					T lastValue;
+					for(vint i=map.Count()-1;i>=-1;i--)
+					{
+						if(lastIndex==-1)
+						{
+							lastIndex=i;
+							if(i!=-1)
+							{
+								lastValue=map.Values()[i];
+							}
+						}
+						else if(i==-1 || map.Values()[i]!=lastValue)
+						{
+							if(lastIndex-i>0)
+							{
+								vint start=map.Keys()[i+1].start;
+								vint end=map.Keys()[lastIndex].end;
+								TextRange key(start, end);
+
+								for(vint j=lastIndex;j>i;j--)
+								{
+									map.Remove(map.Keys()[j]);
+								}
+								map.Add(key, lastValue);
+							}
+							lastIndex=i;
+							if(i!=-1)
+							{
+								lastValue=map.Values()[i];
+							}
+						}
+					}
+				}
+				
+				template<typename T>
+				void SetMap(Dictionary<TextRange, T>& map, vint start, vint length, const T& value)
+				{
+					CutMap(map, start, length);
+					UpdateOverlappedMap(map, start, length, value);
+					DefragmentMap(map);
+				}
+
+				template<typename T>
+				bool GetMap(Dictionary<TextRange, T>& map, vint textPosition, T& value)
+				{
+					vint start=0;
+					vint end=map.Count()-1;
+					while(start<=end)
+					{
+						vint middle=(start+end)/2;
+						TextRange key=map.Keys()[middle];
+						if(textPosition<key.start)
+						{
+							end=middle-1;
+						}
+						else if(textPosition>=key.end)
+						{
+							start=middle+1;
+						}
+						else
+						{
+							value=map.Values()[middle];
+							return true;
+						}
+					}
+					return false;
+				}
+
+/***********************************************************************
+WindowsDirect2DParagraph (Layout Retriving)
 ***********************************************************************/
 
 				void PrepareFormatData()
@@ -251,6 +393,11 @@ WindowsDirect2DParagraph (Initialization)
 					}
 				}
 			public:
+
+/***********************************************************************
+WindowsDirect2DParagraph (Initialization)
+***********************************************************************/
+
 				WindowsDirect2DParagraph(IGuiGraphicsLayoutProvider* _provider, const WString& _text, IGuiGraphicsRenderTarget* _renderTarget)
 					:provider(_provider)
 					,dwriteFactory(GetWindowsDirect2DObjectProvider()->GetDirectWriteFactory())
@@ -282,7 +429,8 @@ WindowsDirect2DParagraph (Initialization)
 						textLayout=rawTextLayout;
 						textLayout->SetWordWrapping(DWRITE_WORD_WRAPPING_WRAP);
 					}
-					interactionIds.Add(Pair<vint, vint>(0, _text.Length()), NullInteractionId);
+					interactionIds.Add(TextRange(0, _text.Length()), NullInteractionId);
+					backgroundColors.Add(TextRange(0, _text.Length()), Color(0, 0, 0, 0));
 
 					GetWindowsDirect2DResourceManager()->DestroyDirect2DTextFormat(defaultFont);
 				}
@@ -435,6 +583,7 @@ WindowsDirect2DParagraph (Formatting)
 
 				bool SetBackgroundColor(vint start, vint length, Color value)override
 				{
+					SetMap(backgroundColors, start, length, value);
 					return true;
 				}
 
@@ -502,69 +651,9 @@ WindowsDirect2DParagraph (Formatting)
 					return false;
 				}
 
-				vint SearchInInteractionIdMap(vint textPosition)
-				{
-					vint start=0;
-					vint end=interactionIds.Count()-1;
-					while(start<=end)
-					{
-						vint middle=start+(end-start)/2;
-						Pair<vint, vint> p=interactionIds.Keys()[middle];
-						if(textPosition<p.key)
-						{
-							end=middle-1;
-						}
-						else if(p.key+p.value<=textPosition)
-						{
-							start=middle+1;
-						}
-						else
-						{
-							return middle;
-						}
-					}
-					return -1;
-				}
-
-				vint CutInteractionIdMap(vint textPosition, vint index)
-				{
-					Pair<vint, vint> p=interactionIds.Keys()[index];
-					CHECK_ERROR(p.key<=textPosition && textPosition<=p.key+p.value, L"WindowsDirect2DParagraph::CutInteractionIdMap(vint, vint)#textPositionÓëindex²»Æ¥Åä¡£");
-					if(textPosition==p.key || textPosition==p.key+p.value)
-					{
-						return 0;
-					}
-					else
-					{
-						vint id=interactionIds.Values().Get(index);
-						Pair<vint, vint> bp=p;
-						Pair<vint, vint> ep=p;
-						bp.value=textPosition-p.key;
-						ep.key=textPosition;
-						ep.value=p.value-bp.value;
-
-						interactionIds.Remove(p);
-						interactionIds.Add(bp, id);
-						interactionIds.Add(ep, id);
-						return 1;
-					}
-				}
-
 				bool SetInteractionId(vint start, vint length, vint value)override
 				{
-					vint begin=SearchInInteractionIdMap(start);
-					vint end=SearchInInteractionIdMap(start+length-1);
-					if(begin==-1 || end==-1) return false;
-					formatDataAvailable=false;
-
-					vint offset=CutInteractionIdMap(start, begin);
-					begin+=offset;
-					end+=offset;
-					CutInteractionIdMap(start+length, end);
-					for(vint i=begin;i<=end;i++)
-					{
-						interactionIds.Set(interactionIds.Keys()[i], value);
-					}
+					SetMap(interactionIds, start, length, value);
 					return true;
 				}
 
@@ -581,7 +670,8 @@ WindowsDirect2DParagraph (Formatting)
 
 					start=metrics.textPosition;
 					length=metrics.length;
-					vint index=SearchInInteractionIdMap(start);
+					vint index=-1;
+					GetMap(interactionIds, start, index);
 					interactionId=index==-1?NullInteractionId:interactionIds.Values().Get(index);
 
 					return inside==TRUE;
@@ -620,6 +710,48 @@ WindowsDirect2DParagraph (Rendering)
 
 				void Render(Rect bounds)override
 				{
+					PrepareFormatData();
+					for(vint i=0;i<backgroundColors.Count();i++)
+					{
+						TextRange key=backgroundColors.Keys()[i];
+						Color color=backgroundColors.Values()[i];
+						if(color.a>0)
+						{
+							ID2D1SolidColorBrush* brush=renderTarget->CreateDirect2DBrush(color);
+
+							vint start=key.start;
+							if(start<0)
+							{
+								start=0;
+							}
+
+							while(start<charHitTestMap.Count() && start<key.end)
+							{
+								vint index=charHitTestMap[start];
+								DWRITE_HIT_TEST_METRICS& hitTest=hitTestMetrics[index];
+
+								FLOAT x1=hitTest.left+(FLOAT)bounds.x1;
+								FLOAT y1=hitTest.top+(FLOAT)bounds.y1;
+								FLOAT x2=x1+hitTest.width;
+								FLOAT y2=y1+hitTest.height;
+
+								x1-=0.5f;
+								y1-=0.5f;
+								x2+=0.5f;
+								y2+=0.5f;
+
+								renderTarget->GetDirect2DRenderTarget()->FillRectangle(
+									D2D1::RectF(x1, y1, x2, y2),
+									brush
+									);
+										
+								start=hitTest.textPosition+hitTest.length;
+							}
+
+							renderTarget->DestroyDirect2DBrush(color);
+						}
+					}
+
 					renderTarget->GetDirect2DRenderTarget()->DrawTextLayout(
 						D2D1::Point2F((FLOAT)bounds.Left(), (FLOAT)bounds.Top()),
 						textLayout.Obj(),
