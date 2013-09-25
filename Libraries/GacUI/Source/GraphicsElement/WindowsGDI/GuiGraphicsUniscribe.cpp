@@ -110,6 +110,30 @@ UniscribeFragment
 				}
 			}
 
+			UniscribeColor UniscribeFragment::GetCharColor(vint charIndex)
+			{
+				vint start=0;
+				vint end=colors.Count()-1;
+				while(start<=end)
+				{
+					vint middle=(start+end)/2;
+					UniscribeColorRange key=colors.Keys()[middle];
+					if(charIndex<key.start)
+					{
+						end=middle-1;
+					}
+					else if(charIndex>=key.end)
+					{
+						start=middle+1;
+					}
+					else
+					{
+						return colors.Values()[middle];
+					}
+				}
+				return UniscribeColor();
+			}
+
 			Ptr<UniscribeFragment> UniscribeFragment::Copy(vint start, vint length)
 			{
 				vint end=start+length;
@@ -487,6 +511,21 @@ UniscribeTextRun
 				wholeGlyph.ClearUniscribeData(0, 0);
 			}
 
+			void UniscribeTextRun::SearchSingleGlyphCluster(vint charStart, vint& charLength, vint& cluster, vint& nextCluster)
+			{
+				cluster=wholeGlyph.charCluster[charStart];
+				vint nextChar=charStart;
+				while(nextChar<wholeGlyph.charCluster.Count())
+				{
+					if(wholeGlyph.charCluster[nextChar]!=cluster)
+					{
+						break;
+					}
+					nextChar++;
+				}
+				SearchGlyphCluster(charStart, charLength, cluster, nextCluster);
+			}
+
 			void UniscribeTextRun::SearchGlyphCluster(vint charStart, vint charLength, vint& cluster, vint& nextCluster)
 			{
 				cluster=wholeGlyph.charCluster[charStart];
@@ -621,33 +660,16 @@ UniscribeTextRun
 			{
 				RunFragmentBounds& fragment=fragmentBounds[fragmentBoundsIndex];
 				if(fragment.length==0) return;
-				RECT rect;
-				rect.left=(int)(fragment.bounds.Left()+offsetX);
-				rect.top=(int)(fragment.bounds.Top()+offsetY);
-				rect.right=(int)(rect.left+fragment.bounds.Width());
-				rect.bottom=(int)(rect.top+fragment.bounds.Height()*1.5);
 
-				if(renderBackground)
+				vint startFromFragment=0;
+				vint accumulatedWidth=0;
+				while(startFromFragment<fragment.length)
 				{
-					//Color backgroundColor=documentFragment->backgroundColor;
-
-					//if(backgroundColor.a>0)
-					//{
-					//	Ptr<WinBrush> brush=new WinBrush(RGB(backgroundColor.r, backgroundColor.g, backgroundColor.b));
-					//	dc->SetBrush(brush);
-					//	dc->FillRect(rect);
-					//}
-				}
-				else
-				{
-					Color fontColor=documentFragment->fontColor;
-					HFONT oldFont=0;
-					dc->SetFont(documentFragment->fontObject);
-					dc->SetTextColor(RGB(fontColor.r, fontColor.g, fontColor.b));
-
+					vint charIndex=fragment.startFromRun+startFromFragment;
+					vint charLength=0;
 					vint cluster=0;
 					vint nextCluster=0;
-					SearchGlyphCluster(fragment.startFromRun, fragment.length, cluster, nextCluster);
+					SearchSingleGlyphCluster(charIndex, charLength, cluster, nextCluster);
 
 					vint clusterStart=0;
 					vint clusterCount=0;
@@ -662,7 +684,46 @@ UniscribeTextRun
 						clusterCount=nextCluster-cluster;
 					}
 
-					HRESULT hr=ScriptTextOut(
+					vint clusterWidth=0;
+					for(vint i=0;i<clusterCount;i++)
+					{
+						clusterWidth+=wholeGlyph.glyphAdvances[i+clusterStart];
+					}
+
+					vint x=0;
+					if(scriptItem->IsRightToLeft())
+					{
+						x=fragment.bounds.x2-accumulatedWidth-clusterWidth;
+					}
+					else
+					{
+						x=fragment.bounds.x1+accumulatedWidth;
+					}
+					RECT rect;
+					rect.left=(int)(x+offsetX);
+					rect.top=(int)(fragment.bounds.Top()+offsetY);
+					rect.right=(int)(rect.left+clusterWidth);
+					rect.bottom=(int)(rect.top+fragment.bounds.Height()*1.5);
+
+					UniscribeColor color=documentFragment->GetCharColor(charIndex+startFromFragment);
+					if(renderBackground)
+					{
+						Color backgroundColor=color.backgroundColor;
+
+						if(backgroundColor.a>0)
+						{
+							Ptr<WinBrush> brush=new WinBrush(RGB(backgroundColor.r, backgroundColor.g, backgroundColor.b));
+							dc->SetBrush(brush);
+							dc->FillRect(rect);
+						}
+					}
+					else
+					{
+						Color fontColor=color.fontColor;
+						dc->SetFont(documentFragment->fontObject);
+						dc->SetTextColor(RGB(fontColor.r, fontColor.g, fontColor.b));
+
+						HRESULT hr=ScriptTextOut(
 						dc->GetHandle(),
 						&scriptCache,
 						rect.left,
@@ -678,6 +739,10 @@ UniscribeTextRun
 						NULL,
 						&wholeGlyph.glyphOffsets[clusterStart]
 						);
+					}
+
+					startFromFragment+=charLength;
+					accumulatedWidth+=clusterWidth;
 				}
 			}
 
@@ -1564,7 +1629,7 @@ UniscribeParagraph (Formatting)
 
 			bool UniscribeParagraph::SetColor(vint start, vint length, Color value)
 			{
-				vint fs, ss, fe, se, f1, f2;
+				vint fs, ss, fe, se;
 				SearchFragment(start, length, fs, ss, fe, se);
 				if(fs==-1 || ss==-1 || fe==-1 || se==-1) return false;
 
@@ -1574,7 +1639,7 @@ UniscribeParagraph (Formatting)
 
 			bool UniscribeParagraph::SetBackgroundColor(vint start, vint length, Color value)
 			{
-				vint fs, ss, fe, se, f1, f2;
+				vint fs, ss, fe, se;
 				SearchFragment(start, length, fs, ss, fe, se);
 				if(fs==-1 || ss==-1 || fe==-1 || se==-1) return false;
 
