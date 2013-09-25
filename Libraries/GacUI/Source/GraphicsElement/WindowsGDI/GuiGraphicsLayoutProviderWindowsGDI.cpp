@@ -48,9 +48,7 @@ WindowsGDIParagraph
 					paragraph=new UniscribeParagraph;
 					paragraph->paragraphText=text;
 
-					Ptr<UniscribeFragment> fragment=new UniscribeFragment;
-					fragment->text=_text;
-					fragment->fontColor=Color(0, 0, 0);
+					Ptr<UniscribeFragment> fragment=new UniscribeFragment(_text);
 					fragment->fontStyle=GetCurrentController()->ResourceService()->GetDefaultFont();
 					paragraph->documentFragments.Add(fragment);
 				}
