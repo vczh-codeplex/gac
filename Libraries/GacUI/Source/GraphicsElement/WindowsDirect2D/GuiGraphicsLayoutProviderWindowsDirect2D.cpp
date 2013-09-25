@@ -177,6 +177,7 @@ WindowsDirect2DParagraph
 
 				bool								formatDataAvailable;
 				Array<DWRITE_LINE_METRICS>			lineMetrics;
+				Array<vint>							lineStarts;
 				Array<DWRITE_CLUSTER_METRICS>		clusterMetrics;
 				Array<DWRITE_HIT_TEST_METRICS>		hitTestMetrics;
 				Array<vint>							charHitTestMap;
@@ -197,6 +198,15 @@ WindowsDirect2DParagraph (Initialization)
 							if(lineCount>0)
 							{
 								textLayout->GetLineMetrics(&lineMetrics[0], lineCount, &lineCount);
+							}
+
+							lineStarts.Resize(lineCount);
+							vint start=0;
+							for(vint i=0;i<lineMetrics.Count();i++)
+							{
+								DWRITE_LINE_METRICS& metrics=lineMetrics[i];
+								lineStarts[i]=start;
+								start+=metrics.length+metrics.newlineLength;
 							}
 						}
 						{
@@ -625,6 +635,76 @@ WindowsDirect2DParagraph (Rendering)
 				}
 
 /***********************************************************************
+WindowsDirect2DParagraph (Caret Helper)
+***********************************************************************/
+
+				void CorrectCaretSide(vint caret, bool& frontSide)
+				{
+					if(caret==0)
+					{
+						frontSide=false;
+					}
+					else if(caret==paragraphText.Length())
+					{
+						frontSide=true;
+					}
+				}
+
+				vint GetCaretHitTestIndex(vint caret, bool& frontSide)
+				{
+					CorrectCaretSide(caret, frontSide);
+					if(frontSide)
+					{
+						caret--;
+					}
+
+					return charHitTestMap[caret];
+				}
+
+				void GetLineIndexFromTextPos(vint textPos, vint& frontLineIndex, vint& backLineIndex)
+				{
+					frontLineIndex=-1;
+					backLineIndex=-1;
+					vint start=0;
+					vint end=lineMetrics.Count()-1;
+					while(start<=end)
+					{
+						vint middle=(start+end)/2;
+						DWRITE_LINE_METRICS& metrics=lineMetrics[middle];
+						vint lineStart=lineStarts[middle];
+						vint lineEnd=lineStart+metrics.length;
+
+						if(textPos<lineStart)
+						{
+							end=middle-1;
+						}
+						else if(textPos>lineEnd)
+						{
+							start=middle+1;
+						}
+						else if(textPos==lineStart && middle!=0)
+						{
+							DWRITE_LINE_METRICS& anotherLine=lineMetrics[middle-1];
+							frontLineIndex=anotherLine.newlineLength==0?middle-1:middle;
+							backLineIndex=middle;
+							return;
+						}
+						else if(textPos==lineEnd && middle!=lineMetrics.Count()-1)
+						{
+							frontLineIndex=middle;
+							backLineIndex=metrics.newlineLength==0?middle+1:middle;
+							return;
+						}
+						else
+						{
+							frontLineIndex=middle;
+							backLineIndex=middle;
+							return;
+						}
+					}
+				}
+
+/***********************************************************************
 WindowsDirect2DParagraph (Caret)
 ***********************************************************************/
 
@@ -647,6 +727,21 @@ WindowsDirect2DParagraph (Caret)
 						if(index==hitTestMetrics.Count()-1) return paragraphText.Length();
 						return hitTestMetrics[index+1].textPosition;
 					}
+
+					vint frontLineIndex=-1;
+					vint backLineIndex=-1;
+					GetLineIndexFromTextPos(comparingCaret, frontLineIndex, backLineIndex);
+					vint lineIndex=preferFrontSide?frontLineIndex:backLineIndex;
+					DWRITE_LINE_METRICS& line=lineMetrics[lineIndex];
+
+					if(position==CaretLineFirst)
+					{
+						return lineStarts[lineIndex];
+					}
+					if(position==CaretLineLast)
+					{
+						return lineStarts[lineIndex]+line.length;
+					}
 					throw 0;
 				}
 
@@ -654,23 +749,9 @@ WindowsDirect2DParagraph (Caret)
 				{
 					PrepareFormatData();
 					if(!IsValidCaret(caret)) return Rect();
-
 					if(paragraphText.Length()==0) return Rect(Point(0, 0), Size(0, GetHeight()));
 
-					if(caret==0)
-					{
-						frontSide=false;
-					}
-					else if(caret==paragraphText.Length())
-					{
-						frontSide=true;
-					}
-					if(frontSide)
-					{
-						caret--;
-					}
-
-					vint index=charHitTestMap[caret];
+					vint index=GetCaretHitTestIndex(caret, frontSide);
 					DWRITE_HIT_TEST_METRICS& hitTest=hitTestMetrics[index];
 					DWRITE_CLUSTER_METRICS& cluster=clusterMetrics[index];
 					if(cluster.isRightToLeft)
