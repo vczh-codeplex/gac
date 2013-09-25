@@ -1132,7 +1132,10 @@ GuiDocumentElement::GuiDocumentElementRenderer
 					vint height=cache->graphicsParagraph->GetHeight();
 					if(paragraphHeight!=height)
 					{
-						paragraphHeights[paragraphIndex]=height;
+						cachedTotalHeight+=height-paragraphHeight;
+						paragraphHeight=height;
+						paragraphHeights[paragraphIndex]=paragraphHeight;
+						minSize=Size(0, cachedTotalHeight);
 					}
 				}
 
@@ -1212,20 +1215,12 @@ GuiDocumentElement::GuiDocumentElementRenderer
 								cache->graphicsParagraph->OpenCaret(lastCaret.column, lastCaretColor, lastCaretFrontSide);
 							}
 
-							vint height=cache->graphicsParagraph->GetHeight();
-							if(paragraphHeight!=height)
-							{
-								cachedTotalHeight+=height-paragraphHeight;
-								paragraphHeight=height;
-							}
-
+							paragraphHeight=cache->graphicsParagraph->GetHeight();
 							cache->graphicsParagraph->Render(Rect(Point(cx, cy+y), Size(maxWidth, paragraphHeight)));
 						}
 
 						y+=paragraphHeight+paragraphDistance;
 					}
-
-					minSize=Size(0, cachedTotalHeight);
 				}
 				renderTarget->PopClipper();
 			}
@@ -1487,7 +1482,7 @@ GuiDocumentElement::GuiDocumentElementRenderer
 						vint y=0;
 						for(vint i=0;i<caret.row;i++)
 						{
-							y+=paragraphHeights[i];
+							y+=paragraphHeights[i]+paragraphDistance;
 						}
 
 						bounds.y1+=y;

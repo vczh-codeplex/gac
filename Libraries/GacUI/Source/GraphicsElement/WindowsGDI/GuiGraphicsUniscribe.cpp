@@ -536,6 +536,22 @@ UniscribeTextRun
 				SearchGlyphCluster(charStart, charLength, cluster, nextCluster);
 			}
 
+			void UniscribeTextRun::SearchSingleChar(vint charStart, vint& charLength, vint& cluster, vint& nextCluster)
+			{
+				charLength=0;
+				vint startFromItem=charStart+startFromLine-scriptItem->startFromLine;
+				vint currentFromItem=startFromItem;
+				while(++currentFromItem<scriptItem->length)
+				{
+					if(scriptItem->charLogattrs[currentFromItem].fCharStop)
+					{
+						break;
+					}
+				}
+				charLength=currentFromItem-startFromItem;
+				SearchGlyphCluster(charStart, charLength, cluster, nextCluster);
+			}
+
 			void UniscribeTextRun::SearchGlyphCluster(vint charStart, vint charLength, vint& cluster, vint& nextCluster)
 			{
 				cluster=wholeGlyph.charCluster[charStart];
@@ -2026,90 +2042,74 @@ UniscribeParagraph (Caret Helper)
 				Ptr<UniscribeTextRun> run=line->scriptRuns[runIndex].Cast<UniscribeTextRun>();
 				UniscribeRun::RunFragmentBounds& bounds=run->fragmentBounds[runBoundsIndex];
 				
+				vint startFromFragmentBounds=0;
 				vint accumulatedWidth=0;
-				vint lastRunChar=bounds.startFromRun;
-				for(vint i=0;i<=bounds.length;i++)
+				while(startFromFragmentBounds<bounds.length)
 				{
-					vint charIndex=bounds.startFromRun+i;
-					vint newLastRunChar=lastRunChar;
-					if(i>0)
+					vint charIndex=bounds.startFromRun+startFromFragmentBounds;
+					vint charLength=0;
+					vint cluster=0;
+					vint nextCluster=0;
+					run->SearchSingleChar(charIndex, charLength, cluster, nextCluster);
+
+					vint clusterStart=0;
+					vint clusterCount=0;
+					if(run->scriptItem->IsRightToLeft())
 					{
-						if(i==bounds.length)
+						clusterStart=nextCluster+1;
+						clusterCount=cluster-nextCluster;
+					}
+					else
+					{
+						clusterStart=cluster;
+						clusterCount=nextCluster-cluster;
+					}
+
+					vint clusterWidth=0;
+					for(vint i=0;i<clusterCount;i++)
+					{
+						clusterWidth+=run->wholeGlyph.glyphAdvances[i+clusterStart];
+					}
+
+					if(run->scriptItem->scriptItem.a.fRTL)
+					{
+						vint x2=bounds.bounds.x2-accumulatedWidth;
+						vint x1=x2-clusterWidth;
+						if(x1<=x && x<x2)
 						{
-							newLastRunChar=charIndex;
-						}
-						else
-						{
-							WORD cluster1=run->wholeGlyph.charCluster[charIndex-1];
-							WORD cluster2=run->wholeGlyph.charCluster[charIndex];
-							if(cluster1!=cluster2)
+							vint d1=x-x1;
+							vint d2=x2-x;
+							if(d1<=d2)
 							{
-								newLastRunChar=charIndex;
+								return line->startFromParagraph+run->startFromLine+charIndex+charLength;
+							}
+							else
+							{
+								return line->startFromParagraph+run->startFromLine+charIndex;
+							}
+						}
+					}
+					else
+					{
+						vint x1=bounds.bounds.x1+accumulatedWidth;
+						vint x2=x1+clusterWidth;
+						if(x1<=x && x<x2)
+						{
+							vint d1=x-x1;
+							vint d2=x2-x;
+							if(d1<=d2)
+							{
+								return line->startFromParagraph+run->startFromLine+charIndex;
+							}
+							else
+							{
+								return line->startFromParagraph+run->startFromLine+charIndex+charLength;
 							}
 						}
 					}
 
-					if(newLastRunChar!=lastRunChar)
-					{
-						WORD glyph1=0;
-						WORD glyph2=0;
-						if(run->scriptItem->scriptItem.a.fRTL)
-						{
-							glyph2=run->wholeGlyph.charCluster[lastRunChar]+1;
-							glyph1=newLastRunChar==run->length?0:run->wholeGlyph.charCluster[newLastRunChar]+1;
-						}
-						else
-						{
-							glyph1=run->wholeGlyph.charCluster[lastRunChar];
-							glyph2=newLastRunChar==run->length?run->wholeGlyph.glyphs.Count():run->wholeGlyph.charCluster[newLastRunChar];
-						}
-
-						vint glyphWidth=0;
-						for(WORD g=glyph1;g<glyph2;g++)
-						{
-							glyphWidth+=run->wholeGlyph.glyphAdvances[g];
-						}
-
-						if(run->scriptItem->scriptItem.a.fRTL)
-						{
-							vint x2=bounds.bounds.x2-accumulatedWidth;
-							vint x1=x2-glyphWidth;
-							if(x1<=x && x<x2)
-							{
-								vint d1=x-x1;
-								vint d2=x2-x;
-								if(d1<=d2)
-								{
-									return line->startFromParagraph+run->startFromLine+newLastRunChar;
-								}
-								else
-								{
-									return line->startFromParagraph+run->startFromLine+lastRunChar;
-								}
-							}
-						}
-						else
-						{
-							vint x1=bounds.bounds.x1+accumulatedWidth;
-							vint x2=x1+glyphWidth;
-							if(x1<=x && x<x2)
-							{
-								vint d1=x-x1;
-								vint d2=x2-x;
-								if(d1<=d2)
-								{
-									return line->startFromParagraph+run->startFromLine+lastRunChar;
-								}
-								else
-								{
-									return line->startFromParagraph+run->startFromLine+newLastRunChar;
-								}
-							}
-						}
-
-						lastRunChar=newLastRunChar;
-						accumulatedWidth+=glyphWidth;
-					}
+					startFromFragmentBounds+=charLength;
+					accumulatedWidth+=clusterWidth;
 				}
 				return -1;
 			}
