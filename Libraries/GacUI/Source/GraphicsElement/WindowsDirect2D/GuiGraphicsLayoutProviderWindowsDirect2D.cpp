@@ -206,7 +206,7 @@ WindowsDirect2DParagraph (Initialization)
 							{
 								DWRITE_LINE_METRICS& metrics=lineMetrics[i];
 								lineStarts[i]=start;
-								start+=metrics.length+metrics.newlineLength;
+								start+=metrics.length;
 							}
 						}
 						{
@@ -638,29 +638,6 @@ WindowsDirect2DParagraph (Rendering)
 WindowsDirect2DParagraph (Caret Helper)
 ***********************************************************************/
 
-				void CorrectCaretSide(vint caret, bool& frontSide)
-				{
-					if(caret==0)
-					{
-						frontSide=false;
-					}
-					else if(caret==paragraphText.Length())
-					{
-						frontSide=true;
-					}
-				}
-
-				vint GetCaretHitTestIndex(vint caret, bool& frontSide)
-				{
-					CorrectCaretSide(caret, frontSide);
-					if(frontSide)
-					{
-						caret--;
-					}
-
-					return charHitTestMap[caret];
-				}
-
 				void GetLineIndexFromTextPos(vint textPos, vint& frontLineIndex, vint& backLineIndex)
 				{
 					frontLineIndex=-1;
@@ -672,7 +649,7 @@ WindowsDirect2DParagraph (Caret Helper)
 						vint middle=(start+end)/2;
 						DWRITE_LINE_METRICS& metrics=lineMetrics[middle];
 						vint lineStart=lineStarts[middle];
-						vint lineEnd=lineStart+metrics.length;
+						vint lineEnd=lineStart+metrics.length-metrics.newlineLength;
 
 						if(textPos<lineStart)
 						{
@@ -704,6 +681,49 @@ WindowsDirect2DParagraph (Caret Helper)
 					}
 				}
 
+				void CorrectCaretSide(vint caret, bool& frontSide)
+				{
+					if(caret==0)
+					{
+						frontSide=false;
+					}
+					else if(caret==paragraphText.Length())
+					{
+						frontSide=true;
+					}
+					else
+					{
+						vint frontLineIndex=-1;
+						vint backLineIndex=-1;
+						GetLineIndexFromTextPos(caret, frontLineIndex, backLineIndex);
+						if(frontLineIndex==backLineIndex)
+						{
+							DWRITE_LINE_METRICS& line=lineMetrics[frontLineIndex];
+							vint lineStart=lineStarts[frontLineIndex];
+							vint lineEnd=lineStart+line.length-line.newlineLength;
+							if(caret==lineStart)
+							{
+								frontSide=false;
+							}
+							else if(caret==lineEnd)
+							{
+								frontSide=true;
+							}
+						}
+					}
+				}
+
+				vint GetCaretHitTestIndex(vint caret, bool& frontSide)
+				{
+					CorrectCaretSide(caret, frontSide);
+					if(frontSide)
+					{
+						caret--;
+					}
+
+					return charHitTestMap[caret];
+				}
+
 /***********************************************************************
 WindowsDirect2DParagraph (Caret)
 ***********************************************************************/
@@ -715,24 +735,47 @@ WindowsDirect2DParagraph (Caret)
 					if(position==CaretLast) return paragraphText.Length();
 					if(!IsValidCaret(comparingCaret)) return -1;
 
-					if(position==CaretMoveLeft)
-					{
-						if(comparingCaret==0) return 0;
-						return hitTestMetrics[charHitTestMap[comparingCaret-1]].textPosition;
-					}
-					if(position==CaretMoveRight)
-					{
-						if(comparingCaret==paragraphText.Length()) return paragraphText.Length();
-						vint index=charHitTestMap[comparingCaret];
-						if(index==hitTestMetrics.Count()-1) return paragraphText.Length();
-						return hitTestMetrics[index+1].textPosition;
-					}
-
 					vint frontLineIndex=-1;
 					vint backLineIndex=-1;
 					GetLineIndexFromTextPos(comparingCaret, frontLineIndex, backLineIndex);
 					vint lineIndex=preferFrontSide?frontLineIndex:backLineIndex;
 					DWRITE_LINE_METRICS& line=lineMetrics[lineIndex];
+					vint lineStart=lineStarts[lineIndex];
+					vint lineEnd=lineStart+line.length-line.newlineLength;
+
+					if(position==CaretMoveLeft)
+					{
+						if(comparingCaret==0)
+						{
+							return 0;
+						}
+						else if(comparingCaret==lineStart)
+						{
+							vint offset=lineMetrics[lineIndex-1].newlineLength;
+							if(offset>0)
+							{
+								return lineStart-offset;
+							}
+						}
+						return hitTestMetrics[charHitTestMap[comparingCaret-1]].textPosition;
+					}
+					if(position==CaretMoveRight)
+					{
+						if(comparingCaret==paragraphText.Length())
+						{
+							return paragraphText.Length();
+						}
+						else if(comparingCaret==lineEnd && line.newlineLength!=0)
+						{
+							return lineEnd+line.newlineLength;
+						}
+						else
+						{
+							vint index=charHitTestMap[comparingCaret];
+							if(index==hitTestMetrics.Count()-1) return paragraphText.Length();
+							return hitTestMetrics[index+1].textPosition;
+						}
+					}
 
 					if(position==CaretLineFirst)
 					{
@@ -740,7 +783,7 @@ WindowsDirect2DParagraph (Caret)
 					}
 					if(position==CaretLineLast)
 					{
-						return lineStarts[lineIndex]+line.length;
+						return lineStarts[lineIndex]+line.length-line.newlineLength;
 					}
 					throw 0;
 				}
@@ -809,6 +852,11 @@ WindowsDirect2DParagraph (Caret)
 					if(!IsValidTextPos(caret)) return false;
 					if(caret==0 || caret==paragraphText.Length()) return true;
 					if(hitTestMetrics[charHitTestMap[caret]].textPosition==caret) return true;
+
+					vint frontLineIndex=-1;
+					vint backLineIndex=-1;
+					GetLineIndexFromTextPos(caret, frontLineIndex, backLineIndex);
+					if(frontLineIndex==-1 && backLineIndex==-1) return false;
 					return false;
 				}
 
