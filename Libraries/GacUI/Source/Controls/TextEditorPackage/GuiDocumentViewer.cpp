@@ -166,9 +166,12 @@ GuiDocumentViewer
 			{
 				if(senderControl->GetVisuallyEnabled())
 				{
-					if(ProcessKey(arguments.code, arguments.shift, arguments.ctrl))
+					if(editMode!=ViewOnly)
 					{
-						arguments.handled=true;
+						if(ProcessKey(arguments.code, arguments.shift, arguments.ctrl))
+						{
+							arguments.handled=true;
+						}
 					}
 				}
 			}
