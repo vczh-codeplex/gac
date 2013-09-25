@@ -603,6 +603,7 @@ Rich Content Document (element)
 					void									FinalizeInternal();
 					void									RenderTargetChangedInternal(IGuiGraphicsRenderTarget* oldRenderTarget, IGuiGraphicsRenderTarget* newRenderTarget);
 					Ptr<ParagraphCache>						EnsureAndGetCache(vint paragraphIndex);
+					bool									GetParagraphIndexFromPoint(Point point, vint& top, vint& index);
 				public:
 					GuiDocumentElementRenderer();
 
@@ -614,6 +615,7 @@ Rich Content Document (element)
 					void									OpenCaret(TextPos caret, Color color, bool frontSide);
 					void									CloseCaret();
 					TextPos									CalculateCaret(TextPos comparingCaret, IGuiGraphicsParagraph::CaretRelativePosition position, bool& preferFrontSide);
+					TextPos									CalculateCaretFromPoint(Point point);
 				};
 
 			protected:
@@ -685,6 +687,10 @@ Rich Content Document (element)
 				/// <param name="position">The relative position.</param>
 				/// <param name="preferFrontSide">Specify the side for the comparingCaret. Retrive the suggested side for the new caret. If the return caret equals compareCaret, this output is ignored.</param>
 				TextPos										CalculateCaret(TextPos comparingCaret, IGuiGraphicsParagraph::CaretRelativePosition position, bool& preferFrontSide);
+				/// <summary>Calculate a caret using a specified point.</summary>
+				/// <returns>The calculated caret.</returns>
+				/// <param name="point">The specified point.</param>
+				TextPos										CalculateCaretFromPoint(Point point);
 
 				/// <summary>Get the caret.</summary>
 				/// <summary>Notify that a specified paragraph is updated.</summary>

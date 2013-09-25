@@ -178,6 +178,7 @@ WindowsDirect2DParagraph
 				bool								formatDataAvailable;
 				Array<DWRITE_LINE_METRICS>			lineMetrics;
 				Array<vint>							lineStarts;
+				Array<FLOAT>						lineTops;
 				Array<DWRITE_CLUSTER_METRICS>		clusterMetrics;
 				Array<DWRITE_HIT_TEST_METRICS>		hitTestMetrics;
 				Array<vint>							charHitTestMap;
@@ -201,12 +202,18 @@ WindowsDirect2DParagraph (Initialization)
 							}
 
 							lineStarts.Resize(lineCount);
+							lineTops.Resize(lineCount);
 							vint start=0;
+							FLOAT top=0;
 							for(vint i=0;i<lineMetrics.Count();i++)
 							{
 								DWRITE_LINE_METRICS& metrics=lineMetrics[i];
+
 								lineStarts[i]=start;
 								start+=metrics.length;
+
+								lineTops[i]=top;
+								top+=metrics.height;
 							}
 						}
 						{
@@ -683,31 +690,9 @@ WindowsDirect2DParagraph (Caret Helper)
 
 				Pair<FLOAT, FLOAT> GetLineYRange(vint lineIndex)
 				{
-					if(paragraphText.Length()==0)
-					{
-						return Pair<FLOAT, FLOAT>(0, (FLOAT)GetHeight());
-					}
-					else
-					{
-						FLOAT minY=0;
-						FLOAT maxY=0;
-						if(lineStarts[lineIndex]==paragraphText.Length())
-						{
-							vint offset=lineMetrics[lineIndex-1].newlineLength;
-							vint index=charHitTestMap[lineStarts[lineIndex]-offset];
-							DWRITE_HIT_TEST_METRICS& hitTest=hitTestMetrics[index];
-							minY=hitTest.top+hitTest.height;
-							maxY=(FLOAT)GetHeight();
-						}
-						else
-						{
-							vint index=charHitTestMap[lineStarts[lineIndex]];
-							DWRITE_HIT_TEST_METRICS& hitTest=hitTestMetrics[index];
-							minY=hitTest.top;
-							maxY=minY+hitTest.height;
-						}
-						return Pair<FLOAT, FLOAT>(minY, maxY);
-					}
+					DWRITE_LINE_METRICS& line=lineMetrics[lineIndex];
+					FLOAT top=lineTops[lineIndex];
+					return Pair<FLOAT, FLOAT>(top, top+line.height);
 				}
 
 				vint GetLineIndexFromY(vint y)

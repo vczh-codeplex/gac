@@ -1100,6 +1100,31 @@ GuiDocumentElement::GuiDocumentElementRenderer
 				return cache;
 			}
 
+			bool GuiDocumentElement::GuiDocumentElementRenderer::GetParagraphIndexFromPoint(Point point, vint& top, vint& index)
+			{
+				vint y=0;
+				for(vint i=0;i<paragraphHeights.Count();i++)
+				{
+					vint paragraphHeight=paragraphHeights[i];
+					if(y+paragraphHeight<=point.y)
+					{
+						y+=paragraphHeight+paragraphDistance;
+						continue;
+					}
+					else if(y>point.y)
+					{
+						break;
+					}
+					else
+					{
+						top=y;
+						index=i;
+						return true;
+					}
+				}
+				return false;
+			}
+
 			GuiDocumentElement::GuiDocumentElementRenderer::GuiDocumentElementRenderer()
 				:paragraphDistance(0)
 				,lastMaxWidth(-1)
@@ -1208,34 +1233,22 @@ GuiDocumentElement::GuiDocumentElementRenderer
 
 			vint GuiDocumentElement::GuiDocumentElementRenderer::GetHyperlinkIdFromPoint(Point point)
 			{
-				vint y=0;
-				for(vint i=0;i<paragraphHeights.Count();i++)
+				vint top=0;
+				vint index=-1;
+				if(GetParagraphIndexFromPoint(point, top, index))
 				{
-					vint paragraphHeight=paragraphHeights[i];
-					if(y+paragraphHeight<=point.y)
+					Ptr<ParagraphCache> cache=paragraphCaches[index];
+					if(cache && cache->graphicsParagraph)
 					{
-						y+=paragraphHeight+paragraphDistance;
-						continue;
-					}
-					else if(y>point.y)
-					{
-						break;
-					}
-					else
-					{
-						Ptr<ParagraphCache> cache=paragraphCaches[i];
-						if(cache && cache->graphicsParagraph)
+						vint start=0;
+						vint length=0;
+						vint id=0;
+						if(cache->graphicsParagraph->HitTestPoint(Point(point.x, point.y-top), start, length, id))
 						{
-							vint start=0;
-							vint length=0;
-							vint id=0;
-							if(cache->graphicsParagraph->HitTestPoint(Point(point.x, point.y-y), start, length, id))
-							{
-								return id;
-							}
+							return id;
 						}
-						return DocumentRun::NullHyperlinkId;
 					}
+					return DocumentRun::NullHyperlinkId;
 				}
 				return DocumentRun::NullHyperlinkId;
 			}
@@ -1366,6 +1379,20 @@ GuiDocumentElement::GuiDocumentElementRenderer
 				return comparingCaret;
 			}
 
+			TextPos GuiDocumentElement::GuiDocumentElementRenderer::CalculateCaretFromPoint(Point point)
+			{
+				vint top=0;
+				vint index=-1;
+				if(GetParagraphIndexFromPoint(point, top, index))
+				{
+					Ptr<ParagraphCache> cache=EnsureAndGetCache(index);
+					Point paragraphPoint(point.x, point.y-top);
+					vint caret=cache->graphicsParagraph->GetCaretFromPoint(paragraphPoint);
+					return TextPos(index, caret);
+				}
+				return lastCaret;
+			}
+
 /***********************************************************************
 GuiDocumentElement
 ***********************************************************************/
@@ -1478,6 +1505,20 @@ GuiDocumentElement
 				else
 				{
 					return comparingCaret;
+				}
+			}
+
+			TextPos GuiDocumentElement::CalculateCaretFromPoint(Point point)
+			{
+				Ptr<GuiDocumentElementRenderer> elementRenderer=renderer.Cast<GuiDocumentElementRenderer>();
+				if(elementRenderer)
+				{
+					TextPos caret=elementRenderer->CalculateCaretFromPoint(point);
+					return caret;
+				}
+				else
+				{
+					return TextPos(0, 0);
 				}
 			}
 			

@@ -188,6 +188,15 @@ GuiDocumentViewer
 							}
 						}
 						break;
+					case Selectable:
+					case Editable:
+						if(dragging)
+						{
+							TextPos caret=documentElement->CalculateCaretFromPoint(Point(arguments.x, arguments.y));
+							TextPos oldCaret=documentElement->GetCaretBegin();
+							Move(caret, true, (oldCaret==caret?documentElement->IsCaretEndPreferFrontSide():caret<oldCaret));
+						}
+						break;
 					}
 				}
 			}
@@ -204,6 +213,17 @@ GuiDocumentViewer
 							vint id=documentElement->GetHyperlinkIdFromPoint(Point(arguments.x, arguments.y));
 							draggingHyperlinkId=id;
 							SetActiveHyperlinkId(id);
+						}
+						break;
+					case Selectable:
+					case Editable:
+						{
+							TextPos caret=documentElement->CalculateCaretFromPoint(Point(arguments.x, arguments.y));
+							TextPos oldCaret=documentElement->GetCaretEnd();
+							if(caret!=oldCaret)
+							{
+								Move(caret, false, caret<oldCaret);
+							}
 						}
 						break;
 					}
