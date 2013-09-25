@@ -761,12 +761,19 @@ WindowsDirect2DParagraph (Caret Helper)
 					vint lineStart=lineStarts[lineIndex];
 					vint lineEnd=lineStart+line.length-line.newlineLength;
 
+					FLOAT minLineX=0;
+					FLOAT maxLineX=0;
+
 					for(vint i=lineStart;i<lineEnd;)
 					{
 						vint index=charHitTestMap[i];
 						DWRITE_HIT_TEST_METRICS& hitTest=hitTestMetrics[index];
 						FLOAT minX=hitTest.left;
 						FLOAT maxX=minX+hitTest.width;
+
+						if(minLineX>minX) minLineX=minX;
+						if(maxLineX<maxX) maxLineX=maxX;
+
 						if(minX<=x && x<maxX)
 						{
 							DWRITE_CLUSTER_METRICS& cluster=clusterMetrics[index];
@@ -774,15 +781,18 @@ WindowsDirect2DParagraph (Caret Helper)
 							FLOAT d2=maxX-x;
 							if(d1<=d2)
 							{
-								return cluster.isRightToLeft?index+hitTest.length:index;
+								return cluster.isRightToLeft?i+hitTest.length:i;
 							}
 							else
 							{
-								return cluster.isRightToLeft?index:index+hitTest.length;
+								return cluster.isRightToLeft?i:i+hitTest.length;
 							}
 						}
 						i+=hitTest.length;
 					}
+					
+					if(x<minLineX) return lineStart;
+					if(x>=maxLineX) return lineEnd;
 					return lineStart;
 				}
 
