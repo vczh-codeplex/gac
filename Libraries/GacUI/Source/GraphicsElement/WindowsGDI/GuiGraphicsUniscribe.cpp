@@ -386,7 +386,7 @@ UniscribeItem
 ***********************************************************************/
 
 			UniscribeItem::UniscribeItem()
-				:start(0)
+				:startFromLine(0)
 				,length(0)
 				,itemText(0)
 			{
@@ -563,7 +563,7 @@ UniscribeTextRun
 				charAdvances=0;
 				for(vint i=tempStart;i<=length;)
 				{
-					if(i==length || scriptItem->charLogattrs[i+(startFromLine-scriptItem->start)].fSoftBreak==TRUE)
+					if(i==length || scriptItem->charLogattrs[i+(startFromLine-scriptItem->startFromLine)].fSoftBreak==TRUE)
 					{
 						if(width<=maxWidth || (firstRun && charLength==0))
 						{
@@ -647,7 +647,7 @@ UniscribeTextRun
 
 					vint cluster=0;
 					vint nextCluster=0;
-					SearchGlyphCluster(fragment.start, fragment.length, cluster, nextCluster);
+					SearchGlyphCluster(fragment.startFromRun, fragment.length, cluster, nextCluster);
 
 					vint clusterStart=0;
 					vint clusterCount=0;
@@ -755,7 +755,7 @@ UniscribeVirtualLine
 ***********************************************************************/
 
 			UniscribeVirtualLine::UniscribeVirtualLine()
-				:start(0)
+				:startFromLine(0)
 				,length(0)
 				,runText(0)
 				,firstRunIndex(-1)
@@ -770,7 +770,7 @@ UniscribeLine
 ***********************************************************************/
 
 			UniscribeLine::UniscribeLine()
-				:start(0)
+				:startFromParagraph(0)
 			{
 			}
 
@@ -786,8 +786,10 @@ UniscribeLine
 				lineText=L"";
 				ClearUniscribeData();
 				vint current=0;
+				List<vint> fragmentStarts;
 				FOREACH(Ptr<UniscribeFragment>, fragment, documentFragments)
 				{
+					fragmentStarts.Add(current);
 					lineText+=fragment->text;
 					current+=fragment->text.Length();
 				}
@@ -823,7 +825,7 @@ UniscribeLine
 						{
 							SCRIPT_ITEM item=items[i];
 							Ptr<UniscribeItem> scriptItem=new UniscribeItem;
-							scriptItem->start=item.iCharPos;
+							scriptItem->startFromLine=item.iCharPos;
 							scriptItem->length=items[i+1].iCharPos-item.iCharPos;
 							scriptItem->itemText=lineText.Buffer()+item.iCharPos;
 							scriptItem->scriptItem=item;
@@ -844,12 +846,12 @@ UniscribeLine
 						for(vint i=0;i<scriptItems.Count();i++)
 						{
 							Ptr<UniscribeItem> scriptItem=scriptItems[i];
-							vint currentStart=scriptItem->start;
+							vint currentStart=scriptItem->startFromLine;
 
-							while(currentStart<scriptItem->start+scriptItem->length)
+							while(currentStart<scriptItem->startFromLine+scriptItem->length)
 							{
 								UniscribeFragment* fragment=0;
-								vint itemRemainLength=scriptItem->length-(currentStart-scriptItem->start);
+								vint itemRemainLength=scriptItem->length-(currentStart-scriptItem->startFromLine);
 								vint fragmentRemainLength=0;
 								while(true)
 								{
@@ -882,6 +884,7 @@ UniscribeLine
 													run->documentFragment=fragment;
 													run->scriptItem=scriptItem.Obj();
 													run->startFromLine=currentStart;
+													run->startFromFragment=currentStart-fragmentStarts[fragmentIndex];
 													run->length=elementLength;
 													run->runText=lineText.Buffer()+currentStart;
 													run->element=elementFragment->element;
@@ -901,6 +904,7 @@ UniscribeLine
 									run->documentFragment=fragment;
 									run->scriptItem=scriptItem.Obj();
 									run->startFromLine=currentStart;
+									run->startFromFragment=currentStart-fragmentStarts[fragmentIndex];
 									run->length=shortLength;
 									run->runText=lineText.Buffer()+currentStart;
 									scriptRuns.Add(run);
@@ -1049,7 +1053,7 @@ UniscribeLine
 								}
 
 								UniscribeRun::RunFragmentBounds fragmentBounds;
-								fragmentBounds.start=start;
+								fragmentBounds.startFromRun=start;
 								fragmentBounds.length=length;
 								fragmentBounds.bounds=Rect(
 									Point(cx, cy+maxHeight-run->SumHeight()),
@@ -1100,9 +1104,9 @@ UniscribeLine
 								UniscribeRun::RunFragmentBounds& firstBounds=firstRun->fragmentBounds[virtualLine->firstRunBoundsIndex];
 								UniscribeRun::RunFragmentBounds& lastBounds=lastRun->fragmentBounds[virtualLine->lastRunBoundsIndex];
 								
-								virtualLine->start=firstRun->startFromLine+firstBounds.start;
-								virtualLine->length=lastRun->startFromLine+lastBounds.start+lastBounds.length-virtualLine->start;
-								virtualLine->runText=lineText.Buffer()+virtualLine->start;
+								virtualLine->startFromLine=firstRun->startFromLine+firstBounds.startFromRun;
+								virtualLine->length=lastRun->startFromLine+lastBounds.startFromRun+lastBounds.length-virtualLine->startFromLine;
+								virtualLine->runText=lineText.Buffer()+virtualLine->startFromLine;
 
 								bool updateBounds=false;
 								for(vint i=startRun;i<=availableLastRun;i++)
@@ -1278,7 +1282,7 @@ UniscribeParagraph (Initialization)
 				vint lineStart=0;
 				FOREACH(Ptr<UniscribeLine>, line, lines)
 				{
-					line->start=lineStart;
+					line->startFromParagraph=lineStart;
 					lineStart+=line->lineText.Length()+2;
 				}
 
@@ -1694,8 +1698,8 @@ UniscribeParagraph (Caret Helper)
 				{
 					vint middle=(start+end)/2;
 					Ptr<UniscribeLine> line=lines[middle];
-					vint lineStart=line->start;
-					vint lineEnd=line->start+line->lineText.Length();
+					vint lineStart=line->startFromParagraph;
+					vint lineEnd=line->startFromParagraph+line->lineText.Length();
 					if(textPos<lineStart)
 					{
 						if(textPos==lineStart-1)
@@ -1745,8 +1749,8 @@ UniscribeParagraph (Caret Helper)
 				{
 					vint middle=(start+end)/2;
 					Ptr<UniscribeVirtualLine> vline=line->virtualLines[middle];
-					vint lineStart=line->start+vline->start;
-					vint lineEnd=line->start+vline->start+vline->length;
+					vint lineStart=line->startFromParagraph+vline->startFromLine;
+					vint lineEnd=line->startFromParagraph+vline->startFromLine+vline->length;
 					if(textPos<lineStart)
 					{
 						end=middle-1;
@@ -1790,8 +1794,8 @@ UniscribeParagraph (Caret Helper)
 				{
 					vint middle=(start+end)/2;
 					Ptr<UniscribeItem> item=line->scriptItems[middle];
-					vint lineStart=line->start+item->start;
-					vint lineEnd=line->start+item->start+item->length;
+					vint lineStart=line->startFromParagraph+item->startFromLine;
+					vint lineEnd=line->startFromParagraph+item->startFromLine+item->length;
 					if(textPos<lineStart)
 					{
 						end=middle-1;
@@ -1824,7 +1828,7 @@ UniscribeParagraph (Caret Helper)
 			Rect UniscribeParagraph::GetCaretBoundsWithLine(vint caret, vint lineIndex, vint virtualLineIndex, bool frontSide)
 			{
 				Ptr<UniscribeLine> line=lines[lineIndex];
-				if(line->start<=caret && caret<=line->start+line->lineText.Length())
+				if(line->startFromParagraph<=caret && caret<=line->startFromParagraph+line->lineText.Length())
 				{
 					if(line->lineText==L"") return line->bounds;
 					Ptr<UniscribeVirtualLine> virtualLine=line->virtualLines[virtualLineIndex];
@@ -1840,7 +1844,7 @@ UniscribeParagraph (Caret Helper)
 							for(vint j=firstBounds;j<=lastBounds;j++)
 							{
 								UniscribeRun::RunFragmentBounds& bounds=run->fragmentBounds[j];
-								vint boundsStart=line->start+run->startFromLine+bounds.start;
+								vint boundsStart=line->startFromParagraph+run->startFromLine+bounds.startFromRun;
 								if(boundsStart==caret)
 								{
 									if(!frontSide || i==virtualLine->firstRunIndex && j==virtualLine->firstRunBoundsIndex)
@@ -1872,10 +1876,10 @@ UniscribeParagraph (Caret Helper)
 								else if(boundsStart<caret && caret<boundsStart+bounds.length)
 								{
 									vint accumulatedWidth=0;
-									vint lastRunChar=bounds.start;
+									vint lastRunChar=bounds.startFromRun;
 									for(vint i=0;i<=bounds.length;i++)
 									{
-										vint charIndex=bounds.start+i;
+										vint charIndex=bounds.startFromRun+i;
 										vint newLastRunChar=lastRunChar;
 										if(i>0)
 										{
@@ -1917,7 +1921,7 @@ UniscribeParagraph (Caret Helper)
 											accumulatedWidth+=glyphWidth;
 											lastRunChar=newLastRunChar;
 
-											if(line->start+run->startFromLine+lastRunChar==caret)
+											if(line->startFromParagraph+run->startFromLine+lastRunChar==caret)
 											{
 												vint x=0;
 												if(run->scriptItem->scriptItem.a.fRTL)
@@ -1943,15 +1947,15 @@ UniscribeParagraph (Caret Helper)
 			vint UniscribeParagraph::GetCaretFromXWithTextRunBounds(vint x, vint lineIndex, vint runIndex, vint runBoundsIndex)
 			{
 				Ptr<UniscribeLine> line=lines[lineIndex];
-				if(line->lineText==L"") return line->start;
+				if(line->lineText==L"") return line->startFromParagraph;
 				Ptr<UniscribeTextRun> run=line->scriptRuns[runIndex].Cast<UniscribeTextRun>();
 				UniscribeRun::RunFragmentBounds& bounds=run->fragmentBounds[runBoundsIndex];
 				
 				vint accumulatedWidth=0;
-				vint lastRunChar=bounds.start;
+				vint lastRunChar=bounds.startFromRun;
 				for(vint i=0;i<=bounds.length;i++)
 				{
-					vint charIndex=bounds.start+i;
+					vint charIndex=bounds.startFromRun+i;
 					vint newLastRunChar=lastRunChar;
 					if(i>0)
 					{
@@ -2001,11 +2005,11 @@ UniscribeParagraph (Caret Helper)
 								vint d2=x2-x;
 								if(d1<=d2)
 								{
-									return line->start+run->startFromLine+newLastRunChar;
+									return line->startFromParagraph+run->startFromLine+newLastRunChar;
 								}
 								else
 								{
-									return line->start+run->startFromLine+lastRunChar;
+									return line->startFromParagraph+run->startFromLine+lastRunChar;
 								}
 							}
 						}
@@ -2019,11 +2023,11 @@ UniscribeParagraph (Caret Helper)
 								vint d2=x2-x;
 								if(d1<=d2)
 								{
-									return line->start+run->startFromLine+lastRunChar;
+									return line->startFromParagraph+run->startFromLine+lastRunChar;
 								}
 								else
 								{
-									return line->start+run->startFromLine+newLastRunChar;
+									return line->startFromParagraph+run->startFromLine+newLastRunChar;
 								}
 							}
 						}
@@ -2038,10 +2042,10 @@ UniscribeParagraph (Caret Helper)
 			vint UniscribeParagraph::GetCaretFromXWithLine(vint x, vint lineIndex, vint virtualLineIndex)
 			{
 				Ptr<UniscribeLine> line=lines[lineIndex];
-				if(line->virtualLines.Count()==0) return line->start;
+				if(line->virtualLines.Count()==0) return line->startFromParagraph;
 				Ptr<UniscribeVirtualLine> virtualLine=line->virtualLines[virtualLineIndex];
-				if(x<virtualLine->bounds.x1) return line->start+virtualLine->start;
-				if(x>=virtualLine->bounds.x2) return line->start+virtualLine->start+virtualLine->length;
+				if(x<virtualLine->bounds.x1) return line->startFromParagraph+virtualLine->startFromLine;
+				if(x>=virtualLine->bounds.x2) return line->startFromParagraph+virtualLine->startFromLine+virtualLine->length;
 
 				for(vint i=virtualLine->firstRunIndex;i<=virtualLine->lastRunIndex;i++)
 				{
@@ -2069,11 +2073,11 @@ UniscribeParagraph (Caret Helper)
 							vint d2=bounds.x2-x;
 							if(d1<=d2)
 							{
-								return line->start+run->startFromLine;
+								return line->startFromParagraph+run->startFromLine;
 							}
 							else
 							{
-								return line->start+run->startFromLine+run->length;
+								return line->startFromParagraph+run->startFromLine+run->length;
 							}
 						}
 					}
@@ -2166,7 +2170,7 @@ UniscribeParagraph (Caret)
 					{
 					case IGuiGraphicsParagraph::CaretLineFirst:
 					case IGuiGraphicsParagraph::CaretLineLast:
-						return line->start;
+						return line->startFromParagraph;
 					}
 				}
 
@@ -2180,9 +2184,9 @@ UniscribeParagraph (Caret)
 				switch(position)
 				{
 				case IGuiGraphicsParagraph::CaretLineFirst:
-					return line->start+virtualLine->start;
+					return line->startFromParagraph+virtualLine->startFromLine;
 				case IGuiGraphicsParagraph::CaretLineLast:
-					return line->start+virtualLine->start+virtualLine->length;
+					return line->startFromParagraph+virtualLine->startFromLine+virtualLine->length;
 				case IGuiGraphicsParagraph::CaretMoveUp:
 					{
 						if(frontLine==0 && virtualLineIndex<=0) return comparingCaret;
@@ -2270,7 +2274,7 @@ UniscribeParagraph (Caret)
 				}
 
 				Ptr<UniscribeLine> line=lines[frontLine];
-				if(textPos==line->start || textPos==line->start+line->lineText.Length())
+				if(textPos==line->startFromParagraph || textPos==line->startFromParagraph+line->lineText.Length())
 				{
 					return textPos;
 				}
@@ -2282,28 +2286,28 @@ UniscribeParagraph (Caret)
 				if(frontItem!=backItem) return textPos;
 				
 				Ptr<UniscribeItem> item=line->scriptItems[frontItem];
-				vint lineTextPos=textPos-line->start;
-				if(lineTextPos==item->start) return textPos;
-				if(lineTextPos==item->start+item->length) return textPos;
+				vint lineTextPos=textPos-line->startFromParagraph;
+				if(lineTextPos==item->startFromLine) return textPos;
+				if(lineTextPos==item->startFromLine+item->length) return textPos;
 
-				vint itemTextPos=lineTextPos-item->start;
+				vint itemTextPos=lineTextPos-item->startFromLine;
 				if(item->charLogattrs[itemTextPos].fCharStop) return textPos;
 
 				if(frontSide)
 				{
 					for(vint i=itemTextPos-1;i>=0;i--)
 					{
-						if(item->charLogattrs[i].fCharStop) return i+line->start+item->start;
+						if(item->charLogattrs[i].fCharStop) return i+line->startFromParagraph+item->startFromLine;
 					}
-					return line->start+item->start;
+					return line->startFromParagraph+item->startFromLine;
 				}
 				else
 				{
 					for(vint i=itemTextPos+1;i<item->length;i++)
 					{
-						if(item->charLogattrs[i].fCharStop) return i+line->start+item->start;
+						if(item->charLogattrs[i].fCharStop) return i+line->startFromParagraph+item->startFromLine;
 					}
-					return line->start+item->start+item->length;
+					return line->startFromParagraph+item->startFromLine+item->length;
 				}
 			}
 
