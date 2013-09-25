@@ -1217,9 +1217,9 @@ UniscribeLine
 
 					// calculate line bounds
 					vint minX=0;
-					vint minY=0;
+					vint minY=top;
 					vint maxX=0;
-					vint maxY=0;
+					vint maxY=top;
 					FOREACH(Ptr<UniscribeRun>, run, scriptRuns)
 					{
 						FOREACH(UniscribeRun::RunFragmentBounds, fragmentBounds, run->fragmentBounds)
@@ -2160,6 +2160,31 @@ UniscribeParagraph (Caret Helper)
 				return -1;
 			}
 
+			vint UniscribeParagraph::GetLineY(vint lineIndex)
+			{
+				if(lineIndex==lines.Count())
+				{
+					return bounds.Height();
+				}
+				else
+				{
+					return lines[lineIndex]->bounds.y1;
+				}
+			}
+
+			vint UniscribeParagraph::GetVirtualLineY(vint lineIndex, vint virtualLineIndex)
+			{
+				Ptr<UniscribeLine> line=lines[lineIndex];
+				if(virtualLineIndex==line->virtualLines.Count())
+				{
+					return GetLineY(lineIndex+1);
+				}
+				else
+				{
+					return line->virtualLines[virtualLineIndex]->bounds.y1;
+				}
+			}
+
 			vint UniscribeParagraph::GetLineIndexFromY(vint y)
 			{
 				if(y<lines[0]->bounds.y1) return 0;
@@ -2170,12 +2195,13 @@ UniscribeParagraph (Caret Helper)
 				while(start<=end)
 				{
 					vint middle=(start+end)/2;
-					Ptr<UniscribeLine> line=lines[middle];
-					if(y<line->bounds.y1)
+					vint minY=GetLineY(middle);
+					vint maxY=GetLineY(middle+1);
+					if(y<minY)
 					{
 						end=middle-1;
 					}
-					else if(y>=line->bounds.y2)
+					else if(y>=maxY)
 					{
 						start=middle+1;
 					}
@@ -2198,12 +2224,13 @@ UniscribeParagraph (Caret Helper)
 				while(start<=end)
 				{
 					vint middle=(start+end)/2;
-					Ptr<UniscribeVirtualLine> vline=line->virtualLines[middle];
-					if(y<vline->bounds.y1)
+					vint minY=GetVirtualLineY(lineIndex, middle);
+					vint maxY=GetVirtualLineY(lineIndex, middle+1);
+					if(y<minY)
 					{
 						end=middle-1;
 					}
-					else if(y>=vline->bounds.y2)
+					else if(y>=maxY)
 					{
 						start=middle+1;
 					}
@@ -2328,7 +2355,7 @@ UniscribeParagraph (Caret)
 				if(lineIndex==-1) return -1;
 
 				Ptr<UniscribeLine> line=lines[lineIndex];
-				if(line->virtualLines.Count()==0) return 0;
+				if(line->virtualLines.Count()==0) return line->startFromParagraph;
 
 				vint virtualLineIndex=GetVirtualLineIndexFromY(point.y, lineIndex);
 				if(virtualLineIndex==-1) return -1;

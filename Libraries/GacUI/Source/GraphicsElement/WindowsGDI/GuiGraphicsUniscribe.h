@@ -322,6 +322,8 @@ UniscribeParagraph
 				Rect							GetCaretBoundsWithLine(vint caret, vint lineIndex, vint virtualLineIndex, bool frontSide);
 				vint							GetCaretFromXWithTextRunBounds(vint x, vint lineIndex, vint runIndex, vint runBoundsIndex);
 				vint							GetCaretFromXWithLine(vint x, vint lineIndex, vint virtualLineIndex);
+				vint							GetLineY(vint lineIndex);
+				vint							GetVirtualLineY(vint lineIndex, vint virtualLineIndex);
 				vint							GetLineIndexFromY(vint y);
 				vint							GetVirtualLineIndexFromY(vint y, vint lineIndex);
 
