@@ -2,6 +2,22 @@
 Primitive Types
 ========================================================
 
+JIT
+IL
+Data Processor Language
+
+Code
+	-> [ParserGen] -> Tree
+	-> [DPL Data Converter] -> DPL Tree
+	-> [Compiler Coded in DPL] -> IL
+
+Native Control Language
+Koncept
+
+========================================================
+Primitive Types
+========================================================
+
 void				system.Void
 					system.Interface
 object				system.Object				// similar to dynamic in C#
