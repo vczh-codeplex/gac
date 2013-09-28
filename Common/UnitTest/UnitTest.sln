@@ -5,10 +5,14 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UnitTest", "UnitTest\UnitTe
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{6DC5F6A6-9796-4424-A4DD-642E32D0D1E3}"
 	ProjectSection(SolutionItems) = preProject
-		..\Draft.txt = ..\Draft.txt
-		..\Koncept.txt = ..\Koncept.txt
-		..\ScriptSystem.txt = ..\ScriptSystem.txt
 		..\vlpp.natvis = ..\vlpp.natvis
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Draft", "Draft", "{DA1ECFB0-3533-4DE4-A9C2-7726B71D4028}"
+	ProjectSection(SolutionItems) = preProject
+		..\Draft\Draft.txt = ..\Draft\Draft.txt
+		..\Draft\Koncept.txt = ..\Draft\Koncept.txt
+		..\Draft\ScriptSystem.txt = ..\Draft\ScriptSystem.txt
 	EndProjectSection
 EndProject
 Global
@@ -39,5 +43,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{DA1ECFB0-3533-4DE4-A9C2-7726B71D4028} = {6DC5F6A6-9796-4424-A4DD-642E32D0D1E3}
 	EndGlobalSection
 EndGlobal
