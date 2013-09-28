@@ -11,6 +11,10 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Draft", "Draft", "{DA1ECFB0-3533-4DE4-A9C2-7726B71D4028}"
 	ProjectSection(SolutionItems) = preProject
 		..\Draft\Draft.txt = ..\Draft\Draft.txt
+		..\Draft\Draft_ConceptBasedScript.txt = ..\Draft\Draft_ConceptBasedScript.txt
+		..\Draft\Draft_ConceptBasedScript2.txt = ..\Draft\Draft_ConceptBasedScript2.txt
+		..\Draft\Draft_ConceptBasedScript3.txt = ..\Draft\Draft_ConceptBasedScript3.txt
+		..\Draft\Draft_FreeScript3.txt = ..\Draft\Draft_FreeScript3.txt
 		..\Draft\Koncept.txt = ..\Draft\Koncept.txt
 		..\Draft\ScriptSystem.txt = ..\Draft\ScriptSystem.txt
 	EndProjectSection
