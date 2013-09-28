@@ -10,13 +10,17 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Draft", "Draft", "{DA1ECFB0-3533-4DE4-A9C2-7726B71D4028}"
 	ProjectSection(SolutionItems) = preProject
-		..\Draft\Draft.txt = ..\Draft\Draft.txt
-		..\Draft\Draft_ConceptBasedScript.txt = ..\Draft\Draft_ConceptBasedScript.txt
-		..\Draft\Draft_ConceptBasedScript2.txt = ..\Draft\Draft_ConceptBasedScript2.txt
-		..\Draft\Draft_ConceptBasedScript3.txt = ..\Draft\Draft_ConceptBasedScript3.txt
-		..\Draft\Draft_FreeScript3.txt = ..\Draft\Draft_FreeScript3.txt
 		..\Draft\Koncept.txt = ..\Draft\Koncept.txt
-		..\Draft\ScriptSystem.txt = ..\Draft\ScriptSystem.txt
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Old", "Old", "{572CE708-D494-4375-8F37-FD19818C3D2B}"
+	ProjectSection(SolutionItems) = preProject
+		..\Draft\Old\Draft.txt = ..\Draft\Old\Draft.txt
+		..\Draft\Old\Draft_ConceptBasedScript.txt = ..\Draft\Old\Draft_ConceptBasedScript.txt
+		..\Draft\Old\Draft_ConceptBasedScript2.txt = ..\Draft\Old\Draft_ConceptBasedScript2.txt
+		..\Draft\Old\Draft_ConceptBasedScript3.txt = ..\Draft\Old\Draft_ConceptBasedScript3.txt
+		..\Draft\Old\Draft_FreeScript3.txt = ..\Draft\Old\Draft_FreeScript3.txt
+		..\Draft\Old\ScriptSystem.txt = ..\Draft\Old\ScriptSystem.txt
 	EndProjectSection
 EndProject
 Global
@@ -50,5 +54,6 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{DA1ECFB0-3533-4DE4-A9C2-7726B71D4028} = {6DC5F6A6-9796-4424-A4DD-642E32D0D1E3}
+		{572CE708-D494-4375-8F37-FD19818C3D2B} = {DA1ECFB0-3533-4DE4-A9C2-7726B71D4028}
 	EndGlobalSection
 EndGlobal
