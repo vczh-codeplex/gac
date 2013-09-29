@@ -40,7 +40,7 @@ call_virtual <return-type> (function)->return_value?
 gc_deref (handle)
 gc_deref_array (handle, item-index)
 gc_alloc <table>
-gc_alloc_array <header-type> <repeat-type> (repeat-count)
+gc_alloc_repeat <repeat-type> (repeat-count)
 gc_checkpoint
 
 =========================================
@@ -48,6 +48,11 @@ gc_checkpoint
 struct UserDefinedType
 	field : <type>
 	field2 : <type>
+end
+
+repeat UserDefinedType
+	header : <type>
+	repeat : <type>
 end
 
 var GlobalVariable : <type>
