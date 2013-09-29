@@ -45,6 +45,7 @@ gc_deref (handle)->pointer
 gc_deref_array (handle, item-index)->pointer
 gc_alloc <table>->handle
 gc_alloc_repeat <repeat-type> (repeat-count)->handle
+gc_length (handle)->u64
 gc_checkpoint
 
 =========================================
