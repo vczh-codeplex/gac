@@ -11,6 +11,10 @@ type:
 instruction:
 	name <immediate_1> <immediate-2> ... (stack_arg_1, stack_arg_2, ...)-stack_result
 
+// all instructions that write data to the stack
+// should ensure that the value type of the value
+// that pushed into the stack is defined or inferable
+
 push <type> <constant>				// push data to stack
 pop									// pop data from stack
 convert <type>						// convert the top value
