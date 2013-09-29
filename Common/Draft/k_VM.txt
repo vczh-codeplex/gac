@@ -1,0 +1,63 @@
+type:
+	i8/i16/i32/i64				// integral
+	u8/u16/u32/u64				// integral
+	f32/f64						// numeric
+	bool						// bit
+	char
+	gc_handle/function/pointer
+	void						// only for call instructions that indicating there is not return value
+	<user-defined-type>
+
+instruction:
+	name <immediate_1> <immediate-2> ... (stack_arg_1, stack_arg_2, ...)-stack_result
+
+push <type> <constant>				// push data to stack
+pop									// pop data from stack
+convert <type>						// convert the top value
+ptr_var <var-name>					// get the address of a variable
+ptr_static_var <var-name>			// get the address of a global variable
+ptr_data							// get the address of the global data buffer
+ptr_const							// get the address of the constant data buffer
+ptr_read <type> (pointer)->data
+ptr_write (pointer, data)
+ptr_copy (dst, src, size)
+
+bit: (op1, op2)->result				// type should be the same
+	and, or, xor, not
+integral: (op1, op2)->result			// type should be the same
+	mod, shl, shr
+numeric: (op1, op2)->result			// type should be the same
+	add, sub, mul, div
+pointer: (ptr, int)->result			// int can be any integral type
+	inc, dec
+
+jump <label>						// only jump to an instruction that has the same stack state (pushed types)
+jump_if <label> (bool-value)
+
+call <function> ()->return_value?
+call_virtual <return-type> (function)->return_value?
+
+gc_deref (handle)
+gc_deref_array (handle, item-index)
+gc_alloc <table>
+gc_alloc_array <header-type> <repeat-type> (repeat-count)
+gc_checkpoint
+
+=========================================
+
+struct UserDefinedType
+	field : <type>
+	field2 : <type>
+end
+
+var GlobalVariable : <type>
+
+func UserDefinedFunction : <type>
+	arg1 : <type>
+	arg2 : <type>
+var
+	var1 : <type>
+	var2 : <type>
+begin
+	<instruction>
+end
