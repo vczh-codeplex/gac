@@ -9,7 +9,7 @@ type:
 	<user-defined-type>
 
 instruction:
-	name <immediate_1> <immediate-2> ... (stack_arg_1, stack_arg_2, ...)-stack_result
+	name <immediate_1> <immediate-2> ... (stack_arg_1, stack_arg_2, ...)->stack_result
 
 // all instructions that write data to the stack
 // should ensure that the value type of the value
@@ -41,10 +41,10 @@ jump_if <label> (bool-value)
 call <function> ()->return_value?
 call_virtual <return-type> (function)->return_value?
 
-gc_deref (handle)
-gc_deref_array (handle, item-index)
-gc_alloc <table>
-gc_alloc_repeat <repeat-type> (repeat-count)
+gc_deref (handle)->pointer
+gc_deref_array (handle, item-index)->pointer
+gc_alloc <table>->handle
+gc_alloc_repeat <repeat-type> (repeat-count)->handle
 gc_checkpoint
 
 =========================================
