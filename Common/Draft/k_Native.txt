@@ -1,3 +1,96 @@
 ========================================================
 Native Language that directly maps to the instructions
 ========================================================
+
+========================================================
+Types
+========================================================
+
+int8/int16/int32/int64
+uint8/uint16/uint32/uint64
+float/double
+char/bool
+handle/pointer/function
+
+<user-defined-type>
+
+T*	// pointer, T cannot be a repeat type
+T^	// handle
+
+function (T1, T2, T3) : R
+
+========================================================
+Expressions
+========================================================
+
+! ~
+
+* / %
++ -
+<< >>
+== != < > <= >=
+^ & |
+^^
+&&
+||
+
+// [op]= satisfies forall T . T op U == T
+= *= /= %= += -= <<= >>= ^= &= |= ^^= &&= ||=
+
+<expr>.field		// get field
+
+pointer:
+	<expr>*			// dereference
+	<expr>->field	// get field
+	<expr>[x]		// offset
+	&<expr>			// get address of a left-value
+
+handle:
+	<expr>^			// dereference handle for struct type or header for repeat type
+	<expr>->field	// get field
+	<expr>[x]		// dereference repeat for repeat type
+
+alloc T				// ptr_alloc
+alloc T[x]			// ptr_alloc
+
+new T				// gc_alloc
+new T[x]			// gc_alloc_array
+pin handle			// gc_pin
+length(handle)		// gc_length
+
+sizeof(T)
+expr as T
+function(args)
+
+// when dereferencing a handle, T^ returns T*, handle returns pointer
+
+========================================================
+Statements
+========================================================
+
+free T;				// ptr_free
+copy(dst, src);		// ptr_copy
+unpin handle;		// gc_unpin
+
+if (expression) statement [else statement]
+loop statement
+
+break;
+continue;
+return [expression];
+
+========================================================
+Definitions
+========================================================
+
+struct Type
+{
+	field : Type,
+	...
+}
+
+repeat Type = HeaderType RepeatType;
+
+var x : Type [= expression];
+
+function (a1 : T1, a2 : T2) : R statement
