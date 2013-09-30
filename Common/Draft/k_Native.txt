@@ -14,10 +14,11 @@ handle/pointer/function
 
 <user-defined-type>
 
-T*	// pointer, T cannot be a repeat type
-T^	// handle
+T*		// pointer, T cannot be a repeat type
+T[x]	// array
+T^		// handle
 
-function (T1, T2, T3) : R
+function (T1, T2, T3) [: R]
 
 ========================================================
 Expressions
@@ -97,4 +98,4 @@ repeat Type = HeaderType RepeatType;
 
 var x : Type [= expression];
 
-function (a1 : T1, a2 : T2) : R statement
+function (a1 : T1, a2 : T2) [: R] statement
