@@ -1,3 +1,6 @@
+========================================================
+VM Instructions
+========================================================
 type:
 	i8/i16/i32/i64				// integral
 	u8/u16/u32/u64				// integral
@@ -14,6 +17,11 @@ instruction:
 // all instructions that write data to the stack
 // should ensure that the value type of the value
 // that pushed into the stack is defined or inferable
+// gc_checkpoint should only appear when the stack is empty
+
+========================================================
+Data Instructions
+========================================================
 
 push <type> <constant>				// push data to stack
 pop									// pop data from stack
@@ -26,20 +34,31 @@ ptr_read <type> (pointer)->data
 ptr_write (pointer, data)
 ptr_copy (dst, src, size)
 
+========================================================
+Arithmetic Instructions
+========================================================
+
 bit: (op1, op2)->result				// type should be the same
 	and, or, xor, not
-integral: (op1, op2)->result			// type should be the same
+integral: (op1, op2)->result		// type should be the same
 	mod, shl, shr
 numeric: (op1, op2)->result			// type should be the same
 	add, sub, mul, div
 pointer: (ptr, int)->result			// int can be any integral type
 	inc, dec
 
+========================================================
+Jumping Instructions
+========================================================
+
 jump <label>						// only jump to an instruction that has the same stack state (pushed types)
 jump_if <label> (bool-value)
-
 call <function> ()->return_value?
 call_virtual <return-type> (function)->return_value?
+
+========================================================
+GC Instructions
+========================================================
 
 gc_deref (handle)->pointer
 gc_deref_array (handle, item-index)->pointer
@@ -48,7 +67,9 @@ gc_alloc_repeat <repeat-type> (repeat-count)->handle
 gc_length (handle)->u64
 gc_checkpoint
 
-=========================================
+========================================================
+Structure
+========================================================
 
 struct UserDefinedType
 	field : <type>
