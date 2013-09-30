@@ -26,13 +26,16 @@ Data Instructions
 push <type> <constant>				// push data to stack
 pop									// pop data from stack
 convert <type>						// convert the top value
-ptr_var <var-name>					// get the address of a variable
-ptr_static_var <var-name>			// get the address of a global variable
-ptr_data							// get the address of the global data buffer
-ptr_const							// get the address of the constant data buffer
+address_var <var-name>				// get the address of a variable
+address_static_var <var-name>		// get the address of a global variable
+address_data						// get the address of the global data buffer
+address_const						// get the address of the constant data buffer
 ptr_read <type> (pointer)->data
 ptr_write (pointer, data)
+ptr_move <type> (dst, src)
 ptr_copy (dst, src, size)
+ptr_alloc (size)->pointer
+ptr_free (pointer)
 
 ========================================================
 Arithmetic Instructions
@@ -46,6 +49,9 @@ numeric: (op1, op2)->result			// type should be the same
 	add, sub, mul, div
 pointer: (ptr, int)->result			// int can be any integral type
 	inc, dec
+compare: (op1, op2)->bool			// type should be the same
+	// for numeric/char/pointer
+	lt, gt, le, ge, eq, ne
 
 ========================================================
 Jumping Instructions
@@ -60,8 +66,12 @@ call_virtual <return-type> (function)->return_value?
 GC Instructions
 ========================================================
 
+// pin and unpin manage a counter
+
 gc_deref (handle)->pointer
 gc_deref_array (handle, item-index)->pointer
+gc_pin (handle)
+gc_unpin (handle)
 gc_alloc <table>->handle
 gc_alloc_repeat <repeat-type> (repeat-count)->handle
 gc_length (handle)->u64
