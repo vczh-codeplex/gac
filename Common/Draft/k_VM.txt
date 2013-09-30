@@ -86,6 +86,12 @@ gc_checkpoint
 Exception Instructions
 ========================================================
 
+ex_get ()->handle		// push the current exception to the stack
+ex_throw (handle)		// find the nearest trap and execute
+ex_trap (label)			// push a trap label pointing to the catch statement
+ex_untrap				// pop a trap label
+ex_rethrow				// find the nearest trap and execute without replacing the exception
+
 ========================================================
 Structure
 ========================================================
