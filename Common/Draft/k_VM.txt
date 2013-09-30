@@ -7,7 +7,7 @@ type:
 	f32/f64						// numeric
 	bool						// bit
 	char
-	gc_handle/function/pointer
+	gc_handle/function/pointer/label
 	void						// only for call instructions that indicating there is not return value
 	<user-defined-type>
 
@@ -18,18 +18,21 @@ instruction:
 // should ensure that the value type of the value
 // that pushed into the stack is defined or inferable
 // gc_checkpoint should only appear when the stack is empty
+// only empty stack state can jump to empty stack state
+// or one-bool stack can jmp to empty stack state conditionally
 
 ========================================================
 Data Instructions
 ========================================================
 
-push <type> <constant>				// push data to stack
-pop									// pop data from stack
-convert <type>						// convert the top value
-address_var <var-name>				// get the address of a variable
-address_static_var <var-name>		// get the address of a global variable
-address_data						// get the address of the global data buffer
-address_const						// get the address of the constant data buffer
+push <type> <constant>								// push data to stack
+pop													// pop data from stack
+convert <type>										// convert the top value
+address_var <var-name> ()->pointer					// get the address of a variable
+address_static_var <var-name> ()->pointer			// get the address of a global variable
+address_data ()->pointer								// get the address of the global data buffer
+address_const ()->pointer							// get the address of the constant data buffer
+address_label <func-name> <var-name> ()->pointer		// get the address
 ptr_read <type> (pointer)->data
 ptr_write (pointer, data)
 ptr_move <type> (dst, src)
@@ -43,7 +46,7 @@ Arithmetic Instructions
 
 bit: (op1, op2)->result				// type should be the same
 	and, or, xor, not
-integral: (op1, op2)->result		// type should be the same
+integral: (op1, op2)->result			// type should be the same
 	mod, shl, shr
 numeric: (op1, op2)->result			// type should be the same
 	add, sub, mul, div
@@ -57,8 +60,10 @@ compare: (op1, op2)->bool			// type should be the same
 Jumping Instructions
 ========================================================
 
-jump <label>						// only jump to an instruction that has the same stack state (pushed types)
+jump <label>
+jump_virtual (label)
 jump_if <label> (bool-value)
+jump_if_virtual (bool-value, label)
 call <function> ()->return_value?
 call_virtual <return-type> (function)->return_value?
 
@@ -76,6 +81,10 @@ gc_alloc <table>->handle
 gc_alloc_repeat <repeat-type> (repeat-count)->handle
 gc_length (handle)->u64
 gc_checkpoint
+
+========================================================
+Exception Instructions
+========================================================
 
 ========================================================
 Structure
