@@ -62,6 +62,8 @@ sizeof(T)
 expr as T
 function(args)
 
+exception			// the current exception object of type handle in catch statements
+
 // when dereferencing a handle, T^ returns T*, handle returns pointer
 
 ========================================================
@@ -74,10 +76,12 @@ unpin handle;		// gc_unpin
 
 if (expression) statement [else statement]
 loop statement
+try statement catch statement finally statement
 
 break;
 continue;
 return [expression];
+throw [expression];
 
 ========================================================
 Definitions
