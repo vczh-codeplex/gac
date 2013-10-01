@@ -5,8 +5,6 @@ type:
 	i8/i16/i32/i64				// integral
 	u8/u16/u32/u64				// integral
 	f32/f64						// numeric
-	bool						// bit
-	char
 	gc_handle/function/pointer/label
 	void						// only for call instructions that indicating there is not return value
 	<user-defined-type>
@@ -28,11 +26,12 @@ Data Instructions
 push <type> <constant>								// push data to stack
 pop													// pop data from stack
 convert <type>										// convert the top value
+copy ()->value										// copy the top value and push
 address_var <var-name> ()->pointer					// get the address of a variable
 address_static_var <var-name> ()->pointer			// get the address of a global variable
-address_data ()->pointer								// get the address of the global data buffer
+address_data ()->pointer							// get the address of the global data buffer
 address_const ()->pointer							// get the address of the constant data buffer
-address_label <func-name> <var-name> ()->pointer		// get the address
+address_label <func-name> <var-name> ()->pointer	// get the address
 ptr_read <type> (pointer)->data
 ptr_write (pointer, data)
 ptr_move <type> (dst, src)
@@ -50,8 +49,6 @@ integral: (op1, op2)->result		// type should be the same
 	mod, shl, shr
 numeric: (op1, op2)->result			// type should be the same
 	add, sub, mul, div
-pointer: (ptr, int)->result			// int can be any integral type
-	inc, dec
 compare: (op1, op2)->bool			// type should be the same
 	// for numeric/char/pointer
 	lt, gt, le, ge, eq, ne
