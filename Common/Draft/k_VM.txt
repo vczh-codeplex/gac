@@ -46,7 +46,7 @@ Arithmetic Instructions
 
 bit: (op1, op2)->result				// type should be the same
 	and, or, xor, not
-integral: (op1, op2)->result			// type should be the same
+integral: (op1, op2)->result		// type should be the same
 	mod, shl, shr
 numeric: (op1, op2)->result			// type should be the same
 	add, sub, mul, div
