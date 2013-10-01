@@ -6,6 +6,7 @@ Native Language that directly maps to the instructions
 Types
 ========================================================
 
+int/uint (according to architecture bits)
 int8/int16/int32/int64
 uint8/uint16/uint32/uint64
 float/double
@@ -21,10 +22,10 @@ T^		// handle
 function (T1, T2, T3) [: R]
 
 ========================================================
-Expressions
+Operators
 ========================================================
 
-! ~
+! ~ + -
 
 * / %
 + -
@@ -35,8 +36,16 @@ Expressions
 &&
 ||
 
-// [op]= satisfies forall T . T op U == T
+// op= satisfies forall T . T op U == T
 = *= /= %= += -= <<= >>= ^= &= |= ^^= &&= ||=
+
+========================================================
+Expressions
+========================================================
+
+op A
+A op B
+(A)
 
 <expr>.field		// get field
 
@@ -64,12 +73,16 @@ expr as T
 function(args)
 
 exception			// the current exception object of type handle in catch statements
+null				// pointer, handle and function
 
 // when dereferencing a handle, T^ returns T*, handle returns pointer
 
 ========================================================
 Statements
 ========================================================
+
+A = B;
+A op= B;
 
 free T;				// ptr_free
 copy(dst, src);		// ptr_copy
