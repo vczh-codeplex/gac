@@ -11,100 +11,33 @@ int8/int16/int32/int64
 uint8/uint16/uint32/uint64
 float/double
 char/bool
-void
-
-T array
-T list
-T stack
-T queue
-T set
-T multiset
-T U map
-T U multimap
-T->U
-(T, U, V)
 
 ========================================================
-Operators
+Data
 ========================================================
 
-! ~ + -
+data Name;					// --> data Name()
+Name						// --> Name()
 
-* / %
-+ -
-<< >>
-== != < > <= >=
-^ & |
-^^
-&&
-||
+data Group(A, B, C) : set(Set1, A) || set(Set2, B) && set(Set3, C); // Set can be a type
+Group(Name1/Value1, ...)
 
 ========================================================
-Expressions
+Relation
 ========================================================
 
-op A
-A op B
-A B
-(A)
-A::Type
+set(Set, <data>);
 
-if A then B else C
-switch A
-	case Pattern1 -> x
-	case Pattern2 -> y
-
-{ statements }
-
-let A = B in C
-
-(A, B, C)
-[array|list|stack|queue|set|multiset|map|multimap][A, B, C: D]
-
-null
+rel Relation(A, B, C) : set(Set1, A) || set(Set2, B) && set(Set3, C); // Set can be a type
+Relation(<data>, <data>);
+Relation(A, B) : SubRelation(A, C) && Relation(C, B);
 
 ========================================================
-Patterns
+External Data Structure
 ========================================================
 
-_
-A
-(x:y:z:xs)
-x::Type
-
-========================================================
-Statements
-========================================================
-
-// [op]= satisfies forall T . T op U == T
-= *= /= %= += -= <<= >>= ^= &= |= ^^= &&= ||=
-
-A = B;
-A op= B;
-
-var x;
-while condition do expression
-for A in B do expression
-
-void;
-break;
-continue;
-exit [expression];		// exit the current {} expression with a value or void
-return [expression];	// exit the function with a value of void
-
-========================================================
-Definition
-========================================================
-
-[extern] data Type [: ParentType]
+struct Type [: Type]
 {
 	field : Type,
 	...
 }
-
-// extern data type can only have primitive types and array
-
-[func Name :: Type]
-func Name pattern1 pattern2 = expression
-func Name pattern3 pattern4 = expression
-...
