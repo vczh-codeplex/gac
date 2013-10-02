@@ -23,17 +23,27 @@ data Group(A, B, C) : set(Set1, A) || set(Set2, B) && set(Set3, C); // Set can b
 Group(Name1/Value1, ...)
 
 ========================================================
-Relation
+Relations
 ========================================================
 
 set(Set, <data>);
 
 rel Relation(A, B, C) : set(Set1, A) || set(Set2, B) && set(Set3, C); // Set can be a type
 Relation(<data>, <data>);
-Relation(A, B) : SubRelation(A, C) && Relation(C, B);
+Relation(A, B) : SubRelation(A, C?) && Relation(C?, B);
 
 ========================================================
-External Data Structure
+Predicate
+========================================================
+
+Relation(A, B, C)
+Variable op Expression		// comparison operators
+(Predicate)
+A && B
+A || B
+
+========================================================
+External Data Structures
 ========================================================
 
 struct Type [: Type]
@@ -41,3 +51,45 @@ struct Type [: Type]
 	field : Type,
 	...
 }
+
+========================================================
+Data Structure Importing
+========================================================
+
+========================================================
+Data Structure Exporting
+========================================================
+
+========================================================
+Expressions
+========================================================
+
+A op B
+A(B, C)
+A.B
+A[x]
+A as Type
+[x,y,z:xs]
+null
+func (x?, y?) : x+y
+if Expression then Expression else Expression
+switch Expression case Pattern->Expression ...
+(Expression)
+
+========================================================
+Functions
+========================================================
+
+Pattern:
+	A?
+	_
+	[x,y,z:xs]
+	Type x
+	Data(A, B, C)
+
+Function:
+	func Name(Patterns, ...) : Expression;
+
+func Add(a?, b?) : a+b;
+func Head([]) : error;
+func Head([x?:_]) : x;
