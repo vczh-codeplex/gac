@@ -32,6 +32,8 @@ rel Relation(A, B, C) : set(Set1, A) || set(Set2, B) && set(Set3, C); // Set can
 Relation(<data>, <data>);
 Relation(A, B) : SubRelation(A, C?) && Relation(C?, B);
 
+// set or relation constructions return true indicate inserting and false indicate ignoring (because of the relation exists)
+
 ========================================================
 Predicate
 ========================================================
@@ -53,12 +55,28 @@ struct Type [: Type]
 }
 
 ========================================================
-Data Structure Importing
+Data Structure Importing and Exporting
 ========================================================
 
-========================================================
-Data Structure Exporting
-========================================================
+importing "Name"
+<function-declaration>
+
+exporting ["Name"]
+<function-declaration>
+
+// "Name" identifies a language processor to the outside world
+// exporting function without a name will not be executed automatically
+
+// execution step:
+// 1. clear and initialize the graph database
+// 2. all importing functions of the specified name are executed in an undefined order
+// 3. all exporting functions of the specified name are executed in an undefined order
+
+// an importing function can only be called during the importing phrase
+// an exporting function can only be called during the exporting phrase
+// an exporting function indicates a mapping from the input node to the calculated object
+// when an exporting function is called, the inpurt value and the result is stored as a map
+// when an exporting function is called using a group of arguments that appears before, error
 
 ========================================================
 Expressions
@@ -75,6 +93,15 @@ func (x?, y?) : x+y
 if Expression then Expression else Expression
 switch Expression case Pattern->Expression ...
 (Expression)
+A?							// a relation query result
+A{B:C, D:E}					// data structure construction
+
+<data-construction>
+<set-construction>			// importing function only
+<relation-construction>		// importing function only
+<set-querying>				// exporting function only
+<relation-querying>			// exporting function only
+{A, B, C}					// evaluating each expression and returning the last one
 
 ========================================================
 Functions
@@ -93,3 +120,18 @@ Function:
 func Add(a?, b?) : a+b;
 func Head([]) : error;
 func Head([x?:_]) : x;
+
+========================================================
+Program Structure
+========================================================
+
+unit UnitName;
+uses UnitName, UnitName, UnitName ...;
+
+<data-declaration>
+<set-construction>
+<relation-declaration>
+<relation-construction>
+<function-declaration>
+<importing-function-declaration>
+<exporting-function-declaration>
