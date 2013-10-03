@@ -75,8 +75,8 @@ A{B:C, D:E}					// data structure construction
 <data-construction>
 <set-construction>			// importing function only
 <relation-construction>		// importing function only
-<set-querying>				// exporting function only
-<relation-querying>			// exporting function only
+<set-querying>
+<relation-querying>
 {A, B, C}					// evaluating each expression and returning the last one
 
 ========================================================
