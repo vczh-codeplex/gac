@@ -61,8 +61,8 @@ jump <label>
 jump_virtual (label)
 jump_if <label> (bool-value)
 jump_if_virtual (bool-value, label)
-call <function> ()->return_value?
-call_virtual <return-type> (function)->return_value?
+call <function> <argument-count> ()->return_value?
+call_virtual <return-type> <argument-count> (function)->return_value?
 
 ========================================================
 GC Instructions
