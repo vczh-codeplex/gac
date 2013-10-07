@@ -19,20 +19,36 @@ Data
 data Name;					// --> data Name()
 Name						// --> Name()
 
-data Group(A, B, C) : set(Set1, A) || set(Set2, B) && set(Set3, C); // Set can be a type
+data Group(A : Type, B : Type, C : Type);
 Group(Name1/Value1, ...)
 
 ========================================================
 Relations
 ========================================================
 
-set(Set, <data>);
+rel Relation(A : Type, B : Type, C? : Type);
+// name without ? cannot be an output argument
 
-rel Relation(A, B, C) : set(Set1, A) || set(Set2, B) && set(Set3, C); // Set can be a type
 Relation(<data>, <data>);
-Relation(A, B) : SubRelation(A, C?) && Relation(C?, B);
+Relation(A?, B?) : SubRelation(A, C?) && Relation(C?, B);
+Relation(A, B?) : SecondRelation(A, B), ThirdRelation(A, B);
 
-// set or relation constructions return true indicate inserting and false indicate ignoring (because of the relation exists)
+========================================================
+Relation Decorations
+========================================================
+
+cached <relation-declaration>
+// "cached" means when the relation is evaluated, the value will be cached
+
+========================================================
+Patterns
+========================================================
+A?
+_
+[x,y,z:xs]
+Type x
+Data(A, B, C)
+A{B:C, D:E}
 
 ========================================================
 Predicate
@@ -48,7 +64,7 @@ A || B
 External Data Structures
 ========================================================
 
-struct Type [: Type]
+data Type [: Type]
 {
 	field : Type,
 	...
@@ -59,13 +75,11 @@ Expressions
 ========================================================
 
 A op B
-A(B, C)
 A.B
 A[x]
 A as Type
 [x,y,z:xs]
 null
-func (x?, y?) : x+y
 if Expression then Expression else Expression
 switch Expression case Pattern->Expression ...
 (Expression)
@@ -73,29 +87,14 @@ A?							// a relation query result
 A{B:C, D:E}					// data structure construction
 
 <data-construction>
-<set-construction>			// importing function only
 <relation-construction>		// importing function only
 <set-querying>
 <relation-querying>
 {A, B, C}					// evaluating each expression and returning the last one
 
 ========================================================
-Functions
+Goals
 ========================================================
-
-Pattern:
-	A?
-	_
-	[x,y,z:xs]
-	Type x
-	Data(A, B, C)
-
-Function:
-	func Name(Patterns, ...) : Expression;
-
-func Add(a?, b?) : a+b;
-func Head([]) : error;
-func Head([x?:_]) : x;
 
 ========================================================
 Program Structure
@@ -105,38 +104,6 @@ unit UnitName;
 uses UnitName, UnitName, UnitName ...;
 
 <data-declaration>
-<set-construction>
 <relation-declaration>
 <relation-construction>
-<function-declaration>
-
-========================================================
-Decorated Functions
-========================================================
-
-importing "Name"
-<function-declaration>
-
-exporting ["Name"]
-<function-declaration>
-
-// "Name" identifies a language processor to the outside world
-// exporting function without a name will not be executed automatically
-
-// execution step:
-// 1. clear and initialize the graph database
-// 2. all importing functions of the specified name are executed in an undefined order
-// 3. all exporting functions of the specified name are executed in an undefined order
-
-// an importing function can only be called during the importing phrase
-// an exporting function can only be called during the exporting phrase
-// an exporting function indicates a mapping from the input node to the calculated object
-// when an exporting function is called, the inpurt value and the result is stored as a map
-// when an exporting function is called using a group of arguments that appears before, error
-
-cached
-<function-declaration>
-
-// when a cached function is called, the result is cached for the arguments
-// when the cached function is called the next time with the cached arguments
-// the cached result is returned without executing this function
+<goal-declaration>
