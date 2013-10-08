@@ -104,7 +104,7 @@ GuiDocumentViewer
 							ProcessKey(VKEY_LEFT, true, false);
 						}
 						Array<WString> text;
-						EditText(begin, end, documentElement->IsCaretEndPreferFrontSide(), text);
+						EditText(documentElement->GetCaretBegin(), documentElement->GetCaretEnd(), documentElement->IsCaretEndPreferFrontSide(), text);
 						return true;
 					}
 					break;
@@ -116,7 +116,7 @@ GuiDocumentViewer
 							ProcessKey(VKEY_RIGHT, true, false);
 						}
 						Array<WString> text;
-						EditText(begin, end, documentElement->IsCaretEndPreferFrontSide(), text);
+						EditText(documentElement->GetCaretBegin(), documentElement->GetCaretEnd(), documentElement->IsCaretEndPreferFrontSide(), text);
 						return true;
 					}
 					break;
@@ -127,12 +127,12 @@ GuiDocumentViewer
 						{
 							Array<WString> text(1);
 							text[0]=L"\r\n";
-							EditText(begin, end, documentElement->IsCaretEndPreferFrontSide(), text);
+							EditText(documentElement->GetCaretBegin(), documentElement->GetCaretEnd(), documentElement->IsCaretEndPreferFrontSide(), text);
 						}
 						else
 						{
 							Array<WString> text(2);
-							EditText(begin, end, documentElement->IsCaretEndPreferFrontSide(), text);
+							EditText(documentElement->GetCaretBegin(), documentElement->GetCaretEnd(), documentElement->IsCaretEndPreferFrontSide(), text);
 						}
 						return true;
 					}
@@ -226,11 +226,11 @@ GuiDocumentViewer
 			{
 				if(senderControl->GetVisuallyEnabled())
 				{
-					if(editMode!=Editable)
+					if(editMode==Editable && arguments.code!=VKEY_ESCAPE && arguments.code!=VKEY_BACK && !arguments.ctrl)
 					{
 						Array<WString> text(1);
 						text[0]=WString(arguments.code);
-						documentElement->EditText(documentElement->GetCaretBegin(), documentElement->GetCaretEnd(), documentElement->IsCaretEndPreferFrontSide(), text);
+						EditText(documentElement->GetCaretBegin(), documentElement->GetCaretEnd(), documentElement->IsCaretEndPreferFrontSide(), text);
 					}
 				}
 			}
@@ -367,6 +367,22 @@ GuiDocumentViewer
 			void GuiDocumentCommonInterface::EditText(TextPos begin, TextPos end, bool frontSide, const collections::Array<WString>& text)
 			{
 				documentElement->EditText(begin, end, frontSide, text);
+				TextPos caret;
+				if(text.Count()==0)
+				{
+					caret=begin;
+				}
+				else if(text.Count()==1)
+				{
+					caret=TextPos(end.row, end.column+text[0].Length());
+					frontSide=true;
+				}
+				else
+				{
+					caret=TextPos(end.row+text.Count()-1, text[text.Count()-1].Length());
+					frontSide=true;
+				}
+				documentElement->SetCaret(caret, caret, frontSide);
 			}
 
 			void GuiDocumentCommonInterface::EditStyle(TextPos begin, TextPos end, Ptr<DocumentStyleProperties> style)
