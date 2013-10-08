@@ -1,0 +1,179 @@
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: ³Âè÷å«(vczh)
+GacUI::Element System
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_ELEMENTS_GUIGRAPHICSDOCUMENTELEMENT
+#define VCZH_PRESENTATION_ELEMENTS_GUIGRAPHICSDOCUMENTELEMENT
+
+#include "GuiGraphicsElement.h"
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace elements
+		{
+
+/***********************************************************************
+Rich Content Document (element)
+***********************************************************************/
+
+			/// <summary>Defines a rich text document element for rendering complex styled document.</summary>
+			class GuiDocumentElement : public Object, public IGuiGraphicsElement, public Description<GuiDocumentElement>
+			{
+				DEFINE_GUI_GRAPHICS_ELEMENT(GuiDocumentElement, L"RichDocument");
+			public:
+				class GuiDocumentElementRenderer : public Object, public IGuiGraphicsRenderer
+				{
+					DEFINE_GUI_GRAPHICS_RENDERER(GuiDocumentElement, GuiDocumentElementRenderer, IGuiGraphicsRenderTarget)
+				protected:
+					struct ParagraphCache
+					{
+						WString								fullText;
+						Ptr<IGuiGraphicsParagraph>			graphicsParagraph;
+						vint								selectionBegin;
+						vint								selectionEnd;
+
+						ParagraphCache()
+							:selectionBegin(-1)
+							,selectionEnd(-1)
+						{
+						}
+					};
+
+					typedef collections::Array<Ptr<ParagraphCache>>		ParagraphCacheArray;
+				protected:
+					vint									paragraphDistance;
+					vint									lastMaxWidth;
+					vint									cachedTotalHeight;
+					IGuiGraphicsLayoutProvider*				layoutProvider;
+					ParagraphCacheArray						paragraphCaches;
+					collections::Array<vint>				paragraphHeights;
+
+					TextPos									lastCaret;
+					Color									lastCaretColor;
+					bool									lastCaretFrontSide;
+
+					void									InitializeInternal();
+					void									FinalizeInternal();
+					void									RenderTargetChangedInternal(IGuiGraphicsRenderTarget* oldRenderTarget, IGuiGraphicsRenderTarget* newRenderTarget);
+					Ptr<ParagraphCache>						EnsureAndGetCache(vint paragraphIndex, bool createParagraph);
+					bool									GetParagraphIndexFromPoint(Point point, vint& top, vint& index);
+				public:
+					GuiDocumentElementRenderer();
+
+					void									Render(Rect bounds)override;
+					void									OnElementStateChanged()override;
+
+					void									NotifyParagraphUpdated(vint index);
+					vint									GetHyperlinkIdFromPoint(Point point);
+					void									OpenCaret(TextPos caret, Color color, bool frontSide);
+					void									CloseCaret();
+					void									SetSelection(TextPos begin, TextPos end);
+					TextPos									CalculateCaret(TextPos comparingCaret, IGuiGraphicsParagraph::CaretRelativePosition position, bool& preferFrontSide);
+					TextPos									CalculateCaretFromPoint(Point point);
+					Rect									GetCaretBounds(TextPos caret, bool frontSide);
+				};
+
+			protected:
+				Ptr<DocumentModel>							document;
+				TextPos										caretBegin;
+				TextPos										caretEnd;
+				bool										caretVisible;
+				bool										caretFrontSide;
+				Color										caretColor;
+
+				void										UpdateCaret();
+
+				GuiDocumentElement();
+			public:
+				~GuiDocumentElement();
+				
+				/// <summary>Get the document.</summary>
+				/// <returns>The document.</returns>
+				Ptr<DocumentModel>							GetDocument();
+				/// <summary>Set the document. When a document is set to this element, modifying the document without invoking <see cref="NotifyParagraphUpdated"/> will lead to undefined behavior.</summary>
+				/// <param name="value">The document.</param>
+				void										SetDocument(Ptr<DocumentModel> value);
+				/// <summary>
+				/// Get the begin position of the selection area.
+				/// </summary>
+				/// <returns>The begin position of the selection area.</returns>
+				TextPos										GetCaretBegin();
+				/// <summary>
+				/// Get the end position of the selection area.
+				/// </summary>
+				/// <returns>The end position of the selection area.</returns>
+				TextPos										GetCaretEnd();
+				/// <summary>
+				/// Get the prefer side for the caret.
+				/// </summary>
+				/// <returns>Returns true if the caret is rendered for the front side.</returns>
+				bool										IsCaretEndPreferFrontSide();
+				/// <summary>
+				/// Set the end position of the selection area.
+				/// </summary>
+				/// <param name="begin">The begin position of the selection area.</param>
+				/// <param name="end">The end position of the selection area.</param>
+				/// <param name="frontSide">Set to true to show the caret for the character before it. This argument is ignored if begin and end are the same.</param>
+				void										SetCaret(TextPos begin, TextPos end, bool frontSide);
+				/// <summary>
+				/// Get the caret visibility.
+				/// </summary>
+				/// <returns>Returns true if the caret will be rendered.</returns>
+				bool										GetCaretVisible();
+				/// <summary>
+				/// Set the caret visibility.
+				/// </summary>
+				/// <param name="value">True if the caret will be rendered.</param>
+				void										SetCaretVisible(bool value);
+				/// <summary>
+				/// Get the color of the caret.
+				/// </summary>
+				/// <returns>The color of the caret.</returns>
+				Color										GetCaretColor();
+				/// <summary>
+				/// Set the color of the caret.
+				/// </summary>
+				/// <param name="value">The color of the caret.</param>
+				void										SetCaretColor(Color value);
+
+				/// <summary>Calculate a caret using a specified comparing caret and a relative position.</summary>
+				/// <returns>The calculated caret.</returns>
+				/// <param name="comparingCaret">The comparing caret.</param>
+				/// <param name="position">The relative position.</param>
+				/// <param name="preferFrontSide">Specify the side for the comparingCaret. Retrive the suggested side for the new caret. If the return caret equals compareCaret, this output is ignored.</param>
+				TextPos										CalculateCaret(TextPos comparingCaret, IGuiGraphicsParagraph::CaretRelativePosition position, bool& preferFrontSide);
+				/// <summary>Calculate a caret using a specified point.</summary>
+				/// <returns>The calculated caret.</returns>
+				/// <param name="point">The specified point.</param>
+				TextPos										CalculateCaretFromPoint(Point point);
+				/// <summary>Get the bounds of a caret.</summary>
+				/// <returns>The bounds.</returns>
+				/// <param name="caret">The caret.</param>
+				/// <param name="frontSide">Set to true to get the bounds for the character before it.</param>
+				Rect										GetCaretBounds(TextPos caret, bool frontSide);
+
+				/// <summary>Get the caret.</summary>
+				/// <summary>Notify that a specified paragraph is updated.</summary>
+				/// <param name="index">The paragraph index.</param>
+				void										NotifyParagraphUpdated(vint index);
+
+				/// <summary>Get hyperlink id from point.</summary>
+				/// <returns>Corressponding hyperlink id. Returns -1 indicates that the point is not in a hyperlink.</returns>
+				/// <param name="index">The point to get the hyperlink id.</param>
+				vint										GetHyperlinkIdFromPoint(Point point);
+				/// <summary>Activate or deactivate a hyperlink.</summary>
+				/// <param name="hyperlinkId">The hyperlink id.</param>
+				/// <param name="active">Set to true to activate the hyperlink, otherwise deactivate.</param>
+				void										ActivateHyperlink(vint hyperlinkId, bool active);
+			};
+		}
+	}
+}
+
+#endif
