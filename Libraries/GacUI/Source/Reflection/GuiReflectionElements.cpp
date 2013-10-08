@@ -237,7 +237,7 @@ Type Declaration
 				CLASS_MEMBER_METHOD(CalculateCaret, {L"comparingCaret" _ L"position" _ L"preferFrontSide"})
 				CLASS_MEMBER_METHOD(GetCaretBounds, {L"caret" _ L"frontSide"})
 				CLASS_MEMBER_METHOD(SetCaret, {L"point"})
-				CLASS_MEMBER_METHOD(NotifyParagraphUpdated, {L"index"})
+				CLASS_MEMBER_METHOD(NotifyParagraphUpdated, {L"index" _ L"oldCount" _ L"newCount" _ L"updatedText"})
 				CLASS_MEMBER_METHOD(GetHyperlinkIdFromPoint, {L"point"})
 				CLASS_MEMBER_METHOD(ActivateHyperlink, {L"hyperlinkId" _ L"active"})
 			END_CLASS_MEMBER(GuiDocumentElement)
