@@ -321,6 +321,9 @@
     <ClCompile Include="..\..\Source\GraphicsElement\WindowsGDI\GuiGraphicsUniscribe.cpp" />
     <ClCompile Include="..\..\Source\GraphicsElement\WindowsGDI\GuiGraphicsWindowsGDI.cpp" />
     <ClCompile Include="..\..\Source\NativeWindow\GuiDocument.cpp" />
+    <ClCompile Include="..\..\Source\NativeWindow\GuiDocument_Edit.cpp" />
+    <ClCompile Include="..\..\Source\NativeWindow\GuiDocument_Load.cpp" />
+    <ClCompile Include="..\..\Source\NativeWindow\GuiDocument_Save.cpp" />
     <ClCompile Include="..\..\Source\NativeWindow\GuiNativeWindow.cpp" />
     <ClCompile Include="..\..\Source\NativeWindow\GuiResource.cpp" />
     <ClCompile Include="..\..\Source\NativeWindow\Windows\Direct2D\WinDirect2DApplication.cpp" />
