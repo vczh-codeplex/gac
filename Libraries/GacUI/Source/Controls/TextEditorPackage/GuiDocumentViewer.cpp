@@ -104,7 +104,7 @@ GuiDocumentViewer
 							ProcessKey(VKEY_LEFT, true, false);
 						}
 						Array<WString> text;
-						documentElement->EditText(begin, end, documentElement->IsCaretEndPreferFrontSide(), text);
+						EditText(begin, end, documentElement->IsCaretEndPreferFrontSide(), text);
 						return true;
 					}
 					break;
@@ -116,7 +116,24 @@ GuiDocumentViewer
 							ProcessKey(VKEY_RIGHT, true, false);
 						}
 						Array<WString> text;
-						documentElement->EditText(begin, end, documentElement->IsCaretEndPreferFrontSide(), text);
+						EditText(begin, end, documentElement->IsCaretEndPreferFrontSide(), text);
+						return true;
+					}
+					break;
+				case VKEY_RETURN:
+					if(editMode==Editable)
+					{
+						if(ctrl)
+						{
+							Array<WString> text(1);
+							text[0]=L"\r\n";
+							EditText(begin, end, documentElement->IsCaretEndPreferFrontSide(), text);
+						}
+						else
+						{
+							Array<WString> text(2);
+							EditText(begin, end, documentElement->IsCaretEndPreferFrontSide(), text);
+						}
 						return true;
 					}
 					break;
