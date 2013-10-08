@@ -467,6 +467,104 @@ document_serialization_visitors::RemoveRunVisitor
 		using namespace document_serialization_visitors;
 
 /***********************************************************************
+document_serialization_visitors::InsertTextVisitor
+***********************************************************************/
+
+		namespace document_serialization_visitors
+		{
+			class InsertTextVisitor : public Object, public DocumentRun::IVisitor
+			{
+			public:
+				RunRangeMap&					runRanges;
+				vint							position;
+				bool							frontSide;
+				WString							text;
+
+				InsertTextVisitor( RunRangeMap& _runRanges, vint _position, bool _frontSide, const WString& _text)
+					:runRanges(_runRanges)
+					,position(_position)
+					,frontSide(_frontSide)
+					,text(_text)
+				{
+				}
+
+				void VisitContainer(DocumentContainerRun* run)
+				{
+					Ptr<DocumentRun> selectedRun;
+					FOREACH(Ptr<DocumentRun>, subRun, run->runs)
+					{
+						RunRange range=runRanges[subRun.Obj()];
+						vint start=range.start;
+						vint end=range.start+range.length;
+						if(position==start)
+						{
+							if(!frontSide)
+							{
+								selectedRun=subRun;
+								break;
+							}
+						}
+						else if(position==end)
+						{
+							if(frontSide)
+							{
+								selectedRun=subRun;
+								break;
+							}
+						}
+						else if(start<position && position<end)
+						{
+							selectedRun=subRun;
+							break;
+						}
+					}
+					selectedRun->Accept(this);
+				}
+
+				void Visit(DocumentTextRun* run)override
+				{
+					RunRange range=runRanges[run];
+					run->text=run->text.Insert(position-range.start, text);
+				}
+
+				void Visit(DocumentStylePropertiesRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentStyleApplicationRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentHyperlinkTextRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentImageRun* run)override
+				{
+				}
+
+				void Visit(DocumentTemplateApplicationRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentTemplateContentRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentParagraphRun* run)override
+				{
+					VisitContainer(run);
+				}
+			};
+		}
+		using namespace document_serialization_visitors;
+
+/***********************************************************************
 DocumentModel
 ***********************************************************************/
 
@@ -478,7 +576,7 @@ DocumentModel
 			if(end.row<0 || end.row>=paragraphs.Count()) return -1;
 
 			// break the first updated paragraph if necessary
-			if(begin.row==end.row)
+			if(begin.row==end.row && text.Count()>1)
 			{
 				Ptr<DocumentRun> clonedParagraph=CloneRunVisitor::CopyRunRecursively(paragraphs[begin.row]);
 				paragraphs.Insert(begin.row, clonedParagraph.Cast<DocumentParagraphRun>());
@@ -492,6 +590,7 @@ DocumentModel
 				GetRunRangeVisitor visitor(runRanges);
 				paragraph->Accept(&visitor);
 			}
+			if(begin.row!=end.row)
 			{
 				Ptr<DocumentParagraphRun> paragraph=paragraphs[end.row];
 				GetRunRangeVisitor visitor(runRanges);
@@ -528,6 +627,10 @@ DocumentModel
 				paragraphs[stylePosition.row]->Accept(&visitor);
 			}
 
+			if(begin.row==end.row)
+			{
+			}
+
 			// copy runs with new text
 			Ptr<DocumentRun> newBeginRun;
 			Ptr<DocumentRun> newEndRun;
@@ -548,13 +651,21 @@ DocumentModel
 			}
 
 			// rearrange paragraphs
+			if(begin.row==end.row)
 			{
-				RemoveRunVisitor visitor(runRanges, begin.column, runRanges[paragraphs[begin.row].Obj()].length);
+				RemoveRunVisitor visitor(runRanges, begin.column, end.column);
 				paragraphs[begin.row]->Accept(&visitor);
 			}
+			else
 			{
-				RemoveRunVisitor visitor(runRanges, 0, end.column);
-				paragraphs[end.row]->Accept(&visitor);
+				{
+					RemoveRunVisitor visitor(runRanges, begin.column, runRanges[paragraphs[begin.row].Obj()].length);
+					paragraphs[begin.row]->Accept(&visitor);
+				}
+				{
+					RemoveRunVisitor visitor(runRanges, 0, end.column);
+					paragraphs[end.row]->Accept(&visitor);
+				} 
 			}
 			for(vint i=end.row-1;i>begin.row;i++)
 			{
