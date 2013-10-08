@@ -486,6 +486,15 @@
     <ClCompile Include="..\..\Source\GraphicsElement\GuiGraphicsDocumentElement.cpp">
       <Filter>GacUI\GraphicsElement</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\NativeWindow\GuiDocument_Load.cpp">
+      <Filter>GacUI\NativeWindow</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\NativeWindow\GuiDocument_Save.cpp">
+      <Filter>GacUI\NativeWindow</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\NativeWindow\GuiDocument_Edit.cpp">
+      <Filter>GacUI\NativeWindow</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Common\Source\Basic.h">
