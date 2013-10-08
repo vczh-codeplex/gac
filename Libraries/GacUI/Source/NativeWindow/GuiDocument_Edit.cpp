@@ -149,7 +149,11 @@ document_serialization_visitors::LocateStyleVisitor
 							break;
 						}
 					}
-					selectedRun->Accept(this);
+
+					if(selectedRun)
+					{
+						selectedRun->Accept(this);
+					}
 				}
 
 				void Visit(DocumentTextRun* run)override
@@ -218,6 +222,16 @@ document_serialization_visitors::CloneRunVisitor
 					if(clonedRun)
 					{
 						cloned->runs.Add(clonedRun);
+						clonedRun=0;
+					}
+					FOREACH(Ptr<DocumentRun>, subRun, run->runs)
+					{
+						subRun->Accept(this);
+						if(clonedRun)
+						{
+							cloned->runs.Add(clonedRun);
+							clonedRun=0;
+						}
 					}
 					clonedRun=cloned;
 				}
@@ -298,12 +312,8 @@ document_serialization_visitors::CloneRunVisitor
 					{
 						Ptr<DocumentParagraphRun> cloned=new DocumentParagraphRun;
 						cloned->alignment=run->alignment;
-
-						if(clonedRun)
-						{
-							cloned->runs.Add(clonedRun);
-						}
-						clonedRun=cloned;
+						
+						VisitContainer(run, cloned);
 					}
 				}
 
@@ -381,7 +391,7 @@ document_serialization_visitors::RemoveRunVisitor
 						if(runStart<=end && start<=runEnd)
 						{
 							subRun->Accept(this);
-							if(subRun.Obj()!=replacedRuns[0])
+							if(replacedRuns.Count()==0 || subRun.Obj()!=replacedRuns[0])
 							{
 								run->runs.RemoveAt(i);
 								for(vint j=0;j<replacedRuns.Count();j++)
@@ -404,15 +414,15 @@ document_serialization_visitors::RemoveRunVisitor
 
 					if(start<=textStart)
 					{
-						if(textEnd>end)
+						if(end<textEnd)
 						{
 							run->text=run->text.Sub(end-textStart, textEnd-end);
+							replacedRuns.Add(run);
 						}
-						replacedRuns.Add(run);
 					}
 					else
 					{
-						if(textEnd>end)
+						if(end<textEnd)
 						{
 							DocumentTextRun* firstRun=new DocumentTextRun;
 							DocumentTextRun* secondRun=new DocumentTextRun;
@@ -521,7 +531,11 @@ document_serialization_visitors::InsertTextVisitor
 							break;
 						}
 					}
-					selectedRun->Accept(this);
+
+					if(selectedRun)
+					{
+						selectedRun->Accept(this);
+					}
 				}
 
 				void Visit(DocumentTextRun* run)override
@@ -582,7 +596,7 @@ DocumentModel
 			if(begin.row==end.row && text.Count()>1)
 			{
 				Ptr<DocumentRun> clonedParagraph=CloneRunVisitor::CopyRunRecursively(paragraphs[begin.row]);
-				paragraphs.Insert(begin.row, clonedParagraph.Cast<DocumentParagraphRun>());
+				paragraphs.Insert(begin.row+1, clonedParagraph.Cast<DocumentParagraphRun>());
 				end.row++;
 			}
 
@@ -677,8 +691,14 @@ DocumentModel
 			}
 			else if(text.Count()>1)
 			{
-				paragraphs[begin.row]->runs.Add(newBeginRun);
-				paragraphs[begin.row+1]->runs.Insert(0, newEndRun);
+				if(newBeginRun)
+				{
+					paragraphs[begin.row]->runs.Add(newBeginRun);
+				}
+				if(newEndRun)
+				{
+					paragraphs[begin.row+1]->runs.Insert(0, newEndRun);
+				}
 
 				for(vint i=0;i<middleParagraphs.Count();i++)
 				{
