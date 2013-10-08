@@ -110,8 +110,8 @@ document_serialization_visitors::LocateStyleVisitor
 				vint							position;
 				bool							frontSide;
 
-				LocateStyleVisitor(List<DocumentContainerRun*>& _locateRuns, RunRangeMap& _runRanges, vint _position, bool _frontSide)
-					:locatedRuns(locatedRuns)
+				LocateStyleVisitor(List<DocumentContainerRun*>& _locatedRuns, RunRangeMap& _runRanges, vint _position, bool _frontSide)
+					:locatedRuns(_locatedRuns)
 					,runRanges(_runRanges)
 					,position(_position)
 					,frontSide(_frontSide)
@@ -370,6 +370,7 @@ document_serialization_visitors::RemoveRunVisitor
 
 				void VisitContainer(DocumentContainerRun* run)
 				{
+					if(start==end) return;
 					for(vint i=run->runs.Count()-1;i>=0;i--)
 					{
 						Ptr<DocumentRun> subRun=run->runs[i];
@@ -377,7 +378,7 @@ document_serialization_visitors::RemoveRunVisitor
 						vint runStart=range.start;
 						vint runEnd=range.start+range.length;
 
-						if(runStart<end && runEnd<start)
+						if(runStart<=end && runEnd<=start)
 						{
 							subRun->Accept(this);
 							if(subRun.Obj()!=replacedRuns[0])
@@ -690,7 +691,7 @@ DocumentModel
 				paragraphs.RemoveAt(begin.row+1);
 			}
 
-			return text.Count();
+			return text.Count()==0?1:text.Count();
 		}
 
 		bool DocumentModel::EditStyle(TextPos begin, TextPos end, Ptr<DocumentStyleProperties> style)
