@@ -271,6 +271,10 @@ document_serialization_visitors::SerializeRunVisitor
 		}
 		using namespace document_serialization_visitors;
 
+/***********************************************************************
+DocumentModel
+***********************************************************************/
+
 		Ptr<parsing::xml::XmlDocument> DocumentModel::SaveToXml()
 		{
 			Ptr<XmlDocument> xml=new XmlDocument;

@@ -6,6 +6,7 @@ namespace vl
 	{
 		namespace controls
 		{
+			using namespace collections;
 			using namespace elements;
 			using namespace compositions;
 
@@ -38,6 +39,9 @@ GuiDocumentViewer
 			{
 				TextPos currentCaret=documentElement->GetCaretEnd();
 				bool frontSide=documentElement->IsCaretEndPreferFrontSide();
+				TextPos begin=documentElement->GetCaretBegin();
+				TextPos end=documentElement->GetCaretEnd();
+
 				switch(code)
 				{
 				case VKEY_UP:
@@ -90,6 +94,30 @@ GuiDocumentViewer
 					break;
 				case VKEY_NEXT:
 					{
+					}
+					break;
+				case VKEY_BACK:
+					if(editMode==Editable)
+					{
+						if(begin==end)
+						{
+							ProcessKey(VKEY_LEFT, true, false);
+						}
+						Array<WString> text;
+						documentElement->EditText(begin, end, documentElement->IsCaretEndPreferFrontSide(), text);
+						return true;
+					}
+					break;
+				case VKEY_DELETE:
+					if(editMode==Editable)
+					{
+						if(begin==end)
+						{
+							ProcessKey(VKEY_RIGHT, true, false);
+						}
+						Array<WString> text;
+						documentElement->EditText(begin, end, documentElement->IsCaretEndPreferFrontSide(), text);
+						return true;
 					}
 					break;
 				}
@@ -172,6 +200,19 @@ GuiDocumentViewer
 						{
 							arguments.handled=true;
 						}
+					}
+				}
+			}
+
+			void GuiDocumentCommonInterface::OnCharInput(compositions::GuiGraphicsComposition* sender, compositions::GuiCharEventArgs& arguments)
+			{
+				if(senderControl->GetVisuallyEnabled())
+				{
+					if(editMode!=Editable)
+					{
+						Array<WString> text(1);
+						text[0]=WString(arguments.code);
+						documentElement->EditText(documentElement->GetCaretBegin(), documentElement->GetCaretEnd(), documentElement->IsCaretEndPreferFrontSide(), text);
 					}
 				}
 			}
@@ -303,6 +344,16 @@ GuiDocumentViewer
 			void GuiDocumentCommonInterface::NotifyParagraphUpdated(vint index, vint oldCount, vint newCount, bool updatedText)
 			{
 				documentElement->NotifyParagraphUpdated(index, oldCount, newCount, updatedText);
+			}
+
+			void GuiDocumentCommonInterface::EditText(TextPos begin, TextPos end, bool frontSide, const collections::Array<WString>& text)
+			{
+				documentElement->EditText(begin, end, frontSide, text);
+			}
+
+			void GuiDocumentCommonInterface::EditStyle(TextPos begin, TextPos end, Ptr<DocumentStyleProperties> style)
+			{
+				documentElement->EditStyle(begin, end, style);
 			}
 
 			vint GuiDocumentCommonInterface::GetActiveHyperlinkId()

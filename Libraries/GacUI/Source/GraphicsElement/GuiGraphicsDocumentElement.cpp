@@ -473,6 +473,23 @@ GuiDocumentElement::GuiDocumentElementRenderer
 				}
 			}
 
+			void GuiDocumentElement::GuiDocumentElementRenderer::EditText(TextPos begin, TextPos end, bool frontSide, const collections::Array<WString>& text)
+			{
+				vint newRows=element->document->EditText(begin, end, frontSide, text);
+				if(newRows!=-1)
+				{
+					NotifyParagraphUpdated(begin.row, end.row-begin.row+1, newRows, true);
+				}
+			}
+
+			void GuiDocumentElement::GuiDocumentElementRenderer::EditStyle(TextPos begin, TextPos end, Ptr<DocumentStyleProperties> style)
+			{
+				if(element->document->EditStyle(begin, end, style))
+				{
+					NotifyParagraphUpdated(begin.row, end.row-begin.row+1, end.row-begin.row+1, false);
+				}
+			}
+
 			vint GuiDocumentElement::GuiDocumentElementRenderer::GetHyperlinkIdFromPoint(Point point)
 			{
 				vint top=0;
@@ -850,6 +867,36 @@ GuiDocumentElement
 				if(elementRenderer)
 				{
 					elementRenderer->NotifyParagraphUpdated(index, oldCount, newCount, updatedText);
+				}
+			}
+
+			void GuiDocumentElement::EditText(TextPos begin, TextPos end, bool frontSide, const collections::Array<WString>& text)
+			{
+				Ptr<GuiDocumentElementRenderer> elementRenderer=renderer.Cast<GuiDocumentElementRenderer>();
+				if(elementRenderer)
+				{
+					if(begin>end)
+					{
+						TextPos temp=begin;
+						begin=end;
+						end=temp;
+					}
+					elementRenderer->EditText(begin, end, frontSide, text);
+				}
+			}
+
+			void GuiDocumentElement::EditStyle(TextPos begin, TextPos end, Ptr<DocumentStyleProperties> style)
+			{
+				Ptr<GuiDocumentElementRenderer> elementRenderer=renderer.Cast<GuiDocumentElementRenderer>();
+				if(elementRenderer)
+				{
+					if(begin>end)
+					{
+						TextPos temp=begin;
+						begin=end;
+						end=temp;
+					}
+					elementRenderer->EditStyle(begin, end, style);
 				}
 			}
 
