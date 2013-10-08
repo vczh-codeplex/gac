@@ -382,12 +382,12 @@ GuiDocumentViewer
 				}
 				else if(text.Count()==1)
 				{
-					caret=TextPos(end.row, end.column+text[0].Length());
+					caret=TextPos(begin.row, begin.column+text[0].Length());
 					frontSide=true;
 				}
 				else
 				{
-					caret=TextPos(end.row+text.Count()-1, text[text.Count()-1].Length());
+					caret=TextPos(begin.row+text.Count()-1, text[text.Count()-1].Length());
 					frontSide=true;
 				}
 				documentElement->SetCaret(caret, caret, frontSide);

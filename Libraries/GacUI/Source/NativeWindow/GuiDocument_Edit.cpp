@@ -752,7 +752,12 @@ DocumentModel
 				{
 					RemoveRunVisitor visitor(runRanges, 0, end.column);
 					paragraphs[end.row]->Accept(&visitor);
-				} 
+				}
+				end=TextPos(begin.row+1, 0);
+				if(stylePosition!=begin)
+				{
+					stylePosition=end;
+				}
 				for(vint i=end.row-1;i>begin.row;i++)
 				{
 					paragraphs.RemoveAt(i);
@@ -762,8 +767,23 @@ DocumentModel
 			// insert text
 			if(text.Count()==1)
 			{
+
+				// refresh run ranges
+				runRanges.Clear();
+				{
+					Ptr<DocumentParagraphRun> paragraph=paragraphs[begin.row];
+					GetRunRangeVisitor visitor(runRanges);
+					paragraph->Accept(&visitor);
+				}
+				if(begin.row!=end.row)
+				{
+					Ptr<DocumentParagraphRun> paragraph=paragraphs[end.row];
+					GetRunRangeVisitor visitor(runRanges);
+					paragraph->Accept(&visitor);
+				}
+
 				InsertTextVisitor visitor(runRanges, stylePosition.column, frontSide, text[0]);
-				Ptr<DocumentParagraphRun> paragraph=paragraphs[stylePosition.row==begin.row?begin.row:begin.row+1];
+				Ptr<DocumentParagraphRun> paragraph=paragraphs[stylePosition.row];
 				paragraph->Accept(&visitor);
 			}
 			else if(text.Count()>1)
@@ -774,20 +794,20 @@ DocumentModel
 				}
 				if(newEndRun)
 				{
-					paragraphs[begin.row+1]->runs.Insert(0, newEndRun);
+					paragraphs[end.row]->runs.Insert(0, newEndRun);
 				}
 
 				for(vint i=0;i<middleParagraphs.Count();i++)
 				{
-					paragraphs.Insert(begin.row+1+i, middleParagraphs[i]);
+					paragraphs.Insert(end.row+i, middleParagraphs[i]);
 				}
 			}
 
 			// merge multiple paragraphs if necessary
 			if(begin.row!=end.row && text.Count()<=1)
 			{
-				CopyFrom(paragraphs[begin.row]->runs, paragraphs[begin.row+1]->runs, true);
-				paragraphs.RemoveAt(begin.row+1);
+				CopyFrom(paragraphs[begin.row]->runs, paragraphs[end.row]->runs, true);
+				paragraphs.RemoveAt(end.row);
 			}
 
 			vint newRowCount=text.Count()==0?1:text.Count();
