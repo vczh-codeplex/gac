@@ -627,30 +627,23 @@ DocumentModel
 				paragraphs[stylePosition.row]->Accept(&visitor);
 			}
 
-			if(begin.row==end.row)
-			{
-			}
-
 			// copy runs with new text
 			Ptr<DocumentRun> newBeginRun;
 			Ptr<DocumentRun> newEndRun;
 			List<Ptr<DocumentParagraphRun>> middleParagraphs;
 
-			if(text.Count()>0)
-			{
-				newBeginRun=CloneRunVisitor::CopyStyledText(styleRuns, text[0], false);
-			}
 			if(text.Count()>1)
 			{
+				newBeginRun=CloneRunVisitor::CopyStyledText(styleRuns, text[0], false);
 				newEndRun=CloneRunVisitor::CopyStyledText(styleRuns, text[text.Count()-1], false);
-			}
-			for(vint i=1;i<text.Count()-2;i++)
-			{
-				Ptr<DocumentRun> clonedRun=CloneRunVisitor::CopyStyledText(styleRuns, text[i], true);
-				middleParagraphs.Add(clonedRun.Cast<DocumentParagraphRun>());
+				for(vint i=1;i<text.Count()-2;i++)
+				{
+					Ptr<DocumentRun> clonedRun=CloneRunVisitor::CopyStyledText(styleRuns, text[i], true);
+					middleParagraphs.Add(clonedRun.Cast<DocumentParagraphRun>());
+				}
 			}
 
-			// rearrange paragraphs
+			// remove selected text
 			if(begin.row==end.row)
 			{
 				RemoveRunVisitor visitor(runRanges, begin.column, end.column);
@@ -666,29 +659,35 @@ DocumentModel
 					RemoveRunVisitor visitor(runRanges, 0, end.column);
 					paragraphs[end.row]->Accept(&visitor);
 				} 
-			}
-			for(vint i=end.row-1;i>begin.row;i++)
-			{
-				paragraphs.RemoveAt(i);
+				for(vint i=end.row-1;i>begin.row;i++)
+				{
+					paragraphs.RemoveAt(i);
+				}
 			}
 
-			// update paragraphs
-			if(newBeginRun)
-			{
-				paragraphs[begin.row]->runs.Add(newBeginRun);
-			}
-			if(newEndRun)
-			{
-				paragraphs[end.row]->runs.Insert(0, newEndRun);
-			}
+			// insert text
 			if(text.Count()==1)
 			{
-				CopyFrom(paragraphs[begin.row]->runs, paragraphs[end.row]->runs, true);
-				paragraphs.RemoveAt(end.row);
+				InsertTextVisitor visitor(runRanges, stylePosition.column, frontSide, text[0]);
+				Ptr<DocumentParagraphRun> paragraph=paragraphs[stylePosition.row==begin.row?begin.row:begin.row+1];
+				paragraph->Accept(&visitor);
 			}
-			for(vint i=0;i<middleParagraphs.Count();i++)
+			else if(text.Count()>1)
 			{
-				paragraphs.Insert(begin.row+1+i, middleParagraphs[i]);
+				paragraphs[begin.row]->runs.Add(newBeginRun);
+				paragraphs[begin.row+1]->runs.Insert(0, newEndRun);
+
+				for(vint i=0;i<middleParagraphs.Count();i++)
+				{
+					paragraphs.Insert(begin.row+1+i, middleParagraphs[i]);
+				}
+			}
+
+			// merge multiple paragraphs if necessary
+			if(begin.row!=end.row && text.Count()<=1)
+			{
+				CopyFrom(paragraphs[begin.row]->runs, paragraphs[begin.row+1]->runs, true);
+				paragraphs.RemoveAt(begin.row+1);
 			}
 
 			return text.Count();
