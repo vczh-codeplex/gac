@@ -367,6 +367,14 @@ GuiDocumentViewer
 			void GuiDocumentCommonInterface::EditText(TextPos begin, TextPos end, bool frontSide, const collections::Array<WString>& text)
 			{
 				documentElement->EditText(begin, end, frontSide, text);
+
+				if(begin>end)
+				{
+					TextPos temp=begin;
+					begin=end;
+					end=temp;
+				}
+
 				TextPos caret;
 				if(text.Count()==0)
 				{

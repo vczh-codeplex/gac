@@ -378,7 +378,7 @@ document_serialization_visitors::RemoveRunVisitor
 						vint runStart=range.start;
 						vint runEnd=range.start+range.length;
 
-						if(runStart<=end && runEnd<=start)
+						if(runStart<=end && start<=runEnd)
 						{
 							subRun->Accept(this);
 							if(subRun.Obj()!=replacedRuns[0])
@@ -408,6 +408,7 @@ document_serialization_visitors::RemoveRunVisitor
 						{
 							run->text=run->text.Sub(end-textStart, textEnd-end);
 						}
+						replacedRuns.Add(run);
 					}
 					else
 					{
@@ -425,6 +426,7 @@ document_serialization_visitors::RemoveRunVisitor
 						else
 						{
 							run->text=run->text.Sub(0, start-textStart);
+							replacedRuns.Add(run);
 						}
 					}
 				}

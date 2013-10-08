@@ -461,6 +461,8 @@ GuiDocumentElement::GuiDocumentElementRenderer
 								if(cache)
 								{
 									cache->graphicsParagraph=0;
+									cache->selectionBegin=-1;
+									cache->selectionEnd=-1;
 								}
 								paragraphCaches[i]=cache;
 							}
