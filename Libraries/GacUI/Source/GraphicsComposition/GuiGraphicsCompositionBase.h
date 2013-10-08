@@ -11,6 +11,7 @@ Interfaces:
 
 #include "..\GraphicsElement\GuiGraphicsElement.h"
 #include "..\GraphicsElement\GuiGraphicsTextElement.h"
+#include "..\GraphicsElement\GuiGraphicsDocumentElement.h"
 #include "GuiGraphicsEventReceiver.h"
 
 namespace vl

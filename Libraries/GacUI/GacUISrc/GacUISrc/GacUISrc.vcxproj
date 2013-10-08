@@ -308,6 +308,7 @@
     <ClCompile Include="..\..\Source\GraphicsComposition\GuiGraphicsSpecializedComposition.cpp" />
     <ClCompile Include="..\..\Source\GraphicsComposition\GuiGraphicsStackComposition.cpp" />
     <ClCompile Include="..\..\Source\GraphicsComposition\GuiGraphicsTableComposition.cpp" />
+    <ClCompile Include="..\..\Source\GraphicsElement\GuiGraphicsDocumentElement.cpp" />
     <ClCompile Include="..\..\Source\GraphicsElement\GuiGraphicsElement.cpp" />
     <ClCompile Include="..\..\Source\GraphicsElement\GuiGraphicsHost.cpp" />
     <ClCompile Include="..\..\Source\GraphicsElement\GuiGraphicsResourceManager.cpp" />
@@ -470,6 +471,7 @@
     <ClInclude Include="..\..\Source\GraphicsComposition\GuiGraphicsSpecializedComposition.h" />
     <ClInclude Include="..\..\Source\GraphicsComposition\GuiGraphicsStackComposition.h" />
     <ClInclude Include="..\..\Source\GraphicsComposition\GuiGraphicsTableComposition.h" />
+    <ClInclude Include="..\..\Source\GraphicsElement\GuiGraphicsDocumentElement.h" />
     <ClInclude Include="..\..\Source\GraphicsElement\GuiGraphicsDocumentInterfaces.h" />
     <ClInclude Include="..\..\Source\GraphicsElement\GuiGraphicsElement.h" />
     <ClInclude Include="..\..\Source\GraphicsElement\GuiGraphicsElementInterfaces.h" />
