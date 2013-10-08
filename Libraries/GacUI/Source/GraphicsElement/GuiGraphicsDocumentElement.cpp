@@ -437,6 +437,7 @@ GuiDocumentElement::GuiDocumentElementRenderer
 				if(0<=index && index<paragraphCaches.Count() && 0<=oldCount && index+oldCount<=paragraphCaches.Count() && 0<=newCount)
 				{
 					vint paragraphCount=element->document->paragraphs.Count();
+					CHECK_ERROR(updatedText || oldCount==newCount, L"GuiDocumentElement::GuiDocumentElementRenderer::NotifyParagraphUpdated(vint, vint, vint, bool)#oldCount和newCount设置错误。");
 					CHECK_ERROR(paragraphCount-paragraphCaches.Count()==newCount-oldCount, L"GuiDocumentElement::GuiDocumentElementRenderer::NotifyParagraphUpdated(vint, vint, vint, bool)#oldCount和newCount设置错误。");
 
 					Array<Ptr<ParagraphCache>> oldCaches;
@@ -461,8 +462,11 @@ GuiDocumentElement::GuiDocumentElementRenderer
 								if(cache)
 								{
 									cache->graphicsParagraph=0;
-									cache->selectionBegin=-1;
-									cache->selectionEnd=-1;
+									if(updatedText)
+									{
+										cache->selectionBegin=-1;
+										cache->selectionEnd=-1;
+									}
 								}
 								paragraphCaches[i]=cache;
 							}
