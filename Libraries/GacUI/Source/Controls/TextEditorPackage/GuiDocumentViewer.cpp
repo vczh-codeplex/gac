@@ -226,7 +226,7 @@ GuiDocumentViewer
 			{
 				if(senderControl->GetVisuallyEnabled())
 				{
-					if(editMode==Editable && arguments.code!=VKEY_ESCAPE && arguments.code!=VKEY_BACK && !arguments.ctrl)
+					if(editMode==Editable && arguments.code!=VKEY_ESCAPE && arguments.code!=VKEY_BACK && arguments.code!=VKEY_RETURN && !arguments.ctrl)
 					{
 						Array<WString> text(1);
 						text[0]=WString(arguments.code);
