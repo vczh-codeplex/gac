@@ -128,28 +128,28 @@ document_serialization_visitors::SerializeRunVisitor
 						if(sp->bold)
 						{
 							Ptr<XmlElement> element=new XmlElement;
-							element->name.value=L"b";
+							element->name.value=sp->bold.Value()?L"b":L"b-";
 							container->subNodes.Add(element);
 							container=element;
 						}
 						if(sp->italic)
 						{
 							Ptr<XmlElement> element=new XmlElement;
-							element->name.value=L"i";
+							element->name.value=sp->italic.Value()?L"i":L"i-";
 							container->subNodes.Add(element);
 							container=element;
 						}
 						if(sp->underline)
 						{
 							Ptr<XmlElement> element=new XmlElement;
-							element->name.value=L"u";
+							element->name.value=sp->underline.Value()?L"u":L"u-";
 							container->subNodes.Add(element);
 							container=element;
 						}
 						if(sp->strikeline)
 						{
 							Ptr<XmlElement> element=new XmlElement;
-							element->name.value=L"s";
+							element->name.value=sp->strikeline.Value()?L"s":L"s-";
 							container->subNodes.Add(element);
 							container=element;
 						}
@@ -477,35 +477,35 @@ document_serialization_visitors::DeserializeNodeVisitor
 						container->runs.Add(run);
 						createdContainer=run;
 					}
-					else if(node->name.value==L"b")
+					else if(node->name.value==L"b" || node->name.value==L"b-")
 					{
 						Ptr<DocumentStylePropertiesRun> run=new DocumentStylePropertiesRun();
 						run->style=new DocumentStyleProperties;
-						run->style->bold=true;
+						run->style->bold=node->name.value==L"b";
 						container->runs.Add(run);
 						createdContainer=run;
 					}
-					else if(node->name.value==L"i")
+					else if(node->name.value==L"i" || node->name.value==L"i-")
 					{
 						Ptr<DocumentStylePropertiesRun> run=new DocumentStylePropertiesRun();
 						run->style=new DocumentStyleProperties;
-						run->style->italic=true;
+						run->style->italic=node->name.value==L"i";
 						container->runs.Add(run);
 						createdContainer=run;
 					}
-					else if(node->name.value==L"u")
+					else if(node->name.value==L"u" || node->name.value==L"u-")
 					{
 						Ptr<DocumentStylePropertiesRun> run=new DocumentStylePropertiesRun();
 						run->style=new DocumentStyleProperties;
-						run->style->underline=true;
+						run->style->underline=node->name.value==L"u";
 						container->runs.Add(run);
 						createdContainer=run;
 					}
-					else if(node->name.value==L"s")
+					else if(node->name.value==L"s" || node->name.value==L"s-")
 					{
 						Ptr<DocumentStylePropertiesRun> run=new DocumentStylePropertiesRun();
 						run->style=new DocumentStyleProperties;
-						run->style->strikeline=true;
+						run->style->strikeline=node->name.value==L"s";
 						container->runs.Add(run);
 						createdContainer=run;
 					}
