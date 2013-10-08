@@ -69,7 +69,7 @@ Rich Content Document (element)
 					void									Render(Rect bounds)override;
 					void									OnElementStateChanged()override;
 
-					void									NotifyParagraphUpdated(vint index);
+					void									NotifyParagraphUpdated(vint index, vint oldCount, vint newCount, bool updatedText);
 					vint									GetHyperlinkIdFromPoint(Point point);
 					void									OpenCaret(TextPos caret, Color color, bool frontSide);
 					void									CloseCaret();
@@ -158,10 +158,12 @@ Rich Content Document (element)
 				/// <param name="frontSide">Set to true to get the bounds for the character before it.</param>
 				Rect										GetCaretBounds(TextPos caret, bool frontSide);
 
-				/// <summary>Get the caret.</summary>
-				/// <summary>Notify that a specified paragraph is updated.</summary>
-				/// <param name="index">The paragraph index.</param>
-				void										NotifyParagraphUpdated(vint index);
+				/// <summary>Notify that some paragraphs are updated.</summary>
+				/// <param name="index">The start paragraph index.</param>
+				/// <param name="oldCount">The number of paragraphs to be updated.</param>
+				/// <param name="newCount">The number of updated paragraphs.</param>
+				/// <param name="updatedText">Set to true to notify that the text is updated.</param>
+				void										NotifyParagraphUpdated(vint index, vint oldCount, vint newCount, bool updatedText);
 
 				/// <summary>Get hyperlink id from point.</summary>
 				/// <returns>Corressponding hyperlink id. Returns -1 indicates that the point is not in a hyperlink.</returns>

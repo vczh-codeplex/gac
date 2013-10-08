@@ -432,14 +432,43 @@ GuiDocumentElement::GuiDocumentElementRenderer
 				}
 			}
 
-			void GuiDocumentElement::GuiDocumentElementRenderer::NotifyParagraphUpdated(vint index)
+			void GuiDocumentElement::GuiDocumentElementRenderer::NotifyParagraphUpdated(vint index, vint oldCount, vint newCount, bool updatedText)
 			{
-				if(0<=index && index<paragraphCaches.Count())
+				if(0<=index && index<paragraphCaches.Count() && 0<=oldCount && index+oldCount<=paragraphCaches.Count() && 0<=newCount)
 				{
-					Ptr<ParagraphCache> cache=paragraphCaches[index];
-					if(cache)
+					vint paragraphCount=element->document->paragraphs.Count();
+					CHECK_ERROR(paragraphCount-paragraphCaches.Count()==newCount-oldCount, L"GuiDocumentElement::GuiDocumentElementRenderer::NotifyParagraphUpdated(vint, vint, vint, bool)#oldCount∫ÕnewCount…Ë÷√¥ÌŒÛ°£");
+
+					Array<Ptr<ParagraphCache>> oldCaches;
+					CopyFrom(oldCaches, paragraphCaches);
+					paragraphCaches.Resize(paragraphCount);
+
+					for(vint i=0;i<paragraphCount;i++)
 					{
-						cache->graphicsParagraph=0;
+						if(i<index)
+						{
+							paragraphCaches[i]=oldCaches[i];
+						}
+						else if(i<index+newCount)
+						{
+							if(updatedText)
+							{
+								paragraphCaches[i]=0;
+							}
+							else if(i<index+oldCount)
+							{
+								Ptr<ParagraphCache> cache=oldCaches[i];
+								if(cache)
+								{
+									cache->graphicsParagraph=0;
+								}
+								paragraphCaches[i]=cache;
+							}
+						}
+						else
+						{
+							paragraphCaches[i]=oldCaches[i-(newCount-oldCount)];
+						}
 					}
 				}
 			}
@@ -521,7 +550,7 @@ GuiDocumentElement::GuiDocumentElementRenderer
 						{
 							cache->selectionBegin=newBegin;
 							cache->selectionEnd=newEnd;
-							NotifyParagraphUpdated(i);
+							NotifyParagraphUpdated(i, 1, 1, false);
 						}
 					}
 					else
@@ -533,7 +562,7 @@ GuiDocumentElement::GuiDocumentElementRenderer
 							{
 								cache->selectionBegin=-1;
 								cache->selectionEnd=-1;
-								NotifyParagraphUpdated(i);
+								NotifyParagraphUpdated(i, 1, 1, false);
 							}
 						}
 					}
@@ -815,12 +844,12 @@ GuiDocumentElement
 				}
 			}
 			
-			void GuiDocumentElement::NotifyParagraphUpdated(vint index)
+			void GuiDocumentElement::NotifyParagraphUpdated(vint index, vint oldCount, vint newCount, bool updatedText)
 			{
 				Ptr<GuiDocumentElementRenderer> elementRenderer=renderer.Cast<GuiDocumentElementRenderer>();
 				if(elementRenderer)
 				{
-					elementRenderer->NotifyParagraphUpdated(index);
+					elementRenderer->NotifyParagraphUpdated(index, oldCount, newCount, updatedText);
 				}
 			}
 
@@ -844,7 +873,7 @@ GuiDocumentElement
 					vint paragraphIndex=document->ActivateHyperlink(hyperlinkId, active);
 					if(paragraphIndex!=-1)
 					{
-						NotifyParagraphUpdated(paragraphIndex);
+						NotifyParagraphUpdated(paragraphIndex, 1, 1, false);
 					}
 				}
 			}

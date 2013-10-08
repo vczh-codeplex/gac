@@ -1206,7 +1206,7 @@ Type Declaration
 				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(ActiveHyperlinkId, ActiveHyperlinkChanged)
 				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(ActiveHyperlinkReference, ActiveHyperlinkChanged)
 
-				CLASS_MEMBER_METHOD(NotifyParagraphUpdated, {L"index"})
+				CLASS_MEMBER_METHOD(NotifyParagraphUpdated, {L"index" _ L"oldCount" _ L"newCount" _ L"updatedText"})
 			END_CLASS_MEMBER(GuiDocumentCommonInterface)
 
 			BEGIN_ENUM_ITEM(GuiDocumentCommonInterface::EditMode)

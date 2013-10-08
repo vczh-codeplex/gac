@@ -74,9 +74,12 @@ GuiDocumentCommonInterface
 				/// <summary>Set the document. When a document is set to this element, modifying the document without invoking <see cref="NotifyParagraphUpdated"/> will lead to undefined behavior.</summary>
 				/// <param name="value">The document.</param>
 				void										SetDocument(Ptr<DocumentModel> value);
-				/// <summary>Notify that a specified paragraph is updated.</summary>
-				/// <param name="index">The paragraph index.</param>
-				void										NotifyParagraphUpdated(vint index);
+				/// <summary>Notify that some paragraphs are updated.</summary>
+				/// <param name="index">The start paragraph index.</param>
+				/// <param name="oldCount">The number of paragraphs to be updated.</param>
+				/// <param name="newCount">The number of updated paragraphs.</param>
+				/// <param name="updatedText">Set to true to notify that the text is updated.</param>
+				void										NotifyParagraphUpdated(vint index, vint oldCount, vint newCount, bool updatedText);
 				/// <summary>Get the active hyperlink id. Returns -1 indicates there is no active hyperlink.</summary>
 				/// <returns>The active hyperlink id.</returns>
 				vint										GetActiveHyperlinkId();

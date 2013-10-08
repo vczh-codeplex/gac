@@ -300,9 +300,9 @@ GuiDocumentViewer
 				documentElement->SetDocument(value);
 			}
 
-			void GuiDocumentCommonInterface::NotifyParagraphUpdated(vint index)
+			void GuiDocumentCommonInterface::NotifyParagraphUpdated(vint index, vint oldCount, vint newCount, bool updatedText)
 			{
-				documentElement->NotifyParagraphUpdated(index);
+				documentElement->NotifyParagraphUpdated(index, oldCount, newCount, updatedText);
 			}
 
 			vint GuiDocumentCommonInterface::GetActiveHyperlinkId()
