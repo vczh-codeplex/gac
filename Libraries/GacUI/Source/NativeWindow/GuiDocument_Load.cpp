@@ -379,6 +379,10 @@ document_serialization_visitors::DeserializeNodeVisitor
 		}
 		using namespace document_serialization_visitors;
 
+/***********************************************************************
+DocumentModel
+***********************************************************************/
+
 		Ptr<DocumentModel> DocumentModel::LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, Ptr<DocumentResolver> resolver)
 		{
 			Ptr<DocumentModel> model=new DocumentModel;

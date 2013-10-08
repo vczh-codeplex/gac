@@ -53,6 +53,7 @@ GuiDocumentCommonInterface
 				void										OnGotFocus(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 				void										OnLostFocus(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 				void										OnKeyDown(compositions::GuiGraphicsComposition* sender, compositions::GuiKeyEventArgs& arguments);
+				void										OnCharInput(compositions::GuiGraphicsComposition* sender, compositions::GuiCharEventArgs& arguments);
 				void										OnMouseMove(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
 				void										OnMouseDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
 				void										OnMouseUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
@@ -80,6 +81,17 @@ GuiDocumentCommonInterface
 				/// <param name="newCount">The number of updated paragraphs.</param>
 				/// <param name="updatedText">Set to true to notify that the text is updated.</param>
 				void										NotifyParagraphUpdated(vint index, vint oldCount, vint newCount, bool updatedText);
+				/// <summary>Edit text in a specified range.</summary>
+				/// <param name="begin">The begin position of the range.</param>
+				/// <param name="end">The end position of the range.</param>
+				/// <param name="frontSide">Set to true to use the text style in front of the specified range.</param>
+				/// <param name="text">The new text.</param>
+				void										EditText(TextPos begin, TextPos end, bool frontSide, const collections::Array<WString>& text);
+				/// <summary>Edit style in a specified range.</summary>
+				/// <param name="begin">The begin position of the range.</param>
+				/// <param name="end">The end position of the range.</param>
+				/// <param name="style">The new style.</param>
+				void										EditStyle(TextPos begin, TextPos end, Ptr<DocumentStyleProperties> style);
 				/// <summary>Get the active hyperlink id. Returns -1 indicates there is no active hyperlink.</summary>
 				/// <returns>The active hyperlink id.</returns>
 				vint										GetActiveHyperlinkId();

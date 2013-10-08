@@ -70,6 +70,8 @@ Rich Content Document (element)
 					void									OnElementStateChanged()override;
 
 					void									NotifyParagraphUpdated(vint index, vint oldCount, vint newCount, bool updatedText);
+					void									EditText(TextPos begin, TextPos end, bool frontSide, const collections::Array<WString>& text);
+					void									EditStyle(TextPos begin, TextPos end, Ptr<DocumentStyleProperties> style);
 					vint									GetHyperlinkIdFromPoint(Point point);
 					void									OpenCaret(TextPos caret, Color color, bool frontSide);
 					void									CloseCaret();
@@ -164,6 +166,17 @@ Rich Content Document (element)
 				/// <param name="newCount">The number of updated paragraphs.</param>
 				/// <param name="updatedText">Set to true to notify that the text is updated.</param>
 				void										NotifyParagraphUpdated(vint index, vint oldCount, vint newCount, bool updatedText);
+				/// <summary>Edit text in a specified range.</summary>
+				/// <param name="begin">The begin position of the range.</param>
+				/// <param name="end">The end position of the range.</param>
+				/// <param name="frontSide">Set to true to use the text style in front of the specified range.</param>
+				/// <param name="text">The new text.</param>
+				void										EditText(TextPos begin, TextPos end, bool frontSide, const collections::Array<WString>& text);
+				/// <summary>Edit style in a specified range.</summary>
+				/// <param name="begin">The begin position of the range.</param>
+				/// <param name="end">The end position of the range.</param>
+				/// <param name="style">The new style.</param>
+				void										EditStyle(TextPos begin, TextPos end, Ptr<DocumentStyleProperties> style);
 
 				/// <summary>Get hyperlink id from point.</summary>
 				/// <returns>Corressponding hyperlink id. Returns -1 indicates that the point is not in a hyperlink.</returns>

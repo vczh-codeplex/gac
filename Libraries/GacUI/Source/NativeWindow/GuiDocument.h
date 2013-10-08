@@ -361,6 +361,9 @@ Rich Content Document (model)
 			ResolvedStyle					GetStyle(const WString& styleName, const ResolvedStyle& context);
 			vint							ActivateHyperlink(vint hyperlinkId, bool active);
 
+			vint							EditText(TextPos begin, TextPos end, bool frontSide, const collections::Array<WString>& text);
+			bool							EditStyle(TextPos begin, TextPos end, Ptr<DocumentStyleProperties> style);
+
 			/// <summary>Load a document model from an xml.</summary>
 			/// <returns>The loaded document model.</returns>
 			/// <param name="xml">The xml document.</param>
