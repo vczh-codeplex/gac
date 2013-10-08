@@ -12,7 +12,7 @@ namespace vl
 		{
 
 /***********************************************************************
-Visitors
+ExtractTextVisitor
 ***********************************************************************/
 
 			namespace visitors
@@ -35,9 +35,14 @@ Visitors
 						}
 					}
 
+					void VisitContent(DocumentContentRun* run)
+					{
+						writer.WriteString(run->GetRepresentationText());
+					}
+
 					void Visit(DocumentTextRun* run)override
 					{
-						writer.WriteString(run->text);
+						VisitContent(run);
 					}
 
 					void Visit(DocumentStylePropertiesRun* run)override
@@ -57,7 +62,7 @@ Visitors
 
 					void Visit(DocumentImageRun* run)override
 					{
-						writer.WriteString(L"[Image]");
+						VisitContent(run);
 					}
 
 					void Visit(DocumentTemplateApplicationRun* run)override
@@ -89,6 +94,10 @@ Visitors
 						return reader.ReadToEnd();
 					}
 				};
+
+/***********************************************************************
+SetPropertiesVisitor
+***********************************************************************/
 
 				class SetPropertiesVisitor : public Object, public DocumentRun::IVisitor
 				{
@@ -150,7 +159,7 @@ Visitors
 
 					void Visit(DocumentTextRun* run)override
 					{
-						length=run->text.Length();
+						length=run->GetRepresentationText().Length();
 						if(length>0)
 						{
 							ResolvedStyle style=styles[styles.Count()-1];
@@ -206,8 +215,7 @@ Visitors
 
 					void Visit(DocumentImageRun* run)override
 					{
-						// [Image]
-						length=7;
+						length=run->GetRepresentationText().Length();
 
 						IGuiGraphicsParagraph::InlineObjectProperties properties;
 						properties.size=run->size;

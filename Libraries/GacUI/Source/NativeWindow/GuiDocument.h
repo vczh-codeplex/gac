@@ -112,9 +112,20 @@ Rich Content Document (run)
 			/// <summary>Sub runs.</summary>
 			RunList							runs;
 		};
+		
+		/// <summary>Pepresents a content run.</summary>
+		class DocumentContentRun : public DocumentRun, public Description<DocumentContentRun>
+		{
+		public:
+			/// <summary>Get representation text.</summary>
+			/// <returns>The representation text.</returns>
+			virtual WString					GetRepresentationText()=0;
+		};
+
+		//-------------------------------------------------------------------------
 
 		/// <summary>Pepresents a text run.</summary>
-		class DocumentTextRun : public DocumentRun, public Description<DocumentTextRun>
+		class DocumentTextRun : public DocumentContentRun, public Description<DocumentTextRun>
 		{
 		public:
 			/// <summary>Run text.</summary>
@@ -122,8 +133,40 @@ Rich Content Document (run)
 
 			DocumentTextRun(){}
 
+			WString							GetRepresentationText()override{return text;}
 			void							Accept(IVisitor* visitor)override{visitor->Visit(this);}
 		};
+				
+		/// <summary>Pepresents a inline object run.</summary>
+		class DocumentInlineObjectRun : public DocumentContentRun, public Description<DocumentInlineObjectRun>
+		{
+		public:
+			/// <summary>Size of the inline object.</summary>
+			Size							size;
+			/// <summary>Baseline of the inline object.</summary>
+			vint							baseline;
+
+			DocumentInlineObjectRun():baseline(-1){}
+		};
+				
+		/// <summary>Pepresents a image run.</summary>
+		class DocumentImageRun : public DocumentInlineObjectRun, public Description<DocumentImageRun>
+		{
+		public:
+			/// <summary>The image.</summary>
+			Ptr<INativeImage>				image;
+			/// <summary>The frame index.</summary>
+			vint							frameIndex;
+			/// <summary>The image source string.</summary>
+			WString							source;
+
+			DocumentImageRun():frameIndex(0){}
+			
+			WString							GetRepresentationText()override{return L"[Image]";}
+			void							Accept(IVisitor* visitor)override{visitor->Visit(this);}
+		};
+
+		//-------------------------------------------------------------------------
 				
 		/// <summary>Pepresents a style properties run.</summary>
 		class DocumentStylePropertiesRun : public DocumentContainerRun, public Description<DocumentStylePropertiesRun>
@@ -161,34 +204,6 @@ Rich Content Document (run)
 			vint							hyperlinkId;
 
 			DocumentHyperlinkTextRun():hyperlinkId(NullHyperlinkId){}
-
-			void							Accept(IVisitor* visitor)override{visitor->Visit(this);}
-		};
-				
-		/// <summary>Pepresents a inline object run.</summary>
-		class DocumentInlineObjectRun : public DocumentRun, public Description<DocumentInlineObjectRun>
-		{
-		public:
-			/// <summary>Size of the inline object.</summary>
-			Size							size;
-			/// <summary>Baseline of the inline object.</summary>
-			vint							baseline;
-
-			DocumentInlineObjectRun():baseline(-1){}
-		};
-				
-		/// <summary>Pepresents a image run.</summary>
-		class DocumentImageRun : public DocumentInlineObjectRun, public Description<DocumentImageRun>
-		{
-		public:
-			/// <summary>The image.</summary>
-			Ptr<INativeImage>				image;
-			/// <summary>The frame index.</summary>
-			vint							frameIndex;
-			/// <summary>The image source string.</summary>
-			WString							source;
-
-			DocumentImageRun():frameIndex(0){}
 
 			void							Accept(IVisitor* visitor)override{visitor->Visit(this);}
 		};
