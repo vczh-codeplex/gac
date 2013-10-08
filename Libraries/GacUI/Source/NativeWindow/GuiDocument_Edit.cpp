@@ -348,22 +348,76 @@ document_serialization_visitors::RemoveRunVisitor
 			class RemoveRunVisitor : public Object, public DocumentRun::IVisitor
 			{
 			public:
+				RunRangeMap&					runRanges;
+				vint							start;
+				vint							end;
+				List<DocumentRun*>				replacedRuns;
 
-				RemoveRunVisitor()
+				RemoveRunVisitor(RunRangeMap& _runRanges, vint _start, vint _end)
+					:runRanges(_runRanges)
+					,start(_start)
+					,end(_end)
 				{
 				}
 
 				void VisitContainer(DocumentContainerRun* run)
 				{
-				}
+					for(vint i=run->runs.Count()-1;i>=0;i--)
+					{
+						Ptr<DocumentRun> subRun=run->runs[i];
+						RunRange range=runRanges[subRun.Obj()];
+						vint runStart=range.start;
+						vint runEnd=range.start+range.length;
 
-				void VisitContent(DocumentContentRun* run)
-				{
+						if(runStart<end && runEnd<start)
+						{
+							subRun->Accept(this);
+							if(subRun.Obj()!=replacedRuns[0])
+							{
+								run->runs.RemoveAt(i);
+								for(vint j=0;j<replacedRuns.Count();j++)
+								{
+									run->runs.Insert(i+j, replacedRuns[j]);
+								}
+							}
+						}
+					}
+					replacedRuns.Clear();
+					replacedRuns.Add(run);
 				}
 
 				void Visit(DocumentTextRun* run)override
 				{
-					VisitContent(run);
+					replacedRuns.Clear();
+					RunRange range=runRanges[run];
+					vint textStart=range.start;
+					vint textEnd=range.start+range.length;
+
+					if(start<=textStart)
+					{
+						if(textEnd>end)
+						{
+							run->text=run->text.Sub(end-textStart, textEnd-end);
+						}
+					}
+					else
+					{
+						if(textEnd>end)
+						{
+							DocumentTextRun* firstRun=new DocumentTextRun;
+							DocumentTextRun* secondRun=new DocumentTextRun;
+
+							firstRun->text=run->text.Sub(0, start-textStart);
+							secondRun->text=run->text.Sub(end-textStart, textEnd-end);
+
+							replacedRuns.Add(firstRun);
+							replacedRuns.Add(secondRun);
+						}
+						else
+						{
+							run->text=run->text.Sub(0, start-textStart);
+						}
+					}
 				}
 
 				void Visit(DocumentStylePropertiesRun* run)override
@@ -383,7 +437,7 @@ document_serialization_visitors::RemoveRunVisitor
 
 				void Visit(DocumentImageRun* run)override
 				{
-					VisitContent(run);
+					replacedRuns.Clear();
 				}
 
 				void Visit(DocumentTemplateApplicationRun* run)override
@@ -464,15 +518,45 @@ DocumentModel
 			Ptr<DocumentRun> newEndRun;
 			List<Ptr<DocumentParagraphRun>> middleParagraphs;
 
-			newBeginRun=CloneStyleRunVisitor::CopyStyledText(styleRuns, (text.Count()==0?L"":text[0]), false);
-			if(begin.row!=end.row)
+			if(text.Count()>0)
 			{
-				newEndRun=CloneStyleRunVisitor::CopyStyledText(styleRuns, (text.Count()==0?L"":text[text.Count()-1]), false);
+				newBeginRun=CloneStyleRunVisitor::CopyStyledText(styleRuns, text[0], false);
+			}
+			if(text.Count()>1)
+			{
+				newEndRun=CloneStyleRunVisitor::CopyStyledText(styleRuns, text[text.Count()-1], false);
 			}
 			for(vint i=1;i<text.Count()-2;i++)
 			{
 				Ptr<DocumentRun> clonedRun=CloneStyleRunVisitor::CopyStyledText(styleRuns, text[i], true);
 				middleParagraphs.Add(clonedRun.Cast<DocumentParagraphRun>());
+			}
+
+			// rearrange paragraphs
+			if(begin.row==end.row)
+			{
+				{
+					RemoveRunVisitor visitor(runRanges, begin.column, end.column);
+					paragraphs[begin.row]->Accept(&visitor);
+				}
+				if(text.Count()>0)
+				{
+				}
+			}
+			else
+			{
+				{
+					RemoveRunVisitor visitor(runRanges, begin.column, runRanges[paragraphs[begin.row].Obj()].length);
+					paragraphs[begin.row]->Accept(&visitor);
+				}
+				{
+					RemoveRunVisitor visitor(runRanges, 0, end.column);
+					paragraphs[end.row]->Accept(&visitor);
+				}
+				for(vint i=end.row-1;i>begin.row;i++)
+				{
+					paragraphs.RemoveAt(i);
+				}
 			}
 
 			return text.Count();
