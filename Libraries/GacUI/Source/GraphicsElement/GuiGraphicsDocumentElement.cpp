@@ -440,23 +440,29 @@ GuiDocumentElement::GuiDocumentElementRenderer
 					CHECK_ERROR(updatedText || oldCount==newCount, L"GuiDocumentElement::GuiDocumentElementRenderer::NotifyParagraphUpdated(vint, vint, vint, bool)#oldCount和newCount设置错误。");
 					CHECK_ERROR(paragraphCount-paragraphCaches.Count()==newCount-oldCount, L"GuiDocumentElement::GuiDocumentElementRenderer::NotifyParagraphUpdated(vint, vint, vint, bool)#oldCount和newCount设置错误。");
 
-					Array<Ptr<ParagraphCache>> oldCaches;
+					ParagraphCacheArray oldCaches;
 					CopyFrom(oldCaches, paragraphCaches);
 					paragraphCaches.Resize(paragraphCount);
+
+					ParagraphHeightArray oldHeights;
+					CopyFrom(oldHeights, paragraphHeights);
+					paragraphHeights.Resize(paragraphCount);
+
+					vint defaultHeight=GetCurrentController()->ResourceService()->GetDefaultFont().size;
+					cachedTotalHeight=0;
 
 					for(vint i=0;i<paragraphCount;i++)
 					{
 						if(i<index)
 						{
 							paragraphCaches[i]=oldCaches[i];
+							paragraphHeights[i]=oldHeights[i];
 						}
 						else if(i<index+newCount)
 						{
-							if(updatedText)
-							{
-								paragraphCaches[i]=0;
-							}
-							else if(i<index+oldCount)
+							paragraphCaches[i]=0;
+							paragraphHeights[i]=defaultHeight;
+							if(!updatedText && i<index+oldCount)
 							{
 								Ptr<ParagraphCache> cache=oldCaches[i];
 								if(cache)
@@ -474,7 +480,9 @@ GuiDocumentElement::GuiDocumentElementRenderer
 						else
 						{
 							paragraphCaches[i]=oldCaches[i-(newCount-oldCount)];
+							paragraphHeights[i]=oldHeights[i-(newCount-oldCount)];
 						}
+						cachedTotalHeight+=paragraphHeights[i];
 					}
 				}
 			}

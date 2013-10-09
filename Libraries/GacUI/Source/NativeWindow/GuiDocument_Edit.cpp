@@ -709,6 +709,8 @@ DocumentModel
 				RemoveRunVisitor::RemoveRun(paragraphs[begin.row].Obj(), runRanges, begin.column, end.column);
 
 				Ptr<DocumentRun> leftRun, rightRun;
+				runRanges.Clear();
+				GetRunRangeVisitor::GetRunRange(paragraphs[begin.row].Obj(), runRanges);
 				CutRunVisitor::CutRun(paragraphs[begin.row].Obj(), runRanges, begin.column, leftRun, rightRun);
 
 				paragraphs.RemoveAt(begin.row);
