@@ -233,7 +233,7 @@ Rich Content Document (run)
 		};
 				
 		/// <summary>Pepresents a paragraph run.</summary>
-		class DocumentParagraphRun : public DocumentContainerRun, public Description<DocumentTemplateContentRun>
+		class DocumentParagraphRun : public DocumentContainerRun, public Description<DocumentParagraphRun>
 		{
 		public:
 			/// <summary>Paragraph alignment.</summary>
