@@ -506,5 +506,25 @@ DocumentModel
 			Ptr<DocumentFileProtocolResolver> resolver=new DocumentFileProtocolResolver(workingDirectory);
 			return LoadFromXml(xml, resolver);
 		}
+
+		Ptr<DocumentModel> DocumentModel::LoadFromXml(const WString& filePath)
+		{
+			Ptr<ParsingTable> table;
+			Ptr<XmlDocument> xml;
+			Ptr<DocumentModel> document;
+			{
+				WString text;
+				if(LoadTextFile(filePath, text))
+				{
+					table=XmlLoadTable();
+					xml=XmlParseDocument(text, table);
+				}
+			}
+			if(xml)
+			{
+				document=DocumentModel::LoadFromXml(xml, GetFolderPath(filePath));
+			}
+			return document;
+		}
 	}
 }

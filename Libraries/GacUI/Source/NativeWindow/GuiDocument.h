@@ -386,6 +386,11 @@ Rich Content Document (model)
 			/// <param name="workingDirectory">The working directory for loading image files.</param>
 			static Ptr<DocumentModel>		LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, const WString& workingDirectory);
 
+			/// <summary>Load a document model from an xml.</summary>
+			/// <returns>The loaded document model.</returns>
+			/// <param name="filePath">The file path of the xml document.</param>
+			static Ptr<DocumentModel>		LoadFromXml(const WString& filePath);
+
 			/// <summary>Save a document model to an xml.</summary>
 			/// <returns>The saved xml document.</returns>
 			Ptr<parsing::xml::XmlDocument>	SaveToXml();
