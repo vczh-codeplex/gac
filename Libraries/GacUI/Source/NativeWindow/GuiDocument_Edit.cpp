@@ -513,6 +513,12 @@ document_serialization_visitors::ClearRunVisitor
 				{
 					VisitContainer(run);
 				}
+
+				static void ClearRun(Ptr<DocumentRun> run)
+				{
+					ClearRunVisitor visitor;
+					run->Accept(&visitor);
+				}
 			};
 		}
 		using namespace document_serialization_visitors;
@@ -551,7 +557,12 @@ DocumentModel
 			RunRangeMap runRanges;
 			if(!CheckEditRange(begin, end, runRanges)) return -1;
 
-			return -1;
+			vint rows=paragraphs.Count()==0?1:paragraphs.Count();
+			for(vint i=0;i<rows;i++)
+			{
+				ClearRunVisitor::ClearRun(paragraphs[begin.row+i]);
+			}
+			return rows;
 		}
 
 		vint DocumentModel::EditText(TextPos begin, TextPos end, bool frontSide, const collections::Array<WString>& text)
