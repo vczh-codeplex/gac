@@ -390,7 +390,7 @@ GuiDocumentElement::GuiDocumentElementRenderer
 							Ptr<ParagraphCache> cache=paragraphCaches[i];
 							bool created=cache && cache->graphicsParagraph;
 							cache=EnsureAndGetCache(i, true);
-							if(!created && i==lastCaret.row)
+							if(!created && i==lastCaret.row && element->caretVisible)
 							{
 								cache->graphicsParagraph->OpenCaret(lastCaret.column, lastCaretColor, lastCaretFrontSide);
 							}
@@ -420,7 +420,7 @@ GuiDocumentElement::GuiDocumentElementRenderer
 					{
 						paragraphHeights[i]=defaultHeight;
 					}
-					cachedTotalHeight=paragraphHeights.Count()*defaultHeight+(paragraphHeights.Count()-1)*paragraphDistance;
+					cachedTotalHeight=paragraphHeights.Count()*(defaultHeight+paragraphDistance);
 					minSize=Size(0, cachedTotalHeight);
 				}
 				else
@@ -482,9 +482,8 @@ GuiDocumentElement::GuiDocumentElementRenderer
 							paragraphCaches[i]=oldCaches[i-(newCount-oldCount)];
 							paragraphHeights[i]=oldHeights[i-(newCount-oldCount)];
 						}
-						cachedTotalHeight+=paragraphHeights[i];
+						cachedTotalHeight+=paragraphHeights[i]+paragraphDistance;
 					}
-					cachedTotalHeight+=+(paragraphCount-1)*paragraphDistance;
 				}
 			}
 

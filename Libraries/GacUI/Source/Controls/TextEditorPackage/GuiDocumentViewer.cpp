@@ -294,7 +294,7 @@ GuiDocumentViewer
 							TextPos oldCaret=documentElement->GetCaretEnd();
 							if(caret!=oldCaret)
 							{
-								Move(caret, false, caret<oldCaret);
+								Move(caret, arguments.shift, caret<oldCaret);
 							}
 						}
 						break;
