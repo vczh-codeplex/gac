@@ -718,8 +718,8 @@ DocumentModel
 			}
 			else
 			{
-				RemoveRunVisitor::RemoveRun(paragraphs[begin.row].Obj(), runRanges, 0, begin.column);
-				RemoveRunVisitor::RemoveRun(paragraphs[end.row].Obj(), runRanges, end.column, runRanges[paragraphs[end.row].Obj()].end);
+				RemoveRunVisitor::RemoveRun(paragraphs[begin.row].Obj(), runRanges, begin.column, runRanges[paragraphs[begin.row].Obj()].end);
+				RemoveRunVisitor::RemoveRun(paragraphs[end.row].Obj(), runRanges, 0, end.column);
 			}
 
 			// insert new paragraphs
