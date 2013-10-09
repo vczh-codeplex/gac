@@ -516,15 +516,18 @@ document_serialization_visitors::CutRunVisitor
 					rightRun=rightContainer;
 				}
 
-				void VisitContent(DocumentContentRun* run)
-				{
-					leftRun=0;
-					rightRun=0;
-				}
-
 				void Visit(DocumentTextRun* run)override
 				{
-					VisitContent(run);
+					RunRange range=runRanges[run];
+
+					Ptr<DocumentTextRun> leftText=new DocumentTextRun;
+					leftText->text=run->text.Sub(0, position-range.start);
+
+					Ptr<DocumentTextRun> rightText=new DocumentTextRun;
+					rightText->text=run->text.Sub(position-range.start, range.end-position);
+
+					leftRun=leftText;
+					rightRun=rightText;
 				}
 
 				void Visit(DocumentStylePropertiesRun* run)override
@@ -544,7 +547,8 @@ document_serialization_visitors::CutRunVisitor
 
 				void Visit(DocumentImageRun* run)override
 				{
-					VisitContent(run);
+					leftRun=0;
+					rightRun=0;
 				}
 
 				void Visit(DocumentTemplateApplicationRun* run)override
