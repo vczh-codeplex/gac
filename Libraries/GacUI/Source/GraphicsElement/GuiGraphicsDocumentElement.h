@@ -74,7 +74,7 @@ Rich Content Document (element)
 					void									EditStyle(TextPos begin, TextPos end, Ptr<DocumentStyleProperties> style);
 					vint									GetHyperlinkIdFromPoint(Point point);
 					void									OpenCaret(TextPos caret, Color color, bool frontSide);
-					void									CloseCaret();
+					void									CloseCaret(TextPos caret);
 					void									SetSelection(TextPos begin, TextPos end);
 					TextPos									CalculateCaret(TextPos comparingCaret, IGuiGraphicsParagraph::CaretRelativePosition position, bool& preferFrontSide);
 					TextPos									CalculateCaretFromPoint(Point point);
