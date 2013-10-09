@@ -711,7 +711,7 @@ DocumentModel
 				Ptr<DocumentRun> leftRun, rightRun;
 				CutRunVisitor::CutRun(paragraphs[begin.row].Obj(), runRanges, begin.column, leftRun, rightRun);
 
-				paragraphs.RemoveAt(paragraphs[begin.row]);
+				paragraphs.RemoveAt(begin.row);
 				paragraphs.Insert(begin.row, leftRun.Cast<DocumentParagraphRun>());
 				paragraphs.Insert(begin.row+1, rightRun.Cast<DocumentParagraphRun>());
 				end.row=begin.row+1;
