@@ -512,6 +512,8 @@ document_serialization_visitors::CutRunVisitor
 					{
 						(i<leftCount?leftContainer:rightContainer)->runs.Add(run->runs[i]);
 					}
+					leftRun=leftContainer;
+					rightRun=rightContainer;
 				}
 
 				void VisitContent(DocumentContentRun* run)
@@ -666,16 +668,15 @@ DocumentModel
 			if(end.row<0 || end.row>=paragraphs.Count()) return false;
 
 			// determine run ranges
-			RunRangeMap runRanges;
-			GetRunRangeVisitor::GetRunRange(paragraphs[begin.row].Obj(), runRanges);
+			GetRunRangeVisitor::GetRunRange(paragraphs[begin.row].Obj(), relatedRanges);
 			if(begin.row!=end.row)
 			{
-				GetRunRangeVisitor::GetRunRange(paragraphs[end.row].Obj(), runRanges);
+				GetRunRangeVisitor::GetRunRange(paragraphs[end.row].Obj(), relatedRanges);
 			}
 			
 			// check caret range
-			RunRange beginRange=runRanges[paragraphs[begin.row].Obj()];
-			RunRange endRange=runRanges[paragraphs[end.row].Obj()];
+			RunRange beginRange=relatedRanges[paragraphs[begin.row].Obj()];
+			RunRange endRange=relatedRanges[paragraphs[end.row].Obj()];
 			if(begin.column<0 || begin.column>beginRange.end) return false;
 			if(end.column<0 || end.column>endRange.end) return false;
 
@@ -749,7 +750,7 @@ DocumentModel
 			}
 
 			// clear unnecessary runs
-			vint rows=paragraphs.Count()==0?1:paragraphs.Count();
+			vint rows=runs.Count()==0?1:runs.Count();
 			for(vint i=0;i<rows;i++)
 			{
 				ClearRunVisitor::ClearRun(paragraphs[begin.row+i].Obj());
@@ -787,7 +788,7 @@ DocumentModel
 			LocateStyleVisitor::LocateStyle(paragraphs[stylePosition.row].Obj(), runRanges, stylePosition.column, frontSide, styleRuns);
 
 			// create paragraphs
-			Array<Ptr<DocumentParagraphRun>> runs;
+			Array<Ptr<DocumentParagraphRun>> runs(text.Count());
 			for(vint i=0;i<text.Count();i++)
 			{
 				Ptr<DocumentRun> paragraph=CloneRunVisitor::CopyStyledText(styleRuns, text[i]);
