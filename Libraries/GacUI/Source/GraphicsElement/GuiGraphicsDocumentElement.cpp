@@ -520,7 +520,7 @@ GuiDocumentElement::GuiDocumentElementRenderer
 
 			void GuiDocumentElement::GuiDocumentElementRenderer::OpenCaret(TextPos caret, Color color, bool frontSide)
 			{
-				CloseCaret();
+				CloseCaret(caret);
 				lastCaret=caret;
 				lastCaretColor=color;
 				lastCaretFrontSide=frontSide;
@@ -532,7 +532,7 @@ GuiDocumentElement::GuiDocumentElementRenderer
 				}
 			}
 
-			void GuiDocumentElement::GuiDocumentElementRenderer::CloseCaret()
+			void GuiDocumentElement::GuiDocumentElementRenderer::CloseCaret(TextPos caret)
 			{
 				if(lastCaret!=TextPos(-1, -1))
 				{
@@ -545,6 +545,7 @@ GuiDocumentElement::GuiDocumentElementRenderer
 						}
 					}
 				}
+				lastCaret=caret;
 			}
 
 			void GuiDocumentElement::GuiDocumentElementRenderer::SetSelection(TextPos begin, TextPos end)
@@ -741,7 +742,7 @@ GuiDocumentElement
 					}
 					else
 					{
-						elementRenderer->CloseCaret();
+						elementRenderer->CloseCaret(caretEnd);
 					}
 				}
 			}
