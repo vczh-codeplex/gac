@@ -46,13 +46,14 @@ Rich Content Document (element)
 					};
 
 					typedef collections::Array<Ptr<ParagraphCache>>		ParagraphCacheArray;
+					typedef collections::Array<vint>					ParagraphHeightArray;
 				protected:
 					vint									paragraphDistance;
 					vint									lastMaxWidth;
 					vint									cachedTotalHeight;
 					IGuiGraphicsLayoutProvider*				layoutProvider;
 					ParagraphCacheArray						paragraphCaches;
-					collections::Array<vint>				paragraphHeights;
+					ParagraphHeightArray					paragraphHeights;
 
 					TextPos									lastCaret;
 					Color									lastCaretColor;
