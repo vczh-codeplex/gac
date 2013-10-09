@@ -88,7 +88,7 @@ document_serialization_visitors::GetRunRangeVisitor
 					VisitContainer(run);
 				}
 
-				static void GetRunRange(Ptr<DocumentRun> run, RunRangeMap& runRanges)
+				static void GetRunRange(DocumentRun* run, RunRangeMap& runRanges)
 				{
 					GetRunRangeVisitor visitor(runRanges);
 					run->Accept(&visitor);
@@ -193,7 +193,7 @@ document_serialization_visitors::LocateStyleVisitor
 					VisitContainer(run);
 				}
 
-				static void LocateStyle(Ptr<DocumentRun> run, RunRangeMap& runRanges, vint position, bool frontSide, List<DocumentContainerRun*>& locatedRuns)
+				static void LocateStyle(DocumentRun* run, RunRangeMap& runRanges, vint position, bool frontSide, List<DocumentContainerRun*>& locatedRuns)
 				{
 					LocateStyleVisitor visitor(locatedRuns, runRanges, position, frontSide);
 					run->Accept(&visitor);
@@ -305,7 +305,7 @@ document_serialization_visitors::CloneRunVisitor
 					VisitContainer(cloned);
 				}
 
-				static Ptr<DocumentRun> CopyRun(Ptr<DocumentRun> run)
+				static Ptr<DocumentRun> CopyRun(DocumentRun* run)
 				{
 					CloneRunVisitor visitor(0);
 					run->Accept(&visitor);
@@ -341,7 +341,7 @@ document_serialization_visitors::RemoveRunVisitor
 				RunRangeMap&					runRanges;
 				vint							start;
 				vint							end;
-				List<DocumentRun*>				replacedRuns;
+				List<Ptr<DocumentRun>>			replacedRuns;
 
 				RemoveRunVisitor(RunRangeMap& _runRanges, vint _start, vint _end)
 					:runRanges(_runRanges)
@@ -361,7 +361,7 @@ document_serialization_visitors::RemoveRunVisitor
 						if(range.start<=end && start<=range.end)
 						{
 							subRun->Accept(this);
-							if(replacedRuns.Count()==0 || subRun.Obj()!=replacedRuns[0])
+							if(replacedRuns.Count()==0 || subRun!=replacedRuns[0])
 							{
 								run->runs.RemoveAt(i);
 								for(vint j=0;j<replacedRuns.Count();j++)
@@ -444,7 +444,7 @@ document_serialization_visitors::RemoveRunVisitor
 					VisitContainer(run);
 				}
 
-				static void RemoveRun(Ptr<DocumentRun> run, RunRangeMap& runRanges, vint start, vint end)
+				static void RemoveRun(DocumentRun* run, RunRangeMap& runRanges, vint start, vint end)
 				{
 					RemoveRunVisitor visitor(runRanges, start, end);
 					run->Accept(&visitor);
@@ -464,7 +464,8 @@ document_serialization_visitors::CutRunVisitor
 			public:
 				RunRangeMap&					runRanges;
 				vint							position;
-				List<DocumentRun*>				replacedRuns;
+				Ptr<DocumentRun>				leftRun;
+				Ptr<DocumentRun>				rightRun;
 
 				CutRunVisitor(RunRangeMap& _runRanges, vint _position)
 					:runRanges(_runRanges)
@@ -474,12 +475,49 @@ document_serialization_visitors::CutRunVisitor
 
 				void VisitContainer(DocumentContainerRun* run)
 				{
+					vint leftCount=0;
+					Ptr<DocumentRun> selectedRun;
+
+					FOREACH(Ptr<DocumentRun>, subRun, run->runs)
+					{
+						RunRange range=runRanges[subRun.Obj()];
+						if(range.start<position)
+						{
+							leftCount++;
+							if (position<range.end)
+							{
+								selectedRun=subRun;
+							}
+						}
+						else
+						{
+							break;
+						}
+					}
+
+					if(selectedRun)
+					{
+						selectedRun->Accept(this);
+						if(leftRun && rightRun)
+						{
+							run->runs.RemoveAt(leftCount-1);
+							run->runs.Insert(leftCount-1, leftRun);
+							run->runs.Insert(leftCount, rightRun);
+						}
+					}
+					
+					Ptr<DocumentContainerRun> leftContainer=CloneRunVisitor::CopyRun(run).Cast<DocumentContainerRun>();
+					Ptr<DocumentContainerRun> rightContainer=CloneRunVisitor::CopyRun(run).Cast<DocumentContainerRun>();
+					for(vint i=0;i<run->runs.Count();i++)
+					{
+						(i<leftCount?leftContainer:rightContainer)->runs.Add(run->runs[i]);
+					}
 				}
 
 				void VisitContent(DocumentContentRun* run)
 				{
-					replacedRuns.Clear();
-					replacedRuns.Add(run);
+					leftRun=0;
+					rightRun=0;
 				}
 
 				void Visit(DocumentTextRun* run)override
@@ -522,15 +560,12 @@ document_serialization_visitors::CutRunVisitor
 					VisitContainer(run);
 				}
 
-				static void CutRun(Ptr<DocumentRun> run, RunRangeMap& runRanges, vint position, List<Ptr<DocumentRun>>& cutRuns)
+				static void CutRun(DocumentRun* run, RunRangeMap& runRanges, vint position, Ptr<DocumentRun>& leftRun, Ptr<DocumentRun>& rightRun)
 				{
 					CutRunVisitor visitor(runRanges, position);
 					run->Accept(&visitor);
-
-					FOREACH(DocumentRun*, cutRun, visitor.replacedRuns)
-					{
-						cutRuns.Add(run==cutRun?run:cutRun);
-					}
+					leftRun=visitor.leftRun;
+					rightRun=visitor.rightRun;
 				}
 			};
 		}
@@ -610,7 +645,7 @@ document_serialization_visitors::ClearRunVisitor
 					VisitContainer(run);
 				}
 
-				static void ClearRun(Ptr<DocumentRun> run)
+				static void ClearRun(DocumentRun* run)
 				{
 					ClearRunVisitor visitor;
 					run->Accept(&visitor);
@@ -632,10 +667,10 @@ DocumentModel
 
 			// determine run ranges
 			RunRangeMap runRanges;
-			GetRunRangeVisitor::GetRunRange(paragraphs[begin.row], runRanges);
+			GetRunRangeVisitor::GetRunRange(paragraphs[begin.row].Obj(), runRanges);
 			if(begin.row!=end.row)
 			{
-				GetRunRangeVisitor::GetRunRange(paragraphs[end.row], runRanges);
+				GetRunRangeVisitor::GetRunRange(paragraphs[end.row].Obj(), runRanges);
 			}
 			
 			// check caret range
@@ -666,21 +701,20 @@ DocumentModel
 			// remove unnecessary runs and ensure begin.row!=end.row
 			if(begin.row==end.row)
 			{
-				RemoveRunVisitor::RemoveRun(paragraphs[begin.row], runRanges, begin.column, end.column);
-				List<Ptr<DocumentRun>> cutRuns;
-				CutRunVisitor::CutRun(paragraphs[begin.row], runRanges, begin.column, cutRuns);
+				RemoveRunVisitor::RemoveRun(paragraphs[begin.row].Obj(), runRanges, begin.column, end.column);
+
+				Ptr<DocumentRun> leftRun, rightRun;
+				CutRunVisitor::CutRun(paragraphs[begin.row].Obj(), runRanges, begin.column, leftRun, rightRun);
 
 				paragraphs.RemoveAt(paragraphs[begin.row]);
-				for(vint i=0;i<cutRuns.Count();i++)
-				{
-					paragraphs.Insert(begin.row+i, cutRuns[i].Cast<DocumentParagraphRun>());
-				}
-				end.row=begin.row+cutRuns.Count()-1;
+				paragraphs.Insert(begin.row, leftRun.Cast<DocumentParagraphRun>());
+				paragraphs.Insert(begin.row+1, rightRun.Cast<DocumentParagraphRun>());
+				end.row=begin.row+1;
 			}
 			else
 			{
-				RemoveRunVisitor::RemoveRun(paragraphs[begin.row], runRanges, 0, begin.column);
-				RemoveRunVisitor::RemoveRun(paragraphs[end.row], runRanges, end.column, runRanges[paragraphs[end.row].Obj()].end);
+				RemoveRunVisitor::RemoveRun(paragraphs[begin.row].Obj(), runRanges, 0, begin.column);
+				RemoveRunVisitor::RemoveRun(paragraphs[end.row].Obj(), runRanges, end.column, runRanges[paragraphs[end.row].Obj()].end);
 			}
 
 			// insert new paragraphs
@@ -718,7 +752,7 @@ DocumentModel
 			vint rows=paragraphs.Count()==0?1:paragraphs.Count();
 			for(vint i=0;i<rows;i++)
 			{
-				ClearRunVisitor::ClearRun(paragraphs[begin.row+i]);
+				ClearRunVisitor::ClearRun(paragraphs[begin.row+i].Obj());
 			}
 			return rows;
 		}
@@ -750,7 +784,7 @@ DocumentModel
 
 			// copy runs that contains the target style for new text
 			List<DocumentContainerRun*> styleRuns;
-			LocateStyleVisitor::LocateStyle(paragraphs[stylePosition.row], runRanges, stylePosition.column, frontSide, styleRuns);
+			LocateStyleVisitor::LocateStyle(paragraphs[stylePosition.row].Obj(), runRanges, stylePosition.column, frontSide, styleRuns);
 
 			// create paragraphs
 			Array<Ptr<DocumentParagraphRun>> runs;
