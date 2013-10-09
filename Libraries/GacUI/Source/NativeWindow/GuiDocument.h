@@ -340,6 +340,14 @@ Rich Content Document (model)
 				{
 				}
 			};
+
+			struct RunRange
+			{
+				vint			start;
+				vint			end;
+			};
+
+			typedef collections::Dictionary<DocumentRun*, RunRange>						RunRangeMap;
 		private:
 			typedef collections::List<Ptr<DocumentParagraphRun>>						ParagraphList;
 			typedef collections::Dictionary<WString, Ptr<DocumentStyle>>				StyleMap;
@@ -360,7 +368,9 @@ Rich Content Document (model)
 			ResolvedStyle					GetStyle(Ptr<DocumentStyleProperties> sp, const ResolvedStyle& context);
 			ResolvedStyle					GetStyle(const WString& styleName, const ResolvedStyle& context);
 			vint							ActivateHyperlink(vint hyperlinkId, bool active);
-
+			
+			bool							CheckEditRange(TextPos begin, TextPos end, RunRangeMap& relatedRanges);
+			vint							EditRun(TextPos begin, TextPos end, const collections::Array<Ptr<DocumentParagraphRun>>& paragraphs);
 			vint							EditText(TextPos begin, TextPos end, bool frontSide, const collections::Array<WString>& text);
 			bool							EditStyle(TextPos begin, TextPos end, Ptr<DocumentStyleProperties> style);
 
