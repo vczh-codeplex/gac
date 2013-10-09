@@ -484,6 +484,7 @@ GuiDocumentElement::GuiDocumentElementRenderer
 						}
 						cachedTotalHeight+=paragraphHeights[i];
 					}
+					cachedTotalHeight+=+(paragraphCount-1)*paragraphDistance;
 				}
 			}
 
