@@ -263,6 +263,7 @@ document_serialization_visitors::CloneRunVisitor
 				void Visit(DocumentHyperlinkTextRun* run)override
 				{
 					Ptr<DocumentHyperlinkTextRun> cloned=new DocumentHyperlinkTextRun;
+					cloned->styleName=run->styleName;
 					cloned->normalStyleName=run->normalStyleName;
 					cloned->activeStyleName=run->activeStyleName;
 					cloned->hyperlinkId=run->hyperlinkId;
