@@ -122,7 +122,7 @@ UniscribeGlyphData
 
 				void							ClearUniscribeData(vint glyphCount, vint length);
 				bool							BuildUniscribeData(WinDC* dc, SCRIPT_ITEM* scriptItem, SCRIPT_CACHE& scriptCache, const wchar_t* runText, vint length, List<vint>& breakings, List<bool>& breakingAvailabilities);
-				void							BuildUniscribeData(SCRIPT_STRING_ANALYSIS ssa, SCRIPT_ITEM* scriptItem);
+				void							BuildUniscribeData(WinDC* dc, SCRIPT_ITEM* scriptItem, SCRIPT_LOGATTR* charLogattrs, const wchar_t* runText, vint length);
 			};
 
 /***********************************************************************
@@ -194,6 +194,7 @@ UniscribeTextRun
 				SCRIPT_CACHE					scriptCache;
 				vint							advance;
 				UniscribeGlyphData				wholeGlyph;
+				bool							needFontFallback;
 
 				UniscribeTextRun();
 				~UniscribeTextRun();

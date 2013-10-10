@@ -373,44 +373,75 @@ UniscribeGlyphData
 				return false;
 			}
 
-			void UniscribeGlyphData::BuildUniscribeData(SCRIPT_STRING_ANALYSIS ssa, SCRIPT_ITEM* scriptItem)
+			void UniscribeGlyphData::BuildUniscribeData(WinDC* dc, SCRIPT_ITEM* scriptItem, SCRIPT_LOGATTR* charLogattrs, const wchar_t* runText, vint length)
 			{
-				int length=*ScriptString_pcOutChars(ssa);
-				ClearUniscribeData(length, length);
-				sa=scriptItem->a;
+				vint glyphCount=0;
+				for(vint i=0;i<length;i++)
 				{
-					const SIZE* size=ScriptString_pSize(ssa);
-					runAbc.abcA=0;
-					runAbc.abcB=size->cx;
-					runAbc.abcC=0;
+					if(i==0 || charLogattrs[i].fCharStop)
+					{
+						glyphCount++;
+					}
 				}
+
+				ClearUniscribeData(glyphCount, length);
+				sa=scriptItem->a;
 				memset(&glyphs[0], 0, sizeof(glyphs[0])*glyphs.Count());
 				memset(&glyphVisattrs[0], 0, sizeof(glyphVisattrs[0])*glyphVisattrs.Count());
 				memset(&glyphAdvances[0], 0, sizeof(glyphAdvances[0])*glyphAdvances.Count());
 				memset(&glyphOffsets[0], 0, sizeof(glyphOffsets[0])*glyphOffsets.Count());
 				memset(&charCluster[0], 0, sizeof(charCluster[0])*charCluster.Count());
 
-				for(vint i=0;i<charCluster.Count();i++)
+				for(vint i=0;i<glyphCount;i++)
 				{
-					charCluster[i]=i;
+					glyphs[i]=i;
 				}
-				ScriptStringGetLogicalWidths(ssa, &glyphAdvances[0]);
+
 				if(sa.fRTL)
 				{
-					for(vint i=0;i<charCluster.Count()/2;i++)
+					vint currentGlyphCount=0;
+					for(vint i=0;i<length;i++)
 					{
-						vint j=charCluster.Count()-1-i;
+						if(i==0 || charLogattrs[i].fCharStop)
 						{
-							WORD t=charCluster[i];
-							charCluster[i]=charCluster[j];
-							charCluster[j]=t;
+							currentGlyphCount++;
 						}
+						charCluster[i]=glyphCount-currentGlyphCount;
+					}
+				}
+				else
+				{
+					vint currentGlyphCount=0;
+					for(vint i=0;i<length;i++)
+					{
+						if(i==0 || charLogattrs[i].fCharStop)
 						{
-							int t=glyphAdvances[i];
-							glyphAdvances[i]=glyphAdvances[j];
-							glyphAdvances[j]=t;
+							currentGlyphCount++;
+						}
+						charCluster[i]=currentGlyphCount-1;
+					}
+				}
+
+				{
+					vint lastCharIndex=0;
+					vint lastGlyphIndex=0;
+					for(vint i=1;i<=length;i++)
+					{
+						if(i==0 || charLogattrs[i].fCharStop)
+						{
+							vint glyphLength=i-lastCharIndex;
+							const wchar_t* glyphText=sa.fRTL?runText+length-lastCharIndex-glyphLength:runText+lastCharIndex;
+							SIZE size=dc->MeasureBuffer(runText, glyphLength, -1);
+							glyphAdvances[lastGlyphIndex]=size.cx;
+							lastCharIndex=i;
+							lastGlyphIndex++;
 						}
 					}
+				}
+
+				for(vint i=0;i<glyphCount;i++)
+				{
+					runAbc.abcB+=glyphAdvances[i];
 				}
 			}
 
@@ -501,6 +532,7 @@ UniscribeTextRun
 			UniscribeTextRun::UniscribeTextRun()
 				:scriptCache(0)
 				,advance(0)
+				,needFontFallback(false)
 			{
 			}
 
@@ -517,6 +549,7 @@ UniscribeTextRun
 					scriptCache=0;
 				}
 				advance=0;
+				needFontFallback=false;
 				wholeGlyph.ClearUniscribeData(0, 0);
 			}
 
@@ -586,9 +619,12 @@ UniscribeTextRun
 					goto BUILD_UNISCRIBE_DATA_FAILED;
 				}
 
-				//if(breakings.Count()==1 && !breakingAvailabilities[0])
-				//{
-				//}
+				if(breakings.Count()==1 && !breakingAvailabilities[0])
+				{
+					SCRIPT_LOGATTR* charLogattrs=&scriptItem->charLogattrs[0]+startFromLine-scriptItem->startFromLine;
+					wholeGlyph.BuildUniscribeData(dc, &scriptItem->scriptItem, charLogattrs, runText, length);
+					needFontFallback=true;
+				}
 				advance=wholeGlyph.runAbc.abcA+wholeGlyph.runAbc.abcB+wholeGlyph.runAbc.abcC;
 
 				return true;
@@ -753,22 +789,29 @@ UniscribeTextRun
 						dc->SetFont(documentFragment->fontObject);
 						dc->SetTextColor(RGB(fontColor.r, fontColor.g, fontColor.b));
 
-						HRESULT hr=ScriptTextOut(
-						dc->GetHandle(),
-						&scriptCache,
-						rect.left,
-						rect.top,
-						0,
-						&rect,
-						&wholeGlyph.sa,
-						NULL,
-						0,
-						&wholeGlyph.glyphs[clusterStart],
-						(int)(clusterCount),
-						&wholeGlyph.glyphAdvances[clusterStart],
-						NULL,
-						&wholeGlyph.glyphOffsets[clusterStart]
-						);
+						if(needFontFallback)
+						{
+							dc->DrawBuffer(rect.left, rect.top, runText+charIndex, charLength);
+						}
+						else
+						{
+							HRESULT hr=ScriptTextOut(
+								dc->GetHandle(),
+								&scriptCache,
+								rect.left,
+								rect.top,
+								0,
+								&rect,
+								&wholeGlyph.sa,
+								NULL,
+								0,
+								&wholeGlyph.glyphs[clusterStart],
+								(int)(clusterCount),
+								&wholeGlyph.glyphAdvances[clusterStart],
+								NULL,
+								&wholeGlyph.glyphOffsets[clusterStart]
+								);
+						}
 					}
 
 					startFromFragmentBounds+=charLength;
