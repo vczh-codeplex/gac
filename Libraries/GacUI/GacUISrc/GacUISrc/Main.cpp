@@ -53,7 +53,7 @@ public:
 
 		{
 			Ptr<GuiResource> resource=GuiResource::LoadFromXml(L"..\\GacUISrcCodepackedTest\\Resources\\XmlResource.xml");
-			Ptr<DocumentModel> document=resource->GetValueByPath(L"XmlDoc.xml").Cast<DocumentModel>();
+			Ptr<DocumentModel> document=resource->GetValueByPath(L"XmlDocComplexScript.xml").Cast<DocumentModel>();
 			viewer->SetDocument(document);
 		}
 
