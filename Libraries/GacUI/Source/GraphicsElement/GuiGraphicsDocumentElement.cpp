@@ -134,7 +134,7 @@ SetPropertiesVisitor
 						}
 					}
 
-					void ApplyStyle(vint start, vint length, vint hyperlinkedId, const ResolvedStyle& style)
+					void ApplyStyle(vint start, vint length, const ResolvedStyle& style)
 					{
 						paragraph->SetFont(start, length, style.style.fontFamily);
 						paragraph->SetSize(start, length, style.style.size);
@@ -151,7 +151,7 @@ SetPropertiesVisitor
 						}
 					}
 
-					void ApplyColor(vint start, vint length, vint hyperlinkedId, const ResolvedStyle& style)
+					void ApplyColor(vint start, vint length, const ResolvedStyle& style)
 					{
 						paragraph->SetColor(start, length, style.color);
 						paragraph->SetBackgroundColor(start, length, style.backgroundColor);
@@ -163,8 +163,8 @@ SetPropertiesVisitor
 						if(length>0)
 						{
 							ResolvedStyle style=styles[styles.Count()-1];
-							ApplyStyle(start, length, hyperlinkId, style);
-							ApplyColor(start, length, hyperlinkId, style);
+							ApplyStyle(start, length, style);
+							ApplyColor(start, length, style);
 
 							vint styleStart=start;
 							vint styleEnd=styleStart+length;
@@ -176,7 +176,7 @@ SetPropertiesVisitor
 								if(s2<s3)
 								{
 									ResolvedStyle selectionStyle=model->GetStyle(DocumentModel::SelectionStyleName, style);
-									ApplyColor(s2, s3-s2, hyperlinkId, selectionStyle);
+									ApplyColor(s2, s3-s2, selectionStyle);
 								}
 							}
 						}
@@ -227,6 +227,14 @@ SetPropertiesVisitor
 						element->SetStretch(true);
 
 						paragraph->SetInlineObject(start, length, properties, element);
+
+						if(start<selectionEnd && selectionBegin<start+length)
+						{
+							ResolvedStyle style=styles[styles.Count()-1];
+							ResolvedStyle selectionStyle=model->GetStyle(DocumentModel::SelectionStyleName, style);
+							ApplyColor(start, length, selectionStyle);
+						}
+
 						if(hyperlinkId!=DocumentRun::NullHyperlinkId)
 						{
 							paragraph->SetInteractionId(start, length, hyperlinkId);

@@ -17,10 +17,19 @@ WindowsDirect2DElementInlineObject
 
 			class WindowsDirect2DElementInlineObject : public IDWriteInlineObject
 			{
+			public:
+				class IRendererCallback : public Interface
+				{
+				public:
+					virtual Color									GetBackgroundColor(vint textPosition)=0;
+					virtual IWindowsDirect2DRenderTarget*			GetDirect2DRenderTarget()=0;
+				};
+
 			protected:
 				vint												counter;
 				IGuiGraphicsParagraph::InlineObjectProperties		properties;
 				Ptr<IGuiGraphicsElement>							element;
+				IRendererCallback*									rendererCallback;
 				vint												start;
 				vint												length;
 
@@ -28,12 +37,14 @@ WindowsDirect2DElementInlineObject
 				WindowsDirect2DElementInlineObject(
 					const IGuiGraphicsParagraph::InlineObjectProperties& _properties,
 					Ptr<IGuiGraphicsElement> _element,
+					IRendererCallback* _rendererCallback,
 					vint _start,
 					vint _length
 					)
 					:counter(1)
 					,properties(_properties)
 					,element(_element)
+					,rendererCallback(_rendererCallback)
 					,start(_start)
 					,length(_length)
 				{
@@ -100,6 +111,23 @@ WindowsDirect2DElementInlineObject
 					{
 						Rect bounds(Point((vint)originX, (vint)originY), properties.size);
 						graphicsRenderer->Render(bounds);
+
+						Color color=rendererCallback->GetBackgroundColor(start);
+						if(color.a!=0)
+						{
+							color.a/=2;
+							if(IWindowsDirect2DRenderTarget* renderTarget=rendererCallback->GetDirect2DRenderTarget())
+							{
+								ID2D1SolidColorBrush* brush=renderTarget->CreateDirect2DBrush(color);
+
+								renderTarget->GetDirect2DRenderTarget()->FillRectangle(
+									D2D1::RectF(bounds.x1-0.5f, bounds.y1-0.5f, bounds.x2+0.5f, bounds.y2+0.5f),
+									brush
+									);
+
+								renderTarget->DestroyDirect2DBrush(color);
+							}
+						}
 					}
 					return S_OK;
 				}
@@ -153,7 +181,7 @@ WindowsDirect2DElementInlineObject
 WindowsDirect2DParagraph
 ***********************************************************************/
 
-			class WindowsDirect2DParagraph : public Object, public IGuiGraphicsParagraph
+			class WindowsDirect2DParagraph : public Object, public IGuiGraphicsParagraph, public WindowsDirect2DElementInlineObject::IRendererCallback
 			{
 			protected:
 				struct TextRange
@@ -603,7 +631,7 @@ WindowsDirect2DParagraph (Formatting)
 					}
 					formatDataAvailable=false;
 
-					ComPtr<WindowsDirect2DElementInlineObject> inlineObject=new WindowsDirect2DElementInlineObject(properties, value, start, length);
+					ComPtr<WindowsDirect2DElementInlineObject> inlineObject=new WindowsDirect2DElementInlineObject(properties, value, this, start, length);
 					DWRITE_TEXT_RANGE range;
 					range.startPosition=(int)start;
 					range.length=(int)length;
@@ -682,6 +710,28 @@ WindowsDirect2DParagraph (Formatting)
 					DWRITE_TEXT_METRICS metrics;
 					textLayout->GetMetrics(&metrics);
 					return (vint)metrics.height;
+				}
+
+/***********************************************************************
+WindowsDirect2DParagraph (IRenderingCallback)
+***********************************************************************/
+
+				Color GetBackgroundColor(vint textPosition)override
+				{
+					Color color;
+					if(GetMap(backgroundColors, textPosition, color))
+					{
+						return color;
+					}
+					else
+					{
+						return Color(0, 0, 0, 0);
+					}
+				}
+
+				IWindowsDirect2DRenderTarget* GetDirect2DRenderTarget()override
+				{
+					return renderTarget;
 				}
 
 /***********************************************************************
