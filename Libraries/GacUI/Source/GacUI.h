@@ -3,7 +3,13 @@ Vczh Library++ 3.0
 Developer: ³Âè÷å«(vczh)
 GacUI Header Files and Common Namespaces
 
-Interfaces:
+Global Objects:
+	vl::reflection::description::		GetGlobalTypeManager
+	vl::presentation::					GetCurrentController
+	vl::presentation::elements::		GetGuiGraphicsResourceManager
+	vl::presentation::controls::		GetApplication
+	vl::presentation::controls::		GetPluginManager
+	vl::presentation::theme::			GetCurrentTheme
 ***********************************************************************/
 
 #ifndef VCZH_PRESENTATION_GACUI

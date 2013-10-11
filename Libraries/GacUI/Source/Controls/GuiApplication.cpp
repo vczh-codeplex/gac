@@ -1,11 +1,6 @@
 #include "GuiApplication.h"
 #include "Styles\GuiWin7Styles.h"
 #include "Styles\GuiWin8Styles.h"
-#include "..\Reflection\GuiReflectionBasic.h"
-#include "..\Reflection\GuiReflectionElements.h"
-#include "..\Reflection\GuiReflectionCompositions.h"
-#include "..\Reflection\GuiReflectionControls.h"
-#include "..\Reflection\GuiReflectionEvents.h"
 
 extern void GuiMain();
 
@@ -18,6 +13,7 @@ namespace vl
 			using namespace collections;
 			using namespace compositions;
 			using namespace theme;
+			using namespace description;
 
 /***********************************************************************
 GuiApplication
@@ -284,15 +280,97 @@ GuiApplication
 			}
 
 /***********************************************************************
+GuiPluginManager
+***********************************************************************/
+
+			class GuiPluginManager : public Object, public IGuiPluginManager
+			{
+			protected:
+				List<Ptr<IGuiPlugin>>				plugins;
+				bool								loaded;
+			public:
+				GuiPluginManager()
+					:loaded(false)
+				{
+				}
+
+				~GuiPluginManager()
+				{
+					Unload();
+				}
+
+				void AddPlugin(Ptr<IGuiPlugin> plugin)override
+				{
+					plugins.Add(plugin);
+					if(loaded)
+					{
+						plugin->Load();
+					}
+				}
+
+				void Load()override
+				{
+					if(!loaded)
+					{
+						loaded=true;
+						FOREACH(Ptr<IGuiPlugin>, plugin, plugins)
+						{
+							plugin->Load();
+						}
+					}
+				}
+
+				void Unload()override
+				{
+					if(loaded)
+					{
+						loaded=false;
+						FOREACH(Ptr<IGuiPlugin>, plugin, plugins)
+						{
+							plugin->Unload();
+						}
+					}
+				}
+
+				bool IsLoaded()override
+				{
+					return loaded;
+				}
+			};
+
+/***********************************************************************
 Helpers
 ***********************************************************************/
 
 			GuiApplication* application=0;
+			IGuiPluginManager* pluginManager=0;
 
 			GuiApplication* GetApplication()
 			{
 				return application;
 			}
+
+			IGuiPluginManager* GetPluginManager()
+			{
+				if(!pluginManager)
+				{
+					pluginManager=new GuiPluginManager;
+				}
+				return pluginManager;
+			}
+
+			void DestroyPluginManager()
+			{
+				if(pluginManager)
+				{
+					delete pluginManager;
+					pluginManager=0;
+				}
+			}
+
+/***********************************************************************
+GuiApplicationMain
+***********************************************************************/
 
 			void GuiApplicationInitialize()
 			{
@@ -311,23 +389,17 @@ Helpers
 					}
 				}
 
-				description::LoadPredefinedTypes();
-				description::LoadParsingTypes();
-				description::LoadGuiBasicTypes();
-				description::LoadGuiElementTypes();
-				description::LoadGuiCompositionTypes();
-				description::LoadGuiControlsTypes();
-				description::LoadGuiEventTypes();
-				theme::SetCurrentTheme(theme.Obj());
-
 				GetCurrentController()->InputService()->StartTimer();
 				GuiApplication app;
 				application=&app;
-
-				description::GetGlobalTypeManager()->Load();
+				
+				GetPluginManager()->Load();
+				GetGlobalTypeManager()->Load();
+				theme::SetCurrentTheme(theme.Obj());
 				GuiMain();
 				theme::SetCurrentTheme(0);
-				description::DestroyGlobalTypeManager();
+				DestroyGlobalTypeManager();
+				DestroyPluginManager();
 			}
 		}
 	}
