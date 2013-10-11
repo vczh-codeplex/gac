@@ -4,12 +4,19 @@ Developer: ³Âè÷å«(vczh)
 GacUI Header Files and Common Namespaces
 
 Global Objects:
-	vl::reflection::description::		GetGlobalTypeManager
-	vl::presentation::					GetCurrentController
-	vl::presentation::elements::		GetGuiGraphicsResourceManager
-	vl::presentation::controls::		GetApplication
-	vl::presentation::controls::		GetPluginManager
-	vl::presentation::theme::			GetCurrentTheme
+	vl::reflection::description::					GetGlobalTypeManager
+	vl::presentation::								GetCurrentController
+	vl::presentation::elements::					GetGuiGraphicsResourceManager
+	vl::presentation::controls::					GetApplication
+	vl::presentation::controls::					GetPluginManager
+	vl::presentation::theme::						GetCurrentTheme
+
+	vl::presentation::windows::						GetDirect2DFactory
+	vl::presentation::windows::						GetDirectWriteFactory
+	vl::presentation::elements_windows_gdi::		GetWindowsGDIResourceManager
+	vl::presentation::elements_windows_gdi::		GetWindowsGDIObjectProvider
+	vl::presentation::elements_windows_d2d::		GetWindowsDirect2DResourceManager
+	vl::presentation::elements_windows_d2d::		GetWindowsDirect2DObjectProvider
 ***********************************************************************/
 
 #ifndef VCZH_PRESENTATION_GACUI

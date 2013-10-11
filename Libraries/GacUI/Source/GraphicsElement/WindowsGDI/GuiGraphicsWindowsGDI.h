@@ -93,7 +93,7 @@ Functionality
 				virtual void								DestroyBitmapCache(INativeImageFrame* frame)=0;
 			};
 
-			extern IWindowsGDIResourceManager*			GetWindowsGDIResourceManager();
+			extern IWindowsGDIResourceManager*				GetWindowsGDIResourceManager();
 
 /***********************************************************************
 OS Supporting
