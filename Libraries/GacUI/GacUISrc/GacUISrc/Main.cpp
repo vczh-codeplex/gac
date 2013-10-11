@@ -37,6 +37,8 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 class RichTextWindow : public GuiWindow
 {
 protected:
+	GuiButton*						buttonBold;
+	GuiButton*						buttonUnbold;
 	GuiDocumentViewer*				viewer;
 
 public:
@@ -46,10 +48,52 @@ public:
 		SetText(L"GacUISrc Test Application");
 		SetClientSize(Size(640, 480));
 
-		viewer=g::NewDocumentViewer();
-		viewer->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-		viewer->SetEditMode(GuiDocumentViewer::Editable);
-		AddChild(viewer);
+		GuiTableComposition* table=new GuiTableComposition;
+		table->SetAlignmentToParent(Margin(0, 0, 0, 0));
+		table->SetCellPadding(5);
+		table->SetRowsAndColumns(2, 3);
+		table->SetRowOption(0, GuiCellOption::MinSizeOption());
+		table->SetRowOption(1, GuiCellOption::PercentageOption(1.0));
+		table->SetColumnOption(0, GuiCellOption::MinSizeOption());
+		table->SetColumnOption(1, GuiCellOption::MinSizeOption());
+		table->SetColumnOption(2, GuiCellOption::PercentageOption(1.0));
+		{
+			GuiCellComposition* cell=new GuiCellComposition;
+			table->AddChild(cell);
+			cell->SetSite(0, 0, 1, 1);
+
+			buttonBold=g::NewButton();
+			buttonBold->SetText(L"Bold");
+			buttonBold->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+			buttonBold->Clicked.AttachLambda([this](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+			{
+			});
+			cell->AddChild(buttonBold->GetBoundsComposition());
+		}
+		{
+			GuiCellComposition* cell=new GuiCellComposition;
+			table->AddChild(cell);
+			cell->SetSite(0, 1, 1, 1);
+
+			buttonUnbold=g::NewButton();
+			buttonUnbold->SetText(L"Unbold");
+			buttonUnbold->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+			buttonUnbold->Clicked.AttachLambda([this](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+			{
+			});
+			cell->AddChild(buttonUnbold->GetBoundsComposition());
+		}
+		{
+			GuiCellComposition* cell=new GuiCellComposition;
+			table->AddChild(cell);
+			cell->SetSite(1, 0, 1, 3);
+
+			viewer=g::NewDocumentViewer();
+			viewer->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+			viewer->SetEditMode(GuiDocumentViewer::Editable);
+			cell->AddChild(viewer->GetBoundsComposition());
+		}
+		GetContainerComposition()->AddChild(table);
 
 		{
 			Ptr<GuiResource> resource=GuiResource::LoadFromXml(L"..\\GacUISrcCodepackedTest\\Resources\\XmlResource.xml");
