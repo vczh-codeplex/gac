@@ -786,7 +786,7 @@ WindowsDirect2DParagraph (Rendering)
 								FLOAT y2=y1+hitTest.height;
 
 								x1-=0.5f;
-								y1-=0.5f;
+								y1-=0.0f;
 								x2+=0.5f;
 								y2+=0.5f;
 
