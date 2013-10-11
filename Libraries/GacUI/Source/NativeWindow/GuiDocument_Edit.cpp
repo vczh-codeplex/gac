@@ -715,6 +715,7 @@ document_serialization_visitors::AddStyleVisitor
 							styleRun->style=CloneRunVisitor::CopyStyle(style);
 
 							vint index=run->runs.IndexOf(selectedRun.Obj());
+							run->runs.RemoveAt(index);
 							styleRun->runs.Add(selectedRun);
 							run->runs.Insert(index, styleRun);
 						}
@@ -951,7 +952,7 @@ DocumentModel
 
 		bool DocumentModel::EditStyle(TextPos begin, TextPos end, Ptr<DocumentStyleProperties> style)
 		{
-			if(begin!=end) return false;
+			if(begin==end) return false;
 
 			// cut paragraphs
 			if(!CutEditRange(begin, end)) return false;
@@ -961,23 +962,39 @@ DocumentModel
 			if(!CheckEditRange(begin, end, runRanges)) return false;
 
 			// add style
-			Ptr<DocumentParagraphRun> beginParagraph=paragraphs[begin.row];
-			Ptr<DocumentParagraphRun> endParagraph=paragraphs[begin.row];
 			if(begin.row==end.row)
 			{
-				AddStyleVisitor::AddStyle(beginParagraph.Obj(), runRanges, begin.column, end.column, style);
+				AddStyleVisitor::AddStyle(paragraphs[begin.row].Obj(), runRanges, begin.column, end.column, style);
 			}
 			else
 			{
-				AddStyleVisitor::AddStyle(beginParagraph.Obj(), runRanges, begin.column, runRanges[beginParagraph.Obj()].end, style);
-				AddStyleVisitor::AddStyle(endParagraph.Obj(), runRanges, 0, end.column, style);
+				for(vint i=begin.row;i<=end.row;i++)
+				{
+					Ptr<DocumentParagraphRun> paragraph=paragraphs[i];
+					if(begin.row<i && i<end.row)
+					{
+						GetRunRangeVisitor::GetRunRange(paragraph.Obj(), runRanges);
+					}
+					RunRange range=runRanges[paragraph.Obj()];
+					if(i==begin.row)
+					{
+						AddStyleVisitor::AddStyle(paragraph.Obj(), runRanges, begin.column, range.end, style);
+					}
+					else if(i==end.row)
+					{
+						AddStyleVisitor::AddStyle(paragraph.Obj(), runRanges, range.start, end.column, style);
+					}
+					else
+					{
+						AddStyleVisitor::AddStyle(paragraph.Obj(), runRanges, range.start, range.end, style);
+					}
+				}
 			}
 
 			// clear paragraphs
-			ClearRunVisitor::ClearRun(paragraphs[begin.row].Obj());
-			if(begin.row!=end.row)
+			for(vint i=begin.row;i<=end.row;i++)
 			{
-				ClearRunVisitor::ClearRun(paragraphs[end.row].Obj());
+				ClearRunVisitor::ClearRun(paragraphs[i].Obj());
 			}
 
 			return true;
