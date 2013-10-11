@@ -359,6 +359,31 @@ GuiDocumentViewer
 				documentElement->SetDocument(value);
 			}
 
+			TextPos GuiDocumentCommonInterface::GetCaretBegin()
+			{
+				return documentElement->GetCaretBegin();
+			}
+
+			TextPos GuiDocumentCommonInterface::GetCaretEnd()
+			{
+				return documentElement->GetCaretEnd();
+			}
+
+			void GuiDocumentCommonInterface::SetCaret(TextPos begin, TextPos end)
+			{
+				documentElement->SetCaret(begin, end, end>=begin);
+			}
+
+			TextPos GuiDocumentCommonInterface::CalculateCaretFromPoint(Point point)
+			{
+				return documentElement->CalculateCaretFromPoint(point);
+			}
+
+			Rect GuiDocumentCommonInterface::GetCaretBounds(TextPos caret, bool frontSide)
+			{
+				return documentElement->GetCaretBounds(caret, frontSide);
+			}
+
 			void GuiDocumentCommonInterface::NotifyParagraphUpdated(vint index, vint oldCount, vint newCount, bool updatedText)
 			{
 				documentElement->NotifyParagraphUpdated(index, oldCount, newCount, updatedText);

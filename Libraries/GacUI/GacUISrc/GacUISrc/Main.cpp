@@ -67,6 +67,11 @@ public:
 			buttonBold->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 			buttonBold->Clicked.AttachLambda([this](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 			{
+				TextPos begin=viewer->GetCaretBegin();
+				TextPos end=viewer->GetCaretEnd();
+				Ptr<DocumentStyleProperties> style=new DocumentStyleProperties;
+				style->bold=true;
+				viewer->EditStyle(begin, end, style);
 			});
 			cell->AddChild(buttonBold->GetBoundsComposition());
 		}
@@ -80,6 +85,11 @@ public:
 			buttonUnbold->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 			buttonUnbold->Clicked.AttachLambda([this](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 			{
+				TextPos begin=viewer->GetCaretBegin();
+				TextPos end=viewer->GetCaretEnd();
+				Ptr<DocumentStyleProperties> style=new DocumentStyleProperties;
+				style->bold=false;
+				viewer->EditStyle(begin, end, style);
 			});
 			cell->AddChild(buttonUnbold->GetBoundsComposition());
 		}
