@@ -17,6 +17,11 @@ namespace vl
 	{
 		namespace controls
 		{
+
+/***********************************************************************
+Application
+***********************************************************************/
+
 			/// <summary>Represents an GacUI application, for window management and asynchronized operation supporting. Use [M:vl.presentation.controls.GetApplication] to access the instance of this class.</summary>
 			class GuiApplication : public Object, private INativeControllerListener, public Description<GuiApplication>
 			{
@@ -134,9 +139,50 @@ namespace vl
 				}
 			};
 
+/***********************************************************************
+Plugin
+***********************************************************************/
+
+			/// <summary>Represents a plugin for the gui.</summary>
+			class IGuiPlugin : public IDescriptable, public Description<IGuiPlugin>
+			{
+			public:
+				/// <summary>Called when the plugin manager want to load this plugin.</summary>
+				virtual void									Load()=0;
+				/// <summary>Called when the plugin manager want to unload this plugin.</summary>
+				virtual void									Unload()=0;
+			};
+
+			/// <summary>Represents a plugin manager.</summary>
+			class IGuiPluginManager : public IDescriptable, public Description<IGuiPluginManager>
+			{
+			public:
+				/// <summary>Add a plugin.</summary>
+				/// <param name="plugin">The plugin.</param>
+				virtual void									AddPlugin(Ptr<IGuiPlugin> plugin)=0;
+				/// <summary>Load all plugins.</summary>
+				virtual void									Load()=0;
+				/// <summary>Unload all plugins.</summary>
+				virtual void									Unload()=0;
+				/// <summary>Test if all plugins are loaded or not.</summary>
+				/// <returns>Returns true if all plugins are loaded.</returns>
+				virtual bool									IsLoaded()=0;
+			};
+
+/***********************************************************************
+Helper Functions
+***********************************************************************/
+
 			/// <summary>Get the global <see cref="GuiApplication"/> object.</summary>
 			/// <returns>The global <see cref="GuiApplication"/> object.</returns>
 			extern GuiApplication*								GetApplication();
+
+			/// <summary>Get the global <see cref="IGuiPluginManager"/> object.</summary>
+			/// <returns>The global <see cref="GuiApplication"/> object.</returns>
+			extern IGuiPluginManager*							GetPluginManager();
+
+			/// <summary>Destroy the global <see cref="IGuiPluginManager"/> object.</summary>
+			extern void											DestroyPluginManager();
 		}
 	}
 }
@@ -145,5 +191,15 @@ extern void GuiApplicationMain();
 
 #define GUI_VALUE(x) vl::presentation::controls::GetApplication()->RunGuiValue(LAMBDA([&](){return (x);}))
 #define GUI_RUN(x) vl::presentation::controls::GetApplication()->RunGuiTask([=](){x})
+
+#define GUI_REGISTER_PLUGIN(TYPE)\
+	class GuiRegisterPluginClass_##TYPE\
+	{\
+	public:\
+		GuiRegisterPluginClass_##TYPE()\
+		{\
+			vl::presentation::controls::GetPluginManager()->AddPlugin(new TYPE);\
+		}\
+	} instance_GuiRegisterPluginClass_##TYPE;\
 
 #endif
