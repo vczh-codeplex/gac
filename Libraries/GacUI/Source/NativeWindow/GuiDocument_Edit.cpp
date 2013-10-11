@@ -88,7 +88,7 @@ document_serialization_visitors::GetRunRangeVisitor
 					VisitContainer(run);
 				}
 
-				static void GetRunRange(DocumentRun* run, RunRangeMap& runRanges)
+				static void GetRunRange(DocumentParagraphRun* run, RunRangeMap& runRanges)
 				{
 					GetRunRangeVisitor visitor(runRanges);
 					run->Accept(&visitor);
@@ -193,7 +193,7 @@ document_serialization_visitors::LocateStyleVisitor
 					VisitContainer(run);
 				}
 
-				static void LocateStyle(DocumentRun* run, RunRangeMap& runRanges, vint position, bool frontSide, List<DocumentContainerRun*>& locatedRuns)
+				static void LocateStyle(DocumentParagraphRun* run, RunRangeMap& runRanges, vint position, bool frontSide, List<DocumentContainerRun*>& locatedRuns)
 				{
 					LocateStyleVisitor visitor(locatedRuns, runRanges, position, frontSide);
 					run->Accept(&visitor);
@@ -237,18 +237,7 @@ document_serialization_visitors::CloneRunVisitor
 				void Visit(DocumentStylePropertiesRun* run)override
 				{
 					Ptr<DocumentStylePropertiesRun> cloned=new DocumentStylePropertiesRun;
-					cloned->style=new DocumentStyleProperties;
-					cloned->style->face					=run->style->face;
-					cloned->style->size					=run->style->size;
-					cloned->style->color				=run->style->color;
-					cloned->style->backgroundColor		=run->style->backgroundColor;
-					cloned->style->bold					=run->style->bold;
-					cloned->style->italic				=run->style->italic;
-					cloned->style->underline			=run->style->underline;
-					cloned->style->strikeline			=run->style->strikeline;
-					cloned->style->antialias			=run->style->antialias;
-					cloned->style->verticalAntialias	=run->style->verticalAntialias;
-
+					cloned->style=CopyStyle(run->style);
 					VisitContainer(cloned);
 				}
 
@@ -304,6 +293,24 @@ document_serialization_visitors::CloneRunVisitor
 					cloned->alignment=run->alignment;
 						
 					VisitContainer(cloned);
+				}
+
+				static Ptr<DocumentStyleProperties> CopyStyle(Ptr<DocumentStyleProperties> style)
+				{
+					Ptr<DocumentStyleProperties> newStyle=new DocumentStyleProperties;
+					
+					newStyle->face					=style->face;
+					newStyle->size					=style->size;
+					newStyle->color					=style->color;
+					newStyle->backgroundColor		=style->backgroundColor;
+					newStyle->bold					=style->bold;
+					newStyle->italic				=style->italic;
+					newStyle->underline				=style->underline;
+					newStyle->strikeline			=style->strikeline;
+					newStyle->antialias				=style->antialias;
+					newStyle->verticalAntialias		=style->verticalAntialias;
+
+					return newStyle;
 				}
 
 				static Ptr<DocumentRun> CopyRun(DocumentRun* run)
@@ -445,7 +452,7 @@ document_serialization_visitors::RemoveRunVisitor
 					VisitContainer(run);
 				}
 
-				static void RemoveRun(DocumentRun* run, RunRangeMap& runRanges, vint start, vint end)
+				static void RemoveRun(DocumentParagraphRun* run, RunRangeMap& runRanges, vint start, vint end)
 				{
 					RemoveRunVisitor visitor(runRanges, start, end);
 					run->Accept(&visitor);
@@ -567,7 +574,7 @@ document_serialization_visitors::CutRunVisitor
 					VisitContainer(run);
 				}
 
-				static void CutRun(DocumentRun* run, RunRangeMap& runRanges, vint position, Ptr<DocumentRun>& leftRun, Ptr<DocumentRun>& rightRun)
+				static void CutRun(DocumentParagraphRun* run, RunRangeMap& runRanges, vint position, Ptr<DocumentRun>& leftRun, Ptr<DocumentRun>& rightRun)
 				{
 					CutRunVisitor visitor(runRanges, position);
 					run->Accept(&visitor);
@@ -652,9 +659,112 @@ document_serialization_visitors::ClearRunVisitor
 					VisitContainer(run);
 				}
 
-				static void ClearRun(DocumentRun* run)
+				static void ClearRun(DocumentParagraphRun* run)
 				{
 					ClearRunVisitor visitor;
+					run->Accept(&visitor);
+				}
+			};
+		}
+		using namespace document_serialization_visitors;
+
+/***********************************************************************
+document_serialization_visitors::AddStyleVisitor
+***********************************************************************/
+
+		namespace document_serialization_visitors
+		{
+			class AddStyleVisitor : public Object, public DocumentRun::IVisitor
+			{
+			public:
+				RunRangeMap&					runRanges;
+				vint							start;
+				vint							end;
+				Ptr<DocumentStyleProperties>	style;
+				bool							insertStyle;
+
+				AddStyleVisitor(RunRangeMap& _runRanges, vint _start, vint _end, Ptr<DocumentStyleProperties> _style)
+					:runRanges(_runRanges)
+					,start(_start)
+					,end(_end)
+					,style(_style)
+					,insertStyle(false)
+				{
+				}
+
+				void VisitContainer(DocumentContainerRun* run)
+				{
+					Ptr<DocumentRun> selectedRun;
+					FOREACH(Ptr<DocumentRun>, subRun, run->runs)
+					{
+						RunRange range=runRanges[subRun.Obj()];
+						if(range.start<end && start<range.end)
+						{
+							selectedRun=subRun;
+							break;
+						}
+					}
+
+					if(selectedRun)
+					{
+						insertStyle=false;
+						selectedRun->Accept(this);
+						if(insertStyle)
+						{
+							Ptr<DocumentStylePropertiesRun> styleRun=new DocumentStylePropertiesRun;
+							styleRun->style=CloneRunVisitor::CopyStyle(style);
+
+							vint index=run->runs.IndexOf(selectedRun.Obj());
+							styleRun->runs.Add(selectedRun);
+							run->runs.Insert(index, styleRun);
+						}
+					}
+					insertStyle=false;
+				}
+
+				void Visit(DocumentTextRun* run)override
+				{
+					insertStyle=true;
+				}
+
+				void Visit(DocumentStylePropertiesRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentStyleApplicationRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentHyperlinkTextRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentImageRun* run)override
+				{
+					insertStyle=false;
+				}
+
+				void Visit(DocumentTemplateApplicationRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentTemplateContentRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentParagraphRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				static void AddStyle(DocumentParagraphRun* run, RunRangeMap& runRanges, vint start, vint end, Ptr<DocumentStyleProperties> style)
+				{
+					AddStyleVisitor visitor(runRanges, start, end, style);
 					run->Accept(&visitor);
 				}
 			};
@@ -685,6 +795,39 @@ DocumentModel
 			if(begin.column<0 || begin.column>beginRange.end) return false;
 			if(end.column<0 || end.column>endRange.end) return false;
 
+			return true;
+		}
+
+		bool DocumentModel::CutParagraph(TextPos position)
+		{
+			if(position.row<0 || position.row>=paragraphs.Count()) return false;
+
+			Ptr<DocumentParagraphRun> paragraph=paragraphs[position.row];
+			RunRangeMap runRanges;
+			Ptr<DocumentRun> leftRun, rightRun;
+
+			GetRunRangeVisitor::GetRunRange(paragraph.Obj(), runRanges);
+			CutRunVisitor::CutRun(paragraph.Obj(), runRanges, position.column, leftRun, rightRun);
+
+			CopyFrom(paragraph->runs, leftRun.Cast<DocumentParagraphRun>()->runs);
+			CopyFrom(paragraph->runs, rightRun.Cast<DocumentParagraphRun>()->runs, true);
+			
+			return true;
+		}
+
+		bool DocumentModel::CutEditRange(TextPos begin, TextPos end)
+		{
+			// check caret range
+			if(begin>end) return false;
+			if(begin.row<0 || begin.row>=paragraphs.Count()) return false;
+			if(end.row<0 || end.row>=paragraphs.Count()) return false;
+
+			// cut paragraphs
+			CutParagraph(begin);
+			if(begin!=end)
+			{
+				CutParagraph(end);
+			}
 			return true;
 		}
 
@@ -808,7 +951,36 @@ DocumentModel
 
 		bool DocumentModel::EditStyle(TextPos begin, TextPos end, Ptr<DocumentStyleProperties> style)
 		{
-			return false;
+			if(begin!=end) return false;
+
+			// cut paragraphs
+			if(!CutEditRange(begin, end)) return false;
+
+			// check caret range
+			RunRangeMap runRanges;
+			if(!CheckEditRange(begin, end, runRanges)) return false;
+
+			// add style
+			Ptr<DocumentParagraphRun> beginParagraph=paragraphs[begin.row];
+			Ptr<DocumentParagraphRun> endParagraph=paragraphs[begin.row];
+			if(begin.row==end.row)
+			{
+				AddStyleVisitor::AddStyle(beginParagraph.Obj(), runRanges, begin.column, end.column, style);
+			}
+			else
+			{
+				AddStyleVisitor::AddStyle(beginParagraph.Obj(), runRanges, begin.column, runRanges[beginParagraph.Obj()].end, style);
+				AddStyleVisitor::AddStyle(endParagraph.Obj(), runRanges, 0, end.column, style);
+			}
+
+			// clear paragraphs
+			ClearRunVisitor::ClearRun(paragraphs[begin.row].Obj());
+			if(begin.row!=end.row)
+			{
+				ClearRunVisitor::ClearRun(paragraphs[end.row].Obj());
+			}
+
+			return true;
 		}
 	}
 }

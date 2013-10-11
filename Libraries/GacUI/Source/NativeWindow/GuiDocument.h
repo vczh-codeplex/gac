@@ -370,6 +370,8 @@ Rich Content Document (model)
 			vint							ActivateHyperlink(vint hyperlinkId, bool active);
 			
 			bool							CheckEditRange(TextPos begin, TextPos end, RunRangeMap& relatedRanges);
+			bool							CutParagraph(TextPos position);
+			bool							CutEditRange(TextPos begin, TextPos end);
 			vint							EditRun(TextPos begin, TextPos end, const collections::Array<Ptr<DocumentParagraphRun>>& runs);
 			vint							EditText(TextPos begin, TextPos end, bool frontSide, const collections::Array<WString>& text);
 			bool							EditStyle(TextPos begin, TextPos end, Ptr<DocumentStyleProperties> style);
