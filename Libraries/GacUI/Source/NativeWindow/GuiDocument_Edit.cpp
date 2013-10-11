@@ -694,30 +694,23 @@ document_serialization_visitors::AddStyleVisitor
 
 				void VisitContainer(DocumentContainerRun* run)
 				{
-					Ptr<DocumentRun> selectedRun;
-					FOREACH(Ptr<DocumentRun>, subRun, run->runs)
+					for(vint i=run->runs.Count()-1;i>=0;i--)
 					{
+						Ptr<DocumentRun> subRun=run->runs[i];
 						RunRange range=runRanges[subRun.Obj()];
 						if(range.start<end && start<range.end)
 						{
-							selectedRun=subRun;
-							break;
-						}
-					}
+							insertStyle=false;
+							subRun->Accept(this);
+							if(insertStyle)
+							{
+								Ptr<DocumentStylePropertiesRun> styleRun=new DocumentStylePropertiesRun;
+								styleRun->style=CloneRunVisitor::CopyStyle(style);
 
-					if(selectedRun)
-					{
-						insertStyle=false;
-						selectedRun->Accept(this);
-						if(insertStyle)
-						{
-							Ptr<DocumentStylePropertiesRun> styleRun=new DocumentStylePropertiesRun;
-							styleRun->style=CloneRunVisitor::CopyStyle(style);
-
-							vint index=run->runs.IndexOf(selectedRun.Obj());
-							run->runs.RemoveAt(index);
-							styleRun->runs.Add(selectedRun);
-							run->runs.Insert(index, styleRun);
+								run->runs.RemoveAt(i);
+								styleRun->runs.Add(subRun);
+								run->runs.Insert(i, styleRun);
+							}
 						}
 					}
 					insertStyle=false;
