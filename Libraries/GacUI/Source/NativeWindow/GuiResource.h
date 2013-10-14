@@ -264,6 +264,30 @@ Resource Loader
 		/// <param name="stream">The stream containing text.</param>
 		/// <param name="text">The text file content, if succeeded.</param>
 		extern bool									LoadTextFromStream(stream::IStream& stream, WString& text);
+
+/***********************************************************************
+Parser Loader
+***********************************************************************/
+
+		/// <summary>Parser manager for caching parsing table globally.</summary>
+		class IParserManager : public IDescriptable, public Description<IParserManager>
+		{
+		protected:
+			typedef parsing::tabling::ParsingTable			Table;
+
+		public:
+			/// <summary>Get a parsing table by name.</summary>
+			/// <returns>The parsing table.</returns>
+			/// <param name="name">The name.</param>
+			virtual Ptr<Table>						GetParsingTable(const WString& name)=0;
+			/// <summary>Set a parsing table loader by name.</summary>
+			/// <param name="name">The name.</param>
+			/// <param name="loader">The parsing table loader.</param>
+			virtual bool							SetParsingTable(const WString& name, Func<Ptr<Table>()> loader)=0;
+		};
+
+		/// <summary>Get the global <see cref="IParserManager"/> object.</summary>
+		extern IParserManager*						GetParserManager();
 	}
 }
 

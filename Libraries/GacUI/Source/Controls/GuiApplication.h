@@ -149,6 +149,8 @@ Plugin
 			public:
 				/// <summary>Called when the plugin manager want to load this plugin.</summary>
 				virtual void									Load()=0;
+				/// <summary>Called after the plugin manager loaded all plugins.</summary>
+				virtual void									AfterLoad()=0;
 				/// <summary>Called when the plugin manager want to unload this plugin.</summary>
 				virtual void									Unload()=0;
 			};

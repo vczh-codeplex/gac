@@ -396,6 +396,11 @@ Rich Content Document (model)
 			/// <summary>Save a document model to an xml.</summary>
 			/// <returns>The saved xml document.</returns>
 			Ptr<parsing::xml::XmlDocument>	SaveToXml();
+			
+			/// <summary>Save a document model to an xml.</summary>
+			/// <returns>Returns true if this operation succeeded.</returns>
+			/// <param name="filePath">The file path of the xml document.</param>
+			bool							SaveToXml(const WString& filePath);
 		};
 	}
 }

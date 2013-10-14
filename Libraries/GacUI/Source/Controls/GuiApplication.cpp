@@ -317,6 +317,10 @@ GuiPluginManager
 						{
 							plugin->Load();
 						}
+						FOREACH(Ptr<IGuiPlugin>, plugin, plugins)
+						{
+							plugin->AfterLoad();
+						}
 					}
 				}
 

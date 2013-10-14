@@ -5,6 +5,7 @@ GacUI Header Files and Common Namespaces
 
 Global Objects:
 	vl::reflection::description::					GetGlobalTypeManager
+	vl::presentation::								GetParserManager
 	vl::presentation::								GetCurrentController
 	vl::presentation::elements::					GetGuiGraphicsResourceManager
 	vl::presentation::controls::					GetApplication

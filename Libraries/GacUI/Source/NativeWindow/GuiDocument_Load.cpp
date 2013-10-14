@@ -516,7 +516,7 @@ DocumentModel
 				WString text;
 				if(LoadTextFile(filePath, text))
 				{
-					table=XmlLoadTable();
+					table=GetParserManager()->GetParsingTable(L"XML");
 					xml=XmlParseDocument(text, table);
 				}
 			}

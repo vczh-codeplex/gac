@@ -1,4 +1,5 @@
 #include "GuiResource.h"
+#include "..\Controls\GuiApplication.h"
 #include "..\..\..\..\Common\Source\Stream\FileStream.h"
 #include "..\..\..\..\Common\Source\Stream\Accessor.h"
 #include "..\..\..\..\Common\Source\Stream\CharFormat.h"
@@ -7,9 +8,11 @@ namespace vl
 {
 	namespace presentation
 	{
+		using namespace controls;
 		using namespace collections;
 		using namespace parsing::tabling;
 		using namespace parsing::xml;
+		using namespace parsing::json;
 		using namespace regex;
 
 		WString GetFolderPath(const WString& filePath)
@@ -453,7 +456,7 @@ GuiResource
 				WString text;
 				if(LoadTextFile(filePath, text))
 				{
-					table=XmlLoadTable();
+					table=GetParserManager()->GetParsingTable(L"XML");
 					xml=XmlParseDocument(text, table);
 				}
 			}
@@ -504,6 +507,79 @@ GuiResource
 			Ptr<ObjectBox<WString>> result=GetValueByPath(path).Cast<ObjectBox<WString>>();
 			if(!result) throw ArgumentException(L"Path not exists.", L"GuiResource::GetStringByPath", L"path");
 			return result->Unbox();
+		}
+
+/***********************************************************************
+IParserManager
+***********************************************************************/
+
+		class ParserManager;
+		ParserManager* parserManager=0;
+
+		class ParserManager : public Object, public IParserManager, public IGuiPlugin
+		{
+		protected:
+			Dictionary<WString, Ptr<Table>>				tables;
+			Dictionary<WString, Func<Ptr<Table>()>>		loaders;
+			SpinLock									lock;
+		public:
+			ParserManager()
+			{
+			}
+
+			~ParserManager()
+			{
+			}
+
+			void Load()override
+			{
+				parserManager=this;
+				SetParsingTable(L"XML", &XmlLoadTable);
+				SetParsingTable(L"JSON", &JsonLoadTable);
+			}
+
+			void AfterLoad()override
+			{
+			}
+
+			void Unload()override
+			{
+				parserManager=0;
+			}
+
+			Ptr<Table> GetParsingTable(const WString& name)
+			{
+				SPIN_LOCK(lock)
+				{
+					vint index=tables.Keys().IndexOf(name);
+					if(index!=-1)
+					{
+						return tables.Values()[index];
+					}
+
+					index=loaders.Keys().IndexOf(name);
+					if(index!=-1)
+					{
+						Ptr<Table> table=loaders.Values()[index]();
+						tables.Add(name, table);
+						return table;
+					}
+				}
+				return 0;
+			}
+
+			bool SetParsingTable(const WString& name, Func<Ptr<Table>()> loader)
+			{
+				if(loaders.Keys().Contains(name)) return false;
+				loaders.Add(name, loader);
+				return true;
+			}
+		};
+		GUI_REGISTER_PLUGIN(ParserManager)
+
+		IParserManager* GetParserManager()
+		{
+			return parserManager;
 		}
 	}
 }
