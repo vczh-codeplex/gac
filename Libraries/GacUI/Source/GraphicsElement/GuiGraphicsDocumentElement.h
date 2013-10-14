@@ -73,6 +73,7 @@ Rich Content Document (element)
 					void									NotifyParagraphUpdated(vint index, vint oldCount, vint newCount, bool updatedText);
 					void									EditText(TextPos begin, TextPos end, bool frontSide, const collections::Array<WString>& text);
 					void									EditStyle(TextPos begin, TextPos end, Ptr<DocumentStyleProperties> style);
+					void									EditImage(TextPos begin, TextPos end, Ptr<GuiImageData> image);
 					vint									GetHyperlinkIdFromPoint(Point point);
 					void									OpenCaret(TextPos caret, Color color, bool frontSide);
 					void									CloseCaret(TextPos caret);
@@ -178,6 +179,11 @@ Rich Content Document (element)
 				/// <param name="end">The end position of the range.</param>
 				/// <param name="style">The new style.</param>
 				void										EditStyle(TextPos begin, TextPos end, Ptr<DocumentStyleProperties> style);
+				/// <summary>Edit image in a specified range.</summary>
+				/// <param name="begin">The begin position of the range.</param>
+				/// <param name="end">The end position of the range.</param>
+				/// <param name="image">The new image.</param>
+				void										EditImage(TextPos begin, TextPos end, Ptr<GuiImageData> image);
 
 				/// <summary>Get hyperlink id from point.</summary>
 				/// <returns>Corressponding hyperlink id. Returns -1 indicates that the point is not in a hyperlink.</returns>

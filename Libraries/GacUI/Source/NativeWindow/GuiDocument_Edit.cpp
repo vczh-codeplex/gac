@@ -992,5 +992,28 @@ DocumentModel
 
 			return true;
 		}
+
+		Ptr<DocumentImageRun> DocumentModel::EditImage(TextPos begin, TextPos end, Ptr<GuiImageData> image)
+		{
+			Ptr<DocumentImageRun> imageRun=new DocumentImageRun;
+			imageRun->size=image->GetImage()->GetFrame(image->GetFrameIndex())->GetSize();
+			imageRun->baseline=imageRun->size.y;
+			imageRun->image=image->GetImage();
+			imageRun->frameIndex=image->GetFrameIndex();
+
+			Ptr<DocumentParagraphRun> paragraph=new DocumentParagraphRun;
+			paragraph->runs.Add(imageRun);
+
+			Array<Ptr<DocumentParagraphRun>> runs(1);
+			runs[0]=paragraph;
+			if(EditRun(begin, end, runs))
+			{
+				return imageRun;
+			}
+			else
+			{
+				return 0;
+			}
+		}
 	}
 }

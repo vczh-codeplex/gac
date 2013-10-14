@@ -119,6 +119,12 @@ GuiDocumentCommonInterface
 				/// <param name="end">The end position of the range.</param>
 				/// <param name="style">The new style.</param>
 				void										EditStyle(TextPos begin, TextPos end, Ptr<DocumentStyleProperties> style);
+				/// <summary>Edit image in a specified range.</summary>
+				/// <param name="begin">The begin position of the range.</param>
+				/// <param name="end">The end position of the range.</param>
+				/// <param name="image">The new image.</param>
+				void										EditImage(TextPos begin, TextPos end, Ptr<GuiImageData> image);
+
 				/// <summary>Get the active hyperlink id. Returns -1 indicates there is no active hyperlink.</summary>
 				/// <returns>The active hyperlink id.</returns>
 				vint										GetActiveHyperlinkId();

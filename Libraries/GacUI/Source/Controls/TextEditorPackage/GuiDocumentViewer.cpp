@@ -423,6 +423,11 @@ GuiDocumentViewer
 				documentElement->EditStyle(begin, end, style);
 			}
 
+			void GuiDocumentCommonInterface::EditImage(TextPos begin, TextPos end, Ptr<GuiImageData> image)
+			{
+				documentElement->EditImage(begin, end, image);
+			}
+
 			vint GuiDocumentCommonInterface::GetActiveHyperlinkId()
 			{
 				return activeHyperlinkId;

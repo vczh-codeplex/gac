@@ -27,6 +27,36 @@ namespace vl
 		class DocumentParagraphRun;
 
 /***********************************************************************
+Resource Image
+***********************************************************************/
+			
+		/// <summary>
+		/// Represnets an image to display.
+		/// </summary>
+		class GuiImageData : public Object, public Description<GuiImageData>
+		{
+		protected:
+			Ptr<INativeImage>				image;
+			vint							frameIndex;
+
+		public:
+			/// <summary>Create an empty image data.</summary>
+			GuiImageData();
+			/// <summary>Create an image data with a specified image and a frame index.</summary>
+			/// <param name="_image">The specified image.</param>
+			/// <param name="_frameIndex">The specified frame index.</param>
+			GuiImageData(Ptr<INativeImage> _image, vint _frameIndex);
+			~GuiImageData();
+
+			/// <summary>Get the specified image.</summary>
+			/// <returns>The specified image.</returns>
+			Ptr<INativeImage>				GetImage();
+			/// <summary>Get the specified frame index.</summary>
+			/// <returns>The specified frame index.</returns>
+			vint							GetFrameIndex();
+		};
+
+/***********************************************************************
 Rich Content Document (style)
 ***********************************************************************/
 
@@ -375,6 +405,7 @@ Rich Content Document (model)
 			vint							EditRun(TextPos begin, TextPos end, const collections::Array<Ptr<DocumentParagraphRun>>& runs);
 			vint							EditText(TextPos begin, TextPos end, bool frontSide, const collections::Array<WString>& text);
 			bool							EditStyle(TextPos begin, TextPos end, Ptr<DocumentStyleProperties> style);
+			Ptr<DocumentImageRun>			EditImage(TextPos begin, TextPos end, Ptr<GuiImageData> image);
 
 			/// <summary>Load a document model from an xml.</summary>
 			/// <returns>The loaded document model.</returns>

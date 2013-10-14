@@ -22,36 +22,6 @@ namespace vl
 		class GuiResource;
 
 /***********************************************************************
-Resource Image
-***********************************************************************/
-			
-		/// <summary>
-		/// Represnets an image to display.
-		/// </summary>
-		class GuiImageData : public Object, public Description<GuiImageData>
-		{
-		protected:
-			Ptr<INativeImage>				image;
-			vint							frameIndex;
-
-		public:
-			/// <summary>Create an empty image data.</summary>
-			GuiImageData();
-			/// <summary>Create an image data with a specified image and a frame index.</summary>
-			/// <param name="_image">The specified image.</param>
-			/// <param name="_frameIndex">The specified frame index.</param>
-			GuiImageData(Ptr<INativeImage> _image, vint _frameIndex);
-			~GuiImageData();
-
-			/// <summary>Get the specified image.</summary>
-			/// <returns>The specified image.</returns>
-			Ptr<INativeImage>				GetImage();
-			/// <summary>Get the specified frame index.</summary>
-			/// <returns>The specified frame index.</returns>
-			vint							GetFrameIndex();
-		};
-
-/***********************************************************************
 Rich Content Document (resolver)
 ***********************************************************************/
 		
