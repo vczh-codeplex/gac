@@ -23,6 +23,10 @@ namespace vl
 					LoadGuiControlsTypes();
 					LoadGuiEventTypes();
 				}
+				
+				void AfterLoad()override
+				{
+				}
 
 				void Unload()override
 				{

@@ -353,5 +353,20 @@ DocumentModel
 			}
 			return xml;
 		}
+
+		bool DocumentModel::SaveToXml(const WString& filePath)
+		{
+			Ptr<XmlDocument> xml=SaveToXml();
+			if(xml)
+			{
+				stream::FileStream fileStream(filePath, stream::FileStream::WriteOnly);
+				stream::BomEncoder encoder(stream::BomEncoder::Utf16);
+				stream::EncoderStream encoderStream(fileStream, encoder);
+				stream::StreamWriter writer(encoderStream);
+				XmlPrint(xml, writer);
+				return true;
+			}
+			return false;
+		}
 	}
 }
