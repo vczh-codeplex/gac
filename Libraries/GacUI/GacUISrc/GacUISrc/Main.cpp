@@ -39,6 +39,8 @@ class RichTextWindow : public GuiWindow
 protected:
 	GuiButton*						buttonBold;
 	GuiButton*						buttonUnbold;
+	GuiButton*						buttonImage;
+	Ptr<GuiImageData>				image;
 	GuiDocumentViewer*				viewer;
 
 public:
@@ -51,12 +53,13 @@ public:
 		GuiTableComposition* table=new GuiTableComposition;
 		table->SetAlignmentToParent(Margin(0, 0, 0, 0));
 		table->SetCellPadding(5);
-		table->SetRowsAndColumns(2, 3);
+		table->SetRowsAndColumns(2, 4);
 		table->SetRowOption(0, GuiCellOption::MinSizeOption());
 		table->SetRowOption(1, GuiCellOption::PercentageOption(1.0));
 		table->SetColumnOption(0, GuiCellOption::MinSizeOption());
 		table->SetColumnOption(1, GuiCellOption::MinSizeOption());
-		table->SetColumnOption(2, GuiCellOption::PercentageOption(1.0));
+		table->SetColumnOption(2, GuiCellOption::MinSizeOption());
+		table->SetColumnOption(3, GuiCellOption::PercentageOption(1.0));
 		{
 			GuiCellComposition* cell=new GuiCellComposition;
 			table->AddChild(cell);
@@ -96,7 +99,23 @@ public:
 		{
 			GuiCellComposition* cell=new GuiCellComposition;
 			table->AddChild(cell);
-			cell->SetSite(1, 0, 1, 3);
+			cell->SetSite(0, 2, 1, 1);
+
+			buttonImage=g::NewButton();
+			buttonImage->SetText(L"Insert Image");
+			buttonImage->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+			buttonImage->Clicked.AttachLambda([this](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+			{
+				TextPos begin=viewer->GetCaretBegin();
+				TextPos end=viewer->GetCaretEnd();
+				viewer->EditImage(begin, end, image);
+			});
+			cell->AddChild(buttonImage->GetBoundsComposition());
+		}
+		{
+			GuiCellComposition* cell=new GuiCellComposition;
+			table->AddChild(cell);
+			cell->SetSite(1, 0, 1, 4);
 
 			viewer=g::NewDocumentViewer();
 			viewer->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
@@ -107,6 +126,7 @@ public:
 
 		{
 			Ptr<GuiResource> resource=GuiResource::LoadFromXml(L"..\\GacUISrcCodepackedTest\\Resources\\XmlResource.xml");
+			image=resource->GetImageByPath(L"Images/_Save.png");
 			Ptr<DocumentModel> document=resource->GetValueByPath(L"XmlDoc.xml").Cast<DocumentModel>();
 			viewer->SetDocument(document);
 		}

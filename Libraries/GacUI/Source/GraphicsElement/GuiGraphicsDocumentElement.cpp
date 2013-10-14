@@ -512,6 +512,14 @@ GuiDocumentElement::GuiDocumentElementRenderer
 				}
 			}
 
+			void GuiDocumentElement::GuiDocumentElementRenderer::EditImage(TextPos begin, TextPos end, Ptr<GuiImageData> image)
+			{
+				if(element->document->EditImage(begin, end, image))
+				{
+					NotifyParagraphUpdated(begin.row, end.row-begin.row+1, 1, true);
+				}
+			}
+
 			vint GuiDocumentElement::GuiDocumentElementRenderer::GetHyperlinkIdFromPoint(Point point)
 			{
 				vint top=0;
@@ -920,6 +928,21 @@ GuiDocumentElement
 						end=temp;
 					}
 					elementRenderer->EditStyle(begin, end, style);
+				}
+			}
+
+			void GuiDocumentElement::EditImage(TextPos begin, TextPos end, Ptr<GuiImageData> image)
+			{
+				Ptr<GuiDocumentElementRenderer> elementRenderer=renderer.Cast<GuiDocumentElementRenderer>();
+				if(elementRenderer)
+				{
+					if(begin>end)
+					{
+						TextPos temp=begin;
+						begin=end;
+						end=temp;
+					}
+					elementRenderer->EditImage(begin, end, image);
 				}
 			}
 
