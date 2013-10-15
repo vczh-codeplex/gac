@@ -322,23 +322,21 @@ GuiDocumentElement::GuiDocumentElementRenderer
 				for(vint i=0;i<paragraphHeights.Count();i++)
 				{
 					vint paragraphHeight=paragraphHeights[i];
-					if(y+paragraphHeight<=point.y)
+					vint nextY=y+paragraphHeight+paragraphDistance;
+					top=y;
+					index=i;
+
+					if(nextY<=point.y)
 					{
-						y+=paragraphHeight+paragraphDistance;
+						y=nextY;
 						continue;
-					}
-					else if(y>point.y)
-					{
-						break;
 					}
 					else
 					{
-						top=y;
-						index=i;
-						return true;
+						break;
 					}
 				}
-				return false;
+				return true;
 			}
 
 			GuiDocumentElement::GuiDocumentElementRenderer::GuiDocumentElementRenderer()
