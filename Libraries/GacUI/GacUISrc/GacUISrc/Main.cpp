@@ -75,6 +75,7 @@ public:
 			listEditMode->GetItems().Add(new list::TextItem(L"ViewOnly"));
 			listEditMode->GetItems().Add(new list::TextItem(L"Selectable"));
 			listEditMode->GetItems().Add(new list::TextItem(L"Editable"));
+			listEditMode->SetHorizontalAlwaysVisible(false);
 			listEditMode->SetVerticalAlwaysVisible(false);
 
 			comboEditMode=g::NewComboBox(listEditMode);

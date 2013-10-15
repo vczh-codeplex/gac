@@ -69,6 +69,11 @@ WindowsDirect2DElementInlineObject
 					return length;
 				}
 
+				Ptr<IGuiGraphicsElement> GetElement()
+				{
+					return element;
+				}
+
 				HRESULT STDMETHODCALLTYPE QueryInterface( 
 					REFIID riid,
 					void __RPC_FAR *__RPC_FAR *ppvObject
@@ -202,6 +207,7 @@ WindowsDirect2DParagraph
 
 				typedef Dictionary<IGuiGraphicsElement*, ComPtr<WindowsDirect2DElementInlineObject>>	InlineElementMap;
 				typedef Dictionary<TextRange, Color>													ColorMap;
+				typedef Dictionary<TextRange, IGuiGraphicsElement*>										GraphicsElementMap;
 			protected:
 				IGuiGraphicsLayoutProvider*				provider;
 				ID2D1SolidColorBrush*					defaultTextColor;
@@ -212,7 +218,9 @@ WindowsDirect2DParagraph
 				bool									wrapLine;
 				vint									maxWidth;
 				List<Color>								usedColors;
+
 				InlineElementMap						inlineElements;
+				GraphicsElementMap						graphicsElements;
 				ColorMap								backgroundColors;
 
 				vint									caret;
@@ -455,6 +463,7 @@ WindowsDirect2DParagraph (Initialization)
 						textLayout=rawTextLayout;
 						textLayout->SetWordWrapping(DWRITE_WORD_WRAPPING_WRAP);
 					}
+					graphicsElements.Add(TextRange(0, _text.Length()), 0);
 					backgroundColors.Add(TextRange(0, _text.Length()), Color(0, 0, 0, 0));
 
 					GetWindowsDirect2DResourceManager()->DestroyDirect2DTextFormat(defaultFont);
@@ -641,6 +650,7 @@ WindowsDirect2DParagraph (Formatting)
 							renderer->SetRenderTarget(renderTarget);
 						}
 						inlineElements.Add(value.Obj(), inlineObject);
+						SetMap(graphicsElements, start, length, value.Obj());
 						return true;
 					}
 					else
@@ -651,26 +661,24 @@ WindowsDirect2DParagraph (Formatting)
 
 				bool ResetInlineObject(vint start, vint length)override
 				{
-					for(vint i=0;i<inlineElements.Count();i++)
+					IGuiGraphicsElement* element=0;
+					if(GetMap(graphicsElements, start, element) && element)
 					{
-						IGuiGraphicsElement* element=inlineElements.Keys().Get(i);
-						ComPtr<WindowsDirect2DElementInlineObject> inlineObject=inlineElements.Values().Get(i);
-						if(inlineObject->GetStart()==start && inlineObject->GetLength()==length)
+						ComPtr<WindowsDirect2DElementInlineObject> inlineObject=inlineElements[element];
+						DWRITE_TEXT_RANGE range;
+						range.startPosition=(int)inlineObject->GetStart();
+						range.length=(int)inlineObject->GetLength();
+						HRESULT hr=textLayout->SetInlineObject(NULL, range);
+						if(!FAILED(hr))
 						{
-							DWRITE_TEXT_RANGE range;
-							range.startPosition=(int)start;
-							range.length=(int)length;
-							HRESULT hr=textLayout->SetInlineObject(NULL, range);
-							if(!FAILED(hr))
-							{
-								formatDataAvailable=false;
-								inlineElements.Remove(element);
-								return true;
-							}
-							else
-							{
-								return false;
-							}
+							formatDataAvailable=false;
+							inlineElements.Remove(element);
+							SetMap(graphicsElements, inlineObject->GetStart(), inlineObject->GetLength(), (IGuiGraphicsElement*)0);
+							return true;
+						}
+						else
+						{
+							return false;
 						}
 					}
 					return false;
@@ -1096,6 +1104,23 @@ WindowsDirect2DParagraph (Caret)
 
 				Ptr<IGuiGraphicsElement> GetInlineObjectFromPoint(Point point, vint& start, vint& length)override
 				{
+					DWRITE_HIT_TEST_METRICS metrics={0};
+					BOOL trailingHit=FALSE;
+					BOOL inside=FALSE;
+					start=-1;
+					length=0;
+					HRESULT hr=textLayout->HitTestPoint((FLOAT)point.x, (FLOAT)point.y, &trailingHit, &inside, &metrics);
+					if(hr==S_OK)
+					{
+						IGuiGraphicsElement* element=0;
+						if(GetMap(graphicsElements, metrics.textPosition, element) && element)
+						{
+							ComPtr<WindowsDirect2DElementInlineObject> inlineObject=inlineElements[element];
+							start=inlineObject->GetStart();
+							length=inlineObject->GetLength();
+							return inlineObject->GetElement();
+						}
+					}
 					return 0;
 				}
 
