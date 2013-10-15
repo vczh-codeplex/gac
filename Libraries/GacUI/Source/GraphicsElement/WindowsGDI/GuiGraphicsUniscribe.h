@@ -320,6 +320,7 @@ UniscribeParagraph
 				Rect							GetCaretBoundsWithLine(vint caret, vint lineIndex, vint virtualLineIndex, bool frontSide);
 				vint							GetCaretFromXWithTextRunBounds(vint x, vint lineIndex, vint runIndex, vint runBoundsIndex);
 				vint							GetCaretFromXWithLine(vint x, vint lineIndex, vint virtualLineIndex);
+				Ptr<IGuiGraphicsElement>		GetInlineObjectFromXWithLine(vint x, vint lineIndex, vint virtualLineIndex, vint& start, vint& length);
 				vint							GetLineY(vint lineIndex);
 				vint							GetVirtualLineY(vint lineIndex, vint virtualLineIndex);
 				vint							GetLineIndexFromY(vint y);
@@ -328,6 +329,7 @@ UniscribeParagraph
 				vint							GetCaret(vint comparingCaret, IGuiGraphicsParagraph::CaretRelativePosition position, bool& preferFrontSide);
 				Rect							GetCaretBounds(vint caret, bool frontSide);
 				vint							GetCaretFromPoint(Point point);
+				Ptr<IGuiGraphicsElement>		GetInlineObjectFromPoint(Point point, vint& start, vint& length);
 				vint							GetNearestCaretFromTextPos(vint textPos, bool frontSide);
 				bool							IsValidCaret(vint caret);
 				bool							IsValidTextPos(vint textPos);
