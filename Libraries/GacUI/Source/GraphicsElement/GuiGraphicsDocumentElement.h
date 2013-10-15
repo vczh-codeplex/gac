@@ -181,6 +181,19 @@ Rich Content Document (element)
 				/// <param name="end">The end position of the range.</param>
 				/// <param name="image">The new image.</param>
 				void										EditImage(TextPos begin, TextPos end, Ptr<GuiImageData> image);
+				/// <summary>Set hyperlink in a specified range.</summary>
+				/// <param name="paragraphIndex">The index of the paragraph to edit.</param>
+				/// <param name="begin">The begin position of the range.</param>
+				/// <param name="end">The end position of the range.</param>
+				/// <param name="reference">The reference of the hyperlink.</param>
+				/// <param name="normalStyleName">The normal style name of the hyperlink.</param>
+				/// <param name="activeStyleName">The active style name of the hyperlink.</param>
+				void										EditHyperlink(vint paragraphIndex, vint begin, vint end, const WString& reference, const WString& normalStyleName=DocumentModel::NormalLinkStyleName, const WString& activeStyleName=DocumentModel::ActiveLinkStyleName);
+				/// <summary>Remove hyperlink in a specified range.</summary>
+				/// <param name="paragraphIndex">The index of the paragraph to edit.</param>
+				/// <param name="begin">The begin position of the range.</param>
+				/// <param name="end">The end position of the range.</param>
+				void										RemoveHyperlink(vint paragraphIndex, vint begin, vint end);
 
 				/// <summary>Get hyperlink from point.</summary>
 				/// <returns>Corressponding hyperlink id. Returns -1 indicates that the point is not in a hyperlink.</returns>

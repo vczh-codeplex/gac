@@ -1126,10 +1126,24 @@ DocumentModel::EditHyperlink
 
 		bool DocumentModel::EditHyperlink(vint paragraphIndex, vint begin, vint end, const WString& reference, const WString& normalStyleName, const WString& activeStyleName)
 		{
+			Ptr<DocumentHyperlinkRun> run=GetHyperlink(paragraphIndex, begin, end);
+			if(run)
+			{
+				run->reference=reference;
+				run->normalStyleName=normalStyleName;
+				run->activeStyleName=activeStyleName;
+				run->styleName=normalStyleName;
+				return true;
+			}
 			return false;
 		}
 
-		Ptr<DocumentHyperlinkRun> DocumentModel::GetHyperlinkLink(vint paragraphIndex, vint begin, vint end)
+		bool DocumentModel::RemoveHyperlink(vint paragraphIndex, vint begin, vint end)
+		{
+			return false;
+		}
+
+		Ptr<DocumentHyperlinkRun> DocumentModel::GetHyperlink(vint paragraphIndex, vint begin, vint end)
 		{
 			if(paragraphIndex<0 || paragraphIndex>=paragraphs.Count()) return 0;
 			
