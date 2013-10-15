@@ -65,16 +65,6 @@ ExtractTextVisitor
 						VisitContent(run);
 					}
 
-					void Visit(DocumentTemplateApplicationRun* run)override
-					{
-						VisitContainer(run);
-					}
-
-					void Visit(DocumentTemplateContentRun* run)override
-					{
-						VisitContainer(run);
-					}
-
 					void Visit(DocumentParagraphRun* run)override
 					{
 						VisitContainer(run);
@@ -226,16 +216,6 @@ SetPropertiesVisitor
 							ApplyColor(start, length, selectionStyle);
 						}
 						start+=length;
-					}
-
-					void Visit(DocumentTemplateApplicationRun* run)override
-					{
-						VisitContainer(run);
-					}
-
-					void Visit(DocumentTemplateContentRun* run)override
-					{
-						VisitContainer(run);
 					}
 
 					void Visit(DocumentParagraphRun* run)override

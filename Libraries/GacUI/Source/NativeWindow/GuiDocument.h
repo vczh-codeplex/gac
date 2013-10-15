@@ -22,8 +22,6 @@ namespace vl
 		class DocumentStyleApplicationRun;
 		class DocumentHyperlinkRun;
 		class DocumentImageRun;
-		class DocumentTemplateApplicationRun;
-		class DocumentTemplateContentRun;
 		class DocumentParagraphRun;
 
 /***********************************************************************
@@ -113,12 +111,6 @@ Rich Content Document (run)
 				/// <summary>Visit operation for <see cref="DocumentImageRun"/>.</summary>
 				/// <param name="run">The run object.</param>
 				virtual void				Visit(DocumentImageRun* run)=0;
-				/// <summary>Visit operation for <see cref="DocumentTemplateApplicationRun"/>.</summary>
-				/// <param name="run">The run object.</param>
-				virtual void				Visit(DocumentTemplateApplicationRun* run)=0;
-				/// <summary>Visit operation for <see cref="DocumentTemplateContentRun"/>.</summary>
-				/// <param name="run">The run object.</param>
-				virtual void				Visit(DocumentTemplateContentRun* run)=0;
 				/// <summary>Visit operation for <see cref="DocumentParagraphRun"/>.</summary>
 				/// <param name="run">The run object.</param>
 				virtual void				Visit(DocumentParagraphRun* run)=0;
@@ -235,30 +227,6 @@ Rich Content Document (run)
 			void							Accept(IVisitor* visitor)override{visitor->Visit(this);}
 		};
 				
-		/// <summary>Pepresents a template application run.</summary>
-		class DocumentTemplateApplicationRun : public DocumentContainerRun, public Description<DocumentStyleApplicationRun>
-		{
-			typedef collections::Dictionary<WString, WString>		AttributeMap;
-		public:
-			/// <summary>Template name.</summary>
-			WString							templateName;
-			/// <summary>Template attributes.</summary>
-			AttributeMap					attributes;
-
-			DocumentTemplateApplicationRun(){}
-
-			void							Accept(IVisitor* visitor)override{visitor->Visit(this);}
-		};
-				
-		/// <summary>Pepresents a template content run in a <see cref="DocumentTemplateApplicationRun"/>.</summary>
-		class DocumentTemplateContentRun : public DocumentContainerRun, public Description<DocumentTemplateContentRun>
-		{
-		public:
-			DocumentTemplateContentRun(){}
-
-			void							Accept(IVisitor* visitor)override{visitor->Visit(this);}
-		};
-				
 		/// <summary>Pepresents a paragraph run.</summary>
 		class DocumentParagraphRun : public DocumentContainerRun, public Description<DocumentParagraphRun>
 		{
@@ -315,13 +283,6 @@ Rich Content Document (model)
 			Ptr<DocumentStyleProperties>	resolvedStyles;
 		};
 
-		/// <summary>Represents a template.</summary>
-		class DocumentTemplate : public Object, public Description<DocumentTemplate>
-		{
-		public:
-			Ptr<parsing::xml::XmlElement>	templateDescription;
-		};
-
 		/// <summary>Represents a rich content document model.</summary>
 		class DocumentModel : public Object, public Description<DocumentModel>
 		{
@@ -364,14 +325,11 @@ Rich Content Document (model)
 		private:
 			typedef collections::List<Ptr<DocumentParagraphRun>>						ParagraphList;
 			typedef collections::Dictionary<WString, Ptr<DocumentStyle>>				StyleMap;
-			typedef collections::Dictionary<WString, Ptr<DocumentTemplate>>				TemplateMap;
 		public:
 			/// <summary>All paragraphs.</summary>
 			ParagraphList					paragraphs;
 			/// <summary>All available styles. These will not be persistant.</summary>
 			StyleMap						styles;
-			/// <summary>All available templates. These will not be persistant.</summary>
-			TemplateMap						templates;
 			
 			DocumentModel();
 

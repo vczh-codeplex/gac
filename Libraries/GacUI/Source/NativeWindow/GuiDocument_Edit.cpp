@@ -73,16 +73,6 @@ document_serialization_visitors::GetRunRangeVisitor
 					VisitContent(run);
 				}
 
-				void Visit(DocumentTemplateApplicationRun* run)override
-				{
-					VisitContainer(run);
-				}
-
-				void Visit(DocumentTemplateContentRun* run)override
-				{
-					VisitContainer(run);
-				}
-
 				void Visit(DocumentParagraphRun* run)override
 				{
 					VisitContainer(run);
@@ -178,16 +168,6 @@ document_serialization_visitors::LocateStyleVisitor
 				{
 				}
 
-				void Visit(DocumentTemplateApplicationRun* run)override
-				{
-					VisitContainer(run);
-				}
-
-				void Visit(DocumentTemplateContentRun* run)override
-				{
-					VisitContainer(run);
-				}
-
 				void Visit(DocumentParagraphRun* run)override
 				{
 					VisitContainer(run);
@@ -263,16 +243,6 @@ document_serialization_visitors::LocateHyperlinkVisitor
 
 				void Visit(DocumentImageRun* run)override
 				{
-				}
-
-				void Visit(DocumentTemplateApplicationRun* run)override
-				{
-					VisitContainer(run);
-				}
-
-				void Visit(DocumentTemplateContentRun* run)override
-				{
-					VisitContainer(run);
 				}
 
 				void Visit(DocumentParagraphRun* run)override
@@ -357,22 +327,6 @@ document_serialization_visitors::CloneRunVisitor
 					cloned->frameIndex=run->frameIndex;
 					cloned->source=run->source;
 					clonedRun=cloned;
-				}
-
-				void Visit(DocumentTemplateApplicationRun* run)override
-				{
-					Ptr<DocumentTemplateApplicationRun> cloned=new DocumentTemplateApplicationRun;
-					cloned->templateName=run->templateName;
-					CopyFrom(cloned->attributes, run->attributes);
-					
-					VisitContainer(cloned);
-				}
-
-				void Visit(DocumentTemplateContentRun* run)override
-				{
-					Ptr<DocumentTemplateContentRun> cloned=new DocumentTemplateContentRun;
-					
-					VisitContainer(cloned);
 				}
 
 				void Visit(DocumentParagraphRun* run)override
@@ -525,16 +479,6 @@ document_serialization_visitors::RemoveRunVisitor
 					replacedRuns.Clear();
 				}
 
-				void Visit(DocumentTemplateApplicationRun* run)override
-				{
-					VisitContainer(run);
-				}
-
-				void Visit(DocumentTemplateContentRun* run)override
-				{
-					VisitContainer(run);
-				}
-
 				void Visit(DocumentParagraphRun* run)override
 				{
 					VisitContainer(run);
@@ -647,16 +591,6 @@ document_serialization_visitors::CutRunVisitor
 					rightRun=0;
 				}
 
-				void Visit(DocumentTemplateApplicationRun* run)override
-				{
-					VisitContainer(run);
-				}
-
-				void Visit(DocumentTemplateContentRun* run)override
-				{
-					VisitContainer(run);
-				}
-
 				void Visit(DocumentParagraphRun* run)override
 				{
 					VisitContainer(run);
@@ -730,16 +664,6 @@ document_serialization_visitors::ClearRunVisitor
 				void Visit(DocumentImageRun* run)override
 				{
 					VisitContent(run);
-				}
-
-				void Visit(DocumentTemplateApplicationRun* run)override
-				{
-					VisitContainer(run);
-				}
-
-				void Visit(DocumentTemplateContentRun* run)override
-				{
-					VisitContainer(run);
 				}
 
 				void Visit(DocumentParagraphRun* run)override
@@ -827,16 +751,6 @@ document_serialization_visitors::AddStyleVisitor
 				void Visit(DocumentImageRun* run)override
 				{
 					insertStyle=false;
-				}
-
-				void Visit(DocumentTemplateApplicationRun* run)override
-				{
-					VisitContainer(run);
-				}
-
-				void Visit(DocumentTemplateContentRun* run)override
-				{
-					VisitContainer(run);
 				}
 
 				void Visit(DocumentParagraphRun* run)override

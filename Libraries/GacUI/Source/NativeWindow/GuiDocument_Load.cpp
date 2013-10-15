@@ -21,25 +21,10 @@ document_serialization_visitors::DeserializeNodeVisitor
 			class DeserializeNodeVisitor : public XmlNode::IVisitor
 			{
 			public:
-				struct TemplateInfo
-				{
-					DocumentTemplateApplicationRun*		run;
-					XmlElement*							templateElement;
-					XmlElement*							contentElement;
-
-					TemplateInfo()
-						:run(0)
-						,templateElement(0)
-						,contentElement(0)
-					{
-					}
-				};
-
 				Ptr<DocumentModel>					model;
 				Ptr<DocumentContainerRun>			container;
 				vint								paragraphIndex;
 				Ptr<DocumentResolver>				resolver;
-				Ptr<TemplateInfo>					templateInfo;
 				Regex								regexAttributeApply;
 
 				DeserializeNodeVisitor(Ptr<DocumentModel> _model, Ptr<DocumentParagraphRun> _paragraph, vint _paragraphIndex, Ptr<DocumentResolver> _resolver)
@@ -51,34 +36,6 @@ document_serialization_visitors::DeserializeNodeVisitor
 				{
 				}
 
-				WString TranslateAttribute(const WString& value)
-				{
-					if(templateInfo)
-					{
-						WString result;
-						RegexMatch::List matches;
-						regexAttributeApply.Cut(value, false, matches);
-						FOREACH(RegexMatch::Ref, match, matches)
-						{
-							if(match->Success())
-							{
-								WString name=match->Groups()[L"value"].Get(0).Value();
-								vint index=templateInfo->run->attributes.Keys().IndexOf(name);
-								result+=(index==-1?match->Result().Value():templateInfo->run->attributes.Values().Get(index));
-							}
-							else
-							{
-								result+=match->Result().Value();
-							}
-						}
-						return result;
-					}
-					else
-					{
-						return value;
-					}
-				}
-
 				void PrintText(const WString& text)
 				{
 					Ptr<DocumentTextRun> run=new DocumentTextRun;
@@ -88,7 +45,7 @@ document_serialization_visitors::DeserializeNodeVisitor
 
 				void Visit(XmlText* node)override
 				{
-					PrintText(TranslateAttribute(node->content.value));
+					PrintText(node->content.value);
 				}
 
 				void Visit(XmlCData* node)override
@@ -107,7 +64,6 @@ document_serialization_visitors::DeserializeNodeVisitor
 				void Visit(XmlElement* node)override
 				{
 					Ptr<DocumentContainerRun> createdContainer;
-					Ptr<TemplateInfo> createdTemplateInfo;
 					bool useTemplateInfo=false;
 					XmlElement* subNodeContainer=node;
 
@@ -128,7 +84,7 @@ document_serialization_visitors::DeserializeNodeVisitor
 						Ptr<DocumentImageRun> run=new DocumentImageRun;
 						if(Ptr<XmlAttribute> source=XmlGetAttribute(node, L"source"))
 						{
-							run->source=TranslateAttribute(source->value.value);
+							run->source=source->value.value;
 							Pair<vint, vint> index=INVLOC.FindFirst(run->source, L"://", Locale::IgnoreCase);
 							if(index.key!=-1)
 							{
@@ -147,19 +103,19 @@ document_serialization_visitors::DeserializeNodeVisitor
 							{
 								if(att->name.value==L"width")
 								{
-									run->size.x=wtoi(TranslateAttribute(att->value.value));
+									run->size.x=wtoi(att->value.value);
 								}
 								else if(att->name.value==L"height")
 								{
-									run->size.y=wtoi(TranslateAttribute(att->value.value));
+									run->size.y=wtoi(att->value.value);
 								}
 								else if(att->name.value==L"baseline")
 								{
-									run->baseline=wtoi(TranslateAttribute(att->value.value));
+									run->baseline=wtoi(att->value.value);
 								}
 								else if(att->name.value==L"frameIndex")
 								{
-									run->frameIndex=wtoi(TranslateAttribute(att->value.value));
+									run->frameIndex=wtoi(att->value.value);
 								}
 							}
 							container->runs.Add(run);
@@ -175,19 +131,19 @@ document_serialization_visitors::DeserializeNodeVisitor
 						{
 							if(att->name.value==L"face")
 							{
-								sp->face=TranslateAttribute(att->value.value);
+								sp->face=att->value.value;
 							}
 							else if(att->name.value==L"size")
 							{
-								sp->size=wtoi(TranslateAttribute(att->value.value));
+								sp->size=wtoi(att->value.value);
 							}
 							else if(att->name.value==L"color")
 							{
-								sp->color=Color::Parse(TranslateAttribute(att->value.value));
+								sp->color=Color::Parse(att->value.value);
 							}
 							else if(att->name.value==L"bkcolor")
 							{
-								sp->backgroundColor=Color::Parse(TranslateAttribute(att->value.value));
+								sp->backgroundColor=Color::Parse(att->value.value);
 							}
 						}
 						container->runs.Add(run);
@@ -256,7 +212,7 @@ document_serialization_visitors::DeserializeNodeVisitor
 					{
 						if(Ptr<XmlAttribute> att=XmlGetAttribute(node, L"style"))
 						{
-							WString styleName=TranslateAttribute(att->value.value);
+							WString styleName=att->value.value;
 							
 							Ptr<DocumentStyleApplicationRun> run=new DocumentStyleApplicationRun;
 							run->styleName=styleName;
@@ -275,15 +231,15 @@ document_serialization_visitors::DeserializeNodeVisitor
 						run->activeStyleName=L"#ActiveLink";
 						if(Ptr<XmlAttribute> att=XmlGetAttribute(node, L"normal"))
 						{
-							run->normalStyleName=TranslateAttribute(att->value.value);
+							run->normalStyleName=att->value.value;
 						}
 						if(Ptr<XmlAttribute> att=XmlGetAttribute(node, L"active"))
 						{
-							run->activeStyleName=TranslateAttribute(att->value.value);
+							run->activeStyleName=att->value.value;
 						}
 						if(Ptr<XmlAttribute> att=XmlGetAttribute(node, L"href"))
 						{
-							run->reference=TranslateAttribute(att->value.value);
+							run->reference=att->value.value;
 						}
 						run->styleName=run->normalStyleName;
 						container->runs.Add(run);
@@ -296,48 +252,11 @@ document_serialization_visitors::DeserializeNodeVisitor
 							sub->Accept(this);
 						}
 					}
-					else if(node->name.value==L"template-content")
-					{
-						if(templateInfo && templateInfo->contentElement)
-						{
-							Ptr<DocumentTemplateContentRun> run=new DocumentTemplateContentRun;
-							container->runs.Add(run);
-							createdContainer=run;
-							createdTemplateInfo=0;
-							useTemplateInfo=true;
-							if(templateInfo)
-							{
-								subNodeContainer=templateInfo->contentElement;
-							}
-						}
-					}
 					else
 					{
-						vint index=model->templates.Keys().IndexOf(node->name.value);
-						if(index==-1)
+						FOREACH(Ptr<XmlNode>, sub, node->subNodes)
 						{
-							FOREACH(Ptr<XmlNode>, sub, node->subNodes)
-							{
-								sub->Accept(this);
-							}
-						}
-						else
-						{
-							Ptr<DocumentTemplateApplicationRun> run=new DocumentTemplateApplicationRun;
-							run->templateName=node->name.value;
-							FOREACH(Ptr<XmlAttribute>, att, node->attributes)
-							{
-								run->attributes.Add(att->name.value, TranslateAttribute(att->value.value));
-							}
-							container->runs.Add(run);
-							createdContainer=run;
-
-							createdTemplateInfo=new TemplateInfo;
-							createdTemplateInfo->run=run.Obj();
-							createdTemplateInfo->templateElement=model->templates.Values().Get(index)->templateDescription.Obj();
-							createdTemplateInfo->contentElement=node;
-							useTemplateInfo=true;
-							subNodeContainer=createdTemplateInfo->templateElement;
+							sub->Accept(this);
 						}
 					}
 
@@ -345,16 +264,10 @@ document_serialization_visitors::DeserializeNodeVisitor
 					{
 						Ptr<DocumentContainerRun> oldContainer=container;
 						container=createdContainer;
-						Ptr<TemplateInfo> oldTemplateInfo=templateInfo;
-						if(useTemplateInfo)
-						{
-							templateInfo=createdTemplateInfo;
-						}
 						FOREACH(Ptr<XmlNode>, subNode, subNodeContainer->subNodes)
 						{
 							subNode->Accept(this);
 						}
-						templateInfo=oldTemplateInfo;
 						container=oldContainer;
 					}
 				}
@@ -450,17 +363,6 @@ DocumentModel
 								}
 							}
 						}
-					}
-				}
-				if(Ptr<XmlElement> styles=XmlGetElement(xml->rootElement, L"Templates"))
-				{
-					FOREACH(Ptr<XmlElement>, templateElement, XmlGetElements(styles, L"Template"))
-					if(Ptr<XmlAttribute> name=XmlGetAttribute(templateElement, L"name"))
-					if(!model->templates.Keys().Contains(name->value.value))
-					{
-						Ptr<DocumentTemplate> tp=new DocumentTemplate;
-						tp->templateDescription=templateElement;
-						model->templates.Add(name->value.value, tp);
 					}
 				}
 				if(Ptr<XmlElement> content=XmlGetElement(xml->rootElement, L"Content"))

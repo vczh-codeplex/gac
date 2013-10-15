@@ -214,42 +214,6 @@ document_serialization_visitors::SerializeRunVisitor
 						;
 				}
 
-				void Visit(DocumentTemplateApplicationRun* run)override
-				{
-					Ptr<XmlElement> element;
-					if(templateLevel==0)
-					{
-						element=new XmlElement;
-						element->name.value=run->templateName;
-
-						XmlElementWriter writer(element);
-						for(vint i=0;i<run->attributes.Count();i++)
-						{
-							WString key=run->attributes.Keys()[i];
-							WString value=run->attributes.Values()[i];
-							writer.Attribute(key, value);
-						}
-					}
-
-					templateLevel++;
-					VisitContainer(element, run);
-					templateLevel--;
-				}
-
-				void Visit(DocumentTemplateContentRun* run)override
-				{
-					if(templateLevel==1)
-					{
-						templateLevel--;
-						VisitContainer(0, run);
-						templateLevel++;
-					}
-					else
-					{
-						VisitContainer(0, run);
-					}
-				}
-
 				void Visit(DocumentParagraphRun* run)override
 				{
 					if(templateLevel==0)
@@ -335,16 +299,6 @@ DocumentModel
 							XmlElementWriter(styleElement).Element(L"antialias").Text(L"vertical");
 						}
 					}
-				}
-			}
-			{
-				Ptr<XmlElement> templatesElement=new XmlElement;
-				templatesElement->name.value=L"Templates";
-				doc->subNodes.Add(templatesElement);
-
-				FOREACH(Ptr<DocumentTemplate>, tp, templates.Values())
-				{
-					templatesElement->subNodes.Add(tp->templateDescription);
 				}
 			}
 			return xml;
