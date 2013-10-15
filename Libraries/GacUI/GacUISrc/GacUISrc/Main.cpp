@@ -160,6 +160,20 @@ public:
 			buttonHyperlink->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 			buttonHyperlink->Clicked.AttachLambda([this](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 			{
+				TextPos begin=viewer->GetCaretBegin();
+				TextPos end=viewer->GetCaretEnd();
+				if(begin.row!=end.row)
+				{
+					GetCurrentController()->DialogService()->ShowMessageBox(
+						GetNativeWindow(),
+						L"Cannot edit a hyperlink when multiple paragraphs are selected.",
+						L"Hyperlink"
+						);
+				}
+				else
+				{
+					viewer->EditHyperlink(begin.row, begin.column, end.column, L"http://www.gaclib.net");
+				}
 			});
 			cell->AddChild(buttonHyperlink->GetBoundsComposition());
 		}
@@ -173,6 +187,20 @@ public:
 			buttonUnhyperlink->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 			buttonUnhyperlink->Clicked.AttachLambda([this](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 			{
+				TextPos begin=viewer->GetCaretBegin();
+				TextPos end=viewer->GetCaretEnd();
+				if(begin.row!=end.row)
+				{
+					GetCurrentController()->DialogService()->ShowMessageBox(
+						GetNativeWindow(),
+						L"Cannot edit a hyperlink when multiple paragraphs are selected.",
+						L"Hyperlink"
+						);
+				}
+				else
+				{
+					viewer->RemoveHyperlink(begin.row, begin.column, end.column);
+				}
 			});
 			cell->AddChild(buttonUnhyperlink->GetBoundsComposition());
 		}

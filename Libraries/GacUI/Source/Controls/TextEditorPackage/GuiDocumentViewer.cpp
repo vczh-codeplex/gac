@@ -452,6 +452,16 @@ GuiDocumentViewer
 				documentElement->EditImage(begin, end, image);
 			}
 
+			void GuiDocumentCommonInterface::EditHyperlink(vint paragraphIndex, vint begin, vint end, const WString& reference, const WString& normalStyleName, const WString& activeStyleName)
+			{
+				documentElement->EditHyperlink(paragraphIndex, begin, end, reference, normalStyleName, activeStyleName);
+			}
+
+			void GuiDocumentCommonInterface::RemoveHyperlink(vint paragraphIndex, vint begin, vint end)
+			{
+				documentElement->RemoveHyperlink(paragraphIndex, begin, end);
+			}
+
 			WString GuiDocumentCommonInterface::GetActiveHyperlinkReference()
 			{
 				return activeHyperlink?activeHyperlink->reference:L"";

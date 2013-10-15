@@ -492,11 +492,11 @@ GuiDocumentElement::GuiDocumentElementRenderer
 					vint length=0;
 					if(cache->graphicsParagraph->GetInlineObjectFromPoint(paragraphPoint, start, length))
 					{
-						return element->document->GetHyperlinkLink(index, start, start+length);
+						return element->document->GetHyperlink(index, start, start+length);
 					}
 
 					vint caret=cache->graphicsParagraph->GetCaretFromPoint(paragraphPoint);
-					return element->document->GetHyperlinkLink(index, caret, caret);
+					return element->document->GetHyperlink(index, caret, caret);
 				}
 				return 0;
 			}
@@ -914,6 +914,44 @@ GuiDocumentElement
 					if(document->EditImage(begin, end, image))
 					{
 						elementRenderer->NotifyParagraphUpdated(begin.row, end.row-begin.row+1, 1, true);
+					}
+				}
+			}
+
+			void GuiDocumentElement::EditHyperlink(vint paragraphIndex, vint begin, vint end, const WString& reference, const WString& normalStyleName, const WString& activeStyleName)
+			{
+				Ptr<GuiDocumentElementRenderer> elementRenderer=renderer.Cast<GuiDocumentElementRenderer>();
+				if(elementRenderer)
+				{
+					if(begin>end)
+					{
+						vint temp=begin;
+						begin=end;
+						end=temp;
+					}
+
+					if(document->EditHyperlink(paragraphIndex, begin, end, reference, normalStyleName, activeStyleName))
+					{
+						elementRenderer->NotifyParagraphUpdated(paragraphIndex, 1, 1, false);
+					}
+				}
+			}
+
+			void GuiDocumentElement::RemoveHyperlink(vint paragraphIndex, vint begin, vint end)
+			{
+				Ptr<GuiDocumentElementRenderer> elementRenderer=renderer.Cast<GuiDocumentElementRenderer>();
+				if(elementRenderer)
+				{
+					if(begin>end)
+					{
+						vint temp=begin;
+						begin=end;
+						end=temp;
+					}
+
+					if(document->RemoveHyperlink(paragraphIndex, begin, end))
+					{
+						elementRenderer->NotifyParagraphUpdated(paragraphIndex, 1, 1, false);
 					}
 				}
 			}

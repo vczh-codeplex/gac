@@ -387,8 +387,8 @@ Rich Content Document (model)
 			bool							EditStyle(TextPos begin, TextPos end, Ptr<DocumentStyleProperties> style);
 			Ptr<DocumentImageRun>			EditImage(TextPos begin, TextPos end, Ptr<GuiImageData> image);
 			bool							EditHyperlink(vint paragraphIndex, vint begin, vint end, const WString& reference, const WString& normalStyleName=NormalLinkStyleName, const WString& activeStyleName=ActiveLinkStyleName);
-
-			Ptr<DocumentHyperlinkRun>		GetHyperlinkLink(vint paragraphIndex, vint begin, vint end);
+			bool							RemoveHyperlink(vint paragraphIndex, vint begin, vint end);
+			Ptr<DocumentHyperlinkRun>		GetHyperlink(vint paragraphIndex, vint begin, vint end);
 
 			/// <summary>Load a document model from an xml.</summary>
 			/// <returns>The loaded document model.</returns>
