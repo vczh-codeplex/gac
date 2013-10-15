@@ -161,20 +161,6 @@ Layout Engine
 				/// <param name="length">The length of the specified range by character.</param>
 				/// <returns>Returns true if this operation succeeded.</returns>
 				virtual bool								ResetInlineObject(vint start, vint length)=0;
-				/// <summary>Replace the interaction id within the specified range.</summary>
-				/// <param name="start">The position of the first character of the specified range.</param>
-				/// <param name="length">The length of the specified range by character.</param>
-				/// <param name="value">The interaction id.</param>
-				/// <returns>Returns true if this operation succeeded.</returns>
-				virtual bool								SetInteractionId(vint start, vint length, vint value=NullInteractionId)=0;
-
-				/// <summary>Find a visual character by point.</summary>
-				/// <returns>Returns true indicates that the point is in the character.</returns>
-				/// <param name="point">The point to find a visual character.</param>
-				/// <param name="start">To receive the character position.</param>
-				/// <param name="length">To receive the number of all character unicode code points.</param>
-				/// <param name="interactionId">To receive the interaction id of the character.</param>
-				virtual bool								HitTestPoint(Point point, vint& start, vint& length, vint& interactionId)=0;
 
 				/// <summary>Get the layouted height of the text. The result depends on rich styled text and the two important properties that can be set using <see cref="SetWrapLine"/> and <see cref="SetMaxWidth"/>.</summary>
 				/// <returns>The layouted height.</returns>

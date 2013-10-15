@@ -63,7 +63,7 @@ document_serialization_visitors::GetRunRangeVisitor
 					VisitContainer(run);
 				}
 
-				void Visit(DocumentHyperlinkTextRun* run)override
+				void Visit(DocumentHyperlinkRun* run)override
 				{
 					VisitContainer(run);
 				}
@@ -169,7 +169,7 @@ document_serialization_visitors::LocateStyleVisitor
 					VisitContainer(run);
 				}
 
-				void Visit(DocumentHyperlinkTextRun* run)override
+				void Visit(DocumentHyperlinkRun* run)override
 				{
 					VisitContainer(run);
 				}
@@ -197,6 +197,94 @@ document_serialization_visitors::LocateStyleVisitor
 				{
 					LocateStyleVisitor visitor(locatedRuns, runRanges, position, frontSide);
 					run->Accept(&visitor);
+				}
+			};
+		}
+		using namespace document_serialization_visitors;
+
+/***********************************************************************
+document_serialization_visitors::LocateHyperlinkVisitor
+***********************************************************************/
+
+		namespace document_serialization_visitors
+		{
+			class LocateHyperlinkVisitor : public Object, public DocumentRun::IVisitor
+			{
+			public:
+				Ptr<DocumentHyperlinkRun>		hyperlink;
+				RunRangeMap&					runRanges;
+				vint							start;
+				vint							end;
+
+				LocateHyperlinkVisitor(RunRangeMap& _runRanges, vint _start, vint _end)
+					:runRanges(_runRanges)
+					,start(_start)
+					,end(_end)
+				{
+				}
+
+				void VisitContainer(DocumentContainerRun* run)
+				{
+					Ptr<DocumentRun> selectedRun;
+					FOREACH(Ptr<DocumentRun>, subRun, run->runs)
+					{
+						RunRange range=runRanges[subRun.Obj()];
+						if(range.start<end && start<range.end)
+						{
+							selectedRun=subRun;
+							break;
+						}
+					}
+
+					if(selectedRun)
+					{
+						selectedRun->Accept(this);
+					}
+				}
+
+				void Visit(DocumentTextRun* run)override
+				{
+				}
+
+				void Visit(DocumentStylePropertiesRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentStyleApplicationRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentHyperlinkRun* run)override
+				{
+					hyperlink=run;
+				}
+
+				void Visit(DocumentImageRun* run)override
+				{
+				}
+
+				void Visit(DocumentTemplateApplicationRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentTemplateContentRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentParagraphRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				static Ptr<DocumentHyperlinkRun> LocateHyperlink(DocumentParagraphRun* run, RunRangeMap& runRanges, vint start, vint end)
+				{
+					LocateHyperlinkVisitor visitor(runRanges, start, end);
+					run->Accept(&visitor);
+					return visitor.hyperlink;
 				}
 			};
 		}
@@ -249,13 +337,13 @@ document_serialization_visitors::CloneRunVisitor
 					VisitContainer(cloned);
 				}
 
-				void Visit(DocumentHyperlinkTextRun* run)override
+				void Visit(DocumentHyperlinkRun* run)override
 				{
-					Ptr<DocumentHyperlinkTextRun> cloned=new DocumentHyperlinkTextRun;
+					Ptr<DocumentHyperlinkRun> cloned=new DocumentHyperlinkRun;
 					cloned->styleName=run->styleName;
 					cloned->normalStyleName=run->normalStyleName;
 					cloned->activeStyleName=run->activeStyleName;
-					cloned->hyperlinkId=run->hyperlinkId;
+					cloned->reference=run->reference;
 					
 					VisitContainer(cloned);
 				}
@@ -427,7 +515,7 @@ document_serialization_visitors::RemoveRunVisitor
 					VisitContainer(run);
 				}
 
-				void Visit(DocumentHyperlinkTextRun* run)override
+				void Visit(DocumentHyperlinkRun* run)override
 				{
 					VisitContainer(run);
 				}
@@ -548,7 +636,7 @@ document_serialization_visitors::CutRunVisitor
 					VisitContainer(run);
 				}
 
-				void Visit(DocumentHyperlinkTextRun* run)override
+				void Visit(DocumentHyperlinkRun* run)override
 				{
 					VisitContainer(run);
 				}
@@ -634,7 +722,7 @@ document_serialization_visitors::ClearRunVisitor
 					VisitContainer(run);
 				}
 
-				void Visit(DocumentHyperlinkTextRun* run)override
+				void Visit(DocumentHyperlinkRun* run)override
 				{
 					VisitContainer(run);
 				}
@@ -731,7 +819,7 @@ document_serialization_visitors::AddStyleVisitor
 					VisitContainer(run);
 				}
 
-				void Visit(DocumentHyperlinkTextRun* run)override
+				void Visit(DocumentHyperlinkRun* run)override
 				{
 					VisitContainer(run);
 				}
@@ -766,7 +854,7 @@ document_serialization_visitors::AddStyleVisitor
 		using namespace document_serialization_visitors;
 
 /***********************************************************************
-DocumentModel
+DocumentModel::EditRangeOperations
 ***********************************************************************/
 
 		bool DocumentModel::CheckEditRange(TextPos begin, TextPos end, RunRangeMap& relatedRanges)
@@ -824,6 +912,10 @@ DocumentModel
 			}
 			return true;
 		}
+
+/***********************************************************************
+DocumentModel::EditRun
+***********************************************************************/
 
 		vint DocumentModel::EditRun(TextPos begin, TextPos end, const collections::Array<Ptr<DocumentParagraphRun>>& runs)
 		{
@@ -902,6 +994,10 @@ DocumentModel
 			return rows;
 		}
 
+/***********************************************************************
+DocumentModel::EditText
+***********************************************************************/
+
 		vint DocumentModel::EditText(TextPos begin, TextPos end, bool frontSide, const collections::Array<WString>& text)
 		{
 			// check caret range
@@ -942,6 +1038,10 @@ DocumentModel
 			// replace the paragraphs
 			return EditRun(begin, end, runs);
 		}
+
+/***********************************************************************
+DocumentModel::EditStyle
+***********************************************************************/
 
 		bool DocumentModel::EditStyle(TextPos begin, TextPos end, Ptr<DocumentStyleProperties> style)
 		{
@@ -993,6 +1093,10 @@ DocumentModel
 			return true;
 		}
 
+/***********************************************************************
+DocumentModel::EditImage
+***********************************************************************/
+
 		Ptr<DocumentImageRun> DocumentModel::EditImage(TextPos begin, TextPos end, Ptr<GuiImageData> image)
 		{
 			Ptr<DocumentImageRun> imageRun=new DocumentImageRun;
@@ -1014,6 +1118,25 @@ DocumentModel
 			{
 				return 0;
 			}
+		}
+
+/***********************************************************************
+DocumentModel::EditHyperlink
+***********************************************************************/
+
+		bool DocumentModel::EditHyperlink(vint paragraphIndex, vint begin, vint end, const WString& reference, const WString& normalStyleName, const WString& activeStyleName)
+		{
+			return false;
+		}
+
+		Ptr<DocumentHyperlinkRun> DocumentModel::GetHyperlinkLink(vint paragraphIndex, vint begin, vint end)
+		{
+			if(paragraphIndex<0 || paragraphIndex>=paragraphs.Count()) return 0;
+			
+			RunRangeMap runRanges;
+			Ptr<DocumentParagraphRun> paragraph=paragraphs[paragraphIndex];
+			GetRunRangeVisitor::GetRunRange(paragraph.Obj(), runRanges);
+			return LocateHyperlinkVisitor::LocateHyperlink(paragraph.Obj(), runRanges, begin, end);
 		}
 	}
 }

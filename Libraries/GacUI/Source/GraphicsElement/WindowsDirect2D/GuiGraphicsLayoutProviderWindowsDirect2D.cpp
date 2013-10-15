@@ -201,7 +201,6 @@ WindowsDirect2DParagraph
 				};
 
 				typedef Dictionary<IGuiGraphicsElement*, ComPtr<WindowsDirect2DElementInlineObject>>	InlineElementMap;
-				typedef Dictionary<TextRange, vint>														InteractionIdMap;
 				typedef Dictionary<TextRange, Color>													ColorMap;
 			protected:
 				IGuiGraphicsLayoutProvider*				provider;
@@ -214,7 +213,6 @@ WindowsDirect2DParagraph
 				vint									maxWidth;
 				List<Color>								usedColors;
 				InlineElementMap						inlineElements;
-				InteractionIdMap						interactionIds;
 				ColorMap								backgroundColors;
 
 				vint									caret;
@@ -457,7 +455,6 @@ WindowsDirect2DParagraph (Initialization)
 						textLayout=rawTextLayout;
 						textLayout->SetWordWrapping(DWRITE_WORD_WRAPPING_WRAP);
 					}
-					interactionIds.Add(TextRange(0, _text.Length()), NullInteractionId);
 					backgroundColors.Add(TextRange(0, _text.Length()), Color(0, 0, 0, 0));
 
 					GetWindowsDirect2DResourceManager()->DestroyDirect2DTextFormat(defaultFont);
@@ -677,32 +674,6 @@ WindowsDirect2DParagraph (Formatting)
 						}
 					}
 					return false;
-				}
-
-				bool SetInteractionId(vint start, vint length, vint value)override
-				{
-					SetMap(interactionIds, start, length, value);
-					return true;
-				}
-
-				bool HitTestPoint(Point point, vint& start, vint& length, vint& interactionId)override
-				{
-					DWRITE_HIT_TEST_METRICS metrics={0};
-					BOOL trailingHit=FALSE;
-					BOOL inside=FALSE;
-					start=-1;
-					length=0;
-					interactionId=NullInteractionId;
-					HRESULT hr=textLayout->HitTestPoint((FLOAT)point.x, (FLOAT)point.y, &trailingHit, &inside, &metrics);
-					if(hr!=S_OK) return false;
-
-					start=metrics.textPosition;
-					length=metrics.length;
-					vint index=-1;
-					GetMap(interactionIds, start, index);
-					interactionId=index==-1?NullInteractionId:interactionIds.Values().Get(index);
-
-					return inside==TRUE;
 				}
 
 				vint GetHeight()override

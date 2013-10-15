@@ -167,14 +167,24 @@ GuiDocumentViewer
 				ActiveHyperlinkExecuted.SetAssociatedComposition(_sender->GetBoundsComposition());
 			}
 
-			void GuiDocumentCommonInterface::SetActiveHyperlinkId(vint value)
+			void GuiDocumentCommonInterface::SetActiveHyperlink(Ptr<DocumentHyperlinkRun> hyperlink, vint paragraphIndex)
 			{
-				if(activeHyperlinkId!=value)
+				if(activeHyperlink!=hyperlink)
 				{
-					documentElement->ActivateHyperlink(activeHyperlinkId, false);
-					activeHyperlinkId=value;
-					documentElement->ActivateHyperlink(activeHyperlinkId, true);
+					ActivateActiveHyperlink(false);
+					activeHyperlink=hyperlink;
+					activeHyperlinkParagraph=paragraphIndex;
+					ActivateActiveHyperlink(true);
 					ActiveHyperlinkChanged.Execute(senderControl->GetNotifyEventArguments());
+				}
+			}
+
+			void GuiDocumentCommonInterface::ActivateActiveHyperlink(bool activate)
+			{
+				if(activeHyperlink)
+				{
+					activeHyperlink->styleName=activate?activeHyperlink->activeStyleName:activeHyperlink->normalStyleName;
+					documentElement->NotifyParagraphUpdated(activeHyperlinkParagraph, 1, 1, false);
 				}
 			}
 
@@ -243,20 +253,30 @@ GuiDocumentViewer
 					{
 					case ViewOnly:
 						{
-							vint id=documentElement->GetHyperlinkIdFromPoint(Point(arguments.x, arguments.y));
-							if(dragging && id!=draggingHyperlinkId)
+							Point point(arguments.x, arguments.y);
+							Ptr<DocumentHyperlinkRun> hyperlink=documentElement->GetHyperlinkFromPoint(point);
+							vint hyperlinkParagraph=hyperlink?documentElement->CalculateCaretFromPoint(point).row:-1;
+
+							if(dragging)
 							{
-								id=DocumentRun::NullHyperlinkId;
-							}
-							SetActiveHyperlinkId(id);
-							if(id==DocumentRun::NullHyperlinkId)
-							{
-								documentComposition->SetAssociatedCursor(0);
+								if(activeHyperlink)
+								{
+									ActivateActiveHyperlink(activeHyperlink==hyperlink);
+								}
 							}
 							else
 							{
+								SetActiveHyperlink(hyperlink, hyperlinkParagraph);
+							}
+
+							if(activeHyperlink && activeHyperlink==hyperlink)
+							{
 								INativeCursor* cursor=GetCurrentController()->ResourceService()->GetSystemCursor(INativeCursor::Hand);
 								documentComposition->SetAssociatedCursor(cursor);
+							}
+							else
+							{
+								documentComposition->SetAssociatedCursor(0);
 							}
 						}
 						break;
@@ -282,9 +302,10 @@ GuiDocumentViewer
 					{
 					case ViewOnly:
 						{
-							vint id=documentElement->GetHyperlinkIdFromPoint(Point(arguments.x, arguments.y));
-							draggingHyperlinkId=id;
-							SetActiveHyperlinkId(id);
+							Point point(arguments.x, arguments.y);
+							Ptr<DocumentHyperlinkRun> hyperlink=documentElement->GetHyperlinkFromPoint(point);
+							vint hyperlinkParagraph=hyperlink?documentElement->CalculateCaretFromPoint(point).row:-1;
+							SetActiveHyperlink(hyperlink, hyperlinkParagraph);
 						}
 						break;
 					case Selectable:
@@ -312,12 +333,16 @@ GuiDocumentViewer
 					{
 					case ViewOnly:
 						{
-							vint id=documentElement->GetHyperlinkIdFromPoint(Point(arguments.x, arguments.y));
-							if(id==draggingHyperlinkId && id!=DocumentRun::NullHyperlinkId)
+							Point point(arguments.x, arguments.y);
+							Ptr<DocumentHyperlinkRun> hyperlink=documentElement->GetHyperlinkFromPoint(point);
+							if(activeHyperlink!=hyperlink)
+							{
+								SetActiveHyperlink(0);
+							}
+							if(activeHyperlink)
 							{
 								ActiveHyperlinkExecuted.Execute(senderControl->GetNotifyEventArguments());
 							}
-							draggingHyperlinkId=DocumentRun::NullHyperlinkId;
 						}
 						break;
 					}
@@ -326,7 +351,7 @@ GuiDocumentViewer
 
 			void GuiDocumentCommonInterface::OnMouseLeave(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
-				SetActiveHyperlinkId(DocumentRun::NullHyperlinkId);
+				SetActiveHyperlink(0);
 			}
 
 			void GuiDocumentCommonInterface::EnsureRectVisible(Rect bounds)
@@ -336,8 +361,7 @@ GuiDocumentViewer
 			GuiDocumentCommonInterface::GuiDocumentCommonInterface()
 				:documentElement(0)
 				,documentComposition(0)
-				,activeHyperlinkId(DocumentRun::NullHyperlinkId)
-				,draggingHyperlinkId(DocumentRun::NullHyperlinkId)
+				,activeHyperlinkParagraph(-1)
 				,dragging(false)
 				,editMode(ViewOnly)
 				,senderControl(0)
@@ -355,7 +379,7 @@ GuiDocumentViewer
 
 			void GuiDocumentCommonInterface::SetDocument(Ptr<DocumentModel> value)
 			{
-				SetActiveHyperlinkId(DocumentRun::NullHyperlinkId);
+				SetActiveHyperlink(0);
 				documentElement->SetDocument(value);
 			}
 
@@ -428,19 +452,9 @@ GuiDocumentViewer
 				documentElement->EditImage(begin, end, image);
 			}
 
-			vint GuiDocumentCommonInterface::GetActiveHyperlinkId()
-			{
-				return activeHyperlinkId;
-			}
-
 			WString GuiDocumentCommonInterface::GetActiveHyperlinkReference()
 			{
-				if(activeHyperlinkId==DocumentRun::NullHyperlinkId) return L"";
-				Ptr<DocumentModel> document=documentElement->GetDocument();
-				if(!document) return L"";
-				vint index=document->hyperlinkInfos.Keys().IndexOf(activeHyperlinkId);
-				if(index==-1) return L"";
-				return document->hyperlinkInfos.Values().Get(index).reference;
+				return activeHyperlink?activeHyperlink->reference:L"";
 			}
 
 			GuiDocumentCommonInterface::EditMode GuiDocumentCommonInterface::GetEditMode()
@@ -450,6 +464,13 @@ GuiDocumentViewer
 
 			void GuiDocumentCommonInterface::SetEditMode(EditMode value)
 			{
+				if(activeHyperlink)
+				{
+					SetActiveHyperlink(0);
+					activeHyperlink=0;
+					activeHyperlinkParagraph=-1;
+				}
+
 				editMode=value;
 				if(editMode==ViewOnly)
 				{

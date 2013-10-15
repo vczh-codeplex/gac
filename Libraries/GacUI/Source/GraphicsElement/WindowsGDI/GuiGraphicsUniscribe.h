@@ -87,7 +87,6 @@ UniscribeFragment
 				FontProperties									fontStyle;
 				const WString									text;
 				Ptr<WinFont>									fontObject;
-				vint											interactionId;
 				//***************************** Document Data (Element)
 				Ptr<IGuiGraphicsElement>						element;
 				IGuiGraphicsParagraph::InlineObjectProperties	inlineObjectProperties;
@@ -180,7 +179,6 @@ UniscribeRun
 				virtual vint					SumHeight()=0;
 				virtual void					SearchForLineBreak(vint tempStart, vint maxWidth, bool firstRun, vint& charLength, vint& charAdvances)=0;
 				virtual void					Render(WinDC* dc, vint fragmentBoundsIndex, vint offsetX, vint offsetY, bool renderBackground)=0;
-				virtual bool					HitTestPoint(Point point, vint& start, vint& length, vint& interactionId);
 			};
 
 /***********************************************************************
@@ -315,8 +313,6 @@ UniscribeParagraph
 				bool							SetBackgroundColor(vint start, vint length, Color value);
 				bool							SetInlineObject(vint start, vint length, const IGuiGraphicsParagraph::InlineObjectProperties& properties, Ptr<IGuiGraphicsElement> value);
 				Ptr<IGuiGraphicsElement>		ResetInlineObject(vint start, vint length);
-				bool							SetInteractionId(vint start, vint length, vint value);
-				bool							HitTestPoint(Point point, vint& start, vint& length, vint& interactionId);
 
 				void							GetLineIndexFromTextPos(vint textPos, vint& frontLine, vint& backLine);
 				void							GetVirtualLineIndexFromTextPos(vint textPos, vint lineIndex, vint& frontLine, vint& backLine);
