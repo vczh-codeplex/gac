@@ -265,6 +265,12 @@ WindowsGDIParagraph
 					return paragraph->GetCaretFromPoint(point);
 				}
 
+				Ptr<IGuiGraphicsElement> GetInlineObjectFromPoint(Point point, vint& start, vint& length)override
+				{
+					PrepareUniscribeData();
+					return paragraph->GetInlineObjectFromPoint(point, start, length);
+				}
+
 				vint GetNearestCaretFromTextPos(vint textPos, bool frontSide)override
 				{
 					PrepareUniscribeData();

@@ -1094,6 +1094,11 @@ WindowsDirect2DParagraph (Caret)
 					return caret;
 				}
 
+				Ptr<IGuiGraphicsElement> GetInlineObjectFromPoint(Point point, vint& start, vint& length)override
+				{
+					return 0;
+				}
+
 				vint GetNearestCaretFromTextPos(vint textPos, bool frontSide)override
 				{
 					PrepareFormatData();

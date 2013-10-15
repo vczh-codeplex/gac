@@ -2139,6 +2139,31 @@ UniscribeParagraph (Caret Helper)
 				return -1;
 			}
 
+			Ptr<IGuiGraphicsElement> UniscribeParagraph::GetInlineObjectFromXWithLine(vint x, vint lineIndex, vint virtualLineIndex, vint& start, vint& length)
+			{
+				Ptr<UniscribeLine> line=lines[lineIndex];
+				if(line->virtualLines.Count()==0) return 0;
+				Ptr<UniscribeVirtualLine> virtualLine=line->virtualLines[virtualLineIndex];
+				if(x<virtualLine->bounds.x1) return 0;
+				if(x>=virtualLine->bounds.x2) return 0;
+
+				for(vint i=virtualLine->firstRunIndex;i<=virtualLine->lastRunIndex;i++)
+				{
+					Ptr<UniscribeRun> run=line->scriptRuns[i];
+					if(Ptr<UniscribeElementRun> elementRun=run.Cast<UniscribeElementRun>())
+					{
+						Rect bounds=run->fragmentBounds[0].bounds;
+						if(bounds.x1<=x && x<bounds.x2)
+						{
+							start=line->startFromParagraph+elementRun->startFromLine;
+							length=elementRun->length;
+							return elementRun->element;
+						}
+					}
+				}
+				return 0;
+			}
+
 			vint UniscribeParagraph::GetLineY(vint lineIndex)
 			{
 				if(lineIndex==lines.Count())
@@ -2340,6 +2365,22 @@ UniscribeParagraph (Caret)
 				if(virtualLineIndex==-1) return -1;
 
 				return GetCaretFromXWithLine(point.x, lineIndex, virtualLineIndex);
+			}
+
+			Ptr<IGuiGraphicsElement> UniscribeParagraph::GetInlineObjectFromPoint(Point point, vint& start, vint& length)
+			{
+				start=-1;
+				length=0;
+				vint lineIndex=GetLineIndexFromY(point.y);
+				if(lineIndex==-1) return 0;
+
+				Ptr<UniscribeLine> line=lines[lineIndex];
+				if(line->virtualLines.Count()==0) return 0;
+
+				vint virtualLineIndex=GetVirtualLineIndexFromY(point.y, lineIndex);
+				if(virtualLineIndex==-1) return 0;
+
+				return GetInlineObjectFromXWithLine(point.x, lineIndex, virtualLineIndex, start, length);
 			}
 
 			vint UniscribeParagraph::GetNearestCaretFromTextPos(vint textPos, bool frontSide)

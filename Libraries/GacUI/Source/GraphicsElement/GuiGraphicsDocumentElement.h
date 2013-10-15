@@ -70,6 +70,7 @@ Rich Content Document (element)
 					void									Render(Rect bounds)override;
 					void									OnElementStateChanged()override;
 					void									NotifyParagraphUpdated(vint index, vint oldCount, vint newCount, bool updatedText);
+					Ptr<DocumentHyperlinkRun>				GetHyperlinkFromPoint(Point point);
 
 					void									OpenCaret(TextPos caret, Color color, bool frontSide);
 					void									CloseCaret(TextPos caret);

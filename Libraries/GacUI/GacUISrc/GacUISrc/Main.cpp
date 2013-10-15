@@ -59,7 +59,7 @@ public:
 		table->SetRowsAndColumns(2, 7);
 		table->SetRowOption(0, GuiCellOption::MinSizeOption());
 		table->SetRowOption(1, GuiCellOption::PercentageOption(1.0));
-		table->SetColumnOption(0, GuiCellOption::AbsoluteOption(80));
+		table->SetColumnOption(0, GuiCellOption::AbsoluteOption(120));
 		table->SetColumnOption(1, GuiCellOption::MinSizeOption());
 		table->SetColumnOption(2, GuiCellOption::MinSizeOption());
 		table->SetColumnOption(3, GuiCellOption::MinSizeOption());
@@ -75,6 +75,7 @@ public:
 			listEditMode->GetItems().Add(new list::TextItem(L"ViewOnly"));
 			listEditMode->GetItems().Add(new list::TextItem(L"Selectable"));
 			listEditMode->GetItems().Add(new list::TextItem(L"Editable"));
+			listEditMode->SetVerticalAlwaysVisible(false);
 
 			comboEditMode=g::NewComboBox(listEditMode);
 			comboEditMode->SetSelectedIndex(2);
