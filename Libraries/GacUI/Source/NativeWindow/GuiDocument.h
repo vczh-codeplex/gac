@@ -20,7 +20,7 @@ namespace vl
 		class DocumentTextRun;
 		class DocumentStylePropertiesRun;
 		class DocumentStyleApplicationRun;
-		class DocumentHyperlinkTextRun;
+		class DocumentHyperlinkRun;
 		class DocumentImageRun;
 		class DocumentTemplateApplicationRun;
 		class DocumentTemplateContentRun;
@@ -94,8 +94,6 @@ Rich Content Document (run)
 		class DocumentRun : public Object, public Description<DocumentRun>
 		{
 		public:
-			static const vint				NullHyperlinkId = -1;
-
 			/// <summary>A visitor interface for <see cref="DocumentRun"/>.</summary>
 			class IVisitor : public Interface
 			{
@@ -109,9 +107,9 @@ Rich Content Document (run)
 				/// <summary>Visit operation for <see cref="DocumentStyleApplicationRun"/>.</summary>
 				/// <param name="run">The run object.</param>
 				virtual void				Visit(DocumentStyleApplicationRun* run)=0;
-				/// <summary>Visit operation for <see cref="DocumentHyperlinkTextRun"/>.</summary>
+				/// <summary>Visit operation for <see cref="DocumentHyperlinkRun"/>.</summary>
 				/// <param name="run">The run object.</param>
-				virtual void				Visit(DocumentHyperlinkTextRun* run)=0;
+				virtual void				Visit(DocumentHyperlinkRun* run)=0;
 				/// <summary>Visit operation for <see cref="DocumentImageRun"/>.</summary>
 				/// <param name="run">The run object.</param>
 				virtual void				Visit(DocumentImageRun* run)=0;
@@ -125,7 +123,6 @@ Rich Content Document (run)
 				/// <param name="run">The run object.</param>
 				virtual void				Visit(DocumentParagraphRun* run)=0;
 			};
-			
 
 			DocumentRun(){}
 
@@ -223,17 +220,17 @@ Rich Content Document (run)
 		};
 		
 		/// <summary>Pepresents a hyperlink text run.</summary>
-		class DocumentHyperlinkTextRun : public DocumentStyleApplicationRun, public Description<DocumentHyperlinkTextRun>
+		class DocumentHyperlinkRun : public DocumentStyleApplicationRun, public Description<DocumentHyperlinkRun>
 		{
 		public:
 			/// <summary>Style name for normal state.</summary>
 			WString							normalStyleName;
 			/// <summary>Style name for active state.</summary>
 			WString							activeStyleName;
-			/// <summary>Id for hyperlink.</summary>
-			vint							hyperlinkId;
+			/// <summary>The reference of the hyperlink.</summary>
+			WString							reference;
 
-			DocumentHyperlinkTextRun():hyperlinkId(NullHyperlinkId){}
+			DocumentHyperlinkRun(){}
 
 			void							Accept(IVisitor* visitor)override{visitor->Visit(this);}
 		};
@@ -335,20 +332,6 @@ Rich Content Document (model)
 			static const wchar_t*			NormalLinkStyleName;
 			static const wchar_t*			ActiveLinkStyleName;
 		public:
-			/// <summary>Store some necessary internal information for a hyperlink.</summary>
-			struct HyperlinkInfo
-			{
-				/// <summary>The href attribute of the hyperlink.</summary>
-				WString						reference;
-				/// <summary>The index of the paragraph that contains this hyperlink.</summary>
-				vint						paragraphIndex;
-
-				HyperlinkInfo()
-					:paragraphIndex(-1)
-				{
-				}
-			};
-
 			/// <summary>Represents a resolved style.</summary>
 			struct ResolvedStyle
 			{
@@ -382,7 +365,6 @@ Rich Content Document (model)
 			typedef collections::List<Ptr<DocumentParagraphRun>>						ParagraphList;
 			typedef collections::Dictionary<WString, Ptr<DocumentStyle>>				StyleMap;
 			typedef collections::Dictionary<WString, Ptr<DocumentTemplate>>				TemplateMap;
-			typedef collections::Dictionary<vint, HyperlinkInfo>						HyperlinkMap;
 		public:
 			/// <summary>All paragraphs.</summary>
 			ParagraphList					paragraphs;
@@ -390,22 +372,23 @@ Rich Content Document (model)
 			StyleMap						styles;
 			/// <summary>All available templates. These will not be persistant.</summary>
 			TemplateMap						templates;
-			/// <summary>Link content. This map stores all "href" value for all hyperlinks.</summary>
-			HyperlinkMap					hyperlinkInfos;
 			
 			DocumentModel();
 
 			ResolvedStyle					GetStyle(Ptr<DocumentStyleProperties> sp, const ResolvedStyle& context);
 			ResolvedStyle					GetStyle(const WString& styleName, const ResolvedStyle& context);
-			vint							ActivateHyperlink(vint hyperlinkId, bool active);
 			
 			bool							CheckEditRange(TextPos begin, TextPos end, RunRangeMap& relatedRanges);
 			bool							CutParagraph(TextPos position);
 			bool							CutEditRange(TextPos begin, TextPos end);
+
 			vint							EditRun(TextPos begin, TextPos end, const collections::Array<Ptr<DocumentParagraphRun>>& runs);
 			vint							EditText(TextPos begin, TextPos end, bool frontSide, const collections::Array<WString>& text);
 			bool							EditStyle(TextPos begin, TextPos end, Ptr<DocumentStyleProperties> style);
 			Ptr<DocumentImageRun>			EditImage(TextPos begin, TextPos end, Ptr<GuiImageData> image);
+			bool							EditHyperlink(vint paragraphIndex, vint begin, vint end, const WString& reference, const WString& normalStyleName=NormalLinkStyleName, const WString& activeStyleName=ActiveLinkStyleName);
+
+			Ptr<DocumentHyperlinkRun>		GetHyperlinkLink(vint paragraphIndex, vint begin, vint end);
 
 			/// <summary>Load a document model from an xml.</summary>
 			/// <returns>The loaded document model.</returns>

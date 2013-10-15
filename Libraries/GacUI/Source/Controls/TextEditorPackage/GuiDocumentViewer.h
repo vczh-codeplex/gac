@@ -39,8 +39,8 @@ GuiDocumentCommonInterface
 			protected:
 				elements::GuiDocumentElement*				documentElement;
 				compositions::GuiBoundsComposition*			documentComposition;
-				vint										activeHyperlinkId;
-				vint										draggingHyperlinkId;
+				Ptr<DocumentHyperlinkRun>					activeHyperlink;
+				vint										activeHyperlinkParagraph;
 				bool										dragging;
 				EditMode									editMode;
 				GuiControl*									senderControl;
@@ -48,7 +48,9 @@ GuiDocumentCommonInterface
 				void										Move(TextPos caret, bool shift, bool frontSide);
 				bool										ProcessKey(vint code, bool shift, bool ctrl);
 				void										InstallDocumentViewer(GuiControl* _sender, compositions::GuiGraphicsComposition* _container);
-				void										SetActiveHyperlinkId(vint value);
+				void										SetActiveHyperlink(Ptr<DocumentHyperlinkRun> hyperlink, vint paragraphIndex=-1);
+				void										ActivateActiveHyperlink(bool activate);
+
 				void										OnCaretNotify(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 				void										OnGotFocus(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 				void										OnLostFocus(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
@@ -125,9 +127,6 @@ GuiDocumentCommonInterface
 				/// <param name="image">The new image.</param>
 				void										EditImage(TextPos begin, TextPos end, Ptr<GuiImageData> image);
 
-				/// <summary>Get the active hyperlink id. Returns -1 indicates there is no active hyperlink.</summary>
-				/// <returns>The active hyperlink id.</returns>
-				vint										GetActiveHyperlinkId();
 				/// <summary>Get the href attribute of the active hyperlink.</summary>
 				/// <returns>The href attribute of the active hyperlink.</returns>
 				WString										GetActiveHyperlinkReference();

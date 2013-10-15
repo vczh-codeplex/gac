@@ -37,9 +37,12 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 class RichTextWindow : public GuiWindow
 {
 protected:
+	GuiComboBoxListControl*			comboEditMode;
 	GuiButton*						buttonBold;
 	GuiButton*						buttonUnbold;
 	GuiButton*						buttonImage;
+	GuiButton*						buttonHyperlink;
+	GuiButton*						buttonUnhyperlink;
 	Ptr<GuiImageData>				image;
 	GuiDocumentViewer*				viewer;
 
@@ -53,17 +56,50 @@ public:
 		GuiTableComposition* table=new GuiTableComposition;
 		table->SetAlignmentToParent(Margin(0, 0, 0, 0));
 		table->SetCellPadding(5);
-		table->SetRowsAndColumns(2, 4);
+		table->SetRowsAndColumns(2, 7);
 		table->SetRowOption(0, GuiCellOption::MinSizeOption());
 		table->SetRowOption(1, GuiCellOption::PercentageOption(1.0));
-		table->SetColumnOption(0, GuiCellOption::MinSizeOption());
+		table->SetColumnOption(0, GuiCellOption::AbsoluteOption(80));
 		table->SetColumnOption(1, GuiCellOption::MinSizeOption());
 		table->SetColumnOption(2, GuiCellOption::MinSizeOption());
-		table->SetColumnOption(3, GuiCellOption::PercentageOption(1.0));
+		table->SetColumnOption(3, GuiCellOption::MinSizeOption());
+		table->SetColumnOption(4, GuiCellOption::MinSizeOption());
+		table->SetColumnOption(5, GuiCellOption::MinSizeOption());
+		table->SetColumnOption(6, GuiCellOption::PercentageOption(1.0));
 		{
 			GuiCellComposition* cell=new GuiCellComposition;
 			table->AddChild(cell);
 			cell->SetSite(0, 0, 1, 1);
+
+			GuiTextList* listEditMode=g::NewTextList();
+			listEditMode->GetItems().Add(new list::TextItem(L"ViewOnly"));
+			listEditMode->GetItems().Add(new list::TextItem(L"Selectable"));
+			listEditMode->GetItems().Add(new list::TextItem(L"Editable"));
+
+			comboEditMode=g::NewComboBox(listEditMode);
+			comboEditMode->SetSelectedIndex(2);
+			comboEditMode->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+			comboEditMode->SelectedIndexChanged.AttachLambda([this](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+			{
+				switch(comboEditMode->GetSelectedIndex())
+				{
+				case 0:
+					viewer->SetEditMode(GuiDocumentViewer::ViewOnly);
+					break;
+				case 1:
+					viewer->SetEditMode(GuiDocumentViewer::Selectable);
+					break;
+				case 2:
+					viewer->SetEditMode(GuiDocumentViewer::Editable);
+					break;
+				}
+			});
+			cell->AddChild(comboEditMode->GetBoundsComposition());
+		}
+		{
+			GuiCellComposition* cell=new GuiCellComposition;
+			table->AddChild(cell);
+			cell->SetSite(0, 1, 1, 1);
 
 			buttonBold=g::NewButton();
 			buttonBold->SetText(L"Bold");
@@ -81,7 +117,7 @@ public:
 		{
 			GuiCellComposition* cell=new GuiCellComposition;
 			table->AddChild(cell);
-			cell->SetSite(0, 1, 1, 1);
+			cell->SetSite(0, 2, 1, 1);
 
 			buttonUnbold=g::NewButton();
 			buttonUnbold->SetText(L"Unbold");
@@ -99,7 +135,7 @@ public:
 		{
 			GuiCellComposition* cell=new GuiCellComposition;
 			table->AddChild(cell);
-			cell->SetSite(0, 2, 1, 1);
+			cell->SetSite(0, 3, 1, 1);
 
 			buttonImage=g::NewButton();
 			buttonImage->SetText(L"Insert Image");
@@ -115,11 +151,46 @@ public:
 		{
 			GuiCellComposition* cell=new GuiCellComposition;
 			table->AddChild(cell);
-			cell->SetSite(1, 0, 1, 4);
+			cell->SetSite(0, 4, 1, 1);
+
+			buttonHyperlink=g::NewButton();
+			buttonHyperlink->SetText(L"SetHyperlink");
+			buttonHyperlink->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+			buttonHyperlink->Clicked.AttachLambda([this](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+			{
+			});
+			cell->AddChild(buttonHyperlink->GetBoundsComposition());
+		}
+		{
+			GuiCellComposition* cell=new GuiCellComposition;
+			table->AddChild(cell);
+			cell->SetSite(0, 5, 1, 1);
+
+			buttonUnhyperlink=g::NewButton();
+			buttonUnhyperlink->SetText(L"Unset Hyperlink");
+			buttonUnhyperlink->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+			buttonUnhyperlink->Clicked.AttachLambda([this](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+			{
+			});
+			cell->AddChild(buttonUnhyperlink->GetBoundsComposition());
+		}
+		{
+			GuiCellComposition* cell=new GuiCellComposition;
+			table->AddChild(cell);
+			cell->SetSite(1, 0, 1, 7);
 
 			viewer=g::NewDocumentViewer();
 			viewer->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 			viewer->SetEditMode(GuiDocumentViewer::Editable);
+			viewer->ActiveHyperlinkExecuted.AttachLambda([this](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+			{
+				WString reference=viewer->GetActiveHyperlinkReference();
+				GetCurrentController()->DialogService()->ShowMessageBox(
+					GetNativeWindow(),
+					reference,
+					L"Hyperlink"
+					);
+			});
 			cell->AddChild(viewer->GetBoundsComposition());
 		}
 		GetContainerComposition()->AddChild(table);

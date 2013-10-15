@@ -55,7 +55,7 @@ ExtractTextVisitor
 						VisitContainer(run);
 					}
 
-					void Visit(DocumentHyperlinkTextRun* run)override
+					void Visit(DocumentHyperlinkRun* run)override
 					{
 						VisitContainer(run);
 					}
@@ -107,7 +107,6 @@ SetPropertiesVisitor
 					vint						length;
 					vint						selectionBegin;
 					vint						selectionEnd;
-					vint						hyperlinkId;
 					List<ResolvedStyle>			styles;
 					DocumentModel*				model;
 					IGuiGraphicsParagraph*		paragraph;
@@ -115,7 +114,6 @@ SetPropertiesVisitor
 					SetPropertiesVisitor(DocumentModel* _model, IGuiGraphicsParagraph* _paragraph, vint _selectionBegin, vint _selectionEnd)
 						:start(0)
 						,length(0)
-						,hyperlinkId(DocumentRun::NullHyperlinkId)
 						,model(_model)
 						,paragraph(_paragraph)
 						,selectionBegin(_selectionBegin)
@@ -145,10 +143,6 @@ SetPropertiesVisitor
 							| (style.style.underline?IGuiGraphicsParagraph::Underline:0)
 							| (style.style.strikeline?IGuiGraphicsParagraph::Strikeline:0)
 							));
-						if(hyperlinkId!=DocumentRun::NullHyperlinkId)
-						{
-							paragraph->SetInteractionId(start, length, hyperlinkId);
-						}
 					}
 
 					void ApplyColor(vint start, vint length, const ResolvedStyle& style)
@@ -201,15 +195,12 @@ SetPropertiesVisitor
 						styles.RemoveAt(styles.Count()-1);
 					}
 
-					void Visit(DocumentHyperlinkTextRun* run)override
+					void Visit(DocumentHyperlinkRun* run)override
 					{
 						ResolvedStyle style=styles[styles.Count()-1];
 						style=model->GetStyle(run->styleName, style);
 						styles.Add(style);
-						vint oldHyperlinkId=hyperlinkId;
-						hyperlinkId=run->hyperlinkId;
 						VisitContainer(run);
-						hyperlinkId=oldHyperlinkId;
 						styles.RemoveAt(styles.Count()-1);
 					}
 
@@ -233,11 +224,6 @@ SetPropertiesVisitor
 							ResolvedStyle style=styles[styles.Count()-1];
 							ResolvedStyle selectionStyle=model->GetStyle(DocumentModel::SelectionStyleName, style);
 							ApplyColor(start, length, selectionStyle);
-						}
-
-						if(hyperlinkId!=DocumentRun::NullHyperlinkId)
-						{
-							paragraph->SetInteractionId(start, length, hyperlinkId);
 						}
 						start+=length;
 					}
@@ -493,53 +479,6 @@ GuiDocumentElement::GuiDocumentElementRenderer
 						cachedTotalHeight+=paragraphHeights[i]+paragraphDistance;
 					}
 				}
-			}
-
-			void GuiDocumentElement::GuiDocumentElementRenderer::EditText(TextPos begin, TextPos end, bool frontSide, const collections::Array<WString>& text)
-			{
-				vint newRows=element->document->EditText(begin, end, frontSide, text);
-				if(newRows!=-1)
-				{
-					NotifyParagraphUpdated(begin.row, end.row-begin.row+1, newRows, true);
-				}
-			}
-
-			void GuiDocumentElement::GuiDocumentElementRenderer::EditStyle(TextPos begin, TextPos end, Ptr<DocumentStyleProperties> style)
-			{
-				if(element->document->EditStyle(begin, end, style))
-				{
-					NotifyParagraphUpdated(begin.row, end.row-begin.row+1, end.row-begin.row+1, false);
-				}
-			}
-
-			void GuiDocumentElement::GuiDocumentElementRenderer::EditImage(TextPos begin, TextPos end, Ptr<GuiImageData> image)
-			{
-				if(element->document->EditImage(begin, end, image))
-				{
-					NotifyParagraphUpdated(begin.row, end.row-begin.row+1, 1, true);
-				}
-			}
-
-			vint GuiDocumentElement::GuiDocumentElementRenderer::GetHyperlinkIdFromPoint(Point point)
-			{
-				vint top=0;
-				vint index=-1;
-				if(GetParagraphIndexFromPoint(point, top, index))
-				{
-					Ptr<ParagraphCache> cache=paragraphCaches[index];
-					if(cache && cache->graphicsParagraph)
-					{
-						vint start=0;
-						vint length=0;
-						vint id=0;
-						if(cache->graphicsParagraph->HitTestPoint(Point(point.x, point.y-top), start, length, id))
-						{
-							return id;
-						}
-					}
-					return DocumentRun::NullHyperlinkId;
-				}
-				return DocumentRun::NullHyperlinkId;
 			}
 
 			void GuiDocumentElement::GuiDocumentElementRenderer::OpenCaret(TextPos caret, Color color, bool frontSide)
@@ -912,7 +851,12 @@ GuiDocumentElement
 						begin=end;
 						end=temp;
 					}
-					elementRenderer->EditText(begin, end, frontSide, text);
+
+					vint newRows=document->EditText(begin, end, frontSide, text);
+					if(newRows!=-1)
+					{
+						elementRenderer->NotifyParagraphUpdated(begin.row, end.row-begin.row+1, newRows, true);
+					}
 				}
 			}
 
@@ -927,7 +871,11 @@ GuiDocumentElement
 						begin=end;
 						end=temp;
 					}
-					elementRenderer->EditStyle(begin, end, style);
+
+					if(document->EditStyle(begin, end, style))
+					{
+						elementRenderer->NotifyParagraphUpdated(begin.row, end.row-begin.row+1, end.row-begin.row+1, false);
+					}
 				}
 			}
 
@@ -942,32 +890,25 @@ GuiDocumentElement
 						begin=end;
 						end=temp;
 					}
-					elementRenderer->EditImage(begin, end, image);
+
+					if(document->EditImage(begin, end, image))
+					{
+						elementRenderer->NotifyParagraphUpdated(begin.row, end.row-begin.row+1, 1, true);
+					}
 				}
 			}
 
-			vint GuiDocumentElement::GetHyperlinkIdFromPoint(Point point)
+			Ptr<DocumentHyperlinkRun> GuiDocumentElement::GetHyperlinkFromPoint(Point point)
 			{
 				Ptr<GuiDocumentElementRenderer> elementRenderer=renderer.Cast<GuiDocumentElementRenderer>();
 				if(elementRenderer)
 				{
-					return elementRenderer->GetHyperlinkIdFromPoint(point);
+					TextPos position=elementRenderer->CalculateCaretFromPoint(point);
+					return document->GetHyperlinkLink(position.row, position.column, position.column);
 				}
 				else
 				{
-					return DocumentRun::NullHyperlinkId;
-				}
-			}
-
-			void GuiDocumentElement::ActivateHyperlink(vint hyperlinkId, bool active)
-			{
-				if(document)
-				{
-					vint paragraphIndex=document->ActivateHyperlink(hyperlinkId, active);
-					if(paragraphIndex!=-1)
-					{
-						NotifyParagraphUpdated(paragraphIndex, 1, 1, false);
-					}
+					return 0;
 				}
 			}
 		}

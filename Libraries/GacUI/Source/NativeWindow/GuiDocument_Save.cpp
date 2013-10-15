@@ -174,7 +174,7 @@ document_serialization_visitors::SerializeRunVisitor
 					}
 				}
 
-				void Visit(DocumentHyperlinkTextRun* run)override
+				void Visit(DocumentHyperlinkRun* run)override
 				{
 					if(templateLevel==0)
 					{
@@ -193,13 +193,9 @@ document_serialization_visitors::SerializeRunVisitor
 						{
 							writer.Attribute(L"active", run->activeStyleName);
 						}
-						if(run->hyperlinkId!=-1)
+						if(run->reference!=L"")
 						{
-							vint index=model->hyperlinkInfos.Keys().IndexOf(run->hyperlinkId);
-							if(index!=-1)
-							{
-								writer.Attribute(L"href", model->hyperlinkInfos.Values()[index].reference);
-							}
+							writer.Attribute(L"href", run->reference);
 						}
 						VisitContainer(element, run);
 					}

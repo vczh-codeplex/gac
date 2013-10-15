@@ -36,84 +36,6 @@ DocumentResolver
 		}
 
 /***********************************************************************
-document_serialization_visitors::ActivateHyperlinkVisitor
-***********************************************************************/
-
-		namespace document_serialization_visitors
-		{
-			class ActivateHyperlinkVisitor : public Object, public DocumentRun::IVisitor
-			{
-			public:
-				vint			hyperlinkId;
-				bool			active;
-
-				ActivateHyperlinkVisitor(vint _hyperlinkId, bool _active)
-					:hyperlinkId(_hyperlinkId)
-					,active(_active)
-				{
-				}
-
-				void VisitContainer(DocumentContainerRun* run)
-				{
-					FOREACH(Ptr<DocumentRun>, subRun, run->runs)
-					{
-						subRun->Accept(this);
-					}
-				}
-
-				void Visit(DocumentTextRun* run)override
-				{
-				}
-
-				void Visit(DocumentStylePropertiesRun* run)override
-				{
-					VisitContainer(run);
-				}
-
-				void Visit(DocumentStyleApplicationRun* run)override
-				{
-					VisitContainer(run);
-				}
-
-				void Visit(DocumentHyperlinkTextRun* run)override
-				{
-					VisitContainer(run);
-					if(run->hyperlinkId==hyperlinkId)
-					{
-						if(active)
-						{
-							run->styleName=run->activeStyleName;
-						}
-						else
-						{
-							run->styleName=run->normalStyleName;
-						}
-					}
-				}
-
-				void Visit(DocumentImageRun* run)override
-				{
-				}
-
-				void Visit(DocumentTemplateApplicationRun* run)override
-				{
-					VisitContainer(run);
-				}
-
-				void Visit(DocumentTemplateContentRun* run)override
-				{
-					VisitContainer(run);
-				}
-
-				void Visit(DocumentParagraphRun* run)override
-				{
-					VisitContainer(run);
-				}
-			};
-		}
-		using namespace document_serialization_visitors;
-
-/***********************************************************************
 DocumentModel
 ***********************************************************************/
 
@@ -242,23 +164,6 @@ DocumentModel
 
 			Ptr<DocumentStyleProperties> sp=selectedStyle->resolvedStyles;
 			return GetStyle(sp, context);
-		}
-
-		vint DocumentModel::ActivateHyperlink(vint hyperlinkId, bool active)
-		{
-			vint index=hyperlinkInfos.Keys().IndexOf(hyperlinkId);
-			if(index!=-1)
-			{
-				vint paragraphIndex=hyperlinkInfos.Values().Get(index).paragraphIndex;
-				if(0<=paragraphIndex && paragraphIndex<paragraphs.Count())
-				{
-					Ptr<DocumentParagraphRun> paragraph=paragraphs[paragraphIndex];
-					ActivateHyperlinkVisitor visitor(hyperlinkId, active);
-					paragraph->Accept(&visitor);
-					return paragraphIndex;
-				}
-			}
-			return  -1;
 		}
 	}
 }

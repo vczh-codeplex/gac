@@ -270,10 +270,9 @@ document_serialization_visitors::DeserializeNodeVisitor
 					}
 					else if(node->name.value==L"a")
 					{
-						Ptr<DocumentHyperlinkTextRun> run=new DocumentHyperlinkTextRun;
+						Ptr<DocumentHyperlinkRun> run=new DocumentHyperlinkRun;
 						run->normalStyleName=L"#NormalLink";
 						run->activeStyleName=L"#ActiveLink";
-						run->hyperlinkId=model->hyperlinkInfos.Count();
 						if(Ptr<XmlAttribute> att=XmlGetAttribute(node, L"normal"))
 						{
 							run->normalStyleName=TranslateAttribute(att->value.value);
@@ -282,21 +281,13 @@ document_serialization_visitors::DeserializeNodeVisitor
 						{
 							run->activeStyleName=TranslateAttribute(att->value.value);
 						}
+						if(Ptr<XmlAttribute> att=XmlGetAttribute(node, L"href"))
+						{
+							run->reference=TranslateAttribute(att->value.value);
+						}
 						run->styleName=run->normalStyleName;
 						container->runs.Add(run);
 						createdContainer=run;
-
-						WString href;
-						if(Ptr<XmlAttribute> att=XmlGetAttribute(node, L"href"))
-						{
-							href=TranslateAttribute(att->value.value);
-						}
-						{
-							DocumentModel::HyperlinkInfo info;
-							info.paragraphIndex=paragraphIndex;
-							info.reference=href;
-							model->hyperlinkInfos.Add(run->hyperlinkId, info);
-						}
 					}
 					else if(node->name.value==L"p")
 					{

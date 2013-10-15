@@ -200,24 +200,6 @@ WindowsGDIParagraph
 					return false;
 				}
 
-				bool SetInteractionId(vint start, vint length, vint value)override
-				{
-					if(length==0) return true;
-					if(0<=start && start<text.Length() && length>=0 && 0<=start+length && start+length<=text.Length())
-					{
-						return paragraph->SetInteractionId(start, length, value);
-					}
-					else
-					{
-						return false;
-					}
-				}
-
-				bool HitTestPoint(Point point, vint& start, vint& length, vint& interactionId)override
-				{
-					return paragraph->HitTestPoint(point, start, length, interactionId);
-				}
-
 				vint GetHeight()override
 				{
 					PrepareUniscribeData();

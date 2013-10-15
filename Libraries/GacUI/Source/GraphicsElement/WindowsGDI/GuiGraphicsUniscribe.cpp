@@ -15,8 +15,7 @@ UniscribeFragment
 ***********************************************************************/
 
 			UniscribeFragment::UniscribeFragment(const WString& _text)
-				:interactionId(-1)
-				,text(_text)
+				:text(_text)
 			{
 				colors.Add(UniscribeColorRange(0, text.Length()), UniscribeColor(Color(0, 0, 0), Color(0, 0, 0, 0)));
 			}
@@ -508,21 +507,6 @@ UniscribeRun
 
 			UniscribeRun::~UniscribeRun()
 			{
-			}
-
-			bool UniscribeRun::HitTestPoint(Point point, vint& start, vint& length, vint& interactionId)
-			{
-				for(vint i=0;i<fragmentBounds.Count();i++)
-				{
-					if(fragmentBounds[i].bounds.Contains(point))
-					{
-						start=this->startFromLine;
-						length=this->length;
-						interactionId=this->documentFragment->interactionId;
-						return true;
-					}
-				}
-				return false;
 			}
 
 /***********************************************************************
@@ -1766,58 +1750,6 @@ UniscribeParagraph (Formatting)
 					return fragment->element;
 				}
 				return 0;
-			}
-
-			bool UniscribeParagraph::SetInteractionId(vint start, vint length, vint value)
-			{
-				vint fs, ss, fe, se, f1, f2;
-				SearchFragment(start, length, fs, ss, fe, se);
-				if(CutFragment(fs, ss, fe, se, f1, f2))
-				{
-					for(vint i=f1;i<=f2;i++)
-					{
-						documentFragments[i]->interactionId=value;
-					}
-					built=false;
-					return true;
-				}
-				else
-				{
-					return false;
-				}
-			}
-
-			bool UniscribeParagraph::HitTestPoint(Point point, vint& start, vint& length, vint& interactionId)
-			{
-				start=-1;
-				length=0;
-				interactionId=IGuiGraphicsParagraph::NullInteractionId;
-
-				if(bounds.Contains(point))
-				{
-					FOREACH(Ptr<UniscribeLine>, line, lines)
-					{
-						if(point.y<line->bounds.y1)
-						{
-							continue;
-						}
-						else if(line->bounds.y2<=point.y)
-						{
-							break;
-						}
-						else if(line->bounds.Contains(point))
-						{
-							FOREACH(Ptr<UniscribeRun>, run, line->scriptRuns)
-							{
-								if(run->HitTestPoint(point, start, length, interactionId))
-								{
-									return true;
-								}
-							}
-						}
-					}
-				}
-				return false;
 			}
 
 /***********************************************************************
