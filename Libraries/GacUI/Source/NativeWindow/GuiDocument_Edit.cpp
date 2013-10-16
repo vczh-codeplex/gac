@@ -1055,6 +1055,56 @@ DocumentModel::EditRangeOperations
 			return true;
 		}
 
+		bool DocumentModel::EditContainer(TextPos begin, TextPos end, const Func<void(DocumentParagraphRun*, RunRangeMap&, vint, vint)>& editor)
+		{
+			if(begin==end) return false;
+
+			// cut paragraphs
+			if(!CutEditRange(begin, end)) return false;
+
+			// check caret range
+			RunRangeMap runRanges;
+			if(!CheckEditRange(begin, end, runRanges)) return false;
+
+			// edit container
+			if(begin.row==end.row)
+			{
+				editor(paragraphs[begin.row].Obj(), runRanges, begin.column, end.column);
+			}
+			else
+			{
+				for(vint i=begin.row;i<=end.row;i++)
+				{
+					Ptr<DocumentParagraphRun> paragraph=paragraphs[i];
+					if(begin.row<i && i<end.row)
+					{
+						GetRunRangeVisitor::GetRunRange(paragraph.Obj(), runRanges);
+					}
+					RunRange range=runRanges[paragraph.Obj()];
+					if(i==begin.row)
+					{
+						editor(paragraph.Obj(), runRanges, begin.column, range.end);
+					}
+					else if(i==end.row)
+					{
+						editor(paragraph.Obj(), runRanges, range.start, end.column);
+					}
+					else
+					{
+						editor(paragraph.Obj(), runRanges, range.start, range.end);
+					}
+				}
+			}
+
+			// clear paragraphs
+			for(vint i=begin.row;i<=end.row;i++)
+			{
+				ClearRunVisitor::ClearRun(paragraphs[i].Obj());
+			}
+
+			return true;
+		}
+
 /***********************************************************************
 DocumentModel::EditRun
 ***********************************************************************/
@@ -1187,52 +1237,10 @@ DocumentModel::EditStyle
 
 		bool DocumentModel::EditStyle(TextPos begin, TextPos end, Ptr<DocumentStyleProperties> style)
 		{
-			if(begin==end) return false;
-
-			// cut paragraphs
-			if(!CutEditRange(begin, end)) return false;
-
-			// check caret range
-			RunRangeMap runRanges;
-			if(!CheckEditRange(begin, end, runRanges)) return false;
-
-			// add style
-			if(begin.row==end.row)
+			return EditContainer(begin, end, [=](DocumentParagraphRun* paragraph, RunRangeMap& runRanges, vint start, vint end)
 			{
-				AddStyleVisitor::AddStyle(paragraphs[begin.row].Obj(), runRanges, begin.column, end.column, style);
-			}
-			else
-			{
-				for(vint i=begin.row;i<=end.row;i++)
-				{
-					Ptr<DocumentParagraphRun> paragraph=paragraphs[i];
-					if(begin.row<i && i<end.row)
-					{
-						GetRunRangeVisitor::GetRunRange(paragraph.Obj(), runRanges);
-					}
-					RunRange range=runRanges[paragraph.Obj()];
-					if(i==begin.row)
-					{
-						AddStyleVisitor::AddStyle(paragraph.Obj(), runRanges, begin.column, range.end, style);
-					}
-					else if(i==end.row)
-					{
-						AddStyleVisitor::AddStyle(paragraph.Obj(), runRanges, range.start, end.column, style);
-					}
-					else
-					{
-						AddStyleVisitor::AddStyle(paragraph.Obj(), runRanges, range.start, range.end, style);
-					}
-				}
-			}
-
-			// clear paragraphs
-			for(vint i=begin.row;i<=end.row;i++)
-			{
-				ClearRunVisitor::ClearRun(paragraphs[i].Obj());
-			}
-
-			return true;
+				AddStyleVisitor::AddStyle(paragraph, runRanges, start, end, style);
+			});
 		}
 
 /***********************************************************************
@@ -1318,102 +1326,18 @@ DocumentModel::EditStyleName
 
 		bool DocumentModel::EditStyleName(TextPos begin, TextPos end, const WString& styleName)
 		{
-			if(begin==end) return false;
-
-			// cut paragraphs
-			if(!CutEditRange(begin, end)) return false;
-
-			// check caret range
-			RunRangeMap runRanges;
-			if(!CheckEditRange(begin, end, runRanges)) return false;
-
-			// add style
-			if(begin.row==end.row)
+			return EditContainer(begin, end, [=](DocumentParagraphRun* paragraph, RunRangeMap& runRanges, vint start, vint end)
 			{
-				AddStyleNameVisitor::AddStyleName(paragraphs[begin.row].Obj(), runRanges, begin.column, end.column, styleName);
-			}
-			else
-			{
-				for(vint i=begin.row;i<=end.row;i++)
-				{
-					Ptr<DocumentParagraphRun> paragraph=paragraphs[i];
-					if(begin.row<i && i<end.row)
-					{
-						GetRunRangeVisitor::GetRunRange(paragraph.Obj(), runRanges);
-					}
-					RunRange range=runRanges[paragraph.Obj()];
-					if(i==begin.row)
-					{
-						AddStyleNameVisitor::AddStyleName(paragraph.Obj(), runRanges, begin.column, range.end, styleName);
-					}
-					else if(i==end.row)
-					{
-						AddStyleNameVisitor::AddStyleName(paragraph.Obj(), runRanges, range.start, end.column, styleName);
-					}
-					else
-					{
-						AddStyleNameVisitor::AddStyleName(paragraph.Obj(), runRanges, range.start, range.end, styleName);
-					}
-				}
-			}
-
-			// clear paragraphs
-			for(vint i=begin.row;i<=end.row;i++)
-			{
-				ClearRunVisitor::ClearRun(paragraphs[i].Obj());
-			}
-
-			return true;
+				AddStyleNameVisitor::AddStyleName(paragraph, runRanges, start, end, styleName);
+			});
 		}
 
 		bool DocumentModel::RemoveStyleName(TextPos begin, TextPos end)
 		{
-			if(begin==end) return false;
-
-			// cut paragraphs
-			if(!CutEditRange(begin, end)) return false;
-
-			// check caret range
-			RunRangeMap runRanges;
-			if(!CheckEditRange(begin, end, runRanges)) return false;
-
-			// add style
-			if(begin.row==end.row)
+			return EditContainer(begin, end, [=](DocumentParagraphRun* paragraph, RunRangeMap& runRanges, vint start, vint end)
 			{
-				RemoveStyleNameVisitor::RemoveStyleName(paragraphs[begin.row].Obj(), runRanges, begin.column, end.column);
-			}
-			else
-			{
-				for(vint i=begin.row;i<=end.row;i++)
-				{
-					Ptr<DocumentParagraphRun> paragraph=paragraphs[i];
-					if(begin.row<i && i<end.row)
-					{
-						GetRunRangeVisitor::GetRunRange(paragraph.Obj(), runRanges);
-					}
-					RunRange range=runRanges[paragraph.Obj()];
-					if(i==begin.row)
-					{
-						RemoveStyleNameVisitor::RemoveStyleName(paragraph.Obj(), runRanges, begin.column, range.end);
-					}
-					else if(i==end.row)
-					{
-						RemoveStyleNameVisitor::RemoveStyleName(paragraph.Obj(), runRanges, range.start, end.column);
-					}
-					else
-					{
-						RemoveStyleNameVisitor::RemoveStyleName(paragraph.Obj(), runRanges, range.start, range.end);
-					}
-				}
-			}
-
-			// clear paragraphs
-			for(vint i=begin.row;i<=end.row;i++)
-			{
-				ClearRunVisitor::ClearRun(paragraphs[i].Obj());
-			}
-
-			return true;
+				RemoveStyleNameVisitor::RemoveStyleName(paragraph, runRanges, start, end);
+			});
 		}
 
 /***********************************************************************
@@ -1422,52 +1346,10 @@ DocumentModel::ClearStyle
 
 		bool DocumentModel::ClearStyle(TextPos begin, TextPos end)
 		{
-			if(begin==end) return false;
-
-			// cut paragraphs
-			if(!CutEditRange(begin, end)) return false;
-
-			// check caret range
-			RunRangeMap runRanges;
-			if(!CheckEditRange(begin, end, runRanges)) return false;
-
-			// add style
-			if(begin.row==end.row)
+			return EditContainer(begin, end, [=](DocumentParagraphRun* paragraph, RunRangeMap& runRanges, vint start, vint end)
 			{
-				ClearStyleVisitor::ClearStyle(paragraphs[begin.row].Obj(), runRanges, begin.column, end.column);
-			}
-			else
-			{
-				for(vint i=begin.row;i<=end.row;i++)
-				{
-					Ptr<DocumentParagraphRun> paragraph=paragraphs[i];
-					if(begin.row<i && i<end.row)
-					{
-						GetRunRangeVisitor::GetRunRange(paragraph.Obj(), runRanges);
-					}
-					RunRange range=runRanges[paragraph.Obj()];
-					if(i==begin.row)
-					{
-						ClearStyleVisitor::ClearStyle(paragraph.Obj(), runRanges, begin.column, range.end);
-					}
-					else if(i==end.row)
-					{
-						ClearStyleVisitor::ClearStyle(paragraph.Obj(), runRanges, range.start, end.column);
-					}
-					else
-					{
-						ClearStyleVisitor::ClearStyle(paragraph.Obj(), runRanges, range.start, range.end);
-					}
-				}
-			}
-
-			// clear paragraphs
-			for(vint i=begin.row;i<=end.row;i++)
-			{
-				ClearRunVisitor::ClearRun(paragraphs[i].Obj());
-			}
-
-			return true;
+				ClearStyleVisitor::ClearStyle(paragraph, runRanges, start, end);
+			});
 		}
 	}
 }
