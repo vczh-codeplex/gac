@@ -347,6 +347,7 @@ Rich Content Document (model)
 			bool							EditHyperlink(vint paragraphIndex, vint begin, vint end, const WString& reference, const WString& normalStyleName=NormalLinkStyleName, const WString& activeStyleName=ActiveLinkStyleName);
 			bool							RemoveHyperlink(vint paragraphIndex, vint begin, vint end);
 			Ptr<DocumentHyperlinkRun>		GetHyperlink(vint paragraphIndex, vint begin, vint end);
+			bool							ClearStyle(TextPos begin, TextPos end);
 
 			/// <summary>Load a document model from an xml.</summary>
 			/// <returns>The loaded document model.</returns>

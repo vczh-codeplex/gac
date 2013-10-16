@@ -43,6 +43,7 @@ protected:
 	GuiButton*						buttonImage;
 	GuiButton*						buttonHyperlink;
 	GuiButton*						buttonUnhyperlink;
+	GuiButton*						buttonClearStyle;
 	Ptr<GuiImageData>				image;
 	GuiDocumentViewer*				viewer;
 
@@ -56,7 +57,7 @@ public:
 		GuiTableComposition* table=new GuiTableComposition;
 		table->SetAlignmentToParent(Margin(0, 0, 0, 0));
 		table->SetCellPadding(5);
-		table->SetRowsAndColumns(2, 7);
+		table->SetRowsAndColumns(2, 8);
 		table->SetRowOption(0, GuiCellOption::MinSizeOption());
 		table->SetRowOption(1, GuiCellOption::PercentageOption(1.0));
 		table->SetColumnOption(0, GuiCellOption::AbsoluteOption(120));
@@ -65,7 +66,8 @@ public:
 		table->SetColumnOption(3, GuiCellOption::MinSizeOption());
 		table->SetColumnOption(4, GuiCellOption::MinSizeOption());
 		table->SetColumnOption(5, GuiCellOption::MinSizeOption());
-		table->SetColumnOption(6, GuiCellOption::PercentageOption(1.0));
+		table->SetColumnOption(6, GuiCellOption::MinSizeOption());
+		table->SetColumnOption(7, GuiCellOption::PercentageOption(1.0));
 		{
 			GuiCellComposition* cell=new GuiCellComposition;
 			table->AddChild(cell);
@@ -207,7 +209,23 @@ public:
 		{
 			GuiCellComposition* cell=new GuiCellComposition;
 			table->AddChild(cell);
-			cell->SetSite(1, 0, 1, 7);
+			cell->SetSite(0, 6, 1, 1);
+
+			buttonClearStyle=g::NewButton();
+			buttonClearStyle->SetText(L"Clear Styles");
+			buttonClearStyle->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+			buttonClearStyle->Clicked.AttachLambda([this](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+			{
+				TextPos begin=viewer->GetCaretBegin();
+				TextPos end=viewer->GetCaretEnd();
+				viewer->ClearStyle(begin, end);
+			});
+			cell->AddChild(buttonClearStyle->GetBoundsComposition());
+		}
+		{
+			GuiCellComposition* cell=new GuiCellComposition;
+			table->AddChild(cell);
+			cell->SetSite(1, 0, 1, 8);
 
 			viewer=g::NewDocumentViewer();
 			viewer->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));

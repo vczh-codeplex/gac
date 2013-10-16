@@ -194,6 +194,10 @@ Rich Content Document (element)
 				/// <param name="begin">The begin position of the range.</param>
 				/// <param name="end">The end position of the range.</param>
 				void										RemoveHyperlink(vint paragraphIndex, vint begin, vint end);
+				/// <summary>Clear all styles in a specified range.</summary>
+				/// <param name="begin">The begin position of the range.</param>
+				/// <param name="end">The end position of the range.</param>
+				void										ClearStyle(TextPos begin, TextPos end);
 
 				/// <summary>Get hyperlink from point.</summary>
 				/// <returns>Corressponding hyperlink id. Returns -1 indicates that the point is not in a hyperlink.</returns>

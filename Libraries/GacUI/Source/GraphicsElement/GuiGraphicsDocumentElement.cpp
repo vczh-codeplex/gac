@@ -936,6 +936,25 @@ GuiDocumentElement
 				}
 			}
 
+			void GuiDocumentElement::ClearStyle(TextPos begin, TextPos end)
+			{
+				Ptr<GuiDocumentElementRenderer> elementRenderer=renderer.Cast<GuiDocumentElementRenderer>();
+				if(elementRenderer)
+				{
+					if(begin>end)
+					{
+						TextPos temp=begin;
+						begin=end;
+						end=temp;
+					}
+
+					if(document->ClearStyle(begin, end))
+					{
+						elementRenderer->NotifyParagraphUpdated(begin.row, end.row-begin.row+1, end.row-begin.row+1, false);
+					}
+				}
+			}
+
 			Ptr<DocumentHyperlinkRun> GuiDocumentElement::GetHyperlinkFromPoint(Point point)
 			{
 				Ptr<GuiDocumentElementRenderer> elementRenderer=renderer.Cast<GuiDocumentElementRenderer>();
