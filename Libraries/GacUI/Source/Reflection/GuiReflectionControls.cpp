@@ -1203,7 +1203,6 @@ Type Declaration
 				CLASS_MEMBER_GUIEVENT(ActiveHyperlinkChanged)
 				CLASS_MEMBER_GUIEVENT(ActiveHyperlinkExecuted)
 
-				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(ActiveHyperlinkId, ActiveHyperlinkChanged)
 				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(ActiveHyperlinkReference, ActiveHyperlinkChanged)
 
 				CLASS_MEMBER_METHOD(NotifyParagraphUpdated, {L"index" _ L"oldCount" _ L"newCount" _ L"updatedText"})
