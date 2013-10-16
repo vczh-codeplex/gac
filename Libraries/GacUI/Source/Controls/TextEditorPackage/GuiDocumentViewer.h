@@ -45,6 +45,7 @@ GuiDocumentCommonInterface
 				EditMode									editMode;
 				GuiControl*									senderControl;
 
+				void										UpdateCaretPoint();
 				void										Move(TextPos caret, bool shift, bool frontSide);
 				bool										ProcessKey(vint code, bool shift, bool ctrl);
 				void										InstallDocumentViewer(GuiControl* _sender, compositions::GuiGraphicsComposition* _container);
@@ -61,6 +62,7 @@ GuiDocumentCommonInterface
 				void										OnMouseUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
 				void										OnMouseLeave(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 
+				virtual Point								GetDocumentViewPosition();
 				virtual void								EnsureRectVisible(Rect bounds);
 			public:
 				GuiDocumentCommonInterface();
@@ -173,6 +175,7 @@ GuiDocumentViewer
 			{
 			protected:
 
+				Point										GetDocumentViewPosition()override;
 				void										EnsureRectVisible(Rect bounds)override;
 			public:
 				/// <summary>Create a control with a specified style provider.</summary>
