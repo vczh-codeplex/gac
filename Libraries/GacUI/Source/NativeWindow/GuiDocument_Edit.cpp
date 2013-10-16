@@ -209,7 +209,7 @@ document_serialization_visitors::LocateHyperlinkVisitor
 					FOREACH(Ptr<DocumentRun>, subRun, run->runs)
 					{
 						RunRange range=runRanges[subRun.Obj()];
-						if(range.start<end && start<range.end)
+						if(range.start<=start && end<=range.end)
 						{
 							selectedRun=subRun;
 							break;
@@ -681,25 +681,25 @@ document_serialization_visitors::ClearRunVisitor
 		using namespace document_serialization_visitors;
 
 /***********************************************************************
-document_serialization_visitors::AddStyleVisitor
+document_serialization_visitors::AddContainerVisitor
 ***********************************************************************/
 
 		namespace document_serialization_visitors
 		{
-			class AddStyleVisitor : public Object, public DocumentRun::IVisitor
+			class AddContainerVisitor : public Object, public DocumentRun::IVisitor
 			{
 			public:
-				RunRangeMap&					runRanges;
-				vint							start;
-				vint							end;
-				Ptr<DocumentStyleProperties>	style;
-				bool							insertStyle;
+				RunRangeMap&							runRanges;
+				vint									start;
+				vint									end;
+				bool									insertStyle;
 
-				AddStyleVisitor(RunRangeMap& _runRanges, vint _start, vint _end, Ptr<DocumentStyleProperties> _style)
+				virtual Ptr<DocumentContainerRun>		CreateContainer()=0;
+
+				AddContainerVisitor(RunRangeMap& _runRanges, vint _start, vint _end)
 					:runRanges(_runRanges)
 					,start(_start)
 					,end(_end)
-					,style(_style)
 					,insertStyle(false)
 				{
 				}
@@ -716,12 +716,10 @@ document_serialization_visitors::AddStyleVisitor
 							subRun->Accept(this);
 							if(insertStyle)
 							{
-								Ptr<DocumentStylePropertiesRun> styleRun=new DocumentStylePropertiesRun;
-								styleRun->style=CloneRunVisitor::CopyStyle(style);
-
+								Ptr<DocumentContainerRun> containerRun=CreateContainer();
 								run->runs.RemoveAt(i);
-								styleRun->runs.Add(subRun);
-								run->runs.Insert(i, styleRun);
+								containerRun->runs.Add(subRun);
+								run->runs.Insert(i, containerRun);
 							}
 						}
 					}
@@ -757,10 +755,61 @@ document_serialization_visitors::AddStyleVisitor
 				{
 					VisitContainer(run);
 				}
+			};
+
+			class AddStyleVisitor : public AddContainerVisitor
+			{
+			public:
+				Ptr<DocumentStyleProperties>	style;
+
+				Ptr<DocumentContainerRun> CreateContainer()override
+				{
+					Ptr<DocumentStylePropertiesRun> containerRun=new DocumentStylePropertiesRun;
+					containerRun->style=CloneRunVisitor::CopyStyle(style);
+					return containerRun;
+				}
+
+				AddStyleVisitor(RunRangeMap& _runRanges, vint _start, vint _end, Ptr<DocumentStyleProperties> _style)
+					:AddContainerVisitor(_runRanges, _start, _end)
+					,style(_style)
+				{
+				}
 
 				static void AddStyle(DocumentParagraphRun* run, RunRangeMap& runRanges, vint start, vint end, Ptr<DocumentStyleProperties> style)
 				{
 					AddStyleVisitor visitor(runRanges, start, end, style);
+					run->Accept(&visitor);
+				}
+			};
+
+			class AddHyperlinkVisitor : public AddContainerVisitor
+			{
+			public:
+				WString							reference;
+				WString							normalStyleName;
+				WString							activeStyleName;
+
+				Ptr<DocumentContainerRun> CreateContainer()override
+				{
+					Ptr<DocumentHyperlinkRun> containerRun=new DocumentHyperlinkRun;
+					containerRun->reference=reference;
+					containerRun->normalStyleName=normalStyleName;
+					containerRun->activeStyleName=activeStyleName;
+					containerRun->styleName=normalStyleName;
+					return containerRun;
+				}
+
+				AddHyperlinkVisitor(RunRangeMap& _runRanges, vint _start, vint _end, const WString& _reference, const WString& _normalStyleName, const WString& _activeStyleName)
+					:AddContainerVisitor(_runRanges, _start, _end)
+					,reference(_reference)
+					,normalStyleName(_normalStyleName)
+					,activeStyleName(_activeStyleName)
+				{
+				}
+
+				static void AddHyperlink(DocumentParagraphRun* run, RunRangeMap& runRanges, vint start, vint end, const WString& reference, const WString& normalStyleName, const WString& activeStyleName)
+				{
+					AddHyperlinkVisitor visitor(runRanges, start, end, reference, normalStyleName, activeStyleName);
 					run->Accept(&visitor);
 				}
 			};
@@ -1160,6 +1209,14 @@ DocumentModel::EditHyperlink
 			}
 			else if(RemoveHyperlink(paragraphIndex, begin, end))
 			{
+				CutEditRange(TextPos(paragraphIndex, begin), TextPos(paragraphIndex, end));
+
+				RunRangeMap runRanges;
+				Ptr<DocumentParagraphRun> paragraph=paragraphs[paragraphIndex];
+				GetRunRangeVisitor::GetRunRange(paragraph.Obj(), runRanges);
+				AddHyperlinkVisitor::AddHyperlink(paragraph.Obj(), runRanges, begin, end, reference, normalStyleName, activeStyleName);
+
+				return true;
 			}
 			return false;
 		}
