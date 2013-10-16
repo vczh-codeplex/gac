@@ -813,6 +813,31 @@ document_serialization_visitors::AddContainerVisitor
 					run->Accept(&visitor);
 				}
 			};
+
+			class AddStyleNameVisitor : public AddContainerVisitor
+			{
+			public:
+				WString							styleName;
+
+				Ptr<DocumentContainerRun> CreateContainer()override
+				{
+					Ptr<DocumentStyleApplicationRun> containerRun=new DocumentStyleApplicationRun;
+					containerRun->styleName=styleName;
+					return containerRun;
+				}
+
+				AddStyleNameVisitor(RunRangeMap& _runRanges, vint _start, vint _end, const WString& _styleName)
+					:AddContainerVisitor(_runRanges, _start, _end)
+					,styleName(_styleName)
+				{
+				}
+
+				static void AddStyleName(DocumentParagraphRun* run, RunRangeMap& runRanges, vint start, vint end, const WString& styleName)
+				{
+					AddStyleNameVisitor visitor(runRanges, start, end, styleName);
+					run->Accept(&visitor);
+				}
+			};
 		}
 		using namespace document_serialization_visitors;
 
@@ -919,6 +944,26 @@ document_serialization_visitors::RemoveContainerVisitor
 				static void RemoveHyperlink(DocumentParagraphRun* run, RunRangeMap& runRanges, vint start, vint end)
 				{
 					RemoveHyperlinkVisitor visitor(runRanges, start, end);
+					run->Accept(&visitor);
+				}
+			};
+
+			class RemoveStyleNameVisitor : public RemoveContainerVisitor
+			{
+			public:
+				RemoveStyleNameVisitor(RunRangeMap& _runRanges, vint _start, vint _end)
+					:RemoveContainerVisitor(_runRanges, _start, _end)
+				{
+				}
+
+				void Visit(DocumentStyleApplicationRun* run)override
+				{
+					RemoveContainer(run);
+				}
+
+				static void RemoveStyleName(DocumentParagraphRun* run, RunRangeMap& runRanges, vint start, vint end)
+				{
+					RemoveStyleNameVisitor visitor(runRanges, start, end);
 					run->Accept(&visitor);
 				}
 			};
@@ -1265,6 +1310,110 @@ DocumentModel::EditHyperlink
 
 			Ptr<DocumentParagraphRun> paragraph=paragraphs[paragraphIndex];
 			return LocateHyperlinkVisitor::LocateHyperlink(paragraph.Obj(), runRanges, begin, end);
+		}
+
+/***********************************************************************
+DocumentModel::EditStyleName
+***********************************************************************/
+
+		bool DocumentModel::EditStyleName(TextPos begin, TextPos end, const WString& styleName)
+		{
+			if(begin==end) return false;
+
+			// cut paragraphs
+			if(!CutEditRange(begin, end)) return false;
+
+			// check caret range
+			RunRangeMap runRanges;
+			if(!CheckEditRange(begin, end, runRanges)) return false;
+
+			// add style
+			if(begin.row==end.row)
+			{
+				AddStyleNameVisitor::AddStyleName(paragraphs[begin.row].Obj(), runRanges, begin.column, end.column, styleName);
+			}
+			else
+			{
+				for(vint i=begin.row;i<=end.row;i++)
+				{
+					Ptr<DocumentParagraphRun> paragraph=paragraphs[i];
+					if(begin.row<i && i<end.row)
+					{
+						GetRunRangeVisitor::GetRunRange(paragraph.Obj(), runRanges);
+					}
+					RunRange range=runRanges[paragraph.Obj()];
+					if(i==begin.row)
+					{
+						AddStyleNameVisitor::AddStyleName(paragraph.Obj(), runRanges, begin.column, range.end, styleName);
+					}
+					else if(i==end.row)
+					{
+						AddStyleNameVisitor::AddStyleName(paragraph.Obj(), runRanges, range.start, end.column, styleName);
+					}
+					else
+					{
+						AddStyleNameVisitor::AddStyleName(paragraph.Obj(), runRanges, range.start, range.end, styleName);
+					}
+				}
+			}
+
+			// clear paragraphs
+			for(vint i=begin.row;i<=end.row;i++)
+			{
+				ClearRunVisitor::ClearRun(paragraphs[i].Obj());
+			}
+
+			return true;
+		}
+
+		bool DocumentModel::RemoveStyleName(TextPos begin, TextPos end)
+		{
+			if(begin==end) return false;
+
+			// cut paragraphs
+			if(!CutEditRange(begin, end)) return false;
+
+			// check caret range
+			RunRangeMap runRanges;
+			if(!CheckEditRange(begin, end, runRanges)) return false;
+
+			// add style
+			if(begin.row==end.row)
+			{
+				RemoveStyleNameVisitor::RemoveStyleName(paragraphs[begin.row].Obj(), runRanges, begin.column, end.column);
+			}
+			else
+			{
+				for(vint i=begin.row;i<=end.row;i++)
+				{
+					Ptr<DocumentParagraphRun> paragraph=paragraphs[i];
+					if(begin.row<i && i<end.row)
+					{
+						GetRunRangeVisitor::GetRunRange(paragraph.Obj(), runRanges);
+					}
+					RunRange range=runRanges[paragraph.Obj()];
+					if(i==begin.row)
+					{
+						RemoveStyleNameVisitor::RemoveStyleName(paragraph.Obj(), runRanges, begin.column, range.end);
+					}
+					else if(i==end.row)
+					{
+						RemoveStyleNameVisitor::RemoveStyleName(paragraph.Obj(), runRanges, range.start, end.column);
+					}
+					else
+					{
+						RemoveStyleNameVisitor::RemoveStyleName(paragraph.Obj(), runRanges, range.start, range.end);
+					}
+				}
+			}
+
+			// clear paragraphs
+			for(vint i=begin.row;i<=end.row;i++)
+			{
+				ClearRunVisitor::ClearRun(paragraphs[i].Obj());
+			}
+
+			return true;
 		}
 
 /***********************************************************************

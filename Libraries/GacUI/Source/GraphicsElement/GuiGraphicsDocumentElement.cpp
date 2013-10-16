@@ -936,6 +936,44 @@ GuiDocumentElement
 				}
 			}
 
+			void GuiDocumentElement::EditStyleName(TextPos begin, TextPos end, const WString& styleName)
+			{
+				Ptr<GuiDocumentElementRenderer> elementRenderer=renderer.Cast<GuiDocumentElementRenderer>();
+				if(elementRenderer)
+				{
+					if(begin>end)
+					{
+						TextPos temp=begin;
+						begin=end;
+						end=temp;
+					}
+
+					if(document->EditStyleName(begin, end, styleName))
+					{
+						elementRenderer->NotifyParagraphUpdated(begin.row, end.row-begin.row+1, end.row-begin.row+1, false);
+					}
+				}
+			}
+
+			void GuiDocumentElement::RemoveStyleName(TextPos begin, TextPos end)
+			{
+				Ptr<GuiDocumentElementRenderer> elementRenderer=renderer.Cast<GuiDocumentElementRenderer>();
+				if(elementRenderer)
+				{
+					if(begin>end)
+					{
+						TextPos temp=begin;
+						begin=end;
+						end=temp;
+					}
+
+					if(document->RemoveStyleName(begin, end))
+					{
+						elementRenderer->NotifyParagraphUpdated(begin.row, end.row-begin.row+1, end.row-begin.row+1, false);
+					}
+				}
+			}
+
 			void GuiDocumentElement::ClearStyle(TextPos begin, TextPos end)
 			{
 				Ptr<GuiDocumentElementRenderer> elementRenderer=renderer.Cast<GuiDocumentElementRenderer>();
