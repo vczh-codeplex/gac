@@ -139,6 +139,10 @@ GuiDocumentCommonInterface
 				/// <param name="begin">The begin position of the range.</param>
 				/// <param name="end">The end position of the range.</param>
 				void										RemoveHyperlink(vint paragraphIndex, vint begin, vint end);
+				/// <summary>Clear all styles in a specified range.</summary>
+				/// <param name="begin">The begin position of the range.</param>
+				/// <param name="end">The end position of the range.</param>
+				void										ClearStyle(TextPos begin, TextPos end);
 
 				/// <summary>Get the href attribute of the active hyperlink.</summary>
 				/// <returns>The href attribute of the active hyperlink.</returns>

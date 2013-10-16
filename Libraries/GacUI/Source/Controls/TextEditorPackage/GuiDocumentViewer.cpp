@@ -462,6 +462,11 @@ GuiDocumentViewer
 				documentElement->RemoveHyperlink(paragraphIndex, begin, end);
 			}
 
+			void GuiDocumentCommonInterface::ClearStyle(TextPos begin, TextPos end)
+			{
+				documentElement->ClearStyle(begin, end);
+			}
+
 			WString GuiDocumentCommonInterface::GetActiveHyperlinkReference()
 			{
 				return activeHyperlink?activeHyperlink->reference:L"";

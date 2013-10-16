@@ -922,6 +922,31 @@ document_serialization_visitors::RemoveContainerVisitor
 					run->Accept(&visitor);
 				}
 			};
+
+			class ClearStyleVisitor : public RemoveContainerVisitor
+			{
+			public:
+				ClearStyleVisitor(RunRangeMap& _runRanges, vint _start, vint _end)
+					:RemoveContainerVisitor(_runRanges, _start, _end)
+				{
+				}
+
+				void Visit(DocumentStylePropertiesRun* run)override
+				{
+					RemoveContainer(run);
+				}
+
+				void Visit(DocumentStyleApplicationRun* run)override
+				{
+					RemoveContainer(run);
+				}
+
+				static void ClearStyle(DocumentParagraphRun* run, RunRangeMap& runRanges, vint start, vint end)
+				{
+					ClearStyleVisitor visitor(runRanges, start, end);
+					run->Accept(&visitor);
+				}
+			};
 		}
 		using namespace document_serialization_visitors;
 
@@ -1216,6 +1241,7 @@ DocumentModel::EditHyperlink
 				GetRunRangeVisitor::GetRunRange(paragraph.Obj(), runRanges);
 				AddHyperlinkVisitor::AddHyperlink(paragraph.Obj(), runRanges, begin, end, reference, normalStyleName, activeStyleName);
 
+				ClearRunVisitor::ClearRun(paragraph.Obj());
 				return true;
 			}
 			return false;
@@ -1228,6 +1254,7 @@ DocumentModel::EditHyperlink
 
 			Ptr<DocumentParagraphRun> paragraph=paragraphs[paragraphIndex];
 			RemoveHyperlinkVisitor::RemoveHyperlink(paragraph.Obj(), runRanges, begin, end);
+			ClearRunVisitor::ClearRun(paragraph.Obj());
 			return true;
 		}
 
@@ -1238,6 +1265,60 @@ DocumentModel::EditHyperlink
 
 			Ptr<DocumentParagraphRun> paragraph=paragraphs[paragraphIndex];
 			return LocateHyperlinkVisitor::LocateHyperlink(paragraph.Obj(), runRanges, begin, end);
+		}
+
+/***********************************************************************
+DocumentModel::ClearStyle
+***********************************************************************/
+
+		bool DocumentModel::ClearStyle(TextPos begin, TextPos end)
+		{
+			if(begin==end) return false;
+
+			// cut paragraphs
+			if(!CutEditRange(begin, end)) return false;
+
+			// check caret range
+			RunRangeMap runRanges;
+			if(!CheckEditRange(begin, end, runRanges)) return false;
+
+			// add style
+			if(begin.row==end.row)
+			{
+				ClearStyleVisitor::ClearStyle(paragraphs[begin.row].Obj(), runRanges, begin.column, end.column);
+			}
+			else
+			{
+				for(vint i=begin.row;i<=end.row;i++)
+				{
+					Ptr<DocumentParagraphRun> paragraph=paragraphs[i];
+					if(begin.row<i && i<end.row)
+					{
+						GetRunRangeVisitor::GetRunRange(paragraph.Obj(), runRanges);
+					}
+					RunRange range=runRanges[paragraph.Obj()];
+					if(i==begin.row)
+					{
+						ClearStyleVisitor::ClearStyle(paragraph.Obj(), runRanges, begin.column, range.end);
+					}
+					else if(i==end.row)
+					{
+						ClearStyleVisitor::ClearStyle(paragraph.Obj(), runRanges, range.start, end.column);
+					}
+					else
+					{
+						ClearStyleVisitor::ClearStyle(paragraph.Obj(), runRanges, range.start, range.end);
+					}
+				}
+			}
+
+			// clear paragraphs
+			for(vint i=begin.row;i<=end.row;i++)
+			{
+				ClearRunVisitor::ClearRun(paragraphs[i].Obj());
+			}
+
+			return true;
 		}
 	}
 }
