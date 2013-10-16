@@ -462,6 +462,16 @@ GuiDocumentViewer
 				documentElement->RemoveHyperlink(paragraphIndex, begin, end);
 			}
 
+			void GuiDocumentCommonInterface::EditStyleName(TextPos begin, TextPos end, const WString& styleName)
+			{
+				documentElement->EditStyleName(begin, end, styleName);
+			}
+
+			void GuiDocumentCommonInterface::RemoveStyleName(TextPos begin, TextPos end)
+			{
+				documentElement->RemoveStyleName(begin, end);
+			}
+
 			void GuiDocumentCommonInterface::ClearStyle(TextPos begin, TextPos end)
 			{
 				documentElement->ClearStyle(begin, end);

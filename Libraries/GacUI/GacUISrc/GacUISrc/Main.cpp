@@ -43,6 +43,8 @@ protected:
 	GuiButton*						buttonImage;
 	GuiButton*						buttonHyperlink;
 	GuiButton*						buttonUnhyperlink;
+	GuiButton*						buttonStyle;
+	GuiButton*						buttonUnstyle;
 	GuiButton*						buttonClearStyle;
 	Ptr<GuiImageData>				image;
 	GuiDocumentViewer*				viewer;
@@ -52,12 +54,12 @@ public:
 		:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
 	{
 		SetText(L"GacUISrc Test Application");
-		SetClientSize(Size(640, 480));
+		SetClientSize(Size(800, 600));
 
 		GuiTableComposition* table=new GuiTableComposition;
 		table->SetAlignmentToParent(Margin(0, 0, 0, 0));
 		table->SetCellPadding(5);
-		table->SetRowsAndColumns(2, 8);
+		table->SetRowsAndColumns(2, 10);
 		table->SetRowOption(0, GuiCellOption::MinSizeOption());
 		table->SetRowOption(1, GuiCellOption::PercentageOption(1.0));
 		table->SetColumnOption(0, GuiCellOption::AbsoluteOption(120));
@@ -67,7 +69,9 @@ public:
 		table->SetColumnOption(4, GuiCellOption::MinSizeOption());
 		table->SetColumnOption(5, GuiCellOption::MinSizeOption());
 		table->SetColumnOption(6, GuiCellOption::MinSizeOption());
-		table->SetColumnOption(7, GuiCellOption::PercentageOption(1.0));
+		table->SetColumnOption(7, GuiCellOption::MinSizeOption());
+		table->SetColumnOption(8, GuiCellOption::MinSizeOption());
+		table->SetColumnOption(9, GuiCellOption::PercentageOption(1.0));
 		{
 			GuiCellComposition* cell=new GuiCellComposition;
 			table->AddChild(cell);
@@ -158,7 +162,7 @@ public:
 			cell->SetSite(0, 4, 1, 1);
 
 			buttonHyperlink=g::NewButton();
-			buttonHyperlink->SetText(L"SetHyperlink");
+			buttonHyperlink->SetText(L"Set Hyperlink");
 			buttonHyperlink->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 			buttonHyperlink->Clicked.AttachLambda([this](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 			{
@@ -211,6 +215,38 @@ public:
 			table->AddChild(cell);
 			cell->SetSite(0, 6, 1, 1);
 
+			buttonStyle=g::NewButton();
+			buttonStyle->SetText(L"Apply Style");
+			buttonStyle->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+			buttonStyle->Clicked.AttachLambda([this](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+			{
+				TextPos begin=viewer->GetCaretBegin();
+				TextPos end=viewer->GetCaretEnd();
+				viewer->EditStyleName(begin, end, L"ActiveButtonText");
+			});
+			cell->AddChild(buttonStyle->GetBoundsComposition());
+		}
+		{
+			GuiCellComposition* cell=new GuiCellComposition;
+			table->AddChild(cell);
+			cell->SetSite(0, 7, 1, 1);
+
+			buttonUnstyle=g::NewButton();
+			buttonUnstyle->SetText(L"Unapply Style");
+			buttonUnstyle->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+			buttonUnstyle->Clicked.AttachLambda([this](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+			{
+				TextPos begin=viewer->GetCaretBegin();
+				TextPos end=viewer->GetCaretEnd();
+				viewer->RemoveStyleName(begin, end);
+			});
+			cell->AddChild(buttonUnstyle->GetBoundsComposition());
+		}
+		{
+			GuiCellComposition* cell=new GuiCellComposition;
+			table->AddChild(cell);
+			cell->SetSite(0, 8, 1, 1);
+
 			buttonClearStyle=g::NewButton();
 			buttonClearStyle->SetText(L"Clear Styles");
 			buttonClearStyle->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
@@ -225,7 +261,7 @@ public:
 		{
 			GuiCellComposition* cell=new GuiCellComposition;
 			table->AddChild(cell);
-			cell->SetSite(1, 0, 1, 8);
+			cell->SetSite(1, 0, 1, 10);
 
 			viewer=g::NewDocumentViewer();
 			viewer->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
@@ -251,7 +287,7 @@ public:
 		}
 
 		// set the preferred minimum client 600
-		this->GetBoundsComposition()->SetPreferredMinSize(Size(640, 480));
+		this->GetBoundsComposition()->SetPreferredMinSize(Size(800, 600));
 		// call this to calculate the size immediately if any indirect content in the table changes
 		// so that the window can calcaulte its correct size before calling the MoveToScreenCenter()
 		this->ForceCalculateSizeImmediately();
