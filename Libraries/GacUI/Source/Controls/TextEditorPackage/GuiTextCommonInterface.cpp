@@ -96,7 +96,6 @@ GuiTextBoxCommonInterface
 				{
 					Rect caret=textElement->GetLines().GetRectFromTextPos(textElement->GetCaretEnd());
 					Point view=textElement->GetViewPosition();
-					vint textMargin=callback->GetTextMargin();
 					vint x=caret.x1-view.x;
 					vint y=caret.y2-view.y;
 					host->SetCaretPoint(Point(x, y), textComposition);

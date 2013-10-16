@@ -14,6 +14,19 @@ namespace vl
 GuiDocumentViewer
 ***********************************************************************/
 
+			void GuiDocumentCommonInterface::UpdateCaretPoint()
+			{
+				GuiGraphicsHost* host=documentComposition->GetRelatedGraphicsHost();
+				if(host)
+				{
+					Rect caret=documentElement->GetCaretBounds(documentElement->GetCaretEnd(), documentElement->IsCaretEndPreferFrontSide());
+					Point view=GetDocumentViewPosition();
+					vint x=caret.x1-view.x;
+					vint y=caret.y2-view.y;
+					host->SetCaretPoint(Point(x, y), documentComposition);
+				}
+			}
+
 			void GuiDocumentCommonInterface::Move(TextPos caret, bool shift, bool frontSide)
 			{
 				TextPos begin=documentElement->GetCaretBegin();
@@ -33,6 +46,7 @@ GuiDocumentViewer
 					bounds.y2+=15;
 					EnsureRectVisible(bounds);
 				}
+				UpdateCaretPoint();
 			}
 
 			bool GuiDocumentCommonInterface::ProcessKey(vint code, bool shift, bool ctrl)
@@ -206,6 +220,7 @@ GuiDocumentViewer
 					if(editMode!=ViewOnly)
 					{
 						documentElement->SetCaretVisible(true);
+						UpdateCaretPoint();
 					}
 				}
 			}
@@ -352,6 +367,11 @@ GuiDocumentViewer
 			void GuiDocumentCommonInterface::OnMouseLeave(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				SetActiveHyperlink(0);
+			}
+
+			Point GuiDocumentCommonInterface::GetDocumentViewPosition()
+			{
+				return Point(0, 0);
 			}
 
 			void GuiDocumentCommonInterface::EnsureRectVisible(Rect bounds)
@@ -511,6 +531,11 @@ GuiDocumentViewer
 /***********************************************************************
 GuiDocumentViewer
 ***********************************************************************/
+
+			Point GuiDocumentViewer::GetDocumentViewPosition()
+			{
+				return GetViewBounds().LeftTop();
+			}
 
 			void GuiDocumentViewer::EnsureRectVisible(Rect bounds)
 			{
