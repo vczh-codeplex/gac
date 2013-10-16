@@ -768,6 +768,115 @@ document_serialization_visitors::AddStyleVisitor
 		using namespace document_serialization_visitors;
 
 /***********************************************************************
+document_serialization_visitors::RemoveContainerVisitor
+***********************************************************************/
+
+		namespace document_serialization_visitors
+		{
+			class RemoveContainerVisitor : public Object, public DocumentRun::IVisitor
+			{
+			public:
+				RunRangeMap&					runRanges;
+				vint							start;
+				vint							end;
+				List<Ptr<DocumentRun>>			replacedRuns;
+
+				RemoveContainerVisitor(RunRangeMap& _runRanges, vint _start, vint _end)
+					:runRanges(_runRanges)
+					,start(_start)
+					,end(_end)
+				{
+				}
+
+				void VisitContainer(DocumentContainerRun* run)
+				{
+					for(vint i=run->runs.Count()-1;i>=0;i--)
+					{
+						Ptr<DocumentRun> subRun=run->runs[i];
+						RunRange range=runRanges[subRun.Obj()];
+						if(range.start<end && start<range.end)
+						{
+							replacedRuns.Clear();
+							subRun->Accept(this);
+							if(replacedRuns.Count()!=1 || replacedRuns[0]!=subRun)
+							{
+								run->runs.RemoveAt(i);
+								for(vint j=0;j<replacedRuns.Count();j++)
+								{
+									run->runs.Insert(i+j, replacedRuns[j]);
+								}
+								i+=replacedRuns.Count();
+							}
+						}
+					}
+					replacedRuns.Clear();
+					replacedRuns.Add(run);
+				}
+
+				void VisitContent(DocumentContentRun* run)
+				{
+					replacedRuns.Add(run);
+				}
+
+				void RemoveContainer(DocumentContainerRun* run)
+				{
+					CopyFrom(replacedRuns, run->runs);
+				}
+
+				void Visit(DocumentTextRun* run)override
+				{
+					VisitContent(run);
+				}
+
+				void Visit(DocumentStylePropertiesRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentStyleApplicationRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentHyperlinkRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentImageRun* run)override
+				{
+					VisitContent(run);
+				}
+
+				void Visit(DocumentParagraphRun* run)override
+				{
+					VisitContainer(run);
+				}
+			};
+
+			class RemoveHyperlinkVisitor : public RemoveContainerVisitor
+			{
+			public:
+				RemoveHyperlinkVisitor(RunRangeMap& _runRanges, vint _start, vint _end)
+					:RemoveContainerVisitor(_runRanges, _start, _end)
+				{
+				}
+
+				void Visit(DocumentHyperlinkRun* run)override
+				{
+					RemoveContainer(run);
+				}
+
+				static void RemoveHyperlink(DocumentParagraphRun* run, RunRangeMap& runRanges, vint start, vint end)
+				{
+					RemoveHyperlinkVisitor visitor(runRanges, start, end);
+					run->Accept(&visitor);
+				}
+			};
+		}
+		using namespace document_serialization_visitors;
+
+/***********************************************************************
 DocumentModel::EditRangeOperations
 ***********************************************************************/
 
@@ -1049,21 +1158,28 @@ DocumentModel::EditHyperlink
 				run->styleName=normalStyleName;
 				return true;
 			}
+			else if(RemoveHyperlink(paragraphIndex, begin, end))
+			{
+			}
 			return false;
 		}
 
 		bool DocumentModel::RemoveHyperlink(vint paragraphIndex, vint begin, vint end)
 		{
-			return false;
+			RunRangeMap runRanges;
+			if(!CheckEditRange(TextPos(paragraphIndex, begin), TextPos(paragraphIndex, end), runRanges)) return false;
+
+			Ptr<DocumentParagraphRun> paragraph=paragraphs[paragraphIndex];
+			RemoveHyperlinkVisitor::RemoveHyperlink(paragraph.Obj(), runRanges, begin, end);
+			return true;
 		}
 
 		Ptr<DocumentHyperlinkRun> DocumentModel::GetHyperlink(vint paragraphIndex, vint begin, vint end)
 		{
-			if(paragraphIndex<0 || paragraphIndex>=paragraphs.Count()) return 0;
-			
 			RunRangeMap runRanges;
+			if(!CheckEditRange(TextPos(paragraphIndex, begin), TextPos(paragraphIndex, end), runRanges)) return 0;
+
 			Ptr<DocumentParagraphRun> paragraph=paragraphs[paragraphIndex];
-			GetRunRangeVisitor::GetRunRange(paragraph.Obj(), runRanges);
 			return LocateHyperlinkVisitor::LocateHyperlink(paragraph.Obj(), runRanges, begin, end);
 		}
 	}
