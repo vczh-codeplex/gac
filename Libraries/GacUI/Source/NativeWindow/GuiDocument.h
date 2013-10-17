@@ -237,6 +237,9 @@ Rich Content Document (run)
 			DocumentParagraphRun():alignment(Alignment::Left){}
 
 			void							Accept(IVisitor* visitor)override{visitor->Visit(this);}
+
+			WString							GetText();
+			void							GetText(stream::TextWriter& writer);
 		};
 
 /***********************************************************************
@@ -335,6 +338,9 @@ Rich Content Document (model)
 
 			ResolvedStyle					GetStyle(Ptr<DocumentStyleProperties> sp, const ResolvedStyle& context);
 			ResolvedStyle					GetStyle(const WString& styleName, const ResolvedStyle& context);
+
+			WString							GetText();
+			void							GetText(stream::TextWriter& writer);
 			
 			bool							CheckEditRange(TextPos begin, TextPos end, RunRangeMap& relatedRanges);
 			bool							CutParagraph(TextPos position);

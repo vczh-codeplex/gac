@@ -565,7 +565,12 @@ GuiDocumentViewer
 
 			void GuiDocumentCommonInterface::SelectAll()
 			{
-				throw 0;
+				vint lastIndex=documentElement->GetDocument()->paragraphs.Count()-1;
+				Ptr<DocumentParagraphRun> lastParagraph=documentElement->GetDocument()->paragraphs[lastIndex];
+
+				TextPos begin(0, 0);
+				TextPos end(lastIndex, lastParagraph->GetText().Length());
+				SetCaret(begin, end);
 			}
 
 			WString GuiDocumentCommonInterface::GetSelectionText()

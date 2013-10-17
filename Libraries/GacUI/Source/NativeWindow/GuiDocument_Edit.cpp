@@ -10,10 +10,10 @@ namespace vl
 		typedef DocumentModel::RunRangeMap		RunRangeMap;
 
 /***********************************************************************
-document_serialization_visitors::GetRunRangeVisitor
+document_operation_visitors::GetRunRangeVisitor
 ***********************************************************************/
 
-		namespace document_serialization_visitors
+		namespace document_operation_visitors
 		{
 			class GetRunRangeVisitor : public Object, public DocumentRun::IVisitor
 			{
@@ -85,13 +85,13 @@ document_serialization_visitors::GetRunRangeVisitor
 				}
 			};
 		}
-		using namespace document_serialization_visitors;
+		using namespace document_operation_visitors;
 
 /***********************************************************************
-document_serialization_visitors::LocateStyleVisitor
+document_operation_visitors::LocateStyleVisitor
 ***********************************************************************/
 
-		namespace document_serialization_visitors
+		namespace document_operation_visitors
 		{
 			class LocateStyleVisitor : public Object, public DocumentRun::IVisitor
 			{
@@ -180,13 +180,13 @@ document_serialization_visitors::LocateStyleVisitor
 				}
 			};
 		}
-		using namespace document_serialization_visitors;
+		using namespace document_operation_visitors;
 
 /***********************************************************************
-document_serialization_visitors::LocateHyperlinkVisitor
+document_operation_visitors::LocateHyperlinkVisitor
 ***********************************************************************/
 
-		namespace document_serialization_visitors
+		namespace document_operation_visitors
 		{
 			class LocateHyperlinkVisitor : public Object, public DocumentRun::IVisitor
 			{
@@ -258,13 +258,13 @@ document_serialization_visitors::LocateHyperlinkVisitor
 				}
 			};
 		}
-		using namespace document_serialization_visitors;
+		using namespace document_operation_visitors;
 
 /***********************************************************************
-document_serialization_visitors::CloneRunVisitor
+document_operation_visitors::CloneRunVisitor
 ***********************************************************************/
 
-		namespace document_serialization_visitors
+		namespace document_operation_visitors
 		{
 			class CloneRunVisitor : public Object, public DocumentRun::IVisitor
 			{
@@ -377,13 +377,13 @@ document_serialization_visitors::CloneRunVisitor
 				}
 			};
 		}
-		using namespace document_serialization_visitors;
+		using namespace document_operation_visitors;
 
 /***********************************************************************
-document_serialization_visitors::RemoveRunVisitor
+document_operation_visitors::RemoveRunVisitor
 ***********************************************************************/
 
-		namespace document_serialization_visitors
+		namespace document_operation_visitors
 		{
 			class RemoveRunVisitor : public Object, public DocumentRun::IVisitor
 			{
@@ -491,13 +491,13 @@ document_serialization_visitors::RemoveRunVisitor
 				}
 			};
 		}
-		using namespace document_serialization_visitors;
+		using namespace document_operation_visitors;
 
 /***********************************************************************
-document_serialization_visitors::CutRunVisitor
+document_operation_visitors::CutRunVisitor
 ***********************************************************************/
 
-		namespace document_serialization_visitors
+		namespace document_operation_visitors
 		{
 			class CutRunVisitor : public Object, public DocumentRun::IVisitor
 			{
@@ -605,13 +605,13 @@ document_serialization_visitors::CutRunVisitor
 				}
 			};
 		}
-		using namespace document_serialization_visitors;
+		using namespace document_operation_visitors;
 
 /***********************************************************************
-document_serialization_visitors::ClearRunVisitor
+document_operation_visitors::ClearRunVisitor
 ***********************************************************************/
 
-		namespace document_serialization_visitors
+		namespace document_operation_visitors
 		{
 			class ClearRunVisitor : public Object, public DocumentRun::IVisitor
 			{
@@ -678,13 +678,13 @@ document_serialization_visitors::ClearRunVisitor
 				}
 			};
 		}
-		using namespace document_serialization_visitors;
+		using namespace document_operation_visitors;
 
 /***********************************************************************
-document_serialization_visitors::AddContainerVisitor
+document_operation_visitors::AddContainerVisitor
 ***********************************************************************/
 
-		namespace document_serialization_visitors
+		namespace document_operation_visitors
 		{
 			class AddContainerVisitor : public Object, public DocumentRun::IVisitor
 			{
@@ -839,13 +839,13 @@ document_serialization_visitors::AddContainerVisitor
 				}
 			};
 		}
-		using namespace document_serialization_visitors;
+		using namespace document_operation_visitors;
 
 /***********************************************************************
-document_serialization_visitors::RemoveContainerVisitor
+document_operation_visitors::RemoveContainerVisitor
 ***********************************************************************/
 
-		namespace document_serialization_visitors
+		namespace document_operation_visitors
 		{
 			class RemoveContainerVisitor : public Object, public DocumentRun::IVisitor
 			{
@@ -993,7 +993,7 @@ document_serialization_visitors::RemoveContainerVisitor
 				}
 			};
 		}
-		using namespace document_serialization_visitors;
+		using namespace document_operation_visitors;
 
 /***********************************************************************
 DocumentModel::EditRangeOperations

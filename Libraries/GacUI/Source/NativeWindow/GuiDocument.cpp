@@ -1,5 +1,6 @@
 #include "GuiResource.h"
 #include "..\..\..\..\Common\Source\Stream\FileStream.h"
+#include "..\..\..\..\Common\Source\Stream\MemoryStream.h"
 #include "..\..\..\..\Common\Source\Stream\Accessor.h"
 #include "..\..\..\..\Common\Source\Stream\CharFormat.h"
 
@@ -33,6 +34,91 @@ DocumentResolver
 				result=previousResolver->ResolveImage(protocol, path);
 			}
 			return result;
+		}
+
+/***********************************************************************
+ExtractTextVisitor
+***********************************************************************/
+
+		namespace document_operation_visitors
+		{
+			class ExtractTextVisitor : public Object, public DocumentRun::IVisitor
+			{
+			public:
+				stream::TextWriter&				writer;
+
+				ExtractTextVisitor(stream::TextWriter& _writer)
+					:writer(_writer)
+				{
+				}
+
+				void VisitContainer(DocumentContainerRun* run)
+				{
+					FOREACH(Ptr<DocumentRun>, subRun, run->runs)
+					{
+						subRun->Accept(this);
+					}
+				}
+
+				void VisitContent(DocumentContentRun* run)
+				{
+					writer.WriteString(run->GetRepresentationText());
+				}
+
+				void Visit(DocumentTextRun* run)override
+				{
+					VisitContent(run);
+				}
+
+				void Visit(DocumentStylePropertiesRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentStyleApplicationRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentHyperlinkRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentImageRun* run)override
+				{
+					VisitContent(run);
+				}
+
+				void Visit(DocumentParagraphRun* run)override
+				{
+					VisitContainer(run);
+				}
+			};
+		}
+		using namespace document_operation_visitors;
+
+/***********************************************************************
+DocumentParagraphRun
+***********************************************************************/
+
+		WString DocumentParagraphRun::GetText()
+		{
+			stream::MemoryStream memoryStream;
+			{
+				stream::StreamWriter writer(memoryStream);
+				GetText(writer);
+			}
+
+			memoryStream.SeekFromBegin(0);
+			stream::StreamReader reader(memoryStream);
+			return reader.ReadToEnd();
+		}
+
+		void DocumentParagraphRun::GetText(stream::TextWriter& writer)
+		{
+			ExtractTextVisitor visitor(writer);
+			Accept(&visitor);
 		}
 
 /***********************************************************************
@@ -164,6 +250,28 @@ DocumentModel
 
 			Ptr<DocumentStyleProperties> sp=selectedStyle->resolvedStyles;
 			return GetStyle(sp, context);
+		}
+
+		WString DocumentModel::GetText()
+		{
+			stream::MemoryStream memoryStream;
+			{
+				stream::StreamWriter writer(memoryStream);
+				GetText(writer);
+			}
+
+			memoryStream.SeekFromBegin(0);
+			stream::StreamReader reader(memoryStream);
+			return reader.ReadToEnd();
+		}
+
+		void DocumentModel::GetText(stream::TextWriter& writer)
+		{
+			FOREACH(Ptr<DocumentParagraphRun>, paragraph, paragraphs)
+			{
+				paragraph->GetText(writer);
+				writer.WriteLine(L"");
+			}
 		}
 	}
 }

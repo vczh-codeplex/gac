@@ -12,83 +12,11 @@ namespace vl
 		{
 
 /***********************************************************************
-ExtractTextVisitor
+SetPropertiesVisitor
 ***********************************************************************/
 
 			namespace visitors
 			{
-				class ExtractTextVisitor : public Object, public DocumentRun::IVisitor
-				{
-				public:
-					stream::StreamWriter&				writer;
-
-					ExtractTextVisitor(stream::StreamWriter& _writer)
-						:writer(_writer)
-					{
-					}
-
-					void VisitContainer(DocumentContainerRun* run)
-					{
-						FOREACH(Ptr<DocumentRun>, subRun, run->runs)
-						{
-							subRun->Accept(this);
-						}
-					}
-
-					void VisitContent(DocumentContentRun* run)
-					{
-						writer.WriteString(run->GetRepresentationText());
-					}
-
-					void Visit(DocumentTextRun* run)override
-					{
-						VisitContent(run);
-					}
-
-					void Visit(DocumentStylePropertiesRun* run)override
-					{
-						VisitContainer(run);
-					}
-
-					void Visit(DocumentStyleApplicationRun* run)override
-					{
-						VisitContainer(run);
-					}
-
-					void Visit(DocumentHyperlinkRun* run)override
-					{
-						VisitContainer(run);
-					}
-
-					void Visit(DocumentImageRun* run)override
-					{
-						VisitContent(run);
-					}
-
-					void Visit(DocumentParagraphRun* run)override
-					{
-						VisitContainer(run);
-					}
-
-					static WString ExtractText(Ptr<DocumentParagraphRun> run)
-					{
-						stream::MemoryStream stream;
-						{
-							stream::StreamWriter writer(stream);
-							ExtractTextVisitor visitor(writer);
-							run->Accept(&visitor);
-						}
-
-						stream.SeekFromBegin(0);
-						stream::StreamReader reader(stream);
-						return reader.ReadToEnd();
-					}
-				};
-
-/***********************************************************************
-SetPropertiesVisitor
-***********************************************************************/
-
 				class SetPropertiesVisitor : public Object, public DocumentRun::IVisitor
 				{
 					typedef DocumentModel::ResolvedStyle			ResolvedStyle;
@@ -265,7 +193,7 @@ GuiDocumentElement::GuiDocumentElementRenderer
 				if(!cache)
 				{
 					cache=new ParagraphCache;
-					cache->fullText=ExtractTextVisitor::ExtractText(paragraph);
+					cache->fullText=paragraph->GetText();
 					paragraphCaches[paragraphIndex]=cache;
 				}
 

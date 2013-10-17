@@ -11,10 +11,10 @@ namespace vl
 		using namespace parsing::xml;
 
 /***********************************************************************
-document_serialization_visitors::SerializeRunVisitor
+document_operation_visitors::SerializeRunVisitor
 ***********************************************************************/
 
-		namespace document_serialization_visitors
+		namespace document_operation_visitors
 		{
 			class SerializeRunVisitor : public Object, public DocumentRun::IVisitor
 			{
@@ -229,7 +229,7 @@ document_serialization_visitors::SerializeRunVisitor
 				}
 			};
 		}
-		using namespace document_serialization_visitors;
+		using namespace document_operation_visitors;
 
 /***********************************************************************
 DocumentModel
