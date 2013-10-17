@@ -380,6 +380,206 @@ document_operation_visitors::CloneRunVisitor
 		using namespace document_operation_visitors;
 
 /***********************************************************************
+document_operation_visitors::CloneRunRecursivelyVisitor
+***********************************************************************/
+
+		namespace document_operation_visitors
+		{
+			class CloneRunRecursivelyVisitor : public Object, public DocumentRun::IVisitor
+			{
+			public:
+				Ptr<DocumentRun>				clonedRun;
+				RunRangeMap&					runRanges;
+				vint							start;
+				vint							end;
+				bool							deepCopy;
+
+				CloneRunRecursivelyVisitor(RunRangeMap& _runRanges, vint _start, vint _end, bool _deepCopy)
+					:runRanges(_runRanges)
+					,start(_start)
+					,end(_end)
+					,deepCopy(_deepCopy)
+				{
+				}
+
+				void VisitContainer(DocumentContainerRun* run)
+				{
+					clonedRun=0;
+					RunRange range=runRanges[run];
+					if(range.start<end && start<range.end)
+					{
+						if(start<=range.start && range.end<=end && !deepCopy)
+						{
+							clonedRun=run;
+						}
+						else
+						{
+							Ptr<DocumentContainerRun> containerRun=CloneRunVisitor::CopyRun(run).Cast<DocumentContainerRun>();
+							FOREACH(Ptr<DocumentRun>, subRun, run->runs)
+							{
+								subRun->Accept(this);
+								if(clonedRun)
+								{
+									containerRun->runs.Add(clonedRun);
+								}
+							}
+							clonedRun=containerRun;
+						}
+					}
+				}
+
+				void Visit(DocumentTextRun* run)override
+				{
+					clonedRun=0;
+					RunRange range=runRanges[run];
+					if(range.start<end && start<range.end)
+					{
+						if(start<=range.start && range.end<=end)
+						{
+							if(deepCopy)
+							{
+								clonedRun=CloneRunVisitor::CopyRun(run);
+							}
+							else
+							{
+								clonedRun=run;
+							}
+						}
+						else
+						{
+							Ptr<DocumentTextRun> textRun=new DocumentTextRun;
+							vint copyStart=start>range.start?start:range.start;
+							vint copyEnd=end<range.end?end:range.end;
+							if(copyStart<copyEnd)
+							{
+								textRun->text=run->text.Sub(copyStart-range.start, copyEnd-copyStart);
+							}
+							clonedRun=textRun;
+						}
+					}
+				}
+
+				void Visit(DocumentStylePropertiesRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentStyleApplicationRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentHyperlinkRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentImageRun* run)override
+				{
+					clonedRun=0;
+					RunRange range=runRanges[run];
+					if(range.start<end && start<range.end)
+					{
+						if(deepCopy)
+						{
+							clonedRun=CloneRunVisitor::CopyRun(run);
+						}
+						else
+						{
+							clonedRun=run;
+						}
+					}
+				}
+
+				void Visit(DocumentParagraphRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				static Ptr<DocumentRun> CopyRun(DocumentParagraphRun* run, RunRangeMap& runRanges, vint start, vint end, bool deepCopy)
+				{
+					CloneRunRecursivelyVisitor visitor(runRanges, start, end, deepCopy);
+					run->Accept(&visitor);
+					return visitor.clonedRun;
+				}
+			};
+		}
+		using namespace document_operation_visitors;
+
+/***********************************************************************
+document_operation_visitors::CollectStyleNameVisitor
+***********************************************************************/
+
+		namespace document_operation_visitors
+		{
+			class CollectStyleNameVisitor : public Object, public DocumentRun::IVisitor
+			{
+			public:
+				List<WString>&					styleNames;
+
+				CollectStyleNameVisitor(List<WString>& _styleNames)
+					:styleNames(_styleNames)
+				{
+				}
+
+				void VisitContainer(DocumentContainerRun* run)
+				{
+					FOREACH(Ptr<DocumentRun>, subRun, run->runs)
+					{
+						subRun->Accept(this);
+					}
+				}
+
+				void Visit(DocumentTextRun* run)override
+				{
+				}
+
+				void Visit(DocumentStylePropertiesRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentStyleApplicationRun* run)override
+				{
+					if(!styleNames.Contains(run->styleName))
+					{
+						styleNames.Add(run->styleName);
+					}
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentHyperlinkRun* run)override
+				{
+					if(!styleNames.Contains(run->normalStyleName))
+					{
+						styleNames.Add(run->normalStyleName);
+					}
+					if(!styleNames.Contains(run->activeStyleName))
+					{
+						styleNames.Add(run->activeStyleName);
+					}
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentImageRun* run)override
+				{
+				}
+
+				void Visit(DocumentParagraphRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				static void CollectStyleName(DocumentParagraphRun* run, List<WString>& styleNames)
+				{
+					CollectStyleNameVisitor visitor(styleNames);
+					run->Accept(&visitor);
+				}
+			};
+		}
+		using namespace document_operation_visitors;
+
+/***********************************************************************
 document_operation_visitors::RemoveRunVisitor
 ***********************************************************************/
 
@@ -1020,6 +1220,89 @@ DocumentModel::EditRangeOperations
 			if(end.column<0 || end.column>endRange.end) return false;
 
 			return true;
+		}
+
+		Ptr<DocumentModel> DocumentModel::CopyDocument(TextPos begin, TextPos end, bool deepCopy)
+		{
+			// check caret range
+			RunRangeMap runRanges;
+			if(!CheckEditRange(begin, end, runRanges)) return 0;
+
+			// get ranges
+			if(deepCopy)
+			{
+				for(vint i=begin.row+1;i<end.row;i++)
+				{
+					GetRunRangeVisitor::GetRunRange(paragraphs[i].Obj(), runRanges);
+				}
+			}
+
+			Ptr<DocumentModel> newDocument=new DocumentModel;
+
+			// copy paragraphs
+			if(begin.row==end.row)
+			{
+				newDocument->paragraphs.Add(CloneRunRecursivelyVisitor::CopyRun(paragraphs[begin.row].Obj(), runRanges, begin.column, end.column, deepCopy).Cast<DocumentParagraphRun>());
+			}
+			else
+			{
+				for(vint i=begin.row;i<=end.row;i++)
+				{
+					Ptr<DocumentParagraphRun> paragraph=paragraphs[i];
+					RunRange range=runRanges[paragraph.Obj()];
+					if(i==begin.row)
+					{
+						newDocument->paragraphs.Add(CloneRunRecursivelyVisitor::CopyRun(paragraph.Obj(), runRanges, begin.column, range.end, deepCopy).Cast<DocumentParagraphRun>());
+					}
+					else if(i==end.row)
+					{
+						newDocument->paragraphs.Add(CloneRunRecursivelyVisitor::CopyRun(paragraph.Obj(), runRanges, range.start, end.column, deepCopy).Cast<DocumentParagraphRun>());
+					}
+					else if(deepCopy)
+					{
+						newDocument->paragraphs.Add(CloneRunRecursivelyVisitor::CopyRun(paragraph.Obj(), runRanges, range.start, range.end, deepCopy).Cast<DocumentParagraphRun>());
+					}
+					else
+					{
+						newDocument->paragraphs.Add(paragraph);
+					}
+				}
+			}
+
+			// copy styles
+			List<WString> styleNames;
+			FOREACH(Ptr<DocumentParagraphRun>, paragraph, newDocument->paragraphs)
+			{
+				CollectStyleNameVisitor::CollectStyleName(paragraph.Obj(), styleNames);
+			}
+
+			for(vint i=0;i<styleNames.Count();i++)
+			{
+				WString styleName=styleNames[i];
+				if(!newDocument->styles.Keys().Contains(styleName))
+				{
+					Ptr<DocumentStyle> style=styles[styleName];
+					if(deepCopy)
+					{
+						Ptr<DocumentStyle> newStyle=new DocumentStyle;
+						newStyle->parentStyleName=style->parentStyleName;
+						newStyle->styles=CloneRunVisitor::CopyStyle(style->styles);
+						newStyle->resolvedStyles=CloneRunVisitor::CopyStyle(style->resolvedStyles);
+						newDocument->styles.Add(styleName, newStyle);
+					}
+					else
+					{
+						newDocument->styles.Add(styleName, style);
+					}
+
+					if(!styleNames.Contains(style->parentStyleName))
+					{
+						styleNames.Add(style->parentStyleName);
+					}
+				}
+			}
+
+			return newDocument;
 		}
 
 		bool DocumentModel::CutParagraph(TextPos position)

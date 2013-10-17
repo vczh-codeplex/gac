@@ -575,7 +575,17 @@ GuiDocumentViewer
 
 			WString GuiDocumentCommonInterface::GetSelectionText()
 			{
-				throw 0;
+				TextPos begin=documentElement->GetCaretBegin();
+				TextPos end=documentElement->GetCaretEnd();
+				if(begin>end)
+				{
+					TextPos temp=begin;
+					begin=end;
+					end=temp;
+				}
+
+				Ptr<DocumentModel> model=documentElement->GetDocument()->CopyDocument(begin, end, false);
+				return model->GetText();
 			}
 
 			void GuiDocumentCommonInterface::SetSelectionText(const WString& value)

@@ -343,6 +343,7 @@ Rich Content Document (model)
 			void							GetText(stream::TextWriter& writer);
 			
 			bool							CheckEditRange(TextPos begin, TextPos end, RunRangeMap& relatedRanges);
+			Ptr<DocumentModel>				CopyDocument(TextPos begin, TextPos end, bool deepCopy);
 			bool							CutParagraph(TextPos position);
 			bool							CutEditRange(TextPos begin, TextPos end);
 			bool							EditContainer(TextPos begin, TextPos end, const Func<void(DocumentParagraphRun*, RunRangeMap&, vint, vint)>& editor);
