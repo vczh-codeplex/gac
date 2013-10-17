@@ -51,6 +51,13 @@ GuiDocumentViewer
 
 			bool GuiDocumentCommonInterface::ProcessKey(vint code, bool shift, bool ctrl)
 			{
+				if(IGuiShortcutKeyItem* item=internalShortcutKeyManager->TryGetShortcut(ctrl, shift, false, code))
+				{
+					GuiEventArgs arguments;
+					item->Executed.Execute(arguments);
+					return true;
+				}
+
 				TextPos currentCaret=documentElement->GetCaretEnd();
 				bool frontSide=documentElement->IsCaretEndPreferFrontSide();
 				TextPos begin=documentElement->GetCaretBegin();
@@ -200,6 +207,15 @@ GuiDocumentViewer
 					activeHyperlink->styleName=activate?activeHyperlink->activeStyleName:activeHyperlink->normalStyleName;
 					documentElement->NotifyParagraphUpdated(activeHyperlinkParagraph, 1, 1, false);
 				}
+			}
+
+			void GuiDocumentCommonInterface::AddShortcutCommand(vint key, const Func<void()>& eventHandler)
+			{
+				IGuiShortcutKeyItem* item=internalShortcutKeyManager->CreateShortcut(true, false, false, key);
+				item->Executed.AttachLambda([=](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+				{
+					eventHandler();
+				});
 			}
 
 			void GuiDocumentCommonInterface::OnCaretNotify(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
@@ -386,6 +402,15 @@ GuiDocumentViewer
 				,editMode(ViewOnly)
 				,senderControl(0)
 			{
+				undoRedoProcessor=new GuiDocumentUndoRedoProcessor;
+
+				internalShortcutKeyManager=new GuiShortcutKeyManager;
+				AddShortcutCommand('Z', Func<bool()>(this, &GuiDocumentCommonInterface::Undo));
+				AddShortcutCommand('Y', Func<bool()>(this, &GuiDocumentCommonInterface::Redo));
+				AddShortcutCommand('A', Func<void()>(this, &GuiDocumentCommonInterface::SelectAll));
+				AddShortcutCommand('X', Func<bool()>(this, &GuiDocumentCommonInterface::Cut));
+				AddShortcutCommand('C', Func<bool()>(this, &GuiDocumentCommonInterface::Copy));
+				AddShortcutCommand('V', Func<bool()>(this, &GuiDocumentCommonInterface::Paste));
 			}
 
 			GuiDocumentCommonInterface::~GuiDocumentCommonInterface()
@@ -402,6 +427,8 @@ GuiDocumentViewer
 				SetActiveHyperlink(0);
 				documentElement->SetDocument(value);
 			}
+
+			//================ caret operations
 
 			TextPos GuiDocumentCommonInterface::GetCaretBegin()
 			{
@@ -427,6 +454,8 @@ GuiDocumentViewer
 			{
 				return documentElement->GetCaretBounds(caret, frontSide);
 			}
+
+			//================ editing operations
 
 			void GuiDocumentCommonInterface::NotifyParagraphUpdated(vint index, vint oldCount, vint newCount, bool updatedText)
 			{
@@ -497,6 +526,8 @@ GuiDocumentViewer
 				documentElement->ClearStyle(begin, end);
 			}
 
+			//================ editing control
+
 			WString GuiDocumentCommonInterface::GetActiveHyperlinkReference()
 			{
 				return activeHyperlink?activeHyperlink->reference:L"";
@@ -526,6 +557,118 @@ GuiDocumentViewer
 					INativeCursor* cursor=GetCurrentController()->ResourceService()->GetSystemCursor(INativeCursor::IBeam);
 					documentComposition->SetAssociatedCursor(cursor);
 				}
+			}
+
+			//================ selection operations
+
+			void GuiDocumentCommonInterface::SelectAll()
+			{
+				throw 0;
+			}
+
+			WString GuiDocumentCommonInterface::GetSelectionText()
+			{
+				throw 0;
+			}
+
+			void GuiDocumentCommonInterface::SetSelectionText(const WString& value)
+			{
+				Array<WString> text;
+				EditText(documentElement->GetCaretBegin(), documentElement->GetCaretEnd(), documentElement->IsCaretEndPreferFrontSide(), text);
+			}
+
+			//================ clipboard operations
+
+			bool GuiDocumentCommonInterface::CanCut()
+			{
+				return editMode==Editable && documentElement->GetCaretBegin()!=documentElement->GetCaretEnd();
+			}
+
+			bool GuiDocumentCommonInterface::CanCopy()
+			{
+				return documentElement->GetCaretBegin()!=documentElement->GetCaretEnd();
+			}
+
+			bool GuiDocumentCommonInterface::CanPaste()
+			{
+				return editMode==Editable && GetCurrentController()->ClipboardService()->ContainsText();
+			}
+
+			bool GuiDocumentCommonInterface::Cut()
+			{
+				if(CanCut())
+				{
+					GetCurrentController()->ClipboardService()->SetText(GetSelectionText());
+					SetSelectionText(L"");
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+
+			bool GuiDocumentCommonInterface::Copy()
+			{
+				if(CanCopy())
+				{
+					GetCurrentController()->ClipboardService()->SetText(GetSelectionText());
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+
+			bool GuiDocumentCommonInterface::Paste()
+			{
+				if(CanPaste())
+				{
+					SetSelectionText(GetCurrentController()->ClipboardService()->GetText());
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+
+			//================ undo redo control
+
+			bool GuiDocumentCommonInterface::CanUndo()
+			{
+				return undoRedoProcessor->CanUndo();
+			}
+
+			bool GuiDocumentCommonInterface::CanRedo()
+			{
+				return undoRedoProcessor->CanRedo();
+			}
+
+			void GuiDocumentCommonInterface::ClearUndoRedo()
+			{
+				undoRedoProcessor->ClearUndoRedo();
+			}
+
+			bool GuiDocumentCommonInterface::GetModified()
+			{
+				return undoRedoProcessor->GetModified();
+			}
+
+			void GuiDocumentCommonInterface::NotifyModificationSaved()
+			{
+				undoRedoProcessor->NotifyModificationSaved();
+			}
+
+			bool GuiDocumentCommonInterface::Undo()
+			{
+				return undoRedoProcessor->Undo();
+			}
+
+			bool GuiDocumentCommonInterface::Redo()
+			{
+				return undoRedoProcessor->Redo();
 			}
 
 /***********************************************************************

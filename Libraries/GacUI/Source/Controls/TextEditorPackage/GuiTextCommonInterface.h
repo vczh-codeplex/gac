@@ -58,24 +58,6 @@ Common Interface
 					vint											GetPageRows()override;
 					bool											BeforeModify(TextPos start, TextPos end, const WString& originalText, WString& inputText)override;
 				};
-
-			public:
-				class ShortcutCommand
-				{
-				protected:
-					bool											ctrl;
-					bool											shift;
-					vint											key;
-					Func<void()>									action;
-				public:
-					ShortcutCommand(bool _ctrl, bool _shift, vint _key, const Func<void()> _action);
-					ShortcutCommand(bool _ctrl, bool _shift, vint _key, const Func<bool()> _action);
-					~ShortcutCommand();
-
-					bool											IsTheRightKey(bool _ctrl, bool _shift, vint _key);
-					void											Execute();
-				};
-
 			private:
 				elements::GuiColorizedTextElement*					textElement;
 				compositions::GuiGraphicsComposition*				textComposition;
@@ -90,7 +72,7 @@ Common Interface
 
 				SpinLock											elementModifyLock;
 				collections::List<Ptr<ICommonTextEditCallback>>		textEditCallbacks;
-				collections::List<Ptr<ShortcutCommand>>				shortcutCommands;
+				Ptr<compositions::GuiShortcutKeyManager>			internalShortcutKeyManager;
 				bool												preventEnterDueToAutoComplete;
 
 				void												UpdateCaretPoint();
@@ -115,7 +97,7 @@ Common Interface
 				void												SetCallback(ICallback* value);
 				bool												AttachTextEditCallback(Ptr<ICommonTextEditCallback> value);
 				bool												DetachTextEditCallback(Ptr<ICommonTextEditCallback> value);
-				void												AddShortcutCommand(Ptr<ShortcutCommand> shortcutCommand);
+				void												AddShortcutCommand(vint key, const Func<void()>& eventHandler);
 				elements::GuiColorizedTextElement*					GetTextElement();
 				void												UnsafeSetText(const WString& value);
 

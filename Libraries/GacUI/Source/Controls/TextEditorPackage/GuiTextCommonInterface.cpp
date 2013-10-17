@@ -52,40 +52,6 @@ GuiTextBoxCommonInterface::DefaultCallback
 			}
 
 /***********************************************************************
-GuiTextBoxCommonInterface::ShortcutCommand
-***********************************************************************/
-
-			GuiTextBoxCommonInterface::ShortcutCommand::ShortcutCommand(bool _ctrl, bool _shift, vint _key, const Func<void()> _action)
-				:ctrl(_ctrl)
-				,shift(_shift)
-				,key(_key)
-				,action(_action)
-			{
-			}
-
-			GuiTextBoxCommonInterface::ShortcutCommand::ShortcutCommand(bool _ctrl, bool _shift, vint _key, const Func<bool()> _action)
-				:ctrl(_ctrl)
-				,shift(_shift)
-				,key(_key)
-				,action(Func<void()>(_action))
-			{
-			}
-
-			GuiTextBoxCommonInterface::ShortcutCommand::~ShortcutCommand()
-			{
-			}
-
-			bool GuiTextBoxCommonInterface::ShortcutCommand::IsTheRightKey(bool _ctrl, bool _shift, vint _key)
-			{
-				return _ctrl==ctrl && _shift==shift && _key==key;
-			}
-
-			void GuiTextBoxCommonInterface::ShortcutCommand::Execute()
-			{
-				action();
-			}
-
-/***********************************************************************
 GuiTextBoxCommonInterface
 ***********************************************************************/
 
@@ -244,14 +210,13 @@ GuiTextBoxCommonInterface
 
 			bool GuiTextBoxCommonInterface::ProcessKey(vint code, bool shift, bool ctrl)
 			{
-				for(vint i=0;i<shortcutCommands.Count();i++)
+				if(IGuiShortcutKeyItem* item=internalShortcutKeyManager->TryGetShortcut(ctrl, shift, false, code))
 				{
-					if(shortcutCommands[i]->IsTheRightKey(ctrl, shift, code))
-					{
-						shortcutCommands[i]->Execute();
-						return true;
-					}
+					GuiEventArgs arguments;
+					item->Executed.Execute(arguments);
+					return true;
 				}
+
 				TextPos begin=textElement->GetCaretBegin();
 				TextPos end=textElement->GetCaretEnd();
 				switch(code)
@@ -572,9 +537,13 @@ GuiTextBoxCommonInterface
 				}
 			}
 
-			void GuiTextBoxCommonInterface::AddShortcutCommand(Ptr<ShortcutCommand> shortcutCommand)
+			void GuiTextBoxCommonInterface::AddShortcutCommand(vint key, const Func<void()>& eventHandler)
 			{
-				shortcutCommands.Add(shortcutCommand);
+				IGuiShortcutKeyItem* item=internalShortcutKeyManager->CreateShortcut(true, false, false, key);
+				item->Executed.AttachLambda([=](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+				{
+					eventHandler();
+				});
 			}
 
 			elements::GuiColorizedTextElement* GuiTextBoxCommonInterface::GetTextElement()
@@ -609,12 +578,13 @@ GuiTextBoxCommonInterface
 				undoRedoProcessor=new GuiTextBoxUndoRedoProcessor;
 				AttachTextEditCallback(undoRedoProcessor);
 
-				AddShortcutCommand(new ShortcutCommand(true, false, 'Z', Func<bool()>(this, &GuiTextBoxCommonInterface::Undo)));
-				AddShortcutCommand(new ShortcutCommand(true, false, 'Y', Func<bool()>(this, &GuiTextBoxCommonInterface::Redo)));
-				AddShortcutCommand(new ShortcutCommand(true, false, 'A', Func<void()>(this, &GuiTextBoxCommonInterface::SelectAll)));
-				AddShortcutCommand(new ShortcutCommand(true, false, 'X', Func<bool()>(this, &GuiTextBoxCommonInterface::Cut)));
-				AddShortcutCommand(new ShortcutCommand(true, false, 'C', Func<bool()>(this, &GuiTextBoxCommonInterface::Copy)));
-				AddShortcutCommand(new ShortcutCommand(true, false, 'V', Func<bool()>(this, &GuiTextBoxCommonInterface::Paste)));
+				internalShortcutKeyManager=new GuiShortcutKeyManager;
+				AddShortcutCommand('Z', Func<bool()>(this, &GuiTextBoxCommonInterface::Undo));
+				AddShortcutCommand('Y', Func<bool()>(this, &GuiTextBoxCommonInterface::Redo));
+				AddShortcutCommand('A', Func<void()>(this, &GuiTextBoxCommonInterface::SelectAll));
+				AddShortcutCommand('X', Func<bool()>(this, &GuiTextBoxCommonInterface::Cut));
+				AddShortcutCommand('C', Func<bool()>(this, &GuiTextBoxCommonInterface::Copy));
+				AddShortcutCommand('V', Func<bool()>(this, &GuiTextBoxCommonInterface::Paste));
 			}
 
 			GuiTextBoxCommonInterface::~GuiTextBoxCommonInterface()

@@ -55,6 +55,10 @@ Undo Redo
 				bool										Redo();
 			};
 
+/***********************************************************************
+Undo Redo (Text)
+***********************************************************************/
+
 			class GuiTextBoxUndoRedoProcessor : public GuiGeneralUndoRedoProcessor, public ICommonTextEditCallback
 			{
 			protected:
@@ -79,6 +83,15 @@ Undo Redo
 				void										TextEditNotify(const TextEditNotifyStruct& arguments)override;
 				void										TextCaretChanged(const TextCaretChangedStruct& arguments)override;
 				void										TextEditFinished(vuint editVersion)override;
+			};
+
+/***********************************************************************
+Undo Redo (Document)
+***********************************************************************/
+
+			class GuiDocumentUndoRedoProcessor : public GuiGeneralUndoRedoProcessor
+			{
+			public:
 			};
 		}
 	}
