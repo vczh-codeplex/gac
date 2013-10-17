@@ -175,7 +175,7 @@ func<T> Link<T>.CreateLink() : Link<T> // static method
 }
 
 ========================================================
-Dynamic Dispatching
+Dynamic Dispatching (plan: syntax merge with static dispatching and pattern matching)
 ========================================================
 
 func DealWith(switch x : object) : void
