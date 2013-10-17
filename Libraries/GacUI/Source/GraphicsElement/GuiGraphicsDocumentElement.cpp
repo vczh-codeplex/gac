@@ -678,6 +678,7 @@ GuiDocumentElement::GuiDocumentElementRenderer
 						vint y=0;
 						for(vint i=0;i<caret.row;i++)
 						{
+							EnsureAndGetCache(i, true);
 							y+=paragraphHeights[i]+paragraphDistance;
 						}
 

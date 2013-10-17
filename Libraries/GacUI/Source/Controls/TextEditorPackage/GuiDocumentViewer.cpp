@@ -1,4 +1,6 @@
 #include "GuiDocumentViewer.h"
+#include "..\..\..\..\..\Common\Source\Stream\MemoryStream.h"
+#include "..\..\..\..\..\Common\Source\Stream\Accessor.h"
 
 namespace vl
 {
@@ -573,7 +575,40 @@ GuiDocumentViewer
 
 			void GuiDocumentCommonInterface::SetSelectionText(const WString& value)
 			{
+				List<WString> paragraphs;
+				{
+					stream::StringReader reader(value);
+					WString paragraph;
+					bool empty=true;
+
+					while(!reader.IsEnd())
+					{
+						WString line=reader.ReadLine();
+						if(empty)
+						{
+							paragraph+=line;
+							empty=false;
+						}
+						else if(line!=L"")
+						{
+							paragraph+=L"\r\n"+line;
+						}
+						else
+						{
+							paragraphs.Add(paragraph);
+							paragraph=L"";
+							empty=true;
+						}
+					}
+
+					if(!empty)
+					{
+						paragraphs.Add(paragraph);
+					}
+				}
+
 				Array<WString> text;
+				CopyFrom(text, paragraphs);
 				EditText(documentElement->GetCaretBegin(), documentElement->GetCaretEnd(), documentElement->IsCaretEndPreferFrontSide(), text);
 			}
 
