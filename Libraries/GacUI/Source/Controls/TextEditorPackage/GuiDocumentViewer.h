@@ -10,6 +10,7 @@ Interfaces:
 #define VCZH_PRESENTATION_CONTROLS_GUIDOCUMENTVIEWER
 
 #include "..\GuiContainerControls.h"
+#include "GuiTextUndoRedo.h"
 
 namespace vl
 {
@@ -45,12 +46,16 @@ GuiDocumentCommonInterface
 				EditMode									editMode;
 				GuiControl*									senderControl;
 
+				Ptr<GuiDocumentUndoRedoProcessor>			undoRedoProcessor;
+				Ptr<compositions::GuiShortcutKeyManager>	internalShortcutKeyManager;
+
 				void										UpdateCaretPoint();
 				void										Move(TextPos caret, bool shift, bool frontSide);
 				bool										ProcessKey(vint code, bool shift, bool ctrl);
 				void										InstallDocumentViewer(GuiControl* _sender, compositions::GuiGraphicsComposition* _container);
 				void										SetActiveHyperlink(Ptr<DocumentHyperlinkRun> hyperlink, vint paragraphIndex=-1);
 				void										ActivateActiveHyperlink(bool activate);
+				void										AddShortcutCommand(vint key, const Func<void()>& eventHandler);
 
 				void										OnCaretNotify(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 				void										OnGotFocus(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
@@ -80,6 +85,8 @@ GuiDocumentCommonInterface
 				/// <param name="value">The document.</param>
 				void										SetDocument(Ptr<DocumentModel> value);
 
+				//================ caret operations
+
 				/// <summary>
 				/// Get the begin position of the selection area.
 				/// </summary>
@@ -105,6 +112,8 @@ GuiDocumentCommonInterface
 				/// <param name="caret">The caret.</param>
 				/// <param name="frontSide">Set to true to get the bounds for the character before it.</param>
 				Rect										GetCaretBounds(TextPos caret, bool frontSide);
+
+				//================ editing operations
 
 				/// <summary>Notify that some paragraphs are updated.</summary>
 				/// <param name="index">The start paragraph index.</param>
@@ -155,6 +164,8 @@ GuiDocumentCommonInterface
 				/// <param name="end">The end position of the range.</param>
 				void										ClearStyle(TextPos begin, TextPos end);
 
+				//================ editing control
+
 				/// <summary>Get the href attribute of the active hyperlink.</summary>
 				/// <returns>The href attribute of the active hyperlink.</returns>
 				WString										GetActiveHyperlinkReference();
@@ -164,6 +175,60 @@ GuiDocumentCommonInterface
 				/// <summary>Set the edit mode of this control.</summary>
 				/// <param name="value">The edit mode.</param>
 				void										SetEditMode(EditMode value);
+
+				//================ selection operations
+
+				/// <summary>Select all text.</summary>
+				void										SelectAll();
+				/// <summary>Get the selected text.</summary>
+				/// <returns>The selected text.</returns>
+				WString										GetSelectionText();
+				/// <summary>Set the selected text.</summary>
+				/// <param name="value">The selected text.</param>
+				void										SetSelectionText(const WString& value);
+
+				//================ clipboard operations
+
+				/// <summary>Test can the selection be cut.</summary>
+				/// <returns>Returns true if the selection can be cut.</returns>
+				bool										CanCut();
+				/// <summary>Test can the selection be copied.</summary>
+				/// <returns>Returns true if the selection can be cut.</returns>
+				bool										CanCopy();
+				/// <summary>Test can the content in the clipboard be pasted.</summary>
+				/// <returns>Returns true if the content in the clipboard can be pasted.</returns>
+				bool										CanPaste();
+				/// <summary>Cut the selection text.</summary>
+				/// <returns>Returns true if this operation succeeded.</returns>
+				bool										Cut();
+				/// <summary>Copy the selection text.</summary>
+				/// <returns>Returns true if this operation succeeded.</returns>
+				bool										Copy();
+				/// <summary>Paste the content from the clipboard and replace the selected text.</summary>
+				/// <returns>Returns true if this operation succeeded.</returns>
+				bool										Paste();
+
+				//================ undo redo control
+
+				/// <summary>Test can undo.</summary>
+				/// <returns>Returns true if this action can be performed.</returns>
+				bool										CanUndo();
+				/// <summary>Test can redo.</summary>
+				/// <returns>Returns true if this action can be performed.</returns>
+				bool										CanRedo();
+				/// <summary>Clear all undo and redo information.</summary>
+				void										ClearUndoRedo();
+				/// <summary>Test is the text box modified.</summary>
+				/// <returns>Returns true if the text box is modified.</returns>
+				bool										GetModified();
+				/// <summary>Notify the text box that the current status is considered saved.</summary>
+				void										NotifyModificationSaved();
+				/// <summary>Perform the undo action.</summary>
+				/// <returns>Returns true if this operation succeeded.</returns>
+				bool										Undo();
+				/// <summary>Perform the redo action.</summary>
+				/// <returns>Returns true if this operation succeeded.</returns>
+				bool										Redo();
 			};
 
 /***********************************************************************
