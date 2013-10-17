@@ -13,10 +13,10 @@ namespace vl
 		using namespace regex;
 
 /***********************************************************************
-document_serialization_visitors::DeserializeNodeVisitor
+document_operation_visitors::DeserializeNodeVisitor
 ***********************************************************************/
 
-		namespace document_serialization_visitors
+		namespace document_operation_visitors
 		{
 			class DeserializeNodeVisitor : public XmlNode::IVisitor
 			{
@@ -281,7 +281,7 @@ document_serialization_visitors::DeserializeNodeVisitor
 				}
 			};
 		}
-		using namespace document_serialization_visitors;
+		using namespace document_operation_visitors;
 
 /***********************************************************************
 DocumentModel
