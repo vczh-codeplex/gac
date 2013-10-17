@@ -46,9 +46,11 @@ ExtractTextVisitor
 			{
 			public:
 				stream::TextWriter&				writer;
+				bool							skipNonTextContent;
 
-				ExtractTextVisitor(stream::TextWriter& _writer)
+				ExtractTextVisitor(stream::TextWriter& _writer, bool _skipNonTextContent)
 					:writer(_writer)
+					,skipNonTextContent(_skipNonTextContent)
 				{
 				}
 
@@ -87,7 +89,10 @@ ExtractTextVisitor
 
 				void Visit(DocumentImageRun* run)override
 				{
-					VisitContent(run);
+					if(!skipNonTextContent)
+					{
+						VisitContent(run);
+					}
 				}
 
 				void Visit(DocumentParagraphRun* run)override
@@ -102,12 +107,12 @@ ExtractTextVisitor
 DocumentParagraphRun
 ***********************************************************************/
 
-		WString DocumentParagraphRun::GetText()
+		WString DocumentParagraphRun::GetText(bool skipNonTextContent)
 		{
 			stream::MemoryStream memoryStream;
 			{
 				stream::StreamWriter writer(memoryStream);
-				GetText(writer);
+				GetText(writer, skipNonTextContent);
 			}
 
 			memoryStream.SeekFromBegin(0);
@@ -115,9 +120,9 @@ DocumentParagraphRun
 			return reader.ReadToEnd();
 		}
 
-		void DocumentParagraphRun::GetText(stream::TextWriter& writer)
+		void DocumentParagraphRun::GetText(stream::TextWriter& writer, bool skipNonTextContent)
 		{
-			ExtractTextVisitor visitor(writer);
+			ExtractTextVisitor visitor(writer, skipNonTextContent);
 			Accept(&visitor);
 		}
 
@@ -252,12 +257,12 @@ DocumentModel
 			return GetStyle(sp, context);
 		}
 
-		WString DocumentModel::GetText()
+		WString DocumentModel::GetText(bool skipNonTextContent)
 		{
 			stream::MemoryStream memoryStream;
 			{
 				stream::StreamWriter writer(memoryStream);
-				GetText(writer);
+				GetText(writer, skipNonTextContent);
 			}
 
 			memoryStream.SeekFromBegin(0);
@@ -265,12 +270,16 @@ DocumentModel
 			return reader.ReadToEnd();
 		}
 
-		void DocumentModel::GetText(stream::TextWriter& writer)
+		void DocumentModel::GetText(stream::TextWriter& writer, bool skipNonTextContent)
 		{
-			FOREACH(Ptr<DocumentParagraphRun>, paragraph, paragraphs)
+			for(vint i=0;i<paragraphs.Count();i++)
 			{
-				paragraph->GetText(writer);
-				writer.WriteLine(L"");
+				Ptr<DocumentParagraphRun> paragraph=paragraphs[i];
+				paragraph->GetText(writer, skipNonTextContent);
+				if(i<paragraphs.Count()-1)
+				{
+					writer.WriteString(L"\r\n\r\n");
+				}
 			}
 		}
 	}

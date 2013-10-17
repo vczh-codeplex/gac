@@ -193,7 +193,7 @@ GuiDocumentElement::GuiDocumentElementRenderer
 				if(!cache)
 				{
 					cache=new ParagraphCache;
-					cache->fullText=paragraph->GetText();
+					cache->fullText=paragraph->GetText(false);
 					paragraphCaches[paragraphIndex]=cache;
 				}
 

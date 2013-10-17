@@ -1229,12 +1229,9 @@ DocumentModel::EditRangeOperations
 			if(!CheckEditRange(begin, end, runRanges)) return 0;
 
 			// get ranges
-			if(deepCopy)
+			for(vint i=begin.row+1;i<end.row;i++)
 			{
-				for(vint i=begin.row+1;i<end.row;i++)
-				{
-					GetRunRangeVisitor::GetRunRange(paragraphs[i].Obj(), runRanges);
-				}
+				GetRunRangeVisitor::GetRunRange(paragraphs[i].Obj(), runRanges);
 			}
 
 			Ptr<DocumentModel> newDocument=new DocumentModel;
