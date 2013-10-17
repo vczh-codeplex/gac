@@ -569,7 +569,7 @@ GuiDocumentViewer
 				Ptr<DocumentParagraphRun> lastParagraph=documentElement->GetDocument()->paragraphs[lastIndex];
 
 				TextPos begin(0, 0);
-				TextPos end(lastIndex, lastParagraph->GetText().Length());
+				TextPos end(lastIndex, lastParagraph->GetText(false).Length());
 				SetCaret(begin, end);
 			}
 
@@ -585,7 +585,7 @@ GuiDocumentViewer
 				}
 
 				Ptr<DocumentModel> model=documentElement->GetDocument()->CopyDocument(begin, end, false);
-				return model->GetText();
+				return model->GetText(true);
 			}
 
 			void GuiDocumentCommonInterface::SetSelectionText(const WString& value)
