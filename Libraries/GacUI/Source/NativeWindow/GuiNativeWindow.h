@@ -37,7 +37,7 @@ System Object
 		/// <summary>
 		/// Represents a screen.
 		/// </summary>
-		class INativeScreen : public Interface
+		class INativeScreen : public virtual IDescriptable, Description<INativeScreen>
 		{
 		public:
 			/// <summary>
@@ -273,7 +273,7 @@ Image Object
 		/// <summary>
 		/// Image service. To access this service, use [M:vl.presentation.INativeController.ImageService].
 		/// </summary>
-		class INativeImageService : public Interface
+		class INativeImageService : public virtual IDescriptable, public Description<INativeImageService>
 		{
 		public:
 			/// <summary>
@@ -882,7 +882,7 @@ Native Window Services
 		/// <summary>
 		/// System resource service. To access this service, use [M:vl.presentation.INativeController.ResourceService].
 		/// </summary>
-		class INativeResourceService : public virtual Interface
+		class INativeResourceService : public virtual IDescriptable, public Description<INativeResourceService>
 		{
 		public:
 			/// <summary>
@@ -912,7 +912,7 @@ Native Window Services
 		/// <summary>
 		/// Delay execution controller.
 		/// </summary>
-		class INativeDelay : public Interface, public Description<INativeDelay>
+		class INativeDelay : public virtual IDescriptable, public Description<INativeDelay>
 		{
 		public:
 			/// <summary>Delay execution controller status.</summary>
@@ -943,7 +943,7 @@ Native Window Services
 		/// <summary>
 		/// Asynchronized operation service. GacUI is not a thread safe library except for this service. To access this service, use [M:vl.presentation.INativeController.AsyncService].
 		/// </summary>
-		class INativeAsyncService : public virtual Interface
+		class INativeAsyncService : public virtual IDescriptable, public Description<INativeAsyncService>
 		{
 		public:
 
@@ -988,7 +988,7 @@ Native Window Services
 		/// <summary>
 		/// Clipboard service. To access this service, use [M:vl.presentation.INativeController.ClipboardService].
 		/// </summary>
-		class INativeClipboardService : public virtual Interface
+		class INativeClipboardService : public virtual IDescriptable, public Description<INativeClipboardService>
 		{
 		public:
 			/// <summary>
@@ -1012,14 +1012,14 @@ Native Window Services
 		/// <summary>
 		/// Screen information service. To access this service, use [M:vl.presentation.INativeController.ScreenService].
 		/// </summary>
-		class INativeScreenService : public virtual Interface
+		class INativeScreenService : public virtual IDescriptable, public Description<INativeScreenService>
 		{
 		public:
 			/// <summary>
 			/// Get the number of all available screens.
 			/// </summary>
 			///  <returns>The number of all available screens.</returns>
-			virtual vint						GetScreenCount()=0;
+			virtual vint					GetScreenCount()=0;
 			/// <summary>
 			/// Get the screen object by a specified screen index.
 			/// </summary>
@@ -1342,7 +1342,7 @@ Native Window Controller
 		/// <summary>
 		/// Global native system service controller. Use [M:vl.presentation.GetCurrentController] to access this controller.
 		/// </summary>
-		class INativeController : public virtual Interface
+		class INativeController : public virtual IDescriptable, public Description<INativeController>
 		{
 		public:
 			/// <summary>

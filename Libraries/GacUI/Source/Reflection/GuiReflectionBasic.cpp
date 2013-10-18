@@ -234,6 +234,7 @@ Type Declaration
 			END_ENUM_ITEM(INativeWindow::WindowSizeState)
 
 			BEGIN_CLASS_MEMBER(INativeDelay)
+				CLASS_MEMBER_BASE(IDescriptable)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(Status)
 
 				CLASS_MEMBER_METHOD(Delay, {L"milliseconds"})
@@ -247,6 +248,73 @@ Type Declaration
 				ENUM_NAMESPACE_ITEM(Executed)
 				ENUM_NAMESPACE_ITEM(Canceled)
 			END_ENUM_ITEM(INativeDelay::ExecuteStatus)
+
+			BEGIN_CLASS_MEMBER(INativeScreen)
+				CLASS_MEMBER_BASE(IDescriptable)
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Bounds);
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ClientBounds);
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Name);
+
+				CLASS_MEMBER_METHOD(IsPrimary, NO_PARAMETER)
+			END_CLASS_MEMBER(INativeScreen)
+
+			BEGIN_CLASS_MEMBER(INativeImageService)
+				CLASS_MEMBER_BASE(IDescriptable)
+
+				CLASS_MEMBER_METHOD(CreateImageFromFile, {L"path"})
+			END_CLASS_MEMBER(INativeImageService)
+
+			BEGIN_CLASS_MEMBER(INativeResourceService)
+				CLASS_MEMBER_BASE(IDescriptable)
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(DefaultSystemCursor)
+				CLASS_MEMBER_PROPERTY_FAST(DefaultFont)
+
+				CLASS_MEMBER_METHOD(GetSystemCursor, {L"type"})
+			END_CLASS_MEMBER(INativeResourceService)
+
+			BEGIN_CLASS_MEMBER(INativeAsyncService)
+				CLASS_MEMBER_BASE(IDescriptable)
+
+				CLASS_MEMBER_METHOD(IsInMainThread, {L"type"})
+				CLASS_MEMBER_METHOD(InvokeAsync, {L"proc"})
+				CLASS_MEMBER_METHOD(InvokeInMainThread, {L"proc"})
+				CLASS_MEMBER_METHOD(InvokeInMainThreadAndWait, {L"proc" _ L"milliseconds"})
+				CLASS_MEMBER_METHOD(DelayExecute, {L"proc" _ L"milliseconds"})
+				CLASS_MEMBER_METHOD(DelayExecuteInMainThread, {L"proc" _ L"milliseconds"})
+			END_CLASS_MEMBER(INativeAsyncService)
+
+			BEGIN_CLASS_MEMBER(INativeClipboardService)
+				CLASS_MEMBER_BASE(IDescriptable)
+
+				CLASS_MEMBER_PROPERTY_FAST(Text)
+
+				CLASS_MEMBER_METHOD(ContainsText, NO_PARAMETER)
+			END_CLASS_MEMBER(INativeClipboardService)
+
+			BEGIN_CLASS_MEMBER(INativeScreenService)
+				CLASS_MEMBER_BASE(IDescriptable)
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ScreenCount)
+
+				CLASS_MEMBER_METHOD_OVERLOAD(GetScreen, {L"index"}, INativeScreen*(INativeScreenService::*)(vint))
+				CLASS_MEMBER_METHOD_OVERLOAD(GetScreen, {L"window"}, INativeScreen*(INativeScreenService::*)(INativeWindow*))
+			END_CLASS_MEMBER(INativeScreenService)
+
+			BEGIN_CLASS_MEMBER(INativeController)
+				CLASS_MEMBER_BASE(IDescriptable)
+				CLASS_MEMBER_STATIC_EXTERNALMETHOD(GetCurrentController, NO_PARAMETER, INativeController*(*)(), &GetCurrentController)
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(OSVersion)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ExecutablePath)
+
+				CLASS_MEMBER_METHOD(ResourceService, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(AsyncService, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(ClipboardService, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(ImageService, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(ScreenService, NO_PARAMETER)
+			END_CLASS_MEMBER(INativeController)
 
 			BEGIN_CLASS_MEMBER(GuiImageData)
 				CLASS_MEMBER_CONSTRUCTOR(Ptr<GuiImageData>(), NO_PARAMETER)
