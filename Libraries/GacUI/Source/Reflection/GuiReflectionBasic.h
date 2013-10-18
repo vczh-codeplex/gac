@@ -43,6 +43,13 @@ Type List
 			F(presentation::INativeWindow::WindowSizeState)\
 			F(presentation::INativeDelay)\
 			F(presentation::INativeDelay::ExecuteStatus)\
+			F(presentation::INativeScreen)\
+			F(presentation::INativeImageService)\
+			F(presentation::INativeResourceService)\
+			F(presentation::INativeAsyncService)\
+			F(presentation::INativeClipboardService)\
+			F(presentation::INativeScreenService)\
+			F(presentation::INativeController)\
 			F(presentation::GuiImageData)\
 			F(presentation::DocumentModel)\
 			F(presentation::GuiResource)\
