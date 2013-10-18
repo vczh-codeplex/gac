@@ -586,6 +586,7 @@ Collections
 
 				ENUM_NAMESPACE_ITEM(RawPtr)
 				ENUM_NAMESPACE_ITEM(SharedPtr)
+				ENUM_NAMESPACE_ITEM(Nullable)
 				ENUM_NAMESPACE_ITEM(TypeDescriptor)
 				ENUM_NAMESPACE_ITEM(Generic)
 			END_ENUM_ITEM(ITypeInfo::Decorator)
