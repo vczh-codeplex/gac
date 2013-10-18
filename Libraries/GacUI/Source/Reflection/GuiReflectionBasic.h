@@ -51,6 +51,18 @@ Type List
 			F(presentation::INativeScreenService)\
 			F(presentation::INativeController)\
 			F(presentation::GuiImageData)\
+			F(presentation::DocumentStyleProperties)\
+			F(presentation::DocumentRun)\
+			F(presentation::DocumentContainerRun)\
+			F(presentation::DocumentContentRun)\
+			F(presentation::DocumentTextRun)\
+			F(presentation::DocumentInlineObjectRun)\
+			F(presentation::DocumentImageRun)\
+			F(presentation::DocumentStylePropertiesRun)\
+			F(presentation::DocumentStyleApplicationRun)\
+			F(presentation::DocumentHyperlinkRun)\
+			F(presentation::DocumentParagraphRun)\
+			F(presentation::DocumentStyle)\
 			F(presentation::DocumentModel)\
 			F(presentation::GuiResource)\
 			F(presentation::elements::IGuiGraphicsElement)\
