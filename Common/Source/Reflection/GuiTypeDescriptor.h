@@ -271,6 +271,7 @@ ITypeDescriptor (type)
 				{
 					RawPtr,
 					SharedPtr,
+					Nullable,
 					TypeDescriptor,
 					Generic,
 				};

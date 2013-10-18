@@ -227,6 +227,10 @@ description::Value
 
 			bool Value::CanConvertTo(ITypeInfo* targetType)const
 			{
+				if(valueType==Null && targetType->GetDecorator()==ITypeInfo::Nullable)
+				{
+					return true;
+				}
 				ValueType targetValueType=ValueType::Null;
 				{
 					ITypeInfo* currentType=targetType;
@@ -243,6 +247,7 @@ description::Value
 							currentType=0;
 							break;
 						case ITypeInfo::TypeDescriptor:
+						case ITypeInfo::Nullable:
 							targetValueType=Text;
 							currentType=0;
 							break;
