@@ -304,13 +304,15 @@ extern void UnitTestInGuiMain();
 
 void GuiMain()
 {
-	//{
-	//	FileStream fileStream(L"Reflection.txt", FileStream::WriteOnly);
-	//	BomEncoder encoder(BomEncoder::Utf16);
-	//	EncoderStream encoderStream(fileStream, encoder);
-	//	StreamWriter writer(encoderStream);
-	//	description::LogTypeManager(writer);
-	//}
+#ifndef VCZH_DEBUG_NO_REFLECTION
+	{
+		FileStream fileStream(L"Reflection.txt", FileStream::WriteOnly);
+		BomEncoder encoder(BomEncoder::Utf16);
+		EncoderStream encoderStream(fileStream, encoder);
+		StreamWriter writer(encoderStream);
+		description::LogTypeManager(writer);
+	}
+#endif
 	UnitTestInGuiMain();
 	RichTextWindow window;
 	GetApplication()->Run(&window);
