@@ -53,7 +53,7 @@ data<T, U> Pair
 
 T..U				Pair<T, U>			default(T)..default(U)					// right associative
 <T, U, V>			T..U..V..void		<default(T), default(U), default(V)
-T?										null
+T?										null	// T can be all types except X? and object. All acceptable types T satisfies concept NotNull<T>
 
 ========================================================
 Interfaces
@@ -123,8 +123,40 @@ new Delegate<int, <int, int>>
 }
 
 ========================================================
+Container Interfaces
+========================================================
+
+========================================================
 Concepts
 ========================================================
+
+concept<T> Addable
+{
+	prop Zero : T {get;}
+	func operator+ (x : T) : T;
+	func operator- (x : T) : T;
+	func operator+ (x : T, y : T) : T;
+	func operator- (x : T, y : T) : T;
+}
+
+concept<T, TDiff> Differentiable
+{
+	prop Zero : TDiff {get;}
+	func operator+ (x : T, y : TDiff) : T;
+	func operator+ (x : TDiff, y : T) : T;
+	func operator- (x : T, y : T) : TDiff;
+}
+
+========================================================
+Predefined Concepts
+========================================================
+
+DefaultValue<T>
+Tuple<T>
+NotNull<T>
+Interface<T>
+Convertable<TFrom, TTo>
+ImplicitConvertable<TFrom, TTo>
 
 ========================================================
 Patterns
