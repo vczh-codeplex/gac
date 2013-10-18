@@ -329,6 +329,17 @@ Type Declaration
 
 			BEGIN_CLASS_MEMBER(DocumentStyleProperties)
 				CLASS_MEMBER_CONSTRUCTOR(Ptr<DocumentStyleProperties>(), NO_PARAMETER)
+
+				CLASS_MEMBER_FIELD(face)
+				CLASS_MEMBER_FIELD(size)
+				CLASS_MEMBER_FIELD(color)
+				CLASS_MEMBER_FIELD(backgroundColor)
+				CLASS_MEMBER_FIELD(bold)
+				CLASS_MEMBER_FIELD(italic)
+				CLASS_MEMBER_FIELD(underline)
+				CLASS_MEMBER_FIELD(strikeline)
+				CLASS_MEMBER_FIELD(antialias)
+				CLASS_MEMBER_FIELD(verticalAntialias)
 			END_CLASS_MEMBER(DocumentStyleProperties)
 
 			BEGIN_CLASS_MEMBER(DocumentRun)
