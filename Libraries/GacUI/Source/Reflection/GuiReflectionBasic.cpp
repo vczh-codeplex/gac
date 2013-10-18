@@ -327,8 +327,97 @@ Type Declaration
 				CLASS_MEMBER_PROPERTY_READONLY(FrameIndex, GetFrameIndex)
 			END_CLASS_MEMBER(GuiImageData)
 
+			BEGIN_CLASS_MEMBER(DocumentStyleProperties)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<DocumentStyleProperties>(), NO_PARAMETER)
+			END_CLASS_MEMBER(DocumentStyleProperties)
+
+			BEGIN_CLASS_MEMBER(DocumentRun)
+			END_CLASS_MEMBER(DocumentRun)
+
+			BEGIN_CLASS_MEMBER(DocumentContainerRun)
+				CLASS_MEMBER_BASE(DocumentRun)
+
+				CLASS_MEMBER_FIELD(runs)
+			END_CLASS_MEMBER(DocumentContainerRun)
+
+			BEGIN_CLASS_MEMBER(DocumentContentRun)
+				CLASS_MEMBER_BASE(DocumentRun)
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(RepresentationText)
+			END_CLASS_MEMBER(DocumentContentRun)
+
+			BEGIN_CLASS_MEMBER(DocumentTextRun)
+				CLASS_MEMBER_BASE(DocumentContentRun)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<DocumentTextRun>(), NO_PARAMETER)
+				
+				CLASS_MEMBER_FIELD(text)
+			END_CLASS_MEMBER(DocumentTextRun)
+
+			BEGIN_CLASS_MEMBER(DocumentInlineObjectRun)
+				CLASS_MEMBER_BASE(DocumentContentRun)
+				
+				CLASS_MEMBER_FIELD(size)
+				CLASS_MEMBER_FIELD(baseline)
+			END_CLASS_MEMBER(DocumentInlineObjectRun)
+
+			BEGIN_CLASS_MEMBER(DocumentImageRun)
+				CLASS_MEMBER_BASE(DocumentInlineObjectRun)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<DocumentImageRun>(), NO_PARAMETER)
+				
+				CLASS_MEMBER_FIELD(image)
+				CLASS_MEMBER_FIELD(frameIndex)
+				CLASS_MEMBER_FIELD(source)
+			END_CLASS_MEMBER(DocumentImageRun)
+
+			BEGIN_CLASS_MEMBER(DocumentStylePropertiesRun)
+				CLASS_MEMBER_BASE(DocumentContainerRun)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<DocumentStylePropertiesRun>(), NO_PARAMETER)
+				
+				CLASS_MEMBER_FIELD(style)
+			END_CLASS_MEMBER(DocumentStylePropertiesRun)
+
+			BEGIN_CLASS_MEMBER(DocumentStyleApplicationRun)
+				CLASS_MEMBER_BASE(DocumentContainerRun)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<DocumentStyleApplicationRun>(), NO_PARAMETER)
+				
+				CLASS_MEMBER_FIELD(styleName)
+			END_CLASS_MEMBER(DocumentStyleApplicationRun)
+
+			BEGIN_CLASS_MEMBER(DocumentHyperlinkRun)
+				CLASS_MEMBER_BASE(DocumentStyleApplicationRun)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<DocumentHyperlinkRun>(), NO_PARAMETER)
+				
+				CLASS_MEMBER_FIELD(normalStyleName)
+				CLASS_MEMBER_FIELD(activeStyleName)
+				CLASS_MEMBER_FIELD(reference)
+			END_CLASS_MEMBER(DocumentHyperlinkRun)
+
+			BEGIN_CLASS_MEMBER(DocumentParagraphRun)
+				CLASS_MEMBER_BASE(DocumentContainerRun)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<DocumentParagraphRun>(), NO_PARAMETER)
+
+				CLASS_MEMBER_FIELD(alignment)
+
+				CLASS_MEMBER_METHOD_OVERLOAD(GetText, {L"skipNonTextContent"}, WString(DocumentParagraphRun::*)(bool))
+			END_CLASS_MEMBER(DocumentParagraphRun)
+
+			BEGIN_CLASS_MEMBER(DocumentStyle)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<DocumentStyle>(), NO_PARAMETER)
+				
+				CLASS_MEMBER_FIELD(parentStyleName)
+				CLASS_MEMBER_FIELD(styles)
+				CLASS_MEMBER_FIELD(resolvedStyles)
+			END_CLASS_MEMBER(DocumentStyle)
+
 			BEGIN_CLASS_MEMBER(DocumentModel)
 				CLASS_MEMBER_EXTERNALCTOR(Ptr<DocumentModel>(const WString&), {L"filePath"}, &DocumentModel_Constructor)
+				
+				CLASS_MEMBER_FIELD(paragraphs)
+				CLASS_MEMBER_FIELD(styles)
+
+				CLASS_MEMBER_METHOD_OVERLOAD(GetText, {L"skipNonTextContent"}, WString(DocumentModel::*)(bool))
+				CLASS_MEMBER_STATIC_METHOD_OVERLOAD(LoadFromXml, {L"filePath"}, Ptr<DocumentModel>(*)(const WString&))
+				CLASS_MEMBER_METHOD_OVERLOAD(SaveToXml, {L"filePath"}, bool(DocumentModel::*)(const WString&))
 			END_CLASS_MEMBER(DocumentModel)
 
 			BEGIN_CLASS_MEMBER(GuiResource)
