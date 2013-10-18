@@ -2,8 +2,8 @@
 Primitive Types
 ========================================================
 
-void				system.Void			<>
 object				system.Object		null
+void				system.Void			<>
 uint8				system.UInt8		0
 uint16				system.UInt16		0
 uint32	(uint)		system.UInt32		0
@@ -24,26 +24,32 @@ Custom Types
 
 data PointI
 {
-	x : int,
-	y : int,
+	x : int;
+	y : int;
 }
 // default value : {x : default(int), y : default(int)}
 
 data<T> Point
 {
-	x : T,
-	y : T
+	x : T;
+	y : T;
 }
 
-data<T, U> Pair
+// {x : 10, y : 20} : Point<int>
+
+data Derived : Base1, Base2
 {
-	first : T,
-	second : U
 }
 
 ========================================================
 Composite Types
 ========================================================
+
+data<T, U> Pair
+{
+	first : T;
+	second : U;
+}
 
 T..U				Pair<T, U>			default(T)..default(U)					// right associative
 <T, U, V>			T..U..V..void		<default(T), default(U), default(V)
@@ -52,6 +58,69 @@ T?										null
 ========================================================
 Interfaces
 ========================================================
+
+interface<T> Enumerator
+{
+	prop Current : T {get;}
+	func MoveNext() : bool;
+}
+
+interface<T> Enumerable
+{
+	func CreateEnumerator() : Enumerator<T>;
+}
+
+interface<T> Disposable
+{
+	func Dispose();
+}
+
+interface<T> Observer
+{
+	func OnNext(value : T);
+	func OnError(error : Exception);
+	func OnComplete();
+}
+
+interface<T> Observable
+{
+	func Subscribe(observer : Observer<T>) : Disposable
+}
+
+// default value for an interface does not exists
+// except the concept DefaultValue is implemented
+
+instance<T> DefaultValue<Enumerable<T>>
+{
+	func Default() = new Enumerable<T>
+	{
+		func CreateEnumerator() = new Enumerator<T>
+		{
+			prop Current : T { get { throw InvalidOperationException{}; } }
+			func MoveNext() : bool = false;
+		};
+	};
+}
+
+interface<TReturn, TArguments> Delegate
+	where Tuple<TArgs>
+{
+	func Invoke(arguments : TArguments) : TReturn;
+}
+
+x=>x+1
+(x,y)=>x+y
+func (x : int, y : int) : int = x + y
+func (x : int, y : int) : int { return x + y; }
+
+// equivalent to the lambda expression above
+new Delegate<int, <int, int>>
+{
+	func Invoke(<x, y> : <int, int>) : int
+	{
+		return x + y;
+	}
+}
 
 ========================================================
 Concepts
@@ -71,6 +140,10 @@ Statements
 
 ========================================================
 Functions
+========================================================
+
+========================================================
+Predefined Convertions
 ========================================================
 
 ========================================================
