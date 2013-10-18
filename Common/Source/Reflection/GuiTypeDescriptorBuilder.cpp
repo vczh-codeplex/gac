@@ -59,6 +59,8 @@ TypeInfoImpl
 					return elementType->GetTypeFriendlyName()+L"*";
 				case SharedPtr:
 					return elementType->GetTypeFriendlyName()+L"^";
+				case Nullable:
+					return elementType->GetTypeFriendlyName()+L"?";
 				case TypeDescriptor:
 					return typeDescriptor->GetTypeName();
 				case Generic:

@@ -313,6 +313,10 @@ namespace test
 		void Reset(vint _a, vint _b){a=_a; b=_b;}
 		void Reset(ResetOption opt){if(opt&ResetA) a=0; if(opt&ResetB) b=0;}
 		void Reset(Derived* derived){a=derived->a; b=derived->b;}
+		
+		Nullable<WString> c;
+		Nullable<WString> GetC(){return c;}
+		void SetC(Nullable<WString> value){c=value;}
 	};
 
 	class BaseSummer : public Description<BaseSummer>
@@ -437,6 +441,9 @@ BEGIN_TYPE_INFO_NAMESPACE
 		CLASS_MEMBER_METHOD_OVERLOAD(Reset, {L"_a" _ L"_b"}, void(Derived::*)(vint _ vint))
 		CLASS_MEMBER_METHOD_OVERLOAD(Reset, {L"opt"}, void(Derived::*)(ResetOption))
 		CLASS_MEMBER_METHOD_OVERLOAD(Reset, {L"derived"}, void(Derived::*)(Derived*))
+
+		CLASS_MEMBER_FIELD(c)
+		CLASS_MEMBER_PROPERTY_FAST(C)
 	END_CLASS_MEMBER(test::Derived)
 
 	BEGIN_STRUCT_MEMBER(test::Point)
@@ -645,6 +652,23 @@ namespace reflection_test
 		} 
 	}
 
+	void TestReflectionNullable()
+	{
+		{
+			Value derived=Value::Create(L"test::Derived");
+			TEST_ASSERT(UnboxValue<Nullable<WString>>(derived.GetProperty(L"c"))==false);
+			TEST_ASSERT(UnboxValue<Nullable<WString>>(derived.GetProperty(L"C"))==false);
+
+			derived.SetProperty(L"c", Nullable<WString>(L"vczh"));
+			TEST_ASSERT(UnboxValue<Nullable<WString>>(derived.GetProperty(L"c")).Value()==L"vczh");
+			TEST_ASSERT(UnboxValue<Nullable<WString>>(derived.GetProperty(L"C")).Value()==L"vczh");
+
+			derived.SetProperty(L"C", Nullable<WString>());
+			TEST_ASSERT(UnboxValue<Nullable<WString>>(derived.GetProperty(L"c"))==false);
+			TEST_ASSERT(UnboxValue<Nullable<WString>>(derived.GetProperty(L"C"))==false);
+		}
+	}
+
 	void TestReflectionStruct()
 	{
 		{
@@ -817,90 +841,24 @@ namespace reflection_test
 }
 using namespace reflection_test;
 
-TEST_CASE(TestReflection)
-{
-	TEST_ASSERT(LoadPredefinedTypes());
-	TEST_ASSERT(GetGlobalTypeManager()->AddTypeLoader(new TestTypeLoader));
-	TEST_ASSERT(GetGlobalTypeManager()->Load());
-	{
-		TestReflectionBuilder();
-	}
-	TEST_ASSERT(ResetGlobalTypeManager());
-}
+#define TEST_CASE_REFLECTION(NAME)\
+	TEST_CASE(NAME)\
+	{\
+		TEST_ASSERT(LoadPredefinedTypes());\
+		TEST_ASSERT(GetGlobalTypeManager()->AddTypeLoader(new TestTypeLoader));\
+		TEST_ASSERT(GetGlobalTypeManager()->Load());\
+		{\
+			NAME();\
+		}\
+		TEST_ASSERT(ResetGlobalTypeManager());\
+	}\
 
-TEST_CASE(TestReflectionInvoke)
-{
-	TEST_ASSERT(LoadPredefinedTypes());
-	TEST_ASSERT(GetGlobalTypeManager()->AddTypeLoader(new TestTypeLoader));
-	TEST_ASSERT(GetGlobalTypeManager()->Load());
-	{
-		TestReflectionInvoke();
-	}
-	TEST_ASSERT(ResetGlobalTypeManager());
-}
-
-TEST_CASE(TestReflectionEnum)
-{
-	TEST_ASSERT(LoadPredefinedTypes());
-	TEST_ASSERT(GetGlobalTypeManager()->AddTypeLoader(new TestTypeLoader));
-	TEST_ASSERT(GetGlobalTypeManager()->Load());
-	{
-		TestReflectionEnum();
-	}
-	TEST_ASSERT(ResetGlobalTypeManager());
-}
-
-TEST_CASE(TestReflectionStruct)
-{
-	TEST_ASSERT(LoadPredefinedTypes());
-	TEST_ASSERT(GetGlobalTypeManager()->AddTypeLoader(new TestTypeLoader));
-	TEST_ASSERT(GetGlobalTypeManager()->Load());
-	{
-		TestReflectionStruct();
-	}
-	TEST_ASSERT(ResetGlobalTypeManager());
-}
-
-TEST_CASE(TestReflectionList)
-{
-	TEST_ASSERT(LoadPredefinedTypes());
-	TEST_ASSERT(GetGlobalTypeManager()->AddTypeLoader(new TestTypeLoader));
-	TEST_ASSERT(GetGlobalTypeManager()->Load());
-	{
-		TestReflectionList();
-	}
-	TEST_ASSERT(ResetGlobalTypeManager());
-}
-
-TEST_CASE(TestReflectionDictionary)
-{
-	TEST_ASSERT(LoadPredefinedTypes());
-	TEST_ASSERT(GetGlobalTypeManager()->AddTypeLoader(new TestTypeLoader));
-	TEST_ASSERT(GetGlobalTypeManager()->Load());
-	{
-		TestReflectionDictionary();
-	}
-	TEST_ASSERT(ResetGlobalTypeManager());
-}
-
-TEST_CASE(TestSharedRawPtrConverting)
-{
-	TEST_ASSERT(LoadPredefinedTypes());
-	TEST_ASSERT(GetGlobalTypeManager()->AddTypeLoader(new TestTypeLoader));
-	TEST_ASSERT(GetGlobalTypeManager()->Load());
-	{
-		TestSharedRawPtrConverting();
-	}
-	TEST_ASSERT(ResetGlobalTypeManager());
-}
-
-TEST_CASE(TestSharedRawPtrDestructing)
-{
-	TEST_ASSERT(LoadPredefinedTypes());
-	TEST_ASSERT(GetGlobalTypeManager()->AddTypeLoader(new TestTypeLoader));
-	TEST_ASSERT(GetGlobalTypeManager()->Load());
-	{
-		TestSharedRawPtrDestructing();
-	}
-	TEST_ASSERT(ResetGlobalTypeManager());
-}
+TEST_CASE_REFLECTION(TestReflectionBuilder)
+TEST_CASE_REFLECTION(TestReflectionInvoke)
+TEST_CASE_REFLECTION(TestReflectionEnum)
+TEST_CASE_REFLECTION(TestReflectionNullable)
+TEST_CASE_REFLECTION(TestReflectionStruct)
+TEST_CASE_REFLECTION(TestReflectionList)
+TEST_CASE_REFLECTION(TestReflectionDictionary)
+TEST_CASE_REFLECTION(TestSharedRawPtrConverting)
+TEST_CASE_REFLECTION(TestSharedRawPtrDestructing)

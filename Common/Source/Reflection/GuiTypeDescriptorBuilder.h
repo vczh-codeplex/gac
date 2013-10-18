@@ -511,11 +511,6 @@ TypeInfoRetriver
 			};
 
 			template<typename T>
-			struct TypeInfoRetriver<Nullable<T>> : public TypeInfoRetriver<T>
-			{
-			};
-
-			template<typename T>
 			struct DetailTypeInfoRetriver<const T, TypeFlags::NonGenericType>
 			{
 				typedef DetailTypeInfoRetriver<T, TypeFlags::NonGenericType>	UpLevelRetriver;
@@ -584,6 +579,26 @@ TypeInfoRetriver
 				{
 					Ptr<ITypeInfo> elementType=TypeInfoRetriver<T>::CreateTypeInfo();
 					Ptr<TypeInfoImpl> type=new TypeInfoImpl(ITypeInfo::SharedPtr);
+					type->SetElementType(elementType);
+					return type;
+				}
+			};
+
+			template<typename T>
+			struct DetailTypeInfoRetriver<Nullable<T>, TypeFlags::NonGenericType>
+			{
+				typedef DetailTypeInfoRetriver<T, TypeFlags::NonGenericType>	UpLevelRetriver;
+
+				static const ITypeInfo::Decorator								Decorator=ITypeInfo::Nullable;
+				typedef typename UpLevelRetriver::Type							Type;
+				typedef Nullable<T>												TempValueType;
+				typedef Nullable<T>&											ResultReferenceType;
+				typedef Nullable<T>												ResultNonReferenceType;
+
+				static Ptr<ITypeInfo> CreateTypeInfo()
+				{
+					Ptr<ITypeInfo> elementType=TypeInfoRetriver<T>::CreateTypeInfo();
+					Ptr<TypeInfoImpl> type=new TypeInfoImpl(ITypeInfo::Nullable);
 					type->SetElementType(elementType);
 					return type;
 				}
@@ -825,6 +840,27 @@ TypeInfoRetriver Helper Functions (BoxValue, UnboxValue)
 			};
 
 			template<typename T>
+			struct ValueAccessor<Nullable<T>, ITypeInfo::Nullable>
+			{
+				static Value BoxValue(Nullable<T> object, ITypeDescriptor* typeDescriptor)
+				{
+					return object?ValueAccessor<T, ITypeInfo::TypeDescriptor>::BoxValue(object.Value(), typeDescriptor):Value();
+				}
+
+				static Nullable<T> UnboxValue(const Value& value, ITypeDescriptor* typeDescriptor, const WString& valueName)
+				{
+					if(value.IsNull())
+					{
+						return Nullable<T>();
+					}
+					else
+					{
+						return ValueAccessor<T, ITypeInfo::TypeDescriptor>::UnboxValue(value, typeDescriptor, valueName);
+					}
+				}
+			};
+
+			template<typename T>
 			struct ValueAccessor<T, ITypeInfo::TypeDescriptor>
 			{
 				static Value BoxValue(const T& object, ITypeDescriptor* typeDescriptor)
@@ -1051,45 +1087,6 @@ CustomFieldInfoImpl
 					if(object)
 					{
 						UnboxParameter<TField>(newValue, object->*FieldRef, GetReturn()->GetTypeDescriptor(), L"newValue");
-					}
-				}
-			public:
-				CustomFieldInfoImpl(ITypeDescriptor* _ownerTypeDescriptor, const WString& _name)
-					:FieldInfoImpl(_ownerTypeDescriptor, _name, TypeInfoRetriver<TField>::CreateTypeInfo())
-				{
-				}
-			};
-
-			template<typename TClass, typename TField, Nullable<TField> TClass::* FieldRef>
-			class CustomFieldInfoImpl<TClass, Nullable<TField>, FieldRef> : public FieldInfoImpl
-			{
-			protected:
-				Value GetValueInternal(const Value& thisObject)override
-				{
-					TClass* object=UnboxValue<TClass*>(thisObject);
-					if(object && object->*FieldRef)
-					{
-						TField extractedValue=(object->*FieldRef).Value();
-						return BoxParameter<TField>(extractedValue, GetReturn()->GetTypeDescriptor());
-					}
-					return Value();
-				}
-
-				void SetValueInternal(Value& thisObject, const Value& newValue)override
-				{
-					TClass* object=UnboxValue<TClass*>(thisObject);
-					if(object)
-					{
-						if(newValue.GetValueType()==Value::Null)
-						{
-							object->*FieldRef=Nullable<TField>();
-						}
-						else
-						{
-							TField extractedValue;
-							UnboxParameter<TField>(newValue, extractedValue, GetReturn()->GetTypeDescriptor(), L"newValue");
-							object->*FieldRef=extractedValue;
-						}
 					}
 				}
 			public:
