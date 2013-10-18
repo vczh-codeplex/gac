@@ -54,6 +54,9 @@ data<T, U> Pair
 T..U				Pair<T, U>			default(T)..default(U)					// right associative
 <T, U, V>			T..U..V..void		<default(T), default(U), default(V)
 T?										null	// T can be all types except X? and object. All acceptable types T satisfies concept NotNull<T>
+T[]					Array<T>
+T[U]				Map<U, T>
+func (T, U) : V		Delegate<<T, U>, V>
 
 ========================================================
 Interfaces
@@ -102,7 +105,7 @@ instance<T> DefaultValue<Enumerable<T>>
 	};
 }
 
-interface<TReturn, TArguments> Delegate
+interface<TArguments, TReturn> Delegate
 	where Tuple<TArgs>
 {
 	func Invoke(arguments : TArguments) : TReturn;
@@ -114,7 +117,7 @@ func (x : int, y : int) : int = x + y
 func (x : int, y : int) : int { return x + y; }
 
 // equivalent to the lambda expression above
-new Delegate<int, <int, int>>
+new Delegate<<int, int>, int>
 {
 	func Invoke(<x, y> : <int, int>) : int
 	{
@@ -125,6 +128,61 @@ new Delegate<int, <int, int>>
 ========================================================
 Container Interfaces
 ========================================================
+
+interface<TKey, TValue> ReadableMapping : Enumerable<TKey..TValue>
+{
+	prop Keys : Enumerable<TKey>;
+	prop Values : Enumerable<TValue>;
+	prop operator[index : TKey] : TValue {get;}
+}
+
+interface<TKey, TValue> Mapping : ReadableMapping
+{
+	prop operator[index : TKey] : TValue {set;}
+}
+
+interface<T> ReadableArray : ReadableMapping<int, T>
+{
+	prop Length : int {get;}
+	func Slice(start : int, length : int) : ReadableArray<T>;
+}
+
+interface<T> Array : ReadableArray<T>, Mapping<int, T>, Enumerable<T>
+{
+	func Slice(start : int, length : int) : Array<T>;
+}
+
+interface<T> Collection : Array<T>
+{
+	func Add(value : T) : int;
+	func Remove(value : T) : bool;
+	func RemoveAt(index : int) : T;
+	func Contains(value : T) : bool;
+	func IndexOf(value : T) : int;
+}
+
+interface<T> List : Collection<T>
+{
+	func Insert(index : int, value : T);
+}
+
+interface<TKey, TValue> Map : Mapping<TKey, TValue>
+{
+	func Add(key : TKey, value : Value);
+}
+
+func<T>				ArrayOf(length : int) : Array<T>;
+func<T>				ArrayOf(values : Enumerable<T>) : Array<T>;
+func<T>				ListOf(values : Enumerable<T>) : Array<T>;
+func<T>				SortedListOf(values : Enumerable<T>) : Array<T>;
+func<T>				SortedSetOf(values : Enumerable<T>) : Array<T>;
+func<T>				HashSetOf(values : Enumerable<T>) : Array<T>;
+func<TKey, TValue>	SortedMapOf(values : Enumerable<TKey..TValue>) : Map<TKey, TValue>;
+func<TKey, TValue>	HashMapOf(values : Enumerable<TKey..TValue>) : Map<TKey, TValue>;
+
+ArrayOf(10) : int[]
+ArrayOf({1, 2, 3, 4, 5})
+HashMapOf({1..1, 2..4, 3..9, 4..16, 5..25})
 
 ========================================================
 Concepts
@@ -152,9 +210,15 @@ Predefined Concepts
 ========================================================
 
 DefaultValue<T>
-Tuple<T>
+SizeOf<T>
+Tuplize<T>
+Hashable<T>
+
 NotNull<T>
 Interface<T>
+Tuple<T>
+InheritFrom<TDerived, TBase>
+
 Convertable<TFrom, TTo>
 ImplicitConvertable<TFrom, TTo>
 
