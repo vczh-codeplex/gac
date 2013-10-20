@@ -274,7 +274,7 @@ Patterns
 ========================================================
 
 Constant
-Identifier
+Identifier		// can only be part of other patterns
 X : Type
 X..Y
 <X, Y, Z>
@@ -316,6 +316,10 @@ if(Expr) statement [else statement]
 if(value = Expr) statement [else statement] // typeof(Expr) = typeof(value)?
 for(<Pattern> in Expr) statement
 while(Expr) statement
+try statement {catch (<pattern>) statement} [finally statement]
+switch (Expr) { {case <pattern> : statement} [default : statement] }
+using(<pattern> = Expr) statement
+lock(Expr) statement
 
 ========================================================
 Functions
