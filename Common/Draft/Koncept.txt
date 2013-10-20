@@ -231,6 +231,26 @@ InheritFrom<TDerived, TBase>
 Convertable<TFrom, TTo>
 ImplicitConvertable<TFrom, TTo>
 
+concept Convertable<TFrom, TTo>
+{
+	func Convert(value : TFrom) : TTo;
+}
+
+instance<TFrom, TTo> Convertable<TFrom? TTo>
+	where Convertable<TFrom, TTo>
+{
+}
+
+instance<TFrom, TTo> Convertable<TFrom, TTo?>
+	where Convertable<TFrom, TTo>
+{
+}
+
+instance<TFrom, TTo> Convertable<TFrom?, TTo?>
+	where Convertable<TFrom, TTo>
+{
+}
+
 ========================================================
 Patterns
 ========================================================
@@ -246,6 +266,21 @@ X..Y
 ========================================================
 Expressions
 ========================================================
+
+Operator:
+	++ -- []
+	+ - not
+	* / %
+	+ -
+	shl shr
+	== != < <= > >=
+	and
+	xor
+	or
+
+LeftValue = Expr
+Expr : Type
+Expr as Type
 
 ========================================================
 Statements
