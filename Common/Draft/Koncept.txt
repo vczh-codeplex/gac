@@ -73,6 +73,12 @@ interface<T> Enumerable
 	func CreateEnumerator() : Enumerator<T>;
 }
 
+interface<T> EvaluatedEnumerable
+{
+	prop Length : int {get;}
+	prop SliceEnumerable(start : int, length : int) : EvaluatedEnumerable<T>;
+}
+
 interface<T> Disposable
 {
 	func Dispose();
@@ -129,11 +135,13 @@ new Delegate<<int, int>, int>
 Container Interfaces
 ========================================================
 
-interface<TKey, TValue> ReadableMapping : Enumerable<TKey..TValue>
+interface<TKey, TValue> ReadableMapping
 {
 	prop Keys : Enumerable<TKey>;
 	prop Values : Enumerable<TValue>;
 	prop operator[index : TKey] : TValue {get;}
+	func ContainsKey(key : TKey) : bool;
+	func TryGet(key : TKey) : TValue..bool;
 }
 
 interface<TKey, TValue> Mapping : ReadableMapping
@@ -141,13 +149,12 @@ interface<TKey, TValue> Mapping : ReadableMapping
 	prop operator[index : TKey] : TValue {set;}
 }
 
-interface<T> ReadableArray : ReadableMapping<int, T>
+interface<T> ReadableArray : ReadableMapping<int, T>, EvaluatedEnumerable<T>
 {
-	prop Length : int {get;}
 	func Slice(start : int, length : int) : ReadableArray<T>;
 }
 
-interface<T> Array : ReadableArray<T>, Mapping<int, T>, Enumerable<T>
+interface<T> Array : ReadableArray<T>, Mapping<int, T>
 {
 	func Slice(start : int, length : int) : Array<T>;
 }
@@ -166,9 +173,10 @@ interface<T> List : Collection<T>
 	func Insert(index : int, value : T);
 }
 
-interface<TKey, TValue> Map : Mapping<TKey, TValue>
+interface<TKey, TValue> Map : Mapping<TKey, TValue>, Enumerable<TKey..TValue>
 {
 	func Add(key : TKey, value : Value);
+	func Set(key : TKey, value : Value) : bool;
 }
 
 func<T>				ArrayOf(length : int) : Array<T>;
@@ -183,6 +191,7 @@ func<TKey, TValue>	HashMapOf(values : Enumerable<TKey..TValue>) : Map<TKey, TVal
 ArrayOf(10) : int[]
 ArrayOf({1, 2, 3, 4, 5})
 HashMapOf({1..1, 2..4, 3..9, 4..16, 5..25})
+// {1, 2, 3} creates an EvaluatedEnumerable<int>
 
 ========================================================
 Concepts
@@ -225,6 +234,14 @@ ImplicitConvertable<TFrom, TTo>
 ========================================================
 Patterns
 ========================================================
+
+Constant
+Identifier
+X : Type
+X..Y
+<X, Y, Z>
+{X, Y, Z: W}
+{x:X, y:Y}
 
 ========================================================
 Expressions
