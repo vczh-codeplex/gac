@@ -58,6 +58,8 @@ T[]					Array<T>
 T[U]				Map<U, T>
 func (T, U) : V		Delegate<<T, U>, V>
 
+typeof(Expr)
+
 ========================================================
 Interfaces
 ========================================================
@@ -232,23 +234,39 @@ Convertable<TFrom, TTo>
 ImplicitConvertable<TFrom, TTo>
 
 concept Convertable<TFrom, TTo>
+	where NotNull<TFrom>, NotNull<TTo>
 {
-	func Convert(value : TFrom) : TTo;
+	func TryConvert(value : TFrom) : TTo?;
+	func Convert(value : TFrom) : TTo
+	{
+		if(result = TryConvert(value))
+		{
+			return result;
+		}
+		else
+		{
+			throw InvalidConvertionException{};
+		}
+	}
 }
 
+// all necessary or inherited constraints will be inferred and filled
+// e.g. if T? exists in the declaration body, then NotNull<T>
+// e.g. if Texpr as U exists then Convertable<T, U>
 instance<TFrom, TTo> Convertable<TFrom? TTo>
 	where Convertable<TFrom, TTo>
 {
-}
-
-instance<TFrom, TTo> Convertable<TFrom, TTo?>
-	where Convertable<TFrom, TTo>
-{
-}
-
-instance<TFrom, TTo> Convertable<TFrom?, TTo?>
-	where Convertable<TFrom, TTo>
-{
+	func TryConvert(value : TFrom?) : TTo?
+	{
+		if(expr = value)
+		{
+			return TryConvert(expr);
+		}
+		else
+		{
+			return null;
+		}
+	}
 }
 
 ========================================================
@@ -278,13 +296,26 @@ Operator:
 	xor
 	or
 
-LeftValue = Expr
+<constructors>
 Expr : Type
-Expr as Type
+
+default(T)					// DefaultValue<T>.Default()
+Expr as Type (or Type?)		// Convertable<typeof(Expr), Type>.Convert()/TryConvert()
 
 ========================================================
 Statements
 ========================================================
+
+<Pattern> | <LeftValue> = Expr
+return [Expr];
+break;
+continue;
+throw [Expr];
+
+if(Expr) statement [else statement]
+if(value = Expr) statement [else statement] // typeof(Expr) = typeof(value)?
+for(<Pattern> in Expr) statement
+while(Expr) statement
 
 ========================================================
 Functions
