@@ -53,7 +53,8 @@ data<T, U> Pair
 
 T..U				Pair<T, U>			default(T)..default(U)					// right associative
 <T, U, V>			T..U..V..void		<default(T), default(U), default(V)
-T?										null	// T can be all types except X? and object. All acceptable types T satisfies concept NotNull<T>
+T?										null		// T can be all types except X?, X^ and object. All acceptable types T satisfies concept NotNull<T>
+T^										default(T)	// T can be all types except X?, X^ and object. All acceptable types T satisfies concept NotNull<T>
 T[]					Array<T>
 T[U]				Map<U, T>
 func (T, U) : V		Delegate<<T, U>, V>
@@ -103,9 +104,9 @@ interface<T> Observable
 
 instance<T> DefaultValue<Enumerable<T>>
 {
-	func Default() = new Enumerable<T>
+	func Default() = Enumerable<T>
 	{
-		func CreateEnumerator() = new Enumerator<T>
+		func CreateEnumerator() = Enumerator<T>
 		{
 			get Current : T { throw InvalidOperationException{}; }
 			func MoveNext() : bool = false;
@@ -125,7 +126,7 @@ func (x : int, y : int) : int = x + y
 func (x : int, y : int) : int { return x + y; }
 
 // equivalent to the lambda expression above
-new Delegate<<int, int>, int>
+Delegate<<int, int>, int>
 {
 	func Invoke(<x, y> : <int, int>) : int
 	{
@@ -276,6 +277,8 @@ Patterns
 Constant
 Identifier		// can only be part of other patterns
 X : Type
+X^				// extract and convert to T^
+X?				// extract and convert to T?
 X..Y
 <X, Y, Z>
 {X, Y, Z: W}
@@ -306,7 +309,7 @@ Expr as Type (or Type?)		// Convertable<typeof(Expr), Type>.Convert()/TryConvert
 Statements
 ========================================================
 
-<Pattern> | <LeftValue> = Expr
+<Pattern> | <LeftValue> | var Name = Expr
 return [Expr];
 break;
 continue;
@@ -336,6 +339,103 @@ func WriteStream<string>(case this : StringStream, value : string);
 
 get/set<T> operator[](this : Enumerable<T>, index : int);
 
+namespace Name {}
+
 ========================================================
 Continuations
 ========================================================
+
+func<T, U> CreateCps(start : func (T):void) : U;
+
+---------------------------------------------------------
+
+data<T> CpsEnumerator
+{
+	current			: T;
+	available		: bool;
+	start			: func (CpsEnumerator<T>^) : void;
+	continuation?	: func () : void;
+}
+
+// func<T> CreateCps<CpsEnumerator^, Enumerable<T>>(..):Enumerable<T> is inferred
+func<T> CreateCps(start : func (CpsEnumerator<T>^):void )
+{
+	return Enumerable<T>
+	{
+		func CreateEnumerator()
+		{
+			state? = CpsEnumerator{ start : start };
+			return Enumerable<T>
+			{
+				get Current : T { return state.current; }
+				func MoveNext()
+				{
+					state.available=false;
+					if(state.continuation==null)
+					{
+						state.startContinuation(state);
+					}
+					else
+					{
+						state.continuation();
+					}
+					return state.available;
+				}
+			};
+		}
+	};
+}
+
+func<T> yield(state : CpsEnumerator<T>^, value : T, continuation : func ():void)
+{
+	state.current=value;
+	state.available=true;
+	state.continuation=continuation;
+}
+
+func<T> exit(state : CpsEnumerator<T>)
+{
+}
+
+---------------------------------------------------------
+
+func<T> Where(this : Enumerable<T>, predicate : func(T):bool)
+{
+	for(s in this)
+		if(predicate(s))
+			yield! s;
+	// return cannot be followed with an expression because exit function does not accept one
+}
+
+---------------------------------------------------------
+
+func<T> CreateCps(start : func (Promise<T>^) : void) : Task<T>
+{
+	return CreateFuturePromiseTask<T>(start);
+}
+
+func<T> await(state : Promise<T>^, value : Task<T>, continuation : func (T):void)
+{
+	source.ContinueWith(task=>continuation(task.Result);
+}
+
+func<T> exit(state : Promose<T>^, value : T)
+{
+	state.SetResult(T);
+}
+
+---------------------------------------------------------
+
+func Find(src)
+{
+    var urls=(await! DownloadAsync(src)).Split("\r\n");
+	for(url in urls)
+	{
+		var content=await! DownloadAsync(url);
+		if(content.Length>100)
+		{
+			return content;
+		}
+	}
+	return null; // call exit
+}
