@@ -66,7 +66,7 @@ Interfaces
 
 interface<T> Enumerator
 {
-	prop Current : T {get;}
+	get Current : T;
 	func MoveNext() : bool;
 }
 
@@ -77,8 +77,8 @@ interface<T> Enumerable
 
 interface<T> EvaluatedEnumerable
 {
-	prop Length : int {get;}
-	prop SliceEnumerable(start : int, length : int) : EvaluatedEnumerable<T>;
+	get Length : int;
+	func SliceEnumerable(start : int, length : int) : EvaluatedEnumerable<T>;
 }
 
 interface<T> Disposable
@@ -107,7 +107,7 @@ instance<T> DefaultValue<Enumerable<T>>
 	{
 		func CreateEnumerator() = new Enumerator<T>
 		{
-			prop Current : T { get { throw InvalidOperationException{}; } }
+			get Current : T { throw InvalidOperationException{}; }
 			func MoveNext() : bool = false;
 		};
 	};
@@ -139,16 +139,16 @@ Container Interfaces
 
 interface<TKey, TValue> ReadableMapping
 {
-	prop Keys : Enumerable<TKey>;
-	prop Values : Enumerable<TValue>;
-	prop operator[index : TKey] : TValue {get;}
+	get Keys : Enumerable<TKey>;
+	get Values : Enumerable<TValue>;
+	get operator[](index : TKey) : TValue;
 	func ContainsKey(key : TKey) : bool;
 	func TryGet(key : TKey) : TValue..bool;
 }
 
 interface<TKey, TValue> Mapping : ReadableMapping
 {
-	prop operator[index : TKey] : TValue {set;}
+	set operator[](index : TKey) : TValue;
 }
 
 interface<T> ReadableArray : ReadableMapping<int, T>, EvaluatedEnumerable<T>
@@ -201,7 +201,7 @@ Concepts
 
 concept<T> Addable
 {
-	prop Zero : T {get;}
+	get Zero : T;
 	func operator+ (x : T) : T;
 	func operator- (x : T) : T;
 	func operator+ (x : T, y : T) : T;
@@ -210,7 +210,7 @@ concept<T> Addable
 
 concept<T, TDiff> Differentiable
 {
-	prop Zero : TDiff {get;}
+	get Zero : TDiff;
 	func operator+ (x : T, y : TDiff) : T;
 	func operator+ (x : TDiff, y : T) : T;
 	func operator- (x : T, y : T) : TDiff;
@@ -334,9 +334,7 @@ func WriteStream<string>(this : Stream, value : string);
 func<T, U> WriteStream<T..U>(this : Stream, value : T..U);
 func WriteStream<string>(case this : StringStream, value : string);
 
-========================================================
-Predefined Convertions
-========================================================
+get/set<T> operator[](this : Enumerable<T>, index : int);
 
 ========================================================
 Continuations
