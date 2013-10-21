@@ -394,7 +394,7 @@ func<T> yield(state : CpsEnumerator<T>^, value : T, continuation : func ():void)
 	state.continuation=continuation;
 }
 
-func<T> exit(state : CpsEnumerator<T>)
+func<T> exit(state : CpsEnumerator<T>^)
 {
 }
 
