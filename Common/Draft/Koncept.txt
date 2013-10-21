@@ -53,8 +53,8 @@ data<T, U> Pair
 
 T..U				Pair<T, U>			default(T)..default(U)					// right associative
 <T, U, V>			T..U..V..void		<default(T), default(U), default(V)
-T?										null		// T can be all types except X?, X^ and object. All acceptable types T satisfies concept NotNull<T>
-T^										default(T)	// T can be all types except X?, X^ and object. All acceptable types T satisfies concept NotNull<T>
+T?										null		// T??->T?, T^?->T?, object?->object
+T^										default(T)	// T?^->T?, T^^->T^, cannot be interface. T should be DataType<T>
 T[]					Array<T>
 T[U]				Map<U, T>
 func (T, U) : V		Delegate<<T, U>, V>
@@ -115,7 +115,7 @@ instance<T> DefaultValue<Enumerable<T>>
 }
 
 interface<TArguments, TReturn> Delegate
-	where Tuple<TArgs>
+	where TupleType<TArgs>
 {
 	func Invoke(arguments : TArguments) : TReturn;
 }
@@ -144,7 +144,7 @@ interface<TKey, TValue> ReadableMapping
 	get Values : Enumerable<TValue>;
 	get operator[](index : TKey) : TValue;
 	func ContainsKey(key : TKey) : bool;
-	func TryGet(key : TKey) : TValue..bool;
+	func TryGet(key : TKey) : TValue?;
 }
 
 interface<TKey, TValue> Mapping : ReadableMapping
@@ -226,9 +226,10 @@ SizeOf<T>
 Tuplize<T>
 Hashable<T>
 
-NotNull<T>
-Interface<T>
-Tuple<T>
+NotNullType<T>
+DataType<T>
+InterfaceType<T>
+TupleType<T>
 InheritFrom<TDerived, TBase>
 
 Convertable<TFrom, TTo>
@@ -252,7 +253,7 @@ concept Convertable<TFrom, TTo>
 }
 
 // all necessary or inherited constraints will be inferred and filled
-// e.g. if T? exists in the declaration body, then NotNull<T>
+// e.g. if T^ exists in the declaration body, then Data<T>
 // e.g. if Texpr as U exists then Convertable<T, U>
 instance<TFrom, TTo> Convertable<TFrom? TTo>
 	where Convertable<TFrom, TTo>
