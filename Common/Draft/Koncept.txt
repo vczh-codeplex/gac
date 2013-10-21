@@ -325,6 +325,15 @@ lock(Expr) statement
 Functions
 ========================================================
 
+func <generic-types> Name <instantiation-types> ( [case]<pattern>, .. ) <generic-requirements> (= Expr | statement )
+
+func<T> WriteStream(this : Stream, value : T); // throw NotImplementedException{}
+
+func WriteStream<int>(this : Stream, value : int);
+func WriteStream<string>(this : Stream, value : string);
+func<T, U> WriteStream<T..U>(this : Stream, value : T..U);
+func WriteStream<string>(case this : StringStream, value : string);
+
 ========================================================
 Predefined Convertions
 ========================================================
