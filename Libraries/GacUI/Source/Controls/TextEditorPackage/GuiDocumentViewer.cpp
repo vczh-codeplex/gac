@@ -49,6 +49,7 @@ GuiDocumentViewer
 					EnsureRectVisible(bounds);
 				}
 				UpdateCaretPoint();
+				SelectionChanged.Execute(documentControl->GetNotifyEventArguments());
 			}
 
 			bool GuiDocumentCommonInterface::ProcessKey(vint code, bool shift, bool ctrl)
@@ -166,7 +167,7 @@ GuiDocumentViewer
 
 			void GuiDocumentCommonInterface::InstallDocumentViewer(GuiControl* _sender, compositions::GuiGraphicsComposition* _container)
 			{
-				senderControl=_sender;
+				documentControl=_sender;
 
 				documentElement=GuiDocumentElement::Create();
 				documentComposition=new GuiBoundsComposition;
@@ -188,6 +189,7 @@ GuiDocumentViewer
 
 				ActiveHyperlinkChanged.SetAssociatedComposition(_sender->GetBoundsComposition());
 				ActiveHyperlinkExecuted.SetAssociatedComposition(_sender->GetBoundsComposition());
+				SelectionChanged.SetAssociatedComposition(_sender->GetBoundsComposition());
 			}
 
 			void GuiDocumentCommonInterface::SetActiveHyperlink(Ptr<DocumentHyperlinkRun> hyperlink, vint paragraphIndex)
@@ -198,7 +200,7 @@ GuiDocumentViewer
 					activeHyperlink=hyperlink;
 					activeHyperlinkParagraph=paragraphIndex;
 					ActivateActiveHyperlink(true);
-					ActiveHyperlinkChanged.Execute(senderControl->GetNotifyEventArguments());
+					ActiveHyperlinkChanged.Execute(documentControl->GetNotifyEventArguments());
 				}
 			}
 
@@ -222,7 +224,7 @@ GuiDocumentViewer
 
 			void GuiDocumentCommonInterface::OnCaretNotify(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
-				if(senderControl->GetVisuallyEnabled())
+				if(documentControl->GetVisuallyEnabled())
 				{
 					if(editMode!=ViewOnly)
 					{
@@ -233,7 +235,7 @@ GuiDocumentViewer
 
 			void GuiDocumentCommonInterface::OnGotFocus(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
-				if(senderControl->GetVisuallyEnabled())
+				if(documentControl->GetVisuallyEnabled())
 				{
 					if(editMode!=ViewOnly)
 					{
@@ -245,7 +247,7 @@ GuiDocumentViewer
 
 			void GuiDocumentCommonInterface::OnLostFocus(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
-				if(senderControl->GetVisuallyEnabled())
+				if(documentControl->GetVisuallyEnabled())
 				{
 					documentElement->SetCaretVisible(false);
 				}
@@ -253,7 +255,7 @@ GuiDocumentViewer
 
 			void GuiDocumentCommonInterface::OnKeyDown(compositions::GuiGraphicsComposition* sender, compositions::GuiKeyEventArgs& arguments)
 			{
-				if(senderControl->GetVisuallyEnabled())
+				if(documentControl->GetVisuallyEnabled())
 				{
 					if(editMode!=ViewOnly)
 					{
@@ -267,7 +269,7 @@ GuiDocumentViewer
 
 			void GuiDocumentCommonInterface::OnCharInput(compositions::GuiGraphicsComposition* sender, compositions::GuiCharEventArgs& arguments)
 			{
-				if(senderControl->GetVisuallyEnabled())
+				if(documentControl->GetVisuallyEnabled())
 				{
 					if(editMode==Editable && arguments.code!=VKEY_ESCAPE && arguments.code!=VKEY_BACK && arguments.code!=VKEY_RETURN && !arguments.ctrl)
 					{
@@ -280,7 +282,7 @@ GuiDocumentViewer
 
 			void GuiDocumentCommonInterface::OnMouseMove(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 			{
-				if(senderControl->GetVisuallyEnabled())
+				if(documentControl->GetVisuallyEnabled())
 				{
 					switch(editMode)
 					{
@@ -328,9 +330,9 @@ GuiDocumentViewer
 
 			void GuiDocumentCommonInterface::OnMouseDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 			{
-				if(senderControl->GetVisuallyEnabled())
+				if(documentControl->GetVisuallyEnabled())
 				{
-					senderControl->SetFocus();
+					documentControl->SetFocus();
 					switch(editMode)
 					{
 					case ViewOnly:
@@ -359,7 +361,7 @@ GuiDocumentViewer
 
 			void GuiDocumentCommonInterface::OnMouseUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 			{
-				if(senderControl->GetVisuallyEnabled())
+				if(documentControl->GetVisuallyEnabled())
 				{
 					dragging=false;
 					switch(editMode)
@@ -374,7 +376,7 @@ GuiDocumentViewer
 							}
 							if(activeHyperlink)
 							{
-								ActiveHyperlinkExecuted.Execute(senderControl->GetNotifyEventArguments());
+								ActiveHyperlinkExecuted.Execute(documentControl->GetNotifyEventArguments());
 							}
 						}
 						break;
@@ -402,7 +404,7 @@ GuiDocumentViewer
 				,activeHyperlinkParagraph(-1)
 				,dragging(false)
 				,editMode(ViewOnly)
-				,senderControl(0)
+				,documentControl(0)
 			{
 				undoRedoProcessor=new GuiDocumentUndoRedoProcessor;
 
@@ -489,6 +491,7 @@ GuiDocumentViewer
 					caret=TextPos(begin.row+model->paragraphs.Count()-1, model->paragraphs[model->paragraphs.Count()-1]->GetText(false).Length());
 				}
 				documentElement->SetCaret(caret, caret, true);
+				documentControl->TextChanged.Execute(documentControl->GetNotifyEventArguments());
 			}
 
 			void GuiDocumentCommonInterface::EditText(TextPos begin, TextPos end, bool frontSide, const collections::Array<WString>& text)
@@ -518,6 +521,7 @@ GuiDocumentViewer
 					frontSide=true;
 				}
 				documentElement->SetCaret(caret, caret, frontSide);
+				documentControl->TextChanged.Execute(documentControl->GetNotifyEventArguments());
 			}
 
 			void GuiDocumentCommonInterface::EditStyle(TextPos begin, TextPos end, Ptr<DocumentStyleProperties> style)
@@ -528,6 +532,7 @@ GuiDocumentViewer
 			void GuiDocumentCommonInterface::EditImage(TextPos begin, TextPos end, Ptr<GuiImageData> image)
 			{
 				documentElement->EditImage(begin, end, image);
+				documentControl->TextChanged.Execute(documentControl->GetNotifyEventArguments());
 			}
 
 			void GuiDocumentCommonInterface::EditHyperlink(vint paragraphIndex, vint begin, vint end, const WString& reference, const WString& normalStyleName, const WString& activeStyleName)
@@ -829,6 +834,18 @@ GuiDocumentViewer
 			{
 			}
 
+			const WString& GuiDocumentViewer::GetText()
+			{
+				text=documentElement->GetDocument()->GetText(true);
+				return text;
+			}
+
+			void GuiDocumentViewer::SetText(const WString& value)
+			{
+				SelectAll();
+				SetSelectionText(value);
+			}
+
 /***********************************************************************
 GuiDocumentLabel
 ***********************************************************************/
@@ -843,6 +860,18 @@ GuiDocumentLabel
 
 			GuiDocumentLabel::~GuiDocumentLabel()
 			{
+			}
+
+			const WString& GuiDocumentLabel::GetText()
+			{
+				text=documentElement->GetDocument()->GetText(true);
+				return text;
+			}
+
+			void GuiDocumentLabel::SetText(const WString& value)
+			{
+				SelectAll();
+				SetSelectionText(value);
 			}
 		}
 	}
