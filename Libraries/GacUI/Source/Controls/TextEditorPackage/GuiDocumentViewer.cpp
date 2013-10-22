@@ -222,6 +222,51 @@ GuiDocumentViewer
 				});
 			}
 
+			void GuiDocumentCommonInterface::EditInternal(TextPos begin, TextPos end, const Func<void(TextPos, TextPos, vint&, vint&)>& editor)
+			{
+				// save run before editing
+				if(begin>end)
+				{
+					TextPos temp=begin;
+					begin=end;
+					end=temp;
+				}
+				Ptr<DocumentModel> originalModel=documentElement->GetDocument()->CopyDocument(begin, end, true);
+				if(originalModel)
+				{
+					// edit
+					vint paragraphCount=0;
+					vint lastParagraphLength=0;
+					editor(begin, end, paragraphCount, lastParagraphLength);
+
+					// calculate new caret
+					TextPos caret;
+					if(paragraphCount==0)
+					{
+						caret=begin;
+					}
+					else
+					{
+						caret=TextPos(begin.row+paragraphCount, lastParagraphLength);
+					}
+					documentElement->SetCaret(caret, caret, true);
+					documentControl->TextChanged.Execute(documentControl->GetNotifyEventArguments());
+
+					// save run after editing
+					Ptr<DocumentModel> inputModel=documentElement->GetDocument()->CopyDocument(begin, caret, true);
+
+					// submit redo-undo
+					GuiDocumentUndoRedoProcessor::ReplaceModelStruct arguments;
+					arguments.originalStart=begin;
+					arguments.originalEnd=end;
+					arguments.originalModel=originalModel;
+					arguments.inputStart=begin;
+					arguments.inputEnd=caret;
+					arguments.inputModel=inputModel;
+					undoRedoProcessor->OnReplaceModel(arguments);
+				}
+			}
+
 			void GuiDocumentCommonInterface::OnCaretNotify(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				if(documentControl->GetVisuallyEnabled())
@@ -468,60 +513,22 @@ GuiDocumentViewer
 
 			void GuiDocumentCommonInterface::EditRun(TextPos begin, TextPos end, Ptr<DocumentModel> model)
 			{
-				documentElement->EditRun(begin, end, model);
-
-				if(begin>end)
+				EditInternal(begin, end, [=](TextPos begin, TextPos end, vint& paragraphCount, vint& lastParagraphLength)
 				{
-					TextPos temp=begin;
-					begin=end;
-					end=temp;
-				}
-
-				TextPos caret;
-				if(model->paragraphs.Count()==0)
-				{
-					caret=begin;
-				}
-				else if(model->paragraphs.Count()==1)
-				{
-					caret=TextPos(begin.row, begin.column+model->paragraphs[0]->GetText(false).Length());
-				}
-				else
-				{
-					caret=TextPos(begin.row+model->paragraphs.Count()-1, model->paragraphs[model->paragraphs.Count()-1]->GetText(false).Length());
-				}
-				documentElement->SetCaret(caret, caret, true);
-				documentControl->TextChanged.Execute(documentControl->GetNotifyEventArguments());
+					documentElement->EditRun(begin, end, model);
+					paragraphCount=model->paragraphs.Count();
+					lastParagraphLength=paragraphCount==0?0:model->paragraphs[paragraphCount-1]->GetText(false).Length();
+				});
 			}
 
 			void GuiDocumentCommonInterface::EditText(TextPos begin, TextPos end, bool frontSide, const collections::Array<WString>& text)
 			{
-				documentElement->EditText(begin, end, frontSide, text);
-
-				if(begin>end)
+				EditInternal(begin, end, [=, &text](TextPos begin, TextPos end, vint& paragraphCount, vint& lastParagraphLength)
 				{
-					TextPos temp=begin;
-					begin=end;
-					end=temp;
-				}
-
-				TextPos caret;
-				if(text.Count()==0)
-				{
-					caret=begin;
-				}
-				else if(text.Count()==1)
-				{
-					caret=TextPos(begin.row, begin.column+text[0].Length());
-					frontSide=true;
-				}
-				else
-				{
-					caret=TextPos(begin.row+text.Count()-1, text[text.Count()-1].Length());
-					frontSide=true;
-				}
-				documentElement->SetCaret(caret, caret, frontSide);
-				documentControl->TextChanged.Execute(documentControl->GetNotifyEventArguments());
+					documentElement->EditText(begin, end, frontSide, text);
+					paragraphCount=text.Count();
+					lastParagraphLength=paragraphCount==0?0:text[paragraphCount-1].Length();
+				});
 			}
 
 			void GuiDocumentCommonInterface::EditStyle(TextPos begin, TextPos end, Ptr<DocumentStyleProperties> style)
@@ -531,8 +538,12 @@ GuiDocumentViewer
 
 			void GuiDocumentCommonInterface::EditImage(TextPos begin, TextPos end, Ptr<GuiImageData> image)
 			{
-				documentElement->EditImage(begin, end, image);
-				documentControl->TextChanged.Execute(documentControl->GetNotifyEventArguments());
+				EditInternal(begin, end, [=](TextPos begin, TextPos end, vint& paragraphCount, vint& lastParagraphLength)
+				{
+					documentElement->EditImage(begin, end, image);
+					paragraphCount=1;
+					lastParagraphLength=wcslen(DocumentImageRun::RepresentationText);
+				});
 			}
 
 			void GuiDocumentCommonInterface::EditHyperlink(vint paragraphIndex, vint begin, vint end, const WString& reference, const WString& normalStyleName, const WString& activeStyleName)
@@ -558,6 +569,12 @@ GuiDocumentViewer
 			void GuiDocumentCommonInterface::RenameStyle(const WString& oldStyleName, const WString& newStyleName)
 			{
 				documentElement->RenameStyle(oldStyleName, newStyleName);
+
+				// submit redo-undo
+				GuiDocumentUndoRedoProcessor::RenameStyleStruct arguments;
+				arguments.oldStyleName=oldStyleName;
+				arguments.newStyleName=newStyleName;
+				undoRedoProcessor->OnRenameStyle(arguments);
 			}
 
 			void GuiDocumentCommonInterface::ClearStyle(TextPos begin, TextPos end)

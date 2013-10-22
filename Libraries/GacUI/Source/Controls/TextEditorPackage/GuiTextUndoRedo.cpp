@@ -1,5 +1,6 @@
 #include "GuiTextUndoRedo.h"
 #include "GuiTextCommonInterface.h"
+#include "GuiDocumentViewer.h"
 
 namespace vl
 {
@@ -166,6 +167,88 @@ GuiTextBoxUndoRedoProcessor
 
 			void GuiTextBoxUndoRedoProcessor::TextEditFinished(vuint editVersion)
 			{
+			}
+
+/***********************************************************************
+GuiDocumentUndoRedoProcessor::ReplaceModelStep
+***********************************************************************/
+
+			void GuiDocumentUndoRedoProcessor::ReplaceModelStep::Undo()
+			{
+				GuiDocumentCommonInterface* ci=dynamic_cast<GuiDocumentCommonInterface*>(processor->ownerComposition->GetRelatedControl());
+				if(ci)
+				{
+					ci->EditRun(arguments.inputStart, arguments.inputEnd, arguments.originalModel);
+					ci->SetCaret(arguments.originalStart, arguments.originalEnd);
+				}
+			}
+
+			void GuiDocumentUndoRedoProcessor::ReplaceModelStep::Redo()
+			{
+				GuiDocumentCommonInterface* ci=dynamic_cast<GuiDocumentCommonInterface*>(processor->ownerComposition->GetRelatedControl());
+				if(ci)
+				{
+					ci->EditRun(arguments.originalStart, arguments.originalEnd, arguments.inputModel);
+					ci->SetCaret(arguments.inputStart, arguments.inputEnd);
+				}
+			}
+
+/***********************************************************************
+GuiDocumentUndoRedoProcessor::RenameStyleStep
+***********************************************************************/
+
+			void GuiDocumentUndoRedoProcessor::RenameStyleStep::Undo()
+			{
+				GuiDocumentCommonInterface* ci=dynamic_cast<GuiDocumentCommonInterface*>(processor->ownerComposition->GetRelatedControl());
+				if(ci)
+				{
+					ci->RenameStyle(arguments.newStyleName, arguments.oldStyleName);
+				}
+			}
+
+			void GuiDocumentUndoRedoProcessor::RenameStyleStep::Redo()
+			{
+				GuiDocumentCommonInterface* ci=dynamic_cast<GuiDocumentCommonInterface*>(processor->ownerComposition->GetRelatedControl());
+				if(ci)
+				{
+					ci->RenameStyle(arguments.oldStyleName, arguments.newStyleName);
+				}
+			}
+
+/***********************************************************************
+GuiDocumentUndoRedoProcessor
+***********************************************************************/
+
+			GuiDocumentUndoRedoProcessor::GuiDocumentUndoRedoProcessor()
+				:element(0)
+				,ownerComposition(0)
+			{
+			}
+
+			GuiDocumentUndoRedoProcessor::~GuiDocumentUndoRedoProcessor()
+			{
+			}
+
+			void GuiDocumentUndoRedoProcessor::Setup(elements::GuiDocumentElement* _element, compositions::GuiGraphicsComposition* _ownerComposition)
+			{
+				element=_element;
+				ownerComposition=_ownerComposition;
+			}
+
+			void GuiDocumentUndoRedoProcessor::OnReplaceModel(const ReplaceModelStruct& arguments)
+			{
+				Ptr<ReplaceModelStep> step=new ReplaceModelStep;
+				step->processor=this;
+				step->arguments=arguments;
+				PushStep(step);
+			}
+
+			void GuiDocumentUndoRedoProcessor::OnRenameStyle(const RenameStyleStruct& arguments)
+			{
+				Ptr<RenameStyleStep> step=new RenameStyleStep;
+				step->processor=this;
+				step->arguments=arguments;
+				PushStep(step);
 			}
 		}
 	}

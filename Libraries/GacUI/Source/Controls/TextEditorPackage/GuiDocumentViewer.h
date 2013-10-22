@@ -56,6 +56,7 @@ GuiDocumentCommonInterface
 				void										SetActiveHyperlink(Ptr<DocumentHyperlinkRun> hyperlink, vint paragraphIndex=-1);
 				void										ActivateActiveHyperlink(bool activate);
 				void										AddShortcutCommand(vint key, const Func<void()>& eventHandler);
+				void										EditInternal(TextPos begin, TextPos end, const Func<void(TextPos, TextPos, vint&, vint&)>& editor);
 
 				void										OnCaretNotify(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 				void										OnGotFocus(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);

@@ -92,6 +92,60 @@ Undo Redo (Document)
 			class GuiDocumentUndoRedoProcessor : public GuiGeneralUndoRedoProcessor
 			{
 			public:
+				struct ReplaceModelStruct
+				{
+					TextPos									originalStart;
+					TextPos									originalEnd;
+					Ptr<DocumentModel>						originalModel;
+					TextPos									inputStart;
+					TextPos									inputEnd;
+					Ptr<DocumentModel>						inputModel;
+
+					ReplaceModelStruct()
+					{
+					}
+				};
+
+				struct RenameStyleStruct
+				{
+					WString									oldStyleName;
+					WString									newStyleName;
+
+					RenameStyleStruct()
+					{
+					}
+				};
+			protected:
+				elements::GuiDocumentElement*				element;
+				compositions::GuiGraphicsComposition*		ownerComposition;
+				
+				class ReplaceModelStep : public Object, public IEditStep
+				{
+				public:
+					GuiDocumentUndoRedoProcessor*			processor;
+					ReplaceModelStruct						arguments;
+					
+					void									Undo();
+					void									Redo();
+				};
+
+				class RenameStyleStep : public Object, public IEditStep
+				{
+				public:
+					GuiDocumentUndoRedoProcessor*			processor;
+					RenameStyleStruct						arguments;
+					
+					void									Undo();
+					void									Redo();
+				};
+			public:
+
+				GuiDocumentUndoRedoProcessor();
+				~GuiDocumentUndoRedoProcessor();
+
+				void										Setup(elements::GuiDocumentElement* _element, compositions::GuiGraphicsComposition* _ownerComposition);
+				void										OnReplaceModel(const ReplaceModelStruct& arguments);
+				void										OnRenameStyle(const RenameStyleStruct& arguments);
 			};
 		}
 	}
