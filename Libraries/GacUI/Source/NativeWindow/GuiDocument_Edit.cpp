@@ -580,6 +580,73 @@ document_operation_visitors::CollectStyleNameVisitor
 		using namespace document_operation_visitors;
 
 /***********************************************************************
+document_operation_visitors::ReplaceStyleNameVisitor
+***********************************************************************/
+
+		namespace document_operation_visitors
+		{
+			class ReplaceStyleNameVisitor : public Object, public DocumentRun::IVisitor
+			{
+			public:
+				WString							oldStyleName;
+				WString							newStyleName;
+
+				ReplaceStyleNameVisitor(const WString& _oldStyleName, const WString& _newStyleName)
+					:oldStyleName(_oldStyleName)
+					,newStyleName(_newStyleName)
+				{
+				}
+
+				void VisitContainer(DocumentContainerRun* run)
+				{
+					FOREACH(Ptr<DocumentRun>, subRun, run->runs)
+					{
+						subRun->Accept(this);
+					}
+				}
+
+				void Visit(DocumentTextRun* run)override
+				{
+				}
+
+				void Visit(DocumentStylePropertiesRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentStyleApplicationRun* run)override
+				{
+					if(run->styleName==oldStyleName) run->styleName=newStyleName;
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentHyperlinkRun* run)override
+				{
+					if(run->styleName==oldStyleName) run->styleName=newStyleName;
+					if(run->normalStyleName==oldStyleName) run->normalStyleName=newStyleName;
+					if(run->activeStyleName==oldStyleName) run->activeStyleName=newStyleName;
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentImageRun* run)override
+				{
+				}
+
+				void Visit(DocumentParagraphRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				static void ReplaceStyleName(DocumentParagraphRun* run, const WString& oldStyleName, const WString& newStyleName)
+				{
+					ReplaceStyleNameVisitor visitor(oldStyleName, newStyleName);
+					run->Accept(&visitor);
+				}
+			};
+		}
+		using namespace document_operation_visitors;
+
+/***********************************************************************
 document_operation_visitors::RemoveRunVisitor
 ***********************************************************************/
 
@@ -1389,6 +1456,54 @@ DocumentModel::EditRangeOperations
 DocumentModel::EditRun
 ***********************************************************************/
 
+		vint DocumentModel::EditRun(TextPos begin, TextPos end, Ptr<DocumentModel> model)
+		{
+			// check caret range
+			RunRangeMap runRanges;
+			if(!CheckEditRange(begin, end, runRanges)) return -1;
+
+			// calculate new names for the model's styles to prevent conflicting
+			List<WString> oldNames, newNames;
+			CopyFrom(oldNames, model->styles.Keys());
+			CopyFrom(newNames, model->styles.Keys());
+			for(vint i=0;i<newNames.Count();i++)
+			{
+				WString name=newNames[i];
+				if(styles.Keys().Contains(name))
+				{
+					vint index=2;
+					while(true)
+					{
+						WString newName=name+L"_"+itow(index++);
+						if(!styles.Keys().Contains(newName) && model->styles.Keys().Contains(newName))
+						{
+							newNames[i]=newName;
+							break;
+						}
+					}
+				}
+			}
+
+			// rename model's styles
+			typedef Pair<WString, WString> NamePair;
+			FOREACH(NamePair, name, From(oldNames).Pairwise(newNames))
+			{
+				model->RenameStyle(name.key, name.value);
+			}
+			FOREACH(WString, name, newNames)
+			{
+				if(!styles.Keys().Contains(name))
+				{
+					styles.Add(name, model->styles[name]);
+				}
+			}
+
+			// edit runs
+			Array<Ptr<DocumentParagraphRun>> runs;
+			CopyFrom(runs, model->paragraphs);
+			return EditRun(begin, end, runs);
+		}
+
 		vint DocumentModel::EditRun(TextPos begin, TextPos end, const collections::Array<Ptr<DocumentParagraphRun>>& runs)
 		{
 			// check caret range
@@ -1618,6 +1733,31 @@ DocumentModel::EditStyleName
 			{
 				RemoveStyleNameVisitor::RemoveStyleName(paragraph, runRanges, start, end);
 			});
+		}
+
+		bool DocumentModel::RenameStyle(const WString& oldStyleName, const WString& newStyleName)
+		{
+			vint index=styles.Keys().IndexOf(oldStyleName);
+			if(index==-1) return false;
+			if(styles.Keys().Contains(newStyleName)) return false;
+
+			Ptr<DocumentStyle> style=styles.Values()[index];
+			styles.Remove(oldStyleName);
+			styles.Add(newStyleName, style);
+
+			FOREACH(Ptr<DocumentStyle>, subStyle, styles.Values())
+			{
+				if(subStyle->parentStyleName==oldStyleName)
+				{
+					subStyle->parentStyleName=newStyleName;
+				}
+			}
+
+			FOREACH(Ptr<DocumentParagraphRun>, paragraph, paragraphs)
+			{
+				ReplaceStyleNameVisitor::ReplaceStyleName(paragraph.Obj(), oldStyleName, newStyleName);
+			}
+			return true;
 		}
 
 /***********************************************************************

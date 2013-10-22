@@ -121,6 +121,11 @@ GuiDocumentCommonInterface
 				/// <param name="newCount">The number of updated paragraphs.</param>
 				/// <param name="updatedText">Set to true to notify that the text is updated.</param>
 				void										NotifyParagraphUpdated(vint index, vint oldCount, vint newCount, bool updatedText);
+				/// <summary>Edit run in a specified range.</summary>
+				/// <param name="begin">The begin position of the range.</param>
+				/// <param name="end">The end position of the range.</param>
+				/// <param name="model">The new run.</param>
+				void										EditRun(TextPos begin, TextPos end, Ptr<DocumentModel> model);
 				/// <summary>Edit text in a specified range.</summary>
 				/// <param name="begin">The begin position of the range.</param>
 				/// <param name="end">The end position of the range.</param>
@@ -159,6 +164,10 @@ GuiDocumentCommonInterface
 				/// <param name="begin">The begin position of the range.</param>
 				/// <param name="end">The end position of the range.</param>
 				void										RemoveStyleName(TextPos begin, TextPos end);
+				/// <summary>Rename a style.</summary>
+				/// <param name="oldStyleName">The name of the style.</param>
+				/// <param name="newStyleName">The new name.</param>
+				void										RenameStyle(const WString& oldStyleName, const WString& newStyleName);
 				/// <summary>Clear all styles in a specified range.</summary>
 				/// <param name="begin">The begin position of the range.</param>
 				/// <param name="end">The end position of the range.</param>
@@ -186,6 +195,12 @@ GuiDocumentCommonInterface
 				/// <summary>Set the selected text.</summary>
 				/// <param name="value">The selected text.</param>
 				void										SetSelectionText(const WString& value);
+				/// <summary>Get the selected model.</summary>
+				/// <returns>The selected model.</returns>
+				Ptr<DocumentModel>							GetSelectionModel();
+				/// <summary>Set the selected model.</summary>
+				/// <param name="value">The selected model.</param>
+				void										SetSelectionModel(Ptr<DocumentModel> value);
 
 				//================ clipboard operations
 

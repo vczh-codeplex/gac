@@ -464,6 +464,33 @@ GuiDocumentViewer
 				documentElement->NotifyParagraphUpdated(index, oldCount, newCount, updatedText);
 			}
 
+			void GuiDocumentCommonInterface::EditRun(TextPos begin, TextPos end, Ptr<DocumentModel> model)
+			{
+				documentElement->EditRun(begin, end, model);
+
+				if(begin>end)
+				{
+					TextPos temp=begin;
+					begin=end;
+					end=temp;
+				}
+
+				TextPos caret;
+				if(model->paragraphs.Count()==0)
+				{
+					caret=begin;
+				}
+				else if(model->paragraphs.Count()==1)
+				{
+					caret=TextPos(begin.row, begin.column+model->paragraphs[0]->GetText(false).Length());
+				}
+				else
+				{
+					caret=TextPos(begin.row+model->paragraphs.Count()-1, model->paragraphs[model->paragraphs.Count()-1]->GetText(false).Length());
+				}
+				documentElement->SetCaret(caret, caret, true);
+			}
+
 			void GuiDocumentCommonInterface::EditText(TextPos begin, TextPos end, bool frontSide, const collections::Array<WString>& text)
 			{
 				documentElement->EditText(begin, end, frontSide, text);
@@ -521,6 +548,11 @@ GuiDocumentViewer
 			void GuiDocumentCommonInterface::RemoveStyleName(TextPos begin, TextPos end)
 			{
 				documentElement->RemoveStyleName(begin, end);
+			}
+
+			void GuiDocumentCommonInterface::RenameStyle(const WString& oldStyleName, const WString& newStyleName)
+			{
+				documentElement->RenameStyle(oldStyleName, newStyleName);
 			}
 
 			void GuiDocumentCommonInterface::ClearStyle(TextPos begin, TextPos end)
@@ -622,9 +654,47 @@ GuiDocumentViewer
 					}
 				}
 
+				TextPos begin=documentElement->GetCaretBegin();
+				TextPos end=documentElement->GetCaretEnd();
+				if(begin>end)
+				{
+					TextPos temp=begin;
+					begin=end;
+					end=temp;
+				}
+
 				Array<WString> text;
 				CopyFrom(text, paragraphs);
-				EditText(documentElement->GetCaretBegin(), documentElement->GetCaretEnd(), documentElement->IsCaretEndPreferFrontSide(), text);
+				EditText(begin, end, documentElement->IsCaretEndPreferFrontSide(), text);
+			}
+
+			Ptr<DocumentModel> GuiDocumentCommonInterface::GetSelectionModel()
+			{
+				TextPos begin=documentElement->GetCaretBegin();
+				TextPos end=documentElement->GetCaretEnd();
+				if(begin>end)
+				{
+					TextPos temp=begin;
+					begin=end;
+					end=temp;
+				}
+
+				Ptr<DocumentModel> model=documentElement->GetDocument()->CopyDocument(begin, end, true);
+				return model;
+			}
+
+			void GuiDocumentCommonInterface::SetSelectionModel(Ptr<DocumentModel> value)
+			{
+				TextPos begin=documentElement->GetCaretBegin();
+				TextPos end=documentElement->GetCaretEnd();
+				if(begin>end)
+				{
+					TextPos temp=begin;
+					begin=end;
+					end=temp;
+				}
+
+				EditRun(begin, end, value);
 			}
 
 			//================ clipboard operations
