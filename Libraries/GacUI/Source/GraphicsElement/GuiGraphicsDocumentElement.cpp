@@ -769,6 +769,26 @@ GuiDocumentElement
 				}
 			}
 
+			void GuiDocumentElement::EditRun(TextPos begin, TextPos end, Ptr<DocumentModel> model)
+			{
+				Ptr<GuiDocumentElementRenderer> elementRenderer=renderer.Cast<GuiDocumentElementRenderer>();
+				if(elementRenderer)
+				{
+					if(begin>end)
+					{
+						TextPos temp=begin;
+						begin=end;
+						end=temp;
+					}
+
+					vint newRows=document->EditRun(begin, end, model);
+					if(newRows!=-1)
+					{
+						elementRenderer->NotifyParagraphUpdated(begin.row, end.row-begin.row+1, newRows, true);
+					}
+				}
+			}
+
 			void GuiDocumentElement::EditText(TextPos begin, TextPos end, bool frontSide, const collections::Array<WString>& text)
 			{
 				Ptr<GuiDocumentElementRenderer> elementRenderer=renderer.Cast<GuiDocumentElementRenderer>();
@@ -900,6 +920,15 @@ GuiDocumentElement
 					{
 						elementRenderer->NotifyParagraphUpdated(begin.row, end.row-begin.row+1, end.row-begin.row+1, false);
 					}
+				}
+			}
+
+			void GuiDocumentElement::RenameStyle(const WString& oldStyleName, const WString& newStyleName)
+			{
+				Ptr<GuiDocumentElementRenderer> elementRenderer=renderer.Cast<GuiDocumentElementRenderer>();
+				if(elementRenderer)
+				{
+					document->RenameStyle(oldStyleName, newStyleName);
 				}
 			}
 

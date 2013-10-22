@@ -347,7 +347,8 @@ Rich Content Document (model)
 			bool							CutParagraph(TextPos position);
 			bool							CutEditRange(TextPos begin, TextPos end);
 			bool							EditContainer(TextPos begin, TextPos end, const Func<void(DocumentParagraphRun*, RunRangeMap&, vint, vint)>& editor);
-
+			
+			vint							EditRun(TextPos begin, TextPos end, Ptr<DocumentModel> model);
 			vint							EditRun(TextPos begin, TextPos end, const collections::Array<Ptr<DocumentParagraphRun>>& runs);
 			vint							EditText(TextPos begin, TextPos end, bool frontSide, const collections::Array<WString>& text);
 			bool							EditStyle(TextPos begin, TextPos end, Ptr<DocumentStyleProperties> style);
@@ -357,6 +358,7 @@ Rich Content Document (model)
 			Ptr<DocumentHyperlinkRun>		GetHyperlink(vint paragraphIndex, vint begin, vint end);
 			bool							EditStyleName(TextPos begin, TextPos end, const WString& styleName);
 			bool							RemoveStyleName(TextPos begin, TextPos end);
+			bool							RenameStyle(const WString& oldStyleName, const WString& newStyleName);
 			bool							ClearStyle(TextPos begin, TextPos end);
 
 			/// <summary>Load a document model from an xml.</summary>
