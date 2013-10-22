@@ -315,7 +315,11 @@ GuiDocumentElement::GuiDocumentElementRenderer
 
 					paragraphCaches.Resize(element->document->paragraphs.Count());
 					paragraphHeights.Resize(element->document->paragraphs.Count());
-
+					
+					for(vint i=0;i<paragraphCaches.Count();i++)
+					{
+						paragraphCaches[i]=0;
+					}
 					for(vint i=0;i<paragraphHeights.Count();i++)
 					{
 						paragraphHeights[i]=defaultHeight;
