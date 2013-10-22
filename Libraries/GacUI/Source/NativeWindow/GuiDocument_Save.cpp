@@ -259,10 +259,10 @@ DocumentModel
 					if(sp->size)				XmlElementWriter(styleElement).Element(L"size").Text(itow(	sp->size.Value()						));
 					if(sp->color)				XmlElementWriter(styleElement).Element(L"color").Text(		sp->color.Value().ToString()			);
 					if(sp->backgroundColor)		XmlElementWriter(styleElement).Element(L"bkcolor").Text(	sp->color.Value().ToString()			);
-					if(sp->bold)				XmlElementWriter(styleElement).Element(L"bold").Text(		sp->bold.Value()?L"true":L"false"		);
-					if(sp->italic)				XmlElementWriter(styleElement).Element(L"italic").Text(		sp->italic.Value()?L"true":L"false"		);
-					if(sp->underline)			XmlElementWriter(styleElement).Element(L"underline").Text(	sp->underline.Value()?L"true":L"false"	);
-					if(sp->strikeline)			XmlElementWriter(styleElement).Element(L"strikeline").Text(	sp->strikeline.Value()?L"true":L"false"	);
+					if(sp->bold)				XmlElementWriter(styleElement).Element(L"b").Text(			sp->bold.Value()?L"true":L"false"		);
+					if(sp->italic)				XmlElementWriter(styleElement).Element(L"i").Text(			sp->italic.Value()?L"true":L"false"		);
+					if(sp->underline)			XmlElementWriter(styleElement).Element(L"u").Text(			sp->underline.Value()?L"true":L"false"	);
+					if(sp->strikeline)			XmlElementWriter(styleElement).Element(L"s").Text(			sp->strikeline.Value()?L"true":L"false"	);
 					if(sp->antialias && sp->verticalAntialias)
 					{
 						bool h=sp->antialias;
@@ -273,7 +273,7 @@ DocumentModel
 						}
 						else if(!v)
 						{
-							XmlElementWriter(styleElement).Element(L"antialias").Text(L"default");
+							XmlElementWriter(styleElement).Element(L"antialias").Text(L"horizontal");
 						}
 						else
 						{
