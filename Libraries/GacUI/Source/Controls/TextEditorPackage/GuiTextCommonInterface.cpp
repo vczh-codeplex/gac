@@ -854,12 +854,12 @@ GuiTextBoxCommonInterface
 
 			bool GuiTextBoxCommonInterface::CanUndo()
 			{
-				return undoRedoProcessor->CanUndo();
+				return !readonly && undoRedoProcessor->CanUndo();
 			}
 
 			bool GuiTextBoxCommonInterface::CanRedo()
 			{
-				return undoRedoProcessor->CanRedo();
+				return !readonly && undoRedoProcessor->CanRedo();
 			}
 
 			void GuiTextBoxCommonInterface::ClearUndoRedo()
@@ -879,12 +879,26 @@ GuiTextBoxCommonInterface
 
 			bool GuiTextBoxCommonInterface::Undo()
 			{
-				return undoRedoProcessor->Undo();
+				if(CanUndo())
+				{
+					return undoRedoProcessor->Undo();
+				}
+				else
+				{
+					return false;
+				}
 			}
 
 			bool GuiTextBoxCommonInterface::Redo()
 			{
-				return undoRedoProcessor->Redo();
+				if(CanRedo())
+				{
+					return undoRedoProcessor->Redo();
+				}
+				else
+				{
+					return false;
+				}
 			}
 		}
 	}

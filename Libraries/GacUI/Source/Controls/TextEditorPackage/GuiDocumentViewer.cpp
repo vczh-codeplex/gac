@@ -223,7 +223,7 @@ GuiDocumentViewer
 				});
 			}
 
-			void GuiDocumentCommonInterface::EditInternal(TextPos begin, TextPos end, const Func<void(TextPos, TextPos, vint&, vint&)>& editor)
+			void GuiDocumentCommonInterface::EditTextInternal(TextPos begin, TextPos end, const Func<void(TextPos, TextPos, vint&, vint&)>& editor)
 			{
 				// save run before editing
 				if(begin>end)
@@ -267,6 +267,36 @@ GuiDocumentViewer
 					arguments.originalModel=originalModel;
 					arguments.inputStart=begin;
 					arguments.inputEnd=caret;
+					arguments.inputModel=inputModel;
+					undoRedoProcessor->OnReplaceModel(arguments);
+				}
+			}
+
+			void GuiDocumentCommonInterface::EditStyleInternal(TextPos begin, TextPos end, const Func<void(TextPos, TextPos)>& editor)
+			{
+				// save run before editing
+				if(begin>end)
+				{
+					TextPos temp=begin;
+					begin=end;
+					end=temp;
+				}
+				Ptr<DocumentModel> originalModel=documentElement->GetDocument()->CopyDocument(begin, end, true);
+				if(originalModel)
+				{
+					// edit
+					editor(begin, end);
+
+					// save run after editing
+					Ptr<DocumentModel> inputModel=documentElement->GetDocument()->CopyDocument(begin, end, true);
+
+					// submit redo-undo
+					GuiDocumentUndoRedoProcessor::ReplaceModelStruct arguments;
+					arguments.originalStart=begin;
+					arguments.originalEnd=end;
+					arguments.originalModel=originalModel;
+					arguments.inputStart=begin;
+					arguments.inputEnd=end;
 					arguments.inputModel=inputModel;
 					undoRedoProcessor->OnReplaceModel(arguments);
 				}
@@ -519,7 +549,7 @@ GuiDocumentViewer
 
 			void GuiDocumentCommonInterface::EditRun(TextPos begin, TextPos end, Ptr<DocumentModel> model)
 			{
-				EditInternal(begin, end, [=](TextPos begin, TextPos end, vint& paragraphCount, vint& lastParagraphLength)
+				EditTextInternal(begin, end, [=](TextPos begin, TextPos end, vint& paragraphCount, vint& lastParagraphLength)
 				{
 					documentElement->EditRun(begin, end, model);
 					paragraphCount=model->paragraphs.Count();
@@ -529,7 +559,7 @@ GuiDocumentViewer
 
 			void GuiDocumentCommonInterface::EditText(TextPos begin, TextPos end, bool frontSide, const collections::Array<WString>& text)
 			{
-				EditInternal(begin, end, [=, &text](TextPos begin, TextPos end, vint& paragraphCount, vint& lastParagraphLength)
+				EditTextInternal(begin, end, [=, &text](TextPos begin, TextPos end, vint& paragraphCount, vint& lastParagraphLength)
 				{
 					documentElement->EditText(begin, end, frontSide, text);
 					paragraphCount=text.Count();
@@ -539,12 +569,15 @@ GuiDocumentViewer
 
 			void GuiDocumentCommonInterface::EditStyle(TextPos begin, TextPos end, Ptr<DocumentStyleProperties> style)
 			{
-				documentElement->EditStyle(begin, end, style);
+				EditStyleInternal(begin, end, [=](TextPos begin, TextPos end)
+				{
+					documentElement->EditStyle(begin, end, style);
+				});
 			}
 
 			void GuiDocumentCommonInterface::EditImage(TextPos begin, TextPos end, Ptr<GuiImageData> image)
 			{
-				EditInternal(begin, end, [=](TextPos begin, TextPos end, vint& paragraphCount, vint& lastParagraphLength)
+				EditTextInternal(begin, end, [=](TextPos begin, TextPos end, vint& paragraphCount, vint& lastParagraphLength)
 				{
 					documentElement->EditImage(begin, end, image);
 					paragraphCount=1;
@@ -554,22 +587,34 @@ GuiDocumentViewer
 
 			void GuiDocumentCommonInterface::EditHyperlink(vint paragraphIndex, vint begin, vint end, const WString& reference, const WString& normalStyleName, const WString& activeStyleName)
 			{
-				documentElement->EditHyperlink(paragraphIndex, begin, end, reference, normalStyleName, activeStyleName);
+				EditStyleInternal(TextPos(paragraphIndex, begin), TextPos(paragraphIndex, end), [=](TextPos begin, TextPos end)
+				{
+					documentElement->EditHyperlink(begin.row, begin.column, end.column, reference, normalStyleName, activeStyleName);
+				});
 			}
 
 			void GuiDocumentCommonInterface::RemoveHyperlink(vint paragraphIndex, vint begin, vint end)
 			{
-				documentElement->RemoveHyperlink(paragraphIndex, begin, end);
+				EditStyleInternal(TextPos(paragraphIndex, begin), TextPos(paragraphIndex, end), [=](TextPos begin, TextPos end)
+				{
+					documentElement->RemoveHyperlink(begin.row, begin.column, end.column);
+				});
 			}
 
 			void GuiDocumentCommonInterface::EditStyleName(TextPos begin, TextPos end, const WString& styleName)
 			{
-				documentElement->EditStyleName(begin, end, styleName);
+				EditStyleInternal(begin, end, [=](TextPos begin, TextPos end)
+				{
+					documentElement->EditStyleName(begin, end, styleName);
+				});
 			}
 
 			void GuiDocumentCommonInterface::RemoveStyleName(TextPos begin, TextPos end)
 			{
-				documentElement->RemoveStyleName(begin, end);
+				EditStyleInternal(begin, end, [=](TextPos begin, TextPos end)
+				{
+					documentElement->RemoveStyleName(begin, end);
+				});
 			}
 
 			void GuiDocumentCommonInterface::RenameStyle(const WString& oldStyleName, const WString& newStyleName)
@@ -585,7 +630,10 @@ GuiDocumentViewer
 
 			void GuiDocumentCommonInterface::ClearStyle(TextPos begin, TextPos end)
 			{
-				documentElement->ClearStyle(begin, end);
+				EditStyleInternal(begin, end, [=](TextPos begin, TextPos end)
+				{
+					documentElement->ClearStyle(begin, end);
+				});
 			}
 
 			//================ editing control
@@ -786,12 +834,12 @@ GuiDocumentViewer
 
 			bool GuiDocumentCommonInterface::CanUndo()
 			{
-				return undoRedoProcessor->CanUndo();
+				return editMode==Editable && undoRedoProcessor->CanUndo();
 			}
 
 			bool GuiDocumentCommonInterface::CanRedo()
 			{
-				return undoRedoProcessor->CanRedo();
+				return editMode==Editable && undoRedoProcessor->CanRedo();
 			}
 
 			void GuiDocumentCommonInterface::ClearUndoRedo()
@@ -811,12 +859,26 @@ GuiDocumentViewer
 
 			bool GuiDocumentCommonInterface::Undo()
 			{
-				return undoRedoProcessor->Undo();
+				if(CanUndo())
+				{
+					return undoRedoProcessor->Undo();
+				}
+				else
+				{
+					return false;
+				}
 			}
 
 			bool GuiDocumentCommonInterface::Redo()
 			{
-				return undoRedoProcessor->Redo();
+				if(CanRedo())
+				{
+					return undoRedoProcessor->Redo();
+				}
+				else
+				{
+					return false;
+				}
 			}
 
 /***********************************************************************
