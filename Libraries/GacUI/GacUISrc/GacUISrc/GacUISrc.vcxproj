@@ -359,6 +359,8 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugNoReflection|Win32'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\Source\Reflection\GuiReflectionPlugin.cpp" />
+    <ClCompile Include="DocumentEditorWindow.cpp" />
+    <ClCompile Include="DocumentEditorWindow_Initialization.cpp" />
     <ClCompile Include="FileSystemInformation.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="TsfTestWindow.cpp" />
@@ -525,6 +527,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugNoReflection|Win32'">false</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="DocumentEditorWindow.h" />
     <ClInclude Include="FileSystemInformation.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

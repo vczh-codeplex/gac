@@ -913,6 +913,7 @@ GuiDocumentViewer
 				SetHorizontalAlwaysVisible(false);
 				SetFocusableComposition(GetBoundsComposition());
 				InstallDocumentViewer(this, GetContainerComposition());
+				SetDocument(new DocumentModel);
 			}
 
 			GuiDocumentViewer::~GuiDocumentViewer()
