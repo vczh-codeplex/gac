@@ -30,11 +30,11 @@ bool DocumentEditorWindow::TryOpen()
 			selectionFileNames,
 			selectionFilterIndex,
 			INativeDialogService::FileDialogOpen,
-			L"Open a text document",
+			L"Open a GacUI Rich Document",
 			L"",
 			L"",
-			L".txt",
-			L"Text Files(*.txt)|*.txt|All Files(*.*)|*.*",
+			L".xml",
+			L"GacUI Rich Document Files(*.xml)|*.xml|All Files(*.*)|*.*",
 			(INativeDialogService::FileDialogOptions)
 				( INativeDialogService::FileDialogAddToRecent
 				| INativeDialogService::FileDialogDereferenceLinks
@@ -44,14 +44,9 @@ bool DocumentEditorWindow::TryOpen()
 			))
 		{
 			fileName=selectionFileNames[0];
-			FileStream fileStream(fileName, FileStream::ReadOnly);
-			BomDecoder decoder;
-			DecoderStream decoderStream(fileStream, decoder);
-			StreamReader reader(decoderStream);
-			textBox->SetText(reader.ReadToEnd());
+			Ptr<DocumentModel> model=DocumentModel::LoadFromXml(fileName);
+			textBox->SetDocument(model);
 			textBox->SetCaret(TextPos(0, 0), TextPos(0, 0));
-			textBox->ClearUndoRedo();
-			textBox->NotifyModificationSaved();
 			return true;
 		}
 	}
@@ -69,11 +64,11 @@ bool DocumentEditorWindow::TrySave(bool ignoreCurrentFileName)
 			selectionFileNames,
 			selectionFilterIndex,
 			INativeDialogService::FileDialogSave,
-			L"Save a text document",
+			L"Save a GacUI Rich Document",
 			L"",
 			L"",
-			L".txt",
-			L"Text Files(*.txt)|*.txt|All Files(*.*)|*.*",
+			L".xml",
+			L"GacUI Rich Document Files(*.xml)|*.xml|All Files(*.*)|*.*",
 			(INativeDialogService::FileDialogOptions)
 				( INativeDialogService::FileDialogAddToRecent
 				| INativeDialogService::FileDialogDereferenceLinks
@@ -90,11 +85,7 @@ bool DocumentEditorWindow::TrySave(bool ignoreCurrentFileName)
 		}
 	}
 	{
-		FileStream fileStream(fileName, FileStream::WriteOnly);
-		BomEncoder encoder(BomEncoder::Utf8);
-		EncoderStream encoderStream(fileStream, encoder);
-		StreamWriter writer(encoderStream);
-		writer.WriteString(textBox->GetText());
+		textBox->GetDocument()->SaveToXml(fileName);
 		textBox->NotifyModificationSaved();
 	}
 	return true;
