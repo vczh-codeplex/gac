@@ -203,7 +203,8 @@ void DocumentEditorWindow::InitializeComponents()
 		cell->SetInternalMargin(Margin(1, 1, 1, 1));
 
 		// create the menu bar
-		textBox=g::NewMultilineTextBox();
+		textBox=g::NewDocumentViewer();
+		textBox->SetEditMode(GuiDocumentViewer::Editable);
 		textBox->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 		cell->AddChild(textBox->GetBoundsComposition());
 	}

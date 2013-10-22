@@ -510,6 +510,10 @@ GuiDocumentViewer
 			{
 				SetActiveHyperlink(0);
 				NotifyModificationSaved();
+				if(value->paragraphs.Count()==0)
+				{
+					value->paragraphs.Add(new DocumentParagraphRun);
+				}
 				documentElement->SetDocument(value);
 			}
 
