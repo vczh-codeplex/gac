@@ -509,6 +509,7 @@ GuiDocumentViewer
 			void GuiDocumentCommonInterface::SetDocument(Ptr<DocumentModel> value)
 			{
 				SetActiveHyperlink(0);
+				ClearUndoRedo();
 				NotifyModificationSaved();
 				if(value->paragraphs.Count()==0)
 				{
