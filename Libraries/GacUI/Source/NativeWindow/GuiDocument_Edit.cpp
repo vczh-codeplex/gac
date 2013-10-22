@@ -1469,7 +1469,7 @@ DocumentModel::EditRun
 			for(vint i=0;i<newNames.Count();i++)
 			{
 				WString name=newNames[i];
-				if(styles.Keys().Contains(name))
+				if((name.Length()==0 || name[0]!=L'#') && styles.Keys().Contains(name))
 				{
 					vint index=2;
 					while(true)
@@ -1492,7 +1492,7 @@ DocumentModel::EditRun
 			}
 			FOREACH(WString, name, newNames)
 			{
-				if(!styles.Keys().Contains(name))
+				if((name.Length()==0 || name[0]!=L'#') && !styles.Keys().Contains(name))
 				{
 					styles.Add(name, model->styles[name]);
 				}

@@ -187,6 +187,7 @@ GuiDocumentViewer
 				_sender->GetFocusableComposition()->GetEventReceiver()->keyDown.AttachMethod(this, &GuiDocumentCommonInterface::OnKeyDown);
 				_sender->GetFocusableComposition()->GetEventReceiver()->charInput.AttachMethod(this, &GuiDocumentCommonInterface::OnCharInput);
 
+				undoRedoProcessor->Setup(documentElement, documentComposition);
 				ActiveHyperlinkChanged.SetAssociatedComposition(_sender->GetBoundsComposition());
 				ActiveHyperlinkExecuted.SetAssociatedComposition(_sender->GetBoundsComposition());
 				SelectionChanged.SetAssociatedComposition(_sender->GetBoundsComposition());
@@ -245,9 +246,13 @@ GuiDocumentViewer
 					{
 						caret=begin;
 					}
+					else if(paragraphCount==1)
+					{
+						caret=TextPos(begin.row, begin.column+lastParagraphLength);
+					}
 					else
 					{
-						caret=TextPos(begin.row+paragraphCount, lastParagraphLength);
+						caret=TextPos(begin.row+paragraphCount-1, lastParagraphLength);
 					}
 					documentElement->SetCaret(caret, caret, true);
 					documentControl->TextChanged.Execute(documentControl->GetNotifyEventArguments());
@@ -474,6 +479,7 @@ GuiDocumentViewer
 			void GuiDocumentCommonInterface::SetDocument(Ptr<DocumentModel> value)
 			{
 				SetActiveHyperlink(0);
+				NotifyModificationSaved();
 				documentElement->SetDocument(value);
 			}
 
