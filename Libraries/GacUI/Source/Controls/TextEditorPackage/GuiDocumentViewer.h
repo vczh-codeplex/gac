@@ -38,13 +38,13 @@ GuiDocumentCommonInterface
 					Editable,
 				};
 			protected:
+				GuiControl*									documentControl;
 				elements::GuiDocumentElement*				documentElement;
 				compositions::GuiBoundsComposition*			documentComposition;
 				Ptr<DocumentHyperlinkRun>					activeHyperlink;
 				vint										activeHyperlinkParagraph;
 				bool										dragging;
 				EditMode									editMode;
-				GuiControl*									senderControl;
 
 				Ptr<GuiDocumentUndoRedoProcessor>			undoRedoProcessor;
 				Ptr<compositions::GuiShortcutKeyManager>	internalShortcutKeyManager;
@@ -77,6 +77,9 @@ GuiDocumentCommonInterface
 				compositions::GuiNotifyEvent				ActiveHyperlinkChanged;
 				/// <summary>Active hyperlink executed event.</summary>
 				compositions::GuiNotifyEvent				ActiveHyperlinkExecuted;
+
+				/// <summary>Selection changed event.</summary>
+				compositions::GuiNotifyEvent				SelectionChanged;
 				
 				/// <summary>Get the document.</summary>
 				/// <returns>The document.</returns>
@@ -262,6 +265,9 @@ GuiDocumentViewer
 				/// <param name="styleProvider">The style provider.</param>
 				GuiDocumentViewer(GuiDocumentViewer::IStyleProvider* styleProvider);
 				~GuiDocumentViewer();
+
+				const WString&								GetText()override;
+				void										SetText(const WString& value)override;
 			};
 
 /***********************************************************************
@@ -276,6 +282,9 @@ GuiDocumentViewer
 				/// <param name="styleController">The style controller.</param>
 				GuiDocumentLabel(GuiDocumentLabel::IStyleController* styleController);
 				~GuiDocumentLabel();
+				
+				const WString&								GetText()override;
+				void										SetText(const WString& value)override;
 			};
 		}
 	}

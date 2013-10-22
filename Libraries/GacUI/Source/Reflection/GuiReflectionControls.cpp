@@ -1202,6 +1202,7 @@ Type Declaration
 
 				CLASS_MEMBER_GUIEVENT(ActiveHyperlinkChanged)
 				CLASS_MEMBER_GUIEVENT(ActiveHyperlinkExecuted)
+				CLASS_MEMBER_GUIEVENT(SelectionChanged)
 
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(CaretBegin)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(CaretEnd)

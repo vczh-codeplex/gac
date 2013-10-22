@@ -210,7 +210,7 @@ GuiMultilineTextBox
 
 			void GuiMultilineTextBox::SetText(const WString& value)
 			{
-				text=GetText();
+				text=styleController->GetText();
 				GuiScrollView::SetText(value);
 				CalculateView();
 			}
