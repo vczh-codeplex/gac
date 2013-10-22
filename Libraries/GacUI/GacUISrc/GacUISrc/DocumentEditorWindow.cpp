@@ -49,7 +49,7 @@ bool DocumentEditorWindow::TryOpen()
 			DecoderStream decoderStream(fileStream, decoder);
 			StreamReader reader(decoderStream);
 			textBox->SetText(reader.ReadToEnd());
-			textBox->Select(TextPos(0, 0), TextPos(0, 0));
+			textBox->SetCaret(TextPos(0, 0), TextPos(0, 0));
 			textBox->ClearUndoRedo();
 			textBox->NotifyModificationSaved();
 			return true;
