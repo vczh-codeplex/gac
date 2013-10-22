@@ -262,20 +262,67 @@ void DocumentEditorWindow::commandEditSelect_Executed(GuiGraphicsComposition* se
 	textBox->SelectAll();
 }
 
-void DocumentEditorWindow::commandFormatFont_Executed(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+void DocumentEditorWindow::commandStyleBold_Executed(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 {
-	FontProperties font=textBox->GetFont();
+}
+
+void DocumentEditorWindow::commandStyleItalic_Executed(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+{
+}
+
+void DocumentEditorWindow::commandStyleUnderline_Executed(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+{
+}
+
+void DocumentEditorWindow::commandStyleStrikeline_Executed(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+{
+}
+
+void DocumentEditorWindow::commandStyleFont_Executed(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+{
+	FontProperties font;
 	Color color;
 	if(GetCurrentController()->DialogService()->ShowFontDialog(
 		this->GetNativeWindow(),
 		font,
 		color,
-		true,
+		false,
 		false,
 		true))
 	{
-		textBox->SetFont(font);
 	}
+}
+
+void DocumentEditorWindow::commandStyleForeColor_Executed(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+{
+	Color color;
+	if(GetCurrentController()->DialogService()->ShowColorDialog(
+		this->GetNativeWindow(),
+		color))
+	{
+	}
+}
+
+void DocumentEditorWindow::commandStyleBackColor_Executed(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+{
+	Color color;
+	if(GetCurrentController()->DialogService()->ShowColorDialog(
+		this->GetNativeWindow(),
+		color))
+	{
+	}
+}
+
+void DocumentEditorWindow::commandStyleAlignLeft_Executed(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+{
+}
+
+void DocumentEditorWindow::commandStyleAlignCenter_Executed(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+{
+}
+
+void DocumentEditorWindow::commandStyleAlignRight_Executed(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+{
 }
 
 DocumentEditorWindow::DocumentEditorWindow()
@@ -303,7 +350,16 @@ DocumentEditorWindow::DocumentEditorWindow()
 	commandEditPaste->Executed.AttachMethod(this, &DocumentEditorWindow::commandEditPaste_Executed);
 	commandEditDelete->Executed.AttachMethod(this, &DocumentEditorWindow::commandEditDelete_Executed);
 	commandEditSelect->Executed.AttachMethod(this, &DocumentEditorWindow::commandEditSelect_Executed);
-	commandFormatFont->Executed.AttachMethod(this, &DocumentEditorWindow::commandFormatFont_Executed);
+	commandStyleBold->Executed.AttachMethod(this, &DocumentEditorWindow::commandStyleBold_Executed);
+	commandStyleItalic->Executed.AttachMethod(this, &DocumentEditorWindow::commandStyleItalic_Executed);
+	commandStyleUnderline->Executed.AttachMethod(this, &DocumentEditorWindow::commandStyleUnderline_Executed);
+	commandStyleStrikeline->Executed.AttachMethod(this, &DocumentEditorWindow::commandStyleStrikeline_Executed);
+	commandStyleFont->Executed.AttachMethod(this, &DocumentEditorWindow::commandStyleFont_Executed);
+	commandStyleForeColor->Executed.AttachMethod(this, &DocumentEditorWindow::commandStyleForeColor_Executed);
+	commandStyleBackColor->Executed.AttachMethod(this, &DocumentEditorWindow::commandStyleBackColor_Executed);
+	commandStyleAlignLeft->Executed.AttachMethod(this, &DocumentEditorWindow::commandStyleAlignLeft_Executed);
+	commandStyleAlignCenter->Executed.AttachMethod(this, &DocumentEditorWindow::commandStyleAlignCenter_Executed);
+	commandStyleAlignRight->Executed.AttachMethod(this, &DocumentEditorWindow::commandStyleAlignRight_Executed);
 }
 
 DocumentEditorWindow::~DocumentEditorWindow()
