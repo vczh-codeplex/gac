@@ -172,6 +172,8 @@ Rich Content Document (run)
 		class DocumentImageRun : public DocumentInlineObjectRun, public Description<DocumentImageRun>
 		{
 		public:
+			static const wchar_t*			RepresentationText;
+
 			/// <summary>The image.</summary>
 			Ptr<INativeImage>				image;
 			/// <summary>The frame index.</summary>
@@ -181,7 +183,7 @@ Rich Content Document (run)
 
 			DocumentImageRun():frameIndex(0){}
 			
-			WString							GetRepresentationText()override{return L"[Image]";}
+			WString							GetRepresentationText()override{return RepresentationText;}
 			void							Accept(IVisitor* visitor)override{visitor->Visit(this);}
 		};
 
