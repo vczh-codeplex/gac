@@ -286,6 +286,9 @@ void DocumentEditorWindow::InitializeComponents()
 		textBox->SetEditMode(GuiDocumentViewer::Editable);
 		textBox->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 		cell->AddChild(textBox->GetBoundsComposition());
+
+		Ptr<DocumentModel> model=DocumentModel::LoadFromXml(GetResourceFolder()+L"XmlDocDemo.xml");
+		textBox->SetDocument(model);
 	}
 
 	// set the preferred minimum client size
