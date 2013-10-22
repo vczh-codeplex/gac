@@ -94,9 +94,64 @@ void DocumentEditorWindow::InitializeCommand()
 		commandEditSelect->SetShortcut(shortcutKeyManager->CreateShortcut(true, false, false, L'A'));
 	}
 	{
-		commandFormatFont=new GuiToolstripCommand;;
-		commandFormatFont->SetText(L"Font...");
-		this->AddComponent(commandFormatFont);
+		commandStyleBold=new GuiToolstripCommand;;
+		commandStyleBold->SetText(L"Bold");
+		SetImage(commandStyleBold, resourceFolder+L"s_Bold.png");
+		this->AddComponent(commandStyleBold);
+	}
+	{
+		commandStyleItalic=new GuiToolstripCommand;;
+		commandStyleItalic->SetText(L"Italic");
+		SetImage(commandStyleItalic, resourceFolder+L"s_Italic.png");
+		this->AddComponent(commandStyleItalic);
+	}
+	{
+		commandStyleUnderline=new GuiToolstripCommand;;
+		commandStyleUnderline->SetText(L"Underline");
+		SetImage(commandStyleUnderline, resourceFolder+L"s_Underline.png");
+		this->AddComponent(commandStyleUnderline);
+	}
+	{
+		commandStyleStrikeline=new GuiToolstripCommand;;
+		commandStyleStrikeline->SetText(L"Strikeline");
+		SetImage(commandStyleStrikeline, resourceFolder+L"s_Strike.png");
+		this->AddComponent(commandStyleStrikeline);
+	}
+	{
+		commandStyleFont=new GuiToolstripCommand;;
+		commandStyleFont->SetText(L"Font...");
+		SetImage(commandStyleFont, resourceFolder+L"s_Font.png");
+		this->AddComponent(commandStyleFont);
+	}
+	{
+		commandStyleForeColor=new GuiToolstripCommand;;
+		commandStyleForeColor->SetText(L"Text Color...");
+		SetImage(commandStyleForeColor, resourceFolder+L"s_Color.png");
+		this->AddComponent(commandStyleForeColor);
+	}
+	{
+		commandStyleBackColor=new GuiToolstripCommand;;
+		commandStyleBackColor->SetText(L"Background Color...");
+		SetImage(commandStyleBackColor, resourceFolder+L"s_Background.png");
+		this->AddComponent(commandStyleBackColor);
+	}
+	{
+		commandStyleAlignLeft=new GuiToolstripCommand;;
+		commandStyleAlignLeft->SetText(L"Left Align");
+		SetImage(commandStyleAlignLeft, resourceFolder+L"s_AlignLeft.png");
+		this->AddComponent(commandStyleAlignLeft);
+	}
+	{
+		commandStyleAlignCenter=new GuiToolstripCommand;;
+		commandStyleAlignCenter->SetText(L"Center Align");
+		SetImage(commandStyleAlignCenter, resourceFolder+L"s_AlignCenter.png");
+		this->AddComponent(commandStyleAlignCenter);
+	}
+	{
+		commandStyleAlignRight=new GuiToolstripCommand;;
+		commandStyleAlignRight->SetText(L"Right Align");
+		SetImage(commandStyleAlignRight, resourceFolder+L"s_AlignRight.png");
+		this->AddComponent(commandStyleAlignRight);
 	}
 }
 
@@ -128,9 +183,18 @@ void DocumentEditorWindow::InitializeMenuBar()
 			->Button(commandEditDelete)
 			->Button(commandEditSelect)
 			->EndSubMenu()
-		->Button(0, L"Format")
+		->Button(0, L"Style")
 			->BeginSubMenu()
-			->Button(commandFormatFont)
+			->Button(commandStyleBold)
+			->Button(commandStyleItalic)
+			->Button(commandStyleUnderline)
+			->Button(commandStyleStrikeline)
+			->Button(commandStyleFont)
+			->Button(commandStyleForeColor)
+			->Button(commandStyleBackColor)
+			->Button(commandStyleAlignLeft)
+			->Button(commandStyleAlignCenter)
+			->Button(commandStyleAlignRight)
 			->EndSubMenu()
 		;
 }
@@ -154,6 +218,17 @@ void DocumentEditorWindow::InitializeToolBar()
 		->Button(commandEditCopy)
 		->Button(commandEditPaste)
 		->Button(commandEditDelete)
+		->Splitter()
+		->Button(commandStyleBold)
+		->Button(commandStyleItalic)
+		->Button(commandStyleUnderline)
+		->Button(commandStyleStrikeline)
+		->Button(commandStyleFont)
+		->Button(commandStyleForeColor)
+		->Button(commandStyleBackColor)
+		->Button(commandStyleAlignLeft)
+		->Button(commandStyleAlignCenter)
+		->Button(commandStyleAlignRight)
 		;
 }
 

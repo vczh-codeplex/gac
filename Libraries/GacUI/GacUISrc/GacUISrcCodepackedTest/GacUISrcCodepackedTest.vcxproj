@@ -281,6 +281,18 @@
     <Font Include="Resources\GentiumPlus-I.ttf" />
     <Font Include="Resources\GentiumPlus-R.ttf" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="Resources\s_AlignCenter.png" />
+    <Image Include="Resources\s_AlignLeft.png" />
+    <Image Include="Resources\s_AlignRight.png" />
+    <Image Include="Resources\s_Background.png" />
+    <Image Include="Resources\s_Bold.png" />
+    <Image Include="Resources\s_Color.png" />
+    <Image Include="Resources\s_Font.png" />
+    <Image Include="Resources\s_Italic.png" />
+    <Image Include="Resources\s_Strike.png" />
+    <Image Include="Resources\s_Underline.png" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
