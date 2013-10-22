@@ -406,7 +406,7 @@ document_operation_visitors::CloneRunRecursivelyVisitor
 				{
 					clonedRun=0;
 					RunRange range=runRanges[run];
-					if(range.start<end && start<range.end)
+					if(range.start<=end && start<=range.end)
 					{
 						if(start<=range.start && range.end<=end && !deepCopy)
 						{
