@@ -309,11 +309,11 @@ Win7ButtonColors
 				Win7ButtonColors colors=
 				{
 					Color(84, 84, 84),
-					Color(156, 156, 156),
-					Color(240, 240, 240),
-					Color(228, 228, 228),
-					Color(222, 222, 222),
-					Color(230, 230, 230),
+					Color(250, 250, 250),
+					Color(250, 250, 250),
+					Color(250, 250, 250),
+					Color(250, 250, 250),
+					Color(250, 250, 250),
 					Win7GetSystemTextColor(true),
 				};
 				return colors;
@@ -432,12 +432,12 @@ Win7ButtonColors
 			{
 				Win7ButtonColors colors=
 				{
+					Color(175, 208, 247),
+					Color(248, 248, 250),
 					Color(0, 0, 0, 0),
 					Color(0, 0, 0, 0),
 					Color(0, 0, 0, 0),
 					Color(0, 0, 0, 0),
-					Color(227, 227, 227),
-					Color(255, 255, 255),
 					Win7GetSystemTextColor(true),
 				};
 				return colors;
@@ -451,8 +451,8 @@ Win7ButtonColors
 					Color(248, 248, 250),
 					Color(243, 245, 247),
 					Color(231, 238, 247),
-					Color(229, 233, 238),
-					Color(245, 249, 255),
+					Color(0, 0, 0, 0),
+					Color(0, 0, 0, 0),
 					Win7GetSystemTextColor(true),
 				};
 				return colors;

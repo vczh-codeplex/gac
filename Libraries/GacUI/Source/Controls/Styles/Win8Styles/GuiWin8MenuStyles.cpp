@@ -337,7 +337,7 @@ Win8MenuItemButtonStyle
 					}
 				}
 				elements.Apply(targetColor);
-				elements.SetActive(active);
+				elements.SetActive(active || selected);
 			}
 
 			Win8MenuItemButtonStyle::Win8MenuItemButtonStyle()
@@ -395,7 +395,6 @@ Win8MenuItemButtonStyle
 				if(isSelected!=value)
 				{
 					isSelected=value;
-					elements.imageElement->SetEnabled(value);
 					TransferInternal(controlStyle, isVisuallyEnabled, isSelected, isOpening);
 				}
 			}
