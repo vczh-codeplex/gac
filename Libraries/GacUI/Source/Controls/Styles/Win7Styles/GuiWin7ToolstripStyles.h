@@ -78,13 +78,14 @@ Toolstrip Button
 				Ptr<TransferringAnimation>					transferringAnimation;
 				controls::GuiButton::ControlState			controlStyle;
 				bool										isVisuallyEnabled;
+				bool										isSelected;
 				bool										isOpening;
 				elements::GuiImageFrameElement*				imageElement;
 				compositions::GuiBoundsComposition*			imageComposition;
 				ButtonStyle									buttonStyle;
 				controls::GuiButton*						subMenuHost;
 
-				virtual void								TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool menuOpening);
+				virtual void								TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool selected, bool menuOpening);
 			public:
 				/// <summary>Create the style.</summary>
 				/// <param name="_buttonStyle">Defines the sub menu dropdown arrow style.</param>

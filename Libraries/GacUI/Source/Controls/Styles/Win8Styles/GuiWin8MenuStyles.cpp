@@ -296,7 +296,7 @@ Win8MenuItemButtonStyle::MeasuringSource
 Win8MenuItemButtonStyle
 ***********************************************************************/
 
-			void Win8MenuItemButtonStyle::TransferInternal(GuiButton::ControlState value, bool enabled, bool opening)
+			void Win8MenuItemButtonStyle::TransferInternal(GuiButton::ControlState value, bool enabled, bool selected, bool opening)
 			{
 				Win8ButtonColors targetColor;
 				bool active=false;
@@ -343,6 +343,7 @@ Win8MenuItemButtonStyle
 			Win8MenuItemButtonStyle::Win8MenuItemButtonStyle()
 				:controlStyle(GuiButton::Normal)
 				,isVisuallyEnabled(true)
+				,isSelected(false)
 				,isOpening(false)
 			{
 				elements=Win8MenuItemButtonElements::Create();
@@ -385,12 +386,18 @@ Win8MenuItemButtonStyle
 				{
 					isVisuallyEnabled=value;
 					elements.imageElement->SetEnabled(value);
-					TransferInternal(controlStyle, isVisuallyEnabled, isOpening);
+					TransferInternal(controlStyle, isVisuallyEnabled, isSelected, isOpening);
 				}
 			}
 
 			void Win8MenuItemButtonStyle::SetSelected(bool value)
 			{
+				if(isSelected!=value)
+				{
+					isSelected=value;
+					elements.imageElement->SetEnabled(value);
+					TransferInternal(controlStyle, isVisuallyEnabled, isSelected, isOpening);
+				}
 			}
 
 			controls::GuiMenu::IStyleController* Win8MenuItemButtonStyle::CreateSubMenuStyleController()
@@ -408,7 +415,7 @@ Win8MenuItemButtonStyle
 				if(isOpening!=value)
 				{
 					isOpening=value;
-					TransferInternal(controlStyle, isVisuallyEnabled, isOpening);
+					TransferInternal(controlStyle, isVisuallyEnabled, isSelected, isOpening);
 				}
 			}
 
@@ -444,7 +451,7 @@ Win8MenuItemButtonStyle
 				if(controlStyle!=value)
 				{
 					controlStyle=value;
-					TransferInternal(controlStyle, isVisuallyEnabled, isOpening);
+					TransferInternal(controlStyle, isVisuallyEnabled, isSelected, isOpening);
 				}
 			}
 

@@ -307,7 +307,7 @@ Win7MenuItemButtonStyle::MeasuringSource
 Win7MenuItemButtonStyle
 ***********************************************************************/
 
-			void Win7MenuItemButtonStyle::TransferInternal(GuiButton::ControlState value, bool enabled, bool opening)
+			void Win7MenuItemButtonStyle::TransferInternal(GuiButton::ControlState value, bool enabled, bool selected, bool opening)
 			{
 				Win7ButtonColors targetColor;
 				bool active=false;
@@ -354,6 +354,7 @@ Win7MenuItemButtonStyle
 			Win7MenuItemButtonStyle::Win7MenuItemButtonStyle()
 				:controlStyle(GuiButton::Normal)
 				,isVisuallyEnabled(true)
+				,isSelected(false)
 				,isOpening(false)
 			{
 				elements=Win7MenuItemButtonElements::Create();
@@ -396,12 +397,18 @@ Win7MenuItemButtonStyle
 				{
 					isVisuallyEnabled=value;
 					elements.imageElement->SetEnabled(value);
-					TransferInternal(controlStyle, isVisuallyEnabled, isOpening);
+					TransferInternal(controlStyle, isVisuallyEnabled, isSelected, isOpening);
 				}
 			}
 
 			void Win7MenuItemButtonStyle::SetSelected(bool value)
 			{
+				if(isSelected!=value)
+				{
+					isSelected=value;
+					elements.imageElement->SetEnabled(value);
+					TransferInternal(controlStyle, isVisuallyEnabled, isSelected, isOpening);
+				}
 			}
 
 			controls::GuiMenu::IStyleController* Win7MenuItemButtonStyle::CreateSubMenuStyleController()
@@ -419,7 +426,7 @@ Win7MenuItemButtonStyle
 				if(isOpening!=value)
 				{
 					isOpening=value;
-					TransferInternal(controlStyle, isVisuallyEnabled, isOpening);
+					TransferInternal(controlStyle, isVisuallyEnabled, isSelected, isOpening);
 				}
 			}
 
@@ -455,7 +462,7 @@ Win7MenuItemButtonStyle
 				if(controlStyle!=value)
 				{
 					controlStyle=value;
-					TransferInternal(controlStyle, isVisuallyEnabled, isOpening);
+					TransferInternal(controlStyle, isVisuallyEnabled, isSelected, isOpening);
 				}
 			}
 

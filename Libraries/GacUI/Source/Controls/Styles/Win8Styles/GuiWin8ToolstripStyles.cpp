@@ -163,7 +163,7 @@ Win8ToolstripButtonStyle
 				style->elements.Apply(colorCurrent);
 			}
 
-			void Win8ToolstripButtonStyle::TransferInternal(GuiButton::ControlState value, bool enabled, bool menuOpening)
+			void Win8ToolstripButtonStyle::TransferInternal(GuiButton::ControlState value, bool enabled, bool selected, bool menuOpening)
 			{
 				Win8ButtonColors targetColor;
 				if(enabled)
@@ -195,6 +195,7 @@ Win8ToolstripButtonStyle
 			Win8ToolstripButtonStyle::Win8ToolstripButtonStyle(ButtonStyle _buttonStyle)
 				:controlStyle(GuiButton::Normal)
 				,isVisuallyEnabled(true)
+				,isSelected(false)
 				,isOpening(false)
 				,buttonStyle(_buttonStyle)
 				,subMenuHost(0)
@@ -294,12 +295,18 @@ Win8ToolstripButtonStyle
 				{
 					isVisuallyEnabled=value;
 					imageElement->SetEnabled(value);
-					TransferInternal(controlStyle, isVisuallyEnabled, isOpening);
+					TransferInternal(controlStyle, isVisuallyEnabled, isSelected, isOpening);
 				}
 			}
 
 			void Win8ToolstripButtonStyle::SetSelected(bool value)
 			{
+				if(isSelected!=value)
+				{
+					isSelected=value;
+					imageElement->SetEnabled(value);
+					TransferInternal(controlStyle, isVisuallyEnabled, isSelected, isOpening);
+				}
 			}
 
 			controls::GuiMenu::IStyleController* Win8ToolstripButtonStyle::CreateSubMenuStyleController()
@@ -316,7 +323,7 @@ Win8ToolstripButtonStyle
 				if(isOpening!=value)
 				{
 					isOpening=value;
-					TransferInternal(controlStyle, isVisuallyEnabled, isOpening);
+					TransferInternal(controlStyle, isVisuallyEnabled, isSelected, isOpening);
 				}
 			}
 
@@ -351,7 +358,7 @@ Win8ToolstripButtonStyle
 				if(controlStyle!=value)
 				{
 					controlStyle=value;
-					TransferInternal(controlStyle, isVisuallyEnabled, isOpening);
+					TransferInternal(controlStyle, isVisuallyEnabled, isSelected, isOpening);
 				}
 			}
 
