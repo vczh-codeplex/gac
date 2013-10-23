@@ -115,6 +115,15 @@ Undo Redo (Document)
 					{
 					}
 				};
+
+				struct SetAlignmentStruct
+				{
+					vint									start;
+					vint									end;
+					collections::Array<Alignment>			originalAlignments;
+					collections::Array<Alignment>			inputAlignments;
+				};
+
 			protected:
 				elements::GuiDocumentElement*				element;
 				compositions::GuiGraphicsComposition*		ownerComposition;
@@ -138,6 +147,16 @@ Undo Redo (Document)
 					void									Undo();
 					void									Redo();
 				};
+
+				class SetAlignmentStep : public Object, public IEditStep
+				{
+				public:
+					GuiDocumentUndoRedoProcessor*			processor;
+					Ptr<SetAlignmentStruct>					arguments;
+					
+					void									Undo();
+					void									Redo();
+				};
 			public:
 
 				GuiDocumentUndoRedoProcessor();
@@ -146,6 +165,7 @@ Undo Redo (Document)
 				void										Setup(elements::GuiDocumentElement* _element, compositions::GuiGraphicsComposition* _ownerComposition);
 				void										OnReplaceModel(const ReplaceModelStruct& arguments);
 				void										OnRenameStyle(const RenameStyleStruct& arguments);
+				void										OnSetAlignment(Ptr<SetAlignmentStruct> arguments);
 			};
 		}
 	}
