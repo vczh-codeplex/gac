@@ -323,11 +323,11 @@ Win7MenuItemButtonStyle
 						switch(value)
 						{
 						case GuiButton::Normal:
-							targetColor=Win7ButtonColors::MenuItemButtonNormal();
+							targetColor=selected?Win7ButtonColors::MenuItemButtonSelected():Win7ButtonColors::MenuItemButtonNormal();
 							break;
 						case GuiButton::Active:
 						case GuiButton::Pressed:
-							targetColor=Win7ButtonColors::MenuItemButtonNormalActive();
+							targetColor=selected?Win7ButtonColors::MenuItemButtonSelectedActive():Win7ButtonColors::MenuItemButtonNormalActive();
 							active=true;
 							break;
 						}
