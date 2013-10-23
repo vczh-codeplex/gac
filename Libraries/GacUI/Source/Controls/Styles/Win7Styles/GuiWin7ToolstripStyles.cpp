@@ -250,6 +250,10 @@ Win7ToolstripButtonStyle
 				}
 			}
 
+			void Win7ToolstripButtonStyle::SetSelected(bool value)
+			{
+			}
+
 			controls::GuiMenu::IStyleController* Win7ToolstripButtonStyle::CreateSubMenuStyleController()
 			{
 				return new Win7MenuStyle;

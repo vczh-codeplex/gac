@@ -222,6 +222,10 @@ Win8MenuBarButtonStyle
 				}
 			}
 
+			void Win8MenuBarButtonStyle::SetSelected(bool value)
+			{
+			}
+
 			controls::GuiMenu::IStyleController* Win8MenuBarButtonStyle::CreateSubMenuStyleController()
 			{
 				return new Win8MenuStyle;
@@ -383,6 +387,10 @@ Win8MenuItemButtonStyle
 					elements.imageElement->SetEnabled(value);
 					TransferInternal(controlStyle, isVisuallyEnabled, isOpening);
 				}
+			}
+
+			void Win8MenuItemButtonStyle::SetSelected(bool value)
+			{
 			}
 
 			controls::GuiMenu::IStyleController* Win8MenuItemButtonStyle::CreateSubMenuStyleController()

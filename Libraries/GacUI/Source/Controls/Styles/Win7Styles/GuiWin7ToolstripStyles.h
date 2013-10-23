@@ -97,6 +97,7 @@ Toolstrip Button
 				void														SetText(const WString& value)override;
 				void														SetFont(const FontProperties& value)override;
 				void														SetVisuallyEnabled(bool value)override;
+				void														SetSelected(bool value)override;
 				controls::GuiMenu::IStyleController*						CreateSubMenuStyleController()override;
 				void														SetSubMenuExisting(bool value)override;
 				void														SetSubMenuOpening(bool value)override;

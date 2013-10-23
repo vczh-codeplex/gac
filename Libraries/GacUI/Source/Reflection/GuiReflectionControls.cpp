@@ -890,7 +890,7 @@ Type Declaration
 			END_CLASS_MEMBER(GuiMenuBar)
 
 			BEGIN_CLASS_MEMBER(GuiMenuButton)
-				CLASS_MEMBER_BASE(GuiButton)
+				CLASS_MEMBER_BASE(GuiSelectableButton)
 				CONTROL_CONSTRUCTOR_CONTROLLER(GuiMenuButton)
 
 				CLASS_MEMBER_PROPERTY_GUIEVENT_FAST(Image)
@@ -907,7 +907,7 @@ Type Declaration
 			END_CLASS_MEMBER(GuiMenuButton)
 
 			BEGIN_CLASS_MEMBER(GuiMenuButton::IStyleController)
-				CLASS_MEMBER_BASE(GuiButton::IStyleController)
+				CLASS_MEMBER_BASE(GuiSelectableButton::IStyleController)
 				INTERFACE_EXTERNALCTOR(GuiMenuButton, IStyleController)
 
 				CLASS_MEMBER_METHOD(CreateSubMenuStyleController, NO_PARAMETER)

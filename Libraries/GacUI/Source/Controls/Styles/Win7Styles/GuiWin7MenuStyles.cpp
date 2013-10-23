@@ -233,6 +233,10 @@ Win7MenuBarButtonStyle
 				}
 			}
 
+			void Win7MenuBarButtonStyle::SetSelected(bool value)
+			{
+			}
+
 			controls::GuiMenu::IStyleController* Win7MenuBarButtonStyle::CreateSubMenuStyleController()
 			{
 				return new Win7MenuStyle;
@@ -394,6 +398,10 @@ Win7MenuItemButtonStyle
 					elements.imageElement->SetEnabled(value);
 					TransferInternal(controlStyle, isVisuallyEnabled, isOpening);
 				}
+			}
+
+			void Win7MenuItemButtonStyle::SetSelected(bool value)
+			{
 			}
 
 			controls::GuiMenu::IStyleController* Win7MenuItemButtonStyle::CreateSubMenuStyleController()

@@ -408,6 +408,7 @@ GuiToolstripButton
 					SetImage(command->GetImage());
 					SetText(command->GetText());
 					SetEnabled(command->GetEnabled());
+					SetSelected(command->GetSelected());
 					if(command->GetShortcut())
 					{
 						SetShortcutText(command->GetShortcut()->GetName());
@@ -422,6 +423,7 @@ GuiToolstripButton
 					SetImage(0);
 					SetText(L"");
 					SetEnabled(true);
+					SetSelected(false);
 					SetShortcutText(L"");
 				}
 			}

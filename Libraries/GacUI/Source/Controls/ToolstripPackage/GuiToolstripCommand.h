@@ -25,6 +25,7 @@ namespace vl
 				WString										text;
 				compositions::IGuiShortcutKeyItem*			shortcutKeyItem;
 				bool										enabled;
+				bool										selected;
 				Ptr<compositions::GuiNotifyEvent::IHandler>	shortcutKeyItemExecutedHandler;
 
 				void										OnShortcutKeyItemExecuted(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
@@ -64,6 +65,12 @@ namespace vl
 				/// <summary>Set the enablility for this command.</summary>
 				/// <param name="value">The enablility for this command.</param>
 				void										SetEnabled(bool value);
+				/// <summary>Get the selection for this command.</summary>
+				/// <returns>The selection for this command.</returns>
+				bool										GetSelected();
+				/// <summary>Set the selection for this command.</summary>
+				/// <param name="value">The selection for this command.</param>
+				void										SetSelected(bool value);
 			};
 		}
 	}
