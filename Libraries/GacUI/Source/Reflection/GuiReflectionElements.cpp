@@ -248,6 +248,7 @@ Type Declaration
 				CLASS_MEMBER_METHOD(RemoveStyleName, {L"begin" _ L"end" _ L"image"})
 				CLASS_MEMBER_METHOD(RenameStyle, {L"oldStyleName" _ L"newStyleName"})
 				CLASS_MEMBER_METHOD(ClearStyle, {L"begin" _ L"end"})
+				CLASS_MEMBER_METHOD(SummarizeStyle, {L"begin" _ L"end"})
 				CLASS_MEMBER_METHOD(GetHyperlinkFromPoint, {L"point"})
 			END_CLASS_MEMBER(GuiDocumentElement)
 #undef _

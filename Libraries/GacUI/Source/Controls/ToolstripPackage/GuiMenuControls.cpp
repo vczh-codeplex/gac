@@ -285,7 +285,7 @@ GuiMenuButton
 				,ownerMenuService(0)
 				,cascadeAction(true)
 			{
-				//SetAutoSelection(false);
+				SetAutoSelection(false);
 				SubMenuOpeningChanged.SetAssociatedComposition(boundsComposition);
 				ImageChanged.SetAssociatedComposition(boundsComposition);
 				ShortcutTextChanged.SetAssociatedComposition(boundsComposition);

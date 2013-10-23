@@ -641,6 +641,11 @@ GuiDocumentViewer
 				});
 			}
 
+			Ptr<DocumentStyleProperties> GuiDocumentCommonInterface::SummarizeStyle(TextPos begin, TextPos end)
+			{
+				return documentElement->SummarizeStyle(begin, end);
+			}
+
 			//================ editing control
 
 			WString GuiDocumentCommonInterface::GetActiveHyperlinkReference()
