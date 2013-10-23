@@ -172,24 +172,17 @@ Win8ToolstripButtonStyle
 					{
 						value=GuiButton::Pressed;
 					}
-					if(selected)
+					switch(value)
 					{
-						targetColor=Win8ButtonColors::ToolstripButtonSelected();
-					}
-					else
-					{
-						switch(value)
-						{
-						case GuiButton::Normal:
-							targetColor=Win8ButtonColors::ToolstripButtonNormal();
-							break;
-						case GuiButton::Active:
-							targetColor=Win8ButtonColors::ToolstripButtonActive();
-							break;
-						case GuiButton::Pressed:
-							targetColor=Win8ButtonColors::ToolstripButtonPressed();
-							break;
-						}
+					case GuiButton::Normal:
+						targetColor=selected?Win8ButtonColors::ToolstripButtonSelected():Win8ButtonColors::ToolstripButtonNormal();
+						break;
+					case GuiButton::Active:
+						targetColor=selected?Win8ButtonColors::ToolstripButtonSelected():Win8ButtonColors::ToolstripButtonActive();
+						break;
+					case GuiButton::Pressed:
+						targetColor=Win8ButtonColors::ToolstripButtonPressed();
+						break;
 					}
 				}
 				else
@@ -311,7 +304,6 @@ Win8ToolstripButtonStyle
 				if(isSelected!=value)
 				{
 					isSelected=value;
-					imageElement->SetEnabled(value);
 					TransferInternal(controlStyle, isVisuallyEnabled, isSelected, isOpening);
 				}
 			}
