@@ -39,11 +39,73 @@ namespace document
 			unsigned __int64 ms=DateTime::LocalTime().totalMilliseconds-startTime;
 			vint frameIndex=(ms/100)%imageRun->image->GetFrameCount();
 			imageRun->frameIndex=frameIndex;
-			documentViewer->NotifyParagraphUpdated(paragraphIndex);
+			documentViewer->NotifyParagraphUpdated(paragraphIndex, 1, 1, false);
 		}
 
 		void Stop()
 		{
+		}
+	};
+	
+	class GifAnimationVisitor : public Object, public DocumentRun::IVisitor
+	{
+	public:
+		GuiControlHost*					controlHost;
+		vint							paragraphIndex;
+		GuiDocumentViewer*				documentViewer;
+
+		GifAnimationVisitor(GuiControlHost* _controlHost, vint _paragraphIndex, GuiDocumentViewer* _documentViewer)
+			:controlHost(_controlHost)
+			,paragraphIndex(_paragraphIndex)
+			,documentViewer(_documentViewer)
+		{
+		}
+
+		void VisitContainer(DocumentContainerRun* run)
+		{
+			FOREACH(Ptr<DocumentRun>, subRun, run->runs)
+			{
+				subRun->Accept(this);
+			}
+		}
+
+		void Visit(DocumentTextRun* run)override
+		{
+		}
+
+		void Visit(DocumentStylePropertiesRun* run)override
+		{
+			VisitContainer(run);
+		}
+
+		void Visit(DocumentStyleApplicationRun* run)override
+		{
+			VisitContainer(run);
+		}
+
+		void Visit(DocumentHyperlinkRun* run)override
+		{
+			VisitContainer(run);
+		}
+
+		void Visit(DocumentImageRun* run)override
+		{
+			if(run->image->GetFrameCount()>1)
+			{
+				Ptr<GifAnimation> gifAnimation=new GifAnimation(run, paragraphIndex, documentViewer);
+				controlHost->GetGraphicsHost()->GetAnimationManager()->AddAnimation(gifAnimation);
+			}
+		}
+
+		void Visit(DocumentParagraphRun* run)override
+		{
+			VisitContainer(run);
+		}
+
+		static void CreateGifAnimation(DocumentParagraphRun* run, GuiControlHost* controlHost, vint paragraphIndex, GuiDocumentViewer* documentViewer)
+		{
+			GifAnimationVisitor visitor(controlHost, paragraphIndex, documentViewer);
+			run->Accept(&visitor);
 		}
 	};
 }
@@ -78,16 +140,9 @@ void SetupDocumentElementLayoutWindow(GuiControlHost* controlHost, GuiControl* c
 			documentViewer->SetDocument(document);
 			documentViewer->GetBoundsComposition()->SetAssociatedCursor(GetCurrentController()->ResourceService()->GetDefaultSystemCursor());
 
-			FOREACH_INDEXER(Ptr<DocumentParagraph>, p, i, document->paragraphs)
-			FOREACH(Ptr<DocumentLine>, l, p->lines)
-			FOREACH(Ptr<DocumentRun>, r, l->runs)
+			FOREACH_INDEXER(Ptr<DocumentParagraphRun>, p, i, document->paragraphs)
 			{
-				Ptr<DocumentImageRun> image=r.Cast<DocumentImageRun>();
-				if(image && image->image->GetFrameCount()>1)
-				{
-					Ptr<GifAnimation> gifAnimation=new GifAnimation(image, i, documentViewer);
-					controlHost->GetGraphicsHost()->GetAnimationManager()->AddAnimation(gifAnimation);
-				}
+				GifAnimationVisitor::CreateGifAnimation(p.Obj(), controlHost, i, documentViewer);
 			}
 		});
 	});

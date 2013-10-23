@@ -1501,28 +1501,38 @@ Visitor Pattern Implementation
 Parser Function
 ***********************************************************************/
 
-			vl::Ptr<vl::parsing::ParsingTreeNode> JsonParseAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)
+			vl::Ptr<vl::parsing::ParsingTreeNode> JsonParseAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors)
 			{
 				vl::parsing::tabling::ParsingState state(input, table);
 				state.Reset(L"JRoot");
 				vl::Ptr<vl::parsing::tabling::ParsingGeneralParser> parser=vl::parsing::tabling::CreateStrictParser(table);
-				vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
 				vl::Ptr<vl::parsing::ParsingTreeNode> node=parser->Parse(state, errors);
 				return node;
 			}
 
-			vl::Ptr<JsonNode> JsonParse(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)
+			vl::Ptr<vl::parsing::ParsingTreeNode> JsonParseAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)
+			{
+				vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
+				return JsonParseAsParsingTreeNode(input, table, errors);
+			}
+
+			vl::Ptr<JsonNode> JsonParse(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors)
 			{
 				vl::parsing::tabling::ParsingState state(input, table);
 				state.Reset(L"JRoot");
 				vl::Ptr<vl::parsing::tabling::ParsingGeneralParser> parser=vl::parsing::tabling::CreateStrictParser(table);
-				vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
 				vl::Ptr<vl::parsing::ParsingTreeNode> node=parser->Parse(state, errors);
-				if(node)
+				if(node && errors.Count()==0)
 				{
 					return JsonConvertParsingTreeNode(node, state.GetTokens()).Cast<JsonNode>();
 				}
 				return 0;
+			}
+
+			vl::Ptr<JsonNode> JsonParse(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)
+			{
+				vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
+				return JsonParse(input, table, errors);
 			}
 
 /***********************************************************************
@@ -1588,7 +1598,7 @@ ParsingGeneralParser
 				for(vint i=0;i<state.GetTokens().Count();i++)
 				{
 					const RegexToken* token=&state.GetTokens().Get(i);
-					if(token->token==-1)
+					if(token->token==-1 || !token->completeToken)
 					{
 						errors.Add(new ParsingError(token, L"Unrecognizable token: \""+WString(token->reading, token->length)+L"\"."));
 					}
@@ -11290,52 +11300,72 @@ Visitor Pattern Implementation
 Parser Function
 ***********************************************************************/
 
-			vl::Ptr<vl::parsing::ParsingTreeNode> XmlParseDocumentAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)
+			vl::Ptr<vl::parsing::ParsingTreeNode> XmlParseDocumentAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors)
 			{
 				vl::parsing::tabling::ParsingState state(input, table);
 				state.Reset(L"XDocument");
 				vl::Ptr<vl::parsing::tabling::ParsingGeneralParser> parser=vl::parsing::tabling::CreateStrictParser(table);
-				vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
 				vl::Ptr<vl::parsing::ParsingTreeNode> node=parser->Parse(state, errors);
 				return node;
 			}
 
-			vl::Ptr<XmlDocument> XmlParseDocument(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)
+			vl::Ptr<vl::parsing::ParsingTreeNode> XmlParseDocumentAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)
+			{
+				vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
+				return XmlParseDocumentAsParsingTreeNode(input, table, errors);
+			}
+
+			vl::Ptr<XmlDocument> XmlParseDocument(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors)
 			{
 				vl::parsing::tabling::ParsingState state(input, table);
 				state.Reset(L"XDocument");
 				vl::Ptr<vl::parsing::tabling::ParsingGeneralParser> parser=vl::parsing::tabling::CreateStrictParser(table);
-				vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
 				vl::Ptr<vl::parsing::ParsingTreeNode> node=parser->Parse(state, errors);
-				if(node)
+				if(node && errors.Count()==0)
 				{
 					return XmlConvertParsingTreeNode(node, state.GetTokens()).Cast<XmlDocument>();
 				}
 				return 0;
 			}
 
-			vl::Ptr<vl::parsing::ParsingTreeNode> XmlParseElementAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)
+			vl::Ptr<XmlDocument> XmlParseDocument(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)
+			{
+				vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
+				return XmlParseDocument(input, table, errors);
+			}
+
+			vl::Ptr<vl::parsing::ParsingTreeNode> XmlParseElementAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors)
 			{
 				vl::parsing::tabling::ParsingState state(input, table);
 				state.Reset(L"XElement");
 				vl::Ptr<vl::parsing::tabling::ParsingGeneralParser> parser=vl::parsing::tabling::CreateStrictParser(table);
-				vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
 				vl::Ptr<vl::parsing::ParsingTreeNode> node=parser->Parse(state, errors);
 				return node;
 			}
 
-			vl::Ptr<XmlElement> XmlParseElement(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)
+			vl::Ptr<vl::parsing::ParsingTreeNode> XmlParseElementAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)
+			{
+				vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
+				return XmlParseElementAsParsingTreeNode(input, table, errors);
+			}
+
+			vl::Ptr<XmlElement> XmlParseElement(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors)
 			{
 				vl::parsing::tabling::ParsingState state(input, table);
 				state.Reset(L"XElement");
 				vl::Ptr<vl::parsing::tabling::ParsingGeneralParser> parser=vl::parsing::tabling::CreateStrictParser(table);
-				vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
 				vl::Ptr<vl::parsing::ParsingTreeNode> node=parser->Parse(state, errors);
-				if(node)
+				if(node && errors.Count()==0)
 				{
 					return XmlConvertParsingTreeNode(node, state.GetTokens()).Cast<XmlElement>();
 				}
 				return 0;
+			}
+
+			vl::Ptr<XmlElement> XmlParseElement(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)
+			{
+				vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
+				return XmlParseElement(input, table, errors);
 			}
 
 /***********************************************************************
@@ -11587,6 +11617,10 @@ description::Value
 
 			bool Value::CanConvertTo(ITypeInfo* targetType)const
 			{
+				if(valueType==Null && targetType->GetDecorator()==ITypeInfo::Nullable)
+				{
+					return true;
+				}
 				ValueType targetValueType=ValueType::Null;
 				{
 					ITypeInfo* currentType=targetType;
@@ -11603,6 +11637,7 @@ description::Value
 							currentType=0;
 							break;
 						case ITypeInfo::TypeDescriptor:
+						case ITypeInfo::Nullable:
 							targetValueType=Text;
 							currentType=0;
 							break;
@@ -12356,6 +12391,8 @@ TypeInfoImpl
 					return elementType->GetTypeFriendlyName()+L"*";
 				case SharedPtr:
 					return elementType->GetTypeFriendlyName()+L"^";
+				case Nullable:
+					return elementType->GetTypeFriendlyName()+L"?";
 				case TypeDescriptor:
 					return typeDescriptor->GetTypeName();
 				case Generic:
@@ -13862,6 +13899,7 @@ Collections
 
 				ENUM_NAMESPACE_ITEM(RawPtr)
 				ENUM_NAMESPACE_ITEM(SharedPtr)
+				ENUM_NAMESPACE_ITEM(Nullable)
 				ENUM_NAMESPACE_ITEM(TypeDescriptor)
 				ENUM_NAMESPACE_ITEM(Generic)
 			END_ENUM_ITEM(ITypeInfo::Decorator)
@@ -14487,6 +14525,7 @@ RegexTokens
 					token.start=0;
 					token.length=0;
 					token.token=-2;
+					token.completeToken=true;
 				}
 				token.rowStart=rowStart;
 				token.columnStart=columnStart;
@@ -14498,10 +14537,28 @@ RegexTokens
 				while(*reading)
 				{
 					vint id=-1;
+					bool completeToken=true;
 					if(!pure->MatchHead(reading, start, result))
 					{
 						result.start=reading-start;
-						result.length=1;
+
+						if(id==-1 && result.terminateState!=-1)
+						{
+							vint state=pure->GetRelatedFinalState(result.terminateState);
+							if(state!=-1)
+							{
+								id=stateTokens[state];
+							}
+						}
+
+						if(id==-1)
+						{
+							result.length=1;
+						}
+						else
+						{
+							completeToken=false;
+						}
 					}
 					else
 					{
@@ -14512,6 +14569,7 @@ RegexTokens
 						token.start=result.start;
 						token.length=result.length;
 						token.token=id;
+						token.completeToken=completeToken;
 					}
 					else if(token.token==id && id==-1)
 					{
@@ -14525,6 +14583,7 @@ RegexTokens
 						cacheToken.length=result.length;
 						cacheToken.codeIndex=codeIndex;
 						cacheToken.token=id;
+						cacheToken.completeToken=completeToken;
 					}
 					reading+=result.length;
 					if(cacheAvailable)
@@ -14901,6 +14960,7 @@ RegexLexer
 
 		RegexTokens RegexLexer::Parse(const WString& code, vint codeIndex)const
 		{
+			pure->PrepareForRelatedFinalStateTable();
 			return RegexTokens(pure, stateTokens, code, codeIndex);
 		}
 
@@ -17086,14 +17146,19 @@ PureInterpretor
 			result.start=input-start;
 			result.length=-1;
 			result.finalState=-1;
+			result.terminateState=-1;
 
 			vint currentState=startState;
+			vint terminateState=-1;
+			vint terminateLength=-1;
 			const wchar_t* read=input;
 			while(currentState!=-1)
 			{
+				terminateState=currentState;
+				terminateLength=read-input;
 				if(finalState[currentState])
 				{
-					result.length=read-input;
+					result.length=terminateLength;
 					result.finalState=currentState;
 				}
 				if(!*read)break;
@@ -17101,7 +17166,19 @@ PureInterpretor
 				currentState=transition[currentState][charIndex];
 			}
 
-			return result.finalState!=-1;
+			if(result.finalState==-1)
+			{
+				if(terminateLength>0)
+				{
+					result.terminateState=terminateState;
+				}
+				result.length=terminateLength;
+				return false;
+			}
+			else
+			{
+				return true;
+			}
 		}
 
 		bool PureInterpretor::Match(const wchar_t* input, const wchar_t* start, PureResult& result)

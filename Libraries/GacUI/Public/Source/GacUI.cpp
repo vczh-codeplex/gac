@@ -19,6 +19,7 @@ namespace vl
 			using namespace collections;
 			using namespace compositions;
 			using namespace theme;
+			using namespace description;
 
 /***********************************************************************
 GuiApplication
@@ -285,15 +286,101 @@ GuiApplication
 			}
 
 /***********************************************************************
+GuiPluginManager
+***********************************************************************/
+
+			class GuiPluginManager : public Object, public IGuiPluginManager
+			{
+			protected:
+				List<Ptr<IGuiPlugin>>				plugins;
+				bool								loaded;
+			public:
+				GuiPluginManager()
+					:loaded(false)
+				{
+				}
+
+				~GuiPluginManager()
+				{
+					Unload();
+				}
+
+				void AddPlugin(Ptr<IGuiPlugin> plugin)override
+				{
+					plugins.Add(plugin);
+					if(loaded)
+					{
+						plugin->Load();
+					}
+				}
+
+				void Load()override
+				{
+					if(!loaded)
+					{
+						loaded=true;
+						FOREACH(Ptr<IGuiPlugin>, plugin, plugins)
+						{
+							plugin->Load();
+						}
+						FOREACH(Ptr<IGuiPlugin>, plugin, plugins)
+						{
+							plugin->AfterLoad();
+						}
+					}
+				}
+
+				void Unload()override
+				{
+					if(loaded)
+					{
+						loaded=false;
+						FOREACH(Ptr<IGuiPlugin>, plugin, plugins)
+						{
+							plugin->Unload();
+						}
+					}
+				}
+
+				bool IsLoaded()override
+				{
+					return loaded;
+				}
+			};
+
+/***********************************************************************
 Helpers
 ***********************************************************************/
 
 			GuiApplication* application=0;
+			IGuiPluginManager* pluginManager=0;
 
 			GuiApplication* GetApplication()
 			{
 				return application;
 			}
+
+			IGuiPluginManager* GetPluginManager()
+			{
+				if(!pluginManager)
+				{
+					pluginManager=new GuiPluginManager;
+				}
+				return pluginManager;
+			}
+
+			void DestroyPluginManager()
+			{
+				if(pluginManager)
+				{
+					delete pluginManager;
+					pluginManager=0;
+				}
+			}
+
+/***********************************************************************
+GuiApplicationMain
+***********************************************************************/
 
 			void GuiApplicationInitialize()
 			{
@@ -312,23 +399,17 @@ Helpers
 					}
 				}
 
-				description::LoadPredefinedTypes();
-				description::LoadParsingTypes();
-				description::LoadGuiBasicTypes();
-				description::LoadGuiElementTypes();
-				description::LoadGuiCompositionTypes();
-				description::LoadGuiControlsTypes();
-				description::LoadGuiEventTypes();
-				theme::SetCurrentTheme(theme.Obj());
-
 				GetCurrentController()->InputService()->StartTimer();
 				GuiApplication app;
 				application=&app;
-
-				description::GetGlobalTypeManager()->Load();
+				
+				GetPluginManager()->Load();
+				GetGlobalTypeManager()->Load();
+				theme::SetCurrentTheme(theme.Obj());
 				GuiMain();
 				theme::SetCurrentTheme(0);
-				description::DestroyGlobalTypeManager();
+				DestroyGlobalTypeManager();
+				DestroyPluginManager();
 			}
 		}
 	}
@@ -13982,6 +14063,10 @@ Win7ListViewColumnHeaderStyle
 				}
 			}
 
+			void Win7ListViewColumnHeaderStyle::SetSelected(bool value)
+			{
+			}
+
 			void Win7ListViewColumnHeaderStyle::Transfer(GuiButton::ControlState value)
 			{
 				if(controlStyle!=value)
@@ -14646,6 +14731,10 @@ Win7MenuBarButtonStyle
 				}
 			}
 
+			void Win7MenuBarButtonStyle::SetSelected(bool value)
+			{
+			}
+
 			controls::GuiMenu::IStyleController* Win7MenuBarButtonStyle::CreateSubMenuStyleController()
 			{
 				return new Win7MenuStyle;
@@ -14716,7 +14805,7 @@ Win7MenuItemButtonStyle::MeasuringSource
 Win7MenuItemButtonStyle
 ***********************************************************************/
 
-			void Win7MenuItemButtonStyle::TransferInternal(GuiButton::ControlState value, bool enabled, bool opening)
+			void Win7MenuItemButtonStyle::TransferInternal(GuiButton::ControlState value, bool enabled, bool selected, bool opening)
 			{
 				Win7ButtonColors targetColor;
 				bool active=false;
@@ -14732,11 +14821,11 @@ Win7MenuItemButtonStyle
 						switch(value)
 						{
 						case GuiButton::Normal:
-							targetColor=Win7ButtonColors::MenuItemButtonNormal();
+							targetColor=selected?Win7ButtonColors::MenuItemButtonSelected():Win7ButtonColors::MenuItemButtonNormal();
 							break;
 						case GuiButton::Active:
 						case GuiButton::Pressed:
-							targetColor=Win7ButtonColors::MenuItemButtonNormalActive();
+							targetColor=selected?Win7ButtonColors::MenuItemButtonSelectedActive():Win7ButtonColors::MenuItemButtonNormalActive();
 							active=true;
 							break;
 						}
@@ -14757,12 +14846,13 @@ Win7MenuItemButtonStyle
 					}
 				}
 				elements.Apply(targetColor);
-				elements.SetActive(active);
+				elements.SetActive(active || selected);
 			}
 
 			Win7MenuItemButtonStyle::Win7MenuItemButtonStyle()
 				:controlStyle(GuiButton::Normal)
 				,isVisuallyEnabled(true)
+				,isSelected(false)
 				,isOpening(false)
 			{
 				elements=Win7MenuItemButtonElements::Create();
@@ -14805,7 +14895,16 @@ Win7MenuItemButtonStyle
 				{
 					isVisuallyEnabled=value;
 					elements.imageElement->SetEnabled(value);
-					TransferInternal(controlStyle, isVisuallyEnabled, isOpening);
+					TransferInternal(controlStyle, isVisuallyEnabled, isSelected, isOpening);
+				}
+			}
+
+			void Win7MenuItemButtonStyle::SetSelected(bool value)
+			{
+				if(isSelected!=value)
+				{
+					isSelected=value;
+					TransferInternal(controlStyle, isVisuallyEnabled, isSelected, isOpening);
 				}
 			}
 
@@ -14824,7 +14923,7 @@ Win7MenuItemButtonStyle
 				if(isOpening!=value)
 				{
 					isOpening=value;
-					TransferInternal(controlStyle, isVisuallyEnabled, isOpening);
+					TransferInternal(controlStyle, isVisuallyEnabled, isSelected, isOpening);
 				}
 			}
 
@@ -14860,7 +14959,7 @@ Win7MenuItemButtonStyle
 				if(controlStyle!=value)
 				{
 					controlStyle=value;
-					TransferInternal(controlStyle, isVisuallyEnabled, isOpening);
+					TransferInternal(controlStyle, isVisuallyEnabled, isSelected, isOpening);
 				}
 			}
 
@@ -15903,6 +16002,21 @@ Win7ButtonColors
 				return colors;
 			}
 
+			Win7ButtonColors Win7ButtonColors::ToolstripButtonSelected()
+			{
+				Win7ButtonColors colors=
+				{
+					Color(84, 84, 84),
+					Color(250, 250, 250),
+					Color(250, 250, 250),
+					Color(250, 250, 250),
+					Color(250, 250, 250),
+					Color(250, 250, 250),
+					Win7GetSystemTextColor(true),
+				};
+				return colors;
+			}
+
 			Win7ButtonColors Win7ButtonColors::ToolstripButtonDisabled()
 			{
 				Win7ButtonColors colors=
@@ -16007,6 +16121,36 @@ Win7ButtonColors
 					Color(231, 238, 247),
 					Color(229, 233, 238),
 					Color(245, 249, 255),
+					Win7GetSystemTextColor(true),
+				};
+				return colors;
+			}
+
+			Win7ButtonColors Win7ButtonColors::MenuItemButtonSelected()
+			{
+				Win7ButtonColors colors=
+				{
+					Color(175, 208, 247),
+					Color(248, 248, 250),
+					Color(0, 0, 0, 0),
+					Color(0, 0, 0, 0),
+					Color(0, 0, 0, 0),
+					Color(0, 0, 0, 0),
+					Win7GetSystemTextColor(true),
+				};
+				return colors;
+			}
+
+			Win7ButtonColors Win7ButtonColors::MenuItemButtonSelectedActive()
+			{
+				Win7ButtonColors colors=
+				{
+					Color(175, 208, 247),
+					Color(248, 248, 250),
+					Color(243, 245, 247),
+					Color(231, 238, 247),
+					Color(0, 0, 0, 0),
+					Color(0, 0, 0, 0),
 					Win7GetSystemTextColor(true),
 				};
 				return colors;
@@ -17140,7 +17284,7 @@ Win7ToolstripButtonStyle
 				style->elements.Apply(colorCurrent);
 			}
 
-			void Win7ToolstripButtonStyle::TransferInternal(GuiButton::ControlState value, bool enabled, bool menuOpening)
+			void Win7ToolstripButtonStyle::TransferInternal(GuiButton::ControlState value, bool enabled, bool selected, bool menuOpening)
 			{
 				Win7ButtonColors targetColor;
 				if(enabled)
@@ -17152,10 +17296,10 @@ Win7ToolstripButtonStyle
 					switch(value)
 					{
 					case GuiButton::Normal:
-						targetColor=Win7ButtonColors::ToolstripButtonNormal();
+						targetColor=selected?Win7ButtonColors::ToolstripButtonSelected():Win7ButtonColors::ToolstripButtonNormal();
 						break;
 					case GuiButton::Active:
-						targetColor=Win7ButtonColors::ToolstripButtonActive();
+						targetColor=selected?Win7ButtonColors::ToolstripButtonSelected():Win7ButtonColors::ToolstripButtonActive();
 						break;
 					case GuiButton::Pressed:
 						targetColor=Win7ButtonColors::ToolstripButtonPressed();
@@ -17172,6 +17316,7 @@ Win7ToolstripButtonStyle
 			Win7ToolstripButtonStyle::Win7ToolstripButtonStyle(ButtonStyle _buttonStyle)
 				:controlStyle(GuiButton::Normal)
 				,isVisuallyEnabled(true)
+				,isSelected(false)
 				,isOpening(false)
 				,buttonStyle(_buttonStyle)
 				,subMenuHost(0)
@@ -17271,7 +17416,16 @@ Win7ToolstripButtonStyle
 				{
 					isVisuallyEnabled=value;
 					imageElement->SetEnabled(value);
-					TransferInternal(controlStyle, isVisuallyEnabled, isOpening);
+					TransferInternal(controlStyle, isVisuallyEnabled, isSelected, isOpening);
+				}
+			}
+
+			void Win7ToolstripButtonStyle::SetSelected(bool value)
+			{
+				if(isSelected!=value)
+				{
+					isSelected=value;
+					TransferInternal(controlStyle, isVisuallyEnabled, isSelected, isOpening);
 				}
 			}
 
@@ -17289,7 +17443,7 @@ Win7ToolstripButtonStyle
 				if(isOpening!=value)
 				{
 					isOpening=value;
-					TransferInternal(controlStyle, isVisuallyEnabled, isOpening);
+					TransferInternal(controlStyle, isVisuallyEnabled, isSelected, isOpening);
 				}
 			}
 
@@ -17324,7 +17478,7 @@ Win7ToolstripButtonStyle
 				if(controlStyle!=value)
 				{
 					controlStyle=value;
-					TransferInternal(controlStyle, isVisuallyEnabled, isOpening);
+					TransferInternal(controlStyle, isVisuallyEnabled, isSelected, isOpening);
 				}
 			}
 
@@ -18591,6 +18745,10 @@ Win8MenuBarButtonStyle
 				}
 			}
 
+			void Win8MenuBarButtonStyle::SetSelected(bool value)
+			{
+			}
+
 			controls::GuiMenu::IStyleController* Win8MenuBarButtonStyle::CreateSubMenuStyleController()
 			{
 				return new Win8MenuStyle;
@@ -18661,7 +18819,7 @@ Win8MenuItemButtonStyle::MeasuringSource
 Win8MenuItemButtonStyle
 ***********************************************************************/
 
-			void Win8MenuItemButtonStyle::TransferInternal(GuiButton::ControlState value, bool enabled, bool opening)
+			void Win8MenuItemButtonStyle::TransferInternal(GuiButton::ControlState value, bool enabled, bool selected, bool opening)
 			{
 				Win8ButtonColors targetColor;
 				bool active=false;
@@ -18677,11 +18835,11 @@ Win8MenuItemButtonStyle
 						switch(value)
 						{
 						case GuiButton::Normal:
-							targetColor=Win8ButtonColors::MenuItemButtonNormal();
+							targetColor=selected?Win8ButtonColors::MenuItemButtonSelected():Win8ButtonColors::MenuItemButtonNormal();
 							break;
 						case GuiButton::Active:
 						case GuiButton::Pressed:
-							targetColor=Win8ButtonColors::MenuItemButtonNormalActive();
+							targetColor=selected?Win8ButtonColors::MenuItemButtonSelectedActive():Win8ButtonColors::MenuItemButtonNormalActive();
 							active=true;
 							break;
 						}
@@ -18702,12 +18860,13 @@ Win8MenuItemButtonStyle
 					}
 				}
 				elements.Apply(targetColor);
-				elements.SetActive(active);
+				elements.SetActive(active || selected);
 			}
 
 			Win8MenuItemButtonStyle::Win8MenuItemButtonStyle()
 				:controlStyle(GuiButton::Normal)
 				,isVisuallyEnabled(true)
+				,isSelected(false)
 				,isOpening(false)
 			{
 				elements=Win8MenuItemButtonElements::Create();
@@ -18750,7 +18909,16 @@ Win8MenuItemButtonStyle
 				{
 					isVisuallyEnabled=value;
 					elements.imageElement->SetEnabled(value);
-					TransferInternal(controlStyle, isVisuallyEnabled, isOpening);
+					TransferInternal(controlStyle, isVisuallyEnabled, isSelected, isOpening);
+				}
+			}
+
+			void Win8MenuItemButtonStyle::SetSelected(bool value)
+			{
+				if(isSelected!=value)
+				{
+					isSelected=value;
+					TransferInternal(controlStyle, isVisuallyEnabled, isSelected, isOpening);
 				}
 			}
 
@@ -18769,7 +18937,7 @@ Win8MenuItemButtonStyle
 				if(isOpening!=value)
 				{
 					isOpening=value;
-					TransferInternal(controlStyle, isVisuallyEnabled, isOpening);
+					TransferInternal(controlStyle, isVisuallyEnabled, isSelected, isOpening);
 				}
 			}
 
@@ -18805,7 +18973,7 @@ Win8MenuItemButtonStyle
 				if(controlStyle!=value)
 				{
 					controlStyle=value;
-					TransferInternal(controlStyle, isVisuallyEnabled, isOpening);
+					TransferInternal(controlStyle, isVisuallyEnabled, isSelected, isOpening);
 				}
 			}
 
@@ -19747,6 +19915,18 @@ Win8ButtonColors
 				return colors;
 			}
 
+			Win8ButtonColors Win8ButtonColors::ToolstripButtonSelected()
+			{
+				Win8ButtonColors colors=
+				{
+					Color(96, 161, 226),
+					Color(233, 241, 250),
+					Color(233, 241, 250),
+					Win8GetSystemTextColor(true),
+				};
+				return colors;
+			}
+
 			Win8ButtonColors Win8ButtonColors::ToolstripButtonDisabled()
 			{
 				Win8ButtonColors colors=
@@ -19925,6 +20105,32 @@ Win8ButtonColors
 					Color(120, 174, 229),
 					Color(209, 226, 242),
 					Color(209, 226, 242),
+					Win8GetSystemTextColor(true),
+					Color(187, 204, 220),
+				};
+				return colors;
+			}
+
+			Win8ButtonColors Win8ButtonColors::MenuItemButtonSelected()
+			{
+				Win8ButtonColors colors=
+				{
+					Color(120, 174, 229),
+					Color(233, 241, 250),
+					Color(233, 241, 250),
+					Win8GetSystemTextColor(true),
+					Color(233, 241, 250),
+				};
+				return colors;
+			}
+
+			Win8ButtonColors Win8ButtonColors::MenuItemButtonSelectedActive()
+			{
+				Win8ButtonColors colors=
+				{
+					Color(120, 174, 229),
+					Color(233, 241, 250),
+					Color(233, 241, 250),
 					Win8GetSystemTextColor(true),
 					Color(187, 204, 220),
 				};
@@ -20700,7 +20906,7 @@ Win8ToolstripButtonStyle
 				style->elements.Apply(colorCurrent);
 			}
 
-			void Win8ToolstripButtonStyle::TransferInternal(GuiButton::ControlState value, bool enabled, bool menuOpening)
+			void Win8ToolstripButtonStyle::TransferInternal(GuiButton::ControlState value, bool enabled, bool selected, bool menuOpening)
 			{
 				Win8ButtonColors targetColor;
 				if(enabled)
@@ -20712,10 +20918,10 @@ Win8ToolstripButtonStyle
 					switch(value)
 					{
 					case GuiButton::Normal:
-						targetColor=Win8ButtonColors::ToolstripButtonNormal();
+						targetColor=selected?Win8ButtonColors::ToolstripButtonSelected():Win8ButtonColors::ToolstripButtonNormal();
 						break;
 					case GuiButton::Active:
-						targetColor=Win8ButtonColors::ToolstripButtonActive();
+						targetColor=selected?Win8ButtonColors::ToolstripButtonSelected():Win8ButtonColors::ToolstripButtonActive();
 						break;
 					case GuiButton::Pressed:
 						targetColor=Win8ButtonColors::ToolstripButtonPressed();
@@ -20732,6 +20938,7 @@ Win8ToolstripButtonStyle
 			Win8ToolstripButtonStyle::Win8ToolstripButtonStyle(ButtonStyle _buttonStyle)
 				:controlStyle(GuiButton::Normal)
 				,isVisuallyEnabled(true)
+				,isSelected(false)
 				,isOpening(false)
 				,buttonStyle(_buttonStyle)
 				,subMenuHost(0)
@@ -20831,7 +21038,16 @@ Win8ToolstripButtonStyle
 				{
 					isVisuallyEnabled=value;
 					imageElement->SetEnabled(value);
-					TransferInternal(controlStyle, isVisuallyEnabled, isOpening);
+					TransferInternal(controlStyle, isVisuallyEnabled, isSelected, isOpening);
+				}
+			}
+
+			void Win8ToolstripButtonStyle::SetSelected(bool value)
+			{
+				if(isSelected!=value)
+				{
+					isSelected=value;
+					TransferInternal(controlStyle, isVisuallyEnabled, isSelected, isOpening);
 				}
 			}
 
@@ -20849,7 +21065,7 @@ Win8ToolstripButtonStyle
 				if(isOpening!=value)
 				{
 					isOpening=value;
-					TransferInternal(controlStyle, isVisuallyEnabled, isOpening);
+					TransferInternal(controlStyle, isVisuallyEnabled, isSelected, isOpening);
 				}
 			}
 
@@ -20884,7 +21100,7 @@ Win8ToolstripButtonStyle
 				if(controlStyle!=value)
 				{
 					controlStyle=value;
-					TransferInternal(controlStyle, isVisuallyEnabled, isOpening);
+					TransferInternal(controlStyle, isVisuallyEnabled, isSelected, isOpening);
 				}
 			}
 
@@ -20955,6 +21171,7 @@ namespace vl
 	{
 		namespace controls
 		{
+			using namespace collections;
 			using namespace elements;
 			using namespace compositions;
 
@@ -20962,9 +21179,158 @@ namespace vl
 GuiDocumentViewer
 ***********************************************************************/
 
+			void GuiDocumentCommonInterface::UpdateCaretPoint()
+			{
+				GuiGraphicsHost* host=documentComposition->GetRelatedGraphicsHost();
+				if(host)
+				{
+					Rect caret=documentElement->GetCaretBounds(documentElement->GetCaretEnd(), documentElement->IsCaretEndPreferFrontSide());
+					Point view=GetDocumentViewPosition();
+					vint x=caret.x1-view.x;
+					vint y=caret.y2-view.y;
+					host->SetCaretPoint(Point(x, y), documentComposition);
+				}
+			}
+
+			void GuiDocumentCommonInterface::Move(TextPos caret, bool shift, bool frontSide)
+			{
+				TextPos begin=documentElement->GetCaretBegin();
+				TextPos end=documentElement->GetCaretEnd();
+				
+				TextPos newBegin=shift?begin:caret;
+				TextPos newEnd=caret;
+				documentElement->SetCaret(newBegin, newEnd, frontSide);
+				documentElement->SetCaretVisible(true);
+
+				Rect bounds=documentElement->GetCaretBounds(newEnd, frontSide);
+				if(bounds!=Rect())
+				{
+					bounds.x1-=15;
+					bounds.y1-=15;
+					bounds.x2+=15;
+					bounds.y2+=15;
+					EnsureRectVisible(bounds);
+				}
+				UpdateCaretPoint();
+				SelectionChanged.Execute(documentControl->GetNotifyEventArguments());
+			}
+
+			bool GuiDocumentCommonInterface::ProcessKey(vint code, bool shift, bool ctrl)
+			{
+				if(IGuiShortcutKeyItem* item=internalShortcutKeyManager->TryGetShortcut(ctrl, shift, false, code))
+				{
+					GuiEventArgs arguments;
+					item->Executed.Execute(arguments);
+					return true;
+				}
+
+				TextPos currentCaret=documentElement->GetCaretEnd();
+				bool frontSide=documentElement->IsCaretEndPreferFrontSide();
+				TextPos begin=documentElement->GetCaretBegin();
+				TextPos end=documentElement->GetCaretEnd();
+
+				switch(code)
+				{
+				case VKEY_UP:
+					{
+						TextPos newCaret=documentElement->CalculateCaret(currentCaret, IGuiGraphicsParagraph::CaretMoveUp, frontSide);
+						Move(newCaret, shift, frontSide);
+					}
+					break;
+				case VKEY_DOWN:
+					{
+						TextPos newCaret=documentElement->CalculateCaret(currentCaret, IGuiGraphicsParagraph::CaretMoveDown, frontSide);
+						Move(newCaret, shift, frontSide);
+					}
+					break;
+				case VKEY_LEFT:
+					{
+						TextPos newCaret=documentElement->CalculateCaret(currentCaret, IGuiGraphicsParagraph::CaretMoveLeft, frontSide);
+						Move(newCaret, shift, frontSide);
+					}
+					break;
+				case VKEY_RIGHT:
+					{
+						TextPos newCaret=documentElement->CalculateCaret(currentCaret, IGuiGraphicsParagraph::CaretMoveRight, frontSide);
+						Move(newCaret, shift, frontSide);
+					}
+					break;
+				case VKEY_HOME:
+					{
+						TextPos newCaret=documentElement->CalculateCaret(currentCaret, IGuiGraphicsParagraph::CaretLineFirst, frontSide);
+						if(newCaret==currentCaret)
+						{
+							newCaret=documentElement->CalculateCaret(currentCaret, IGuiGraphicsParagraph::CaretFirst, frontSide);
+						}
+						Move(newCaret, shift, frontSide);
+					}
+					break;
+				case VKEY_END:
+					{
+						TextPos newCaret=documentElement->CalculateCaret(currentCaret, IGuiGraphicsParagraph::CaretLineLast, frontSide);
+						if(newCaret==currentCaret)
+						{
+							newCaret=documentElement->CalculateCaret(currentCaret, IGuiGraphicsParagraph::CaretLast, frontSide);
+						}
+						Move(newCaret, shift, frontSide);
+					}
+					break;
+				case VKEY_PRIOR:
+					{
+					}
+					break;
+				case VKEY_NEXT:
+					{
+					}
+					break;
+				case VKEY_BACK:
+					if(editMode==Editable)
+					{
+						if(begin==end)
+						{
+							ProcessKey(VKEY_LEFT, true, false);
+						}
+						Array<WString> text;
+						EditText(documentElement->GetCaretBegin(), documentElement->GetCaretEnd(), documentElement->IsCaretEndPreferFrontSide(), text);
+						return true;
+					}
+					break;
+				case VKEY_DELETE:
+					if(editMode==Editable)
+					{
+						if(begin==end)
+						{
+							ProcessKey(VKEY_RIGHT, true, false);
+						}
+						Array<WString> text;
+						EditText(documentElement->GetCaretBegin(), documentElement->GetCaretEnd(), documentElement->IsCaretEndPreferFrontSide(), text);
+						return true;
+					}
+					break;
+				case VKEY_RETURN:
+					if(editMode==Editable)
+					{
+						if(ctrl)
+						{
+							Array<WString> text(1);
+							text[0]=L"\r\n";
+							EditText(documentElement->GetCaretBegin(), documentElement->GetCaretEnd(), documentElement->IsCaretEndPreferFrontSide(), text);
+						}
+						else
+						{
+							Array<WString> text(2);
+							EditText(documentElement->GetCaretBegin(), documentElement->GetCaretEnd(), documentElement->IsCaretEndPreferFrontSide(), text);
+						}
+						return true;
+					}
+					break;
+				}
+				return false;
+			}
+
 			void GuiDocumentCommonInterface::InstallDocumentViewer(GuiControl* _sender, compositions::GuiGraphicsComposition* _container)
 			{
-				senderControl=_sender;
+				documentControl=_sender;
 
 				documentElement=GuiDocumentElement::Create();
 				documentComposition=new GuiBoundsComposition;
@@ -20978,72 +21344,320 @@ GuiDocumentViewer
 				documentComposition->GetEventReceiver()->leftButtonUp.AttachMethod(this, &GuiDocumentCommonInterface::OnMouseUp);
 				documentComposition->GetEventReceiver()->mouseLeave.AttachMethod(this, &GuiDocumentCommonInterface::OnMouseLeave);
 
+				_sender->GetFocusableComposition()->GetEventReceiver()->caretNotify.AttachMethod(this, &GuiDocumentCommonInterface::OnCaretNotify);
+				_sender->GetFocusableComposition()->GetEventReceiver()->gotFocus.AttachMethod(this, &GuiDocumentCommonInterface::OnGotFocus);
+				_sender->GetFocusableComposition()->GetEventReceiver()->lostFocus.AttachMethod(this, &GuiDocumentCommonInterface::OnLostFocus);
+				_sender->GetFocusableComposition()->GetEventReceiver()->keyDown.AttachMethod(this, &GuiDocumentCommonInterface::OnKeyDown);
+				_sender->GetFocusableComposition()->GetEventReceiver()->charInput.AttachMethod(this, &GuiDocumentCommonInterface::OnCharInput);
+
+				undoRedoProcessor->Setup(documentElement, documentComposition);
 				ActiveHyperlinkChanged.SetAssociatedComposition(_sender->GetBoundsComposition());
 				ActiveHyperlinkExecuted.SetAssociatedComposition(_sender->GetBoundsComposition());
+				SelectionChanged.SetAssociatedComposition(_sender->GetBoundsComposition());
 			}
 
-			void GuiDocumentCommonInterface::SetActiveHyperlinkId(vint value)
+			void GuiDocumentCommonInterface::SetActiveHyperlink(Ptr<DocumentHyperlinkRun> hyperlink, vint paragraphIndex)
 			{
-				if(activeHyperlinkId!=value)
+				if(activeHyperlink!=hyperlink)
 				{
-					documentElement->ActivateHyperlink(activeHyperlinkId, false);
-					activeHyperlinkId=value;
-					documentElement->ActivateHyperlink(activeHyperlinkId, true);
-					ActiveHyperlinkChanged.Execute(senderControl->GetNotifyEventArguments());
+					ActivateActiveHyperlink(false);
+					activeHyperlink=hyperlink;
+					activeHyperlinkParagraph=paragraphIndex;
+					ActivateActiveHyperlink(true);
+					ActiveHyperlinkChanged.Execute(documentControl->GetNotifyEventArguments());
+				}
+			}
+
+			void GuiDocumentCommonInterface::ActivateActiveHyperlink(bool activate)
+			{
+				if(activeHyperlink)
+				{
+					activeHyperlink->styleName=activate?activeHyperlink->activeStyleName:activeHyperlink->normalStyleName;
+					documentElement->NotifyParagraphUpdated(activeHyperlinkParagraph, 1, 1, false);
+				}
+			}
+
+			void GuiDocumentCommonInterface::AddShortcutCommand(vint key, const Func<void()>& eventHandler)
+			{
+				IGuiShortcutKeyItem* item=internalShortcutKeyManager->CreateShortcut(true, false, false, key);
+				item->Executed.AttachLambda([=](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+				{
+					eventHandler();
+				});
+			}
+
+			void GuiDocumentCommonInterface::EditTextInternal(TextPos begin, TextPos end, const Func<void(TextPos, TextPos, vint&, vint&)>& editor)
+			{
+				// save run before editing
+				if(begin>end)
+				{
+					TextPos temp=begin;
+					begin=end;
+					end=temp;
+				}
+				Ptr<DocumentModel> originalModel=documentElement->GetDocument()->CopyDocument(begin, end, true);
+				if(originalModel)
+				{
+					// edit
+					vint paragraphCount=0;
+					vint lastParagraphLength=0;
+					editor(begin, end, paragraphCount, lastParagraphLength);
+
+					// calculate new caret
+					TextPos caret;
+					if(paragraphCount==0)
+					{
+						caret=begin;
+					}
+					else if(paragraphCount==1)
+					{
+						caret=TextPos(begin.row, begin.column+lastParagraphLength);
+					}
+					else
+					{
+						caret=TextPos(begin.row+paragraphCount-1, lastParagraphLength);
+					}
+					documentElement->SetCaret(caret, caret, true);
+					documentControl->TextChanged.Execute(documentControl->GetNotifyEventArguments());
+
+					// save run after editing
+					Ptr<DocumentModel> inputModel=documentElement->GetDocument()->CopyDocument(begin, caret, true);
+
+					// submit redo-undo
+					GuiDocumentUndoRedoProcessor::ReplaceModelStruct arguments;
+					arguments.originalStart=begin;
+					arguments.originalEnd=end;
+					arguments.originalModel=originalModel;
+					arguments.inputStart=begin;
+					arguments.inputEnd=caret;
+					arguments.inputModel=inputModel;
+					undoRedoProcessor->OnReplaceModel(arguments);
+				}
+			}
+
+			void GuiDocumentCommonInterface::EditStyleInternal(TextPos begin, TextPos end, const Func<void(TextPos, TextPos)>& editor)
+			{
+				// save run before editing
+				if(begin>end)
+				{
+					TextPos temp=begin;
+					begin=end;
+					end=temp;
+				}
+				Ptr<DocumentModel> originalModel=documentElement->GetDocument()->CopyDocument(begin, end, true);
+				if(originalModel)
+				{
+					// edit
+					editor(begin, end);
+
+					// save run after editing
+					Ptr<DocumentModel> inputModel=documentElement->GetDocument()->CopyDocument(begin, end, true);
+
+					// submit redo-undo
+					GuiDocumentUndoRedoProcessor::ReplaceModelStruct arguments;
+					arguments.originalStart=begin;
+					arguments.originalEnd=end;
+					arguments.originalModel=originalModel;
+					arguments.inputStart=begin;
+					arguments.inputEnd=end;
+					arguments.inputModel=inputModel;
+					undoRedoProcessor->OnReplaceModel(arguments);
+				}
+			}
+
+			void GuiDocumentCommonInterface::OnCaretNotify(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				if(documentControl->GetVisuallyEnabled())
+				{
+					if(editMode!=ViewOnly)
+					{
+						documentElement->SetCaretVisible(!documentElement->GetCaretVisible());
+					}
+				}
+			}
+
+			void GuiDocumentCommonInterface::OnGotFocus(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				if(documentControl->GetVisuallyEnabled())
+				{
+					if(editMode!=ViewOnly)
+					{
+						documentElement->SetCaretVisible(true);
+						UpdateCaretPoint();
+					}
+				}
+			}
+
+			void GuiDocumentCommonInterface::OnLostFocus(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				if(documentControl->GetVisuallyEnabled())
+				{
+					documentElement->SetCaretVisible(false);
+				}
+			}
+
+			void GuiDocumentCommonInterface::OnKeyDown(compositions::GuiGraphicsComposition* sender, compositions::GuiKeyEventArgs& arguments)
+			{
+				if(documentControl->GetVisuallyEnabled())
+				{
+					if(editMode!=ViewOnly)
+					{
+						if(ProcessKey(arguments.code, arguments.shift, arguments.ctrl))
+						{
+							arguments.handled=true;
+						}
+					}
+				}
+			}
+
+			void GuiDocumentCommonInterface::OnCharInput(compositions::GuiGraphicsComposition* sender, compositions::GuiCharEventArgs& arguments)
+			{
+				if(documentControl->GetVisuallyEnabled())
+				{
+					if(editMode==Editable && arguments.code!=VKEY_ESCAPE && arguments.code!=VKEY_BACK && arguments.code!=VKEY_RETURN && !arguments.ctrl)
+					{
+						Array<WString> text(1);
+						text[0]=WString(arguments.code);
+						EditText(documentElement->GetCaretBegin(), documentElement->GetCaretEnd(), documentElement->IsCaretEndPreferFrontSide(), text);
+					}
 				}
 			}
 
 			void GuiDocumentCommonInterface::OnMouseMove(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 			{
-				vint id=documentElement->GetHyperlinkIdFromPoint(Point(arguments.x, arguments.y));
-				if(dragging && id!=draggingHyperlinkId)
+				if(documentControl->GetVisuallyEnabled())
 				{
-					id=DocumentRun::NullHyperlinkId;
-				}
-				SetActiveHyperlinkId(id);
-				if(id==DocumentRun::NullHyperlinkId)
-				{
-					documentComposition->SetAssociatedCursor(0);
-				}
-				else
-				{
-					INativeCursor* cursor=GetCurrentController()->ResourceService()->GetSystemCursor(INativeCursor::Hand);
-					documentComposition->SetAssociatedCursor(cursor);
+					switch(editMode)
+					{
+					case ViewOnly:
+						{
+							Point point(arguments.x, arguments.y);
+							Ptr<DocumentHyperlinkRun> hyperlink=documentElement->GetHyperlinkFromPoint(point);
+							vint hyperlinkParagraph=hyperlink?documentElement->CalculateCaretFromPoint(point).row:-1;
+
+							if(dragging)
+							{
+								if(activeHyperlink)
+								{
+									ActivateActiveHyperlink(activeHyperlink==hyperlink);
+								}
+							}
+							else
+							{
+								SetActiveHyperlink(hyperlink, hyperlinkParagraph);
+							}
+
+							if(activeHyperlink && activeHyperlink==hyperlink)
+							{
+								INativeCursor* cursor=GetCurrentController()->ResourceService()->GetSystemCursor(INativeCursor::Hand);
+								documentComposition->SetAssociatedCursor(cursor);
+							}
+							else
+							{
+								documentComposition->SetAssociatedCursor(0);
+							}
+						}
+						break;
+					case Selectable:
+					case Editable:
+						if(dragging)
+						{
+							TextPos caret=documentElement->CalculateCaretFromPoint(Point(arguments.x, arguments.y));
+							TextPos oldCaret=documentElement->GetCaretBegin();
+							Move(caret, true, (oldCaret==caret?documentElement->IsCaretEndPreferFrontSide():caret<oldCaret));
+						}
+						break;
+					}
 				}
 			}
 
 			void GuiDocumentCommonInterface::OnMouseDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 			{
-				vint id=documentElement->GetHyperlinkIdFromPoint(Point(arguments.x, arguments.y));
-				draggingHyperlinkId=id;
-				SetActiveHyperlinkId(id);
-				dragging=true;
+				if(documentControl->GetVisuallyEnabled())
+				{
+					documentControl->SetFocus();
+					switch(editMode)
+					{
+					case ViewOnly:
+						{
+							Point point(arguments.x, arguments.y);
+							Ptr<DocumentHyperlinkRun> hyperlink=documentElement->GetHyperlinkFromPoint(point);
+							vint hyperlinkParagraph=hyperlink?documentElement->CalculateCaretFromPoint(point).row:-1;
+							SetActiveHyperlink(hyperlink, hyperlinkParagraph);
+						}
+						break;
+					case Selectable:
+					case Editable:
+						{
+							TextPos caret=documentElement->CalculateCaretFromPoint(Point(arguments.x, arguments.y));
+							TextPos oldCaret=documentElement->GetCaretEnd();
+							if(caret!=oldCaret)
+							{
+								Move(caret, arguments.shift, caret<oldCaret);
+							}
+						}
+						break;
+					}
+					dragging=true;
+				}
 			}
 
 			void GuiDocumentCommonInterface::OnMouseUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 			{
-				dragging=false;
-				vint id=documentElement->GetHyperlinkIdFromPoint(Point(arguments.x, arguments.y));
-				if(id==draggingHyperlinkId && id!=DocumentRun::NullHyperlinkId)
+				if(documentControl->GetVisuallyEnabled())
 				{
-					ActiveHyperlinkExecuted.Execute(senderControl->GetNotifyEventArguments());
+					dragging=false;
+					switch(editMode)
+					{
+					case ViewOnly:
+						{
+							Point point(arguments.x, arguments.y);
+							Ptr<DocumentHyperlinkRun> hyperlink=documentElement->GetHyperlinkFromPoint(point);
+							if(activeHyperlink!=hyperlink)
+							{
+								SetActiveHyperlink(0);
+							}
+							if(activeHyperlink)
+							{
+								ActiveHyperlinkExecuted.Execute(documentControl->GetNotifyEventArguments());
+							}
+						}
+						break;
+					}
 				}
-				draggingHyperlinkId=DocumentRun::NullHyperlinkId;
 			}
 
 			void GuiDocumentCommonInterface::OnMouseLeave(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
-				SetActiveHyperlinkId(DocumentRun::NullHyperlinkId);
+				SetActiveHyperlink(0);
+			}
+
+			Point GuiDocumentCommonInterface::GetDocumentViewPosition()
+			{
+				return Point(0, 0);
+			}
+
+			void GuiDocumentCommonInterface::EnsureRectVisible(Rect bounds)
+			{
 			}
 
 			GuiDocumentCommonInterface::GuiDocumentCommonInterface()
 				:documentElement(0)
 				,documentComposition(0)
-				,activeHyperlinkId(DocumentRun::NullHyperlinkId)
-				,draggingHyperlinkId(DocumentRun::NullHyperlinkId)
+				,activeHyperlinkParagraph(-1)
 				,dragging(false)
-				,senderControl(0)
+				,editMode(ViewOnly)
+				,documentControl(0)
 			{
+				undoRedoProcessor=new GuiDocumentUndoRedoProcessor;
+
+				internalShortcutKeyManager=new GuiShortcutKeyManager;
+				AddShortcutCommand('Z', Func<bool()>(this, &GuiDocumentCommonInterface::Undo));
+				AddShortcutCommand('Y', Func<bool()>(this, &GuiDocumentCommonInterface::Redo));
+				AddShortcutCommand('A', Func<void()>(this, &GuiDocumentCommonInterface::SelectAll));
+				AddShortcutCommand('X', Func<bool()>(this, &GuiDocumentCommonInterface::Cut));
+				AddShortcutCommand('C', Func<bool()>(this, &GuiDocumentCommonInterface::Copy));
+				AddShortcutCommand('V', Func<bool()>(this, &GuiDocumentCommonInterface::Paste));
 			}
 
 			GuiDocumentCommonInterface::~GuiDocumentCommonInterface()
@@ -21057,44 +21671,467 @@ GuiDocumentViewer
 
 			void GuiDocumentCommonInterface::SetDocument(Ptr<DocumentModel> value)
 			{
-				SetActiveHyperlinkId(DocumentRun::NullHyperlinkId);
+				SetActiveHyperlink(0);
+				ClearUndoRedo();
+				NotifyModificationSaved();
+				if(value->paragraphs.Count()==0)
+				{
+					value->paragraphs.Add(new DocumentParagraphRun);
+				}
 				documentElement->SetDocument(value);
 			}
 
-			void GuiDocumentCommonInterface::NotifyParagraphUpdated(vint index)
+			//================ caret operations
+
+			TextPos GuiDocumentCommonInterface::GetCaretBegin()
 			{
-				documentElement->NotifyParagraphUpdated(index);
+				return documentElement->GetCaretBegin();
 			}
 
-			vint GuiDocumentCommonInterface::GetActiveHyperlinkId()
+			TextPos GuiDocumentCommonInterface::GetCaretEnd()
 			{
-				return activeHyperlinkId;
+				return documentElement->GetCaretEnd();
 			}
+
+			void GuiDocumentCommonInterface::SetCaret(TextPos begin, TextPos end)
+			{
+				documentElement->SetCaret(begin, end, end>=begin);
+			}
+
+			TextPos GuiDocumentCommonInterface::CalculateCaretFromPoint(Point point)
+			{
+				return documentElement->CalculateCaretFromPoint(point);
+			}
+
+			Rect GuiDocumentCommonInterface::GetCaretBounds(TextPos caret, bool frontSide)
+			{
+				return documentElement->GetCaretBounds(caret, frontSide);
+			}
+
+			//================ editing operations
+
+			void GuiDocumentCommonInterface::NotifyParagraphUpdated(vint index, vint oldCount, vint newCount, bool updatedText)
+			{
+				documentElement->NotifyParagraphUpdated(index, oldCount, newCount, updatedText);
+			}
+
+			void GuiDocumentCommonInterface::EditRun(TextPos begin, TextPos end, Ptr<DocumentModel> model)
+			{
+				EditTextInternal(begin, end, [=](TextPos begin, TextPos end, vint& paragraphCount, vint& lastParagraphLength)
+				{
+					documentElement->EditRun(begin, end, model);
+					paragraphCount=model->paragraphs.Count();
+					lastParagraphLength=paragraphCount==0?0:model->paragraphs[paragraphCount-1]->GetText(false).Length();
+				});
+			}
+
+			void GuiDocumentCommonInterface::EditText(TextPos begin, TextPos end, bool frontSide, const collections::Array<WString>& text)
+			{
+				EditTextInternal(begin, end, [=, &text](TextPos begin, TextPos end, vint& paragraphCount, vint& lastParagraphLength)
+				{
+					documentElement->EditText(begin, end, frontSide, text);
+					paragraphCount=text.Count();
+					lastParagraphLength=paragraphCount==0?0:text[paragraphCount-1].Length();
+				});
+			}
+
+			void GuiDocumentCommonInterface::EditStyle(TextPos begin, TextPos end, Ptr<DocumentStyleProperties> style)
+			{
+				EditStyleInternal(begin, end, [=](TextPos begin, TextPos end)
+				{
+					documentElement->EditStyle(begin, end, style);
+				});
+			}
+
+			void GuiDocumentCommonInterface::EditImage(TextPos begin, TextPos end, Ptr<GuiImageData> image)
+			{
+				EditTextInternal(begin, end, [=](TextPos begin, TextPos end, vint& paragraphCount, vint& lastParagraphLength)
+				{
+					documentElement->EditImage(begin, end, image);
+					paragraphCount=1;
+					lastParagraphLength=wcslen(DocumentImageRun::RepresentationText);
+				});
+			}
+
+			void GuiDocumentCommonInterface::EditHyperlink(vint paragraphIndex, vint begin, vint end, const WString& reference, const WString& normalStyleName, const WString& activeStyleName)
+			{
+				EditStyleInternal(TextPos(paragraphIndex, begin), TextPos(paragraphIndex, end), [=](TextPos begin, TextPos end)
+				{
+					documentElement->EditHyperlink(begin.row, begin.column, end.column, reference, normalStyleName, activeStyleName);
+				});
+			}
+
+			void GuiDocumentCommonInterface::RemoveHyperlink(vint paragraphIndex, vint begin, vint end)
+			{
+				EditStyleInternal(TextPos(paragraphIndex, begin), TextPos(paragraphIndex, end), [=](TextPos begin, TextPos end)
+				{
+					documentElement->RemoveHyperlink(begin.row, begin.column, end.column);
+				});
+			}
+
+			void GuiDocumentCommonInterface::EditStyleName(TextPos begin, TextPos end, const WString& styleName)
+			{
+				EditStyleInternal(begin, end, [=](TextPos begin, TextPos end)
+				{
+					documentElement->EditStyleName(begin, end, styleName);
+				});
+			}
+
+			void GuiDocumentCommonInterface::RemoveStyleName(TextPos begin, TextPos end)
+			{
+				EditStyleInternal(begin, end, [=](TextPos begin, TextPos end)
+				{
+					documentElement->RemoveStyleName(begin, end);
+				});
+			}
+
+			void GuiDocumentCommonInterface::RenameStyle(const WString& oldStyleName, const WString& newStyleName)
+			{
+				documentElement->RenameStyle(oldStyleName, newStyleName);
+
+				// submit redo-undo
+				GuiDocumentUndoRedoProcessor::RenameStyleStruct arguments;
+				arguments.oldStyleName=oldStyleName;
+				arguments.newStyleName=newStyleName;
+				undoRedoProcessor->OnRenameStyle(arguments);
+			}
+
+			void GuiDocumentCommonInterface::ClearStyle(TextPos begin, TextPos end)
+			{
+				EditStyleInternal(begin, end, [=](TextPos begin, TextPos end)
+				{
+					documentElement->ClearStyle(begin, end);
+				});
+			}
+
+			Ptr<DocumentStyleProperties> GuiDocumentCommonInterface::SummarizeStyle(TextPos begin, TextPos end)
+			{
+				return documentElement->SummarizeStyle(begin, end);
+			}
+
+			void GuiDocumentCommonInterface::SetParagraphAlignment(TextPos begin, TextPos end, const collections::Array<Alignment>& alignments)
+			{
+				vint first=begin.row;
+				vint last=end.row;
+				if(first>last)
+				{
+					vint temp=first;
+					first=last;
+					last=temp;
+				}
+
+				Ptr<DocumentModel> document=documentElement->GetDocument();
+				if(0<=first && first<document->paragraphs.Count() && 0<=last && last<document->paragraphs.Count() && last-first+1==alignments.Count())
+				{
+					Ptr<GuiDocumentUndoRedoProcessor::SetAlignmentStruct> arguments=new GuiDocumentUndoRedoProcessor::SetAlignmentStruct;
+					arguments->start=first;
+					arguments->end=last;
+					arguments->originalAlignments.Resize(alignments.Count());
+					arguments->inputAlignments.Resize(alignments.Count());
+					for(vint i=first;i<=last;i++)
+					{
+						arguments->originalAlignments[i-first]=document->paragraphs[i]->alignment;
+						arguments->inputAlignments[i-first]=alignments[i-first];
+					}
+					documentElement->SetParagraphAlignment(begin, end, alignments);
+					undoRedoProcessor->OnSetAlignment(arguments);
+				}
+			}
+
+			//================ editing control
 
 			WString GuiDocumentCommonInterface::GetActiveHyperlinkReference()
 			{
-				if(activeHyperlinkId==DocumentRun::NullHyperlinkId) return L"";
-				Ptr<DocumentModel> document=documentElement->GetDocument();
-				if(!document) return L"";
-				vint index=document->hyperlinkInfos.Keys().IndexOf(activeHyperlinkId);
-				if(index==-1) return L"";
-				return document->hyperlinkInfos.Values().Get(index).reference;
+				return activeHyperlink?activeHyperlink->reference:L"";
+			}
+
+			GuiDocumentCommonInterface::EditMode GuiDocumentCommonInterface::GetEditMode()
+			{
+				return editMode;
+			}
+
+			void GuiDocumentCommonInterface::SetEditMode(EditMode value)
+			{
+				if(activeHyperlink)
+				{
+					SetActiveHyperlink(0);
+					activeHyperlink=0;
+					activeHyperlinkParagraph=-1;
+				}
+
+				editMode=value;
+				if(editMode==ViewOnly)
+				{
+					documentComposition->SetAssociatedCursor(0);
+				}
+				else
+				{
+					INativeCursor* cursor=GetCurrentController()->ResourceService()->GetSystemCursor(INativeCursor::IBeam);
+					documentComposition->SetAssociatedCursor(cursor);
+				}
+			}
+
+			//================ selection operations
+
+			void GuiDocumentCommonInterface::SelectAll()
+			{
+				vint lastIndex=documentElement->GetDocument()->paragraphs.Count()-1;
+				Ptr<DocumentParagraphRun> lastParagraph=documentElement->GetDocument()->paragraphs[lastIndex];
+
+				TextPos begin(0, 0);
+				TextPos end(lastIndex, lastParagraph->GetText(false).Length());
+				SetCaret(begin, end);
+			}
+
+			WString GuiDocumentCommonInterface::GetSelectionText()
+			{
+				TextPos begin=documentElement->GetCaretBegin();
+				TextPos end=documentElement->GetCaretEnd();
+				if(begin>end)
+				{
+					TextPos temp=begin;
+					begin=end;
+					end=temp;
+				}
+
+				Ptr<DocumentModel> model=documentElement->GetDocument()->CopyDocument(begin, end, false);
+				return model->GetText(true);
+			}
+
+			void GuiDocumentCommonInterface::SetSelectionText(const WString& value)
+			{
+				List<WString> paragraphs;
+				{
+					stream::StringReader reader(value);
+					WString paragraph;
+					bool empty=true;
+
+					while(!reader.IsEnd())
+					{
+						WString line=reader.ReadLine();
+						if(empty)
+						{
+							paragraph+=line;
+							empty=false;
+						}
+						else if(line!=L"")
+						{
+							paragraph+=L"\r\n"+line;
+						}
+						else
+						{
+							paragraphs.Add(paragraph);
+							paragraph=L"";
+							empty=true;
+						}
+					}
+
+					if(!empty)
+					{
+						paragraphs.Add(paragraph);
+					}
+				}
+
+				TextPos begin=documentElement->GetCaretBegin();
+				TextPos end=documentElement->GetCaretEnd();
+				if(begin>end)
+				{
+					TextPos temp=begin;
+					begin=end;
+					end=temp;
+				}
+
+				Array<WString> text;
+				CopyFrom(text, paragraphs);
+				EditText(begin, end, documentElement->IsCaretEndPreferFrontSide(), text);
+			}
+
+			Ptr<DocumentModel> GuiDocumentCommonInterface::GetSelectionModel()
+			{
+				TextPos begin=documentElement->GetCaretBegin();
+				TextPos end=documentElement->GetCaretEnd();
+				if(begin>end)
+				{
+					TextPos temp=begin;
+					begin=end;
+					end=temp;
+				}
+
+				Ptr<DocumentModel> model=documentElement->GetDocument()->CopyDocument(begin, end, true);
+				return model;
+			}
+
+			void GuiDocumentCommonInterface::SetSelectionModel(Ptr<DocumentModel> value)
+			{
+				TextPos begin=documentElement->GetCaretBegin();
+				TextPos end=documentElement->GetCaretEnd();
+				if(begin>end)
+				{
+					TextPos temp=begin;
+					begin=end;
+					end=temp;
+				}
+
+				EditRun(begin, end, value);
+			}
+
+			//================ clipboard operations
+
+			bool GuiDocumentCommonInterface::CanCut()
+			{
+				return editMode==Editable && documentElement->GetCaretBegin()!=documentElement->GetCaretEnd();
+			}
+
+			bool GuiDocumentCommonInterface::CanCopy()
+			{
+				return documentElement->GetCaretBegin()!=documentElement->GetCaretEnd();
+			}
+
+			bool GuiDocumentCommonInterface::CanPaste()
+			{
+				return editMode==Editable && GetCurrentController()->ClipboardService()->ContainsText();
+			}
+
+			bool GuiDocumentCommonInterface::Cut()
+			{
+				if(CanCut())
+				{
+					GetCurrentController()->ClipboardService()->SetText(GetSelectionText());
+					SetSelectionText(L"");
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+
+			bool GuiDocumentCommonInterface::Copy()
+			{
+				if(CanCopy())
+				{
+					GetCurrentController()->ClipboardService()->SetText(GetSelectionText());
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+
+			bool GuiDocumentCommonInterface::Paste()
+			{
+				if(CanPaste())
+				{
+					SetSelectionText(GetCurrentController()->ClipboardService()->GetText());
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+
+			//================ undo redo control
+
+			bool GuiDocumentCommonInterface::CanUndo()
+			{
+				return editMode==Editable && undoRedoProcessor->CanUndo();
+			}
+
+			bool GuiDocumentCommonInterface::CanRedo()
+			{
+				return editMode==Editable && undoRedoProcessor->CanRedo();
+			}
+
+			void GuiDocumentCommonInterface::ClearUndoRedo()
+			{
+				undoRedoProcessor->ClearUndoRedo();
+			}
+
+			bool GuiDocumentCommonInterface::GetModified()
+			{
+				return undoRedoProcessor->GetModified();
+			}
+
+			void GuiDocumentCommonInterface::NotifyModificationSaved()
+			{
+				undoRedoProcessor->NotifyModificationSaved();
+			}
+
+			bool GuiDocumentCommonInterface::Undo()
+			{
+				if(CanUndo())
+				{
+					return undoRedoProcessor->Undo();
+				}
+				else
+				{
+					return false;
+				}
+			}
+
+			bool GuiDocumentCommonInterface::Redo()
+			{
+				if(CanRedo())
+				{
+					return undoRedoProcessor->Redo();
+				}
+				else
+				{
+					return false;
+				}
 			}
 
 /***********************************************************************
 GuiDocumentViewer
 ***********************************************************************/
 
+			Point GuiDocumentViewer::GetDocumentViewPosition()
+			{
+				return GetViewBounds().LeftTop();
+			}
+
+			void GuiDocumentViewer::EnsureRectVisible(Rect bounds)
+			{
+				Rect viewBounds=GetViewBounds();
+				vint offset=0;
+				if(bounds.y1<viewBounds.y1)
+				{
+					offset=bounds.y1-viewBounds.y1;
+				}
+				else if(bounds.y2>viewBounds.y2)
+				{
+					offset=bounds.y2-viewBounds.y2;
+				}
+
+				GetVerticalScroll()->SetPosition(viewBounds.y1+offset);
+			}
+
 			GuiDocumentViewer::GuiDocumentViewer(GuiDocumentViewer::IStyleProvider* styleProvider)
 				:GuiScrollContainer(styleProvider)
 			{
 				SetExtendToFullWidth(true);
 				SetHorizontalAlwaysVisible(false);
+				SetFocusableComposition(GetBoundsComposition());
 				InstallDocumentViewer(this, GetContainerComposition());
+				SetDocument(new DocumentModel);
 			}
 
 			GuiDocumentViewer::~GuiDocumentViewer()
 			{
+			}
+
+			const WString& GuiDocumentViewer::GetText()
+			{
+				text=documentElement->GetDocument()->GetText(true);
+				return text;
+			}
+
+			void GuiDocumentViewer::SetText(const WString& value)
+			{
+				SelectAll();
+				SetSelectionText(value);
 			}
 
 /***********************************************************************
@@ -21105,11 +22142,24 @@ GuiDocumentLabel
 				:GuiControl(styleController)
 			{
 				GetContainerComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+				SetFocusableComposition(GetBoundsComposition());
 				InstallDocumentViewer(this, GetContainerComposition());
 			}
 
 			GuiDocumentLabel::~GuiDocumentLabel()
 			{
+			}
+
+			const WString& GuiDocumentLabel::GetText()
+			{
+				text=documentElement->GetDocument()->GetText(true);
+				return text;
+			}
+
+			void GuiDocumentLabel::SetText(const WString& value)
+			{
+				SelectAll();
+				SetSelectionText(value);
 			}
 		}
 	}
@@ -21385,6 +22435,7 @@ GuiTextBoxAutoCompleteBase
 					if(selected!=-1)
 					{
 						autoCompleteList->SetSelected(selected, true);
+						autoCompleteList->EnsureItemVisible(selected);
 					}
 				}
 			}
@@ -23081,40 +24132,6 @@ GuiTextBoxCommonInterface::DefaultCallback
 			}
 
 /***********************************************************************
-GuiTextBoxCommonInterface::ShortcutCommand
-***********************************************************************/
-
-			GuiTextBoxCommonInterface::ShortcutCommand::ShortcutCommand(bool _ctrl, bool _shift, vint _key, const Func<void()> _action)
-				:ctrl(_ctrl)
-				,shift(_shift)
-				,key(_key)
-				,action(_action)
-			{
-			}
-
-			GuiTextBoxCommonInterface::ShortcutCommand::ShortcutCommand(bool _ctrl, bool _shift, vint _key, const Func<bool()> _action)
-				:ctrl(_ctrl)
-				,shift(_shift)
-				,key(_key)
-				,action(Func<void()>(_action))
-			{
-			}
-
-			GuiTextBoxCommonInterface::ShortcutCommand::~ShortcutCommand()
-			{
-			}
-
-			bool GuiTextBoxCommonInterface::ShortcutCommand::IsTheRightKey(bool _ctrl, bool _shift, vint _key)
-			{
-				return _ctrl==ctrl && _shift==shift && _key==key;
-			}
-
-			void GuiTextBoxCommonInterface::ShortcutCommand::Execute()
-			{
-				action();
-			}
-
-/***********************************************************************
 GuiTextBoxCommonInterface
 ***********************************************************************/
 
@@ -23125,7 +24142,6 @@ GuiTextBoxCommonInterface
 				{
 					Rect caret=textElement->GetLines().GetRectFromTextPos(textElement->GetCaretEnd());
 					Point view=textElement->GetViewPosition();
-					vint textMargin=callback->GetTextMargin();
 					vint x=caret.x1-view.x;
 					vint y=caret.y2-view.y;
 					host->SetCaretPoint(Point(x, y), textComposition);
@@ -23274,14 +24290,13 @@ GuiTextBoxCommonInterface
 
 			bool GuiTextBoxCommonInterface::ProcessKey(vint code, bool shift, bool ctrl)
 			{
-				for(vint i=0;i<shortcutCommands.Count();i++)
+				if(IGuiShortcutKeyItem* item=internalShortcutKeyManager->TryGetShortcut(ctrl, shift, false, code))
 				{
-					if(shortcutCommands[i]->IsTheRightKey(ctrl, shift, code))
-					{
-						shortcutCommands[i]->Execute();
-						return true;
-					}
+					GuiEventArgs arguments;
+					item->Executed.Execute(arguments);
+					return true;
 				}
+
 				TextPos begin=textElement->GetCaretBegin();
 				TextPos end=textElement->GetCaretEnd();
 				switch(code)
@@ -23427,7 +24442,7 @@ GuiTextBoxCommonInterface
 							{
 								ProcessKey(VKEY_LEFT, true, false);
 							}
-							SetSelectionText(L"", true);
+							SetSelectionTextAsKeyInput(L"");
 						}
 						return true;
 					}
@@ -23451,7 +24466,7 @@ GuiTextBoxCommonInterface
 							{
 								ProcessKey(VKEY_RIGHT, true, false);
 							}
-							SetSelectionText(L"", true);
+							SetSelectionTextAsKeyInput(L"");
 						}
 						return true;
 					}
@@ -23533,7 +24548,7 @@ GuiTextBoxCommonInterface
 				{
 					if(!readonly && arguments.code!=VKEY_ESCAPE && arguments.code!=VKEY_BACK && !arguments.ctrl)
 					{
-						SetSelectionText(WString(arguments.code), true);
+						SetSelectionTextAsKeyInput(WString(arguments.code));
 					}
 				}
 			}
@@ -23602,9 +24617,13 @@ GuiTextBoxCommonInterface
 				}
 			}
 
-			void GuiTextBoxCommonInterface::AddShortcutCommand(Ptr<ShortcutCommand> shortcutCommand)
+			void GuiTextBoxCommonInterface::AddShortcutCommand(vint key, const Func<void()>& eventHandler)
 			{
-				shortcutCommands.Add(shortcutCommand);
+				IGuiShortcutKeyItem* item=internalShortcutKeyManager->CreateShortcut(true, false, false, key);
+				item->Executed.AttachLambda([=](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+				{
+					eventHandler();
+				});
 			}
 
 			elements::GuiColorizedTextElement* GuiTextBoxCommonInterface::GetTextElement()
@@ -23639,12 +24658,13 @@ GuiTextBoxCommonInterface
 				undoRedoProcessor=new GuiTextBoxUndoRedoProcessor;
 				AttachTextEditCallback(undoRedoProcessor);
 
-				AddShortcutCommand(new ShortcutCommand(true, false, 'Z', Func<bool()>(this, &GuiTextBoxCommonInterface::Undo)));
-				AddShortcutCommand(new ShortcutCommand(true, false, 'Y', Func<bool()>(this, &GuiTextBoxCommonInterface::Redo)));
-				AddShortcutCommand(new ShortcutCommand(true, false, 'A', Func<void()>(this, &GuiTextBoxCommonInterface::SelectAll)));
-				AddShortcutCommand(new ShortcutCommand(true, false, 'X', Func<bool()>(this, &GuiTextBoxCommonInterface::Cut)));
-				AddShortcutCommand(new ShortcutCommand(true, false, 'C', Func<bool()>(this, &GuiTextBoxCommonInterface::Copy)));
-				AddShortcutCommand(new ShortcutCommand(true, false, 'V', Func<bool()>(this, &GuiTextBoxCommonInterface::Paste)));
+				internalShortcutKeyManager=new GuiShortcutKeyManager;
+				AddShortcutCommand('Z', Func<bool()>(this, &GuiTextBoxCommonInterface::Undo));
+				AddShortcutCommand('Y', Func<bool()>(this, &GuiTextBoxCommonInterface::Redo));
+				AddShortcutCommand('A', Func<void()>(this, &GuiTextBoxCommonInterface::SelectAll));
+				AddShortcutCommand('X', Func<bool()>(this, &GuiTextBoxCommonInterface::Cut));
+				AddShortcutCommand('C', Func<bool()>(this, &GuiTextBoxCommonInterface::Copy));
+				AddShortcutCommand('V', Func<bool()>(this, &GuiTextBoxCommonInterface::Paste));
 			}
 
 			GuiTextBoxCommonInterface::~GuiTextBoxCommonInterface()
@@ -23758,9 +24778,14 @@ GuiTextBoxCommonInterface
 				return textElement->GetLines().GetText(selectionBegin, selectionEnd);
 			}
 
-			void GuiTextBoxCommonInterface::SetSelectionText(const WString& value, bool asKeyInput)
+			void GuiTextBoxCommonInterface::SetSelectionText(const WString& value)
 			{
-				Modify(textElement->GetCaretBegin(), textElement->GetCaretEnd(), value, asKeyInput);
+				Modify(textElement->GetCaretBegin(), textElement->GetCaretEnd(), value, false);
+			}
+
+			void GuiTextBoxCommonInterface::SetSelectionTextAsKeyInput(const WString& value)
+			{
+				Modify(textElement->GetCaretBegin(), textElement->GetCaretEnd(), value, true);
 			}
 
 			WString GuiTextBoxCommonInterface::GetRowText(vint row)
@@ -23909,12 +24934,12 @@ GuiTextBoxCommonInterface
 
 			bool GuiTextBoxCommonInterface::CanUndo()
 			{
-				return undoRedoProcessor->CanUndo();
+				return !readonly && undoRedoProcessor->CanUndo();
 			}
 
 			bool GuiTextBoxCommonInterface::CanRedo()
 			{
-				return undoRedoProcessor->CanRedo();
+				return !readonly && undoRedoProcessor->CanRedo();
 			}
 
 			void GuiTextBoxCommonInterface::ClearUndoRedo()
@@ -23934,12 +24959,26 @@ GuiTextBoxCommonInterface
 
 			bool GuiTextBoxCommonInterface::Undo()
 			{
-				return undoRedoProcessor->Undo();
+				if(CanUndo())
+				{
+					return undoRedoProcessor->Undo();
+				}
+				else
+				{
+					return false;
+				}
 			}
 
 			bool GuiTextBoxCommonInterface::Redo()
 			{
-				return undoRedoProcessor->Redo();
+				if(CanRedo())
+				{
+					return undoRedoProcessor->Redo();
+				}
+				else
+				{
+					return false;
+				}
 			}
 		}
 	}
@@ -24159,7 +25198,7 @@ GuiMultilineTextBox
 
 			void GuiMultilineTextBox::SetText(const WString& value)
 			{
-				text=GetText();
+				text=styleController->GetText();
 				GuiScrollView::SetText(value);
 				CalculateView();
 			}
@@ -25043,6 +26082,118 @@ GuiTextBoxUndoRedoProcessor
 			void GuiTextBoxUndoRedoProcessor::TextEditFinished(vuint editVersion)
 			{
 			}
+
+/***********************************************************************
+GuiDocumentUndoRedoProcessor::ReplaceModelStep
+***********************************************************************/
+
+			void GuiDocumentUndoRedoProcessor::ReplaceModelStep::Undo()
+			{
+				GuiDocumentCommonInterface* ci=dynamic_cast<GuiDocumentCommonInterface*>(processor->ownerComposition->GetRelatedControl());
+				if(ci)
+				{
+					ci->EditRun(arguments.inputStart, arguments.inputEnd, arguments.originalModel);
+					ci->SetCaret(arguments.originalStart, arguments.originalEnd);
+				}
+			}
+
+			void GuiDocumentUndoRedoProcessor::ReplaceModelStep::Redo()
+			{
+				GuiDocumentCommonInterface* ci=dynamic_cast<GuiDocumentCommonInterface*>(processor->ownerComposition->GetRelatedControl());
+				if(ci)
+				{
+					ci->EditRun(arguments.originalStart, arguments.originalEnd, arguments.inputModel);
+					ci->SetCaret(arguments.inputStart, arguments.inputEnd);
+				}
+			}
+
+/***********************************************************************
+GuiDocumentUndoRedoProcessor::RenameStyleStep
+***********************************************************************/
+
+			void GuiDocumentUndoRedoProcessor::RenameStyleStep::Undo()
+			{
+				GuiDocumentCommonInterface* ci=dynamic_cast<GuiDocumentCommonInterface*>(processor->ownerComposition->GetRelatedControl());
+				if(ci)
+				{
+					ci->RenameStyle(arguments.newStyleName, arguments.oldStyleName);
+				}
+			}
+
+			void GuiDocumentUndoRedoProcessor::RenameStyleStep::Redo()
+			{
+				GuiDocumentCommonInterface* ci=dynamic_cast<GuiDocumentCommonInterface*>(processor->ownerComposition->GetRelatedControl());
+				if(ci)
+				{
+					ci->RenameStyle(arguments.oldStyleName, arguments.newStyleName);
+				}
+			}
+
+/***********************************************************************
+GuiDocumentUndoRedoProcessor::RenameStyleStep
+***********************************************************************/
+
+			void GuiDocumentUndoRedoProcessor::SetAlignmentStep::Undo()
+			{
+				GuiDocumentCommonInterface* ci=dynamic_cast<GuiDocumentCommonInterface*>(processor->ownerComposition->GetRelatedControl());
+				if(ci)
+				{
+					ci->SetParagraphAlignment(TextPos(arguments->start, 0), TextPos(arguments->end, 0), arguments->originalAlignments);
+				}
+			}
+
+			void GuiDocumentUndoRedoProcessor::SetAlignmentStep::Redo()
+			{
+				GuiDocumentCommonInterface* ci=dynamic_cast<GuiDocumentCommonInterface*>(processor->ownerComposition->GetRelatedControl());
+				if(ci)
+				{
+					ci->SetParagraphAlignment(TextPos(arguments->start, 0), TextPos(arguments->end, 0), arguments->inputAlignments);
+				}
+			}
+
+/***********************************************************************
+GuiDocumentUndoRedoProcessor
+***********************************************************************/
+
+			GuiDocumentUndoRedoProcessor::GuiDocumentUndoRedoProcessor()
+				:element(0)
+				,ownerComposition(0)
+			{
+			}
+
+			GuiDocumentUndoRedoProcessor::~GuiDocumentUndoRedoProcessor()
+			{
+			}
+
+			void GuiDocumentUndoRedoProcessor::Setup(elements::GuiDocumentElement* _element, compositions::GuiGraphicsComposition* _ownerComposition)
+			{
+				element=_element;
+				ownerComposition=_ownerComposition;
+			}
+
+			void GuiDocumentUndoRedoProcessor::OnReplaceModel(const ReplaceModelStruct& arguments)
+			{
+				Ptr<ReplaceModelStep> step=new ReplaceModelStep;
+				step->processor=this;
+				step->arguments=arguments;
+				PushStep(step);
+			}
+
+			void GuiDocumentUndoRedoProcessor::OnRenameStyle(const RenameStyleStruct& arguments)
+			{
+				Ptr<RenameStyleStep> step=new RenameStyleStep;
+				step->processor=this;
+				step->arguments=arguments;
+				PushStep(step);
+			}
+
+			void GuiDocumentUndoRedoProcessor::OnSetAlignment(Ptr<SetAlignmentStruct> arguments)
+			{
+				Ptr<SetAlignmentStep> step=new SetAlignmentStep;
+				step->processor=this;
+				step->arguments=arguments;
+				PushStep(step);
+			}
 		}
 	}
 }
@@ -25329,13 +26480,14 @@ GuiMenuButton
 			}
 
 			GuiMenuButton::GuiMenuButton(IStyleController* _styleController)
-				:GuiButton(_styleController)
+				:GuiSelectableButton(_styleController)
 				,styleController(_styleController)
 				,subMenu(0)
 				,ownedSubMenu(false)
 				,ownerMenuService(0)
 				,cascadeAction(true)
 			{
+				SetAutoSelection(false);
 				SubMenuOpeningChanged.SetAssociatedComposition(boundsComposition);
 				ImageChanged.SetAssociatedComposition(boundsComposition);
 				ShortcutTextChanged.SetAssociatedComposition(boundsComposition);
@@ -25520,6 +26672,7 @@ GuiToolstripCommand
 			GuiToolstripCommand::GuiToolstripCommand()
 				:shortcutKeyItem(0)
 				,enabled(true)
+				,selected(false)
 			{
 			}
 
@@ -25589,6 +26742,20 @@ GuiToolstripCommand
 				if(enabled!=value)
 				{
 					enabled=value;
+					InvokeDescriptionChanged();
+				}
+			}
+
+			bool GuiToolstripCommand::GetSelected()
+			{
+				return selected;
+			}
+
+			void GuiToolstripCommand::SetSelected(bool value)
+			{
+				if(selected!=value)
+				{
+					selected=value;
 					InvokeDescriptionChanged();
 				}
 			}
@@ -26007,6 +27174,7 @@ GuiToolstripButton
 					SetImage(command->GetImage());
 					SetText(command->GetText());
 					SetEnabled(command->GetEnabled());
+					SetSelected(command->GetSelected());
 					if(command->GetShortcut())
 					{
 						SetShortcutText(command->GetShortcut()->GetName());
@@ -26021,6 +27189,7 @@ GuiToolstripButton
 					SetImage(0);
 					SetText(L"");
 					SetEnabled(true);
+					SetSelected(false);
 					SetShortcutText(L"");
 				}
 			}
@@ -28411,6 +29580,1021 @@ GuiCellComposition
 }
 
 /***********************************************************************
+GraphicsElement\GuiGraphicsDocumentElement.cpp
+***********************************************************************/
+
+namespace vl
+{
+	using namespace collections;
+
+	namespace presentation
+	{
+		namespace elements
+		{
+
+/***********************************************************************
+SetPropertiesVisitor
+***********************************************************************/
+
+			namespace visitors
+			{
+				class SetPropertiesVisitor : public Object, public DocumentRun::IVisitor
+				{
+					typedef DocumentModel::ResolvedStyle			ResolvedStyle;
+				public:
+					vint						start;
+					vint						length;
+					vint						selectionBegin;
+					vint						selectionEnd;
+					List<ResolvedStyle>			styles;
+					DocumentModel*				model;
+					IGuiGraphicsParagraph*		paragraph;
+
+					SetPropertiesVisitor(DocumentModel* _model, IGuiGraphicsParagraph* _paragraph, vint _selectionBegin, vint _selectionEnd)
+						:start(0)
+						,length(0)
+						,model(_model)
+						,paragraph(_paragraph)
+						,selectionBegin(_selectionBegin)
+						,selectionEnd(_selectionEnd)
+					{
+						ResolvedStyle style;
+						style=model->GetStyle(DocumentModel::DefaultStyleName, style);
+						styles.Add(style);
+					}
+
+					void VisitContainer(DocumentContainerRun* run)
+					{
+						FOREACH(Ptr<DocumentRun>, subRun, run->runs)
+						{
+							subRun->Accept(this);
+						}
+					}
+
+					void ApplyStyle(vint start, vint length, const ResolvedStyle& style)
+					{
+						paragraph->SetFont(start, length, style.style.fontFamily);
+						paragraph->SetSize(start, length, style.style.size);
+						paragraph->SetStyle(start, length, 
+							(IGuiGraphicsParagraph::TextStyle)
+							( (style.style.bold?IGuiGraphicsParagraph::Bold:0)
+							| (style.style.italic?IGuiGraphicsParagraph::Italic:0)
+							| (style.style.underline?IGuiGraphicsParagraph::Underline:0)
+							| (style.style.strikeline?IGuiGraphicsParagraph::Strikeline:0)
+							));
+					}
+
+					void ApplyColor(vint start, vint length, const ResolvedStyle& style)
+					{
+						paragraph->SetColor(start, length, style.color);
+						paragraph->SetBackgroundColor(start, length, style.backgroundColor);
+					}
+
+					void Visit(DocumentTextRun* run)override
+					{
+						length=run->GetRepresentationText().Length();
+						if(length>0)
+						{
+							ResolvedStyle style=styles[styles.Count()-1];
+							ApplyStyle(start, length, style);
+							ApplyColor(start, length, style);
+
+							vint styleStart=start;
+							vint styleEnd=styleStart+length;
+							if(styleStart<selectionEnd && selectionBegin<styleEnd)
+							{
+								vint s2=styleStart>selectionBegin?styleStart:selectionBegin;
+								vint s3=selectionEnd<styleEnd?selectionEnd:styleEnd;
+
+								if(s2<s3)
+								{
+									ResolvedStyle selectionStyle=model->GetStyle(DocumentModel::SelectionStyleName, style);
+									ApplyColor(s2, s3-s2, selectionStyle);
+								}
+							}
+						}
+						start+=length;
+					}
+
+					void Visit(DocumentStylePropertiesRun* run)override
+					{
+						ResolvedStyle style=styles[styles.Count()-1];
+						style=model->GetStyle(run->style, style);
+						styles.Add(style);
+						VisitContainer(run);
+						styles.RemoveAt(styles.Count()-1);
+					}
+
+					void Visit(DocumentStyleApplicationRun* run)override
+					{
+						ResolvedStyle style=styles[styles.Count()-1];
+						style=model->GetStyle(run->styleName, style);
+						styles.Add(style);
+						VisitContainer(run);
+						styles.RemoveAt(styles.Count()-1);
+					}
+
+					void Visit(DocumentHyperlinkRun* run)override
+					{
+						ResolvedStyle style=styles[styles.Count()-1];
+						style=model->GetStyle(run->styleName, style);
+						styles.Add(style);
+						VisitContainer(run);
+						styles.RemoveAt(styles.Count()-1);
+					}
+
+					void Visit(DocumentImageRun* run)override
+					{
+						length=run->GetRepresentationText().Length();
+
+						IGuiGraphicsParagraph::InlineObjectProperties properties;
+						properties.size=run->size;
+						properties.baseline=run->baseline;
+						properties.breakCondition=IGuiGraphicsParagraph::Alone;
+
+						Ptr<GuiImageFrameElement> element=GuiImageFrameElement::Create();
+						element->SetImage(run->image, run->frameIndex);
+						element->SetStretch(true);
+
+						paragraph->SetInlineObject(start, length, properties, element);
+
+						if(start<selectionEnd && selectionBegin<start+length)
+						{
+							ResolvedStyle style=styles[styles.Count()-1];
+							ResolvedStyle selectionStyle=model->GetStyle(DocumentModel::SelectionStyleName, style);
+							ApplyColor(start, length, selectionStyle);
+						}
+						start+=length;
+					}
+
+					void Visit(DocumentParagraphRun* run)override
+					{
+						VisitContainer(run);
+					}
+
+					static vint SetProperty(DocumentModel* model, IGuiGraphicsParagraph* paragraph, Ptr<DocumentParagraphRun> run, vint selectionBegin, vint selectionEnd)
+					{
+						SetPropertiesVisitor visitor(model, paragraph, selectionBegin, selectionEnd);
+						run->Accept(&visitor);
+						return visitor.length;
+					}
+				};
+			}
+			using namespace visitors;
+
+/***********************************************************************
+GuiDocumentElement::GuiDocumentElementRenderer
+***********************************************************************/
+
+			void GuiDocumentElement::GuiDocumentElementRenderer::InitializeInternal()
+			{
+			}
+
+			void GuiDocumentElement::GuiDocumentElementRenderer::FinalizeInternal()
+			{
+			}
+
+			void GuiDocumentElement::GuiDocumentElementRenderer::RenderTargetChangedInternal(IGuiGraphicsRenderTarget* oldRenderTarget, IGuiGraphicsRenderTarget* newRenderTarget)
+			{
+				for(vint i=0;i<paragraphCaches.Count();i++)
+				{
+					ParagraphCache* cache=paragraphCaches[i].Obj();
+					if(cache)
+					{
+						cache->graphicsParagraph=0;
+					}
+				}
+			}
+
+			Ptr<GuiDocumentElement::GuiDocumentElementRenderer::ParagraphCache> GuiDocumentElement::GuiDocumentElementRenderer::EnsureAndGetCache(vint paragraphIndex, bool createParagraph)
+			{
+				if(paragraphIndex<0 || paragraphIndex>=paragraphCaches.Count()) return 0;
+				Ptr<DocumentParagraphRun> paragraph=element->document->paragraphs[paragraphIndex];
+				Ptr<ParagraphCache> cache=paragraphCaches[paragraphIndex];
+				if(!cache)
+				{
+					cache=new ParagraphCache;
+					cache->fullText=paragraph->GetText(false);
+					paragraphCaches[paragraphIndex]=cache;
+				}
+
+				if(createParagraph)
+				{
+					if(!cache->graphicsParagraph)
+					{
+						cache->graphicsParagraph=layoutProvider->CreateParagraph(cache->fullText, renderTarget);
+						cache->graphicsParagraph->SetParagraphAlignment(paragraph->alignment);
+						SetPropertiesVisitor::SetProperty(element->document.Obj(), cache->graphicsParagraph.Obj(), paragraph, cache->selectionBegin, cache->selectionEnd);
+					}
+					if(cache->graphicsParagraph->GetMaxWidth()!=lastMaxWidth)
+					{
+						cache->graphicsParagraph->SetMaxWidth(lastMaxWidth);
+					}
+
+					vint paragraphHeight=paragraphHeights[paragraphIndex];
+					vint height=cache->graphicsParagraph->GetHeight();
+					if(paragraphHeight!=height)
+					{
+						cachedTotalHeight+=height-paragraphHeight;
+						paragraphHeight=height;
+						paragraphHeights[paragraphIndex]=paragraphHeight;
+						minSize=Size(0, cachedTotalHeight);
+					}
+				}
+
+				return cache;
+			}
+
+			bool GuiDocumentElement::GuiDocumentElementRenderer::GetParagraphIndexFromPoint(Point point, vint& top, vint& index)
+			{
+				vint y=0;
+				for(vint i=0;i<paragraphHeights.Count();i++)
+				{
+					vint paragraphHeight=paragraphHeights[i];
+					vint nextY=y+paragraphHeight+paragraphDistance;
+					top=y;
+					index=i;
+
+					if(nextY<=point.y)
+					{
+						y=nextY;
+						continue;
+					}
+					else
+					{
+						break;
+					}
+				}
+				return true;
+			}
+
+			GuiDocumentElement::GuiDocumentElementRenderer::GuiDocumentElementRenderer()
+				:paragraphDistance(0)
+				,lastMaxWidth(-1)
+				,cachedTotalHeight(0)
+				,layoutProvider(GetGuiGraphicsResourceManager()->GetLayoutProvider())
+				,lastCaret(-1, -1)
+				,lastCaretFrontSide(false)
+			{
+			}
+
+			void GuiDocumentElement::GuiDocumentElementRenderer::Render(Rect bounds)
+			{
+				renderTarget->PushClipper(bounds);
+				if(!renderTarget->IsClipperCoverWholeTarget())
+				{
+					vint maxWidth=bounds.Width();
+					Rect clipper=renderTarget->GetClipper();
+					vint cx=bounds.Left();
+					vint cy=bounds.Top();
+					vint y1=clipper.Top()-bounds.Top();
+					vint y2=y1+clipper.Height();
+					vint y=0;
+
+					lastMaxWidth=maxWidth;
+
+					for(vint i=0;i<paragraphHeights.Count();i++)
+					{
+						vint paragraphHeight=paragraphHeights[i];
+						if(y+paragraphHeight<=y1)
+						{
+							y+=paragraphHeight+paragraphDistance;
+							continue;
+						}
+						else if(y>=y2)
+						{
+							break;
+						}
+						else
+						{
+							Ptr<DocumentParagraphRun> paragraph=element->document->paragraphs[i];
+							Ptr<ParagraphCache> cache=paragraphCaches[i];
+							bool created=cache && cache->graphicsParagraph;
+							cache=EnsureAndGetCache(i, true);
+							if(!created && i==lastCaret.row && element->caretVisible)
+							{
+								cache->graphicsParagraph->OpenCaret(lastCaret.column, lastCaretColor, lastCaretFrontSide);
+							}
+
+							paragraphHeight=cache->graphicsParagraph->GetHeight();
+							cache->graphicsParagraph->Render(Rect(Point(cx, cy+y), Size(maxWidth, paragraphHeight)));
+						}
+
+						y+=paragraphHeight+paragraphDistance;
+					}
+				}
+				renderTarget->PopClipper();
+			}
+
+			void GuiDocumentElement::GuiDocumentElementRenderer::OnElementStateChanged()
+			{
+				if(element->document && element->document->paragraphs.Count()>0)
+				{
+					vint defaultSize=GetCurrentController()->ResourceService()->GetDefaultFont().size;
+					paragraphDistance=defaultSize;
+					vint defaultHeight=defaultSize;
+
+					paragraphCaches.Resize(element->document->paragraphs.Count());
+					paragraphHeights.Resize(element->document->paragraphs.Count());
+					
+					for(vint i=0;i<paragraphCaches.Count();i++)
+					{
+						paragraphCaches[i]=0;
+					}
+					for(vint i=0;i<paragraphHeights.Count();i++)
+					{
+						paragraphHeights[i]=defaultHeight;
+					}
+					cachedTotalHeight=paragraphHeights.Count()*(defaultHeight+paragraphDistance);
+					minSize=Size(0, cachedTotalHeight);
+				}
+				else
+				{
+					paragraphCaches.Resize(0);
+					paragraphHeights.Resize(0);
+					cachedTotalHeight=0;
+					minSize=Size(0, 0);
+				}
+			}
+
+			void GuiDocumentElement::GuiDocumentElementRenderer::NotifyParagraphUpdated(vint index, vint oldCount, vint newCount, bool updatedText)
+			{
+				if(0<=index && index<paragraphCaches.Count() && 0<=oldCount && index+oldCount<=paragraphCaches.Count() && 0<=newCount)
+				{
+					vint paragraphCount=element->document->paragraphs.Count();
+					CHECK_ERROR(updatedText || oldCount==newCount, L"GuiDocumentElement::GuiDocumentElementRenderer::NotifyParagraphUpdated(vint, vint, vint, bool)#oldCount和newCount设置错误。");
+					CHECK_ERROR(paragraphCount-paragraphCaches.Count()==newCount-oldCount, L"GuiDocumentElement::GuiDocumentElementRenderer::NotifyParagraphUpdated(vint, vint, vint, bool)#oldCount和newCount设置错误。");
+
+					ParagraphCacheArray oldCaches;
+					CopyFrom(oldCaches, paragraphCaches);
+					paragraphCaches.Resize(paragraphCount);
+
+					ParagraphHeightArray oldHeights;
+					CopyFrom(oldHeights, paragraphHeights);
+					paragraphHeights.Resize(paragraphCount);
+
+					vint defaultHeight=GetCurrentController()->ResourceService()->GetDefaultFont().size;
+					cachedTotalHeight=0;
+
+					for(vint i=0;i<paragraphCount;i++)
+					{
+						if(i<index)
+						{
+							paragraphCaches[i]=oldCaches[i];
+							paragraphHeights[i]=oldHeights[i];
+						}
+						else if(i<index+newCount)
+						{
+							paragraphCaches[i]=0;
+							paragraphHeights[i]=defaultHeight;
+							if(!updatedText && i<index+oldCount)
+							{
+								Ptr<ParagraphCache> cache=oldCaches[i];
+								if(cache)
+								{
+									cache->graphicsParagraph=0;
+									if(updatedText)
+									{
+										cache->selectionBegin=-1;
+										cache->selectionEnd=-1;
+									}
+								}
+								paragraphCaches[i]=cache;
+							}
+						}
+						else
+						{
+							paragraphCaches[i]=oldCaches[i-(newCount-oldCount)];
+							paragraphHeights[i]=oldHeights[i-(newCount-oldCount)];
+						}
+						cachedTotalHeight+=paragraphHeights[i]+paragraphDistance;
+					}
+				}
+			}
+
+			Ptr<DocumentHyperlinkRun> GuiDocumentElement::GuiDocumentElementRenderer::GetHyperlinkFromPoint(Point point)
+			{
+				vint top=0;
+				vint index=-1;
+				if(GetParagraphIndexFromPoint(point, top, index))
+				{
+					Ptr<ParagraphCache> cache=EnsureAndGetCache(index, true);
+					Point paragraphPoint(point.x, point.y-top);
+
+					vint start=-1;
+					vint length=0;
+					if(cache->graphicsParagraph->GetInlineObjectFromPoint(paragraphPoint, start, length))
+					{
+						return element->document->GetHyperlink(index, start, start+length);
+					}
+
+					vint caret=cache->graphicsParagraph->GetCaretFromPoint(paragraphPoint);
+					return element->document->GetHyperlink(index, caret, caret);
+				}
+				return 0;
+			}
+
+			void GuiDocumentElement::GuiDocumentElementRenderer::OpenCaret(TextPos caret, Color color, bool frontSide)
+			{
+				CloseCaret(caret);
+				lastCaret=caret;
+				lastCaretColor=color;
+				lastCaretFrontSide=frontSide;
+
+				Ptr<ParagraphCache> cache=paragraphCaches[lastCaret.row];
+				if(cache && cache->graphicsParagraph)
+				{
+					cache->graphicsParagraph->OpenCaret(lastCaret.column, lastCaretColor, lastCaretFrontSide);
+				}
+			}
+
+			void GuiDocumentElement::GuiDocumentElementRenderer::CloseCaret(TextPos caret)
+			{
+				if(lastCaret!=TextPos(-1, -1))
+				{
+					if(0<=lastCaret.row && lastCaret.row<paragraphCaches.Count())
+					{
+						Ptr<ParagraphCache> cache=paragraphCaches[lastCaret.row];
+						if(cache && cache->graphicsParagraph)
+						{
+							cache->graphicsParagraph->CloseCaret();
+						}
+					}
+				}
+				lastCaret=caret;
+			}
+
+			void GuiDocumentElement::GuiDocumentElementRenderer::SetSelection(TextPos begin, TextPos end)
+			{
+				if(begin>end)
+				{
+					TextPos t=begin;
+					begin=end;
+					end=t;
+				}
+				if(begin==end)
+				{
+					begin=TextPos(-1, -1);
+					end=TextPos(-1, -1);
+				}
+
+				for(vint i=0;i<paragraphCaches.Count();i++)
+				{
+					if(begin.row<=i && i<=end.row)
+					{
+						Ptr<ParagraphCache> cache=EnsureAndGetCache(i, false);
+						vint newBegin=i==begin.row?begin.column:0;
+						vint newEnd=i==end.row?end.column:cache->fullText.Length();
+
+						if(cache->selectionBegin!=newBegin || cache->selectionEnd!=newEnd)
+						{
+							cache->selectionBegin=newBegin;
+							cache->selectionEnd=newEnd;
+							NotifyParagraphUpdated(i, 1, 1, false);
+						}
+					}
+					else
+					{
+						Ptr<ParagraphCache> cache=paragraphCaches[i];
+						if(cache)
+						{
+							if(cache->selectionBegin!=-1 || cache->selectionEnd!=-1)
+							{
+								cache->selectionBegin=-1;
+								cache->selectionEnd=-1;
+								NotifyParagraphUpdated(i, 1, 1, false);
+							}
+						}
+					}
+				}
+			}
+
+			TextPos GuiDocumentElement::GuiDocumentElementRenderer::CalculateCaret(TextPos comparingCaret, IGuiGraphicsParagraph::CaretRelativePosition position, bool& preferFrontSide)
+			{
+				Ptr<ParagraphCache> cache=EnsureAndGetCache(comparingCaret.row, true);
+				if(cache)
+				{
+					switch(position)
+					{
+					case IGuiGraphicsParagraph::CaretFirst:
+						{
+							preferFrontSide=false;
+							vint caret=cache->graphicsParagraph->GetCaret(0, IGuiGraphicsParagraph::CaretFirst, preferFrontSide);
+							return TextPos(comparingCaret.row, caret);
+						}
+					case IGuiGraphicsParagraph::CaretLast:
+						{
+							preferFrontSide=true;
+							vint caret=cache->graphicsParagraph->GetCaret(0, IGuiGraphicsParagraph::CaretLast, preferFrontSide);
+							return TextPos(comparingCaret.row, caret);
+						}
+					case IGuiGraphicsParagraph::CaretLineFirst:
+						{
+							preferFrontSide=false;
+							vint caret=cache->graphicsParagraph->GetCaret(comparingCaret.column, IGuiGraphicsParagraph::CaretLineFirst, preferFrontSide);
+							return TextPos(comparingCaret.row, caret);
+						}
+					case IGuiGraphicsParagraph::CaretLineLast:
+						{
+							preferFrontSide=true;
+							vint caret=cache->graphicsParagraph->GetCaret(comparingCaret.column, IGuiGraphicsParagraph::CaretLineLast, preferFrontSide);
+							return TextPos(comparingCaret.row, caret);
+						}
+					case IGuiGraphicsParagraph::CaretMoveUp:
+						{
+							vint caret=cache->graphicsParagraph->GetCaret(comparingCaret.column, IGuiGraphicsParagraph::CaretMoveUp, preferFrontSide);
+							if(caret==comparingCaret.column && comparingCaret.row>0)
+							{
+								Rect caretBounds=cache->graphicsParagraph->GetCaretBounds(comparingCaret.column, preferFrontSide);
+								Ptr<ParagraphCache> anotherCache=EnsureAndGetCache(comparingCaret.row-1, true);
+								vint height=anotherCache->graphicsParagraph->GetHeight();
+								caret=anotherCache->graphicsParagraph->GetCaretFromPoint(Point(caretBounds.x1, height));
+								return TextPos(comparingCaret.row-1, caret);
+							}
+							else
+							{
+								return TextPos(comparingCaret.row, caret);
+							}
+						}
+					case IGuiGraphicsParagraph::CaretMoveDown:
+						{
+							vint caret=cache->graphicsParagraph->GetCaret(comparingCaret.column, IGuiGraphicsParagraph::CaretMoveDown, preferFrontSide);
+							if(caret==comparingCaret.column && comparingCaret.row<paragraphCaches.Count()-1)
+							{
+								Rect caretBounds=cache->graphicsParagraph->GetCaretBounds(comparingCaret.column, preferFrontSide);
+								Ptr<ParagraphCache> anotherCache=EnsureAndGetCache(comparingCaret.row+1, true);
+								caret=anotherCache->graphicsParagraph->GetCaretFromPoint(Point(caretBounds.x1, 0));
+								return TextPos(comparingCaret.row+1, caret);
+							}
+							else
+							{
+								return TextPos(comparingCaret.row, caret);
+							}
+						}
+					case IGuiGraphicsParagraph::CaretMoveLeft:
+						{
+							preferFrontSide=false;
+							vint caret=cache->graphicsParagraph->GetCaret(comparingCaret.column, IGuiGraphicsParagraph::CaretMoveLeft, preferFrontSide);
+							if(caret==comparingCaret.column && comparingCaret.row>0)
+							{
+								Ptr<ParagraphCache> anotherCache=EnsureAndGetCache(comparingCaret.row-1, true);
+								caret=anotherCache->graphicsParagraph->GetCaret(0, IGuiGraphicsParagraph::CaretLast, preferFrontSide);
+								return TextPos(comparingCaret.row-1, caret);
+							}
+							else
+							{
+								return TextPos(comparingCaret.row, caret);
+							}
+						}
+					case IGuiGraphicsParagraph::CaretMoveRight:
+						{
+							preferFrontSide=true;
+							vint caret=cache->graphicsParagraph->GetCaret(comparingCaret.column, IGuiGraphicsParagraph::CaretMoveRight, preferFrontSide);
+							if(caret==comparingCaret.column && comparingCaret.row<paragraphCaches.Count()-1)
+							{
+								Ptr<ParagraphCache> anotherCache=EnsureAndGetCache(comparingCaret.row+1, true);
+								caret=anotherCache->graphicsParagraph->GetCaret(0, IGuiGraphicsParagraph::CaretFirst, preferFrontSide);
+								return TextPos(comparingCaret.row+1, caret);
+							}
+							else
+							{
+								return TextPos(comparingCaret.row, caret);
+							}
+						}
+					}
+				}
+				return comparingCaret;
+			}
+
+			TextPos GuiDocumentElement::GuiDocumentElementRenderer::CalculateCaretFromPoint(Point point)
+			{
+				vint top=0;
+				vint index=-1;
+				if(GetParagraphIndexFromPoint(point, top, index))
+				{
+					Ptr<ParagraphCache> cache=EnsureAndGetCache(index, true);
+					Point paragraphPoint(point.x, point.y-top);
+					vint caret=cache->graphicsParagraph->GetCaretFromPoint(paragraphPoint);
+					return TextPos(index, caret);
+				}
+				return TextPos(-1, -1);
+			}
+
+			Rect GuiDocumentElement::GuiDocumentElementRenderer::GetCaretBounds(TextPos caret, bool frontSide)
+			{
+				Ptr<ParagraphCache> cache=EnsureAndGetCache(caret.row, true);
+				if(cache)
+				{
+					Rect bounds=cache->graphicsParagraph->GetCaretBounds(caret.column, frontSide);
+					if(bounds!=Rect())
+					{
+						vint y=0;
+						for(vint i=0;i<caret.row;i++)
+						{
+							EnsureAndGetCache(i, true);
+							y+=paragraphHeights[i]+paragraphDistance;
+						}
+
+						bounds.y1+=y;
+						bounds.y2+=y;
+						return bounds;
+					}
+				}
+				return Rect();
+			}
+
+/***********************************************************************
+GuiDocumentElement
+***********************************************************************/
+
+			void GuiDocumentElement::UpdateCaret()
+			{
+				Ptr<GuiDocumentElementRenderer> elementRenderer=renderer.Cast<GuiDocumentElementRenderer>();
+				if(elementRenderer)
+				{
+					elementRenderer->SetSelection(caretBegin, caretEnd);
+					if(caretVisible)
+					{
+						elementRenderer->OpenCaret(caretEnd, caretColor, caretFrontSide);
+					}
+					else
+					{
+						elementRenderer->CloseCaret(caretEnd);
+					}
+				}
+			}
+
+			GuiDocumentElement::GuiDocumentElement()
+				:caretVisible(false)
+				,caretFrontSide(false)
+			{
+			}
+
+			GuiDocumentElement::~GuiDocumentElement()
+			{
+			}
+
+			Ptr<DocumentModel> GuiDocumentElement::GetDocument()
+			{
+				return document;
+			}
+
+			void GuiDocumentElement::SetDocument(Ptr<DocumentModel> value)
+			{
+				document=value;
+				if(renderer)
+				{
+					renderer->OnElementStateChanged();
+					SetCaret(TextPos(), TextPos(), false);
+				}
+			}
+
+			TextPos GuiDocumentElement::GetCaretBegin()
+			{
+				return caretBegin;
+			}
+
+			TextPos GuiDocumentElement::GetCaretEnd()
+			{
+				return caretEnd;
+			}
+
+			bool GuiDocumentElement::IsCaretEndPreferFrontSide()
+			{
+				return caretFrontSide;
+			}
+
+			void GuiDocumentElement::SetCaret(TextPos begin, TextPos end, bool frontSide)
+			{
+				caretBegin=begin;
+				caretEnd=end;
+				if(caretBegin<caretEnd)
+				{
+					caretFrontSide=true;
+				}
+				else if(caretBegin>caretEnd)
+				{
+					caretFrontSide=false;
+				}
+				else
+				{
+					caretFrontSide=frontSide;
+				}
+				UpdateCaret();
+			}
+
+			bool GuiDocumentElement::GetCaretVisible()
+			{
+				return caretVisible;
+			}
+
+			void GuiDocumentElement::SetCaretVisible(bool value)
+			{
+				caretVisible=value;
+				UpdateCaret();
+			}
+
+			Color GuiDocumentElement::GetCaretColor()
+			{
+				return caretColor;
+			}
+
+			void GuiDocumentElement::SetCaretColor(Color value)
+			{
+				caretColor=value;
+				UpdateCaret();
+			}
+
+			TextPos GuiDocumentElement::CalculateCaret(TextPos comparingCaret, IGuiGraphicsParagraph::CaretRelativePosition position, bool& preferFrontSide)
+			{
+				Ptr<GuiDocumentElementRenderer> elementRenderer=renderer.Cast<GuiDocumentElementRenderer>();
+				if(elementRenderer)
+				{
+					TextPos caret=elementRenderer->CalculateCaret(comparingCaret, position, preferFrontSide);
+					return caret.column==-1?comparingCaret:caret;
+				}
+				else
+				{
+					return comparingCaret;
+				}
+			}
+
+			TextPos GuiDocumentElement::CalculateCaretFromPoint(Point point)
+			{
+				Ptr<GuiDocumentElementRenderer> elementRenderer=renderer.Cast<GuiDocumentElementRenderer>();
+				if(elementRenderer)
+				{
+					return elementRenderer->CalculateCaretFromPoint(point);
+				}
+				else
+				{
+					return TextPos(0, 0);
+				}
+			}
+
+			Rect GuiDocumentElement::GetCaretBounds(TextPos caret, bool frontSide)
+			{
+				Ptr<GuiDocumentElementRenderer> elementRenderer=renderer.Cast<GuiDocumentElementRenderer>();
+				if(elementRenderer)
+				{
+					return elementRenderer->GetCaretBounds(caret, frontSide);
+				}
+				else
+				{
+					return Rect();
+				}
+			}
+			
+			void GuiDocumentElement::NotifyParagraphUpdated(vint index, vint oldCount, vint newCount, bool updatedText)
+			{
+				Ptr<GuiDocumentElementRenderer> elementRenderer=renderer.Cast<GuiDocumentElementRenderer>();
+				if(elementRenderer)
+				{
+					elementRenderer->NotifyParagraphUpdated(index, oldCount, newCount, updatedText);
+				}
+			}
+
+			void GuiDocumentElement::EditRun(TextPos begin, TextPos end, Ptr<DocumentModel> model)
+			{
+				Ptr<GuiDocumentElementRenderer> elementRenderer=renderer.Cast<GuiDocumentElementRenderer>();
+				if(elementRenderer)
+				{
+					if(begin>end)
+					{
+						TextPos temp=begin;
+						begin=end;
+						end=temp;
+					}
+
+					vint newRows=document->EditRun(begin, end, model);
+					if(newRows!=-1)
+					{
+						elementRenderer->NotifyParagraphUpdated(begin.row, end.row-begin.row+1, newRows, true);
+					}
+				}
+			}
+
+			void GuiDocumentElement::EditText(TextPos begin, TextPos end, bool frontSide, const collections::Array<WString>& text)
+			{
+				Ptr<GuiDocumentElementRenderer> elementRenderer=renderer.Cast<GuiDocumentElementRenderer>();
+				if(elementRenderer)
+				{
+					if(begin>end)
+					{
+						TextPos temp=begin;
+						begin=end;
+						end=temp;
+					}
+
+					vint newRows=document->EditText(begin, end, frontSide, text);
+					if(newRows!=-1)
+					{
+						elementRenderer->NotifyParagraphUpdated(begin.row, end.row-begin.row+1, newRows, true);
+					}
+				}
+			}
+
+			void GuiDocumentElement::EditStyle(TextPos begin, TextPos end, Ptr<DocumentStyleProperties> style)
+			{
+				Ptr<GuiDocumentElementRenderer> elementRenderer=renderer.Cast<GuiDocumentElementRenderer>();
+				if(elementRenderer)
+				{
+					if(begin>end)
+					{
+						TextPos temp=begin;
+						begin=end;
+						end=temp;
+					}
+
+					if(document->EditStyle(begin, end, style))
+					{
+						elementRenderer->NotifyParagraphUpdated(begin.row, end.row-begin.row+1, end.row-begin.row+1, false);
+					}
+				}
+			}
+
+			void GuiDocumentElement::EditImage(TextPos begin, TextPos end, Ptr<GuiImageData> image)
+			{
+				Ptr<GuiDocumentElementRenderer> elementRenderer=renderer.Cast<GuiDocumentElementRenderer>();
+				if(elementRenderer)
+				{
+					if(begin>end)
+					{
+						TextPos temp=begin;
+						begin=end;
+						end=temp;
+					}
+
+					if(document->EditImage(begin, end, image))
+					{
+						elementRenderer->NotifyParagraphUpdated(begin.row, end.row-begin.row+1, 1, true);
+					}
+				}
+			}
+
+			void GuiDocumentElement::EditHyperlink(vint paragraphIndex, vint begin, vint end, const WString& reference, const WString& normalStyleName, const WString& activeStyleName)
+			{
+				Ptr<GuiDocumentElementRenderer> elementRenderer=renderer.Cast<GuiDocumentElementRenderer>();
+				if(elementRenderer)
+				{
+					if(begin>end)
+					{
+						vint temp=begin;
+						begin=end;
+						end=temp;
+					}
+
+					if(document->EditHyperlink(paragraphIndex, begin, end, reference, normalStyleName, activeStyleName))
+					{
+						elementRenderer->NotifyParagraphUpdated(paragraphIndex, 1, 1, false);
+					}
+				}
+			}
+
+			void GuiDocumentElement::RemoveHyperlink(vint paragraphIndex, vint begin, vint end)
+			{
+				Ptr<GuiDocumentElementRenderer> elementRenderer=renderer.Cast<GuiDocumentElementRenderer>();
+				if(elementRenderer)
+				{
+					if(begin>end)
+					{
+						vint temp=begin;
+						begin=end;
+						end=temp;
+					}
+
+					if(document->RemoveHyperlink(paragraphIndex, begin, end))
+					{
+						elementRenderer->NotifyParagraphUpdated(paragraphIndex, 1, 1, false);
+					}
+				}
+			}
+
+			void GuiDocumentElement::EditStyleName(TextPos begin, TextPos end, const WString& styleName)
+			{
+				Ptr<GuiDocumentElementRenderer> elementRenderer=renderer.Cast<GuiDocumentElementRenderer>();
+				if(elementRenderer)
+				{
+					if(begin>end)
+					{
+						TextPos temp=begin;
+						begin=end;
+						end=temp;
+					}
+
+					if(document->EditStyleName(begin, end, styleName))
+					{
+						elementRenderer->NotifyParagraphUpdated(begin.row, end.row-begin.row+1, end.row-begin.row+1, false);
+					}
+				}
+			}
+
+			void GuiDocumentElement::RemoveStyleName(TextPos begin, TextPos end)
+			{
+				Ptr<GuiDocumentElementRenderer> elementRenderer=renderer.Cast<GuiDocumentElementRenderer>();
+				if(elementRenderer)
+				{
+					if(begin>end)
+					{
+						TextPos temp=begin;
+						begin=end;
+						end=temp;
+					}
+
+					if(document->RemoveStyleName(begin, end))
+					{
+						elementRenderer->NotifyParagraphUpdated(begin.row, end.row-begin.row+1, end.row-begin.row+1, false);
+					}
+				}
+			}
+
+			void GuiDocumentElement::RenameStyle(const WString& oldStyleName, const WString& newStyleName)
+			{
+				Ptr<GuiDocumentElementRenderer> elementRenderer=renderer.Cast<GuiDocumentElementRenderer>();
+				if(elementRenderer)
+				{
+					document->RenameStyle(oldStyleName, newStyleName);
+				}
+			}
+
+			void GuiDocumentElement::ClearStyle(TextPos begin, TextPos end)
+			{
+				Ptr<GuiDocumentElementRenderer> elementRenderer=renderer.Cast<GuiDocumentElementRenderer>();
+				if(elementRenderer)
+				{
+					if(begin>end)
+					{
+						TextPos temp=begin;
+						begin=end;
+						end=temp;
+					}
+
+					if(document->ClearStyle(begin, end))
+					{
+						elementRenderer->NotifyParagraphUpdated(begin.row, end.row-begin.row+1, end.row-begin.row+1, false);
+					}
+				}
+			}
+
+			Ptr<DocumentStyleProperties> GuiDocumentElement::SummarizeStyle(TextPos begin, TextPos end)
+			{
+				Ptr<GuiDocumentElementRenderer> elementRenderer=renderer.Cast<GuiDocumentElementRenderer>();
+				if(elementRenderer)
+				{
+					if(begin>end)
+					{
+						TextPos temp=begin;
+						begin=end;
+						end=temp;
+					}
+
+					return document->SummarizeStyle(begin, end);
+				}
+				return 0;
+			}
+
+			void GuiDocumentElement::SetParagraphAlignment(TextPos begin, TextPos end, const collections::Array<Alignment>& alignments)
+			{
+				Ptr<GuiDocumentElementRenderer> elementRenderer=renderer.Cast<GuiDocumentElementRenderer>();
+				if(elementRenderer)
+				{
+					vint first=begin.row;
+					vint last=end.row;
+					if(first>last)
+					{
+						vint temp=first;
+						first=last;
+						last=temp;
+					}
+
+					if(0<=first && first<document->paragraphs.Count() && 0<=last && last<document->paragraphs.Count() && last-first+1==alignments.Count())
+					{
+						for(vint i=first;i<=last;i++)
+						{
+							document->paragraphs[i]->alignment=alignments[i-first];
+						}
+						elementRenderer->NotifyParagraphUpdated(first, alignments.Count(), alignments.Count(), false);
+					}
+				}
+			}
+
+			Ptr<DocumentHyperlinkRun> GuiDocumentElement::GetHyperlinkFromPoint(Point point)
+			{
+				Ptr<GuiDocumentElementRenderer> elementRenderer=renderer.Cast<GuiDocumentElementRenderer>();
+				if(elementRenderer)
+				{
+					return elementRenderer->GetHyperlinkFromPoint(point);
+				}
+				else
+				{
+					return 0;
+				}
+			}
+		}
+	}
+}
+
+/***********************************************************************
 GraphicsElement\GuiGraphicsElement.cpp
 ***********************************************************************/
 
@@ -30048,7 +32232,6 @@ GraphicsElement\GuiGraphicsTextElement.cpp
 namespace vl
 {
 	using namespace collections;
-	using namespace parsing::xml;
 
 	namespace presentation
 	{
@@ -30881,373 +33064,3042 @@ GuiColorizedTextElement
 					}
 				}
 			}
+		}
+	}
+}
 
 /***********************************************************************
-Visitors
+NativeWindow\GuiDocument.cpp
 ***********************************************************************/
 
-			namespace visitors
-			{
-				class ExtractTextVisitor : public Object, public DocumentRun::IVisitor
-				{
-				public:
-					WString						text;
-
-					void Visit(DocumentTextRun* run)override
-					{
-						text=run->text;
-					}
-
-					void Visit(DocumentHyperlinkTextRun* run)override
-					{
-						Visit(static_cast<DocumentTextRun*>(run));
-					}
-
-					void Visit(DocumentImageRun* run)override
-					{
-						text=L"[Image]";
-					}
-
-					static WString ExtractText(DocumentRun* run)
-					{
-						ExtractTextVisitor visitor;
-						run->Accept(&visitor);
-						return visitor.text;
-					}
-				};
-
-				class SetPropertiesVisitor : public Object, public DocumentRun::IVisitor
-				{
-				public:
-					vint						start;
-					vint						length;
-					IGuiGraphicsParagraph*		paragraph;
-
-					SetPropertiesVisitor(vint _start, IGuiGraphicsParagraph* _paragraph)
-						:start(_start)
-						,length(0)
-						,paragraph(_paragraph)
-					{
-					}
-
-					void Visit(DocumentTextRun* run)override
-					{
-						length=run->text.Length();
-						if(length>0)
-						{
-							paragraph->SetFont(start, length, run->style.fontFamily);
-							paragraph->SetSize(start, length, run->style.size);
-							paragraph->SetColor(start, length, run->color);
-							paragraph->SetStyle(start, length, 
-								(IGuiGraphicsParagraph::TextStyle)
-								( (run->style.bold?IGuiGraphicsParagraph::Bold:0)
-								| (run->style.italic?IGuiGraphicsParagraph::Italic:0)
-								| (run->style.underline?IGuiGraphicsParagraph::Underline:0)
-								| (run->style.strikeline?IGuiGraphicsParagraph::Strikeline:0)
-								));
-							if(run->hyperlinkId!=DocumentRun::NullHyperlinkId)
-							{
-								paragraph->SetInteractionId(start, length, run->hyperlinkId);
-							}
-						}
-					}
-
-					void Visit(DocumentHyperlinkTextRun* run)override
-					{
-						Visit(static_cast<DocumentTextRun*>(run));
-					}
-
-					void Visit(DocumentImageRun* run)override
-					{
-						// [Image]
-						length=7;
-
-						IGuiGraphicsParagraph::InlineObjectProperties properties;
-						properties.size=run->size;
-						properties.baseline=run->baseline;
-						properties.breakCondition=IGuiGraphicsParagraph::Alone;
-
-						Ptr<GuiImageFrameElement> element=GuiImageFrameElement::Create();
-						element->SetImage(run->image, run->frameIndex);
-						element->SetStretch(true);
-
-						paragraph->SetInlineObject(start, length, properties, element);
-						if(run->hyperlinkId!=DocumentRun::NullHyperlinkId)
-						{
-							paragraph->SetInteractionId(start, length, run->hyperlinkId);
-						}
-					}
-
-					static vint SetProperty(vint start, IGuiGraphicsParagraph* paragraph, DocumentRun* run)
-					{
-						SetPropertiesVisitor visitor(start, paragraph);
-						run->Accept(&visitor);
-						return visitor.length;
-					}
-				};
-			}
-			using namespace visitors;
+namespace vl
+{
+	namespace presentation
+	{
+		using namespace collections;
+		using namespace parsing::tabling;
+		using namespace parsing::xml;
+		using namespace regex;
 
 /***********************************************************************
-GuiDocumentElement::GuiDocumentElementRenderer
+DocumentImageRun
 ***********************************************************************/
 
-			void GuiDocumentElement::GuiDocumentElementRenderer::InitializeInternal()
-			{
-			}
+		const wchar_t* DocumentImageRun::RepresentationText=L"[Image]";
 
-			void GuiDocumentElement::GuiDocumentElementRenderer::FinalizeInternal()
-			{
-			}
+/***********************************************************************
+DocumentResolver
+***********************************************************************/
 
-			void GuiDocumentElement::GuiDocumentElementRenderer::RenderTargetChangedInternal(IGuiGraphicsRenderTarget* oldRenderTarget, IGuiGraphicsRenderTarget* newRenderTarget)
+		DocumentResolver::DocumentResolver(Ptr<DocumentResolver> _previousResolver)
+			:previousResolver(_previousResolver)
+		{
+		}
+
+		DocumentResolver::~DocumentResolver()
+		{
+		}
+
+		Ptr<INativeImage> DocumentResolver::ResolveImage(const WString& protocol, const WString& path)
+		{
+			auto result=ResolveImageInternal(protocol, path);
+			if(!result && previousResolver)
 			{
-				for(vint i=0;i<paragraphCaches.Count();i++)
+				result=previousResolver->ResolveImage(protocol, path);
+			}
+			return result;
+		}
+
+/***********************************************************************
+ExtractTextVisitor
+***********************************************************************/
+
+		namespace document_operation_visitors
+		{
+			class ExtractTextVisitor : public Object, public DocumentRun::IVisitor
+			{
+			public:
+				stream::TextWriter&				writer;
+				bool							skipNonTextContent;
+
+				ExtractTextVisitor(stream::TextWriter& _writer, bool _skipNonTextContent)
+					:writer(_writer)
+					,skipNonTextContent(_skipNonTextContent)
 				{
-					ParagraphCache* cache=paragraphCaches[i].Obj();
-					if(cache)
+				}
+
+				void VisitContainer(DocumentContainerRun* run)
+				{
+					FOREACH(Ptr<DocumentRun>, subRun, run->runs)
 					{
-						cache->graphicsParagraph=0;
+						subRun->Accept(this);
 					}
+				}
+
+				void VisitContent(DocumentContentRun* run)
+				{
+					writer.WriteString(run->GetRepresentationText());
+				}
+
+				void Visit(DocumentTextRun* run)override
+				{
+					VisitContent(run);
+				}
+
+				void Visit(DocumentStylePropertiesRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentStyleApplicationRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentHyperlinkRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentImageRun* run)override
+				{
+					if(!skipNonTextContent)
+					{
+						VisitContent(run);
+					}
+				}
+
+				void Visit(DocumentParagraphRun* run)override
+				{
+					VisitContainer(run);
+				}
+			};
+		}
+		using namespace document_operation_visitors;
+
+/***********************************************************************
+DocumentParagraphRun
+***********************************************************************/
+
+		WString DocumentParagraphRun::GetText(bool skipNonTextContent)
+		{
+			stream::MemoryStream memoryStream;
+			{
+				stream::StreamWriter writer(memoryStream);
+				GetText(writer, skipNonTextContent);
+			}
+
+			memoryStream.SeekFromBegin(0);
+			stream::StreamReader reader(memoryStream);
+			return reader.ReadToEnd();
+		}
+
+		void DocumentParagraphRun::GetText(stream::TextWriter& writer, bool skipNonTextContent)
+		{
+			ExtractTextVisitor visitor(writer, skipNonTextContent);
+			Accept(&visitor);
+		}
+
+/***********************************************************************
+DocumentModel
+***********************************************************************/
+
+		const wchar_t* DocumentModel::DefaultStyleName		= L"#Default";
+		const wchar_t* DocumentModel::SelectionStyleName	= L"#Selection";
+		const wchar_t* DocumentModel::ContextStyleName		= L"#Context";
+		const wchar_t* DocumentModel::NormalLinkStyleName	= L"#NormalLink";
+		const wchar_t* DocumentModel::ActiveLinkStyleName	= L"#ActiveLink";
+
+		DocumentModel::DocumentModel()
+		{
+			{
+				FontProperties font=GetCurrentController()->ResourceService()->GetDefaultFont();
+				Ptr<DocumentStyleProperties> sp=new DocumentStyleProperties;
+				sp->face=font.fontFamily;
+				sp->size=font.size;
+				sp->color=Color();
+				sp->backgroundColor=Color(0, 0, 0, 0);
+				sp->bold=font.bold;
+				sp->italic=font.italic;
+				sp->underline=font.underline;
+				sp->strikeline=font.strikeline;
+				sp->antialias=font.antialias;
+				sp->verticalAntialias=font.verticalAntialias;
+
+				Ptr<DocumentStyle> style=new DocumentStyle;
+				style->styles=sp;
+				styles.Add(L"#Default", style);
+			}
+			{
+				Ptr<DocumentStyleProperties> sp=new DocumentStyleProperties;
+				sp->color=Color(255, 255, 255);
+				sp->backgroundColor=Color(51, 153, 255);
+
+				Ptr<DocumentStyle> style=new DocumentStyle;
+				style->styles=sp;
+				styles.Add(L"#Selection", style);
+			}
+			{
+				Ptr<DocumentStyleProperties> sp=new DocumentStyleProperties;
+
+				Ptr<DocumentStyle> style=new DocumentStyle;
+				style->styles=sp;
+				styles.Add(L"#Context", style);
+			}
+			{
+				Ptr<DocumentStyleProperties> sp=new DocumentStyleProperties;
+				sp->color=Color(0, 0, 255);
+				sp->underline=true;
+
+				Ptr<DocumentStyle> style=new DocumentStyle;
+				style->parentStyleName=L"#Context";
+				style->styles=sp;
+				styles.Add(L"#NormalLink", style);
+			}
+			{
+				Ptr<DocumentStyleProperties> sp=new DocumentStyleProperties;
+				sp->color=Color(0, 0, 255);
+				sp->underline=true;
+
+				Ptr<DocumentStyle> style=new DocumentStyle;
+				style->parentStyleName=L"#Context";
+				style->styles=sp;
+				styles.Add(L"#ActiveLink", style);
+			}
+		}
+
+		DocumentModel::ResolvedStyle DocumentModel::GetStyle(Ptr<DocumentStyleProperties> sp, const ResolvedStyle& context)
+		{
+			FontProperties font;
+			font.fontFamily			=sp->face				?sp->face.Value()				:context.style.fontFamily;
+			font.size				=sp->size				?sp->size.Value()				:context.style.size;
+			font.bold				=sp->bold				?sp->bold.Value()				:context.style.bold;
+			font.italic				=sp->italic				?sp->italic.Value()				:context.style.italic;
+			font.underline			=sp->underline			?sp->underline.Value()			:context.style.underline;
+			font.strikeline			=sp->strikeline			?sp->strikeline.Value()			:context.style.strikeline;
+			font.antialias			=sp->antialias			?sp->antialias.Value()			:context.style.antialias;
+			font.verticalAntialias	=sp->verticalAntialias	?sp->verticalAntialias.Value()	:context.style.verticalAntialias;
+			Color color				=sp->color				?sp->color.Value()				:context.color;
+			Color backgroundColor	=sp->backgroundColor	?sp->backgroundColor.Value()	:context.backgroundColor;
+			return ResolvedStyle(font, color, backgroundColor);
+		}
+
+		DocumentModel::ResolvedStyle DocumentModel::GetStyle(const WString& styleName, const ResolvedStyle& context)
+		{
+			Ptr<DocumentStyle> selectedStyle;
+			{
+				vint index=styles.Keys().IndexOf(styleName);
+				if(index!=-1)
+				{
+					selectedStyle=styles.Values()[index];
+				}
+				else
+				{
+					selectedStyle=styles[L"#Default"];
 				}
 			}
 
-			GuiDocumentElement::GuiDocumentElementRenderer::GuiDocumentElementRenderer()
-				:paragraphDistance(0)
-				,lastMaxWidth(-1)
-				,cachedTotalHeight(0)
-				,layoutProvider(GetGuiGraphicsResourceManager()->GetLayoutProvider())
+			if(!selectedStyle->resolvedStyles)
 			{
+				Ptr<DocumentStyleProperties> sp=new DocumentStyleProperties;
+				selectedStyle->resolvedStyles=sp;
+
+				Ptr<DocumentStyle> currentStyle;
+				WString currentName=styleName;
+				while(true)
+				{
+					vint index=styles.Keys().IndexOf(currentName);
+					if(index==-1) break;
+					currentStyle=styles.Values().Get(index);
+					currentName=currentStyle->parentStyleName;
+					Ptr<DocumentStyleProperties> csp=currentStyle->styles;
+
+					if(!sp->face				&& csp->face)				sp->face				=csp->face;
+					if(!sp->size				&& csp->size)				sp->size				=csp->size;
+					if(!sp->color				&& csp->color)				sp->color				=csp->color;
+					if(!sp->backgroundColor		&& csp->backgroundColor)	sp->backgroundColor		=csp->backgroundColor;
+					if(!sp->bold				&& csp->bold)				sp->bold				=csp->bold;
+					if(!sp->italic				&& csp->italic)				sp->italic				=csp->italic;
+					if(!sp->underline			&& csp->underline)			sp->underline			=csp->underline;
+					if(!sp->strikeline			&& csp->strikeline)			sp->strikeline			=csp->strikeline;
+					if(!sp->antialias			&& csp->antialias)			sp->antialias			=csp->antialias;
+					if(!sp->verticalAntialias	&& csp->verticalAntialias)	sp->verticalAntialias	=csp->verticalAntialias;
+				}
 			}
 
-			void GuiDocumentElement::GuiDocumentElementRenderer::Render(Rect bounds)
-			{
-				renderTarget->PushClipper(bounds);
-				if(!renderTarget->IsClipperCoverWholeTarget())
-				{
-					vint maxWidth=bounds.Width();
-					Rect clipper=renderTarget->GetClipper();
-					vint cx=bounds.Left();
-					vint cy=bounds.Top();
-					vint y1=clipper.Top()-bounds.Top();
-					vint y2=y1+clipper.Height();
-					vint y=0;
+			Ptr<DocumentStyleProperties> sp=selectedStyle->resolvedStyles;
+			return GetStyle(sp, context);
+		}
 
-					for(vint i=0;i<paragraphHeights.Count();i++)
+		WString DocumentModel::GetText(bool skipNonTextContent)
+		{
+			stream::MemoryStream memoryStream;
+			{
+				stream::StreamWriter writer(memoryStream);
+				GetText(writer, skipNonTextContent);
+			}
+
+			memoryStream.SeekFromBegin(0);
+			stream::StreamReader reader(memoryStream);
+			return reader.ReadToEnd();
+		}
+
+		void DocumentModel::GetText(stream::TextWriter& writer, bool skipNonTextContent)
+		{
+			for(vint i=0;i<paragraphs.Count();i++)
+			{
+				Ptr<DocumentParagraphRun> paragraph=paragraphs[i];
+				paragraph->GetText(writer, skipNonTextContent);
+				if(i<paragraphs.Count()-1)
+				{
+					writer.WriteString(L"\r\n\r\n");
+				}
+			}
+		}
+	}
+}
+
+/***********************************************************************
+NativeWindow\GuiDocument_Edit.cpp
+***********************************************************************/
+
+namespace vl
+{
+	namespace presentation
+	{
+		using namespace collections;
+
+		typedef DocumentModel::RunRange			RunRange;
+		typedef DocumentModel::RunRangeMap		RunRangeMap;
+
+/***********************************************************************
+document_operation_visitors::GetRunRangeVisitor
+***********************************************************************/
+
+		namespace document_operation_visitors
+		{
+			class GetRunRangeVisitor : public Object, public DocumentRun::IVisitor
+			{
+			public:
+				RunRangeMap&					runRanges;
+				vint							start;
+
+				GetRunRangeVisitor(RunRangeMap& _runRanges)
+					:runRanges(_runRanges)
+					,start(0)
+				{
+				}
+
+				void VisitContainer(DocumentContainerRun* run)
+				{
+					RunRange range;
+					range.start=start;
+					FOREACH(Ptr<DocumentRun>, subRun, run->runs)
 					{
-						vint paragraphHeight=paragraphHeights[i];
-						if(y+paragraphHeight<=y1)
+						subRun->Accept(this);
+					}
+					range.end=start;
+					runRanges.Add(run, range);
+				}
+
+				void VisitContent(DocumentContentRun* run)
+				{
+					RunRange range;
+					range.start=start;
+					start+=run->GetRepresentationText().Length();
+					range.end=start;
+					runRanges.Add(run, range);
+				}
+
+				void Visit(DocumentTextRun* run)override
+				{
+					VisitContent(run);
+				}
+
+				void Visit(DocumentStylePropertiesRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentStyleApplicationRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentHyperlinkRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentImageRun* run)override
+				{
+					VisitContent(run);
+				}
+
+				void Visit(DocumentParagraphRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				static void GetRunRange(DocumentParagraphRun* run, RunRangeMap& runRanges)
+				{
+					GetRunRangeVisitor visitor(runRanges);
+					run->Accept(&visitor);
+				}
+			};
+		}
+		using namespace document_operation_visitors;
+
+/***********************************************************************
+document_operation_visitors::LocateStyleVisitor
+***********************************************************************/
+
+		namespace document_operation_visitors
+		{
+			class LocateStyleVisitor : public Object, public DocumentRun::IVisitor
+			{
+			public:
+				List<DocumentContainerRun*>&	locatedRuns;
+				RunRangeMap&					runRanges;
+				vint							position;
+				bool							frontSide;
+
+				LocateStyleVisitor(List<DocumentContainerRun*>& _locatedRuns, RunRangeMap& _runRanges, vint _position, bool _frontSide)
+					:locatedRuns(_locatedRuns)
+					,runRanges(_runRanges)
+					,position(_position)
+					,frontSide(_frontSide)
+				{
+				}
+
+				void VisitContainer(DocumentContainerRun* run)
+				{
+					locatedRuns.Add(run);
+					Ptr<DocumentRun> selectedRun;
+					FOREACH(Ptr<DocumentRun>, subRun, run->runs)
+					{
+						RunRange range=runRanges[subRun.Obj()];
+						if(position==range.start)
 						{
-							y+=paragraphHeight+paragraphDistance;
-							continue;
+							if(!frontSide)
+							{
+								selectedRun=subRun;
+								break;
+							}
 						}
-						else if(y>=y2)
+						else if(position==range.end)
 						{
+							if(frontSide)
+							{
+								selectedRun=subRun;
+								break;
+							}
+						}
+						else if(range.start<position && position<range.end)
+						{
+							selectedRun=subRun;
 							break;
+						}
+					}
+
+					if(selectedRun)
+					{
+						selectedRun->Accept(this);
+					}
+				}
+
+				void Visit(DocumentTextRun* run)override
+				{
+				}
+
+				void Visit(DocumentStylePropertiesRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentStyleApplicationRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentHyperlinkRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentImageRun* run)override
+				{
+				}
+
+				void Visit(DocumentParagraphRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				static void LocateStyle(DocumentParagraphRun* run, RunRangeMap& runRanges, vint position, bool frontSide, List<DocumentContainerRun*>& locatedRuns)
+				{
+					LocateStyleVisitor visitor(locatedRuns, runRanges, position, frontSide);
+					run->Accept(&visitor);
+				}
+			};
+		}
+		using namespace document_operation_visitors;
+
+/***********************************************************************
+document_operation_visitors::LocateHyperlinkVisitor
+***********************************************************************/
+
+		namespace document_operation_visitors
+		{
+			class LocateHyperlinkVisitor : public Object, public DocumentRun::IVisitor
+			{
+			public:
+				Ptr<DocumentHyperlinkRun>		hyperlink;
+				RunRangeMap&					runRanges;
+				vint							start;
+				vint							end;
+
+				LocateHyperlinkVisitor(RunRangeMap& _runRanges, vint _start, vint _end)
+					:runRanges(_runRanges)
+					,start(_start)
+					,end(_end)
+				{
+				}
+
+				void VisitContainer(DocumentContainerRun* run)
+				{
+					Ptr<DocumentRun> selectedRun;
+					FOREACH(Ptr<DocumentRun>, subRun, run->runs)
+					{
+						RunRange range=runRanges[subRun.Obj()];
+						if(range.start<=start && end<=range.end)
+						{
+							selectedRun=subRun;
+							break;
+						}
+					}
+
+					if(selectedRun)
+					{
+						selectedRun->Accept(this);
+					}
+				}
+
+				void Visit(DocumentTextRun* run)override
+				{
+				}
+
+				void Visit(DocumentStylePropertiesRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentStyleApplicationRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentHyperlinkRun* run)override
+				{
+					hyperlink=run;
+				}
+
+				void Visit(DocumentImageRun* run)override
+				{
+				}
+
+				void Visit(DocumentParagraphRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				static Ptr<DocumentHyperlinkRun> LocateHyperlink(DocumentParagraphRun* run, RunRangeMap& runRanges, vint start, vint end)
+				{
+					LocateHyperlinkVisitor visitor(runRanges, start, end);
+					run->Accept(&visitor);
+					return visitor.hyperlink;
+				}
+			};
+		}
+		using namespace document_operation_visitors;
+
+/***********************************************************************
+document_operation_visitors::CloneRunVisitor
+***********************************************************************/
+
+		namespace document_operation_visitors
+		{
+			class CloneRunVisitor : public Object, public DocumentRun::IVisitor
+			{
+			public:
+				Ptr<DocumentRun>				clonedRun;
+
+				CloneRunVisitor(Ptr<DocumentRun> subRun)
+					:clonedRun(subRun)
+				{
+				}
+
+				void VisitContainer(Ptr<DocumentContainerRun> cloned)
+				{
+					if(clonedRun)
+					{
+						cloned->runs.Add(clonedRun);
+					}
+					clonedRun=cloned;
+				}
+
+				void Visit(DocumentTextRun* run)override
+				{
+					Ptr<DocumentTextRun> cloned=new DocumentTextRun;
+					cloned->text=run->text;
+					clonedRun=cloned;
+				}
+
+				void Visit(DocumentStylePropertiesRun* run)override
+				{
+					Ptr<DocumentStylePropertiesRun> cloned=new DocumentStylePropertiesRun;
+					cloned->style=CopyStyle(run->style);
+					VisitContainer(cloned);
+				}
+
+				void Visit(DocumentStyleApplicationRun* run)override
+				{
+					Ptr<DocumentStyleApplicationRun> cloned=new DocumentStyleApplicationRun;
+					cloned->styleName=run->styleName;
+					
+					VisitContainer(cloned);
+				}
+
+				void Visit(DocumentHyperlinkRun* run)override
+				{
+					Ptr<DocumentHyperlinkRun> cloned=new DocumentHyperlinkRun;
+					cloned->styleName=run->styleName;
+					cloned->normalStyleName=run->normalStyleName;
+					cloned->activeStyleName=run->activeStyleName;
+					cloned->reference=run->reference;
+					
+					VisitContainer(cloned);
+				}
+
+				void Visit(DocumentImageRun* run)override
+				{
+					Ptr<DocumentImageRun> cloned=new DocumentImageRun;
+					cloned->size=run->size;
+					cloned->baseline=run->baseline;
+					cloned->image=run->image;
+					cloned->frameIndex=run->frameIndex;
+					cloned->source=run->source;
+					clonedRun=cloned;
+				}
+
+				void Visit(DocumentParagraphRun* run)override
+				{
+					Ptr<DocumentParagraphRun> cloned=new DocumentParagraphRun;
+					cloned->alignment=run->alignment;
+						
+					VisitContainer(cloned);
+				}
+
+				static Ptr<DocumentStyleProperties> CopyStyle(Ptr<DocumentStyleProperties> style)
+				{
+					Ptr<DocumentStyleProperties> newStyle=new DocumentStyleProperties;
+					
+					newStyle->face					=style->face;
+					newStyle->size					=style->size;
+					newStyle->color					=style->color;
+					newStyle->backgroundColor		=style->backgroundColor;
+					newStyle->bold					=style->bold;
+					newStyle->italic				=style->italic;
+					newStyle->underline				=style->underline;
+					newStyle->strikeline			=style->strikeline;
+					newStyle->antialias				=style->antialias;
+					newStyle->verticalAntialias		=style->verticalAntialias;
+
+					return newStyle;
+				}
+
+				static Ptr<DocumentRun> CopyRun(DocumentRun* run)
+				{
+					CloneRunVisitor visitor(0);
+					run->Accept(&visitor);
+					return visitor.clonedRun;
+				}
+
+				static Ptr<DocumentRun> CopyStyledText(List<DocumentContainerRun*>& styleRuns, const WString& text)
+				{
+					Ptr<DocumentTextRun> textRun=new DocumentTextRun;
+					textRun->text=text;
+
+					CloneRunVisitor visitor(textRun);
+					for(vint i=styleRuns.Count()-1;i>=0;i--)
+					{
+						styleRuns[i]->Accept(&visitor);
+					}
+
+					return visitor.clonedRun;
+				}
+			};
+		}
+		using namespace document_operation_visitors;
+
+/***********************************************************************
+document_operation_visitors::CloneRunRecursivelyVisitor
+***********************************************************************/
+
+		namespace document_operation_visitors
+		{
+			class CloneRunRecursivelyVisitor : public Object, public DocumentRun::IVisitor
+			{
+			public:
+				Ptr<DocumentRun>				clonedRun;
+				RunRangeMap&					runRanges;
+				vint							start;
+				vint							end;
+				bool							deepCopy;
+
+				CloneRunRecursivelyVisitor(RunRangeMap& _runRanges, vint _start, vint _end, bool _deepCopy)
+					:runRanges(_runRanges)
+					,start(_start)
+					,end(_end)
+					,deepCopy(_deepCopy)
+				{
+				}
+
+				void VisitContainer(DocumentContainerRun* run)
+				{
+					clonedRun=0;
+					RunRange range=runRanges[run];
+					if(range.start<=end && start<=range.end)
+					{
+						if(start<=range.start && range.end<=end && !deepCopy)
+						{
+							clonedRun=run;
 						}
 						else
 						{
-							Ptr<DocumentParagraph> paragraph=element->document->paragraphs[i];
-							Ptr<ParagraphCache> cache=paragraphCaches[i];
-							if(!cache)
+							Ptr<DocumentContainerRun> containerRun=CloneRunVisitor::CopyRun(run).Cast<DocumentContainerRun>();
+							FOREACH(Ptr<DocumentRun>, subRun, run->runs)
 							{
-								cache=new ParagraphCache;
-								paragraphCaches[i]=cache;
-
-								stream::MemoryStream stream;
+								subRun->Accept(this);
+								if(clonedRun)
 								{
-									stream::StreamWriter writer(stream);
-									FOREACH_INDEXER(Ptr<DocumentLine>, line, lineIndex, paragraph->lines)
-									{
-										FOREACH(Ptr<DocumentRun>, run, line->runs)
-										{
-											WString text=ExtractTextVisitor::ExtractText(run.Obj());
-											writer.WriteString(text);
-										}
-										if(lineIndex<paragraph->lines.Count()-1)
-										{
-											writer.WriteString(L"\r\n");
-										}
-									}
-								}
-								{
-									stream.SeekFromBegin(0);
-									stream::StreamReader reader(stream);
-									cache->fullText=reader.ReadToEnd();
+									containerRun->runs.Add(clonedRun);
 								}
 							}
-
-							if(!cache->graphicsParagraph)
-							{
-								cache->graphicsParagraph=layoutProvider->CreateParagraph(cache->fullText, renderTarget);
-								cache->graphicsParagraph->SetParagraphAlignment(paragraph->alignment);
-								vint start=0;
-								FOREACH(Ptr<DocumentLine>, line, paragraph->lines)
-								{
-									FOREACH(Ptr<DocumentRun>, run, line->runs)
-									{
-										vint length=SetPropertiesVisitor::SetProperty(start, cache->graphicsParagraph.Obj(), run.Obj());
-										start+=length;
-									}
-									start+=2;
-								}
-							}
-							if(cache->graphicsParagraph->GetMaxWidth()!=maxWidth)
-							{
-								cache->graphicsParagraph->SetMaxWidth(maxWidth);
-								vint height=cache->graphicsParagraph->GetHeight();
-								if(paragraphHeight!=height)
-								{
-									cachedTotalHeight+=height-paragraphHeight;
-									paragraphHeight=height;
-									paragraphHeights[i]=paragraphHeight;
-								}
-							}
-
-							cache->graphicsParagraph->Render(Rect(Point(cx, cy+y), Size(maxWidth, paragraphHeight)));
+							clonedRun=containerRun;
 						}
-
-						y+=paragraphHeight+paragraphDistance;
 					}
-
-					lastMaxWidth=maxWidth;
-					minSize=Size(0, cachedTotalHeight);
 				}
-				renderTarget->PopClipper();
-			}
 
-			void GuiDocumentElement::GuiDocumentElementRenderer::OnElementStateChanged()
+				void Visit(DocumentTextRun* run)override
+				{
+					clonedRun=0;
+					RunRange range=runRanges[run];
+					if(range.start<end && start<range.end)
+					{
+						if(start<=range.start && range.end<=end)
+						{
+							if(deepCopy)
+							{
+								clonedRun=CloneRunVisitor::CopyRun(run);
+							}
+							else
+							{
+								clonedRun=run;
+							}
+						}
+						else
+						{
+							Ptr<DocumentTextRun> textRun=new DocumentTextRun;
+							vint copyStart=start>range.start?start:range.start;
+							vint copyEnd=end<range.end?end:range.end;
+							if(copyStart<copyEnd)
+							{
+								textRun->text=run->text.Sub(copyStart-range.start, copyEnd-copyStart);
+							}
+							clonedRun=textRun;
+						}
+					}
+				}
+
+				void Visit(DocumentStylePropertiesRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentStyleApplicationRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentHyperlinkRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentImageRun* run)override
+				{
+					clonedRun=0;
+					RunRange range=runRanges[run];
+					if(range.start<end && start<range.end)
+					{
+						if(deepCopy)
+						{
+							clonedRun=CloneRunVisitor::CopyRun(run);
+						}
+						else
+						{
+							clonedRun=run;
+						}
+					}
+				}
+
+				void Visit(DocumentParagraphRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				static Ptr<DocumentRun> CopyRun(DocumentParagraphRun* run, RunRangeMap& runRanges, vint start, vint end, bool deepCopy)
+				{
+					CloneRunRecursivelyVisitor visitor(runRanges, start, end, deepCopy);
+					run->Accept(&visitor);
+					return visitor.clonedRun;
+				}
+			};
+		}
+		using namespace document_operation_visitors;
+
+/***********************************************************************
+document_operation_visitors::CollectStyleNameVisitor
+***********************************************************************/
+
+		namespace document_operation_visitors
+		{
+			class CollectStyleNameVisitor : public Object, public DocumentRun::IVisitor
 			{
-				if(element->document && element->document->paragraphs.Count()>0)
+			public:
+				List<WString>&					styleNames;
+
+				CollectStyleNameVisitor(List<WString>& _styleNames)
+					:styleNames(_styleNames)
 				{
-					vint defaultSize=GetCurrentController()->ResourceService()->GetDefaultFont().size;
-					paragraphDistance=defaultSize;
-					vint defaultHeight=defaultSize;
+				}
 
-					paragraphCaches.Resize(element->document->paragraphs.Count());
-					paragraphHeights.Resize(element->document->paragraphs.Count());
-
-					for(vint i=0;i<paragraphHeights.Count();i++)
+				void VisitContainer(DocumentContainerRun* run)
+				{
+					FOREACH(Ptr<DocumentRun>, subRun, run->runs)
 					{
-						paragraphHeights[i]=defaultHeight;
+						subRun->Accept(this);
 					}
-					cachedTotalHeight=paragraphHeights.Count()*defaultHeight+(paragraphHeights.Count()-1)*paragraphDistance;
-					minSize=Size(0, cachedTotalHeight);
 				}
-				else
-				{
-					paragraphCaches.Resize(0);
-					paragraphHeights.Resize(0);
-					cachedTotalHeight=0;
-					minSize=Size(0, 0);
-				}
-			}
 
-			void GuiDocumentElement::GuiDocumentElementRenderer::NotifyParagraphUpdated(vint index)
+				void Visit(DocumentTextRun* run)override
+				{
+				}
+
+				void Visit(DocumentStylePropertiesRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentStyleApplicationRun* run)override
+				{
+					if(!styleNames.Contains(run->styleName))
+					{
+						styleNames.Add(run->styleName);
+					}
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentHyperlinkRun* run)override
+				{
+					if(!styleNames.Contains(run->normalStyleName))
+					{
+						styleNames.Add(run->normalStyleName);
+					}
+					if(!styleNames.Contains(run->activeStyleName))
+					{
+						styleNames.Add(run->activeStyleName);
+					}
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentImageRun* run)override
+				{
+				}
+
+				void Visit(DocumentParagraphRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				static void CollectStyleName(DocumentParagraphRun* run, List<WString>& styleNames)
+				{
+					CollectStyleNameVisitor visitor(styleNames);
+					run->Accept(&visitor);
+				}
+			};
+		}
+		using namespace document_operation_visitors;
+
+/***********************************************************************
+document_operation_visitors::ReplaceStyleNameVisitor
+***********************************************************************/
+
+		namespace document_operation_visitors
+		{
+			class ReplaceStyleNameVisitor : public Object, public DocumentRun::IVisitor
 			{
-				if(0<=index && index<paragraphCaches.Count())
+			public:
+				WString							oldStyleName;
+				WString							newStyleName;
+
+				ReplaceStyleNameVisitor(const WString& _oldStyleName, const WString& _newStyleName)
+					:oldStyleName(_oldStyleName)
+					,newStyleName(_newStyleName)
 				{
-					Ptr<ParagraphCache> cache=paragraphCaches[index];
-					if(cache)
+				}
+
+				void VisitContainer(DocumentContainerRun* run)
+				{
+					FOREACH(Ptr<DocumentRun>, subRun, run->runs)
 					{
-						cache->graphicsParagraph=0;
+						subRun->Accept(this);
 					}
 				}
-			}
 
-			vint GuiDocumentElement::GuiDocumentElementRenderer::GetHyperlinkIdFromPoint(Point point)
-			{
-				vint y=0;
-				for(vint i=0;i<paragraphHeights.Count();i++)
+				void Visit(DocumentTextRun* run)override
 				{
-					vint paragraphHeight=paragraphHeights[i];
-					if(y+paragraphHeight<=point.y)
+				}
+
+				void Visit(DocumentStylePropertiesRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentStyleApplicationRun* run)override
+				{
+					if(run->styleName==oldStyleName) run->styleName=newStyleName;
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentHyperlinkRun* run)override
+				{
+					if(run->styleName==oldStyleName) run->styleName=newStyleName;
+					if(run->normalStyleName==oldStyleName) run->normalStyleName=newStyleName;
+					if(run->activeStyleName==oldStyleName) run->activeStyleName=newStyleName;
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentImageRun* run)override
+				{
+				}
+
+				void Visit(DocumentParagraphRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				static void ReplaceStyleName(DocumentParagraphRun* run, const WString& oldStyleName, const WString& newStyleName)
+				{
+					ReplaceStyleNameVisitor visitor(oldStyleName, newStyleName);
+					run->Accept(&visitor);
+				}
+			};
+		}
+		using namespace document_operation_visitors;
+
+/***********************************************************************
+document_operation_visitors::RemoveRunVisitor
+***********************************************************************/
+
+		namespace document_operation_visitors
+		{
+			class RemoveRunVisitor : public Object, public DocumentRun::IVisitor
+			{
+			public:
+				RunRangeMap&					runRanges;
+				vint							start;
+				vint							end;
+				List<Ptr<DocumentRun>>			replacedRuns;
+
+				RemoveRunVisitor(RunRangeMap& _runRanges, vint _start, vint _end)
+					:runRanges(_runRanges)
+					,start(_start)
+					,end(_end)
+				{
+				}
+
+				void VisitContainer(DocumentContainerRun* run)
+				{
+					if(start==end) return;
+					for(vint i=run->runs.Count()-1;i>=0;i--)
 					{
-						y+=paragraphHeight+paragraphDistance;
-						continue;
+						Ptr<DocumentRun> subRun=run->runs[i];
+						RunRange range=runRanges[subRun.Obj()];
+
+						if(range.start<=end && start<=range.end)
+						{
+							subRun->Accept(this);
+							if(replacedRuns.Count()==0 || subRun!=replacedRuns[0])
+							{
+								run->runs.RemoveAt(i);
+								for(vint j=0;j<replacedRuns.Count();j++)
+								{
+									run->runs.Insert(i+j, replacedRuns[j]);
+								}
+							}
+						}
 					}
-					else if(y>point.y)
+					replacedRuns.Clear();
+					replacedRuns.Add(run);
+				}
+
+				void Visit(DocumentTextRun* run)override
+				{
+					replacedRuns.Clear();
+					RunRange range=runRanges[run];
+
+					if(start<=range.start)
 					{
-						break;
+						if(end<range.end)
+						{
+							run->text=run->text.Sub(end-range.start, range.end-end);
+							replacedRuns.Add(run);
+						}
 					}
 					else
 					{
-						Ptr<ParagraphCache> cache=paragraphCaches[i];
-						if(cache && cache->graphicsParagraph)
+						if(end<range.end)
 						{
-							vint start=0;
-							vint length=0;
-							vint id=0;
-							if(cache->graphicsParagraph->HitTestPoint(Point(point.x, point.y-y), start, length, id))
-							{
-								return id;
-							}
+							DocumentTextRun* firstRun=new DocumentTextRun;
+							DocumentTextRun* secondRun=new DocumentTextRun;
+
+							firstRun->text=run->text.Sub(0, start-range.start);
+							secondRun->text=run->text.Sub(end-range.start, range.end-end);
+
+							replacedRuns.Add(firstRun);
+							replacedRuns.Add(secondRun);
 						}
-						return DocumentRun::NullHyperlinkId;
+						else
+						{
+							run->text=run->text.Sub(0, start-range.start);
+							replacedRuns.Add(run);
+						}
 					}
 				}
-				return DocumentRun::NullHyperlinkId;
-			}
+
+				void Visit(DocumentStylePropertiesRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentStyleApplicationRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentHyperlinkRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentImageRun* run)override
+				{
+					replacedRuns.Clear();
+				}
+
+				void Visit(DocumentParagraphRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				static void RemoveRun(DocumentParagraphRun* run, RunRangeMap& runRanges, vint start, vint end)
+				{
+					RemoveRunVisitor visitor(runRanges, start, end);
+					run->Accept(&visitor);
+				}
+			};
+		}
+		using namespace document_operation_visitors;
 
 /***********************************************************************
-GuiDocumentElement
+document_operation_visitors::CutRunVisitor
 ***********************************************************************/
 
-			GuiDocumentElement::GuiDocumentElement()
+		namespace document_operation_visitors
+		{
+			class CutRunVisitor : public Object, public DocumentRun::IVisitor
 			{
-			}
+			public:
+				RunRangeMap&					runRanges;
+				vint							position;
+				Ptr<DocumentRun>				leftRun;
+				Ptr<DocumentRun>				rightRun;
 
-			GuiDocumentElement::~GuiDocumentElement()
-			{
-			}
-
-			Ptr<DocumentModel> GuiDocumentElement::GetDocument()
-			{
-				return document;
-			}
-
-			void GuiDocumentElement::SetDocument(Ptr<DocumentModel> value)
-			{
-				document=value;
-				if(renderer)
+				CutRunVisitor(RunRangeMap& _runRanges, vint _position)
+					:runRanges(_runRanges)
+					,position(_position)
 				{
-					renderer->OnElementStateChanged();
 				}
+
+				void VisitContainer(DocumentContainerRun* run)
+				{
+					vint leftCount=0;
+					Ptr<DocumentRun> selectedRun;
+
+					FOREACH(Ptr<DocumentRun>, subRun, run->runs)
+					{
+						RunRange range=runRanges[subRun.Obj()];
+						if(range.start<position)
+						{
+							leftCount++;
+							if (position<range.end)
+							{
+								selectedRun=subRun;
+							}
+						}
+						else
+						{
+							break;
+						}
+					}
+
+					if(selectedRun)
+					{
+						selectedRun->Accept(this);
+						if(leftRun && rightRun)
+						{
+							run->runs.RemoveAt(leftCount-1);
+							run->runs.Insert(leftCount-1, leftRun);
+							run->runs.Insert(leftCount, rightRun);
+						}
+					}
+					
+					Ptr<DocumentContainerRun> leftContainer=CloneRunVisitor::CopyRun(run).Cast<DocumentContainerRun>();
+					Ptr<DocumentContainerRun> rightContainer=CloneRunVisitor::CopyRun(run).Cast<DocumentContainerRun>();
+					for(vint i=0;i<run->runs.Count();i++)
+					{
+						(i<leftCount?leftContainer:rightContainer)->runs.Add(run->runs[i]);
+					}
+					leftRun=leftContainer;
+					rightRun=rightContainer;
+				}
+
+				void Visit(DocumentTextRun* run)override
+				{
+					RunRange range=runRanges[run];
+
+					Ptr<DocumentTextRun> leftText=new DocumentTextRun;
+					leftText->text=run->text.Sub(0, position-range.start);
+
+					Ptr<DocumentTextRun> rightText=new DocumentTextRun;
+					rightText->text=run->text.Sub(position-range.start, range.end-position);
+
+					leftRun=leftText;
+					rightRun=rightText;
+				}
+
+				void Visit(DocumentStylePropertiesRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentStyleApplicationRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentHyperlinkRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentImageRun* run)override
+				{
+					leftRun=0;
+					rightRun=0;
+				}
+
+				void Visit(DocumentParagraphRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				static void CutRun(DocumentParagraphRun* run, RunRangeMap& runRanges, vint position, Ptr<DocumentRun>& leftRun, Ptr<DocumentRun>& rightRun)
+				{
+					CutRunVisitor visitor(runRanges, position);
+					run->Accept(&visitor);
+					leftRun=visitor.leftRun;
+					rightRun=visitor.rightRun;
+				}
+			};
+		}
+		using namespace document_operation_visitors;
+
+/***********************************************************************
+document_operation_visitors::ClearRunVisitor
+***********************************************************************/
+
+		namespace document_operation_visitors
+		{
+			class ClearRunVisitor : public Object, public DocumentRun::IVisitor
+			{
+			public:
+				vint							start;
+
+				ClearRunVisitor()
+					:start(0)
+				{
+				}
+
+				void VisitContainer(DocumentContainerRun* run)
+				{
+					for(vint i=run->runs.Count()-1;i>=0;i--)
+					{
+						vint oldStart=start;
+						run->runs[i]->Accept(this);
+						if(oldStart==start)
+						{
+							run->runs.RemoveAt(i);
+						}
+					}
+				}
+
+				void VisitContent(DocumentContentRun* run)
+				{
+					start+=run->GetRepresentationText().Length();
+				}
+
+				void Visit(DocumentTextRun* run)override
+				{
+					VisitContent(run);
+				}
+
+				void Visit(DocumentStylePropertiesRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentStyleApplicationRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentHyperlinkRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentImageRun* run)override
+				{
+					VisitContent(run);
+				}
+
+				void Visit(DocumentParagraphRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				static void ClearRun(DocumentParagraphRun* run)
+				{
+					ClearRunVisitor visitor;
+					run->Accept(&visitor);
+				}
+			};
+		}
+		using namespace document_operation_visitors;
+
+/***********************************************************************
+document_operation_visitors::AddContainerVisitor
+***********************************************************************/
+
+		namespace document_operation_visitors
+		{
+			class AddContainerVisitor : public Object, public DocumentRun::IVisitor
+			{
+			public:
+				RunRangeMap&							runRanges;
+				vint									start;
+				vint									end;
+				bool									insertStyle;
+
+				virtual Ptr<DocumentContainerRun>		CreateContainer()=0;
+
+				AddContainerVisitor(RunRangeMap& _runRanges, vint _start, vint _end)
+					:runRanges(_runRanges)
+					,start(_start)
+					,end(_end)
+					,insertStyle(false)
+				{
+				}
+
+				void VisitContainer(DocumentContainerRun* run)
+				{
+					for(vint i=run->runs.Count()-1;i>=0;i--)
+					{
+						Ptr<DocumentRun> subRun=run->runs[i];
+						RunRange range=runRanges[subRun.Obj()];
+						if(range.start<end && start<range.end)
+						{
+							insertStyle=false;
+							subRun->Accept(this);
+							if(insertStyle)
+							{
+								Ptr<DocumentContainerRun> containerRun=CreateContainer();
+								run->runs.RemoveAt(i);
+								containerRun->runs.Add(subRun);
+								run->runs.Insert(i, containerRun);
+							}
+						}
+					}
+					insertStyle=false;
+				}
+
+				void Visit(DocumentTextRun* run)override
+				{
+					insertStyle=true;
+				}
+
+				void Visit(DocumentStylePropertiesRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentStyleApplicationRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentHyperlinkRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentImageRun* run)override
+				{
+					insertStyle=false;
+				}
+
+				void Visit(DocumentParagraphRun* run)override
+				{
+					VisitContainer(run);
+				}
+			};
+
+			class AddStyleVisitor : public AddContainerVisitor
+			{
+			public:
+				Ptr<DocumentStyleProperties>	style;
+
+				Ptr<DocumentContainerRun> CreateContainer()override
+				{
+					Ptr<DocumentStylePropertiesRun> containerRun=new DocumentStylePropertiesRun;
+					containerRun->style=CloneRunVisitor::CopyStyle(style);
+					return containerRun;
+				}
+
+				AddStyleVisitor(RunRangeMap& _runRanges, vint _start, vint _end, Ptr<DocumentStyleProperties> _style)
+					:AddContainerVisitor(_runRanges, _start, _end)
+					,style(_style)
+				{
+				}
+
+				static void AddStyle(DocumentParagraphRun* run, RunRangeMap& runRanges, vint start, vint end, Ptr<DocumentStyleProperties> style)
+				{
+					AddStyleVisitor visitor(runRanges, start, end, style);
+					run->Accept(&visitor);
+				}
+			};
+
+			class AddHyperlinkVisitor : public AddContainerVisitor
+			{
+			public:
+				WString							reference;
+				WString							normalStyleName;
+				WString							activeStyleName;
+
+				Ptr<DocumentContainerRun> CreateContainer()override
+				{
+					Ptr<DocumentHyperlinkRun> containerRun=new DocumentHyperlinkRun;
+					containerRun->reference=reference;
+					containerRun->normalStyleName=normalStyleName;
+					containerRun->activeStyleName=activeStyleName;
+					containerRun->styleName=normalStyleName;
+					return containerRun;
+				}
+
+				AddHyperlinkVisitor(RunRangeMap& _runRanges, vint _start, vint _end, const WString& _reference, const WString& _normalStyleName, const WString& _activeStyleName)
+					:AddContainerVisitor(_runRanges, _start, _end)
+					,reference(_reference)
+					,normalStyleName(_normalStyleName)
+					,activeStyleName(_activeStyleName)
+				{
+				}
+
+				static void AddHyperlink(DocumentParagraphRun* run, RunRangeMap& runRanges, vint start, vint end, const WString& reference, const WString& normalStyleName, const WString& activeStyleName)
+				{
+					AddHyperlinkVisitor visitor(runRanges, start, end, reference, normalStyleName, activeStyleName);
+					run->Accept(&visitor);
+				}
+			};
+
+			class AddStyleNameVisitor : public AddContainerVisitor
+			{
+			public:
+				WString							styleName;
+
+				Ptr<DocumentContainerRun> CreateContainer()override
+				{
+					Ptr<DocumentStyleApplicationRun> containerRun=new DocumentStyleApplicationRun;
+					containerRun->styleName=styleName;
+					return containerRun;
+				}
+
+				AddStyleNameVisitor(RunRangeMap& _runRanges, vint _start, vint _end, const WString& _styleName)
+					:AddContainerVisitor(_runRanges, _start, _end)
+					,styleName(_styleName)
+				{
+				}
+
+				static void AddStyleName(DocumentParagraphRun* run, RunRangeMap& runRanges, vint start, vint end, const WString& styleName)
+				{
+					AddStyleNameVisitor visitor(runRanges, start, end, styleName);
+					run->Accept(&visitor);
+				}
+			};
+		}
+		using namespace document_operation_visitors;
+
+/***********************************************************************
+document_operation_visitors::RemoveContainerVisitor
+***********************************************************************/
+
+		namespace document_operation_visitors
+		{
+			class RemoveContainerVisitor : public Object, public DocumentRun::IVisitor
+			{
+			public:
+				RunRangeMap&					runRanges;
+				vint							start;
+				vint							end;
+				List<Ptr<DocumentRun>>			replacedRuns;
+
+				RemoveContainerVisitor(RunRangeMap& _runRanges, vint _start, vint _end)
+					:runRanges(_runRanges)
+					,start(_start)
+					,end(_end)
+				{
+				}
+
+				void VisitContainer(DocumentContainerRun* run)
+				{
+					for(vint i=run->runs.Count()-1;i>=0;i--)
+					{
+						Ptr<DocumentRun> subRun=run->runs[i];
+						RunRange range=runRanges[subRun.Obj()];
+						if(range.start<end && start<range.end)
+						{
+							replacedRuns.Clear();
+							subRun->Accept(this);
+							if(replacedRuns.Count()!=1 || replacedRuns[0]!=subRun)
+							{
+								run->runs.RemoveAt(i);
+								for(vint j=0;j<replacedRuns.Count();j++)
+								{
+									run->runs.Insert(i+j, replacedRuns[j]);
+								}
+								i+=replacedRuns.Count();
+							}
+						}
+					}
+					replacedRuns.Clear();
+					replacedRuns.Add(run);
+				}
+
+				void VisitContent(DocumentContentRun* run)
+				{
+					replacedRuns.Add(run);
+				}
+
+				void RemoveContainer(DocumentContainerRun* run)
+				{
+					CopyFrom(replacedRuns, run->runs);
+				}
+
+				void Visit(DocumentTextRun* run)override
+				{
+					VisitContent(run);
+				}
+
+				void Visit(DocumentStylePropertiesRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentStyleApplicationRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentHyperlinkRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				void Visit(DocumentImageRun* run)override
+				{
+					VisitContent(run);
+				}
+
+				void Visit(DocumentParagraphRun* run)override
+				{
+					VisitContainer(run);
+				}
+			};
+
+			class RemoveHyperlinkVisitor : public RemoveContainerVisitor
+			{
+			public:
+				RemoveHyperlinkVisitor(RunRangeMap& _runRanges, vint _start, vint _end)
+					:RemoveContainerVisitor(_runRanges, _start, _end)
+				{
+				}
+
+				void Visit(DocumentHyperlinkRun* run)override
+				{
+					RemoveContainer(run);
+				}
+
+				static void RemoveHyperlink(DocumentParagraphRun* run, RunRangeMap& runRanges, vint start, vint end)
+				{
+					RemoveHyperlinkVisitor visitor(runRanges, start, end);
+					run->Accept(&visitor);
+				}
+			};
+
+			class RemoveStyleNameVisitor : public RemoveContainerVisitor
+			{
+			public:
+				RemoveStyleNameVisitor(RunRangeMap& _runRanges, vint _start, vint _end)
+					:RemoveContainerVisitor(_runRanges, _start, _end)
+				{
+				}
+
+				void Visit(DocumentStyleApplicationRun* run)override
+				{
+					RemoveContainer(run);
+				}
+
+				static void RemoveStyleName(DocumentParagraphRun* run, RunRangeMap& runRanges, vint start, vint end)
+				{
+					RemoveStyleNameVisitor visitor(runRanges, start, end);
+					run->Accept(&visitor);
+				}
+			};
+
+			class ClearStyleVisitor : public RemoveContainerVisitor
+			{
+			public:
+				ClearStyleVisitor(RunRangeMap& _runRanges, vint _start, vint _end)
+					:RemoveContainerVisitor(_runRanges, _start, _end)
+				{
+				}
+
+				void Visit(DocumentStylePropertiesRun* run)override
+				{
+					RemoveContainer(run);
+				}
+
+				void Visit(DocumentStyleApplicationRun* run)override
+				{
+					RemoveContainer(run);
+				}
+
+				static void ClearStyle(DocumentParagraphRun* run, RunRangeMap& runRanges, vint start, vint end)
+				{
+					ClearStyleVisitor visitor(runRanges, start, end);
+					run->Accept(&visitor);
+				}
+			};
+		}
+		using namespace document_operation_visitors;
+
+/***********************************************************************
+document_operation_visitors::SummerizeStyleVisitor
+***********************************************************************/
+
+		namespace document_operation_visitors
+		{
+			class SummerizeStyleVisitor : public Object, public DocumentRun::IVisitor
+			{
+			public:
+				RunRangeMap&							runRanges;
+				DocumentModel*							model;
+				vint									start;
+				vint									end;
+				Ptr<DocumentStyleProperties>			style;
+				List<DocumentModel::ResolvedStyle>		resolvedStyles;
+
+				SummerizeStyleVisitor(RunRangeMap& _runRanges, DocumentModel* _model, vint _start, vint _end)
+					:runRanges(_runRanges)
+					,model(_model)
+					,start(_start)
+					,end(_end)
+				{
+					DocumentModel::ResolvedStyle resolvedStyle=model->GetStyle(DocumentModel::DefaultStyleName, resolvedStyle);
+					resolvedStyles.Add(resolvedStyle);
+				}
+
+				const DocumentModel::ResolvedStyle& GetCurrentResolvedStyle()
+				{
+					return resolvedStyles[resolvedStyles.Count()-1];
+				}
+
+				template<typename T>
+				void OverrideStyleItem(Nullable<T> DocumentStyleProperties::* dstField, T FontProperties::* srcField)
+				{
+					const DocumentModel::ResolvedStyle& src=GetCurrentResolvedStyle();
+					style.Obj()->*dstField=src.style.*srcField;
+				}
+
+				template<typename T>
+				void OverrideStyleItem(Nullable<T> DocumentStyleProperties::* dstField, T DocumentModel::ResolvedStyle::* srcField)
+				{
+					const DocumentModel::ResolvedStyle& src=GetCurrentResolvedStyle();
+					style.Obj()->*dstField=src.*srcField;
+				}
+
+				template<typename T>
+				void SetStyleItem(Nullable<T> DocumentStyleProperties::* dstField, T FontProperties::* srcField)
+				{
+					const DocumentModel::ResolvedStyle& src=GetCurrentResolvedStyle();
+					if(style.Obj()->*dstField && (style.Obj()->*dstField).Value()!=src.style.*srcField)
+					{
+						style.Obj()->*dstField=Nullable<T>();
+					}
+				}
+
+				template<typename T>
+				void SetStyleItem(Nullable<T> DocumentStyleProperties::* dstField, T DocumentModel::ResolvedStyle::* srcField)
+				{
+					const DocumentModel::ResolvedStyle& src=GetCurrentResolvedStyle();
+					if(style.Obj()->*dstField && (style.Obj()->*dstField).Value()!=src.*srcField)
+					{
+						style.Obj()->*dstField=Nullable<T>();
+					}
+				}
+
+				void VisitContainer(DocumentContainerRun* run)
+				{
+					for(vint i=run->runs.Count()-1;i>=0;i--)
+					{
+						Ptr<DocumentRun> subRun=run->runs[i];
+						RunRange range=runRanges[subRun.Obj()];
+						if(range.start<end && start<range.end)
+						{
+							subRun->Accept(this);
+						}
+					}
+				}
+
+				void Visit(DocumentTextRun* run)override
+				{
+					const DocumentModel::ResolvedStyle& currentResolvedStyle=GetCurrentResolvedStyle();
+					if(style)
+					{
+						SetStyleItem(&DocumentStyleProperties::face,					&FontProperties::fontFamily);
+						SetStyleItem(&DocumentStyleProperties::size,					&FontProperties::size);
+						SetStyleItem(&DocumentStyleProperties::color,					&DocumentModel::ResolvedStyle::color);
+						SetStyleItem(&DocumentStyleProperties::backgroundColor,			&DocumentModel::ResolvedStyle::backgroundColor);
+						SetStyleItem(&DocumentStyleProperties::bold,					&FontProperties::bold);
+						SetStyleItem(&DocumentStyleProperties::italic,					&FontProperties::italic);
+						SetStyleItem(&DocumentStyleProperties::underline,				&FontProperties::underline);
+						SetStyleItem(&DocumentStyleProperties::strikeline,				&FontProperties::strikeline);
+						SetStyleItem(&DocumentStyleProperties::antialias,				&FontProperties::antialias);
+						SetStyleItem(&DocumentStyleProperties::verticalAntialias,		&FontProperties::verticalAntialias);
+					}
+					else
+					{
+						style=new DocumentStyleProperties;
+						OverrideStyleItem(&DocumentStyleProperties::face,				&FontProperties::fontFamily);
+						OverrideStyleItem(&DocumentStyleProperties::size,				&FontProperties::size);
+						OverrideStyleItem(&DocumentStyleProperties::color,				&DocumentModel::ResolvedStyle::color);
+						OverrideStyleItem(&DocumentStyleProperties::backgroundColor,	&DocumentModel::ResolvedStyle::backgroundColor);
+						OverrideStyleItem(&DocumentStyleProperties::bold,				&FontProperties::bold);
+						OverrideStyleItem(&DocumentStyleProperties::italic,				&FontProperties::italic);
+						OverrideStyleItem(&DocumentStyleProperties::underline,			&FontProperties::underline);
+						OverrideStyleItem(&DocumentStyleProperties::strikeline,			&FontProperties::strikeline);
+						OverrideStyleItem(&DocumentStyleProperties::antialias,			&FontProperties::antialias);
+						OverrideStyleItem(&DocumentStyleProperties::verticalAntialias,	&FontProperties::verticalAntialias);
+					}
+				}
+
+				void Visit(DocumentStylePropertiesRun* run)override
+				{
+					const DocumentModel::ResolvedStyle& currentResolvedStyle=GetCurrentResolvedStyle();
+					DocumentModel::ResolvedStyle resolvedStyle=model->GetStyle(run->style, currentResolvedStyle);
+					resolvedStyles.Add(resolvedStyle);
+					VisitContainer(run);
+					resolvedStyles.RemoveAt(resolvedStyles.Count()-1);
+				}
+
+				void Visit(DocumentStyleApplicationRun* run)override
+				{
+					const DocumentModel::ResolvedStyle& currentResolvedStyle=GetCurrentResolvedStyle();
+					DocumentModel::ResolvedStyle resolvedStyle=model->GetStyle(run->styleName, currentResolvedStyle);
+					resolvedStyles.Add(resolvedStyle);
+					VisitContainer(run);
+					resolvedStyles.RemoveAt(resolvedStyles.Count()-1);
+				}
+
+				void Visit(DocumentHyperlinkRun* run)override
+				{
+					const DocumentModel::ResolvedStyle& currentResolvedStyle=GetCurrentResolvedStyle();
+					DocumentModel::ResolvedStyle resolvedStyle=model->GetStyle(run->styleName, currentResolvedStyle);
+					resolvedStyles.Add(resolvedStyle);
+					VisitContainer(run);
+					resolvedStyles.RemoveAt(resolvedStyles.Count()-1);
+				}
+
+				void Visit(DocumentImageRun* run)override
+				{
+				}
+
+				void Visit(DocumentParagraphRun* run)override
+				{
+					VisitContainer(run);
+				}
+
+				static Ptr<DocumentStyleProperties> SummerizeStyle(DocumentParagraphRun* run, RunRangeMap& runRanges, DocumentModel* model, vint start, vint end)
+				{
+					SummerizeStyleVisitor visitor(runRanges, model, start, end);
+					run->Accept(&visitor);
+					return visitor.style;
+				}
+
+				template<typename T>
+				static void AggregateStyleItem(Ptr<DocumentStyleProperties>& dst, Ptr<DocumentStyleProperties> src, Nullable<T> DocumentStyleProperties::* field)
+				{
+					if(dst.Obj()->*field && (!(src.Obj()->*field) || (dst.Obj()->*field).Value()!=(src.Obj()->*field).Value()))
+					{
+						dst.Obj()->*field=Nullable<T>();
+					}
+				}
+
+				static void AggregateStyle(Ptr<DocumentStyleProperties>& dst, Ptr<DocumentStyleProperties> src)
+				{
+					AggregateStyleItem(dst, src, &DocumentStyleProperties::face);
+					AggregateStyleItem(dst, src, &DocumentStyleProperties::size);
+					AggregateStyleItem(dst, src, &DocumentStyleProperties::color);
+					AggregateStyleItem(dst, src, &DocumentStyleProperties::backgroundColor);
+					AggregateStyleItem(dst, src, &DocumentStyleProperties::bold);
+					AggregateStyleItem(dst, src, &DocumentStyleProperties::italic);
+					AggregateStyleItem(dst, src, &DocumentStyleProperties::underline);
+					AggregateStyleItem(dst, src, &DocumentStyleProperties::strikeline);
+					AggregateStyleItem(dst, src, &DocumentStyleProperties::antialias);
+					AggregateStyleItem(dst, src, &DocumentStyleProperties::verticalAntialias);
+				}
+			};
+		}
+		using namespace document_operation_visitors;
+
+/***********************************************************************
+DocumentModel::EditRangeOperations
+***********************************************************************/
+
+		bool DocumentModel::CheckEditRange(TextPos begin, TextPos end, RunRangeMap& relatedRanges)
+		{
+			// check caret range
+			if(begin>end) return false;
+			if(begin.row<0 || begin.row>=paragraphs.Count()) return false;
+			if(end.row<0 || end.row>=paragraphs.Count()) return false;
+
+			// determine run ranges
+			GetRunRangeVisitor::GetRunRange(paragraphs[begin.row].Obj(), relatedRanges);
+			if(begin.row!=end.row)
+			{
+				GetRunRangeVisitor::GetRunRange(paragraphs[end.row].Obj(), relatedRanges);
 			}
 			
-			void GuiDocumentElement::NotifyParagraphUpdated(vint index)
+			// check caret range
+			RunRange beginRange=relatedRanges[paragraphs[begin.row].Obj()];
+			RunRange endRange=relatedRanges[paragraphs[end.row].Obj()];
+			if(begin.column<0 || begin.column>beginRange.end) return false;
+			if(end.column<0 || end.column>endRange.end) return false;
+
+			return true;
+		}
+
+		Ptr<DocumentModel> DocumentModel::CopyDocument(TextPos begin, TextPos end, bool deepCopy)
+		{
+			// check caret range
+			RunRangeMap runRanges;
+			if(!CheckEditRange(begin, end, runRanges)) return 0;
+
+			// get ranges
+			for(vint i=begin.row+1;i<end.row;i++)
 			{
-				Ptr<GuiDocumentElementRenderer> elementRenderer=renderer.Cast<GuiDocumentElementRenderer>();
-				if(elementRenderer)
-				{
-					elementRenderer->NotifyParagraphUpdated(index);
-				}
+				GetRunRangeVisitor::GetRunRange(paragraphs[i].Obj(), runRanges);
 			}
 
-			vint GuiDocumentElement::GetHyperlinkIdFromPoint(Point point)
-			{
-				Ptr<GuiDocumentElementRenderer> elementRenderer=renderer.Cast<GuiDocumentElementRenderer>();
-				if(elementRenderer)
-				{
-					return elementRenderer->GetHyperlinkIdFromPoint(point);
-				}
-				else
-				{
-					return DocumentRun::NullHyperlinkId;
-				}
-			}
+			Ptr<DocumentModel> newDocument=new DocumentModel;
 
-			void GuiDocumentElement::ActivateHyperlink(vint hyperlinkId, bool active)
+			// copy paragraphs
+			if(begin.row==end.row)
 			{
-				if(document)
+				newDocument->paragraphs.Add(CloneRunRecursivelyVisitor::CopyRun(paragraphs[begin.row].Obj(), runRanges, begin.column, end.column, deepCopy).Cast<DocumentParagraphRun>());
+			}
+			else
+			{
+				for(vint i=begin.row;i<=end.row;i++)
 				{
-					vint paragraphIndex=document->ActivateHyperlink(hyperlinkId, active);
-					if(paragraphIndex!=-1)
+					Ptr<DocumentParagraphRun> paragraph=paragraphs[i];
+					RunRange range=runRanges[paragraph.Obj()];
+					if(i==begin.row)
 					{
-						NotifyParagraphUpdated(paragraphIndex);
+						newDocument->paragraphs.Add(CloneRunRecursivelyVisitor::CopyRun(paragraph.Obj(), runRanges, begin.column, range.end, deepCopy).Cast<DocumentParagraphRun>());
+					}
+					else if(i==end.row)
+					{
+						newDocument->paragraphs.Add(CloneRunRecursivelyVisitor::CopyRun(paragraph.Obj(), runRanges, range.start, end.column, deepCopy).Cast<DocumentParagraphRun>());
+					}
+					else if(deepCopy)
+					{
+						newDocument->paragraphs.Add(CloneRunRecursivelyVisitor::CopyRun(paragraph.Obj(), runRanges, range.start, range.end, deepCopy).Cast<DocumentParagraphRun>());
+					}
+					else
+					{
+						newDocument->paragraphs.Add(paragraph);
 					}
 				}
 			}
+
+			// copy styles
+			List<WString> styleNames;
+			FOREACH(Ptr<DocumentParagraphRun>, paragraph, newDocument->paragraphs)
+			{
+				CollectStyleNameVisitor::CollectStyleName(paragraph.Obj(), styleNames);
+			}
+
+			for(vint i=0;i<styleNames.Count();i++)
+			{
+				WString styleName=styleNames[i];
+				if(!newDocument->styles.Keys().Contains(styleName))
+				{
+					Ptr<DocumentStyle> style=styles[styleName];
+					if(deepCopy)
+					{
+						Ptr<DocumentStyle> newStyle=new DocumentStyle;
+						newStyle->parentStyleName=style->parentStyleName;
+						newStyle->styles=CloneRunVisitor::CopyStyle(style->styles);
+						newStyle->resolvedStyles=CloneRunVisitor::CopyStyle(style->resolvedStyles);
+						newDocument->styles.Add(styleName, newStyle);
+					}
+					else
+					{
+						newDocument->styles.Add(styleName, style);
+					}
+
+					if(!styleNames.Contains(style->parentStyleName))
+					{
+						styleNames.Add(style->parentStyleName);
+					}
+				}
+			}
+
+			return newDocument;
+		}
+
+		bool DocumentModel::CutParagraph(TextPos position)
+		{
+			if(position.row<0 || position.row>=paragraphs.Count()) return false;
+
+			Ptr<DocumentParagraphRun> paragraph=paragraphs[position.row];
+			RunRangeMap runRanges;
+			Ptr<DocumentRun> leftRun, rightRun;
+
+			GetRunRangeVisitor::GetRunRange(paragraph.Obj(), runRanges);
+			CutRunVisitor::CutRun(paragraph.Obj(), runRanges, position.column, leftRun, rightRun);
+
+			CopyFrom(paragraph->runs, leftRun.Cast<DocumentParagraphRun>()->runs);
+			CopyFrom(paragraph->runs, rightRun.Cast<DocumentParagraphRun>()->runs, true);
+			
+			return true;
+		}
+
+		bool DocumentModel::CutEditRange(TextPos begin, TextPos end)
+		{
+			// check caret range
+			if(begin>end) return false;
+			if(begin.row<0 || begin.row>=paragraphs.Count()) return false;
+			if(end.row<0 || end.row>=paragraphs.Count()) return false;
+
+			// cut paragraphs
+			CutParagraph(begin);
+			if(begin!=end)
+			{
+				CutParagraph(end);
+			}
+			return true;
+		}
+
+		bool DocumentModel::EditContainer(TextPos begin, TextPos end, const Func<void(DocumentParagraphRun*, RunRangeMap&, vint, vint)>& editor)
+		{
+			if(begin==end) return false;
+
+			// cut paragraphs
+			if(!CutEditRange(begin, end)) return false;
+
+			// check caret range
+			RunRangeMap runRanges;
+			if(!CheckEditRange(begin, end, runRanges)) return false;
+
+			// edit container
+			if(begin.row==end.row)
+			{
+				editor(paragraphs[begin.row].Obj(), runRanges, begin.column, end.column);
+			}
+			else
+			{
+				for(vint i=begin.row;i<=end.row;i++)
+				{
+					Ptr<DocumentParagraphRun> paragraph=paragraphs[i];
+					if(begin.row<i && i<end.row)
+					{
+						GetRunRangeVisitor::GetRunRange(paragraph.Obj(), runRanges);
+					}
+					RunRange range=runRanges[paragraph.Obj()];
+					if(i==begin.row)
+					{
+						editor(paragraph.Obj(), runRanges, begin.column, range.end);
+					}
+					else if(i==end.row)
+					{
+						editor(paragraph.Obj(), runRanges, range.start, end.column);
+					}
+					else
+					{
+						editor(paragraph.Obj(), runRanges, range.start, range.end);
+					}
+				}
+			}
+
+			// clear paragraphs
+			for(vint i=begin.row;i<=end.row;i++)
+			{
+				ClearRunVisitor::ClearRun(paragraphs[i].Obj());
+			}
+
+			return true;
+		}
+
+/***********************************************************************
+DocumentModel::EditRun
+***********************************************************************/
+
+		vint DocumentModel::EditRun(TextPos begin, TextPos end, Ptr<DocumentModel> model)
+		{
+			// check caret range
+			RunRangeMap runRanges;
+			if(!CheckEditRange(begin, end, runRanges)) return -1;
+
+			// calculate new names for the model's styles to prevent conflicting
+			List<WString> oldNames, newNames;
+			CopyFrom(oldNames, model->styles.Keys());
+			CopyFrom(newNames, model->styles.Keys());
+			for(vint i=0;i<newNames.Count();i++)
+			{
+				WString name=newNames[i];
+				if((name.Length()==0 || name[0]!=L'#') && styles.Keys().Contains(name))
+				{
+					vint index=2;
+					while(true)
+					{
+						WString newName=name+L"_"+itow(index++);
+						if(!styles.Keys().Contains(newName) && model->styles.Keys().Contains(newName))
+						{
+							newNames[i]=newName;
+							break;
+						}
+					}
+				}
+			}
+
+			// rename model's styles
+			typedef Pair<WString, WString> NamePair;
+			FOREACH(NamePair, name, From(oldNames).Pairwise(newNames))
+			{
+				model->RenameStyle(name.key, name.value);
+			}
+			FOREACH(WString, name, newNames)
+			{
+				if((name.Length()==0 || name[0]!=L'#') && !styles.Keys().Contains(name))
+				{
+					styles.Add(name, model->styles[name]);
+				}
+			}
+
+			// edit runs
+			Array<Ptr<DocumentParagraphRun>> runs;
+			CopyFrom(runs, model->paragraphs);
+			return EditRun(begin, end, runs);
+		}
+
+		vint DocumentModel::EditRun(TextPos begin, TextPos end, const collections::Array<Ptr<DocumentParagraphRun>>& runs)
+		{
+			// check caret range
+			RunRangeMap runRanges;
+			if(!CheckEditRange(begin, end, runRanges)) return -1;
+
+			// remove unnecessary paragraphs
+			if(begin.row!=end.row)
+			{
+				for(vint i=end.row-1;i>begin.row;i--)
+				{
+					paragraphs.RemoveAt(i);
+				}
+				end.row=begin.row+1;
+			}
+
+			// remove unnecessary runs and ensure begin.row!=end.row
+			if(begin.row==end.row)
+			{
+				RemoveRunVisitor::RemoveRun(paragraphs[begin.row].Obj(), runRanges, begin.column, end.column);
+
+				Ptr<DocumentRun> leftRun, rightRun;
+				runRanges.Clear();
+				GetRunRangeVisitor::GetRunRange(paragraphs[begin.row].Obj(), runRanges);
+				CutRunVisitor::CutRun(paragraphs[begin.row].Obj(), runRanges, begin.column, leftRun, rightRun);
+
+				paragraphs.RemoveAt(begin.row);
+				paragraphs.Insert(begin.row, leftRun.Cast<DocumentParagraphRun>());
+				paragraphs.Insert(begin.row+1, rightRun.Cast<DocumentParagraphRun>());
+				end.row=begin.row+1;
+			}
+			else
+			{
+				RemoveRunVisitor::RemoveRun(paragraphs[begin.row].Obj(), runRanges, begin.column, runRanges[paragraphs[begin.row].Obj()].end);
+				RemoveRunVisitor::RemoveRun(paragraphs[end.row].Obj(), runRanges, 0, end.column);
+			}
+
+			// insert new paragraphs
+			Ptr<DocumentParagraphRun> beginParagraph=paragraphs[begin.row];
+			Ptr<DocumentParagraphRun> endParagraph=paragraphs[end.row];
+			if(runs.Count()==0)
+			{
+				CopyFrom(beginParagraph->runs, endParagraph->runs, true);
+				paragraphs.RemoveAt(end.row);
+			}
+			else if(runs.Count()==1)
+			{
+				CopyFrom(beginParagraph->runs, runs[0]->runs, true);
+				CopyFrom(beginParagraph->runs, endParagraph->runs, true);
+				paragraphs.RemoveAt(end.row);
+			}
+			else
+			{
+				Ptr<DocumentParagraphRun> newBeginRuns=runs[0];
+				CopyFrom(beginParagraph->runs, newBeginRuns->runs, true);
+				
+				Ptr<DocumentParagraphRun> newEndRuns=runs[runs.Count()-1];
+				for(vint i=0;i<newEndRuns->runs.Count();i++)
+				{
+					endParagraph->runs.Insert(i, newEndRuns->runs[i]);
+				}
+
+				for(vint i=1;i<runs.Count()-1;i++)
+				{
+					paragraphs.Insert(begin.row+i, runs[i]);
+				}
+			}
+
+			// clear unnecessary runs
+			vint rows=runs.Count()==0?1:runs.Count();
+			for(vint i=0;i<rows;i++)
+			{
+				ClearRunVisitor::ClearRun(paragraphs[begin.row+i].Obj());
+			}
+			return rows;
+		}
+
+/***********************************************************************
+DocumentModel::EditText
+***********************************************************************/
+
+		vint DocumentModel::EditText(TextPos begin, TextPos end, bool frontSide, const collections::Array<WString>& text)
+		{
+			// check caret range
+			RunRangeMap runRanges;
+			if(!CheckEditRange(begin, end, runRanges)) return -1;
+
+			// calcuate the position to get the text style
+			TextPos stylePosition;
+			if(frontSide)
+			{
+				stylePosition=begin;
+				if(stylePosition.column==0)
+				{
+					frontSide=false;
+				}
+			}
+			else
+			{
+				stylePosition=end;
+				if(stylePosition.column==runRanges[paragraphs[end.row].Obj()].end)
+				{
+					frontSide=true;
+				}
+			}
+
+			// copy runs that contains the target style for new text
+			List<DocumentContainerRun*> styleRuns;
+			LocateStyleVisitor::LocateStyle(paragraphs[stylePosition.row].Obj(), runRanges, stylePosition.column, frontSide, styleRuns);
+
+			// create paragraphs
+			Array<Ptr<DocumentParagraphRun>> runs(text.Count());
+			for(vint i=0;i<text.Count();i++)
+			{
+				Ptr<DocumentRun> paragraph=CloneRunVisitor::CopyStyledText(styleRuns, text[i]);
+				runs[i]=paragraph.Cast<DocumentParagraphRun>();
+			}
+
+			// replace the paragraphs
+			return EditRun(begin, end, runs);
+		}
+
+/***********************************************************************
+DocumentModel::EditStyle
+***********************************************************************/
+
+		bool DocumentModel::EditStyle(TextPos begin, TextPos end, Ptr<DocumentStyleProperties> style)
+		{
+			return EditContainer(begin, end, [=](DocumentParagraphRun* paragraph, RunRangeMap& runRanges, vint start, vint end)
+			{
+				AddStyleVisitor::AddStyle(paragraph, runRanges, start, end, style);
+			});
+		}
+
+/***********************************************************************
+DocumentModel::EditImage
+***********************************************************************/
+
+		Ptr<DocumentImageRun> DocumentModel::EditImage(TextPos begin, TextPos end, Ptr<GuiImageData> image)
+		{
+			Ptr<DocumentImageRun> imageRun=new DocumentImageRun;
+			imageRun->size=image->GetImage()->GetFrame(image->GetFrameIndex())->GetSize();
+			imageRun->baseline=imageRun->size.y;
+			imageRun->image=image->GetImage();
+			imageRun->frameIndex=image->GetFrameIndex();
+
+			Ptr<DocumentParagraphRun> paragraph=new DocumentParagraphRun;
+			paragraph->runs.Add(imageRun);
+
+			Array<Ptr<DocumentParagraphRun>> runs(1);
+			runs[0]=paragraph;
+			if(EditRun(begin, end, runs))
+			{
+				return imageRun;
+			}
+			else
+			{
+				return 0;
+			}
+		}
+
+/***********************************************************************
+DocumentModel::EditHyperlink
+***********************************************************************/
+
+		bool DocumentModel::EditHyperlink(vint paragraphIndex, vint begin, vint end, const WString& reference, const WString& normalStyleName, const WString& activeStyleName)
+		{
+			Ptr<DocumentHyperlinkRun> run=GetHyperlink(paragraphIndex, begin, end);
+			if(run)
+			{
+				run->reference=reference;
+				run->normalStyleName=normalStyleName;
+				run->activeStyleName=activeStyleName;
+				run->styleName=normalStyleName;
+				return true;
+			}
+			else if(RemoveHyperlink(paragraphIndex, begin, end))
+			{
+				CutEditRange(TextPos(paragraphIndex, begin), TextPos(paragraphIndex, end));
+
+				RunRangeMap runRanges;
+				Ptr<DocumentParagraphRun> paragraph=paragraphs[paragraphIndex];
+				GetRunRangeVisitor::GetRunRange(paragraph.Obj(), runRanges);
+				AddHyperlinkVisitor::AddHyperlink(paragraph.Obj(), runRanges, begin, end, reference, normalStyleName, activeStyleName);
+
+				ClearRunVisitor::ClearRun(paragraph.Obj());
+				return true;
+			}
+			return false;
+		}
+
+		bool DocumentModel::RemoveHyperlink(vint paragraphIndex, vint begin, vint end)
+		{
+			RunRangeMap runRanges;
+			if(!CheckEditRange(TextPos(paragraphIndex, begin), TextPos(paragraphIndex, end), runRanges)) return false;
+
+			Ptr<DocumentParagraphRun> paragraph=paragraphs[paragraphIndex];
+			RemoveHyperlinkVisitor::RemoveHyperlink(paragraph.Obj(), runRanges, begin, end);
+			ClearRunVisitor::ClearRun(paragraph.Obj());
+			return true;
+		}
+
+		Ptr<DocumentHyperlinkRun> DocumentModel::GetHyperlink(vint paragraphIndex, vint begin, vint end)
+		{
+			RunRangeMap runRanges;
+			if(!CheckEditRange(TextPos(paragraphIndex, begin), TextPos(paragraphIndex, end), runRanges)) return 0;
+
+			Ptr<DocumentParagraphRun> paragraph=paragraphs[paragraphIndex];
+			return LocateHyperlinkVisitor::LocateHyperlink(paragraph.Obj(), runRanges, begin, end);
+		}
+
+/***********************************************************************
+DocumentModel::EditStyleName
+***********************************************************************/
+
+		bool DocumentModel::EditStyleName(TextPos begin, TextPos end, const WString& styleName)
+		{
+			return EditContainer(begin, end, [=](DocumentParagraphRun* paragraph, RunRangeMap& runRanges, vint start, vint end)
+			{
+				AddStyleNameVisitor::AddStyleName(paragraph, runRanges, start, end, styleName);
+			});
+		}
+
+		bool DocumentModel::RemoveStyleName(TextPos begin, TextPos end)
+		{
+			return EditContainer(begin, end, [=](DocumentParagraphRun* paragraph, RunRangeMap& runRanges, vint start, vint end)
+			{
+				RemoveStyleNameVisitor::RemoveStyleName(paragraph, runRanges, start, end);
+			});
+		}
+
+		bool DocumentModel::RenameStyle(const WString& oldStyleName, const WString& newStyleName)
+		{
+			vint index=styles.Keys().IndexOf(oldStyleName);
+			if(index==-1) return false;
+			if(styles.Keys().Contains(newStyleName)) return false;
+
+			Ptr<DocumentStyle> style=styles.Values()[index];
+			styles.Remove(oldStyleName);
+			styles.Add(newStyleName, style);
+
+			FOREACH(Ptr<DocumentStyle>, subStyle, styles.Values())
+			{
+				if(subStyle->parentStyleName==oldStyleName)
+				{
+					subStyle->parentStyleName=newStyleName;
+				}
+			}
+
+			FOREACH(Ptr<DocumentParagraphRun>, paragraph, paragraphs)
+			{
+				ReplaceStyleNameVisitor::ReplaceStyleName(paragraph.Obj(), oldStyleName, newStyleName);
+			}
+			return true;
+		}
+
+/***********************************************************************
+DocumentModel::ClearStyle
+***********************************************************************/
+
+		bool DocumentModel::ClearStyle(TextPos begin, TextPos end)
+		{
+			return EditContainer(begin, end, [=](DocumentParagraphRun* paragraph, RunRangeMap& runRanges, vint start, vint end)
+			{
+				ClearStyleVisitor::ClearStyle(paragraph, runRanges, start, end);
+			});
+		}
+
+/***********************************************************************
+DocumentModel::ClearStyle
+***********************************************************************/
+
+		Ptr<DocumentStyleProperties> DocumentModel::SummarizeStyle(TextPos begin, TextPos end)
+		{
+			Ptr<DocumentStyleProperties> style;
+			RunRangeMap runRanges;
+
+			if(begin==end) goto END_OF_SUMMERIZING;
+
+			// check caret range
+			if(!CheckEditRange(begin, end, runRanges)) return false;
+
+			// summerize container
+			if(begin.row==end.row)
+			{
+				style=SummerizeStyleVisitor::SummerizeStyle(paragraphs[begin.row].Obj(), runRanges, this, begin.column, end.column);
+			}
+			else
+			{
+				for(vint i=begin.row;i<=end.row;i++)
+				{
+					Ptr<DocumentParagraphRun> paragraph=paragraphs[i];
+					if(begin.row<i && i<end.row)
+					{
+						GetRunRangeVisitor::GetRunRange(paragraph.Obj(), runRanges);
+					}
+					RunRange range=runRanges[paragraph.Obj()];
+					Ptr<DocumentStyleProperties> paragraphStyle;
+					if(i==begin.row)
+					{
+						paragraphStyle=SummerizeStyleVisitor::SummerizeStyle(paragraph.Obj(), runRanges, this, begin.column, range.end);
+					}
+					else if(i==end.row)
+					{
+						paragraphStyle=SummerizeStyleVisitor::SummerizeStyle(paragraph.Obj(), runRanges, this, range.start, end.column);
+					}
+					else
+					{
+						paragraphStyle=SummerizeStyleVisitor::SummerizeStyle(paragraph.Obj(), runRanges, this, range.start, range.end);
+					}
+
+					if(!style)
+					{
+						style=paragraphStyle;
+					}
+					else if(paragraphStyle)
+					{
+						SummerizeStyleVisitor::AggregateStyle(style, paragraphStyle);
+					}
+				}
+			}
+
+		END_OF_SUMMERIZING:
+			if(!style)
+			{
+				style=new DocumentStyleProperties;
+			}
+			return style;
+		}
+	}
+}
+
+/***********************************************************************
+NativeWindow\GuiDocument_Load.cpp
+***********************************************************************/
+
+namespace vl
+{
+	namespace presentation
+	{
+		using namespace collections;
+		using namespace parsing::tabling;
+		using namespace parsing::xml;
+		using namespace regex;
+
+/***********************************************************************
+document_operation_visitors::DeserializeNodeVisitor
+***********************************************************************/
+
+		namespace document_operation_visitors
+		{
+			class DeserializeNodeVisitor : public XmlNode::IVisitor
+			{
+			public:
+				Ptr<DocumentModel>					model;
+				Ptr<DocumentContainerRun>			container;
+				vint								paragraphIndex;
+				Ptr<DocumentResolver>				resolver;
+				Regex								regexAttributeApply;
+
+				DeserializeNodeVisitor(Ptr<DocumentModel> _model, Ptr<DocumentParagraphRun> _paragraph, vint _paragraphIndex, Ptr<DocumentResolver> _resolver)
+					:model(_model)
+					,container(_paragraph)
+					,paragraphIndex(_paragraphIndex)
+					,resolver(_resolver)
+					,regexAttributeApply(L"/{@(<value>[^{}]+)/}")
+				{
+				}
+
+				void PrintText(const WString& text)
+				{
+					Ptr<DocumentTextRun> run=new DocumentTextRun;
+					run->text=text;
+					container->runs.Add(run);
+				}
+
+				void Visit(XmlText* node)override
+				{
+					PrintText(node->content.value);
+				}
+
+				void Visit(XmlCData* node)override
+				{
+					PrintText(node->content.value);
+				}
+
+				void Visit(XmlAttribute* node)override
+				{
+				}
+
+				void Visit(XmlComment* node)override
+				{
+				}
+
+				void Visit(XmlElement* node)override
+				{
+					Ptr<DocumentContainerRun> createdContainer;
+					bool useTemplateInfo=false;
+					XmlElement* subNodeContainer=node;
+
+					if(node->name.value==L"br")
+					{
+						PrintText(L"\r\n");
+					}
+					else if(node->name.value==L"sp")
+					{
+						PrintText(L" ");
+					}
+					else if(node->name.value==L"tab")
+					{
+						PrintText(L"\t");
+					}
+					else if(node->name.value==L"img")
+					{
+						Ptr<DocumentImageRun> run=new DocumentImageRun;
+						if(Ptr<XmlAttribute> source=XmlGetAttribute(node, L"source"))
+						{
+							run->source=source->value.value;
+							Pair<vint, vint> index=INVLOC.FindFirst(run->source, L"://", Locale::IgnoreCase);
+							if(index.key!=-1)
+							{
+								WString protocol=run->source.Sub(0, index.key);
+								WString path=run->source.Sub(index.key+index.value, run->source.Length()-index.key-index.value);
+								run->image=resolver->ResolveImage(protocol, path);
+								if(run->image && run->image->GetFrameCount()>0)
+								{
+									run->size=run->image->GetFrame(0)->GetSize();
+									run->baseline=run->size.y;
+									run->frameIndex=0;
+								}
+							}
+
+							FOREACH(Ptr<XmlAttribute>, att, node->attributes)
+							{
+								if(att->name.value==L"width")
+								{
+									run->size.x=wtoi(att->value.value);
+								}
+								else if(att->name.value==L"height")
+								{
+									run->size.y=wtoi(att->value.value);
+								}
+								else if(att->name.value==L"baseline")
+								{
+									run->baseline=wtoi(att->value.value);
+								}
+								else if(att->name.value==L"frameIndex")
+								{
+									run->frameIndex=wtoi(att->value.value);
+								}
+							}
+							container->runs.Add(run);
+						}
+					}
+					else if(node->name.value==L"font")
+					{
+						Ptr<DocumentStylePropertiesRun> run=new DocumentStylePropertiesRun();
+						Ptr<DocumentStyleProperties> sp=new DocumentStyleProperties;
+						run->style=sp;
+
+						FOREACH(Ptr<XmlAttribute>, att, node->attributes)
+						{
+							if(att->name.value==L"face")
+							{
+								sp->face=att->value.value;
+							}
+							else if(att->name.value==L"size")
+							{
+								sp->size=wtoi(att->value.value);
+							}
+							else if(att->name.value==L"color")
+							{
+								sp->color=Color::Parse(att->value.value);
+							}
+							else if(att->name.value==L"bkcolor")
+							{
+								sp->backgroundColor=Color::Parse(att->value.value);
+							}
+						}
+						container->runs.Add(run);
+						createdContainer=run;
+					}
+					else if(node->name.value==L"b" || node->name.value==L"b-")
+					{
+						Ptr<DocumentStylePropertiesRun> run=new DocumentStylePropertiesRun();
+						run->style=new DocumentStyleProperties;
+						run->style->bold=node->name.value==L"b";
+						container->runs.Add(run);
+						createdContainer=run;
+					}
+					else if(node->name.value==L"i" || node->name.value==L"i-")
+					{
+						Ptr<DocumentStylePropertiesRun> run=new DocumentStylePropertiesRun();
+						run->style=new DocumentStyleProperties;
+						run->style->italic=node->name.value==L"i";
+						container->runs.Add(run);
+						createdContainer=run;
+					}
+					else if(node->name.value==L"u" || node->name.value==L"u-")
+					{
+						Ptr<DocumentStylePropertiesRun> run=new DocumentStylePropertiesRun();
+						run->style=new DocumentStyleProperties;
+						run->style->underline=node->name.value==L"u";
+						container->runs.Add(run);
+						createdContainer=run;
+					}
+					else if(node->name.value==L"s" || node->name.value==L"s-")
+					{
+						Ptr<DocumentStylePropertiesRun> run=new DocumentStylePropertiesRun();
+						run->style=new DocumentStyleProperties;
+						run->style->strikeline=node->name.value==L"s";
+						container->runs.Add(run);
+						createdContainer=run;
+					}
+					else if(node->name.value==L"ha")
+					{
+						Ptr<DocumentStylePropertiesRun> run=new DocumentStylePropertiesRun();
+						run->style=new DocumentStyleProperties;
+						run->style->antialias=true;
+						run->style->verticalAntialias=false;
+						container->runs.Add(run);
+						createdContainer=run;
+					}
+					else if(node->name.value==L"va")
+					{
+						Ptr<DocumentStylePropertiesRun> run=new DocumentStylePropertiesRun();
+						run->style=new DocumentStyleProperties;
+						run->style->antialias=true;
+						run->style->verticalAntialias=true;
+						container->runs.Add(run);
+						createdContainer=run;
+					}
+					else if(node->name.value==L"na")
+					{
+						Ptr<DocumentStylePropertiesRun> run=new DocumentStylePropertiesRun();
+						run->style=new DocumentStyleProperties;
+						run->style->antialias=false;
+						run->style->verticalAntialias=false;
+						container->runs.Add(run);
+						createdContainer=run;
+					}
+					else if(node->name.value==L"div")
+					{
+						if(Ptr<XmlAttribute> att=XmlGetAttribute(node, L"style"))
+						{
+							WString styleName=att->value.value;
+							
+							Ptr<DocumentStyleApplicationRun> run=new DocumentStyleApplicationRun;
+							run->styleName=styleName;
+							container->runs.Add(run);
+							createdContainer=run;
+						}
+						else
+						{
+							createdContainer=container;
+						}
+					}
+					else if(node->name.value==L"a")
+					{
+						Ptr<DocumentHyperlinkRun> run=new DocumentHyperlinkRun;
+						run->normalStyleName=L"#NormalLink";
+						run->activeStyleName=L"#ActiveLink";
+						if(Ptr<XmlAttribute> att=XmlGetAttribute(node, L"normal"))
+						{
+							run->normalStyleName=att->value.value;
+						}
+						if(Ptr<XmlAttribute> att=XmlGetAttribute(node, L"active"))
+						{
+							run->activeStyleName=att->value.value;
+						}
+						if(Ptr<XmlAttribute> att=XmlGetAttribute(node, L"href"))
+						{
+							run->reference=att->value.value;
+						}
+						run->styleName=run->normalStyleName;
+						container->runs.Add(run);
+						createdContainer=run;
+					}
+					else if(node->name.value==L"p")
+					{
+						FOREACH(Ptr<XmlNode>, sub, node->subNodes)
+						{
+							sub->Accept(this);
+						}
+					}
+					else
+					{
+						FOREACH(Ptr<XmlNode>, sub, node->subNodes)
+						{
+							sub->Accept(this);
+						}
+					}
+
+					if(createdContainer)
+					{
+						Ptr<DocumentContainerRun> oldContainer=container;
+						container=createdContainer;
+						FOREACH(Ptr<XmlNode>, subNode, subNodeContainer->subNodes)
+						{
+							subNode->Accept(this);
+						}
+						container=oldContainer;
+					}
+				}
+
+				void Visit(XmlInstruction* node)override
+				{
+				}
+
+				void Visit(XmlDocument* node)override
+				{
+				}
+			};
+		}
+		using namespace document_operation_visitors;
+
+/***********************************************************************
+DocumentModel
+***********************************************************************/
+
+		Ptr<DocumentModel> DocumentModel::LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, Ptr<DocumentResolver> resolver)
+		{
+			Ptr<DocumentModel> model=new DocumentModel;
+			if(xml->rootElement->name.value==L"Doc")
+			{
+				if(Ptr<XmlElement> styles=XmlGetElement(xml->rootElement, L"Styles"))
+				{
+					FOREACH(Ptr<XmlElement>, styleElement, XmlGetElements(styles, L"Style"))
+					if(Ptr<XmlAttribute> name=XmlGetAttribute(styleElement, L"name"))
+					if(!model->styles.Keys().Contains(name->value.value))
+					{
+						Ptr<DocumentStyle> style=new DocumentStyle;
+						model->styles.Add(name->value.value, style);
+
+						if(Ptr<XmlAttribute> parent=XmlGetAttribute(styleElement, L"parent"))
+						{
+							style->parentStyleName=parent->value.value;
+						}
+
+						Ptr<DocumentStyleProperties> sp=new DocumentStyleProperties;
+						style->styles=sp;
+
+						FOREACH(Ptr<XmlElement>, att, XmlGetElements(styleElement))
+						{
+							if(att->name.value==L"face")
+							{
+								sp->face=XmlGetValue(att);
+							}
+							else if(att->name.value==L"size")
+							{
+								sp->size=wtoi(XmlGetValue(att));
+							}
+							else if(att->name.value==L"color")
+							{
+								sp->color=Color::Parse(XmlGetValue(att));
+							}
+							else if(att->name.value==L"bkcolor")
+							{
+								sp->backgroundColor=Color::Parse(XmlGetValue(att));
+							}
+							else if(att->name.value==L"b")
+							{
+								sp->bold=XmlGetValue(att)==L"true";
+							}
+							else if(att->name.value==L"i")
+							{
+								sp->italic=XmlGetValue(att)==L"true";
+							}
+							else if(att->name.value==L"u")
+							{
+								sp->underline=XmlGetValue(att)==L"true";
+							}
+							else if(att->name.value==L"s")
+							{
+								sp->strikeline=XmlGetValue(att)==L"true";
+							}
+							else if(att->name.value==L"antialias")
+							{
+								WString value=XmlGetValue(att);
+								if(value==L"horizontal" || value==L"default")
+								{
+									sp->antialias=true;
+									sp->verticalAntialias=false;
+								}
+								else if(value==L"no")
+								{
+									sp->antialias=false;
+									sp->verticalAntialias=false;
+								}
+								else if(value==L"vertical")
+								{
+									sp->antialias=true;
+									sp->verticalAntialias=true;
+								}
+							}
+						}
+					}
+				}
+				if(Ptr<XmlElement> content=XmlGetElement(xml->rootElement, L"Content"))
+				{
+					FOREACH_INDEXER(Ptr<XmlElement>, p, i, XmlGetElements(content, L"p"))
+					{
+						Ptr<DocumentParagraphRun> paragraph=new DocumentParagraphRun;
+						if(Ptr<XmlAttribute> att=XmlGetAttribute(p, L"align"))
+						{
+							if(att->value.value==L"Left")
+							{
+								paragraph->alignment=Alignment::Left;
+							}
+							else if(att->value.value==L"Center")
+							{
+								paragraph->alignment=Alignment::Center;
+							}
+							else if(att->value.value==L"Right")
+							{
+								paragraph->alignment=Alignment::Right;
+							}
+						}
+						model->paragraphs.Add(paragraph);
+						DeserializeNodeVisitor visitor(model, paragraph, i, resolver);
+						p->Accept(&visitor);
+					}
+				}
+			}
+			return model;
+		}
+
+		Ptr<DocumentModel> DocumentModel::LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, const WString& workingDirectory)
+		{
+			Ptr<DocumentFileProtocolResolver> resolver=new DocumentFileProtocolResolver(workingDirectory);
+			return LoadFromXml(xml, resolver);
+		}
+
+		Ptr<DocumentModel> DocumentModel::LoadFromXml(const WString& filePath)
+		{
+			Ptr<ParsingTable> table;
+			Ptr<XmlDocument> xml;
+			Ptr<DocumentModel> document;
+			{
+				WString text;
+				if(LoadTextFile(filePath, text))
+				{
+					table=GetParserManager()->GetParsingTable(L"XML");
+					xml=XmlParseDocument(text, table);
+				}
+			}
+			if(xml)
+			{
+				document=DocumentModel::LoadFromXml(xml, GetFolderPath(filePath));
+			}
+			return document;
+		}
+	}
+}
+
+/***********************************************************************
+NativeWindow\GuiDocument_Save.cpp
+***********************************************************************/
+
+namespace vl
+{
+	namespace presentation
+	{
+		using namespace collections;
+		using namespace parsing::xml;
+
+/***********************************************************************
+document_operation_visitors::SerializeRunVisitor
+***********************************************************************/
+
+		namespace document_operation_visitors
+		{
+			class SerializeRunVisitor : public Object, public DocumentRun::IVisitor
+			{
+			protected:
+				DocumentModel*				model;
+				Ptr<XmlElement>				parent;
+
+			public:
+				SerializeRunVisitor(DocumentModel* _model, Ptr<XmlElement> _parent)
+					:model(_model)
+					,parent(_parent)
+				{
+				}
+
+				void VisitContainer(Ptr<XmlElement> replacedParent, DocumentContainerRun* run)
+				{
+					if(replacedParent)
+					{
+						parent->subNodes.Add(replacedParent);
+						Ptr<XmlElement> oldParent=parent;
+						parent=replacedParent;
+						FOREACH(Ptr<DocumentRun>, subRun, run->runs)
+						{
+							subRun->Accept(this);
+						}
+						parent=oldParent;
+					}
+					else
+					{
+						FOREACH(Ptr<DocumentRun>, subRun, run->runs)
+						{
+							subRun->Accept(this);
+						}
+					}
+				}
+
+				void Visit(DocumentTextRun* run)override
+				{
+					if(run->text!=L"")
+					{
+						XmlElementWriter writer(parent);
+						writer.Text(run->text);
+					}
+				}
+
+				void Visit(DocumentStylePropertiesRun* run)override
+				{
+					Ptr<DocumentStyleProperties> sp=run->style;
+					Ptr<XmlElement> oldParent=parent;
+					if(sp->face || sp->size || sp->color)
+					{
+						Ptr<XmlElement> element=new XmlElement;
+						element->name.value=L"font";
+						parent->subNodes.Add(element);
+
+						XmlElementWriter writer(element);
+						if(sp->face)
+						{
+							writer.Attribute(L"face", sp->face.Value());
+						}
+						if(sp->size)
+						{
+							writer.Attribute(L"size", itow(sp->size.Value()));
+						}
+						if(sp->color)
+						{
+							writer.Attribute(L"color", sp->color.Value().ToString());
+						}
+						if(sp->backgroundColor)
+						{
+							writer.Attribute(L"bkcolor", sp->backgroundColor.Value().ToString());
+						}
+						parent=element;
+					}
+					if(sp->bold)
+					{
+						Ptr<XmlElement> element=new XmlElement;
+						element->name.value=sp->bold.Value()?L"b":L"b-";
+						parent->subNodes.Add(element);
+						parent=element;
+					}
+					if(sp->italic)
+					{
+						Ptr<XmlElement> element=new XmlElement;
+						element->name.value=sp->italic.Value()?L"i":L"i-";
+						parent->subNodes.Add(element);
+						parent=element;
+					}
+					if(sp->underline)
+					{
+						Ptr<XmlElement> element=new XmlElement;
+						element->name.value=sp->underline.Value()?L"u":L"u-";
+						parent->subNodes.Add(element);
+						parent=element;
+					}
+					if(sp->strikeline)
+					{
+						Ptr<XmlElement> element=new XmlElement;
+						element->name.value=sp->strikeline.Value()?L"s":L"s-";
+						parent->subNodes.Add(element);
+						parent=element;
+					}
+					if(sp->antialias || sp->verticalAntialias)
+					{
+						bool ha=sp->antialias?sp->antialias.Value():true;
+						bool va=sp->verticalAntialias?sp->verticalAntialias.Value():false;
+						if(!ha)
+						{
+							Ptr<XmlElement> element=new XmlElement;
+							element->name.value=L"ha";
+							parent->subNodes.Add(element);
+							parent=element;
+						}
+						else if(!va)
+						{
+							Ptr<XmlElement> element=new XmlElement;
+							element->name.value=L"va";
+							parent->subNodes.Add(element);
+							parent=element;
+						}
+						else
+						{
+							Ptr<XmlElement> element=new XmlElement;
+							element->name.value=L"na";
+							parent->subNodes.Add(element);
+							parent=element;
+						}
+					}
+					VisitContainer(0, run);
+					parent=oldParent;
+				}
+
+				void Visit(DocumentStyleApplicationRun* run)override
+				{
+					Ptr<XmlElement> element=new XmlElement;
+					element->name.value=L"div";
+					XmlElementWriter(element).Attribute(L"style", run->styleName);
+					VisitContainer(element, run);
+				}
+
+				void Visit(DocumentHyperlinkRun* run)override
+				{
+					Ptr<XmlElement> element=new XmlElement;
+					element->name.value=L"a";
+					XmlElementWriter writer(element);
+					if(run->normalStyleName!=L"#NormalLink")
+					{
+						writer.Attribute(L"normal", run->normalStyleName);
+					}
+					if(run->activeStyleName!=L"#ActiveLink")
+					{
+						writer.Attribute(L"active", run->activeStyleName);
+					}
+					if(run->reference!=L"")
+					{
+						writer.Attribute(L"href", run->reference);
+					}
+					VisitContainer(element, run);
+				}
+
+				void Visit(DocumentImageRun* run)override
+				{
+					XmlElementWriter writer(parent);
+					writer
+						.Element(L"img")
+						.Attribute(L"width", itow(run->size.x))
+						.Attribute(L"height", itow(run->size.y))
+						.Attribute(L"baseline", itow(run->baseline))
+						.Attribute(L"frameIndex", itow(run->frameIndex))
+						.Attribute(L"source", run->source)
+						;
+				}
+
+				void Visit(DocumentParagraphRun* run)override
+				{
+					Ptr<XmlElement> element=new XmlElement;
+					element->name.value=L"p";
+
+					XmlElementWriter writer(element);
+					switch(run->alignment)
+					{
+					case Alignment::Left:
+						writer.Attribute(L"align", L"Left");
+						break;
+					case Alignment::Center:
+						writer.Attribute(L"align", L"Center");
+						break;
+					case Alignment::Right:
+						writer.Attribute(L"align", L"Right");
+						break;
+					}
+					VisitContainer(element, run);
+				}
+			};
+		}
+		using namespace document_operation_visitors;
+
+/***********************************************************************
+DocumentModel
+***********************************************************************/
+
+		Ptr<parsing::xml::XmlDocument> DocumentModel::SaveToXml()
+		{
+			Ptr<XmlDocument> xml=new XmlDocument;
+			Ptr<XmlElement> doc=new XmlElement;
+			doc->name.value=L"Doc";
+			xml->rootElement=doc;
+			{
+				Ptr<XmlElement> content=new XmlElement;
+				content->name.value=L"Content";
+				doc->subNodes.Add(content);
+				
+				FOREACH(Ptr<DocumentParagraphRun>, p, paragraphs)
+				{
+					SerializeRunVisitor visitor(this, content);
+					p->Accept(&visitor);
+				}
+			}
+			{
+				Ptr<XmlElement> stylesElement=new XmlElement;
+				stylesElement->name.value=L"Styles";
+				doc->subNodes.Add(stylesElement);
+
+				for(vint i=0;i<styles.Count();i++)
+				{
+					WString name=styles.Keys()[i];
+					if(name.Length()>0 && name[0]==L'#') continue;
+
+					Ptr<DocumentStyle> style=styles.Values().Get(i);
+					Ptr<DocumentStyleProperties> sp=style->styles;
+					Ptr<XmlElement> styleElement=new XmlElement;
+					styleElement->name.value=L"Style";
+					stylesElement->subNodes.Add(styleElement);
+
+					XmlElementWriter(styleElement).Attribute(L"name", name);
+					if(style->parentStyleName!=L"")
+					{
+						XmlElementWriter(styleElement).Attribute(L"parent", style->parentStyleName);
+					}
+
+					if(sp->face)				XmlElementWriter(styleElement).Element(L"face").Text(		sp->face.Value()						);
+					if(sp->size)				XmlElementWriter(styleElement).Element(L"size").Text(itow(	sp->size.Value()						));
+					if(sp->color)				XmlElementWriter(styleElement).Element(L"color").Text(		sp->color.Value().ToString()			);
+					if(sp->backgroundColor)		XmlElementWriter(styleElement).Element(L"bkcolor").Text(	sp->color.Value().ToString()			);
+					if(sp->bold)				XmlElementWriter(styleElement).Element(L"b").Text(			sp->bold.Value()?L"true":L"false"		);
+					if(sp->italic)				XmlElementWriter(styleElement).Element(L"i").Text(			sp->italic.Value()?L"true":L"false"		);
+					if(sp->underline)			XmlElementWriter(styleElement).Element(L"u").Text(			sp->underline.Value()?L"true":L"false"	);
+					if(sp->strikeline)			XmlElementWriter(styleElement).Element(L"s").Text(			sp->strikeline.Value()?L"true":L"false"	);
+					if(sp->antialias && sp->verticalAntialias)
+					{
+						bool h=sp->antialias;
+						bool v=sp->verticalAntialias;
+						if(!h)
+						{
+							XmlElementWriter(styleElement).Element(L"antialias").Text(L"no");
+						}
+						else if(!v)
+						{
+							XmlElementWriter(styleElement).Element(L"antialias").Text(L"horizontal");
+						}
+						else
+						{
+							XmlElementWriter(styleElement).Element(L"antialias").Text(L"vertical");
+						}
+					}
+				}
+			}
+			return xml;
+		}
+
+		bool DocumentModel::SaveToXml(const WString& filePath)
+		{
+			Ptr<XmlDocument> xml=SaveToXml();
+			if(xml)
+			{
+				stream::FileStream fileStream(filePath, stream::FileStream::WriteOnly);
+				stream::BomEncoder encoder(stream::BomEncoder::Utf16);
+				stream::EncoderStream encoderStream(fileStream, encoder);
+				stream::StreamWriter writer(encoderStream);
+				XmlPrint(xml, writer);
+				return true;
+			}
+			return false;
 		}
 	}
 }
@@ -31468,9 +36320,11 @@ namespace vl
 {
 	namespace presentation
 	{
+		using namespace controls;
 		using namespace collections;
 		using namespace parsing::tabling;
 		using namespace parsing::xml;
+		using namespace parsing::json;
 		using namespace regex;
 
 		WString GetFolderPath(const WString& filePath)
@@ -31543,922 +36397,6 @@ GuiImageData
 		vint GuiImageData::GetFrameIndex()
 		{
 			return frameIndex;
-		}
-
-/***********************************************************************
-DocumentResolver
-***********************************************************************/
-
-		DocumentResolver::DocumentResolver(Ptr<DocumentResolver> _previousResolver)
-			:previousResolver(_previousResolver)
-		{
-		}
-
-		DocumentResolver::~DocumentResolver()
-		{
-		}
-
-		Ptr<INativeImage> DocumentResolver::ResolveImage(const WString& protocol, const WString& path)
-		{
-			auto result=ResolveImageInternal(protocol, path);
-			if(!result && previousResolver)
-			{
-				result=previousResolver->ResolveImage(protocol, path);
-			}
-			return result;
-		}
-
-/***********************************************************************
-document_serialization_visitors::SerializeRunVisitor
-***********************************************************************/
-
-		namespace document_serialization_visitors
-		{
-			class SerializeRunVisitor : public Object, public DocumentRun::IVisitor
-			{
-			protected:
-
-				const XmlElementWriter& Text(DocumentTextRun* run, const XmlElementWriter& writer)
-				{
-					return writer.Text(run->text);
-				}
-
-				const XmlElementWriter& Antialias(DocumentTextRun* run, const XmlElementWriter& writer)
-				{
-					if(!run->style.antialias)
-					{
-						return Text(run, writer.Element(L"na")).End();
-					}
-					else if(!run->style.verticalAntialias)
-					{
-						return Text(run, writer);
-					}
-					else
-					{
-						return Text(run, writer.Element(L"va")).End();
-					}
-				}
-
-				const XmlElementWriter& Strikeline(DocumentTextRun* run, const XmlElementWriter& writer)
-				{
-					if(run->style.strikeline)
-					{
-						return Antialias(run, writer.Element(L"s")).End();
-					}
-					else
-					{
-						return Antialias(run, writer);
-					}
-				}
-
-				const XmlElementWriter& Underline(DocumentTextRun* run, const XmlElementWriter& writer)
-				{
-					if(run->style.underline)
-					{
-						return Strikeline(run, writer.Element(L"u")).End();
-					}
-					else
-					{
-						return Strikeline(run, writer);
-					}
-				}
-
-				const XmlElementWriter& Italic(DocumentTextRun* run, const XmlElementWriter& writer)
-				{
-					if(run->style.italic)
-					{
-						return Underline(run, writer.Element(L"i")).End();
-					}
-					else
-					{
-						return Underline(run, writer);
-					}
-				}
-
-				const XmlElementWriter& Bold(DocumentTextRun* run, const XmlElementWriter& writer)
-				{
-					if(run->style.bold)
-					{
-						return Italic(run, writer.Element(L"b")).End();
-					}
-					else
-					{
-						return Italic(run, writer);
-					}
-				}
-
-				const XmlElementWriter& Font(DocumentTextRun* run, const XmlElementWriter& writer)
-				{
-					const XmlElementWriter& font=writer.Element(L"font");
-					font.Attribute(L"face", run->style.fontFamily);
-					font.Attribute(L"size", itow(run->style.size));
-					font.Attribute(L"color", run->color.ToString());
-					Bold(run, font);
-					return writer;
-				}
-			public:
-				Ptr<XmlElement> container;
-
-				void Visit(DocumentTextRun* run)override
-				{
-					if(run->text!=L"")
-					{
-						XmlElementWriter writer(container);
-						Font(run, writer);
-					}
-				}
-
-				void Visit(DocumentHyperlinkTextRun* run)override
-				{
-					Visit(static_cast<DocumentTextRun*>(run));
-				}
-
-				void Visit(DocumentImageRun* run)override
-				{
-					XmlElementWriter writer(container);
-					writer
-						.Element(L"img")
-						.Attribute(L"width", itow(run->size.x))
-						.Attribute(L"height", itow(run->size.y))
-						.Attribute(L"baseline", itow(run->baseline))
-						.Attribute(L"frameIndex", itow(run->frameIndex))
-						.Attribute(L"source", run->source)
-						;
-				}
-			};
-		}
-		using namespace document_serialization_visitors;
-
-/***********************************************************************
-document_serialization_visitors::DeserializeNodeVisitor
-***********************************************************************/
-
-		namespace document_serialization_visitors
-		{
-			class DeserializeNodeVisitor : public XmlNode::IVisitor
-			{
-			public:
-				struct TemplateInfo
-				{
-					Dictionary<WString, WString>	attributes;
-					XmlElement*						templateElement;
-					XmlElement*						contentElement;
-
-					TemplateInfo()
-						:templateElement(0)
-						,contentElement(0)
-					{
-					}
-				};
-
-				struct StyleStackItem
-				{
-					Pair<FontProperties, Color>		normalStyle;
-					Pair<FontProperties, Color>		activeStyle;
-					vint							hyperlinkId;
-
-					StyleStackItem()
-						:hyperlinkId(DocumentRun::NullHyperlinkId)
-					{
-					}
-				};
-
-				List<StyleStackItem>				styleStack;
-				Ptr<DocumentModel>					model;
-				Ptr<DocumentParagraph>				paragraph;
-				vint								paragraphIndex;
-				Ptr<DocumentLine>					line;
-				Ptr<DocumentResolver>				resolver;
-				Ptr<TemplateInfo>					templateInfo;
-				Regex								regexAttributeApply;
-
-				DeserializeNodeVisitor(Ptr<DocumentModel> _model, Ptr<DocumentParagraph> _paragraph, vint _paragraphIndex, Ptr<DocumentResolver> _resolver)
-					:model(_model)
-					,paragraph(_paragraph)
-					,paragraphIndex(_paragraphIndex)
-					,resolver(_resolver)
-					,regexAttributeApply(L"/{@(<value>[^{}]+)/}")
-				{
-					StyleStackItem item;
-					item.normalStyle=Pair<FontProperties, Color>(GetCurrentController()->ResourceService()->GetDefaultFont(), Color());
-					item.activeStyle=item.normalStyle;
-					styleStack.Add(item);
-				}
-
-				WString TranslateAttribute(const WString& value)
-				{
-					if(templateInfo)
-					{
-						WString result;
-						RegexMatch::List matches;
-						regexAttributeApply.Cut(value, false, matches);
-						FOREACH(RegexMatch::Ref, match, matches)
-						{
-							if(match->Success())
-							{
-								WString name=match->Groups()[L"value"].Get(0).Value();
-								vint index=templateInfo->attributes.Keys().IndexOf(name);
-								result+=(index==-1?match->Result().Value():templateInfo->attributes.Values().Get(index));
-							}
-							else
-							{
-								result+=match->Result().Value();
-							}
-						}
-						return result;
-					}
-					else
-					{
-						return value;
-					}
-				}
-
-				void PrintText(const WString& text)
-				{
-					if(!line)
-					{
-						line=new DocumentLine;
-						paragraph->lines.Add(line);
-					}
-					Ptr<DocumentTextRun> run;
-					const StyleStackItem& item=styleStack[styleStack.Count()-1];
-					if(item.hyperlinkId==DocumentRun::NullHyperlinkId || item.normalStyle==item.activeStyle)
-					{
-						run=new DocumentTextRun;
-					}
-					else
-					{
-						Ptr<DocumentHyperlinkTextRun> hyperlink=new DocumentHyperlinkTextRun;
-						hyperlink->normalStyle=item.normalStyle.key;
-						hyperlink->normalColor=item.normalStyle.value;
-						hyperlink->activeStyle=item.activeStyle.key;
-						hyperlink->activeColor=item.activeStyle.value;
-						run=hyperlink;
-					}
-					run->hyperlinkId=item.hyperlinkId;
-					run->style=item.normalStyle.key;
-					run->color=item.normalStyle.value;
-					run->text=text;
-					line->runs.Add(run);
-				}
-
-				void Visit(XmlText* node)override
-				{
-					PrintText(TranslateAttribute(node->content.value));
-				}
-
-				void Visit(XmlCData* node)override
-				{
-					PrintText(node->content.value);
-				}
-
-				void Visit(XmlAttribute* node)override
-				{
-				}
-
-				void Visit(XmlComment* node)override
-				{
-				}
-
-				void Visit(XmlElement* node)override
-				{
-					if(node->name.value==L"br")
-					{
-						if(!line) PrintText(L"");
-						line=0;
-					}
-					else if(node->name.value==L"sp")
-					{
-						PrintText(L" ");
-					}
-					else if(node->name.value==L"tab")
-					{
-						PrintText(L"\t");
-					}
-					else if(node->name.value==L"img")
-					{
-						if(!line)
-						{
-							line=new DocumentLine;
-							paragraph->lines.Add(line);
-						}
-						Ptr<DocumentImageRun> run=new DocumentImageRun;
-						if(Ptr<XmlAttribute> source=XmlGetAttribute(node, L"source"))
-						{
-							run->hyperlinkId=styleStack[styleStack.Count()-1].hyperlinkId;
-							run->source=TranslateAttribute(source->value.value);
-							Pair<vint, vint> index=INVLOC.FindFirst(run->source, L"://", Locale::IgnoreCase);
-							if(index.key!=-1)
-							{
-								WString protocol=run->source.Sub(0, index.key);
-								WString path=run->source.Sub(index.key+index.value, run->source.Length()-index.key-index.value);
-								run->image=resolver->ResolveImage(protocol, path);
-								if(run->image && run->image->GetFrameCount()>0)
-								{
-									run->size=run->image->GetFrame(0)->GetSize();
-									run->baseline=run->size.y;
-									run->frameIndex=0;
-								}
-							}
-
-							FOREACH(Ptr<XmlAttribute>, att, node->attributes)
-							{
-								if(att->name.value==L"width")
-								{
-									run->size.x=wtoi(TranslateAttribute(att->value.value));
-								}
-								else if(att->name.value==L"height")
-								{
-									run->size.y=wtoi(TranslateAttribute(att->value.value));
-								}
-								else if(att->name.value==L"baseline")
-								{
-									run->baseline=wtoi(TranslateAttribute(att->value.value));
-								}
-								else if(att->name.value==L"frameIndex")
-								{
-									run->frameIndex=wtoi(TranslateAttribute(att->value.value));
-								}
-							}
-							line->runs.Add(run);
-						}
-					}
-					else if(node->name.value==L"font")
-					{
-						auto style=styleStack[styleStack.Count()-1];
-						FOREACH(Ptr<XmlAttribute>, att, node->attributes)
-						{
-							if(att->name.value==L"face")
-							{
-								style.normalStyle.key.fontFamily=TranslateAttribute(att->value.value);
-								style.activeStyle.key.fontFamily=TranslateAttribute(att->value.value);
-							}
-							else if(att->name.value==L"size")
-							{
-								style.normalStyle.key.size=wtoi(TranslateAttribute(att->value.value));
-								style.activeStyle.key.size=wtoi(TranslateAttribute(att->value.value));
-							}
-							else if(att->name.value==L"color")
-							{
-								style.normalStyle.value=Color::Parse(TranslateAttribute(att->value.value));
-								style.activeStyle.value=Color::Parse(TranslateAttribute(att->value.value));
-							}
-						}
-						styleStack.Add(style);
-						FOREACH(Ptr<XmlNode>, sub, node->subNodes)
-						{
-							sub->Accept(this);
-						}
-						styleStack.RemoveAt(styleStack.Count()-1);
-					}
-					else if(node->name.value==L"b")
-					{
-						auto style=styleStack[styleStack.Count()-1];
-						style.normalStyle.key.bold=true;
-						style.activeStyle.key.bold=true;
-						styleStack.Add(style);
-						FOREACH(Ptr<XmlNode>, sub, node->subNodes)
-						{
-							sub->Accept(this);
-						}
-						styleStack.RemoveAt(styleStack.Count()-1);
-					}
-					else if(node->name.value==L"i")
-					{
-						auto style=styleStack[styleStack.Count()-1];
-						style.normalStyle.key.italic=true;
-						style.activeStyle.key.italic=true;
-						styleStack.Add(style);
-						FOREACH(Ptr<XmlNode>, sub, node->subNodes)
-						{
-							sub->Accept(this);
-						}
-						styleStack.RemoveAt(styleStack.Count()-1);
-					}
-					else if(node->name.value==L"u")
-					{
-						auto style=styleStack[styleStack.Count()-1];
-						style.normalStyle.key.underline=true;
-						style.activeStyle.key.underline=true;
-						styleStack.Add(style);
-						FOREACH(Ptr<XmlNode>, sub, node->subNodes)
-						{
-							sub->Accept(this);
-						}
-						styleStack.RemoveAt(styleStack.Count()-1);
-					}
-					else if(node->name.value==L"s")
-					{
-						auto style=styleStack[styleStack.Count()-1];
-						style.normalStyle.key.strikeline=true;
-						style.activeStyle.key.strikeline=true;
-						styleStack.Add(style);
-						FOREACH(Ptr<XmlNode>, sub, node->subNodes)
-						{
-							sub->Accept(this);
-						}
-						styleStack.RemoveAt(styleStack.Count()-1);
-					}
-					else if(node->name.value==L"ha")
-					{
-						auto style=styleStack[styleStack.Count()-1];
-						style.normalStyle.key.antialias=true;
-						style.normalStyle.key.verticalAntialias=false;
-						style.activeStyle.key.antialias=true;
-						style.activeStyle.key.verticalAntialias=false;
-						styleStack.Add(style);
-						FOREACH(Ptr<XmlNode>, sub, node->subNodes)
-						{
-							sub->Accept(this);
-						}
-						styleStack.RemoveAt(styleStack.Count()-1);
-					}
-					else if(node->name.value==L"va")
-					{
-						auto style=styleStack[styleStack.Count()-1];
-						style.normalStyle.key.antialias=true;
-						style.normalStyle.key.verticalAntialias=true;
-						style.activeStyle.key.antialias=true;
-						style.activeStyle.key.verticalAntialias=true;
-						styleStack.Add(style);
-						FOREACH(Ptr<XmlNode>, sub, node->subNodes)
-						{
-							sub->Accept(this);
-						}
-						styleStack.RemoveAt(styleStack.Count()-1);
-					}
-					else if(node->name.value==L"na")
-					{
-						auto style=styleStack[styleStack.Count()-1];
-						style.normalStyle.key.antialias=false;
-						style.normalStyle.key.verticalAntialias=false;
-						style.activeStyle.key.antialias=false;
-						style.activeStyle.key.verticalAntialias=false;
-						styleStack.Add(style);
-						FOREACH(Ptr<XmlNode>, sub, node->subNodes)
-						{
-							sub->Accept(this);
-						}
-						styleStack.RemoveAt(styleStack.Count()-1);
-					}
-					else if(node->name.value==L"div")
-					{
-						auto style=styleStack[styleStack.Count()-1];
-						WString styleName;
-						if(Ptr<XmlAttribute> att=XmlGetAttribute(node, L"style"))
-						{
-							styleName=TranslateAttribute(att->value.value);
-						}
-						style.normalStyle=model->GetStyle(styleName, style.normalStyle);
-						style.activeStyle=model->GetStyle(styleName, style.activeStyle);
-						styleStack.Add(style);
-						FOREACH(Ptr<XmlNode>, sub, node->subNodes)
-						{
-							sub->Accept(this);
-						}
-						styleStack.RemoveAt(styleStack.Count()-1);
-					}
-					else if(node->name.value==L"a")
-					{
-						auto style=styleStack[styleStack.Count()-1];
-						WString normalStyle=L"#NormalLink";
-						WString activeStyle=L"#ActiveLink";
-						if(Ptr<XmlAttribute> att=XmlGetAttribute(node, L"normal"))
-						{
-							normalStyle=TranslateAttribute(att->value.value);
-						}
-						if(Ptr<XmlAttribute> att=XmlGetAttribute(node, L"active"))
-						{
-							activeStyle=TranslateAttribute(att->value.value);
-						}
-						style.normalStyle=model->GetStyle(normalStyle, style.normalStyle);
-						style.activeStyle=model->GetStyle(activeStyle, style.activeStyle);
-						style.hyperlinkId=model->hyperlinkInfos.Count();
-						styleStack.Add(style);
-
-						WString href;
-						if(Ptr<XmlAttribute> att=XmlGetAttribute(node, L"href"))
-						{
-							href=TranslateAttribute(att->value.value);
-						}
-						{
-							DocumentModel::HyperlinkInfo info;
-							info.paragraphIndex=paragraphIndex;
-							info.reference=href;
-							model->hyperlinkInfos.Add(style.hyperlinkId, info);
-						}
-						FOREACH(Ptr<XmlNode>, sub, node->subNodes)
-						{
-							sub->Accept(this);
-						}
-
-						styleStack.RemoveAt(styleStack.Count()-1);
-					}
-					else if(node->name.value==L"template-content")
-					{
-						if(templateInfo && templateInfo->contentElement)
-						{
-							Ptr<TemplateInfo> info=templateInfo;
-							templateInfo=0;
-							FOREACH(Ptr<XmlNode>, sub, info->contentElement->subNodes)
-							{
-								sub->Accept(this);
-							}
-							templateInfo=info;
-						}
-					}
-					else
-					{
-						vint index=model->templates.Keys().IndexOf(node->name.value);
-						if(index==-1)
-						{
-							FOREACH(Ptr<XmlNode>, sub, node->subNodes)
-							{
-								sub->Accept(this);
-							}
-						}
-						else
-						{
-							Ptr<TemplateInfo> newInfo=new TemplateInfo;
-							newInfo->templateElement=model->templates.Values().Get(index).Obj();
-							newInfo->contentElement=node;
-							FOREACH(Ptr<XmlAttribute>, att, newInfo->contentElement->attributes)
-							{
-								newInfo->attributes.Add(att->name.value, TranslateAttribute(att->value.value));
-							}
-
-							Ptr<TemplateInfo> info=templateInfo;
-							templateInfo=newInfo;
-							FOREACH(Ptr<XmlNode>, sub, newInfo->templateElement->subNodes)
-							{
-								sub->Accept(this);
-							}
-							templateInfo=info;
-						}
-					}
-				}
-
-				void Visit(XmlInstruction* node)override
-				{
-				}
-
-				void Visit(XmlDocument* node)override
-				{
-				}
-			};
-		}
-		using namespace document_serialization_visitors;
-
-/***********************************************************************
-document_serialization_visitors::ActivateHyperlinkVisitor
-***********************************************************************/
-
-		namespace document_serialization_visitors
-		{
-			class ActivateHyperlinkVisitor : public Object, public DocumentRun::IVisitor
-			{
-			public:
-				vint			hyperlinkId;
-				bool			active;
-
-				ActivateHyperlinkVisitor(vint _hyperlinkId, bool _active)
-					:hyperlinkId(_hyperlinkId)
-					,active(_active)
-				{
-				}
-
-				void Visit(DocumentTextRun* run)override
-				{
-				}
-
-				void Visit(DocumentHyperlinkTextRun* run)override
-				{
-					if(run->hyperlinkId==hyperlinkId)
-					{
-						if(active)
-						{
-							run->style=run->activeStyle;
-							run->color=run->activeColor;
-						}
-						else
-						{
-							run->style=run->normalStyle;
-							run->color=run->normalColor;
-						}
-					}
-				}
-
-				void Visit(DocumentImageRun* run)override
-				{
-				}
-			};
-		}
-		using namespace document_serialization_visitors;
-
-/***********************************************************************
-DocumentModel
-***********************************************************************/
-
-		DocumentModel::DocumentModel()
-		{
-			{
-				FontProperties font=GetCurrentController()->ResourceService()->GetDefaultFont();
-				Ptr<DocumentStyle> style=new DocumentStyle;
-				style->face=font.fontFamily;
-				style->size=font.size;
-				style->color=Color();
-				style->bold=font.bold;
-				style->italic=font.italic;
-				style->underline=font.underline;
-				style->strikeline=font.strikeline;
-				style->antialias=font.antialias;
-				style->verticalAntialias=font.verticalAntialias;
-				styles.Add(L"#Default", style);
-			}
-			{
-				Ptr<DocumentStyle> style=new DocumentStyle;
-				styles.Add(L"#Context", style);
-			}
-			{
-				Ptr<DocumentStyle> style=new DocumentStyle;
-				style->parentStyleName=L"#Context";
-				style->color=Color(0, 0, 255);
-				style->underline=true;
-				styles.Add(L"#NormalLink", style);
-			}
-			{
-				Ptr<DocumentStyle> style=new DocumentStyle;
-				style->parentStyleName=L"#Context";
-				style->color=Color(0, 0, 255);
-				style->underline=true;
-				styles.Add(L"#ActiveLink", style);
-			}
-		}
-
-		DocumentModel::RawStylePair DocumentModel::GetStyle(const WString& styleName, const RawStylePair& context)
-		{
-			DocumentStyle result;
-			Ptr<DocumentStyle> currentStyle;
-			WString currentName=styleName;
-			while(true)
-			{
-				vint index=styles.Keys().IndexOf(currentName);
-				if(index==-1) break;
-				currentStyle=styles.Values().Get(index);
-				currentName=currentStyle->parentStyleName;
-
-				if(!result.face && currentStyle->face) result.face=currentStyle->face;
-				if(!result.size && currentStyle->size) result.size=currentStyle->size;
-				if(!result.color && currentStyle->color) result.color=currentStyle->color;
-				if(!result.bold && currentStyle->bold) result.bold=currentStyle->bold;
-				if(!result.italic && currentStyle->italic) result.italic=currentStyle->italic;
-				if(!result.underline && currentStyle->underline) result.underline=currentStyle->underline;
-				if(!result.strikeline && currentStyle->strikeline) result.strikeline=currentStyle->strikeline;
-				if(!result.antialias && currentStyle->antialias) result.antialias=currentStyle->antialias;
-				if(!result.verticalAntialias && currentStyle->verticalAntialias) result.verticalAntialias=currentStyle->verticalAntialias;
-			}
-
-			if(!result.face) result.face=context.key.fontFamily;
-			if(!result.size) result.size=context.key.size;
-			if(!result.color) result.color=context.value;
-			if(!result.bold) result.bold=context.key.bold;
-			if(!result.italic) result.italic=context.key.italic;
-			if(!result.underline) result.underline=context.key.underline;
-			if(!result.strikeline) result.strikeline=context.key.strikeline;
-			if(!result.antialias) result.antialias=context.key.antialias;
-			if(!result.verticalAntialias) result.verticalAntialias=context.key.verticalAntialias;
-
-			FontProperties font;
-			font.fontFamily=result.face.Value();
-			font.size=result.size.Value();
-			font.bold=result.bold.Value();
-			font.italic=result.italic.Value();
-			font.underline=result.underline.Value();
-			font.strikeline=result.strikeline.Value();
-			font.antialias=result.antialias.Value();
-			font.verticalAntialias=result.verticalAntialias.Value();
-			return RawStylePair(font, result.color.Value());
-		}
-
-		vint DocumentModel::ActivateHyperlink(vint hyperlinkId, bool active)
-		{
-			vint index=hyperlinkInfos.Keys().IndexOf(hyperlinkId);
-			if(index!=-1)
-			{
-				vint paragraphIndex=hyperlinkInfos.Values().Get(index).paragraphIndex;
-				if(0<=paragraphIndex && paragraphIndex<paragraphs.Count())
-				{
-					Ptr<DocumentParagraph> paragraph=paragraphs[paragraphIndex];
-					ActivateHyperlinkVisitor visitor(hyperlinkId, active);
-					FOREACH(Ptr<DocumentLine>, line, paragraph->lines)
-					{
-						FOREACH(Ptr<DocumentRun>, run, line->runs)
-						{
-							run->Accept(&visitor);
-						}
-					}
-					return paragraphIndex;
-				}
-			}
-			return  -1;
-		}
-
-		Ptr<DocumentModel> DocumentModel::LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, Ptr<DocumentResolver> resolver)
-		{
-			Ptr<DocumentModel> model=new DocumentModel;
-			if(xml->rootElement->name.value==L"Doc")
-			{
-				if(Ptr<XmlElement> styles=XmlGetElement(xml->rootElement, L"Styles"))
-				{
-					FOREACH(Ptr<XmlElement>, styleElement, XmlGetElements(styles, L"Style"))
-					if(Ptr<XmlAttribute> name=XmlGetAttribute(styleElement, L"name"))
-					if(!model->styles.Keys().Contains(name->value.value))
-					{
-						Ptr<DocumentStyle> style=new DocumentStyle;
-						model->styles.Add(name->value.value, style);
-
-						if(Ptr<XmlAttribute> parent=XmlGetAttribute(styleElement, L"parent"))
-						{
-							style->parentStyleName=parent->value.value;
-						}
-
-						FOREACH(Ptr<XmlElement>, att, XmlGetElements(styleElement))
-						{
-							if(att->name.value==L"face")
-							{
-								style->face=XmlGetValue(att);
-							}
-							else if(att->name.value==L"size")
-							{
-								style->size=wtoi(XmlGetValue(att));
-							}
-							else if(att->name.value==L"color")
-							{
-								style->color=Color::Parse(XmlGetValue(att));
-							}
-							else if(att->name.value==L"b")
-							{
-								style->bold=XmlGetValue(att)==L"true";
-							}
-							else if(att->name.value==L"i")
-							{
-								style->italic=XmlGetValue(att)==L"true";
-							}
-							else if(att->name.value==L"u")
-							{
-								style->underline=XmlGetValue(att)==L"true";
-							}
-							else if(att->name.value==L"s")
-							{
-								style->strikeline=XmlGetValue(att)==L"true";
-							}
-							else if(att->name.value==L"antialias")
-							{
-								WString value=XmlGetValue(att);
-								if(value==L"horizontal" || value==L"default")
-								{
-									style->antialias=true;
-									style->verticalAntialias=false;
-								}
-								else if(value==L"no")
-								{
-									style->antialias=false;
-									style->verticalAntialias=false;
-								}
-								else if(value==L"vertical")
-								{
-									style->antialias=true;
-									style->verticalAntialias=true;
-								}
-							}
-						}
-					}
-				}
-				if(Ptr<XmlElement> styles=XmlGetElement(xml->rootElement, L"Templates"))
-				{
-					FOREACH(Ptr<XmlElement>, templateElement, XmlGetElements(styles, L"Template"))
-					if(Ptr<XmlAttribute> name=XmlGetAttribute(templateElement, L"name"))
-					if(!model->styles.Keys().Contains(name->value.value))
-					{
-						model->templates.Add(name->value.value, templateElement);
-					}
-				}
-				if(Ptr<XmlElement> content=XmlGetElement(xml->rootElement, L"Content"))
-				{
-					FOREACH_INDEXER(Ptr<XmlElement>, p, i, XmlGetElements(content, L"p"))
-					{
-						Ptr<DocumentParagraph> paragraph=new DocumentParagraph;
-						if(Ptr<XmlAttribute> att=XmlGetAttribute(p, L"align"))
-						{
-							if(att->value.value==L"Left")
-							{
-								paragraph->alignment=Alignment::Left;
-							}
-							else if(att->value.value==L"Center")
-							{
-								paragraph->alignment=Alignment::Center;
-							}
-							else if(att->value.value==L"Right")
-							{
-								paragraph->alignment=Alignment::Right;
-							}
-						}
-						model->paragraphs.Add(paragraph);
-						DeserializeNodeVisitor visitor(model, paragraph, i, resolver);
-						p->Accept(&visitor);
-					}
-				}
-			}
-			return model;
-		}
-
-		Ptr<DocumentModel> DocumentModel::LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, const WString& workingDirectory)
-		{
-			Ptr<DocumentFileProtocolResolver> resolver=new DocumentFileProtocolResolver(workingDirectory);
-			return LoadFromXml(xml, resolver);
-		}
-
-		Ptr<parsing::xml::XmlDocument> DocumentModel::SaveToXml()
-		{
-			SerializeRunVisitor visitor;
-			Ptr<XmlDocument> xml=new XmlDocument;
-			Ptr<XmlElement> doc=new XmlElement;
-			doc->name.value=L"Doc";
-			xml->rootElement=doc;
-			{
-				Ptr<XmlElement> content=new XmlElement;
-				content->name.value=L"Content";
-				doc->subNodes.Add(content);
-
-				FOREACH(Ptr<DocumentParagraph>, p, paragraphs)
-				{
-					Ptr<XmlElement> paragraph=new XmlElement;
-					paragraph->name.value=L"p";
-					content->subNodes.Add(paragraph);
-
-					FOREACH(Ptr<DocumentLine>, l, p->lines)
-					{
-						FOREACH(Ptr<DocumentRun>, r, l->runs)
-						{
-							visitor.container=paragraph;
-							r->Accept(&visitor);
-						}
-						{
-							Ptr<XmlElement> line=new XmlElement;
-							line->name.value=L"br";
-							paragraph->subNodes.Add(line);
-						}
-					}
-				}
-			}
-			{
-				Ptr<XmlElement> stylesElement=new XmlElement;
-				stylesElement->name.value=L"Styles";
-				doc->subNodes.Add(stylesElement);
-
-				for(vint i=0;i<styles.Count();i++)
-				{
-					WString name=styles.Keys()[i];
-					if(name.Length()>0 && name[0]==L'#') continue;
-
-					Ptr<DocumentStyle> style=styles.Values().Get(i);
-					Ptr<XmlElement> styleElement=new XmlElement;
-					styleElement->name.value=L"Style";
-					stylesElement->subNodes.Add(styleElement);
-
-					XmlElementWriter(styleElement).Attribute(L"name", name);
-					if(style->parentStyleName!=L"")
-					{
-						XmlElementWriter(styleElement).Attribute(L"parent", style->parentStyleName);
-					}
-
-					if(style->face) XmlElementWriter(styleElement).Element(L"face").Text(style->face.Value());
-					if(style->size) XmlElementWriter(styleElement).Element(L"size").Text(itow(style->size.Value()));
-					if(style->color) XmlElementWriter(styleElement).Element(L"color").Text(style->color.Value().ToString());
-					if(style->bold) XmlElementWriter(styleElement).Element(L"bold").Text(style->bold.Value()?L"true":L"false");
-					if(style->italic) XmlElementWriter(styleElement).Element(L"italic").Text(style->italic.Value()?L"true":L"false");
-					if(style->underline) XmlElementWriter(styleElement).Element(L"underline").Text(style->underline.Value()?L"true":L"false");
-					if(style->strikeline) XmlElementWriter(styleElement).Element(L"strikeline").Text(style->strikeline.Value()?L"true":L"false");
-					if(style->antialias && style->verticalAntialias)
-					{
-						bool h=style->antialias;
-						bool v=style->verticalAntialias;
-						if(!h)
-						{
-							XmlElementWriter(styleElement).Element(L"antialias").Text(L"no");
-						}
-						else if(!v)
-						{
-							XmlElementWriter(styleElement).Element(L"antialias").Text(L"default");
-						}
-						else
-						{
-							XmlElementWriter(styleElement).Element(L"antialias").Text(L"vertical");
-						}
-					}
-				}
-			}
-			return xml;
 		}
 
 /***********************************************************************
@@ -32830,7 +36768,7 @@ GuiResource
 				WString text;
 				if(LoadTextFile(filePath, text))
 				{
-					table=XmlLoadTable();
+					table=GetParserManager()->GetParsingTable(L"XML");
 					xml=XmlParseDocument(text, table);
 				}
 			}
@@ -32881,6 +36819,79 @@ GuiResource
 			Ptr<ObjectBox<WString>> result=GetValueByPath(path).Cast<ObjectBox<WString>>();
 			if(!result) throw ArgumentException(L"Path not exists.", L"GuiResource::GetStringByPath", L"path");
 			return result->Unbox();
+		}
+
+/***********************************************************************
+IParserManager
+***********************************************************************/
+
+		class ParserManager;
+		ParserManager* parserManager=0;
+
+		class ParserManager : public Object, public IParserManager, public IGuiPlugin
+		{
+		protected:
+			Dictionary<WString, Ptr<Table>>				tables;
+			Dictionary<WString, Func<Ptr<Table>()>>		loaders;
+			SpinLock									lock;
+		public:
+			ParserManager()
+			{
+			}
+
+			~ParserManager()
+			{
+			}
+
+			void Load()override
+			{
+				parserManager=this;
+				SetParsingTable(L"XML", &XmlLoadTable);
+				SetParsingTable(L"JSON", &JsonLoadTable);
+			}
+
+			void AfterLoad()override
+			{
+			}
+
+			void Unload()override
+			{
+				parserManager=0;
+			}
+
+			Ptr<Table> GetParsingTable(const WString& name)
+			{
+				SPIN_LOCK(lock)
+				{
+					vint index=tables.Keys().IndexOf(name);
+					if(index!=-1)
+					{
+						return tables.Values()[index];
+					}
+
+					index=loaders.Keys().IndexOf(name);
+					if(index!=-1)
+					{
+						Ptr<Table> table=loaders.Values()[index]();
+						tables.Add(name, table);
+						return table;
+					}
+				}
+				return 0;
+			}
+
+			bool SetParsingTable(const WString& name, Func<Ptr<Table>()> loader)
+			{
+				if(loaders.Keys().Contains(name)) return false;
+				loaders.Add(name, loader);
+				return true;
+			}
+		};
+		GUI_REGISTER_PLUGIN(ParserManager)
+
+		IParserManager* GetParserManager()
+		{
+			return parserManager;
 		}
 	}
 }
@@ -33123,6 +37134,7 @@ Type Declaration
 			END_ENUM_ITEM(INativeWindow::WindowSizeState)
 
 			BEGIN_CLASS_MEMBER(INativeDelay)
+				CLASS_MEMBER_BASE(IDescriptable)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(Status)
 
 				CLASS_MEMBER_METHOD(Delay, {L"milliseconds"})
@@ -33137,6 +37149,73 @@ Type Declaration
 				ENUM_NAMESPACE_ITEM(Canceled)
 			END_ENUM_ITEM(INativeDelay::ExecuteStatus)
 
+			BEGIN_CLASS_MEMBER(INativeScreen)
+				CLASS_MEMBER_BASE(IDescriptable)
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Bounds);
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ClientBounds);
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Name);
+
+				CLASS_MEMBER_METHOD(IsPrimary, NO_PARAMETER)
+			END_CLASS_MEMBER(INativeScreen)
+
+			BEGIN_CLASS_MEMBER(INativeImageService)
+				CLASS_MEMBER_BASE(IDescriptable)
+
+				CLASS_MEMBER_METHOD(CreateImageFromFile, {L"path"})
+			END_CLASS_MEMBER(INativeImageService)
+
+			BEGIN_CLASS_MEMBER(INativeResourceService)
+				CLASS_MEMBER_BASE(IDescriptable)
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(DefaultSystemCursor)
+				CLASS_MEMBER_PROPERTY_FAST(DefaultFont)
+
+				CLASS_MEMBER_METHOD(GetSystemCursor, {L"type"})
+			END_CLASS_MEMBER(INativeResourceService)
+
+			BEGIN_CLASS_MEMBER(INativeAsyncService)
+				CLASS_MEMBER_BASE(IDescriptable)
+
+				CLASS_MEMBER_METHOD(IsInMainThread, {L"type"})
+				CLASS_MEMBER_METHOD(InvokeAsync, {L"proc"})
+				CLASS_MEMBER_METHOD(InvokeInMainThread, {L"proc"})
+				CLASS_MEMBER_METHOD(InvokeInMainThreadAndWait, {L"proc" _ L"milliseconds"})
+				CLASS_MEMBER_METHOD(DelayExecute, {L"proc" _ L"milliseconds"})
+				CLASS_MEMBER_METHOD(DelayExecuteInMainThread, {L"proc" _ L"milliseconds"})
+			END_CLASS_MEMBER(INativeAsyncService)
+
+			BEGIN_CLASS_MEMBER(INativeClipboardService)
+				CLASS_MEMBER_BASE(IDescriptable)
+
+				CLASS_MEMBER_PROPERTY_FAST(Text)
+
+				CLASS_MEMBER_METHOD(ContainsText, NO_PARAMETER)
+			END_CLASS_MEMBER(INativeClipboardService)
+
+			BEGIN_CLASS_MEMBER(INativeScreenService)
+				CLASS_MEMBER_BASE(IDescriptable)
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ScreenCount)
+
+				CLASS_MEMBER_METHOD_OVERLOAD(GetScreen, {L"index"}, INativeScreen*(INativeScreenService::*)(vint))
+				CLASS_MEMBER_METHOD_OVERLOAD(GetScreen, {L"window"}, INativeScreen*(INativeScreenService::*)(INativeWindow*))
+			END_CLASS_MEMBER(INativeScreenService)
+
+			BEGIN_CLASS_MEMBER(INativeController)
+				CLASS_MEMBER_BASE(IDescriptable)
+				CLASS_MEMBER_STATIC_EXTERNALMETHOD(GetCurrentController, NO_PARAMETER, INativeController*(*)(), &GetCurrentController)
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(OSVersion)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ExecutablePath)
+
+				CLASS_MEMBER_METHOD(ResourceService, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(AsyncService, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(ClipboardService, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(ImageService, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(ScreenService, NO_PARAMETER)
+			END_CLASS_MEMBER(INativeController)
+
 			BEGIN_CLASS_MEMBER(GuiImageData)
 				CLASS_MEMBER_CONSTRUCTOR(Ptr<GuiImageData>(), NO_PARAMETER)
 				CLASS_MEMBER_CONSTRUCTOR(Ptr<GuiImageData>(Ptr<INativeImage>, vint), {L"image" _ L"frameIndex"})
@@ -33148,8 +37227,108 @@ Type Declaration
 				CLASS_MEMBER_PROPERTY_READONLY(FrameIndex, GetFrameIndex)
 			END_CLASS_MEMBER(GuiImageData)
 
+			BEGIN_CLASS_MEMBER(DocumentStyleProperties)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<DocumentStyleProperties>(), NO_PARAMETER)
+
+				CLASS_MEMBER_FIELD(face)
+				CLASS_MEMBER_FIELD(size)
+				CLASS_MEMBER_FIELD(color)
+				CLASS_MEMBER_FIELD(backgroundColor)
+				CLASS_MEMBER_FIELD(bold)
+				CLASS_MEMBER_FIELD(italic)
+				CLASS_MEMBER_FIELD(underline)
+				CLASS_MEMBER_FIELD(strikeline)
+				CLASS_MEMBER_FIELD(antialias)
+				CLASS_MEMBER_FIELD(verticalAntialias)
+			END_CLASS_MEMBER(DocumentStyleProperties)
+
+			BEGIN_CLASS_MEMBER(DocumentRun)
+			END_CLASS_MEMBER(DocumentRun)
+
+			BEGIN_CLASS_MEMBER(DocumentContainerRun)
+				CLASS_MEMBER_BASE(DocumentRun)
+
+				CLASS_MEMBER_FIELD(runs)
+			END_CLASS_MEMBER(DocumentContainerRun)
+
+			BEGIN_CLASS_MEMBER(DocumentContentRun)
+				CLASS_MEMBER_BASE(DocumentRun)
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(RepresentationText)
+			END_CLASS_MEMBER(DocumentContentRun)
+
+			BEGIN_CLASS_MEMBER(DocumentTextRun)
+				CLASS_MEMBER_BASE(DocumentContentRun)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<DocumentTextRun>(), NO_PARAMETER)
+				
+				CLASS_MEMBER_FIELD(text)
+			END_CLASS_MEMBER(DocumentTextRun)
+
+			BEGIN_CLASS_MEMBER(DocumentInlineObjectRun)
+				CLASS_MEMBER_BASE(DocumentContentRun)
+				
+				CLASS_MEMBER_FIELD(size)
+				CLASS_MEMBER_FIELD(baseline)
+			END_CLASS_MEMBER(DocumentInlineObjectRun)
+
+			BEGIN_CLASS_MEMBER(DocumentImageRun)
+				CLASS_MEMBER_BASE(DocumentInlineObjectRun)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<DocumentImageRun>(), NO_PARAMETER)
+				
+				CLASS_MEMBER_FIELD(image)
+				CLASS_MEMBER_FIELD(frameIndex)
+				CLASS_MEMBER_FIELD(source)
+			END_CLASS_MEMBER(DocumentImageRun)
+
+			BEGIN_CLASS_MEMBER(DocumentStylePropertiesRun)
+				CLASS_MEMBER_BASE(DocumentContainerRun)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<DocumentStylePropertiesRun>(), NO_PARAMETER)
+				
+				CLASS_MEMBER_FIELD(style)
+			END_CLASS_MEMBER(DocumentStylePropertiesRun)
+
+			BEGIN_CLASS_MEMBER(DocumentStyleApplicationRun)
+				CLASS_MEMBER_BASE(DocumentContainerRun)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<DocumentStyleApplicationRun>(), NO_PARAMETER)
+				
+				CLASS_MEMBER_FIELD(styleName)
+			END_CLASS_MEMBER(DocumentStyleApplicationRun)
+
+			BEGIN_CLASS_MEMBER(DocumentHyperlinkRun)
+				CLASS_MEMBER_BASE(DocumentStyleApplicationRun)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<DocumentHyperlinkRun>(), NO_PARAMETER)
+				
+				CLASS_MEMBER_FIELD(normalStyleName)
+				CLASS_MEMBER_FIELD(activeStyleName)
+				CLASS_MEMBER_FIELD(reference)
+			END_CLASS_MEMBER(DocumentHyperlinkRun)
+
+			BEGIN_CLASS_MEMBER(DocumentParagraphRun)
+				CLASS_MEMBER_BASE(DocumentContainerRun)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<DocumentParagraphRun>(), NO_PARAMETER)
+
+				CLASS_MEMBER_FIELD(alignment)
+
+				CLASS_MEMBER_METHOD_OVERLOAD(GetText, {L"skipNonTextContent"}, WString(DocumentParagraphRun::*)(bool))
+			END_CLASS_MEMBER(DocumentParagraphRun)
+
+			BEGIN_CLASS_MEMBER(DocumentStyle)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<DocumentStyle>(), NO_PARAMETER)
+				
+				CLASS_MEMBER_FIELD(parentStyleName)
+				CLASS_MEMBER_FIELD(styles)
+				CLASS_MEMBER_FIELD(resolvedStyles)
+			END_CLASS_MEMBER(DocumentStyle)
+
 			BEGIN_CLASS_MEMBER(DocumentModel)
 				CLASS_MEMBER_EXTERNALCTOR(Ptr<DocumentModel>(const WString&), {L"filePath"}, &DocumentModel_Constructor)
+				
+				CLASS_MEMBER_FIELD(paragraphs)
+				CLASS_MEMBER_FIELD(styles)
+
+				CLASS_MEMBER_METHOD_OVERLOAD(GetText, {L"skipNonTextContent"}, WString(DocumentModel::*)(bool))
+				CLASS_MEMBER_STATIC_METHOD_OVERLOAD(LoadFromXml, {L"filePath"}, Ptr<DocumentModel>(*)(const WString&))
+				CLASS_MEMBER_METHOD_OVERLOAD(SaveToXml, {L"filePath"}, bool(DocumentModel::*)(const WString&))
 			END_CLASS_MEMBER(DocumentModel)
 
 			BEGIN_CLASS_MEMBER(GuiResource)
@@ -34566,7 +38745,7 @@ Type Declaration
 			END_CLASS_MEMBER(GuiMenuBar)
 
 			BEGIN_CLASS_MEMBER(GuiMenuButton)
-				CLASS_MEMBER_BASE(GuiButton)
+				CLASS_MEMBER_BASE(GuiSelectableButton)
 				CONTROL_CONSTRUCTOR_CONTROLLER(GuiMenuButton)
 
 				CLASS_MEMBER_PROPERTY_GUIEVENT_FAST(Image)
@@ -34583,7 +38762,7 @@ Type Declaration
 			END_CLASS_MEMBER(GuiMenuButton)
 
 			BEGIN_CLASS_MEMBER(GuiMenuButton::IStyleController)
-				CLASS_MEMBER_BASE(GuiButton::IStyleController)
+				CLASS_MEMBER_BASE(GuiSelectableButton::IStyleController)
 				INTERFACE_EXTERNALCTOR(GuiMenuButton, IStyleController)
 
 				CLASS_MEMBER_METHOD(CreateSubMenuStyleController, NO_PARAMETER)
@@ -34874,15 +39053,55 @@ Type Declaration
 
 			BEGIN_CLASS_MEMBER(GuiDocumentCommonInterface)
 				CLASS_MEMBER_PROPERTY_FAST(Document)
+				CLASS_MEMBER_PROPERTY_FAST(EditMode)
 
 				CLASS_MEMBER_GUIEVENT(ActiveHyperlinkChanged)
 				CLASS_MEMBER_GUIEVENT(ActiveHyperlinkExecuted)
+				CLASS_MEMBER_GUIEVENT(SelectionChanged)
 
-				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(ActiveHyperlinkId, ActiveHyperlinkChanged)
-				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(ActiveHyperlinkReference, ActiveHyperlinkChanged)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(CaretBegin)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(CaretEnd)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ActiveHyperlinkReference)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(SelectionText)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(SelectionModel)
 
-				CLASS_MEMBER_METHOD(NotifyParagraphUpdated, {L"index"})
+				CLASS_MEMBER_METHOD(SetCaret, {L"begin" _ L"end" _ L"frontSide"})
+				CLASS_MEMBER_METHOD(CalculateCaretFromPoint, {L"point"})
+				CLASS_MEMBER_METHOD(GetCaretBounds, {L"caret" _ L"frontSide"})
+				CLASS_MEMBER_METHOD(NotifyParagraphUpdated, {L"index" _ L"oldCount" _ L"newCount" _ L"updatedText"})
+				CLASS_MEMBER_METHOD(EditRun, {L"begin" _ L"end" _ L"model"})
+				CLASS_MEMBER_METHOD(EditText, {L"begin" _ L"end" _ L"frontSide" _ L"text"})
+				CLASS_MEMBER_METHOD(EditStyle, {L"begin" _ L"end" _ L"style"})
+				CLASS_MEMBER_METHOD(EditImage, {L"begin" _ L"end" _ L"image"})
+				CLASS_MEMBER_METHOD(EditImage, {L"paragraphIndex" _ L"begin" _ L"end" _ L"reference" _ L"normalStyleName" _ L"activeStyleName"})
+				CLASS_MEMBER_METHOD(RemoveHyperlink, {L"paragraphIndex" _ L"begin" _ L"end"})
+				CLASS_MEMBER_METHOD(EditStyleName, {L"begin" _ L"end" _ L"styleName"})
+				CLASS_MEMBER_METHOD(RemoveStyleName, {L"begin" _ L"end" _ L"image"})
+				CLASS_MEMBER_METHOD(RenameStyle, {L"oldStyleName" _ L"newStyleName"})
+				CLASS_MEMBER_METHOD(ClearStyle, {L"begin" _ L"end"})
+				CLASS_MEMBER_METHOD(SummarizeStyle, {L"begin" _ L"end"})
+				CLASS_MEMBER_METHOD(SetParagraphAlignment, {L"begin" _ L"end" _ L"alignments"})
+				CLASS_MEMBER_METHOD(SelectAll, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(CanCut, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(CanCopy, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(CanPaste, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(Cut, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(Copy, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(Paste, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(CanUndo, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(CanRedo, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(ClearUndoRedo, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(NotifyModificationSaved, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(Undo, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(Redo, NO_PARAMETER)
 			END_CLASS_MEMBER(GuiDocumentCommonInterface)
+
+			BEGIN_ENUM_ITEM(GuiDocumentCommonInterface::EditMode)
+				ENUM_ITEM_NAMESPACE(GuiDocumentCommonInterface)
+				ENUM_NAMESPACE_ITEM(ViewOnly)
+				ENUM_NAMESPACE_ITEM(Selectable)
+				ENUM_NAMESPACE_ITEM(Editable)
+			END_ENUM_ITEM(GuiDocumentCommonInterface::EditMode)
 
 			BEGIN_CLASS_MEMBER(GuiDocumentViewer)
 				CLASS_MEMBER_BASE(GuiScrollContainer)
@@ -34921,6 +39140,7 @@ Type Declaration
 				CLASS_MEMBER_METHOD(Paste, NO_PARAMETER)
 				CLASS_MEMBER_METHOD(SelectAll, NO_PARAMETER)
 				CLASS_MEMBER_METHOD(Select, {L"begin" _ L"end"})
+				CLASS_MEMBER_METHOD(SetSelectionTextAsKeyInput, {L"value"})
 				CLASS_MEMBER_METHOD(GetRowText, {L"row"})
 				CLASS_MEMBER_METHOD(GetFragmentText, {L"start" _ L"end"})
 				CLASS_MEMBER_METHOD(GetRowWidth, {L"row"})
@@ -34992,6 +39212,17 @@ Type Declaration
 			END_CLASS_MEMBER(GuiGrammarColorizer)
 
 			BEGIN_CLASS_MEMBER(GuiTextBoxAutoCompleteBase)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ListStartPosition)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(SelectedListItem)
+
+				CLASS_MEMBER_METHOD(IsListOpening, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(OpenList, {L"startPosition"})
+				CLASS_MEMBER_METHOD(CloseList, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(SetListContent, {L"items"})
+				CLASS_MEMBER_METHOD(SelectPreviousListItem, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(SelectNextListItem, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(ApplySelectedListItem, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(HighlightList, {L"editingText"})
 			END_CLASS_MEMBER(GuiTextBoxAutoCompleteBase)
 
 			BEGIN_CLASS_MEMBER(GuiGrammarAutoComplete)
@@ -35452,6 +39683,22 @@ Type Declaration
 
 #define _ ,
 
+			BEGIN_CLASS_MEMBER(IGuiGraphicsParagraph)
+				CLASS_MEMBER_BASE(IDescriptable)
+			END_CLASS_MEMBER(IGuiGraphicsParagraph)
+
+			BEGIN_ENUM_ITEM(IGuiGraphicsParagraph::CaretRelativePosition)
+				ENUM_ITEM_NAMESPACE(IGuiGraphicsParagraph)
+				ENUM_NAMESPACE_ITEM(CaretFirst)
+				ENUM_NAMESPACE_ITEM(CaretLast)
+				ENUM_NAMESPACE_ITEM(CaretLineFirst)
+				ENUM_NAMESPACE_ITEM(CaretLineLast)
+				ENUM_NAMESPACE_ITEM(CaretMoveLeft)
+				ENUM_NAMESPACE_ITEM(CaretMoveRight)
+				ENUM_NAMESPACE_ITEM(CaretMoveUp)
+				ENUM_NAMESPACE_ITEM(CaretMoveDown)
+			END_ENUM_ITEM(IGuiGraphicsParagraph::CaretRelativePosition)
+
 			BEGIN_ENUM_ITEM(ElementShape)
 				ENUM_CLASS_ITEM(Rectangle)
 				ENUM_CLASS_ITEM(Ellipse)
@@ -35630,9 +39877,30 @@ Type Declaration
 				CLASS_MEMBER_EXTERNALCTOR(Ptr<GuiDocumentElement>(), NO_PARAMETER, &Element_Constructor<GuiDocumentElement>)
 
 				CLASS_MEMBER_PROPERTY_FAST(Document)
-				CLASS_MEMBER_METHOD(NotifyParagraphUpdated, {L"index"})
-				CLASS_MEMBER_METHOD(GetHyperlinkIdFromPoint, {L"point"})
-				CLASS_MEMBER_METHOD(ActivateHyperlink, {L"hyperlinkId" _ L"active"})
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(CaretBegin)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(CaretEnd)
+				CLASS_MEMBER_PROPERTY_FAST(CaretVisible)
+				CLASS_MEMBER_PROPERTY_FAST(CaretColor)
+
+				CLASS_MEMBER_METHOD(IsCaretEndPreferFrontSide, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(SetCaret, {L"begin" _ L"end" _ L"frontSide"})
+				CLASS_MEMBER_METHOD(CalculateCaret, {L"comparingCaret" _ L"position" _ L"preferFrontSide"})
+				CLASS_MEMBER_METHOD(CalculateCaretFromPoint, {L"point"})
+				CLASS_MEMBER_METHOD(GetCaretBounds, {L"caret" _ L"frontSide"})
+				CLASS_MEMBER_METHOD(NotifyParagraphUpdated, {L"index" _ L"oldCount" _ L"newCount" _ L"updatedText"})
+				CLASS_MEMBER_METHOD(EditRun, {L"begin" _ L"end" _ L"model"})
+				CLASS_MEMBER_METHOD(EditText, {L"begin" _ L"end" _ L"frontSide" _ L"text"})
+				CLASS_MEMBER_METHOD(EditStyle, {L"begin" _ L"end" _ L"style"})
+				CLASS_MEMBER_METHOD(EditImage, {L"begin" _ L"end" _ L"image"})
+				CLASS_MEMBER_METHOD(EditImage, {L"paragraphIndex" _ L"begin" _ L"end" _ L"reference" _ L"normalStyleName" _ L"activeStyleName"})
+				CLASS_MEMBER_METHOD(RemoveHyperlink, {L"paragraphIndex" _ L"begin" _ L"end"})
+				CLASS_MEMBER_METHOD(EditStyleName, {L"begin" _ L"end" _ L"styleName"})
+				CLASS_MEMBER_METHOD(RemoveStyleName, {L"begin" _ L"end" _ L"image"})
+				CLASS_MEMBER_METHOD(RenameStyle, {L"oldStyleName" _ L"newStyleName"})
+				CLASS_MEMBER_METHOD(ClearStyle, {L"begin" _ L"end"})
+				CLASS_MEMBER_METHOD(SummarizeStyle, {L"begin" _ L"end"})
+				CLASS_MEMBER_METHOD(SetParagraphAlignment, {L"begin" _ L"end" _ L"alignments"})
+				CLASS_MEMBER_METHOD(GetHyperlinkFromPoint, {L"point"})
 			END_CLASS_MEMBER(GuiDocumentElement)
 #undef _
 
@@ -35810,6 +40078,43 @@ Type Loader
 #endif
 				return false;
 			}
+		}
+	}
+}
+
+/***********************************************************************
+Reflection\GuiReflectionPlugin.cpp
+***********************************************************************/
+
+namespace vl
+{
+	namespace reflection
+	{
+		namespace description
+		{
+			class GuiReflectionPlugin : public Object, public IGuiPlugin
+			{
+			public:
+				void Load()override
+				{
+					LoadPredefinedTypes();
+					LoadParsingTypes();
+					LoadGuiBasicTypes();
+					LoadGuiElementTypes();
+					LoadGuiCompositionTypes();
+					LoadGuiControlsTypes();
+					LoadGuiEventTypes();
+				}
+				
+				void AfterLoad()override
+				{
+				}
+
+				void Unload()override
+				{
+				}
+			};
+			GUI_REGISTER_PLUGIN(GuiReflectionPlugin)
 		}
 	}
 }
