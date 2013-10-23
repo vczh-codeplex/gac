@@ -3269,6 +3269,7 @@ namespace vl
 			vint										token;
 			const wchar_t*								reading;
 			vint										codeIndex;
+			bool										completeToken;
 
 			vint										rowStart;
 			vint										columnStart;
@@ -10897,6 +10898,7 @@ ITypeDescriptor (type)
 				{
 					RawPtr,
 					SharedPtr,
+					Nullable,
 					TypeDescriptor,
 					Generic,
 				};
@@ -13792,6 +13794,26 @@ TypeInfoRetriver
 			};
 
 			template<typename T>
+			struct DetailTypeInfoRetriver<Nullable<T>, TypeFlags::NonGenericType>
+			{
+				typedef DetailTypeInfoRetriver<T, TypeFlags::NonGenericType>	UpLevelRetriver;
+
+				static const ITypeInfo::Decorator								Decorator=ITypeInfo::Nullable;
+				typedef typename UpLevelRetriver::Type							Type;
+				typedef Nullable<T>												TempValueType;
+				typedef Nullable<T>&											ResultReferenceType;
+				typedef Nullable<T>												ResultNonReferenceType;
+
+				static Ptr<ITypeInfo> CreateTypeInfo()
+				{
+					Ptr<ITypeInfo> elementType=TypeInfoRetriver<T>::CreateTypeInfo();
+					Ptr<TypeInfoImpl> type=new TypeInfoImpl(ITypeInfo::Nullable);
+					type->SetElementType(elementType);
+					return type;
+				}
+			};
+
+			template<typename T>
 			struct DetailTypeInfoRetriver<T&, TypeFlags::NonGenericType>
 			{
 				typedef DetailTypeInfoRetriver<T, TypeFlags::NonGenericType>	UpLevelRetriver;
@@ -14023,6 +14045,27 @@ TypeInfoRetriver Helper Functions (BoxValue, UnboxValue)
 						throw ArgumentTypeMismtatchException(valueName, typeDescriptor, Value::SharedPtr, value);
 					}
 					return result;
+				}
+			};
+
+			template<typename T>
+			struct ValueAccessor<Nullable<T>, ITypeInfo::Nullable>
+			{
+				static Value BoxValue(Nullable<T> object, ITypeDescriptor* typeDescriptor)
+				{
+					return object?ValueAccessor<T, ITypeInfo::TypeDescriptor>::BoxValue(object.Value(), typeDescriptor):Value();
+				}
+
+				static Nullable<T> UnboxValue(const Value& value, ITypeDescriptor* typeDescriptor, const WString& valueName)
+				{
+					if(value.IsNull())
+					{
+						return Nullable<T>();
+					}
+					else
+					{
+						return ValueAccessor<T, ITypeInfo::TypeDescriptor>::UnboxValue(value, typeDescriptor, valueName);
+					}
 				}
 			};
 
@@ -21233,7 +21276,9 @@ namespace vl
 			extern vl::Ptr<vl::parsing::ParsingTreeCustomBase> JsonConvertParsingTreeNode(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 			extern vl::Ptr<vl::parsing::tabling::ParsingTable> JsonLoadTable();
 
+			extern vl::Ptr<vl::parsing::ParsingTreeNode> JsonParseAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
 			extern vl::Ptr<vl::parsing::ParsingTreeNode> JsonParseAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
+			extern vl::Ptr<JsonNode> JsonParse(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
 			extern vl::Ptr<JsonNode> JsonParse(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
 
 		}
@@ -22017,10 +22062,14 @@ namespace vl
 			extern vl::Ptr<vl::parsing::ParsingTreeCustomBase> XmlConvertParsingTreeNode(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 			extern vl::Ptr<vl::parsing::tabling::ParsingTable> XmlLoadTable();
 
+			extern vl::Ptr<vl::parsing::ParsingTreeNode> XmlParseDocumentAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
 			extern vl::Ptr<vl::parsing::ParsingTreeNode> XmlParseDocumentAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
+			extern vl::Ptr<XmlDocument> XmlParseDocument(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
 			extern vl::Ptr<XmlDocument> XmlParseDocument(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
 
+			extern vl::Ptr<vl::parsing::ParsingTreeNode> XmlParseElementAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
 			extern vl::Ptr<vl::parsing::ParsingTreeNode> XmlParseElementAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
+			extern vl::Ptr<XmlElement> XmlParseElement(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
 			extern vl::Ptr<XmlElement> XmlParseElement(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
 
 		}
@@ -22119,6 +22168,7 @@ namespace vl
 			vint				start;
 			vint				length;
 			vint				finalState;
+			vint				terminateState;
 		};
 
 		class PureInterpretor : public Object
