@@ -1418,7 +1418,7 @@ document_operation_visitors::SummerizeStyleVisitor
 				template<typename T>
 				static void AggregateStyleItem(Ptr<DocumentStyleProperties>& dst, Ptr<DocumentStyleProperties> src, Nullable<T> DocumentStyleProperties::* field)
 				{
-					if((dst.Obj()->*field).Value()!=(src.Obj()->*field).Value())
+					if(dst.Obj()->*field && (!(src.Obj()->*field) || (dst.Obj()->*field).Value()!=(src.Obj()->*field).Value()))
 					{
 						dst.Obj()->*field=Nullable<T>();
 					}
