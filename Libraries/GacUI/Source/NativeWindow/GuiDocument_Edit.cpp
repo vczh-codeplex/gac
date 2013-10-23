@@ -1778,7 +1778,7 @@ DocumentModel::ClearStyle
 
 		Ptr<DocumentStyleProperties> DocumentModel::SummarizeStyle(TextPos begin, TextPos end)
 		{
-			return 0;
+			return new DocumentStyleProperties;
 		}
 	}
 }
