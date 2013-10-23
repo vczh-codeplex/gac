@@ -62,8 +62,8 @@ token ELEMENT_OPEN = "/<"				@Color("Boundary");
 token ELEMENT_CLOSE = "/>"				@Color("Boundary");
 token EQUAL = "/=";
 
-token NAME = "[a-zA-Z0-9:._/-]+"								@ContextColor("Default");
-token ATTVALUE = """[^<>""]*""|'[^<>']*'"						@ContextColor("Default");
+token NAME = "[a-zA-Z0-9:._/-]+"								@ContextColor();
+token ATTVALUE = """[^<>""]*""|'[^<>']*'"						@ContextColor();
 token COMMENT = "/</!--([^/->]|-[^/->]|--[^>])*--/>"			@Color("Comment");
 token CDATA = "/</!/[CDATA/[([^/]]|/][^/]]|/]/][^>])*/]/]/>";
 token TEXT = "([^<>=""' /r/n/ta-zA-Z0-9:._/-])+|""|'";
