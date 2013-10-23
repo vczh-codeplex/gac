@@ -26,7 +26,7 @@ class Literal:Node
 
 class String:Node
 {
-	token content(JsonUnescapingString);
+	token content(JsonUnescapingString)				@Color("String");
 }
 
 class Number:Node
@@ -60,7 +60,7 @@ token ARRCLOSE = "\]"								@Color("Boundary");
 token COMMA = ",";
 token COLON = ":";
 token NUMBER = "[\-]?\d+(.\d+)?([eE][+\-]?\d+)?"	@Color("Number");
-token STRING = """([^\\""]|\\[^u]|\\u\d{4})*"""		@ContextColor("String");
+token STRING = """([^\\""]|\\[^u]|\\u\d{4})*"""		@ContextColor();
 
 discardtoken SPACE = "\s+";
 

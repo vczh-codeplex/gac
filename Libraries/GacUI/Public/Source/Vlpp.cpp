@@ -1221,7 +1221,7 @@ L"\r\n"L"}"
 L"\r\n"L""
 L"\r\n"L"class String:Node"
 L"\r\n"L"{"
-L"\r\n"L"\ttoken content(JsonUnescapingString);"
+L"\r\n"L"\ttoken content(JsonUnescapingString)\t\t\t\t@Color(\"String\");"
 L"\r\n"L"}"
 L"\r\n"L""
 L"\r\n"L"class Number:Node"
@@ -1255,7 +1255,7 @@ L"\r\n"L"token ARRCLOSE = \"\\]\"\t\t\t\t\t\t\t\t@Color(\"Boundary\");"
 L"\r\n"L"token COMMA = \",\";"
 L"\r\n"L"token COLON = \":\";"
 L"\r\n"L"token NUMBER = \"[\\-]?\\d+(.\\d+)?([eE][+\\-]?\\d+)?\"\t@Color(\"Number\");"
-L"\r\n"L"token STRING = \"\"\"([^\\\\\"\"]|\\\\[^u]|\\\\u\\d{4})*\"\"\"\t\t@ContextColor(\"String\");"
+L"\r\n"L"token STRING = \"\"\"([^\\\\\"\"]|\\\\[^u]|\\\\u\\d{4})*\"\"\"\t\t@ContextColor();"
 L"\r\n"L""
 L"\r\n"L"discardtoken SPACE = \"\\s+\";"
 L"\r\n"L""
@@ -11049,8 +11049,8 @@ L"\r\n"L"token ELEMENT_OPEN = \"/<\"\t\t\t\t@Color(\"Boundary\");"
 L"\r\n"L"token ELEMENT_CLOSE = \"/>\"\t\t\t\t@Color(\"Boundary\");"
 L"\r\n"L"token EQUAL = \"/=\";"
 L"\r\n"L""
-L"\r\n"L"token NAME = \"[a-zA-Z0-9:._/-]+\"\t\t\t\t\t\t\t\t@ContextColor(\"Default\");"
-L"\r\n"L"token ATTVALUE = \"\"\"[^<>\"\"]*\"\"|\'[^<>\']*\'\"\t\t\t\t\t\t@ContextColor(\"Default\");"
+L"\r\n"L"token NAME = \"[a-zA-Z0-9:._/-]+\"\t\t\t\t\t\t\t\t@ContextColor();"
+L"\r\n"L"token ATTVALUE = \"\"\"[^<>\"\"]*\"\"|\'[^<>\']*\'\"\t\t\t\t\t\t@ContextColor();"
 L"\r\n"L"token COMMENT = \"/</!--([^/->]|-[^/->]|--[^>])*--/>\"\t\t\t@Color(\"Comment\");"
 L"\r\n"L"token CDATA = \"/</!/[CDATA/[([^/]]|/][^/]]|/]/][^>])*/]/]/>\";"
 L"\r\n"L"token TEXT = \"([^<>=\"\"\' /r/n/ta-zA-Z0-9:._/-])+|\"\"|\'\";"
@@ -17900,6 +17900,7 @@ RegexNode
 /***********************************************************************
 Stream\Accessor.cpp
 ***********************************************************************/
+#include <string.h>
 
 namespace vl
 {
@@ -20626,6 +20627,7 @@ namespace vl
 /***********************************************************************
 Threading.cpp
 ***********************************************************************/
+#include <intrin.h>
 
 namespace vl
 {

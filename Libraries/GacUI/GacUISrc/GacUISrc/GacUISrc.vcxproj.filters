@@ -498,12 +498,6 @@
     <ClCompile Include="..\..\Source\Reflection\GuiReflectionPlugin.cpp">
       <Filter>GacUI\Reflection</Filter>
     </ClCompile>
-    <ClCompile Include="DocumentEditorWindow.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="DocumentEditorWindow_Initialization.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Common\Source\Basic.h">
@@ -946,9 +940,6 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\GraphicsElement\GuiGraphicsDocumentElement.h">
       <Filter>GacUI\GraphicsElement</Filter>
-    </ClInclude>
-    <ClInclude Include="DocumentEditorWindow.h">
-      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
