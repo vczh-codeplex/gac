@@ -216,6 +216,28 @@ GuiDocumentUndoRedoProcessor::RenameStyleStep
 			}
 
 /***********************************************************************
+GuiDocumentUndoRedoProcessor::RenameStyleStep
+***********************************************************************/
+
+			void GuiDocumentUndoRedoProcessor::SetAlignmentStep::Undo()
+			{
+				GuiDocumentCommonInterface* ci=dynamic_cast<GuiDocumentCommonInterface*>(processor->ownerComposition->GetRelatedControl());
+				if(ci)
+				{
+					ci->SetParagraphAlignment(TextPos(arguments->start, 0), TextPos(arguments->end, 0), arguments->originalAlignments);
+				}
+			}
+
+			void GuiDocumentUndoRedoProcessor::SetAlignmentStep::Redo()
+			{
+				GuiDocumentCommonInterface* ci=dynamic_cast<GuiDocumentCommonInterface*>(processor->ownerComposition->GetRelatedControl());
+				if(ci)
+				{
+					ci->SetParagraphAlignment(TextPos(arguments->start, 0), TextPos(arguments->end, 0), arguments->inputAlignments);
+				}
+			}
+
+/***********************************************************************
 GuiDocumentUndoRedoProcessor
 ***********************************************************************/
 
@@ -246,6 +268,14 @@ GuiDocumentUndoRedoProcessor
 			void GuiDocumentUndoRedoProcessor::OnRenameStyle(const RenameStyleStruct& arguments)
 			{
 				Ptr<RenameStyleStep> step=new RenameStyleStep;
+				step->processor=this;
+				step->arguments=arguments;
+				PushStep(step);
+			}
+
+			void GuiDocumentUndoRedoProcessor::OnSetAlignment(Ptr<SetAlignmentStruct> arguments)
+			{
+				Ptr<SetAlignmentStep> step=new SetAlignmentStep;
 				step->processor=this;
 				step->arguments=arguments;
 				PushStep(step);

@@ -972,6 +972,31 @@ GuiDocumentElement
 				return 0;
 			}
 
+			void GuiDocumentElement::SetParagraphAlignment(TextPos begin, TextPos end, const collections::Array<Alignment>& alignments)
+			{
+				Ptr<GuiDocumentElementRenderer> elementRenderer=renderer.Cast<GuiDocumentElementRenderer>();
+				if(elementRenderer)
+				{
+					vint first=begin.row;
+					vint last=end.row;
+					if(first>last)
+					{
+						vint temp=first;
+						first=last;
+						last=temp;
+					}
+
+					if(0<=first && first<document->paragraphs.Count() && 0<=last && last<document->paragraphs.Count() && last-first+1==alignments.Count())
+					{
+						for(vint i=first;i<=last;i++)
+						{
+							document->paragraphs[i]->alignment=alignments[i-first];
+						}
+						elementRenderer->NotifyParagraphUpdated(first, alignments.Count(), alignments.Count(), false);
+					}
+				}
+			}
+
 			Ptr<DocumentHyperlinkRun> GuiDocumentElement::GetHyperlinkFromPoint(Point point)
 			{
 				Ptr<GuiDocumentElementRenderer> elementRenderer=renderer.Cast<GuiDocumentElementRenderer>();

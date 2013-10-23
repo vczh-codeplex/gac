@@ -182,6 +182,11 @@ GuiDocumentCommonInterface
 				/// <param name="begin">The begin position of the range.</param>
 				/// <param name="end">The end position of the range.</param>
 				Ptr<DocumentStyleProperties>				SummarizeStyle(TextPos begin, TextPos end);
+				/// <summary>Set the alignment of paragraphs in a specified range.</summary>
+				/// <param name="begin">The begin position of the range.</param>
+				/// <param name="end">The end position of the range.</param>
+				/// <param name="alignments">The alignment for each paragraph.</param>
+				void										SetParagraphAlignment(TextPos begin, TextPos end, const collections::Array<Alignment>& alignments);
 
 				//================ editing control
 
