@@ -1771,5 +1771,14 @@ DocumentModel::ClearStyle
 				ClearStyleVisitor::ClearStyle(paragraph, runRanges, start, end);
 			});
 		}
+
+/***********************************************************************
+DocumentModel::ClearStyle
+***********************************************************************/
+
+		Ptr<DocumentStyleProperties> DocumentModel::SummarizeStyle(TextPos begin, TextPos end)
+		{
+			return 0;
+		}
 	}
 }

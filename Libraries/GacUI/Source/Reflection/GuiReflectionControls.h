@@ -1072,12 +1072,13 @@ Interface Proxy
 					}
 				};
 
-				class GuiMenuButton_IStyleController : public virtual GuiButton_IStyleController, public virtual GuiMenuButton::IStyleController
+				class GuiMenuButton_IStyleController : public virtual GuiSelectableButton_IStyleController, public virtual GuiMenuButton::IStyleController
 				{
 				public:
 					GuiMenuButton_IStyleController(Ptr<IValueInterfaceProxy> _proxy)
 						:GuiControl_IStyleController(_proxy)
 						,GuiButton_IStyleController(_proxy)
+						,GuiSelectableButton_IStyleController(_proxy)
 					{
 					}
 
@@ -1128,6 +1129,7 @@ Interface Proxy
 					GuiListViewColumnHeader_IStyleController(Ptr<IValueInterfaceProxy> _proxy)
 						:GuiControl_IStyleController(_proxy)
 						,GuiButton_IStyleController(_proxy)
+						,GuiSelectableButton_IStyleController(_proxy)
 						,GuiMenuButton_IStyleController(_proxy)
 					{
 					}
@@ -1446,6 +1448,7 @@ Interface Proxy
 					GuiComboBoxBase_IStyleController(Ptr<IValueInterfaceProxy> _proxy)
 						:GuiControl_IStyleController(_proxy)
 						,GuiButton_IStyleController(_proxy)
+						,GuiSelectableButton_IStyleController(_proxy)
 						,GuiMenuButton_IStyleController(_proxy)
 					{
 					}
