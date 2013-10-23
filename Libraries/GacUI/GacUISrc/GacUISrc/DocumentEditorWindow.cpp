@@ -158,6 +158,12 @@ void DocumentEditorWindow::UpdateMenuItems(int commands)
 		commandEditCut->SetEnabled(textBox->CanCut());
 		commandEditCopy->SetEnabled(textBox->CanCopy());
 		commandEditDelete->SetEnabled(textBox->GetCaretBegin()!=textBox->GetCaretEnd());
+
+		Ptr<DocumentStyleProperties> style=textBox->SummarizeStyle(textBox->GetCaretBegin(), textBox->GetCaretEnd());
+		commandStyleBold->SetSelected(style->bold && style->bold.Value());
+		commandStyleItalic->SetSelected(style->italic && style->italic.Value());
+		commandStyleUnderline->SetSelected(style->underline && style->underline.Value());
+		commandStyleStrikeline->SetSelected(style->strikeline && style->strikeline.Value());
 	}
 	if(commands & UndoRedoCommands)
 	{
@@ -255,18 +261,34 @@ void DocumentEditorWindow::commandEditSelect_Executed(GuiGraphicsComposition* se
 
 void DocumentEditorWindow::commandStyleBold_Executed(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 {
+	Ptr<DocumentStyleProperties> style=new DocumentStyleProperties;
+	style->bold=!commandStyleBold->GetSelected();
+	textBox->EditStyle(textBox->GetCaretBegin(), textBox->GetCaretEnd(), style);
+	commandStyleBold->SetSelected(!commandStyleBold->GetSelected());
 }
 
 void DocumentEditorWindow::commandStyleItalic_Executed(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 {
+	Ptr<DocumentStyleProperties> style=new DocumentStyleProperties;
+	style->italic=!commandStyleItalic->GetSelected();
+	textBox->EditStyle(textBox->GetCaretBegin(), textBox->GetCaretEnd(), style);
+	commandStyleItalic->SetSelected(!commandStyleItalic->GetSelected());
 }
 
 void DocumentEditorWindow::commandStyleUnderline_Executed(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 {
+	Ptr<DocumentStyleProperties> style=new DocumentStyleProperties;
+	style->underline=!commandStyleUnderline->GetSelected();
+	textBox->EditStyle(textBox->GetCaretBegin(), textBox->GetCaretEnd(), style);
+	commandStyleUnderline->SetSelected(!commandStyleUnderline->GetSelected());
 }
 
 void DocumentEditorWindow::commandStyleStrikeline_Executed(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 {
+	Ptr<DocumentStyleProperties> style=new DocumentStyleProperties;
+	style->strikeline=!commandStyleStrikeline->GetSelected();
+	textBox->EditStyle(textBox->GetCaretBegin(), textBox->GetCaretEnd(), style);
+	commandStyleStrikeline->SetSelected(!commandStyleStrikeline->GetSelected());
 }
 
 void DocumentEditorWindow::commandStyleFont_Executed(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
