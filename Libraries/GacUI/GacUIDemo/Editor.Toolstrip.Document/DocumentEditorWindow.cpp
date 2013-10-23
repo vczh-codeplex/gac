@@ -338,6 +338,7 @@ void DocumentEditorWindow::commandStyleFont_Executed(GuiGraphicsComposition* sen
 	{
 		Ptr<DocumentStyleProperties> style=new DocumentStyleProperties;
 		style->face=font.fontFamily;
+		style->size=font.size;
 		textBox->EditStyle(textBox->GetCaretBegin(), textBox->GetCaretEnd(), style);
 	}
 }
