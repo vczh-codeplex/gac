@@ -75,6 +75,7 @@ Button Configuration
 				static Win7ButtonColors						ToolstripButtonNormal();
 				static Win7ButtonColors						ToolstripButtonActive();
 				static Win7ButtonColors						ToolstripButtonPressed();
+				static Win7ButtonColors						ToolstripButtonSelected();
 				static Win7ButtonColors						ToolstripButtonDisabled();
 
 				static Win7ButtonColors						MenuBarButtonNormal();
@@ -84,6 +85,8 @@ Button Configuration
 
 				static Win7ButtonColors						MenuItemButtonNormal();
 				static Win7ButtonColors						MenuItemButtonNormalActive();
+				static Win7ButtonColors						MenuItemButtonSelected();
+				static Win7ButtonColors						MenuItemButtonSelectedActive();
 				static Win7ButtonColors						MenuItemButtonDisabled();
 				static Win7ButtonColors						MenuItemButtonDisabledActive();
 

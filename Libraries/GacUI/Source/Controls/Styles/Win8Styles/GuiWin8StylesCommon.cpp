@@ -244,6 +244,18 @@ Win8ButtonColors
 				return colors;
 			}
 
+			Win8ButtonColors Win8ButtonColors::ToolstripButtonSelected()
+			{
+				Win8ButtonColors colors=
+				{
+					Color(96, 161, 226),
+					Color(180, 212, 244),
+					Color(180, 212, 244),
+					Win8GetSystemTextColor(true),
+				};
+				return colors;
+			}
+
 			Win8ButtonColors Win8ButtonColors::ToolstripButtonDisabled()
 			{
 				Win8ButtonColors colors=
@@ -416,6 +428,32 @@ Win8ButtonColors
 			}
 
 			Win8ButtonColors Win8ButtonColors::MenuItemButtonNormalActive()
+			{
+				Win8ButtonColors colors=
+				{
+					Color(120, 174, 229),
+					Color(209, 226, 242),
+					Color(209, 226, 242),
+					Win8GetSystemTextColor(true),
+					Color(187, 204, 220),
+				};
+				return colors;
+			}
+
+			Win8ButtonColors Win8ButtonColors::MenuItemButtonSelected()
+			{
+				Win8ButtonColors colors=
+				{
+					Color(240, 240, 240),
+					Color(240, 240, 240),
+					Color(240, 240, 240),
+					Win8GetSystemTextColor(true),
+					Win8GetMenuSplitterColor(),
+				};
+				return colors;
+			}
+
+			Win8ButtonColors Win8ButtonColors::MenuItemButtonSelectedActive()
 			{
 				Win8ButtonColors colors=
 				{

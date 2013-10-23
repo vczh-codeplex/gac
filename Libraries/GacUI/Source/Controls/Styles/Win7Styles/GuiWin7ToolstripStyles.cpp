@@ -124,17 +124,24 @@ Win7ToolstripButtonStyle
 					{
 						value=GuiButton::Pressed;
 					}
-					switch(value)
+					if(selected)
 					{
-					case GuiButton::Normal:
-						targetColor=Win7ButtonColors::ToolstripButtonNormal();
-						break;
-					case GuiButton::Active:
-						targetColor=Win7ButtonColors::ToolstripButtonActive();
-						break;
-					case GuiButton::Pressed:
-						targetColor=Win7ButtonColors::ToolstripButtonPressed();
-						break;
+						targetColor=Win7ButtonColors::ToolstripButtonSelected();
+					}
+					else
+					{
+						switch(value)
+						{
+						case GuiButton::Normal:
+							targetColor=Win7ButtonColors::ToolstripButtonNormal();
+							break;
+						case GuiButton::Active:
+							targetColor=Win7ButtonColors::ToolstripButtonActive();
+							break;
+						case GuiButton::Pressed:
+							targetColor=Win7ButtonColors::ToolstripButtonPressed();
+							break;
+						}
 					}
 				}
 				else

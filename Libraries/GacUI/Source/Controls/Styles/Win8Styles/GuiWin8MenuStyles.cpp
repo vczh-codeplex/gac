@@ -312,11 +312,11 @@ Win8MenuItemButtonStyle
 						switch(value)
 						{
 						case GuiButton::Normal:
-							targetColor=Win8ButtonColors::MenuItemButtonNormal();
+							targetColor=selected?Win8ButtonColors::MenuItemButtonSelected():Win8ButtonColors::MenuItemButtonNormal();
 							break;
 						case GuiButton::Active:
 						case GuiButton::Pressed:
-							targetColor=Win8ButtonColors::MenuItemButtonNormalActive();
+							targetColor=selected?Win8ButtonColors::MenuItemButtonSelectedActive():Win8ButtonColors::MenuItemButtonNormalActive();
 							active=true;
 							break;
 						}

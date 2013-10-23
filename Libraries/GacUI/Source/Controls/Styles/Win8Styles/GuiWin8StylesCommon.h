@@ -67,6 +67,7 @@ Button Configuration
 				static Win8ButtonColors						ToolstripButtonNormal();
 				static Win8ButtonColors						ToolstripButtonActive();
 				static Win8ButtonColors						ToolstripButtonPressed();
+				static Win8ButtonColors						ToolstripButtonSelected();
 				static Win8ButtonColors						ToolstripButtonDisabled();
 
 				static Win8ButtonColors						ScrollHandleNormal();
@@ -85,6 +86,8 @@ Button Configuration
 
 				static Win8ButtonColors						MenuItemButtonNormal();
 				static Win8ButtonColors						MenuItemButtonNormalActive();
+				static Win8ButtonColors						MenuItemButtonSelected();
+				static Win8ButtonColors						MenuItemButtonSelectedActive();
 				static Win8ButtonColors						MenuItemButtonDisabled();
 				static Win8ButtonColors						MenuItemButtonDisabledActive();
 
