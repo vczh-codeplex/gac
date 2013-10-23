@@ -303,6 +303,9 @@ void DocumentEditorWindow::commandStyleFont_Executed(GuiGraphicsComposition* sen
 		false,
 		true))
 	{
+		Ptr<DocumentStyleProperties> style=new DocumentStyleProperties;
+		style->face=font.fontFamily;
+		textBox->EditStyle(textBox->GetCaretBegin(), textBox->GetCaretEnd(), style);
 	}
 }
 
@@ -313,6 +316,9 @@ void DocumentEditorWindow::commandStyleForeColor_Executed(GuiGraphicsComposition
 		this->GetNativeWindow(),
 		color))
 	{
+		Ptr<DocumentStyleProperties> style=new DocumentStyleProperties;
+		style->color=color;
+		textBox->EditStyle(textBox->GetCaretBegin(), textBox->GetCaretEnd(), style);
 	}
 }
 
@@ -323,6 +329,9 @@ void DocumentEditorWindow::commandStyleBackColor_Executed(GuiGraphicsComposition
 		this->GetNativeWindow(),
 		color))
 	{
+		Ptr<DocumentStyleProperties> style=new DocumentStyleProperties;
+		style->backgroundColor=color;
+		textBox->EditStyle(textBox->GetCaretBegin(), textBox->GetCaretEnd(), style);
 	}
 }
 
