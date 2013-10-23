@@ -1,4 +1,4 @@
-#include "TextEditorWindow.h"
+#include "DocumentEditorWindow.h"
 
 void SetImage(GuiToolstripCommand* command, const WString& imagePath)
 {
@@ -11,7 +11,7 @@ WString GetResourceFolder()
 	return exePath+L"..\\Resources\\";
 }
 
-void TextEditorWindow::InitializeCommand()
+void DocumentEditorWindow::InitializeCommand()
 {
 	WString resourceFolder=GetResourceFolder();
 	{
@@ -94,13 +94,68 @@ void TextEditorWindow::InitializeCommand()
 		commandEditSelect->SetShortcut(shortcutKeyManager->CreateShortcut(true, false, false, L'A'));
 	}
 	{
-		commandFormatFont=new GuiToolstripCommand;;
-		commandFormatFont->SetText(L"Font...");
-		this->AddComponent(commandFormatFont);
+		commandStyleBold=new GuiToolstripCommand;;
+		commandStyleBold->SetText(L"Bold");
+		SetImage(commandStyleBold, resourceFolder+L"s_Bold.png");
+		this->AddComponent(commandStyleBold);
+	}
+	{
+		commandStyleItalic=new GuiToolstripCommand;;
+		commandStyleItalic->SetText(L"Italic");
+		SetImage(commandStyleItalic, resourceFolder+L"s_Italic.png");
+		this->AddComponent(commandStyleItalic);
+	}
+	{
+		commandStyleUnderline=new GuiToolstripCommand;;
+		commandStyleUnderline->SetText(L"Underline");
+		SetImage(commandStyleUnderline, resourceFolder+L"s_Underline.png");
+		this->AddComponent(commandStyleUnderline);
+	}
+	{
+		commandStyleStrikeline=new GuiToolstripCommand;;
+		commandStyleStrikeline->SetText(L"Strikeline");
+		SetImage(commandStyleStrikeline, resourceFolder+L"s_Strike.png");
+		this->AddComponent(commandStyleStrikeline);
+	}
+	{
+		commandStyleFont=new GuiToolstripCommand;;
+		commandStyleFont->SetText(L"Font...");
+		SetImage(commandStyleFont, resourceFolder+L"s_Font.png");
+		this->AddComponent(commandStyleFont);
+	}
+	{
+		commandStyleForeColor=new GuiToolstripCommand;;
+		commandStyleForeColor->SetText(L"Text Color...");
+		SetImage(commandStyleForeColor, resourceFolder+L"s_Color.png");
+		this->AddComponent(commandStyleForeColor);
+	}
+	{
+		commandStyleBackColor=new GuiToolstripCommand;;
+		commandStyleBackColor->SetText(L"Background Color...");
+		SetImage(commandStyleBackColor, resourceFolder+L"s_Background.png");
+		this->AddComponent(commandStyleBackColor);
+	}
+	{
+		commandStyleAlignLeft=new GuiToolstripCommand;;
+		commandStyleAlignLeft->SetText(L"Left Align");
+		SetImage(commandStyleAlignLeft, resourceFolder+L"s_AlignLeft.png");
+		this->AddComponent(commandStyleAlignLeft);
+	}
+	{
+		commandStyleAlignCenter=new GuiToolstripCommand;;
+		commandStyleAlignCenter->SetText(L"Center Align");
+		SetImage(commandStyleAlignCenter, resourceFolder+L"s_AlignCenter.png");
+		this->AddComponent(commandStyleAlignCenter);
+	}
+	{
+		commandStyleAlignRight=new GuiToolstripCommand;;
+		commandStyleAlignRight->SetText(L"Right Align");
+		SetImage(commandStyleAlignRight, resourceFolder+L"s_AlignRight.png");
+		this->AddComponent(commandStyleAlignRight);
 	}
 }
 
-void TextEditorWindow::InitializeMenuBar()
+void DocumentEditorWindow::InitializeMenuBar()
 {
 	menuBar=g::NewMenuBar();
 	menuBar->GetBoundsComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
@@ -128,14 +183,25 @@ void TextEditorWindow::InitializeMenuBar()
 			->Button(commandEditDelete)
 			->Button(commandEditSelect)
 			->EndSubMenu()
-		->Button(0, L"Format")
+		->Button(0, L"Style")
 			->BeginSubMenu()
-			->Button(commandFormatFont)
+			->Button(commandStyleBold)
+			->Button(commandStyleItalic)
+			->Button(commandStyleUnderline)
+			->Button(commandStyleStrikeline)
+			->Splitter()
+			->Button(commandStyleFont)
+			->Button(commandStyleForeColor)
+			->Button(commandStyleBackColor)
+			->Splitter()
+			->Button(commandStyleAlignLeft)
+			->Button(commandStyleAlignCenter)
+			->Button(commandStyleAlignRight)
 			->EndSubMenu()
 		;
 }
 
-void TextEditorWindow::InitializeToolBar()
+void DocumentEditorWindow::InitializeToolBar()
 {
 	toolbar=g::NewToolbar();
 	toolbar->GetBoundsComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
@@ -154,10 +220,23 @@ void TextEditorWindow::InitializeToolBar()
 		->Button(commandEditCopy)
 		->Button(commandEditPaste)
 		->Button(commandEditDelete)
+		->Splitter()
+		->Button(commandStyleBold)
+		->Button(commandStyleItalic)
+		->Button(commandStyleUnderline)
+		->Button(commandStyleStrikeline)
+		->Splitter()
+		->Button(commandStyleFont)
+		->Button(commandStyleForeColor)
+		->Button(commandStyleBackColor)
+		->Splitter()
+		->Button(commandStyleAlignLeft)
+		->Button(commandStyleAlignCenter)
+		->Button(commandStyleAlignRight)
 		;
 }
 
-void TextEditorWindow::InitializeComponents()
+void DocumentEditorWindow::InitializeComponents()
 {
 	shortcutKeyManager=new GuiShortcutKeyManager();
 	this->SetShortcutKeyManager(shortcutKeyManager);
@@ -203,9 +282,13 @@ void TextEditorWindow::InitializeComponents()
 		cell->SetInternalMargin(Margin(1, 1, 1, 1));
 
 		// create the menu bar
-		textBox=g::NewMultilineTextBox();
+		textBox=g::NewDocumentViewer();
+		textBox->SetEditMode(GuiDocumentViewer::Editable);
 		textBox->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 		cell->AddChild(textBox->GetBoundsComposition());
+
+		Ptr<DocumentModel> model=DocumentModel::LoadFromXml(GetResourceFolder()+L"XmlDocDemo.xml");
+		textBox->SetDocument(model);
 	}
 
 	// set the preferred minimum client size

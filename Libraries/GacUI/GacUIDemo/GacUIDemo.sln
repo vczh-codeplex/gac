@@ -76,9 +76,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Editor.AutoComplete.Grammar
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Editor.Toolstrip.TextFile", "Editor.Toolstrip.TextFile\Editor.Toolstrip.TextFile.vcxproj", "{A16CF7D1-364D-412E-AF27-9C70C81DAE04}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Editor.Toolstrip.Document", "Editor.Toolstrip.Document\Editor.Toolstrip.Document.vcxproj", "{91F2E005-F8BF-4C80-8471-FAF4F5A93785}"
+EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 32
+		SccNumberOfProjects = 33
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = https://tfs.codeplex.com/tfs/tfs02
 		SccLocalPath0 = .
@@ -204,6 +206,10 @@ Global
 		SccProjectTopLevelParentUniqueName31 = GacUIDemo.sln
 		SccProjectName31 = Editor.Toolstrip.TextFile
 		SccLocalPath31 = Editor.Toolstrip.TextFile
+		SccProjectUniqueName32 = Editor.Toolstrip.Document\\Editor.Toolstrip.Document.vcxproj
+		SccProjectTopLevelParentUniqueName32 = GacUIDemo.sln
+		SccProjectName32 = Editor.Toolstrip.Document
+		SccLocalPath32 = Editor.Toolstrip.Document
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -334,6 +340,10 @@ Global
 		{A16CF7D1-364D-412E-AF27-9C70C81DAE04}.Debug|Win32.Build.0 = Debug|Win32
 		{A16CF7D1-364D-412E-AF27-9C70C81DAE04}.Release|Win32.ActiveCfg = Release|Win32
 		{A16CF7D1-364D-412E-AF27-9C70C81DAE04}.Release|Win32.Build.0 = Release|Win32
+		{91F2E005-F8BF-4C80-8471-FAF4F5A93785}.Debug|Win32.ActiveCfg = Debug|Win32
+		{91F2E005-F8BF-4C80-8471-FAF4F5A93785}.Debug|Win32.Build.0 = Debug|Win32
+		{91F2E005-F8BF-4C80-8471-FAF4F5A93785}.Release|Win32.ActiveCfg = Release|Win32
+		{91F2E005-F8BF-4C80-8471-FAF4F5A93785}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -368,5 +378,6 @@ Global
 		{728C31C9-EBEC-4C01-8658-DC1BA60BE40F} = {EBECB34C-801E-43D7-9FDF-EDE249CF053D}
 		{35F9BA10-1A66-4120-8E0E-749979249C8D} = {EBECB34C-801E-43D7-9FDF-EDE249CF053D}
 		{A16CF7D1-364D-412E-AF27-9C70C81DAE04} = {EBECB34C-801E-43D7-9FDF-EDE249CF053D}
+		{91F2E005-F8BF-4C80-8471-FAF4F5A93785} = {EBECB34C-801E-43D7-9FDF-EDE249CF053D}
 	EndGlobalSection
 EndGlobal

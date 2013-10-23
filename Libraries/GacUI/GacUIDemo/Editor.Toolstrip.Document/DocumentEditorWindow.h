@@ -3,12 +3,12 @@
 
 #include "..\..\Public\Source\GacUI.h"
 
-class TextEditorWindow : public GuiWindow
+class DocumentEditorWindow : public GuiWindow
 {
 private:
 	GuiToolstripMenuBar*			menuBar;
 	GuiToolstripToolbar*			toolbar;
-	GuiMultilineTextBox*			textBox;
+	GuiDocumentViewer*				textBox;
 	GuiShortcutKeyManager*			shortcutKeyManager;
 
 	GuiToolstripCommand*			commandFileNew;
@@ -23,7 +23,16 @@ private:
 	GuiToolstripCommand*			commandEditPaste;
 	GuiToolstripCommand*			commandEditDelete;
 	GuiToolstripCommand*			commandEditSelect;
-	GuiToolstripCommand*			commandFormatFont;
+	GuiToolstripCommand*			commandStyleBold;
+	GuiToolstripCommand*			commandStyleItalic;
+	GuiToolstripCommand*			commandStyleUnderline;
+	GuiToolstripCommand*			commandStyleStrikeline;
+	GuiToolstripCommand*			commandStyleFont;
+	GuiToolstripCommand*			commandStyleForeColor;
+	GuiToolstripCommand*			commandStyleBackColor;
+	GuiToolstripCommand*			commandStyleAlignLeft;
+	GuiToolstripCommand*			commandStyleAlignCenter;
+	GuiToolstripCommand*			commandStyleAlignRight;
 
 	void							InitializeCommand();
 	void							InitializeMenuBar();
@@ -75,10 +84,19 @@ Menu Handlers
 	void							commandEditDelete_Executed(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
 	void							commandEditSelect_Executed(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
 	void							commandEditGoto_Executed(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
-	void							commandFormatFont_Executed(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
+	void							commandStyleBold_Executed(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
+	void							commandStyleItalic_Executed(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
+	void							commandStyleUnderline_Executed(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
+	void							commandStyleStrikeline_Executed(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
+	void							commandStyleFont_Executed(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
+	void							commandStyleForeColor_Executed(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
+	void							commandStyleBackColor_Executed(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
+	void							commandStyleAlignLeft_Executed(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
+	void							commandStyleAlignCenter_Executed(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
+	void							commandStyleAlignRight_Executed(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
 public:
-	TextEditorWindow();
-	~TextEditorWindow();
+	DocumentEditorWindow();
+	~DocumentEditorWindow();
 };
 
 #endif
