@@ -326,6 +326,10 @@ Win7ListViewColumnHeaderStyle
 				}
 			}
 
+			void Win7ListViewColumnHeaderStyle::SetSelected(bool value)
+			{
+			}
+
 			void Win7ListViewColumnHeaderStyle::Transfer(GuiButton::ControlState value)
 			{
 				if(controlStyle!=value)

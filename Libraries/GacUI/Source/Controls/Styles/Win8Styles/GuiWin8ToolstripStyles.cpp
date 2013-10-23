@@ -298,6 +298,10 @@ Win8ToolstripButtonStyle
 				}
 			}
 
+			void Win8ToolstripButtonStyle::SetSelected(bool value)
+			{
+			}
+
 			controls::GuiMenu::IStyleController* Win8ToolstripButtonStyle::CreateSubMenuStyleController()
 			{
 				return new Win8MenuStyle;

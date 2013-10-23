@@ -26,6 +26,7 @@ GuiToolstripCommand
 			GuiToolstripCommand::GuiToolstripCommand()
 				:shortcutKeyItem(0)
 				,enabled(true)
+				,selected(false)
 			{
 			}
 
@@ -95,6 +96,20 @@ GuiToolstripCommand
 				if(enabled!=value)
 				{
 					enabled=value;
+					InvokeDescriptionChanged();
+				}
+			}
+
+			bool GuiToolstripCommand::GetSelected()
+			{
+				return selected;
+			}
+
+			void GuiToolstripCommand::SetSelected(bool value)
+			{
+				if(selected!=value)
+				{
+					selected=value;
 					InvokeDescriptionChanged();
 				}
 			}

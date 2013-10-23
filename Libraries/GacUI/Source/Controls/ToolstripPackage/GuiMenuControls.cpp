@@ -278,13 +278,14 @@ GuiMenuButton
 			}
 
 			GuiMenuButton::GuiMenuButton(IStyleController* _styleController)
-				:GuiButton(_styleController)
+				:GuiSelectableButton(_styleController)
 				,styleController(_styleController)
 				,subMenu(0)
 				,ownedSubMenu(false)
 				,ownerMenuService(0)
 				,cascadeAction(true)
 			{
+				SetAutoSelection(false);
 				SubMenuOpeningChanged.SetAssociatedComposition(boundsComposition);
 				ImageChanged.SetAssociatedComposition(boundsComposition);
 				ShortcutTextChanged.SetAssociatedComposition(boundsComposition);
