@@ -114,9 +114,10 @@ Menu Button
 				Ptr<MeasuringSource>						measuringSource;
 				controls::GuiButton::ControlState			controlStyle;
 				bool										isVisuallyEnabled;
+				bool										isSelected;
 				bool										isOpening;
 
-				void										TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool opening);
+				void										TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool selected, bool opening);
 			public:
 				/// <summary>Create the style.</summary>
 				Win7MenuItemButtonStyle();
