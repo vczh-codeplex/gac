@@ -164,6 +164,39 @@ void DocumentEditorWindow::UpdateMenuItems(int commands)
 		commandStyleItalic->SetSelected(style->italic && style->italic.Value());
 		commandStyleUnderline->SetSelected(style->underline && style->underline.Value());
 		commandStyleStrikeline->SetSelected(style->strikeline && style->strikeline.Value());
+
+		bool left=false;
+		bool center=false;
+		bool right=false;
+		vint first=textBox->GetCaretBegin().row;
+		vint last=textBox->GetCaretEnd().row;
+		if(first>last)
+		{
+			vint temp=first;
+			first=last;
+			last=temp;
+		}
+
+		for(vint i=first;i<=last;i++)
+		{
+			Ptr<DocumentParagraphRun> paragraph=textBox->GetDocument()->paragraphs[i];
+			switch(paragraph->alignment)
+			{
+			case Alignment::Left:
+				left=true;
+				break;
+			case Alignment::Center:
+				center=true;
+				break;
+			case Alignment::Right:
+				right=true;
+				break;
+			}
+		}
+
+		commandStyleAlignLeft->SetSelected(left && !center && !right);
+		commandStyleAlignCenter->SetSelected(!left && center && !right);
+		commandStyleAlignRight->SetSelected(!left && !center && right);
 	}
 	if(commands & UndoRedoCommands)
 	{
@@ -337,14 +370,65 @@ void DocumentEditorWindow::commandStyleBackColor_Executed(GuiGraphicsComposition
 
 void DocumentEditorWindow::commandStyleAlignLeft_Executed(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 {
+	if(!commandStyleAlignLeft->GetSelected())
+	{
+		vint count=textBox->GetCaretBegin().row-textBox->GetCaretEnd().row;
+		if(count<0) count=-count;
+		count++;
+		
+		Array<Alignment> alignments(count);
+		for(vint i=0;i<count;i++)
+		{
+			alignments[i]=Alignment::Left;
+		}
+		textBox->SetParagraphAlignment(textBox->GetCaretBegin(), textBox->GetCaretEnd(), alignments);
+
+		commandStyleAlignLeft->SetSelected(true);
+		commandStyleAlignCenter->SetSelected(false);
+		commandStyleAlignRight->SetSelected(false);
+	}
 }
 
 void DocumentEditorWindow::commandStyleAlignCenter_Executed(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 {
+	if(!commandStyleAlignCenter->GetSelected())
+	{
+		vint count=textBox->GetCaretBegin().row-textBox->GetCaretEnd().row;
+		if(count<0) count=-count;
+		count++;
+		
+		Array<Alignment> alignments(count);
+		for(vint i=0;i<count;i++)
+		{
+			alignments[i]=Alignment::Center;
+		}
+		textBox->SetParagraphAlignment(textBox->GetCaretBegin(), textBox->GetCaretEnd(), alignments);
+
+		commandStyleAlignLeft->SetSelected(false);
+		commandStyleAlignCenter->SetSelected(true);
+		commandStyleAlignRight->SetSelected(false);
+	}
 }
 
 void DocumentEditorWindow::commandStyleAlignRight_Executed(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 {
+	if(!commandStyleAlignRight->GetSelected())
+	{
+		vint count=textBox->GetCaretBegin().row-textBox->GetCaretEnd().row;
+		if(count<0) count=-count;
+		count++;
+		
+		Array<Alignment> alignments(count);
+		for(vint i=0;i<count;i++)
+		{
+			alignments[i]=Alignment::Right;
+		}
+		textBox->SetParagraphAlignment(textBox->GetCaretBegin(), textBox->GetCaretEnd(), alignments);
+
+		commandStyleAlignLeft->SetSelected(false);
+		commandStyleAlignCenter->SetSelected(false);
+		commandStyleAlignRight->SetSelected(true);
+	}
 }
 
 DocumentEditorWindow::DocumentEditorWindow()
