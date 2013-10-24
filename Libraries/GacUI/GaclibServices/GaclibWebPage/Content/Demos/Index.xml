@@ -41,6 +41,9 @@
       <date>2013/10/24</date>
       <image src="DXGUI_84.jpg" />
       <cpp src="Main.cpp" />
+      <cpp src="DocumentEditorWindow.h" />
+      <cpp src="DocumentEditorWindow.cpp" />
+      <cpp src="DocumentEditorWindow_Initialization.cpp" />
       <description>This demo shows how to build an editor like Microsoft Write.</description>
     </demo>
   </category>
