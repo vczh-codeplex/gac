@@ -191,6 +191,9 @@
     <Content Include="Content\Demos\Controls.TextBox.ContextColorizer\Main.cpp" />
     <Content Include="Content\Demos\Controls.TextBox.Editor\DXGUI_34.jpg" />
     <Content Include="Content\Demos\Controls.TextBox.Editor\Main.cpp" />
+    <Content Include="Content\Demos\Demos.Editor.Toolstrip.Document.jpg" />
+    <Content Include="Content\Demos\Editor.Toolstrip.Document\DXGUI_84.jpg" />
+    <Content Include="Content\Demos\Editor.Toolstrip.Document\Main.cpp" />
     <Content Include="Content\Demos\Editor.Toolstrip.TextFile\DXGUI_53.jpg" />
     <Content Include="Content\Demos\Editor.Toolstrip.TextFile\DXGUI_54.jpg" />
     <Content Include="Content\Demos\Editor.Toolstrip.TextFile\DXGUI_55.jpg" />
