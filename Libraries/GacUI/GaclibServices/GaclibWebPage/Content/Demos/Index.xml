@@ -37,6 +37,12 @@
       <cpp src="TextEditorWindow_Initialization.cpp" />
       <description>This demo shows how to build Notepad with functionalities like new/open/save, or undo/redo/clipboard operations, using menus and toolbars in the toolstrip control package.</description>
     </demo>
+    <demo name="Toolstrip.Document">
+      <date>2013/10/24</date>
+      <image src="DXGUI_84.jpg" />
+      <cpp src="Main.cpp" />
+      <description>This demo shows how to build an editor like Microsoft Write.</description>
+    </demo>
   </category>
   <category name="Controls">
     <description>The &quot;Controls&quot; category contains demos that show how to use individual controls.</description>
