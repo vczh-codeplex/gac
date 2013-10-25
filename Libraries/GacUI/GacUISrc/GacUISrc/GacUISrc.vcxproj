@@ -344,6 +344,7 @@
     <ClCompile Include="..\..\Source\Resources\GuiDocument_Edit.cpp" />
     <ClCompile Include="..\..\Source\Resources\GuiDocument_Load.cpp" />
     <ClCompile Include="..\..\Source\Resources\GuiDocument_Save.cpp" />
+    <ClCompile Include="..\..\Source\Resources\GuiPersistence.cpp" />
     <ClCompile Include="..\..\Source\Resources\GuiResource.cpp" />
     <ClCompile Include="FileSystemInformation.cpp" />
     <ClCompile Include="Main.cpp" />
@@ -496,6 +497,7 @@
     <ClInclude Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionElements.h" />
     <ClInclude Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionEvents.h" />
     <ClInclude Include="..\..\Source\Resources\GuiDocument.h" />
+    <ClInclude Include="..\..\Source\Resources\GuiPersistence.h" />
     <ClInclude Include="..\..\Source\Resources\GuiResource.h" />
     <ClInclude Include="FileSystemInformation.h" />
   </ItemGroup>

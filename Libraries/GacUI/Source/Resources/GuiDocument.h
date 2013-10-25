@@ -6,8 +6,8 @@ GacUI::Resource
 Interfaces:
 ***********************************************************************/
 
-#ifndef VCZH_PRESENTATION_GUIDOCUMENT
-#define VCZH_PRESENTATION_GUIDOCUMENT
+#ifndef VCZH_PRESENTATION_RESOURCES_GUIDOCUMENT
+#define VCZH_PRESENTATION_RESOURCES_GUIDOCUMENT
 
 #include "GuiResource.h"
 

@@ -1,4 +1,5 @@
-#include "GuiResource.h"
+#include "GuiDocument.h"
+#include "GuiPersistence.h"
 #include "..\Controls\GuiApplication.h"
 #include "..\..\..\..\Common\Source\Stream\FileStream.h"
 #include "..\..\..\..\Common\Source\Stream\Accessor.h"
