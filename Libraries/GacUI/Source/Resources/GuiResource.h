@@ -9,7 +9,7 @@ Interfaces:
 #ifndef VCZH_PRESENTATION_GUIRESOURCE
 #define VCZH_PRESENTATION_GUIRESOURCE
 
-#include "GuiDocument.h"
+#include "..\NativeWindow\GuiNativeWindow.h"
 
 namespace vl
 {
@@ -22,35 +22,33 @@ namespace vl
 		class GuiResource;
 
 /***********************************************************************
-Rich Content Document (resolver)
+Resource Image
 ***********************************************************************/
-		
-		/// <summary>Document resolver: image loader for "file" protocol.</summary>
-		class DocumentFileProtocolResolver : public DocumentResolver
+			
+		/// <summary>
+		/// Represnets an image to display.
+		/// </summary>
+		class GuiImageData : public Object, public Description<GuiImageData>
 		{
 		protected:
-			WString							workingDirectory;
+			Ptr<INativeImage>				image;
+			vint							frameIndex;
 
-			Ptr<INativeImage>				ResolveImageInternal(const WString& protocol, const WString& path)override;
 		public:
-			/// <summary>Create a document resolver.</summary>
-			/// <param name="_workingDirectory">Specify a working directory when the file path is a relative path.</param>
-			/// <param name="previousResolver">The previous resolver. See <see cref="DocumentResolver"/> for details.</param>
-			DocumentFileProtocolResolver(const WString& _workingDirectory, Ptr<DocumentResolver> previousResolver=0);
-		};
-		
-		/// <summary>Document resolver: image loader for "res" protocol.</summary>
-		class DocumentResProtocolResolver : public DocumentResolver
-		{
-		protected:
-			Ptr<GuiResource>				resource;
+			/// <summary>Create an empty image data.</summary>
+			GuiImageData();
+			/// <summary>Create an image data with a specified image and a frame index.</summary>
+			/// <param name="_image">The specified image.</param>
+			/// <param name="_frameIndex">The specified frame index.</param>
+			GuiImageData(Ptr<INativeImage> _image, vint _frameIndex);
+			~GuiImageData();
 
-			Ptr<INativeImage>				ResolveImageInternal(const WString& protocol, const WString& path)override;
-		public:
-			/// <summary>Create a document resolver.</summary>
-			/// <param name="_resource">The resource that contains images for retriving by path.</param>
-			/// <param name="previousResolver">The previous resolver. See <see cref="DocumentResolver"/> for details.</param>
-			DocumentResProtocolResolver(Ptr<GuiResource> _resource, Ptr<DocumentResolver> previousResolver=0);
+			/// <summary>Get the specified image.</summary>
+			/// <returns>The specified image.</returns>
+			Ptr<INativeImage>				GetImage();
+			/// <summary>Get the specified frame index.</summary>
+			/// <returns>The specified frame index.</returns>
+			vint							GetFrameIndex();
 		};
 
 /***********************************************************************
@@ -76,6 +74,8 @@ Resource Structure
 			/// <returns>The name of this resource node .</returns>
 			const WString&							GetName();
 		};
+
+		class DocumentModel;
 		
 		/// <summary>Resource item.</summary>
 		class GuiResourceItem : public GuiResourceNodeBase
@@ -257,7 +257,83 @@ Parser Loader
 		};
 
 		/// <summary>Get the global <see cref="IGuiParserManager"/> object.</summary>
-		extern IGuiParserManager*						GetParserManager();
+		extern IGuiParserManager*					GetParserManager();
+
+/***********************************************************************
+Resource Type Resolver
+***********************************************************************/
+
+/***********************************************************************
+Resource Path Resolver
+***********************************************************************/
+
+		/// <summary>Represents a symbol resolver for loading a resource of a certain protocol.</summary>
+		class IGuiResourcePathResolver : public IDescriptable, public Description<IGuiResourcePathResolver>
+		{
+		public:
+			/// <summary>Load a resource when the descriptor is something like a protocol-prefixed uri.</summary>
+			/// <returns>The loaded resource. Returns null if failed to load.</returns>
+			/// <param name="path">The path.</param>
+			virtual Ptr<Object>								ResolveResource(const WString& path)=0;
+		};
+
+		/// <summary>Represents an <see cref="IGuiResourcePathResolver"/> factory.</summary>
+		class IGuiResourcePathResolverFactory : public IDescriptable, public Description<IGuiResourcePathResolverFactory>
+		{
+		public:
+			/// <summary>Get the protocol for this resolver.</summary>
+			/// <returns>The protocol.</returns>
+			virtual WString									GetProtocol()=0;
+
+			/// <summary>Create an <see cref="IGuiResourcePathResolver"/> object.</summary>
+			/// <returns>The created resolver.</returns>
+			/// <param name="resource">The resource context.</param>
+			/// <param name="workingDirectory">The working directory context.</param>
+			virtual Ptr<IGuiResourcePathResolver>			CreateResolver(Ptr<GuiResource> resource, const WString& workingDirectory)=0;
+		};
+		
+		/// <summary>Represents a symbol resolver for loading a resource.</summary>
+		class GuiResourcePathResolver : public Object, public Description<GuiResourcePathResolver>
+		{
+			typedef collections::Dictionary<WString, Ptr<IGuiResourcePathResolver>>		ResolverMap;
+		protected:
+			ResolverMap										resolvers;
+			Ptr<GuiResource>								resource;
+			WString											workingDirectory;
+
+		public:
+			/// <summary>Create a resolver.</summary>
+			/// <param name="_resource">The resource context.</param>
+			/// <param name="_workingDirectory">The working directory context.</param>
+			GuiResourcePathResolver(Ptr<GuiResource> _resource, const WString& _workingDirectory);
+			~GuiResourcePathResolver();
+
+			/// <summary>Load a resource when the descriptor is something like a protocol-prefixed uri.</summary>
+			/// <returns>The loaded resource. Returns null if failed to load.</returns>
+			/// <param name="protocol">The protocol.</param>
+			/// <param name="path">The path.</param>
+			Ptr<Object>										ResolveResource(const WString& protocol, const WString& path);
+		};
+
+/***********************************************************************
+Resource Resolver Manager
+***********************************************************************/
+
+		/// <summary>A resource resolver manager.</summary>
+		class IGuiResourceResolverManager : public IDescriptable, public Description<IGuiResourceResolverManager>
+		{
+		public:
+			/// <summary>Get the <see cref="IGuiResourcePathResolverFactory"/> for a protocol.</summary>
+			/// <returns>The created factory.</returns>
+			/// <param name="protocol">The protocol.</param>
+			virtual IGuiResourcePathResolverFactory*		GetPathResolverFactory(const WString& protocol)=0;
+			/// <summary>Set the <see cref="IGuiResourcePathResolverFactory"/> for a protocol.</summary>
+			/// <returns>Returns true if this operation succeeded.</returns>
+			/// <param name="factory">The factory.</param>
+			virtual bool									SetPathResolverFactory(Ptr<IGuiResourcePathResolverFactory> factory)=0;
+		};
+		
+		extern IGuiResourceResolverManager*					GetResourceResolverManager();
 	}
 }
 

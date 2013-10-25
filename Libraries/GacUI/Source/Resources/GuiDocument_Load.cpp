@@ -1,4 +1,4 @@
-#include "GuiResource.h"
+#include "GuiDocument.h"
 #include "..\..\..\..\Common\Source\Stream\FileStream.h"
 #include "..\..\..\..\Common\Source\Stream\Accessor.h"
 #include "..\..\..\..\Common\Source\Stream\CharFormat.h"
@@ -24,10 +24,10 @@ document_operation_visitors::DeserializeNodeVisitor
 				Ptr<DocumentModel>					model;
 				Ptr<DocumentContainerRun>			container;
 				vint								paragraphIndex;
-				Ptr<DocumentResolver>				resolver;
+				Ptr<GuiResourcePathResolver>		resolver;
 				Regex								regexAttributeApply;
 
-				DeserializeNodeVisitor(Ptr<DocumentModel> _model, Ptr<DocumentParagraphRun> _paragraph, vint _paragraphIndex, Ptr<DocumentResolver> _resolver)
+				DeserializeNodeVisitor(Ptr<DocumentModel> _model, Ptr<DocumentParagraphRun> _paragraph, vint _paragraphIndex, Ptr<GuiResourcePathResolver> _resolver)
 					:model(_model)
 					,container(_paragraph)
 					,paragraphIndex(_paragraphIndex)
@@ -90,7 +90,11 @@ document_operation_visitors::DeserializeNodeVisitor
 							{
 								WString protocol=run->source.Sub(0, index.key);
 								WString path=run->source.Sub(index.key+index.value, run->source.Length()-index.key-index.value);
-								run->image=resolver->ResolveImage(protocol, path);
+								Ptr<GuiImageData> imageData=resolver->ResolveResource(protocol, path).Cast<GuiImageData>();
+								if(imageData)
+								{
+									run->image=imageData->GetImage();
+								}
 								if(run->image && run->image->GetFrameCount()>0)
 								{
 									run->size=run->image->GetFrame(0)->GetSize();
@@ -287,7 +291,7 @@ document_operation_visitors::DeserializeNodeVisitor
 DocumentModel
 ***********************************************************************/
 
-		Ptr<DocumentModel> DocumentModel::LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, Ptr<DocumentResolver> resolver)
+		Ptr<DocumentModel> DocumentModel::LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, Ptr<GuiResourcePathResolver> resolver)
 		{
 			Ptr<DocumentModel> model=new DocumentModel;
 			if(xml->rootElement->name.value==L"Doc")
@@ -396,7 +400,7 @@ DocumentModel
 
 		Ptr<DocumentModel> DocumentModel::LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, const WString& workingDirectory)
 		{
-			Ptr<DocumentFileProtocolResolver> resolver=new DocumentFileProtocolResolver(workingDirectory);
+			Ptr<GuiResourcePathResolver> resolver=new GuiResourcePathResolver(0, workingDirectory);
 			return LoadFromXml(xml, resolver);
 		}
 

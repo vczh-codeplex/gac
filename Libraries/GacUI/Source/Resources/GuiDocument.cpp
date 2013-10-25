@@ -1,4 +1,4 @@
-#include "GuiResource.h"
+#include "GuiDocument.h"
 #include "..\..\..\..\Common\Source\Stream\FileStream.h"
 #include "..\..\..\..\Common\Source\Stream\MemoryStream.h"
 #include "..\..\..\..\Common\Source\Stream\Accessor.h"
@@ -18,29 +18,6 @@ DocumentImageRun
 ***********************************************************************/
 
 		const wchar_t* DocumentImageRun::RepresentationText=L"[Image]";
-
-/***********************************************************************
-DocumentResolver
-***********************************************************************/
-
-		DocumentResolver::DocumentResolver(Ptr<DocumentResolver> _previousResolver)
-			:previousResolver(_previousResolver)
-		{
-		}
-
-		DocumentResolver::~DocumentResolver()
-		{
-		}
-
-		Ptr<INativeImage> DocumentResolver::ResolveImage(const WString& protocol, const WString& path)
-		{
-			auto result=ResolveImageInternal(protocol, path);
-			if(!result && previousResolver)
-			{
-				result=previousResolver->ResolveImage(protocol, path);
-			}
-			return result;
-		}
 
 /***********************************************************************
 ExtractTextVisitor
