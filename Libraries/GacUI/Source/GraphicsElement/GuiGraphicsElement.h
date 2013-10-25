@@ -10,7 +10,7 @@ Interfaces:
 #define VCZH_PRESENTATION_ELEMENTS_GUIGRAPHICSELEMENT
 
 #include "GuiGraphicsResourceManager.h"
-#include "..\NativeWindow\GuiResource.h"
+#include "..\Resources\GuiResource.h"
 
 namespace vl
 {

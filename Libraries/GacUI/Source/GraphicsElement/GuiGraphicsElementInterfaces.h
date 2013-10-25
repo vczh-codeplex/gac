@@ -9,7 +9,7 @@ Interfaces:
 #ifndef VCZH_PRESENTATION_ELEMENTS_GUIGRAPHICSELEMENTINTERFACES
 #define VCZH_PRESENTATION_ELEMENTS_GUIGRAPHICSELEMENTINTERFACES
 
-#include "..\NativeWindow\GuiTypes.h"
+#include "..\GuiTypes.h"
 
 namespace vl
 {

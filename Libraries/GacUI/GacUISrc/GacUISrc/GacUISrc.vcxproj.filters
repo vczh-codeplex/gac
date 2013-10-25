@@ -97,6 +97,9 @@
     <Filter Include="GacUI\Reflection\TypeDescriptors">
       <UniqueIdentifier>{4d4fab23-2e07-4acc-bec4-2360bac2fd1b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="GacUI\Resources">
+      <UniqueIdentifier>{ff392072-6eb8-4bc4-8468-a928af679d20}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\Common\Source\Basic.cpp">
@@ -426,9 +429,6 @@
     <ClCompile Include="..\..\..\..\Common\Source\Locale.cpp">
       <Filter>Common\Basic</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\NativeWindow\GuiResource.cpp">
-      <Filter>GacUI\NativeWindow</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\Controls\TextEditorPackage\GuiDocumentViewer.cpp">
       <Filter>GacUI\Controls\TextEditorPackage</Filter>
     </ClCompile>
@@ -456,23 +456,11 @@
     <ClCompile Include="..\..\Source\Controls\TextEditorPackage\GuiTextAutoComplete.cpp">
       <Filter>GacUI\Controls\TextEditorPackage</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\NativeWindow\GuiDocument.cpp">
-      <Filter>GacUI\NativeWindow</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\GraphicsElement\WindowsGDI\GuiGraphicsUniscribe.cpp">
       <Filter>GacUI\GraphicsElement\WindowsGDI</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\GraphicsElement\GuiGraphicsDocumentElement.cpp">
       <Filter>GacUI\GraphicsElement</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\NativeWindow\GuiDocument_Load.cpp">
-      <Filter>GacUI\NativeWindow</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\NativeWindow\GuiDocument_Save.cpp">
-      <Filter>GacUI\NativeWindow</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\NativeWindow\GuiDocument_Edit.cpp">
-      <Filter>GacUI\NativeWindow</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionBasic.cpp">
       <Filter>GacUI\Reflection\TypeDescriptors</Filter>
@@ -503,6 +491,21 @@
     </ClCompile>
     <ClCompile Include="..\..\Source\Reflection\GuiInstanceLoader.cpp">
       <Filter>GacUI\Reflection</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Resources\GuiDocument.cpp">
+      <Filter>GacUI\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Resources\GuiDocument_Edit.cpp">
+      <Filter>GacUI\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Resources\GuiDocument_Load.cpp">
+      <Filter>GacUI\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Resources\GuiDocument_Save.cpp">
+      <Filter>GacUI\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Resources\GuiResource.cpp">
+      <Filter>GacUI\Resources</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -645,9 +648,6 @@
       <Filter>GacUI\GraphicsElement</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\NativeWindow\GuiNativeWindow.h">
-      <Filter>GacUI\NativeWindow</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\NativeWindow\GuiTypes.h">
       <Filter>GacUI\NativeWindow</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\NativeWindow\Windows\WinNativeWindow.h">
@@ -881,9 +881,6 @@
     <ClInclude Include="..\..\..\..\Common\Source\Locale.h">
       <Filter>Common\Basic</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\NativeWindow\GuiResource.h">
-      <Filter>GacUI\NativeWindow</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\Controls\TextEditorPackage\GuiDocumentViewer.h">
       <Filter>GacUI\Controls\TextEditorPackage</Filter>
     </ClInclude>
@@ -907,9 +904,6 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Controls\TextEditorPackage\GuiTextAutoComplete.h">
       <Filter>GacUI\Controls\TextEditorPackage</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\NativeWindow\GuiDocument.h">
-      <Filter>GacUI\NativeWindow</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\GraphicsElement\WindowsGDI\GuiGraphicsUniscribe.h">
       <Filter>GacUI\GraphicsElement\WindowsGDI</Filter>
@@ -949,6 +943,15 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Reflection\GuiInstanceLoader.h">
       <Filter>GacUI\Reflection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\GuiTypes.h">
+      <Filter>GacUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Resources\GuiDocument.h">
+      <Filter>GacUI\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Resources\GuiResource.h">
+      <Filter>GacUI\Resources</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
