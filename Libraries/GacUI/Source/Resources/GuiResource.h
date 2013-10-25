@@ -144,13 +144,17 @@ Resource Structure
 
 			struct DelayLoading
 			{
-				collections::Dictionary<Ptr<GuiResourceItem>, WString>			documentModelFolders;
+				WString								type;
+				WString								workingDirectory;
+				Ptr<GuiResourceItem>				preloadResource;
 			};
+
+			typedef collections::List<DelayLoading>								DelayLoadingList;
 
 			ItemMap									items;
 			FolderMap								folders;
 
-			void									LoadResourceFolderXml(DelayLoading& delayLoading, const WString& containingFolder, Ptr<parsing::xml::XmlElement> folderXml, Ptr<parsing::tabling::ParsingTable> xmlParsingTable);
+			void									LoadResourceFolderXml(DelayLoadingList& delayLoadings, const WString& containingFolder, Ptr<parsing::xml::XmlElement> folderXml, Ptr<parsing::tabling::ParsingTable> xmlParsingTable);
 		public:
 			/// <summary>Create a resource folder.</summary>
 			GuiResourceFolder();
@@ -345,12 +349,28 @@ Resource Type Resolver
 			/// <summary>Get the type of the resource that load by this resolver.</summary>
 			/// <returns>The type.</returns>
 			virtual WString									GetType()=0;
+			/// <summary>Get the preload type to load the resource before delay loading.</summary>
+			/// <returns>The preload type. Returns an empty string to indicate that there is no preload type for this resolver.</returns>
+			virtual WString									GetPreloadType()=0;
+			/// <summary>Get the delay load feature for this resolver.</summary>
+			/// <returns>Returns true if this type need to delay load.</returns>
+			virtual bool									IsDelayLoad()=0;
 
-			/// <summary>Load a resource for a type from an xml.</summary>
+			/// <summary>Load a resource for a type inside an xml element.</summary>
 			/// <returns>The resource.</returns>
-			/// <param name="xml">The xml.</param>
-			/// <param name="resolver">The path resolver.</param>
-			virtual Ptr<DescriptableObject>					ResolveResource(Ptr<parsing::xml::XmlDocument> xml, Ptr<GuiResourcePathResolver> resolver)=0;
+			/// <param name="element">The xml element.</param>
+			virtual Ptr<Object>								ResolveResource(Ptr<parsing::xml::XmlElement> element)=0;
+
+			/// <summary>Load a resource for a type from a file.</summary>
+			/// <returns>The resource.</returns>
+			/// <param name="path">The file path.</param>
+			virtual Ptr<Object>								ResolveResource(const WString& path)=0;
+
+			/// <summary>Load a resource for a type from a resource loaded by the preload type resolver.</summary>
+			/// <returns>The resource.</returns>
+			/// <param name="resource">The resource.</param>
+			/// <param name="resolver">The path resolver. This is only for delay load resource.</param>
+			virtual Ptr<Object>								ResolveResource(Ptr<Object> resource, Ptr<GuiResourcePathResolver> resolver)=0;
 		};
 
 /***********************************************************************
@@ -372,11 +392,11 @@ Resource Resolver Manager
 			/// <summary>Get the <see cref="IGuiResourceTypeResolver"/> for a resource type.</summary>
 			/// <returns>The resolver.</returns>
 			/// <param name="type">The resource type.</param>
-			virtual IGuiResourceTypeResolver*				GetTypeResolverFactory(const WString& type)=0;
+			virtual IGuiResourceTypeResolver*				GetTypeResolver(const WString& type)=0;
 			/// <summary>Set the <see cref="IGuiResourceTypeResolver"/> for a resource type.</summary>
 			/// <returns>Returns true if this operation succeeded.</returns>
 			/// <param name="resolver">The resolver.</param>
-			virtual bool									SetTypeResolverFactory(Ptr<IGuiResourceTypeResolver> resolver)=0;
+			virtual bool									SetTypeResolver(Ptr<IGuiResourceTypeResolver> resolver)=0;
 		};
 		
 		extern IGuiResourceResolverManager*					GetResourceResolverManager();

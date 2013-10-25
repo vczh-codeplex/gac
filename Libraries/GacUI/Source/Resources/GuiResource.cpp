@@ -175,7 +175,7 @@ GuiResourceItem
 GuiResourceFolder
 ***********************************************************************/
 
-		void GuiResourceFolder::LoadResourceFolderXml(DelayLoading& delayLoading, const WString& containingFolder, Ptr<parsing::xml::XmlElement> folderXml, Ptr<parsing::tabling::ParsingTable> xmlParsingTable)
+		void GuiResourceFolder::LoadResourceFolderXml(DelayLoadingList& delayLoadings, const WString& containingFolder, Ptr<parsing::xml::XmlElement> folderXml, Ptr<parsing::tabling::ParsingTable> xmlParsingTable)
 		{
 			ClearItems();
 			ClearFolders();
@@ -212,7 +212,7 @@ GuiResourceFolder
 									}
 								}
 							}
-							folder->LoadResourceFolderXml(delayLoading, newContainingFolder, newFolderXml, xmlParsingTable);
+							folder->LoadResourceFolderXml(delayLoadings, newContainingFolder, newFolderXml, xmlParsingTable);
 						}
 					}
 				}
@@ -236,67 +236,64 @@ GuiResourceFolder
 					{
 						if(filePath!=L"")
 						{
-							stream::FileStream fileStream(filePath, stream::FileStream::ReadOnly);
-							if(fileStream.IsAvailable())
+							WString type=element->name.value;
+							bool preload=false;
+							IGuiResourceTypeResolver* typeResolver=GetResourceResolverManager()->GetTypeResolver(type);
+
+							if(typeResolver)
 							{
-								if(element->name.value==L"Xml" || element->name.value==L"Doc")
+								WString preloadType=typeResolver->GetPreloadType();
+								if(preloadType!=L"")
 								{
-									WString text;
-									if(LoadTextFromStream(fileStream, text))
-									{
-										Ptr<XmlDocument> xml=XmlParseDocument(text, xmlParsingTable);
-										if(xml)
-										{
-											item->SetContent(xml);
-											if(element->name.value==L"Doc")
-											{
-												delayLoading.documentModelFolders.Add(item, containingFolder);
-											}
-										}
-									}
+									typeResolver=GetResourceResolverManager()->GetTypeResolver(preloadType);
+									preload=true;
 								}
-								else if(element->name.value==L"Text")
+							}
+
+							if(typeResolver)
+							{
+								Ptr<Object> resource=typeResolver->ResolveResource(filePath);
+								item->SetContent(resource);
+
+								if(preload)
 								{
-									WString text;
-									if(LoadTextFromStream(fileStream, text))
-									{
-										item->SetContent(new GuiTextData(text));
-									}
-								}
-								else if(element->name.value==L"Image")
-								{
-									Ptr<INativeImage> image=GetCurrentController()->ImageService()->CreateImageFromStream(fileStream);
-									if(image)
-									{
-										Ptr<GuiImageData> imageData=new GuiImageData(image, 0);
-										item->SetContent(imageData);
-									}
+									DelayLoading delayLoading;
+									delayLoading.type=type;
+									delayLoading.workingDirectory=containingFolder;
+									delayLoading.preloadResource=item;
+									delayLoadings.Add(delayLoading);
 								}
 							}
 						}
 						else
 						{
-							if(element->name.value==L"Xml" || element->name.value==L"Doc")
+							WString type=element->name.value;
+							bool preload=false;
+							IGuiResourceTypeResolver* typeResolver=GetResourceResolverManager()->GetTypeResolver(type);
+
+							if(typeResolver)
 							{
-								Ptr<XmlElement> root=XmlGetElements(element).First(0);
-								if(root)
+								WString preloadType=typeResolver->GetPreloadType();
+								if(preloadType!=L"")
 								{
-									Ptr<XmlDocument> xml=new XmlDocument;
-									xml->rootElement=root;
-									item->SetContent(xml);
-									if(element->name.value==L"Doc")
-									{
-										delayLoading.documentModelFolders.Add(item, containingFolder);
-									}
+									typeResolver=GetResourceResolverManager()->GetTypeResolver(preloadType);
+									preload=true;
 								}
 							}
-							else if(element->name.value==L"Text")
+
+							if(typeResolver)
 							{
-								WString text=XmlGetValue(element);
-								item->SetContent(new GuiTextData(text));
-							}
-							else if(element->name.value==L"Image")
-							{
+								Ptr<Object> resource=typeResolver->ResolveResource(element);
+								item->SetContent(resource);
+
+								if(preload)
+								{
+									DelayLoading delayLoading;
+									delayLoading.type=type;
+									delayLoading.workingDirectory=containingFolder;
+									delayLoading.preloadResource=item;
+									delayLoadings.Add(delayLoading);
+								}
 							}
 						}
 						if(!item->GetContent())
@@ -437,18 +434,24 @@ GuiResource
 			if(xml)
 			{
 				resource=new GuiResource;
-				DelayLoading delayLoading;
-				resource->LoadResourceFolderXml(delayLoading, GetFolderPath(filePath), xml->rootElement, table);
+				DelayLoadingList delayLoadings;
+				resource->LoadResourceFolderXml(delayLoadings, GetFolderPath(filePath), xml->rootElement, table);
 
-				for(vint i=0;i<delayLoading.documentModelFolders.Count();i++)
+				FOREACH(DelayLoading, delay, delayLoadings)
 				{
-					Ptr<GuiResourceItem> item=delayLoading.documentModelFolders.Keys()[i];
-					WString folder=delayLoading.documentModelFolders.Values().Get(i);
-					if(Ptr<XmlDocument> xml=item->AsXml())
+					WString type=delay.type;
+					WString folder=delay.workingDirectory;
+					Ptr<GuiResourceItem> item=delay.preloadResource;
+
+					IGuiResourceTypeResolver* typeResolver=GetResourceResolverManager()->GetTypeResolver(type);
+					if(typeResolver && item->GetContent())
 					{
-						Ptr<GuiResourcePathResolver> resolver=new GuiResourcePathResolver(resource, folder);
-						Ptr<DocumentModel> model=DocumentModel::LoadFromXml(xml, resolver);
-						item->SetContent(model);
+						Ptr<GuiResourcePathResolver> pathResolver=new GuiResourcePathResolver(resource, folder);
+						Ptr<Object> resource=typeResolver->ResolveResource(item->GetContent(), pathResolver);
+						if(resource)
+						{
+							item->SetContent(resource);
+						}
 					}
 				}
 			}
@@ -728,13 +731,13 @@ IGuiResourceResolverManager
 				return true;
 			}
 
-			IGuiResourceTypeResolver* GetTypeResolverFactory(const WString& type)override
+			IGuiResourceTypeResolver* GetTypeResolver(const WString& type)override
 			{
 				vint index=typeResolvers.Keys().IndexOf(type);
 				return index==-1?0:typeResolvers.Values()[index].Obj();
 			}
 
-			bool SetTypeResolverFactory(Ptr<IGuiResourceTypeResolver> resolver)override
+			bool SetTypeResolver(Ptr<IGuiResourceTypeResolver> resolver)override
 			{
 				if(typeResolvers.Keys().Contains(resolver->GetType())) return false;
 				typeResolvers.Add(resolver->GetType(), resolver);

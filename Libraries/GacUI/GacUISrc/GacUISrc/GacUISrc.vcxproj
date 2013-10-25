@@ -346,6 +346,7 @@
     <ClCompile Include="..\..\Source\Resources\GuiDocument_Save.cpp" />
     <ClCompile Include="..\..\Source\Resources\GuiPersistence.cpp" />
     <ClCompile Include="..\..\Source\Resources\GuiResource.cpp" />
+    <ClCompile Include="..\..\Source\Resources\GuiResourceTypeResolvers.cpp" />
     <ClCompile Include="FileSystemInformation.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="TsfTestWindow.cpp" />
