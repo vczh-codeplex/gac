@@ -10,7 +10,7 @@ Interfaces:
 #define VCZH_PRESENTATION_CONTROLS_GUIWINDOWCONTROLS
 
 #include "GuiBasicControls.h"
-#include "..\NativeWindow\GuiResource.h"
+#include "..\Resources\GuiResource.h"
 
 namespace vl
 {

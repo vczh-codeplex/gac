@@ -320,12 +320,7 @@
     <ClCompile Include="..\..\Source\GraphicsElement\WindowsGDI\GuiGraphicsRenderersWindowsGDI.cpp" />
     <ClCompile Include="..\..\Source\GraphicsElement\WindowsGDI\GuiGraphicsUniscribe.cpp" />
     <ClCompile Include="..\..\Source\GraphicsElement\WindowsGDI\GuiGraphicsWindowsGDI.cpp" />
-    <ClCompile Include="..\..\Source\NativeWindow\GuiDocument.cpp" />
-    <ClCompile Include="..\..\Source\NativeWindow\GuiDocument_Edit.cpp" />
-    <ClCompile Include="..\..\Source\NativeWindow\GuiDocument_Load.cpp" />
-    <ClCompile Include="..\..\Source\NativeWindow\GuiDocument_Save.cpp" />
     <ClCompile Include="..\..\Source\NativeWindow\GuiNativeWindow.cpp" />
-    <ClCompile Include="..\..\Source\NativeWindow\GuiResource.cpp" />
     <ClCompile Include="..\..\Source\NativeWindow\Windows\Direct2D\WinDirect2DApplication.cpp" />
     <ClCompile Include="..\..\Source\NativeWindow\Windows\GDI\WinGDI.cpp" />
     <ClCompile Include="..\..\Source\NativeWindow\Windows\GDI\WinGDIApplication.cpp" />
@@ -345,6 +340,11 @@
     <ClCompile Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionElements.cpp" />
     <ClCompile Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionEvents.cpp" />
     <ClCompile Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionPlugin.cpp" />
+    <ClCompile Include="..\..\Source\Resources\GuiDocument.cpp" />
+    <ClCompile Include="..\..\Source\Resources\GuiDocument_Edit.cpp" />
+    <ClCompile Include="..\..\Source\Resources\GuiDocument_Load.cpp" />
+    <ClCompile Include="..\..\Source\Resources\GuiDocument_Save.cpp" />
+    <ClCompile Include="..\..\Source\Resources\GuiResource.cpp" />
     <ClCompile Include="FileSystemInformation.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="TsfTestWindow.cpp" />
@@ -475,10 +475,8 @@
     <ClInclude Include="..\..\Source\GraphicsElement\WindowsGDI\GuiGraphicsRenderersWindowsGDI.h" />
     <ClInclude Include="..\..\Source\GraphicsElement\WindowsGDI\GuiGraphicsUniscribe.h" />
     <ClInclude Include="..\..\Source\GraphicsElement\WindowsGDI\GuiGraphicsWindowsGDI.h" />
-    <ClInclude Include="..\..\Source\NativeWindow\GuiDocument.h" />
+    <ClInclude Include="..\..\Source\GuiTypes.h" />
     <ClInclude Include="..\..\Source\NativeWindow\GuiNativeWindow.h" />
-    <ClInclude Include="..\..\Source\NativeWindow\GuiResource.h" />
-    <ClInclude Include="..\..\Source\NativeWindow\GuiTypes.h" />
     <ClInclude Include="..\..\Source\NativeWindow\Windows\Direct2D\WinDirect2DApplication.h" />
     <ClInclude Include="..\..\Source\NativeWindow\Windows\GDI\WinGDI.h" />
     <ClInclude Include="..\..\Source\NativeWindow\Windows\GDI\WinGDIApplication.h" />
@@ -497,6 +495,8 @@
     <ClInclude Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionControls.h" />
     <ClInclude Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionElements.h" />
     <ClInclude Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionEvents.h" />
+    <ClInclude Include="..\..\Source\Resources\GuiDocument.h" />
+    <ClInclude Include="..\..\Source\Resources\GuiResource.h" />
     <ClInclude Include="FileSystemInformation.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -17,7 +17,7 @@ Renderers:
 #ifndef VCZH_PRESENTATION_GUINATIVEWINDOW
 #define VCZH_PRESENTATION_GUINATIVEWINDOW
 
-#include "GuiTypes.h"
+#include "..\GuiTypes.h"
 
 namespace vl
 {
