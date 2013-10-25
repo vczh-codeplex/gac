@@ -237,9 +237,6 @@
     <ClCompile Include="..\..\..\..\Common\Source\Parsing\ParsingTree.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\Parsing\Xml\ParsingXml.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\Parsing\Xml\ParsingXml_Parser.cpp" />
-    <ClCompile Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptor.cpp" />
-    <ClCompile Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorBuilder.cpp" />
-    <ClCompile Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorPredefined.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\Regex\Regex.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\Regex\RegexAutomaton.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\Regex\RegexData.cpp" />
@@ -338,27 +335,12 @@
     <ClCompile Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsResourceService.cpp" />
     <ClCompile Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsScreenService.cpp" />
     <ClCompile Include="..\..\Source\NativeWindow\Windows\WinNativeWindow.cpp" />
-    <ClCompile Include="..\..\Source\Reflection\GuiReflectionBasic.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugNoReflection|Win32'">false</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Reflection\GuiReflectionCompositions.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugNoReflection|Win32'">false</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Reflection\GuiReflectionControls.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugNoReflection|Win32'">false</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Reflection\GuiReflectionElements.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugNoReflection|Win32'">false</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Reflection\GuiReflectionEvents.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugNoReflection|Win32'">false</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Reflection\GuiReflectionPlugin.cpp" />
+    <ClCompile Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionBasic.cpp" />
+    <ClCompile Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionCompositions.cpp" />
+    <ClCompile Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionControls.cpp" />
+    <ClCompile Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionElements.cpp" />
+    <ClCompile Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionEvents.cpp" />
+    <ClCompile Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionPlugin.cpp" />
     <ClCompile Include="FileSystemInformation.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="TsfTestWindow.cpp" />
@@ -398,11 +380,6 @@
     <ClInclude Include="..\..\..\..\Common\Source\Parsing\Xml\ParsingXml.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Parsing\Xml\ParsingXml_Parser.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Pointer.h" />
-    <ClInclude Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptor.h" />
-    <ClInclude Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorBuilder.h" />
-    <ClInclude Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorBuilder_Gen.h" />
-    <ClInclude Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorMacros.h" />
-    <ClInclude Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorPredefined.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Regex\Regex.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Regex\RegexAutomaton.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Regex\RegexData.h" />
@@ -505,26 +482,11 @@
     <ClInclude Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsResourceService.h" />
     <ClInclude Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsScreenService.h" />
     <ClInclude Include="..\..\Source\NativeWindow\Windows\WinNativeWindow.h" />
-    <ClInclude Include="..\..\Source\Reflection\GuiReflectionBasic.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugNoReflection|Win32'">false</ExcludedFromBuild>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Reflection\GuiReflectionCompositions.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugNoReflection|Win32'">false</ExcludedFromBuild>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Reflection\GuiReflectionControls.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugNoReflection|Win32'">false</ExcludedFromBuild>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Reflection\GuiReflectionElements.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugNoReflection|Win32'">false</ExcludedFromBuild>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Reflection\GuiReflectionEvents.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugNoReflection|Win32'">false</ExcludedFromBuild>
-    </ClInclude>
+    <ClInclude Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionBasic.h" />
+    <ClInclude Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionCompositions.h" />
+    <ClInclude Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionControls.h" />
+    <ClInclude Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionElements.h" />
+    <ClInclude Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionEvents.h" />
     <ClInclude Include="FileSystemInformation.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

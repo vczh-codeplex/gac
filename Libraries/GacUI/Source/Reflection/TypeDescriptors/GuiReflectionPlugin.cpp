@@ -1,8 +1,8 @@
-#include "..\Reflection\GuiReflectionBasic.h"
-#include "..\Reflection\GuiReflectionElements.h"
-#include "..\Reflection\GuiReflectionCompositions.h"
-#include "..\Reflection\GuiReflectionControls.h"
-#include "..\Reflection\GuiReflectionEvents.h"
+#include "GuiReflectionBasic.h"
+#include "GuiReflectionElements.h"
+#include "GuiReflectionCompositions.h"
+#include "GuiReflectionControls.h"
+#include "GuiReflectionEvents.h"
 
 namespace vl
 {

@@ -9,14 +9,17 @@
       <except pattern="\Windows\" />
       <except pattern="\WindowsDirect2D\" />
       <except pattern="\WindowsGDI\" />
+      <except pattern="\Reflection\" />
     </category>
     <category name="windows" pattern="\GacUI\Source\GraphicsElement\WindowsDirect2D\" />
     <category name="windows" pattern="\GacUI\Source\GraphicsElement\WindowsGDI\" />
     <category name="windows" pattern="\GacUI\Source\NativeWindow\Windows\" />
+    <category name="reflection" pattern="\GacUI\Source\Reflection\" />
   </categories>
   <output path="Source\">
     <codepair category="vlpp" filename="Vlpp" />
     <codepair category="gacui" filename="GacUI" />
     <codepair category="windows" filename="GacUIWindows" />
+    <codepair category="reflection" filename="GacUIReflection" />
   </output>
 </codegen>
