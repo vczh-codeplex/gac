@@ -237,6 +237,9 @@
     <ClCompile Include="..\..\..\..\Common\Source\Parsing\ParsingTree.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\Parsing\Xml\ParsingXml.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\Parsing\Xml\ParsingXml_Parser.cpp" />
+    <ClCompile Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptor.cpp" />
+    <ClCompile Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorBuilder.cpp" />
+    <ClCompile Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorPredefined.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\Regex\Regex.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\Regex\RegexAutomaton.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\Regex\RegexData.cpp" />
@@ -380,6 +383,11 @@
     <ClInclude Include="..\..\..\..\Common\Source\Parsing\Xml\ParsingXml.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Parsing\Xml\ParsingXml_Parser.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Pointer.h" />
+    <ClInclude Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptor.h" />
+    <ClInclude Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorBuilder.h" />
+    <ClInclude Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorBuilder_Gen.h" />
+    <ClInclude Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorMacros.h" />
+    <ClInclude Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorPredefined.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Regex\Regex.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Regex\RegexAutomaton.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Regex\RegexData.h" />

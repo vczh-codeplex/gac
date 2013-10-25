@@ -492,6 +492,15 @@
     <ClCompile Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionPlugin.cpp">
       <Filter>GacUI\Reflection\TypeDescriptors</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptor.cpp">
+      <Filter>Common\Reflection</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorBuilder.cpp">
+      <Filter>Common\Reflection</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorPredefined.cpp">
+      <Filter>Common\Reflection</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Common\Source\Basic.h">
@@ -919,6 +928,21 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionEvents.h">
       <Filter>GacUI\Reflection\TypeDescriptors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptor.h">
+      <Filter>Common\Reflection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorBuilder.h">
+      <Filter>Common\Reflection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorBuilder_Gen.h">
+      <Filter>Common\Reflection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorMacros.h">
+      <Filter>Common\Reflection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorPredefined.h">
+      <Filter>Common\Reflection</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
