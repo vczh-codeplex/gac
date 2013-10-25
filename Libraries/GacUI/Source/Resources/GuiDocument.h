@@ -9,7 +9,7 @@ Interfaces:
 #ifndef VCZH_PRESENTATION_GUIDOCUMENT
 #define VCZH_PRESENTATION_GUIDOCUMENT
 
-#include "..\NativeWindow\GuiNativeWindow.h"
+#include "GuiResource.h"
 
 namespace vl
 {
@@ -23,36 +23,6 @@ namespace vl
 		class DocumentHyperlinkRun;
 		class DocumentImageRun;
 		class DocumentParagraphRun;
-
-/***********************************************************************
-Resource Image
-***********************************************************************/
-			
-		/// <summary>
-		/// Represnets an image to display.
-		/// </summary>
-		class GuiImageData : public Object, public Description<GuiImageData>
-		{
-		protected:
-			Ptr<INativeImage>				image;
-			vint							frameIndex;
-
-		public:
-			/// <summary>Create an empty image data.</summary>
-			GuiImageData();
-			/// <summary>Create an image data with a specified image and a frame index.</summary>
-			/// <param name="_image">The specified image.</param>
-			/// <param name="_frameIndex">The specified frame index.</param>
-			GuiImageData(Ptr<INativeImage> _image, vint _frameIndex);
-			~GuiImageData();
-
-			/// <summary>Get the specified image.</summary>
-			/// <returns>The specified image.</returns>
-			Ptr<INativeImage>				GetImage();
-			/// <summary>Get the specified frame index.</summary>
-			/// <returns>The specified frame index.</returns>
-			vint							GetFrameIndex();
-		};
 
 /***********************************************************************
 Rich Content Document (style)
@@ -245,32 +215,6 @@ Rich Content Document (run)
 		};
 
 /***********************************************************************
-Rich Content Document (resolver)
-***********************************************************************/
-
-		/// <summary>Represents a symbol resolver for loading a document model.</summary>
-		class DocumentResolver : public Object
-		{
-		private:
-			Ptr<DocumentResolver>			previousResolver;
-
-		protected:
-
-			virtual Ptr<INativeImage>		ResolveImageInternal(const WString& protocol, const WString& path)=0;
-		public:
-			/// <summary>Create a document resolver.</summary>
-			/// <param name="_previousResolver">A previous resolver. When loading a resource failed, the resolver will try to invoke the previous resolver for loading the resource.</param>
-			DocumentResolver(Ptr<DocumentResolver> _previousResolver);
-			~DocumentResolver();
-
-			/// <summary>Load an image when the [F:vl.presentation.DocumentImageRun.source] of [T:vl.presentation.DocumentImageRun] is something like a protocol-prefixed uri.</summary>
-			/// <returns>The loaded image. Returns null if failed to load.</returns>
-			/// <param name="protocol">The protocol.</param>
-			/// <param name="path">The path.</param>
-			Ptr<INativeImage>				ResolveImage(const WString& protocol, const WString& path);
-		};
-
-/***********************************************************************
 Rich Content Document (model)
 ***********************************************************************/
 
@@ -368,7 +312,7 @@ Rich Content Document (model)
 			/// <returns>The loaded document model.</returns>
 			/// <param name="xml">The xml document.</param>
 			/// <param name="resolver">A document resolver to resolve symbols in non-embedded objects like image.</param>
-			static Ptr<DocumentModel>		LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, Ptr<DocumentResolver> resolver);
+			static Ptr<DocumentModel>		LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, Ptr<GuiResourcePathResolver> resolver);
 
 			/// <summary>Load a document model from an xml.</summary>
 			/// <returns>The loaded document model.</returns>

@@ -1,4 +1,4 @@
-#include "GuiResource.h"
+#include "GuiDocument.h"
 
 namespace vl
 {

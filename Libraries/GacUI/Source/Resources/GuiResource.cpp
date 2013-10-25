@@ -88,51 +88,6 @@ GuiImageData
 		}
 
 /***********************************************************************
-DocumentFileProtocolResolver
-***********************************************************************/
-
-		Ptr<INativeImage> DocumentFileProtocolResolver::ResolveImageInternal(const WString& protocol, const WString& path)
-		{
-			if(INVLOC.ToUpper(protocol)!=L"FILE") return 0;
-			WString filename=path;
-			if(filename.Length()>=2 && filename[1]!=L':')
-			{
-				filename=workingDirectory+filename;
-			}
-			return GetCurrentController()->ImageService()->CreateImageFromFile(filename);
-		}
-
-		DocumentFileProtocolResolver::DocumentFileProtocolResolver(const WString& _workingDirectory, Ptr<DocumentResolver> previousResolver)
-			:DocumentResolver(previousResolver)
-			,workingDirectory(_workingDirectory)
-		{
-		}
-
-/***********************************************************************
-DocumentResProtocolResolver
-***********************************************************************/
-
-		Ptr<INativeImage> DocumentResProtocolResolver::ResolveImageInternal(const WString& protocol, const WString& path)
-		{
-			if(INVLOC.ToUpper(protocol)!=L"RES") return 0;
-			Ptr<GuiImageData> image=resource->GetValueByPath(path).Cast<GuiImageData>();
-			if(image)
-			{
-				return image->GetImage();
-			}
-			else
-			{
-				return 0;
-			}
-		}
-
-		DocumentResProtocolResolver::DocumentResProtocolResolver(Ptr<GuiResource> _resource, Ptr<DocumentResolver> previousResolver)
-			:DocumentResolver(previousResolver)
-			,resource(_resource)
-		{
-		}
-
-/***********************************************************************
 GuiResourceNodeBase
 ***********************************************************************/
 
@@ -472,7 +427,7 @@ GuiResource
 					WString folder=delayLoading.documentModelFolders.Values().Get(i);
 					if(Ptr<XmlDocument> xml=item->AsXml())
 					{
-						Ptr<DocumentResolver> resolver=new DocumentResProtocolResolver(resource, new DocumentFileProtocolResolver(folder));
+						Ptr<GuiResourcePathResolver> resolver=new GuiResourcePathResolver(resource, folder);
 						Ptr<DocumentModel> model=DocumentModel::LoadFromXml(xml, resolver);
 						item->SetContent(model);
 					}
@@ -580,5 +535,179 @@ IGuiParserManager
 			}
 		};
 		GUI_REGISTER_PLUGIN(GuiParserManager)
+
+/***********************************************************************
+GuiResourcePathResolver
+***********************************************************************/
+
+		GuiResourcePathResolver::GuiResourcePathResolver(Ptr<GuiResource> _resource, const WString& _workingDirectory)
+			:resource(_resource)
+			,workingDirectory(_workingDirectory)
+		{
+		}
+
+		GuiResourcePathResolver::~GuiResourcePathResolver()
+		{
+		}
+
+		Ptr<Object> GuiResourcePathResolver::ResolveResource(const WString& protocol, const WString& path)
+		{
+			Ptr<IGuiResourcePathResolver> resolver;
+			vint index=resolvers.Keys().IndexOf(protocol);
+			if(index==-1)
+			{
+				IGuiResourcePathResolverFactory* factory=GetResourceResolverManager()->GetPathResolverFactory(protocol);
+				if(factory)
+				{
+					resolver=factory->CreateResolver(resource, workingDirectory);
+				}
+				resolvers.Add(protocol, resolver);
+			}
+			else
+			{
+				resolver=resolvers.Values()[index];
+			}
+
+			if(resolver)
+			{
+				return resolver->ResolveResource(path);
+			}
+			else
+			{
+				return 0;
+			}
+		}
+
+/***********************************************************************
+GuiResourcePathFileResolver
+***********************************************************************/
+
+		class GuiResourcePathFileResolver : public Object, public IGuiResourcePathResolver
+		{
+		protected:
+			WString					workingDirectory;
+
+		public:
+			GuiResourcePathFileResolver(const WString& _workingDirectory)
+				:workingDirectory(_workingDirectory)
+			{
+			}
+
+			Ptr<Object> ResolveResource(const WString& path)
+			{
+				WString filename=path;
+				if(filename.Length()>=2 && filename[1]!=L':')
+				{
+					filename=workingDirectory+filename;
+				}
+				Ptr<INativeImage> image=GetCurrentController()->ImageService()->CreateImageFromFile(filename);
+				return new GuiImageData(image, 0);
+			}
+
+			class Factory : public Object, public IGuiResourcePathResolverFactory
+			{
+			public:
+				WString GetProtocol()override
+				{
+					return L"file";
+				}
+
+				Ptr<IGuiResourcePathResolver> CreateResolver(Ptr<GuiResource> resource, const WString& workingDirectory)override
+				{
+					return new GuiResourcePathFileResolver(workingDirectory);
+				}
+			};
+		};
+
+/***********************************************************************
+GuiResourcePathResResolver
+***********************************************************************/
+
+		class GuiResourcePathResResolver : public Object, public IGuiResourcePathResolver
+		{
+		protected:
+			Ptr<GuiResource>		resource;
+
+		public:
+			GuiResourcePathResResolver(Ptr<GuiResource> _resource)
+				:resource(_resource)
+			{
+			}
+
+			Ptr<Object> ResolveResource(const WString& path)
+			{
+				return resource?resource->GetValueByPath(path):0;
+			}
+
+			class Factory : public Object, public IGuiResourcePathResolverFactory
+			{
+			public:
+				WString GetProtocol()override
+				{
+					return L"res";
+				}
+
+				Ptr<IGuiResourcePathResolver> CreateResolver(Ptr<GuiResource> resource, const WString& workingDirectory)override
+				{
+					return new GuiResourcePathResResolver(resource);
+				}
+			};
+		};
+
+/***********************************************************************
+IGuiResourceResolverManager
+***********************************************************************/
+
+		IGuiResourceResolverManager* resourceResolverManager=0;
+
+		IGuiResourceResolverManager* GetResourceResolverManager()
+		{
+			return resourceResolverManager;
+		}
+
+		class GuiResourceResolverManager : public Object, public IGuiResourceResolverManager, public IGuiPlugin
+		{
+		protected:
+			Dictionary<WString, Ptr<IGuiResourcePathResolverFactory>>		pathFactories;
+
+		public:
+			GuiResourceResolverManager()
+			{
+			}
+
+			~GuiResourceResolverManager()
+			{
+			}
+
+			void Load()override
+			{
+				resourceResolverManager=this;
+				SetPathResolverFactory(new GuiResourcePathFileResolver::Factory);
+				SetPathResolverFactory(new GuiResourcePathResResolver::Factory);
+			}
+
+			void AfterLoad()override
+			{
+			}
+
+			void Unload()override
+			{
+				resourceResolverManager=0;
+			}
+
+			IGuiResourcePathResolverFactory* GetPathResolverFactory(const WString& protocol)override
+			{
+				vint index=pathFactories.Keys().IndexOf(protocol);
+				return index==-1?0:pathFactories.Values()[index].Obj();
+			}
+
+			bool SetPathResolverFactory(Ptr<IGuiResourcePathResolverFactory> factory)override
+			{
+				if(pathFactories.Keys().Contains(factory->GetProtocol())) return false;
+				pathFactories.Add(factory->GetProtocol(), factory);
+				return true;
+			}
+		};
+		GUI_REGISTER_PLUGIN(GuiResourceResolverManager)
 	}
 }

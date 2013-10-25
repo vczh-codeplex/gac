@@ -11,6 +11,7 @@ Interfaces:
 
 #include "GuiGraphicsResourceManager.h"
 #include "..\Resources\GuiResource.h"
+#include "..\Resources\GuiDocument.h"
 
 namespace vl
 {
