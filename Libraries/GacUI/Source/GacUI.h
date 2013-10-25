@@ -7,6 +7,7 @@ Global Objects:
 	vl::reflection::description::					GetGlobalTypeManager
 	vl::presentation::								GetParserManager
 	vl::presentation::								GetCurrentController
+	vl::presentation::								GetInstanceLoaderManager
 	vl::presentation::elements::					GetGuiGraphicsResourceManager
 	vl::presentation::controls::					GetApplication
 	vl::presentation::controls::					GetPluginManager
@@ -26,6 +27,7 @@ Global Objects:
 #include "Controls\GuiApplication.h"
 #include "Controls\Styles\GuiWin7Styles.h"
 #include "Controls\Styles\GuiWin8Styles.h"
+#include "Reflection\GuiInstanceLoader.h"
 
 using namespace vl;
 using namespace vl::presentation;

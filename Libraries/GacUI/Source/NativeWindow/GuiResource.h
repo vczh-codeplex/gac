@@ -240,7 +240,7 @@ Parser Loader
 ***********************************************************************/
 
 		/// <summary>Parser manager for caching parsing table globally.</summary>
-		class IParserManager : public IDescriptable, public Description<IParserManager>
+		class IGuiParserManager : public IDescriptable, public Description<IGuiParserManager>
 		{
 		protected:
 			typedef parsing::tabling::ParsingTable			Table;
@@ -256,8 +256,8 @@ Parser Loader
 			virtual bool							SetParsingTable(const WString& name, Func<Ptr<Table>()> loader)=0;
 		};
 
-		/// <summary>Get the global <see cref="IParserManager"/> object.</summary>
-		extern IParserManager*						GetParserManager();
+		/// <summary>Get the global <see cref="IGuiParserManager"/> object.</summary>
+		extern IGuiParserManager*						GetParserManager();
 	}
 }
 

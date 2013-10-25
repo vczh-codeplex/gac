@@ -510,24 +510,28 @@ GuiResource
 		}
 
 /***********************************************************************
-IParserManager
+IGuiParserManager
 ***********************************************************************/
 
-		class ParserManager;
-		ParserManager* parserManager=0;
+		IGuiParserManager* parserManager=0;
 
-		class ParserManager : public Object, public IParserManager, public IGuiPlugin
+		IGuiParserManager* GetParserManager()
+		{
+			return parserManager;
+		}
+
+		class GuiParserManager : public Object, public IGuiParserManager, public IGuiPlugin
 		{
 		protected:
 			Dictionary<WString, Ptr<Table>>				tables;
 			Dictionary<WString, Func<Ptr<Table>()>>		loaders;
 			SpinLock									lock;
 		public:
-			ParserManager()
+			GuiParserManager()
 			{
 			}
 
-			~ParserManager()
+			~GuiParserManager()
 			{
 			}
 
@@ -575,11 +579,6 @@ IParserManager
 				return true;
 			}
 		};
-		GUI_REGISTER_PLUGIN(ParserManager)
-
-		IParserManager* GetParserManager()
-		{
-			return parserManager;
-		}
+		GUI_REGISTER_PLUGIN(GuiParserManager)
 	}
 }
