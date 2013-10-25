@@ -89,6 +89,24 @@ GuiImageData
 		}
 
 /***********************************************************************
+GuiTextData
+***********************************************************************/
+
+		GuiTextData::GuiTextData()
+		{
+		}
+
+		GuiTextData::GuiTextData(const WString& _text)
+			:text(_text)
+		{
+		}
+
+		WString GuiTextData::GetText()
+		{
+			return text;
+		}
+
+/***********************************************************************
 GuiResourceNodeBase
 ***********************************************************************/
 
@@ -143,9 +161,9 @@ GuiResourceItem
 			return content.Cast<XmlDocument>();
 		}
 
-		Ptr<ObjectBox<WString>> GuiResourceItem::AsString()
+		Ptr<GuiTextData> GuiResourceItem::AsString()
 		{
-			return content.Cast<ObjectBox<WString>>();
+			return content.Cast<GuiTextData>();
 		}
 
 		Ptr<DocumentModel> GuiResourceItem::AsDocument()
@@ -242,7 +260,7 @@ GuiResourceFolder
 									WString text;
 									if(LoadTextFromStream(fileStream, text))
 									{
-										item->SetContent(new ObjectBox<WString>(text));
+										item->SetContent(new GuiTextData(text));
 									}
 								}
 								else if(element->name.value==L"Image")
@@ -275,7 +293,7 @@ GuiResourceFolder
 							else if(element->name.value==L"Text")
 							{
 								WString text=XmlGetValue(element);
-								item->SetContent(new ObjectBox<WString>(text));
+								item->SetContent(new GuiTextData(text));
 							}
 							else if(element->name.value==L"Image")
 							{
@@ -670,6 +688,7 @@ IGuiResourceResolverManager
 		{
 		protected:
 			Dictionary<WString, Ptr<IGuiResourcePathResolverFactory>>		pathFactories;
+			Dictionary<WString, Ptr<IGuiResourceTypeResolver>>				typeResolvers;
 
 		public:
 			GuiResourceResolverManager()
@@ -706,6 +725,19 @@ IGuiResourceResolverManager
 			{
 				if(pathFactories.Keys().Contains(factory->GetProtocol())) return false;
 				pathFactories.Add(factory->GetProtocol(), factory);
+				return true;
+			}
+
+			IGuiResourceTypeResolver* GetTypeResolverFactory(const WString& type)override
+			{
+				vint index=typeResolvers.Keys().IndexOf(type);
+				return index==-1?0:typeResolvers.Values()[index].Obj();
+			}
+
+			bool SetTypeResolverFactory(Ptr<IGuiResourceTypeResolver> resolver)override
+			{
+				if(typeResolvers.Keys().Contains(resolver->GetType())) return false;
+				typeResolvers.Add(resolver->GetType(), resolver);
 				return true;
 			}
 		};

@@ -327,6 +327,13 @@ Type Declaration
 				CLASS_MEMBER_PROPERTY_READONLY(FrameIndex, GetFrameIndex)
 			END_CLASS_MEMBER(GuiImageData)
 
+			BEGIN_CLASS_MEMBER(GuiTextData)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<GuiTextData>(), NO_PARAMETER)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<GuiTextData>(const WString&), {L"text"})
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Text)
+			END_CLASS_MEMBER(GuiTextData)
+
 			BEGIN_CLASS_MEMBER(DocumentStyleProperties)
 				CLASS_MEMBER_CONSTRUCTOR(Ptr<DocumentStyleProperties>(), NO_PARAMETER)
 

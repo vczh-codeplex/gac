@@ -52,6 +52,29 @@ Resource Image
 		};
 
 /***********************************************************************
+Resource String
+***********************************************************************/
+
+
+		/// <summary>Represents a text resource.</summary>
+		class GuiTextData : public Object, public Description<GuiTextData>
+		{
+		protected:
+			WString							text;
+
+		public:
+			/// <summary>Create an empty text data.</summary>
+			GuiTextData();
+			/// <summary>Create a text data with a specified text.</summary>
+			/// <param name="_text">The specified text.</param>
+			GuiTextData(const WString& _text);
+			
+			/// <summary>Get the specified text.</summary>
+			/// <returns>The specified text.</returns>
+			WString							GetText();
+		};
+
+/***********************************************************************
 Resource Structure
 ***********************************************************************/
 
@@ -104,7 +127,7 @@ Resource Structure
 			Ptr<parsing::xml::XmlDocument>			AsXml();
 			/// <summary>Get the contained object as a string.</summary>
 			/// <returns>The contained object.</returns>
-			Ptr<ObjectBox<WString>>					AsString();
+			Ptr<GuiTextData>						AsString();
 			/// <summary>Get the contained object as a document model.</summary>
 			/// <returns>The contained object.</returns>
 			Ptr<DocumentModel>						AsDocument();
@@ -260,10 +283,6 @@ Parser Loader
 		extern IGuiParserManager*					GetParserManager();
 
 /***********************************************************************
-Resource Type Resolver
-***********************************************************************/
-
-/***********************************************************************
 Resource Path Resolver
 ***********************************************************************/
 
@@ -316,6 +335,25 @@ Resource Path Resolver
 		};
 
 /***********************************************************************
+Resource Type Resolver
+***********************************************************************/
+
+		/// <summary>Represents a symbol type for loading a resource.</summary>
+		class IGuiResourceTypeResolver : public IDescriptable, public Description<IGuiResourceTypeResolver>
+		{
+		public:
+			/// <summary>Get the type of the resource that load by this resolver.</summary>
+			/// <returns>The type.</returns>
+			virtual WString									GetType()=0;
+
+			/// <summary>Load a resource for a type from an xml.</summary>
+			/// <returns>The resource.</returns>
+			/// <param name="xml">The xml.</param>
+			/// <param name="resolver">The path resolver.</param>
+			virtual Ptr<DescriptableObject>					ResolveResource(Ptr<parsing::xml::XmlDocument> xml, Ptr<GuiResourcePathResolver> resolver)=0;
+		};
+
+/***********************************************************************
 Resource Resolver Manager
 ***********************************************************************/
 
@@ -324,13 +362,21 @@ Resource Resolver Manager
 		{
 		public:
 			/// <summary>Get the <see cref="IGuiResourcePathResolverFactory"/> for a protocol.</summary>
-			/// <returns>The created factory.</returns>
+			/// <returns>The factory.</returns>
 			/// <param name="protocol">The protocol.</param>
 			virtual IGuiResourcePathResolverFactory*		GetPathResolverFactory(const WString& protocol)=0;
 			/// <summary>Set the <see cref="IGuiResourcePathResolverFactory"/> for a protocol.</summary>
 			/// <returns>Returns true if this operation succeeded.</returns>
 			/// <param name="factory">The factory.</param>
 			virtual bool									SetPathResolverFactory(Ptr<IGuiResourcePathResolverFactory> factory)=0;
+			/// <summary>Get the <see cref="IGuiResourceTypeResolver"/> for a resource type.</summary>
+			/// <returns>The resolver.</returns>
+			/// <param name="type">The resource type.</param>
+			virtual IGuiResourceTypeResolver*				GetTypeResolverFactory(const WString& type)=0;
+			/// <summary>Set the <see cref="IGuiResourceTypeResolver"/> for a resource type.</summary>
+			/// <returns>Returns true if this operation succeeded.</returns>
+			/// <param name="resolver">The resolver.</param>
+			virtual bool									SetTypeResolverFactory(Ptr<IGuiResourceTypeResolver> resolver)=0;
 		};
 		
 		extern IGuiResourceResolverManager*					GetResourceResolverManager();

@@ -51,6 +51,7 @@ Type List
 			F(presentation::INativeScreenService)\
 			F(presentation::INativeController)\
 			F(presentation::GuiImageData)\
+			F(presentation::GuiTextData)\
 			F(presentation::DocumentStyleProperties)\
 			F(presentation::DocumentRun)\
 			F(presentation::DocumentContainerRun)\
