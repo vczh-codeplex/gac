@@ -338,6 +338,7 @@
     <ClCompile Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsResourceService.cpp" />
     <ClCompile Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsScreenService.cpp" />
     <ClCompile Include="..\..\Source\NativeWindow\Windows\WinNativeWindow.cpp" />
+    <ClCompile Include="..\..\Source\Reflection\TypeDescriptors\GuiInstanceLoader.cpp" />
     <ClCompile Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionBasic.cpp" />
     <ClCompile Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionCompositions.cpp" />
     <ClCompile Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionControls.cpp" />
@@ -490,6 +491,7 @@
     <ClInclude Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsResourceService.h" />
     <ClInclude Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsScreenService.h" />
     <ClInclude Include="..\..\Source\NativeWindow\Windows\WinNativeWindow.h" />
+    <ClInclude Include="..\..\Source\Reflection\TypeDescriptors\GuiInstanceLoader.h" />
     <ClInclude Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionBasic.h" />
     <ClInclude Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionCompositions.h" />
     <ClInclude Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionControls.h" />
