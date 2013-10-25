@@ -94,6 +94,9 @@
     <Filter Include="GacUI\Reflection">
       <UniqueIdentifier>{9fcd500b-d608-436c-b21e-158a049341d8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="GacUI\Reflection\TypeDescriptors">
+      <UniqueIdentifier>{4d4fab23-2e07-4acc-bec4-2360bac2fd1b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\Common\Source\Basic.cpp">
@@ -288,9 +291,6 @@
     <ClCompile Include="..\..\Source\Controls\ToolstripPackage\GuiToolstripMenu.cpp">
       <Filter>GacUI\Controls\ToolstripPackage</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptor.cpp">
-      <Filter>Common\Reflection</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\Controls\Styles\GuiWin8Styles.cpp">
       <Filter>GacUI\Controls\Styles</Filter>
     </ClCompile>
@@ -299,9 +299,6 @@
     </ClCompile>
     <ClCompile Include="..\..\Source\Controls\Styles\Win8Styles\GuiWin8StylesCommon.cpp">
       <Filter>GacUI\Controls\Styles\Win8Styles</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorBuilder.cpp">
-      <Filter>Common\Reflection</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Controls\Styles\Win8Styles\GuiWin8ButtonStyles.cpp">
       <Filter>GacUI\Controls\Styles\Win8Styles</Filter>
@@ -435,24 +432,6 @@
     <ClCompile Include="..\..\Source\Controls\TextEditorPackage\GuiDocumentViewer.cpp">
       <Filter>GacUI\Controls\TextEditorPackage</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorPredefined.cpp">
-      <Filter>Common\Reflection</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Reflection\GuiReflectionBasic.cpp">
-      <Filter>GacUI\Reflection</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Reflection\GuiReflectionElements.cpp">
-      <Filter>GacUI\Reflection</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Reflection\GuiReflectionCompositions.cpp">
-      <Filter>GacUI\Reflection</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Reflection\GuiReflectionControls.cpp">
-      <Filter>GacUI\Reflection</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Reflection\GuiReflectionEvents.cpp">
-      <Filter>GacUI\Reflection</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\Common\Source\Parsing\ParsingAutomaton_MergeStates.cpp">
       <Filter>Common\Parsing</Filter>
     </ClCompile>
@@ -495,8 +474,23 @@
     <ClCompile Include="..\..\Source\NativeWindow\GuiDocument_Edit.cpp">
       <Filter>GacUI\NativeWindow</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Reflection\GuiReflectionPlugin.cpp">
-      <Filter>GacUI\Reflection</Filter>
+    <ClCompile Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionBasic.cpp">
+      <Filter>GacUI\Reflection\TypeDescriptors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionCompositions.cpp">
+      <Filter>GacUI\Reflection\TypeDescriptors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionControls.cpp">
+      <Filter>GacUI\Reflection\TypeDescriptors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionElements.cpp">
+      <Filter>GacUI\Reflection\TypeDescriptors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionEvents.cpp">
+      <Filter>GacUI\Reflection\TypeDescriptors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionPlugin.cpp">
+      <Filter>GacUI\Reflection\TypeDescriptors</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -755,9 +749,6 @@
     <ClInclude Include="..\..\Source\Controls\ToolstripPackage\GuiToolstripMenu.h">
       <Filter>GacUI\Controls\ToolstripPackage</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptor.h">
-      <Filter>Common\Reflection</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\Controls\Styles\GuiWin8Styles.h">
       <Filter>GacUI\Controls\Styles</Filter>
     </ClInclude>
@@ -766,9 +757,6 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Controls\Styles\Win8Styles\GuiWin8StylesCommon.h">
       <Filter>GacUI\Controls\Styles\Win8Styles</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorBuilder.h">
-      <Filter>Common\Reflection</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Controls\Styles\Win8Styles\GuiWin8ButtonStyles.h">
       <Filter>GacUI\Controls\Styles\Win8Styles</Filter>
@@ -887,30 +875,6 @@
     <ClInclude Include="..\..\Source\Controls\TextEditorPackage\GuiDocumentViewer.h">
       <Filter>GacUI\Controls\TextEditorPackage</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorPredefined.h">
-      <Filter>Common\Reflection</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorBuilder_Gen.h">
-      <Filter>Common\Reflection</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorMacros.h">
-      <Filter>Common\Reflection</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Reflection\GuiReflectionBasic.h">
-      <Filter>GacUI\Reflection</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Reflection\GuiReflectionElements.h">
-      <Filter>GacUI\Reflection</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Reflection\GuiReflectionCompositions.h">
-      <Filter>GacUI\Reflection</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Reflection\GuiReflectionControls.h">
-      <Filter>GacUI\Reflection</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Reflection\GuiReflectionEvents.h">
-      <Filter>GacUI\Reflection</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\Controls\ListControlPackage\GuiDataGridControls.h">
       <Filter>GacUI\Controls\ListControlPackage</Filter>
     </ClInclude>
@@ -940,6 +904,21 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\GraphicsElement\GuiGraphicsDocumentElement.h">
       <Filter>GacUI\GraphicsElement</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionBasic.h">
+      <Filter>GacUI\Reflection\TypeDescriptors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionCompositions.h">
+      <Filter>GacUI\Reflection\TypeDescriptors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionControls.h">
+      <Filter>GacUI\Reflection\TypeDescriptors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionElements.h">
+      <Filter>GacUI\Reflection\TypeDescriptors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionEvents.h">
+      <Filter>GacUI\Reflection\TypeDescriptors</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
