@@ -1654,7 +1654,7 @@ DocumentModel::EditRun
 					while(true)
 					{
 						WString newName=name+L"_"+itow(index++);
-						if(!styles.Keys().Contains(newName) && model->styles.Keys().Contains(newName))
+						if(!styles.Keys().Contains(newName) && !model->styles.Keys().Contains(newName))
 						{
 							newNames[i]=newName;
 							break;
