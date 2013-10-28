@@ -10,6 +10,7 @@ Interfaces:
 #define VCZH_PRESENTATION_REFLECTION_GUIREFLECTIONBASIC
 
 #include "..\..\GacUI.h"
+#include "..\GuiInstanceLoader.h"
 
 namespace vl
 {

@@ -76,12 +76,36 @@ Instance Context
 
 		class GuiInstanceContext : public Object, public Description<GuiInstanceContext>
 		{
-			typedef collections::Group<WString, WString>			NamespaceGroup;
+		public:
+			struct NamespacePattern
+			{
+				WString								prefix;
+				WString								postfix;
+			};
+			typedef collections::List<NamespacePattern>					NamespacePatternList;
+
+			struct NamespaceInfo
+			{
+				bool								isDefault;
+				WString								name;
+				NamespacePatternList				patterns;
+			};
+			typedef collections::Group<WString, Ptr<NamespaceInfo>>		NamespaceGroup;
+
+			struct Reference
+			{
+				bool								isFolder;
+				WString								resourcePath;
+			};
+			typedef collections::List<Reference>						ReferenceList;
 		public:
 			Ptr<GuiInstanceRepr>					instance;
 			NamespaceGroup							namespaces;
+			ReferenceList							references;
+			WString									referenceNamespace;
+			WString									typeName;
 
-			static Ptr<GuiInstanceContext>			LoadFromXml(Ptr<parsing::xml::XmlDocument> xml);
+			static Ptr<GuiInstanceContext>			LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, Ptr<GuiResourcePathResolver> resolver);
 		};
 	}
 }
