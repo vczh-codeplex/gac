@@ -11,6 +11,7 @@ Interfaces:
 
 #include "..\Controls\GuiApplication.h"
 #include "..\Controls\Styles\GuiThemeStyleFactory.h"
+#include "GuiInstanceRepresentation.h"
 
 namespace vl
 {
