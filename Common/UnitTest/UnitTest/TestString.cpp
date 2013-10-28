@@ -83,6 +83,8 @@ TEST_CASE(StringLeftRightSub)
 	CheckString(string.Sub(4,4).Left(2),L" i");
 	CheckString(string.Sub(4,4).Sub(1,2),L"is");
 	CheckString(string.Sub(4,4).Right(2),L"s ");
+	CheckString(string.Sub(0,0),L"");
+	CheckString(string.Sub(12,0),L"");
 }
 
 TEST_CASE(StringConcat)
