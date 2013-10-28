@@ -386,6 +386,30 @@ GuiResourceFolder
 			return 0;
 		}
 
+		Ptr<GuiResourceFolder> GuiResourceFolder::GetFolderByPath(const WString& path)
+		{
+			const wchar_t* buffer=path.Buffer();
+			const wchar_t* index=wcschr(buffer, L'\\');
+			if(!index) index=wcschr(buffer, '/');
+			if(!index) return 0;
+
+			WString name=path.Sub(0, index-buffer);
+			Ptr<GuiResourceFolder> folder=GetFolder(name);
+
+			if(index-buffer==path.Length()-1)
+			{
+				return folder;
+			}
+
+			if(folder)
+			{
+				vint start=index-buffer+1;
+				return folder->GetFolderByPath(path.Sub(start, path.Length()-start));
+			}
+
+			return 0;
+		}
+
 /***********************************************************************
 GuiResource
 ***********************************************************************/

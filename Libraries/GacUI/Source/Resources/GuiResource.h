@@ -202,6 +202,10 @@ Resource Structure
 			/// <returns>The containd resource object.</returns>
 			/// <param name="path">The path.</param>
 			Ptr<Object>								GetValueByPath(const WString& path);
+			/// <summary>Get a resource folder using a path like "Packages\Application\Name\".</summary>
+			/// <returns>The resource folder.</returns>
+			/// <param name="path">The path.</param>
+			Ptr<GuiResourceFolder>					GetFolderByPath(const WString& path);
 		};
 
 /***********************************************************************

@@ -48,27 +48,32 @@ GuiInstanceLoaderManager
 				throw 0;
 			}
 
-			bool SetLoaderForType(description::ITypeDescriptor* typeDescriptor, Ptr<IGuiInstanceLoader> loader)override
+			bool SetLoaderForType(description::ITypeDescriptor* baseType, Ptr<IGuiInstanceLoader> loader)override
 			{
 				throw 0;
 			}
 
-			IGuiInstanceLoader* GetLoaderFromType(description::ITypeDescriptor* typeDescriptor)override
+			bool SetLoaderForVirtualType(const WString& typeName, description::ITypeDescriptor* baseType, Ptr<IGuiInstanceLoader> loader)override
 			{
 				throw 0;
 			}
 
-			IGuiInstanceLoader* GetLoaderFromContext(Ptr<GuiInstanceContext> context)override
+			IGuiInstanceLoader* GetLoaderFromType(const WString& typeName)override
 			{
 				throw 0;
 			}
 
-			DescriptableObject* LoadObject(Ptr<GuiInstanceContext> context)override
+			IGuiInstanceLoader* GetLoaderForInstance(Ptr<GuiInstanceContext> context, Ptr<GuiInstanceRepr> instance, Ptr<GuiResourcePathResolver> resolver)override
 			{
 				throw 0;
 			}
 
-			bool LoadObject(DescriptableObject* createdInstance, Ptr<GuiInstanceContext> context)override
+			DescriptableObject* LoadObject(Ptr<GuiInstanceContext> context, Ptr<GuiResourcePathResolver> resolver)override
+			{
+				throw 0;
+			}
+
+			bool LoadObject(DescriptableObject* createdInstance, Ptr<GuiInstanceContext> context, Ptr<GuiResourcePathResolver> resolver)override
 			{
 				throw 0;
 			}
