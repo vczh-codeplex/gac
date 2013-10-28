@@ -6,8 +6,8 @@ GacUI Reflection: InstanceLoader
 Interfaces:
 ***********************************************************************/
 
-#ifndef VCZH_PRESENTATION_REFLECTION_GUIPERSISTENCE
-#define VCZH_PRESENTATION_REFLECTION_GUIPERSISTENCE
+#ifndef VCZH_PRESENTATION_REFLECTION_GUIINSTANCEREPRESENTATION
+#define VCZH_PRESENTATION_REFLECTION_GUIINSTANCEREPRESENTATION
 
 #include "..\Resources\GuiResource.h"
 
