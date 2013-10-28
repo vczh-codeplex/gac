@@ -6,10 +6,10 @@ GacUI Reflection: InstanceLoader
 Interfaces:
 ***********************************************************************/
 
-#ifndef VCZH_PRESENTATION_RESOURCES_GUIPERSISTENCE
-#define VCZH_PRESENTATION_RESOURCES_GUIPERSISTENCE
+#ifndef VCZH_PRESENTATION_REFLECTION_GUIPERSISTENCE
+#define VCZH_PRESENTATION_REFLECTION_GUIPERSISTENCE
 
-#include "GuiResource.h"
+#include "..\Resources\GuiResource.h"
 
 namespace vl
 {

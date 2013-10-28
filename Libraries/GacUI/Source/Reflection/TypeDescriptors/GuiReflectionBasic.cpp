@@ -442,6 +442,8 @@ Type Declaration
 				CLASS_MEMBER_CONSTRUCTOR(Ptr<GuiResource>(), NO_PARAMETER)
 				CLASS_MEMBER_EXTERNALCTOR(Ptr<GuiResource>(const WString&), {L"filePath"}, &GuiResource::LoadFromXml);
 
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(WorkingDirectory)
+
 				CLASS_MEMBER_METHOD(GetDocumentByPath, {L"path"})
 				CLASS_MEMBER_METHOD(GetImageByPath, {L"path"})
 				CLASS_MEMBER_METHOD(GetStringByPath, {L"path"})

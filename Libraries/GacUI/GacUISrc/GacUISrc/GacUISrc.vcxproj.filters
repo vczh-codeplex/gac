@@ -507,11 +507,11 @@
     <ClCompile Include="..\..\Source\Resources\GuiResource.cpp">
       <Filter>GacUI\Resources</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Resources\GuiPersistence.cpp">
-      <Filter>GacUI\Resources</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\Resources\GuiResourceTypeResolvers.cpp">
       <Filter>GacUI\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Reflection\GuiInstanceRepresentation.cpp">
+      <Filter>GacUI\Reflection</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -959,8 +959,8 @@
     <ClInclude Include="..\..\Source\Resources\GuiResource.h">
       <Filter>GacUI\Resources</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Resources\GuiPersistence.h">
-      <Filter>GacUI\Resources</Filter>
+    <ClInclude Include="..\..\Source\Reflection\GuiInstanceRepresentation.h">
+      <Filter>GacUI\Reflection</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
