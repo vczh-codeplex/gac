@@ -95,7 +95,8 @@ Instance Context
 			struct Reference
 			{
 				bool								isFolder;
-				WString								resourcePath;
+				WString								protocol;
+				WString								path;
 			};
 			typedef collections::List<Reference>						ReferenceList;
 		public:
