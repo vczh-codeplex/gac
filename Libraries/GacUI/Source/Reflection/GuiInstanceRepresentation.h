@@ -20,47 +20,55 @@ namespace vl
 Instance Context
 ***********************************************************************/
 
-		class GuiTextDescription;
-		class GuiObjectDescription;
-		class GuiInstanceDescription;
+		class GuiResourceRepr;
+		class GuiAttSetterRepr;
+		class GuiInstanceRepr;
 
-		class GuiValueDescription : public Object, public Description<GuiValueDescription>
+		class GuiValueRepr : public Object, public Description<GuiValueRepr>
 		{
 		public:
 			class IVisitor : public IDescriptable, public Description<IVisitor>
 			{
 			public:
-				virtual void						Visit(GuiTextDescription* description)=0;
-				virtual void						Visit(GuiObjectDescription* description)=0;
-				virtual void						Visit(GuiInstanceDescription* description)=0;
+				virtual void						Visit(GuiResourceRepr* description)=0;
+				virtual void						Visit(GuiAttSetterRepr* description)=0;
+				virtual void						Visit(GuiInstanceRepr* description)=0;
 			};
 
 			virtual void							Accept(IVisitor* visitor)=0;
 		};
 
-		class GuiTextDescription : public GuiValueDescription, public Description<GuiTextDescription>
+		class GuiResourceRepr : public GuiValueRepr, public Description<GuiResourceRepr>
 		{
 		public:
-			WString									binder;
-			WString									text;
+			Ptr<Object>								resource;
 
 			void									Accept(IVisitor* visitor)override{visitor->Visit(this);}
 		};
 
-		class GuiObjectDescription : public GuiValueDescription, public Description<GuiObjectDescription>
+		class GuiAttSetterRepr : public GuiValueRepr, public Description<GuiAttSetterRepr>
 		{
-			typedef collections::Dictionary<WString, Ptr<GuiValueDescription>>			PropertyValueMap;
-			typedef collections::List<Ptr<GuiInstanceDescription>>						SubInstanceList;
 		public:
-			PropertyValueMap						PropertyValues;
-			SubInstanceList							SubInstances;
+			typedef collections::List<Ptr<GuiValueRepr>>				ValueList;
+
+			struct Setter
+			{
+				WString								binding;
+				ValueList							values;
+			};
+
+			typedef collections::Dictionary<WString, Ptr<Setter>>		SetterMap;
+		public:
+			SetterMap								setters;
+			ValueList								children;
 
 			void									Accept(IVisitor* visitor)override{visitor->Visit(this);}
 		};
 
-		class GuiInstanceDescription : public GuiObjectDescription, public Description<GuiInstanceDescription>
+		class GuiInstanceRepr : public GuiAttSetterRepr, public Description<GuiInstanceRepr>
 		{
 		public:
+			WString									typeNamespace;
 			WString									typeName;
 
 			void									Accept(IVisitor* visitor)override{visitor->Visit(this);}
@@ -68,8 +76,10 @@ Instance Context
 
 		class GuiInstanceContext : public Object, public Description<GuiInstanceContext>
 		{
+			typedef collections::Group<WString, WString>			NamespaceGroup;
 		public:
-			Ptr<GuiInstanceDescription>				instance;
+			Ptr<GuiInstanceRepr>					instance;
+			NamespaceGroup							namespaces;
 
 			static Ptr<GuiInstanceContext>			LoadFromXml(Ptr<parsing::xml::XmlDocument> xml);
 		};
