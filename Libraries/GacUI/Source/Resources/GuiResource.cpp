@@ -1,5 +1,4 @@
 #include "GuiDocument.h"
-#include "GuiPersistence.h"
 #include "..\Controls\GuiApplication.h"
 #include "..\..\..\..\Common\Source\Stream\FileStream.h"
 #include "..\..\..\..\Common\Source\Stream\Accessor.h"
@@ -418,6 +417,11 @@ GuiResource
 		{
 		}
 
+		WString GuiResource::GetWorkingDirectory()
+		{
+			return workingDirectory;
+		}
+
 		Ptr<GuiResource> GuiResource::LoadFromXml(const WString& filePath)
 		{
 			Ptr<ParsingTable> table;
@@ -434,8 +438,9 @@ GuiResource
 			if(xml)
 			{
 				resource=new GuiResource;
+				resource->workingDirectory=GetFolderPath(filePath);
 				DelayLoadingList delayLoadings;
-				resource->LoadResourceFolderXml(delayLoadings, GetFolderPath(filePath), xml->rootElement, table);
+				resource->LoadResourceFolderXml(delayLoadings, resource->workingDirectory, xml->rootElement, table);
 
 				FOREACH(DelayLoading, delay, delayLoadings)
 				{

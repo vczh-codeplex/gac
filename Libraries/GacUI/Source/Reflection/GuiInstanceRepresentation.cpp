@@ -1,4 +1,4 @@
-#include "GuiPersistence.h"
+#include "GuiInstanceRepresentation.h"
 
 namespace vl
 {

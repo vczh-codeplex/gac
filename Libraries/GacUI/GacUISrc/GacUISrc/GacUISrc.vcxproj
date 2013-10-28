@@ -335,6 +335,7 @@
     <ClCompile Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsScreenService.cpp" />
     <ClCompile Include="..\..\Source\NativeWindow\Windows\WinNativeWindow.cpp" />
     <ClCompile Include="..\..\Source\Reflection\GuiInstanceLoader.cpp" />
+    <ClCompile Include="..\..\Source\Reflection\GuiInstanceRepresentation.cpp" />
     <ClCompile Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionBasic.cpp" />
     <ClCompile Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionCompositions.cpp" />
     <ClCompile Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionControls.cpp" />
@@ -345,7 +346,6 @@
     <ClCompile Include="..\..\Source\Resources\GuiDocument_Edit.cpp" />
     <ClCompile Include="..\..\Source\Resources\GuiDocument_Load.cpp" />
     <ClCompile Include="..\..\Source\Resources\GuiDocument_Save.cpp" />
-    <ClCompile Include="..\..\Source\Resources\GuiPersistence.cpp" />
     <ClCompile Include="..\..\Source\Resources\GuiResource.cpp" />
     <ClCompile Include="..\..\Source\Resources\GuiResourceTypeResolvers.cpp" />
     <ClCompile Include="FileSystemInformation.cpp" />
@@ -493,13 +493,13 @@
     <ClInclude Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsScreenService.h" />
     <ClInclude Include="..\..\Source\NativeWindow\Windows\WinNativeWindow.h" />
     <ClInclude Include="..\..\Source\Reflection\GuiInstanceLoader.h" />
+    <ClInclude Include="..\..\Source\Reflection\GuiInstanceRepresentation.h" />
     <ClInclude Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionBasic.h" />
     <ClInclude Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionCompositions.h" />
     <ClInclude Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionControls.h" />
     <ClInclude Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionElements.h" />
     <ClInclude Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionEvents.h" />
     <ClInclude Include="..\..\Source\Resources\GuiDocument.h" />
-    <ClInclude Include="..\..\Source\Resources\GuiPersistence.h" />
     <ClInclude Include="..\..\Source\Resources\GuiResource.h" />
     <ClInclude Include="FileSystemInformation.h" />
   </ItemGroup>

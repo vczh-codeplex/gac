@@ -211,10 +211,16 @@ Resource Loader
 		/// <summary>Resource. A resource is a root resource folder that does not have a name.</summary>
 		class GuiResource : public GuiResourceFolder, public Description<GuiResource>
 		{
+		protected:
+			WString									workingDirectory;
 		public:
 			/// <summary>Create a resource.</summary>
 			GuiResource();
 			~GuiResource();
+
+			/// <summary>Get the directory where the resource is load.</summary>
+			/// <returns>The directory.</returns>
+			WString									GetWorkingDirectory();
 
 			/// <summary>Load a resource from an xml file. If the xml file refers other files, they will be loaded as well.</summary>
 			/// <returns>The loaded resource.</returns>
