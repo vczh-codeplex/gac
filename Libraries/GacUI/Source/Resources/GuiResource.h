@@ -355,7 +355,7 @@ Resource Type Resolver
 			/// <summary>Get the type of the resource that load by this resolver.</summary>
 			/// <returns>The type.</returns>
 			virtual WString									GetType()=0;
-			/// <summary>Get the preload type to load the resource before delay loading.</summary>
+			/// <summary>Get the preload type to load the resource before loading itself.</summary>
 			/// <returns>The preload type. Returns an empty string to indicate that there is no preload type for this resolver.</returns>
 			virtual WString									GetPreloadType()=0;
 			/// <summary>Get the delay load feature for this resolver.</summary>

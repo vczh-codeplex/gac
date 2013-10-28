@@ -233,28 +233,34 @@ GuiResourceFolder
 					Ptr<GuiResourceItem> item=new GuiResourceItem;
 					if(AddItem(name, item))
 					{
-						if(filePath!=L"")
-						{
-							WString type=element->name.value;
-							bool preload=false;
-							IGuiResourceTypeResolver* typeResolver=GetResourceResolverManager()->GetTypeResolver(type);
+						WString type=element->name.value;
+						IGuiResourceTypeResolver* typeResolver=GetResourceResolverManager()->GetTypeResolver(type);
+						IGuiResourceTypeResolver* preloadResolver=typeResolver;
 
-							if(typeResolver)
+						if(typeResolver)
+						{
+							WString preloadType=typeResolver->GetPreloadType();
+							if(preloadType!=L"")
 							{
-								WString preloadType=typeResolver->GetPreloadType();
-								if(preloadType!=L"")
-								{
-									typeResolver=GetResourceResolverManager()->GetTypeResolver(preloadType);
-									preload=true;
-								}
+								preloadResolver=GetResourceResolverManager()->GetTypeResolver(preloadType);
+							}
+						}
+
+						if(typeResolver && preloadResolver)
+						{
+							Ptr<Object> resource;
+							if(filePath==L"")
+							{
+								resource=preloadResolver->ResolveResource(element);
+							}
+							else
+							{
+								resource=preloadResolver->ResolveResource(filePath);
 							}
 
-							if(typeResolver)
+							if(typeResolver!=preloadResolver)
 							{
-								Ptr<Object> resource=typeResolver->ResolveResource(filePath);
-								item->SetContent(resource);
-
-								if(preload)
+								if(typeResolver->IsDelayLoad())
 								{
 									DelayLoading delayLoading;
 									delayLoading.type=type;
@@ -262,39 +268,14 @@ GuiResourceFolder
 									delayLoading.preloadResource=item;
 									delayLoadings.Add(delayLoading);
 								}
-							}
-						}
-						else
-						{
-							WString type=element->name.value;
-							bool preload=false;
-							IGuiResourceTypeResolver* typeResolver=GetResourceResolverManager()->GetTypeResolver(type);
-
-							if(typeResolver)
-							{
-								WString preloadType=typeResolver->GetPreloadType();
-								if(preloadType!=L"")
+								else if(resource)
 								{
-									typeResolver=GetResourceResolverManager()->GetTypeResolver(preloadType);
-									preload=true;
+									resource=typeResolver->ResolveResource(resource, 0);
 								}
 							}
-
-							if(typeResolver)
-							{
-								Ptr<Object> resource=typeResolver->ResolveResource(element);
-								item->SetContent(resource);
-
-								if(preload)
-								{
-									DelayLoading delayLoading;
-									delayLoading.type=type;
-									delayLoading.workingDirectory=containingFolder;
-									delayLoading.preloadResource=item;
-									delayLoadings.Add(delayLoading);
-								}
-							}
+							item->SetContent(resource);
 						}
+
 						if(!item->GetContent())
 						{
 							RemoveItem(name);
