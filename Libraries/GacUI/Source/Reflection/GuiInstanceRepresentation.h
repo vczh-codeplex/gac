@@ -128,11 +128,26 @@ Instance Context
 				NamespacePatternList				patterns;
 			};
 			typedef collections::Dictionary<WString, Ptr<NamespaceInfo>>		NamespaceMap;
+
+			class ElementName : public Object
+			{
+			public:
+				WString								namespaceName;
+				WString								category;
+				WString								name;
+				WString								binding;
+
+				bool IsCtorName(){ return category==L"" && name!=L"" && binding==L""; }
+				bool IsPropertyAttributeName(){ return namespaceName==L"" && category==L"" && name!=L""; }
+				bool IsPropertyElementName(){ return namespaceName==L"" && category==L"att" && name!=L""; }
+			};
 		public:
 			Ptr<GuiConstructorRepr>					instance;
 			NamespaceMap							namespaces;
 			WString									typeName;
 
+			static void								FillAttSetter(Ptr<GuiAttSetterRepr> setter, Ptr<parsing::xml::XmlElement> xml, Ptr<GuiResourcePathResolver> resolver);
+			static Ptr<GuiConstructorRepr>			LoadCtor(Ptr<parsing::xml::XmlElement> xml, Ptr<GuiResourcePathResolver> resolver);
 			static Ptr<GuiInstanceContext>			LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, Ptr<GuiResourcePathResolver> resolver);
 		};
 	}
