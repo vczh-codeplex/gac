@@ -1,4 +1,5 @@
 #include "GuiDocument.h"
+#include "GuiParserManager.h"
 #include "..\Controls\GuiApplication.h"
 #include "..\..\..\..\Common\Source\Stream\FileStream.h"
 #include "..\..\..\..\Common\Source\Stream\Accessor.h"
@@ -510,78 +511,6 @@ GuiResource
 			if(!result) throw ArgumentException(L"Path not exists.", L"GuiResource::GetStringByPath", L"path");
 			return result->Unbox();
 		}
-
-/***********************************************************************
-IGuiParserManager
-***********************************************************************/
-
-		IGuiParserManager* parserManager=0;
-
-		IGuiParserManager* GetParserManager()
-		{
-			return parserManager;
-		}
-
-		class GuiParserManager : public Object, public IGuiParserManager, public IGuiPlugin
-		{
-		protected:
-			Dictionary<WString, Ptr<Table>>				tables;
-			Dictionary<WString, Func<Ptr<Table>()>>		loaders;
-			SpinLock									lock;
-		public:
-			GuiParserManager()
-			{
-			}
-
-			~GuiParserManager()
-			{
-			}
-
-			void Load()override
-			{
-				parserManager=this;
-				SetParsingTable(L"XML", &XmlLoadTable);
-				SetParsingTable(L"JSON", &JsonLoadTable);
-			}
-
-			void AfterLoad()override
-			{
-			}
-
-			void Unload()override
-			{
-				parserManager=0;
-			}
-
-			Ptr<Table> GetParsingTable(const WString& name)
-			{
-				SPIN_LOCK(lock)
-				{
-					vint index=tables.Keys().IndexOf(name);
-					if(index!=-1)
-					{
-						return tables.Values()[index];
-					}
-
-					index=loaders.Keys().IndexOf(name);
-					if(index!=-1)
-					{
-						Ptr<Table> table=loaders.Values()[index]();
-						tables.Add(name, table);
-						return table;
-					}
-				}
-				return 0;
-			}
-
-			bool SetParsingTable(const WString& name, Func<Ptr<Table>()> loader)
-			{
-				if(loaders.Keys().Contains(name)) return false;
-				loaders.Add(name, loader);
-				return true;
-			}
-		};
-		GUI_REGISTER_PLUGIN(GuiParserManager)
 
 /***********************************************************************
 GuiResourcePathResolver

@@ -1,4 +1,5 @@
 #include "GuiDocument.h"
+#include "GuiParserManager.h"
 #include "..\..\..\..\Common\Source\Stream\FileStream.h"
 #include "..\..\..\..\Common\Source\Stream\Accessor.h"
 #include "..\..\..\..\Common\Source\Stream\CharFormat.h"
