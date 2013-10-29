@@ -77,7 +77,7 @@ Instance Type Resolver
 
 			bool IsDelayLoad()
 			{
-				return true;
+				return false;
 			}
 
 			Ptr<Object> ResolveResource(Ptr<parsing::xml::XmlElement> element)
@@ -95,7 +95,7 @@ Instance Type Resolver
 				Ptr<XmlDocument> xml=resource.Cast<XmlDocument>();
 				if(xml)
 				{
-					Ptr<GuiInstanceContext> context=GuiInstanceContext::LoadFromXml(xml, resolver);
+					Ptr<GuiInstanceContext> context=GuiInstanceContext::LoadFromXml(xml);
 					return context;
 				}
 				return 0;
