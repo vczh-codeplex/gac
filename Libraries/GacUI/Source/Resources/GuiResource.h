@@ -271,6 +271,12 @@ Resource Loader
 		/// <param name="stream">The stream containing text.</param>
 		/// <param name="text">The text file content, if succeeded.</param>
 		extern bool									LoadTextFromStream(stream::IStream& stream, WString& text);
+		/// <summary>Test is a text a resource url and extract the protocol and the path.</summary>
+		/// <returns>Returns true if the text is a resource url.</returns>
+		/// <param name="text">The text.</param>
+		/// <param name="protocol">The extracted protocol.</param>
+		/// <param name="path">The extracted path.</param>
+		extern bool									IsResourceUrl(const WString& text, WString& protocol, WString& path);
 
 /***********************************************************************
 Parser Loader

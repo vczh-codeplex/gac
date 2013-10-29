@@ -91,8 +91,6 @@ Instance Namespace
 				virtual void						Visit(GuiInstanceNamePattern* ns)=0;
 			};
 
-			WString									name;
-
 			virtual void							Accept(IVisitor* visitor)=0;
 		};
 
