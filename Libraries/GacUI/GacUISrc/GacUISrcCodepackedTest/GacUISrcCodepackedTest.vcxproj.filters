@@ -194,6 +194,9 @@
     <Xml Include="Resources\XmlDocDemo.xml">
       <Filter>Resource Files</Filter>
     </Xml>
+    <Xml Include="Resources\XmlWindowResource.xml">
+      <Filter>Resource Files</Filter>
+    </Xml>
   </ItemGroup>
   <ItemGroup>
     <Font Include="Resources\aldhabi.ttf">

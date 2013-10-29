@@ -276,6 +276,7 @@
     <Xml Include="Resources\XmlDocComplexScript.xml" />
     <Xml Include="Resources\XmlDocDemo.xml" />
     <Xml Include="Resources\XmlResource.xml" />
+    <Xml Include="Resources\XmlWindowResource.xml" />
   </ItemGroup>
   <ItemGroup>
     <Font Include="Resources\aldhabi.ttf" />
