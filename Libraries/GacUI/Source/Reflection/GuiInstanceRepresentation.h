@@ -20,7 +20,7 @@ namespace vl
 Instance Representation
 ***********************************************************************/
 
-		class GuiResourceRepr;
+		class GuiTextRepr;
 		class GuiAttSetterRepr;
 		class GuiConstructorRepr;
 
@@ -30,7 +30,7 @@ Instance Representation
 			class IVisitor : public IDescriptable, public Description<IVisitor>
 			{
 			public:
-				virtual void						Visit(GuiResourceRepr* repr)=0;
+				virtual void						Visit(GuiTextRepr* repr)=0;
 				virtual void						Visit(GuiAttSetterRepr* repr)=0;
 				virtual void						Visit(GuiConstructorRepr* repr)=0;
 			};
@@ -38,10 +38,10 @@ Instance Representation
 			virtual void							Accept(IVisitor* visitor)=0;
 		};
 
-		class GuiResourceRepr : public GuiValueRepr, public Description<GuiResourceRepr>
+		class GuiTextRepr : public GuiValueRepr, public Description<GuiTextRepr>
 		{
 		public:
-			Ptr<Object>								resource;
+			WString									text;
 
 			void									Accept(IVisitor* visitor)override{visitor->Visit(this);}
 		};
@@ -145,10 +145,10 @@ Instance Context
 			NamespaceMap							namespaces;
 			WString									typeName;
 
-			static void								CollectValues(collections::Dictionary<WString, Ptr<GuiAttSetterRepr::SetterValue>>& setters, Ptr<parsing::xml::XmlElement> xml, Ptr<GuiResourcePathResolver> resolver);
-			static void								FillAttSetter(Ptr<GuiAttSetterRepr> setter, Ptr<parsing::xml::XmlElement> xml, Ptr<GuiResourcePathResolver> resolver);
-			static Ptr<GuiConstructorRepr>			LoadCtor(Ptr<parsing::xml::XmlElement> xml, Ptr<GuiResourcePathResolver> resolver);
-			static Ptr<GuiInstanceContext>			LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, Ptr<GuiResourcePathResolver> resolver);
+			static void								CollectValues(collections::Dictionary<WString, Ptr<GuiAttSetterRepr::SetterValue>>& setters, Ptr<parsing::xml::XmlElement> xml);
+			static void								FillAttSetter(Ptr<GuiAttSetterRepr> setter, Ptr<parsing::xml::XmlElement> xml);
+			static Ptr<GuiConstructorRepr>			LoadCtor(Ptr<parsing::xml::XmlElement> xml);
+			static Ptr<GuiInstanceContext>			LoadFromXml(Ptr<parsing::xml::XmlDocument> xml);
 		};
 	}
 }

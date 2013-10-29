@@ -13,7 +13,7 @@ namespace vl
 GuiInstanceContext
 ***********************************************************************/
 
-		void GuiInstanceContext::CollectValues(collections::Dictionary<WString, Ptr<GuiAttSetterRepr::SetterValue>>& setters, Ptr<parsing::xml::XmlElement> xml, Ptr<GuiResourcePathResolver> resolver)
+		void GuiInstanceContext::CollectValues(collections::Dictionary<WString, Ptr<GuiAttSetterRepr::SetterValue>>& setters, Ptr<parsing::xml::XmlElement> xml)
 		{
 			if(auto parser=GetParserManager()->GetParser<ElementName>(L"INSTANCE-ELEMENT-NAME"))
 			{
@@ -23,14 +23,14 @@ GuiInstanceContext
 				{
 					if(Ptr<XmlText> text=xml->subNodes[0].Cast<XmlText>())
 					{
-						Ptr<GuiResourceRepr> value=new GuiResourceRepr;
-						value->resource=new GuiTextData(text->content.value);
+						Ptr<GuiTextRepr> value=new GuiTextRepr;
+						value->text=text->content.value;
 						defaultValue->values.Add(value);
 					}
 					else if(Ptr<XmlCData> text=xml->subNodes[0].Cast<XmlCData>())
 					{
-						Ptr<GuiResourceRepr> value=new GuiResourceRepr;
-						value->resource=new GuiTextData(text->content.value);
+						Ptr<GuiTextRepr> value=new GuiTextRepr;
+						value->text=text->content.value;
 						defaultValue->values.Add(value);
 					}
 				}
@@ -52,7 +52,7 @@ GuiInstanceContext
 								{
 									// if the binding is "set", it means that this element is a complete setter element
 									Ptr<GuiAttSetterRepr> setter=new GuiAttSetterRepr;
-									FillAttSetter(setter, element, resolver);
+									FillAttSetter(setter, element);
 									sv->values.Add(setter);
 								}
 								else
@@ -60,7 +60,7 @@ GuiInstanceContext
 									// if the binding is not "set", then this is a single-value attribute or a colection attribute
 									// fill all data into this attribute
 									Dictionary<WString, Ptr<GuiAttSetterRepr::SetterValue>> newSetters;
-									CollectValues(newSetters, element, resolver);
+									CollectValues(newSetters, element);
 									vint index=newSetters.Keys().IndexOf(L"");
 									if(index!=-1)
 									{
@@ -77,7 +77,7 @@ GuiInstanceContext
 						else if(name->IsCtorName())
 						{
 							// collect constructor values in the default attribute setter
-							auto ctor=LoadCtor(element, resolver);
+							auto ctor=LoadCtor(element);
 							if(ctor)
 							{
 								defaultValue->values.Add(ctor);
@@ -93,7 +93,7 @@ GuiInstanceContext
 			}
 		}
 
-		void GuiInstanceContext::FillAttSetter(Ptr<GuiAttSetterRepr> setter, Ptr<parsing::xml::XmlElement> xml, Ptr<GuiResourcePathResolver> resolver)
+		void GuiInstanceContext::FillAttSetter(Ptr<GuiAttSetterRepr> setter, Ptr<parsing::xml::XmlElement> xml)
 		{
 			if(auto parser=GetParserManager()->GetParser<ElementName>(L"INSTANCE-ELEMENT-NAME"))
 			{
@@ -109,19 +109,19 @@ GuiInstanceContext
 							sv->binding=name->binding;
 							setter->setters.Add(name->name, sv);
 
-							Ptr<GuiResourceRepr> value=new GuiResourceRepr;
-							value->resource=new GuiTextData(att->value.value);
+							Ptr<GuiTextRepr> value=new GuiTextRepr;
+							value->text=att->value.value;
 							sv->values.Add(value);
 						}
 					}
 				}
 
 				// collect children as setters
-				CollectValues(setter->setters, xml, resolver);
+				CollectValues(setter->setters, xml);
 			}
 		}
 
-		Ptr<GuiConstructorRepr> GuiInstanceContext::LoadCtor(Ptr<parsing::xml::XmlElement> xml, Ptr<GuiResourcePathResolver> resolver)
+		Ptr<GuiConstructorRepr> GuiInstanceContext::LoadCtor(Ptr<parsing::xml::XmlElement> xml)
 		{
 			if(auto parser=GetParserManager()->GetParser<ElementName>(L"INSTANCE-ELEMENT-NAME"))
 			if(auto name=parser->TypedParse(xml->name.value))
@@ -130,13 +130,13 @@ GuiInstanceContext
 				Ptr<GuiConstructorRepr> ctor=new GuiConstructorRepr;
 				ctor->typeNamespace=name->namespaceName;
 				ctor->typeName=name->name;
-				FillAttSetter(ctor, xml, resolver);
+				FillAttSetter(ctor, xml);
 				return ctor;
 			}
 			return 0;
 		}
 
-		Ptr<GuiInstanceContext> GuiInstanceContext::LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, Ptr<GuiResourcePathResolver> resolver)
+		Ptr<GuiInstanceContext> GuiInstanceContext::LoadFromXml(Ptr<parsing::xml::XmlDocument> xml)
 		{
 			Ptr<GuiInstanceContext> context=new GuiInstanceContext;
 			if(xml->rootElement->name.value==L"Instance")
@@ -232,7 +232,7 @@ GuiInstanceContext
 				// load instance
 				if(Ptr<XmlElement> element=XmlGetElements(xml->rootElement).First(0))
 				{
-					context->instance=LoadCtor(element, resolver);
+					context->instance=LoadCtor(element);
 				}
 			}
 
