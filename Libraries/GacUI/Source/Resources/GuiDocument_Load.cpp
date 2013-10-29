@@ -85,11 +85,9 @@ document_operation_visitors::DeserializeNodeVisitor
 						if(Ptr<XmlAttribute> source=XmlGetAttribute(node, L"source"))
 						{
 							run->source=source->value.value;
-							Pair<vint, vint> index=INVLOC.FindFirst(run->source, L"://", Locale::IgnoreCase);
-							if(index.key!=-1)
+							WString protocol, path;
+							if(IsResourceUrl(run->source, protocol, path))
 							{
-								WString protocol=run->source.Sub(0, index.key);
-								WString path=run->source.Sub(index.key+index.value, run->source.Length()-index.key-index.value);
 								Ptr<GuiImageData> imageData=resolver->ResolveResource(protocol, path).Cast<GuiImageData>();
 								if(imageData)
 								{

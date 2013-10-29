@@ -58,6 +58,21 @@ namespace vl
 			return false;
 		}
 
+		bool IsResourceUrl(const WString& text, WString& protocol, WString& path)
+		{
+			Pair<vint, vint> index=INVLOC.FindFirst(text, L"://", Locale::None);
+			if(index.key!=-1)
+			{
+				protocol=INVLOC.ToLower(text.Sub(0, index.key));
+				path=text.Sub(index.key+index.value, text.Length()-index.key-index.value);
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+
 /***********************************************************************
 GuiImageData
 ***********************************************************************/
