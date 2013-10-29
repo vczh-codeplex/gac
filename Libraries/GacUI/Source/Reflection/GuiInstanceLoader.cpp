@@ -11,6 +11,50 @@ namespace vl
 		using namespace controls;
 
 /***********************************************************************
+Instance Type Resolver
+***********************************************************************/
+
+		class GuiResourceInstanceTypeResolver : public Object, public IGuiResourceTypeResolver
+		{
+		public:
+			WString GetType()
+			{
+				return L"Instance";
+			}
+
+			WString GetPreloadType()
+			{
+				return L"Xml";
+			}
+
+			bool IsDelayLoad()
+			{
+				return true;
+			}
+
+			Ptr<Object> ResolveResource(Ptr<parsing::xml::XmlElement> element)
+			{
+				return 0;
+			}
+
+			Ptr<Object> ResolveResource(const WString& path)
+			{
+				return 0;
+			}
+
+			Ptr<Object> ResolveResource(Ptr<Object> resource, Ptr<GuiResourcePathResolver> resolver)
+			{
+				Ptr<XmlDocument> xml=resource.Cast<XmlDocument>();
+				if(xml)
+				{
+					Ptr<GuiInstanceContext> context=GuiInstanceContext::LoadFromXml(xml, resolver);
+					return context;
+				}
+				return 0;
+			}
+		};
+
+/***********************************************************************
 GuiInstanceLoaderManager
 ***********************************************************************/
 
@@ -31,6 +75,8 @@ GuiInstanceLoaderManager
 				
 			void AfterLoad()override
 			{
+				IGuiResourceResolverManager* manager=GetResourceResolverManager();
+				manager->SetTypeResolver(new GuiResourceInstanceTypeResolver);
 			}
 
 			void Unload()override
