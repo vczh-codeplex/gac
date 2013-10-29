@@ -1,4 +1,5 @@
 #include "GuiInstanceRepresentation.h"
+#include "..\Resources\GuiParserManager.h"
 
 namespace vl
 {
@@ -11,6 +12,25 @@ namespace vl
 /***********************************************************************
 GuiInstanceContext
 ***********************************************************************/
+
+		void GuiInstanceContext::FillAttSetter(Ptr<GuiAttSetterRepr> setter, Ptr<parsing::xml::XmlElement> xml, Ptr<GuiResourcePathResolver> resolver)
+		{
+		}
+
+		Ptr<GuiConstructorRepr> GuiInstanceContext::LoadCtor(Ptr<parsing::xml::XmlElement> xml, Ptr<GuiResourcePathResolver> resolver)
+		{
+			if(auto parser=GetParserManager()->GetParser<ElementName>(L"INSTANCE-ELEMENT-NAME"))
+			if(auto name=parser->TypedParse(xml->name.value))
+			if(name->IsCtorName())
+			{
+				Ptr<GuiConstructorRepr> ctor=new GuiConstructorRepr;
+				ctor->typeNamespace=name->namespaceName;
+				ctor->typeName=name->name;
+				FillAttSetter(ctor, xml, resolver);
+				return ctor;
+			}
+			return 0;
+		}
 
 		Ptr<GuiInstanceContext> GuiInstanceContext::LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, Ptr<GuiResourcePathResolver> resolver)
 		{
@@ -106,8 +126,13 @@ GuiInstanceContext
 				}
 
 				// load instance
+				if(Ptr<XmlElement> element=XmlGetElements(xml->rootElement).First(0))
+				{
+					context->instance=LoadCtor(element, resolver);
+				}
 			}
-			return context;
+
+			return context->instance?context:0;
 		}
 	}
 }

@@ -1,4 +1,5 @@
 #include "GuiInstanceLoader.h"
+#include "..\Resources\GuiParserManager.h"
 
 namespace vl
 {
@@ -9,6 +10,53 @@ namespace vl
 		using namespace parsing::xml;
 		using namespace parsing::tabling;
 		using namespace controls;
+		using namespace regex;
+
+/***********************************************************************
+GuiInstanceContext::ElementName Parser
+***********************************************************************/
+
+		class GuiInstanceContextElementNameParser : public Object, public IGuiParser<GuiInstanceContext::ElementName>
+		{
+			typedef GuiInstanceContext::ElementName			ElementName;
+		public:
+			Regex						regexElementName;
+
+			GuiInstanceContextElementNameParser()
+				:regexElementName(L"(<namespaceName>[a-zA-Z_]/w*:)?(<category>[a-zA-Z_]/w*.)?(<name>[a-zA-Z_]/w*)(-<binding>[a-zA-Z_]/w*)?")
+			{
+			}
+
+			Ptr<ElementName> TypedParse(const WString& text)override
+			{
+				Ptr<RegexMatch> match=regexElementName.MatchHead(text);
+				if(match && match->Result().Length()!=text.Length()) return 0;
+
+				Ptr<ElementName> elementName=new ElementName;
+				if(match->Groups().Keys().Contains(L"namespaceName"))
+				{
+					elementName->namespaceName=match->Groups()[L"namespaceName"][0].Value();
+				}
+				if(match->Groups().Keys().Contains(L"category"))
+				{
+					elementName->category=match->Groups()[L"category"][0].Value();
+				}
+				if(match->Groups().Keys().Contains(L"name"))
+				{
+					elementName->name=match->Groups()[L"name"][0].Value();
+				}
+				if(match->Groups().Keys().Contains(L"binding"))
+				{
+					elementName->binding=match->Groups()[L"binding"][0].Value();
+				}
+				return elementName;
+			}
+
+			Ptr<Object> Parse(const WString& text)override
+			{
+				return TypedParse(text);
+			}
+		};
 
 /***********************************************************************
 Instance Type Resolver
@@ -75,8 +123,14 @@ GuiInstanceLoaderManager
 				
 			void AfterLoad()override
 			{
-				IGuiResourceResolverManager* manager=GetResourceResolverManager();
-				manager->SetTypeResolver(new GuiResourceInstanceTypeResolver);
+				{
+					IGuiResourceResolverManager* manager=GetResourceResolverManager();
+					manager->SetTypeResolver(new GuiResourceInstanceTypeResolver);
+				}
+				{
+					IGuiParserManager* manager=GetParserManager();
+					manager->SetParser(L"INSTANCE-ELEMENT-NAME", new GuiInstanceContextElementNameParser);
+				}
 			}
 
 			void Unload()override
