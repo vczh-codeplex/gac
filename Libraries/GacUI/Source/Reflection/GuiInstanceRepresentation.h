@@ -17,12 +17,12 @@ namespace vl
 	{
 
 /***********************************************************************
-Instance Context
+Instance Representation
 ***********************************************************************/
 
 		class GuiResourceRepr;
 		class GuiAttSetterRepr;
-		class GuiInstanceRepr;
+		class GuiConstructorRepr;
 
 		class GuiValueRepr : public Object, public Description<GuiValueRepr>
 		{
@@ -30,9 +30,9 @@ Instance Context
 			class IVisitor : public IDescriptable, public Description<IVisitor>
 			{
 			public:
-				virtual void						Visit(GuiResourceRepr* description)=0;
-				virtual void						Visit(GuiAttSetterRepr* description)=0;
-				virtual void						Visit(GuiInstanceRepr* description)=0;
+				virtual void						Visit(GuiResourceRepr* repr)=0;
+				virtual void						Visit(GuiAttSetterRepr* repr)=0;
+				virtual void						Visit(GuiConstructorRepr* repr)=0;
 			};
 
 			virtual void							Accept(IVisitor* visitor)=0;
@@ -65,7 +65,7 @@ Instance Context
 			void									Accept(IVisitor* visitor)override{visitor->Visit(this);}
 		};
 
-		class GuiInstanceRepr : public GuiAttSetterRepr, public Description<GuiInstanceRepr>
+		class GuiConstructorRepr : public GuiAttSetterRepr, public Description<GuiConstructorRepr>
 		{
 		public:
 			WString									typeNamespace;
@@ -74,36 +74,65 @@ Instance Context
 			void									Accept(IVisitor* visitor)override{visitor->Visit(this);}
 		};
 
+/***********************************************************************
+Instance Namespace
+***********************************************************************/
+
+		class GuiInstanceResourcePattern;
+		class GuiInstanceNamePattern;
+
+		class GuiInstancePattern : public Object, public Description<GuiInstancePattern>
+		{
+		public:
+			class IVisitor : public IDescriptable, public Description<IVisitor>
+			{
+			public:
+				virtual void						Visit(GuiInstanceResourcePattern* ns)=0;
+				virtual void						Visit(GuiInstanceNamePattern* ns)=0;
+			};
+
+			WString									name;
+
+			virtual void							Accept(IVisitor* visitor)=0;
+		};
+
+		class GuiInstanceResourcePattern : public GuiInstancePattern, public Description<GuiInstanceResourcePattern>
+		{
+		public:
+			bool									isFolder;
+			WString									protocol;
+			WString									path;
+
+			void									Accept(IVisitor* visitor)override{visitor->Visit(this);}
+		};
+
+		class GuiInstanceNamePattern : public GuiInstancePattern, public Description<GuiInstanceNamePattern>
+		{
+		public:
+			WString									prefix;
+			WString									postfix;
+
+			void									Accept(IVisitor* visitor)override{visitor->Visit(this);}
+		};
+
+/***********************************************************************
+Instance Context
+***********************************************************************/
+
 		class GuiInstanceContext : public Object, public Description<GuiInstanceContext>
 		{
 		public:
-			struct NamespacePattern
-			{
-				WString								prefix;
-				WString								postfix;
-			};
-			typedef collections::List<NamespacePattern>					NamespacePatternList;
+			typedef collections::List<Ptr<GuiInstancePattern>>					NamespacePatternList;
 
 			struct NamespaceInfo
 			{
-				bool								isDefault;
 				WString								name;
 				NamespacePatternList				patterns;
 			};
-			typedef collections::Group<WString, Ptr<NamespaceInfo>>		NamespaceGroup;
-
-			struct Reference
-			{
-				bool								isFolder;
-				WString								protocol;
-				WString								path;
-			};
-			typedef collections::List<Reference>						ReferenceList;
+			typedef collections::Dictionary<WString, Ptr<NamespaceInfo>>		NamespaceMap;
 		public:
-			Ptr<GuiInstanceRepr>					instance;
-			NamespaceGroup							namespaces;
-			ReferenceList							references;
-			WString									referenceNamespace;
+			Ptr<GuiConstructorRepr>					instance;
+			NamespaceMap							namespaces;
 			WString									typeName;
 
 			static Ptr<GuiInstanceContext>			LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, Ptr<GuiResourcePathResolver> resolver);
