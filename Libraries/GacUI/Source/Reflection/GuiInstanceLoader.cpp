@@ -63,7 +63,7 @@ GuiInstanceLoaderManager
 				throw 0;
 			}
 
-			IGuiInstanceLoader* GetLoaderForInstance(Ptr<GuiInstanceContext> context, Ptr<GuiInstanceRepr> instance, Ptr<GuiResourcePathResolver> resolver)override
+			IGuiInstanceLoader* GetLoaderForInstance(Ptr<GuiInstanceContext> context, Ptr<GuiConstructorRepr> ctor, Ptr<GuiResourcePathResolver> resolver)override
 			{
 				throw 0;
 			}

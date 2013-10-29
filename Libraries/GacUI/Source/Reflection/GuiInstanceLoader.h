@@ -49,7 +49,7 @@ Instance Loader Manager
 			virtual bool							SetLoaderForType(description::ITypeDescriptor* baseType, Ptr<IGuiInstanceLoader> loader)=0;
 			virtual bool							SetLoaderForVirtualType(const WString& typeName, description::ITypeDescriptor* baseType, Ptr<IGuiInstanceLoader> loader)=0;
 			virtual IGuiInstanceLoader*				GetLoaderFromType(const WString& typeName)=0;
-			virtual IGuiInstanceLoader*				GetLoaderForInstance(Ptr<GuiInstanceContext> context, Ptr<GuiInstanceRepr> instance, Ptr<GuiResourcePathResolver> resolver)=0;
+			virtual IGuiInstanceLoader*				GetLoaderForInstance(Ptr<GuiInstanceContext> context, Ptr<GuiConstructorRepr> ctor, Ptr<GuiResourcePathResolver> resolver)=0;
 			virtual DescriptableObject*				LoadObject(Ptr<GuiInstanceContext> context, Ptr<GuiResourcePathResolver> resolver)=0;
 			virtual bool							LoadObject(DescriptableObject* createdInstance, Ptr<GuiInstanceContext> context, Ptr<GuiResourcePathResolver> resolver)=0;
 		};
