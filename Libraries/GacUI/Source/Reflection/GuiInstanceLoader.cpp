@@ -23,7 +23,7 @@ GuiInstanceContext::ElementName Parser
 			Regex						regexElementName;
 
 			GuiInstanceContextElementNameParser()
-				:regexElementName(L"(<namespaceName>[a-zA-Z_]/w*:)?(<category>[a-zA-Z_]/w*.)?(<name>[a-zA-Z_]/w*)(-<binding>[a-zA-Z_]/w*)?")
+				:regexElementName(L"((<namespaceName>[a-zA-Z_]/w*):)?((<category>[a-zA-Z_]/w*).)?(<name>[a-zA-Z_]/w*)(-(<binding>[a-zA-Z_]/w*))?")
 			{
 			}
 
