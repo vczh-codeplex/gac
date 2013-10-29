@@ -134,14 +134,12 @@ Xml Type Resolver
 
 			Ptr<Object> ResolveResource(const WString& path)
 			{
-				Ptr<ParsingTable> table=GetParserManager()->GetParsingTable(L"XML");
-				if(table)
+				if(auto parser=GetParserManager()->GetParser<XmlDocument>(L"XML"))
 				{
 					WString text;
 					if(LoadTextFile(path, text))
 					{
-						Ptr<XmlDocument> xml=XmlParseDocument(text, table);
-						return xml;
+						return parser->TypedParse(text);
 					}
 				}
 				return 0;

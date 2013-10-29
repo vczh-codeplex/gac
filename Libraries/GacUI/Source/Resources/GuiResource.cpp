@@ -190,7 +190,7 @@ GuiResourceItem
 GuiResourceFolder
 ***********************************************************************/
 
-		void GuiResourceFolder::LoadResourceFolderXml(DelayLoadingList& delayLoadings, const WString& containingFolder, Ptr<parsing::xml::XmlElement> folderXml, Ptr<parsing::tabling::ParsingTable> xmlParsingTable)
+		void GuiResourceFolder::LoadResourceFolderXml(DelayLoadingList& delayLoadings, const WString& containingFolder, Ptr<parsing::xml::XmlElement> folderXml)
 		{
 			ClearItems();
 			ClearFolders();
@@ -218,16 +218,18 @@ GuiResourceFolder
 									WString text;
 									if(LoadTextFile(filePath, text))
 									{
-										Ptr<XmlDocument> xml=XmlParseDocument(text, xmlParsingTable);
-										if(xml)
+										if(auto parser=GetParserManager()->GetParser<XmlDocument>(L"XML"))
 										{
-											newContainingFolder=GetFolderPath(filePath);
-											newFolderXml=xml->rootElement;
+											if(auto xml=parser->TypedParse(text))
+											{
+												newContainingFolder=GetFolderPath(filePath);
+												newFolderXml=xml->rootElement;
+											}
 										}
 									}
 								}
 							}
-							folder->LoadResourceFolderXml(delayLoadings, newContainingFolder, newFolderXml, xmlParsingTable);
+							folder->LoadResourceFolderXml(delayLoadings, newContainingFolder, newFolderXml);
 						}
 					}
 				}
@@ -445,15 +447,14 @@ GuiResource
 
 		Ptr<GuiResource> GuiResource::LoadFromXml(const WString& filePath)
 		{
-			Ptr<ParsingTable> table;
 			Ptr<XmlDocument> xml;
 			Ptr<GuiResource> resource;
+			if(auto parser=GetParserManager()->GetParser<XmlDocument>(L"XML"))
 			{
 				WString text;
 				if(LoadTextFile(filePath, text))
 				{
-					table=GetParserManager()->GetParsingTable(L"XML");
-					xml=XmlParseDocument(text, table);
+					xml=parser->TypedParse(text);
 				}
 			}
 			if(xml)
@@ -461,7 +462,7 @@ GuiResource
 				resource=new GuiResource;
 				resource->workingDirectory=GetFolderPath(filePath);
 				DelayLoadingList delayLoadings;
-				resource->LoadResourceFolderXml(delayLoadings, resource->workingDirectory, xml->rootElement, table);
+				resource->LoadResourceFolderXml(delayLoadings, resource->workingDirectory, xml->rootElement);
 
 				FOREACH(DelayLoading, delay, delayLoadings)
 				{

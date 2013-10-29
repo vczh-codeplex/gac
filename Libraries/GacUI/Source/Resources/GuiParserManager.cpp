@@ -45,6 +45,8 @@ IGuiParserManager
 				parserManager=this;
 				SetParsingTable(L"XML", &XmlLoadTable);
 				SetParsingTable(L"JSON", &JsonLoadTable);
+				SetTableParser(L"XML", L"XML", &XmlParseDocument);
+				SetTableParser(L"JSON", L"JSON", &JsonParse);
 			}
 
 			void AfterLoad()override

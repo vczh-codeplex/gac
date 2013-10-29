@@ -405,15 +405,14 @@ DocumentModel
 
 		Ptr<DocumentModel> DocumentModel::LoadFromXml(const WString& filePath)
 		{
-			Ptr<ParsingTable> table;
 			Ptr<XmlDocument> xml;
 			Ptr<DocumentModel> document;
+			if(auto parser=GetParserManager()->GetParser<XmlDocument>(L"XML"))
 			{
 				WString text;
 				if(LoadTextFile(filePath, text))
 				{
-					table=GetParserManager()->GetParsingTable(L"XML");
-					xml=XmlParseDocument(text, table);
+					xml=parser->TypedParse(text);
 				}
 			}
 			if(xml)

@@ -183,7 +183,7 @@ Resource Structure
 			ItemMap									items;
 			FolderMap								folders;
 
-			void									LoadResourceFolderXml(DelayLoadingList& delayLoadings, const WString& containingFolder, Ptr<parsing::xml::XmlElement> folderXml, Ptr<parsing::tabling::ParsingTable> xmlParsingTable);
+			void									LoadResourceFolderXml(DelayLoadingList& delayLoadings, const WString& containingFolder, Ptr<parsing::xml::XmlElement> folderXml);
 		public:
 			/// <summary>Create a resource folder.</summary>
 			GuiResourceFolder();
