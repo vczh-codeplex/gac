@@ -513,6 +513,9 @@
     <ClCompile Include="..\..\Source\Reflection\GuiInstanceRepresentation.cpp">
       <Filter>GacUI\Reflection</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Resources\GuiParserManager.cpp">
+      <Filter>GacUI\Resources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Common\Source\Basic.h">
@@ -961,6 +964,9 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Reflection\GuiInstanceRepresentation.h">
       <Filter>GacUI\Reflection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Resources\GuiParserManager.h">
+      <Filter>GacUI\Resources</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

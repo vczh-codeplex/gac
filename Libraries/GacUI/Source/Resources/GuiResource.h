@@ -22,6 +22,35 @@ namespace vl
 		class GuiResource;
 
 /***********************************************************************
+Helper Functions
+***********************************************************************/
+
+		/// <summary>Get the folder path from a file path. The result folder path is ended with a separator.</summary>
+		/// <returns>The folder path.</returns>
+		/// <param name="filePath">The file path.</param>
+		extern WString								GetFolderPath(const WString& filePath);
+		/// <summary>Get the file name from a file path.</summary>
+		/// <returns>The file name.</returns>
+		/// <param name="filePath">The file path.</param>
+		extern WString								GetFileName(const WString& filePath);
+		/// <summary>Load a text file.</summary>
+		/// <returns>Returns true if the operation succeeded.</returns>
+		/// <param name="filePath">The text file path.</param>
+		/// <param name="text">The text file content, if succeeded.</param>
+		extern bool									LoadTextFile(const WString& filePath, WString& text);
+		/// <summary>Load the text from a stream.</summary>
+		/// <returns>Returns true if the operation succeeded.</returns>
+		/// <param name="stream">The stream containing text.</param>
+		/// <param name="text">The text file content, if succeeded.</param>
+		extern bool									LoadTextFromStream(stream::IStream& stream, WString& text);
+		/// <summary>Test is a text a resource url and extract the protocol and the path.</summary>
+		/// <returns>Returns true if the text is a resource url.</returns>
+		/// <param name="text">The text.</param>
+		/// <param name="protocol">The extracted protocol.</param>
+		/// <param name="path">The extracted path.</param>
+		extern bool									IsResourceUrl(const WString& text, WString& protocol, WString& path);
+
+/***********************************************************************
 Resource Image
 ***********************************************************************/
 			
@@ -209,7 +238,7 @@ Resource Structure
 		};
 
 /***********************************************************************
-Resource Loader
+Resource
 ***********************************************************************/
 		
 		/// <summary>Resource. A resource is a root resource folder that does not have a name.</summary>
@@ -248,59 +277,6 @@ Resource Loader
 			/// <param name="path">The path.</param>
 			WString									GetStringByPath(const WString& path);
 		};
-
-/***********************************************************************
-Resource Loader
-***********************************************************************/
-
-		/// <summary>Get the folder path from a file path. The result folder path is ended with a separator.</summary>
-		/// <returns>The folder path.</returns>
-		/// <param name="filePath">The file path.</param>
-		extern WString								GetFolderPath(const WString& filePath);
-		/// <summary>Get the file name from a file path.</summary>
-		/// <returns>The file name.</returns>
-		/// <param name="filePath">The file path.</param>
-		extern WString								GetFileName(const WString& filePath);
-		/// <summary>Load a text file.</summary>
-		/// <returns>Returns true if the operation succeeded.</returns>
-		/// <param name="filePath">The text file path.</param>
-		/// <param name="text">The text file content, if succeeded.</param>
-		extern bool									LoadTextFile(const WString& filePath, WString& text);
-		/// <summary>Load the text from a stream.</summary>
-		/// <returns>Returns true if the operation succeeded.</returns>
-		/// <param name="stream">The stream containing text.</param>
-		/// <param name="text">The text file content, if succeeded.</param>
-		extern bool									LoadTextFromStream(stream::IStream& stream, WString& text);
-		/// <summary>Test is a text a resource url and extract the protocol and the path.</summary>
-		/// <returns>Returns true if the text is a resource url.</returns>
-		/// <param name="text">The text.</param>
-		/// <param name="protocol">The extracted protocol.</param>
-		/// <param name="path">The extracted path.</param>
-		extern bool									IsResourceUrl(const WString& text, WString& protocol, WString& path);
-
-/***********************************************************************
-Parser Loader
-***********************************************************************/
-
-		/// <summary>Parser manager for caching parsing table globally.</summary>
-		class IGuiParserManager : public IDescriptable, public Description<IGuiParserManager>
-		{
-		protected:
-			typedef parsing::tabling::ParsingTable			Table;
-
-		public:
-			/// <summary>Get a parsing table by name.</summary>
-			/// <returns>The parsing table.</returns>
-			/// <param name="name">The name.</param>
-			virtual Ptr<Table>						GetParsingTable(const WString& name)=0;
-			/// <summary>Set a parsing table loader by name.</summary>
-			/// <param name="name">The name.</param>
-			/// <param name="loader">The parsing table loader.</param>
-			virtual bool							SetParsingTable(const WString& name, Func<Ptr<Table>()> loader)=0;
-		};
-
-		/// <summary>Get the global <see cref="IGuiParserManager"/> object.</summary>
-		extern IGuiParserManager*					GetParserManager();
 
 /***********************************************************************
 Resource Path Resolver
