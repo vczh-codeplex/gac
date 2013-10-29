@@ -13,8 +13,112 @@ namespace vl
 GuiInstanceContext
 ***********************************************************************/
 
+		void GuiInstanceContext::CollectValues(collections::Dictionary<WString, Ptr<GuiAttSetterRepr::SetterValue>>& setters, Ptr<parsing::xml::XmlElement> xml, Ptr<GuiResourcePathResolver> resolver)
+		{
+			if(auto parser=GetParserManager()->GetParser<ElementName>(L"INSTANCE-ELEMENT-NAME"))
+			{
+				// test if there is only one text value in the xml
+				Ptr<GuiAttSetterRepr::SetterValue> defaultValue=new GuiAttSetterRepr::SetterValue;
+				if(xml->subNodes.Count()==1)
+				{
+					if(Ptr<XmlText> text=xml->subNodes[0].Cast<XmlText>())
+					{
+						Ptr<GuiResourceRepr> value=new GuiResourceRepr;
+						value->resource=new GuiTextData(text->content.value);
+						defaultValue->values.Add(value);
+					}
+					else if(Ptr<XmlCData> text=xml->subNodes[0].Cast<XmlCData>())
+					{
+						Ptr<GuiResourceRepr> value=new GuiResourceRepr;
+						value->resource=new GuiTextData(text->content.value);
+						defaultValue->values.Add(value);
+					}
+				}
+
+				// collect values
+				FOREACH(Ptr<XmlElement>, element, XmlGetElements(xml))
+				{
+					if(auto name=parser->TypedParse(element->name.value))
+					{
+						if(name->IsPropertyElementName())
+						{
+							// collect a value as a new attribute setter
+							if(!setters.Keys().Contains(name->name))
+							{
+								Ptr<GuiAttSetterRepr::SetterValue> sv=new GuiAttSetterRepr::SetterValue;
+								sv->binding=name->binding;
+
+								if(name->binding==L"set")
+								{
+									// if the binding is "set", it means that this element is a complete setter element
+									Ptr<GuiAttSetterRepr> setter=new GuiAttSetterRepr;
+									FillAttSetter(setter, element, resolver);
+									sv->values.Add(setter);
+								}
+								else
+								{
+									// if the binding is not "set", then this is a single-value attribute or a colection attribute
+									// fill all data into this attribute
+									Dictionary<WString, Ptr<GuiAttSetterRepr::SetterValue>> newSetters;
+									CollectValues(newSetters, element, resolver);
+									vint index=newSetters.Keys().IndexOf(L"");
+									if(index!=-1)
+									{
+										CopyFrom(sv->values, newSetters.Values()[index]->values);
+									}
+								}
+
+								if(sv->values.Count()>0)
+								{
+									setters.Add(name->name, sv);
+								}
+							}
+						}
+						else if(name->IsCtorName())
+						{
+							// collect constructor values in the default attribute setter
+							auto ctor=LoadCtor(element, resolver);
+							if(ctor)
+							{
+								defaultValue->values.Add(ctor);
+							}
+						}
+					}
+				}
+
+				if(defaultValue->values.Count()>0)
+				{
+					setters.Add(L"", defaultValue);
+				}
+			}
+		}
+
 		void GuiInstanceContext::FillAttSetter(Ptr<GuiAttSetterRepr> setter, Ptr<parsing::xml::XmlElement> xml, Ptr<GuiResourcePathResolver> resolver)
 		{
+			if(auto parser=GetParserManager()->GetParser<ElementName>(L"INSTANCE-ELEMENT-NAME"))
+			{
+				// collect attributes as setters
+				FOREACH(Ptr<XmlAttribute>, att, xml->attributes)
+				{
+					if(auto name=parser->TypedParse(att->name.value))
+					if(name->IsPropertyAttributeName())
+					{
+						if(!setter->setters.Keys().Contains(name->name))
+						{
+							Ptr<GuiAttSetterRepr::SetterValue> sv=new GuiAttSetterRepr::SetterValue;
+							sv->binding=name->binding;
+							setter->setters.Add(name->name, sv);
+
+							Ptr<GuiResourceRepr> value=new GuiResourceRepr;
+							value->resource=new GuiTextData(att->value.value);
+							sv->values.Add(value);
+						}
+					}
+				}
+
+				// collect children as setters
+				CollectValues(setter->setters, xml, resolver);
+			}
 		}
 
 		Ptr<GuiConstructorRepr> GuiInstanceContext::LoadCtor(Ptr<parsing::xml::XmlElement> xml, Ptr<GuiResourcePathResolver> resolver)

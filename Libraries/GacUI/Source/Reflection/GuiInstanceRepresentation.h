@@ -49,18 +49,17 @@ Instance Representation
 		class GuiAttSetterRepr : public GuiValueRepr, public Description<GuiAttSetterRepr>
 		{
 		public:
-			typedef collections::List<Ptr<GuiValueRepr>>				ValueList;
+			typedef collections::List<Ptr<GuiValueRepr>>						ValueList;
 
-			struct Setter
+			struct SetterValue
 			{
 				WString								binding;
 				ValueList							values;
 			};
 
-			typedef collections::Dictionary<WString, Ptr<Setter>>		SetterMap;
+			typedef collections::Dictionary<WString, Ptr<SetterValue>>			SetteValuerMap;
 		public:
-			SetterMap								setters;
-			ValueList								children;
+			SetteValuerMap							setters;					// empty key means default property
 
 			void									Accept(IVisitor* visitor)override{visitor->Visit(this);}
 		};
@@ -132,7 +131,7 @@ Instance Context
 			class ElementName : public Object
 			{
 			public:
-				WString								namespaceName;
+				WString								namespaceName;				// empty key means default namespace
 				WString								category;
 				WString								name;
 				WString								binding;
@@ -146,6 +145,7 @@ Instance Context
 			NamespaceMap							namespaces;
 			WString									typeName;
 
+			static void								CollectValues(collections::Dictionary<WString, Ptr<GuiAttSetterRepr::SetterValue>>& setters, Ptr<parsing::xml::XmlElement> xml, Ptr<GuiResourcePathResolver> resolver);
 			static void								FillAttSetter(Ptr<GuiAttSetterRepr> setter, Ptr<parsing::xml::XmlElement> xml, Ptr<GuiResourcePathResolver> resolver);
 			static Ptr<GuiConstructorRepr>			LoadCtor(Ptr<parsing::xml::XmlElement> xml, Ptr<GuiResourcePathResolver> resolver);
 			static Ptr<GuiInstanceContext>			LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, Ptr<GuiResourcePathResolver> resolver);
