@@ -54,7 +54,7 @@ public:
 		viewer->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 		this->GetBoundsComposition()->AddChild(viewer->GetBoundsComposition());
 
-		Ptr<GuiResource> resource=GuiResource::LoadFromXml(L"..\\GacUISrcCodepackedTest\\Resources\\XmlResource.xml");
+		Ptr<GuiResource> resource=GuiResource::LoadFromXml(L"..\\GacUISrcCodepackedTest\\Resources\\XmlWindowResource.xml");
 		Ptr<DocumentModel> document=resource->GetDocumentByPath(L"XmlDoc.xml");
 		viewer->SetDocument(document);
 
