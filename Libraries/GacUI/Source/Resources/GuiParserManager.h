@@ -35,13 +35,57 @@ Parser
 		class IGuiParser : public IGuiGeneralParser
 		{
 		public:
-			virtual Ptr<T>							ParseWithType(const WString& text)=0;
+			virtual Ptr<T>							TypedParse(const WString& text)=0;
 
 			Ptr<Object> Parse(const WString& text)override
 			{
-				return ParseToType(text);
+				return TypedParse(text);
 			}
 		};
+
+		class IGuiParserManager;
+
+		/// <summary>Get the global <see cref="IGuiParserManager"/> object.</summary>
+		extern IGuiParserManager*					GetParserManager();
+
+/***********************************************************************
+Strong Typed Table Parser
+***********************************************************************/
+
+		template<typename T>
+		class GuiStrongTypedTableParser : public Object, public IGuiParser<T>
+		{
+		protected:
+			typedef parsing::tabling::ParsingTable				Table;
+			typedef Ptr<T>(ParserFunction)(const WString&, Ptr<Table>);
+		protected:
+			WString									name;
+			Ptr<Table>								table;
+			Func<ParserFunction>					function;
+		public:
+			GuiStrongTypedTableParser(const WString& _name, ParserFunction* _function)
+				:name(_name)
+				,function(_function)
+			{
+			}
+
+			Ptr<T> TypedParse(const WString& text)override
+			{
+				if(!table)
+				{
+					table=GetParserManager()->GetParsingTable(name);
+				}
+				if(table)
+				{
+					return function(text, table);
+				}
+				return 0;
+			}
+		};
+
+/***********************************************************************
+Parser Manager
+***********************************************************************/
 
 		/// <summary>Parser manager for caching parsing table globally.</summary>
 		class IGuiParserManager : public IDescriptable, public Description<IGuiParserManager>
@@ -72,10 +116,14 @@ Parser
 			{
 				return GetParser(name).Cast<IGuiParser<T>>();
 			}
-		};
 
-		/// <summary>Get the global <see cref="IGuiParserManager"/> object.</summary>
-		extern IGuiParserManager*					GetParserManager();
+			template<typename T>
+			bool SetTableParser(const WString& tableName, const WString& parserName, Ptr<T>(*function)(const WString&, Ptr<Table>))
+			{
+				Ptr<IGuiParser<T>> parser=new GuiStrongTypedTableParser<T>(tableName, function);
+				return SetParser(parserName, parser);
+			}
+		};
 	}
 }
 
