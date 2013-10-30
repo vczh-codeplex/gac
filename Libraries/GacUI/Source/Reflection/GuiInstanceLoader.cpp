@@ -115,6 +115,10 @@ GuiInstanceLoaderManager
 
 		class GuiInstanceLoaderManager : public Object, public IGuiInstanceLoaderManager, public IGuiPlugin
 		{
+			typedef Dictionary<WString, Ptr<IGuiInstanceBinder>>				BinderMap;
+		protected:
+			BinderMap				binders;
+
 		public:
 			void Load()override
 			{
@@ -140,30 +144,33 @@ GuiInstanceLoaderManager
 
 			bool AddInstanceBinder(Ptr<IGuiInstanceBinder> binder)override
 			{
-				throw 0;
+				if(binders.Keys().Contains(binder->GetBindingName())) return false;
+				binders.Add(binder->GetBindingName(), binder);
+				return true;
 			}
 
-			IGuiInstanceBinder* GetInstanceBinder(const WString& name)override
+			IGuiInstanceBinder* GetInstanceBinder(const WString& bindingName)override
+			{
+				vint index=binders.Keys().IndexOf(bindingName);
+				return index==-1?0:binders.Values()[index].Obj();
+			}
+
+			bool CreateVirtualType(const WString& typeName, const WString& parentType)override
 			{
 				throw 0;
 			}
 
-			bool SetLoaderForType(description::ITypeDescriptor* baseType, Ptr<IGuiInstanceLoader> loader)override
+			bool SetLoader(Ptr<IGuiInstanceLoader> loader)override
 			{
 				throw 0;
 			}
 
-			bool SetLoaderForVirtualType(const WString& typeName, description::ITypeDescriptor* baseType, Ptr<IGuiInstanceLoader> loader)override
+			IGuiInstanceLoader* GetLoader(const WString& typeName)override
 			{
 				throw 0;
 			}
 
-			IGuiInstanceLoader* GetLoaderFromType(const WString& typeName)override
-			{
-				throw 0;
-			}
-
-			IGuiInstanceLoader* GetLoaderForInstance(Ptr<GuiInstanceContext> context, Ptr<GuiConstructorRepr> ctor, Ptr<GuiResourcePathResolver> resolver)override
+			IGuiInstanceLoader* GetParentLoader(IGuiInstanceLoader* loader)override
 			{
 				throw 0;
 			}
