@@ -11,6 +11,7 @@ namespace vl
 		using namespace parsing::tabling;
 		using namespace controls;
 		using namespace regex;
+		using namespace reflection::description;
 
 /***********************************************************************
 GuiInstanceContext::ElementName Parser
@@ -115,10 +116,26 @@ GuiInstanceLoaderManager
 
 		class GuiInstanceLoaderManager : public Object, public IGuiInstanceLoaderManager, public IGuiPlugin
 		{
-			typedef Dictionary<WString, Ptr<IGuiInstanceBinder>>				BinderMap;
 		protected:
-			BinderMap				binders;
+			typedef Dictionary<WString, Ptr<IGuiInstanceBinder>>				BinderMap;
 
+			struct TypeInfo
+			{
+				WString								typeName;
+				ITypeDescriptor*					typeDescriptor;
+				WString								parentTypeName;
+				Ptr<IGuiInstanceLoader>				loader;
+			};
+			typedef Dictionary<WString, Ptr<TypeInfo>>							TypeInfoMap;
+
+			Ptr<IGuiInstanceLoader>					rootLoader;
+			BinderMap								binders;
+			TypeInfoMap								typeInfos;
+
+			bool IsTypeExists(const WString& name)
+			{
+				return GetGlobalTypeManager()->GetTypeDescriptor(name)!=0 || typeInfos.Keys().Contains(name);
+			}
 		public:
 			void Load()override
 			{
@@ -157,7 +174,13 @@ GuiInstanceLoaderManager
 
 			bool CreateVirtualType(const WString& typeName, const WString& parentType)override
 			{
-				throw 0;
+				if(IsTypeExists(typeName) || !IsTypeExists(parentType)) return false;
+
+				Ptr<TypeInfo> typeInfo=new TypeInfo;
+				typeInfo->typeName=typeName;
+				typeInfo->parentTypeName=parentType;
+				typeInfos.Add(typeName, typeInfo);
+				return true;
 			}
 
 			bool SetLoader(Ptr<IGuiInstanceLoader> loader)override
@@ -167,12 +190,20 @@ GuiInstanceLoaderManager
 
 			IGuiInstanceLoader* GetLoader(const WString& typeName)override
 			{
-				throw 0;
+				vint index=typeInfos.Keys().Contains(typeName);
+				return index==-1?0:typeInfos.Values()[index]->loader.Obj();
 			}
 
 			IGuiInstanceLoader* GetParentLoader(IGuiInstanceLoader* loader)override
 			{
-				throw 0;
+				vint index=typeInfos.Keys().Contains(loader->GetTypeName());
+				if(index!=-1)
+				{
+					Ptr<TypeInfo> typeInfo=typeInfos.Values()[index];
+					IGuiInstanceLoader* parentLoader=GetLoader(typeInfo->parentTypeName);
+					return parentLoader?parentLoader:rootLoader.Obj();
+				}
+				return 0;
 			}
 
 			DescriptableObject* LoadObject(Ptr<GuiInstanceContext> context, Ptr<GuiResourcePathResolver> resolver)override
