@@ -185,7 +185,25 @@ GuiInstanceLoaderManager
 
 			bool SetLoader(Ptr<IGuiInstanceLoader> loader)override
 			{
-				throw 0;
+				vint index=typeInfos.Keys().IndexOf(loader->GetTypeName());
+				if(index!=-1)
+				{
+					Ptr<TypeInfo> typeInfo=typeInfos.Values()[index];
+					if(typeInfo->loader) return false;
+					typeInfo->loader=loader;
+					return true;
+				}
+
+				ITypeDescriptor* typeDescriptor=GetGlobalTypeManager()->GetTypeDescriptor(loader->GetTypeName());
+				if(typeDescriptor==0) return false;
+
+				Ptr<TypeInfo> typeInfo=new TypeInfo;
+				typeInfo->typeName=loader->GetTypeName();
+				typeInfo->loader=loader;
+				typeInfo->typeDescriptor=typeDescriptor;
+				typeInfos.Add(typeInfo->typeName, typeInfo);
+
+				return false;
 			}
 
 			IGuiInstanceLoader* GetLoader(const WString& typeName)override
