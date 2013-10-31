@@ -48,7 +48,7 @@ Instance Loader Manager
 		public:
 			virtual bool							AddInstanceBinder(Ptr<IGuiInstanceBinder> binder)=0;
 			virtual IGuiInstanceBinder*				GetInstanceBinder(const WString& bindingName)=0;
-			virtual bool							CreateVirtualType(const WString& typeName, const WString& parentType)=0;
+			virtual bool							CreateVirtualType(const WString& typeName, const WString& parentType, Ptr<IGuiInstanceLoader> loader)=0;
 			virtual bool							SetLoader(Ptr<IGuiInstanceLoader> loader)=0;
 			virtual IGuiInstanceLoader*				GetLoader(const WString& typeName)=0;
 			virtual IGuiInstanceLoader*				GetParentLoader(IGuiInstanceLoader* loader)=0;

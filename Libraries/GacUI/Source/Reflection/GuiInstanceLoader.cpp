@@ -123,8 +123,11 @@ GuiInstanceLoaderManager
 			{
 				WString								typeName;
 				ITypeDescriptor*					typeDescriptor;
-				WString								parentTypeName;
+				WString								parentTypeName;				// for virtual type only
 				Ptr<IGuiInstanceLoader>				loader;
+
+				List<ITypeDescriptor*>				parentTypes;				// all direct or indirect base types that does not has a type info
+				List<TypeInfo*>						parentTypeInfos;			// type infos for all registered direct or indirect base types
 			};
 			typedef Dictionary<WString, Ptr<TypeInfo>>							TypeInfoMap;
 
@@ -135,6 +138,76 @@ GuiInstanceLoaderManager
 			bool IsTypeExists(const WString& name)
 			{
 				return GetGlobalTypeManager()->GetTypeDescriptor(name)!=0 || typeInfos.Keys().Contains(name);
+			}
+
+			void FindParentTypeInfos(Ptr<TypeInfo> typeInfo, ITypeDescriptor* searchType)
+			{
+				if(searchType!=typeInfo->typeDescriptor)
+				{
+					vint index=typeInfos.Keys().Contains(searchType->GetTypeName());
+					if(index==-1)
+					{
+						typeInfo->parentTypes.Add(searchType);
+					}
+					else
+					{
+						typeInfo->parentTypeInfos.Add(typeInfos.Values()[index].Obj());
+						return;
+					}
+				}
+
+				vint count=searchType->GetBaseTypeDescriptorCount();
+				for(vint i=0;i<count;i++)
+				{
+					ITypeDescriptor* baseType=searchType->GetBaseTypeDescriptor(i);
+					FindParentTypeInfos(typeInfo, baseType);
+				}
+			}
+
+			void FillParentTypeInfos(Ptr<TypeInfo> typeInfo)
+			{
+				typeInfo->parentTypes.Clear();
+				typeInfo->parentTypeInfos.Clear();
+
+				ITypeDescriptor* searchType=typeInfo->typeDescriptor;
+				if(!searchType)
+				{
+					vint index=typeInfos.Keys().IndexOf(typeInfo->parentTypeName);
+					if(index==-1)
+					{
+						searchType=GetGlobalTypeManager()->GetTypeDescriptor(typeInfo->parentTypeName);
+					}
+					else
+					{
+						typeInfo->parentTypeInfos.Add(typeInfos.Values()[index].Obj());
+						return;
+					}
+				}
+
+				if(searchType)
+				{
+					FindParentTypeInfos(typeInfo, searchType);
+				}
+			}
+
+			IGuiInstanceLoader* GetLoaderFromType(ITypeDescriptor* typeDescriptor)
+			{
+				vint index=typeInfos.Keys().IndexOf(typeDescriptor->GetTypeName());
+				if(index==-1)
+				{
+					vint count=typeDescriptor->GetBaseTypeDescriptorCount();
+					for(vint i=0;i<count;i++)
+					{
+						ITypeDescriptor* baseType=typeDescriptor->GetBaseTypeDescriptor(i);
+						IGuiInstanceLoader* loader=GetLoaderFromType(baseType);
+						if(loader) return loader;
+					}
+					return 0;
+				}
+				else
+				{
+					return typeInfos.Values()[index]->loader.Obj();
+				}
 			}
 		public:
 			void Load()override
@@ -172,36 +245,42 @@ GuiInstanceLoaderManager
 				return index==-1?0:binders.Values()[index].Obj();
 			}
 
-			bool CreateVirtualType(const WString& typeName, const WString& parentType)override
+			bool CreateVirtualType(const WString& typeName, const WString& parentType, Ptr<IGuiInstanceLoader> loader)override
 			{
 				if(IsTypeExists(typeName) || !IsTypeExists(parentType)) return false;
 
 				Ptr<TypeInfo> typeInfo=new TypeInfo;
 				typeInfo->typeName=typeName;
 				typeInfo->parentTypeName=parentType;
+				typeInfo->loader=loader;
 				typeInfos.Add(typeName, typeInfo);
+				FillParentTypeInfos(typeInfo);
+
 				return true;
 			}
 
 			bool SetLoader(Ptr<IGuiInstanceLoader> loader)override
 			{
 				vint index=typeInfos.Keys().IndexOf(loader->GetTypeName());
-				if(index!=-1)
-				{
-					Ptr<TypeInfo> typeInfo=typeInfos.Values()[index];
-					if(typeInfo->loader) return false;
-					typeInfo->loader=loader;
-					return true;
-				}
+				if(index!=-1) return false;
 
 				ITypeDescriptor* typeDescriptor=GetGlobalTypeManager()->GetTypeDescriptor(loader->GetTypeName());
 				if(typeDescriptor==0) return false;
 
 				Ptr<TypeInfo> typeInfo=new TypeInfo;
 				typeInfo->typeName=loader->GetTypeName();
-				typeInfo->loader=loader;
 				typeInfo->typeDescriptor=typeDescriptor;
+				typeInfo->loader=loader;
 				typeInfos.Add(typeInfo->typeName, typeInfo);
+				FillParentTypeInfos(typeInfo);
+				
+				FOREACH(Ptr<TypeInfo>, derived, typeInfos.Values())
+				{
+					if(derived->parentTypes.Contains(typeInfo->typeDescriptor))
+					{
+						FillParentTypeInfos(derived);
+					}
+				}
 
 				return false;
 			}
@@ -209,7 +288,18 @@ GuiInstanceLoaderManager
 			IGuiInstanceLoader* GetLoader(const WString& typeName)override
 			{
 				vint index=typeInfos.Keys().Contains(typeName);
-				return index==-1?0:typeInfos.Values()[index]->loader.Obj();
+				if(index!=-1)
+				{
+					return typeInfos.Values()[index]->loader.Obj();
+				}
+
+				ITypeDescriptor* typeDescriptor=GetGlobalTypeManager()->GetTypeDescriptor(typeName);
+				if(typeDescriptor)
+				{
+					IGuiInstanceLoader* loader=GetLoaderFromType(typeDescriptor);
+					return loader?loader:rootLoader.Obj();
+				}
+				return 0;
 			}
 
 			IGuiInstanceLoader* GetParentLoader(IGuiInstanceLoader* loader)override
@@ -218,8 +308,11 @@ GuiInstanceLoaderManager
 				if(index!=-1)
 				{
 					Ptr<TypeInfo> typeInfo=typeInfos.Values()[index];
-					IGuiInstanceLoader* parentLoader=GetLoader(typeInfo->parentTypeName);
-					return parentLoader?parentLoader:rootLoader.Obj();
+					if(typeInfo->parentTypeInfos.Count()>0)
+					{
+						return typeInfo->parentTypeInfos[0]->loader.Obj();
+					}
+					return rootLoader.Obj();
 				}
 				return 0;
 			}
