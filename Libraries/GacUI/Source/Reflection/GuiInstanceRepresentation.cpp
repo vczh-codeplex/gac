@@ -226,7 +226,6 @@ GuiInstanceContext
 							{
 								// resource pattern
 								Ptr<GuiInstanceResourcePattern> patternItem=new GuiInstanceResourcePattern;
-								patternItem->isFolder=protocol==L"res" && pattern[pattern.Length()-1]==L'/';
 								patternItem->protocol=protocol;
 								patternItem->path=path;
 								info->patterns.Add(patternItem);

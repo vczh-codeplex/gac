@@ -335,6 +335,7 @@
     <ClCompile Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsScreenService.cpp" />
     <ClCompile Include="..\..\Source\NativeWindow\Windows\WinNativeWindow.cpp" />
     <ClCompile Include="..\..\Source\Reflection\GuiInstanceLoader.cpp" />
+    <ClCompile Include="..\..\Source\Reflection\GuiInstanceLoader_LoadInstance.cpp" />
     <ClCompile Include="..\..\Source\Reflection\GuiInstanceRepresentation.cpp" />
     <ClCompile Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionBasic.cpp" />
     <ClCompile Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionCompositions.cpp" />

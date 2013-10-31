@@ -96,7 +96,6 @@ Instance Namespace
 		class GuiInstanceResourcePattern : public GuiInstancePattern, public Description<GuiInstanceResourcePattern>
 		{
 		public:
-			bool									isFolder;
 			WString									protocol;
 			WString									path;
 

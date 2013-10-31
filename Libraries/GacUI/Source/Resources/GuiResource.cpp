@@ -613,7 +613,20 @@ GuiResourcePathResResolver
 
 			Ptr<Object> ResolveResource(const WString& path)
 			{
-				return resource?resource->GetValueByPath(path):0;
+				if(resource)
+				{
+					if(path.Length()>0)
+					{
+						switch(path[path.Length()-1])
+						{
+						case L'\\':case L'/':
+							return resource->GetFolderByPath(path);
+						default:
+							return resource->GetValueByPath(path);
+						}
+					}
+				}
+				return 0;
 			}
 
 			class Factory : public Object, public IGuiResourcePathResolverFactory
