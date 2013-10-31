@@ -148,7 +148,29 @@ GuiInstanceContext
 				}
 
 				// load namespaces
-				FOREACH(Ptr<XmlAttribute>, att, xml->rootElement->attributes)
+				List<Ptr<XmlAttribute>> namespaceAttributes;
+				CopyFrom(namespaceAttributes, xml->rootElement->attributes);
+				if(!XmlGetAttribute(xml->rootElement, L"xmlns"))
+				{
+					Ptr<XmlAttribute> att=new XmlAttribute;
+					att->name.value=L"xmlns";
+					att->value.value=
+						L"system::*;"
+						L"system::reflection::*;"
+						L"presentation::*;"
+						L"presentation::Gui*;"
+						L"presentation::controls::*;"
+						L"presentation::controls::Gui*;"
+						L"presentation::controls::list::*;"
+						L"presentation::controls::tree::*;"
+						L"presentation::elements::*;"
+						L"presentation::elements::Gui*Element;"
+						L"presentation::elements::text*;"
+						L"presentation::compositions::*;"
+						L"presentation::compositions::Gui*Composition";
+					namespaceAttributes.Add(att);
+				}
+				FOREACH(Ptr<XmlAttribute>, att, namespaceAttributes)
 				{
 					// check if the attribute defines a namespace
 					WString attName=att->name.value;
