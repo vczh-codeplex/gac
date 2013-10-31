@@ -275,17 +275,21 @@ Structured DataSource Extensions
 					/// <returns>Returns true if this operation succeeded.</returns>
 					/// <param name="column">The column index.</param>
 					/// <param name="value">The column.</param>
+					/// <param name="callback">Set to true to invoke the command executor.</param>
 					bool												InsertColumnInternal(vint column, Ptr<StructuredColummProviderBase> value, bool callback);
 					/// <summary>Add a column.</summary>
 					/// <returns>Returns true if this operation succeeded.</returns>
 					/// <param name="value">The column.</param>
+					/// <param name="callback">Set to true to invoke the command executor.</param>
 					bool												AddColumnInternal(Ptr<StructuredColummProviderBase> value, bool callback);
 					/// <summary>Remove a column.</summary>
 					/// <returns>Returns true if this operation succeeded.</returns>
 					/// <param name="value">The column.</param>
+					/// <param name="callback">Set to true to invoke the command executor.</param>
 					bool												RemoveColumnInternal(Ptr<StructuredColummProviderBase> value, bool callback);
 					/// <summary>Clear all columns.</summary>
 					/// <returns>Returns true if this operation succeeded.</returns>
+					/// <param name="callback">Set to true to invoke the command executor.</param>
 					bool												ClearColumnsInternal(bool callback);
 				public:
 					StructuredDataProviderBase();
