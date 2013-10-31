@@ -52,11 +52,27 @@ Instance Loader Manager
 			virtual bool							SetLoader(Ptr<IGuiInstanceLoader> loader)=0;
 			virtual IGuiInstanceLoader*				GetLoader(const WString& typeName)=0;
 			virtual IGuiInstanceLoader*				GetParentLoader(IGuiInstanceLoader* loader)=0;
-			virtual DescriptableObject*				LoadObject(Ptr<GuiInstanceContext> context, Ptr<GuiResourcePathResolver> resolver)=0;
-			virtual bool							LoadObject(DescriptableObject* createdInstance, Ptr<GuiInstanceContext> context, Ptr<GuiResourcePathResolver> resolver)=0;
+		};
+
+		struct InstanceLoadingSource
+		{
+			IGuiInstanceLoader*						loader;
+			Ptr<GuiInstanceContext>					context;
+
+			InstanceLoadingSource():loader(0){}
+			InstanceLoadingSource(IGuiInstanceLoader* _loader):loader(_loader){}
+			InstanceLoadingSource(Ptr<GuiInstanceContext> _context):loader(0), context(_context){}
+
+			operator bool()const
+			{
+				return loader!=0 || context;
+			}
 		};
 
 		extern IGuiInstanceLoaderManager*			GetInstanceLoaderManager();
+		extern InstanceLoadingSource				FindInstanceLoadingSource(Ptr<GuiInstanceContext> context, Ptr<GuiConstructorRepr> ctor, Ptr<GuiResourcePathResolver> resolver);
+		extern DescriptableObject*					LoadInstance(Ptr<GuiInstanceContext> context, Ptr<GuiResourcePathResolver> resolver);
+		extern bool									LoadInstance(DescriptableObject* createdInstance, Ptr<GuiInstanceContext> context, Ptr<GuiResourcePathResolver> resolver);
 	}
 }
 

@@ -316,16 +316,6 @@ GuiInstanceLoaderManager
 				}
 				return 0;
 			}
-
-			DescriptableObject* LoadObject(Ptr<GuiInstanceContext> context, Ptr<GuiResourcePathResolver> resolver)override
-			{
-				throw 0;
-			}
-
-			bool LoadObject(DescriptableObject* createdInstance, Ptr<GuiInstanceContext> context, Ptr<GuiResourcePathResolver> resolver)override
-			{
-				throw 0;
-			}
 		};
 		GUI_REGISTER_PLUGIN(GuiInstanceLoaderManager)
 	}
