@@ -89,6 +89,12 @@ void GuiMain()
 	Ptr<GuiInstanceContext> context=resource->GetValueByPath(L"Controls/DocumentWindowResource").Cast<GuiInstanceContext>();
 	if(context)
 	{
-		Value window=LoadInstance(context, new GuiResourcePathResolver(resource, resource->GetWorkingDirectory()));
+		Value windowInstance=LoadInstance(context, new GuiResourcePathResolver(resource, resource->GetWorkingDirectory()));
+		GuiWindow* window=dynamic_cast<GuiWindow*>(windowInstance.GetRawPtr());
+		if(window)
+		{
+			GetApplication()->Run(window);
+		}
+		windowInstance.DeleteRawPtr();
 	}
 }
