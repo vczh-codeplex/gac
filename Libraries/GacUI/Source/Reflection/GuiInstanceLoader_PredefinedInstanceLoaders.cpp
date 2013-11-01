@@ -181,6 +181,11 @@ GuiControlInstanceLoader
 				bool &nullable
 				)override
 			{
+				if(propertyName==L"")
+				{
+					elementType=description::GetTypeDescriptor<Value>();
+					nullable=false;
+				}
 				return IGuiInstanceLoader::HandleByParentLoader;
 			}
 
@@ -202,6 +207,17 @@ GuiControlInstanceLoader
 				description::Value propertyValue
 				)override
 			{
+				if(GuiControl* container=dynamic_cast<GuiControl*>(createdInstance.GetRawPtr()))
+				{
+					if(auto control=dynamic_cast<GuiControl*>(propertyValue.GetRawPtr()))
+					{
+						container->AddChild(control);
+					}
+					else if(auto composition=dynamic_cast<GuiGraphicsComposition*>(propertyValue.GetRawPtr()))
+					{
+						container->GetBoundsComposition()->AddChild(composition);
+					}
+				}
 				return false;
 			}
 		};
@@ -269,6 +285,10 @@ GuiInstanceLoaderVirtualTypesPlugin
 			void AfterLoad()override
 			{
 				IGuiInstanceLoaderManager* manager=GetInstanceLoaderManager();
+
+				manager->SetLoader(new GuiControlInstanceLoader);
+				manager->SetLoader(new GuiCompositionInstanceLoader);
+
 #define ADD_VIRTUAL_TYPE(VIRTUALTYPENAME, TYPENAME, CONSTRUCTOR)\
 	manager->CreateVirtualType(\
 		L"presentation::controls::Gui" L#VIRTUALTYPENAME,\
@@ -297,9 +317,6 @@ GuiInstanceLoaderVirtualTypesPlugin
 				ADD_VIRTUAL_TYPE(RadioTextList,				GuiTextList,			g::NewRadioTextList);
 
 #undef ADD_VIRTUAL_TYPE
-
-				manager->SetLoader(new GuiControlInstanceLoader);
-				manager->SetLoader(new GuiCompositionInstanceLoader);
 			}
 
 			void Unload()override
