@@ -116,7 +116,7 @@ Instance Loader Manager
 		extern IGuiInstanceLoaderManager*			GetInstanceLoaderManager();
 		extern InstanceLoadingSource				FindInstanceLoadingSource(
 														Ptr<GuiInstanceContext> context,
-														Ptr<GuiConstructorRepr> ctor,
+														GuiConstructorRepr* ctor,
 														Ptr<GuiResourcePathResolver> resolver
 														);
 		extern description::Value					LoadInstance(
@@ -125,7 +125,7 @@ Instance Loader Manager
 														);
 		extern description::Value					LoadInstance(
 														Ptr<GuiInstanceContext> context,
-														Ptr<GuiConstructorRepr> ctor,
+														GuiConstructorRepr* ctor,
 														Ptr<GuiResourcePathResolver> resolver,
 														WString& typeName,
 														description::ITypeDescriptor*& typeDescriptor
