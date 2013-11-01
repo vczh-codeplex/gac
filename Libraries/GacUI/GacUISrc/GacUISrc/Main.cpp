@@ -75,6 +75,13 @@ Type Loader:
 	GuiListView
 	GuiComboBoxListControl
 	GuiToolstripMenu
+
+Features:
+	Component Xml Layout	: Type Loaders, Virtual Type Loaders
+	Expression				: "bind" Binder
+	Data Binding			: Data structure declaration
+	Scripting				: Event subscription, code behind
+	Control Template		: Template definition and referencing
 */
 
 void GuiMain()
