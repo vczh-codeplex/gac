@@ -519,7 +519,7 @@
     <ClCompile Include="..\..\Source\Reflection\GuiInstanceLoader_LoadInstance.cpp">
       <Filter>GacUI\Reflection</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Reflection\GuiInstanceLoader_VirtualTypes.cpp">
+    <ClCompile Include="..\..\Source\Reflection\GuiInstanceLoader_PredefinedInstanceLoaders.cpp">
       <Filter>GacUI\Reflection</Filter>
     </ClCompile>
   </ItemGroup>
