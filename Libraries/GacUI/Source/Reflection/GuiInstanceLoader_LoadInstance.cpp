@@ -138,11 +138,26 @@ Helper Functions
 					case IGuiInstanceLoader::ValueProperty:
 						if(propertyValue->values.Count()==1)
 						{
+							if(propertyValue->binding==L"")
+							{
+							}
+							else if(propertyValue->binding==L"set")
+							{
+							}
+							else
+							{
+							}
 						}
 						break;
 					case IGuiInstanceLoader::CollectionProperty:
 						FOREACH(Ptr<GuiValueRepr>, value, propertyValue->values)
 						{
+							if(propertyValue->binding==L"")
+							{
+							}
+							else if(propertyValue->binding!=L"set")
+							{
+							}
 						}
 						break;
 					}
