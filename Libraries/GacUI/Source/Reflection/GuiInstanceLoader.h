@@ -20,16 +20,6 @@ namespace vl
 		using namespace reflection;
 
 /***********************************************************************
-Instance Binder
-***********************************************************************/
-
-		class IGuiInstanceBinder : public IDescriptable, public Description<IGuiInstanceBinder>
-		{
-		public:
-			virtual WString							GetBindingName()=0;
-		};
-
-/***********************************************************************
 Instance Loader
 ***********************************************************************/
 
@@ -78,6 +68,27 @@ Instance Loader
 														description::ITypeDescriptor* typeDescriptor,
 														const WString& propertyName,
 														description::Value propertyValue
+														)=0;
+		};
+
+/***********************************************************************
+Instance Binder
+***********************************************************************/
+
+		class IGuiInstanceBinder : public IDescriptable, public Description<IGuiInstanceBinder>
+		{
+		public:
+			virtual WString							GetBindingName()=0;
+			virtual description::ITypeDescriptor*	GetExpectedValueType()=0;
+			virtual bool							SetPropertyValue(
+														IGuiInstanceLoader* loader,
+														Ptr<GuiResourcePathResolver> resolver,
+														description::Value createdInstance,
+														const WString& typeName,
+														description::ITypeDescriptor* typeDescriptor,
+														const WString& propertyName,
+														description::Value propertyValue,
+														bool collectionProperty
 														)=0;
 		};
 

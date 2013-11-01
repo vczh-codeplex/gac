@@ -275,10 +275,10 @@ GuiCompositionInstanceLoader
 		};
 
 /***********************************************************************
-GuiInstanceLoaderVirtualTypesPlugin
+GuiPredefinedInstanceLoadersPlugin
 ***********************************************************************/
 
-		class GuiInstanceLoaderVirtualTypesPlugin : public Object, public IGuiPlugin
+		class GuiPredefinedInstanceLoadersPlugin : public Object, public IGuiPlugin
 		{
 		public:
 			void Load()override
@@ -326,6 +326,6 @@ GuiInstanceLoaderVirtualTypesPlugin
 			{
 			}
 		};
-		GUI_REGISTER_PLUGIN(GuiInstanceLoaderVirtualTypesPlugin)
+		GUI_REGISTER_PLUGIN(GuiPredefinedInstanceLoadersPlugin)
 	}
 }

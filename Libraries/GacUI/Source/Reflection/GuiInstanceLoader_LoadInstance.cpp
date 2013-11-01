@@ -216,6 +216,16 @@ Helper Functions
 							}
 							else
 							{
+								// other binding: provide the property value to the specified binder
+								IGuiInstanceBinder* binder=GetInstanceLoaderManager()->GetInstanceBinder(propertyValue->binding);
+								if(binder)
+								{
+									Value value=LoadValueVisitor::LoadValue(valueRepr, context, resolver, binder->GetExpectedValueType());
+									if(!binder->SetPropertyValue(propertyLoader, resolver, createdInstance, typeName, typeDescriptor, propertyName, value, false))
+									{
+										value.DeleteRawPtr();
+									}
+								}
 							}
 						}
 						break;
@@ -234,6 +244,16 @@ Helper Functions
 							}
 							else if(propertyValue->binding!=L"set")
 							{
+								// other binding: provide the property value to the specified binder
+								IGuiInstanceBinder* binder=GetInstanceLoaderManager()->GetInstanceBinder(propertyValue->binding);
+								if(binder)
+								{
+									Value value=LoadValueVisitor::LoadValue(valueRepr, context, resolver, binder->GetExpectedValueType());
+									if(!binder->SetPropertyValue(propertyLoader, resolver, createdInstance, typeName, typeDescriptor, propertyName, value, true))
+									{
+										value.DeleteRawPtr();
+									}
+								}
 							}
 						}
 						break;
