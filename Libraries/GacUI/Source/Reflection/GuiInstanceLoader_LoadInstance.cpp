@@ -106,6 +106,10 @@ LoadValueVisitor
 
 				void Visit(GuiTextRepr* repr)override
 				{
+					if(IValueSerializer* serializer=typeDescriptor->GetValueSerializer())
+					{
+						serializer->Parse(repr->text, result);
+					}
 				}
 
 				void Visit(GuiAttSetterRepr* repr)override
@@ -114,6 +118,9 @@ LoadValueVisitor
 
 				void Visit(GuiConstructorRepr* repr)override
 				{
+					WString _typeName;
+					ITypeDescriptor* _typeDescriptor=0;
+					result=LoadInstance(context, repr, resolver, _typeName, _typeDescriptor);
 				}
 
 				static Value LoadValue(Ptr<GuiValueRepr> valueRepr, Ptr<GuiInstanceContext> context, Ptr<GuiResourcePathResolver> resolver, ITypeDescriptor* typeDescriptor)
