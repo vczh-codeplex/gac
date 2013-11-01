@@ -110,7 +110,7 @@ Default Instance Loader
 		class GuiDefaultInstanceLoader : public Object, public IGuiInstanceLoader
 		{
 		public:
-			WString GetTypeName()
+			WString GetTypeName()override
 			{
 				return L"";
 			}
@@ -121,7 +121,7 @@ Default Instance Loader
 				Ptr<GuiResourcePathResolver> resolver,
 				const WString& typeName,
 				description::ITypeDescriptor* typeDescriptor
-				)
+				)override
 			{
 				vint count=typeDescriptor->GetConstructorGroup()->GetMethodCount();
 				for(vint i=0;i<count;i++)
@@ -133,6 +133,80 @@ Default Instance Loader
 					}
 				}
 				return Value();
+			}
+
+			IGuiInstanceLoader::PropertyType GetPropertyType(
+				ITypeInfo* propType,
+				ITypeDescriptor*& elementType,
+				bool &nullable
+				)
+			{
+				switch(propType->GetDecorator())
+				{
+				case ITypeInfo::RawPtr:
+				case ITypeInfo::SharedPtr:
+					return GetPropertyType(propType->GetElementType(), elementType, nullable);
+				case ITypeInfo::Nullable:
+					nullable=true;
+					return GetPropertyType(propType->GetElementType(), elementType, nullable);
+				case ITypeInfo::TypeDescriptor:
+					elementType=propType->GetTypeDescriptor();
+					return IGuiInstanceLoader::ValueProperty;
+				case ITypeInfo::Generic:
+					{
+						ITypeDescriptor* genericType=propType->GetTypeDescriptor();
+						IGuiInstanceLoader::PropertyType type=IGuiInstanceLoader::UnsupportedProperty;
+
+						if(genericType==description::GetTypeDescriptor<IValueList>())
+						{
+							type=IGuiInstanceLoader::CollectionProperty;
+						}
+						else if(genericType==description::GetTypeDescriptor<IValueFunctionProxy>())
+						{
+							type=IGuiInstanceLoader::ValueProperty;
+						}
+
+						if(type!=IGuiInstanceLoader::UnsupportedProperty)
+						{
+							if(GetPropertyType(propType->GetElementType(), elementType, nullable))
+							{
+								return type;
+							}
+						}
+					}
+				default:
+					return IGuiInstanceLoader::UnsupportedProperty;
+				}
+			}
+
+			IGuiInstanceLoader::PropertyType GetPropertyType(
+				const WString& typeName,
+				description::ITypeDescriptor* typeDescriptor,
+				const WString& propertyName,
+				description::ITypeDescriptor*& elementType,
+				bool &nullable
+				)override
+			{
+				elementType=0;
+				nullable=false;
+				IPropertyInfo* prop=typeDescriptor->GetPropertyByName(propertyName, true);
+				if(prop)
+				{
+					ITypeInfo* propType=prop->GetReturn();
+					if(IMethodInfo* method=prop->GetSetter())
+					{
+						if(method->GetParameterCount()==1)
+						{
+							propType=method->GetParameter(0)->GetType();
+						}
+					}
+
+					if(propType)
+					{
+						return GetPropertyType(propType, elementType, nullable);
+					}
+				}
+				return IGuiInstanceLoader::UnsupportedProperty;
 			}
 		};
 
