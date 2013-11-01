@@ -37,7 +37,7 @@ Instance Loader
 		{
 		public:
 			virtual WString							GetTypeName()=0;
-			virtual DescriptableObject*				CreateInstance(Ptr<GuiInstanceContext> context, Ptr<GuiConstructorRepr> ctor, Ptr<GuiResourcePathResolver> resolver)=0;
+			virtual DescriptableObject*				CreateInstance(Ptr<GuiInstanceContext> context, Ptr<GuiConstructorRepr> ctor, Ptr<GuiResourcePathResolver> resolver, const WString& typeName, description::ITypeDescriptor* typeDescriptor)=0;
 		};
 
 /***********************************************************************
@@ -53,15 +53,17 @@ Instance Loader Manager
 			virtual bool							SetLoader(Ptr<IGuiInstanceLoader> loader)=0;
 			virtual IGuiInstanceLoader*				GetLoader(const WString& typeName)=0;
 			virtual IGuiInstanceLoader*				GetParentLoader(IGuiInstanceLoader* loader)=0;
+			virtual description::ITypeDescriptor*	GetTypeDescriptorForType(const WString& typeName)=0;
 		};
 
 		struct InstanceLoadingSource
 		{
 			IGuiInstanceLoader*						loader;
+			WString									typeName;
 			Ptr<GuiInstanceContext>					context;
 
 			InstanceLoadingSource():loader(0){}
-			InstanceLoadingSource(IGuiInstanceLoader* _loader):loader(_loader){}
+			InstanceLoadingSource(IGuiInstanceLoader* _loader, const WString& _typeName):loader(_loader), typeName(_typeName){}
 			InstanceLoadingSource(Ptr<GuiInstanceContext> _context):loader(0), context(_context){}
 
 			operator bool()const
