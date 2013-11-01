@@ -339,7 +339,9 @@
     <ClCompile Include="..\..\Source\Reflection\GuiInstanceRepresentation.cpp" />
     <ClCompile Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionBasic.cpp" />
     <ClCompile Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionCompositions.cpp" />
-    <ClCompile Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionControls.cpp" />
+    <ClCompile Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionControls.cpp">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/bigobj %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
     <ClCompile Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionElements.cpp" />
     <ClCompile Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionEvents.cpp" />
     <ClCompile Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionPlugin.cpp" />
