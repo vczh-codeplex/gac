@@ -185,6 +185,7 @@ GuiControlInstanceLoader
 				{
 					elementType=description::GetTypeDescriptor<Value>();
 					nullable=false;
+					return IGuiInstanceLoader::CollectionProperty;
 				}
 				return IGuiInstanceLoader::HandleByParentLoader;
 			}
@@ -212,10 +213,12 @@ GuiControlInstanceLoader
 					if(auto control=dynamic_cast<GuiControl*>(propertyValue.GetRawPtr()))
 					{
 						container->AddChild(control);
+						return true;
 					}
 					else if(auto composition=dynamic_cast<GuiGraphicsComposition*>(propertyValue.GetRawPtr()))
 					{
 						container->GetBoundsComposition()->AddChild(composition);
+						return true;
 					}
 				}
 				return false;
