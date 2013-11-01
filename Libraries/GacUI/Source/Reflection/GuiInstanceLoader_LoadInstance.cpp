@@ -73,7 +73,7 @@ FindTypeVisitor
 					IGuiInstanceLoader* loader=GetInstanceLoaderManager()->GetLoader(fullName);
 					if(loader)
 					{
-						result=InstanceLoadingSource(loader);
+						result=InstanceLoadingSource(loader, fullName);
 					}
 				}
 
@@ -118,7 +118,7 @@ Helper Functions
 			DescriptableObject* instance=0;
 			if(source.loader)
 			{
-				instance=source.loader->CreateInstance(context, ctor, resolver);
+				instance=source.loader->CreateInstance(context, ctor, resolver, source.typeName, GetInstanceLoaderManager()->GetTypeDescriptorForType(source.typeName));
 			}
 			else if(source.context)
 			{

@@ -104,6 +104,24 @@ Instance Type Resolver
 		};
 
 /***********************************************************************
+Default Instance Loader
+***********************************************************************/
+
+		class GuiDefaultInstanceLoader : public Object, public IGuiInstanceLoader
+		{
+		public:
+			WString GetTypeName()
+			{
+				return L"";
+			}
+
+			DescriptableObject* CreateInstance(Ptr<GuiInstanceContext> context, Ptr<GuiConstructorRepr> ctor, Ptr<GuiResourcePathResolver> resolver, const WString& typeName, description::ITypeDescriptor* typeDescriptor)
+			{
+				return 0;
+			}
+		};
+
+/***********************************************************************
 GuiInstanceLoaderManager
 ***********************************************************************/
 
@@ -176,10 +194,13 @@ GuiInstanceLoaderManager
 					if(index==-1)
 					{
 						searchType=GetGlobalTypeManager()->GetTypeDescriptor(typeInfo->parentTypeName);
+						typeInfo->typeDescriptor=searchType;
 					}
 					else
 					{
-						typeInfo->parentTypeInfos.Add(typeInfos.Values()[index].Obj());
+						TypeInfo* parentTypeInfo=typeInfos.Values()[index].Obj();
+						typeInfo->typeDescriptor=parentTypeInfo->typeDescriptor;
+						typeInfo->parentTypeInfos.Add(parentTypeInfo);
 						return;
 					}
 				}
@@ -210,6 +231,11 @@ GuiInstanceLoaderManager
 				}
 			}
 		public:
+			GuiInstanceLoaderManager()
+			{
+				rootLoader=new GuiDefaultInstanceLoader;
+			}
+
 			void Load()override
 			{
 				instanceLoaderManager=this;
@@ -315,6 +341,14 @@ GuiInstanceLoaderManager
 					return rootLoader.Obj();
 				}
 				return 0;
+			}
+
+			description::ITypeDescriptor* GetTypeDescriptorForType(const WString& typeName)override
+			{
+				vint index=typeInfos.Keys().Contains(typeName);
+				return index==-1
+					?GetGlobalTypeManager()->GetTypeDescriptor(typeName)
+					:typeInfos.Values()[index]->typeDescriptor;
 			}
 		};
 		GUI_REGISTER_PLUGIN(GuiInstanceLoaderManager)
