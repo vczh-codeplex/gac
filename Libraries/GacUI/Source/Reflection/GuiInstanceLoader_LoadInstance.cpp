@@ -109,10 +109,30 @@ Helper Functions
 
 		DescriptableObject* LoadInstance(Ptr<GuiInstanceContext> context, Ptr<GuiResourcePathResolver> resolver)
 		{
-			throw 0;
+			return LoadInstance(context, context->instance, resolver);
 		}
 
-		bool LoadInstance(DescriptableObject* createdInstance, Ptr<GuiInstanceContext> context, Ptr<GuiResourcePathResolver> resolver)
+		DescriptableObject* LoadInstance(Ptr<GuiInstanceContext> context, Ptr<GuiConstructorRepr> ctor, Ptr<GuiResourcePathResolver> resolver)
+		{
+			InstanceLoadingSource source=FindInstanceLoadingSource(context, ctor, resolver);
+			DescriptableObject* instance=0;
+			if(source.loader)
+			{
+				instance=source.loader->CreateInstance(context, ctor, resolver);
+			}
+			else if(source.context)
+			{
+				instance=LoadInstance(source.context, resolver);
+			}
+
+			if(instance)
+			{
+				FillInstance(instance, context, ctor, resolver, source.loader);
+			}
+			return instance;
+		}
+
+		void FillInstance(DescriptableObject* createdInstance, Ptr<GuiInstanceContext> context, Ptr<GuiConstructorRepr> ctor, Ptr<GuiResourcePathResolver> resolver, IGuiInstanceLoader* loader)
 		{
 			throw 0;
 		}
