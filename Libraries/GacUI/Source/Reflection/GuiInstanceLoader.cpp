@@ -268,6 +268,11 @@ GuiInstanceLoaderManager
 
 				List<ITypeDescriptor*>				parentTypes;				// all direct or indirect base types that does not has a type info
 				List<TypeInfo*>						parentTypeInfos;			// type infos for all registered direct or indirect base types
+
+				TypeInfo()
+					:typeDescriptor(0)
+				{
+				}
 			};
 			typedef Dictionary<WString, Ptr<TypeInfo>>							TypeInfoMap;
 
@@ -284,7 +289,7 @@ GuiInstanceLoaderManager
 			{
 				if(searchType!=typeInfo->typeDescriptor)
 				{
-					vint index=typeInfos.Keys().Contains(searchType->GetTypeName());
+					vint index=typeInfos.Keys().IndexOf(searchType->GetTypeName());
 					if(index==-1)
 					{
 						typeInfo->parentTypes.Add(searchType);
@@ -317,6 +322,7 @@ GuiInstanceLoaderManager
 					{
 						searchType=GetGlobalTypeManager()->GetTypeDescriptor(typeInfo->parentTypeName);
 						typeInfo->typeDescriptor=searchType;
+						typeInfo->parentTypes.Add(searchType);
 					}
 					else
 					{
@@ -430,7 +436,7 @@ GuiInstanceLoaderManager
 					}
 				}
 
-				return false;
+				return true;
 			}
 
 			IGuiInstanceLoader* GetLoader(const WString& typeName)override
