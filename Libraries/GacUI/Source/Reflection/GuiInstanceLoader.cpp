@@ -216,7 +216,7 @@ Default Instance Loader
 				const WString& propertyName
 				)override
 			{
-				return Value();
+				return createdInstance.GetProperty(propertyName);
 			}
 
 			bool SetPropertyValue(
@@ -227,7 +227,8 @@ Default Instance Loader
 				description::Value propertyValue
 				)override
 			{
-				return false;
+				createdInstance.SetProperty(propertyName, propertyValue);
+				return true;
 			}
 
 			bool SetPropertyCollection(
