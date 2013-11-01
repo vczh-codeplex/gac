@@ -82,7 +82,7 @@ Instance Loader Manager
 		extern InstanceLoadingSource				FindInstanceLoadingSource(Ptr<GuiInstanceContext> context, Ptr<GuiConstructorRepr> ctor, Ptr<GuiResourcePathResolver> resolver);
 		extern description::Value					LoadInstance(Ptr<GuiInstanceContext> context, Ptr<GuiResourcePathResolver> resolver);
 		extern description::Value					LoadInstance(Ptr<GuiInstanceContext> context, Ptr<GuiConstructorRepr> ctor, Ptr<GuiResourcePathResolver> resolver);
-		extern void									FillInstance(description::Value createdInstance, Ptr<GuiInstanceContext> context, Ptr<GuiConstructorRepr> ctor, Ptr<GuiResourcePathResolver> resolver, IGuiInstanceLoader* loader);
+		extern void									FillInstance(description::Value createdInstance, Ptr<GuiInstanceContext> context, Ptr<GuiAttSetterRepr> attSetter, Ptr<GuiResourcePathResolver> resolver, IGuiInstanceLoader* loader);
 	}
 }
 

@@ -100,6 +100,8 @@ void GuiMain()
 		GuiWindow* window=dynamic_cast<GuiWindow*>(windowInstance.GetRawPtr());
 		if(window)
 		{
+			window->ForceCalculateSizeImmediately();
+			window->MoveToScreenCenter();
 			GetApplication()->Run(window);
 		}
 		windowInstance.DeleteRawPtr();
