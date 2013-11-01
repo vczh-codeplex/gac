@@ -37,7 +37,7 @@ Instance Loader
 		{
 		public:
 			virtual WString							GetTypeName()=0;
-			virtual DescriptableObject*				CreateInstance(Ptr<GuiInstanceContext> context, Ptr<GuiConstructorRepr> ctor, Ptr<GuiResourcePathResolver> resolver, const WString& typeName, description::ITypeDescriptor* typeDescriptor)=0;
+			virtual description::Value				CreateInstance(Ptr<GuiInstanceContext> context, Ptr<GuiConstructorRepr> ctor, Ptr<GuiResourcePathResolver> resolver, const WString& typeName, description::ITypeDescriptor* typeDescriptor)=0;
 		};
 
 /***********************************************************************
@@ -74,9 +74,9 @@ Instance Loader Manager
 
 		extern IGuiInstanceLoaderManager*			GetInstanceLoaderManager();
 		extern InstanceLoadingSource				FindInstanceLoadingSource(Ptr<GuiInstanceContext> context, Ptr<GuiConstructorRepr> ctor, Ptr<GuiResourcePathResolver> resolver);
-		extern DescriptableObject*					LoadInstance(Ptr<GuiInstanceContext> context, Ptr<GuiResourcePathResolver> resolver);
-		extern DescriptableObject*					LoadInstance(Ptr<GuiInstanceContext> context, Ptr<GuiConstructorRepr> ctor, Ptr<GuiResourcePathResolver> resolver);
-		extern void									FillInstance(DescriptableObject* createdInstance, Ptr<GuiInstanceContext> context, Ptr<GuiConstructorRepr> ctor, Ptr<GuiResourcePathResolver> resolver, IGuiInstanceLoader* loader);
+		extern description::Value					LoadInstance(Ptr<GuiInstanceContext> context, Ptr<GuiResourcePathResolver> resolver);
+		extern description::Value					LoadInstance(Ptr<GuiInstanceContext> context, Ptr<GuiConstructorRepr> ctor, Ptr<GuiResourcePathResolver> resolver);
+		extern void									FillInstance(description::Value createdInstance, Ptr<GuiInstanceContext> context, Ptr<GuiConstructorRepr> ctor, Ptr<GuiResourcePathResolver> resolver, IGuiInstanceLoader* loader);
 	}
 }
 

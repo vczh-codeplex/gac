@@ -107,15 +107,15 @@ Helper Functions
 			return InstanceLoadingSource();
 		}
 
-		DescriptableObject* LoadInstance(Ptr<GuiInstanceContext> context, Ptr<GuiResourcePathResolver> resolver)
+		description::Value LoadInstance(Ptr<GuiInstanceContext> context, Ptr<GuiResourcePathResolver> resolver)
 		{
 			return LoadInstance(context, context->instance, resolver);
 		}
 
-		DescriptableObject* LoadInstance(Ptr<GuiInstanceContext> context, Ptr<GuiConstructorRepr> ctor, Ptr<GuiResourcePathResolver> resolver)
+		description::Value LoadInstance(Ptr<GuiInstanceContext> context, Ptr<GuiConstructorRepr> ctor, Ptr<GuiResourcePathResolver> resolver)
 		{
 			InstanceLoadingSource source=FindInstanceLoadingSource(context, ctor, resolver);
-			DescriptableObject* instance=0;
+			Value instance;
 			if(source.loader)
 			{
 				instance=source.loader->CreateInstance(context, ctor, resolver, source.typeName, GetInstanceLoaderManager()->GetTypeDescriptorForType(source.typeName));
@@ -125,16 +125,15 @@ Helper Functions
 				instance=LoadInstance(source.context, resolver);
 			}
 
-			if(instance)
-			{
-				FillInstance(instance, context, ctor, resolver, source.loader);
-			}
+			FillInstance(instance, context, ctor, resolver, source.loader);
 			return instance;
 		}
 
-		void FillInstance(DescriptableObject* createdInstance, Ptr<GuiInstanceContext> context, Ptr<GuiConstructorRepr> ctor, Ptr<GuiResourcePathResolver> resolver, IGuiInstanceLoader* loader)
+		void FillInstance(description::Value createdInstance, Ptr<GuiInstanceContext> context, Ptr<GuiConstructorRepr> ctor, Ptr<GuiResourcePathResolver> resolver, IGuiInstanceLoader* loader)
 		{
-			throw 0;
+			if(createdInstance.GetRawPtr())
+			{
+			}
 		}
 	}
 }
