@@ -188,7 +188,10 @@ Helper Functions
 							if(propertyValue->binding==L"")
 							{
 								Value value=LoadValueVisitor::LoadValue(valueRepr, context, resolver, elementType);
-								propertyLoader->SetPropertyValue(createdInstance, typeName, typeDescriptor, propertyName, value);
+								if(!propertyLoader->SetPropertyValue(createdInstance, typeName, typeDescriptor, propertyName, value))
+								{
+									value.DeleteRawPtr();
+								}
 							}
 							else if(propertyValue->binding==L"set")
 							{
@@ -217,7 +220,10 @@ Helper Functions
 							if(propertyValue->binding==L"")
 							{
 								Value value=LoadValueVisitor::LoadValue(valueRepr, context, resolver, elementType);
-								propertyLoader->SetPropertyCollection(createdInstance, typeName, typeDescriptor, propertyName, value);
+								if(!propertyLoader->SetPropertyCollection(createdInstance, typeName, typeDescriptor, propertyName, value))
+								{
+									value.DeleteRawPtr();
+								}
 							}
 							else if(propertyValue->binding!=L"set")
 							{
