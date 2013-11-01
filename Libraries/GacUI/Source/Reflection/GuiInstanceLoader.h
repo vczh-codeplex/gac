@@ -59,6 +59,26 @@ Instance Loader
 														description::ITypeDescriptor*& elementType,
 														bool &nullable
 														)=0;
+			virtual description::Value				GetPropertyValue(
+														description::Value createdInstance,
+														const WString& typeName,
+														description::ITypeDescriptor* typeDescriptor,
+														const WString& propertyName
+														)=0;
+			virtual bool							SetPropertyValue(
+														description::Value createdInstance,
+														const WString& typeName,
+														description::ITypeDescriptor* typeDescriptor,
+														const WString& propertyName,
+														description::Value propertyValue
+														)=0;
+			virtual bool							SetPropertyCollection(
+														description::Value createdInstance,
+														const WString& typeName,
+														description::ITypeDescriptor* typeDescriptor,
+														const WString& propertyName,
+														description::Value propertyValue
+														)=0;
 		};
 
 /***********************************************************************

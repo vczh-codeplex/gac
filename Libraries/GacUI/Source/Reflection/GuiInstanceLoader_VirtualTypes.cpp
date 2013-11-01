@@ -55,6 +55,38 @@ GuiVrtualTypeInstanceLoader
 			{
 				return IGuiInstanceLoader::HandleByParentLoader;
 			}
+
+			description::Value GetPropertyValue(
+				description::Value createdInstance,
+				const WString& typeName,
+				description::ITypeDescriptor* typeDescriptor,
+				const WString& propertyName
+				)override
+			{
+				return Value();
+			}
+
+			bool SetPropertyValue(
+				description::Value createdInstance,
+				const WString& typeName,
+				description::ITypeDescriptor* typeDescriptor,
+				const WString& propertyName,
+				description::Value propertyValue
+				)override
+			{
+				return false;
+			}
+
+			bool SetPropertyCollection(
+				description::Value createdInstance,
+				const WString& typeName,
+				description::ITypeDescriptor* typeDescriptor,
+				const WString& propertyName,
+				description::Value propertyValue
+				)override
+			{
+				return false;
+			}
 		};
 
 /***********************************************************************
