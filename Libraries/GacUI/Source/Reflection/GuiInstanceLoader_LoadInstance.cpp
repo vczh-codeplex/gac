@@ -92,7 +92,11 @@ FindTypeVisitor
 Helper Functions
 ***********************************************************************/
 
-		InstanceLoadingSource FindInstanceLoadingSource(Ptr<GuiInstanceContext> context, Ptr<GuiConstructorRepr> ctor, Ptr<GuiResourcePathResolver> resolver)
+		InstanceLoadingSource FindInstanceLoadingSource(
+			Ptr<GuiInstanceContext> context,
+			Ptr<GuiConstructorRepr> ctor,
+			Ptr<GuiResourcePathResolver> resolver
+			)
 		{
 			vint index=context->namespaces.Keys().IndexOf(ctor->typeNamespace);
 			if(index!=-1)
@@ -107,38 +111,90 @@ Helper Functions
 			return InstanceLoadingSource();
 		}
 
-		description::Value LoadInstance(Ptr<GuiInstanceContext> context, Ptr<GuiResourcePathResolver> resolver)
+		void FillInstance(
+			description::Value createdInstance,
+			Ptr<GuiInstanceContext> context,
+			Ptr<GuiAttSetterRepr> attSetter,
+			Ptr<GuiResourcePathResolver> resolver,
+			IGuiInstanceLoader* loader,
+			const WString& typeName,
+			description::ITypeDescriptor* typeDescriptor
+			)
 		{
-			return LoadInstance(context, context->instance, resolver);
+			for(vint i=0;i<attSetter->setters.Count();i++)
+			{
+				WString propertyName=attSetter->setters.Keys()[i];
+				auto propertyValue=attSetter->setters.Values()[i];
+				IGuiInstanceLoader* propertyLoader=loader;
+
+				while(propertyLoader)
+				{
+					ITypeDescriptor* elementType=0;
+					bool nullable=false;
+					auto propertyType=propertyLoader->GetPropertyType(typeName, typeDescriptor, propertyName, elementType, nullable);
+
+					switch(propertyType)
+					{
+					case IGuiInstanceLoader::ValueProperty:
+						break;
+					case IGuiInstanceLoader::CollectionProperty:
+						break;
+					}
+
+					if(propertyType==IGuiInstanceLoader::HandleByParentLoader)
+					{
+						propertyLoader=GetInstanceLoaderManager()->GetParentLoader(propertyLoader);
+					}
+					else
+					{
+						break;
+					}
+				}
+			}
 		}
 
-		description::Value LoadInstance(Ptr<GuiInstanceContext> context, Ptr<GuiConstructorRepr> ctor, Ptr<GuiResourcePathResolver> resolver)
+		description::Value LoadInstance(
+			Ptr<GuiInstanceContext> context,
+			Ptr<GuiResourcePathResolver> resolver
+			)
+		{
+			WString typeName;
+			ITypeDescriptor* typeDescriptor=0;
+			return LoadInstance(context, context->instance, resolver, typeName, typeDescriptor);
+		}
+
+		description::Value LoadInstance(
+			Ptr<GuiInstanceContext> context,
+			Ptr<GuiConstructorRepr> ctor,
+			Ptr<GuiResourcePathResolver> resolver,
+			WString& typeName,
+			description::ITypeDescriptor*& typeDescriptor
+			)
 		{
 			InstanceLoadingSource source=FindInstanceLoadingSource(context, ctor, resolver);
 			Value instance;
 			if(source.loader)
 			{
 				IGuiInstanceLoader* loader=source.loader;
+				typeName=source.typeName;
+				typeDescriptor=GetInstanceLoaderManager()->GetTypeDescriptorForType(source.typeName);
 				while(loader && instance.IsNull())
 				{
-					instance=loader->CreateInstance(context, ctor, resolver, source.typeName, GetInstanceLoaderManager()->GetTypeDescriptorForType(source.typeName));
+					instance=loader->CreateInstance(context, ctor, resolver, typeName, typeDescriptor);
 					loader=GetInstanceLoaderManager()->GetParentLoader(loader);
 				}
 			}
 			else if(source.context)
 			{
-				instance=LoadInstance(source.context, resolver);
+				instance=LoadInstance(source.context, source.context->instance, resolver, typeName, typeDescriptor);
 			}
 
-			FillInstance(instance, context, ctor, resolver, source.loader);
-			return instance;
-		}
-
-		void FillInstance(description::Value createdInstance, Ptr<GuiInstanceContext> context, Ptr<GuiAttSetterRepr> attSetter, Ptr<GuiResourcePathResolver> resolver, IGuiInstanceLoader* loader)
-		{
-			if(createdInstance.GetRawPtr())
+			if(instance.GetRawPtr())
 			{
+				FillInstance(instance, context, ctor, resolver, source.loader, typeName, typeDescriptor);
 			}
+
+			return instance;
 		}
 	}
 }

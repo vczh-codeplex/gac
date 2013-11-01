@@ -36,6 +36,14 @@ Instance Loader
 		class IGuiInstanceLoader : public IDescriptable, public Description<IGuiInstanceLoader>
 		{
 		public:
+			enum PropertyType
+			{
+				ValueProperty,
+				CollectionProperty,
+				UnsupportedProperty,
+				HandleByParentLoader,
+			};
+
 			virtual WString							GetTypeName()=0;
 			virtual description::Value				CreateInstance(
 														Ptr<GuiInstanceContext> context,
@@ -43,6 +51,13 @@ Instance Loader
 														Ptr<GuiResourcePathResolver> resolver,
 														const WString& typeName,
 														description::ITypeDescriptor* typeDescriptor
+														)=0;
+			virtual PropertyType					GetPropertyType(
+														const WString& typeName,
+														description::ITypeDescriptor* typeDescriptor,
+														const WString& propertyName,
+														description::ITypeDescriptor*& elementType,
+														bool &nullable
 														)=0;
 		};
 
@@ -79,10 +94,22 @@ Instance Loader Manager
 		};
 
 		extern IGuiInstanceLoaderManager*			GetInstanceLoaderManager();
-		extern InstanceLoadingSource				FindInstanceLoadingSource(Ptr<GuiInstanceContext> context, Ptr<GuiConstructorRepr> ctor, Ptr<GuiResourcePathResolver> resolver);
-		extern description::Value					LoadInstance(Ptr<GuiInstanceContext> context, Ptr<GuiResourcePathResolver> resolver);
-		extern description::Value					LoadInstance(Ptr<GuiInstanceContext> context, Ptr<GuiConstructorRepr> ctor, Ptr<GuiResourcePathResolver> resolver);
-		extern void									FillInstance(description::Value createdInstance, Ptr<GuiInstanceContext> context, Ptr<GuiAttSetterRepr> attSetter, Ptr<GuiResourcePathResolver> resolver, IGuiInstanceLoader* loader);
+		extern InstanceLoadingSource				FindInstanceLoadingSource(
+														Ptr<GuiInstanceContext> context,
+														Ptr<GuiConstructorRepr> ctor,
+														Ptr<GuiResourcePathResolver> resolver
+														);
+		extern description::Value					LoadInstance(
+														Ptr<GuiInstanceContext> context,
+														Ptr<GuiResourcePathResolver> resolver
+														);
+		extern description::Value					LoadInstance(
+														Ptr<GuiInstanceContext> context,
+														Ptr<GuiConstructorRepr> ctor,
+														Ptr<GuiResourcePathResolver> resolver,
+														WString& typeName,
+														description::ITypeDescriptor*& typeDescriptor
+														);
 	}
 }
 

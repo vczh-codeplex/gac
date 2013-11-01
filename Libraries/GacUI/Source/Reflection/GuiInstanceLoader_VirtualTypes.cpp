@@ -44,6 +44,17 @@ GuiVrtualTypeInstanceLoader
 				}
 				return Value();
 			}
+
+			IGuiInstanceLoader::PropertyType GetPropertyType(
+				const WString& typeName,
+				description::ITypeDescriptor* typeDescriptor,
+				const WString& propertyName,
+				description::ITypeDescriptor*& elementType,
+				bool &nullable
+				)override
+			{
+				return IGuiInstanceLoader::HandleByParentLoader;
+			}
 		};
 
 /***********************************************************************
