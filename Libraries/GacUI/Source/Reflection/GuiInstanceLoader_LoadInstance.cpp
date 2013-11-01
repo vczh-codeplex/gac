@@ -136,8 +136,14 @@ Helper Functions
 					switch(propertyType)
 					{
 					case IGuiInstanceLoader::ValueProperty:
+						if(propertyValue->values.Count()==1)
+						{
+						}
 						break;
 					case IGuiInstanceLoader::CollectionProperty:
+						FOREACH(Ptr<GuiValueRepr>, value, propertyValue->values)
+						{
+						}
 						break;
 					}
 
