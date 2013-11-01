@@ -167,12 +167,14 @@ Helper Functions
 			description::ITypeDescriptor* typeDescriptor
 			)
 		{
-			for(vint i=0;i<attSetter->setters.Count();i++)
+			// reverse loop to set the default property (name == L"") after all other properties
+			for(vint i=attSetter->setters.Count()-1;i>=0;i--)
 			{
 				WString propertyName=attSetter->setters.Keys()[i];
 				auto propertyValue=attSetter->setters.Values()[i];
 				IGuiInstanceLoader* propertyLoader=loader;
 
+				// try to look for a loader to handle this property
 				while(propertyLoader)
 				{
 					ITypeDescriptor* elementType=0;
@@ -182,11 +184,13 @@ Helper Functions
 					switch(propertyType)
 					{
 					case IGuiInstanceLoader::ValueProperty:
+						// a property that accept a value
 						if(propertyValue->values.Count()==1)
 						{
 							Ptr<GuiValueRepr> valueRepr=propertyValue->values[0];
 							if(propertyValue->binding==L"")
 							{
+								// default binding: set the value directly
 								Value value=LoadValueVisitor::LoadValue(valueRepr, context, resolver, elementType);
 								if(!propertyLoader->SetPropertyValue(createdInstance, typeName, typeDescriptor, propertyName, value))
 								{
@@ -195,6 +199,7 @@ Helper Functions
 							}
 							else if(propertyValue->binding==L"set")
 							{
+								// set binding: get the property value and apply another property list on it
 								if(Ptr<GuiAttSetterRepr> propertyAttSetter=valueRepr.Cast<GuiAttSetterRepr>())
 								{
 									Value propertyValue=propertyLoader->GetPropertyValue(createdInstance, typeName, typeDescriptor, propertyName);
@@ -215,10 +220,12 @@ Helper Functions
 						}
 						break;
 					case IGuiInstanceLoader::CollectionProperty:
+						// a property that accept a collection
 						FOREACH(Ptr<GuiValueRepr>, valueRepr, propertyValue->values)
 						{
 							if(propertyValue->binding==L"")
 							{
+								// default binding: add the value directly
 								Value value=LoadValueVisitor::LoadValue(valueRepr, context, resolver, elementType);
 								if(!propertyLoader->SetPropertyCollection(createdInstance, typeName, typeDescriptor, propertyName, value))
 								{
@@ -274,15 +281,21 @@ Helper Functions
 					instance=loader->CreateInstance(context, ctor, resolver, typeName, typeDescriptor);
 					loader=GetInstanceLoaderManager()->GetParentLoader(loader);
 				}
+
+				if(instance.GetRawPtr())
+				{
+					FillInstance(instance, context, ctor, resolver, source.loader, typeName, typeDescriptor);
+				}
 			}
 			else if(source.context)
 			{
 				instance=LoadInstance(source.context, source.context->instance.Obj(), resolver, typeName, typeDescriptor);
-			}
+				IGuiInstanceLoader* loader=GetInstanceLoaderManager()->GetLoader(typeName);
 
-			if(instance.GetRawPtr())
-			{
-				FillInstance(instance, context, ctor, resolver, source.loader, typeName, typeDescriptor);
+				if(instance.GetRawPtr() && loader)
+				{
+					FillInstance(instance, context, ctor, resolver, loader, typeName, typeDescriptor);
+				}
 			}
 
 			return instance;
