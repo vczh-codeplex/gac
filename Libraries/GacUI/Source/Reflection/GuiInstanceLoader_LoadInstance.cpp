@@ -85,6 +85,45 @@ FindTypeVisitor
 				}
 			};
 
+/***********************************************************************
+LoadValueVisitor
+***********************************************************************/
+
+			class LoadValueVisitor : public Object, public GuiValueRepr::IVisitor
+			{
+			public:
+				Ptr<GuiInstanceContext>					context;
+				Ptr<GuiResourcePathResolver>			resolver;
+				ITypeDescriptor*						typeDescriptor;
+				Value									result;
+
+				LoadValueVisitor(Ptr<GuiInstanceContext> _context, Ptr<GuiResourcePathResolver> _resolver, ITypeDescriptor* _typeDescriptor)
+					:context(_context)
+					,resolver(_resolver)
+					,typeDescriptor(_typeDescriptor)
+				{
+				}
+
+				void Visit(GuiTextRepr* repr)override
+				{
+				}
+
+				void Visit(GuiAttSetterRepr* repr)override
+				{
+				}
+
+				void Visit(GuiConstructorRepr* repr)override
+				{
+				}
+
+				static Value LoadValue(Ptr<GuiValueRepr> valueRepr, Ptr<GuiInstanceContext> context, Ptr<GuiResourcePathResolver> resolver, ITypeDescriptor* typeDescriptor)
+				{
+					LoadValueVisitor visitor(context, resolver, typeDescriptor);
+					valueRepr->Accept(&visitor);
+					return visitor.result;
+				}
+			};
+
 		}
 		using namespace visitors;
 
@@ -94,7 +133,7 @@ Helper Functions
 
 		InstanceLoadingSource FindInstanceLoadingSource(
 			Ptr<GuiInstanceContext> context,
-			Ptr<GuiConstructorRepr> ctor,
+			GuiConstructorRepr* ctor,
 			Ptr<GuiResourcePathResolver> resolver
 			)
 		{
@@ -114,7 +153,7 @@ Helper Functions
 		void FillInstance(
 			description::Value createdInstance,
 			Ptr<GuiInstanceContext> context,
-			Ptr<GuiAttSetterRepr> attSetter,
+			GuiAttSetterRepr* attSetter,
 			Ptr<GuiResourcePathResolver> resolver,
 			IGuiInstanceLoader* loader,
 			const WString& typeName,
@@ -138,11 +177,27 @@ Helper Functions
 					case IGuiInstanceLoader::ValueProperty:
 						if(propertyValue->values.Count()==1)
 						{
+							Ptr<GuiValueRepr> valueRepr=propertyValue->values[0];
 							if(propertyValue->binding==L"")
 							{
+								Value value=LoadValueVisitor::LoadValue(valueRepr, context, resolver, elementType);
+								propertyLoader->SetPropertyValue(createdInstance, typeName, typeDescriptor, propertyName, value);
 							}
 							else if(propertyValue->binding==L"set")
 							{
+								if(Ptr<GuiAttSetterRepr> propertyAttSetter=valueRepr.Cast<GuiAttSetterRepr>())
+								{
+									Value propertyValue=propertyLoader->GetPropertyValue(createdInstance, typeName, typeDescriptor, propertyName);
+									if(propertyValue.GetRawPtr())
+									{
+										ITypeDescriptor* propertyTypeDescriptor=propertyValue.GetRawPtr()->GetTypeDescriptor();
+										IGuiInstanceLoader* propertyInstanceLoader=GetInstanceLoaderManager()->GetLoader(propertyTypeDescriptor->GetTypeName());
+										if(propertyInstanceLoader)
+										{
+											FillInstance(propertyValue, context, propertyAttSetter.Obj(), resolver, propertyInstanceLoader, propertyTypeDescriptor->GetTypeName(), propertyTypeDescriptor);
+										}
+									}
+								}
 							}
 							else
 							{
@@ -150,10 +205,12 @@ Helper Functions
 						}
 						break;
 					case IGuiInstanceLoader::CollectionProperty:
-						FOREACH(Ptr<GuiValueRepr>, value, propertyValue->values)
+						FOREACH(Ptr<GuiValueRepr>, valueRepr, propertyValue->values)
 						{
 							if(propertyValue->binding==L"")
 							{
+								Value value=LoadValueVisitor::LoadValue(valueRepr, context, resolver, elementType);
+								propertyLoader->SetPropertyCollection(createdInstance, typeName, typeDescriptor, propertyName, value);
 							}
 							else if(propertyValue->binding!=L"set")
 							{
@@ -181,12 +238,12 @@ Helper Functions
 		{
 			WString typeName;
 			ITypeDescriptor* typeDescriptor=0;
-			return LoadInstance(context, context->instance, resolver, typeName, typeDescriptor);
+			return LoadInstance(context, context->instance.Obj(), resolver, typeName, typeDescriptor);
 		}
 
 		description::Value LoadInstance(
 			Ptr<GuiInstanceContext> context,
-			Ptr<GuiConstructorRepr> ctor,
+			GuiConstructorRepr* ctor,
 			Ptr<GuiResourcePathResolver> resolver,
 			WString& typeName,
 			description::ITypeDescriptor*& typeDescriptor
@@ -207,7 +264,7 @@ Helper Functions
 			}
 			else if(source.context)
 			{
-				instance=LoadInstance(source.context, source.context->instance, resolver, typeName, typeDescriptor);
+				instance=LoadInstance(source.context, source.context->instance.Obj(), resolver, typeName, typeDescriptor);
 			}
 
 			if(instance.GetRawPtr())
