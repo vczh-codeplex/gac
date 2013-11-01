@@ -7,11 +7,13 @@
 #pragma comment(linker,"\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
 #include "..\..\Source\GacUI.h"
+#include "..\..\Source\Reflection\GuiInstanceLoader.h"
 #include <Windows.h>
 
 using namespace vl::stream;
 using namespace vl::parsing::tabling;
 using namespace vl::parsing;
+using namespace vl::reflection::description;
 
 #define GUI_GRAPHICS_RENDERER_DIRECT2D
 
@@ -80,6 +82,13 @@ void GuiMain()
 	}
 #endif
 	UnitTestInGuiMain();
-	TestWindow window;
-	GetApplication()->Run(&window);
+	//TestWindow window;
+	//GetApplication()->Run(&window);
+	
+	Ptr<GuiResource> resource=GuiResource::LoadFromXml(L"..\\GacUISrcCodepackedTest\\Resources\\XmlWindowResource.xml");
+	Ptr<GuiInstanceContext> context=resource->GetValueByPath(L"Controls/DocumentWindowResource").Cast<GuiInstanceContext>();
+	if(context)
+	{
+		Value window=LoadInstance(context, new GuiResourcePathResolver(resource, resource->GetWorkingDirectory()));
+	}
 }

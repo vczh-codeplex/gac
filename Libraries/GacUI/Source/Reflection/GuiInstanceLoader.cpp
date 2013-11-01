@@ -115,9 +115,18 @@ Default Instance Loader
 				return L"";
 			}
 
-			DescriptableObject* CreateInstance(Ptr<GuiInstanceContext> context, Ptr<GuiConstructorRepr> ctor, Ptr<GuiResourcePathResolver> resolver, const WString& typeName, description::ITypeDescriptor* typeDescriptor)
+			description::Value CreateInstance(Ptr<GuiInstanceContext> context, Ptr<GuiConstructorRepr> ctor, Ptr<GuiResourcePathResolver> resolver, const WString& typeName, description::ITypeDescriptor* typeDescriptor)
 			{
-				return 0;
+				vint count=typeDescriptor->GetConstructorGroup()->GetMethodCount();
+				for(vint i=0;i<count;i++)
+				{
+					IMethodInfo* method=typeDescriptor->GetConstructorGroup()->GetMethod(i);
+					if(method->GetParameterCount()==0)
+					{
+						return method->Invoke(Value(), (Value::xs()));
+					}
+				}
+				return Value();
 			}
 		};
 
