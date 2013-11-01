@@ -71,25 +71,6 @@ public:
 };
 
 /*
-Virtual Type:
-	GroupBox					: GuiControl
-	MenuSplitter				: GuiControl
-	MenuBarButton				: GuiToolstripButton
-	MenuItemButton				: GuiToolstripButton
-	ToolstripButton				: GuiToolstripButton
-	ToolstripDropdownButton		: GuiToolstripButton
-	ToolstripSplitButton		: GuiToolstripButton
-	ToolstripSplitter			: GuiControl
-	CheckBox					: GuiSelectableButton
-	RadioButton					: GuiDatePicker
-	HScroll						: GuiScroll
-	VScroll						: GuiScroll
-	HTracker					: GuiScroll
-	VTracker					: GuiScroll
-	ProgressBar					: GuiScroll
-	CheckTextList				: GuiTextList
-	RadioTextList				: GuiTextList
-
 Type Loader:
 	GuiListView
 	GuiComboBoxListControl

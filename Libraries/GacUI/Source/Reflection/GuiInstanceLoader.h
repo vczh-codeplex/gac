@@ -37,7 +37,13 @@ Instance Loader
 		{
 		public:
 			virtual WString							GetTypeName()=0;
-			virtual description::Value				CreateInstance(Ptr<GuiInstanceContext> context, Ptr<GuiConstructorRepr> ctor, Ptr<GuiResourcePathResolver> resolver, const WString& typeName, description::ITypeDescriptor* typeDescriptor)=0;
+			virtual description::Value				CreateInstance(
+														Ptr<GuiInstanceContext> context,
+														Ptr<GuiConstructorRepr> ctor,
+														Ptr<GuiResourcePathResolver> resolver,
+														const WString& typeName,
+														description::ITypeDescriptor* typeDescriptor
+														)=0;
 		};
 
 /***********************************************************************
