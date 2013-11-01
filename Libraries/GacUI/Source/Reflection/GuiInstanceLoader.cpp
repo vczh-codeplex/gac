@@ -322,7 +322,7 @@ GuiInstanceLoaderManager
 
 			IGuiInstanceLoader* GetLoader(const WString& typeName)override
 			{
-				vint index=typeInfos.Keys().Contains(typeName);
+				vint index=typeInfos.Keys().IndexOf(typeName);
 				if(index!=-1)
 				{
 					return typeInfos.Values()[index]->loader.Obj();
@@ -339,7 +339,7 @@ GuiInstanceLoaderManager
 
 			IGuiInstanceLoader* GetParentLoader(IGuiInstanceLoader* loader)override
 			{
-				vint index=typeInfos.Keys().Contains(loader->GetTypeName());
+				vint index=typeInfos.Keys().IndexOf(loader->GetTypeName());
 				if(index!=-1)
 				{
 					Ptr<TypeInfo> typeInfo=typeInfos.Values()[index];
@@ -354,7 +354,7 @@ GuiInstanceLoaderManager
 
 			description::ITypeDescriptor* GetTypeDescriptorForType(const WString& typeName)override
 			{
-				vint index=typeInfos.Keys().Contains(typeName);
+				vint index=typeInfos.Keys().IndexOf(typeName);
 				return index==-1
 					?GetGlobalTypeManager()->GetTypeDescriptor(typeName)
 					:typeInfos.Values()[index]->typeDescriptor;
