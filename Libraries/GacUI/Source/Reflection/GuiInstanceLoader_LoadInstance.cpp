@@ -118,7 +118,12 @@ Helper Functions
 			Value instance;
 			if(source.loader)
 			{
-				instance=source.loader->CreateInstance(context, ctor, resolver, source.typeName, GetInstanceLoaderManager()->GetTypeDescriptorForType(source.typeName));
+				IGuiInstanceLoader* loader=source.loader;
+				while(loader && instance.IsNull())
+				{
+					instance=loader->CreateInstance(context, ctor, resolver, source.typeName, GetInstanceLoaderManager()->GetTypeDescriptorForType(source.typeName));
+					loader=GetInstanceLoaderManager()->GetParentLoader(loader);
+				}
 			}
 			else if(source.context)
 			{
@@ -129,7 +134,7 @@ Helper Functions
 			return instance;
 		}
 
-		void FillInstance(description::Value createdInstance, Ptr<GuiInstanceContext> context, Ptr<GuiConstructorRepr> ctor, Ptr<GuiResourcePathResolver> resolver, IGuiInstanceLoader* loader)
+		void FillInstance(description::Value createdInstance, Ptr<GuiInstanceContext> context, Ptr<GuiAttSetterRepr> attSetter, Ptr<GuiResourcePathResolver> resolver, IGuiInstanceLoader* loader)
 		{
 			if(createdInstance.GetRawPtr())
 			{

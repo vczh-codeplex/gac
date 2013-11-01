@@ -42,14 +42,6 @@ GuiVrtualTypeInstanceLoader
 				{
 					return constructor();
 				}
-				else
-				{
-					IGuiInstanceLoader* parentLoader=GetInstanceLoaderManager()->GetParentLoader(this);
-					if(parentLoader)
-					{
-						return parentLoader->CreateInstance(context, ctor, resolver, _typeName, typeDescriptor);
-					}
-				}
 				return Value();
 			}
 		};
