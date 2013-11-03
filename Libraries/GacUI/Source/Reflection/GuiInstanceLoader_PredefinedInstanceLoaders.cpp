@@ -81,7 +81,7 @@ GuiVrtualTypeInstanceLoader
 			{
 			}
 
-			WString GetTypeName()
+			WString GetTypeName()override
 			{
 				return typeName;
 			}
@@ -108,11 +108,7 @@ GuiControlInstanceLoader
 		class GuiControlInstanceLoader : public GuiRewriteInstanceLoader
 		{
 		public:
-			GuiControlInstanceLoader()
-			{
-			}
-
-			WString GetTypeName()
+			WString GetTypeName()override
 			{
 				return description::GetTypeDescriptor<GuiControl>()->GetTypeName();
 			}
@@ -154,17 +150,41 @@ GuiControlInstanceLoader
 		};
 
 /***********************************************************************
+GuiControlHostInstanceLoader
+***********************************************************************/
+
+		class GuiControlHostInstanceLoader : public GuiControlInstanceLoader
+		{
+		public:
+			WString GetTypeName()override
+			{
+				return description::GetTypeDescriptor<GuiControlHost>()->GetTypeName();
+			}
+
+			bool SetPropertyCollection(
+				PropertyValue& propertyValue
+				)override
+			{
+				if (GuiControlHost* container = dynamic_cast<GuiControlHost*>(propertyValue.instanceValue.GetRawPtr()))
+				{
+					if (auto component = dynamic_cast<GuiComponent*>(propertyValue.propertyValue.GetRawPtr()))
+					{
+						container->AddComponent(component);
+						return true;
+					}
+				}
+				return GuiControlInstanceLoader::SetPropertyCollection(propertyValue);
+			}
+		};
+
+/***********************************************************************
 GuiCompositionInstanceLoader
 ***********************************************************************/
 
 		class GuiCompositionInstanceLoader : public GuiRewriteInstanceLoader
 		{
 		public:
-			GuiCompositionInstanceLoader()
-			{
-			}
-
-			WString GetTypeName()
+			WString GetTypeName()override
 			{
 				return description::GetTypeDescriptor<GuiGraphicsComposition>()->GetTypeName();
 			}
@@ -219,6 +239,7 @@ GuiPredefinedInstanceLoadersPlugin
 				IGuiInstanceLoaderManager* manager=GetInstanceLoaderManager();
 
 				manager->SetLoader(new GuiControlInstanceLoader);
+				manager->SetLoader(new GuiControlHostInstanceLoader);
 				manager->SetLoader(new GuiCompositionInstanceLoader);
 
 #define ADD_VIRTUAL_TYPE(VIRTUALTYPENAME, TYPENAME, CONSTRUCTOR)\
