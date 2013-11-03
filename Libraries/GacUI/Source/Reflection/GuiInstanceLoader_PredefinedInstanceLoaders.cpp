@@ -11,6 +11,8 @@ namespace vl
 		using namespace compositions;
 		using namespace theme;
 
+#ifndef VCZH_DEBUG_NO_REFLECTION
+
 /***********************************************************************
 GuiVrtualTypeInstanceLoader
 ***********************************************************************/
@@ -274,6 +276,8 @@ GuiCompositionInstanceLoader
 			}
 		};
 
+#endif
+
 /***********************************************************************
 GuiPredefinedInstanceLoadersPlugin
 ***********************************************************************/
@@ -287,6 +291,7 @@ GuiPredefinedInstanceLoadersPlugin
 
 			void AfterLoad()override
 			{
+#ifndef VCZH_DEBUG_NO_REFLECTION
 				IGuiInstanceLoaderManager* manager=GetInstanceLoaderManager();
 
 				manager->SetLoader(new GuiControlInstanceLoader);
@@ -320,6 +325,7 @@ GuiPredefinedInstanceLoadersPlugin
 				ADD_VIRTUAL_TYPE(RadioTextList,				GuiTextList,			g::NewRadioTextList);
 
 #undef ADD_VIRTUAL_TYPE
+#endif
 			}
 
 			void Unload()override

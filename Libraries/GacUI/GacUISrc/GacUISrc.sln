@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GacUISrc", "GacUISrc\GacUISrc.vcxproj", "{85807517-320F-43CD-BD53-93CED2EAED9E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Public", "Public", "{843780E4-7D2F-4955-B988-88325DFB6B9E}"
@@ -19,6 +21,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Source", "Source", "{695AA4
 	ProjectSection(SolutionItems) = preProject
 		..\Public\Source\GacUI.cpp = ..\Public\Source\GacUI.cpp
 		..\Public\Source\GacUI.h = ..\Public\Source\GacUI.h
+		..\Public\Source\GacUIReflection.cpp = ..\Public\Source\GacUIReflection.cpp
+		..\Public\Source\GacUIReflection.h = ..\Public\Source\GacUIReflection.h
 		..\Public\Source\GacUIWindows.cpp = ..\Public\Source\GacUIWindows.cpp
 		..\Public\Source\GacUIWindows.h = ..\Public\Source\GacUIWindows.h
 		..\Public\Source\Vlpp.cpp = ..\Public\Source\Vlpp.cpp

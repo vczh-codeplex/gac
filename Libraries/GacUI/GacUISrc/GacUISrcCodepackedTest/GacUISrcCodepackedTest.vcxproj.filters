@@ -90,6 +90,9 @@
     <ClCompile Include="SetupDatagridExplorerWindow.cpp">
       <Filter>TabPages\ListBoxGroup</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Public\Source\GacUIReflection.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Public\Source\GacUI.h">
@@ -102,6 +105,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="FileSystemInformation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Public\Source\GacUIReflection.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
