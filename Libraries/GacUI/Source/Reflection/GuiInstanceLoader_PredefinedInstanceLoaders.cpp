@@ -14,10 +14,62 @@ namespace vl
 #ifndef VCZH_DEBUG_NO_REFLECTION
 
 /***********************************************************************
+GuiRewriteInstanceLoader
+***********************************************************************/
+
+		class GuiRewriteInstanceLoader : public Object, public IGuiInstanceLoader
+		{
+		public:
+			GuiRewriteInstanceLoader()
+			{
+			}
+
+			description::Value CreateInstance(
+				Ptr<GuiInstanceContext> context,
+				Ptr<GuiConstructorRepr> ctor,
+				Ptr<GuiResourcePathResolver> resolver,
+				const TypeInfo& typeInfo
+				)
+			{
+				return Value();
+			}
+
+			IGuiInstanceLoader::PropertyType GetPropertyType(
+				const PropertyInfo& propertyInfo,
+				description::ITypeDescriptor*& elementType,
+				bool &nullable
+				)override
+			{
+				return IGuiInstanceLoader::HandleByParentLoader;
+			}
+
+			bool GetPropertyValue(
+				PropertyValue& propertyValue
+				)override
+			{
+				return false;
+			}
+
+			bool SetPropertyValue(
+				PropertyValue& propertyValue
+				)override
+			{
+				return false;
+			}
+
+			bool SetPropertyCollection(
+				PropertyValue& propertyValue
+				)override
+			{
+				return false;
+			}
+		};
+
+/***********************************************************************
 GuiVrtualTypeInstanceLoader
 ***********************************************************************/
 
-		class GuiVrtualTypeInstanceLoader : public Object, public IGuiInstanceLoader
+		class GuiVrtualTypeInstanceLoader : public GuiRewriteInstanceLoader
 		{
 		protected:
 			WString							typeName;
@@ -38,124 +90,14 @@ GuiVrtualTypeInstanceLoader
 				Ptr<GuiInstanceContext> context,
 				Ptr<GuiConstructorRepr> ctor,
 				Ptr<GuiResourcePathResolver> resolver,
-				const WString& _typeName,
-				description::ITypeDescriptor* typeDescriptor
+				const TypeInfo& typeInfo
 				)
 			{
-				if(typeName==_typeName)
+				if(typeName==typeInfo.typeName)
 				{
 					return constructor();
 				}
 				return Value();
-			}
-
-			IGuiInstanceLoader::PropertyType GetPropertyType(
-				const WString& typeName,
-				description::ITypeDescriptor* typeDescriptor,
-				const WString& propertyName,
-				description::ITypeDescriptor*& elementType,
-				bool &nullable
-				)override
-			{
-				return IGuiInstanceLoader::HandleByParentLoader;
-			}
-
-			description::Value GetPropertyValue(
-				description::Value createdInstance,
-				const WString& typeName,
-				description::ITypeDescriptor* typeDescriptor,
-				const WString& propertyName
-				)override
-			{
-				return Value();
-			}
-
-			bool SetPropertyValue(
-				description::Value createdInstance,
-				const WString& typeName,
-				description::ITypeDescriptor* typeDescriptor,
-				const WString& propertyName,
-				description::Value propertyValue
-				)override
-			{
-				return false;
-			}
-
-			bool SetPropertyCollection(
-				description::Value createdInstance,
-				const WString& typeName,
-				description::ITypeDescriptor* typeDescriptor,
-				const WString& propertyName,
-				description::Value propertyValue
-				)override
-			{
-				return false;
-			}
-		};
-
-/***********************************************************************
-GuiRewriteInstanceLoader
-***********************************************************************/
-
-		class GuiRewriteInstanceLoader : public Object, public IGuiInstanceLoader
-		{
-		public:
-			GuiRewriteInstanceLoader()
-			{
-			}
-
-			description::Value CreateInstance(
-				Ptr<GuiInstanceContext> context,
-				Ptr<GuiConstructorRepr> ctor,
-				Ptr<GuiResourcePathResolver> resolver,
-				const WString& _typeName,
-				description::ITypeDescriptor* typeDescriptor
-				)
-			{
-				return Value();
-			}
-
-			IGuiInstanceLoader::PropertyType GetPropertyType(
-				const WString& typeName,
-				description::ITypeDescriptor* typeDescriptor,
-				const WString& propertyName,
-				description::ITypeDescriptor*& elementType,
-				bool &nullable
-				)override
-			{
-				return IGuiInstanceLoader::HandleByParentLoader;
-			}
-
-			description::Value GetPropertyValue(
-				description::Value createdInstance,
-				const WString& typeName,
-				description::ITypeDescriptor* typeDescriptor,
-				const WString& propertyName
-				)override
-			{
-				return Value();
-			}
-
-			bool SetPropertyValue(
-				description::Value createdInstance,
-				const WString& typeName,
-				description::ITypeDescriptor* typeDescriptor,
-				const WString& propertyName,
-				description::Value propertyValue
-				)override
-			{
-				return false;
-			}
-
-			bool SetPropertyCollection(
-				description::Value createdInstance,
-				const WString& typeName,
-				description::ITypeDescriptor* typeDescriptor,
-				const WString& propertyName,
-				description::Value propertyValue
-				)override
-			{
-				return false;
 			}
 		};
 
@@ -176,14 +118,12 @@ GuiControlInstanceLoader
 			}
 
 			IGuiInstanceLoader::PropertyType GetPropertyType(
-				const WString& typeName,
-				description::ITypeDescriptor* typeDescriptor,
-				const WString& propertyName,
+				const PropertyInfo& propertyInfo,
 				description::ITypeDescriptor*& elementType,
 				bool &nullable
 				)override
 			{
-				if(propertyName==L"")
+				if (propertyInfo.propertyName == L"")
 				{
 					elementType=description::GetTypeDescriptor<Value>();
 					nullable=false;
@@ -192,32 +132,18 @@ GuiControlInstanceLoader
 				return IGuiInstanceLoader::HandleByParentLoader;
 			}
 
-			description::Value GetPropertyValue(
-				description::Value createdInstance,
-				const WString& typeName,
-				description::ITypeDescriptor* typeDescriptor,
-				const WString& propertyName
-				)override
-			{
-				return Value();
-			}
-
 			bool SetPropertyCollection(
-				description::Value createdInstance,
-				const WString& typeName,
-				description::ITypeDescriptor* typeDescriptor,
-				const WString& propertyName,
-				description::Value propertyValue
+				PropertyValue& propertyValue
 				)override
 			{
-				if(GuiControl* container=dynamic_cast<GuiControl*>(createdInstance.GetRawPtr()))
+				if (GuiControl* container = dynamic_cast<GuiControl*>(propertyValue.instanceValue.GetRawPtr()))
 				{
-					if(auto control=dynamic_cast<GuiControl*>(propertyValue.GetRawPtr()))
+					if (auto control = dynamic_cast<GuiControl*>(propertyValue.propertyValue.GetRawPtr()))
 					{
 						container->AddChild(control);
 						return true;
 					}
-					else if(auto composition=dynamic_cast<GuiGraphicsComposition*>(propertyValue.GetRawPtr()))
+					else if (auto composition = dynamic_cast<GuiGraphicsComposition*>(propertyValue.propertyValue.GetRawPtr()))
 					{
 						container->GetBoundsComposition()->AddChild(composition);
 						return true;
@@ -244,34 +170,32 @@ GuiCompositionInstanceLoader
 			}
 
 			IGuiInstanceLoader::PropertyType GetPropertyType(
-				const WString& typeName,
-				description::ITypeDescriptor* typeDescriptor,
-				const WString& propertyName,
+				const PropertyInfo& propertyInfo,
 				description::ITypeDescriptor*& elementType,
 				bool &nullable
 				)override
 			{
+				if (propertyInfo.propertyName == L"")
+				{
+					elementType = description::GetTypeDescriptor<Value>();
+					nullable = false;
+					return IGuiInstanceLoader::CollectionProperty;
+				}
 				return IGuiInstanceLoader::HandleByParentLoader;
 			}
 
-			description::Value GetPropertyValue(
-				description::Value createdInstance,
-				const WString& typeName,
-				description::ITypeDescriptor* typeDescriptor,
-				const WString& propertyName
-				)override
-			{
-				return Value();
-			}
-
 			bool SetPropertyCollection(
-				description::Value createdInstance,
-				const WString& typeName,
-				description::ITypeDescriptor* typeDescriptor,
-				const WString& propertyName,
-				description::Value propertyValue
+				PropertyValue& propertyValue
 				)override
 			{
+				if (GuiGraphicsComposition* container = dynamic_cast<GuiGraphicsComposition*>(propertyValue.instanceValue.GetRawPtr()))
+				{
+					if(auto composition = dynamic_cast<GuiGraphicsComposition*>(propertyValue.propertyValue.GetRawPtr()))
+					{
+						container->AddChild(composition);
+						return true;
+					}
+				}
 				return false;
 			}
 		};
