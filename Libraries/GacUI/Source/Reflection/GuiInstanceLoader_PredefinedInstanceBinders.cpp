@@ -35,18 +35,14 @@ GuiResourceInstanceBinder
 			bool SetPropertyValue(
 				IGuiInstanceLoader* loader,
 				Ptr<GuiResourcePathResolver> resolver,
-				description::Value createdInstance,
-				const WString& typeName,
-				description::ITypeDescriptor* typeDescriptor,
-				const WString& propertyName,
-				description::Value propertyValue,
+				IGuiInstanceLoader::PropertyValue& propertyValue,
 				bool collectionProperty
 				)override
 			{
-				if(propertyValue.GetValueType()==Value::Text)
+				if (propertyValue.propertyValue.GetValueType() == Value::Text)
 				{
 					WString protocol, path;
-					if(IsResourceUrl(propertyValue.GetText(), protocol, path))
+					if (IsResourceUrl(propertyValue.propertyValue.GetText(), protocol, path))
 					{
 						if(Ptr<Object> resource=resolver->ResolveResource(protocol, path))
 						{
@@ -62,13 +58,15 @@ GuiResourceInstanceBinder
 
 							if(!value.IsNull())
 							{
+								IGuiInstanceLoader::PropertyValue newValue = propertyValue;
+								newValue.propertyValue = value;
 								if(collectionProperty)
 								{
-									return loader->SetPropertyCollection(createdInstance, typeName, typeDescriptor, propertyName, value);
+									return loader->SetPropertyCollection(newValue);
 								}
 								else
 								{
-									return loader->SetPropertyValue(createdInstance, typeName, typeDescriptor, propertyName, value);
+									return loader->SetPropertyValue(newValue);
 								}
 							}
 						}

@@ -40,18 +40,38 @@ Instance Loader
 				description::ITypeDescriptor*		typeDescriptor;
 
 				TypeInfo() :typeDescriptor(0){}
+				TypeInfo(const WString& _typeName, description::ITypeDescriptor* _typeDescriptor)
+					:typeName(_typeName)
+					,typeDescriptor(_typeDescriptor)
+				{
+				}
 			};
 
 			struct PropertyInfo
 			{
 				TypeInfo							typeInfo;
 				WString								propertyName;
+
+				PropertyInfo(){}
+				PropertyInfo(const TypeInfo& _typeInfo, const WString& _propertyName)
+					:typeInfo(_typeInfo)
+					,propertyName(_propertyName)
+				{
+				}
 			};
 
 			struct PropertyValue : PropertyInfo
 			{
 				description::Value					instanceValue;
 				description::Value					propertyValue;
+
+				PropertyValue(){}
+				PropertyValue(const TypeInfo& _typeInfo, const WString& _propertyName, description::Value _instanceValue, description::Value _propertyValue)
+					:PropertyInfo(_typeInfo, propertyName)
+					,instanceValue(_instanceValue)
+					,propertyValue(_propertyValue)
+				{
+				}
 			};
 
 			virtual WString							GetTypeName()=0;
@@ -89,7 +109,7 @@ Instance Binder
 			virtual bool							SetPropertyValue(
 														IGuiInstanceLoader* loader,
 														Ptr<GuiResourcePathResolver> resolver,
-														const IGuiInstanceLoader::PropertyValue& propertyValue,
+														IGuiInstanceLoader::PropertyValue& propertyValue,
 														bool collectionProperty
 														)=0;
 		};
