@@ -66,8 +66,8 @@ Instance Loader
 				description::Value					propertyValue;
 
 				PropertyValue(){}
-				PropertyValue(const TypeInfo& _typeInfo, const WString& _propertyName, description::Value _instanceValue, description::Value _propertyValue)
-					:PropertyInfo(_typeInfo, propertyName)
+				PropertyValue(const TypeInfo& _typeInfo, const WString& _propertyName, description::Value _instanceValue, description::Value _propertyValue=description::Value())
+					:PropertyInfo(_typeInfo, _propertyName)
 					,instanceValue(_instanceValue)
 					,propertyValue(_propertyValue)
 				{
