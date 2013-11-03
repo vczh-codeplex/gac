@@ -179,7 +179,13 @@ Helper Functions
 				{
 					ITypeDescriptor* elementType=0;
 					bool nullable=false;
-					auto propertyType=propertyLoader->GetPropertyType(typeName, typeDescriptor, propertyName, elementType, nullable);
+					auto propertyType=propertyLoader->GetPropertyType(
+						IGuiInstanceLoader::PropertyInfo(
+							IGuiInstanceLoader::TypeInfo(typeName, typeDescriptor),
+							propertyName
+							),
+						elementType,
+						nullable);
 
 					switch(propertyType)
 					{
@@ -192,7 +198,14 @@ Helper Functions
 							{
 								// default binding: set the value directly
 								Value value=LoadValueVisitor::LoadValue(valueRepr, context, resolver, elementType);
-								if(!propertyLoader->SetPropertyValue(createdInstance, typeName, typeDescriptor, propertyName, value))
+								if(!propertyLoader->SetPropertyValue(
+									IGuiInstanceLoader::PropertyValue(
+										IGuiInstanceLoader::TypeInfo(typeName, typeDescriptor),
+										propertyName,
+										createdInstance,
+										value
+										)
+									))
 								{
 									value.DeleteRawPtr();
 								}
@@ -202,14 +215,18 @@ Helper Functions
 								// set binding: get the property value and apply another property list on it
 								if(Ptr<GuiAttSetterRepr> propertyAttSetter=valueRepr.Cast<GuiAttSetterRepr>())
 								{
-									Value propertyValue=propertyLoader->GetPropertyValue(createdInstance, typeName, typeDescriptor, propertyName);
-									if(propertyValue.GetRawPtr())
+									IGuiInstanceLoader::PropertyValue propertyValue(
+										IGuiInstanceLoader::TypeInfo(typeName, typeDescriptor),
+										propertyName,
+										createdInstance
+										);
+									if(propertyLoader->GetPropertyValue(propertyValue) && propertyValue.propertyValue.GetRawPtr())
 									{
-										ITypeDescriptor* propertyTypeDescriptor=propertyValue.GetRawPtr()->GetTypeDescriptor();
+										ITypeDescriptor* propertyTypeDescriptor=propertyValue.propertyValue.GetRawPtr()->GetTypeDescriptor();
 										IGuiInstanceLoader* propertyInstanceLoader=GetInstanceLoaderManager()->GetLoader(propertyTypeDescriptor->GetTypeName());
 										if(propertyInstanceLoader)
 										{
-											FillInstance(propertyValue, context, propertyAttSetter.Obj(), resolver, propertyInstanceLoader, propertyTypeDescriptor->GetTypeName(), propertyTypeDescriptor);
+											FillInstance(propertyValue.propertyValue, context, propertyAttSetter.Obj(), resolver, propertyInstanceLoader, propertyTypeDescriptor->GetTypeName(), propertyTypeDescriptor);
 										}
 									}
 								}
@@ -221,7 +238,17 @@ Helper Functions
 								if(binder)
 								{
 									Value value=LoadValueVisitor::LoadValue(valueRepr, context, resolver, binder->GetExpectedValueType());
-									if(!binder->SetPropertyValue(propertyLoader, resolver, createdInstance, typeName, typeDescriptor, propertyName, value, false))
+									if(!binder->SetPropertyValue(
+										propertyLoader,
+										resolver,
+										IGuiInstanceLoader::PropertyValue(
+											IGuiInstanceLoader::TypeInfo(typeName, typeDescriptor),
+											propertyName,
+											createdInstance,
+											value
+											),
+										false
+										))
 									{
 										value.DeleteRawPtr();
 									}
@@ -237,7 +264,14 @@ Helper Functions
 							{
 								// default binding: add the value directly
 								Value value=LoadValueVisitor::LoadValue(valueRepr, context, resolver, elementType);
-								if(!propertyLoader->SetPropertyCollection(createdInstance, typeName, typeDescriptor, propertyName, value))
+								if(!propertyLoader->SetPropertyCollection(
+									IGuiInstanceLoader::PropertyValue(
+										IGuiInstanceLoader::TypeInfo(typeName, typeDescriptor),
+										propertyName,
+										createdInstance,
+										value
+										)
+									))
 								{
 									value.DeleteRawPtr();
 								}
@@ -249,7 +283,17 @@ Helper Functions
 								if(binder)
 								{
 									Value value=LoadValueVisitor::LoadValue(valueRepr, context, resolver, binder->GetExpectedValueType());
-									if(!binder->SetPropertyValue(propertyLoader, resolver, createdInstance, typeName, typeDescriptor, propertyName, value, true))
+									if(!binder->SetPropertyValue(
+										propertyLoader,
+										resolver,
+										IGuiInstanceLoader::PropertyValue(
+											IGuiInstanceLoader::TypeInfo(typeName, typeDescriptor),
+											propertyName,
+											createdInstance,
+											value
+											),
+										true
+										))
 									{
 										value.DeleteRawPtr();
 									}
@@ -298,7 +342,7 @@ Helper Functions
 				typeDescriptor=GetInstanceLoaderManager()->GetTypeDescriptorForType(source.typeName);
 				while(loader && instance.IsNull())
 				{
-					instance=loader->CreateInstance(context, ctor, resolver, typeName, typeDescriptor);
+					instance=loader->CreateInstance(context, ctor, resolver, IGuiInstanceLoader::TypeInfo(typeName, typeDescriptor));
 					loader=GetInstanceLoaderManager()->GetParentLoader(loader);
 				}
 
