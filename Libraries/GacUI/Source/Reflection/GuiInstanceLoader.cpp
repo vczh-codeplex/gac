@@ -119,14 +119,13 @@ Default Instance Loader
 				Ptr<GuiInstanceContext> context,
 				Ptr<GuiConstructorRepr> ctor,
 				Ptr<GuiResourcePathResolver> resolver,
-				const WString& typeName,
-				description::ITypeDescriptor* typeDescriptor
+				const TypeInfo& typeInfo
 				)override
 			{
-				vint count=typeDescriptor->GetConstructorGroup()->GetMethodCount();
+				vint count = typeInfo.typeDescriptor->GetConstructorGroup()->GetMethodCount();
 				for(vint i=0;i<count;i++)
 				{
-					IMethodInfo* method=typeDescriptor->GetConstructorGroup()->GetMethod(i);
+					IMethodInfo* method = typeInfo.typeDescriptor->GetConstructorGroup()->GetMethod(i);
 					if(method->GetParameterCount()==0)
 					{
 						return method->Invoke(Value(), (Value::xs()));
@@ -180,16 +179,14 @@ Default Instance Loader
 			}
 
 			IGuiInstanceLoader::PropertyType GetPropertyType(
-				const WString& typeName,
-				description::ITypeDescriptor* typeDescriptor,
-				const WString& propertyName,
+				const PropertyInfo& propertyInfo,
 				description::ITypeDescriptor*& elementType,
 				bool &nullable
 				)override
 			{
 				elementType=0;
 				nullable=false;
-				IPropertyInfo* prop=typeDescriptor->GetPropertyByName(propertyName, true);
+				IPropertyInfo* prop = propertyInfo.typeInfo.typeDescriptor->GetPropertyByName(propertyInfo.propertyName, true);
 				if(prop)
 				{
 					ITypeInfo* propType=prop->GetReturn();
@@ -209,34 +206,31 @@ Default Instance Loader
 				return IGuiInstanceLoader::UnsupportedProperty;
 			}
 
-			description::Value GetPropertyValue(
-				description::Value createdInstance,
-				const WString& typeName,
-				description::ITypeDescriptor* typeDescriptor,
-				const WString& propertyName
+			bool GetPropertyValue(
+				PropertyValue& propertyValue
 				)override
 			{
-				return createdInstance.GetProperty(propertyName);
+				if (IPropertyInfo* prop = propertyValue.typeInfo.typeDescriptor->GetPropertyByName(propertyValue.propertyName, true))
+				{
+					if (prop->IsReadable())
+					{
+						propertyValue.propertyValue = prop->GetValue(propertyValue.instanceValue);
+						return true;
+					}
+				}
+				return false;
 			}
 
 			bool SetPropertyValue(
-				description::Value createdInstance,
-				const WString& typeName,
-				description::ITypeDescriptor* typeDescriptor,
-				const WString& propertyName,
-				description::Value propertyValue
+				PropertyValue& propertyValue
 				)override
 			{
-				createdInstance.SetProperty(propertyName, propertyValue);
+				propertyValue.instanceValue.SetProperty(propertyValue.propertyName, propertyValue.propertyValue);
 				return true;
 			}
 
 			bool SetPropertyCollection(
-				description::Value createdInstance,
-				const WString& typeName,
-				description::ITypeDescriptor* typeDescriptor,
-				const WString& propertyName,
-				description::Value propertyValue
+				PropertyValue& propertyValue
 				)override
 			{
 				return false;
@@ -259,7 +253,7 @@ GuiInstanceLoaderManager
 		protected:
 			typedef Dictionary<WString, Ptr<IGuiInstanceBinder>>				BinderMap;
 
-			struct TypeInfo
+			struct VirtualTypeInfo
 			{
 				WString								typeName;
 				ITypeDescriptor*					typeDescriptor;
@@ -267,25 +261,25 @@ GuiInstanceLoaderManager
 				Ptr<IGuiInstanceLoader>				loader;
 
 				List<ITypeDescriptor*>				parentTypes;				// all direct or indirect base types that does not has a type info
-				List<TypeInfo*>						parentTypeInfos;			// type infos for all registered direct or indirect base types
+				List<VirtualTypeInfo*>				parentTypeInfos;			// type infos for all registered direct or indirect base types
 
-				TypeInfo()
+				VirtualTypeInfo()
 					:typeDescriptor(0)
 				{
 				}
 			};
-			typedef Dictionary<WString, Ptr<TypeInfo>>							TypeInfoMap;
+			typedef Dictionary<WString, Ptr<VirtualTypeInfo>>					VirtualTypeInfoMap;
 
 			Ptr<IGuiInstanceLoader>					rootLoader;
 			BinderMap								binders;
-			TypeInfoMap								typeInfos;
+			VirtualTypeInfoMap						typeInfos;
 
 			bool IsTypeExists(const WString& name)
 			{
 				return GetGlobalTypeManager()->GetTypeDescriptor(name)!=0 || typeInfos.Keys().Contains(name);
 			}
 
-			void FindParentTypeInfos(Ptr<TypeInfo> typeInfo, ITypeDescriptor* searchType)
+			void FindParentTypeInfos(Ptr<VirtualTypeInfo> typeInfo, ITypeDescriptor* searchType)
 			{
 				if(searchType!=typeInfo->typeDescriptor)
 				{
@@ -309,7 +303,7 @@ GuiInstanceLoaderManager
 				}
 			}
 
-			void FillParentTypeInfos(Ptr<TypeInfo> typeInfo)
+			void FillParentTypeInfos(Ptr<VirtualTypeInfo> typeInfo)
 			{
 				typeInfo->parentTypes.Clear();
 				typeInfo->parentTypeInfos.Clear();
@@ -326,7 +320,7 @@ GuiInstanceLoaderManager
 					}
 					else
 					{
-						TypeInfo* parentTypeInfo=typeInfos.Values()[index].Obj();
+						VirtualTypeInfo* parentTypeInfo = typeInfos.Values()[index].Obj();
 						typeInfo->typeDescriptor=parentTypeInfo->typeDescriptor;
 						typeInfo->parentTypeInfos.Add(parentTypeInfo);
 						return;
@@ -403,7 +397,7 @@ GuiInstanceLoaderManager
 			{
 				if(IsTypeExists(typeName) || !IsTypeExists(parentType)) return false;
 
-				Ptr<TypeInfo> typeInfo=new TypeInfo;
+				Ptr<VirtualTypeInfo> typeInfo = new VirtualTypeInfo;
 				typeInfo->typeName=typeName;
 				typeInfo->parentTypeName=parentType;
 				typeInfo->loader=loader;
@@ -421,14 +415,14 @@ GuiInstanceLoaderManager
 				ITypeDescriptor* typeDescriptor=GetGlobalTypeManager()->GetTypeDescriptor(loader->GetTypeName());
 				if(typeDescriptor==0) return false;
 
-				Ptr<TypeInfo> typeInfo=new TypeInfo;
+				Ptr<VirtualTypeInfo> typeInfo = new VirtualTypeInfo;
 				typeInfo->typeName=loader->GetTypeName();
 				typeInfo->typeDescriptor=typeDescriptor;
 				typeInfo->loader=loader;
 				typeInfos.Add(typeInfo->typeName, typeInfo);
 				FillParentTypeInfos(typeInfo);
 				
-				FOREACH(Ptr<TypeInfo>, derived, typeInfos.Values())
+				FOREACH(Ptr<VirtualTypeInfo>, derived, typeInfos.Values())
 				{
 					if(derived->parentTypes.Contains(typeInfo->typeDescriptor))
 					{
@@ -461,7 +455,7 @@ GuiInstanceLoaderManager
 				vint index=typeInfos.Keys().IndexOf(loader->GetTypeName());
 				if(index!=-1)
 				{
-					Ptr<TypeInfo> typeInfo=typeInfos.Values()[index];
+					Ptr<VirtualTypeInfo> typeInfo = typeInfos.Values()[index];
 					if(typeInfo->parentTypeInfos.Count()>0)
 					{
 						return typeInfo->parentTypeInfos[0]->loader.Obj();

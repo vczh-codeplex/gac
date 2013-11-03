@@ -34,40 +34,46 @@ Instance Loader
 				HandleByParentLoader,
 			};
 
+			struct TypeInfo
+			{
+				WString								typeName;
+				description::ITypeDescriptor*		typeDescriptor;
+
+				TypeInfo() :typeDescriptor(0){}
+			};
+
+			struct PropertyInfo
+			{
+				TypeInfo							typeInfo;
+				WString								propertyName;
+			};
+
+			struct PropertyValue : PropertyInfo
+			{
+				description::Value					instanceValue;
+				description::Value					propertyValue;
+			};
+
 			virtual WString							GetTypeName()=0;
 			virtual description::Value				CreateInstance(
 														Ptr<GuiInstanceContext> context,
 														Ptr<GuiConstructorRepr> ctor,
 														Ptr<GuiResourcePathResolver> resolver,
-														const WString& typeName,
-														description::ITypeDescriptor* typeDescriptor
+														const TypeInfo& typeInfo
 														)=0;
 			virtual PropertyType					GetPropertyType(
-														const WString& typeName,
-														description::ITypeDescriptor* typeDescriptor,
-														const WString& propertyName,
+														const PropertyInfo& propertyInfo,
 														description::ITypeDescriptor*& elementType,
 														bool &nullable
 														)=0;
-			virtual description::Value				GetPropertyValue(
-														description::Value createdInstance,
-														const WString& typeName,
-														description::ITypeDescriptor* typeDescriptor,
-														const WString& propertyName
+			virtual bool							GetPropertyValue(
+														PropertyValue& propertyValue
 														)=0;
 			virtual bool							SetPropertyValue(
-														description::Value createdInstance,
-														const WString& typeName,
-														description::ITypeDescriptor* typeDescriptor,
-														const WString& propertyName,
-														description::Value propertyValue
+														PropertyValue& propertyValue
 														)=0;
 			virtual bool							SetPropertyCollection(
-														description::Value createdInstance,
-														const WString& typeName,
-														description::ITypeDescriptor* typeDescriptor,
-														const WString& propertyName,
-														description::Value propertyValue
+														PropertyValue& propertyValue
 														)=0;
 		};
 
@@ -83,11 +89,7 @@ Instance Binder
 			virtual bool							SetPropertyValue(
 														IGuiInstanceLoader* loader,
 														Ptr<GuiResourcePathResolver> resolver,
-														description::Value createdInstance,
-														const WString& typeName,
-														description::ITypeDescriptor* typeDescriptor,
-														const WString& propertyName,
-														description::Value propertyValue,
+														const IGuiInstanceLoader::PropertyValue& propertyValue,
 														bool collectionProperty
 														)=0;
 		};
