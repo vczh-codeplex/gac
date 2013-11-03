@@ -9891,19 +9891,11 @@ WindowsDirect2DParagraph (Ranges)
 				template<typename T>
 				void DefragmentMap(Dictionary<TextRange, T>& map)
 				{
-					vint lastIndex=-1;
-					T lastValue;
-					for(vint i=map.Count()-1;i>=-1;i--)
+					vint lastIndex=map.Count()-1;
+					T lastValue=map.Values()[lastIndex];
+					for(vint i=map.Count()-2;i>=-1;i--)
 					{
-						if(lastIndex==-1)
-						{
-							lastIndex=i;
-							if(i!=-1)
-							{
-								lastValue=map.Values()[i];
-							}
-						}
-						else if(i==-1 || map.Values()[i]!=lastValue)
+						if(i==-1 || map.Values()[i]!=lastValue)
 						{
 							if(lastIndex-i>0)
 							{

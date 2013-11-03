@@ -932,7 +932,7 @@ namespace vl
 
 		ObjectString<T> Sub(vint index, vint count)const
 		{
-			CHECK_ERROR(index>=0 && index<length, L"ObjectString<T>::Sub(vint, vint)#参数index越界。");
+			CHECK_ERROR(index>=0 && index<=length, L"ObjectString<T>::Sub(vint, vint)#参数index越界。");
 			CHECK_ERROR(index+count>=0 && index+count<=length, L"ObjectString<T>::Sub(vint, vint)#参数count越界。");
 			return ObjectString<T>(*this, index, count);
 		}
