@@ -118,9 +118,27 @@ LoadValueVisitor
 
 				void Visit(GuiConstructorRepr* repr)override
 				{
-					WString _typeName;
-					ITypeDescriptor* _typeDescriptor=0;
-					result=LoadInstance(context, repr, resolver, _typeName, _typeDescriptor);
+					if (IValueSerializer* serializer = typeDescriptor->GetValueSerializer())
+					{
+						vint index = repr->setters.Keys().IndexOf(L"");
+						if (index != -1)
+						{
+							auto setterValue = repr->setters.Values()[index];
+							if (setterValue->values.Count() == 1)
+							{
+								if (auto textRepr = setterValue->values[0].Cast<GuiTextRepr>())
+								{
+									result = LoadValueVisitor::LoadValue(textRepr, context, resolver, typeDescriptor);
+								}
+							}
+						}
+					}
+					else
+					{
+						WString _typeName;
+						ITypeDescriptor* _typeDescriptor=0;
+						result=LoadInstance(context, repr, resolver, _typeName, _typeDescriptor);
+					}
 				}
 
 				static Value LoadValue(Ptr<GuiValueRepr> valueRepr, Ptr<GuiInstanceContext> context, Ptr<GuiResourcePathResolver> resolver, ITypeDescriptor* typeDescriptor)
@@ -198,7 +216,7 @@ Helper Functions
 							{
 								// default binding: set the value directly
 								Value value=LoadValueVisitor::LoadValue(valueRepr, context, resolver, elementType);
-								if(!propertyLoader->SetPropertyValue(
+								if((nullable || !value.IsNull()) && !propertyLoader->SetPropertyValue(
 									IGuiInstanceLoader::PropertyValue(
 										IGuiInstanceLoader::TypeInfo(typeName, typeDescriptor),
 										propertyName,
@@ -238,7 +256,7 @@ Helper Functions
 								if(binder)
 								{
 									Value value=LoadValueVisitor::LoadValue(valueRepr, context, resolver, binder->GetExpectedValueType());
-									if(!binder->SetPropertyValue(
+									if((nullable || !value.IsNull()) && !binder->SetPropertyValue(
 										propertyLoader,
 										resolver,
 										IGuiInstanceLoader::PropertyValue(
@@ -264,7 +282,7 @@ Helper Functions
 							{
 								// default binding: add the value directly
 								Value value=LoadValueVisitor::LoadValue(valueRepr, context, resolver, elementType);
-								if(!propertyLoader->SetPropertyCollection(
+								if((nullable || !value.IsNull()) && !propertyLoader->SetPropertyCollection(
 									IGuiInstanceLoader::PropertyValue(
 										IGuiInstanceLoader::TypeInfo(typeName, typeDescriptor),
 										propertyName,
@@ -283,7 +301,7 @@ Helper Functions
 								if(binder)
 								{
 									Value value=LoadValueVisitor::LoadValue(valueRepr, context, resolver, binder->GetExpectedValueType());
-									if(!binder->SetPropertyValue(
+									if((nullable || !value.IsNull()) && !binder->SetPropertyValue(
 										propertyLoader,
 										resolver,
 										IGuiInstanceLoader::PropertyValue(
@@ -341,28 +359,10 @@ Helper Functions
 				typeName=source.typeName;
 				typeDescriptor=GetInstanceLoaderManager()->GetTypeDescriptorForType(source.typeName);
 
-				if (IValueSerializer* serializer = typeDescriptor->GetValueSerializer())
+				while(loader && instance.IsNull())
 				{
-					vint index = ctor->setters.Keys().IndexOf(L"");
-					if (index != -1)
-					{
-						auto setterValue = ctor->setters.Values()[index];
-						if (setterValue->values.Count() == 1)
-						{
-							if (auto textRepr = setterValue->values[0].Cast<GuiTextRepr>())
-							{
-								instance = LoadValueVisitor::LoadValue(textRepr, context, resolver, typeDescriptor);
-							}
-						}
-					}
-				}
-				else
-				{
-					while(loader && instance.IsNull())
-					{
-						instance=loader->CreateInstance(context, ctor, resolver, IGuiInstanceLoader::TypeInfo(typeName, typeDescriptor));
-						loader=GetInstanceLoaderManager()->GetParentLoader(loader);
-					}
+					instance=loader->CreateInstance(context, ctor, resolver, IGuiInstanceLoader::TypeInfo(typeName, typeDescriptor));
+					loader=GetInstanceLoaderManager()->GetParentLoader(loader);
 				}
 
 				if(instance.GetRawPtr())
