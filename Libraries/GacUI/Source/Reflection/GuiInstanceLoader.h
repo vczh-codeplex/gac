@@ -1,7 +1,7 @@
 /***********************************************************************
 Vczh Library++ 3.0
 Developer: іВиче«(vczh)
-GacUI Reflection: InstanceLoader
+GacUI Reflection: Instance Loader
 
 Interfaces:
 ***********************************************************************/

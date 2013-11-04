@@ -525,6 +525,9 @@
     <ClCompile Include="..\..\Source\Reflection\GuiInstanceLoader_PredefinedInstanceBinders.cpp">
       <Filter>GacUI\Reflection</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Reflection\GuiInstanceHelperTypes.cpp">
+      <Filter>GacUI\Reflection</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Common\Source\Basic.h">
@@ -976,6 +979,9 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Resources\GuiParserManager.h">
       <Filter>GacUI\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Reflection\GuiInstanceHelperTypes.h">
+      <Filter>GacUI\Reflection</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
