@@ -191,6 +191,11 @@ GuiCompositionInstanceLoader
 							container->AddChild(composition);
 							return true;
 						}
+						else if (Ptr<IGuiGraphicsElement> element = propertyValue.propertyValue.GetSharedPtr().Cast<IGuiGraphicsElement>())
+						{
+							container->SetOwnedElement(element);
+							return true;
+						}
 					}
 				}
 				return false;
