@@ -96,11 +96,9 @@ void GuiMain()
 	}
 #endif
 	UnitTestInGuiMain();
-	//TestWindow window;
-	//GetApplication()->Run(&window);
 	
 	Ptr<GuiResource> resource=GuiResource::LoadFromXml(L"..\\GacUISrcCodepackedTest\\Resources\\XmlWindowResource.xml");
-	Ptr<GuiInstanceContext> context=resource->GetValueByPath(L"XmlWindowDemos/RichTextWindow/MainWindowResource").Cast<GuiInstanceContext>();
+	Ptr<GuiInstanceContext> context=resource->GetValueByPath(L"XmlWindowDemos/SignInWindow/MainWindowResource").Cast<GuiInstanceContext>();
 	if(context)
 	{
 		Value windowInstance=LoadInstance(context, new GuiResourcePathResolver(resource, resource->GetWorkingDirectory()));
