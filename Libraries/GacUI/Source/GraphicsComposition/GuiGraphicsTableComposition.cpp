@@ -716,7 +716,10 @@ GuiCellComposition
 			{
 				if(SetSiteInternal(_row, _column, _rowSpan, _columnSpan))
 				{
-					tableParent->UpdateCellBounds();
+					if (tableParent)
+					{
+						tableParent->UpdateCellBounds();
+					}
 					return true;
 				}
 				else
