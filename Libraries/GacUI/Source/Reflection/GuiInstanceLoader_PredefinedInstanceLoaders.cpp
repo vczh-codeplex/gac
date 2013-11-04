@@ -24,42 +24,27 @@ GuiRewriteInstanceLoader
 			{
 			}
 
-			description::Value CreateInstance(
-				Ptr<GuiInstanceContext> context,
-				Ptr<GuiConstructorRepr> ctor,
-				Ptr<GuiResourcePathResolver> resolver,
-				const TypeInfo& typeInfo
-				)
+			description::Value CreateInstance(Ptr<GuiInstanceContext> context, Ptr<GuiConstructorRepr> ctor, Ptr<GuiResourcePathResolver> resolver, const TypeInfo& typeInfo)
 			{
 				return Value();
 			}
 
-			IGuiInstanceLoader::PropertyType GetPropertyType(
-				const PropertyInfo& propertyInfo,
-				description::ITypeDescriptor*& elementType,
-				bool &nullable
-				)override
+			IGuiInstanceLoader::PropertyType GetPropertyType(const PropertyInfo& propertyInfo, description::ITypeDescriptor*& elementType, bool &nullable)override
 			{
 				return IGuiInstanceLoader::HandleByParentLoader;
 			}
 
-			bool GetPropertyValue(
-				PropertyValue& propertyValue
-				)override
+			bool GetPropertyValue(PropertyValue& propertyValue)override
 			{
 				return false;
 			}
 
-			bool SetPropertyValue(
-				PropertyValue& propertyValue
-				)override
+			bool SetPropertyValue(PropertyValue& propertyValue)override
 			{
 				return false;
 			}
 
-			bool SetPropertyCollection(
-				PropertyValue& propertyValue
-				)override
+			bool SetPropertyCollection(PropertyValue& propertyValue)override
 			{
 				return false;
 			}
@@ -86,12 +71,7 @@ GuiVrtualTypeInstanceLoader
 				return typeName;
 			}
 
-			description::Value CreateInstance(
-				Ptr<GuiInstanceContext> context,
-				Ptr<GuiConstructorRepr> ctor,
-				Ptr<GuiResourcePathResolver> resolver,
-				const TypeInfo& typeInfo
-				)
+			description::Value CreateInstance(Ptr<GuiInstanceContext> context, Ptr<GuiConstructorRepr> ctor, Ptr<GuiResourcePathResolver> resolver, const TypeInfo& typeInfo)
 			{
 				if(typeName==typeInfo.typeName)
 				{
@@ -113,11 +93,7 @@ GuiControlInstanceLoader
 				return description::GetTypeDescriptor<GuiControl>()->GetTypeName();
 			}
 
-			IGuiInstanceLoader::PropertyType GetPropertyType(
-				const PropertyInfo& propertyInfo,
-				description::ITypeDescriptor*& elementType,
-				bool &nullable
-				)override
+			IGuiInstanceLoader::PropertyType GetPropertyType(const PropertyInfo& propertyInfo, description::ITypeDescriptor*& elementType, bool &nullable)override
 			{
 				if (propertyInfo.propertyName == L"")
 				{
@@ -128,9 +104,7 @@ GuiControlInstanceLoader
 				return IGuiInstanceLoader::HandleByParentLoader;
 			}
 
-			bool SetPropertyCollection(
-				PropertyValue& propertyValue
-				)override
+			bool SetPropertyCollection(PropertyValue& propertyValue)override
 			{
 				if (GuiControl* container = dynamic_cast<GuiControl*>(propertyValue.instanceValue.GetRawPtr()))
 				{
@@ -161,9 +135,7 @@ GuiControlHostInstanceLoader
 				return description::GetTypeDescriptor<GuiControlHost>()->GetTypeName();
 			}
 
-			bool SetPropertyCollection(
-				PropertyValue& propertyValue
-				)override
+			bool SetPropertyCollection(PropertyValue& propertyValue)override
 			{
 				if (GuiControlHost* container = dynamic_cast<GuiControlHost*>(propertyValue.instanceValue.GetRawPtr()))
 				{
@@ -189,11 +161,7 @@ GuiCompositionInstanceLoader
 				return description::GetTypeDescriptor<GuiGraphicsComposition>()->GetTypeName();
 			}
 
-			IGuiInstanceLoader::PropertyType GetPropertyType(
-				const PropertyInfo& propertyInfo,
-				description::ITypeDescriptor*& elementType,
-				bool &nullable
-				)override
+			IGuiInstanceLoader::PropertyType GetPropertyType(const PropertyInfo& propertyInfo, description::ITypeDescriptor*& elementType, bool &nullable)override
 			{
 				if (propertyInfo.propertyName == L"")
 				{
@@ -204,9 +172,7 @@ GuiCompositionInstanceLoader
 				return IGuiInstanceLoader::HandleByParentLoader;
 			}
 
-			bool SetPropertyCollection(
-				PropertyValue& propertyValue
-				)override
+			bool SetPropertyCollection(PropertyValue& propertyValue)override
 			{
 				if (GuiGraphicsComposition* container = dynamic_cast<GuiGraphicsComposition*>(propertyValue.instanceValue.GetRawPtr()))
 				{
@@ -217,6 +183,19 @@ GuiCompositionInstanceLoader
 					}
 				}
 				return false;
+			}
+		};
+
+/***********************************************************************
+GuiTableCompositionInstanceLoader
+***********************************************************************/
+
+		class GuiTableCompositionInstanceLoader : public GuiRewriteInstanceLoader
+		{
+		public:
+			WString GetTypeName()override
+			{
+				return description::GetTypeDescriptor<GuiTableComposition>()->GetTypeName();
 			}
 		};
 
@@ -241,6 +220,7 @@ GuiPredefinedInstanceLoadersPlugin
 				manager->SetLoader(new GuiControlInstanceLoader);
 				manager->SetLoader(new GuiControlHostInstanceLoader);
 				manager->SetLoader(new GuiCompositionInstanceLoader);
+				manager->SetLoader(new GuiTableCompositionInstanceLoader);
 
 #define ADD_VIRTUAL_TYPE(VIRTUALTYPENAME, TYPENAME, CONSTRUCTOR)\
 	manager->CreateVirtualType(\

@@ -115,12 +115,7 @@ Default Instance Loader
 				return L"";
 			}
 
-			description::Value CreateInstance(
-				Ptr<GuiInstanceContext> context,
-				Ptr<GuiConstructorRepr> ctor,
-				Ptr<GuiResourcePathResolver> resolver,
-				const TypeInfo& typeInfo
-				)override
+			description::Value CreateInstance(Ptr<GuiInstanceContext> context, Ptr<GuiConstructorRepr> ctor, Ptr<GuiResourcePathResolver> resolver, const TypeInfo& typeInfo)override
 			{
 				vint count = typeInfo.typeDescriptor->GetConstructorGroup()->GetMethodCount();
 				for(vint i=0;i<count;i++)
@@ -134,11 +129,7 @@ Default Instance Loader
 				return Value();
 			}
 
-			IGuiInstanceLoader::PropertyType GetPropertyType(
-				ITypeInfo* propType,
-				ITypeDescriptor*& elementType,
-				bool &nullable
-				)
+			IGuiInstanceLoader::PropertyType GetPropertyType(ITypeInfo* propType, ITypeDescriptor*& elementType, bool &nullable)
 			{
 				switch(propType->GetDecorator())
 				{
@@ -178,11 +169,7 @@ Default Instance Loader
 				}
 			}
 
-			IGuiInstanceLoader::PropertyType GetPropertyType(
-				const PropertyInfo& propertyInfo,
-				description::ITypeDescriptor*& elementType,
-				bool &nullable
-				)override
+			IGuiInstanceLoader::PropertyType GetPropertyType(const PropertyInfo& propertyInfo, description::ITypeDescriptor*& elementType, bool &nullable)override
 			{
 				elementType=0;
 				nullable=false;
@@ -206,9 +193,7 @@ Default Instance Loader
 				return IGuiInstanceLoader::UnsupportedProperty;
 			}
 
-			bool GetPropertyValue(
-				PropertyValue& propertyValue
-				)override
+			bool GetPropertyValue(PropertyValue& propertyValue)override
 			{
 				if (IPropertyInfo* prop = propertyValue.typeInfo.typeDescriptor->GetPropertyByName(propertyValue.propertyName, true))
 				{
@@ -221,17 +206,13 @@ Default Instance Loader
 				return false;
 			}
 
-			bool SetPropertyValue(
-				PropertyValue& propertyValue
-				)override
+			bool SetPropertyValue(PropertyValue& propertyValue)override
 			{
 				propertyValue.instanceValue.SetProperty(propertyValue.propertyName, propertyValue.propertyValue);
 				return true;
 			}
 
-			bool SetPropertyCollection(
-				PropertyValue& propertyValue
-				)override
+			bool SetPropertyCollection(PropertyValue& propertyValue)override
 			{
 				return false;
 			}
