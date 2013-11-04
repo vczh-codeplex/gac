@@ -186,7 +186,12 @@ GuiCompositionInstanceLoader
 				{
 					if (propertyValue.propertyName == L"")
 					{
-						if(auto composition = dynamic_cast<GuiGraphicsComposition*>(propertyValue.propertyValue.GetRawPtr()))
+						if (auto control = dynamic_cast<GuiControl*>(propertyValue.propertyValue.GetRawPtr()))
+						{
+							container->AddChild(control->GetBoundsComposition());
+							return true;
+						}
+						else if(auto composition = dynamic_cast<GuiGraphicsComposition*>(propertyValue.propertyValue.GetRawPtr()))
 						{
 							container->AddChild(composition);
 							return true;

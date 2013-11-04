@@ -340,10 +340,29 @@ Helper Functions
 				IGuiInstanceLoader* loader=source.loader;
 				typeName=source.typeName;
 				typeDescriptor=GetInstanceLoaderManager()->GetTypeDescriptorForType(source.typeName);
-				while(loader && instance.IsNull())
+
+				if (IValueSerializer* serializer = typeDescriptor->GetValueSerializer())
 				{
-					instance=loader->CreateInstance(context, ctor, resolver, IGuiInstanceLoader::TypeInfo(typeName, typeDescriptor));
-					loader=GetInstanceLoaderManager()->GetParentLoader(loader);
+					vint index = ctor->setters.Keys().IndexOf(L"");
+					if (index != -1)
+					{
+						auto setterValue = ctor->setters.Values()[index];
+						if (setterValue->values.Count() == 1)
+						{
+							if (auto textRepr = setterValue->values[0].Cast<GuiTextRepr>())
+							{
+								instance = LoadValueVisitor::LoadValue(textRepr, context, resolver, typeDescriptor);
+							}
+						}
+					}
+				}
+				else
+				{
+					while(loader && instance.IsNull())
+					{
+						instance=loader->CreateInstance(context, ctor, resolver, IGuiInstanceLoader::TypeInfo(typeName, typeDescriptor));
+						loader=GetInstanceLoaderManager()->GetParentLoader(loader);
+					}
 				}
 
 				if(instance.GetRawPtr())
