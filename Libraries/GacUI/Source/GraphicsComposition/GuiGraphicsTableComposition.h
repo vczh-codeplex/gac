@@ -110,7 +110,7 @@ Table Compositions
 				Size										previousContentMinSize;
 				Size										tableContentMinSize;
 
-				vint									GetSiteIndex(vint _rows, vint _columns, vint _row, vint _column);
+				vint								GetSiteIndex(vint _rows, vint _columns, vint _row, vint _column);
 				void								SetSitedCell(vint _row, vint _column, GuiCellComposition* cell);
 
 				void								UpdateCellBoundsInternal(

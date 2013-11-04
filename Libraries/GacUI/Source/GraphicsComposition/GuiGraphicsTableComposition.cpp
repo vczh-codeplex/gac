@@ -613,27 +613,34 @@ GuiCellComposition
 
 			bool GuiCellComposition::SetSiteInternal(vint _row, vint _column, vint _rowSpan, vint _columnSpan)
 			{
-				if(!tableParent) return false;
-				if(_row<0 || _row>=tableParent->rows || _column<0 || _column>=tableParent->columns) return false;
-				if(_rowSpan<1 || _row+_rowSpan>tableParent->rows || _columnSpan<1 || _column+_columnSpan>tableParent->columns) return false;
-
-				for(vint r=0;r<_rowSpan;r++)
+				if (tableParent)
 				{
-					for(vint c=0;c<_columnSpan;c++)
+					if(_row<0 || _row>=tableParent->rows || _column<0 || _column>=tableParent->columns) return false;
+					if(_rowSpan<1 || _row+_rowSpan>tableParent->rows || _columnSpan<1 || _column+_columnSpan>tableParent->columns) return false;
+
+					for(vint r=0;r<_rowSpan;r++)
 					{
-						GuiCellComposition* cell=tableParent->GetSitedCell(_row+r, _column+c);
-						if(cell && cell!=this)
+						for(vint c=0;c<_columnSpan;c++)
 						{
-							return false;
+							GuiCellComposition* cell=tableParent->GetSitedCell(_row+r, _column+c);
+							if(cell && cell!=this)
+							{
+								return false;
+							}
 						}
 					}
+					ClearSitedCells(tableParent);
 				}
-				ClearSitedCells(tableParent);
+
 				row=_row;
 				column=_column;
 				rowSpan=_rowSpan;
 				columnSpan=_columnSpan;
-				SetSitedCells(tableParent);
+
+				if (tableParent)
+				{
+					SetSitedCells(tableParent);
+				}
 				return true;
 			}
 
@@ -650,6 +657,10 @@ GuiCellComposition
 				}
 				if(tableParent)
 				{
+					if (row != -1 && column != -1)
+					{
+						SetSiteInternal(row, column, rowSpan, columnSpan);
+					}
 					tableParent->UpdateCellBounds();
 				}
 			}
