@@ -265,7 +265,7 @@ Helper Functions
 											createdInstance,
 											value
 											),
-										false
+										-1
 										))
 									{
 										value.DeleteRawPtr();
@@ -276,7 +276,7 @@ Helper Functions
 						break;
 					case IGuiInstanceLoader::CollectionProperty:
 						// a property that accept a collection
-						FOREACH(Ptr<GuiValueRepr>, valueRepr, propertyValue->values)
+						FOREACH_INDEXER(Ptr<GuiValueRepr>, valueRepr, currentIndex, propertyValue->values)
 						{
 							if(propertyValue->binding==L"")
 							{
@@ -288,7 +288,8 @@ Helper Functions
 										propertyName,
 										createdInstance,
 										value
-										)
+										),
+									currentIndex
 									))
 								{
 									value.DeleteRawPtr();
@@ -310,7 +311,7 @@ Helper Functions
 											createdInstance,
 											value
 											),
-										true
+										currentIndex
 										))
 									{
 										value.DeleteRawPtr();

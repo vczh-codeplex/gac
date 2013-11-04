@@ -212,7 +212,7 @@ Default Instance Loader
 				return true;
 			}
 
-			bool SetPropertyCollection(PropertyValue& propertyValue)override
+			bool SetPropertyCollection(PropertyValue& propertyValue, vint currentIndex)override
 			{
 				return false;
 			}

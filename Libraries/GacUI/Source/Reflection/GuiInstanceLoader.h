@@ -79,7 +79,7 @@ Instance Loader
 			virtual PropertyType					GetPropertyType(const PropertyInfo& propertyInfo, description::ITypeDescriptor*& elementType, bool &nullable)=0;
 			virtual bool							GetPropertyValue(PropertyValue& propertyValue)=0;
 			virtual bool							SetPropertyValue(PropertyValue& propertyValue)=0;
-			virtual bool							SetPropertyCollection(PropertyValue& propertyValue)=0;
+			virtual bool							SetPropertyCollection(PropertyValue& propertyValue, vint currentIndex)=0;
 		};
 
 /***********************************************************************
@@ -91,7 +91,7 @@ Instance Binder
 		public:
 			virtual WString							GetBindingName()=0;
 			virtual description::ITypeDescriptor*	GetExpectedValueType()=0;
-			virtual bool							SetPropertyValue(IGuiInstanceLoader* loader, Ptr<GuiResourcePathResolver> resolver, IGuiInstanceLoader::PropertyValue& propertyValue, bool collectionProperty)=0;
+			virtual bool							SetPropertyValue(IGuiInstanceLoader* loader, Ptr<GuiResourcePathResolver> resolver, IGuiInstanceLoader::PropertyValue& propertyValue, vint currentIndex=-1)=0;
 		};
 
 /***********************************************************************
