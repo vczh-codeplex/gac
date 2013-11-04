@@ -277,7 +277,7 @@ GuiCellCompositionInstanceLoader
 				return IGuiInstanceLoader::HandleByParentLoader;
 			}
 
-			bool SetPropertyCollection(PropertyValue& propertyValue)override
+			bool SetPropertyValue(PropertyValue& propertyValue)override
 			{
 				if (GuiCellComposition* container = dynamic_cast<GuiCellComposition*>(propertyValue.instanceValue.GetRawPtr()))
 				{
