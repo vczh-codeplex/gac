@@ -1,4 +1,5 @@
 #include "GuiInstanceLoader.h"
+#include "GuiInstanceHelperTypes.h"
 #include "TypeDescriptors\GuiReflectionControls.h"
 
 namespace vl
@@ -10,6 +11,7 @@ namespace vl
 		using namespace controls;
 		using namespace compositions;
 		using namespace theme;
+		using namespace helper_types;
 
 #ifndef VCZH_DEBUG_NO_REFLECTION
 
@@ -108,15 +110,18 @@ GuiControlInstanceLoader
 			{
 				if (GuiControl* container = dynamic_cast<GuiControl*>(propertyValue.instanceValue.GetRawPtr()))
 				{
-					if (auto control = dynamic_cast<GuiControl*>(propertyValue.propertyValue.GetRawPtr()))
+					if (propertyValue.propertyName == L"")
 					{
-						container->AddChild(control);
-						return true;
-					}
-					else if (auto composition = dynamic_cast<GuiGraphicsComposition*>(propertyValue.propertyValue.GetRawPtr()))
-					{
-						container->GetBoundsComposition()->AddChild(composition);
-						return true;
+						if (auto control = dynamic_cast<GuiControl*>(propertyValue.propertyValue.GetRawPtr()))
+						{
+							container->AddChild(control);
+							return true;
+						}
+						else if (auto composition = dynamic_cast<GuiGraphicsComposition*>(propertyValue.propertyValue.GetRawPtr()))
+						{
+							container->GetBoundsComposition()->AddChild(composition);
+							return true;
+						}
 					}
 				}
 				return false;
@@ -139,10 +144,13 @@ GuiControlHostInstanceLoader
 			{
 				if (GuiControlHost* container = dynamic_cast<GuiControlHost*>(propertyValue.instanceValue.GetRawPtr()))
 				{
-					if (auto component = dynamic_cast<GuiComponent*>(propertyValue.propertyValue.GetRawPtr()))
+					if (propertyValue.propertyName == L"")
 					{
-						container->AddComponent(component);
-						return true;
+						if (auto component = dynamic_cast<GuiComponent*>(propertyValue.propertyValue.GetRawPtr()))
+						{
+							container->AddComponent(component);
+							return true;
+						}
 					}
 				}
 				return GuiControlInstanceLoader::SetPropertyCollection(propertyValue);
@@ -176,10 +184,13 @@ GuiCompositionInstanceLoader
 			{
 				if (GuiGraphicsComposition* container = dynamic_cast<GuiGraphicsComposition*>(propertyValue.instanceValue.GetRawPtr()))
 				{
-					if(auto composition = dynamic_cast<GuiGraphicsComposition*>(propertyValue.propertyValue.GetRawPtr()))
+					if (propertyValue.propertyName == L"")
 					{
-						container->AddChild(composition);
-						return true;
+						if(auto composition = dynamic_cast<GuiGraphicsComposition*>(propertyValue.propertyValue.GetRawPtr()))
+						{
+							container->AddChild(composition);
+							return true;
+						}
 					}
 				}
 				return false;
@@ -196,6 +207,78 @@ GuiTableCompositionInstanceLoader
 			WString GetTypeName()override
 			{
 				return description::GetTypeDescriptor<GuiTableComposition>()->GetTypeName();
+			}
+
+			IGuiInstanceLoader::PropertyType GetPropertyType(const PropertyInfo& propertyInfo, description::ITypeDescriptor*& elementType, bool &nullable)override
+			{
+				if (propertyInfo.propertyName == L"Rows" || propertyInfo.propertyName==L"Columns")
+				{
+					elementType = description::GetTypeDescriptor<GuiCellOption>();
+					nullable = false;
+					return IGuiInstanceLoader::CollectionProperty;
+				}
+				return IGuiInstanceLoader::HandleByParentLoader;
+			}
+
+			bool SetPropertyCollection(PropertyValue& propertyValue)override
+			{
+				if (GuiTableComposition* container = dynamic_cast<GuiTableComposition*>(propertyValue.instanceValue.GetRawPtr()))
+				{
+					if (propertyValue.propertyName == L"Rows")
+					{
+						GuiCellOption option = UnboxValue<GuiCellOption>(propertyValue.propertyValue);
+						container->SetRowsAndColumns(container->GetRows() + 1, container->GetColumns());
+						container->SetRowOption(container->GetRows() - 1, option);
+						return true;
+					}
+					else if (propertyValue.propertyName == L"Columns")
+					{
+						GuiCellOption option = UnboxValue<GuiCellOption>(propertyValue.propertyValue);
+						container->SetRowsAndColumns(container->GetRows(), container->GetColumns() + 1);
+						container->SetColumnOption(container->GetColumns() - 1, option);
+						return true;
+					}
+				}
+				return false;
+			}
+		};
+
+/***********************************************************************
+GuiCellCompositionInstanceLoader
+***********************************************************************/
+
+		class GuiCellCompositionInstanceLoader : public GuiRewriteInstanceLoader
+		{
+		public:
+
+			WString GetTypeName()override
+			{
+				return description::GetTypeDescriptor<GuiCellComposition>()->GetTypeName();
+			}
+
+			IGuiInstanceLoader::PropertyType GetPropertyType(const PropertyInfo& propertyInfo, description::ITypeDescriptor*& elementType, bool &nullable)override
+			{
+				if (propertyInfo.propertyName == L"Site")
+				{
+					elementType = description::GetTypeDescriptor<SiteValue>();
+					nullable = false;
+					return IGuiInstanceLoader::ValueProperty;
+				}
+				return IGuiInstanceLoader::HandleByParentLoader;
+			}
+
+			bool SetPropertyCollection(PropertyValue& propertyValue)override
+			{
+				if (GuiCellComposition* container = dynamic_cast<GuiCellComposition*>(propertyValue.instanceValue.GetRawPtr()))
+				{
+					if (propertyValue.propertyName == L"Site")
+					{
+						SiteValue site = UnboxValue<SiteValue>(propertyValue.propertyValue);
+						container->SetSite(site.row, site.column, site.rowSpan, site.columnSpan);
+						return true;
+					}
+				}
+				return false;
 			}
 		};
 
@@ -221,6 +304,7 @@ GuiPredefinedInstanceLoadersPlugin
 				manager->SetLoader(new GuiControlHostInstanceLoader);
 				manager->SetLoader(new GuiCompositionInstanceLoader);
 				manager->SetLoader(new GuiTableCompositionInstanceLoader);
+				manager->SetLoader(new GuiCellCompositionInstanceLoader);
 
 #define ADD_VIRTUAL_TYPE(VIRTUALTYPENAME, TYPENAME, CONSTRUCTOR)\
 	manager->CreateVirtualType(\
