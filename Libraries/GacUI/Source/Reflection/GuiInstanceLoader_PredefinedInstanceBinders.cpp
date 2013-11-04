@@ -32,7 +32,7 @@ GuiResourceInstanceBinder
 				return stringTypeDescriptor;
 			}
 
-			bool SetPropertyValue(IGuiInstanceLoader* loader, Ptr<GuiResourcePathResolver> resolver, IGuiInstanceLoader::PropertyValue& propertyValue, bool collectionProperty)override
+			bool SetPropertyValue(IGuiInstanceLoader* loader, Ptr<GuiResourcePathResolver> resolver, IGuiInstanceLoader::PropertyValue& propertyValue, vint currentIndex)override
 			{
 				if (propertyValue.propertyValue.GetValueType() == Value::Text)
 				{
@@ -55,13 +55,13 @@ GuiResourceInstanceBinder
 							{
 								IGuiInstanceLoader::PropertyValue newValue = propertyValue;
 								newValue.propertyValue = value;
-								if(collectionProperty)
+								if(currentIndex==-1)
 								{
-									return loader->SetPropertyCollection(newValue);
+									return loader->SetPropertyValue(newValue);
 								}
 								else
 								{
-									return loader->SetPropertyValue(newValue);
+									return loader->SetPropertyCollection(newValue, currentIndex);
 								}
 							}
 						}

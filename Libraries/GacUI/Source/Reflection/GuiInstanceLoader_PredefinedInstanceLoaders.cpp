@@ -46,7 +46,7 @@ GuiRewriteInstanceLoader
 				return false;
 			}
 
-			bool SetPropertyCollection(PropertyValue& propertyValue)override
+			bool SetPropertyCollection(PropertyValue& propertyValue, vint currentIndex)override
 			{
 				return false;
 			}
@@ -106,7 +106,7 @@ GuiControlInstanceLoader
 				return IGuiInstanceLoader::HandleByParentLoader;
 			}
 
-			bool SetPropertyCollection(PropertyValue& propertyValue)override
+			bool SetPropertyCollection(PropertyValue& propertyValue, vint currentIndex)override
 			{
 				if (GuiControl* container = dynamic_cast<GuiControl*>(propertyValue.instanceValue.GetRawPtr()))
 				{
@@ -140,7 +140,7 @@ GuiControlHostInstanceLoader
 				return description::GetTypeDescriptor<GuiControlHost>()->GetTypeName();
 			}
 
-			bool SetPropertyCollection(PropertyValue& propertyValue)override
+			bool SetPropertyCollection(PropertyValue& propertyValue, vint currentIndex)override
 			{
 				if (GuiControlHost* container = dynamic_cast<GuiControlHost*>(propertyValue.instanceValue.GetRawPtr()))
 				{
@@ -153,7 +153,7 @@ GuiControlHostInstanceLoader
 						}
 					}
 				}
-				return GuiControlInstanceLoader::SetPropertyCollection(propertyValue);
+				return GuiControlInstanceLoader::SetPropertyCollection(propertyValue, currentIndex);
 			}
 		};
 
@@ -180,7 +180,7 @@ GuiCompositionInstanceLoader
 				return IGuiInstanceLoader::HandleByParentLoader;
 			}
 
-			bool SetPropertyCollection(PropertyValue& propertyValue)override
+			bool SetPropertyCollection(PropertyValue& propertyValue, vint currentIndex)override
 			{
 				if (GuiGraphicsComposition* container = dynamic_cast<GuiGraphicsComposition*>(propertyValue.instanceValue.GetRawPtr()))
 				{
@@ -230,22 +230,22 @@ GuiTableCompositionInstanceLoader
 				return IGuiInstanceLoader::HandleByParentLoader;
 			}
 
-			bool SetPropertyCollection(PropertyValue& propertyValue)override
+			bool SetPropertyCollection(PropertyValue& propertyValue, vint currentIndex)override
 			{
 				if (GuiTableComposition* container = dynamic_cast<GuiTableComposition*>(propertyValue.instanceValue.GetRawPtr()))
 				{
 					if (propertyValue.propertyName == L"Rows")
 					{
 						GuiCellOption option = UnboxValue<GuiCellOption>(propertyValue.propertyValue);
-						container->SetRowsAndColumns(container->GetRows() + 1, container->GetColumns());
-						container->SetRowOption(container->GetRows() - 1, option);
+						container->SetRowsAndColumns(currentIndex + 1, container->GetColumns());
+						container->SetRowOption(currentIndex, option);
 						return true;
 					}
 					else if (propertyValue.propertyName == L"Columns")
 					{
 						GuiCellOption option = UnboxValue<GuiCellOption>(propertyValue.propertyValue);
-						container->SetRowsAndColumns(container->GetRows(), container->GetColumns() + 1);
-						container->SetColumnOption(container->GetColumns() - 1, option);
+						container->SetRowsAndColumns(container->GetRows(), currentIndex + 1);
+						container->SetColumnOption(currentIndex, option);
 						return true;
 					}
 				}
