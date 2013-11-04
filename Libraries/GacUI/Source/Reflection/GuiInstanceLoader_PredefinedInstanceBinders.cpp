@@ -32,12 +32,7 @@ GuiResourceInstanceBinder
 				return stringTypeDescriptor;
 			}
 
-			bool SetPropertyValue(
-				IGuiInstanceLoader* loader,
-				Ptr<GuiResourcePathResolver> resolver,
-				IGuiInstanceLoader::PropertyValue& propertyValue,
-				bool collectionProperty
-				)override
+			bool SetPropertyValue(IGuiInstanceLoader* loader, Ptr<GuiResourcePathResolver> resolver, IGuiInstanceLoader::PropertyValue& propertyValue, bool collectionProperty)override
 			{
 				if (propertyValue.propertyValue.GetValueType() == Value::Text)
 				{
