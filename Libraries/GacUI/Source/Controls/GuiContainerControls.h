@@ -29,11 +29,11 @@ Tab Control
 				friend class GuiTab;
 				friend class Ptr<GuiTabPage>;
 			protected:
-				GuiControl*										container;
+				compositions::GuiBoundsComposition*				containerComposition;
 				GuiTab*											owner;
 				WString											text;
 
-				bool											AssociateTab(GuiTab* _owner, GuiControl::IStyleController* _styleController);
+				bool											AssociateTab(GuiTab* _owner);
 				bool											DeassociateTab(GuiTab* _owner);
 			public:
 				/// <summary>Create a tab page.</summary>
@@ -46,12 +46,10 @@ Tab Control
 				compositions::GuiNotifyEvent					PageInstalled;
 				/// <summary>Page installed event.</summary>
 				compositions::GuiNotifyEvent					PageUninstalled;
-				/// <summary>Page container ready event.</summary>
-				compositions::GuiNotifyEvent					PageContainerReady;
 
 				/// <summary>Get the container control to store all sub controls.</summary>
 				/// <returns>The container control to store all sub controls.</returns>
-				GuiControl*										GetContainer();
+				compositions::GuiBoundsComposition*				GetContainerComposition();
 				/// <summary>Get the owner <see cref="GuiTab"/>.</summary>
 				/// <returns>The owner <see cref="GuiTab"/>.</returns>
 				GuiTab*											GetOwnerTab();
@@ -104,9 +102,6 @@ Tab Control
 					/// <summary>Render a tag header at the specified position as selected.</summary>
 					/// <param name="index">The specified position.</param>
 					virtual void								SetSelectedTab(vint index)=0;
-					/// <summary>Create a style controller for tab page container control.</summary>
-					/// <returns>The created style controller.</returns>
-					virtual GuiControl::IStyleController*		CreateTabPageStyleController()=0;
 				};
 			protected:
 				class CommandExecutor : public Object, public ICommandExecutor
