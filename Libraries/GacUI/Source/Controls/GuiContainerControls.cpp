@@ -12,7 +12,7 @@ namespace vl
 GuiTabPage
 ***********************************************************************/
 
-			bool GuiTabPage::AssociateTab(GuiTab* _owner, GuiControl::IStyleController* _styleController)
+			bool GuiTabPage::AssociateTab(GuiTab* _owner)
 			{
 				if(owner)
 				{
@@ -20,18 +20,9 @@ GuiTabPage
 				}
 				else
 				{
-					if(!container)
-					{
-						container=new GuiControl(_styleController);
-						TextChanged.SetAssociatedComposition(container->GetBoundsComposition());
-						PageInstalled.SetAssociatedComposition(container->GetBoundsComposition());
-						PageUninstalled.SetAssociatedComposition(container->GetBoundsComposition());
-						PageContainerReady.SetAssociatedComposition(container->GetBoundsComposition());
-
-						PageContainerReady.Execute(container->GetNotifyEventArguments());
-					}
 					owner=_owner;
-					PageInstalled.Execute(container->GetNotifyEventArguments());
+					GuiEventArgs arguments(containerComposition);
+					PageInstalled.Execute(arguments);
 					return true;
 				}
 			}
@@ -40,7 +31,8 @@ GuiTabPage
 			{
 				if(owner && owner==_owner)
 				{
-					PageUninstalled.Execute(container->GetNotifyEventArguments());
+					GuiEventArgs arguments(containerComposition);
+					PageUninstalled.Execute(arguments);
 					owner=0;
 					return true;
 				}
@@ -51,22 +43,28 @@ GuiTabPage
 			}
 
 			GuiTabPage::GuiTabPage()
-				:container(0)
+				:containerComposition(0)
 				,owner(0)
 			{
+				containerComposition = new GuiBoundsComposition;
+				containerComposition->SetAlignmentToParent(Margin(0, 0, 0, 0));
+
+				TextChanged.SetAssociatedComposition(containerComposition);
+				PageInstalled.SetAssociatedComposition(containerComposition);
+				PageUninstalled.SetAssociatedComposition(containerComposition);
 			}
 
 			GuiTabPage::~GuiTabPage()
 			{
-				if(!container->GetParent())
+				if(!containerComposition->GetParent())
 				{
-					delete container;
+					delete containerComposition;
 				}
 			}
 
-			GuiControl* GuiTabPage::GetContainer()
+			compositions::GuiBoundsComposition* GuiTabPage::GetContainerComposition()
 			{
-				return container;
+				return containerComposition;
 			}
 
 			GuiTab* GuiTabPage::GetOwnerTab()
@@ -88,15 +86,8 @@ GuiTabPage
 					{
 						owner->styleController->SetTabText(owner->tabPages.IndexOf(this), text);
 					}
-					if(container)
-					{
-						TextChanged.Execute(container->GetNotifyEventArguments());
-					}
-					else
-					{
-						GuiEventArgs arguments;
-						TextChanged.Execute(arguments);
-					}
+					GuiEventArgs arguments(containerComposition);
+					TextChanged.Execute(arguments);
 				}
 			}
 
@@ -165,10 +156,10 @@ GuiTab
 					index=-1;
 				}
 
-				if(page->AssociateTab(this, styleController->CreateTabPageStyleController()))
+				if(page->AssociateTab(this))
 				{
 					index=index==-1?tabPages.Add(page):tabPages.Insert(index, page);
-					GetContainerComposition()->AddChild(page->GetContainer()->GetBoundsComposition());
+					GetContainerComposition()->AddChild(page->GetContainerComposition());
 					styleController->InsertTab(index);
 					styleController->SetTabText(index, page->GetText());
 				
@@ -176,7 +167,7 @@ GuiTab
 					{
 						SetSelectedPage(page);
 					}
-					page->GetContainer()->SetVisible(page==selectedPage);
+					page->GetContainerComposition()->SetVisible(page==selectedPage);
 					return true;
 				}
 				else
@@ -191,7 +182,7 @@ GuiTab
 				{
 					vint index=tabPages.IndexOf(value);
 					styleController->RemoveTab(index);
-					GetContainerComposition()->RemoveChild(value->GetContainer()->GetBoundsComposition());
+					GetContainerComposition()->RemoveChild(value->GetContainerComposition());
 					tabPages.RemoveAt(index);
 					if(tabPages.Count()==0)
 					{
@@ -249,7 +240,7 @@ GuiTab
 						for(vint i=0;i<tabPages.Count();i++)
 						{
 							bool selected=tabPages[i]==value;
-							tabPages[i]->GetContainer()->SetVisible(selected);
+							tabPages[i]->GetContainerComposition()->SetVisible(selected);
 							if(selected)
 							{
 								styleController->SetSelectedTab(i);
