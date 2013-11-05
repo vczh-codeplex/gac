@@ -351,11 +351,6 @@ Interface Proxy
 					{
 						INVOKE_INTERFACE_PROXY(SetSelectedTab, index);
 					}
-
-					GuiControl::IStyleController* CreateTabPageStyleController()override
-					{
-						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(CreateTabPageStyleController);
-					}
 				};
 
 				class GuiScrollView_IStyleProvider : public virtual GuiControl_IStyleProvider, public virtual GuiScrollView::IStyleProvider

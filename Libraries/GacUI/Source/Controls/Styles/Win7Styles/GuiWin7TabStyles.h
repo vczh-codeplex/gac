@@ -91,7 +91,6 @@ Tab
 				void														RemoveTab(vint index)override;
 				void														MoveTab(vint oldIndex, vint newIndex)override;
 				void														SetSelectedTab(vint index)override;
-				controls::GuiControl::IStyleController*						CreateTabPageStyleController()override;
 			};
 		}
 	}

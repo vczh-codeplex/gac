@@ -47,7 +47,7 @@ GuiTabPage
 				,owner(0)
 			{
 				containerComposition = new GuiBoundsComposition;
-				containerComposition->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				containerComposition->SetAlignmentToParent(Margin(2, 2, 2, 2));
 
 				TextChanged.SetAssociatedComposition(containerComposition);
 				PageInstalled.SetAssociatedComposition(containerComposition);
