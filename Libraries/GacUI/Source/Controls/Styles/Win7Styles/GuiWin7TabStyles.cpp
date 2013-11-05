@@ -207,8 +207,12 @@ Win7TabStyle
 					GuiCellComposition* cell=new GuiCellComposition;
 					boundsComposition->AddChild(cell);
 					cell->SetSite(1, 0, 1, 2);
+					
+					GuiSolidBackgroundElement* element=GuiSolidBackgroundElement::Create();
+					element->SetColor(GetBackgroundColor());
 
 					containerComposition=new GuiBoundsComposition;
+					containerComposition->SetOwnedElement(element);
 					containerComposition->SetAlignmentToParent(Margin(1, 0, 1, 1));
 					containerComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 					cell->AddChild(containerComposition);
@@ -375,13 +379,6 @@ Win7TabStyle
 				headerButtons[index]->SetSelected(true);
 				
 				UpdateHeaderLayout();
-			}
-
-			controls::GuiControl::IStyleController* Win7TabStyle::CreateTabPageStyleController()
-			{
-				GuiControl::IStyleController* style=new Win7EmptyStyle(GetBackgroundColor());
-				style->GetBoundsComposition()->SetAlignmentToParent(Margin(2, 2, 2, 2));
-				return style;
 			}
 		}
 	}

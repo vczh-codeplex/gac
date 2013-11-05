@@ -265,9 +265,8 @@ Type Declaration
 			BEGIN_CLASS_MEMBER(GuiTabPage)
 				CLASS_MEMBER_GUIEVENT(PageInstalled)
 				CLASS_MEMBER_GUIEVENT(PageUninstalled)
-				CLASS_MEMBER_GUIEVENT(PageContainerReady)
 
-				CLASS_MEMBER_PROPERTY_READONLY_FAST(Container)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ContainerComposition)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(OwnerTab)
 				CLASS_MEMBER_PROPERTY_GUIEVENT_FAST(Text)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(Selected)
@@ -302,7 +301,6 @@ Type Declaration
 				CLASS_MEMBER_METHOD(RemoveTab, {L"index"})
 				CLASS_MEMBER_METHOD(MoveTab, {L"oldIndex" _ L"newIndex"})
 				CLASS_MEMBER_METHOD(SetSelectedTab, {L"index"})
-				CLASS_MEMBER_METHOD(CreateTabPageStyleController, NO_PARAMETER)
 			END_CLASS_MEMBER(GuiTab::IStyleController)
 
 			BEGIN_CLASS_MEMBER(GuiScrollView)
