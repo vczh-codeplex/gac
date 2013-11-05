@@ -158,6 +158,69 @@ GuiControlHostInstanceLoader
 		};
 
 /***********************************************************************
+GuiTabInstanceLoader
+***********************************************************************/
+
+		class GuiTabInstanceLoader : public GuiControlInstanceLoader
+		{
+		public:
+			WString GetTypeName()override
+			{
+				return description::GetTypeDescriptor<GuiTab>()->GetTypeName();
+			}
+
+			bool SetPropertyCollection(PropertyValue& propertyValue, vint currentIndex)override
+			{
+				if (GuiTab* container = dynamic_cast<GuiTab*>(propertyValue.instanceValue.GetRawPtr()))
+				{
+					if (propertyValue.propertyName == L"")
+					{
+						if (auto tabPage = dynamic_cast<GuiTabPage*>(propertyValue.propertyValue.GetRawPtr()))
+						{
+							container->CreatePage(tabPage);
+							return true;
+						}
+					}
+				}
+				return GuiControlInstanceLoader::SetPropertyCollection(propertyValue, currentIndex);
+			}
+		};
+
+/***********************************************************************
+GuiTabPageInstanceLoader
+***********************************************************************/
+
+		class GuiTabPageInstanceLoader : public GuiControlInstanceLoader
+		{
+		public:
+			WString GetTypeName()override
+			{
+				return description::GetTypeDescriptor<GuiTabPage>()->GetTypeName();
+			}
+
+			bool SetPropertyCollection(PropertyValue& propertyValue, vint currentIndex)override
+			{
+				if (GuiTabPage* container = dynamic_cast<GuiTabPage*>(propertyValue.instanceValue.GetRawPtr()))
+				{
+					if (propertyValue.propertyName == L"")
+					{
+						if (auto control = dynamic_cast<GuiControl*>(propertyValue.propertyValue.GetRawPtr()))
+						{
+							container->GetContainerComposition()->AddChild(control->GetBoundsComposition());
+							return true;
+						}
+						else if (auto composition = dynamic_cast<GuiGraphicsComposition*>(propertyValue.propertyValue.GetRawPtr()))
+						{
+							container->GetContainerComposition()->AddChild(composition);
+							return true;
+						}
+					}
+				}
+				return GuiControlInstanceLoader::SetPropertyCollection(propertyValue, currentIndex);
+			}
+		};
+
+/***********************************************************************
 GuiCompositionInstanceLoader
 ***********************************************************************/
 
@@ -312,6 +375,8 @@ GuiPredefinedInstanceLoadersPlugin
 
 				manager->SetLoader(new GuiControlInstanceLoader);
 				manager->SetLoader(new GuiControlHostInstanceLoader);
+				manager->SetLoader(new GuiTabInstanceLoader);
+				manager->SetLoader(new GuiTabPageInstanceLoader);
 				manager->SetLoader(new GuiCompositionInstanceLoader);
 				manager->SetLoader(new GuiTableCompositionInstanceLoader);
 				manager->SetLoader(new GuiCellCompositionInstanceLoader);

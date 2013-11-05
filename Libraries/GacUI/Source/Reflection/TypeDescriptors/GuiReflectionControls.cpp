@@ -263,6 +263,7 @@ Type Declaration
 			END_CLASS_MEMBER(GuiScroll::IStyleController)
 
 			BEGIN_CLASS_MEMBER(GuiTabPage)
+				CLASS_MEMBER_CONSTRUCTOR(GuiTabPage*(), NO_PARAMETER)
 				CLASS_MEMBER_GUIEVENT(PageInstalled)
 				CLASS_MEMBER_GUIEVENT(PageUninstalled)
 
