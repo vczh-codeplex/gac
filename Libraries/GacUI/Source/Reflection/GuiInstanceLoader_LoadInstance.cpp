@@ -141,7 +141,7 @@ LoadValueVisitor
 					}
 				}
 
-				static Value LoadValue(Ptr<GuiValueRepr> valueRepr, Ptr<GuiInstanceContext> context, Ptr<GuiResourcePathResolver> resolver, ITypeDescriptor* typeDescriptor)
+				static bool LoadValue(Ptr<GuiValueRepr> valueRepr, Ptr<GuiInstanceContext> context, Ptr<GuiResourcePathResolver> resolver, List<ITypeDescriptor*>& acceptableTypes, Value& result)
 				{
 					LoadValueVisitor visitor(context, resolver, typeDescriptor);
 					valueRepr->Accept(&visitor);
@@ -191,144 +191,100 @@ Helper Functions
 				WString propertyName=attSetter->setters.Keys()[i];
 				auto propertyValue=attSetter->setters.Values()[i];
 				IGuiInstanceLoader* propertyLoader=loader;
+				IGuiInstanceLoader::PropertyValue cachedPropertyValue(IGuiInstanceLoader::TypeInfo(typeName, typeDescriptor), propertyName, createdInstance);
+
+				List<Ptr<GuiValueRepr>> values;
+				CopyFrom(values, propertyValue->values);
+				vint loadedValueCount = 0;
 
 				// try to look for a loader to handle this property
-				while(propertyLoader)
+				while(propertyLoader && loadedValueCount<values.Count())
 				{
-					ITypeDescriptor* elementType=0;
-					bool nullable=false;
+					List<ITypeDescriptor*> acceptableTypes, binderExpectedTypes;
 					auto propertyType=propertyLoader->GetPropertyType(
 						IGuiInstanceLoader::PropertyInfo(
 							IGuiInstanceLoader::TypeInfo(typeName, typeDescriptor),
 							propertyName
 							),
-						elementType,
-						nullable);
+						acceptableTypes
+						);
 
-					switch(propertyType)
+					if (propertyType & IGuiInstanceLoader::SupportedProperty)
 					{
-					case IGuiInstanceLoader::ValueProperty:
-						// a property that accept a value
-						if(propertyValue->values.Count()==1)
+						vint currentIndex = 0;
+						for (vint i = 0; i < values.Count(); i++)
 						{
-							Ptr<GuiValueRepr> valueRepr=propertyValue->values[0];
-							if(propertyValue->binding==L"")
+							bool canRemoveLoadedValue = false;
+							if (Ptr<GuiValueRepr> valueRepr = values[i])
 							{
-								// default binding: set the value directly
-								Value value=LoadValueVisitor::LoadValue(valueRepr, context, resolver, elementType);
-								if((nullable || !value.IsNull()) && !propertyLoader->SetPropertyValue(
-									IGuiInstanceLoader::PropertyValue(
-										IGuiInstanceLoader::TypeInfo(typeName, typeDescriptor),
-										propertyName,
-										createdInstance,
-										value
-										)
-									))
+								if(propertyValue->binding==L"")
 								{
-									value.DeleteRawPtr();
-								}
-							}
-							else if(propertyValue->binding==L"set")
-							{
-								// set binding: get the property value and apply another property list on it
-								if(Ptr<GuiAttSetterRepr> propertyAttSetter=valueRepr.Cast<GuiAttSetterRepr>())
-								{
-									IGuiInstanceLoader::PropertyValue propertyValue(
-										IGuiInstanceLoader::TypeInfo(typeName, typeDescriptor),
-										propertyName,
-										createdInstance
-										);
-									if(propertyLoader->GetPropertyValue(propertyValue) && propertyValue.propertyValue.GetRawPtr())
+									// default binding: set the value directly
+									if (LoadValueVisitor::LoadValue(valueRepr, context, resolver, acceptableTypes, cachedPropertyValue.propertyValue))
 									{
-										ITypeDescriptor* propertyTypeDescriptor=propertyValue.propertyValue.GetRawPtr()->GetTypeDescriptor();
-										IGuiInstanceLoader* propertyInstanceLoader=GetInstanceLoaderManager()->GetLoader(propertyTypeDescriptor->GetTypeName());
-										if(propertyInstanceLoader)
+										canRemoveLoadedValue = true;
+										if(propertyLoader->SetPropertyValue(cachedPropertyValue, currentIndex))
 										{
-											FillInstance(propertyValue.propertyValue, context, propertyAttSetter.Obj(), resolver, propertyInstanceLoader, propertyTypeDescriptor->GetTypeName(), propertyTypeDescriptor);
+											currentIndex++;
+										}
+										else
+										{
+											cachedPropertyValue.propertyValue.DeleteRawPtr();
 										}
 									}
 								}
-							}
-							else
-							{
-								// other binding: provide the property value to the specified binder
-								IGuiInstanceBinder* binder=GetInstanceLoaderManager()->GetInstanceBinder(propertyValue->binding);
-								if(binder)
+								if (propertyValue->binding == L"set")
 								{
-									Value value=LoadValueVisitor::LoadValue(valueRepr, context, resolver, binder->GetExpectedValueType());
-									if((nullable || !value.IsNull()) && !binder->SetPropertyValue(
-										propertyLoader,
-										resolver,
-										IGuiInstanceLoader::PropertyValue(
-											IGuiInstanceLoader::TypeInfo(typeName, typeDescriptor),
-											propertyName,
-											createdInstance,
-											value
-											),
-										-1
-										))
+									// set binding: get the property value and apply another property list on it
+									if(Ptr<GuiAttSetterRepr> propertyAttSetter=valueRepr.Cast<GuiAttSetterRepr>())
 									{
-										value.DeleteRawPtr();
+										if(propertyLoader->GetPropertyValue(cachedPropertyValue) && cachedPropertyValue.propertyValue.GetRawPtr())
+										{
+											canRemoveLoadedValue = true;
+											ITypeDescriptor* propertyTypeDescriptor=cachedPropertyValue.propertyValue.GetRawPtr()->GetTypeDescriptor();
+											IGuiInstanceLoader* propertyInstanceLoader=GetInstanceLoaderManager()->GetLoader(propertyTypeDescriptor->GetTypeName());
+											if(propertyInstanceLoader)
+											{
+												FillInstance(cachedPropertyValue.propertyValue, context, propertyAttSetter.Obj(), resolver, propertyInstanceLoader, propertyTypeDescriptor->GetTypeName(), propertyTypeDescriptor);
+											}
+										}
 									}
+								}
+								else if (IGuiInstanceBinder* binder=GetInstanceLoaderManager()->GetInstanceBinder(propertyValue->binding))
+								{
+									// other binding: provide the property value to the specified binder
+									binderExpectedTypes.Clear();
+									binder->GetExpectedValueTypes(binderExpectedTypes);
+									if (LoadValueVisitor::LoadValue(valueRepr, context, resolver, binderExpectedTypes, cachedPropertyValue.propertyValue))
+									{
+										canRemoveLoadedValue = true;
+										if(propertyLoader->SetPropertyValue(cachedPropertyValue, currentIndex))
+										{
+											currentIndex++;
+										}
+										else
+										{
+											cachedPropertyValue.propertyValue.DeleteRawPtr();
+										}
+									}
+								}
+
+								if (canRemoveLoadedValue)
+								{
+									values[i] = 0;
+									loadedValueCount++;
 								}
 							}
 						}
-						break;
-					case IGuiInstanceLoader::CollectionProperty:
-						// a property that accept a collection
-						FOREACH_INDEXER(Ptr<GuiValueRepr>, valueRepr, currentIndex, propertyValue->values)
-						{
-							if(propertyValue->binding==L"")
-							{
-								// default binding: add the value directly
-								Value value=LoadValueVisitor::LoadValue(valueRepr, context, resolver, elementType);
-								if((nullable || !value.IsNull()) && !propertyLoader->SetPropertyCollection(
-									IGuiInstanceLoader::PropertyValue(
-										IGuiInstanceLoader::TypeInfo(typeName, typeDescriptor),
-										propertyName,
-										createdInstance,
-										value
-										),
-									currentIndex
-									))
-								{
-									value.DeleteRawPtr();
-								}
-							}
-							else if(propertyValue->binding!=L"set")
-							{
-								// other binding: provide the property value to the specified binder
-								IGuiInstanceBinder* binder=GetInstanceLoaderManager()->GetInstanceBinder(propertyValue->binding);
-								if(binder)
-								{
-									Value value=LoadValueVisitor::LoadValue(valueRepr, context, resolver, binder->GetExpectedValueType());
-									if((nullable || !value.IsNull()) && !binder->SetPropertyValue(
-										propertyLoader,
-										resolver,
-										IGuiInstanceLoader::PropertyValue(
-											IGuiInstanceLoader::TypeInfo(typeName, typeDescriptor),
-											propertyName,
-											createdInstance,
-											value
-											),
-										currentIndex
-										))
-									{
-										value.DeleteRawPtr();
-									}
-								}
-							}
-						}
-						break;
 					}
 
-					if(propertyType==IGuiInstanceLoader::HandleByParentLoader)
+					if(propertyType & IGuiInstanceLoader::HandleByParentLoader)
 					{
 						propertyLoader=GetInstanceLoaderManager()->GetParentLoader(propertyLoader);
 					}
 					else
 					{
-						break;
+						propertyLoader=0;
 					}
 				}
 			}

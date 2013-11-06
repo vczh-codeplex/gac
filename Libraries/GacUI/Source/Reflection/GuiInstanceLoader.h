@@ -88,7 +88,7 @@ Instance Binder
 		{
 		public:
 			virtual WString							GetBindingName()=0;
-			virtual description::ITypeDescriptor*	GetExpectedValueType()=0;
+			virtual void							GetExpectedValueTypes(collections::List<description::ITypeDescriptor*>& expectedTypes)=0;
 			virtual bool							SetPropertyValue(IGuiInstanceLoader* loader, Ptr<GuiResourcePathResolver> resolver, IGuiInstanceLoader::PropertyValue& propertyValue, vint currentIndex=-1)=0;
 		};
 
