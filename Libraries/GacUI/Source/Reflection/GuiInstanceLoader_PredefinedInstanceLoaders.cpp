@@ -179,7 +179,7 @@ GuiTabInstanceLoader
 				if (propertyInfo.propertyName == L"")
 				{
 					acceptableTypes.Add(description::GetTypeDescriptor<GuiTabPage>());
-					return IGuiInstanceLoader::SupportedProperty;
+					return (IGuiInstanceLoader::PropertyType)(IGuiInstanceLoader::SupportedProperty | IGuiInstanceLoader::HandleByParentLoader);
 				}
 				return IGuiInstanceLoader::HandleByParentLoader;
 			}
