@@ -94,21 +94,30 @@ LoadValueVisitor
 			public:
 				Ptr<GuiInstanceContext>					context;
 				Ptr<GuiResourcePathResolver>			resolver;
-				ITypeDescriptor*						typeDescriptor;
-				Value									result;
+				List<ITypeDescriptor*>&					acceptableTypes;
+				bool									result;
+				Value									loadedValue;
 
-				LoadValueVisitor(Ptr<GuiInstanceContext> _context, Ptr<GuiResourcePathResolver> _resolver, ITypeDescriptor* _typeDescriptor)
+				LoadValueVisitor(Ptr<GuiInstanceContext> _context, Ptr<GuiResourcePathResolver> _resolver, List<ITypeDescriptor*>& _acceptableTypes)
 					:context(_context)
 					,resolver(_resolver)
-					,typeDescriptor(_typeDescriptor)
+					,acceptableTypes(_acceptableTypes)
+					,result(false)
 				{
 				}
 
 				void Visit(GuiTextRepr* repr)override
 				{
-					if(IValueSerializer* serializer=typeDescriptor->GetValueSerializer())
+					FOREACH(ITypeDescriptor*, typeDescriptor, acceptableTypes)
 					{
-						serializer->Parse(repr->text, result);
+						if(IValueSerializer* serializer=typeDescriptor->GetValueSerializer())
+						{
+							if (serializer->Parse(repr->text, loadedValue))
+							{
+								result = true;
+								return;
+							}
+						}
 					}
 				}
 
@@ -118,7 +127,7 @@ LoadValueVisitor
 
 				void Visit(GuiConstructorRepr* repr)override
 				{
-					if (IValueSerializer* serializer = typeDescriptor->GetValueSerializer())
+					Ptr<GuiTextRepr> singleTextValue;
 					{
 						vint index = repr->setters.Keys().IndexOf(L"");
 						if (index != -1)
@@ -126,25 +135,43 @@ LoadValueVisitor
 							auto setterValue = repr->setters.Values()[index];
 							if (setterValue->values.Count() == 1)
 							{
-								if (auto textRepr = setterValue->values[0].Cast<GuiTextRepr>())
-								{
-									result = LoadValueVisitor::LoadValue(textRepr, context, resolver, typeDescriptor);
-								}
+								singleTextValue = setterValue->values[0].Cast<GuiTextRepr>();
 							}
 						}
 					}
-					else
+					
+					FOREACH(ITypeDescriptor*, typeDescriptor, acceptableTypes)
 					{
-						WString _typeName;
-						ITypeDescriptor* _typeDescriptor=0;
-						result=LoadInstance(context, repr, resolver, _typeName, _typeDescriptor);
+						if (IValueSerializer* serializer = typeDescriptor->GetValueSerializer())
+						{
+							if (singleTextValue && serializer->Parse(singleTextValue->text, loadedValue))
+							{
+								result = true;
+								return;
+							}
+						}
+						else
+						{
+							WString _typeName;
+							ITypeDescriptor* _typeDescriptor=0;
+							loadedValue=LoadInstance(context, repr, resolver, _typeName, _typeDescriptor);
+							if (!loadedValue.IsNull())
+							{
+								result = true;
+								return;
+							}
+						}
 					}
 				}
 
-				static bool LoadValue(Ptr<GuiValueRepr> valueRepr, Ptr<GuiInstanceContext> context, Ptr<GuiResourcePathResolver> resolver, List<ITypeDescriptor*>& acceptableTypes, Value& result)
+				static bool LoadValue(Ptr<GuiValueRepr> valueRepr, Ptr<GuiInstanceContext> context, Ptr<GuiResourcePathResolver> resolver, List<ITypeDescriptor*>& acceptableTypes, Value& loadedValue)
 				{
-					LoadValueVisitor visitor(context, resolver, typeDescriptor);
+					LoadValueVisitor visitor(context, resolver, acceptableTypes);
 					valueRepr->Accept(&visitor);
+					if (visitor.result)
+					{
+						loadedValue = visitor.loadedValue;
+					}
 					return visitor.result;
 				}
 			};
