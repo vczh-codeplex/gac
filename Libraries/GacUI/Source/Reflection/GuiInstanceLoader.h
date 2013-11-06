@@ -28,10 +28,9 @@ Instance Loader
 		public:
 			enum PropertyType
 			{
-				ValueProperty,
-				CollectionProperty,
-				UnsupportedProperty,
-				HandleByParentLoader,
+				UnsupportedProperty		=0,
+				SupportedProperty		=1<<0,
+				HandleByParentLoader	=1<<1,
 			};
 
 			struct TypeInfo
@@ -76,10 +75,9 @@ Instance Loader
 
 			virtual WString							GetTypeName()=0;
 			virtual description::Value				CreateInstance(Ptr<GuiInstanceContext> context, Ptr<GuiConstructorRepr> ctor, Ptr<GuiResourcePathResolver> resolver, const TypeInfo& typeInfo)=0;
-			virtual PropertyType					GetPropertyType(const PropertyInfo& propertyInfo, description::ITypeDescriptor*& elementType, bool &nullable)=0;
+			virtual PropertyType					GetPropertyType(const PropertyInfo& propertyInfo, collections::List<description::ITypeDescriptor*>& acceptableTypes)=0;
 			virtual bool							GetPropertyValue(PropertyValue& propertyValue)=0;
-			virtual bool							SetPropertyValue(PropertyValue& propertyValue)=0;
-			virtual bool							SetPropertyCollection(PropertyValue& propertyValue, vint currentIndex)=0;
+			virtual bool							SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)=0;
 		};
 
 /***********************************************************************

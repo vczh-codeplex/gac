@@ -55,14 +55,7 @@ GuiResourceInstanceBinder
 							{
 								IGuiInstanceLoader::PropertyValue newValue = propertyValue;
 								newValue.propertyValue = value;
-								if(currentIndex==-1)
-								{
-									return loader->SetPropertyValue(newValue);
-								}
-								else
-								{
-									return loader->SetPropertyCollection(newValue, currentIndex);
-								}
+								return loader->SetPropertyValue(newValue, currentIndex);
 							}
 						}
 					}
