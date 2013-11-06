@@ -27,9 +27,9 @@ GuiResourceInstanceBinder
 				return L"uri";
 			}
 
-			description::ITypeDescriptor* GetExpectedValueType()
+			void GetExpectedValueTypes(collections::List<description::ITypeDescriptor*>& expectedTypes)override
 			{
-				return stringTypeDescriptor;
+				expectedTypes.Add(stringTypeDescriptor);
 			}
 
 			bool SetPropertyValue(IGuiInstanceLoader* loader, Ptr<GuiResourcePathResolver> resolver, IGuiInstanceLoader::PropertyValue& propertyValue, vint currentIndex)override
