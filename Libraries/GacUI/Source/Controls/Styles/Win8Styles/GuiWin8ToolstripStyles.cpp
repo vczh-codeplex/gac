@@ -15,7 +15,7 @@ namespace vl
 Win8WindowStyle
 ***********************************************************************/
 
-			Win8ToolstripToolbarStyle::Win8ToolstripToolbarStyle()
+			Win8ToolstripToolBarStyle::Win8ToolstripToolBarStyle()
 			{
 				{
 					GuiSolidBackgroundElement* element=GuiSolidBackgroundElement::Create();
@@ -44,33 +44,33 @@ Win8WindowStyle
 				}
 			}
 
-			Win8ToolstripToolbarStyle::~Win8ToolstripToolbarStyle()
+			Win8ToolstripToolBarStyle::~Win8ToolstripToolBarStyle()
 			{
 			}
 
-			compositions::GuiBoundsComposition* Win8ToolstripToolbarStyle::GetBoundsComposition()
+			compositions::GuiBoundsComposition* Win8ToolstripToolBarStyle::GetBoundsComposition()
 			{
 				return boundsComposition;
 			}
 
-			compositions::GuiGraphicsComposition* Win8ToolstripToolbarStyle::GetContainerComposition()
+			compositions::GuiGraphicsComposition* Win8ToolstripToolBarStyle::GetContainerComposition()
 			{
 				return containerComposition;
 			}
 
-			void Win8ToolstripToolbarStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
+			void Win8ToolstripToolBarStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
 			{
 			}
 
-			void Win8ToolstripToolbarStyle::SetText(const WString& value)
+			void Win8ToolstripToolBarStyle::SetText(const WString& value)
 			{
 			}
 
-			void Win8ToolstripToolbarStyle::SetFont(const FontProperties& value)
+			void Win8ToolstripToolBarStyle::SetFont(const FontProperties& value)
 			{
 			}
 
-			void Win8ToolstripToolbarStyle::SetVisuallyEnabled(bool value)
+			void Win8ToolstripToolBarStyle::SetVisuallyEnabled(bool value)
 			{
 			}
 

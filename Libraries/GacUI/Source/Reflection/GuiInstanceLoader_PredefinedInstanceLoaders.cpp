@@ -247,6 +247,167 @@ GuiTabPageInstanceLoader
 		};
 
 /***********************************************************************
+GuiToolstripMenuInstanceLoader
+***********************************************************************/
+
+		class GuiToolstripMenuInstanceLoader : public GuiRewriteInstanceLoader
+		{
+		public:
+			WString GetTypeName()override
+			{
+				return description::GetTypeDescriptor<GuiToolstripMenu>()->GetTypeName();
+			}
+
+			IGuiInstanceLoader::PropertyType GetPropertyType(const PropertyInfo& propertyInfo, collections::List<description::ITypeDescriptor*>& acceptableTypes)override
+			{
+				if (propertyInfo.propertyName == L"")
+				{
+					acceptableTypes.Add(description::GetTypeDescriptor<GuiControl>());
+					return (IGuiInstanceLoader::PropertyType)(IGuiInstanceLoader::SupportedProperty | IGuiInstanceLoader::HandleByParentLoader);
+				}
+				return IGuiInstanceLoader::HandleByParentLoader;
+			}
+
+			bool SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)override
+			{
+				if (GuiToolstripMenu* container = dynamic_cast<GuiToolstripMenu*>(propertyValue.instanceValue.GetRawPtr()))
+				{
+					if (propertyValue.propertyName == L"")
+					{
+						if (auto control = dynamic_cast<GuiControl*>(propertyValue.propertyValue.GetRawPtr()))
+						{
+							container->GetToolstripItems().Add(control);
+							return true;
+						}
+					}
+				}
+				return false;
+			}
+		};
+
+/***********************************************************************
+GuiToolstripMenuBarInstanceLoader
+***********************************************************************/
+
+		class GuiToolstripMenuBarInstanceLoader : public GuiRewriteInstanceLoader
+		{
+		public:
+			WString GetTypeName()override
+			{
+				return description::GetTypeDescriptor<GuiToolstripMenuBar>()->GetTypeName();
+			}
+
+			IGuiInstanceLoader::PropertyType GetPropertyType(const PropertyInfo& propertyInfo, collections::List<description::ITypeDescriptor*>& acceptableTypes)override
+			{
+				if (propertyInfo.propertyName == L"")
+				{
+					acceptableTypes.Add(description::GetTypeDescriptor<GuiControl>());
+					return (IGuiInstanceLoader::PropertyType)(IGuiInstanceLoader::SupportedProperty | IGuiInstanceLoader::HandleByParentLoader);
+				}
+				return IGuiInstanceLoader::HandleByParentLoader;
+			}
+
+			bool SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)override
+			{
+				if (GuiToolstripMenuBar* container = dynamic_cast<GuiToolstripMenuBar*>(propertyValue.instanceValue.GetRawPtr()))
+				{
+					if (propertyValue.propertyName == L"")
+					{
+						if (auto control = dynamic_cast<GuiControl*>(propertyValue.propertyValue.GetRawPtr()))
+						{
+							container->GetToolstripItems().Add(control);
+							return true;
+						}
+					}
+				}
+				return false;
+			}
+		};
+
+/***********************************************************************
+GuiToolstripToolBarInstanceLoader
+***********************************************************************/
+
+		class GuiToolstripToolBarInstanceLoader : public GuiRewriteInstanceLoader
+		{
+		public:
+			WString GetTypeName()override
+			{
+				return description::GetTypeDescriptor<GuiToolstripToolBar>()->GetTypeName();
+			}
+
+			IGuiInstanceLoader::PropertyType GetPropertyType(const PropertyInfo& propertyInfo, collections::List<description::ITypeDescriptor*>& acceptableTypes)override
+			{
+				if (propertyInfo.propertyName == L"")
+				{
+					acceptableTypes.Add(description::GetTypeDescriptor<GuiControl>());
+					return (IGuiInstanceLoader::PropertyType)(IGuiInstanceLoader::SupportedProperty | IGuiInstanceLoader::HandleByParentLoader);
+				}
+				return IGuiInstanceLoader::HandleByParentLoader;
+			}
+
+			bool SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)override
+			{
+				if (GuiToolstripToolBar* container = dynamic_cast<GuiToolstripToolBar*>(propertyValue.instanceValue.GetRawPtr()))
+				{
+					if (propertyValue.propertyName == L"")
+					{
+						if (auto control = dynamic_cast<GuiControl*>(propertyValue.propertyValue.GetRawPtr()))
+						{
+							container->GetToolstripItems().Add(control);
+							return true;
+						}
+					}
+				}
+				return false;
+			}
+		};
+
+/***********************************************************************
+GuiToolstripButtonInstanceLoader
+***********************************************************************/
+
+		class GuiToolstripButtonInstanceLoader : public GuiRewriteInstanceLoader
+		{
+		public:
+			WString GetTypeName()override
+			{
+				return description::GetTypeDescriptor<GuiToolstripButton>()->GetTypeName();
+			}
+
+			IGuiInstanceLoader::PropertyType GetPropertyType(const PropertyInfo& propertyInfo, collections::List<description::ITypeDescriptor*>& acceptableTypes)override
+			{
+				if (propertyInfo.propertyName == L"SubMenu")
+				{
+					acceptableTypes.Add(description::GetTypeDescriptor<GuiToolstripMenu>());
+					return IGuiInstanceLoader::SupportedProperty;
+				}
+				return IGuiInstanceLoader::HandleByParentLoader;
+			}
+
+			
+
+			bool GetPropertyValue(PropertyValue& propertyValue)override
+			{
+				if (GuiToolstripButton* container = dynamic_cast<GuiToolstripButton*>(propertyValue.instanceValue.GetRawPtr()))
+				{
+					if (propertyValue.propertyName == L"SubMenu")
+					{
+						if (auto control = dynamic_cast<GuiControl*>(propertyValue.propertyValue.GetRawPtr()))
+						{
+							if (!container->GetToolstripSubMenu())
+							{
+								container->CreateToolstripSubMenu();
+							}
+							propertyValue.propertyValue = Value::From(container->GetToolstripSubMenu());
+						}
+					}
+				}
+				return false;
+			}
+		};
+
+/***********************************************************************
 GuiCompositionInstanceLoader
 ***********************************************************************/
 
@@ -402,6 +563,10 @@ GuiPredefinedInstanceLoadersPlugin
 				manager->SetLoader(new GuiControlHostInstanceLoader);
 				manager->SetLoader(new GuiTabInstanceLoader);
 				manager->SetLoader(new GuiTabPageInstanceLoader);
+				manager->SetLoader(new GuiToolstripMenuInstanceLoader);
+				manager->SetLoader(new GuiToolstripMenuBarInstanceLoader);
+				manager->SetLoader(new GuiToolstripToolBarInstanceLoader);
+				manager->SetLoader(new GuiToolstripButtonInstanceLoader);
 				manager->SetLoader(new GuiCompositionInstanceLoader);
 				manager->SetLoader(new GuiTableCompositionInstanceLoader);
 				manager->SetLoader(new GuiCellCompositionInstanceLoader);
@@ -419,10 +584,10 @@ GuiPredefinedInstanceLoadersPlugin
 				ADD_VIRTUAL_TYPE(MenuSplitter,				GuiControl,				g::NewMenuSplitter);
 				ADD_VIRTUAL_TYPE(MenuBarButton,				GuiToolstripButton,		g::NewMenuBarButton);
 				ADD_VIRTUAL_TYPE(MenuItemButton,			GuiToolstripButton,		g::NewMenuItemButton);
-				ADD_VIRTUAL_TYPE(ToolstripButton,			GuiToolstripButton,		g::NewToolbarButton);
-				ADD_VIRTUAL_TYPE(ToolstripDropdownButton,	GuiToolstripButton,		g::NewToolbarDropdownButton);
-				ADD_VIRTUAL_TYPE(ToolstripSplitButton,		GuiToolstripButton,		g::NewToolbarSplitButton);
-				ADD_VIRTUAL_TYPE(ToolstripSplitter,			GuiControl,				g::NewToolbarSplitter);
+				ADD_VIRTUAL_TYPE(ToolstripButton,			GuiToolstripButton,		g::NewToolBarButton);
+				ADD_VIRTUAL_TYPE(ToolstripDropdownButton,	GuiToolstripButton,		g::NewToolBarDropdownButton);
+				ADD_VIRTUAL_TYPE(ToolstripSplitButton,		GuiToolstripButton,		g::NewToolBarSplitButton);
+				ADD_VIRTUAL_TYPE(ToolstripSplitter,			GuiControl,				g::NewToolBarSplitter);
 				ADD_VIRTUAL_TYPE(CheckBox,					GuiSelectableButton,	g::NewCheckBox);
 				ADD_VIRTUAL_TYPE(RadioButton,				GuiSelectableButton,	g::NewRadioButton);
 				ADD_VIRTUAL_TYPE(HScroll,					GuiScroll,				g::NewHScroll);

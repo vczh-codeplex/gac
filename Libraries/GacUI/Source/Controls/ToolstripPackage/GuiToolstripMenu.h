@@ -62,13 +62,13 @@ Toolstrip Builder Facade
 			{
 				friend class GuiToolstripMenu;
 				friend class GuiToolstripMenuBar;
-				friend class GuiToolstripToolbar;
+				friend class GuiToolstripToolBar;
 			protected:
 				enum Environment
 				{
 					Menu,
 					MenuBar,
-					Toolbar,
+					ToolBar,
 				};
 
 				Environment									environment;
@@ -176,7 +176,7 @@ Toolstrip Container
 			};
 
 			/// <summary>Toolstrip tool bar.</summary>
-			class GuiToolstripToolbar : public GuiControl, public Description<GuiToolstripToolbar>
+			class GuiToolstripToolBar : public GuiControl, public Description<GuiToolstripToolBar>
 			{
 			protected:
 				compositions::GuiStackComposition*			stackComposition;
@@ -186,8 +186,8 @@ Toolstrip Container
 			public:
 				/// <summary>Create a control with a specified style controller.</summary>
 				/// <param name="_styleController">The style controller.</param>
-				GuiToolstripToolbar(IStyleController* _styleController);
-				~GuiToolstripToolbar();
+				GuiToolstripToolBar(IStyleController* _styleController);
+				~GuiToolstripToolBar();
 				
 				/// <summary>Get all managed child controls ordered by their positions.</summary>
 				/// <returns>All managed child controls.</returns>

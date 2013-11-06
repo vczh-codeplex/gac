@@ -124,8 +124,8 @@ GuiToolstripBuilder
 				case MenuBar:
 					lastCreatedButton=new GuiToolstripButton(theme->CreateMenuBarButtonStyle());
 					break;
-				case Toolbar:
-					lastCreatedButton=new GuiToolstripButton(theme->CreateToolbarButtonStyle());
+				case ToolBar:
+					lastCreatedButton=new GuiToolstripButton(theme->CreateToolBarButtonStyle());
 					break;
 				}
 				if(lastCreatedButton)
@@ -152,8 +152,8 @@ GuiToolstripBuilder
 				case MenuBar:
 					lastCreatedButton=new GuiToolstripButton(theme->CreateMenuBarButtonStyle());
 					break;
-				case Toolbar:
-					lastCreatedButton=new GuiToolstripButton(theme->CreateToolbarButtonStyle());
+				case ToolBar:
+					lastCreatedButton=new GuiToolstripButton(theme->CreateToolBarButtonStyle());
 					break;
 				}
 				if(lastCreatedButton)
@@ -173,8 +173,8 @@ GuiToolstripBuilder
 				lastCreatedButton=0;
 				switch(environment)
 				{
-				case Toolbar:
-					lastCreatedButton=new GuiToolstripButton(theme->CreateToolbarDropdownButtonStyle());
+				case ToolBar:
+					lastCreatedButton=new GuiToolstripButton(theme->CreateToolBarDropdownButtonStyle());
 					break;
 				}
 				if(lastCreatedButton)
@@ -195,8 +195,8 @@ GuiToolstripBuilder
 				lastCreatedButton=0;
 				switch(environment)
 				{
-				case Toolbar:
-					lastCreatedButton=new GuiToolstripButton(theme->CreateToolbarDropdownButtonStyle());
+				case ToolBar:
+					lastCreatedButton=new GuiToolstripButton(theme->CreateToolBarDropdownButtonStyle());
 					break;
 				}
 				if(lastCreatedButton)
@@ -216,8 +216,8 @@ GuiToolstripBuilder
 				lastCreatedButton=0;
 				switch(environment)
 				{
-				case Toolbar:
-					lastCreatedButton=new GuiToolstripButton(theme->CreateToolbarSplitButtonStyle());
+				case ToolBar:
+					lastCreatedButton=new GuiToolstripButton(theme->CreateToolBarSplitButtonStyle());
 					break;
 				}
 				if(lastCreatedButton)
@@ -238,8 +238,8 @@ GuiToolstripBuilder
 				lastCreatedButton=0;
 				switch(environment)
 				{
-				case Toolbar:
-					lastCreatedButton=new GuiToolstripButton(theme->CreateToolbarSplitButtonStyle());
+				case ToolBar:
+					lastCreatedButton=new GuiToolstripButton(theme->CreateToolBarSplitButtonStyle());
 					break;
 				}
 				if(lastCreatedButton)
@@ -262,8 +262,8 @@ GuiToolstripBuilder
 				case Menu:
 					toolstripItems->Add(new GuiControl(theme->CreateMenuSplitterStyle()));
 					break;
-				case Toolbar:
-					toolstripItems->Add(new GuiControl(theme->CreateToolbarSplitterStyle()));
+				case ToolBar:
+					toolstripItems->Add(new GuiControl(theme->CreateToolBarSplitterStyle()));
 					break;
 				}
 				return this;
@@ -366,10 +366,10 @@ GuiToolstripMenuBar
 			}
 
 /***********************************************************************
-GuiToolstripToolbar
+GuiToolstripToolBar
 ***********************************************************************/
 				
-			GuiToolstripToolbar::GuiToolstripToolbar(IStyleController* _styleController)
+			GuiToolstripToolBar::GuiToolstripToolBar(IStyleController* _styleController)
 				:GuiControl(_styleController)
 			{
 				stackComposition=new GuiStackComposition;
@@ -379,19 +379,19 @@ GuiToolstripToolbar
 				GetContainerComposition()->AddChild(stackComposition);
 
 				toolstripItems=new GuiToolstripCollection(0, stackComposition, 0);
-				builder=new GuiToolstripBuilder(GuiToolstripBuilder::Toolbar, toolstripItems.Obj());
+				builder=new GuiToolstripBuilder(GuiToolstripBuilder::ToolBar, toolstripItems.Obj());
 			}
 
-			GuiToolstripToolbar::~GuiToolstripToolbar()
+			GuiToolstripToolBar::~GuiToolstripToolBar()
 			{
 			}
 
-			GuiToolstripCollection& GuiToolstripToolbar::GetToolstripItems()
+			GuiToolstripCollection& GuiToolstripToolBar::GetToolstripItems()
 			{
 				return *toolstripItems.Obj();
 			}
 
-			GuiToolstripBuilder* GuiToolstripToolbar::GetBuilder(theme::ITheme* themeObject)
+			GuiToolstripBuilder* GuiToolstripToolBar::GetBuilder(theme::ITheme* themeObject)
 			{
 				builder->theme=themeObject?themeObject:theme::GetCurrentTheme();
 				return builder.Obj();

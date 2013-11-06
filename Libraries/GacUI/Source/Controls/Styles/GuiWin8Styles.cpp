@@ -132,27 +132,27 @@ Win8Theme
 				return new Win8MenuItemButtonStyle;
 			}
 
-			controls::GuiControl::IStyleController* Win8Theme::CreateToolbarStyle()
+			controls::GuiControl::IStyleController* Win8Theme::CreateToolBarStyle()
 			{
-				return new Win8ToolstripToolbarStyle;
+				return new Win8ToolstripToolBarStyle;
 			}
 
-			controls::GuiToolstripButton::IStyleController* Win8Theme::CreateToolbarButtonStyle()
+			controls::GuiToolstripButton::IStyleController* Win8Theme::CreateToolBarButtonStyle()
 			{
 				return new Win8ToolstripButtonStyle(Win8ToolstripButtonStyle::CommandButton);
 			}
 
-			controls::GuiToolstripButton::IStyleController* Win8Theme::CreateToolbarDropdownButtonStyle()
+			controls::GuiToolstripButton::IStyleController* Win8Theme::CreateToolBarDropdownButtonStyle()
 			{
 				return new Win8ToolstripButtonStyle(Win8ToolstripButtonStyle::DropdownButton);
 			}
 
-			controls::GuiToolstripButton::IStyleController* Win8Theme::CreateToolbarSplitButtonStyle()
+			controls::GuiToolstripButton::IStyleController* Win8Theme::CreateToolBarSplitButtonStyle()
 			{
 				return new Win8ToolstripButtonStyle(Win8ToolstripButtonStyle::SplitButton);
 			}
 
-			controls::GuiControl::IStyleController* Win8Theme::CreateToolbarSplitterStyle()
+			controls::GuiControl::IStyleController* Win8Theme::CreateToolBarSplitterStyle()
 			{
 				return new Win8ToolstripSplitterStyle;
 			}

@@ -133,27 +133,27 @@ Win7Theme
 				return new Win7MenuItemButtonStyle;
 			}
 
-			controls::GuiControl::IStyleController* Win7Theme::CreateToolbarStyle()
+			controls::GuiControl::IStyleController* Win7Theme::CreateToolBarStyle()
 			{
-				return new Win7ToolstripToolbarStyle;
+				return new Win7ToolstripToolBarStyle;
 			}
 
-			controls::GuiToolstripButton::IStyleController* Win7Theme::CreateToolbarButtonStyle()
+			controls::GuiToolstripButton::IStyleController* Win7Theme::CreateToolBarButtonStyle()
 			{
 				return new Win7ToolstripButtonStyle(Win7ToolstripButtonStyle::CommandButton);
 			}
 
-			controls::GuiToolstripButton::IStyleController* Win7Theme::CreateToolbarDropdownButtonStyle()
+			controls::GuiToolstripButton::IStyleController* Win7Theme::CreateToolBarDropdownButtonStyle()
 			{
 				return new Win7ToolstripButtonStyle(Win7ToolstripButtonStyle::DropdownButton);
 			}
 
-			controls::GuiToolstripButton::IStyleController* Win7Theme::CreateToolbarSplitButtonStyle()
+			controls::GuiToolstripButton::IStyleController* Win7Theme::CreateToolBarSplitButtonStyle()
 			{
 				return new Win7ToolstripButtonStyle(Win7ToolstripButtonStyle::SplitButton);
 			}
 
-			controls::GuiControl::IStyleController* Win7Theme::CreateToolbarSplitterStyle()
+			controls::GuiControl::IStyleController* Win7Theme::CreateToolBarSplitterStyle()
 			{
 				return new Win7ToolstripSplitterStyle;
 			}
