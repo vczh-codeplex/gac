@@ -152,19 +152,10 @@ Instance Loader Manager
 		};
 
 		extern IGuiInstanceLoaderManager*			GetInstanceLoaderManager();
-		extern InstanceLoadingSource				FindInstanceLoadingSource(
-														Ptr<GuiInstanceEnvironment> env,
-														GuiConstructorRepr* ctor
-														);
 		extern Ptr<GuiInstanceContextScope>			LoadInstance(
 														Ptr<GuiResource> resource,
-														const WString& instancePath
-														);
-		extern description::Value					LoadInstance(
-														Ptr<GuiInstanceEnvironment> env,
-														GuiConstructorRepr* ctor,
-														description::ITypeDescriptor* expectedType,
-														WString& typeName
+														const WString& instancePath,
+														description::ITypeDescriptor* expectedType=0
 														);
 	}
 }

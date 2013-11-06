@@ -130,6 +130,20 @@ GuiInstanceContext
 				Ptr<GuiConstructorRepr> ctor=new GuiConstructorRepr;
 				ctor->typeNamespace=name->namespaceName;
 				ctor->typeName=name->name;
+				
+				// collect reference attributes
+				FOREACH(Ptr<XmlAttribute>, att, xml->attributes)
+				{
+					if(auto name=parser->TypedParse(att->name.value))
+					if(name->IsReferenceAttributeName())
+					{
+						if(!ctor->referenceAttributes.Keys().Contains(name->name))
+						{
+							ctor->referenceAttributes.Add(name->name, att->value.value);
+						}
+					}
+				}
+				// collect attributes as setters
 				FillAttSetter(ctor, xml);
 				return ctor;
 			}

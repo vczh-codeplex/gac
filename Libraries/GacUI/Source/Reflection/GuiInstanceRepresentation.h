@@ -66,9 +66,11 @@ Instance Representation
 
 		class GuiConstructorRepr : public GuiAttSetterRepr, public Description<GuiConstructorRepr>
 		{
+			typedef collections::Dictionary<WString, WString>					ReferenceAttrubuteMap;
 		public:
 			WString									typeNamespace;
 			WString									typeName;
+			ReferenceAttrubuteMap					referenceAttributes;
 
 			void									Accept(IVisitor* visitor)override{visitor->Visit(this);}
 		};
@@ -138,6 +140,7 @@ Instance Context
 				bool IsCtorName(){ return category==L"" && name!=L"" && binding==L""; }
 				bool IsPropertyAttributeName(){ return namespaceName==L"" && category==L"" && name!=L""; }
 				bool IsPropertyElementName(){ return namespaceName==L"" && category==L"att" && name!=L""; }
+				bool IsReferenceAttributeName(){ return namespaceName==L"" && category==L"ref" && name!=L""; }
 			};
 		public:
 			Ptr<GuiConstructorRepr>					instance;
