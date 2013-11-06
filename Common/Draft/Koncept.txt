@@ -3,7 +3,7 @@ Primitive Types
 ========================================================
 
 object				system.Object		null
-void				system.Void			<>
+void				system.Void			{}
 uint8				system.UInt8		0
 uint16				system.UInt16		0
 uint32	(uint)		system.UInt32		0
@@ -51,13 +51,13 @@ data<T, U> Pair
 	second : U;
 }
 
-T..U				Pair<T, U>			default(T)..default(U)					// right associative
-<T, U, V>			T..U..V..void		<default(T), default(U), default(V)
-T?										null		// T??->T?, T^?->T?, object?->object
-T^										default(T)	// T?^->T?, T^^->T^, cannot be interface. T should be DataType<T>
-T[]					Array<T>
-T[U]				Map<U, T>
-func (T, U) : V		Delegate<<T, U>, V>
+
+(T, U, V)			Pair<T, Pair<U, Pair<V, void>>>		{default(T), default(U), default(V)}
+T?														null		// T??->T?, T^?->T?, object?->object
+T^														default(T)	// T?^->T?, T^^->T^, cannot be interface. T should be DataType<T>
+T()					Array<T>
+T(U)				Map<U, T>
+(T, U)=>V			Delegate<(T, U), V>
 
 typeof(Expr)
 
@@ -126,9 +126,9 @@ func (x : int, y : int) : int = x + y
 func (x : int, y : int) : int { return x + y; }
 
 // equivalent to the lambda expression above
-Delegate<<int, int>, int>
+Delegate<(int, int), int>
 {
-	func Invoke(<x, y> : <int, int>) : int
+	func Invoke({x, y} : (int, int)) : int
 	{
 		return x + y;
 	}
@@ -138,62 +138,18 @@ Delegate<<int, int>, int>
 Container Interfaces
 ========================================================
 
-interface<TKey, TValue> ReadableMapping
-{
-	get Keys : Enumerable<TKey>;
-	get Values : Enumerable<TValue>;
-	get operator[](index : TKey) : TValue;
-	func ContainsKey(key : TKey) : bool;
-	func TryGet(key : TKey) : TValue?;
-}
-
-interface<TKey, TValue> Mapping : ReadableMapping
-{
-	set operator[](index : TKey) : TValue;
-}
-
-interface<T> ReadableArray : ReadableMapping<int, T>, EvaluatedEnumerable<T>
-{
-	func Slice(start : int, length : int) : ReadableArray<T>;
-}
-
-interface<T> Array : ReadableArray<T>, Mapping<int, T>
-{
-	func Slice(start : int, length : int) : Array<T>;
-}
-
-interface<T> Collection : Array<T>
-{
-	func Add(value : T) : int;
-	func Remove(value : T) : bool;
-	func RemoveAt(index : int) : T;
-	func Contains(value : T) : bool;
-	func IndexOf(value : T) : int;
-}
-
-interface<T> List : Collection<T>
-{
-	func Insert(index : int, value : T);
-}
-
-interface<TKey, TValue> Map : Mapping<TKey, TValue>, Enumerable<TKey..TValue>
-{
-	func Add(key : TKey, value : Value);
-	func Set(key : TKey, value : Value) : bool;
-}
-
 func<T>				ArrayOf(length : int) : Array<T>;
 func<T>				ArrayOf(values : Enumerable<T>) : Array<T>;
 func<T>				ListOf(values : Enumerable<T>) : Array<T>;
 func<T>				SortedListOf(values : Enumerable<T>) : Array<T>;
 func<T>				SortedSetOf(values : Enumerable<T>) : Array<T>;
 func<T>				HashSetOf(values : Enumerable<T>) : Array<T>;
-func<TKey, TValue>	SortedMapOf(values : Enumerable<TKey..TValue>) : Map<TKey, TValue>;
-func<TKey, TValue>	HashMapOf(values : Enumerable<TKey..TValue>) : Map<TKey, TValue>;
+func<TKey, TValue>	SortedMapOf(values : Enumerable<(TKey, TValue)>) : Map<TKey, TValue>;
+func<TKey, TValue>	HashMapOf(values : Enumerable<(TKey, TValue)>) : Map<TKey, TValue>;
 
 ArrayOf(10) : int[]
 ArrayOf({1, 2, 3, 4, 5})
-HashMapOf({1..1, 2..4, 3..9, 4..16, 5..25})
+HashMapOf({{1,1}, {2,4}, {3,9}, {4,16}, {5,25}})
 // {1, 2, 3} creates an EvaluatedEnumerable<int>
 
 ========================================================
@@ -280,8 +236,7 @@ Identifier		// can only be part of other patterns
 X : Type
 X^				// extract and convert to T^
 X?				// extract and convert to T?
-X..Y
-<X, Y, Z>
+{X, Y, Z}
 {X, Y, Z: W}
 {x:X, y:Y}
 
@@ -335,7 +290,7 @@ func<T> WriteStream(this : Stream, value : T); // throw NotImplementedException{
 
 func WriteStream<int>(this : Stream, value : int);
 func WriteStream<string>(this : Stream, value : string);
-func<T, U> WriteStream<T..U>(this : Stream, value : T..U);
+func<T, U> WriteStream<Pair<T, U>>(this : Stream, value : Pair<T, U>);
 func WriteStream<string>(case this : StringStream, value : string);
 
 get/set<T> operator[](this : Enumerable<T>, index : int);
@@ -346,7 +301,7 @@ namespace Name {}
 Continuations
 ========================================================
 
-func<T, U> CreateCps(start : func (T):void) : U;
+func<T, U> CreateCps(start : (T)=>void) : U;
 
 ---------------------------------------------------------
 
@@ -354,12 +309,12 @@ data<T> CpsEnumerator
 {
 	current			: T;
 	available		: bool;
-	start			: func (CpsEnumerator<T>^) : void;
-	continuation?	: func () : void;
+	start			: (CpsEnumerator<T>^)=>void;
+	continuation?	: ()=>void;
 }
 
 // func<T> CreateCps<CpsEnumerator^, Enumerable<T>>(..):Enumerable<T> is inferred
-func<T> CreateCps(start : func (CpsEnumerator<T>^):void )
+func<T> CreateCps(start : (CpsEnumerator<T>^)=>void )
 {
 	return Enumerable<T>
 	{
@@ -387,7 +342,7 @@ func<T> CreateCps(start : func (CpsEnumerator<T>^):void )
 	};
 }
 
-func<T> yield(state : CpsEnumerator<T>^, value : T, continuation : func ():void)
+func<T> yield(state : CpsEnumerator<T>^, value : T, continuation : ()=>void)
 {
 	state.current=value;
 	state.available=true;
@@ -400,7 +355,7 @@ func<T> exit(state : CpsEnumerator<T>^)
 
 ---------------------------------------------------------
 
-func<T> Where(this : Enumerable<T>, predicate : func(T):bool)
+func<T> Where(this : Enumerable<T>, predicate : (T)=>bool)
 {
 	for(s in this)
 		if(predicate(s))
@@ -410,12 +365,12 @@ func<T> Where(this : Enumerable<T>, predicate : func(T):bool)
 
 ---------------------------------------------------------
 
-func<T> CreateCps(start : func (Promise<T>^) : void) : Task<T>
+func<T> CreateCps(start : (Promise<T>^)=>void) : Task<T>
 {
 	return CreateFuturePromiseTask<T>(start);
 }
 
-func<T> await(state : Promise<T>^, value : Task<T>, continuation : func (T):void)
+func<T> await(state : Promise<T>^, value : Task<T>, continuation : (T)=>void)
 {
 	source.ContinueWith(task=>continuation(task.Result);
 }
