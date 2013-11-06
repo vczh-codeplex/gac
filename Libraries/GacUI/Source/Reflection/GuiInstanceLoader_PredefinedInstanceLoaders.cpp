@@ -26,7 +26,7 @@ GuiRewriteInstanceLoader
 			{
 			}
 
-			description::Value CreateInstance(Ptr<GuiInstanceContext> context, Ptr<GuiConstructorRepr> ctor, Ptr<GuiResourcePathResolver> resolver, const TypeInfo& typeInfo)
+			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, Ptr<GuiConstructorRepr> ctor, const TypeInfo& typeInfo)override
 			{
 				return Value();
 			}
@@ -68,7 +68,7 @@ GuiVrtualTypeInstanceLoader
 				return typeName;
 			}
 
-			description::Value CreateInstance(Ptr<GuiInstanceContext> context, Ptr<GuiConstructorRepr> ctor, Ptr<GuiResourcePathResolver> resolver, const TypeInfo& typeInfo)
+			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, Ptr<GuiConstructorRepr> ctor, const TypeInfo& typeInfo)override
 			{
 				if(typeName==typeInfo.typeName)
 				{

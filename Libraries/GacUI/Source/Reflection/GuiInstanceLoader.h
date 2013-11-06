@@ -20,6 +20,33 @@ namespace vl
 		using namespace reflection;
 
 /***********************************************************************
+Instance Environment
+***********************************************************************/
+
+		class GuiInstanceContextScope : public Object, public Description<GuiInstanceContextScope>
+		{
+			typedef collections::Dictionary<WString, description::Value>		ValueMap;
+		public:
+			description::Value						rootInstance;
+			ValueMap								referenceValues;
+		};
+
+		class GuiInstanceEnvironment : public Object, public Description<GuiInstanceEnvironment>
+		{
+		public:
+			Ptr<GuiInstanceContext>					context;
+			Ptr<GuiResourcePathResolver>			resolver;
+			Ptr<GuiInstanceContextScope>			scope;
+
+			GuiInstanceEnvironment(Ptr<GuiInstanceContext> _context, Ptr<GuiResourcePathResolver> _resolver)
+				:context(_context)
+				,resolver(_resolver)
+			{
+				scope = new GuiInstanceContextScope;
+			}
+		};
+
+/***********************************************************************
 Instance Loader
 ***********************************************************************/
 
@@ -74,7 +101,7 @@ Instance Loader
 			};
 
 			virtual WString							GetTypeName()=0;
-			virtual description::Value				CreateInstance(Ptr<GuiInstanceContext> context, Ptr<GuiConstructorRepr> ctor, Ptr<GuiResourcePathResolver> resolver, const TypeInfo& typeInfo)=0;
+			virtual description::Value				CreateInstance(Ptr<GuiInstanceEnvironment> env, Ptr<GuiConstructorRepr> ctor, const TypeInfo& typeInfo)=0;
 			virtual PropertyType					GetPropertyType(const PropertyInfo& propertyInfo, collections::List<description::ITypeDescriptor*>& acceptableTypes)=0;
 			virtual bool							GetPropertyValue(PropertyValue& propertyValue)=0;
 			virtual bool							SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)=0;
@@ -89,7 +116,7 @@ Instance Binder
 		public:
 			virtual WString							GetBindingName()=0;
 			virtual void							GetExpectedValueTypes(collections::List<description::ITypeDescriptor*>& expectedTypes)=0;
-			virtual bool							SetPropertyValue(IGuiInstanceLoader* loader, Ptr<GuiResourcePathResolver> resolver, IGuiInstanceLoader::PropertyValue& propertyValue, vint currentIndex=-1)=0;
+			virtual bool							SetPropertyValue(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, IGuiInstanceLoader::PropertyValue& propertyValue, vint currentIndex=-1)=0;
 		};
 
 /***********************************************************************
@@ -126,18 +153,16 @@ Instance Loader Manager
 
 		extern IGuiInstanceLoaderManager*			GetInstanceLoaderManager();
 		extern InstanceLoadingSource				FindInstanceLoadingSource(
-														Ptr<GuiInstanceContext> context,
-														GuiConstructorRepr* ctor,
-														Ptr<GuiResourcePathResolver> resolver
+														Ptr<GuiInstanceEnvironment> env,
+														GuiConstructorRepr* ctor
+														);
+		extern Ptr<GuiInstanceContextScope>			LoadInstance(
+														Ptr<GuiResource> resource,
+														const WString& instancePath
 														);
 		extern description::Value					LoadInstance(
-														Ptr<GuiInstanceContext> context,
-														Ptr<GuiResourcePathResolver> resolver
-														);
-		extern description::Value					LoadInstance(
-														Ptr<GuiInstanceContext> context,
+														Ptr<GuiInstanceEnvironment> env,
 														GuiConstructorRepr* ctor,
-														Ptr<GuiResourcePathResolver> resolver,
 														description::ITypeDescriptor* expectedType,
 														WString& typeName
 														);

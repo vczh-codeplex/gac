@@ -102,17 +102,16 @@ void GuiMain()
 	// SignInWindow
 	// ChatWindow
 	// EditorWindow
-	Ptr<GuiInstanceContext> context=resource->GetValueByPath(L"XmlWindowDemos/EditorWindow/MainWindowResource").Cast<GuiInstanceContext>();
-	if(context)
+	Ptr<GuiInstanceContextScope> scope = LoadInstance(resource, L"XmlWindowDemos/EditorWindow/MainWindowResource");
+	if(scope)
 	{
-		Value windowInstance=LoadInstance(context, new GuiResourcePathResolver(resource, resource->GetWorkingDirectory()));
-		GuiWindow* window=dynamic_cast<GuiWindow*>(windowInstance.GetRawPtr());
+		GuiWindow* window=dynamic_cast<GuiWindow*>(scope->rootInstance.GetRawPtr());
 		if(window)
 		{
 			window->ForceCalculateSizeImmediately();
 			window->MoveToScreenCenter();
 			GetApplication()->Run(window);
 		}
-		windowInstance.DeleteRawPtr();
+		scope->rootInstance.DeleteRawPtr();
 	}
 }

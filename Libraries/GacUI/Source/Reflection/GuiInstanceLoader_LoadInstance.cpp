@@ -17,14 +17,12 @@ FindTypeVisitor
 			class FindTypeVisitor : public Object, public GuiInstancePattern::IVisitor
 			{
 			public:
-				Ptr<GuiInstanceContext>			context;
-				Ptr<GuiResourcePathResolver>	resolver;
+				Ptr<GuiInstanceEnvironment>		env;
 				WString							typeName;
 				InstanceLoadingSource			result;
 
-				FindTypeVisitor(Ptr<GuiInstanceContext> _context, Ptr<GuiResourcePathResolver> _resolver, const WString& _typeName)
-					:context(_context)
-					,resolver(_resolver)
+				FindTypeVisitor(Ptr<GuiInstanceEnvironment> _env, const WString& _typeName)
+					:env(_env)
 					,typeName(_typeName)
 				{
 				}
@@ -59,7 +57,7 @@ FindTypeVisitor
 
 				void Visit(GuiInstanceResourcePattern* ns)
 				{
-					Ptr<Object> resource=resolver->ResolveResource(ns->protocol, ns->path);
+					Ptr<Object> resource=env->resolver->ResolveResource(ns->protocol, ns->path);
 					Ptr<GuiInstanceContext> context=FindInstanceContext(resource);
 					if(context)
 					{
@@ -77,9 +75,9 @@ FindTypeVisitor
 					}
 				}
 
-				static InstanceLoadingSource FindType(GuiInstancePattern* pattern, Ptr<GuiInstanceContext> context, Ptr<GuiResourcePathResolver> resolver, const WString& typeName)
+				static InstanceLoadingSource FindType(GuiInstancePattern* pattern, Ptr<GuiInstanceEnvironment> env, const WString& typeName)
 				{
-					FindTypeVisitor visitor(context, resolver, typeName);
+					FindTypeVisitor visitor(env, typeName);
 					pattern->Accept(&visitor);
 					return visitor.result;
 				}
@@ -92,15 +90,13 @@ LoadValueVisitor
 			class LoadValueVisitor : public Object, public GuiValueRepr::IVisitor
 			{
 			public:
-				Ptr<GuiInstanceContext>					context;
-				Ptr<GuiResourcePathResolver>			resolver;
+				Ptr<GuiInstanceEnvironment>				env;
 				List<ITypeDescriptor*>&					acceptableTypes;
 				bool									result;
 				Value									loadedValue;
 
-				LoadValueVisitor(Ptr<GuiInstanceContext> _context, Ptr<GuiResourcePathResolver> _resolver, List<ITypeDescriptor*>& _acceptableTypes)
-					:context(_context)
-					,resolver(_resolver)
+				LoadValueVisitor(Ptr<GuiInstanceEnvironment> _env, List<ITypeDescriptor*>& _acceptableTypes)
+					:env(_env)
 					,acceptableTypes(_acceptableTypes)
 					,result(false)
 				{
@@ -153,7 +149,7 @@ LoadValueVisitor
 						else
 						{
 							WString _typeName;
-							loadedValue=LoadInstance(context, repr, resolver, typeDescriptor, _typeName);
+							loadedValue=LoadInstance(env, repr, typeDescriptor, _typeName);
 							if (!loadedValue.IsNull())
 							{
 								result = true;
@@ -163,9 +159,9 @@ LoadValueVisitor
 					}
 				}
 
-				static bool LoadValue(Ptr<GuiValueRepr> valueRepr, Ptr<GuiInstanceContext> context, Ptr<GuiResourcePathResolver> resolver, List<ITypeDescriptor*>& acceptableTypes, Value& loadedValue)
+				static bool LoadValue(Ptr<GuiValueRepr> valueRepr, Ptr<GuiInstanceEnvironment> env, List<ITypeDescriptor*>& acceptableTypes, Value& loadedValue)
 				{
-					LoadValueVisitor visitor(context, resolver, acceptableTypes);
+					LoadValueVisitor visitor(env, acceptableTypes);
 					valueRepr->Accept(&visitor);
 					if (visitor.result)
 					{
@@ -183,18 +179,17 @@ Helper Functions
 ***********************************************************************/
 
 		InstanceLoadingSource FindInstanceLoadingSource(
-			Ptr<GuiInstanceContext> context,
-			GuiConstructorRepr* ctor,
-			Ptr<GuiResourcePathResolver> resolver
+			Ptr<GuiInstanceEnvironment> env,
+			GuiConstructorRepr* ctor
 			)
 		{
-			vint index=context->namespaces.Keys().IndexOf(ctor->typeNamespace);
+			vint index=env->context->namespaces.Keys().IndexOf(ctor->typeNamespace);
 			if(index!=-1)
 			{
-				Ptr<GuiInstanceContext::NamespaceInfo> namespaceInfo=context->namespaces.Values()[index];
+				Ptr<GuiInstanceContext::NamespaceInfo> namespaceInfo=env->context->namespaces.Values()[index];
 				FOREACH(Ptr<GuiInstancePattern>, pattern, namespaceInfo->patterns)
 				{
-					InstanceLoadingSource source=FindTypeVisitor::FindType(pattern.Obj(), context, resolver, ctor->typeName);
+					InstanceLoadingSource source=FindTypeVisitor::FindType(pattern.Obj(), env, ctor->typeName);
 					if(source) return source;
 				}
 			}
@@ -218,9 +213,8 @@ Helper Functions
 
 		void FillInstance(
 			description::Value createdInstance,
-			Ptr<GuiInstanceContext> context,
+			Ptr<GuiInstanceEnvironment> env,
 			GuiAttSetterRepr* attSetter,
-			Ptr<GuiResourcePathResolver> resolver,
 			IGuiInstanceLoader* loader,
 			const WString& typeName,
 			List<FillInstanceBindingSetter>& bindingSetters
@@ -259,7 +253,7 @@ Helper Functions
 								if(propertyValue->binding==L"")
 								{
 									// default binding: set the value directly
-									if (LoadValueVisitor::LoadValue(valueRepr, context, resolver, acceptableTypes, cachedPropertyValue.propertyValue))
+									if (LoadValueVisitor::LoadValue(valueRepr, env, acceptableTypes, cachedPropertyValue.propertyValue))
 									{
 										canRemoveLoadedValue = true;
 										if(propertyLoader->SetPropertyValue(cachedPropertyValue, currentIndex))
@@ -284,7 +278,7 @@ Helper Functions
 											IGuiInstanceLoader* propertyInstanceLoader=GetInstanceLoaderManager()->GetLoader(propertyTypeDescriptor->GetTypeName());
 											if(propertyInstanceLoader)
 											{
-												FillInstance(cachedPropertyValue.propertyValue, context, propertyAttSetter.Obj(), resolver, propertyInstanceLoader, propertyTypeDescriptor->GetTypeName(), bindingSetters);
+												FillInstance(cachedPropertyValue.propertyValue, env, propertyAttSetter.Obj(), propertyInstanceLoader, propertyTypeDescriptor->GetTypeName(), bindingSetters);
 											}
 										}
 									}
@@ -294,7 +288,7 @@ Helper Functions
 									// other binding: provide the property value to the specified binder
 									binderExpectedTypes.Clear();
 									binder->GetExpectedValueTypes(binderExpectedTypes);
-									if (LoadValueVisitor::LoadValue(valueRepr, context, resolver, binderExpectedTypes, cachedPropertyValue.propertyValue))
+									if (LoadValueVisitor::LoadValue(valueRepr, env, binderExpectedTypes, cachedPropertyValue.propertyValue))
 									{
 										canRemoveLoadedValue = true;
 										FillInstanceBindingSetter bindingSetter;
@@ -328,24 +322,33 @@ Helper Functions
 			}
 		}
 
-		description::Value LoadInstance(
-			Ptr<GuiInstanceContext> context,
-			Ptr<GuiResourcePathResolver> resolver
+		Ptr<GuiInstanceContextScope> LoadInstance(
+			Ptr<GuiResource> resource,
+			const WString& instancePath
 			)
 		{
-			WString typeName;
-			return LoadInstance(context, context->instance.Obj(), resolver, 0, typeName);
+			Ptr<GuiInstanceContext> context=resource->GetValueByPath(instancePath).Cast<GuiInstanceContext>();
+			if (context)
+			{
+				Ptr<GuiInstanceEnvironment> env = new GuiInstanceEnvironment(context, new GuiResourcePathResolver(resource, resource->GetWorkingDirectory()));
+				WString typeName;
+				env->scope->rootInstance=LoadInstance(env, context->instance.Obj(), 0, typeName);
+				if (!env->scope->rootInstance.IsNull())
+				{
+					return env->scope;
+				}
+			}
+			return 0;
 		}
 
 		description::Value LoadInstance(
-			Ptr<GuiInstanceContext> context,
+			Ptr<GuiInstanceEnvironment> env,
 			GuiConstructorRepr* ctor,
-			Ptr<GuiResourcePathResolver> resolver,
 			description::ITypeDescriptor* expectedType,
 			WString& typeName
 			)
 		{
-			InstanceLoadingSource source=FindInstanceLoadingSource(context, ctor, resolver);
+			InstanceLoadingSource source=FindInstanceLoadingSource(env, ctor);
 			Value instance;
 			IGuiInstanceLoader* instanceLoader = 0;
 
@@ -360,25 +363,25 @@ Helper Functions
 				{
 					while(loader && instance.IsNull())
 					{
-						instance=loader->CreateInstance(context, ctor, resolver, IGuiInstanceLoader::TypeInfo(typeName, typeDescriptor));
+						instance=loader->CreateInstance(env, ctor, IGuiInstanceLoader::TypeInfo(typeName, typeDescriptor));
 						loader=GetInstanceLoaderManager()->GetParentLoader(loader);
 					}
 				}
 			}
 			else if(source.context)
 			{
-				instance=LoadInstance(source.context, source.context->instance.Obj(), resolver, expectedType, typeName);
+				instance=LoadInstance(new GuiInstanceEnvironment(source.context, env->resolver), source.context->instance.Obj(), expectedType, typeName);
 				instanceLoader=GetInstanceLoaderManager()->GetLoader(typeName);
 			}
 
 			if(instance.GetRawPtr() && instanceLoader)
 			{
 				List<FillInstanceBindingSetter> bindingSetters;
-				FillInstance(instance, context, ctor, resolver, instanceLoader, typeName, bindingSetters);
+				FillInstance(instance, env, ctor, instanceLoader, typeName, bindingSetters);
 
 				FOREACH(FillInstanceBindingSetter, bindingSetter, bindingSetters)
 				{
-					if (!bindingSetter.binder->SetPropertyValue(bindingSetter.loader, resolver, bindingSetter.propertyValue, bindingSetter.currentIndex))
+					if (!bindingSetter.binder->SetPropertyValue(env, bindingSetter.loader, bindingSetter.propertyValue, bindingSetter.currentIndex))
 					{
 						bindingSetter.propertyValue.propertyValue.DeleteRawPtr();
 					}
