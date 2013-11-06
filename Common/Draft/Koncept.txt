@@ -329,7 +329,7 @@ func WriteStream<string>(this : Stream, value : string);
 func<T, U> WriteStream<Pair<T, U>>(this : Stream, value : Pair<T, U>);
 func WriteStream<string>(case this : StringStream, value : string);
 
-get/set<T> operator[](this : Enumerable<T>, index : int);
+get/set<T> operator()(this : Enumerable<T>, index : (int));
 
 namespace Name {}
 
