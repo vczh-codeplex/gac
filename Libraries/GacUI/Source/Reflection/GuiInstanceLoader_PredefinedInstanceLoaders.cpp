@@ -375,6 +375,15 @@ GuiToolstripButtonInstanceLoader
 				return description::GetTypeDescriptor<GuiToolstripButton>()->GetTypeName();
 			}
 
+			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, Ptr<GuiConstructorRepr> ctor, const TypeInfo& typeInfo)override
+			{
+				if (typeInfo.typeName == GetTypeName())
+				{
+					return Value::From(g::NewToolBarButton());
+				}
+				return Value();
+			}
+
 			IGuiInstanceLoader::PropertyType GetPropertyType(const PropertyInfo& propertyInfo, collections::List<description::ITypeDescriptor*>& acceptableTypes)override
 			{
 				if (propertyInfo.propertyName == L"SubMenu")
@@ -384,8 +393,6 @@ GuiToolstripButtonInstanceLoader
 				}
 				return IGuiInstanceLoader::HandleByParentLoader;
 			}
-
-			
 
 			bool GetPropertyValue(PropertyValue& propertyValue)override
 			{
@@ -398,6 +405,7 @@ GuiToolstripButtonInstanceLoader
 							container->CreateToolstripSubMenu();
 						}
 						propertyValue.propertyValue = Value::From(container->GetToolstripSubMenu());
+						return true;
 					}
 				}
 				return false;
@@ -581,7 +589,6 @@ GuiPredefinedInstanceLoadersPlugin
 				ADD_VIRTUAL_TYPE(MenuSplitter,				GuiControl,				g::NewMenuSplitter);
 				ADD_VIRTUAL_TYPE(MenuBarButton,				GuiToolstripButton,		g::NewMenuBarButton);
 				ADD_VIRTUAL_TYPE(MenuItemButton,			GuiToolstripButton,		g::NewMenuItemButton);
-				ADD_VIRTUAL_TYPE(ToolstripButton,			GuiToolstripButton,		g::NewToolBarButton);
 				ADD_VIRTUAL_TYPE(ToolstripDropdownButton,	GuiToolstripButton,		g::NewToolBarDropdownButton);
 				ADD_VIRTUAL_TYPE(ToolstripSplitButton,		GuiToolstripButton,		g::NewToolBarSplitButton);
 				ADD_VIRTUAL_TYPE(ToolstripSplitter,			GuiControl,				g::NewToolBarSplitter);
