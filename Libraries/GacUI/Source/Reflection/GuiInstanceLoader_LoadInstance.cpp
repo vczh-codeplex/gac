@@ -153,8 +153,7 @@ LoadValueVisitor
 						else
 						{
 							WString _typeName;
-							ITypeDescriptor* _typeDescriptor=0;
-							loadedValue=LoadInstance(context, repr, resolver, _typeName, _typeDescriptor);
+							loadedValue=LoadInstance(context, repr, resolver, typeDescriptor, _typeName);
 							if (!loadedValue.IsNull())
 							{
 								result = true;
@@ -208,8 +207,7 @@ Helper Functions
 			GuiAttSetterRepr* attSetter,
 			Ptr<GuiResourcePathResolver> resolver,
 			IGuiInstanceLoader* loader,
-			const WString& typeName,
-			description::ITypeDescriptor* typeDescriptor
+			const WString& typeName
 			)
 		{
 			// reverse loop to set the default property (name == L"") after all other properties
@@ -218,7 +216,11 @@ Helper Functions
 				WString propertyName=attSetter->setters.Keys()[i];
 				auto propertyValue=attSetter->setters.Values()[i];
 				IGuiInstanceLoader* propertyLoader=loader;
-				IGuiInstanceLoader::PropertyValue cachedPropertyValue(IGuiInstanceLoader::TypeInfo(typeName, typeDescriptor), propertyName, createdInstance);
+				IGuiInstanceLoader::PropertyValue cachedPropertyValue(
+					IGuiInstanceLoader::TypeInfo(typeName, createdInstance.GetTypeDescriptor()),
+					propertyName,
+					createdInstance
+					);
 
 				List<Ptr<GuiValueRepr>> values;
 				CopyFrom(values, propertyValue->values);
@@ -228,13 +230,7 @@ Helper Functions
 				while(propertyLoader && loadedValueCount<values.Count())
 				{
 					List<ITypeDescriptor*> acceptableTypes, binderExpectedTypes;
-					auto propertyType=propertyLoader->GetPropertyType(
-						IGuiInstanceLoader::PropertyInfo(
-							IGuiInstanceLoader::TypeInfo(typeName, typeDescriptor),
-							propertyName
-							),
-						acceptableTypes
-						);
+					auto propertyType = propertyLoader->GetPropertyType(cachedPropertyValue, acceptableTypes);
 
 					if (propertyType & IGuiInstanceLoader::SupportedProperty)
 					{
@@ -272,7 +268,7 @@ Helper Functions
 											IGuiInstanceLoader* propertyInstanceLoader=GetInstanceLoaderManager()->GetLoader(propertyTypeDescriptor->GetTypeName());
 											if(propertyInstanceLoader)
 											{
-												FillInstance(cachedPropertyValue.propertyValue, context, propertyAttSetter.Obj(), resolver, propertyInstanceLoader, propertyTypeDescriptor->GetTypeName(), propertyTypeDescriptor);
+												FillInstance(cachedPropertyValue.propertyValue, context, propertyAttSetter.Obj(), resolver, propertyInstanceLoader, propertyTypeDescriptor->GetTypeName());
 											}
 										}
 									}
@@ -323,16 +319,15 @@ Helper Functions
 			)
 		{
 			WString typeName;
-			ITypeDescriptor* typeDescriptor=0;
-			return LoadInstance(context, context->instance.Obj(), resolver, typeName, typeDescriptor);
+			return LoadInstance(context, context->instance.Obj(), resolver, 0, typeName);
 		}
 
 		description::Value LoadInstance(
 			Ptr<GuiInstanceContext> context,
 			GuiConstructorRepr* ctor,
 			Ptr<GuiResourcePathResolver> resolver,
-			WString& typeName,
-			description::ITypeDescriptor*& typeDescriptor
+			description::ITypeDescriptor* expectedType,
+			WString& typeName
 			)
 		{
 			InstanceLoadingSource source=FindInstanceLoadingSource(context, ctor, resolver);
@@ -341,7 +336,7 @@ Helper Functions
 			{
 				IGuiInstanceLoader* loader=source.loader;
 				typeName=source.typeName;
-				typeDescriptor=GetInstanceLoaderManager()->GetTypeDescriptorForType(source.typeName);
+				ITypeDescriptor* typeDescriptor=GetInstanceLoaderManager()->GetTypeDescriptorForType(source.typeName);
 
 				while(loader && instance.IsNull())
 				{
@@ -351,17 +346,17 @@ Helper Functions
 
 				if(instance.GetRawPtr())
 				{
-					FillInstance(instance, context, ctor, resolver, source.loader, typeName, typeDescriptor);
+					FillInstance(instance, context, ctor, resolver, source.loader, typeName);
 				}
 			}
 			else if(source.context)
 			{
-				instance=LoadInstance(source.context, source.context->instance.Obj(), resolver, typeName, typeDescriptor);
+				instance=LoadInstance(source.context, source.context->instance.Obj(), resolver, expectedType, typeName);
 				IGuiInstanceLoader* loader=GetInstanceLoaderManager()->GetLoader(typeName);
 
 				if(instance.GetRawPtr() && loader)
 				{
-					FillInstance(instance, context, ctor, resolver, loader, typeName, typeDescriptor);
+					FillInstance(instance, context, ctor, resolver, loader, typeName);
 				}
 			}
 
