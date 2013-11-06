@@ -9,27 +9,35 @@ namespace vl
 		using namespace reflection::description;
 
 /***********************************************************************
-GuiResourceInstanceBinder
+GuiTextInstanceBinderBase
 ***********************************************************************/
 
-		class GuiResourceInstanceBinder : public Object, public IGuiInstanceBinder
+		class GuiTextInstanceBinderBase : public Object, public IGuiInstanceBinder
 		{
 		protected:
 			ITypeDescriptor*				stringTypeDescriptor;
 		public:
-			GuiResourceInstanceBinder()
+			GuiTextInstanceBinderBase()
 				:stringTypeDescriptor(description::GetTypeDescriptor<WString>())
 			{
-			}
-
-			WString GetBindingName()override
-			{
-				return L"uri";
 			}
 
 			void GetExpectedValueTypes(collections::List<description::ITypeDescriptor*>& expectedTypes)override
 			{
 				expectedTypes.Add(stringTypeDescriptor);
+			}
+		};
+
+/***********************************************************************
+GuiResourceInstanceBinder
+***********************************************************************/
+
+		class GuiResourceInstanceBinder : public GuiTextInstanceBinderBase
+		{
+		public:
+			WString GetBindingName()override
+			{
+				return L"uri";
 			}
 
 			bool SetPropertyValue(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, IGuiInstanceLoader::PropertyValue& propertyValue, vint currentIndex)override
@@ -65,6 +73,38 @@ GuiResourceInstanceBinder
 		};
 
 /***********************************************************************
+GuiReferenceInstanceBinder
+***********************************************************************/
+
+		class GuiReferenceInstanceBinder : public GuiTextInstanceBinderBase
+		{
+		public:
+			WString GetBindingName()override
+			{
+				return L"ref";
+			}
+
+			bool SetPropertyValue(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, IGuiInstanceLoader::PropertyValue& propertyValue, vint currentIndex)override
+			{
+				if (propertyValue.propertyValue.GetValueType() == Value::Text)
+				{
+					WString name = propertyValue.propertyValue.GetText();
+					vint index = env->scope->referenceValues.Keys().IndexOf(name);
+					if (index != -1)
+					{
+						IGuiInstanceLoader::PropertyValue newValue = propertyValue;
+						newValue.propertyValue = env->scope->referenceValues.Values()[index];
+						if (!newValue.propertyValue.IsNull())
+						{
+							return loader->SetPropertyValue(newValue, currentIndex);
+						}
+					}
+				}
+				return false;
+			}
+		};
+
+/***********************************************************************
 GuiPredefinedInstanceBindersPlugin
 ***********************************************************************/
 
@@ -80,6 +120,7 @@ GuiPredefinedInstanceBindersPlugin
 				IGuiInstanceLoaderManager* manager=GetInstanceLoaderManager();
 
 				manager->AddInstanceBinder(new GuiResourceInstanceBinder);
+				manager->AddInstanceBinder(new GuiReferenceInstanceBinder);
 			}
 
 			void Unload()override
