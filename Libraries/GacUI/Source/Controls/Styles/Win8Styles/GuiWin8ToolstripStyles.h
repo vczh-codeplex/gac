@@ -24,15 +24,15 @@ Toolstrip Button
 ***********************************************************************/
 
 			/// <summary>Toolstrip toolbar style (Windows 8). Using the Windows 8 window background color to fill the whold control</summary>
-			class Win8ToolstripToolbarStyle : public Object, public virtual controls::GuiControl::IStyleController, public Description<Win8ToolstripToolbarStyle>
+			class Win8ToolstripToolBarStyle : public Object, public virtual controls::GuiControl::IStyleController, public Description<Win8ToolstripToolBarStyle>
 			{
 			protected:
 				compositions::GuiBoundsComposition*			boundsComposition;
 				compositions::GuiBoundsComposition*			containerComposition;
 			public:
 				/// <summary>Create the style.</summary>
-				Win8ToolstripToolbarStyle();
-				~Win8ToolstripToolbarStyle();
+				Win8ToolstripToolBarStyle();
+				~Win8ToolstripToolBarStyle();
 
 				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
 				compositions::GuiGraphicsComposition*		GetContainerComposition()override;

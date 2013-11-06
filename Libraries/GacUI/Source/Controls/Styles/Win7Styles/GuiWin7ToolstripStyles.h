@@ -24,12 +24,12 @@ Toolstrip Button
 ***********************************************************************/
 
 			/// <summary>Toolstrip toolbar style (Windows 7). Using the Windows 7 window background color to fill the whold control</summary>
-			class Win7ToolstripToolbarStyle : public Win7EmptyStyle, public Description<Win7ToolstripToolbarStyle>
+			class Win7ToolstripToolBarStyle : public Win7EmptyStyle, public Description<Win7ToolstripToolBarStyle>
 			{
 			public:
 				/// <summary>Create the style.</summary>
-				Win7ToolstripToolbarStyle();
-				~Win7ToolstripToolbarStyle();
+				Win7ToolstripToolBarStyle();
+				~Win7ToolstripToolBarStyle();
 			};
 
 			/// <summary>Toolstrip split button dropdown style (Windows 7).</summary>

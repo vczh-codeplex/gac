@@ -139,7 +139,7 @@ Type List
 			F(presentation::controls::GuiToolstripCommand)\
 			F(presentation::controls::GuiToolstripMenu)\
 			F(presentation::controls::GuiToolstripMenuBar)\
-			F(presentation::controls::GuiToolstripToolbar)\
+			F(presentation::controls::GuiToolstripToolBar)\
 			F(presentation::controls::GuiToolstripButton)\
 			F(presentation::controls::GuiDocumentCommonInterface)\
 			F(presentation::controls::GuiDocumentCommonInterface::EditMode)\
