@@ -32,14 +32,14 @@ GuiResourceInstanceBinder
 				expectedTypes.Add(stringTypeDescriptor);
 			}
 
-			bool SetPropertyValue(IGuiInstanceLoader* loader, Ptr<GuiResourcePathResolver> resolver, IGuiInstanceLoader::PropertyValue& propertyValue, vint currentIndex)override
+			bool SetPropertyValue(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, IGuiInstanceLoader::PropertyValue& propertyValue, vint currentIndex)override
 			{
 				if (propertyValue.propertyValue.GetValueType() == Value::Text)
 				{
 					WString protocol, path;
 					if (IsResourceUrl(propertyValue.propertyValue.GetText(), protocol, path))
 					{
-						if(Ptr<Object> resource=resolver->ResolveResource(protocol, path))
+						if(Ptr<Object> resource=env->resolver->ResolveResource(protocol, path))
 						{
 							Value value;
 							if(Ptr<GuiTextData> text=resource.Cast<GuiTextData>())

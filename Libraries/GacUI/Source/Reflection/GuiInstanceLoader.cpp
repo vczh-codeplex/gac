@@ -115,7 +115,7 @@ Default Instance Loader
 				return L"";
 			}
 
-			description::Value CreateInstance(Ptr<GuiInstanceContext> context, Ptr<GuiConstructorRepr> ctor, Ptr<GuiResourcePathResolver> resolver, const TypeInfo& typeInfo)override
+			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, Ptr<GuiConstructorRepr> ctor, const TypeInfo& typeInfo)override
 			{
 				vint count = typeInfo.typeDescriptor->GetConstructorGroup()->GetMethodCount();
 				for(vint i=0;i<count;i++)
