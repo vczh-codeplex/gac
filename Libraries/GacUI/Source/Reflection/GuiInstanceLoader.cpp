@@ -129,50 +129,8 @@ Default Instance Loader
 				return Value();
 			}
 
-			IGuiInstanceLoader::PropertyType GetPropertyType(ITypeInfo* propType, ITypeDescriptor*& elementType, bool &nullable)
+			ITypeInfo* GetPropertyType(const PropertyInfo& propertyInfo)
 			{
-				switch(propType->GetDecorator())
-				{
-				case ITypeInfo::RawPtr:
-				case ITypeInfo::SharedPtr:
-					return GetPropertyType(propType->GetElementType(), elementType, nullable);
-				case ITypeInfo::Nullable:
-					nullable=true;
-					return GetPropertyType(propType->GetElementType(), elementType, nullable);
-				case ITypeInfo::TypeDescriptor:
-					elementType=propType->GetTypeDescriptor();
-					return IGuiInstanceLoader::ValueProperty;
-				case ITypeInfo::Generic:
-					{
-						ITypeDescriptor* genericType=propType->GetTypeDescriptor();
-						IGuiInstanceLoader::PropertyType type=IGuiInstanceLoader::UnsupportedProperty;
-
-						if(genericType==description::GetTypeDescriptor<IValueList>())
-						{
-							type=IGuiInstanceLoader::CollectionProperty;
-						}
-						else if(genericType==description::GetTypeDescriptor<IValueFunctionProxy>())
-						{
-							type=IGuiInstanceLoader::ValueProperty;
-						}
-
-						if(type!=IGuiInstanceLoader::UnsupportedProperty)
-						{
-							if(GetPropertyType(propType->GetElementType(), elementType, nullable))
-							{
-								return type;
-							}
-						}
-					}
-				default:
-					return IGuiInstanceLoader::UnsupportedProperty;
-				}
-			}
-
-			IGuiInstanceLoader::PropertyType GetPropertyType(const PropertyInfo& propertyInfo, description::ITypeDescriptor*& elementType, bool &nullable)override
-			{
-				elementType=0;
-				nullable=false;
 				IPropertyInfo* prop = propertyInfo.typeInfo.typeDescriptor->GetPropertyByName(propertyInfo.propertyName, true);
 				if(prop)
 				{
@@ -184,11 +142,51 @@ Default Instance Loader
 							propType=method->GetParameter(0)->GetType();
 						}
 					}
+					return propType;
+				}
+				return 0;
+			}
 
-					if(propType)
+			IGuiInstanceLoader::PropertyType GetPropertyType(ITypeInfo* propType, collections::List<description::ITypeDescriptor*>& acceptableTypes)
+			{
+				switch(propType->GetDecorator())
+				{
+				case ITypeInfo::RawPtr:
+				case ITypeInfo::SharedPtr:
+					return GetPropertyType(propType->GetElementType(), acceptableTypes);
+				case ITypeInfo::Nullable:
+					acceptableTypes.Add(0);
+					return GetPropertyType(propType->GetElementType(), acceptableTypes);
+				case ITypeInfo::TypeDescriptor:
+					acceptableTypes.Add(propType->GetTypeDescriptor());
+					return IGuiInstanceLoader::SupportedProperty;
+				case ITypeInfo::Generic:
 					{
-						return GetPropertyType(propType, elementType, nullable);
+						ITypeDescriptor* genericType=propType->GetElementType()->GetTypeDescriptor();
+
+						if(genericType==description::GetTypeDescriptor<IValueList>())
+						{
+							return GetPropertyType(propType->GetGenericArgument(0), acceptableTypes);
+						}
+						else if(genericType==description::GetTypeDescriptor<IValueFunctionProxy>())
+						{
+							return IGuiInstanceLoader::SupportedProperty;
+						}
+						else
+						{
+							return IGuiInstanceLoader::UnsupportedProperty;
+						}
 					}
+				default:
+					return IGuiInstanceLoader::UnsupportedProperty;
+				}
+			}
+
+			IGuiInstanceLoader::PropertyType GetPropertyType(const PropertyInfo& propertyInfo, collections::List<description::ITypeDescriptor*>& acceptableTypes)override
+			{
+				if (ITypeInfo* propType = GetPropertyType(propertyInfo))
+				{
+					return GetPropertyType(propType, acceptableTypes);
 				}
 				return IGuiInstanceLoader::UnsupportedProperty;
 			}
@@ -206,15 +204,30 @@ Default Instance Loader
 				return false;
 			}
 
-			bool SetPropertyValue(PropertyValue& propertyValue)override
+			bool SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)override
 			{
+				if (ITypeInfo* propType = GetPropertyType(propertyValue))
+				{
+					if (propType->GetDecorator() == ITypeInfo::Generic)
+					{
+						ITypeDescriptor* genericType=propType->GetElementType()->GetTypeDescriptor();
+						if (genericType == description::GetTypeDescriptor<IValueList>())
+						{
+							Value value = propertyValue.instanceValue.GetProperty(propertyValue.propertyName);
+							if (auto list = dynamic_cast<IValueList*>(value.GetRawPtr()))
+							{
+								list->Add(propertyValue.propertyValue);
+								return true;
+							}
+							else
+							{
+								return false;
+							}
+						}
+					}
+				}
 				propertyValue.instanceValue.SetProperty(propertyValue.propertyName, propertyValue.propertyValue);
 				return true;
-			}
-
-			bool SetPropertyCollection(PropertyValue& propertyValue, vint currentIndex)override
-			{
-				return false;
 			}
 		};
 
