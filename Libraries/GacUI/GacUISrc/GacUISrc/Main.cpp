@@ -97,11 +97,11 @@ void GuiMain()
 #endif
 	UnitTestInGuiMain();
 	
-	Ptr<GuiResource> resource=GuiResource::LoadFromXml(L"..\\GacUISrcCodepackedTest\\Resources\\XmlWindowResource.xml");
 	// RichTextWindow
 	// SignInWindow
 	// ChatWindow
 	// EditorWindow
+	Ptr<GuiResource> resource=GuiResource::LoadFromXml(L"..\\GacUISrcCodepackedTest\\Resources\\XmlWindowResource.xml");
 	Ptr<GuiInstanceContextScope> scope = LoadInstance(resource, L"XmlWindowDemos/EditorWindow/MainWindowResource");
 	if(scope)
 	{
