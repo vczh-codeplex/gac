@@ -273,7 +273,7 @@ X : Type
 X^				// extract and convert to T^
 X?				// extract and convert to T?
 {X, Y, Z}
-{X, Y, Z: W}
+{X, Y, Z} ++ W
 {x:X, y:Y}
 
 ========================================================
