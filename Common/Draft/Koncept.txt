@@ -65,23 +65,6 @@ typeof(Expr)
 Interfaces
 ========================================================
 
-interface<T> Enumerator
-{
-	get Current : T;
-	func MoveNext() : bool;
-}
-
-interface<T> Enumerable
-{
-	func CreateEnumerator() : Enumerator<T>;
-}
-
-interface<T> EvaluatedEnumerable
-{
-	get Length : int;
-	func SliceEnumerable(start : int, length : int) : EvaluatedEnumerable<T>;
-}
-
 interface<T> Disposable
 {
 	func Dispose();
@@ -138,7 +121,24 @@ Delegate<(int, int), int>
 Container Interfaces
 ========================================================
 
-func<T>				ArrayOf(length : int) : Array<T>;
+interface<T> Enumerator
+{
+	get Current : T;
+	func MoveNext() : bool;
+}
+
+interface<T> Enumerable
+{
+	func CreateEnumerator() : Enumerator<T>;
+}
+
+interface<T> Sequence : Enumerable<T>
+{
+	get Length : T;
+	func SliceFrom(start : int) : Sequence<T>
+}
+
+func<T>				Array(length : int) : Array<T>;
 func<T>				ArrayOf(values : Enumerable<T>) : Array<T>;
 func<T>				ListOf(values : Enumerable<T>) : Array<T>;
 func<T>				SortedListOf(values : Enumerable<T>) : Array<T>;
@@ -147,7 +147,7 @@ func<T>				HashSetOf(values : Enumerable<T>) : Array<T>;
 func<TKey, TValue>	SortedMapOf(values : Enumerable<(TKey, TValue)>) : Map<TKey, TValue>;
 func<TKey, TValue>	HashMapOf(values : Enumerable<(TKey, TValue)>) : Map<TKey, TValue>;
 
-ArrayOf(10) : int[]
+Array(10) : int[]
 ArrayOf({1, 2, 3, 4, 5})
 HashMapOf({{1,1}, {2,4}, {3,9}, {4,16}, {5,25}})
 // {1, 2, 3} creates an EvaluatedEnumerable<int>
