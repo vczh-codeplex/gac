@@ -393,14 +393,11 @@ GuiToolstripButtonInstanceLoader
 				{
 					if (propertyValue.propertyName == L"SubMenu")
 					{
-						if (auto control = dynamic_cast<GuiControl*>(propertyValue.propertyValue.GetRawPtr()))
+						if (!container->GetToolstripSubMenu())
 						{
-							if (!container->GetToolstripSubMenu())
-							{
-								container->CreateToolstripSubMenu();
-							}
-							propertyValue.propertyValue = Value::From(container->GetToolstripSubMenu());
+							container->CreateToolstripSubMenu();
 						}
+						propertyValue.propertyValue = Value::From(container->GetToolstripSubMenu());
 					}
 				}
 				return false;
