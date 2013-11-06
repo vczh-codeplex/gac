@@ -338,10 +338,13 @@ Helper Functions
 				typeName=source.typeName;
 				ITypeDescriptor* typeDescriptor=GetInstanceLoaderManager()->GetTypeDescriptorForType(source.typeName);
 
-				while(loader && instance.IsNull())
+				if (!expectedType || typeDescriptor->CanConvertTo(expectedType))
 				{
-					instance=loader->CreateInstance(context, ctor, resolver, IGuiInstanceLoader::TypeInfo(typeName, typeDescriptor));
-					loader=GetInstanceLoaderManager()->GetParentLoader(loader);
+					while(loader && instance.IsNull())
+					{
+						instance=loader->CreateInstance(context, ctor, resolver, IGuiInstanceLoader::TypeInfo(typeName, typeDescriptor));
+						loader=GetInstanceLoaderManager()->GetParentLoader(loader);
+					}
 				}
 
 				if(instance.GetRawPtr())
