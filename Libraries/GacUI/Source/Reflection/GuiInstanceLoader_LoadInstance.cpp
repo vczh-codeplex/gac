@@ -285,7 +285,7 @@ Helper Functions
 									if (LoadValueVisitor::LoadValue(valueRepr, context, resolver, binderExpectedTypes, cachedPropertyValue.propertyValue))
 									{
 										canRemoveLoadedValue = true;
-										if(propertyLoader->SetPropertyValue(cachedPropertyValue, currentIndex))
+										if (binder->SetPropertyValue(propertyLoader, resolver, cachedPropertyValue, currentIndex))
 										{
 											currentIndex++;
 										}
