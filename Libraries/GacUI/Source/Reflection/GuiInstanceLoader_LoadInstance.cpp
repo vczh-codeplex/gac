@@ -201,13 +201,29 @@ Helper Functions
 			return InstanceLoadingSource();
 		}
 
+		struct FillInstanceBindingSetter
+		{
+			IGuiInstanceBinder*					binder;
+			IGuiInstanceLoader*					loader;
+			IGuiInstanceLoader::PropertyValue	propertyValue;
+			vint								currentIndex;
+
+			FillInstanceBindingSetter()
+				:binder(0)
+				,loader(0)
+				,currentIndex(-1)
+			{
+			}
+		};
+
 		void FillInstance(
 			description::Value createdInstance,
 			Ptr<GuiInstanceContext> context,
 			GuiAttSetterRepr* attSetter,
 			Ptr<GuiResourcePathResolver> resolver,
 			IGuiInstanceLoader* loader,
-			const WString& typeName
+			const WString& typeName,
+			List<FillInstanceBindingSetter>& bindingSetters
 			)
 		{
 			// reverse loop to set the default property (name == L"") after all other properties
@@ -268,7 +284,7 @@ Helper Functions
 											IGuiInstanceLoader* propertyInstanceLoader=GetInstanceLoaderManager()->GetLoader(propertyTypeDescriptor->GetTypeName());
 											if(propertyInstanceLoader)
 											{
-												FillInstance(cachedPropertyValue.propertyValue, context, propertyAttSetter.Obj(), resolver, propertyInstanceLoader, propertyTypeDescriptor->GetTypeName());
+												FillInstance(cachedPropertyValue.propertyValue, context, propertyAttSetter.Obj(), resolver, propertyInstanceLoader, propertyTypeDescriptor->GetTypeName(), bindingSetters);
 											}
 										}
 									}
@@ -281,14 +297,13 @@ Helper Functions
 									if (LoadValueVisitor::LoadValue(valueRepr, context, resolver, binderExpectedTypes, cachedPropertyValue.propertyValue))
 									{
 										canRemoveLoadedValue = true;
-										if (binder->SetPropertyValue(propertyLoader, resolver, cachedPropertyValue, currentIndex))
-										{
-											currentIndex++;
-										}
-										else
-										{
-											cachedPropertyValue.propertyValue.DeleteRawPtr();
-										}
+										FillInstanceBindingSetter bindingSetter;
+										bindingSetter.binder = binder;
+										bindingSetter.loader = propertyLoader;
+										bindingSetter.propertyValue = cachedPropertyValue;
+										bindingSetter.currentIndex = currentIndex;
+										bindingSetters.Add(bindingSetter);
+										currentIndex++;
 									}
 								}
 
@@ -332,9 +347,12 @@ Helper Functions
 		{
 			InstanceLoadingSource source=FindInstanceLoadingSource(context, ctor, resolver);
 			Value instance;
+			IGuiInstanceLoader* instanceLoader = 0;
+
 			if(source.loader)
 			{
 				IGuiInstanceLoader* loader=source.loader;
+				instanceLoader = source.loader;
 				typeName=source.typeName;
 				ITypeDescriptor* typeDescriptor=GetInstanceLoaderManager()->GetTypeDescriptorForType(source.typeName);
 
@@ -346,20 +364,24 @@ Helper Functions
 						loader=GetInstanceLoaderManager()->GetParentLoader(loader);
 					}
 				}
-
-				if(instance.GetRawPtr())
-				{
-					FillInstance(instance, context, ctor, resolver, source.loader, typeName);
-				}
 			}
 			else if(source.context)
 			{
 				instance=LoadInstance(source.context, source.context->instance.Obj(), resolver, expectedType, typeName);
-				IGuiInstanceLoader* loader=GetInstanceLoaderManager()->GetLoader(typeName);
+				instanceLoader=GetInstanceLoaderManager()->GetLoader(typeName);
+			}
 
-				if(instance.GetRawPtr() && loader)
+			if(instance.GetRawPtr() && instanceLoader)
+			{
+				List<FillInstanceBindingSetter> bindingSetters;
+				FillInstance(instance, context, ctor, resolver, instanceLoader, typeName, bindingSetters);
+
+				FOREACH(FillInstanceBindingSetter, bindingSetter, bindingSetters)
 				{
-					FillInstance(instance, context, ctor, resolver, loader, typeName);
+					if (!bindingSetter.binder->SetPropertyValue(bindingSetter.loader, resolver, bindingSetter.propertyValue, bindingSetter.currentIndex))
+					{
+						bindingSetter.propertyValue.propertyValue.DeleteRawPtr();
+					}
 				}
 			}
 
