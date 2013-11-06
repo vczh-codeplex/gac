@@ -100,7 +100,7 @@ instance<T> DefaultValue<Enumerable<T>>
 interface<TArguments, TReturn> Delegate
 	where TupleType<TArgs>
 {
-	func Invoke(arguments : TArguments) : TReturn;
+	get operator()(arguments : TArguments) : TReturn;
 }
 
 x=>x+1
@@ -111,7 +111,7 @@ func (x : int, y : int) : int { return x + y; }
 // equivalent to the lambda expression above
 Delegate<(int, int), int>
 {
-	func Invoke({x, y} : (int, int)) : int
+	get operator()({x, y} : (int, int)) : int
 	{
 		return x + y;
 	}
@@ -138,19 +138,50 @@ interface<T> Sequence : Enumerable<T>
 	func SliceFrom(start : int) : Sequence<T>
 }
 
+interface<T, U> ReadableMapping : Delegate<(T), U>
+{
+	get Keys : Enumerable<T>;
+	get Values : Enumerable<U>;
+	get Pairs : Enumerable<(T, U)>;
+}
+
+interface<T> Array : ReadableMapping<int, T>, Sequence<T>
+{
+	set operator()(index : (int)) : T
+	func Slice(start : int, length : int) : Array<T>;
+}
+
+interface<T> List : Array<T>
+{
+	func Contains(value : T) : bool;
+	func IndexOf(value : T) : int;
+	func Add(value : T) : int;
+	func Insert(index : int, value : T) : bool;
+	func Remove(value : T) : bool;
+	func RemoveAt(index : int) : bool;
+}
+
+interface<T, U> Map : ReadableMapping<T, U>
+{
+	set operator()(index : (T)) : U
+	func ContainsKey(value : T) : bool;
+	func Add(key : T, value : U) : int;
+	func Remove(key : T) : bool;
+}
+
 func<T>				Array(length : int) : Array<T>;
 func<T>				ArrayOf(values : Enumerable<T>) : Array<T>;
-func<T>				ListOf(values : Enumerable<T>) : Array<T>;
-func<T>				SortedListOf(values : Enumerable<T>) : Array<T>;
-func<T>				SortedSetOf(values : Enumerable<T>) : Array<T>;
-func<T>				HashSetOf(values : Enumerable<T>) : Array<T>;
+func<T>				ListOf(values : Enumerable<T>) : List<T>;
+func<T>				SortedListOf(values : Enumerable<T>) : List<T>;
+func<T>				SortedSetOf(values : Enumerable<T>) : List<T>;
+func<T>				HashSetOf(values : Enumerable<T>) : List<T>;
 func<TKey, TValue>	SortedMapOf(values : Enumerable<(TKey, TValue)>) : Map<TKey, TValue>;
 func<TKey, TValue>	HashMapOf(values : Enumerable<(TKey, TValue)>) : Map<TKey, TValue>;
 
-Array(10) : int[]
+Array(10) : int()
 ArrayOf({1, 2, 3, 4, 5})
 HashMapOf({{1,1}, {2,4}, {3,9}, {4,16}, {5,25}})
-// {1, 2, 3} creates an EvaluatedEnumerable<int>
+// {1, 2, 3} creates an Sequence<int> or (int, int, int)
 
 ========================================================
 Concepts
@@ -245,7 +276,7 @@ Expressions
 ========================================================
 
 Operator:
-	++ -- []
+	++ -- ()
 	+ - not
 	* / %
 	+ -
