@@ -151,13 +151,17 @@ interface<T> Array : ReadableMapping<int, T>, Sequence<T>
 	func Slice(start : int, length : int) : Array<T>;
 }
 
-interface<T> List : Array<T>
+interface<T> Set : Sequence<T>
 {
 	func Contains(value : T) : bool;
-	func IndexOf(value : T) : int;
-	func Add(value : T) : int;
-	func Insert(index : int, value : T) : bool;
+	func Add(value : T) : bool;
 	func Remove(value : T) : bool;
+}
+
+interface<T> List : Array<T>, Collection<T>
+{
+	func IndexOf(value : T) : int;
+	func Insert(index : int, value : T) : bool;
 	func RemoveAt(index : int) : bool;
 }
 
@@ -173,15 +177,16 @@ func<T>				Array(length : int) : Array<T>;
 func<T>				ArrayOf(values : Enumerable<T>) : Array<T>;
 func<T>				ListOf(values : Enumerable<T>) : List<T>;
 func<T>				SortedListOf(values : Enumerable<T>) : List<T>;
-func<T>				SortedSetOf(values : Enumerable<T>) : List<T>;
-func<T>				HashSetOf(values : Enumerable<T>) : List<T>;
+func<T>				SortedSetOf(values : Enumerable<T>) : Set<T>;
+func<T>				HashSetOf(values : Enumerable<T>) : Set<T>;
 func<TKey, TValue>	SortedMapOf(values : Enumerable<(TKey, TValue)>) : Map<TKey, TValue>;
 func<TKey, TValue>	HashMapOf(values : Enumerable<(TKey, TValue)>) : Map<TKey, TValue>;
 
 Array(10) : int()
 ArrayOf({1, 2, 3, 4, 5})
 HashMapOf({{1,1}, {2,4}, {3,9}, {4,16}, {5,25}})
-// {1, 2, 3} creates an Sequence<int> or (int, int, int)
+// {1, 2, 3} creates (int, int, int)
+// (int, int, int) implicitly converts to Sequence<int>
 
 ========================================================
 Concepts
