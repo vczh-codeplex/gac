@@ -101,7 +101,8 @@ void GuiMain()
 	// RichTextWindow
 	// SignInWindow
 	// ChatWindow
-	Ptr<GuiInstanceContext> context=resource->GetValueByPath(L"XmlWindowDemos/ChatWindow/MainWindowResource").Cast<GuiInstanceContext>();
+	// EditorWindow
+	Ptr<GuiInstanceContext> context=resource->GetValueByPath(L"XmlWindowDemos/EditorWindow/MainWindowResource").Cast<GuiInstanceContext>();
 	if(context)
 	{
 		Value windowInstance=LoadInstance(context, new GuiResourcePathResolver(resource, resource->GetWorkingDirectory()));
