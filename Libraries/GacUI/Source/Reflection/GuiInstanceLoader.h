@@ -138,8 +138,8 @@ Instance Loader Manager
 														Ptr<GuiInstanceContext> context,
 														GuiConstructorRepr* ctor,
 														Ptr<GuiResourcePathResolver> resolver,
-														WString& typeName,
-														description::ITypeDescriptor*& typeDescriptor
+														description::ITypeDescriptor* expectedType,
+														WString& typeName
 														);
 	}
 }
