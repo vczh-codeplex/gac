@@ -27,6 +27,7 @@ Instance Environment
 		{
 			typedef collections::Dictionary<WString, description::Value>		ValueMap;
 		public:
+			WString									typeName;
 			description::Value						rootInstance;
 			ValueMap								referenceValues;
 		};
