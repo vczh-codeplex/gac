@@ -867,6 +867,11 @@ GuiPopup
 			void GuiPopup::PopupClosed(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				GetApplication()->RegisterPopupClosed(this);
+				INativeWindow* window=GetNativeWindow();
+				if(window)
+				{
+					window->SetParent(0);
+				}
 			}
 
 			GuiPopup::GuiPopup(IStyleController* _styleController)
