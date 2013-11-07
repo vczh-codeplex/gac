@@ -386,8 +386,11 @@ Helper Functions
 			}
 			else if(source.context)
 			{
-				instance = LoadInstance(source.context, env->resolver, expectedType)->rootInstance;
-				instanceLoader=GetInstanceLoaderManager()->GetLoader(typeName);
+				if (Ptr<GuiInstanceContextScope> scope = LoadInstance(source.context, env->resolver, expectedType))
+				{
+					instance = scope->rootInstance;
+					instanceLoader=GetInstanceLoaderManager()->GetLoader(typeName);
+				}
 			}
 
 			if(instance.GetRawPtr() && instanceLoader)

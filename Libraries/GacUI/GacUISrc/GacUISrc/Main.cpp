@@ -10,9 +10,8 @@
 #include "..\..\Source\Reflection\GuiInstanceLoader.h"
 #include <Windows.h>
 
+using namespace vl::collections;
 using namespace vl::stream;
-using namespace vl::parsing::tabling;
-using namespace vl::parsing;
 using namespace vl::reflection::description;
 
 #define GUI_GRAPHICS_RENDERER_DIRECT2D
@@ -41,27 +40,57 @@ TestWindow
 class TestWindow : public GuiWindow
 {
 protected:
-	GuiDocumentViewer*					viewer;
+	Ptr<GuiResource>				resource;
+	GuiTextList*					listResources;
 
+	void listResources_ItemDoubleClicked(GuiGraphicsComposition* sender, GuiItemMouseEventArgs& arguments)
+	{
+		WString selectedResource = listResources->GetItems()[arguments.itemIndex]->GetText();
+		if (auto scope = LoadInstance(resource, L"XmlWindowDemos/"+selectedResource+L"/MainWindowResource"))
+		{
+			GuiWindow* window=dynamic_cast<GuiWindow*>(scope->rootInstance.GetRawPtr());
+			if(window)
+			{
+				window->ForceCalculateSizeImmediately();
+				window->MoveToScreenCenter();
+				window->Show();
+
+				window->WindowClosed.AttachLambda([window](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+				{
+					GetApplication()->InvokeInMainThread([window]()
+					{
+						delete window;
+					});
+				});
+			}
+		}
+	}
 public:
 	TestWindow()
 		:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
 	{
-		SetText(L"Editor.Colorizer.Xml");
-		SetClientSize(Size(640, 480));
+		SetText(L"Xml Window Loading");
+		SetClientSize(Size(200, 300));
+		SetMinimizedBox(false);
+		SetMaximizedBox(false);
+		SetSizeBox(false);
 
-		viewer=g::NewDocumentViewer();
-		viewer->SetVerticalAlwaysVisible(false);
-		viewer->SetHorizontalAlwaysVisible(false);
-		viewer->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-		this->GetBoundsComposition()->AddChild(viewer->GetBoundsComposition());
+		resource=GuiResource::LoadFromXml(L"..\\GacUISrcCodepackedTest\\Resources\\XmlWindowResource.xml");
 
-		Ptr<GuiResource> resource=GuiResource::LoadFromXml(L"..\\GacUISrcCodepackedTest\\Resources\\XmlWindowResource.xml");
-		Ptr<DocumentModel> document=resource->GetDocumentByPath(L"XmlDoc.xml");
-		viewer->SetDocument(document);
+		listResources = g::NewTextList();
+		listResources->SetVerticalAlwaysVisible(false);
+		listResources->SetHorizontalAlwaysVisible(false);
+		listResources->GetBoundsComposition()->SetAlignmentToParent(Margin(5, 5, 5, 5));
+		listResources->ItemLeftButtonDoubleClick.AttachMethod(this, &TestWindow::listResources_ItemDoubleClicked);
+		this->GetBoundsComposition()->AddChild(listResources->GetBoundsComposition());
+
+		FOREACH(Ptr<GuiResourceFolder>, folder, resource->GetFolderByPath(L"XmlWindowDemos/")->GetFolders())
+		{
+			listResources->GetItems().Add(new list::TextItem(folder->GetName()));
+		}
 
 		// set the preferred minimum client 600
-		this->GetBoundsComposition()->SetPreferredMinSize(Size(640, 480));
+		this->GetBoundsComposition()->SetPreferredMinSize(Size(200, 300));
 		// call this to calculate the size immediately if any indirect content in the table changes
 		// so that the window can calcaulte its correct size before calling the MoveToScreenCenter()
 		this->ForceCalculateSizeImmediately();
@@ -92,26 +121,10 @@ void GuiMain()
 		BomEncoder encoder(BomEncoder::Utf16);
 		EncoderStream encoderStream(fileStream, encoder);
 		StreamWriter writer(encoderStream);
-		description::LogTypeManager(writer);
+		LogTypeManager(writer);
 	}
 #endif
 	UnitTestInGuiMain();
-	
-	// RichTextWindow
-	// SignInWindow
-	// ChatWindow
-	// EditorWindow
-	Ptr<GuiResource> resource=GuiResource::LoadFromXml(L"..\\GacUISrcCodepackedTest\\Resources\\XmlWindowResource.xml");
-	Ptr<GuiInstanceContextScope> scope = LoadInstance(resource, L"XmlWindowDemos/EditorWindow/MainWindowResource");
-	if(scope)
-	{
-		GuiWindow* window=dynamic_cast<GuiWindow*>(scope->rootInstance.GetRawPtr());
-		if(window)
-		{
-			window->ForceCalculateSizeImmediately();
-			window->MoveToScreenCenter();
-			GetApplication()->Run(window);
-		}
-		scope->rootInstance.DeleteRawPtr();
-	}
+	TestWindow window;
+	GetApplication()->Run(&window);
 }
