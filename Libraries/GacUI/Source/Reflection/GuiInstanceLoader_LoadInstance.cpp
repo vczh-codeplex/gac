@@ -388,6 +388,7 @@ Helper Functions
 			{
 				if (Ptr<GuiInstanceContextScope> scope = LoadInstance(source.context, env->resolver, expectedType))
 				{
+					typeName = scope->typeName;
 					instance = scope->rootInstance;
 					instanceLoader=GetInstanceLoaderManager()->GetLoader(typeName);
 				}
@@ -418,9 +419,8 @@ Helper Functions
 			)
 		{
 			Ptr<GuiInstanceEnvironment> env = new GuiInstanceEnvironment(context, resolver);
-			WString typeName;
 			List<FillInstanceBindingSetter> bindingSetters;
-			env->scope->rootInstance=LoadInstance(env, context->instance.Obj(), expectedType, typeName, bindingSetters);
+			env->scope->rootInstance=LoadInstance(env, context->instance.Obj(), expectedType, env->scope->typeName, bindingSetters);
 
 			if (!env->scope->rootInstance.IsNull())
 			{
