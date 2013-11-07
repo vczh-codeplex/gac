@@ -298,6 +298,7 @@
     <Image Include="Resources\s_Italic.png" />
     <Image Include="Resources\s_Strike.png" />
     <Image Include="Resources\s_Underline.png" />
+    <Image Include="Resources\XmlDocDemo_TooltipWindow.jpg" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
