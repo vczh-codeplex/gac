@@ -246,5 +246,8 @@
     <Image Include="Resources\s_Underline.png">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="Resources\XmlDocDemo_TooltipWindow.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>
