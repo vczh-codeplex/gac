@@ -22,6 +22,7 @@ WindowsInputService
 
 			WString WindowsInputService::GetKeyNameInternal(vint code)
 			{
+				if (code < 8) return L"?";
 				wchar_t name[256]={0};
 				vint scanCode=MapVirtualKey((int)code, MAPVK_VK_TO_VSC)<<16;
 				switch(code)
@@ -38,6 +39,14 @@ WindowsInputService
 				case VK_DOWN:
 					scanCode|=1<<24;
 					break;
+				case VK_CLEAR:
+				case VK_LSHIFT:
+				case VK_RSHIFT: 
+				case VK_LCONTROL:
+				case VK_RCONTROL:
+				case VK_LMENU:
+				case VK_RMENU:
+					return L"?";
 				}
 				GetKeyNameText((int)scanCode, name, sizeof(name)/sizeof(*name));
 				return name[0]?name:L"?";
@@ -50,7 +59,7 @@ WindowsInputService
 					keyNames[i] = GetKeyNameInternal(i);
 					if (keyNames[i] != L"?")
 					{
-						keys.Add(keyNames[i], i);
+						keys.Set(keyNames[i], i);
 					}
 				}
 			}
@@ -60,7 +69,7 @@ WindowsInputService
 				,mouseHook(NULL)
 				,isTimerEnabled(false)
 				,mouseProc(_mouseProc)
-				,keyNames(256)
+				,keyNames(146)
 			{
 				InitializeKeyNames();
 			}
