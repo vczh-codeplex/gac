@@ -213,8 +213,11 @@ GuiToolstripCommand::ShortcutBuilder Parser
 					builder->ctrl = match->Groups().Contains(L"ctrl");
 					builder->shift = match->Groups().Contains(L"shift");
 					builder->alt = match->Groups().Contains(L"alt");
-					builder->key = L'A';
-					return builder;
+
+					WString name = match->Groups()[L"key"][0].Value();
+					builder->key = GetCurrentController()->InputService()->GetKey(name);
+
+					return builder->key == -1 ? 0 : builder;
 				}
 			};
 
