@@ -56,25 +56,31 @@ GuiToolstripCommand
 
 			void GuiToolstripCommand::BuildShortcut(const WString& builderText)
 			{
-				if (shortcutOwner)
 				if (auto parser = GetParserManager()->GetParser<ShortcutBuilder>(L"SHORTCUT"))
 				if (Ptr<ShortcutBuilder> builder = parser->TypedParse(builderText))
 				{
-					if (!shortcutOwner->GetShortcutKeyManager())
+					if (shortcutOwner)
 					{
-						shortcutOwner->SetShortcutKeyManager(new GuiShortcutKeyManager);
-					}
-					if (auto manager = dynamic_cast<GuiShortcutKeyManager*>(shortcutOwner->GetShortcutKeyManager()))
-					{
-						IGuiShortcutKeyItem* item = manager->TryGetShortcut(builder->ctrl, builder->shift, builder->alt, builder->key);
-						if (!item)
+						if (!shortcutOwner->GetShortcutKeyManager())
 						{
-							item = manager->CreateShortcut(builder->ctrl, builder->shift, builder->alt, builder->key);
-							if (item)
+							shortcutOwner->SetShortcutKeyManager(new GuiShortcutKeyManager);
+						}
+						if (auto manager = dynamic_cast<GuiShortcutKeyManager*>(shortcutOwner->GetShortcutKeyManager()))
+						{
+							IGuiShortcutKeyItem* item = manager->TryGetShortcut(builder->ctrl, builder->shift, builder->alt, builder->key);
+							if (!item)
 							{
-								ReplaceShortcut(item, builder);
+								item = manager->CreateShortcut(builder->ctrl, builder->shift, builder->alt, builder->key);
+								if (item)
+								{
+									ReplaceShortcut(item, builder);
+								}
 							}
 						}
+					}
+					else
+					{
+						shortcutBuilder = builder;
 					}
 				}
 			}
