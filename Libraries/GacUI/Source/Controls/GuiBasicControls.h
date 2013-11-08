@@ -262,6 +262,9 @@ Basic Construction
 			public:
 				GuiComponent();
 				~GuiComponent();
+
+				virtual void							Attach(GuiControlHost* controlHost);
+				virtual void							Detach(GuiControlHost* controlHost);
 			};
 
 			template<typename T>

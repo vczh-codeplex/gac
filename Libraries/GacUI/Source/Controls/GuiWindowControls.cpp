@@ -209,6 +209,7 @@ GuiControlHost
 				styleController=0;
 				for(vint i=0;i<components.Count();i++)
 				{
+					components[i]->Detach(this);
 					delete components[i];
 				}
 				delete host;
@@ -404,13 +405,22 @@ GuiControlHost
 				else
 				{
 					components.Add(component);
+					component->Attach(this);
 					return true;
 				}
 			}
 
 			bool GuiControlHost::RemoveComponent(GuiComponent* component)
 			{
-				return components.Remove(component);
+				vint index = components.IndexOf(component);
+				if (index == -1)
+				{
+					return false;
+				}
+				{
+					component->Detach(this);
+					return components.RemoveAt(index);
+				}
 			}
 
 			bool GuiControlHost::ContainsComponent(GuiComponent* component)

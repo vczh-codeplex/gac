@@ -1171,6 +1171,7 @@ Type Declaration
 				CLASS_MEMBER_PROPERTY_EVENT_FAST(Image, DescriptionChanged)
 				CLASS_MEMBER_PROPERTY_EVENT_FAST(Text, DescriptionChanged)
 				CLASS_MEMBER_PROPERTY_EVENT_FAST(Shortcut, DescriptionChanged)
+				CLASS_MEMBER_PROPERTY_EVENT_FAST(ShortcutBuilder, DescriptionChanged)
 				CLASS_MEMBER_PROPERTY_EVENT_FAST(Enabled, DescriptionChanged)
 			END_CLASS_MEMBER(GuiToolstripCommand)
 

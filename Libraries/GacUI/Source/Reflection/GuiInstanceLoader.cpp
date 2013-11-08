@@ -52,11 +52,6 @@ GuiInstanceContext::ElementName Parser
 				}
 				return elementName;
 			}
-
-			Ptr<Object> Parse(const WString& text)override
-			{
-				return TypedParse(text);
-			}
 		};
 
 /***********************************************************************

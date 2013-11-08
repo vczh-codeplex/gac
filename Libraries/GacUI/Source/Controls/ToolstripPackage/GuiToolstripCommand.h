@@ -20,6 +20,16 @@ namespace vl
 			/// <summary>A command for toolstrip controls.</summary>
 			class GuiToolstripCommand : public GuiComponent, public Description<GuiToolstripCommand>
 			{
+			public:
+				class ShortcutBuilder : public Object
+				{
+				public:
+					WString									text;
+					bool									ctrl;
+					bool									shift;
+					bool									alt;
+					vint									key;
+				};
 			protected:
 				Ptr<GuiImageData>							image;
 				WString										text;
@@ -27,13 +37,20 @@ namespace vl
 				bool										enabled;
 				bool										selected;
 				Ptr<compositions::GuiNotifyEvent::IHandler>	shortcutKeyItemExecutedHandler;
+				Ptr<ShortcutBuilder>						shortcutBuilder;
+				GuiControlHost*								shortcutOwner;
 
 				void										OnShortcutKeyItemExecuted(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 				void										InvokeDescriptionChanged();
+				void										ReplaceShortcut(compositions::IGuiShortcutKeyItem* value, Ptr<ShortcutBuilder> builder);
+				void										BuildShortcut(const WString& builderText);
 			public:
 				/// <summary>Create the command.</summary>
 				GuiToolstripCommand();
 				~GuiToolstripCommand();
+
+				void										Attach(GuiControlHost* controlHost)override;
+				void										Detach(GuiControlHost* controlHost)override;
 
 				/// <summary>Executed event.</summary>
 				compositions::GuiNotifyEvent				Executed;
@@ -59,6 +76,12 @@ namespace vl
 				/// <summary>Set the shortcut key item for this command.</summary>
 				/// <param name="value">The shortcut key item for this command.</param>
 				void										SetShortcut(compositions::IGuiShortcutKeyItem* value);
+				/// <summary>Get the shortcut builder for this command.</summary>
+				/// <returns>The shortcut builder for this command.</returns>
+				WString										GetShortcutBuilder();
+				/// <summary>Set the shortcut builder for this command. When the command is attached to a window as a component without a shortcut, the command will try to convert the shortcut builder to a shortcut key item.</summary>
+				/// <param name="value">The shortcut builder for this command.</param>
+				void										SetShortcutBuilder(const WString& value);
 				/// <summary>Get the enablility for this command.</summary>
 				/// <returns>The enablility for this command.</returns>
 				bool										GetEnabled();
