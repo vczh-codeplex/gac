@@ -108,11 +108,12 @@ Type Loader:
 	GuiComboBoxListControl
 
 Features:
-	Component Xml Layout	: Type Loaders, Virtual Type Loaders
+	Component Xml Layout	: Type Loaders, Virtual Type Loaders, Constructor Parameters, Object Inception (e.g. ViewModel object), Object Schema
 	Expression				: "bind" Binder
 	Data Binding			: Data structure declaration
 	Scripting				: Event subscription, code behind
 	Control Template		: Template definition and referencing
+	Data Service and Query
 */
 
 void GuiMain()
