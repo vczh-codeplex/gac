@@ -8,6 +8,7 @@
 
 #include "..\..\Source\GacUI.h"
 #include "..\..\Source\Reflection\GuiInstanceLoader.h"
+#include "..\..\Source\Reflection\TypeDescriptors\GuiReflectionControls.h"
 #include <Windows.h>
 
 using namespace vl::collections;
@@ -33,72 +34,6 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 extern void UnitTestInGuiMain();
 
-/***********************************************************************
-TestWindow
-***********************************************************************/
-
-class TestWindow : public GuiWindow
-{
-protected:
-	Ptr<GuiResource>				resource;
-	GuiTextList*					listResources;
-
-	void listResources_ItemDoubleClicked(GuiGraphicsComposition* sender, GuiItemMouseEventArgs& arguments)
-	{
-		WString selectedResource = listResources->GetItems()[arguments.itemIndex]->GetText();
-		if (auto scope = LoadInstance(resource, L"XmlWindowDemos/"+selectedResource+L"/MainWindowResource"))
-		{
-			GuiWindow* window=dynamic_cast<GuiWindow*>(scope->rootInstance.GetRawPtr());
-			if(window)
-			{
-				window->ForceCalculateSizeImmediately();
-				window->MoveToScreenCenter();
-				window->Show();
-
-				window->WindowClosed.AttachLambda([window](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
-				{
-					GetApplication()->InvokeInMainThread([window]()
-					{
-						delete window;
-					});
-				});
-			}
-		}
-	}
-public:
-	TestWindow()
-		:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
-	{
-		SetText(L"Xml Window Loading");
-		SetClientSize(Size(200, 300));
-		SetMinimizedBox(false);
-		SetMaximizedBox(false);
-		SetSizeBox(false);
-
-		resource=GuiResource::LoadFromXml(L"..\\GacUISrcCodepackedTest\\Resources\\XmlWindowResource.xml");
-
-		listResources = g::NewTextList();
-		listResources->SetVerticalAlwaysVisible(false);
-		listResources->SetHorizontalAlwaysVisible(false);
-		listResources->GetBoundsComposition()->SetAlignmentToParent(Margin(5, 5, 5, 5));
-		listResources->ItemLeftButtonDoubleClick.AttachMethod(this, &TestWindow::listResources_ItemDoubleClicked);
-		this->GetBoundsComposition()->AddChild(listResources->GetBoundsComposition());
-
-		FOREACH(Ptr<GuiResourceFolder>, folder, resource->GetFolderByPath(L"XmlWindowDemos/")->GetFolders())
-		{
-			listResources->GetItems().Add(new list::TextItem(folder->GetName()));
-		}
-
-		// set the preferred minimum client 600
-		this->GetBoundsComposition()->SetPreferredMinSize(Size(200, 300));
-		// call this to calculate the size immediately if any indirect content in the table changes
-		// so that the window can calcaulte its correct size before calling the MoveToScreenCenter()
-		this->ForceCalculateSizeImmediately();
-		// move to the screen center
-		this->MoveToScreenCenter();
-	}
-};
-
 /*
 Type Loader:
 	GuiListView
@@ -113,6 +48,34 @@ Features:
 	Control Template		: Template definition and referencing
 */
 
+Ptr<GuiInstanceContextScope> ShowWindowInResource(Ptr<GuiResource> resource, const WString& name, bool show)
+{
+	if (auto scope = LoadInstance(resource, L"XmlWindowDemos/"+name+L"/MainWindowResource"))
+	{
+		GuiWindow* window=dynamic_cast<GuiWindow*>(scope->rootInstance.GetRawPtr());
+		if(window)
+		{
+			window->ForceCalculateSizeImmediately();
+			window->MoveToScreenCenter();
+			if (show)
+			{
+				window->Show();
+			}
+
+			window->WindowClosed.AttachLambda([window](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+			{
+				GetApplication()->InvokeInMainThread([window]()
+				{
+					delete window;
+				});
+			});
+
+			return scope;
+		}
+	}
+	return 0;
+}
+
 void GuiMain()
 {
 #ifndef VCZH_DEBUG_NO_REFLECTION
@@ -125,6 +88,32 @@ void GuiMain()
 	}
 #endif
 	UnitTestInGuiMain();
-	TestWindow window;
-	GetApplication()->Run(&window);
+
+	auto resource=GuiResource::LoadFromXml(L"..\\GacUISrcCodepackedTest\\Resources\\XmlWindowResource.xml");
+	auto scope = ShowWindowInResource(resource, L"MainWindow", false);
+
+	auto listResources = UnboxValue<GuiTextList*>(scope->referenceValues[L"listResources"]);
+	FOREACH(Ptr<GuiResourceFolder>, folder, resource->GetFolderByPath(L"XmlWindowDemos/")->GetFolders())
+	{
+		if (folder->GetName() != L"MainWindow")
+		{
+			listResources->GetItems().Add(new list::TextItem(folder->GetName()));
+		}
+	}
+	listResources->ItemLeftButtonDoubleClick.AttachLambda([=](GuiGraphicsComposition* sender, GuiItemMouseEventArgs& arguments)
+	{
+		ShowWindowInResource(resource, listResources->GetItems()[arguments.itemIndex]->GetText(), true);
+	});
+
+	auto buttonShow = UnboxValue<GuiButton*>(scope->referenceValues[L"buttonShow"]);
+	buttonShow->Clicked.AttachLambda([=](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+	{
+		if (listResources->GetSelectedItems().Count() == 1)
+		{
+			vint itemIndex = listResources->GetSelectedItems()[0];
+			ShowWindowInResource(resource, listResources->GetItems()[itemIndex]->GetText(), true);
+		}
+	});
+
+	GetApplication()->Run(UnboxValue<GuiWindow*>(scope->rootInstance));
 }
