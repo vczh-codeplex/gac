@@ -302,6 +302,15 @@ Type Declaration
 				CLASS_MEMBER_METHOD_OVERLOAD(GetScreen, {L"window"}, INativeScreen*(INativeScreenService::*)(INativeWindow*))
 			END_CLASS_MEMBER(INativeScreenService)
 
+			BEGIN_CLASS_MEMBER(INativeInputService)
+				CLASS_MEMBER_BASE(IDescriptable)
+
+				CLASS_MEMBER_METHOD(IsKeyPressing, { L"code" })
+				CLASS_MEMBER_METHOD(IsKeyToggled, { L"code" })
+				CLASS_MEMBER_METHOD(GetKeyName, { L"code" })
+				CLASS_MEMBER_METHOD(GetKey, { L"name" })
+			END_CLASS_MEMBER(INativeInputService)
+
 			BEGIN_CLASS_MEMBER(INativeController)
 				CLASS_MEMBER_BASE(IDescriptable)
 				CLASS_MEMBER_STATIC_EXTERNALMETHOD(GetCurrentController, NO_PARAMETER, INativeController*(*)(), &GetCurrentController)
@@ -314,6 +323,7 @@ Type Declaration
 				CLASS_MEMBER_METHOD(ClipboardService, NO_PARAMETER)
 				CLASS_MEMBER_METHOD(ImageService, NO_PARAMETER)
 				CLASS_MEMBER_METHOD(ScreenService, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(InputService, NO_PARAMETER)
 			END_CLASS_MEMBER(INativeController)
 
 			BEGIN_CLASS_MEMBER(GuiImageData)

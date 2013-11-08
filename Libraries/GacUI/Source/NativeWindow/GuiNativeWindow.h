@@ -1071,7 +1071,7 @@ Native Window Services
 		/// <summary>
 		/// User input service. To access this service, use [M:vl.presentation.INativeController.InputService].
 		/// </summary>
-		class INativeInputService : public virtual Interface
+		class INativeInputService : public virtual IDescriptable, public Description<INativeInputService>
 		{
 		public:
 			/// <summary>
@@ -1119,6 +1119,12 @@ Native Window Services
 			/// <returns>The name of a key.</returns>
 			/// <param name="key">Key code</param>
 			virtual WString					GetKeyName(vint code)=0;
+			/// <summary>
+			/// Get the key from a name.
+			/// </summary>
+			/// <returns>The key, returns -1 if the key name doesn't exist.</returns>
+			/// <param name="name">Key name</param>
+			virtual vint					GetKey(const WString& name)=0;
 		};
 		
 		/// <summary>

@@ -50,6 +50,7 @@ Type List
 			F(presentation::INativeAsyncService)\
 			F(presentation::INativeClipboardService)\
 			F(presentation::INativeScreenService)\
+			F(presentation::INativeInputService)\
 			F(presentation::INativeController)\
 			F(presentation::GuiImageData)\
 			F(presentation::GuiTextData)\
