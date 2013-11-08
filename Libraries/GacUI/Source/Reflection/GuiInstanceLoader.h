@@ -160,6 +160,47 @@ Instance Loader Manager
 														const WString& instancePath,
 														description::ITypeDescriptor* expectedType=0
 														);
+
+/***********************************************************************
+Instance Scope Wrapper
+***********************************************************************/
+
+		template<typename T>
+		class GuiInstance : public Object
+		{
+		private:
+			Ptr<GuiResource>						resource;
+			Ptr<GuiInstanceContextScope>			scope;
+			T*										instance;
+
+		public:
+			GuiInstance(Ptr<GuiResource> _resource, const WString& path)
+				:resource(_resource)
+				,instance(0)
+			{
+				if (scope = LoadInstance(resource, path))
+				{
+					instance = description::UnboxValue<T*>(scope->rootInstance);
+				}
+			}
+
+			Ptr<GuiResource> GetResource()
+			{
+				return resource;
+			}
+
+			Ptr<GuiInstanceContextScope> GetScope()
+			{
+				return scope;
+			}
+
+			T* GetInstance()
+			{
+				return instance;
+			}
+		};
+
+#define GUI_INSTANCE_REFERENCE(NAME) this->NAME=vl::reflection::description::UnboxValue<decltype(NAME)>(this->GetScope()->referenceValues[L#NAME])
 	}
 }
 
