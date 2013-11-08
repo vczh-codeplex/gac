@@ -172,38 +172,14 @@ LoadValueVisitor
 
 				void Visit(GuiConstructorRepr* repr)override
 				{
-					Ptr<GuiTextRepr> singleTextValue;
-					{
-						vint index = repr->setters.Keys().IndexOf(L"");
-						if (index != -1)
-						{
-							auto setterValue = repr->setters.Values()[index];
-							if (setterValue->values.Count() == 1)
-							{
-								singleTextValue = setterValue->values[0].Cast<GuiTextRepr>();
-							}
-						}
-					}
-					
 					FOREACH(ITypeDescriptor*, typeDescriptor, acceptableTypes)
 					{
-						if (IValueSerializer* serializer = typeDescriptor->GetValueSerializer())
+						WString _typeName;
+						loadedValue=LoadInstance(env, repr, typeDescriptor, _typeName, bindingSetters);
+						if (!loadedValue.IsNull())
 						{
-							if (singleTextValue && serializer->Parse(singleTextValue->text, loadedValue))
-							{
-								result = true;
-								return;
-							}
-						}
-						else
-						{
-							WString _typeName;
-							loadedValue=LoadInstance(env, repr, typeDescriptor, _typeName, bindingSetters);
-							if (!loadedValue.IsNull())
-							{
-								result = true;
-								return;
-							}
+							result = true;
+							return;
 						}
 					}
 				}
@@ -374,12 +350,33 @@ Helper Functions
 				instanceLoader = source.loader;
 				typeName=source.typeName;
 				ITypeDescriptor* typeDescriptor=GetInstanceLoaderManager()->GetTypeDescriptorForType(source.typeName);
+				
+				Ptr<GuiTextRepr> singleTextValue;
+				{
+					vint index = ctor->setters.Keys().IndexOf(L"");
+					if (index != -1)
+					{
+						auto setterValue = ctor->setters.Values()[index];
+						if (setterValue->values.Count() == 1)
+						{
+							singleTextValue = setterValue->values[0].Cast<GuiTextRepr>();
+						}
+					}
+				}
 
 				if (!expectedType || typeDescriptor->CanConvertTo(expectedType))
 				{
+					IGuiInstanceLoader::TypeInfo typeInfo(typeName, typeDescriptor);
 					while(loader && instance.IsNull())
 					{
-						instance=loader->CreateInstance(IGuiInstanceLoader::TypeInfo(typeName, typeDescriptor));
+						if (singleTextValue && loader->IsDeserializable(typeInfo))
+						{
+							instance = loader->Deserialize(typeInfo, singleTextValue->text);
+						}
+						else
+						{
+							instance=loader->CreateInstance(IGuiInstanceLoader::TypeInfo(typeName, typeDescriptor));
+						}
 						loader=GetInstanceLoaderManager()->GetParentLoader(loader);
 					}
 				}

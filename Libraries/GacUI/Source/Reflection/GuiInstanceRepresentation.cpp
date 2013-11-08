@@ -168,20 +168,22 @@ GuiInstanceContext
 				{
 					Ptr<XmlAttribute> att=new XmlAttribute;
 					att->name.value=L"xmlns";
-					att->value.value=
+					att->value.value =
+						L"presentation::controls::Gui*;"
+						L"presentation::elements::Gui*Element;"
+						L"presentation::compositions::Gui*Composition;"
+						L"presentation::compositions::Gui*;"
 						L"system::*;"
 						L"system::reflection::*;"
 						L"presentation::*;"
 						L"presentation::Gui*;"
 						L"presentation::controls::*;"
-						L"presentation::controls::Gui*;"
 						L"presentation::controls::list::*;"
 						L"presentation::controls::tree::*;"
 						L"presentation::elements::*;"
-						L"presentation::elements::Gui*Element;"
+						L"presentation::elements::Gui*;"
 						L"presentation::elements::text*;"
-						L"presentation::compositions::*;"
-						L"presentation::compositions::Gui*Composition";
+						L"presentation::compositions::*";
 					namespaceAttributes.Add(att);
 				}
 				FOREACH(Ptr<XmlAttribute>, att, namespaceAttributes)
