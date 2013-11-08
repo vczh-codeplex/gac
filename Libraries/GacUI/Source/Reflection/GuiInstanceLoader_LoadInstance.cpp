@@ -37,6 +37,7 @@ Helper Functions Declarations
 			Ptr<GuiInstanceEnvironment> env,
 			GuiAttSetterRepr* attSetter,
 			IGuiInstanceLoader* loader,
+			bool skipDefaultProperty,
 			const WString& typeName,
 			List<FillInstanceBindingSetter>& bindingSetters
 			);
@@ -226,6 +227,7 @@ Helper Functions
 			Ptr<GuiInstanceEnvironment> env,
 			GuiAttSetterRepr* attSetter,
 			IGuiInstanceLoader* loader,
+			bool skipDefaultProperty,
 			const WString& typeName,
 			List<FillInstanceBindingSetter>& bindingSetters
 			)
@@ -234,6 +236,11 @@ Helper Functions
 			for(vint i=attSetter->setters.Count()-1;i>=0;i--)
 			{
 				WString propertyName=attSetter->setters.Keys()[i];
+				if (propertyName == L"" && skipDefaultProperty)
+				{
+					continue;
+				}
+
 				auto propertyValue=attSetter->setters.Values()[i];
 				IGuiInstanceLoader* propertyLoader=loader;
 				IGuiInstanceLoader::PropertyValue cachedPropertyValue(
@@ -288,7 +295,7 @@ Helper Functions
 											IGuiInstanceLoader* propertyInstanceLoader=GetInstanceLoaderManager()->GetLoader(propertyTypeDescriptor->GetTypeName());
 											if(propertyInstanceLoader)
 											{
-												FillInstance(cachedPropertyValue.propertyValue, env, propertyAttSetter.Obj(), propertyInstanceLoader, propertyTypeDescriptor->GetTypeName(), bindingSetters);
+												FillInstance(cachedPropertyValue.propertyValue, env, propertyAttSetter.Obj(), propertyInstanceLoader, false, propertyTypeDescriptor->GetTypeName(), bindingSetters);
 											}
 										}
 									}
@@ -343,6 +350,7 @@ Helper Functions
 			InstanceLoadingSource source=FindInstanceLoadingSource(env, ctor);
 			Value instance;
 			IGuiInstanceLoader* instanceLoader = 0;
+			bool deserialized = false;
 
 			if(source.loader)
 			{
@@ -372,6 +380,10 @@ Helper Functions
 						if (singleTextValue && loader->IsDeserializable(typeInfo))
 						{
 							instance = loader->Deserialize(typeInfo, singleTextValue->text);
+							if (!instance.IsNull())
+							{
+								deserialized = true;
+							}
 						}
 						else
 						{
@@ -393,7 +405,7 @@ Helper Functions
 
 			if(instance.GetRawPtr() && instanceLoader)
 			{
-				FillInstance(instance, env, ctor, instanceLoader, typeName, bindingSetters);
+				FillInstance(instance, env, ctor, instanceLoader, deserialized, typeName, bindingSetters);
 
 				vint index = ctor->referenceAttributes.Keys().IndexOf(L"Name");
 				if (index != -1)
