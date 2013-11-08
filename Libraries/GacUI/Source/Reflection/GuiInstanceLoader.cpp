@@ -117,11 +117,19 @@ Default Instance Loader
 
 			bool IsDeserializable(const TypeInfo& typeInfo)override
 			{
-				return false;
+				return typeInfo.typeDescriptor->GetValueSerializer() != 0;
 			}
 
 			description::Value Deserialize(const TypeInfo& typeInfo, const WString& text)override
 			{
+				if (IValueSerializer* serializer = typeInfo.typeDescriptor->GetValueSerializer())
+				{
+					Value loadedValue;
+					if (serializer->Parse(text, loadedValue))
+					{
+						return loadedValue;
+					}
+				}
 				return Value();
 			}
 
