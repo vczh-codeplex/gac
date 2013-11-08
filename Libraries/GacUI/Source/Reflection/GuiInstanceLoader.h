@@ -102,7 +102,9 @@ Instance Loader
 			};
 
 			virtual WString							GetTypeName()=0;
-			virtual description::Value				CreateInstance(Ptr<GuiInstanceEnvironment> env, Ptr<GuiConstructorRepr> ctor, const TypeInfo& typeInfo)=0;
+			virtual bool							IsDeserializable(const TypeInfo& typeInfo) = 0;
+			virtual description::Value				Deserialize(const TypeInfo& typeInfo, const WString& text) = 0;
+			virtual description::Value				CreateInstance(const TypeInfo& typeInfo)=0;
 			virtual PropertyType					GetPropertyType(const PropertyInfo& propertyInfo, collections::List<description::ITypeDescriptor*>& acceptableTypes)=0;
 			virtual bool							GetPropertyValue(PropertyValue& propertyValue)=0;
 			virtual bool							SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)=0;

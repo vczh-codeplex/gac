@@ -26,7 +26,17 @@ GuiRewriteInstanceLoader
 			{
 			}
 
-			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, Ptr<GuiConstructorRepr> ctor, const TypeInfo& typeInfo)override
+			bool IsDeserializable(const TypeInfo& typeInfo)override
+			{
+				return false;
+			}
+
+			description::Value Deserialize(const TypeInfo& typeInfo, const WString& text)override
+			{
+				return Value();
+			}
+
+			description::Value CreateInstance(const TypeInfo& typeInfo)override
 			{
 				return Value();
 			}
@@ -68,7 +78,7 @@ GuiVrtualTypeInstanceLoader
 				return typeName;
 			}
 
-			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, Ptr<GuiConstructorRepr> ctor, const TypeInfo& typeInfo)override
+			description::Value CreateInstance(const TypeInfo& typeInfo)override
 			{
 				if(typeName==typeInfo.typeName)
 				{
@@ -375,7 +385,7 @@ GuiToolstripButtonInstanceLoader
 				return description::GetTypeDescriptor<GuiToolstripButton>()->GetTypeName();
 			}
 
-			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, Ptr<GuiConstructorRepr> ctor, const TypeInfo& typeInfo)override
+			description::Value CreateInstance(const TypeInfo& typeInfo)override
 			{
 				if (typeInfo.typeName == GetTypeName())
 				{

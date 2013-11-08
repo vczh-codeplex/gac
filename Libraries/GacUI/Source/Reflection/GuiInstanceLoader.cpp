@@ -115,7 +115,17 @@ Default Instance Loader
 				return L"";
 			}
 
-			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, Ptr<GuiConstructorRepr> ctor, const TypeInfo& typeInfo)override
+			bool IsDeserializable(const TypeInfo& typeInfo)override
+			{
+				return false;
+			}
+
+			description::Value Deserialize(const TypeInfo& typeInfo, const WString& text)override
+			{
+				return Value();
+			}
+
+			description::Value CreateInstance(const TypeInfo& typeInfo)override
 			{
 				vint count = typeInfo.typeDescriptor->GetConstructorGroup()->GetMethodCount();
 				for(vint i=0;i<count;i++)
