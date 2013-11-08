@@ -394,6 +394,14 @@ GuiComponent
 			{
 			}
 
+			void GuiComponent::Attach(GuiControlHost* controlHost)
+			{
+			}
+
+			void GuiComponent::Detach(GuiControlHost* controlHost)
+			{
+			}
+
 /***********************************************************************
 GuiLabel
 ***********************************************************************/

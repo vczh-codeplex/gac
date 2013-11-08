@@ -28,35 +28,35 @@ Control Host
 			class GuiControlHost : public GuiControl, private INativeWindowListener, public Description<GuiControlHost>
 			{
 			protected:
-				compositions::GuiGraphicsHost*			host;
-				collections::List<GuiComponent*>		components;
+				compositions::GuiGraphicsHost*					host;
+				collections::SortedList<GuiComponent*>			components;
 
-				virtual void							OnNativeWindowChanged();
-				virtual void							OnVisualStatusChanged();
+				virtual void									OnNativeWindowChanged();
+				virtual void									OnVisualStatusChanged();
 			private:
-				static const vint						TooltipDelayOpenTime=500;
-				static const vint						TooltipDelayCloseTime=500;
-				static const vint						TooltipDelayLifeTime=5000;
+				static const vint								TooltipDelayOpenTime=500;
+				static const vint								TooltipDelayCloseTime=500;
+				static const vint								TooltipDelayLifeTime=5000;
 
-				Ptr<INativeDelay>						tooltipOpenDelay;
-				Ptr<INativeDelay>						tooltipCloseDelay;
-				Point									tooltipLocation;
+				Ptr<INativeDelay>								tooltipOpenDelay;
+				Ptr<INativeDelay>								tooltipCloseDelay;
+				Point											tooltipLocation;
 				
-				GuiControl*								GetTooltipOwner(Point location);
-				void									MoveIntoTooltipControl(GuiControl* tooltipControl, Point location);
-				void									MouseMoving(const NativeWindowMouseInfo& info)override;
-				void									MouseLeaved()override;
-				void									Moved()override;
-				void									Enabled()override;
-				void									Disabled()override;
-				void									GotFocus()override;
-				void									LostFocus()override;
-				void									Activated()override;
-				void									Deactivated()override;
-				void									Opened()override;
-				void									Closing(bool& cancel)override;
-				void									Closed()override;
-				void									Destroying()override;
+				GuiControl*										GetTooltipOwner(Point location);
+				void											MoveIntoTooltipControl(GuiControl* tooltipControl, Point location);
+				void											MouseMoving(const NativeWindowMouseInfo& info)override;
+				void											MouseLeaved()override;
+				void											Moved()override;
+				void											Enabled()override;
+				void											Disabled()override;
+				void											GotFocus()override;
+				void											LostFocus()override;
+				void											Activated()override;
+				void											Deactivated()override;
+				void											Opened()override;
+				void											Closing(bool& cancel)override;
+				void											Closed()override;
+				void											Destroying()override;
 			public:
 				/// <summary>Create a control with a specified style controller.</summary>
 				/// <param name="_styleController">The style controller.</param>
@@ -64,21 +64,21 @@ Control Host
 				~GuiControlHost();
 				
 				/// <summary>Window got focus event.</summary>
-				compositions::GuiNotifyEvent			WindowGotFocus;
+				compositions::GuiNotifyEvent					WindowGotFocus;
 				/// <summary>Window lost focus event.</summary>
-				compositions::GuiNotifyEvent			WindowLostFocus;
+				compositions::GuiNotifyEvent					WindowLostFocus;
 				/// <summary>Window activated event.</summary>
-				compositions::GuiNotifyEvent			WindowActivated;
+				compositions::GuiNotifyEvent					WindowActivated;
 				/// <summary>Window deactivated event.</summary>
-				compositions::GuiNotifyEvent			WindowDeactivated;
+				compositions::GuiNotifyEvent					WindowDeactivated;
 				/// <summary>Window opened event.</summary>
-				compositions::GuiNotifyEvent			WindowOpened;
+				compositions::GuiNotifyEvent					WindowOpened;
 				/// <summary>Window closing event.</summary>
-				compositions::GuiRequestEvent			WindowClosing;
+				compositions::GuiRequestEvent					WindowClosing;
 				/// <summary>Window closed event.</summary>
-				compositions::GuiNotifyEvent			WindowClosed;
+				compositions::GuiNotifyEvent					WindowClosed;
 				/// <summary>Window destroying event.</summary>
-				compositions::GuiNotifyEvent			WindowDestroying;
+				compositions::GuiNotifyEvent					WindowDestroying;
 
 				/// <summary>Get the internal <see cref="compositions::GuiGraphicsHost"/> object to host the window content.</summary>
 				/// <returns>The internal <see cref="compositions::GuiGraphicsHost"/> object to host the window content.</returns>
