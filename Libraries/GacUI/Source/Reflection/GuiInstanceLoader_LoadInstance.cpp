@@ -379,7 +379,7 @@ Helper Functions
 				{
 					while(loader && instance.IsNull())
 					{
-						instance=loader->CreateInstance(env, ctor, IGuiInstanceLoader::TypeInfo(typeName, typeDescriptor));
+						instance=loader->CreateInstance(IGuiInstanceLoader::TypeInfo(typeName, typeDescriptor));
 						loader=GetInstanceLoaderManager()->GetParentLoader(loader);
 					}
 				}
