@@ -34,11 +34,81 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 extern void UnitTestInGuiMain();
 
+class WindowInstance : public GuiInstance<GuiWindow>
+{
+protected:
+	void window_WindowClosed(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+	{
+		GetApplication()->InvokeInMainThread([sender]()
+		{
+			if (auto window = dynamic_cast<GuiWindow*>(sender->GetRelatedControlHost()))
+			{
+				delete window;
+			}
+		});
+	}
+public:
+	WindowInstance(Ptr<GuiResource> resource, const WString& name)
+		:GuiInstance(resource, L"XmlWindowDemos/"+name+L"/MainWindowResource")
+	{
+		GetInstance()->ForceCalculateSizeImmediately();
+		GetInstance()->MoveToScreenCenter();
+		GetInstance()->WindowClosed.AttachMethod(this, &WindowInstance::window_WindowClosed);
+	}
+};
+
+class MainWindowInstance : public WindowInstance
+{
+protected:
+	GuiTextList*					listResources;
+	GuiButton*						buttonShow;
+
+	void ShowWindowInResource(const WString& name)
+	{
+		WindowInstance instance(GetResource(), name);
+		instance.GetInstance()->Show();
+	}
+
+	void listResources_SelectionChanged(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+	{
+		buttonShow->SetEnabled(listResources->GetSelectedItems().Count() == 1);
+	}
+
+	void listResources_ItemLeftButtonDoubleClick(GuiGraphicsComposition* sender, GuiItemMouseEventArgs& arguments)
+	{
+		ShowWindowInResource(listResources->GetItems()[arguments.itemIndex]->GetText());
+	}
+
+	void buttonShow_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+	{
+		vint itemIndex = listResources->GetSelectedItems()[0];
+		ShowWindowInResource(listResources->GetItems()[itemIndex]->GetText());
+	}
+public:
+	MainWindowInstance(Ptr<GuiResource> resource)
+		:WindowInstance(resource, L"MainWindow")
+	{
+		GUI_INSTANCE_REFERENCE(listResources);
+		GUI_INSTANCE_REFERENCE(buttonShow);
+
+		FOREACH(Ptr<GuiResourceFolder>, folder, GetResource()->GetFolderByPath(L"XmlWindowDemos/")->GetFolders())
+		{
+			if (folder->GetName() != L"MainWindow")
+			{
+				listResources->GetItems().Add(new list::TextItem(folder->GetName()));
+			}
+		}
+		
+		listResources->SelectionChanged.AttachMethod(this, &MainWindowInstance::listResources_SelectionChanged);
+		listResources->ItemLeftButtonDoubleClick.AttachMethod(this, &MainWindowInstance::listResources_ItemLeftButtonDoubleClick);
+		buttonShow->Clicked.AttachMethod(this, &MainWindowInstance::buttonShow_Clicked);
+	}
+};
+
 /*
 Type Loader:
 	GuiListView
 	GuiComboBoxListControl
-	GuiToolstripMenu
 
 Features:
 	Component Xml Layout	: Type Loaders, Virtual Type Loaders
@@ -47,34 +117,6 @@ Features:
 	Scripting				: Event subscription, code behind
 	Control Template		: Template definition and referencing
 */
-
-Ptr<GuiInstanceContextScope> ShowWindowInResource(Ptr<GuiResource> resource, const WString& name, bool show)
-{
-	if (auto scope = LoadInstance(resource, L"XmlWindowDemos/"+name+L"/MainWindowResource"))
-	{
-		GuiWindow* window=dynamic_cast<GuiWindow*>(scope->rootInstance.GetRawPtr());
-		if(window)
-		{
-			window->ForceCalculateSizeImmediately();
-			window->MoveToScreenCenter();
-			if (show)
-			{
-				window->Show();
-			}
-
-			window->WindowClosed.AttachLambda([window](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
-			{
-				GetApplication()->InvokeInMainThread([window]()
-				{
-					delete window;
-				});
-			});
-
-			return scope;
-		}
-	}
-	return 0;
-}
 
 void GuiMain()
 {
@@ -90,30 +132,6 @@ void GuiMain()
 	UnitTestInGuiMain();
 
 	auto resource=GuiResource::LoadFromXml(L"..\\GacUISrcCodepackedTest\\Resources\\XmlWindowResource.xml");
-	auto scope = ShowWindowInResource(resource, L"MainWindow", false);
-
-	auto listResources = UnboxValue<GuiTextList*>(scope->referenceValues[L"listResources"]);
-	FOREACH(Ptr<GuiResourceFolder>, folder, resource->GetFolderByPath(L"XmlWindowDemos/")->GetFolders())
-	{
-		if (folder->GetName() != L"MainWindow")
-		{
-			listResources->GetItems().Add(new list::TextItem(folder->GetName()));
-		}
-	}
-	listResources->ItemLeftButtonDoubleClick.AttachLambda([=](GuiGraphicsComposition* sender, GuiItemMouseEventArgs& arguments)
-	{
-		ShowWindowInResource(resource, listResources->GetItems()[arguments.itemIndex]->GetText(), true);
-	});
-
-	auto buttonShow = UnboxValue<GuiButton*>(scope->referenceValues[L"buttonShow"]);
-	buttonShow->Clicked.AttachLambda([=](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
-	{
-		if (listResources->GetSelectedItems().Count() == 1)
-		{
-			vint itemIndex = listResources->GetSelectedItems()[0];
-			ShowWindowInResource(resource, listResources->GetItems()[itemIndex]->GetText(), true);
-		}
-	});
-
-	GetApplication()->Run(UnboxValue<GuiWindow*>(scope->rootInstance));
+	MainWindowInstance instance(resource);
+	GetApplication()->Run(instance.GetInstance());
 }
