@@ -14,6 +14,58 @@ namespace vl
 		using namespace reflection::description;
 
 /***********************************************************************
+GuiInstancePropertyInfo
+***********************************************************************/
+
+		GuiInstancePropertyInfo::GuiInstancePropertyInfo()
+			:supported(false)
+			, tryParent(false)
+			, multipleValues(false)
+			, required(false)
+			, constructorParameter(false)
+		{
+		}
+
+		GuiInstancePropertyInfo::~GuiInstancePropertyInfo()
+		{
+		}
+
+		Ptr<GuiInstancePropertyInfo> GuiInstancePropertyInfo::Unsupported()
+		{
+			Ptr<GuiInstancePropertyInfo> info = new GuiInstancePropertyInfo;
+			return info;
+		}
+
+		Ptr<GuiInstancePropertyInfo> GuiInstancePropertyInfo::Supported(description::ITypeDescriptor* typeDescriptor)
+		{
+			Ptr<GuiInstancePropertyInfo> info = new GuiInstancePropertyInfo;
+			info->supported = true;
+			if (typeDescriptor) info->acceptableTypes.Add(typeDescriptor);
+			return info;
+		}
+
+		Ptr<GuiInstancePropertyInfo> GuiInstancePropertyInfo::SupportedWithParent(description::ITypeDescriptor* typeDescriptor)
+		{
+			Ptr<GuiInstancePropertyInfo> info = Supported(typeDescriptor);
+			info->tryParent = true;
+			return info;
+		}
+
+		Ptr<GuiInstancePropertyInfo> GuiInstancePropertyInfo::SupportedCollection(description::ITypeDescriptor* typeDescriptor)
+		{
+			Ptr<GuiInstancePropertyInfo> info = Supported(typeDescriptor);
+			info->multipleValues = true;
+			return info;
+		}
+
+		Ptr<GuiInstancePropertyInfo> GuiInstancePropertyInfo::SupportedCollectionWithParent(description::ITypeDescriptor* typeDescriptor)
+		{
+			Ptr<GuiInstancePropertyInfo> info = SupportedWithParent(typeDescriptor);
+			info->multipleValues = true;
+			return info;
+		}
+
+/***********************************************************************
 GuiInstanceContext::ElementName Parser
 ***********************************************************************/
 
@@ -142,7 +194,7 @@ Default Instance Loader
 				return Value();
 			}
 
-			ITypeInfo* GetPropertyType(const PropertyInfo& propertyInfo)
+			ITypeInfo* GetPropertyReflectionTypeInfo(const PropertyInfo& propertyInfo)
 			{
 				IPropertyInfo* prop = propertyInfo.typeInfo.typeDescriptor->GetPropertyByName(propertyInfo.propertyName, true);
 				if(prop)
@@ -160,48 +212,47 @@ Default Instance Loader
 				return 0;
 			}
 
-			IGuiInstanceLoader::PropertyType GetPropertyType(ITypeInfo* propType, collections::List<description::ITypeDescriptor*>& acceptableTypes)
+			Ptr<GuiInstancePropertyInfo> GetPropertyTypeInternal(ITypeInfo* propType, bool collectionType)
 			{
 				switch(propType->GetDecorator())
 				{
 				case ITypeInfo::RawPtr:
 				case ITypeInfo::SharedPtr:
-					return GetPropertyType(propType->GetElementType(), acceptableTypes);
 				case ITypeInfo::Nullable:
-					acceptableTypes.Add(0);
-					return GetPropertyType(propType->GetElementType(), acceptableTypes);
+					return GetPropertyTypeInternal(propType->GetElementType(), collectionType);
 				case ITypeInfo::TypeDescriptor:
-					acceptableTypes.Add(propType->GetTypeDescriptor());
-					return IGuiInstanceLoader::SupportedProperty;
+					if (collectionType)
+					{
+						return GuiInstancePropertyInfo::SupportedCollection(propType->GetTypeDescriptor());
+					}
+					else
+					{
+						return GuiInstancePropertyInfo::Supported(propType->GetTypeDescriptor());
+					}
 				case ITypeInfo::Generic:
 					{
 						ITypeDescriptor* genericType=propType->GetElementType()->GetTypeDescriptor();
 
 						if(genericType==description::GetTypeDescriptor<IValueList>())
 						{
-							return GetPropertyType(propType->GetGenericArgument(0), acceptableTypes);
+							return GetPropertyTypeInternal(propType->GetGenericArgument(0), true);
 						}
 						else if(genericType==description::GetTypeDescriptor<IValueFunctionProxy>())
 						{
-							return IGuiInstanceLoader::SupportedProperty;
-						}
-						else
-						{
-							return IGuiInstanceLoader::UnsupportedProperty;
+							return GuiInstancePropertyInfo::Supported(genericType);
 						}
 					}
-				default:
-					return IGuiInstanceLoader::UnsupportedProperty;
 				}
+				return GuiInstancePropertyInfo::Unsupported();
 			}
 
-			IGuiInstanceLoader::PropertyType GetPropertyType(const PropertyInfo& propertyInfo, collections::List<description::ITypeDescriptor*>& acceptableTypes)override
+			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
 			{
-				if (ITypeInfo* propType = GetPropertyType(propertyInfo))
+				if (ITypeInfo* propType = GetPropertyReflectionTypeInfo(propertyInfo))
 				{
-					return GetPropertyType(propType, acceptableTypes);
+					return GetPropertyTypeInternal(propType, false);
 				}
-				return IGuiInstanceLoader::UnsupportedProperty;
+				return GuiInstancePropertyInfo::Unsupported();
 			}
 
 			bool GetPropertyValue(PropertyValue& propertyValue)override
@@ -219,7 +270,7 @@ Default Instance Loader
 
 			bool SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)override
 			{
-				if (ITypeInfo* propType = GetPropertyType(propertyValue))
+				if (ITypeInfo* propType = GetPropertyReflectionTypeInfo(propertyValue))
 				{
 					if (propType->GetDecorator() == ITypeInfo::Generic)
 					{

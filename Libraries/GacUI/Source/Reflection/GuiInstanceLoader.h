@@ -51,16 +51,30 @@ Instance Environment
 Instance Loader
 ***********************************************************************/
 
+		class GuiInstancePropertyInfo : public IDescriptable, public Description<GuiInstancePropertyInfo>
+		{
+			typedef collections::List<description::ITypeDescriptor*>		TypeDescriptorList;
+		public:
+			bool									supported;
+			bool									tryParent;
+			bool									multipleValues;
+			bool									required;
+			bool									constructorParameter;
+			TypeDescriptorList						acceptableTypes;
+
+			GuiInstancePropertyInfo();
+			~GuiInstancePropertyInfo();
+
+			static Ptr<GuiInstancePropertyInfo>		Unsupported();
+			static Ptr<GuiInstancePropertyInfo>		Supported(description::ITypeDescriptor* typeDescriptor = 0);
+			static Ptr<GuiInstancePropertyInfo>		SupportedWithParent(description::ITypeDescriptor* typeDescriptor = 0);
+			static Ptr<GuiInstancePropertyInfo>		SupportedCollection(description::ITypeDescriptor* typeDescriptor = 0);
+			static Ptr<GuiInstancePropertyInfo>		SupportedCollectionWithParent(description::ITypeDescriptor* typeDescriptor = 0);
+		};
+
 		class IGuiInstanceLoader : public IDescriptable, public Description<IGuiInstanceLoader>
 		{
 		public:
-			enum PropertyType
-			{
-				UnsupportedProperty		=0,
-				SupportedProperty		=1<<0,
-				HandleByParentLoader	=1<<1,
-			};
-
 			struct TypeInfo
 			{
 				WString								typeName;
@@ -105,7 +119,7 @@ Instance Loader
 			virtual bool							IsDeserializable(const TypeInfo& typeInfo) = 0;
 			virtual description::Value				Deserialize(const TypeInfo& typeInfo, const WString& text) = 0;
 			virtual description::Value				CreateInstance(const TypeInfo& typeInfo)=0;
-			virtual PropertyType					GetPropertyType(const PropertyInfo& propertyInfo, collections::List<description::ITypeDescriptor*>& acceptableTypes)=0;
+			virtual Ptr<GuiInstancePropertyInfo>	GetPropertyType(const PropertyInfo& propertyInfo)=0;
 			virtual bool							GetPropertyValue(PropertyValue& propertyValue)=0;
 			virtual bool							SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)=0;
 		};
