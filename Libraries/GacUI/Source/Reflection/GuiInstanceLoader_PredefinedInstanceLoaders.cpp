@@ -41,9 +41,9 @@ GuiRewriteInstanceLoader
 				return Value();
 			}
 
-			IGuiInstanceLoader::PropertyType GetPropertyType(const PropertyInfo& propertyInfo, collections::List<description::ITypeDescriptor*>& acceptableTypes)override
+			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
 			{
-				return IGuiInstanceLoader::HandleByParentLoader;
+				return 0;
 			}
 
 			bool GetPropertyValue(PropertyValue& propertyValue)override
@@ -100,15 +100,16 @@ GuiControlInstanceLoader
 				return description::GetTypeDescriptor<GuiControl>()->GetTypeName();
 			}
 
-			IGuiInstanceLoader::PropertyType GetPropertyType(const PropertyInfo& propertyInfo, collections::List<description::ITypeDescriptor*>& acceptableTypes)override
+			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
 			{
 				if (propertyInfo.propertyName == L"")
 				{
-					acceptableTypes.Add(description::GetTypeDescriptor<GuiControl>());
-					acceptableTypes.Add(description::GetTypeDescriptor<GuiGraphicsComposition>());
-					return IGuiInstanceLoader::SupportedProperty;
+					auto info = GuiInstancePropertyInfo::SupportedCollection();
+					info->acceptableTypes.Add(description::GetTypeDescriptor<GuiControl>());
+					info->acceptableTypes.Add(description::GetTypeDescriptor<GuiGraphicsComposition>());
+					return info;
 				}
-				return IGuiInstanceLoader::HandleByParentLoader;
+				return GuiRewriteInstanceLoader::GetPropertyType(propertyInfo);
 			}
 
 			bool SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)override
@@ -145,14 +146,15 @@ GuiControlHostInstanceLoader
 				return description::GetTypeDescriptor<GuiControlHost>()->GetTypeName();
 			}
 
-			IGuiInstanceLoader::PropertyType GetPropertyType(const PropertyInfo& propertyInfo, collections::List<description::ITypeDescriptor*>& acceptableTypes)override
+			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
 			{
 				if (propertyInfo.propertyName == L"")
 				{
-					acceptableTypes.Add(description::GetTypeDescriptor<GuiComponent>());
-					return (IGuiInstanceLoader::PropertyType)(IGuiInstanceLoader::SupportedProperty | IGuiInstanceLoader::HandleByParentLoader);
+					auto info = GuiInstancePropertyInfo::SupportedCollectionWithParent();
+					info->acceptableTypes.Add(description::GetTypeDescriptor<GuiComponent>());
+					return info;
 				}
-				return IGuiInstanceLoader::HandleByParentLoader;
+				return GuiRewriteInstanceLoader::GetPropertyType(propertyInfo);
 			}
 
 			bool SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)override
@@ -184,14 +186,15 @@ GuiTabInstanceLoader
 				return description::GetTypeDescriptor<GuiTab>()->GetTypeName();
 			}
 
-			IGuiInstanceLoader::PropertyType GetPropertyType(const PropertyInfo& propertyInfo, collections::List<description::ITypeDescriptor*>& acceptableTypes)override
+			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
 			{
 				if (propertyInfo.propertyName == L"")
 				{
-					acceptableTypes.Add(description::GetTypeDescriptor<GuiTabPage>());
-					return (IGuiInstanceLoader::PropertyType)(IGuiInstanceLoader::SupportedProperty | IGuiInstanceLoader::HandleByParentLoader);
+					auto info = GuiInstancePropertyInfo::SupportedCollectionWithParent();
+					info->acceptableTypes.Add(description::GetTypeDescriptor<GuiTabPage>());
+					return info;
 				}
-				return IGuiInstanceLoader::HandleByParentLoader;
+				return GuiRewriteInstanceLoader::GetPropertyType(propertyInfo);
 			}
 
 			bool SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)override
@@ -223,15 +226,16 @@ GuiTabPageInstanceLoader
 				return description::GetTypeDescriptor<GuiTabPage>()->GetTypeName();
 			}
 
-			IGuiInstanceLoader::PropertyType GetPropertyType(const PropertyInfo& propertyInfo, collections::List<description::ITypeDescriptor*>& acceptableTypes)override
+			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
 			{
 				if (propertyInfo.propertyName == L"")
 				{
-					acceptableTypes.Add(description::GetTypeDescriptor<GuiControl>());
-					acceptableTypes.Add(description::GetTypeDescriptor<GuiGraphicsComposition>());
-					return IGuiInstanceLoader::SupportedProperty;
+					auto info = GuiInstancePropertyInfo::SupportedCollection();
+					info->acceptableTypes.Add(description::GetTypeDescriptor<GuiControl>());
+					info->acceptableTypes.Add(description::GetTypeDescriptor<GuiGraphicsComposition>());
+					return info;
 				}
-				return IGuiInstanceLoader::HandleByParentLoader;
+				return GuiRewriteInstanceLoader::GetPropertyType(propertyInfo);
 			}
 
 			bool SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)override
@@ -268,14 +272,15 @@ GuiToolstripMenuInstanceLoader
 				return description::GetTypeDescriptor<GuiToolstripMenu>()->GetTypeName();
 			}
 
-			IGuiInstanceLoader::PropertyType GetPropertyType(const PropertyInfo& propertyInfo, collections::List<description::ITypeDescriptor*>& acceptableTypes)override
+			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
 			{
 				if (propertyInfo.propertyName == L"")
 				{
-					acceptableTypes.Add(description::GetTypeDescriptor<GuiControl>());
-					return (IGuiInstanceLoader::PropertyType)(IGuiInstanceLoader::SupportedProperty | IGuiInstanceLoader::HandleByParentLoader);
+					auto info = GuiInstancePropertyInfo::SupportedCollectionWithParent();
+					info->acceptableTypes.Add(description::GetTypeDescriptor<GuiControl>());
+					return info;
 				}
-				return IGuiInstanceLoader::HandleByParentLoader;
+				return GuiRewriteInstanceLoader::GetPropertyType(propertyInfo);
 			}
 
 			bool SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)override
@@ -307,14 +312,15 @@ GuiToolstripMenuBarInstanceLoader
 				return description::GetTypeDescriptor<GuiToolstripMenuBar>()->GetTypeName();
 			}
 
-			IGuiInstanceLoader::PropertyType GetPropertyType(const PropertyInfo& propertyInfo, collections::List<description::ITypeDescriptor*>& acceptableTypes)override
+			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
 			{
 				if (propertyInfo.propertyName == L"")
 				{
-					acceptableTypes.Add(description::GetTypeDescriptor<GuiControl>());
-					return (IGuiInstanceLoader::PropertyType)(IGuiInstanceLoader::SupportedProperty | IGuiInstanceLoader::HandleByParentLoader);
+					auto info = GuiInstancePropertyInfo::SupportedCollectionWithParent();
+					info->acceptableTypes.Add(description::GetTypeDescriptor<GuiControl>());
+					return info;
 				}
-				return IGuiInstanceLoader::HandleByParentLoader;
+				return GuiRewriteInstanceLoader::GetPropertyType(propertyInfo);
 			}
 
 			bool SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)override
@@ -346,14 +352,15 @@ GuiToolstripToolBarInstanceLoader
 				return description::GetTypeDescriptor<GuiToolstripToolBar>()->GetTypeName();
 			}
 
-			IGuiInstanceLoader::PropertyType GetPropertyType(const PropertyInfo& propertyInfo, collections::List<description::ITypeDescriptor*>& acceptableTypes)override
+			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
 			{
 				if (propertyInfo.propertyName == L"")
 				{
-					acceptableTypes.Add(description::GetTypeDescriptor<GuiControl>());
-					return (IGuiInstanceLoader::PropertyType)(IGuiInstanceLoader::SupportedProperty | IGuiInstanceLoader::HandleByParentLoader);
+					auto info = GuiInstancePropertyInfo::SupportedCollectionWithParent();
+					info->acceptableTypes.Add(description::GetTypeDescriptor<GuiControl>());
+					return info;
 				}
-				return IGuiInstanceLoader::HandleByParentLoader;
+				return GuiRewriteInstanceLoader::GetPropertyType(propertyInfo);
 			}
 
 			bool SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)override
@@ -394,14 +401,15 @@ GuiToolstripButtonInstanceLoader
 				return Value();
 			}
 
-			IGuiInstanceLoader::PropertyType GetPropertyType(const PropertyInfo& propertyInfo, collections::List<description::ITypeDescriptor*>& acceptableTypes)override
+			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
 			{
 				if (propertyInfo.propertyName == L"SubMenu")
 				{
-					acceptableTypes.Add(description::GetTypeDescriptor<GuiToolstripMenu>());
-					return IGuiInstanceLoader::SupportedProperty;
+					auto info = GuiInstancePropertyInfo::SupportedCollection();
+					info->acceptableTypes.Add(description::GetTypeDescriptor<GuiToolstripMenu>());
+					return info;
 				}
-				return IGuiInstanceLoader::HandleByParentLoader;
+				return GuiRewriteInstanceLoader::GetPropertyType(propertyInfo);
 			}
 
 			bool GetPropertyValue(PropertyValue& propertyValue)override
@@ -434,16 +442,17 @@ GuiCompositionInstanceLoader
 				return description::GetTypeDescriptor<GuiGraphicsComposition>()->GetTypeName();
 			}
 
-			IGuiInstanceLoader::PropertyType GetPropertyType(const PropertyInfo& propertyInfo, collections::List<description::ITypeDescriptor*>& acceptableTypes)override
+			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
 			{
 				if (propertyInfo.propertyName == L"")
 				{
-					acceptableTypes.Add(description::GetTypeDescriptor<GuiControl>());
-					acceptableTypes.Add(description::GetTypeDescriptor<GuiGraphicsComposition>());
-					acceptableTypes.Add(description::GetTypeDescriptor<IGuiGraphicsElement>());
-					return IGuiInstanceLoader::SupportedProperty;
+					auto info = GuiInstancePropertyInfo::SupportedCollection();
+					info->acceptableTypes.Add(description::GetTypeDescriptor<GuiControl>());
+					info->acceptableTypes.Add(description::GetTypeDescriptor<GuiGraphicsComposition>());
+					info->acceptableTypes.Add(description::GetTypeDescriptor<IGuiGraphicsElement>());
+					return info;
 				}
-				return IGuiInstanceLoader::HandleByParentLoader;
+				return GuiRewriteInstanceLoader::GetPropertyType(propertyInfo);
 			}
 
 			bool SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)override
@@ -485,14 +494,15 @@ GuiTableCompositionInstanceLoader
 				return description::GetTypeDescriptor<GuiTableComposition>()->GetTypeName();
 			}
 
-			IGuiInstanceLoader::PropertyType GetPropertyType(const PropertyInfo& propertyInfo, collections::List<description::ITypeDescriptor*>& acceptableTypes)override
+			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
 			{
 				if (propertyInfo.propertyName == L"Rows" || propertyInfo.propertyName==L"Columns")
 				{
-					acceptableTypes.Add(description::GetTypeDescriptor<GuiCellOption>());
-					return IGuiInstanceLoader::SupportedProperty;
+					auto info = GuiInstancePropertyInfo::SupportedCollection();
+					info->acceptableTypes.Add(description::GetTypeDescriptor<GuiCellOption>());
+					return info;
 				}
-				return IGuiInstanceLoader::HandleByParentLoader;
+				return GuiRewriteInstanceLoader::GetPropertyType(propertyInfo);
 			}
 
 			bool SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)override
@@ -531,14 +541,15 @@ GuiCellCompositionInstanceLoader
 				return description::GetTypeDescriptor<GuiCellComposition>()->GetTypeName();
 			}
 
-			IGuiInstanceLoader::PropertyType GetPropertyType(const PropertyInfo& propertyInfo, collections::List<description::ITypeDescriptor*>& acceptableTypes)override
+			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
 			{
 				if (propertyInfo.propertyName == L"Site")
 				{
-					acceptableTypes.Add(description::GetTypeDescriptor<SiteValue>());
-					return IGuiInstanceLoader::SupportedProperty;
+					auto info = GuiInstancePropertyInfo::Supported();
+					info->acceptableTypes.Add(description::GetTypeDescriptor<SiteValue>());
+					return info;
 				}
-				return IGuiInstanceLoader::HandleByParentLoader;
+				return GuiRewriteInstanceLoader::GetPropertyType(propertyInfo);
 			}
 
 			bool SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)override
