@@ -256,11 +256,13 @@ Helper Functions
 				// try to look for a loader to handle this property
 				while(propertyLoader && loadedValueCount<values.Count())
 				{
-					List<ITypeDescriptor*> acceptableTypes, binderExpectedTypes;
-					auto propertyType = propertyLoader->GetPropertyType(cachedPropertyValue, acceptableTypes);
-
-					if (propertyType & IGuiInstanceLoader::SupportedProperty)
+					if (auto propertyInfo = propertyLoader->GetPropertyType(cachedPropertyValue))
 					{
+						if (!propertyInfo->supported)
+						{
+							break;
+						}
+
 						vint currentIndex = 0;
 						for (vint i = 0; i < values.Count(); i++)
 						{
@@ -270,7 +272,7 @@ Helper Functions
 								if(propertyValue->binding==L"")
 								{
 									// default binding: set the value directly
-									if (LoadValueVisitor::LoadValue(valueRepr, env, acceptableTypes, bindingSetters, cachedPropertyValue.propertyValue))
+									if (LoadValueVisitor::LoadValue(valueRepr, env, propertyInfo->acceptableTypes, bindingSetters, cachedPropertyValue.propertyValue))
 									{
 										canRemoveLoadedValue = true;
 										if(propertyLoader->SetPropertyValue(cachedPropertyValue, currentIndex))
@@ -303,7 +305,7 @@ Helper Functions
 								else if (IGuiInstanceBinder* binder=GetInstanceLoaderManager()->GetInstanceBinder(propertyValue->binding))
 								{
 									// other binding: provide the property value to the specified binder
-									binderExpectedTypes.Clear();
+									List<ITypeDescriptor*> binderExpectedTypes;
 									binder->GetExpectedValueTypes(binderExpectedTypes);
 									if (LoadValueVisitor::LoadValue(valueRepr, env, binderExpectedTypes, bindingSetters, cachedPropertyValue.propertyValue))
 									{
@@ -325,16 +327,13 @@ Helper Functions
 								}
 							}
 						}
-					}
 
-					if(propertyType & IGuiInstanceLoader::HandleByParentLoader)
-					{
-						propertyLoader=GetInstanceLoaderManager()->GetParentLoader(propertyLoader);
+						if (!propertyInfo->tryParent)
+						{
+							break;
+						}
 					}
-					else
-					{
-						propertyLoader=0;
-					}
+					propertyLoader=GetInstanceLoaderManager()->GetParentLoader(propertyLoader);
 				}
 			}
 		}
