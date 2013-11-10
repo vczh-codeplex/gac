@@ -18,7 +18,8 @@ GuiInstancePropertyInfo
 ***********************************************************************/
 
 		GuiInstancePropertyInfo::GuiInstancePropertyInfo()
-			:supported(false)
+			:supportAssign(false)
+			, supportSet(false)
 			, tryParent(false)
 			, multipleValues(false)
 			, required(false)
@@ -39,7 +40,8 @@ GuiInstancePropertyInfo
 		Ptr<GuiInstancePropertyInfo> GuiInstancePropertyInfo::Supported(description::ITypeDescriptor* typeDescriptor)
 		{
 			Ptr<GuiInstancePropertyInfo> info = new GuiInstancePropertyInfo;
-			info->supported = true;
+			info->supportAssign = true;
+			info->supportSet = true;
 			if (typeDescriptor) info->acceptableTypes.Add(typeDescriptor);
 			return info;
 		}
