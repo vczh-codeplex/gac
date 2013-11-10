@@ -258,7 +258,7 @@ Helper Functions
 				{
 					if (auto propertyInfo = propertyLoader->GetPropertyType(cachedPropertyValue))
 					{
-						if (!propertyInfo->supported)
+						if (!propertyInfo->supportAssign && !propertyInfo->supportSet)
 						{
 							break;
 						}
@@ -271,52 +271,61 @@ Helper Functions
 							{
 								if(propertyValue->binding==L"")
 								{
-									// default binding: set the value directly
-									if (LoadValueVisitor::LoadValue(valueRepr, env, propertyInfo->acceptableTypes, bindingSetters, cachedPropertyValue.propertyValue))
+									if (propertyInfo->supportAssign)
 									{
-										canRemoveLoadedValue = true;
-										if(propertyLoader->SetPropertyValue(cachedPropertyValue, currentIndex))
+										// default binding: set the value directly
+										if (LoadValueVisitor::LoadValue(valueRepr, env, propertyInfo->acceptableTypes, bindingSetters, cachedPropertyValue.propertyValue))
 										{
-											currentIndex++;
-										}
-										else
-										{
-											cachedPropertyValue.propertyValue.DeleteRawPtr();
+											canRemoveLoadedValue = true;
+											if(propertyLoader->SetPropertyValue(cachedPropertyValue, currentIndex))
+											{
+												currentIndex++;
+											}
+											else
+											{
+												cachedPropertyValue.propertyValue.DeleteRawPtr();
+											}
 										}
 									}
 								}
 								if (propertyValue->binding == L"set")
 								{
-									// set binding: get the property value and apply another property list on it
-									if(Ptr<GuiAttSetterRepr> propertyAttSetter=valueRepr.Cast<GuiAttSetterRepr>())
+									if (propertyInfo->supportSet)
 									{
-										if(propertyLoader->GetPropertyValue(cachedPropertyValue) && cachedPropertyValue.propertyValue.GetRawPtr())
+										// set binding: get the property value and apply another property list on it
+										if(Ptr<GuiAttSetterRepr> propertyAttSetter=valueRepr.Cast<GuiAttSetterRepr>())
 										{
-											canRemoveLoadedValue = true;
-											ITypeDescriptor* propertyTypeDescriptor=cachedPropertyValue.propertyValue.GetRawPtr()->GetTypeDescriptor();
-											IGuiInstanceLoader* propertyInstanceLoader=GetInstanceLoaderManager()->GetLoader(propertyTypeDescriptor->GetTypeName());
-											if(propertyInstanceLoader)
+											if(propertyLoader->GetPropertyValue(cachedPropertyValue) && cachedPropertyValue.propertyValue.GetRawPtr())
 											{
-												FillInstance(cachedPropertyValue.propertyValue, env, propertyAttSetter.Obj(), propertyInstanceLoader, false, propertyTypeDescriptor->GetTypeName(), bindingSetters);
+												canRemoveLoadedValue = true;
+												ITypeDescriptor* propertyTypeDescriptor=cachedPropertyValue.propertyValue.GetRawPtr()->GetTypeDescriptor();
+												IGuiInstanceLoader* propertyInstanceLoader=GetInstanceLoaderManager()->GetLoader(propertyTypeDescriptor->GetTypeName());
+												if(propertyInstanceLoader)
+												{
+													FillInstance(cachedPropertyValue.propertyValue, env, propertyAttSetter.Obj(), propertyInstanceLoader, false, propertyTypeDescriptor->GetTypeName(), bindingSetters);
+												}
 											}
 										}
 									}
 								}
 								else if (IGuiInstanceBinder* binder=GetInstanceLoaderManager()->GetInstanceBinder(propertyValue->binding))
 								{
-									// other binding: provide the property value to the specified binder
-									List<ITypeDescriptor*> binderExpectedTypes;
-									binder->GetExpectedValueTypes(binderExpectedTypes);
-									if (LoadValueVisitor::LoadValue(valueRepr, env, binderExpectedTypes, bindingSetters, cachedPropertyValue.propertyValue))
+									if (propertyInfo->supportAssign)
 									{
-										canRemoveLoadedValue = true;
-										FillInstanceBindingSetter bindingSetter;
-										bindingSetter.binder = binder;
-										bindingSetter.loader = propertyLoader;
-										bindingSetter.propertyValue = cachedPropertyValue;
-										bindingSetter.currentIndex = currentIndex;
-										bindingSetters.Add(bindingSetter);
-										currentIndex++;
+										// other binding: provide the property value to the specified binder
+										List<ITypeDescriptor*> binderExpectedTypes;
+										binder->GetExpectedValueTypes(binderExpectedTypes);
+										if (LoadValueVisitor::LoadValue(valueRepr, env, binderExpectedTypes, bindingSetters, cachedPropertyValue.propertyValue))
+										{
+											canRemoveLoadedValue = true;
+											FillInstanceBindingSetter bindingSetter;
+											bindingSetter.binder = binder;
+											bindingSetter.loader = propertyLoader;
+											bindingSetter.propertyValue = cachedPropertyValue;
+											bindingSetter.currentIndex = currentIndex;
+											bindingSetters.Add(bindingSetter);
+											currentIndex++;
+										}
 									}
 								}
 

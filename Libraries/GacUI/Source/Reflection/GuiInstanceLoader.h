@@ -55,7 +55,8 @@ Instance Loader
 		{
 			typedef collections::List<description::ITypeDescriptor*>		TypeDescriptorList;
 		public:
-			bool									supported;
+			bool									supportAssign;
+			bool									supportSet;
 			bool									tryParent;
 			bool									multipleValues;
 			bool									required;
