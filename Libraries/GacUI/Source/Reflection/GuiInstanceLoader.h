@@ -123,6 +123,7 @@ Instance Loader
 			virtual description::Value				Deserialize(const TypeInfo& typeInfo, const WString& text) = 0;
 			virtual bool							IsCreatable(const TypeInfo& typeInfo) = 0;
 			virtual description::Value				CreateInstance(const TypeInfo& typeInfo)=0;
+			virtual void							GetPropertyNames(const TypeInfo& typeInfo, collections::List<WString>& propertyNames) = 0;
 			virtual Ptr<GuiInstancePropertyInfo>	GetPropertyType(const PropertyInfo& propertyInfo)=0;
 			virtual bool							GetPropertyValue(PropertyValue& propertyValue)=0;
 			virtual bool							SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)=0;

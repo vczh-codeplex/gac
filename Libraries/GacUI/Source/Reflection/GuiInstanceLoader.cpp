@@ -293,6 +293,34 @@ Default Instance Loader
 				return false;
 			}
 
+			void CollectPropertyNames(const TypeInfo& typeInfo, ITypeDescriptor* typeDescriptor, collections::List<WString>& propertyNames)
+			{
+				vint propertyCount = typeDescriptor->GetPropertyCount();
+				for (vint i = 0; i < propertyCount; i++)
+				{
+					WString propertyName = typeDescriptor->GetProperty(i)->GetName();
+					if (!propertyNames.Contains(propertyName))
+					{
+						auto info = GetPropertyType(PropertyInfo(typeInfo, propertyName));
+						if (info && (info->supportAssign || info->supportSet))
+						{
+							propertyNames.Add(propertyName);
+						}
+					}
+				}
+
+				vint parentCount = typeDescriptor->GetBaseTypeDescriptorCount();
+				for (vint i = 0; i < parentCount; i++)
+				{
+					CollectPropertyNames(typeInfo, typeDescriptor->GetBaseTypeDescriptor(i), propertyNames);
+				}
+			}
+
+			void GetPropertyNames(const TypeInfo& typeInfo, collections::List<WString>& propertyNames)override
+			{
+				CollectPropertyNames(typeInfo, typeInfo.typeDescriptor, propertyNames);
+			}
+
 			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
 			{
 				bool set = false;
@@ -663,6 +691,118 @@ Helper Functions
 			writer.WriteString(L" : ");
 		}
 
+		void LogInstanceLoaderManager_PrintProperties(stream::TextWriter& writer, const WString& typeName)
+		{
+			List<IGuiInstanceLoader*> loaders;
+			{
+				IGuiInstanceLoader* loader = GetInstanceLoaderManager()->GetLoader(typeName);
+				while (loader)
+				{
+					loaders.Add(loader);
+					loader = GetInstanceLoaderManager()->GetParentLoader(loader);
+				}
+			}
+			
+			IGuiInstanceLoader::TypeInfo typeInfo(typeName, GetInstanceLoaderManager()->GetTypeDescriptorForType(typeName));
+			Dictionary<WString, IGuiInstanceLoader*> propertyLoaders;
+			FOREACH(IGuiInstanceLoader*, loader, loaders)
+			{
+				List<WString> propertyNames;
+				loader->GetPropertyNames(typeInfo, propertyNames);
+
+				FOREACH(WString, propertyName, propertyNames)
+				{
+					if (!propertyLoaders.Keys().Contains(propertyName))
+					{
+						propertyLoaders.Add(propertyName, loader);
+					}
+				}
+			}
+
+			FOREACH_INDEXER(WString, propertyName, index, propertyLoaders.Keys())
+			{
+				SortedList<WString> acceptableTypes;
+				Ptr<GuiInstancePropertyInfo> firstInfo;
+				IGuiInstanceLoader* loader = propertyLoaders.Values()[index];
+				IGuiInstanceLoader::PropertyInfo propertyInfo(typeInfo, propertyName);
+
+				while (loader)
+				{
+					if (auto info = loader->GetPropertyType(propertyInfo))
+					{
+						if (firstInfo)
+						{
+							if (info->supportAssign != firstInfo->supportAssign ||
+								info->supportSet != firstInfo->supportSet ||
+								info->multipleValues != firstInfo->multipleValues
+								)
+							{
+								break;
+							}
+						}
+						else
+						{
+							firstInfo = info;
+						}
+
+						if (info->supportAssign || info->supportSet)
+						{
+							FOREACH(ITypeDescriptor*, type, info->acceptableTypes)
+							{
+								if (!acceptableTypes.Contains(type->GetTypeName()))
+								{
+									acceptableTypes.Add(type->GetTypeName());
+								}
+							}
+
+							if (!info->tryParent)
+							{
+								break;
+							}
+						}
+						else
+						{
+							break;
+						}
+					}
+					
+					vint index = loaders.IndexOf(loader);
+					loader = index == loaders.Count() - 1 ? 0 : loaders[index + 1];
+				}
+
+				LogInstanceLoaderManager_PrintFieldName(writer, propertyName);
+				if (firstInfo->supportSet)
+				{
+					writer.WriteString(L"[set]        ");
+				}
+				else if (firstInfo->multipleValues)
+				{
+					writer.WriteString(L"[collection] ");
+				}
+				else
+				{
+					writer.WriteString(L"[assign]     ");
+				}
+
+				switch (acceptableTypes.Count())
+				{
+				case 0:
+					writer.WriteLine(L"<UNKNOWN-TYPE>");
+					break;
+				case 1:
+					writer.WriteLine(acceptableTypes[0]);
+					break;
+				default:
+					writer.WriteLine(L"{");
+					FOREACH(WString, typeName, acceptableTypes)
+					{
+						writer.WriteLine(L"            " + typeName + L",");
+					}
+					writer.WriteLine(L"        }");
+				}
+			}
+		}
+
 		void LogInstanceLoaderManager_PrintSerializableTypes(stream::TextWriter& writer, const WString& typeName)
 		{
 			if (ITypeDescriptor* type = GetGlobalTypeManager()->GetTypeDescriptor(typeName))
@@ -706,6 +846,7 @@ Helper Functions
 					else
 					{
 						writer.WriteLine(L"    data "+ typeName +  + L" = {" + serializer->GetDefaultText() + L"}");
+						return;
 					}
 				}
 			}
@@ -717,6 +858,7 @@ Helper Functions
 			writer.WriteLine(L"    " + typeName);
 			LogInstanceLoaderManager_PrintParentTypes(writer, typeName);
 			writer.WriteLine(L"    {");
+			LogInstanceLoaderManager_PrintProperties(writer, typeName);
 			writer.WriteLine(L"    }");
 		}
 
