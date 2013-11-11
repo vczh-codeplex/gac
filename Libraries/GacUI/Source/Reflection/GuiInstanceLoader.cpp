@@ -13,15 +13,13 @@ namespace vl
 		using namespace regex;
 		using namespace reflection::description;
 
-/***********************************************************************
-GuiInstancePropertyInfo
-***********************************************************************/
+		/***********************************************************************
+		GuiInstancePropertyInfo
+		***********************************************************************/
 
 		GuiInstancePropertyInfo::GuiInstancePropertyInfo()
-			:supportAssign(false)
-			, supportSet(false)
+			:support(NotSupport)
 			, tryParent(false)
-			, multipleValues(false)
 			, required(false)
 			, constructorParameter(false)
 		{
@@ -33,14 +31,13 @@ GuiInstancePropertyInfo
 
 		Ptr<GuiInstancePropertyInfo> GuiInstancePropertyInfo::Unsupported()
 		{
-			Ptr<GuiInstancePropertyInfo> info = new GuiInstancePropertyInfo;
-			return info;
+			return new GuiInstancePropertyInfo;
 		}
 
 		Ptr<GuiInstancePropertyInfo> GuiInstancePropertyInfo::Assign(description::ITypeDescriptor* typeDescriptor)
 		{
 			Ptr<GuiInstancePropertyInfo> info = new GuiInstancePropertyInfo;
-			info->supportAssign = true;
+			info->support = SupportAssign;
 			if (typeDescriptor) info->acceptableTypes.Add(typeDescriptor);
 			return info;
 		}
@@ -52,38 +49,39 @@ GuiInstancePropertyInfo
 			return info;
 		}
 
-		Ptr<GuiInstancePropertyInfo> GuiInstancePropertyInfo::AssignCollection(description::ITypeDescriptor* typeDescriptor)
+		Ptr<GuiInstancePropertyInfo> GuiInstancePropertyInfo::Collection(description::ITypeDescriptor* typeDescriptor)
 		{
 			Ptr<GuiInstancePropertyInfo> info = Assign(typeDescriptor);
-			info->multipleValues = true;
+			info->support = SupportCollection;
 			return info;
 		}
 
-		Ptr<GuiInstancePropertyInfo> GuiInstancePropertyInfo::AssignCollectionWithParent(description::ITypeDescriptor* typeDescriptor)
+		Ptr<GuiInstancePropertyInfo> GuiInstancePropertyInfo::CollectionWithParent(description::ITypeDescriptor* typeDescriptor)
 		{
-			Ptr<GuiInstancePropertyInfo> info = AssignWithParent(typeDescriptor);
-			info->multipleValues = true;
+			Ptr<GuiInstancePropertyInfo> info = Collection(typeDescriptor);
+			info->tryParent = true;
 			return info;
 		}
 
 		Ptr<GuiInstancePropertyInfo> GuiInstancePropertyInfo::Set(description::ITypeDescriptor* typeDescriptor)
 		{
 			Ptr<GuiInstancePropertyInfo> info = new GuiInstancePropertyInfo;
-			info->supportSet = true;
+			info->support = SupportSet;
 			if (typeDescriptor) info->acceptableTypes.Add(typeDescriptor);
 			return info;
 		}
 
-		Ptr<GuiInstancePropertyInfo> GuiInstancePropertyInfo::SetWithParent(description::ITypeDescriptor* typeDescriptor)
+		Ptr<GuiInstancePropertyInfo> GuiInstancePropertyInfo::Array(description::ITypeDescriptor* typeDescriptor)
 		{
-			Ptr<GuiInstancePropertyInfo> info = Set(typeDescriptor);
-			info->tryParent = true;
+			Ptr<GuiInstancePropertyInfo> info = new GuiInstancePropertyInfo;
+			info->support = SupportArray;
+			if (typeDescriptor) info->acceptableTypes.Add(typeDescriptor);
 			return info;
 		}
 
-/***********************************************************************
-GuiInstanceContext::ElementName Parser
-***********************************************************************/
+		/***********************************************************************
+		GuiInstanceContext::ElementName Parser
+		***********************************************************************/
 
 		class GuiInstanceContextElementNameParser : public Object, public IGuiParser<GuiInstanceContext::ElementName>
 		{
@@ -98,33 +96,33 @@ GuiInstanceContext::ElementName Parser
 
 			Ptr<ElementName> TypedParse(const WString& text)override
 			{
-				Ptr<RegexMatch> match=regexElementName.MatchHead(text);
-				if(match && match->Result().Length()!=text.Length()) return 0;
+				Ptr<RegexMatch> match = regexElementName.MatchHead(text);
+				if (match && match->Result().Length() != text.Length()) return 0;
 
-				Ptr<ElementName> elementName=new ElementName;
-				if(match->Groups().Keys().Contains(L"namespaceName"))
+				Ptr<ElementName> elementName = new ElementName;
+				if (match->Groups().Keys().Contains(L"namespaceName"))
 				{
-					elementName->namespaceName=match->Groups()[L"namespaceName"][0].Value();
+					elementName->namespaceName = match->Groups()[L"namespaceName"][0].Value();
 				}
-				if(match->Groups().Keys().Contains(L"category"))
+				if (match->Groups().Keys().Contains(L"category"))
 				{
-					elementName->category=match->Groups()[L"category"][0].Value();
+					elementName->category = match->Groups()[L"category"][0].Value();
 				}
-				if(match->Groups().Keys().Contains(L"name"))
+				if (match->Groups().Keys().Contains(L"name"))
 				{
-					elementName->name=match->Groups()[L"name"][0].Value();
+					elementName->name = match->Groups()[L"name"][0].Value();
 				}
-				if(match->Groups().Keys().Contains(L"binding"))
+				if (match->Groups().Keys().Contains(L"binding"))
 				{
-					elementName->binding=match->Groups()[L"binding"][0].Value();
+					elementName->binding = match->Groups()[L"binding"][0].Value();
 				}
 				return elementName;
 			}
 		};
 
-/***********************************************************************
-Instance Type Resolver
-***********************************************************************/
+		/***********************************************************************
+		Instance Type Resolver
+		***********************************************************************/
 
 		class GuiResourceInstanceTypeResolver : public Object, public IGuiResourceTypeResolver
 		{
@@ -156,19 +154,19 @@ Instance Type Resolver
 
 			Ptr<Object> ResolveResource(Ptr<Object> resource, Ptr<GuiResourcePathResolver> resolver)
 			{
-				Ptr<XmlDocument> xml=resource.Cast<XmlDocument>();
-				if(xml)
+				Ptr<XmlDocument> xml = resource.Cast<XmlDocument>();
+				if (xml)
 				{
-					Ptr<GuiInstanceContext> context=GuiInstanceContext::LoadFromXml(xml);
+					Ptr<GuiInstanceContext> context = GuiInstanceContext::LoadFromXml(xml);
 					return context;
 				}
 				return 0;
 			}
 		};
 
-/***********************************************************************
-Default Instance Loader
-***********************************************************************/
+		/***********************************************************************
+		Default Instance Loader
+		***********************************************************************/
 
 		class GuiDefaultInstanceLoader : public Object, public IGuiInstanceLoader
 		{
@@ -201,10 +199,10 @@ Default Instance Loader
 				if (auto ctors = typeInfo.typeDescriptor->GetConstructorGroup())
 				{
 					vint count = ctors->GetMethodCount();
-					for(vint i=0;i<count;i++)
+					for (vint i = 0; i < count; i++)
 					{
 						IMethodInfo* method = ctors->GetMethod(i);
-						if(method->GetParameterCount()==0)
+						if (method->GetParameterCount() == 0)
 						{
 							return method;
 						}
@@ -227,10 +225,12 @@ Default Instance Loader
 				return Value();
 			}
 
-			void ProcessGenericType(ITypeInfo* propType, ITypeInfo*& genericType, ITypeInfo*& elementType, bool& collectionType)
+			void ProcessGenericType(ITypeInfo* propType, ITypeInfo*& genericType, ITypeInfo*& elementType, bool& readableList, bool& writableList, bool& collectionType)
 			{
 				genericType = 0;
 				elementType = 0;
+				readableList = false;
+				writableList = false;
 				collectionType = false;
 				if (propType->GetDecorator() == ITypeInfo::SharedPtr && propType->GetElementType()->GetDecorator() == ITypeInfo::Generic)
 				{
@@ -239,28 +239,50 @@ Default Instance Loader
 					if (genericType->GetTypeDescriptor() == description::GetTypeDescriptor<IValueList>())
 					{
 						elementType = propType->GetGenericArgument(0);
+						readableList = true;
+						writableList = true;
 						collectionType = true;
 					}
-					else if (genericType->GetTypeDescriptor() == description::GetTypeDescriptor<IValueEnumerator>()){ collectionType = true; }
-					else if (genericType->GetTypeDescriptor() == description::GetTypeDescriptor<IValueEnumerable>()){ collectionType = true; }
-					else if (genericType->GetTypeDescriptor() == description::GetTypeDescriptor<IValueReadonlyList>()){ collectionType = true; }
-					else if (genericType->GetTypeDescriptor() == description::GetTypeDescriptor<IValueReadonlyDictionary>()){ collectionType = true; }
-					else if (genericType->GetTypeDescriptor() == description::GetTypeDescriptor<IValueDictionary>()){ collectionType = true; }
+					else if (genericType->GetTypeDescriptor() == description::GetTypeDescriptor<IValueEnumerator>())
+					{
+						collectionType = true;
+					}
+					else if (genericType->GetTypeDescriptor() == description::GetTypeDescriptor<IValueEnumerable>())
+					{
+						elementType = propType->GetGenericArgument(0);
+						readableList = true;
+						collectionType = true;
+					}
+					else if (genericType->GetTypeDescriptor() == description::GetTypeDescriptor<IValueReadonlyList>())
+					{
+						elementType = propType->GetGenericArgument(0);
+						readableList = true;
+						collectionType = true;
+					}
+					else if (genericType->GetTypeDescriptor() == description::GetTypeDescriptor<IValueReadonlyDictionary>())
+					{
+						collectionType = true;
+					}
+					else if (genericType->GetTypeDescriptor() == description::GetTypeDescriptor<IValueDictionary>())
+					{
+						collectionType = true;
+					}
 				}
 			}
 
-			ITypeInfo* GetPropertyReflectionTypeInfo(const PropertyInfo& propertyInfo, bool& set, bool& multipleValues)
+			ITypeInfo* GetPropertyReflectionTypeInfo(const PropertyInfo& propertyInfo, GuiInstancePropertyInfo::Support& support)
 			{
-				set = false;
-				multipleValues = false;
+				support = GuiInstancePropertyInfo::NotSupport;
 				IPropertyInfo* prop = propertyInfo.typeInfo.typeDescriptor->GetPropertyByName(propertyInfo.propertyName, true);
-				if(prop)
+				if (prop)
 				{
 					ITypeInfo* propType = prop->GetReturn();
 					ITypeInfo* genericType = 0;
 					ITypeInfo* elementType = 0;
+					bool readableList = false;
+					bool writableList = false;
 					bool collectionType = false;
-					ProcessGenericType(propType, genericType, elementType, collectionType);
+					ProcessGenericType(propType, genericType, elementType, readableList, writableList, collectionType);
 
 					if (prop->IsWritable())
 					{
@@ -268,24 +290,27 @@ Default Instance Loader
 						{
 							if (setter->GetParameterCount() == 1)
 							{
+								support = GuiInstancePropertyInfo::SupportAssign;
 								return setter->GetParameter(0)->GetType();
 							}
 						}
 
 						if (collectionType)
 						{
-							if (elementType)
+							if (readableList)
 							{
-								multipleValues = true;
+								support = GuiInstancePropertyInfo::SupportArray;
 								return elementType;
 							}
 						}
 						else if (genericType)
 						{
+							support = GuiInstancePropertyInfo::SupportAssign;
 							return genericType;
 						}
 						else
 						{
+							support = GuiInstancePropertyInfo::SupportAssign;
 							return propType;
 						}
 					}
@@ -293,15 +318,15 @@ Default Instance Loader
 					{
 						if (collectionType)
 						{
-							if (elementType)
+							if (writableList)
 							{
-								multipleValues = true;
+								support = GuiInstancePropertyInfo::SupportCollection;
 								return elementType;
 							}
 						}
 						else if (!genericType)
 						{
-							set = true;
+							support = GuiInstancePropertyInfo::SupportSet;
 							return propType;
 						}
 					}
@@ -311,7 +336,7 @@ Default Instance Loader
 
 			bool FillPropertyInfo(Ptr<GuiInstancePropertyInfo> propertyInfo, ITypeInfo* propType)
 			{
-				switch(propType->GetDecorator())
+				switch (propType->GetDecorator())
 				{
 				case ITypeInfo::RawPtr:
 				case ITypeInfo::SharedPtr:
@@ -334,7 +359,7 @@ Default Instance Loader
 					if (!propertyNames.Contains(propertyName))
 					{
 						auto info = GetPropertyType(PropertyInfo(typeInfo, propertyName));
-						if (info && (info->supportAssign || info->supportSet))
+						if (info && info->support != GuiInstancePropertyInfo::NotSupport)
 						{
 							propertyNames.Add(propertyName);
 						}
@@ -355,28 +380,13 @@ Default Instance Loader
 
 			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
 			{
-				bool set = false;
-				bool collection = false;
-				if (ITypeInfo* propType = GetPropertyReflectionTypeInfo(propertyInfo, set, collection))
+				GuiInstancePropertyInfo::Support support = GuiInstancePropertyInfo::NotSupport;
+				if (ITypeInfo* propType = GetPropertyReflectionTypeInfo(propertyInfo, support))
 				{
-					Ptr<GuiInstancePropertyInfo> propertyInfo;
-					if (!set && !collection)
-					{
-						propertyInfo = GuiInstancePropertyInfo::Assign();
-					}
-					else if (set && !collection)
-					{
-						if (!propType->GetTypeDescriptor()->GetValueSerializer())
-						{
-							propertyInfo = GuiInstancePropertyInfo::Set();
-						}
-					}
-					else if (!set && collection)
-					{
-						propertyInfo = GuiInstancePropertyInfo::AssignCollection();
-					}
+					Ptr<GuiInstancePropertyInfo> propertyInfo = new GuiInstancePropertyInfo;
+					propertyInfo->support = support;
 
-					if (propertyInfo && FillPropertyInfo(propertyInfo, propType))
+					if (FillPropertyInfo(propertyInfo, propType))
 					{
 						return propertyInfo;
 					}
@@ -399,21 +409,23 @@ Default Instance Loader
 
 			bool SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)override
 			{
-				bool set = false;
-				bool collection = false;
-				if (GetPropertyReflectionTypeInfo(propertyValue, set, collection) && !set)
+				GuiInstancePropertyInfo::Support support = GuiInstancePropertyInfo::NotSupport;
+				if (GetPropertyReflectionTypeInfo(propertyValue, support))
 				{
-					if (collection)
+					switch (support)
 					{
-						Value value = propertyValue.instanceValue.GetProperty(propertyValue.propertyName);
-						if (auto list = dynamic_cast<IValueList*>(value.GetRawPtr()))
+					case GuiInstancePropertyInfo::SupportCollection:
 						{
-							list->Add(propertyValue.propertyValue);
-							return true;
+							Value value = propertyValue.instanceValue.GetProperty(propertyValue.propertyName);
+							if (auto list = dynamic_cast<IValueList*>(value.GetRawPtr()))
+							{
+								list->Add(propertyValue.propertyValue);
+								return true;
+							}
 						}
-					}
-					else
-					{
+						break;
+					case GuiInstancePropertyInfo::SupportAssign:
+					case GuiInstancePropertyInfo::SupportArray:
 						propertyValue.instanceValue.SetProperty(propertyValue.propertyName, propertyValue.propertyValue);
 						return true;
 					}
@@ -422,11 +434,11 @@ Default Instance Loader
 			}
 		};
 
-/***********************************************************************
-GuiInstanceLoaderManager
-***********************************************************************/
+		/***********************************************************************
+		GuiInstanceLoaderManager
+		***********************************************************************/
 
-		IGuiInstanceLoaderManager* instanceLoaderManager=0;
+		IGuiInstanceLoaderManager* instanceLoaderManager = 0;
 
 		IGuiInstanceLoaderManager* GetInstanceLoaderManager()
 		{
@@ -461,15 +473,15 @@ GuiInstanceLoaderManager
 
 			bool IsTypeExists(const WString& name)
 			{
-				return GetGlobalTypeManager()->GetTypeDescriptor(name)!=0 || typeInfos.Keys().Contains(name);
+				return GetGlobalTypeManager()->GetTypeDescriptor(name) != 0 || typeInfos.Keys().Contains(name);
 			}
 
 			void FindParentTypeInfos(Ptr<VirtualTypeInfo> typeInfo, ITypeDescriptor* searchType)
 			{
-				if(searchType!=typeInfo->typeDescriptor)
+				if (searchType != typeInfo->typeDescriptor)
 				{
-					vint index=typeInfos.Keys().IndexOf(searchType->GetTypeName());
-					if(index==-1)
+					vint index = typeInfos.Keys().IndexOf(searchType->GetTypeName());
+					if (index == -1)
 					{
 						typeInfo->parentTypes.Add(searchType);
 					}
@@ -480,10 +492,10 @@ GuiInstanceLoaderManager
 					}
 				}
 
-				vint count=searchType->GetBaseTypeDescriptorCount();
-				for(vint i=0;i<count;i++)
+				vint count = searchType->GetBaseTypeDescriptorCount();
+				for (vint i = 0; i < count; i++)
 				{
-					ITypeDescriptor* baseType=searchType->GetBaseTypeDescriptor(i);
+					ITypeDescriptor* baseType = searchType->GetBaseTypeDescriptor(i);
 					FindParentTypeInfos(typeInfo, baseType);
 				}
 			}
@@ -493,26 +505,26 @@ GuiInstanceLoaderManager
 				typeInfo->parentTypes.Clear();
 				typeInfo->parentTypeInfos.Clear();
 
-				ITypeDescriptor* searchType=typeInfo->typeDescriptor;
-				if(!searchType)
+				ITypeDescriptor* searchType = typeInfo->typeDescriptor;
+				if (!searchType)
 				{
-					vint index=typeInfos.Keys().IndexOf(typeInfo->parentTypeName);
-					if(index==-1)
+					vint index = typeInfos.Keys().IndexOf(typeInfo->parentTypeName);
+					if (index == -1)
 					{
-						searchType=GetGlobalTypeManager()->GetTypeDescriptor(typeInfo->parentTypeName);
-						typeInfo->typeDescriptor=searchType;
+						searchType = GetGlobalTypeManager()->GetTypeDescriptor(typeInfo->parentTypeName);
+						typeInfo->typeDescriptor = searchType;
 						typeInfo->parentTypes.Add(searchType);
 					}
 					else
 					{
 						VirtualTypeInfo* parentTypeInfo = typeInfos.Values()[index].Obj();
-						typeInfo->typeDescriptor=parentTypeInfo->typeDescriptor;
+						typeInfo->typeDescriptor = parentTypeInfo->typeDescriptor;
 						typeInfo->parentTypeInfos.Add(parentTypeInfo);
 						return;
 					}
 				}
 
-				if(searchType)
+				if (searchType)
 				{
 					FindParentTypeInfos(typeInfo, searchType);
 				}
@@ -520,15 +532,15 @@ GuiInstanceLoaderManager
 
 			IGuiInstanceLoader* GetLoaderFromType(ITypeDescriptor* typeDescriptor)
 			{
-				vint index=typeInfos.Keys().IndexOf(typeDescriptor->GetTypeName());
-				if(index==-1)
+				vint index = typeInfos.Keys().IndexOf(typeDescriptor->GetTypeName());
+				if (index == -1)
 				{
-					vint count=typeDescriptor->GetBaseTypeDescriptorCount();
-					for(vint i=0;i<count;i++)
+					vint count = typeDescriptor->GetBaseTypeDescriptorCount();
+					for (vint i = 0; i < count; i++)
 					{
-						ITypeDescriptor* baseType=typeDescriptor->GetBaseTypeDescriptor(i);
-						IGuiInstanceLoader* loader=GetLoaderFromType(baseType);
-						if(loader) return loader;
+						ITypeDescriptor* baseType = typeDescriptor->GetBaseTypeDescriptor(i);
+						IGuiInstanceLoader* loader = GetLoaderFromType(baseType);
+						if (loader) return loader;
 					}
 					return 0;
 				}
@@ -540,52 +552,52 @@ GuiInstanceLoaderManager
 		public:
 			GuiInstanceLoaderManager()
 			{
-				rootLoader=new GuiDefaultInstanceLoader;
+				rootLoader = new GuiDefaultInstanceLoader;
 			}
 
 			void Load()override
 			{
-				instanceLoaderManager=this;
+				instanceLoaderManager = this;
 			}
-				
+
 			void AfterLoad()override
 			{
 				{
-					IGuiResourceResolverManager* manager=GetResourceResolverManager();
+					IGuiResourceResolverManager* manager = GetResourceResolverManager();
 					manager->SetTypeResolver(new GuiResourceInstanceTypeResolver);
 				}
 				{
-					IGuiParserManager* manager=GetParserManager();
-					manager->SetParser(L"INSTANCE-ELEMENT-NAME", new GuiInstanceContextElementNameParser);
-				}
+				IGuiParserManager* manager = GetParserManager();
+				manager->SetParser(L"INSTANCE-ELEMENT-NAME", new GuiInstanceContextElementNameParser);
+			}
 			}
 
 			void Unload()override
 			{
-				instanceLoaderManager=0;
+				instanceLoaderManager = 0;
 			}
 
 			bool AddInstanceBinder(Ptr<IGuiInstanceBinder> binder)override
 			{
-				if(binders.Keys().Contains(binder->GetBindingName())) return false;
+				if (binders.Keys().Contains(binder->GetBindingName())) return false;
 				binders.Add(binder->GetBindingName(), binder);
 				return true;
 			}
 
 			IGuiInstanceBinder* GetInstanceBinder(const WString& bindingName)override
 			{
-				vint index=binders.Keys().IndexOf(bindingName);
-				return index==-1?0:binders.Values()[index].Obj();
+				vint index = binders.Keys().IndexOf(bindingName);
+				return index == -1 ? 0 : binders.Values()[index].Obj();
 			}
 
 			bool CreateVirtualType(const WString& typeName, const WString& parentType, Ptr<IGuiInstanceLoader> loader)override
 			{
-				if(IsTypeExists(typeName) || !IsTypeExists(parentType)) return false;
+				if (IsTypeExists(typeName) || !IsTypeExists(parentType)) return false;
 
 				Ptr<VirtualTypeInfo> typeInfo = new VirtualTypeInfo;
-				typeInfo->typeName=typeName;
-				typeInfo->parentTypeName=parentType;
-				typeInfo->loader=loader;
+				typeInfo->typeName = typeName;
+				typeInfo->parentTypeName = parentType;
+				typeInfo->loader = loader;
 				typeInfos.Add(typeName, typeInfo);
 				FillParentTypeInfos(typeInfo);
 
@@ -594,22 +606,22 @@ GuiInstanceLoaderManager
 
 			bool SetLoader(Ptr<IGuiInstanceLoader> loader)override
 			{
-				vint index=typeInfos.Keys().IndexOf(loader->GetTypeName());
-				if(index!=-1) return false;
+				vint index = typeInfos.Keys().IndexOf(loader->GetTypeName());
+				if (index != -1) return false;
 
-				ITypeDescriptor* typeDescriptor=GetGlobalTypeManager()->GetTypeDescriptor(loader->GetTypeName());
-				if(typeDescriptor==0) return false;
+				ITypeDescriptor* typeDescriptor = GetGlobalTypeManager()->GetTypeDescriptor(loader->GetTypeName());
+				if (typeDescriptor == 0) return false;
 
 				Ptr<VirtualTypeInfo> typeInfo = new VirtualTypeInfo;
-				typeInfo->typeName=loader->GetTypeName();
-				typeInfo->typeDescriptor=typeDescriptor;
-				typeInfo->loader=loader;
+				typeInfo->typeName = loader->GetTypeName();
+				typeInfo->typeDescriptor = typeDescriptor;
+				typeInfo->loader = loader;
 				typeInfos.Add(typeInfo->typeName, typeInfo);
 				FillParentTypeInfos(typeInfo);
-				
+
 				FOREACH(Ptr<VirtualTypeInfo>, derived, typeInfos.Values())
 				{
-					if(derived->parentTypes.Contains(typeInfo->typeDescriptor))
+					if (derived->parentTypes.Contains(typeInfo->typeDescriptor))
 					{
 						FillParentTypeInfos(derived);
 					}
@@ -620,28 +632,28 @@ GuiInstanceLoaderManager
 
 			IGuiInstanceLoader* GetLoader(const WString& typeName)override
 			{
-				vint index=typeInfos.Keys().IndexOf(typeName);
-				if(index!=-1)
+				vint index = typeInfos.Keys().IndexOf(typeName);
+				if (index != -1)
 				{
 					return typeInfos.Values()[index]->loader.Obj();
 				}
 
-				ITypeDescriptor* typeDescriptor=GetGlobalTypeManager()->GetTypeDescriptor(typeName);
-				if(typeDescriptor)
+				ITypeDescriptor* typeDescriptor = GetGlobalTypeManager()->GetTypeDescriptor(typeName);
+				if (typeDescriptor)
 				{
-					IGuiInstanceLoader* loader=GetLoaderFromType(typeDescriptor);
-					return loader?loader:rootLoader.Obj();
+					IGuiInstanceLoader* loader = GetLoaderFromType(typeDescriptor);
+					return loader ? loader : rootLoader.Obj();
 				}
 				return 0;
 			}
 
 			IGuiInstanceLoader* GetParentLoader(IGuiInstanceLoader* loader)override
 			{
-				vint index=typeInfos.Keys().IndexOf(loader->GetTypeName());
-				if(index!=-1)
+				vint index = typeInfos.Keys().IndexOf(loader->GetTypeName());
+				if (index != -1)
 				{
 					Ptr<VirtualTypeInfo> typeInfo = typeInfos.Values()[index];
-					if(typeInfo->parentTypeInfos.Count()>0)
+					if (typeInfo->parentTypeInfos.Count() > 0)
 					{
 						return typeInfo->parentTypeInfos[0]->loader.Obj();
 					}
@@ -652,10 +664,10 @@ GuiInstanceLoaderManager
 
 			description::ITypeDescriptor* GetTypeDescriptorForType(const WString& typeName)override
 			{
-				vint index=typeInfos.Keys().IndexOf(typeName);
-				return index==-1
-					?GetGlobalTypeManager()->GetTypeDescriptor(typeName)
-					:typeInfos.Values()[index]->typeDescriptor;
+				vint index = typeInfos.Keys().IndexOf(typeName);
+				return index == -1
+					? GetGlobalTypeManager()->GetTypeDescriptor(typeName)
+					: typeInfos.Values()[index]->typeDescriptor;
 			}
 
 			void GetVirtualTypes(collections::List<WString>& typeNames)

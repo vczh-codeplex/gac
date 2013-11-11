@@ -55,10 +55,17 @@ Instance Loader
 		{
 			typedef collections::List<description::ITypeDescriptor*>		TypeDescriptorList;
 		public:
-			bool									supportAssign;
-			bool									supportSet;
+			enum Support
+			{
+				NotSupport,
+				SupportAssign,
+				SupportArray,
+				SupportCollection,
+				SupportSet,
+			};
+
+			Support									support;
 			bool									tryParent;
-			bool									multipleValues;
 			bool									required;
 			bool									constructorParameter;
 			TypeDescriptorList						acceptableTypes;
@@ -69,10 +76,10 @@ Instance Loader
 			static Ptr<GuiInstancePropertyInfo>		Unsupported();
 			static Ptr<GuiInstancePropertyInfo>		Assign(description::ITypeDescriptor* typeDescriptor = 0);
 			static Ptr<GuiInstancePropertyInfo>		AssignWithParent(description::ITypeDescriptor* typeDescriptor = 0);
-			static Ptr<GuiInstancePropertyInfo>		AssignCollection(description::ITypeDescriptor* typeDescriptor = 0);
-			static Ptr<GuiInstancePropertyInfo>		AssignCollectionWithParent(description::ITypeDescriptor* typeDescriptor = 0);
+			static Ptr<GuiInstancePropertyInfo>		Collection(description::ITypeDescriptor* typeDescriptor = 0);
+			static Ptr<GuiInstancePropertyInfo>		CollectionWithParent(description::ITypeDescriptor* typeDescriptor = 0);
 			static Ptr<GuiInstancePropertyInfo>		Set(description::ITypeDescriptor* typeDescriptor = 0);
-			static Ptr<GuiInstancePropertyInfo>		SetWithParent(description::ITypeDescriptor* typeDescriptor = 0);
+			static Ptr<GuiInstancePropertyInfo>		Array(description::ITypeDescriptor* typeDescriptor = 0);
 		};
 
 		class IGuiInstanceLoader : public IDescriptable, public Description<IGuiInstanceLoader>
