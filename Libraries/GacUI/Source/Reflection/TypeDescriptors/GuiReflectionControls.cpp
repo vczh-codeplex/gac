@@ -773,26 +773,31 @@ Type Declaration
 
 			BEGIN_CLASS_MEMBER(ListViewBigIconContentProvider)
 				CLASS_MEMBER_BASE(ListViewItemStyleProvider::IListViewItemContentProvider)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<ListViewBigIconContentProvider>(), NO_PARAMETER)
 				CLASS_MEMBER_CONSTRUCTOR(Ptr<ListViewBigIconContentProvider>(Size), {L"iconSize"})
 			END_CLASS_MEMBER(ListViewBigIconContentProvider)
 
 			BEGIN_CLASS_MEMBER(ListViewSmallIconContentProvider)
 				CLASS_MEMBER_BASE(ListViewItemStyleProvider::IListViewItemContentProvider)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<ListViewSmallIconContentProvider>(), NO_PARAMETER)
 				CLASS_MEMBER_CONSTRUCTOR(Ptr<ListViewSmallIconContentProvider>(Size), {L"iconSize"})
 			END_CLASS_MEMBER(ListViewSmallIconContentProvider)
 
 			BEGIN_CLASS_MEMBER(ListViewListContentProvider)
 				CLASS_MEMBER_BASE(ListViewItemStyleProvider::IListViewItemContentProvider)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<ListViewListContentProvider>(), NO_PARAMETER)
 				CLASS_MEMBER_CONSTRUCTOR(Ptr<ListViewListContentProvider>(Size), {L"iconSize"})
 			END_CLASS_MEMBER(ListViewListContentProvider)
 
 			BEGIN_CLASS_MEMBER(ListViewTileContentProvider)
 				CLASS_MEMBER_BASE(ListViewItemStyleProvider::IListViewItemContentProvider)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<ListViewTileContentProvider>(), NO_PARAMETER)
 				CLASS_MEMBER_CONSTRUCTOR(Ptr<ListViewTileContentProvider>(Size), {L"iconSize"})
 			END_CLASS_MEMBER(ListViewTileContentProvider)
 
 			BEGIN_CLASS_MEMBER(ListViewInformationContentProvider)
 				CLASS_MEMBER_BASE(ListViewItemStyleProvider::IListViewItemContentProvider)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<ListViewInformationContentProvider>(), NO_PARAMETER)
 				CLASS_MEMBER_CONSTRUCTOR(Ptr<ListViewInformationContentProvider>(Size), {L"iconSize"})
 			END_CLASS_MEMBER(ListViewInformationContentProvider)
 
@@ -823,6 +828,7 @@ Type Declaration
 
 			BEGIN_CLASS_MEMBER(ListViewDetailContentProvider)
 				CLASS_MEMBER_BASE(ListViewItemStyleProvider::IListViewItemContentProvider)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<ListViewDetailContentProvider>(), NO_PARAMETER)
 				CLASS_MEMBER_CONSTRUCTOR(Ptr<ListViewDetailContentProvider>(Size), {L"iconSize"})
 			END_CLASS_MEMBER(ListViewDetailContentProvider)
 

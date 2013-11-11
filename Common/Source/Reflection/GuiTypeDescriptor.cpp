@@ -671,50 +671,6 @@ LogTypeManager (data)
 LogTypeManager (class)
 ***********************************************************************/
 
-			bool LogTypeManager_IsInterface(ITypeDescriptor* type)
-			{
-				bool containsConstructor=false;
-				if(IMethodGroupInfo* group=type->GetConstructorGroup())
-				{
-					containsConstructor=group->GetMethodCount()>0;
-					if(group->GetMethodCount()==1)
-					{
-						if(IMethodInfo* info=group->GetMethod(0))
-						{
-							if(info->GetParameterCount()==1 && info->GetParameter(0)->GetType()->GetTypeDescriptor()->GetTypeName()==TypeInfo<IValueInterfaceProxy>::TypeName)
-							{
-								return true;
-							}
-						}
-					}
-				}
-
-				if(!containsConstructor)
-				{
-					if(type->GetTypeName()==TypeInfo<IDescriptable>::TypeName)
-					{
-						return true;
-					}
-					else
-					{
-						for(vint i=0;i<type->GetBaseTypeDescriptorCount();i++)
-						{
-							if(!LogTypeManager_IsInterface(type->GetBaseTypeDescriptor(i)))
-							{
-								return false;
-							}
-						}
-						const wchar_t* name=type->GetTypeName().Buffer();
-						while(const wchar_t* next=wcschr(name, L':'))
-						{
-							name=next+1;
-						}
-						return name[0]==L'I' && (L'A'<=name[1] && name[1]<=L'Z');
-					}
-				}
-				return false;
-			}
-
 			void LogTypeManager_PrintEvents(stream::TextWriter& writer, ITypeDescriptor* type)
 			{
 				bool printed=false;
@@ -824,7 +780,8 @@ LogTypeManager (class)
 
 			void LogTypeManager_Class(stream::TextWriter& writer, ITypeDescriptor* type)
 			{
-				bool isInterface=LogTypeManager_IsInterface(type);
+				bool acceptProxy = false;
+				bool isInterface=IsInterfaceType(type, acceptProxy);
 				writer.WriteString((isInterface?L"interface ":L"class ")+type->GetTypeName());
 				for(vint j=0;j<type->GetBaseTypeDescriptorCount();j++)
 				{
@@ -847,6 +804,52 @@ LogTypeManager (class)
 /***********************************************************************
 LogTypeManager
 ***********************************************************************/
+
+			bool IsInterfaceType(ITypeDescriptor* typeDescriptor, bool& acceptProxy)
+			{
+				bool containsConstructor=false;
+				if(IMethodGroupInfo* group=typeDescriptor->GetConstructorGroup())
+				{
+					containsConstructor=group->GetMethodCount()>0;
+					if(group->GetMethodCount()==1)
+					{
+						if(IMethodInfo* info=group->GetMethod(0))
+						{
+							if(info->GetParameterCount()==1 && info->GetParameter(0)->GetType()->GetTypeDescriptor()->GetTypeName()==TypeInfo<IValueInterfaceProxy>::TypeName)
+							{
+								acceptProxy = true;
+								return true;
+							}
+						}
+					}
+				}
+
+				if(!containsConstructor)
+				{
+					if(typeDescriptor->GetTypeName()==TypeInfo<IDescriptable>::TypeName)
+					{
+						return true;
+					}
+					else
+					{
+						for(vint i=0;i<typeDescriptor->GetBaseTypeDescriptorCount();i++)
+						{
+							bool _acceptProxy = false;
+							if(!IsInterfaceType(typeDescriptor->GetBaseTypeDescriptor(i), _acceptProxy))
+							{
+								return false;
+							}
+						}
+						const wchar_t* name=typeDescriptor->GetTypeName().Buffer();
+						while(const wchar_t* next=wcschr(name, L':'))
+						{
+							name=next+1;
+						}
+						return name[0]==L'I' && (L'A'<=name[1] && name[1]<=L'Z');
+					}
+				}
+				return false;
+			}
 
 			void LogTypeManager(stream::TextWriter& writer)
 			{
