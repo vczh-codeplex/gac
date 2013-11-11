@@ -96,6 +96,10 @@ GuiVrtualTypeInstanceLoader
 				}
 				return Value();
 			}
+
+			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			{
+			}
 		};
 
 /***********************************************************************
@@ -108,6 +112,11 @@ GuiControlInstanceLoader
 			WString GetTypeName()override
 			{
 				return description::GetTypeDescriptor<GuiControl>()->GetTypeName();
+			}
+
+			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			{
+				propertyNames.Add(L"");
 			}
 
 			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
@@ -156,6 +165,11 @@ GuiControlHostInstanceLoader
 				return description::GetTypeDescriptor<GuiControlHost>()->GetTypeName();
 			}
 
+			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			{
+				propertyNames.Add(L"");
+			}
+
 			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
 			{
 				if (propertyInfo.propertyName == L"")
@@ -196,6 +210,11 @@ GuiTabInstanceLoader
 				return description::GetTypeDescriptor<GuiTab>()->GetTypeName();
 			}
 
+			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			{
+				propertyNames.Add(L"");
+			}
+
 			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
 			{
 				if (propertyInfo.propertyName == L"")
@@ -234,6 +253,11 @@ GuiTabPageInstanceLoader
 			WString GetTypeName()override
 			{
 				return description::GetTypeDescriptor<GuiTabPage>()->GetTypeName();
+			}
+
+			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			{
+				propertyNames.Add(L"");
 			}
 
 			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
@@ -282,6 +306,11 @@ GuiToolstripMenuInstanceLoader
 				return description::GetTypeDescriptor<GuiToolstripMenu>()->GetTypeName();
 			}
 
+			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			{
+				propertyNames.Add(L"");
+			}
+
 			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
 			{
 				if (propertyInfo.propertyName == L"")
@@ -322,6 +351,11 @@ GuiToolstripMenuBarInstanceLoader
 				return description::GetTypeDescriptor<GuiToolstripMenuBar>()->GetTypeName();
 			}
 
+			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			{
+				propertyNames.Add(L"");
+			}
+
 			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
 			{
 				if (propertyInfo.propertyName == L"")
@@ -360,6 +394,11 @@ GuiToolstripToolBarInstanceLoader
 			WString GetTypeName()override
 			{
 				return description::GetTypeDescriptor<GuiToolstripToolBar>()->GetTypeName();
+			}
+
+			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			{
+				propertyNames.Add(L"");
 			}
 
 			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
@@ -416,6 +455,11 @@ GuiToolstripButtonInstanceLoader
 				return Value();
 			}
 
+			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			{
+				propertyNames.Add(L"SubMenu");
+			}
+
 			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
 			{
 				if (propertyInfo.propertyName == L"SubMenu")
@@ -455,6 +499,11 @@ GuiCompositionInstanceLoader
 			WString GetTypeName()override
 			{
 				return description::GetTypeDescriptor<GuiGraphicsComposition>()->GetTypeName();
+			}
+
+			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			{
+				propertyNames.Add(L"");
 			}
 
 			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
@@ -509,6 +558,12 @@ GuiTableCompositionInstanceLoader
 				return description::GetTypeDescriptor<GuiTableComposition>()->GetTypeName();
 			}
 
+			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			{
+				propertyNames.Add(L"Rows");
+				propertyNames.Add(L"Columns");
+			}
+
 			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
 			{
 				if (propertyInfo.propertyName == L"Rows" || propertyInfo.propertyName==L"Columns")
@@ -554,6 +609,11 @@ GuiCellCompositionInstanceLoader
 			WString GetTypeName()override
 			{
 				return description::GetTypeDescriptor<GuiCellComposition>()->GetTypeName();
+			}
+
+			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			{
+				propertyNames.Add(L"Site");
 			}
 
 			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
