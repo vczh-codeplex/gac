@@ -294,19 +294,22 @@ Helper Functions
 								vint currentIndex = 0;
 								FOREACH_INDEXER(Ptr<GuiValueRepr>, valueRepr, index, values)
 								{
-									// default binding: set the value directly
-									if (LoadValueVisitor::LoadValue(valueRepr, env, propertyInfo->acceptableTypes, bindingSetters, cachedPropertyValue.propertyValue))
+									if (valueRepr)
 									{
-										values[0] = 0;
-										loadedValueCount++;
+										// default binding: set the value directly
+										if (LoadValueVisitor::LoadValue(valueRepr, env, propertyInfo->acceptableTypes, bindingSetters, cachedPropertyValue.propertyValue))
+										{
+											values[index] = 0;
+											loadedValueCount++;
 
-										if(propertyLoader->SetPropertyValue(cachedPropertyValue, currentIndex))
-										{
-											currentIndex++;
-										}
-										else
-										{
-											cachedPropertyValue.propertyValue.DeleteRawPtr();
+											if(propertyLoader->SetPropertyValue(cachedPropertyValue, currentIndex))
+											{
+												currentIndex++;
+											}
+											else
+											{
+												cachedPropertyValue.propertyValue.DeleteRawPtr();
+											}
 										}
 									}
 								}
@@ -319,45 +322,48 @@ Helper Functions
 								vint currentIndex = 0;
 								FOREACH_INDEXER(Ptr<GuiValueRepr>, valueRepr, index, values)
 								{
-									bool canRemoveLoadedValue = false;
-									if (propertyValue->binding == L"")
+									if (valueRepr)
 									{
-										// default binding: set the value directly
-										if (LoadValueVisitor::LoadValue(valueRepr, env, propertyInfo->acceptableTypes, bindingSetters, cachedPropertyValue.propertyValue))
+										bool canRemoveLoadedValue = false;
+										if (propertyValue->binding == L"")
 										{
-											canRemoveLoadedValue = true;
-											if(propertyLoader->SetPropertyValue(cachedPropertyValue, currentIndex))
+											// default binding: set the value directly
+											if (LoadValueVisitor::LoadValue(valueRepr, env, propertyInfo->acceptableTypes, bindingSetters, cachedPropertyValue.propertyValue))
 											{
+												canRemoveLoadedValue = true;
+												if(propertyLoader->SetPropertyValue(cachedPropertyValue, currentIndex))
+												{
+													currentIndex++;
+												}
+												else
+												{
+													cachedPropertyValue.propertyValue.DeleteRawPtr();
+												}
+											}
+										}
+										else if (IGuiInstanceBinder* binder=GetInstanceLoaderManager()->GetInstanceBinder(propertyValue->binding))
+										{
+											// other binding: provide the property value to the specified binder
+											List<ITypeDescriptor*> binderExpectedTypes;
+											binder->GetExpectedValueTypes(binderExpectedTypes);
+											if (LoadValueVisitor::LoadValue(valueRepr, env, binderExpectedTypes, bindingSetters, cachedPropertyValue.propertyValue))
+											{
+												canRemoveLoadedValue = true;
+												FillInstanceBindingSetter bindingSetter;
+												bindingSetter.binder = binder;
+												bindingSetter.loader = propertyLoader;
+												bindingSetter.propertyValue = cachedPropertyValue;
+												bindingSetter.currentIndex = currentIndex;
+												bindingSetters.Add(bindingSetter);
 												currentIndex++;
 											}
-											else
-											{
-												cachedPropertyValue.propertyValue.DeleteRawPtr();
-											}
 										}
-									}
-									else if (IGuiInstanceBinder* binder=GetInstanceLoaderManager()->GetInstanceBinder(propertyValue->binding))
-									{
-										// other binding: provide the property value to the specified binder
-										List<ITypeDescriptor*> binderExpectedTypes;
-										binder->GetExpectedValueTypes(binderExpectedTypes);
-										if (LoadValueVisitor::LoadValue(valueRepr, env, binderExpectedTypes, bindingSetters, cachedPropertyValue.propertyValue))
-										{
-											canRemoveLoadedValue = true;
-											FillInstanceBindingSetter bindingSetter;
-											bindingSetter.binder = binder;
-											bindingSetter.loader = propertyLoader;
-											bindingSetter.propertyValue = cachedPropertyValue;
-											bindingSetter.currentIndex = currentIndex;
-											bindingSetters.Add(bindingSetter);
-											currentIndex++;
-										}
-									}
 
-									if (canRemoveLoadedValue)
-									{
-										values[index] = 0;
-										loadedValueCount++;
+										if (canRemoveLoadedValue)
+										{
+											values[index] = 0;
+											loadedValueCount++;
+										}
 									}
 								}
 							}
