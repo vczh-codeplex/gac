@@ -114,7 +114,7 @@ GuiControlInstanceLoader
 			{
 				if (propertyInfo.propertyName == L"")
 				{
-					auto info = GuiInstancePropertyInfo::SupportedCollection();
+					auto info = GuiInstancePropertyInfo::AssignCollection();
 					info->acceptableTypes.Add(description::GetTypeDescriptor<GuiControl>());
 					info->acceptableTypes.Add(description::GetTypeDescriptor<GuiGraphicsComposition>());
 					return info;
@@ -160,7 +160,7 @@ GuiControlHostInstanceLoader
 			{
 				if (propertyInfo.propertyName == L"")
 				{
-					auto info = GuiInstancePropertyInfo::SupportedCollectionWithParent();
+					auto info = GuiInstancePropertyInfo::AssignCollectionWithParent();
 					info->acceptableTypes.Add(description::GetTypeDescriptor<GuiComponent>());
 					return info;
 				}
@@ -200,7 +200,7 @@ GuiTabInstanceLoader
 			{
 				if (propertyInfo.propertyName == L"")
 				{
-					auto info = GuiInstancePropertyInfo::SupportedCollectionWithParent();
+					auto info = GuiInstancePropertyInfo::AssignCollectionWithParent();
 					info->acceptableTypes.Add(description::GetTypeDescriptor<GuiTabPage>());
 					return info;
 				}
@@ -240,7 +240,7 @@ GuiTabPageInstanceLoader
 			{
 				if (propertyInfo.propertyName == L"")
 				{
-					auto info = GuiInstancePropertyInfo::SupportedCollection();
+					auto info = GuiInstancePropertyInfo::AssignCollection();
 					info->acceptableTypes.Add(description::GetTypeDescriptor<GuiControl>());
 					info->acceptableTypes.Add(description::GetTypeDescriptor<GuiGraphicsComposition>());
 					return info;
@@ -286,7 +286,7 @@ GuiToolstripMenuInstanceLoader
 			{
 				if (propertyInfo.propertyName == L"")
 				{
-					auto info = GuiInstancePropertyInfo::SupportedCollectionWithParent();
+					auto info = GuiInstancePropertyInfo::AssignCollectionWithParent();
 					info->acceptableTypes.Add(description::GetTypeDescriptor<GuiControl>());
 					return info;
 				}
@@ -326,7 +326,7 @@ GuiToolstripMenuBarInstanceLoader
 			{
 				if (propertyInfo.propertyName == L"")
 				{
-					auto info = GuiInstancePropertyInfo::SupportedCollectionWithParent();
+					auto info = GuiInstancePropertyInfo::AssignCollectionWithParent();
 					info->acceptableTypes.Add(description::GetTypeDescriptor<GuiControl>());
 					return info;
 				}
@@ -366,7 +366,7 @@ GuiToolstripToolBarInstanceLoader
 			{
 				if (propertyInfo.propertyName == L"")
 				{
-					auto info = GuiInstancePropertyInfo::SupportedCollectionWithParent();
+					auto info = GuiInstancePropertyInfo::AssignCollectionWithParent();
 					info->acceptableTypes.Add(description::GetTypeDescriptor<GuiControl>());
 					return info;
 				}
@@ -420,7 +420,7 @@ GuiToolstripButtonInstanceLoader
 			{
 				if (propertyInfo.propertyName == L"SubMenu")
 				{
-					auto info = GuiInstancePropertyInfo::SupportedCollection();
+					auto info = GuiInstancePropertyInfo::Set();
 					info->acceptableTypes.Add(description::GetTypeDescriptor<GuiToolstripMenu>());
 					return info;
 				}
@@ -461,7 +461,7 @@ GuiCompositionInstanceLoader
 			{
 				if (propertyInfo.propertyName == L"")
 				{
-					auto info = GuiInstancePropertyInfo::SupportedCollection();
+					auto info = GuiInstancePropertyInfo::AssignCollection();
 					info->acceptableTypes.Add(description::GetTypeDescriptor<GuiControl>());
 					info->acceptableTypes.Add(description::GetTypeDescriptor<GuiGraphicsComposition>());
 					info->acceptableTypes.Add(description::GetTypeDescriptor<IGuiGraphicsElement>());
@@ -513,7 +513,7 @@ GuiTableCompositionInstanceLoader
 			{
 				if (propertyInfo.propertyName == L"Rows" || propertyInfo.propertyName==L"Columns")
 				{
-					auto info = GuiInstancePropertyInfo::SupportedCollection();
+					auto info = GuiInstancePropertyInfo::AssignCollection();
 					info->acceptableTypes.Add(description::GetTypeDescriptor<GuiCellOption>());
 					return info;
 				}
@@ -560,7 +560,7 @@ GuiCellCompositionInstanceLoader
 			{
 				if (propertyInfo.propertyName == L"Site")
 				{
-					auto info = GuiInstancePropertyInfo::Supported();
+					auto info = GuiInstancePropertyInfo::Assign();
 					info->acceptableTypes.Add(description::GetTypeDescriptor<SiteValue>());
 					return info;
 				}

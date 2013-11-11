@@ -67,10 +67,12 @@ Instance Loader
 			~GuiInstancePropertyInfo();
 
 			static Ptr<GuiInstancePropertyInfo>		Unsupported();
-			static Ptr<GuiInstancePropertyInfo>		Supported(description::ITypeDescriptor* typeDescriptor = 0);
-			static Ptr<GuiInstancePropertyInfo>		SupportedWithParent(description::ITypeDescriptor* typeDescriptor = 0);
-			static Ptr<GuiInstancePropertyInfo>		SupportedCollection(description::ITypeDescriptor* typeDescriptor = 0);
-			static Ptr<GuiInstancePropertyInfo>		SupportedCollectionWithParent(description::ITypeDescriptor* typeDescriptor = 0);
+			static Ptr<GuiInstancePropertyInfo>		Assign(description::ITypeDescriptor* typeDescriptor = 0);
+			static Ptr<GuiInstancePropertyInfo>		AssignWithParent(description::ITypeDescriptor* typeDescriptor = 0);
+			static Ptr<GuiInstancePropertyInfo>		AssignCollection(description::ITypeDescriptor* typeDescriptor = 0);
+			static Ptr<GuiInstancePropertyInfo>		AssignCollectionWithParent(description::ITypeDescriptor* typeDescriptor = 0);
+			static Ptr<GuiInstancePropertyInfo>		Set(description::ITypeDescriptor* typeDescriptor = 0);
+			static Ptr<GuiInstancePropertyInfo>		SetWithParent(description::ITypeDescriptor* typeDescriptor = 0);
 		};
 
 		class IGuiInstanceLoader : public IDescriptable, public Description<IGuiInstanceLoader>
