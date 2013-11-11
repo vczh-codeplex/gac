@@ -182,7 +182,7 @@ Default Instance Loader
 				return Value();
 			}
 
-			description::Value CreateInstance(const TypeInfo& typeInfo)override
+			IMethodInfo* GetDefaultConstructor(const TypeInfo& typeInfo)
 			{
 				vint count = typeInfo.typeDescriptor->GetConstructorGroup()->GetMethodCount();
 				for(vint i=0;i<count;i++)
@@ -190,8 +190,22 @@ Default Instance Loader
 					IMethodInfo* method = typeInfo.typeDescriptor->GetConstructorGroup()->GetMethod(i);
 					if(method->GetParameterCount()==0)
 					{
-						return method->Invoke(Value(), (Value::xs()));
+						return method;
 					}
+				}
+				return 0;
+			}
+
+			bool IsCreatable(const TypeInfo& typeInfo)override
+			{
+				return GetDefaultConstructor(typeInfo) != 0;
+			}
+
+			description::Value CreateInstance(const TypeInfo& typeInfo)override
+			{
+				if (IMethodInfo* method = GetDefaultConstructor(typeInfo))
+				{
+					return method->Invoke(Value(), (Value::xs()));
 				}
 				return Value();
 			}
