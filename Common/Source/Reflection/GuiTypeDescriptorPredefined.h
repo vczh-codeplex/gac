@@ -49,6 +49,7 @@ GeneralValueSeriaizer
 			protected:
 				ITypeDescriptor*							ownedTypeDescriptor;
 
+				virtual T									GetDefaultValue() = 0;
 				virtual bool								Serialize(const T& input, WString& output)=0;
 				virtual bool								Deserialize(const WString& input, T& output)=0;
 			public:
@@ -78,6 +79,14 @@ GeneralValueSeriaizer
 						return true;
 					}
 					return false;
+				}
+
+				WString GetDefaultText()override
+				{
+					T defaultValue = GetDefaultValue();
+					WString output;
+					Serialize(defaultValue, output);
+					return output;
 				}
 
 				bool HasCandidate()override
@@ -134,6 +143,13 @@ TypedValueSerializer
 			class TypedValueSerializer : public GeneralValueSeriaizer<T>
 			{
 			protected:
+				T											defaultValue;
+
+				T GetDefaultValue()
+				{
+					return defaultValue;
+				}
+
 				bool Serialize(const T& input, WString& output)override
 				{
 					return TypedValueSerializerProvider<T>::Serialize(input, output);
@@ -144,8 +160,19 @@ TypedValueSerializer
 					return TypedValueSerializerProvider<T>::Deserialize(input, output);
 				}
 			public:
-				TypedValueSerializer(ITypeDescriptor* _ownedTypeDescriptor)
+				TypedValueSerializer(ITypeDescriptor* _ownedTypeDescriptor, const T& _defaultValue)
 					:GeneralValueSeriaizer(_ownedTypeDescriptor)
+					, defaultValue(_defaultValue)
+				{
+				}
+			};
+
+			template<typename T>
+			class TypedDefaultValueSerializer : public TypedValueSerializer<T>
+			{
+			public:
+				TypedDefaultValueSerializer(ITypeDescriptor* _ownedTypeDescriptor)
+					:TypedValueSerializer(_ownedTypeDescriptor, TypedValueSerializerProvider<T>::GetDefaultValue())
 				{
 				}
 			};
@@ -226,7 +253,13 @@ EnumValueSeriaizer
 			class EnumValueSeriaizer : public GeneralValueSeriaizer<T>
 			{
 			protected:
+				T											defaultValue;
 				collections::Dictionary<WString, T>			candidates;
+
+				T GetDefaultValue()override
+				{
+					return defaultValue;
+				}
 
 				bool Serialize(const T& input, WString& output)override
 				{
@@ -238,8 +271,9 @@ EnumValueSeriaizer
 					return EnumValueSerializerProvider<T, CanMerge>::Deserialize(candidates, input, output);
 				}
 			public:
-				EnumValueSeriaizer(ITypeDescriptor* _ownedTypeDescriptor)
+				EnumValueSeriaizer(ITypeDescriptor* _ownedTypeDescriptor, const T& _defaultValue)
 					:GeneralValueSeriaizer(_ownedTypeDescriptor)
+					, defaultValue(_defaultValue)
 				{
 				}
 
@@ -358,6 +392,7 @@ Predefined Types
 			template<>
 			struct TypedValueSerializerProvider<unsigned __int8>
 			{
+				static unsigned __int8 GetDefaultValue();
 				static bool Serialize(const unsigned __int8& input, WString& output);
 				static bool Deserialize(const WString& input, unsigned __int8& output);
 			};
@@ -365,6 +400,7 @@ Predefined Types
 			template<>
 			struct TypedValueSerializerProvider<unsigned __int16>
 			{
+				static unsigned __int16 GetDefaultValue();
 				static bool Serialize(const unsigned __int16& input, WString& output);
 				static bool Deserialize(const WString& input, unsigned __int16& output);
 			};
@@ -372,6 +408,7 @@ Predefined Types
 			template<>
 			struct TypedValueSerializerProvider<unsigned __int32>
 			{
+				static unsigned __int32 GetDefaultValue();
 				static bool Serialize(const unsigned __int32& input, WString& output);
 				static bool Deserialize(const WString& input, unsigned __int32& output);
 			};
@@ -379,6 +416,7 @@ Predefined Types
 			template<>
 			struct TypedValueSerializerProvider<unsigned __int64>
 			{
+				static unsigned __int64 GetDefaultValue();
 				static bool Serialize(const unsigned __int64& input, WString& output);
 				static bool Deserialize(const WString& input, unsigned __int64& output);
 			};
@@ -386,6 +424,7 @@ Predefined Types
 			template<>
 			struct TypedValueSerializerProvider<signed __int8>
 			{
+				static signed __int8 GetDefaultValue();
 				static bool Serialize(const signed __int8& input, WString& output);
 				static bool Deserialize(const WString& input, signed __int8& output);
 			};
@@ -393,6 +432,7 @@ Predefined Types
 			template<>
 			struct TypedValueSerializerProvider<signed __int16>
 			{
+				static signed __int16 GetDefaultValue();
 				static bool Serialize(const signed __int16& input, WString& output);
 				static bool Deserialize(const WString& input, signed __int16& output);
 			};
@@ -400,6 +440,7 @@ Predefined Types
 			template<>
 			struct TypedValueSerializerProvider<signed __int32>
 			{
+				static signed __int32 GetDefaultValue();
 				static bool Serialize(const signed __int32& input, WString& output);
 				static bool Deserialize(const WString& input, signed __int32& output);
 			};
@@ -407,6 +448,7 @@ Predefined Types
 			template<>
 			struct TypedValueSerializerProvider<signed __int64>
 			{
+				static signed __int64 GetDefaultValue();
 				static bool Serialize(const signed __int64& input, WString& output);
 				static bool Deserialize(const WString& input, signed __int64& output);
 			};
@@ -414,6 +456,7 @@ Predefined Types
 			template<>
 			struct TypedValueSerializerProvider<float>
 			{
+				static float GetDefaultValue();
 				static bool Serialize(const float& input, WString& output);
 				static bool Deserialize(const WString& input, float& output);
 			};
@@ -421,6 +464,7 @@ Predefined Types
 			template<>
 			struct TypedValueSerializerProvider<double>
 			{
+				static double GetDefaultValue();
 				static bool Serialize(const double& input, WString& output);
 				static bool Deserialize(const WString& input, double& output);
 			};
@@ -428,6 +472,7 @@ Predefined Types
 			template<>
 			struct TypedValueSerializerProvider<wchar_t>
 			{
+				static wchar_t GetDefaultValue();
 				static bool Serialize(const wchar_t& input, WString& output);
 				static bool Deserialize(const WString& input, wchar_t& output);
 			};
@@ -435,8 +480,17 @@ Predefined Types
 			template<>
 			struct TypedValueSerializerProvider<WString>
 			{
+				static WString GetDefaultValue();
 				static bool Serialize(const WString& input, WString& output);
 				static bool Deserialize(const WString& input, WString& output);
+			};
+
+			template<>
+			struct TypedValueSerializerProvider<Locale>
+			{
+				static Locale GetDefaultValue();
+				static bool Serialize(const Locale& input, WString& output);
+				static bool Deserialize(const WString& input, Locale& output);
 			};
 
 /***********************************************************************

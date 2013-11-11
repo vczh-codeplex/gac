@@ -245,6 +245,7 @@ Value
 				virtual ITypeDescriptor*		GetOwnerTypeDescriptor()=0;
 				virtual bool					Validate(const WString& text)=0;
 				virtual bool					Parse(const WString& input, Value& output)=0;
+				virtual WString					GetDefaultText() = 0;
 
 				virtual bool					HasCandidate()=0;
 				virtual vint					GetCandidateCount()=0;

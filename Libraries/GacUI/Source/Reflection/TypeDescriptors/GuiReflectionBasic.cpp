@@ -16,6 +16,11 @@ namespace vl
 
 			GUIREFLECTIONBASIC_TYPELIST(IMPL_TYPE_INFO)
 
+			Color TypedValueSerializerProvider<Color>::GetDefaultValue()
+			{
+				return Color();
+			}
+
 			bool TypedValueSerializerProvider<Color>::Serialize(const Color& input, WString& output)
 			{
 				output=input.ToString();

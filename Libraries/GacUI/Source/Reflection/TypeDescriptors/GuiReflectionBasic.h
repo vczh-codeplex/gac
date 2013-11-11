@@ -90,6 +90,7 @@ Type Declaration
 			template<>
 			struct TypedValueSerializerProvider<Color>
 			{
+				static Color GetDefaultValue();
 				static bool Serialize(const Color& input, WString& output);
 				static bool Deserialize(const WString& input, Color& output);
 			};
@@ -98,7 +99,7 @@ Type Declaration
 			struct CustomTypeDescriptorSelector<Color>
 			{
 			public:
-				typedef SerializableTypeDescriptor<TypedValueSerializer<Color>> CustomTypeDescriptorImpl;
+				typedef SerializableTypeDescriptor<TypedDefaultValueSerializer<Color>> CustomTypeDescriptorImpl;
 			};
 
 /***********************************************************************
