@@ -123,7 +123,7 @@ GuiControlInstanceLoader
 			{
 				if (propertyInfo.propertyName == L"")
 				{
-					auto info = GuiInstancePropertyInfo::AssignCollection();
+					auto info = GuiInstancePropertyInfo::Collection();
 					info->acceptableTypes.Add(description::GetTypeDescriptor<GuiControl>());
 					info->acceptableTypes.Add(description::GetTypeDescriptor<GuiGraphicsComposition>());
 					return info;
@@ -174,7 +174,7 @@ GuiControlHostInstanceLoader
 			{
 				if (propertyInfo.propertyName == L"")
 				{
-					auto info = GuiInstancePropertyInfo::AssignCollectionWithParent();
+					auto info = GuiInstancePropertyInfo::CollectionWithParent();
 					info->acceptableTypes.Add(description::GetTypeDescriptor<GuiComponent>());
 					return info;
 				}
@@ -219,7 +219,7 @@ GuiTabInstanceLoader
 			{
 				if (propertyInfo.propertyName == L"")
 				{
-					auto info = GuiInstancePropertyInfo::AssignCollectionWithParent();
+					auto info = GuiInstancePropertyInfo::CollectionWithParent();
 					info->acceptableTypes.Add(description::GetTypeDescriptor<GuiTabPage>());
 					return info;
 				}
@@ -264,7 +264,7 @@ GuiTabPageInstanceLoader
 			{
 				if (propertyInfo.propertyName == L"")
 				{
-					auto info = GuiInstancePropertyInfo::AssignCollection();
+					auto info = GuiInstancePropertyInfo::Collection();
 					info->acceptableTypes.Add(description::GetTypeDescriptor<GuiControl>());
 					info->acceptableTypes.Add(description::GetTypeDescriptor<GuiGraphicsComposition>());
 					return info;
@@ -315,7 +315,7 @@ GuiToolstripMenuInstanceLoader
 			{
 				if (propertyInfo.propertyName == L"")
 				{
-					auto info = GuiInstancePropertyInfo::AssignCollectionWithParent();
+					auto info = GuiInstancePropertyInfo::CollectionWithParent();
 					info->acceptableTypes.Add(description::GetTypeDescriptor<GuiControl>());
 					return info;
 				}
@@ -360,7 +360,7 @@ GuiToolstripMenuBarInstanceLoader
 			{
 				if (propertyInfo.propertyName == L"")
 				{
-					auto info = GuiInstancePropertyInfo::AssignCollectionWithParent();
+					auto info = GuiInstancePropertyInfo::CollectionWithParent();
 					info->acceptableTypes.Add(description::GetTypeDescriptor<GuiControl>());
 					return info;
 				}
@@ -405,7 +405,7 @@ GuiToolstripToolBarInstanceLoader
 			{
 				if (propertyInfo.propertyName == L"")
 				{
-					auto info = GuiInstancePropertyInfo::AssignCollectionWithParent();
+					auto info = GuiInstancePropertyInfo::CollectionWithParent();
 					info->acceptableTypes.Add(description::GetTypeDescriptor<GuiControl>());
 					return info;
 				}
@@ -510,7 +510,7 @@ GuiCompositionInstanceLoader
 			{
 				if (propertyInfo.propertyName == L"")
 				{
-					auto info = GuiInstancePropertyInfo::AssignCollection();
+					auto info = GuiInstancePropertyInfo::Collection();
 					info->acceptableTypes.Add(description::GetTypeDescriptor<GuiControl>());
 					info->acceptableTypes.Add(description::GetTypeDescriptor<GuiGraphicsComposition>());
 					info->acceptableTypes.Add(description::GetTypeDescriptor<IGuiGraphicsElement>());
@@ -568,7 +568,7 @@ GuiTableCompositionInstanceLoader
 			{
 				if (propertyInfo.propertyName == L"Rows" || propertyInfo.propertyName==L"Columns")
 				{
-					auto info = GuiInstancePropertyInfo::AssignCollection();
+					auto info = GuiInstancePropertyInfo::Collection();
 					info->acceptableTypes.Add(description::GetTypeDescriptor<GuiCellOption>());
 					return info;
 				}

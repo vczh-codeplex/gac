@@ -101,10 +101,7 @@ LogInstanceLoaderManager_PrintProperties
 					{
 						if (firstInfo)
 						{
-							if (info->supportAssign != firstInfo->supportAssign ||
-								info->supportSet != firstInfo->supportSet ||
-								info->multipleValues != firstInfo->multipleValues
-								)
+							if (info->support != firstInfo->support)
 							{
 								break;
 							}
@@ -114,7 +111,7 @@ LogInstanceLoaderManager_PrintProperties
 							firstInfo = info;
 						}
 
-						if (info->supportAssign || info->supportSet)
+						if (info->support!=GuiInstancePropertyInfo::NotSupport)
 						{
 							FOREACH(ITypeDescriptor*, type, info->acceptableTypes)
 							{
@@ -140,17 +137,20 @@ LogInstanceLoaderManager_PrintProperties
 				}
 
 				LogInstanceLoaderManager_PrintFieldName(writer, (propertyName == L"" ? L"<DEFAULT-PROPERTY>" : propertyName));
-				if (firstInfo->supportSet)
+				switch (firstInfo->support)
 				{
-					writer.WriteString(L"[set]        ");
-				}
-				else if (firstInfo->multipleValues)
-				{
-					writer.WriteString(L"[collection] ");
-				}
-				else
-				{
+				case GuiInstancePropertyInfo::SupportAssign:
 					writer.WriteString(L"[assign]     ");
+					break;
+				case GuiInstancePropertyInfo::SupportCollection:
+					writer.WriteString(L"[collection] ");
+					break;
+				case GuiInstancePropertyInfo::SupportArray:
+					writer.WriteString(L"[array]      ");
+					break;
+				case GuiInstancePropertyInfo::SupportSet:
+					writer.WriteString(L"[set]        ");
+					break;
 				}
 
 				switch (acceptableTypes.Count())
