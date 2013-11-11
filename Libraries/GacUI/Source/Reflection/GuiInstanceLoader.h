@@ -155,6 +155,7 @@ Instance Loader Manager
 			virtual IGuiInstanceLoader*				GetParentLoader(IGuiInstanceLoader* loader)=0;
 			virtual description::ITypeDescriptor*	GetTypeDescriptorForType(const WString& typeName)=0;
 			virtual void							GetVirtualTypes(collections::List<WString>& typeNames) = 0;
+			virtual WString							GetParentTypeForVirtualType(const WString& virtualType) = 0;
 		};
 
 		struct InstanceLoadingSource

@@ -605,6 +605,17 @@ GuiInstanceLoaderManager
 					}
 				}
 			}
+
+			WString GetParentTypeForVirtualType(const WString& virtualType)
+			{
+				vint index = typeInfos.Keys().IndexOf(virtualType);
+				if (index != -1)
+				{
+					auto typeInfo = typeInfos.Values()[index];
+					return typeInfo->parentTypeName;
+				}
+				return L"";
+			}
 		};
 		GUI_REGISTER_PLUGIN(GuiInstanceLoaderManager)
 
@@ -614,6 +625,120 @@ Helper Functions
 
 		void LogInstanceLoaderManager(stream::TextWriter& writer)
 		{
+			SortedList<WString> allTypes;
+			Group<WString, WString> typeParents, typeChildren;
+
+			// collect types
+			{
+				vint typeCount = GetGlobalTypeManager()->GetTypeDescriptorCount();
+				for (vint i = 0; i < typeCount; i++)
+				{
+					ITypeDescriptor* type = GetGlobalTypeManager()->GetTypeDescriptor(i);
+					allTypes.Add(type->GetTypeName());
+
+					vint parentCount = type->GetBaseTypeDescriptorCount();
+					for (vint j = 0; j < parentCount; j++)
+					{
+						ITypeDescriptor* parent = type->GetBaseTypeDescriptor(j);
+						typeParents.Add(type->GetTypeName(), parent->GetTypeName());
+						typeChildren.Add(parent->GetTypeName(), type->GetTypeName());
+					}
+				}
+
+				List<WString> virtualTypes;
+				GetInstanceLoaderManager()->GetVirtualTypes(virtualTypes);
+				FOREACH(WString, typeName, virtualTypes)
+				{
+					WString parentType = GetInstanceLoaderManager()->GetParentTypeForVirtualType(typeName);
+					allTypes.Add(typeName);
+					typeParents.Add(typeName, parentType);
+					typeChildren.Add(parentType, typeName);
+				}
+			}
+
+			// sort types
+			List<WString> sortedTypes;
+			{
+				FOREACH(WString, typeName, allTypes)
+				{
+					if (!typeParents.Contains(typeName))
+					{
+						sortedTypes.Add(typeName);
+					}
+				}
+
+				for (vint i = 0; i < sortedTypes.Count(); i++)
+				{
+					WString selectedType = sortedTypes[i];
+					vint index = typeChildren.Keys().IndexOf(selectedType);
+					if (index != -1)
+					{
+						FOREACH(WString, childType, typeChildren.GetByIndex(index))
+						{
+							typeParents.Remove(childType, selectedType);
+							if (!typeParents.Contains(childType))
+							{
+								sortedTypes.Add(childType);
+							}
+						}
+						typeChildren.Remove(selectedType);
+					}
+				}
+			}
+
+			// categorize types
+			List<WString> serializableTypes, constructableTypes, unconstructableTypes;
+			{
+				FOREACH(WString, typeName, sortedTypes)
+				{
+					auto typeDescriptor = GetInstanceLoaderManager()->GetTypeDescriptorForType(typeName);
+					auto loader = GetInstanceLoaderManager()->GetLoader(typeName);
+					IGuiInstanceLoader::TypeInfo typeInfo(typeName, typeDescriptor);
+
+					if (loader->IsDeserializable(typeInfo))
+					{
+						serializableTypes.Add(typeName);
+					}
+					else if (loader->IsCreatable(typeInfo))
+					{
+						constructableTypes.Add(typeName);
+					}
+					else
+					{
+						unconstructableTypes.Add(typeName);
+					}
+				}
+			}
+
+			writer.WriteLine(L"/***********************************************************************");
+			writer.WriteLine(L"Serializable Types");
+			writer.WriteLine(L"***********************************************************************/");
+			FOREACH(WString, typeName, serializableTypes)
+			{
+				writer.WriteLine(L"");
+				writer.WriteLine(L"    " + typeName);
+			}
+			writer.WriteLine(L"");
+
+			writer.WriteLine(L"/***********************************************************************");
+			writer.WriteLine(L"Constructable Types");
+			writer.WriteLine(L"***********************************************************************/");
+			FOREACH(WString, typeName, constructableTypes)
+			{
+				writer.WriteLine(L"");
+				writer.WriteLine(L"    " + typeName);
+			}
+			writer.WriteLine(L"");
+
+			writer.WriteLine(L"/***********************************************************************");
+			writer.WriteLine(L"Unconstructable Types");
+			writer.WriteLine(L"***********************************************************************/");
+			FOREACH(WString, typeName, unconstructableTypes)
+			{
+				writer.WriteLine(L"");
+				writer.WriteLine(L"    " + typeName);
+			}
+			writer.WriteLine(L"");
 		}
 	}
 }
