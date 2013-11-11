@@ -198,13 +198,16 @@ Default Instance Loader
 
 			IMethodInfo* GetDefaultConstructor(const TypeInfo& typeInfo)
 			{
-				vint count = typeInfo.typeDescriptor->GetConstructorGroup()->GetMethodCount();
-				for(vint i=0;i<count;i++)
+				if (auto ctors = typeInfo.typeDescriptor->GetConstructorGroup())
 				{
-					IMethodInfo* method = typeInfo.typeDescriptor->GetConstructorGroup()->GetMethod(i);
-					if(method->GetParameterCount()==0)
+					vint count = ctors->GetMethodCount();
+					for(vint i=0;i<count;i++)
 					{
-						return method;
+						IMethodInfo* method = ctors->GetMethod(i);
+						if(method->GetParameterCount()==0)
+						{
+							return method;
+						}
 					}
 				}
 				return 0;
@@ -692,18 +695,27 @@ Helper Functions
 				FOREACH(WString, typeName, sortedTypes)
 				{
 					auto typeDescriptor = GetInstanceLoaderManager()->GetTypeDescriptorForType(typeName);
-					auto loader = GetInstanceLoaderManager()->GetLoader(typeName);
 					IGuiInstanceLoader::TypeInfo typeInfo(typeName, typeDescriptor);
-
-					if (loader->IsDeserializable(typeInfo))
+					
+					auto loader = GetInstanceLoaderManager()->GetLoader(typeName);
+					while (loader)
 					{
-						serializableTypes.Add(typeName);
+						if (loader->IsDeserializable(typeInfo))
+						{
+							serializableTypes.Add(typeName);
+							break;
+						}
+						else if (loader->IsCreatable(typeInfo))
+						{
+							constructableTypes.Add(typeName);
+							break;
+						}
+						else
+						{
+							loader = GetInstanceLoaderManager()->GetParentLoader(loader);
+						}
 					}
-					else if (loader->IsCreatable(typeInfo))
-					{
-						constructableTypes.Add(typeName);
-					}
-					else
+					if (!loader)
 					{
 						unconstructableTypes.Add(typeName);
 					}
