@@ -626,6 +626,79 @@ GuiInstanceLoaderManager
 Helper Functions
 ***********************************************************************/
 
+		void LogInstanceLoaderManager_GetParentTypes(const WString& typeName, List<WString>& parentTypes)
+		{
+			if (ITypeDescriptor* type = GetGlobalTypeManager()->GetTypeDescriptor(typeName))
+			{
+				vint parentCount = type->GetBaseTypeDescriptorCount();
+				for (vint j = 0; j < parentCount; j++)
+				{
+					ITypeDescriptor* parent = type->GetBaseTypeDescriptor(j);
+					parentTypes.Add(parent->GetTypeName());
+				}
+			}
+			else
+			{
+				parentTypes.Add(GetInstanceLoaderManager()->GetParentTypeForVirtualType(typeName));
+			}
+		}
+
+		void LogInstanceLoaderManager_PrintParentTypes(stream::TextWriter& writer, const WString& typeName)
+		{
+			List<WString> parentTypes;
+			LogInstanceLoaderManager_GetParentTypes(typeName, parentTypes);
+			FOREACH(WString, parentType, parentTypes)
+			{
+				writer.WriteLine(L"        " + parentType);
+			}
+		}
+
+		void LogInstanceLoaderManager_PrintSerializableTypes(stream::TextWriter& writer, const WString& typeName)
+		{
+			if (ITypeDescriptor* type = GetGlobalTypeManager()->GetTypeDescriptor(typeName))
+			{
+				if (IValueSerializer* serializer = type->GetValueSerializer())
+				{
+					if (serializer->HasCandidate())
+					{
+						if (serializer->CanMergeCandidate())
+						{
+							writer.WriteLine(L"    " + typeName + L" [enum]");
+						}
+						else
+						{
+							writer.WriteLine(L"    " + typeName + L" [flags]");
+						}
+
+						vint count = serializer->GetCandidateCount();
+						for (vint i = 0; i < count; i++)
+						{
+							writer.WriteLine(L"        " + serializer->GetCandidate(i));
+						}
+						return;
+					}
+				}
+			}
+			writer.WriteLine(L"    " + typeName);
+		}
+
+		void LogInstanceLoaderManager_PrintConstructableTypes(stream::TextWriter& writer, const WString& typeName)
+		{
+			writer.WriteLine(L"    " + typeName);
+			LogInstanceLoaderManager_PrintParentTypes(writer, typeName);
+		}
+
+		void LogInstanceLoaderManager_PrintUnconstructableParentTypes(stream::TextWriter& writer, const WString& typeName)
+		{
+			writer.WriteLine(L"    " + typeName);
+			LogInstanceLoaderManager_PrintParentTypes(writer, typeName);
+		}
+
+		void LogInstanceLoaderManager_PrintUnconstructableTypes(stream::TextWriter& writer, const WString& typeName)
+		{
+			writer.WriteLine(L"    " + typeName);
+		}
+
 		void LogInstanceLoaderManager(stream::TextWriter& writer)
 		{
 			SortedList<WString> allTypes;
@@ -690,7 +763,7 @@ Helper Functions
 			}
 
 			// categorize types
-			List<WString> serializableTypes, constructableTypes, unconstructableTypes;
+			List<WString> serializableTypes, constructableTypes, unconstructableParentTypes, unconstructableTypes;
 			{
 				FOREACH(WString, typeName, sortedTypes)
 				{
@@ -720,6 +793,26 @@ Helper Functions
 						unconstructableTypes.Add(typeName);
 					}
 				}
+
+				List<WString> parentTypes;
+				FOREACH(WString, typeName, constructableTypes)
+				{
+					parentTypes.Add(typeName);
+				}
+				for (vint i = 0; i < parentTypes.Count(); i++)
+				{
+					LogInstanceLoaderManager_GetParentTypes(parentTypes[i], parentTypes);
+				}
+
+				for (vint i = unconstructableTypes.Count() - 1; i >= 0; i--)
+				{
+					WString selectedType = unconstructableTypes[i];
+					if (parentTypes.Contains(selectedType))
+					{
+						unconstructableTypes.RemoveAt(i);
+						unconstructableParentTypes.Insert(0, selectedType);
+					}
+				}
 			}
 
 			writer.WriteLine(L"/***********************************************************************");
@@ -728,7 +821,7 @@ Helper Functions
 			FOREACH(WString, typeName, serializableTypes)
 			{
 				writer.WriteLine(L"");
-				writer.WriteLine(L"    " + typeName);
+				LogInstanceLoaderManager_PrintSerializableTypes(writer, typeName);
 			}
 			writer.WriteLine(L"");
 
@@ -738,7 +831,17 @@ Helper Functions
 			FOREACH(WString, typeName, constructableTypes)
 			{
 				writer.WriteLine(L"");
-				writer.WriteLine(L"    " + typeName);
+				LogInstanceLoaderManager_PrintConstructableTypes(writer, typeName);
+			}
+			writer.WriteLine(L"");
+
+			writer.WriteLine(L"/***********************************************************************");
+			writer.WriteLine(L"Unconstructable Parent Types");
+			writer.WriteLine(L"***********************************************************************/");
+			FOREACH(WString, typeName, unconstructableParentTypes)
+			{
+				writer.WriteLine(L"");
+				LogInstanceLoaderManager_PrintUnconstructableParentTypes(writer, typeName);
 			}
 			writer.WriteLine(L"");
 
@@ -748,7 +851,7 @@ Helper Functions
 			FOREACH(WString, typeName, unconstructableTypes)
 			{
 				writer.WriteLine(L"");
-				writer.WriteLine(L"    " + typeName);
+				LogInstanceLoaderManager_PrintUnconstructableTypes(writer, typeName);
 			}
 			writer.WriteLine(L"");
 		}
