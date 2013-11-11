@@ -36,11 +36,6 @@ External Functions
 				return new win8::Win8Theme();
 			}
 
-			TextItemProvider* GuiTextList_GetItemProvider(GuiTextList* thisObject)
-			{
-				return &thisObject->GetItems();
-			}
-
 			ListViewItemStyleProvider::IListViewItemContent* ListViewItemStyleProvider_GetItemContent(ListViewItemStyleProvider* thisObject, GuiListControl::IItemStyleController* itemStyleController)
 			{
 				return thisObject->GetItemContent<ListViewItemStyleProvider::IListViewItemContent>(itemStyleController);
@@ -655,9 +650,6 @@ Type Declaration
 				CONTROL_CONSTRUCTOR_DEFAULT(GuiTextList, &g::NewTextList)
 
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(Items)
-
-				CLASS_MEMBER_EXTERNALMETHOD(GetItemProvider, NO_PARAMETER, TextItemProvider*(GuiTextList::*)(), &GuiTextList_GetItemProvider)
-				CLASS_MEMBER_PROPERTY_READONLY(ItemProvider, GetItemProvider)
 			END_CLASS_MEMBER(GuiTextList)
 
 			BEGIN_CLASS_MEMBER(ListViewItemStyleProviderBase)

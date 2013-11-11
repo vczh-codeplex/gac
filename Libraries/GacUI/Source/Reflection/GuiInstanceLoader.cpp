@@ -286,15 +286,6 @@ namespace vl
 
 					if (prop->IsWritable())
 					{
-						if (auto setter = prop->GetSetter())
-						{
-							if (setter->GetParameterCount() == 1)
-							{
-								support = GuiInstancePropertyInfo::SupportAssign;
-								return setter->GetParameter(0)->GetType();
-							}
-						}
-
 						if (collectionType)
 						{
 							if (readableList)
