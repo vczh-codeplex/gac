@@ -227,57 +227,79 @@ Default Instance Loader
 				return Value();
 			}
 
-			ITypeInfo* GetPropertyReflectionTypeInfo(const PropertyInfo& propertyInfo, bool& set, bool& collection)
+			void ProcessGenericType(ITypeInfo* propType, ITypeInfo*& genericType, ITypeInfo*& elementType, bool& collectionType)
+			{
+				genericType = 0;
+				elementType = 0;
+				collectionType = false;
+				if (propType->GetDecorator() == ITypeInfo::SharedPtr && propType->GetElementType()->GetDecorator() == ITypeInfo::Generic)
+				{
+					propType = propType->GetElementType();
+					genericType = propType->GetElementType();
+					if (genericType->GetTypeDescriptor() == description::GetTypeDescriptor<IValueList>())
+					{
+						elementType = propType->GetGenericArgument(0);
+						collectionType = true;
+					}
+					else if (genericType->GetTypeDescriptor() == description::GetTypeDescriptor<IValueEnumerator>()){ collectionType = true; }
+					else if (genericType->GetTypeDescriptor() == description::GetTypeDescriptor<IValueEnumerable>()){ collectionType = true; }
+					else if (genericType->GetTypeDescriptor() == description::GetTypeDescriptor<IValueReadonlyList>()){ collectionType = true; }
+					else if (genericType->GetTypeDescriptor() == description::GetTypeDescriptor<IValueReadonlyDictionary>()){ collectionType = true; }
+					else if (genericType->GetTypeDescriptor() == description::GetTypeDescriptor<IValueDictionary>()){ collectionType = true; }
+				}
+			}
+
+			ITypeInfo* GetPropertyReflectionTypeInfo(const PropertyInfo& propertyInfo, bool& set, bool& multipleValues)
 			{
 				set = false;
-				collection = false;
-				if (propertyInfo.propertyName == L"Children")
-				{
-					int a = 0;
-				}
+				multipleValues = false;
 				IPropertyInfo* prop = propertyInfo.typeInfo.typeDescriptor->GetPropertyByName(propertyInfo.propertyName, true);
 				if(prop)
 				{
 					ITypeInfo* propType = prop->GetReturn();
+					ITypeInfo* genericType = 0;
+					ITypeInfo* elementType = 0;
+					bool collectionType = false;
+					ProcessGenericType(propType, genericType, elementType, collectionType);
 
 					if (prop->IsWritable())
 					{
-						auto setter = prop->GetSetter();
-						if (setter && setter->GetParameterCount() == 1)
+						if (auto setter = prop->GetSetter())
 						{
-							propType = setter->GetParameter(0)->GetType();
+							if (setter->GetParameterCount() == 1)
+							{
+								return setter->GetParameter(0)->GetType();
+							}
 						}
 
-						return propType;
+						if (collectionType)
+						{
+							if (elementType)
+							{
+								multipleValues = true;
+								return elementType;
+							}
+						}
+						else if (genericType)
+						{
+							return genericType;
+						}
+						else
+						{
+							return propType;
+						}
 					}
 					else if (prop->IsReadable())
 					{
-						auto getter = prop->GetGetter();
-						if (getter && getter->GetParameterCount() == 0)
+						if (collectionType)
 						{
-							propType = getter->GetReturn();
-						}
-
-						if (propType->GetDecorator() == ITypeInfo::SharedPtr && propType->GetElementType()->GetDecorator() == ITypeInfo::Generic)
-						{
-							propType = propType->GetElementType();
-							ITypeInfo* genericType = propType->GetElementType();
-							if (genericType->GetTypeDescriptor() == description::GetTypeDescriptor<IValueList>())
+							if (elementType)
 							{
-								collection = true;
-								return propType->GetGenericArgument(0);
-							}
-							else if (genericType->GetTypeDescriptor() == description::GetTypeDescriptor<IValueEnumerator>()){ return 0; }
-							else if (genericType->GetTypeDescriptor() == description::GetTypeDescriptor<IValueEnumerable>()){ return 0; }
-							else if (genericType->GetTypeDescriptor() == description::GetTypeDescriptor<IValueReadonlyList>()){ return 0; }
-							else if (genericType->GetTypeDescriptor() == description::GetTypeDescriptor<IValueReadonlyDictionary>()){ return 0; }
-							else if (genericType->GetTypeDescriptor() == description::GetTypeDescriptor<IValueDictionary>()){ return 0; }
-							else
-							{
-								return genericType;
+								multipleValues = true;
+								return elementType;
 							}
 						}
-						else
+						else if (!genericType)
 						{
 							set = true;
 							return propType;
