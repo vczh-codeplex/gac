@@ -568,7 +568,7 @@ GuiTableCompositionInstanceLoader
 			{
 				if (propertyInfo.propertyName == L"Rows" || propertyInfo.propertyName==L"Columns")
 				{
-					auto info = GuiInstancePropertyInfo::Collection();
+					auto info = GuiInstancePropertyInfo::Array();
 					info->acceptableTypes.Add(description::GetTypeDescriptor<GuiCellOption>());
 					return info;
 				}
@@ -581,16 +581,24 @@ GuiTableCompositionInstanceLoader
 				{
 					if (propertyValue.propertyName == L"Rows")
 					{
-						GuiCellOption option = UnboxValue<GuiCellOption>(propertyValue.propertyValue);
-						container->SetRowsAndColumns(currentIndex + 1, container->GetColumns());
-						container->SetRowOption(currentIndex, option);
+						List<GuiCellOption> options;
+						CopyFrom(options, UnboxValue<Ptr<IValueList>>(propertyValue.propertyValue)->GetLazyList<GuiCellOption>());
+						container->SetRowsAndColumns(options.Count(), container->GetColumns());
+						FOREACH_INDEXER(GuiCellOption, option, index, options)
+						{
+							container->SetRowOption(index, option);
+						}
 						return true;
 					}
 					else if (propertyValue.propertyName == L"Columns")
 					{
-						GuiCellOption option = UnboxValue<GuiCellOption>(propertyValue.propertyValue);
-						container->SetRowsAndColumns(container->GetRows(), currentIndex + 1);
-						container->SetColumnOption(currentIndex, option);
+						List<GuiCellOption> options;
+						CopyFrom(options, UnboxValue<Ptr<IValueList>>(propertyValue.propertyValue)->GetLazyList<GuiCellOption>());
+						container->SetRowsAndColumns(container->GetRows(), options.Count());
+						FOREACH_INDEXER(GuiCellOption, option, index, options)
+						{
+							container->SetColumnOption(index, option);
+						}
 						return true;
 					}
 				}
