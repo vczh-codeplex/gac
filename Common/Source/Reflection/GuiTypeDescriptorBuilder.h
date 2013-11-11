@@ -1250,6 +1250,11 @@ StructValueSeriaizer
 					return true;
 				}
 
+				T GetDefaultValue()override
+				{
+					return T();
+				}
+
 				bool Serialize(const T& input, WString& output)override
 				{
 					Load();

@@ -166,6 +166,11 @@ TypeName
 TypedValueSerializerProvider
 ***********************************************************************/
 
+			unsigned __int8 TypedValueSerializerProvider<unsigned __int8>::GetDefaultValue()
+			{
+				return 0;
+			}
+
 			bool TypedValueSerializerProvider<unsigned __int8>::Serialize(const unsigned __int8& input, WString& output)
 			{
 				output=u64tow(input);
@@ -180,6 +185,13 @@ TypedValueSerializerProvider
 				if(result>_UI8_MAX) return false;
 				output=(unsigned __int8)result;
 				return true;
+			}
+
+			//---------------------------------------
+
+			unsigned __int16 TypedValueSerializerProvider<unsigned __int16>::GetDefaultValue()
+			{
+				return 0;
 			}
 
 			bool TypedValueSerializerProvider<unsigned __int16>::Serialize(const unsigned __int16& input, WString& output)
@@ -198,6 +210,13 @@ TypedValueSerializerProvider
 				return true;
 			}
 
+			//---------------------------------------
+
+			unsigned __int32 TypedValueSerializerProvider<unsigned __int32>::GetDefaultValue()
+			{
+				return 0;
+			}
+
 			bool TypedValueSerializerProvider<unsigned __int32>::Serialize(const unsigned __int32& input, WString& output)
 			{
 				output=u64tow(input);
@@ -214,6 +233,13 @@ TypedValueSerializerProvider
 				return true;
 			}
 
+			//---------------------------------------
+
+			unsigned __int64 TypedValueSerializerProvider<unsigned __int64>::GetDefaultValue()
+			{
+				return 0;
+			}
+
 			bool TypedValueSerializerProvider<unsigned __int64>::Serialize(const unsigned __int64& input, WString& output)
 			{
 				output=u64tow(input);
@@ -227,6 +253,13 @@ TypedValueSerializerProvider
 				if(!success) return false;
 				output=result;
 				return true;
+			}
+
+			//---------------------------------------
+
+			signed __int8 TypedValueSerializerProvider<signed __int8>::GetDefaultValue()
+			{
+				return 0;
 			}
 
 			bool TypedValueSerializerProvider<signed __int8>::Serialize(const signed __int8& input, WString& output)
@@ -245,6 +278,13 @@ TypedValueSerializerProvider
 				return true;
 			}
 
+			//---------------------------------------
+
+			signed __int16 TypedValueSerializerProvider<signed __int16>::GetDefaultValue()
+			{
+				return 0;
+			}
+
 			bool TypedValueSerializerProvider<signed __int16>::Serialize(const signed __int16& input, WString& output)
 			{
 				output=i64tow(input);
@@ -259,6 +299,13 @@ TypedValueSerializerProvider
 				if(result<_I16_MIN || result>_I16_MAX) return false;
 				output=(signed __int16)result;
 				return true;
+			}
+
+			//---------------------------------------
+
+			signed __int32 TypedValueSerializerProvider<signed __int32>::GetDefaultValue()
+			{
+				return 0;
 			}
 
 			bool TypedValueSerializerProvider<signed __int32>::Serialize(const signed __int32& input, WString& output)
@@ -277,6 +324,13 @@ TypedValueSerializerProvider
 				return true;
 			}
 
+			//---------------------------------------
+
+			signed __int64 TypedValueSerializerProvider<signed __int64>::GetDefaultValue()
+			{
+				return 0;
+			}
+
 			bool TypedValueSerializerProvider<signed __int64>::Serialize(const signed __int64& input, WString& output)
 			{
 				output=i64tow(input);
@@ -290,6 +344,13 @@ TypedValueSerializerProvider
 				if(!success) return false;
 				output=result;
 				return true;
+			}
+
+			//---------------------------------------
+
+			float TypedValueSerializerProvider<float>::GetDefaultValue()
+			{
+				return 0;
 			}
 
 			bool TypedValueSerializerProvider<float>::Serialize(const float& input, WString& output)
@@ -308,6 +369,13 @@ TypedValueSerializerProvider
 				return true;
 			}
 
+			//---------------------------------------
+
+			double TypedValueSerializerProvider<double>::GetDefaultValue()
+			{
+				return 0;
+			}
+
 			bool TypedValueSerializerProvider<double>::Serialize(const double& input, WString& output)
 			{
 				output=ftow(input);
@@ -323,6 +391,13 @@ TypedValueSerializerProvider
 				return true;
 			}
 
+			//---------------------------------------
+
+			wchar_t TypedValueSerializerProvider<wchar_t>::GetDefaultValue()
+			{
+				return 0;
+			}
+
 			bool TypedValueSerializerProvider<wchar_t>::Serialize(const wchar_t& input, WString& output)
 			{
 				output=input;
@@ -336,6 +411,13 @@ TypedValueSerializerProvider
 				return true;
 			}
 
+			//---------------------------------------
+
+			WString TypedValueSerializerProvider<WString>::GetDefaultValue()
+			{
+				return L"";
+			}
+
 			bool TypedValueSerializerProvider<WString>::Serialize(const WString& input, WString& output)
 			{
 				output=input;
@@ -345,6 +427,25 @@ TypedValueSerializerProvider
 			bool TypedValueSerializerProvider<WString>::Deserialize(const WString& input, WString& output)
 			{
 				output=input;
+				return true;
+			}
+
+			//---------------------------------------
+
+			Locale TypedValueSerializerProvider<Locale>::GetDefaultValue()
+			{
+				return Locale();
+			}
+
+			bool TypedValueSerializerProvider<Locale>::Serialize(const Locale& input, WString& output)
+			{
+				output=input.GetName();
+				return true;
+			}
+
+			bool TypedValueSerializerProvider<Locale>::Deserialize(const WString& input, Locale& output)
+			{
+				output=Locale(input);
 				return true;
 			}
 
@@ -369,7 +470,7 @@ BoolValueSerializer
 			{
 			public:
 				BoolValueSeriaizer(ITypeDescriptor* _ownerTypeDescriptor)
-					:EnumValueSeriaizer(_ownerTypeDescriptor)
+					:EnumValueSeriaizer(_ownerTypeDescriptor, false)
 				{
 					candidates.Add(L"true", true);
 					candidates.Add(L"false", false);
@@ -384,6 +485,11 @@ DateTimeValueSerializer
 			{
 			protected:
 				Regex				regexDateTime;
+
+				DateTime GetDefaultValue()override
+				{
+					return DateTime();
+				}
 
 				bool Serialize(const DateTime& input, WString& output)override
 				{
@@ -417,32 +523,6 @@ DateTimeValueSerializer
 				DateTimeValueSerializer(ITypeDescriptor* _ownerTypeDescriptor)
 					:GeneralValueSeriaizer(_ownerTypeDescriptor)
 					,regexDateTime(L"(<Y>/d/d/d/d)-(<M>/d/d)-(<D>/d/d) (<h>/d/d):(<m>/d/d):(<s>/d/d).(<ms>/d/d/d)")
-				{
-				}
-			};
-
-/***********************************************************************
-LocaleValueSerializer
-***********************************************************************/
-
-			class LocaleValueSerializer : public GeneralValueSeriaizer<Locale>
-			{
-			protected:
-
-				bool Serialize(const Locale& input, WString& output)override
-				{
-					output=input.GetName();
-					return true;
-				}
-
-				bool Deserialize(const WString& input, Locale& output)override
-				{
-					output=Locale(input);
-					return true;
-				}
-			public:
-				LocaleValueSerializer(ITypeDescriptor* _ownerTypeDescriptor)
-					:GeneralValueSeriaizer(_ownerTypeDescriptor)
 				{
 				}
 			};
@@ -713,21 +793,21 @@ LoadPredefinedTypes
 				void Load(ITypeManager* manager)override
 				{
 					manager->SetTypeDescriptor(TypeInfo<Value>::TypeName, new ObjectTypeDescriptor);
-					AddSerializableType<TypedValueSerializer<unsigned __int8>>(manager);
-					AddSerializableType<TypedValueSerializer<unsigned __int16>>(manager);
-					AddSerializableType<TypedValueSerializer<unsigned __int32>>(manager);
-					AddSerializableType<TypedValueSerializer<unsigned __int64>>(manager);
-					AddSerializableType<TypedValueSerializer<signed __int8>>(manager);
-					AddSerializableType<TypedValueSerializer<signed __int16>>(manager);
-					AddSerializableType<TypedValueSerializer<signed __int32>>(manager);
-					AddSerializableType<TypedValueSerializer<signed __int64>>(manager);
-					AddSerializableType<TypedValueSerializer<float>>(manager);
-					AddSerializableType<TypedValueSerializer<double>>(manager);
+					AddSerializableType<TypedDefaultValueSerializer<unsigned __int8>>(manager);
+					AddSerializableType<TypedDefaultValueSerializer<unsigned __int16>>(manager);
+					AddSerializableType<TypedDefaultValueSerializer<unsigned __int32>>(manager);
+					AddSerializableType<TypedDefaultValueSerializer<unsigned __int64>>(manager);
+					AddSerializableType<TypedDefaultValueSerializer<signed __int8>>(manager);
+					AddSerializableType<TypedDefaultValueSerializer<signed __int16>>(manager);
+					AddSerializableType<TypedDefaultValueSerializer<signed __int32>>(manager);
+					AddSerializableType<TypedDefaultValueSerializer<signed __int64>>(manager);
+					AddSerializableType<TypedDefaultValueSerializer<float>>(manager);
+					AddSerializableType<TypedDefaultValueSerializer<double>>(manager);
+					AddSerializableType<TypedDefaultValueSerializer<wchar_t>>(manager);
+					AddSerializableType<TypedDefaultValueSerializer<WString>>(manager);
+					AddSerializableType<TypedDefaultValueSerializer<Locale>>(manager);
 					AddSerializableType<BoolValueSeriaizer>(manager);
-					AddSerializableType<TypedValueSerializer<wchar_t>>(manager);
-					AddSerializableType<TypedValueSerializer<WString>>(manager);
 					AddSerializableType<DateTimeValueSerializer>(manager);
-					AddSerializableType<LocaleValueSerializer>(manager);
 					ADD_TYPE_INFO(VoidValue)
 					ADD_TYPE_INFO(IDescriptable)
 

@@ -647,9 +647,9 @@ Helper Functions
 		{
 			List<WString> parentTypes;
 			LogInstanceLoaderManager_GetParentTypes(typeName, parentTypes);
-			FOREACH(WString, parentType, parentTypes)
+			FOREACH_INDEXER(WString, parentType, index, parentTypes)
 			{
-				writer.WriteLine(L"        " + parentType);
+				writer.WriteLine(L"        " + WString(index == 0 ? L": " : L", ") + parentType);
 			}
 		}
 
@@ -663,19 +663,25 @@ Helper Functions
 					{
 						if (serializer->CanMergeCandidate())
 						{
-							writer.WriteLine(L"    " + typeName + L" [enum]");
+							writer.WriteLine(L"    enum " + typeName + L" = {" + serializer->GetDefaultText() + L"}");
 						}
 						else
 						{
-							writer.WriteLine(L"    " + typeName + L" [flags]");
+							writer.WriteLine(L"    flags " + typeName + L" = {" + serializer->GetDefaultText() + L"}");
 						}
 
+						writer.WriteLine(L"    {");
 						vint count = serializer->GetCandidateCount();
 						for (vint i = 0; i < count; i++)
 						{
-							writer.WriteLine(L"        " + serializer->GetCandidate(i));
+							writer.WriteLine(L"        " + serializer->GetCandidate(i) + L",");
 						}
+						writer.WriteLine(L"    }");
 						return;
+					}
+					else
+					{
+						writer.WriteLine(L"    struct " + typeName +  + L" = {" + serializer->GetDefaultText() + L"}");
 					}
 				}
 			}
@@ -685,13 +691,17 @@ Helper Functions
 		void LogInstanceLoaderManager_PrintConstructableTypes(stream::TextWriter& writer, const WString& typeName)
 		{
 			writer.WriteLine(L"    " + typeName);
+			writer.WriteLine(L"    {");
 			LogInstanceLoaderManager_PrintParentTypes(writer, typeName);
+			writer.WriteLine(L"    }");
 		}
 
 		void LogInstanceLoaderManager_PrintUnconstructableParentTypes(stream::TextWriter& writer, const WString& typeName)
 		{
 			writer.WriteLine(L"    " + typeName);
+			writer.WriteLine(L"    {");
 			LogInstanceLoaderManager_PrintParentTypes(writer, typeName);
+			writer.WriteLine(L"    }");
 		}
 
 		void LogInstanceLoaderManager_PrintUnconstructableTypes(stream::TextWriter& writer, const WString& typeName)
