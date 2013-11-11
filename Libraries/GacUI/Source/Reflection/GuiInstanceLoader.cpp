@@ -224,63 +224,99 @@ Default Instance Loader
 				return Value();
 			}
 
-			ITypeInfo* GetPropertyReflectionTypeInfo(const PropertyInfo& propertyInfo)
+			ITypeInfo* GetPropertyReflectionTypeInfo(const PropertyInfo& propertyInfo, bool& set, bool& collection)
 			{
+				set = false;
+				collection = false;
 				IPropertyInfo* prop = propertyInfo.typeInfo.typeDescriptor->GetPropertyByName(propertyInfo.propertyName, true);
 				if(prop)
 				{
-					ITypeInfo* propType=prop->GetReturn();
-					if(IMethodInfo* method=prop->GetSetter())
+					ITypeInfo* propType = prop->GetReturn();
+
+					if (prop->IsWritable())
 					{
-						if(method->GetParameterCount()==1)
+						auto setter = prop->GetSetter();
+						if (setter && setter->GetParameterCount() == 1)
 						{
-							propType=method->GetParameter(0)->GetType();
+							propType = setter->GetParameter(0)->GetType();
+						}
+
+						return propType;
+					}
+					else if (prop->IsReadable())
+					{
+						auto getter = prop->GetGetter();
+						if (getter && getter->GetParameterCount() == 0)
+						{
+							propType = getter->GetReturn();
+						}
+
+						if (propType->GetDecorator() == ITypeInfo::Generic)
+						{
+							ITypeInfo* genericType = propType->GetElementType();
+							if (genericType->GetTypeDescriptor() == description::GetTypeDescriptor<IValueList>())
+							{
+								collection = true;
+								return propType->GetGenericArgument(0);
+							}
+							else
+							{
+								return genericType;
+							}
+						}
+						else
+						{
+							set = true;
+							return propType;
 						}
 					}
-					return propType;
 				}
 				return 0;
 			}
 
-			Ptr<GuiInstancePropertyInfo> GetPropertyTypeInternal(ITypeInfo* propType, bool collectionType)
+			bool FillPropertyInfo(Ptr<GuiInstancePropertyInfo> propertyInfo, ITypeInfo* propType)
 			{
 				switch(propType->GetDecorator())
 				{
 				case ITypeInfo::RawPtr:
 				case ITypeInfo::SharedPtr:
 				case ITypeInfo::Nullable:
-					return GetPropertyTypeInternal(propType->GetElementType(), collectionType);
+					FillPropertyInfo(propertyInfo, propType->GetElementType());
+					return true;
 				case ITypeInfo::TypeDescriptor:
-					if (collectionType)
-					{
-						return GuiInstancePropertyInfo::AssignCollection(propType->GetTypeDescriptor());
-					}
-					else
-					{
-						return GuiInstancePropertyInfo::Assign(propType->GetTypeDescriptor());
-					}
-				case ITypeInfo::Generic:
-					{
-						ITypeDescriptor* genericType=propType->GetElementType()->GetTypeDescriptor();
-
-						if(genericType==description::GetTypeDescriptor<IValueList>())
-						{
-							return GetPropertyTypeInternal(propType->GetGenericArgument(0), true);
-						}
-						else if(genericType==description::GetTypeDescriptor<IValueFunctionProxy>())
-						{
-							return GuiInstancePropertyInfo::Assign(genericType);
-						}
-					}
+					propertyInfo->acceptableTypes.Add(propType->GetTypeDescriptor());
+					return true;
 				}
-				return GuiInstancePropertyInfo::Unsupported();
+				return false;
 			}
 
 			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
 			{
-				if (ITypeInfo* propType = GetPropertyReflectionTypeInfo(propertyInfo))
+				bool set = false;
+				bool collection = false;
+				if (ITypeInfo* propType = GetPropertyReflectionTypeInfo(propertyInfo, set, collection))
 				{
-					return GetPropertyTypeInternal(propType, false);
+					Ptr<GuiInstancePropertyInfo> propertyInfo;
+					if (!set && !collection)
+					{
+						propertyInfo = GuiInstancePropertyInfo::Assign();
+					}
+					else if (set && !collection)
+					{
+						if (!propType->GetTypeDescriptor()->GetValueSerializer())
+						{
+							propertyInfo = GuiInstancePropertyInfo::Set();
+						}
+					}
+					else if (!set && collection)
+					{
+						propertyInfo = GuiInstancePropertyInfo::AssignCollection();
+					}
+
+					if (propertyInfo && FillPropertyInfo(propertyInfo, propType))
+					{
+						return propertyInfo;
+					}
 				}
 				return GuiInstancePropertyInfo::Unsupported();
 			}
@@ -300,28 +336,26 @@ Default Instance Loader
 
 			bool SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)override
 			{
-				if (ITypeInfo* propType = GetPropertyReflectionTypeInfo(propertyValue))
+				bool set = false;
+				bool collection = false;
+				if (GetPropertyReflectionTypeInfo(propertyValue, set, collection) && !set)
 				{
-					if (propType->GetDecorator() == ITypeInfo::Generic)
+					if (collection)
 					{
-						ITypeDescriptor* genericType=propType->GetElementType()->GetTypeDescriptor();
-						if (genericType == description::GetTypeDescriptor<IValueList>())
+						Value value = propertyValue.instanceValue.GetProperty(propertyValue.propertyName);
+						if (auto list = dynamic_cast<IValueList*>(value.GetRawPtr()))
 						{
-							Value value = propertyValue.instanceValue.GetProperty(propertyValue.propertyName);
-							if (auto list = dynamic_cast<IValueList*>(value.GetRawPtr()))
-							{
-								list->Add(propertyValue.propertyValue);
-								return true;
-							}
-							else
-							{
-								return false;
-							}
+							list->Add(propertyValue.propertyValue);
+							return true;
 						}
 					}
+					else
+					{
+						propertyValue.instanceValue.SetProperty(propertyValue.propertyName, propertyValue.propertyValue);
+						return true;
+					}
 				}
-				propertyValue.instanceValue.SetProperty(propertyValue.propertyName, propertyValue.propertyValue);
-				return true;
+				return false;
 			}
 		};
 
