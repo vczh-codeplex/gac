@@ -653,6 +653,16 @@ Helper Functions
 			}
 		}
 
+		void LogInstanceLoaderManager_PrintFieldName(stream::TextWriter& writer, const WString& name)
+		{
+			writer.WriteString(L"        " + name);
+			for (int i = name.Length(); i < 24; i++)
+			{
+				writer.WriteChar(L' ');
+			}
+			writer.WriteString(L" : ");
+		}
+
 		void LogInstanceLoaderManager_PrintSerializableTypes(stream::TextWriter& writer, const WString& typeName)
 		{
 			if (ITypeDescriptor* type = GetGlobalTypeManager()->GetTypeDescriptor(typeName))
@@ -679,28 +689,42 @@ Helper Functions
 						writer.WriteLine(L"    }");
 						return;
 					}
+					else if (type->GetPropertyCount() > 0)
+					{
+						writer.WriteLine(L"    struct "+ typeName +  + L" = {" + serializer->GetDefaultText() + L"}");
+						writer.WriteLine(L"    {");
+						vint count = type->GetPropertyCount();
+						for (vint i = 0; i < count; i++)
+						{
+							IPropertyInfo* prop = type->GetProperty(i);
+							LogInstanceLoaderManager_PrintFieldName(writer, prop->GetName());
+							writer.WriteLine(prop->GetReturn()->GetTypeFriendlyName() + L";");
+						}
+						writer.WriteLine(L"    }");
+						return;
+					}
 					else
 					{
-						writer.WriteLine(L"    struct " + typeName +  + L" = {" + serializer->GetDefaultText() + L"}");
+						writer.WriteLine(L"    data "+ typeName +  + L" = {" + serializer->GetDefaultText() + L"}");
 					}
 				}
 			}
-			writer.WriteLine(L"    " + typeName);
+			writer.WriteLine(L"    serializable " + typeName);
 		}
 
 		void LogInstanceLoaderManager_PrintConstructableTypes(stream::TextWriter& writer, const WString& typeName)
 		{
 			writer.WriteLine(L"    " + typeName);
-			writer.WriteLine(L"    {");
 			LogInstanceLoaderManager_PrintParentTypes(writer, typeName);
+			writer.WriteLine(L"    {");
 			writer.WriteLine(L"    }");
 		}
 
 		void LogInstanceLoaderManager_PrintUnconstructableParentTypes(stream::TextWriter& writer, const WString& typeName)
 		{
 			writer.WriteLine(L"    " + typeName);
-			writer.WriteLine(L"    {");
 			LogInstanceLoaderManager_PrintParentTypes(writer, typeName);
+			writer.WriteLine(L"    {");
 			writer.WriteLine(L"    }");
 		}
 

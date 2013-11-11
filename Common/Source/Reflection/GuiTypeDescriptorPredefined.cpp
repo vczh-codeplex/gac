@@ -400,7 +400,7 @@ TypedValueSerializerProvider
 
 			bool TypedValueSerializerProvider<wchar_t>::Serialize(const wchar_t& input, WString& output)
 			{
-				output=input;
+				output=input?WString(input):L"";
 				return true;
 			}
 
