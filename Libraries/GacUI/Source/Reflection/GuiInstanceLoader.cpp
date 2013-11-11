@@ -231,6 +231,10 @@ Default Instance Loader
 			{
 				set = false;
 				collection = false;
+				if (propertyInfo.propertyName == L"Children")
+				{
+					int a = 0;
+				}
 				IPropertyInfo* prop = propertyInfo.typeInfo.typeDescriptor->GetPropertyByName(propertyInfo.propertyName, true);
 				if(prop)
 				{
@@ -254,14 +258,20 @@ Default Instance Loader
 							propType = getter->GetReturn();
 						}
 
-						if (propType->GetDecorator() == ITypeInfo::Generic)
+						if (propType->GetDecorator() == ITypeInfo::SharedPtr && propType->GetElementType()->GetDecorator() == ITypeInfo::Generic)
 						{
+							propType = propType->GetElementType();
 							ITypeInfo* genericType = propType->GetElementType();
 							if (genericType->GetTypeDescriptor() == description::GetTypeDescriptor<IValueList>())
 							{
 								collection = true;
 								return propType->GetGenericArgument(0);
 							}
+							else if (genericType->GetTypeDescriptor() == description::GetTypeDescriptor<IValueEnumerator>()){ return 0; }
+							else if (genericType->GetTypeDescriptor() == description::GetTypeDescriptor<IValueEnumerable>()){ return 0; }
+							else if (genericType->GetTypeDescriptor() == description::GetTypeDescriptor<IValueReadonlyList>()){ return 0; }
+							else if (genericType->GetTypeDescriptor() == description::GetTypeDescriptor<IValueReadonlyDictionary>()){ return 0; }
+							else if (genericType->GetTypeDescriptor() == description::GetTypeDescriptor<IValueDictionary>()){ return 0; }
 							else
 							{
 								return genericType;
