@@ -154,6 +154,7 @@ Instance Loader Manager
 			virtual IGuiInstanceLoader*				GetLoader(const WString& typeName)=0;
 			virtual IGuiInstanceLoader*				GetParentLoader(IGuiInstanceLoader* loader)=0;
 			virtual description::ITypeDescriptor*	GetTypeDescriptorForType(const WString& typeName)=0;
+			virtual void							GetVirtualTypes(collections::List<WString>& typeNames) = 0;
 		};
 
 		struct InstanceLoadingSource
@@ -178,6 +179,7 @@ Instance Loader Manager
 														const WString& instancePath,
 														description::ITypeDescriptor* expectedType=0
 														);
+		extern void									LogInstanceLoaderManager(stream::TextWriter& writer);
 
 /***********************************************************************
 Instance Scope Wrapper
