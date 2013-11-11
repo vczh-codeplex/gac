@@ -36,6 +36,11 @@ GuiRewriteInstanceLoader
 				return Value();
 			}
 
+			bool IsCreatable(const TypeInfo& typeInfo)override
+			{
+				return false;
+			}
+
 			description::Value CreateInstance(const TypeInfo& typeInfo)override
 			{
 				return Value();
@@ -76,6 +81,11 @@ GuiVrtualTypeInstanceLoader
 			WString GetTypeName()override
 			{
 				return typeName;
+			}
+
+			bool IsCreatable(const TypeInfo& typeInfo)override
+			{
+				return typeName==typeInfo.typeName;
 			}
 
 			description::Value CreateInstance(const TypeInfo& typeInfo)override
@@ -390,6 +400,11 @@ GuiToolstripButtonInstanceLoader
 			WString GetTypeName()override
 			{
 				return description::GetTypeDescriptor<GuiToolstripButton>()->GetTypeName();
+			}
+
+			bool IsCreatable(const TypeInfo& typeInfo)override
+			{
+				return typeInfo.typeName == GetTypeName();
 			}
 
 			description::Value CreateInstance(const TypeInfo& typeInfo)override

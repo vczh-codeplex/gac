@@ -393,9 +393,9 @@ Helper Functions
 								deserialized = true;
 							}
 						}
-						else
+						else if (loader->IsCreatable(typeInfo))
 						{
-							instance=loader->CreateInstance(IGuiInstanceLoader::TypeInfo(typeName, typeDescriptor));
+							instance=loader->CreateInstance(typeInfo);
 						}
 						loader=GetInstanceLoaderManager()->GetParentLoader(loader);
 					}
