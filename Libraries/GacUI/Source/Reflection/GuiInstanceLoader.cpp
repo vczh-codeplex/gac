@@ -594,7 +594,26 @@ GuiInstanceLoaderManager
 					?GetGlobalTypeManager()->GetTypeDescriptor(typeName)
 					:typeInfos.Values()[index]->typeDescriptor;
 			}
+
+			void GetVirtualTypes(collections::List<WString>& typeNames)
+			{
+				for (vint i = 0; i < typeInfos.Count(); i++)
+				{
+					if (typeInfos.Values()[i]->parentTypeName != L"")
+					{
+						typeNames.Add(typeInfos.Keys()[i]);
+					}
+				}
+			}
 		};
 		GUI_REGISTER_PLUGIN(GuiInstanceLoaderManager)
+
+/***********************************************************************
+Helper Functions
+***********************************************************************/
+
+		void LogInstanceLoaderManager(stream::TextWriter& writer)
+		{
+		}
 	}
 }
