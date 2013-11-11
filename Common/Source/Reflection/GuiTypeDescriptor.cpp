@@ -633,7 +633,7 @@ LogTypeManager (enum)
 
 			void LogTypeManager_Enum(stream::TextWriter& writer, ITypeDescriptor* type, IValueSerializer* serializer)
 			{
-				writer.WriteLine(L"enum "+type->GetTypeName()+(serializer->CanMergeCandidate()?L" flag":L""));
+				writer.WriteLine((serializer->CanMergeCandidate()?L"flags ":L"enum ")+type->GetTypeName());
 				writer.WriteLine(L"{");
 				for(vint j=0;j<serializer->GetCandidateCount();j++)
 				{
