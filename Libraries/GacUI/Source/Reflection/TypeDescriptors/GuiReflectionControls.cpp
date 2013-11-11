@@ -1038,6 +1038,7 @@ Type Declaration
 			END_CLASS_MEMBER(NodeRootProviderBase)
 
 			BEGIN_CLASS_MEMBER(MemoryNodeRootProvider)
+				CLASS_MEMBER_BASE(MemoryNodeProvider)
 				CLASS_MEMBER_BASE(NodeRootProviderBase)
 				CLASS_MEMBER_CONSTRUCTOR(Ptr<MemoryNodeRootProvider>(), NO_PARAMETER)
 
