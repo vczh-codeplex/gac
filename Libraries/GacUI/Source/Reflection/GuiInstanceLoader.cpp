@@ -770,7 +770,7 @@ Helper Functions
 					loader = index == loaders.Count() - 1 ? 0 : loaders[index + 1];
 				}
 
-				LogInstanceLoaderManager_PrintFieldName(writer, propertyName);
+				LogInstanceLoaderManager_PrintFieldName(writer, (propertyName == L"" ? L"<DEFAULT-PROPERTY>" : propertyName));
 				if (firstInfo->supportSet)
 				{
 					writer.WriteString(L"[set]        ");
