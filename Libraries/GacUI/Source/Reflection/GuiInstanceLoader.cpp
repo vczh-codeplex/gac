@@ -37,33 +37,47 @@ GuiInstancePropertyInfo
 			return info;
 		}
 
-		Ptr<GuiInstancePropertyInfo> GuiInstancePropertyInfo::Supported(description::ITypeDescriptor* typeDescriptor)
+		Ptr<GuiInstancePropertyInfo> GuiInstancePropertyInfo::Assign(description::ITypeDescriptor* typeDescriptor)
 		{
 			Ptr<GuiInstancePropertyInfo> info = new GuiInstancePropertyInfo;
 			info->supportAssign = true;
+			if (typeDescriptor) info->acceptableTypes.Add(typeDescriptor);
+			return info;
+		}
+
+		Ptr<GuiInstancePropertyInfo> GuiInstancePropertyInfo::AssignWithParent(description::ITypeDescriptor* typeDescriptor)
+		{
+			Ptr<GuiInstancePropertyInfo> info = Assign(typeDescriptor);
+			info->tryParent = true;
+			return info;
+		}
+
+		Ptr<GuiInstancePropertyInfo> GuiInstancePropertyInfo::AssignCollection(description::ITypeDescriptor* typeDescriptor)
+		{
+			Ptr<GuiInstancePropertyInfo> info = Assign(typeDescriptor);
+			info->multipleValues = true;
+			return info;
+		}
+
+		Ptr<GuiInstancePropertyInfo> GuiInstancePropertyInfo::AssignCollectionWithParent(description::ITypeDescriptor* typeDescriptor)
+		{
+			Ptr<GuiInstancePropertyInfo> info = AssignWithParent(typeDescriptor);
+			info->multipleValues = true;
+			return info;
+		}
+
+		Ptr<GuiInstancePropertyInfo> GuiInstancePropertyInfo::Set(description::ITypeDescriptor* typeDescriptor)
+		{
+			Ptr<GuiInstancePropertyInfo> info = new GuiInstancePropertyInfo;
 			info->supportSet = true;
 			if (typeDescriptor) info->acceptableTypes.Add(typeDescriptor);
 			return info;
 		}
 
-		Ptr<GuiInstancePropertyInfo> GuiInstancePropertyInfo::SupportedWithParent(description::ITypeDescriptor* typeDescriptor)
+		Ptr<GuiInstancePropertyInfo> GuiInstancePropertyInfo::SetWithParent(description::ITypeDescriptor* typeDescriptor)
 		{
-			Ptr<GuiInstancePropertyInfo> info = Supported(typeDescriptor);
+			Ptr<GuiInstancePropertyInfo> info = Set(typeDescriptor);
 			info->tryParent = true;
-			return info;
-		}
-
-		Ptr<GuiInstancePropertyInfo> GuiInstancePropertyInfo::SupportedCollection(description::ITypeDescriptor* typeDescriptor)
-		{
-			Ptr<GuiInstancePropertyInfo> info = Supported(typeDescriptor);
-			info->multipleValues = true;
-			return info;
-		}
-
-		Ptr<GuiInstancePropertyInfo> GuiInstancePropertyInfo::SupportedCollectionWithParent(description::ITypeDescriptor* typeDescriptor)
-		{
-			Ptr<GuiInstancePropertyInfo> info = SupportedWithParent(typeDescriptor);
-			info->multipleValues = true;
 			return info;
 		}
 
@@ -239,11 +253,11 @@ Default Instance Loader
 				case ITypeInfo::TypeDescriptor:
 					if (collectionType)
 					{
-						return GuiInstancePropertyInfo::SupportedCollection(propType->GetTypeDescriptor());
+						return GuiInstancePropertyInfo::AssignCollection(propType->GetTypeDescriptor());
 					}
 					else
 					{
-						return GuiInstancePropertyInfo::Supported(propType->GetTypeDescriptor());
+						return GuiInstancePropertyInfo::Assign(propType->GetTypeDescriptor());
 					}
 				case ITypeInfo::Generic:
 					{
@@ -255,7 +269,7 @@ Default Instance Loader
 						}
 						else if(genericType==description::GetTypeDescriptor<IValueFunctionProxy>())
 						{
-							return GuiInstancePropertyInfo::Supported(genericType);
+							return GuiInstancePropertyInfo::Assign(genericType);
 						}
 					}
 				}
