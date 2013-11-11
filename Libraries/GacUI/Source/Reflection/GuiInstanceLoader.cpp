@@ -317,8 +317,11 @@ namespace vl
 						}
 						else if (!genericType)
 						{
-							support = GuiInstancePropertyInfo::SupportSet;
-							return propType;
+							if (propType->GetDecorator() == ITypeInfo::SharedPtr || propType->GetDecorator() == ITypeInfo::RawPtr)
+							{
+								support = GuiInstancePropertyInfo::SupportSet;
+								return propType;
+							}
 						}
 					}
 				}
