@@ -137,6 +137,10 @@ LogInstanceLoaderManager_PrintProperties
 				}
 
 				LogInstanceLoaderManager_PrintFieldName(writer, (propertyName == L"" ? L"<DEFAULT-PROPERTY>" : propertyName));
+				if (firstInfo->constructorParameter)
+				{
+					writer.WriteString(firstInfo->required ? L"+" : L"*");
+				}
 				switch (firstInfo->support)
 				{
 				case GuiInstancePropertyInfo::SupportAssign:
