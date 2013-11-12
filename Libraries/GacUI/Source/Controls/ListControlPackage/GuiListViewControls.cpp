@@ -281,7 +281,7 @@ ListViewItemStyleProvider
 ListViewBigIconContentProvider
 ***********************************************************************/
 
-				ListViewBigIconContentProvider::ItemContent::ItemContent(Size iconSize, const FontProperties& font)
+				ListViewBigIconContentProvider::ItemContent::ItemContent(Size minIconSize, bool fitImage, const FontProperties& font)
 					:contentComposition(0)
 				{
 					contentComposition=new GuiBoundsComposition;
@@ -301,7 +301,11 @@ ListViewBigIconContentProvider
 						GuiCellComposition* cell=new GuiCellComposition;
 						table->AddChild(cell);
 						cell->SetSite(0, 1, 1, 1);
-						cell->SetPreferredMinSize(iconSize);
+						cell->SetPreferredMinSize(minIconSize);
+						if (!fitImage)
+						{
+							cell->SetMinSizeLimitation(GuiGraphicsComposition::NoLimit);
+						}
 
 						image=GuiImageFrameElement::Create();
 						image->SetStretch(true);
@@ -378,7 +382,7 @@ ListViewBigIconContentProvider
 
 				ListViewItemStyleProvider::IListViewItemContent* ListViewBigIconContentProvider::CreateItemContent(const FontProperties& font)
 				{
-					return new ItemContent(iconSize, font);
+					return new ItemContent(minIconSize, fitImage, font);
 				}
 
 				void ListViewBigIconContentProvider::AttachListControl(GuiListControl* value)
@@ -393,7 +397,7 @@ ListViewBigIconContentProvider
 ListViewSmallIconContentProvider
 ***********************************************************************/
 
-				ListViewSmallIconContentProvider::ItemContent::ItemContent(Size iconSize, const FontProperties& font)
+				ListViewSmallIconContentProvider::ItemContent::ItemContent(Size minIconSize, bool fitImage, const FontProperties& font)
 					:contentComposition(0)
 				{
 					contentComposition=new GuiBoundsComposition;
@@ -413,7 +417,11 @@ ListViewSmallIconContentProvider
 						GuiCellComposition* cell=new GuiCellComposition;
 						table->AddChild(cell);
 						cell->SetSite(1, 0, 1, 1);
-						cell->SetPreferredMinSize(iconSize);
+						cell->SetPreferredMinSize(minIconSize);
+						if (!fitImage)
+						{
+							cell->SetMinSizeLimitation(GuiGraphicsComposition::NoLimit);
+						}
 
 						image=GuiImageFrameElement::Create();
 						image->SetStretch(true);
@@ -488,7 +496,7 @@ ListViewSmallIconContentProvider
 
 				ListViewItemStyleProvider::IListViewItemContent* ListViewSmallIconContentProvider::CreateItemContent(const FontProperties& font)
 				{
-					return new ItemContent(iconSize, font);
+					return new ItemContent(minIconSize, fitImage, font);
 				}
 
 				void ListViewSmallIconContentProvider::AttachListControl(GuiListControl* value)
@@ -503,7 +511,7 @@ ListViewSmallIconContentProvider
 ListViewListContentProvider
 ***********************************************************************/
 
-				ListViewListContentProvider::ItemContent::ItemContent(Size iconSize, const FontProperties& font)
+				ListViewListContentProvider::ItemContent::ItemContent(Size minIconSize, bool fitImage, const FontProperties& font)
 					:contentComposition(0)
 				{
 					contentComposition=new GuiBoundsComposition;
@@ -523,7 +531,11 @@ ListViewListContentProvider
 						GuiCellComposition* cell=new GuiCellComposition;
 						table->AddChild(cell);
 						cell->SetSite(1, 0, 1, 1);
-						cell->SetPreferredMinSize(iconSize);
+						cell->SetPreferredMinSize(minIconSize);
+						if (!fitImage)
+						{
+							cell->SetMinSizeLimitation(GuiGraphicsComposition::NoLimit);
+						}
 
 						image=GuiImageFrameElement::Create();
 						image->SetStretch(true);
@@ -597,7 +609,7 @@ ListViewListContentProvider
 
 				ListViewItemStyleProvider::IListViewItemContent* ListViewListContentProvider::CreateItemContent(const FontProperties& font)
 				{
-					return new ItemContent(iconSize, font);
+					return new ItemContent(minIconSize, fitImage, font);
 				}
 
 				void ListViewListContentProvider::AttachListControl(GuiListControl* value)
@@ -645,7 +657,7 @@ ListViewTileContentProvider
 					textTable->SetColumnOption(0, GuiCellOption::PercentageOption(1.0));
 				}
 
-				ListViewTileContentProvider::ItemContent::ItemContent(Size iconSize, const FontProperties& font)
+				ListViewTileContentProvider::ItemContent::ItemContent(Size minIconSize, bool fitImage, const FontProperties& font)
 					:contentComposition(0)
 				{
 					contentComposition=new GuiBoundsComposition;
@@ -665,7 +677,11 @@ ListViewTileContentProvider
 						GuiCellComposition* cell=new GuiCellComposition;
 						table->AddChild(cell);
 						cell->SetSite(1, 0, 1, 1);
-						cell->SetPreferredMinSize(iconSize);
+						cell->SetPreferredMinSize(minIconSize);
+						if (!fitImage)
+						{
+							cell->SetMinSizeLimitation(GuiGraphicsComposition::NoLimit);
+						}
 
 						image=GuiImageFrameElement::Create();
 						image->SetStretch(true);
@@ -757,7 +773,7 @@ ListViewTileContentProvider
 
 				ListViewItemStyleProvider::IListViewItemContent* ListViewTileContentProvider::CreateItemContent(const FontProperties& font)
 				{
-					return new ItemContent(iconSize, font);
+					return new ItemContent(minIconSize, fitImage, font);
 				}
 
 				void ListViewTileContentProvider::AttachListControl(GuiListControl* value)
@@ -772,7 +788,7 @@ ListViewTileContentProvider
 ListViewInformationContentProvider
 ***********************************************************************/
 
-				ListViewInformationContentProvider::ItemContent::ItemContent(Size iconSize, const FontProperties& font)
+				ListViewInformationContentProvider::ItemContent::ItemContent(Size minIconSize, bool fitImage, const FontProperties& font)
 					:contentComposition(0)
 					,baselineFont(font)
 				{
@@ -801,7 +817,11 @@ ListViewInformationContentProvider
 						GuiCellComposition* cell=new GuiCellComposition;
 						table->AddChild(cell);
 						cell->SetSite(1, 0, 1, 1);
-						cell->SetPreferredMinSize(iconSize);
+						cell->SetPreferredMinSize(minIconSize);
+						if (!fitImage)
+						{
+							cell->SetMinSizeLimitation(GuiGraphicsComposition::NoLimit);
+						}
 
 						image=GuiImageFrameElement::Create();
 						image->SetStretch(true);
@@ -943,7 +963,7 @@ ListViewInformationContentProvider
 
 				ListViewItemStyleProvider::IListViewItemContent* ListViewInformationContentProvider::CreateItemContent(const FontProperties& font)
 				{
-					return new ItemContent(iconSize, font);
+					return new ItemContent(minIconSize, fitImage, font);
 				}
 
 				void ListViewInformationContentProvider::AttachListControl(GuiListControl* value)
@@ -1207,7 +1227,7 @@ ListViewColumnItemArranger
 ListViewDetailContentProvider
 ***********************************************************************/
 
-				ListViewDetailContentProvider::ItemContent::ItemContent(Size iconSize, const FontProperties& font, GuiListControl::IItemProvider* _itemProvider)
+				ListViewDetailContentProvider::ItemContent::ItemContent(Size minIconSize, bool fitImage, const FontProperties& font, GuiListControl::IItemProvider* _itemProvider)
 					:contentComposition(0)
 					,itemProvider(_itemProvider)
 				{
@@ -1240,7 +1260,11 @@ ListViewDetailContentProvider
 							GuiCellComposition* cell=new GuiCellComposition;
 							table->AddChild(cell);
 							cell->SetSite(1, 0, 1, 1);
-							cell->SetPreferredMinSize(iconSize);
+							cell->SetPreferredMinSize(minIconSize);
+							if (!fitImage)
+							{
+								cell->SetMinSizeLimitation(GuiGraphicsComposition::NoLimit);
+							}
 
 							image=GuiImageFrameElement::Create();
 							image->SetStretch(true);
@@ -1377,7 +1401,7 @@ ListViewDetailContentProvider
 
 				ListViewItemStyleProvider::IListViewItemContent* ListViewDetailContentProvider::CreateItemContent(const FontProperties& font)
 				{
-					return new ItemContent(iconSize, font, itemProvider);
+					return new ItemContent(minIconSize, fitImage, font, itemProvider);
 				}
 
 				void ListViewDetailContentProvider::AttachListControl(GuiListControl* value)

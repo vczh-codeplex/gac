@@ -330,7 +330,7 @@ ListView ItemContentProvider
 						elements::GuiSolidLabelElement*					text;
 
 					public:
-						ItemContent(Size iconSize, const FontProperties& font);
+						ItemContent(Size minIconSize, bool fitImage, const FontProperties& font);
 						~ItemContent();
 
 						compositions::GuiBoundsComposition*				GetContentComposition()override;
@@ -366,7 +366,7 @@ ListView ItemContentProvider
 						elements::GuiSolidLabelElement*					text;
 
 					public:
-						ItemContent(Size iconSize, const FontProperties& font);
+						ItemContent(Size minIconSize, bool fitImage, const FontProperties& font);
 						~ItemContent();
 
 						compositions::GuiBoundsComposition*				GetContentComposition()override;
@@ -402,7 +402,7 @@ ListView ItemContentProvider
 						elements::GuiSolidLabelElement*					text;
 
 					public:
-						ItemContent(Size iconSize, const FontProperties& font);
+						ItemContent(Size minIconSize, bool fitImage, const FontProperties& font);
 						~ItemContent();
 
 						compositions::GuiBoundsComposition*				GetContentComposition()override;
@@ -444,7 +444,7 @@ ListView ItemContentProvider
 						elements::GuiSolidLabelElement*					CreateTextElement(vint textRow, const FontProperties& font);
 						void											ResetTextTable(vint textRows);
 					public:
-						ItemContent(Size iconSize, const FontProperties& font);
+						ItemContent(Size minIconSize, bool fitImage, const FontProperties& font);
 						~ItemContent();
 
 						compositions::GuiBoundsComposition*				GetContentComposition()override;
@@ -487,7 +487,7 @@ ListView ItemContentProvider
 						compositions::GuiBoundsComposition*				bottomLineComposition;
 
 					public:
-						ItemContent(Size iconSize, const FontProperties& font);
+						ItemContent(Size minIconSize, bool fitImage, const FontProperties& font);
 						~ItemContent();
 
 						compositions::GuiBoundsComposition*				GetContentComposition()override;
@@ -634,7 +634,7 @@ ListView ItemContentProvider(Detailed)
 						ListViewColumnItemArranger::IColumnItemView*	columnItemView;
 
 					public:
-						ItemContent(Size iconSize, const FontProperties& font, GuiListControl::IItemProvider* _itemProvider);
+						ItemContent(Size minIconSize, bool fitImage, const FontProperties& font, GuiListControl::IItemProvider* _itemProvider);
 						~ItemContent();
 
 						compositions::GuiBoundsComposition*				GetContentComposition()override;
