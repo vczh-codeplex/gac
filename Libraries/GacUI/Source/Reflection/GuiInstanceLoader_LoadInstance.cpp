@@ -32,6 +32,17 @@ Helper Functions Declarations
 			GuiConstructorRepr* ctor
 			);
 
+		bool LoadInstancePropertyValue(
+			Ptr<GuiInstanceEnvironment> env,
+			const WString& binding,
+			IGuiInstanceLoader::PropertyValue propertyValue,
+			List<Ptr<GuiValueRepr>>& input,
+			IGuiInstanceLoader* propertyLoader,
+			bool constructorArgument,
+			List<Pair<Value, IGuiInstanceLoader*>>& output,
+			List<FillInstanceBindingSetter>& bindingSetters
+			);
+
 		void FillInstance(
 			description::Value createdInstance,
 			Ptr<GuiInstanceEnvironment> env,
@@ -42,7 +53,7 @@ Helper Functions Declarations
 			List<FillInstanceBindingSetter>& bindingSetters
 			);
 
-		description::Value LoadInstance(
+		description::Value LoadInstanceInternal(
 			Ptr<GuiInstanceEnvironment> env,
 			GuiConstructorRepr* ctor,
 			description::ITypeDescriptor* expectedType,
@@ -50,7 +61,7 @@ Helper Functions Declarations
 			List<FillInstanceBindingSetter>& bindingSetters
 			);
 
-		Ptr<GuiInstanceContextScope> LoadInstance(
+		Ptr<GuiInstanceContextScope> LoadInstanceInternal(
 			Ptr<GuiInstanceContext> context,
 			Ptr<GuiResourcePathResolver> resolver,
 			description::ITypeDescriptor* expectedType
@@ -176,7 +187,7 @@ LoadValueVisitor
 					FOREACH(ITypeDescriptor*, typeDescriptor, acceptableTypes)
 					{
 						WString _typeName;
-						loadedValue=LoadInstance(env, repr, typeDescriptor, _typeName, bindingSetters);
+						loadedValue=LoadInstanceInternal(env, repr, typeDescriptor, _typeName, bindingSetters);
 						if (!loadedValue.IsNull())
 						{
 							result = true;
@@ -201,7 +212,7 @@ LoadValueVisitor
 		using namespace visitors;
 
 /***********************************************************************
-Helper Functions
+FindInstanceLoadingSource
 ***********************************************************************/
 
 		InstanceLoadingSource FindInstanceLoadingSource(
@@ -221,6 +232,158 @@ Helper Functions
 			}
 			return InstanceLoadingSource();
 		}
+
+/***********************************************************************
+LoadInstancePropertyValue
+***********************************************************************/
+
+		bool LoadInstancePropertyValue(
+			Ptr<GuiInstanceEnvironment> env,
+			const WString& binding,
+			IGuiInstanceLoader::PropertyValue propertyValue,
+			List<Ptr<GuiValueRepr>>& input,
+			IGuiInstanceLoader* propertyLoader,
+			bool constructorArgument,
+			List<Pair<Value, IGuiInstanceLoader*>>& output,
+			List<FillInstanceBindingSetter>& bindingSetters
+			)
+		{
+			vint loadedValueCount = 0;
+			// try to look for a loader to handle this property
+			while(propertyLoader && loadedValueCount<input.Count())
+			{
+				if (auto propertyInfo = propertyLoader->GetPropertyType(propertyValue))
+				{
+					if (propertyInfo->support == GuiInstancePropertyInfo::NotSupport)
+					{
+						break;
+					}
+
+					switch (propertyInfo->support)
+					{
+					case GuiInstancePropertyInfo::SupportSet:
+						if (input.Count() != 1) return false;
+						if (constructorArgument) return false;
+						if (binding != L"set") return false;
+						{
+							// set binding: get the property value and apply another property list on it
+							if(Ptr<GuiAttSetterRepr> propertyAttSetter=input[0].Cast<GuiAttSetterRepr>())
+							{
+								if(propertyLoader->GetPropertyValue(propertyValue) && propertyValue.propertyValue.GetRawPtr())
+								{
+									input[0] = 0;
+									loadedValueCount++;
+
+									ITypeDescriptor* propertyTypeDescriptor=propertyValue.propertyValue.GetRawPtr()->GetTypeDescriptor();
+									IGuiInstanceLoader* propertyInstanceLoader=GetInstanceLoaderManager()->GetLoader(propertyTypeDescriptor->GetTypeName());
+									if(propertyInstanceLoader)
+									{
+										FillInstance(propertyValue.propertyValue, env, propertyAttSetter.Obj(), propertyInstanceLoader, false, propertyTypeDescriptor->GetTypeName(), bindingSetters);
+									}
+								}
+							}
+						}
+						break;
+					case GuiInstancePropertyInfo::SupportCollection:
+						if (binding != L"") return false;
+						{
+							FOREACH_INDEXER(Ptr<GuiValueRepr>, valueRepr, index, input)
+							{
+								if (valueRepr)
+								{
+									// default binding: set the value directly
+									if (LoadValueVisitor::LoadValue(valueRepr, env, propertyInfo->acceptableTypes, bindingSetters, propertyValue.propertyValue))
+									{
+										input[index] = 0;
+										loadedValueCount++;
+										output.Add(Pair<Value, IGuiInstanceLoader*>(propertyValue.propertyValue, propertyLoader));
+									}
+								}
+							}
+						}
+						break;
+					case GuiInstancePropertyInfo::SupportAssign:
+						if (input.Count() != 1) return false;
+						if (constructorArgument && binding != L"") return false;
+						if (binding == L"set") return false;
+						{
+							vint currentIndex = 0;
+							FOREACH_INDEXER(Ptr<GuiValueRepr>, valueRepr, index, input)
+							{
+								if (valueRepr)
+								{
+									bool canRemoveLoadedValue = false;
+									if (binding == L"")
+									{
+										// default binding: set the value directly
+										if (LoadValueVisitor::LoadValue(valueRepr, env, propertyInfo->acceptableTypes, bindingSetters, propertyValue.propertyValue))
+										{
+											canRemoveLoadedValue = true;
+											output.Add(Pair<Value, IGuiInstanceLoader*>(propertyValue.propertyValue, propertyLoader));
+										}
+									}
+									else if (IGuiInstanceBinder* binder=GetInstanceLoaderManager()->GetInstanceBinder(binding))
+									{
+										// other binding: provide the property value to the specified binder
+										List<ITypeDescriptor*> binderExpectedTypes;
+										binder->GetExpectedValueTypes(binderExpectedTypes);
+										if (LoadValueVisitor::LoadValue(valueRepr, env, binderExpectedTypes, bindingSetters, propertyValue.propertyValue))
+										{
+											canRemoveLoadedValue = true;
+											currentIndex++;
+											FillInstanceBindingSetter bindingSetter;
+											bindingSetter.binder = binder;
+											bindingSetter.loader = propertyLoader;
+											bindingSetter.propertyValue = propertyValue;
+											bindingSetter.currentIndex = currentIndex;
+											bindingSetters.Add(bindingSetter);
+											currentIndex++;
+										}
+									}
+
+									if (canRemoveLoadedValue)
+									{
+										input[index] = 0;
+										loadedValueCount++;
+									}
+								}
+							}
+						}
+						break;
+					case GuiInstancePropertyInfo::SupportArray:
+						if (binding != L"") return false;
+						{
+							auto list = IValueList::Create();
+							FOREACH_INDEXER(Ptr<GuiValueRepr>, valueRepr, index, input)
+							{
+								// default binding: add the value to the list
+								if (LoadValueVisitor::LoadValue(valueRepr, env, propertyInfo->acceptableTypes, bindingSetters, propertyValue.propertyValue))
+								{
+									input[index] = 0;
+									loadedValueCount++;
+									list->Add(propertyValue.propertyValue);
+								}
+							}
+
+							// set the whole list to the property
+							output.Add(Pair<Value, IGuiInstanceLoader*>(Value::From(list), propertyLoader));
+						}
+						break;
+					}
+
+					if (!propertyInfo->tryParent)
+					{
+						break;
+					}
+				}
+				propertyLoader=GetInstanceLoaderManager()->GetParentLoader(propertyLoader);
+			}
+			return true;
+		}
+
+/***********************************************************************
+FillInstance
+***********************************************************************/
 
 		void FillInstance(
 			description::Value createdInstance,
@@ -248,159 +411,40 @@ Helper Functions
 					propertyName,
 					createdInstance
 					);
+				List<Ptr<GuiValueRepr>> input;
+				List<Pair<Value, IGuiInstanceLoader*>> output;
 
-				List<Ptr<GuiValueRepr>> values;
-				CopyFrom(values, propertyValue->values);
-				vint loadedValueCount = 0;
+				// extract all loaded property values
+				CopyFrom(input, propertyValue->values);
+				LoadInstancePropertyValue(env, propertyValue->binding, cachedPropertyValue, input, propertyLoader, false, output, bindingSetters);
 
-				// try to look for a loader to handle this property
-				while(propertyLoader && loadedValueCount<values.Count())
+				// if there is no binding, set all values into the specified property
+				if (propertyValue->binding == L"")
 				{
-					if (auto propertyInfo = propertyLoader->GetPropertyType(cachedPropertyValue))
+					vint currentIndex = 0;
+					for (vint i = 0; i < output.Count(); i++)
 					{
-						if (propertyInfo->support == GuiInstancePropertyInfo::NotSupport)
+						auto value = output[i].key;
+						auto valueLoader = output[i].value;
+						cachedPropertyValue.propertyValue = value;
+						if (valueLoader->SetPropertyValue(cachedPropertyValue, currentIndex))
 						{
-							break;
+							currentIndex++;
 						}
-
-						switch (propertyInfo->support)
+						else
 						{
-						case GuiInstancePropertyInfo::SupportSet:
-							if (values.Count() != 1) return;
-							if (propertyValue->binding == L"set")
-							{
-
-								// set binding: get the property value and apply another property list on it
-								if(Ptr<GuiAttSetterRepr> propertyAttSetter=values[0].Cast<GuiAttSetterRepr>())
-								{
-									if(propertyLoader->GetPropertyValue(cachedPropertyValue) && cachedPropertyValue.propertyValue.GetRawPtr())
-									{
-										values[0] = 0;
-										loadedValueCount++;
-
-										ITypeDescriptor* propertyTypeDescriptor=cachedPropertyValue.propertyValue.GetRawPtr()->GetTypeDescriptor();
-										IGuiInstanceLoader* propertyInstanceLoader=GetInstanceLoaderManager()->GetLoader(propertyTypeDescriptor->GetTypeName());
-										if(propertyInstanceLoader)
-										{
-											FillInstance(cachedPropertyValue.propertyValue, env, propertyAttSetter.Obj(), propertyInstanceLoader, false, propertyTypeDescriptor->GetTypeName(), bindingSetters);
-										}
-									}
-								}
-							}
-							break;
-						case GuiInstancePropertyInfo::SupportCollection:
-							if (propertyValue->binding == L"")
-							{
-								vint currentIndex = 0;
-								FOREACH_INDEXER(Ptr<GuiValueRepr>, valueRepr, index, values)
-								{
-									if (valueRepr)
-									{
-										// default binding: set the value directly
-										if (LoadValueVisitor::LoadValue(valueRepr, env, propertyInfo->acceptableTypes, bindingSetters, cachedPropertyValue.propertyValue))
-										{
-											values[index] = 0;
-											loadedValueCount++;
-
-											if(propertyLoader->SetPropertyValue(cachedPropertyValue, currentIndex))
-											{
-												currentIndex++;
-											}
-											else
-											{
-												cachedPropertyValue.propertyValue.DeleteRawPtr();
-											}
-										}
-									}
-								}
-							}
-							break;
-						case GuiInstancePropertyInfo::SupportAssign:
-							if (values.Count() != 1) return;
-							if (propertyValue->binding != L"set")
-							{
-								vint currentIndex = 0;
-								FOREACH_INDEXER(Ptr<GuiValueRepr>, valueRepr, index, values)
-								{
-									if (valueRepr)
-									{
-										bool canRemoveLoadedValue = false;
-										if (propertyValue->binding == L"")
-										{
-											// default binding: set the value directly
-											if (LoadValueVisitor::LoadValue(valueRepr, env, propertyInfo->acceptableTypes, bindingSetters, cachedPropertyValue.propertyValue))
-											{
-												canRemoveLoadedValue = true;
-												if(propertyLoader->SetPropertyValue(cachedPropertyValue, currentIndex))
-												{
-													currentIndex++;
-												}
-												else
-												{
-													cachedPropertyValue.propertyValue.DeleteRawPtr();
-												}
-											}
-										}
-										else if (IGuiInstanceBinder* binder=GetInstanceLoaderManager()->GetInstanceBinder(propertyValue->binding))
-										{
-											// other binding: provide the property value to the specified binder
-											List<ITypeDescriptor*> binderExpectedTypes;
-											binder->GetExpectedValueTypes(binderExpectedTypes);
-											if (LoadValueVisitor::LoadValue(valueRepr, env, binderExpectedTypes, bindingSetters, cachedPropertyValue.propertyValue))
-											{
-												canRemoveLoadedValue = true;
-												FillInstanceBindingSetter bindingSetter;
-												bindingSetter.binder = binder;
-												bindingSetter.loader = propertyLoader;
-												bindingSetter.propertyValue = cachedPropertyValue;
-												bindingSetter.currentIndex = currentIndex;
-												bindingSetters.Add(bindingSetter);
-												currentIndex++;
-											}
-										}
-
-										if (canRemoveLoadedValue)
-										{
-											values[index] = 0;
-											loadedValueCount++;
-										}
-									}
-								}
-							}
-							break;
-						case GuiInstancePropertyInfo::SupportArray:
-							if (propertyValue->binding == L"")
-							{
-								auto list = IValueList::Create();
-								FOREACH_INDEXER(Ptr<GuiValueRepr>, valueRepr, index, values)
-								{
-									// default binding: add the value to the list
-									if (LoadValueVisitor::LoadValue(valueRepr, env, propertyInfo->acceptableTypes, bindingSetters, cachedPropertyValue.propertyValue))
-									{
-										values[index] = 0;
-										loadedValueCount++;
-										list->Add(cachedPropertyValue.propertyValue);
-									}
-								}
-
-								// set the whole list to the property
-								cachedPropertyValue.propertyValue = Value::From(list);
-								propertyLoader->SetPropertyValue(cachedPropertyValue, 0);
-							}
-							break;
-						}
-
-						if (!propertyInfo->tryParent)
-						{
-							break;
+							value.DeleteRawPtr();
 						}
 					}
-					propertyLoader=GetInstanceLoaderManager()->GetParentLoader(propertyLoader);
 				}
 			}
 		}
 
-		description::Value LoadInstance(
+/***********************************************************************
+Helper Functions
+***********************************************************************/
+
+		description::Value LoadInstanceInternal(
 			Ptr<GuiInstanceEnvironment> env,
 			GuiConstructorRepr* ctor,
 			description::ITypeDescriptor* expectedType,
@@ -456,7 +500,7 @@ Helper Functions
 			}
 			else if(source.context)
 			{
-				if (Ptr<GuiInstanceContextScope> scope = LoadInstance(source.context, env->resolver, expectedType))
+				if (Ptr<GuiInstanceContextScope> scope = LoadInstanceInternal(source.context, env->resolver, expectedType))
 				{
 					typeName = scope->typeName;
 					instance = scope->rootInstance;
@@ -482,7 +526,7 @@ Helper Functions
 			return instance;
 		}
 
-		Ptr<GuiInstanceContextScope> LoadInstance(
+		Ptr<GuiInstanceContextScope> LoadInstanceInternal(
 			Ptr<GuiInstanceContext> context,
 			Ptr<GuiResourcePathResolver> resolver,
 			description::ITypeDescriptor* expectedType
@@ -490,7 +534,7 @@ Helper Functions
 		{
 			Ptr<GuiInstanceEnvironment> env = new GuiInstanceEnvironment(context, resolver);
 			List<FillInstanceBindingSetter> bindingSetters;
-			env->scope->rootInstance=LoadInstance(env, context->instance.Obj(), expectedType, env->scope->typeName, bindingSetters);
+			env->scope->rootInstance=LoadInstanceInternal(env, context->instance.Obj(), expectedType, env->scope->typeName, bindingSetters);
 
 			if (!env->scope->rootInstance.IsNull())
 			{
@@ -506,6 +550,10 @@ Helper Functions
 			return 0;
 		}
 
+/***********************************************************************
+Helper Functions
+***********************************************************************/
+
 		Ptr<GuiInstanceContextScope> LoadInstance(
 			Ptr<GuiResource> resource,
 			const WString& instancePath,
@@ -516,7 +564,7 @@ Helper Functions
 			if (context)
 			{
 				Ptr<GuiResourcePathResolver> resolver = new GuiResourcePathResolver(resource, resource->GetWorkingDirectory());
-				return LoadInstance(context, resolver, expectedType);
+				return LoadInstanceInternal(context, resolver, expectedType);
 			}
 			return 0;
 		}
