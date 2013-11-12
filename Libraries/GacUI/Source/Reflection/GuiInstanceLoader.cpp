@@ -216,7 +216,7 @@ namespace vl
 				return GetDefaultConstructor(typeInfo) != 0;
 			}
 
-			description::Value CreateInstance(const TypeInfo& typeInfo)override
+			description::Value CreateInstance(const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
 			{
 				if (IMethodInfo* method = GetDefaultConstructor(typeInfo))
 				{
@@ -370,6 +370,10 @@ namespace vl
 			void GetPropertyNames(const TypeInfo& typeInfo, collections::List<WString>& propertyNames)override
 			{
 				CollectPropertyNames(typeInfo, typeInfo.typeDescriptor, propertyNames);
+			}
+
+			void GetConstructorParameters(const TypeInfo& typeInfo, collections::List<WString>& propertyNames)override
+			{
 			}
 
 			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override

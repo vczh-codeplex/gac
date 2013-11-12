@@ -254,6 +254,10 @@ LoadInstancePropertyValue
 			{
 				if (auto propertyInfo = propertyLoader->GetPropertyType(propertyValue))
 				{
+					if (propertyInfo->constructorParameter != constructorArgument)
+					{
+						return false;
+					}
 					if (propertyInfo->support == GuiInstancePropertyInfo::NotSupport)
 					{
 						break;
@@ -376,7 +380,14 @@ LoadInstancePropertyValue
 						break;
 					}
 				}
-				propertyLoader=GetInstanceLoaderManager()->GetParentLoader(propertyLoader);
+				if (constructorArgument)
+				{
+					break;
+				}
+				else
+				{
+					propertyLoader=GetInstanceLoaderManager()->GetParentLoader(propertyLoader);
+				}
 			}
 			return true;
 		}
@@ -452,6 +463,7 @@ Helper Functions
 			List<FillInstanceBindingSetter>& bindingSetters
 			)
 		{
+			// search for a correct loader
 			InstanceLoadingSource source=FindInstanceLoadingSource(env, ctor);
 			Value instance;
 			IGuiInstanceLoader* instanceLoader = 0;
@@ -459,11 +471,13 @@ Helper Functions
 
 			if(source.loader)
 			{
+				// found the correct loader, prepare a TypeInfo
 				IGuiInstanceLoader* loader=source.loader;
 				instanceLoader = source.loader;
 				typeName=source.typeName;
 				ITypeDescriptor* typeDescriptor=GetInstanceLoaderManager()->GetTypeDescriptorForType(source.typeName);
 				
+				// see if the constructor contains only a single text value
 				Ptr<GuiTextRepr> singleTextValue;
 				{
 					vint index = ctor->setters.Keys().IndexOf(L"");
@@ -477,13 +491,17 @@ Helper Functions
 					}
 				}
 
+				// if the target type is not the expected type, fail
 				if (!expectedType || typeDescriptor->CanConvertTo(expectedType))
 				{
+					// traverse the loader and all ancestors to load the type
 					IGuiInstanceLoader::TypeInfo typeInfo(typeName, typeDescriptor);
 					while(loader && instance.IsNull())
 					{
 						if (singleTextValue && loader->IsDeserializable(typeInfo))
 						{
+							// if the loader support deserialization and this is a single text value constructor
+							// then choose deserialization
 							instance = loader->Deserialize(typeInfo, singleTextValue->text);
 							if (!instance.IsNull())
 							{
@@ -492,7 +510,77 @@ Helper Functions
 						}
 						else if (loader->IsCreatable(typeInfo))
 						{
-							instance=loader->CreateInstance(typeInfo);
+							// find all constructor parameters
+							List<WString> constructorParameters;
+							List<WString> requiredParameters;
+							loader->GetConstructorParameters(typeInfo, constructorParameters);
+							
+							// see if all parameters exists
+							Group<WString, Value> constructorArguments;
+							FOREACH(WString, propertyName, constructorParameters)
+							{
+								IGuiInstanceLoader::PropertyInfo propertyInfo(typeInfo, propertyName);
+								auto info = loader->GetPropertyType(propertyInfo);
+								vint index = ctor->setters.Keys().IndexOf(propertyName);
+
+								if (info->constructorParameter)
+								{
+									if (info->required)
+									{
+										if (index == -1)
+										{
+											// if a required parameter doesn't exist, fail
+											goto SKIP_CREATE_INSTANCE;
+										}
+										requiredParameters.Add(propertyName);
+									}
+
+									if (index != -1)
+									{
+										auto setterValue = ctor->setters.Values()[index];
+										if (setterValue->binding != L"")
+										{
+											// if the constructor argument uses binding, fail
+											goto SKIP_CREATE_INSTANCE;
+										}
+
+										// load the parameter
+										List<Ptr<GuiValueRepr>> input;
+										List<Pair<Value, IGuiInstanceLoader*>> output;
+										IGuiInstanceLoader::PropertyValue propertyValue(typeInfo, propertyName, Value());
+										LoadInstancePropertyValue(env, setterValue->binding, propertyValue, input, loader, true, output, bindingSetters);
+
+										for (vint i = 0; i < output.Count(); i++)
+										{
+											constructorArguments.Add(propertyName, output[i].key);
+										}
+									}
+								}
+							}
+							
+							// check if all required parameters exist
+							FOREACH(WString, propertyName, requiredParameters)
+							{
+								if (!constructorArguments.Contains(propertyName))
+								{
+									goto SKIP_CREATE_INSTANCE;
+								}
+							}
+
+							// create the instance
+							instance=loader->CreateInstance(typeInfo, constructorArguments);
+						SKIP_CREATE_INSTANCE:
+							// delete all arguments if the constructing fails
+							if (instance.IsNull())
+							{
+								for (vint i = 0; i < constructorArguments.Count(); i++)
+								{
+									FOREACH(Value, value, constructorArguments.GetByIndex(i))
+									{
+										value.DeleteRawPtr();
+									}
+								}
+							}
 						}
 						loader=GetInstanceLoaderManager()->GetParentLoader(loader);
 					}
@@ -500,6 +588,7 @@ Helper Functions
 			}
 			else if(source.context)
 			{
+				// found another instance in the resource
 				if (Ptr<GuiInstanceContextScope> scope = LoadInstanceInternal(source.context, env->resolver, expectedType))
 				{
 					typeName = scope->typeName;

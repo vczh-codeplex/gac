@@ -41,9 +41,17 @@ GuiRewriteInstanceLoader
 				return false;
 			}
 
-			description::Value CreateInstance(const TypeInfo& typeInfo)override
+			description::Value CreateInstance(const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
 			{
 				return Value();
+			}
+
+			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			{
+			}
+
+			void GetConstructorParameters(const TypeInfo& typeInfo, collections::List<WString>& propertyNames)override
+			{
 			}
 
 			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
@@ -88,17 +96,13 @@ GuiVrtualTypeInstanceLoader
 				return typeName==typeInfo.typeName;
 			}
 
-			description::Value CreateInstance(const TypeInfo& typeInfo)override
+			description::Value CreateInstance(const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
 			{
 				if(typeName==typeInfo.typeName)
 				{
 					return constructor();
 				}
 				return Value();
-			}
-
-			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
-			{
 			}
 		};
 
@@ -446,7 +450,7 @@ GuiToolstripButtonInstanceLoader
 				return typeInfo.typeName == GetTypeName();
 			}
 
-			description::Value CreateInstance(const TypeInfo& typeInfo)override
+			description::Value CreateInstance(const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
 			{
 				if (typeInfo.typeName == GetTypeName())
 				{
