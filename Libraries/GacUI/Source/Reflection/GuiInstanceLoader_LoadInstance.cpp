@@ -489,6 +489,11 @@ Helper Functions
 							singleTextValue = setterValue->values[0].Cast<GuiTextRepr>();
 						}
 					}
+					else
+					{
+						singleTextValue = new GuiTextRepr;
+						singleTextValue->text = L"";
+					}
 				}
 
 				// if the target type is not the expected type, fail

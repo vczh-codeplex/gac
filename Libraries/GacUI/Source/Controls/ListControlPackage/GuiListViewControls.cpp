@@ -356,8 +356,9 @@ ListViewBigIconContentProvider
 				{
 				}
 
-				ListViewBigIconContentProvider::ListViewBigIconContentProvider(Size _iconSize)
-					:iconSize(_iconSize)
+				ListViewBigIconContentProvider::ListViewBigIconContentProvider(Size _minIconSize, bool _fitImage)
+					:minIconSize(_minIconSize)
+					,fitImage(_fitImage)
 				{
 				}
 
@@ -465,8 +466,9 @@ ListViewSmallIconContentProvider
 				{
 				}
 
-				ListViewSmallIconContentProvider::ListViewSmallIconContentProvider(Size _iconSize)
-					:iconSize(_iconSize)
+				ListViewSmallIconContentProvider::ListViewSmallIconContentProvider(Size _minIconSize, bool _fitImage)
+					:minIconSize(_minIconSize)
+					,fitImage(_fitImage)
 				{
 				}
 
@@ -573,8 +575,9 @@ ListViewListContentProvider
 				{
 				}
 
-				ListViewListContentProvider::ListViewListContentProvider(Size _iconSize)
-					:iconSize(_iconSize)
+				ListViewListContentProvider::ListViewListContentProvider(Size _minIconSize, bool _fitImage)
+					:minIconSize(_minIconSize)
+					,fitImage(_fitImage)
 				{
 				}
 
@@ -732,8 +735,9 @@ ListViewTileContentProvider
 				{
 				}
 
-				ListViewTileContentProvider::ListViewTileContentProvider(Size _iconSize)
-					:iconSize(_iconSize)
+				ListViewTileContentProvider::ListViewTileContentProvider(Size _minIconSize, bool _fitImage)
+					:minIconSize(_minIconSize)
+					,fitImage(_fitImage)
 				{
 				}
 
@@ -917,8 +921,9 @@ ListViewInformationContentProvider
 				{
 				}
 
-				ListViewInformationContentProvider::ListViewInformationContentProvider(Size _iconSize)
-					:iconSize(_iconSize)
+				ListViewInformationContentProvider::ListViewInformationContentProvider(Size _minIconSize, bool _fitImage)
+					:minIconSize(_minIconSize)
+					,fitImage(_fitImage)
 				{
 				}
 
@@ -1347,8 +1352,9 @@ ListViewDetailContentProvider
 					}
 				}
 
-				ListViewDetailContentProvider::ListViewDetailContentProvider(Size _iconSize)
-					:iconSize(_iconSize)
+				ListViewDetailContentProvider::ListViewDetailContentProvider(Size _minIconSize, bool _fitImage)
+					:minIconSize(_minIconSize)
+					,fitImage(_fitImage)
 					,itemProvider(0)
 					,columnItemView(0)
 					,listViewItemStyleProvider(0)

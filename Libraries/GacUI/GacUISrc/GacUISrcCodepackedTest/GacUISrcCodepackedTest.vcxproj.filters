@@ -249,5 +249,20 @@
     <Image Include="Resources\XmlDocDemo_TooltipWindow.jpg">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="Resources\OfficeExcel.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\OfficeOneNote.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\OfficeOutlook.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\OfficePowerPoint.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\OfficeWord.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

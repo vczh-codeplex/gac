@@ -288,6 +288,11 @@
     <Font Include="Resources\GentiumPlus-R.ttf" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="Resources\OfficeExcel.ico" />
+    <Image Include="Resources\OfficeOneNote.ico" />
+    <Image Include="Resources\OfficeOutlook.ico" />
+    <Image Include="Resources\OfficePowerPoint.ico" />
+    <Image Include="Resources\OfficeWord.ico" />
     <Image Include="Resources\s_AlignCenter.png" />
     <Image Include="Resources\s_AlignLeft.png" />
     <Image Include="Resources\s_AlignRight.png" />

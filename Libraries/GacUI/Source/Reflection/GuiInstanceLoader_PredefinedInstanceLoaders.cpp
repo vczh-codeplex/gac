@@ -503,35 +503,44 @@ GuiListViewInstanceLoader
 				if (typeInfo.typeName == GetTypeName())
 				{
 					ListViewViewType viewType = ListViewViewType::Detail;
+					Size iconSize;
 					{
 						vint indexView = constructorArguments.Keys().IndexOf(L"View");
 						if (indexView != -1)
 						{
 							viewType = UnboxValue<ListViewViewType>(constructorArguments.GetByIndex(indexView)[0]);
 						}
+
+						vint indexIconSize = constructorArguments.Keys().IndexOf(L"IconSize");
+						if (indexIconSize != -1)
+						{
+							iconSize = UnboxValue<Size>(constructorArguments.GetByIndex(indexIconSize)[0]);
+						}
 					}
 
 					auto listView = new GuiListView(GetCurrentTheme()->CreateListViewStyle());
 					switch (viewType)
 					{
-					case ListViewViewType::BigIcon:
-						listView->ChangeItemStyle(new list::ListViewBigIconContentProvider);
-						break;
-					case ListViewViewType::SmallIcon:
-						listView->ChangeItemStyle(new list::ListViewSmallIconContentProvider);
-						break;
-					case ListViewViewType::List:
-						listView->ChangeItemStyle(new list::ListViewListContentProvider);
-						break;
-					case ListViewViewType::Tile:
-						listView->ChangeItemStyle(new list::ListViewTileContentProvider);
-						break;
-					case ListViewViewType::Information:
-						listView->ChangeItemStyle(new list::ListViewInformationContentProvider);
-						break;
-					case ListViewViewType::Detail:
-						listView->ChangeItemStyle(new list::ListViewDetailContentProvider);
-						break;
+#define VIEW_TYPE_CASE(NAME)\
+					case ListViewViewType::NAME:\
+						if (iconSize == Size())\
+						{\
+							listView->ChangeItemStyle(new list::ListView##NAME##ContentProvider);\
+						}\
+						else\
+						{\
+							listView->ChangeItemStyle(new list::ListView##NAME##ContentProvider(iconSize, false));\
+						}\
+						break;\
+
+						VIEW_TYPE_CASE(BigIcon)
+						VIEW_TYPE_CASE(SmallIcon)
+						VIEW_TYPE_CASE(List)
+						VIEW_TYPE_CASE(Tile)
+						VIEW_TYPE_CASE(Information)
+						VIEW_TYPE_CASE(Detail)
+
+#undef VIEW_TYPE_CASE
 					}
 
 					return Value::From(listView);
@@ -542,6 +551,7 @@ GuiListViewInstanceLoader
 			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
 			{
 				propertyNames.Add(L"View");
+				propertyNames.Add(L"IconSize");
 				propertyNames.Add(L"Items");
 				propertyNames.Add(L"Columns");
 				propertyNames.Add(L"DataColumns");
@@ -550,6 +560,7 @@ GuiListViewInstanceLoader
 			void GetConstructorParameters(const TypeInfo& typeInfo, List<WString>& propertyNames)override
 			{
 				propertyNames.Add(L"View");
+				propertyNames.Add(L"IconSize");
 			}
 
 			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
@@ -557,6 +568,12 @@ GuiListViewInstanceLoader
 				if (propertyInfo.propertyName == L"View")
 				{
 					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<ListViewViewType>());
+					info->constructorParameter = true;
+					return info;
+				}
+				else if (propertyInfo.propertyName == L"IconSize")
+				{
+					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<Size>());
 					info->constructorParameter = true;
 					return info;
 				}
@@ -593,7 +610,7 @@ GuiListViewInstanceLoader
 					}
 					else if (propertyValue.propertyName == L"DataColumns")
 					{
-						auto item = UnboxValue<Ptr<vint>>(propertyValue.propertyValue);
+						auto item = UnboxValue<vint>(propertyValue.propertyValue);
 						container->GetItems().GetDataColumns().Add(item);
 						return true;
 					}
