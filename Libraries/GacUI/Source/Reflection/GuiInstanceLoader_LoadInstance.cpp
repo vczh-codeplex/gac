@@ -496,10 +496,12 @@ Helper Functions
 				{
 					// traverse the loader and all ancestors to load the type
 					IGuiInstanceLoader::TypeInfo typeInfo(typeName, typeDescriptor);
-					while(loader && instance.IsNull())
+					bool foundLoader = false;
+					while(!foundLoader && loader && instance.IsNull())
 					{
 						if (singleTextValue && loader->IsDeserializable(typeInfo))
 						{
+							foundLoader = true;
 							// if the loader support deserialization and this is a single text value constructor
 							// then choose deserialization
 							instance = loader->Deserialize(typeInfo, singleTextValue->text);
@@ -510,6 +512,7 @@ Helper Functions
 						}
 						else if (loader->IsCreatable(typeInfo))
 						{
+							foundLoader = true;
 							// find all constructor parameters
 							List<WString> constructorParameters;
 							List<WString> requiredParameters;
@@ -548,6 +551,8 @@ Helper Functions
 										List<Ptr<GuiValueRepr>> input;
 										List<Pair<Value, IGuiInstanceLoader*>> output;
 										IGuiInstanceLoader::PropertyValue propertyValue(typeInfo, propertyName, Value());
+
+										CopyFrom(input, setterValue->values);
 										LoadInstancePropertyValue(env, setterValue->binding, propertyValue, input, loader, true, output, bindingSetters);
 
 										for (vint i = 0; i < output.Count(); i++)
