@@ -141,6 +141,10 @@ LogInstanceLoaderManager_PrintProperties
 				{
 					writer.WriteString(firstInfo->required ? L"+" : L"*");
 				}
+				else
+				{
+					writer.WriteString(L" ");
+				}
 				switch (firstInfo->support)
 				{
 				case GuiInstancePropertyInfo::SupportAssign:

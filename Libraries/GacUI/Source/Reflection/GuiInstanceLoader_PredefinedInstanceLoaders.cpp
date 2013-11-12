@@ -482,6 +482,127 @@ GuiToolstripButtonInstanceLoader
 		};
 
 /***********************************************************************
+GuiListViewInstanceLoader
+***********************************************************************/
+
+		class GuiListViewInstanceLoader : public GuiRewriteInstanceLoader
+		{
+		public:
+			WString GetTypeName()override
+			{
+				return description::GetTypeDescriptor<GuiListView>()->GetTypeName();
+			}
+
+			bool IsCreatable(const TypeInfo& typeInfo)override
+			{
+				return typeInfo.typeName == GetTypeName();
+			}
+
+			description::Value CreateInstance(const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
+			{
+				if (typeInfo.typeName == GetTypeName())
+				{
+					ListViewViewType viewType = ListViewViewType::Detail;
+					{
+						vint indexView = constructorArguments.Keys().IndexOf(L"View");
+						if (indexView != -1)
+						{
+							viewType = UnboxValue<ListViewViewType>(constructorArguments.GetByIndex(indexView)[0]);
+						}
+					}
+
+					auto listView = new GuiListView(GetCurrentTheme()->CreateListViewStyle());
+					switch (viewType)
+					{
+					case ListViewViewType::BigIcon:
+						listView->ChangeItemStyle(new list::ListViewBigIconContentProvider);
+						break;
+					case ListViewViewType::SmallIcon:
+						listView->ChangeItemStyle(new list::ListViewSmallIconContentProvider);
+						break;
+					case ListViewViewType::List:
+						listView->ChangeItemStyle(new list::ListViewListContentProvider);
+						break;
+					case ListViewViewType::Tile:
+						listView->ChangeItemStyle(new list::ListViewTileContentProvider);
+						break;
+					case ListViewViewType::Information:
+						listView->ChangeItemStyle(new list::ListViewInformationContentProvider);
+						break;
+					case ListViewViewType::Detail:
+						listView->ChangeItemStyle(new list::ListViewDetailContentProvider);
+						break;
+					}
+
+					return Value::From(listView);
+				}
+				return Value();
+			}
+
+			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			{
+				propertyNames.Add(L"View");
+				propertyNames.Add(L"Items");
+				propertyNames.Add(L"Columns");
+				propertyNames.Add(L"DataColumns");
+			}
+
+			void GetConstructorParameters(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			{
+				propertyNames.Add(L"View");
+			}
+
+			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
+			{
+				if (propertyInfo.propertyName == L"View")
+				{
+					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<ListViewViewType>());
+					info->constructorParameter = true;
+					return info;
+				}
+				else if (propertyInfo.propertyName == L"Items")
+				{
+					return GuiInstancePropertyInfo::Collection(description::GetTypeDescriptor<list::ListViewItem>());
+				}
+				else if (propertyInfo.propertyName == L"Columns")
+				{
+					return GuiInstancePropertyInfo::Collection(description::GetTypeDescriptor<list::ListViewColumn>());
+				}
+				else if (propertyInfo.propertyName == L"DataColumns")
+				{
+					return GuiInstancePropertyInfo::Collection(description::GetTypeDescriptor<vint>());
+				}
+				return GuiRewriteInstanceLoader::GetPropertyType(propertyInfo);
+			}
+
+			bool SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)override
+			{
+				if (GuiListView* container = dynamic_cast<GuiListView*>(propertyValue.instanceValue.GetRawPtr()))
+				{
+					if (propertyValue.propertyName == L"Items")
+					{
+						auto item = UnboxValue<Ptr<list::ListViewItem>>(propertyValue.propertyValue);
+						container->GetItems().Add(item);
+						return true;
+					}
+					else if (propertyValue.propertyName == L"Columns")
+					{
+						auto item = UnboxValue<Ptr<list::ListViewColumn>>(propertyValue.propertyValue);
+						container->GetItems().GetColumns().Add(item);
+						return true;
+					}
+					else if (propertyValue.propertyName == L"DataColumns")
+					{
+						auto item = UnboxValue<Ptr<vint>>(propertyValue.propertyValue);
+						container->GetItems().GetDataColumns().Add(item);
+						return true;
+					}
+				}
+				return false;
+			}
+		};
+
+/***********************************************************************
 GuiCompositionInstanceLoader
 ***********************************************************************/
 
@@ -712,20 +833,6 @@ GuiTextItemInstanceLoader
 				}
 				return GuiRewriteInstanceLoader::GetPropertyType(propertyInfo);
 			}
-
-			bool SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)override
-			{
-				if (GuiCellComposition* container = dynamic_cast<GuiCellComposition*>(propertyValue.instanceValue.GetRawPtr()))
-				{
-					if (propertyValue.propertyName == L"Site")
-					{
-						SiteValue site = UnboxValue<SiteValue>(propertyValue.propertyValue);
-						container->SetSite(site.row, site.column, site.rowSpan, site.columnSpan);
-						return true;
-					}
-				}
-				return false;
-			}
 		};
 
 #endif
@@ -754,6 +861,7 @@ GuiPredefinedInstanceLoadersPlugin
 				manager->SetLoader(new GuiToolstripMenuBarInstanceLoader);
 				manager->SetLoader(new GuiToolstripToolBarInstanceLoader);
 				manager->SetLoader(new GuiToolstripButtonInstanceLoader);
+				manager->SetLoader(new GuiListViewInstanceLoader);
 
 				manager->SetLoader(new GuiCompositionInstanceLoader);
 				manager->SetLoader(new GuiTableCompositionInstanceLoader);
