@@ -339,11 +339,12 @@ ListView ItemContentProvider
 						void											Uninstall()override;
 					};
 
-					Size												iconSize;
+					Size												minIconSize;
+					bool												fitImage;
 				public:
 					/// <summary>Create the content provider.</summary>
 					/// <param name="_iconSize">The icon size.</param>
-					ListViewBigIconContentProvider(Size _iconSize=Size(32, 32));
+					ListViewBigIconContentProvider(Size _minIconSize=Size(32, 32), bool _fitImage=true);
 					~ListViewBigIconContentProvider();
 
 					GuiListControl::IItemCoordinateTransformer*			CreatePreferredCoordinateTransformer()override;
@@ -374,11 +375,12 @@ ListView ItemContentProvider
 						void											Uninstall()override;
 					};
 
-					Size												iconSize;
+					Size												minIconSize;
+					bool												fitImage;
 				public:
 					/// <summary>Create the content provider.</summary>
 					/// <param name="_iconSize">The icon size.</param>
-					ListViewSmallIconContentProvider(Size _iconSize=Size(16, 16));
+					ListViewSmallIconContentProvider(Size _minIconSize=Size(16, 16), bool _fitImage=true);
 					~ListViewSmallIconContentProvider();
 					
 					GuiListControl::IItemCoordinateTransformer*			CreatePreferredCoordinateTransformer()override;
@@ -409,11 +411,12 @@ ListView ItemContentProvider
 						void											Uninstall()override;
 					};
 
-					Size												iconSize;
+					Size												minIconSize;
+					bool												fitImage;
 				public:
 					/// <summary>Create the content provider.</summary>
 					/// <param name="_iconSize">The icon size.</param>
-					ListViewListContentProvider(Size _iconSize=Size(16, 16));
+					ListViewListContentProvider(Size _minIconSize=Size(16, 16), bool _fitImage=true);
 					~ListViewListContentProvider();
 					
 					GuiListControl::IItemCoordinateTransformer*			CreatePreferredCoordinateTransformer()override;
@@ -450,11 +453,12 @@ ListView ItemContentProvider
 						void											Uninstall()override;
 					};
 
-					Size												iconSize;
+					Size												minIconSize;
+					bool												fitImage;
 				public:
 					/// <summary>Create the content provider.</summary>
 					/// <param name="_iconSize">The icon size.</param>
-					ListViewTileContentProvider(Size _iconSize=Size(32, 32));
+					ListViewTileContentProvider(Size _minIconSize=Size(32, 32), bool _fitImage=true);
 					~ListViewTileContentProvider();
 					
 					GuiListControl::IItemCoordinateTransformer*			CreatePreferredCoordinateTransformer()override;
@@ -492,11 +496,12 @@ ListView ItemContentProvider
 						void											Uninstall()override;
 					};
 
-					Size												iconSize;
+					Size												minIconSize;
+					bool												fitImage;
 				public:
 					/// <summary>Create the content provider.</summary>
 					/// <param name="_iconSize">The icon size.</param>
-					ListViewInformationContentProvider(Size _iconSize=Size(32, 32));
+					ListViewInformationContentProvider(Size _minIconSize=Size(32, 32), bool _fitImage=true);
 					~ListViewInformationContentProvider();
 					
 					GuiListControl::IItemCoordinateTransformer*			CreatePreferredCoordinateTransformer()override;
@@ -639,7 +644,8 @@ ListView ItemContentProvider(Detailed)
 						void											Uninstall()override;
 					};
 
-					Size												iconSize;
+					Size												minIconSize;
+					bool												fitImage;
 					GuiListControl::IItemProvider*						itemProvider;
 					ListViewColumnItemArranger::IColumnItemView*		columnItemView;
 					ListViewItemStyleProvider*							listViewItemStyleProvider;
@@ -648,7 +654,7 @@ ListView ItemContentProvider(Detailed)
 				public:
 					/// <summary>Create the content provider.</summary>
 					/// <param name="_iconSize">The icon size.</param>
-					ListViewDetailContentProvider(Size _iconSize=Size(16, 16));
+					ListViewDetailContentProvider(Size _minIconSize=Size(16, 16), bool _fitImage=true);
 					~ListViewDetailContentProvider();
 					
 					GuiListControl::IItemCoordinateTransformer*			CreatePreferredCoordinateTransformer()override;
