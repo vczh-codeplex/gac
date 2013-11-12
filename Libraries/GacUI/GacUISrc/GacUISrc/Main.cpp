@@ -79,14 +79,6 @@ public:
 	{
 		GUI_INSTANCE_REFERENCE(listResources);
 		GUI_INSTANCE_REFERENCE(buttonShow);
-
-		FOREACH(Ptr<GuiResourceFolder>, folder, GetResource()->GetFolderByPath(L"XmlWindowDemos/")->GetFolders())
-		{
-			if (folder->GetName() != L"MainWindow")
-			{
-				listResources->GetItems().Add(new list::TextItem(folder->GetName()));
-			}
-		}
 		
 		listResources->SelectionChanged.AttachMethod(this, &MainWindowInstance::listResources_SelectionChanged);
 		listResources->ItemLeftButtonDoubleClick.AttachMethod(this, &MainWindowInstance::listResources_ItemLeftButtonDoubleClick);

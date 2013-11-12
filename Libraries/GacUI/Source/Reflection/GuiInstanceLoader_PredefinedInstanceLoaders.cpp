@@ -178,9 +178,7 @@ GuiControlHostInstanceLoader
 			{
 				if (propertyInfo.propertyName == L"")
 				{
-					auto info = GuiInstancePropertyInfo::CollectionWithParent();
-					info->acceptableTypes.Add(description::GetTypeDescriptor<GuiComponent>());
-					return info;
+					return GuiInstancePropertyInfo::CollectionWithParent(description::GetTypeDescriptor<GuiComponent>());
 				}
 				return GuiRewriteInstanceLoader::GetPropertyType(propertyInfo);
 			}
@@ -223,9 +221,7 @@ GuiTabInstanceLoader
 			{
 				if (propertyInfo.propertyName == L"")
 				{
-					auto info = GuiInstancePropertyInfo::CollectionWithParent();
-					info->acceptableTypes.Add(description::GetTypeDescriptor<GuiTabPage>());
-					return info;
+					return GuiInstancePropertyInfo::CollectionWithParent(description::GetTypeDescriptor<GuiTabPage>());
 				}
 				return GuiRewriteInstanceLoader::GetPropertyType(propertyInfo);
 			}
@@ -319,9 +315,7 @@ GuiToolstripMenuInstanceLoader
 			{
 				if (propertyInfo.propertyName == L"")
 				{
-					auto info = GuiInstancePropertyInfo::CollectionWithParent();
-					info->acceptableTypes.Add(description::GetTypeDescriptor<GuiControl>());
-					return info;
+					return GuiInstancePropertyInfo::CollectionWithParent(description::GetTypeDescriptor<GuiControl>());
 				}
 				return GuiRewriteInstanceLoader::GetPropertyType(propertyInfo);
 			}
@@ -364,9 +358,7 @@ GuiToolstripMenuBarInstanceLoader
 			{
 				if (propertyInfo.propertyName == L"")
 				{
-					auto info = GuiInstancePropertyInfo::CollectionWithParent();
-					info->acceptableTypes.Add(description::GetTypeDescriptor<GuiControl>());
-					return info;
+					return GuiInstancePropertyInfo::CollectionWithParent(description::GetTypeDescriptor<GuiControl>());
 				}
 				return GuiRewriteInstanceLoader::GetPropertyType(propertyInfo);
 			}
@@ -409,9 +401,7 @@ GuiToolstripToolBarInstanceLoader
 			{
 				if (propertyInfo.propertyName == L"")
 				{
-					auto info = GuiInstancePropertyInfo::CollectionWithParent();
-					info->acceptableTypes.Add(description::GetTypeDescriptor<GuiControl>());
-					return info;
+					return GuiInstancePropertyInfo::CollectionWithParent(description::GetTypeDescriptor<GuiControl>());
 				}
 				return GuiRewriteInstanceLoader::GetPropertyType(propertyInfo);
 			}
@@ -468,9 +458,7 @@ GuiToolstripButtonInstanceLoader
 			{
 				if (propertyInfo.propertyName == L"SubMenu")
 				{
-					auto info = GuiInstancePropertyInfo::Set();
-					info->acceptableTypes.Add(description::GetTypeDescriptor<GuiToolstripMenu>());
-					return info;
+					return GuiInstancePropertyInfo::Set(description::GetTypeDescriptor<GuiToolstripMenu>());
 				}
 				return GuiRewriteInstanceLoader::GetPropertyType(propertyInfo);
 			}
@@ -572,9 +560,7 @@ GuiTableCompositionInstanceLoader
 			{
 				if (propertyInfo.propertyName == L"Rows" || propertyInfo.propertyName==L"Columns")
 				{
-					auto info = GuiInstancePropertyInfo::Array();
-					info->acceptableTypes.Add(description::GetTypeDescriptor<GuiCellOption>());
-					return info;
+					return GuiInstancePropertyInfo::Array(description::GetTypeDescriptor<GuiCellOption>());
 				}
 				return GuiRewriteInstanceLoader::GetPropertyType(propertyInfo);
 			}
@@ -632,8 +618,96 @@ GuiCellCompositionInstanceLoader
 			{
 				if (propertyInfo.propertyName == L"Site")
 				{
-					auto info = GuiInstancePropertyInfo::Assign();
-					info->acceptableTypes.Add(description::GetTypeDescriptor<SiteValue>());
+					return GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<SiteValue>());
+				}
+				return GuiRewriteInstanceLoader::GetPropertyType(propertyInfo);
+			}
+
+			bool SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)override
+			{
+				if (GuiCellComposition* container = dynamic_cast<GuiCellComposition*>(propertyValue.instanceValue.GetRawPtr()))
+				{
+					if (propertyValue.propertyName == L"Site")
+					{
+						SiteValue site = UnboxValue<SiteValue>(propertyValue.propertyValue);
+						container->SetSite(site.row, site.column, site.rowSpan, site.columnSpan);
+						return true;
+					}
+				}
+				return false;
+			}
+		};
+
+/***********************************************************************
+GuiTextItemInstanceLoader
+***********************************************************************/
+
+		class GuiTextItemInstanceLoader : public GuiRewriteInstanceLoader
+		{
+		public:
+
+			WString GetTypeName()override
+			{
+				return description::GetTypeDescriptor<list::TextItem>()->GetTypeName();
+			}
+
+			bool IsCreatable(const TypeInfo& typeInfo)override
+			{
+				return typeInfo.typeName == GetTypeName();
+			}
+
+			description::Value CreateInstance(const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
+			{
+				if (typeInfo.typeName == GetTypeName())
+				{
+					vint indexText = constructorArguments.Keys().IndexOf(L"Text");
+					vint indexChecked = constructorArguments.Keys().IndexOf(L"Checked");
+
+					if (indexText != -1)
+					{
+						WString text = UnboxValue<WString>(constructorArguments.GetByIndex(indexText)[0]);
+						bool checked = false;
+						if (indexChecked != -1)
+						{
+							checked=UnboxValue<bool>(constructorArguments.GetByIndex(indexChecked)[0]);
+						}
+						return Value::From(Ptr<list::TextItem>(new list::TextItem(text, checked)));
+					}
+				}
+				return Value();
+			}
+
+			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			{
+				if (typeInfo.typeName == GetTypeName())
+				{
+					propertyNames.Add(L"Text");
+					propertyNames.Add(L"Checked");
+				}
+			}
+
+			void GetConstructorParameters(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			{
+				if (typeInfo.typeName == GetTypeName())
+				{
+					propertyNames.Add(L"Text");
+					propertyNames.Add(L"Checked");
+				}
+			}
+
+			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
+			{
+				if (propertyInfo.propertyName == L"Text")
+				{
+					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<WString>());
+					info->constructorParameter = true;
+					info->required = true;
+					return info;
+				}
+				else if (propertyInfo.propertyName == L"Checked")
+				{
+					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<bool>());
+					info->constructorParameter = true;
 					return info;
 				}
 				return GuiRewriteInstanceLoader::GetPropertyType(propertyInfo);
@@ -680,9 +754,12 @@ GuiPredefinedInstanceLoadersPlugin
 				manager->SetLoader(new GuiToolstripMenuBarInstanceLoader);
 				manager->SetLoader(new GuiToolstripToolBarInstanceLoader);
 				manager->SetLoader(new GuiToolstripButtonInstanceLoader);
+
 				manager->SetLoader(new GuiCompositionInstanceLoader);
 				manager->SetLoader(new GuiTableCompositionInstanceLoader);
 				manager->SetLoader(new GuiCellCompositionInstanceLoader);
+
+				manager->SetLoader(new GuiTextItemInstanceLoader);
 
 #define ADD_VIRTUAL_TYPE(VIRTUALTYPENAME, TYPENAME, CONSTRUCTOR)\
 	manager->CreateVirtualType(\
