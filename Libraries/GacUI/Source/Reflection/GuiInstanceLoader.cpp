@@ -565,9 +565,9 @@ namespace vl
 					manager->SetTypeResolver(new GuiResourceInstanceTypeResolver);
 				}
 				{
-				IGuiParserManager* manager = GetParserManager();
-				manager->SetParser(L"INSTANCE-ELEMENT-NAME", new GuiInstanceContextElementNameParser);
-			}
+					IGuiParserManager* manager = GetParserManager();
+					manager->SetParser(L"INSTANCE-ELEMENT-NAME", new GuiInstanceContextElementNameParser);
+				}
 			}
 
 			void Unload()override
