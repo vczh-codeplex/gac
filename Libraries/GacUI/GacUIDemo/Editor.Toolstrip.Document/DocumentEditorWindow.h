@@ -7,7 +7,7 @@ class DocumentEditorWindow : public GuiWindow
 {
 private:
 	GuiToolstripMenuBar*			menuBar;
-	GuiToolstripToolbar*			toolbar;
+	GuiToolstripToolBar*			ToolBar;
 	GuiDocumentViewer*				textBox;
 	GuiShortcutKeyManager*			shortcutKeyManager;
 
