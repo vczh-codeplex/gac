@@ -91,7 +91,7 @@ FindTypeVisitor
 					FOREACH(Ptr<GuiResourceItem>, item, folder->GetItems())
 					{
 						Ptr<GuiInstanceContext> context=item->GetContent().Cast<GuiInstanceContext>();
-						if(context) return context;
+						if (context && context->typeName == typeName) return context;
 					}
 					FOREACH(Ptr<GuiResourceFolder>, folder, folder->GetFolders())
 					{
