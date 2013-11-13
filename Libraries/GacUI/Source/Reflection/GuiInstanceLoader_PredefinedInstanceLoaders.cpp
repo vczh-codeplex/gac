@@ -708,6 +708,74 @@ GuiTreeViewInstanceLoader
 		};
 
 /***********************************************************************
+GuiComboBoxInstanceLoader
+***********************************************************************/
+
+		class GuiComboBoxInstanceLoader : public GuiRewriteInstanceLoader
+		{
+		protected:
+			WString							typeName;
+		public:
+			GuiComboBoxInstanceLoader()
+				:typeName(L"presentation::controls::GuiComboBox")
+			{
+			}
+
+			WString GetTypeName()override
+			{
+				return typeName;
+			}
+
+			bool IsCreatable(const TypeInfo& typeInfo)override
+			{
+				return typeInfo.typeName == GetTypeName();
+			}
+
+			description::Value CreateInstance(const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
+			{
+				if (typeInfo.typeName == GetTypeName())
+				{
+					vint indexListControl = constructorArguments.Keys().IndexOf(L"ListControl");
+					if (indexListControl != -1)
+					{
+						auto listControl = UnboxValue<GuiSelectableListControl*>(constructorArguments.GetByIndex(indexListControl)[0]);
+						auto comboBox = new GuiComboBoxListControl(GetCurrentTheme()->CreateComboBoxStyle(), listControl);
+						return Value::From(comboBox);
+					}
+				}
+				return Value();
+			}
+
+			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			{
+				if (typeInfo.typeName == GetTypeName())
+				{
+					propertyNames.Add(L"ListControl");
+				}
+			}
+
+			void GetConstructorParameters(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			{
+				if (typeInfo.typeName == GetTypeName())
+				{
+					propertyNames.Add(L"ListControl");
+				}
+			}
+
+			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
+			{
+				 if (propertyInfo.propertyName == L"ListControl")
+				{
+					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<GuiSelectableListControl>());
+					info->constructorParameter = true;
+					info->required = true;
+					return info;
+				}
+				return GuiRewriteInstanceLoader::GetPropertyType(propertyInfo);
+			}
+		};
+
+/***********************************************************************
 GuiCompositionInstanceLoader
 ***********************************************************************/
 
@@ -1048,6 +1116,20 @@ GuiPredefinedInstanceLoadersPlugin
 #ifndef VCZH_DEBUG_NO_REFLECTION
 				IGuiInstanceLoaderManager* manager=GetInstanceLoaderManager();
 
+#define ADD_VIRTUAL_TYPE_LOADER(TYPENAME, LOADER)\
+	manager->CreateVirtualType(\
+		description::GetTypeDescriptor<TYPENAME>()->GetTypeName(),\
+		new LOADER\
+		)
+
+#define ADD_VIRTUAL_TYPE(VIRTUALTYPENAME, TYPENAME, CONSTRUCTOR)\
+	manager->CreateVirtualType(\
+		description::GetTypeDescriptor<TYPENAME>()->GetTypeName(),\
+		new GuiVrtualTypeInstanceLoader(\
+			L"presentation::controls::Gui" L#VIRTUALTYPENAME,\
+			[](){return Value::From(CONSTRUCTOR());})\
+		)
+
 				manager->SetLoader(new GuiControlInstanceLoader);
 				manager->SetLoader(new GuiControlHostInstanceLoader);
 				manager->SetLoader(new GuiTabInstanceLoader);
@@ -1064,15 +1146,9 @@ GuiPredefinedInstanceLoadersPlugin
 				manager->SetLoader(new GuiCellCompositionInstanceLoader);
 
 				manager->SetLoader(new GuiTextItemInstanceLoader);
-				manager->CreateVirtualType(description::GetTypeDescriptor<tree::MemoryNodeProvider>()->GetTypeName(), new GuiTreeNodeInstanceLoader);
-
-#define ADD_VIRTUAL_TYPE(VIRTUALTYPENAME, TYPENAME, CONSTRUCTOR)\
-	manager->CreateVirtualType(\
-		description::GetTypeDescriptor<TYPENAME>()->GetTypeName(),\
-		new GuiVrtualTypeInstanceLoader(\
-			L"presentation::controls::Gui" L#VIRTUALTYPENAME,\
-			[](){return Value::From(CONSTRUCTOR());})\
-		)
+				
+				ADD_VIRTUAL_TYPE_LOADER(GuiComboBoxListControl,						GuiComboBoxInstanceLoader);
+				ADD_VIRTUAL_TYPE_LOADER(tree::MemoryNodeProvider,					GuiTreeNodeInstanceLoader);
 
 				ADD_VIRTUAL_TYPE(GroupBox,					GuiControl,				g::NewGroupBox);
 				ADD_VIRTUAL_TYPE(MenuSplitter,				GuiControl,				g::NewMenuSplitter);
@@ -1092,6 +1168,7 @@ GuiPredefinedInstanceLoadersPlugin
 				ADD_VIRTUAL_TYPE(RadioTextList,				GuiTextList,			g::NewRadioTextList);
 
 #undef ADD_VIRTUAL_TYPE
+#undef ADD_VIRTUAL_TYPE_LOADER
 #endif
 			}
 

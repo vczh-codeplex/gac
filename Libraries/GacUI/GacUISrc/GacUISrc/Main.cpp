@@ -97,6 +97,14 @@ public:
 /*
 Type Loader:
 	GuiComboBoxListControl
+	GuiStringGrid
+
+Data Binding:
+	GuiSelectableListControl
+	GuiVirtualTextList
+	GuiVirtualListView
+	GuiVirtualTreeView
+	GuiVirtualDataGrid
 
 Features:
 	Component Xml Layout	: Type Loaders, Virtual Type Loaders, Constructor Parameters, Object Inception (e.g. ViewModel object), Object Schema
