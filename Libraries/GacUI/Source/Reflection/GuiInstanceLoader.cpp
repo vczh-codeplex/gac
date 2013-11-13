@@ -588,15 +588,15 @@ namespace vl
 				return index == -1 ? 0 : binders.Values()[index].Obj();
 			}
 
-			bool CreateVirtualType(const WString& typeName, const WString& parentType, Ptr<IGuiInstanceLoader> loader)override
+			bool CreateVirtualType(const WString& parentType, Ptr<IGuiInstanceLoader> loader)override
 			{
-				if (IsTypeExists(typeName) || !IsTypeExists(parentType)) return false;
+				if (IsTypeExists(loader->GetTypeName()) || !IsTypeExists(parentType)) return false;
 
 				Ptr<VirtualTypeInfo> typeInfo = new VirtualTypeInfo;
-				typeInfo->typeName = typeName;
+				typeInfo->typeName = loader->GetTypeName();
 				typeInfo->parentTypeName = parentType;
 				typeInfo->loader = loader;
-				typeInfos.Add(typeName, typeInfo);
+				typeInfos.Add(loader->GetTypeName(), typeInfo);
 				FillParentTypeInfos(typeInfo);
 
 				return true;

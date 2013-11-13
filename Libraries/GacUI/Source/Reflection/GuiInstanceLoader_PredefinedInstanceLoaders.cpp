@@ -550,8 +550,11 @@ GuiListViewInstanceLoader
 
 			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
 			{
-				propertyNames.Add(L"View");
-				propertyNames.Add(L"IconSize");
+				if (typeInfo.typeName == GetTypeName())
+				{
+					propertyNames.Add(L"View");
+					propertyNames.Add(L"IconSize");
+				}
 				propertyNames.Add(L"Items");
 				propertyNames.Add(L"Columns");
 				propertyNames.Add(L"DataColumns");
@@ -559,8 +562,11 @@ GuiListViewInstanceLoader
 
 			void GetConstructorParameters(const TypeInfo& typeInfo, List<WString>& propertyNames)override
 			{
-				propertyNames.Add(L"View");
-				propertyNames.Add(L"IconSize");
+				if (typeInfo.typeName == GetTypeName())
+				{
+					propertyNames.Add(L"View");
+					propertyNames.Add(L"IconSize");
+				}
 			}
 
 			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
@@ -612,6 +618,47 @@ GuiListViewInstanceLoader
 					{
 						auto item = UnboxValue<vint>(propertyValue.propertyValue);
 						container->GetItems().GetDataColumns().Add(item);
+						return true;
+					}
+				}
+				return false;
+			}
+		};
+
+/***********************************************************************
+GuiTreeViewInstanceLoader
+***********************************************************************/
+
+		class GuiTreeViewInstanceLoader : public GuiRewriteInstanceLoader
+		{
+		public:
+			WString GetTypeName()override
+			{
+				return description::GetTypeDescriptor<GuiTreeView>()->GetTypeName();
+			}
+
+			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			{
+				propertyNames.Add(L"Nodes");
+			}
+
+			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
+			{
+				if (propertyInfo.propertyName == L"Nodes")
+				{
+					return GuiInstancePropertyInfo::Collection(description::GetTypeDescriptor<tree::MemoryNodeProvider>());
+				}
+				return GuiRewriteInstanceLoader::GetPropertyType(propertyInfo);
+			}
+
+			bool SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)override
+			{
+				if (GuiTreeView* container = dynamic_cast<GuiTreeView*>(propertyValue.instanceValue.GetRawPtr()))
+				{
+					if (propertyValue.propertyName == L"Nodes")
+					{
+						auto item = UnboxValue<Ptr<tree::MemoryNodeProvider>>(propertyValue.propertyValue);
+						container->Nodes()->Children().Add(item);
 						return true;
 					}
 				}
@@ -852,6 +899,110 @@ GuiTextItemInstanceLoader
 			}
 		};
 
+/***********************************************************************
+GuiTreeNodeInstanceLoader
+***********************************************************************/
+
+		class GuiTreeNodeInstanceLoader : public GuiRewriteInstanceLoader
+		{
+		protected:
+			WString							typeName;
+		public:
+			GuiTreeNodeInstanceLoader()
+				:typeName(L"presentation::controls::tree::TreeNode")
+			{
+			}
+
+			WString GetTypeName()override
+			{
+				return typeName;
+			}
+
+			bool IsCreatable(const TypeInfo& typeInfo)override
+			{
+				return typeInfo.typeName == GetTypeName();
+			}
+
+			description::Value CreateInstance(const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
+			{
+				if (typeInfo.typeName == GetTypeName())
+				{
+					vint indexText = constructorArguments.Keys().IndexOf(L"Text");
+					vint indexImage = constructorArguments.Keys().IndexOf(L"Image");
+
+					if (indexText != -1)
+					{
+						WString text = UnboxValue<WString>(constructorArguments.GetByIndex(indexText)[0]);
+						Ptr<GuiImageData> image;
+						if (indexImage != -1)
+						{
+							image=UnboxValue<Ptr<GuiImageData>>(constructorArguments.GetByIndex(indexImage)[0]);
+						}
+
+						Ptr<tree::TreeViewItem> item = new tree::TreeViewItem(image, text);
+						Ptr<tree::MemoryNodeProvider> node = new tree::MemoryNodeProvider(item);
+						return Value::From(node);
+					}
+				}
+				return Value();
+			}
+
+			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			{
+				if (typeInfo.typeName == GetTypeName())
+				{
+					propertyNames.Add(L"Text");
+					propertyNames.Add(L"Image");
+				}
+				propertyNames.Add(L"");
+			}
+
+			void GetConstructorParameters(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			{
+				if (typeInfo.typeName == GetTypeName())
+				{
+					propertyNames.Add(L"Text");
+					propertyNames.Add(L"Image");
+				}
+			}
+
+			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
+			{
+				if (propertyInfo.propertyName == L"Text")
+				{
+					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<WString>());
+					info->constructorParameter = true;
+					info->required = true;
+					return info;
+				}
+				else if (propertyInfo.propertyName == L"Image")
+				{
+					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<GuiImageData>());
+					info->constructorParameter = true;
+					return info;
+				}
+				else if (propertyInfo.propertyName == L"")
+				{
+					return GuiInstancePropertyInfo::Collection(description::GetTypeDescriptor<tree::MemoryNodeProvider>());
+				}
+				return GuiRewriteInstanceLoader::GetPropertyType(propertyInfo);
+			}
+
+			bool SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)override
+			{
+				if (tree::MemoryNodeProvider* container = dynamic_cast<tree::MemoryNodeProvider*>(propertyValue.instanceValue.GetRawPtr()))
+				{
+					if (propertyValue.propertyName == L"")
+					{
+						auto item = UnboxValue<Ptr<tree::MemoryNodeProvider>>(propertyValue.propertyValue);
+						container->Children().Add(item);
+						return true;
+					}
+				}
+				return false;
+			}
+		};
+
 #endif
 
 /***********************************************************************
@@ -879,16 +1030,17 @@ GuiPredefinedInstanceLoadersPlugin
 				manager->SetLoader(new GuiToolstripToolBarInstanceLoader);
 				manager->SetLoader(new GuiToolstripButtonInstanceLoader);
 				manager->SetLoader(new GuiListViewInstanceLoader);
+				manager->SetLoader(new GuiTreeViewInstanceLoader);
 
 				manager->SetLoader(new GuiCompositionInstanceLoader);
 				manager->SetLoader(new GuiTableCompositionInstanceLoader);
 				manager->SetLoader(new GuiCellCompositionInstanceLoader);
 
 				manager->SetLoader(new GuiTextItemInstanceLoader);
+				manager->CreateVirtualType(description::GetTypeDescriptor<tree::MemoryNodeProvider>()->GetTypeName(), new GuiTreeNodeInstanceLoader);
 
 #define ADD_VIRTUAL_TYPE(VIRTUALTYPENAME, TYPENAME, CONSTRUCTOR)\
 	manager->CreateVirtualType(\
-		L"presentation::controls::Gui" L#VIRTUALTYPENAME,\
 		description::GetTypeDescriptor<TYPENAME>()->GetTypeName(),\
 		new GuiVrtualTypeInstanceLoader(\
 			L"presentation::controls::Gui" L#VIRTUALTYPENAME,\
