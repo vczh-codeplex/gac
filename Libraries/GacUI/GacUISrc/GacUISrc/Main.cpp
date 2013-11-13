@@ -95,10 +95,6 @@ public:
 };
 
 /*
-Type Loader:
-	GuiComboBoxListControl
-	GuiStringGrid
-
 Data Binding:
 	GuiSelectableListControl
 	GuiVirtualTextList
