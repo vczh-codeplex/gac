@@ -115,6 +115,24 @@
     <Image Include="..\Resources\s_Underline.png">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="..\Resources\OfficeExcel.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\Resources\OfficeOneNote.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\Resources\OfficeOutlook.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\Resources\OfficePowerPoint.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\Resources\OfficeWord.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\Resources\XmlDocDemo_TooltipWindow.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\Resources\CalculatorDefinition.txt">
@@ -138,6 +156,9 @@
       <Filter>Resource Files</Filter>
     </Xml>
     <Xml Include="..\Resources\XmlDocDemo.xml">
+      <Filter>Resource Files</Filter>
+    </Xml>
+    <Xml Include="..\Resources\XmlWindowResource.xml">
       <Filter>Resource Files</Filter>
     </Xml>
   </ItemGroup>

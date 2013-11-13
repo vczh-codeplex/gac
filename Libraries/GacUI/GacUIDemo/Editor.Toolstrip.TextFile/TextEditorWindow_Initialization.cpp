@@ -137,11 +137,11 @@ void TextEditorWindow::InitializeMenuBar()
 
 void TextEditorWindow::InitializeToolBar()
 {
-	toolbar=g::NewToolbar();
-	toolbar->GetBoundsComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
-	toolbar->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+	ToolBar=g::NewToolBar();
+	ToolBar->GetBoundsComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+	ToolBar->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 
-	toolbar->GetBuilder()
+	ToolBar->GetBuilder()
 		->Button(commandFileNew)
 		->Button(commandFileOpen)
 		->Button(commandFileSave)
@@ -192,7 +192,7 @@ void TextEditorWindow::InitializeComponents()
 		cell->SetInternalMargin(Margin(1, 0, 1, 0));
 		
 		InitializeToolBar();
-		cell->AddChild(toolbar->GetBoundsComposition());
+		cell->AddChild(ToolBar->GetBoundsComposition());
 	}
 
 	// create the text box
