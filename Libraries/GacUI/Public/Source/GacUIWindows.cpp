@@ -3478,12 +3478,58 @@ namespace vl
 WindowsInputService
 ***********************************************************************/
 
+			WString WindowsInputService::GetKeyNameInternal(vint code)
+			{
+				if (code < 8) return L"?";
+				wchar_t name[256]={0};
+				vint scanCode=MapVirtualKey((int)code, MAPVK_VK_TO_VSC)<<16;
+				switch(code)
+				{
+				case VK_INSERT:
+				case VK_DELETE:
+				case VK_HOME:
+				case VK_END:
+				case VK_PRIOR:
+				case VK_NEXT:
+				case VK_LEFT:
+				case VK_RIGHT:
+				case VK_UP:
+				case VK_DOWN:
+					scanCode|=1<<24;
+					break;
+				case VK_CLEAR:
+				case VK_LSHIFT:
+				case VK_RSHIFT: 
+				case VK_LCONTROL:
+				case VK_RCONTROL:
+				case VK_LMENU:
+				case VK_RMENU:
+					return L"?";
+				}
+				GetKeyNameText((int)scanCode, name, sizeof(name)/sizeof(*name));
+				return name[0]?name:L"?";
+			}
+
+			void WindowsInputService::InitializeKeyNames()
+			{
+				for (vint i = 0; i < keyNames.Count(); i++)
+				{
+					keyNames[i] = GetKeyNameInternal(i);
+					if (keyNames[i] != L"?")
+					{
+						keys.Set(keyNames[i], i);
+					}
+				}
+			}
+
 			WindowsInputService::WindowsInputService(HOOKPROC _mouseProc)
 				:ownerHandle(NULL)
 				,mouseHook(NULL)
 				,isTimerEnabled(false)
 				,mouseProc(_mouseProc)
+				,keyNames(146)
 			{
+				InitializeKeyNames();
 			}
 
 			void WindowsInputService::SetOwnerHandle(HWND handle)
@@ -3548,25 +3594,20 @@ WindowsInputService
 
 			WString WindowsInputService::GetKeyName(vint code)
 			{
-				wchar_t name[256]={0};
-				vint scanCode=MapVirtualKey((int)code, MAPVK_VK_TO_VSC)<<16;
-				switch(code)
+				if (0 <= code && 0 < keyNames.Count())
 				{
-				case VK_INSERT:
-				case VK_DELETE:
-				case VK_HOME:
-				case VK_END:
-				case VK_PRIOR:
-				case VK_NEXT:
-				case VK_LEFT:
-				case VK_RIGHT:
-				case VK_UP:
-				case VK_DOWN:
-					scanCode|=1<<24;
-					break;
+					return keyNames[code];
 				}
-				GetKeyNameText((int)scanCode, name, sizeof(name)/sizeof(*name));
-				return name[0]?name:L"?";
+				else
+				{
+					return L"?";
+				}
+			}
+
+			vint WindowsInputService::GetKey(const WString& name)
+			{
+				vint index = keys.Keys().IndexOf(name);
+				return index == -1 ? -1 : keys.Values()[index];
 			}
 		}
 	}

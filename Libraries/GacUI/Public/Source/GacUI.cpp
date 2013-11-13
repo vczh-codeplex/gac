@@ -817,6 +817,14 @@ GuiComponent
 			{
 			}
 
+			void GuiComponent::Attach(GuiControlHost* controlHost)
+			{
+			}
+
+			void GuiComponent::Detach(GuiControlHost* controlHost)
+			{
+			}
+
 /***********************************************************************
 GuiLabel
 ***********************************************************************/
@@ -1314,7 +1322,7 @@ namespace vl
 GuiTabPage
 ***********************************************************************/
 
-			bool GuiTabPage::AssociateTab(GuiTab* _owner, GuiControl::IStyleController* _styleController)
+			bool GuiTabPage::AssociateTab(GuiTab* _owner)
 			{
 				if(owner)
 				{
@@ -1322,18 +1330,9 @@ GuiTabPage
 				}
 				else
 				{
-					if(!container)
-					{
-						container=new GuiControl(_styleController);
-						TextChanged.SetAssociatedComposition(container->GetBoundsComposition());
-						PageInstalled.SetAssociatedComposition(container->GetBoundsComposition());
-						PageUninstalled.SetAssociatedComposition(container->GetBoundsComposition());
-						PageContainerReady.SetAssociatedComposition(container->GetBoundsComposition());
-
-						PageContainerReady.Execute(container->GetNotifyEventArguments());
-					}
 					owner=_owner;
-					PageInstalled.Execute(container->GetNotifyEventArguments());
+					GuiEventArgs arguments(containerComposition);
+					PageInstalled.Execute(arguments);
 					return true;
 				}
 			}
@@ -1342,7 +1341,8 @@ GuiTabPage
 			{
 				if(owner && owner==_owner)
 				{
-					PageUninstalled.Execute(container->GetNotifyEventArguments());
+					GuiEventArgs arguments(containerComposition);
+					PageUninstalled.Execute(arguments);
 					owner=0;
 					return true;
 				}
@@ -1353,22 +1353,28 @@ GuiTabPage
 			}
 
 			GuiTabPage::GuiTabPage()
-				:container(0)
+				:containerComposition(0)
 				,owner(0)
 			{
+				containerComposition = new GuiBoundsComposition;
+				containerComposition->SetAlignmentToParent(Margin(2, 2, 2, 2));
+
+				TextChanged.SetAssociatedComposition(containerComposition);
+				PageInstalled.SetAssociatedComposition(containerComposition);
+				PageUninstalled.SetAssociatedComposition(containerComposition);
 			}
 
 			GuiTabPage::~GuiTabPage()
 			{
-				if(!container->GetParent())
+				if(!containerComposition->GetParent())
 				{
-					delete container;
+					delete containerComposition;
 				}
 			}
 
-			GuiControl* GuiTabPage::GetContainer()
+			compositions::GuiBoundsComposition* GuiTabPage::GetContainerComposition()
 			{
-				return container;
+				return containerComposition;
 			}
 
 			GuiTab* GuiTabPage::GetOwnerTab()
@@ -1390,15 +1396,8 @@ GuiTabPage
 					{
 						owner->styleController->SetTabText(owner->tabPages.IndexOf(this), text);
 					}
-					if(container)
-					{
-						TextChanged.Execute(container->GetNotifyEventArguments());
-					}
-					else
-					{
-						GuiEventArgs arguments;
-						TextChanged.Execute(arguments);
-					}
+					GuiEventArgs arguments(containerComposition);
+					TextChanged.Execute(arguments);
 				}
 			}
 
@@ -1467,10 +1466,10 @@ GuiTab
 					index=-1;
 				}
 
-				if(page->AssociateTab(this, styleController->CreateTabPageStyleController()))
+				if(page->AssociateTab(this))
 				{
 					index=index==-1?tabPages.Add(page):tabPages.Insert(index, page);
-					GetContainerComposition()->AddChild(page->GetContainer()->GetBoundsComposition());
+					GetContainerComposition()->AddChild(page->GetContainerComposition());
 					styleController->InsertTab(index);
 					styleController->SetTabText(index, page->GetText());
 				
@@ -1478,7 +1477,7 @@ GuiTab
 					{
 						SetSelectedPage(page);
 					}
-					page->GetContainer()->SetVisible(page==selectedPage);
+					page->GetContainerComposition()->SetVisible(page==selectedPage);
 					return true;
 				}
 				else
@@ -1493,7 +1492,7 @@ GuiTab
 				{
 					vint index=tabPages.IndexOf(value);
 					styleController->RemoveTab(index);
-					GetContainerComposition()->RemoveChild(value->GetContainer()->GetBoundsComposition());
+					GetContainerComposition()->RemoveChild(value->GetContainerComposition());
 					tabPages.RemoveAt(index);
 					if(tabPages.Count()==0)
 					{
@@ -1551,7 +1550,7 @@ GuiTab
 						for(vint i=0;i<tabPages.Count();i++)
 						{
 							bool selected=tabPages[i]==value;
-							tabPages[i]->GetContainer()->SetVisible(selected);
+							tabPages[i]->GetContainerComposition()->SetVisible(selected);
 							if(selected)
 							{
 								styleController->SetSelectedTab(i);
@@ -2730,6 +2729,7 @@ GuiControlHost
 				styleController=0;
 				for(vint i=0;i<components.Count();i++)
 				{
+					components[i]->Detach(this);
 					delete components[i];
 				}
 				delete host;
@@ -2925,13 +2925,22 @@ GuiControlHost
 				else
 				{
 					components.Add(component);
+					component->Attach(this);
 					return true;
 				}
 			}
 
 			bool GuiControlHost::RemoveComponent(GuiComponent* component)
 			{
-				return components.Remove(component);
+				vint index = components.IndexOf(component);
+				if (index == -1)
+				{
+					return false;
+				}
+				{
+					component->Detach(this);
+					return components.RemoveAt(index);
+				}
 			}
 
 			bool GuiControlHost::ContainsComponent(GuiComponent* component)
@@ -3388,6 +3397,11 @@ GuiPopup
 			void GuiPopup::PopupClosed(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				GetApplication()->RegisterPopupClosed(this);
+				INativeWindow* window=GetNativeWindow();
+				if(window)
+				{
+					window->SetParent(0);
+				}
 			}
 
 			GuiPopup::GuiPopup(IStyleController* _styleController)
@@ -8601,7 +8615,7 @@ ListViewItemStyleProvider
 ListViewBigIconContentProvider
 ***********************************************************************/
 
-				ListViewBigIconContentProvider::ItemContent::ItemContent(Size iconSize, const FontProperties& font)
+				ListViewBigIconContentProvider::ItemContent::ItemContent(Size minIconSize, bool fitImage, const FontProperties& font)
 					:contentComposition(0)
 				{
 					contentComposition=new GuiBoundsComposition;
@@ -8621,7 +8635,11 @@ ListViewBigIconContentProvider
 						GuiCellComposition* cell=new GuiCellComposition;
 						table->AddChild(cell);
 						cell->SetSite(0, 1, 1, 1);
-						cell->SetPreferredMinSize(iconSize);
+						cell->SetPreferredMinSize(minIconSize);
+						if (!fitImage)
+						{
+							cell->SetMinSizeLimitation(GuiGraphicsComposition::NoLimit);
+						}
 
 						image=GuiImageFrameElement::Create();
 						image->SetStretch(true);
@@ -8676,8 +8694,9 @@ ListViewBigIconContentProvider
 				{
 				}
 
-				ListViewBigIconContentProvider::ListViewBigIconContentProvider(Size _iconSize)
-					:iconSize(_iconSize)
+				ListViewBigIconContentProvider::ListViewBigIconContentProvider(Size _minIconSize, bool _fitImage)
+					:minIconSize(_minIconSize)
+					,fitImage(_fitImage)
 				{
 				}
 
@@ -8697,7 +8716,7 @@ ListViewBigIconContentProvider
 
 				ListViewItemStyleProvider::IListViewItemContent* ListViewBigIconContentProvider::CreateItemContent(const FontProperties& font)
 				{
-					return new ItemContent(iconSize, font);
+					return new ItemContent(minIconSize, fitImage, font);
 				}
 
 				void ListViewBigIconContentProvider::AttachListControl(GuiListControl* value)
@@ -8712,7 +8731,7 @@ ListViewBigIconContentProvider
 ListViewSmallIconContentProvider
 ***********************************************************************/
 
-				ListViewSmallIconContentProvider::ItemContent::ItemContent(Size iconSize, const FontProperties& font)
+				ListViewSmallIconContentProvider::ItemContent::ItemContent(Size minIconSize, bool fitImage, const FontProperties& font)
 					:contentComposition(0)
 				{
 					contentComposition=new GuiBoundsComposition;
@@ -8732,7 +8751,11 @@ ListViewSmallIconContentProvider
 						GuiCellComposition* cell=new GuiCellComposition;
 						table->AddChild(cell);
 						cell->SetSite(1, 0, 1, 1);
-						cell->SetPreferredMinSize(iconSize);
+						cell->SetPreferredMinSize(minIconSize);
+						if (!fitImage)
+						{
+							cell->SetMinSizeLimitation(GuiGraphicsComposition::NoLimit);
+						}
 
 						image=GuiImageFrameElement::Create();
 						image->SetStretch(true);
@@ -8785,8 +8808,9 @@ ListViewSmallIconContentProvider
 				{
 				}
 
-				ListViewSmallIconContentProvider::ListViewSmallIconContentProvider(Size _iconSize)
-					:iconSize(_iconSize)
+				ListViewSmallIconContentProvider::ListViewSmallIconContentProvider(Size _minIconSize, bool _fitImage)
+					:minIconSize(_minIconSize)
+					,fitImage(_fitImage)
 				{
 				}
 
@@ -8806,7 +8830,7 @@ ListViewSmallIconContentProvider
 
 				ListViewItemStyleProvider::IListViewItemContent* ListViewSmallIconContentProvider::CreateItemContent(const FontProperties& font)
 				{
-					return new ItemContent(iconSize, font);
+					return new ItemContent(minIconSize, fitImage, font);
 				}
 
 				void ListViewSmallIconContentProvider::AttachListControl(GuiListControl* value)
@@ -8821,7 +8845,7 @@ ListViewSmallIconContentProvider
 ListViewListContentProvider
 ***********************************************************************/
 
-				ListViewListContentProvider::ItemContent::ItemContent(Size iconSize, const FontProperties& font)
+				ListViewListContentProvider::ItemContent::ItemContent(Size minIconSize, bool fitImage, const FontProperties& font)
 					:contentComposition(0)
 				{
 					contentComposition=new GuiBoundsComposition;
@@ -8841,7 +8865,11 @@ ListViewListContentProvider
 						GuiCellComposition* cell=new GuiCellComposition;
 						table->AddChild(cell);
 						cell->SetSite(1, 0, 1, 1);
-						cell->SetPreferredMinSize(iconSize);
+						cell->SetPreferredMinSize(minIconSize);
+						if (!fitImage)
+						{
+							cell->SetMinSizeLimitation(GuiGraphicsComposition::NoLimit);
+						}
 
 						image=GuiImageFrameElement::Create();
 						image->SetStretch(true);
@@ -8893,8 +8921,9 @@ ListViewListContentProvider
 				{
 				}
 
-				ListViewListContentProvider::ListViewListContentProvider(Size _iconSize)
-					:iconSize(_iconSize)
+				ListViewListContentProvider::ListViewListContentProvider(Size _minIconSize, bool _fitImage)
+					:minIconSize(_minIconSize)
+					,fitImage(_fitImage)
 				{
 				}
 
@@ -8914,7 +8943,7 @@ ListViewListContentProvider
 
 				ListViewItemStyleProvider::IListViewItemContent* ListViewListContentProvider::CreateItemContent(const FontProperties& font)
 				{
-					return new ItemContent(iconSize, font);
+					return new ItemContent(minIconSize, fitImage, font);
 				}
 
 				void ListViewListContentProvider::AttachListControl(GuiListControl* value)
@@ -8962,7 +8991,7 @@ ListViewTileContentProvider
 					textTable->SetColumnOption(0, GuiCellOption::PercentageOption(1.0));
 				}
 
-				ListViewTileContentProvider::ItemContent::ItemContent(Size iconSize, const FontProperties& font)
+				ListViewTileContentProvider::ItemContent::ItemContent(Size minIconSize, bool fitImage, const FontProperties& font)
 					:contentComposition(0)
 				{
 					contentComposition=new GuiBoundsComposition;
@@ -8982,7 +9011,11 @@ ListViewTileContentProvider
 						GuiCellComposition* cell=new GuiCellComposition;
 						table->AddChild(cell);
 						cell->SetSite(1, 0, 1, 1);
-						cell->SetPreferredMinSize(iconSize);
+						cell->SetPreferredMinSize(minIconSize);
+						if (!fitImage)
+						{
+							cell->SetMinSizeLimitation(GuiGraphicsComposition::NoLimit);
+						}
 
 						image=GuiImageFrameElement::Create();
 						image->SetStretch(true);
@@ -9052,8 +9085,9 @@ ListViewTileContentProvider
 				{
 				}
 
-				ListViewTileContentProvider::ListViewTileContentProvider(Size _iconSize)
-					:iconSize(_iconSize)
+				ListViewTileContentProvider::ListViewTileContentProvider(Size _minIconSize, bool _fitImage)
+					:minIconSize(_minIconSize)
+					,fitImage(_fitImage)
 				{
 				}
 
@@ -9073,7 +9107,7 @@ ListViewTileContentProvider
 
 				ListViewItemStyleProvider::IListViewItemContent* ListViewTileContentProvider::CreateItemContent(const FontProperties& font)
 				{
-					return new ItemContent(iconSize, font);
+					return new ItemContent(minIconSize, fitImage, font);
 				}
 
 				void ListViewTileContentProvider::AttachListControl(GuiListControl* value)
@@ -9088,7 +9122,7 @@ ListViewTileContentProvider
 ListViewInformationContentProvider
 ***********************************************************************/
 
-				ListViewInformationContentProvider::ItemContent::ItemContent(Size iconSize, const FontProperties& font)
+				ListViewInformationContentProvider::ItemContent::ItemContent(Size minIconSize, bool fitImage, const FontProperties& font)
 					:contentComposition(0)
 					,baselineFont(font)
 				{
@@ -9117,7 +9151,11 @@ ListViewInformationContentProvider
 						GuiCellComposition* cell=new GuiCellComposition;
 						table->AddChild(cell);
 						cell->SetSite(1, 0, 1, 1);
-						cell->SetPreferredMinSize(iconSize);
+						cell->SetPreferredMinSize(minIconSize);
+						if (!fitImage)
+						{
+							cell->SetMinSizeLimitation(GuiGraphicsComposition::NoLimit);
+						}
 
 						image=GuiImageFrameElement::Create();
 						image->SetStretch(true);
@@ -9237,8 +9275,9 @@ ListViewInformationContentProvider
 				{
 				}
 
-				ListViewInformationContentProvider::ListViewInformationContentProvider(Size _iconSize)
-					:iconSize(_iconSize)
+				ListViewInformationContentProvider::ListViewInformationContentProvider(Size _minIconSize, bool _fitImage)
+					:minIconSize(_minIconSize)
+					,fitImage(_fitImage)
 				{
 				}
 
@@ -9258,7 +9297,7 @@ ListViewInformationContentProvider
 
 				ListViewItemStyleProvider::IListViewItemContent* ListViewInformationContentProvider::CreateItemContent(const FontProperties& font)
 				{
-					return new ItemContent(iconSize, font);
+					return new ItemContent(minIconSize, fitImage, font);
 				}
 
 				void ListViewInformationContentProvider::AttachListControl(GuiListControl* value)
@@ -9522,7 +9561,7 @@ ListViewColumnItemArranger
 ListViewDetailContentProvider
 ***********************************************************************/
 
-				ListViewDetailContentProvider::ItemContent::ItemContent(Size iconSize, const FontProperties& font, GuiListControl::IItemProvider* _itemProvider)
+				ListViewDetailContentProvider::ItemContent::ItemContent(Size minIconSize, bool fitImage, const FontProperties& font, GuiListControl::IItemProvider* _itemProvider)
 					:contentComposition(0)
 					,itemProvider(_itemProvider)
 				{
@@ -9555,7 +9594,11 @@ ListViewDetailContentProvider
 							GuiCellComposition* cell=new GuiCellComposition;
 							table->AddChild(cell);
 							cell->SetSite(1, 0, 1, 1);
-							cell->SetPreferredMinSize(iconSize);
+							cell->SetPreferredMinSize(minIconSize);
+							if (!fitImage)
+							{
+								cell->SetMinSizeLimitation(GuiGraphicsComposition::NoLimit);
+							}
 
 							image=GuiImageFrameElement::Create();
 							image->SetStretch(true);
@@ -9667,8 +9710,9 @@ ListViewDetailContentProvider
 					}
 				}
 
-				ListViewDetailContentProvider::ListViewDetailContentProvider(Size _iconSize)
-					:iconSize(_iconSize)
+				ListViewDetailContentProvider::ListViewDetailContentProvider(Size _minIconSize, bool _fitImage)
+					:minIconSize(_minIconSize)
+					,fitImage(_fitImage)
 					,itemProvider(0)
 					,columnItemView(0)
 					,listViewItemStyleProvider(0)
@@ -9691,7 +9735,7 @@ ListViewDetailContentProvider
 
 				ListViewItemStyleProvider::IListViewItemContent* ListViewDetailContentProvider::CreateItemContent(const FontProperties& font)
 				{
-					return new ItemContent(iconSize, font, itemProvider);
+					return new ItemContent(minIconSize, fitImage, font, itemProvider);
 				}
 
 				void ListViewDetailContentProvider::AttachListControl(GuiListControl* value)
@@ -11385,7 +11429,7 @@ TreeViewNodeItemStyleProvider::ItemController
 					}
 				}
 
-				TreeViewNodeItemStyleProvider::ItemController::ItemController(TreeViewNodeItemStyleProvider* _styleProvider)
+				TreeViewNodeItemStyleProvider::ItemController::ItemController(TreeViewNodeItemStyleProvider* _styleProvider, Size minIconSize, bool fitImage)
 					:list::ItemStyleControllerBase(_styleProvider->GetBindedItemStyleProvider(), 0)
 					,styleProvider(_styleProvider)
 				{
@@ -11423,7 +11467,11 @@ TreeViewNodeItemStyleProvider::ItemController
 						GuiCellComposition* cell=new GuiCellComposition;
 						table->AddChild(cell);
 						cell->SetSite(1, 2, 1, 1);
-						cell->SetPreferredMinSize(Size(16, 16));
+						cell->SetPreferredMinSize(minIconSize);
+						if (!fitImage)
+						{
+							cell->SetMinSizeLimitation(GuiGraphicsComposition::NoLimit);
+						}
 
 						image=GuiImageFrameElement::Create();
 						image->SetStretch(true);
@@ -11494,17 +11542,6 @@ TreeViewNodeItemStyleProvider::ItemController
 TreeViewNodeItemStyleProvider
 ***********************************************************************/
 
-				TreeViewNodeItemStyleProvider::TreeViewNodeItemStyleProvider()
-					:treeControl(0)
-					,bindedItemStyleProvider(0)
-					,treeViewItemView(0)
-				{
-				}
-
-				TreeViewNodeItemStyleProvider::~TreeViewNodeItemStyleProvider()
-				{
-				}
-
 				TreeViewNodeItemStyleProvider::ItemController* TreeViewNodeItemStyleProvider::GetRelatedController(INodeProvider* node)
 				{
 					vint index=treeControl->GetNodeItemView()->CalculateNodeVisibilityIndex(node);
@@ -11552,6 +11589,19 @@ TreeViewNodeItemStyleProvider
 					UpdateExpandingButton(node);
 				}
 
+				TreeViewNodeItemStyleProvider::TreeViewNodeItemStyleProvider(Size _minIconSize, bool _fitImage)
+					:treeControl(0)
+					,bindedItemStyleProvider(0)
+					,treeViewItemView(0)
+					, minIconSize(_minIconSize)
+					, fitImage(_fitImage)
+				{
+				}
+
+				TreeViewNodeItemStyleProvider::~TreeViewNodeItemStyleProvider()
+				{
+				}
+
 				void TreeViewNodeItemStyleProvider::BindItemStyleProvider(GuiListControl::IItemStyleProvider* styleProvider)
 				{
 					bindedItemStyleProvider=styleProvider;
@@ -11593,7 +11643,7 @@ TreeViewNodeItemStyleProvider
 
 				INodeItemStyleController* TreeViewNodeItemStyleProvider::CreateItemStyle(vint styleId)
 				{
-					return new ItemController(this);
+					return new ItemController(this, minIconSize, fitImage);
 				}
 
 				void TreeViewNodeItemStyleProvider::DestroyItemStyle(INodeItemStyleController* style)
@@ -12484,29 +12534,29 @@ namespace vl
 					return new controls::GuiToolstripButton(GetCurrentTheme()->CreateMenuItemButtonStyle());
 				}
 
-				controls::GuiToolstripToolbar* NewToolbar()
+				controls::GuiToolstripToolBar* NewToolBar()
 				{
-					return new controls::GuiToolstripToolbar(GetCurrentTheme()->CreateToolbarStyle());
+					return new controls::GuiToolstripToolBar(GetCurrentTheme()->CreateToolBarStyle());
 				}
 
-				controls::GuiToolstripButton* NewToolbarButton()
+				controls::GuiToolstripButton* NewToolBarButton()
 				{
-					return new controls::GuiToolstripButton(GetCurrentTheme()->CreateToolbarButtonStyle());
+					return new controls::GuiToolstripButton(GetCurrentTheme()->CreateToolBarButtonStyle());
 				}
 
-				controls::GuiToolstripButton* NewToolbarDropdownButton()
+				controls::GuiToolstripButton* NewToolBarDropdownButton()
 				{
-					return new controls::GuiToolstripButton(GetCurrentTheme()->CreateToolbarDropdownButtonStyle());
+					return new controls::GuiToolstripButton(GetCurrentTheme()->CreateToolBarDropdownButtonStyle());
 				}
 
-				controls::GuiToolstripButton* NewToolbarSplitButton()
+				controls::GuiToolstripButton* NewToolBarSplitButton()
 				{
-					return new controls::GuiToolstripButton(GetCurrentTheme()->CreateToolbarSplitButtonStyle());
+					return new controls::GuiToolstripButton(GetCurrentTheme()->CreateToolBarSplitButtonStyle());
 				}
 
-				controls::GuiControl* NewToolbarSplitter()
+				controls::GuiControl* NewToolBarSplitter()
 				{
-					return new controls::GuiControl(GetCurrentTheme()->CreateToolbarSplitterStyle());
+					return new controls::GuiControl(GetCurrentTheme()->CreateToolBarSplitterStyle());
 				}
 
 				controls::GuiButton* NewButton()
@@ -12712,27 +12762,27 @@ Win7Theme
 				return new Win7MenuItemButtonStyle;
 			}
 
-			controls::GuiControl::IStyleController* Win7Theme::CreateToolbarStyle()
+			controls::GuiControl::IStyleController* Win7Theme::CreateToolBarStyle()
 			{
-				return new Win7ToolstripToolbarStyle;
+				return new Win7ToolstripToolBarStyle;
 			}
 
-			controls::GuiToolstripButton::IStyleController* Win7Theme::CreateToolbarButtonStyle()
+			controls::GuiToolstripButton::IStyleController* Win7Theme::CreateToolBarButtonStyle()
 			{
 				return new Win7ToolstripButtonStyle(Win7ToolstripButtonStyle::CommandButton);
 			}
 
-			controls::GuiToolstripButton::IStyleController* Win7Theme::CreateToolbarDropdownButtonStyle()
+			controls::GuiToolstripButton::IStyleController* Win7Theme::CreateToolBarDropdownButtonStyle()
 			{
 				return new Win7ToolstripButtonStyle(Win7ToolstripButtonStyle::DropdownButton);
 			}
 
-			controls::GuiToolstripButton::IStyleController* Win7Theme::CreateToolbarSplitButtonStyle()
+			controls::GuiToolstripButton::IStyleController* Win7Theme::CreateToolBarSplitButtonStyle()
 			{
 				return new Win7ToolstripButtonStyle(Win7ToolstripButtonStyle::SplitButton);
 			}
 
-			controls::GuiControl::IStyleController* Win7Theme::CreateToolbarSplitterStyle()
+			controls::GuiControl::IStyleController* Win7Theme::CreateToolBarSplitterStyle()
 			{
 				return new Win7ToolstripSplitterStyle;
 			}
@@ -12942,27 +12992,27 @@ Win8Theme
 				return new Win8MenuItemButtonStyle;
 			}
 
-			controls::GuiControl::IStyleController* Win8Theme::CreateToolbarStyle()
+			controls::GuiControl::IStyleController* Win8Theme::CreateToolBarStyle()
 			{
-				return new Win8ToolstripToolbarStyle;
+				return new Win8ToolstripToolBarStyle;
 			}
 
-			controls::GuiToolstripButton::IStyleController* Win8Theme::CreateToolbarButtonStyle()
+			controls::GuiToolstripButton::IStyleController* Win8Theme::CreateToolBarButtonStyle()
 			{
 				return new Win8ToolstripButtonStyle(Win8ToolstripButtonStyle::CommandButton);
 			}
 
-			controls::GuiToolstripButton::IStyleController* Win8Theme::CreateToolbarDropdownButtonStyle()
+			controls::GuiToolstripButton::IStyleController* Win8Theme::CreateToolBarDropdownButtonStyle()
 			{
 				return new Win8ToolstripButtonStyle(Win8ToolstripButtonStyle::DropdownButton);
 			}
 
-			controls::GuiToolstripButton::IStyleController* Win8Theme::CreateToolbarSplitButtonStyle()
+			controls::GuiToolstripButton::IStyleController* Win8Theme::CreateToolBarSplitButtonStyle()
 			{
 				return new Win8ToolstripButtonStyle(Win8ToolstripButtonStyle::SplitButton);
 			}
 
-			controls::GuiControl::IStyleController* Win8Theme::CreateToolbarSplitterStyle()
+			controls::GuiControl::IStyleController* Win8Theme::CreateToolBarSplitterStyle()
 			{
 				return new Win8ToolstripSplitterStyle;
 			}
@@ -16985,8 +17035,12 @@ Win7TabStyle
 					GuiCellComposition* cell=new GuiCellComposition;
 					boundsComposition->AddChild(cell);
 					cell->SetSite(1, 0, 1, 2);
+					
+					GuiSolidBackgroundElement* element=GuiSolidBackgroundElement::Create();
+					element->SetColor(GetBackgroundColor());
 
 					containerComposition=new GuiBoundsComposition;
+					containerComposition->SetOwnedElement(element);
 					containerComposition->SetAlignmentToParent(Margin(1, 0, 1, 1));
 					containerComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 					cell->AddChild(containerComposition);
@@ -17154,13 +17208,6 @@ Win7TabStyle
 				
 				UpdateHeaderLayout();
 			}
-
-			controls::GuiControl::IStyleController* Win7TabStyle::CreateTabPageStyleController()
-			{
-				GuiControl::IStyleController* style=new Win7EmptyStyle(GetBackgroundColor());
-				style->GetBoundsComposition()->SetAlignmentToParent(Margin(2, 2, 2, 2));
-				return style;
-			}
 		}
 	}
 }
@@ -17184,13 +17231,13 @@ namespace vl
 Win7WindowStyle
 ***********************************************************************/
 
-			Win7ToolstripToolbarStyle::Win7ToolstripToolbarStyle()
+			Win7ToolstripToolBarStyle::Win7ToolstripToolBarStyle()
 				:Win7EmptyStyle(Win7GetSystemWindowColor())
 			{
 				boundsComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 			}
 
-			Win7ToolstripToolbarStyle::~Win7ToolstripToolbarStyle()
+			Win7ToolstripToolBarStyle::~Win7ToolstripToolBarStyle()
 			{
 			}
 
@@ -20758,7 +20805,7 @@ namespace vl
 Win8WindowStyle
 ***********************************************************************/
 
-			Win8ToolstripToolbarStyle::Win8ToolstripToolbarStyle()
+			Win8ToolstripToolBarStyle::Win8ToolstripToolBarStyle()
 			{
 				{
 					GuiSolidBackgroundElement* element=GuiSolidBackgroundElement::Create();
@@ -20787,33 +20834,33 @@ Win8WindowStyle
 				}
 			}
 
-			Win8ToolstripToolbarStyle::~Win8ToolstripToolbarStyle()
+			Win8ToolstripToolBarStyle::~Win8ToolstripToolBarStyle()
 			{
 			}
 
-			compositions::GuiBoundsComposition* Win8ToolstripToolbarStyle::GetBoundsComposition()
+			compositions::GuiBoundsComposition* Win8ToolstripToolBarStyle::GetBoundsComposition()
 			{
 				return boundsComposition;
 			}
 
-			compositions::GuiGraphicsComposition* Win8ToolstripToolbarStyle::GetContainerComposition()
+			compositions::GuiGraphicsComposition* Win8ToolstripToolBarStyle::GetContainerComposition()
 			{
 				return containerComposition;
 			}
 
-			void Win8ToolstripToolbarStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
+			void Win8ToolstripToolBarStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
 			{
 			}
 
-			void Win8ToolstripToolbarStyle::SetText(const WString& value)
+			void Win8ToolstripToolBarStyle::SetText(const WString& value)
 			{
 			}
 
-			void Win8ToolstripToolbarStyle::SetFont(const FontProperties& value)
+			void Win8ToolstripToolBarStyle::SetFont(const FontProperties& value)
 			{
 			}
 
-			void Win8ToolstripToolbarStyle::SetVisuallyEnabled(bool value)
+			void Win8ToolstripToolBarStyle::SetVisuallyEnabled(bool value)
 			{
 			}
 
@@ -26653,6 +26700,7 @@ namespace vl
 		namespace controls
 		{
 			using namespace compositions;
+			using namespace regex;
 
 /***********************************************************************
 GuiToolstripCommand
@@ -26669,15 +26717,90 @@ GuiToolstripCommand
 				DescriptionChanged.Execute(arguments);
 			}
 
+			void GuiToolstripCommand::ReplaceShortcut(compositions::IGuiShortcutKeyItem* value, Ptr<ShortcutBuilder> builder)
+			{
+				if(shortcutKeyItem!=value)
+				{
+					if(shortcutKeyItem)
+					{
+						shortcutKeyItem->Executed.Detach(shortcutKeyItemExecutedHandler);
+						if (shortcutBuilder)
+						{
+							auto manager = dynamic_cast<GuiShortcutKeyManager*>(shortcutOwner->GetShortcutKeyManager());
+							if (manager)
+							{
+								manager->DestroyShortcut(shortcutBuilder->ctrl, shortcutBuilder->shift, shortcutBuilder->alt, shortcutBuilder->key);
+							}
+						}
+					}
+					shortcutKeyItem=0;
+					shortcutKeyItemExecutedHandler=0;
+					shortcutBuilder = value ? builder : 0;
+					if(value)
+					{
+						shortcutKeyItem=value;
+						shortcutKeyItemExecutedHandler=shortcutKeyItem->Executed.AttachMethod(this, &GuiToolstripCommand::OnShortcutKeyItemExecuted);
+					}
+					InvokeDescriptionChanged();
+				}
+			}
+
+			void GuiToolstripCommand::BuildShortcut(const WString& builderText)
+			{
+				if (auto parser = GetParserManager()->GetParser<ShortcutBuilder>(L"SHORTCUT"))
+				if (Ptr<ShortcutBuilder> builder = parser->TypedParse(builderText))
+				{
+					if (shortcutOwner)
+					{
+						if (!shortcutOwner->GetShortcutKeyManager())
+						{
+							shortcutOwner->SetShortcutKeyManager(new GuiShortcutKeyManager);
+						}
+						if (auto manager = dynamic_cast<GuiShortcutKeyManager*>(shortcutOwner->GetShortcutKeyManager()))
+						{
+							IGuiShortcutKeyItem* item = manager->TryGetShortcut(builder->ctrl, builder->shift, builder->alt, builder->key);
+							if (!item)
+							{
+								item = manager->CreateShortcut(builder->ctrl, builder->shift, builder->alt, builder->key);
+								if (item)
+								{
+									ReplaceShortcut(item, builder);
+								}
+							}
+						}
+					}
+					else
+					{
+						shortcutBuilder = builder;
+					}
+				}
+			}
+
 			GuiToolstripCommand::GuiToolstripCommand()
 				:shortcutKeyItem(0)
 				,enabled(true)
 				,selected(false)
+				,shortcutOwner(0)
 			{
 			}
 
 			GuiToolstripCommand::~GuiToolstripCommand()
 			{
+			}
+
+			void GuiToolstripCommand::Attach(GuiControlHost* controlHost)
+			{
+				shortcutOwner = controlHost;
+				if (shortcutBuilder && !shortcutKeyItem)
+				{
+					BuildShortcut(shortcutBuilder->text);
+				}
+			}
+
+			void GuiToolstripCommand::Detach(GuiControlHost* controlHost)
+			{
+				ReplaceShortcut(0, false);
+				shortcutOwner = 0;
 			}
 
 			Ptr<GuiImageData> GuiToolstripCommand::GetImage()
@@ -26715,21 +26838,17 @@ GuiToolstripCommand
 
 			void GuiToolstripCommand::SetShortcut(compositions::IGuiShortcutKeyItem* value)
 			{
-				if(shortcutKeyItem!=value)
-				{
-					if(shortcutKeyItem)
-					{
-						shortcutKeyItem->Executed.Detach(shortcutKeyItemExecutedHandler);
-					}
-					shortcutKeyItem=0;
-					shortcutKeyItemExecutedHandler=0;
-					if(value)
-					{
-						shortcutKeyItem=value;
-						shortcutKeyItemExecutedHandler=shortcutKeyItem->Executed.AttachMethod(this, &GuiToolstripCommand::OnShortcutKeyItemExecuted);
-					}
-					InvokeDescriptionChanged();
-				}
+				ReplaceShortcut(value, 0);
+			}
+
+			WString GuiToolstripCommand::GetShortcutBuilder()
+			{
+				return shortcutBuilder ? shortcutBuilder->text : L"";
+			}
+
+			void GuiToolstripCommand::SetShortcutBuilder(const WString& value)
+			{
+				BuildShortcut(value);
 			}
 
 			bool GuiToolstripCommand::GetEnabled()
@@ -26759,6 +26878,66 @@ GuiToolstripCommand
 					InvokeDescriptionChanged();
 				}
 			}
+
+/***********************************************************************
+GuiToolstripCommand::ShortcutBuilder Parser
+***********************************************************************/
+
+			class GuiToolstripCommandShortcutParser : public Object, public IGuiParser<GuiToolstripCommand::ShortcutBuilder>
+			{
+				typedef GuiToolstripCommand::ShortcutBuilder			ShortcutBuilder;
+			public:
+				Regex						regexShortcut;
+
+				GuiToolstripCommandShortcutParser()
+					:regexShortcut(L"((<ctrl>Ctrl)/+|(<shift>Shift)/+|(<alt>Alt)/+)*(<key>/.+)")
+				{
+				}
+
+				Ptr<ShortcutBuilder> TypedParse(const WString& text)override
+				{
+					Ptr<RegexMatch> match=regexShortcut.MatchHead(text);
+					if(match && match->Result().Length()!=text.Length()) return 0;
+
+					Ptr<ShortcutBuilder> builder = new ShortcutBuilder;
+					builder->text = text;
+					builder->ctrl = match->Groups().Contains(L"ctrl");
+					builder->shift = match->Groups().Contains(L"shift");
+					builder->alt = match->Groups().Contains(L"alt");
+
+					WString name = match->Groups()[L"key"][0].Value();
+					builder->key = GetCurrentController()->InputService()->GetKey(name);
+
+					return builder->key == -1 ? 0 : builder;
+				}
+			};
+
+/***********************************************************************
+GuiToolstripCommandPlugin
+***********************************************************************/
+
+			class GuiToolstripCommandPlugin : public Object, public IGuiPlugin
+			{
+			public:
+				GuiToolstripCommandPlugin()
+				{
+				}
+
+				void Load()override
+				{
+				}
+				
+				void AfterLoad()override
+				{
+					IGuiParserManager* manager=GetParserManager();
+					manager->SetParser(L"SHORTCUT", new GuiToolstripCommandShortcutParser);
+				}
+
+				void Unload()override
+				{
+				}
+			};
+			GUI_REGISTER_PLUGIN(GuiToolstripCommandPlugin)
 		}
 	}
 }
@@ -26890,8 +27069,8 @@ GuiToolstripBuilder
 				case MenuBar:
 					lastCreatedButton=new GuiToolstripButton(theme->CreateMenuBarButtonStyle());
 					break;
-				case Toolbar:
-					lastCreatedButton=new GuiToolstripButton(theme->CreateToolbarButtonStyle());
+				case ToolBar:
+					lastCreatedButton=new GuiToolstripButton(theme->CreateToolBarButtonStyle());
 					break;
 				}
 				if(lastCreatedButton)
@@ -26918,8 +27097,8 @@ GuiToolstripBuilder
 				case MenuBar:
 					lastCreatedButton=new GuiToolstripButton(theme->CreateMenuBarButtonStyle());
 					break;
-				case Toolbar:
-					lastCreatedButton=new GuiToolstripButton(theme->CreateToolbarButtonStyle());
+				case ToolBar:
+					lastCreatedButton=new GuiToolstripButton(theme->CreateToolBarButtonStyle());
 					break;
 				}
 				if(lastCreatedButton)
@@ -26939,8 +27118,8 @@ GuiToolstripBuilder
 				lastCreatedButton=0;
 				switch(environment)
 				{
-				case Toolbar:
-					lastCreatedButton=new GuiToolstripButton(theme->CreateToolbarDropdownButtonStyle());
+				case ToolBar:
+					lastCreatedButton=new GuiToolstripButton(theme->CreateToolBarDropdownButtonStyle());
 					break;
 				}
 				if(lastCreatedButton)
@@ -26961,8 +27140,8 @@ GuiToolstripBuilder
 				lastCreatedButton=0;
 				switch(environment)
 				{
-				case Toolbar:
-					lastCreatedButton=new GuiToolstripButton(theme->CreateToolbarDropdownButtonStyle());
+				case ToolBar:
+					lastCreatedButton=new GuiToolstripButton(theme->CreateToolBarDropdownButtonStyle());
 					break;
 				}
 				if(lastCreatedButton)
@@ -26982,8 +27161,8 @@ GuiToolstripBuilder
 				lastCreatedButton=0;
 				switch(environment)
 				{
-				case Toolbar:
-					lastCreatedButton=new GuiToolstripButton(theme->CreateToolbarSplitButtonStyle());
+				case ToolBar:
+					lastCreatedButton=new GuiToolstripButton(theme->CreateToolBarSplitButtonStyle());
 					break;
 				}
 				if(lastCreatedButton)
@@ -27004,8 +27183,8 @@ GuiToolstripBuilder
 				lastCreatedButton=0;
 				switch(environment)
 				{
-				case Toolbar:
-					lastCreatedButton=new GuiToolstripButton(theme->CreateToolbarSplitButtonStyle());
+				case ToolBar:
+					lastCreatedButton=new GuiToolstripButton(theme->CreateToolBarSplitButtonStyle());
 					break;
 				}
 				if(lastCreatedButton)
@@ -27028,8 +27207,8 @@ GuiToolstripBuilder
 				case Menu:
 					toolstripItems->Add(new GuiControl(theme->CreateMenuSplitterStyle()));
 					break;
-				case Toolbar:
-					toolstripItems->Add(new GuiControl(theme->CreateToolbarSplitterStyle()));
+				case ToolBar:
+					toolstripItems->Add(new GuiControl(theme->CreateToolBarSplitterStyle()));
 					break;
 				}
 				return this;
@@ -27132,10 +27311,10 @@ GuiToolstripMenuBar
 			}
 
 /***********************************************************************
-GuiToolstripToolbar
+GuiToolstripToolBar
 ***********************************************************************/
 				
-			GuiToolstripToolbar::GuiToolstripToolbar(IStyleController* _styleController)
+			GuiToolstripToolBar::GuiToolstripToolBar(IStyleController* _styleController)
 				:GuiControl(_styleController)
 			{
 				stackComposition=new GuiStackComposition;
@@ -27145,19 +27324,19 @@ GuiToolstripToolbar
 				GetContainerComposition()->AddChild(stackComposition);
 
 				toolstripItems=new GuiToolstripCollection(0, stackComposition, 0);
-				builder=new GuiToolstripBuilder(GuiToolstripBuilder::Toolbar, toolstripItems.Obj());
+				builder=new GuiToolstripBuilder(GuiToolstripBuilder::ToolBar, toolstripItems.Obj());
 			}
 
-			GuiToolstripToolbar::~GuiToolstripToolbar()
+			GuiToolstripToolBar::~GuiToolstripToolBar()
 			{
 			}
 
-			GuiToolstripCollection& GuiToolstripToolbar::GetToolstripItems()
+			GuiToolstripCollection& GuiToolstripToolBar::GetToolstripItems()
 			{
 				return *toolstripItems.Obj();
 			}
 
-			GuiToolstripBuilder* GuiToolstripToolbar::GetBuilder(theme::ITheme* themeObject)
+			GuiToolstripBuilder* GuiToolstripToolBar::GetBuilder(theme::ITheme* themeObject)
 			{
 				builder->theme=themeObject?themeObject:theme::GetCurrentTheme();
 				return builder.Obj();
@@ -29443,27 +29622,34 @@ GuiCellComposition
 
 			bool GuiCellComposition::SetSiteInternal(vint _row, vint _column, vint _rowSpan, vint _columnSpan)
 			{
-				if(!tableParent) return false;
-				if(_row<0 || _row>=tableParent->rows || _column<0 || _column>=tableParent->columns) return false;
-				if(_rowSpan<1 || _row+_rowSpan>tableParent->rows || _columnSpan<1 || _column+_columnSpan>tableParent->columns) return false;
-
-				for(vint r=0;r<_rowSpan;r++)
+				if (tableParent)
 				{
-					for(vint c=0;c<_columnSpan;c++)
+					if(_row<0 || _row>=tableParent->rows || _column<0 || _column>=tableParent->columns) return false;
+					if(_rowSpan<1 || _row+_rowSpan>tableParent->rows || _columnSpan<1 || _column+_columnSpan>tableParent->columns) return false;
+
+					for(vint r=0;r<_rowSpan;r++)
 					{
-						GuiCellComposition* cell=tableParent->GetSitedCell(_row+r, _column+c);
-						if(cell && cell!=this)
+						for(vint c=0;c<_columnSpan;c++)
 						{
-							return false;
+							GuiCellComposition* cell=tableParent->GetSitedCell(_row+r, _column+c);
+							if(cell && cell!=this)
+							{
+								return false;
+							}
 						}
 					}
+					ClearSitedCells(tableParent);
 				}
-				ClearSitedCells(tableParent);
+
 				row=_row;
 				column=_column;
 				rowSpan=_rowSpan;
 				columnSpan=_columnSpan;
-				SetSitedCells(tableParent);
+
+				if (tableParent)
+				{
+					SetSitedCells(tableParent);
+				}
 				return true;
 			}
 
@@ -29480,6 +29666,10 @@ GuiCellComposition
 				}
 				if(tableParent)
 				{
+					if (row != -1 && column != -1)
+					{
+						SetSiteInternal(row, column, rowSpan, columnSpan);
+					}
 					tableParent->UpdateCellBounds();
 				}
 			}
@@ -29535,7 +29725,10 @@ GuiCellComposition
 			{
 				if(SetSiteInternal(_row, _column, _rowSpan, _columnSpan))
 				{
-					tableParent->UpdateCellBounds();
+					if (tableParent)
+					{
+						tableParent->UpdateCellBounds();
+					}
 					return true;
 				}
 				else

@@ -1,46 +1,46 @@
 #include "..\..\Public\Source\GacUI.h"
 
-extern void SetupListControlWindow(GuiControlHost* controlHost, GuiControl* container);
-extern void SetupListDirectionWindow(GuiControlHost* controlHost, GuiControl* container);
-extern void SetupListviewWindow(GuiControlHost* controlHost, GuiControl* container);
-extern void SetupTreeviewWindow(GuiControlHost* controlHost, GuiControl* container);
-extern void SetupDatagridElementsWindow(GuiControlHost* controlHost, GuiControl* container);
-extern void SetupDatagridExplorerWindow(GuiControlHost* controlHost, GuiControl* container);
+extern void SetupListControlWindow(GuiControlHost* controlHost, GuiGraphicsComposition* container);
+extern void SetupListDirectionWindow(GuiControlHost* controlHost, GuiGraphicsComposition* container);
+extern void SetupListviewWindow(GuiControlHost* controlHost, GuiGraphicsComposition* container);
+extern void SetupTreeviewWindow(GuiControlHost* controlHost, GuiGraphicsComposition* container);
+extern void SetupDatagridElementsWindow(GuiControlHost* controlHost, GuiGraphicsComposition* container);
+extern void SetupDatagridExplorerWindow(GuiControlHost* controlHost, GuiGraphicsComposition* container);
 
-void SetupTabPageListControlWindow(GuiControlHost* controlHost, GuiControl* container)
+void SetupTabPageListControlWindow(GuiControlHost* controlHost, GuiGraphicsComposition* container)
 {
-	container->GetBoundsComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+	container->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 	GuiTab* tab=g::NewTab();
 	tab->GetBoundsComposition()->SetAlignmentToParent(Margin(6, 6, 6, 6));
 	{
 		GuiTabPage* page=tab->CreatePage();
 		page->SetText(L"Text List");
-		SetupListControlWindow(controlHost, page->GetContainer());
+		SetupListControlWindow(controlHost, page->GetContainerComposition());
 	}
 	{
 		GuiTabPage* page=tab->CreatePage();
 		page->SetText(L"Layout Direction");
-		SetupListDirectionWindow(controlHost, page->GetContainer());
+		SetupListDirectionWindow(controlHost, page->GetContainerComposition());
 	}
 	{
 		GuiTabPage* page=tab->CreatePage();
 		page->SetText(L"List View");
-		SetupListviewWindow(controlHost, page->GetContainer());
+		SetupListviewWindow(controlHost, page->GetContainerComposition());
 	}
 	{
 		GuiTabPage* page=tab->CreatePage();
 		page->SetText(L"Tree View");
-		SetupTreeviewWindow(controlHost, page->GetContainer());
+		SetupTreeviewWindow(controlHost, page->GetContainerComposition());
 	}
 	{
 		GuiTabPage* page=tab->CreatePage();
 		page->SetText(L"Data Grid (Elements)");
-		SetupDatagridElementsWindow(controlHost, page->GetContainer());
+		SetupDatagridElementsWindow(controlHost, page->GetContainerComposition());
 	}
 	{
 		GuiTabPage* page=tab->CreatePage();
 		page->SetText(L"Data Grid (Explorer)");
-		SetupDatagridExplorerWindow(controlHost, page->GetContainer());
+		SetupDatagridExplorerWindow(controlHost, page->GetContainerComposition());
 	}
-	container->GetContainerComposition()->AddChild(tab->GetBoundsComposition());
+	container->AddChild(tab->GetBoundsComposition());
 }

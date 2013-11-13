@@ -1136,7 +1136,7 @@ Native Window Services
 			virtual void					Run(INativeWindow* window)=0;
 		};
 		
-		class INativeInputService : public virtual Interface
+		class INativeInputService : public virtual IDescriptable, public Description<INativeInputService>
 		{
 		public:
 			virtual void					StartHookMouse()=0;
@@ -1151,6 +1151,7 @@ Native Window Services
 			virtual bool					IsKeyToggled(vint code)=0;
 
 			virtual WString					GetKeyName(vint code)=0;
+			virtual vint					GetKey(const WString& name)=0;
 		};
 		
 		class INativeCallbackService : public virtual Interface
@@ -3614,7 +3615,7 @@ Table Compositions
 				Size										previousContentMinSize;
 				Size										tableContentMinSize;
 
-				vint									GetSiteIndex(vint _rows, vint _columns, vint _row, vint _column);
+				vint								GetSiteIndex(vint _rows, vint _columns, vint _row, vint _column);
 				void								SetSitedCell(vint _row, vint _column, GuiCellComposition* cell);
 
 				void								UpdateCellBoundsInternal(
@@ -4356,6 +4357,9 @@ Basic Construction
 			public:
 				GuiComponent();
 				~GuiComponent();
+
+				virtual void							Attach(GuiControlHost* controlHost);
+				virtual void							Detach(GuiControlHost* controlHost);
 			};
 
 			template<typename T>
@@ -4787,47 +4791,47 @@ Control Host
 			class GuiControlHost : public GuiControl, private INativeWindowListener, public Description<GuiControlHost>
 			{
 			protected:
-				compositions::GuiGraphicsHost*			host;
-				collections::List<GuiComponent*>		components;
+				compositions::GuiGraphicsHost*					host;
+				collections::SortedList<GuiComponent*>			components;
 
-				virtual void							OnNativeWindowChanged();
-				virtual void							OnVisualStatusChanged();
+				virtual void									OnNativeWindowChanged();
+				virtual void									OnVisualStatusChanged();
 			private:
-				static const vint						TooltipDelayOpenTime=500;
-				static const vint						TooltipDelayCloseTime=500;
-				static const vint						TooltipDelayLifeTime=5000;
+				static const vint								TooltipDelayOpenTime=500;
+				static const vint								TooltipDelayCloseTime=500;
+				static const vint								TooltipDelayLifeTime=5000;
 
-				Ptr<INativeDelay>						tooltipOpenDelay;
-				Ptr<INativeDelay>						tooltipCloseDelay;
-				Point									tooltipLocation;
+				Ptr<INativeDelay>								tooltipOpenDelay;
+				Ptr<INativeDelay>								tooltipCloseDelay;
+				Point											tooltipLocation;
 				
-				GuiControl*								GetTooltipOwner(Point location);
-				void									MoveIntoTooltipControl(GuiControl* tooltipControl, Point location);
-				void									MouseMoving(const NativeWindowMouseInfo& info)override;
-				void									MouseLeaved()override;
-				void									Moved()override;
-				void									Enabled()override;
-				void									Disabled()override;
-				void									GotFocus()override;
-				void									LostFocus()override;
-				void									Activated()override;
-				void									Deactivated()override;
-				void									Opened()override;
-				void									Closing(bool& cancel)override;
-				void									Closed()override;
-				void									Destroying()override;
+				GuiControl*										GetTooltipOwner(Point location);
+				void											MoveIntoTooltipControl(GuiControl* tooltipControl, Point location);
+				void											MouseMoving(const NativeWindowMouseInfo& info)override;
+				void											MouseLeaved()override;
+				void											Moved()override;
+				void											Enabled()override;
+				void											Disabled()override;
+				void											GotFocus()override;
+				void											LostFocus()override;
+				void											Activated()override;
+				void											Deactivated()override;
+				void											Opened()override;
+				void											Closing(bool& cancel)override;
+				void											Closed()override;
+				void											Destroying()override;
 			public:
 				GuiControlHost(GuiControl::IStyleController* _styleController);
 				~GuiControlHost();
 				
-				compositions::GuiNotifyEvent			WindowGotFocus;
-				compositions::GuiNotifyEvent			WindowLostFocus;
-				compositions::GuiNotifyEvent			WindowActivated;
-				compositions::GuiNotifyEvent			WindowDeactivated;
-				compositions::GuiNotifyEvent			WindowOpened;
-				compositions::GuiRequestEvent			WindowClosing;
-				compositions::GuiNotifyEvent			WindowClosed;
-				compositions::GuiNotifyEvent			WindowDestroying;
+				compositions::GuiNotifyEvent					WindowGotFocus;
+				compositions::GuiNotifyEvent					WindowLostFocus;
+				compositions::GuiNotifyEvent					WindowActivated;
+				compositions::GuiNotifyEvent					WindowDeactivated;
+				compositions::GuiNotifyEvent					WindowOpened;
+				compositions::GuiRequestEvent					WindowClosing;
+				compositions::GuiNotifyEvent					WindowClosed;
+				compositions::GuiNotifyEvent					WindowDestroying;
 
 				compositions::GuiGraphicsHost*					GetGraphicsHost();
 				compositions::GuiGraphicsComposition*			GetMainComposition();
@@ -5179,11 +5183,11 @@ Tab Control
 				friend class GuiTab;
 				friend class Ptr<GuiTabPage>;
 			protected:
-				GuiControl*										container;
+				compositions::GuiBoundsComposition*				containerComposition;
 				GuiTab*											owner;
 				WString											text;
 
-				bool											AssociateTab(GuiTab* _owner, GuiControl::IStyleController* _styleController);
+				bool											AssociateTab(GuiTab* _owner);
 				bool											DeassociateTab(GuiTab* _owner);
 			public:
 				GuiTabPage();
@@ -5192,9 +5196,8 @@ Tab Control
 				compositions::GuiNotifyEvent					TextChanged;
 				compositions::GuiNotifyEvent					PageInstalled;
 				compositions::GuiNotifyEvent					PageUninstalled;
-				compositions::GuiNotifyEvent					PageContainerReady;
 
-				GuiControl*										GetContainer();
+				compositions::GuiBoundsComposition*				GetContainerComposition();
 				GuiTab*											GetOwnerTab();
 				const WString&									GetText();
 				void											SetText(const WString& param);
@@ -5220,7 +5223,6 @@ Tab Control
 					virtual void								RemoveTab(vint index)=0;
 					virtual void								MoveTab(vint oldIndex, vint newIndex)=0;
 					virtual void								SetSelectedTab(vint index)=0;
-					virtual GuiControl::IStyleController*		CreateTabPageStyleController()=0;
 				};
 			protected:
 				class CommandExecutor : public Object, public ICommandExecutor
@@ -6483,7 +6485,7 @@ ListView ItemContentProvider
 						elements::GuiSolidLabelElement*					text;
 
 					public:
-						ItemContent(Size iconSize, const FontProperties& font);
+						ItemContent(Size minIconSize, bool fitImage, const FontProperties& font);
 						~ItemContent();
 
 						compositions::GuiBoundsComposition*				GetContentComposition()override;
@@ -6492,9 +6494,10 @@ ListView ItemContentProvider
 						void											Uninstall()override;
 					};
 
-					Size												iconSize;
+					Size												minIconSize;
+					bool												fitImage;
 				public:
-					ListViewBigIconContentProvider(Size _iconSize=Size(32, 32));
+					ListViewBigIconContentProvider(Size _minIconSize=Size(32, 32), bool _fitImage=true);
 					~ListViewBigIconContentProvider();
 
 					GuiListControl::IItemCoordinateTransformer*			CreatePreferredCoordinateTransformer()override;
@@ -6515,7 +6518,7 @@ ListView ItemContentProvider
 						elements::GuiSolidLabelElement*					text;
 
 					public:
-						ItemContent(Size iconSize, const FontProperties& font);
+						ItemContent(Size minIconSize, bool fitImage, const FontProperties& font);
 						~ItemContent();
 
 						compositions::GuiBoundsComposition*				GetContentComposition()override;
@@ -6524,9 +6527,10 @@ ListView ItemContentProvider
 						void											Uninstall()override;
 					};
 
-					Size												iconSize;
+					Size												minIconSize;
+					bool												fitImage;
 				public:
-					ListViewSmallIconContentProvider(Size _iconSize=Size(16, 16));
+					ListViewSmallIconContentProvider(Size _minIconSize=Size(16, 16), bool _fitImage=true);
 					~ListViewSmallIconContentProvider();
 					
 					GuiListControl::IItemCoordinateTransformer*			CreatePreferredCoordinateTransformer()override;
@@ -6547,7 +6551,7 @@ ListView ItemContentProvider
 						elements::GuiSolidLabelElement*					text;
 
 					public:
-						ItemContent(Size iconSize, const FontProperties& font);
+						ItemContent(Size minIconSize, bool fitImage, const FontProperties& font);
 						~ItemContent();
 
 						compositions::GuiBoundsComposition*				GetContentComposition()override;
@@ -6556,9 +6560,10 @@ ListView ItemContentProvider
 						void											Uninstall()override;
 					};
 
-					Size												iconSize;
+					Size												minIconSize;
+					bool												fitImage;
 				public:
-					ListViewListContentProvider(Size _iconSize=Size(16, 16));
+					ListViewListContentProvider(Size _minIconSize=Size(16, 16), bool _fitImage=true);
 					~ListViewListContentProvider();
 					
 					GuiListControl::IItemCoordinateTransformer*			CreatePreferredCoordinateTransformer()override;
@@ -6585,7 +6590,7 @@ ListView ItemContentProvider
 						elements::GuiSolidLabelElement*					CreateTextElement(vint textRow, const FontProperties& font);
 						void											ResetTextTable(vint textRows);
 					public:
-						ItemContent(Size iconSize, const FontProperties& font);
+						ItemContent(Size minIconSize, bool fitImage, const FontProperties& font);
 						~ItemContent();
 
 						compositions::GuiBoundsComposition*				GetContentComposition()override;
@@ -6594,9 +6599,10 @@ ListView ItemContentProvider
 						void											Uninstall()override;
 					};
 
-					Size												iconSize;
+					Size												minIconSize;
+					bool												fitImage;
 				public:
-					ListViewTileContentProvider(Size _iconSize=Size(32, 32));
+					ListViewTileContentProvider(Size _minIconSize=Size(32, 32), bool _fitImage=true);
 					~ListViewTileContentProvider();
 					
 					GuiListControl::IItemCoordinateTransformer*			CreatePreferredCoordinateTransformer()override;
@@ -6624,7 +6630,7 @@ ListView ItemContentProvider
 						compositions::GuiBoundsComposition*				bottomLineComposition;
 
 					public:
-						ItemContent(Size iconSize, const FontProperties& font);
+						ItemContent(Size minIconSize, bool fitImage, const FontProperties& font);
 						~ItemContent();
 
 						compositions::GuiBoundsComposition*				GetContentComposition()override;
@@ -6633,9 +6639,10 @@ ListView ItemContentProvider
 						void											Uninstall()override;
 					};
 
-					Size												iconSize;
+					Size												minIconSize;
+					bool												fitImage;
 				public:
-					ListViewInformationContentProvider(Size _iconSize=Size(32, 32));
+					ListViewInformationContentProvider(Size _minIconSize=Size(32, 32), bool _fitImage=true);
 					~ListViewInformationContentProvider();
 					
 					GuiListControl::IItemCoordinateTransformer*			CreatePreferredCoordinateTransformer()override;
@@ -6739,7 +6746,7 @@ ListView ItemContentProvider(Detailed)
 						ListViewColumnItemArranger::IColumnItemView*	columnItemView;
 
 					public:
-						ItemContent(Size iconSize, const FontProperties& font, GuiListControl::IItemProvider* _itemProvider);
+						ItemContent(Size minIconSize, bool fitImage, const FontProperties& font, GuiListControl::IItemProvider* _itemProvider);
 						~ItemContent();
 
 						compositions::GuiBoundsComposition*				GetContentComposition()override;
@@ -6749,14 +6756,15 @@ ListView ItemContentProvider(Detailed)
 						void											Uninstall()override;
 					};
 
-					Size												iconSize;
+					Size												minIconSize;
+					bool												fitImage;
 					GuiListControl::IItemProvider*						itemProvider;
 					ListViewColumnItemArranger::IColumnItemView*		columnItemView;
 					ListViewItemStyleProvider*							listViewItemStyleProvider;
 
 					void												OnColumnChanged()override;
 				public:
-					ListViewDetailContentProvider(Size _iconSize=Size(16, 16));
+					ListViewDetailContentProvider(Size _minIconSize=Size(16, 16), bool _fitImage=true);
 					~ListViewDetailContentProvider();
 					
 					GuiListControl::IItemCoordinateTransformer*			CreatePreferredCoordinateTransformer()override;
@@ -7318,7 +7326,7 @@ TreeView
 						void								OnExpandingButtonDoubleClick(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
 						void								OnExpandingButtonClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 					public:
-						ItemController(TreeViewNodeItemStyleProvider* _styleProvider);
+						ItemController(TreeViewNodeItemStyleProvider* _styleProvider, Size minIconSize, bool fitImage);
 
 						INodeItemStyleProvider*				GetNodeStyleProvider()override;
 						void								Install(INodeProvider* node);
@@ -7332,6 +7340,8 @@ TreeView
 					GuiVirtualTreeView*						treeControl;
 					GuiListControl::IItemStyleProvider*		bindedItemStyleProvider;
 					ITreeViewItemView*						treeViewItemView;
+					Size									minIconSize;
+					bool									fitImage;
 
 				protected:
 					ItemController*							GetRelatedController(INodeProvider* node);
@@ -7342,7 +7352,7 @@ TreeView
 					void									OnItemExpanded(INodeProvider* node)override;
 					void									OnItemCollapsed(INodeProvider* node)override;
 				public:
-					TreeViewNodeItemStyleProvider();
+					TreeViewNodeItemStyleProvider(Size _minIconSize = Size(16, 16), bool _fitImage = true);
 					~TreeViewNodeItemStyleProvider();
 
 					void									BindItemStyleProvider(GuiListControl::IItemStyleProvider* styleProvider)override;
@@ -10123,6 +10133,16 @@ namespace vl
 		{
 			class GuiToolstripCommand : public GuiComponent, public Description<GuiToolstripCommand>
 			{
+			public:
+				class ShortcutBuilder : public Object
+				{
+				public:
+					WString									text;
+					bool									ctrl;
+					bool									shift;
+					bool									alt;
+					vint									key;
+				};
 			protected:
 				Ptr<GuiImageData>							image;
 				WString										text;
@@ -10130,12 +10150,19 @@ namespace vl
 				bool										enabled;
 				bool										selected;
 				Ptr<compositions::GuiNotifyEvent::IHandler>	shortcutKeyItemExecutedHandler;
+				Ptr<ShortcutBuilder>						shortcutBuilder;
+				GuiControlHost*								shortcutOwner;
 
 				void										OnShortcutKeyItemExecuted(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 				void										InvokeDescriptionChanged();
+				void										ReplaceShortcut(compositions::IGuiShortcutKeyItem* value, Ptr<ShortcutBuilder> builder);
+				void										BuildShortcut(const WString& builderText);
 			public:
 				GuiToolstripCommand();
 				~GuiToolstripCommand();
+
+				void										Attach(GuiControlHost* controlHost)override;
+				void										Detach(GuiControlHost* controlHost)override;
 
 				compositions::GuiNotifyEvent				Executed;
 
@@ -10147,6 +10174,8 @@ namespace vl
 				void										SetText(const WString& value);
 				compositions::IGuiShortcutKeyItem*			GetShortcut();
 				void										SetShortcut(compositions::IGuiShortcutKeyItem* value);
+				WString										GetShortcutBuilder();
+				void										SetShortcutBuilder(const WString& value);
 				bool										GetEnabled();
 				void										SetEnabled(bool value);
 				bool										GetSelected();
@@ -10221,13 +10250,13 @@ Toolstrip Builder Facade
 			{
 				friend class GuiToolstripMenu;
 				friend class GuiToolstripMenuBar;
-				friend class GuiToolstripToolbar;
+				friend class GuiToolstripToolBar;
 			protected:
 				enum Environment
 				{
 					Menu,
 					MenuBar,
-					Toolbar,
+					ToolBar,
 				};
 
 				Environment									environment;
@@ -10288,7 +10317,7 @@ Toolstrip Container
 				GuiToolstripBuilder*						GetBuilder(theme::ITheme* themeObject=0);
 			};
 
-			class GuiToolstripToolbar : public GuiControl, public Description<GuiToolstripToolbar>
+			class GuiToolstripToolBar : public GuiControl, public Description<GuiToolstripToolBar>
 			{
 			protected:
 				compositions::GuiStackComposition*			stackComposition;
@@ -10296,8 +10325,8 @@ Toolstrip Container
 				Ptr<GuiToolstripBuilder>					builder;
 
 			public:
-				GuiToolstripToolbar(IStyleController* _styleController);
-				~GuiToolstripToolbar();
+				GuiToolstripToolBar(IStyleController* _styleController);
+				~GuiToolstripToolBar();
 				
 				GuiToolstripCollection&						GetToolstripItems();
 				GuiToolstripBuilder*						GetBuilder(theme::ITheme* themeObject=0);
@@ -10393,11 +10422,11 @@ namespace vl
 				virtual controls::GuiControl::IStyleController*								CreateMenuSplitterStyle()=0;
 				virtual controls::GuiToolstripButton::IStyleController*						CreateMenuBarButtonStyle()=0;
 				virtual controls::GuiToolstripButton::IStyleController*						CreateMenuItemButtonStyle()=0;
-				virtual controls::GuiToolstripToolbar::IStyleController*					CreateToolbarStyle()=0;
-				virtual controls::GuiToolstripButton::IStyleController*						CreateToolbarButtonStyle()=0;
-				virtual controls::GuiToolstripButton::IStyleController*						CreateToolbarDropdownButtonStyle()=0;
-				virtual controls::GuiToolstripButton::IStyleController*						CreateToolbarSplitButtonStyle()=0;
-				virtual controls::GuiControl::IStyleController*								CreateToolbarSplitterStyle()=0;
+				virtual controls::GuiToolstripToolBar::IStyleController*					CreateToolBarStyle()=0;
+				virtual controls::GuiToolstripButton::IStyleController*						CreateToolBarButtonStyle()=0;
+				virtual controls::GuiToolstripButton::IStyleController*						CreateToolBarDropdownButtonStyle()=0;
+				virtual controls::GuiToolstripButton::IStyleController*						CreateToolBarSplitButtonStyle()=0;
+				virtual controls::GuiControl::IStyleController*								CreateToolBarSplitterStyle()=0;
 				
 				virtual controls::GuiButton::IStyleController*								CreateButtonStyle()=0;
 				virtual controls::GuiSelectableButton::IStyleController*					CreateCheckBoxStyle()=0;
@@ -10447,11 +10476,11 @@ namespace vl
 				extern controls::GuiControl*					NewMenuSplitter();
 				extern controls::GuiToolstripButton*			NewMenuBarButton();
 				extern controls::GuiToolstripButton*			NewMenuItemButton();
-				extern controls::GuiToolstripToolbar*			NewToolbar();
-				extern controls::GuiToolstripButton*			NewToolbarButton();
-				extern controls::GuiToolstripButton*			NewToolbarDropdownButton();
-				extern controls::GuiToolstripButton*			NewToolbarSplitButton();
-				extern controls::GuiControl*					NewToolbarSplitter();
+				extern controls::GuiToolstripToolBar*			NewToolBar();
+				extern controls::GuiToolstripButton*			NewToolBarButton();
+				extern controls::GuiToolstripButton*			NewToolBarDropdownButton();
+				extern controls::GuiToolstripButton*			NewToolBarSplitButton();
+				extern controls::GuiControl*					NewToolBarSplitter();
 
 				extern controls::GuiButton*						NewButton();
 				extern controls::GuiSelectableButton*			NewCheckBox();
@@ -10528,11 +10557,11 @@ Theme
 				controls::GuiControl::IStyleController*								CreateMenuSplitterStyle()override;
 				controls::GuiToolstripButton::IStyleController*						CreateMenuBarButtonStyle()override;
 				controls::GuiToolstripButton::IStyleController*						CreateMenuItemButtonStyle()override;
-				controls::GuiToolstripToolbar::IStyleController*					CreateToolbarStyle()override;
-				controls::GuiToolstripButton::IStyleController*						CreateToolbarButtonStyle()override;
-				controls::GuiToolstripButton::IStyleController*						CreateToolbarDropdownButtonStyle()override;
-				controls::GuiToolstripButton::IStyleController*						CreateToolbarSplitButtonStyle()override;
-				controls::GuiControl::IStyleController*								CreateToolbarSplitterStyle()override;
+				controls::GuiToolstripToolBar::IStyleController*					CreateToolBarStyle()override;
+				controls::GuiToolstripButton::IStyleController*						CreateToolBarButtonStyle()override;
+				controls::GuiToolstripButton::IStyleController*						CreateToolBarDropdownButtonStyle()override;
+				controls::GuiToolstripButton::IStyleController*						CreateToolBarSplitButtonStyle()override;
+				controls::GuiControl::IStyleController*								CreateToolBarSplitterStyle()override;
 
 				controls::GuiButton::IStyleController*								CreateButtonStyle()override;
 				controls::GuiSelectableButton::IStyleController*					CreateCheckBoxStyle()override;
@@ -10611,11 +10640,11 @@ Theme
 				controls::GuiControl::IStyleController*								CreateMenuSplitterStyle()override;
 				controls::GuiToolstripButton::IStyleController*						CreateMenuBarButtonStyle()override;
 				controls::GuiToolstripButton::IStyleController*						CreateMenuItemButtonStyle()override;
-				controls::GuiToolstripToolbar::IStyleController*					CreateToolbarStyle()override;
-				controls::GuiToolstripButton::IStyleController*						CreateToolbarButtonStyle()override;
-				controls::GuiToolstripButton::IStyleController*						CreateToolbarDropdownButtonStyle()override;
-				controls::GuiToolstripButton::IStyleController*						CreateToolbarSplitButtonStyle()override;
-				controls::GuiControl::IStyleController*								CreateToolbarSplitterStyle()override;
+				controls::GuiToolstripToolBar::IStyleController*					CreateToolBarStyle()override;
+				controls::GuiToolstripButton::IStyleController*						CreateToolBarButtonStyle()override;
+				controls::GuiToolstripButton::IStyleController*						CreateToolBarDropdownButtonStyle()override;
+				controls::GuiToolstripButton::IStyleController*						CreateToolBarSplitButtonStyle()override;
+				controls::GuiControl::IStyleController*								CreateToolBarSplitterStyle()override;
 
 				controls::GuiButton::IStyleController*								CreateButtonStyle()override;
 				controls::GuiSelectableButton::IStyleController*					CreateCheckBoxStyle()override;
@@ -11608,7 +11637,6 @@ Tab
 				void														RemoveTab(vint index)override;
 				void														MoveTab(vint oldIndex, vint newIndex)override;
 				void														SetSelectedTab(vint index)override;
-				controls::GuiControl::IStyleController*						CreateTabPageStyleController()override;
 			};
 		}
 	}
@@ -11642,11 +11670,11 @@ namespace vl
 Toolstrip Button
 ***********************************************************************/
 
-			class Win7ToolstripToolbarStyle : public Win7EmptyStyle, public Description<Win7ToolstripToolbarStyle>
+			class Win7ToolstripToolBarStyle : public Win7EmptyStyle, public Description<Win7ToolstripToolBarStyle>
 			{
 			public:
-				Win7ToolstripToolbarStyle();
-				~Win7ToolstripToolbarStyle();
+				Win7ToolstripToolBarStyle();
+				~Win7ToolstripToolBarStyle();
 			};
 
 			class Win7ToolstripButtonDropdownStyle : public Object, public virtual controls::GuiButton::IStyleController, public Description<Win7ToolstripButtonDropdownStyle>
@@ -12858,14 +12886,14 @@ namespace vl
 Toolstrip Button
 ***********************************************************************/
 
-			class Win8ToolstripToolbarStyle : public Object, public virtual controls::GuiControl::IStyleController, public Description<Win8ToolstripToolbarStyle>
+			class Win8ToolstripToolBarStyle : public Object, public virtual controls::GuiControl::IStyleController, public Description<Win8ToolstripToolBarStyle>
 			{
 			protected:
 				compositions::GuiBoundsComposition*			boundsComposition;
 				compositions::GuiBoundsComposition*			containerComposition;
 			public:
-				Win8ToolstripToolbarStyle();
-				~Win8ToolstripToolbarStyle();
+				Win8ToolstripToolBarStyle();
+				~Win8ToolstripToolBarStyle();
 
 				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
 				compositions::GuiGraphicsComposition*		GetContainerComposition()override;

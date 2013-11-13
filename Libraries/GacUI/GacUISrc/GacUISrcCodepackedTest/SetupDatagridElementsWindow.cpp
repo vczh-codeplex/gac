@@ -509,12 +509,12 @@ public:
 	}
 };
 
-void SetupDatagridElementsWindow(GuiControlHost* controlHost, GuiControl* container)
+void SetupDatagridElementsWindow(GuiControlHost* controlHost, GuiGraphicsComposition* container)
 {
-	container->GetBoundsComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+	container->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 	GuiVirtualDataGrid* dataGrid=new GuiVirtualDataGrid(GetCurrentTheme()->CreateListViewStyle(), new ElementsDataProvider);
 	dataGrid->GetBoundsComposition()->SetAlignmentToParent(Margin(5, 5, 5, 5));
 	dataGrid->SetHorizontalAlwaysVisible(false);
 	dataGrid->SetVerticalAlwaysVisible(false);
-	container->GetBoundsComposition()->AddChild(dataGrid->GetBoundsComposition());
+	container->AddChild(dataGrid->GetBoundsComposition());
 }

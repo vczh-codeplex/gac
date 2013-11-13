@@ -48,7 +48,7 @@ void CreateSubMenu(GuiControlHost* controlHost, GuiToolstripButton* parentMenuIt
 }
 
 template<int count>
-void CreateToolbar(GuiControlHost* controlHost, Ptr<INativeImage> (&imageButtons)[count], GuiToolstripToolbar* toolbar)
+void CreateToolBar(GuiControlHost* controlHost, Ptr<INativeImage> (&imageButtons)[count], GuiToolstripToolBar* toolbar)
 {
 	const wchar_t* fileMenuText[]={L"New", L"Open", L"Save", L"Save As...", L"-", L"Page Setting...", L"Print...", L"-", L"Exit"};
 	const wchar_t* fileMenuImage[]={L"_New.png", L"_Open.png", L"_Save.png", L"_SaveAs.png", 0, 0, L"_Print.png", 0, 0};
@@ -66,19 +66,19 @@ void CreateToolbar(GuiControlHost* controlHost, Ptr<INativeImage> (&imageButtons
 			{
 			case 0:
 				{
-					button=g::NewToolbarDropdownButton();
+					button=g::NewToolBarDropdownButton();
 					CreateSubMenu(controlHost, button, fileMenuText, fileMenuImage, fileMenuShortcut);
 				}
 				break;
 			case 1:
 				{
-					button=g::NewToolbarSplitButton();
+					button=g::NewToolBarSplitButton();
 					CreateSubMenu(controlHost, button, editMenuText, editMenuImage, editMenuShortcut);
 				}
 				break;
 			default:
 				{
-					button=g::NewToolbarButton();
+					button=g::NewToolBarButton();
 				}
 			}
 			button->SetImage(new GuiImageData(imageButtons[i], 0));
@@ -86,15 +86,15 @@ void CreateToolbar(GuiControlHost* controlHost, Ptr<INativeImage> (&imageButtons
 		}
 		else
 		{
-			GuiControl* splitter=g::NewToolbarSplitter();
+			GuiControl* splitter=g::NewToolBarSplitter();
 			toolbar->GetToolstripItems().Add(splitter);
 		}
 	}
 }
 
-void SetupTabPageToolstripWindow(GuiControlHost* controlHost, GuiControl* container)
+void SetupTabPageToolstripWindow(GuiControlHost* controlHost, GuiGraphicsComposition* container)
 {
-	container->GetBoundsComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+	container->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 	INativeImageService* imageService=GetCurrentController()->ImageService();
 
 	const wchar_t* fileMenuText[]={L"New", L"Open", L"Save", L"Save As...", L"-", L"Page Setting...", L"Print...", L"-", L"Exit"};
@@ -143,7 +143,7 @@ void SetupTabPageToolstripWindow(GuiControlHost* controlHost, GuiControl* contai
 		}
 	}
 
-	GuiToolstripToolbar* smallToolbar=g::NewToolbar();
+	GuiToolstripToolBar* smallToolBar=g::NewToolBar();
 	{
 		Ptr<INativeImage> imageButtons[]=
 		{
@@ -165,10 +165,10 @@ void SetupTabPageToolstripWindow(GuiControlHost* controlHost, GuiControl* contai
 			imageService->CreateImageFromFile(L"Resources\\_Paste.png"),
 			imageService->CreateImageFromFile(L"Resources\\_Delete.png"),
 		};
-		CreateToolbar(controlHost, imageButtons, smallToolbar);
+		CreateToolBar(controlHost, imageButtons, smallToolBar);
 	}
 	
-	GuiToolstripToolbar* bigToolbar=g::NewToolbar();
+	GuiToolstripToolBar* bigToolBar=g::NewToolBar();
 	{
 		Ptr<INativeImage> imageButtons[]=
 		{
@@ -179,7 +179,7 @@ void SetupTabPageToolstripWindow(GuiControlHost* controlHost, GuiControl* contai
 			imageService->CreateImageFromFile(L"Resources\\Open.png"),
 			imageService->CreateImageFromFile(L"Resources\\Save.png"),
 		};
-		CreateToolbar(controlHost, imageButtons, bigToolbar);
+		CreateToolBar(controlHost, imageButtons, bigToolBar);
 	}
 
 	GuiStackComposition* windowStack=new GuiStackComposition;
@@ -193,16 +193,16 @@ void SetupTabPageToolstripWindow(GuiControlHost* controlHost, GuiControl* contai
 		windowStack->AddChild(item);
 	}
 	{
-		smallToolbar->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+		smallToolBar->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 		GuiStackItemComposition* item=new GuiStackItemComposition;
-		item->AddChild(smallToolbar->GetBoundsComposition());
+		item->AddChild(smallToolBar->GetBoundsComposition());
 		windowStack->AddChild(item);
 	}
 	{
-		bigToolbar->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+		bigToolBar->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 		GuiStackItemComposition* item=new GuiStackItemComposition;
-		item->AddChild(bigToolbar->GetBoundsComposition());
+		item->AddChild(bigToolBar->GetBoundsComposition());
 		windowStack->AddChild(item);
 	}
-	container->GetContainerComposition()->AddChild(windowStack);
+	container->AddChild(windowStack);
 }

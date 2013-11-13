@@ -1,45 +1,45 @@
 #include "..\..\Public\Source\GacUI.h"
 
-extern void SetupTextBoxWindow(GuiControlHost* controlHost, GuiControl* container);
-extern void SetupSolidLabelElementLayoutWindow(GuiControlHost* controlHost, GuiControl* container);
-extern void SetupDocumentElementLayoutWindow(GuiControlHost* controlHost, GuiControl* container, const WString& filename);
-extern void SetupDocumentViewerLayoutWindow(GuiControlHost* controlHost, GuiControl* container);
-extern void SetupDocumentLabelLayoutWindow(GuiControlHost* controlHost, GuiControl* container);
+extern void SetupTextBoxWindow(GuiControlHost* controlHost, GuiGraphicsComposition* container);
+extern void SetupSolidLabelElementLayoutWindow(GuiControlHost* controlHost, GuiGraphicsComposition* container);
+extern void SetupDocumentElementLayoutWindow(GuiControlHost* controlHost, GuiGraphicsComposition* container, const WString& filename);
+extern void SetupDocumentViewerLayoutWindow(GuiControlHost* controlHost, GuiGraphicsComposition* container);
+extern void SetupDocumentLabelLayoutWindow(GuiControlHost* controlHost, GuiGraphicsComposition* container);
 
-void SetupTabPageTextBoxlWindow(GuiControlHost* controlHost, GuiControl* container)
+void SetupTabPageTextBoxlWindow(GuiControlHost* controlHost, GuiGraphicsComposition* container)
 {
-	container->GetBoundsComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+	container->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 	GuiTab* tab=g::NewTab();
 	tab->GetBoundsComposition()->SetAlignmentToParent(Margin(6, 6, 6, 6));
 	{
 		GuiTabPage* page=tab->CreatePage();
 		page->SetText(L"Colorized TextBox");
-		SetupTextBoxWindow(controlHost, page->GetContainer());
+		SetupTextBoxWindow(controlHost, page->GetContainerComposition());
 	}
 	{
 		GuiTabPage* page=tab->CreatePage();
 		page->SetText(L"Solid Label Layout");
-		SetupSolidLabelElementLayoutWindow(controlHost, page->GetContainer());
+		SetupSolidLabelElementLayoutWindow(controlHost, page->GetContainerComposition());
 	}
 	{
 		GuiTabPage* page=tab->CreatePage();
 		page->SetText(L"document.xml");
-		SetupDocumentElementLayoutWindow(controlHost, page->GetContainer(), L"Resources\\document.xml");
+		SetupDocumentElementLayoutWindow(controlHost, page->GetContainerComposition(), L"Resources\\document.xml");
 	}
 	{
 		GuiTabPage* page=tab->CreatePage();
 		page->SetText(L"document2.xml");
-		SetupDocumentElementLayoutWindow(controlHost, page->GetContainer(), L"Resources\\document2.xml");
+		SetupDocumentElementLayoutWindow(controlHost, page->GetContainerComposition(), L"Resources\\document2.xml");
 	}
 	{
 		GuiTabPage* page=tab->CreatePage();
 		page->SetText(L"Document Viewer");
-		SetupDocumentViewerLayoutWindow(controlHost, page->GetContainer());
+		SetupDocumentViewerLayoutWindow(controlHost, page->GetContainerComposition());
 	}
 	{
 		GuiTabPage* page=tab->CreatePage();
 		page->SetText(L"Document Label");
-		SetupDocumentLabelLayoutWindow(controlHost, page->GetContainer());
+		SetupDocumentLabelLayoutWindow(controlHost, page->GetContainerComposition());
 	}
-	container->GetContainerComposition()->AddChild(tab->GetBoundsComposition());
+	container->AddChild(tab->GetBoundsComposition());
 }

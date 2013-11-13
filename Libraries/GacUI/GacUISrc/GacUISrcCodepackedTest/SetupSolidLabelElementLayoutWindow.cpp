@@ -25,9 +25,9 @@ GuiGraphicsComposition* CreateWrapLineText(const WString& text)
 	return borderComposition;
 }
 
-void SetupSolidLabelElementLayoutWindow(GuiControlHost* controlHost, GuiControl* container)
+void SetupSolidLabelElementLayoutWindow(GuiControlHost* controlHost, GuiGraphicsComposition* container)
 {
-	container->GetBoundsComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+	container->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 
 	const wchar_t* texts[]=
 	{
@@ -87,5 +87,5 @@ void SetupSolidLabelElementLayoutWindow(GuiControlHost* controlHost, GuiControl*
 		cell->AddChild(sub);
 	}
 
-	container->GetContainerComposition()->AddChild(table);
+	container->AddChild(table);
 }

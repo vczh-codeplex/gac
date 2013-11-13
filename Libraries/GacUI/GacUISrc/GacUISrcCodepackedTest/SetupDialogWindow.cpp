@@ -21,7 +21,7 @@ namespace SetupDialogWindowHelper
 }
 using namespace SetupDialogWindowHelper;
 
-void SetupDialogWindow(GuiControlHost* controlHost, GuiControl* container)
+void SetupDialogWindow(GuiControlHost* controlHost, GuiGraphicsComposition* container)
 {
 	{
 		const wchar_t* input[]={L"OK", L"OKCancel", L"YesNo", L"YesNoCancel", L"RetryCancel", L"AbortRetryIgnore", L"CancelTryAgainContinue"};
@@ -43,11 +43,11 @@ void SetupDialogWindow(GuiControlHost* controlHost, GuiControl* container)
 		buttonMessageBox->SetText(L"ShowMessageBox");
 		buttonMessageBox->GetBoundsComposition()->SetBounds(Rect(Point(10, 130), Size(0, 0)));
 
-		container->AddChild(comboInput);
-		container->AddChild(comboDefault);
-		container->AddChild(comboIcons);
-		container->AddChild(comboModal);
-		container->AddChild(buttonMessageBox);
+		container->AddChild(comboInput->GetBoundsComposition());
+		container->AddChild(comboDefault->GetBoundsComposition());
+		container->AddChild(comboIcons->GetBoundsComposition());
+		container->AddChild(comboModal->GetBoundsComposition());
+		container->AddChild(buttonMessageBox->GetBoundsComposition());
 
 		buttonMessageBox->Clicked.AttachLambda([=](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 		{
@@ -79,7 +79,7 @@ void SetupDialogWindow(GuiControlHost* controlHost, GuiControl* container)
 		GuiButton* buttonColorDialog1=g::NewButton();
 		buttonColorDialog1->SetText(L"SimpleCustomColor");
 		buttonColorDialog1->GetBoundsComposition()->SetBounds(Rect(Point(10, 160), Size(0, 0)));
-		container->AddChild(buttonColorDialog1);
+		container->AddChild(buttonColorDialog1->GetBoundsComposition());
 
 		buttonColorDialog1->Clicked.AttachLambda([=](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 		{
@@ -94,7 +94,7 @@ void SetupDialogWindow(GuiControlHost* controlHost, GuiControl* container)
 		GuiButton* buttonColorDialog2=g::NewButton();
 		buttonColorDialog2->SetText(L"RichCustomColor");
 		buttonColorDialog2->GetBoundsComposition()->SetBounds(Rect(Point(10, 190), Size(0, 0)));
-		container->AddChild(buttonColorDialog2);
+		container->AddChild(buttonColorDialog2->GetBoundsComposition());
 
 		buttonColorDialog2->Clicked.AttachLambda([=](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 		{
@@ -129,7 +129,7 @@ void SetupDialogWindow(GuiControlHost* controlHost, GuiControl* container)
 		GuiButton* buttonFontDialog1=g::NewButton();
 		buttonFontDialog1->SetText(L"SimpleFontDialog");
 		buttonFontDialog1->GetBoundsComposition()->SetBounds(Rect(Point(10, 220), Size(0, 0)));
-		container->AddChild(buttonFontDialog1);
+		container->AddChild(buttonFontDialog1->GetBoundsComposition());
 
 		buttonFontDialog1->Clicked.AttachLambda([=](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 		{
@@ -145,7 +145,7 @@ void SetupDialogWindow(GuiControlHost* controlHost, GuiControl* container)
 		GuiButton* buttonFontDialog2=g::NewButton();
 		buttonFontDialog2->SetText(L"RichFontDialog");
 		buttonFontDialog2->GetBoundsComposition()->SetBounds(Rect(Point(10, 250), Size(0, 0)));
-		container->AddChild(buttonFontDialog2);
+		container->AddChild(buttonFontDialog2->GetBoundsComposition());
 
 		buttonFontDialog2->Clicked.AttachLambda([=](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 		{
@@ -162,22 +162,22 @@ void SetupDialogWindow(GuiControlHost* controlHost, GuiControl* container)
 		GuiButton* buttonFileDialog1=g::NewButton();
 		buttonFileDialog1->SetText(L"OpenFileDialog");
 		buttonFileDialog1->GetBoundsComposition()->SetBounds(Rect(Point(10, 280), Size(0, 0)));
-		container->AddChild(buttonFileDialog1);
+		container->AddChild(buttonFileDialog1->GetBoundsComposition());
 		
 		GuiButton* buttonFileDialog2=g::NewButton();
 		buttonFileDialog2->SetText(L"OpenFileDialogPreview");
 		buttonFileDialog2->GetBoundsComposition()->SetBounds(Rect(Point(10, 310), Size(0, 0)));
-		container->AddChild(buttonFileDialog2);
+		container->AddChild(buttonFileDialog2->GetBoundsComposition());
 		
 		GuiButton* buttonFileDialog3=g::NewButton();
 		buttonFileDialog3->SetText(L"SaveFileDialog");
 		buttonFileDialog3->GetBoundsComposition()->SetBounds(Rect(Point(10, 340), Size(0, 0)));
-		container->AddChild(buttonFileDialog3);
+		container->AddChild(buttonFileDialog3->GetBoundsComposition());
 		
 		GuiButton* buttonFileDialog4=g::NewButton();
 		buttonFileDialog4->SetText(L"SaveFileDialogPreview");
 		buttonFileDialog4->GetBoundsComposition()->SetBounds(Rect(Point(10, 370), Size(0, 0)));
-		container->AddChild(buttonFileDialog4);
+		container->AddChild(buttonFileDialog4->GetBoundsComposition());
 
 		buttonFileDialog1->Clicked.AttachLambda([=](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 		{

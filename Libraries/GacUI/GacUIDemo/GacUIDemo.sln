@@ -78,9 +78,13 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Editor.Toolstrip.TextFile",
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Editor.Toolstrip.Document", "Editor.Toolstrip.Document\Editor.Toolstrip.Document.vcxproj", "{91F2E005-F8BF-4C80-8471-FAF4F5A93785}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GacUIReflectionStaticLibrary", "GacUIReflectionStaticLibrary\GacUIReflectionStaticLibrary.vcxproj", "{8C242464-8009-4A8A-9443-ABE406809C71}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Persistant.LoadFromXml.Controls", "Persistant.LoadFromXml.Controls\Persistant.LoadFromXml.Controls.vcxproj", "{7470589A-7E7D-4274-835C-0FDAD6992F1D}"
+EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 33
+		SccNumberOfProjects = 35
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = https://tfs.codeplex.com/tfs/tfs02
 		SccLocalPath0 = .
@@ -210,6 +214,13 @@ Global
 		SccProjectTopLevelParentUniqueName32 = GacUIDemo.sln
 		SccProjectName32 = Editor.Toolstrip.Document
 		SccLocalPath32 = Editor.Toolstrip.Document
+		SccProjectUniqueName33 = GacUIReflectionStaticLibrary\\GacUIReflectionStaticLibrary.vcxproj
+		SccProjectName33 = GacUIReflectionStaticLibrary
+		SccLocalPath33 = GacUIReflectionStaticLibrary
+		SccProjectUniqueName34 = Persistant.LoadFromXml.Controls\\Persistant.LoadFromXml.Controls.vcxproj
+		SccProjectTopLevelParentUniqueName34 = GacUIDemo.sln
+		SccProjectName34 = Persistant.LoadFromXml.Controls
+		SccLocalPath34 = Persistant.LoadFromXml.Controls
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -344,6 +355,14 @@ Global
 		{91F2E005-F8BF-4C80-8471-FAF4F5A93785}.Debug|Win32.Build.0 = Debug|Win32
 		{91F2E005-F8BF-4C80-8471-FAF4F5A93785}.Release|Win32.ActiveCfg = Release|Win32
 		{91F2E005-F8BF-4C80-8471-FAF4F5A93785}.Release|Win32.Build.0 = Release|Win32
+		{8C242464-8009-4A8A-9443-ABE406809C71}.Debug|Win32.ActiveCfg = Debug|Win32
+		{8C242464-8009-4A8A-9443-ABE406809C71}.Debug|Win32.Build.0 = Debug|Win32
+		{8C242464-8009-4A8A-9443-ABE406809C71}.Release|Win32.ActiveCfg = Release|Win32
+		{8C242464-8009-4A8A-9443-ABE406809C71}.Release|Win32.Build.0 = Release|Win32
+		{7470589A-7E7D-4274-835C-0FDAD6992F1D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{7470589A-7E7D-4274-835C-0FDAD6992F1D}.Debug|Win32.Build.0 = Debug|Win32
+		{7470589A-7E7D-4274-835C-0FDAD6992F1D}.Release|Win32.ActiveCfg = Release|Win32
+		{7470589A-7E7D-4274-835C-0FDAD6992F1D}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -373,6 +392,7 @@ Global
 		{FBAA9433-4B1B-44FF-8EC9-F7C037859ABC} = {57FFC37A-0073-4D67-92D4-98FB5C4A309A}
 		{6AB710A6-1530-4D9B-B954-E772B69E7373} = {57FFC37A-0073-4D67-92D4-98FB5C4A309A}
 		{AAC4B8ED-F725-4563-9D41-3857D8B32CB4} = {52446C02-0696-4691-95FD-5E737EECBE67}
+		{7470589A-7E7D-4274-835C-0FDAD6992F1D} = {52446C02-0696-4691-95FD-5E737EECBE67}
 		{D5B762A4-3BDB-4D7C-8EB4-533B2BAE6EB6} = {EBECB34C-801E-43D7-9FDF-EDE249CF053D}
 		{46F8C4C0-3B85-412F-B1A9-F9CD63AA9BB4} = {EBECB34C-801E-43D7-9FDF-EDE249CF053D}
 		{728C31C9-EBEC-4C01-8658-DC1BA60BE40F} = {EBECB34C-801E-43D7-9FDF-EDE249CF053D}

@@ -901,27 +901,34 @@ namespace vl
 			class WindowsInputService : public Object, public INativeInputService
 			{
 			protected:
-				HWND								ownerHandle;
-				HHOOK								mouseHook;
-				bool								isTimerEnabled;
-				HOOKPROC							mouseProc;
+				HWND									ownerHandle;
+				HHOOK									mouseHook;
+				bool									isTimerEnabled;
+				HOOKPROC								mouseProc;
+
+				collections::Array<WString>				keyNames;
+				collections::Dictionary<WString, vint>	keys;
+
+				WString									GetKeyNameInternal(vint code);
+				void									InitializeKeyNames();
 			public:
 				WindowsInputService(HOOKPROC _mouseProc);
 
-				void								SetOwnerHandle(HWND handle);
-				void								StartHookMouse()override;
-				void								StopHookMouse()override;
-				bool								IsHookingMouse()override;
-				void								StartTimer()override;
-				void								StopTimer()override;
-				bool								IsTimerEnabled()override;
-				bool								IsKeyPressing(vint code)override;
-				bool								IsKeyToggled(vint code)override;
-				WString								GetKeyName(vint code)override;
+				void									SetOwnerHandle(HWND handle);
+				void									StartHookMouse()override;
+				void									StopHookMouse()override;
+				bool									IsHookingMouse()override;
+				void									StartTimer()override;
+				void									StopTimer()override;
+				bool									IsTimerEnabled()override;
+				bool									IsKeyPressing(vint code)override;
+				bool									IsKeyToggled(vint code)override;
+				WString									GetKeyName(vint code)override;
+				vint									GetKey(const WString& name)override;
 			};
 
-			extern bool								WinIsKeyPressing(vint code);
-			extern bool								WinIsKeyToggled(vint code);
+			extern bool									WinIsKeyPressing(vint code);
+			extern bool									WinIsKeyToggled(vint code);
 		}
 	}
 }

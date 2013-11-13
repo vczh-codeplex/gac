@@ -1,8 +1,8 @@
 #include "..\..\Public\Source\GacUI.h"
 
-void SetupListDirectionWindow(GuiControlHost* controlHost, GuiControl* container)
+void SetupListDirectionWindow(GuiControlHost* controlHost, GuiGraphicsComposition* container)
 {
-	container->GetBoundsComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+	container->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 	GuiListView* listControl=0;
 	{
 		listControl=g::NewListViewBigIcon();
@@ -10,7 +10,7 @@ void SetupListDirectionWindow(GuiControlHost* controlHost, GuiControl* container
 		listControl->GetBoundsComposition()->SetBounds(Rect(0, 0, 300, 200));
 		listControl->SetHorizontalAlwaysVisible(false);
 		listControl->SetVerticalAlwaysVisible(false);
-		container->GetBoundsComposition()->AddChild(listControl->GetBoundsComposition());
+		container->AddChild(listControl->GetBoundsComposition());
 		
 		INativeImageService* imageService=GetCurrentController()->ImageService();
 		Ptr<INativeImage> largeImage=imageService->CreateImageFromFile(L"Resources\\BigDoc.png");
@@ -31,7 +31,7 @@ void SetupListDirectionWindow(GuiControlHost* controlHost, GuiControl* container
 		typeList->GetBoundsComposition()->SetAlignmentToParent(Margin(5, 5, -1, 160));
 		typeList->GetBoundsComposition()->SetBounds(Rect(0, 0, 190, 200));
 		typeList->SetHorizontalAlwaysVisible(false);
-		container->GetBoundsComposition()->AddChild(typeList->GetBoundsComposition());
+		container->AddChild(typeList->GetBoundsComposition());
 
 		typeList->GetItems().Add(new list::TextItem(L"Right Down"));
 		typeList->GetItems().Add(new list::TextItem(L"Left Down"));
@@ -82,7 +82,7 @@ void SetupListDirectionWindow(GuiControlHost* controlHost, GuiControl* container
 		typeList->GetBoundsComposition()->SetAlignmentToParent(Margin(5, -1, -1, 5));
 		typeList->GetBoundsComposition()->SetBounds(Rect(0, 0, 190, 145));
 		typeList->SetHorizontalAlwaysVisible(false);
-		container->GetBoundsComposition()->AddChild(typeList->GetBoundsComposition());
+		container->AddChild(typeList->GetBoundsComposition());
 
 		typeList->GetItems().Add(new list::TextItem(L"Block"));
 		typeList->GetItems().Add(new list::TextItem(L"Item"));

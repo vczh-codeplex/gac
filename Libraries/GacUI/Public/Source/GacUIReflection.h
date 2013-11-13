@@ -6,12 +6,84 @@ DEVELOPER: 陈梓瀚(vczh)
 #include "GacUI.h"
 
 /***********************************************************************
+GUIINSTANCEHELPERTYPES.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+GacUI Reflection: Instance Helper Types
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_REFLECTION_GUIINSTANCEHELPERTYPES
+#define VCZH_PRESENTATION_REFLECTION_GUIINSTANCEHELPERTYPES
+
+
+namespace vl
+{
+	namespace presentation
+	{
+
+/***********************************************************************
+Helper Types
+***********************************************************************/
+
+		namespace helper_types
+		{
+			struct SiteValue
+			{
+				vint			row;
+				vint			column;
+				vint			rowSpan;
+				vint			columnSpan;
+
+				SiteValue() :row(0), column(0), rowSpan(1), columnSpan(1){}
+			};
+
+			enum class ListViewViewType
+			{
+				BigIcon,
+				SmallIcon,
+				List,
+				Tile,
+				Information,
+				Detail,
+			};
+		}
+	}
+
+#ifndef VCZH_DEBUG_NO_REFLECTION
+
+	namespace reflection
+	{
+		namespace description
+		{
+
+/***********************************************************************
+Type List
+***********************************************************************/
+
+#define GUIREFLECTIONHELPERTYPES_TYPELIST(F)\
+			F(presentation::helper_types::SiteValue)\
+			F(presentation::helper_types::ListViewViewType)\
+
+			GUIREFLECTIONHELPERTYPES_TYPELIST(DECL_TYPE_INFO)
+		}
+	}
+
+#endif
+}
+
+#endif
+
+/***********************************************************************
 GUIINSTANCEREPRESENTATION.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
 Developer: 陈梓瀚(vczh)
-GacUI Reflection: InstanceLoader
+GacUI Reflection: Instance Representation
 
 Interfaces:
 ***********************************************************************/
@@ -75,9 +147,11 @@ Instance Representation
 
 		class GuiConstructorRepr : public GuiAttSetterRepr, public Description<GuiConstructorRepr>
 		{
+			typedef collections::Dictionary<WString, WString>					ReferenceAttrubuteMap;
 		public:
 			WString									typeNamespace;
 			WString									typeName;
+			ReferenceAttrubuteMap					referenceAttributes;
 
 			void									Accept(IVisitor* visitor)override{visitor->Visit(this);}
 		};
@@ -147,6 +221,7 @@ Instance Context
 				bool IsCtorName(){ return category==L"" && name!=L"" && binding==L""; }
 				bool IsPropertyAttributeName(){ return namespaceName==L"" && category==L"" && name!=L""; }
 				bool IsPropertyElementName(){ return namespaceName==L"" && category==L"att" && name!=L""; }
+				bool IsReferenceAttributeName(){ return namespaceName==L"" && category==L"ref" && name!=L""; }
 			};
 		public:
 			Ptr<GuiConstructorRepr>					instance;
@@ -169,7 +244,7 @@ GUIINSTANCELOADER.H
 /***********************************************************************
 Vczh Library++ 3.0
 Developer: 陈梓瀚(vczh)
-GacUI Reflection: InstanceLoader
+GacUI Reflection: Instance Loader
 
 Interfaces:
 ***********************************************************************/
@@ -185,55 +260,121 @@ namespace vl
 		using namespace reflection;
 
 /***********************************************************************
+Instance Environment
+***********************************************************************/
+
+		class GuiInstanceContextScope : public Object, public Description<GuiInstanceContextScope>
+		{
+			typedef collections::Dictionary<WString, description::Value>		ValueMap;
+		public:
+			WString									typeName;
+			description::Value						rootInstance;
+			ValueMap								referenceValues;
+		};
+
+		class GuiInstanceEnvironment : public Object, public Description<GuiInstanceEnvironment>
+		{
+		public:
+			Ptr<GuiInstanceContext>					context;
+			Ptr<GuiResourcePathResolver>			resolver;
+			Ptr<GuiInstanceContextScope>			scope;
+
+			GuiInstanceEnvironment(Ptr<GuiInstanceContext> _context, Ptr<GuiResourcePathResolver> _resolver)
+				:context(_context)
+				,resolver(_resolver)
+			{
+				scope = new GuiInstanceContextScope;
+			}
+		};
+
+/***********************************************************************
 Instance Loader
 ***********************************************************************/
+
+		class GuiInstancePropertyInfo : public IDescriptable, public Description<GuiInstancePropertyInfo>
+		{
+			typedef collections::List<description::ITypeDescriptor*>		TypeDescriptorList;
+		public:
+			enum Support
+			{
+				NotSupport,
+				SupportAssign,
+				SupportArray,
+				SupportCollection,
+				SupportSet,
+			};
+
+			Support									support;
+			bool									tryParent;
+			bool									required;
+			bool									constructorParameter;
+			TypeDescriptorList						acceptableTypes;
+
+			GuiInstancePropertyInfo();
+			~GuiInstancePropertyInfo();
+
+			static Ptr<GuiInstancePropertyInfo>		Unsupported();
+			static Ptr<GuiInstancePropertyInfo>		Assign(description::ITypeDescriptor* typeDescriptor = 0);
+			static Ptr<GuiInstancePropertyInfo>		AssignWithParent(description::ITypeDescriptor* typeDescriptor = 0);
+			static Ptr<GuiInstancePropertyInfo>		Collection(description::ITypeDescriptor* typeDescriptor = 0);
+			static Ptr<GuiInstancePropertyInfo>		CollectionWithParent(description::ITypeDescriptor* typeDescriptor = 0);
+			static Ptr<GuiInstancePropertyInfo>		Set(description::ITypeDescriptor* typeDescriptor = 0);
+			static Ptr<GuiInstancePropertyInfo>		Array(description::ITypeDescriptor* typeDescriptor = 0);
+		};
 
 		class IGuiInstanceLoader : public IDescriptable, public Description<IGuiInstanceLoader>
 		{
 		public:
-			enum PropertyType
+			struct TypeInfo
 			{
-				ValueProperty,
-				CollectionProperty,
-				UnsupportedProperty,
-				HandleByParentLoader,
+				WString								typeName;
+				description::ITypeDescriptor*		typeDescriptor;
+
+				TypeInfo() :typeDescriptor(0){}
+				TypeInfo(const WString& _typeName, description::ITypeDescriptor* _typeDescriptor)
+					:typeName(_typeName)
+					,typeDescriptor(_typeDescriptor)
+				{
+				}
+			};
+
+			struct PropertyInfo
+			{
+				TypeInfo							typeInfo;
+				WString								propertyName;
+
+				PropertyInfo(){}
+				PropertyInfo(const TypeInfo& _typeInfo, const WString& _propertyName)
+					:typeInfo(_typeInfo)
+					,propertyName(_propertyName)
+				{
+				}
+			};
+
+			struct PropertyValue : PropertyInfo
+			{
+				description::Value					instanceValue;
+				description::Value					propertyValue;
+
+				PropertyValue(){}
+				PropertyValue(const TypeInfo& _typeInfo, const WString& _propertyName, description::Value _instanceValue, description::Value _propertyValue=description::Value())
+					:PropertyInfo(_typeInfo, _propertyName)
+					,instanceValue(_instanceValue)
+					,propertyValue(_propertyValue)
+				{
+				}
 			};
 
 			virtual WString							GetTypeName()=0;
-			virtual description::Value				CreateInstance(
-														Ptr<GuiInstanceContext> context,
-														Ptr<GuiConstructorRepr> ctor,
-														Ptr<GuiResourcePathResolver> resolver,
-														const WString& typeName,
-														description::ITypeDescriptor* typeDescriptor
-														)=0;
-			virtual PropertyType					GetPropertyType(
-														const WString& typeName,
-														description::ITypeDescriptor* typeDescriptor,
-														const WString& propertyName,
-														description::ITypeDescriptor*& elementType,
-														bool &nullable
-														)=0;
-			virtual description::Value				GetPropertyValue(
-														description::Value createdInstance,
-														const WString& typeName,
-														description::ITypeDescriptor* typeDescriptor,
-														const WString& propertyName
-														)=0;
-			virtual bool							SetPropertyValue(
-														description::Value createdInstance,
-														const WString& typeName,
-														description::ITypeDescriptor* typeDescriptor,
-														const WString& propertyName,
-														description::Value propertyValue
-														)=0;
-			virtual bool							SetPropertyCollection(
-														description::Value createdInstance,
-														const WString& typeName,
-														description::ITypeDescriptor* typeDescriptor,
-														const WString& propertyName,
-														description::Value propertyValue
-														)=0;
+			virtual bool							IsDeserializable(const TypeInfo& typeInfo) = 0;
+			virtual description::Value				Deserialize(const TypeInfo& typeInfo, const WString& text) = 0;
+			virtual bool							IsCreatable(const TypeInfo& typeInfo) = 0;
+			virtual description::Value				CreateInstance(const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)=0;
+			virtual void							GetPropertyNames(const TypeInfo& typeInfo, collections::List<WString>& propertyNames) = 0;
+			virtual void							GetConstructorParameters(const TypeInfo& typeInfo, collections::List<WString>& propertyNames) = 0;
+			virtual Ptr<GuiInstancePropertyInfo>	GetPropertyType(const PropertyInfo& propertyInfo)=0;
+			virtual bool							GetPropertyValue(PropertyValue& propertyValue)=0;
+			virtual bool							SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)=0;
 		};
 
 /***********************************************************************
@@ -244,17 +385,8 @@ Instance Binder
 		{
 		public:
 			virtual WString							GetBindingName()=0;
-			virtual description::ITypeDescriptor*	GetExpectedValueType()=0;
-			virtual bool							SetPropertyValue(
-														IGuiInstanceLoader* loader,
-														Ptr<GuiResourcePathResolver> resolver,
-														description::Value createdInstance,
-														const WString& typeName,
-														description::ITypeDescriptor* typeDescriptor,
-														const WString& propertyName,
-														description::Value propertyValue,
-														bool collectionProperty
-														)=0;
+			virtual void							GetExpectedValueTypes(collections::List<description::ITypeDescriptor*>& expectedTypes)=0;
+			virtual bool							SetPropertyValue(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, IGuiInstanceLoader::PropertyValue& propertyValue, vint currentIndex=-1)=0;
 		};
 
 /***********************************************************************
@@ -266,11 +398,13 @@ Instance Loader Manager
 		public:
 			virtual bool							AddInstanceBinder(Ptr<IGuiInstanceBinder> binder)=0;
 			virtual IGuiInstanceBinder*				GetInstanceBinder(const WString& bindingName)=0;
-			virtual bool							CreateVirtualType(const WString& typeName, const WString& parentType, Ptr<IGuiInstanceLoader> loader)=0;
+			virtual bool							CreateVirtualType(const WString& parentType, Ptr<IGuiInstanceLoader> loader)=0;
 			virtual bool							SetLoader(Ptr<IGuiInstanceLoader> loader)=0;
 			virtual IGuiInstanceLoader*				GetLoader(const WString& typeName)=0;
 			virtual IGuiInstanceLoader*				GetParentLoader(IGuiInstanceLoader* loader)=0;
 			virtual description::ITypeDescriptor*	GetTypeDescriptorForType(const WString& typeName)=0;
+			virtual void							GetVirtualTypes(collections::List<WString>& typeNames) = 0;
+			virtual WString							GetParentTypeForVirtualType(const WString& virtualType) = 0;
 		};
 
 		struct InstanceLoadingSource
@@ -290,22 +424,53 @@ Instance Loader Manager
 		};
 
 		extern IGuiInstanceLoaderManager*			GetInstanceLoaderManager();
-		extern InstanceLoadingSource				FindInstanceLoadingSource(
-														Ptr<GuiInstanceContext> context,
-														GuiConstructorRepr* ctor,
-														Ptr<GuiResourcePathResolver> resolver
+		extern Ptr<GuiInstanceContextScope>			LoadInstance(
+														Ptr<GuiResource> resource,
+														const WString& instancePath,
+														description::ITypeDescriptor* expectedType=0
 														);
-		extern description::Value					LoadInstance(
-														Ptr<GuiInstanceContext> context,
-														Ptr<GuiResourcePathResolver> resolver
-														);
-		extern description::Value					LoadInstance(
-														Ptr<GuiInstanceContext> context,
-														GuiConstructorRepr* ctor,
-														Ptr<GuiResourcePathResolver> resolver,
-														WString& typeName,
-														description::ITypeDescriptor*& typeDescriptor
-														);
+		extern void									LogInstanceLoaderManager(stream::TextWriter& writer);
+
+/***********************************************************************
+Instance Scope Wrapper
+***********************************************************************/
+
+		template<typename T>
+		class GuiInstance : public Object
+		{
+		private:
+			Ptr<GuiResource>						resource;
+			Ptr<GuiInstanceContextScope>			scope;
+			T*										instance;
+
+		public:
+			GuiInstance(Ptr<GuiResource> _resource, const WString& path)
+				:resource(_resource)
+				,instance(0)
+			{
+				if (scope = LoadInstance(resource, path))
+				{
+					instance = description::UnboxValue<T*>(scope->rootInstance);
+				}
+			}
+
+			Ptr<GuiResource> GetResource()
+			{
+				return resource;
+			}
+
+			Ptr<GuiInstanceContextScope> GetScope()
+			{
+				return scope;
+			}
+
+			T* GetInstance()
+			{
+				return instance;
+			}
+		};
+
+#define GUI_INSTANCE_REFERENCE(NAME) this->NAME=vl::reflection::description::UnboxValue<decltype(NAME)>(this->GetScope()->referenceValues[L#NAME])
 	}
 }
 
@@ -364,6 +529,7 @@ Type List
 			F(presentation::INativeAsyncService)\
 			F(presentation::INativeClipboardService)\
 			F(presentation::INativeScreenService)\
+			F(presentation::INativeInputService)\
 			F(presentation::INativeController)\
 			F(presentation::GuiImageData)\
 			F(presentation::GuiTextData)\
@@ -403,6 +569,7 @@ Type Declaration
 			template<>
 			struct TypedValueSerializerProvider<Color>
 			{
+				static Color GetDefaultValue();
 				static bool Serialize(const Color& input, WString& output);
 				static bool Deserialize(const WString& input, Color& output);
 			};
@@ -411,7 +578,7 @@ Type Declaration
 			struct CustomTypeDescriptorSelector<Color>
 			{
 			public:
-				typedef SerializableTypeDescriptor<TypedValueSerializer<Color>> CustomTypeDescriptorImpl;
+				typedef SerializableTypeDescriptor<TypedDefaultValueSerializer<Color>> CustomTypeDescriptorImpl;
 			};
 
 /***********************************************************************
@@ -895,7 +1062,7 @@ Type List
 			F(presentation::controls::GuiToolstripCommand)\
 			F(presentation::controls::GuiToolstripMenu)\
 			F(presentation::controls::GuiToolstripMenuBar)\
-			F(presentation::controls::GuiToolstripToolbar)\
+			F(presentation::controls::GuiToolstripToolBar)\
 			F(presentation::controls::GuiToolstripButton)\
 			F(presentation::controls::GuiDocumentCommonInterface)\
 			F(presentation::controls::GuiDocumentCommonInterface::EditMode)\
@@ -1106,11 +1273,6 @@ Interface Proxy
 					void SetSelectedTab(vint index)override
 					{
 						INVOKE_INTERFACE_PROXY(SetSelectedTab, index);
-					}
-
-					GuiControl::IStyleController* CreateTabPageStyleController()override
-					{
-						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(CreateTabPageStyleController);
 					}
 				};
 
