@@ -96,10 +96,7 @@ public:
 
 /*
 Type Loader:
-	GuiListView
 	GuiComboBoxListControl
-	GuiImageData
-	GuiTextData
 
 Features:
 	Component Xml Layout	: Type Loaders, Virtual Type Loaders, Constructor Parameters, Object Inception (e.g. ViewModel object), Object Schema

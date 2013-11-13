@@ -1127,6 +1127,7 @@ Type Declaration
 			BEGIN_CLASS_MEMBER(TreeViewNodeItemStyleProvider)
 				CLASS_MEMBER_BASE(INodeItemStyleProvider)
 				CLASS_MEMBER_CONSTRUCTOR(Ptr<TreeViewNodeItemStyleProvider>(), NO_PARAMETER)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<TreeViewNodeItemStyleProvider>(Size, bool), {L"minIconSize" _ L"fitImage"})
 			END_CLASS_MEMBER(TreeViewNodeItemStyleProvider)
 
 			BEGIN_CLASS_MEMBER(GuiComboBoxBase)
