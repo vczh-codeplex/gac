@@ -637,9 +637,44 @@ GuiTreeViewInstanceLoader
 				return description::GetTypeDescriptor<GuiTreeView>()->GetTypeName();
 			}
 
+			bool IsCreatable(const TypeInfo& typeInfo)override
+			{
+				return typeInfo.typeName == GetTypeName();
+			}
+
+			description::Value CreateInstance(const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
+			{
+				if (typeInfo.typeName == GetTypeName())
+				{
+					GuiTreeView* treeView = new GuiTreeView(GetCurrentTheme()->CreateTreeViewStyle());
+
+					vint indexIconSize = constructorArguments.Keys().IndexOf(L"IconSize");
+					if (indexIconSize != -1)
+					{
+						auto iconSize = UnboxValue<Size>(constructorArguments.GetByIndex(indexIconSize)[0]);
+						treeView->SetNodeStyleProvider(new tree::TreeViewNodeItemStyleProvider(iconSize, false));
+					}
+
+					return Value::From(treeView);
+				}
+				return Value();
+			}
+
 			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
 			{
+				if (typeInfo.typeName == GetTypeName())
+				{
+					propertyNames.Add(L"IconSize");
+				}
 				propertyNames.Add(L"Nodes");
+			}
+
+			void GetConstructorParameters(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			{
+				if (typeInfo.typeName == GetTypeName())
+				{
+					propertyNames.Add(L"IconSize");
+				}
 			}
 
 			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
@@ -647,6 +682,12 @@ GuiTreeViewInstanceLoader
 				if (propertyInfo.propertyName == L"Nodes")
 				{
 					return GuiInstancePropertyInfo::Collection(description::GetTypeDescriptor<tree::MemoryNodeProvider>());
+				}
+				else if (propertyInfo.propertyName == L"IconSize")
+				{
+					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<Size>());
+					info->constructorParameter = true;
+					return info;
 				}
 				return GuiRewriteInstanceLoader::GetPropertyType(propertyInfo);
 			}
@@ -927,59 +968,29 @@ GuiTreeNodeInstanceLoader
 			{
 				if (typeInfo.typeName == GetTypeName())
 				{
-					vint indexText = constructorArguments.Keys().IndexOf(L"Text");
-					vint indexImage = constructorArguments.Keys().IndexOf(L"Image");
-
-					if (indexText != -1)
-					{
-						WString text = UnboxValue<WString>(constructorArguments.GetByIndex(indexText)[0]);
-						Ptr<GuiImageData> image;
-						if (indexImage != -1)
-						{
-							image=UnboxValue<Ptr<GuiImageData>>(constructorArguments.GetByIndex(indexImage)[0]);
-						}
-
-						Ptr<tree::TreeViewItem> item = new tree::TreeViewItem(image, text);
-						Ptr<tree::MemoryNodeProvider> node = new tree::MemoryNodeProvider(item);
-						return Value::From(node);
-					}
+					Ptr<tree::TreeViewItem> item = new tree::TreeViewItem;
+					Ptr<tree::MemoryNodeProvider> node = new tree::MemoryNodeProvider(item);
+					return Value::From(node);
 				}
 				return Value();
 			}
 
 			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
 			{
-				if (typeInfo.typeName == GetTypeName())
-				{
-					propertyNames.Add(L"Text");
-					propertyNames.Add(L"Image");
-				}
+				propertyNames.Add(L"Text");
+				propertyNames.Add(L"Image");
 				propertyNames.Add(L"");
-			}
-
-			void GetConstructorParameters(const TypeInfo& typeInfo, List<WString>& propertyNames)override
-			{
-				if (typeInfo.typeName == GetTypeName())
-				{
-					propertyNames.Add(L"Text");
-					propertyNames.Add(L"Image");
-				}
 			}
 
 			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
 			{
 				if (propertyInfo.propertyName == L"Text")
 				{
-					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<WString>());
-					info->constructorParameter = true;
-					info->required = true;
-					return info;
+					return GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<WString>());
 				}
 				else if (propertyInfo.propertyName == L"Image")
 				{
-					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<GuiImageData>());
-					info->constructorParameter = true;
-					return info;
+					return GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<GuiImageData>());
 				}
 				else if (propertyInfo.propertyName == L"")
 				{
@@ -992,7 +1003,23 @@ GuiTreeNodeInstanceLoader
 			{
 				if (tree::MemoryNodeProvider* container = dynamic_cast<tree::MemoryNodeProvider*>(propertyValue.instanceValue.GetRawPtr()))
 				{
-					if (propertyValue.propertyName == L"")
+					if (propertyValue.propertyName == L"Text")
+					{
+						if (auto item = container->GetData().Cast<tree::TreeViewItem>())
+						{
+							item->text = UnboxValue<WString>(propertyValue.propertyValue);
+							container->NotifyDataModified();
+						}
+					}
+					else if (propertyValue.propertyName == L"Image")
+					{
+						if (auto item = container->GetData().Cast<tree::TreeViewItem>())
+						{
+							item->image = UnboxValue<Ptr<GuiImageData>>(propertyValue.propertyValue);
+							container->NotifyDataModified();
+						}
+					}
+					else if (propertyValue.propertyName == L"")
 					{
 						auto item = UnboxValue<Ptr<tree::MemoryNodeProvider>>(propertyValue.propertyValue);
 						container->Children().Add(item);

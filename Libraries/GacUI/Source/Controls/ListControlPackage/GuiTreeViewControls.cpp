@@ -1014,7 +1014,7 @@ TreeViewNodeItemStyleProvider::ItemController
 					}
 				}
 
-				TreeViewNodeItemStyleProvider::ItemController::ItemController(TreeViewNodeItemStyleProvider* _styleProvider)
+				TreeViewNodeItemStyleProvider::ItemController::ItemController(TreeViewNodeItemStyleProvider* _styleProvider, Size minIconSize, bool fitImage)
 					:list::ItemStyleControllerBase(_styleProvider->GetBindedItemStyleProvider(), 0)
 					,styleProvider(_styleProvider)
 				{
@@ -1052,7 +1052,11 @@ TreeViewNodeItemStyleProvider::ItemController
 						GuiCellComposition* cell=new GuiCellComposition;
 						table->AddChild(cell);
 						cell->SetSite(1, 2, 1, 1);
-						cell->SetPreferredMinSize(Size(16, 16));
+						cell->SetPreferredMinSize(minIconSize);
+						if (!fitImage)
+						{
+							cell->SetMinSizeLimitation(GuiGraphicsComposition::NoLimit);
+						}
 
 						image=GuiImageFrameElement::Create();
 						image->SetStretch(true);
@@ -1123,17 +1127,6 @@ TreeViewNodeItemStyleProvider::ItemController
 TreeViewNodeItemStyleProvider
 ***********************************************************************/
 
-				TreeViewNodeItemStyleProvider::TreeViewNodeItemStyleProvider()
-					:treeControl(0)
-					,bindedItemStyleProvider(0)
-					,treeViewItemView(0)
-				{
-				}
-
-				TreeViewNodeItemStyleProvider::~TreeViewNodeItemStyleProvider()
-				{
-				}
-
 				TreeViewNodeItemStyleProvider::ItemController* TreeViewNodeItemStyleProvider::GetRelatedController(INodeProvider* node)
 				{
 					vint index=treeControl->GetNodeItemView()->CalculateNodeVisibilityIndex(node);
@@ -1181,6 +1174,19 @@ TreeViewNodeItemStyleProvider
 					UpdateExpandingButton(node);
 				}
 
+				TreeViewNodeItemStyleProvider::TreeViewNodeItemStyleProvider(Size _minIconSize, bool _fitImage)
+					:treeControl(0)
+					,bindedItemStyleProvider(0)
+					,treeViewItemView(0)
+					, minIconSize(_minIconSize)
+					, fitImage(_fitImage)
+				{
+				}
+
+				TreeViewNodeItemStyleProvider::~TreeViewNodeItemStyleProvider()
+				{
+				}
+
 				void TreeViewNodeItemStyleProvider::BindItemStyleProvider(GuiListControl::IItemStyleProvider* styleProvider)
 				{
 					bindedItemStyleProvider=styleProvider;
@@ -1222,7 +1228,7 @@ TreeViewNodeItemStyleProvider
 
 				INodeItemStyleController* TreeViewNodeItemStyleProvider::CreateItemStyle(vint styleId)
 				{
-					return new ItemController(this);
+					return new ItemController(this, minIconSize, fitImage);
 				}
 
 				void TreeViewNodeItemStyleProvider::DestroyItemStyle(INodeItemStyleController* style)

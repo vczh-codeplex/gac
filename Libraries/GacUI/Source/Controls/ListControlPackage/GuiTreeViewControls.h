@@ -616,7 +616,7 @@ TreeView
 						void								OnExpandingButtonDoubleClick(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
 						void								OnExpandingButtonClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 					public:
-						ItemController(TreeViewNodeItemStyleProvider* _styleProvider);
+						ItemController(TreeViewNodeItemStyleProvider* _styleProvider, Size minIconSize, bool fitImage);
 
 						INodeItemStyleProvider*				GetNodeStyleProvider()override;
 						void								Install(INodeProvider* node);
@@ -630,6 +630,8 @@ TreeView
 					GuiVirtualTreeView*						treeControl;
 					GuiListControl::IItemStyleProvider*		bindedItemStyleProvider;
 					ITreeViewItemView*						treeViewItemView;
+					Size									minIconSize;
+					bool									fitImage;
 
 				protected:
 					ItemController*							GetRelatedController(INodeProvider* node);
@@ -641,7 +643,7 @@ TreeView
 					void									OnItemCollapsed(INodeProvider* node)override;
 				public:
 					/// <summary>Create a node item style provider.</summary>
-					TreeViewNodeItemStyleProvider();
+					TreeViewNodeItemStyleProvider(Size _minIconSize = Size(16, 16), bool _fitImage = true);
 					~TreeViewNodeItemStyleProvider();
 
 					void									BindItemStyleProvider(GuiListControl::IItemStyleProvider* styleProvider)override;
