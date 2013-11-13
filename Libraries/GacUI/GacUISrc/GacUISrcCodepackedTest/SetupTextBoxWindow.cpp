@@ -625,9 +625,9 @@ Event Handlers
 
 using namespace colorization;
 
-void SetupTextBoxWindow(GuiControlHost* controlHost, GuiControl* container)
+void SetupTextBoxWindow(GuiControlHost* controlHost, GuiGraphicsComposition* container)
 {
-	container->GetBoundsComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+	container->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 	
 	GuiMultilineTextBox* textBox=0;
 	GuiSelectableButton* radioGrammar=0;
@@ -638,7 +638,7 @@ void SetupTextBoxWindow(GuiControlHost* controlHost, GuiControl* container)
 
 	GuiTableComposition* table=new GuiTableComposition;
 	table->SetAlignmentToParent(Margin(0, 0, 0, 0));
-	container->GetBoundsComposition()->AddChild(table);
+	container->AddChild(table);
 
 	table->SetCellPadding(5);
 	table->SetRowsAndColumns(2, 4);

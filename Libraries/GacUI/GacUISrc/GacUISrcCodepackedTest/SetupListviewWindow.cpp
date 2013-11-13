@@ -1,8 +1,8 @@
 #include "..\..\Public\Source\GacUI.h"
 
-void SetupListviewWindow(GuiControlHost* controlHost, GuiControl* container)
+void SetupListviewWindow(GuiControlHost* controlHost, GuiGraphicsComposition* container)
 {
-	container->GetBoundsComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+	container->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 	GuiListView* listControl=0;
 	{
 		listControl=g::NewListViewBigIcon();
@@ -11,7 +11,7 @@ void SetupListviewWindow(GuiControlHost* controlHost, GuiControl* container)
 		listControl->SetHorizontalAlwaysVisible(false);
 		listControl->SetVerticalAlwaysVisible(false);
 		listControl->SetMultiSelect(true);
-		container->GetBoundsComposition()->AddChild(listControl->GetBoundsComposition());
+		container->AddChild(listControl->GetBoundsComposition());
 		
 		INativeImageService* imageService=GetCurrentController()->ImageService();
 		Ptr<INativeImage> largeImage=imageService->CreateImageFromFile(L"Resources\\BigDoc.png");
@@ -47,7 +47,7 @@ void SetupListviewWindow(GuiControlHost* controlHost, GuiControl* container)
 		typeList->GetBoundsComposition()->SetAlignmentToParent(Margin(5, 5, -1, 5));
 		typeList->GetBoundsComposition()->SetBounds(Rect(0, 0, 190, 200));
 		typeList->SetHorizontalAlwaysVisible(false);
-		container->GetBoundsComposition()->AddChild(typeList->GetBoundsComposition());
+		container->AddChild(typeList->GetBoundsComposition());
 
 		typeList->GetItems().Add(new list::TextItem(L"Big Icon"));
 		typeList->GetItems().Add(new list::TextItem(L"Small Icon"));

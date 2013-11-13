@@ -111,9 +111,9 @@ namespace document
 }
 using namespace document;
 
-void SetupDocumentElementLayoutWindow(GuiControlHost* controlHost, GuiControl* container, const WString& filename)
+void SetupDocumentElementLayoutWindow(GuiControlHost* controlHost, GuiGraphicsComposition* container, const WString& filename)
 {
-	container->GetBoundsComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+	container->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 	
 	GuiDocumentViewer* documentViewer=g::NewDocumentViewer();
 	documentViewer->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
@@ -147,10 +147,10 @@ void SetupDocumentElementLayoutWindow(GuiControlHost* controlHost, GuiControl* c
 		});
 	});
 
-	container->GetContainerComposition()->AddChild(documentViewer->GetBoundsComposition());
+	container->AddChild(documentViewer->GetBoundsComposition());
 }
 
-void SetupDocumentViewerLayoutWindow(GuiControlHost* controlHost, GuiControl* container)
+void SetupDocumentViewerLayoutWindow(GuiControlHost* controlHost, GuiGraphicsComposition* container)
 {
 	GuiDocumentViewer* documentControl=g::NewDocumentViewer();
 	documentControl->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
@@ -161,14 +161,14 @@ void SetupDocumentViewerLayoutWindow(GuiControlHost* controlHost, GuiControl* co
 			documentControl->GetActiveHyperlinkReference(),
 			controlHost->GetText());
 	});
-	container->AddChild(documentControl);
+	container->AddChild(documentControl->GetBoundsComposition());
 
 	Ptr<GuiResource> resource=GuiResource::LoadFromXml(L"Resources\\XmlResource.xml");
 	Ptr<DocumentModel> document=resource->GetValueByPath(L"XmlDoc.xml").Cast<DocumentModel>();
 	documentControl->SetDocument(document);
 }
 
-void SetupDocumentLabelLayoutWindow(GuiControlHost* controlHost, GuiControl* container)
+void SetupDocumentLabelLayoutWindow(GuiControlHost* controlHost, GuiGraphicsComposition* container)
 {
 	GuiDocumentLabel* documentControl=g::NewDocumentLabel();
 	documentControl->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
@@ -179,7 +179,7 @@ void SetupDocumentLabelLayoutWindow(GuiControlHost* controlHost, GuiControl* con
 			documentControl->GetActiveHyperlinkReference(),
 			controlHost->GetText());
 	});
-	container->AddChild(documentControl);
+	container->AddChild(documentControl->GetBoundsComposition());
 
 	Ptr<GuiResource> resource=GuiResource::LoadFromXml(L"Resources\\XmlResource.xml");
 	Ptr<DocumentModel> document=resource->GetValueByPath(L"XmlDoc.xml").Cast<DocumentModel>();

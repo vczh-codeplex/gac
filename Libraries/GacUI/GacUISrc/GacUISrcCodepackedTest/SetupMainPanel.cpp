@@ -1,6 +1,6 @@
 #include "..\..\Public\Source\GacUI.h"
 
-void SetupMainPanel(GuiControlHost* controlHost, GuiControl* container, GuiCellComposition* cell)
+void SetupMainPanel(GuiControlHost* controlHost, GuiGraphicsComposition* container, GuiCellComposition* cell)
 {
 	{
 		GuiControl* groupBox=g::NewGroupBox();

@@ -1,8 +1,8 @@
 #include "..\..\Public\Source\GacUI.h"
 
-void SetupListControlWindow(GuiControlHost* controlHost, GuiControl* container)
+void SetupListControlWindow(GuiControlHost* controlHost, GuiGraphicsComposition* container)
 {
-	container->GetBoundsComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+	container->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 	GuiTextList* listControl=0;
 	{
 		listControl=g::NewTextList();
@@ -10,7 +10,7 @@ void SetupListControlWindow(GuiControlHost* controlHost, GuiControl* container)
 		listControl->GetBoundsComposition()->SetBounds(Rect(0, 0, 300, 200));
 		listControl->SetHorizontalAlwaysVisible(false);
 		listControl->SetMultiSelect(true);
-		container->GetBoundsComposition()->AddChild(listControl->GetBoundsComposition());
+		container->AddChild(listControl->GetBoundsComposition());
 
 		for(int i=0;i<30;i++)
 		{
@@ -23,7 +23,7 @@ void SetupListControlWindow(GuiControlHost* controlHost, GuiControl* container)
 		typeList->GetBoundsComposition()->SetAlignmentToParent(Margin(5, 5, -1, 5));
 		typeList->GetBoundsComposition()->SetBounds(Rect(0, 0, 190, 200));
 		typeList->SetHorizontalAlwaysVisible(false);
-		container->GetBoundsComposition()->AddChild(typeList->GetBoundsComposition());
+		container->AddChild(typeList->GetBoundsComposition());
 
 		typeList->GetItems().Add(new list::TextItem(L"Text List"));
 		typeList->GetItems().Add(new list::TextItem(L"Check List"));

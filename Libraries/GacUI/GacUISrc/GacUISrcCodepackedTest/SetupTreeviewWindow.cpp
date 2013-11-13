@@ -1,14 +1,14 @@
 #include "..\..\Public\Source\GacUI.h"
 
-void SetupTreeviewWindow(GuiControlHost* controlHost, GuiControl* container)
+void SetupTreeviewWindow(GuiControlHost* controlHost, GuiGraphicsComposition* container)
 {
-	container->GetBoundsComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+	container->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 	GuiTreeView* treeControl=g::NewTreeView();
 	treeControl->GetBoundsComposition()->SetAlignmentToParent(Margin(5, 5, 5, 5));
 	treeControl->GetBoundsComposition()->SetBounds(Rect(0, 0, 300, 200));
 	treeControl->SetHorizontalAlwaysVisible(false);
 	treeControl->SetVerticalAlwaysVisible(false);
-	container->GetBoundsComposition()->AddChild(treeControl->GetBoundsComposition());
+	container->AddChild(treeControl->GetBoundsComposition());
 
 	treeControl->NodeLeftButtonDoubleClick.AttachLambda([=](GuiGraphicsComposition* sender, GuiNodeMouseEventArgs& arguments)
 	{

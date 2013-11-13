@@ -1,13 +1,13 @@
 #include "..\..\Public\Source\GacUI.h"
 
-extern void SetupMainPanel(GuiControlHost* controlHost, GuiControl* container, GuiCellComposition* cell);
+extern void SetupMainPanel(GuiControlHost* controlHost, GuiGraphicsComposition* container, GuiCellComposition* cell);
 
-void SetupBasicWindow(GuiControlHost* controlHost, GuiControl* container)
+void SetupBasicWindow(GuiControlHost* controlHost, GuiGraphicsComposition* container)
 {
-	container->GetBoundsComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+	container->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 	GuiTableComposition* table=new GuiTableComposition;
 	table->SetAlignmentToParent(Margin(0, 0, 0, 0));
-	container->GetContainerComposition()->AddChild(table);
+	container->AddChild(table);
 	table->SetRowsAndColumns(2, 3);
 	table->SetCellPadding(5);
 	table->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);

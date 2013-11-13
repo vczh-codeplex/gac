@@ -25,7 +25,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 #endif
 	return result;
 }
-extern void SetupTabPageWindow(GuiControlHost* controlHost, GuiControl* container);
+extern void SetupTabPageWindow(GuiControlHost* controlHost, GuiGraphicsComposition* container);
 
 /***********************************************************************
 MainWindow
@@ -45,7 +45,7 @@ public:
 #endif
 		SetClientSize(Size(800, 660));
 		MoveToScreenCenter();
-		SetupTabPageWindow(this, this);
+		SetupTabPageWindow(this, this->GetContainerComposition());
 	}
 };
 
