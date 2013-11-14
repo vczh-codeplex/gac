@@ -234,5 +234,15 @@
       <cpp src="Main.cpp" />
       <description>This demo shows how to build a window with a customized border and a skin.</description>
     </demo>
+    <demo name="LoadFromXml.Controls">
+      <date>2013/11/14</date>
+      <image src="DXGUI_84.jpg" />
+      <image src="DXGUI_85.jpg" />
+      <image src="DXGUI_86.jpg" />
+      <image src="DXGUI_87.jpg" />
+      <image src="DXGUI_88.jpg" />
+      <cpp src="Main.cpp" />
+      <description>This demo shows how to load windows or controls from an XML resource.</description>
+    </demo>
   </category>
 </demos>

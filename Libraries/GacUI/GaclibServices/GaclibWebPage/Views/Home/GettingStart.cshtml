@@ -34,15 +34,13 @@
             If you don't know how to create a Visual C++ project, please read <a href="http://msdn.microsoft.com/en-us/library/4457htyc.aspx" target="_blank">this MSDN article</a>.
         </p>
         <p>
-            After a Visual C++ project is created, add these 5 source files to your project. If you still have trouble getting these files, please read the <a href="@Url.Action("Download")">DOWNLOAD</a> page again.
+            After a Visual C++ project is created, add these 8 source files to your project. If you still have trouble getting these files, please read the <a href="@Url.Action("Download")">DOWNLOAD</a> page again.
         </p>
         <ul>
-            <li>GacUI.h</li>
-            <li>GacUI.cpp</li>
-            <li>GacUIWindows.h</li>
-            <li>GacUIWindows.cpp</li>
-            <li>Vlpp.h</li>
-            <li>Vlpp.cpp</li>
+            <li><b>Vlpp.h/cpp</b> : A C++ common library.</li>
+            <li><b>GacUI.h/cpp</b> : Containing all main features.</li>
+            <li><b>GacUIWindows.h.cpp</b> : Containing all features that interact with the Microsoft Windows.</li>
+            <li><b>GacUIReflection.h/cpp</b> : (Optional) Containing all features that need reflection, like loading windows from xml resource, data binding, etc.</li>
         </ul>
         <p>
             Precompiled headers are recommended to use for a GacUI project. Adding these header files to your precompiled headers will speed up the compiling, especially for big projects. Remember disable precompiled headers for these cpp files, or you have to add #include "stdafx.h" to these cpp files yourself.
@@ -56,7 +54,7 @@
         </p>
         <h2>WinMain</h2>
         <p>
-            The only function you need to call in WinMain is <strong>SetupWindowsDirect2DRenderer</strong> or <strong>SetupWindowsGDIRenderer</strong>. This is the only chance to choose which renderer to use after a program is executed. If you want to use Direct2D which is a good solution to speed up your program using GPU, call <strong>SetupWindowsDirect2DRenderer</strong>. If you want to use GDI, which is only suggested to use in an environment that Direct2D is not available, call <strong>SetupWindowsGDIRenderer</strong>. If you want to make your program compatible with Windows XP operating system, you can test if the system supports Direct2D in <strong>WinMain</strong>, and then decide which function to call.
+            The only function you need to call in WinMain is <strong>SetupWindowsDirect2DRenderer</strong> or <strong>SetupWindowsGDIRenderer</strong>. This is the only chance to choose which renderer to use after a program is executed. If you want to use Direct2D which is a good solution to speed up your program using GPU, call <strong>SetupWindowsDirect2DRenderer</strong>. If you want to use GDI, which is only suggested to use in an environment that Direct2D is not available, call <strong>SetupWindowsGDIRenderer</strong>.
         </p>
         <h2>GuiMain</h2>
         <p>
