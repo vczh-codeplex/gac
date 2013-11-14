@@ -25,19 +25,26 @@
             </il>
             <il>
                 <strong>Download Pages in Codeplex</strong>
-                @foreach(var version in Model.Versions)
+                @foreach(var version in Model.Versions.Take(5))
                 {
                     <p>
                     <strong>@version.Version</strong>@(": ")<a href="@version.Url" target="_blank">@version.Url</a>
                     </p>
                 }
+                <p>...</p>
             </il>
         </ul>
         <h1 id="Introduction">Introduction</h1>
         <p>
-            GacUI library is released by source code in <a href="http://gac.codeplex.com/" target="_blank">http://gac.codeplex.com/</a>. GacUI is released under the MS-PL license. That says, if you want to redistribute your open source project that depends on GacUI, all GacUI source code (modified or not) should be under MS-PL, and your can choose your favorite license for your code. In other cases, MS-PL is very similar to Apache or BSD. Currently a complete GacUI release contains only 5 source files:
+            GacUI library is released by source code in <a href="http://gac.codeplex.com/" target="_blank">http://gac.codeplex.com/</a>. GacUI is released under the MS-PL license. That says, if you want to redistribute your open source project that depends on GacUI, all GacUI source code (modified or not) should be under MS-PL, and your can choose your favorite license for your code. In other cases, MS-PL is very similar to Apache or BSD. Currently a complete GacUI release contains 8 source files:
         </p>
         <ul>
+            <li>
+                <strong>Vlpp.h and Vlpp.cpp</strong>
+                <p>
+                    These files comes from <a href="http://vlpp.codeplex.com/" target="_blank">http://vlpp.codeplex.com/</a> project, which constructions that encapsulated strings, containers, regex, threading, synchronization and other tools for making C++ development easier.
+                </p>
+            </li>
             <li>
                 <strong>GacUI.h and GacUI.cpp</strong>
                 <p>
@@ -51,9 +58,9 @@
                 </p>
             </li>
             <li>
-                <strong>Vlpp.h and Vlpp.cpp</strong>
+                <strong>GacUIReflection.h and GacUIReflection.cpp (includes reflection and xml resource features)</strong>
                 <p>
-                    These files comes from <a href="http://vlpp.codeplex.com/" target="_blank">http://vlpp.codeplex.com/</a> project, which constructions that encapsulated strings, containers, regex, threading, synchronization and other tools for making C++ development easier.
+                    GuiUIReflection.h contains all features that need reflection, like loading windows from xml resource, data binding, etc. If you don't need this feature, you don't need to compile these 2 files in your project.
                 </p>
             </li>
         </ul>
@@ -87,7 +94,7 @@
                 </p>
                 <ul>
                     <li>Open <strong>Libraries\GacUI\GacUISrc\GacUISrc.sln</strong> using Visual Studio 2012.</li>
-                    <li>Compile the GacUISrc project under <strong>Debug</strong> configuration.</li>
+                    <li>Compile the GacUISrc project under <strong>DebugNoReflection</strong> configuration.</li>
                     <li>Run <strong>Libraries\GacUI\Public\Release.bat</strong> in Windows Explorer.</li>
                 </ul>
                 <p>
