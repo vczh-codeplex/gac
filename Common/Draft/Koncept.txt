@@ -53,7 +53,7 @@ data<T, U> Pair
 
 
 (T, U, V)			Pair<T, Pair<U, Pair<V, void>>>		{default(T), default(U), default(V)}
-T?														null		// T??->T?, T^?->T?, object?->object
+T?														null		// T??->T?, T^?->T?, object?->object | null
 T^														default(T)	// T?^->T?, T^^->T^, cannot be interface. T should be DataType<T>
 T()					Array<T>
 T(U)				Map<U, T>
