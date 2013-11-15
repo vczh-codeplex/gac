@@ -3,7 +3,7 @@
 #include <crtdbg.h>
 #include <windows.h>
 
-#include "..\..\Source\KonceptVlppReferences.h"
+#include "..\..\Source\WorkflowVlppReferences.h"
 #include "..\..\..\..\Common\Source\Console.h"
 
 using namespace vl;
@@ -32,7 +32,7 @@ WString GetPath()
 
 int wmain(int argc, wchar_t* argv[])
 {
-	Console::SetTitle(L"Koncept UnitTest Project");
+	Console::SetTitle(L"Workflow UnitTest Project");
 	_CrtDumpMemoryLeaks();
 	return 0;
 }

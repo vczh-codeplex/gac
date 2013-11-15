@@ -171,6 +171,15 @@
     <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptor.cpp">
+      <Filter>Common\Reflection</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorBuilder.cpp">
+      <Filter>Common\Reflection</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorPredefined.cpp">
+      <Filter>Common\Reflection</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Common\Source\Basic.h">
@@ -325,6 +334,21 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\KonceptVlppReferences.h">
       <Filter>Koncept</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptor.h">
+      <Filter>Common\Reflection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorBuilder.h">
+      <Filter>Common\Reflection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorBuilder_Gen.h">
+      <Filter>Common\Reflection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorMacros.h">
+      <Filter>Common\Reflection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorPredefined.h">
+      <Filter>Common\Reflection</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
