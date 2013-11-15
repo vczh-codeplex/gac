@@ -143,7 +143,7 @@ TypeName
 
 			const wchar_t* TypeInfo<IValueEnumerator>::TypeName			= L"system::Enumerator";
 			const wchar_t* TypeInfo<IValueEnumerable>::TypeName			= L"system::Enumerable";
-			const wchar_t* TypeInfo<IValueReadonlyList>::TypeName		= L"system::ReadableList";
+			const wchar_t* TypeInfo<IValueReadonlyList>::TypeName		= L"system::ReadonlyList";
 			const wchar_t* TypeInfo<IValueList>::TypeName				= L"system::List";
 			const wchar_t* TypeInfo<IValueReadonlyDictionary>::TypeName	= L"system::ReadonlyDictionary";
 			const wchar_t* TypeInfo<IValueDictionary>::TypeName			= L"system::Dictionary";
