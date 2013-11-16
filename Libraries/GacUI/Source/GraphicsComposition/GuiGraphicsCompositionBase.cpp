@@ -59,13 +59,15 @@ GuiGraphicsComposition
 				}
 			}
 
-			void GuiGraphicsComposition::SharedPtrDestructorProc(DescriptableObject* obj)
+			bool GuiGraphicsComposition::SharedPtrDestructorProc(DescriptableObject* obj, bool forceDisposing)
 			{
 				GuiGraphicsComposition* value=dynamic_cast<GuiGraphicsComposition*>(obj);
-				if(value->parent==0)
+				if(value->parent)
 				{
-					SafeDeleteComposition(value);
+					if (!forceDisposing) return false;
 				}
+				SafeDeleteComposition(value);
+				return true;
 			}
 
 			GuiGraphicsComposition::GuiGraphicsComposition()
