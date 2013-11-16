@@ -1,0 +1,46 @@
+ReferenceType means pointer
+ReferenceType^ means smart pointer
+int[] is IValueList^
+int[string] is IValueDictionary^
+int{} is IValueEnumerable^
+int(string, string) is IValueFunction^
+int -> System.Int32/64
+uint -> System.UInt32/64
+----------------------------
+^
+* /
++ - not
+shl shr
+< > <= >= != ==
+xor
+and
+or
+----------------------------
+"String" // can be implicitly converted to all other serializable types
+$"1 + 2 = ($1 + 2)"
+' and " is exchangable
+true false null
+----------------------------
+let x = expression in expression
+condition ? true_branch : false_branch
+x in (a, b) | [a, b) | (a, b] | [a, b]
+x in collection
+----------------------------
+// the meaning of the following patterns of expression dependes on the destination type
+{a b c d}
+{a:b c:d}
+Spring
+Spring | Summer | Autumn | Winter
+----------------------------
+int[]{a b c d}
+int[string]{a:b c:d e:f}
+Point{x:10 y:20}
+----------------------------
+x[y]
+x(x, y, z)
+----------------------------
+ptr T^ -> T*
+shared_ptr T* -> T^
+expression :: Type // infer
+expression as Type // cast
+----------------------------
