@@ -6,7 +6,7 @@ int{} is IValueEnumerable^
 int(string, string) is IValueFunction^
 int -> System.Int32/64
 uint -> System.UInt32/64
-----------------------------
+======================================================
 ^
 * /
 + - not
@@ -17,8 +17,8 @@ and
 or
 ----------------------------
 "String" // can be implicitly converted to all other serializable types
-$"1 + 2 = ($1 + 2)"
-' and " is exchangable
+$"1 + 2 = $(1 + 2)"
+' and " is exchangable, '' in 'string' means ''', "" in "string" means '"'
 true false null
 ----------------------------
 let x = expression in expression
@@ -36,11 +36,13 @@ int[]{a b c d}
 int[string]{a:b c:d e:f}
 Point{x:10 y:20}
 ----------------------------
-x[y]
+x(y)
 x(x, y, z)
+[$+1]
+[$1+$2]
 ----------------------------
-ptr T^ -> T*
-shared_ptr T* -> T^
+ptr(T^) -> T*
+shared_ptr(T*) -> T^
 expression :: Type // infer
 expression as Type // cast
-----------------------------
+======================================================
