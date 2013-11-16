@@ -127,7 +127,7 @@ Basic Construction
 				virtual void							UpdateVisuallyEnabled();
 				void									SetFocusableComposition(compositions::GuiGraphicsComposition* value);
 
-				static void								SharedPtrDestructorProc(DescriptableObject* obj);
+				static bool								SharedPtrDestructorProc(DescriptableObject* obj, bool forceDisposing);
 			public:
 				/// <summary>Create a control with a specified style controller.</summary>
 				/// <param name="_styleController">The style controller.</param>

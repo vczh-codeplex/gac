@@ -120,13 +120,15 @@ GuiControl
 				}
 			}
 
-			void GuiControl::SharedPtrDestructorProc(DescriptableObject* obj)
+			bool GuiControl::SharedPtrDestructorProc(DescriptableObject* obj, bool forceDisposing)
 			{
 				GuiControl* value=dynamic_cast<GuiControl*>(obj);
-				if(value->GetBoundsComposition()->GetParent()==0)
+				if(value->GetBoundsComposition()->GetParent())
 				{
-					SafeDeleteControl(value);
+					if (!forceDisposing) return false;
 				}
+				SafeDeleteControl(value);
+				return true;
 			}
 
 			GuiControl::GuiControl(IStyleController* _styleController)

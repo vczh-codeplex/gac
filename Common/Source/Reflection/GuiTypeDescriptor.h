@@ -51,7 +51,7 @@ Attribute
 			friend class DescriptableValue;
 
 			typedef collections::Dictionary<WString, Ptr<Object>>		InternalPropertyMap;
-			typedef void(*DestructorProc)(DescriptableObject* obj);
+			typedef bool(*DestructorProc)(DescriptableObject* obj, bool forceDisposing);
 		protected:
 			volatile vint							referenceCounter;
 			DestructorProc							sharedPtrDestructorProc;
@@ -66,6 +66,7 @@ Attribute
 			description::ITypeDescriptor*			GetTypeDescriptor();
 			Ptr<Object>								GetInternalProperty(const WString& name);
 			void									SetInternalProperty(const WString& name, Ptr<Object> value);
+			bool									Dispose(bool forceDisposing);
 		};
 		
 		template<typename T>
@@ -123,14 +124,7 @@ ReferenceCounterOperator
 		static __forceinline void DeleteReference(volatile vint* counter, void* reference)
 		{
 			reflection::DescriptableObject* obj=(T*)reference;
-			if(obj->sharedPtrDestructorProc)
-			{
-				obj->sharedPtrDestructorProc(obj);
-			}
-			else
-			{
-				delete obj;
-			}
+			obj->Dispose(false);
 		}
 	};
 
@@ -877,6 +871,15 @@ Exceptions
 			public:
 				TypeDescriptorException(const WString& message)
 					:Exception(message)
+				{
+				}
+			};
+
+			class ValueNotDisposableException : public TypeDescriptorException
+			{
+			public:
+				ValueNotDisposableException()
+					:TypeDescriptorException(L"Cannot dispose an object whose reference counter is not 0.")
 				{
 				}
 			};

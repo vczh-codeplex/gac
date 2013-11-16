@@ -74,6 +74,24 @@ DescriptableObject
 			}
 		}
 
+		bool DescriptableObject::Dispose(bool forceDisposing)
+		{
+			if (referenceCounter > 0 && forceDisposing)
+			{
+				throw description::ValueNotDisposableException();
+			}
+
+			if (sharedPtrDestructorProc)
+			{
+				return sharedPtrDestructorProc(this, forceDisposing);
+			}
+			else
+			{
+				delete this;
+				return true;
+			}
+		}
+
 /***********************************************************************
 description::Value
 ***********************************************************************/
@@ -409,7 +427,7 @@ description::Value
 			{
 				if(valueType!=RawPtr) return false;
 				if(!rawPtr) return false;
-				delete rawPtr;
+				rawPtr->Dispose(true);
 				*this=Value();
 				return true;
 			}
