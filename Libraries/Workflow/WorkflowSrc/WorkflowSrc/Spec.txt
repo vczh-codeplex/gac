@@ -49,9 +49,10 @@ func Type(Type a, Type b) <statement>
 ----------------------------
 ptr(T^) -> T*
 shared_ptr(T*) -> T^
-expression :: Type // infer
-expression as Type // cast
-expression is Type // test
+expression :: Type		// infer
+cast Type expression	// cast, exception if failed
+expression as Type		// cast, null if failed
+expression is Type		// test
 ======================================================
 func Type Name(Type a, Type b) <statement>
 
