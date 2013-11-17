@@ -1,11 +1,15 @@
 ReferenceType means pointer
 ReferenceType^ means smart pointer
-int[] is IValueList^
-int[string] is IValueDictionary^
-int{} is IValueEnumerable^
-int(string, string) is IValueFunction^
-int -> System.Int32/64
-uint -> System.UInt32/64
+int[] is ValueList^
+int[string] is ValueDictionary^
+int{} is ValueEnumerable^
+int(string, string) is ValueFunction^
+int -> Int32/64
+uint -> UInt32/64
+
+captured variable cannot be modified
+struct fields cannot be modified
+argument cannot be modified
 ======================================================
 ^
 * /
@@ -38,11 +42,30 @@ Point{x:10 y:20}
 ----------------------------
 x(y)
 x(x, y, z)
+x.y
 [$+1]
 [$1+$2]
+func Type(Type a, Type b) <statements> end
 ----------------------------
 ptr(T^) -> T*
 shared_ptr(T*) -> T^
 expression :: Type // infer
 expression as Type // cast
+expression is Type // test
 ======================================================
+func Type Name(Type a, Type b) <statements> end
+
+var [Type] Name = <expression>
+break
+continue
+exit
+return <expression>
+
+<left-value> = <right-value>
+if condition then <statements> {else if condition then <statements>} [else <statements>] end
+select <expression> {case condition do <statements>} [else <statements>] end
+// condition in if statement can be "<expression>" or "cast Type Name = <expression>"
+
+while condition do <statements> end
+loop <statements> until condition
+for x in (<collection> | [reversed] <range>) do <statements> end
