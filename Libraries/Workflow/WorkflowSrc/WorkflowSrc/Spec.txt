@@ -45,7 +45,7 @@ x(x, y, z)
 x.y
 [$+1]
 [$1+$2]
-func Type(Type a, Type b) <statements> end
+func Type(Type a, Type b) <statement>
 ----------------------------
 ptr(T^) -> T*
 shared_ptr(T*) -> T^
@@ -53,19 +53,23 @@ expression :: Type // infer
 expression as Type // cast
 expression is Type // test
 ======================================================
-func Type Name(Type a, Type b) <statements> end
+func Type Name(Type a, Type b) <statement>
 
-var [Type] Name = <expression>
-break
-continue
-exit
-return <expression>
+{ statement ... }
 
-<left-value> = <right-value>
-if condition then <statements> {else if condition then <statements>} [else <statements>] end
-select <expression> {case condition do <statements>} [else <statements>] end
-// condition in if statement can be "<expression>" or "cast Type Name = <expression>"
+var [Type] Name = <expression>;
+<left-value> = <right-value>;
+break;
+continue;
+return [<expression>];
 
-while condition do <statements> end
-loop <statements> until condition
-for x in (<collection> | [reversed] <range>) do <statements> end
+if ([cast Type Name = ] <expression>) <statement> [else <statement>]
+select (<expression>)
+{
+	{case condition : <statement>}
+	[default : <statement>]
+}
+
+while condition do <statement>
+do <statement> while condition;
+for (x in (<collection> | [reversed] <range>)) <statement>
