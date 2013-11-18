@@ -14,8 +14,9 @@ void WriteTypeReflectionImplementation(ParsingSymbolManager* manager, const WStr
 		writer.WriteLine(L";");
 	}
 
-	SortedList<ParsingSymbol*> types;
+	SortedList<ParsingSymbol*> types, leafClasses;
 	EnumerateAllTypes(manager, manager->GetGlobal(), types);
+	EnumerateAllLeafClass(manager, leafClasses);
 	
 	writer.WriteLine(L"");
 	FOREACH(ParsingSymbol*, type, types)
@@ -75,6 +76,15 @@ void WriteTypeReflectionImplementation(ParsingSymbolManager* manager, const WStr
 					writer.WriteString(L"\tCLASS_MEMBER_BASE(");
 					PrintType(parent, config.classPrefix, writer);
 					writer.WriteLine(L")");
+					writer.WriteLine(L"");
+				}
+				
+				if (leafClasses.Contains(type))
+				{
+					writer.WriteString(prefix);
+					writer.WriteString(L"\tCLASS_MEMBER_CONSTRUCTOR(vl::Ptr<");
+					PrintType(type, config.classPrefix, writer);
+					writer.WriteLine(L">(), NO_PARAMETER)");
 					writer.WriteLine(L"");
 				}
 
@@ -149,5 +159,72 @@ void WriteTypeReflectionImplementation(ParsingSymbolManager* manager, const WStr
 			break;
 		}
 	}
+
+	writer.WriteLine(L"");
+	writer.WriteString(prefix);
+	writer.WriteString(L"class ");
+	writer.WriteString(config.classPrefix);
+	writer.WriteLine(L"TypeLoader : public vl::Object, public ITypeLoader");
+	writer.WriteString(prefix);
+	writer.WriteLine(L"{");
+	writer.WriteString(prefix);
+	writer.WriteLine(L"public:");
+	
+	writer.WriteString(prefix);
+	writer.WriteLine(L"\tvoid Load(ITypeManager* manager)");
+	writer.WriteString(prefix);
+	writer.WriteLine(L"\t{");
+	FOREACH(ParsingSymbol*, type, types)
+	{
+		writer.WriteString(prefix);
+		writer.WriteString(L"\t\tADD_TYPE_INFO(");
+		PrintNamespaces(config.codeNamespaces, writer);
+		PrintType(type, config.classPrefix, writer);
+		writer.WriteLine(L")");
+	}
+	writer.WriteString(prefix);
+	writer.WriteLine(L"\t}");
+	
+	writer.WriteLine(L"");
+	writer.WriteString(prefix);
+	writer.WriteLine(L"\tvoid Unload(ITypeManager* manager)");
+	writer.WriteString(prefix);
+	writer.WriteLine(L"\t{");
+	writer.WriteString(prefix);
+	writer.WriteLine(L"\t}");
+
+	writer.WriteString(prefix);
+	writer.WriteLine(L"};");
+
 	writer.WriteLine(L"#endif");
+
+	writer.WriteLine(L"");
+	writer.WriteString(prefix);
+	writer.WriteString(L"bool ");
+	writer.WriteString(config.classPrefix);
+	writer.WriteLine(L"LoadTypes()");
+	writer.WriteString(prefix);
+	writer.WriteLine(L"{");
+	writer.WriteLine(L"#ifndef VCZH_DEBUG_NO_REFLECTION");
+
+	writer.WriteString(prefix);
+	writer.WriteLine(L"\tITypeManager* manager=GetGlobalTypeManager();");
+	writer.WriteString(prefix);
+	writer.WriteLine(L"\tif(manager)");
+	writer.WriteString(prefix);
+	writer.WriteLine(L"\t{");
+	writer.WriteString(prefix);
+	writer.WriteString(L"\t\tPtr<ITypeLoader> loader=new ");
+	writer.WriteString(config.classPrefix);
+	writer.WriteLine(L"TypeLoader;");
+	writer.WriteString(prefix);
+	writer.WriteLine(L"\t\treturn manager->AddTypeLoader(loader);");
+	writer.WriteString(prefix);
+	writer.WriteLine(L"\t}");
+
+	writer.WriteLine(L"#endif");
+	writer.WriteString(prefix);
+	writer.WriteLine(L"\treturn false;");
+	writer.WriteString(prefix);
+	writer.WriteLine(L"}");
 }

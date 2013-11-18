@@ -1,5 +1,6 @@
 include:"..\..\..\..\Libraries\GacUI\Public\Source\Vlpp.h"
 namespace:vczh.whoknows.xmlutility
+reflection:System
 classPrefix:Xml
 guard:VCZH_PARSING_XML
 parser:ParseDocument(XDocument)

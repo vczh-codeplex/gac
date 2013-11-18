@@ -19,21 +19,21 @@ namespace vl
 	{
 		namespace xml
 		{
-			struct XmlParserTokenIndex abstract
+			enum class XmlParserTokenIndex
 			{
-				static const vl::vint INSTRUCTION_OPEN = 0;
-				static const vl::vint INSTRUCTION_CLOSE = 1;
-				static const vl::vint COMPLEX_ELEMENT_OPEN = 2;
-				static const vl::vint SINGLE_ELEMENT_CLOSE = 3;
-				static const vl::vint ELEMENT_OPEN = 4;
-				static const vl::vint ELEMENT_CLOSE = 5;
-				static const vl::vint EQUAL = 6;
-				static const vl::vint NAME = 7;
-				static const vl::vint ATTVALUE = 8;
-				static const vl::vint COMMENT = 9;
-				static const vl::vint CDATA = 10;
-				static const vl::vint TEXT = 11;
-				static const vl::vint SPACE = 12;
+				INSTRUCTION_OPEN = 0,
+				INSTRUCTION_CLOSE = 1,
+				COMPLEX_ELEMENT_OPEN = 2,
+				SINGLE_ELEMENT_CLOSE = 3,
+				ELEMENT_OPEN = 4,
+				ELEMENT_CLOSE = 5,
+				EQUAL = 6,
+				NAME = 7,
+				ATTVALUE = 8,
+				COMMENT = 9,
+				CDATA = 10,
+				TEXT = 11,
+				SPACE = 12,
 			};
 			class XmlNode;
 			class XmlText;
@@ -153,6 +153,37 @@ namespace vl
 			extern vl::Ptr<XmlElement> XmlParseElement(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
 			extern vl::Ptr<XmlElement> XmlParseElement(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
 
+			extern vl::Ptr<vl::parsing::ParsingTreeNode> XmlParseDocumentAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
+			extern vl::Ptr<vl::parsing::ParsingTreeNode> XmlParseDocumentAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
+			extern vl::Ptr<XmlDocument> XmlParseDocument(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
+			extern vl::Ptr<XmlDocument> XmlParseDocument(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
+
+			extern vl::Ptr<vl::parsing::ParsingTreeNode> XmlParseElementAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
+			extern vl::Ptr<vl::parsing::ParsingTreeNode> XmlParseElementAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
+			extern vl::Ptr<XmlElement> XmlParseElement(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
+			extern vl::Ptr<XmlElement> XmlParseElement(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
+
+		}
+	}
+}
+namespace vl
+{
+	namespace reflection
+	{
+		namespace description
+		{
+#ifndef VCZH_DEBUG_NO_REFLECTION
+			DECL_TYPE_INFO(vl::parsing::xml::XmlNode)
+			DECL_TYPE_INFO(vl::parsing::xml::XmlText)
+			DECL_TYPE_INFO(vl::parsing::xml::XmlCData)
+			DECL_TYPE_INFO(vl::parsing::xml::XmlAttribute)
+			DECL_TYPE_INFO(vl::parsing::xml::XmlComment)
+			DECL_TYPE_INFO(vl::parsing::xml::XmlElement)
+			DECL_TYPE_INFO(vl::parsing::xml::XmlInstruction)
+			DECL_TYPE_INFO(vl::parsing::xml::XmlDocument)
+#endif
+
+			extern bool XmlLoadTypes();
 		}
 	}
 }

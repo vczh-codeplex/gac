@@ -401,3 +401,146 @@ Table Generation
 		}
 	}
 }
+namespace vl
+{
+	namespace reflection
+	{
+		namespace description
+		{
+#ifndef VCZH_DEBUG_NO_REFLECTION
+			using namespace vl::parsing::xml;
+
+			IMPL_TYPE_INFO_RENAME(XmlNode, System::XmlNode)
+			IMPL_TYPE_INFO_RENAME(XmlText, System::XmlText)
+			IMPL_TYPE_INFO_RENAME(XmlCData, System::XmlCData)
+			IMPL_TYPE_INFO_RENAME(XmlAttribute, System::XmlAttribute)
+			IMPL_TYPE_INFO_RENAME(XmlComment, System::XmlComment)
+			IMPL_TYPE_INFO_RENAME(XmlElement, System::XmlElement)
+			IMPL_TYPE_INFO_RENAME(XmlInstruction, System::XmlInstruction)
+			IMPL_TYPE_INFO_RENAME(XmlDocument, System::XmlDocument)
+
+			BEGIN_CLASS_MEMBER(XmlNode)
+
+			END_CLASS_MEMBER(XmlNode)
+
+			BEGIN_CLASS_MEMBER(XmlText)
+				CLASS_MEMBER_BASE(XmlNode)
+
+				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<XmlText>(), NO_PARAMETER)
+
+				CLASS_MEMBER_EXTERNALMETHOD(get_content, NO_PARAMETER, vl::WString(XmlText::*)(), [](XmlText* node){ return node->content.value; })
+				CLASS_MEMBER_EXTERNALMETHOD(set_content, {L"value"}, void(XmlText::*)(const vl::WString&), [](XmlText* node, const vl::WString& value){ node->content.value = value; })
+
+				CLASS_MEMBER_PROPERTY(content, get_content, set_content)
+			END_CLASS_MEMBER(XmlText)
+
+			BEGIN_CLASS_MEMBER(XmlCData)
+				CLASS_MEMBER_BASE(XmlNode)
+
+				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<XmlCData>(), NO_PARAMETER)
+
+				CLASS_MEMBER_EXTERNALMETHOD(get_content, NO_PARAMETER, vl::WString(XmlCData::*)(), [](XmlCData* node){ return node->content.value; })
+				CLASS_MEMBER_EXTERNALMETHOD(set_content, {L"value"}, void(XmlCData::*)(const vl::WString&), [](XmlCData* node, const vl::WString& value){ node->content.value = value; })
+
+				CLASS_MEMBER_PROPERTY(content, get_content, set_content)
+			END_CLASS_MEMBER(XmlCData)
+
+			BEGIN_CLASS_MEMBER(XmlAttribute)
+				CLASS_MEMBER_BASE(XmlNode)
+
+				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<XmlAttribute>(), NO_PARAMETER)
+
+				CLASS_MEMBER_EXTERNALMETHOD(get_name, NO_PARAMETER, vl::WString(XmlAttribute::*)(), [](XmlAttribute* node){ return node->name.value; })
+				CLASS_MEMBER_EXTERNALMETHOD(set_name, {L"value"}, void(XmlAttribute::*)(const vl::WString&), [](XmlAttribute* node, const vl::WString& value){ node->name.value = value; })
+				CLASS_MEMBER_EXTERNALMETHOD(get_value, NO_PARAMETER, vl::WString(XmlAttribute::*)(), [](XmlAttribute* node){ return node->value.value; })
+				CLASS_MEMBER_EXTERNALMETHOD(set_value, {L"value"}, void(XmlAttribute::*)(const vl::WString&), [](XmlAttribute* node, const vl::WString& value){ node->value.value = value; })
+
+				CLASS_MEMBER_PROPERTY(name, get_name, set_name)
+				CLASS_MEMBER_PROPERTY(value, get_value, set_value)
+			END_CLASS_MEMBER(XmlAttribute)
+
+			BEGIN_CLASS_MEMBER(XmlComment)
+				CLASS_MEMBER_BASE(XmlNode)
+
+				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<XmlComment>(), NO_PARAMETER)
+
+				CLASS_MEMBER_EXTERNALMETHOD(get_content, NO_PARAMETER, vl::WString(XmlComment::*)(), [](XmlComment* node){ return node->content.value; })
+				CLASS_MEMBER_EXTERNALMETHOD(set_content, {L"value"}, void(XmlComment::*)(const vl::WString&), [](XmlComment* node, const vl::WString& value){ node->content.value = value; })
+
+				CLASS_MEMBER_PROPERTY(content, get_content, set_content)
+			END_CLASS_MEMBER(XmlComment)
+
+			BEGIN_CLASS_MEMBER(XmlElement)
+				CLASS_MEMBER_BASE(XmlNode)
+
+				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<XmlElement>(), NO_PARAMETER)
+
+				CLASS_MEMBER_EXTERNALMETHOD(get_name, NO_PARAMETER, vl::WString(XmlElement::*)(), [](XmlElement* node){ return node->name.value; })
+				CLASS_MEMBER_EXTERNALMETHOD(set_name, {L"value"}, void(XmlElement::*)(const vl::WString&), [](XmlElement* node, const vl::WString& value){ node->name.value = value; })
+				CLASS_MEMBER_EXTERNALMETHOD(get_closingName, NO_PARAMETER, vl::WString(XmlElement::*)(), [](XmlElement* node){ return node->closingName.value; })
+				CLASS_MEMBER_EXTERNALMETHOD(set_closingName, {L"value"}, void(XmlElement::*)(const vl::WString&), [](XmlElement* node, const vl::WString& value){ node->closingName.value = value; })
+
+				CLASS_MEMBER_PROPERTY(name, get_name, set_name)
+				CLASS_MEMBER_PROPERTY(closingName, get_closingName, set_closingName)
+				CLASS_MEMBER_FIELD(attributes)
+				CLASS_MEMBER_FIELD(subNodes)
+			END_CLASS_MEMBER(XmlElement)
+
+			BEGIN_CLASS_MEMBER(XmlInstruction)
+				CLASS_MEMBER_BASE(XmlNode)
+
+				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<XmlInstruction>(), NO_PARAMETER)
+
+				CLASS_MEMBER_EXTERNALMETHOD(get_name, NO_PARAMETER, vl::WString(XmlInstruction::*)(), [](XmlInstruction* node){ return node->name.value; })
+				CLASS_MEMBER_EXTERNALMETHOD(set_name, {L"value"}, void(XmlInstruction::*)(const vl::WString&), [](XmlInstruction* node, const vl::WString& value){ node->name.value = value; })
+
+				CLASS_MEMBER_PROPERTY(name, get_name, set_name)
+				CLASS_MEMBER_FIELD(attributes)
+			END_CLASS_MEMBER(XmlInstruction)
+
+			BEGIN_CLASS_MEMBER(XmlDocument)
+				CLASS_MEMBER_BASE(XmlNode)
+
+				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<XmlDocument>(), NO_PARAMETER)
+
+
+				CLASS_MEMBER_FIELD(prologs)
+				CLASS_MEMBER_FIELD(rootElement)
+			END_CLASS_MEMBER(XmlDocument)
+
+			class XmlTypeLoader : public vl::Object, public ITypeLoader
+			{
+			public:
+				void Load(ITypeManager* manager)
+				{
+					ADD_TYPE_INFO(vl::parsing::xml::XmlNode)
+					ADD_TYPE_INFO(vl::parsing::xml::XmlText)
+					ADD_TYPE_INFO(vl::parsing::xml::XmlCData)
+					ADD_TYPE_INFO(vl::parsing::xml::XmlAttribute)
+					ADD_TYPE_INFO(vl::parsing::xml::XmlComment)
+					ADD_TYPE_INFO(vl::parsing::xml::XmlElement)
+					ADD_TYPE_INFO(vl::parsing::xml::XmlInstruction)
+					ADD_TYPE_INFO(vl::parsing::xml::XmlDocument)
+				}
+
+				void Unload(ITypeManager* manager)
+				{
+				}
+			};
+#endif
+
+			bool XmlLoadTypes()
+			{
+#ifndef VCZH_DEBUG_NO_REFLECTION
+				ITypeManager* manager=GetGlobalTypeManager();
+				if(manager)
+				{
+					Ptr<ITypeLoader> loader=new XmlTypeLoader;
+					return manager->AddTypeLoader(loader);
+				}
+#endif
+				return false;
+			}
+		}
+	}
+}

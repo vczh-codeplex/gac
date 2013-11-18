@@ -17,21 +17,21 @@ namespace vczh
 	{
 		namespace xmlutility
 		{
-			struct XmlParserTokenIndex abstract
+			enum class XmlParserTokenIndex
 			{
-				static const vl::vint INSTRUCTION_OPEN = 0;
-				static const vl::vint INSTRUCTION_CLOSE = 1;
-				static const vl::vint COMPLEX_ELEMENT_OPEN = 2;
-				static const vl::vint SINGLE_ELEMENT_CLOSE = 3;
-				static const vl::vint ELEMENT_OPEN = 4;
-				static const vl::vint ELEMENT_CLOSE = 5;
-				static const vl::vint EQUAL = 6;
-				static const vl::vint NAME = 7;
-				static const vl::vint ATTVALUE = 8;
-				static const vl::vint COMMENT = 9;
-				static const vl::vint CDATA = 10;
-				static const vl::vint TEXT = 11;
-				static const vl::vint SPACE = 12;
+				INSTRUCTION_OPEN = 0,
+				INSTRUCTION_CLOSE = 1,
+				COMPLEX_ELEMENT_OPEN = 2,
+				SINGLE_ELEMENT_CLOSE = 3,
+				ELEMENT_OPEN = 4,
+				ELEMENT_CLOSE = 5,
+				EQUAL = 6,
+				NAME = 7,
+				ATTVALUE = 8,
+				COMMENT = 9,
+				CDATA = 10,
+				TEXT = 11,
+				SPACE = 12,
 			};
 			class XmlNode;
 			class XmlAmbiguousNode;
@@ -153,14 +153,11 @@ namespace vczh
 				static vl::Ptr<XmlDocument> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 			};
 
-			struct XmlDirectEnum abstract
+			enum class XmlDirectEnum
 			{
-				enum Type
-				{
-					A,
-					B,
-					C,
-				};
+				A,
+				B,
+				C,
 			};
 
 			class XmlFirstClass abstract : public vl::parsing::ParsingTreeCustomBase
@@ -177,14 +174,11 @@ namespace vczh
 				class XmlSecondClass;
 				class XmlSecondClassChild;
 
-				struct XmlIndirectEnum abstract
+				enum class XmlIndirectEnum
 				{
-					enum Type
-					{
-						D,
-						E,
-						F,
-					};
+					D,
+					E,
+					F,
 				};
 
 				class XmlSecondClass abstract : public vl::parsing::ParsingTreeCustomBase
@@ -263,6 +257,46 @@ namespace vczh
 			extern vl::Ptr<XmlElement> XmlParseElement(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
 			extern vl::Ptr<XmlElement> XmlParseElement(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
 
+			extern vl::Ptr<vl::parsing::ParsingTreeNode> XmlParseDocumentAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
+			extern vl::Ptr<vl::parsing::ParsingTreeNode> XmlParseDocumentAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
+			extern vl::Ptr<XmlDocument> XmlParseDocument(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
+			extern vl::Ptr<XmlDocument> XmlParseDocument(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
+
+			extern vl::Ptr<vl::parsing::ParsingTreeNode> XmlParseElementAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
+			extern vl::Ptr<vl::parsing::ParsingTreeNode> XmlParseElementAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
+			extern vl::Ptr<XmlElement> XmlParseElement(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
+			extern vl::Ptr<XmlElement> XmlParseElement(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
+
+		}
+	}
+}
+namespace vl
+{
+	namespace reflection
+	{
+		namespace description
+		{
+#ifndef VCZH_DEBUG_NO_REFLECTION
+			DECL_TYPE_INFO(vczh::whoknows::xmlutility::XmlAmbiguousNode)
+			DECL_TYPE_INFO(vczh::whoknows::xmlutility::XmlNode)
+			DECL_TYPE_INFO(vczh::whoknows::xmlutility::XmlCData)
+			DECL_TYPE_INFO(vczh::whoknows::xmlutility::XmlDirectEnum)
+			DECL_TYPE_INFO(vczh::whoknows::xmlutility::XmlComment)
+			DECL_TYPE_INFO(vczh::whoknows::xmlutility::XmlFirstClassChild)
+			DECL_TYPE_INFO(vczh::whoknows::xmlutility::XmlElement)
+			DECL_TYPE_INFO(vczh::whoknows::xmlutility::XmlAttribute)
+			DECL_TYPE_INFO(vczh::whoknows::xmlutility::XmlThirdClassChild)
+			DECL_TYPE_INFO(vczh::whoknows::xmlutility::XmlInstruction)
+			DECL_TYPE_INFO(vczh::whoknows::xmlutility::XmlDocument)
+			DECL_TYPE_INFO(vczh::whoknows::xmlutility::XmlFirstClass)
+			DECL_TYPE_INFO(vczh::whoknows::xmlutility::XmlFirstClass::XmlIndirectEnum)
+			DECL_TYPE_INFO(vczh::whoknows::xmlutility::XmlFirstClass::XmlSecondClass)
+			DECL_TYPE_INFO(vczh::whoknows::xmlutility::XmlFirstClass::XmlSecondClass::XmlThirdClass)
+			DECL_TYPE_INFO(vczh::whoknows::xmlutility::XmlFirstClass::XmlSecondClassChild)
+			DECL_TYPE_INFO(vczh::whoknows::xmlutility::XmlText)
+#endif
+
+			extern bool XmlLoadTypes();
 		}
 	}
 }

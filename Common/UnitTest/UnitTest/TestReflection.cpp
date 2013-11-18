@@ -4,10 +4,12 @@
 #include "..\..\Source\Stream\Accessor.h"
 #include "..\..\Source\Stream\CharFormat.h"
 #include "..\..\Source\Collections\Operation.h"
-
+#include "..\..\Source\Parsing\Parsing.h"
+#include "..\..\Source\Parsing\Xml\ParsingXml.h"
+#include "..\..\Source\Parsing\Json\ParsingJson.h"
+#include <limits>
 
 using namespace vl;
-#include <limits>
 using namespace vl::collections;
 using namespace vl::reflection;
 using namespace vl::reflection::description;
@@ -845,6 +847,9 @@ using namespace reflection_test;
 	TEST_CASE(NAME)\
 	{\
 		TEST_ASSERT(LoadPredefinedTypes());\
+		TEST_ASSERT(LoadParsingTypes());\
+		TEST_ASSERT(XmlLoadTypes());\
+		TEST_ASSERT(JsonLoadTypes());\
 		TEST_ASSERT(GetGlobalTypeManager()->AddTypeLoader(new TestTypeLoader));\
 		TEST_ASSERT(GetGlobalTypeManager()->Load());\
 		{\
