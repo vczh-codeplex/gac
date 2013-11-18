@@ -917,6 +917,28 @@ Type Declaration
 				CLASS_MEMBER_METHOD_OVERLOAD(GetSymbolsRecursively, {L"scope" _ L"name"}, LazySymbolList(ParsingScopeFinder::*)(ParsingScope*, const WString&))
 				CLASS_MEMBER_METHOD_OVERLOAD(GetSymbolsRecursively, {L"scope"}, LazySymbolList(ParsingScopeFinder::*)(ParsingScope*))
 			END_CLASS_MEMBER(ParsingScopeFinder)
+
+			BEGIN_CLASS_MEMBER(ParsingTreeCustomBase)
+				CLASS_MEMBER_FIELD(codeRange)
+				CLASS_MEMBER_FIELD(creatorRules)
+			END_CLASS_MEMBER(ParsingTreeCustomBase)
+
+			BEGIN_CLASS_MEMBER(ParsingToken)
+				CLASS_MEMBER_BASE(ParsingTreeCustomBase)
+
+				CLASS_MEMBER_FIELD(tokenIndex)
+				CLASS_MEMBER_FIELD(value)
+			END_CLASS_MEMBER(ParsingToken)
+
+			BEGIN_CLASS_MEMBER(ParsingError)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<ParsingError>(), NO_PARAMETER)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<ParsingError>(const WString&), {L"errorMessage"})
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<ParsingError>(ParsingTreeCustomBase*, const WString&), {L"parsingTree" _ L"errorMessage"})
+
+				CLASS_MEMBER_FIELD(codeRange)
+				CLASS_MEMBER_FIELD(parsingTree)
+				CLASS_MEMBER_FIELD(errorMessage)
+			END_CLASS_MEMBER(ParsingError)
 #undef _
 		}
 	}

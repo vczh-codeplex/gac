@@ -285,14 +285,14 @@ namespace vl
 语法树基础设施
 ***********************************************************************/
 
-		class ParsingTreeCustomBase : public Object
+		class ParsingTreeCustomBase : public Object, public reflection::Description<ParsingTreeCustomBase>
 		{
 		public:
 			ParsingTextRange					codeRange;
 			collections::List<WString>			creatorRules;
 		};
 
-		class ParsingToken : public ParsingTreeCustomBase
+		class ParsingToken : public ParsingTreeCustomBase, public reflection::Description<ParsingToken>
 		{
 		public:
 			vint								tokenIndex;
@@ -301,7 +301,7 @@ namespace vl
 			ParsingToken():tokenIndex(-1){}
 		};
 
-		class ParsingError : public Object
+		class ParsingError : public Object, public reflection::Description<ParsingError>
 		{
 		public:
 			ParsingTextRange					codeRange;
