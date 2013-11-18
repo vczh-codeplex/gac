@@ -19,57 +19,10 @@ void WriteHeaderFile(const WString& name, Ptr<ParsingDefinition> definition, Ptr
 		ValidateDefinition(definition, &manager, errors);
 	}
 
-	writer.WriteString(prefix);
-	writer.WriteString(L"enum class ");
-	writer.WriteString(config.classPrefix);
-	writer.WriteLine(L"ParserTokenIndex");
-	writer.WriteString(prefix);
-	writer.WriteLine(L"{");
-	for(vint i=0;i<table->GetTokenCount();i++)
-	{
-		const ParsingTable::TokenInfo& info=table->GetTokenInfo(i);
-		if(info.regexTokenIndex!=-1)
-		{
-			writer.WriteString(prefix);
-			writer.WriteString(L"\t");
-			writer.WriteString(info.name);
-			writer.WriteString(L" = ");
-			writer.WriteString(itow(info.regexTokenIndex));
-			writer.WriteLine(L",");
-		}
-	}
-	for(vint i=0;i<table->GetDiscardTokenCount();i++)
-	{
-		const ParsingTable::TokenInfo& info=table->GetDiscardTokenInfo(i);
-		if(info.regexTokenIndex!=-1)
-		{
-			writer.WriteString(prefix);
-			writer.WriteString(L"\t");
-			writer.WriteString(info.name);
-			writer.WriteString(L" = ");
-			writer.WriteString(itow(info.regexTokenIndex));
-			writer.WriteLine(L",");
-		}
-	}
-	writer.WriteString(prefix);
-	writer.WriteLine(L"};");
-		
-	PrintTypeDefinitions(definition->types, prefix, 0, &manager, config.classPrefix, writer);
-
-	writer.WriteString(prefix);
-	writer.WriteString(L"extern vl::WString ");
-	writer.WriteString(config.classPrefix);
-	writer.WriteLine(L"GetParserTextBuffer();");
-
-	writer.WriteString(prefix);
-	writer.WriteString(L"extern vl::Ptr<vl::parsing::ParsingTreeCustomBase> ");
-	writer.WriteString(config.classPrefix);
-	writer.WriteLine(L"ConvertParsingTreeNode(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);");
-
-	writer.WriteString(prefix);
-	writer.WriteString(L"extern vl::Ptr<vl::parsing::tabling::ParsingTable> ");
-	writer.WriteString(config.classPrefix);
-	writer.WriteLine(L"LoadTable();");
+	WriteTokenDefinition(table, prefix, config.classPrefix, writer);
+	WriteTypeDefinitions(definition->types, prefix, 0, &manager, config.classPrefix, writer);
+	WriteMetaDefinition(prefix, config.classPrefix, writer);
+	WriteParserFunctions(&manager, config.parsers, prefix, config.classPrefix, writer);
 
 	writer.WriteLine(L"");
 	FOREACH(WString, name, config.parsers.Keys())

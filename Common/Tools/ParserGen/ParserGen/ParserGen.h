@@ -51,13 +51,17 @@ extern void							WriteCppString(const WString& text, TextWriter& writer);
 
 extern void							PrintType(ParsingDefinitionType* _type, ParsingSymbol* _scope, ParsingSymbolManager* _manager, const WString& _codeClassPrefix, TextWriter& _writer);
 extern void							PrintTypeForValue(ParsingDefinitionType* _type, ParsingSymbol* _scope, ParsingSymbolManager* _manager, const WString& _codeClassPrefix, TextWriter& _writer);
-extern void							PrintTypeDefinitions(List<Ptr<ParsingDefinitionTypeDefinition>>& types, const WString& prefix, ParsingSymbol* scope, ParsingSymbolManager* manager, const WString& codeClassPrefix, TextWriter& writer);
 extern bool							PrintType(ParsingSymbol* type, const WString& codeClassPrefix, TextWriter& writer);
 extern void							PrintTypeForValue(ParsingSymbol* type, const WString& codeClassPrefix, TextWriter& writer);
 
 extern void							EnumerateAllClass(ParsingSymbolManager* manager, ParsingSymbol* scope, SortedList<ParsingSymbol*>& types);
 extern void							EnumerateAllLeafClass(ParsingSymbolManager* manager, SortedList<ParsingSymbol*>& types);
 extern void							SearchChildClasses(ParsingSymbol* parent, ParsingSymbol* scope, ParsingSymbolManager* manager, List<ParsingSymbol*>& children);
+
+extern void							WriteTokenDefinition(Ptr<ParsingTable> table, const WString& prefix, const WString& codeClassPrefix, TextWriter& writer);
+extern void							WriteTypeDefinitions(List<Ptr<ParsingDefinitionTypeDefinition>>& types, const WString& prefix, ParsingSymbol* scope, ParsingSymbolManager* manager, const WString& codeClassPrefix, TextWriter& writer);
+extern void							WriteMetaDefinition(const WString& prefix, const WString& codeClassPrefix, TextWriter& writer);
+extern void							WriteParserFunctions(ParsingSymbolManager* manager, const Dictionary<WString, WString>& parsers, const WString& prefix, const WString& codeClassPrefix, TextWriter& writer);
 
 extern void							WriteGetParserTextBuffer(ParsingSymbolManager* manager, const WString& prefix, const WString& codeClassPrefix, TextWriter& writer);
 extern void							WriteParserText(const WString& parserText, TextWriter& writer);

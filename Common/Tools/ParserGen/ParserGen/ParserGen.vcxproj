@@ -95,6 +95,10 @@
     <ClCompile Include="ParserGen_WriteCppFile_Unescaping.cpp" />
     <ClCompile Include="ParserGen_WriteCppFile_Visitor.cpp" />
     <ClCompile Include="ParserGen_WriteHeaderFile.cpp" />
+    <ClCompile Include="ParserGen_WriteHeaderFile_ParserFunctions.cpp" />
+    <ClCompile Include="ParserGen_WriteHeaderFile_TableGen.cpp" />
+    <ClCompile Include="ParserGen_WriteHeaderFile_Tokens.cpp" />
+    <ClCompile Include="ParserGen_WriteHeaderFile_Types.cpp" />
     <ClCompile Include="Test.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
