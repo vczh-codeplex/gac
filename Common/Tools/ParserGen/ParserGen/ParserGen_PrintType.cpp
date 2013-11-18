@@ -4,6 +4,18 @@
 Helper Functions
 ***********************************************************************/
 
+void EnumerateAllTypes(ParsingSymbolManager* manager, ParsingSymbol* scope, SortedList<ParsingSymbol*>& types)
+{
+	if(scope->GetType()==ParsingSymbol::ClassType || scope->GetType()==ParsingSymbol::EnumType)
+	{
+		types.Add(scope);
+	}
+	for(vint i=0;i<scope->GetSubSymbolCount();i++)
+	{
+		EnumerateAllTypes(manager, scope->GetSubSymbol(i), types);
+	}
+}
+
 void EnumerateAllClass(ParsingSymbolManager* manager, ParsingSymbol* scope, SortedList<ParsingSymbol*>& types)
 {
 	if(scope->GetType()==ParsingSymbol::ClassType)
@@ -111,6 +123,15 @@ void PrintTypeForValue(ParsingDefinitionType* _type, ParsingSymbol* _scope, Pars
 	else
 	{
 		PrintType(_type, _scope, _manager, _codeClassPrefix, _writer);
+	}
+}
+
+void PrintNamespaces(const List<WString>& namespaces, TextWriter& writer)
+{
+	FOREACH(WString, ns, namespaces)
+	{
+		writer.WriteString(ns);
+		writer.WriteString(L"::");
 	}
 }
 

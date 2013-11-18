@@ -75,6 +75,12 @@
     <ClCompile Include="ParserGen_WriteHeaderFile_Types.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ParserGen_WriteHeaderFile_Reflection.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ParserGen_WriteCppFile_Reflection.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Test.h">

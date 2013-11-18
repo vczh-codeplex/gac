@@ -90,12 +90,14 @@
     <ClCompile Include="ParserGen_PrintType.cpp" />
     <ClCompile Include="ParserGen_WriteCppFile.cpp" />
     <ClCompile Include="ParserGen_WriteCppFile_ParserText.cpp" />
+    <ClCompile Include="ParserGen_WriteCppFile_Reflection.cpp" />
     <ClCompile Include="ParserGen_WriteCppFile_TableGen.cpp" />
     <ClCompile Include="ParserGen_WriteCppFile_TreeBuilder.cpp" />
     <ClCompile Include="ParserGen_WriteCppFile_Unescaping.cpp" />
     <ClCompile Include="ParserGen_WriteCppFile_Visitor.cpp" />
     <ClCompile Include="ParserGen_WriteHeaderFile.cpp" />
     <ClCompile Include="ParserGen_WriteHeaderFile_ParserFunctions.cpp" />
+    <ClCompile Include="ParserGen_WriteHeaderFile_Reflection.cpp" />
     <ClCompile Include="ParserGen_WriteHeaderFile_TableGen.cpp" />
     <ClCompile Include="ParserGen_WriteHeaderFile_Tokens.cpp" />
     <ClCompile Include="ParserGen_WriteHeaderFile_Types.cpp" />
