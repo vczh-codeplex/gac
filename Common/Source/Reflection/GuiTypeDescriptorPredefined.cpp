@@ -569,10 +569,30 @@ Helper Functions
 Collections
 ***********************************************************************/
 
-#define _ ,
-
-			BEGIN_CLASS_MEMBER(DescriptableObject)
-			END_CLASS_MEMBER(DescriptableObject)
+#define _ ,	
+			
+			template<>
+			struct CustomTypeDescriptorSelector<DescriptableObject>
+			{
+			public:
+				class CustomTypeDescriptorImpl : public TypeDescriptorImpl
+				{
+				public:
+					CustomTypeDescriptorImpl()
+						:TypeDescriptorImpl(TypeInfo<DescriptableObject>::TypeName)
+					{
+						Description<DescriptableObject>::SetAssociatedTypeDescroptor(this);
+					}
+					~CustomTypeDescriptorImpl()
+					{
+						Description<DescriptableObject>::SetAssociatedTypeDescroptor(0);
+					}
+				protected:
+					void LoadInternal()override
+					{
+					}
+				};
+			};
 
 			BEGIN_STRUCT_MEMBER(VoidValue)
 			END_STRUCT_MEMBER(VoidValue)
@@ -814,6 +834,7 @@ LoadPredefinedTypes
 					AddSerializableType<DateTimeValueSerializer>(manager);
 					ADD_TYPE_INFO(VoidValue)
 					ADD_TYPE_INFO(IDescriptable)
+					ADD_TYPE_INFO(DescriptableObject)
 
 					ADD_TYPE_INFO(IValueEnumerator)
 					ADD_TYPE_INFO(IValueEnumerable)

@@ -410,14 +410,14 @@ namespace vl
 #ifndef VCZH_DEBUG_NO_REFLECTION
 			using namespace vl::parsing::xml;
 
-			IMPL_TYPE_INFO_RENAME(XmlNode, System::XmlNode)
-			IMPL_TYPE_INFO_RENAME(XmlText, System::XmlText)
-			IMPL_TYPE_INFO_RENAME(XmlCData, System::XmlCData)
-			IMPL_TYPE_INFO_RENAME(XmlAttribute, System::XmlAttribute)
-			IMPL_TYPE_INFO_RENAME(XmlComment, System::XmlComment)
-			IMPL_TYPE_INFO_RENAME(XmlElement, System::XmlElement)
-			IMPL_TYPE_INFO_RENAME(XmlInstruction, System::XmlInstruction)
-			IMPL_TYPE_INFO_RENAME(XmlDocument, System::XmlDocument)
+			IMPL_TYPE_INFO_RENAME(XmlNode, system::XmlNode)
+			IMPL_TYPE_INFO_RENAME(XmlText, system::XmlText)
+			IMPL_TYPE_INFO_RENAME(XmlCData, system::XmlCData)
+			IMPL_TYPE_INFO_RENAME(XmlAttribute, system::XmlAttribute)
+			IMPL_TYPE_INFO_RENAME(XmlComment, system::XmlComment)
+			IMPL_TYPE_INFO_RENAME(XmlElement, system::XmlElement)
+			IMPL_TYPE_INFO_RENAME(XmlInstruction, system::XmlInstruction)
+			IMPL_TYPE_INFO_RENAME(XmlDocument, system::XmlDocument)
 
 			BEGIN_CLASS_MEMBER(XmlNode)
 

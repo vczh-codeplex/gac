@@ -2,7 +2,7 @@ include:"..\Parsing.h"
 include:"..\ParsingDefinitions.h"
 include:"..\ParsingAutomaton.h"
 namespace:vl.parsing.xml
-reflection:System
+reflection:system
 classPrefix:Xml
 guard:VCZH_PARSING_XML_PARSINGXML_PARSER
 parser:ParseDocument(XDocument)

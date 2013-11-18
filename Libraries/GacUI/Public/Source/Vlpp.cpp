@@ -1561,14 +1561,14 @@ namespace vl
 #ifndef VCZH_DEBUG_NO_REFLECTION
 			using namespace vl::parsing::json;
 
-			IMPL_TYPE_INFO_RENAME(JsonNode, System::JsonNode)
-			IMPL_TYPE_INFO_RENAME(JsonLiteral, System::JsonLiteral)
-			IMPL_TYPE_INFO_RENAME(JsonLiteral::JsonValue, System::JsonLiteral::JsonValue)
-			IMPL_TYPE_INFO_RENAME(JsonString, System::JsonString)
-			IMPL_TYPE_INFO_RENAME(JsonNumber, System::JsonNumber)
-			IMPL_TYPE_INFO_RENAME(JsonArray, System::JsonArray)
-			IMPL_TYPE_INFO_RENAME(JsonObjectField, System::JsonObjectField)
-			IMPL_TYPE_INFO_RENAME(JsonObject, System::JsonObject)
+			IMPL_TYPE_INFO_RENAME(JsonNode, system::JsonNode)
+			IMPL_TYPE_INFO_RENAME(JsonLiteral, system::JsonLiteral)
+			IMPL_TYPE_INFO_RENAME(JsonLiteral::JsonValue, system::JsonLiteral::JsonValue)
+			IMPL_TYPE_INFO_RENAME(JsonString, system::JsonString)
+			IMPL_TYPE_INFO_RENAME(JsonNumber, system::JsonNumber)
+			IMPL_TYPE_INFO_RENAME(JsonArray, system::JsonArray)
+			IMPL_TYPE_INFO_RENAME(JsonObjectField, system::JsonObjectField)
+			IMPL_TYPE_INFO_RENAME(JsonObject, system::JsonObject)
 
 			BEGIN_CLASS_MEMBER(JsonNode)
 
@@ -11542,14 +11542,14 @@ namespace vl
 #ifndef VCZH_DEBUG_NO_REFLECTION
 			using namespace vl::parsing::xml;
 
-			IMPL_TYPE_INFO_RENAME(XmlNode, System::XmlNode)
-			IMPL_TYPE_INFO_RENAME(XmlText, System::XmlText)
-			IMPL_TYPE_INFO_RENAME(XmlCData, System::XmlCData)
-			IMPL_TYPE_INFO_RENAME(XmlAttribute, System::XmlAttribute)
-			IMPL_TYPE_INFO_RENAME(XmlComment, System::XmlComment)
-			IMPL_TYPE_INFO_RENAME(XmlElement, System::XmlElement)
-			IMPL_TYPE_INFO_RENAME(XmlInstruction, System::XmlInstruction)
-			IMPL_TYPE_INFO_RENAME(XmlDocument, System::XmlDocument)
+			IMPL_TYPE_INFO_RENAME(XmlNode, system::XmlNode)
+			IMPL_TYPE_INFO_RENAME(XmlText, system::XmlText)
+			IMPL_TYPE_INFO_RENAME(XmlCData, system::XmlCData)
+			IMPL_TYPE_INFO_RENAME(XmlAttribute, system::XmlAttribute)
+			IMPL_TYPE_INFO_RENAME(XmlComment, system::XmlComment)
+			IMPL_TYPE_INFO_RENAME(XmlElement, system::XmlElement)
+			IMPL_TYPE_INFO_RENAME(XmlInstruction, system::XmlInstruction)
+			IMPL_TYPE_INFO_RENAME(XmlDocument, system::XmlDocument)
 
 			BEGIN_CLASS_MEMBER(XmlNode)
 
@@ -14194,10 +14194,30 @@ Helper Functions
 Collections
 ***********************************************************************/
 
-#define _ ,
-
-			BEGIN_CLASS_MEMBER(DescriptableObject)
-			END_CLASS_MEMBER(DescriptableObject)
+#define _ ,	
+			
+			template<>
+			struct CustomTypeDescriptorSelector<DescriptableObject>
+			{
+			public:
+				class CustomTypeDescriptorImpl : public TypeDescriptorImpl
+				{
+				public:
+					CustomTypeDescriptorImpl()
+						:TypeDescriptorImpl(TypeInfo<DescriptableObject>::TypeName)
+					{
+						Description<DescriptableObject>::SetAssociatedTypeDescroptor(this);
+					}
+					~CustomTypeDescriptorImpl()
+					{
+						Description<DescriptableObject>::SetAssociatedTypeDescroptor(0);
+					}
+				protected:
+					void LoadInternal()override
+					{
+					}
+				};
+			};
 
 			BEGIN_STRUCT_MEMBER(VoidValue)
 			END_STRUCT_MEMBER(VoidValue)
@@ -14439,6 +14459,7 @@ LoadPredefinedTypes
 					AddSerializableType<DateTimeValueSerializer>(manager);
 					ADD_TYPE_INFO(VoidValue)
 					ADD_TYPE_INFO(IDescriptable)
+					ADD_TYPE_INFO(DescriptableObject)
 
 					ADD_TYPE_INFO(IValueEnumerator)
 					ADD_TYPE_INFO(IValueEnumerable)
@@ -18296,6 +18317,7 @@ RegexNode
 /***********************************************************************
 Stream\Accessor.cpp
 ***********************************************************************/
+#include <string.h>
 
 namespace vl
 {
@@ -21022,6 +21044,7 @@ namespace vl
 /***********************************************************************
 Threading.cpp
 ***********************************************************************/
+#include <intrin.h>
 
 namespace vl
 {
