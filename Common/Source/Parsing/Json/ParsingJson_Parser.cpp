@@ -370,14 +370,14 @@ namespace vl
 #ifndef VCZH_DEBUG_NO_REFLECTION
 			using namespace vl::parsing::json;
 
-			IMPL_TYPE_INFO_RENAME(JsonNode, System::JsonNode)
-			IMPL_TYPE_INFO_RENAME(JsonLiteral, System::JsonLiteral)
-			IMPL_TYPE_INFO_RENAME(JsonLiteral::JsonValue, System::JsonLiteral::JsonValue)
-			IMPL_TYPE_INFO_RENAME(JsonString, System::JsonString)
-			IMPL_TYPE_INFO_RENAME(JsonNumber, System::JsonNumber)
-			IMPL_TYPE_INFO_RENAME(JsonArray, System::JsonArray)
-			IMPL_TYPE_INFO_RENAME(JsonObjectField, System::JsonObjectField)
-			IMPL_TYPE_INFO_RENAME(JsonObject, System::JsonObject)
+			IMPL_TYPE_INFO_RENAME(JsonNode, system::JsonNode)
+			IMPL_TYPE_INFO_RENAME(JsonLiteral, system::JsonLiteral)
+			IMPL_TYPE_INFO_RENAME(JsonLiteral::JsonValue, system::JsonLiteral::JsonValue)
+			IMPL_TYPE_INFO_RENAME(JsonString, system::JsonString)
+			IMPL_TYPE_INFO_RENAME(JsonNumber, system::JsonNumber)
+			IMPL_TYPE_INFO_RENAME(JsonArray, system::JsonArray)
+			IMPL_TYPE_INFO_RENAME(JsonObjectField, system::JsonObjectField)
+			IMPL_TYPE_INFO_RENAME(JsonObject, system::JsonObject)
 
 			BEGIN_CLASS_MEMBER(JsonNode)
 
