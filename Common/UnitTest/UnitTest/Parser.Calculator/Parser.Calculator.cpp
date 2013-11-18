@@ -92,7 +92,7 @@ Parsing Tree Conversion Driver Implementation
 		public:
 			using vl::parsing::ParsingTreeConverter::SetMember;
 
-			bool SetMember(CalBinaryExpression::CalBinaryOperator::Type& member, vl::Ptr<vl::parsing::ParsingTreeNode> node, const TokenList& tokens)
+			bool SetMember(CalBinaryExpression::CalBinaryOperator& member, vl::Ptr<vl::parsing::ParsingTreeNode> node, const TokenList& tokens)
 			{
 				vl::Ptr<vl::parsing::ParsingTreeToken> token=node.Cast<vl::parsing::ParsingTreeToken>();
 				if(token)
@@ -210,28 +210,38 @@ Visitor Pattern Implementation
 Parser Function
 ***********************************************************************/
 
-		vl::Ptr<vl::parsing::ParsingTreeNode> CalParseExpressionAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)
+		vl::Ptr<vl::parsing::ParsingTreeNode> CalParseExpressionAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors)
 		{
 			vl::parsing::tabling::ParsingState state(input, table);
 			state.Reset(L"Exp");
 			vl::Ptr<vl::parsing::tabling::ParsingGeneralParser> parser=vl::parsing::tabling::CreateStrictParser(table);
-			vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
 			vl::Ptr<vl::parsing::ParsingTreeNode> node=parser->Parse(state, errors);
 			return node;
 		}
 
-		vl::Ptr<CalExpression> CalParseExpression(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)
+		vl::Ptr<vl::parsing::ParsingTreeNode> CalParseExpressionAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)
+		{
+			vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
+			return CalParseExpressionAsParsingTreeNode(input, table, errors);
+		}
+
+		vl::Ptr<CalExpression> CalParseExpression(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors)
 		{
 			vl::parsing::tabling::ParsingState state(input, table);
 			state.Reset(L"Exp");
 			vl::Ptr<vl::parsing::tabling::ParsingGeneralParser> parser=vl::parsing::tabling::CreateStrictParser(table);
-			vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
 			vl::Ptr<vl::parsing::ParsingTreeNode> node=parser->Parse(state, errors);
-			if(node)
+			if(node && errors.Count()==0)
 			{
 				return CalConvertParsingTreeNode(node, state.GetTokens()).Cast<CalExpression>();
 			}
 			return 0;
+		}
+
+		vl::Ptr<CalExpression> CalParseExpression(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)
+		{
+			vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
+			return CalParseExpression(input, table, errors);
 		}
 
 /***********************************************************************
@@ -248,5 +258,99 @@ Table Generation
 		    return table;
 		}
 
+	}
+}
+namespace vl
+{
+	namespace reflection
+	{
+		namespace description
+		{
+#ifndef VCZH_DEBUG_NO_REFLECTION
+			using namespace test::parser;
+
+			IMPL_TYPE_INFO_RENAME(CalExpression, System::CalExpression)
+			IMPL_TYPE_INFO_RENAME(CalNumberExpression, System::CalNumberExpression)
+			IMPL_TYPE_INFO_RENAME(CalBinaryExpression, System::CalBinaryExpression)
+			IMPL_TYPE_INFO_RENAME(CalBinaryExpression::CalBinaryOperator, System::CalBinaryExpression::CalBinaryOperator)
+			IMPL_TYPE_INFO_RENAME(CalFunctionExpression, System::CalFunctionExpression)
+
+			BEGIN_CLASS_MEMBER(CalExpression)
+
+			END_CLASS_MEMBER(CalExpression)
+
+			BEGIN_CLASS_MEMBER(CalNumberExpression)
+				CLASS_MEMBER_BASE(CalExpression)
+
+				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<CalNumberExpression>(), NO_PARAMETER)
+
+				CLASS_MEMBER_EXTERNALMETHOD(get_value, NO_PARAMETER, vl::WString(CalNumberExpression::*)(), [](CalNumberExpression* node){ return node->value.value; })
+				CLASS_MEMBER_EXTERNALMETHOD(set_value, {L"value"}, void(CalNumberExpression::*)(const vl::WString&), [](CalNumberExpression* node, const vl::WString& value){ node->value.value = value; })
+
+				CLASS_MEMBER_PROPERTY(value, get_value, set_value)
+			END_CLASS_MEMBER(CalNumberExpression)
+
+			BEGIN_CLASS_MEMBER(CalBinaryExpression)
+				CLASS_MEMBER_BASE(CalExpression)
+
+				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<CalBinaryExpression>(), NO_PARAMETER)
+
+
+				CLASS_MEMBER_FIELD(firstOperand)
+				CLASS_MEMBER_FIELD(secondOperand)
+				CLASS_MEMBER_FIELD(binaryOperator)
+			END_CLASS_MEMBER(CalBinaryExpression)
+
+			BEGIN_ENUM_ITEM(CalBinaryExpression::CalBinaryOperator)
+				ENUM_ITEM_NAMESPACE(CalBinaryExpression::CalBinaryOperator)
+				ENUM_NAMESPACE_ITEM(Add)
+				ENUM_NAMESPACE_ITEM(Sub)
+				ENUM_NAMESPACE_ITEM(Mul)
+				ENUM_NAMESPACE_ITEM(Div)
+			END_ENUM_ITEM(CalBinaryExpression::CalBinaryOperator)
+
+			BEGIN_CLASS_MEMBER(CalFunctionExpression)
+				CLASS_MEMBER_BASE(CalExpression)
+
+				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<CalFunctionExpression>(), NO_PARAMETER)
+
+				CLASS_MEMBER_EXTERNALMETHOD(get_functionName, NO_PARAMETER, vl::WString(CalFunctionExpression::*)(), [](CalFunctionExpression* node){ return node->functionName.value; })
+				CLASS_MEMBER_EXTERNALMETHOD(set_functionName, {L"value"}, void(CalFunctionExpression::*)(const vl::WString&), [](CalFunctionExpression* node, const vl::WString& value){ node->functionName.value = value; })
+
+				CLASS_MEMBER_PROPERTY(functionName, get_functionName, set_functionName)
+				CLASS_MEMBER_FIELD(arguments)
+			END_CLASS_MEMBER(CalFunctionExpression)
+
+			class CalTypeLoader : public vl::Object, public ITypeLoader
+			{
+			public:
+				void Load(ITypeManager* manager)
+				{
+					ADD_TYPE_INFO(test::parser::CalExpression)
+					ADD_TYPE_INFO(test::parser::CalNumberExpression)
+					ADD_TYPE_INFO(test::parser::CalBinaryExpression)
+					ADD_TYPE_INFO(test::parser::CalBinaryExpression::CalBinaryOperator)
+					ADD_TYPE_INFO(test::parser::CalFunctionExpression)
+				}
+
+				void Unload(ITypeManager* manager)
+				{
+				}
+			};
+#endif
+
+			bool CalLoadTypes()
+			{
+#ifndef VCZH_DEBUG_NO_REFLECTION
+				ITypeManager* manager=GetGlobalTypeManager();
+				if(manager)
+				{
+					Ptr<ITypeLoader> loader=new CalTypeLoader;
+					return manager->AddTypeLoader(loader);
+				}
+#endif
+				return false;
+			}
+		}
 	}
 }

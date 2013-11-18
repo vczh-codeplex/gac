@@ -286,9 +286,18 @@ namespace test
 
 	Ptr<ParsingDefinition> LoadDefinition(const WString& parserName)
 	{
-		WString fileName=GetPath()+L"\\Parsers\\Parsing."+parserName+L".Definition.txt";
 		WString text;
+		if (parserName == L"Xml")
 		{
+			text = xml::XmlGetParserTextBuffer();
+		}
+		else if (parserName == L"Json")
+		{
+			text = json::JsonGetParserTextBuffer();
+		}
+		else
+		{
+			WString fileName=GetPath()+L"\\Parsers\\Parsing."+parserName+L".Definition.txt";
 			FileStream fileStream(fileName, FileStream::ReadOnly);
 			BomDecoder decoder;
 			DecoderStream decoderStream(fileStream, decoder);

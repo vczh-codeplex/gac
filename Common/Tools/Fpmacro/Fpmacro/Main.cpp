@@ -158,9 +158,9 @@ public:
 		ExecutableObject* result=new ExecutableObject;
 		result->name=node->name.value;
 		result->predefinedEnvironment=new RunningObject::Environment;
-		FOREACH(vl::parsing::ParsingToken, parameter, node->parameters)
+		FOREACH(Ptr<FpmReferenceParameter>, parameter, node->parameters)
 		{
-			result->parameters.Add(parameter.value);
+			result->parameters.Add(parameter->name.value);
 		}
 		ConcatObject* concat=new ConcatObject;
 		FOREACH(Ptr<FpmDefinition>, definition, node->definitions)
@@ -319,10 +319,10 @@ public:
 		writer.WriteString(L"    ");
 		writer.WriteString(node->name.value);
 		writer.WriteString(L" : ");
-		FOREACH_INDEXER(vl::parsing::ParsingToken, parameter, i, node->parameters)
+		FOREACH_INDEXER(Ptr<FpmReferenceParameter>, parameter, i, node->parameters)
 		{
 			if(i)writer.WriteString(L" , ");
-			writer.WriteString(parameter.value);
+			writer.WriteString(parameter->name.value);
 		}
 		writer.WriteLine(L"");
 		FOREACH(Ptr<FpmDefinition>, definition, node->definitions)

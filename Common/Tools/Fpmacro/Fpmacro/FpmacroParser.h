@@ -9,26 +9,27 @@ Parser::FpmacroParser
 #ifndef FPMACRO_PARSER
 #define FPMACRO_PARSER
 
-#include "..\..\..\..\Libraries\GacUI\Public\Source\Vlpp.h"
+#include "..\..\..\Source\Parsing\Parsing.h"
+#include "..\..\..\Source\Parsing\ParsingAutomaton.h"
 
 namespace fpmacro
 {
 	namespace parser
 	{
-		struct FpmParserTokenIndex abstract
+		enum class FpmParserTokenIndex
 		{
-			static const vl::vint BRACKET_OPEN = 0;
-			static const vl::vint BRACKET_CLOSE = 1;
-			static const vl::vint ARRAY = 2;
-			static const vl::vint DEFINE = 3;
-			static const vl::vint BEGIN = 4;
-			static const vl::vint END = 5;
-			static const vl::vint COMMA = 6;
-			static const vl::vint NAME = 7;
-			static const vl::vint NEW_LINE = 8;
-			static const vl::vint SPACE = 9;
-			static const vl::vint TEXT_FRAGMENT = 10;
-			static const vl::vint BRACKET = 11;
+			BRACKET_OPEN = 0,
+			BRACKET_CLOSE = 1,
+			ARRAY = 2,
+			DEFINE = 3,
+			BEGIN = 4,
+			END = 5,
+			COMMA = 6,
+			NAME = 7,
+			NEW_LINE = 8,
+			SPACE = 9,
+			TEXT_FRAGMENT = 10,
+			BRACKET = 11,
 		};
 		class FpmExpression;
 		class FpmConcatExpression;
@@ -39,6 +40,7 @@ namespace fpmacro
 		class FpmTextExpression;
 		class FpmDefinition;
 		class FpmExpressionDefinition;
+		class FpmReferenceParameter;
 		class FpmReferenceDefinition;
 		class FpmMacro;
 
@@ -145,11 +147,19 @@ namespace fpmacro
 			static vl::Ptr<FpmExpressionDefinition> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 		};
 
+		class FpmReferenceParameter : public vl::parsing::ParsingTreeCustomBase
+		{
+		public:
+			vl::parsing::ParsingToken name;
+
+			static vl::Ptr<FpmReferenceParameter> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
+		};
+
 		class FpmReferenceDefinition : public FpmDefinition
 		{
 		public:
 			vl::parsing::ParsingToken name;
-			vl::collections::List<vl::parsing::ParsingToken> parameters;
+			vl::collections::List<vl::Ptr<FpmReferenceParameter>> parameters;
 			vl::collections::List<vl::Ptr<FpmDefinition>> definitions;
 
 			void Accept(FpmDefinition::IVisitor* visitor)override;
@@ -165,12 +175,45 @@ namespace fpmacro
 			static vl::Ptr<FpmMacro> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 		};
 
+		extern vl::WString FpmGetParserTextBuffer();
 		extern vl::Ptr<vl::parsing::ParsingTreeCustomBase> FpmConvertParsingTreeNode(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 		extern vl::Ptr<vl::parsing::tabling::ParsingTable> FpmLoadTable();
 
+		extern vl::Ptr<vl::parsing::ParsingTreeNode> FpmParseFpmacroCodeAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
 		extern vl::Ptr<vl::parsing::ParsingTreeNode> FpmParseFpmacroCodeAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
+		extern vl::Ptr<FpmMacro> FpmParseFpmacroCode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
 		extern vl::Ptr<FpmMacro> FpmParseFpmacroCode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
 
+		extern vl::Ptr<vl::parsing::ParsingTreeNode> FpmParseFpmacroCodeAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
+		extern vl::Ptr<vl::parsing::ParsingTreeNode> FpmParseFpmacroCodeAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
+		extern vl::Ptr<FpmMacro> FpmParseFpmacroCode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
+		extern vl::Ptr<FpmMacro> FpmParseFpmacroCode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
+
+	}
+}
+namespace vl
+{
+	namespace reflection
+	{
+		namespace description
+		{
+#ifndef VCZH_DEBUG_NO_REFLECTION
+			DECL_TYPE_INFO(fpmacro::parser::FpmReferenceParameter)
+			DECL_TYPE_INFO(fpmacro::parser::FpmReferenceDefinition)
+			DECL_TYPE_INFO(fpmacro::parser::FpmMacro)
+			DECL_TYPE_INFO(fpmacro::parser::FpmExpression)
+			DECL_TYPE_INFO(fpmacro::parser::FpmConcatExpression)
+			DECL_TYPE_INFO(fpmacro::parser::FpmArrayExpression)
+			DECL_TYPE_INFO(fpmacro::parser::FpmInvokeExpression)
+			DECL_TYPE_INFO(fpmacro::parser::FpmBracketExpression)
+			DECL_TYPE_INFO(fpmacro::parser::FpmReferenceExpression)
+			DECL_TYPE_INFO(fpmacro::parser::FpmTextExpression)
+			DECL_TYPE_INFO(fpmacro::parser::FpmDefinition)
+			DECL_TYPE_INFO(fpmacro::parser::FpmExpressionDefinition)
+#endif
+
+			extern bool FpmLoadTypes();
+		}
 	}
 }
 #endif

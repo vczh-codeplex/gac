@@ -307,11 +307,9 @@
     <Text Include="..\TestFiles\Baseline\RegexString.Nfa.txt" />
     <Text Include="..\TestFiles\Parsers\Parsing.AmbiguousExpression.Definition.txt" />
     <Text Include="..\TestFiles\Parsers\Parsing.Calculator.Definition.txt" />
-    <Text Include="..\TestFiles\Parsers\Parsing.Json.Definition.txt" />
     <Text Include="..\TestFiles\Parsers\Parsing.NameList.Definition.txt" />
     <Text Include="..\TestFiles\Parsers\Parsing.NameSemicolonList.Definition.txt" />
     <Text Include="..\TestFiles\Parsers\Parsing.Statement.Definition.txt" />
-    <Text Include="..\TestFiles\Parsers\Parsing.Xml.Definition.txt" />
     <Text Include="Parser.Calculator\Parser.Calculator.parser.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

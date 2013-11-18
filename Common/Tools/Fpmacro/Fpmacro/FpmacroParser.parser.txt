@@ -1,11 +1,11 @@
 include:"..\..\..\Source\Parsing\Parsing.h"
 include:"..\..\..\Source\Parsing\ParsingAutomaton.h"
 namespace:fpmacro.parser
+reflection:Fpmacro
 classPrefix:Fpm
 guard:FPMACRO_PARSER
 parser:ParseFpmacroCode(macro_start)
 ambiguity:enabled
-parsertext:enabled
 grammar:
 
 class Expression
@@ -52,10 +52,15 @@ class ExpressionDefinition : Definition
 	Expression expression;
 }
 
+class ReferenceParameter
+{
+	token name;
+}
+
 class ReferenceDefinition : Definition
 {
 	token name;
-	token[] parameters;
+	ReferenceParameter[] parameters;
 	Definition[] definitions;
 }
 
@@ -127,8 +132,12 @@ rule ExpressionDefinition exp_def
 	= exp : expression as ExpressionDefinition
 	;
 
+rule ReferenceParameter ref_parameter
+	= NAME : name as ReferenceParameter
+	;
+
 rule ReferenceDefinition ref_def
-	= "$$define" [SPACE] NAME : name ("(" [NAME : parameters {"," NAME : parameters}] ")" | "()") SPACE
+	= "$$define" [SPACE] NAME : name ("(" [ref_parameter : parameters {"," ref_parameter : parameters}] ")" | "()") SPACE
 		( exp_def : definitions
 		| "$$begin" NEW_LINE {def : definitions NEW_LINE } "$$end"
 		) as ReferenceDefinition

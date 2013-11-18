@@ -14,18 +14,18 @@ namespace test
 {
 	namespace parser
 	{
-		struct CalParserTokenIndex abstract
+		enum class CalParserTokenIndex
 		{
-			static const vl::vint NAME = 0;
-			static const vl::vint NUMBER = 1;
-			static const vl::vint ADD = 2;
-			static const vl::vint SUB = 3;
-			static const vl::vint MUL = 4;
-			static const vl::vint DIV = 5;
-			static const vl::vint LEFT = 6;
-			static const vl::vint RIGHT = 7;
-			static const vl::vint COMMA = 8;
-			static const vl::vint SPACE = 9;
+			NAME = 0,
+			NUMBER = 1,
+			ADD = 2,
+			SUB = 3,
+			MUL = 4,
+			DIV = 5,
+			LEFT = 6,
+			RIGHT = 7,
+			COMMA = 8,
+			SPACE = 9,
 		};
 		class CalExpression;
 		class CalNumberExpression;
@@ -60,20 +60,17 @@ namespace test
 		class CalBinaryExpression : public CalExpression
 		{
 		public:
-			struct CalBinaryOperator abstract
+			enum class CalBinaryOperator
 			{
-				enum Type
-				{
-					Add,
-					Sub,
-					Mul,
-					Div,
-				};
+				Add,
+				Sub,
+				Mul,
+				Div,
 			};
 
 			vl::Ptr<CalExpression> firstOperand;
 			vl::Ptr<CalExpression> secondOperand;
-			CalBinaryOperator::Type binaryOperator;
+			CalBinaryOperator binaryOperator;
 
 			void Accept(CalExpression::IVisitor* visitor)override;
 
@@ -95,8 +92,33 @@ namespace test
 		extern vl::Ptr<vl::parsing::ParsingTreeCustomBase> CalConvertParsingTreeNode(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 		extern vl::Ptr<vl::parsing::tabling::ParsingTable> CalLoadTable();
 
+		extern vl::Ptr<vl::parsing::ParsingTreeNode> CalParseExpressionAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
 		extern vl::Ptr<vl::parsing::ParsingTreeNode> CalParseExpressionAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
+		extern vl::Ptr<CalExpression> CalParseExpression(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
 		extern vl::Ptr<CalExpression> CalParseExpression(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
 
+		extern vl::Ptr<vl::parsing::ParsingTreeNode> CalParseExpressionAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
+		extern vl::Ptr<vl::parsing::ParsingTreeNode> CalParseExpressionAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
+		extern vl::Ptr<CalExpression> CalParseExpression(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
+		extern vl::Ptr<CalExpression> CalParseExpression(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
+
+	}
+}
+namespace vl
+{
+	namespace reflection
+	{
+		namespace description
+		{
+#ifndef VCZH_DEBUG_NO_REFLECTION
+			DECL_TYPE_INFO(test::parser::CalExpression)
+			DECL_TYPE_INFO(test::parser::CalNumberExpression)
+			DECL_TYPE_INFO(test::parser::CalBinaryExpression)
+			DECL_TYPE_INFO(test::parser::CalBinaryExpression::CalBinaryOperator)
+			DECL_TYPE_INFO(test::parser::CalFunctionExpression)
+#endif
+
+			extern bool CalLoadTypes();
+		}
 	}
 }
