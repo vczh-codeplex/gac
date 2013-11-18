@@ -1846,7 +1846,7 @@ Resource String
 Resource Structure
 ***********************************************************************/
 
-		class GuiResourceNodeBase : public Object
+		class GuiResourceNodeBase : public Object, public Description<GuiResourceNodeBase>
 		{
 			friend class GuiResourceFolder;
 		protected:
@@ -1863,18 +1863,18 @@ Resource Structure
 
 		class DocumentModel;
 		
-		class GuiResourceItem : public GuiResourceNodeBase
+		class GuiResourceItem : public GuiResourceNodeBase, public Description<GuiResourceItem>
 		{
 			friend class GuiResourceFolder;
 		protected:
-			Ptr<Object>								content;
+			Ptr<DescriptableObject>					content;
 			
 		public:
 			GuiResourceItem();
 			~GuiResourceItem();
 			
-			Ptr<Object>								GetContent();
-			void									SetContent(Ptr<Object> value);
+			Ptr<DescriptableObject>					GetContent();
+			void									SetContent(Ptr<DescriptableObject> value);
 
 			Ptr<GuiImageData>						AsImage();
 			Ptr<parsing::xml::XmlDocument>			AsXml();
@@ -1882,7 +1882,7 @@ Resource Structure
 			Ptr<DocumentModel>						AsDocument();
 		};
 		
-		class GuiResourceFolder : public GuiResourceNodeBase
+		class GuiResourceFolder : public GuiResourceNodeBase, public Description<GuiResourceFolder>
 		{
 		protected:
 			typedef collections::Dictionary<WString, Ptr<GuiResourceItem>>		ItemMap;
@@ -1919,7 +1919,7 @@ Resource Structure
 			Ptr<GuiResourceFolder>					RemoveFolder(const WString& name);
 			void									ClearFolders();
 
-			Ptr<Object>								GetValueByPath(const WString& path);
+			Ptr<DescriptableObject>					GetValueByPath(const WString& path);
 			Ptr<GuiResourceFolder>					GetFolderByPath(const WString& path);
 		};
 
@@ -1952,7 +1952,7 @@ Resource Path Resolver
 		class IGuiResourcePathResolver : public IDescriptable, public Description<IGuiResourcePathResolver>
 		{
 		public:
-			virtual Ptr<Object>								ResolveResource(const WString& path)=0;
+			virtual Ptr<DescriptableObject>					ResolveResource(const WString& path)=0;
 		};
 
 		class IGuiResourcePathResolverFactory : public IDescriptable, public Description<IGuiResourcePathResolverFactory>
@@ -1975,7 +1975,7 @@ Resource Path Resolver
 			GuiResourcePathResolver(Ptr<GuiResource> _resource, const WString& _workingDirectory);
 			~GuiResourcePathResolver();
 
-			Ptr<Object>										ResolveResource(const WString& protocol, const WString& path);
+			Ptr<DescriptableObject>							ResolveResource(const WString& protocol, const WString& path);
 		};
 
 /***********************************************************************
@@ -1989,11 +1989,11 @@ Resource Type Resolver
 			virtual WString									GetPreloadType()=0;
 			virtual bool									IsDelayLoad()=0;
 
-			virtual Ptr<Object>								ResolveResource(Ptr<parsing::xml::XmlElement> element)=0;
+			virtual Ptr<DescriptableObject>					ResolveResource(Ptr<parsing::xml::XmlElement> element)=0;
 
-			virtual Ptr<Object>								ResolveResource(const WString& path)=0;
+			virtual Ptr<DescriptableObject>					ResolveResource(const WString& path)=0;
 
-			virtual Ptr<Object>								ResolveResource(Ptr<Object> resource, Ptr<GuiResourcePathResolver> resolver)=0;
+			virtual Ptr<DescriptableObject>					ResolveResource(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver)=0;
 		};
 
 /***********************************************************************

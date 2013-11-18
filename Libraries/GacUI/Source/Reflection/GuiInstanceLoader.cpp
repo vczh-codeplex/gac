@@ -13,9 +13,9 @@ namespace vl
 		using namespace regex;
 		using namespace reflection::description;
 
-		/***********************************************************************
-		GuiInstancePropertyInfo
-		***********************************************************************/
+/***********************************************************************
+GuiInstancePropertyInfo
+***********************************************************************/
 
 		GuiInstancePropertyInfo::GuiInstancePropertyInfo()
 			:support(NotSupport)
@@ -79,9 +79,9 @@ namespace vl
 			return info;
 		}
 
-		/***********************************************************************
-		GuiInstanceContext::ElementName Parser
-		***********************************************************************/
+/***********************************************************************
+GuiInstanceContext::ElementName Parser
+***********************************************************************/
 
 		class GuiInstanceContextElementNameParser : public Object, public IGuiParser<GuiInstanceContext::ElementName>
 		{
@@ -120,9 +120,9 @@ namespace vl
 			}
 		};
 
-		/***********************************************************************
-		Instance Type Resolver
-		***********************************************************************/
+/***********************************************************************
+Instance Type Resolver
+***********************************************************************/
 
 		class GuiResourceInstanceTypeResolver : public Object, public IGuiResourceTypeResolver
 		{
@@ -142,17 +142,17 @@ namespace vl
 				return false;
 			}
 
-			Ptr<Object> ResolveResource(Ptr<parsing::xml::XmlElement> element)
+			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element)
 			{
 				return 0;
 			}
 
-			Ptr<Object> ResolveResource(const WString& path)
+			Ptr<DescriptableObject> ResolveResource(const WString& path)
 			{
 				return 0;
 			}
 
-			Ptr<Object> ResolveResource(Ptr<Object> resource, Ptr<GuiResourcePathResolver> resolver)
+			Ptr<DescriptableObject> ResolveResource(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver)
 			{
 				Ptr<XmlDocument> xml = resource.Cast<XmlDocument>();
 				if (xml)
@@ -164,9 +164,9 @@ namespace vl
 			}
 		};
 
-		/***********************************************************************
-		Default Instance Loader
-		***********************************************************************/
+/***********************************************************************
+Default Instance Loader
+***********************************************************************/
 
 		class GuiDefaultInstanceLoader : public Object, public IGuiInstanceLoader
 		{
@@ -432,9 +432,9 @@ namespace vl
 			}
 		};
 
-		/***********************************************************************
-		GuiInstanceLoaderManager
-		***********************************************************************/
+/***********************************************************************
+GuiInstanceLoaderManager
+***********************************************************************/
 
 		IGuiInstanceLoaderManager* instanceLoaderManager = 0;
 

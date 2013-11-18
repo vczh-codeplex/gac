@@ -108,7 +108,7 @@ Resource Structure
 ***********************************************************************/
 
 		/// <summary>Resource node base.</summary>
-		class GuiResourceNodeBase : public Object
+		class GuiResourceNodeBase : public Object, public Description<GuiResourceNodeBase>
 		{
 			friend class GuiResourceFolder;
 		protected:
@@ -130,11 +130,11 @@ Resource Structure
 		class DocumentModel;
 		
 		/// <summary>Resource item.</summary>
-		class GuiResourceItem : public GuiResourceNodeBase
+		class GuiResourceItem : public GuiResourceNodeBase, public Description<GuiResourceItem>
 		{
 			friend class GuiResourceFolder;
 		protected:
-			Ptr<Object>								content;
+			Ptr<DescriptableObject>					content;
 			
 		public:
 			/// <summary>Create a resource item.</summary>
@@ -143,10 +143,10 @@ Resource Structure
 			
 			/// <summary>Get the contained object for this resource item.</summary>
 			/// <returns>The contained object.</returns>
-			Ptr<Object>								GetContent();
+			Ptr<DescriptableObject>					GetContent();
 			/// <summary>Set the containd object for this resource item.</summary>
 			/// <param name="value">The contained object.</param>
-			void									SetContent(Ptr<Object> value);
+			void									SetContent(Ptr<DescriptableObject> value);
 
 			/// <summary>Get the contained object as an image.</summary>
 			/// <returns>The contained object.</returns>
@@ -163,7 +163,7 @@ Resource Structure
 		};
 		
 		/// <summary>Resource folder. A resource folder contains many sub folders and sub items.</summary>
-		class GuiResourceFolder : public GuiResourceNodeBase
+		class GuiResourceFolder : public GuiResourceNodeBase, public Description<GuiResourceFolder>
 		{
 		protected:
 			typedef collections::Dictionary<WString, Ptr<GuiResourceItem>>		ItemMap;
@@ -230,7 +230,7 @@ Resource Structure
 			/// <summary>Get a contained resource object using a path like "Packages\Application\Name".</summary>
 			/// <returns>The containd resource object.</returns>
 			/// <param name="path">The path.</param>
-			Ptr<Object>								GetValueByPath(const WString& path);
+			Ptr<DescriptableObject>					GetValueByPath(const WString& path);
 			/// <summary>Get a resource folder using a path like "Packages\Application\Name\".</summary>
 			/// <returns>The resource folder.</returns>
 			/// <param name="path">The path.</param>
@@ -289,7 +289,7 @@ Resource Path Resolver
 			/// <summary>Load a resource when the descriptor is something like a protocol-prefixed uri.</summary>
 			/// <returns>The loaded resource. Returns null if failed to load.</returns>
 			/// <param name="path">The path.</param>
-			virtual Ptr<Object>								ResolveResource(const WString& path)=0;
+			virtual Ptr<DescriptableObject>					ResolveResource(const WString& path)=0;
 		};
 
 		/// <summary>Represents an <see cref="IGuiResourcePathResolver"/> factory.</summary>
@@ -327,7 +327,7 @@ Resource Path Resolver
 			/// <returns>The loaded resource. Returns null if failed to load.</returns>
 			/// <param name="protocol">The protocol.</param>
 			/// <param name="path">The path.</param>
-			Ptr<Object>										ResolveResource(const WString& protocol, const WString& path);
+			Ptr<DescriptableObject>							ResolveResource(const WString& protocol, const WString& path);
 		};
 
 /***********************************************************************
@@ -351,18 +351,18 @@ Resource Type Resolver
 			/// <summary>Load a resource for a type inside an xml element.</summary>
 			/// <returns>The resource.</returns>
 			/// <param name="element">The xml element.</param>
-			virtual Ptr<Object>								ResolveResource(Ptr<parsing::xml::XmlElement> element)=0;
+			virtual Ptr<DescriptableObject>					ResolveResource(Ptr<parsing::xml::XmlElement> element)=0;
 
 			/// <summary>Load a resource for a type from a file.</summary>
 			/// <returns>The resource.</returns>
 			/// <param name="path">The file path.</param>
-			virtual Ptr<Object>								ResolveResource(const WString& path)=0;
+			virtual Ptr<DescriptableObject>					ResolveResource(const WString& path)=0;
 
 			/// <summary>Load a resource for a type from a resource loaded by the preload type resolver.</summary>
 			/// <returns>The resource.</returns>
 			/// <param name="resource">The resource.</param>
 			/// <param name="resolver">The path resolver. This is only for delay load resource.</param>
-			virtual Ptr<Object>								ResolveResource(Ptr<Object> resource, Ptr<GuiResourcePathResolver> resolver)=0;
+			virtual Ptr<DescriptableObject>					ResolveResource(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver)=0;
 		};
 
 /***********************************************************************

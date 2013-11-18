@@ -13749,6 +13749,7 @@ TypeName
 			const wchar_t* TypeInfo<void>::TypeName						= L"system::Void";
 			const wchar_t* TypeInfo<VoidValue>::TypeName				= L"system::Void";
 			const wchar_t* TypeInfo<IDescriptable>::TypeName			= L"system::Interface";
+			const wchar_t* TypeInfo<DescriptableObject>::TypeName		= L"system::ReferenceType";
 			const wchar_t* TypeInfo<Value>::TypeName					= L"system::Object";
 			const wchar_t* TypeInfo<unsigned __int8>::TypeName			= L"system::UInt8";
 			const wchar_t* TypeInfo<unsigned __int16>::TypeName			= L"system::UInt16";
@@ -14194,6 +14195,9 @@ Collections
 ***********************************************************************/
 
 #define _ ,
+
+			BEGIN_CLASS_MEMBER(DescriptableObject)
+			END_CLASS_MEMBER(DescriptableObject)
 
 			BEGIN_STRUCT_MEMBER(VoidValue)
 			END_STRUCT_MEMBER(VoidValue)

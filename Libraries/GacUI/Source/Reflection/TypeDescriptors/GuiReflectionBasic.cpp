@@ -453,6 +453,40 @@ Type Declaration
 				CLASS_MEMBER_METHOD_OVERLOAD(SaveToXml, {L"filePath"}, bool(DocumentModel::*)(const WString&))
 			END_CLASS_MEMBER(DocumentModel)
 
+			BEGIN_CLASS_MEMBER(GuiResourceNodeBase)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Parent)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Name)
+			END_CLASS_MEMBER(GuiResourceNodeBase)
+
+			BEGIN_CLASS_MEMBER(GuiResourceItem)
+				CLASS_MEMBER_BASE(GuiResourceNodeBase)
+
+				CLASS_MEMBER_PROPERTY_FAST(Content)
+
+				CLASS_MEMBER_METHOD(AsImage, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(AsXml, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(AsString, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(AsDocument, NO_PARAMETER)
+			END_CLASS_MEMBER(GuiResourceItem)
+
+			BEGIN_CLASS_MEMBER(GuiResourceFolder)
+				CLASS_MEMBER_BASE(GuiResourceNodeBase)
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Items)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Folders)
+
+				CLASS_MEMBER_METHOD(GetItem, { L"name" })
+				CLASS_MEMBER_METHOD(AddItem, { L"name" _ L"item" })
+				CLASS_MEMBER_METHOD(RemoveItem, { L"name" })
+				CLASS_MEMBER_METHOD(ClearItems, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(GetFolder, { L"name" })
+				CLASS_MEMBER_METHOD(AddFolder, { L"name" _ L"folder" })
+				CLASS_MEMBER_METHOD(RemoveFolder, { L"name" })
+				CLASS_MEMBER_METHOD(ClearFolders, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(GetValueByPath, { L"path" })
+				CLASS_MEMBER_METHOD(GetFolderByPath, { L"path" })
+			END_CLASS_MEMBER(GuiResourceFolder)
+
 			BEGIN_CLASS_MEMBER(GuiResource)
 				CLASS_MEMBER_CONSTRUCTOR(Ptr<GuiResource>(), NO_PARAMETER)
 				CLASS_MEMBER_EXTERNALCTOR(Ptr<GuiResource>(const WString&), {L"filePath"}, &GuiResource::LoadFromXml);
@@ -461,6 +495,7 @@ Type Declaration
 
 				CLASS_MEMBER_METHOD(GetDocumentByPath, {L"path"})
 				CLASS_MEMBER_METHOD(GetImageByPath, {L"path"})
+				CLASS_MEMBER_METHOD(GetXmlByPath, {L"path"})
 				CLASS_MEMBER_METHOD(GetStringByPath, {L"path"})
 			END_CLASS_MEMBER(GuiResource)
 
