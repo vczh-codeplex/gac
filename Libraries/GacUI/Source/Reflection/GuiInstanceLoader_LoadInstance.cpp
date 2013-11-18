@@ -101,7 +101,7 @@ FindTypeVisitor
 					return 0;
 				}
 
-				Ptr<GuiInstanceContext> FindInstanceContext(Ptr<Object> resource)
+				Ptr<GuiInstanceContext> FindInstanceContext(Ptr<DescriptableObject> resource)
 				{
 					if(auto context=resource.Cast<GuiInstanceContext>())
 					{
@@ -116,7 +116,7 @@ FindTypeVisitor
 
 				void Visit(GuiInstanceResourcePattern* ns)
 				{
-					Ptr<Object> resource=env->resolver->ResolveResource(ns->protocol, ns->path);
+					Ptr<DescriptableObject> resource=env->resolver->ResolveResource(ns->protocol, ns->path);
 					Ptr<GuiInstanceContext> context=FindInstanceContext(resource);
 					if(context)
 					{

@@ -67,6 +67,9 @@ Type List
 			F(presentation::DocumentParagraphRun)\
 			F(presentation::DocumentStyle)\
 			F(presentation::DocumentModel)\
+			F(presentation::GuiResourceNodeBase)\
+			F(presentation::GuiResourceItem)\
+			F(presentation::GuiResourceFolder)\
 			F(presentation::GuiResource)\
 			F(presentation::elements::IGuiGraphicsElement)\
 			F(presentation::compositions::GuiGraphicsComposition)\

@@ -156,12 +156,12 @@ GuiResourceItem
 		{
 		}
 
-		Ptr<Object> GuiResourceItem::GetContent()
+		Ptr<DescriptableObject> GuiResourceItem::GetContent()
 		{
 			return content;
 		}
 
-		void GuiResourceItem::SetContent(Ptr<Object> value)
+		void GuiResourceItem::SetContent(Ptr<DescriptableObject> value)
 		{
 			content=value;
 		}
@@ -266,7 +266,7 @@ GuiResourceFolder
 
 						if(typeResolver && preloadResolver)
 						{
-							Ptr<Object> resource;
+							Ptr<DescriptableObject> resource;
 							if(filePath==L"")
 							{
 								resource=preloadResolver->ResolveResource(element);
@@ -377,7 +377,7 @@ GuiResourceFolder
 			folders.Clear();
 		}
 
-		Ptr<Object> GuiResourceFolder::GetValueByPath(const WString& path)
+		Ptr<DescriptableObject> GuiResourceFolder::GetValueByPath(const WString& path)
 		{
 			const wchar_t* buffer=path.Buffer();
 			const wchar_t* index=wcschr(buffer, L'\\');
@@ -474,7 +474,7 @@ GuiResource
 					if(typeResolver && item->GetContent())
 					{
 						Ptr<GuiResourcePathResolver> pathResolver=new GuiResourcePathResolver(resource, folder);
-						Ptr<Object> resource=typeResolver->ResolveResource(item->GetContent(), pathResolver);
+						Ptr<DescriptableObject> resource=typeResolver->ResolveResource(item->GetContent(), pathResolver);
 						if(resource)
 						{
 							item->SetContent(resource);
@@ -527,7 +527,7 @@ GuiResourcePathResolver
 		{
 		}
 
-		Ptr<Object> GuiResourcePathResolver::ResolveResource(const WString& protocol, const WString& path)
+		Ptr<DescriptableObject> GuiResourcePathResolver::ResolveResource(const WString& protocol, const WString& path)
 		{
 			Ptr<IGuiResourcePathResolver> resolver;
 			vint index=resolvers.Keys().IndexOf(protocol);
@@ -570,7 +570,7 @@ GuiResourcePathFileResolver
 			{
 			}
 
-			Ptr<Object> ResolveResource(const WString& path)
+			Ptr<DescriptableObject> ResolveResource(const WString& path)
 			{
 				WString filename=path;
 				if(filename.Length()>=2 && filename[1]!=L':')
@@ -611,7 +611,7 @@ GuiResourcePathResResolver
 			{
 			}
 
-			Ptr<Object> ResolveResource(const WString& path)
+			Ptr<DescriptableObject> ResolveResource(const WString& path)
 			{
 				if(resource)
 				{

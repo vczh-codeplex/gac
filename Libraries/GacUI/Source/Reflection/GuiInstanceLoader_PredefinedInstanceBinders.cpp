@@ -47,7 +47,7 @@ GuiResourceInstanceBinder
 					WString protocol, path;
 					if (IsResourceUrl(propertyValue.propertyValue.GetText(), protocol, path))
 					{
-						if(Ptr<Object> resource=env->resolver->ResolveResource(protocol, path))
+						if(Ptr<DescriptableObject> resource=env->resolver->ResolveResource(protocol, path))
 						{
 							Value value;
 							if(Ptr<GuiTextData> text=resource.Cast<GuiTextData>())

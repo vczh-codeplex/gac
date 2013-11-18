@@ -351,6 +351,7 @@ Predefined Types
 			template<>struct TypeInfo<void>{static const wchar_t* TypeName;};
 			template<>struct TypeInfo<VoidValue>{static const wchar_t* TypeName;};
 			template<>struct TypeInfo<IDescriptable>{static const wchar_t* TypeName;};
+			template<>struct TypeInfo<DescriptableObject>{static const wchar_t* TypeName;};
 			template<>struct TypeInfo<Value>{static const wchar_t* TypeName;};
 			template<>struct TypeInfo<unsigned __int8>{static const wchar_t* TypeName;};
 			template<>struct TypeInfo<unsigned __int16>{static const wchar_t* TypeName;};

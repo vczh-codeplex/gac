@@ -141,13 +141,14 @@ Class
 					void LoadInternal()override\
 					{
 
+#define CLASS_MEMBER_BASE(TYPENAME)\
+			AddBaseType(description::GetTypeDescriptor<TYPENAME>());
+
 #define END_CLASS_MEMBER(TYPENAME)\
+						if (GetBaseTypeDescriptorCount() == 0) CLASS_MEMBER_BASE(DescriptableObject)\
 					}\
 				};\
 			};
-
-#define CLASS_MEMBER_BASE(TYPENAME)\
-			AddBaseType(description::GetTypeDescriptor<TYPENAME>());
 
 /***********************************************************************
 Field

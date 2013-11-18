@@ -34,12 +34,12 @@ Image Type Resolver
 				return false;
 			}
 
-			Ptr<Object> ResolveResource(Ptr<parsing::xml::XmlElement> element)
+			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element)
 			{
 				return 0;
 			}
 
-			Ptr<Object> ResolveResource(const WString& path)
+			Ptr<DescriptableObject> ResolveResource(const WString& path)
 			{
 				Ptr<INativeImage> image=GetCurrentController()->ImageService()->CreateImageFromFile(path);
 				if(image)
@@ -49,7 +49,7 @@ Image Type Resolver
 				return 0;
 			}
 
-			Ptr<Object> ResolveResource(Ptr<Object> resource, Ptr<GuiResourcePathResolver> resolver)
+			Ptr<DescriptableObject> ResolveResource(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver)
 			{
 				return 0;
 			}
@@ -77,12 +77,12 @@ Text Type Resolver
 				return false;
 			}
 
-			Ptr<Object> ResolveResource(Ptr<parsing::xml::XmlElement> element)
+			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element)
 			{
 				return new GuiTextData(XmlGetValue(element));
 			}
 
-			Ptr<Object> ResolveResource(const WString& path)
+			Ptr<DescriptableObject> ResolveResource(const WString& path)
 			{
 				WString text;
 				if(LoadTextFile(path, text))
@@ -92,7 +92,7 @@ Text Type Resolver
 				return 0;
 			}
 
-			Ptr<Object> ResolveResource(Ptr<Object> resource, Ptr<GuiResourcePathResolver> resolver)
+			Ptr<DescriptableObject> ResolveResource(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver)
 			{
 				return 0;
 			}
@@ -120,7 +120,7 @@ Xml Type Resolver
 				return false;
 			}
 
-			Ptr<Object> ResolveResource(Ptr<parsing::xml::XmlElement> element)
+			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element)
 			{
 				Ptr<XmlElement> root=XmlGetElements(element).First(0);
 				if(root)
@@ -132,7 +132,7 @@ Xml Type Resolver
 				return 0;
 			}
 
-			Ptr<Object> ResolveResource(const WString& path)
+			Ptr<DescriptableObject> ResolveResource(const WString& path)
 			{
 				if(auto parser=GetParserManager()->GetParser<XmlDocument>(L"XML"))
 				{
@@ -145,7 +145,7 @@ Xml Type Resolver
 				return 0;
 			}
 
-			Ptr<Object> ResolveResource(Ptr<Object> resource, Ptr<GuiResourcePathResolver> resolver)
+			Ptr<DescriptableObject> ResolveResource(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver)
 			{
 				return 0;
 			}
@@ -173,17 +173,17 @@ Doc Type Resolver
 				return true;
 			}
 
-			Ptr<Object> ResolveResource(Ptr<parsing::xml::XmlElement> element)
+			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element)
 			{
 				return 0;
 			}
 
-			Ptr<Object> ResolveResource(const WString& path)
+			Ptr<DescriptableObject> ResolveResource(const WString& path)
 			{
 				return 0;
 			}
 
-			Ptr<Object> ResolveResource(Ptr<Object> resource, Ptr<GuiResourcePathResolver> resolver)
+			Ptr<DescriptableObject> ResolveResource(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver)
 			{
 				Ptr<XmlDocument> xml=resource.Cast<XmlDocument>();
 				if(xml)

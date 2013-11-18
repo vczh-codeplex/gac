@@ -13111,6 +13111,7 @@ Predefined Types
 			template<>struct TypeInfo<void>{static const wchar_t* TypeName;};
 			template<>struct TypeInfo<VoidValue>{static const wchar_t* TypeName;};
 			template<>struct TypeInfo<IDescriptable>{static const wchar_t* TypeName;};
+			template<>struct TypeInfo<DescriptableObject>{static const wchar_t* TypeName;};
 			template<>struct TypeInfo<Value>{static const wchar_t* TypeName;};
 			template<>struct TypeInfo<unsigned __int8>{static const wchar_t* TypeName;};
 			template<>struct TypeInfo<unsigned __int16>{static const wchar_t* TypeName;};
@@ -19957,13 +19958,14 @@ Class
 					void LoadInternal()override\
 					{
 
+#define CLASS_MEMBER_BASE(TYPENAME)\
+			AddBaseType(description::GetTypeDescriptor<TYPENAME>());
+
 #define END_CLASS_MEMBER(TYPENAME)\
+						if (GetBaseTypeDescriptorCount() == 0) CLASS_MEMBER_BASE(DescriptableObject)\
 					}\
 				};\
 			};
-
-#define CLASS_MEMBER_BASE(TYPENAME)\
-			AddBaseType(description::GetTypeDescriptor<TYPENAME>());
 
 /***********************************************************************
 Field
