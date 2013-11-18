@@ -94,19 +94,16 @@ Code Config
 class CodegenConfig
 {
 public:
-	List<WString>					codeIncludes;
+	List<WString>					includes;
 	List<WString>					codeNamespaces;
-	Dictionary<WString, WString>	codeParsers;
-	WString							codeClassPrefix;
-	WString							codeGuard;
-	bool							parsingTree;
-	bool							parserText;
+	List<WString>					reflectionNamespaces;
+	Dictionary<WString, WString>	parsers;
+	WString							classPrefix;
+	WString							guard;
 	bool							ambiguity;
 
 	CodegenConfig()
-		:parsingTree(true)
-		,parserText(true)
-		,ambiguity(false)
+		:ambiguity(false)
 	{
 	}
 
@@ -116,9 +113,8 @@ public:
 		Regex regexClassPrefix(L"^classPrefix:(<prefix>/.+)$");
 		Regex regexGuard(L"^guard:(<guard>/.+)$");
 		Regex regexNamespace(L"^namespace:((<namespace>[^.]+)(.(<namespace>[^.]+))*)?$");
+		Regex regexReflection(L"^reflection:((<namespace>[^.]+)(.(<namespace>[^.]+))*)?$");
 		Regex regexParser(L"^parser:(<name>/w+)/((<rule>/w+)/)$");
-		Regex regexParsingTree(L"^parsingtree:(<value>enabled|disabled)$");
-		Regex regexParserText(L"^parsertext:(<value>enabled|disabled)$");
 		Regex regexAmbiguity(L"^ambiguity:(<value>enabled|disabled)$");
 
 		while(!reader.IsEnd())
@@ -131,15 +127,15 @@ public:
 			}
 			else if((match=regexClassPrefix.Match(line)) && match->Success())
 			{
-				codeClassPrefix=match->Groups().Get(L"prefix").Get(0).Value();
+				classPrefix=match->Groups().Get(L"prefix").Get(0).Value();
 			}
 			else if((match=regexGuard.Match(line)) && match->Success())
 			{
-				codeGuard=match->Groups().Get(L"guard").Get(0).Value();
+				guard=match->Groups().Get(L"guard").Get(0).Value();
 			}
 			else if((match=regexInclude.Match(line)) && match->Success())
 			{
-				codeIncludes.Add(match->Groups().Get(L"path").Get(0).Value());
+				includes.Add(match->Groups().Get(L"path").Get(0).Value());
 			}
 			else if((match=regexNamespace.Match(line)) && match->Success())
 			{
@@ -149,23 +145,22 @@ public:
 						return s.Value();
 					}));
 			}
+			else if((match=regexReflection.Match(line)) && match->Success())
+			{
+				CopyFrom(reflectionNamespaces, From(match->Groups().Get(L"namespace"))
+					.Select([=](RegexString s)->WString
+					{
+						return s.Value();
+					}));
+			}
 			else if((match=regexParser.Match(line)) && match->Success())
 			{
 				WString name=match->Groups().Get(L"name").Get(0).Value();
 				WString rule=match->Groups().Get(L"rule").Get(0).Value();
-				if(!codeParsers.Keys().Contains(name))
+				if(!parsers.Keys().Contains(name))
 				{
-					codeParsers.Add(name, rule);
+					parsers.Add(name, rule);
 				}
-			}
-			else if((match=regexParsingTree.Match(line)) && match->Success())
-			{
-				WString value=match->Groups().Get(L"value").Get(0).Value();
-				parsingTree=value==L"enabled";
-			}
-			else if((match=regexParserText.Match(line)) && match->Success())
-			{
-				// always enable parser text
 			}
 			else if((match=regexAmbiguity.Match(line)) && match->Success())
 			{
@@ -200,7 +195,7 @@ void WriteFileComment(const WString& name, StreamWriter& writer)
 
 WString WriteFileBegin(const CodegenConfig& config, StreamWriter& writer)
 {
-	FOREACH(WString, include, config.codeIncludes)
+	FOREACH(WString, include, config.includes)
 	{
 		writer.WriteLine(L"#include "+include);
 	}
@@ -317,7 +312,6 @@ void PrintTypeForValue(ParsingDefinitionType* _type, ParsingSymbol* _scope, Pars
 	if(type->GetType()==ParsingSymbol::EnumType)
 	{
 		PrintType(_type, _scope, _manager, _codeClassPrefix, _writer);
-		_writer.WriteString(L"::Type");
 	}
 	else if(type->GetType()==ParsingSymbol::ClassType)
 	{
@@ -366,7 +360,6 @@ void PrintTypeForValue(ParsingSymbol* type, const WString& codeClassPrefix, Text
 	if(type->GetType()==ParsingSymbol::EnumType)
 	{
 		PrintType(type, codeClassPrefix, writer);
-		writer.WriteString(L"::Type");
 	}
 	else if(type->GetType()==ParsingSymbol::ClassType)
 	{
@@ -531,28 +524,17 @@ public:
 	void Visit(ParsingDefinitionEnumDefinition* node)override
 	{
 		writer.WriteString(prefix);
-		writer.WriteString(L"struct ");
+		writer.WriteString(L"enum class ");
 		writer.WriteString(codeClassPrefix);
-		writer.WriteString(node->name);
-		writer.WriteLine(L" abstract");
+		writer.WriteLine(node->name);
 		writer.WriteString(prefix);
-		writer.WriteLine(L"{");
-
-		writer.WriteString(prefix);
-		writer.WriteString(L"\t");
-		writer.WriteLine(L"enum Type");
-		writer.WriteString(prefix);
-		writer.WriteString(L"\t");
 		writer.WriteLine(L"{");
 
 		for(int i=0;i<node->members.Count();i++)
 		{
-			LogInternal(node, node->members[i].Obj(), prefix+L"\t\t");
+			LogInternal(node, node->members[i].Obj(), prefix+L"\t");
 		}
 
-		writer.WriteString(prefix);
-		writer.WriteString(L"\t");
-		writer.WriteLine(L"};");
 		writer.WriteString(prefix);
 		writer.WriteLine(L"};");
 	}
@@ -621,12 +603,12 @@ void PrintTypeDefinitions(List<Ptr<ParsingDefinitionTypeDefinition>>& types, con
 void WriteHeaderFile(const WString& name, Ptr<ParsingDefinition> definition, Ptr<ParsingTable> table, const CodegenConfig& config, StreamWriter& writer)
 {
 	WriteFileComment(name, writer);
-	if(config.codeGuard!=L"")
+	if(config.guard!=L"")
 	{
 		writer.WriteString(L"#ifndef ");
-		writer.WriteLine(config.codeGuard);
+		writer.WriteLine(config.guard);
 		writer.WriteString(L"#define ");
-		writer.WriteLine(config.codeGuard);
+		writer.WriteLine(config.guard);
 		writer.WriteLine(L"");
 	}
 	WString prefix=WriteFileBegin(config, writer);
@@ -636,108 +618,100 @@ void WriteHeaderFile(const WString& name, Ptr<ParsingDefinition> definition, Ptr
 		List<Ptr<ParsingError>> errors;
 		ValidateDefinition(definition, &manager, errors);
 	}
-	if(config.parsingTree)
+
+	writer.WriteString(prefix);
+	writer.WriteString(L"enum class ");
+	writer.WriteString(config.classPrefix);
+	writer.WriteLine(L"ParserTokenIndex");
+	writer.WriteString(prefix);
+	writer.WriteLine(L"{");
+	for(vint i=0;i<table->GetTokenCount();i++)
 	{
-		writer.WriteString(prefix);
-		writer.WriteString(L"struct ");
-		writer.WriteString(config.codeClassPrefix);
-		writer.WriteLine(L"ParserTokenIndex abstract");
-		writer.WriteString(prefix);
-		writer.WriteLine(L"{");
-		for(vint i=0;i<table->GetTokenCount();i++)
+		const ParsingTable::TokenInfo& info=table->GetTokenInfo(i);
+		if(info.regexTokenIndex!=-1)
 		{
-			const ParsingTable::TokenInfo& info=table->GetTokenInfo(i);
-			if(info.regexTokenIndex!=-1)
-			{
-				writer.WriteString(prefix);
-				writer.WriteString(L"\tstatic const vl::vint ");
-				writer.WriteString(info.name);
-				writer.WriteString(L" = ");
-				writer.WriteString(itow(info.regexTokenIndex));
-				writer.WriteLine(L";");
-			}
+			writer.WriteString(prefix);
+			writer.WriteString(L"\t");
+			writer.WriteString(info.name);
+			writer.WriteString(L" = ");
+			writer.WriteString(itow(info.regexTokenIndex));
+			writer.WriteLine(L",");
 		}
-		for(vint i=0;i<table->GetDiscardTokenCount();i++)
-		{
-			const ParsingTable::TokenInfo& info=table->GetDiscardTokenInfo(i);
-			if(info.regexTokenIndex!=-1)
-			{
-				writer.WriteString(prefix);
-				writer.WriteString(L"\tstatic const vl::vint ");
-				writer.WriteString(info.name);
-				writer.WriteString(L" = ");
-				writer.WriteString(itow(info.regexTokenIndex));
-				writer.WriteLine(L";");
-			}
-		}
-		writer.WriteString(prefix);
-		writer.WriteLine(L"};");
-		
-		PrintTypeDefinitions(definition->types, prefix, 0, &manager, config.codeClassPrefix, writer);
 	}
+	for(vint i=0;i<table->GetDiscardTokenCount();i++)
+	{
+		const ParsingTable::TokenInfo& info=table->GetDiscardTokenInfo(i);
+		if(info.regexTokenIndex!=-1)
+		{
+			writer.WriteString(prefix);
+			writer.WriteString(L"\t");
+			writer.WriteString(info.name);
+			writer.WriteString(L" = ");
+			writer.WriteString(itow(info.regexTokenIndex));
+			writer.WriteLine(L",");
+		}
+	}
+	writer.WriteString(prefix);
+	writer.WriteLine(L"};");
+		
+	PrintTypeDefinitions(definition->types, prefix, 0, &manager, config.classPrefix, writer);
 
 	writer.WriteString(prefix);
 	writer.WriteString(L"extern vl::WString ");
-	writer.WriteString(config.codeClassPrefix);
+	writer.WriteString(config.classPrefix);
 	writer.WriteLine(L"GetParserTextBuffer();");
 
-	if(config.parsingTree)
-	{
-		writer.WriteString(prefix);
-		writer.WriteString(L"extern vl::Ptr<vl::parsing::ParsingTreeCustomBase> ");
-		writer.WriteString(config.codeClassPrefix);
-		writer.WriteLine(L"ConvertParsingTreeNode(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);");
-	}
+	writer.WriteString(prefix);
+	writer.WriteString(L"extern vl::Ptr<vl::parsing::ParsingTreeCustomBase> ");
+	writer.WriteString(config.classPrefix);
+	writer.WriteLine(L"ConvertParsingTreeNode(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);");
 
 	writer.WriteString(prefix);
 	writer.WriteString(L"extern vl::Ptr<vl::parsing::tabling::ParsingTable> ");
-	writer.WriteString(config.codeClassPrefix);
+	writer.WriteString(config.classPrefix);
 	writer.WriteLine(L"LoadTable();");
 
 	writer.WriteLine(L"");
-	FOREACH(WString, name, config.codeParsers.Keys())
+	FOREACH(WString, name, config.parsers.Keys())
 	{
-		ParsingSymbol* rule=manager.GetGlobal()->GetSubSymbolByName(config.codeParsers[name]);
+		ParsingSymbol* rule=manager.GetGlobal()->GetSubSymbolByName(config.parsers[name]);
 		if(rule)
 		{
-			{
-				writer.WriteString(prefix);
-				writer.WriteString(L"extern vl::Ptr<vl::parsing::ParsingTreeNode> ");
-				writer.WriteString(config.codeClassPrefix);
-				writer.WriteString(name);
-				writer.WriteLine(L"AsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);");
+			writer.WriteString(prefix);
+			writer.WriteString(L"extern vl::Ptr<vl::parsing::ParsingTreeNode> ");
+			writer.WriteString(config.classPrefix);
+			writer.WriteString(name);
+			writer.WriteLine(L"AsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);");
 				
-				writer.WriteString(prefix);
-				writer.WriteString(L"extern vl::Ptr<vl::parsing::ParsingTreeNode> ");
-				writer.WriteString(config.codeClassPrefix);
-				writer.WriteString(name);
-				writer.WriteLine(L"AsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);");
-			}
-			if(config.parsingTree)
-			{
-				ParsingSymbol* type=rule->GetDescriptorSymbol();
-				writer.WriteString(prefix);
-				writer.WriteString(L"extern ");
-				PrintTypeForValue(type, config.codeClassPrefix, writer);
-				writer.WriteString(L" ");
-				writer.WriteString(config.codeClassPrefix);
-				writer.WriteString(name);
-				writer.WriteLine(L"(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);");
+			writer.WriteString(prefix);
+			writer.WriteString(L"extern vl::Ptr<vl::parsing::ParsingTreeNode> ");
+			writer.WriteString(config.classPrefix);
+			writer.WriteString(name);
+			writer.WriteLine(L"AsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);");
+
+			ParsingSymbol* type=rule->GetDescriptorSymbol();
+			writer.WriteString(prefix);
+			writer.WriteString(L"extern ");
+			PrintTypeForValue(type, config.classPrefix, writer);
+			writer.WriteString(L" ");
+			writer.WriteString(config.classPrefix);
+			writer.WriteString(name);
+			writer.WriteLine(L"(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);");
 				
-				writer.WriteString(prefix);
-				writer.WriteString(L"extern ");
-				PrintTypeForValue(type, config.codeClassPrefix, writer);
-				writer.WriteString(L" ");
-				writer.WriteString(config.codeClassPrefix);
-				writer.WriteString(name);
-				writer.WriteLine(L"(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);");
-			}
+			writer.WriteString(prefix);
+			writer.WriteString(L"extern ");
+			PrintTypeForValue(type, config.classPrefix, writer);
+			writer.WriteString(L" ");
+			writer.WriteString(config.classPrefix);
+			writer.WriteString(name);
+			writer.WriteLine(L"(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);");
+
 			writer.WriteLine(L"");
 		}
 	}
 
 	WriteFileEnd(config, writer);
-	if(config.codeGuard!=L"")
+	if(config.guard!=L"")
 	{
 		writer.WriteString(L"#endif");
 	}
@@ -1196,280 +1170,6 @@ void WriteCppString(const WString& text, TextWriter& writer)
 	writer.WriteString(L"\"");
 }
 
-void WriteTable(Ptr<ParsingTable> table, const WString& prefix, const WString& codeClassPrefix, TextWriter& writer)
-{
-	writer.WriteString(prefix);
-	writer.WriteString(L"vl::Ptr<vl::parsing::tabling::ParsingTable> ");
-	writer.WriteString(codeClassPrefix);
-	writer.WriteLine(L"LoadTable()");
-	writer.WriteString(prefix);
-	writer.WriteLine(L"{");
-
-	writer.WriteString(prefix);
-	writer.WriteString(L"\tvl::Ptr<vl::parsing::tabling::ParsingTable> table=new vl::parsing::tabling::ParsingTable(");
-	writer.WriteString(itow(table->GetTokenCount()));
-	writer.WriteString(L"-vl::parsing::tabling::ParsingTable::UserTokenStart, ");
-	writer.WriteString(itow(table->GetDiscardTokenCount()));
-	writer.WriteString(L", ");
-	writer.WriteString(itow(table->GetStateCount()));
-	writer.WriteString(L", ");
-	writer.WriteString(itow(table->GetRuleCount()));
-	writer.WriteLine(L");");
-	if(table->GetAmbiguity())
-	{
-		writer.WriteString(prefix);
-		writer.WriteLine(L"table->SetAmbiguity(true);");
-	}
-
-	writer.WriteString(prefix);
-	writer.WriteLine(L"\t#define SET_TOKEN_INFO(INDEX, NAME, REGEX) table->SetTokenInfo(INDEX, vl::parsing::tabling::ParsingTable::TokenInfo(NAME, REGEX));");
-	writer.WriteString(prefix);
-	writer.WriteLine(L"\t#define SET_DISCARD_TOKEN_INFO(INDEX, NAME, REGEX) table->SetDiscardTokenInfo(INDEX, vl::parsing::tabling::ParsingTable::TokenInfo(NAME, REGEX));");
-	writer.WriteString(prefix);
-	writer.WriteLine(L"\t#define SET_STATE_INFO(INDEX, RULE, STATE, EXPR) table->SetStateInfo(INDEX, vl::parsing::tabling::ParsingTable::StateInfo(RULE, STATE, EXPR));");
-	writer.WriteString(prefix);
-	writer.WriteLine(L"\t#define SET_RULE_INFO(INDEX, NAME, TYPE, STARTSTATE) table->SetRuleInfo(INDEX, vl::parsing::tabling::ParsingTable::RuleInfo(NAME, TYPE, L\"\", STARTSTATE));");
-	writer.WriteString(prefix);
-	writer.WriteLine(L"\t#define SET_AMBIGUOUS_RULE_INFO(INDEX, NAME, TYPE, AMBIGUOUSTYPE, STARTSTATE) table->SetRuleInfo(INDEX, vl::parsing::tabling::ParsingTable::RuleInfo(NAME, TYPE, AMBIGUOUSTYPE, STARTSTATE));");
-	writer.WriteString(prefix);
-	writer.WriteLine(L"\t#define BEGIN_TRANSITION_BAG(STATE, TOKEN) {vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag; table->SetTransitionBag(STATE, TOKEN, bag);");
-	writer.WriteString(prefix);
-	writer.WriteLine(L"\t#define BEGIN_TRANSITION_ITEM(TOKEN, TARGETSTATE) {vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(TOKEN, TARGETSTATE); bag->transitionItems.Add(item);");
-	writer.WriteString(prefix);
-	writer.WriteLine(L"\t#define END_TRANSITION_ITEM }");
-	writer.WriteString(prefix);
-	writer.WriteLine(L"\t#define END_TRANSITION_BAG }");
-	writer.WriteString(prefix);
-	writer.WriteLine(L"\t#define ITEM_STACK_PATTERN(STATE) item->stackPattern.Add(STATE);");
-	writer.WriteString(prefix);
-	writer.WriteLine(L"\t#define ITEM_INSTRUCTION(TYPE, STATE, NAME, VALUE, RULE) item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::TYPE, STATE, NAME, VALUE, RULE));");
-	writer.WriteString(prefix);
-	writer.WriteLine(L"\t#define BEGIN_LOOK_AHEAD(STATE) {vl::Ptr<vl::parsing::tabling::ParsingTable::LookAheadInfo> lookAheadInfo=new vl::parsing::tabling::ParsingTable::LookAheadInfo; item->lookAheads.Add(lookAheadInfo); lookAheadInfo->state=STATE;");
-	writer.WriteString(prefix);
-	writer.WriteLine(L"\t#define LOOK_AHEAD(TOKEN) lookAheadInfo->tokens.Add(TOKEN);");
-	writer.WriteString(prefix);
-	writer.WriteLine(L"\t#define END_LOOK_AHEAD }");
-	writer.WriteLine(L"");
-
-	for(vint i=0;i<table->GetTokenCount();i++)
-	{
-		const ParsingTable::TokenInfo& info=table->GetTokenInfo(i);
-		writer.WriteString(prefix);
-		writer.WriteString(L"\tSET_TOKEN_INFO(");
-		writer.WriteString(itow(i));
-		writer.WriteString(L", ");
-		WriteCppString(info.name, writer);
-		writer.WriteString(L", ");
-		WriteCppString(info.regex, writer);
-		writer.WriteLine(L")");
-	}
-	writer.WriteLine(L"");
-
-	for(vint i=0;i<table->GetDiscardTokenCount();i++)
-	{
-		const ParsingTable::TokenInfo& info=table->GetDiscardTokenInfo(i);
-		writer.WriteString(prefix);
-		writer.WriteString(L"\tSET_DISCARD_TOKEN_INFO(");
-		writer.WriteString(itow(i));
-		writer.WriteString(L", ");
-		WriteCppString(info.name, writer);
-		writer.WriteString(L", ");
-		WriteCppString(info.regex, writer);
-		writer.WriteLine(L")");
-	}
-	writer.WriteLine(L"");
-
-	for(vint i=0;i<table->GetStateCount();i++)
-	{
-		const ParsingTable::StateInfo& info=table->GetStateInfo(i);
-		writer.WriteString(prefix);
-		writer.WriteString(L"\tSET_STATE_INFO(");
-		writer.WriteString(itow(i));
-		writer.WriteString(L", ");
-		WriteCppString(info.ruleName, writer);
-		writer.WriteString(L", ");
-		WriteCppString(info.stateName, writer);
-		writer.WriteString(L", ");
-		WriteCppString(info.stateExpression, writer);
-		writer.WriteLine(L")");
-	}
-	writer.WriteLine(L"");
-
-	for(vint i=0;i<table->GetRuleCount();i++)
-	{
-		const ParsingTable::RuleInfo& info=table->GetRuleInfo(i);
-		if(info.ambiguousType==L"")
-		{
-			writer.WriteString(prefix);
-			writer.WriteString(L"\tSET_RULE_INFO(");
-			writer.WriteString(itow(i));
-			writer.WriteString(L", ");
-			WriteCppString(info.name, writer);
-			writer.WriteString(L", ");
-			WriteCppString(info.type, writer);
-			writer.WriteString(L", ");
-			writer.WriteString(itow(info.rootStartState));
-			writer.WriteLine(L")");
-		}
-		else
-		{
-			writer.WriteString(prefix);
-			writer.WriteString(L"\tSET_AMBIGUOUS_RULE_INFO(");
-			writer.WriteString(itow(i));
-			writer.WriteString(L", ");
-			WriteCppString(info.name, writer);
-			writer.WriteString(L", ");
-			WriteCppString(info.type, writer);
-			writer.WriteString(L", ");
-			WriteCppString(info.ambiguousType, writer);
-			writer.WriteString(L", ");
-			writer.WriteString(itow(info.rootStartState));
-			writer.WriteLine(L")");
-		}
-	}
-	writer.WriteLine(L"");
-
-	for(vint i=0;i<table->GetStateCount();i++)
-	{
-		for(vint j=0;j<table->GetTokenCount();j++)
-		{
-			Ptr<ParsingTable::TransitionBag> bag=table->GetTransitionBag(i, j);
-			if(bag)
-			{
-				writer.WriteString(prefix);
-				writer.WriteString(L"\tBEGIN_TRANSITION_BAG(");
-				writer.WriteString(itow(i));
-				writer.WriteString(L", ");
-				writer.WriteString(itow(j));
-				writer.WriteLine(L")");
-				writer.WriteLine(L"");
-				for(vint k=0;k<bag->transitionItems.Count();k++)
-				{
-					Ptr<ParsingTable::TransitionItem> item=bag->transitionItems[k];
-					writer.WriteString(prefix);
-					writer.WriteString(L"\t\tBEGIN_TRANSITION_ITEM(");
-					writer.WriteString(itow(item->token));
-					writer.WriteString(L", ");
-					writer.WriteString(itow(item->targetState));
-					writer.WriteLine(L")");
-
-					FOREACH(Ptr<ParsingTable::LookAheadInfo>, lookAheadInfo, item->lookAheads)
-					{
-						writer.WriteString(prefix);
-						writer.WriteString(L"\t\tBEGIN_LOOK_AHEAD(");
-						writer.WriteString(itow(lookAheadInfo->state));
-						writer.WriteString(L") ");
-
-						FOREACH(vint, token, lookAheadInfo->tokens)
-						{
-							writer.WriteString(L"LOOK_AHEAD(");
-							writer.WriteString(itow(token));
-							writer.WriteString(L") ");
-						}
-						writer.WriteLine(L"END_LOOK_AHEAD");
-					}
-
-					FOREACH(vint, state, item->stackPattern)
-					{
-						writer.WriteString(prefix);
-						writer.WriteString(L"\t\tITEM_STACK_PATTERN(");
-						writer.WriteString(itow(state));
-						writer.WriteLine(L")");
-					}
-
-					FOREACH(ParsingTable::Instruction, ins, item->instructions)
-					{
-						writer.WriteString(prefix);
-						writer.WriteString(L"\t\tITEM_INSTRUCTION(");
-						switch(ins.instructionType)
-						{
-						case ParsingTable::Instruction::Create:
-							writer.WriteString(L"Create");
-							break;
-						case ParsingTable::Instruction::Assign:
-							writer.WriteString(L"Assign");
-							break;
-						case ParsingTable::Instruction::Item:
-							writer.WriteString(L"Item");
-							break;
-						case ParsingTable::Instruction::Using:
-							writer.WriteString(L"Using");
-							break;
-						case ParsingTable::Instruction::Setter:
-							writer.WriteString(L"Setter");
-							break;
-						case ParsingTable::Instruction::Shift:
-							writer.WriteString(L"Shift");
-							break;
-						case ParsingTable::Instruction::Reduce:
-							writer.WriteString(L"Reduce");
-							break;
-						case ParsingTable::Instruction::LeftRecursiveReduce:
-							writer.WriteString(L"LeftRecursiveReduce");
-							break;
-						}
-						writer.WriteString(L", ");
-						writer.WriteString(itow(ins.stateParameter));
-						writer.WriteString(L", ");
-						WriteCppString(ins.nameParameter, writer);
-						writer.WriteString(L", ");
-						WriteCppString(ins.value, writer);
-						writer.WriteString(L", ");
-						WriteCppString(ins.creatorRule, writer);
-						writer.WriteLine(L");");
-					}
-
-					writer.WriteString(prefix);
-					writer.WriteLine(L"\t\tEND_TRANSITION_ITEM");
-					writer.WriteLine(L"");
-				}
-				writer.WriteString(prefix);
-				writer.WriteLine(L"\tEND_TRANSITION_BAG");
-				writer.WriteLine(L"");
-			}
-		}
-	}
-	
-	writer.WriteString(prefix);
-	writer.WriteLine(L"\ttable->Initialize();");
-	writer.WriteString(prefix);
-	writer.WriteLine(L"\treturn table;");
-
-	writer.WriteLine(L"");
-	writer.WriteString(prefix);
-	writer.WriteLine(L"\t#undef SET_TOKEN_INFO");
-	writer.WriteString(prefix);
-	writer.WriteLine(L"\t#undef SET_DISCARD_TOKEN_INFO");
-	writer.WriteString(prefix);
-	writer.WriteLine(L"\t#undef SET_STATE_INFO");
-	writer.WriteString(prefix);
-	writer.WriteLine(L"\t#undef SET_RULE_INFO");
-	writer.WriteString(prefix);
-	writer.WriteLine(L"\t#undef SET_AMBIGUOUS_RULE_INFO");
-	writer.WriteString(prefix);
-	writer.WriteLine(L"\t#undef BEGIN_TRANSITION_BAG");
-	writer.WriteString(prefix);
-	writer.WriteLine(L"\t#undef BEGIN_TRANSITION_ITEM");
-	writer.WriteString(prefix);
-	writer.WriteLine(L"\t#undef END_TRANSITION_ITEM");
-	writer.WriteString(prefix);
-	writer.WriteLine(L"\t#undef END_TRANSITION_BAG");
-	writer.WriteString(prefix);
-	writer.WriteLine(L"\t#undef ITEM_STACK_PATTERN");
-	writer.WriteString(prefix);
-	writer.WriteLine(L"\t#undef ITEM_INSTRUCTION");
-	writer.WriteString(prefix);
-	writer.WriteLine(L"\t#undef BEGIN_LOOK_AHEAD");
-	writer.WriteString(prefix);
-	writer.WriteLine(L"\t#undef LOOK_AHEAD");
-	writer.WriteString(prefix);
-	writer.WriteLine(L"\t#undef END_LOOK_AHEAD");
-
-	writer.WriteString(prefix);
-	writer.WriteLine(L"}");
-	writer.WriteLine(L"");
-}
-
 void WriteTable(const WString& parserCode, bool enableAmbiguity, const WString& prefix, const WString& codeClassPrefix, TextWriter& writer)
 {
 	writer.WriteString(prefix);
@@ -1523,15 +1223,15 @@ Parser Function Generation
 
 void WriteParserFunctions(ParsingSymbolManager* manager, const WString& prefix, const CodegenConfig& config, TextWriter& writer)
 {
-	FOREACH(WString, name, config.codeParsers.Keys())
+	FOREACH(WString, name, config.parsers.Keys())
 	{
-		ParsingSymbol* rule=manager->GetGlobal()->GetSubSymbolByName(config.codeParsers[name]);
+		ParsingSymbol* rule=manager->GetGlobal()->GetSubSymbolByName(config.parsers[name]);
 		if(rule)
 		{
 			{
 				writer.WriteString(prefix);
 				writer.WriteString(L"vl::Ptr<vl::parsing::ParsingTreeNode> ");
-				writer.WriteString(config.codeClassPrefix);
+				writer.WriteString(config.classPrefix);
 				writer.WriteString(name);
 				writer.WriteLine(L"AsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors)");
 				writer.WriteString(prefix);
@@ -1558,7 +1258,7 @@ void WriteParserFunctions(ParsingSymbolManager* manager, const WString& prefix, 
 				
 				writer.WriteString(prefix);
 				writer.WriteString(L"vl::Ptr<vl::parsing::ParsingTreeNode> ");
-				writer.WriteString(config.codeClassPrefix);
+				writer.WriteString(config.classPrefix);
 				writer.WriteString(name);
 				writer.WriteLine(L"AsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)");
 				writer.WriteString(prefix);
@@ -1568,7 +1268,7 @@ void WriteParserFunctions(ParsingSymbolManager* manager, const WString& prefix, 
 				writer.WriteLine(L"\tvl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;");
 				writer.WriteString(prefix);
 				writer.WriteString(L"\treturn ");
-				writer.WriteString(config.codeClassPrefix);
+				writer.WriteString(config.classPrefix);
 				writer.WriteString(name);
 				writer.WriteLine(L"AsParsingTreeNode(input, table, errors);");
 
@@ -1576,70 +1276,68 @@ void WriteParserFunctions(ParsingSymbolManager* manager, const WString& prefix, 
 				writer.WriteLine(L"}");
 				writer.WriteLine(L"");
 			}
-			if(config.parsingTree)
-			{
-				ParsingSymbol* type=rule->GetDescriptorSymbol();
-				writer.WriteString(prefix);
-				PrintTypeForValue(type, config.codeClassPrefix, writer);
-				writer.WriteString(L" ");
-				writer.WriteString(config.codeClassPrefix);
-				writer.WriteString(name);
-				writer.WriteLine(L"(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors)");
-				writer.WriteString(prefix);
-				writer.WriteLine(L"{");
+
+			ParsingSymbol* type=rule->GetDescriptorSymbol();
+			writer.WriteString(prefix);
+			PrintTypeForValue(type, config.classPrefix, writer);
+			writer.WriteString(L" ");
+			writer.WriteString(config.classPrefix);
+			writer.WriteString(name);
+			writer.WriteLine(L"(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors)");
+			writer.WriteString(prefix);
+			writer.WriteLine(L"{");
 			
-				writer.WriteString(prefix);
-				writer.WriteLine(L"\tvl::parsing::tabling::ParsingState state(input, table);");
-				writer.WriteString(prefix);
-				writer.WriteString(L"\tstate.Reset(L\"");
-				writer.WriteString(rule->GetName());
-				writer.WriteLine(L"\");");
-				writer.WriteString(prefix);
-				writer.WriteLine(L"\tvl::Ptr<vl::parsing::tabling::ParsingGeneralParser> parser=vl::parsing::tabling::CreateStrictParser(table);");
-				writer.WriteString(prefix);
-				writer.WriteLine(L"\tvl::Ptr<vl::parsing::ParsingTreeNode> node=parser->Parse(state, errors);");
+			writer.WriteString(prefix);
+			writer.WriteLine(L"\tvl::parsing::tabling::ParsingState state(input, table);");
+			writer.WriteString(prefix);
+			writer.WriteString(L"\tstate.Reset(L\"");
+			writer.WriteString(rule->GetName());
+			writer.WriteLine(L"\");");
+			writer.WriteString(prefix);
+			writer.WriteLine(L"\tvl::Ptr<vl::parsing::tabling::ParsingGeneralParser> parser=vl::parsing::tabling::CreateStrictParser(table);");
+			writer.WriteString(prefix);
+			writer.WriteLine(L"\tvl::Ptr<vl::parsing::ParsingTreeNode> node=parser->Parse(state, errors);");
 
-				writer.WriteString(prefix);
-				writer.WriteLine(L"\tif(node && errors.Count()==0)");
-				writer.WriteString(prefix);
-				writer.WriteLine(L"\t{");
-				writer.WriteString(prefix);
-				writer.WriteString(L"\t\treturn ");
-				writer.WriteString(config.codeClassPrefix);
-				writer.WriteString(L"ConvertParsingTreeNode(node, state.GetTokens()).Cast<");
-				PrintType(type, config.codeClassPrefix, writer);
-				writer.WriteLine(L">();");
-				writer.WriteString(prefix);
-				writer.WriteLine(L"\t}");
+			writer.WriteString(prefix);
+			writer.WriteLine(L"\tif(node && errors.Count()==0)");
+			writer.WriteString(prefix);
+			writer.WriteLine(L"\t{");
+			writer.WriteString(prefix);
+			writer.WriteString(L"\t\treturn ");
+			writer.WriteString(config.classPrefix);
+			writer.WriteString(L"ConvertParsingTreeNode(node, state.GetTokens()).Cast<");
+			PrintType(type, config.classPrefix, writer);
+			writer.WriteLine(L">();");
+			writer.WriteString(prefix);
+			writer.WriteLine(L"\t}");
 			
-				writer.WriteString(prefix);
-				writer.WriteLine(L"\treturn 0;");
-				writer.WriteString(prefix);
-				writer.WriteLine(L"}");
-				writer.WriteLine(L"");
+			writer.WriteString(prefix);
+			writer.WriteLine(L"\treturn 0;");
+			writer.WriteString(prefix);
+			writer.WriteLine(L"}");
+			writer.WriteLine(L"");
 
-				//--------------------------------------------------------
+			//--------------------------------------------------------
 
-				writer.WriteString(prefix);
-				PrintTypeForValue(type, config.codeClassPrefix, writer);
-				writer.WriteString(L" ");
-				writer.WriteString(config.codeClassPrefix);
-				writer.WriteString(name);
-				writer.WriteLine(L"(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)");
-				writer.WriteString(prefix);
-				writer.WriteLine(L"{");
+			writer.WriteString(prefix);
+			PrintTypeForValue(type, config.classPrefix, writer);
+			writer.WriteString(L" ");
+			writer.WriteString(config.classPrefix);
+			writer.WriteString(name);
+			writer.WriteLine(L"(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)");
+			writer.WriteString(prefix);
+			writer.WriteLine(L"{");
 
-				writer.WriteString(prefix);
-				writer.WriteLine(L"\tvl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;");
-				writer.WriteString(prefix);
-				writer.WriteString(L"\treturn ");
-				writer.WriteString(config.codeClassPrefix);
-				writer.WriteString(name);
-				writer.WriteLine(L"(input, table, errors);");
-				writer.WriteString(prefix);
-				writer.WriteLine(L"}");
-				writer.WriteLine(L"");
-			}
+			writer.WriteString(prefix);
+			writer.WriteLine(L"\tvl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;");
+			writer.WriteString(prefix);
+			writer.WriteString(L"\treturn ");
+			writer.WriteString(config.classPrefix);
+			writer.WriteString(name);
+			writer.WriteLine(L"(input, table, errors);");
+			writer.WriteString(prefix);
+			writer.WriteLine(L"}");
+			writer.WriteLine(L"");
 		}
 	}
 }
@@ -1660,34 +1358,31 @@ void WriteCppFile(const WString& name, const WString& parserCode, Ptr<ParsingDef
 	writer.WriteLine(L"");
 	WriteParserText(parserCode, writer);
 	writer.WriteLine(L"");
-	WriteGetParserTextBuffer(&manager, prefix, config.codeClassPrefix, writer);
+	WriteGetParserTextBuffer(&manager, prefix, config.classPrefix, writer);
 
-	if(config.parsingTree)
-	{
-		writer.WriteLine(L"/***********************************************************************");
-		writer.WriteLine(L"Unescaping Function Foward Declarations");
-		writer.WriteLine(L"***********************************************************************/");
-		writer.WriteLine(L"");
-		WriteUnescapingFunctionForwardDeclarations(definition, &manager, prefix, config.codeClassPrefix, writer);
+	writer.WriteLine(L"/***********************************************************************");
+	writer.WriteLine(L"Unescaping Function Foward Declarations");
+	writer.WriteLine(L"***********************************************************************/");
+	writer.WriteLine(L"");
+	WriteUnescapingFunctionForwardDeclarations(definition, &manager, prefix, config.classPrefix, writer);
 
-		writer.WriteLine(L"/***********************************************************************");
-		writer.WriteLine(L"Parsing Tree Conversion Driver Implementation");
-		writer.WriteLine(L"***********************************************************************/");
-		writer.WriteLine(L"");
-		WriteNodeConverterClassImpl(definition, &manager, prefix, config.codeClassPrefix, writer);
+	writer.WriteLine(L"/***********************************************************************");
+	writer.WriteLine(L"Parsing Tree Conversion Driver Implementation");
+	writer.WriteLine(L"***********************************************************************/");
+	writer.WriteLine(L"");
+	WriteNodeConverterClassImpl(definition, &manager, prefix, config.classPrefix, writer);
 
-		writer.WriteLine(L"/***********************************************************************");
-		writer.WriteLine(L"Parsing Tree Conversion Implementation");
-		writer.WriteLine(L"***********************************************************************/");
-		writer.WriteLine(L"");
-		WriteConvertImpl(&manager, prefix, config.codeClassPrefix, writer);
+	writer.WriteLine(L"/***********************************************************************");
+	writer.WriteLine(L"Parsing Tree Conversion Implementation");
+	writer.WriteLine(L"***********************************************************************/");
+	writer.WriteLine(L"");
+	WriteConvertImpl(&manager, prefix, config.classPrefix, writer);
 
-		writer.WriteLine(L"/***********************************************************************");
-		writer.WriteLine(L"Visitor Pattern Implementation");
-		writer.WriteLine(L"***********************************************************************/");
-		writer.WriteLine(L"");
-		WriteVisitorImpl(&manager, manager.GetGlobal(), prefix, config.codeClassPrefix, writer);
-	}
+	writer.WriteLine(L"/***********************************************************************");
+	writer.WriteLine(L"Visitor Pattern Implementation");
+	writer.WriteLine(L"***********************************************************************/");
+	writer.WriteLine(L"");
+	WriteVisitorImpl(&manager, manager.GetGlobal(), prefix, config.classPrefix, writer);
 
 	writer.WriteLine(L"/***********************************************************************");
 	writer.WriteLine(L"Parser Function");
@@ -1699,24 +1394,20 @@ void WriteCppFile(const WString& name, const WString& parserCode, Ptr<ParsingDef
 	writer.WriteLine(L"Table Generation");
 	writer.WriteLine(L"***********************************************************************/");
 	writer.WriteLine(L"");
-	if(config.parserText)
-	{
-		WriteTable(parserCode, config.ambiguity, prefix, config.codeClassPrefix, writer);
-	}
-	else
-	{
-		WriteTable(table, prefix, config.codeClassPrefix, writer);
-	}
+
+	WriteTable(parserCode, config.ambiguity, prefix, config.classPrefix, writer);
 
 	WriteFileEnd(config, writer);
 }
 
 /***********************************************************************
 include:xxxx
-include:xxxx
 ...
 namespace:abc.def.ghi
+reflection:abc.def.ghi
 classPrefix:abc
+guard:ABC_DEF_GHI
+parser:ParseType(Type)
 grammar:
 ***********************************************************************/
 
@@ -1870,8 +1561,8 @@ int wmain(int argc, wchar_t* argv[])
 				EncoderStream encoderStream(fileStream, encoder);
 				StreamWriter writer(encoderStream);
 				
-				config.codeIncludes.Clear();
-				config.codeIncludes.Add(L"\""+name+L".h\"");
+				config.includes.Clear();
+				config.includes.Add(L"\""+name+L".h\"");
 				WriteCppFile(name, codeGrammar, definition, table, config, writer);
 			}
 		}
