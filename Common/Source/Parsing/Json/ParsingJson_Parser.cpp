@@ -120,7 +120,7 @@ Parsing Tree Conversion Driver Implementation
 			public:
 				using vl::parsing::ParsingTreeConverter::SetMember;
 
-				bool SetMember(JsonLiteral::JsonValue::Type& member, vl::Ptr<vl::parsing::ParsingTreeNode> node, const TokenList& tokens)
+				bool SetMember(JsonLiteral::JsonValue& member, vl::Ptr<vl::parsing::ParsingTreeNode> node, const TokenList& tokens)
 				{
 					vl::Ptr<vl::parsing::ParsingTreeToken> token=node.Cast<vl::parsing::ParsingTreeToken>();
 					if(token)
@@ -358,6 +358,132 @@ Table Generation
 			    return table;
 			}
 
+		}
+	}
+}
+namespace vl
+{
+	namespace reflection
+	{
+		namespace description
+		{
+#ifndef VCZH_DEBUG_NO_REFLECTION
+			using namespace vl::parsing::json;
+
+			IMPL_TYPE_INFO_RENAME(JsonNode, System::JsonNode)
+			IMPL_TYPE_INFO_RENAME(JsonLiteral, System::JsonLiteral)
+			IMPL_TYPE_INFO_RENAME(JsonLiteral::JsonValue, System::JsonLiteral::JsonValue)
+			IMPL_TYPE_INFO_RENAME(JsonString, System::JsonString)
+			IMPL_TYPE_INFO_RENAME(JsonNumber, System::JsonNumber)
+			IMPL_TYPE_INFO_RENAME(JsonArray, System::JsonArray)
+			IMPL_TYPE_INFO_RENAME(JsonObjectField, System::JsonObjectField)
+			IMPL_TYPE_INFO_RENAME(JsonObject, System::JsonObject)
+
+			BEGIN_CLASS_MEMBER(JsonNode)
+
+			END_CLASS_MEMBER(JsonNode)
+
+			BEGIN_CLASS_MEMBER(JsonLiteral)
+				CLASS_MEMBER_BASE(JsonNode)
+
+				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<JsonLiteral>(), NO_PARAMETER)
+
+
+				CLASS_MEMBER_FIELD(value)
+			END_CLASS_MEMBER(JsonLiteral)
+
+			BEGIN_ENUM_ITEM(JsonLiteral::JsonValue)
+				ENUM_ITEM_NAMESPACE(JsonLiteral::JsonValue)
+				ENUM_NAMESPACE_ITEM(True)
+				ENUM_NAMESPACE_ITEM(False)
+				ENUM_NAMESPACE_ITEM(Null)
+			END_ENUM_ITEM(JsonLiteral::JsonValue)
+
+			BEGIN_CLASS_MEMBER(JsonString)
+				CLASS_MEMBER_BASE(JsonNode)
+
+				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<JsonString>(), NO_PARAMETER)
+
+				CLASS_MEMBER_EXTERNALMETHOD(get_content, NO_PARAMETER, vl::WString(JsonString::*)(), [](JsonString* node){ return node->content.value; })
+				CLASS_MEMBER_EXTERNALMETHOD(set_content, {L"value"}, void(JsonString::*)(const vl::WString&), [](JsonString* node, const vl::WString& value){ node->content.value = value; })
+
+				CLASS_MEMBER_PROPERTY(content, get_content, set_content)
+			END_CLASS_MEMBER(JsonString)
+
+			BEGIN_CLASS_MEMBER(JsonNumber)
+				CLASS_MEMBER_BASE(JsonNode)
+
+				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<JsonNumber>(), NO_PARAMETER)
+
+				CLASS_MEMBER_EXTERNALMETHOD(get_content, NO_PARAMETER, vl::WString(JsonNumber::*)(), [](JsonNumber* node){ return node->content.value; })
+				CLASS_MEMBER_EXTERNALMETHOD(set_content, {L"value"}, void(JsonNumber::*)(const vl::WString&), [](JsonNumber* node, const vl::WString& value){ node->content.value = value; })
+
+				CLASS_MEMBER_PROPERTY(content, get_content, set_content)
+			END_CLASS_MEMBER(JsonNumber)
+
+			BEGIN_CLASS_MEMBER(JsonArray)
+				CLASS_MEMBER_BASE(JsonNode)
+
+				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<JsonArray>(), NO_PARAMETER)
+
+
+				CLASS_MEMBER_FIELD(items)
+			END_CLASS_MEMBER(JsonArray)
+
+			BEGIN_CLASS_MEMBER(JsonObjectField)
+				CLASS_MEMBER_BASE(JsonNode)
+
+				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<JsonObjectField>(), NO_PARAMETER)
+
+				CLASS_MEMBER_EXTERNALMETHOD(get_name, NO_PARAMETER, vl::WString(JsonObjectField::*)(), [](JsonObjectField* node){ return node->name.value; })
+				CLASS_MEMBER_EXTERNALMETHOD(set_name, {L"value"}, void(JsonObjectField::*)(const vl::WString&), [](JsonObjectField* node, const vl::WString& value){ node->name.value = value; })
+
+				CLASS_MEMBER_PROPERTY(name, get_name, set_name)
+				CLASS_MEMBER_FIELD(value)
+			END_CLASS_MEMBER(JsonObjectField)
+
+			BEGIN_CLASS_MEMBER(JsonObject)
+				CLASS_MEMBER_BASE(JsonNode)
+
+				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<JsonObject>(), NO_PARAMETER)
+
+
+				CLASS_MEMBER_FIELD(fields)
+			END_CLASS_MEMBER(JsonObject)
+
+			class JsonTypeLoader : public vl::Object, public ITypeLoader
+			{
+			public:
+				void Load(ITypeManager* manager)
+				{
+					ADD_TYPE_INFO(vl::parsing::json::JsonNode)
+					ADD_TYPE_INFO(vl::parsing::json::JsonLiteral)
+					ADD_TYPE_INFO(vl::parsing::json::JsonLiteral::JsonValue)
+					ADD_TYPE_INFO(vl::parsing::json::JsonString)
+					ADD_TYPE_INFO(vl::parsing::json::JsonNumber)
+					ADD_TYPE_INFO(vl::parsing::json::JsonArray)
+					ADD_TYPE_INFO(vl::parsing::json::JsonObjectField)
+					ADD_TYPE_INFO(vl::parsing::json::JsonObject)
+				}
+
+				void Unload(ITypeManager* manager)
+				{
+				}
+			};
+#endif
+
+			bool JsonLoadTypes()
+			{
+#ifndef VCZH_DEBUG_NO_REFLECTION
+				ITypeManager* manager=GetGlobalTypeManager();
+				if(manager)
+				{
+					Ptr<ITypeLoader> loader=new JsonTypeLoader;
+					return manager->AddTypeLoader(loader);
+				}
+#endif
+				return false;
+			}
 		}
 	}
 }

@@ -19,20 +19,20 @@ namespace vl
 	{
 		namespace json
 		{
-			struct JsonParserTokenIndex abstract
+			enum class JsonParserTokenIndex
 			{
-				static const vl::vint TRUEVALUE = 0;
-				static const vl::vint FALSEVALUE = 1;
-				static const vl::vint NULLVALUE = 2;
-				static const vl::vint OBJOPEN = 3;
-				static const vl::vint OBJCLOSE = 4;
-				static const vl::vint ARROPEN = 5;
-				static const vl::vint ARRCLOSE = 6;
-				static const vl::vint COMMA = 7;
-				static const vl::vint COLON = 8;
-				static const vl::vint NUMBER = 9;
-				static const vl::vint STRING = 10;
-				static const vl::vint SPACE = 11;
+				TRUEVALUE = 0,
+				FALSEVALUE = 1,
+				NULLVALUE = 2,
+				OBJOPEN = 3,
+				OBJCLOSE = 4,
+				ARROPEN = 5,
+				ARRCLOSE = 6,
+				COMMA = 7,
+				COLON = 8,
+				NUMBER = 9,
+				STRING = 10,
+				SPACE = 11,
 			};
 			class JsonNode;
 			class JsonLiteral;
@@ -63,17 +63,14 @@ namespace vl
 			class JsonLiteral : public JsonNode
 			{
 			public:
-				struct JsonValue abstract
+				enum class JsonValue
 				{
-					enum Type
-					{
-						True,
-						False,
-						Null,
-					};
+					True,
+					False,
+					Null,
 				};
 
-				JsonValue::Type value;
+				JsonValue value;
 
 				void Accept(JsonNode::IVisitor* visitor)override;
 
@@ -140,6 +137,32 @@ namespace vl
 			extern vl::Ptr<JsonNode> JsonParse(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
 			extern vl::Ptr<JsonNode> JsonParse(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
 
+			extern vl::Ptr<vl::parsing::ParsingTreeNode> JsonParseAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
+			extern vl::Ptr<vl::parsing::ParsingTreeNode> JsonParseAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
+			extern vl::Ptr<JsonNode> JsonParse(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
+			extern vl::Ptr<JsonNode> JsonParse(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
+
+		}
+	}
+}
+namespace vl
+{
+	namespace reflection
+	{
+		namespace description
+		{
+#ifndef VCZH_DEBUG_NO_REFLECTION
+			DECL_TYPE_INFO(vl::parsing::json::JsonNode)
+			DECL_TYPE_INFO(vl::parsing::json::JsonLiteral)
+			DECL_TYPE_INFO(vl::parsing::json::JsonLiteral::JsonValue)
+			DECL_TYPE_INFO(vl::parsing::json::JsonString)
+			DECL_TYPE_INFO(vl::parsing::json::JsonNumber)
+			DECL_TYPE_INFO(vl::parsing::json::JsonArray)
+			DECL_TYPE_INFO(vl::parsing::json::JsonObjectField)
+			DECL_TYPE_INFO(vl::parsing::json::JsonObject)
+#endif
+
+			extern bool JsonLoadTypes();
 		}
 	}
 }

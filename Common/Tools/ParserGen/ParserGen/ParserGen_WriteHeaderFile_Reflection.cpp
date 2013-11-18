@@ -15,4 +15,10 @@ void WriteTypeReflectionDeclaration(ParsingSymbolManager* manager, const WString
 		writer.WriteLine(L")");
 	}
 	writer.WriteLine(L"#endif");
+
+	writer.WriteLine(L"");
+	writer.WriteString(prefix);
+	writer.WriteString(L"extern bool ");
+	writer.WriteString(config.classPrefix);
+	writer.WriteLine(L"LoadTypes();");
 }
