@@ -10678,7 +10678,7 @@ Attribute
 			friend class DescriptableValue;
 
 			typedef collections::Dictionary<WString, Ptr<Object>>		InternalPropertyMap;
-			typedef void(*DestructorProc)(DescriptableObject* obj);
+			typedef bool(*DestructorProc)(DescriptableObject* obj, bool forceDisposing);
 		protected:
 			volatile vint							referenceCounter;
 			DestructorProc							sharedPtrDestructorProc;
@@ -10693,6 +10693,7 @@ Attribute
 			description::ITypeDescriptor*			GetTypeDescriptor();
 			Ptr<Object>								GetInternalProperty(const WString& name);
 			void									SetInternalProperty(const WString& name, Ptr<Object> value);
+			bool									Dispose(bool forceDisposing);
 		};
 		
 		template<typename T>
@@ -10750,14 +10751,7 @@ ReferenceCounterOperator
 		static __forceinline void DeleteReference(volatile vint* counter, void* reference)
 		{
 			reflection::DescriptableObject* obj=(T*)reference;
-			if(obj->sharedPtrDestructorProc)
-			{
-				obj->sharedPtrDestructorProc(obj);
-			}
-			else
-			{
-				delete obj;
-			}
+			obj->Dispose(false);
 		}
 	};
 
@@ -11508,6 +11502,15 @@ Exceptions
 				}
 			};
 
+			class ValueNotDisposableException : public TypeDescriptorException
+			{
+			public:
+				ValueNotDisposableException()
+					:TypeDescriptorException(L"Cannot dispose an object whose reference counter is not 0.")
+				{
+				}
+			};
+
 			class TypeNotExistsException : public TypeDescriptorException
 			{
 			public:
@@ -11878,14 +11881,14 @@ namespace vl
 语法树基础设施
 ***********************************************************************/
 
-		class ParsingTreeCustomBase : public Object
+		class ParsingTreeCustomBase : public Object, public reflection::Description<ParsingTreeCustomBase>
 		{
 		public:
 			ParsingTextRange					codeRange;
 			collections::List<WString>			creatorRules;
 		};
 
-		class ParsingToken : public ParsingTreeCustomBase
+		class ParsingToken : public ParsingTreeCustomBase, public reflection::Description<ParsingToken>
 		{
 		public:
 			vint								tokenIndex;
@@ -11894,7 +11897,7 @@ namespace vl
 			ParsingToken():tokenIndex(-1){}
 		};
 
-		class ParsingError : public Object
+		class ParsingError : public Object, public reflection::Description<ParsingError>
 		{
 		public:
 			ParsingTextRange					codeRange;
@@ -19847,6 +19850,7 @@ Type
 #define END_TYPE_INFO_NAMESPACE }}}
 #define DECL_TYPE_INFO(TYPENAME) template<>struct TypeInfo<TYPENAME>{static const wchar_t* TypeName;};
 #define IMPL_TYPE_INFO(TYPENAME) const wchar_t* TypeInfo<TYPENAME>::TypeName = L#TYPENAME;
+#define IMPL_TYPE_INFO_RENAME(TYPENAME, EXPECTEDNAME) const wchar_t* TypeInfo<TYPENAME>::TypeName = L#EXPECTEDNAME;
 #define ADD_TYPE_INFO(TYPENAME)\
 			{\
 				Ptr<ITypeDescriptor> type=new CustomTypeDescriptorSelector<TYPENAME>::CustomTypeDescriptorImpl();\
@@ -20272,6 +20276,9 @@ namespace vl
 			F(parsing::ParsingScope)\
 			F(parsing::ParsingScopeSymbol)\
 			F(parsing::ParsingScopeFinder)\
+			F(parsing::ParsingTreeCustomBase)\
+			F(parsing::ParsingToken)\
+			F(parsing::ParsingError)\
 
 			PARSINGREFLECTION_TYPELIST(DECL_TYPE_INFO)
 		}

@@ -64,6 +64,18 @@ void WriteHeaderFile(const WString& name, Ptr<ParsingDefinition> definition, Ptr
 	}
 
 	WriteFileEnd(config, writer);
+
+	writer.WriteLine(L"namespace vl");
+	writer.WriteLine(L"{");
+	writer.WriteLine(L"\tnamespace reflection");
+	writer.WriteLine(L"\t{");
+	writer.WriteLine(L"\t\tnamespace description");
+	writer.WriteLine(L"\t\t{");
+	WriteTypeReflectionDeclaration(&manager, L"\t\t\t", config, writer);
+	writer.WriteLine(L"\t\t}");
+	writer.WriteLine(L"\t}");
+	writer.WriteLine(L"}");
+
 	if(config.guard!=L"")
 	{
 		writer.WriteString(L"#endif");

@@ -56,4 +56,15 @@ void WriteCppFile(const WString& name, const WString& parserCode, Ptr<ParsingDef
 	WriteTable(parserCode, config.ambiguity, prefix, config.classPrefix, writer);
 
 	WriteFileEnd(config, writer);
+
+	writer.WriteLine(L"namespace vl");
+	writer.WriteLine(L"{");
+	writer.WriteLine(L"\tnamespace reflection");
+	writer.WriteLine(L"\t{");
+	writer.WriteLine(L"\t\tnamespace description");
+	writer.WriteLine(L"\t\t{");
+	WriteTypeReflectionImplementation(&manager, L"\t\t\t", config, writer);
+	writer.WriteLine(L"\t\t}");
+	writer.WriteLine(L"\t}");
+	writer.WriteLine(L"}");
 }

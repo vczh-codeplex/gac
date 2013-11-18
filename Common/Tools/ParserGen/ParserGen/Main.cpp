@@ -7,7 +7,7 @@ namespace:abc.def.ghi
 reflection:abc.def.ghi
 classPrefix:abc
 guard:ABC_DEF_GHI
-parser:ParseType(Type)
+parser:ParseType(Rule)
 grammar:
 ***********************************************************************/
 
