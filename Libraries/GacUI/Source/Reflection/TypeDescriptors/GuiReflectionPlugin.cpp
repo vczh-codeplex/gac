@@ -17,6 +17,8 @@ namespace vl
 				{
 					LoadPredefinedTypes();
 					LoadParsingTypes();
+					XmlLoadTypes();
+					JsonLoadTypes();
 					LoadGuiBasicTypes();
 					LoadGuiElementTypes();
 					LoadGuiCompositionTypes();

@@ -3372,7 +3372,7 @@ Basic Construction
 				virtual void								SetAssociatedControl(controls::GuiControl* control);
 				virtual void								SetAssociatedHost(GuiGraphicsHost* host);
 
-				static void									SharedPtrDestructorProc(DescriptableObject* obj);
+				static bool									SharedPtrDestructorProc(DescriptableObject* obj, bool forceDisposing);
 			public:
 				GuiGraphicsComposition();
 				~GuiGraphicsComposition();
@@ -4299,7 +4299,7 @@ Basic Construction
 				virtual void							UpdateVisuallyEnabled();
 				void									SetFocusableComposition(compositions::GuiGraphicsComposition* value);
 
-				static void								SharedPtrDestructorProc(DescriptableObject* obj);
+				static bool								SharedPtrDestructorProc(DescriptableObject* obj, bool forceDisposing);
 			public:
 				GuiControl(IStyleController* _styleController);
 				~GuiControl();
