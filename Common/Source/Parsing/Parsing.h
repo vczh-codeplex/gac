@@ -138,6 +138,9 @@ namespace vl
 			F(parsing::ParsingScope)\
 			F(parsing::ParsingScopeSymbol)\
 			F(parsing::ParsingScopeFinder)\
+			F(parsing::ParsingTreeCustomBase)\
+			F(parsing::ParsingToken)\
+			F(parsing::ParsingError)\
 
 			PARSINGREFLECTION_TYPELIST(DECL_TYPE_INFO)
 		}
