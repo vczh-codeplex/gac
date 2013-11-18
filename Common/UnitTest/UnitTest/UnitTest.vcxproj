@@ -279,7 +279,6 @@
     <None Include="Parser.Calculator\Codegen.bat" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="..\..\Source\Parsing\Bootstrap\ParsingBootstrap_Parser.parser.txt" />
     <Text Include="..\..\Source\Parsing\Json\ParsingJson_Parser.parser.txt" />
     <Text Include="..\..\Source\Parsing\Xml\ParsingXml_Parser.parser.txt" />
     <Text Include="..\TestFiles\Baseline\RegexComment.Dfa.txt" />

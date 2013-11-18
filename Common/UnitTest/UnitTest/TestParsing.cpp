@@ -10,7 +10,6 @@
 #include "..\..\Source\Parsing\Parsing.h"
 #include "..\..\Source\Parsing\Xml\ParsingXml.h"
 #include "..\..\Source\Parsing\Json\ParsingJson.h"
-#include "..\..\Source\Parsing\Bootstrap\ParsingBootstrap_Parser.h"
 #include "Parser.Calculator\Parser.Calculator.h"
 
 using namespace vl;
@@ -23,7 +22,6 @@ using namespace vl::parsing::analyzing;
 using namespace vl::parsing::tabling;
 using namespace vl::parsing::xml;
 using namespace vl::parsing::json;
-using namespace vl::parsing::bootstrap;
 using namespace test::parser;
 
 extern WString GetPath();
