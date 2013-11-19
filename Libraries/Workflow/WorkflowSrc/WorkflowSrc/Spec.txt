@@ -80,6 +80,5 @@ select (<expression>)
 	[default : <statement>]
 }
 
-while condition do <statement>
-do <statement> while condition;
+while (condition) <statement>
 for (x in (<collection> | [reversed] <range>)) <statement>
