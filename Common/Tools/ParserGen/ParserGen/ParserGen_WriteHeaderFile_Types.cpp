@@ -73,7 +73,10 @@ public:
 		{
 			writer.WriteString(L"vl::parsing::ParsingTreeCustomBase");
 		}
-		writer.WriteLine(L"");
+		writer.WriteString(L", vl::reflection::Description<");
+		writer.WriteString(codeClassPrefix);
+		writer.WriteString(node->name);
+		writer.WriteLine(L">");
 
 		writer.WriteString(prefix);
 		writer.WriteLine(L"{");
@@ -83,7 +86,7 @@ public:
 		if (children.Count() > 0 && !thisType->GetDescriptorSymbol())
 		{
 			writer.WriteString(prefix);
-			writer.WriteLine(L"\tclass IVisitor : public vl::Interface");
+			writer.WriteLine(L"\tclass IVisitor : public vl::reflection::IDescriptable, vl::reflection::Description<IVisitor>");
 			writer.WriteString(prefix);
 			writer.WriteLine(L"\t{");
 			writer.WriteString(prefix);

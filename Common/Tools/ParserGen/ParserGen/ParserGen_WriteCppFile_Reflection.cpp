@@ -32,6 +32,20 @@ void WriteTypeReflectionImplementation(ParsingSymbolManager* manager, const WStr
 
 	FOREACH(ParsingSymbol*, type, types)
 	{
+		if (type->GetType() == ParsingSymbol::ClassType && !type->GetDescriptorSymbol() && !leafClasses.Contains(type))
+		{
+			writer.WriteString(prefix);
+			writer.WriteString(L"IMPL_TYPE_INFO_RENAME(");
+			PrintType(type, config.classPrefix, writer);
+			writer.WriteString(L"::IVisitor, ");
+			PrintNamespaces(config.reflectionNamespaces, writer);
+			PrintType(type, config.classPrefix, writer);
+			writer.WriteLine(L"::IVisitor)");
+		}
+	}
+
+	FOREACH(ParsingSymbol*, type, types)
+	{
 		switch (type->GetType())
 		{
 		case ParsingSymbol::EnumType:
@@ -77,6 +91,11 @@ void WriteTypeReflectionImplementation(ParsingSymbolManager* manager, const WStr
 					PrintType(parent, config.classPrefix, writer);
 					writer.WriteLine(L")");
 					writer.WriteLine(L"");
+				}
+				else if (!leafClasses.Contains(type))
+				{
+					writer.WriteString(prefix);
+					writer.WriteLine(L"\tCLASS_MEMBER_METHOD(Accept, {L\"visitor\"})");
 				}
 				
 				if (leafClasses.Contains(type))
@@ -157,6 +176,39 @@ void WriteTypeReflectionImplementation(ParsingSymbolManager* manager, const WStr
 				writer.WriteLine(L")");
 			}
 			break;
+		}
+	}
+
+	FOREACH(ParsingSymbol*, type, types)
+	{
+		if (type->GetType() == ParsingSymbol::ClassType && !type->GetDescriptorSymbol() && !leafClasses.Contains(type))
+		{
+			writer.WriteLine(L"");
+			writer.WriteString(prefix);
+			writer.WriteString(L"BEGIN_CLASS_MEMBER(");
+			PrintType(type, config.classPrefix, writer);
+			writer.WriteLine(L"::IVisitor)");
+
+			writer.WriteString(prefix);
+			writer.WriteLine(L"\tCLASS_MEMBER_BASE(vl::reflection::IDescriptable)");
+			writer.WriteLine(L"");
+
+			List<ParsingSymbol*> visitableTypes;
+			SearchLeafDescendantClasses(type, manager, visitableTypes);
+			FOREACH(ParsingSymbol*, child, visitableTypes)
+			{
+				writer.WriteString(prefix);
+				writer.WriteString(L"\tCLASS_MEMBER_METHOD_OVERLOAD(Visit, {L\"node\"}, void(");
+				PrintType(type, config.classPrefix, writer);
+				writer.WriteString(L"::IVisitor::*)(");
+				PrintType(child, config.classPrefix, writer);
+				writer.WriteLine(L"* node))");
+			}
+
+			writer.WriteString(prefix);
+			writer.WriteString(L"END_CLASS_MEMBER(");
+			PrintType(type, config.classPrefix, writer);
+			writer.WriteLine(L")");
 		}
 	}
 

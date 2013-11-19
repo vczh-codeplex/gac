@@ -74,6 +74,10 @@ L"\r\n"L"\tenum IndirectEnum"
 L"\r\n"L"\t{"
 L"\r\n"L"\t\tD,E,F,"
 L"\r\n"L"\t}"
+L"\r\n"L""
+L"\r\n"L"\tclass EmptyClass"
+L"\r\n"L"\t{"
+L"\r\n"L"\t}"
 L"\r\n"L"\t"
 L"\r\n"L"\tclass Body"
 L"\r\n"L"\t{"
@@ -265,6 +269,10 @@ Parsing Tree Conversion Driver Implementation
 					SetMember(tree->name, obj->GetMember(L"name"), tokens);
 				}
 
+				void Fill(vl::Ptr<TestXmlAnimal::TestXmlEmptyClass> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
+				{
+				}
+
 				void Fill(vl::Ptr<TestXmlAnimal::TestXmlBody> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
 				{
 				}
@@ -370,6 +378,13 @@ Parsing Tree Conversion Driver Implementation
 						Fill(tree.Cast<TestXmlNode>(), obj, tokens);
 						return tree;
 					}
+					else if(obj->GetType()==L"Animal.EmptyClass")
+					{
+						vl::Ptr<TestXmlAnimal::TestXmlEmptyClass> tree = new TestXmlAnimal::TestXmlEmptyClass;
+						vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
+						Fill(tree, obj, tokens);
+						return tree;
+					}
 					else if(obj->GetType()==L"Animal.Leg")
 					{
 						vl::Ptr<TestXmlAnimal::TestXmlLeg> tree = new TestXmlAnimal::TestXmlLeg;
@@ -467,6 +482,11 @@ Parsing Tree Conversion Implementation
 			vl::Ptr<TestXmlDocument> TestXmlDocument::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
 			{
 				return TestXmlConvertParsingTreeNode(node, tokens).Cast<TestXmlDocument>();
+			}
+
+			vl::Ptr<TestXmlAnimal::TestXmlEmptyClass> TestXmlAnimal::TestXmlEmptyClass::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
+			{
+				return TestXmlConvertParsingTreeNode(node, tokens).Cast<TestXmlAnimal::TestXmlEmptyClass>();
 			}
 
 			vl::Ptr<TestXmlAnimal::TestXmlLeg> TestXmlAnimal::TestXmlLeg::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
@@ -673,6 +693,7 @@ namespace vl
 			IMPL_TYPE_INFO_RENAME(TestXmlDirectEnum, system::xmlutility::TestXmlDirectEnum)
 			IMPL_TYPE_INFO_RENAME(TestXmlAnimal, system::xmlutility::TestXmlAnimal)
 			IMPL_TYPE_INFO_RENAME(TestXmlAnimal::TestXmlIndirectEnum, system::xmlutility::TestXmlAnimal::TestXmlIndirectEnum)
+			IMPL_TYPE_INFO_RENAME(TestXmlAnimal::TestXmlEmptyClass, system::xmlutility::TestXmlAnimal::TestXmlEmptyClass)
 			IMPL_TYPE_INFO_RENAME(TestXmlAnimal::TestXmlBody, system::xmlutility::TestXmlAnimal::TestXmlBody)
 			IMPL_TYPE_INFO_RENAME(TestXmlAnimal::TestXmlBody::TestXmlFur, system::xmlutility::TestXmlAnimal::TestXmlBody::TestXmlFur)
 			IMPL_TYPE_INFO_RENAME(TestXmlAnimal::TestXmlLeg, system::xmlutility::TestXmlAnimal::TestXmlLeg)
@@ -681,8 +702,13 @@ namespace vl
 			IMPL_TYPE_INFO_RENAME(TestXmlGoose, system::xmlutility::TestXmlGoose)
 			IMPL_TYPE_INFO_RENAME(TestXmlDuck, system::xmlutility::TestXmlDuck)
 			IMPL_TYPE_INFO_RENAME(TestXmlBlackHole, system::xmlutility::TestXmlBlackHole)
+			IMPL_TYPE_INFO_RENAME(TestXmlNode::IVisitor, system::xmlutility::TestXmlNode::IVisitor)
+			IMPL_TYPE_INFO_RENAME(TestXmlAnimal::IVisitor, system::xmlutility::TestXmlAnimal::IVisitor)
+			IMPL_TYPE_INFO_RENAME(TestXmlAnimal::TestXmlBody::IVisitor, system::xmlutility::TestXmlAnimal::TestXmlBody::IVisitor)
+			IMPL_TYPE_INFO_RENAME(TestXmlAnimal::TestXmlBody::TestXmlFur::IVisitor, system::xmlutility::TestXmlAnimal::TestXmlBody::TestXmlFur::IVisitor)
 
 			BEGIN_CLASS_MEMBER(TestXmlNode)
+				CLASS_MEMBER_METHOD(Accept, {L"visitor"})
 
 			END_CLASS_MEMBER(TestXmlNode)
 
@@ -789,6 +815,7 @@ namespace vl
 			END_ENUM_ITEM(TestXmlDirectEnum)
 
 			BEGIN_CLASS_MEMBER(TestXmlAnimal)
+				CLASS_MEMBER_METHOD(Accept, {L"visitor"})
 				CLASS_MEMBER_EXTERNALMETHOD(get_name, NO_PARAMETER, vl::WString(TestXmlAnimal::*)(), [](TestXmlAnimal* node){ return node->name.value; })
 				CLASS_MEMBER_EXTERNALMETHOD(set_name, {L"value"}, void(TestXmlAnimal::*)(const vl::WString&), [](TestXmlAnimal* node, const vl::WString& value){ node->name.value = value; })
 
@@ -802,11 +829,19 @@ namespace vl
 				ENUM_NAMESPACE_ITEM(F)
 			END_ENUM_ITEM(TestXmlAnimal::TestXmlIndirectEnum)
 
+			BEGIN_CLASS_MEMBER(TestXmlAnimal::TestXmlEmptyClass)
+				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<TestXmlAnimal::TestXmlEmptyClass>(), NO_PARAMETER)
+
+
+			END_CLASS_MEMBER(TestXmlAnimal::TestXmlEmptyClass)
+
 			BEGIN_CLASS_MEMBER(TestXmlAnimal::TestXmlBody)
+				CLASS_MEMBER_METHOD(Accept, {L"visitor"})
 
 			END_CLASS_MEMBER(TestXmlAnimal::TestXmlBody)
 
 			BEGIN_CLASS_MEMBER(TestXmlAnimal::TestXmlBody::TestXmlFur)
+				CLASS_MEMBER_METHOD(Accept, {L"visitor"})
 				CLASS_MEMBER_EXTERNALMETHOD(get_title, NO_PARAMETER, vl::WString(TestXmlAnimal::TestXmlBody::TestXmlFur::*)(), [](TestXmlAnimal::TestXmlBody::TestXmlFur* node){ return node->title.value; })
 				CLASS_MEMBER_EXTERNALMETHOD(set_title, {L"value"}, void(TestXmlAnimal::TestXmlBody::TestXmlFur::*)(const vl::WString&), [](TestXmlAnimal::TestXmlBody::TestXmlFur* node, const vl::WString& value){ node->title.value = value; })
 
@@ -877,6 +912,39 @@ namespace vl
 				CLASS_MEMBER_PROPERTY(id, get_id, set_id)
 			END_CLASS_MEMBER(TestXmlBlackHole)
 
+			BEGIN_CLASS_MEMBER(TestXmlNode::IVisitor)
+				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
+
+				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(TestXmlNode::IVisitor::*)(TestXmlAmbiguousNode* node))
+				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(TestXmlNode::IVisitor::*)(TestXmlText* node))
+				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(TestXmlNode::IVisitor::*)(TestXmlCData* node))
+				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(TestXmlNode::IVisitor::*)(TestXmlAttribute* node))
+				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(TestXmlNode::IVisitor::*)(TestXmlComment* node))
+				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(TestXmlNode::IVisitor::*)(TestXmlElement* node))
+				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(TestXmlNode::IVisitor::*)(TestXmlInstruction* node))
+				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(TestXmlNode::IVisitor::*)(TestXmlDocument* node))
+			END_CLASS_MEMBER(TestXmlNode)
+
+			BEGIN_CLASS_MEMBER(TestXmlAnimal::IVisitor)
+				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
+
+				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(TestXmlAnimal::IVisitor::*)(TestXmlGoose* node))
+				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(TestXmlAnimal::IVisitor::*)(TestXmlDuck* node))
+			END_CLASS_MEMBER(TestXmlAnimal)
+
+			BEGIN_CLASS_MEMBER(TestXmlAnimal::TestXmlBody::IVisitor)
+				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
+
+				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(TestXmlAnimal::TestXmlBody::IVisitor::*)(TestXmlAnimal::TestXmlLeg* node))
+				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(TestXmlAnimal::TestXmlBody::IVisitor::*)(TestXmlAnimal::TestXmlTail* node))
+			END_CLASS_MEMBER(TestXmlAnimal::TestXmlBody)
+
+			BEGIN_CLASS_MEMBER(TestXmlAnimal::TestXmlBody::TestXmlFur::IVisitor)
+				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
+
+				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(TestXmlAnimal::TestXmlBody::TestXmlFur::IVisitor::*)(TestXmlBlackHole* node))
+			END_CLASS_MEMBER(TestXmlAnimal::TestXmlBody::TestXmlFur)
+
 			class TestXmlTypeLoader : public vl::Object, public ITypeLoader
 			{
 			public:
@@ -894,6 +962,7 @@ namespace vl
 					ADD_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlDirectEnum)
 					ADD_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlAnimal)
 					ADD_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlAnimal::TestXmlIndirectEnum)
+					ADD_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlAnimal::TestXmlEmptyClass)
 					ADD_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlAnimal::TestXmlBody)
 					ADD_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlAnimal::TestXmlBody::TestXmlFur)
 					ADD_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlAnimal::TestXmlLeg)
