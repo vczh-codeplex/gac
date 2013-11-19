@@ -1569,8 +1569,10 @@ namespace vl
 			IMPL_TYPE_INFO_RENAME(JsonArray, system::JsonArray)
 			IMPL_TYPE_INFO_RENAME(JsonObjectField, system::JsonObjectField)
 			IMPL_TYPE_INFO_RENAME(JsonObject, system::JsonObject)
+			IMPL_TYPE_INFO_RENAME(JsonNode::IVisitor, system::JsonNode::IVisitor)
 
 			BEGIN_CLASS_MEMBER(JsonNode)
+				CLASS_MEMBER_METHOD(Accept, {L"visitor"})
 
 			END_CLASS_MEMBER(JsonNode)
 
@@ -1642,6 +1644,18 @@ namespace vl
 				CLASS_MEMBER_FIELD(fields)
 			END_CLASS_MEMBER(JsonObject)
 
+			BEGIN_CLASS_MEMBER(JsonNode::IVisitor)
+				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
+				CLASS_MEMBER_EXTERNALCTOR(Ptr<JsonNode::IVisitor>(Ptr<IValueInterfaceProxy>), {L"proxy"}, &interface_proxy::JsonNode_IVisitor::Create)
+
+				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(JsonNode::IVisitor::*)(JsonLiteral* node))
+				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(JsonNode::IVisitor::*)(JsonString* node))
+				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(JsonNode::IVisitor::*)(JsonNumber* node))
+				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(JsonNode::IVisitor::*)(JsonArray* node))
+				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(JsonNode::IVisitor::*)(JsonObjectField* node))
+				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(JsonNode::IVisitor::*)(JsonObject* node))
+			END_CLASS_MEMBER(JsonNode)
+
 			class JsonTypeLoader : public vl::Object, public ITypeLoader
 			{
 			public:
@@ -1655,6 +1669,7 @@ namespace vl
 					ADD_TYPE_INFO(vl::parsing::json::JsonArray)
 					ADD_TYPE_INFO(vl::parsing::json::JsonObjectField)
 					ADD_TYPE_INFO(vl::parsing::json::JsonObject)
+					ADD_TYPE_INFO(vl::parsing::json::JsonNode::IVisitor)
 				}
 
 				void Unload(ITypeManager* manager)
@@ -11550,8 +11565,10 @@ namespace vl
 			IMPL_TYPE_INFO_RENAME(XmlElement, system::XmlElement)
 			IMPL_TYPE_INFO_RENAME(XmlInstruction, system::XmlInstruction)
 			IMPL_TYPE_INFO_RENAME(XmlDocument, system::XmlDocument)
+			IMPL_TYPE_INFO_RENAME(XmlNode::IVisitor, system::XmlNode::IVisitor)
 
 			BEGIN_CLASS_MEMBER(XmlNode)
+				CLASS_MEMBER_METHOD(Accept, {L"visitor"})
 
 			END_CLASS_MEMBER(XmlNode)
 
@@ -11640,6 +11657,19 @@ namespace vl
 				CLASS_MEMBER_FIELD(rootElement)
 			END_CLASS_MEMBER(XmlDocument)
 
+			BEGIN_CLASS_MEMBER(XmlNode::IVisitor)
+				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
+				CLASS_MEMBER_EXTERNALCTOR(Ptr<XmlNode::IVisitor>(Ptr<IValueInterfaceProxy>), {L"proxy"}, &interface_proxy::XmlNode_IVisitor::Create)
+
+				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(XmlNode::IVisitor::*)(XmlText* node))
+				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(XmlNode::IVisitor::*)(XmlCData* node))
+				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(XmlNode::IVisitor::*)(XmlAttribute* node))
+				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(XmlNode::IVisitor::*)(XmlComment* node))
+				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(XmlNode::IVisitor::*)(XmlElement* node))
+				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(XmlNode::IVisitor::*)(XmlInstruction* node))
+				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(XmlNode::IVisitor::*)(XmlDocument* node))
+			END_CLASS_MEMBER(XmlNode)
+
 			class XmlTypeLoader : public vl::Object, public ITypeLoader
 			{
 			public:
@@ -11653,6 +11683,7 @@ namespace vl
 					ADD_TYPE_INFO(vl::parsing::xml::XmlElement)
 					ADD_TYPE_INFO(vl::parsing::xml::XmlInstruction)
 					ADD_TYPE_INFO(vl::parsing::xml::XmlDocument)
+					ADD_TYPE_INFO(vl::parsing::xml::XmlNode::IVisitor)
 				}
 
 				void Unload(ITypeManager* manager)
@@ -18317,7 +18348,6 @@ RegexNode
 /***********************************************************************
 Stream\Accessor.cpp
 ***********************************************************************/
-#include <string.h>
 
 namespace vl
 {
@@ -21044,7 +21074,6 @@ namespace vl
 /***********************************************************************
 Threading.cpp
 ***********************************************************************/
-#include <intrin.h>
 
 namespace vl
 {

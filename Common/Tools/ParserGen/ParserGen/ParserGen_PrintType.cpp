@@ -177,13 +177,13 @@ void PrintNamespaces(const List<WString>& namespaces, TextWriter& writer)
 	}
 }
 
-bool PrintType(ParsingSymbol* type, const WString& codeClassPrefix, TextWriter& writer)
+bool PrintType(ParsingSymbol* type, const WString& codeClassPrefix, TextWriter& writer, const WString& delimiter)
 {
 	if(type->GetType()==ParsingSymbol::ClassType || type->GetType()==ParsingSymbol::EnumType)
 	{
-		if(PrintType(type->GetParentSymbol(), codeClassPrefix, writer))
+		if(PrintType(type->GetParentSymbol(), codeClassPrefix, writer, delimiter))
 		{
-			writer.WriteString(L"::");
+			writer.WriteString(delimiter);
 		}
 		writer.WriteString(codeClassPrefix);
 		writer.WriteString(type->GetName());

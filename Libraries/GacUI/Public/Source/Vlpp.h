@@ -21254,10 +21254,10 @@ namespace vl
 			class JsonObjectField;
 			class JsonObject;
 
-			class JsonNode abstract : public vl::parsing::ParsingTreeCustomBase
+			class JsonNode abstract : public vl::parsing::ParsingTreeCustomBase, vl::reflection::Description<JsonNode>
 			{
 			public:
-				class IVisitor : public vl::Interface
+				class IVisitor : public vl::reflection::IDescriptable, vl::reflection::Description<IVisitor>
 				{
 				public:
 					virtual void Visit(JsonLiteral* node)=0;
@@ -21272,7 +21272,7 @@ namespace vl
 
 			};
 
-			class JsonLiteral : public JsonNode
+			class JsonLiteral : public JsonNode, vl::reflection::Description<JsonLiteral>
 			{
 			public:
 				enum class JsonValue
@@ -21289,7 +21289,7 @@ namespace vl
 				static vl::Ptr<JsonLiteral> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 			};
 
-			class JsonString : public JsonNode
+			class JsonString : public JsonNode, vl::reflection::Description<JsonString>
 			{
 			public:
 				vl::parsing::ParsingToken content;
@@ -21299,7 +21299,7 @@ namespace vl
 				static vl::Ptr<JsonString> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 			};
 
-			class JsonNumber : public JsonNode
+			class JsonNumber : public JsonNode, vl::reflection::Description<JsonNumber>
 			{
 			public:
 				vl::parsing::ParsingToken content;
@@ -21309,7 +21309,7 @@ namespace vl
 				static vl::Ptr<JsonNumber> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 			};
 
-			class JsonArray : public JsonNode
+			class JsonArray : public JsonNode, vl::reflection::Description<JsonArray>
 			{
 			public:
 				vl::collections::List<vl::Ptr<JsonNode>> items;
@@ -21319,7 +21319,7 @@ namespace vl
 				static vl::Ptr<JsonArray> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 			};
 
-			class JsonObjectField : public JsonNode
+			class JsonObjectField : public JsonNode, vl::reflection::Description<JsonObjectField>
 			{
 			public:
 				vl::parsing::ParsingToken name;
@@ -21330,7 +21330,7 @@ namespace vl
 				static vl::Ptr<JsonObjectField> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 			};
 
-			class JsonObject : public JsonNode
+			class JsonObject : public JsonNode, vl::reflection::Description<JsonObject>
 			{
 			public:
 				vl::collections::List<vl::Ptr<JsonObjectField>> fields;
@@ -21372,6 +21372,56 @@ namespace vl
 			DECL_TYPE_INFO(vl::parsing::json::JsonArray)
 			DECL_TYPE_INFO(vl::parsing::json::JsonObjectField)
 			DECL_TYPE_INFO(vl::parsing::json::JsonObject)
+			DECL_TYPE_INFO(vl::parsing::json::JsonNode::IVisitor)
+
+			namespace interface_proxy
+			{
+				class JsonNode_IVisitor : public ValueInterfaceRoot, public virtual vl::parsing::json::JsonNode::IVisitor
+				{
+				public:
+					JsonNode_IVisitor(Ptr<IValueInterfaceProxy> proxy)
+						:ValueInterfaceRoot(proxy)
+					{
+					}
+
+					static Ptr<vl::parsing::json::JsonNode::IVisitor> Create(Ptr<IValueInterfaceProxy> proxy)
+					{
+						return new JsonNode_IVisitor(proxy);
+					}
+
+					void Visit(vl::parsing::json::JsonLiteral* node)override
+					{
+						INVOKE_INTERFACE_PROXY(Visit, node);
+					}
+
+					void Visit(vl::parsing::json::JsonString* node)override
+					{
+						INVOKE_INTERFACE_PROXY(Visit, node);
+					}
+
+					void Visit(vl::parsing::json::JsonNumber* node)override
+					{
+						INVOKE_INTERFACE_PROXY(Visit, node);
+					}
+
+					void Visit(vl::parsing::json::JsonArray* node)override
+					{
+						INVOKE_INTERFACE_PROXY(Visit, node);
+					}
+
+					void Visit(vl::parsing::json::JsonObjectField* node)override
+					{
+						INVOKE_INTERFACE_PROXY(Visit, node);
+					}
+
+					void Visit(vl::parsing::json::JsonObject* node)override
+					{
+						INVOKE_INTERFACE_PROXY(Visit, node);
+					}
+
+				};
+
+				}
 #endif
 
 			extern bool JsonLoadTypes();
@@ -22057,10 +22107,10 @@ namespace vl
 			class XmlInstruction;
 			class XmlDocument;
 
-			class XmlNode abstract : public vl::parsing::ParsingTreeCustomBase
+			class XmlNode abstract : public vl::parsing::ParsingTreeCustomBase, vl::reflection::Description<XmlNode>
 			{
 			public:
-				class IVisitor : public vl::Interface
+				class IVisitor : public vl::reflection::IDescriptable, vl::reflection::Description<IVisitor>
 				{
 				public:
 					virtual void Visit(XmlText* node)=0;
@@ -22076,7 +22126,7 @@ namespace vl
 
 			};
 
-			class XmlText : public XmlNode
+			class XmlText : public XmlNode, vl::reflection::Description<XmlText>
 			{
 			public:
 				vl::parsing::ParsingToken content;
@@ -22086,7 +22136,7 @@ namespace vl
 				static vl::Ptr<XmlText> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 			};
 
-			class XmlCData : public XmlNode
+			class XmlCData : public XmlNode, vl::reflection::Description<XmlCData>
 			{
 			public:
 				vl::parsing::ParsingToken content;
@@ -22096,7 +22146,7 @@ namespace vl
 				static vl::Ptr<XmlCData> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 			};
 
-			class XmlAttribute : public XmlNode
+			class XmlAttribute : public XmlNode, vl::reflection::Description<XmlAttribute>
 			{
 			public:
 				vl::parsing::ParsingToken name;
@@ -22107,7 +22157,7 @@ namespace vl
 				static vl::Ptr<XmlAttribute> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 			};
 
-			class XmlComment : public XmlNode
+			class XmlComment : public XmlNode, vl::reflection::Description<XmlComment>
 			{
 			public:
 				vl::parsing::ParsingToken content;
@@ -22117,7 +22167,7 @@ namespace vl
 				static vl::Ptr<XmlComment> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 			};
 
-			class XmlElement : public XmlNode
+			class XmlElement : public XmlNode, vl::reflection::Description<XmlElement>
 			{
 			public:
 				vl::parsing::ParsingToken name;
@@ -22130,7 +22180,7 @@ namespace vl
 				static vl::Ptr<XmlElement> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 			};
 
-			class XmlInstruction : public XmlNode
+			class XmlInstruction : public XmlNode, vl::reflection::Description<XmlInstruction>
 			{
 			public:
 				vl::parsing::ParsingToken name;
@@ -22141,7 +22191,7 @@ namespace vl
 				static vl::Ptr<XmlInstruction> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 			};
 
-			class XmlDocument : public XmlNode
+			class XmlDocument : public XmlNode, vl::reflection::Description<XmlDocument>
 			{
 			public:
 				vl::collections::List<vl::Ptr<XmlNode>> prologs;
@@ -22194,6 +22244,61 @@ namespace vl
 			DECL_TYPE_INFO(vl::parsing::xml::XmlElement)
 			DECL_TYPE_INFO(vl::parsing::xml::XmlInstruction)
 			DECL_TYPE_INFO(vl::parsing::xml::XmlDocument)
+			DECL_TYPE_INFO(vl::parsing::xml::XmlNode::IVisitor)
+
+			namespace interface_proxy
+			{
+				class XmlNode_IVisitor : public ValueInterfaceRoot, public virtual vl::parsing::xml::XmlNode::IVisitor
+				{
+				public:
+					XmlNode_IVisitor(Ptr<IValueInterfaceProxy> proxy)
+						:ValueInterfaceRoot(proxy)
+					{
+					}
+
+					static Ptr<vl::parsing::xml::XmlNode::IVisitor> Create(Ptr<IValueInterfaceProxy> proxy)
+					{
+						return new XmlNode_IVisitor(proxy);
+					}
+
+					void Visit(vl::parsing::xml::XmlText* node)override
+					{
+						INVOKE_INTERFACE_PROXY(Visit, node);
+					}
+
+					void Visit(vl::parsing::xml::XmlCData* node)override
+					{
+						INVOKE_INTERFACE_PROXY(Visit, node);
+					}
+
+					void Visit(vl::parsing::xml::XmlAttribute* node)override
+					{
+						INVOKE_INTERFACE_PROXY(Visit, node);
+					}
+
+					void Visit(vl::parsing::xml::XmlComment* node)override
+					{
+						INVOKE_INTERFACE_PROXY(Visit, node);
+					}
+
+					void Visit(vl::parsing::xml::XmlElement* node)override
+					{
+						INVOKE_INTERFACE_PROXY(Visit, node);
+					}
+
+					void Visit(vl::parsing::xml::XmlInstruction* node)override
+					{
+						INVOKE_INTERFACE_PROXY(Visit, node);
+					}
+
+					void Visit(vl::parsing::xml::XmlDocument* node)override
+					{
+						INVOKE_INTERFACE_PROXY(Visit, node);
+					}
+
+				};
+
+				}
 #endif
 
 			extern bool XmlLoadTypes();

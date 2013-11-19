@@ -52,7 +52,7 @@ extern void							WriteCppString(const WString& text, TextWriter& writer);
 extern void							PrintType(ParsingDefinitionType* _type, ParsingSymbol* _scope, ParsingSymbolManager* _manager, const WString& _codeClassPrefix, TextWriter& _writer);
 extern void							PrintTypeForValue(ParsingDefinitionType* _type, ParsingSymbol* _scope, ParsingSymbolManager* _manager, const WString& _codeClassPrefix, TextWriter& _writer);
 extern void							PrintNamespaces(const List<WString>& namespaces, TextWriter& writer);
-extern bool							PrintType(ParsingSymbol* type, const WString& codeClassPrefix, TextWriter& writer);
+extern bool							PrintType(ParsingSymbol* type, const WString& codeClassPrefix, TextWriter& writer, const WString& delimiter=L"::");
 extern void							PrintTypeForValue(ParsingSymbol* type, const WString& codeClassPrefix, TextWriter& writer);
 
 extern void							SearchLeafClasses(List<ParsingSymbol*>& classes, List<ParsingSymbol*>& leafClasses);

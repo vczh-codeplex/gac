@@ -274,8 +274,10 @@ namespace vl
 			IMPL_TYPE_INFO_RENAME(CalBinaryExpression, System::CalBinaryExpression)
 			IMPL_TYPE_INFO_RENAME(CalBinaryExpression::CalBinaryOperator, System::CalBinaryExpression::CalBinaryOperator)
 			IMPL_TYPE_INFO_RENAME(CalFunctionExpression, System::CalFunctionExpression)
+			IMPL_TYPE_INFO_RENAME(CalExpression::IVisitor, System::CalExpression::IVisitor)
 
 			BEGIN_CLASS_MEMBER(CalExpression)
+				CLASS_MEMBER_METHOD(Accept, {L"visitor"})
 
 			END_CLASS_MEMBER(CalExpression)
 
@@ -321,6 +323,15 @@ namespace vl
 				CLASS_MEMBER_FIELD(arguments)
 			END_CLASS_MEMBER(CalFunctionExpression)
 
+			BEGIN_CLASS_MEMBER(CalExpression::IVisitor)
+				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
+				CLASS_MEMBER_EXTERNALCTOR(Ptr<CalExpression::IVisitor>(Ptr<IValueInterfaceProxy>), {L"proxy"}, &interface_proxy::CalExpression_IVisitor::Create)
+
+				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(CalExpression::IVisitor::*)(CalNumberExpression* node))
+				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(CalExpression::IVisitor::*)(CalBinaryExpression* node))
+				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(CalExpression::IVisitor::*)(CalFunctionExpression* node))
+			END_CLASS_MEMBER(CalExpression)
+
 			class CalTypeLoader : public vl::Object, public ITypeLoader
 			{
 			public:
@@ -331,6 +342,7 @@ namespace vl
 					ADD_TYPE_INFO(test::parser::CalBinaryExpression)
 					ADD_TYPE_INFO(test::parser::CalBinaryExpression::CalBinaryOperator)
 					ADD_TYPE_INFO(test::parser::CalFunctionExpression)
+					ADD_TYPE_INFO(test::parser::CalExpression::IVisitor)
 				}
 
 				void Unload(ITypeManager* manager)
