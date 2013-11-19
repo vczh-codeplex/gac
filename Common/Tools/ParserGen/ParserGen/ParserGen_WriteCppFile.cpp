@@ -40,7 +40,7 @@ void WriteCppFile(const WString& name, const WString& parserCode, Ptr<ParsingDef
 	writer.WriteLine(L"Visitor Pattern Implementation");
 	writer.WriteLine(L"***********************************************************************/");
 	writer.WriteLine(L"");
-	WriteVisitorImpl(&manager, manager.GetGlobal(), prefix, config.classPrefix, writer);
+	WriteVisitorImpl(&manager, prefix, config.classPrefix, writer);
 
 	writer.WriteLine(L"/***********************************************************************");
 	writer.WriteLine(L"Parser Function");

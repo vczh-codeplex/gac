@@ -99,8 +99,8 @@ public:
 
 void WriteNodeConverterClassImplFragment(ParsingSymbolManager* manager, const WString& prefix, const WString& codeClassPrefix, TextWriter& writer)
 {
-	SortedList<ParsingSymbol*> leafClasses;
-	EnumerateAllLeafClass(manager, leafClasses);
+	List<ParsingSymbol*> leafClasses;
+	EnumerateAllLeafClass(manager, manager->GetGlobal(), leafClasses);
 	FOREACH(ParsingSymbol*, scope, leafClasses)
 	{
 		writer.WriteString(L"if(obj->GetType()==L\"");
@@ -268,8 +268,8 @@ Node Conversion Generation Function
 
 void WriteConvertImpl(ParsingSymbolManager* manager, const WString& prefix, const WString& codeClassPrefix, TextWriter& writer)
 {
-	SortedList<ParsingSymbol*> leafClasses;
-	EnumerateAllLeafClass(manager, leafClasses);
+	List<ParsingSymbol*> leafClasses;
+	EnumerateAllLeafClass(manager, manager->GetGlobal(), leafClasses);
 	FOREACH(ParsingSymbol*, scope, leafClasses)
 	{
 		writer.WriteString(prefix);

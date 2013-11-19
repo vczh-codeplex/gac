@@ -20,6 +20,7 @@ void WriteHeaderFile(const WString& name, Ptr<ParsingDefinition> definition, Ptr
 	}
 
 	WriteTokenDefinition(table, prefix, config.classPrefix, writer);
+	WriteTypeForwardDefinitions(definition->types, prefix, 0, &manager, config.classPrefix, writer);
 	WriteTypeDefinitions(definition->types, prefix, 0, &manager, config.classPrefix, writer);
 	WriteMetaDefinition(prefix, config.classPrefix, writer);
 	WriteParserFunctions(&manager, config.parsers, prefix, config.classPrefix, writer);

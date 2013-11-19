@@ -23,23 +23,23 @@ L"\r\n"L"}"
 L"\r\n"L""
 L"\r\n"L"class Text : Node"
 L"\r\n"L"{"
-L"\r\n"L"\ttoken content (XmlUnescapeTextFragment);"
+L"\r\n"L"\ttoken content (TestXmlUnescapeTextFragment);"
 L"\r\n"L"}"
 L"\r\n"L""
 L"\r\n"L"class CData : Node"
 L"\r\n"L"{"
-L"\r\n"L"\ttoken content (XmlUnescapeCData);"
+L"\r\n"L"\ttoken content (TestXmlUnescapeCData);"
 L"\r\n"L"}"
 L"\r\n"L""
 L"\r\n"L"class Attribute : Node"
 L"\r\n"L"{"
 L"\r\n"L"\ttoken name;"
-L"\r\n"L"\ttoken value (XmlUnescapeAttributeValue);"
+L"\r\n"L"\ttoken value (TestXmlUnescapeAttributeValue);"
 L"\r\n"L"}"
 L"\r\n"L""
 L"\r\n"L"class Comment : Node"
 L"\r\n"L"{"
-L"\r\n"L"\ttoken content (XmlUnescapeComment);"
+L"\r\n"L"\ttoken content (TestXmlUnescapeComment);"
 L"\r\n"L"}"
 L"\r\n"L""
 L"\r\n"L"class Element : Node"
@@ -47,7 +47,7 @@ L"\r\n"L"{"
 L"\r\n"L"\ttoken name;"
 L"\r\n"L"\ttoken closingName;"
 L"\r\n"L"\tAttribute[] attributes;"
-L"\r\n"L"\tNode[] subNodes (XmlMergeTextFragment);"
+L"\r\n"L"\tNode[] subNodes (TestXmlMergeTextFragment);"
 L"\r\n"L"}"
 L"\r\n"L""
 L"\r\n"L"class Instruction : Node"
@@ -68,37 +68,52 @@ L"\r\n"L"{"
 L"\r\n"L"\tA,B,C,"
 L"\r\n"L"}"
 L"\r\n"L""
-L"\r\n"L"class FirstClass"
+L"\r\n"L"class Animal"
 L"\r\n"L"{"
 L"\r\n"L"\tenum IndirectEnum"
 L"\r\n"L"\t{"
 L"\r\n"L"\t\tD,E,F,"
 L"\r\n"L"\t}"
 L"\r\n"L"\t"
-L"\r\n"L"\tclass SecondClass"
+L"\r\n"L"\tclass Body"
 L"\r\n"L"\t{"
-L"\r\n"L"\t\tclass ThirdClass"
+L"\r\n"L"\t\tclass Fur"
 L"\r\n"L"\t\t{"
-L"\r\n"L"\t\t\ttoken field1;"
+L"\r\n"L"\t\t\ttoken title;"
 L"\r\n"L"\t\t}"
 L"\r\n"L"\t}"
 L"\r\n"L""
-L"\r\n"L"\tclass SecondClassChild : SecondClass"
+L"\r\n"L"\tclass Leg : Body"
 L"\r\n"L"\t{"
-L"\r\n"L"\t\ttoken field3;"
+L"\r\n"L"\t\ttoken id;"
 L"\r\n"L"\t}"
 L"\r\n"L""
-L"\r\n"L"\ttoken field4;"
+L"\r\n"L"\tclass Tail : Body"
+L"\r\n"L"\t{"
+L"\r\n"L"\t\ttoken id;"
+L"\r\n"L"\t}"
+L"\r\n"L""
+L"\r\n"L"\ttoken name;"
 L"\r\n"L"}"
 L"\r\n"L""
-L"\r\n"L"class FirstClassChild : FirstClass"
+L"\r\n"L"class Bird : Animal"
 L"\r\n"L"{"
-L"\r\n"L"\ttoken field2;"
+L"\r\n"L"\ttoken id;"
 L"\r\n"L"}"
 L"\r\n"L""
-L"\r\n"L"class ThirdClassChild : FirstClass.SecondClass.ThirdClass"
+L"\r\n"L"class Goose : Bird"
 L"\r\n"L"{"
-L"\r\n"L"\ttoken field5;"
+L"\r\n"L"\ttoken title;"
+L"\r\n"L"}"
+L"\r\n"L""
+L"\r\n"L"class Duck : Bird"
+L"\r\n"L"{"
+L"\r\n"L"\ttoken title;"
+L"\r\n"L"}"
+L"\r\n"L""
+L"\r\n"L"class BlackHole : Animal.Body.Fur"
+L"\r\n"L"{"
+L"\r\n"L"\ttoken id;"
 L"\r\n"L"}"
 L"\r\n"L""
 L"\r\n"L"token INSTRUCTION_OPEN = \"/</?\";"
@@ -127,7 +142,7 @@ L"\r\n"L"rule Instruction XInstruction = \"<?\" NAME:name {XAttribute:attributes
 L"\r\n"L"rule Document XDocument = {XInstruction:instructions | XComment:comments} XElement:rootElement as Document;"
 ;
 
-			vl::WString XmlGetParserTextBuffer()
+			vl::WString TestXmlGetParserTextBuffer()
 			{
 				return parserTextBuffer;
 			}
@@ -136,232 +151,265 @@ L"\r\n"L"rule Document XDocument = {XInstruction:instructions | XComment:comment
 Unescaping Function Foward Declarations
 ***********************************************************************/
 
-			extern void XmlMergeTextFragment(vl::collections::List<vl::Ptr<XmlNode>>& value, const vl::collections::List<vl::regex::RegexToken>& tokens);
-			extern void XmlUnescapeAttributeValue(vl::parsing::ParsingToken& value, const vl::collections::List<vl::regex::RegexToken>& tokens);
-			extern void XmlUnescapeCData(vl::parsing::ParsingToken& value, const vl::collections::List<vl::regex::RegexToken>& tokens);
-			extern void XmlUnescapeComment(vl::parsing::ParsingToken& value, const vl::collections::List<vl::regex::RegexToken>& tokens);
-			extern void XmlUnescapeTextFragment(vl::parsing::ParsingToken& value, const vl::collections::List<vl::regex::RegexToken>& tokens);
+			extern void TestXmlMergeTextFragment(vl::collections::List<vl::Ptr<TestXmlNode>>& value, const vl::collections::List<vl::regex::RegexToken>& tokens);
+			extern void TestXmlUnescapeAttributeValue(vl::parsing::ParsingToken& value, const vl::collections::List<vl::regex::RegexToken>& tokens);
+			extern void TestXmlUnescapeCData(vl::parsing::ParsingToken& value, const vl::collections::List<vl::regex::RegexToken>& tokens);
+			extern void TestXmlUnescapeComment(vl::parsing::ParsingToken& value, const vl::collections::List<vl::regex::RegexToken>& tokens);
+			extern void TestXmlUnescapeTextFragment(vl::parsing::ParsingToken& value, const vl::collections::List<vl::regex::RegexToken>& tokens);
 
 /***********************************************************************
 Parsing Tree Conversion Driver Implementation
 ***********************************************************************/
 
-			class XmlTreeConverter : public vl::parsing::ParsingTreeConverter
+			class TestXmlTreeConverter : public vl::parsing::ParsingTreeConverter
 			{
 			public:
 				using vl::parsing::ParsingTreeConverter::SetMember;
 
-				bool SetMember(XmlDirectEnum& member, vl::Ptr<vl::parsing::ParsingTreeNode> node, const TokenList& tokens)
+				bool SetMember(TestXmlDirectEnum& member, vl::Ptr<vl::parsing::ParsingTreeNode> node, const TokenList& tokens)
 				{
 					vl::Ptr<vl::parsing::ParsingTreeToken> token=node.Cast<vl::parsing::ParsingTreeToken>();
 					if(token)
 					{
-						if(token->GetValue()==L"A") { member=XmlDirectEnum::A; return true; }
-						else if(token->GetValue()==L"B") { member=XmlDirectEnum::B; return true; }
-						else if(token->GetValue()==L"C") { member=XmlDirectEnum::C; return true; }
-						else { member=XmlDirectEnum::A; return false; }
+						if(token->GetValue()==L"A") { member=TestXmlDirectEnum::A; return true; }
+						else if(token->GetValue()==L"B") { member=TestXmlDirectEnum::B; return true; }
+						else if(token->GetValue()==L"C") { member=TestXmlDirectEnum::C; return true; }
+						else { member=TestXmlDirectEnum::A; return false; }
 					}
-					member=XmlDirectEnum::A;
+					member=TestXmlDirectEnum::A;
 					return false;
 				}
 
-				bool SetMember(XmlFirstClass::XmlIndirectEnum& member, vl::Ptr<vl::parsing::ParsingTreeNode> node, const TokenList& tokens)
+				bool SetMember(TestXmlAnimal::TestXmlIndirectEnum& member, vl::Ptr<vl::parsing::ParsingTreeNode> node, const TokenList& tokens)
 				{
 					vl::Ptr<vl::parsing::ParsingTreeToken> token=node.Cast<vl::parsing::ParsingTreeToken>();
 					if(token)
 					{
-						if(token->GetValue()==L"D") { member=XmlFirstClass::XmlIndirectEnum::D; return true; }
-						else if(token->GetValue()==L"E") { member=XmlFirstClass::XmlIndirectEnum::E; return true; }
-						else if(token->GetValue()==L"F") { member=XmlFirstClass::XmlIndirectEnum::F; return true; }
-						else { member=XmlFirstClass::XmlIndirectEnum::D; return false; }
+						if(token->GetValue()==L"D") { member=TestXmlAnimal::TestXmlIndirectEnum::D; return true; }
+						else if(token->GetValue()==L"E") { member=TestXmlAnimal::TestXmlIndirectEnum::E; return true; }
+						else if(token->GetValue()==L"F") { member=TestXmlAnimal::TestXmlIndirectEnum::F; return true; }
+						else { member=TestXmlAnimal::TestXmlIndirectEnum::D; return false; }
 					}
-					member=XmlFirstClass::XmlIndirectEnum::D;
+					member=TestXmlAnimal::TestXmlIndirectEnum::D;
 					return false;
 				}
 
-				void Fill(vl::Ptr<XmlNode> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
+				void Fill(vl::Ptr<TestXmlNode> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
 				{
 				}
 
-				void Fill(vl::Ptr<XmlAmbiguousNode> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
+				void Fill(vl::Ptr<TestXmlAmbiguousNode> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
 				{
 					SetMember(tree->items, obj->GetMember(L"items"), tokens);
 				}
 
-				void Fill(vl::Ptr<XmlText> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
+				void Fill(vl::Ptr<TestXmlText> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
 				{
 					if(SetMember(tree->content, obj->GetMember(L"content"), tokens))
 					{
-						XmlUnescapeTextFragment(tree->content, tokens);
+						TestXmlUnescapeTextFragment(tree->content, tokens);
 					}
 				}
 
-				void Fill(vl::Ptr<XmlCData> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
+				void Fill(vl::Ptr<TestXmlCData> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
 				{
 					if(SetMember(tree->content, obj->GetMember(L"content"), tokens))
 					{
-						XmlUnescapeCData(tree->content, tokens);
+						TestXmlUnescapeCData(tree->content, tokens);
 					}
 				}
 
-				void Fill(vl::Ptr<XmlAttribute> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
+				void Fill(vl::Ptr<TestXmlAttribute> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
 				{
 					SetMember(tree->name, obj->GetMember(L"name"), tokens);
 					if(SetMember(tree->value, obj->GetMember(L"value"), tokens))
 					{
-						XmlUnescapeAttributeValue(tree->value, tokens);
+						TestXmlUnescapeAttributeValue(tree->value, tokens);
 					}
 				}
 
-				void Fill(vl::Ptr<XmlComment> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
+				void Fill(vl::Ptr<TestXmlComment> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
 				{
 					if(SetMember(tree->content, obj->GetMember(L"content"), tokens))
 					{
-						XmlUnescapeComment(tree->content, tokens);
+						TestXmlUnescapeComment(tree->content, tokens);
 					}
 				}
 
-				void Fill(vl::Ptr<XmlElement> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
+				void Fill(vl::Ptr<TestXmlElement> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
 				{
 					SetMember(tree->name, obj->GetMember(L"name"), tokens);
 					SetMember(tree->closingName, obj->GetMember(L"closingName"), tokens);
 					SetMember(tree->attributes, obj->GetMember(L"attributes"), tokens);
 					if(SetMember(tree->subNodes, obj->GetMember(L"subNodes"), tokens))
 					{
-						XmlMergeTextFragment(tree->subNodes, tokens);
+						TestXmlMergeTextFragment(tree->subNodes, tokens);
 					}
 				}
 
-				void Fill(vl::Ptr<XmlInstruction> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
+				void Fill(vl::Ptr<TestXmlInstruction> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
 				{
 					SetMember(tree->name, obj->GetMember(L"name"), tokens);
 					SetMember(tree->attributes, obj->GetMember(L"attributes"), tokens);
 				}
 
-				void Fill(vl::Ptr<XmlDocument> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
+				void Fill(vl::Ptr<TestXmlDocument> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
 				{
 					SetMember(tree->instructions, obj->GetMember(L"instructions"), tokens);
 					SetMember(tree->comments, obj->GetMember(L"comments"), tokens);
 					SetMember(tree->rootElement, obj->GetMember(L"rootElement"), tokens);
 				}
 
-				void Fill(vl::Ptr<XmlFirstClass> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
+				void Fill(vl::Ptr<TestXmlAnimal> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
 				{
-					SetMember(tree->field4, obj->GetMember(L"field4"), tokens);
+					SetMember(tree->name, obj->GetMember(L"name"), tokens);
 				}
 
-				void Fill(vl::Ptr<XmlFirstClass::XmlSecondClass> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
+				void Fill(vl::Ptr<TestXmlAnimal::TestXmlBody> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
 				{
 				}
 
-				void Fill(vl::Ptr<XmlFirstClass::XmlSecondClass::XmlThirdClass> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
+				void Fill(vl::Ptr<TestXmlAnimal::TestXmlBody::TestXmlFur> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
 				{
-					SetMember(tree->field1, obj->GetMember(L"field1"), tokens);
+					SetMember(tree->title, obj->GetMember(L"title"), tokens);
 				}
 
-				void Fill(vl::Ptr<XmlFirstClass::XmlSecondClassChild> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
+				void Fill(vl::Ptr<TestXmlAnimal::TestXmlLeg> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
 				{
-					SetMember(tree->field3, obj->GetMember(L"field3"), tokens);
+					SetMember(tree->id, obj->GetMember(L"id"), tokens);
 				}
 
-				void Fill(vl::Ptr<XmlFirstClassChild> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
+				void Fill(vl::Ptr<TestXmlAnimal::TestXmlTail> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
 				{
-					SetMember(tree->field2, obj->GetMember(L"field2"), tokens);
+					SetMember(tree->id, obj->GetMember(L"id"), tokens);
 				}
 
-				void Fill(vl::Ptr<XmlThirdClassChild> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
+				void Fill(vl::Ptr<TestXmlBird> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
 				{
-					SetMember(tree->field5, obj->GetMember(L"field5"), tokens);
+					SetMember(tree->id, obj->GetMember(L"id"), tokens);
+				}
+
+				void Fill(vl::Ptr<TestXmlGoose> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
+				{
+					SetMember(tree->title, obj->GetMember(L"title"), tokens);
+				}
+
+				void Fill(vl::Ptr<TestXmlDuck> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
+				{
+					SetMember(tree->title, obj->GetMember(L"title"), tokens);
+				}
+
+				void Fill(vl::Ptr<TestXmlBlackHole> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
+				{
+					SetMember(tree->id, obj->GetMember(L"id"), tokens);
 				}
 
 				vl::Ptr<vl::parsing::ParsingTreeCustomBase> ConvertClass(vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)override
 				{
 					if(obj->GetType()==L"AmbiguousNode")
 					{
-						vl::Ptr<XmlAmbiguousNode> tree = new XmlAmbiguousNode;
+						vl::Ptr<TestXmlAmbiguousNode> tree = new TestXmlAmbiguousNode;
 						vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
 						Fill(tree, obj, tokens);
-						Fill(tree.Cast<XmlNode>(), obj, tokens);
-						return tree;
-					}
-					else if(obj->GetType()==L"CData")
-					{
-						vl::Ptr<XmlCData> tree = new XmlCData;
-						vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
-						Fill(tree, obj, tokens);
-						Fill(tree.Cast<XmlNode>(), obj, tokens);
-						return tree;
-					}
-					else if(obj->GetType()==L"Comment")
-					{
-						vl::Ptr<XmlComment> tree = new XmlComment;
-						vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
-						Fill(tree, obj, tokens);
-						Fill(tree.Cast<XmlNode>(), obj, tokens);
-						return tree;
-					}
-					else if(obj->GetType()==L"Element")
-					{
-						vl::Ptr<XmlElement> tree = new XmlElement;
-						vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
-						Fill(tree, obj, tokens);
-						Fill(tree.Cast<XmlNode>(), obj, tokens);
-						return tree;
-					}
-					else if(obj->GetType()==L"FirstClassChild")
-					{
-						vl::Ptr<XmlFirstClassChild> tree = new XmlFirstClassChild;
-						vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
-						Fill(tree, obj, tokens);
-						Fill(tree.Cast<XmlFirstClass>(), obj, tokens);
-						return tree;
-					}
-					else if(obj->GetType()==L"Attribute")
-					{
-						vl::Ptr<XmlAttribute> tree = new XmlAttribute;
-						vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
-						Fill(tree, obj, tokens);
-						Fill(tree.Cast<XmlNode>(), obj, tokens);
-						return tree;
-					}
-					else if(obj->GetType()==L"ThirdClassChild")
-					{
-						vl::Ptr<XmlThirdClassChild> tree = new XmlThirdClassChild;
-						vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
-						Fill(tree, obj, tokens);
-						Fill(tree.Cast<XmlFirstClass::XmlSecondClass::XmlThirdClass>(), obj, tokens);
-						return tree;
-					}
-					else if(obj->GetType()==L"Document")
-					{
-						vl::Ptr<XmlDocument> tree = new XmlDocument;
-						vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
-						Fill(tree, obj, tokens);
-						Fill(tree.Cast<XmlNode>(), obj, tokens);
-						return tree;
-					}
-					else if(obj->GetType()==L"Instruction")
-					{
-						vl::Ptr<XmlInstruction> tree = new XmlInstruction;
-						vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
-						Fill(tree, obj, tokens);
-						Fill(tree.Cast<XmlNode>(), obj, tokens);
-						return tree;
-					}
-					else if(obj->GetType()==L"FirstClass.SecondClassChild")
-					{
-						vl::Ptr<XmlFirstClass::XmlSecondClassChild> tree = new XmlFirstClass::XmlSecondClassChild;
-						vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
-						Fill(tree, obj, tokens);
-						Fill(tree.Cast<XmlFirstClass::XmlSecondClass>(), obj, tokens);
+						Fill(tree.Cast<TestXmlNode>(), obj, tokens);
 						return tree;
 					}
 					else if(obj->GetType()==L"Text")
 					{
-						vl::Ptr<XmlText> tree = new XmlText;
+						vl::Ptr<TestXmlText> tree = new TestXmlText;
 						vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
 						Fill(tree, obj, tokens);
-						Fill(tree.Cast<XmlNode>(), obj, tokens);
+						Fill(tree.Cast<TestXmlNode>(), obj, tokens);
+						return tree;
+					}
+					else if(obj->GetType()==L"CData")
+					{
+						vl::Ptr<TestXmlCData> tree = new TestXmlCData;
+						vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
+						Fill(tree, obj, tokens);
+						Fill(tree.Cast<TestXmlNode>(), obj, tokens);
+						return tree;
+					}
+					else if(obj->GetType()==L"Attribute")
+					{
+						vl::Ptr<TestXmlAttribute> tree = new TestXmlAttribute;
+						vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
+						Fill(tree, obj, tokens);
+						Fill(tree.Cast<TestXmlNode>(), obj, tokens);
+						return tree;
+					}
+					else if(obj->GetType()==L"Comment")
+					{
+						vl::Ptr<TestXmlComment> tree = new TestXmlComment;
+						vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
+						Fill(tree, obj, tokens);
+						Fill(tree.Cast<TestXmlNode>(), obj, tokens);
+						return tree;
+					}
+					else if(obj->GetType()==L"Element")
+					{
+						vl::Ptr<TestXmlElement> tree = new TestXmlElement;
+						vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
+						Fill(tree, obj, tokens);
+						Fill(tree.Cast<TestXmlNode>(), obj, tokens);
+						return tree;
+					}
+					else if(obj->GetType()==L"Instruction")
+					{
+						vl::Ptr<TestXmlInstruction> tree = new TestXmlInstruction;
+						vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
+						Fill(tree, obj, tokens);
+						Fill(tree.Cast<TestXmlNode>(), obj, tokens);
+						return tree;
+					}
+					else if(obj->GetType()==L"Document")
+					{
+						vl::Ptr<TestXmlDocument> tree = new TestXmlDocument;
+						vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
+						Fill(tree, obj, tokens);
+						Fill(tree.Cast<TestXmlNode>(), obj, tokens);
+						return tree;
+					}
+					else if(obj->GetType()==L"Animal.Leg")
+					{
+						vl::Ptr<TestXmlAnimal::TestXmlLeg> tree = new TestXmlAnimal::TestXmlLeg;
+						vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
+						Fill(tree, obj, tokens);
+						Fill(tree.Cast<TestXmlAnimal::TestXmlBody>(), obj, tokens);
+						return tree;
+					}
+					else if(obj->GetType()==L"Animal.Tail")
+					{
+						vl::Ptr<TestXmlAnimal::TestXmlTail> tree = new TestXmlAnimal::TestXmlTail;
+						vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
+						Fill(tree, obj, tokens);
+						Fill(tree.Cast<TestXmlAnimal::TestXmlBody>(), obj, tokens);
+						return tree;
+					}
+					else if(obj->GetType()==L"Goose")
+					{
+						vl::Ptr<TestXmlGoose> tree = new TestXmlGoose;
+						vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
+						Fill(tree, obj, tokens);
+						Fill(tree.Cast<TestXmlBird>(), obj, tokens);
+						Fill(tree.Cast<TestXmlAnimal>(), obj, tokens);
+						return tree;
+					}
+					else if(obj->GetType()==L"Duck")
+					{
+						vl::Ptr<TestXmlDuck> tree = new TestXmlDuck;
+						vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
+						Fill(tree, obj, tokens);
+						Fill(tree.Cast<TestXmlBird>(), obj, tokens);
+						Fill(tree.Cast<TestXmlAnimal>(), obj, tokens);
+						return tree;
+					}
+					else if(obj->GetType()==L"BlackHole")
+					{
+						vl::Ptr<TestXmlBlackHole> tree = new TestXmlBlackHole;
+						vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
+						Fill(tree, obj, tokens);
+						Fill(tree.Cast<TestXmlAnimal::TestXmlBody::TestXmlFur>(), obj, tokens);
 						return tree;
 					}
 					else 
@@ -369,9 +417,9 @@ Parsing Tree Conversion Driver Implementation
 				}
 			};
 
-			vl::Ptr<vl::parsing::ParsingTreeCustomBase> XmlConvertParsingTreeNode(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
+			vl::Ptr<vl::parsing::ParsingTreeCustomBase> TestXmlConvertParsingTreeNode(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
 			{
-				XmlTreeConverter converter;
+				TestXmlTreeConverter converter;
 				vl::Ptr<vl::parsing::ParsingTreeCustomBase> tree;
 				converter.SetMember(tree, node, tokens);
 				return tree;
@@ -381,116 +429,136 @@ Parsing Tree Conversion Driver Implementation
 Parsing Tree Conversion Implementation
 ***********************************************************************/
 
-			vl::Ptr<XmlAmbiguousNode> XmlAmbiguousNode::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
+			vl::Ptr<TestXmlAmbiguousNode> TestXmlAmbiguousNode::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
 			{
-				return XmlConvertParsingTreeNode(node, tokens).Cast<XmlAmbiguousNode>();
+				return TestXmlConvertParsingTreeNode(node, tokens).Cast<TestXmlAmbiguousNode>();
 			}
 
-			vl::Ptr<XmlCData> XmlCData::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
+			vl::Ptr<TestXmlText> TestXmlText::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
 			{
-				return XmlConvertParsingTreeNode(node, tokens).Cast<XmlCData>();
+				return TestXmlConvertParsingTreeNode(node, tokens).Cast<TestXmlText>();
 			}
 
-			vl::Ptr<XmlComment> XmlComment::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
+			vl::Ptr<TestXmlCData> TestXmlCData::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
 			{
-				return XmlConvertParsingTreeNode(node, tokens).Cast<XmlComment>();
+				return TestXmlConvertParsingTreeNode(node, tokens).Cast<TestXmlCData>();
 			}
 
-			vl::Ptr<XmlElement> XmlElement::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
+			vl::Ptr<TestXmlAttribute> TestXmlAttribute::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
 			{
-				return XmlConvertParsingTreeNode(node, tokens).Cast<XmlElement>();
+				return TestXmlConvertParsingTreeNode(node, tokens).Cast<TestXmlAttribute>();
 			}
 
-			vl::Ptr<XmlFirstClassChild> XmlFirstClassChild::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
+			vl::Ptr<TestXmlComment> TestXmlComment::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
 			{
-				return XmlConvertParsingTreeNode(node, tokens).Cast<XmlFirstClassChild>();
+				return TestXmlConvertParsingTreeNode(node, tokens).Cast<TestXmlComment>();
 			}
 
-			vl::Ptr<XmlAttribute> XmlAttribute::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
+			vl::Ptr<TestXmlElement> TestXmlElement::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
 			{
-				return XmlConvertParsingTreeNode(node, tokens).Cast<XmlAttribute>();
+				return TestXmlConvertParsingTreeNode(node, tokens).Cast<TestXmlElement>();
 			}
 
-			vl::Ptr<XmlThirdClassChild> XmlThirdClassChild::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
+			vl::Ptr<TestXmlInstruction> TestXmlInstruction::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
 			{
-				return XmlConvertParsingTreeNode(node, tokens).Cast<XmlThirdClassChild>();
+				return TestXmlConvertParsingTreeNode(node, tokens).Cast<TestXmlInstruction>();
 			}
 
-			vl::Ptr<XmlDocument> XmlDocument::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
+			vl::Ptr<TestXmlDocument> TestXmlDocument::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
 			{
-				return XmlConvertParsingTreeNode(node, tokens).Cast<XmlDocument>();
+				return TestXmlConvertParsingTreeNode(node, tokens).Cast<TestXmlDocument>();
 			}
 
-			vl::Ptr<XmlInstruction> XmlInstruction::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
+			vl::Ptr<TestXmlAnimal::TestXmlLeg> TestXmlAnimal::TestXmlLeg::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
 			{
-				return XmlConvertParsingTreeNode(node, tokens).Cast<XmlInstruction>();
+				return TestXmlConvertParsingTreeNode(node, tokens).Cast<TestXmlAnimal::TestXmlLeg>();
 			}
 
-			vl::Ptr<XmlFirstClass::XmlSecondClassChild> XmlFirstClass::XmlSecondClassChild::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
+			vl::Ptr<TestXmlAnimal::TestXmlTail> TestXmlAnimal::TestXmlTail::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
 			{
-				return XmlConvertParsingTreeNode(node, tokens).Cast<XmlFirstClass::XmlSecondClassChild>();
+				return TestXmlConvertParsingTreeNode(node, tokens).Cast<TestXmlAnimal::TestXmlTail>();
 			}
 
-			vl::Ptr<XmlText> XmlText::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
+			vl::Ptr<TestXmlGoose> TestXmlGoose::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
 			{
-				return XmlConvertParsingTreeNode(node, tokens).Cast<XmlText>();
+				return TestXmlConvertParsingTreeNode(node, tokens).Cast<TestXmlGoose>();
+			}
+
+			vl::Ptr<TestXmlDuck> TestXmlDuck::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
+			{
+				return TestXmlConvertParsingTreeNode(node, tokens).Cast<TestXmlDuck>();
+			}
+
+			vl::Ptr<TestXmlBlackHole> TestXmlBlackHole::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
+			{
+				return TestXmlConvertParsingTreeNode(node, tokens).Cast<TestXmlBlackHole>();
 			}
 
 /***********************************************************************
 Visitor Pattern Implementation
 ***********************************************************************/
 
-			void XmlAmbiguousNode::Accept(XmlNode::IVisitor* visitor)
+			void TestXmlAmbiguousNode::Accept(TestXmlNode::IVisitor* visitor)
 			{
 				visitor->Visit(this);
 			}
 
-			void XmlText::Accept(XmlNode::IVisitor* visitor)
+			void TestXmlText::Accept(TestXmlNode::IVisitor* visitor)
 			{
 				visitor->Visit(this);
 			}
 
-			void XmlCData::Accept(XmlNode::IVisitor* visitor)
+			void TestXmlCData::Accept(TestXmlNode::IVisitor* visitor)
 			{
 				visitor->Visit(this);
 			}
 
-			void XmlAttribute::Accept(XmlNode::IVisitor* visitor)
+			void TestXmlAttribute::Accept(TestXmlNode::IVisitor* visitor)
 			{
 				visitor->Visit(this);
 			}
 
-			void XmlComment::Accept(XmlNode::IVisitor* visitor)
+			void TestXmlComment::Accept(TestXmlNode::IVisitor* visitor)
 			{
 				visitor->Visit(this);
 			}
 
-			void XmlElement::Accept(XmlNode::IVisitor* visitor)
+			void TestXmlElement::Accept(TestXmlNode::IVisitor* visitor)
 			{
 				visitor->Visit(this);
 			}
 
-			void XmlInstruction::Accept(XmlNode::IVisitor* visitor)
+			void TestXmlInstruction::Accept(TestXmlNode::IVisitor* visitor)
 			{
 				visitor->Visit(this);
 			}
 
-			void XmlDocument::Accept(XmlNode::IVisitor* visitor)
+			void TestXmlDocument::Accept(TestXmlNode::IVisitor* visitor)
 			{
 				visitor->Visit(this);
 			}
 
-			void XmlFirstClass::XmlSecondClassChild::Accept(XmlFirstClass::XmlSecondClass::IVisitor* visitor)
+			void TestXmlAnimal::TestXmlLeg::Accept(TestXmlAnimal::TestXmlBody::IVisitor* visitor)
 			{
 				visitor->Visit(this);
 			}
 
-			void XmlFirstClassChild::Accept(XmlFirstClass::IVisitor* visitor)
+			void TestXmlAnimal::TestXmlTail::Accept(TestXmlAnimal::TestXmlBody::IVisitor* visitor)
 			{
 				visitor->Visit(this);
 			}
 
-			void XmlThirdClassChild::Accept(XmlFirstClass::XmlSecondClass::XmlThirdClass::IVisitor* visitor)
+			void TestXmlGoose::Accept(TestXmlAnimal::IVisitor* visitor)
+			{
+				visitor->Visit(this);
+			}
+
+			void TestXmlDuck::Accept(TestXmlAnimal::IVisitor* visitor)
+			{
+				visitor->Visit(this);
+			}
+
+			void TestXmlBlackHole::Accept(TestXmlAnimal::TestXmlBody::TestXmlFur::IVisitor* visitor)
 			{
 				visitor->Visit(this);
 			}
@@ -499,7 +567,7 @@ Visitor Pattern Implementation
 Parser Function
 ***********************************************************************/
 
-			vl::Ptr<vl::parsing::ParsingTreeNode> XmlParseDocumentAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors)
+			vl::Ptr<vl::parsing::ParsingTreeNode> TestXmlParseDocumentAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors)
 			{
 				vl::parsing::tabling::ParsingState state(input, table);
 				state.Reset(L"XDocument");
@@ -508,13 +576,13 @@ Parser Function
 				return node;
 			}
 
-			vl::Ptr<vl::parsing::ParsingTreeNode> XmlParseDocumentAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)
+			vl::Ptr<vl::parsing::ParsingTreeNode> TestXmlParseDocumentAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)
 			{
 				vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
-				return XmlParseDocumentAsParsingTreeNode(input, table, errors);
+				return TestXmlParseDocumentAsParsingTreeNode(input, table, errors);
 			}
 
-			vl::Ptr<XmlDocument> XmlParseDocument(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors)
+			vl::Ptr<TestXmlDocument> TestXmlParseDocument(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors)
 			{
 				vl::parsing::tabling::ParsingState state(input, table);
 				state.Reset(L"XDocument");
@@ -522,18 +590,18 @@ Parser Function
 				vl::Ptr<vl::parsing::ParsingTreeNode> node=parser->Parse(state, errors);
 				if(node && errors.Count()==0)
 				{
-					return XmlConvertParsingTreeNode(node, state.GetTokens()).Cast<XmlDocument>();
+					return TestXmlConvertParsingTreeNode(node, state.GetTokens()).Cast<TestXmlDocument>();
 				}
 				return 0;
 			}
 
-			vl::Ptr<XmlDocument> XmlParseDocument(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)
+			vl::Ptr<TestXmlDocument> TestXmlParseDocument(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)
 			{
 				vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
-				return XmlParseDocument(input, table, errors);
+				return TestXmlParseDocument(input, table, errors);
 			}
 
-			vl::Ptr<vl::parsing::ParsingTreeNode> XmlParseElementAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors)
+			vl::Ptr<vl::parsing::ParsingTreeNode> TestXmlParseElementAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors)
 			{
 				vl::parsing::tabling::ParsingState state(input, table);
 				state.Reset(L"XElement");
@@ -542,13 +610,13 @@ Parser Function
 				return node;
 			}
 
-			vl::Ptr<vl::parsing::ParsingTreeNode> XmlParseElementAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)
+			vl::Ptr<vl::parsing::ParsingTreeNode> TestXmlParseElementAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)
 			{
 				vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
-				return XmlParseElementAsParsingTreeNode(input, table, errors);
+				return TestXmlParseElementAsParsingTreeNode(input, table, errors);
 			}
 
-			vl::Ptr<XmlElement> XmlParseElement(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors)
+			vl::Ptr<TestXmlElement> TestXmlParseElement(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors)
 			{
 				vl::parsing::tabling::ParsingState state(input, table);
 				state.Reset(L"XElement");
@@ -556,22 +624,22 @@ Parser Function
 				vl::Ptr<vl::parsing::ParsingTreeNode> node=parser->Parse(state, errors);
 				if(node && errors.Count()==0)
 				{
-					return XmlConvertParsingTreeNode(node, state.GetTokens()).Cast<XmlElement>();
+					return TestXmlConvertParsingTreeNode(node, state.GetTokens()).Cast<TestXmlElement>();
 				}
 				return 0;
 			}
 
-			vl::Ptr<XmlElement> XmlParseElement(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)
+			vl::Ptr<TestXmlElement> TestXmlParseElement(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)
 			{
 				vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
-				return XmlParseElement(input, table, errors);
+				return TestXmlParseElement(input, table, errors);
 			}
 
 /***********************************************************************
 Table Generation
 ***********************************************************************/
 
-			vl::Ptr<vl::parsing::tabling::ParsingTable> XmlLoadTable()
+			vl::Ptr<vl::parsing::tabling::ParsingTable> TestXmlLoadTable()
 			{
 			    vl::Ptr<vl::parsing::tabling::ParsingGeneralParser> parser=vl::parsing::tabling::CreateBootstrapStrictParser();
 			    vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
@@ -593,210 +661,247 @@ namespace vl
 #ifndef VCZH_DEBUG_NO_REFLECTION
 			using namespace vczh::whoknows::xmlutility;
 
-			IMPL_TYPE_INFO_RENAME(XmlAmbiguousNode, System::XmlAmbiguousNode)
-			IMPL_TYPE_INFO_RENAME(XmlNode, System::XmlNode)
-			IMPL_TYPE_INFO_RENAME(XmlCData, System::XmlCData)
-			IMPL_TYPE_INFO_RENAME(XmlComment, System::XmlComment)
-			IMPL_TYPE_INFO_RENAME(XmlElement, System::XmlElement)
-			IMPL_TYPE_INFO_RENAME(XmlFirstClassChild, System::XmlFirstClassChild)
-			IMPL_TYPE_INFO_RENAME(XmlAttribute, System::XmlAttribute)
-			IMPL_TYPE_INFO_RENAME(XmlThirdClassChild, System::XmlThirdClassChild)
-			IMPL_TYPE_INFO_RENAME(XmlDocument, System::XmlDocument)
-			IMPL_TYPE_INFO_RENAME(XmlInstruction, System::XmlInstruction)
-			IMPL_TYPE_INFO_RENAME(XmlFirstClass::XmlSecondClass::XmlThirdClass, System::XmlFirstClass::XmlSecondClass::XmlThirdClass)
-			IMPL_TYPE_INFO_RENAME(XmlFirstClass, System::XmlFirstClass)
-			IMPL_TYPE_INFO_RENAME(XmlFirstClass::XmlIndirectEnum, System::XmlFirstClass::XmlIndirectEnum)
-			IMPL_TYPE_INFO_RENAME(XmlDirectEnum, System::XmlDirectEnum)
-			IMPL_TYPE_INFO_RENAME(XmlFirstClass::XmlSecondClass, System::XmlFirstClass::XmlSecondClass)
-			IMPL_TYPE_INFO_RENAME(XmlFirstClass::XmlSecondClassChild, System::XmlFirstClass::XmlSecondClassChild)
-			IMPL_TYPE_INFO_RENAME(XmlText, System::XmlText)
+			IMPL_TYPE_INFO_RENAME(TestXmlNode, system::xmlutility::TestXmlNode)
+			IMPL_TYPE_INFO_RENAME(TestXmlAmbiguousNode, system::xmlutility::TestXmlAmbiguousNode)
+			IMPL_TYPE_INFO_RENAME(TestXmlText, system::xmlutility::TestXmlText)
+			IMPL_TYPE_INFO_RENAME(TestXmlCData, system::xmlutility::TestXmlCData)
+			IMPL_TYPE_INFO_RENAME(TestXmlAttribute, system::xmlutility::TestXmlAttribute)
+			IMPL_TYPE_INFO_RENAME(TestXmlComment, system::xmlutility::TestXmlComment)
+			IMPL_TYPE_INFO_RENAME(TestXmlElement, system::xmlutility::TestXmlElement)
+			IMPL_TYPE_INFO_RENAME(TestXmlInstruction, system::xmlutility::TestXmlInstruction)
+			IMPL_TYPE_INFO_RENAME(TestXmlDocument, system::xmlutility::TestXmlDocument)
+			IMPL_TYPE_INFO_RENAME(TestXmlDirectEnum, system::xmlutility::TestXmlDirectEnum)
+			IMPL_TYPE_INFO_RENAME(TestXmlAnimal, system::xmlutility::TestXmlAnimal)
+			IMPL_TYPE_INFO_RENAME(TestXmlAnimal::TestXmlIndirectEnum, system::xmlutility::TestXmlAnimal::TestXmlIndirectEnum)
+			IMPL_TYPE_INFO_RENAME(TestXmlAnimal::TestXmlBody, system::xmlutility::TestXmlAnimal::TestXmlBody)
+			IMPL_TYPE_INFO_RENAME(TestXmlAnimal::TestXmlBody::TestXmlFur, system::xmlutility::TestXmlAnimal::TestXmlBody::TestXmlFur)
+			IMPL_TYPE_INFO_RENAME(TestXmlAnimal::TestXmlLeg, system::xmlutility::TestXmlAnimal::TestXmlLeg)
+			IMPL_TYPE_INFO_RENAME(TestXmlAnimal::TestXmlTail, system::xmlutility::TestXmlAnimal::TestXmlTail)
+			IMPL_TYPE_INFO_RENAME(TestXmlBird, system::xmlutility::TestXmlBird)
+			IMPL_TYPE_INFO_RENAME(TestXmlGoose, system::xmlutility::TestXmlGoose)
+			IMPL_TYPE_INFO_RENAME(TestXmlDuck, system::xmlutility::TestXmlDuck)
+			IMPL_TYPE_INFO_RENAME(TestXmlBlackHole, system::xmlutility::TestXmlBlackHole)
 
-			BEGIN_CLASS_MEMBER(XmlAmbiguousNode)
-				CLASS_MEMBER_BASE(XmlNode)
+			BEGIN_CLASS_MEMBER(TestXmlNode)
 
-				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<XmlAmbiguousNode>(), NO_PARAMETER)
+			END_CLASS_MEMBER(TestXmlNode)
+
+			BEGIN_CLASS_MEMBER(TestXmlAmbiguousNode)
+				CLASS_MEMBER_BASE(TestXmlNode)
+
+				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<TestXmlAmbiguousNode>(), NO_PARAMETER)
 
 
 				CLASS_MEMBER_FIELD(items)
-			END_CLASS_MEMBER(XmlAmbiguousNode)
+			END_CLASS_MEMBER(TestXmlAmbiguousNode)
 
-			BEGIN_CLASS_MEMBER(XmlNode)
+			BEGIN_CLASS_MEMBER(TestXmlText)
+				CLASS_MEMBER_BASE(TestXmlNode)
 
-			END_CLASS_MEMBER(XmlNode)
+				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<TestXmlText>(), NO_PARAMETER)
 
-			BEGIN_CLASS_MEMBER(XmlCData)
-				CLASS_MEMBER_BASE(XmlNode)
-
-				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<XmlCData>(), NO_PARAMETER)
-
-				CLASS_MEMBER_EXTERNALMETHOD(get_content, NO_PARAMETER, vl::WString(XmlCData::*)(), [](XmlCData* node){ return node->content.value; })
-				CLASS_MEMBER_EXTERNALMETHOD(set_content, {L"value"}, void(XmlCData::*)(const vl::WString&), [](XmlCData* node, const vl::WString& value){ node->content.value = value; })
+				CLASS_MEMBER_EXTERNALMETHOD(get_content, NO_PARAMETER, vl::WString(TestXmlText::*)(), [](TestXmlText* node){ return node->content.value; })
+				CLASS_MEMBER_EXTERNALMETHOD(set_content, {L"value"}, void(TestXmlText::*)(const vl::WString&), [](TestXmlText* node, const vl::WString& value){ node->content.value = value; })
 
 				CLASS_MEMBER_PROPERTY(content, get_content, set_content)
-			END_CLASS_MEMBER(XmlCData)
+			END_CLASS_MEMBER(TestXmlText)
 
-			BEGIN_CLASS_MEMBER(XmlComment)
-				CLASS_MEMBER_BASE(XmlNode)
+			BEGIN_CLASS_MEMBER(TestXmlCData)
+				CLASS_MEMBER_BASE(TestXmlNode)
 
-				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<XmlComment>(), NO_PARAMETER)
+				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<TestXmlCData>(), NO_PARAMETER)
 
-				CLASS_MEMBER_EXTERNALMETHOD(get_content, NO_PARAMETER, vl::WString(XmlComment::*)(), [](XmlComment* node){ return node->content.value; })
-				CLASS_MEMBER_EXTERNALMETHOD(set_content, {L"value"}, void(XmlComment::*)(const vl::WString&), [](XmlComment* node, const vl::WString& value){ node->content.value = value; })
+				CLASS_MEMBER_EXTERNALMETHOD(get_content, NO_PARAMETER, vl::WString(TestXmlCData::*)(), [](TestXmlCData* node){ return node->content.value; })
+				CLASS_MEMBER_EXTERNALMETHOD(set_content, {L"value"}, void(TestXmlCData::*)(const vl::WString&), [](TestXmlCData* node, const vl::WString& value){ node->content.value = value; })
 
 				CLASS_MEMBER_PROPERTY(content, get_content, set_content)
-			END_CLASS_MEMBER(XmlComment)
+			END_CLASS_MEMBER(TestXmlCData)
 
-			BEGIN_CLASS_MEMBER(XmlElement)
-				CLASS_MEMBER_BASE(XmlNode)
+			BEGIN_CLASS_MEMBER(TestXmlAttribute)
+				CLASS_MEMBER_BASE(TestXmlNode)
 
-				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<XmlElement>(), NO_PARAMETER)
+				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<TestXmlAttribute>(), NO_PARAMETER)
 
-				CLASS_MEMBER_EXTERNALMETHOD(get_name, NO_PARAMETER, vl::WString(XmlElement::*)(), [](XmlElement* node){ return node->name.value; })
-				CLASS_MEMBER_EXTERNALMETHOD(set_name, {L"value"}, void(XmlElement::*)(const vl::WString&), [](XmlElement* node, const vl::WString& value){ node->name.value = value; })
-				CLASS_MEMBER_EXTERNALMETHOD(get_closingName, NO_PARAMETER, vl::WString(XmlElement::*)(), [](XmlElement* node){ return node->closingName.value; })
-				CLASS_MEMBER_EXTERNALMETHOD(set_closingName, {L"value"}, void(XmlElement::*)(const vl::WString&), [](XmlElement* node, const vl::WString& value){ node->closingName.value = value; })
+				CLASS_MEMBER_EXTERNALMETHOD(get_name, NO_PARAMETER, vl::WString(TestXmlAttribute::*)(), [](TestXmlAttribute* node){ return node->name.value; })
+				CLASS_MEMBER_EXTERNALMETHOD(set_name, {L"value"}, void(TestXmlAttribute::*)(const vl::WString&), [](TestXmlAttribute* node, const vl::WString& value){ node->name.value = value; })
+				CLASS_MEMBER_EXTERNALMETHOD(get_value, NO_PARAMETER, vl::WString(TestXmlAttribute::*)(), [](TestXmlAttribute* node){ return node->value.value; })
+				CLASS_MEMBER_EXTERNALMETHOD(set_value, {L"value"}, void(TestXmlAttribute::*)(const vl::WString&), [](TestXmlAttribute* node, const vl::WString& value){ node->value.value = value; })
+
+				CLASS_MEMBER_PROPERTY(name, get_name, set_name)
+				CLASS_MEMBER_PROPERTY(value, get_value, set_value)
+			END_CLASS_MEMBER(TestXmlAttribute)
+
+			BEGIN_CLASS_MEMBER(TestXmlComment)
+				CLASS_MEMBER_BASE(TestXmlNode)
+
+				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<TestXmlComment>(), NO_PARAMETER)
+
+				CLASS_MEMBER_EXTERNALMETHOD(get_content, NO_PARAMETER, vl::WString(TestXmlComment::*)(), [](TestXmlComment* node){ return node->content.value; })
+				CLASS_MEMBER_EXTERNALMETHOD(set_content, {L"value"}, void(TestXmlComment::*)(const vl::WString&), [](TestXmlComment* node, const vl::WString& value){ node->content.value = value; })
+
+				CLASS_MEMBER_PROPERTY(content, get_content, set_content)
+			END_CLASS_MEMBER(TestXmlComment)
+
+			BEGIN_CLASS_MEMBER(TestXmlElement)
+				CLASS_MEMBER_BASE(TestXmlNode)
+
+				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<TestXmlElement>(), NO_PARAMETER)
+
+				CLASS_MEMBER_EXTERNALMETHOD(get_name, NO_PARAMETER, vl::WString(TestXmlElement::*)(), [](TestXmlElement* node){ return node->name.value; })
+				CLASS_MEMBER_EXTERNALMETHOD(set_name, {L"value"}, void(TestXmlElement::*)(const vl::WString&), [](TestXmlElement* node, const vl::WString& value){ node->name.value = value; })
+				CLASS_MEMBER_EXTERNALMETHOD(get_closingName, NO_PARAMETER, vl::WString(TestXmlElement::*)(), [](TestXmlElement* node){ return node->closingName.value; })
+				CLASS_MEMBER_EXTERNALMETHOD(set_closingName, {L"value"}, void(TestXmlElement::*)(const vl::WString&), [](TestXmlElement* node, const vl::WString& value){ node->closingName.value = value; })
 
 				CLASS_MEMBER_PROPERTY(name, get_name, set_name)
 				CLASS_MEMBER_PROPERTY(closingName, get_closingName, set_closingName)
 				CLASS_MEMBER_FIELD(attributes)
 				CLASS_MEMBER_FIELD(subNodes)
-			END_CLASS_MEMBER(XmlElement)
+			END_CLASS_MEMBER(TestXmlElement)
 
-			BEGIN_CLASS_MEMBER(XmlFirstClassChild)
-				CLASS_MEMBER_BASE(XmlFirstClass)
+			BEGIN_CLASS_MEMBER(TestXmlInstruction)
+				CLASS_MEMBER_BASE(TestXmlNode)
 
-				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<XmlFirstClassChild>(), NO_PARAMETER)
+				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<TestXmlInstruction>(), NO_PARAMETER)
 
-				CLASS_MEMBER_EXTERNALMETHOD(get_field2, NO_PARAMETER, vl::WString(XmlFirstClassChild::*)(), [](XmlFirstClassChild* node){ return node->field2.value; })
-				CLASS_MEMBER_EXTERNALMETHOD(set_field2, {L"value"}, void(XmlFirstClassChild::*)(const vl::WString&), [](XmlFirstClassChild* node, const vl::WString& value){ node->field2.value = value; })
-
-				CLASS_MEMBER_PROPERTY(field2, get_field2, set_field2)
-			END_CLASS_MEMBER(XmlFirstClassChild)
-
-			BEGIN_CLASS_MEMBER(XmlAttribute)
-				CLASS_MEMBER_BASE(XmlNode)
-
-				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<XmlAttribute>(), NO_PARAMETER)
-
-				CLASS_MEMBER_EXTERNALMETHOD(get_name, NO_PARAMETER, vl::WString(XmlAttribute::*)(), [](XmlAttribute* node){ return node->name.value; })
-				CLASS_MEMBER_EXTERNALMETHOD(set_name, {L"value"}, void(XmlAttribute::*)(const vl::WString&), [](XmlAttribute* node, const vl::WString& value){ node->name.value = value; })
-				CLASS_MEMBER_EXTERNALMETHOD(get_value, NO_PARAMETER, vl::WString(XmlAttribute::*)(), [](XmlAttribute* node){ return node->value.value; })
-				CLASS_MEMBER_EXTERNALMETHOD(set_value, {L"value"}, void(XmlAttribute::*)(const vl::WString&), [](XmlAttribute* node, const vl::WString& value){ node->value.value = value; })
+				CLASS_MEMBER_EXTERNALMETHOD(get_name, NO_PARAMETER, vl::WString(TestXmlInstruction::*)(), [](TestXmlInstruction* node){ return node->name.value; })
+				CLASS_MEMBER_EXTERNALMETHOD(set_name, {L"value"}, void(TestXmlInstruction::*)(const vl::WString&), [](TestXmlInstruction* node, const vl::WString& value){ node->name.value = value; })
 
 				CLASS_MEMBER_PROPERTY(name, get_name, set_name)
-				CLASS_MEMBER_PROPERTY(value, get_value, set_value)
-			END_CLASS_MEMBER(XmlAttribute)
+				CLASS_MEMBER_FIELD(attributes)
+			END_CLASS_MEMBER(TestXmlInstruction)
 
-			BEGIN_CLASS_MEMBER(XmlThirdClassChild)
-				CLASS_MEMBER_BASE(XmlFirstClass::XmlSecondClass::XmlThirdClass)
+			BEGIN_CLASS_MEMBER(TestXmlDocument)
+				CLASS_MEMBER_BASE(TestXmlNode)
 
-				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<XmlThirdClassChild>(), NO_PARAMETER)
-
-				CLASS_MEMBER_EXTERNALMETHOD(get_field5, NO_PARAMETER, vl::WString(XmlThirdClassChild::*)(), [](XmlThirdClassChild* node){ return node->field5.value; })
-				CLASS_MEMBER_EXTERNALMETHOD(set_field5, {L"value"}, void(XmlThirdClassChild::*)(const vl::WString&), [](XmlThirdClassChild* node, const vl::WString& value){ node->field5.value = value; })
-
-				CLASS_MEMBER_PROPERTY(field5, get_field5, set_field5)
-			END_CLASS_MEMBER(XmlThirdClassChild)
-
-			BEGIN_CLASS_MEMBER(XmlDocument)
-				CLASS_MEMBER_BASE(XmlNode)
-
-				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<XmlDocument>(), NO_PARAMETER)
+				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<TestXmlDocument>(), NO_PARAMETER)
 
 
 				CLASS_MEMBER_FIELD(instructions)
 				CLASS_MEMBER_FIELD(comments)
 				CLASS_MEMBER_FIELD(rootElement)
-			END_CLASS_MEMBER(XmlDocument)
+			END_CLASS_MEMBER(TestXmlDocument)
 
-			BEGIN_CLASS_MEMBER(XmlInstruction)
-				CLASS_MEMBER_BASE(XmlNode)
-
-				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<XmlInstruction>(), NO_PARAMETER)
-
-				CLASS_MEMBER_EXTERNALMETHOD(get_name, NO_PARAMETER, vl::WString(XmlInstruction::*)(), [](XmlInstruction* node){ return node->name.value; })
-				CLASS_MEMBER_EXTERNALMETHOD(set_name, {L"value"}, void(XmlInstruction::*)(const vl::WString&), [](XmlInstruction* node, const vl::WString& value){ node->name.value = value; })
-
-				CLASS_MEMBER_PROPERTY(name, get_name, set_name)
-				CLASS_MEMBER_FIELD(attributes)
-			END_CLASS_MEMBER(XmlInstruction)
-
-			BEGIN_CLASS_MEMBER(XmlFirstClass::XmlSecondClass::XmlThirdClass)
-				CLASS_MEMBER_EXTERNALMETHOD(get_field1, NO_PARAMETER, vl::WString(XmlFirstClass::XmlSecondClass::XmlThirdClass::*)(), [](XmlFirstClass::XmlSecondClass::XmlThirdClass* node){ return node->field1.value; })
-				CLASS_MEMBER_EXTERNALMETHOD(set_field1, {L"value"}, void(XmlFirstClass::XmlSecondClass::XmlThirdClass::*)(const vl::WString&), [](XmlFirstClass::XmlSecondClass::XmlThirdClass* node, const vl::WString& value){ node->field1.value = value; })
-
-				CLASS_MEMBER_PROPERTY(field1, get_field1, set_field1)
-			END_CLASS_MEMBER(XmlFirstClass::XmlSecondClass::XmlThirdClass)
-
-			BEGIN_CLASS_MEMBER(XmlFirstClass)
-				CLASS_MEMBER_EXTERNALMETHOD(get_field4, NO_PARAMETER, vl::WString(XmlFirstClass::*)(), [](XmlFirstClass* node){ return node->field4.value; })
-				CLASS_MEMBER_EXTERNALMETHOD(set_field4, {L"value"}, void(XmlFirstClass::*)(const vl::WString&), [](XmlFirstClass* node, const vl::WString& value){ node->field4.value = value; })
-
-				CLASS_MEMBER_PROPERTY(field4, get_field4, set_field4)
-			END_CLASS_MEMBER(XmlFirstClass)
-
-			BEGIN_ENUM_ITEM(XmlFirstClass::XmlIndirectEnum)
-				ENUM_ITEM_NAMESPACE(XmlFirstClass::XmlIndirectEnum)
-				ENUM_NAMESPACE_ITEM(D)
-				ENUM_NAMESPACE_ITEM(E)
-				ENUM_NAMESPACE_ITEM(F)
-			END_ENUM_ITEM(XmlFirstClass::XmlIndirectEnum)
-
-			BEGIN_ENUM_ITEM(XmlDirectEnum)
-				ENUM_ITEM_NAMESPACE(XmlDirectEnum)
+			BEGIN_ENUM_ITEM(TestXmlDirectEnum)
+				ENUM_ITEM_NAMESPACE(TestXmlDirectEnum)
 				ENUM_NAMESPACE_ITEM(A)
 				ENUM_NAMESPACE_ITEM(B)
 				ENUM_NAMESPACE_ITEM(C)
-			END_ENUM_ITEM(XmlDirectEnum)
+			END_ENUM_ITEM(TestXmlDirectEnum)
 
-			BEGIN_CLASS_MEMBER(XmlFirstClass::XmlSecondClass)
+			BEGIN_CLASS_MEMBER(TestXmlAnimal)
+				CLASS_MEMBER_EXTERNALMETHOD(get_name, NO_PARAMETER, vl::WString(TestXmlAnimal::*)(), [](TestXmlAnimal* node){ return node->name.value; })
+				CLASS_MEMBER_EXTERNALMETHOD(set_name, {L"value"}, void(TestXmlAnimal::*)(const vl::WString&), [](TestXmlAnimal* node, const vl::WString& value){ node->name.value = value; })
 
-			END_CLASS_MEMBER(XmlFirstClass::XmlSecondClass)
+				CLASS_MEMBER_PROPERTY(name, get_name, set_name)
+			END_CLASS_MEMBER(TestXmlAnimal)
 
-			BEGIN_CLASS_MEMBER(XmlFirstClass::XmlSecondClassChild)
-				CLASS_MEMBER_BASE(XmlFirstClass::XmlSecondClass)
+			BEGIN_ENUM_ITEM(TestXmlAnimal::TestXmlIndirectEnum)
+				ENUM_ITEM_NAMESPACE(TestXmlAnimal::TestXmlIndirectEnum)
+				ENUM_NAMESPACE_ITEM(D)
+				ENUM_NAMESPACE_ITEM(E)
+				ENUM_NAMESPACE_ITEM(F)
+			END_ENUM_ITEM(TestXmlAnimal::TestXmlIndirectEnum)
 
-				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<XmlFirstClass::XmlSecondClassChild>(), NO_PARAMETER)
+			BEGIN_CLASS_MEMBER(TestXmlAnimal::TestXmlBody)
 
-				CLASS_MEMBER_EXTERNALMETHOD(get_field3, NO_PARAMETER, vl::WString(XmlFirstClass::XmlSecondClassChild::*)(), [](XmlFirstClass::XmlSecondClassChild* node){ return node->field3.value; })
-				CLASS_MEMBER_EXTERNALMETHOD(set_field3, {L"value"}, void(XmlFirstClass::XmlSecondClassChild::*)(const vl::WString&), [](XmlFirstClass::XmlSecondClassChild* node, const vl::WString& value){ node->field3.value = value; })
+			END_CLASS_MEMBER(TestXmlAnimal::TestXmlBody)
 
-				CLASS_MEMBER_PROPERTY(field3, get_field3, set_field3)
-			END_CLASS_MEMBER(XmlFirstClass::XmlSecondClassChild)
+			BEGIN_CLASS_MEMBER(TestXmlAnimal::TestXmlBody::TestXmlFur)
+				CLASS_MEMBER_EXTERNALMETHOD(get_title, NO_PARAMETER, vl::WString(TestXmlAnimal::TestXmlBody::TestXmlFur::*)(), [](TestXmlAnimal::TestXmlBody::TestXmlFur* node){ return node->title.value; })
+				CLASS_MEMBER_EXTERNALMETHOD(set_title, {L"value"}, void(TestXmlAnimal::TestXmlBody::TestXmlFur::*)(const vl::WString&), [](TestXmlAnimal::TestXmlBody::TestXmlFur* node, const vl::WString& value){ node->title.value = value; })
 
-			BEGIN_CLASS_MEMBER(XmlText)
-				CLASS_MEMBER_BASE(XmlNode)
+				CLASS_MEMBER_PROPERTY(title, get_title, set_title)
+			END_CLASS_MEMBER(TestXmlAnimal::TestXmlBody::TestXmlFur)
 
-				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<XmlText>(), NO_PARAMETER)
+			BEGIN_CLASS_MEMBER(TestXmlAnimal::TestXmlLeg)
+				CLASS_MEMBER_BASE(TestXmlAnimal::TestXmlBody)
 
-				CLASS_MEMBER_EXTERNALMETHOD(get_content, NO_PARAMETER, vl::WString(XmlText::*)(), [](XmlText* node){ return node->content.value; })
-				CLASS_MEMBER_EXTERNALMETHOD(set_content, {L"value"}, void(XmlText::*)(const vl::WString&), [](XmlText* node, const vl::WString& value){ node->content.value = value; })
+				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<TestXmlAnimal::TestXmlLeg>(), NO_PARAMETER)
 
-				CLASS_MEMBER_PROPERTY(content, get_content, set_content)
-			END_CLASS_MEMBER(XmlText)
+				CLASS_MEMBER_EXTERNALMETHOD(get_id, NO_PARAMETER, vl::WString(TestXmlAnimal::TestXmlLeg::*)(), [](TestXmlAnimal::TestXmlLeg* node){ return node->id.value; })
+				CLASS_MEMBER_EXTERNALMETHOD(set_id, {L"value"}, void(TestXmlAnimal::TestXmlLeg::*)(const vl::WString&), [](TestXmlAnimal::TestXmlLeg* node, const vl::WString& value){ node->id.value = value; })
 
-			class XmlTypeLoader : public vl::Object, public ITypeLoader
+				CLASS_MEMBER_PROPERTY(id, get_id, set_id)
+			END_CLASS_MEMBER(TestXmlAnimal::TestXmlLeg)
+
+			BEGIN_CLASS_MEMBER(TestXmlAnimal::TestXmlTail)
+				CLASS_MEMBER_BASE(TestXmlAnimal::TestXmlBody)
+
+				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<TestXmlAnimal::TestXmlTail>(), NO_PARAMETER)
+
+				CLASS_MEMBER_EXTERNALMETHOD(get_id, NO_PARAMETER, vl::WString(TestXmlAnimal::TestXmlTail::*)(), [](TestXmlAnimal::TestXmlTail* node){ return node->id.value; })
+				CLASS_MEMBER_EXTERNALMETHOD(set_id, {L"value"}, void(TestXmlAnimal::TestXmlTail::*)(const vl::WString&), [](TestXmlAnimal::TestXmlTail* node, const vl::WString& value){ node->id.value = value; })
+
+				CLASS_MEMBER_PROPERTY(id, get_id, set_id)
+			END_CLASS_MEMBER(TestXmlAnimal::TestXmlTail)
+
+			BEGIN_CLASS_MEMBER(TestXmlBird)
+				CLASS_MEMBER_BASE(TestXmlAnimal)
+
+				CLASS_MEMBER_EXTERNALMETHOD(get_id, NO_PARAMETER, vl::WString(TestXmlBird::*)(), [](TestXmlBird* node){ return node->id.value; })
+				CLASS_MEMBER_EXTERNALMETHOD(set_id, {L"value"}, void(TestXmlBird::*)(const vl::WString&), [](TestXmlBird* node, const vl::WString& value){ node->id.value = value; })
+
+				CLASS_MEMBER_PROPERTY(id, get_id, set_id)
+			END_CLASS_MEMBER(TestXmlBird)
+
+			BEGIN_CLASS_MEMBER(TestXmlGoose)
+				CLASS_MEMBER_BASE(TestXmlBird)
+
+				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<TestXmlGoose>(), NO_PARAMETER)
+
+				CLASS_MEMBER_EXTERNALMETHOD(get_title, NO_PARAMETER, vl::WString(TestXmlGoose::*)(), [](TestXmlGoose* node){ return node->title.value; })
+				CLASS_MEMBER_EXTERNALMETHOD(set_title, {L"value"}, void(TestXmlGoose::*)(const vl::WString&), [](TestXmlGoose* node, const vl::WString& value){ node->title.value = value; })
+
+				CLASS_MEMBER_PROPERTY(title, get_title, set_title)
+			END_CLASS_MEMBER(TestXmlGoose)
+
+			BEGIN_CLASS_MEMBER(TestXmlDuck)
+				CLASS_MEMBER_BASE(TestXmlBird)
+
+				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<TestXmlDuck>(), NO_PARAMETER)
+
+				CLASS_MEMBER_EXTERNALMETHOD(get_title, NO_PARAMETER, vl::WString(TestXmlDuck::*)(), [](TestXmlDuck* node){ return node->title.value; })
+				CLASS_MEMBER_EXTERNALMETHOD(set_title, {L"value"}, void(TestXmlDuck::*)(const vl::WString&), [](TestXmlDuck* node, const vl::WString& value){ node->title.value = value; })
+
+				CLASS_MEMBER_PROPERTY(title, get_title, set_title)
+			END_CLASS_MEMBER(TestXmlDuck)
+
+			BEGIN_CLASS_MEMBER(TestXmlBlackHole)
+				CLASS_MEMBER_BASE(TestXmlAnimal::TestXmlBody::TestXmlFur)
+
+				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<TestXmlBlackHole>(), NO_PARAMETER)
+
+				CLASS_MEMBER_EXTERNALMETHOD(get_id, NO_PARAMETER, vl::WString(TestXmlBlackHole::*)(), [](TestXmlBlackHole* node){ return node->id.value; })
+				CLASS_MEMBER_EXTERNALMETHOD(set_id, {L"value"}, void(TestXmlBlackHole::*)(const vl::WString&), [](TestXmlBlackHole* node, const vl::WString& value){ node->id.value = value; })
+
+				CLASS_MEMBER_PROPERTY(id, get_id, set_id)
+			END_CLASS_MEMBER(TestXmlBlackHole)
+
+			class TestXmlTypeLoader : public vl::Object, public ITypeLoader
 			{
 			public:
 				void Load(ITypeManager* manager)
 				{
-					ADD_TYPE_INFO(vczh::whoknows::xmlutility::XmlAmbiguousNode)
-					ADD_TYPE_INFO(vczh::whoknows::xmlutility::XmlNode)
-					ADD_TYPE_INFO(vczh::whoknows::xmlutility::XmlCData)
-					ADD_TYPE_INFO(vczh::whoknows::xmlutility::XmlComment)
-					ADD_TYPE_INFO(vczh::whoknows::xmlutility::XmlElement)
-					ADD_TYPE_INFO(vczh::whoknows::xmlutility::XmlFirstClassChild)
-					ADD_TYPE_INFO(vczh::whoknows::xmlutility::XmlAttribute)
-					ADD_TYPE_INFO(vczh::whoknows::xmlutility::XmlThirdClassChild)
-					ADD_TYPE_INFO(vczh::whoknows::xmlutility::XmlDocument)
-					ADD_TYPE_INFO(vczh::whoknows::xmlutility::XmlInstruction)
-					ADD_TYPE_INFO(vczh::whoknows::xmlutility::XmlFirstClass::XmlSecondClass::XmlThirdClass)
-					ADD_TYPE_INFO(vczh::whoknows::xmlutility::XmlFirstClass)
-					ADD_TYPE_INFO(vczh::whoknows::xmlutility::XmlFirstClass::XmlIndirectEnum)
-					ADD_TYPE_INFO(vczh::whoknows::xmlutility::XmlDirectEnum)
-					ADD_TYPE_INFO(vczh::whoknows::xmlutility::XmlFirstClass::XmlSecondClass)
-					ADD_TYPE_INFO(vczh::whoknows::xmlutility::XmlFirstClass::XmlSecondClassChild)
-					ADD_TYPE_INFO(vczh::whoknows::xmlutility::XmlText)
+					ADD_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlNode)
+					ADD_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlAmbiguousNode)
+					ADD_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlText)
+					ADD_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlCData)
+					ADD_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlAttribute)
+					ADD_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlComment)
+					ADD_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlElement)
+					ADD_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlInstruction)
+					ADD_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlDocument)
+					ADD_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlDirectEnum)
+					ADD_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlAnimal)
+					ADD_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlAnimal::TestXmlIndirectEnum)
+					ADD_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlAnimal::TestXmlBody)
+					ADD_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlAnimal::TestXmlBody::TestXmlFur)
+					ADD_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlAnimal::TestXmlLeg)
+					ADD_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlAnimal::TestXmlTail)
+					ADD_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlBird)
+					ADD_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlGoose)
+					ADD_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlDuck)
+					ADD_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlBlackHole)
 				}
 
 				void Unload(ITypeManager* manager)
@@ -805,13 +910,13 @@ namespace vl
 			};
 #endif
 
-			bool XmlLoadTypes()
+			bool TestXmlLoadTypes()
 			{
 #ifndef VCZH_DEBUG_NO_REFLECTION
 				ITypeManager* manager=GetGlobalTypeManager();
 				if(manager)
 				{
-					Ptr<ITypeLoader> loader=new XmlTypeLoader;
+					Ptr<ITypeLoader> loader=new TestXmlTypeLoader;
 					return manager->AddTypeLoader(loader);
 				}
 #endif

@@ -12,7 +12,7 @@ public:
 	WString							prefix;
 	WString							codeClassPrefix;
 	TextWriter&						writer;
-	SortedList<ParsingSymbol*>		leafClasses;
+	List<ParsingSymbol*>			leafClasses;
 
 	void LogInternal(ParsingDefinitionTypeDefinition* _this, ParsingDefinitionTypeDefinition* _definition, const WString& _prefix)
 	{
@@ -35,7 +35,7 @@ public:
 		,codeClassPrefix(_codeClassPrefix)
 		,writer(_writer)
 	{
-		EnumerateAllLeafClass(manager, leafClasses);
+		EnumerateAllLeafClass(manager, (_scope ? _scope : manager->GetGlobal()), leafClasses);
 	}
 
 	void Visit(ParsingDefinitionClassMemberDefinition* node)override
@@ -51,9 +51,10 @@ public:
 
 	void Visit(ParsingDefinitionClassDefinition* node)override
 	{
-		List<ParsingSymbol*> children;
-		ParsingSymbol* thisType=(scope?scope:manager->GetGlobal())->GetSubSymbolByName(node->name);
+		List<ParsingSymbol*> children, leadChildren;
+		ParsingSymbol* thisType = (scope ? scope : manager->GetGlobal())->GetSubSymbolByName(node->name);
 		SearchChildClasses(thisType, manager->GetGlobal(), manager, children);
+		SearchLeafDescendantClasses(thisType, manager, leadChildren);
 
 		writer.WriteString(prefix);
 		writer.WriteString(L"class ");
@@ -78,7 +79,8 @@ public:
 		writer.WriteLine(L"{");
 		writer.WriteString(prefix);
 		writer.WriteLine(L"public:");
-		if(children.Count()>0)
+
+		if (children.Count() > 0 && !thisType->GetDescriptorSymbol())
 		{
 			writer.WriteString(prefix);
 			writer.WriteLine(L"\tclass IVisitor : public vl::Interface");
@@ -87,7 +89,7 @@ public:
 			writer.WriteString(prefix);
 			writer.WriteLine(L"\tpublic:");
 
-			FOREACH(ParsingSymbol*, child, children)
+			FOREACH(ParsingSymbol*, child, leadChildren)
 			{
 				writer.WriteString(prefix);
 				writer.WriteString(L"\t\tvirtual void Visit(");
@@ -104,7 +106,8 @@ public:
 			writer.WriteLine(L"::IVisitor* visitor)=0;");
 			writer.WriteLine(L"");
 		}
-
+		
+		WriteTypeForwardDefinitions(node->subTypes, prefix+L"\t", thisType, manager, codeClassPrefix, writer);
 		WriteTypeDefinitions(node->subTypes, prefix+L"\t", thisType, manager, codeClassPrefix, writer);
 
 		for(int i=0;i<node->members.Count();i++)
@@ -112,13 +115,17 @@ public:
 			LogInternal(node, node->members[i].Obj(), prefix+L"\t");
 		}
 
-		if(node->parentType)
+		if (children.Count() == 0)
 		{
-			writer.WriteLine(L"");
-			writer.WriteString(prefix);
-			writer.WriteString(L"\tvoid Accept(");
-			PrintType(thisType->GetDescriptorSymbol(), codeClassPrefix, writer);
-			writer.WriteLine(L"::IVisitor* visitor)override;");
+			ParsingSymbol* rootAncestor = GetRootAncestor(thisType);
+			if(rootAncestor!=thisType)
+			{
+				writer.WriteLine(L"");
+				writer.WriteString(prefix);
+				writer.WriteString(L"\tvoid Accept(");
+				PrintType(thisType->GetDescriptorSymbol(), codeClassPrefix, writer);
+				writer.WriteLine(L"::IVisitor* visitor)override;");
+			}
 		}
 		if(leafClasses.Contains(thisType))
 		{
@@ -203,22 +210,28 @@ public:
 };
 
 /***********************************************************************
+WriteTypeForwardDefinitions
+***********************************************************************/
+
+void WriteTypeForwardDefinitions(List<Ptr<ParsingDefinitionTypeDefinition>>& types, const WString& prefix, ParsingSymbol* scope, ParsingSymbolManager* manager, const WString& codeClassPrefix, TextWriter& writer)
+{
+	PrintForwardTypeDefinitionVisitor visitor(prefix, codeClassPrefix, writer);
+	FOREACH(Ptr<ParsingDefinitionTypeDefinition>, type, types)
+	{
+		type->Accept(&visitor);
+	}
+	if(visitor.exists)
+	{
+		writer.WriteLine(L"");
+	}
+}
+
+/***********************************************************************
 WriteTypeDefinitions
 ***********************************************************************/
 
 void WriteTypeDefinitions(List<Ptr<ParsingDefinitionTypeDefinition>>& types, const WString& prefix, ParsingSymbol* scope, ParsingSymbolManager* manager, const WString& codeClassPrefix, TextWriter& writer)
 {
-	{
-		PrintForwardTypeDefinitionVisitor visitor(prefix, codeClassPrefix, writer);
-		FOREACH(Ptr<ParsingDefinitionTypeDefinition>, type, types)
-		{
-			type->Accept(&visitor);
-		}
-		if(visitor.exists)
-		{
-			writer.WriteLine(L"");
-		}
-	}
 	FOREACH(Ptr<ParsingDefinitionTypeDefinition>, type, types)
 	{
 		PrintTypeDefinitionVisitor visitor(scope, manager, prefix, codeClassPrefix, writer);
