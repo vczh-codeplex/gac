@@ -236,29 +236,7 @@ Parsing Tree Conversion Driver Implementation
 
 			vl::Ptr<vl::parsing::ParsingTreeCustomBase> ConvertClass(vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)override
 			{
-				if(obj->GetType()==L"ReferenceParameter")
-				{
-					vl::Ptr<FpmReferenceParameter> tree = new FpmReferenceParameter;
-					vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
-					Fill(tree, obj, tokens);
-					return tree;
-				}
-				else if(obj->GetType()==L"ReferenceDefinition")
-				{
-					vl::Ptr<FpmReferenceDefinition> tree = new FpmReferenceDefinition;
-					vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
-					Fill(tree, obj, tokens);
-					Fill(tree.Cast<FpmDefinition>(), obj, tokens);
-					return tree;
-				}
-				else if(obj->GetType()==L"Macro")
-				{
-					vl::Ptr<FpmMacro> tree = new FpmMacro;
-					vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
-					Fill(tree, obj, tokens);
-					return tree;
-				}
-				else if(obj->GetType()==L"ConcatExpression")
+				if(obj->GetType()==L"ConcatExpression")
 				{
 					vl::Ptr<FpmConcatExpression> tree = new FpmConcatExpression;
 					vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
@@ -314,6 +292,28 @@ Parsing Tree Conversion Driver Implementation
 					Fill(tree.Cast<FpmDefinition>(), obj, tokens);
 					return tree;
 				}
+				else if(obj->GetType()==L"ReferenceParameter")
+				{
+					vl::Ptr<FpmReferenceParameter> tree = new FpmReferenceParameter;
+					vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
+					Fill(tree, obj, tokens);
+					return tree;
+				}
+				else if(obj->GetType()==L"ReferenceDefinition")
+				{
+					vl::Ptr<FpmReferenceDefinition> tree = new FpmReferenceDefinition;
+					vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
+					Fill(tree, obj, tokens);
+					Fill(tree.Cast<FpmDefinition>(), obj, tokens);
+					return tree;
+				}
+				else if(obj->GetType()==L"Macro")
+				{
+					vl::Ptr<FpmMacro> tree = new FpmMacro;
+					vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
+					Fill(tree, obj, tokens);
+					return tree;
+				}
 				else 
 					return 0;
 			}
@@ -330,21 +330,6 @@ Parsing Tree Conversion Driver Implementation
 /***********************************************************************
 Parsing Tree Conversion Implementation
 ***********************************************************************/
-
-		vl::Ptr<FpmReferenceParameter> FpmReferenceParameter::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
-		{
-			return FpmConvertParsingTreeNode(node, tokens).Cast<FpmReferenceParameter>();
-		}
-
-		vl::Ptr<FpmReferenceDefinition> FpmReferenceDefinition::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
-		{
-			return FpmConvertParsingTreeNode(node, tokens).Cast<FpmReferenceDefinition>();
-		}
-
-		vl::Ptr<FpmMacro> FpmMacro::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
-		{
-			return FpmConvertParsingTreeNode(node, tokens).Cast<FpmMacro>();
-		}
 
 		vl::Ptr<FpmConcatExpression> FpmConcatExpression::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
 		{
@@ -379,6 +364,21 @@ Parsing Tree Conversion Implementation
 		vl::Ptr<FpmExpressionDefinition> FpmExpressionDefinition::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
 		{
 			return FpmConvertParsingTreeNode(node, tokens).Cast<FpmExpressionDefinition>();
+		}
+
+		vl::Ptr<FpmReferenceParameter> FpmReferenceParameter::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
+		{
+			return FpmConvertParsingTreeNode(node, tokens).Cast<FpmReferenceParameter>();
+		}
+
+		vl::Ptr<FpmReferenceDefinition> FpmReferenceDefinition::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
+		{
+			return FpmConvertParsingTreeNode(node, tokens).Cast<FpmReferenceDefinition>();
+		}
+
+		vl::Ptr<FpmMacro> FpmMacro::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
+		{
+			return FpmConvertParsingTreeNode(node, tokens).Cast<FpmMacro>();
 		}
 
 /***********************************************************************
@@ -488,9 +488,6 @@ namespace vl
 #ifndef VCZH_DEBUG_NO_REFLECTION
 			using namespace fpmacro::parser;
 
-			IMPL_TYPE_INFO_RENAME(FpmReferenceParameter, Fpmacro::FpmReferenceParameter)
-			IMPL_TYPE_INFO_RENAME(FpmReferenceDefinition, Fpmacro::FpmReferenceDefinition)
-			IMPL_TYPE_INFO_RENAME(FpmMacro, Fpmacro::FpmMacro)
 			IMPL_TYPE_INFO_RENAME(FpmExpression, Fpmacro::FpmExpression)
 			IMPL_TYPE_INFO_RENAME(FpmConcatExpression, Fpmacro::FpmConcatExpression)
 			IMPL_TYPE_INFO_RENAME(FpmArrayExpression, Fpmacro::FpmArrayExpression)
@@ -500,37 +497,14 @@ namespace vl
 			IMPL_TYPE_INFO_RENAME(FpmTextExpression, Fpmacro::FpmTextExpression)
 			IMPL_TYPE_INFO_RENAME(FpmDefinition, Fpmacro::FpmDefinition)
 			IMPL_TYPE_INFO_RENAME(FpmExpressionDefinition, Fpmacro::FpmExpressionDefinition)
-
-			BEGIN_CLASS_MEMBER(FpmReferenceParameter)
-				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<FpmReferenceParameter>(), NO_PARAMETER)
-
-				CLASS_MEMBER_EXTERNALMETHOD(get_name, NO_PARAMETER, vl::WString(FpmReferenceParameter::*)(), [](FpmReferenceParameter* node){ return node->name.value; })
-				CLASS_MEMBER_EXTERNALMETHOD(set_name, {L"value"}, void(FpmReferenceParameter::*)(const vl::WString&), [](FpmReferenceParameter* node, const vl::WString& value){ node->name.value = value; })
-
-				CLASS_MEMBER_PROPERTY(name, get_name, set_name)
-			END_CLASS_MEMBER(FpmReferenceParameter)
-
-			BEGIN_CLASS_MEMBER(FpmReferenceDefinition)
-				CLASS_MEMBER_BASE(FpmDefinition)
-
-				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<FpmReferenceDefinition>(), NO_PARAMETER)
-
-				CLASS_MEMBER_EXTERNALMETHOD(get_name, NO_PARAMETER, vl::WString(FpmReferenceDefinition::*)(), [](FpmReferenceDefinition* node){ return node->name.value; })
-				CLASS_MEMBER_EXTERNALMETHOD(set_name, {L"value"}, void(FpmReferenceDefinition::*)(const vl::WString&), [](FpmReferenceDefinition* node, const vl::WString& value){ node->name.value = value; })
-
-				CLASS_MEMBER_PROPERTY(name, get_name, set_name)
-				CLASS_MEMBER_FIELD(parameters)
-				CLASS_MEMBER_FIELD(definitions)
-			END_CLASS_MEMBER(FpmReferenceDefinition)
-
-			BEGIN_CLASS_MEMBER(FpmMacro)
-				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<FpmMacro>(), NO_PARAMETER)
-
-
-				CLASS_MEMBER_FIELD(definitions)
-			END_CLASS_MEMBER(FpmMacro)
+			IMPL_TYPE_INFO_RENAME(FpmReferenceParameter, Fpmacro::FpmReferenceParameter)
+			IMPL_TYPE_INFO_RENAME(FpmReferenceDefinition, Fpmacro::FpmReferenceDefinition)
+			IMPL_TYPE_INFO_RENAME(FpmMacro, Fpmacro::FpmMacro)
+			IMPL_TYPE_INFO_RENAME(FpmExpression::IVisitor, Fpmacro::FpmExpression::IVisitor)
+			IMPL_TYPE_INFO_RENAME(FpmDefinition::IVisitor, Fpmacro::FpmDefinition::IVisitor)
 
 			BEGIN_CLASS_MEMBER(FpmExpression)
+				CLASS_MEMBER_METHOD(Accept, {L"visitor"})
 
 			END_CLASS_MEMBER(FpmExpression)
 
@@ -594,6 +568,7 @@ namespace vl
 			END_CLASS_MEMBER(FpmTextExpression)
 
 			BEGIN_CLASS_MEMBER(FpmDefinition)
+				CLASS_MEMBER_METHOD(Accept, {L"visitor"})
 
 			END_CLASS_MEMBER(FpmDefinition)
 
@@ -606,14 +581,60 @@ namespace vl
 				CLASS_MEMBER_FIELD(expression)
 			END_CLASS_MEMBER(FpmExpressionDefinition)
 
+			BEGIN_CLASS_MEMBER(FpmReferenceParameter)
+				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<FpmReferenceParameter>(), NO_PARAMETER)
+
+				CLASS_MEMBER_EXTERNALMETHOD(get_name, NO_PARAMETER, vl::WString(FpmReferenceParameter::*)(), [](FpmReferenceParameter* node){ return node->name.value; })
+				CLASS_MEMBER_EXTERNALMETHOD(set_name, {L"value"}, void(FpmReferenceParameter::*)(const vl::WString&), [](FpmReferenceParameter* node, const vl::WString& value){ node->name.value = value; })
+
+				CLASS_MEMBER_PROPERTY(name, get_name, set_name)
+			END_CLASS_MEMBER(FpmReferenceParameter)
+
+			BEGIN_CLASS_MEMBER(FpmReferenceDefinition)
+				CLASS_MEMBER_BASE(FpmDefinition)
+
+				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<FpmReferenceDefinition>(), NO_PARAMETER)
+
+				CLASS_MEMBER_EXTERNALMETHOD(get_name, NO_PARAMETER, vl::WString(FpmReferenceDefinition::*)(), [](FpmReferenceDefinition* node){ return node->name.value; })
+				CLASS_MEMBER_EXTERNALMETHOD(set_name, {L"value"}, void(FpmReferenceDefinition::*)(const vl::WString&), [](FpmReferenceDefinition* node, const vl::WString& value){ node->name.value = value; })
+
+				CLASS_MEMBER_PROPERTY(name, get_name, set_name)
+				CLASS_MEMBER_FIELD(parameters)
+				CLASS_MEMBER_FIELD(definitions)
+			END_CLASS_MEMBER(FpmReferenceDefinition)
+
+			BEGIN_CLASS_MEMBER(FpmMacro)
+				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<FpmMacro>(), NO_PARAMETER)
+
+
+				CLASS_MEMBER_FIELD(definitions)
+			END_CLASS_MEMBER(FpmMacro)
+
+			BEGIN_CLASS_MEMBER(FpmExpression::IVisitor)
+				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
+				CLASS_MEMBER_EXTERNALCTOR(Ptr<FpmExpression::IVisitor>(Ptr<IValueInterfaceProxy>), {L"proxy"}, &interface_proxy::FpmExpression_IVisitor::Create)
+
+				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(FpmExpression::IVisitor::*)(FpmConcatExpression* node))
+				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(FpmExpression::IVisitor::*)(FpmArrayExpression* node))
+				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(FpmExpression::IVisitor::*)(FpmInvokeExpression* node))
+				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(FpmExpression::IVisitor::*)(FpmBracketExpression* node))
+				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(FpmExpression::IVisitor::*)(FpmReferenceExpression* node))
+				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(FpmExpression::IVisitor::*)(FpmTextExpression* node))
+			END_CLASS_MEMBER(FpmExpression)
+
+			BEGIN_CLASS_MEMBER(FpmDefinition::IVisitor)
+				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
+				CLASS_MEMBER_EXTERNALCTOR(Ptr<FpmDefinition::IVisitor>(Ptr<IValueInterfaceProxy>), {L"proxy"}, &interface_proxy::FpmDefinition_IVisitor::Create)
+
+				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(FpmDefinition::IVisitor::*)(FpmExpressionDefinition* node))
+				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(FpmDefinition::IVisitor::*)(FpmReferenceDefinition* node))
+			END_CLASS_MEMBER(FpmDefinition)
+
 			class FpmTypeLoader : public vl::Object, public ITypeLoader
 			{
 			public:
 				void Load(ITypeManager* manager)
 				{
-					ADD_TYPE_INFO(fpmacro::parser::FpmReferenceParameter)
-					ADD_TYPE_INFO(fpmacro::parser::FpmReferenceDefinition)
-					ADD_TYPE_INFO(fpmacro::parser::FpmMacro)
 					ADD_TYPE_INFO(fpmacro::parser::FpmExpression)
 					ADD_TYPE_INFO(fpmacro::parser::FpmConcatExpression)
 					ADD_TYPE_INFO(fpmacro::parser::FpmArrayExpression)
@@ -623,6 +644,11 @@ namespace vl
 					ADD_TYPE_INFO(fpmacro::parser::FpmTextExpression)
 					ADD_TYPE_INFO(fpmacro::parser::FpmDefinition)
 					ADD_TYPE_INFO(fpmacro::parser::FpmExpressionDefinition)
+					ADD_TYPE_INFO(fpmacro::parser::FpmReferenceParameter)
+					ADD_TYPE_INFO(fpmacro::parser::FpmReferenceDefinition)
+					ADD_TYPE_INFO(fpmacro::parser::FpmMacro)
+					ADD_TYPE_INFO(fpmacro::parser::FpmExpression::IVisitor)
+					ADD_TYPE_INFO(fpmacro::parser::FpmDefinition::IVisitor)
 				}
 
 				void Unload(ITypeManager* manager)

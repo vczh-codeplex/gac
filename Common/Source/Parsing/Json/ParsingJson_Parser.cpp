@@ -378,8 +378,10 @@ namespace vl
 			IMPL_TYPE_INFO_RENAME(JsonArray, system::JsonArray)
 			IMPL_TYPE_INFO_RENAME(JsonObjectField, system::JsonObjectField)
 			IMPL_TYPE_INFO_RENAME(JsonObject, system::JsonObject)
+			IMPL_TYPE_INFO_RENAME(JsonNode::IVisitor, system::JsonNode::IVisitor)
 
 			BEGIN_CLASS_MEMBER(JsonNode)
+				CLASS_MEMBER_METHOD(Accept, {L"visitor"})
 
 			END_CLASS_MEMBER(JsonNode)
 
@@ -451,6 +453,18 @@ namespace vl
 				CLASS_MEMBER_FIELD(fields)
 			END_CLASS_MEMBER(JsonObject)
 
+			BEGIN_CLASS_MEMBER(JsonNode::IVisitor)
+				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
+				CLASS_MEMBER_EXTERNALCTOR(Ptr<JsonNode::IVisitor>(Ptr<IValueInterfaceProxy>), {L"proxy"}, &interface_proxy::JsonNode_IVisitor::Create)
+
+				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(JsonNode::IVisitor::*)(JsonLiteral* node))
+				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(JsonNode::IVisitor::*)(JsonString* node))
+				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(JsonNode::IVisitor::*)(JsonNumber* node))
+				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(JsonNode::IVisitor::*)(JsonArray* node))
+				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(JsonNode::IVisitor::*)(JsonObjectField* node))
+				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(JsonNode::IVisitor::*)(JsonObject* node))
+			END_CLASS_MEMBER(JsonNode)
+
 			class JsonTypeLoader : public vl::Object, public ITypeLoader
 			{
 			public:
@@ -464,6 +478,7 @@ namespace vl
 					ADD_TYPE_INFO(vl::parsing::json::JsonArray)
 					ADD_TYPE_INFO(vl::parsing::json::JsonObjectField)
 					ADD_TYPE_INFO(vl::parsing::json::JsonObject)
+					ADD_TYPE_INFO(vl::parsing::json::JsonNode::IVisitor)
 				}
 
 				void Unload(ITypeManager* manager)

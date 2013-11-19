@@ -343,6 +343,135 @@ namespace vl
 			DECL_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlAnimal::IVisitor)
 			DECL_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlAnimal::TestXmlBody::IVisitor)
 			DECL_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlAnimal::TestXmlBody::TestXmlFur::IVisitor)
+
+			namespace interface_proxy
+			{
+				class TestXmlNode_IVisitor : public ValueInterfaceRoot, public virtual vczh::whoknows::xmlutility::TestXmlNode::IVisitor
+				{
+				public:
+					TestXmlNode_IVisitor(Ptr<IValueInterfaceProxy> proxy)
+						:ValueInterfaceRoot(proxy)
+					{
+					}
+
+					static Ptr<vczh::whoknows::xmlutility::TestXmlNode::IVisitor> Create(Ptr<IValueInterfaceProxy> proxy)
+					{
+						return new TestXmlNode_IVisitor(proxy);
+					}
+
+					void Visit(vczh::whoknows::xmlutility::TestXmlAmbiguousNode* node)override
+					{
+						INVOKE_INTERFACE_PROXY(Visit, node);
+					}
+
+					void Visit(vczh::whoknows::xmlutility::TestXmlText* node)override
+					{
+						INVOKE_INTERFACE_PROXY(Visit, node);
+					}
+
+					void Visit(vczh::whoknows::xmlutility::TestXmlCData* node)override
+					{
+						INVOKE_INTERFACE_PROXY(Visit, node);
+					}
+
+					void Visit(vczh::whoknows::xmlutility::TestXmlAttribute* node)override
+					{
+						INVOKE_INTERFACE_PROXY(Visit, node);
+					}
+
+					void Visit(vczh::whoknows::xmlutility::TestXmlComment* node)override
+					{
+						INVOKE_INTERFACE_PROXY(Visit, node);
+					}
+
+					void Visit(vczh::whoknows::xmlutility::TestXmlElement* node)override
+					{
+						INVOKE_INTERFACE_PROXY(Visit, node);
+					}
+
+					void Visit(vczh::whoknows::xmlutility::TestXmlInstruction* node)override
+					{
+						INVOKE_INTERFACE_PROXY(Visit, node);
+					}
+
+					void Visit(vczh::whoknows::xmlutility::TestXmlDocument* node)override
+					{
+						INVOKE_INTERFACE_PROXY(Visit, node);
+					}
+
+				};
+
+				class TestXmlAnimal_IVisitor : public ValueInterfaceRoot, public virtual vczh::whoknows::xmlutility::TestXmlAnimal::IVisitor
+				{
+				public:
+					TestXmlAnimal_IVisitor(Ptr<IValueInterfaceProxy> proxy)
+						:ValueInterfaceRoot(proxy)
+					{
+					}
+
+					static Ptr<vczh::whoknows::xmlutility::TestXmlAnimal::IVisitor> Create(Ptr<IValueInterfaceProxy> proxy)
+					{
+						return new TestXmlAnimal_IVisitor(proxy);
+					}
+
+					void Visit(vczh::whoknows::xmlutility::TestXmlGoose* node)override
+					{
+						INVOKE_INTERFACE_PROXY(Visit, node);
+					}
+
+					void Visit(vczh::whoknows::xmlutility::TestXmlDuck* node)override
+					{
+						INVOKE_INTERFACE_PROXY(Visit, node);
+					}
+
+				};
+
+				class TestXmlAnimal_TestXmlBody_IVisitor : public ValueInterfaceRoot, public virtual vczh::whoknows::xmlutility::TestXmlAnimal::TestXmlBody::IVisitor
+				{
+				public:
+					TestXmlAnimal_TestXmlBody_IVisitor(Ptr<IValueInterfaceProxy> proxy)
+						:ValueInterfaceRoot(proxy)
+					{
+					}
+
+					static Ptr<vczh::whoknows::xmlutility::TestXmlAnimal::TestXmlBody::IVisitor> Create(Ptr<IValueInterfaceProxy> proxy)
+					{
+						return new TestXmlAnimal_TestXmlBody_IVisitor(proxy);
+					}
+
+					void Visit(vczh::whoknows::xmlutility::TestXmlAnimal::TestXmlLeg* node)override
+					{
+						INVOKE_INTERFACE_PROXY(Visit, node);
+					}
+
+					void Visit(vczh::whoknows::xmlutility::TestXmlAnimal::TestXmlTail* node)override
+					{
+						INVOKE_INTERFACE_PROXY(Visit, node);
+					}
+
+				};
+
+				class TestXmlAnimal_TestXmlBody_TestXmlFur_IVisitor : public ValueInterfaceRoot, public virtual vczh::whoknows::xmlutility::TestXmlAnimal::TestXmlBody::TestXmlFur::IVisitor
+				{
+				public:
+					TestXmlAnimal_TestXmlBody_TestXmlFur_IVisitor(Ptr<IValueInterfaceProxy> proxy)
+						:ValueInterfaceRoot(proxy)
+					{
+					}
+
+					static Ptr<vczh::whoknows::xmlutility::TestXmlAnimal::TestXmlBody::TestXmlFur::IVisitor> Create(Ptr<IValueInterfaceProxy> proxy)
+					{
+						return new TestXmlAnimal_TestXmlBody_TestXmlFur_IVisitor(proxy);
+					}
+
+					void Visit(vczh::whoknows::xmlutility::TestXmlBlackHole* node)override
+					{
+						INVOKE_INTERFACE_PROXY(Visit, node);
+					}
+
+				};
+
+				}
 #endif
 
 			extern bool TestXmlLoadTypes();

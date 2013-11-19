@@ -914,6 +914,7 @@ namespace vl
 
 			BEGIN_CLASS_MEMBER(TestXmlNode::IVisitor)
 				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
+				CLASS_MEMBER_EXTERNALCTOR(Ptr<TestXmlNode::IVisitor>(Ptr<IValueInterfaceProxy>), {L"proxy"}, &interface_proxy::TestXmlNode_IVisitor::Create)
 
 				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(TestXmlNode::IVisitor::*)(TestXmlAmbiguousNode* node))
 				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(TestXmlNode::IVisitor::*)(TestXmlText* node))
@@ -927,6 +928,7 @@ namespace vl
 
 			BEGIN_CLASS_MEMBER(TestXmlAnimal::IVisitor)
 				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
+				CLASS_MEMBER_EXTERNALCTOR(Ptr<TestXmlAnimal::IVisitor>(Ptr<IValueInterfaceProxy>), {L"proxy"}, &interface_proxy::TestXmlAnimal_IVisitor::Create)
 
 				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(TestXmlAnimal::IVisitor::*)(TestXmlGoose* node))
 				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(TestXmlAnimal::IVisitor::*)(TestXmlDuck* node))
@@ -934,6 +936,7 @@ namespace vl
 
 			BEGIN_CLASS_MEMBER(TestXmlAnimal::TestXmlBody::IVisitor)
 				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
+				CLASS_MEMBER_EXTERNALCTOR(Ptr<TestXmlAnimal::TestXmlBody::IVisitor>(Ptr<IValueInterfaceProxy>), {L"proxy"}, &interface_proxy::TestXmlAnimal_TestXmlBody_IVisitor::Create)
 
 				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(TestXmlAnimal::TestXmlBody::IVisitor::*)(TestXmlAnimal::TestXmlLeg* node))
 				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(TestXmlAnimal::TestXmlBody::IVisitor::*)(TestXmlAnimal::TestXmlTail* node))
@@ -941,6 +944,7 @@ namespace vl
 
 			BEGIN_CLASS_MEMBER(TestXmlAnimal::TestXmlBody::TestXmlFur::IVisitor)
 				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
+				CLASS_MEMBER_EXTERNALCTOR(Ptr<TestXmlAnimal::TestXmlBody::TestXmlFur::IVisitor>(Ptr<IValueInterfaceProxy>), {L"proxy"}, &interface_proxy::TestXmlAnimal_TestXmlBody_TestXmlFur_IVisitor::Create)
 
 				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(TestXmlAnimal::TestXmlBody::TestXmlFur::IVisitor::*)(TestXmlBlackHole* node))
 			END_CLASS_MEMBER(TestXmlAnimal::TestXmlBody::TestXmlFur)
@@ -971,6 +975,10 @@ namespace vl
 					ADD_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlGoose)
 					ADD_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlDuck)
 					ADD_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlBlackHole)
+					ADD_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlNode::IVisitor)
+					ADD_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlAnimal::IVisitor)
+					ADD_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlAnimal::TestXmlBody::IVisitor)
+					ADD_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlAnimal::TestXmlBody::TestXmlFur::IVisitor)
 				}
 
 				void Unload(ITypeManager* manager)

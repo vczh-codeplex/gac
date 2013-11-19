@@ -44,10 +44,10 @@ namespace fpmacro
 		class FpmReferenceDefinition;
 		class FpmMacro;
 
-		class FpmExpression abstract : public vl::parsing::ParsingTreeCustomBase
+		class FpmExpression abstract : public vl::parsing::ParsingTreeCustomBase, vl::reflection::Description<FpmExpression>
 		{
 		public:
-			class IVisitor : public vl::Interface
+			class IVisitor : public vl::reflection::IDescriptable, vl::reflection::Description<IVisitor>
 			{
 			public:
 				virtual void Visit(FpmConcatExpression* node)=0;
@@ -62,7 +62,7 @@ namespace fpmacro
 
 		};
 
-		class FpmConcatExpression : public FpmExpression
+		class FpmConcatExpression : public FpmExpression, vl::reflection::Description<FpmConcatExpression>
 		{
 		public:
 			vl::collections::List<vl::Ptr<FpmExpression>> expressions;
@@ -72,7 +72,7 @@ namespace fpmacro
 			static vl::Ptr<FpmConcatExpression> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 		};
 
-		class FpmArrayExpression : public FpmExpression
+		class FpmArrayExpression : public FpmExpression, vl::reflection::Description<FpmArrayExpression>
 		{
 		public:
 			vl::collections::List<vl::Ptr<FpmExpression>> elements;
@@ -82,7 +82,7 @@ namespace fpmacro
 			static vl::Ptr<FpmArrayExpression> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 		};
 
-		class FpmInvokeExpression : public FpmExpression
+		class FpmInvokeExpression : public FpmExpression, vl::reflection::Description<FpmInvokeExpression>
 		{
 		public:
 			vl::Ptr<FpmExpression> function;
@@ -93,7 +93,7 @@ namespace fpmacro
 			static vl::Ptr<FpmInvokeExpression> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 		};
 
-		class FpmBracketExpression : public FpmExpression
+		class FpmBracketExpression : public FpmExpression, vl::reflection::Description<FpmBracketExpression>
 		{
 		public:
 			vl::Ptr<FpmExpression> expression;
@@ -103,7 +103,7 @@ namespace fpmacro
 			static vl::Ptr<FpmBracketExpression> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 		};
 
-		class FpmReferenceExpression : public FpmExpression
+		class FpmReferenceExpression : public FpmExpression, vl::reflection::Description<FpmReferenceExpression>
 		{
 		public:
 			vl::parsing::ParsingToken name;
@@ -113,7 +113,7 @@ namespace fpmacro
 			static vl::Ptr<FpmReferenceExpression> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 		};
 
-		class FpmTextExpression : public FpmExpression
+		class FpmTextExpression : public FpmExpression, vl::reflection::Description<FpmTextExpression>
 		{
 		public:
 			vl::parsing::ParsingToken text;
@@ -123,10 +123,10 @@ namespace fpmacro
 			static vl::Ptr<FpmTextExpression> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 		};
 
-		class FpmDefinition abstract : public vl::parsing::ParsingTreeCustomBase
+		class FpmDefinition abstract : public vl::parsing::ParsingTreeCustomBase, vl::reflection::Description<FpmDefinition>
 		{
 		public:
-			class IVisitor : public vl::Interface
+			class IVisitor : public vl::reflection::IDescriptable, vl::reflection::Description<IVisitor>
 			{
 			public:
 				virtual void Visit(FpmExpressionDefinition* node)=0;
@@ -137,7 +137,7 @@ namespace fpmacro
 
 		};
 
-		class FpmExpressionDefinition : public FpmDefinition
+		class FpmExpressionDefinition : public FpmDefinition, vl::reflection::Description<FpmExpressionDefinition>
 		{
 		public:
 			vl::Ptr<FpmExpression> expression;
@@ -147,7 +147,7 @@ namespace fpmacro
 			static vl::Ptr<FpmExpressionDefinition> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 		};
 
-		class FpmReferenceParameter : public vl::parsing::ParsingTreeCustomBase
+		class FpmReferenceParameter : public vl::parsing::ParsingTreeCustomBase, vl::reflection::Description<FpmReferenceParameter>
 		{
 		public:
 			vl::parsing::ParsingToken name;
@@ -155,7 +155,7 @@ namespace fpmacro
 			static vl::Ptr<FpmReferenceParameter> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 		};
 
-		class FpmReferenceDefinition : public FpmDefinition
+		class FpmReferenceDefinition : public FpmDefinition, vl::reflection::Description<FpmReferenceDefinition>
 		{
 		public:
 			vl::parsing::ParsingToken name;
@@ -167,7 +167,7 @@ namespace fpmacro
 			static vl::Ptr<FpmReferenceDefinition> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 		};
 
-		class FpmMacro : public vl::parsing::ParsingTreeCustomBase
+		class FpmMacro : public vl::parsing::ParsingTreeCustomBase, vl::reflection::Description<FpmMacro>
 		{
 		public:
 			vl::collections::List<vl::Ptr<FpmDefinition>> definitions;
@@ -198,9 +198,6 @@ namespace vl
 		namespace description
 		{
 #ifndef VCZH_DEBUG_NO_REFLECTION
-			DECL_TYPE_INFO(fpmacro::parser::FpmReferenceParameter)
-			DECL_TYPE_INFO(fpmacro::parser::FpmReferenceDefinition)
-			DECL_TYPE_INFO(fpmacro::parser::FpmMacro)
 			DECL_TYPE_INFO(fpmacro::parser::FpmExpression)
 			DECL_TYPE_INFO(fpmacro::parser::FpmConcatExpression)
 			DECL_TYPE_INFO(fpmacro::parser::FpmArrayExpression)
@@ -210,6 +207,85 @@ namespace vl
 			DECL_TYPE_INFO(fpmacro::parser::FpmTextExpression)
 			DECL_TYPE_INFO(fpmacro::parser::FpmDefinition)
 			DECL_TYPE_INFO(fpmacro::parser::FpmExpressionDefinition)
+			DECL_TYPE_INFO(fpmacro::parser::FpmReferenceParameter)
+			DECL_TYPE_INFO(fpmacro::parser::FpmReferenceDefinition)
+			DECL_TYPE_INFO(fpmacro::parser::FpmMacro)
+			DECL_TYPE_INFO(fpmacro::parser::FpmExpression::IVisitor)
+			DECL_TYPE_INFO(fpmacro::parser::FpmDefinition::IVisitor)
+
+			namespace interface_proxy
+			{
+				class FpmExpression_IVisitor : public ValueInterfaceRoot, public virtual fpmacro::parser::FpmExpression::IVisitor
+				{
+				public:
+					FpmExpression_IVisitor(Ptr<IValueInterfaceProxy> proxy)
+						:ValueInterfaceRoot(proxy)
+					{
+					}
+
+					static Ptr<fpmacro::parser::FpmExpression::IVisitor> Create(Ptr<IValueInterfaceProxy> proxy)
+					{
+						return new FpmExpression_IVisitor(proxy);
+					}
+
+					void Visit(fpmacro::parser::FpmConcatExpression* node)override
+					{
+						INVOKE_INTERFACE_PROXY(Visit, node);
+					}
+
+					void Visit(fpmacro::parser::FpmArrayExpression* node)override
+					{
+						INVOKE_INTERFACE_PROXY(Visit, node);
+					}
+
+					void Visit(fpmacro::parser::FpmInvokeExpression* node)override
+					{
+						INVOKE_INTERFACE_PROXY(Visit, node);
+					}
+
+					void Visit(fpmacro::parser::FpmBracketExpression* node)override
+					{
+						INVOKE_INTERFACE_PROXY(Visit, node);
+					}
+
+					void Visit(fpmacro::parser::FpmReferenceExpression* node)override
+					{
+						INVOKE_INTERFACE_PROXY(Visit, node);
+					}
+
+					void Visit(fpmacro::parser::FpmTextExpression* node)override
+					{
+						INVOKE_INTERFACE_PROXY(Visit, node);
+					}
+
+				};
+
+				class FpmDefinition_IVisitor : public ValueInterfaceRoot, public virtual fpmacro::parser::FpmDefinition::IVisitor
+				{
+				public:
+					FpmDefinition_IVisitor(Ptr<IValueInterfaceProxy> proxy)
+						:ValueInterfaceRoot(proxy)
+					{
+					}
+
+					static Ptr<fpmacro::parser::FpmDefinition::IVisitor> Create(Ptr<IValueInterfaceProxy> proxy)
+					{
+						return new FpmDefinition_IVisitor(proxy);
+					}
+
+					void Visit(fpmacro::parser::FpmExpressionDefinition* node)override
+					{
+						INVOKE_INTERFACE_PROXY(Visit, node);
+					}
+
+					void Visit(fpmacro::parser::FpmReferenceDefinition* node)override
+					{
+						INVOKE_INTERFACE_PROXY(Visit, node);
+					}
+
+				};
+
+				}
 #endif
 
 			extern bool FpmLoadTypes();

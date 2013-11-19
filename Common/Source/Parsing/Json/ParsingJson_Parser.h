@@ -42,10 +42,10 @@ namespace vl
 			class JsonObjectField;
 			class JsonObject;
 
-			class JsonNode abstract : public vl::parsing::ParsingTreeCustomBase
+			class JsonNode abstract : public vl::parsing::ParsingTreeCustomBase, vl::reflection::Description<JsonNode>
 			{
 			public:
-				class IVisitor : public vl::Interface
+				class IVisitor : public vl::reflection::IDescriptable, vl::reflection::Description<IVisitor>
 				{
 				public:
 					virtual void Visit(JsonLiteral* node)=0;
@@ -60,7 +60,7 @@ namespace vl
 
 			};
 
-			class JsonLiteral : public JsonNode
+			class JsonLiteral : public JsonNode, vl::reflection::Description<JsonLiteral>
 			{
 			public:
 				enum class JsonValue
@@ -77,7 +77,7 @@ namespace vl
 				static vl::Ptr<JsonLiteral> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 			};
 
-			class JsonString : public JsonNode
+			class JsonString : public JsonNode, vl::reflection::Description<JsonString>
 			{
 			public:
 				vl::parsing::ParsingToken content;
@@ -87,7 +87,7 @@ namespace vl
 				static vl::Ptr<JsonString> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 			};
 
-			class JsonNumber : public JsonNode
+			class JsonNumber : public JsonNode, vl::reflection::Description<JsonNumber>
 			{
 			public:
 				vl::parsing::ParsingToken content;
@@ -97,7 +97,7 @@ namespace vl
 				static vl::Ptr<JsonNumber> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 			};
 
-			class JsonArray : public JsonNode
+			class JsonArray : public JsonNode, vl::reflection::Description<JsonArray>
 			{
 			public:
 				vl::collections::List<vl::Ptr<JsonNode>> items;
@@ -107,7 +107,7 @@ namespace vl
 				static vl::Ptr<JsonArray> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 			};
 
-			class JsonObjectField : public JsonNode
+			class JsonObjectField : public JsonNode, vl::reflection::Description<JsonObjectField>
 			{
 			public:
 				vl::parsing::ParsingToken name;
@@ -118,7 +118,7 @@ namespace vl
 				static vl::Ptr<JsonObjectField> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 			};
 
-			class JsonObject : public JsonNode
+			class JsonObject : public JsonNode, vl::reflection::Description<JsonObject>
 			{
 			public:
 				vl::collections::List<vl::Ptr<JsonObjectField>> fields;
@@ -160,6 +160,56 @@ namespace vl
 			DECL_TYPE_INFO(vl::parsing::json::JsonArray)
 			DECL_TYPE_INFO(vl::parsing::json::JsonObjectField)
 			DECL_TYPE_INFO(vl::parsing::json::JsonObject)
+			DECL_TYPE_INFO(vl::parsing::json::JsonNode::IVisitor)
+
+			namespace interface_proxy
+			{
+				class JsonNode_IVisitor : public ValueInterfaceRoot, public virtual vl::parsing::json::JsonNode::IVisitor
+				{
+				public:
+					JsonNode_IVisitor(Ptr<IValueInterfaceProxy> proxy)
+						:ValueInterfaceRoot(proxy)
+					{
+					}
+
+					static Ptr<vl::parsing::json::JsonNode::IVisitor> Create(Ptr<IValueInterfaceProxy> proxy)
+					{
+						return new JsonNode_IVisitor(proxy);
+					}
+
+					void Visit(vl::parsing::json::JsonLiteral* node)override
+					{
+						INVOKE_INTERFACE_PROXY(Visit, node);
+					}
+
+					void Visit(vl::parsing::json::JsonString* node)override
+					{
+						INVOKE_INTERFACE_PROXY(Visit, node);
+					}
+
+					void Visit(vl::parsing::json::JsonNumber* node)override
+					{
+						INVOKE_INTERFACE_PROXY(Visit, node);
+					}
+
+					void Visit(vl::parsing::json::JsonArray* node)override
+					{
+						INVOKE_INTERFACE_PROXY(Visit, node);
+					}
+
+					void Visit(vl::parsing::json::JsonObjectField* node)override
+					{
+						INVOKE_INTERFACE_PROXY(Visit, node);
+					}
+
+					void Visit(vl::parsing::json::JsonObject* node)override
+					{
+						INVOKE_INTERFACE_PROXY(Visit, node);
+					}
+
+				};
+
+				}
 #endif
 
 			extern bool JsonLoadTypes();

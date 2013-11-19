@@ -191,6 +191,12 @@ void WriteTypeReflectionImplementation(ParsingSymbolManager* manager, const WStr
 
 			writer.WriteString(prefix);
 			writer.WriteLine(L"\tCLASS_MEMBER_BASE(vl::reflection::IDescriptable)");
+			writer.WriteString(prefix);
+			writer.WriteString(L"\tCLASS_MEMBER_EXTERNALCTOR(Ptr<");
+			PrintType(type, config.classPrefix, writer);
+			writer.WriteString(L"::IVisitor>(Ptr<IValueInterfaceProxy>), {L\"proxy\"}, &interface_proxy::");
+			PrintType(type, config.classPrefix, writer, L"_");
+			writer.WriteLine(L"_IVisitor::Create)");
 			writer.WriteLine(L"");
 
 			List<ParsingSymbol*> visitableTypes;
@@ -226,6 +232,7 @@ void WriteTypeReflectionImplementation(ParsingSymbolManager* manager, const WStr
 	writer.WriteLine(L"\tvoid Load(ITypeManager* manager)");
 	writer.WriteString(prefix);
 	writer.WriteLine(L"\t{");
+
 	FOREACH(ParsingSymbol*, type, types)
 	{
 		writer.WriteString(prefix);
@@ -234,6 +241,19 @@ void WriteTypeReflectionImplementation(ParsingSymbolManager* manager, const WStr
 		PrintType(type, config.classPrefix, writer);
 		writer.WriteLine(L")");
 	}
+
+	FOREACH(ParsingSymbol*, type, types)
+	{
+		if (type->GetType() == ParsingSymbol::ClassType && !type->GetDescriptorSymbol() && !leafClasses.Contains(type))
+		{
+			writer.WriteString(prefix);
+			writer.WriteString(L"\t\tADD_TYPE_INFO(");
+			PrintNamespaces(config.codeNamespaces, writer);
+			PrintType(type, config.classPrefix, writer);
+			writer.WriteLine(L"::IVisitor)");
+		}
+	}
+
 	writer.WriteString(prefix);
 	writer.WriteLine(L"\t}");
 	
