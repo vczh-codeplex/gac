@@ -1,8 +1,8 @@
 include:"..\..\..\..\Libraries\GacUI\Public\Source\Vlpp.h"
 namespace:vczh.whoknows.xmlutility
-reflection:System
-classPrefix:Xml
-guard:VCZH_PARSING_XML
+reflection:system.xmlutility
+classPrefix:TestXml
+guard:VCZH_PARSING_TESTXML2
 parser:ParseDocument(XDocument)
 parser:ParseElement(XElement)
 grammar:
@@ -18,23 +18,23 @@ class AmbiguousNode : Node
 
 class Text : Node
 {
-	token content (XmlUnescapeTextFragment);
+	token content (TestXmlUnescapeTextFragment);
 }
 
 class CData : Node
 {
-	token content (XmlUnescapeCData);
+	token content (TestXmlUnescapeCData);
 }
 
 class Attribute : Node
 {
 	token name;
-	token value (XmlUnescapeAttributeValue);
+	token value (TestXmlUnescapeAttributeValue);
 }
 
 class Comment : Node
 {
-	token content (XmlUnescapeComment);
+	token content (TestXmlUnescapeComment);
 }
 
 class Element : Node
@@ -42,7 +42,7 @@ class Element : Node
 	token name;
 	token closingName;
 	Attribute[] attributes;
-	Node[] subNodes (XmlMergeTextFragment);
+	Node[] subNodes (TestXmlMergeTextFragment);
 }
 
 class Instruction : Node
@@ -63,37 +63,52 @@ enum DirectEnum
 	A,B,C,
 }
 
-class FirstClass
+class Animal
 {
 	enum IndirectEnum
 	{
 		D,E,F,
 	}
 	
-	class SecondClass
+	class Body
 	{
-		class ThirdClass
+		class Fur
 		{
-			token field1;
+			token title;
 		}
 	}
 
-	class SecondClassChild : SecondClass
+	class Leg : Body
 	{
-		token field3;
+		token id;
 	}
 
-	token field4;
+	class Tail : Body
+	{
+		token id;
+	}
+
+	token name;
 }
 
-class FirstClassChild : FirstClass
+class Bird : Animal
 {
-	token field2;
+	token id;
 }
 
-class ThirdClassChild : FirstClass.SecondClass.ThirdClass
+class Goose : Bird
 {
-	token field5;
+	token title;
+}
+
+class Duck : Bird
+{
+	token title;
+}
+
+class BlackHole : Animal.Body.Fur
+{
+	token id;
 }
 
 token INSTRUCTION_OPEN = "/</?";

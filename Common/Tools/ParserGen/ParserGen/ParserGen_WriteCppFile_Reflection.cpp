@@ -14,9 +14,9 @@ void WriteTypeReflectionImplementation(ParsingSymbolManager* manager, const WStr
 		writer.WriteLine(L";");
 	}
 
-	SortedList<ParsingSymbol*> types, leafClasses;
+	List<ParsingSymbol*> types, leafClasses;
 	EnumerateAllTypes(manager, manager->GetGlobal(), types);
-	EnumerateAllLeafClass(manager, leafClasses);
+	EnumerateAllLeafClass(manager, manager->GetGlobal(), leafClasses);
 	
 	writer.WriteLine(L"");
 	FOREACH(ParsingSymbol*, type, types)

@@ -4,7 +4,23 @@
 Helper Functions
 ***********************************************************************/
 
-void EnumerateAllTypes(ParsingSymbolManager* manager, ParsingSymbol* scope, SortedList<ParsingSymbol*>& types)
+void SearchLeafClasses(List<ParsingSymbol*>& classes, List<ParsingSymbol*>& leafClasses)
+{
+	SortedList<ParsingSymbol*> parents;
+	CopyFrom(
+		parents,
+		From(classes)
+			.Select([](ParsingSymbol* type){ return type->GetDescriptorSymbol(); })
+			.Distinct()
+		);
+	CopyFrom(
+		leafClasses,
+		From(classes)
+			.Where([&parents](ParsingSymbol* type){ return !parents.Contains(type); })
+		);
+}
+
+void EnumerateAllTypes(ParsingSymbolManager* manager, ParsingSymbol* scope, List<ParsingSymbol*>& types)
 {
 	if(scope->GetType()==ParsingSymbol::ClassType || scope->GetType()==ParsingSymbol::EnumType)
 	{
@@ -16,7 +32,7 @@ void EnumerateAllTypes(ParsingSymbolManager* manager, ParsingSymbol* scope, Sort
 	}
 }
 
-void EnumerateAllClass(ParsingSymbolManager* manager, ParsingSymbol* scope, SortedList<ParsingSymbol*>& types)
+void EnumerateAllClass(ParsingSymbolManager* manager, ParsingSymbol* scope, List<ParsingSymbol*>& types)
 {
 	if(scope->GetType()==ParsingSymbol::ClassType)
 	{
@@ -28,13 +44,11 @@ void EnumerateAllClass(ParsingSymbolManager* manager, ParsingSymbol* scope, Sort
 	}
 }
 
-void EnumerateAllLeafClass(ParsingSymbolManager* manager, SortedList<ParsingSymbol*>& types)
+void EnumerateAllLeafClass(ParsingSymbolManager* manager, ParsingSymbol* scope, List<ParsingSymbol*>& types)
 {
-	EnumerateAllClass(manager, manager->GetGlobal(), types);
-	for(vint i=types.Count()-1;i>=0;i--)
-	{
-		types.Remove(types[i]->GetDescriptorSymbol());
-	}
+	List<ParsingSymbol*> classes;
+	EnumerateAllClass(manager, scope, classes);
+	SearchLeafClasses(classes, types);
 }
 
 void SearchChildClasses(ParsingSymbol* parent, ParsingSymbol* scope, ParsingSymbolManager* manager, List<ParsingSymbol*>& children)
@@ -47,6 +61,34 @@ void SearchChildClasses(ParsingSymbol* parent, ParsingSymbol* scope, ParsingSymb
 	{
 		SearchChildClasses(parent, scope->GetSubSymbol(i), manager, children);
 	}
+}
+
+void SearchDescendantClasses(ParsingSymbol* parent, ParsingSymbolManager* manager, List<ParsingSymbol*>& children)
+{
+	vint start = children.Count();
+	SearchChildClasses(parent, manager->GetGlobal(), manager, children);
+	vint end = children.Count();
+	for (vint i = start; i < end; i++)
+	{
+		SearchDescendantClasses(children[i], manager, children);
+	}
+}
+
+void SearchLeafDescendantClasses(ParsingSymbol* parent, ParsingSymbolManager* manager, List<ParsingSymbol*>& children)
+{
+	List<ParsingSymbol*> classes;
+	SearchDescendantClasses(parent, manager, classes);
+	SearchLeafClasses(classes, children);
+}
+
+ParsingSymbol* GetRootAncestor(ParsingSymbol* type)
+{
+	if (type->GetType() == ParsingSymbol::ClassType)
+	{
+		ParsingSymbol* parent = type->GetDescriptorSymbol();
+		return parent ? GetRootAncestor(parent) : type;
+	}
+	return 0;
 }
 
 /***********************************************************************

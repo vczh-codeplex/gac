@@ -3,7 +3,7 @@
 void WriteTypeReflectionDeclaration(ParsingSymbolManager* manager, const WString& prefix, const CodegenConfig& config, TextWriter& writer)
 {
 	writer.WriteLine(L"#ifndef VCZH_DEBUG_NO_REFLECTION");
-	SortedList<ParsingSymbol*> types;
+	List<ParsingSymbol*> types;
 	EnumerateAllTypes(manager, manager->GetGlobal(), types);
 
 	FOREACH(ParsingSymbol*, type, types)

@@ -6,8 +6,8 @@ Parser::Test
 本文件使用Vczh Parsing Generator工具自动生成
 ***********************************************************************/
 
-#ifndef VCZH_PARSING_XML
-#define VCZH_PARSING_XML
+#ifndef VCZH_PARSING_TESTXML2
+#define VCZH_PARSING_TESTXML2
 
 #include "..\..\..\..\Libraries\GacUI\Public\Source\Vlpp.h"
 
@@ -17,7 +17,7 @@ namespace vczh
 	{
 		namespace xmlutility
 		{
-			enum class XmlParserTokenIndex
+			enum class TestXmlParserTokenIndex
 			{
 				INSTRUCTION_OPEN = 0,
 				INSTRUCTION_CLOSE = 1,
@@ -33,239 +33,272 @@ namespace vczh
 				TEXT = 11,
 				SPACE = 12,
 			};
-			class XmlNode;
-			class XmlAmbiguousNode;
-			class XmlText;
-			class XmlCData;
-			class XmlAttribute;
-			class XmlComment;
-			class XmlElement;
-			class XmlInstruction;
-			class XmlDocument;
-			class XmlFirstClass;
-			class XmlFirstClassChild;
-			class XmlThirdClassChild;
+			class TestXmlNode;
+			class TestXmlAmbiguousNode;
+			class TestXmlText;
+			class TestXmlCData;
+			class TestXmlAttribute;
+			class TestXmlComment;
+			class TestXmlElement;
+			class TestXmlInstruction;
+			class TestXmlDocument;
+			class TestXmlAnimal;
+			class TestXmlBird;
+			class TestXmlGoose;
+			class TestXmlDuck;
+			class TestXmlBlackHole;
 
-			class XmlNode abstract : public vl::parsing::ParsingTreeCustomBase
+			class TestXmlNode abstract : public vl::parsing::ParsingTreeCustomBase
 			{
 			public:
 				class IVisitor : public vl::Interface
 				{
 				public:
-					virtual void Visit(XmlAmbiguousNode* node)=0;
-					virtual void Visit(XmlText* node)=0;
-					virtual void Visit(XmlCData* node)=0;
-					virtual void Visit(XmlAttribute* node)=0;
-					virtual void Visit(XmlComment* node)=0;
-					virtual void Visit(XmlElement* node)=0;
-					virtual void Visit(XmlInstruction* node)=0;
-					virtual void Visit(XmlDocument* node)=0;
+					virtual void Visit(TestXmlAmbiguousNode* node)=0;
+					virtual void Visit(TestXmlText* node)=0;
+					virtual void Visit(TestXmlCData* node)=0;
+					virtual void Visit(TestXmlAttribute* node)=0;
+					virtual void Visit(TestXmlComment* node)=0;
+					virtual void Visit(TestXmlElement* node)=0;
+					virtual void Visit(TestXmlInstruction* node)=0;
+					virtual void Visit(TestXmlDocument* node)=0;
 				};
 
-				virtual void Accept(XmlNode::IVisitor* visitor)=0;
+				virtual void Accept(TestXmlNode::IVisitor* visitor)=0;
 
 			};
 
-			class XmlAmbiguousNode : public XmlNode
+			class TestXmlAmbiguousNode : public TestXmlNode
 			{
 			public:
-				vl::collections::List<vl::Ptr<XmlNode>> items;
+				vl::collections::List<vl::Ptr<TestXmlNode>> items;
 
-				void Accept(XmlNode::IVisitor* visitor)override;
+				void Accept(TestXmlNode::IVisitor* visitor)override;
 
-				static vl::Ptr<XmlAmbiguousNode> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
+				static vl::Ptr<TestXmlAmbiguousNode> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 			};
 
-			class XmlText : public XmlNode
-			{
-			public:
-				vl::parsing::ParsingToken content;
-
-				void Accept(XmlNode::IVisitor* visitor)override;
-
-				static vl::Ptr<XmlText> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
-			};
-
-			class XmlCData : public XmlNode
+			class TestXmlText : public TestXmlNode
 			{
 			public:
 				vl::parsing::ParsingToken content;
 
-				void Accept(XmlNode::IVisitor* visitor)override;
+				void Accept(TestXmlNode::IVisitor* visitor)override;
 
-				static vl::Ptr<XmlCData> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
+				static vl::Ptr<TestXmlText> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 			};
 
-			class XmlAttribute : public XmlNode
+			class TestXmlCData : public TestXmlNode
+			{
+			public:
+				vl::parsing::ParsingToken content;
+
+				void Accept(TestXmlNode::IVisitor* visitor)override;
+
+				static vl::Ptr<TestXmlCData> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
+			};
+
+			class TestXmlAttribute : public TestXmlNode
 			{
 			public:
 				vl::parsing::ParsingToken name;
 				vl::parsing::ParsingToken value;
 
-				void Accept(XmlNode::IVisitor* visitor)override;
+				void Accept(TestXmlNode::IVisitor* visitor)override;
 
-				static vl::Ptr<XmlAttribute> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
+				static vl::Ptr<TestXmlAttribute> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 			};
 
-			class XmlComment : public XmlNode
+			class TestXmlComment : public TestXmlNode
 			{
 			public:
 				vl::parsing::ParsingToken content;
 
-				void Accept(XmlNode::IVisitor* visitor)override;
+				void Accept(TestXmlNode::IVisitor* visitor)override;
 
-				static vl::Ptr<XmlComment> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
+				static vl::Ptr<TestXmlComment> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 			};
 
-			class XmlElement : public XmlNode
+			class TestXmlElement : public TestXmlNode
 			{
 			public:
 				vl::parsing::ParsingToken name;
 				vl::parsing::ParsingToken closingName;
-				vl::collections::List<vl::Ptr<XmlAttribute>> attributes;
-				vl::collections::List<vl::Ptr<XmlNode>> subNodes;
+				vl::collections::List<vl::Ptr<TestXmlAttribute>> attributes;
+				vl::collections::List<vl::Ptr<TestXmlNode>> subNodes;
 
-				void Accept(XmlNode::IVisitor* visitor)override;
+				void Accept(TestXmlNode::IVisitor* visitor)override;
 
-				static vl::Ptr<XmlElement> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
+				static vl::Ptr<TestXmlElement> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 			};
 
-			class XmlInstruction : public XmlNode
+			class TestXmlInstruction : public TestXmlNode
 			{
 			public:
 				vl::parsing::ParsingToken name;
-				vl::collections::List<vl::Ptr<XmlAttribute>> attributes;
+				vl::collections::List<vl::Ptr<TestXmlAttribute>> attributes;
 
-				void Accept(XmlNode::IVisitor* visitor)override;
+				void Accept(TestXmlNode::IVisitor* visitor)override;
 
-				static vl::Ptr<XmlInstruction> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
+				static vl::Ptr<TestXmlInstruction> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 			};
 
-			class XmlDocument : public XmlNode
+			class TestXmlDocument : public TestXmlNode
 			{
 			public:
-				vl::collections::List<vl::Ptr<XmlInstruction>> instructions;
-				vl::collections::List<vl::Ptr<XmlComment>> comments;
-				vl::Ptr<XmlElement> rootElement;
+				vl::collections::List<vl::Ptr<TestXmlInstruction>> instructions;
+				vl::collections::List<vl::Ptr<TestXmlComment>> comments;
+				vl::Ptr<TestXmlElement> rootElement;
 
-				void Accept(XmlNode::IVisitor* visitor)override;
+				void Accept(TestXmlNode::IVisitor* visitor)override;
 
-				static vl::Ptr<XmlDocument> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
+				static vl::Ptr<TestXmlDocument> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 			};
 
-			enum class XmlDirectEnum
+			enum class TestXmlDirectEnum
 			{
 				A,
 				B,
 				C,
 			};
 
-			class XmlFirstClass abstract : public vl::parsing::ParsingTreeCustomBase
+			class TestXmlAnimal abstract : public vl::parsing::ParsingTreeCustomBase
 			{
 			public:
 				class IVisitor : public vl::Interface
 				{
 				public:
-					virtual void Visit(XmlFirstClassChild* node)=0;
+					virtual void Visit(TestXmlGoose* node)=0;
+					virtual void Visit(TestXmlDuck* node)=0;
 				};
 
-				virtual void Accept(XmlFirstClass::IVisitor* visitor)=0;
+				virtual void Accept(TestXmlAnimal::IVisitor* visitor)=0;
 
-				class XmlSecondClass;
-				class XmlSecondClassChild;
+				class TestXmlBody;
+				class TestXmlLeg;
+				class TestXmlTail;
 
-				enum class XmlIndirectEnum
+				enum class TestXmlIndirectEnum
 				{
 					D,
 					E,
 					F,
 				};
 
-				class XmlSecondClass abstract : public vl::parsing::ParsingTreeCustomBase
+				class TestXmlBody abstract : public vl::parsing::ParsingTreeCustomBase
 				{
 				public:
 					class IVisitor : public vl::Interface
 					{
 					public:
-						virtual void Visit(XmlFirstClass::XmlSecondClassChild* node)=0;
+						virtual void Visit(TestXmlAnimal::TestXmlLeg* node)=0;
+						virtual void Visit(TestXmlAnimal::TestXmlTail* node)=0;
 					};
 
-					virtual void Accept(XmlFirstClass::XmlSecondClass::IVisitor* visitor)=0;
+					virtual void Accept(TestXmlAnimal::TestXmlBody::IVisitor* visitor)=0;
 
-					class XmlThirdClass;
+					class TestXmlFur;
 
-					class XmlThirdClass abstract : public vl::parsing::ParsingTreeCustomBase
+					class TestXmlFur abstract : public vl::parsing::ParsingTreeCustomBase
 					{
 					public:
 						class IVisitor : public vl::Interface
 						{
 						public:
-							virtual void Visit(XmlThirdClassChild* node)=0;
+							virtual void Visit(TestXmlBlackHole* node)=0;
 						};
 
-						virtual void Accept(XmlFirstClass::XmlSecondClass::XmlThirdClass::IVisitor* visitor)=0;
+						virtual void Accept(TestXmlAnimal::TestXmlBody::TestXmlFur::IVisitor* visitor)=0;
 
-						vl::parsing::ParsingToken field1;
+						vl::parsing::ParsingToken title;
+
+						static vl::Ptr<TestXmlAnimal::TestXmlBody::TestXmlFur> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 					};
 
 				};
 
-				class XmlSecondClassChild : public XmlSecondClass
+				class TestXmlLeg : public TestXmlBody
 				{
 				public:
-					vl::parsing::ParsingToken field3;
+					vl::parsing::ParsingToken id;
 
-					void Accept(XmlFirstClass::XmlSecondClass::IVisitor* visitor)override;
+					void Accept(TestXmlAnimal::TestXmlBody::IVisitor* visitor)override;
 
-					static vl::Ptr<XmlFirstClass::XmlSecondClassChild> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
+					static vl::Ptr<TestXmlAnimal::TestXmlLeg> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 				};
 
-				vl::parsing::ParsingToken field4;
+				class TestXmlTail : public TestXmlBody
+				{
+				public:
+					vl::parsing::ParsingToken id;
+
+					void Accept(TestXmlAnimal::TestXmlBody::IVisitor* visitor)override;
+
+					static vl::Ptr<TestXmlAnimal::TestXmlTail> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
+				};
+
+				vl::parsing::ParsingToken name;
 			};
 
-			class XmlFirstClassChild : public XmlFirstClass
+			class TestXmlBird abstract : public TestXmlAnimal
 			{
 			public:
-				vl::parsing::ParsingToken field2;
-
-				void Accept(XmlFirstClass::IVisitor* visitor)override;
-
-				static vl::Ptr<XmlFirstClassChild> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
+				vl::parsing::ParsingToken id;
 			};
 
-			class XmlThirdClassChild : public XmlFirstClass::XmlSecondClass::XmlThirdClass
+			class TestXmlGoose : public TestXmlBird
 			{
 			public:
-				vl::parsing::ParsingToken field5;
+				vl::parsing::ParsingToken title;
 
-				void Accept(XmlFirstClass::XmlSecondClass::XmlThirdClass::IVisitor* visitor)override;
+				void Accept(TestXmlBird::IVisitor* visitor)override;
 
-				static vl::Ptr<XmlThirdClassChild> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
+				static vl::Ptr<TestXmlGoose> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 			};
 
-			extern vl::WString XmlGetParserTextBuffer();
-			extern vl::Ptr<vl::parsing::ParsingTreeCustomBase> XmlConvertParsingTreeNode(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
-			extern vl::Ptr<vl::parsing::tabling::ParsingTable> XmlLoadTable();
+			class TestXmlDuck : public TestXmlBird
+			{
+			public:
+				vl::parsing::ParsingToken title;
 
-			extern vl::Ptr<vl::parsing::ParsingTreeNode> XmlParseDocumentAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
-			extern vl::Ptr<vl::parsing::ParsingTreeNode> XmlParseDocumentAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
-			extern vl::Ptr<XmlDocument> XmlParseDocument(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
-			extern vl::Ptr<XmlDocument> XmlParseDocument(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
+				void Accept(TestXmlBird::IVisitor* visitor)override;
 
-			extern vl::Ptr<vl::parsing::ParsingTreeNode> XmlParseElementAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
-			extern vl::Ptr<vl::parsing::ParsingTreeNode> XmlParseElementAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
-			extern vl::Ptr<XmlElement> XmlParseElement(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
-			extern vl::Ptr<XmlElement> XmlParseElement(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
+				static vl::Ptr<TestXmlDuck> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
+			};
 
-			extern vl::Ptr<vl::parsing::ParsingTreeNode> XmlParseDocumentAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
-			extern vl::Ptr<vl::parsing::ParsingTreeNode> XmlParseDocumentAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
-			extern vl::Ptr<XmlDocument> XmlParseDocument(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
-			extern vl::Ptr<XmlDocument> XmlParseDocument(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
+			class TestXmlBlackHole : public TestXmlAnimal::TestXmlBody::TestXmlFur
+			{
+			public:
+				vl::parsing::ParsingToken id;
 
-			extern vl::Ptr<vl::parsing::ParsingTreeNode> XmlParseElementAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
-			extern vl::Ptr<vl::parsing::ParsingTreeNode> XmlParseElementAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
-			extern vl::Ptr<XmlElement> XmlParseElement(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
-			extern vl::Ptr<XmlElement> XmlParseElement(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
+				void Accept(TestXmlAnimal::TestXmlBody::TestXmlFur::IVisitor* visitor)override;
+
+				static vl::Ptr<TestXmlBlackHole> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
+			};
+
+			extern vl::WString TestXmlGetParserTextBuffer();
+			extern vl::Ptr<vl::parsing::ParsingTreeCustomBase> TestXmlConvertParsingTreeNode(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
+			extern vl::Ptr<vl::parsing::tabling::ParsingTable> TestXmlLoadTable();
+
+			extern vl::Ptr<vl::parsing::ParsingTreeNode> TestXmlParseDocumentAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
+			extern vl::Ptr<vl::parsing::ParsingTreeNode> TestXmlParseDocumentAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
+			extern vl::Ptr<TestXmlDocument> TestXmlParseDocument(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
+			extern vl::Ptr<TestXmlDocument> TestXmlParseDocument(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
+
+			extern vl::Ptr<vl::parsing::ParsingTreeNode> TestXmlParseElementAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
+			extern vl::Ptr<vl::parsing::ParsingTreeNode> TestXmlParseElementAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
+			extern vl::Ptr<TestXmlElement> TestXmlParseElement(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
+			extern vl::Ptr<TestXmlElement> TestXmlParseElement(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
+
+			extern vl::Ptr<vl::parsing::ParsingTreeNode> TestXmlParseDocumentAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
+			extern vl::Ptr<vl::parsing::ParsingTreeNode> TestXmlParseDocumentAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
+			extern vl::Ptr<TestXmlDocument> TestXmlParseDocument(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
+			extern vl::Ptr<TestXmlDocument> TestXmlParseDocument(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
+
+			extern vl::Ptr<vl::parsing::ParsingTreeNode> TestXmlParseElementAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
+			extern vl::Ptr<vl::parsing::ParsingTreeNode> TestXmlParseElementAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
+			extern vl::Ptr<TestXmlElement> TestXmlParseElement(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
+			extern vl::Ptr<TestXmlElement> TestXmlParseElement(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
 
 		}
 	}
@@ -277,26 +310,29 @@ namespace vl
 		namespace description
 		{
 #ifndef VCZH_DEBUG_NO_REFLECTION
-			DECL_TYPE_INFO(vczh::whoknows::xmlutility::XmlAmbiguousNode)
-			DECL_TYPE_INFO(vczh::whoknows::xmlutility::XmlNode)
-			DECL_TYPE_INFO(vczh::whoknows::xmlutility::XmlCData)
-			DECL_TYPE_INFO(vczh::whoknows::xmlutility::XmlDirectEnum)
-			DECL_TYPE_INFO(vczh::whoknows::xmlutility::XmlComment)
-			DECL_TYPE_INFO(vczh::whoknows::xmlutility::XmlFirstClassChild)
-			DECL_TYPE_INFO(vczh::whoknows::xmlutility::XmlElement)
-			DECL_TYPE_INFO(vczh::whoknows::xmlutility::XmlAttribute)
-			DECL_TYPE_INFO(vczh::whoknows::xmlutility::XmlThirdClassChild)
-			DECL_TYPE_INFO(vczh::whoknows::xmlutility::XmlInstruction)
-			DECL_TYPE_INFO(vczh::whoknows::xmlutility::XmlDocument)
-			DECL_TYPE_INFO(vczh::whoknows::xmlutility::XmlFirstClass)
-			DECL_TYPE_INFO(vczh::whoknows::xmlutility::XmlFirstClass::XmlIndirectEnum)
-			DECL_TYPE_INFO(vczh::whoknows::xmlutility::XmlFirstClass::XmlSecondClass)
-			DECL_TYPE_INFO(vczh::whoknows::xmlutility::XmlFirstClass::XmlSecondClass::XmlThirdClass)
-			DECL_TYPE_INFO(vczh::whoknows::xmlutility::XmlFirstClass::XmlSecondClassChild)
-			DECL_TYPE_INFO(vczh::whoknows::xmlutility::XmlText)
+			DECL_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlNode)
+			DECL_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlAmbiguousNode)
+			DECL_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlText)
+			DECL_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlCData)
+			DECL_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlAttribute)
+			DECL_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlComment)
+			DECL_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlElement)
+			DECL_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlInstruction)
+			DECL_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlDocument)
+			DECL_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlDirectEnum)
+			DECL_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlAnimal)
+			DECL_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlAnimal::TestXmlIndirectEnum)
+			DECL_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlAnimal::TestXmlBody)
+			DECL_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlAnimal::TestXmlBody::TestXmlFur)
+			DECL_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlAnimal::TestXmlLeg)
+			DECL_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlAnimal::TestXmlTail)
+			DECL_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlBird)
+			DECL_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlGoose)
+			DECL_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlDuck)
+			DECL_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlBlackHole)
 #endif
 
-			extern bool XmlLoadTypes();
+			extern bool TestXmlLoadTypes();
 		}
 	}
 }

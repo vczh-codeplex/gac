@@ -4,18 +4,20 @@
 WriteVisitorImpl
 ***********************************************************************/
 
-void WriteVisitorImpl(ParsingSymbolManager* manager, ParsingSymbol* scope, const WString& prefix, const WString& codeClassPrefix, TextWriter& writer)
+void WriteVisitorImpl(ParsingSymbolManager* manager, const WString& prefix, const WString& codeClassPrefix, TextWriter& writer)
 {
-	if(scope->GetType()==ParsingSymbol::ClassType)
+	List<ParsingSymbol*> leafClasses;
+	EnumerateAllLeafClass(manager, manager->GetGlobal(), leafClasses);
+	FOREACH(ParsingSymbol*, type, leafClasses)
 	{
-		ParsingSymbol* parent=scope->GetDescriptorSymbol();
-		if(parent)
+		ParsingSymbol* rootAncestor = GetRootAncestor(type);
+		if (rootAncestor != type)
 		{
 			writer.WriteString(prefix);
 			writer.WriteString(L"void ");
-			PrintType(scope, codeClassPrefix, writer);
+			PrintType(type, codeClassPrefix, writer);
 			writer.WriteString(L"::Accept(");
-			PrintType(parent, codeClassPrefix, writer);
+			PrintType(rootAncestor, codeClassPrefix, writer);
 			writer.WriteLine(L"::IVisitor* visitor)");
 			writer.WriteString(prefix);
 			writer.WriteLine(L"{");
@@ -25,9 +27,5 @@ void WriteVisitorImpl(ParsingSymbolManager* manager, ParsingSymbol* scope, const
 			writer.WriteLine(L"}");
 			writer.WriteLine(L"");
 		}
-	}
-	for(vint i=0;i<scope->GetSubSymbolCount();i++)
-	{
-		WriteVisitorImpl(manager, scope->GetSubSymbol(i), prefix, codeClassPrefix, writer);
 	}
 }
