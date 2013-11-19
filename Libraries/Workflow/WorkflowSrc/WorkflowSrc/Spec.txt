@@ -34,8 +34,8 @@ x [not] in collection
 // the meaning of the following patterns of expression dependes on the destination type
 {a b c d}
 {a:b c:d}
-Spring
-Spring | Summer | Autumn | Winter
+"Spring"
+"Spring | Summer | Autumn | Winter"
 ----------------------------
 {a b c d} of int[]
 {a:b c:d e:f} of int[string]
@@ -82,3 +82,5 @@ select (<expression>)
 
 while (condition) <statement>
 for (x in (<collection> | [reversed] <range>)) <statement>
+
+using <type-path> // can contain class
