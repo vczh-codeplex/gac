@@ -41,6 +41,17 @@ x [not] in collection
 {a:b c:d e:f} of int[string]
 {x:10 y:20} of Point
 ----------------------------
+new int[10]
+new int[string]
+new Type(arguments)
+new Fuckable
+{
+	func Fuck():void
+	{
+		raise "I am not ready yet.";
+	}
+}
+----------------------------
 x(y)
 x(x, y, z)
 x.y
@@ -72,6 +83,7 @@ break;
 continue;
 return [<expression>];
 delete [<expression>];
+raise <expression>;
 
 if ([Name : Type = ] <expression>) <statement> [else <statement>]
 select (<expression>)
@@ -83,4 +95,4 @@ select (<expression>)
 while (condition) <statement>
 for (x in (<collection> | [reversed] <range>)) <statement>
 
-using <type-path> // can contain class
+using <type-path>; // can contain class
