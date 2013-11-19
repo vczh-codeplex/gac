@@ -69,6 +69,10 @@ class Animal
 	{
 		D,E,F,
 	}
+
+	class EmptyClass
+	{
+	}
 	
 	class Body
 	{

@@ -48,10 +48,10 @@ namespace vczh
 			class TestXmlDuck;
 			class TestXmlBlackHole;
 
-			class TestXmlNode abstract : public vl::parsing::ParsingTreeCustomBase
+			class TestXmlNode abstract : public vl::parsing::ParsingTreeCustomBase, vl::reflection::Description<TestXmlNode>
 			{
 			public:
-				class IVisitor : public vl::Interface
+				class IVisitor : public vl::reflection::IDescriptable, vl::reflection::Description<IVisitor>
 				{
 				public:
 					virtual void Visit(TestXmlAmbiguousNode* node)=0;
@@ -68,7 +68,7 @@ namespace vczh
 
 			};
 
-			class TestXmlAmbiguousNode : public TestXmlNode
+			class TestXmlAmbiguousNode : public TestXmlNode, vl::reflection::Description<TestXmlAmbiguousNode>
 			{
 			public:
 				vl::collections::List<vl::Ptr<TestXmlNode>> items;
@@ -78,7 +78,7 @@ namespace vczh
 				static vl::Ptr<TestXmlAmbiguousNode> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 			};
 
-			class TestXmlText : public TestXmlNode
+			class TestXmlText : public TestXmlNode, vl::reflection::Description<TestXmlText>
 			{
 			public:
 				vl::parsing::ParsingToken content;
@@ -88,7 +88,7 @@ namespace vczh
 				static vl::Ptr<TestXmlText> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 			};
 
-			class TestXmlCData : public TestXmlNode
+			class TestXmlCData : public TestXmlNode, vl::reflection::Description<TestXmlCData>
 			{
 			public:
 				vl::parsing::ParsingToken content;
@@ -98,7 +98,7 @@ namespace vczh
 				static vl::Ptr<TestXmlCData> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 			};
 
-			class TestXmlAttribute : public TestXmlNode
+			class TestXmlAttribute : public TestXmlNode, vl::reflection::Description<TestXmlAttribute>
 			{
 			public:
 				vl::parsing::ParsingToken name;
@@ -109,7 +109,7 @@ namespace vczh
 				static vl::Ptr<TestXmlAttribute> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 			};
 
-			class TestXmlComment : public TestXmlNode
+			class TestXmlComment : public TestXmlNode, vl::reflection::Description<TestXmlComment>
 			{
 			public:
 				vl::parsing::ParsingToken content;
@@ -119,7 +119,7 @@ namespace vczh
 				static vl::Ptr<TestXmlComment> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 			};
 
-			class TestXmlElement : public TestXmlNode
+			class TestXmlElement : public TestXmlNode, vl::reflection::Description<TestXmlElement>
 			{
 			public:
 				vl::parsing::ParsingToken name;
@@ -132,7 +132,7 @@ namespace vczh
 				static vl::Ptr<TestXmlElement> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 			};
 
-			class TestXmlInstruction : public TestXmlNode
+			class TestXmlInstruction : public TestXmlNode, vl::reflection::Description<TestXmlInstruction>
 			{
 			public:
 				vl::parsing::ParsingToken name;
@@ -143,7 +143,7 @@ namespace vczh
 				static vl::Ptr<TestXmlInstruction> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 			};
 
-			class TestXmlDocument : public TestXmlNode
+			class TestXmlDocument : public TestXmlNode, vl::reflection::Description<TestXmlDocument>
 			{
 			public:
 				vl::collections::List<vl::Ptr<TestXmlInstruction>> instructions;
@@ -162,10 +162,10 @@ namespace vczh
 				C,
 			};
 
-			class TestXmlAnimal abstract : public vl::parsing::ParsingTreeCustomBase
+			class TestXmlAnimal abstract : public vl::parsing::ParsingTreeCustomBase, vl::reflection::Description<TestXmlAnimal>
 			{
 			public:
-				class IVisitor : public vl::Interface
+				class IVisitor : public vl::reflection::IDescriptable, vl::reflection::Description<IVisitor>
 				{
 				public:
 					virtual void Visit(TestXmlGoose* node)=0;
@@ -174,6 +174,7 @@ namespace vczh
 
 				virtual void Accept(TestXmlAnimal::IVisitor* visitor)=0;
 
+				class TestXmlEmptyClass;
 				class TestXmlBody;
 				class TestXmlLeg;
 				class TestXmlTail;
@@ -185,10 +186,17 @@ namespace vczh
 					F,
 				};
 
-				class TestXmlBody abstract : public vl::parsing::ParsingTreeCustomBase
+				class TestXmlEmptyClass : public vl::parsing::ParsingTreeCustomBase, vl::reflection::Description<TestXmlEmptyClass>
 				{
 				public:
-					class IVisitor : public vl::Interface
+
+					static vl::Ptr<TestXmlAnimal::TestXmlEmptyClass> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
+				};
+
+				class TestXmlBody abstract : public vl::parsing::ParsingTreeCustomBase, vl::reflection::Description<TestXmlBody>
+				{
+				public:
+					class IVisitor : public vl::reflection::IDescriptable, vl::reflection::Description<IVisitor>
 					{
 					public:
 						virtual void Visit(TestXmlAnimal::TestXmlLeg* node)=0;
@@ -199,10 +207,10 @@ namespace vczh
 
 					class TestXmlFur;
 
-					class TestXmlFur abstract : public vl::parsing::ParsingTreeCustomBase
+					class TestXmlFur abstract : public vl::parsing::ParsingTreeCustomBase, vl::reflection::Description<TestXmlFur>
 					{
 					public:
-						class IVisitor : public vl::Interface
+						class IVisitor : public vl::reflection::IDescriptable, vl::reflection::Description<IVisitor>
 						{
 						public:
 							virtual void Visit(TestXmlBlackHole* node)=0;
@@ -217,7 +225,7 @@ namespace vczh
 
 				};
 
-				class TestXmlLeg : public TestXmlBody
+				class TestXmlLeg : public TestXmlBody, vl::reflection::Description<TestXmlLeg>
 				{
 				public:
 					vl::parsing::ParsingToken id;
@@ -227,7 +235,7 @@ namespace vczh
 					static vl::Ptr<TestXmlAnimal::TestXmlLeg> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 				};
 
-				class TestXmlTail : public TestXmlBody
+				class TestXmlTail : public TestXmlBody, vl::reflection::Description<TestXmlTail>
 				{
 				public:
 					vl::parsing::ParsingToken id;
@@ -240,13 +248,13 @@ namespace vczh
 				vl::parsing::ParsingToken name;
 			};
 
-			class TestXmlBird abstract : public TestXmlAnimal
+			class TestXmlBird abstract : public TestXmlAnimal, vl::reflection::Description<TestXmlBird>
 			{
 			public:
 				vl::parsing::ParsingToken id;
 			};
 
-			class TestXmlGoose : public TestXmlBird
+			class TestXmlGoose : public TestXmlBird, vl::reflection::Description<TestXmlGoose>
 			{
 			public:
 				vl::parsing::ParsingToken title;
@@ -256,7 +264,7 @@ namespace vczh
 				static vl::Ptr<TestXmlGoose> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 			};
 
-			class TestXmlDuck : public TestXmlBird
+			class TestXmlDuck : public TestXmlBird, vl::reflection::Description<TestXmlDuck>
 			{
 			public:
 				vl::parsing::ParsingToken title;
@@ -266,7 +274,7 @@ namespace vczh
 				static vl::Ptr<TestXmlDuck> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 			};
 
-			class TestXmlBlackHole : public TestXmlAnimal::TestXmlBody::TestXmlFur
+			class TestXmlBlackHole : public TestXmlAnimal::TestXmlBody::TestXmlFur, vl::reflection::Description<TestXmlBlackHole>
 			{
 			public:
 				vl::parsing::ParsingToken id;
@@ -322,6 +330,7 @@ namespace vl
 			DECL_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlDirectEnum)
 			DECL_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlAnimal)
 			DECL_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlAnimal::TestXmlIndirectEnum)
+			DECL_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlAnimal::TestXmlEmptyClass)
 			DECL_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlAnimal::TestXmlBody)
 			DECL_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlAnimal::TestXmlBody::TestXmlFur)
 			DECL_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlAnimal::TestXmlLeg)
@@ -330,6 +339,10 @@ namespace vl
 			DECL_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlGoose)
 			DECL_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlDuck)
 			DECL_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlBlackHole)
+			DECL_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlNode::IVisitor)
+			DECL_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlAnimal::IVisitor)
+			DECL_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlAnimal::TestXmlBody::IVisitor)
+			DECL_TYPE_INFO(vczh::whoknows::xmlutility::TestXmlAnimal::TestXmlBody::TestXmlFur::IVisitor)
 #endif
 
 			extern bool TestXmlLoadTypes();
