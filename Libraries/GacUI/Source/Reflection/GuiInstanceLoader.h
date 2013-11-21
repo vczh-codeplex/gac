@@ -41,7 +41,7 @@ Instance Environment
 
 			GuiInstanceEnvironment(Ptr<GuiInstanceContext> _context, Ptr<GuiResourcePathResolver> _resolver)
 				:context(_context)
-				,resolver(_resolver)
+				, resolver(_resolver)
 			{
 				scope = new GuiInstanceContextScope;
 			}
@@ -93,7 +93,7 @@ Instance Loader
 				TypeInfo() :typeDescriptor(0){}
 				TypeInfo(const WString& _typeName, description::ITypeDescriptor* _typeDescriptor)
 					:typeName(_typeName)
-					,typeDescriptor(_typeDescriptor)
+					, typeDescriptor(_typeDescriptor)
 				{
 				}
 			};
@@ -106,7 +106,7 @@ Instance Loader
 				PropertyInfo(){}
 				PropertyInfo(const TypeInfo& _typeInfo, const WString& _propertyName)
 					:typeInfo(_typeInfo)
-					,propertyName(_propertyName)
+					, propertyName(_propertyName)
 				{
 				}
 			};
@@ -117,24 +117,24 @@ Instance Loader
 				description::Value					propertyValue;
 
 				PropertyValue(){}
-				PropertyValue(const TypeInfo& _typeInfo, const WString& _propertyName, description::Value _instanceValue, description::Value _propertyValue=description::Value())
+				PropertyValue(const TypeInfo& _typeInfo, const WString& _propertyName, description::Value _instanceValue, description::Value _propertyValue = description::Value())
 					:PropertyInfo(_typeInfo, _propertyName)
-					,instanceValue(_instanceValue)
-					,propertyValue(_propertyValue)
+					, instanceValue(_instanceValue)
+					, propertyValue(_propertyValue)
 				{
 				}
 			};
 
-			virtual WString							GetTypeName()=0;
+			virtual WString							GetTypeName() = 0;
 			virtual bool							IsDeserializable(const TypeInfo& typeInfo) = 0;
 			virtual description::Value				Deserialize(const TypeInfo& typeInfo, const WString& text) = 0;
 			virtual bool							IsCreatable(const TypeInfo& typeInfo) = 0;
-			virtual description::Value				CreateInstance(const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)=0;
+			virtual description::Value				CreateInstance(const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments) = 0;
 			virtual void							GetPropertyNames(const TypeInfo& typeInfo, collections::List<WString>& propertyNames) = 0;
 			virtual void							GetConstructorParameters(const TypeInfo& typeInfo, collections::List<WString>& propertyNames) = 0;
-			virtual Ptr<GuiInstancePropertyInfo>	GetPropertyType(const PropertyInfo& propertyInfo)=0;
-			virtual bool							GetPropertyValue(PropertyValue& propertyValue)=0;
-			virtual bool							SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)=0;
+			virtual Ptr<GuiInstancePropertyInfo>	GetPropertyType(const PropertyInfo& propertyInfo) = 0;
+			virtual bool							GetPropertyValue(PropertyValue& propertyValue) = 0;
+			virtual bool							SetPropertyValue(PropertyValue& propertyValue, vint currentIndex) = 0;
 		};
 
 /***********************************************************************
@@ -144,9 +144,9 @@ Instance Binder
 		class IGuiInstanceBinder : public IDescriptable, public Description<IGuiInstanceBinder>
 		{
 		public:
-			virtual WString							GetBindingName()=0;
-			virtual void							GetExpectedValueTypes(collections::List<description::ITypeDescriptor*>& expectedTypes)=0;
-			virtual bool							SetPropertyValue(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, IGuiInstanceLoader::PropertyValue& propertyValue, vint currentIndex=-1)=0;
+			virtual WString							GetBindingName() = 0;
+			virtual void							GetExpectedValueTypes(collections::List<description::ITypeDescriptor*>& expectedTypes) = 0;
+			virtual bool							SetPropertyValue(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, IGuiInstanceLoader::PropertyValue& propertyValue, vint currentIndex = -1) = 0;
 		};
 
 /***********************************************************************
@@ -156,13 +156,13 @@ Instance Loader Manager
 		class IGuiInstanceLoaderManager : public IDescriptable, public Description<IGuiInstanceLoaderManager>
 		{
 		public:
-			virtual bool							AddInstanceBinder(Ptr<IGuiInstanceBinder> binder)=0;
-			virtual IGuiInstanceBinder*				GetInstanceBinder(const WString& bindingName)=0;
-			virtual bool							CreateVirtualType(const WString& parentType, Ptr<IGuiInstanceLoader> loader)=0;
-			virtual bool							SetLoader(Ptr<IGuiInstanceLoader> loader)=0;
-			virtual IGuiInstanceLoader*				GetLoader(const WString& typeName)=0;
-			virtual IGuiInstanceLoader*				GetParentLoader(IGuiInstanceLoader* loader)=0;
-			virtual description::ITypeDescriptor*	GetTypeDescriptorForType(const WString& typeName)=0;
+			virtual bool							AddInstanceBinder(Ptr<IGuiInstanceBinder> binder) = 0;
+			virtual IGuiInstanceBinder*				GetInstanceBinder(const WString& bindingName) = 0;
+			virtual bool							CreateVirtualType(const WString& parentType, Ptr<IGuiInstanceLoader> loader) = 0;
+			virtual bool							SetLoader(Ptr<IGuiInstanceLoader> loader) = 0;
+			virtual IGuiInstanceLoader*				GetLoader(const WString& typeName) = 0;
+			virtual IGuiInstanceLoader*				GetParentLoader(IGuiInstanceLoader* loader) = 0;
+			virtual description::ITypeDescriptor*	GetTypeDescriptorForType(const WString& typeName) = 0;
 			virtual void							GetVirtualTypes(collections::List<WString>& typeNames) = 0;
 			virtual WString							GetParentTypeForVirtualType(const WString& virtualType) = 0;
 		};
@@ -173,26 +173,31 @@ Instance Loader Manager
 			WString									typeName;
 			Ptr<GuiInstanceContext>					context;
 
-			InstanceLoadingSource():loader(0){}
-			InstanceLoadingSource(IGuiInstanceLoader* _loader, const WString& _typeName):loader(_loader), typeName(_typeName){}
-			InstanceLoadingSource(Ptr<GuiInstanceContext> _context):loader(0), context(_context){}
+			InstanceLoadingSource() :loader(0){}
+			InstanceLoadingSource(IGuiInstanceLoader* _loader, const WString& _typeName) :loader(_loader), typeName(_typeName){}
+			InstanceLoadingSource(Ptr<GuiInstanceContext> _context) :loader(0), context(_context){}
 
 			operator bool()const
 			{
-				return loader!=0 || context;
+				return loader != 0 || context;
 			}
 		};
 
 		extern IGuiInstanceLoaderManager*			GetInstanceLoaderManager();
 		extern InstanceLoadingSource				FindInstanceLoadingSource(
-														Ptr<GuiInstanceEnvironment> env,
-														GuiConstructorRepr* ctor
-														);
+			Ptr<GuiInstanceEnvironment> env,
+			GuiConstructorRepr* ctor
+			);
 		extern Ptr<GuiInstanceContextScope>			LoadInstance(
-														Ptr<GuiResource> resource,
-														const WString& instancePath,
-														description::ITypeDescriptor* expectedType=0
-														);
+			Ptr<GuiResource> resource,
+			const WString& instancePath,
+			description::ITypeDescriptor* expectedType = 0
+			);
+		extern Ptr<GuiInstanceContextScope>			InitializeInstance(
+			Ptr<GuiResource> resource,
+			const WString& instancePath,
+			DescriptableObject* instance
+			);
 		extern void									LogInstanceLoaderManager(stream::TextWriter& writer);
 
 /***********************************************************************
@@ -200,22 +205,44 @@ Instance Scope Wrapper
 ***********************************************************************/
 
 		template<typename T>
-		class GuiInstance : public Object
+		class GuiInstancePartialClass
 		{
+			template<typename T>
+			friend class GuiInstance;
 		private:
 			Ptr<GuiResource>						resource;
 			Ptr<GuiInstanceContextScope>			scope;
 			T*										instance;
 
-		public:
-			GuiInstance(Ptr<GuiResource> _resource, const WString& path)
-				:resource(_resource)
-				,instance(0)
+			bool LoadFromResource(const WString& path)
 			{
+				scope = 0;
+				instance = 0;
 				if (scope = LoadInstance(resource, path))
 				{
 					instance = description::UnboxValue<T*>(scope->rootInstance);
+					return true;
 				}
+				return false;
+			}
+			
+		protected:
+			bool InitializeFromResource(const WString& path)
+			{
+				scope = 0;
+				instance = dynamic_cast<T*>(this);
+				if (scope = InitializeInstance(resource, path, instance))
+				{
+					return true;
+				}
+				instance = 0;
+				return false;
+			}
+		public:
+			GuiInstancePartialClass(Ptr<GuiResource> _resource)
+				:resource(_resource)
+				, instance(0)
+			{
 			}
 
 			Ptr<GuiResource> GetResource()
@@ -231,6 +258,16 @@ Instance Scope Wrapper
 			T* GetInstance()
 			{
 				return instance;
+			}
+		};
+
+		template<typename T>
+		class GuiInstance : public Object, public GuiInstancePartialClass<T>
+		{
+		public:
+			GuiInstance(Ptr<GuiResource> _resource, const WString& path) :GuiInstancePartialClass<T>(_resource)
+			{
+				LoadFromResource(path);
 			}
 		};
 

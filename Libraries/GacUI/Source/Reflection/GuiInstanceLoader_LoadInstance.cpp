@@ -662,5 +662,23 @@ LoadInstance
 			}
 			return 0;
 		}
+
+/***********************************************************************
+InitializeInstance
+***********************************************************************/
+
+		Ptr<GuiInstanceContextScope> InitializeInstance(
+			Ptr<GuiResource> resource,
+			const WString& instancePath,
+			DescriptableObject* instance
+			)
+		{
+			Ptr<GuiInstanceContext> context=resource->GetValueByPath(instancePath).Cast<GuiInstanceContext>();
+			if (context)
+			{
+				Ptr<GuiResourcePathResolver> resolver = new GuiResourcePathResolver(resource, resource->GetWorkingDirectory());
+			}
+			return 0;
+		}
 	}
 }

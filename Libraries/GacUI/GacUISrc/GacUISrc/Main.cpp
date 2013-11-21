@@ -23,7 +23,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	int result=SetupWindowsGDIRenderer();
 #endif
 #ifdef GUI_GRAPHICS_RENDERER_DIRECT2D
-	int result=SetupWindowsDirect2DRenderer();
+	int result = SetupWindowsDirect2DRenderer();
 #endif
 
 #if _DEBUG
@@ -34,7 +34,8 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 extern void UnitTestInGuiMain();
 
-class MainWindowInstance : public GuiInstance<GuiWindow>
+template<typename TImpl>
+class SignInWindow_ : public GuiWindow, public GuiInstancePartialClass<GuiWindow>
 {
 protected:
 	GuiDocumentLabel*				documentLabelTop;
@@ -43,38 +44,63 @@ protected:
 	GuiSinglelineTextBox*			textBoxPassword;
 	GuiButton*						buttonLogin;
 
-public:
-	MainWindowInstance(Ptr<GuiResource> resource)
-		:GuiInstance(resource, L"SignInWindow/MainWindowResource")
+	void InitializeComponents()
 	{
-		GUI_INSTANCE_REFERENCE(documentLabelTop);
-		GUI_INSTANCE_REFERENCE(documentLabelBottom);
-		GUI_INSTANCE_REFERENCE(textBoxUserName);
-		GUI_INSTANCE_REFERENCE(textBoxPassword);
-		GUI_INSTANCE_REFERENCE(buttonLogin);
-	}
+		if (InitializeFromResource(L"SignInWindow/MainWindowResource"))
+		{
+			GUI_INSTANCE_REFERENCE(documentLabelTop);
+			GUI_INSTANCE_REFERENCE(documentLabelBottom);
+			GUI_INSTANCE_REFERENCE(textBoxUserName);
+			GUI_INSTANCE_REFERENCE(textBoxPassword);
+			GUI_INSTANCE_REFERENCE(buttonLogin);
 
-	~MainWindowInstance()
+			TImpl* impl = dynamic_cast <TImpl*>(this);
+			buttonLogin->Clicked.AttachMethod(impl, TImpl::buttonLogin_Clicked);
+		}
+	}
+public:
+	SignInWindow_(Ptr<GuiResource> resource)
+		:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
+		, GuiInstancePartialClass<GuiWindow>(resource)
+		, documentLabelTop(0)
+		, documentLabelBottom(0)
+		, textBoxUserName(0)
+		, textBoxPassword(0)
+		, buttonLogin(0)
 	{
-		delete GetInstance();
+	}
+};
+
+class SignInWindow : public SignInWindow_<SignInWindow>
+{
+	friend class SignInWindow_<SignInWindow>;
+protected:
+
+	void buttonLogin_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+	{
+	}
+public:
+	SignInWindow(Ptr<GuiResource> resource)
+		:SignInWindow_<SignInWindow>(resource)
+	{
 	}
 };
 
 /*
 Data Binding:
-	GuiSelectableListControl
-	GuiVirtualTextList
-	GuiVirtualListView
-	GuiVirtualTreeView
-	GuiVirtualDataGrid
+GuiSelectableListControl
+GuiVirtualTextList
+GuiVirtualListView
+GuiVirtualTreeView
+GuiVirtualDataGrid
 
 Features:
-	Component Xml Layout	: Type Loaders, Virtual Type Loaders, Constructor Parameters, Object Inception (e.g. ViewModel object), Object Schema
-	Expression				: "bind" Binder
-	Data Binding			: Data structure declaration
-	Scripting				: Event subscription, code behind
-	Control Template		: Template definition and referencing
-	Data Service and Query
+Component Xml Layout	: Type Loaders, Virtual Type Loaders, Constructor Parameters, Object Inception (e.g. ViewModel object), Object Schema
+Expression				: "bind" Binder
+Data Binding			: Data structure declaration
+Scripting				: Event subscription, code behind
+Control Template		: Template definition and referencing
+Data Service and Query
 */
 
 void GuiMain()
@@ -97,9 +123,9 @@ void GuiMain()
 #endif
 	UnitTestInGuiMain();
 
-	auto resource=GuiResource::LoadFromXml(L"..\\GacUISrcCodepackedTest\\Resources\\XmlWindowResource.xml");
-	MainWindowInstance instance(resource);
-	instance.GetInstance()->ForceCalculateSizeImmediately();
-	instance.GetInstance()->MoveToScreenCenter();
-	GetApplication()->Run(instance.GetInstance());
+	auto resource = GuiResource::LoadFromXml(L"..\\GacUISrcCodepackedTest\\Resources\\XmlWindowResource.xml");
+	SignInWindow window(resource);
+	window.ForceCalculateSizeImmediately();
+	window.MoveToScreenCenter();
+	GetApplication()->Run(&window);
 }
