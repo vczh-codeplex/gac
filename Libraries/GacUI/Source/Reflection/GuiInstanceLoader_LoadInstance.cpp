@@ -56,16 +56,24 @@ Helper Functions Declarations
 			List<FillInstanceBindingSetter>& bindingSetters
 			);
 
+		void ExecuteBindingSetters(
+			Ptr<GuiInstanceEnvironment> env,
+			List<FillInstanceBindingSetter>& bindingSetters
+			);
+
 		Ptr<GuiInstanceContextScope> LoadInstanceFromContext(
 			Ptr<GuiInstanceContext> context,
 			Ptr<GuiResourcePathResolver> resolver,
 			description::ITypeDescriptor* expectedType
 			);
 
-		Ptr<GuiInstanceContextScope> InitializeInstanceFromContext(
-			Ptr<GuiInstanceContext> context,
-			Ptr<GuiResourcePathResolver> resolver,
-			description::Value,
+		Ptr<GuiInstanceContextScope> InitializeInstanceFromConstructor(
+			Ptr<GuiInstanceEnvironment> env,
+			GuiConstructorRepr* ctor,
+			IGuiInstanceLoader* instanceLoader,
+			const WString& typeName,
+			description::Value instance,
+			bool deserialized,
 			List<FillInstanceBindingSetter>& bindingSetters
 			);
 
@@ -611,20 +619,28 @@ CreateInstance
 
 			if(instance.GetRawPtr() && instanceLoader)
 			{
-				FillInstance(instance, env, ctor, instanceLoader, deserialized, typeName, bindingSetters);
+				InitializeInstanceFromConstructor(env, ctor, instanceLoader, typeName, instance, deserialized, bindingSetters);
+			}
+			return instance;
+		}
 
-				vint index = ctor->referenceAttributes.Keys().IndexOf(L"Name");
-				if (index != -1)
+/***********************************************************************
+ExecuteBindingSetters
+***********************************************************************/
+
+		void ExecuteBindingSetters(
+			Ptr<GuiInstanceEnvironment> env,
+			List<FillInstanceBindingSetter>& bindingSetters
+			)
+		{
+			// set all -bind attributes
+			FOREACH(FillInstanceBindingSetter, bindingSetter, bindingSetters)
+			{
+				if (!bindingSetter.binder->SetPropertyValue(env, bindingSetter.loader, bindingSetter.propertyValue, bindingSetter.currentIndex))
 				{
-					WString referenceName = ctor->referenceAttributes.Values()[index];
-					if (!env->scope->referenceValues.Keys().Contains(referenceName))
-					{
-						env->scope->referenceValues.Add(referenceName, instance);
-					}
+					bindingSetter.propertyValue.propertyValue.DeleteRawPtr();
 				}
 			}
-
-			return instance;
 		}
 
 /***********************************************************************
@@ -639,17 +655,12 @@ LoadInstance
 		{
 			Ptr<GuiInstanceEnvironment> env = new GuiInstanceEnvironment(context, resolver);
 			List<FillInstanceBindingSetter> bindingSetters;
-			env->scope->rootInstance=CreateInstance(env, context->instance.Obj(), expectedType, env->scope->typeName, bindingSetters);
-
-			if (!env->scope->rootInstance.IsNull())
+			Value instance = CreateInstance(env, context->instance.Obj(), expectedType, env->scope->typeName, bindingSetters);
+			
+			if (!instance.IsNull())
 			{
-				FOREACH(FillInstanceBindingSetter, bindingSetter, bindingSetters)
-				{
-					if (!bindingSetter.binder->SetPropertyValue(env, bindingSetter.loader, bindingSetter.propertyValue, bindingSetter.currentIndex))
-					{
-						bindingSetter.propertyValue.propertyValue.DeleteRawPtr();
-					}
-				}
+				ExecuteBindingSetters(env, bindingSetters);
+				env->scope->rootInstance = instance;
 				return env->scope;
 			}
 			return 0;
@@ -674,14 +685,30 @@ LoadInstance
 InitializeInstance
 ***********************************************************************/
 
-		Ptr<GuiInstanceContextScope> InitializeInstanceFromContext(
-			Ptr<GuiInstanceContext> context,
-			Ptr<GuiResourcePathResolver> resolver,
-			description::Value,
+		Ptr<GuiInstanceContextScope> InitializeInstanceFromConstructor(
+			Ptr<GuiInstanceEnvironment> env,
+			GuiConstructorRepr* ctor,
+			IGuiInstanceLoader* instanceLoader,
+			const WString& typeName,
+			description::Value instance,
+			bool deserialized,
 			List<FillInstanceBindingSetter>& bindingSetters
 			)
 		{
-			return 0;
+			// fill all attributes
+			FillInstance(instance, env, ctor, instanceLoader, deserialized, typeName, bindingSetters);
+
+			vint index = ctor->referenceAttributes.Keys().IndexOf(L"Name");
+			if (index != -1)
+			{
+				// bind the created instance to a name
+				WString referenceName = ctor->referenceAttributes.Values()[index];
+				if (!env->scope->referenceValues.Keys().Contains(referenceName))
+				{
+					env->scope->referenceValues.Add(referenceName, instance);
+				}
+			}
+			return env->scope;
 		}
 
 		Ptr<GuiInstanceContextScope> InitializeInstance(
@@ -690,12 +717,29 @@ InitializeInstance
 			description::Value instance
 			)
 		{
-			Ptr<GuiInstanceContext> context=resource->GetValueByPath(instancePath).Cast<GuiInstanceContext>();
-			if (context)
+			if (instance.GetRawPtr())
 			{
-				Ptr<GuiResourcePathResolver> resolver = new GuiResourcePathResolver(resource, resource->GetWorkingDirectory());
-				List<FillInstanceBindingSetter> bindingSetters;
-				return InitializeInstanceFromContext(context, resolver, instance, bindingSetters);
+				Ptr<GuiInstanceContext> context=resource->GetValueByPath(instancePath).Cast<GuiInstanceContext>();
+				if (context)
+				{
+					Ptr<GuiResourcePathResolver> resolver = new GuiResourcePathResolver(resource, resource->GetWorkingDirectory());
+					List<FillInstanceBindingSetter> bindingSetters;
+
+					// search for a correct loader
+					GuiConstructorRepr* ctor = context->instance.Obj();
+					Ptr<GuiInstanceEnvironment> env = new GuiInstanceEnvironment(context, resolver);
+					InstanceLoadingSource source=FindInstanceLoadingSource(env, ctor);
+
+					// initialize the instance
+					if(source.loader)
+					{
+						if (auto scope = InitializeInstanceFromConstructor(env, ctor, source.loader, source.typeName, instance, false, bindingSetters))
+						{
+							ExecuteBindingSetters(env, bindingSetters);
+							return scope;
+						}
+					}
+				}
 			}
 			return 0;
 		}
