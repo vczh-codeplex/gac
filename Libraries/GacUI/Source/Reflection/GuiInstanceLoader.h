@@ -245,6 +245,10 @@ Instance Scope Wrapper
 			{
 			}
 
+			virtual ~GuiInstancePartialClass()
+			{
+			}
+
 			Ptr<GuiResource> GetResource()
 			{
 				return resource;
