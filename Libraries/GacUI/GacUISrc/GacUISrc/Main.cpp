@@ -37,55 +37,21 @@ extern void UnitTestInGuiMain();
 class MainWindowInstance : public GuiInstance<GuiWindow>
 {
 protected:
-	GuiTextList*					listResources;
-	GuiButton*						buttonShow;
+	GuiDocumentLabel*				documentLabelTop;
+	GuiDocumentLabel*				documentLabelBottom;
+	GuiSinglelineTextBox*			textBoxUserName;
+	GuiSinglelineTextBox*			textBoxPassword;
+	GuiButton*						buttonLogin;
 
-	void ShowWindowInResource(const WString& name)
-	{
-		auto scope = LoadInstance(GetResource(), L"XmlWindowDemos/" + name + L"/MainWindowResource");
-		auto window = UnboxValue<GuiWindow*>(scope->rootInstance);
-
-		window->ForceCalculateSizeImmediately();
-		window->MoveToScreenCenter();
-		window->Show();
-
-		window->WindowClosed.AttachLambda([=](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
-		{
-			GetApplication()->InvokeInMainThread([=]()
-			{
-				delete window;
-			});
-		});
-	}
-
-	void listResources_SelectionChanged(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
-	{
-		buttonShow->SetEnabled(listResources->GetSelectedItems().Count() == 1);
-	}
-
-	void listResources_ItemLeftButtonDoubleClick(GuiGraphicsComposition* sender, GuiItemMouseEventArgs& arguments)
-	{
-		ShowWindowInResource(listResources->GetItems()[arguments.itemIndex]->GetText());
-	}
-
-	void buttonShow_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
-	{
-		vint itemIndex = listResources->GetSelectedItems()[0];
-		ShowWindowInResource(listResources->GetItems()[itemIndex]->GetText());
-	}
 public:
 	MainWindowInstance(Ptr<GuiResource> resource)
-		:GuiInstance(resource, L"XmlWindowDemos/MainWindow/MainWindowResource")
+		:GuiInstance(resource, L"SignInWindow/MainWindowResource")
 	{
-		GUI_INSTANCE_REFERENCE(listResources);
-		GUI_INSTANCE_REFERENCE(buttonShow);
-		
-		listResources->SelectionChanged.AttachMethod(this, &MainWindowInstance::listResources_SelectionChanged);
-		listResources->ItemLeftButtonDoubleClick.AttachMethod(this, &MainWindowInstance::listResources_ItemLeftButtonDoubleClick);
-		buttonShow->Clicked.AttachMethod(this, &MainWindowInstance::buttonShow_Clicked);
-
-		GetInstance()->ForceCalculateSizeImmediately();
-		GetInstance()->MoveToScreenCenter();
+		GUI_INSTANCE_REFERENCE(documentLabelTop);
+		GUI_INSTANCE_REFERENCE(documentLabelBottom);
+		GUI_INSTANCE_REFERENCE(textBoxUserName);
+		GUI_INSTANCE_REFERENCE(textBoxPassword);
+		GUI_INSTANCE_REFERENCE(buttonLogin);
 	}
 
 	~MainWindowInstance()
@@ -114,24 +80,26 @@ Features:
 void GuiMain()
 {
 #ifndef VCZH_DEBUG_NO_REFLECTION
-	{
-		FileStream fileStream(L"Reflection.txt", FileStream::WriteOnly);
-		BomEncoder encoder(BomEncoder::Utf16);
-		EncoderStream encoderStream(fileStream, encoder);
-		StreamWriter writer(encoderStream);
-		LogTypeManager(writer);
-	}
-	{
-		FileStream fileStream(L"Instance.txt", FileStream::WriteOnly);
-		BomEncoder encoder(BomEncoder::Utf16);
-		EncoderStream encoderStream(fileStream, encoder);
-		StreamWriter writer(encoderStream);
-		LogInstanceLoaderManager(writer);
-	}
+	//{
+	//	FileStream fileStream(L"Reflection.txt", FileStream::WriteOnly);
+	//	BomEncoder encoder(BomEncoder::Utf16);
+	//	EncoderStream encoderStream(fileStream, encoder);
+	//	StreamWriter writer(encoderStream);
+	//	LogTypeManager(writer);
+	//}
+	//{
+	//	FileStream fileStream(L"Instance.txt", FileStream::WriteOnly);
+	//	BomEncoder encoder(BomEncoder::Utf16);
+	//	EncoderStream encoderStream(fileStream, encoder);
+	//	StreamWriter writer(encoderStream);
+	//	LogInstanceLoaderManager(writer);
+	//}
 #endif
 	UnitTestInGuiMain();
 
 	auto resource=GuiResource::LoadFromXml(L"..\\GacUISrcCodepackedTest\\Resources\\XmlWindowResource.xml");
 	MainWindowInstance instance(resource);
+	instance.GetInstance()->ForceCalculateSizeImmediately();
+	instance.GetInstance()->MoveToScreenCenter();
 	GetApplication()->Run(instance.GetInstance());
 }

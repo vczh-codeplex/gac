@@ -184,6 +184,10 @@ Instance Loader Manager
 		};
 
 		extern IGuiInstanceLoaderManager*			GetInstanceLoaderManager();
+		extern InstanceLoadingSource				FindInstanceLoadingSource(
+														Ptr<GuiInstanceEnvironment> env,
+														GuiConstructorRepr* ctor
+														);
 		extern Ptr<GuiInstanceContextScope>			LoadInstance(
 														Ptr<GuiResource> resource,
 														const WString& instancePath,

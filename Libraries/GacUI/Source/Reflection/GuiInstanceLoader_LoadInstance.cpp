@@ -27,11 +27,6 @@ Helper Functions Declarations
 			}
 		};
 
-		InstanceLoadingSource FindInstanceLoadingSource(
-			Ptr<GuiInstanceEnvironment> env,
-			GuiConstructorRepr* ctor
-			);
-
 		bool LoadInstancePropertyValue(
 			Ptr<GuiInstanceEnvironment> env,
 			const WString& binding,
@@ -452,7 +447,7 @@ FillInstance
 		}
 
 /***********************************************************************
-Helper Functions
+LoadInstanceInternal
 ***********************************************************************/
 
 		description::Value LoadInstanceInternal(
@@ -650,7 +645,7 @@ Helper Functions
 		}
 
 /***********************************************************************
-Helper Functions
+LoadInstance
 ***********************************************************************/
 
 		Ptr<GuiInstanceContextScope> LoadInstance(
