@@ -35,53 +35,76 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 extern void UnitTestInGuiMain();
 
 template<typename TImpl>
-class SignInWindow_ : public GuiWindow, public GuiInstancePartialClass<GuiWindow>
+class MainWindow_ : public GuiWindow, public GuiInstancePartialClass<GuiWindow>
 {
 protected:
-	GuiDocumentLabel*				documentLabelTop;
-	GuiDocumentLabel*				documentLabelBottom;
-	GuiSinglelineTextBox*			textBoxUserName;
-	GuiSinglelineTextBox*			textBoxPassword;
-	GuiButton*						buttonLogin;
+	GuiTextList*					listResources;
+	GuiButton*						buttonShow;
 
 	void InitializeComponents()
 	{
-		if (InitializeFromResource(L"SignInWindow/MainWindowResource"))
+		if (InitializeFromResource(L"XmlWindowDemos/MainWindow/MainWindowResource"))
 		{
-			GUI_INSTANCE_REFERENCE(documentLabelTop);
-			GUI_INSTANCE_REFERENCE(documentLabelBottom);
-			GUI_INSTANCE_REFERENCE(textBoxUserName);
-			GUI_INSTANCE_REFERENCE(textBoxPassword);
-			GUI_INSTANCE_REFERENCE(buttonLogin);
+			GUI_INSTANCE_REFERENCE(listResources);
+			GUI_INSTANCE_REFERENCE(buttonShow);
 
 			TImpl* impl = dynamic_cast <TImpl*>(this);
-			buttonLogin->Clicked.AttachMethod(impl, TImpl::buttonLogin_Clicked);
+			listResources->SelectionChanged.AttachMethod(impl, &TImpl::listResources_SelectionChanged);
+			listResources->ItemLeftButtonDoubleClick.AttachMethod(impl, &TImpl::listResources_ItemLeftButtonDoubleClick);
+			buttonShow->Clicked.AttachMethod(impl, &TImpl::buttonShow_Clicked);
 		}
 	}
 public:
-	SignInWindow_(Ptr<GuiResource> resource)
+	MainWindow_(Ptr<GuiResource> resource)
 		:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
 		, GuiInstancePartialClass<GuiWindow>(resource)
-		, documentLabelTop(0)
-		, documentLabelBottom(0)
-		, textBoxUserName(0)
-		, textBoxPassword(0)
-		, buttonLogin(0)
+		, listResources(0)
+		, buttonShow(0)
 	{
 	}
 };
 
-class SignInWindow : public SignInWindow_<SignInWindow>
+class MainWindow : public MainWindow_<MainWindow>
 {
-	friend class SignInWindow_<SignInWindow>;
+	friend class MainWindow_<MainWindow>;
 protected:
 
-	void buttonLogin_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+	void ShowWindowInResource(const WString& name)
 	{
+		auto scope = LoadInstance(GetResource(), L"XmlWindowDemos/" + name + L"/MainWindowResource");
+		auto window = UnboxValue<GuiWindow*>(scope->rootInstance);
+
+		window->ForceCalculateSizeImmediately();
+		window->MoveToScreenCenter();
+		window->Show();
+
+		window->WindowClosed.AttachLambda([=](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+		{
+			GetApplication()->InvokeInMainThread([=]()
+			{
+				delete window;
+			});
+		});
+	}
+
+	void listResources_SelectionChanged(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+	{
+		buttonShow->SetEnabled(listResources->GetSelectedItems().Count() == 1);
+	}
+
+	void listResources_ItemLeftButtonDoubleClick(GuiGraphicsComposition* sender, GuiItemMouseEventArgs& arguments)
+	{
+		ShowWindowInResource(listResources->GetItems()[arguments.itemIndex]->GetText());
+	}
+
+	void buttonShow_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+	{
+		vint itemIndex = listResources->GetSelectedItems()[0];
+		ShowWindowInResource(listResources->GetItems()[itemIndex]->GetText());
 	}
 public:
-	SignInWindow(Ptr<GuiResource> resource)
-		:SignInWindow_<SignInWindow>(resource)
+	MainWindow(Ptr<GuiResource> resource)
+		:MainWindow_<MainWindow>(resource)
 	{
 	}
 };
@@ -124,7 +147,7 @@ void GuiMain()
 	UnitTestInGuiMain();
 
 	auto resource = GuiResource::LoadFromXml(L"..\\GacUISrcCodepackedTest\\Resources\\XmlWindowResource.xml");
-	SignInWindow window(resource);
+	MainWindow window(resource);
 	window.ForceCalculateSizeImmediately();
 	window.MoveToScreenCenter();
 	GetApplication()->Run(&window);

@@ -196,7 +196,7 @@ Instance Loader Manager
 		extern Ptr<GuiInstanceContextScope>			InitializeInstance(
 			Ptr<GuiResource> resource,
 			const WString& instancePath,
-			DescriptableObject* instance
+			description::Value instance
 			);
 		extern void									LogInstanceLoaderManager(stream::TextWriter& writer);
 
