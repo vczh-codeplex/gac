@@ -155,6 +155,17 @@ Type Declaration
 				CLASS_MEMBER_METHOD(CreateRadioTextListItemStyle, NO_PARAMETER)
 			END_CLASS_MEMBER(ITheme)
 
+			BEGIN_CLASS_MEMBER(GuiCustomControl)
+				CLASS_MEMBER_BASE(GuiControl)
+				CONTROL_CONSTRUCTOR_CONTROLLER(GuiCustomControl)
+				CONTROL_CONSTRUCTOR_DEFAULT(GuiCustomControl, &g::NewCustomControl)
+			END_CLASS_MEMBER(GuiCustomControl)
+
+			BEGIN_CLASS_MEMBER(GuiCustomControl::IStyleController)
+				CLASS_MEMBER_BASE(GuiControl::IStyleController)
+				INTERFACE_EXTERNALCTOR(GuiCustomControl, IStyleController)
+			END_CLASS_MEMBER(GuiCustomControl::IStyleController)
+
 			BEGIN_CLASS_MEMBER(GuiLabel)
 				CLASS_MEMBER_BASE(GuiControl)
 				CONTROL_CONSTRUCTOR_CONTROLLER(GuiLabel)

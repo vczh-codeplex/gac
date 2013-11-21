@@ -40,6 +40,8 @@ namespace vl
 				/// <summary>Create a style for window.</summary>
 				/// <returns>The created style.</returns>
 				virtual controls::GuiWindow::IStyleController*								CreateWindowStyle()=0;
+				/// <summary>Create a style for a user customizable control.</summary>
+				virtual controls::GuiCustomControl::IStyleController*						CreateCustomControlStyle() = 0;
 				/// <summary>Create a style for tooltip.</summary>
 				/// <returns>The created style.</returns>
 				virtual controls::GuiTooltip::IStyleController*								CreateTooltipStyle()=0;
@@ -175,6 +177,9 @@ namespace vl
 				/// <summary>Create a window.</summary>
 				/// <returns>The created control.</returns>
 				extern controls::GuiWindow*						NewWindow();
+				/// <summary>Create a user customizable control.</summary>
+				/// <returns>The created control.</returns>
+				extern controls::GuiCustomControl*				NewCustomControl();
 				/// <summary>Create a label.</summary>
 				/// <returns>The created control.</returns>
 				extern controls::GuiLabel*						NewLabel();

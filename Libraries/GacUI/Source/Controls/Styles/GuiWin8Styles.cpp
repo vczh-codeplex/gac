@@ -37,6 +37,11 @@ Win8Theme
 				return new Win8WindowStyle;
 			}
 
+			controls::GuiCustomControl::IStyleController* Win8Theme::CreateCustomControlStyle()
+			{
+				return new GuiCustomControl::EmptyStyleController;
+			}
+
 			controls::GuiTooltip::IStyleController* Win8Theme::CreateTooltipStyle()
 			{
 				return new Win8TooltipStyle;

@@ -38,6 +38,11 @@ Win7Theme
 				return new Win7WindowStyle;
 			}
 
+			controls::GuiCustomControl::IStyleController* Win7Theme::CreateCustomControlStyle()
+			{
+				return new GuiCustomControl::EmptyStyleController;
+			}
+
 			controls::GuiTooltip::IStyleController* Win7Theme::CreateTooltipStyle()
 			{
 				return new Win7TooltipStyle;
