@@ -231,7 +231,7 @@ Instance Scope Wrapper
 			{
 				scope = 0;
 				instance = dynamic_cast<T*>(this);
-				if (scope = InitializeInstance(resource, path, instance))
+				if (scope = InitializeInstance(resource, path, Value::From(instance)))
 				{
 					return true;
 				}

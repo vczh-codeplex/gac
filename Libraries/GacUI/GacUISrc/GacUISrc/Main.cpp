@@ -106,6 +106,7 @@ public:
 	MainWindow(Ptr<GuiResource> resource)
 		:MainWindow_<MainWindow>(resource)
 	{
+		InitializeComponents();
 	}
 };
 
