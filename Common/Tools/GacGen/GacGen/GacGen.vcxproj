@@ -106,6 +106,9 @@
     <ClInclude Include="..\..\..\..\Libraries\GacUI\Public\Source\GacUIWindows.h" />
     <ClInclude Include="..\..\..\..\Libraries\GacUI\Public\Source\Vlpp.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Xml Include="XmlWindowResource.xml" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

@@ -808,6 +808,19 @@ GuiControl
 			}
 
 /***********************************************************************
+GuiCustomControl
+***********************************************************************/
+
+			GuiCustomControl::GuiCustomControl(IStyleController* _styleController)
+				:GuiControl(_styleController)
+			{
+			}
+
+			GuiCustomControl::~GuiCustomControl()
+			{
+			}
+
+/***********************************************************************
 GuiComponent
 ***********************************************************************/
 			
@@ -12414,6 +12427,11 @@ namespace vl
 					return new controls::GuiWindow(GetCurrentTheme()->CreateWindowStyle());
 				}
 
+				controls::GuiCustomControl* NewCustomControl()
+				{
+					return new controls::GuiCustomControl(GetCurrentTheme()->CreateCustomControlStyle());
+				}
+
 				controls::GuiLabel* NewLabel()
 				{
 					return new controls::GuiLabel(GetCurrentTheme()->CreateLabelStyle());
@@ -12669,6 +12687,11 @@ Win7Theme
 				return new Win7WindowStyle;
 			}
 
+			controls::GuiCustomControl::IStyleController* Win7Theme::CreateCustomControlStyle()
+			{
+				return new GuiCustomControl::EmptyStyleController;
+			}
+
 			controls::GuiTooltip::IStyleController* Win7Theme::CreateTooltipStyle()
 			{
 				return new Win7TooltipStyle;
@@ -12897,6 +12920,11 @@ Win8Theme
 			controls::GuiWindow::IStyleController* Win8Theme::CreateWindowStyle()
 			{
 				return new Win8WindowStyle;
+			}
+
+			controls::GuiCustomControl::IStyleController* Win8Theme::CreateCustomControlStyle()
+			{
+				return new GuiCustomControl::EmptyStyleController;
 			}
 
 			controls::GuiTooltip::IStyleController* Win8Theme::CreateTooltipStyle()

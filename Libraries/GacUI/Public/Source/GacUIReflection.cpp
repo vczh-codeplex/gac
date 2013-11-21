@@ -833,11 +833,6 @@ Helper Functions Declarations
 			}
 		};
 
-		InstanceLoadingSource FindInstanceLoadingSource(
-			Ptr<GuiInstanceEnvironment> env,
-			GuiConstructorRepr* ctor
-			);
-
 		bool LoadInstancePropertyValue(
 			Ptr<GuiInstanceEnvironment> env,
 			const WString& binding,
@@ -859,7 +854,7 @@ Helper Functions Declarations
 			List<FillInstanceBindingSetter>& bindingSetters
 			);
 
-		description::Value LoadInstanceInternal(
+		description::Value CreateInstance(
 			Ptr<GuiInstanceEnvironment> env,
 			GuiConstructorRepr* ctor,
 			description::ITypeDescriptor* expectedType,
@@ -867,10 +862,25 @@ Helper Functions Declarations
 			List<FillInstanceBindingSetter>& bindingSetters
 			);
 
-		Ptr<GuiInstanceContextScope> LoadInstanceInternal(
+		void ExecuteBindingSetters(
+			Ptr<GuiInstanceEnvironment> env,
+			List<FillInstanceBindingSetter>& bindingSetters
+			);
+
+		Ptr<GuiInstanceContextScope> LoadInstanceFromContext(
 			Ptr<GuiInstanceContext> context,
 			Ptr<GuiResourcePathResolver> resolver,
 			description::ITypeDescriptor* expectedType
+			);
+
+		Ptr<GuiInstanceContextScope> InitializeInstanceFromConstructor(
+			Ptr<GuiInstanceEnvironment> env,
+			GuiConstructorRepr* ctor,
+			IGuiInstanceLoader* instanceLoader,
+			const WString& typeName,
+			description::Value instance,
+			bool deserialized,
+			List<FillInstanceBindingSetter>& bindingSetters
 			);
 
 		namespace visitors
@@ -993,7 +1003,7 @@ LoadValueVisitor
 					FOREACH(ITypeDescriptor*, typeDescriptor, acceptableTypes)
 					{
 						WString _typeName;
-						loadedValue=LoadInstanceInternal(env, repr, typeDescriptor, _typeName, bindingSetters);
+						loadedValue=CreateInstance(env, repr, typeDescriptor, _typeName, bindingSetters);
 						if (!loadedValue.IsNull())
 						{
 							result = true;
@@ -1258,10 +1268,10 @@ FillInstance
 		}
 
 /***********************************************************************
-Helper Functions
+CreateInstance
 ***********************************************************************/
 
-		description::Value LoadInstanceInternal(
+		description::Value CreateInstance(
 			Ptr<GuiInstanceEnvironment> env,
 			GuiConstructorRepr* ctor,
 			description::ITypeDescriptor* expectedType,
@@ -1405,7 +1415,7 @@ Helper Functions
 			else if(source.context)
 			{
 				// found another instance in the resource
-				if (Ptr<GuiInstanceContextScope> scope = LoadInstanceInternal(source.context, env->resolver, expectedType))
+				if (Ptr<GuiInstanceContextScope> scope = LoadInstanceFromContext(source.context, env->resolver, expectedType))
 				{
 					typeName = scope->typeName;
 					instance = scope->rootInstance;
@@ -1415,23 +1425,35 @@ Helper Functions
 
 			if(instance.GetRawPtr() && instanceLoader)
 			{
-				FillInstance(instance, env, ctor, instanceLoader, deserialized, typeName, bindingSetters);
-
-				vint index = ctor->referenceAttributes.Keys().IndexOf(L"Name");
-				if (index != -1)
-				{
-					WString referenceName = ctor->referenceAttributes.Values()[index];
-					if (!env->scope->referenceValues.Keys().Contains(referenceName))
-					{
-						env->scope->referenceValues.Add(referenceName, instance);
-					}
-				}
+				InitializeInstanceFromConstructor(env, ctor, instanceLoader, typeName, instance, deserialized, bindingSetters);
 			}
-
 			return instance;
 		}
 
-		Ptr<GuiInstanceContextScope> LoadInstanceInternal(
+/***********************************************************************
+ExecuteBindingSetters
+***********************************************************************/
+
+		void ExecuteBindingSetters(
+			Ptr<GuiInstanceEnvironment> env,
+			List<FillInstanceBindingSetter>& bindingSetters
+			)
+		{
+			// set all -bind attributes
+			FOREACH(FillInstanceBindingSetter, bindingSetter, bindingSetters)
+			{
+				if (!bindingSetter.binder->SetPropertyValue(env, bindingSetter.loader, bindingSetter.propertyValue, bindingSetter.currentIndex))
+				{
+					bindingSetter.propertyValue.propertyValue.DeleteRawPtr();
+				}
+			}
+		}
+
+/***********************************************************************
+LoadInstance
+***********************************************************************/
+
+		Ptr<GuiInstanceContextScope> LoadInstanceFromContext(
 			Ptr<GuiInstanceContext> context,
 			Ptr<GuiResourcePathResolver> resolver,
 			description::ITypeDescriptor* expectedType
@@ -1439,25 +1461,16 @@ Helper Functions
 		{
 			Ptr<GuiInstanceEnvironment> env = new GuiInstanceEnvironment(context, resolver);
 			List<FillInstanceBindingSetter> bindingSetters;
-			env->scope->rootInstance=LoadInstanceInternal(env, context->instance.Obj(), expectedType, env->scope->typeName, bindingSetters);
-
-			if (!env->scope->rootInstance.IsNull())
+			Value instance = CreateInstance(env, context->instance.Obj(), expectedType, env->scope->typeName, bindingSetters);
+			
+			if (!instance.IsNull())
 			{
-				FOREACH(FillInstanceBindingSetter, bindingSetter, bindingSetters)
-				{
-					if (!bindingSetter.binder->SetPropertyValue(env, bindingSetter.loader, bindingSetter.propertyValue, bindingSetter.currentIndex))
-					{
-						bindingSetter.propertyValue.propertyValue.DeleteRawPtr();
-					}
-				}
+				ExecuteBindingSetters(env, bindingSetters);
+				env->scope->rootInstance = instance;
 				return env->scope;
 			}
 			return 0;
 		}
-
-/***********************************************************************
-Helper Functions
-***********************************************************************/
 
 		Ptr<GuiInstanceContextScope> LoadInstance(
 			Ptr<GuiResource> resource,
@@ -1469,7 +1482,70 @@ Helper Functions
 			if (context)
 			{
 				Ptr<GuiResourcePathResolver> resolver = new GuiResourcePathResolver(resource, resource->GetWorkingDirectory());
-				return LoadInstanceInternal(context, resolver, expectedType);
+				return LoadInstanceFromContext(context, resolver, expectedType);
+			}
+			return 0;
+		}
+
+/***********************************************************************
+InitializeInstance
+***********************************************************************/
+
+		Ptr<GuiInstanceContextScope> InitializeInstanceFromConstructor(
+			Ptr<GuiInstanceEnvironment> env,
+			GuiConstructorRepr* ctor,
+			IGuiInstanceLoader* instanceLoader,
+			const WString& typeName,
+			description::Value instance,
+			bool deserialized,
+			List<FillInstanceBindingSetter>& bindingSetters
+			)
+		{
+			// fill all attributes
+			FillInstance(instance, env, ctor, instanceLoader, deserialized, typeName, bindingSetters);
+
+			vint index = ctor->referenceAttributes.Keys().IndexOf(L"Name");
+			if (index != -1)
+			{
+				// bind the created instance to a name
+				WString referenceName = ctor->referenceAttributes.Values()[index];
+				if (!env->scope->referenceValues.Keys().Contains(referenceName))
+				{
+					env->scope->referenceValues.Add(referenceName, instance);
+				}
+			}
+			return env->scope;
+		}
+
+		Ptr<GuiInstanceContextScope> InitializeInstance(
+			Ptr<GuiResource> resource,
+			const WString& instancePath,
+			description::Value instance
+			)
+		{
+			if (instance.GetRawPtr())
+			{
+				Ptr<GuiInstanceContext> context=resource->GetValueByPath(instancePath).Cast<GuiInstanceContext>();
+				if (context)
+				{
+					Ptr<GuiResourcePathResolver> resolver = new GuiResourcePathResolver(resource, resource->GetWorkingDirectory());
+					List<FillInstanceBindingSetter> bindingSetters;
+
+					// search for a correct loader
+					GuiConstructorRepr* ctor = context->instance.Obj();
+					Ptr<GuiInstanceEnvironment> env = new GuiInstanceEnvironment(context, resolver);
+					InstanceLoadingSource source=FindInstanceLoadingSource(env, ctor);
+
+					// initialize the instance
+					if(source.loader)
+					{
+						if (auto scope = InitializeInstanceFromConstructor(env, ctor, source.loader, source.typeName, instance, false, bindingSetters))
+						{
+							ExecuteBindingSetters(env, bindingSetters);
+							return scope;
+						}
+					}
+				}
 			}
 			return 0;
 		}
@@ -4749,6 +4825,17 @@ Type Declaration
 				CLASS_MEMBER_METHOD(CreateCheckTextListItemStyle, NO_PARAMETER)
 				CLASS_MEMBER_METHOD(CreateRadioTextListItemStyle, NO_PARAMETER)
 			END_CLASS_MEMBER(ITheme)
+
+			BEGIN_CLASS_MEMBER(GuiCustomControl)
+				CLASS_MEMBER_BASE(GuiControl)
+				CONTROL_CONSTRUCTOR_CONTROLLER(GuiCustomControl)
+				CONTROL_CONSTRUCTOR_DEFAULT(GuiCustomControl, &g::NewCustomControl)
+			END_CLASS_MEMBER(GuiCustomControl)
+
+			BEGIN_CLASS_MEMBER(GuiCustomControl::IStyleController)
+				CLASS_MEMBER_BASE(GuiControl::IStyleController)
+				INTERFACE_EXTERNALCTOR(GuiCustomControl, IStyleController)
+			END_CLASS_MEMBER(GuiCustomControl::IStyleController)
 
 			BEGIN_CLASS_MEMBER(GuiLabel)
 				CLASS_MEMBER_BASE(GuiControl)
