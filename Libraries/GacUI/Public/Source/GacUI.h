@@ -4247,7 +4247,7 @@ Basic Construction
 					virtual void									SetVisuallyEnabled(bool value)=0;
 				};
 
-				class EmptyStyleController : public Object, public IStyleController, public Description<EmptyStyleController>
+				class EmptyStyleController : public Object, public virtual IStyleController, public Description<EmptyStyleController>
 				{
 				protected:
 					compositions::GuiBoundsComposition*				boundsComposition;
@@ -4350,6 +4350,26 @@ Basic Construction
 				{
 					return dynamic_cast<T*>(QueryService(T::Identifier));
 				}
+			};
+
+			class GuiCustomControl : public GuiControl, public Description<GuiCustomControl>
+			{
+			public:
+				class IStyleController : virtual public GuiControl::IStyleController, public Description<IStyleController>
+				{
+				public:
+				};
+
+#pragma warning(push)
+#pragma warning(disable:4250)
+				class EmptyStyleController : public GuiControl::EmptyStyleController, public virtual IStyleController, public Description<EmptyStyleController>
+				{
+				};
+#pragma warning(pop)
+
+			public:
+				GuiCustomControl(IStyleController* _styleController);
+				~GuiCustomControl();
 			};
 
 			class GuiComponent : public Object, public Description<GuiComponent>
@@ -10402,6 +10422,7 @@ namespace vl
 			{
 			public:
 				virtual controls::GuiWindow::IStyleController*								CreateWindowStyle()=0;
+				virtual controls::GuiCustomControl::IStyleController*						CreateCustomControlStyle() = 0;
 				virtual controls::GuiTooltip::IStyleController*								CreateTooltipStyle()=0;
 				virtual controls::GuiLabel::IStyleController*								CreateLabelStyle()=0;
 				virtual controls::GuiScrollContainer::IStyleProvider*						CreateScrollContainerStyle()=0;
@@ -10453,6 +10474,7 @@ namespace vl
 			namespace g
 			{
 				extern controls::GuiWindow*						NewWindow();
+				extern controls::GuiCustomControl*				NewCustomControl();
 				extern controls::GuiLabel*						NewLabel();
 				extern controls::GuiScrollContainer*			NewScrollContainer();
 				extern controls::GuiControl*					NewGroupBox();
@@ -10537,6 +10559,7 @@ Theme
 				~Win7Theme();
 
 				controls::GuiWindow::IStyleController*								CreateWindowStyle()override;
+				controls::GuiCustomControl::IStyleController*						CreateCustomControlStyle()override;
 				controls::GuiTooltip::IStyleController*								CreateTooltipStyle()override;
 				controls::GuiLabel::IStyleController*								CreateLabelStyle()override;
 				controls::GuiScrollContainer::IStyleProvider*						CreateScrollContainerStyle()override;
@@ -10620,6 +10643,7 @@ Theme
 				~Win8Theme();
 
 				controls::GuiWindow::IStyleController*								CreateWindowStyle()override;
+				controls::GuiCustomControl::IStyleController*						CreateCustomControlStyle()override;
 				controls::GuiTooltip::IStyleController*								CreateTooltipStyle()override;
 				controls::GuiLabel::IStyleController*								CreateLabelStyle()override;
 				controls::GuiScrollContainer::IStyleProvider*						CreateScrollContainerStyle()override;
