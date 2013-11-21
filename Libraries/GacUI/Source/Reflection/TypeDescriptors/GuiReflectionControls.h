@@ -28,6 +28,8 @@ Type List
 #define GUIREFLECTIONCONTROLS_TYPELIST(F)\
 			F(presentation::controls::GuiApplication)\
 			F(presentation::theme::ITheme)\
+			F(presentation::controls::GuiCustomControl)\
+			F(presentation::controls::GuiCustomControl::IStyleController)\
 			F(presentation::controls::GuiLabel)\
 			F(presentation::controls::GuiLabel::IStyleController)\
 			F(presentation::controls::GuiButton)\
@@ -212,6 +214,20 @@ Interface Proxy
 #pragma warning(disable:4250)
 			namespace interface_proxy
 			{
+				class GuiCustomControl_IStyleController : public virtual GuiControl_IStyleController, public virtual GuiCustomControl::IStyleController
+				{
+				public:
+					GuiCustomControl_IStyleController(Ptr<IValueInterfaceProxy> _proxy)
+						:GuiControl_IStyleController(_proxy)
+					{
+					}
+
+					static GuiCustomControl::IStyleController* Create(Ptr<IValueInterfaceProxy> _proxy)
+					{
+						return new GuiCustomControl_IStyleController(_proxy);
+					}
+				};
+
 				class GuiLabel_IStyleController : public virtual GuiControl_IStyleController, public virtual GuiLabel::IStyleController
 				{
 				public:

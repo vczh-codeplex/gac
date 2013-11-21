@@ -25,6 +25,11 @@ namespace vl
 					return new controls::GuiWindow(GetCurrentTheme()->CreateWindowStyle());
 				}
 
+				controls::GuiCustomControl* NewCustomControl()
+				{
+					return new controls::GuiCustomControl(GetCurrentTheme()->CreateCustomControlStyle());
+				}
+
 				controls::GuiLabel* NewLabel()
 				{
 					return new controls::GuiLabel(GetCurrentTheme()->CreateLabelStyle());

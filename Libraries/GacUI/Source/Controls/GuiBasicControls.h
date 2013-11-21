@@ -62,7 +62,7 @@ Basic Construction
 				/// <summary>
 				/// An empty style for <see cref="GuiControl"/>.
 				/// </summary>
-				class EmptyStyleController : public Object, public IStyleController, public Description<EmptyStyleController>
+				class EmptyStyleController : public Object, public virtual IStyleController, public Description<EmptyStyleController>
 				{
 				protected:
 					compositions::GuiBoundsComposition*				boundsComposition;
@@ -252,6 +252,33 @@ Basic Construction
 				{
 					return dynamic_cast<T*>(QueryService(T::Identifier));
 				}
+			};
+
+			/// <summary>Represnets a user customizable control.</summary>
+			class GuiCustomControl : public GuiControl, public Description<GuiCustomControl>
+			{
+			public:
+				/// <summary>Style controller interface for <see cref="GuiCustomControl"/>.</summary>
+				class IStyleController : virtual public GuiControl::IStyleController, public Description<IStyleController>
+				{
+				public:
+				};
+
+#pragma warning(push)
+#pragma warning(disable:4250)
+				/// <summary>
+				/// An empty style for <see cref="GuiCustomControl"/>.
+				/// </summary>
+				class EmptyStyleController : public GuiControl::EmptyStyleController, public virtual IStyleController, public Description<EmptyStyleController>
+				{
+				};
+#pragma warning(pop)
+
+			public:
+				/// <summary>Create a control with a specified style controller.</summary>
+				/// <param name="_styleController">The style controller.</param>
+				GuiCustomControl(IStyleController* _styleController);
+				~GuiCustomControl();
 			};
 
 			/// <summary>

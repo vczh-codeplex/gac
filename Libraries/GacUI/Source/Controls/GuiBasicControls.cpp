@@ -385,6 +385,19 @@ GuiControl
 			}
 
 /***********************************************************************
+GuiCustomControl
+***********************************************************************/
+
+			GuiCustomControl::GuiCustomControl(IStyleController* _styleController)
+				:GuiControl(_styleController)
+			{
+			}
+
+			GuiCustomControl::~GuiCustomControl()
+			{
+			}
+
+/***********************************************************************
 GuiComponent
 ***********************************************************************/
 			
