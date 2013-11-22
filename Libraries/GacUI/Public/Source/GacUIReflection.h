@@ -151,7 +151,7 @@ Instance Representation
 		public:
 			WString									typeNamespace;
 			WString									typeName;
-			ReferenceAttrubuteMap					referenceAttributes;
+			Nullable<WString>						instanceName;
 
 			void									Accept(IVisitor* visitor)override{visitor->Visit(this);}
 		};
@@ -160,38 +160,11 @@ Instance Representation
 Instance Namespace
 ***********************************************************************/
 
-		class GuiInstanceResourcePattern;
-		class GuiInstanceNamePattern;
-
-		class GuiInstancePattern : public Object, public Description<GuiInstancePattern>
-		{
-		public:
-			class IVisitor : public IDescriptable, public Description<IVisitor>
-			{
-			public:
-				virtual void						Visit(GuiInstanceResourcePattern* ns)=0;
-				virtual void						Visit(GuiInstanceNamePattern* ns)=0;
-			};
-
-			virtual void							Accept(IVisitor* visitor)=0;
-		};
-
-		class GuiInstanceResourcePattern : public GuiInstancePattern, public Description<GuiInstanceResourcePattern>
-		{
-		public:
-			WString									protocol;
-			WString									path;
-
-			void									Accept(IVisitor* visitor)override{visitor->Visit(this);}
-		};
-
-		class GuiInstanceNamePattern : public GuiInstancePattern, public Description<GuiInstanceNamePattern>
+		class GuiInstanceNamespace : public Object, public Description<GuiInstanceNamespace>
 		{
 		public:
 			WString									prefix;
 			WString									postfix;
-
-			void									Accept(IVisitor* visitor)override{visitor->Visit(this);}
 		};
 
 /***********************************************************************
@@ -201,12 +174,12 @@ Instance Context
 		class GuiInstanceContext : public Object, public Description<GuiInstanceContext>
 		{
 		public:
-			typedef collections::List<Ptr<GuiInstancePattern>>					NamespacePatternList;
+			typedef collections::List<Ptr<GuiInstanceNamespace>>				NamespaceList;
 
 			struct NamespaceInfo
 			{
 				WString								name;
-				NamespacePatternList				patterns;
+				NamespaceList						namespaces;
 			};
 			typedef collections::Dictionary<WString, Ptr<NamespaceInfo>>		NamespaceMap;
 
@@ -226,7 +199,7 @@ Instance Context
 		public:
 			Ptr<GuiConstructorRepr>					instance;
 			NamespaceMap							namespaces;
-			WString									typeName;
+			Nullable<WString>						className;
 
 			static void								CollectValues(collections::Dictionary<WString, Ptr<GuiAttSetterRepr::SetterValue>>& setters, Ptr<parsing::xml::XmlElement> xml);
 			static void								FillAttSetter(Ptr<GuiAttSetterRepr> setter, Ptr<parsing::xml::XmlElement> xml);
@@ -370,6 +343,8 @@ Instance Loader
 			virtual description::Value				Deserialize(const TypeInfo& typeInfo, const WString& text) = 0;
 			virtual bool							IsCreatable(const TypeInfo& typeInfo) = 0;
 			virtual description::Value				CreateInstance(const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments) = 0;
+			virtual bool							IsInitializable(const TypeInfo& typeInfo) = 0;
+			virtual Ptr<GuiInstanceContextScope>	InitializeInstance(const TypeInfo& typeInfo, description::Value instance) = 0;
 			virtual void							GetPropertyNames(const TypeInfo& typeInfo, collections::List<WString>& propertyNames) = 0;
 			virtual void							GetConstructorParameters(const TypeInfo& typeInfo, collections::List<WString>& propertyNames) = 0;
 			virtual Ptr<GuiInstancePropertyInfo>	GetPropertyType(const PropertyInfo& propertyInfo) = 0;
@@ -405,6 +380,8 @@ Instance Loader Manager
 			virtual description::ITypeDescriptor*	GetTypeDescriptorForType(const WString& typeName) = 0;
 			virtual void							GetVirtualTypes(collections::List<WString>& typeNames) = 0;
 			virtual WString							GetParentTypeForVirtualType(const WString& virtualType) = 0;
+			virtual bool							SetResource(const WString& name, Ptr<GuiResource> resource) = 0;
+			virtual Ptr<GuiResource>				GetResource(const WString& name) = 0;
 		};
 
 		struct InstanceLoadingSource
@@ -428,10 +405,20 @@ Instance Loader Manager
 			Ptr<GuiInstanceEnvironment> env,
 			GuiConstructorRepr* ctor
 			);
+		Ptr<GuiInstanceContextScope>				LoadInstanceFromContext(
+			Ptr<GuiInstanceContext> context,
+			Ptr<GuiResourcePathResolver> resolver,
+			description::ITypeDescriptor* expectedType = 0
+			);
 		extern Ptr<GuiInstanceContextScope>			LoadInstance(
 			Ptr<GuiResource> resource,
 			const WString& instancePath,
 			description::ITypeDescriptor* expectedType = 0
+			);
+		extern Ptr<GuiInstanceContextScope>			InitializeInstanceFromContext(
+			Ptr<GuiInstanceContext> context,
+			Ptr<GuiResourcePathResolver> resolver,
+			description::Value instance
 			);
 		extern Ptr<GuiInstanceContextScope>			InitializeInstance(
 			Ptr<GuiResource> resource,
@@ -449,39 +436,33 @@ Instance Scope Wrapper
 		{
 			template<typename T>
 			friend class GuiInstance;
-		private:
-			Ptr<GuiResource>						resource;
-			Ptr<GuiInstanceContextScope>			scope;
-			T*										instance;
 
-			bool LoadFromResource(const WString& path)
-			{
-				scope = 0;
-				instance = 0;
-				if (scope = LoadInstance(resource, path))
-				{
-					instance = description::UnboxValue<T*>(scope->rootInstance);
-					return true;
-				}
-				return false;
-			}
-			
+			typedef collections::Dictionary<WString, description::Value>	ValueMap;
+		private:
+			WString									className;
+			Ptr<GuiInstanceContextScope>			scope;
+
 		protected:
-			bool InitializeFromResource(const WString& path)
+			bool InitializeFromResource()
 			{
-				scope = 0;
-				instance = dynamic_cast<T*>(this);
-				if (scope = InitializeInstance(resource, path, Value::From(instance)))
+				if (scope) return false;
+				if (auto loader = GetInstanceLoaderManager()->GetLoader(className))
 				{
-					return true;
+					IGuiInstanceLoader::TypeInfo typeInfo(className, description::GetTypeDescriptor<T>());
+					if (loader->IsInitializable(typeInfo))
+					{
+						auto value = description::Value::From(dynamic_cast<T*>(this));
+						if (scope = loader->InitializeInstance(typeInfo, value))
+						{
+							return true;
+						}
+					}
 				}
-				instance = 0;
 				return false;
 			}
 		public:
-			GuiInstancePartialClass(Ptr<GuiResource> _resource)
-				:resource(_resource)
-				, instance(0)
+			GuiInstancePartialClass(const WString& _className)
+				:className(_className)
 			{
 			}
 
@@ -489,19 +470,9 @@ Instance Scope Wrapper
 			{
 			}
 
-			Ptr<GuiResource> GetResource()
-			{
-				return resource;
-			}
-
 			Ptr<GuiInstanceContextScope> GetScope()
 			{
 				return scope;
-			}
-
-			T* GetInstance()
-			{
-				return instance;
 			}
 		};
 
