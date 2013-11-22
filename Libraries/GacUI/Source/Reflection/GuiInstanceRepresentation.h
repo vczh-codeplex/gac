@@ -70,7 +70,7 @@ Instance Representation
 		public:
 			WString									typeNamespace;
 			WString									typeName;
-			ReferenceAttrubuteMap					referenceAttributes;
+			Nullable<WString>						instanceName;
 
 			void									Accept(IVisitor* visitor)override{visitor->Visit(this);}
 		};
@@ -79,38 +79,11 @@ Instance Representation
 Instance Namespace
 ***********************************************************************/
 
-		class GuiInstanceResourcePattern;
-		class GuiInstanceNamePattern;
-
-		class GuiInstancePattern : public Object, public Description<GuiInstancePattern>
-		{
-		public:
-			class IVisitor : public IDescriptable, public Description<IVisitor>
-			{
-			public:
-				virtual void						Visit(GuiInstanceResourcePattern* ns)=0;
-				virtual void						Visit(GuiInstanceNamePattern* ns)=0;
-			};
-
-			virtual void							Accept(IVisitor* visitor)=0;
-		};
-
-		class GuiInstanceResourcePattern : public GuiInstancePattern, public Description<GuiInstanceResourcePattern>
-		{
-		public:
-			WString									protocol;
-			WString									path;
-
-			void									Accept(IVisitor* visitor)override{visitor->Visit(this);}
-		};
-
-		class GuiInstanceNamePattern : public GuiInstancePattern, public Description<GuiInstanceNamePattern>
+		class GuiInstanceNamespace : public Object, public Description<GuiInstanceNamespace>
 		{
 		public:
 			WString									prefix;
 			WString									postfix;
-
-			void									Accept(IVisitor* visitor)override{visitor->Visit(this);}
 		};
 
 /***********************************************************************
@@ -120,12 +93,12 @@ Instance Context
 		class GuiInstanceContext : public Object, public Description<GuiInstanceContext>
 		{
 		public:
-			typedef collections::List<Ptr<GuiInstancePattern>>					NamespacePatternList;
+			typedef collections::List<Ptr<GuiInstanceNamespace>>				NamespaceList;
 
 			struct NamespaceInfo
 			{
 				WString								name;
-				NamespacePatternList				patterns;
+				NamespaceList						namespaces;
 			};
 			typedef collections::Dictionary<WString, Ptr<NamespaceInfo>>		NamespaceMap;
 
@@ -145,7 +118,7 @@ Instance Context
 		public:
 			Ptr<GuiConstructorRepr>					instance;
 			NamespaceMap							namespaces;
-			WString									typeName;
+			Nullable<WString>						className;
 
 			static void								CollectValues(collections::Dictionary<WString, Ptr<GuiAttSetterRepr::SetterValue>>& setters, Ptr<parsing::xml::XmlElement> xml);
 			static void								FillAttSetter(Ptr<GuiAttSetterRepr> setter, Ptr<parsing::xml::XmlElement> xml);

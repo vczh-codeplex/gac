@@ -137,9 +137,9 @@ GuiInstanceContext
 					if(auto name=parser->TypedParse(att->name.value))
 					if(name->IsReferenceAttributeName())
 					{
-						if(!ctor->referenceAttributes.Keys().Contains(name->name))
+						if (name->name == L"Name")
 						{
-							ctor->referenceAttributes.Add(name->name, att->value.value);
+							ctor->instanceName = att->value.value;
 						}
 					}
 				}
@@ -156,9 +156,9 @@ GuiInstanceContext
 			if(xml->rootElement->name.value==L"Instance")
 			{
 				// load type name
-				if(Ptr<XmlAttribute> att=XmlGetAttribute(xml->rootElement, L"name"))
+				if(Ptr<XmlAttribute> att=XmlGetAttribute(xml->rootElement, L"ref.Class"))
 				{
-					context->typeName=att->value.value;
+					context->className=att->value.value;
 				}
 
 				// load namespaces
@@ -223,6 +223,7 @@ GuiInstanceContext
 						const wchar_t* attValue=att->value.value.Buffer();
 						while(*attValue)
 						{
+							// split the value by ';'
 							const wchar_t* attSemicolon=wcschr(attValue, L';');
 							WString pattern;
 							if(attSemicolon)
@@ -237,31 +238,19 @@ GuiInstanceContext
 								attValue+=len;
 							}
 
-							WString protocol, path;
-							if(IsResourceUrl(pattern, protocol, path))
+							// add the pattern to the namespace
+							Ptr<GuiInstanceNamespace> ns=new GuiInstanceNamespace;
+							Pair<vint, vint> star=INVLOC.FindFirst(pattern, L"*", Locale::None);
+							if(star.key==-1)
 							{
-								// resource pattern
-								Ptr<GuiInstanceResourcePattern> patternItem=new GuiInstanceResourcePattern;
-								patternItem->protocol=protocol;
-								patternItem->path=path;
-								info->patterns.Add(patternItem);
+								ns->prefix=pattern;
 							}
 							else
 							{
-								// name pattern
-								Ptr<GuiInstanceNamePattern> patternItem=new GuiInstanceNamePattern;
-								Pair<vint, vint> star=INVLOC.FindFirst(pattern, L"*", Locale::None);
-								if(star.key==-1)
-								{
-									patternItem->prefix=pattern;
-								}
-								else
-								{
-									patternItem->prefix=pattern.Sub(0, star.key);
-									patternItem->postfix=pattern.Sub(star.key+star.value, pattern.Length()-star.key-star.value);
-								}
-								info->patterns.Add(patternItem);
+								ns->prefix=pattern.Sub(0, star.key);
+								ns->postfix=pattern.Sub(star.key+star.value, pattern.Length()-star.key-star.value);
 							}
+							info->namespaces.Add(ns);
 						}
 					}
 				}
