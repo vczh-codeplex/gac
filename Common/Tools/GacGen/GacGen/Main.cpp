@@ -33,20 +33,32 @@ void PrintSuccessMessage(const WString& message)
 class CodegenConfig
 {
 public:
-	WString						includePath;
+	WString						folder;
+	WString						include;
+	WString						name;
+	WString						prefix;
+
+	static bool LoadConfigString(Ptr<GuiResource> resource, const WString& name, WString& value)
+	{
+		if (auto includeItem = resource->GetValueByPath(L"GacGenConfig/" + name).Cast<GuiTextData>())
+		{
+			value = includeItem->GetText();
+			return true;
+		}
+		else
+		{
+			PrintErrorMessage(L"Cannot find configuration in resource \"GacGenConfig/" + name + L"\".");
+			return false;
+		}
+	}
 
 	static Ptr<CodegenConfig> LoadConfig(Ptr<GuiResource> resource)
 	{
 		Ptr<CodegenConfig> config = new CodegenConfig;
-		if (auto includeItem = resource->GetValueByPath(L"GacGenConfig/Include").Cast<GuiTextData>())
-		{
-			config->includePath = includeItem->GetText();
-		}
-		else
-		{
-			PrintErrorMessage(L"Cannot find include path for GacUIResource.h in resource \"GacGenConfig/Include\".");
-			return 0;
-		}
+		if (!LoadConfigString(resource, L"Folder", config->folder)) return false;
+		if (!LoadConfigString(resource, L"Include", config->include)) return false;
+		if (!LoadConfigString(resource, L"Name", config->name)) return false;
+		if (!LoadConfigString(resource, L"Prefix", config->prefix)) return false;
 		return config;
 	}
 };
