@@ -474,14 +474,7 @@ GuiResourceInstanceLoader
 
 			bool IsCreatable(const TypeInfo& typeInfo)override
 			{
-				if (typeInfo.typeName == context->className.Value())
-				{
-					if (auto typeDescriptor = GetGlobalTypeManager()->GetTypeDescriptor(typeInfo.typeName))
-					{
-						return GuiDefaultInstanceLoader::GetDefaultConstructor(typeDescriptor) != 0;
-					}
-				}
-				return false;
+				return typeInfo.typeName == context->className.Value();
 			}
 
 			description::Value CreateInstance(const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
@@ -494,6 +487,14 @@ GuiResourceInstanceLoader
 						{
 							return method->Invoke(Value(), (Value::xs()));
 						}
+					}
+
+					Ptr<GuiResourcePathResolver> resolver = new GuiResourcePathResolver(resource, resource->GetWorkingDirectory());
+					auto scope = LoadInstanceFromContext(context, resolver);
+
+					if (scope)
+					{
+						return scope->rootInstance;
 					}
 				}
 				return Value();

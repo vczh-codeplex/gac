@@ -274,12 +274,29 @@ Instance Type Resolver
 		};
 
 /***********************************************************************
-Default Instance Loader
+GuiDefaultInstanceLoader
 ***********************************************************************/
 
 		class GuiDefaultInstanceLoader : public Object, public IGuiInstanceLoader
 		{
 		public:
+			static IMethodInfo* GetDefaultConstructor(ITypeDescriptor* typeDescriptor)
+			{
+				if (auto ctors = typeDescriptor->GetConstructorGroup())
+				{
+					vint count = ctors->GetMethodCount();
+					for (vint i = 0; i < count; i++)
+					{
+						IMethodInfo* method = ctors->GetMethod(i);
+						if (method->GetParameterCount() == 0)
+						{
+							return method;
+						}
+					}
+				}
+				return 0;
+			}
+
 			WString GetTypeName()override
 			{
 				return L"";
@@ -303,35 +320,28 @@ Default Instance Loader
 				return Value();
 			}
 
-			IMethodInfo* GetDefaultConstructor(const TypeInfo& typeInfo)
-			{
-				if (auto ctors = typeInfo.typeDescriptor->GetConstructorGroup())
-				{
-					vint count = ctors->GetMethodCount();
-					for (vint i = 0; i < count; i++)
-					{
-						IMethodInfo* method = ctors->GetMethod(i);
-						if (method->GetParameterCount() == 0)
-						{
-							return method;
-						}
-					}
-				}
-				return 0;
-			}
-
 			bool IsCreatable(const TypeInfo& typeInfo)override
 			{
-				return GetDefaultConstructor(typeInfo) != 0;
+				return GetDefaultConstructor(typeInfo.typeDescriptor) != 0;
 			}
 
 			description::Value CreateInstance(const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
 			{
-				if (IMethodInfo* method = GetDefaultConstructor(typeInfo))
+				if (IMethodInfo* method = GetDefaultConstructor(typeInfo.typeDescriptor))
 				{
 					return method->Invoke(Value(), (Value::xs()));
 				}
 				return Value();
+			}
+
+			bool IsInitializable(const TypeInfo& typeInfo)override
+			{
+				return false;
+			}
+
+			Ptr<GuiInstanceContextScope> InitializeInstance(const TypeInfo& typeInfo, description::Value instance)override
+			{
+				return 0;
 			}
 
 			void ProcessGenericType(ITypeInfo* propType, ITypeInfo*& genericType, ITypeInfo*& elementType, bool& readableList, bool& writableList, bool& collectionType)
@@ -540,6 +550,104 @@ Default Instance Loader
 				return false;
 			}
 		};
+/***********************************************************************
+GuiResourceInstanceLoader
+***********************************************************************/
+
+		class GuiResourceInstanceLoader : public Object, public IGuiInstanceLoader
+		{
+		protected:
+			Ptr<GuiResource>						resource;
+			Ptr<GuiInstanceContext>					context;
+		public:
+			GuiResourceInstanceLoader(Ptr<GuiResource> _resource, Ptr<GuiInstanceContext> _context)
+				:resource(_resource)
+				, context(_context)
+			{
+			}
+
+			WString GetTypeName()override
+			{
+				return context->className.Value();
+			}
+
+			bool IsDeserializable(const TypeInfo& typeInfo)override
+			{
+				return false;
+			}
+
+			description::Value Deserialize(const TypeInfo& typeInfo, const WString& text)override
+			{
+				return Value();
+			}
+
+			bool IsCreatable(const TypeInfo& typeInfo)override
+			{
+				return typeInfo.typeName == context->className.Value();
+			}
+
+			description::Value CreateInstance(const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
+			{
+				if (typeInfo.typeName == context->className.Value())
+				{
+					if (auto typeDescriptor = GetGlobalTypeManager()->GetTypeDescriptor(typeInfo.typeName))
+					{
+						if (auto method = GuiDefaultInstanceLoader::GetDefaultConstructor(typeDescriptor))
+						{
+							return method->Invoke(Value(), (Value::xs()));
+						}
+					}
+
+					Ptr<GuiResourcePathResolver> resolver = new GuiResourcePathResolver(resource, resource->GetWorkingDirectory());
+					auto scope = LoadInstanceFromContext(context, resolver);
+
+					if (scope)
+					{
+						return scope->rootInstance;
+					}
+				}
+				return Value();
+			}
+
+			bool IsInitializable(const TypeInfo& typeInfo)override
+			{
+				return typeInfo.typeName == context->className.Value();
+			}
+
+			Ptr<GuiInstanceContextScope> InitializeInstance(const TypeInfo& typeInfo, description::Value instance)override
+			{
+				if (typeInfo.typeName == context->className.Value())
+				{
+					Ptr<GuiResourcePathResolver> resolver = new GuiResourcePathResolver(resource, resource->GetWorkingDirectory());
+					auto scope = InitializeInstanceFromContext(context, resolver, instance);
+					return scope;
+				}
+				return false;
+			}
+
+			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			{
+			}
+
+			void GetConstructorParameters(const TypeInfo& typeInfo, collections::List<WString>& propertyNames)override
+			{
+			}
+
+			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
+			{
+				return 0;
+			}
+
+			bool GetPropertyValue(PropertyValue& propertyValue)override
+			{
+				return false;
+			}
+
+			bool SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)override
+			{
+				return false;
+			}
+		};
 
 /***********************************************************************
 GuiInstanceLoaderManager
@@ -573,10 +681,12 @@ GuiInstanceLoaderManager
 				}
 			};
 			typedef Dictionary<WString, Ptr<VirtualTypeInfo>>					VirtualTypeInfoMap;
+			typedef Dictionary<WString, Ptr<GuiResource>>						ResourceMap;
 
 			Ptr<IGuiInstanceLoader>					rootLoader;
 			BinderMap								binders;
 			VirtualTypeInfoMap						typeInfos;
+			ResourceMap								resources;
 
 			bool IsTypeExists(const WString& name)
 			{
@@ -654,6 +764,24 @@ GuiInstanceLoaderManager
 				else
 				{
 					return typeInfos.Values()[index]->loader.Obj();
+				}
+			}
+
+			void GetClassesInResource(Ptr<GuiResourceFolder> folder, Dictionary<WString, Ptr<GuiInstanceContext>>& classes)
+			{
+				FOREACH(Ptr<GuiResourceItem>, item, folder->GetItems())
+				{
+					if (auto context = item->GetContent().Cast<GuiInstanceContext>())
+					{
+						if (context->className && !classes.Keys().Contains(context->className.Value()))
+						{
+							classes.Add(context->className.Value(), context);
+						}
+					}
+				}
+				FOREACH(Ptr<GuiResourceFolder>, subFolder, folder->GetFolders())
+				{
+					GetClassesInResource(subFolder, classes);
 				}
 			}
 		public:
@@ -777,7 +905,7 @@ GuiInstanceLoaderManager
 					: typeInfos.Values()[index]->typeDescriptor;
 			}
 
-			void GetVirtualTypes(collections::List<WString>& typeNames)
+			void GetVirtualTypes(collections::List<WString>& typeNames)override
 			{
 				for (vint i = 0; i < typeInfos.Count(); i++)
 				{
@@ -788,7 +916,7 @@ GuiInstanceLoaderManager
 				}
 			}
 
-			WString GetParentTypeForVirtualType(const WString& virtualType)
+			WString GetParentTypeForVirtualType(const WString& virtualType)override
 			{
 				vint index = typeInfos.Keys().IndexOf(virtualType);
 				if (index != -1)
@@ -797,6 +925,46 @@ GuiInstanceLoaderManager
 					return typeInfo->parentTypeName;
 				}
 				return L"";
+			}
+
+			bool SetResource(const WString& name, Ptr<GuiResource> resource)override
+			{
+				vint index = resources.Keys().IndexOf(name);
+				if (index != -1) return false;
+
+				Ptr<GuiResourcePathResolver> resolver = new GuiResourcePathResolver(resource, resource->GetWorkingDirectory());
+				Dictionary<WString, Ptr<GuiInstanceContext>> classes;
+				Dictionary<WString, IGuiInstanceLoader*> loaders;
+				GetClassesInResource(resource, classes);
+				FOREACH(Ptr<GuiInstanceContext>, context, classes.Values())
+				{
+					if (typeInfos.Keys().Contains(context->className.Value()))
+					{
+						return false;
+					}
+
+					Ptr<GuiInstanceEnvironment> env = new GuiInstanceEnvironment(context, resolver);
+					auto source = FindInstanceLoadingSource(env, context->instance.Obj());
+					if (!source.loader) return false;
+					loaders.Add(context->className.Value(), source.loader);
+				}
+
+				FOREACH(WString, className, classes.Keys())
+				{
+					CreateVirtualType(
+						loaders[className]->GetTypeName(),
+						new GuiResourceInstanceLoader(resource, classes[className])
+						);
+				}
+
+				resources.Add(name, resource);
+				return true;
+			}
+
+			Ptr<GuiResource> GetResource(const WString& name)override
+			{
+				vint index = resources.Keys().IndexOf(name);
+				return index == -1 ? 0 : resources.Values()[index];
 			}
 		};
 		GUI_REGISTER_PLUGIN(GuiInstanceLoaderManager)
@@ -867,12 +1035,6 @@ Helper Functions Declarations
 			List<FillInstanceBindingSetter>& bindingSetters
 			);
 
-		Ptr<GuiInstanceContextScope> LoadInstanceFromContext(
-			Ptr<GuiInstanceContext> context,
-			Ptr<GuiResourcePathResolver> resolver,
-			description::ITypeDescriptor* expectedType
-			);
-
 		Ptr<GuiInstanceContextScope> InitializeInstanceFromConstructor(
 			Ptr<GuiInstanceEnvironment> env,
 			GuiConstructorRepr* ctor,
@@ -885,78 +1047,6 @@ Helper Functions Declarations
 
 		namespace visitors
 		{
-/***********************************************************************
-FindTypeVisitor
-***********************************************************************/
-
-			class FindTypeVisitor : public Object, public GuiInstancePattern::IVisitor
-			{
-			public:
-				Ptr<GuiInstanceEnvironment>		env;
-				WString							typeName;
-				InstanceLoadingSource			result;
-
-				FindTypeVisitor(Ptr<GuiInstanceEnvironment> _env, const WString& _typeName)
-					:env(_env)
-					,typeName(_typeName)
-				{
-				}
-
-				Ptr<GuiInstanceContext> FindInstanceContextInFolder(Ptr<GuiResourceFolder> folder)
-				{
-					FOREACH(Ptr<GuiResourceItem>, item, folder->GetItems())
-					{
-						Ptr<GuiInstanceContext> context=item->GetContent().Cast<GuiInstanceContext>();
-						if (context && context->typeName == typeName) return context;
-					}
-					FOREACH(Ptr<GuiResourceFolder>, folder, folder->GetFolders())
-					{
-						Ptr<GuiInstanceContext> context=FindInstanceContextInFolder(folder);
-						if(context) return context;
-					}
-					return 0;
-				}
-
-				Ptr<GuiInstanceContext> FindInstanceContext(Ptr<DescriptableObject> resource)
-				{
-					if(auto context=resource.Cast<GuiInstanceContext>())
-					{
-						return context;
-					}
-					else if(auto folder=resource.Cast<GuiResourceFolder>())
-					{
-						return FindInstanceContextInFolder(folder);
-					}
-					return 0;
-				}
-
-				void Visit(GuiInstanceResourcePattern* ns)
-				{
-					Ptr<DescriptableObject> resource=env->resolver->ResolveResource(ns->protocol, ns->path);
-					Ptr<GuiInstanceContext> context=FindInstanceContext(resource);
-					if(context)
-					{
-						result=InstanceLoadingSource(context);
-					}
-				}
-
-				void Visit(GuiInstanceNamePattern* ns)
-				{
-					WString fullName=ns->prefix+typeName+ns->postfix;
-					IGuiInstanceLoader* loader=GetInstanceLoaderManager()->GetLoader(fullName);
-					if(loader)
-					{
-						result=InstanceLoadingSource(loader, fullName);
-					}
-				}
-
-				static InstanceLoadingSource FindType(GuiInstancePattern* pattern, Ptr<GuiInstanceEnvironment> env, const WString& typeName)
-				{
-					FindTypeVisitor visitor(env, typeName);
-					pattern->Accept(&visitor);
-					return visitor.result;
-				}
-			};
 
 /***********************************************************************
 LoadValueVisitor
@@ -1040,10 +1130,14 @@ FindInstanceLoadingSource
 			if(index!=-1)
 			{
 				Ptr<GuiInstanceContext::NamespaceInfo> namespaceInfo=env->context->namespaces.Values()[index];
-				FOREACH(Ptr<GuiInstancePattern>, pattern, namespaceInfo->patterns)
+				FOREACH(Ptr<GuiInstanceNamespace>, ns, namespaceInfo->namespaces)
 				{
-					InstanceLoadingSource source=FindTypeVisitor::FindType(pattern.Obj(), env, ctor->typeName);
-					if(source) return source;
+					WString fullName = ns->prefix + ctor->typeName + ns->postfix;
+					IGuiInstanceLoader* loader = GetInstanceLoaderManager()->GetLoader(fullName);
+					if(loader)
+					{
+						return InstanceLoadingSource(loader, fullName);
+					}
 				}
 			}
 			return InstanceLoadingSource();
@@ -1504,17 +1598,36 @@ InitializeInstance
 			// fill all attributes
 			FillInstance(instance, env, ctor, instanceLoader, deserialized, typeName, bindingSetters);
 
-			vint index = ctor->referenceAttributes.Keys().IndexOf(L"Name");
-			if (index != -1)
+			if (ctor->instanceName)
 			{
-				// bind the created instance to a name
-				WString referenceName = ctor->referenceAttributes.Values()[index];
-				if (!env->scope->referenceValues.Keys().Contains(referenceName))
-				{
-					env->scope->referenceValues.Add(referenceName, instance);
-				}
+				env->scope->referenceValues.Add(ctor->instanceName.Value(), instance);
 			}
 			return env->scope;
+		}
+
+		extern Ptr<GuiInstanceContextScope> InitializeInstanceFromContext(
+			Ptr<GuiInstanceContext> context,
+			Ptr<GuiResourcePathResolver> resolver,
+			description::Value instance
+			)
+		{
+			List<FillInstanceBindingSetter> bindingSetters;
+
+			// search for a correct loader
+			GuiConstructorRepr* ctor = context->instance.Obj();
+			Ptr<GuiInstanceEnvironment> env = new GuiInstanceEnvironment(context, resolver);
+			InstanceLoadingSource source=FindInstanceLoadingSource(env, ctor);
+
+			// initialize the instance
+			if(source.loader)
+			{
+				if (auto scope = InitializeInstanceFromConstructor(env, ctor, source.loader, source.typeName, instance, false, bindingSetters))
+				{
+					ExecuteBindingSetters(env, bindingSetters);
+					return scope;
+				}
+			}
+			return 0;
 		}
 
 		Ptr<GuiInstanceContextScope> InitializeInstance(
@@ -1529,22 +1642,7 @@ InitializeInstance
 				if (context)
 				{
 					Ptr<GuiResourcePathResolver> resolver = new GuiResourcePathResolver(resource, resource->GetWorkingDirectory());
-					List<FillInstanceBindingSetter> bindingSetters;
-
-					// search for a correct loader
-					GuiConstructorRepr* ctor = context->instance.Obj();
-					Ptr<GuiInstanceEnvironment> env = new GuiInstanceEnvironment(context, resolver);
-					InstanceLoadingSource source=FindInstanceLoadingSource(env, ctor);
-
-					// initialize the instance
-					if(source.loader)
-					{
-						if (auto scope = InitializeInstanceFromConstructor(env, ctor, source.loader, source.typeName, instance, false, bindingSetters))
-						{
-							ExecuteBindingSetters(env, bindingSetters);
-							return scope;
-						}
-					}
+					return InitializeInstanceFromContext(context, resolver, instance);
 				}
 			}
 			return 0;
@@ -2236,6 +2334,16 @@ GuiRewriteInstanceLoader
 			description::Value CreateInstance(const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
 			{
 				return Value();
+			}
+
+			bool IsInitializable(const TypeInfo& typeInfo)override
+			{
+				return false;
+			}
+
+			Ptr<GuiInstanceContextScope> InitializeInstance(const TypeInfo& typeInfo, description::Value instance)override
+			{
+				return 0;
 			}
 
 			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
@@ -3512,9 +3620,9 @@ GuiInstanceContext
 					if(auto name=parser->TypedParse(att->name.value))
 					if(name->IsReferenceAttributeName())
 					{
-						if(!ctor->referenceAttributes.Keys().Contains(name->name))
+						if (name->name == L"Name")
 						{
-							ctor->referenceAttributes.Add(name->name, att->value.value);
+							ctor->instanceName = att->value.value;
 						}
 					}
 				}
@@ -3531,9 +3639,9 @@ GuiInstanceContext
 			if(xml->rootElement->name.value==L"Instance")
 			{
 				// load type name
-				if(Ptr<XmlAttribute> att=XmlGetAttribute(xml->rootElement, L"name"))
+				if(Ptr<XmlAttribute> att=XmlGetAttribute(xml->rootElement, L"ref.Class"))
 				{
-					context->typeName=att->value.value;
+					context->className=att->value.value;
 				}
 
 				// load namespaces
@@ -3598,6 +3706,7 @@ GuiInstanceContext
 						const wchar_t* attValue=att->value.value.Buffer();
 						while(*attValue)
 						{
+							// split the value by ';'
 							const wchar_t* attSemicolon=wcschr(attValue, L';');
 							WString pattern;
 							if(attSemicolon)
@@ -3612,31 +3721,19 @@ GuiInstanceContext
 								attValue+=len;
 							}
 
-							WString protocol, path;
-							if(IsResourceUrl(pattern, protocol, path))
+							// add the pattern to the namespace
+							Ptr<GuiInstanceNamespace> ns=new GuiInstanceNamespace;
+							Pair<vint, vint> star=INVLOC.FindFirst(pattern, L"*", Locale::None);
+							if(star.key==-1)
 							{
-								// resource pattern
-								Ptr<GuiInstanceResourcePattern> patternItem=new GuiInstanceResourcePattern;
-								patternItem->protocol=protocol;
-								patternItem->path=path;
-								info->patterns.Add(patternItem);
+								ns->prefix=pattern;
 							}
 							else
 							{
-								// name pattern
-								Ptr<GuiInstanceNamePattern> patternItem=new GuiInstanceNamePattern;
-								Pair<vint, vint> star=INVLOC.FindFirst(pattern, L"*", Locale::None);
-								if(star.key==-1)
-								{
-									patternItem->prefix=pattern;
-								}
-								else
-								{
-									patternItem->prefix=pattern.Sub(0, star.key);
-									patternItem->postfix=pattern.Sub(star.key+star.value, pattern.Length()-star.key-star.value);
-								}
-								info->patterns.Add(patternItem);
+								ns->prefix=pattern.Sub(0, star.key);
+								ns->postfix=pattern.Sub(star.key+star.value, pattern.Length()-star.key-star.value);
 							}
+							info->namespaces.Add(ns);
 						}
 					}
 				}
