@@ -165,7 +165,7 @@ Instance Type Resolver
 		};
 
 /***********************************************************************
-Default Instance Loader
+GuiDefaultInstanceLoader
 ***********************************************************************/
 
 		class GuiDefaultInstanceLoader : public Object, public IGuiInstanceLoader
@@ -431,6 +431,70 @@ Default Instance Loader
 				return false;
 			}
 		};
+/***********************************************************************
+GuiResourceInstanceLoader
+***********************************************************************/
+
+		class GuiResourceInstanceLoader : public Object, public IGuiInstanceLoader
+		{
+		protected:
+			Ptr<GuiResource>						resource;
+			Ptr<GuiInstanceContext>					context;
+		public:
+			GuiResourceInstanceLoader(Ptr<GuiResource> _resource, Ptr<GuiInstanceContext> _context)
+				:resource(_resource)
+				, context(_context)
+			{
+			}
+
+			WString GetTypeName()override
+			{
+				return context->className.Value();
+			}
+
+			bool IsDeserializable(const TypeInfo& typeInfo)override
+			{
+				return false;
+			}
+
+			description::Value Deserialize(const TypeInfo& typeInfo, const WString& text)override
+			{
+				return Value();
+			}
+
+			bool IsCreatable(const TypeInfo& typeInfo)override
+			{
+				return false;
+			}
+
+			description::Value CreateInstance(const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
+			{
+				return Value();
+			}
+
+			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			{
+			}
+
+			void GetConstructorParameters(const TypeInfo& typeInfo, collections::List<WString>& propertyNames)override
+			{
+			}
+
+			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
+			{
+				return 0;
+			}
+
+			bool GetPropertyValue(PropertyValue& propertyValue)override
+			{
+				return false;
+			}
+
+			bool SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)override
+			{
+				return false;
+			}
+		};
 
 /***********************************************************************
 GuiInstanceLoaderManager
@@ -464,10 +528,12 @@ GuiInstanceLoaderManager
 				}
 			};
 			typedef Dictionary<WString, Ptr<VirtualTypeInfo>>					VirtualTypeInfoMap;
+			typedef Dictionary<WString, Ptr<GuiResource>>						ResourceMap;
 
 			Ptr<IGuiInstanceLoader>					rootLoader;
 			BinderMap								binders;
 			VirtualTypeInfoMap						typeInfos;
+			ResourceMap								resources;
 
 			bool IsTypeExists(const WString& name)
 			{
@@ -545,6 +611,24 @@ GuiInstanceLoaderManager
 				else
 				{
 					return typeInfos.Values()[index]->loader.Obj();
+				}
+			}
+
+			void GetClassesInResource(Ptr<GuiResourceFolder> folder, Dictionary<WString, Ptr<GuiInstanceContext>>& classes)
+			{
+				FOREACH(Ptr<GuiResourceItem>, item, folder->GetItems())
+				{
+					if (auto context = item->GetContent().Cast<GuiInstanceContext>())
+					{
+						if (context->className && !classes.Keys().Contains(context->className.Value()))
+						{
+							classes.Add(context->className.Value(), context);
+						}
+					}
+				}
+				FOREACH(Ptr<GuiResourceFolder>, subFolder, folder->GetFolders())
+				{
+					GetClassesInResource(subFolder, classes);
 				}
 			}
 		public:
@@ -668,7 +752,7 @@ GuiInstanceLoaderManager
 					: typeInfos.Values()[index]->typeDescriptor;
 			}
 
-			void GetVirtualTypes(collections::List<WString>& typeNames)
+			void GetVirtualTypes(collections::List<WString>& typeNames)override
 			{
 				for (vint i = 0; i < typeInfos.Count(); i++)
 				{
@@ -679,7 +763,7 @@ GuiInstanceLoaderManager
 				}
 			}
 
-			WString GetParentTypeForVirtualType(const WString& virtualType)
+			WString GetParentTypeForVirtualType(const WString& virtualType)override
 			{
 				vint index = typeInfos.Keys().IndexOf(virtualType);
 				if (index != -1)
@@ -688,6 +772,46 @@ GuiInstanceLoaderManager
 					return typeInfo->parentTypeName;
 				}
 				return L"";
+			}
+
+			bool SetResource(const WString& name, Ptr<GuiResource> resource)override
+			{
+				vint index = resources.Keys().IndexOf(name);
+				if (index != -1) return false;
+
+				Ptr<GuiResourcePathResolver> resolver = new GuiResourcePathResolver(resource, resource->GetWorkingDirectory());
+				Dictionary<WString, Ptr<GuiInstanceContext>> classes;
+				Dictionary<WString, IGuiInstanceLoader*> loaders;
+				GetClassesInResource(resource, classes);
+				FOREACH(Ptr<GuiInstanceContext>, context, classes.Values())
+				{
+					if (typeInfos.Keys().Contains(context->className.Value()))
+					{
+						return false;
+					}
+
+					Ptr<GuiInstanceEnvironment> env = new GuiInstanceEnvironment(context, resolver);
+					auto source = FindInstanceLoadingSource(env, context->instance.Obj());
+					if (!source.loader) return false;
+					loaders.Add(context->className.Value(), source.loader);
+				}
+
+				FOREACH(WString, className, classes.Keys())
+				{
+					CreateVirtualType(
+						loaders[className]->GetTypeName(),
+						new GuiResourceInstanceLoader(resource, classes[className])
+						);
+				}
+
+				resources.Add(name, resource);
+				return true;
+			}
+
+			Ptr<GuiResource> GetResource(const WString& name)override
+			{
+				vint index = resources.Keys().IndexOf(name);
+				return index == -1 ? 0 : resources.Values()[index];
 			}
 		};
 		GUI_REGISTER_PLUGIN(GuiInstanceLoaderManager)

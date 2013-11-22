@@ -147,7 +147,7 @@ void GuiMain()
 #endif
 	UnitTestInGuiMain();
 
-	auto resource = GuiResource::LoadFromXml(L"..\\GacUISrcCodepackedTest\\Resources\\XmlWindowResource.xml");
+	GetInstanceLoaderManager()->SetResource(L"Resource", GuiResource::LoadFromXml(L"..\\GacUISrcCodepackedTest\\Resources\\XmlWindowResource.xml"));
 	MainWindow window(resource);
 	window.ForceCalculateSizeImmediately();
 	window.MoveToScreenCenter();
