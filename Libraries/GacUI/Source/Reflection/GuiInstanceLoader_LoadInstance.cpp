@@ -79,78 +79,6 @@ Helper Functions Declarations
 
 		namespace visitors
 		{
-/***********************************************************************
-FindTypeVisitor
-***********************************************************************/
-
-			class FindTypeVisitor : public Object, public GuiInstancePattern::IVisitor
-			{
-			public:
-				Ptr<GuiInstanceEnvironment>		env;
-				WString							typeName;
-				InstanceLoadingSource			result;
-
-				FindTypeVisitor(Ptr<GuiInstanceEnvironment> _env, const WString& _typeName)
-					:env(_env)
-					,typeName(_typeName)
-				{
-				}
-
-				Ptr<GuiInstanceContext> FindInstanceContextInFolder(Ptr<GuiResourceFolder> folder)
-				{
-					FOREACH(Ptr<GuiResourceItem>, item, folder->GetItems())
-					{
-						Ptr<GuiInstanceContext> context=item->GetContent().Cast<GuiInstanceContext>();
-						if (context && context->typeName == typeName) return context;
-					}
-					FOREACH(Ptr<GuiResourceFolder>, folder, folder->GetFolders())
-					{
-						Ptr<GuiInstanceContext> context=FindInstanceContextInFolder(folder);
-						if(context) return context;
-					}
-					return 0;
-				}
-
-				Ptr<GuiInstanceContext> FindInstanceContext(Ptr<DescriptableObject> resource)
-				{
-					if(auto context=resource.Cast<GuiInstanceContext>())
-					{
-						return context;
-					}
-					else if(auto folder=resource.Cast<GuiResourceFolder>())
-					{
-						return FindInstanceContextInFolder(folder);
-					}
-					return 0;
-				}
-
-				void Visit(GuiInstanceResourcePattern* ns)
-				{
-					Ptr<DescriptableObject> resource=env->resolver->ResolveResource(ns->protocol, ns->path);
-					Ptr<GuiInstanceContext> context=FindInstanceContext(resource);
-					if(context)
-					{
-						result=InstanceLoadingSource(context);
-					}
-				}
-
-				void Visit(GuiInstanceNamePattern* ns)
-				{
-					WString fullName=ns->prefix+typeName+ns->postfix;
-					IGuiInstanceLoader* loader=GetInstanceLoaderManager()->GetLoader(fullName);
-					if(loader)
-					{
-						result=InstanceLoadingSource(loader, fullName);
-					}
-				}
-
-				static InstanceLoadingSource FindType(GuiInstancePattern* pattern, Ptr<GuiInstanceEnvironment> env, const WString& typeName)
-				{
-					FindTypeVisitor visitor(env, typeName);
-					pattern->Accept(&visitor);
-					return visitor.result;
-				}
-			};
 
 /***********************************************************************
 LoadValueVisitor
@@ -234,10 +162,14 @@ FindInstanceLoadingSource
 			if(index!=-1)
 			{
 				Ptr<GuiInstanceContext::NamespaceInfo> namespaceInfo=env->context->namespaces.Values()[index];
-				FOREACH(Ptr<GuiInstancePattern>, pattern, namespaceInfo->patterns)
+				FOREACH(Ptr<GuiInstanceNamespace>, ns, namespaceInfo->namespaces)
 				{
-					InstanceLoadingSource source=FindTypeVisitor::FindType(pattern.Obj(), env, ctor->typeName);
-					if(source) return source;
+					WString fullName = ns->prefix + ctor->typeName + ns->postfix;
+					IGuiInstanceLoader* loader = GetInstanceLoaderManager()->GetLoader(fullName);
+					if(loader)
+					{
+						return InstanceLoadingSource(loader, fullName);
+					}
 				}
 			}
 			return InstanceLoadingSource();
@@ -698,15 +630,9 @@ InitializeInstance
 			// fill all attributes
 			FillInstance(instance, env, ctor, instanceLoader, deserialized, typeName, bindingSetters);
 
-			vint index = ctor->referenceAttributes.Keys().IndexOf(L"Name");
-			if (index != -1)
+			if (ctor->instanceName)
 			{
-				// bind the created instance to a name
-				WString referenceName = ctor->referenceAttributes.Values()[index];
-				if (!env->scope->referenceValues.Keys().Contains(referenceName))
-				{
-					env->scope->referenceValues.Add(referenceName, instance);
-				}
+				env->scope->referenceValues.Add(ctor->instanceName.Value(), instance);
 			}
 			return env->scope;
 		}
