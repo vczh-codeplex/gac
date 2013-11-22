@@ -130,6 +130,8 @@ Instance Loader
 			virtual description::Value				Deserialize(const TypeInfo& typeInfo, const WString& text) = 0;
 			virtual bool							IsCreatable(const TypeInfo& typeInfo) = 0;
 			virtual description::Value				CreateInstance(const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments) = 0;
+			virtual bool							IsInitializable(const TypeInfo& typeInfo) = 0;
+			virtual Ptr<GuiInstanceContextScope>	InitializeInstance(const TypeInfo& typeInfo, description::Value instance) = 0;
 			virtual void							GetPropertyNames(const TypeInfo& typeInfo, collections::List<WString>& propertyNames) = 0;
 			virtual void							GetConstructorParameters(const TypeInfo& typeInfo, collections::List<WString>& propertyNames) = 0;
 			virtual Ptr<GuiInstancePropertyInfo>	GetPropertyType(const PropertyInfo& propertyInfo) = 0;
@@ -190,10 +192,20 @@ Instance Loader Manager
 			Ptr<GuiInstanceEnvironment> env,
 			GuiConstructorRepr* ctor
 			);
+		Ptr<GuiInstanceContextScope>				LoadInstanceFromContext(
+			Ptr<GuiInstanceContext> context,
+			Ptr<GuiResourcePathResolver> resolver,
+			description::ITypeDescriptor* expectedType = 0
+			);
 		extern Ptr<GuiInstanceContextScope>			LoadInstance(
 			Ptr<GuiResource> resource,
 			const WString& instancePath,
 			description::ITypeDescriptor* expectedType = 0
+			);
+		extern Ptr<GuiInstanceContextScope>			InitializeInstanceFromContext(
+			Ptr<GuiInstanceContext> context,
+			Ptr<GuiResourcePathResolver> resolver,
+			description::Value instance
 			);
 		extern Ptr<GuiInstanceContextScope>			InitializeInstance(
 			Ptr<GuiResource> resource,
@@ -211,39 +223,33 @@ Instance Scope Wrapper
 		{
 			template<typename T>
 			friend class GuiInstance;
-		private:
-			Ptr<GuiResource>						resource;
-			Ptr<GuiInstanceContextScope>			scope;
-			T*										instance;
 
-			bool LoadFromResource(const WString& path)
-			{
-				scope = 0;
-				instance = 0;
-				if (scope = LoadInstance(resource, path))
-				{
-					instance = description::UnboxValue<T*>(scope->rootInstance);
-					return true;
-				}
-				return false;
-			}
-			
+			typedef collections::Dictionary<WString, description::Value>	ValueMap;
+		private:
+			WString									className;
+			Ptr<GuiInstanceContextScope>			scope;
+
 		protected:
-			bool InitializeFromResource(const WString& path)
+			bool InitializeFromResource()
 			{
-				scope = 0;
-				instance = dynamic_cast<T*>(this);
-				if (scope = InitializeInstance(resource, path, Value::From(instance)))
+				if (scope) return false;
+				if (auto loader = GetInstanceLoaderManager()->GetLoader(className))
 				{
-					return true;
+					IGuiInstanceLoader::TypeInfo typeInfo(className, description::GetTypeDescriptor<T>());
+					if (loader->IsInitializable(typeInfo))
+					{
+						auto value = description::Value::From(dynamic_cast<T*>(this));
+						if (scope = loader->InitializeInstance(typeInfo, value))
+						{
+							return true;
+						}
+					}
 				}
-				instance = 0;
 				return false;
 			}
 		public:
-			GuiInstancePartialClass(Ptr<GuiResource> _resource)
-				:resource(_resource)
-				, instance(0)
+			GuiInstancePartialClass(const WString& _className)
+				:className(_className)
 			{
 			}
 
@@ -251,19 +257,9 @@ Instance Scope Wrapper
 			{
 			}
 
-			Ptr<GuiResource> GetResource()
-			{
-				return resource;
-			}
-
 			Ptr<GuiInstanceContextScope> GetScope()
 			{
 				return scope;
-			}
-
-			T* GetInstance()
-			{
-				return instance;
 			}
 		};
 

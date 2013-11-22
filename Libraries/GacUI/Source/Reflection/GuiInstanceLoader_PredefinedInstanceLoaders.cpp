@@ -46,6 +46,16 @@ GuiRewriteInstanceLoader
 				return Value();
 			}
 
+			bool IsInitializable(const TypeInfo& typeInfo)override
+			{
+				return false;
+			}
+
+			Ptr<GuiInstanceContextScope> InitializeInstance(const TypeInfo& typeInfo, description::Value instance)override
+			{
+				return 0;
+			}
+
 			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
 			{
 			}

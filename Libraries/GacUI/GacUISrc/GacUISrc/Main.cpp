@@ -43,7 +43,7 @@ protected:
 
 	void InitializeComponents()
 	{
-		if (InitializeFromResource(L"XmlWindowDemos/MainWindow/MainWindowResource"))
+		if (InitializeFromResource())
 		{
 			GUI_INSTANCE_REFERENCE(listResources);
 			GUI_INSTANCE_REFERENCE(buttonShow);
@@ -55,9 +55,9 @@ protected:
 		}
 	}
 public:
-	MainWindow_(Ptr<GuiResource> resource)
+	MainWindow_()
 		:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
-		, GuiInstancePartialClass<GuiWindow>(resource)
+		, GuiInstancePartialClass<GuiWindow>(L"demos::MainWindow")
 		, listResources(0)
 		, buttonShow(0)
 	{
@@ -71,7 +71,8 @@ protected:
 
 	void ShowWindowInResource(const WString& name)
 	{
-		auto scope = LoadInstance(GetResource(), L"XmlWindowDemos/" + name + L"/MainWindowResource");
+		auto resource = GetInstanceLoaderManager()->GetResource(L"Resource");
+		auto scope = LoadInstance(resource, L"XmlWindowDemos/" + name + L"/MainWindowResource");
 		auto window = UnboxValue<GuiWindow*>(scope->rootInstance);
 
 		window->ForceCalculateSizeImmediately();
@@ -103,8 +104,7 @@ protected:
 		ShowWindowInResource(listResources->GetItems()[itemIndex]->GetText());
 	}
 public:
-	MainWindow(Ptr<GuiResource> resource)
-		:MainWindow_<MainWindow>(resource)
+	MainWindow()
 	{
 		InitializeComponents();
 	}
@@ -148,7 +148,7 @@ void GuiMain()
 	UnitTestInGuiMain();
 
 	GetInstanceLoaderManager()->SetResource(L"Resource", GuiResource::LoadFromXml(L"..\\GacUISrcCodepackedTest\\Resources\\XmlWindowResource.xml"));
-	MainWindow window(resource);
+	MainWindow window;
 	window.ForceCalculateSizeImmediately();
 	window.MoveToScreenCenter();
 	GetApplication()->Run(&window);
