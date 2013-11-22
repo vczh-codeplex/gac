@@ -171,6 +171,23 @@ GuiDefaultInstanceLoader
 		class GuiDefaultInstanceLoader : public Object, public IGuiInstanceLoader
 		{
 		public:
+			static IMethodInfo* GetDefaultConstructor(ITypeDescriptor* typeDescriptor)
+			{
+				if (auto ctors = typeDescriptor->GetConstructorGroup())
+				{
+					vint count = ctors->GetMethodCount();
+					for (vint i = 0; i < count; i++)
+					{
+						IMethodInfo* method = ctors->GetMethod(i);
+						if (method->GetParameterCount() == 0)
+						{
+							return method;
+						}
+					}
+				}
+				return 0;
+			}
+
 			WString GetTypeName()override
 			{
 				return L"";
@@ -194,31 +211,14 @@ GuiDefaultInstanceLoader
 				return Value();
 			}
 
-			IMethodInfo* GetDefaultConstructor(const TypeInfo& typeInfo)
-			{
-				if (auto ctors = typeInfo.typeDescriptor->GetConstructorGroup())
-				{
-					vint count = ctors->GetMethodCount();
-					for (vint i = 0; i < count; i++)
-					{
-						IMethodInfo* method = ctors->GetMethod(i);
-						if (method->GetParameterCount() == 0)
-						{
-							return method;
-						}
-					}
-				}
-				return 0;
-			}
-
 			bool IsCreatable(const TypeInfo& typeInfo)override
 			{
-				return GetDefaultConstructor(typeInfo) != 0;
+				return GetDefaultConstructor(typeInfo.typeDescriptor) != 0;
 			}
 
 			description::Value CreateInstance(const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
 			{
-				if (IMethodInfo* method = GetDefaultConstructor(typeInfo))
+				if (IMethodInfo* method = GetDefaultConstructor(typeInfo.typeDescriptor))
 				{
 					return method->Invoke(Value(), (Value::xs()));
 				}
@@ -474,19 +474,26 @@ GuiResourceInstanceLoader
 
 			bool IsCreatable(const TypeInfo& typeInfo)override
 			{
-				return typeInfo.typeName == context->className.Value();
+				if (typeInfo.typeName == context->className.Value())
+				{
+					if (auto typeDescriptor = GetGlobalTypeManager()->GetTypeDescriptor(typeInfo.typeName))
+					{
+						return GuiDefaultInstanceLoader::GetDefaultConstructor(typeDescriptor) != 0;
+					}
+				}
+				return false;
 			}
 
 			description::Value CreateInstance(const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
 			{
 				if (typeInfo.typeName == context->className.Value())
 				{
-					Ptr<GuiResourcePathResolver> resolver = new GuiResourcePathResolver(resource, resource->GetWorkingDirectory());
-					auto scope = LoadInstanceFromContext(context, resolver);
-
-					if (scope)
+					if (auto typeDescriptor = GetGlobalTypeManager()->GetTypeDescriptor(typeInfo.typeName))
 					{
-						return scope->rootInstance;
+						if (auto method = GuiDefaultInstanceLoader::GetDefaultConstructor(typeDescriptor))
+						{
+							return method->Invoke(Value(), (Value::xs()));
+						}
 					}
 				}
 				return Value();

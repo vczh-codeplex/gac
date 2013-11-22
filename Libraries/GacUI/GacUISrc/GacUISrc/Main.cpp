@@ -35,7 +35,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 extern void UnitTestInGuiMain();
 
 template<typename TImpl>
-class MainWindow_ : public GuiWindow, public GuiInstancePartialClass<GuiWindow>
+class MainWindow_ : public GuiWindow, public GuiInstancePartialClass<GuiWindow>, public Description<TImpl>
 {
 protected:
 	GuiTextList*					listResources;
@@ -110,6 +110,27 @@ public:
 	}
 };
 
+DECL_TYPE_INFO(MainWindow)
+IMPL_TYPE_INFO_RENAME(MainWindow, demos::MainWindow)
+
+BEGIN_CLASS_MEMBER(MainWindow)
+	CLASS_MEMBER_BASE(GuiWindow)
+	CLASS_MEMBER_CONSTRUCTOR(MainWindow*(), NO_PARAMETER)
+END_CLASS_MEMBER(MainWindow)
+
+class ResourceLoader : public Object, public ITypeLoader
+{
+public:
+	void Load(ITypeManager* manager)
+	{
+		ADD_TYPE_INFO(MainWindow)
+	}
+
+	void Unload(ITypeManager* manager)
+	{
+	}
+};
+
 /*
 Data Binding:
 GuiSelectableListControl
@@ -148,6 +169,8 @@ void GuiMain()
 	UnitTestInGuiMain();
 
 	GetInstanceLoaderManager()->SetResource(L"Resource", GuiResource::LoadFromXml(L"..\\GacUISrcCodepackedTest\\Resources\\XmlWindowResource.xml"));
+	GetGlobalTypeManager()->AddTypeLoader(new ResourceLoader);
+
 	MainWindow window;
 	window.ForceCalculateSizeImmediately();
 	window.MoveToScreenCenter();
