@@ -225,6 +225,16 @@ GuiDefaultInstanceLoader
 				return Value();
 			}
 
+			bool IsInitializable(const TypeInfo& typeInfo)override
+			{
+				return false;
+			}
+
+			Ptr<GuiInstanceContextScope> InitializeInstance(const TypeInfo& typeInfo, description::Value instance)override
+			{
+				return 0;
+			}
+
 			void ProcessGenericType(ITypeInfo* propType, ITypeInfo*& genericType, ITypeInfo*& elementType, bool& readableList, bool& writableList, bool& collectionType)
 			{
 				genericType = 0;
@@ -464,12 +474,38 @@ GuiResourceInstanceLoader
 
 			bool IsCreatable(const TypeInfo& typeInfo)override
 			{
-				return false;
+				return typeInfo.typeName == context->className.Value();
 			}
 
 			description::Value CreateInstance(const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
 			{
+				if (typeInfo.typeName == context->className.Value())
+				{
+					Ptr<GuiResourcePathResolver> resolver = new GuiResourcePathResolver(resource, resource->GetWorkingDirectory());
+					auto scope = LoadInstanceFromContext(context, resolver);
+
+					if (scope)
+					{
+						return scope->rootInstance;
+					}
+				}
 				return Value();
+			}
+
+			bool IsInitializable(const TypeInfo& typeInfo)override
+			{
+				return typeInfo.typeName == context->className.Value();
+			}
+
+			Ptr<GuiInstanceContextScope> InitializeInstance(const TypeInfo& typeInfo, description::Value instance)override
+			{
+				if (typeInfo.typeName == context->className.Value())
+				{
+					Ptr<GuiResourcePathResolver> resolver = new GuiResourcePathResolver(resource, resource->GetWorkingDirectory());
+					auto scope = InitializeInstanceFromContext(context, resolver, instance);
+					return scope;
+				}
+				return false;
 			}
 
 			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override

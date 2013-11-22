@@ -61,12 +61,6 @@ Helper Functions Declarations
 			List<FillInstanceBindingSetter>& bindingSetters
 			);
 
-		Ptr<GuiInstanceContextScope> LoadInstanceFromContext(
-			Ptr<GuiInstanceContext> context,
-			Ptr<GuiResourcePathResolver> resolver,
-			description::ITypeDescriptor* expectedType
-			);
-
 		Ptr<GuiInstanceContextScope> InitializeInstanceFromConstructor(
 			Ptr<GuiInstanceEnvironment> env,
 			GuiConstructorRepr* ctor,
@@ -637,6 +631,31 @@ InitializeInstance
 			return env->scope;
 		}
 
+		extern Ptr<GuiInstanceContextScope> InitializeInstanceFromContext(
+			Ptr<GuiInstanceContext> context,
+			Ptr<GuiResourcePathResolver> resolver,
+			description::Value instance
+			)
+		{
+			List<FillInstanceBindingSetter> bindingSetters;
+
+			// search for a correct loader
+			GuiConstructorRepr* ctor = context->instance.Obj();
+			Ptr<GuiInstanceEnvironment> env = new GuiInstanceEnvironment(context, resolver);
+			InstanceLoadingSource source=FindInstanceLoadingSource(env, ctor);
+
+			// initialize the instance
+			if(source.loader)
+			{
+				if (auto scope = InitializeInstanceFromConstructor(env, ctor, source.loader, source.typeName, instance, false, bindingSetters))
+				{
+					ExecuteBindingSetters(env, bindingSetters);
+					return scope;
+				}
+			}
+			return 0;
+		}
+
 		Ptr<GuiInstanceContextScope> InitializeInstance(
 			Ptr<GuiResource> resource,
 			const WString& instancePath,
@@ -649,22 +668,7 @@ InitializeInstance
 				if (context)
 				{
 					Ptr<GuiResourcePathResolver> resolver = new GuiResourcePathResolver(resource, resource->GetWorkingDirectory());
-					List<FillInstanceBindingSetter> bindingSetters;
-
-					// search for a correct loader
-					GuiConstructorRepr* ctor = context->instance.Obj();
-					Ptr<GuiInstanceEnvironment> env = new GuiInstanceEnvironment(context, resolver);
-					InstanceLoadingSource source=FindInstanceLoadingSource(env, ctor);
-
-					// initialize the instance
-					if(source.loader)
-					{
-						if (auto scope = InitializeInstanceFromConstructor(env, ctor, source.loader, source.typeName, instance, false, bindingSetters))
-						{
-							ExecuteBindingSetters(env, bindingSetters);
-							return scope;
-						}
-					}
+					return InitializeInstanceFromContext(context, resolver, instance);
 				}
 			}
 			return 0;
