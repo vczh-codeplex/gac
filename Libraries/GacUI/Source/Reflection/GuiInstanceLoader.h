@@ -165,6 +165,8 @@ Instance Loader Manager
 			virtual description::ITypeDescriptor*	GetTypeDescriptorForType(const WString& typeName) = 0;
 			virtual void							GetVirtualTypes(collections::List<WString>& typeNames) = 0;
 			virtual WString							GetParentTypeForVirtualType(const WString& virtualType) = 0;
+			virtual bool							SetResource(const WString& name, Ptr<GuiResource> resource) = 0;
+			virtual Ptr<GuiResource>				GetResource(const WString& name) = 0;
 		};
 
 		struct InstanceLoadingSource
