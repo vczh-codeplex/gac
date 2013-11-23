@@ -15,6 +15,9 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <Xml Include="XmlWindowResource.xml" />
+  </ItemGroup>
+  <ItemGroup>
     <ClCompile Include="..\..\..\..\Libraries\GacUI\Public\Source\GacUI.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
