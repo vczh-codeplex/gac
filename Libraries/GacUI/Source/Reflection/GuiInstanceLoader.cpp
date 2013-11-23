@@ -825,8 +825,9 @@ GuiInstanceLoaderManager
 
 				Ptr<GuiResourcePathResolver> resolver = new GuiResourcePathResolver(resource, resource->GetWorkingDirectory());
 				Dictionary<WString, Ptr<GuiInstanceContext>> classes;
-				Dictionary<WString, IGuiInstanceLoader*> loaders;
+				Dictionary<WString, WString> parentTypes;
 				GetClassesInResource(resource, classes);
+
 				FOREACH(Ptr<GuiInstanceContext>, context, classes.Values())
 				{
 					if (typeInfos.Keys().Contains(context->className.Value()))
@@ -835,17 +836,25 @@ GuiInstanceLoaderManager
 					}
 
 					Ptr<GuiInstanceEnvironment> env = new GuiInstanceEnvironment(context, resolver);
-					auto source = FindInstanceLoadingSource(env, context->instance.Obj());
-					if (!source.loader) return false;
-					loaders.Add(context->className.Value(), source.loader);
+					auto loadingSource = FindInstanceLoadingSource(env, context->instance.Obj());
+					if (!loadingSource.loader) return false;
+					parentTypes.Add(context->className.Value(), loadingSource.typeName);
 				}
-
+				
 				FOREACH(WString, className, classes.Keys())
 				{
-					CreateVirtualType(
-						loaders[className]->GetTypeName(),
-						new GuiResourceInstanceLoader(resource, classes[className])
-						);
+					auto context = classes[className];
+					auto parentType = parentTypes[className];
+
+					Ptr<IGuiInstanceLoader> loader = new GuiResourceInstanceLoader(resource, context);
+					if (GetGlobalTypeManager()->GetTypeDescriptor(context->className.Value()))
+					{
+						SetLoader(loader);
+					}
+					else
+					{
+						CreateVirtualType(parentType, loader);
+					}
 				}
 
 				resources.Add(name, resource);

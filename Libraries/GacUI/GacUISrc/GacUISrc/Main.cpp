@@ -110,26 +110,54 @@ public:
 	}
 };
 
-DECL_TYPE_INFO(MainWindow)
-IMPL_TYPE_INFO_RENAME(MainWindow, demos::MainWindow)
-
-BEGIN_CLASS_MEMBER(MainWindow)
-	CLASS_MEMBER_BASE(GuiWindow)
-	CLASS_MEMBER_CONSTRUCTOR(MainWindow*(), NO_PARAMETER)
-END_CLASS_MEMBER(MainWindow)
-
-class ResourceLoader : public Object, public ITypeLoader
+namespace vl
 {
-public:
-	void Load(ITypeManager* manager)
+	namespace reflection
 	{
-		ADD_TYPE_INFO(MainWindow)
-	}
+		namespace description
+		{
 
-	void Unload(ITypeManager* manager)
-	{
+			DECL_TYPE_INFO(MainWindow)
+			IMPL_TYPE_INFO_RENAME(MainWindow, demos::MainWindow)
+
+			BEGIN_CLASS_MEMBER(MainWindow)
+				CLASS_MEMBER_BASE(GuiWindow)
+				CLASS_MEMBER_CONSTRUCTOR(MainWindow*(), NO_PARAMETER)
+			END_CLASS_MEMBER(MainWindow)
+
+			class ResourceLoader : public Object, public ITypeLoader
+			{
+			public:
+				void Load(ITypeManager* manager)
+				{
+					ADD_TYPE_INFO(MainWindow)
+				}
+
+				void Unload(ITypeManager* manager)
+				{
+				}
+			};
+
+			class ResourcePlugin : public Object, public IGuiPlugin
+			{
+			public:
+				void Load()override
+				{
+					GetGlobalTypeManager()->AddTypeLoader(new ResourceLoader);
+				}
+
+				void AfterLoad()override
+				{
+				}
+
+				void Unload()override
+				{
+				}
+			};
+			GUI_REGISTER_PLUGIN(ResourcePlugin)
+		}
 	}
-};
+}
 
 /*
 Data Binding:
@@ -169,8 +197,6 @@ void GuiMain()
 	UnitTestInGuiMain();
 
 	GetInstanceLoaderManager()->SetResource(L"Resource", GuiResource::LoadFromXml(L"..\\GacUISrcCodepackedTest\\Resources\\XmlWindowResource.xml"));
-	GetGlobalTypeManager()->AddTypeLoader(new ResourceLoader);
-
 	MainWindow window;
 	window.ForceCalculateSizeImmediately();
 	window.MoveToScreenCenter();
