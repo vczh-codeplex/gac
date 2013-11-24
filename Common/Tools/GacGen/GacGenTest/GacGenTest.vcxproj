@@ -101,13 +101,18 @@
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/bigobj %(AdditionalOptions)</AdditionalOptions>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="CodeplexClientPartialClasses.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="SignInWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Libraries\GacUI\Public\Source\GacUI.h" />
     <ClInclude Include="..\..\..\..\Libraries\GacUI\Public\Source\GacUIReflection.h" />
     <ClInclude Include="..\..\..\..\Libraries\GacUI\Public\Source\GacUIWindows.h" />
     <ClInclude Include="..\..\..\..\Libraries\GacUI\Public\Source\Vlpp.h" />
+    <ClInclude Include="CodeplexClient.h" />
+    <ClInclude Include="CodeplexClientPartialClasses.h" />
+    <ClInclude Include="SignInWindow.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

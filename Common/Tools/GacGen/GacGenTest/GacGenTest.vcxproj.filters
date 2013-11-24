@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="GeneratedCode">
+      <UniqueIdentifier>{03e01296-b2ba-4ebd-b177-dd5efb88b776}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Xml Include="XmlWindowResource.xml" />
@@ -33,6 +36,12 @@
     <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CodeplexClientPartialClasses.cpp">
+      <Filter>GeneratedCode</Filter>
+    </ClCompile>
+    <ClCompile Include="SignInWindow.cpp">
+      <Filter>GeneratedCode</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Libraries\GacUI\Public\Source\GacUI.h">
@@ -46,6 +55,15 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\Libraries\GacUI\Public\Source\Vlpp.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CodeplexClient.h">
+      <Filter>GeneratedCode</Filter>
+    </ClInclude>
+    <ClInclude Include="CodeplexClientPartialClasses.h">
+      <Filter>GeneratedCode</Filter>
+    </ClInclude>
+    <ClInclude Include="SignInWindow.h">
+      <Filter>GeneratedCode</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
