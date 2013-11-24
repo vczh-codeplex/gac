@@ -20,4 +20,24 @@ namespace codeplex_client
 		SignInWindow();
 	};
 }
+
+namespace vl
+{
+	namespace reflection
+	{
+		namespace description
+		{
+			// -- REFLECTION CODE --
+			// DO NOT MODIFY IF YOU DO NOT UNDERATAND.
+			// THESE LINES OF CODE IS NECESSARY TO CORRECTLY LOAD THE CONTROL FROM THE RESOURCE.
+			DECL_TYPE_INFO(codeplex_client::SignInWindow)
+
+			BEGIN_CLASS_MEMBER(codeplex_client::SignInWindow)
+				CLASS_MEMBER_BASE(vl::presentation::controls::GuiWindow)
+				CLASS_MEMBER_CONSTRUCTOR(codeplex_client::SignInWindow*(), NO_PARAMETER)
+			END_CLASS_MEMBER(codeplex_client::SignInWindow)
+		}
+	}
+}
+
 #endif
