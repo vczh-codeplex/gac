@@ -6,7 +6,7 @@ GacUI::SignInWindow
 本文件使用Vczh GacUI Resource Code Generator工具自动生成
 ***********************************************************************/
 
-#include "SignInWindow.h"
+#include "CodeplexClient.h"
 
 namespace codeplex_client
 {
