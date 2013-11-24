@@ -15,3 +15,18 @@ namespace codeplex_client
 		InitializeComponents();
 	}
 }
+
+namespace vl
+{
+	namespace reflection
+	{
+		namespace description
+		{
+			// -- REFLECTION CODE --
+			// DO NOT MODIFY IF YOU DO NOT UNDERATAND.
+			// THESE LINES OF CODE IS NECESSARY TO CORRECTLY LOAD THE CONTROL FROM THE RESOURCE.
+			IMPL_TYPE_INFO(codeplex_client::SignInWindow)
+		}
+	}
+}
+

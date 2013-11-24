@@ -197,6 +197,11 @@ void SearchAllInstances(const Regex& regexClassName, Ptr<GuiResourcePathResolver
 	}
 }
 
+WString GetCppTypeName(ITypeDescriptor* typeDescriptor)
+{
+	return L"vl::" + typeDescriptor->GetTypeName();
+}
+
 WString GetCppTypeName(Ptr<CodegenConfig> config, Dictionary<WString, Ptr<Instance>>& instances, Ptr<Instance> instance, GuiConstructorRepr* ctor)
 {
 	Ptr<GuiResourcePathResolver> resolver = new GuiResourcePathResolver(config->resource, config->resource->GetWorkingDirectory());
@@ -220,10 +225,10 @@ WString GetCppTypeName(Ptr<CodegenConfig> config, Dictionary<WString, Ptr<Instan
 	}
 
 	auto manager = GetInstanceLoaderManager();
-	return L"vl::" + manager->GetTypeDescriptorForType(typeName)->GetTypeName();
+	return GetCppTypeName(manager->GetTypeDescriptorForType(typeName));
 }
 
-void WriteFileComment(const WString& name, StreamWriter& writer)
+void WriteFileComment(const WString& name, bool doNotModify, StreamWriter& writer)
 {
 	writer.WriteLine(L"/***********************************************************************");
 	writer.WriteLine(L"Vczh Library++ 3.0");
@@ -231,6 +236,11 @@ void WriteFileComment(const WString& name, StreamWriter& writer)
 	writer.WriteLine(L"GacUI::" + name);
 	writer.WriteLine(L"");
 	writer.WriteLine(L"本文件使用Vczh GacUI Resource Code Generator工具自动生成");
+	if (doNotModify)
+	{
+		writer.WriteLine(L"************************************************************************");
+		writer.WriteLine(L"DO NOT MODIFY");
+	}
 	writer.WriteLine(L"***********************************************************************/");
 	writer.WriteLine(L"");
 }
@@ -267,41 +277,72 @@ void WriteNamespaceEnd(List<WString>& namespaces, StreamWriter& writer)
 	}
 }
 
-void WriteControlClassHeaderFileContent(Ptr<CodegenConfig> config, Ptr<Instance> instance, const WString& prefix, StreamWriter& writer)
+void WriteControlClassHeaderFileContent(Ptr<CodegenConfig> config, Ptr<Instance> instance, StreamWriter& writer)
 {
+	WString prefix = WriteNamespaceBegin(instance->namespaces, writer);
 	writer.WriteLine(prefix + L"class " + instance->typeName + L" : public " + instance->typeName + L"_<" + instance->typeName + L">");
 	writer.WriteLine(prefix + L"{");
 	writer.WriteLine(prefix + L"\tfriend class " + instance->typeName + L"_<" + instance->typeName + L">;");
 	writer.WriteLine(prefix + L"public:");
 	writer.WriteLine(prefix + L"\t" + instance->typeName + L"();");
 	writer.WriteLine(prefix + L"};");
+	WriteNamespaceEnd(instance->namespaces, writer);
+	writer.WriteLine(L"");
+
+	List<WString> ns;
+	FillReflectionNamespaces(ns);
+	prefix = WriteNamespaceBegin(ns, writer);
+	writer.WriteLine(prefix + L"// -- REFLECTION CODE --");
+	writer.WriteLine(prefix + L"// DO NOT MODIFY IF YOU DO NOT UNDERATAND.");
+	writer.WriteLine(prefix + L"// THESE LINES OF CODE IS NECESSARY TO CORRECTLY LOAD THE CONTROL FROM THE RESOURCE.");
+	writer.WriteLine(prefix + L"DECL_TYPE_INFO(" + instance->GetFullName() + L")");
+	writer.WriteLine(L"");
+	writer.WriteLine(prefix + L"BEGIN_CLASS_MEMBER(" + instance->GetFullName() + L")");
+	writer.WriteLine(prefix + L"\tCLASS_MEMBER_BASE(" + GetCppTypeName(instance->baseType) + L")");
+	writer.WriteLine(prefix + L"\tCLASS_MEMBER_CONSTRUCTOR(" + instance->GetFullName() + L"*(), NO_PARAMETER)");
+	writer.WriteLine(prefix + L"END_CLASS_MEMBER(" + instance->GetFullName() + L")");
+	WriteNamespaceEnd(ns, writer);
+	writer.WriteLine(L"");
 }
 
-void WriteControlClassCppFileContent(Ptr<CodegenConfig> config, Ptr<Instance> instance, const WString& prefix, StreamWriter& writer)
+void WriteControlClassCppFileContent(Ptr<CodegenConfig> config, Ptr<Instance> instance, StreamWriter& writer)
 {
+	WString prefix = WriteNamespaceBegin(instance->namespaces, writer);
 	writer.WriteLine(prefix + instance->typeName + L"::" + instance->typeName + L"()");
 	writer.WriteLine(prefix + L"{");
 	writer.WriteLine(prefix + L"\tInitializeComponents();");
 	writer.WriteLine(prefix + L"}");
+	WriteNamespaceEnd(instance->namespaces, writer);
+	writer.WriteLine(L"");
+
+	List<WString> ns;
+	FillReflectionNamespaces(ns);
+	prefix = WriteNamespaceBegin(ns, writer);
+	writer.WriteLine(prefix + L"// -- REFLECTION CODE --");
+	writer.WriteLine(prefix + L"// DO NOT MODIFY IF YOU DO NOT UNDERATAND.");
+	writer.WriteLine(prefix + L"// THESE LINES OF CODE IS NECESSARY TO CORRECTLY LOAD THE CONTROL FROM THE RESOURCE.");
+	writer.WriteLine(prefix + L"IMPL_TYPE_INFO(" + instance->GetFullName() + L")");
+	WriteNamespaceEnd(ns, writer);
+	writer.WriteLine(L"");
 }
 
-#define OPEN_FILE(FILENAME, NAME)\
+#define OPEN_FILE(FILENAME, NAME, DONOTMODIFY)\
 	WString fileName = FILENAME; \
 	FileStream fileStream(config->resource->GetWorkingDirectory() + fileName, FileStream::WriteOnly); \
-	if (!fileStream.IsAvailable()) \
-	{ \
-		PrintErrorMessage(L"gacgen> Failed to generate " + fileName); \
-		return; \
-	} \
+if (!fileStream.IsAvailable()) \
+{ \
+	PrintErrorMessage(L"gacgen> Failed to generate " + fileName); \
+	return; \
+} \
 	BomEncoder encoder(BomEncoder::Utf8); \
 	EncoderStream encoderStream(fileStream, encoder); \
 	StreamWriter writer(encoderStream); \
 	PrintSuccessMessage(L"gacgen> Generating " + fileName); \
-	WriteFileComment(NAME, writer);
+	WriteFileComment(NAME, DONOTMODIFY, writer);
 
 void WriteControlClassHeaderFile(Ptr<CodegenConfig> config, Ptr<Instance> instance)
 {
-	OPEN_FILE(config->GetControlClassHeaderFileName(instance), instance->typeName);
+	OPEN_FILE(config->GetControlClassHeaderFileName(instance), instance->typeName, false);
 
 	writer.WriteLine(L"#ifndef VCZH_GACUI_RESOURCE_CODE_GENERATOR_" + config->name + L"_" + instance->typeName);
 	writer.WriteLine(L"#define VCZH_GACUI_RESOURCE_CODE_GENERATOR_" + config->name + L"_" + instance->typeName);
@@ -309,27 +350,23 @@ void WriteControlClassHeaderFile(Ptr<CodegenConfig> config, Ptr<Instance> instan
 	writer.WriteLine(L"#include \"" + config->GetPartialClassHeaderFileName() + L"\"");
 	writer.WriteLine(L"");
 
-	WString prefix = WriteNamespaceBegin(instance->namespaces, writer);
-	WriteControlClassHeaderFileContent(config, instance, prefix, writer);
-	WriteNamespaceEnd(instance->namespaces, writer);
+	WriteControlClassHeaderFileContent(config, instance, writer);
 
 	writer.WriteLine(L"#endif");
 }
 
 void WriteControlClassCppFile(Ptr<CodegenConfig> config, Ptr<Instance> instance)
 {
-	OPEN_FILE(config->GetControlClassCppFileName(instance), instance->typeName);
+	OPEN_FILE(config->GetControlClassCppFileName(instance), instance->typeName, false);
 	writer.WriteLine(L"#include \"" + config->GetGlobalHeaderFileName() + L"\"");
 	writer.WriteLine(L"");
 
-	WString prefix = WriteNamespaceBegin(instance->namespaces, writer);
-	WriteControlClassCppFileContent(config, instance, prefix, writer);
-	WriteNamespaceEnd(instance->namespaces, writer);
+	WriteControlClassCppFileContent(config, instance, writer);
 }
 
 void WritePartialClassHeaderFile(Ptr<CodegenConfig> config, Dictionary<WString, Ptr<Instance>>& instances)
 {
-	OPEN_FILE(config->GetPartialClassHeaderFileName(), L"Partial Classes");
+	OPEN_FILE(config->GetPartialClassHeaderFileName(), L"Partial Classes", true);
 
 	writer.WriteLine(L"#ifndef VCZH_GACUI_RESOURCE_CODE_GENERATOR_" + config->name + L"_PARTIAL_CLASSES");
 	writer.WriteLine(L"#define VCZH_GACUI_RESOURCE_CODE_GENERATOR_" + config->name + L"_PARTIAL_CLASSES");
@@ -341,7 +378,7 @@ void WritePartialClassHeaderFile(Ptr<CodegenConfig> config, Dictionary<WString, 
 	{
 		WString prefix = WriteNamespaceBegin(instance->namespaces, writer);
 		writer.WriteLine(prefix + L"template<typename TImpl>");
-		writer.WriteLine(prefix + L"class " + instance->typeName + L"_ : public vl::" + instance->baseType->GetTypeName() + L", public vl::presentation::GuiInstancePartialClass<vl::" + instance->baseType->GetTypeName() + L">, public vl::reflection::Description<TImpl>");
+		writer.WriteLine(prefix + L"class " + instance->typeName + L"_ : public " + GetCppTypeName(instance->baseType) + L", public vl::presentation::GuiInstancePartialClass<vl::" + instance->baseType->GetTypeName() + L">, public vl::reflection::Description<TImpl>");
 		writer.WriteLine(prefix + L"{");
 		writer.WriteLine(prefix + L"protected:");
 		FOREACH(WString, field, instance->fields.Keys())
@@ -363,13 +400,13 @@ void WritePartialClassHeaderFile(Ptr<CodegenConfig> config, Dictionary<WString, 
 		writer.WriteLine(prefix + L"\t" + instance->typeName + L"_()");
 		if (instance->baseType == GetTypeDescriptor<GuiWindow>())
 		{
-			writer.WriteLine(prefix + L"\t\t:vl::" + instance->baseType->GetTypeName() + L"(vl::presentation::theme::GetCurrentTheme()->CreateWindowStyle())");
+			writer.WriteLine(prefix + L"\t\t:" + GetCppTypeName(instance->baseType) + L"(vl::presentation::theme::GetCurrentTheme()->CreateWindowStyle())");
 		}
 		else if (instance->baseType == GetTypeDescriptor<GuiCustomControl>())
 		{
-			writer.WriteLine(prefix + L"\t\t:vl::" + instance->baseType->GetTypeName() + L"(vl::presentation::theme::GetCurrentTheme()->CreateCustomControlStyle())");
+			writer.WriteLine(prefix + L"\t\t:" + GetCppTypeName(instance->baseType) + L"(vl::presentation::theme::GetCurrentTheme()->CreateCustomControlStyle())");
 		}
-		writer.WriteLine(prefix + L"\t\t,vl::presentation::GuiInstancePartialClass<vl::" + instance->baseType->GetTypeName() + L">(L\"" + instance->GetFullName() + L"\")");
+		writer.WriteLine(prefix + L"\t\t,vl::presentation::GuiInstancePartialClass<" + GetCppTypeName(instance->baseType) + L">(L\"" + instance->GetFullName() + L"\")");
 		FOREACH(WString, field, instance->fields.Keys())
 		{
 			writer.WriteLine(prefix + L"\t\t," + field + L"(0)");
@@ -387,10 +424,10 @@ void WritePartialClassHeaderFile(Ptr<CodegenConfig> config, Dictionary<WString, 
 	FOREACH(Ptr<Instance>, instance, instances.Values())
 	{
 		writer.WriteLine(config->GetControlClassHeaderFileName(instance) + L" :");
-		WriteControlClassHeaderFileContent(config, instance, L"\t", writer);
+		WriteControlClassHeaderFileContent(config, instance, writer);
 		writer.WriteLine(L"");
 		writer.WriteLine(config->GetControlClassCppFileName(instance) + L" :");
-		WriteControlClassCppFileContent(config, instance, L"\t", writer);
+		WriteControlClassCppFileContent(config, instance, writer);
 		writer.WriteLine(L"");
 	}
 	writer.WriteLine(L"*/");
@@ -401,7 +438,7 @@ void WritePartialClassHeaderFile(Ptr<CodegenConfig> config, Dictionary<WString, 
 
 void WritePartialClassCppFile(Ptr<CodegenConfig> config, Dictionary<WString, Ptr<Instance>>& instances)
 {
-	OPEN_FILE(config->GetPartialClassCppFileName(), L"Partial Classes");
+	OPEN_FILE(config->GetPartialClassCppFileName(), L"Partial Classes", true);
 
 	writer.WriteLine(L"#include \"" + config->GetGlobalHeaderFileName() + L"\"");
 	writer.WriteLine(L"");
@@ -409,21 +446,6 @@ void WritePartialClassCppFile(Ptr<CodegenConfig> config, Dictionary<WString, Ptr
 	List<WString> ns;
 	FillReflectionNamespaces(ns);
 	WString prefix = WriteNamespaceBegin(ns, writer);
-
-	FOREACH(Ptr<Instance>, instance, instances.Values())
-	{
-		writer.WriteLine(prefix + L"IMPL_TYPE_INFO(" + instance->GetFullName() + L")");
-	}
-	writer.WriteLine(L"");
-
-	FOREACH(Ptr<Instance>, instance, instances.Values())
-	{
-		writer.WriteLine(prefix + L"BEGIN_CLASS_MEMBER(" + instance->GetFullName() + L")");
-		writer.WriteLine(prefix + L"\tCLASS_MEMBER_BASE(vl::" + instance->baseType->GetTypeName() + L")");
-		writer.WriteLine(prefix + L"\tCLASS_MEMBER_CONSTRUCTOR(" + instance->GetFullName() + L"*(), NO_PARAMETER)");
-		writer.WriteLine(prefix + L"END_CLASS_MEMBER(" + instance->GetFullName() + L")");
-		writer.WriteLine(L"");
-	}
 
 	writer.WriteLine(prefix + L"class " + config->name + L"ResourceLoader : public Object, public ITypeLoader");
 	writer.WriteLine(prefix + L"{");
@@ -465,7 +487,7 @@ void WritePartialClassCppFile(Ptr<CodegenConfig> config, Dictionary<WString, Ptr
 
 void WriteGlobalHeaderFile(Ptr<CodegenConfig> config, Dictionary<WString, Ptr<Instance>>& instances)
 {
-	OPEN_FILE(config->GetGlobalHeaderFileName(), config->name);
+	OPEN_FILE(config->GetGlobalHeaderFileName(), config->name, true);
 
 	writer.WriteLine(L"#ifndef VCZH_GACUI_RESOURCE_CODE_GENERATOR_" + config->name);
 	writer.WriteLine(L"#define VCZH_GACUI_RESOURCE_CODE_GENERATOR_" + config->name);
@@ -474,16 +496,6 @@ void WriteGlobalHeaderFile(Ptr<CodegenConfig> config, Dictionary<WString, Ptr<In
 	{
 		writer.WriteLine(L"#include \"" + config->GetControlClassHeaderFileName(instance) + L"\"");
 	}
-	writer.WriteLine(L"");
-
-	List<WString> ns;
-	FillReflectionNamespaces(ns);
-	WString prefix = WriteNamespaceBegin(ns, writer);
-	FOREACH(Ptr<Instance>, instance, instances.Values())
-	{
-		writer.WriteLine(prefix + L"DECL_TYPE_INFO(" + instance->GetFullName() + L")");
-	}
-	WriteNamespaceEnd(ns, writer);
 	writer.WriteLine(L"");
 
 	writer.WriteLine(L"#endif");
