@@ -35,11 +35,11 @@ int wmain(int argc, wchar_t* argv[])
 
 struct Instance
 {
-	Ptr<GuiInstanceContext>				context;
-	ITypeDescriptor*					baseType;
-	List<WString>						namespaces;
-	WString								typeName;
-	Dictionary<WString, WString>		fields;
+	Ptr<GuiInstanceContext>						context;
+	ITypeDescriptor*							baseType;
+	List<WString>								namespaces;
+	WString										typeName;
+	Dictionary<WString, GuiConstructorRepr*>	fields;
 
 	WString GetFullName()
 	{
@@ -55,10 +55,10 @@ struct Instance
 class CodegenConfig
 {
 public:
-	Ptr<GuiResource>					resource;
-	WString								include;
-	WString								name;
-	WString								prefix;
+	Ptr<GuiResource>							resource;
+	WString										include;
+	WString										name;
+	WString										prefix;
 
 	static bool LoadConfigString(Ptr<GuiResource> resource, const WString& name, WString& value)
 	{
@@ -113,11 +113,11 @@ public:
 class SearchAllFieldsVisitor : public Object, public GuiValueRepr::IVisitor
 {
 protected:
-	Ptr<GuiInstanceEnvironment>			env;
-	Dictionary<WString, WString>&		fields;
+	Ptr<GuiInstanceEnvironment>						env;
+	Dictionary<WString, GuiConstructorRepr*>&		fields;
 
 public:
-	SearchAllFieldsVisitor(Ptr<GuiInstanceEnvironment> _env, Dictionary<WString, WString>& _fields)
+	SearchAllFieldsVisitor(Ptr<GuiInstanceEnvironment> _env, Dictionary<WString, GuiConstructorRepr*>& _fields)
 		:env(_env)
 		, fields(_fields)
 	{
@@ -143,13 +143,13 @@ public:
 		if (repr->instanceName && !fields.Keys().Contains(repr->instanceName.Value()))
 		{
 			auto loadingSource = FindInstanceLoadingSource(env, repr);
-			fields.Add(repr->instanceName.Value(), loadingSource.typeName);
+			fields.Add(repr->instanceName.Value(), repr);
 		}
 		Visit((GuiAttSetterRepr*)repr);
 	}
 };
 
-void SearchAllFields(Ptr<GuiInstanceEnvironment> env, Ptr<GuiInstanceContext> context, Dictionary<WString, WString>& fields)
+void SearchAllFields(Ptr<GuiInstanceEnvironment> env, Ptr<GuiInstanceContext> context, Dictionary<WString, GuiConstructorRepr*>& fields)
 {
 	SearchAllFieldsVisitor visitor(env, fields);
 	context->instance->Accept(&visitor);
@@ -195,6 +195,32 @@ void SearchAllInstances(const Regex& regexClassName, Ptr<GuiResourcePathResolver
 	{
 		SearchAllInstances(regexClassName, resolver, subFolder, instances);
 	}
+}
+
+WString GetCppTypeName(Ptr<CodegenConfig> config, Dictionary<WString, Ptr<Instance>>& instances, Ptr<Instance> instance, GuiConstructorRepr* ctor)
+{
+	Ptr<GuiResourcePathResolver> resolver = new GuiResourcePathResolver(config->resource, config->resource->GetWorkingDirectory());
+
+	Ptr<GuiInstanceContext> currentContext = instance->context;
+	GuiConstructorRepr* currentCtor = ctor;
+	WString typeName;
+
+	while (currentContext)
+	{
+		Ptr<GuiInstanceEnvironment> env = new GuiInstanceEnvironment(currentContext, resolver);
+		auto loadingSource = FindInstanceLoadingSource(env, currentCtor);
+		currentContext = loadingSource.context;
+		currentCtor = currentContext ? currentContext->instance.Obj() : 0;
+		typeName = loadingSource.typeName;
+
+		if (instances.Keys().Contains(typeName))
+		{
+			return typeName;
+		}
+	}
+
+	auto manager = GetInstanceLoaderManager();
+	return L"vl::" + manager->GetTypeDescriptorForType(typeName)->GetTypeName();
 }
 
 void WriteFileComment(const WString& name, StreamWriter& writer)
@@ -262,11 +288,16 @@ void WriteControlClassCppFileContent(Ptr<CodegenConfig> config, Ptr<Instance> in
 #define OPEN_FILE(FILENAME, NAME)\
 	WString fileName = FILENAME; \
 	FileStream fileStream(config->resource->GetWorkingDirectory() + fileName, FileStream::WriteOnly); \
+	if (!fileStream.IsAvailable()) \
+	{ \
+		PrintErrorMessage(L"gacgen> Failed to generate " + fileName); \
+		return; \
+	} \
 	BomEncoder encoder(BomEncoder::Utf8); \
 	EncoderStream encoderStream(fileStream, encoder); \
 	StreamWriter writer(encoderStream); \
 	PrintSuccessMessage(L"gacgen> Generating " + fileName); \
-	WriteFileComment(NAME, writer)
+	WriteFileComment(NAME, writer);
 
 void WriteControlClassHeaderFile(Ptr<CodegenConfig> config, Ptr<Instance> instance)
 {
@@ -288,7 +319,7 @@ void WriteControlClassHeaderFile(Ptr<CodegenConfig> config, Ptr<Instance> instan
 void WriteControlClassCppFile(Ptr<CodegenConfig> config, Ptr<Instance> instance)
 {
 	OPEN_FILE(config->GetControlClassCppFileName(instance), instance->typeName);
-	writer.WriteLine(L"#include \"" + config->GetControlClassHeaderFileName(instance) + L"\"");
+	writer.WriteLine(L"#include \"" + config->GetGlobalHeaderFileName() + L"\"");
 	writer.WriteLine(L"");
 
 	WString prefix = WriteNamespaceBegin(instance->namespaces, writer);
@@ -313,9 +344,20 @@ void WritePartialClassHeaderFile(Ptr<CodegenConfig> config, Dictionary<WString, 
 		writer.WriteLine(prefix + L"class " + instance->typeName + L"_ : public vl::" + instance->baseType->GetTypeName() + L", public vl::presentation::GuiInstancePartialClass<vl::" + instance->baseType->GetTypeName() + L">, public vl::reflection::Description<TImpl>");
 		writer.WriteLine(prefix + L"{");
 		writer.WriteLine(prefix + L"protected:");
+		FOREACH(WString, field, instance->fields.Keys())
+		{
+			writer.WriteLine(prefix + L"\t" + GetCppTypeName(config, instances, instance, instance->fields[field]) + L"* " + field + L";");
+		}
 		writer.WriteLine(L"");
-		writer.WriteLine(L"\tvoid InitializeComponents()");
+		writer.WriteLine(L"\t\tvoid InitializeComponents()");
 		writer.WriteLine(prefix + L"\t{");
+		writer.WriteLine(prefix + L"\t\tif (InitializeFromResource())");
+		writer.WriteLine(prefix + L"\t\t{");
+		FOREACH(WString, field, instance->fields.Keys())
+		{
+			writer.WriteLine(prefix + L"\t\t\tGUI_INSTANCE_REFERENCE(" + field + L");");
+		}
+		writer.WriteLine(prefix + L"\t\t}");
 		writer.WriteLine(prefix + L"\t}");
 		writer.WriteLine(prefix + L"public:");
 		writer.WriteLine(prefix + L"\t" + instance->typeName + L"_()");
@@ -328,9 +370,15 @@ void WritePartialClassHeaderFile(Ptr<CodegenConfig> config, Dictionary<WString, 
 			writer.WriteLine(prefix + L"\t\t:vl::" + instance->baseType->GetTypeName() + L"(vl::presentation::theme::GetCurrentTheme()->CreateCustomControlStyle())");
 		}
 		writer.WriteLine(prefix + L"\t\t,vl::presentation::GuiInstancePartialClass<vl::" + instance->baseType->GetTypeName() + L">(L\"" + instance->GetFullName() + L"\")");
+		FOREACH(WString, field, instance->fields.Keys())
+		{
+			writer.WriteLine(prefix + L"\t\t," + field + L"(0)");
+		}
 		writer.WriteLine(prefix + L"\t{");
 		writer.WriteLine(prefix + L"\t}");
 		writer.WriteLine(prefix + L"};");
+		writer.WriteLine(L"");
+		writer.WriteLine(prefix + L"class " + instance->typeName + L";");
 		WriteNamespaceEnd(instance->namespaces, writer);
 		writer.WriteLine(L"");
 	}
@@ -467,16 +515,6 @@ void GuiMain()
 		Ptr<GuiResourcePathResolver> resolver = new GuiResourcePathResolver(resource, resource->GetWorkingDirectory());
 		Dictionary<WString, Ptr<Instance>> instances;
 		SearchAllInstances(regexClassName, resolver, resource, instances);
-
-		FOREACH(Ptr<Instance>, instance, instances.Values())
-		{
-			PrintSuccessMessage(L"gacgen>class " + instance->context->className.Value());
-			Console::WriteLine(L"\t<Base Type> : " + instance->baseType->GetTypeName());
-			FOREACH(WString, field, instance->fields.Keys())
-			{
-				Console::WriteLine(L"\t" + field + L" : " + instance->fields[field]);
-			}
-		}
 
 		FOREACH(Ptr<Instance>, instance, instances.Values())
 		{
