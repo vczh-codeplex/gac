@@ -620,6 +620,12 @@ GuiDefaultInstanceLoader
 
 			bool SetEventValue(PropertyValue& propertyValue)override
 			{
+				auto eventInfo = GetEventType(propertyValue);
+				if (eventInfo && eventInfo->support == GuiInstanceEventInfo::SupportAssign)
+				{
+					propertyValue.instanceValue.AttachEvent(propertyValue.propertyName, propertyValue.propertyValue);
+					return true;
+				}
 				return false;
 			}
 		};

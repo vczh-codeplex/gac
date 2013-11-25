@@ -30,7 +30,7 @@ Helper Functions Declarations
 		{
 			IGuiInstanceLoader*					loader;
 			Ptr<GuiInstanceEventInfo>			eventInfo;
-			IGuiInstanceLoader::PropertyInfo	propertyInfo;
+			IGuiInstanceLoader::PropertyValue	propertyValue;
 			WString								handlerName;
 
 			FillInstanceEventSetter()
@@ -438,7 +438,9 @@ FillInstance
 					FillInstanceEventSetter eventSetter;
 					eventSetter.loader = eventLoader;
 					eventSetter.eventInfo = eventInfo;
-					eventSetter.propertyInfo = propertyInfo;
+					eventSetter.propertyValue.typeInfo = propertyInfo.typeInfo;
+					eventSetter.propertyValue.propertyName = propertyInfo.propertyName;
+					eventSetter.propertyValue.instanceValue = createdInstance;
 					eventSetter.handlerName = handlerName;
 					eventSetters.Add(eventSetter);
 				}
@@ -663,10 +665,8 @@ ExecuteBindingSetters
 						if (senderType->GetDecorator() != ITypeInfo::TypeDescriptor) goto UNSUPPORTED;
 						if (senderType->GetTypeDescriptor() != description::GetTypeDescriptor<compositions::GuiGraphicsComposition>()) goto UNSUPPORTED;
 					
-						if (argumentType->GetDecorator() == ITypeInfo::RawPtr)
-						{
-							argumentType = argumentType->GetElementType();
-						}
+						if (argumentType->GetDecorator() != ITypeInfo::RawPtr) goto UNSUPPORTED;
+						argumentType = argumentType->GetElementType();
 						if (argumentType->GetDecorator() != ITypeInfo::TypeDescriptor) goto UNSUPPORTED;
 						if (argumentType->GetTypeDescriptor() != eventSetter.eventInfo->argumentType) goto UNSUPPORTED;
 
@@ -682,12 +682,8 @@ ExecuteBindingSetters
 						Value proxy = selectedMethod->CreateFunctionProxy(createdInstance);
 						if (!proxy.IsNull())
 						{
-							IGuiInstanceLoader::PropertyValue propertyValue(
-								eventSetter.propertyInfo.typeInfo,
-								eventSetter.propertyInfo.propertyName,
-								createdInstance,
-								proxy
-								);
+							auto propertyValue = eventSetter.propertyValue;
+							propertyValue.propertyValue = proxy;
 							eventSetter.loader->SetEventValue(propertyValue);
 						}
 					}
