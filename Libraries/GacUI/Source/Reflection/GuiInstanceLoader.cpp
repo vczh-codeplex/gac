@@ -80,6 +80,63 @@ GuiInstancePropertyInfo
 		}
 
 /***********************************************************************
+IGuiInstanceLoader
+***********************************************************************/
+
+		bool IGuiInstanceLoader::IsDeserializable(const TypeInfo& typeInfo)
+		{
+			return false;
+		}
+
+		description::Value IGuiInstanceLoader::Deserialize(const TypeInfo& typeInfo, const WString& text)
+		{
+			return Value();
+		}
+
+		bool IGuiInstanceLoader::IsCreatable(const TypeInfo& typeInfo)
+		{
+			return false;
+		}
+
+		description::Value IGuiInstanceLoader::CreateInstance(const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)
+		{
+			return Value();
+		}
+
+		bool IGuiInstanceLoader::IsInitializable(const TypeInfo& typeInfo)
+		{
+			return false;
+		}
+
+		Ptr<GuiInstanceContextScope> IGuiInstanceLoader::InitializeInstance(const TypeInfo& typeInfo, description::Value instance)
+		{
+			return 0;
+		}
+
+		void IGuiInstanceLoader::GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)
+		{
+		}
+
+		void IGuiInstanceLoader::GetConstructorParameters(const TypeInfo& typeInfo, collections::List<WString>& propertyNames)
+		{
+		}
+
+		Ptr<GuiInstancePropertyInfo> IGuiInstanceLoader::GetPropertyType(const PropertyInfo& propertyInfo)
+		{
+			return 0;
+		}
+
+		bool IGuiInstanceLoader::GetPropertyValue(PropertyValue& propertyValue)
+		{
+			return false;
+		}
+
+		bool IGuiInstanceLoader::SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)
+		{
+			return false;
+		}
+
+/***********************************************************************
 GuiInstanceContext::ElementName Parser
 ***********************************************************************/
 
@@ -462,16 +519,6 @@ GuiResourceInstanceLoader
 				return context->className.Value();
 			}
 
-			bool IsDeserializable(const TypeInfo& typeInfo)override
-			{
-				return false;
-			}
-
-			description::Value Deserialize(const TypeInfo& typeInfo, const WString& text)override
-			{
-				return Value();
-			}
-
 			bool IsCreatable(const TypeInfo& typeInfo)override
 			{
 				return typeInfo.typeName == context->className.Value();
@@ -513,29 +560,6 @@ GuiResourceInstanceLoader
 					auto scope = InitializeInstanceFromContext(context, resolver, instance);
 					return scope;
 				}
-				return false;
-			}
-
-			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
-			{
-			}
-
-			void GetConstructorParameters(const TypeInfo& typeInfo, collections::List<WString>& propertyNames)override
-			{
-			}
-
-			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
-			{
-				return 0;
-			}
-
-			bool GetPropertyValue(PropertyValue& propertyValue)override
-			{
-				return false;
-			}
-
-			bool SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)override
-			{
 				return false;
 			}
 		};

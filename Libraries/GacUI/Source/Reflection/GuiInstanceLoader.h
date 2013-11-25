@@ -126,17 +126,17 @@ Instance Loader
 			};
 
 			virtual WString							GetTypeName() = 0;
-			virtual bool							IsDeserializable(const TypeInfo& typeInfo) = 0;
-			virtual description::Value				Deserialize(const TypeInfo& typeInfo, const WString& text) = 0;
-			virtual bool							IsCreatable(const TypeInfo& typeInfo) = 0;
-			virtual description::Value				CreateInstance(const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments) = 0;
-			virtual bool							IsInitializable(const TypeInfo& typeInfo) = 0;
-			virtual Ptr<GuiInstanceContextScope>	InitializeInstance(const TypeInfo& typeInfo, description::Value instance) = 0;
-			virtual void							GetPropertyNames(const TypeInfo& typeInfo, collections::List<WString>& propertyNames) = 0;
-			virtual void							GetConstructorParameters(const TypeInfo& typeInfo, collections::List<WString>& propertyNames) = 0;
-			virtual Ptr<GuiInstancePropertyInfo>	GetPropertyType(const PropertyInfo& propertyInfo) = 0;
-			virtual bool							GetPropertyValue(PropertyValue& propertyValue) = 0;
-			virtual bool							SetPropertyValue(PropertyValue& propertyValue, vint currentIndex) = 0;
+			virtual bool							IsDeserializable(const TypeInfo& typeInfo);
+			virtual description::Value				Deserialize(const TypeInfo& typeInfo, const WString& text);
+			virtual bool							IsCreatable(const TypeInfo& typeInfo);
+			virtual description::Value				CreateInstance(const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments);
+			virtual bool							IsInitializable(const TypeInfo& typeInfo);
+			virtual Ptr<GuiInstanceContextScope>	InitializeInstance(const TypeInfo& typeInfo, description::Value instance);
+			virtual void							GetPropertyNames(const TypeInfo& typeInfo, collections::List<WString>& propertyNames);
+			virtual void							GetConstructorParameters(const TypeInfo& typeInfo, collections::List<WString>& propertyNames);
+			virtual Ptr<GuiInstancePropertyInfo>	GetPropertyType(const PropertyInfo& propertyInfo);
+			virtual bool							GetPropertyValue(PropertyValue& propertyValue);
+			virtual bool							SetPropertyValue(PropertyValue& propertyValue, vint currentIndex);
 		};
 
 /***********************************************************************

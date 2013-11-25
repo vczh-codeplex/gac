@@ -16,75 +16,10 @@ namespace vl
 #ifndef VCZH_DEBUG_NO_REFLECTION
 
 /***********************************************************************
-GuiRewriteInstanceLoader
-***********************************************************************/
-
-		class GuiRewriteInstanceLoader : public Object, public IGuiInstanceLoader
-		{
-		public:
-			GuiRewriteInstanceLoader()
-			{
-			}
-
-			bool IsDeserializable(const TypeInfo& typeInfo)override
-			{
-				return false;
-			}
-
-			description::Value Deserialize(const TypeInfo& typeInfo, const WString& text)override
-			{
-				return Value();
-			}
-
-			bool IsCreatable(const TypeInfo& typeInfo)override
-			{
-				return false;
-			}
-
-			description::Value CreateInstance(const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
-			{
-				return Value();
-			}
-
-			bool IsInitializable(const TypeInfo& typeInfo)override
-			{
-				return false;
-			}
-
-			Ptr<GuiInstanceContextScope> InitializeInstance(const TypeInfo& typeInfo, description::Value instance)override
-			{
-				return 0;
-			}
-
-			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
-			{
-			}
-
-			void GetConstructorParameters(const TypeInfo& typeInfo, collections::List<WString>& propertyNames)override
-			{
-			}
-
-			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
-			{
-				return 0;
-			}
-
-			bool GetPropertyValue(PropertyValue& propertyValue)override
-			{
-				return false;
-			}
-
-			bool SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)override
-			{
-				return false;
-			}
-		};
-
-/***********************************************************************
 GuiVrtualTypeInstanceLoader
 ***********************************************************************/
 
-		class GuiVrtualTypeInstanceLoader : public GuiRewriteInstanceLoader
+		class GuiVrtualTypeInstanceLoader : public Object, public IGuiInstanceLoader
 		{
 		protected:
 			WString							typeName;
@@ -120,7 +55,7 @@ GuiVrtualTypeInstanceLoader
 GuiControlInstanceLoader
 ***********************************************************************/
 
-		class GuiControlInstanceLoader : public GuiRewriteInstanceLoader
+		class GuiControlInstanceLoader : public Object, public IGuiInstanceLoader
 		{
 		public:
 			WString GetTypeName()override
@@ -142,7 +77,7 @@ GuiControlInstanceLoader
 					info->acceptableTypes.Add(description::GetTypeDescriptor<GuiGraphicsComposition>());
 					return info;
 				}
-				return GuiRewriteInstanceLoader::GetPropertyType(propertyInfo);
+				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
 			}
 
 			bool SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)override
@@ -171,7 +106,7 @@ GuiControlInstanceLoader
 GuiControlHostInstanceLoader
 ***********************************************************************/
 
-		class GuiControlHostInstanceLoader : public GuiRewriteInstanceLoader
+		class GuiControlHostInstanceLoader : public Object, public IGuiInstanceLoader
 		{
 		public:
 			WString GetTypeName()override
@@ -190,7 +125,7 @@ GuiControlHostInstanceLoader
 				{
 					return GuiInstancePropertyInfo::CollectionWithParent(description::GetTypeDescriptor<GuiComponent>());
 				}
-				return GuiRewriteInstanceLoader::GetPropertyType(propertyInfo);
+				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
 			}
 
 			bool SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)override
@@ -214,7 +149,7 @@ GuiControlHostInstanceLoader
 GuiTabInstanceLoader
 ***********************************************************************/
 
-		class GuiTabInstanceLoader : public GuiRewriteInstanceLoader
+		class GuiTabInstanceLoader : public Object, public IGuiInstanceLoader
 		{
 		public:
 			WString GetTypeName()override
@@ -233,7 +168,7 @@ GuiTabInstanceLoader
 				{
 					return GuiInstancePropertyInfo::CollectionWithParent(description::GetTypeDescriptor<GuiTabPage>());
 				}
-				return GuiRewriteInstanceLoader::GetPropertyType(propertyInfo);
+				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
 			}
 
 			bool SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)override
@@ -257,7 +192,7 @@ GuiTabInstanceLoader
 GuiTabPageInstanceLoader
 ***********************************************************************/
 
-		class GuiTabPageInstanceLoader : public GuiRewriteInstanceLoader
+		class GuiTabPageInstanceLoader : public Object, public IGuiInstanceLoader
 		{
 		public:
 			WString GetTypeName()override
@@ -279,7 +214,7 @@ GuiTabPageInstanceLoader
 					info->acceptableTypes.Add(description::GetTypeDescriptor<GuiGraphicsComposition>());
 					return info;
 				}
-				return GuiRewriteInstanceLoader::GetPropertyType(propertyInfo);
+				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
 			}
 
 			bool SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)override
@@ -308,7 +243,7 @@ GuiTabPageInstanceLoader
 GuiToolstripMenuInstanceLoader
 ***********************************************************************/
 
-		class GuiToolstripMenuInstanceLoader : public GuiRewriteInstanceLoader
+		class GuiToolstripMenuInstanceLoader : public Object, public IGuiInstanceLoader
 		{
 		public:
 			WString GetTypeName()override
@@ -327,7 +262,7 @@ GuiToolstripMenuInstanceLoader
 				{
 					return GuiInstancePropertyInfo::CollectionWithParent(description::GetTypeDescriptor<GuiControl>());
 				}
-				return GuiRewriteInstanceLoader::GetPropertyType(propertyInfo);
+				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
 			}
 
 			bool SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)override
@@ -351,7 +286,7 @@ GuiToolstripMenuInstanceLoader
 GuiToolstripMenuBarInstanceLoader
 ***********************************************************************/
 
-		class GuiToolstripMenuBarInstanceLoader : public GuiRewriteInstanceLoader
+		class GuiToolstripMenuBarInstanceLoader : public Object, public IGuiInstanceLoader
 		{
 		public:
 			WString GetTypeName()override
@@ -370,7 +305,7 @@ GuiToolstripMenuBarInstanceLoader
 				{
 					return GuiInstancePropertyInfo::CollectionWithParent(description::GetTypeDescriptor<GuiControl>());
 				}
-				return GuiRewriteInstanceLoader::GetPropertyType(propertyInfo);
+				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
 			}
 
 			bool SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)override
@@ -394,7 +329,7 @@ GuiToolstripMenuBarInstanceLoader
 GuiToolstripToolBarInstanceLoader
 ***********************************************************************/
 
-		class GuiToolstripToolBarInstanceLoader : public GuiRewriteInstanceLoader
+		class GuiToolstripToolBarInstanceLoader : public Object, public IGuiInstanceLoader
 		{
 		public:
 			WString GetTypeName()override
@@ -413,7 +348,7 @@ GuiToolstripToolBarInstanceLoader
 				{
 					return GuiInstancePropertyInfo::CollectionWithParent(description::GetTypeDescriptor<GuiControl>());
 				}
-				return GuiRewriteInstanceLoader::GetPropertyType(propertyInfo);
+				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
 			}
 
 			bool SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)override
@@ -437,7 +372,7 @@ GuiToolstripToolBarInstanceLoader
 GuiToolstripButtonInstanceLoader
 ***********************************************************************/
 
-		class GuiToolstripButtonInstanceLoader : public GuiRewriteInstanceLoader
+		class GuiToolstripButtonInstanceLoader : public Object, public IGuiInstanceLoader
 		{
 		public:
 			WString GetTypeName()override
@@ -470,7 +405,7 @@ GuiToolstripButtonInstanceLoader
 				{
 					return GuiInstancePropertyInfo::Set(description::GetTypeDescriptor<GuiToolstripMenu>());
 				}
-				return GuiRewriteInstanceLoader::GetPropertyType(propertyInfo);
+				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
 			}
 
 			bool GetPropertyValue(PropertyValue& propertyValue)override
@@ -495,7 +430,7 @@ GuiToolstripButtonInstanceLoader
 GuiListViewInstanceLoader
 ***********************************************************************/
 
-		class GuiListViewInstanceLoader : public GuiRewriteInstanceLoader
+		class GuiListViewInstanceLoader : public Object, public IGuiInstanceLoader
 		{
 		public:
 			WString GetTypeName()override
@@ -605,7 +540,7 @@ GuiListViewInstanceLoader
 				{
 					return GuiInstancePropertyInfo::Collection(description::GetTypeDescriptor<vint>());
 				}
-				return GuiRewriteInstanceLoader::GetPropertyType(propertyInfo);
+				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
 			}
 
 			bool SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)override
@@ -639,7 +574,7 @@ GuiListViewInstanceLoader
 GuiTreeViewInstanceLoader
 ***********************************************************************/
 
-		class GuiTreeViewInstanceLoader : public GuiRewriteInstanceLoader
+		class GuiTreeViewInstanceLoader : public Object, public IGuiInstanceLoader
 		{
 		public:
 			WString GetTypeName()override
@@ -699,7 +634,7 @@ GuiTreeViewInstanceLoader
 					info->constructorParameter = true;
 					return info;
 				}
-				return GuiRewriteInstanceLoader::GetPropertyType(propertyInfo);
+				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
 			}
 
 			bool SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)override
@@ -721,7 +656,7 @@ GuiTreeViewInstanceLoader
 GuiComboBoxInstanceLoader
 ***********************************************************************/
 
-		class GuiComboBoxInstanceLoader : public GuiRewriteInstanceLoader
+		class GuiComboBoxInstanceLoader : public Object, public IGuiInstanceLoader
 		{
 		protected:
 			WString							typeName;
@@ -781,7 +716,7 @@ GuiComboBoxInstanceLoader
 					info->required = true;
 					return info;
 				}
-				return GuiRewriteInstanceLoader::GetPropertyType(propertyInfo);
+				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
 			}
 		};
 
@@ -789,7 +724,7 @@ GuiComboBoxInstanceLoader
 GuiCompositionInstanceLoader
 ***********************************************************************/
 
-		class GuiCompositionInstanceLoader : public GuiRewriteInstanceLoader
+		class GuiCompositionInstanceLoader : public Object, public IGuiInstanceLoader
 		{
 		public:
 			WString GetTypeName()override
@@ -812,7 +747,7 @@ GuiCompositionInstanceLoader
 					info->acceptableTypes.Add(description::GetTypeDescriptor<IGuiGraphicsElement>());
 					return info;
 				}
-				return GuiRewriteInstanceLoader::GetPropertyType(propertyInfo);
+				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
 			}
 
 			bool SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)override
@@ -846,7 +781,7 @@ GuiCompositionInstanceLoader
 GuiTableCompositionInstanceLoader
 ***********************************************************************/
 
-		class GuiTableCompositionInstanceLoader : public GuiRewriteInstanceLoader
+		class GuiTableCompositionInstanceLoader : public Object, public IGuiInstanceLoader
 		{
 		public:
 			WString GetTypeName()override
@@ -866,7 +801,7 @@ GuiTableCompositionInstanceLoader
 				{
 					return GuiInstancePropertyInfo::Array(description::GetTypeDescriptor<GuiCellOption>());
 				}
-				return GuiRewriteInstanceLoader::GetPropertyType(propertyInfo);
+				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
 			}
 
 			bool SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)override
@@ -904,7 +839,7 @@ GuiTableCompositionInstanceLoader
 GuiCellCompositionInstanceLoader
 ***********************************************************************/
 
-		class GuiCellCompositionInstanceLoader : public GuiRewriteInstanceLoader
+		class GuiCellCompositionInstanceLoader : public Object, public IGuiInstanceLoader
 		{
 		public:
 
@@ -924,7 +859,7 @@ GuiCellCompositionInstanceLoader
 				{
 					return GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<SiteValue>());
 				}
-				return GuiRewriteInstanceLoader::GetPropertyType(propertyInfo);
+				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
 			}
 
 			bool SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)override
@@ -946,7 +881,7 @@ GuiCellCompositionInstanceLoader
 GuiTextItemInstanceLoader
 ***********************************************************************/
 
-		class GuiTextItemInstanceLoader : public GuiRewriteInstanceLoader
+		class GuiTextItemInstanceLoader : public Object, public IGuiInstanceLoader
 		{
 		public:
 
@@ -1014,7 +949,7 @@ GuiTextItemInstanceLoader
 					info->constructorParameter = true;
 					return info;
 				}
-				return GuiRewriteInstanceLoader::GetPropertyType(propertyInfo);
+				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
 			}
 		};
 
@@ -1022,7 +957,7 @@ GuiTextItemInstanceLoader
 GuiTreeNodeInstanceLoader
 ***********************************************************************/
 
-		class GuiTreeNodeInstanceLoader : public GuiRewriteInstanceLoader
+		class GuiTreeNodeInstanceLoader : public Object, public IGuiInstanceLoader
 		{
 		protected:
 			WString							typeName;
@@ -1074,7 +1009,7 @@ GuiTreeNodeInstanceLoader
 				{
 					return GuiInstancePropertyInfo::Collection(description::GetTypeDescriptor<tree::MemoryNodeProvider>());
 				}
-				return GuiRewriteInstanceLoader::GetPropertyType(propertyInfo);
+				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
 			}
 
 			bool SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)override
