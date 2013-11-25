@@ -85,17 +85,17 @@ protected:
 		});
 	}
 
-	void listResources_SelectionChanged(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+	void listResources_SelectionChanged(GuiGraphicsComposition* sender, GuiEventArgs* arguments)
 	{
 		buttonShow->SetEnabled(listResources->GetSelectedItems().Count() == 1);
 	}
 
-	void listResources_ItemLeftButtonDoubleClick(GuiGraphicsComposition* sender, GuiItemMouseEventArgs& arguments)
+	void listResources_ItemLeftButtonDoubleClick(GuiGraphicsComposition* sender, GuiItemMouseEventArgs* arguments)
 	{
-		ShowWindowInResource(listResources->GetItems()[arguments.itemIndex]->GetText());
+		ShowWindowInResource(listResources->GetItems()[arguments->itemIndex]->GetText());
 	}
 
-	void buttonShow_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+	void buttonShow_Clicked(GuiGraphicsComposition* sender, GuiEventArgs* arguments)
 	{
 		vint itemIndex = listResources->GetSelectedItems()[0];
 		ShowWindowInResource(listResources->GetItems()[itemIndex]->GetText());
