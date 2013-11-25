@@ -33,6 +33,10 @@ int wmain(int argc, wchar_t* argv[])
 	SetupWindowsDirect2DRenderer();
 }
 
+/***********************************************************************
+Object Model
+***********************************************************************/
+
 struct Instance
 {
 	Ptr<GuiInstanceContext>						context;
@@ -40,6 +44,7 @@ struct Instance
 	List<WString>								namespaces;
 	WString										typeName;
 	Dictionary<WString, GuiConstructorRepr*>	fields;
+	Dictionary<WString, ITypeDescriptor*>		eventHandlers;
 
 	WString GetFullName()
 	{
@@ -110,6 +115,71 @@ public:
 	}
 };
 
+/***********************************************************************
+TypeTransformation
+***********************************************************************/
+
+ITypeDescriptor* GetCppTypeDescriptor(Ptr<CodegenConfig> config, Dictionary<WString, Ptr<Instance>>& instances, Ptr<Instance> instance, GuiConstructorRepr* ctor)
+{
+	Ptr<GuiResourcePathResolver> resolver = new GuiResourcePathResolver(config->resource, config->resource->GetWorkingDirectory());
+
+	Ptr<GuiInstanceContext> currentContext = instance->context;
+	GuiConstructorRepr* currentCtor = ctor;
+	WString typeName;
+
+	while (currentContext)
+	{
+		Ptr<GuiInstanceEnvironment> env = new GuiInstanceEnvironment(currentContext, resolver);
+		auto loadingSource = FindInstanceLoadingSource(env, currentCtor);
+		currentContext = loadingSource.context;
+		currentCtor = currentContext ? currentContext->instance.Obj() : 0;
+		typeName = loadingSource.typeName;
+
+		if (instances.Keys().Contains(typeName))
+		{
+			auto manager = GetInstanceLoaderManager();
+			return manager->GetTypeDescriptorForType(typeName);
+		}
+	}
+
+	return 0;
+}
+
+WString GetCppTypeName(ITypeDescriptor* typeDescriptor)
+{
+	return L"vl::" + typeDescriptor->GetTypeName();
+}
+
+WString GetCppTypeName(Ptr<CodegenConfig> config, Dictionary<WString, Ptr<Instance>>& instances, Ptr<Instance> instance, GuiConstructorRepr* ctor)
+{
+	Ptr<GuiResourcePathResolver> resolver = new GuiResourcePathResolver(config->resource, config->resource->GetWorkingDirectory());
+
+	Ptr<GuiInstanceContext> currentContext = instance->context;
+	GuiConstructorRepr* currentCtor = ctor;
+	WString typeName;
+
+	while (currentContext)
+	{
+		Ptr<GuiInstanceEnvironment> env = new GuiInstanceEnvironment(currentContext, resolver);
+		auto loadingSource = FindInstanceLoadingSource(env, currentCtor);
+		currentContext = loadingSource.context;
+		currentCtor = currentContext ? currentContext->instance.Obj() : 0;
+		typeName = loadingSource.typeName;
+
+		if (instances.Keys().Contains(typeName))
+		{
+			return typeName;
+		}
+	}
+	
+	auto manager = GetInstanceLoaderManager();
+	return GetCppTypeName(manager->GetTypeDescriptorForType(typeName));
+}
+
+/***********************************************************************
+SearchAllInstances
+***********************************************************************/
+
 class SearchAllFieldsVisitor : public Object, public GuiValueRepr::IVisitor
 {
 protected:
@@ -131,9 +201,15 @@ public:
 	{
 		FOREACH(Ptr<GuiAttSetterRepr::SetterValue>, setterValue, repr->setters.Values())
 		{
-			FOREACH(Ptr<GuiValueRepr>, value, setterValue->values)
+			if (setterValue->binding == L"set")
 			{
-				value->Accept(this);
+			}
+			else
+			{
+				FOREACH(Ptr<GuiValueRepr>, value, setterValue->values)
+				{
+					value->Accept(this);
+				}
 			}
 		}
 	}
@@ -144,6 +220,11 @@ public:
 		{
 			auto loadingSource = FindInstanceLoadingSource(env, repr);
 			fields.Add(repr->instanceName.Value(), repr);
+		}
+
+		FOREACH(WString, name, repr->eventHandlers.Keys())
+		{
+			WString handler = repr->eventHandlers[name];
 		}
 		Visit((GuiAttSetterRepr*)repr);
 	}
@@ -180,10 +261,10 @@ void SearchAllInstances(const Regex& regexClassName, Ptr<GuiResourcePathResolver
 			CopyFrom(
 				instance->namespaces,
 				From(match->Groups()[L"namespace"])
-				.Select([](const RegexString& str)->WString
-			{
-				return str.Value();
-			})
+					.Select([](const RegexString& str)->WString
+					{
+						return str.Value();
+					})
 				);
 		}
 		instance->typeName = match->Groups()[L"type"][0].Value();
@@ -197,36 +278,9 @@ void SearchAllInstances(const Regex& regexClassName, Ptr<GuiResourcePathResolver
 	}
 }
 
-WString GetCppTypeName(ITypeDescriptor* typeDescriptor)
-{
-	return L"vl::" + typeDescriptor->GetTypeName();
-}
-
-WString GetCppTypeName(Ptr<CodegenConfig> config, Dictionary<WString, Ptr<Instance>>& instances, Ptr<Instance> instance, GuiConstructorRepr* ctor)
-{
-	Ptr<GuiResourcePathResolver> resolver = new GuiResourcePathResolver(config->resource, config->resource->GetWorkingDirectory());
-
-	Ptr<GuiInstanceContext> currentContext = instance->context;
-	GuiConstructorRepr* currentCtor = ctor;
-	WString typeName;
-
-	while (currentContext)
-	{
-		Ptr<GuiInstanceEnvironment> env = new GuiInstanceEnvironment(currentContext, resolver);
-		auto loadingSource = FindInstanceLoadingSource(env, currentCtor);
-		currentContext = loadingSource.context;
-		currentCtor = currentContext ? currentContext->instance.Obj() : 0;
-		typeName = loadingSource.typeName;
-
-		if (instances.Keys().Contains(typeName))
-		{
-			return typeName;
-		}
-	}
-
-	auto manager = GetInstanceLoaderManager();
-	return GetCppTypeName(manager->GetTypeDescriptorForType(typeName));
-}
+/***********************************************************************
+Codegen
+***********************************************************************/
 
 void WriteFileComment(const WString& name, bool doNotModify, StreamWriter& writer)
 {
@@ -283,6 +337,13 @@ void WriteControlClassHeaderFileContent(Ptr<CodegenConfig> config, Ptr<Instance>
 	writer.WriteLine(prefix + L"class " + instance->typeName + L" : public " + instance->typeName + L"_<" + instance->typeName + L">");
 	writer.WriteLine(prefix + L"{");
 	writer.WriteLine(prefix + L"\tfriend class " + instance->typeName + L"_<" + instance->typeName + L">;");
+	writer.WriteLine(prefix + L"\tfriend struct vl::reflection::description::CustomTypeDescriptorSelector<" + instance->typeName + L">;");
+	writer.WriteLine(prefix + L"protected:");
+	FOREACH(WString, name, instance->eventHandlers.Keys())
+	{
+		writer.WriteLine(prefix + L"\tvoid " + name + L"(GuiGraphicsComposition* sender, " + GetCppTypeName(instance->eventHandlers[name]) + L"* arguments);");
+	}
+	writer.WriteLine(L"");
 	writer.WriteLine(prefix + L"public:");
 	writer.WriteLine(prefix + L"\t" + instance->typeName + L"();");
 	writer.WriteLine(prefix + L"};");
@@ -300,6 +361,11 @@ void WriteControlClassHeaderFileContent(Ptr<CodegenConfig> config, Ptr<Instance>
 	writer.WriteLine(prefix + L"BEGIN_CLASS_MEMBER(" + instance->GetFullName() + L")");
 	writer.WriteLine(prefix + L"\tCLASS_MEMBER_BASE(" + GetCppTypeName(instance->baseType) + L")");
 	writer.WriteLine(prefix + L"\tCLASS_MEMBER_CONSTRUCTOR(" + instance->GetFullName() + L"*(), NO_PARAMETER)");
+	writer.WriteLine(L"");
+	FOREACH(WString, name, instance->eventHandlers.Keys())
+	{
+		writer.WriteLine(prefix + L"\tCLASS_MEMBER_METHOD(" + name + L", EVENT_HANDLER_PARAMETERS)");
+	}
 	writer.WriteLine(prefix + L"END_CLASS_MEMBER(" + instance->GetFullName() + L")");
 	WriteNamespaceEnd(ns, writer);
 	writer.WriteLine(L"");
@@ -308,6 +374,13 @@ void WriteControlClassHeaderFileContent(Ptr<CodegenConfig> config, Ptr<Instance>
 void WriteControlClassCppFileContent(Ptr<CodegenConfig> config, Ptr<Instance> instance, StreamWriter& writer)
 {
 	WString prefix = WriteNamespaceBegin(instance->namespaces, writer);
+	FOREACH(WString, name, instance->eventHandlers.Keys())
+	{
+		writer.WriteLine(prefix + L"void " + name + L"(GuiGraphicsComposition* sender, " + GetCppTypeName(instance->eventHandlers[name]) + L"* arguments)");
+		writer.WriteLine(prefix + L"{");
+		writer.WriteLine(prefix + L"}");
+		writer.WriteLine(L"");
+	}
 	writer.WriteLine(prefix + instance->typeName + L"::" + instance->typeName + L"()");
 	writer.WriteLine(prefix + L"{");
 	writer.WriteLine(prefix + L"\tInitializeComponents();");
@@ -500,6 +573,10 @@ void WriteGlobalHeaderFile(Ptr<CodegenConfig> config, Dictionary<WString, Ptr<In
 
 	writer.WriteLine(L"#endif");
 }
+
+/***********************************************************************
+Main
+***********************************************************************/
 
 void GuiMain()
 {

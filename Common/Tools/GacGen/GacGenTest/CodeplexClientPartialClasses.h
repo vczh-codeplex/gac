@@ -59,6 +59,9 @@ namespace codeplex_client
 	class SignInWindow : public SignInWindow_<SignInWindow>
 	{
 		friend class SignInWindow_<SignInWindow>;
+		friend struct vl::reflection::description::CustomTypeDescriptorSelector<SignInWindow>;
+	protected:
+
 	public:
 		SignInWindow();
 	};
@@ -78,6 +81,7 @@ namespace vl
 			BEGIN_CLASS_MEMBER(codeplex_client::SignInWindow)
 				CLASS_MEMBER_BASE(vl::presentation::controls::GuiWindow)
 				CLASS_MEMBER_CONSTRUCTOR(codeplex_client::SignInWindow*(), NO_PARAMETER)
+
 			END_CLASS_MEMBER(codeplex_client::SignInWindow)
 		}
 	}
