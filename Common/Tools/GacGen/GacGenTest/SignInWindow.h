@@ -19,6 +19,7 @@ namespace codeplex_client
 		friend struct vl::reflection::description::CustomTypeDescriptorSelector<SignInWindow>;
 	protected:
 
+		void buttonLogin_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
 	public:
 		SignInWindow();
 	};
@@ -39,6 +40,7 @@ namespace vl
 				CLASS_MEMBER_BASE(vl::presentation::controls::GuiWindow)
 				CLASS_MEMBER_CONSTRUCTOR(codeplex_client::SignInWindow*(), NO_PARAMETER)
 
+				CLASS_MEMBER_GUIEVENT_HANDLER(buttonLogin_Clicked, vl::presentation::compositions::GuiEventArgs)
 			END_CLASS_MEMBER(codeplex_client::SignInWindow)
 		}
 	}

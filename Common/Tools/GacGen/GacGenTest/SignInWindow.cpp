@@ -10,6 +10,10 @@ GacUI::SignInWindow
 
 namespace codeplex_client
 {
+	void SignInWindow::buttonLogin_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
+	{
+	}
+
 	SignInWindow::SignInWindow()
 	{
 		InitializeComponents();

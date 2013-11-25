@@ -3131,6 +3131,18 @@ Macros
 			CLASS_MEMBER_GUIEVENT(PROPERTYNAME##Changed)\
 			CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(PROPERTYNAME, PROPERTYNAME##Changed)\
 
+#define GUIEVENT_HANDLER_PARAMETERS {L"sender", L"arguments"}
+
+#define CLASS_MEMBER_GUIEVENT_HANDLER(FUNCTIONNAME, ARGUMENTTYPE)\
+			CLASS_MEMBER_EXTERNALMETHOD(\
+				FUNCTIONNAME,\
+				GUIEVENT_HANDLER_PARAMETERS,\
+				void(ClassType::*)(vl::presentation::compositions::GuiGraphicsComposition*, ARGUMENTTYPE*),\
+				[](ClassType* owner, vl::presentation::compositions::GuiGraphicsComposition* sender, ARGUMENTTYPE* arguments)\
+				{\
+					owner->FUNCTIONNAME(sender, *arguments);\
+				})\
+
 /***********************************************************************
 Type Loader
 ***********************************************************************/

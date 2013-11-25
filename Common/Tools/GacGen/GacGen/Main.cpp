@@ -119,13 +119,21 @@ public:
 TypeTransformation
 ***********************************************************************/
 
-ITypeDescriptor* GetCppTypeDescriptor(Ptr<CodegenConfig> config, Dictionary<WString, Ptr<Instance>>& instances, Ptr<Instance> instance, GuiConstructorRepr* ctor)
+bool DetermineCppType(
+	Ptr<CodegenConfig> config,
+	Dictionary<WString, Ptr<Instance>>& instances,
+	Ptr<Instance> instance,
+	GuiConstructorRepr* ctor,
+	WString& typeName,
+	IGuiInstanceLoader*& loader,
+	const Func<bool()>& stop
+	)
 {
 	Ptr<GuiResourcePathResolver> resolver = new GuiResourcePathResolver(config->resource, config->resource->GetWorkingDirectory());
-
 	Ptr<GuiInstanceContext> currentContext = instance->context;
 	GuiConstructorRepr* currentCtor = ctor;
-	WString typeName;
+	typeName = L"";
+	loader = 0;
 
 	while (currentContext)
 	{
@@ -134,15 +142,15 @@ ITypeDescriptor* GetCppTypeDescriptor(Ptr<CodegenConfig> config, Dictionary<WStr
 		currentContext = loadingSource.context;
 		currentCtor = currentContext ? currentContext->instance.Obj() : 0;
 		typeName = loadingSource.typeName;
+		loader = loadingSource.loader;
 
-		if (instances.Keys().Contains(typeName))
+		if (stop())
 		{
-			auto manager = GetInstanceLoaderManager();
-			return manager->GetTypeDescriptorForType(typeName);
+			return true;
 		}
 	}
 
-	return 0;
+	return false;
 }
 
 WString GetCppTypeName(ITypeDescriptor* typeDescriptor)
@@ -152,32 +160,37 @@ WString GetCppTypeName(ITypeDescriptor* typeDescriptor)
 
 WString GetCppTypeName(Ptr<CodegenConfig> config, Dictionary<WString, Ptr<Instance>>& instances, Ptr<Instance> instance, GuiConstructorRepr* ctor)
 {
-	Ptr<GuiResourcePathResolver> resolver = new GuiResourcePathResolver(config->resource, config->resource->GetWorkingDirectory());
-
-	Ptr<GuiInstanceContext> currentContext = instance->context;
-	GuiConstructorRepr* currentCtor = ctor;
 	WString typeName;
-
-	while (currentContext)
-	{
-		Ptr<GuiInstanceEnvironment> env = new GuiInstanceEnvironment(currentContext, resolver);
-		auto loadingSource = FindInstanceLoadingSource(env, currentCtor);
-		currentContext = loadingSource.context;
-		currentCtor = currentContext ? currentContext->instance.Obj() : 0;
-		typeName = loadingSource.typeName;
-
-		if (instances.Keys().Contains(typeName))
+	IGuiInstanceLoader* loader = 0;
+	if (DetermineCppType(config, instances, instance, ctor, typeName, loader, [&]()
 		{
-			return typeName;
-		}
+			return instances.Keys().Contains(typeName);
+		}))
+	{
+		return typeName;
 	}
-	
+	else
+	{
+		auto manager = GetInstanceLoaderManager();
+		return GetCppTypeName(manager->GetTypeDescriptorForType(typeName));
+	}
+}
+
+IGuiInstanceLoader::TypeInfo GetCppTypeInfo(Ptr<CodegenConfig> config, Dictionary<WString, Ptr<Instance>>& instances, Ptr<Instance> instance, GuiConstructorRepr* ctor)
+{
+	WString typeName;
+	IGuiInstanceLoader* loader = 0;
+	DetermineCppType(config, instances, instance, ctor, typeName, loader, [&]()
+	{
+		return loader != 0;
+	});
 	auto manager = GetInstanceLoaderManager();
-	return GetCppTypeName(manager->GetTypeDescriptorForType(typeName));
+	ITypeDescriptor* typeDescriptor = manager->GetTypeDescriptorForType(typeName);
+	return IGuiInstanceLoader::TypeInfo(typeName, typeDescriptor);
 }
 
 /***********************************************************************
-SearchAllInstances
+SearchAllFields
 ***********************************************************************/
 
 class SearchAllFieldsVisitor : public Object, public GuiValueRepr::IVisitor
@@ -185,6 +198,7 @@ class SearchAllFieldsVisitor : public Object, public GuiValueRepr::IVisitor
 protected:
 	Ptr<GuiInstanceEnvironment>						env;
 	Dictionary<WString, GuiConstructorRepr*>&		fields;
+	IGuiInstanceLoader::TypeInfo					typeInfo;
 
 public:
 	SearchAllFieldsVisitor(Ptr<GuiInstanceEnvironment> _env, Dictionary<WString, GuiConstructorRepr*>& _fields)
@@ -201,15 +215,9 @@ public:
 	{
 		FOREACH(Ptr<GuiAttSetterRepr::SetterValue>, setterValue, repr->setters.Values())
 		{
-			if (setterValue->binding == L"set")
+			FOREACH(Ptr<GuiValueRepr>, value, setterValue->values)
 			{
-			}
-			else
-			{
-				FOREACH(Ptr<GuiValueRepr>, value, setterValue->values)
-				{
-					value->Accept(this);
-				}
+				value->Accept(this);
 			}
 		}
 	}
@@ -221,11 +229,6 @@ public:
 			auto loadingSource = FindInstanceLoadingSource(env, repr);
 			fields.Add(repr->instanceName.Value(), repr);
 		}
-
-		FOREACH(WString, name, repr->eventHandlers.Keys())
-		{
-			WString handler = repr->eventHandlers[name];
-		}
 		Visit((GuiAttSetterRepr*)repr);
 	}
 };
@@ -235,6 +238,10 @@ void SearchAllFields(Ptr<GuiInstanceEnvironment> env, Ptr<GuiInstanceContext> co
 	SearchAllFieldsVisitor visitor(env, fields);
 	context->instance->Accept(&visitor);
 }
+
+/***********************************************************************
+SearchAllInstances
+***********************************************************************/
 
 void SearchAllInstances(const Regex& regexClassName, Ptr<GuiResourcePathResolver> resolver, Ptr<GuiResourceFolder> folder, Dictionary<WString, Ptr<Instance>>& instances)
 {
@@ -276,6 +283,124 @@ void SearchAllInstances(const Regex& regexClassName, Ptr<GuiResourcePathResolver
 	{
 		SearchAllInstances(regexClassName, resolver, subFolder, instances);
 	}
+}
+
+/***********************************************************************
+SearchAllEventHandlers
+***********************************************************************/
+
+class SearchAllEventHandlersVisitor : public Object, public GuiValueRepr::IVisitor
+{
+protected:
+	Ptr<CodegenConfig>								config;
+	Dictionary<WString, Ptr<Instance>>&				instances;
+	Ptr<Instance>									instance;
+	Ptr<GuiInstanceEnvironment>						env;
+	Dictionary<WString, ITypeDescriptor*>&			eventHandlers;
+	IGuiInstanceLoader::TypeInfo					typeInfo;
+
+public:
+	SearchAllEventHandlersVisitor(Ptr<CodegenConfig> _config, Dictionary<WString, Ptr<Instance>>& _instances, Ptr<Instance> _instance, Ptr<GuiInstanceEnvironment> _env, Dictionary<WString, ITypeDescriptor*>& _eventHandlers)
+		:config(_config)
+		, instances(_instances)
+		, instance(_instance)
+		, env(_env)
+		, eventHandlers(_eventHandlers)
+	{
+	}
+
+	static Ptr<GuiInstancePropertyInfo> GetPropertyInfo(const IGuiInstanceLoader::TypeInfo& typeInfo, const WString& name, IGuiInstanceLoader*& loader)
+	{
+		loader = GetInstanceLoaderManager()->GetLoader(typeInfo.typeName);
+		auto propertyInfo = IGuiInstanceLoader::PropertyInfo(typeInfo, name);
+		while (loader)
+		{
+			if (auto info = loader->GetPropertyType(propertyInfo))
+			{
+				if (info->support == GuiInstancePropertyInfo::NotSupport)
+				{
+					return 0;
+				}
+				else if (info->acceptableTypes.Count() > 0)
+				{
+					return info;
+				}
+			}
+			loader = GetInstanceLoaderManager()->GetParentLoader(loader);
+		}
+		return 0;
+	}
+
+	static Ptr<GuiInstanceEventInfo> GetEventInfo(const IGuiInstanceLoader::TypeInfo& typeInfo, const WString& name, IGuiInstanceLoader*& loader)
+	{
+		loader = GetInstanceLoaderManager()->GetLoader(typeInfo.typeName);
+		auto propertyInfo = IGuiInstanceLoader::PropertyInfo(typeInfo, name);
+		while (loader)
+		{
+			if (auto info = loader->GetEventType(propertyInfo))
+			{
+				if (info->support == GuiInstanceEventInfo::NotSupport)
+				{
+					return 0;
+				}
+				else
+				{
+					return info;
+				}
+			}
+			loader = GetInstanceLoaderManager()->GetParentLoader(loader);
+		}
+		return 0;
+	}
+
+	void Visit(GuiTextRepr* repr)
+	{
+	}
+
+	void Visit(GuiAttSetterRepr* repr)
+	{
+		FOREACH(WString, eventName, repr->eventHandlers.Keys())
+		{
+			if (!eventHandlers.Keys().Contains(eventName))
+			{
+				IGuiInstanceLoader* loader = 0;
+				if (auto info = GetEventInfo(typeInfo, eventName, loader))
+				{
+					eventHandlers.Add(repr->eventHandlers[eventName], info->argumentType);
+				}
+			}
+		}
+
+		auto oldTypeInfo = typeInfo;
+		FOREACH(WString, propertyName, repr->setters.Keys())
+		{
+			auto setterValue = repr->setters[propertyName];
+			IGuiInstanceLoader* loader = 0;
+			if (auto info = GetPropertyInfo(typeInfo, propertyName, loader))
+			{
+				typeInfo = IGuiInstanceLoader::TypeInfo(info->acceptableTypes[0]->GetTypeName(), info->acceptableTypes[0]);
+				FOREACH(Ptr<GuiValueRepr>, value, setterValue->values)
+				{
+					value->Accept(this);
+				}
+			}
+		}
+		typeInfo = oldTypeInfo;
+	}
+
+	void Visit(GuiConstructorRepr* repr)
+	{
+		auto oldTypeInfo = typeInfo;
+		typeInfo = GetCppTypeInfo(config, instances, instance, repr);
+		Visit((GuiAttSetterRepr*)repr);
+		typeInfo = oldTypeInfo;
+	}
+};
+
+void SearchAllEventHandlers(Ptr<CodegenConfig> config, Dictionary<WString, Ptr<Instance>>& instances, Ptr<Instance> instance, Ptr<GuiInstanceEnvironment> env, Dictionary<WString, ITypeDescriptor*>& eventHandlers)
+{
+	SearchAllEventHandlersVisitor visitor(config, instances, instance, env, eventHandlers);
+	instance->context->instance->Accept(&visitor);
 }
 
 /***********************************************************************
@@ -338,12 +463,16 @@ void WriteControlClassHeaderFileContent(Ptr<CodegenConfig> config, Ptr<Instance>
 	writer.WriteLine(prefix + L"{");
 	writer.WriteLine(prefix + L"\tfriend class " + instance->typeName + L"_<" + instance->typeName + L">;");
 	writer.WriteLine(prefix + L"\tfriend struct vl::reflection::description::CustomTypeDescriptorSelector<" + instance->typeName + L">;");
-	writer.WriteLine(prefix + L"protected:");
-	FOREACH(WString, name, instance->eventHandlers.Keys())
+
+	if (instance->eventHandlers.Count() > 0)
 	{
-		writer.WriteLine(prefix + L"\tvoid " + name + L"(GuiGraphicsComposition* sender, " + GetCppTypeName(instance->eventHandlers[name]) + L"* arguments);");
+		writer.WriteLine(prefix + L"protected:");
+		writer.WriteLine(L"");
+		FOREACH(WString, name, instance->eventHandlers.Keys())
+		{
+			writer.WriteLine(prefix + L"\tvoid " + name + L"(GuiGraphicsComposition* sender, " + GetCppTypeName(instance->eventHandlers[name]) + L"& arguments);");
+		}
 	}
-	writer.WriteLine(L"");
 	writer.WriteLine(prefix + L"public:");
 	writer.WriteLine(prefix + L"\t" + instance->typeName + L"();");
 	writer.WriteLine(prefix + L"};");
@@ -364,7 +493,7 @@ void WriteControlClassHeaderFileContent(Ptr<CodegenConfig> config, Ptr<Instance>
 	writer.WriteLine(L"");
 	FOREACH(WString, name, instance->eventHandlers.Keys())
 	{
-		writer.WriteLine(prefix + L"\tCLASS_MEMBER_METHOD(" + name + L", EVENT_HANDLER_PARAMETERS)");
+		writer.WriteLine(prefix + L"\tCLASS_MEMBER_GUIEVENT_HANDLER(" + name + L", " + GetCppTypeName(instance->eventHandlers[name]) + L")");
 	}
 	writer.WriteLine(prefix + L"END_CLASS_MEMBER(" + instance->GetFullName() + L")");
 	WriteNamespaceEnd(ns, writer);
@@ -376,7 +505,7 @@ void WriteControlClassCppFileContent(Ptr<CodegenConfig> config, Ptr<Instance> in
 	WString prefix = WriteNamespaceBegin(instance->namespaces, writer);
 	FOREACH(WString, name, instance->eventHandlers.Keys())
 	{
-		writer.WriteLine(prefix + L"void " + name + L"(GuiGraphicsComposition* sender, " + GetCppTypeName(instance->eventHandlers[name]) + L"* arguments)");
+		writer.WriteLine(prefix + L"void " + instance->typeName + L"::" + name + L"(GuiGraphicsComposition* sender, " + GetCppTypeName(instance->eventHandlers[name]) + L"& arguments)");
 		writer.WriteLine(prefix + L"{");
 		writer.WriteLine(prefix + L"}");
 		writer.WriteLine(L"");
@@ -604,6 +733,12 @@ void GuiMain()
 		Ptr<GuiResourcePathResolver> resolver = new GuiResourcePathResolver(resource, resource->GetWorkingDirectory());
 		Dictionary<WString, Ptr<Instance>> instances;
 		SearchAllInstances(regexClassName, resolver, resource, instances);
+		
+		FOREACH(Ptr<Instance>, instance, instances.Values())
+		{
+			Ptr<GuiInstanceEnvironment> env = new GuiInstanceEnvironment(instance->context, resolver);
+			SearchAllEventHandlers(config, instances, instance, env, instance->eventHandlers);
+		}
 
 		FOREACH(Ptr<Instance>, instance, instances.Values())
 		{
