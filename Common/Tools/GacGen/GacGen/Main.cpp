@@ -375,6 +375,10 @@ public:
 		FOREACH(WString, propertyName, repr->setters.Keys())
 		{
 			auto setterValue = repr->setters[propertyName];
+			if (setterValue->binding == L"set")
+			{
+				int a = 0;
+			}
 			IGuiInstanceLoader* loader = 0;
 			if (auto info = GetPropertyInfo(typeInfo, propertyName, loader))
 			{
@@ -383,6 +387,7 @@ public:
 				{
 					value->Accept(this);
 				}
+				typeInfo = oldTypeInfo;
 			}
 		}
 		typeInfo = oldTypeInfo;
