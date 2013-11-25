@@ -1,4 +1,5 @@
 #include "GuiInstanceLoader.h"
+#include "TypeDescriptors\GuiReflectionEvents.h"
 #include "..\Resources\GuiParserManager.h"
 
 namespace vl
@@ -80,6 +81,33 @@ GuiInstancePropertyInfo
 		}
 
 /***********************************************************************
+GuiInstanceEventInfo
+***********************************************************************/
+
+		GuiInstanceEventInfo::GuiInstanceEventInfo()
+			:support(NotSupport)
+			, argumentType(0)
+		{
+		}
+
+		GuiInstanceEventInfo::~GuiInstanceEventInfo()
+		{
+		}
+
+		Ptr<GuiInstanceEventInfo> GuiInstanceEventInfo::Unsupported()
+		{
+			return new GuiInstanceEventInfo;
+		}
+
+		Ptr<GuiInstanceEventInfo> GuiInstanceEventInfo::Assign(description::ITypeDescriptor* typeDescriptor)
+		{
+			Ptr<GuiInstanceEventInfo> info = new GuiInstanceEventInfo;
+			info->support = SupportAssign;
+			info->argumentType = typeDescriptor;
+			return info;
+		}
+
+/***********************************************************************
 IGuiInstanceLoader
 ***********************************************************************/
 
@@ -131,7 +159,21 @@ IGuiInstanceLoader
 			return false;
 		}
 
-		bool IGuiInstanceLoader::SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)
+		bool IGuiInstanceLoader::SetPropertyValue(PropertyValue& propertyValue)
+		{
+			return false;
+		}
+
+		void IGuiInstanceLoader::GetEventNames(const TypeInfo& typeInfo, collections::List<WString>& eventNames)
+		{
+		}
+
+		Ptr<GuiInstanceEventInfo> IGuiInstanceLoader::GetEventType(const PropertyInfo& eventInfo)
+		{
+			return 0;
+		}
+
+		bool IGuiInstanceLoader::SetEventValue(PropertyValue& propertyValue)
 		{
 			return false;
 		}
@@ -250,6 +292,8 @@ GuiDefaultInstanceLoader
 				return L"";
 			}
 
+			//***********************************************************************************
+
 			bool IsDeserializable(const TypeInfo& typeInfo)override
 			{
 				return typeInfo.typeDescriptor->GetValueSerializer() != 0;
@@ -291,6 +335,8 @@ GuiDefaultInstanceLoader
 			{
 				return 0;
 			}
+
+			//***********************************************************************************
 
 			void ProcessGenericType(ITypeInfo* propType, ITypeInfo*& genericType, ITypeInfo*& elementType, bool& readableList, bool& writableList, bool& collectionType)
 			{
@@ -434,6 +480,8 @@ GuiDefaultInstanceLoader
 				}
 			}
 
+			//***********************************************************************************
+
 			void GetPropertyNames(const TypeInfo& typeInfo, collections::List<WString>& propertyNames)override
 			{
 				CollectPropertyNames(typeInfo, typeInfo.typeDescriptor, propertyNames);
@@ -472,7 +520,7 @@ GuiDefaultInstanceLoader
 				return false;
 			}
 
-			bool SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)override
+			bool SetPropertyValue(PropertyValue& propertyValue)override
 			{
 				GuiInstancePropertyInfo::Support support = GuiInstancePropertyInfo::NotSupport;
 				if (GetPropertyReflectionTypeInfo(propertyValue, support))
@@ -497,7 +545,85 @@ GuiDefaultInstanceLoader
 				}
 				return false;
 			}
+
+			//***********************************************************************************
+
+			void CollectEventNames(const TypeInfo& typeInfo, ITypeDescriptor* typeDescriptor, collections::List<WString>& eventNames)
+			{
+				vint eventCount = typeDescriptor->GetEventCount();
+				for (vint i = 0; i < eventCount; i++)
+				{
+					WString eventName = typeDescriptor->GetEvent(i)->GetName();
+					if (!eventNames.Contains(eventName))
+					{
+						auto info = GetEventType(PropertyInfo(typeInfo, eventName));
+						if (info && info->support != GuiInstanceEventInfo::NotSupport)
+						{
+							eventNames.Add(eventName);
+						}
+					}
+				}
+
+				vint parentCount = typeDescriptor->GetBaseTypeDescriptorCount();
+				for (vint i = 0; i < parentCount; i++)
+				{
+					CollectEventNames(typeInfo, typeDescriptor->GetBaseTypeDescriptor(i), eventNames);
+				}
+			}
+
+			//***********************************************************************************
+
+			void GetEventNames(const TypeInfo& typeInfo, collections::List<WString>& eventNames)override
+			{
+				CollectEventNames(typeInfo, typeInfo.typeDescriptor, eventNames);
+			}
+
+			Ptr<GuiInstanceEventInfo> GetEventType(const PropertyInfo& eventInfo)override
+			{
+				if (IEventInfo* ev = eventInfo.typeInfo.typeDescriptor->GetEventByName(eventInfo.propertyName, true))
+				{
+					auto handlerType = ev->GetHandlerType();
+					if (handlerType->GetDecorator() != ITypeInfo::SharedPtr) goto UNSUPPORTED;
+
+					auto genericType = handlerType->GetElementType();
+					if (genericType->GetDecorator() != ITypeInfo::Generic) goto UNSUPPORTED;
+
+					auto functionType = genericType->GetElementType();
+					if (functionType->GetDecorator() != ITypeInfo::TypeDescriptor) goto UNSUPPORTED;
+					if (functionType->GetTypeDescriptor() != description::GetTypeDescriptor<IValueFunctionProxy>()) goto UNSUPPORTED;
+
+					if (genericType->GetGenericArgumentCount() != 3) goto UNSUPPORTED;
+					auto returnType = genericType->GetGenericArgument(0);
+					auto senderType = genericType->GetGenericArgument(1);
+					auto argumentType = genericType->GetGenericArgument(2);
+					
+					if (returnType->GetDecorator() != ITypeInfo::TypeDescriptor) goto UNSUPPORTED;
+					if (returnType->GetTypeDescriptor() != description::GetTypeDescriptor<VoidValue>()) goto UNSUPPORTED;
+					
+					if (senderType->GetDecorator() != ITypeInfo::RawPtr) goto UNSUPPORTED;
+					senderType = senderType->GetElementType();
+					if (senderType->GetDecorator() != ITypeInfo::TypeDescriptor) goto UNSUPPORTED;
+					if (senderType->GetTypeDescriptor() != description::GetTypeDescriptor<compositions::GuiGraphicsComposition>()) goto UNSUPPORTED;
+					
+					if (argumentType->GetDecorator() != ITypeInfo::RawPtr) goto UNSUPPORTED;
+					argumentType = argumentType->GetElementType();
+					if (argumentType->GetDecorator() != ITypeInfo::TypeDescriptor) goto UNSUPPORTED;
+					if (!argumentType->GetTypeDescriptor()->CanConvertTo(description::GetTypeDescriptor<compositions::GuiEventArgs>())) goto UNSUPPORTED;
+
+					return GuiInstanceEventInfo::Assign(argumentType->GetTypeDescriptor());
+
+				UNSUPPORTED:
+					return GuiInstanceEventInfo::Unsupported();
+				}
+				return 0;
+			}
+
+			bool SetEventValue(PropertyValue& propertyValue)override
+			{
+				return false;
+			}
 		};
+
 /***********************************************************************
 GuiResourceInstanceLoader
 ***********************************************************************/

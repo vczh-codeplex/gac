@@ -136,6 +136,11 @@ LogInstanceLoaderManager_PrintProperties
 					loader = index == loaders.Count() - 1 ? 0 : loaders[index + 1];
 				}
 
+				if (firstInfo->support == GuiInstanceEventInfo::NotSupport)
+				{
+					continue;
+				}
+
 				LogInstanceLoaderManager_PrintFieldName(writer, (propertyName == L"" ? L"<DEFAULT-PROPERTY>" : propertyName));
 				if (firstInfo->constructorParameter)
 				{
@@ -177,6 +182,54 @@ LogInstanceLoaderManager_PrintProperties
 					}
 					writer.WriteLine(L"        }");
 				}
+			}
+		}
+
+/***********************************************************************
+LogInstanceLoaderManager_PrintProperties
+***********************************************************************/
+
+		void LogInstanceLoaderManager_PrintEvents(stream::TextWriter& writer, const WString& typeName)
+		{
+			List<IGuiInstanceLoader*> loaders;
+			{
+				IGuiInstanceLoader* loader = GetInstanceLoaderManager()->GetLoader(typeName);
+				while (loader)
+				{
+					loaders.Add(loader);
+					loader = GetInstanceLoaderManager()->GetParentLoader(loader);
+				}
+			}
+			
+			IGuiInstanceLoader::TypeInfo typeInfo(typeName, GetInstanceLoaderManager()->GetTypeDescriptorForType(typeName));
+			Dictionary<WString, IGuiInstanceLoader*> eventLoaders;
+			FOREACH(IGuiInstanceLoader*, loader, loaders)
+			{
+				List<WString> eventNames;
+				loader->GetEventNames(typeInfo, eventNames);
+
+				FOREACH(WString, eventName, eventNames)
+				{
+					if (!eventLoaders.Keys().Contains(eventName))
+					{
+						eventLoaders.Add(eventName, loader);
+					}
+				}
+			}
+
+			FOREACH_INDEXER(WString, eventName, index, eventLoaders.Keys())
+			{
+				IGuiInstanceLoader* loader = eventLoaders.Values()[index];
+				IGuiInstanceLoader::PropertyInfo propertyInfo(typeInfo, eventName);
+				auto info = loader->GetEventType(propertyInfo);
+				if (info->support == GuiInstanceEventInfo::NotSupport)
+				{
+					continue;
+				}
+
+				LogInstanceLoaderManager_PrintFieldName(writer, eventName);
+				writer.WriteString(L" [event]      ");
+				writer.WriteLine(info->argumentType->GetTypeName());
 			}
 		}
 
@@ -244,6 +297,7 @@ LogInstanceLoaderManager_PrintConstructableType
 			LogInstanceLoaderManager_PrintParentTypes(writer, typeName);
 			writer.WriteLine(L"    {");
 			LogInstanceLoaderManager_PrintProperties(writer, typeName);
+			LogInstanceLoaderManager_PrintEvents(writer, typeName);
 			writer.WriteLine(L"    }");
 		}
 

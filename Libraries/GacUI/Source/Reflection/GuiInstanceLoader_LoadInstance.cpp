@@ -17,12 +17,10 @@ Helper Functions Declarations
 			IGuiInstanceBinder*					binder;
 			IGuiInstanceLoader*					loader;
 			IGuiInstanceLoader::PropertyValue	propertyValue;
-			vint								currentIndex;
 
 			FillInstanceBindingSetter()
 				:binder(0)
 				,loader(0)
-				,currentIndex(-1)
 			{
 			}
 		};
@@ -247,7 +245,6 @@ LoadInstancePropertyValue
 						if (constructorArgument && binding != L"") return false;
 						if (binding == L"set") return false;
 						{
-							vint currentIndex = 0;
 							FOREACH_INDEXER(Ptr<GuiValueRepr>, valueRepr, index, input)
 							{
 								if (valueRepr)
@@ -270,14 +267,11 @@ LoadInstancePropertyValue
 										if (LoadValueVisitor::LoadValue(valueRepr, env, binderExpectedTypes, bindingSetters, propertyValue.propertyValue))
 										{
 											canRemoveLoadedValue = true;
-											currentIndex++;
 											FillInstanceBindingSetter bindingSetter;
 											bindingSetter.binder = binder;
 											bindingSetter.loader = propertyLoader;
 											bindingSetter.propertyValue = propertyValue;
-											bindingSetter.currentIndex = currentIndex;
 											bindingSetters.Add(bindingSetter);
-											currentIndex++;
 										}
 									}
 
@@ -368,17 +362,12 @@ FillInstance
 				// if there is no binding, set all values into the specified property
 				if (propertyValue->binding == L"")
 				{
-					vint currentIndex = 0;
 					for (vint i = 0; i < output.Count(); i++)
 					{
 						auto value = output[i].key;
 						auto valueLoader = output[i].value;
 						cachedPropertyValue.propertyValue = value;
-						if (valueLoader->SetPropertyValue(cachedPropertyValue, currentIndex))
-						{
-							currentIndex++;
-						}
-						else
+						if (!valueLoader->SetPropertyValue(cachedPropertyValue))
 						{
 							value.DeleteRawPtr();
 						}
@@ -562,7 +551,7 @@ ExecuteBindingSetters
 			// set all -bind attributes
 			FOREACH(FillInstanceBindingSetter, bindingSetter, bindingSetters)
 			{
-				if (!bindingSetter.binder->SetPropertyValue(env, bindingSetter.loader, bindingSetter.propertyValue, bindingSetter.currentIndex))
+				if (!bindingSetter.binder->SetPropertyValue(env, bindingSetter.loader, bindingSetter.propertyValue))
 				{
 					bindingSetter.propertyValue.propertyValue.DeleteRawPtr();
 				}

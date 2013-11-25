@@ -80,7 +80,7 @@ GuiControlInstanceLoader
 				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
 			}
 
-			bool SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)override
+			bool SetPropertyValue(PropertyValue& propertyValue)override
 			{
 				if (GuiControl* container = dynamic_cast<GuiControl*>(propertyValue.instanceValue.GetRawPtr()))
 				{
@@ -128,7 +128,7 @@ GuiControlHostInstanceLoader
 				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
 			}
 
-			bool SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)override
+			bool SetPropertyValue(PropertyValue& propertyValue)override
 			{
 				if (GuiControlHost* container = dynamic_cast<GuiControlHost*>(propertyValue.instanceValue.GetRawPtr()))
 				{
@@ -171,7 +171,7 @@ GuiTabInstanceLoader
 				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
 			}
 
-			bool SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)override
+			bool SetPropertyValue(PropertyValue& propertyValue)override
 			{
 				if (GuiTab* container = dynamic_cast<GuiTab*>(propertyValue.instanceValue.GetRawPtr()))
 				{
@@ -217,7 +217,7 @@ GuiTabPageInstanceLoader
 				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
 			}
 
-			bool SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)override
+			bool SetPropertyValue(PropertyValue& propertyValue)override
 			{
 				if (GuiTabPage* container = dynamic_cast<GuiTabPage*>(propertyValue.instanceValue.GetRawPtr()))
 				{
@@ -265,7 +265,7 @@ GuiToolstripMenuInstanceLoader
 				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
 			}
 
-			bool SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)override
+			bool SetPropertyValue(PropertyValue& propertyValue)override
 			{
 				if (GuiToolstripMenu* container = dynamic_cast<GuiToolstripMenu*>(propertyValue.instanceValue.GetRawPtr()))
 				{
@@ -308,7 +308,7 @@ GuiToolstripMenuBarInstanceLoader
 				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
 			}
 
-			bool SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)override
+			bool SetPropertyValue(PropertyValue& propertyValue)override
 			{
 				if (GuiToolstripMenuBar* container = dynamic_cast<GuiToolstripMenuBar*>(propertyValue.instanceValue.GetRawPtr()))
 				{
@@ -351,7 +351,7 @@ GuiToolstripToolBarInstanceLoader
 				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
 			}
 
-			bool SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)override
+			bool SetPropertyValue(PropertyValue& propertyValue)override
 			{
 				if (GuiToolstripToolBar* container = dynamic_cast<GuiToolstripToolBar*>(propertyValue.instanceValue.GetRawPtr()))
 				{
@@ -543,7 +543,7 @@ GuiListViewInstanceLoader
 				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
 			}
 
-			bool SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)override
+			bool SetPropertyValue(PropertyValue& propertyValue)override
 			{
 				if (GuiListView* container = dynamic_cast<GuiListView*>(propertyValue.instanceValue.GetRawPtr()))
 				{
@@ -637,7 +637,7 @@ GuiTreeViewInstanceLoader
 				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
 			}
 
-			bool SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)override
+			bool SetPropertyValue(PropertyValue& propertyValue)override
 			{
 				if (GuiTreeView* container = dynamic_cast<GuiTreeView*>(propertyValue.instanceValue.GetRawPtr()))
 				{
@@ -750,7 +750,7 @@ GuiCompositionInstanceLoader
 				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
 			}
 
-			bool SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)override
+			bool SetPropertyValue(PropertyValue& propertyValue)override
 			{
 				if (GuiGraphicsComposition* container = dynamic_cast<GuiGraphicsComposition*>(propertyValue.instanceValue.GetRawPtr()))
 				{
@@ -804,7 +804,7 @@ GuiTableCompositionInstanceLoader
 				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
 			}
 
-			bool SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)override
+			bool SetPropertyValue(PropertyValue& propertyValue)override
 			{
 				if (GuiTableComposition* container = dynamic_cast<GuiTableComposition*>(propertyValue.instanceValue.GetRawPtr()))
 				{
@@ -862,7 +862,7 @@ GuiCellCompositionInstanceLoader
 				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
 			}
 
-			bool SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)override
+			bool SetPropertyValue(PropertyValue& propertyValue)override
 			{
 				if (GuiCellComposition* container = dynamic_cast<GuiCellComposition*>(propertyValue.instanceValue.GetRawPtr()))
 				{
@@ -1012,7 +1012,7 @@ GuiTreeNodeInstanceLoader
 				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
 			}
 
-			bool SetPropertyValue(PropertyValue& propertyValue, vint currentIndex)override
+			bool SetPropertyValue(PropertyValue& propertyValue)override
 			{
 				if (tree::MemoryNodeProvider* container = dynamic_cast<tree::MemoryNodeProvider*>(propertyValue.instanceValue.GetRawPtr()))
 				{

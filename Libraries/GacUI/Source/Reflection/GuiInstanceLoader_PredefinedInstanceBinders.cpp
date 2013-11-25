@@ -40,7 +40,7 @@ GuiResourceInstanceBinder
 				return L"uri";
 			}
 
-			bool SetPropertyValue(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, IGuiInstanceLoader::PropertyValue& propertyValue, vint currentIndex)override
+			bool SetPropertyValue(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, IGuiInstanceLoader::PropertyValue& propertyValue)override
 			{
 				if (propertyValue.propertyValue.GetValueType() == Value::Text)
 				{
@@ -63,7 +63,7 @@ GuiResourceInstanceBinder
 							{
 								IGuiInstanceLoader::PropertyValue newValue = propertyValue;
 								newValue.propertyValue = value;
-								return loader->SetPropertyValue(newValue, currentIndex);
+								return loader->SetPropertyValue(newValue);
 							}
 						}
 					}
@@ -84,7 +84,7 @@ GuiReferenceInstanceBinder
 				return L"ref";
 			}
 
-			bool SetPropertyValue(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, IGuiInstanceLoader::PropertyValue& propertyValue, vint currentIndex)override
+			bool SetPropertyValue(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, IGuiInstanceLoader::PropertyValue& propertyValue)override
 			{
 				if (propertyValue.propertyValue.GetValueType() == Value::Text)
 				{
@@ -96,7 +96,7 @@ GuiReferenceInstanceBinder
 						newValue.propertyValue = env->scope->referenceValues.Values()[index];
 						if (!newValue.propertyValue.IsNull())
 						{
-							return loader->SetPropertyValue(newValue, currentIndex);
+							return loader->SetPropertyValue(newValue);
 						}
 					}
 				}
