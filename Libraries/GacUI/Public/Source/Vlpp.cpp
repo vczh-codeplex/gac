@@ -12899,6 +12899,22 @@ MethodInfoImpl
 				return InvokeInternal(thisObject, arguments);
 			}
 
+			Value MethodInfoImpl::CreateFunctionProxy(const Value& thisObject)
+			{
+				if(thisObject.IsNull())
+				{
+					if(!isStatic)
+					{
+						throw ArgumentNullException(L"thisObject");
+					}
+				}
+				else if(!thisObject.CanConvertTo(ownerMethodGroup->GetOwnerTypeDescriptor(), Value::RawPtr))
+				{
+					throw ArgumentTypeMismtatchException(L"thisObject", ownerMethodGroup->GetOwnerTypeDescriptor(), Value::RawPtr, thisObject);
+				}
+				return CreateFunctionProxyInternal(thisObject);
+			}
+
 			bool MethodInfoImpl::AddParameter(Ptr<IParameterInfo> parameter)
 			{
 				for(vint i=0;i<parameters.Count();i++)

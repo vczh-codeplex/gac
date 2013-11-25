@@ -137,10 +137,12 @@ Instance Representation
 				WString								binding;
 				ValueList							values;
 			};
-
+			
 			typedef collections::Dictionary<WString, Ptr<SetterValue>>			SetteValuerMap;
+			typedef collections::Dictionary<WString, WString>					EventHandlerMap;
 		public:
 			SetteValuerMap							setters;					// empty key means default property
+			EventHandlerMap							eventHandlers;
 
 			void									Accept(IVisitor* visitor)override{visitor->Visit(this);}
 		};
@@ -192,16 +194,20 @@ Instance Context
 				WString								binding;
 
 				bool IsCtorName(){ return category==L"" && name!=L"" && binding==L""; }
+				bool IsReferenceAttributeName(){ return namespaceName==L"" && category==L"ref" && name!=L"" && binding==L""; }
 				bool IsPropertyAttributeName(){ return namespaceName==L"" && category==L"" && name!=L""; }
 				bool IsPropertyElementName(){ return namespaceName==L"" && category==L"att" && name!=L""; }
-				bool IsReferenceAttributeName(){ return namespaceName==L"" && category==L"ref" && name!=L""; }
+				bool IsEventAttributeName(){ return namespaceName==L"" && category==L"ev" && name!=L"" && binding==L""; }
+				bool IsEventElementName(){ return namespaceName==L"" && category==L"ev" && name!=L"" && binding==L""; }
 			};
 		public:
 			Ptr<GuiConstructorRepr>					instance;
 			NamespaceMap							namespaces;
 			Nullable<WString>						className;
 
-			static void								CollectValues(collections::Dictionary<WString, Ptr<GuiAttSetterRepr::SetterValue>>& setters, Ptr<parsing::xml::XmlElement> xml);
+			static void								CollectDefaultAttributes(GuiAttSetterRepr::ValueList& values, Ptr<parsing::xml::XmlElement> xml);
+			static void								CollectAttributes(GuiAttSetterRepr::SetteValuerMap& setters, Ptr<parsing::xml::XmlElement> xml);
+			static void								CollectEvents(GuiAttSetterRepr::EventHandlerMap& eventHandlers, Ptr<parsing::xml::XmlElement> xml);
 			static void								FillAttSetter(Ptr<GuiAttSetterRepr> setter, Ptr<parsing::xml::XmlElement> xml);
 			static Ptr<GuiConstructorRepr>			LoadCtor(Ptr<parsing::xml::XmlElement> xml);
 			static Ptr<GuiInstanceContext>			LoadFromXml(Ptr<parsing::xml::XmlDocument> xml);
@@ -295,6 +301,26 @@ Instance Loader
 			static Ptr<GuiInstancePropertyInfo>		Array(description::ITypeDescriptor* typeDescriptor = 0);
 		};
 
+		class GuiInstanceEventInfo : public IDescriptable, public Description<GuiInstanceEventInfo>
+		{
+			typedef collections::List<description::ITypeDescriptor*>		TypeDescriptorList;
+		public:
+			enum Support
+			{
+				NotSupport,
+				SupportAssign,
+			};
+
+			Support									support;
+			description::ITypeDescriptor*			argumentType;
+
+			GuiInstanceEventInfo();
+			~GuiInstanceEventInfo();
+
+			static Ptr<GuiInstanceEventInfo>		Unsupported();
+			static Ptr<GuiInstanceEventInfo>		Assign(description::ITypeDescriptor* typeDescriptor);
+		};
+
 		class IGuiInstanceLoader : public IDescriptable, public Description<IGuiInstanceLoader>
 		{
 		public:
@@ -339,17 +365,23 @@ Instance Loader
 			};
 
 			virtual WString							GetTypeName() = 0;
-			virtual bool							IsDeserializable(const TypeInfo& typeInfo) = 0;
-			virtual description::Value				Deserialize(const TypeInfo& typeInfo, const WString& text) = 0;
-			virtual bool							IsCreatable(const TypeInfo& typeInfo) = 0;
-			virtual description::Value				CreateInstance(const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments) = 0;
-			virtual bool							IsInitializable(const TypeInfo& typeInfo) = 0;
-			virtual Ptr<GuiInstanceContextScope>	InitializeInstance(const TypeInfo& typeInfo, description::Value instance) = 0;
-			virtual void							GetPropertyNames(const TypeInfo& typeInfo, collections::List<WString>& propertyNames) = 0;
-			virtual void							GetConstructorParameters(const TypeInfo& typeInfo, collections::List<WString>& propertyNames) = 0;
-			virtual Ptr<GuiInstancePropertyInfo>	GetPropertyType(const PropertyInfo& propertyInfo) = 0;
-			virtual bool							GetPropertyValue(PropertyValue& propertyValue) = 0;
-			virtual bool							SetPropertyValue(PropertyValue& propertyValue, vint currentIndex) = 0;
+
+			virtual bool							IsDeserializable(const TypeInfo& typeInfo);
+			virtual description::Value				Deserialize(const TypeInfo& typeInfo, const WString& text);
+			virtual bool							IsCreatable(const TypeInfo& typeInfo);
+			virtual description::Value				CreateInstance(const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments);
+			virtual bool							IsInitializable(const TypeInfo& typeInfo);
+			virtual Ptr<GuiInstanceContextScope>	InitializeInstance(const TypeInfo& typeInfo, description::Value instance);
+
+			virtual void							GetPropertyNames(const TypeInfo& typeInfo, collections::List<WString>& propertyNames);
+			virtual void							GetConstructorParameters(const TypeInfo& typeInfo, collections::List<WString>& propertyNames);
+			virtual Ptr<GuiInstancePropertyInfo>	GetPropertyType(const PropertyInfo& propertyInfo);
+			virtual bool							GetPropertyValue(PropertyValue& propertyValue);
+			virtual bool							SetPropertyValue(PropertyValue& propertyValue);
+
+			virtual void							GetEventNames(const TypeInfo& typeInfo, collections::List<WString>& eventNames);
+			virtual Ptr<GuiInstanceEventInfo>		GetEventType(const PropertyInfo& eventInfo);
+			virtual bool							SetEventValue(PropertyValue& propertyValue);
 		};
 
 /***********************************************************************
@@ -361,7 +393,7 @@ Instance Binder
 		public:
 			virtual WString							GetBindingName() = 0;
 			virtual void							GetExpectedValueTypes(collections::List<description::ITypeDescriptor*>& expectedTypes) = 0;
-			virtual bool							SetPropertyValue(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, IGuiInstanceLoader::PropertyValue& propertyValue, vint currentIndex = -1) = 0;
+			virtual bool							SetPropertyValue(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, IGuiInstanceLoader::PropertyValue& propertyValue) = 0;
 		};
 
 /***********************************************************************
