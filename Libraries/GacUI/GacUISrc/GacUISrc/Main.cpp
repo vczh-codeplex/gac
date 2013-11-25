@@ -85,17 +85,17 @@ protected:
 		});
 	}
 
-	void listResources_SelectionChanged(GuiGraphicsComposition* sender, GuiEventArgs* arguments)
+	void listResources_SelectionChanged(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 	{
 		buttonShow->SetEnabled(listResources->GetSelectedItems().Count() == 1);
 	}
 
-	void listResources_ItemLeftButtonDoubleClick(GuiGraphicsComposition* sender, GuiItemMouseEventArgs* arguments)
+	void listResources_ItemLeftButtonDoubleClick(GuiGraphicsComposition* sender, GuiItemMouseEventArgs& arguments)
 	{
-		ShowWindowInResource(listResources->GetItems()[arguments->itemIndex]->GetText());
+		ShowWindowInResource(listResources->GetItems()[arguments.itemIndex]->GetText());
 	}
 
-	void buttonShow_Clicked(GuiGraphicsComposition* sender, GuiEventArgs* arguments)
+	void buttonShow_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 	{
 		vint itemIndex = listResources->GetSelectedItems()[0];
 		ShowWindowInResource(listResources->GetItems()[itemIndex]->GetText());
@@ -121,9 +121,9 @@ namespace vl
 				CLASS_MEMBER_BASE(GuiWindow)
 				CLASS_MEMBER_CONSTRUCTOR(MainWindow*(), NO_PARAMETER)
 
-				CLASS_MEMBER_METHOD(listResources_SelectionChanged, EVENT_HANDLER_PARAMETERS)
-				CLASS_MEMBER_METHOD(listResources_ItemLeftButtonDoubleClick, EVENT_HANDLER_PARAMETERS)
-				CLASS_MEMBER_METHOD(buttonShow_Clicked, EVENT_HANDLER_PARAMETERS)
+				CLASS_MEMBER_GUIEVENT_HANDLER(listResources_SelectionChanged, GuiEventArgs)
+				CLASS_MEMBER_GUIEVENT_HANDLER(listResources_ItemLeftButtonDoubleClick, GuiItemMouseEventArgs)
+				CLASS_MEMBER_GUIEVENT_HANDLER(buttonShow_Clicked, GuiEventArgs)
 			END_CLASS_MEMBER(MainWindow)
 
 			class ResourceLoader : public Object, public ITypeLoader
