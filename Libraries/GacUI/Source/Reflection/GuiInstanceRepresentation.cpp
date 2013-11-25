@@ -104,6 +104,39 @@ GuiInstanceContext
 			}
 		}
 
+		void GuiInstanceContext::CollectEvents(GuiAttSetterRepr::EventHandlerMap& eventHandlers, Ptr<parsing::xml::XmlElement> xml)
+		{
+			if(auto parser=GetParserManager()->GetParser<ElementName>(L"INSTANCE-ELEMENT-NAME"))
+			{
+				// collect values
+				FOREACH(Ptr<XmlElement>, element, XmlGetElements(xml))
+				{
+					if(auto name=parser->TypedParse(element->name.value))
+					{
+						if(name->IsEventElementName())
+						{
+							// collect a value as a new attribute setter
+							if(!eventHandlers.Keys().Contains(name->name))
+							{
+								// test if there is only one text value in the xml
+								if(xml->subNodes.Count()==1)
+								{
+									if(Ptr<XmlText> text=xml->subNodes[0].Cast<XmlText>())
+									{
+										eventHandlers.Add(name->name, text->content.value);
+									}
+									else if(Ptr<XmlCData> text=xml->subNodes[0].Cast<XmlCData>())
+									{
+										eventHandlers.Add(name->name, text->content.value);
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
 		void GuiInstanceContext::FillAttSetter(Ptr<GuiAttSetterRepr> setter, Ptr<parsing::xml::XmlElement> xml)
 		{
 			if(auto parser=GetParserManager()->GetParser<ElementName>(L"INSTANCE-ELEMENT-NAME"))
@@ -134,8 +167,9 @@ GuiInstanceContext
 					}
 				}
 
-				// collect attributes
+				// collect attributes and events
 				CollectAttributes(setter->setters, xml);
+				CollectEvents(setter->eventHandlers, xml);
 			}
 		}
 

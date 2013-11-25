@@ -113,10 +113,11 @@ Instance Context
 				WString								binding;
 
 				bool IsCtorName(){ return category==L"" && name!=L"" && binding==L""; }
+				bool IsReferenceAttributeName(){ return namespaceName==L"" && category==L"ref" && name!=L"" && binding==L""; }
 				bool IsPropertyAttributeName(){ return namespaceName==L"" && category==L"" && name!=L""; }
 				bool IsPropertyElementName(){ return namespaceName==L"" && category==L"att" && name!=L""; }
-				bool IsReferenceAttributeName(){ return namespaceName==L"" && category==L"ref" && name!=L"" && binding==L""; }
 				bool IsEventAttributeName(){ return namespaceName==L"" && category==L"ev" && name!=L"" && binding==L""; }
+				bool IsEventElementName(){ return namespaceName==L"" && category==L"ev" && name!=L"" && binding==L""; }
 			};
 		public:
 			Ptr<GuiConstructorRepr>					instance;
@@ -125,6 +126,7 @@ Instance Context
 
 			static void								CollectDefaultAttributes(GuiAttSetterRepr::ValueList& values, Ptr<parsing::xml::XmlElement> xml);
 			static void								CollectAttributes(GuiAttSetterRepr::SetteValuerMap& setters, Ptr<parsing::xml::XmlElement> xml);
+			static void								CollectEvents(GuiAttSetterRepr::EventHandlerMap& eventHandlers, Ptr<parsing::xml::XmlElement> xml);
 			static void								FillAttSetter(Ptr<GuiAttSetterRepr> setter, Ptr<parsing::xml::XmlElement> xml);
 			static Ptr<GuiConstructorRepr>			LoadCtor(Ptr<parsing::xml::XmlElement> xml);
 			static Ptr<GuiInstanceContext>			LoadFromXml(Ptr<parsing::xml::XmlDocument> xml);
