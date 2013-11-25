@@ -489,7 +489,7 @@ void WriteControlClassHeaderFileContent(Ptr<CodegenConfig> config, Ptr<Instance>
 	prefix = WriteNamespaceBegin(ns, writer);
 	writer.WriteLine(prefix + L"// -- REFLECTION CODE --");
 	writer.WriteLine(prefix + L"// DO NOT MODIFY IF YOU DO NOT UNDERATAND.");
-	writer.WriteLine(prefix + L"// THESE LINES OF CODE IS NECESSARY TO CORRECTLY LOAD THE CONTROL FROM THE RESOURCE.");
+	writer.WriteLine(prefix + L"// THESE LINES OF CODE ARE NECESSARY TO CORRECTLY LOAD THE CONTROL FROM THE RESOURCE.");
 	writer.WriteLine(prefix + L"DECL_TYPE_INFO(" + instance->GetFullName() + L")");
 	writer.WriteLine(L"");
 	writer.WriteLine(prefix + L"BEGIN_CLASS_MEMBER(" + instance->GetFullName() + L")");
@@ -527,7 +527,7 @@ void WriteControlClassCppFileContent(Ptr<CodegenConfig> config, Ptr<Instance> in
 	prefix = WriteNamespaceBegin(ns, writer);
 	writer.WriteLine(prefix + L"// -- REFLECTION CODE --");
 	writer.WriteLine(prefix + L"// DO NOT MODIFY IF YOU DO NOT UNDERATAND.");
-	writer.WriteLine(prefix + L"// THESE LINES OF CODE IS NECESSARY TO CORRECTLY LOAD THE CONTROL FROM THE RESOURCE.");
+	writer.WriteLine(prefix + L"// THESE LINES OF CODE ARE NECESSARY TO CORRECTLY LOAD THE CONTROL FROM THE RESOURCE.");
 	writer.WriteLine(prefix + L"IMPL_TYPE_INFO(" + instance->GetFullName() + L")");
 	WriteNamespaceEnd(ns, writer);
 	writer.WriteLine(L"");
