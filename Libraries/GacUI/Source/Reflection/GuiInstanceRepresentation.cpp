@@ -119,13 +119,13 @@ GuiInstanceContext
 							if(!eventHandlers.Keys().Contains(name->name))
 							{
 								// test if there is only one text value in the xml
-								if(xml->subNodes.Count()==1)
+								if(element->subNodes.Count()==1)
 								{
-									if(Ptr<XmlText> text=xml->subNodes[0].Cast<XmlText>())
+									if(Ptr<XmlText> text=element->subNodes[0].Cast<XmlText>())
 									{
 										eventHandlers.Add(name->name, text->content.value);
 									}
-									else if(Ptr<XmlCData> text=xml->subNodes[0].Cast<XmlCData>())
+									else if(Ptr<XmlCData> text=element->subNodes[0].Cast<XmlCData>())
 									{
 										eventHandlers.Add(name->name, text->content.value);
 									}
