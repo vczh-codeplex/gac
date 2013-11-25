@@ -337,7 +337,7 @@ FillInstance
 			)
 		{
 			// reverse loop to set the default property (name == L"") after all other properties
-			for(vint i=attSetter->setters.Count()-1;i>=0;i--)
+			for (vint i = attSetter->setters.Count() - 1; i >= 0; i--)
 			{
 				WString propertyName=attSetter->setters.Keys()[i];
 				if (propertyName == L"" && skipDefaultProperty)
@@ -373,6 +373,13 @@ FillInstance
 						}
 					}
 				}
+			}
+
+			// attach events
+			for (vint i = 0; i < attSetter->eventHandlers.Count(); i++)
+			{
+				WString eventName = attSetter->eventHandlers.Keys()[i];
+				WString handlerName = attSetter->eventHandlers.Values()[i];
 			}
 		}
 

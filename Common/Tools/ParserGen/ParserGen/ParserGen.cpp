@@ -63,7 +63,9 @@ bool CodegenConfig::ReadConfig(StreamReader& reader)
 		}
 		else
 		{
+			Console::SetColor(true, false, false, true);
 			Console::WriteLine(L"error> Unknown property \""+line+L".");
+			Console::SetColor(false, true, false, true);
 			return false;
 		}
 	}

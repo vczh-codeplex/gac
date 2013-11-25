@@ -548,6 +548,11 @@ namespace reflection_test
 		LogTypeManager(writer);
 	}
 
+	int MyFunc(int a, int b)
+	{
+		return a + b;
+	}
+
 	void TestReflectionInvoke()
 	{
 		{
@@ -604,6 +609,41 @@ namespace reflection_test
 			derived2.Invoke(L"Reset", (Value::xs(), derived));
 			TEST_ASSERT(UnboxValue<vint>(derived2.GetProperty(L"a"))==30);
 			TEST_ASSERT(UnboxValue<vint>(derived2.GetProperty(L"b"))==40);
+		}
+	}
+
+	void TestReflectionInvokeIndirect()
+	{
+		Value derived;
+		{
+			auto type = GetTypeDescriptor<Derived>();
+			auto ctors = type->GetConstructorGroup();
+			for (vint i = 0; i < ctors->GetMethodCount(); i++)
+			{
+				auto ctor = ctors->GetMethod(i);
+				if (ctor->GetParameterCount() == 2)
+				{
+					auto proxy = ctor->CreateFunctionProxy(Value());
+
+					auto xs = IValueList::Create();
+					xs->Add(BoxValue<vint>(1));
+					xs->Add(BoxValue<vint>(2));
+					derived = proxy.Invoke(L"Invoke", (Value::xs(), xs));
+
+					TEST_ASSERT(!derived.IsNull());
+					TEST_ASSERT(UnboxValue<vint>(derived.Invoke(L"GetB", (Value::xs()))) == 2);
+					break;
+				}
+			}
+		}
+		{
+			auto proxy = derived.GetTypeDescriptor()->GetMethodGroupByName(L"SetB", true)->GetMethod(0)->CreateFunctionProxy(derived);
+			{
+				auto xs = IValueList::Create();
+				xs->Add(BoxValue<vint>(3));
+				proxy.Invoke(L"Invoke", (Value::xs(), xs));
+			}
+			TEST_ASSERT(UnboxValue<vint>(derived.Invoke(L"GetB", (Value::xs()))) == 3);
 		}
 	}
 
@@ -860,6 +900,7 @@ using namespace reflection_test;
 
 TEST_CASE_REFLECTION(TestReflectionBuilder)
 TEST_CASE_REFLECTION(TestReflectionInvoke)
+TEST_CASE_REFLECTION(TestReflectionInvokeIndirect)
 TEST_CASE_REFLECTION(TestReflectionEnum)
 TEST_CASE_REFLECTION(TestReflectionNullable)
 TEST_CASE_REFLECTION(TestReflectionStruct)

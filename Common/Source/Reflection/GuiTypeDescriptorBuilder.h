@@ -80,6 +80,7 @@ MethodInfoImpl
 				bool									isStatic;
 
 				virtual Value							InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)=0;
+				virtual Value							CreateFunctionProxyInternal(const Value& thisObject) = 0;
 			public:
 				MethodInfoImpl(IMethodGroupInfo* _ownerMethodGroup, Ptr<ITypeInfo> _return, bool _isStatic);
 				~MethodInfoImpl();
@@ -94,6 +95,7 @@ MethodInfoImpl
 				bool									IsStatic()override;
 				void									CheckArguments(collections::Array<Value>& arguments)override;
 				Value									Invoke(const Value& thisObject, collections::Array<Value>& arguments)override;
+				Value									CreateFunctionProxy(const Value& thisObject)override;
 				bool									AddParameter(Ptr<IParameterInfo> parameter);
 				bool									SetOwnerMethodgroup(IMethodGroupInfo* _ownerMethodGroup);
 			};
