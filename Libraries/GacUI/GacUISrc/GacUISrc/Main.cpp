@@ -9,6 +9,7 @@
 #include "..\..\Source\GacUI.h"
 #include "..\..\Source\Reflection\GuiInstanceLoader.h"
 #include "..\..\Source\Reflection\TypeDescriptors\GuiReflectionControls.h"
+#include "..\..\Source\Reflection\TypeDescriptors\GuiReflectionEvents.h"
 #include <Windows.h>
 
 using namespace vl::collections;
@@ -67,6 +68,7 @@ public:
 class MainWindow : public MainWindow_<MainWindow>
 {
 	friend class MainWindow_<MainWindow>;
+	friend struct vl::reflection::description::CustomTypeDescriptorSelector<MainWindow>;
 protected:
 
 	void ShowWindowInResource(const WString& name)
@@ -123,6 +125,10 @@ namespace vl
 			BEGIN_CLASS_MEMBER(MainWindow)
 				CLASS_MEMBER_BASE(GuiWindow)
 				CLASS_MEMBER_CONSTRUCTOR(MainWindow*(), NO_PARAMETER)
+
+				CLASS_MEMBER_METHOD(listResources_SelectionChanged, EVENT_HANDLER_PARAMETERS)
+				CLASS_MEMBER_METHOD(listResources_ItemLeftButtonDoubleClick, EVENT_HANDLER_PARAMETERS)
+				CLASS_MEMBER_METHOD(buttonShow_Clicked, EVENT_HANDLER_PARAMETERS)
 			END_CLASS_MEMBER(MainWindow)
 
 			class ResourceLoader : public Object, public ITypeLoader

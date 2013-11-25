@@ -13,26 +13,57 @@ namespace vl
 GuiInstanceContext
 ***********************************************************************/
 
-		void GuiInstanceContext::CollectValues(collections::Dictionary<WString, Ptr<GuiAttSetterRepr::SetterValue>>& setters, Ptr<parsing::xml::XmlElement> xml)
+		void GuiInstanceContext::CollectDefaultAttributes(GuiAttSetterRepr::ValueList& values, Ptr<parsing::xml::XmlElement> xml)
 		{
 			if(auto parser=GetParserManager()->GetParser<ElementName>(L"INSTANCE-ELEMENT-NAME"))
 			{
 				// test if there is only one text value in the xml
-				Ptr<GuiAttSetterRepr::SetterValue> defaultValue=new GuiAttSetterRepr::SetterValue;
 				if(xml->subNodes.Count()==1)
 				{
 					if(Ptr<XmlText> text=xml->subNodes[0].Cast<XmlText>())
 					{
 						Ptr<GuiTextRepr> value=new GuiTextRepr;
 						value->text=text->content.value;
-						defaultValue->values.Add(value);
+						values.Add(value);
 					}
 					else if(Ptr<XmlCData> text=xml->subNodes[0].Cast<XmlCData>())
 					{
 						Ptr<GuiTextRepr> value=new GuiTextRepr;
 						value->text=text->content.value;
-						defaultValue->values.Add(value);
+						values.Add(value);
 					}
+				}
+
+				// collect default attributes
+				FOREACH(Ptr<XmlElement>, element, XmlGetElements(xml))
+				{
+					if(auto name=parser->TypedParse(element->name.value))
+					{
+						if(name->IsCtorName())
+						{
+							// collect constructor values in the default attribute setter
+							auto ctor=LoadCtor(element);
+							if(ctor)
+							{
+								values.Add(ctor);
+							}
+						}
+					}
+				}
+			}
+		}
+
+		void GuiInstanceContext::CollectAttributes(GuiAttSetterRepr::SetteValuerMap& setters, Ptr<parsing::xml::XmlElement> xml)
+		{
+			if(auto parser=GetParserManager()->GetParser<ElementName>(L"INSTANCE-ELEMENT-NAME"))
+			{
+				Ptr<GuiAttSetterRepr::SetterValue> defaultValue=new GuiAttSetterRepr::SetterValue;
+
+				// collect default attributes
+				CollectDefaultAttributes(defaultValue->values, xml);
+				if(defaultValue->values.Count()>0)
+				{
+					setters.Add(L"", defaultValue);
 				}
 
 				// collect values
@@ -59,13 +90,7 @@ GuiInstanceContext
 								{
 									// if the binding is not "set", then this is a single-value attribute or a colection attribute
 									// fill all data into this attribute
-									Dictionary<WString, Ptr<GuiAttSetterRepr::SetterValue>> newSetters;
-									CollectValues(newSetters, element);
-									vint index=newSetters.Keys().IndexOf(L"");
-									if(index!=-1)
-									{
-										CopyFrom(sv->values, newSetters.Values()[index]->values);
-									}
+									CollectDefaultAttributes(sv->values, element);
 								}
 
 								if(sv->values.Count()>0)
@@ -74,21 +99,7 @@ GuiInstanceContext
 								}
 							}
 						}
-						else if(name->IsCtorName())
-						{
-							// collect constructor values in the default attribute setter
-							auto ctor=LoadCtor(element);
-							if(ctor)
-							{
-								defaultValue->values.Add(ctor);
-							}
-						}
 					}
-				}
-
-				if(defaultValue->values.Count()>0)
-				{
-					setters.Add(L"", defaultValue);
 				}
 			}
 		}
@@ -114,10 +125,17 @@ GuiInstanceContext
 							sv->values.Add(value);
 						}
 					}
+					else if (name->IsEventAttributeName())
+					{
+						if (!setter->eventHandlers.Keys().Contains(name->name))
+						{
+							setter->eventHandlers.Add(name->name, att->value.value);
+						}
+					}
 				}
 
-				// collect children as setters
-				CollectValues(setter->setters, xml);
+				// collect attributes
+				CollectAttributes(setter->setters, xml);
 			}
 		}
 
