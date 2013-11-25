@@ -82,6 +82,26 @@ Instance Loader
 			static Ptr<GuiInstancePropertyInfo>		Array(description::ITypeDescriptor* typeDescriptor = 0);
 		};
 
+		class GuiInstanceEventInfo : public IDescriptable, public Description<GuiInstanceEventInfo>
+		{
+			typedef collections::List<description::ITypeDescriptor*>		TypeDescriptorList;
+		public:
+			enum Support
+			{
+				NotSupport,
+				SupportAssign,
+			};
+
+			Support									support;
+			description::ITypeDescriptor*			argumentType;
+
+			GuiInstanceEventInfo();
+			~GuiInstanceEventInfo();
+
+			static Ptr<GuiInstanceEventInfo>		Unsupported();
+			static Ptr<GuiInstanceEventInfo>		Assign(description::ITypeDescriptor* typeDescriptor);
+		};
+
 		class IGuiInstanceLoader : public IDescriptable, public Description<IGuiInstanceLoader>
 		{
 		public:
@@ -126,17 +146,23 @@ Instance Loader
 			};
 
 			virtual WString							GetTypeName() = 0;
+
 			virtual bool							IsDeserializable(const TypeInfo& typeInfo);
 			virtual description::Value				Deserialize(const TypeInfo& typeInfo, const WString& text);
 			virtual bool							IsCreatable(const TypeInfo& typeInfo);
 			virtual description::Value				CreateInstance(const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments);
 			virtual bool							IsInitializable(const TypeInfo& typeInfo);
 			virtual Ptr<GuiInstanceContextScope>	InitializeInstance(const TypeInfo& typeInfo, description::Value instance);
+
 			virtual void							GetPropertyNames(const TypeInfo& typeInfo, collections::List<WString>& propertyNames);
 			virtual void							GetConstructorParameters(const TypeInfo& typeInfo, collections::List<WString>& propertyNames);
 			virtual Ptr<GuiInstancePropertyInfo>	GetPropertyType(const PropertyInfo& propertyInfo);
 			virtual bool							GetPropertyValue(PropertyValue& propertyValue);
-			virtual bool							SetPropertyValue(PropertyValue& propertyValue, vint currentIndex);
+			virtual bool							SetPropertyValue(PropertyValue& propertyValue);
+
+			virtual void							GetEventNames(const TypeInfo& typeInfo, collections::List<WString>& eventNames);
+			virtual Ptr<GuiInstanceEventInfo>		GetEventType(const PropertyInfo& eventInfo);
+			virtual bool							SetEventValue(PropertyValue& propertyValue);
 		};
 
 /***********************************************************************
@@ -148,7 +174,7 @@ Instance Binder
 		public:
 			virtual WString							GetBindingName() = 0;
 			virtual void							GetExpectedValueTypes(collections::List<description::ITypeDescriptor*>& expectedTypes) = 0;
-			virtual bool							SetPropertyValue(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, IGuiInstanceLoader::PropertyValue& propertyValue, vint currentIndex = -1) = 0;
+			virtual bool							SetPropertyValue(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, IGuiInstanceLoader::PropertyValue& propertyValue) = 0;
 		};
 
 /***********************************************************************

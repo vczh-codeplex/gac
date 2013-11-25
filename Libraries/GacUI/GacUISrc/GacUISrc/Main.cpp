@@ -167,38 +167,38 @@ namespace vl
 
 /*
 Data Binding:
-GuiSelectableListControl
-GuiVirtualTextList
-GuiVirtualListView
-GuiVirtualTreeView
-GuiVirtualDataGrid
+	GuiSelectableListControl
+	GuiVirtualTextList
+	GuiVirtualListView
+	GuiVirtualTreeView
+	GuiVirtualDataGrid
 
 Features:
-Component Xml Layout	: Type Loaders, Virtual Type Loaders, Constructor Parameters, Object Inception (e.g. ViewModel object), Object Schema
-Expression				: "bind" Binder
-Data Binding			: Data structure declaration
-Scripting				: Event subscription, code behind
-Control Template		: Template definition and referencing
-Data Service and Query
+	Component Xml Layout	: Type Loaders, Virtual Type Loaders, Constructor Parameters, Object Inception (e.g. ViewModel object), Object Schema
+	Expression				: "bind" Binder
+	Data Binding			: Data structure declaration
+	Scripting				: Event subscription, code behind
+	Control Template		: Template definition and referencing
+	Data Service and Query
 */
 
 void GuiMain()
 {
 #ifndef VCZH_DEBUG_NO_REFLECTION
-	//{
-	//	FileStream fileStream(L"Reflection.txt", FileStream::WriteOnly);
-	//	BomEncoder encoder(BomEncoder::Utf16);
-	//	EncoderStream encoderStream(fileStream, encoder);
-	//	StreamWriter writer(encoderStream);
-	//	LogTypeManager(writer);
-	//}
-	//{
-	//	FileStream fileStream(L"Instance.txt", FileStream::WriteOnly);
-	//	BomEncoder encoder(BomEncoder::Utf16);
-	//	EncoderStream encoderStream(fileStream, encoder);
-	//	StreamWriter writer(encoderStream);
-	//	LogInstanceLoaderManager(writer);
-	//}
+	{
+		FileStream fileStream(L"Reflection.txt", FileStream::WriteOnly);
+		BomEncoder encoder(BomEncoder::Utf16);
+		EncoderStream encoderStream(fileStream, encoder);
+		StreamWriter writer(encoderStream);
+		LogTypeManager(writer);
+	}
+	{
+		FileStream fileStream(L"Instance.txt", FileStream::WriteOnly);
+		BomEncoder encoder(BomEncoder::Utf16);
+		EncoderStream encoderStream(fileStream, encoder);
+		StreamWriter writer(encoderStream);
+		LogInstanceLoaderManager(writer);
+	}
 #endif
 	UnitTestInGuiMain();
 
