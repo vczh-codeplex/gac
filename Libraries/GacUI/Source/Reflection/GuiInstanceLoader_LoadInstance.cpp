@@ -1,4 +1,5 @@
 #include "GuiInstanceLoader.h"
+#include "TypeDescriptors\GuiReflectionEvents.h"
 #include "..\Resources\GuiParserManager.h"
 
 namespace vl
@@ -336,6 +337,7 @@ FillInstance
 			List<FillInstanceBindingSetter>& bindingSetters
 			)
 		{
+			IGuiInstanceLoader::TypeInfo typeInfo(typeName, createdInstance.GetTypeDescriptor());
 			// reverse loop to set the default property (name == L"") after all other properties
 			for (vint i = attSetter->setters.Count() - 1; i >= 0; i--)
 			{
@@ -348,7 +350,7 @@ FillInstance
 				auto propertyValue=attSetter->setters.Values()[i];
 				IGuiInstanceLoader* propertyLoader=loader;
 				IGuiInstanceLoader::PropertyValue cachedPropertyValue(
-					IGuiInstanceLoader::TypeInfo(typeName, createdInstance.GetTypeDescriptor()),
+					typeInfo,
 					propertyName,
 					createdInstance
 					);
@@ -380,6 +382,77 @@ FillInstance
 			{
 				WString eventName = attSetter->eventHandlers.Keys()[i];
 				WString handlerName = attSetter->eventHandlers.Values()[i];
+
+				IGuiInstanceLoader::PropertyValue propertyValue(
+					typeInfo,
+					eventName,
+					createdInstance
+					);
+
+				// get the loader to attach the event
+				Ptr<GuiInstanceEventInfo> eventInfo;
+				IGuiInstanceLoader* eventLoader = loader;
+				{
+					while (eventLoader)
+					{
+						if (eventInfo = eventLoader->GetEventType(propertyValue))
+						{
+							if (eventInfo->support == GuiInstanceEventInfo::NotSupport)
+							{
+								eventInfo = 0;
+							}
+							break;
+						}
+						eventLoader = GetInstanceLoaderManager()->GetParentLoader(eventLoader);
+					}
+				}
+
+				if (eventInfo)
+				{
+					// find a correct method
+					if (auto group = createdInstance.GetTypeDescriptor()->GetMethodGroupByName(handlerName, true))
+					{
+						vint count = group->GetMethodCount();
+						IMethodInfo* selectedMethod = 0;
+						for (vint i = 0; i < count; i++)
+						{
+							auto method = group->GetMethod(i);
+							if (method->GetParameterCount() != 2) goto UNSUPPORTED;
+
+							auto returnType = method->GetReturn();
+							auto senderType = method->GetParameter(0)->GetType();
+							auto argumentType = method->GetParameter(1)->GetType();
+					
+							if (returnType->GetDecorator() != ITypeInfo::TypeDescriptor) goto UNSUPPORTED;
+							if (returnType->GetTypeDescriptor() != description::GetTypeDescriptor<VoidValue>()) goto UNSUPPORTED;
+					
+							if (senderType->GetDecorator() != ITypeInfo::RawPtr) goto UNSUPPORTED;
+							senderType = senderType->GetElementType();
+							if (senderType->GetDecorator() != ITypeInfo::TypeDescriptor) goto UNSUPPORTED;
+							if (senderType->GetTypeDescriptor() != description::GetTypeDescriptor<compositions::GuiGraphicsComposition>()) goto UNSUPPORTED;
+					
+							if (argumentType->GetDecorator() != ITypeInfo::RawPtr) goto UNSUPPORTED;
+							argumentType = argumentType->GetElementType();
+							if (argumentType->GetDecorator() != ITypeInfo::TypeDescriptor) goto UNSUPPORTED;
+							if (argumentType->GetTypeDescriptor() != eventInfo->argumentType) goto UNSUPPORTED;
+
+							selectedMethod = method;
+							break;
+
+						UNSUPPORTED:
+							continue;
+						}
+
+						if (selectedMethod)
+						{
+							Value proxy = selectedMethod->CreateFunctionProxy(createdInstance);
+							if (proxy.IsNull()) goto UNSUPPORTED;
+
+							propertyValue.propertyValue = proxy;
+							eventLoader->SetEventValue(propertyValue);
+						}
+					}
+				}
 			}
 		}
 

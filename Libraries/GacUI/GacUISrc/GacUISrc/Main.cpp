@@ -48,11 +48,6 @@ protected:
 		{
 			GUI_INSTANCE_REFERENCE(listResources);
 			GUI_INSTANCE_REFERENCE(buttonShow);
-
-			TImpl* impl = dynamic_cast <TImpl*>(this);
-			listResources->SelectionChanged.AttachMethod(impl, &TImpl::listResources_SelectionChanged);
-			listResources->ItemLeftButtonDoubleClick.AttachMethod(impl, &TImpl::listResources_ItemLeftButtonDoubleClick);
-			buttonShow->Clicked.AttachMethod(impl, &TImpl::buttonShow_Clicked);
 		}
 	}
 public:
