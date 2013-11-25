@@ -14,6 +14,14 @@ namespace codeplex_client
 	{
 	}
 
+	void SignInWindow::window_gotFocus(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
+	{
+	}
+
+	void SignInWindow::window_lostFocus(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
+	{
+	}
+
 	SignInWindow::SignInWindow()
 	{
 		InitializeComponents();

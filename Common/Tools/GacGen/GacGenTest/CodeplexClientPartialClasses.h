@@ -63,6 +63,8 @@ namespace codeplex_client
 	protected:
 
 		void buttonLogin_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
+		void window_gotFocus(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
+		void window_lostFocus(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
 	public:
 		SignInWindow();
 	};
@@ -84,6 +86,8 @@ namespace vl
 				CLASS_MEMBER_CONSTRUCTOR(codeplex_client::SignInWindow*(), NO_PARAMETER)
 
 				CLASS_MEMBER_GUIEVENT_HANDLER(buttonLogin_Clicked, vl::presentation::compositions::GuiEventArgs)
+				CLASS_MEMBER_GUIEVENT_HANDLER(window_gotFocus, vl::presentation::compositions::GuiEventArgs)
+				CLASS_MEMBER_GUIEVENT_HANDLER(window_lostFocus, vl::presentation::compositions::GuiEventArgs)
 			END_CLASS_MEMBER(codeplex_client::SignInWindow)
 		}
 	}
@@ -94,6 +98,14 @@ SignInWindow.cpp :
 namespace codeplex_client
 {
 	void SignInWindow::buttonLogin_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
+	{
+	}
+
+	void SignInWindow::window_gotFocus(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
+	{
+	}
+
+	void SignInWindow::window_lostFocus(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
 	{
 	}
 
