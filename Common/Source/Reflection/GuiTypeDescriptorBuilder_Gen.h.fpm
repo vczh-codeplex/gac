@@ -25,6 +25,18 @@ $loop($count,0,$PREPARE_PARAMETER)
 					R result = new typename TypeInfoRetriver<R>::Type($ARGUMENT_LIST($count));
 					return BoxParameter<R>(result, GetOwnerTypeDescriptor());
 				}
+$( )
+				Value CreateFunctionProxyInternal(const Value& thisObject)override
+				{
+					Func<$FUNCTION_TYPE($count,1)> proxy$(()
+						LAMBDA$(()[]($PARAMETER_LIST($count))->R
+						{
+							R result = new TypeInfoRetriver<R>::Type($ARGUMENT_LIST($count));
+							return result;
+						}$())
+					$());
+					return BoxParameter<Func<$FUNCTION_TYPE($count,1)>>(proxy);
+				}
 			public:
 				CustomConstructorInfoImpl(const wchar_t* parameterNames[])
 					:MethodInfoImpl(0, TypeInfoRetriver<R>::CreateTypeInfo(), true)
@@ -56,6 +68,13 @@ $loop($count,0,$PREPARE_PARAMETER)
 					$if($function,R result = ,$( )) (object->*method)($ARGUMENT_LIST($count));
 					return $if($function,BoxParameter<R>(result, GetReturn()->GetTypeDescriptor()),Value());
 				}
+$( )
+				Value CreateFunctionProxyInternal(const Value& thisObject)override
+				{
+					TClass* object=UnboxValue<TClass*>(thisObject, GetOwnerTypeDescriptor(), L"thisObject");
+					Func<$FUNCTION_TYPE($count,$function)> proxy(object, method);
+					return BoxParameter<Func<$FUNCTION_TYPE($count,$function)>>(proxy);
+				}
 			public:
 				CustomMethodInfoImpl(const wchar_t* parameterNames[], $FUNCTION_DECL($count,$function,__thiscall TClass::* _method))
 					:MethodInfoImpl(0, $if($function,TypeInfoRetriver<R>::CreateTypeInfo(),TypeInfoRetriver<void>::CreateTypeInfo()), false)
@@ -76,6 +95,19 @@ $( )
 $loop($count,0,$PREPARE_PARAMETER)
 					$if($function,R result = ,$( )) method(object$loop($count,0,$EXTERNAL_ARGUMENT_ITEM));
 					return $if($function,BoxParameter<R>(result, GetReturn()->GetTypeDescriptor()),Value());
+				}
+$( )
+				Value CreateFunctionProxyInternal(const Value& thisObject)override
+				{
+					TClass* object=UnboxValue<TClass*>(thisObject, GetOwnerTypeDescriptor(), L"thisObject");
+					Func<$FUNCTION_TYPE($count,$function)> proxy$(()
+						LAMBDA$(()[object, this]($PARAMETER_LIST($count))->$if($function,R,void)
+						{
+							$if($function,R result = ,$( )) method(object$loop($count,0,$EXTERNAL_ARGUMENT_ITEM));
+							$if($function,return result;,$( ))
+						}$())
+					$());
+					return BoxParameter<Func<$FUNCTION_TYPE($count,$function)>>(proxy);
 				}
 			public:
 				ExternalMethodInfoImpl(const wchar_t* parameterNames[], $if($function,R,void)(*_method)(TClass*$loop($count,0,$EXTERNAL_TYPE_ITEM)))
@@ -105,6 +137,12 @@ $( )
 $loop($count,0,$PREPARE_PARAMETER)
 					$if($function,R result = ,$( )) method($ARGUMENT_LIST($count));
 					return $if($function,BoxParameter<R>(result, GetReturn()->GetTypeDescriptor()),Value());
+				}
+$( )
+				Value CreateFunctionProxyInternal(const Value& thisObject)override
+				{
+					Func<$FUNCTION_TYPE($count,$function)> proxy(method);
+					return BoxParameter<Func<$FUNCTION_TYPE($count,$function)>>(proxy);
 				}
 			public:
 				CustomMethodInfoImpl(const wchar_t* parameterNames[], $FUNCTION_DECL($count,$function,* _method))
@@ -250,6 +288,27 @@ namespace vl
 	{
 		namespace description
 		{
+
+$$define $FUNCTION_TYPE_RETRIVER_APPLY($count) $$begin
+$( )
+$FUNCTION_TYPE_RETRIVER($count)
+$( )
+$$end
+$loop($MAX_FUNCTION_NUMBER(),0,$FUNCTION_TYPE_RETRIVER_APPLY)
+$( )
+			template<typename T>
+			class ValueFunctionProxyWrapper
+			{
+			};
+$( )
+$$define $FUNCTION_PARAMETER_ACCESSOR_APPLY($count) $$begin
+$( )
+$FUNCTION_PARAMETER_ACCESSOR($count,0)
+$FUNCTION_PARAMETER_ACCESSOR($count,1)
+$( )
+$$end
+$loop($MAX_FUNCTION_NUMBER(),0,$FUNCTION_PARAMETER_ACCESSOR_APPLY)
+
 			template<typename T>
 			class CustomConstructorInfoImpl{};
 			template<typename TClass, typename T>
@@ -276,26 +335,6 @@ $STATIC_METHOD_DECLARATION($count,1)
 $( )
 $$end
 $loop($MAX_FUNCTION_NUMBER(),0,$STATIC_METHOD_APPLY)
-
-$$define $FUNCTION_TYPE_RETRIVER_APPLY($count) $$begin
-$( )
-$FUNCTION_TYPE_RETRIVER($count)
-$( )
-$$end
-$loop($MAX_FUNCTION_NUMBER(),0,$FUNCTION_TYPE_RETRIVER_APPLY)
-$( )
-			template<typename T>
-			class ValueFunctionProxyWrapper
-			{
-			};
-$( )
-$$define $FUNCTION_PARAMETER_ACCESSOR_APPLY($count) $$begin
-$( )
-$FUNCTION_PARAMETER_ACCESSOR($count,0)
-$FUNCTION_PARAMETER_ACCESSOR($count,1)
-$( )
-$$end
-$loop($MAX_FUNCTION_NUMBER(),0,$FUNCTION_PARAMETER_ACCESSOR_APPLY)
 $( )
 $(/)***********************************************************************
 Parameter Accessor: const function

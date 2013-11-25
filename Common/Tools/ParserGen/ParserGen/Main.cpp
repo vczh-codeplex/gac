@@ -82,7 +82,9 @@ int wmain(int argc, wchar_t* argv[])
 				FileStream fileStream(inputPath, FileStream::ReadOnly);
 				if(!fileStream.IsAvailable())
 				{
+					Console::SetColor(true, false, false, true);
 					Console::WriteLine(L"error> Cannot open \""+inputPath+L" for read.");
+					Console::SetColor(false, true, false, true);
 					goto STOP_PARSING;
 				}
 				BomDecoder decoder;
@@ -102,7 +104,9 @@ int wmain(int argc, wchar_t* argv[])
 				FileStream fileStream(logPath, FileStream::WriteOnly);
 				if(!fileStream.IsAvailable())
 				{
+					Console::SetColor(true, false, false, true);
 					Console::WriteLine(L"error> Cannot open \""+logPath+L" for write.");
+					Console::SetColor(false, true, false, true);
 					goto STOP_PARSING;
 				}
 				BomEncoder encoder(BomEncoder::Utf16);
@@ -127,14 +131,18 @@ int wmain(int argc, wchar_t* argv[])
 				}
 				if(!definition)
 				{
+					Console::SetColor(true, false, false, true);
 					Console::WriteLine(L"error> Error happened. Open \""+logPath+L" for details.");
+					Console::SetColor(false, true, false, true);
 					goto STOP_PARSING;
 				}
 
 				table=CreateTable(definition, writer, config.ambiguity);
 				if(!table)
 				{
+					Console::SetColor(true, false, false, true);
 					Console::WriteLine(L"error> Error happened. Open \""+logPath+L" for details.");
+					Console::SetColor(false, true, false, true);
 					goto STOP_PARSING;
 				}
 			}
@@ -142,7 +150,9 @@ int wmain(int argc, wchar_t* argv[])
 				FileStream fileStream(outputHeaderPath, FileStream::WriteOnly);
 				if(!fileStream.IsAvailable())
 				{
+					Console::SetColor(true, false, false, true);
 					Console::WriteLine(L"error> Cannot open \""+outputHeaderPath+L" for write.");
+					Console::SetColor(false, true, false, true);
 					goto STOP_PARSING;
 				}
 				BomEncoder encoder(BomEncoder::Mbcs);
@@ -154,7 +164,9 @@ int wmain(int argc, wchar_t* argv[])
 				FileStream fileStream(outputCppPath, FileStream::WriteOnly);
 				if(!fileStream.IsAvailable())
 				{
+					Console::SetColor(true, false, false, true);
 					Console::WriteLine(L"error> Cannot open \""+outputCppPath+L" for write.");
+					Console::SetColor(false, true, false, true);
 					goto STOP_PARSING;
 				}
 				BomEncoder encoder(BomEncoder::Mbcs);

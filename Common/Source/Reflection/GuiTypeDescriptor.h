@@ -353,6 +353,7 @@ ITypeDescriptor (method)
 				virtual bool					IsStatic()=0;
 				virtual void					CheckArguments(collections::Array<Value>& arguments)=0;
 				virtual Value					Invoke(const Value& thisObject, collections::Array<Value>& arguments)=0;
+				virtual Value					CreateFunctionProxy(const Value& thisObject) = 0;
 			};
 
 			class IMethodGroupInfo : public virtual IMemberInfo, public Description<IMethodGroupInfo>
