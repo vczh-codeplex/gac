@@ -473,10 +473,12 @@ void WriteControlClassHeaderFileContent(Ptr<CodegenConfig> config, Ptr<Instance>
 	{
 		writer.WriteLine(prefix + L"protected:");
 		writer.WriteLine(L"");
+		writer.WriteLine(prefix + L"\t// #region CLASS_MEMBER_GUIEVENT_HANDLER");
 		FOREACH(WString, name, instance->eventHandlers.Keys())
 		{
 			writer.WriteLine(prefix + L"\tvoid " + name + L"(GuiGraphicsComposition* sender, " + GetCppTypeName(instance->eventHandlers[name]) + L"& arguments);");
 		}
+		writer.WriteLine(prefix + L"\t// #endregion CLASS_MEMBER_GUIEVENT_HANDLER");
 	}
 	writer.WriteLine(prefix + L"public:");
 	writer.WriteLine(prefix + L"\t" + instance->typeName + L"();");
@@ -488,6 +490,8 @@ void WriteControlClassHeaderFileContent(Ptr<CodegenConfig> config, Ptr<Instance>
 void WriteControlClassCppFileContent(Ptr<CodegenConfig> config, Ptr<Instance> instance, StreamWriter& writer)
 {
 	WString prefix = WriteNamespaceBegin(instance->namespaces, writer);
+	writer.WriteLine(prefix + L"// #region CLASS_MEMBER_GUIEVENT_HANDLER");
+	writer.WriteLine(L"");
 	FOREACH(WString, name, instance->eventHandlers.Keys())
 	{
 		writer.WriteLine(prefix + L"void " + instance->typeName + L"::" + name + L"(GuiGraphicsComposition* sender, " + GetCppTypeName(instance->eventHandlers[name]) + L"& arguments)");
@@ -495,6 +499,8 @@ void WriteControlClassCppFileContent(Ptr<CodegenConfig> config, Ptr<Instance> in
 		writer.WriteLine(prefix + L"}");
 		writer.WriteLine(L"");
 	}
+	writer.WriteLine(prefix + L"// #endregion CLASS_MEMBER_GUIEVENT_HANDLER");
+	writer.WriteLine(L"");
 	writer.WriteLine(prefix + instance->typeName + L"::" + instance->typeName + L"()");
 	writer.WriteLine(prefix + L"{");
 	writer.WriteLine(prefix + L"\tInitializeComponents();");

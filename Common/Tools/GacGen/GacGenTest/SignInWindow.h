@@ -19,9 +19,11 @@ namespace codeplex_client
 		friend struct vl::reflection::description::CustomTypeDescriptorSelector<SignInWindow>;
 	protected:
 
+		// #region CLASS_MEMBER_GUIEVENT_HANDLER
 		void buttonLogin_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
 		void window_gotFocus(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
 		void window_lostFocus(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
+		// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 	public:
 		SignInWindow();
 	};
