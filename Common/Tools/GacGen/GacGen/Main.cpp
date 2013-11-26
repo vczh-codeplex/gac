@@ -50,9 +50,9 @@ struct Instance
 	{
 		return From(namespaces)
 			.Aggregate(WString(), [](const WString& a, const WString& b)->WString
-		{
-			return a + b + L"::";
-		})
+			{
+				return a + b + L"::";
+			})
 			+ typeName;
 	}
 };
