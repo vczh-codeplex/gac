@@ -52,6 +52,17 @@ namespace codeplex_client
 	class SignInWindow;
 }
 
+namespace vl
+{
+	namespace reflection
+	{
+		namespace description
+		{
+			DECL_TYPE_INFO(codeplex_client::SignInWindow)
+		}
+	}
+}
+
 /*
 SignInWindow.h :
 namespace codeplex_client
@@ -68,29 +79,6 @@ namespace codeplex_client
 	public:
 		SignInWindow();
 	};
-}
-
-namespace vl
-{
-	namespace reflection
-	{
-		namespace description
-		{
-			// -- REFLECTION CODE --
-			// DO NOT MODIFY IF YOU DO NOT UNDERATAND.
-			// THESE LINES OF CODE ARE NECESSARY TO CORRECTLY LOAD THE CONTROL FROM THE RESOURCE.
-			DECL_TYPE_INFO(codeplex_client::SignInWindow)
-
-			BEGIN_CLASS_MEMBER(codeplex_client::SignInWindow)
-				CLASS_MEMBER_BASE(vl::presentation::controls::GuiWindow)
-				CLASS_MEMBER_CONSTRUCTOR(codeplex_client::SignInWindow*(), NO_PARAMETER)
-
-				CLASS_MEMBER_GUIEVENT_HANDLER(buttonLogin_Clicked, vl::presentation::compositions::GuiEventArgs)
-				CLASS_MEMBER_GUIEVENT_HANDLER(window_gotFocus, vl::presentation::compositions::GuiEventArgs)
-				CLASS_MEMBER_GUIEVENT_HANDLER(window_lostFocus, vl::presentation::compositions::GuiEventArgs)
-			END_CLASS_MEMBER(codeplex_client::SignInWindow)
-		}
-	}
 }
 
 
@@ -112,20 +100,6 @@ namespace codeplex_client
 	SignInWindow::SignInWindow()
 	{
 		InitializeComponents();
-	}
-}
-
-namespace vl
-{
-	namespace reflection
-	{
-		namespace description
-		{
-			// -- REFLECTION CODE --
-			// DO NOT MODIFY IF YOU DO NOT UNDERATAND.
-			// THESE LINES OF CODE ARE NECESSARY TO CORRECTLY LOAD THE CONTROL FROM THE RESOURCE.
-			IMPL_TYPE_INFO(codeplex_client::SignInWindow)
-		}
 	}
 }
 
