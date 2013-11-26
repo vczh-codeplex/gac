@@ -10,6 +10,8 @@ GacUI::SignInWindow
 
 namespace codeplex_client
 {
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER
+
 	void SignInWindow::buttonLogin_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
 	{
 	}
@@ -21,6 +23,8 @@ namespace codeplex_client
 	void SignInWindow::window_lostFocus(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
 	{
 	}
+
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 
 	SignInWindow::SignInWindow()
 	{
