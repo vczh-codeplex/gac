@@ -439,7 +439,7 @@ namespace vl
 
 		friend ObjectString<T> operator+(const T* left, const ObjectString<T>& right)
 		{
-			return WString(left, false)+right;
+			return ObjectString<T>(left, false)+right;
 		}
 	};
 
