@@ -483,26 +483,6 @@ void WriteControlClassHeaderFileContent(Ptr<CodegenConfig> config, Ptr<Instance>
 	writer.WriteLine(prefix + L"};");
 	WriteNamespaceEnd(instance->namespaces, writer);
 	writer.WriteLine(L"");
-
-	List<WString> ns;
-	FillReflectionNamespaces(ns);
-	prefix = WriteNamespaceBegin(ns, writer);
-	writer.WriteLine(prefix + L"// -- REFLECTION CODE --");
-	writer.WriteLine(prefix + L"// DO NOT MODIFY IF YOU DO NOT UNDERATAND.");
-	writer.WriteLine(prefix + L"// THESE LINES OF CODE ARE NECESSARY TO CORRECTLY LOAD THE CONTROL FROM THE RESOURCE.");
-	writer.WriteLine(prefix + L"DECL_TYPE_INFO(" + instance->GetFullName() + L")");
-	writer.WriteLine(L"");
-	writer.WriteLine(prefix + L"BEGIN_CLASS_MEMBER(" + instance->GetFullName() + L")");
-	writer.WriteLine(prefix + L"\tCLASS_MEMBER_BASE(" + GetCppTypeName(instance->baseType) + L")");
-	writer.WriteLine(prefix + L"\tCLASS_MEMBER_CONSTRUCTOR(" + instance->GetFullName() + L"*(), NO_PARAMETER)");
-	writer.WriteLine(L"");
-	FOREACH(WString, name, instance->eventHandlers.Keys())
-	{
-		writer.WriteLine(prefix + L"\tCLASS_MEMBER_GUIEVENT_HANDLER(" + name + L", " + GetCppTypeName(instance->eventHandlers[name]) + L")");
-	}
-	writer.WriteLine(prefix + L"END_CLASS_MEMBER(" + instance->GetFullName() + L")");
-	WriteNamespaceEnd(ns, writer);
-	writer.WriteLine(L"");
 }
 
 void WriteControlClassCppFileContent(Ptr<CodegenConfig> config, Ptr<Instance> instance, StreamWriter& writer)
@@ -520,16 +500,6 @@ void WriteControlClassCppFileContent(Ptr<CodegenConfig> config, Ptr<Instance> in
 	writer.WriteLine(prefix + L"\tInitializeComponents();");
 	writer.WriteLine(prefix + L"}");
 	WriteNamespaceEnd(instance->namespaces, writer);
-	writer.WriteLine(L"");
-
-	List<WString> ns;
-	FillReflectionNamespaces(ns);
-	prefix = WriteNamespaceBegin(ns, writer);
-	writer.WriteLine(prefix + L"// -- REFLECTION CODE --");
-	writer.WriteLine(prefix + L"// DO NOT MODIFY IF YOU DO NOT UNDERATAND.");
-	writer.WriteLine(prefix + L"// THESE LINES OF CODE ARE NECESSARY TO CORRECTLY LOAD THE CONTROL FROM THE RESOURCE.");
-	writer.WriteLine(prefix + L"IMPL_TYPE_INFO(" + instance->GetFullName() + L")");
-	WriteNamespaceEnd(ns, writer);
 	writer.WriteLine(L"");
 }
 
@@ -625,6 +595,16 @@ void WritePartialClassHeaderFile(Ptr<CodegenConfig> config, Dictionary<WString, 
 		writer.WriteLine(prefix + L"class " + instance->typeName + L";");
 		WriteNamespaceEnd(instance->namespaces, writer);
 		writer.WriteLine(L"");
+
+		List<WString> ns;
+		FillReflectionNamespaces(ns);
+		prefix = WriteNamespaceBegin(ns, writer);
+		FOREACH(Ptr<Instance>, instance, instances.Values())
+		{
+			writer.WriteLine(prefix + L"DECL_TYPE_INFO(" + instance->GetFullName() + L")");
+		}
+		WriteNamespaceEnd(ns, writer);
+		writer.WriteLine(L"");
 	}
 
 	writer.WriteLine(L"/*");
@@ -653,6 +633,26 @@ void WritePartialClassCppFile(Ptr<CodegenConfig> config, Dictionary<WString, Ptr
 	List<WString> ns;
 	FillReflectionNamespaces(ns);
 	WString prefix = WriteNamespaceBegin(ns, writer);
+
+	FOREACH(Ptr<Instance>, instance, instances.Values())
+	{
+		writer.WriteLine(prefix + L"IMPL_TYPE_INFO(" + instance->GetFullName() + L")");
+	}
+	writer.WriteLine(L"");
+
+	FOREACH(Ptr<Instance>, instance, instances.Values())
+	{
+		writer.WriteLine(prefix + L"BEGIN_CLASS_MEMBER(" + instance->GetFullName() + L")");
+		writer.WriteLine(prefix + L"\tCLASS_MEMBER_BASE(" + GetCppTypeName(instance->baseType) + L")");
+		writer.WriteLine(prefix + L"\tCLASS_MEMBER_CONSTRUCTOR(" + instance->GetFullName() + L"*(), NO_PARAMETER)");
+		writer.WriteLine(L"");
+		FOREACH(WString, name, instance->eventHandlers.Keys())
+		{
+			writer.WriteLine(prefix + L"\tCLASS_MEMBER_GUIEVENT_HANDLER(" + name + L", " + GetCppTypeName(instance->eventHandlers[name]) + L")");
+		}
+		writer.WriteLine(prefix + L"END_CLASS_MEMBER(" + instance->GetFullName() + L")");
+		writer.WriteLine(L"");
+	}
 
 	writer.WriteLine(prefix + L"class " + config->name + L"ResourceLoader : public Object, public ITypeLoader");
 	writer.WriteLine(prefix + L"{");
