@@ -169,7 +169,7 @@ Data Binding:
 	GuiVirtualDataGrid
 
 Features:
-	Component Xml Layout	: Type Loaders, Virtual Type Loaders, Constructor Parameters, Object Inception (e.g. ViewModel object), Object Schema
+	Component Xml Layout	: Object Inception, Object Schema
 	Expression				: "bind" Binder
 	Data Binding			: Data structure declaration
 	Scripting				: Event subscription, code behind
