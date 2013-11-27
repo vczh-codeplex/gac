@@ -982,7 +982,7 @@ namespace vl
 
 		friend ObjectString<T> operator+(const T* left, const ObjectString<T>& right)
 		{
-			return WString(left, false)+right;
+			return ObjectString<T>(left, false)+right;
 		}
 	};
 
@@ -20691,7 +20691,6 @@ Constructor
 ***********************************************************************/
 
 #define NO_PARAMETER {L""}
-#define EVENT_HANDLER_PARAMETERS {L"sender", L"arguments"}
 
 #define CLASS_MEMBER_CONSTRUCTOR(FUNCTIONTYPE, PARAMETERNAMES)\
 			{\

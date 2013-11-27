@@ -414,7 +414,7 @@ Color
 				const wchar_t* code=L"0123456789ABCDEF";
 				if((value.Length()==7 || value.Length()==9) && value[0]==L'#')
 				{
-					int index[8]={15, 15, 15, 15, 15, 15, 15, 15};
+					vint index[8]={15, 15, 15, 15, 15, 15, 15, 15};
 					for(vint i=0;i<value.Length()-1;i++)
 					{
 						index[i]=wcschr(code, value[i+1])-code;
@@ -8064,7 +8064,7 @@ GuiGrammarColorizer
 				void														SetColor(const WString& name, const ColorEntry& entry);
 				void														SetColor(const WString& name, const Color& color);
 				void														EndSetColors();
-				void														ColorizeTokenContextSensitive(int lineIndex, const wchar_t* text, vint start, vint length, vint& token, int& contextState)override;
+				void														ColorizeTokenContextSensitive(vint lineIndex, const wchar_t* text, vint start, vint length, vint& token, vint& contextState)override;
 
 				Ptr<RepeatingParsingExecutor>								GetParsingExecutor();
 			};

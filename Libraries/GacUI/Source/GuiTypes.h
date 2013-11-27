@@ -450,7 +450,7 @@ Color
 				const wchar_t* code=L"0123456789ABCDEF";
 				if((value.Length()==7 || value.Length()==9) && value[0]==L'#')
 				{
-					int index[8]={15, 15, 15, 15, 15, 15, 15, 15};
+					vint index[8]={15, 15, 15, 15, 15, 15, 15, 15};
 					for(vint i=0;i<value.Length()-1;i++)
 					{
 						index[i]=wcschr(code, value[i+1])-code;

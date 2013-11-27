@@ -1993,7 +1993,7 @@ LogInstanceLoaderManager_PrintFieldName
 		void LogInstanceLoaderManager_PrintFieldName(stream::TextWriter& writer, const WString& name)
 		{
 			writer.WriteString(L"        " + name);
-			for (int i = name.Length(); i < 24; i++)
+			for (vint i = name.Length(); i < 24; i++)
 			{
 				writer.WriteChar(L' ');
 			}
@@ -4852,14 +4852,14 @@ External Functions
 
 			void GuiTableComposition_SetRows(GuiTableComposition* thisObject, vint value)
 			{
-				int columns=thisObject->GetColumns();
+				vint columns=thisObject->GetColumns();
 				if(columns<=0) columns=1;
 				thisObject->SetRowsAndColumns(value, columns);
 			}
 
 			void GuiTableComposition_SetColumns(GuiTableComposition* thisObject, vint value)
 			{
-				int row=thisObject->GetRows();
+				vint row=thisObject->GetRows();
 				if(row<=0) row=1;
 				thisObject->SetRowsAndColumns(row, value);
 			}

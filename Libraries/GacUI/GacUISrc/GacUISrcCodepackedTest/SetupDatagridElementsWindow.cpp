@@ -335,7 +335,7 @@ protected:
 				WString number=itow(electronCounts[i]);
 				arguments.rt->DrawText(
 					number.Buffer(),
-					number.Length(),
+					(UINT32)number.Length(),
 					textFormat.Obj(),
 					rect,
 					textBrush.Obj()
@@ -371,7 +371,7 @@ public:
 	void ShowGraph(list::StrongTypedDataProvider<ElementData>* dataProvider, vint row)
 	{
 		Array<vint> counts;
-		CopyFrom(counts, Range(0, 1).Repeat(10));
+		CopyFrom(counts, Range<vint>(0, 1).Repeat(10));
 
 		ElementData data;
 		vint order=row+1;

@@ -71,7 +71,7 @@ Ptr<GuiImageData> GetFileIcon(const WString& fullPath, UINT uFlags)
 {
 	// Use SHGetFileInfo to get the correct icons for the specified directory or file.
 	SHFILEINFO info;
-	DWORD result=SHGetFileInfo(fullPath.Buffer(), 0, &info, sizeof(SHFILEINFO), uFlags);
+	DWORD_PTR result=SHGetFileInfo(fullPath.Buffer(), 0, &info, sizeof(SHFILEINFO), uFlags);
 	Ptr<GuiImageData> imageData;
 	if(result)
 	{
@@ -88,14 +88,14 @@ Ptr<GuiImageData> GetFileIcon(const WString& fullPath, UINT uFlags)
 WString GetFileDisplayName(const WString& fullPath)
 {
 	SHFILEINFO info;
-	DWORD result=SHGetFileInfo(fullPath.Buffer(), 0, &info, sizeof(SHFILEINFO), SHGFI_DISPLAYNAME);
+	DWORD_PTR result=SHGetFileInfo(fullPath.Buffer(), 0, &info, sizeof(SHFILEINFO), SHGFI_DISPLAYNAME);
 	return result?info.szDisplayName:L"";
 }
 
 WString GetFileTypeName(const WString& fullPath)
 {
 	SHFILEINFO info;
-	DWORD result=SHGetFileInfo(fullPath.Buffer(), 0, &info, sizeof(SHFILEINFO), SHGFI_TYPENAME);
+	DWORD_PTR result=SHGetFileInfo(fullPath.Buffer(), 0, &info, sizeof(SHFILEINFO), SHGFI_TYPENAME);
 	return result?info.szTypeName:L"";
 }
 

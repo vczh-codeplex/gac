@@ -22,14 +22,14 @@ External Functions
 
 			void GuiTableComposition_SetRows(GuiTableComposition* thisObject, vint value)
 			{
-				int columns=thisObject->GetColumns();
+				vint columns=thisObject->GetColumns();
 				if(columns<=0) columns=1;
 				thisObject->SetRowsAndColumns(value, columns);
 			}
 
 			void GuiTableComposition_SetColumns(GuiTableComposition* thisObject, vint value)
 			{
-				int row=thisObject->GetRows();
+				vint row=thisObject->GetRows();
 				if(row<=0) row=1;
 				thisObject->SetRowsAndColumns(row, value);
 			}

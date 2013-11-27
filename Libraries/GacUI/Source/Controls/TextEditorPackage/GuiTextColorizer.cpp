@@ -544,7 +544,7 @@ GuiGrammarColorizer
 				Setup();
 			}
 
-			void GuiGrammarColorizer::ColorizeTokenContextSensitive(int lineIndex, const wchar_t* text, vint start, vint length, vint& token, int& contextState)
+			void GuiGrammarColorizer::ColorizeTokenContextSensitive(vint lineIndex, const wchar_t* text, vint start, vint length, vint& token, vint& contextState)
 			{
 				SPIN_LOCK(contextLock)
 				{
