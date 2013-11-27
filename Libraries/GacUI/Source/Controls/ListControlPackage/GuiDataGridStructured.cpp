@@ -246,7 +246,7 @@ StructuredDataProvider
 					List<Ptr<IStructuredDataFilter>> selectedFilters;
 					CopyFrom(
 						selectedFilters,
-						Range(0, GetColumnCount())
+						Range<vint>(0, GetColumnCount())
 							.Select([this](vint column){return structuredDataProvider->GetColumn(column)->GetInherentFilter();})
 							.Where([](Ptr<IStructuredDataFilter> filter){return (bool)filter;})
 						);

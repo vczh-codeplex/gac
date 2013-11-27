@@ -1370,7 +1370,7 @@ WindowsController
 						vint maxSp = SystemMaxServerPacks[systemIndex];
 						for(vint sp = maxSp; sp>=0; sp--)
 						{
-							if(IsWindowsVersionEqualOrGreater(HIBYTE(systemVersion), LOBYTE(systemVersion), sp))
+							if(IsWindowsVersionEqualOrGreater(HIBYTE(systemVersion), LOBYTE(systemVersion), (WORD)sp))
 							{
 								WString systemName = isWindowsServer?SystemServerNames[systemIndex]:SystemClientNames[systemIndex];
 								if(sp==0)
@@ -1390,7 +1390,7 @@ WindowsController
 				WString GetExecutablePath()
 				{
 					Array<wchar_t> buffer(65536);
-					GetModuleFileName(NULL, &buffer[0], buffer.Count());
+					GetModuleFileName(NULL, &buffer[0], (DWORD)buffer.Count());
 					return &buffer[0];
 				}
 

@@ -393,7 +393,7 @@ UniscribeGlyphData
 
 				for(vint i=0;i<glyphCount;i++)
 				{
-					glyphs[i]=i;
+					glyphs[i]=(WORD)i;
 				}
 
 				if(sa.fRTL)
@@ -405,7 +405,7 @@ UniscribeGlyphData
 						{
 							currentGlyphCount++;
 						}
-						charCluster[i]=glyphCount-currentGlyphCount;
+						charCluster[i]=(WORD)(glyphCount-currentGlyphCount);
 					}
 				}
 				else
@@ -417,7 +417,7 @@ UniscribeGlyphData
 						{
 							currentGlyphCount++;
 						}
-						charCluster[i]=currentGlyphCount-1;
+						charCluster[i]=(WORD)(currentGlyphCount-1);
 					}
 				}
 
@@ -1151,8 +1151,8 @@ UniscribeLine
 
 							// determine the rendering order for all runs inside this range
 							Array<BYTE> levels(availableLastRun-startRun+1);
-							Array<vint> runVisualToLogical(levels.Count());
-							Array<vint> runLogicalToVisual(levels.Count());
+							Array<int> runVisualToLogical(levels.Count());
+							Array<int> runLogicalToVisual(levels.Count());
 							for(vint i=startRun;i<=availableLastRun;i++)
 							{
 								levels[i-startRun]=scriptRuns[i]->scriptItem->scriptItem.a.s.uBidiLevel;
@@ -1980,7 +1980,7 @@ UniscribeParagraph (Caret Helper)
 											else
 											{
 												glyph1=textRun->wholeGlyph.charCluster[lastRunChar];
-												glyph2=newLastRunChar==run->length?textRun->wholeGlyph.glyphs.Count():textRun->wholeGlyph.charCluster[newLastRunChar];
+												glyph2=newLastRunChar==run->length?(WORD)textRun->wholeGlyph.glyphs.Count():textRun->wholeGlyph.charCluster[newLastRunChar];
 											}
 
 											vint glyphWidth=0;

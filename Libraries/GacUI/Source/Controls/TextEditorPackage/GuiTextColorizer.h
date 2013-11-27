@@ -216,7 +216,7 @@ GuiGrammarColorizer
 				void														SetColor(const WString& name, const Color& color);
 				/// <summary>Submit all color settings.</summary>
 				void														EndSetColors();
-				void														ColorizeTokenContextSensitive(int lineIndex, const wchar_t* text, vint start, vint length, vint& token, int& contextState)override;
+				void														ColorizeTokenContextSensitive(vint lineIndex, const wchar_t* text, vint start, vint length, vint& token, vint& contextState)override;
 
 				/// <summary>Get the internal parsing executor.</summary>
 				/// <returns>The parsing executor.</returns>

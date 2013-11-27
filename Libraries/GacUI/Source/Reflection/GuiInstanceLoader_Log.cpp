@@ -49,7 +49,7 @@ LogInstanceLoaderManager_PrintFieldName
 		void LogInstanceLoaderManager_PrintFieldName(stream::TextWriter& writer, const WString& name)
 		{
 			writer.WriteString(L"        " + name);
-			for (int i = name.Length(); i < 24; i++)
+			for (vint i = name.Length(); i < 24; i++)
 			{
 				writer.WriteChar(L' ');
 			}

@@ -401,7 +401,7 @@ WindowsDirect2DParagraph (Layout Retriving)
 								FLOAT x=0;
 								FLOAT y=0;
 								DWRITE_HIT_TEST_METRICS& metrics=hitTestMetrics[i];
-								textLayout->HitTestTextPosition(textPos, FALSE, &x, &y, &metrics);
+								textLayout->HitTestTextPosition((UINT32)textPos, FALSE, &x, &y, &metrics);
 								textPos+=metrics.length;
 							}
 						}

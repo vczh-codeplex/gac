@@ -5787,7 +5787,7 @@ StructuredDataProvider
 					List<Ptr<IStructuredDataFilter>> selectedFilters;
 					CopyFrom(
 						selectedFilters,
-						Range(0, GetColumnCount())
+						Range<vint>(0, GetColumnCount())
 							.Select([this](vint column){return structuredDataProvider->GetColumn(column)->GetInherentFilter();})
 							.Where([](Ptr<IStructuredDataFilter> filter){return (bool)filter;})
 						);
@@ -24109,7 +24109,7 @@ GuiGrammarColorizer
 				Setup();
 			}
 
-			void GuiGrammarColorizer::ColorizeTokenContextSensitive(int lineIndex, const wchar_t* text, vint start, vint length, vint& token, int& contextState)
+			void GuiGrammarColorizer::ColorizeTokenContextSensitive(vint lineIndex, const wchar_t* text, vint start, vint length, vint& token, vint& contextState)
 			{
 				SPIN_LOCK(contextLock)
 				{
