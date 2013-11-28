@@ -21,17 +21,32 @@ namespace gacstudio
 		class MainWindow_ : public vl::presentation::controls::GuiWindow, public vl::presentation::GuiInstancePartialClass<vl::presentation::controls::GuiWindow>, public vl::reflection::Description<TImpl>
 		{
 		protected:
+			vl::presentation::controls::GuiToolstripCommand* commandFileExit;
+			vl::presentation::controls::GuiToolstripCommand* commandFileNew;
+			vl::presentation::controls::GuiToolstripCommand* commandFileOpen;
+			vl::presentation::controls::GuiToolstripCommand* commandFileSave;
+			vl::presentation::controls::GuiToolstripCommand* commandFileSaveAll;
 
 		void InitializeComponents()
 			{
 				if (InitializeFromResource())
 				{
+					GUI_INSTANCE_REFERENCE(commandFileExit);
+					GUI_INSTANCE_REFERENCE(commandFileNew);
+					GUI_INSTANCE_REFERENCE(commandFileOpen);
+					GUI_INSTANCE_REFERENCE(commandFileSave);
+					GUI_INSTANCE_REFERENCE(commandFileSaveAll);
 				}
 			}
 		public:
 			MainWindow_()
 				:vl::presentation::controls::GuiWindow(vl::presentation::theme::GetCurrentTheme()->CreateWindowStyle())
 				,vl::presentation::GuiInstancePartialClass<vl::presentation::controls::GuiWindow>(L"gacstudio::user_interface::MainWindow")
+				,commandFileExit(0)
+				,commandFileNew(0)
+				,commandFileOpen(0)
+				,commandFileSave(0)
+				,commandFileSaveAll(0)
 			{
 			}
 		};
