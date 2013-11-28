@@ -22,6 +22,13 @@ void PrintSuccessMessage(const WString& message)
 	Console::SetColor(true, true, true, false);
 }
 
+void PrintInformationMessage(const WString& message)
+{
+	Console::SetColor(true, true, false, true);
+	Console::WriteLine(message);
+	Console::SetColor(true, true, true, false);
+}
+
 int wmain(int argc, wchar_t* argv[])
 {
 	Array<WString> _arguments(argc - 1);
@@ -409,7 +416,7 @@ void SearchAllEventHandlers(Ptr<CodegenConfig> config, Dictionary<WString, Ptr<I
 }
 
 /***********************************************************************
-Codegen
+Codegen::Utility
 ***********************************************************************/
 
 void WriteFileComment(const WString& name, bool doNotModify, StreamWriter& writer)
@@ -461,6 +468,10 @@ void WriteNamespaceEnd(List<WString>& namespaces, StreamWriter& writer)
 	}
 }
 
+/***********************************************************************
+Codegen::EventHandlers
+***********************************************************************/
+
 WString GetEventHandlerCommentBegin(const WString& prefix)
 {
 	return prefix + L"// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)";
@@ -471,15 +482,53 @@ WString GetEventHandlerCommentEnd(const WString& prefix)
 	return prefix + L"// #endregion CLASS_MEMBER_GUIEVENT_HANDLER";
 }
 
+WString GetEventHandlerHeader(const WString& prefix, Ptr<Instance> instance, const WString& name, bool addClassName)
+{
+	return prefix + L"void " + (addClassName ? instance->typeName + L"::" : L"") + name + L"(GuiGraphicsComposition* sender, " + GetCppTypeName(instance->eventHandlers[name]) + L"& arguments)" + (addClassName ? L"" : L";");
+}
+
 void WriteControlClassHeaderFileEventHandlers(Ptr<CodegenConfig> config, Ptr<Instance> instance, const WString& prefix, StreamWriter& writer)
 {
 	writer.WriteLine(GetEventHandlerCommentBegin(prefix + L"\t"));
 	FOREACH(WString, name, instance->eventHandlers.Keys())
 	{
-		writer.WriteLine(prefix + L"\tvoid " + name + L"(GuiGraphicsComposition* sender, " + GetCppTypeName(instance->eventHandlers[name]) + L"& arguments);");
+		writer.WriteLine(GetEventHandlerHeader(prefix + L"\t", instance, name, false));
 	}
 	writer.WriteLine(GetEventHandlerCommentEnd(prefix + L"\t"));
 }
+
+void WriteControlClassCppFileEventHandlers(Ptr<CodegenConfig> config, Ptr<Instance> instance, const WString& prefix, Group<WString, WString>& existingEventHandlers, List<WString>& additionalLines, StreamWriter& writer)
+{
+	writer.WriteLine(GetEventHandlerCommentBegin(prefix));
+	writer.WriteLine(L"");
+	FOREACH(WString, name, instance->eventHandlers.Keys())
+	{
+		writer.WriteLine(GetEventHandlerHeader(prefix, instance, name, true));
+		vint index = existingEventHandlers.Keys().IndexOf(name);
+		if (index == -1)
+		{
+			writer.WriteLine(prefix + L"{");
+			writer.WriteLine(prefix + L"}");
+		}
+		else
+		{
+			FOREACH(WString, line, existingEventHandlers.GetByIndex(index))
+			{
+				writer.WriteLine(line);
+			}
+		}
+		writer.WriteLine(L"");
+	}
+	FOREACH(WString, line, additionalLines)
+	{
+		writer.WriteLine(line);
+	}
+	writer.WriteLine(GetEventHandlerCommentEnd(prefix));
+}
+
+/***********************************************************************
+Codegen::ControlClassContent
+***********************************************************************/
 
 void WriteControlClassHeaderFileContent(Ptr<CodegenConfig> config, Ptr<Instance> instance, StreamWriter& writer)
 {
@@ -500,17 +549,10 @@ void WriteControlClassHeaderFileContent(Ptr<CodegenConfig> config, Ptr<Instance>
 
 void WriteControlClassCppFileContent(Ptr<CodegenConfig> config, Ptr<Instance> instance, StreamWriter& writer)
 {
+	Group<WString, WString> existingEventHandlers;
+	List<WString> additionalLines;
 	WString prefix = WriteNamespaceBegin(instance->namespaces, writer);
-	writer.WriteLine(GetEventHandlerCommentBegin(prefix));
-	writer.WriteLine(L"");
-	FOREACH(WString, name, instance->eventHandlers.Keys())
-	{
-		writer.WriteLine(prefix + L"void " + instance->typeName + L"::" + name + L"(GuiGraphicsComposition* sender, " + GetCppTypeName(instance->eventHandlers[name]) + L"& arguments)");
-		writer.WriteLine(prefix + L"{");
-		writer.WriteLine(prefix + L"}");
-		writer.WriteLine(L"");
-	}
-	writer.WriteLine(GetEventHandlerCommentEnd(prefix));
+	WriteControlClassCppFileEventHandlers(config, instance, prefix, existingEventHandlers, additionalLines, writer);
 	writer.WriteLine(L"");
 	writer.WriteLine(prefix + instance->typeName + L"::" + instance->typeName + L"()");
 	writer.WriteLine(prefix + L"{");
@@ -520,7 +562,11 @@ void WriteControlClassCppFileContent(Ptr<CodegenConfig> config, Ptr<Instance> in
 	writer.WriteLine(L"");
 }
 
-#define OPEN_FILE(NAME, DONOTMODIFY)\
+/***********************************************************************
+Codegen::ControlClass
+***********************************************************************/
+
+#define OPEN_FILE(NAME)\
 	FileStream fileStream(config->resource->GetWorkingDirectory() + fileName, FileStream::WriteOnly); \
 	if (!fileStream.IsAvailable()) \
 	{ \
@@ -530,8 +576,14 @@ void WriteControlClassCppFileContent(Ptr<CodegenConfig> config, Ptr<Instance> in
 	BomEncoder encoder(BomEncoder::Utf8); \
 	EncoderStream encoderStream(fileStream, encoder); \
 	StreamWriter writer(encoderStream); \
-	PrintSuccessMessage(L"gacgen> Generating " + fileName); \
+	PrintSuccessMessage(L"gacgen> Generating " + fileName);
+
+#define OPEN_FILE_WITH_COMMENT(NAME, DONOTMODIFY)\
+	OPEN_FILE(NAME)\
 	WriteFileComment(NAME, DONOTMODIFY, writer);
+
+#define CANNOT_MERGE_CONTENT\
+	PrintErrorMessage(L"error> Don't know how to override " + fileName + L". Please open " + config->GetPartialClassHeaderFileName() + L" to get the latest content in the comment and modify the file by yourself.")
 
 bool TryReadFile(Ptr<CodegenConfig> config, const WString& fileName, List<WString>& lines)
 {
@@ -567,11 +619,12 @@ void WriteControlClassHeaderFile(Ptr<CodegenConfig> config, Ptr<Instance> instan
 		vint end = lines.IndexOf(GetEventHandlerCommentEnd(prefix + L"\t"));
 		if (begin == -1 || end == -1)
 		{
-			PrintErrorMessage(L"error> Don't know how to override " + fileName + L". Please open " + config->GetPartialClassHeaderFileName() + L" to get the latest content in the comment and modify the file by yourself.");
+			CANNOT_MERGE_CONTENT;
 			return;
 		}
 		
-		OPEN_FILE(instance->typeName, false);
+		OPEN_FILE(instance->typeName);
+		PrintInformationMessage(L"gacgen> Merging content into " + fileName);
 
 		for (vint i = 0; i < begin; i++)
 		{
@@ -585,7 +638,7 @@ void WriteControlClassHeaderFile(Ptr<CodegenConfig> config, Ptr<Instance> instan
 	}
 	else
 	{
-		OPEN_FILE(instance->typeName, false);
+		OPEN_FILE_WITH_COMMENT(instance->typeName, false);
 
 		writer.WriteLine(L"#ifndef VCZH_GACUI_RESOURCE_CODE_GENERATOR_" + config->name + L"_" + instance->typeName);
 		writer.WriteLine(L"#define VCZH_GACUI_RESOURCE_CODE_GENERATOR_" + config->name + L"_" + instance->typeName);
@@ -608,21 +661,116 @@ void WriteControlClassCppFile(Ptr<CodegenConfig> config, Ptr<Instance> instance)
 		{
 			prefix += L"\t";
 		}
-		PrintErrorMessage(L"error> Don't know how to override " + fileName + L". Please open " + config->GetPartialClassHeaderFileName() + L" to get the latest content in the comment and modify the file by yourself.");
+		vint begin = lines.IndexOf(GetEventHandlerCommentBegin(prefix));
+		vint end = lines.IndexOf(GetEventHandlerCommentEnd(prefix));
+		if (begin == -1 || end == -1)
+		{
+			CANNOT_MERGE_CONTENT;
+			return;
+		}
+
+		Group<WString, WString> existingEventHandlers;
+		List<WString> additionalLines;
+
+		bool inCode = false;
+		WString eventHandlerName;
+		for (vint i = begin + 1; i < end; i++)
+		{
+			WString line = lines[i];
+			if (!inCode)
+			{
+				if (eventHandlerName != L"")
+				{
+					inCode = true;
+				}
+				else
+				{
+					bool allSpaces = true;
+					for (vint j = 0; j < line.Length(); j++)
+					{
+						wchar_t c = line[j];
+						if (c != L' '&&c != L'\t')
+						{
+							allSpaces = false;
+							break;
+						}
+					}
+
+					if (!allSpaces)
+					{
+						FOREACH(WString, name, instance->eventHandlers.Keys())
+						{
+							if (line == GetEventHandlerHeader(prefix, instance, name, true))
+							{
+								eventHandlerName = name;
+								break;
+							}
+						}
+
+						if (eventHandlerName == L"")
+						{
+							inCode = true;
+						}
+					}
+				}
+			}
+
+			if (inCode)
+			{
+				if (eventHandlerName == L"")
+				{
+					additionalLines.Add(line);
+				}
+				else
+				{
+					existingEventHandlers.Add(eventHandlerName, line);
+				}
+
+				if (line == prefix + L"}")
+				{
+					inCode = false;
+					if (eventHandlerName == L"")
+					{
+						additionalLines.Add(L"");
+					}
+					else
+					{
+						eventHandlerName = L"";
+					}
+				}
+			}
+		}
+		
+		OPEN_FILE(instance->typeName);
+		PrintInformationMessage(L"gacgen> Merging content into " + fileName);
+
+		for (vint i = 0; i < begin; i++)
+		{
+			writer.WriteLine(lines[i]);
+		}
+		WriteControlClassCppFileEventHandlers(config, instance, prefix, existingEventHandlers, additionalLines, writer);
+		for (vint i = end + 1; i < lines.Count(); i++)
+		{
+			writer.WriteLine(lines[i]);
+		}
 	}
 	else
 	{
-		OPEN_FILE(instance->typeName, false);
+		OPEN_FILE_WITH_COMMENT(instance->typeName, false);
 		writer.WriteLine(L"#include \"" + config->GetGlobalHeaderFileName() + L"\"");
 		writer.WriteLine(L"");
 		WriteControlClassCppFileContent(config, instance, writer);
 	}
 }
 
+/***********************************************************************
+Codegen::PartialClass
+***********************************************************************/
+
 void WritePartialClassHeaderFile(Ptr<CodegenConfig> config, Dictionary<WString, Ptr<Instance>>& instances)
 {
 	WString fileName = config->GetPartialClassHeaderFileName();
-	OPEN_FILE(L"Partial Classes", true);
+	OPEN_FILE_WITH_COMMENT(L"Partial Classes", true);
 
 	writer.WriteLine(L"#ifndef VCZH_GACUI_RESOURCE_CODE_GENERATOR_" + config->name + L"_PARTIAL_CLASSES");
 	writer.WriteLine(L"#define VCZH_GACUI_RESOURCE_CODE_GENERATOR_" + config->name + L"_PARTIAL_CLASSES");
@@ -705,7 +853,7 @@ void WritePartialClassHeaderFile(Ptr<CodegenConfig> config, Dictionary<WString, 
 void WritePartialClassCppFile(Ptr<CodegenConfig> config, Dictionary<WString, Ptr<Instance>>& instances)
 {
 	WString fileName = config->GetPartialClassCppFileName();
-	OPEN_FILE(L"Partial Classes", true);
+	OPEN_FILE_WITH_COMMENT(L"Partial Classes", true);
 
 	writer.WriteLine(L"#include \"" + config->GetGlobalHeaderFileName() + L"\"");
 	writer.WriteLine(L"");
@@ -772,10 +920,14 @@ void WritePartialClassCppFile(Ptr<CodegenConfig> config, Dictionary<WString, Ptr
 	writer.WriteLine(L"");
 }
 
+/***********************************************************************
+Codegen::GlobalHeader
+***********************************************************************/
+
 void WriteGlobalHeaderFile(Ptr<CodegenConfig> config, Dictionary<WString, Ptr<Instance>>& instances)
 {
 	WString fileName = config->GetGlobalHeaderFileName();
-	OPEN_FILE(config->name, true);
+	OPEN_FILE_WITH_COMMENT(config->name, true);
 
 	writer.WriteLine(L"#ifndef VCZH_GACUI_RESOURCE_CODE_GENERATOR_" + config->name);
 	writer.WriteLine(L"#define VCZH_GACUI_RESOURCE_CODE_GENERATOR_" + config->name);

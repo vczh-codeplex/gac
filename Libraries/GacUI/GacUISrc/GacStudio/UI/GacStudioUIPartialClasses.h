@@ -61,6 +61,10 @@ namespace gacstudio
 		{
 			friend class MainWindow_<MainWindow>;
 			friend struct vl::reflection::description::CustomTypeDescriptorSelector<MainWindow>;
+		protected:
+
+			// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+			// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 		public:
 			MainWindow();
 		};
@@ -73,7 +77,7 @@ namespace gacstudio
 {
 	namespace user_interface
 	{
-		// #region CLASS_MEMBER_GUIEVENT_HANDLER
+		// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
 
 		// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 
