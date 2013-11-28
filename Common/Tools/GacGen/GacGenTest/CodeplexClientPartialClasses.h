@@ -73,9 +73,13 @@ namespace codeplex_client
 		friend struct vl::reflection::description::CustomTypeDescriptorSelector<SignInWindow>;
 	protected:
 
+		// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
 		void buttonLogin_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
+		void textBoxPassword_TextChanged(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
+		void textBoxUserName_TextChanged(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
 		void window_gotFocus(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
 		void window_lostFocus(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
+		// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 	public:
 		SignInWindow();
 	};
@@ -85,7 +89,17 @@ namespace codeplex_client
 SignInWindow.cpp :
 namespace codeplex_client
 {
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
 	void SignInWindow::buttonLogin_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
+	{
+	}
+
+	void SignInWindow::textBoxPassword_TextChanged(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
+	{
+	}
+
+	void SignInWindow::textBoxUserName_TextChanged(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
 	{
 	}
 
@@ -96,6 +110,8 @@ namespace codeplex_client
 	void SignInWindow::window_lostFocus(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
 	{
 	}
+
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 
 	SignInWindow::SignInWindow()
 	{

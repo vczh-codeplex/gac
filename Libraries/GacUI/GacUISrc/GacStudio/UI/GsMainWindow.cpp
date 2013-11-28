@@ -12,7 +12,7 @@ namespace gacstudio
 {
 	namespace user_interface
 	{
-		// #region CLASS_MEMBER_GUIEVENT_HANDLER
+		// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
 
 		// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 
