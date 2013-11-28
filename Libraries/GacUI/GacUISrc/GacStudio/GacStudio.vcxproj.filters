@@ -19,6 +19,9 @@
     <Filter Include="UI">
       <UniqueIdentifier>{f572cc54-144f-4ca1-bff2-2268163a25bd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\CommandImages">
+      <UniqueIdentifier>{5dc0ce44-f6be-472d-9789-74fc034802ea}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -70,10 +73,27 @@
     <Xml Include="UI\Resources.xml">
       <Filter>Resource Files</Filter>
     </Xml>
+    <Xml Include="UI\CommandImages\Folder.xml">
+      <Filter>Resource Files\CommandImages</Filter>
+    </Xml>
   </ItemGroup>
   <ItemGroup>
     <None Include="UI\Codegen.bat">
       <Filter>Resource Files</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="UI\CommandImages\New.png">
+      <Filter>Resource Files\CommandImages</Filter>
+    </Image>
+    <Image Include="UI\CommandImages\Open.png">
+      <Filter>Resource Files\CommandImages</Filter>
+    </Image>
+    <Image Include="UI\CommandImages\Save.png">
+      <Filter>Resource Files\CommandImages</Filter>
+    </Image>
+    <Image Include="UI\CommandImages\SaveAll.png">
+      <Filter>Resource Files\CommandImages</Filter>
+    </Image>
   </ItemGroup>
 </Project>

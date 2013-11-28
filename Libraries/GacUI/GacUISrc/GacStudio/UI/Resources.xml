@@ -5,11 +5,62 @@
     <Text name="Name">GacStudioUI</Text>
     <Text name="Prefix">Gs</Text>
   </Folder>
+  <Folder name="CommandImages" content="Link">CommandImages\Folder.xml</Folder>
   <Folder name="UI">
     <Instance name="MainWindowResource">
       <Instance ref.Class="gacstudio::user_interface::MainWindow">
         <Window Text="GacStudio 1.0 (www.gaclib.net)" ClientSize="x:800 y:600">
           <att.BoundsComposition-set PreferredMinSize="x:640 y:480"/>
+
+          <ToolstripCommand ref.Name="commandFileNew" Text="New" Image-uri="res://CommandImages/New.png" ShortcutBuilder="Ctrl+N"/>
+          <ToolstripCommand ref.Name="commandFileOpen" Text="Open..." Image-uri="res://CommandImages/Open.png" ShortcutBuilder="Ctrl+O"/>
+          <ToolstripCommand ref.Name="commandFileSave" Text="Save" Image-uri="res://CommandImages/Save.png" ShortcutBuilder="Ctrl+S"/>
+          <ToolstripCommand ref.Name="commandFileSaveAll" Text="Save All" Image-uri="res://CommandImages/SaveAll.png" ShortcutBuilder="Ctrl+Shift+S"/>
+          <ToolstripCommand ref.Name="commandFileExit" Text="Exit"/>
+
+          <Table AlignmentToParent="left:0 top:0 right:0 bottom:0">
+            <att.Rows>
+              <CellOption>composeType:MinSize</CellOption>
+              <CellOption>composeType:MinSize</CellOption>
+              <CellOption>composeType:Percentage percentage:1.0</CellOption>
+            </att.Rows>
+            <att.Columns>
+              <CellOption>composeType:Percentage percentage:1.0</CellOption>
+            </att.Columns>
+
+            <Cell Site="row:0 column:0" InternalMargin="left:1 right:1">
+              <ToolstripMenuBar>
+                <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
+                <MenuBarButton Text="File">
+                  <att.SubMenu-set>
+                    <MenuItemButton Command-ref="commandFileNew"/>
+                    <MenuItemButton Command-ref="commandFileOpen"/>
+                    <MenuItemButton Command-ref="commandFileSave"/>
+                    <MenuItemButton Command-ref="commandFileSaveAll"/>
+                    <MenuSplitter/>
+                    <MenuItemButton Command-ref="commandFileExit"/>
+                  </att.SubMenu-set>
+                </MenuBarButton>
+              </ToolstripMenuBar>
+            </Cell>
+
+            <Cell Site="row:1 column:0" InternalMargin="left:1 top:1 right:1 bottom:1">
+              <ToolstripToolBar>
+                <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
+                <ToolstripButton Command-ref="commandFileNew"/>
+                <ToolstripButton Command-ref="commandFileOpen"/>
+                <ToolstripButton Command-ref="commandFileSave"/>
+                <ToolstripButton Command-ref="commandFileSaveAll"/>
+              </ToolstripToolBar>
+            </Cell>
+
+            <Cell Site="row:2 column:0">
+              <Tab>
+                <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
+                <TabPage Text="Sample Tab Page"/>
+              </Tab>
+            </Cell>
+          </Table>
         </Window>
       </Instance>
     </Instance>

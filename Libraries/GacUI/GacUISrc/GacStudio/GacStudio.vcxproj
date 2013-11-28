@@ -185,12 +185,19 @@
     <ClInclude Include="UI\GsMainWindow.h" />
   </ItemGroup>
   <ItemGroup>
+    <Xml Include="UI\CommandImages\Folder.xml" />
     <Xml Include="UI\Resources.xml">
       <SubType>Designer</SubType>
     </Xml>
   </ItemGroup>
   <ItemGroup>
     <None Include="UI\Codegen.bat" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="UI\CommandImages\New.png" />
+    <Image Include="UI\CommandImages\Open.png" />
+    <Image Include="UI\CommandImages\Save.png" />
+    <Image Include="UI\CommandImages\SaveAll.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
