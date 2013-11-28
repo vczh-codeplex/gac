@@ -124,7 +124,7 @@
               <CellOption>composeType:MinSize</CellOption>
             </att.Columns>
 
-            <Cell Site="row:0 column:0" Margin="left:6 top:6 right:6 bottom:6">
+            <Cell Site="row:0 column:0" Margin="left:4 top:4 right:4 bottom:4">
               <Label Text="Select Project Template:"/>
             </Cell>
 
@@ -138,26 +138,26 @@
               </ListView>
             </Cell>
             <Cell Site="row:1 column:2 rowSpan:1 columnSpan:2">
-              <DocumentLabel EditMode="Selectable">
+              <DocumentViewer EditMode="Selectable" HorizontalAlwaysVisible="false" VerticalAlwaysVisible="false">
                 <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
                 <att.Text>This is the projet description.</att.Text>
-              </DocumentLabel>
+              </DocumentViewer>
             </Cell>
 
-            <Cell Site="row:2 column:0" Margin="left:6 top:6 right:6 bottom:6">
+            <Cell Site="row:2 column:0" Margin="left:4 top:4 right:4 bottom:4">
               <Label Text="Project Name:"/>
             </Cell>
             <Cell Site="row:2 column:1 rowSpan:1 columnSpan:3">
-              <SinglelineTextBox ref.Name="textBoxProjectName">
+              <SinglelineTextBox ref.Name="textBoxProjectName" Text="MyProject">
                 <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
               </SinglelineTextBox>
             </Cell>
 
-            <Cell Site="row:3 column:0" Margin="left:6 top:6 right:6 bottom:6">
+            <Cell Site="row:3 column:0" Margin="left:4 top:4 right:4 bottom:4">
               <Label Text="Location:"/>
             </Cell>
             <Cell Site="row:3 column:1 rowSpan:1 columnSpan:2">
-              <SinglelineTextBox ref.Name="textBoxLocation" Text="MyProject">
+              <SinglelineTextBox ref.Name="textBoxLocation">
                 <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
               </SinglelineTextBox>
             </Cell>
@@ -167,7 +167,7 @@
               </Button>
             </Cell>
 
-            <Cell Site="row:4 column:0" Margin="left:6 top:6 right:6 bottom:6">
+            <Cell Site="row:4 column:0" Margin="left:4 top:4 right:4 bottom:4">
               <Label Text="Solution:"/>
             </Cell>
             <Cell Site="row:4 column:1 rowSpan:1 columnSpan:3">
@@ -184,7 +184,7 @@
               </ComboBox>
             </Cell>
 
-            <Cell Site="row:5 column:0" Margin="left:6 top:6 right:6 bottom:6">
+            <Cell Site="row:5 column:0" Margin="left:4 top:4 right:4 bottom:4">
               <Label Text="Solution Name:"/>
             </Cell>
             <Cell Site="row:5 column:1 rowSpan:1 columnSpan:3">

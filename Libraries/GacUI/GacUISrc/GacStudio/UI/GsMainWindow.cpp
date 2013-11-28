@@ -33,8 +33,10 @@ namespace gacstudio
 			{
 				GetApplication()->InvokeInMainThread([=]()
 				{
-					delete window;
+					window->GetNativeWindow()->SetParent(0);
 					SetEnabled(true);
+					SetActivated();
+					delete window;
 				});
 			});
 			window->Show();
