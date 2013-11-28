@@ -100,5 +100,105 @@
         </Window>
       </Instance>
     </Instance>
+
+    <Instance name="NewProjectWindowResource">
+      <Instance ref.Class="gacstudio::user_interface::NewProjectWindow">
+        <Window Text="New Project" ClientSize="x:400 y:300">
+          <att.BoundsComposition-set PreferredMinSize="x:400 y:300"/>
+
+          <Table AlignmentToParent="left:0 top:0 right:0 bottom:0" CellPadding="5">
+            <Rows>
+              <CellOption>composeType:MinSize</CellOption>
+              <CellOption>composeType:Percentage percentage:1.0</CellOption>
+              <CellOption>composeType:MinSize</CellOption>
+              <CellOption>composeType:MinSize</CellOption>
+              <CellOption>composeType:MinSize</CellOption>
+              <CellOption>composeType:MinSize</CellOption>
+              <CellOption>composeType:MinSize</CellOption>
+            </Rows>
+            <Columns>
+              <CellOption>composeType:MinSize</CellOption>
+              <CellOption>composeType:Percentage percentage:1.0</CellOption>
+              <CellOption>composeType:MinSize</CellOption>
+              <CellOption>composeType:MinSize</CellOption>
+            </Columns>
+
+            <Cell Site="row:0 column:0" Margin="left:6 top:6 right:6 bottom:6">
+              <Label Text="Select Project Template:"/>
+            </Cell>
+
+            <Cell Site="row:1 column:0 rowSpan:1 columnSpan:4" Margin="left:6 top:6 right:6 bottom:6">
+              <ListView ref.Name="listViewProjectTemplate" View="BigIcon" HorizontalAlwaysVisible="false" VerticalAlwaysVisible="false">
+                <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
+                <att.Items>
+                  <ListViewItem text="C++ GacUI Resource Project"/>
+                  <ListViewItem text="C++ Parser Project"/>
+                </att.Items>
+              </ListView>
+            </Cell>
+
+            <Cell Site="row:2 column:0" Margin="left:6 top:6 right:6 bottom:6">
+              <Label Text="Project Name:"/>
+            </Cell>
+            <Cell Site="row:2 column:1 rowSpan:1 columnSpan:3">
+              <SinglelineTextBox ref.Name="textBoxProjectName">
+                <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
+              </SinglelineTextBox>
+            </Cell>
+
+            <Cell Site="row:3 column:0" Margin="left:6 top:6 right:6 bottom:6">
+              <Label Text="Location:"/>
+            </Cell>
+            <Cell Site="row:3 column:1 rowSpan:1 columnSpan:2">
+              <SinglelineTextBox ref.Name="textBoxLocation">
+                <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
+              </SinglelineTextBox>
+            </Cell>
+            <Cell Site="row:3 column:3">
+              <Button ref.Name="buttonBrowse" Text="Browse..." ev.Clicked="buttonBrowse_Clicked">
+                <att.BoundsComposition-set AlignmentToParent="left:-1 top:0 right:0 bottom:0" PreferredMinSize="x:120 y:30"/>
+              </Button>
+            </Cell>
+
+            <Cell Site="row:4 column:0" Margin="left:6 top:6 right:6 bottom:6">
+              <Label Text="Solution:"/>
+            </Cell>
+            <Cell Site="row:4 column:1 rowSpan:1 columnSpan:3">
+              <ComboBox ref.Name="comboSolution" SelectedIndex="1">
+                <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
+                <att.ListControl>
+                  <TextList HorizontalAlwaysVisible="false" VerticalAlwaysVisible="false">
+                    <att.Items>
+                      <TextItem Text="Create New Solution"/>
+                      <TextItem Text="Add To Solution"/>
+                    </att.Items>
+                  </TextList>
+                </att.ListControl>
+              </ComboBox>
+            </Cell>
+
+            <Cell Site="row:5 column:0" Margin="left:6 top:6 right:6 bottom:6">
+              <Label Text="Solution Name:"/>
+            </Cell>
+            <Cell Site="row:5 column:1 rowSpan:1 columnSpan:3">
+              <SinglelineTextBox ref.Name="textBoxSolutionName">
+                <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
+              </SinglelineTextBox>
+            </Cell>
+
+            <Cell Site="row:6 column:2">
+              <Button ref.Name="buttonCreate" Text="Create" ev.Clicked="buttonCreate_Clicked">
+                <att.BoundsComposition-set AlignmentToParent="left:-1 top:0 right:0 bottom:0" PreferredMinSize="x:120 y:30"/>
+              </Button>
+            </Cell>
+            <Cell Site="row:6 column:3">
+              <Button ref.Name="buttonCancel" Text="Cancel" ev.Clicked="buttonCancel_Clicked">
+                <att.BoundsComposition-set AlignmentToParent="left:-1 top:0 right:0 bottom:0" PreferredMinSize="x:120 y:30"/>
+              </Button>
+            </Cell>
+          </Table>
+        </Window>
+      </Instance>
+    </Instance>
   </Folder>
 </Resource>

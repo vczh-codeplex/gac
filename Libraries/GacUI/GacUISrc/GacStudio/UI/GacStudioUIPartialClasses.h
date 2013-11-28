@@ -61,6 +61,57 @@ namespace gacstudio
 	}
 }
 
+namespace gacstudio
+{
+	namespace user_interface
+	{
+		template<typename TImpl>
+		class NewProjectWindow_ : public vl::presentation::controls::GuiWindow, public vl::presentation::GuiInstancePartialClass<vl::presentation::controls::GuiWindow>, public vl::reflection::Description<TImpl>
+		{
+		protected:
+			vl::presentation::controls::GuiButton* buttonBrowse;
+			vl::presentation::controls::GuiButton* buttonCancel;
+			vl::presentation::controls::GuiButton* buttonCreate;
+			vl::presentation::controls::GuiComboBoxListControl* comboSolution;
+			vl::presentation::controls::GuiListView* listViewProjectTemplate;
+			vl::presentation::controls::GuiSinglelineTextBox* textBoxLocation;
+			vl::presentation::controls::GuiSinglelineTextBox* textBoxProjectName;
+			vl::presentation::controls::GuiSinglelineTextBox* textBoxSolutionName;
+
+		void InitializeComponents()
+			{
+				if (InitializeFromResource())
+				{
+					GUI_INSTANCE_REFERENCE(buttonBrowse);
+					GUI_INSTANCE_REFERENCE(buttonCancel);
+					GUI_INSTANCE_REFERENCE(buttonCreate);
+					GUI_INSTANCE_REFERENCE(comboSolution);
+					GUI_INSTANCE_REFERENCE(listViewProjectTemplate);
+					GUI_INSTANCE_REFERENCE(textBoxLocation);
+					GUI_INSTANCE_REFERENCE(textBoxProjectName);
+					GUI_INSTANCE_REFERENCE(textBoxSolutionName);
+				}
+			}
+		public:
+			NewProjectWindow_()
+				:vl::presentation::controls::GuiWindow(vl::presentation::theme::GetCurrentTheme()->CreateWindowStyle())
+				,vl::presentation::GuiInstancePartialClass<vl::presentation::controls::GuiWindow>(L"gacstudio::user_interface::NewProjectWindow")
+				,buttonBrowse(0)
+				,buttonCancel(0)
+				,buttonCreate(0)
+				,comboSolution(0)
+				,listViewProjectTemplate(0)
+				,textBoxLocation(0)
+				,textBoxProjectName(0)
+				,textBoxSolutionName(0)
+			{
+			}
+		};
+
+		class NewProjectWindow;
+	}
+}
+
 namespace vl
 {
 	namespace reflection
@@ -68,6 +119,7 @@ namespace vl
 		namespace description
 		{
 			DECL_TYPE_INFO(gacstudio::user_interface::MainWindow)
+			DECL_TYPE_INFO(gacstudio::user_interface::NewProjectWindow)
 		}
 	}
 }
@@ -138,6 +190,58 @@ namespace gacstudio
 		// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 
 		MainWindow::MainWindow()
+		{
+			InitializeComponents();
+		}
+	}
+}
+
+
+GsNewProjectWindow.h :
+namespace gacstudio
+{
+	namespace user_interface
+	{
+		class NewProjectWindow : public NewProjectWindow_<NewProjectWindow>
+		{
+			friend class NewProjectWindow_<NewProjectWindow>;
+			friend struct vl::reflection::description::CustomTypeDescriptorSelector<NewProjectWindow>;
+		protected:
+
+			// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+			void buttonBrowse_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
+			void buttonCancel_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
+			void buttonCreate_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
+			// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+		public:
+			NewProjectWindow();
+		};
+	}
+}
+
+
+GsNewProjectWindow.cpp :
+namespace gacstudio
+{
+	namespace user_interface
+	{
+		// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+		void NewProjectWindow::buttonBrowse_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
+		{
+		}
+
+		void NewProjectWindow::buttonCancel_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
+		{
+		}
+
+		void NewProjectWindow::buttonCreate_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
+		{
+		}
+
+		// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+
+		NewProjectWindow::NewProjectWindow()
 		{
 			InitializeComponents();
 		}
