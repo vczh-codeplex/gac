@@ -110,5 +110,11 @@
     <Image Include="UI\CommandImages\NewProject.png">
       <Filter>Resource Files\CommandImages</Filter>
     </Image>
+    <Image Include="UI\ProjectImages\Dialog.png">
+      <Filter>Resource Files\ProjectImages</Filter>
+    </Image>
+    <Image Include="UI\ProjectImages\Parser.png">
+      <Filter>Resource Files\ProjectImages</Filter>
+    </Image>
   </ItemGroup>
 </Project>
