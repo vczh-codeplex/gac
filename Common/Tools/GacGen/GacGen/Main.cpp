@@ -74,7 +74,7 @@ public:
 		}
 		else
 		{
-			PrintErrorMessage(L"Cannot find configuration in resource \"GacGenConfig/" + name + L"\".");
+			PrintErrorMessage(L"error> Cannot find configuration in resource \"GacGenConfig/" + name + L"\".");
 			return false;
 		}
 	}
@@ -461,6 +461,16 @@ void WriteNamespaceEnd(List<WString>& namespaces, StreamWriter& writer)
 	}
 }
 
+void WriteControlClassHeaderFileEventHandlers(Ptr<CodegenConfig> config, Ptr<Instance> instance, const WString& prefix, StreamWriter& writer)
+{
+	writer.WriteLine(prefix + L"\t// #region CLASS_MEMBER_GUIEVENT_HANDLER");
+	FOREACH(WString, name, instance->eventHandlers.Keys())
+	{
+		writer.WriteLine(prefix + L"\tvoid " + name + L"(GuiGraphicsComposition* sender, " + GetCppTypeName(instance->eventHandlers[name]) + L"& arguments);");
+	}
+	writer.WriteLine(prefix + L"\t// #endregion CLASS_MEMBER_GUIEVENT_HANDLER");
+}
+
 void WriteControlClassHeaderFileContent(Ptr<CodegenConfig> config, Ptr<Instance> instance, StreamWriter& writer)
 {
 	WString prefix = WriteNamespaceBegin(instance->namespaces, writer);
@@ -468,18 +478,9 @@ void WriteControlClassHeaderFileContent(Ptr<CodegenConfig> config, Ptr<Instance>
 	writer.WriteLine(prefix + L"{");
 	writer.WriteLine(prefix + L"\tfriend class " + instance->typeName + L"_<" + instance->typeName + L">;");
 	writer.WriteLine(prefix + L"\tfriend struct vl::reflection::description::CustomTypeDescriptorSelector<" + instance->typeName + L">;");
-
-	if (instance->eventHandlers.Count() > 0)
-	{
-		writer.WriteLine(prefix + L"protected:");
-		writer.WriteLine(L"");
-		writer.WriteLine(prefix + L"\t// #region CLASS_MEMBER_GUIEVENT_HANDLER");
-		FOREACH(WString, name, instance->eventHandlers.Keys())
-		{
-			writer.WriteLine(prefix + L"\tvoid " + name + L"(GuiGraphicsComposition* sender, " + GetCppTypeName(instance->eventHandlers[name]) + L"& arguments);");
-		}
-		writer.WriteLine(prefix + L"\t// #endregion CLASS_MEMBER_GUIEVENT_HANDLER");
-	}
+	writer.WriteLine(prefix + L"protected:");
+	writer.WriteLine(L"");
+	WriteControlClassHeaderFileEventHandlers(config, instance, prefix, writer);
 	writer.WriteLine(prefix + L"public:");
 	writer.WriteLine(prefix + L"\t" + instance->typeName + L"();");
 	writer.WriteLine(prefix + L"};");
@@ -509,47 +510,81 @@ void WriteControlClassCppFileContent(Ptr<CodegenConfig> config, Ptr<Instance> in
 	writer.WriteLine(L"");
 }
 
-#define OPEN_FILE(FILENAME, NAME, DONOTMODIFY)\
-	WString fileName = FILENAME; \
+#define OPEN_FILE(NAME, DONOTMODIFY)\
 	FileStream fileStream(config->resource->GetWorkingDirectory() + fileName, FileStream::WriteOnly); \
-if (!fileStream.IsAvailable()) \
-{ \
-	PrintErrorMessage(L"gacgen> Failed to generate " + fileName); \
-	return; \
-} \
+	if (!fileStream.IsAvailable()) \
+	{ \
+		PrintErrorMessage(L"error> Failed to generate " + fileName); \
+		return; \
+	} \
 	BomEncoder encoder(BomEncoder::Utf8); \
 	EncoderStream encoderStream(fileStream, encoder); \
 	StreamWriter writer(encoderStream); \
 	PrintSuccessMessage(L"gacgen> Generating " + fileName); \
 	WriteFileComment(NAME, DONOTMODIFY, writer);
 
+bool TryReadFile(Ptr<CodegenConfig> config, const WString& fileName, List<WString>& lines)
+{
+	FileStream fileStream(config->resource->GetWorkingDirectory() + fileName, FileStream::ReadOnly);
+	if (!fileStream.IsAvailable())
+	{
+		return false;
+	}
+
+	BomDecoder decoder;
+	DecoderStream decoderStream(fileStream, decoder);
+	StreamReader reader(decoderStream);
+
+	while (!reader.IsEnd())
+	{
+		lines.Add(reader.ReadLine());
+	}
+	return true;
+}
+
 void WriteControlClassHeaderFile(Ptr<CodegenConfig> config, Ptr<Instance> instance)
 {
-	OPEN_FILE(config->GetControlClassHeaderFileName(instance), instance->typeName, false);
+	WString fileName = config->GetControlClassHeaderFileName(instance);
+	List<WString> lines;
+	if (TryReadFile(config, fileName, lines))
+	{
+		PrintErrorMessage(L"error> Don't know how to override " + fileName);
+	}
+	else
+	{
+		OPEN_FILE(instance->typeName, false);
 
-	writer.WriteLine(L"#ifndef VCZH_GACUI_RESOURCE_CODE_GENERATOR_" + config->name + L"_" + instance->typeName);
-	writer.WriteLine(L"#define VCZH_GACUI_RESOURCE_CODE_GENERATOR_" + config->name + L"_" + instance->typeName);
-	writer.WriteLine(L"");
-	writer.WriteLine(L"#include \"" + config->GetPartialClassHeaderFileName() + L"\"");
-	writer.WriteLine(L"");
-
-	WriteControlClassHeaderFileContent(config, instance, writer);
-
-	writer.WriteLine(L"#endif");
+		writer.WriteLine(L"#ifndef VCZH_GACUI_RESOURCE_CODE_GENERATOR_" + config->name + L"_" + instance->typeName);
+		writer.WriteLine(L"#define VCZH_GACUI_RESOURCE_CODE_GENERATOR_" + config->name + L"_" + instance->typeName);
+		writer.WriteLine(L"");
+		writer.WriteLine(L"#include \"" + config->GetPartialClassHeaderFileName() + L"\"");
+		writer.WriteLine(L"");
+		WriteControlClassHeaderFileContent(config, instance, writer);
+		writer.WriteLine(L"#endif");
+	}
 }
 
 void WriteControlClassCppFile(Ptr<CodegenConfig> config, Ptr<Instance> instance)
 {
-	OPEN_FILE(config->GetControlClassCppFileName(instance), instance->typeName, false);
-	writer.WriteLine(L"#include \"" + config->GetGlobalHeaderFileName() + L"\"");
-	writer.WriteLine(L"");
-
-	WriteControlClassCppFileContent(config, instance, writer);
+	WString fileName = config->GetControlClassCppFileName(instance);
+	List<WString> lines;
+	if (TryReadFile(config, fileName, lines))
+	{
+		PrintErrorMessage(L"error> Don't know how to override " + fileName);
+	}
+	else
+	{
+		OPEN_FILE(instance->typeName, false);
+		writer.WriteLine(L"#include \"" + config->GetGlobalHeaderFileName() + L"\"");
+		writer.WriteLine(L"");
+		WriteControlClassCppFileContent(config, instance, writer);
+	}
 }
 
 void WritePartialClassHeaderFile(Ptr<CodegenConfig> config, Dictionary<WString, Ptr<Instance>>& instances)
 {
-	OPEN_FILE(config->GetPartialClassHeaderFileName(), L"Partial Classes", true);
+	WString fileName = config->GetPartialClassHeaderFileName();
+	OPEN_FILE(L"Partial Classes", true);
 
 	writer.WriteLine(L"#ifndef VCZH_GACUI_RESOURCE_CODE_GENERATOR_" + config->name + L"_PARTIAL_CLASSES");
 	writer.WriteLine(L"#define VCZH_GACUI_RESOURCE_CODE_GENERATOR_" + config->name + L"_PARTIAL_CLASSES");
@@ -631,7 +666,8 @@ void WritePartialClassHeaderFile(Ptr<CodegenConfig> config, Dictionary<WString, 
 
 void WritePartialClassCppFile(Ptr<CodegenConfig> config, Dictionary<WString, Ptr<Instance>>& instances)
 {
-	OPEN_FILE(config->GetPartialClassCppFileName(), L"Partial Classes", true);
+	WString fileName = config->GetPartialClassCppFileName();
+	OPEN_FILE(L"Partial Classes", true);
 
 	writer.WriteLine(L"#include \"" + config->GetGlobalHeaderFileName() + L"\"");
 	writer.WriteLine(L"");
@@ -700,7 +736,8 @@ void WritePartialClassCppFile(Ptr<CodegenConfig> config, Dictionary<WString, Ptr
 
 void WriteGlobalHeaderFile(Ptr<CodegenConfig> config, Dictionary<WString, Ptr<Instance>>& instances)
 {
-	OPEN_FILE(config->GetGlobalHeaderFileName(), config->name, true);
+	WString fileName = config->GetGlobalHeaderFileName();
+	OPEN_FILE(config->name, true);
 
 	writer.WriteLine(L"#ifndef VCZH_GACUI_RESOURCE_CODE_GENERATOR_" + config->name);
 	writer.WriteLine(L"#define VCZH_GACUI_RESOURCE_CODE_GENERATOR_" + config->name);
@@ -729,14 +766,14 @@ void GuiMain()
 		auto resource = GuiResource::LoadFromXml(arguments->Get(0));
 		if (!resource)
 		{
-			PrintErrorMessage(L"Failed to load resource.");
+			PrintErrorMessage(L"error> Failed to load resource.");
 			return;
 		}
 
 		auto config = CodegenConfig::LoadConfig(resource);
 		if (!config)
 		{
-			PrintErrorMessage(L"Failed to load config.");
+			PrintErrorMessage(L"error> Failed to load config.");
 			return;
 		}
 
