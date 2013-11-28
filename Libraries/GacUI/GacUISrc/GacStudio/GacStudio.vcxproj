@@ -188,6 +188,7 @@
   </ItemGroup>
   <ItemGroup>
     <Xml Include="UI\CommandImages\Folder.xml" />
+    <Xml Include="UI\ProjectImages\Folder.xml" />
     <Xml Include="UI\Resources.xml">
       <SubType>Designer</SubType>
     </Xml>

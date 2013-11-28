@@ -22,6 +22,9 @@
     <Filter Include="Resource Files\CommandImages">
       <UniqueIdentifier>{5dc0ce44-f6be-472d-9789-74fc034802ea}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\ProjectImages">
+      <UniqueIdentifier>{95245d7f-7e27-4a0c-b76f-ba9cb4a2691e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -81,6 +84,9 @@
     </Xml>
     <Xml Include="UI\CommandImages\Folder.xml">
       <Filter>Resource Files\CommandImages</Filter>
+    </Xml>
+    <Xml Include="UI\ProjectImages\Folder.xml">
+      <Filter>Resource Files\ProjectImages</Filter>
     </Xml>
   </ItemGroup>
   <ItemGroup>

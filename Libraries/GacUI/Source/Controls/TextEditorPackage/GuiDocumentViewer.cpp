@@ -981,6 +981,7 @@ GuiDocumentLabel
 				GetContainerComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 				SetFocusableComposition(GetBoundsComposition());
 				InstallDocumentViewer(this, GetContainerComposition());
+				SetDocument(new DocumentModel);
 			}
 
 			GuiDocumentLabel::~GuiDocumentLabel()
