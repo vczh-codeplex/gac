@@ -16,6 +16,9 @@
     <Filter Include="Studio">
       <UniqueIdentifier>{aaa9fcb3-48ea-46ae-9ea6-0b7655c15bdd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="UI">
+      <UniqueIdentifier>{f572cc54-144f-4ca1-bff2-2268163a25bd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -33,6 +36,12 @@
     <ClCompile Include="..\..\Public\Source\Vlpp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="UI\GacStudioUIPartialClasses.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="UI\GsMainWindow.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Public\Source\GacUI.h">
@@ -47,5 +56,24 @@
     <ClInclude Include="..\..\Public\Source\Vlpp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="UI\GacStudioUI.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="UI\GacStudioUIPartialClasses.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="UI\GsMainWindow.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="UI\Resources.xml">
+      <Filter>Resource Files</Filter>
+    </Xml>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="UI\Codegen.bat">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
