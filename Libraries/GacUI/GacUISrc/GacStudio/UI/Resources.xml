@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Resource>
+  <Folder name="GacGenConfig">
+    <Text name="Include">..\..\..\Public\Source\GacUIReflection.h</Text>
+    <Text name="Name">GacStudioUI</Text>
+    <Text name="Prefix">Gs</Text>
+  </Folder>
+  <Folder name="UI">
+    <Instance name="MainWindowResource">
+      <Instance ref.Class="gacstudio::user_interface::MainWindow">
+        <Window Text="GacStudio 1.0 (www.gaclib.net)" ClientSize="x:800 y:600">
+          <att.BoundsComposition-set PreferredMinSize="x:640 y:480"/>
+        </Window>
+      </Instance>
+    </Instance>
+  </Folder>
+</Resource>

@@ -172,12 +172,25 @@
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="UI\GacStudioUIPartialClasses.cpp" />
+    <ClCompile Include="UI\GsMainWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Public\Source\GacUI.h" />
     <ClInclude Include="..\..\Public\Source\GacUIReflection.h" />
     <ClInclude Include="..\..\Public\Source\GacUIWindows.h" />
     <ClInclude Include="..\..\Public\Source\Vlpp.h" />
+    <ClInclude Include="UI\GacStudioUI.h" />
+    <ClInclude Include="UI\GacStudioUIPartialClasses.h" />
+    <ClInclude Include="UI\GsMainWindow.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="UI\Resources.xml">
+      <SubType>Designer</SubType>
+    </Xml>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="UI\Codegen.bat" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
