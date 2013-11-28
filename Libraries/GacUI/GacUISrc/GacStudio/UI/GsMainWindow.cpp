@@ -24,14 +24,17 @@ namespace gacstudio
 
 		void MainWindow::commandFileNewProject_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
 		{
+			SetEnabled(false);
 			auto window = new NewProjectWindow;
 			window->ForceCalculateSizeImmediately();
 			window->MoveToScreenCenter();
+			window->GetNativeWindow()->SetParent(GetNativeWindow());
 			window->WindowClosed.AttachLambda([=](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 			{
 				GetApplication()->InvokeInMainThread([=]()
 				{
 					delete window;
+					SetEnabled(true);
 				});
 			});
 			window->Show();
