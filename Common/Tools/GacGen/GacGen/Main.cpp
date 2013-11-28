@@ -558,7 +558,30 @@ void WriteControlClassHeaderFile(Ptr<CodegenConfig> config, Ptr<Instance> instan
 	List<WString> lines;
 	if (TryReadFile(config, fileName, lines))
 	{
-		PrintErrorMessage(L"error> Don't know how to override " + fileName + L". Please open " + config->GetPartialClassHeaderFileName() + L" to get the latest content in the comment and modify the file by yourself.");
+		WString prefix;
+		for (vint i = 0; i < instance->namespaces.Count(); i++)
+		{
+			prefix += L"\t";
+		}
+		vint begin = lines.IndexOf(GetEventHandlerCommentBegin(prefix + L"\t"));
+		vint end = lines.IndexOf(GetEventHandlerCommentEnd(prefix + L"\t"));
+		if (begin == -1 || end == -1)
+		{
+			PrintErrorMessage(L"error> Don't know how to override " + fileName + L". Please open " + config->GetPartialClassHeaderFileName() + L" to get the latest content in the comment and modify the file by yourself.");
+			return;
+		}
+		
+		OPEN_FILE(instance->typeName, false);
+
+		for (vint i = 0; i < begin; i++)
+		{
+			writer.WriteLine(lines[i]);
+		}
+		WriteControlClassHeaderFileEventHandlers(config, instance, prefix, writer);
+		for (vint i = end + 1; i < lines.Count(); i++)
+		{
+			writer.WriteLine(lines[i]);
+		}
 	}
 	else
 	{
@@ -580,6 +603,11 @@ void WriteControlClassCppFile(Ptr<CodegenConfig> config, Ptr<Instance> instance)
 	List<WString> lines;
 	if (TryReadFile(config, fileName, lines))
 	{
+		WString prefix;
+		for (vint i = 0; i < instance->namespaces.Count(); i++)
+		{
+			prefix += L"\t";
+		}
 		PrintErrorMessage(L"error> Don't know how to override " + fileName + L". Please open " + config->GetPartialClassHeaderFileName() + L" to get the latest content in the comment and modify the file by yourself.");
 	}
 	else
