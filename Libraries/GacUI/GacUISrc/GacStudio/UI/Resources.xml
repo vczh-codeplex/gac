@@ -140,7 +140,7 @@
             <Cell Site="row:1 column:2 rowSpan:1 columnSpan:2">
               <DocumentViewer EditMode="Selectable" HorizontalAlwaysVisible="false" VerticalAlwaysVisible="false">
                 <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
-                <att.Text>This is the projet description.</att.Text>
+                <att.Text>This is the project description.</att.Text>
               </DocumentViewer>
             </Cell>
 
