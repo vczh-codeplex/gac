@@ -461,14 +461,24 @@ void WriteNamespaceEnd(List<WString>& namespaces, StreamWriter& writer)
 	}
 }
 
+WString GetEventHandlerCommentBegin(const WString& prefix)
+{
+	return prefix + L"// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)";
+}
+
+WString GetEventHandlerCommentEnd(const WString& prefix)
+{
+	return prefix + L"// #endregion CLASS_MEMBER_GUIEVENT_HANDLER";
+}
+
 void WriteControlClassHeaderFileEventHandlers(Ptr<CodegenConfig> config, Ptr<Instance> instance, const WString& prefix, StreamWriter& writer)
 {
-	writer.WriteLine(prefix + L"\t// #region CLASS_MEMBER_GUIEVENT_HANDLER");
+	writer.WriteLine(GetEventHandlerCommentBegin(prefix + L"\t"));
 	FOREACH(WString, name, instance->eventHandlers.Keys())
 	{
 		writer.WriteLine(prefix + L"\tvoid " + name + L"(GuiGraphicsComposition* sender, " + GetCppTypeName(instance->eventHandlers[name]) + L"& arguments);");
 	}
-	writer.WriteLine(prefix + L"\t// #endregion CLASS_MEMBER_GUIEVENT_HANDLER");
+	writer.WriteLine(GetEventHandlerCommentEnd(prefix + L"\t"));
 }
 
 void WriteControlClassHeaderFileContent(Ptr<CodegenConfig> config, Ptr<Instance> instance, StreamWriter& writer)
@@ -491,7 +501,7 @@ void WriteControlClassHeaderFileContent(Ptr<CodegenConfig> config, Ptr<Instance>
 void WriteControlClassCppFileContent(Ptr<CodegenConfig> config, Ptr<Instance> instance, StreamWriter& writer)
 {
 	WString prefix = WriteNamespaceBegin(instance->namespaces, writer);
-	writer.WriteLine(prefix + L"// #region CLASS_MEMBER_GUIEVENT_HANDLER");
+	writer.WriteLine(GetEventHandlerCommentBegin(prefix));
 	writer.WriteLine(L"");
 	FOREACH(WString, name, instance->eventHandlers.Keys())
 	{
@@ -500,7 +510,7 @@ void WriteControlClassCppFileContent(Ptr<CodegenConfig> config, Ptr<Instance> in
 		writer.WriteLine(prefix + L"}");
 		writer.WriteLine(L"");
 	}
-	writer.WriteLine(prefix + L"// #endregion CLASS_MEMBER_GUIEVENT_HANDLER");
+	writer.WriteLine(GetEventHandlerCommentEnd(prefix));
 	writer.WriteLine(L"");
 	writer.WriteLine(prefix + instance->typeName + L"::" + instance->typeName + L"()");
 	writer.WriteLine(prefix + L"{");
@@ -548,7 +558,7 @@ void WriteControlClassHeaderFile(Ptr<CodegenConfig> config, Ptr<Instance> instan
 	List<WString> lines;
 	if (TryReadFile(config, fileName, lines))
 	{
-		PrintErrorMessage(L"error> Don't know how to override " + fileName);
+		PrintErrorMessage(L"error> Don't know how to override " + fileName + L". Please open " + config->GetPartialClassHeaderFileName() + L" to get the latest content in the comment and modify the file by yourself.");
 	}
 	else
 	{
@@ -570,7 +580,7 @@ void WriteControlClassCppFile(Ptr<CodegenConfig> config, Ptr<Instance> instance)
 	List<WString> lines;
 	if (TryReadFile(config, fileName, lines))
 	{
-		PrintErrorMessage(L"error> Don't know how to override " + fileName);
+		PrintErrorMessage(L"error> Don't know how to override " + fileName + L". Please open " + config->GetPartialClassHeaderFileName() + L" to get the latest content in the comment and modify the file by yourself.");
 	}
 	else
 	{
