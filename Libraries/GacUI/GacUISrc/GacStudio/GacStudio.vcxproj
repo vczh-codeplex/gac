@@ -195,6 +195,7 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="UI\CommandImages\New.png" />
+    <Image Include="UI\CommandImages\NewProject.png" />
     <Image Include="UI\CommandImages\Open.png" />
     <Image Include="UI\CommandImages\Save.png" />
     <Image Include="UI\CommandImages\SaveAll.png" />

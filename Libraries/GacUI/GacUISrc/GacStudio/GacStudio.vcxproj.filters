@@ -95,5 +95,8 @@
     <Image Include="UI\CommandImages\SaveAll.png">
       <Filter>Resource Files\CommandImages</Filter>
     </Image>
+    <Image Include="UI\CommandImages\NewProject.png">
+      <Filter>Resource Files\CommandImages</Filter>
+    </Image>
   </ItemGroup>
 </Project>

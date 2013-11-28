@@ -22,8 +22,10 @@ namespace gacstudio
 		{
 		protected:
 			vl::presentation::controls::GuiToolstripCommand* commandFileExit;
-			vl::presentation::controls::GuiToolstripCommand* commandFileNew;
-			vl::presentation::controls::GuiToolstripCommand* commandFileOpen;
+			vl::presentation::controls::GuiToolstripCommand* commandFileNewFile;
+			vl::presentation::controls::GuiToolstripCommand* commandFileNewProject;
+			vl::presentation::controls::GuiToolstripCommand* commandFileOpenFile;
+			vl::presentation::controls::GuiToolstripCommand* commandFileOpenProject;
 			vl::presentation::controls::GuiToolstripCommand* commandFileSave;
 			vl::presentation::controls::GuiToolstripCommand* commandFileSaveAll;
 
@@ -32,8 +34,10 @@ namespace gacstudio
 				if (InitializeFromResource())
 				{
 					GUI_INSTANCE_REFERENCE(commandFileExit);
-					GUI_INSTANCE_REFERENCE(commandFileNew);
-					GUI_INSTANCE_REFERENCE(commandFileOpen);
+					GUI_INSTANCE_REFERENCE(commandFileNewFile);
+					GUI_INSTANCE_REFERENCE(commandFileNewProject);
+					GUI_INSTANCE_REFERENCE(commandFileOpenFile);
+					GUI_INSTANCE_REFERENCE(commandFileOpenProject);
 					GUI_INSTANCE_REFERENCE(commandFileSave);
 					GUI_INSTANCE_REFERENCE(commandFileSaveAll);
 				}
@@ -43,8 +47,10 @@ namespace gacstudio
 				:vl::presentation::controls::GuiWindow(vl::presentation::theme::GetCurrentTheme()->CreateWindowStyle())
 				,vl::presentation::GuiInstancePartialClass<vl::presentation::controls::GuiWindow>(L"gacstudio::user_interface::MainWindow")
 				,commandFileExit(0)
-				,commandFileNew(0)
-				,commandFileOpen(0)
+				,commandFileNewFile(0)
+				,commandFileNewProject(0)
+				,commandFileOpenFile(0)
+				,commandFileOpenProject(0)
 				,commandFileSave(0)
 				,commandFileSaveAll(0)
 			{
@@ -79,6 +85,13 @@ namespace gacstudio
 		protected:
 
 			// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+			void commandFileExit_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
+			void commandFileNewFile_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
+			void commandFileNewProject_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
+			void commandFileOpenFile_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
+			void commandFileOpenProject_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
+			void commandFileSaveAll_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
+			void commandFileSave_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
 			// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 		public:
 			MainWindow();
@@ -93,6 +106,34 @@ namespace gacstudio
 	namespace user_interface
 	{
 		// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+		void MainWindow::commandFileExit_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
+		{
+		}
+
+		void MainWindow::commandFileNewFile_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
+		{
+		}
+
+		void MainWindow::commandFileNewProject_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
+		{
+		}
+
+		void MainWindow::commandFileOpenFile_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
+		{
+		}
+
+		void MainWindow::commandFileOpenProject_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
+		{
+		}
+
+		void MainWindow::commandFileSaveAll_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
+		{
+		}
+
+		void MainWindow::commandFileSave_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
+		{
+		}
 
 		// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 

@@ -12,11 +12,27 @@
         <Window Text="GacStudio 1.0 (www.gaclib.net)" ClientSize="x:800 y:600">
           <att.BoundsComposition-set PreferredMinSize="x:640 y:480"/>
 
-          <ToolstripCommand ref.Name="commandFileNew" Text="New" Image-uri="res://CommandImages/New.png" ShortcutBuilder="Ctrl+N"/>
-          <ToolstripCommand ref.Name="commandFileOpen" Text="Open..." Image-uri="res://CommandImages/Open.png" ShortcutBuilder="Ctrl+O"/>
-          <ToolstripCommand ref.Name="commandFileSave" Text="Save" Image-uri="res://CommandImages/Save.png" ShortcutBuilder="Ctrl+S"/>
-          <ToolstripCommand ref.Name="commandFileSaveAll" Text="Save All" Image-uri="res://CommandImages/SaveAll.png" ShortcutBuilder="Ctrl+Shift+S"/>
-          <ToolstripCommand ref.Name="commandFileExit" Text="Exit"/>
+          <ToolstripCommand ref.Name="commandFileNewProject" Text="New Project..." Image-uri="res://CommandImages/NewProject.png" ShortcutBuilder="Ctrl+Shift+N">
+            <ev.Executed>commandFileNewProject_Executed</ev.Executed>
+          </ToolstripCommand>
+          <ToolstripCommand ref.Name="commandFileNewFile" Text="New File..." Image-uri="res://CommandImages/New.png" ShortcutBuilder="Ctrl+N">
+            <ev.Executed>commandFileNewFile_Executed</ev.Executed>
+          </ToolstripCommand>
+          <ToolstripCommand ref.Name="commandFileOpenProject" Text="New Project..." Image-uri="res://CommandImages/Open.png" ShortcutBuilder="Ctrl+Shift+O">
+            <ev.Executed>commandFileOpenProject_Executed</ev.Executed>
+          </ToolstripCommand>
+          <ToolstripCommand ref.Name="commandFileOpenFile" Text="New File..." Image-uri="res://CommandImages/Open.png" ShortcutBuilder="Ctrl+O">
+            <ev.Executed>commandFileOpenFile_Executed</ev.Executed>
+          </ToolstripCommand>
+          <ToolstripCommand ref.Name="commandFileSave" Text="Save" Image-uri="res://CommandImages/Save.png" ShortcutBuilder="Ctrl+S">
+            <ev.Executed>commandFileSave_Executed</ev.Executed>
+          </ToolstripCommand>
+          <ToolstripCommand ref.Name="commandFileSaveAll" Text="Save All" Image-uri="res://CommandImages/SaveAll.png" ShortcutBuilder="Ctrl+Shift+S">
+            <ev.Executed>commandFileSaveAll_Executed</ev.Executed>
+          </ToolstripCommand>
+          <ToolstripCommand ref.Name="commandFileExit" Text="Exit">
+            <ev.Executed>commandFileExit_Executed</ev.Executed>
+          </ToolstripCommand>
 
           <Table AlignmentToParent="left:0 top:0 right:0 bottom:0">
             <att.Rows>
@@ -33,8 +49,18 @@
                 <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
                 <MenuBarButton Text="File">
                   <att.SubMenu-set>
-                    <MenuItemButton Command-ref="commandFileNew"/>
-                    <MenuItemButton Command-ref="commandFileOpen"/>
+                    <MenuItemButton Text="New" Image-uri="res://CommandImages/New.png">
+                      <att.SubMenu-set>
+                        <MenuItemButton Command-ref="commandFileNewProject"/>
+                        <MenuItemButton Command-ref="commandFileNewFile"/>
+                      </att.SubMenu-set>
+                    </MenuItemButton>
+                    <MenuItemButton Text="Open" Image-uri="res://CommandImages/Open.png">
+                      <att.SubMenu-set>
+                        <MenuItemButton Command-ref="commandFileOpenProject"/>
+                        <MenuItemButton Command-ref="commandFileOpenFile"/>
+                      </att.SubMenu-set>
+                    </MenuItemButton>
                     <MenuItemButton Command-ref="commandFileSave"/>
                     <MenuItemButton Command-ref="commandFileSaveAll"/>
                     <MenuSplitter/>
@@ -47,8 +73,18 @@
             <Cell Site="row:1 column:0" InternalMargin="left:1 top:1 right:1 bottom:1">
               <ToolstripToolBar>
                 <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
-                <ToolstripButton Command-ref="commandFileNew"/>
-                <ToolstripButton Command-ref="commandFileOpen"/>
+                <ToolstripSplitButton Command-ref="commandFileNewProject">
+                  <att.SubMenu-set>
+                    <MenuItemButton Command-ref="commandFileNewProject"/>
+                    <MenuItemButton Command-ref="commandFileNewFile"/>
+                  </att.SubMenu-set>
+                </ToolstripSplitButton>
+                <ToolstripSplitButton Command-ref="commandFileOpenProject">
+                  <att.SubMenu-set>
+                    <MenuItemButton Command-ref="commandFileOpenProject"/>
+                    <MenuItemButton Command-ref="commandFileOpenFile"/>
+                  </att.SubMenu-set>
+                </ToolstripSplitButton>
                 <ToolstripButton Command-ref="commandFileSave"/>
                 <ToolstripButton Command-ref="commandFileSaveAll"/>
               </ToolstripToolBar>
