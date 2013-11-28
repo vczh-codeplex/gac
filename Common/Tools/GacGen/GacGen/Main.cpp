@@ -822,10 +822,12 @@ void WritePartialClassHeaderFile(Ptr<CodegenConfig> config, Dictionary<WString, 
 		writer.WriteLine(prefix + L"class " + instance->typeName + L";");
 		WriteNamespaceEnd(instance->namespaces, writer);
 		writer.WriteLine(L"");
+	}
 
+	{
 		List<WString> ns;
 		FillReflectionNamespaces(ns);
-		prefix = WriteNamespaceBegin(ns, writer);
+		WString prefix = WriteNamespaceBegin(ns, writer);
 		FOREACH(Ptr<Instance>, instance, instances.Values())
 		{
 			writer.WriteLine(prefix + L"DECL_TYPE_INFO(" + instance->GetFullName() + L")");

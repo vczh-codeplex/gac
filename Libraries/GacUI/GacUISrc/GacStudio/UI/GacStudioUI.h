@@ -12,5 +12,6 @@ DO NOT MODIFY
 #define VCZH_GACUI_RESOURCE_CODE_GENERATOR_GacStudioUI
 
 #include "GsMainWindow.h"
+#include "GsNewProjectWindow.h"
 
 #endif

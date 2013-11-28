@@ -24,6 +24,17 @@ namespace gacstudio
 
 		void MainWindow::commandFileNewProject_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
 		{
+			auto window = new NewProjectWindow;
+			window->ForceCalculateSizeImmediately();
+			window->MoveToScreenCenter();
+			window->WindowClosed.AttachLambda([=](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+			{
+				GetApplication()->InvokeInMainThread([=]()
+				{
+					delete window;
+				});
+			});
+			window->Show();
 		}
 
 		void MainWindow::commandFileOpenFile_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
@@ -50,6 +61,8 @@ namespace gacstudio
 		}
 	}
 }
+
+
 
 
 

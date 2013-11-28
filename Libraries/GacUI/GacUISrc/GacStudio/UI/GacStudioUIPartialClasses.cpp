@@ -17,6 +17,7 @@ namespace vl
 		namespace description
 		{
 			IMPL_TYPE_INFO(gacstudio::user_interface::MainWindow)
+			IMPL_TYPE_INFO(gacstudio::user_interface::NewProjectWindow)
 
 			BEGIN_CLASS_MEMBER(gacstudio::user_interface::MainWindow)
 				CLASS_MEMBER_BASE(vl::presentation::controls::GuiWindow)
@@ -31,12 +32,22 @@ namespace vl
 				CLASS_MEMBER_GUIEVENT_HANDLER(commandFileSave_Executed, vl::presentation::compositions::GuiEventArgs)
 			END_CLASS_MEMBER(gacstudio::user_interface::MainWindow)
 
+			BEGIN_CLASS_MEMBER(gacstudio::user_interface::NewProjectWindow)
+				CLASS_MEMBER_BASE(vl::presentation::controls::GuiWindow)
+				CLASS_MEMBER_CONSTRUCTOR(gacstudio::user_interface::NewProjectWindow*(), NO_PARAMETER)
+
+				CLASS_MEMBER_GUIEVENT_HANDLER(buttonBrowse_Clicked, vl::presentation::compositions::GuiEventArgs)
+				CLASS_MEMBER_GUIEVENT_HANDLER(buttonCancel_Clicked, vl::presentation::compositions::GuiEventArgs)
+				CLASS_MEMBER_GUIEVENT_HANDLER(buttonCreate_Clicked, vl::presentation::compositions::GuiEventArgs)
+			END_CLASS_MEMBER(gacstudio::user_interface::NewProjectWindow)
+
 			class GacStudioUIResourceLoader : public Object, public ITypeLoader
 			{
 			public:
 				void Load(ITypeManager* manager)
 				{
 					ADD_TYPE_INFO(gacstudio::user_interface::MainWindow)
+					ADD_TYPE_INFO(gacstudio::user_interface::NewProjectWindow)
 				}
 
 				void Unload(ITypeManager* manager)
