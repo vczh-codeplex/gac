@@ -862,6 +862,7 @@ GuiWindow
 
 			void GuiWindow::ShowModal(GuiWindow* owner, const Func<void()>& callback)
 			{
+				owner->SetEnabled(false);
 				GetNativeWindow()->SetParent(owner->GetNativeWindow());
 				auto container = CreateEventHandlerContainer<GuiEventArgs>();
 				container->handler = WindowClosed.AttachLambda([=](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
@@ -880,6 +881,7 @@ GuiWindow
 
 			void GuiWindow::ShowModalAndDelete(GuiWindow* owner, const Func<void()>& callback)
 			{
+				owner->SetEnabled(false);
 				GetNativeWindow()->SetParent(owner->GetNativeWindow());
 				WindowClosed.AttachLambda([=](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 				{
