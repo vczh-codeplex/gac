@@ -6,3 +6,5 @@ Persistant:
 		Multiple resources propritized referenced by a class definition
 		Locale awared
 		Using GuiResource
+
+// this line is added by VIM with Team Explorer Everywhere under Ubuntu
