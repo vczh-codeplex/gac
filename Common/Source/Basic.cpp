@@ -1,5 +1,7 @@
 #include "Basic.h"
+#ifdef VCZH_WINDOWS
 #include <Windows.h>
+#endif
 
 namespace vl
 {
@@ -47,6 +49,7 @@ Object
 DateTime
 ***********************************************************************/
 
+#ifdef VCZH_WINDOWS
 	DateTime SystemTimeToDateTime(const SYSTEMTIME& systemTime)
 	{
 		DateTime dateTime;
@@ -82,6 +85,7 @@ DateTime
 		FileTimeToSystemTime(&fileTime, &systemTime);
 		return systemTime;
 	}
+#endif
 
 	DateTime DateTime::LocalTime()
 	{
@@ -115,7 +119,7 @@ DateTime
 		return SystemTimeToDateTime(systemTime);
 	}
 
-	DateTime DateTime::FromFileTime(unsigned __int64 filetime)
+	DateTime DateTime::FromFileTime(vuint64 filetime)
 	{
 		ULARGE_INTEGER largeInteger;
 		largeInteger.QuadPart=filetime;
@@ -156,12 +160,12 @@ DateTime
 		return SystemTimeToDateTime(utcTime);
 	}
 
-	DateTime DateTime::Forward(unsigned __int64 milliseconds)
+	DateTime DateTime::Forward(vuint64 milliseconds)
 	{
 		return FromFileTime(filetime+milliseconds*10000);
 	}
 
-	DateTime DateTime::Backward(unsigned __int64 milliseconds)
+	DateTime DateTime::Backward(vuint64 milliseconds)
 	{
 		return FromFileTime(filetime-milliseconds*10000);
 	}
