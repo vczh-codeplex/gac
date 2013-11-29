@@ -15,8 +15,6 @@ Macros:
 #ifndef VCZH_BASIC
 #define VCZH_BASIC
 
-#include <intrin.h>
-
 namespace vl
 {
 
@@ -24,21 +22,54 @@ namespace vl
 32Œª/64ŒªºÊ»›
 ***********************************************************************/
 
-#ifdef _WIN64
+#if defined _WIN64 || __x86_64_
 #define VCZH_64
 #endif
 
-#ifdef VCZH_64
-	typedef __int64					vint;
-	typedef signed __int64			vsint;
-	typedef unsigned __int64		vuint;
+#if defined _WIN32 || _WIN64
+#define VCZH_WINDOWS
 #else
-	typedef __int32					vint;
-	typedef signed __int32			vsint;
-	typedef unsigned __int32		vuint;
+#define VCZH_LINUX
 #endif
 
-typedef signed __int64	pos_t;
+#if defined VCZH_WINDOWS
+#include <intrin.h>
+#elif defined VCZH_LINUX
+#include <x86intrin.h>
+#include <stdint.h>
+#include <stddef.h>
+#endif
+
+#if defined VCZH_WINDOWS
+	typedef signed __int8			vint8;
+	typedef unsigned __int8			vuint8;
+	typedef signed __int16			vint16;
+	typedef unsigned __int16		vuint16;
+	typedef signed __int32			vint32;
+	typedef unsigned __int32		vuint32;
+	typedef signed __int64			vint64;
+	typedef unsigned __int64		vuint64;
+#elif defined VCZH_LINUX
+	typedef int8_t					vint8;
+	typedef uint8_t					vuint8;
+	typedef int16_t					vint16;
+	typedef uint16_t				vuint16;
+	typedef int32_t					vint32;
+	typedef uint32_t				vuint32;
+	typedef int64_t					vint64;
+	typedef uint64_t				vuint64;
+#endif
+
+#ifdef VCZH_64
+	typedef vint64					vint;
+	typedef vint64					vsint;
+	typedef vuint64					vuint;
+#else
+	typedef vint32					vint;
+	typedef vint32					vsint;
+	typedef vuint32					vuint;
+#endif
+	typedef vint64					pos_t;
 
 #ifdef VCZH_64
 #define ITOA_S		_i64toa_s
@@ -423,14 +454,14 @@ typedef signed __int64	pos_t;
 	};
 
 	template<>struct POD<bool>{static const bool Result=true;};
-	template<>struct POD<unsigned __int8>{static const bool Result=true;};
-	template<>struct POD<signed __int8>{static const bool Result=true;};
-	template<>struct POD<unsigned __int16>{static const bool Result=true;};
-	template<>struct POD<signed __int16>{static const bool Result=true;};
-	template<>struct POD<unsigned __int32>{static const bool Result=true;};
-	template<>struct POD<signed __int32>{static const bool Result=true;};
-	template<>struct POD<unsigned __int64>{static const bool Result=true;};
-	template<>struct POD<signed __int64>{static const bool Result=true;};
+	template<>struct POD<vint8>{static const bool Result=true;};
+	template<>struct POD<vuint8>{static const bool Result=true;};
+	template<>struct POD<vint16>{static const bool Result=true;};
+	template<>struct POD<vuint16>{static const bool Result=true;};
+	template<>struct POD<vint32>{static const bool Result=true;};
+	template<>struct POD<vuint32>{static const bool Result=true;};
+	template<>struct POD<vint64>{static const bool Result=true;};
+	template<>struct POD<vuint64>{static const bool Result=true;};
 	template<>struct POD<char>{static const bool Result=true;};
 	template<>struct POD<wchar_t>{static const bool Result=true;};
 	template<typename T>struct POD<T*>{static const bool Result=true;};
@@ -456,20 +487,20 @@ typedef signed __int64	pos_t;
 		vint				second;
 		vint				milliseconds;
 
-		unsigned __int64	totalMilliseconds;
-		unsigned __int64	filetime;
+		vuint64				totalMilliseconds;
+		vuint64				filetime;
 
 		static DateTime		LocalTime();
 		static DateTime		UtcTime();
 		static DateTime		FromDateTime(vint _year, vint _month, vint _day, vint _hour=0, vint _minute=0, vint _second=0, vint _milliseconds=0);
-		static DateTime		FromFileTime(unsigned __int64 filetime);
+		static DateTime		FromFileTime(vuint64 filetime);
 
 		DateTime();
 
 		DateTime			ToLocalTime();
 		DateTime			ToUtcTime();
-		DateTime			Forward(unsigned __int64 milliseconds);
-		DateTime			Backward(unsigned __int64 milliseconds);
+		DateTime			Forward(vuint64 milliseconds);
+		DateTime			Backward(vuint64 milliseconds);
 
 		bool operator==(const DateTime& value)const { return filetime==value.filetime; }
 		bool operator!=(const DateTime& value)const { return filetime!=value.filetime; }
