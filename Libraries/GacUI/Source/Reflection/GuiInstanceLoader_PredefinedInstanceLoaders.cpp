@@ -992,6 +992,7 @@ GuiTreeNodeInstanceLoader
 			{
 				propertyNames.Add(L"Text");
 				propertyNames.Add(L"Image");
+				propertyNames.Add(L"Tag");
 				propertyNames.Add(L"");
 			}
 
@@ -1004,6 +1005,10 @@ GuiTreeNodeInstanceLoader
 				else if (propertyInfo.propertyName == L"Image")
 				{
 					return GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<GuiImageData>());
+				}
+				else if (propertyInfo.propertyName == L"Tag")
+				{
+					return GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<Value>());
 				}
 				else if (propertyInfo.propertyName == L"")
 				{
@@ -1030,6 +1035,13 @@ GuiTreeNodeInstanceLoader
 						{
 							item->image = UnboxValue<Ptr<GuiImageData>>(propertyValue.propertyValue);
 							container->NotifyDataModified();
+						}
+					}
+					else if (propertyValue.propertyName == L"Tag")
+					{
+						if (auto item = container->GetData().Cast<tree::TreeViewItem>())
+						{
+							item->tag = propertyValue.propertyValue;
 						}
 					}
 					else if (propertyValue.propertyName == L"")
