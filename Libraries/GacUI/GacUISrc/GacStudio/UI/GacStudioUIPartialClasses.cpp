@@ -17,6 +17,7 @@ namespace vl
 		namespace description
 		{
 			IMPL_TYPE_INFO(gacstudio::user_interface::MainWindow)
+			IMPL_TYPE_INFO(gacstudio::user_interface::NewFileWindow)
 			IMPL_TYPE_INFO(gacstudio::user_interface::NewProjectWindow)
 
 			BEGIN_CLASS_MEMBER(gacstudio::user_interface::MainWindow)
@@ -31,6 +32,14 @@ namespace vl
 				CLASS_MEMBER_GUIEVENT_HANDLER(commandFileSaveAll_Executed, vl::presentation::compositions::GuiEventArgs)
 				CLASS_MEMBER_GUIEVENT_HANDLER(commandFileSave_Executed, vl::presentation::compositions::GuiEventArgs)
 			END_CLASS_MEMBER(gacstudio::user_interface::MainWindow)
+
+			BEGIN_CLASS_MEMBER(gacstudio::user_interface::NewFileWindow)
+				CLASS_MEMBER_BASE(vl::presentation::controls::GuiWindow)
+				CLASS_MEMBER_CONSTRUCTOR(gacstudio::user_interface::NewFileWindow*(), NO_PARAMETER)
+
+				CLASS_MEMBER_GUIEVENT_HANDLER(buttonCancel_Clicked, vl::presentation::compositions::GuiEventArgs)
+				CLASS_MEMBER_GUIEVENT_HANDLER(buttonCreate_Clicked, vl::presentation::compositions::GuiEventArgs)
+			END_CLASS_MEMBER(gacstudio::user_interface::NewFileWindow)
 
 			BEGIN_CLASS_MEMBER(gacstudio::user_interface::NewProjectWindow)
 				CLASS_MEMBER_BASE(vl::presentation::controls::GuiWindow)
@@ -47,6 +56,7 @@ namespace vl
 				void Load(ITypeManager* manager)
 				{
 					ADD_TYPE_INFO(gacstudio::user_interface::MainWindow)
+					ADD_TYPE_INFO(gacstudio::user_interface::NewFileWindow)
 					ADD_TYPE_INFO(gacstudio::user_interface::NewProjectWindow)
 				}
 

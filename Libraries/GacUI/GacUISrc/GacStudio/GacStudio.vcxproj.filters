@@ -51,6 +51,9 @@
     <ClCompile Include="UI\GsNewProjectWindow.cpp">
       <Filter>UI</Filter>
     </ClCompile>
+    <ClCompile Include="UI\GsNewFileWindow.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Public\Source\GacUI.h">
@@ -75,6 +78,9 @@
       <Filter>UI</Filter>
     </ClInclude>
     <ClInclude Include="UI\GsNewProjectWindow.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="UI\GsNewFileWindow.h">
       <Filter>UI</Filter>
     </ClInclude>
   </ItemGroup>

@@ -16,10 +16,17 @@ namespace gacstudio
 
 		void MainWindow::commandFileExit_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
 		{
+			Close();
 		}
 
 		void MainWindow::commandFileNewFile_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
 		{
+			auto window = new NewFileWindow;
+			window->ForceCalculateSizeImmediately();
+			window->MoveToScreenCenter();
+			window->ShowModalAndDelete(this, []()
+			{
+			});
 		}
 
 		void MainWindow::commandFileNewProject_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
