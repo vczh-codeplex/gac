@@ -25,6 +25,9 @@
     <Filter Include="Resource Files\ProjectImages">
       <UniqueIdentifier>{95245d7f-7e27-4a0c-b76f-ba9cb4a2691e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\FileImages">
+      <UniqueIdentifier>{43132756-5ca4-4b30-8e92-1596444db029}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -94,6 +97,9 @@
     <Xml Include="UI\ProjectImages\Folder.xml">
       <Filter>Resource Files\ProjectImages</Filter>
     </Xml>
+    <Xml Include="UI\FileImages\Folder.xml">
+      <Filter>Resource Files\FileImages</Filter>
+    </Xml>
   </ItemGroup>
   <ItemGroup>
     <None Include="UI\Codegen.bat">
@@ -130,6 +136,30 @@
     </Image>
     <Image Include="UI\ProjectImages\ParserSmall.png">
       <Filter>Resource Files\ProjectImages</Filter>
+    </Image>
+    <Image Include="UI\FileImages\Dialog.png">
+      <Filter>Resource Files\FileImages</Filter>
+    </Image>
+    <Image Include="UI\FileImages\Parser.png">
+      <Filter>Resource Files\FileImages</Filter>
+    </Image>
+    <Image Include="UI\FileImages\Image.png">
+      <Filter>Resource Files\FileImages</Filter>
+    </Image>
+    <Image Include="UI\FileImages\Control.png">
+      <Filter>Resource Files\FileImages</Filter>
+    </Image>
+    <Image Include="UI\FileImages\Document.png">
+      <Filter>Resource Files\FileImages</Filter>
+    </Image>
+    <Image Include="UI\FileImages\RichDocument.png">
+      <Filter>Resource Files\FileImages</Filter>
+    </Image>
+    <Image Include="UI\FileImages\XmlDocument.png">
+      <Filter>Resource Files\FileImages</Filter>
+    </Image>
+    <Image Include="UI\FileImages\Class.png">
+      <Filter>Resource Files\FileImages</Filter>
     </Image>
   </ItemGroup>
 </Project>
