@@ -174,6 +174,7 @@
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="UI\GacStudioUIPartialClasses.cpp" />
     <ClCompile Include="UI\GsMainWindow.cpp" />
+    <ClCompile Include="UI\GsNewFileWindow.cpp" />
     <ClCompile Include="UI\GsNewProjectWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -184,6 +185,7 @@
     <ClInclude Include="UI\GacStudioUI.h" />
     <ClInclude Include="UI\GacStudioUIPartialClasses.h" />
     <ClInclude Include="UI\GsMainWindow.h" />
+    <ClInclude Include="UI\GsNewFileWindow.h" />
     <ClInclude Include="UI\GsNewProjectWindow.h" />
   </ItemGroup>
   <ItemGroup>

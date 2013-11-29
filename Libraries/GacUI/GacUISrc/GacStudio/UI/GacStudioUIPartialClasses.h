@@ -66,6 +66,51 @@ namespace gacstudio
 	namespace user_interface
 	{
 		template<typename TImpl>
+		class NewFileWindow_ : public vl::presentation::controls::GuiWindow, public vl::presentation::GuiInstancePartialClass<vl::presentation::controls::GuiWindow>, public vl::reflection::Description<TImpl>
+		{
+		protected:
+			vl::presentation::controls::GuiButton* buttonCancel;
+			vl::presentation::controls::GuiButton* buttonCreate;
+			vl::presentation::controls::GuiListView* listViewFileTemplate;
+			vl::presentation::controls::GuiSinglelineTextBox* textBoxLocation;
+			vl::presentation::controls::GuiSinglelineTextBox* textBoxProjectName;
+			vl::presentation::controls::GuiTreeView* treeViewProjectTemplate;
+
+		void InitializeComponents()
+			{
+				if (InitializeFromResource())
+				{
+					GUI_INSTANCE_REFERENCE(buttonCancel);
+					GUI_INSTANCE_REFERENCE(buttonCreate);
+					GUI_INSTANCE_REFERENCE(listViewFileTemplate);
+					GUI_INSTANCE_REFERENCE(textBoxLocation);
+					GUI_INSTANCE_REFERENCE(textBoxProjectName);
+					GUI_INSTANCE_REFERENCE(treeViewProjectTemplate);
+				}
+			}
+		public:
+			NewFileWindow_()
+				:vl::presentation::controls::GuiWindow(vl::presentation::theme::GetCurrentTheme()->CreateWindowStyle())
+				,vl::presentation::GuiInstancePartialClass<vl::presentation::controls::GuiWindow>(L"gacstudio::user_interface::NewFileWindow")
+				,buttonCancel(0)
+				,buttonCreate(0)
+				,listViewFileTemplate(0)
+				,textBoxLocation(0)
+				,textBoxProjectName(0)
+				,treeViewProjectTemplate(0)
+			{
+			}
+		};
+
+		class NewFileWindow;
+	}
+}
+
+namespace gacstudio
+{
+	namespace user_interface
+	{
+		template<typename TImpl>
 		class NewProjectWindow_ : public vl::presentation::controls::GuiWindow, public vl::presentation::GuiInstancePartialClass<vl::presentation::controls::GuiWindow>, public vl::reflection::Description<TImpl>
 		{
 		protected:
@@ -119,6 +164,7 @@ namespace vl
 		namespace description
 		{
 			DECL_TYPE_INFO(gacstudio::user_interface::MainWindow)
+			DECL_TYPE_INFO(gacstudio::user_interface::NewFileWindow)
 			DECL_TYPE_INFO(gacstudio::user_interface::NewProjectWindow)
 		}
 	}
@@ -190,6 +236,53 @@ namespace gacstudio
 		// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 
 		MainWindow::MainWindow()
+		{
+			InitializeComponents();
+		}
+	}
+}
+
+
+GsNewFileWindow.h :
+namespace gacstudio
+{
+	namespace user_interface
+	{
+		class NewFileWindow : public NewFileWindow_<NewFileWindow>
+		{
+			friend class NewFileWindow_<NewFileWindow>;
+			friend struct vl::reflection::description::CustomTypeDescriptorSelector<NewFileWindow>;
+		protected:
+
+			// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+			void buttonCancel_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
+			void buttonCreate_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
+			// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+		public:
+			NewFileWindow();
+		};
+	}
+}
+
+
+GsNewFileWindow.cpp :
+namespace gacstudio
+{
+	namespace user_interface
+	{
+		// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+		void NewFileWindow::buttonCancel_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
+		{
+		}
+
+		void NewFileWindow::buttonCreate_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
+		{
+		}
+
+		// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+
+		NewFileWindow::NewFileWindow()
 		{
 			InitializeComponents();
 		}
