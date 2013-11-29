@@ -122,5 +122,14 @@
     <Image Include="UI\ProjectImages\Parser.png">
       <Filter>Resource Files\ProjectImages</Filter>
     </Image>
+    <Image Include="UI\ProjectImages\AllSmall.png">
+      <Filter>Resource Files\ProjectImages</Filter>
+    </Image>
+    <Image Include="UI\ProjectImages\DialogSmall.png">
+      <Filter>Resource Files\ProjectImages</Filter>
+    </Image>
+    <Image Include="UI\ProjectImages\ParserSmall.png">
+      <Filter>Resource Files\ProjectImages</Filter>
+    </Image>
   </ItemGroup>
 </Project>

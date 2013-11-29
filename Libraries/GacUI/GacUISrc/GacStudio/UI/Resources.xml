@@ -244,13 +244,13 @@
               <TreeView ref.Name="treeViewProjectTemplate" HorizontalAlwaysVisible="false" VerticalAlwaysVisible="false">
                 <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
                 <att.Nodes>
-                  <TreeNode Text="All">
-                    <TreeNode Text="GacUI Resource">
+                  <TreeNode Text="All" Expanding="true" Image-uri="res://ProjectImages/AllSmall.png">
+                    <TreeNode Text="GacUI Resource" Image-uri="res://ProjectImages/DialogSmall.png">
                       <att.tag>
                         <String>GACUI_RESOURCE_PROJECT</String>
                       </att.tag>
                     </TreeNode>   
-                    <TreeNode Text="Parser">
+                    <TreeNode Text="Parser" Image-uri="res://ProjectImages/ParserSmall.png">
                       <att.tag>
                         <String>PARSER_PROJECT</String>
                       </att.tag>
