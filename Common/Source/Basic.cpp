@@ -89,20 +89,27 @@ DateTime
 
 	DateTime DateTime::LocalTime()
 	{
+#if defined VCZH_WINDOWS
 		SYSTEMTIME systemTime;
 		GetLocalTime(&systemTime);
 		return SystemTimeToDateTime(systemTime);
+#elif defined VCZH_LINUX
+#endif
 	}
 
 	DateTime DateTime::UtcTime()
 	{
+#if defined VCZH_WINDOWS
 		SYSTEMTIME utcTime;
 		GetSystemTime(&utcTime);
 		return SystemTimeToDateTime(utcTime);
+#elif defined VCZH_LINUX
+#endif
 	}
 
 	DateTime DateTime::FromDateTime(vint _year, vint _month, vint _day, vint _hour, vint _minute, vint _second, vint _milliseconds)
 	{
+#if defined VCZH_WINDOWS
 		SYSTEMTIME systemTime;
 		memset(&systemTime, 0, sizeof(systemTime));
 		systemTime.wYear=(WORD)_year;
@@ -117,10 +124,13 @@ DateTime
 		SystemTimeToFileTime(&systemTime, &fileTime);
 		FileTimeToSystemTime(&fileTime, &systemTime);
 		return SystemTimeToDateTime(systemTime);
+#elif defined VCZH_LINUX
+#endif
 	}
 
 	DateTime DateTime::FromFileTime(vuint64_t filetime)
 	{
+#if defined VCZH_WINDOWS
 		ULARGE_INTEGER largeInteger;
 		largeInteger.QuadPart=filetime;
 		FILETIME fileTime;
@@ -130,6 +140,8 @@ DateTime
 		SYSTEMTIME systemTime;
 		FileTimeToSystemTime(&fileTime, &systemTime);
 		return SystemTimeToDateTime(systemTime);
+#elif defined VCZH_LINUX
+#endif
 	}
 
 	DateTime::DateTime()
@@ -146,18 +158,24 @@ DateTime
 
 	DateTime DateTime::ToLocalTime()
 	{
+#if defined VCZH_WINDOWS
 		SYSTEMTIME utcTime=DateTimeToSystemTime(*this);
 		SYSTEMTIME localTime;
 		SystemTimeToTzSpecificLocalTime(NULL, &utcTime, &localTime);
 		return SystemTimeToDateTime(localTime);
+#elif defined VCZH_LINUX
+#endif
 	}
 
 	DateTime DateTime::ToUtcTime()
 	{
+#if defined VCZH_WINDOWS
 		SYSTEMTIME localTime=DateTimeToSystemTime(*this);
 		SYSTEMTIME utcTime;
 		TzSpecificLocalTimeToSystemTime(NULL, &localTime, &utcTime);
 		return SystemTimeToDateTime(utcTime);
+#elif defined VCZH_LINUX
+#endif
 	}
 
 	DateTime DateTime::Forward(vuint64_t milliseconds)
