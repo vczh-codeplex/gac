@@ -1346,6 +1346,10 @@ LoadInstancePropertyValue
 			List<FillInstanceEventSetter>& eventSetters
 			)
 		{
+			if (propertyValue.propertyName == L"Tag")
+			{
+				int a = 0;
+			}
 			vint loadedValueCount = 0;
 			// try to look for a loader to handle this property
 			while(propertyLoader && loadedValueCount<input.Count())
@@ -1631,7 +1635,7 @@ CreateInstance
 				}
 
 				// if the target type is not the expected type, fail
-				if (!expectedType || typeDescriptor->CanConvertTo(expectedType))
+				if (!expectedType || expectedType==GetTypeDescriptor<Value>() || typeDescriptor->CanConvertTo(expectedType))
 				{
 					// traverse the loader and all ancestors to load the type
 					IGuiInstanceLoader::TypeInfo typeInfo(typeName, typeDescriptor);
