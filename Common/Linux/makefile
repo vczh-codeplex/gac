@@ -1,10 +1,13 @@
 CPP = g++ -std=c++11 -finput-charset=gbk
+OBJ = ./obj/
+BIN = ./exe/
+VLPP = ./Source/
 
-all: obj/Main.o
-	$(CPP) -o exe/UnitTest obj/Main.o
+all: $(OBJ)Main.o
+	$(CPP) -o $(BIN)UnitTest $(OBJ)Main.o
 
-obj/Main.o: Main.cpp
-	$(CPP) -o obj/Main.o -c Main.cpp 
+$(OBJ)Main.o: Main.cpp
+	$(CPP) -o $(OBJ)Main.o -c Main.cpp 
 
 clean:
-	rm exe/* obj/*
+	rm $(BIN)* $(OBJ)*
