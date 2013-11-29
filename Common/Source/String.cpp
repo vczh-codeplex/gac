@@ -1,6 +1,8 @@
 #include <stdlib.h>
-#include <windows.h>
 #include "String.h"
+#ifdef VCZH_WINDOWS
+#include <Windows.h>
+#endif
 
 namespace vl
 {
