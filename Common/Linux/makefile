@@ -1,4 +1,4 @@
-CPP = g++ -std=c++11
+CPP = g++ -std=c++11 -finput-charset=gbk
 
 all: obj/Main.o
 	$(CPP) -o exe/UnitTest obj/Main.o

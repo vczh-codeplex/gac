@@ -5,6 +5,7 @@ using namespace std;
 
 int main()
 {
-	cout<<"Hello, world!"<<endl;
+	wcout<<L"Hello, world!"<<endl;
+	wcout<<L"sizeof(wchar_t) = "<<sizeof(wchar_t)<<endl;
 	return 0;
 }
