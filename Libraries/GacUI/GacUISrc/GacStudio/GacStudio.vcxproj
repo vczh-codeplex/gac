@@ -204,8 +204,11 @@
     <Image Include="UI\CommandImages\Open.png" />
     <Image Include="UI\CommandImages\Save.png" />
     <Image Include="UI\CommandImages\SaveAll.png" />
+    <Image Include="UI\ProjectImages\AllSmall.png" />
     <Image Include="UI\ProjectImages\Dialog.png" />
+    <Image Include="UI\ProjectImages\DialogSmall.png" />
     <Image Include="UI\ProjectImages\Parser.png" />
+    <Image Include="UI\ProjectImages\ParserSmall.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
