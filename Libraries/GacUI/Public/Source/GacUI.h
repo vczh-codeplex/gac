@@ -2962,11 +2962,17 @@ Event
 				public:
 					virtual void			Execute(GuiGraphicsComposition* sender, T& argument)=0;
 				};
+
+				class HandlerContainer
+				{
+				public:
+					Ptr<IHandler>			handler;
+				};
 				
 				class FunctionHandler : public Object, public IHandler
 				{
 				protected:
-					FunctionType		handler;
+					FunctionType			handler;
 				public:
 					FunctionHandler(const FunctionType& _handler)
 						:handler(_handler)
@@ -3090,6 +3096,12 @@ Event
 					ExecuteWithNewSender(argument, 0);
 				}
 			};
+
+			template<typename T>
+			Ptr<typename GuiGraphicsEvent<T>::HandlerContainer> CreateEventHandlerContainer()
+			{
+				return new typename GuiGraphicsEvent<T>::HandlerContainer;
+			}
 
 /***********************************************************************
 Predefined Events
@@ -4286,7 +4298,7 @@ Basic Construction
 
 				GuiControl*								parent;
 				ControlList								children;
-				Ptr<Object>								tag;
+				description::Value						tag;
 				GuiControl*								tooltipControl;
 				vint									tooltipWidth;
 
@@ -4334,8 +4346,8 @@ Basic Construction
 				virtual void							SetFont(const FontProperties& value);
 				virtual void							SetFocus();
 
-				Ptr<Object>								GetTag();
-				void									SetTag(Ptr<Object> value);
+				description::Value						GetTag();
+				void									SetTag(const description::Value& value);
 				GuiControl*								GetTooltipControl();
 				GuiControl*								SetTooltipControl(GuiControl* value);
 				vint									GetTooltipWidth();
@@ -4975,6 +4987,8 @@ Window
 				void									SetIconVisible(bool visible);
 				bool									GetTitleBar();
 				void									SetTitleBar(bool visible);
+				void									ShowModal(GuiWindow* owner, const Func<void()>& callback);
+				void									ShowModalAndDelete(GuiWindow* owner, const Func<void()>& callback);
 			};
 			
 			class GuiPopup : public GuiWindow, public Description<GuiPopup>
@@ -6808,7 +6822,7 @@ ListView
 					Ptr<GuiImageData>								largeImage;
 					WString											text;
 					collections::List<WString>						subItems;
-					Ptr<Object>										tag;
+					description::Value								tag;
 				};
 				
 				class ListViewColumn : public Object, public Description<ListViewColumn>
@@ -7261,7 +7275,7 @@ TreeView
 				public:
 					Ptr<GuiImageData>				image;
 					WString							text;
-					Ptr<Object>						tag;
+					description::Value				tag;
 
 					TreeViewItem();
 					TreeViewItem(const Ptr<GuiImageData>& _image, const WString& _text);

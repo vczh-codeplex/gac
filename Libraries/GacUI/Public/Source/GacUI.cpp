@@ -748,12 +748,12 @@ GuiControl
 				}
 			}
 
-			Ptr<Object> GuiControl::GetTag()
+			description::Value GuiControl::GetTag()
 			{
 				return tag;
 			}
 
-			void GuiControl::SetTag(Ptr<Object> value)
+			void GuiControl::SetTag(const description::Value& value)
 			{
 				tag=value;
 			}
@@ -3393,6 +3393,41 @@ GuiWindow
 			void GuiWindow::SetTitleBar(bool visible)
 			{
 				styleController->SetTitleBar(visible);
+			}
+
+			void GuiWindow::ShowModal(GuiWindow* owner, const Func<void()>& callback)
+			{
+				GetNativeWindow()->SetParent(owner->GetNativeWindow());
+				auto container = CreateEventHandlerContainer<GuiEventArgs>();
+				container->handler = WindowClosed.AttachLambda([=](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+				{
+					GetApplication()->InvokeInMainThread([=]()
+					{
+						WindowClosed.Detach(container->handler);
+						GetNativeWindow()->SetParent(0);
+						callback();
+						owner->SetEnabled(true);
+						owner->SetActivated();
+					});
+				});
+				Show();
+			}
+
+			void GuiWindow::ShowModalAndDelete(GuiWindow* owner, const Func<void()>& callback)
+			{
+				GetNativeWindow()->SetParent(owner->GetNativeWindow());
+				WindowClosed.AttachLambda([=](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+				{
+					GetApplication()->InvokeInMainThread([=]()
+					{
+						GetNativeWindow()->SetParent(0);
+						callback();
+						owner->SetEnabled(true);
+						owner->SetActivated();
+						delete this;
+					});
+				});
+				Show();
 			}
 
 /***********************************************************************

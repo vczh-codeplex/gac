@@ -392,6 +392,14 @@ Window
 				/// </summary>
 				/// <param name="visible">True to make the title bar visible.</param>
 				void									SetTitleBar(bool visible);
+				/// <summary>
+				/// Show a model window, get a callback when the window is closed.
+				/// </summary>
+				void									ShowModal(GuiWindow* owner, const Func<void()>& callback);
+				/// <summary>
+				/// Show a model window, get a callback when the window is closed, and then delete itself.
+				/// </summary>
+				void									ShowModalAndDelete(GuiWindow* owner, const Func<void()>& callback);
 			};
 			
 			/// <summary>

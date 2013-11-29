@@ -52,11 +52,17 @@ Event
 				public:
 					virtual void			Execute(GuiGraphicsComposition* sender, T& argument)=0;
 				};
+
+				class HandlerContainer
+				{
+				public:
+					Ptr<IHandler>			handler;
+				};
 				
 				class FunctionHandler : public Object, public IHandler
 				{
 				protected:
-					FunctionType		handler;
+					FunctionType			handler;
 				public:
 					FunctionHandler(const FunctionType& _handler)
 						:handler(_handler)
@@ -180,6 +186,12 @@ Event
 					ExecuteWithNewSender(argument, 0);
 				}
 			};
+
+			template<typename T>
+			Ptr<typename GuiGraphicsEvent<T>::HandlerContainer> CreateEventHandlerContainer()
+			{
+				return new typename GuiGraphicsEvent<T>::HandlerContainer;
+			}
 
 /***********************************************************************
 Predefined Events

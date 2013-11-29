@@ -842,6 +842,7 @@ Type Declaration
 				CLASS_MEMBER_FIELD(largeImage)
 				CLASS_MEMBER_FIELD(text)
 				CLASS_MEMBER_FIELD(subItems)
+				CLASS_MEMBER_FIELD(tag)
 			END_CLASS_MEMBER(ListViewItem)
 
 			BEGIN_CLASS_MEMBER(ListViewColumn)
@@ -1098,6 +1099,7 @@ Type Declaration
 
 				CLASS_MEMBER_FIELD(image)
 				CLASS_MEMBER_FIELD(text)
+				CLASS_MEMBER_FIELD(tag)
 			END_CLASS_MEMBER(TreeViewItem)
 
 			BEGIN_CLASS_MEMBER(TreeViewItemRootProvider)

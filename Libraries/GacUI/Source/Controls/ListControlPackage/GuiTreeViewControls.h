@@ -499,7 +499,7 @@ TreeView
 					/// <summary>The text of this item.</summary>
 					WString							text;
 					/// <summary>Tag object.</summary>
-					Ptr<Object>						tag;
+					description::Value				tag;
 
 					/// <summary>Create a tree view item.</summary>
 					TreeViewItem();

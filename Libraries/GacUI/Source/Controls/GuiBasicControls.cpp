@@ -325,12 +325,12 @@ GuiControl
 				}
 			}
 
-			Ptr<Object> GuiControl::GetTag()
+			description::Value GuiControl::GetTag()
 			{
 				return tag;
 			}
 
-			void GuiControl::SetTag(Ptr<Object> value)
+			void GuiControl::SetTag(const description::Value& value)
 			{
 				tag=value;
 			}

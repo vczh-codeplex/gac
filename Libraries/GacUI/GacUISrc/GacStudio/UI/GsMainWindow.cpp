@@ -28,18 +28,9 @@ namespace gacstudio
 			auto window = new NewProjectWindow;
 			window->ForceCalculateSizeImmediately();
 			window->MoveToScreenCenter();
-			window->GetNativeWindow()->SetParent(GetNativeWindow());
-			window->WindowClosed.AttachLambda([=](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+			window->ShowModalAndDelete(this, []()
 			{
-				GetApplication()->InvokeInMainThread([=]()
-				{
-					window->GetNativeWindow()->SetParent(0);
-					SetEnabled(true);
-					SetActivated();
-					delete window;
-				});
 			});
-			window->Show();
 		}
 
 		void MainWindow::commandFileOpenFile_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
