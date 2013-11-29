@@ -684,7 +684,7 @@ ListView
 					/// <summary>Sub items.</summary>
 					collections::List<WString>						subItems;
 					/// <summary>Tag object.</summary>
-					Ptr<Object>										tag;
+					description::Value								tag;
 				};
 				
 				/// <summary>List view column.</summary>

@@ -114,7 +114,7 @@ Basic Construction
 
 				GuiControl*								parent;
 				ControlList								children;
-				Ptr<Object>								tag;
+				description::Value						tag;
 				GuiControl*								tooltipControl;
 				vint									tooltipWidth;
 
@@ -220,10 +220,10 @@ Basic Construction
 
 				/// <summary>Get the tag object of the control.</summary>
 				/// <returns>The tag object of the control.</returns>
-				Ptr<Object>								GetTag();
+				description::Value						GetTag();
 				/// <summary>Set the tag object of the control.</summary>
 				/// <param name="value">The tag object of the control.</param>
-				void									SetTag(Ptr<Object> value);
+				void									SetTag(const description::Value& value);
 				/// <summary>Get the tooltip control of the control.</summary>
 				/// <returns>The tooltip control of the control.</returns>
 				GuiControl*								GetTooltipControl();
