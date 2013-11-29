@@ -24,7 +24,6 @@ namespace gacstudio
 
 		void MainWindow::commandFileNewProject_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
 		{
-			SetEnabled(false);
 			auto window = new NewProjectWindow;
 			window->ForceCalculateSizeImmediately();
 			window->MoveToScreenCenter();
