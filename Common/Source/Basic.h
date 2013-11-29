@@ -15,13 +15,6 @@ Macros:
 #ifndef VCZH_BASIC
 #define VCZH_BASIC
 
-namespace vl
-{
-
-/***********************************************************************
-32位/64位兼容
-***********************************************************************/
-
 #if defined _WIN64 || __x86_64_
 #define VCZH_64
 #endif
@@ -40,36 +33,43 @@ namespace vl
 #include <stddef.h>
 #endif
 
+namespace vl
+{
+
+/***********************************************************************
+32位/64位兼容
+***********************************************************************/
+
 #if defined VCZH_WINDOWS
-	typedef signed __int8			vint8;
-	typedef unsigned __int8			vuint8;
-	typedef signed __int16			vint16;
-	typedef unsigned __int16		vuint16;
-	typedef signed __int32			vint32;
-	typedef unsigned __int32		vuint32;
-	typedef signed __int64			vint64;
-	typedef unsigned __int64		vuint64;
+	typedef signed __int8			vint8_t;
+	typedef unsigned __int8			vuint8_t;
+	typedef signed __int16			vint16_t;
+	typedef unsigned __int16		vuint16_t;
+	typedef signed __int32			vint32_t;
+	typedef unsigned __int32		vuint32_t;
+	typedef signed __int64			vint64_t;
+	typedef unsigned __int64		vuint64_t;
 #elif defined VCZH_LINUX
-	typedef int8_t					vint8;
-	typedef uint8_t					vuint8;
-	typedef int16_t					vint16;
-	typedef uint16_t				vuint16;
-	typedef int32_t					vint32;
-	typedef uint32_t				vuint32;
-	typedef int64_t					vint64;
-	typedef uint64_t				vuint64;
+	typedef int8_t					vint8_t;
+	typedef uint8_t					vuint8_t;
+	typedef int16_t					vint16_t;
+	typedef uint16_t				vuint16_t;
+	typedef int32_t					vint32_t;
+	typedef uint32_t				vuint32_t;
+	typedef int64_t					vint64_t;
+	typedef uint64_t				vuint64_t;
 #endif
 
 #ifdef VCZH_64
-	typedef vint64					vint;
-	typedef vint64					vsint;
-	typedef vuint64					vuint;
+	typedef vint64_t				vint;
+	typedef vint64_t				vsint;
+	typedef vuint64_t				vuint;
 #else
-	typedef vint32					vint;
-	typedef vint32					vsint;
-	typedef vuint32					vuint;
+	typedef vint32_t				vint;
+	typedef vint32_t				vsint;
+	typedef vuint32_t				vuint;
 #endif
-	typedef vint64					pos_t;
+	typedef vint64_t				pos_t;
 
 #ifdef VCZH_64
 #define ITOA_S		_i64toa_s
@@ -454,14 +454,14 @@ namespace vl
 	};
 
 	template<>struct POD<bool>{static const bool Result=true;};
-	template<>struct POD<vint8>{static const bool Result=true;};
-	template<>struct POD<vuint8>{static const bool Result=true;};
-	template<>struct POD<vint16>{static const bool Result=true;};
-	template<>struct POD<vuint16>{static const bool Result=true;};
-	template<>struct POD<vint32>{static const bool Result=true;};
-	template<>struct POD<vuint32>{static const bool Result=true;};
-	template<>struct POD<vint64>{static const bool Result=true;};
-	template<>struct POD<vuint64>{static const bool Result=true;};
+	template<>struct POD<vint8_t>{static const bool Result=true;};
+	template<>struct POD<vuint8_t>{static const bool Result=true;};
+	template<>struct POD<vint16_t>{static const bool Result=true;};
+	template<>struct POD<vuint16_t>{static const bool Result=true;};
+	template<>struct POD<vint32_t>{static const bool Result=true;};
+	template<>struct POD<vuint32_t>{static const bool Result=true;};
+	template<>struct POD<vint64_t>{static const bool Result=true;};
+	template<>struct POD<vuint64_t>{static const bool Result=true;};
 	template<>struct POD<char>{static const bool Result=true;};
 	template<>struct POD<wchar_t>{static const bool Result=true;};
 	template<typename T>struct POD<T*>{static const bool Result=true;};
@@ -487,20 +487,20 @@ namespace vl
 		vint				second;
 		vint				milliseconds;
 
-		vuint64				totalMilliseconds;
-		vuint64				filetime;
+		vuint64_t			totalMilliseconds;
+		vuint64_t			filetime;
 
 		static DateTime		LocalTime();
 		static DateTime		UtcTime();
 		static DateTime		FromDateTime(vint _year, vint _month, vint _day, vint _hour=0, vint _minute=0, vint _second=0, vint _milliseconds=0);
-		static DateTime		FromFileTime(vuint64 filetime);
+		static DateTime		FromFileTime(vuint64_t filetime);
 
 		DateTime();
 
 		DateTime			ToLocalTime();
 		DateTime			ToUtcTime();
-		DateTime			Forward(vuint64 milliseconds);
-		DateTime			Backward(vuint64 milliseconds);
+		DateTime			Forward(vuint64_t milliseconds);
+		DateTime			Backward(vuint64_t milliseconds);
 
 		bool operator==(const DateTime& value)const { return filetime==value.filetime; }
 		bool operator!=(const DateTime& value)const { return filetime!=value.filetime; }

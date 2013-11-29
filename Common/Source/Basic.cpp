@@ -119,7 +119,7 @@ DateTime
 		return SystemTimeToDateTime(systemTime);
 	}
 
-	DateTime DateTime::FromFileTime(vuint64 filetime)
+	DateTime DateTime::FromFileTime(vuint64_t filetime)
 	{
 		ULARGE_INTEGER largeInteger;
 		largeInteger.QuadPart=filetime;
@@ -160,12 +160,12 @@ DateTime
 		return SystemTimeToDateTime(utcTime);
 	}
 
-	DateTime DateTime::Forward(vuint64 milliseconds)
+	DateTime DateTime::Forward(vuint64_t milliseconds)
 	{
 		return FromFileTime(filetime+milliseconds*10000);
 	}
 
-	DateTime DateTime::Backward(vuint64 milliseconds)
+	DateTime DateTime::Backward(vuint64_t milliseconds)
 	{
 		return FromFileTime(filetime-milliseconds*10000);
 	}
