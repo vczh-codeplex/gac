@@ -199,6 +199,41 @@ Utf-16
 #if defined VCZH_MSVC
 			return stream->Write(_buffer, chars*sizeof(wchar_t))/sizeof(wchar_t);
 #elif defined VCZH_GCC
+			vint writed = 0;
+			vuint16_t utf16 = 0;
+			vuint8_t* utf16buf = (vuint8_t*)&utf16;
+			while (writed < chars)
+			{
+				wchar_t w = *_buffer++;
+				if (w < 0x10000)
+				{
+					utf16 = (vuint16_t)w;
+					if (stream->Write(&utf16buf[0], 1) != 1) break;
+					if (stream->Write(&utf16buf[1], 1) != 1) break;
+				}
+				else if (w < 0x110000)
+				{
+					wchar_t inc = w - 0x10000;
+
+					utf16 = (vuint16_t)(w / 0x400) + 0xD800;
+					if (stream->Write(&utf16buf[0], 1) != 1) break;
+					if (stream->Write(&utf16buf[1], 1) != 1) break;
+
+					utf16 = (vuint16_t)(w % 0x400) + 0xDC00;
+					if (stream->Write(&utf16buf[0], 1) != 1) break;
+					if (stream->Write(&utf16buf[1], 1) != 1) break;
+				}
+				else
+				{
+					break;
+				}
+				writed++;
+			}
+			if(writed!=chars)
+			{
+				Close();
+			}
+			return writed;
 #endif
 		}
 
@@ -207,6 +242,35 @@ Utf-16
 #if defined VCZH_MSVC
 			return stream->Read(_buffer, chars*sizeof(wchar_t))/sizeof(wchar_t);
 #elif defined VCZH_GCC
+			wchar_t* writing = _buffer;
+			while (writing - _buffer < chars)
+			{
+				vuint16_t utf16_1 = 0;
+				vuint16_t utf16_2 = 0;
+
+				if (stream->Read(&utf16_1, 2) != 2) break;
+				if (utf16_1 < 0xD800 || utf16_1 > 0xDFFF)
+				{
+					*writing++ = (wchar_t)utf16_1;
+				}
+				else if (utf16_1 < 0xDC00)
+				{
+					if (stream->Read(&utf16_2, 2) != 2) break;
+					if (0xDC00 <= utf16_2 && utf16_2 <= 0xDFFF)
+					{
+						*writing++ = (wchar_t)(utf16_1 - 0xD800) * 400 + (wchar_t)(utf16_2 - 0xDC00) + 0x10000;
+					}
+					else
+					{
+						break;
+					}
+				}
+				else
+				{
+					break;
+				}
+			}
+			return writing - _buffer;
 #endif
 		}
 
@@ -237,6 +301,41 @@ Utf-16-be
 			}
 			return writed;
 #elif defined VCZH_GCC
+			vint writed = 0;
+			vuint16_t utf16 = 0;
+			vuint8_t* utf16buf = (vuint8_t*)&utf16;
+			while (writed < chars)
+			{
+				wchar_t w = *_buffer++;
+				if (w < 0x10000)
+				{
+					utf16 = (vuint16_t)w;
+					if (stream->Write(&utf16buf[1], 1) != 1) break;
+					if (stream->Write(&utf16buf[0], 1) != 1) break;
+				}
+				else if (w < 0x110000)
+				{
+					wchar_t inc = w - 0x10000;
+
+					utf16 = (vuint16_t)(w / 0x400) + 0xD800;
+					if (stream->Write(&utf16buf[1], 1) != 1) break;
+					if (stream->Write(&utf16buf[0], 1) != 1) break;
+
+					utf16 = (vuint16_t)(w % 0x400) + 0xDC00;
+					if (stream->Write(&utf16buf[1], 1) != 1) break;
+					if (stream->Write(&utf16buf[0], 1) != 1) break;
+				}
+				else
+				{
+					break;
+				}
+				writed++;
+			}
+			if(writed!=chars)
+			{
+				Close();
+			}
+			return writed;
 #endif
 		}
 
@@ -254,6 +353,49 @@ Utf-16-be
 			}
 			return chars;
 #elif defined VCZH_GCC
+			wchar_t* writing = _buffer;
+			while (writing - _buffer < chars)
+			{
+				vuint16_t utf16_1 = 0;
+				vuint16_t utf16_2 = 0;
+				vuint8_t* utf16buf = 0;
+				vuint8_t utf16buf_temp = 0;
+
+				if (stream->Read(&utf16_1, 2) != 2) break;
+
+				utf16buf = (vuint8_t*)&utf16_1;
+				utf16buf_temp = utf16buf[0];
+				utf16buf[0] = utf16buf[1];
+				utf16buf[1] = utf16buf_temp;
+
+				if (utf16_1 < 0xD800 || utf16_1 > 0xDFFF)
+				{
+					*writing++ = (wchar_t)utf16_1;
+				}
+				else if (utf16_1 < 0xDC00)
+				{
+					if (stream->Read(&utf16_2, 2) != 2) break;
+
+					utf16buf = (vuint8_t*)&utf16_2;
+					utf16buf_temp = utf16buf[0];
+					utf16buf[0] = utf16buf[1];
+					utf16buf[1] = utf16buf_temp;
+
+					if (0xDC00 <= utf16_2 && utf16_2 <= 0xDFFF)
+					{
+						*writing++ = (wchar_t)(utf16_1 - 0xD800) * 400 + (wchar_t)(utf16_2 - 0xDC00) + 0x10000;
+					}
+					else
+					{
+						break;
+					}
+				}
+				else
+				{
+					break;
+				}
+			}
+			return writing - _buffer;
 #endif
 		}
 
