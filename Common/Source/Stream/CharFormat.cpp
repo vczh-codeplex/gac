@@ -1,5 +1,9 @@
-#include <windows.h>
 #include "CharFormat.h"
+#if defined VCZH_MSVC
+#include <windows.h>
+#elif defined VCZH_GCC
+#include <string.h>
+#endif
 
 namespace vl
 {
@@ -360,13 +364,13 @@ BomEncoder
 			case Mbcs:
 				break;
 			case Utf8:
-				_stream->Write("\xEF\xBB\xBF", 3);
+				_stream->Write((void*)"\xEF\xBB\xBF", 3);
 				break;
 			case Utf16:
-				_stream->Write("\xFF\xFE", 2);
+				_stream->Write((void*)"\xFF\xFE", 2);
 				break;
 			case Utf16BE:
-				_stream->Write("\xFE\xFF", 2);
+				_stream->Write((void*)"\xFE\xFF", 2);
 				break;
 			}
 			encoder->Setup(_stream);
@@ -610,7 +614,7 @@ CharEncoder
 			for(vint i=0;i<size;i+=2)
 			{
 				if(buffer[i]>=128 && buffer[i+1]==0) return false;
-				unsigned __int16 c=buffer[i]+(buffer[i+1]<<8);
+				vuint16_t c=buffer[i]+(buffer[i+1]<<8);
 				if(c==0xFFFF) return false;
 				vint type=0;
 				if(0xD800<=c && c<=0xDBFF) type=1;
@@ -648,7 +652,7 @@ CharEncoder
 			for(vint i=0;i<size;i+=2)
 			{
 				if(buffer[i+1]>=128 && buffer[i]==0) return false;
-				unsigned __int16 c=buffer[i+1]+(buffer[i]<<8);
+				vuint16_t c=buffer[i+1]+(buffer[i]<<8);
 				if(c==0xFFFF) return false;
 				vint type=0;
 				if(0xD800<=c && c<=0xDBFF) type=1;
@@ -679,6 +683,7 @@ CharEncoder
 			return !needTrail;
 		}
 
+#if defined VCZH_MSVC
 		template<vint Count>
 		bool GetEncodingResult(int (&tests)[Count], bool(&results)[Count], int test)
 		{
@@ -691,6 +696,7 @@ CharEncoder
 			}
 			return false;
 		}
+#endif
 
 		void TestEncoding(unsigned char* buffer, vint size, BomEncoder::Encoding& encoding, bool& containsBom)
 		{
@@ -718,12 +724,15 @@ CharEncoder
 				bool roughUtf8=CanBeUtf8(buffer, size);
 				bool roughUtf16=CanBeUtf16(buffer, size);
 				bool roughUtf16BE=CanBeUtf16BE(buffer, size);
+#if defined VCZH_MSVC
 				vint roughCount=(roughMbcs?1:0)+(roughUtf8?1:0)+(roughUtf16?1:0)+(roughUtf16BE?1:0);
 				if(roughCount==1)
 				{
+#endif
 					if(roughUtf8) encoding=BomEncoder::Utf8;
 					if(roughUtf16) encoding=BomEncoder::Utf16;
 					if(roughUtf16BE) encoding=BomEncoder::Utf16BE;
+#if defined VCZH_MSVC
 				}
 				else if(roughCount>1)
 				{
@@ -826,6 +835,7 @@ CharEncoder
 						}
 					}
 				}
+#endif
 				containsBom=encoding==BomEncoder::Mbcs;
 			}
 		}

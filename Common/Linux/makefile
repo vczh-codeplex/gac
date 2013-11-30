@@ -20,7 +20,7 @@ all:
 	$(CPP)		-o $(OBJ)Accessor.o				-c $(VLPP)Stream/Accessor.cpp
 	$(CPP)		-o $(OBJ)BroadcastStream.o		-c $(VLPP)Stream/BroadcastStream.cpp
 	$(CPP)		-o $(OBJ)CacheStream.o			-c $(VLPP)Stream/CacheStream.cpp
-	#$(CPP)		-o $(OBJ)CharFormat.o			-c $(VLPP)Stream/CharFormat.cpp
+	$(CPP)		-o $(OBJ)CharFormat.o			-c $(VLPP)Stream/CharFormat.cpp
 	$(CPP)		-o $(OBJ)FileStream.o			-c $(VLPP)Stream/FileStream.cpp
 	$(CPP)		-o $(OBJ)MemoryStream.o			-c $(VLPP)Stream/MemoryStream.cpp
 	$(CPP)		-o $(OBJ)MemoryWrapperStream.o	-c $(VLPP)Stream/MemoryWrapperStream.cpp
