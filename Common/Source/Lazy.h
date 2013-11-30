@@ -98,4 +98,4 @@ namespace vl
 	};
 }
 
-#endif VCZH_LAZY
+#endif

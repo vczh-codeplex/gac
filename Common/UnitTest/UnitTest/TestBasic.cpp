@@ -1,9 +1,7 @@
 #include "../../Source/UnitTest/UnitTest.h"
 #include "../../Source/Pointer.h"
 #include "../../Source/Tuple.h"
-#if defined VCZH_WINDOWS
 #include "../../Source/Lazy.h"
-#endif
 
 using namespace vl;
 
@@ -97,7 +95,6 @@ TEST_CASE(TestAutoPointer)
 	TEST_ASSERT(p2->number==5);
 }
 
-#if defined VCZH_WINDOWS
 vint GetLazyValue1()
 {
 	return 100;
@@ -110,7 +107,7 @@ vint GetLazyValue2()
 
 TEST_CASE(TestLazy)
 {
-	Lazy<vint> a=GetLazyValue1;
+	Lazy<vint> a(&GetLazyValue1);
 	Lazy<vint> b=a;
 	TEST_ASSERT(a.IsEvaluated()==false);
 	TEST_ASSERT(b.IsEvaluated()==false);
@@ -119,7 +116,7 @@ TEST_CASE(TestLazy)
 	TEST_ASSERT(b.IsEvaluated()==true);
 	TEST_ASSERT(b.Value()==100);
 
-	b=GetLazyValue2;
+	b=&GetLazyValue2;
 	TEST_ASSERT(b.IsEvaluated()==false);
 	TEST_ASSERT(a.IsEvaluated()==true);
 	a=b;
@@ -141,7 +138,6 @@ TEST_CASE(TestLazy)
 	a=Lazy<vint>();
 	TEST_ASSERT(a.IsAvailable()==false);
 }
-#endif
 
 TEST_CASE(TestDateTime)
 {
