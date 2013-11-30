@@ -406,40 +406,88 @@ Utf8
 		vint Utf8Encoder::WriteString(wchar_t* _buffer, vint chars)
 		{
 #if defined VCZH_MSVC
-			vint length=WideCharToMultiByte(CP_UTF8, 0, _buffer, (int)chars, NULL, NULL, NULL, NULL);
-			char* mbcs=new char[length];
-			WideCharToMultiByte(CP_UTF8, 0, _buffer, (int)chars, mbcs, (int)length, NULL, NULL);
-			vint result=stream->Write(mbcs, length);
-			delete[] mbcs;
-#elif defined VCZH_GCC
-#endif
-			if(result==length)
+			//vint length=WideCharToMultiByte(CP_UTF8, 0, _buffer, (int)chars, NULL, NULL, NULL, NULL);
+			//char* mbcs=new char[length];
+			//WideCharToMultiByte(CP_UTF8, 0, _buffer, (int)chars, mbcs, (int)length, NULL, NULL);
+			//vint result=stream->Write(mbcs, length);
+			//delete[] mbcs;
+			//if(result==length)
+			//{
+			//	return chars;
+			//}
+			//else
+			//{
+			//	Close();
+			//	return 0;
+			//}
+//#elif defined VCZH_GCC
+			vint writed = 0;
+			while (writed < chars)
 			{
-				return chars;
+				wchar_t w = *_buffer++;
+				vuint8_t utf8[4];
+				if (w < 0x80)
+				{
+					utf8[0] = (vuint8_t)w;
+					if (stream->Write(utf8, 1) != 1) break;
+				}
+				else if (w < 0x800)
+				{
+					utf8[0] = 0xC0 + ((w & 0x7C0) >> 6);
+					utf8[1] = 0x80 + (w & 0x3F);
+					if (stream->Write(utf8, 2) != 1) break;
+				}
+				else if (w < 0x10000)
+				{
+					utf8[0] = 0xE0 + ((w & 0xF000) >> 12);
+					utf8[1] = 0x80 + ((w & 0xFC0) >> 6);
+					utf8[2] = 0x80 + (w & 0x3F);
+					if (stream->Write(utf8, 3) != 1) break;
+				}
+				else if (w < 0x110000) // only accept UTF-16 range
+				{
+					utf8[0] = 0xF0 + ((w & 0x1C0000) >> 18);
+					utf8[1] = 0x80 + ((w & 0x3F000) >> 12);
+					utf8[2] = 0x80 + ((w & 0xFC0) >> 6);
+					utf8[3] = 0x80 + (w & 0x3F);
+					if (stream->Write(utf8, 3) != 1) break;
+					if (stream->Write(utf8, 4) != 1) break;
+				}
+				else
+				{
+					break;
+				}
+				writed++;
 			}
-			else
+			if(writed!=chars)
 			{
 				Close();
-				return 0;
 			}
+			return writed;
+#endif
 		}
 
 		Utf8Decoder::Utf8Decoder()
+#if defined VCZH_MSVC
 			:cache(0)
 			,cacheAvailable(false)
+#endif
 		{
 		}
 
 		vint Utf8Decoder::ReadString(wchar_t* _buffer, vint chars)
 		{
 			char source[4];
+#if defined VCZH_MSVC
 			wchar_t target[2];
 			wchar_t* writing=_buffer;
+#endif
 			vint readed=0;
 			vint sourceCount=0;
 
 			while(readed<chars)
 			{
+#if defined VCZH_MSVC
 				if(cacheAvailable)
 				{
 					*writing++=cache;
@@ -448,6 +496,7 @@ Utf8
 				}
 				else
 				{
+#endif
 					if(stream->Read(source, 1)!=1)
 					{
 						break;
@@ -482,8 +531,6 @@ Utf8
 					}
 #if defined VCZH_MSVC	
 					int targetCount=MultiByteToWideChar(CP_UTF8, 0, source, (int)sourceCount, target, 2);
-#elif defined VCZH_GCC
-#endif
 					if(targetCount==1)
 					{
 						*writing++=target[0];
@@ -499,6 +546,8 @@ Utf8
 						break;
 					}
 				}
+#elif defined VCZH_GCC
+#endif
 				readed++;
 			}
 			return readed;

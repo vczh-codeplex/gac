@@ -140,9 +140,10 @@ Utf-8
 		class Utf8Decoder : public CharDecoder
 		{
 		protected:
+#if defined VCZH_MSVC
 			wchar_t							cache;
 			bool							cacheAvailable;
-
+#endif
 			vint							ReadString(wchar_t* _buffer, vint chars);
 		public:
 			Utf8Decoder();
