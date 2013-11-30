@@ -625,41 +625,49 @@ void TestEncodingInternal(IEncoder& encoder, IDecoder& decoder, BomEncoder::Enco
 TEST_CASE(TestEncoding)
 {
 	{
+		TEST_PRINT(L"TestEncoding<MBCS, BOM>");
 		BomEncoder encoder(BomEncoder::Mbcs);
 		BomDecoder decoder;
 		TestEncodingInternal(encoder, decoder, BomEncoder::Mbcs, true);
 	}
 	{
+		TEST_PRINT(L"TestEncoding<UTF8, BOM>");
 		BomEncoder encoder(BomEncoder::Utf8);
 		BomDecoder decoder;
 		TestEncodingInternal(encoder, decoder, BomEncoder::Utf8, true);
 	}
 	{
+		TEST_PRINT(L"TestEncoding<UTF16, BOM>");
 		BomEncoder encoder(BomEncoder::Utf16);
 		BomDecoder decoder;
 		TestEncodingInternal(encoder, decoder, BomEncoder::Utf16, true);
 	}
 	{
+		TEST_PRINT(L"TestEncoding<UTF16_BE, BOM>");
 		BomEncoder encoder(BomEncoder::Utf16BE);
 		BomDecoder decoder;
 		TestEncodingInternal(encoder, decoder, BomEncoder::Utf16BE, true);
 	}
 	{
+		TEST_PRINT(L"TestEncoding<MBCS, NO-BOM>");
 		MbcsEncoder encoder;
 		MbcsDecoder decoder;
 		TestEncodingInternal(encoder, decoder, BomEncoder::Mbcs, true);
 	}
 	{
+		TEST_PRINT(L"TestEncoding<UTF8, NO-BOM>");
 		Utf8Encoder encoder;
 		Utf8Decoder decoder;
 		TestEncodingInternal(encoder, decoder, BomEncoder::Utf8, false);
 	}
 	{
+		TEST_PRINT(L"TestEncoding<UTF16, NO-BOM>");
 		Utf16Encoder encoder;
 		Utf16Decoder decoder;
 		TestEncodingInternal(encoder, decoder, BomEncoder::Utf16, false);
 	}
 	{
+		TEST_PRINT(L"TestEncoding<UTF16_BE, NO-BOM>");
 		Utf16BEEncoder encoder;
 		Utf16BEDecoder decoder;
 		TestEncodingInternal(encoder, decoder, BomEncoder::Utf16BE, false);
