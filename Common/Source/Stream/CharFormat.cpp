@@ -480,8 +480,8 @@ Utf8
 			vuint8_t source[4];
 #if defined VCZH_MSVC
 			wchar_t target[2];
-			wchar_t* writing=_buffer;
 #endif
+			wchar_t* writing=_buffer;
 			vint readed=0;
 			vint sourceCount=0;
 
