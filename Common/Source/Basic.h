@@ -19,7 +19,7 @@ Macros:
 #define VCZH_64
 #endif
 
-#if defined _WIN32 || _WIN64
+#if defined _MSC_VER
 #define VCZH_WINDOWS
 #else
 #define VCZH_LINUX
@@ -31,7 +31,13 @@ Macros:
 #include <x86intrin.h>
 #include <stdint.h>
 #include <stddef.h>
+#define override
+#define abstract
+#define __forceinline inline
 #endif
+
+#define L_(x) L__(x)
+#define L__(x) L ## x
 
 namespace vl
 {
@@ -103,11 +109,6 @@ namespace vl
 #define INCRC(x)	(__sync_fetch_and_add(x, 1))
 #define DECRC(x)	(__sync_fetch_and_sub(x, 1))
 #endif
-#endif
-
-#ifndef _MSC_VER
-#define override
-#define abstract
 #endif
 
 /***********************************************************************
