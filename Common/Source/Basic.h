@@ -80,8 +80,13 @@ namespace vl
 #define UITOW_S		_ui64tow_s
 #define UI64TOA_S	_ui64toa_s
 #define UI64TOW_S	_ui64tow_s
+#if defined VCZH_WINDOWS
 #define INCRC(x)	(_InterlockedIncrement64(x))
 #define DECRC(x)	(_InterlockedDecrement64(x))
+#elif defined VCZH_LINUX
+#define INCRC(x)	(__sync_fetch_and_add(x, 1))
+#define DECRC(x)	(__sync_fetch_and_sub(x, 1))
+#endif
 #else
 #define ITOA_S		_itoa_s
 #define ITOW_S		_itow_s
@@ -91,8 +96,13 @@ namespace vl
 #define UITOW_S		_ui64tow_s
 #define UI64TOA_S	_ui64toa_s
 #define UI64TOW_S	_ui64tow_s
+#if defined VCZH_WINDOWS
 #define INCRC(x)	(_InterlockedIncrement((volatile long*)(x)))
 #define DECRC(x)	(_InterlockedDecrement((volatile long*)(x)))
+#elif defined VCZH_LINUX
+#define INCRC(x)	(__sync_fetch_and_add(x, 1))
+#define DECRC(x)	(__sync_fetch_and_sub(x, 1))
+#endif
 #endif
 
 #ifndef _MSC_VER
@@ -116,11 +126,11 @@ namespace vl
 	class Error
 	{
 	private:
-		wchar_t*			description;
+		const wchar_t*		description;
 	public:
-		Error(wchar_t* _description);
+		Error(const wchar_t* _description);
 
-		wchar_t*			Description()const;
+		const wchar_t*		Description()const;
 	};
 
 #if defined _DEBUG || defined VCZH_LINUX
