@@ -1,5 +1,5 @@
 #include "RegexExpression.h"
-#include "..\Collections\OperationCopyFrom.h"
+#include "../Collections/OperationCopyFrom.h"
 
 namespace vl
 {

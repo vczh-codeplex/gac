@@ -1,6 +1,6 @@
 #include "UnitTest.h"
-#include "..\Console.h"
-#include "..\Threading.h"
+#include "../Console.h"
+#include "../Threading.h"
 
 namespace vl
 {

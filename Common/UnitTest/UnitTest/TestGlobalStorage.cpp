@@ -1,5 +1,5 @@
-#include "..\..\Source\UnitTest\UnitTest.h"
-#include "..\..\Source\GlobalStorage.h"
+#include "../../Source/UnitTest/UnitTest.h"
+#include "../../Source/GlobalStorage.h"
 
 using namespace vl;
 

@@ -1,12 +1,12 @@
-#include "..\..\Source\UnitTest\UnitTest.h"
-#include "..\..\Source\Reflection\GuiTypeDescriptorMacros.h"
-#include "..\..\Source\Stream\FileStream.h"
-#include "..\..\Source\Stream\Accessor.h"
-#include "..\..\Source\Stream\CharFormat.h"
-#include "..\..\Source\Collections\Operation.h"
-#include "..\..\Source\Parsing\Parsing.h"
-#include "..\..\Source\Parsing\Xml\ParsingXml.h"
-#include "..\..\Source\Parsing\Json\ParsingJson.h"
+#include "../../Source/UnitTest/UnitTest.h"
+#include "../../Source/Reflection/GuiTypeDescriptorMacros.h"
+#include "../../Source/Stream/FileStream.h"
+#include "../../Source/Stream/Accessor.h"
+#include "../../Source/Stream/CharFormat.h"
+#include "../../Source/Collections/Operation.h"
+#include "../../Source/Parsing/Parsing.h"
+#include "../../Source/Parsing/Xml/ParsingXml.h"
+#include "../../Source/Parsing/Json/ParsingJson.h"
 #include <limits>
 
 using namespace vl;

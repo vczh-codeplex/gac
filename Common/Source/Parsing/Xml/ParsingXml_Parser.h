@@ -9,9 +9,9 @@ Parser::ParsingXml_Parser
 #ifndef VCZH_PARSING_XML_PARSINGXML_PARSER
 #define VCZH_PARSING_XML_PARSINGXML_PARSER
 
-#include "..\Parsing.h"
-#include "..\ParsingDefinitions.h"
-#include "..\ParsingAutomaton.h"
+#include "../Parsing.h"
+#include "../ParsingDefinitions.h"
+#include "../ParsingAutomaton.h"
 
 namespace vl
 {

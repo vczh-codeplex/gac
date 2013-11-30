@@ -1,7 +1,7 @@
-#include "..\..\Source\UnitTest\UnitTest.h"
-#include "..\..\Source\Function.h"
-#include "..\..\Source\Event.h"
-#include "..\..\Source\Collections\List.h"
+#include "../../Source/UnitTest/UnitTest.h"
+#include "../../Source/Function.h"
+#include "../../Source/Event.h"
+#include "../../Source/Collections/List.h"
 
 using namespace vl;
 using namespace vl::unittest;

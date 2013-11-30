@@ -8,7 +8,7 @@ UI::Console
 #ifndef VCZH_UNITTEST
 #define VCZH_UNITTEST
 
-#include "..\String.h"
+#include "../String.h"
 
 class UnitTestError
 {

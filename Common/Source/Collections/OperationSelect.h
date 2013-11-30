@@ -9,7 +9,7 @@ Data Structure::Operations
 #define VCZH_COLLECTIONS_OPERATIONSELECT
 
 #include "OperationEnumerable.h"
-#include "..\Function.h"
+#include "../Function.h"
 
 namespace vl
 {

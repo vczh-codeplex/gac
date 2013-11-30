@@ -1,7 +1,7 @@
 #include <limits.h>
 #include <float.h>
 #include "GuiTypeDescriptorMacros.h"
-#include "..\Regex\Regex.h"
+#include "../Regex/Regex.h"
 
 namespace vl
 {

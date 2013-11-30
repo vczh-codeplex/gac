@@ -1,7 +1,7 @@
-#include "..\..\Source\UnitTest\UnitTest.h"
-#include "..\..\Source\Threading.h"
-#include "..\..\Source\Collections\List.h"
-#include "..\..\Source\Collections\OperationForEach.h"
+#include "../../Source/UnitTest/UnitTest.h"
+#include "../../Source/Threading.h"
+#include "../../Source/Collections/List.h"
+#include "../../Source/Collections/OperationForEach.h"
 
 using namespace vl;
 using namespace vl::collections;

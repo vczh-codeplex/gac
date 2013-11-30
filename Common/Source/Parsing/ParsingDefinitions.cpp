@@ -1,5 +1,5 @@
 #include "ParsingDefinitions.h"
-#include "..\Collections\Operation.h"
+#include "../Collections/Operation.h"
 
 namespace vl
 {

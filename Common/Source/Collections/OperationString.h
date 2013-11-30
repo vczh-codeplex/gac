@@ -9,7 +9,7 @@ Data Structure::Operations
 #define VCZH_COLLECTIONS_OPERATIONSTRING
 
 #include "Interfaces.h"
-#include "..\String.h"
+#include "../String.h"
 #include "OperationCopyFrom.h"
 
 namespace vl

@@ -9,10 +9,10 @@ Classes:
 #ifndef VCZH_PARSING_PARSINGTREE
 #define VCZH_PARSING_PARSINGTREE
 
-#include "..\Regex\Regex.h"
-#include "..\Stream\Accessor.h"
-#include "..\Collections\OperationCopyFrom.h"
-#include "..\Reflection\GuiTypeDescriptor.h"
+#include "../Regex/Regex.h"
+#include "../Stream/Accessor.h"
+#include "../Collections/OperationCopyFrom.h"
+#include "../Reflection/GuiTypeDescriptor.h"
 
 namespace vl
 {

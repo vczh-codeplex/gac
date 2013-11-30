@@ -1,8 +1,8 @@
 #include "ParsingDefinitions.h"
 #include "ParsingAutomaton.h"
-#include "..\Regex\RegexExpression.h"
-#include "..\Stream\MemoryStream.h"
-#include "..\Collections\OperationForEach.h"
+#include "../Regex/RegexExpression.h"
+#include "../Stream/MemoryStream.h"
+#include "../Collections/OperationForEach.h"
 
 namespace vl
 {
