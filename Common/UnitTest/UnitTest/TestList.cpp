@@ -1,7 +1,9 @@
 #include "../../Source/UnitTest/UnitTest.h"
 #include "../../Source/Collections/List.h"
 #include "../../Source/Collections/Dictionary.h"
+#if defined VCZH_WINDOWS
 #include "../../Source/Collections/Operation.h"
+#endif
 
 using namespace vl;
 using namespace vl::collections;
@@ -322,6 +324,7 @@ TEST_CASE(TestGroup)
 	TestSortedGroup(group);
 }
 
+#if defined VCZH_WINDOWS
 TEST_CASE(TestListCopy)
 {
 	Array<vint> arr;
@@ -975,3 +978,4 @@ TEST_CASE(TestFromIterator)
 	CopyFrom(list, FromArray(numbers));
 	CHECK_LIST_ITEMS(list, {1 _ 2 _ 3 _ 4 _ 5});
 }
+#endif
