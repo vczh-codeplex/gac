@@ -603,6 +603,7 @@ void TestEncodingInternal(IEncoder& encoder, IDecoder& decoder, BomEncoder::Enco
 	Array<unsigned char> buffer;
 	buffer.Resize((vint)memoryStream.Size());
 	memoryStream.Read(&buffer[0], buffer.Count());
+
 #if defined VCZH_WINDOWS	
 	BomEncoder::Encoding resultEncoding;
 	bool resultContainsBom;
@@ -610,6 +611,7 @@ void TestEncodingInternal(IEncoder& encoder, IDecoder& decoder, BomEncoder::Enco
 	TEST_ASSERT(encoding==resultEncoding);
 	TEST_ASSERT(containsBom==resultContainsBom);
 #endif
+
 	if(encoding!=BomEncoder::Mbcs)
 	{
 		memoryStream.SeekFromBegin(0);
