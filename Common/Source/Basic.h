@@ -33,6 +33,7 @@ Macros:
 #include <stddef.h>
 #define override
 #define abstract
+#define __thiscall
 #define __forceinline inline
 #endif
 
