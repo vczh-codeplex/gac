@@ -1,11 +1,71 @@
 #include <stdlib.h>
 #include "String.h"
-#ifdef VCZH_WINDOWS
+#if defined VCZH_WINDOWS
 #include <Windows.h>
+#elif defined VCZH_LINUX
+#include <wchar.h>
+#define _strtoi64 strtoll
+#define _strtoui64 strtoull
+#define _wcstoi64 wcstoll
+#define _wcstoui64 wcstoull
 #endif
 
 namespace vl
 {
+#if defined VCZH_LINUX
+	void _itoa_s(vint32_t value, char* buffer, size_t size, vint radix)
+	{
+	}
+
+	void _itow_s(vint32_t value, wchar_t* buffer, size_t size, vint radix)
+	{
+	}
+
+	void _i64toa_s(vint64_t value, char* buffer, size_t size, vint radix)
+	{
+	}
+
+	void _i64tow_s(vint64_t value, wchar_t* buffer, size_t size, vint radix)
+	{
+	}
+
+	void _uitoa_s(vuint32_t value, char* buffer, size_t size, vint radix)
+	{
+	}
+
+	void _uitow_s(vuint32_t value, wchar_t* buffer, size_t size, vint radix)
+	{
+	}
+
+	void _ui64toa_s(vuint64_t value, char* buffer, size_t size, vint radix)
+	{
+	}
+
+	void _ui64tow_s(vuint64_t value, wchar_t* buffer, size_t size, vint radix)
+	{
+	}
+
+	void _gcvt_s(char* buffer, size_t size, double value, vint numberOfDigits)
+	{
+	}
+
+	void _strlwr_s(char* buffer, size_t size)
+	{
+	}
+
+	void _strupr_s(char* buffer, size_t size)
+	{
+	}
+
+	void _wcslwr_s(wchar_t* buffer, size_t size)
+	{
+	}
+
+	void _wcsupr_s(wchar_t* buffer, size_t size)
+	{
+	}
+#endif
+
 	vint atoi_test(const AString& string, bool& success)
 	{
 		char* endptr=0;
@@ -221,13 +281,18 @@ namespace vl
 
 	vint _wtoa(const wchar_t* w, char* a, vint chars)
 	{
+#if defined VCZH_WINDOWS
 		return WideCharToMultiByte(CP_THREAD_ACP, 0, w, -1, a, (int)(a?chars:0), 0, 0);
+#elif defined VCZH_LINUX
+		return wcstombs(a, w, chars-1)+1;
+#endif
 	}
 
 	AString wtoa(const WString& string)
 	{
 		vint len=_wtoa(string.Buffer(), 0, 0);
 		char* buffer=new char[len];
+		memset(buffer, 0, len*sizeof(*buffer));
 		_wtoa(string.Buffer(), buffer, (int)len);
 		AString s=buffer;
 		delete[] buffer;
@@ -236,13 +301,18 @@ namespace vl
 
 	vint _atow(const char* a, wchar_t* w, vint chars)
 	{
+#if defined VCZH_WINDOWS
 		return MultiByteToWideChar(CP_THREAD_ACP, 0, a, -1, w, (int)(w?chars:0));
+#elif defined VCZH_LINUX
+		return mbstowcs(w, a, chars-1)+1;
+#endif
 	}
 
 	WString atow(const AString& string)
 	{
 		vint len=_atow(string.Buffer(), 0, 0);
 		wchar_t* buffer=new wchar_t[len];
+		memset(buffer, 0, len*sizeof(*buffer));
 		_atow(string.Buffer(), buffer, (int)len);
 		WString s=buffer;
 		delete[] buffer;

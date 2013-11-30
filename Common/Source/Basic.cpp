@@ -30,12 +30,12 @@ NotCopyable
 Error
 ***********************************************************************/
 
-	Error::Error(wchar_t* _description)
+	Error::Error(const wchar_t* _description)
 	{
 		description=_description;
 	}
 
-	wchar_t* Error::Description()const
+	const wchar_t* Error::Description()const
 	{
 		return description;
 	}
