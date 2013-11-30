@@ -10,6 +10,9 @@
 #include "../../Source/Stream/Accessor.h"
 #include "../../Source/Stream/CharFormat.h"
 #include "../../Source/Pointer.h"
+#if defined VCZH_GCC
+#include <wchar.h>
+#endif
 
 using namespace vl;
 using namespace vl::stream;
@@ -411,7 +414,7 @@ TEST_CASE(TestCacheStream)
 	CacheStream cache(memory, 4);
 	TestUnlimitedProperty(cache, 0, 0);
 
-	TEST_ASSERT(cache.Write("vcz", 3)==3);
+	TEST_ASSERT(cache.Write((void*)"vcz", 3)==3);
 	TestUnlimitedProperty(cache, 3, 3);
 	cache.Seek(-2);
 	TestUnlimitedProperty(cache, 1, 3);
@@ -419,11 +422,11 @@ TEST_CASE(TestCacheStream)
 	TEST_ASSERT(strncmp(buffer, "cz", 2)==0);
 	TestUnlimitedProperty(cache, 3, 3);
 
-	TEST_ASSERT(cache.Write("h ", 2)==2);
+	TEST_ASSERT(cache.Write((void*)"h ", 2)==2);
 	TestUnlimitedProperty(cache, 5, 5);
 	cache.Seek(-5);
 	TestUnlimitedProperty(cache, 0, 5);
-	TEST_ASSERT(cache.Write("V", 1)==1);
+	TEST_ASSERT(cache.Write((void*)"V", 1)==1);
 	TestUnlimitedProperty(cache, 1, 5);
 	cache.SeekFromEnd(1);
 	TestUnlimitedProperty(cache, 4, 5);
@@ -431,9 +434,9 @@ TEST_CASE(TestCacheStream)
 	TEST_ASSERT(strncmp(buffer, " ", 1)==0);
 	TestUnlimitedProperty(cache, 5, 5);
 
-	TEST_ASSERT(cache.Write("is", 2)==2);
+	TEST_ASSERT(cache.Write((void*)"is", 2)==2);
 	TestUnlimitedProperty(cache, 7, 7);
-	TEST_ASSERT(cache.Write(" genius!", 8)==8);
+	TEST_ASSERT(cache.Write((void*)" genius!", 8)==8);
 	TestUnlimitedProperty(cache, 15, 15);
 	cache.Seek(-8);
 	TEST_ASSERT(cache.Read(buffer, 1)==1);
