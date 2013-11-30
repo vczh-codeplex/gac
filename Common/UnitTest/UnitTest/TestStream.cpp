@@ -620,6 +620,7 @@ void TestEncodingInternal(IEncoder& encoder, IDecoder& decoder, BomEncoder::Enco
 	}
 }
 
+#if defined VCZH_WINDOWS
 TEST_CASE(TestEncoding)
 {
 	{
@@ -663,3 +664,4 @@ TEST_CASE(TestEncoding)
 		TestEncodingInternal(encoder, decoder, BomEncoder::Utf16BE, false);
 	}
 }
+#endif
