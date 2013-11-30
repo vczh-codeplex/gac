@@ -4,6 +4,9 @@
 #elif defined VCZH_LINUX
 #include <time.h>
 #include <memory.h>
+#include <iostream>
+#include <string>
+using namespace std;
 #endif
 
 namespace vl
@@ -91,17 +94,18 @@ DateTime
 #elif defined VCZH_LINUX
 	DateTime ConvertTMToDateTime(tm* timeinfo)
 	{
+		time_t timer = mktime(timeinfo);
 		DateTime dt;
-		dt.year = timeinfo->tm_year;
-		dt.month = timeinfo->tm_mon;
+		dt.year = timeinfo->tm_year+1900;
+		dt.month = timeinfo->tm_mon+1;
 		dt.day = timeinfo->tm_mday;
 		dt.dayOfWeek = timeinfo->tm_wday;
 		dt.hour = timeinfo->tm_hour;
 		dt.minute = timeinfo->tm_min;
 		dt.second = timeinfo->tm_sec;
 		dt.milliseconds = 0;
-		dt.filetime = mktime(timeinfo);
-		dt.totalMilliseconds = dt.filetime*1000;
+		dt.filetime = (vuint64_t)timer;
+		dt.totalMilliseconds = (vuint64_t)(timer*1000);
 		return dt;
 	}
 #endif
@@ -152,8 +156,8 @@ DateTime
 #elif defined VCZH_LINUX
 		tm timeinfo;
 		memset(&timeinfo, 0, sizeof(timeinfo));
-		timeinfo.tm_year = _year;
-		timeinfo.tm_mon = _month;
+		timeinfo.tm_year = _year-1900;
+		timeinfo.tm_mon = _month-1;
 		timeinfo.tm_mday = _day;
 		timeinfo.tm_hour = _hour;
 		timeinfo.tm_min = _minute;
