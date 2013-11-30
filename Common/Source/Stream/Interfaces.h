@@ -10,7 +10,7 @@ Interfaces:
 #ifndef VCZH_STREAM_INTERFACES
 #define VCZH_STREAM_INTERFACES
 
-#include "..\Basic.h"
+#include "../Basic.h"
 
 namespace vl
 {

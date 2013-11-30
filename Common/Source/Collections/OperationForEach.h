@@ -12,8 +12,8 @@ Data Structure::Operations
 
 #ifndef VCZH_COLLECTIONS_FOREACH
 #define VCZH_COLLECTIONS_FOREACH
-#include "..\Basic.h"
-#include "..\Pointer.h"
+#include "../Basic.h"
+#include "../Pointer.h"
 #include "Interfaces.h"
 
 namespace vl

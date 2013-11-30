@@ -1,16 +1,16 @@
 #include <string.h>
-#include "..\..\Source\Exception.h"
-#include "..\..\Source\UnitTest\UnitTest.h"
-#include "..\..\Source\Stream\FileStream.h"
-#include "..\..\Source\Stream\MemoryStream.h"
-#include "..\..\Source\Stream\Accessor.h"
-#include "..\..\Source\Stream\CharFormat.h"
-#include "..\..\Source\Collections\Operation.h"
-#include "..\..\Source\Parsing\ParsingAutomaton.h"
-#include "..\..\Source\Parsing\Parsing.h"
-#include "..\..\Source\Parsing\Xml\ParsingXml.h"
-#include "..\..\Source\Parsing\Json\ParsingJson.h"
-#include "Parser.Calculator\Parser.Calculator.h"
+#include "../../Source/Exception.h"
+#include "../../Source/UnitTest/UnitTest.h"
+#include "../../Source/Stream/FileStream.h"
+#include "../../Source/Stream/MemoryStream.h"
+#include "../../Source/Stream/Accessor.h"
+#include "../../Source/Stream/CharFormat.h"
+#include "../../Source/Collections/Operation.h"
+#include "../../Source/Parsing/ParsingAutomaton.h"
+#include "../../Source/Parsing/Parsing.h"
+#include "../../Source/Parsing/Xml/ParsingXml.h"
+#include "../../Source/Parsing/Json/ParsingJson.h"
+#include "Parser.Calculator/Parser.Calculator.h"
 
 using namespace vl;
 using namespace vl::stream;
@@ -297,7 +297,7 @@ namespace test
 		}
 		else
 		{
-			WString fileName=GetPath()+L"\\Parsers\\Parsing."+parserName+L".Definition.txt";
+			WString fileName=GetPath()+L"/Parsers/Parsing."+parserName+L".Definition.txt";
 			FileStream fileStream(fileName, FileStream::ReadOnly);
 			BomDecoder decoder;
 			DecoderStream decoderStream(fileStream, decoder);

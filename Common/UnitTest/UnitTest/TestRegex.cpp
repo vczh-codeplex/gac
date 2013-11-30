@@ -1,14 +1,14 @@
 #include <stdlib.h>
-#include "..\..\Source\UnitTest\UnitTest.h"
-#include "..\..\Source\Regex\RegexExpression.h"
-#include "..\..\Source\Regex\RegexWriter.h"
-#include "..\..\Source\Regex\RegexPure.h"
-#include "..\..\Source\Regex\RegexRich.h"
-#include "..\..\Source\Regex\Regex.h"
-#include "..\..\Source\Stream\FileStream.h"
-#include "..\..\Source\Stream\CharFormat.h"
-#include "..\..\Source\Stream\Accessor.h"
-#include "..\..\Source\Collections\OperationCopyFrom.h"
+#include "../../Source/UnitTest/UnitTest.h"
+#include "../../Source/Regex/RegexExpression.h"
+#include "../../Source/Regex/RegexWriter.h"
+#include "../../Source/Regex/RegexPure.h"
+#include "../../Source/Regex/RegexRich.h"
+#include "../../Source/Regex/Regex.h"
+#include "../../Source/Stream/FileStream.h"
+#include "../../Source/Stream/CharFormat.h"
+#include "../../Source/Stream/Accessor.h"
+#include "../../Source/Collections/OperationCopyFrom.h"
 
 using namespace vl;
 using namespace vl::regex;
@@ -277,7 +277,7 @@ void PrintAutomaton(WString fileName, Automaton::Ref automaton)
 void CompareToBaseline(WString fileName)
 {
 	WString generatedPath=GetPath()+fileName;
-	WString baselinePath=GetPath()+L"Baseline\\"+fileName;
+	WString baselinePath=GetPath()+L"Baseline/"+fileName;
 
 	FileStream generatedFile(generatedPath, FileStream::ReadOnly);
 	FileStream baselineFile(baselinePath, FileStream::ReadOnly);

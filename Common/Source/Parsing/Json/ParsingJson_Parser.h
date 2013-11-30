@@ -9,9 +9,9 @@ Parser::ParsingJson_Parser
 #ifndef VCZH_PARSING_JSON_PARSINGJSON_PARSER
 #define VCZH_PARSING_JSON_PARSINGJSON_PARSER
 
-#include "..\Parsing.h"
-#include "..\ParsingDefinitions.h"
-#include "..\ParsingAutomaton.h"
+#include "../Parsing.h"
+#include "../ParsingDefinitions.h"
+#include "../ParsingAutomaton.h"
 
 namespace vl
 {

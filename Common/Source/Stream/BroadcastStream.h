@@ -11,7 +11,7 @@ Interfaces:
 #define VCZH_STREAM_BROADCASTSTREAM
 
 #include "Interfaces.h"
-#include "..\Collections\List.h"
+#include "../Collections/List.h"
 
 namespace vl
 {

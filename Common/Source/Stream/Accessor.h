@@ -16,8 +16,8 @@ Classes:
 #define VCZH_STREAM_ACCESSOR
 
 #include "Interfaces.h"
-#include "..\Collections\List.h"
-#include "..\String.h"
+#include "../Collections/List.h"
+#include "../String.h"
 
 namespace vl
 {

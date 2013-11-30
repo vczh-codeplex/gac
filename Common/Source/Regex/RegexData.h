@@ -9,11 +9,11 @@ Classes:
 #ifndef VCZH_REGEX_REGEXDATA
 #define VCZH_REGEX_REGEXDATA
 
-#include "..\String.h"
-#include "..\Pointer.h"
-#include "..\Exception.h"
-#include "..\Collections\List.h"
-#include "..\Collections\Dictionary.h"
+#include "../String.h"
+#include "../Pointer.h"
+#include "../Exception.h"
+#include "../Collections/List.h"
+#include "../Collections/Dictionary.h"
 
 namespace vl
 {

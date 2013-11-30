@@ -6,9 +6,9 @@ Parser::Parser.Calculator
 本文件使用Vczh Parsing Generator工具自动生成
 ***********************************************************************/
 
-#include "..\..\..\Source\Parsing\Parsing.h"
-#include "..\..\..\Source\Parsing\ParsingDefinitions.h"
-#include "..\..\..\Source\Parsing\ParsingAutomaton.h"
+#include "../../../Source/Parsing/Parsing.h"
+#include "../../../Source/Parsing/ParsingDefinitions.h"
+#include "../../../Source/Parsing/ParsingAutomaton.h"
 
 namespace test
 {

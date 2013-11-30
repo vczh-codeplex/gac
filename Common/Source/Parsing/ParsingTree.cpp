@@ -1,6 +1,6 @@
 #include "ParsingTree.h"
-#include "..\Collections\Operation.h"
-#include "..\Collections\OperationForEach.h"
+#include "../Collections/Operation.h"
+#include "../Collections/OperationForEach.h"
 
 namespace vl
 {

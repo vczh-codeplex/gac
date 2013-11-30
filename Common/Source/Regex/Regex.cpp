@@ -2,7 +2,7 @@
 #include "RegexExpression.h"
 #include "RegexPure.h"
 #include "RegexRich.h"
-#include "..\Collections\OperationCopyFrom.h"
+#include "../Collections/OperationCopyFrom.h"
 
 namespace vl
 {

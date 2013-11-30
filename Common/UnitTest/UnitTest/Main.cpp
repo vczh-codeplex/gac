@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <crtdbg.h>
 #include <windows.h>
-#include "..\..\Source\String.h"
-#include "..\..\Source\GlobalStorage.h"
+#include "../../Source/String.h"
+#include "../../Source/GlobalStorage.h"
 
 using namespace vl;
 
@@ -15,16 +15,16 @@ WString GetPath()
 	vint index=0;
 	while(buffer[index])
 	{
-		if(buffer[index]==L'\\')
+		if(buffer[index]==L'\\' || buffer[index]==L'/')
 		{
 			pos=index;
 		}
 		index++;
 	}
 #ifdef _WIN64
-	return WString(buffer, pos+1)+L"..\\..\\TestFiles\\";
+	return WString(buffer, pos+1)+L"../../TestFiles/";
 #else
-	return WString(buffer, pos+1)+L"..\\TestFiles\\";
+	return WString(buffer, pos+1)+L"../TestFiles/";
 #endif
 }
 

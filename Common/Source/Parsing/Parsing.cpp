@@ -1,7 +1,7 @@
 #include "Parsing.h"
 #include "ParsingAutomaton.h"
-#include "..\Collections\OperationForEach.h"
-#include "..\Collections\OperationCopyFrom.h"
+#include "../Collections/OperationForEach.h"
+#include "../Collections/OperationCopyFrom.h"
 
 namespace vl
 {

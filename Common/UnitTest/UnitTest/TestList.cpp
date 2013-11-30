@@ -1,7 +1,7 @@
-#include "..\..\Source\UnitTest\UnitTest.h"
-#include "..\..\Source\Collections\List.h"
-#include "..\..\Source\Collections\Dictionary.h"
-#include "..\..\Source\Collections\Operation.h"
+#include "../../Source/UnitTest/UnitTest.h"
+#include "../../Source/Collections/List.h"
+#include "../../Source/Collections/Dictionary.h"
+#include "../../Source/Collections/Operation.h"
 
 using namespace vl;
 using namespace vl::collections;
