@@ -4106,12 +4106,12 @@ vl::Func<R(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)>
 		template<typename T>
 		typename LambdaRetriveType<decltype(&T::operator())>::Type Lambda(T functionObject)
 		{
-			return functionObject;
+			return typename LambdaRetriveType<decltype(&T::operator())>::Type(functionObject);
 		}
 		template<typename T>
 		typename FunctionObjectRetriveType<T>::Type ConvertToFunction(T functionObject)
 		{
-			return functionObject;
+			return FunctionObjectRetriveType<T>::Type(functionObject);
 		}
 #define LAMBDA vl::function_lambda::Lambda
 #define FUNCTION vl::function_lambda::ConvertToFunction
