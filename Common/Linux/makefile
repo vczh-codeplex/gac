@@ -16,7 +16,7 @@ all:
 	$(CPP)		-o $(OBJ)String.o		-c $(VLPP)String.cpp
 	$(CPP)		-o $(OBJ)Console.o		-c $(VLPP)Console.cpp
 	$(CPP)		-o $(OBJ)UnitTest.o		-c $(VLPP)UnitTest/UnitTest.cpp
-	$(CPPBOM)	-o $(OBJ)TestBasic.o	-c $(UNITTEST)TestBasic.cpp
+	$(CPP)		-o $(OBJ)TestBasic.o	-c $(UNITTEST)TestBasic.cpp
 	$(CPP)		-o $(OBJ)Main.o			-c Main.cpp 
 	$(CPP)		-o $(BIN)UnitTest $(OBJ)Main.o $(VLPP_OBJS) $(UNITTEST_OBJS)
 
