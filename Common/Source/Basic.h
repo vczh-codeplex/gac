@@ -20,14 +20,14 @@ Macros:
 #endif
 
 #if defined _MSC_VER
-#define VCZH_WINDOWS
+#define VCZH_MSVC
 #else
-#define VCZH_LINUX
+#define VCZH_GCC
 #endif
 
-#if defined VCZH_WINDOWS
+#if defined VCZH_MSVC
 #include <intrin.h>
-#elif defined VCZH_LINUX
+#elif defined VCZH_GCC
 #include <x86intrin.h>
 #include <stdint.h>
 #include <stddef.h>
@@ -47,7 +47,7 @@ namespace vl
 32Œª/64ŒªºÊ»›
 ***********************************************************************/
 
-#if defined VCZH_WINDOWS
+#if defined VCZH_MSVC
 	typedef signed __int8			vint8_t;
 	typedef unsigned __int8			vuint8_t;
 	typedef signed __int16			vint16_t;
@@ -56,7 +56,7 @@ namespace vl
 	typedef unsigned __int32		vuint32_t;
 	typedef signed __int64			vint64_t;
 	typedef unsigned __int64		vuint64_t;
-#elif defined VCZH_LINUX
+#elif defined VCZH_GCC
 	typedef int8_t					vint8_t;
 	typedef uint8_t					vuint8_t;
 	typedef int16_t					vint16_t;
@@ -87,10 +87,10 @@ namespace vl
 #define UITOW_S		_ui64tow_s
 #define UI64TOA_S	_ui64toa_s
 #define UI64TOW_S	_ui64tow_s
-#if defined VCZH_WINDOWS
+#if defined VCZH_MSVC
 #define INCRC(x)	(_InterlockedIncrement64(x))
 #define DECRC(x)	(_InterlockedDecrement64(x))
-#elif defined VCZH_LINUX
+#elif defined VCZH_GCC
 #define INCRC(x)	(__sync_fetch_and_add(x, 1))
 #define DECRC(x)	(__sync_fetch_and_sub(x, 1))
 #endif
@@ -103,10 +103,10 @@ namespace vl
 #define UITOW_S		_ui64tow_s
 #define UI64TOA_S	_ui64toa_s
 #define UI64TOW_S	_ui64tow_s
-#if defined VCZH_WINDOWS
+#if defined VCZH_MSVC
 #define INCRC(x)	(_InterlockedIncrement((volatile long*)(x)))
 #define DECRC(x)	(_InterlockedDecrement((volatile long*)(x)))
-#elif defined VCZH_LINUX
+#elif defined VCZH_GCC
 #define INCRC(x)	(__sync_fetch_and_add(x, 1))
 #define DECRC(x)	(__sync_fetch_and_sub(x, 1))
 #endif
@@ -135,7 +135,7 @@ namespace vl
 		const wchar_t*		Description()const;
 	};
 
-#if defined _DEBUG || defined VCZH_LINUX
+#if defined _DEBUG || defined VCZH_GCC
 	#define CHECK_ERROR(CONDITION,DESCRIPTION) do{if(!(CONDITION))throw Error(DESCRIPTION);}while(0)
 #endif
 #ifdef NDEBUG

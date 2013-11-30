@@ -1,7 +1,7 @@
 #include "../../Source/UnitTest/UnitTest.h"
 #include "../../Source/Collections/List.h"
 #include "../../Source/Collections/Dictionary.h"
-#if defined VCZH_WINDOWS
+#if defined VCZH_MSVC
 #include "../../Source/Collections/Operation.h"
 #endif
 
@@ -324,7 +324,7 @@ TEST_CASE(TestGroup)
 	TestSortedGroup(group);
 }
 
-#if defined VCZH_WINDOWS
+#if defined VCZH_MSVC
 TEST_CASE(TestListCopy)
 {
 	Array<vint> arr;

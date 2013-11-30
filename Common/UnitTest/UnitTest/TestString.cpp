@@ -1,6 +1,6 @@
 #include <string.h>
 #include "../../Source/UnitTest/UnitTest.h"
-#if defined VCZH_LINUX
+#if defined VCZH_GCC
 #include <wchar.h>
 #endif
 
