@@ -67,17 +67,17 @@ RecorderStream
 
 		void RecorderStream::Seek(pos_t _size)
 		{
-			CHECK_FAIL(L"RecorderStream::Seek(pos_t)#不支持此操作。");
+			CHECK_FAIL(L"RecorderStream::Seek(pos_t)#Operation not supported.");
 		}
 
 		void RecorderStream::SeekFromBegin(pos_t _size)
 		{
-			CHECK_FAIL(L"RecorderStream::SeekFromBegin(pos_t)#不支持此操作。");
+			CHECK_FAIL(L"RecorderStream::SeekFromBegin(pos_t)#Operation not supported.");
 		}
 
 		void RecorderStream::SeekFromEnd(pos_t _size)
 		{
-			CHECK_FAIL(L"RecorderStream::SeekFromEnd(pos_t)#不支持此操作。");
+			CHECK_FAIL(L"RecorderStream::SeekFromEnd(pos_t)#Operation not supported.");
 		}
 
 		vint RecorderStream::Read(void* _buffer, vint _size)
@@ -89,12 +89,12 @@ RecorderStream
 
 		vint RecorderStream::Write(void* _buffer, vint _size)
 		{
-			CHECK_FAIL(L"RecorderStream::Write(void*, vint)#不支持此操作。");
+			CHECK_FAIL(L"RecorderStream::Write(void*, vint)#Operation not supported.");
 		}
 
 		vint RecorderStream::Peek(void* _buffer, vint _size)
 		{
-			CHECK_FAIL(L"RecorderStream::Peek(void*, vint)#不支持此操作。");
+			CHECK_FAIL(L"RecorderStream::Peek(void*, vint)#Operation not supported.");
 		}
 	}
 }

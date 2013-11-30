@@ -146,13 +146,13 @@ namespace vl
 
 			const T& Get(vint index)const
 			{
-				CHECK_ERROR(index>=0 && index<count, L"ArrayBase<T, K>::Get(vint)#参数越界。");
+				CHECK_ERROR(index>=0 && index<count, L"ArrayBase<T, K>::Get(vint)#Argument index not in range.");
 				return buffer[index];
 			}
 
 			const T& operator[](vint index)const
 			{
-				CHECK_ERROR(index>=0 && index<count, L"ArrayBase<T, K>::operator[](vint)#参数index越界。");
+				CHECK_ERROR(index>=0 && index<count, L"ArrayBase<T, K>::operator[](vint)#Argument index not in range.");
 				return buffer[index];
 			}
 		};
@@ -235,7 +235,7 @@ namespace vl
 			bool RemoveAt(vint index)
 			{
 				vint previousCount=ArrayBase<T>::count;
-				CHECK_ERROR(index>=0 && index<ArrayBase<T>::count, L"ListBase<T, K>::RemoveAt(vint)#参数index越界。");
+				CHECK_ERROR(index>=0 && index<ArrayBase<T>::count, L"ListBase<T, K>::RemoveAt(vint)#Argument index not in range.");
 				ListStore<T, POD<T>::Result>::CopyObjects(ArrayBase<T>::buffer+index,ArrayBase<T>::buffer+index+1,ArrayBase<T>::count-index-1);
 				ArrayBase<T>::count--;
 				ReleaseUnnecessaryBuffer(previousCount);
@@ -245,8 +245,8 @@ namespace vl
 			bool RemoveRange(vint index, vint _count)
 			{
 				vint previousCount=ArrayBase<T>::count;
-				CHECK_ERROR(index>=0 && index<=ArrayBase<T>::count, L"ListBase<T, K>::RemoveRange(vint, vint)#参数index越界。");
-				CHECK_ERROR(index+_count>=0 && index+_count<=ArrayBase<T>::count, L"ListBase<T,K>::RemoveRange(vint, vint)#参数_count越界。");
+				CHECK_ERROR(index>=0 && index<=ArrayBase<T>::count, L"ListBase<T, K>::RemoveRange(vint, vint)#Argument index not in range.");
+				CHECK_ERROR(index+_count>=0 && index+_count<=ArrayBase<T>::count, L"ListBase<T,K>::RemoveRange(vint, vint)#Argument _count not in range.");
 				ListStore<T, POD<T>::Result>::CopyObjects(ArrayBase<T>::buffer+index, ArrayBase<T>::buffer+index+_count, ArrayBase<T>::count-index-_count);
 				ArrayBase<T>::count-=_count;
 				ReleaseUnnecessaryBuffer(previousCount);
@@ -335,14 +335,14 @@ namespace vl
 
 			void Set(vint index, const T& item)
 			{
-				CHECK_ERROR(index>=0 && index<ArrayBase<T>::count, L"Array<T, K>::Set(vint)#参数index越界。");
+				CHECK_ERROR(index>=0 && index<ArrayBase<T>::count, L"Array<T, K>::Set(vint)#Argument index not in range.");
 				ArrayBase<T>::buffer[index]=item;
 			}
 
 			using ArrayBase<T>::operator[];
 			T& operator[](vint index)
 			{
-				CHECK_ERROR(index>=0 && index<ArrayBase<T>::count, L"Array<T, K>::operator[](vint)#参数index越界。");
+				CHECK_ERROR(index>=0 && index<ArrayBase<T>::count, L"Array<T, K>::operator[](vint)#Argument index not in range.");
 				return ArrayBase<T>::buffer[index];
 			}
 
@@ -390,7 +390,7 @@ namespace vl
 
 			vint Insert(vint index, const T& item)
 			{
-				CHECK_ERROR(index>=0 && index<=ArrayBase<T>::count, L"List<T, K>::Insert(vint, const T&)#参数index越界。");
+				CHECK_ERROR(index>=0 && index<=ArrayBase<T>::count, L"List<T, K>::Insert(vint, const T&)#Argument index not in range.");
 				ListBase<T, K>::MakeRoom(index,1);
 				ArrayBase<T>::buffer[index]=item;
 				return index;
@@ -412,7 +412,7 @@ namespace vl
 
 			bool Set(vint index, const T& item)
 			{
-				CHECK_ERROR(index>=0 && index<ArrayBase<T>::count, L"List<T, K>::Set(vint)#参数index越界。");
+				CHECK_ERROR(index>=0 && index<ArrayBase<T>::count, L"List<T, K>::Set(vint)#Argument index not in range.");
 				ArrayBase<T>::buffer[index]=item;
 				return true;
 			}
@@ -420,7 +420,7 @@ namespace vl
 			using ListBase<T, K>::operator[];
 			T& operator[](vint index)
 			{
-				CHECK_ERROR(index>=0 && index<ArrayBase<T>::count, L"List<T, K>::operator[](vint)#参数index越界。");
+				CHECK_ERROR(index>=0 && index<ArrayBase<T>::count, L"List<T, K>::operator[](vint)#Argument index not in range.");
 				return ArrayBase<T>::buffer[index];
 			}
 		};
@@ -496,7 +496,7 @@ namespace vl
 							start=index+1;
 						}
 					}
-					CHECK_ERROR(index>=0 && index<ArrayBase<T>::count, L"SortedList<T, K>::Add(const T&)#内部错误，变量index越界");
+					CHECK_ERROR(index>=0 && index<ArrayBase<T>::count, L"SortedList<T, K>::Add(const T&)#Internal error, index not in range.");
 					if(ArrayBase<T>::buffer[index]<item)
 					{
 						index++;

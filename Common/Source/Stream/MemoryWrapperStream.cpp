@@ -79,7 +79,7 @@ MemoryWrapperStream
 
 		void MemoryWrapperStream::SeekFromBegin(pos_t _size)
 		{
-			CHECK_ERROR(buffer!=0, L"MemoryWrapperStream::SeekFromBegin(pos_t)#流处于关闭状态，不可执行此操作。");
+			CHECK_ERROR(buffer!=0, L"MemoryWrapperStream::SeekFromBegin(pos_t)#Stream is closed, cannot perform this operation.");
 			vint expected=(vint)_size;
 			if(expected<0)
 			{
@@ -102,8 +102,8 @@ MemoryWrapperStream
 
 		vint MemoryWrapperStream::Read(void* _buffer, vint _size)
 		{
-			CHECK_ERROR(buffer!=0, L"MemoryWrapperStream::Read(pos_t)#流处于关闭状态，不可执行此操作。");
-			CHECK_ERROR(_size>=0, L"MemoryWrapperStream::Read(void*, vint)#参数size不可为负。");
+			CHECK_ERROR(buffer!=0, L"MemoryWrapperStream::Read(pos_t)#Stream is closed, cannot perform this operation.");
+			CHECK_ERROR(_size>=0, L"MemoryWrapperStream::Read(void*, vint)#Argument size cannot be negative.");
 			vint max=size-position;
 			if(_size>max)
 			{
@@ -116,8 +116,8 @@ MemoryWrapperStream
 
 		vint MemoryWrapperStream::Write(void* _buffer, vint _size)
 		{
-			CHECK_ERROR(buffer!=0, L"MemoryWrapperStream::Write(pos_t)#流处于关闭状态，不可执行此操作。");
-			CHECK_ERROR(_size>=0, L"MemoryWrapperStream::Write(void*, vint)#参数size不可为负。");
+			CHECK_ERROR(buffer!=0, L"MemoryWrapperStream::Write(pos_t)#Stream is closed, cannot perform this operation.");
+			CHECK_ERROR(_size>=0, L"MemoryWrapperStream::Write(void*, vint)#Argument size cannot be negative.");
 			vint max=size-position;
 			if(_size>max)
 			{
@@ -130,8 +130,8 @@ MemoryWrapperStream
 
 		vint MemoryWrapperStream::Peek(void* _buffer, vint _size)
 		{
-			CHECK_ERROR(buffer!=0, L"MemoryWrapperStream::Peek(pos_t)#流处于关闭状态，不可执行此操作。");
-			CHECK_ERROR(_size>=0, L"MemoryWrapperStream::Peek(void*, vint)#参数size不可为负。");
+			CHECK_ERROR(buffer!=0, L"MemoryWrapperStream::Peek(pos_t)#Stream is closed, cannot perform this operation.");
+			CHECK_ERROR(_size>=0, L"MemoryWrapperStream::Peek(void*, vint)#Argument size cannot be negative.");
 			vint max=size-position;
 			if(_size>max)
 			{
