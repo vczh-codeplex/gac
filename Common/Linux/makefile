@@ -1,12 +1,15 @@
 CPP = g++ -std=c++11 -finput-charset=gbk
 CPPBOM = g++ -std=c++11
+
 OBJ = ./obj/
 BIN = ./exe/
 VLPP = ../Source/
 UNITTEST = ../UnitTest/UnitTest/
+
 VLPP_STREAM_OBJS = $(OBJ)Accessor.o $(OBJ)BroadcastStream.o $(OBJ)CacheStream.o $(OBJ)CharFormat.o $(OBJ)FileStream.o $(OBJ)MemoryStream.o $(OBJ)MemoryWrapperStream.o $(OBJ)RecorderStream.o
 VLPP_OBJS = $(OBJ)Basic.o $(OBJ)String.o $(OBJ)Console.o $(OBJ)UnitTest.o $(VLPP_STREAM_OBJS)
-UNITTEST_OBJS = $(OBJ)TestBasic.o $(OBJ)TestString.o $(OBJ)TestList.o $(OBJ)TestFunction.o
+
+UNITTEST_OBJS = $(OBJ)TestBasic.o $(OBJ)TestString.o $(OBJ)TestList.o $(OBJ)TestFunction.o $(OBJ)TestStream.o
 
 all:
 	echo =====================================
@@ -29,6 +32,7 @@ all:
 	$(CPP)		-o $(OBJ)TestString.o			-c $(UNITTEST)TestString.cpp
 	$(CPP)		-o $(OBJ)TestList.o				-c $(UNITTEST)TestList.cpp
 	$(CPP)		-o $(OBJ)TestFunction.o			-c $(UNITTEST)TestFunction.cpp
+	$(CPPBOM)	-o $(OBJ)TestStream.o			-c $(UNITTEST)TestStream.cpp
 	$(CPP)		-o $(OBJ)Main.o					-c Main.cpp 
 	$(CPP)		-o $(BIN)UnitTest $(OBJ)Main.o $(VLPP_OBJS) $(UNITTEST_OBJS)
 

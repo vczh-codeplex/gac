@@ -1,7 +1,11 @@
-#include <iostream>
-#include <string>
+#include "../Source/String.h"
 
-using namespace std;
+using namespace vl;
+
+WString GetPath()
+{
+	return L"../UnitTest/TestFiles/";
+}
 
 int main()
 {
