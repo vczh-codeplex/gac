@@ -4,6 +4,8 @@
 #include <Windows.h>
 #elif defined VCZH_LINUX
 #include <stdio.h>
+#include <ctype.h>
+#include <wctype.h>
 #include <wchar.h>
 #define _strtoi64 strtoll
 #define _strtoui64 strtoull
@@ -56,22 +58,43 @@ namespace vl
 
 	void _gcvt_s(char* buffer, size_t size, double value, vint numberOfDigits)
 	{
+		sprintf(buffer, "%fl", value);
 	}
 
 	void _strlwr_s(char* buffer, size_t size)
 	{
+		while(*buffer)
+		{
+			*buffer=(char)tolower(*buffer);
+			buffer++;
+		}
 	}
 
 	void _strupr_s(char* buffer, size_t size)
 	{
+		while(*buffer)
+		{
+			*buffer=(char)toupper(*buffer);
+			buffer++;
+		}
 	}
 
 	void _wcslwr_s(wchar_t* buffer, size_t size)
 	{
+		while(*buffer)
+		{
+			*buffer=(char)towlower(*buffer);
+			buffer++;
+		}
 	}
 
 	void _wcsupr_s(wchar_t* buffer, size_t size)
 	{
+		while(*buffer)
+		{
+			*buffer=(char)towupper(*buffer);
+			buffer++;
+		}
 	}
 #endif
 
