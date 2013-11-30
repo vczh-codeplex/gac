@@ -2,6 +2,7 @@
 #if defined VCZH_MSVC
 #include <windows.h>
 #elif defined VCZH_GCC
+#include "../String.h"
 #include <string.h>
 #endif
 
@@ -126,11 +127,18 @@ Mbcs
 
 		vint MbcsEncoder::WriteString(wchar_t* _buffer, vint chars)
 		{
+#if defined VCZH_MSVC
 			vint length=WideCharToMultiByte(CP_THREAD_ACP, 0, _buffer, (int)chars, NULL, NULL, NULL, NULL);
 			char* mbcs=new char[length];
 			WideCharToMultiByte(CP_THREAD_ACP, 0, _buffer, (int)chars, mbcs, (int)length, NULL, NULL);
 			vint result=stream->Write(mbcs, length);
 			delete[] mbcs;
+#elif defined VCZH_GCC
+			WString w(_buffer, chars);
+			AString a=wtoa(w);
+			vint length=a.Length();
+			vint result=stream->Write((void*)a.Buffer(), length);
+#endif
 			if(result==length)
 			{
 				return chars;
@@ -153,7 +161,11 @@ Mbcs
 				{
 					break;
 				}
+#if defined VCZH_MSVC
 				if(IsDBCSLeadByte(*reading))
+#elif defined VCZH_GCC
+				if((vint8_t)*reading<0)
+#endif
 				{
 					if(stream->Read(reading+1, 1)!=1)
 					{
@@ -167,7 +179,13 @@ Mbcs
 				}
 				readed++;
 			}
+#if defined VCZH_MSVC
 			MultiByteToWideChar(CP_THREAD_ACP, 0, source, (int)(reading-source), _buffer, (int)chars);
+#elif defined VCZH_GCC
+			AString a(source, (vint)(reading-source));
+			WString w=atow(a);
+			memcpy(_buffer, w.Buffer(), readed*sizeof(wchar_t));
+#endif
 			delete[] source;
 			return readed;
 		}
@@ -178,12 +196,18 @@ Utf-16
 
 		vint Utf16Encoder::WriteString(wchar_t* _buffer, vint chars)
 		{
+#if defined VCZH_MSVC
 			return stream->Write(_buffer, chars*sizeof(wchar_t))/sizeof(wchar_t);
+#elif defined VCZH_GCC
+#endif
 		}
 
 		vint Utf16Decoder::ReadString(wchar_t* _buffer, vint chars)
 		{
+#if defined VCZH_MSVC
 			return stream->Read(_buffer, chars*sizeof(wchar_t))/sizeof(wchar_t);
+#elif defined VCZH_GCC
+#endif
 		}
 
 /***********************************************************************
@@ -192,6 +216,7 @@ Utf-16-be
 
 		vint Utf16BEEncoder::WriteString(wchar_t* _buffer, vint chars)
 		{
+#if defined VCZH_MSVC
 			vint writed=0;
 			while(writed<chars)
 			{
@@ -211,10 +236,13 @@ Utf-16-be
 				Close();
 			}
 			return writed;
+#elif defined VCZH_GCC
+#endif
 		}
 
 		vint Utf16BEDecoder::ReadString(wchar_t* _buffer, vint chars)
 		{
+#if defined VCZH_MSVC
 			chars=stream->Read(_buffer, chars*sizeof(wchar_t))/sizeof(wchar_t);
 			unsigned char* unicode=(unsigned char*)_buffer;
 			for(vint i=0;i<chars;i++)
@@ -225,6 +253,8 @@ Utf-16-be
 				unicode++;
 			}
 			return chars;
+#elif defined VCZH_GCC
+#endif
 		}
 
 /***********************************************************************
@@ -233,11 +263,14 @@ Utf8
 
 		vint Utf8Encoder::WriteString(wchar_t* _buffer, vint chars)
 		{
+#if defined VCZH_MSVC
 			vint length=WideCharToMultiByte(CP_UTF8, 0, _buffer, (int)chars, NULL, NULL, NULL, NULL);
 			char* mbcs=new char[length];
 			WideCharToMultiByte(CP_UTF8, 0, _buffer, (int)chars, mbcs, (int)length, NULL, NULL);
 			vint result=stream->Write(mbcs, length);
 			delete[] mbcs;
+#elif defined VCZH_GCC
+#endif
 			if(result==length)
 			{
 				return chars;
@@ -305,8 +338,10 @@ Utf8
 					{
 						sourceCount=1;
 					}
-					
+#if defined VCZH_MSVC	
 					int targetCount=MultiByteToWideChar(CP_UTF8, 0, source, (int)sourceCount, target, 2);
+#elif defined VCZH_GCC
+#endif
 					if(targetCount==1)
 					{
 						*writing++=target[0];
