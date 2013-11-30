@@ -406,21 +406,21 @@ Utf8
 		vint Utf8Encoder::WriteString(wchar_t* _buffer, vint chars)
 		{
 #if defined VCZH_MSVC
-			//vint length=WideCharToMultiByte(CP_UTF8, 0, _buffer, (int)chars, NULL, NULL, NULL, NULL);
-			//char* mbcs=new char[length];
-			//WideCharToMultiByte(CP_UTF8, 0, _buffer, (int)chars, mbcs, (int)length, NULL, NULL);
-			//vint result=stream->Write(mbcs, length);
-			//delete[] mbcs;
-			//if(result==length)
-			//{
-			//	return chars;
-			//}
-			//else
-			//{
-			//	Close();
-			//	return 0;
-			//}
-//#elif defined VCZH_GCC
+			vint length=WideCharToMultiByte(CP_UTF8, 0, _buffer, (int)chars, NULL, NULL, NULL, NULL);
+			char* mbcs=new char[length];
+			WideCharToMultiByte(CP_UTF8, 0, _buffer, (int)chars, mbcs, (int)length, NULL, NULL);
+			vint result=stream->Write(mbcs, length);
+			delete[] mbcs;
+			if(result==length)
+			{
+				return chars;
+			}
+			else
+			{
+				Close();
+				return 0;
+			}
+#elif defined VCZH_GCC
 			vint writed = 0;
 			while (writed < chars)
 			{
@@ -477,7 +477,7 @@ Utf8
 
 		vint Utf8Decoder::ReadString(wchar_t* _buffer, vint chars)
 		{
-			char source[4];
+			vuint8_t source[4];
 #if defined VCZH_MSVC
 			wchar_t target[2];
 			wchar_t* writing=_buffer;
@@ -530,7 +530,7 @@ Utf8
 						sourceCount=1;
 					}
 #if defined VCZH_MSVC	
-					int targetCount=MultiByteToWideChar(CP_UTF8, 0, source, (int)sourceCount, target, 2);
+					int targetCount=MultiByteToWideChar(CP_UTF8, 0, (char*)source, (int)sourceCount, target, 2);
 					if(targetCount==1)
 					{
 						*writing++=target[0];
@@ -547,6 +547,26 @@ Utf8
 					}
 				}
 #elif defined VCZH_GCC
+					if (sourceCount == 1)
+					{
+						*writing++ = (wchar_t)source[0];
+					}
+					else if (sourceCount == 2)
+					{
+						*writing++ = (((wchar_t)source[0] & 0x1F) << 6) + ((wchar_t)source[1] & 0x3F);
+					}
+					else if (sourceCount == 3)
+					{
+						*writing++ = (((wchar_t)source[0] & 0xF) << 12) + (((wchar_t)source[1] & 0x3F) << 6) + ((wchar_t)source[2] & 0x3F);
+					}
+					else if (sourceCount == 4)
+					{
+						*writing++ = (((wchar_t)source[0] & 0x7) << 18) + (((wchar_t)source[1] & 0x3F) << 12) + (((wchar_t)source[2] & 0x3F) << 6) + ((wchar_t)source[3] & 0x3F);
+					}
+					else
+					{
+						break;
+					}
 #endif
 				readed++;
 			}
