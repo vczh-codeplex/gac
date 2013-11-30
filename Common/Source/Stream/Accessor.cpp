@@ -450,22 +450,22 @@ EncoderStream
 
 		void EncoderStream::Seek(pos_t _size)
 		{
-			CHECK_FAIL(L"EncoderStream::Seek(pos_t)#不支持此操作。");
+			CHECK_FAIL(L"EncoderStream::Seek(pos_t)#Operation not supported.");
 		}
 
 		void EncoderStream::SeekFromBegin(pos_t _size)
 		{
-			CHECK_FAIL(L"EncoderStream::SeekFromBegin(pos_t)#不支持此操作。");
+			CHECK_FAIL(L"EncoderStream::SeekFromBegin(pos_t)#Operation not supported.");
 		}
 
 		void EncoderStream::SeekFromEnd(pos_t _size)
 		{
-			CHECK_FAIL(L"EncoderStream::SeekFromEnd(pos_t)#不支持此操作。");
+			CHECK_FAIL(L"EncoderStream::SeekFromEnd(pos_t)#Operation not supported.");
 		}
 
 		vint EncoderStream::Read(void* _buffer, vint _size)
 		{
-			CHECK_FAIL(L"EncoderStream::Read(void*, vint)#不支持此操作。");
+			CHECK_FAIL(L"EncoderStream::Read(void*, vint)#Operation not supported.");
 		}
 
 		vint EncoderStream::Write(void* _buffer, vint _size)
@@ -480,7 +480,7 @@ EncoderStream
 
 		vint EncoderStream::Peek(void* _buffer, vint _size)
 		{
-			CHECK_FAIL(L"EncoderStream::Peek(void*, vint)#不支持此操作。");
+			CHECK_FAIL(L"EncoderStream::Peek(void*, vint)#Operation not supported.");
 		}
 
 /***********************************************************************
@@ -548,17 +548,17 @@ DecoderStream
 
 		void DecoderStream::Seek(pos_t _size)
 		{
-			CHECK_FAIL(L"DecoderStream::Seek(pos_t)#不支持此操作。");
+			CHECK_FAIL(L"DecoderStream::Seek(pos_t)#Operation not supported.");
 		}
 
 		void DecoderStream::SeekFromBegin(pos_t _size)
 		{
-			CHECK_FAIL(L"DecoderStream::SeekFromBegin(pos_t)#不支持此操作。");
+			CHECK_FAIL(L"DecoderStream::SeekFromBegin(pos_t)#Operation not supported.");
 		}
 
 		void DecoderStream::SeekFromEnd(pos_t _size)
 		{
-			CHECK_FAIL(L"DecoderStream::SeekFromEnd(pos_t)#不支持此操作。");
+			CHECK_FAIL(L"DecoderStream::SeekFromEnd(pos_t)#Operation not supported.");
 		}
 
 		vint DecoderStream::Read(void* _buffer, vint _size)
@@ -573,12 +573,12 @@ DecoderStream
 
 		vint DecoderStream::Write(void* _buffer, vint _size)
 		{
-			CHECK_FAIL(L"DecoderStream::Write(void*, vint)#不支持此操作。");
+			CHECK_FAIL(L"DecoderStream::Write(void*, vint)#Operation not supported.");
 		}
 
 		vint DecoderStream::Peek(void* _buffer, vint _size)
 		{
-			CHECK_FAIL(L"DecoderStream::Peek(void*, vint)#不支持此操作。");
+			CHECK_FAIL(L"DecoderStream::Peek(void*, vint)#Operation not supported.");
 		}
 	}
 }

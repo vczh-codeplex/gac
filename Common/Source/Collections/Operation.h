@@ -218,7 +218,7 @@ LazyList
 				Ptr<IEnumerator<T>> enumerator=CreateEnumerator();
 				if(!enumerator->Next())
 				{
-					throw Error(L"LazyList<T>::Aggregate(F)#容器为空并且没有初始值，Aggregate操作失败。");
+					throw Error(L"LazyList<T>::Aggregate(F)#Aggregate failed to calculate from an empty container.");
 				}
 				T result=enumerator->Current();
 				while(enumerator->Next())
@@ -265,7 +265,7 @@ LazyList
 				Ptr<IEnumerator<T>> enumerator=CreateEnumerator();
 				if(!enumerator->Next())
 				{
-					throw Error(L"LazyList<T>::First(F)#容器为空并且没有初始值，Aggregate操作失败。");
+					throw Error(L"LazyList<T>::First(F)#First failed to calculate from an empty container.");
 				}
 				return enumerator->Current();
 			}
@@ -285,7 +285,7 @@ LazyList
 				Ptr<IEnumerator<T>> enumerator=CreateEnumerator();
 				if(!enumerator->Next())
 				{
-					throw Error(L"LazyList<T>::Last(F)#容器为空并且没有初始值，Aggregate操作失败。");
+					throw Error(L"LazyList<T>::Last(F)#Last failed to calculate from an empty container.");
 				}
 				else
 				{

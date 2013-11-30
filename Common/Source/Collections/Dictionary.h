@@ -145,7 +145,7 @@ namespace vl
 
 			bool Add(const KT& key, const VT& value)
 			{
-				CHECK_ERROR(!keys.Contains(KeyType<KT>::GetKeyValue(key)), L"Dictionary<KT, KK, ValueContainer, VT, VK>::Add(const KT&, const VT&)#key“—¥Ê‘⁄°£");
+				CHECK_ERROR(!keys.Contains(KeyType<KT>::GetKeyValue(key)), L"Dictionary<KT, KK, ValueContainer, VT, VK>::Add(const KT&, const VT&)#Key already exists.");
 				vint index=keys.Add(key);
 				values.Insert(index, value);
 				return true;

@@ -182,7 +182,7 @@ namespace vl
 
 		ObjectString(const T* _buffer, bool copy = true)
 		{
-			CHECK_ERROR(_buffer!=0, L"ObjectString<T>::ObjectString(const T*, bool)#不能用空指针构造字符串。");
+			CHECK_ERROR(_buffer!=0, L"ObjectString<T>::ObjectString(const T*, bool)#Cannot construct a string from nullptr.");
 			if(copy)
 			{
 				counter=new vint(1);
@@ -355,7 +355,7 @@ namespace vl
 
 		T operator[](vint index)const
 		{
-			CHECK_ERROR(index>=0 && index<length, L"ObjectString:<T>:operator[](vint)#参数index越界。");
+			CHECK_ERROR(index>=0 && index<length, L"ObjectString:<T>:operator[](vint)#Argument index not in range.");
 			return buffer[start+index];
 		}
 
@@ -377,33 +377,33 @@ namespace vl
 
 		ObjectString<T> Left(vint count)const
 		{
-			CHECK_ERROR(count>=0 && count<=length, L"ObjectString<T>::Left(vint)#参数count越界。");
+			CHECK_ERROR(count>=0 && count<=length, L"ObjectString<T>::Left(vint)#Argument count not in range.");
 			return ObjectString<T>(*this, 0, count);
 		}
 
 		ObjectString<T> Right(vint count)const
 		{
-			CHECK_ERROR(count>=0 && count<=length, L"ObjectString<T>::Right(vint)#参数count越界。");
+			CHECK_ERROR(count>=0 && count<=length, L"ObjectString<T>::Right(vint)#Argument count not in range.");
 			return ObjectString<T>(*this, length-count, count);
 		}
 
 		ObjectString<T> Sub(vint index, vint count)const
 		{
-			CHECK_ERROR(index>=0 && index<=length, L"ObjectString<T>::Sub(vint, vint)#参数index越界。");
-			CHECK_ERROR(index+count>=0 && index+count<=length, L"ObjectString<T>::Sub(vint, vint)#参数count越界。");
+			CHECK_ERROR(index>=0 && index<=length, L"ObjectString<T>::Sub(vint, vint)#Argument index not in range.");
+			CHECK_ERROR(index+count>=0 && index+count<=length, L"ObjectString<T>::Sub(vint, vint)#Argument count not in range.");
 			return ObjectString<T>(*this, index, count);
 		}
 
 		ObjectString<T> Remove(vint index, vint count)const
 		{
-			CHECK_ERROR(index>=0 && index<length, L"ObjectString<T>::Remove(vint, vint)#参数index越界。");
-			CHECK_ERROR(index+count>=0 && index+count<=length, L"ObjectString<T>::Remove(vint, vint)#参数count越界。");
+			CHECK_ERROR(index>=0 && index<length, L"ObjectString<T>::Remove(vint, vint)#Argument index not in range.");
+			CHECK_ERROR(index+count>=0 && index+count<=length, L"ObjectString<T>::Remove(vint, vint)#Argument count not in range.");
 			return ObjectString<T>(*this, ObjectString<T>(), index, count);
 		}
 
 		ObjectString<T> Insert(vint index, const ObjectString<T>& string)const
 		{
-			CHECK_ERROR(index>=0 && index<=length, L"ObjectString<T>::Insert(vint)#参数count越界。");
+			CHECK_ERROR(index>=0 && index<=length, L"ObjectString<T>::Insert(vint)#Argument count not in range.");
 			return ObjectString<T>(*this, string, index, 0);
 		}
 

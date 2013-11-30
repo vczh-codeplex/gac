@@ -252,8 +252,8 @@ CacheStream
 
 		vint CacheStream::Read(void* _buffer, vint _size)
 		{
-			CHECK_ERROR(CanRead(), L"CacheStream::Read(void*, vint)#流已关闭或不支持此操作。");
-			CHECK_ERROR(_size>=0, L"CacheStream::Read(void*, vint)#参数size不可为负。");
+			CHECK_ERROR(CanRead(), L"CacheStream::Read(void*, vint)#Stream is closed or operation not supported.");
+			CHECK_ERROR(_size>=0, L"CacheStream::Read(void*, vint)#Argument size cannot be negative.");
 
 			_size=InternalRead(_buffer, _size);
 			position+=_size;
@@ -266,8 +266,8 @@ CacheStream
 
 		vint CacheStream::Write(void* _buffer, vint _size)
 		{
-			CHECK_ERROR(CanWrite(), L"CacheStream::Write(void*, vint)#流已关闭或不支持此操作。");
-			CHECK_ERROR(_size>=0, L"CacheStream::Read(void*, vint)#参数size不可为负。");
+			CHECK_ERROR(CanWrite(), L"CacheStream::Write(void*, vint)#Stream is closed or operation not supported.");
+			CHECK_ERROR(_size>=0, L"CacheStream::Read(void*, vint)#Argument size cannot be negative.");
 
 			if(IsLimited())
 			{
@@ -293,8 +293,8 @@ CacheStream
 
 		vint CacheStream::Peek(void* _buffer, vint _size)
 		{
-			CHECK_ERROR(CanPeek(), L"CacheStream::Peek(void*, vint)#流已关闭或不支持此操作。");
-			CHECK_ERROR(_size>=0, L"CacheStream::Read(void*, vint)#参数size不可为负。");
+			CHECK_ERROR(CanPeek(), L"CacheStream::Peek(void*, vint)#Stream is closed or operation not supported.");
+			CHECK_ERROR(_size>=0, L"CacheStream::Read(void*, vint)#Argument size cannot be negative.");
 
 			return InternalRead(_buffer, _size);
 		}

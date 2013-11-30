@@ -103,7 +103,7 @@ MemoryStream
 
 		void MemoryStream::SeekFromBegin(pos_t _size)
 		{
-			CHECK_ERROR(block!=0, L"MemoryStream::SeekFromBegin(pos_t)#流处于关闭状态，不可执行此操作。");
+			CHECK_ERROR(block!=0, L"MemoryStream::SeekFromBegin(pos_t)#Stream is closed, cannot perform this operation.");
 			vint expected=(vint)_size;
 			if(expected<0)
 			{
@@ -126,8 +126,8 @@ MemoryStream
 
 		vint MemoryStream::Read(void* _buffer, vint _size)
 		{
-			CHECK_ERROR(block!=0, L"MemoryStream::Read(pos_t)#流处于关闭状态，不可执行此操作。");
-			CHECK_ERROR(_size>=0, L"MemoryStream::Read(void*, vint)#参数size不可为负。");
+			CHECK_ERROR(block!=0, L"MemoryStream::Read(pos_t)#Stream is closed, cannot perform this operation.");
+			CHECK_ERROR(_size>=0, L"MemoryStream::Read(void*, vint)#Argument size cannot be negative.");
 			vint max=size-position;
 			if(_size>max)
 			{
@@ -140,8 +140,8 @@ MemoryStream
 
 		vint MemoryStream::Write(void* _buffer, vint _size)
 		{
-			CHECK_ERROR(block!=0, L"MemoryStream::Write(pos_t)#流处于关闭状态，不可执行此操作。");
-			CHECK_ERROR(_size>=0, L"MemoryStream::Write(void*, vint)#参数size不可为负。");
+			CHECK_ERROR(block!=0, L"MemoryStream::Write(pos_t)#Stream is closed, cannot perform this operation.");
+			CHECK_ERROR(_size>=0, L"MemoryStream::Write(void*, vint)#Argument size cannot be negative.");
 			PrepareSpace(size+_size);
 			memmove(buffer+position, _buffer, _size);
 			position+=_size;
@@ -154,8 +154,8 @@ MemoryStream
 
 		vint MemoryStream::Peek(void* _buffer, vint _size)
 		{
-			CHECK_ERROR(block!=0, L"MemoryStream::Peek(pos_t)#流处于关闭状态，不可执行此操作。");
-			CHECK_ERROR(_size>=0, L"MemoryStream::Peek(void*, vint)#参数size不可为负。");
+			CHECK_ERROR(block!=0, L"MemoryStream::Peek(pos_t)#Stream is closed, cannot perform this operation.");
+			CHECK_ERROR(_size>=0, L"MemoryStream::Peek(void*, vint)#Argument size cannot be negative.");
 			vint max=size-position;
 			if(_size>max)
 			{
