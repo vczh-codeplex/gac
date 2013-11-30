@@ -3,6 +3,9 @@
 #include <Windows.h>
 #elif defined VCZH_LINUX
 #include <wchar.h>
+#include <iostream>
+#include <string>
+using namespace std;
 #endif
 
 namespace vl
@@ -34,7 +37,9 @@ Console
 				delete codePageBuffer;
 			}
 #elif defined VCZH_LINUX
-			wprintf(L"%.*s", (int)length, string);
+			//wprintf(L"%.*s", (int)length, string);
+			wstring s(string, string+length);
+			wcout<<s<<ends;
 #endif
 		}
 
@@ -79,10 +84,13 @@ Console
 			}
 			return result;
 #elif defined VCZH_LINUX
-			wchar_t buffer[1024];
-			memset(buffer, 0, sizeof(buffer));
-			wscanf(L"%1023s\n", buffer);
-			return buffer;
+			//wchar_t buffer[1024];
+			//memset(buffer, 0, sizeof(buffer));
+			//wscanf(L"%1023s\n", buffer);
+			//return buffer;
+			wstring s;
+			getline(wcin, s, L'\n');
+			return s.c_str();
 #endif
 		}
 
@@ -97,11 +105,11 @@ Console
 			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),attribute);
 			SetConsoleTextAttribute(GetStdHandle(STD_INPUT_HANDLE),attribute);
 #elif defined VCZH_LINUX
-			vint color = (blue?1:0)*4 + (green?1:0)*2 + (red?1:0);
-			if(light)
-				wprintf(L"\e[3%dm;", (int)color);
-			else
-				wprintf(L"\e[9%dm;", (int)color);
+			//vint color = (blue?1:0)*4 + (green?1:0)*2 + (red?1:0);
+			//if(light)
+			//	wprintf(L"\e[3%dm;", (int)color);
+			//else
+			//	wprintf(L"\e[9%dm;", (int)color);
 #endif
 		}
 
