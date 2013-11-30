@@ -25,8 +25,19 @@ namespace vl
 			static void PrintInfo(const WString& string);
 			static void PrintError(const WString& string);
 		};
-		
+#if defined VCZH_WINDOWS	
 #define TEST_CHECK_ERROR(CONDITION,DESCRIPTION) do{if(!(CONDITION))throw Error(DESCRIPTION);}while(0)
+#elif defined VCZH_LINUX
+#define TEST_CHECK_ERROR(CONDITION,DESCRIPTION)\
+	do\
+	{\
+		vl::unittest::UnitTest::PrintInfo(L"\t" L_(#CONDITION));\
+		if(!(CONDITION))\
+		{\
+			throw Error(DESCRIPTION);\
+		}\
+	}while(0)
+#endif
 #define TEST_ASSERT(CONDITION) do{TEST_CHECK_ERROR(CONDITION,L"");}while(0)
 #define TEST_ERROR(CONDITION) do{try{CONDITION;throw UnitTestError();}catch(const Error&){}catch(const UnitTestError&){TEST_CHECK_ERROR(false,L"");}}while(0)
 #define TEST_CASE(NAME)\

@@ -89,25 +89,13 @@ DateTime
 		return systemTime;
 	}
 #elif defined VCZH_LINUX
-	tm ConvertDateTimeToTM(const DateTime& dt)
-	{
-		tm timeinfo;
-		memset(&timeinfo, 0, sizeof(timeinfo));
-		timeinfo.tm_year = dt.year;
-		timeinfo.tm_mon = dt.month;
-		timeinfo.tm_mday = dt.day;
-		timeinfo.tm_hour = dt.hour;
-		timeinfo.tm_min = dt.minute;
-		timeinfo.tm_sec = dt.second;
-		return timeinfo;
-	}
-
 	DateTime ConvertTMToDateTime(tm* timeinfo)
 	{
 		DateTime dt;
 		dt.year = timeinfo->tm_year;
 		dt.month = timeinfo->tm_mon;
 		dt.day = timeinfo->tm_mday;
+		dt.dayOfWeek = timeinfo->tm_wday;
 		dt.hour = timeinfo->tm_hour;
 		dt.minute = timeinfo->tm_min;
 		dt.second = timeinfo->tm_sec;
