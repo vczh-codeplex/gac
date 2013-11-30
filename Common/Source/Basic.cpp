@@ -4,9 +4,6 @@
 #elif defined VCZH_LINUX
 #include <time.h>
 #include <memory.h>
-#include <iostream>
-#include <string>
-using namespace std;
 #endif
 
 namespace vl

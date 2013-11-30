@@ -20,7 +20,7 @@ namespace vl
 	class ObjectString : public Object
 	{
 	private:
-		static const T	zero=0;
+		static const T				zero;
 
 		mutable T*					buffer;
 		mutable volatile vint*		counter;
@@ -445,6 +445,8 @@ namespace vl
 
 	template<typename T>
 	ObjectString<T> ObjectString<T>::Empty=ObjectString<T>();
+	template<typename T>
+	const T ObjectString<T>::zero=0;
 
 	typedef ObjectString<char>		AString;
 	typedef ObjectString<wchar_t>	WString;

@@ -1,5 +1,9 @@
 #include <string.h>
 #include "../../Source/UnitTest/UnitTest.h"
+#if defined VCZH_LINUX
+#include <wchar.h>
+#endif
+
 
 using namespace vl;
 
@@ -34,7 +38,7 @@ TEST_CASE(StringDefaultConstructor)
 
 TEST_CASE(StringNonCopyConstructor)
 {
-	wchar_t* buffer=L"vczh";
+	const wchar_t* buffer=L"vczh";
 	WString string(buffer,false);
 	TEST_ASSERT(string.Buffer()==buffer);
 	CheckString(string,L"vczh");
@@ -42,7 +46,7 @@ TEST_CASE(StringNonCopyConstructor)
 
 TEST_CASE(StringBufferCopyConstructor)
 {
-	wchar_t* buffer=L"vczh";
+	const wchar_t* buffer=L"vczh";
 	WString string(buffer,true);
 	TEST_ASSERT(string.Buffer()!=buffer);
 	CheckString(string,L"vczh");

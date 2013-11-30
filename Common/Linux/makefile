@@ -5,7 +5,7 @@ BIN = ./exe/
 VLPP = ../Source/
 UNITTEST = ../UnitTest/UnitTest/
 VLPP_OBJS = $(OBJ)Basic.o $(OBJ)String.o $(OBJ)Console.o $(OBJ)UnitTest.o
-UNITTEST_OBJS = $(OBJ)TestBasic.o
+UNITTEST_OBJS = $(OBJ)TestBasic.o $(OBJ)TestString.o
 
 all:
 	echo =====================================
@@ -17,6 +17,7 @@ all:
 	$(CPP)		-o $(OBJ)Console.o		-c $(VLPP)Console.cpp
 	$(CPP)		-o $(OBJ)UnitTest.o		-c $(VLPP)UnitTest/UnitTest.cpp
 	$(CPP)		-o $(OBJ)TestBasic.o	-c $(UNITTEST)TestBasic.cpp
+	$(CPP)		-o $(OBJ)TestString.o	-c $(UNITTEST)TestString.cpp
 	$(CPP)		-o $(OBJ)Main.o			-c Main.cpp 
 	$(CPP)		-o $(BIN)UnitTest $(OBJ)Main.o $(VLPP_OBJS) $(UNITTEST_OBJS)
 
