@@ -257,7 +257,6 @@ TEST_CASE(TestLambdaChooser)
 	auto f3=[](){};
 
 	typedef decltype(f3) T3;
-	auto f4=&(T3::operator());
 
 	auto t1=LambdaChooser(f1);
 	auto t2=LambdaChooser(f2);
