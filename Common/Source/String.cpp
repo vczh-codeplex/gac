@@ -3,6 +3,7 @@
 #if defined VCZH_WINDOWS
 #include <Windows.h>
 #elif defined VCZH_LINUX
+#include <stdio.h>
 #include <wchar.h>
 #define _strtoi64 strtoll
 #define _strtoui64 strtoull
@@ -15,34 +16,42 @@ namespace vl
 #if defined VCZH_LINUX
 	void _itoa_s(vint32_t value, char* buffer, size_t size, vint radix)
 	{
+		sprintf(buffer, "%d", value);
 	}
 
 	void _itow_s(vint32_t value, wchar_t* buffer, size_t size, vint radix)
 	{
+		swprintf(buffer, size - 1, L"%d", value);
 	}
 
 	void _i64toa_s(vint64_t value, char* buffer, size_t size, vint radix)
 	{
+		sprintf(buffer, "%dll", value);
 	}
 
 	void _i64tow_s(vint64_t value, wchar_t* buffer, size_t size, vint radix)
 	{
+		swprintf(buffer, size - 1, L"%dll", value);
 	}
 
 	void _uitoa_s(vuint32_t value, char* buffer, size_t size, vint radix)
 	{
+		sprintf(buffer, "%u", value);
 	}
 
 	void _uitow_s(vuint32_t value, wchar_t* buffer, size_t size, vint radix)
 	{
+		swprintf(buffer, size - 1, L"%u", value);
 	}
 
 	void _ui64toa_s(vuint64_t value, char* buffer, size_t size, vint radix)
 	{
+		sprintf(buffer, "%ull", value);
 	}
 
 	void _ui64tow_s(vuint64_t value, wchar_t* buffer, size_t size, vint radix)
 	{
+		swprintf(buffer, size - 1, L"%ull", value);
 	}
 
 	void _gcvt_s(char* buffer, size_t size, double value, vint numberOfDigits)
