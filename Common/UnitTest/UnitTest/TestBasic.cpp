@@ -1,4 +1,4 @@
-﻿#include "../../Source/UnitTest/UnitTest.h"
+#include "../../Source/UnitTest/UnitTest.h"
 #include "../../Source/Pointer.h"
 #include "../../Source/Tuple.h"
 #if defined VCZH_WINDOWS
