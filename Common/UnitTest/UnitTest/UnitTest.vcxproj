@@ -199,6 +199,7 @@
     <ClCompile Include="TestFunction.cpp" />
     <ClCompile Include="TestGlobalStorage.cpp" />
     <ClCompile Include="TestList.cpp" />
+    <ClCompile Include="TestLocale.cpp" />
     <ClCompile Include="TestParsing.cpp" />
     <ClCompile Include="TestReflection.cpp" />
     <ClCompile Include="TestRegex.cpp" />
