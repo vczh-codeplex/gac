@@ -22,18 +22,18 @@ namespace vl
 		return result;
 	}
 
-	__int64 atoi64_test(const AString& string, bool& success)
+	vint64_t atoi64_test(const AString& string, bool& success)
 	{
 		char* endptr=0;
-		__int64 result=_strtoi64(string.Buffer(), &endptr, 10);
+		vint64_t result=_strtoi64(string.Buffer(), &endptr, 10);
 		success=endptr==string.Buffer()+string.Length();
 		return result;
 	}
 
-	__int64 wtoi64_test(const WString& string, bool& success)
+	vint64_t wtoi64_test(const WString& string, bool& success)
 	{
 		wchar_t* endptr=0;
-		__int64 result=_wcstoi64(string.Buffer(), &endptr, 10);
+		vint64_t result=_wcstoi64(string.Buffer(), &endptr, 10);
 		success=endptr==string.Buffer()+string.Length();
 		return result;
 	}
@@ -54,18 +54,18 @@ namespace vl
 		return result;
 	}
 
-	unsigned __int64 atou64_test(const AString& string, bool& success)
+	vuint64_t atou64_test(const AString& string, bool& success)
 	{
 		char* endptr=0;
-		unsigned __int64 result=_strtoui64(string.Buffer(), &endptr, 10);
+		vuint64_t result=_strtoui64(string.Buffer(), &endptr, 10);
 		success=endptr==string.Buffer()+string.Length();
 		return result;
 	}
 
-	unsigned __int64 wtou64_test(const WString& string, bool& success)
+	vuint64_t wtou64_test(const WString& string, bool& success)
 	{
 		wchar_t* endptr=0;
-		unsigned __int64 result=_wcstoui64(string.Buffer(), &endptr, 10);
+		vuint64_t result=_wcstoui64(string.Buffer(), &endptr, 10);
 		success=endptr==string.Buffer()+string.Length();
 		return result;
 	}
@@ -98,13 +98,13 @@ namespace vl
 		return wtoi_test(string, success);
 	}
 
-	__int64 atoi64(const AString& string)
+	vint64_t atoi64(const AString& string)
 	{
 		bool success=false;
 		return atoi64_test(string, success);
 	}
 
-	__int64 wtoi64(const WString& string)
+	vint64_t wtoi64(const WString& string)
 	{
 		bool success=false;
 		return wtoi64_test(string, success);
@@ -122,13 +122,13 @@ namespace vl
 		return wtou_test(string, success);
 	}
 
-	unsigned __int64 atou64(const AString& string)
+	vuint64_t atou64(const AString& string)
 	{
 		bool success=false;
 		return atou64_test(string, success);
 	}
 
-	unsigned __int64 wtou64(const WString& string)
+	vuint64_t wtou64(const WString& string)
 	{
 		bool success=false;
 		return wtou64_test(string, success);
@@ -160,14 +160,14 @@ namespace vl
 		return buffer;
 	}
 
-	AString i64toa(__int64 number)
+	AString i64toa(vint64_t number)
 	{
 		char buffer[100];
 		I64TOA_S(number, buffer, sizeof(buffer)/sizeof(*buffer), 10);
 		return buffer;
 	}
 
-	WString i64tow(__int64 number)
+	WString i64tow(vint64_t number)
 	{
 		wchar_t buffer[100];
 		I64TOW_S(number, buffer, sizeof(buffer)/sizeof(*buffer), 10);
@@ -188,14 +188,14 @@ namespace vl
 		return buffer;
 	}
 
-	AString u64toa(unsigned __int64 number)
+	AString u64toa(vuint64_t number)
 	{
 		char buffer[100];
 		UI64TOA_S(number, buffer, sizeof(buffer)/sizeof(*buffer), 10);
 		return buffer;
 	}
 
-	WString u64tow(unsigned __int64 number)
+	WString u64tow(vuint64_t number)
 	{
 		wchar_t buffer[100];
 		UI64TOW_S(number, buffer, sizeof(buffer)/sizeof(*buffer), 10);

@@ -123,7 +123,7 @@ namespace vl
 		wchar_t*			Description()const;
 	};
 
-#ifdef _DEBUG
+#if defined _DEBUG || defined VCZH_LINUX
 	#define CHECK_ERROR(CONDITION,DESCRIPTION) do{if(!(CONDITION))throw Error(DESCRIPTION);}while(0)
 #endif
 #ifdef NDEBUG

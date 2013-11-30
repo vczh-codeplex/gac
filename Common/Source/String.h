@@ -451,34 +451,34 @@ namespace vl
 
 	extern vint					atoi_test(const AString& string, bool& success);
 	extern vint					wtoi_test(const WString& string, bool& success);
-	extern __int64				atoi64_test(const AString& string, bool& success);
-	extern __int64				wtoi64_test(const WString& string, bool& success);
+	extern vint64_t				atoi64_test(const AString& string, bool& success);
+	extern vint64_t				wtoi64_test(const WString& string, bool& success);
 	extern vuint				atou_test(const AString& string, bool& success);
 	extern vuint				wtou_test(const WString& string, bool& success);
-	extern unsigned __int64		atou64_test(const AString& string, bool& success);
-	extern unsigned __int64		wtou64_test(const WString& string, bool& success);
+	extern vuint64_t			atou64_test(const AString& string, bool& success);
+	extern vuint64_t			wtou64_test(const WString& string, bool& success);
 	extern double				atof_test(const AString& string, bool& success);
 	extern double				wtof_test(const WString& string, bool& success);
 
 	extern vint					atoi(const AString& string);
 	extern vint					wtoi(const WString& string);
-	extern __int64				atoi64(const AString& string);
-	extern __int64				wtoi64(const WString& string);
+	extern vint64_t				atoi64(const AString& string);
+	extern vint64_t				wtoi64(const WString& string);
 	extern vuint				atou(const AString& string);
 	extern vuint				wtou(const WString& string);
-	extern unsigned __int64		atou64(const AString& string);
-	extern unsigned __int64		wtou64(const WString& string);
+	extern vuint64_t			atou64(const AString& string);
+	extern vuint64_t			wtou64(const WString& string);
 	extern double				atof(const AString& string);
 	extern double				wtof(const WString& string);
 
 	extern AString				itoa(vint number);
 	extern WString				itow(vint number);
-	extern AString				i64toa(__int64 number);
-	extern WString				i64tow(__int64 number);
+	extern AString				i64toa(vint64_t number);
+	extern WString				i64tow(vint64_t number);
 	extern AString				utoa(vuint number);
 	extern WString				utow(vuint number);
-	extern AString				u64toa(unsigned __int64 number);
-	extern WString				u64tow(unsigned __int64 number);
+	extern AString				u64toa(vuint64_t number);
+	extern WString				u64tow(vuint64_t number);
 	extern AString				ftoa(double number);
 	extern WString				ftow(double number);
 
