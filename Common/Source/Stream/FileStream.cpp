@@ -1,9 +1,20 @@
 #include "FileStream.h"
+#if defined VCZH_GCC
+#include <stdio.h>
+#endif
 
 namespace vl
 {
 	namespace stream
 	{
+
+#if defined VCZH_GCC
+		void _fseeki64(FILE* file, pos_t offset, int origin)
+		{
+			fseek(file, (long)offset, origin);
+		}
+#endif
+
 /***********************************************************************
 FileStream
 ***********************************************************************/
@@ -25,10 +36,16 @@ FileStream
 				break;
 			}
 
+#if defined VCZH_MSVC
 			if(_wfopen_s(&file, fileName.Buffer(), mode)!=0)
 			{
 				file=0;
 			}
+#elif defined VCZH_GCC
+			AString fileNameA = wtoa(fileName);
+			AString modeA = wtoa(mode);
+			file = fopen(fileNameA.Buffer(), modeA.Buffer());			
+#endif
 		}
 
 		FileStream::~FileStream()
@@ -79,11 +96,15 @@ FileStream
 		{
 			if(file!=0)
 			{
+#if defined VCZH_MSVC
 				fpos_t position=0;
 				if(fgetpos(file, &position)==0)
 				{
 					return position;
 				}
+#elif defined VCZH_GCC
+				return (pos_t)ftell(file);
+#endif
 			}
 			return -1;
 		}
@@ -92,6 +113,7 @@ FileStream
 		{
 			if(file!=0)
 			{
+#if defined VCZH_MSVC
 				fpos_t position=0;
 				if(fgetpos(file, &position)==0)
 				{
@@ -104,6 +126,13 @@ FileStream
 						}
 					}
 				}
+#elif defined VCZH_GCC
+				long position = ftell(file);
+				fseek(file, 0, SEEK_END);
+				long size=ftell(file);
+				fseek(file, position, SEEK_SET);
+				return (pos_t)size;
+#endif
 			}
 			return -1;
 		}
@@ -174,6 +203,7 @@ FileStream
 		{
 			CHECK_ERROR(file!=0, L"FileStream::Peek(pos_t)#流处于关闭状态，不可执行此操作。");
 			CHECK_ERROR(_size>=0, L"FileStream::Peek(void*, vint)#参数size不可为负。");
+#if defined VCZH_MSVC
 			fpos_t position=0;
 			if(fgetpos(file, &position)==0)
 			{
@@ -184,6 +214,12 @@ FileStream
 				}
 			}
 			return -1;
+#elif defined VCZH_GCC
+			long position=ftell(file);
+			size_t count=fread(_buffer, 1, _size, file);
+			fseek(file, position, SEEK_SET);
+			return count;
+#endif
 		}
 	}
 }
