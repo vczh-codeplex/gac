@@ -176,55 +176,55 @@ namespace vl
 
 			void MakeRoom(vint index, vint _count)
 			{
-				vint newCount=count+_count;
+				vint newCount=ArrayBase<T>::count+_count;
 				if(newCount>capacity)
 				{
 					vint newCapacity=CalculateCapacity(newCount);
 					T* newBuffer=new T[newCapacity];
-					CopyObjects(newBuffer, buffer, index);
-					CopyObjects(newBuffer+index+_count, buffer+index, count-index);
-					delete[] buffer;
+					ListStore<T, POD<T>::Result>::CopyObjects(newBuffer, ArrayBase<T>::buffer, index);
+					ListStore<T, POD<T>::Result>::CopyObjects(newBuffer+index+_count, ArrayBase<T>::buffer+index, ArrayBase<T>::count-index);
+					delete[] ArrayBase<T>::buffer;
 					capacity=newCapacity;
-					buffer=newBuffer;
+					ArrayBase<T>::buffer=newBuffer;
 				}
 				else
 				{
-					CopyObjects(buffer+index+_count, buffer+index, count-index);
+					ListStore<T, POD<T>::Result>::CopyObjects(ArrayBase<T>::buffer+index+_count, ArrayBase<T>::buffer+index, ArrayBase<T>::count-index);
 				}
-				count=newCount;
+				ArrayBase<T>::count=newCount;
 			}
 
 			void ReleaseUnnecessaryBuffer(vint previousCount)
 			{
-				if(buffer && count<previousCount)
+				if(ArrayBase<T>::buffer && ArrayBase<T>::count<previousCount)
 				{
-					ClearObjects(&buffer[count], previousCount-count);
+					ListStore<T, POD<T>::Result>::ClearObjects(&ArrayBase<T>::buffer[ArrayBase<T>::count], previousCount-ArrayBase<T>::count);
 				}
-				if(lessMemoryMode && count<=capacity/2)
+				if(lessMemoryMode && ArrayBase<T>::count<=capacity/2)
 				{
 					vint newCapacity=capacity*5/8;
-					if(count<newCapacity)
+					if(ArrayBase<T>::count<newCapacity)
 					{
 						T* newBuffer=new T[newCapacity];
-						CopyObjects(newBuffer, buffer, count);
-						delete[] buffer;
+						ListStore<T, POD<T>::Result>::CopyObjects(newBuffer, ArrayBase<T>::buffer, ArrayBase<T>::count);
+						delete[] ArrayBase<T>::buffer;
 						capacity=newCapacity;
-						buffer=newBuffer;
+						ArrayBase<T>::buffer=newBuffer;
 					}
 				}
 			}
 		public:
 			ListBase()
 			{
-				count=0;
+				ArrayBase<T>::count=0;
 				capacity=0;
-				buffer=0;
+				ArrayBase<T>::buffer=0;
 				lessMemoryMode=true;
 			}
 
 			~ListBase()
 			{
-				delete[] buffer;
+				delete[] ArrayBase<T>::buffer;
 			}
 
 			void SetLessMemoryMode(bool mode)
@@ -234,34 +234,34 @@ namespace vl
 
 			bool RemoveAt(vint index)
 			{
-				vint previousCount=count;
-				CHECK_ERROR(index>=0 && index<count, L"ListBase<T, K>::RemoveAt(vint)#参数index越界。");
-				CopyObjects(buffer+index,buffer+index+1,count-index-1);
-				count--;
+				vint previousCount=ArrayBase<T>::count;
+				CHECK_ERROR(index>=0 && index<ArrayBase<T>::count, L"ListBase<T, K>::RemoveAt(vint)#参数index越界。");
+				ListStore<T, POD<T>::Result>::CopyObjects(ArrayBase<T>::buffer+index,ArrayBase<T>::buffer+index+1,ArrayBase<T>::count-index-1);
+				ArrayBase<T>::count--;
 				ReleaseUnnecessaryBuffer(previousCount);
 				return true;
 			}
 
 			bool RemoveRange(vint index, vint _count)
 			{
-				vint previousCount=count;
-				CHECK_ERROR(index>=0 && index<=count, L"ListBase<T, K>::RemoveRange(vint, vint)#参数index越界。");
-				CHECK_ERROR(index+_count>=0 && index+_count<=count, L"ListBase<T,K>::RemoveRange(vint, vint)#参数_count越界。");
-				CopyObjects(buffer+index, buffer+index+_count, count-index-_count);
-				count-=_count;
+				vint previousCount=ArrayBase<T>::count;
+				CHECK_ERROR(index>=0 && index<=ArrayBase<T>::count, L"ListBase<T, K>::RemoveRange(vint, vint)#参数index越界。");
+				CHECK_ERROR(index+_count>=0 && index+_count<=ArrayBase<T>::count, L"ListBase<T,K>::RemoveRange(vint, vint)#参数_count越界。");
+				ListStore<T, POD<T>::Result>::CopyObjects(ArrayBase<T>::buffer+index, ArrayBase<T>::buffer+index+_count, ArrayBase<T>::count-index-_count);
+				ArrayBase<T>::count-=_count;
 				ReleaseUnnecessaryBuffer(previousCount);
 				return true;
 			}
 
 			bool Clear()
 			{
-				vint previousCount=count;
-				count=0;
+				vint previousCount=ArrayBase<T>::count;
+				ArrayBase<T>::count=0;
 				if(lessMemoryMode)
 				{
 					capacity=0;
-					delete[] buffer;
-					buffer=0;
+					delete[] ArrayBase<T>::buffer;
+					ArrayBase<T>::buffer=0;
 				}
 				else
 				{
@@ -283,21 +283,21 @@ namespace vl
 			{
 				if(size>0)
 				{
-					count=size;
-					buffer=new T[size];
+					ArrayBase<T>::count=size;
+					ArrayBase<T>::buffer=new T[size];
 				}
 				else
 				{
-					count=0;
-					buffer=0;
+					ArrayBase<T>::count=0;
+					ArrayBase<T>::buffer=0;
 				}
 			}
 
 			void Destroy()
 			{
-				count=0;
-				delete[] buffer;
-				buffer=0;
+				ArrayBase<T>::count=0;
+				delete[] ArrayBase<T>::buffer;
+				ArrayBase<T>::buffer=0;
 			}
 		public:
 			Array(vint size=0)
@@ -308,7 +308,7 @@ namespace vl
 			Array(const T* _buffer, vint size)
 			{
 				Create(size);
-				CopyObjects(buffer, _buffer, size);
+				ListStore<T, POD<T>::Result>::CopyObjects(ArrayBase<T>::buffer, _buffer, size);
 			}
 
 			~Array()
@@ -323,9 +323,9 @@ namespace vl
 
 			vint IndexOf(const K& item)const
 			{
-				for(vint i=0;i<count;i++)
+				for(vint i=0;i<ArrayBase<T>::count;i++)
 				{
-					if(buffer[i]==item)
+					if(ArrayBase<T>::buffer[i]==item)
 					{
 						return i;
 					}
@@ -335,23 +335,23 @@ namespace vl
 
 			void Set(vint index, const T& item)
 			{
-				CHECK_ERROR(index>=0 && index<count, L"Array<T, K>::Set(vint)#参数index越界。");
-				buffer[index]=item;
+				CHECK_ERROR(index>=0 && index<ArrayBase<T>::count, L"Array<T, K>::Set(vint)#参数index越界。");
+				ArrayBase<T>::buffer[index]=item;
 			}
 
 			using ArrayBase<T>::operator[];
 			T& operator[](vint index)
 			{
-				CHECK_ERROR(index>=0 && index<count, L"Array<T, K>::operator[](vint)#参数index越界。");
-				return buffer[index];
+				CHECK_ERROR(index>=0 && index<ArrayBase<T>::count, L"Array<T, K>::operator[](vint)#参数index越界。");
+				return ArrayBase<T>::buffer[index];
 			}
 
 			void Resize(vint size)
 			{
-				vint oldCount=count;
-				T* oldBuffer=buffer;
+				vint oldCount=ArrayBase<T>::count;
+				T* oldBuffer=ArrayBase<T>::buffer;
 				Create(size);
-				CopyObjects(buffer, oldBuffer, (count<oldCount?count:oldCount));
+				ListStore<T, POD<T>::Result>::CopyObjects(ArrayBase<T>::buffer, oldBuffer, (ArrayBase<T>::count<oldCount?ArrayBase<T>::count:oldCount));
 				delete[] oldBuffer;
 			}
 		};
@@ -371,9 +371,9 @@ namespace vl
 
 			vint IndexOf(const K& item)const
 			{
-				for(vint i=0;i<count;i++)
+				for(vint i=0;i<ArrayBase<T>::count;i++)
 				{
-					if(buffer[i]==item)
+					if(ArrayBase<T>::buffer[i]==item)
 					{
 						return i;
 					}
@@ -383,25 +383,25 @@ namespace vl
 
 			vint Add(const T& item)
 			{
-				MakeRoom(count, 1);
-				buffer[count-1]=item;
-				return count-1;
+				ListBase<T, K>::MakeRoom(ArrayBase<T>::count, 1);
+				ArrayBase<T>::buffer[ArrayBase<T>::count-1]=item;
+				return ArrayBase<T>::count-1;
 			}
 
 			vint Insert(vint index, const T& item)
 			{
-				CHECK_ERROR(index>=0 && index<=count, L"List<T, K>::Insert(vint, const T&)#参数index越界。");
-				MakeRoom(index,1);
-				buffer[index]=item;
+				CHECK_ERROR(index>=0 && index<=ArrayBase<T>::count, L"List<T, K>::Insert(vint, const T&)#参数index越界。");
+				ListBase<T, K>::MakeRoom(index,1);
+				ArrayBase<T>::buffer[index]=item;
 				return index;
 			}
 
 			bool Remove(const K& item)
 			{
 				vint index=IndexOf(item);
-				if(index>=0 && index<count)
+				if(index>=0 && index<ArrayBase<T>::count)
 				{
-					RemoveAt(index);
+					ListBase<T, K>::RemoveAt(index);
 					return true;
 				}
 				else
@@ -412,16 +412,16 @@ namespace vl
 
 			bool Set(vint index, const T& item)
 			{
-				CHECK_ERROR(index>=0 && index<count, L"List<T, K>::Set(vint)#参数index越界。");
-				buffer[index]=item;
+				CHECK_ERROR(index>=0 && index<ArrayBase<T>::count, L"List<T, K>::Set(vint)#参数index越界。");
+				ArrayBase<T>::buffer[index]=item;
 				return true;
 			}
 			
 			using ListBase<T, K>::operator[];
 			T& operator[](vint index)
 			{
-				CHECK_ERROR(index>=0 && index<count, L"List<T, K>::operator[](vint)#参数index越界。");
-				return buffer[index];
+				CHECK_ERROR(index>=0 && index<ArrayBase<T>::count, L"List<T, K>::operator[](vint)#参数index越界。");
+				return ArrayBase<T>::buffer[index];
 			}
 		};
 
@@ -442,15 +442,15 @@ namespace vl
 			vint IndexOf(const Key& item)const
 			{
 				vint start=0;
-				vint end=count-1;
+				vint end=ArrayBase<T>::count-1;
 				while(start<=end)
 				{
 					vint index=start+(end-start)/2;
-					if(buffer[index]==item)
+					if(ArrayBase<T>::buffer[index]==item)
 					{
 						return index;
 					}
-					else if(buffer[index]>item)
+					else if(ArrayBase<T>::buffer[index]>item)
 					{
 						end=index-1;
 					}
@@ -469,25 +469,25 @@ namespace vl
 
 			vint Add(const T& item)
 			{
-				if(count==0)
+				if(ArrayBase<T>::count==0)
 				{
-					MakeRoom(0, 1);
-					buffer[0]=item;
+					ListBase<T, K>::MakeRoom(0, 1);
+					ArrayBase<T>::buffer[0]=item;
 					return 0;
 				}
 				else
 				{
 					vint start=0;
-					vint end=count-1;
+					vint end=ArrayBase<T>::count-1;
 					vint index=-1;
 					while(start<=end)
 					{
 						index=(start+end)/2;
-						if(buffer[index]==item)
+						if(ArrayBase<T>::buffer[index]==item)
 						{
 							goto SORTED_LIST_INSERT;
 						}
-						else if(buffer[index]>item)
+						else if(ArrayBase<T>::buffer[index]>item)
 						{
 							end=index-1;
 						}
@@ -496,14 +496,14 @@ namespace vl
 							start=index+1;
 						}
 					}
-					CHECK_ERROR(index>=0 && index<count, L"SortedList<T, K>::Add(const T&)#内部错误，变量index越界");
-					if(buffer[index]<item)
+					CHECK_ERROR(index>=0 && index<ArrayBase<T>::count, L"SortedList<T, K>::Add(const T&)#内部错误，变量index越界");
+					if(ArrayBase<T>::buffer[index]<item)
 					{
 						index++;
 					}
 SORTED_LIST_INSERT:
-					MakeRoom(index, 1);
-					buffer[index]=item;
+					ListBase<T, K>::MakeRoom(index, 1);
+					ArrayBase<T>::buffer[index]=item;
 					return index;
 				}
 			}
@@ -511,9 +511,9 @@ SORTED_LIST_INSERT:
 			bool Remove(const K& item)
 			{
 				vint index=IndexOf(item);
-				if(index>=0 && index<count)
+				if(index>=0 && index<ArrayBase<T>::count)
 				{
-					RemoveAt(index);
+					ListBase<T, K>::RemoveAt(index);
 					return true;
 				}
 				else
