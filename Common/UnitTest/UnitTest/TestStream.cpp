@@ -603,13 +603,13 @@ void TestEncodingInternal(IEncoder& encoder, IDecoder& decoder, BomEncoder::Enco
 	Array<unsigned char> buffer;
 	buffer.Resize((vint)memoryStream.Size());
 	memoryStream.Read(&buffer[0], buffer.Count());
-	
+#if defined VCZH_WINDOWS	
 	BomEncoder::Encoding resultEncoding;
 	bool resultContainsBom;
 	TestEncoding(&buffer[0], buffer.Count(), resultEncoding, resultContainsBom);
 	TEST_ASSERT(encoding==resultEncoding);
 	TEST_ASSERT(containsBom==resultContainsBom);
-	
+#endif
 	if(encoding!=BomEncoder::Mbcs)
 	{
 		memoryStream.SeekFromBegin(0);
@@ -620,7 +620,6 @@ void TestEncodingInternal(IEncoder& encoder, IDecoder& decoder, BomEncoder::Enco
 	}
 }
 
-#if defined VCZH_WINDOWS
 TEST_CASE(TestEncoding)
 {
 	{
@@ -664,4 +663,3 @@ TEST_CASE(TestEncoding)
 		TestEncodingInternal(encoder, decoder, BomEncoder::Utf16BE, false);
 	}
 }
-#endif
