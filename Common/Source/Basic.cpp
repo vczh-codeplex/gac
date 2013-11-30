@@ -1,7 +1,7 @@
 #include "Basic.h"
-#if defined VCZH_WINDOWS
+#if defined VCZH_MSVC
 #include <Windows.h>
-#elif defined VCZH_LINUX
+#elif defined VCZH_GCC
 #include <time.h>
 #include <memory.h>
 #endif
@@ -52,7 +52,7 @@ Object
 DateTime
 ***********************************************************************/
 
-#if defined VCZH_WINDOWS
+#if defined VCZH_MSVC
 	DateTime SystemTimeToDateTime(const SYSTEMTIME& systemTime)
 	{
 		DateTime dateTime;
@@ -88,7 +88,7 @@ DateTime
 		FileTimeToSystemTime(&fileTime, &systemTime);
 		return systemTime;
 	}
-#elif defined VCZH_LINUX
+#elif defined VCZH_GCC
 	DateTime ConvertTMToDateTime(tm* timeinfo)
 	{
 		time_t timer = mktime(timeinfo);
@@ -109,11 +109,11 @@ DateTime
 
 	DateTime DateTime::LocalTime()
 	{
-#if defined VCZH_WINDOWS
+#if defined VCZH_MSVC
 		SYSTEMTIME systemTime;
 		GetLocalTime(&systemTime);
 		return SystemTimeToDateTime(systemTime);
-#elif defined VCZH_LINUX
+#elif defined VCZH_GCC
 		time_t timer = time(nullptr);
 		tm* timeinfo = localtime(&timer);
 		return ConvertTMToDateTime(timeinfo);
@@ -122,11 +122,11 @@ DateTime
 
 	DateTime DateTime::UtcTime()
 	{
-#if defined VCZH_WINDOWS
+#if defined VCZH_MSVC
 		SYSTEMTIME utcTime;
 		GetSystemTime(&utcTime);
 		return SystemTimeToDateTime(utcTime);
-#elif defined VCZH_LINUX
+#elif defined VCZH_GCC
 		time_t timer = time(nullptr);
 		tm* timeinfo = gmtime(&timer);
 		return ConvertTMToDateTime(timeinfo);
@@ -135,7 +135,7 @@ DateTime
 
 	DateTime DateTime::FromDateTime(vint _year, vint _month, vint _day, vint _hour, vint _minute, vint _second, vint _milliseconds)
 	{
-#if defined VCZH_WINDOWS
+#if defined VCZH_MSVC
 		SYSTEMTIME systemTime;
 		memset(&systemTime, 0, sizeof(systemTime));
 		systemTime.wYear=(WORD)_year;
@@ -150,7 +150,7 @@ DateTime
 		SystemTimeToFileTime(&systemTime, &fileTime);
 		FileTimeToSystemTime(&fileTime, &systemTime);
 		return SystemTimeToDateTime(systemTime);
-#elif defined VCZH_LINUX
+#elif defined VCZH_GCC
 		tm timeinfo;
 		memset(&timeinfo, 0, sizeof(timeinfo));
 		timeinfo.tm_year = _year-1900;
@@ -165,7 +165,7 @@ DateTime
 
 	DateTime DateTime::FromFileTime(vuint64_t filetime)
 	{
-#if defined VCZH_WINDOWS
+#if defined VCZH_MSVC
 		ULARGE_INTEGER largeInteger;
 		largeInteger.QuadPart=filetime;
 		FILETIME fileTime;
@@ -175,7 +175,7 @@ DateTime
 		SYSTEMTIME systemTime;
 		FileTimeToSystemTime(&fileTime, &systemTime);
 		return SystemTimeToDateTime(systemTime);
-#elif defined VCZH_LINUX
+#elif defined VCZH_GCC
 		time_t timer = (time_t)filetime;
 		tm* timeinfo = localtime(&timer);
 		return ConvertTMToDateTime(timeinfo);
@@ -196,12 +196,12 @@ DateTime
 
 	DateTime DateTime::ToLocalTime()
 	{
-#if defined VCZH_WINDOWS
+#if defined VCZH_MSVC
 		SYSTEMTIME utcTime=DateTimeToSystemTime(*this);
 		SYSTEMTIME localTime;
 		SystemTimeToTzSpecificLocalTime(NULL, &utcTime, &localTime);
 		return SystemTimeToDateTime(localTime);
-#elif defined VCZH_LINUX
+#elif defined VCZH_GCC
 		time_t localTimer = time(nullptr);
 		time_t utcTimer = mktime(gmtime(&localTimer));
 		time_t timer = (time_t)filetime + localTimer - utcTimer;
@@ -212,12 +212,12 @@ DateTime
 
 	DateTime DateTime::ToUtcTime()
 	{
-#if defined VCZH_WINDOWS
+#if defined VCZH_MSVC
 		SYSTEMTIME localTime=DateTimeToSystemTime(*this);
 		SYSTEMTIME utcTime;
 		TzSpecificLocalTimeToSystemTime(NULL, &localTime, &utcTime);
 		return SystemTimeToDateTime(utcTime);
-#elif defined VCZH_LINUX
+#elif defined VCZH_GCC
 		time_t timer = (time_t)filetime;
 		tm* timeinfo = gmtime(&timer);
 		return ConvertTMToDateTime(timeinfo);

@@ -25,9 +25,9 @@ namespace vl
 			static void PrintInfo(const WString& string);
 			static void PrintError(const WString& string);
 		};
-#if defined VCZH_WINDOWS	
+#if defined VCZH_MSVC	
 #define TEST_CHECK_ERROR(CONDITION,DESCRIPTION) do{if(!(CONDITION))throw Error(DESCRIPTION);}while(0)
-#elif defined VCZH_LINUX
+#elif defined VCZH_GCC
 #define TEST_CHECK_ERROR(CONDITION,DESCRIPTION)\
 	do\
 	{\

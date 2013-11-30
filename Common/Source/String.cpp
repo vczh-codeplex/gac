@@ -1,8 +1,8 @@
 #include <stdlib.h>
 #include "String.h"
-#if defined VCZH_WINDOWS
+#if defined VCZH_MSVC
 #include <Windows.h>
-#elif defined VCZH_LINUX
+#elif defined VCZH_GCC
 #include <stdio.h>
 #include <ctype.h>
 #include <wctype.h>
@@ -15,7 +15,7 @@
 
 namespace vl
 {
-#if defined VCZH_LINUX
+#if defined VCZH_GCC
 	void _itoa_s(vint32_t value, char* buffer, size_t size, vint radix)
 	{
 		sprintf(buffer, "%d", value);
@@ -313,9 +313,9 @@ namespace vl
 
 	vint _wtoa(const wchar_t* w, char* a, vint chars)
 	{
-#if defined VCZH_WINDOWS
+#if defined VCZH_MSVC
 		return WideCharToMultiByte(CP_THREAD_ACP, 0, w, -1, a, (int)(a?chars:0), 0, 0);
-#elif defined VCZH_LINUX
+#elif defined VCZH_GCC
 		return wcstombs(a, w, chars-1)+1;
 #endif
 	}
@@ -333,9 +333,9 @@ namespace vl
 
 	vint _atow(const char* a, wchar_t* w, vint chars)
 	{
-#if defined VCZH_WINDOWS
+#if defined VCZH_MSVC
 		return MultiByteToWideChar(CP_THREAD_ACP, 0, a, -1, w, (int)(w?chars:0));
-#elif defined VCZH_LINUX
+#elif defined VCZH_GCC
 		return mbstowcs(w, a, chars-1)+1;
 #endif
 	}

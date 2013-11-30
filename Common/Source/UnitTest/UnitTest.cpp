@@ -1,6 +1,6 @@
 #include "UnitTest.h"
 #include "../Console.h"
-#if defined VCZH_WINDOWS
+#if defined VCZH_MSVC
 #include "../Threading.h"
 #endif
 
@@ -14,13 +14,13 @@ namespace vl
 UnitTest
 ***********************************************************************/
 
-#if defined VCZH_WINDOWS
+#if defined VCZH_MSVC
 		SpinLock spinLockUnitTest;
 #endif
 
 		void UnitTest::PrintMessage(const WString& string)
 		{
-#if defined VCZH_WINDOWS
+#if defined VCZH_MSVC
 			SpinLock::Scope scope(spinLockUnitTest);
 #endif
 			Console::SetColor(false, true, false, true);
@@ -30,7 +30,7 @@ UnitTest
 
 		void UnitTest::PrintInfo(const WString& string)
 		{
-#if defined VCZH_WINDOWS
+#if defined VCZH_MSVC
 			SpinLock::Scope scope(spinLockUnitTest);
 #endif
 			Console::SetColor(true, true, true, true);
@@ -40,7 +40,7 @@ UnitTest
 
 		void UnitTest::PrintError(const WString& string)
 		{
-#if defined VCZH_WINDOWS
+#if defined VCZH_MSVC
 			SpinLock::Scope scope(spinLockUnitTest);
 #endif
 			Console::SetColor(true, false, false, true);
