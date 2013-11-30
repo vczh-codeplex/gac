@@ -51,7 +51,7 @@ void TestBidirectionalLimitedStreamWithSize15(IStream& stream)
 	char buffer[BUFFER_SIZE];
 
 	TestLimitedProperty(stream, 0, 15);
-	TEST_ASSERT(stream.Write("vczh", 4)==4);
+	TEST_ASSERT(stream.Write((void*)"vczh", 4)==4);
 	TestLimitedProperty(stream, 4, 15);
 	stream.Seek(-4);
 	TestLimitedProperty(stream, 0, 15);
@@ -63,7 +63,7 @@ void TestBidirectionalLimitedStreamWithSize15(IStream& stream)
 	TEST_ASSERT(strncmp(buffer, "vczh", 4)==0);
 	TestLimitedProperty(stream, 4, 15);
 
-	TEST_ASSERT(stream.Write(" is genius!0123456789", 21)==11);
+	TEST_ASSERT(stream.Write((void*)" is genius!0123456789", 21)==11);
 	TestLimitedProperty(stream, 15, 15);
 	stream.SeekFromEnd(7);
 	TestLimitedProperty(stream, 8, 15);
@@ -102,7 +102,7 @@ void TestBidirectionalUnlimitedStream(IStream& stream)
 	char buffer[BUFFER_SIZE];
 
 	TestUnlimitedProperty(stream, 0, 0);
-	TEST_ASSERT(stream.Write("vczh", 4)==4);
+	TEST_ASSERT(stream.Write((void*)"vczh", 4)==4);
 	TestUnlimitedProperty(stream, 4, 4);
 	stream.Seek(-4);
 	TestUnlimitedProperty(stream, 0, 4);
@@ -114,7 +114,7 @@ void TestBidirectionalUnlimitedStream(IStream& stream)
 	TEST_ASSERT(strncmp(buffer, "vczh", 4)==0);
 	TestUnlimitedProperty(stream, 4, 4);
 
-	TEST_ASSERT(stream.Write(" is genius!0123456789", 11)==11);
+	TEST_ASSERT(stream.Write((void*)" is genius!0123456789", 11)==11);
 	TestUnlimitedProperty(stream, 15, 15);
 	stream.SeekFromEnd(7);
 	TestUnlimitedProperty(stream, 8, 15);
@@ -191,11 +191,11 @@ void TestWriteonlySeekableProperty(IStream& stream, pos_t position, pos_t size)
 void TestWriteonlySeekableStream(IStream& stream)
 {
 	TestWriteonlySeekableProperty(stream, 0, 0);
-	TEST_ASSERT(stream.Write("genius!", 7)==7);
+	TEST_ASSERT(stream.Write((void*)"genius!", 7)==7);
 	TestWriteonlySeekableProperty(stream, 7, 7);
 	stream.Seek(-7);
 	TestWriteonlySeekableProperty(stream, 0, 7);
-	TEST_ASSERT(stream.Write("vczh is genius!", 15)==15);
+	TEST_ASSERT(stream.Write((void*)"vczh is genius!", 15)==15);
 	TestWriteonlySeekableProperty(stream, 15, 15);
 
 	stream.SeekFromBegin(100);
@@ -248,9 +248,9 @@ void TestWriteonlyUnseekableProperty(IStream& stream, pos_t position, pos_t size
 void TestWriteonlyUnseekableStream(IStream& stream, bool limited)
 {
 	TestWriteonlyUnseekableProperty(stream, 0, 0, limited);
-	TEST_ASSERT(stream.Write("vczh is ", 8)==8);
+	TEST_ASSERT(stream.Write((void*)"vczh is ", 8)==8);
 	TestWriteonlyUnseekableProperty(stream, 8, 8, limited);
-	TEST_ASSERT(stream.Write("genius!", 7)==7);
+	TEST_ASSERT(stream.Write((void*)"genius!", 7)==7);
 	TestWriteonlyUnseekableProperty(stream, 15, 15, limited);
 }
 
@@ -460,7 +460,7 @@ TEST_CASE(TestCacheStream)
 
 TEST_CASE(TestStringReader)
 {
-	wchar_t text[]=L"1:Vczh is genius!\r\n2:Vczh is genius!\r\n3:Vczh is genius!\r\n4:Vczh is genius!";
+	const wchar_t text[]=L"1:Vczh is genius!\r\n2:Vczh is genius!\r\n3:Vczh is genius!\r\n4:Vczh is genius!";
 	StringReader reader(text);
 
 	TEST_ASSERT(reader.ReadChar()==L'1');
@@ -472,8 +472,8 @@ TEST_CASE(TestStringReader)
 
 TEST_CASE(TestStringReaderWithCrLf)
 {
-	wchar_t text[]=L"1:Vczh is genius!\r\n2:Vczh is genius!!\r\n3:Vczh is genius!!!\r\n4:Vczh is genius!!!!\r\n";
-	wchar_t* lines[]={L"1:Vczh is genius!", L"2:Vczh is genius!!", L"3:Vczh is genius!!!", L"4:Vczh is genius!!!!",L""};
+	const wchar_t text[]=L"1:Vczh is genius!\r\n2:Vczh is genius!!\r\n3:Vczh is genius!!!\r\n4:Vczh is genius!!!!\r\n";
+	const wchar_t* lines[]={L"1:Vczh is genius!", L"2:Vczh is genius!!", L"3:Vczh is genius!!!", L"4:Vczh is genius!!!!",L""};
 	StringReader reader(text);
 	vint index=0;
 
@@ -487,8 +487,8 @@ TEST_CASE(TestStringReaderWithCrLf)
 
 TEST_CASE(TestStringReaderWithoutCrLf)
 {
-	wchar_t text[]=L"1:Vczh is genius!\r\n2:Vczh is genius!!\r\n3:Vczh is genius!!!\r\n4:Vczh is genius!!!!";
-	wchar_t* lines[]={L"1:Vczh is genius!", L"2:Vczh is genius!!", L"3:Vczh is genius!!!", L"4:Vczh is genius!!!!"};
+	const wchar_t text[]=L"1:Vczh is genius!\r\n2:Vczh is genius!!\r\n3:Vczh is genius!!!\r\n4:Vczh is genius!!!!";
+	const wchar_t* lines[]={L"1:Vczh is genius!", L"2:Vczh is genius!!", L"3:Vczh is genius!!!", L"4:Vczh is genius!!!!"};
 	StringReader reader(text);
 	vint index=0;
 
@@ -520,7 +520,7 @@ TEST_CASE(TestStreamReader)
 TEST_CASE(TestStreamReaderWithCrLf)
 {
 	wchar_t text[]=L"1:Vczh is genius!\r\n2:Vczh is genius!!\r\n3:Vczh is genius!!!\r\n4:Vczh is genius!!!!\r\n";
-	wchar_t* lines[]={L"1:Vczh is genius!", L"2:Vczh is genius!!", L"3:Vczh is genius!!!", L"4:Vczh is genius!!!!",L""};
+	const wchar_t* lines[]={L"1:Vczh is genius!", L"2:Vczh is genius!!", L"3:Vczh is genius!!!", L"4:Vczh is genius!!!!",L""};
 	MemoryWrapperStream stream(text, sizeof(text)-sizeof(*text));
 	StreamReader reader(stream);
 	vint index=0;
@@ -536,7 +536,7 @@ TEST_CASE(TestStreamReaderWithCrLf)
 TEST_CASE(TestStreamReaderWithoutCrLf)
 {
 	wchar_t text[]=L"1:Vczh is genius!\r\n2:Vczh is genius!!\r\n3:Vczh is genius!!!\r\n4:Vczh is genius!!!!";
-	wchar_t* lines[]={L"1:Vczh is genius!", L"2:Vczh is genius!!", L"3:Vczh is genius!!!", L"4:Vczh is genius!!!!"};
+	const wchar_t* lines[]={L"1:Vczh is genius!", L"2:Vczh is genius!!", L"3:Vczh is genius!!!", L"4:Vczh is genius!!!!"};
 	MemoryWrapperStream stream(text, sizeof(text)-sizeof(*text));
 	StreamReader reader(stream);
 	vint index=0;
