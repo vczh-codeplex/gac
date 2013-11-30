@@ -366,12 +366,12 @@ $( )
 		template<typename T>
 		typename LambdaRetriveType<decltype(&T::operator())>::Type Lambda(T functionObject)
 		{
-			return functionObject;
+			return typename LambdaRetriveType<decltype(&T::operator())>::Type(functionObject);
 		}
 		template<typename T>
 		typename FunctionObjectRetriveType<T>::Type ConvertToFunction(T functionObject)
 		{
-			return functionObject;
+			return FunctionObjectRetriveType<T>::Type(functionObject);
 		}
 #define LAMBDA vl::function_lambda::Lambda
 #define FUNCTION vl::function_lambda::ConvertToFunction
