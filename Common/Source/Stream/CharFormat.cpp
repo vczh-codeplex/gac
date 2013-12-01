@@ -4,9 +4,6 @@
 #elif defined VCZH_GCC
 #include "../String.h"
 #include <string.h>
-#include <iostream>
-#include <string>
-using namespace std;
 #endif
 
 namespace vl
@@ -440,14 +437,14 @@ Utf8
 				{
 					utf8[0] = 0xC0 + ((w & 0x7C0) >> 6);
 					utf8[1] = 0x80 + (w & 0x3F);
-					if (stream->Write(utf8, 2) != 1) break;
+					if (stream->Write(utf8, 2) != 2) break;
 				}
 				else if (w < 0x10000)
 				{
 					utf8[0] = 0xE0 + ((w & 0xF000) >> 12);
 					utf8[1] = 0x80 + ((w & 0xFC0) >> 6);
 					utf8[2] = 0x80 + (w & 0x3F);
-					if (stream->Write(utf8, 3) != 1) break;
+					if (stream->Write(utf8, 3) != 3) break;
 				}
 				else if (w < 0x110000) // only accept UTF-16 range
 				{
@@ -455,8 +452,7 @@ Utf8
 					utf8[1] = 0x80 + ((w & 0x3F000) >> 12);
 					utf8[2] = 0x80 + ((w & 0xFC0) >> 6);
 					utf8[3] = 0x80 + (w & 0x3F);
-					if (stream->Write(utf8, 3) != 1) break;
-					if (stream->Write(utf8, 4) != 1) break;
+					if (stream->Write(utf8, 4) != 4) break;
 				}
 				else
 				{
