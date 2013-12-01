@@ -592,9 +592,8 @@ TEST_CASE(TestStreamWriter)
 
 void TestEncodingInternal(IEncoder& encoder, IDecoder& decoder, BomEncoder::Encoding encoding, bool containsBom)
 {
-	//const wchar_t* text=L"𩰪㦲𦰗𠀼 𣂕𣴑𣱳𦁚 Vczh is genius!@我是天才";
-	const wchar_t* text=L"A𩰪我";
-	TEST_PRINT(L"\tTest: " + WString(text));
+	const wchar_t* text=L"𩰪㦲𦰗𠀼 𣂕𣴑𣱳𦁚 Vczh is genius!@我是天才";
+	//const wchar_t* text=L"A𩰪我";
 	MemoryStream memoryStream;
 	{
 		EncoderStream encoderStream(memoryStream, encoder);
@@ -631,7 +630,6 @@ void TestEncodingInternal(IEncoder& encoder, IDecoder& decoder, BomEncoder::Enco
 		DecoderStream decoderStream(memoryStream, decoder);
 		StreamReader reader(decoderStream);
 		WString read=reader.ReadToEnd();
-		TEST_PRINT(L"\tRead: " + read);
 		TEST_ASSERT(read==text);
 	}
 }
