@@ -592,7 +592,10 @@ TEST_CASE(TestStreamWriter)
 
 void TestEncodingInternal(IEncoder& encoder, IDecoder& decoder, BomEncoder::Encoding encoding, bool containsBom)
 {
-	const wchar_t* text=L"𩰪㦲𦰗𠀼 𣂕𣴑𣱳𦁚 Vczh is genius!@我是天才";
+	//const wchar_t* text=L"𩰪㦲𦰗𠀼 𣂕𣴑𣱳𦁚 Vczh is genius!@我是天才";
+	const wchar_t* text=L"A𩰪我";
+	//const wchar_t* text=L"A我";
+	TEST_PRINT(L"\tTest: " + WString(text));
 	MemoryStream memoryStream;
 	{
 		EncoderStream encoderStream(memoryStream, encoder);
@@ -600,9 +603,20 @@ void TestEncodingInternal(IEncoder& encoder, IDecoder& decoder, BomEncoder::Enco
 		writer.WriteString(text);
 	}
 	memoryStream.SeekFromBegin(0);
-	Array<unsigned char> buffer;
+	Array<vuint8_t> buffer;
 	buffer.Resize((vint)memoryStream.Size());
 	memoryStream.Read(&buffer[0], buffer.Count());
+	{
+		WString output;
+		for(vint i=0; i<buffer.Count(); i++)
+		{
+			vuint8_t byte=buffer[i];
+			output += L"0123456789ABCDEF"[byte/16];	
+			output += L"0123456789ABCDEF"[byte%16];
+			output += L' ';
+		}
+		TEST_PRINT(L"\tEncoded: "+output);
+	}
 
 #if defined VCZH_WINDOWS	
 	BomEncoder::Encoding resultEncoding;
@@ -618,6 +632,7 @@ void TestEncodingInternal(IEncoder& encoder, IDecoder& decoder, BomEncoder::Enco
 		DecoderStream decoderStream(memoryStream, decoder);
 		StreamReader reader(decoderStream);
 		WString read=reader.ReadToEnd();
+		TEST_PRINT(L"\tRead: " + read);
 		TEST_ASSERT(read==text);
 	}
 }
@@ -625,51 +640,51 @@ void TestEncodingInternal(IEncoder& encoder, IDecoder& decoder, BomEncoder::Enco
 TEST_CASE(TestEncoding)
 {
 	{
-		TEST_PRINT(L"\t<MBCS, BOM>");
-		BomEncoder encoder(BomEncoder::Mbcs);
-		BomDecoder decoder;
-		TestEncodingInternal(encoder, decoder, BomEncoder::Mbcs, true);
-	}
-	{
-		TEST_PRINT(L"\t<UTF8, BOM>");
-		BomEncoder encoder(BomEncoder::Utf8);
-		BomDecoder decoder;
-		TestEncodingInternal(encoder, decoder, BomEncoder::Utf8, true);
-	}
-	{
-		TEST_PRINT(L"\t<UTF16, BOM>");
-		BomEncoder encoder(BomEncoder::Utf16);
-		BomDecoder decoder;
-		TestEncodingInternal(encoder, decoder, BomEncoder::Utf16, true);
-	}
-	{
-		TEST_PRINT(L"\t<UTF16_BE, BOM>");
-		BomEncoder encoder(BomEncoder::Utf16BE);
-		BomDecoder decoder;
-		TestEncodingInternal(encoder, decoder, BomEncoder::Utf16BE, true);
-	}
-	{
-		TEST_PRINT(L"\t<MBCS, NO-BOM>");
+		TEST_PRINT(L"<MBCS, NO-BOM>");
 		MbcsEncoder encoder;
 		MbcsDecoder decoder;
 		TestEncodingInternal(encoder, decoder, BomEncoder::Mbcs, true);
 	}
 	{
-		TEST_PRINT(L"\t<UTF8, NO-BOM>");
-		Utf8Encoder encoder;
-		Utf8Decoder decoder;
-		TestEncodingInternal(encoder, decoder, BomEncoder::Utf8, false);
+		//TEST_PRINT(L"\t<UTF8, NO-BOM>");
+		//Utf8Encoder encoder;
+		//Utf8Decoder decoder;
+		//TestEncodingInternal(encoder, decoder, BomEncoder::Utf8, false);
 	}
 	{
-		TEST_PRINT(L"\t<UTF16, NO-BOM>");
+		TEST_PRINT(L"<UTF16, NO-BOM>");
 		Utf16Encoder encoder;
 		Utf16Decoder decoder;
 		TestEncodingInternal(encoder, decoder, BomEncoder::Utf16, false);
 	}
 	{
-		TEST_PRINT(L"\t<UTF16_BE, NO-BOM>");
+		TEST_PRINT(L"<UTF16_BE, NO-BOM>");
 		Utf16BEEncoder encoder;
 		Utf16BEDecoder decoder;
 		TestEncodingInternal(encoder, decoder, BomEncoder::Utf16BE, false);
+	}
+	{
+		TEST_PRINT(L"<MBCS, BOM>");
+		BomEncoder encoder(BomEncoder::Mbcs);
+		BomDecoder decoder;
+		TestEncodingInternal(encoder, decoder, BomEncoder::Mbcs, true);
+	}
+	{
+		//TEST_PRINT(L"\t<UTF8, BOM>");
+		//BomEncoder encoder(BomEncoder::Utf8);
+		//BomDecoder decoder;
+		//TestEncodingInternal(encoder, decoder, BomEncoder::Utf8, true);
+	}
+	{
+		TEST_PRINT(L"<UTF16, BOM>");
+		BomEncoder encoder(BomEncoder::Utf16);
+		BomDecoder decoder;
+		TestEncodingInternal(encoder, decoder, BomEncoder::Utf16, true);
+	}
+	{
+		TEST_PRINT(L"<UTF16_BE, BOM>");
+		BomEncoder encoder(BomEncoder::Utf16BE);
+		BomDecoder decoder;
+		TestEncodingInternal(encoder, decoder, BomEncoder::Utf16BE, true);
 	}
 }
