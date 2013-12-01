@@ -400,7 +400,8 @@ LazyList
 			template<typename F>
 			FUNCTION_RESULT_TYPE(F) SelectMany(F f)const
 			{
-				typedef typename FUNCTION_RESULT_TYPE(F)::ElementType U;
+				typedef FUNCTION_RESULT_TYPE(F) LazyListU;
+				typedef typename LazyListU::ElementType U;
 				return Select(f).Aggregate(LazyList<U>(), [](const LazyList<U>& a, const IEnumerable<U>& b)->LazyList<U>{return a.Concat(b);});
 			}
 
