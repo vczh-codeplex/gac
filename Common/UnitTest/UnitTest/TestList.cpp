@@ -510,7 +510,6 @@ TEST_CASE(TestSelectOperation)
 	CompareEnumerable(dst, From(src).Select(Square).Select(Double));
 }
 
-#if defined VCZH_MSVC
 TEST_CASE(TestSelectManyOperation)
 {
 	vint src[]={1,2,3};
@@ -526,7 +525,6 @@ TEST_CASE(TestSelectManyOperation)
 		}));
 	CHECK_LIST_ITEMS(dst, {1 _ 2 _ 3 _ 2 _ 4 _ 6 _ 3 _ 6 _ 9});
 }
-#endif
 
 bool Odd(vint a)
 {
@@ -799,7 +797,6 @@ Func<bool(vint)> dividableConverter(vint a)
 	return Curry(dividable)(a);
 }
 
-#if defined VCZH_MSVC
 TEST_CASE(TestFunctionCollection)
 {
 	vint divider[]={2,3,5};
@@ -817,7 +814,6 @@ TEST_CASE(TestFunctionCollection)
 	CopyFrom(dst, From(src).Where(selector));
 	CHECK_LIST_ITEMS(dst, {30 _ 60 _ 90});
 }
-#endif
 
 template<typename TList>
 void TestABCDE(const TList& list, vint repeat)
@@ -934,7 +930,6 @@ vint Compare(vint a, vint b)
 	return a-b;
 }
 
-#if defined VCZH_MSVC
 TEST_CASE(TestOrderBy)
 {
 	vint numbers[]={7, 1, 12, 2, 8, 3, 11, 4, 9, 5, 13, 6, 10};
@@ -942,7 +937,6 @@ TEST_CASE(TestOrderBy)
 	CopyFrom(list, From(numbers).OrderBy(Compare));
 	CHECK_LIST_ITEMS(list, {1 _ 2 _ 3 _ 4 _ 5 _ 6 _ 7 _ 8 _ 9 _ 10 _ 11 _ 12 _ 13});
 }
-#endif
 
 TEST_CASE(TestRange)
 {
@@ -967,7 +961,6 @@ TEST_CASE(TestGroupBy)
 	CHECK_LIST_ITEMS(keys, {2 _ 5 _ 8});
 }
 
-#if defined VCZH_MSVC
 TEST_CASE(TestFromIterator)
 {
 	vint numbers[]={1, 2, 3, 4, 5};
@@ -982,4 +975,3 @@ TEST_CASE(TestFromIterator)
 	CopyFrom(list, FromArray(numbers));
 	CHECK_LIST_ITEMS(list, {1 _ 2 _ 3 _ 4 _ 5});
 }
-#endif
