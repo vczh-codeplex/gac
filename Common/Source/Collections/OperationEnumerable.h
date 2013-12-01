@@ -186,7 +186,7 @@ namespace vl
 		{
 			Ptr<IEnumerator<T>> ator=a.CreateEnumerator();
 			Ptr<IEnumerator<U>> btor=b.CreateEnumerator();
-			while()
+			while(true)
 			{
 				bool a=ator->Next();
 				bool b=btor->Next();
