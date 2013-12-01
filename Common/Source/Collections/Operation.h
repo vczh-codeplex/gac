@@ -430,6 +430,12 @@ LazyList
 		}
 
 		template<typename T>
+		LazyList<T> From(const LazyList<T>& enumerable)
+		{
+			return enumerable;
+		}
+
+		template<typename T>
 		LazyList<T> From(const T* begin, const T* end)
 		{
 			return FromPointer(begin, end);
