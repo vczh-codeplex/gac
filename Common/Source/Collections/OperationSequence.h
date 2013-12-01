@@ -401,6 +401,12 @@ FromIterator
 				,end(_end)
 			{
 			}
+
+			FromIteratorEnumerable(const FromIteratorEnumerable<T, I>& enumerable)
+				:begin(enumerable.begin)
+				,end(enumerable.end)
+			{
+			}
 		};
 
 		template<typename T>
