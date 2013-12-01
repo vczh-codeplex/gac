@@ -401,7 +401,7 @@ LazyList
 			auto SelectMany(F f)const -> LazyList<decltype(Element(f(T())))>
 			{
 				typedef decltype(Element(f(T()))) U;
-				return Select(f).Aggregate(LazyList<U>(), [](const LazyList<U>& a, const IEnumerable<U>& b){return a.Concat(b);});
+				return Select(f).Aggregate(LazyList<U>(), [](const LazyList<U>& a, const IEnumerable<U>& b)->LazyList<U>{return a.Concat(b);});
 			}
 
 			template<typename F>
