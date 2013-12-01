@@ -12,6 +12,7 @@ Interfaces:
 #define VCZH_COLLECTIONS_INTERFACES
 
 #include "../Basic.h"
+#include "../Pointer.h"
 #include "Pair.h"
 
 namespace vl
