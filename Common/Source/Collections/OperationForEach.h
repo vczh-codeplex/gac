@@ -53,7 +53,7 @@ IEnumerable<T>Ö§³Ö
 			}
 
 			EnumerableForEachIterator(const EnumerableForEachIterator<T>& enumerableIterator)
-				:enumerator(enumerableIterator.iterator)
+				:enumerator(enumerableIterator.enumerator)
 			{
 			}
 
