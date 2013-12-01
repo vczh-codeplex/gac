@@ -179,13 +179,6 @@ LazyList
 			{
 				return new SelectEnumerator<T, FUNCTION_RESULT_TYPE(F)>(xs(), f);
 			}
-
-			template<typename F>
-			auto SelectMany(F f)const -> LazyList<decltype(Element(f(T())))>
-			{
-				typedef decltype(Element(f(T()))) U;
-				return Select(f).Aggregate(LazyList<U>(), [](const LazyList<U>& a, const IEnumerable<U>& b){return a.Concat(b);});
-			}
 			
 			template<typename F>
 			LazyList<T> Where(F f)const
@@ -402,6 +395,13 @@ LazyList
 					CopyFrom(*xs.Obj(), *this);
 					return xs;
 				}
+			}
+
+			template<typename F>
+			auto SelectMany(F f)const -> LazyList<decltype(Element(f(T())))>
+			{
+				typedef decltype(Element(f(T()))) U;
+				return Select(f).Aggregate(LazyList<U>(), [](const LazyList<U>& a, const IEnumerable<U>& b)->LazyList<U>{return a.Concat(b);});
 			}
 
 			template<typename F>
