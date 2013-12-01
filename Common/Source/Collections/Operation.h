@@ -122,6 +122,9 @@ LazyList
 		protected:
 			Ptr<IEnumerator<T>>			enumeratorPrototype;
 
+			template<typename T>
+			static T Element(const IEnumerable<T>&);
+
 			IEnumerator<T>* xs()const
 			{
 				return enumeratorPrototype->Clone();
@@ -178,9 +181,9 @@ LazyList
 			}
 
 			template<typename F>
-			auto SelectMany(F f)const -> LazyList<decltype(From(f(T())).First())>
+			auto SelectMany(F f)const -> LazyList<decltype(Element(f(T())))>
 			{
-				typedef decltype(From(f(T())).First()) U;
+				typedef decltype(Element(f(T()))) U;
 				return Select(f).Aggregate(LazyList<U>(), [](const LazyList<U>& a, const IEnumerable<U>& b){return a.Concat(b);});
 			}
 			
