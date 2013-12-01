@@ -210,7 +210,6 @@ Utf-16
 			while (writed < chars)
 			{
 				wchar_t w = *_buffer++;
-				wcout<<L"WRITING: "<<w<<endl;
 				if (w < 0x10000)
 				{
 					utf16 = (vuint16_t)w;
@@ -221,11 +220,11 @@ Utf-16
 				{
 					wchar_t inc = w - 0x10000;
 
-					utf16 = (vuint16_t)(w / 0x400) + 0xD800;
+					utf16 = (vuint16_t)(inc / 0x400) + 0xD800;
 					if (stream->Write(&utf16buf[0], 1) != 1) break;
 					if (stream->Write(&utf16buf[1], 1) != 1) break;
 
-					utf16 = (vuint16_t)(w % 0x400) + 0xDC00;
+					utf16 = (vuint16_t)(inc % 0x400) + 0xDC00;
 					if (stream->Write(&utf16buf[0], 1) != 1) break;
 					if (stream->Write(&utf16buf[1], 1) != 1) break;
 				}
@@ -323,11 +322,11 @@ Utf-16-be
 				{
 					wchar_t inc = w - 0x10000;
 
-					utf16 = (vuint16_t)(w / 0x400) + 0xD800;
+					utf16 = (vuint16_t)(inc / 0x400) + 0xD800;
 					if (stream->Write(&utf16buf[1], 1) != 1) break;
 					if (stream->Write(&utf16buf[0], 1) != 1) break;
 
-					utf16 = (vuint16_t)(w % 0x400) + 0xDC00;
+					utf16 = (vuint16_t)(inc % 0x400) + 0xDC00;
 					if (stream->Write(&utf16buf[1], 1) != 1) break;
 					if (stream->Write(&utf16buf[0], 1) != 1) break;
 				}
