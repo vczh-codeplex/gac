@@ -51,8 +51,8 @@ namespace vl
 		{
 		protected:
 			IStream*						stream;
-			unsigned char					cache;
-			bool							cacheAvailable;
+			vuint8_t						cacheBuffer[sizeof(wchar_t)];
+			vint							cacheSize;
 
 			virtual vint					WriteString(wchar_t* _buffer, vint chars)=0;
 		public:
@@ -67,8 +67,8 @@ namespace vl
 		{
 		protected:
 			IStream*						stream;
-			unsigned char					cache;
-			bool							cacheAvailable;
+			vuint8_t						cacheBuffer[sizeof(wchar_t)];
+			vint							cacheSize;
 
 			virtual vint					ReadString(wchar_t* _buffer, vint chars)=0;
 		public:

@@ -4,6 +4,9 @@
 #elif defined VCZH_GCC
 #include "../String.h"
 #include <string.h>
+#include <iostream>
+#include <string>
+using namespace std;
 #endif
 
 namespace vl
@@ -17,8 +20,7 @@ CharEncoder
 
 		CharEncoder::CharEncoder()
 			:stream(0)
-			,cache(0)
-			,cacheAvailable(false)
+			,cacheSize(0)
 		{
 		}
 
@@ -33,28 +35,28 @@ CharEncoder
 
 		vint CharEncoder::Write(void* _buffer, vint _size)
 		{
-			const vint all=(cacheAvailable?1:0)+_size;
-			const vint chars=all/2;
-			const vint bytes=chars*2;
+			const vint all=cacheSize+_size;
+			const vint chars=all/sizeof(wchar_t);
+			const vint bytes=chars*sizeof(wchar_t);
 			wchar_t* unicode=0;
 			bool needToFree=false;
 			vint result=0;
 
 			if(chars)
 			{
-				if(cacheAvailable)
+				if(cacheSize>0)
 				{
 					unicode=new wchar_t[chars];
-					memcpy(unicode, &cache, sizeof(cache));
-					memcpy(((unsigned char*)unicode)+1, _buffer, bytes-sizeof(cache));
+					memcpy(unicode, cacheBuffer, cacheSize);
+					memcpy(((vuint8_t*)unicode)+cacheSize, _buffer, bytes-cacheSize);
 					needToFree=true;
 				}
 				else
 				{
 					unicode=(wchar_t*)_buffer;
 				}
-				result=WriteString(unicode, chars)*2-(cacheAvailable?1:0);
-				cacheAvailable=false;
+				result=WriteString(unicode, chars)*sizeof(wchar_t)-cacheSize;
+				cacheSize=0;
 			}
 
 			if(needToFree)
@@ -63,9 +65,9 @@ CharEncoder
 			}
 			if(all-bytes>0)
 			{
-				cache=((unsigned char*)_buffer)[_size-1];
-				cacheAvailable=true;
-				result++;
+				cacheSize=all-bytes;
+				memcpy(cacheBuffer, (vuint8_t*)_buffer+_size-cacheSize, cacheSize);
+				result+=cacheSize;
 			}
 			return result;
 		}
@@ -76,8 +78,7 @@ CharDecoder
 
 		CharDecoder::CharDecoder()
 			:stream(0)
-			,cache(0)
-			,cacheAvailable(false)
+			,cacheSize(0)
 		{
 		}
 
@@ -92,30 +93,34 @@ CharDecoder
 
 		vint CharDecoder::Read(void* _buffer, vint _size)
 		{
-			unsigned char* unicode=(unsigned char*)_buffer;
+			vuint8_t* unicode=(vuint8_t*)_buffer;
 			vint result=0;
-			if(cacheAvailable && _size>0)
 			{
-				*unicode++=cache;
-				cacheAvailable=false;
-				result++;
+				vint index=0;
+				while(cacheSize>0 && _size>0)
+				{
+					*unicode++=cacheBuffer[index]++;
+					cacheSize--;
+					_size--;
+					result++;
+				}
 			}
 
-			const vint chars=_size/2;
-			vint bytes=ReadString((wchar_t*)unicode, chars)*2;
+			const vint chars=_size/sizeof(wchar_t);
+			vint bytes=ReadString((wchar_t*)unicode, chars)*sizeof(wchar_t);
 			result+=bytes;
 			_size-=bytes;
 			unicode+=bytes;
 
-			if(_size-result==1)
+			if(_size>0)
 			{
 				wchar_t c;
 				if(ReadString(&c, 1)==1)
 				{
-					unicode[0]=((unsigned char*)&c)[0];
-					cache=((unsigned char*)&c)[1];
-					cacheAvailable=true;
-					result++;
+					cacheSize=sizeof(wchar_t)-_size;
+					memcpy(unicode, &c, _size);
+					memcpy(cacheBuffer, (vuint8_t*)c+_size, cacheSize);
+					result+=_size;
 				}
 			}
 			return result;
@@ -205,6 +210,7 @@ Utf-16
 			while (writed < chars)
 			{
 				wchar_t w = *_buffer++;
+				wcout<<L"WRITING: "<<w<<endl;
 				if (w < 0x10000)
 				{
 					utf16 = (vuint16_t)w;
@@ -258,7 +264,7 @@ Utf-16
 					if (stream->Read(&utf16_2, 2) != 2) break;
 					if (0xDC00 <= utf16_2 && utf16_2 <= 0xDFFF)
 					{
-						*writing++ = (wchar_t)(utf16_1 - 0xD800) * 400 + (wchar_t)(utf16_2 - 0xDC00) + 0x10000;
+						*writing++ = (wchar_t)(utf16_1 - 0xD800) * 0x400 + (wchar_t)(utf16_2 - 0xDC00) + 0x10000;
 					}
 					else
 					{
@@ -383,7 +389,7 @@ Utf-16-be
 
 					if (0xDC00 <= utf16_2 && utf16_2 <= 0xDFFF)
 					{
-						*writing++ = (wchar_t)(utf16_1 - 0xD800) * 400 + (wchar_t)(utf16_2 - 0xDC00) + 0x10000;
+						*writing++ = (wchar_t)(utf16_1 - 0xD800) * 0x400 + (wchar_t)(utf16_2 - 0xDC00) + 0x10000;
 					}
 					else
 					{
