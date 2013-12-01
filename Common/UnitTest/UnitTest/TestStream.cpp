@@ -594,7 +594,6 @@ void TestEncodingInternal(IEncoder& encoder, IDecoder& decoder, BomEncoder::Enco
 {
 	//const wchar_t* text=L"𩰪㦲𦰗𠀼 𣂕𣴑𣱳𦁚 Vczh is genius!@我是天才";
 	const wchar_t* text=L"A𩰪我";
-	//const wchar_t* text=L"A我";
 	TEST_PRINT(L"\tTest: " + WString(text));
 	MemoryStream memoryStream;
 	{
@@ -646,10 +645,10 @@ TEST_CASE(TestEncoding)
 		TestEncodingInternal(encoder, decoder, BomEncoder::Mbcs, true);
 	}
 	{
-		//TEST_PRINT(L"\t<UTF8, NO-BOM>");
-		//Utf8Encoder encoder;
-		//Utf8Decoder decoder;
-		//TestEncodingInternal(encoder, decoder, BomEncoder::Utf8, false);
+		TEST_PRINT(L"<UTF8, NO-BOM>");
+		Utf8Encoder encoder;
+		Utf8Decoder decoder;
+		TestEncodingInternal(encoder, decoder, BomEncoder::Utf8, false);
 	}
 	{
 		TEST_PRINT(L"<UTF16, NO-BOM>");
@@ -670,10 +669,10 @@ TEST_CASE(TestEncoding)
 		TestEncodingInternal(encoder, decoder, BomEncoder::Mbcs, true);
 	}
 	{
-		//TEST_PRINT(L"\t<UTF8, BOM>");
-		//BomEncoder encoder(BomEncoder::Utf8);
-		//BomDecoder decoder;
-		//TestEncodingInternal(encoder, decoder, BomEncoder::Utf8, true);
+		TEST_PRINT(L"<UTF8, BOM>");
+		BomEncoder encoder(BomEncoder::Utf8);
+		BomDecoder decoder;
+		TestEncodingInternal(encoder, decoder, BomEncoder::Utf8, true);
 	}
 	{
 		TEST_PRINT(L"<UTF16, BOM>");
