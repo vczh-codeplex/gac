@@ -127,6 +127,11 @@ LazyList
 				return enumeratorPrototype->Clone();
 			}
 		public:
+			LazyList(IEnumerator<T>* enumerator)
+				:enumeratorPrototype(enumerator)
+			{
+			}
+
 			LazyList(Ptr<IEnumerator<T>> enumerator)
 				:enumeratorPrototype(enumerator)
 			{
