@@ -14,7 +14,7 @@ argument cannot be modified
 ======================================================
 ^
 * /
-+ - not
++ - not &(for string concatination)
 shl shr
 < > <= >= != ==
 xor
