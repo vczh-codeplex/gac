@@ -135,10 +135,9 @@ namespace vl
 		const wchar_t*		Description()const;
 	};
 
-#if defined _DEBUG || defined VCZH_GCC
+#if defined VCZH_MSVC || defined VCZH_GCC || defined _DEBUG
 	#define CHECK_ERROR(CONDITION,DESCRIPTION) do{if(!(CONDITION))throw Error(DESCRIPTION);}while(0)
-#endif
-#ifdef NDEBUG
+#elif defined NDEBUG
 	#define CHECK_ERROR(CONDITION,DESCRIPTION)
 #endif
 
