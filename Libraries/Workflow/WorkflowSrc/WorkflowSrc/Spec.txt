@@ -20,6 +20,7 @@ shl shr
 xor
 and
 or
+?? (if a failed or null then b)
 ----------------------------
 "String" // can be implicitly converted to all other serializable types
 $"1 + 2 = $(1 + 2)"
