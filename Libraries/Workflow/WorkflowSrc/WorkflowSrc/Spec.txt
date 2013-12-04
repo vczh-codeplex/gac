@@ -74,11 +74,14 @@ attach(event, function)
 detach(handler)
 typeof(type)
 type(expression)
-----------------------------
-bind(expression)						// return an ValueSubscription
+======================================================
+binding(expression)						// analyze "expression" and return an instance of ValueSuscription
+x.y.bind(z.u.v)							// subscribe x.y.zChanged with the value of x.y.z.u.v
+x.y.bind(z.u.v on zUpdated)				// subscribe x.y.zUpdated (if exists) or <current-scope>.zUpdated (if x.y.zUpdated not exists) additionally
 
-expression on event1, event2, ...		// can only appear in bind
-										// code in lambda expression will not be analyzed and subscribe
+code in lambda expression will not be analyzed and subscribe
+if x.y.zChanged exists, then binding(expression) == binding(x.y.bind(z on zChanged))
+binding(a.b.c() ? d.e : f g) == binding(a.bind(b.c()?d.bind(e on eChanged):f.bind(g on gChanged) on bChanged))
 ======================================================
 func Name(a : Type, b : Type) : Type <statement>
 
