@@ -12,6 +12,7 @@ captured variable cannot be modified
 struct fields cannot be modified
 argument cannot be modified
 ======================================================
++ - x[y]
 ^
 * /
 + - not &(for string concatination)
