@@ -40,6 +40,9 @@ Attribute
 			class IMethodInfo;
 			class IMethodGroupInfo;
 			class IValueFunctionProxy;
+			class IValueInterfaceProxy;
+			class IValueListener;
+			class IValueSubscription;
 		}
 
 		class DescriptableObject
@@ -845,6 +848,20 @@ Interface Implementation Proxy
 			{
 			public:
 				virtual Value					Invoke(Ptr<IValueList> arguments)=0;
+			};
+
+			class IValueListener : public virtual IDescriptable, public Description<IValueSubscription>
+			{
+			public:
+				virtual IValueSubscription*		GetSubscription() = 0;
+				virtual bool					GetStopped() = 0;
+				virtual bool					StopListening() = 0;
+			};
+
+			class IValueSubscription : public virtual IDescriptable, public Description<IValueSubscription>
+			{
+			public:
+				virtual Ptr<IValueListener>		Subscribe(Ptr<IValueFunctionProxy> callback) = 0;
 			};
 
 			class ValueInterfaceRoot : public virtual IDescriptable

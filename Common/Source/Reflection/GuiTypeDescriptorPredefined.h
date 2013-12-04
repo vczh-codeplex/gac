@@ -377,6 +377,8 @@ Predefined Types
 			template<>struct TypeInfo<IValueDictionary>{static const wchar_t* TypeName;};
 			template<>struct TypeInfo<IValueInterfaceProxy>{static const wchar_t* TypeName;};
 			template<>struct TypeInfo<IValueFunctionProxy>{static const wchar_t* TypeName;};
+			template<>struct TypeInfo<IValueListener>{static const wchar_t* TypeName;};
+			template<>struct TypeInfo<IValueSubscription>{static const wchar_t* TypeName;};
 
 			template<>struct TypeInfo<IValueSerializer>{static const wchar_t* TypeName;};
 			template<>struct TypeInfo<ITypeInfo>{static const wchar_t* TypeName;};

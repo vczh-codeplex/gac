@@ -73,6 +73,11 @@ attach(event, function)
 detach(handler)
 typeof(type)
 type(expression)
+----------------------------
+bind(expression)						// return an ValueSubscription
+
+expression on event1, event2, ...		// can only appear in bind
+										// code in lambda expression will not be analyzed and subscribe
 ======================================================
 func Name(a : Type, b : Type) : Type <statement>
 
