@@ -150,6 +150,8 @@ TypeName
 			const wchar_t* TypeInfo<IValueDictionary>::TypeName			= L"system::Dictionary";
 			const wchar_t* TypeInfo<IValueInterfaceProxy>::TypeName		= L"system::InterfaceProxy";
 			const wchar_t* TypeInfo<IValueFunctionProxy>::TypeName		= L"system::Function";
+			const wchar_t* TypeInfo<IValueListener>::TypeName			= L"system::Listener";
+			const wchar_t* TypeInfo<IValueSubscription>::TypeName		= L"system::Subscription";
 
 			const wchar_t* TypeInfo<IValueSerializer>::TypeName			= L"system::reflection::ValueSerializer";
 			const wchar_t* TypeInfo<ITypeInfo>::TypeName				= L"system::reflection::TypeInfo";
@@ -659,6 +661,18 @@ Collections
 				CLASS_MEMBER_BASE(IDescriptable)
 				CLASS_MEMBER_METHOD(Invoke, {L"arguments"})
 			END_CLASS_MEMBER(IValueFunctionProxy)
+
+			BEGIN_CLASS_MEMBER(IValueListener)
+				CLASS_MEMBER_BASE(IDescriptable)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Subscription)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Stopped)
+				CLASS_MEMBER_METHOD(StopListening, NO_PARAMETER)
+			END_CLASS_MEMBER(IValueListener)
+
+			BEGIN_CLASS_MEMBER(IValueSubscription)
+				CLASS_MEMBER_BASE(IDescriptable)
+				CLASS_MEMBER_METHOD(Subscribe, { L"callback" })
+			END_CLASS_MEMBER(IValueSubscription)
 
 			BEGIN_CLASS_MEMBER(IValueSerializer)
 				CLASS_MEMBER_BASE(IDescriptable)
