@@ -75,13 +75,20 @@ detach(handler)
 typeof(type)
 type(expression)
 ======================================================
-bind(expression)						// analyze "expression" and return an instance of ValueSuscription
-x.y.observe(z).u.v						// subscribe x.y.zChanged with the value of x.y.z.u.v
-x.y.observe(z on zUpdated).u.v			// subscribe x.y.zUpdated (if exists) or <current-scope>.zUpdated (if x.y.zUpdated not exists) additionally
+bind(expression)										// analyze "expression" and return an instance of ValueSuscription
+x.y.observe(z).u.v										// subscribe x.y.zChanged with the value of x.y.z.u.v
+x.y.observe(z on zUpdated).u.v							// subscribe x.y.zUpdated (if exists) or <current-scope>.zUpdated (if x.y.zUpdated not exists) additionally
+x.y.observe as source(source.z on source.zUpdated).u.v	// equivalent
+x.y.observe as source(source.z.u.v on source.zUpdated)	// equivalent
 
 code in lambda expression will not be analyzed and subscribe
-if x.y.zChanged exists, then bind(x.y.z) == bind(x.y.observe(z on zChanged))
-bind(a.b.c() ? d.e : f g) == bind(a.observe(b on bChanged).c()?d.observe(e on eChanged):f.observe(g on gChanged))
+
+bind(x.y.z)
+	== bind(x.y.observe(z on zChanged))
+bind(a.b.c() ? d.e : f g)
+	== bind(a.observe(b on bChanged).c()?d.observe(e on eChanged):f.observe(g on gChanged))
+	== bind(a.observe as _a(_a.b.c()?d.observe as _d(_d.e on _d.eChanged):f.observe as _f(_f.g on _f.gChanged) on _a.bChanged))
+	
 ======================================================
 func Name(a : Type, b : Type) : Type <statement>
 
