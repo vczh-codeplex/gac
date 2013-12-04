@@ -101,4 +101,6 @@ select (<expression>)
 while (condition) <statement>
 for (x in (<collection> | [reversed] <range>)) <statement>
 
+try <statement> [catch(ex) <statement>] [finally <statement>]
+
 using <type-path>; // can contain class
