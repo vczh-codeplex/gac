@@ -568,6 +568,66 @@ Helper Functions
 			}
 
 /***********************************************************************
+Interface Implementation Proxy (Implement)
+***********************************************************************/
+
+			namespace interface_proxy
+			{
+				class description_IValueListener : public ValueInterfaceRoot, public IValueListener
+				{
+				public:
+					description_IValueListener(Ptr<IValueInterfaceProxy> proxy)
+						:ValueInterfaceRoot(proxy)
+					{
+					}
+
+					static Ptr<IValueListener> Create(Ptr<IValueInterfaceProxy> proxy)
+					{
+						return new description_IValueListener(proxy);
+					}
+
+					IValueSubscription* GetSubscription()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetSubscription);
+					}
+
+					bool GetStopped()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetStopped);
+					}
+
+					bool StopListening()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(StopListening);
+					}
+				};
+
+				class description_IValueSubscription: public ValueInterfaceRoot, public IValueSubscription
+				{
+				public:
+					description_IValueSubscription(Ptr<IValueInterfaceProxy> proxy)
+						:ValueInterfaceRoot(proxy)
+					{
+					}
+
+					static Ptr<IValueSubscription> Create(Ptr<IValueInterfaceProxy> proxy)
+					{
+						return new description_IValueSubscription(proxy);
+					}
+
+					Ptr<IValueListener> Subscribe(Ptr<IValueFunctionProxy> callback)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(Subscribe, callback);
+					}
+
+					bool Close()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(Close);
+					}
+				};
+			}
+
+/***********************************************************************
 Collections
 ***********************************************************************/
 
@@ -664,6 +724,7 @@ Collections
 
 			BEGIN_CLASS_MEMBER(IValueListener)
 				CLASS_MEMBER_BASE(IDescriptable)
+				CLASS_MEMBER_EXTERNALCTOR(Ptr<IValueListener>(Ptr<IValueInterfaceProxy>), {L"proxy"}, &interface_proxy::description_IValueListener::Create)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(Subscription)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(Stopped)
 				CLASS_MEMBER_METHOD(StopListening, NO_PARAMETER)
@@ -671,6 +732,7 @@ Collections
 
 			BEGIN_CLASS_MEMBER(IValueSubscription)
 				CLASS_MEMBER_BASE(IDescriptable)
+				CLASS_MEMBER_EXTERNALCTOR(Ptr<IValueSubscription>(Ptr<IValueInterfaceProxy>), {L"proxy"}, &interface_proxy::description_IValueSubscription::Create)
 				CLASS_MEMBER_METHOD(Subscribe, { L"callback" })
 				CLASS_MEMBER_METHOD(Close, NO_PARAMETER)
 			END_CLASS_MEMBER(IValueSubscription)

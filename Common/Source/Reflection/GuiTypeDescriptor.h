@@ -865,6 +865,10 @@ Interface Implementation Proxy
 				virtual bool					Close() = 0;
 			};
 
+/***********************************************************************
+Interface Implementation Proxy (Implement)
+***********************************************************************/
+
 			class ValueInterfaceRoot : public virtual IDescriptable
 			{
 			protected:
