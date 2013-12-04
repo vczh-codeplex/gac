@@ -862,6 +862,7 @@ Interface Implementation Proxy
 			{
 			public:
 				virtual Ptr<IValueListener>		Subscribe(Ptr<IValueFunctionProxy> callback) = 0;
+				virtual bool					Close() = 0;
 			};
 
 			class ValueInterfaceRoot : public virtual IDescriptable
