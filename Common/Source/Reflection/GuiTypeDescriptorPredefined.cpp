@@ -672,6 +672,7 @@ Collections
 			BEGIN_CLASS_MEMBER(IValueSubscription)
 				CLASS_MEMBER_BASE(IDescriptable)
 				CLASS_MEMBER_METHOD(Subscribe, { L"callback" })
+				CLASS_MEMBER_METHOD(Close, NO_PARAMETER)
 			END_CLASS_MEMBER(IValueSubscription)
 
 			BEGIN_CLASS_MEMBER(IValueSerializer)
