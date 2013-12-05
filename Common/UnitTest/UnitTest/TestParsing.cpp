@@ -73,9 +73,6 @@ namespace test
 		CompactJointPDA(jointPDA);
 		LogParsingData(jointPDA, L"Parsing."+name+L".JPDA-Compacted.txt", L"Compacted Joint PDA");
 
-		MergeJointPDAStates(jointPDA);
-		LogParsingData(jointPDA, L"Parsing."+name+L".JPDA-Merged.txt", L"Merged Joint PDA");
-
 		MarkLeftRecursiveInJointPDA(jointPDA, errors);
 		LogParsingData(jointPDA, L"Parsing."+name+L".JPDA-Marked.txt", L"Compacted Joint PDA", errors);
 		TEST_ASSERT(errors.Count()==0);
