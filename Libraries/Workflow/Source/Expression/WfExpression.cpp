@@ -78,6 +78,7 @@ L"\r\n"L"\tEQ,"
 L"\r\n"L"\tNE,"
 L"\r\n"L"\tXor,"
 L"\r\n"L"\tAnd,"
+L"\r\n"L"\tOr,"
 L"\r\n"L"\tNot,"
 L"\r\n"L"\tFailedThen,"
 L"\r\n"L"}"
@@ -89,19 +90,64 @@ L"\r\n"L"\tExpression\t\t\tfirst;"
 L"\r\n"L"\tExpression\t\t\tsecond;"
 L"\r\n"L"}"
 L"\r\n"L""
+L"\r\n"L"class LetExpression : Expression"
+L"\r\n"L"{"
+L"\r\n"L"\ttoken\t\t\t\tname;"
+L"\r\n"L"\tExpression\t\t\tvalue;"
+L"\r\n"L"\tExpression\t\t\texp;"
+L"\r\n"L"}"
+L"\r\n"L""
+L"\r\n"L"class IfExpression : Expression"
+L"\r\n"L"{"
+L"\r\n"L"\tExpression\t\t\tcondition;"
+L"\r\n"L"\tExpression\t\t\ttrueBranch;"
+L"\r\n"L"\tExpression\t\t\tfalseBranch;"
+L"\r\n"L"}"
+L"\r\n"L""
+L"\r\n"L"enum RangeBoundary"
+L"\r\n"L"{"
+L"\r\n"L"\tInclusive,"
+L"\r\n"L"\tExclusive,"
+L"\r\n"L"}"
+L"\r\n"L""
+L"\r\n"L"class RangeExpression : Expression"
+L"\r\n"L"{"
+L"\r\n"L"\tExpression\t\t\tbegin;"
+L"\r\n"L"\tRangeBoundary\t\tbeginBoundary;"
+L"\r\n"L"\tExpression\t\t\tend;"
+L"\r\n"L"\tRangeBoundary\t\tendBoundary;"
+L"\r\n"L"}"
+L"\r\n"L""
+L"\r\n"L"enum ElementExisting"
+L"\r\n"L"{"
+L"\r\n"L"\tExists,"
+L"\r\n"L"\tNotExists,"
+L"\r\n"L"}"
+L"\r\n"L""
+L"\r\n"L"class ElementExpression : Expression"
+L"\r\n"L"{"
+L"\r\n"L"\tElementExisting\t\ttest;"
+L"\r\n"L"\tExpression\t\t\telement;"
+L"\r\n"L"\tExpression\t\t\tcollection;"
+L"\r\n"L"}"
+L"\r\n"L""
 L"\r\n"L"token EXP = \"/^\";"
 L"\r\n"L"token ADD = \"/+\";"
 L"\r\n"L"token SUB = \"-\";"
 L"\r\n"L"token MUL = \"/*\";"
-L"\r\n"L"token DIV = \"/\\\";"
+L"\r\n"L"token DIV = \"//\";"
 L"\r\n"L"token CONCAT = \"&\";"
-L"\r\n"L"token LE = \"/<=\";"
-L"\r\n"L"token GE = \"/>=\";"
+L"\r\n"L"token LE = \"/</=\";"
+L"\r\n"L"token GE = \"/>/=\";"
 L"\r\n"L"token LT = \"/<\";"
 L"\r\n"L"token GT = \"/>\";"
-L"\r\n"L"token EQ = \"=\";"
-L"\r\n"L"token NE = \"!=\";"
+L"\r\n"L"token EQ = \"/=\";"
+L"\r\n"L"token NE = \"/!/=\";"
 L"\r\n"L"token FAILED_THEN = \"/?/?\";"
+L"\r\n"L"token QUESTION_MARK = \"/?\";"
+L"\r\n"L"token COLON = \":\";"
+L"\r\n"L"token SEMICOLON = \";\";"
+L"\r\n"L"token COMMA = \",\";"
 L"\r\n"L"token OPEN_ARRAY = \"/[\";"
 L"\r\n"L"token CLOSE_ARRAY = \"/]\";"
 L"\r\n"L"token OPEN_BRACE = \"/{\";"
@@ -113,9 +159,12 @@ L"\r\n"L"token XOR = \"xor\";"
 L"\r\n"L"token AND = \"and\";"
 L"\r\n"L"token OR = \"or\";"
 L"\r\n"L"token NOT = \"not\";"
-L"\r\n"L"token NULL = \"null\";"
-L"\r\n"L"token TRUE = \"true\";"
-L"\r\n"L"token FALSE = \"false\";"
+L"\r\n"L"token NULL_VALUE = \"null\";"
+L"\r\n"L"token TRUE_VALUE = \"true\";"
+L"\r\n"L"token FALSE_VALUE = \"false\";"
+L"\r\n"L"token LET = \"let\";"
+L"\r\n"L"token IN = \"in\";"
+L"\r\n"L"token RANGE = \"range\";"
 L"\r\n"L""
 L"\r\n"L"token NAME = \"[a-zA-Z_]/w*\";"
 L"\r\n"L"token FLOAT = \"/d+(./d+)?\";"
@@ -124,36 +173,6 @@ L"\r\n"L"token STRING = \"(\'[^\']*\')+|(\"\"[^\"\"]*\"\")+\";"
 L"\r\n"L"token FORMATSTRING = \"/$((\'[^\']*\')+|(\"\"[^\"\"]*\"\")+)\";"
 L"\r\n"L""
 L"\r\n"L"discardtoken SPACE = \"/s+\";"
-L"\r\n"L""
-L"\r\n"L"rule LiteralExpression Literal"
-L"\r\n"L"\t= \"null\" as LiteralExpression with {value = \"Null\"}"
-L"\r\n"L"\t= \"true\" as LiteralExpression with {value = \"True\"}"
-L"\r\n"L"\t= \"false\" as LiteralExpression with {value = \"False\"}"
-L"\r\n"L"\t;"
-L"\r\n"L"rule IntegerExpression Integer"
-L"\r\n"L"\t= INTEGER : value as IntegerExpression"
-L"\r\n"L"\t;"
-L"\r\n"L"rule FloatingExpression FloatingPoint"
-L"\r\n"L"\t= FLOAT : value as FloatingExpression"
-L"\r\n"L"\t;"
-L"\r\n"L"rule StringExpression String"
-L"\r\n"L"\t= STRING : value as StringExpression"
-L"\r\n"L"\t;"
-L"\r\n"L"rule FormatExpression FormatString"
-L"\r\n"L"\t= FORMATSTRING : value as FormatExpression"
-L"\r\n"L"\t;"
-L"\r\n"L""
-L"\r\n"L"rule Expression Constant"
-L"\r\n"L"\t= !Literal"
-L"\r\n"L"\t= !Integer"
-L"\r\n"L"\t= !FloatingPoint"
-L"\r\n"L"\t= !String"
-L"\r\n"L"\t= !FormatString"
-L"\r\n"L"\t;"
-L"\r\n"L""
-L"\r\n"L"rule Expression WorkflowExpression"
-L"\r\n"L"\t= !Constant"
-L"\r\n"L"\t;"
 ;
 
 		vl::WString WfGetParserTextBuffer()
@@ -224,11 +243,38 @@ Parsing Tree Conversion Driver Implementation
 					else if(token->GetValue()==L"NE") { member=WfBinaryOperator::NE; return true; }
 					else if(token->GetValue()==L"Xor") { member=WfBinaryOperator::Xor; return true; }
 					else if(token->GetValue()==L"And") { member=WfBinaryOperator::And; return true; }
+					else if(token->GetValue()==L"Or") { member=WfBinaryOperator::Or; return true; }
 					else if(token->GetValue()==L"Not") { member=WfBinaryOperator::Not; return true; }
 					else if(token->GetValue()==L"FailedThen") { member=WfBinaryOperator::FailedThen; return true; }
 					else { member=WfBinaryOperator::Index; return false; }
 				}
 				member=WfBinaryOperator::Index;
+				return false;
+			}
+
+			bool SetMember(WfRangeBoundary& member, vl::Ptr<vl::parsing::ParsingTreeNode> node, const TokenList& tokens)
+			{
+				vl::Ptr<vl::parsing::ParsingTreeToken> token=node.Cast<vl::parsing::ParsingTreeToken>();
+				if(token)
+				{
+					if(token->GetValue()==L"Inclusive") { member=WfRangeBoundary::Inclusive; return true; }
+					else if(token->GetValue()==L"Exclusive") { member=WfRangeBoundary::Exclusive; return true; }
+					else { member=WfRangeBoundary::Inclusive; return false; }
+				}
+				member=WfRangeBoundary::Inclusive;
+				return false;
+			}
+
+			bool SetMember(WfElementExisting& member, vl::Ptr<vl::parsing::ParsingTreeNode> node, const TokenList& tokens)
+			{
+				vl::Ptr<vl::parsing::ParsingTreeToken> token=node.Cast<vl::parsing::ParsingTreeToken>();
+				if(token)
+				{
+					if(token->GetValue()==L"Exists") { member=WfElementExisting::Exists; return true; }
+					else if(token->GetValue()==L"NotExists") { member=WfElementExisting::NotExists; return true; }
+					else { member=WfElementExisting::Exists; return false; }
+				}
+				member=WfElementExisting::Exists;
 				return false;
 			}
 
@@ -272,6 +318,35 @@ Parsing Tree Conversion Driver Implementation
 				SetMember(tree->op, obj->GetMember(L"op"), tokens);
 				SetMember(tree->first, obj->GetMember(L"first"), tokens);
 				SetMember(tree->second, obj->GetMember(L"second"), tokens);
+			}
+
+			void Fill(vl::Ptr<WfLetExpression> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
+			{
+				SetMember(tree->name, obj->GetMember(L"name"), tokens);
+				SetMember(tree->value, obj->GetMember(L"value"), tokens);
+				SetMember(tree->exp, obj->GetMember(L"exp"), tokens);
+			}
+
+			void Fill(vl::Ptr<WfIfExpression> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
+			{
+				SetMember(tree->condition, obj->GetMember(L"condition"), tokens);
+				SetMember(tree->trueBranch, obj->GetMember(L"trueBranch"), tokens);
+				SetMember(tree->falseBranch, obj->GetMember(L"falseBranch"), tokens);
+			}
+
+			void Fill(vl::Ptr<WfRangeExpression> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
+			{
+				SetMember(tree->begin, obj->GetMember(L"begin"), tokens);
+				SetMember(tree->beginBoundary, obj->GetMember(L"beginBoundary"), tokens);
+				SetMember(tree->end, obj->GetMember(L"end"), tokens);
+				SetMember(tree->endBoundary, obj->GetMember(L"endBoundary"), tokens);
+			}
+
+			void Fill(vl::Ptr<WfElementExpression> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
+			{
+				SetMember(tree->test, obj->GetMember(L"test"), tokens);
+				SetMember(tree->element, obj->GetMember(L"element"), tokens);
+				SetMember(tree->collection, obj->GetMember(L"collection"), tokens);
 			}
 
 			vl::Ptr<vl::parsing::ParsingTreeCustomBase> ConvertClass(vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)override
@@ -331,6 +406,38 @@ Parsing Tree Conversion Driver Implementation
 					Fill(tree.Cast<WfExpression>(), obj, tokens);
 					return tree;
 				}
+				else if(obj->GetType()==L"LetExpression")
+				{
+					vl::Ptr<WfLetExpression> tree = new WfLetExpression;
+					vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
+					Fill(tree, obj, tokens);
+					Fill(tree.Cast<WfExpression>(), obj, tokens);
+					return tree;
+				}
+				else if(obj->GetType()==L"IfExpression")
+				{
+					vl::Ptr<WfIfExpression> tree = new WfIfExpression;
+					vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
+					Fill(tree, obj, tokens);
+					Fill(tree.Cast<WfExpression>(), obj, tokens);
+					return tree;
+				}
+				else if(obj->GetType()==L"RangeExpression")
+				{
+					vl::Ptr<WfRangeExpression> tree = new WfRangeExpression;
+					vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
+					Fill(tree, obj, tokens);
+					Fill(tree.Cast<WfExpression>(), obj, tokens);
+					return tree;
+				}
+				else if(obj->GetType()==L"ElementExpression")
+				{
+					vl::Ptr<WfElementExpression> tree = new WfElementExpression;
+					vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
+					Fill(tree, obj, tokens);
+					Fill(tree.Cast<WfExpression>(), obj, tokens);
+					return tree;
+				}
 				else 
 					return 0;
 			}
@@ -383,6 +490,26 @@ Parsing Tree Conversion Implementation
 			return WfConvertParsingTreeNode(node, tokens).Cast<WfBinaryExpression>();
 		}
 
+		vl::Ptr<WfLetExpression> WfLetExpression::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
+		{
+			return WfConvertParsingTreeNode(node, tokens).Cast<WfLetExpression>();
+		}
+
+		vl::Ptr<WfIfExpression> WfIfExpression::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
+		{
+			return WfConvertParsingTreeNode(node, tokens).Cast<WfIfExpression>();
+		}
+
+		vl::Ptr<WfRangeExpression> WfRangeExpression::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
+		{
+			return WfConvertParsingTreeNode(node, tokens).Cast<WfRangeExpression>();
+		}
+
+		vl::Ptr<WfElementExpression> WfElementExpression::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
+		{
+			return WfConvertParsingTreeNode(node, tokens).Cast<WfElementExpression>();
+		}
+
 /***********************************************************************
 Visitor Pattern Implementation
 ***********************************************************************/
@@ -417,43 +544,29 @@ Visitor Pattern Implementation
 			visitor->Visit(this);
 		}
 
+		void WfLetExpression::Accept(WfExpression::IVisitor* visitor)
+		{
+			visitor->Visit(this);
+		}
+
+		void WfIfExpression::Accept(WfExpression::IVisitor* visitor)
+		{
+			visitor->Visit(this);
+		}
+
+		void WfRangeExpression::Accept(WfExpression::IVisitor* visitor)
+		{
+			visitor->Visit(this);
+		}
+
+		void WfElementExpression::Accept(WfExpression::IVisitor* visitor)
+		{
+			visitor->Visit(this);
+		}
+
 /***********************************************************************
 Parser Function
 ***********************************************************************/
-
-		vl::Ptr<vl::parsing::ParsingTreeNode> WfParseExpressionAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors)
-		{
-			vl::parsing::tabling::ParsingState state(input, table);
-			state.Reset(L"WorkflowExpression");
-			vl::Ptr<vl::parsing::tabling::ParsingGeneralParser> parser=vl::parsing::tabling::CreateStrictParser(table);
-			vl::Ptr<vl::parsing::ParsingTreeNode> node=parser->Parse(state, errors);
-			return node;
-		}
-
-		vl::Ptr<vl::parsing::ParsingTreeNode> WfParseExpressionAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)
-		{
-			vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
-			return WfParseExpressionAsParsingTreeNode(input, table, errors);
-		}
-
-		vl::Ptr<WfExpression> WfParseExpression(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors)
-		{
-			vl::parsing::tabling::ParsingState state(input, table);
-			state.Reset(L"WorkflowExpression");
-			vl::Ptr<vl::parsing::tabling::ParsingGeneralParser> parser=vl::parsing::tabling::CreateStrictParser(table);
-			vl::Ptr<vl::parsing::ParsingTreeNode> node=parser->Parse(state, errors);
-			if(node && errors.Count()==0)
-			{
-				return WfConvertParsingTreeNode(node, state.GetTokens()).Cast<WfExpression>();
-			}
-			return 0;
-		}
-
-		vl::Ptr<WfExpression> WfParseExpression(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)
-		{
-			vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
-			return WfParseExpression(input, table, errors);
-		}
 
 /***********************************************************************
 Table Generation
@@ -491,6 +604,12 @@ namespace vl
 			IMPL_TYPE_INFO_RENAME(WfUnaryExpression, Workflow::WfUnaryExpression)
 			IMPL_TYPE_INFO_RENAME(WfBinaryOperator, Workflow::WfBinaryOperator)
 			IMPL_TYPE_INFO_RENAME(WfBinaryExpression, Workflow::WfBinaryExpression)
+			IMPL_TYPE_INFO_RENAME(WfLetExpression, Workflow::WfLetExpression)
+			IMPL_TYPE_INFO_RENAME(WfIfExpression, Workflow::WfIfExpression)
+			IMPL_TYPE_INFO_RENAME(WfRangeBoundary, Workflow::WfRangeBoundary)
+			IMPL_TYPE_INFO_RENAME(WfRangeExpression, Workflow::WfRangeExpression)
+			IMPL_TYPE_INFO_RENAME(WfElementExisting, Workflow::WfElementExisting)
+			IMPL_TYPE_INFO_RENAME(WfElementExpression, Workflow::WfElementExpression)
 			IMPL_TYPE_INFO_RENAME(WfExpression::IVisitor, Workflow::WfExpression::IVisitor)
 
 			BEGIN_CLASS_MEMBER(WfExpression)
@@ -592,6 +711,7 @@ namespace vl
 				ENUM_NAMESPACE_ITEM(NE)
 				ENUM_NAMESPACE_ITEM(Xor)
 				ENUM_NAMESPACE_ITEM(And)
+				ENUM_NAMESPACE_ITEM(Or)
 				ENUM_NAMESPACE_ITEM(Not)
 				ENUM_NAMESPACE_ITEM(FailedThen)
 			END_ENUM_ITEM(WfBinaryOperator)
@@ -607,6 +727,65 @@ namespace vl
 				CLASS_MEMBER_FIELD(second)
 			END_CLASS_MEMBER(WfBinaryExpression)
 
+			BEGIN_CLASS_MEMBER(WfLetExpression)
+				CLASS_MEMBER_BASE(WfExpression)
+
+				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<WfLetExpression>(), NO_PARAMETER)
+
+				CLASS_MEMBER_EXTERNALMETHOD(get_name, NO_PARAMETER, vl::WString(WfLetExpression::*)(), [](WfLetExpression* node){ return node->name.value; })
+				CLASS_MEMBER_EXTERNALMETHOD(set_name, {L"value"}, void(WfLetExpression::*)(const vl::WString&), [](WfLetExpression* node, const vl::WString& value){ node->name.value = value; })
+
+				CLASS_MEMBER_PROPERTY(name, get_name, set_name)
+				CLASS_MEMBER_FIELD(value)
+				CLASS_MEMBER_FIELD(exp)
+			END_CLASS_MEMBER(WfLetExpression)
+
+			BEGIN_CLASS_MEMBER(WfIfExpression)
+				CLASS_MEMBER_BASE(WfExpression)
+
+				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<WfIfExpression>(), NO_PARAMETER)
+
+
+				CLASS_MEMBER_FIELD(condition)
+				CLASS_MEMBER_FIELD(trueBranch)
+				CLASS_MEMBER_FIELD(falseBranch)
+			END_CLASS_MEMBER(WfIfExpression)
+
+			BEGIN_ENUM_ITEM(WfRangeBoundary)
+				ENUM_ITEM_NAMESPACE(WfRangeBoundary)
+				ENUM_NAMESPACE_ITEM(Inclusive)
+				ENUM_NAMESPACE_ITEM(Exclusive)
+			END_ENUM_ITEM(WfRangeBoundary)
+
+			BEGIN_CLASS_MEMBER(WfRangeExpression)
+				CLASS_MEMBER_BASE(WfExpression)
+
+				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<WfRangeExpression>(), NO_PARAMETER)
+
+
+				CLASS_MEMBER_FIELD(begin)
+				CLASS_MEMBER_FIELD(beginBoundary)
+				CLASS_MEMBER_FIELD(end)
+				CLASS_MEMBER_FIELD(endBoundary)
+			END_CLASS_MEMBER(WfRangeExpression)
+
+			BEGIN_ENUM_ITEM(WfElementExisting)
+				ENUM_ITEM_NAMESPACE(WfElementExisting)
+				ENUM_NAMESPACE_ITEM(Exists)
+				ENUM_NAMESPACE_ITEM(NotExists)
+			END_ENUM_ITEM(WfElementExisting)
+
+			BEGIN_CLASS_MEMBER(WfElementExpression)
+				CLASS_MEMBER_BASE(WfExpression)
+
+				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<WfElementExpression>(), NO_PARAMETER)
+
+
+				CLASS_MEMBER_FIELD(test)
+				CLASS_MEMBER_FIELD(element)
+				CLASS_MEMBER_FIELD(collection)
+			END_CLASS_MEMBER(WfElementExpression)
+
 			BEGIN_CLASS_MEMBER(WfExpression::IVisitor)
 				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
 				CLASS_MEMBER_EXTERNALCTOR(Ptr<WfExpression::IVisitor>(Ptr<IValueInterfaceProxy>), {L"proxy"}, &interface_proxy::WfExpression_IVisitor::Create)
@@ -617,6 +796,10 @@ namespace vl
 				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(WfExpression::IVisitor::*)(WfFormatExpression* node))
 				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(WfExpression::IVisitor::*)(WfUnaryExpression* node))
 				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(WfExpression::IVisitor::*)(WfBinaryExpression* node))
+				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(WfExpression::IVisitor::*)(WfLetExpression* node))
+				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(WfExpression::IVisitor::*)(WfIfExpression* node))
+				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(WfExpression::IVisitor::*)(WfRangeExpression* node))
+				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(WfExpression::IVisitor::*)(WfElementExpression* node))
 			END_CLASS_MEMBER(WfExpression)
 
 			class WfTypeLoader : public vl::Object, public ITypeLoader
@@ -635,6 +818,12 @@ namespace vl
 					ADD_TYPE_INFO(vl::workflow::WfUnaryExpression)
 					ADD_TYPE_INFO(vl::workflow::WfBinaryOperator)
 					ADD_TYPE_INFO(vl::workflow::WfBinaryExpression)
+					ADD_TYPE_INFO(vl::workflow::WfLetExpression)
+					ADD_TYPE_INFO(vl::workflow::WfIfExpression)
+					ADD_TYPE_INFO(vl::workflow::WfRangeBoundary)
+					ADD_TYPE_INFO(vl::workflow::WfRangeExpression)
+					ADD_TYPE_INFO(vl::workflow::WfElementExisting)
+					ADD_TYPE_INFO(vl::workflow::WfElementExpression)
 					ADD_TYPE_INFO(vl::workflow::WfExpression::IVisitor)
 				}
 

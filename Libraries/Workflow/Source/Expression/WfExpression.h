@@ -29,25 +29,32 @@ namespace vl
 			EQ = 10,
 			NE = 11,
 			FAILED_THEN = 12,
-			OPEN_ARRAY = 13,
-			CLOSE_ARRAY = 14,
-			OPEN_BRACE = 15,
-			CLOSE_BRACE = 16,
-			SHL = 17,
-			SHR = 18,
-			XOR = 19,
-			AND = 20,
-			OR = 21,
-			NOT = 22,
-			NULL = 23,
-			TRUE = 24,
-			FALSE = 25,
-			NAME = 26,
-			FLOAT = 27,
-			INTEGER = 28,
-			STRING = 29,
-			FORMATSTRING = 30,
-			SPACE = 31,
+			QUESTION_MARK = 13,
+			COLON = 14,
+			SEMICOLON = 15,
+			COMMA = 16,
+			OPEN_ARRAY = 17,
+			CLOSE_ARRAY = 18,
+			OPEN_BRACE = 19,
+			CLOSE_BRACE = 20,
+			SHL = 21,
+			SHR = 22,
+			XOR = 23,
+			AND = 24,
+			OR = 25,
+			NOT = 26,
+			NULL_VALUE = 27,
+			TRUE_VALUE = 28,
+			FALSE_VALUE = 29,
+			LET = 30,
+			IN = 31,
+			RANGE = 32,
+			NAME = 33,
+			FLOAT = 34,
+			INTEGER = 35,
+			STRING = 36,
+			FORMATSTRING = 37,
+			SPACE = 38,
 		};
 		class WfExpression;
 		class WfLiteralExpression;
@@ -57,6 +64,10 @@ namespace vl
 		class WfFormatExpression;
 		class WfUnaryExpression;
 		class WfBinaryExpression;
+		class WfLetExpression;
+		class WfIfExpression;
+		class WfRangeExpression;
+		class WfElementExpression;
 
 		class WfExpression abstract : public vl::parsing::ParsingTreeCustomBase, vl::reflection::Description<WfExpression>
 		{
@@ -70,6 +81,10 @@ namespace vl
 				virtual void Visit(WfFormatExpression* node)=0;
 				virtual void Visit(WfUnaryExpression* node)=0;
 				virtual void Visit(WfBinaryExpression* node)=0;
+				virtual void Visit(WfLetExpression* node)=0;
+				virtual void Visit(WfIfExpression* node)=0;
+				virtual void Visit(WfRangeExpression* node)=0;
+				virtual void Visit(WfElementExpression* node)=0;
 			};
 
 			virtual void Accept(WfExpression::IVisitor* visitor)=0;
@@ -168,6 +183,7 @@ namespace vl
 			NE,
 			Xor,
 			And,
+			Or,
 			Not,
 			FailedThen,
 		};
@@ -184,14 +200,70 @@ namespace vl
 			static vl::Ptr<WfBinaryExpression> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 		};
 
+		class WfLetExpression : public WfExpression, vl::reflection::Description<WfLetExpression>
+		{
+		public:
+			vl::parsing::ParsingToken name;
+			vl::Ptr<WfExpression> value;
+			vl::Ptr<WfExpression> exp;
+
+			void Accept(WfExpression::IVisitor* visitor)override;
+
+			static vl::Ptr<WfLetExpression> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
+		};
+
+		class WfIfExpression : public WfExpression, vl::reflection::Description<WfIfExpression>
+		{
+		public:
+			vl::Ptr<WfExpression> condition;
+			vl::Ptr<WfExpression> trueBranch;
+			vl::Ptr<WfExpression> falseBranch;
+
+			void Accept(WfExpression::IVisitor* visitor)override;
+
+			static vl::Ptr<WfIfExpression> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
+		};
+
+		enum class WfRangeBoundary
+		{
+			Inclusive,
+			Exclusive,
+		};
+
+		class WfRangeExpression : public WfExpression, vl::reflection::Description<WfRangeExpression>
+		{
+		public:
+			vl::Ptr<WfExpression> begin;
+			WfRangeBoundary beginBoundary;
+			vl::Ptr<WfExpression> end;
+			WfRangeBoundary endBoundary;
+
+			void Accept(WfExpression::IVisitor* visitor)override;
+
+			static vl::Ptr<WfRangeExpression> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
+		};
+
+		enum class WfElementExisting
+		{
+			Exists,
+			NotExists,
+		};
+
+		class WfElementExpression : public WfExpression, vl::reflection::Description<WfElementExpression>
+		{
+		public:
+			WfElementExisting test;
+			vl::Ptr<WfExpression> element;
+			vl::Ptr<WfExpression> collection;
+
+			void Accept(WfExpression::IVisitor* visitor)override;
+
+			static vl::Ptr<WfElementExpression> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
+		};
+
 		extern vl::WString WfGetParserTextBuffer();
 		extern vl::Ptr<vl::parsing::ParsingTreeCustomBase> WfConvertParsingTreeNode(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 		extern vl::Ptr<vl::parsing::tabling::ParsingTable> WfLoadTable();
-
-		extern vl::Ptr<vl::parsing::ParsingTreeNode> WfParseExpressionAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
-		extern vl::Ptr<vl::parsing::ParsingTreeNode> WfParseExpressionAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
-		extern vl::Ptr<WfExpression> WfParseExpression(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
-		extern vl::Ptr<WfExpression> WfParseExpression(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
 	}
 }
 namespace vl
@@ -212,6 +284,12 @@ namespace vl
 			DECL_TYPE_INFO(vl::workflow::WfUnaryExpression)
 			DECL_TYPE_INFO(vl::workflow::WfBinaryOperator)
 			DECL_TYPE_INFO(vl::workflow::WfBinaryExpression)
+			DECL_TYPE_INFO(vl::workflow::WfLetExpression)
+			DECL_TYPE_INFO(vl::workflow::WfIfExpression)
+			DECL_TYPE_INFO(vl::workflow::WfRangeBoundary)
+			DECL_TYPE_INFO(vl::workflow::WfRangeExpression)
+			DECL_TYPE_INFO(vl::workflow::WfElementExisting)
+			DECL_TYPE_INFO(vl::workflow::WfElementExpression)
 			DECL_TYPE_INFO(vl::workflow::WfExpression::IVisitor)
 
 			namespace interface_proxy
@@ -255,6 +333,26 @@ namespace vl
 					}
 
 					void Visit(vl::workflow::WfBinaryExpression* node)override
+					{
+						INVOKE_INTERFACE_PROXY(Visit, node);
+					}
+
+					void Visit(vl::workflow::WfLetExpression* node)override
+					{
+						INVOKE_INTERFACE_PROXY(Visit, node);
+					}
+
+					void Visit(vl::workflow::WfIfExpression* node)override
+					{
+						INVOKE_INTERFACE_PROXY(Visit, node);
+					}
+
+					void Visit(vl::workflow::WfRangeExpression* node)override
+					{
+						INVOKE_INTERFACE_PROXY(Visit, node);
+					}
+
+					void Visit(vl::workflow::WfElementExpression* node)override
 					{
 						INVOKE_INTERFACE_PROXY(Visit, node);
 					}
