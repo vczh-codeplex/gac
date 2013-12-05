@@ -3,8 +3,9 @@
 #include <crtdbg.h>
 #include <windows.h>
 
-#include "..\..\Source\WorkflowVlppReferences.h"
 #include "..\..\..\..\Common\Source\Console.h"
+#include "..\..\Source\WorkflowVlppReferences.h"
+#include "..\..\Source\Expression\WfExpression.h"
 
 using namespace vl;
 using namespace vl::console;

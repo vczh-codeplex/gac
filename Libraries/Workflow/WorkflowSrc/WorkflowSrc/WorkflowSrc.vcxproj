@@ -203,6 +203,7 @@
     <ClInclude Include="..\..\..\..\Common\Source\String.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Threading.h" />
     <ClInclude Include="..\..\..\..\Common\Source\UnitTest\UnitTest.h" />
+    <ClInclude Include="..\..\Source\Expression\WfExpression.h" />
     <ClInclude Include="..\..\Source\WorkflowVlppReferences.h" />
   </ItemGroup>
   <ItemGroup>
@@ -251,10 +252,15 @@
     <ClCompile Include="..\..\..\..\Common\Source\String.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\Threading.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\UnitTest\UnitTest.cpp" />
+    <ClCompile Include="..\..\Source\Expression\WfExpression.cpp" />
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <Text Include="..\..\Source\Expression\WfExpression.parser.txt" />
     <Text Include="Spec.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\Source\Expression\Codegen.bat" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
