@@ -260,7 +260,11 @@ rule Expression Exp9
 	= !Exp8
 	= Exp9 : first "??" Exp8 : second as BinaryExpression with {op = "FailedThen"}
 	;
+rule Expression Exp10
+	= !Exp9
+	= Exp9 : condition "?" Exp10 : trueBranch ":" Exp10 : falseBranch as IfExpression
+	;
 
 rule Expression WorkflowExpression
-	= !Exp9
+	= !Exp10
 	;
