@@ -1,0 +1,58 @@
+include:"../../../../Common/Source/Parsing/Parsing.h"
+include:"../../../../Common/Source/Parsing/ParsingDefinitions.h"
+include:"../../../../Common/Source/Parsing/ParsingAutomaton.h"
+namespace:vl.workflow
+reflection:Workflow
+classPrefix:Wf
+parser:ParseExpression(WorkflowExpression)
+grammar:
+
+class Expression
+{
+}
+
+class FloatingExpression : Expression
+{
+	token				value;
+}
+
+class IntegerExpression : Expression
+{
+	token				value;
+}
+
+class StringExpression : Expression
+{
+	token				value;
+}
+
+class FormatExpression : Expression
+{
+	token				value;
+}
+
+token NAME = "[a-zA-Z_]/w*";
+token FLOAT = "/d+(./d+)?";
+token INTEGER = "/d+(./d+)?";
+token STRING = "('[^']*')+|(""[^""]*"")+";
+token FORMATSTRING = "/$(('[^']*')+|(""[^""]*"")+)";
+discardtoken SPACE = "/s+";
+
+rule IntegerExpression Integer
+        = INTEGER : value as IntegerExpression
+        ;
+rule FloatingExpression FloatingPoint
+        = FLOAT : value as FloatingExpression
+        ;
+rule StringExpression String
+        = STRING : value as StringExpression
+        ;
+rule FormatExpression FormatString
+        = FORMATSTRING : value as FormatExpression
+        ;
+rule Expression WorkflowExpression
+		= !Integer
+		= !FloatingPoint
+		= !String
+		= !FormatString
+		;

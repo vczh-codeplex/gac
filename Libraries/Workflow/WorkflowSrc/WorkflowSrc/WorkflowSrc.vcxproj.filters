@@ -46,6 +46,9 @@
     <Filter Include="Common\Parsing\Xml">
       <UniqueIdentifier>{2836f308-6347-4646-82b7-bc84622357a5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Workflow\Expression">
+      <UniqueIdentifier>{04d03346-ddff-4937-ba7f-e41b62b5c162}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Source\WorkflowVlppReferences.h">
@@ -219,6 +222,9 @@
     <ClInclude Include="..\..\..\..\Common\Source\Threading.h">
       <Filter>Common\Basic</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Expression\WfExpression.h">
+      <Filter>Workflow\Expression</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\Common\Source\Stream\Accessor.cpp">
@@ -359,8 +365,19 @@
     <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Expression\WfExpression.cpp">
+      <Filter>Workflow\Expression</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Spec.txt" />
+    <Text Include="..\..\Source\Expression\WfExpression.parser.txt">
+      <Filter>Workflow\Expression</Filter>
+    </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\Source\Expression\Codegen.bat">
+      <Filter>Workflow\Expression</Filter>
+    </None>
   </ItemGroup>
 </Project>
