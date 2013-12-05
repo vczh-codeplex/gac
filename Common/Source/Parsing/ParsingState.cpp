@@ -65,6 +65,34 @@ ParsingTokenWalker::LookAheadEnumerator
 			}
 
 /***********************************************************************
+ParsingTokenWalker::TokenLookAhead
+***********************************************************************/
+
+			ParsingTokenWalker::TokenLookAhead::TokenLookAhead(const ParsingTokenWalker* _walker)
+				:walker(_walker)
+			{
+			}
+
+			collections::IEnumerator<vint>* ParsingTokenWalker::TokenLookAhead::CreateEnumerator()const
+			{
+				return new LookAheadEnumerator(walker, walker->currentToken);
+			}
+
+/***********************************************************************
+ParsingTokenWalker::ReduceLookAhead
+***********************************************************************/
+
+			ParsingTokenWalker::ReduceLookAhead::ReduceLookAhead(const ParsingTokenWalker* _walker)
+				:walker(_walker)
+			{
+			}
+
+			collections::IEnumerator<vint>* ParsingTokenWalker::ReduceLookAhead::CreateEnumerator()const
+			{
+				return new LookAheadEnumerator(walker, walker->currentToken - 1);
+			}
+
+/***********************************************************************
 ParsingTokenWalker
 ***********************************************************************/
 
@@ -116,15 +144,12 @@ ParsingTokenWalker
 				}
 			}
 
-			collections::IEnumerator<vint>* ParsingTokenWalker::CreateEnumerator()const
-			{
-				return new LookAheadEnumerator(this, currentToken);
-			}
-
 			ParsingTokenWalker::ParsingTokenWalker(collections::List<regex::RegexToken>& _tokens, Ptr<ParsingTable> _table)
 				:tokens(_tokens)
 				,table(_table)
 				,currentToken(-2)
+				, tokenLookAhead(this)
+				, reduceLookAhead(this)
 			{
 			}
 
@@ -132,9 +157,14 @@ ParsingTokenWalker
 			{
 			}
 
-			const collections::IEnumerable<vint>& ParsingTokenWalker::GetLookahead()const
+			const collections::IEnumerable<vint>& ParsingTokenWalker::GetTokenLookahead()const
 			{
-				return *this;
+				return tokenLookAhead;
+			}
+
+			const collections::IEnumerable<vint>& ParsingTokenWalker::GetReduceLookahead()const
+			{
+				return reduceLookAhead;
 			}
 
 			void ParsingTokenWalker::Reset()
@@ -553,10 +583,10 @@ ParsingState
 				RegexToken* regexToken=walker->GetRegexToken();
 
 				bool tryReduce=false;
-				TransitionResult result=ReadToken(token, regexToken, &walker->GetLookahead());
+				TransitionResult result=ReadToken(token, regexToken, &walker->GetTokenLookahead());
 				if(!result)
 				{
-					result=ReadToken(ParsingTable::TryReduce, 0, 0);
+					result=ReadToken(ParsingTable::TryReduce, 0, &walker->GetReduceLookahead());
 					tryReduce=true;
 				}
 

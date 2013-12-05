@@ -22,16 +22,8 @@ namespace vl
 Óï·¨·ÖÎöÆ÷
 ***********************************************************************/
 			
-			class ParsingTokenWalker : public Object, protected collections::IEnumerable<vint>
+			class ParsingTokenWalker : public Object
 			{
-			protected:
-				collections::List<regex::RegexToken>&	tokens;
-				Ptr<ParsingTable>						table;
-				vint									currentToken;
-
-				vint									GetNextIndex(vint index)const;
-				vint									GetTableTokenIndex(vint index)const;
-				collections::IEnumerator<vint>*			CreateEnumerator()const override;
 			protected:
 				class LookAheadEnumerator : public Object, public collections::IEnumerator<vint>
 				{
@@ -52,11 +44,42 @@ namespace vl
 					bool								Next()override;
 					void								Reset()override;
 				};
+
+				class TokenLookAhead : public Object, public collections::IEnumerable<vint>
+				{
+				protected:
+					const ParsingTokenWalker*			walker;
+				public:
+					TokenLookAhead(const ParsingTokenWalker* _talker);
+
+					collections::IEnumerator<vint>*			CreateEnumerator()const override;
+				};
+
+				class ReduceLookAhead : public Object, public collections::IEnumerable<vint>
+				{
+				protected:
+					const ParsingTokenWalker*			walker;
+				public:
+					ReduceLookAhead(const ParsingTokenWalker* _walker);
+
+					collections::IEnumerator<vint>*			CreateEnumerator()const override;
+				};
+
+			protected:
+				collections::List<regex::RegexToken>&	tokens;
+				Ptr<ParsingTable>						table;
+				vint									currentToken;
+				TokenLookAhead							tokenLookAhead;
+				ReduceLookAhead							reduceLookAhead;
+
+				vint									GetNextIndex(vint index)const;
+				vint									GetTableTokenIndex(vint index)const;
 			public:
 				ParsingTokenWalker(collections::List<regex::RegexToken>& _tokens, Ptr<ParsingTable> _table);
 				~ParsingTokenWalker();
 
-				const collections::IEnumerable<vint>&	GetLookahead()const;
+				const collections::IEnumerable<vint>&	GetTokenLookahead()const;
+				const collections::IEnumerable<vint>&	GetReduceLookahead()const;
 				void									Reset();
 				bool									Move();
 				vint									GetTableTokenIndex()const;

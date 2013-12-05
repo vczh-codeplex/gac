@@ -219,6 +219,7 @@ namespace vl
 					};
 
 					static PrefixResult						TestPrefix(Ptr<LookAheadInfo> a, Ptr<LookAheadInfo> b);
+					static void								WalkToken(Ptr<ParsingTable> table, Ptr<LookAheadInfo> previous, vint state, vint token, collections::SortedList<vint>& walkedStates, collections::SortedList<vint>& targetStates, collections::List<Ptr<LookAheadInfo>>& newInfos);
 					static void								Walk(Ptr<ParsingTable> table, Ptr<LookAheadInfo> previous, vint state, collections::List<Ptr<LookAheadInfo>>& newInfos);
 				};
 

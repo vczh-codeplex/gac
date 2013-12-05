@@ -283,6 +283,14 @@ namespace test
 
 	Ptr<ParsingDefinition> LoadDefinition(const WString& parserName)
 	{
+		static bool firstLoad = false;
+		if (!firstLoad)
+		{
+			firstLoad = true;
+			Ptr<ParsingTable> table = CreateTable(CreateParserDefinition(), L"Syngram");
+			TEST_ASSERT(table);
+		}
+
 		WString text;
 		if (parserName == L"Xml")
 		{
@@ -302,8 +310,6 @@ namespace test
 			text=reader.ReadToEnd();
 		}
 
-		//Ptr<ParsingTable> table=BootstrapLoadTable();
-		//Ptr<ParsingStrictParser> parser=new ParsingStrictParser(table);
 		Ptr<ParsingGeneralParser> parser=CreateBootstrapStrictParser();
 		TEST_ASSERT(parser);
 

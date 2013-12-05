@@ -46,29 +46,50 @@ ParsingTable::LookAheadInfo
 				return a->tokens.Count()<b->tokens.Count()?ParsingTable::LookAheadInfo::Prefix:ParsingTable::LookAheadInfo::Equal;
 			}
 
+			void ParsingTable::LookAheadInfo::WalkToken(Ptr<ParsingTable> table, Ptr<LookAheadInfo> previous, vint state, vint token, collections::SortedList<vint>& walkedStates, collections::SortedList<vint>& targetStates, collections::List<Ptr<LookAheadInfo>>& newInfos)
+			{
+				//if (walkedStates.Contains(state))
+				//{
+				//	return;
+				//}
+				//walkedStates.Add(state);
+
+				if(Ptr<TransitionBag> bag=table->GetTransitionBag(state, token))
+				{
+					FOREACH(Ptr<TransitionItem>, item, bag->transitionItems)
+					{
+						if(!targetStates.Contains(item->targetState))
+						{
+							targetStates.Add(item->targetState);
+							Ptr<LookAheadInfo> info=new LookAheadInfo;
+							info->state=item->targetState;
+							if(previous)
+							{
+								CopyFrom(info->tokens, previous->tokens);
+							}
+							info->tokens.Add(token);
+							newInfos.Add(info);
+						}
+					}
+				}
+
+				//if(Ptr<TransitionBag> bag=table->GetTransitionBag(state, ParsingTable::TryReduce))
+				//{
+				//	FOREACH(Ptr<TransitionItem>, item, bag->transitionItems)
+				//	{
+				//		WalkToken(table, previous, item->targetState, token, walkedStates, targetStates, newInfos);
+				//	}
+				//}
+			}
+
 			void ParsingTable::LookAheadInfo::Walk(Ptr<ParsingTable> table, Ptr<LookAheadInfo> previous, vint state, collections::List<Ptr<LookAheadInfo>>& newInfos)
 			{
-				for(vint i=0;i<table->GetTokenCount();i++)
+				for (vint i = 0; i < table->GetTokenCount(); i++)
 				{
-					Ptr<TransitionBag> bag=table->GetTransitionBag(state, i);
-					if(bag)
+					//if (i != ParsingTable::TryReduce)
 					{
-						SortedList<vint> newStates;
-						FOREACH(Ptr<TransitionItem>, item, bag->transitionItems)
-						{
-							if(!newStates.Contains(item->targetState))
-							{
-								newStates.Add(item->targetState);
-								Ptr<LookAheadInfo> info=new LookAheadInfo;
-								info->state=item->targetState;
-								if(previous)
-								{
-									CopyFrom(info->tokens, previous->tokens);
-								}
-								info->tokens.Add(i);
-								newInfos.Add(info);
-							}
-						}
+						SortedList<vint> walkedStates, targetStates;
+						WalkToken(table, previous, state, i, walkedStates, targetStates, newInfos);
 					}
 				}
 			}
