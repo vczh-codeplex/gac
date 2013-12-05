@@ -103,7 +103,7 @@ CreateJointPDAFromNondeterministicPDA
 
 								FOREACH(State*, oldEndState, oldRuleInfo->endStates)
 								{
-									Transition* reduceTransition=automaton->Epsilon(oldNewStateMap[oldEndState], newTarget);
+									Transition* reduceTransition=automaton->TryReduce(oldNewStateMap[oldEndState], newTarget);
 									Ptr<Action> action=new Action;
 									action->actionType=Action::Reduce;
 									action->shiftReduceSource=newSource;
