@@ -5,6 +5,7 @@ namespace:vl.workflow
 reflection:Workflow
 classPrefix:Wf
 parser:ParseExpression(WorkflowExpression)
+ambiguity:enabled
 grammar:
 
 class Expression
