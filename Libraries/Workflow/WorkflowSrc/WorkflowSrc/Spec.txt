@@ -30,7 +30,7 @@ true false null
 ----------------------------
 let x = expression in expression
 condition ? true_branch : false_branch
-x [not] in (a, b) | [a, b) | (a, b] | [a, b]
+x [not] in range (a, b) | [a, b) | (a, b] | [a, b]
 x [not] in collection
 ----------------------------
 // the meaning of the following patterns of expression dependes on the destination type

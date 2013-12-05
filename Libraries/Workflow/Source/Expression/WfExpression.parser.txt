@@ -75,6 +75,7 @@ enum BinaryOperator
 	NE,
 	Xor,
 	And,
+	Or,
 	Not,
 	FailedThen,
 }
@@ -86,33 +87,83 @@ class BinaryExpression : Expression
 	Expression			second;
 }
 
+class LetExpression : Expression
+{
+	token				name;
+	Expression			value;
+	Expression			exp;
+}
+
+class IfExpression : Expression
+{
+	Expression			condition;
+	Expression			trueBranch;
+	Expression			falseBranch;
+}
+
+enum RangeBoundary
+{
+	Inclusive,
+	Exclusive,
+}
+
+class RangeExpression : Expression
+{
+	Expression			begin;
+	RangeBoundary		beginBoundary;
+	Expression			end;
+	RangeBoundary		endBoundary;
+}
+
+enum ElementExisting
+{
+	Exists,
+	NotExists,
+}
+
+class ElementExpression : Expression
+{
+	ElementExisting		test;
+	Expression			element;
+	Expression			collection;
+}
+
 token EXP = "/^";
 token ADD = "/+";
 token SUB = "-";
 token MUL = "/*";
-token DIV = "/\";
+token DIV = "//";
 token CONCAT = "&";
-token LE = "/<=";
-token GE = "/>=";
+token LE = "/</=";
+token GE = "/>/=";
 token LT = "/<";
 token GT = "/>";
-token EQ = "=";
-token NE = "!=";
+token EQ = "/=";
+token NE = "/!/=";
 token FAILED_THEN = "/?/?";
+token QUESTION_MARK = "/?";
+token COLON = ":";
+token SEMICOLON = ";";
+token COMMA = ",";
 token OPEN_ARRAY = "/[";
 token CLOSE_ARRAY = "/]";
 token OPEN_BRACE = "/{";
 token CLOSE_BRACE = "/}";
+token OPEN_BRACKET = "/(";
+token CLOSE_BRACKET = "/)";
 
-token SHL = "shl";
-token SHR = "shr";
-token XOR = "xor";
-token AND = "and";
-token OR = "or";
-token NOT = "not";
-token NULL = "null";
-token TRUE = "true";
-token FALSE = "false";
+token KEYWORD_SHL = "shl";
+token KEYWORD_SHR = "shr";
+token KEYWORD_XOR = "xor";
+token KEYWORD_AND = "and";
+token KEYWORD_OR = "or";
+token KEYWORD_NOT = "not";
+token KEYWORD_NULL= "null";
+token KEYWORD_TRUE= "true";
+token KEYWORD_FALSE = "false";
+token KEYWORD_LET = "let";
+token KEYWORD_IN = "in";
+token KEYWORD_RANGE = "range";
 
 token NAME = "[a-zA-Z_]/w*";
 token FLOAT = "/d+(./d+)?";
@@ -139,7 +190,6 @@ rule StringExpression String
 rule FormatExpression FormatString
 	= FORMATSTRING : value as FormatExpression
 	;
-
 rule Expression Constant
 	= !Literal
 	= !Integer
@@ -148,6 +198,73 @@ rule Expression Constant
 	= !FormatString
 	;
 
-rule Expression WorkflowExpression
+rule Expression Exp0
 	= !Constant
+	= "(" !WorkflowExpression ")"
+	= "let" NAME : name "in" WorkflowExpression : value "=" WorkflowExpression : exp as LetExpression
+	= "+" Exp0 as UnaryExpression with {op = "Positive"}
+	= "-" Exp0 as UnaryExpression with {op = "Negative"}
+	= "not" Exp0 as UnaryExpression with {op = "Not"}
+	= "range"
+		(("(" with {beginBoundary = "Exclusive"}) | ("[" with {beginBoundary = "Inclusive"}))
+		WorkflowExpression : begin "," WorkflowExpression : end
+		((")" with {beginBoundary = "Exclusive"}) | ("]" with {beginBoundary = "Inclusive"}))
+		as RangeExpression
+	= Exp0 : first "[" WorkflowExpression : second "]" as BinaryExpression with {op = "Index"}
+	= Exp0 : element "in" WorkflowExpression : collection as ElementExpression with {test = "Exists"}
+	= Exp0 : element "not" "in" WorkflowExpression : collection as ElementExpression with {test = "NotExists"}
+	;
+
+rule Expression Exp1
+	= !Exp0
+	= Exp1 : first "^" Exp0 : second as BinaryExpression with {op = "Exp"}
+	;
+rule Expression Exp2
+	= !Exp1
+	= Exp2 : first "*" Exp1 : second as BinaryExpression with {op = "Mul"}
+	= Exp2 : first "/" Exp1 : second as BinaryExpression with {op = "Div"}
+	;
+rule Expression Exp3
+	= !Exp2
+	= Exp3 : first "+" Exp2 : second as BinaryExpression with {op = "Add"}
+	= Exp3 : first "-" Exp2 : second as BinaryExpression with {op = "Sub"}
+	= Exp3 : first "&" Exp2 : second as BinaryExpression with {op = "Concat"}
+	;
+rule Expression Exp4
+	= !Exp3
+	= Exp4 : first "shl" Exp3 : second as BinaryExpression with {op = "Shl"}
+	= Exp4 : first "shr" Exp3 : second as BinaryExpression with {op = "Shr"}
+	;
+rule Expression Exp5
+	= !Exp4
+	= Exp5 : first "<" Exp4 : second as BinaryExpression with {op = "LT"}
+	= Exp5 : first ">" Exp4 : second as BinaryExpression with {op = "GT"}
+	= Exp5 : first "<=" Exp4 : second as BinaryExpression with {op = "LE"}
+	= Exp5 : first ">=" Exp4 : second as BinaryExpression with {op = "GE"}
+	= Exp5 : first "=" Exp4 : second as BinaryExpression with {op = "EQ"}
+	= Exp5 : first "!=" Exp4 : second as BinaryExpression with {op = "NE"}
+	;
+rule Expression Exp6
+	= !Exp5
+	= Exp6 : first "xor" Exp5 : second as BinaryExpression with {op = "Xor"}
+	;
+rule Expression Exp7
+	= !Exp6
+	= Exp7 : first "and" Exp6 : second as BinaryExpression with {op = "And"}
+	;
+rule Expression Exp8
+	= !Exp7
+	= Exp8 : first "or" Exp7 : second as BinaryExpression with {op = "Or"}
+	;
+rule Expression Exp9
+	= !Exp8
+	= Exp9 : first "??" Exp8 : second as BinaryExpression with {op = "FailedThen"}
+	;
+rule Expression Exp10
+	= !Exp9
+	= Exp9 : condition "?" Exp10 : trueBranch ":" Exp10 : falseBranch as IfExpression
+	;
+
+rule Expression WorkflowExpression
+	= !Exp10
 	;
