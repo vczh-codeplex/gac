@@ -11,6 +11,18 @@ class Expression
 {
 }
 
+enum LiteralValue
+{
+	Null,
+	True,
+	False,
+}
+
+class LiteralExpression
+{
+	LiteralValue		value;
+}
+
 class FloatingExpression : Expression
 {
 	token				value;
@@ -31,28 +43,111 @@ class FormatExpression : Expression
 	token				value;
 }
 
+enum UnaryOperator
+{
+	Positive,
+	Negative,
+	Not,
+}
+
+class UnaryExpression : Expression
+{
+	UnaryOperator		op;
+	Expression			operand;
+}
+
+enum BinaryOperator
+{
+	Index,
+	Exp,
+	Add,
+	Sub,
+	Mul,
+	Div,
+	Concat,
+	Shl,
+	Shr,
+	LT,
+	GT,
+	LE,
+	GE,
+	EQ,
+	NE,
+	Xor,
+	And,
+	Not,
+	FailedThen,
+}
+
+class BinaryExpression : Expression
+{
+	BinaryOperator		op;
+	Expression			first;
+	Expression			second;
+}
+
+token EXP = "/^";
+token ADD = "/+";
+token SUB = "-";
+token MUL = "/*";
+token DIV = "/\";
+token CONCAT = "&";
+token LE = "/<=";
+token GE = "/>=";
+token LT = "/<";
+token GT = "/>";
+token EQ = "=";
+token NE = "!=";
+token FAILED_THEN = "/?/?";
+token OPEN_ARRAY = "/[";
+token CLOSE_ARRAY = "/]";
+token OPEN_BRACE = "/{";
+token CLOSE_BRACE = "/}";
+
+token SHL = "shl";
+token SHR = "shr";
+token XOR = "xor";
+token AND = "and";
+token OR = "or";
+token NOT = "not";
+token NULL = "null";
+token TRUE = "true";
+token FALSE = "false";
+
 token NAME = "[a-zA-Z_]/w*";
 token FLOAT = "/d+(./d+)?";
 token INTEGER = "/d+(./d+)?";
 token STRING = "('[^']*')+|(""[^""]*"")+";
 token FORMATSTRING = "/$(('[^']*')+|(""[^""]*"")+)";
+
 discardtoken SPACE = "/s+";
 
+rule LiteralExpression Literal
+	= "null" as LiteralExpression with {value = "Null"}
+	= "true" as LiteralExpression with {value = "True"}
+	= "false" as LiteralExpression with {value = "False"}
+	;
 rule IntegerExpression Integer
-        = INTEGER : value as IntegerExpression
-        ;
+	= INTEGER : value as IntegerExpression
+	;
 rule FloatingExpression FloatingPoint
-        = FLOAT : value as FloatingExpression
-        ;
+	= FLOAT : value as FloatingExpression
+	;
 rule StringExpression String
-        = STRING : value as StringExpression
-        ;
+	= STRING : value as StringExpression
+	;
 rule FormatExpression FormatString
-        = FORMATSTRING : value as FormatExpression
-        ;
+	= FORMATSTRING : value as FormatExpression
+	;
+
+rule Expression Constant
+	= !Literal
+	= !Integer
+	= !FloatingPoint
+	= !String
+	= !FormatString
+	;
+
 rule Expression WorkflowExpression
-		= !Integer
-		= !FloatingPoint
-		= !String
-		= !FormatString
-		;
+	= !Constant
+	;
