@@ -248,7 +248,8 @@ namespace vl
 				bool										TestExplore(vint tableTokenIndex, Future* previous);
 				void										Explore(vint tableTokenIndex, Future* previous, collections::List<Future*>& possibilities);
 				regex::RegexToken*							ExploreStep(collections::List<Future*>& previousFutures, vint start, vint count, collections::List<Future*>& possibilities);
-				void										ExploreTryReduce(collections::List<Future*>& previousFutures, vint start, vint count, collections::List<Future*>& possibilities);
+				void										ExploreNormalReduce(collections::List<Future*>& previousFutures, vint start, vint count, collections::List<Future*>& possibilities);
+				void										ExploreLeftRecursiveReduce(collections::List<Future*>& previousFutures, vint start, vint count, collections::List<Future*>& possibilities);
 				Future*										ExploreCreateRootFuture();
 
 				Ptr<StateGroup>								TakeSnapshot();

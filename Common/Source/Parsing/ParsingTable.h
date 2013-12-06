@@ -27,8 +27,9 @@ namespace vl
 			public:
 				static const vint							TokenBegin=0;
 				static const vint							TokenFinish=1;
-				static const vint							TryReduce=2;
-				static const vint							UserTokenStart=3;
+				static const vint							NormalReduce=2;
+				static const vint							LeftRecursiveReduce=3;
+				static const vint							UserTokenStart=4;
 
 				class AttributeInfo : public Object
 				{

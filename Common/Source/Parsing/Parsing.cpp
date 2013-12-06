@@ -319,7 +319,11 @@ ParsingAmbiguousParser
 					regex::RegexToken* token=state.ExploreStep(futures, previousBegin, previousEnd-previousBegin, futures);
 					if(futures.Count()==previousEnd)
 					{
-						state.ExploreTryReduce(futures, previousBegin, previousEnd-previousBegin, futures);
+						state.ExploreLeftRecursiveReduce(futures, previousBegin, previousEnd-previousBegin, futures);
+					}
+					if(futures.Count()==previousEnd)
+					{
+						state.ExploreNormalReduce(futures, previousBegin, previousEnd-previousBegin, futures);
 					}
 					if(futures.Count()==previousEnd)
 					{
@@ -694,7 +698,15 @@ ParsingAutoRecoverAmbiguousParser
 						for(vint i=begin;i<end;i++)
 						{
 							ParsingState::Future* now=futures[i];
-							state.Explore(ParsingTable::TryReduce, now, futures);
+							state.Explore(ParsingTable::LeftRecursiveReduce, now, futures);
+						}
+					}
+					if(futures.Count()==end)
+					{
+						for(vint i=begin;i<end;i++)
+						{
+							ParsingState::Future* now=futures[i];
+							state.Explore(ParsingTable::NormalReduce, now, futures);
 						}
 					}
 					else

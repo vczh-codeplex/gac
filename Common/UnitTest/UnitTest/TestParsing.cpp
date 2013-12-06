@@ -184,8 +184,11 @@ namespace test
 									status=Closed;
 								}
 								break;
-							case ParsingTable::TryReduce:
-								writer.WriteString(L"TryReduce => ");
+							case ParsingTable::NormalReduce:
+								writer.WriteString(L"NormalReduce => ");
+								break;
+							case ParsingTable::LeftRecursiveReduce:
+								writer.WriteString(L"LeftRecursiveReduce => ");
 								break;
 							default:
 								writer.WriteString(table->GetTokenInfo(result.tableTokenIndex).name);

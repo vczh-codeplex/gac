@@ -103,7 +103,7 @@ CreateJointPDAFromNondeterministicPDA
 
 								FOREACH(State*, oldEndState, oldRuleInfo->endStates)
 								{
-									Transition* reduceTransition=automaton->TryReduce(oldNewStateMap[oldEndState], newTarget);
+									Transition* reduceTransition=automaton->NormalReduce(oldNewStateMap[oldEndState], newTarget);
 									Ptr<Action> action=new Action;
 									action->actionType=Action::Reduce;
 									action->shiftReduceSource=newSource;
@@ -188,10 +188,7 @@ CompactJointPDA
 								// when trying to do a transition by $TokenFinish
 								//     "a b" should reduce once
 								//     "a b c" should reduce twice
-								// if such a case happened, a $TryReduce transition should be added
-
-								stackOperationType=Transition::ShiftReduceCompacted;
-								transitionType=Transition::TryReduce;
+								// because that a reduce is not considered a virtual token, so this is not going to be happened
 							}
 						}
 						else if(closureItem.transitions->Count()>1)
@@ -291,17 +288,25 @@ MarkLeftRecursiveInJointPDA
 								Pair<State*, State*> shift(action->shiftReduceSource, action->shiftReduceTarget);
 								if(leftRecursiveShifts.Contains(shift))
 								{
-									// need to create a new action because in the previous phrases, these action object are shared and treated as read only
-									Ptr<Action> newAction=new Action;
-									newAction->actionType=Action::LeftRecursiveReduce;
-									newAction->actionSource=action->actionSource;
-									newAction->actionTarget=action->actionTarget;
-									newAction->creatorRule=action->creatorRule;
-									newAction->shiftReduceSource=action->shiftReduceSource;
-									newAction->shiftReduceTarget=action->shiftReduceTarget;
-									newAction->creatorRule=shift.key->ownerRule;
-
-									transition->actions[i]=newAction;
+									// check if this is a normal reduce transition, and change it to a left recursive reduce transition.
+									if (transition->transitionType == Transition::NormalReduce)
+									{
+										transition->transitionType = Transition::LeftRecursiveReduce;
+										// need to create a new action because in the previous phrases, these action object are shared and treated as read only
+										Ptr<Action> newAction=new Action;
+										newAction->actionType=Action::LeftRecursiveReduce;
+										newAction->actionSource=action->actionSource;
+										newAction->actionTarget=action->actionTarget;
+										newAction->creatorRule=action->creatorRule;
+										newAction->shiftReduceSource=action->shiftReduceSource;
+										newAction->shiftReduceTarget=action->shiftReduceTarget;
+										newAction->creatorRule=shift.key->ownerRule;
+										transition->actions[i]=newAction;
+									}
+									else
+									{
+										errors.Add(new ParsingError(state->ownerRule, L"Left recursive reduce action in non-normal-reduce found in rule \""+state->ownerRule->name+L"\" is not allowed."));
+									}
 								}
 							}
 						}
