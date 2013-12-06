@@ -534,11 +534,17 @@ GenerateTable
 				***********************************************************************/
 				for(vint i=0;i<table->GetStateCount();i++)
 				{
+					bool reducableState = false;
 					for(vint j=0;j<table->GetTokenCount();j++)
 					{
 						Ptr<ParsingTable::TransitionBag> bag=table->GetTransitionBag(i, j);
 						if(bag)
 						{
+							if (j == ParsingTable::NormalReduce || j == ParsingTable::NormalReduce)
+							{
+								reducableState = true;
+							}
+
 							CopyFrom(bag->transitionItems, From(bag->transitionItems).OrderBy(ParsingTable::TransitionItem::Compare));
 							for(vint k1=0;k1<bag->transitionItems.Count()-1;k1++)
 							for(vint k2=k1+1;k2<bag->transitionItems.Count();k2++)
@@ -561,14 +567,16 @@ GenerateTable
 								}
 							}
 
-							// force left-recursive-reduce transition to have lookaheads
-							if (j == ParsingTable::LeftRecursiveReduce)
+							// force any left-recursive-reduce or token transition to have lookaheads
+							if (j == ParsingTable::LeftRecursiveReduce || (reducableState && j >= ParsingTable::UserTokenStart))
 							{
 								FOREACH(Ptr<ParsingTable::TransitionItem>, item, bag->transitionItems)
 								{
 									if (item->lookAheads.Count() == 0)
 									{
-										ParsingTable::LookAheadInfo::Walk(table, 0, item->targetState, item->lookAheads);
+										List<Ptr<ParsingTable::LookAheadInfo>> la;
+										ParsingTable::LookAheadInfo::Walk(table, 0, item->targetState, la);
+										CompactLookAheads(item, la);
 									}
 								}
 							}
