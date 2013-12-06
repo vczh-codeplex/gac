@@ -681,6 +681,7 @@ Logger (Automaton)
 								break;
 							case Transition::NormalReduce:
 								writer.WriteString(L"    NORMAL-REDUCE");
+								break;
 							case Transition::LeftRecursiveReduce:
 								writer.WriteString(L"    LREC-REDUCE");
 								break;
