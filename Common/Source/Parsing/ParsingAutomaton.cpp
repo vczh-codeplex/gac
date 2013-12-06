@@ -233,10 +233,17 @@ Automaton
 				return transition;
 			}
 
-			Transition* Automaton::TryReduce(State* start, State* end)
+			Transition* Automaton::NormalReduce(State* start, State* end)
 			{
 				Transition* transition=CreateTransition(start, end);
-				transition->transitionType=Transition::TryReduce;
+				transition->transitionType=Transition::NormalReduce;
+				return transition;
+			}
+
+			Transition* Automaton::LeftRecursiveReduce(State* start, State* end)
+			{
+				Transition* transition=CreateTransition(start, end);
+				transition->transitionType=Transition::LeftRecursiveReduce;
 				return transition;
 			}
 

@@ -679,8 +679,10 @@ Logger (Automaton)
 							case Transition::TokenFinish:
 								writer.WriteString(L"    TOKEN-FINISH");
 								break;
-							case Transition::TryReduce:
+							case Transition::NormalReduce:
 								writer.WriteString(L"    TRY-REDUCE");
+							case Transition::LeftRecursiveReduce:
+								writer.WriteString(L"    LREC-REDUCE");
 								break;
 							case Transition::Symbol:
 								{
@@ -806,7 +808,8 @@ Logger (ParsingTable)
 					WString content=
 						column==ParsingTable::TokenBegin?L"0: $TokenBegin":
 						column==ParsingTable::TokenFinish?L"1: $TokenFinish":
-						column==ParsingTable::TryReduce?L"2: $TryReduce":
+						column==ParsingTable::NormalReduce?L"2: $NormalReduce":
+						column==ParsingTable::LeftRecursiveReduce?L"3: $LeftRecursiveReduce":
 						itow(column)+L": "+table->GetTokenInfo(column).name+L"\r\n  "+table->GetTokenInfo(column).regex;
 					stringTable[column+1]=content;
 				}

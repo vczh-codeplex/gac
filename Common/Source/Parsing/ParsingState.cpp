@@ -586,7 +586,12 @@ ParsingState
 				TransitionResult result=ReadToken(token, regexToken, &walker->GetTokenLookahead());
 				if(!result)
 				{
-					result=ReadToken(ParsingTable::TryReduce, 0, &walker->GetReduceLookahead());
+					result=ReadToken(ParsingTable::LeftRecursiveReduce, 0, &walker->GetReduceLookahead());
+					tryReduce=true;
+				}
+				if(!result)
+				{
+					result=ReadToken(ParsingTable::NormalReduce, 0, &walker->GetReduceLookahead());
 					tryReduce=true;
 				}
 
@@ -665,7 +670,7 @@ ParsingState
 				}
 			}
 
-			void ParsingState::ExploreTryReduce(collections::List<Future*>& previousFutures, vint start, vint count, collections::List<Future*>& possibilities)
+			void ParsingState::ExploreNormalReduce(collections::List<Future*>& previousFutures, vint start, vint count, collections::List<Future*>& possibilities)
 			{
 				if(walker->GetTableTokenIndex()==-1)
 				{
@@ -674,7 +679,20 @@ ParsingState
 				for(vint i=0;i<count;i++)
 				{
 					Future* previous=previousFutures[start+i];
-					Explore(ParsingTable::TryReduce, previous, possibilities);
+					Explore(ParsingTable::NormalReduce, previous, possibilities);
+				}
+			}
+
+			void ParsingState::ExploreLeftRecursiveReduce(collections::List<Future*>& previousFutures, vint start, vint count, collections::List<Future*>& possibilities)
+			{
+				if(walker->GetTableTokenIndex()==-1)
+				{
+					return;
+				}
+				for(vint i=0;i<count;i++)
+				{
+					Future* previous=previousFutures[start+i];
+					Explore(ParsingTable::LeftRecursiveReduce, previous, possibilities);
 				}
 			}
 

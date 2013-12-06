@@ -444,8 +444,11 @@ GenerateTable
 						case Transition::TokenFinish:
 							tokenIndex=ParsingTable::TokenFinish;
 							break;
-						case Transition::TryReduce:
-							tokenIndex=ParsingTable::TryReduce;
+						case Transition::NormalReduce:
+							tokenIndex=ParsingTable::NormalReduce;
+							break;
+						case Transition::LeftRecursiveReduce:
+							tokenIndex=ParsingTable::LeftRecursiveReduce;
 							break;
 						case Transition::Symbol:
 							tokenIndex=tokenIds[transition->transitionSymbol];
@@ -550,7 +553,8 @@ GenerateTable
 										WString tokenName=
 											j==ParsingTable::TokenBegin?WString(L"$TokenBegin"):
 											j==ParsingTable::TokenFinish?WString(L"$TokenFinish"):
-											j==ParsingTable::TryReduce?WString(L"$TryReduce"):
+											j==ParsingTable::NormalReduce?WString(L"$NormalReduce"):
+											j==ParsingTable::LeftRecursiveReduce?WString(L"$LeftRecursiveReduce"):
 											table->GetTokenInfo(j).name;
 										errors.Add(new ParsingError(stateIds[i]->ownerRule, L"Conflict happened in transition of \""+tokenName+L"\" of state \""+stateName+L"\"."));
 									}
