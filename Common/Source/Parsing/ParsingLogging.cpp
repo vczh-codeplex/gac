@@ -680,7 +680,7 @@ Logger (Automaton)
 								writer.WriteString(L"    TOKEN-FINISH");
 								break;
 							case Transition::NormalReduce:
-								writer.WriteString(L"    TRY-REDUCE");
+								writer.WriteString(L"    NORMAL-REDUCE");
 							case Transition::LeftRecursiveReduce:
 								writer.WriteString(L"    LREC-REDUCE");
 								break;
