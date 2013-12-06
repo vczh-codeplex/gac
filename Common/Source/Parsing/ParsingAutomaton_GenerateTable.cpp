@@ -560,6 +560,18 @@ GenerateTable
 									}
 								}
 							}
+
+							// force left-recursive-reduce transition to have lookaheads
+							if (j == ParsingTable::LeftRecursiveReduce)
+							{
+								FOREACH(Ptr<ParsingTable::TransitionItem>, item, bag->transitionItems)
+								{
+									if (item->lookAheads.Count() == 0)
+									{
+										ParsingTable::LookAheadInfo::Walk(table, 0, item->targetState, item->lookAheads);
+									}
+								}
+							}
 						}
 					}
 				}
