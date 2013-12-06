@@ -198,6 +198,13 @@ namespace test
 							}
 							writer.WriteLine(itow(result.tableStateTarget)+L"["+table->GetStateInfo(result.tableStateTarget).stateName+L"]");
 
+							writer.WriteString(L"    <STACK>:");
+							FOREACH(vint, state, state.GetStateStack())
+							{
+								writer.WriteString(L" " + itow(state));
+							}
+							writer.WriteLine(L"");
+
 							vint shiftReduceRangeIndex=0;
 							FOREACH(ParsingTable::Instruction, ins, From(result.transition->instructions).Skip(result.instructionBegin).Take(result.instructionCount))
 							{
