@@ -184,13 +184,26 @@ CollectAttribute
 GenerateTable
 ***********************************************************************/
 
+			vint LookAheadConflictPriority(vint tableTokenIndex)
+			{
+				switch (tableTokenIndex)
+				{
+				case ParsingTable::NormalReduce:
+					return 0;
+				case ParsingTable::LeftRecursiveReduce:
+					return 1;
+				default:
+					return 2;
+				}
+			}
+
 			void GenerateLookAhead(Ptr<ParsingTable> table, List<State*>& stateIds, vint state, vint token, Ptr<ParsingTable::TransitionItem> t1, Ptr<ParsingTable::TransitionItem> t2, bool enableAmbiguity, collections::List<Ptr<ParsingError>>& errors)
 			{
 				if(ParsingTable::TransitionItem::CheckOrder(t1, t2, false)==ParsingTable::TransitionItem::UnknownOrder)
 				{
 					if(enableAmbiguity || !CreateLookAhead(table, t1, t2, 16))
 					{
-						if (t1->token == ParsingTable::NormalReduce && t2->token == ParsingTable::LeftRecursiveReduce)
+						if (LookAheadConflictPriority(t1->token) != LookAheadConflictPriority(t2->token))
 						{
 							return;
 						}
