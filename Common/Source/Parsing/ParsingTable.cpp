@@ -46,18 +46,23 @@ ParsingTable::LookAheadInfo
 				return a->tokens.Count()<b->tokens.Count()?ParsingTable::LookAheadInfo::Prefix:ParsingTable::LookAheadInfo::Equal;
 			}
 
-			void ParsingTable::LookAheadInfo::Walk(Ptr<ParsingTable> table, Ptr<LookAheadInfo> previous, vint state, collections::List<Ptr<LookAheadInfo>>& newInfos)
+			void ParsingTable::LookAheadInfo::WalkInternal(Ptr<ParsingTable> table, Ptr<LookAheadInfo> previous, vint state, collections::SortedList<vint>& walkedStates, collections::List<Ptr<LookAheadInfo>>& newInfos)
 			{
+				if (walkedStates.Contains(state)) return;
+				walkedStates.Add(state);
+
 				for (vint i = 0; i < table->GetTokenCount(); i++)
 				{
 					if(Ptr<TransitionBag> bag=table->GetTransitionBag(state, i))
 					{
-						SortedList<vint> targetStates;
 						FOREACH(Ptr<TransitionItem>, item, bag->transitionItems)
 						{
-							if(!targetStates.Contains(item->targetState))
+							if (i == ParsingTable::NormalReduce || i == ParsingTable::LeftRecursiveReduce)
 							{
-								targetStates.Add(item->targetState);
+								WalkInternal(table, previous, item->targetState, walkedStates, newInfos);
+							}
+							else
+							{
 								Ptr<LookAheadInfo> info=new LookAheadInfo;
 								info->state=item->targetState;
 								if(previous)
@@ -70,6 +75,14 @@ ParsingTable::LookAheadInfo
 						}
 					}
 				}
+
+				walkedStates.Remove(state);
+			}
+
+			void ParsingTable::LookAheadInfo::Walk(Ptr<ParsingTable> table, Ptr<LookAheadInfo> previous, vint state, collections::List<Ptr<LookAheadInfo>>& newInfos)
+			{
+				SortedList<vint> walkedStates;
+				WalkInternal(table, previous, state, walkedStates, newInfos);
 			}
 
 /***********************************************************************
