@@ -97,17 +97,43 @@ CreateLookAhead
 
 			bool CreateLookAhead(Ptr<ParsingTable> table, Ptr<ParsingTable::TransitionItem> t1, Ptr<ParsingTable::TransitionItem> t2, vint maxTokenCount)
 			{
-				List<Ptr<ParsingTable::LookAheadInfo>> la1, la2, sla1, sla2; // look-ahead and stable-look-ahead
+				List<Ptr<ParsingTable::LookAheadInfo>> la1, la2, sla1, sla2;
+
+				// calculate 1-token look aheads
 				ParsingTable::LookAheadInfo::Walk(table, 0, t1->targetState, la1);
 				ParsingTable::LookAheadInfo::Walk(table, 0, t2->targetState, la2);
 
 				do
 				{
+					// pick up all stable look aheads and remove them from the look ahead list
+					// stable look ahead means, when the look ahead is satisfied, then the transition is picked up with full confidence
+					// non-stable look ahead means, when the look ahead is satisifed, it only increase confidence, needs further tokens for decision
 					CopyStableLookAheads(la1, sla1, la2);
 					CopyStableLookAheads(la2, sla2, la1);
 					RemoveStableLookAheads(la1, sla1);
 					RemoveStableLookAheads(la2, sla2);
 
+					// check if there are non-stable look aheads in two transitions points to the same state
+					// in such situation means that the two transition cannot always be determined using look aheads
+					FOREACH(Ptr<ParsingTable::LookAheadInfo>, lai1, la1)
+					{
+						FOREACH(Ptr<ParsingTable::LookAheadInfo>, lai2, la2)
+						{
+							if (lai1->state == lai2->state)
+							{
+								if (ParsingTable::LookAheadInfo::TestPrefix(lai1, lai2) != ParsingTable::LookAheadInfo::NotPrefix)
+								{
+									return false;
+								}
+								if (ParsingTable::LookAheadInfo::TestPrefix(lai2, lai1) != ParsingTable::LookAheadInfo::NotPrefix)
+								{
+									return false;
+								}
+							}
+						}
+					}
+
+					// use the non-stable look aheads to walk a token further
 					if(!WalkLookAheads(table, la1, maxTokenCount) || !WalkLookAheads(table, la2, maxTokenCount))
 					{
 						return false;
@@ -157,6 +183,39 @@ CollectAttribute
 /***********************************************************************
 GenerateTable
 ***********************************************************************/
+
+			void GenerateLookAhead(Ptr<ParsingTable> table, List<State*>& stateIds, vint state, vint token, Ptr<ParsingTable::TransitionItem> t1, Ptr<ParsingTable::TransitionItem> t2, bool enableAmbiguity, collections::List<Ptr<ParsingError>>& errors)
+			{
+				if(ParsingTable::TransitionItem::CheckOrder(t1, t2, false)==ParsingTable::TransitionItem::UnknownOrder)
+				{
+					if(enableAmbiguity || !CreateLookAhead(table, t1, t2, 16))
+					{
+						if (t1->token == ParsingTable::NormalReduce && t2->token == ParsingTable::LeftRecursiveReduce)
+						{
+							return;
+						}
+						WString stateName=itow(state)+L"["+table->GetStateInfo(state).stateName+L"]";
+						WString tokenName=
+							token==ParsingTable::TokenBegin?WString(L"$TokenBegin"):
+							token==ParsingTable::TokenFinish?WString(L"$TokenFinish"):
+							token==ParsingTable::NormalReduce?WString(L"$NormalReduce"):
+							token==ParsingTable::LeftRecursiveReduce?WString(L"$LeftRecursiveReduce"):
+							table->GetTokenInfo(token).name;
+						switch (t1->token)
+						{
+						case ParsingTable::NormalReduce:
+							errors.Add(new ParsingError(stateIds[state]->ownerRule, L"Conflict happened with normal reduce in transition of \""+tokenName+L"\" of state \""+stateName+L"\"."));
+							break;
+						case ParsingTable::LeftRecursiveReduce:
+							errors.Add(new ParsingError(stateIds[state]->ownerRule, L"Conflict happened with left recursive reduce in transition of \""+tokenName+L"\" of state \""+stateName+L"\"."));
+							break;
+						default:
+							errors.Add(new ParsingError(stateIds[state]->ownerRule, L"Conflict happened in transition of \""+tokenName+L"\" of state \""+stateName+L"\"."));
+							break;
+						}
+					}
+				}
+			}
 
 			Ptr<tabling::ParsingTable> GenerateTableFromPDA(Ptr<definitions::ParsingDefinition> definition, ParsingSymbolManager* manager, Ptr<Automaton> jointPDA, bool enableAmbiguity, collections::List<Ptr<ParsingError>>& errors)
 			{
@@ -532,51 +591,39 @@ GenerateTable
 				/***********************************************************************
 				check conflict and build look ahead table
 				***********************************************************************/
-				for(vint i=0;i<table->GetStateCount();i++)
+				for (vint i = 0; i < table->GetStateCount(); i++)
 				{
-					bool reducableState = false;
-					for(vint j=0;j<table->GetTokenCount();j++)
+					for (vint j = 0; j < table->GetTokenCount(); j++)
 					{
 						Ptr<ParsingTable::TransitionBag> bag=table->GetTransitionBag(i, j);
 						if(bag)
 						{
-							if (j == ParsingTable::NormalReduce || j == ParsingTable::NormalReduce)
-							{
-								reducableState = true;
-							}
-
 							CopyFrom(bag->transitionItems, From(bag->transitionItems).OrderBy(ParsingTable::TransitionItem::Compare));
-							for(vint k1=0;k1<bag->transitionItems.Count()-1;k1++)
-							for(vint k2=k1+1;k2<bag->transitionItems.Count();k2++)
+
+							// build look ahead inside a transition
+							for (vint k1 = 0; k1 < bag->transitionItems.Count() - 1; k1++)
 							{
-								Ptr<ParsingTable::TransitionItem> t1=bag->transitionItems[k1];
-								Ptr<ParsingTable::TransitionItem> t2=bag->transitionItems[k2];
-								if(ParsingTable::TransitionItem::CheckOrder(t1, t2, false)==ParsingTable::TransitionItem::UnknownOrder)
+								for (vint k2 = k1 + 1; k2 < bag->transitionItems.Count(); k2++)
 								{
-									if(enableAmbiguity || !CreateLookAhead(table, t1, t2, 16))
-									{
-										WString stateName=itow(i)+L"["+table->GetStateInfo(i).stateName+L"]";
-										WString tokenName=
-											j==ParsingTable::TokenBegin?WString(L"$TokenBegin"):
-											j==ParsingTable::TokenFinish?WString(L"$TokenFinish"):
-											j==ParsingTable::NormalReduce?WString(L"$NormalReduce"):
-											j==ParsingTable::LeftRecursiveReduce?WString(L"$LeftRecursiveReduce"):
-											table->GetTokenInfo(j).name;
-										errors.Add(new ParsingError(stateIds[i]->ownerRule, L"Conflict happened in transition of \""+tokenName+L"\" of state \""+stateName+L"\"."));
-									}
+									Ptr<ParsingTable::TransitionItem> t1=bag->transitionItems[k1];
+									Ptr<ParsingTable::TransitionItem> t2=bag->transitionItems[k2];
+									GenerateLookAhead(table, stateIds, i, j, t1, t2, enableAmbiguity, errors);
 								}
 							}
 
-							// force any left-recursive-reduce or token transition to have lookaheads
-							if (j == ParsingTable::LeftRecursiveReduce || (reducableState && j >= ParsingTable::UserTokenStart))
+							// build look ahead between this transition and reduce transitions
+							for (vint t = ParsingTable::NormalReduce; t <= ParsingTable::LeftRecursiveReduce && t < j; t++)
 							{
-								FOREACH(Ptr<ParsingTable::TransitionItem>, item, bag->transitionItems)
+								if (Ptr<ParsingTable::TransitionBag> reduceBag = table->GetTransitionBag(i, t))
 								{
-									if (item->lookAheads.Count() == 0)
+									for (vint k1 = 0; k1 < reduceBag->transitionItems.Count(); k1++)
 									{
-										List<Ptr<ParsingTable::LookAheadInfo>> la;
-										ParsingTable::LookAheadInfo::Walk(table, 0, item->targetState, la);
-										CompactLookAheads(item, la);
+										for (vint k2 = 0; k2 < bag->transitionItems.Count(); k2++)
+										{
+											Ptr<ParsingTable::TransitionItem> t1=reduceBag->transitionItems[k1];
+											Ptr<ParsingTable::TransitionItem> t2=bag->transitionItems[k2];
+											GenerateLookAhead(table, stateIds, i, j, t1, t2, enableAmbiguity, errors);
+										}
 									}
 								}
 							}
