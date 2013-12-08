@@ -237,7 +237,7 @@ namespace test
 									{
 										ParsingState::ShiftReduceRange range=result.shiftReduceRanges->Get(shiftReduceRangeIndex++);
 										writer.WriteString(L"    ¡¾");
-										if (range.shiftToken)
+										if (range.shiftToken && range.reduceToken)
 										{
 											vint start=range.shiftToken->start;
 											vint end=range.reduceToken->start+range.reduceToken->length;
@@ -259,7 +259,7 @@ namespace test
 								{
 									ParsingState::ShiftReduceRange range=result.shiftReduceRanges->Get(shiftReduceRangeIndex++);
 									writer.WriteString(L"¡¾");
-									if (range.shiftToken)
+									if (range.shiftToken && range.reduceToken)
 									{
 										vint start=range.shiftToken->start;
 										vint end=range.reduceToken->start+range.reduceToken->length;
@@ -273,7 +273,12 @@ namespace test
 					}
 					writer.WriteLine(L"");
 
-					TEST_ASSERT(builder.Run(result));
+					if (!builder.Run(result))
+					{
+						encoderStream.Close();
+						fileStream.Close();
+						TEST_ASSERT(false);
+					}
 				}
 				else
 				{
@@ -611,10 +616,10 @@ namespace test
 		List<Ptr<ParsingError>> errors;
 		Ptr<ParsingTable> table=GenerateTable(definition, enableAmbiguity, errors);
 		TEST_ASSERT(table);
+		LogParsingData(table, L"Parsing.AutoRecover[" + name + L"].Table.txt", L"Table");
 
 		FOREACH_INDEXER(WString, input, index, inputs)
 		{
-			unittest::UnitTest::PrintInfo(L"Parsing: "+input);
 			Parse(table, input, L"AutoRecover[" + name + L"]", rule, index, true, true);
 		}
 	}

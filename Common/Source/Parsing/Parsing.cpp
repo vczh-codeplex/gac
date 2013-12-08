@@ -117,7 +117,11 @@ ParsingGeneralParser
 ParsingStrictParser
 ***********************************************************************/
 
-			ParsingState::TransitionResult ParsingStrictParser::OnErrorRecover(ParsingState& state, vint currentTokenIndex, const regex::RegexToken* currentToken, collections::List<Ptr<ParsingError>>& errors)
+			void ParsingStrictParser::OnClearErrorRecover()
+			{
+			}
+
+			ParsingState::TransitionResult ParsingStrictParser::OnErrorRecover(ParsingState& state, vint currentTokenIndex, collections::List<Ptr<ParsingError>>& errors)
 			{
 				const RegexToken* token=state.GetToken(state.GetCurrentToken());
 				errors.Add(new ParsingError(token, (token==0?L"Error happened during parsing when reaching the end of the input.":L"Error happened during parsing.")));
@@ -136,11 +140,17 @@ ParsingStrictParser
 			ParsingState::TransitionResult ParsingStrictParser::ParseStep(ParsingState& state, collections::List<Ptr<ParsingError>>& errors)
 			{
 				ParsingState::TransitionResult result=state.ReadToken();
-				if(!result)
+				if (result)
 				{
-					const RegexToken* currentToken=state.GetToken(state.GetCurrentToken());
-					vint currentTokenIndex=(currentToken?table->GetTableTokenIndex(currentToken->token):ParsingTable::TokenFinish);
-					result=OnErrorRecover(state, currentTokenIndex, currentToken, errors);
+					OnClearErrorRecover();
+				}
+				else
+				{
+					vint currentTokenIndex = state.GetCurrentTableTokenIndex();
+					if (currentTokenIndex != -1)
+					{
+						result = OnErrorRecover(state, currentTokenIndex, errors);
+					}
 				}
 				return result;
 			}
@@ -149,7 +159,12 @@ ParsingStrictParser
 ParsingAutoRecoverParser
 ***********************************************************************/
 
-			ParsingState::TransitionResult ParsingAutoRecoverParser::OnErrorRecover(ParsingState& state, vint currentTokenIndex, const regex::RegexToken* currentToken, collections::List<Ptr<ParsingError>>& errors)
+			void ParsingAutoRecoverParser::OnClearErrorRecover()
+			{
+				recoveringFutureIndex = -1;
+			}
+
+			ParsingState::TransitionResult ParsingAutoRecoverParser::OnErrorRecover(ParsingState& state, vint currentTokenIndex, collections::List<Ptr<ParsingError>>& errors)
 			{
 				if(recoveringFutureIndex==-1)
 				{
@@ -238,6 +253,7 @@ ParsingAutoRecoverParser
 			void ParsingAutoRecoverParser::BeginParse()
 			{
 				recoveringFutureIndex = -1;
+				ParsingStrictParser::BeginParse();
 			}
 
 /***********************************************************************
@@ -658,6 +674,7 @@ ParsingAmbiguousParser
 			{
 				decisions.Clear();
 				consumedDecisionCount=0;
+				ParsingGeneralParser::BeginParse();
 			}
 
 /***********************************************************************
