@@ -94,7 +94,7 @@ namespace test
 		Closed,
 	};
 
-	Ptr<ParsingTreeNode> Parse(Ptr<ParsingTable> table, const WString& input, const WString& name, const WString& rule, vint index, bool showInput)
+	Ptr<ParsingTreeNode> Parse(Ptr<ParsingTable> table, const WString& input, const WString& name, const WString& rule, vint index, bool showInput, bool autoRecover)
 	{
 		if(showInput)
 		{
@@ -108,7 +108,7 @@ namespace test
 			EncoderStream encoderStream(fileStream, encoder);
 			StreamWriter writer(encoderStream);
 
-			Ptr<ParsingGeneralParser> parser=CreateStrictParser(table);
+			Ptr<ParsingGeneralParser> parser = autoRecover ? CreateAutoRecoverParser(table) : CreateStrictParser(table);
 			parser->BeginParse();
 			ParsingState state(input, table);
 			List<Ptr<ParsingError>> errors;
@@ -193,7 +193,10 @@ namespace test
 							default:
 								writer.WriteString(table->GetTokenInfo(result.tableTokenIndex).name);
 								writer.WriteString(L"[");
-								writer.WriteString(WString(result.token->reading, result.token->length));
+								if (result.token)
+								{
+									writer.WriteString(WString(result.token->reading, result.token->length));
+								}
 								writer.WriteString(L"] => ");
 							}
 							writer.WriteLine(itow(result.tableStateTarget)+L"["+table->GetStateInfo(result.tableStateTarget).stateName+L"]");
@@ -233,10 +236,13 @@ namespace test
 									if(result.shiftReduceRanges && showInput)
 									{
 										ParsingState::ShiftReduceRange range=result.shiftReduceRanges->Get(shiftReduceRangeIndex++);
-										vint start=range.shiftToken->start;
-										vint end=range.reduceToken->start+range.reduceToken->length;
 										writer.WriteString(L"    ¡¾");
-										writer.WriteString(input.Sub(start, end-start));
+										if (range.shiftToken)
+										{
+											vint start=range.shiftToken->start;
+											vint end=range.reduceToken->start+range.reduceToken->length;
+											writer.WriteString(input.Sub(start, end-start));
+										}
 										writer.WriteLine(L"¡¿");
 									}
 									break;
@@ -252,10 +258,13 @@ namespace test
 								if(result.shiftReduceRanges && showInput)
 								{
 									ParsingState::ShiftReduceRange range=result.shiftReduceRanges->Get(shiftReduceRangeIndex++);
-									vint start=range.shiftToken->start;
-									vint end=range.reduceToken->start+range.reduceToken->length;
 									writer.WriteString(L"¡¾");
-									writer.WriteString(input.Sub(start, end-start));
+									if (range.shiftToken)
+									{
+										vint start=range.shiftToken->start;
+										vint end=range.reduceToken->start+range.reduceToken->length;
+										writer.WriteString(input.Sub(start, end-start));
+									}
 									writer.WriteLine(L"¡¿");
 								}
 							}
@@ -345,7 +354,7 @@ TEST_CASE(TestParseNameList)
 	};
 	for(vint i=0;i<sizeof(inputs)/sizeof(*inputs);i++)
 	{
-		Parse(table, inputs[i], L"NameList", L"NameList", i, true);
+		Parse(table, inputs[i], L"NameList", L"NameList", i, true, false);
 	}
 }
 
@@ -364,7 +373,7 @@ TEST_CASE(TestParsingExpression)
 	};
 	for(vint i=0;i<sizeof(inputs)/sizeof(*inputs);i++)
 	{
-		Parse(table, inputs[i], L"Calculator", L"Exp", i, true);
+		Parse(table, inputs[i], L"Calculator", L"Exp", i, true, false);
 	}
 }
 
@@ -387,7 +396,7 @@ TEST_CASE(TestParsingStatement)
 	};
 	for(vint i=0;i<sizeof(inputs)/sizeof(*inputs);i++)
 	{
-		Parse(table, inputs[i], L"Statement", L"Stat", i, true);
+		Parse(table, inputs[i], L"Statement", L"Stat", i, true, false);
 	}
 }
 
@@ -404,7 +413,7 @@ TEST_CASE(TestParsingNameSemicolonList)
 	};
 	for(vint i=0;i<sizeof(inputs)/sizeof(*inputs);i++)
 	{
-		Parse(table, inputs[i], L"NameSemicolonList", L"NameTable", i, true);
+		Parse(table, inputs[i], L"NameSemicolonList", L"NameTable", i, true, false);
 	}
 }
 
@@ -431,7 +440,7 @@ TEST_CASE(TestParsingAmbigiousExpression)
 	};
 	for(vint i=0;i<sizeof(inputs)/sizeof(*inputs);i++)
 	{
-		Parse(table, inputs[i], L"AmbiguousExpression", L"Exp", i, true);
+		Parse(table, inputs[i], L"AmbiguousExpression", L"Exp", i, true, false);
 	}
 }
 
@@ -493,12 +502,12 @@ TEST_CASE(TestParsingGrammar)
 	Ptr<ParsingTable> table=CreateTable(definition, L"Syngram");
 	for(vint i=0;i<sizeof(inputTexts)/sizeof(*inputTexts);i++)
 	{
-		Parse(table, inputTexts[i][1], L"Syngram", inputTexts[i][0], i, true);
+		Parse(table, inputTexts[i][1], L"Syngram", inputTexts[i][0], i, true, false);
 	}
 	for(vint i=0;i<sizeof(inputDefs)/sizeof(*inputDefs);i++)
 	{
 		WString grammar=ParsingDefinitionToText(inputDefs[i]);
-		Parse(table, grammar, L"Syngram_Bootstrap", L"ParserDecl", i, false);
+		Parse(table, grammar, L"Syngram_Bootstrap", L"ParserDecl", i, false, false);
 	}
 }
 
@@ -602,25 +611,11 @@ namespace test
 		List<Ptr<ParsingError>> errors;
 		Ptr<ParsingTable> table=GenerateTable(definition, enableAmbiguity, errors);
 		TEST_ASSERT(table);
-		Ptr<ParsingGeneralParser> parser=CreateAutoRecoverParser(table);
 
-		FileStream fileStream(GetPath()+L"Parsing.AutoRecover."+name+L".txt", FileStream::WriteOnly);
-		BomEncoder encoder(BomEncoder::Utf16);
-		EncoderStream encoderStream(fileStream, encoder);
-		StreamWriter writer(encoderStream);
-
-		FOREACH(WString, input, inputs)
+		FOREACH_INDEXER(WString, input, index, inputs)
 		{
 			unittest::UnitTest::PrintInfo(L"Parsing: "+input);
-			writer.WriteLine(L"=============================================================");
-			writer.WriteLine(input);
-			writer.WriteLine(L"=============================================================");
-
-			errors.Clear();
-			Ptr<ParsingTreeNode> node=parser->Parse(input, rule, errors);
-			TEST_ASSERT(node);
-			Log(node.Obj(), input, writer);
-			writer.WriteLine(L"");
+			Parse(table, input, L"AutoRecover[" + name + L"]", rule, index, true, true);
 		}
 	}
 }
@@ -744,7 +739,7 @@ namespace test
 	{
 		for(vint i=0;i<Count;i++)
 		{
-			Parse(table, input[i], name, rule, i, true);
+			Parse(table, input[i], name, rule, i, true, false);
 			Ptr<T> node=deserializer(input[i], table);
 			WString text=serializer(node);
 			TEST_ASSERT(text==output[i]);
@@ -789,7 +784,7 @@ TEST_CASE(TestGeneratedParser_Json)
 		Ptr<ParsingTable> table=CreateTable(definition, L"Json");
 		for(vint i=0;i<sizeof(input)/sizeof(*input);i++)
 		{
-			Parse(table, input[i], L"Json", L"JRoot", i, true);
+			Parse(table, input[i], L"Json", L"JRoot", i, true, false);
 		}
 	}
 }
@@ -825,7 +820,7 @@ TEST_CASE(TestGeneratedParser_Xml)
 		Ptr<ParsingTable> table=CreateTable(definition, L"Xml");
 		for(vint i=0;i<sizeof(input)/sizeof(*input);i++)
 		{
-			Parse(table, input[i], L"Xml", L"XDocument", i, true);
+			Parse(table, input[i], L"Xml", L"XDocument", i, true, false);
 		}
 	}
 }
