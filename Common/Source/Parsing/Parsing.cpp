@@ -249,10 +249,8 @@ ParsingAmbiguousParser
 			{
 			}
 
-			void ParsingAmbiguousParser::OnErrorRecover(ParsingState& state, vint currentTokenIndex, const regex::RegexToken* currentToken, collections::List<ParsingState::Future*>& futures, vint& begin, vint& end, vint& insertedTokenCount, vint& skippedTokenCount, collections::List<Ptr<ParsingError>>& errors)
+			void ParsingAmbiguousParser::OnErrorRecover(ParsingState& state, vint currentTokenIndex, collections::List<ParsingState::Future*>& futures, vint& begin, vint& end, collections::List<Ptr<ParsingError>>& errors)
 			{
-				insertedTokenCount=0;
-				skippedTokenCount=0;
 				begin=end;
 			}
 
@@ -306,66 +304,72 @@ ParsingAmbiguousParser
 				}
 			}
 
-			vint ParsingAmbiguousParser::SearchPathForOneStep(ParsingState& state, collections::List<ParsingState::Future*>& futures, collections::List<regex::RegexToken*>& tokens, vint& begin, vint& end, collections::List<Ptr<ParsingError>>& errors)
+			vint ParsingAmbiguousParser::SearchPathForOneStep(ParsingState& state, collections::List<ParsingState::Future*>& futures, vint& begin, vint& end, collections::List<Ptr<ParsingError>>& errors)
 			{
 				futures.Add(state.ExploreCreateRootFuture());
-				vint previousBegin=0;
-				vint previousEnd=1;
-				vint resolvableFutureLevels=0;
-				bool errorRecovered=false;
+				vint previousBegin = 0;
+				vint previousEnd = 1;
+				vint resolvableFutureLevels = 0;
+				bool errorRecovered = false;
 
 				while(true)
 				{
-					regex::RegexToken* token=state.ExploreStep(futures, previousBegin, previousEnd-previousBegin, futures);
-					if(futures.Count()==previousEnd)
+					// keep all futures that consumed a token in a list
+					List<ParsingState::Future*> consumedTokenFutures;
+					vint processBegin = previousBegin;
+					vint processEnd = previousEnd;
+					while (processBegin > previousBegin)
 					{
-						state.ExploreLeftRecursiveReduce(futures, previousBegin, previousEnd-previousBegin, futures);
-						state.ExploreNormalReduce(futures, previousBegin, previousEnd-previousBegin, futures);
-					}
-					if(futures.Count()==previousEnd)
-					{
-						vint insertedTokenCount=0;
-						vint skippedTokenCount=0;
-						vint tokenIndex=(token?table->GetTableTokenIndex(token->token):ParsingTable::TokenFinish);
-						OnErrorRecover(state, tokenIndex, token, futures, previousBegin, previousEnd, insertedTokenCount, skippedTokenCount, errors);
-						if(previousBegin==previousEnd)
+						// explore the current token
+						if (state.ExploreStep(futures, processBegin, processEnd - processBegin, futures))
 						{
-							break;
+							CopyFrom(
+								consumedTokenFutures,
+								From(futures)
+									.Skip(processEnd)
+									.Take(futures.Count() - processEnd)
+								);
+							futures.RemoveRange(processEnd, futures.Count() - processEnd);
 						}
 
-						errorRecovered=true;
-						for(vint i=0;i<insertedTokenCount;i++)
+						// explore left recursive reduce and normal reduce
+						state.ExploreLeftRecursiveReduce(futures, processBegin, processEnd - processBegin, futures);
+						state.ExploreNormalReduce(futures, processBegin, processEnd - processBegin, futures);
+
+						// if a token is consumed, then for those reduce futures, explore them until a token is consumed, and discard all failed futures
+						processBegin = processEnd;
+						processEnd = futures.Count();
+					}
+
+					if (consumedTokenFutures.Count() == 0)
+					{
+						// failed to get any future that consumed a token, do error recovering
+						vint tokenIndex = state.GetCurrentTableTokenIndex();
+						OnErrorRecover(state, tokenIndex, futures, previousBegin, previousEnd, errors);
+						if (previousBegin == previousEnd)
 						{
-							tokens.Add(0);
-						}
-						for(vint i=0;i=skippedTokenCount;i++)
-						{
-							state.SkipCurrentToken();
-						}
-						if(skippedTokenCount>0)
-						{
-							continue;
+							break;
 						}
 					}
 					else
 					{
-						if(futures.Count()>previousEnd && token)
-						{
-							tokens.Add(token);
-						}
-						previousBegin=previousEnd;
-						previousEnd=futures.Count();
+						state.SkipCurrentToken();
+						// put all futures that consumed a token from consumedTokenFutures back to future list
+						previousBegin = futures.Count();
+						CopyFrom(futures, consumedTokenFutures, true);
+						previousEnd = futures.Count();
 
-						resolvableFutureLevels=GetResolvableFutureLevels(futures, previousBegin, previousEnd);
-						if(resolvableFutureLevels!=0)
+						// resolve all futures and see if all futures collapsed into a equivalent single future
+						resolvableFutureLevels = GetResolvableFutureLevels(futures, previousBegin, previousEnd);
+						if (resolvableFutureLevels != 0)
 						{
 							break;
 						}
 					}
 				}
 
-				begin=previousBegin;
-				end=previousEnd;
+				begin = previousBegin;
+				end = previousEnd;
 				return resolvableFutureLevels;
 			}
 
@@ -470,22 +474,16 @@ ParsingAmbiguousParser
 				return affectedStackNodeCount;
 			}
 
-			void ParsingAmbiguousParser::BuildSingleDecisionPath(ParsingState& state, ParsingState::Future* future, collections::List<regex::RegexToken*>& tokens, vint availableTokenCount, vint lastAvailableInstructionCount)
+			void ParsingAmbiguousParser::BuildSingleDecisionPath(ParsingState& state, ParsingState::Future* future, vint lastAvailableInstructionCount)
 			{
-				vint currentRegexToken=availableTokenCount-1;
 				List<Pair<ParsingTable::TransitionItem*, regex::RegexToken*>> path;
 				while(future && future->selectedToken!=-1)
 				{
-					regex::RegexToken* token=0;
-					if(future->selectedToken>=ParsingTable::UserTokenStart)
-					{
-						token=tokens[currentRegexToken--];
-					}
-					path.Add(Pair<ParsingTable::TransitionItem*, regex::RegexToken*>(future->selectedItem, token));
-					future=future->previous;
+					path.Add(Pair<ParsingTable::TransitionItem*, regex::RegexToken*>(future->selectedItem, future->selectedRegexToken));
+					future = future->previous;
 				}
 
-				for(vint j=path.Count()-1;j>=0;j--)
+				for (vint j = path.Count() - 1; j >= 0; j--)
 				{
 					if(j==0 && lastAvailableInstructionCount!=-1)
 					{
@@ -498,23 +496,20 @@ ParsingAmbiguousParser
 				}
 			}
 
-			void ParsingAmbiguousParser::BuildAmbiguousDecisions(ParsingState& state, collections::List<ParsingState::Future*>& futures, collections::List<regex::RegexToken*>& tokens, vint begin, vint end, vint resolvableFutureLevels, collections::List<Ptr<ParsingError>>& errors)
+			void ParsingAmbiguousParser::BuildAmbiguousDecisions(ParsingState& state, collections::List<ParsingState::Future*>& futures, vint begin, vint end, vint resolvableFutureLevels, collections::List<Ptr<ParsingError>>& errors)
 			{
-				vint availableTokenCount=tokens.Count();
 				List<ParsingState::Future*> resolvingFutures;
-				for(vint i=begin;i<end;i++)
+				CopyFrom(
+					resolvingFutures,
+					From(futures)
+						.Skip(begin)
+						.Take(end - begin)
+					);
+				for (vint i = 1; i < resolvableFutureLevels; i++)
 				{
-					resolvingFutures.Add(futures[i]);
-				}
-				for(vint i=1;i<resolvableFutureLevels;i++)
-				{
-					if(resolvingFutures[0]->selectedToken>=ParsingTable::UserTokenStart)
-					{
-						availableTokenCount--;
-					}
 					for(vint j=0;j<resolvingFutures.Count();j++)
 					{
-						resolvingFutures[j]=resolvingFutures[j]->previous;
+						resolvingFutures[j] = resolvingFutures[j]->previous;
 					}
 				}
 
@@ -574,7 +569,7 @@ ParsingAmbiguousParser
 						decisions.Add(result);
 					}
 					{
-						BuildSingleDecisionPath(state, resolvingFutures[i], tokens, availableTokenCount, conflictReduceIndices[i]);
+						BuildSingleDecisionPath(state, resolvingFutures[i], conflictReduceIndices[i]);
 
 						if(i==resolvingFutures.Count()-1)
 						{
@@ -599,11 +594,11 @@ ParsingAmbiguousParser
 
 				if(lastFuture)
 				{
-					BuildSingleDecisionPath(state, lastFuture, tokens, tokens.Count(), -1);
+					BuildSingleDecisionPath(state, lastFuture, -1);
 				}
 			}
 
-			void ParsingAmbiguousParser::BuildDecisions(ParsingState& state, collections::List<ParsingState::Future*>& futures, collections::List<regex::RegexToken*>& tokens, vint begin, vint end, vint resolvableFutureLevels, collections::List<Ptr<ParsingError>>& errors)
+			void ParsingAmbiguousParser::BuildDecisions(ParsingState& state, collections::List<ParsingState::Future*>& futures, vint begin, vint end, vint resolvableFutureLevels, collections::List<Ptr<ParsingError>>& errors)
 			{
 				if(end-begin==0)
 				{
@@ -612,11 +607,11 @@ ParsingAmbiguousParser
 				}
 				else if(end-begin==1)
 				{
-					BuildSingleDecisionPath(state, futures[begin], tokens, tokens.Count(), -1);
+					BuildSingleDecisionPath(state, futures[begin], -1);
 				}
 				else
 				{
-					BuildAmbiguousDecisions(state, futures, tokens, begin, end, resolvableFutureLevels, errors);
+					BuildAmbiguousDecisions(state, futures, begin, end, resolvableFutureLevels, errors);
 				}
 			}
 			
@@ -625,12 +620,11 @@ ParsingAmbiguousParser
 				if(decisions.Count()==consumedDecisionCount)
 				{
 					List<ParsingState::Future*> futures;
-					List<regex::RegexToken*> tokens;
 					vint resultBegin=0;
 					vint resultEnd=0;
 
-					vint resolvableFutureLevels=SearchPathForOneStep(state, futures, tokens, resultBegin, resultEnd, errors);
-					BuildDecisions(state, futures, tokens, resultBegin, resultEnd, resolvableFutureLevels, errors);
+					vint resolvableFutureLevels=SearchPathForOneStep(state, futures, resultBegin, resultEnd, errors);
+					BuildDecisions(state, futures, resultBegin, resultEnd, resolvableFutureLevels, errors);
 
 					FOREACH(ParsingState::Future*, future, futures)
 					{
@@ -664,10 +658,8 @@ ParsingAmbiguousParser
 ParsingAutoRecoverAmbiguousParser
 ***********************************************************************/
 
-			void ParsingAutoRecoverAmbiguousParser::OnErrorRecover(ParsingState& state, vint currentTokenIndex, const regex::RegexToken* currentToken, collections::List<ParsingState::Future*>& futures, vint& begin, vint& end, vint& insertedTokenCount, vint& skippedTokenCount, collections::List<Ptr<ParsingError>>& errors)
+			void ParsingAutoRecoverAmbiguousParser::OnErrorRecover(ParsingState& state, vint currentTokenIndex, collections::List<ParsingState::Future*>& futures, vint& begin, vint& end, collections::List<Ptr<ParsingError>>& errors)
 			{
-				insertedTokenCount=0;
-				skippedTokenCount=0;
 				vint oldFutureCount=futures.Count();
 				while(futures.Count()-oldFutureCount<65536 && begin<end)
 				{
@@ -706,10 +698,6 @@ ParsingAutoRecoverAmbiguousParser
 							state.Explore(ParsingTable::NormalReduce, now, futures);
 						}
 					}
-					else
-					{
-						insertedTokenCount++;
-					}
 
 					begin=end;
 					end=futures.Count();
@@ -718,7 +706,7 @@ ParsingAutoRecoverAmbiguousParser
 			FINISH_ERROR_RECOVERY:
 				if(begin==end && currentTokenIndex>=ParsingTable::UserTokenStart)
 				{
-					skippedTokenCount=1;
+					// skipped one token
 				}
 			}
 

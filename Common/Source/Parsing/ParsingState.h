@@ -165,6 +165,7 @@ namespace vl
 					vint									currentState;
 					vint									reduceStateCount;
 					collections::List<vint>					shiftStates;
+					regex::RegexToken*						selectedRegexToken;
 					vint									selectedToken;
 					ParsingTable::TransitionItem*			selectedItem;
 					Future*									previous;
@@ -173,6 +174,7 @@ namespace vl
 					Future()
 						:currentState(-1)
 						,reduceStateCount(0)
+						,selectedRegexToken(0)
 						,selectedToken(-1)
 						,selectedItem(0)
 						,previous(0)
@@ -182,13 +184,14 @@ namespace vl
 
 					Future* Clone()
 					{
-						Future* future=new Future;
-						future->currentState=currentState;
-						future->reduceStateCount=reduceStateCount;
+						Future* future = new Future;
+						future->currentState = currentState;
+						future->reduceStateCount = reduceStateCount;
 						CopyFrom(future->shiftStates, shiftStates);
-						future->selectedToken=selectedToken;
-						future->selectedItem=selectedItem;
-						future->previous=previous;
+						future->selectedRegexToken = selectedRegexToken;
+						future->selectedToken = selectedToken;
+						future->selectedItem = selectedItem;
+						future->previous = previous;
 						return future;
 					}
 				};
@@ -246,10 +249,10 @@ namespace vl
 				TransitionResult							ReadToken();
 
 				bool										TestExplore(vint tableTokenIndex, Future* previous);
-				void										Explore(vint tableTokenIndex, Future* previous, collections::List<Future*>& possibilities);
-				regex::RegexToken*							ExploreStep(collections::List<Future*>& previousFutures, vint start, vint count, collections::List<Future*>& possibilities);
-				void										ExploreNormalReduce(collections::List<Future*>& previousFutures, vint start, vint count, collections::List<Future*>& possibilities);
-				void										ExploreLeftRecursiveReduce(collections::List<Future*>& previousFutures, vint start, vint count, collections::List<Future*>& possibilities);
+				bool										Explore(vint tableTokenIndex, Future* previous, collections::List<Future*>& possibilities);
+				bool										ExploreStep(collections::List<Future*>& previousFutures, vint start, vint count, collections::List<Future*>& possibilities);
+				bool										ExploreNormalReduce(collections::List<Future*>& previousFutures, vint start, vint count, collections::List<Future*>& possibilities);
+				bool										ExploreLeftRecursiveReduce(collections::List<Future*>& previousFutures, vint start, vint count, collections::List<Future*>& possibilities);
 				Future*										ExploreCreateRootFuture();
 
 				Ptr<StateGroup>								TakeSnapshot();
