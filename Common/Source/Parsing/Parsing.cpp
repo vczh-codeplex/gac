@@ -320,9 +320,6 @@ ParsingAmbiguousParser
 					if(futures.Count()==previousEnd)
 					{
 						state.ExploreLeftRecursiveReduce(futures, previousBegin, previousEnd-previousBegin, futures);
-					}
-					if(futures.Count()==previousEnd)
-					{
 						state.ExploreNormalReduce(futures, previousBegin, previousEnd-previousBegin, futures);
 					}
 					if(futures.Count()==previousEnd)
