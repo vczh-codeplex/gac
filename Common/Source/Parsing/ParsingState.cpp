@@ -623,13 +623,14 @@ ParsingState
 				return false;
 			}
 
-			void ParsingState::Explore(vint tableTokenIndex, Future* previous, collections::List<Future*>& possibilities)
+			bool ParsingState::Explore(vint tableTokenIndex, Future* previous, collections::List<Future*>& possibilities)
 			{
 				Future fakePrevious;
 				fakePrevious.currentState=stateGroup->currentState;
 				Future* realPrevious=previous?previous:&fakePrevious;
 
 				ParsingTable::TransitionBag* bag=table->GetTransitionBag(realPrevious->currentState, tableTokenIndex).Obj();
+				bool successful = false;
 				if(bag)
 				{
 					for(vint i=0;i<bag->transitionItems.Count();i++)
@@ -640,60 +641,66 @@ ParsingState
 							Future* now=new Future;
 							RunTransitionInFuture(item, previous, now);
 							possibilities.Add(now);
+							successful = true;
 						}
 					}
 				}
+				return successful;
 			}
 
-			regex::RegexToken* ParsingState::ExploreStep(collections::List<Future*>& previousFutures, vint start, vint count, collections::List<Future*>& possibilities)
+			bool ParsingState::ExploreStep(collections::List<Future*>& previousFutures, vint start, vint count, collections::List<Future*>& possibilities)
 			{
 				if(walker->GetTableTokenIndex()==-1)
 				{
-					return 0;
+					return false;
 				}
-				vint token=walker->GetTableTokenIndex();
-				RegexToken* regexToken=walker->GetRegexToken();
-				vint oldPossibilitiesCount=possibilities.Count();
-				for(vint i=0;i<count;i++)
+				vint token = walker->GetTableTokenIndex();
+				RegexToken* regexToken = walker->GetRegexToken();
+				vint oldPossibilitiesCount = possibilities.Count();
+				for (vint i = 0; i<count; i++)
 				{
-					Future* previous=previousFutures[start+i];
+					Future* previous = previousFutures[start + i];
 					Explore(token, previous, possibilities);
 				}
-				if(possibilities.Count()>oldPossibilitiesCount)
+				if (possibilities.Count() == oldPossibilitiesCount)
 				{
-					walker->Move();
-					return regexToken;
+					return false;
 				}
-				else
+				for (vint i = oldPossibilitiesCount; i < possibilities.Count(); i++)
 				{
-					return 0;
+					possibilities[i]->selectedRegexToken = regexToken;
 				}
+				return true;
 			}
 
-			void ParsingState::ExploreNormalReduce(collections::List<Future*>& previousFutures, vint start, vint count, collections::List<Future*>& possibilities)
+			bool ParsingState::ExploreNormalReduce(collections::List<Future*>& previousFutures, vint start, vint count, collections::List<Future*>& possibilities)
 			{
 				if(walker->GetTableTokenIndex()==-1)
 				{
-					return;
+					return false;
 				}
+				vint oldPossibilitiesCount = possibilities.Count();
 				for(vint i=0;i<count;i++)
 				{
 					Future* previous=previousFutures[start+i];
 					Explore(ParsingTable::NormalReduce, previous, possibilities);
 				}
+				return possibilities.Count() > oldPossibilitiesCount;
 			}
 
-			void ParsingState::ExploreLeftRecursiveReduce(collections::List<Future*>& previousFutures, vint start, vint count, collections::List<Future*>& possibilities)
+			bool ParsingState::ExploreLeftRecursiveReduce(collections::List<Future*>& previousFutures, vint start, vint count, collections::List<Future*>& possibilities)
 			{
 				if(walker->GetTableTokenIndex()==-1)
 				{
-					return;
+					return false;
 				}
+				vint oldPossibilitiesCount = possibilities.Count();
 				for(vint i=0;i<count;i++)
 				{
 					Future* previous=previousFutures[start+i];
 					Explore(ParsingTable::LeftRecursiveReduce, previous, possibilities);
 				}
+				return possibilities.Count() > oldPossibilitiesCount;
 			}
 
 			ParsingState::Future* ParsingState::ExploreCreateRootFuture()
