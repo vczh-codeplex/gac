@@ -235,6 +235,11 @@ ParsingAutoRecoverParser
 			{
 			}
 
+			void ParsingAutoRecoverParser::BeginParse()
+			{
+				recoveringFutureIndex = -1;
+			}
+
 /***********************************************************************
 ParsingAmbiguousParser
 ***********************************************************************/
