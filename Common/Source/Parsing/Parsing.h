@@ -46,8 +46,9 @@ namespace vl
 			class ParsingStrictParser : public ParsingGeneralParser
 			{
 			protected:
-
-				virtual ParsingState::TransitionResult		OnErrorRecover(ParsingState& state, vint currentTokenIndex, const regex::RegexToken* currentToken, collections::List<Ptr<ParsingError>>& errors);
+				
+				virtual void								OnClearErrorRecover();
+				virtual ParsingState::TransitionResult		OnErrorRecover(ParsingState& state, vint currentTokenIndex, collections::List<Ptr<ParsingError>>& errors);
 			public:
 				ParsingStrictParser(Ptr<ParsingTable> _table=0);
 				~ParsingStrictParser();
@@ -61,7 +62,8 @@ namespace vl
 				collections::Array<ParsingState::Future>	recoverFutures;
 				vint										recoveringFutureIndex;
 
-				ParsingState::TransitionResult				OnErrorRecover(ParsingState& state, vint currentTokenIndex, const regex::RegexToken* currentToken, collections::List<Ptr<ParsingError>>& errors)override;
+				void										OnClearErrorRecover()override;
+				ParsingState::TransitionResult				OnErrorRecover(ParsingState& state, vint currentTokenIndex, collections::List<Ptr<ParsingError>>& errors)override;
 			public:
 				ParsingAutoRecoverParser(Ptr<ParsingTable> _table=0);
 				~ParsingAutoRecoverParser();
