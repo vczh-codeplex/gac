@@ -186,6 +186,17 @@ ParsingAutoRecoverParser
 			{
 				if(recoveringFutureIndex==-1)
 				{
+					List<vint> prioritizedTokens;
+					prioritizedTokens.Add(ParsingTable::TokenFinish);
+					CopyFrom(
+						prioritizedTokens,
+						Range<vint>(ParsingTable::UserTokenStart, table->GetTokenCount() - ParsingTable::UserTokenStart)
+						);
+					prioritizedTokens.Add(ParsingTable::LeftRecursiveReduce);
+					prioritizedTokens.Add(ParsingTable::NormalReduce);
+					prioritizedTokens.Remove(currentTokenIndex);
+					prioritizedTokens.Insert(0, currentTokenIndex);
+
 					vint processingFutureIndex=-1;
 					vint usedFutureCount=0;
 					while(processingFutureIndex<usedFutureCount)
@@ -198,9 +209,12 @@ ParsingAutoRecoverParser
 						processingFutureIndex++;
 						if(previous && previous->currentState==-1) continue;
 
-						vint currentTableTokenIndex=0;
-						while(currentTableTokenIndex<table->GetTokenCount() && usedFutureCount<recoverFutures.Count())
+						FOREACH(vint, currentTableTokenIndex, prioritizedTokens)
 						{
+							if (usedFutureCount == recoverFutures.Count())
+							{
+								break;
+							}
 							ParsingState::Future* now=&recoverFutures[usedFutureCount];
 							if(state.ReadTokenInFuture(currentTableTokenIndex, previous, now, 0))
 							{
