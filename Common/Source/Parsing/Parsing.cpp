@@ -318,7 +318,7 @@ ParsingAmbiguousParser
 					List<ParsingState::Future*> consumedTokenFutures;
 					vint processBegin = previousBegin;
 					vint processEnd = previousEnd;
-					while (processBegin > previousBegin)
+					while (processEnd > processBegin)
 					{
 						// explore the current token
 						if (state.ExploreStep(futures, processBegin, processEnd - processBegin, futures))
@@ -327,7 +327,8 @@ ParsingAmbiguousParser
 								consumedTokenFutures,
 								From(futures)
 									.Skip(processEnd)
-									.Take(futures.Count() - processEnd)
+									.Take(futures.Count() - processEnd),
+								true
 								);
 							futures.RemoveRange(processEnd, futures.Count() - processEnd);
 						}
