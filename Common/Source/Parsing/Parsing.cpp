@@ -172,6 +172,27 @@ ParsingStrictParser
 ParsingAutoRecoverParser
 ***********************************************************************/
 
+			ParsingAutoRecoverParser::RecoverFuture& ParsingAutoRecoverParser::GetRecoverFuture(vint index)
+			{
+				return recoverFutures[index];
+			}
+
+			ParsingAutoRecoverParser::RecoverFuture& ParsingAutoRecoverParser::CreateRecoverFuture(vint index, vint previousIndex)
+			{
+				RecoverFuture* rf = 0;
+				if (index >= recoverFutures.Count())
+				{
+					CHECK_ERROR(index == recoverFutures.Count(), L"ParsingAutoRecoverParser::CreateRecoverFuture(vint, vint)#Wrong argument: index.");
+					RecoverFuture recoverFuture;
+					recoverFuture.future = new ParsingState::Future;
+					index = recoverFutures.Add(recoverFuture);
+				}
+				rf = &GetRecoverFuture(index);
+				rf->index = index;
+				rf->previousIndex = previousIndex;
+				return *rf;
+			}
+
 			bool ParsingAutoRecoverParser::OnTestErrorRecoverExists()
 			{
 				return recoveringFutureIndex != -1;
@@ -201,38 +222,49 @@ ParsingAutoRecoverParser
 					vint usedFutureCount=0;
 					while(processingFutureIndex<usedFutureCount)
 					{
-						ParsingState::Future* previous=0;
+						RecoverFuture previous;
 						if(processingFutureIndex!=-1)
 						{
-							previous=&recoverFutures[processingFutureIndex];
+							previous = GetRecoverFuture(processingFutureIndex);
 						}
 						processingFutureIndex++;
-						if(previous && previous->currentState==-1) continue;
+						if(previous.future && previous.future->currentState==-1) continue;
 
 						FOREACH(vint, currentTableTokenIndex, prioritizedTokens)
 						{
-							if (usedFutureCount == recoverFutures.Count())
+							vint newInsertedTokenCount = previous.insertedTokenCount;
+							if (currentTableTokenIndex != ParsingTable::NormalReduce && currentTableTokenIndex != ParsingTable::LeftRecursiveReduce)
 							{
-								break;
+								newInsertedTokenCount++;
 							}
-							ParsingState::Future* now=&recoverFutures[usedFutureCount];
-							if(state.ReadTokenInFuture(currentTableTokenIndex, previous, now, 0))
+							if (currentTableTokenIndex != currentTokenIndex && newInsertedTokenCount > maxInsertedTokenCount)
+							{
+								continue;
+							}
+
+							RecoverFuture& now = CreateRecoverFuture(usedFutureCount, previous.index);
+							now.insertedTokenCount = newInsertedTokenCount;
+
+							if(state.ReadTokenInFuture(currentTableTokenIndex, previous.future, now.future, 0))
 							{
 								if(currentTableTokenIndex==currentTokenIndex)
 								{
-									if(previous)
+									if(previous.future)
 									{
-										ParsingState::Future* future=previous;
-										while(future->previous)
+										recoveringFutureIndex = previous.index;
+										RecoverFuture* rf = &GetRecoverFuture(previous.index);
+										while(rf->future->previous)
 										{
-											future->previous->next=future;
-											future=future->previous;
+											RecoverFuture* prf = &GetRecoverFuture(rf->previousIndex);
+											prf->nextIndex = rf->index;
+											prf->future->next = rf->future;
+											rf = prf;
 										}
-										recoveringFutureIndex=future-&recoverFutures[0];
+										recoveringFutureIndex = rf->index;
 									}
 									else
 									{
-										recoveringFutureIndex=0;
+										recoveringFutureIndex = 0;
 									}
 									goto FOUND_ERROR_RECOVER_SOLUTION;
 								}
@@ -241,29 +273,28 @@ ParsingAutoRecoverParser
 									usedFutureCount++;
 								}
 							}
-							currentTableTokenIndex++;
 						}
 					}
 				}
 			FOUND_ERROR_RECOVER_SOLUTION:
 
-				ParsingState::Future* selectedFuture=0;
-				if(recoveringFutureIndex!=-1)
+				RecoverFuture* rf = 0;
+				if (recoveringFutureIndex != -1)
 				{
-					selectedFuture=&recoverFutures[recoveringFutureIndex];
-					if(selectedFuture->next)
+					rf = &GetRecoverFuture(recoveringFutureIndex);
+					if(rf->future->next)
 					{
-						recoveringFutureIndex+=selectedFuture->next-selectedFuture;
+						recoveringFutureIndex = rf->nextIndex;
 					}
 					else
 					{
-						recoveringFutureIndex=-1;
+						recoveringFutureIndex = -1;
 					}
 				}
 
-				if(selectedFuture)
+				if(rf)
 				{
-					return state.RunTransition(selectedFuture->selectedItem, 0);
+					return state.RunTransition(rf->future->selectedItem, 0);
 				}
 				else
 				{
@@ -271,15 +302,19 @@ ParsingAutoRecoverParser
 				}
 			}
 
-			ParsingAutoRecoverParser::ParsingAutoRecoverParser(Ptr<ParsingTable> _table)
+			ParsingAutoRecoverParser::ParsingAutoRecoverParser(Ptr<ParsingTable> _table, vint _maxInsertedTokenCount)
 				:ParsingStrictParser(_table)
-				,recoverFutures(1024)
-				,recoveringFutureIndex(-1)
+				, recoveringFutureIndex(-1)
+				, maxInsertedTokenCount(_maxInsertedTokenCount == -1 ? 4 : _maxInsertedTokenCount)
 			{
 			}
 
 			ParsingAutoRecoverParser::~ParsingAutoRecoverParser()
 			{
+				FOREACH(RecoverFuture, future, recoverFutures)
+				{
+					delete future.future;
+				}
 			}
 
 			void ParsingAutoRecoverParser::BeginParse()

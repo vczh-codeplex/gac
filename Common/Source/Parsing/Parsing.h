@@ -59,15 +59,36 @@ namespace vl
 
 			class ParsingAutoRecoverParser : public ParsingStrictParser
 			{
+			public:
+				struct RecoverFuture
+				{
+					ParsingState::Future*					future;
+					vint									insertedTokenCount;
+					vint									index;
+					vint									previousIndex;
+					vint									nextIndex;
+
+					RecoverFuture()
+						:future(0)
+						, insertedTokenCount(0)
+						, index(-1)
+						, previousIndex(-1)
+						, nextIndex(-1)
+					{
+					}
+				};
 			protected:
-				collections::Array<ParsingState::Future>	recoverFutures;
+				vint										maxInsertedTokenCount;
+				collections::List<RecoverFuture>			recoverFutures;
 				vint										recoveringFutureIndex;
 				
-				 bool										OnTestErrorRecoverExists()override;
+				RecoverFuture&								GetRecoverFuture(vint index);
+				RecoverFuture&								CreateRecoverFuture(vint index, vint previousIndex);
+				bool										OnTestErrorRecoverExists()override;
 				void										OnClearErrorRecover()override;
 				ParsingState::TransitionResult				OnErrorRecover(ParsingState& state, vint currentTokenIndex, collections::List<Ptr<ParsingError>>& errors)override;
 			public:
-				ParsingAutoRecoverParser(Ptr<ParsingTable> _table=0);
+				ParsingAutoRecoverParser(Ptr<ParsingTable> _table = 0, vint _maxInsertedTokenCount = -1);
 				~ParsingAutoRecoverParser();
 
 				void										BeginParse()override;
