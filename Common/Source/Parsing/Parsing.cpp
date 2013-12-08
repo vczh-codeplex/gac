@@ -117,6 +117,11 @@ ParsingGeneralParser
 ParsingStrictParser
 ***********************************************************************/
 
+			bool ParsingStrictParser::OnTestErrorRecoverExists()
+			{
+				return false;
+			}
+
 			void ParsingStrictParser::OnClearErrorRecover()
 			{
 			}
@@ -139,17 +144,25 @@ ParsingStrictParser
 			
 			ParsingState::TransitionResult ParsingStrictParser::ParseStep(ParsingState& state, collections::List<Ptr<ParsingError>>& errors)
 			{
-				ParsingState::TransitionResult result=state.ReadToken();
-				if (result)
+				ParsingState::TransitionResult result;
+				if (OnTestErrorRecoverExists())
 				{
-					OnClearErrorRecover();
+					result = OnErrorRecover(state, -1, errors);
 				}
 				else
 				{
-					vint currentTokenIndex = state.GetCurrentTableTokenIndex();
-					if (currentTokenIndex != -1)
+					result = state.ReadToken();
+					if (result)
 					{
-						result = OnErrorRecover(state, currentTokenIndex, errors);
+						OnClearErrorRecover();
+					}
+					else
+					{
+						vint currentTokenIndex = state.GetCurrentTableTokenIndex();
+						if (currentTokenIndex != -1)
+						{
+							result = OnErrorRecover(state, currentTokenIndex, errors);
+						}
 					}
 				}
 				return result;
@@ -158,6 +171,11 @@ ParsingStrictParser
 /***********************************************************************
 ParsingAutoRecoverParser
 ***********************************************************************/
+
+			bool ParsingAutoRecoverParser::OnTestErrorRecoverExists()
+			{
+				return recoveringFutureIndex != -1;
+			}
 
 			void ParsingAutoRecoverParser::OnClearErrorRecover()
 			{
