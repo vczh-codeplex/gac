@@ -47,6 +47,7 @@ namespace vl
 			{
 			protected:
 				
+				virtual bool								OnTestErrorRecoverExists();
 				virtual void								OnClearErrorRecover();
 				virtual ParsingState::TransitionResult		OnErrorRecover(ParsingState& state, vint currentTokenIndex, collections::List<Ptr<ParsingError>>& errors);
 			public:
@@ -61,7 +62,8 @@ namespace vl
 			protected:
 				collections::Array<ParsingState::Future>	recoverFutures;
 				vint										recoveringFutureIndex;
-
+				
+				 bool										OnTestErrorRecoverExists()override;
 				void										OnClearErrorRecover()override;
 				ParsingState::TransitionResult				OnErrorRecover(ParsingState& state, vint currentTokenIndex, collections::List<Ptr<ParsingError>>& errors)override;
 			public:

@@ -270,10 +270,26 @@ namespace test
 							}
 						}
 						break;
+					case ParsingState::TransitionResult::SkipToken:
+						writer.WriteLine(L"<SkipToken>");
+						break;
 					}
 					writer.WriteLine(L"");
 
-					if (!builder.Run(result))
+					if (result.transitionType == ParsingState::TransitionResult::SkipToken)
+					{
+						if (state.GetCurrentTableTokenIndex() == ParsingTable::TokenFinish)
+						{
+							encoderStream.Close();
+							fileStream.Close();
+							TEST_ASSERT(false);
+						}
+						else
+						{
+							state.SkipCurrentToken();
+						}
+					}
+					else if (!builder.Run(result))
 					{
 						encoderStream.Close();
 						fileStream.Close();
