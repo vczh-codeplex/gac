@@ -152,19 +152,21 @@ L"\r\n"L"token OPEN_ARRAY = \"/[\";"
 L"\r\n"L"token CLOSE_ARRAY = \"/]\";"
 L"\r\n"L"token OPEN_BRACE = \"/{\";"
 L"\r\n"L"token CLOSE_BRACE = \"/}\";"
+L"\r\n"L"token OPEN_BRACKET = \"/(\";"
+L"\r\n"L"token CLOSE_BRACKET = \"/)\";"
 L"\r\n"L""
-L"\r\n"L"token SHL = \"shl\";"
-L"\r\n"L"token SHR = \"shr\";"
-L"\r\n"L"token XOR = \"xor\";"
-L"\r\n"L"token AND = \"and\";"
-L"\r\n"L"token OR = \"or\";"
-L"\r\n"L"token NOT = \"not\";"
-L"\r\n"L"token NULL_VALUE = \"null\";"
-L"\r\n"L"token TRUE_VALUE = \"true\";"
-L"\r\n"L"token FALSE_VALUE = \"false\";"
-L"\r\n"L"token LET = \"let\";"
-L"\r\n"L"token IN = \"in\";"
-L"\r\n"L"token RANGE = \"range\";"
+L"\r\n"L"token KEYWORD_SHL = \"shl\";"
+L"\r\n"L"token KEYWORD_SHR = \"shr\";"
+L"\r\n"L"token KEYWORD_XOR = \"xor\";"
+L"\r\n"L"token KEYWORD_AND = \"and\";"
+L"\r\n"L"token KEYWORD_OR = \"or\";"
+L"\r\n"L"token KEYWORD_NOT = \"not\";"
+L"\r\n"L"token KEYWORD_NULL= \"null\";"
+L"\r\n"L"token KEYWORD_TRUE= \"true\";"
+L"\r\n"L"token KEYWORD_FALSE = \"false\";"
+L"\r\n"L"token KEYWORD_LET = \"let\";"
+L"\r\n"L"token KEYWORD_IN = \"in\";"
+L"\r\n"L"token KEYWORD_RANGE = \"range\";"
 L"\r\n"L""
 L"\r\n"L"token NAME = \"[a-zA-Z_]/w*\";"
 L"\r\n"L"token FLOAT = \"/d+(./d+)?\";"
@@ -173,6 +175,102 @@ L"\r\n"L"token STRING = \"(\'[^\']*\')+|(\"\"[^\"\"]*\"\")+\";"
 L"\r\n"L"token FORMATSTRING = \"/$((\'[^\']*\')+|(\"\"[^\"\"]*\"\")+)\";"
 L"\r\n"L""
 L"\r\n"L"discardtoken SPACE = \"/s+\";"
+L"\r\n"L""
+L"\r\n"L"rule LiteralExpression Literal"
+L"\r\n"L"\t= \"null\" as LiteralExpression with {value = \"Null\"}"
+L"\r\n"L"\t= \"true\" as LiteralExpression with {value = \"True\"}"
+L"\r\n"L"\t= \"false\" as LiteralExpression with {value = \"False\"}"
+L"\r\n"L"\t;"
+L"\r\n"L"rule IntegerExpression Integer"
+L"\r\n"L"\t= INTEGER : value as IntegerExpression"
+L"\r\n"L"\t;"
+L"\r\n"L"rule FloatingExpression FloatingPoint"
+L"\r\n"L"\t= FLOAT : value as FloatingExpression"
+L"\r\n"L"\t;"
+L"\r\n"L"rule StringExpression String"
+L"\r\n"L"\t= STRING : value as StringExpression"
+L"\r\n"L"\t;"
+L"\r\n"L"rule FormatExpression FormatString"
+L"\r\n"L"\t= FORMATSTRING : value as FormatExpression"
+L"\r\n"L"\t;"
+L"\r\n"L"rule Expression Constant"
+L"\r\n"L"\t= !Literal"
+L"\r\n"L"\t= !Integer"
+L"\r\n"L"\t= !FloatingPoint"
+L"\r\n"L"\t= !String"
+L"\r\n"L"\t= !FormatString"
+L"\r\n"L"\t;"
+L"\r\n"L""
+L"\r\n"L"rule Expression Exp0"
+L"\r\n"L"\t= !Constant"
+L"\r\n"L"\t= \"(\" !WorkflowExpression \")\""
+L"\r\n"L"\t= \"let\" NAME : name \"in\" WorkflowExpression : value \"=\" WorkflowExpression : exp as LetExpression"
+L"\r\n"L"\t= \"+\" Exp0 as UnaryExpression with {op = \"Positive\"}"
+L"\r\n"L"\t= \"-\" Exp0 as UnaryExpression with {op = \"Negative\"}"
+L"\r\n"L"\t= \"not\" Exp0 as UnaryExpression with {op = \"Not\"}"
+L"\r\n"L"\t= \"range\""
+L"\r\n"L"\t\t((\"(\" with {beginBoundary = \"Exclusive\"}) | (\"[\" with {beginBoundary = \"Inclusive\"}))"
+L"\r\n"L"\t\tWorkflowExpression : begin \",\" WorkflowExpression : end"
+L"\r\n"L"\t\t((\")\" with {beginBoundary = \"Exclusive\"}) | (\"]\" with {beginBoundary = \"Inclusive\"}))"
+L"\r\n"L"\t\tas RangeExpression"
+L"\r\n"L"\t= Exp0 : first \"[\" WorkflowExpression : second \"]\" as BinaryExpression with {op = \"Index\"}"
+L"\r\n"L"\t= Exp0 : element \"in\" WorkflowExpression : collection as ElementExpression with {test = \"Exists\"}"
+L"\r\n"L"\t= Exp0 : element \"not\" \"in\" WorkflowExpression : collection as ElementExpression with {test = \"NotExists\"}"
+L"\r\n"L"\t;"
+L"\r\n"L""
+L"\r\n"L"rule Expression Exp1"
+L"\r\n"L"\t= !Exp0"
+L"\r\n"L"\t= Exp1 : first \"^\" Exp0 : second as BinaryExpression with {op = \"Exp\"}"
+L"\r\n"L"\t;"
+L"\r\n"L"rule Expression Exp2"
+L"\r\n"L"\t= !Exp1"
+L"\r\n"L"\t= Exp2 : first \"*\" Exp1 : second as BinaryExpression with {op = \"Mul\"}"
+L"\r\n"L"\t= Exp2 : first \"/\" Exp1 : second as BinaryExpression with {op = \"Div\"}"
+L"\r\n"L"\t;"
+L"\r\n"L"rule Expression Exp3"
+L"\r\n"L"\t= !Exp2"
+L"\r\n"L"\t= Exp3 : first \"+\" Exp2 : second as BinaryExpression with {op = \"Add\"}"
+L"\r\n"L"\t= Exp3 : first \"-\" Exp2 : second as BinaryExpression with {op = \"Sub\"}"
+L"\r\n"L"\t= Exp3 : first \"&\" Exp2 : second as BinaryExpression with {op = \"Concat\"}"
+L"\r\n"L"\t;"
+L"\r\n"L"rule Expression Exp4"
+L"\r\n"L"\t= !Exp3"
+L"\r\n"L"\t= Exp4 : first \"shl\" Exp3 : second as BinaryExpression with {op = \"Shl\"}"
+L"\r\n"L"\t= Exp4 : first \"shr\" Exp3 : second as BinaryExpression with {op = \"Shr\"}"
+L"\r\n"L"\t;"
+L"\r\n"L"rule Expression Exp5"
+L"\r\n"L"\t= !Exp4"
+L"\r\n"L"\t= Exp5 : first \"<\" Exp4 : second as BinaryExpression with {op = \"LT\"}"
+L"\r\n"L"\t= Exp5 : first \">\" Exp4 : second as BinaryExpression with {op = \"GT\"}"
+L"\r\n"L"\t= Exp5 : first \"<=\" Exp4 : second as BinaryExpression with {op = \"LE\"}"
+L"\r\n"L"\t= Exp5 : first \">=\" Exp4 : second as BinaryExpression with {op = \"GE\"}"
+L"\r\n"L"\t= Exp5 : first \"=\" Exp4 : second as BinaryExpression with {op = \"EQ\"}"
+L"\r\n"L"\t= Exp5 : first \"!=\" Exp4 : second as BinaryExpression with {op = \"NE\"}"
+L"\r\n"L"\t;"
+L"\r\n"L"rule Expression Exp6"
+L"\r\n"L"\t= !Exp5"
+L"\r\n"L"\t= Exp6 : first \"xor\" Exp5 : second as BinaryExpression with {op = \"Xor\"}"
+L"\r\n"L"\t;"
+L"\r\n"L"rule Expression Exp7"
+L"\r\n"L"\t= !Exp6"
+L"\r\n"L"\t= Exp7 : first \"and\" Exp6 : second as BinaryExpression with {op = \"And\"}"
+L"\r\n"L"\t;"
+L"\r\n"L"rule Expression Exp8"
+L"\r\n"L"\t= !Exp7"
+L"\r\n"L"\t= Exp8 : first \"or\" Exp7 : second as BinaryExpression with {op = \"Or\"}"
+L"\r\n"L"\t;"
+L"\r\n"L"rule Expression Exp9"
+L"\r\n"L"\t= !Exp8"
+L"\r\n"L"\t= Exp9 : first \"??\" Exp8 : second as BinaryExpression with {op = \"FailedThen\"}"
+L"\r\n"L"\t;"
+L"\r\n"L"rule Expression Exp10"
+L"\r\n"L"\t= !Exp9"
+L"\r\n"L"\t= Exp9 : condition \"?\" Exp10 : trueBranch \":\" Exp10 : falseBranch as IfExpression"
+L"\r\n"L"\t;"
+L"\r\n"L""
+L"\r\n"L"rule Expression WorkflowExpression"
+L"\r\n"L"\t= !Exp10"
+L"\r\n"L"\t;"
 ;
 
 		vl::WString WfGetParserTextBuffer()
@@ -568,6 +666,40 @@ Visitor Pattern Implementation
 Parser Function
 ***********************************************************************/
 
+		vl::Ptr<vl::parsing::ParsingTreeNode> WfParseExpressionAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors)
+		{
+			vl::parsing::tabling::ParsingState state(input, table);
+			state.Reset(L"WorkflowExpression");
+			vl::Ptr<vl::parsing::tabling::ParsingGeneralParser> parser=vl::parsing::tabling::CreateStrictParser(table);
+			vl::Ptr<vl::parsing::ParsingTreeNode> node=parser->Parse(state, errors);
+			return node;
+		}
+
+		vl::Ptr<vl::parsing::ParsingTreeNode> WfParseExpressionAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)
+		{
+			vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
+			return WfParseExpressionAsParsingTreeNode(input, table, errors);
+		}
+
+		vl::Ptr<WfExpression> WfParseExpression(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors)
+		{
+			vl::parsing::tabling::ParsingState state(input, table);
+			state.Reset(L"WorkflowExpression");
+			vl::Ptr<vl::parsing::tabling::ParsingGeneralParser> parser=vl::parsing::tabling::CreateStrictParser(table);
+			vl::Ptr<vl::parsing::ParsingTreeNode> node=parser->Parse(state, errors);
+			if(node && errors.Count()==0)
+			{
+				return WfConvertParsingTreeNode(node, state.GetTokens()).Cast<WfExpression>();
+			}
+			return 0;
+		}
+
+		vl::Ptr<WfExpression> WfParseExpression(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)
+		{
+			vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
+			return WfParseExpression(input, table, errors);
+		}
+
 /***********************************************************************
 Table Generation
 ***********************************************************************/
@@ -578,7 +710,7 @@ Table Generation
 		    vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
 		    vl::Ptr<vl::parsing::ParsingTreeNode> definitionNode=parser->Parse(parserTextBuffer, L"ParserDecl", errors);
 		    vl::Ptr<vl::parsing::definitions::ParsingDefinition> definition=vl::parsing::definitions::DeserializeDefinition(definitionNode);
-		    vl::Ptr<vl::parsing::tabling::ParsingTable> table=vl::parsing::analyzing::GenerateTable(definition, false, errors);
+		    vl::Ptr<vl::parsing::tabling::ParsingTable> table=vl::parsing::analyzing::GenerateTable(definition, true, errors);
 		    return table;
 		}
 

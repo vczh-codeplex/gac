@@ -7,7 +7,11 @@ DEVELOPER: 陈梓瀚(vczh)
 /***********************************************************************
 Basic.cpp
 ***********************************************************************/
+#if defined VCZH_MSVC
 #include <Windows.h>
+#elif defined VCZH_GCC
+#include <time.h>
+#endif
 
 namespace vl
 {
@@ -33,12 +37,12 @@ NotCopyable
 Error
 ***********************************************************************/
 
-	Error::Error(wchar_t* _description)
+	Error::Error(const wchar_t* _description)
 	{
 		description=_description;
 	}
 
-	wchar_t* Error::Description()const
+	const wchar_t* Error::Description()const
 	{
 		return description;
 	}
@@ -55,6 +59,7 @@ Object
 DateTime
 ***********************************************************************/
 
+#if defined VCZH_MSVC
 	DateTime SystemTimeToDateTime(const SYSTEMTIME& systemTime)
 	{
 		DateTime dateTime;
@@ -90,23 +95,54 @@ DateTime
 		FileTimeToSystemTime(&fileTime, &systemTime);
 		return systemTime;
 	}
+#elif defined VCZH_GCC
+	DateTime ConvertTMToDateTime(tm* timeinfo)
+	{
+		time_t timer = mktime(timeinfo);
+		DateTime dt;
+		dt.year = timeinfo->tm_year+1900;
+		dt.month = timeinfo->tm_mon+1;
+		dt.day = timeinfo->tm_mday;
+		dt.dayOfWeek = timeinfo->tm_wday;
+		dt.hour = timeinfo->tm_hour;
+		dt.minute = timeinfo->tm_min;
+		dt.second = timeinfo->tm_sec;
+		dt.milliseconds = 0;
+		dt.filetime = (vuint64_t)timer;
+		dt.totalMilliseconds = (vuint64_t)(timer*1000);
+		return dt;
+	}
+#endif
 
 	DateTime DateTime::LocalTime()
 	{
+#if defined VCZH_MSVC
 		SYSTEMTIME systemTime;
 		GetLocalTime(&systemTime);
 		return SystemTimeToDateTime(systemTime);
+#elif defined VCZH_GCC
+		time_t timer = time(nullptr);
+		tm* timeinfo = localtime(&timer);
+		return ConvertTMToDateTime(timeinfo);
+#endif
 	}
 
 	DateTime DateTime::UtcTime()
 	{
+#if defined VCZH_MSVC
 		SYSTEMTIME utcTime;
 		GetSystemTime(&utcTime);
 		return SystemTimeToDateTime(utcTime);
+#elif defined VCZH_GCC
+		time_t timer = time(nullptr);
+		tm* timeinfo = gmtime(&timer);
+		return ConvertTMToDateTime(timeinfo);
+#endif
 	}
 
 	DateTime DateTime::FromDateTime(vint _year, vint _month, vint _day, vint _hour, vint _minute, vint _second, vint _milliseconds)
 	{
+#if defined VCZH_MSVC
 		SYSTEMTIME systemTime;
 		memset(&systemTime, 0, sizeof(systemTime));
 		systemTime.wYear=(WORD)_year;
@@ -121,10 +157,22 @@ DateTime
 		SystemTimeToFileTime(&systemTime, &fileTime);
 		FileTimeToSystemTime(&fileTime, &systemTime);
 		return SystemTimeToDateTime(systemTime);
+#elif defined VCZH_GCC
+		tm timeinfo;
+		memset(&timeinfo, 0, sizeof(timeinfo));
+		timeinfo.tm_year = _year-1900;
+		timeinfo.tm_mon = _month-1;
+		timeinfo.tm_mday = _day;
+		timeinfo.tm_hour = _hour;
+		timeinfo.tm_min = _minute;
+		timeinfo.tm_sec = _second;
+		return ConvertTMToDateTime(&timeinfo);
+#endif
 	}
 
-	DateTime DateTime::FromFileTime(unsigned __int64 filetime)
+	DateTime DateTime::FromFileTime(vuint64_t filetime)
 	{
+#if defined VCZH_MSVC
 		ULARGE_INTEGER largeInteger;
 		largeInteger.QuadPart=filetime;
 		FILETIME fileTime;
@@ -134,6 +182,11 @@ DateTime
 		SYSTEMTIME systemTime;
 		FileTimeToSystemTime(&fileTime, &systemTime);
 		return SystemTimeToDateTime(systemTime);
+#elif defined VCZH_GCC
+		time_t timer = (time_t)filetime;
+		tm* timeinfo = localtime(&timer);
+		return ConvertTMToDateTime(timeinfo);
+#endif
 	}
 
 	DateTime::DateTime()
@@ -150,28 +203,42 @@ DateTime
 
 	DateTime DateTime::ToLocalTime()
 	{
+#if defined VCZH_MSVC
 		SYSTEMTIME utcTime=DateTimeToSystemTime(*this);
 		SYSTEMTIME localTime;
 		SystemTimeToTzSpecificLocalTime(NULL, &utcTime, &localTime);
 		return SystemTimeToDateTime(localTime);
+#elif defined VCZH_GCC
+		time_t localTimer = time(nullptr);
+		time_t utcTimer = mktime(gmtime(&localTimer));
+		time_t timer = (time_t)filetime + localTimer - utcTimer;
+		tm* timeinfo = localtime(&timer);
+		return ConvertTMToDateTime(timeinfo);
+#endif
 	}
 
 	DateTime DateTime::ToUtcTime()
 	{
+#if defined VCZH_MSVC
 		SYSTEMTIME localTime=DateTimeToSystemTime(*this);
 		SYSTEMTIME utcTime;
 		TzSpecificLocalTimeToSystemTime(NULL, &localTime, &utcTime);
 		return SystemTimeToDateTime(utcTime);
+#elif defined VCZH_GCC
+		time_t timer = (time_t)filetime;
+		tm* timeinfo = gmtime(&timer);
+		return ConvertTMToDateTime(timeinfo);
+#endif
 	}
 
-	DateTime DateTime::Forward(unsigned __int64 milliseconds)
+	DateTime DateTime::Forward(vuint64_t milliseconds)
 	{
-		return FromFileTime(filetime+milliseconds*10000);
+		return FromFileTime(filetime+milliseconds/1000);
 	}
 
-	DateTime DateTime::Backward(unsigned __int64 milliseconds)
+	DateTime DateTime::Backward(vuint64_t milliseconds)
 	{
-		return FromFileTime(filetime-milliseconds*10000);
+		return FromFileTime(filetime-milliseconds/1000);
 	}
 
 /***********************************************************************
@@ -186,6 +253,13 @@ Interface
 /***********************************************************************
 Console.cpp
 ***********************************************************************/
+#if defined VCZH_MSVC
+#elif defined VCZH_GCC
+#include <wchar.h>
+#include <iostream>
+#include <string>
+using namespace std;
+#endif
 
 namespace vl
 {
@@ -198,6 +272,7 @@ Console
 
 		void Console::Write(const wchar_t* string, vint length)
 		{
+#if defined VCZH_MSVC
 			HANDLE outHandle=GetStdHandle(STD_OUTPUT_HANDLE);
 			DWORD fileMode=0;
 			DWORD written=0;
@@ -214,6 +289,11 @@ Console
 				WriteFile(outHandle, codePageBuffer, charCount-1, &written, 0);
 				delete codePageBuffer;
 			}
+#elif defined VCZH_GCC
+			//wprintf(L"%.*s", (int)length, string);
+			wstring s(string, string+length);
+			wcout<<s<<ends;
+#endif
 		}
 
 		void Console::Write(const wchar_t* string)
@@ -234,6 +314,7 @@ Console
 
 		WString Console::Read()
 		{
+#if defined VCZH_MSVC
 			WString result;
 			DWORD count;
 			for(;;)
@@ -255,10 +336,20 @@ Console
 				}
 			}
 			return result;
+#elif defined VCZH_GCC
+			//wchar_t buffer[1024];
+			//memset(buffer, 0, sizeof(buffer));
+			//wscanf(L"%1023s\n", buffer);
+			//return buffer;
+			wstring s;
+			getline(wcin, s, L'\n');
+			return s.c_str();
+#endif
 		}
 
 		void Console::SetColor(bool red, bool green, bool blue, bool light)
 		{
+#if defined VCZH_MSVC
 			WORD attribute=0;
 			if(red)attribute		|=FOREGROUND_RED;
 			if(green)attribute		|=FOREGROUND_GREEN;
@@ -266,11 +357,20 @@ Console
 			if(light)attribute		|=FOREGROUND_INTENSITY;
 			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),attribute);
 			SetConsoleTextAttribute(GetStdHandle(STD_INPUT_HANDLE),attribute);
+#elif defined VCZH_GCC
+			//vint color = (blue?1:0)*4 + (green?1:0)*2 + (red?1:0);
+			//if(light)
+			//	wprintf(L"\e[3%dm;", (int)color);
+			//else
+			//	wprintf(L"\e[9%dm;", (int)color);
+#endif
 		}
 
 		void Console::SetTitle(const WString& string)
 		{
+#if defined VCZH_MSVC
 			SetConsoleTitle(string.Buffer());
+#endif
 		}
 	}
 }
@@ -1812,7 +1912,16 @@ ParsingGeneralParser
 ParsingStrictParser
 ***********************************************************************/
 
-			ParsingState::TransitionResult ParsingStrictParser::OnErrorRecover(ParsingState& state, vint currentTokenIndex, const regex::RegexToken* currentToken, collections::List<Ptr<ParsingError>>& errors)
+			bool ParsingStrictParser::OnTestErrorRecoverExists()
+			{
+				return false;
+			}
+
+			void ParsingStrictParser::OnClearErrorRecover()
+			{
+			}
+
+			ParsingState::TransitionResult ParsingStrictParser::OnErrorRecover(ParsingState& state, vint currentTokenIndex, collections::List<Ptr<ParsingError>>& errors)
 			{
 				const RegexToken* token=state.GetToken(state.GetCurrentToken());
 				errors.Add(new ParsingError(token, (token==0?L"Error happened during parsing when reaching the end of the input.":L"Error happened during parsing.")));
@@ -1830,12 +1939,26 @@ ParsingStrictParser
 			
 			ParsingState::TransitionResult ParsingStrictParser::ParseStep(ParsingState& state, collections::List<Ptr<ParsingError>>& errors)
 			{
-				ParsingState::TransitionResult result=state.ReadToken();
-				if(!result)
+				ParsingState::TransitionResult result;
+				if (OnTestErrorRecoverExists())
 				{
-					const RegexToken* currentToken=state.GetToken(state.GetCurrentToken());
-					vint currentTokenIndex=(currentToken?table->GetTableTokenIndex(currentToken->token):ParsingTable::TokenFinish);
-					result=OnErrorRecover(state, currentTokenIndex, currentToken, errors);
+					result = OnErrorRecover(state, -1, errors);
+				}
+				else
+				{
+					result = state.ReadToken();
+					if (result)
+					{
+						OnClearErrorRecover();
+					}
+					else
+					{
+						vint currentTokenIndex = state.GetCurrentTableTokenIndex();
+						if (currentTokenIndex != -1)
+						{
+							result = OnErrorRecover(state, currentTokenIndex, errors);
+						}
+					}
 				}
 				return result;
 			}
@@ -1844,43 +1967,99 @@ ParsingStrictParser
 ParsingAutoRecoverParser
 ***********************************************************************/
 
-			ParsingState::TransitionResult ParsingAutoRecoverParser::OnErrorRecover(ParsingState& state, vint currentTokenIndex, const regex::RegexToken* currentToken, collections::List<Ptr<ParsingError>>& errors)
+			ParsingAutoRecoverParser::RecoverFuture& ParsingAutoRecoverParser::GetRecoverFuture(vint index)
+			{
+				return recoverFutures[index];
+			}
+
+			ParsingAutoRecoverParser::RecoverFuture& ParsingAutoRecoverParser::CreateRecoverFuture(vint index, vint previousIndex)
+			{
+				RecoverFuture* rf = 0;
+				if (index >= recoverFutures.Count())
+				{
+					CHECK_ERROR(index == recoverFutures.Count(), L"ParsingAutoRecoverParser::CreateRecoverFuture(vint, vint)#Wrong argument: index.");
+					RecoverFuture recoverFuture;
+					recoverFuture.future = new ParsingState::Future;
+					index = recoverFutures.Add(recoverFuture);
+				}
+				rf = &GetRecoverFuture(index);
+				rf->index = index;
+				rf->previousIndex = previousIndex;
+				return *rf;
+			}
+
+			bool ParsingAutoRecoverParser::OnTestErrorRecoverExists()
+			{
+				return recoveringFutureIndex != -1;
+			}
+
+			void ParsingAutoRecoverParser::OnClearErrorRecover()
+			{
+				recoveringFutureIndex = -1;
+			}
+
+			ParsingState::TransitionResult ParsingAutoRecoverParser::OnErrorRecover(ParsingState& state, vint currentTokenIndex, collections::List<Ptr<ParsingError>>& errors)
 			{
 				if(recoveringFutureIndex==-1)
 				{
+					List<vint> prioritizedTokens;
+					prioritizedTokens.Add(ParsingTable::TokenFinish);
+					CopyFrom(
+						prioritizedTokens,
+						Range<vint>(ParsingTable::UserTokenStart, table->GetTokenCount() - ParsingTable::UserTokenStart)
+						);
+					prioritizedTokens.Add(ParsingTable::LeftRecursiveReduce);
+					prioritizedTokens.Add(ParsingTable::NormalReduce);
+					prioritizedTokens.Remove(currentTokenIndex);
+					prioritizedTokens.Insert(0, currentTokenIndex);
+
 					vint processingFutureIndex=-1;
 					vint usedFutureCount=0;
 					while(processingFutureIndex<usedFutureCount)
 					{
-						ParsingState::Future* previous=0;
+						RecoverFuture previous;
 						if(processingFutureIndex!=-1)
 						{
-							previous=&recoverFutures[processingFutureIndex];
+							previous = GetRecoverFuture(processingFutureIndex);
 						}
 						processingFutureIndex++;
-						if(previous && previous->currentState==-1) continue;
+						if(previous.future && previous.future->currentState==-1) continue;
 
-						vint currentTableTokenIndex=0;
-						while(currentTableTokenIndex<table->GetTokenCount() && usedFutureCount<recoverFutures.Count())
+						FOREACH(vint, currentTableTokenIndex, prioritizedTokens)
 						{
-							ParsingState::Future* now=&recoverFutures[usedFutureCount];
-							if(state.ReadTokenInFuture(currentTableTokenIndex, previous, now, 0))
+							vint newInsertedTokenCount = previous.insertedTokenCount;
+							if (currentTableTokenIndex != ParsingTable::NormalReduce && currentTableTokenIndex != ParsingTable::LeftRecursiveReduce)
+							{
+								newInsertedTokenCount++;
+							}
+							if (currentTableTokenIndex != currentTokenIndex && newInsertedTokenCount > maxInsertedTokenCount)
+							{
+								continue;
+							}
+
+							RecoverFuture& now = CreateRecoverFuture(usedFutureCount, previous.index);
+							now.insertedTokenCount = newInsertedTokenCount;
+
+							if(state.ReadTokenInFuture(currentTableTokenIndex, previous.future, now.future, 0))
 							{
 								if(currentTableTokenIndex==currentTokenIndex)
 								{
-									if(previous)
+									if(previous.future)
 									{
-										ParsingState::Future* future=previous;
-										while(future->previous)
+										recoveringFutureIndex = previous.index;
+										RecoverFuture* rf = &GetRecoverFuture(previous.index);
+										while(rf->future->previous)
 										{
-											future->previous->next=future;
-											future=future->previous;
+											RecoverFuture* prf = &GetRecoverFuture(rf->previousIndex);
+											prf->nextIndex = rf->index;
+											prf->future->next = rf->future;
+											rf = prf;
 										}
-										recoveringFutureIndex=future-&recoverFutures[0];
+										recoveringFutureIndex = rf->index;
 									}
 									else
 									{
-										recoveringFutureIndex=0;
+										recoveringFutureIndex = 0;
 									}
 									goto FOUND_ERROR_RECOVER_SOLUTION;
 								}
@@ -1889,29 +2068,28 @@ ParsingAutoRecoverParser
 									usedFutureCount++;
 								}
 							}
-							currentTableTokenIndex++;
 						}
 					}
 				}
 			FOUND_ERROR_RECOVER_SOLUTION:
 
-				ParsingState::Future* selectedFuture=0;
-				if(recoveringFutureIndex!=-1)
+				RecoverFuture* rf = 0;
+				if (recoveringFutureIndex != -1)
 				{
-					selectedFuture=&recoverFutures[recoveringFutureIndex];
-					if(selectedFuture->next)
+					rf = &GetRecoverFuture(recoveringFutureIndex);
+					if(rf->future->next)
 					{
-						recoveringFutureIndex+=selectedFuture->next-selectedFuture;
+						recoveringFutureIndex = rf->nextIndex;
 					}
 					else
 					{
-						recoveringFutureIndex=-1;
+						recoveringFutureIndex = -1;
 					}
 				}
 
-				if(selectedFuture)
+				if(rf)
 				{
-					return state.RunTransition(selectedFuture->selectedItem, 0);
+					return state.RunTransition(rf->future->selectedItem, 0);
 				}
 				else
 				{
@@ -1919,15 +2097,25 @@ ParsingAutoRecoverParser
 				}
 			}
 
-			ParsingAutoRecoverParser::ParsingAutoRecoverParser(Ptr<ParsingTable> _table)
+			ParsingAutoRecoverParser::ParsingAutoRecoverParser(Ptr<ParsingTable> _table, vint _maxInsertedTokenCount)
 				:ParsingStrictParser(_table)
-				,recoverFutures(1024)
-				,recoveringFutureIndex(-1)
+				, recoveringFutureIndex(-1)
+				, maxInsertedTokenCount(_maxInsertedTokenCount == -1 ? 4 : _maxInsertedTokenCount)
 			{
 			}
 
 			ParsingAutoRecoverParser::~ParsingAutoRecoverParser()
 			{
+				FOREACH(RecoverFuture, future, recoverFutures)
+				{
+					delete future.future;
+				}
+			}
+
+			void ParsingAutoRecoverParser::BeginParse()
+			{
+				recoveringFutureIndex = -1;
+				ParsingStrictParser::BeginParse();
 			}
 
 /***********************************************************************
@@ -1944,10 +2132,8 @@ ParsingAmbiguousParser
 			{
 			}
 
-			void ParsingAmbiguousParser::OnErrorRecover(ParsingState& state, vint currentTokenIndex, const regex::RegexToken* currentToken, collections::List<ParsingState::Future*>& futures, vint& begin, vint& end, vint& insertedTokenCount, vint& skippedTokenCount, collections::List<Ptr<ParsingError>>& errors)
+			void ParsingAmbiguousParser::OnErrorRecover(ParsingState& state, vint currentTokenIndex, collections::List<ParsingState::Future*>& futures, vint& begin, vint& end, collections::List<Ptr<ParsingError>>& errors)
 			{
-				insertedTokenCount=0;
-				skippedTokenCount=0;
 				begin=end;
 			}
 
@@ -2001,65 +2187,73 @@ ParsingAmbiguousParser
 				}
 			}
 
-			vint ParsingAmbiguousParser::SearchPathForOneStep(ParsingState& state, collections::List<ParsingState::Future*>& futures, collections::List<regex::RegexToken*>& tokens, vint& begin, vint& end, collections::List<Ptr<ParsingError>>& errors)
+			vint ParsingAmbiguousParser::SearchPathForOneStep(ParsingState& state, collections::List<ParsingState::Future*>& futures, vint& begin, vint& end, collections::List<Ptr<ParsingError>>& errors)
 			{
 				futures.Add(state.ExploreCreateRootFuture());
-				vint previousBegin=0;
-				vint previousEnd=1;
-				vint resolvableFutureLevels=0;
-				bool errorRecovered=false;
+				vint previousBegin = 0;
+				vint previousEnd = 1;
+				vint resolvableFutureLevels = 0;
+				bool errorRecovered = false;
 
 				while(true)
 				{
-					regex::RegexToken* token=state.ExploreStep(futures, previousBegin, previousEnd-previousBegin, futures);
-					if(futures.Count()==previousEnd)
+					// keep all futures that consumed a token in a list
+					List<ParsingState::Future*> consumedTokenFutures;
+					vint processBegin = previousBegin;
+					vint processEnd = previousEnd;
+					while (processEnd > processBegin)
 					{
-						state.ExploreTryReduce(futures, previousBegin, previousEnd-previousBegin, futures);
-					}
-					if(futures.Count()==previousEnd)
-					{
-						vint insertedTokenCount=0;
-						vint skippedTokenCount=0;
-						vint tokenIndex=(token?table->GetTableTokenIndex(token->token):ParsingTable::TokenFinish);
-						OnErrorRecover(state, tokenIndex, token, futures, previousBegin, previousEnd, insertedTokenCount, skippedTokenCount, errors);
-						if(previousBegin==previousEnd)
+						// explore the current token
+						if (state.ExploreStep(futures, processBegin, processEnd - processBegin, futures))
 						{
-							break;
+							CopyFrom(
+								consumedTokenFutures,
+								From(futures)
+									.Skip(processEnd)
+									.Take(futures.Count() - processEnd),
+								true
+								);
+							futures.RemoveRange(processEnd, futures.Count() - processEnd);
 						}
 
-						errorRecovered=true;
-						for(vint i=0;i<insertedTokenCount;i++)
+						// explore left recursive reduce and normal reduce
+						state.ExploreLeftRecursiveReduce(futures, processBegin, processEnd - processBegin, futures);
+						state.ExploreNormalReduce(futures, processBegin, processEnd - processBegin, futures);
+
+						// if a token is consumed, then for those reduce futures, explore them until a token is consumed, and discard all failed futures
+						processBegin = processEnd;
+						processEnd = futures.Count();
+					}
+
+					if (consumedTokenFutures.Count() == 0)
+					{
+						// failed to get any future that consumed a token, do error recovering
+						vint tokenIndex = state.GetCurrentTableTokenIndex();
+						OnErrorRecover(state, tokenIndex, futures, previousBegin, previousEnd, errors);
+						if (previousBegin == previousEnd)
 						{
-							tokens.Add(0);
-						}
-						for(vint i=0;i=skippedTokenCount;i++)
-						{
-							state.SkipCurrentToken();
-						}
-						if(skippedTokenCount>0)
-						{
-							continue;
+							break;
 						}
 					}
 					else
 					{
-						if(futures.Count()>previousEnd && token)
-						{
-							tokens.Add(token);
-						}
-						previousBegin=previousEnd;
-						previousEnd=futures.Count();
+						state.SkipCurrentToken();
+						// put all futures that consumed a token from consumedTokenFutures back to future list
+						previousBegin = futures.Count();
+						CopyFrom(futures, consumedTokenFutures, true);
+						previousEnd = futures.Count();
 
-						resolvableFutureLevels=GetResolvableFutureLevels(futures, previousBegin, previousEnd);
-						if(resolvableFutureLevels!=0)
+						// resolve all futures and see if all futures collapsed into a equivalent single future
+						resolvableFutureLevels = GetResolvableFutureLevels(futures, previousBegin, previousEnd);
+						if (resolvableFutureLevels != 0)
 						{
 							break;
 						}
 					}
 				}
 
-				begin=previousBegin;
-				end=previousEnd;
+				begin = previousBegin;
+				end = previousEnd;
 				return resolvableFutureLevels;
 			}
 
@@ -2164,22 +2358,16 @@ ParsingAmbiguousParser
 				return affectedStackNodeCount;
 			}
 
-			void ParsingAmbiguousParser::BuildSingleDecisionPath(ParsingState& state, ParsingState::Future* future, collections::List<regex::RegexToken*>& tokens, vint availableTokenCount, vint lastAvailableInstructionCount)
+			void ParsingAmbiguousParser::BuildSingleDecisionPath(ParsingState& state, ParsingState::Future* future, vint lastAvailableInstructionCount)
 			{
-				vint currentRegexToken=availableTokenCount-1;
 				List<Pair<ParsingTable::TransitionItem*, regex::RegexToken*>> path;
 				while(future && future->selectedToken!=-1)
 				{
-					regex::RegexToken* token=0;
-					if(future->selectedToken>=ParsingTable::UserTokenStart)
-					{
-						token=tokens[currentRegexToken--];
-					}
-					path.Add(Pair<ParsingTable::TransitionItem*, regex::RegexToken*>(future->selectedItem, token));
-					future=future->previous;
+					path.Add(Pair<ParsingTable::TransitionItem*, regex::RegexToken*>(future->selectedItem, future->selectedRegexToken));
+					future = future->previous;
 				}
 
-				for(vint j=path.Count()-1;j>=0;j--)
+				for (vint j = path.Count() - 1; j >= 0; j--)
 				{
 					if(j==0 && lastAvailableInstructionCount!=-1)
 					{
@@ -2192,23 +2380,20 @@ ParsingAmbiguousParser
 				}
 			}
 
-			void ParsingAmbiguousParser::BuildAmbiguousDecisions(ParsingState& state, collections::List<ParsingState::Future*>& futures, collections::List<regex::RegexToken*>& tokens, vint begin, vint end, vint resolvableFutureLevels, collections::List<Ptr<ParsingError>>& errors)
+			void ParsingAmbiguousParser::BuildAmbiguousDecisions(ParsingState& state, collections::List<ParsingState::Future*>& futures, vint begin, vint end, vint resolvableFutureLevels, collections::List<Ptr<ParsingError>>& errors)
 			{
-				vint availableTokenCount=tokens.Count();
 				List<ParsingState::Future*> resolvingFutures;
-				for(vint i=begin;i<end;i++)
+				CopyFrom(
+					resolvingFutures,
+					From(futures)
+						.Skip(begin)
+						.Take(end - begin)
+					);
+				for (vint i = 1; i < resolvableFutureLevels; i++)
 				{
-					resolvingFutures.Add(futures[i]);
-				}
-				for(vint i=1;i<resolvableFutureLevels;i++)
-				{
-					if(resolvingFutures[0]->selectedToken>=ParsingTable::UserTokenStart)
-					{
-						availableTokenCount--;
-					}
 					for(vint j=0;j<resolvingFutures.Count();j++)
 					{
-						resolvingFutures[j]=resolvingFutures[j]->previous;
+						resolvingFutures[j] = resolvingFutures[j]->previous;
 					}
 				}
 
@@ -2268,7 +2453,7 @@ ParsingAmbiguousParser
 						decisions.Add(result);
 					}
 					{
-						BuildSingleDecisionPath(state, resolvingFutures[i], tokens, availableTokenCount, conflictReduceIndices[i]);
+						BuildSingleDecisionPath(state, resolvingFutures[i], conflictReduceIndices[i]);
 
 						if(i==resolvingFutures.Count()-1)
 						{
@@ -2293,11 +2478,11 @@ ParsingAmbiguousParser
 
 				if(lastFuture)
 				{
-					BuildSingleDecisionPath(state, lastFuture, tokens, tokens.Count(), -1);
+					BuildSingleDecisionPath(state, lastFuture, -1);
 				}
 			}
 
-			void ParsingAmbiguousParser::BuildDecisions(ParsingState& state, collections::List<ParsingState::Future*>& futures, collections::List<regex::RegexToken*>& tokens, vint begin, vint end, vint resolvableFutureLevels, collections::List<Ptr<ParsingError>>& errors)
+			void ParsingAmbiguousParser::BuildDecisions(ParsingState& state, collections::List<ParsingState::Future*>& futures, vint begin, vint end, vint resolvableFutureLevels, collections::List<Ptr<ParsingError>>& errors)
 			{
 				if(end-begin==0)
 				{
@@ -2306,11 +2491,11 @@ ParsingAmbiguousParser
 				}
 				else if(end-begin==1)
 				{
-					BuildSingleDecisionPath(state, futures[begin], tokens, tokens.Count(), -1);
+					BuildSingleDecisionPath(state, futures[begin], -1);
 				}
 				else
 				{
-					BuildAmbiguousDecisions(state, futures, tokens, begin, end, resolvableFutureLevels, errors);
+					BuildAmbiguousDecisions(state, futures, begin, end, resolvableFutureLevels, errors);
 				}
 			}
 			
@@ -2319,12 +2504,11 @@ ParsingAmbiguousParser
 				if(decisions.Count()==consumedDecisionCount)
 				{
 					List<ParsingState::Future*> futures;
-					List<regex::RegexToken*> tokens;
 					vint resultBegin=0;
 					vint resultEnd=0;
 
-					vint resolvableFutureLevels=SearchPathForOneStep(state, futures, tokens, resultBegin, resultEnd, errors);
-					BuildDecisions(state, futures, tokens, resultBegin, resultEnd, resolvableFutureLevels, errors);
+					vint resolvableFutureLevels=SearchPathForOneStep(state, futures, resultBegin, resultEnd, errors);
+					BuildDecisions(state, futures, resultBegin, resultEnd, resolvableFutureLevels, errors);
 
 					FOREACH(ParsingState::Future*, future, futures)
 					{
@@ -2352,64 +2536,113 @@ ParsingAmbiguousParser
 			{
 				decisions.Clear();
 				consumedDecisionCount=0;
+				ParsingGeneralParser::BeginParse();
 			}
 
 /***********************************************************************
 ParsingAutoRecoverAmbiguousParser
 ***********************************************************************/
 
-			void ParsingAutoRecoverAmbiguousParser::OnErrorRecover(ParsingState& state, vint currentTokenIndex, const regex::RegexToken* currentToken, collections::List<ParsingState::Future*>& futures, vint& begin, vint& end, vint& insertedTokenCount, vint& skippedTokenCount, collections::List<Ptr<ParsingError>>& errors)
+			void ParsingAutoRecoverAmbiguousParser::OnErrorRecover(ParsingState& state, vint currentTokenIndex, collections::List<ParsingState::Future*>& futures, vint& begin, vint& end, collections::List<Ptr<ParsingError>>& errors)
 			{
-				insertedTokenCount=0;
-				skippedTokenCount=0;
-				vint oldFutureCount=futures.Count();
-				while(futures.Count()-oldFutureCount<65536 && begin<end)
+				vint insertedTokenCount = 0;
+				while (insertedTokenCount++ < maxInsertedTokenCount)
 				{
-					for(vint i=begin;i<end;i++)
+					// keep all futures that consumed a token in a list
+					List<ParsingState::Future*> consumedTokenFutures;
+					vint processBegin = begin;
+					vint processEnd = end;
+					while (processEnd > processBegin)
 					{
-						if(state.TestExplore(currentTokenIndex, futures[i]))
+						// explore all tokens
+						for (vint i = processBegin; i < processEnd; i++)
 						{
-							goto FINISH_ERROR_RECOVERY;
-						}
-					}
-					
-					for(vint j=ParsingTable::UserTokenStart;j<table->GetTokenCount();j++)
-					{
-						if(j!=currentTokenIndex)
-						{
-							for(vint i=begin;i<end;i++)
+							state.Explore(ParsingTable::TokenFinish, futures[i], futures);
+							for (vint token = ParsingTable::UserTokenStart; token < state.GetTable()->GetTokenCount(); token++)
 							{
-								ParsingState::Future* now=futures[i];
-								state.Explore(j, now, futures);
+								state.Explore(token, futures[i], futures);
 							}
 						}
-					}
-					if(futures.Count()==end)
-					{
-						for(vint i=begin;i<end;i++)
+						// copy all futures that consumed a token to consumedTokenFutures
+						if (futures.Count() > processEnd)
 						{
-							ParsingState::Future* now=futures[i];
-							state.Explore(ParsingTable::TryReduce, now, futures);
+							CopyFrom(
+								consumedTokenFutures,
+								From(futures)
+									.Skip(processEnd)
+									.Take(futures.Count() - processEnd),
+								true
+								);
+							futures.RemoveRange(processEnd, futures.Count() - processEnd);
 						}
+
+						// explore left recursive reduce and normal reduce
+						state.ExploreLeftRecursiveReduce(futures, processBegin, processEnd - processBegin, futures);
+						state.ExploreNormalReduce(futures, processBegin, processEnd - processBegin, futures);
+
+						// if a token is consumed, then for those reduce futures, explore them until a token is consumed, and discard all failed futures
+						processBegin = processEnd;
+						processEnd = futures.Count();
+					}
+
+					if (consumedTokenFutures.Count() == 0)
+					{
+						// failed to get any future that consumed a token
+						goto ERROR_RECOVERY_FAILED;
 					}
 					else
 					{
-						insertedTokenCount++;
+						// try to see if the target token is reached
+						List<ParsingState::Future*> recoveryFutures;
+						FOREACH(ParsingState::Future*, future, consumedTokenFutures)
+						{
+							if (future->selectedToken == currentTokenIndex)
+							{
+								// because this is reached by error recoverying, so all futures in availableFutures should have previous futures
+								recoveryFutures.Add(future->previous);
+							}
+						}
+
+						if (recoveryFutures.Count()>0)
+						{
+							// finally reached the expected currentTokenIndex
+							// move these previous futures to the end
+							// then the original parser algorith, will use these previous futures to reach the currentTokenIndex in the next step
+							FOREACH(ParsingState::Future*, future, recoveryFutures)
+							{
+								futures.Remove(future);
+								futures.Add(future);
+							}
+							begin = futures.Count() - recoveryFutures.Count();
+							end = futures.Count();
+
+							// delete all futures in consumedTokenFutures
+							FOREACH(ParsingState::Future*, future, consumedTokenFutures)
+							{
+								delete future;
+							}
+							goto ERROR_RECOVERY_SUCCEEDED;
+						}
+						else
+						{
+							// put all futures that consumed a token from consumedTokenFutures back to future list
+							begin = futures.Count();
+							CopyFrom(futures, consumedTokenFutures, true);
+							end = futures.Count();
+						}
 					}
-
-					begin=end;
-					end=futures.Count();
 				}
-
-			FINISH_ERROR_RECOVERY:
-				if(begin==end && currentTokenIndex>=ParsingTable::UserTokenStart)
-				{
-					skippedTokenCount=1;
-				}
+				// if the maxInsertedTokenCount is exceeded, then we get here
+			ERROR_RECOVERY_FAILED:
+				begin = end = futures.Count();
+				return;
+			ERROR_RECOVERY_SUCCEEDED:
+				return;
 			}
 
-			ParsingAutoRecoverAmbiguousParser::ParsingAutoRecoverAmbiguousParser(Ptr<ParsingTable> _table)
+			ParsingAutoRecoverAmbiguousParser::ParsingAutoRecoverAmbiguousParser(Ptr<ParsingTable> _table, vint _maxInsertedTokenCount)
 				:ParsingAmbiguousParser(_table)
+				, maxInsertedTokenCount(_maxInsertedTokenCount == -1 ? 4 : _maxInsertedTokenCount)
 			{
 			}
 
@@ -4285,10 +4518,17 @@ Automaton
 				return transition;
 			}
 
-			Transition* Automaton::TryReduce(State* start, State* end)
+			Transition* Automaton::NormalReduce(State* start, State* end)
 			{
 				Transition* transition=CreateTransition(start, end);
-				transition->transitionType=Transition::TryReduce;
+				transition->transitionType=Transition::NormalReduce;
+				return transition;
+			}
+
+			Transition* Automaton::LeftRecursiveReduce(State* start, State* end)
+			{
+				Transition* transition=CreateTransition(start, end);
+				transition->transitionType=Transition::LeftRecursiveReduce;
 				return transition;
 			}
 
@@ -4765,17 +5005,43 @@ CreateLookAhead
 
 			bool CreateLookAhead(Ptr<ParsingTable> table, Ptr<ParsingTable::TransitionItem> t1, Ptr<ParsingTable::TransitionItem> t2, vint maxTokenCount)
 			{
-				List<Ptr<ParsingTable::LookAheadInfo>> la1, la2, sla1, sla2; // look-ahead and stable-look-ahead
+				List<Ptr<ParsingTable::LookAheadInfo>> la1, la2, sla1, sla2;
+
+				// calculate 1-token look aheads
 				ParsingTable::LookAheadInfo::Walk(table, 0, t1->targetState, la1);
 				ParsingTable::LookAheadInfo::Walk(table, 0, t2->targetState, la2);
 
 				do
 				{
+					// pick up all stable look aheads and remove them from the look ahead list
+					// stable look ahead means, when the look ahead is satisfied, then the transition is picked up with full confidence
+					// non-stable look ahead means, when the look ahead is satisifed, it only increase confidence, needs further tokens for decision
 					CopyStableLookAheads(la1, sla1, la2);
 					CopyStableLookAheads(la2, sla2, la1);
 					RemoveStableLookAheads(la1, sla1);
 					RemoveStableLookAheads(la2, sla2);
 
+					// check if there are non-stable look aheads in two transitions points to the same state
+					// in such situation means that the two transition cannot always be determined using look aheads
+					FOREACH(Ptr<ParsingTable::LookAheadInfo>, lai1, la1)
+					{
+						FOREACH(Ptr<ParsingTable::LookAheadInfo>, lai2, la2)
+						{
+							if (lai1->state == lai2->state)
+							{
+								if (ParsingTable::LookAheadInfo::TestPrefix(lai1, lai2) != ParsingTable::LookAheadInfo::NotPrefix)
+								{
+									return false;
+								}
+								if (ParsingTable::LookAheadInfo::TestPrefix(lai2, lai1) != ParsingTable::LookAheadInfo::NotPrefix)
+								{
+									return false;
+								}
+							}
+						}
+					}
+
+					// use the non-stable look aheads to walk a token further
 					if(!WalkLookAheads(table, la1, maxTokenCount) || !WalkLookAheads(table, la2, maxTokenCount))
 					{
 						return false;
@@ -4825,6 +5091,52 @@ CollectAttribute
 /***********************************************************************
 GenerateTable
 ***********************************************************************/
+
+			vint LookAheadConflictPriority(vint tableTokenIndex)
+			{
+				switch (tableTokenIndex)
+				{
+				case ParsingTable::NormalReduce:
+					return 0;
+				case ParsingTable::LeftRecursiveReduce:
+					return 1;
+				default:
+					return 2;
+				}
+			}
+
+			void GenerateLookAhead(Ptr<ParsingTable> table, List<State*>& stateIds, vint state, vint token, Ptr<ParsingTable::TransitionItem> t1, Ptr<ParsingTable::TransitionItem> t2, bool enableAmbiguity, collections::List<Ptr<ParsingError>>& errors)
+			{
+				if(ParsingTable::TransitionItem::CheckOrder(t1, t2, false)==ParsingTable::TransitionItem::UnknownOrder)
+				{
+					if(enableAmbiguity || !CreateLookAhead(table, t1, t2, 16))
+					{
+						if (LookAheadConflictPriority(t1->token) != LookAheadConflictPriority(t2->token))
+						{
+							return;
+						}
+						WString stateName=itow(state)+L"["+table->GetStateInfo(state).stateName+L"]";
+						WString tokenName=
+							token==ParsingTable::TokenBegin?WString(L"$TokenBegin"):
+							token==ParsingTable::TokenFinish?WString(L"$TokenFinish"):
+							token==ParsingTable::NormalReduce?WString(L"$NormalReduce"):
+							token==ParsingTable::LeftRecursiveReduce?WString(L"$LeftRecursiveReduce"):
+							table->GetTokenInfo(token).name;
+						switch (t1->token)
+						{
+						case ParsingTable::NormalReduce:
+							errors.Add(new ParsingError(stateIds[state]->ownerRule, L"Conflict happened with normal reduce in transition of \""+tokenName+L"\" of state \""+stateName+L"\"."));
+							break;
+						case ParsingTable::LeftRecursiveReduce:
+							errors.Add(new ParsingError(stateIds[state]->ownerRule, L"Conflict happened with left recursive reduce in transition of \""+tokenName+L"\" of state \""+stateName+L"\"."));
+							break;
+						default:
+							errors.Add(new ParsingError(stateIds[state]->ownerRule, L"Conflict happened in transition of \""+tokenName+L"\" of state \""+stateName+L"\"."));
+							break;
+						}
+					}
+				}
+			}
 
 			Ptr<tabling::ParsingTable> GenerateTableFromPDA(Ptr<definitions::ParsingDefinition> definition, ParsingSymbolManager* manager, Ptr<Automaton> jointPDA, bool enableAmbiguity, collections::List<Ptr<ParsingError>>& errors)
 			{
@@ -5112,8 +5424,11 @@ GenerateTable
 						case Transition::TokenFinish:
 							tokenIndex=ParsingTable::TokenFinish;
 							break;
-						case Transition::TryReduce:
-							tokenIndex=ParsingTable::TryReduce;
+						case Transition::NormalReduce:
+							tokenIndex=ParsingTable::NormalReduce;
+							break;
+						case Transition::LeftRecursiveReduce:
+							tokenIndex=ParsingTable::LeftRecursiveReduce;
 							break;
 						case Transition::Symbol:
 							tokenIndex=tokenIds[transition->transitionSymbol];
@@ -5197,30 +5512,39 @@ GenerateTable
 				/***********************************************************************
 				check conflict and build look ahead table
 				***********************************************************************/
-				for(vint i=0;i<table->GetStateCount();i++)
+				for (vint i = 0; i < table->GetStateCount(); i++)
 				{
-					for(vint j=0;j<table->GetTokenCount();j++)
+					for (vint j = 0; j < table->GetTokenCount(); j++)
 					{
 						Ptr<ParsingTable::TransitionBag> bag=table->GetTransitionBag(i, j);
 						if(bag)
 						{
 							CopyFrom(bag->transitionItems, From(bag->transitionItems).OrderBy(ParsingTable::TransitionItem::Compare));
-							for(vint k1=0;k1<bag->transitionItems.Count()-1;k1++)
-							for(vint k2=k1+1;k2<bag->transitionItems.Count();k2++)
+
+							// build look ahead inside a transition
+							for (vint k1 = 0; k1 < bag->transitionItems.Count() - 1; k1++)
 							{
-								Ptr<ParsingTable::TransitionItem> t1=bag->transitionItems[k1];
-								Ptr<ParsingTable::TransitionItem> t2=bag->transitionItems[k2];
-								if(ParsingTable::TransitionItem::CheckOrder(t1, t2, false)==ParsingTable::TransitionItem::UnknownOrder)
+								for (vint k2 = k1 + 1; k2 < bag->transitionItems.Count(); k2++)
 								{
-									if(enableAmbiguity || !CreateLookAhead(table, t1, t2, 16))
+									Ptr<ParsingTable::TransitionItem> t1=bag->transitionItems[k1];
+									Ptr<ParsingTable::TransitionItem> t2=bag->transitionItems[k2];
+									GenerateLookAhead(table, stateIds, i, j, t1, t2, enableAmbiguity, errors);
+								}
+							}
+
+							// build look ahead between this transition and reduce transitions
+							for (vint t = ParsingTable::NormalReduce; t <= ParsingTable::LeftRecursiveReduce && t < j; t++)
+							{
+								if (Ptr<ParsingTable::TransitionBag> reduceBag = table->GetTransitionBag(i, t))
+								{
+									for (vint k1 = 0; k1 < reduceBag->transitionItems.Count(); k1++)
 									{
-										WString stateName=itow(i)+L"["+table->GetStateInfo(i).stateName+L"]";
-										WString tokenName=
-											j==ParsingTable::TokenBegin?WString(L"$TokenBegin"):
-											j==ParsingTable::TokenFinish?WString(L"$TokenFinish"):
-											j==ParsingTable::TryReduce?WString(L"$TryReduce"):
-											table->GetTokenInfo(j).name;
-										errors.Add(new ParsingError(stateIds[i]->ownerRule, L"Conflict happened in transition of \""+tokenName+L"\" of state \""+stateName+L"\"."));
+										for (vint k2 = 0; k2 < bag->transitionItems.Count(); k2++)
+										{
+											Ptr<ParsingTable::TransitionItem> t1=reduceBag->transitionItems[k1];
+											Ptr<ParsingTable::TransitionItem> t2=bag->transitionItems[k2];
+											GenerateLookAhead(table, stateIds, i, j, t1, t2, enableAmbiguity, errors);
+										}
 									}
 								}
 							}
@@ -5250,7 +5574,6 @@ GenerateTable
 					Ptr<Automaton> nondeterministicPDA=CreateNondeterministicPDAFromEpsilonPDA(epsilonPDA);
 					Ptr<Automaton> jointPDA=CreateJointPDAFromNondeterministicPDA(nondeterministicPDA);
 					CompactJointPDA(jointPDA);
-					MergeJointPDAStates(jointPDA);
 					MarkLeftRecursiveInJointPDA(jointPDA, errors);
 					if(errors.Count()==0)
 					{
@@ -5373,7 +5696,7 @@ CreateJointPDAFromNondeterministicPDA
 
 								FOREACH(State*, oldEndState, oldRuleInfo->endStates)
 								{
-									Transition* reduceTransition=automaton->Epsilon(oldNewStateMap[oldEndState], newTarget);
+									Transition* reduceTransition=automaton->NormalReduce(oldNewStateMap[oldEndState], newTarget);
 									Ptr<Action> action=new Action;
 									action->actionType=Action::Reduce;
 									action->shiftReduceSource=newSource;
@@ -5458,10 +5781,7 @@ CompactJointPDA
 								// when trying to do a transition by $TokenFinish
 								//     "a b" should reduce once
 								//     "a b c" should reduce twice
-								// if such a case happened, a $TryReduce transition should be added
-
-								stackOperationType=Transition::ShiftReduceCompacted;
-								transitionType=Transition::TryReduce;
+								// because that a reduce is not considered a virtual token, so this is not going to be happened
 							}
 						}
 						else if(closureItem.transitions->Count()>1)
@@ -5499,14 +5819,6 @@ CompactJointPDA
 					}
 				}
 			}
-
-/***********************************************************************
-MergeJointPDAStates
-***********************************************************************/
-
-			 void MergeJointPDAStates(Ptr<Automaton> jointPDA)
-			 {
-			 }
 
 /***********************************************************************
 MarkLeftRecursiveInJointPDA
@@ -5569,17 +5881,25 @@ MarkLeftRecursiveInJointPDA
 								Pair<State*, State*> shift(action->shiftReduceSource, action->shiftReduceTarget);
 								if(leftRecursiveShifts.Contains(shift))
 								{
-									// need to create a new action because in the previous phrases, these action object are shared and treated as read only
-									Ptr<Action> newAction=new Action;
-									newAction->actionType=Action::LeftRecursiveReduce;
-									newAction->actionSource=action->actionSource;
-									newAction->actionTarget=action->actionTarget;
-									newAction->creatorRule=action->creatorRule;
-									newAction->shiftReduceSource=action->shiftReduceSource;
-									newAction->shiftReduceTarget=action->shiftReduceTarget;
-									newAction->creatorRule=shift.key->ownerRule;
-
-									transition->actions[i]=newAction;
+									// check if this is a normal reduce transition, and change it to a left recursive reduce transition.
+									if (transition->transitionType == Transition::NormalReduce)
+									{
+										transition->transitionType = Transition::LeftRecursiveReduce;
+										// need to create a new action because in the previous phrases, these action object are shared and treated as read only
+										Ptr<Action> newAction=new Action;
+										newAction->actionType=Action::LeftRecursiveReduce;
+										newAction->actionSource=action->actionSource;
+										newAction->actionTarget=action->actionTarget;
+										newAction->creatorRule=action->creatorRule;
+										newAction->shiftReduceSource=action->shiftReduceSource;
+										newAction->shiftReduceTarget=action->shiftReduceTarget;
+										newAction->creatorRule=shift.key->ownerRule;
+										transition->actions[i]=newAction;
+									}
+									else
+									{
+										errors.Add(new ParsingError(state->ownerRule, L"Left recursive reduce action in non-normal-reduce found in rule \""+state->ownerRule->name+L"\" is not allowed."));
+									}
 								}
 							}
 						}
@@ -7858,8 +8178,11 @@ Logger (Automaton)
 							case Transition::TokenFinish:
 								writer.WriteString(L"    TOKEN-FINISH");
 								break;
-							case Transition::TryReduce:
-								writer.WriteString(L"    TRY-REDUCE");
+							case Transition::NormalReduce:
+								writer.WriteString(L"    NORMAL-REDUCE");
+								break;
+							case Transition::LeftRecursiveReduce:
+								writer.WriteString(L"    LREC-REDUCE");
 								break;
 							case Transition::Symbol:
 								{
@@ -7985,7 +8308,8 @@ Logger (ParsingTable)
 					WString content=
 						column==ParsingTable::TokenBegin?L"0: $TokenBegin":
 						column==ParsingTable::TokenFinish?L"1: $TokenFinish":
-						column==ParsingTable::TryReduce?L"2: $TryReduce":
+						column==ParsingTable::NormalReduce?L"2: $NormalReduce":
+						column==ParsingTable::LeftRecursiveReduce?L"3: $LeftRecursiveReduce":
 						itow(column)+L": "+table->GetTokenInfo(column).name+L"\r\n  "+table->GetTokenInfo(column).regex;
 					stringTable[column+1]=content;
 				}
@@ -8318,6 +8642,34 @@ ParsingTokenWalker::LookAheadEnumerator
 			}
 
 /***********************************************************************
+ParsingTokenWalker::TokenLookAhead
+***********************************************************************/
+
+			ParsingTokenWalker::TokenLookAhead::TokenLookAhead(const ParsingTokenWalker* _walker)
+				:walker(_walker)
+			{
+			}
+
+			collections::IEnumerator<vint>* ParsingTokenWalker::TokenLookAhead::CreateEnumerator()const
+			{
+				return new LookAheadEnumerator(walker, walker->currentToken);
+			}
+
+/***********************************************************************
+ParsingTokenWalker::ReduceLookAhead
+***********************************************************************/
+
+			ParsingTokenWalker::ReduceLookAhead::ReduceLookAhead(const ParsingTokenWalker* _walker)
+				:walker(_walker)
+			{
+			}
+
+			collections::IEnumerator<vint>* ParsingTokenWalker::ReduceLookAhead::CreateEnumerator()const
+			{
+				return new LookAheadEnumerator(walker, walker->currentToken - 1);
+			}
+
+/***********************************************************************
 ParsingTokenWalker
 ***********************************************************************/
 
@@ -8369,15 +8721,12 @@ ParsingTokenWalker
 				}
 			}
 
-			collections::IEnumerator<vint>* ParsingTokenWalker::CreateEnumerator()const
-			{
-				return new LookAheadEnumerator(this, currentToken);
-			}
-
 			ParsingTokenWalker::ParsingTokenWalker(collections::List<regex::RegexToken>& _tokens, Ptr<ParsingTable> _table)
 				:tokens(_tokens)
 				,table(_table)
 				,currentToken(-2)
+				, tokenLookAhead(this)
+				, reduceLookAhead(this)
 			{
 			}
 
@@ -8385,9 +8734,14 @@ ParsingTokenWalker
 			{
 			}
 
-			const collections::IEnumerable<vint>& ParsingTokenWalker::GetLookahead()const
+			const collections::IEnumerable<vint>& ParsingTokenWalker::GetTokenLookahead()const
 			{
-				return *this;
+				return tokenLookAhead;
+			}
+
+			const collections::IEnumerable<vint>& ParsingTokenWalker::GetReduceLookahead()const
+			{
+				return reduceLookAhead;
 			}
 
 			void ParsingTokenWalker::Reset()
@@ -8806,10 +9160,15 @@ ParsingState
 				RegexToken* regexToken=walker->GetRegexToken();
 
 				bool tryReduce=false;
-				TransitionResult result=ReadToken(token, regexToken, &walker->GetLookahead());
+				TransitionResult result=ReadToken(token, regexToken, &walker->GetTokenLookahead());
 				if(!result)
 				{
-					result=ReadToken(ParsingTable::TryReduce, 0, 0);
+					result=ReadToken(ParsingTable::LeftRecursiveReduce, 0, &walker->GetReduceLookahead());
+					tryReduce=true;
+				}
+				if(!result)
+				{
+					result=ReadToken(ParsingTable::NormalReduce, 0, &walker->GetReduceLookahead());
 					tryReduce=true;
 				}
 
@@ -8841,13 +9200,14 @@ ParsingState
 				return false;
 			}
 
-			void ParsingState::Explore(vint tableTokenIndex, Future* previous, collections::List<Future*>& possibilities)
+			bool ParsingState::Explore(vint tableTokenIndex, Future* previous, collections::List<Future*>& possibilities)
 			{
 				Future fakePrevious;
 				fakePrevious.currentState=stateGroup->currentState;
 				Future* realPrevious=previous?previous:&fakePrevious;
 
 				ParsingTable::TransitionBag* bag=table->GetTransitionBag(realPrevious->currentState, tableTokenIndex).Obj();
+				bool successful = false;
 				if(bag)
 				{
 					for(vint i=0;i<bag->transitionItems.Count();i++)
@@ -8858,47 +9218,66 @@ ParsingState
 							Future* now=new Future;
 							RunTransitionInFuture(item, previous, now);
 							possibilities.Add(now);
+							successful = true;
 						}
 					}
 				}
+				return successful;
 			}
 
-			regex::RegexToken* ParsingState::ExploreStep(collections::List<Future*>& previousFutures, vint start, vint count, collections::List<Future*>& possibilities)
+			bool ParsingState::ExploreStep(collections::List<Future*>& previousFutures, vint start, vint count, collections::List<Future*>& possibilities)
 			{
 				if(walker->GetTableTokenIndex()==-1)
 				{
-					return 0;
+					return false;
 				}
-				vint token=walker->GetTableTokenIndex();
-				RegexToken* regexToken=walker->GetRegexToken();
-				vint oldPossibilitiesCount=possibilities.Count();
-				for(vint i=0;i<count;i++)
+				vint token = walker->GetTableTokenIndex();
+				RegexToken* regexToken = walker->GetRegexToken();
+				vint oldPossibilitiesCount = possibilities.Count();
+				for (vint i = 0; i<count; i++)
 				{
-					Future* previous=previousFutures[start+i];
+					Future* previous = previousFutures[start + i];
 					Explore(token, previous, possibilities);
 				}
-				if(possibilities.Count()>oldPossibilitiesCount)
+				if (possibilities.Count() == oldPossibilitiesCount)
 				{
-					walker->Move();
-					return regexToken;
+					return false;
 				}
-				else
+				for (vint i = oldPossibilitiesCount; i < possibilities.Count(); i++)
 				{
-					return 0;
+					possibilities[i]->selectedRegexToken = regexToken;
 				}
+				return true;
 			}
 
-			void ParsingState::ExploreTryReduce(collections::List<Future*>& previousFutures, vint start, vint count, collections::List<Future*>& possibilities)
+			bool ParsingState::ExploreNormalReduce(collections::List<Future*>& previousFutures, vint start, vint count, collections::List<Future*>& possibilities)
 			{
 				if(walker->GetTableTokenIndex()==-1)
 				{
-					return;
+					return false;
 				}
+				vint oldPossibilitiesCount = possibilities.Count();
 				for(vint i=0;i<count;i++)
 				{
 					Future* previous=previousFutures[start+i];
-					Explore(ParsingTable::TryReduce, previous, possibilities);
+					Explore(ParsingTable::NormalReduce, previous, possibilities);
 				}
+				return possibilities.Count() > oldPossibilitiesCount;
+			}
+
+			bool ParsingState::ExploreLeftRecursiveReduce(collections::List<Future*>& previousFutures, vint start, vint count, collections::List<Future*>& possibilities)
+			{
+				if(walker->GetTableTokenIndex()==-1)
+				{
+					return false;
+				}
+				vint oldPossibilitiesCount = possibilities.Count();
+				for(vint i=0;i<count;i++)
+				{
+					Future* previous=previousFutures[start+i];
+					Explore(ParsingTable::LeftRecursiveReduce, previous, possibilities);
+				}
+				return possibilities.Count() > oldPossibilitiesCount;
 			}
 
 			ParsingState::Future* ParsingState::ExploreCreateRootFuture()
@@ -9343,19 +9722,23 @@ ParsingTable::LookAheadInfo
 				return a->tokens.Count()<b->tokens.Count()?ParsingTable::LookAheadInfo::Prefix:ParsingTable::LookAheadInfo::Equal;
 			}
 
-			void ParsingTable::LookAheadInfo::Walk(Ptr<ParsingTable> table, Ptr<LookAheadInfo> previous, vint state, collections::List<Ptr<LookAheadInfo>>& newInfos)
+			void ParsingTable::LookAheadInfo::WalkInternal(Ptr<ParsingTable> table, Ptr<LookAheadInfo> previous, vint state, collections::SortedList<vint>& walkedStates, collections::List<Ptr<LookAheadInfo>>& newInfos)
 			{
-				for(vint i=0;i<table->GetTokenCount();i++)
+				if (walkedStates.Contains(state)) return;
+				walkedStates.Add(state);
+
+				for (vint i = 0; i < table->GetTokenCount(); i++)
 				{
-					Ptr<TransitionBag> bag=table->GetTransitionBag(state, i);
-					if(bag)
+					if(Ptr<TransitionBag> bag=table->GetTransitionBag(state, i))
 					{
-						SortedList<vint> newStates;
 						FOREACH(Ptr<TransitionItem>, item, bag->transitionItems)
 						{
-							if(!newStates.Contains(item->targetState))
+							if (i == ParsingTable::NormalReduce || i == ParsingTable::LeftRecursiveReduce)
 							{
-								newStates.Add(item->targetState);
+								WalkInternal(table, previous, item->targetState, walkedStates, newInfos);
+							}
+							else
+							{
 								Ptr<LookAheadInfo> info=new LookAheadInfo;
 								info->state=item->targetState;
 								if(previous)
@@ -9368,6 +9751,14 @@ ParsingTable::LookAheadInfo
 						}
 					}
 				}
+
+				walkedStates.Remove(state);
+			}
+
+			void ParsingTable::LookAheadInfo::Walk(Ptr<ParsingTable> table, Ptr<LookAheadInfo> previous, vint state, collections::List<Ptr<LookAheadInfo>>& newInfos)
+			{
+				SortedList<vint> walkedStates;
+				WalkInternal(table, previous, state, walkedStates, newInfos);
 			}
 
 /***********************************************************************
@@ -13822,6 +14213,8 @@ TypeName
 			const wchar_t* TypeInfo<IValueDictionary>::TypeName			= L"system::Dictionary";
 			const wchar_t* TypeInfo<IValueInterfaceProxy>::TypeName		= L"system::InterfaceProxy";
 			const wchar_t* TypeInfo<IValueFunctionProxy>::TypeName		= L"system::Function";
+			const wchar_t* TypeInfo<IValueListener>::TypeName			= L"system::Listener";
+			const wchar_t* TypeInfo<IValueSubscription>::TypeName		= L"system::Subscription";
 
 			const wchar_t* TypeInfo<IValueSerializer>::TypeName			= L"system::reflection::ValueSerializer";
 			const wchar_t* TypeInfo<ITypeInfo>::TypeName				= L"system::reflection::TypeInfo";
@@ -14238,6 +14631,66 @@ Helper Functions
 			}
 
 /***********************************************************************
+Interface Implementation Proxy (Implement)
+***********************************************************************/
+
+			namespace interface_proxy
+			{
+				class description_IValueListener : public ValueInterfaceRoot, public IValueListener
+				{
+				public:
+					description_IValueListener(Ptr<IValueInterfaceProxy> proxy)
+						:ValueInterfaceRoot(proxy)
+					{
+					}
+
+					static Ptr<IValueListener> Create(Ptr<IValueInterfaceProxy> proxy)
+					{
+						return new description_IValueListener(proxy);
+					}
+
+					IValueSubscription* GetSubscription()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetSubscription);
+					}
+
+					bool GetStopped()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetStopped);
+					}
+
+					bool StopListening()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(StopListening);
+					}
+				};
+
+				class description_IValueSubscription: public ValueInterfaceRoot, public IValueSubscription
+				{
+				public:
+					description_IValueSubscription(Ptr<IValueInterfaceProxy> proxy)
+						:ValueInterfaceRoot(proxy)
+					{
+					}
+
+					static Ptr<IValueSubscription> Create(Ptr<IValueInterfaceProxy> proxy)
+					{
+						return new description_IValueSubscription(proxy);
+					}
+
+					Ptr<IValueListener> Subscribe(Ptr<IValueFunctionProxy> callback)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(Subscribe, callback);
+					}
+
+					bool Close()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(Close);
+					}
+				};
+			}
+
+/***********************************************************************
 Collections
 ***********************************************************************/
 
@@ -14331,6 +14784,21 @@ Collections
 				CLASS_MEMBER_BASE(IDescriptable)
 				CLASS_MEMBER_METHOD(Invoke, {L"arguments"})
 			END_CLASS_MEMBER(IValueFunctionProxy)
+
+			BEGIN_CLASS_MEMBER(IValueListener)
+				CLASS_MEMBER_BASE(IDescriptable)
+				CLASS_MEMBER_EXTERNALCTOR(Ptr<IValueListener>(Ptr<IValueInterfaceProxy>), {L"proxy"}, &interface_proxy::description_IValueListener::Create)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Subscription)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Stopped)
+				CLASS_MEMBER_METHOD(StopListening, NO_PARAMETER)
+			END_CLASS_MEMBER(IValueListener)
+
+			BEGIN_CLASS_MEMBER(IValueSubscription)
+				CLASS_MEMBER_BASE(IDescriptable)
+				CLASS_MEMBER_EXTERNALCTOR(Ptr<IValueSubscription>(Ptr<IValueInterfaceProxy>), {L"proxy"}, &interface_proxy::description_IValueSubscription::Create)
+				CLASS_MEMBER_METHOD(Subscribe, { L"callback" })
+				CLASS_MEMBER_METHOD(Close, NO_PARAMETER)
+			END_CLASS_MEMBER(IValueSubscription)
 
 			BEGIN_CLASS_MEMBER(IValueSerializer)
 				CLASS_MEMBER_BASE(IDescriptable)
@@ -16673,7 +17141,7 @@ EpsilonNfaAlgorithm
 
 			EpsilonNfa Apply(UsingExpression* expression, Automaton* target)
 			{
-				CHECK_FAIL(L"RegexExpression::GenerateEpsilonNfa()#UsingExpression不能产生状态机。");
+				CHECK_FAIL(L"RegexExpression::GenerateEpsilonNfa()#UsingExpression cannot create state machine.");
 			}
 		};
 
@@ -18364,6 +18832,8 @@ RegexNode
 /***********************************************************************
 Stream\Accessor.cpp
 ***********************************************************************/
+#if defined VCZH_GCC
+#endif
 
 namespace vl
 {
@@ -18811,22 +19281,22 @@ EncoderStream
 
 		void EncoderStream::Seek(pos_t _size)
 		{
-			CHECK_FAIL(L"EncoderStream::Seek(pos_t)#不支持此操作。");
+			CHECK_FAIL(L"EncoderStream::Seek(pos_t)#Operation not supported.");
 		}
 
 		void EncoderStream::SeekFromBegin(pos_t _size)
 		{
-			CHECK_FAIL(L"EncoderStream::SeekFromBegin(pos_t)#不支持此操作。");
+			CHECK_FAIL(L"EncoderStream::SeekFromBegin(pos_t)#Operation not supported.");
 		}
 
 		void EncoderStream::SeekFromEnd(pos_t _size)
 		{
-			CHECK_FAIL(L"EncoderStream::SeekFromEnd(pos_t)#不支持此操作。");
+			CHECK_FAIL(L"EncoderStream::SeekFromEnd(pos_t)#Operation not supported.");
 		}
 
 		vint EncoderStream::Read(void* _buffer, vint _size)
 		{
-			CHECK_FAIL(L"EncoderStream::Read(void*, vint)#不支持此操作。");
+			CHECK_FAIL(L"EncoderStream::Read(void*, vint)#Operation not supported.");
 		}
 
 		vint EncoderStream::Write(void* _buffer, vint _size)
@@ -18841,7 +19311,7 @@ EncoderStream
 
 		vint EncoderStream::Peek(void* _buffer, vint _size)
 		{
-			CHECK_FAIL(L"EncoderStream::Peek(void*, vint)#不支持此操作。");
+			CHECK_FAIL(L"EncoderStream::Peek(void*, vint)#Operation not supported.");
 		}
 
 /***********************************************************************
@@ -18909,17 +19379,17 @@ DecoderStream
 
 		void DecoderStream::Seek(pos_t _size)
 		{
-			CHECK_FAIL(L"DecoderStream::Seek(pos_t)#不支持此操作。");
+			CHECK_FAIL(L"DecoderStream::Seek(pos_t)#Operation not supported.");
 		}
 
 		void DecoderStream::SeekFromBegin(pos_t _size)
 		{
-			CHECK_FAIL(L"DecoderStream::SeekFromBegin(pos_t)#不支持此操作。");
+			CHECK_FAIL(L"DecoderStream::SeekFromBegin(pos_t)#Operation not supported.");
 		}
 
 		void DecoderStream::SeekFromEnd(pos_t _size)
 		{
-			CHECK_FAIL(L"DecoderStream::SeekFromEnd(pos_t)#不支持此操作。");
+			CHECK_FAIL(L"DecoderStream::SeekFromEnd(pos_t)#Operation not supported.");
 		}
 
 		vint DecoderStream::Read(void* _buffer, vint _size)
@@ -18934,12 +19404,12 @@ DecoderStream
 
 		vint DecoderStream::Write(void* _buffer, vint _size)
 		{
-			CHECK_FAIL(L"DecoderStream::Write(void*, vint)#不支持此操作。");
+			CHECK_FAIL(L"DecoderStream::Write(void*, vint)#Operation not supported.");
 		}
 
 		vint DecoderStream::Peek(void* _buffer, vint _size)
 		{
-			CHECK_FAIL(L"DecoderStream::Peek(void*, vint)#不支持此操作。");
+			CHECK_FAIL(L"DecoderStream::Peek(void*, vint)#Operation not supported.");
 		}
 	}
 }
@@ -19019,22 +19489,22 @@ BroadcastStream
 
 		void BroadcastStream::Seek(pos_t _size)
 		{
-			CHECK_FAIL(L"BroadcastStream::Seek(pos_t)#不支持此操作。");
+			CHECK_FAIL(L"BroadcastStream::Seek(pos_t)#Operation not supported.");
 		}
 
 		void BroadcastStream::SeekFromBegin(pos_t _size)
 		{
-			CHECK_FAIL(L"BroadcastStream::SeekFromBegin(pos_t)#不支持此操作。");
+			CHECK_FAIL(L"BroadcastStream::SeekFromBegin(pos_t)#Operation not supported.");
 		}
 
 		void BroadcastStream::SeekFromEnd(pos_t _size)
 		{
-			CHECK_FAIL(L"BroadcastStream::SeekFromEnd(pos_t)#不支持此操作。");
+			CHECK_FAIL(L"BroadcastStream::SeekFromEnd(pos_t)#Operation not supported.");
 		}
 
 		vint BroadcastStream::Read(void* _buffer, vint _size)
 		{
-			CHECK_FAIL(L"BroadcastStream::Read(void*, vint)#不支持此操作。");
+			CHECK_FAIL(L"BroadcastStream::Read(void*, vint)#Operation not supported.");
 		}
 
 		vint BroadcastStream::Write(void* _buffer, vint _size)
@@ -19049,7 +19519,7 @@ BroadcastStream
 
 		vint BroadcastStream::Peek(void* _buffer, vint _size)
 		{
-			CHECK_FAIL(L"BroadcastStream::Peek(void*, vint)#不支持此操作。");
+			CHECK_FAIL(L"BroadcastStream::Peek(void*, vint)#Operation not supported.");
 		}
 	}
 }
@@ -19309,8 +19779,8 @@ CacheStream
 
 		vint CacheStream::Read(void* _buffer, vint _size)
 		{
-			CHECK_ERROR(CanRead(), L"CacheStream::Read(void*, vint)#流已关闭或不支持此操作。");
-			CHECK_ERROR(_size>=0, L"CacheStream::Read(void*, vint)#参数size不可为负。");
+			CHECK_ERROR(CanRead(), L"CacheStream::Read(void*, vint)#Stream is closed or operation not supported.");
+			CHECK_ERROR(_size>=0, L"CacheStream::Read(void*, vint)#Argument size cannot be negative.");
 
 			_size=InternalRead(_buffer, _size);
 			position+=_size;
@@ -19323,8 +19793,8 @@ CacheStream
 
 		vint CacheStream::Write(void* _buffer, vint _size)
 		{
-			CHECK_ERROR(CanWrite(), L"CacheStream::Write(void*, vint)#流已关闭或不支持此操作。");
-			CHECK_ERROR(_size>=0, L"CacheStream::Read(void*, vint)#参数size不可为负。");
+			CHECK_ERROR(CanWrite(), L"CacheStream::Write(void*, vint)#Stream is closed or operation not supported.");
+			CHECK_ERROR(_size>=0, L"CacheStream::Read(void*, vint)#Argument size cannot be negative.");
 
 			if(IsLimited())
 			{
@@ -19350,8 +19820,8 @@ CacheStream
 
 		vint CacheStream::Peek(void* _buffer, vint _size)
 		{
-			CHECK_ERROR(CanPeek(), L"CacheStream::Peek(void*, vint)#流已关闭或不支持此操作。");
-			CHECK_ERROR(_size>=0, L"CacheStream::Read(void*, vint)#参数size不可为负。");
+			CHECK_ERROR(CanPeek(), L"CacheStream::Peek(void*, vint)#Stream is closed or operation not supported.");
+			CHECK_ERROR(_size>=0, L"CacheStream::Read(void*, vint)#Argument size cannot be negative.");
 
 			return InternalRead(_buffer, _size);
 		}
@@ -19361,6 +19831,9 @@ CacheStream
 /***********************************************************************
 Stream\CharFormat.cpp
 ***********************************************************************/
+#if defined VCZH_MSVC
+#elif defined VCZH_GCC
+#endif
 
 namespace vl
 {
@@ -19373,8 +19846,7 @@ CharEncoder
 
 		CharEncoder::CharEncoder()
 			:stream(0)
-			,cache(0)
-			,cacheAvailable(false)
+			,cacheSize(0)
 		{
 		}
 
@@ -19389,28 +19861,28 @@ CharEncoder
 
 		vint CharEncoder::Write(void* _buffer, vint _size)
 		{
-			const vint all=(cacheAvailable?1:0)+_size;
-			const vint chars=all/2;
-			const vint bytes=chars*2;
+			const vint all=cacheSize+_size;
+			const vint chars=all/sizeof(wchar_t);
+			const vint bytes=chars*sizeof(wchar_t);
 			wchar_t* unicode=0;
 			bool needToFree=false;
 			vint result=0;
 
 			if(chars)
 			{
-				if(cacheAvailable)
+				if(cacheSize>0)
 				{
 					unicode=new wchar_t[chars];
-					memcpy(unicode, &cache, sizeof(cache));
-					memcpy(((unsigned char*)unicode)+1, _buffer, bytes-sizeof(cache));
+					memcpy(unicode, cacheBuffer, cacheSize);
+					memcpy(((vuint8_t*)unicode)+cacheSize, _buffer, bytes-cacheSize);
 					needToFree=true;
 				}
 				else
 				{
 					unicode=(wchar_t*)_buffer;
 				}
-				result=WriteString(unicode, chars)*2-(cacheAvailable?1:0);
-				cacheAvailable=false;
+				result=WriteString(unicode, chars)*sizeof(wchar_t)-cacheSize;
+				cacheSize=0;
 			}
 
 			if(needToFree)
@@ -19419,9 +19891,9 @@ CharEncoder
 			}
 			if(all-bytes>0)
 			{
-				cache=((unsigned char*)_buffer)[_size-1];
-				cacheAvailable=true;
-				result++;
+				cacheSize=all-bytes;
+				memcpy(cacheBuffer, (vuint8_t*)_buffer+_size-cacheSize, cacheSize);
+				result+=cacheSize;
 			}
 			return result;
 		}
@@ -19432,8 +19904,7 @@ CharDecoder
 
 		CharDecoder::CharDecoder()
 			:stream(0)
-			,cache(0)
-			,cacheAvailable(false)
+			,cacheSize(0)
 		{
 		}
 
@@ -19448,30 +19919,34 @@ CharDecoder
 
 		vint CharDecoder::Read(void* _buffer, vint _size)
 		{
-			unsigned char* unicode=(unsigned char*)_buffer;
+			vuint8_t* unicode=(vuint8_t*)_buffer;
 			vint result=0;
-			if(cacheAvailable && _size>0)
 			{
-				*unicode++=cache;
-				cacheAvailable=false;
-				result++;
+				vint index=0;
+				while(cacheSize>0 && _size>0)
+				{
+					*unicode++=cacheBuffer[index]++;
+					cacheSize--;
+					_size--;
+					result++;
+				}
 			}
 
-			const vint chars=_size/2;
-			vint bytes=ReadString((wchar_t*)unicode, chars)*2;
+			const vint chars=_size/sizeof(wchar_t);
+			vint bytes=ReadString((wchar_t*)unicode, chars)*sizeof(wchar_t);
 			result+=bytes;
 			_size-=bytes;
 			unicode+=bytes;
 
-			if(_size-result==1)
+			if(_size>0)
 			{
 				wchar_t c;
 				if(ReadString(&c, 1)==1)
 				{
-					unicode[0]=((unsigned char*)&c)[0];
-					cache=((unsigned char*)&c)[1];
-					cacheAvailable=true;
-					result++;
+					cacheSize=sizeof(wchar_t)-_size;
+					memcpy(unicode, &c, _size);
+					memcpy(cacheBuffer, (vuint8_t*)c+_size, cacheSize);
+					result+=_size;
 				}
 			}
 			return result;
@@ -19483,11 +19958,18 @@ Mbcs
 
 		vint MbcsEncoder::WriteString(wchar_t* _buffer, vint chars)
 		{
+#if defined VCZH_MSVC
 			vint length=WideCharToMultiByte(CP_THREAD_ACP, 0, _buffer, (int)chars, NULL, NULL, NULL, NULL);
 			char* mbcs=new char[length];
 			WideCharToMultiByte(CP_THREAD_ACP, 0, _buffer, (int)chars, mbcs, (int)length, NULL, NULL);
 			vint result=stream->Write(mbcs, length);
 			delete[] mbcs;
+#elif defined VCZH_GCC
+			WString w(_buffer, chars);
+			AString a=wtoa(w);
+			vint length=a.Length();
+			vint result=stream->Write((void*)a.Buffer(), length);
+#endif
 			if(result==length)
 			{
 				return chars;
@@ -19510,7 +19992,11 @@ Mbcs
 				{
 					break;
 				}
+#if defined VCZH_MSVC
 				if(IsDBCSLeadByte(*reading))
+#elif defined VCZH_GCC
+				if((vint8_t)*reading<0)
+#endif
 				{
 					if(stream->Read(reading+1, 1)!=1)
 					{
@@ -19524,7 +20010,13 @@ Mbcs
 				}
 				readed++;
 			}
+#if defined VCZH_MSVC
 			MultiByteToWideChar(CP_THREAD_ACP, 0, source, (int)(reading-source), _buffer, (int)chars);
+#elif defined VCZH_GCC
+			AString a(source, (vint)(reading-source));
+			WString w=atow(a);
+			memcpy(_buffer, w.Buffer(), readed*sizeof(wchar_t));
+#endif
 			delete[] source;
 			return readed;
 		}
@@ -19535,12 +20027,82 @@ Utf-16
 
 		vint Utf16Encoder::WriteString(wchar_t* _buffer, vint chars)
 		{
+#if defined VCZH_MSVC
 			return stream->Write(_buffer, chars*sizeof(wchar_t))/sizeof(wchar_t);
+#elif defined VCZH_GCC
+			vint writed = 0;
+			vuint16_t utf16 = 0;
+			vuint8_t* utf16buf = (vuint8_t*)&utf16;
+			while (writed < chars)
+			{
+				wchar_t w = *_buffer++;
+				if (w < 0x10000)
+				{
+					utf16 = (vuint16_t)w;
+					if (stream->Write(&utf16buf[0], 1) != 1) break;
+					if (stream->Write(&utf16buf[1], 1) != 1) break;
+				}
+				else if (w < 0x110000)
+				{
+					wchar_t inc = w - 0x10000;
+
+					utf16 = (vuint16_t)(inc / 0x400) + 0xD800;
+					if (stream->Write(&utf16buf[0], 1) != 1) break;
+					if (stream->Write(&utf16buf[1], 1) != 1) break;
+
+					utf16 = (vuint16_t)(inc % 0x400) + 0xDC00;
+					if (stream->Write(&utf16buf[0], 1) != 1) break;
+					if (stream->Write(&utf16buf[1], 1) != 1) break;
+				}
+				else
+				{
+					break;
+				}
+				writed++;
+			}
+			if(writed!=chars)
+			{
+				Close();
+			}
+			return writed;
+#endif
 		}
 
 		vint Utf16Decoder::ReadString(wchar_t* _buffer, vint chars)
 		{
+#if defined VCZH_MSVC
 			return stream->Read(_buffer, chars*sizeof(wchar_t))/sizeof(wchar_t);
+#elif defined VCZH_GCC
+			wchar_t* writing = _buffer;
+			while (writing - _buffer < chars)
+			{
+				vuint16_t utf16_1 = 0;
+				vuint16_t utf16_2 = 0;
+
+				if (stream->Read(&utf16_1, 2) != 2) break;
+				if (utf16_1 < 0xD800 || utf16_1 > 0xDFFF)
+				{
+					*writing++ = (wchar_t)utf16_1;
+				}
+				else if (utf16_1 < 0xDC00)
+				{
+					if (stream->Read(&utf16_2, 2) != 2) break;
+					if (0xDC00 <= utf16_2 && utf16_2 <= 0xDFFF)
+					{
+						*writing++ = (wchar_t)(utf16_1 - 0xD800) * 0x400 + (wchar_t)(utf16_2 - 0xDC00) + 0x10000;
+					}
+					else
+					{
+						break;
+					}
+				}
+				else
+				{
+					break;
+				}
+			}
+			return writing - _buffer;
+#endif
 		}
 
 /***********************************************************************
@@ -19549,6 +20111,7 @@ Utf-16-be
 
 		vint Utf16BEEncoder::WriteString(wchar_t* _buffer, vint chars)
 		{
+#if defined VCZH_MSVC
 			vint writed=0;
 			while(writed<chars)
 			{
@@ -19568,10 +20131,48 @@ Utf-16-be
 				Close();
 			}
 			return writed;
+#elif defined VCZH_GCC
+			vint writed = 0;
+			vuint16_t utf16 = 0;
+			vuint8_t* utf16buf = (vuint8_t*)&utf16;
+			while (writed < chars)
+			{
+				wchar_t w = *_buffer++;
+				if (w < 0x10000)
+				{
+					utf16 = (vuint16_t)w;
+					if (stream->Write(&utf16buf[1], 1) != 1) break;
+					if (stream->Write(&utf16buf[0], 1) != 1) break;
+				}
+				else if (w < 0x110000)
+				{
+					wchar_t inc = w - 0x10000;
+
+					utf16 = (vuint16_t)(inc / 0x400) + 0xD800;
+					if (stream->Write(&utf16buf[1], 1) != 1) break;
+					if (stream->Write(&utf16buf[0], 1) != 1) break;
+
+					utf16 = (vuint16_t)(inc % 0x400) + 0xDC00;
+					if (stream->Write(&utf16buf[1], 1) != 1) break;
+					if (stream->Write(&utf16buf[0], 1) != 1) break;
+				}
+				else
+				{
+					break;
+				}
+				writed++;
+			}
+			if(writed!=chars)
+			{
+				Close();
+			}
+			return writed;
+#endif
 		}
 
 		vint Utf16BEDecoder::ReadString(wchar_t* _buffer, vint chars)
 		{
+#if defined VCZH_MSVC
 			chars=stream->Read(_buffer, chars*sizeof(wchar_t))/sizeof(wchar_t);
 			unsigned char* unicode=(unsigned char*)_buffer;
 			for(vint i=0;i<chars;i++)
@@ -19582,6 +20183,51 @@ Utf-16-be
 				unicode++;
 			}
 			return chars;
+#elif defined VCZH_GCC
+			wchar_t* writing = _buffer;
+			while (writing - _buffer < chars)
+			{
+				vuint16_t utf16_1 = 0;
+				vuint16_t utf16_2 = 0;
+				vuint8_t* utf16buf = 0;
+				vuint8_t utf16buf_temp = 0;
+
+				if (stream->Read(&utf16_1, 2) != 2) break;
+
+				utf16buf = (vuint8_t*)&utf16_1;
+				utf16buf_temp = utf16buf[0];
+				utf16buf[0] = utf16buf[1];
+				utf16buf[1] = utf16buf_temp;
+
+				if (utf16_1 < 0xD800 || utf16_1 > 0xDFFF)
+				{
+					*writing++ = (wchar_t)utf16_1;
+				}
+				else if (utf16_1 < 0xDC00)
+				{
+					if (stream->Read(&utf16_2, 2) != 2) break;
+
+					utf16buf = (vuint8_t*)&utf16_2;
+					utf16buf_temp = utf16buf[0];
+					utf16buf[0] = utf16buf[1];
+					utf16buf[1] = utf16buf_temp;
+
+					if (0xDC00 <= utf16_2 && utf16_2 <= 0xDFFF)
+					{
+						*writing++ = (wchar_t)(utf16_1 - 0xD800) * 0x400 + (wchar_t)(utf16_2 - 0xDC00) + 0x10000;
+					}
+					else
+					{
+						break;
+					}
+				}
+				else
+				{
+					break;
+				}
+			}
+			return writing - _buffer;
+#endif
 		}
 
 /***********************************************************************
@@ -19590,6 +20236,7 @@ Utf8
 
 		vint Utf8Encoder::WriteString(wchar_t* _buffer, vint chars)
 		{
+#if defined VCZH_MSVC
 			vint length=WideCharToMultiByte(CP_UTF8, 0, _buffer, (int)chars, NULL, NULL, NULL, NULL);
 			char* mbcs=new char[length];
 			WideCharToMultiByte(CP_UTF8, 0, _buffer, (int)chars, mbcs, (int)length, NULL, NULL);
@@ -19604,24 +20251,73 @@ Utf8
 				Close();
 				return 0;
 			}
+#elif defined VCZH_GCC
+			vint writed = 0;
+			while (writed < chars)
+			{
+				wchar_t w = *_buffer++;
+				vuint8_t utf8[4];
+				if (w < 0x80)
+				{
+					utf8[0] = (vuint8_t)w;
+					if (stream->Write(utf8, 1) != 1) break;
+				}
+				else if (w < 0x800)
+				{
+					utf8[0] = 0xC0 + ((w & 0x7C0) >> 6);
+					utf8[1] = 0x80 + (w & 0x3F);
+					if (stream->Write(utf8, 2) != 2) break;
+				}
+				else if (w < 0x10000)
+				{
+					utf8[0] = 0xE0 + ((w & 0xF000) >> 12);
+					utf8[1] = 0x80 + ((w & 0xFC0) >> 6);
+					utf8[2] = 0x80 + (w & 0x3F);
+					if (stream->Write(utf8, 3) != 3) break;
+				}
+				else if (w < 0x110000) // only accept UTF-16 range
+				{
+					utf8[0] = 0xF0 + ((w & 0x1C0000) >> 18);
+					utf8[1] = 0x80 + ((w & 0x3F000) >> 12);
+					utf8[2] = 0x80 + ((w & 0xFC0) >> 6);
+					utf8[3] = 0x80 + (w & 0x3F);
+					if (stream->Write(utf8, 4) != 4) break;
+				}
+				else
+				{
+					break;
+				}
+				writed++;
+			}
+			if(writed!=chars)
+			{
+				Close();
+			}
+			return writed;
+#endif
 		}
 
 		Utf8Decoder::Utf8Decoder()
+#if defined VCZH_MSVC
 			:cache(0)
 			,cacheAvailable(false)
+#endif
 		{
 		}
 
 		vint Utf8Decoder::ReadString(wchar_t* _buffer, vint chars)
 		{
-			char source[4];
+			vuint8_t source[4];
+#if defined VCZH_MSVC
 			wchar_t target[2];
+#endif
 			wchar_t* writing=_buffer;
 			vint readed=0;
 			vint sourceCount=0;
 
 			while(readed<chars)
 			{
+#if defined VCZH_MSVC
 				if(cacheAvailable)
 				{
 					*writing++=cache;
@@ -19630,6 +20326,7 @@ Utf8
 				}
 				else
 				{
+#endif
 					if(stream->Read(source, 1)!=1)
 					{
 						break;
@@ -19662,8 +20359,8 @@ Utf8
 					{
 						sourceCount=1;
 					}
-					
-					int targetCount=MultiByteToWideChar(CP_UTF8, 0, source, (int)sourceCount, target, 2);
+#if defined VCZH_MSVC	
+					int targetCount=MultiByteToWideChar(CP_UTF8, 0, (char*)source, (int)sourceCount, target, 2);
 					if(targetCount==1)
 					{
 						*writing++=target[0];
@@ -19679,6 +20376,28 @@ Utf8
 						break;
 					}
 				}
+#elif defined VCZH_GCC
+					if (sourceCount == 1)
+					{
+						*writing++ = (wchar_t)source[0];
+					}
+					else if (sourceCount == 2)
+					{
+						*writing++ = (((wchar_t)source[0] & 0x1F) << 6) + ((wchar_t)source[1] & 0x3F);
+					}
+					else if (sourceCount == 3)
+					{
+						*writing++ = (((wchar_t)source[0] & 0xF) << 12) + (((wchar_t)source[1] & 0x3F) << 6) + ((wchar_t)source[2] & 0x3F);
+					}
+					else if (sourceCount == 4)
+					{
+						*writing++ = (((wchar_t)source[0] & 0x7) << 18) + (((wchar_t)source[1] & 0x3F) << 12) + (((wchar_t)source[2] & 0x3F) << 6) + ((wchar_t)source[3] & 0x3F);
+					}
+					else
+					{
+						break;
+					}
+#endif
 				readed++;
 			}
 			return readed;
@@ -19721,13 +20440,13 @@ BomEncoder
 			case Mbcs:
 				break;
 			case Utf8:
-				_stream->Write("\xEF\xBB\xBF", 3);
+				_stream->Write((void*)"\xEF\xBB\xBF", 3);
 				break;
 			case Utf16:
-				_stream->Write("\xFF\xFE", 2);
+				_stream->Write((void*)"\xFF\xFE", 2);
 				break;
 			case Utf16BE:
-				_stream->Write("\xFE\xFF", 2);
+				_stream->Write((void*)"\xFE\xFF", 2);
 				break;
 			}
 			encoder->Setup(_stream);
@@ -19807,17 +20526,17 @@ BomDecoder
 
 		void BomDecoder::BomStream::Seek(pos_t _size)
 		{
-			CHECK_FAIL(L"BomDecoder::BomStream::Seek(pos_t)#不支持此操作。");
+			CHECK_FAIL(L"BomDecoder::BomStream::Seek(pos_t)#Operation not supported.");
 		}
 
 		void BomDecoder::BomStream::SeekFromBegin(pos_t _size)
 		{
-			CHECK_FAIL(L"BomDecoder::BomStream::SeekFromBegin(pos_t)#不支持此操作。");
+			CHECK_FAIL(L"BomDecoder::BomStream::SeekFromBegin(pos_t)#Operation not supported.");
 		}
 
 		void BomDecoder::BomStream::SeekFromEnd(pos_t _size)
 		{
-			CHECK_FAIL(L"BomDecoder::BomStream::SeekFromEnd(pos_t)#不支持此操作。");
+			CHECK_FAIL(L"BomDecoder::BomStream::SeekFromEnd(pos_t)#Operation not supported.");
 		}
 
 		vint BomDecoder::BomStream::Read(void* _buffer, vint _size)
@@ -19842,12 +20561,12 @@ BomDecoder
 
 		vint BomDecoder::BomStream::Write(void* _buffer, vint _size)
 		{
-			CHECK_FAIL(L"BomDecoder::BomStream::Write(void*, vint)#不支持此操作。");
+			CHECK_FAIL(L"BomDecoder::BomStream::Write(void*, vint)#Operation not supported.");
 		}
 
 		vint BomDecoder::BomStream::Peek(void* _buffer, vint _size)
 		{
-			CHECK_FAIL(L"BomDecoder::BomStream::Peek(void*, vint)#不支持此操作。");
+			CHECK_FAIL(L"BomDecoder::BomStream::Peek(void*, vint)#Operation not supported.");
 		}
 
 		BomDecoder::BomDecoder()
@@ -19971,7 +20690,7 @@ CharEncoder
 			for(vint i=0;i<size;i+=2)
 			{
 				if(buffer[i]>=128 && buffer[i+1]==0) return false;
-				unsigned __int16 c=buffer[i]+(buffer[i+1]<<8);
+				vuint16_t c=buffer[i]+(buffer[i+1]<<8);
 				if(c==0xFFFF) return false;
 				vint type=0;
 				if(0xD800<=c && c<=0xDBFF) type=1;
@@ -20009,7 +20728,7 @@ CharEncoder
 			for(vint i=0;i<size;i+=2)
 			{
 				if(buffer[i+1]>=128 && buffer[i]==0) return false;
-				unsigned __int16 c=buffer[i+1]+(buffer[i]<<8);
+				vuint16_t c=buffer[i+1]+(buffer[i]<<8);
 				if(c==0xFFFF) return false;
 				vint type=0;
 				if(0xD800<=c && c<=0xDBFF) type=1;
@@ -20040,6 +20759,7 @@ CharEncoder
 			return !needTrail;
 		}
 
+#if defined VCZH_MSVC
 		template<vint Count>
 		bool GetEncodingResult(int (&tests)[Count], bool(&results)[Count], int test)
 		{
@@ -20052,6 +20772,7 @@ CharEncoder
 			}
 			return false;
 		}
+#endif
 
 		void TestEncoding(unsigned char* buffer, vint size, BomEncoder::Encoding& encoding, bool& containsBom)
 		{
@@ -20079,12 +20800,15 @@ CharEncoder
 				bool roughUtf8=CanBeUtf8(buffer, size);
 				bool roughUtf16=CanBeUtf16(buffer, size);
 				bool roughUtf16BE=CanBeUtf16BE(buffer, size);
+#if defined VCZH_MSVC
 				vint roughCount=(roughMbcs?1:0)+(roughUtf8?1:0)+(roughUtf16?1:0)+(roughUtf16BE?1:0);
 				if(roughCount==1)
 				{
+#endif
 					if(roughUtf8) encoding=BomEncoder::Utf8;
 					if(roughUtf16) encoding=BomEncoder::Utf16;
 					if(roughUtf16BE) encoding=BomEncoder::Utf16BE;
+#if defined VCZH_MSVC
 				}
 				else if(roughCount>1)
 				{
@@ -20187,6 +20911,7 @@ CharEncoder
 						}
 					}
 				}
+#endif
 				containsBom=encoding==BomEncoder::Mbcs;
 			}
 		}
@@ -20196,11 +20921,21 @@ CharEncoder
 /***********************************************************************
 Stream\FileStream.cpp
 ***********************************************************************/
+#if defined VCZH_GCC
+#endif
 
 namespace vl
 {
 	namespace stream
 	{
+
+#if defined VCZH_GCC
+		void _fseeki64(FILE* file, pos_t offset, int origin)
+		{
+			fseek(file, (long)offset, origin);
+		}
+#endif
+
 /***********************************************************************
 FileStream
 ***********************************************************************/
@@ -20222,10 +20957,16 @@ FileStream
 				break;
 			}
 
+#if defined VCZH_MSVC
 			if(_wfopen_s(&file, fileName.Buffer(), mode)!=0)
 			{
 				file=0;
 			}
+#elif defined VCZH_GCC
+			AString fileNameA = wtoa(fileName);
+			AString modeA = wtoa(mode);
+			file = fopen(fileNameA.Buffer(), modeA.Buffer());			
+#endif
 		}
 
 		FileStream::~FileStream()
@@ -20276,11 +21017,15 @@ FileStream
 		{
 			if(file!=0)
 			{
+#if defined VCZH_MSVC
 				fpos_t position=0;
 				if(fgetpos(file, &position)==0)
 				{
 					return position;
 				}
+#elif defined VCZH_GCC
+				return (pos_t)ftell(file);
+#endif
 			}
 			return -1;
 		}
@@ -20289,6 +21034,7 @@ FileStream
 		{
 			if(file!=0)
 			{
+#if defined VCZH_MSVC
 				fpos_t position=0;
 				if(fgetpos(file, &position)==0)
 				{
@@ -20301,6 +21047,13 @@ FileStream
 						}
 					}
 				}
+#elif defined VCZH_GCC
+				long position = ftell(file);
+				fseek(file, 0, SEEK_END);
+				long size=ftell(file);
+				fseek(file, position, SEEK_SET);
+				return (pos_t)size;
+#endif
 			}
 			return -1;
 		}
@@ -20355,22 +21108,23 @@ FileStream
 
 		vint FileStream::Read(void* _buffer, vint _size)
 		{
-			CHECK_ERROR(file!=0, L"FileStream::Read(pos_t)#流处于关闭状态，不可执行此操作。");
-			CHECK_ERROR(_size>=0, L"FileStream::Read(void*, vint)#参数size不可为负。");
+			CHECK_ERROR(file!=0, L"FileStream::Read(pos_t)#Stream is closed, cannot perform this operation.");
+			CHECK_ERROR(_size>=0, L"FileStream::Read(void*, vint)#Argument size cannot be negative.");
 			return fread(_buffer, 1, _size, file);
 		}
 
 		vint FileStream::Write(void* _buffer, vint _size)
 		{
-			CHECK_ERROR(file!=0, L"FileStream::Write(pos_t)#流处于关闭状态，不可执行此操作。");
-			CHECK_ERROR(_size>=0, L"FileStream::Write(void*, vint)#参数size不可为负。");
+			CHECK_ERROR(file!=0, L"FileStream::Write(pos_t)#Stream is closed, cannot perform this operation.");
+			CHECK_ERROR(_size>=0, L"FileStream::Write(void*, vint)#Argument size cannot be negative.");
 			return fwrite(_buffer, 1, _size, file);
 		}
 
 		vint FileStream::Peek(void* _buffer, vint _size)
 		{
-			CHECK_ERROR(file!=0, L"FileStream::Peek(pos_t)#流处于关闭状态，不可执行此操作。");
-			CHECK_ERROR(_size>=0, L"FileStream::Peek(void*, vint)#参数size不可为负。");
+			CHECK_ERROR(file!=0, L"FileStream::Peek(pos_t)#Stream is closed, cannot perform this operation.");
+			CHECK_ERROR(_size>=0, L"FileStream::Peek(void*, vint)#Argument size cannot be negative.");
+#if defined VCZH_MSVC
 			fpos_t position=0;
 			if(fgetpos(file, &position)==0)
 			{
@@ -20381,6 +21135,12 @@ FileStream
 				}
 			}
 			return -1;
+#elif defined VCZH_GCC
+			long position=ftell(file);
+			size_t count=fread(_buffer, 1, _size, file);
+			fseek(file, position, SEEK_SET);
+			return count;
+#endif
 		}
 	}
 }
@@ -20491,7 +21251,7 @@ MemoryStream
 
 		void MemoryStream::SeekFromBegin(pos_t _size)
 		{
-			CHECK_ERROR(block!=0, L"MemoryStream::SeekFromBegin(pos_t)#流处于关闭状态，不可执行此操作。");
+			CHECK_ERROR(block!=0, L"MemoryStream::SeekFromBegin(pos_t)#Stream is closed, cannot perform this operation.");
 			vint expected=(vint)_size;
 			if(expected<0)
 			{
@@ -20514,8 +21274,8 @@ MemoryStream
 
 		vint MemoryStream::Read(void* _buffer, vint _size)
 		{
-			CHECK_ERROR(block!=0, L"MemoryStream::Read(pos_t)#流处于关闭状态，不可执行此操作。");
-			CHECK_ERROR(_size>=0, L"MemoryStream::Read(void*, vint)#参数size不可为负。");
+			CHECK_ERROR(block!=0, L"MemoryStream::Read(pos_t)#Stream is closed, cannot perform this operation.");
+			CHECK_ERROR(_size>=0, L"MemoryStream::Read(void*, vint)#Argument size cannot be negative.");
 			vint max=size-position;
 			if(_size>max)
 			{
@@ -20528,8 +21288,8 @@ MemoryStream
 
 		vint MemoryStream::Write(void* _buffer, vint _size)
 		{
-			CHECK_ERROR(block!=0, L"MemoryStream::Write(pos_t)#流处于关闭状态，不可执行此操作。");
-			CHECK_ERROR(_size>=0, L"MemoryStream::Write(void*, vint)#参数size不可为负。");
+			CHECK_ERROR(block!=0, L"MemoryStream::Write(pos_t)#Stream is closed, cannot perform this operation.");
+			CHECK_ERROR(_size>=0, L"MemoryStream::Write(void*, vint)#Argument size cannot be negative.");
 			PrepareSpace(size+_size);
 			memmove(buffer+position, _buffer, _size);
 			position+=_size;
@@ -20542,8 +21302,8 @@ MemoryStream
 
 		vint MemoryStream::Peek(void* _buffer, vint _size)
 		{
-			CHECK_ERROR(block!=0, L"MemoryStream::Peek(pos_t)#流处于关闭状态，不可执行此操作。");
-			CHECK_ERROR(_size>=0, L"MemoryStream::Peek(void*, vint)#参数size不可为负。");
+			CHECK_ERROR(block!=0, L"MemoryStream::Peek(pos_t)#Stream is closed, cannot perform this operation.");
+			CHECK_ERROR(_size>=0, L"MemoryStream::Peek(void*, vint)#Argument size cannot be negative.");
 			vint max=size-position;
 			if(_size>max)
 			{
@@ -20642,7 +21402,7 @@ MemoryWrapperStream
 
 		void MemoryWrapperStream::SeekFromBegin(pos_t _size)
 		{
-			CHECK_ERROR(buffer!=0, L"MemoryWrapperStream::SeekFromBegin(pos_t)#流处于关闭状态，不可执行此操作。");
+			CHECK_ERROR(buffer!=0, L"MemoryWrapperStream::SeekFromBegin(pos_t)#Stream is closed, cannot perform this operation.");
 			vint expected=(vint)_size;
 			if(expected<0)
 			{
@@ -20665,8 +21425,8 @@ MemoryWrapperStream
 
 		vint MemoryWrapperStream::Read(void* _buffer, vint _size)
 		{
-			CHECK_ERROR(buffer!=0, L"MemoryWrapperStream::Read(pos_t)#流处于关闭状态，不可执行此操作。");
-			CHECK_ERROR(_size>=0, L"MemoryWrapperStream::Read(void*, vint)#参数size不可为负。");
+			CHECK_ERROR(buffer!=0, L"MemoryWrapperStream::Read(pos_t)#Stream is closed, cannot perform this operation.");
+			CHECK_ERROR(_size>=0, L"MemoryWrapperStream::Read(void*, vint)#Argument size cannot be negative.");
 			vint max=size-position;
 			if(_size>max)
 			{
@@ -20679,8 +21439,8 @@ MemoryWrapperStream
 
 		vint MemoryWrapperStream::Write(void* _buffer, vint _size)
 		{
-			CHECK_ERROR(buffer!=0, L"MemoryWrapperStream::Write(pos_t)#流处于关闭状态，不可执行此操作。");
-			CHECK_ERROR(_size>=0, L"MemoryWrapperStream::Write(void*, vint)#参数size不可为负。");
+			CHECK_ERROR(buffer!=0, L"MemoryWrapperStream::Write(pos_t)#Stream is closed, cannot perform this operation.");
+			CHECK_ERROR(_size>=0, L"MemoryWrapperStream::Write(void*, vint)#Argument size cannot be negative.");
 			vint max=size-position;
 			if(_size>max)
 			{
@@ -20693,8 +21453,8 @@ MemoryWrapperStream
 
 		vint MemoryWrapperStream::Peek(void* _buffer, vint _size)
 		{
-			CHECK_ERROR(buffer!=0, L"MemoryWrapperStream::Peek(pos_t)#流处于关闭状态，不可执行此操作。");
-			CHECK_ERROR(_size>=0, L"MemoryWrapperStream::Peek(void*, vint)#参数size不可为负。");
+			CHECK_ERROR(buffer!=0, L"MemoryWrapperStream::Peek(pos_t)#Stream is closed, cannot perform this operation.");
+			CHECK_ERROR(_size>=0, L"MemoryWrapperStream::Peek(void*, vint)#Argument size cannot be negative.");
 			vint max=size-position;
 			if(_size>max)
 			{
@@ -20776,17 +21536,17 @@ RecorderStream
 
 		void RecorderStream::Seek(pos_t _size)
 		{
-			CHECK_FAIL(L"RecorderStream::Seek(pos_t)#不支持此操作。");
+			CHECK_FAIL(L"RecorderStream::Seek(pos_t)#Operation not supported.");
 		}
 
 		void RecorderStream::SeekFromBegin(pos_t _size)
 		{
-			CHECK_FAIL(L"RecorderStream::SeekFromBegin(pos_t)#不支持此操作。");
+			CHECK_FAIL(L"RecorderStream::SeekFromBegin(pos_t)#Operation not supported.");
 		}
 
 		void RecorderStream::SeekFromEnd(pos_t _size)
 		{
-			CHECK_FAIL(L"RecorderStream::SeekFromEnd(pos_t)#不支持此操作。");
+			CHECK_FAIL(L"RecorderStream::SeekFromEnd(pos_t)#Operation not supported.");
 		}
 
 		vint RecorderStream::Read(void* _buffer, vint _size)
@@ -20798,12 +21558,12 @@ RecorderStream
 
 		vint RecorderStream::Write(void* _buffer, vint _size)
 		{
-			CHECK_FAIL(L"RecorderStream::Write(void*, vint)#不支持此操作。");
+			CHECK_FAIL(L"RecorderStream::Write(void*, vint)#Operation not supported.");
 		}
 
 		vint RecorderStream::Peek(void* _buffer, vint _size)
 		{
-			CHECK_FAIL(L"RecorderStream::Peek(void*, vint)#不支持此操作。");
+			CHECK_FAIL(L"RecorderStream::Peek(void*, vint)#Operation not supported.");
 		}
 	}
 }
@@ -20812,9 +21572,101 @@ RecorderStream
 String.cpp
 ***********************************************************************/
 #include <stdlib.h>
+#if defined VCZH_MSVC
+#elif defined VCZH_GCC
+#include <ctype.h>
+#include <wctype.h>
+#define _strtoi64 strtoll
+#define _strtoui64 strtoull
+#define _wcstoi64 wcstoll
+#define _wcstoui64 wcstoull
+#endif
 
 namespace vl
 {
+#if defined VCZH_GCC
+	void _itoa_s(vint32_t value, char* buffer, size_t size, vint radix)
+	{
+		sprintf(buffer, "%d", value);
+	}
+
+	void _itow_s(vint32_t value, wchar_t* buffer, size_t size, vint radix)
+	{
+		swprintf(buffer, size - 1, L"%d", value);
+	}
+
+	void _i64toa_s(vint64_t value, char* buffer, size_t size, vint radix)
+	{
+		sprintf(buffer, "%dll", value);
+	}
+
+	void _i64tow_s(vint64_t value, wchar_t* buffer, size_t size, vint radix)
+	{
+		swprintf(buffer, size - 1, L"%dll", value);
+	}
+
+	void _uitoa_s(vuint32_t value, char* buffer, size_t size, vint radix)
+	{
+		sprintf(buffer, "%u", value);
+	}
+
+	void _uitow_s(vuint32_t value, wchar_t* buffer, size_t size, vint radix)
+	{
+		swprintf(buffer, size - 1, L"%u", value);
+	}
+
+	void _ui64toa_s(vuint64_t value, char* buffer, size_t size, vint radix)
+	{
+		sprintf(buffer, "%ull", value);
+	}
+
+	void _ui64tow_s(vuint64_t value, wchar_t* buffer, size_t size, vint radix)
+	{
+		swprintf(buffer, size - 1, L"%ull", value);
+	}
+
+	void _gcvt_s(char* buffer, size_t size, double value, vint numberOfDigits)
+	{
+		sprintf(buffer, "%fl", value);
+	}
+
+	void _strlwr_s(char* buffer, size_t size)
+	{
+		while(*buffer)
+		{
+			*buffer=(char)tolower(*buffer);
+			buffer++;
+		}
+	}
+
+	void _strupr_s(char* buffer, size_t size)
+	{
+		while(*buffer)
+		{
+			*buffer=(char)toupper(*buffer);
+			buffer++;
+		}
+	}
+
+	void _wcslwr_s(wchar_t* buffer, size_t size)
+	{
+		while(*buffer)
+		{
+			*buffer=(char)towlower(*buffer);
+			buffer++;
+		}
+	}
+
+	void _wcsupr_s(wchar_t* buffer, size_t size)
+	{
+		while(*buffer)
+		{
+			*buffer=(char)towupper(*buffer);
+			buffer++;
+		}
+	}
+#endif
+
 	vint atoi_test(const AString& string, bool& success)
 	{
 		char* endptr=0;
@@ -20831,18 +21683,18 @@ namespace vl
 		return result;
 	}
 
-	__int64 atoi64_test(const AString& string, bool& success)
+	vint64_t atoi64_test(const AString& string, bool& success)
 	{
 		char* endptr=0;
-		__int64 result=_strtoi64(string.Buffer(), &endptr, 10);
+		vint64_t result=_strtoi64(string.Buffer(), &endptr, 10);
 		success=endptr==string.Buffer()+string.Length();
 		return result;
 	}
 
-	__int64 wtoi64_test(const WString& string, bool& success)
+	vint64_t wtoi64_test(const WString& string, bool& success)
 	{
 		wchar_t* endptr=0;
-		__int64 result=_wcstoi64(string.Buffer(), &endptr, 10);
+		vint64_t result=_wcstoi64(string.Buffer(), &endptr, 10);
 		success=endptr==string.Buffer()+string.Length();
 		return result;
 	}
@@ -20863,18 +21715,18 @@ namespace vl
 		return result;
 	}
 
-	unsigned __int64 atou64_test(const AString& string, bool& success)
+	vuint64_t atou64_test(const AString& string, bool& success)
 	{
 		char* endptr=0;
-		unsigned __int64 result=_strtoui64(string.Buffer(), &endptr, 10);
+		vuint64_t result=_strtoui64(string.Buffer(), &endptr, 10);
 		success=endptr==string.Buffer()+string.Length();
 		return result;
 	}
 
-	unsigned __int64 wtou64_test(const WString& string, bool& success)
+	vuint64_t wtou64_test(const WString& string, bool& success)
 	{
 		wchar_t* endptr=0;
-		unsigned __int64 result=_wcstoui64(string.Buffer(), &endptr, 10);
+		vuint64_t result=_wcstoui64(string.Buffer(), &endptr, 10);
 		success=endptr==string.Buffer()+string.Length();
 		return result;
 	}
@@ -20907,13 +21759,13 @@ namespace vl
 		return wtoi_test(string, success);
 	}
 
-	__int64 atoi64(const AString& string)
+	vint64_t atoi64(const AString& string)
 	{
 		bool success=false;
 		return atoi64_test(string, success);
 	}
 
-	__int64 wtoi64(const WString& string)
+	vint64_t wtoi64(const WString& string)
 	{
 		bool success=false;
 		return wtoi64_test(string, success);
@@ -20931,13 +21783,13 @@ namespace vl
 		return wtou_test(string, success);
 	}
 
-	unsigned __int64 atou64(const AString& string)
+	vuint64_t atou64(const AString& string)
 	{
 		bool success=false;
 		return atou64_test(string, success);
 	}
 
-	unsigned __int64 wtou64(const WString& string)
+	vuint64_t wtou64(const WString& string)
 	{
 		bool success=false;
 		return wtou64_test(string, success);
@@ -20969,14 +21821,14 @@ namespace vl
 		return buffer;
 	}
 
-	AString i64toa(__int64 number)
+	AString i64toa(vint64_t number)
 	{
 		char buffer[100];
 		I64TOA_S(number, buffer, sizeof(buffer)/sizeof(*buffer), 10);
 		return buffer;
 	}
 
-	WString i64tow(__int64 number)
+	WString i64tow(vint64_t number)
 	{
 		wchar_t buffer[100];
 		I64TOW_S(number, buffer, sizeof(buffer)/sizeof(*buffer), 10);
@@ -20997,14 +21849,14 @@ namespace vl
 		return buffer;
 	}
 
-	AString u64toa(unsigned __int64 number)
+	AString u64toa(vuint64_t number)
 	{
 		char buffer[100];
 		UI64TOA_S(number, buffer, sizeof(buffer)/sizeof(*buffer), 10);
 		return buffer;
 	}
 
-	WString u64tow(unsigned __int64 number)
+	WString u64tow(vuint64_t number)
 	{
 		wchar_t buffer[100];
 		UI64TOW_S(number, buffer, sizeof(buffer)/sizeof(*buffer), 10);
@@ -21030,13 +21882,18 @@ namespace vl
 
 	vint _wtoa(const wchar_t* w, char* a, vint chars)
 	{
+#if defined VCZH_MSVC
 		return WideCharToMultiByte(CP_THREAD_ACP, 0, w, -1, a, (int)(a?chars:0), 0, 0);
+#elif defined VCZH_GCC
+		return wcstombs(a, w, chars-1)+1;
+#endif
 	}
 
 	AString wtoa(const WString& string)
 	{
 		vint len=_wtoa(string.Buffer(), 0, 0);
 		char* buffer=new char[len];
+		memset(buffer, 0, len*sizeof(*buffer));
 		_wtoa(string.Buffer(), buffer, (int)len);
 		AString s=buffer;
 		delete[] buffer;
@@ -21045,13 +21902,18 @@ namespace vl
 
 	vint _atow(const char* a, wchar_t* w, vint chars)
 	{
+#if defined VCZH_MSVC
 		return MultiByteToWideChar(CP_THREAD_ACP, 0, a, -1, w, (int)(w?chars:0));
+#elif defined VCZH_GCC
+		return mbstowcs(w, a, chars-1)+1;
+#endif
 	}
 
 	WString atow(const AString& string)
 	{
 		vint len=_atow(string.Buffer(), 0, 0);
 		wchar_t* buffer=new wchar_t[len];
+		memset(buffer, 0, len*sizeof(*buffer));
 		_atow(string.Buffer(), buffer, (int)len);
 		WString s=buffer;
 		delete[] buffer;
