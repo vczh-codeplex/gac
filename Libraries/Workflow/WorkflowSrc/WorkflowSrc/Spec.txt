@@ -30,8 +30,8 @@ true false null
 ----------------------------
 let x = expression in expression
 condition ? true_branch : false_branch
-x in range (a, b) | [a, b) | (a, b] | [a, b]
-x in collection
+x [not] in range (a, b) | [a, b) | (a, b] | [a, b]
+x [not] in collection
 ----------------------------
 // the meaning of the following patterns of expression dependes on the destination type
 {a b c d}
@@ -66,8 +66,8 @@ shared_ptr(T*) -> T^
 expression of Type				// infer
 cast Type expression			// cast, exception if failed
 expression as Type				// cast, null if failed
-expression is Type				// test
-expression == null				// test
+expression is [not] Type		// test
+expression is [not] null		// test
 ----------------------------
 attach(event, function)
 detach(handler)
@@ -102,7 +102,7 @@ delete [<expression>];
 raise <expression>;
 
 if ([Name : Type = ] <expression>) <statement> [else <statement>]
-select (<expression>)
+switch (<expression>)
 {
 	{case <expression> : <statement>}
 	[default : <statement>]

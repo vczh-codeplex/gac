@@ -438,6 +438,28 @@ TEST_CASE(TestParsingNameSemicolonList)
 	}
 }
 
+TEST_CASE(TestParsingWorkflowType)
+{
+	Ptr<ParsingDefinition> definition=LoadDefinition(L"WorkflowType");
+	Ptr<ParsingTable> table=CreateTable(definition, L"WorkflowType");
+	const wchar_t* inputs[]=
+	{
+		L"int",
+		L"func():void",
+		L"func(int, int):int",
+		L"int[]",
+		L"int[string]",
+		L"int{}",
+		L"int^",
+		L"int::Representation",
+		L"func(int{}, func(int):double{}):double{}",
+	};
+	for(vint i=0;i<sizeof(inputs)/sizeof(*inputs);i++)
+	{
+		Parse(table, inputs[i], L"WorkflowType", L"WorkflowType", i, true, false);
+	}
+}
+
 TEST_CASE(TestParsingAmbigiousExpression)
 {
 	Ptr<ParsingDefinition> definition=LoadDefinition(L"AmbiguousExpression");

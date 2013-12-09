@@ -4,7 +4,9 @@ include:"../../../../Common/Source/Parsing/ParsingAutomaton.h"
 namespace:vl.workflow
 reflection:Workflow
 classPrefix:Wf
+parser:ParseType(WorkflowType)
 parser:ParseExpression(WorkflowExpression)
+parser:ParseStatement(WorkflowStatement)
 ambiguity:enabled
 grammar:
 
@@ -59,6 +61,16 @@ enum LiteralValue
 class ReferenceExpression : Expression
 {
 	token					name;
+}
+
+class OrderedNameExpression : Expression
+{
+	token					name;
+}
+
+class OrderedLambdaExpression : Expression
+{
+	Expression				body;
 }
 
 class MemberExpression : Expression
@@ -164,8 +176,15 @@ class RangeExpression : Expression
 	RangeBoundary			endBoundary;
 }
 
+enum ExpressionTesting
+{
+	Normal,
+	Reversed,
+}
+
 class SetTestingExpression : Expression
 {
+	ExpressionTesting		test;
 	Expression				element;
 	Expression				collection;
 }
@@ -202,8 +221,15 @@ class TypeCastingExpression : Expression
 
 class TypeTestingExpression : Expression
 {
+	ExpressionTesting		test;
 	Expression				expression;
 	Type					type;
+}
+
+class NullTestingExpression : Expression
+{
+	ExpressionTesting		test;
+	Expression				expression;
 }
 
 class TypeOfTypeExpression : Expression
@@ -216,10 +242,148 @@ class TypeOfExpressionExpression : Expression
 	Expression				expression;
 }
 
+class AttachEventExpression : Expression
+{
+	Expression				event;
+	Expression				function;
+}
+
+class DetachEventExpression : Expression
+{
+	Expression				handler;
+}
+
+class BindExpression : Expression
+{
+	Expression				expression;
+}
+
+enum ObserveType
+{
+	SimpleObserve,
+	ExtendedObserve,
+}
+
+class ObserveExpression : Expression
+{
+	Expression				parent;
+	ObserveType				observeType;
+	token					name;
+	Expression				expression;
+	Expression[]			events;
+}
+
 class CallExpression : Expression
 {
 	Expression				function;
 	Expression[]			arguments;
+}
+
+class Statement
+{
+}
+
+class VariableStatement : Statement
+{
+	Type					type;
+	token					name;
+	Expression				expression;
+}
+
+class AssignmentStatement : Statement
+{
+	Expression				left;
+	Expression				right;
+}
+
+class BreakStatement : Statement
+{
+}
+
+class ContinueStatement : Statement
+{
+}
+
+class ReturnStatement : Statement
+{
+	Expression				expression;
+}
+
+class DeleteStatement : Statement
+{
+	Expression				expression;
+}
+
+class RaiseExceptionStatement : Statement
+{
+	Expression				expression;
+}
+
+class IfCastStatement : Statement
+{
+	Type					type;
+	token					name;
+	Expression				expression;
+	Statement				trueBranch;
+	Statement				falseBranch;
+}
+
+class IfStatement : Statement
+{
+	Expression				condition;
+	Statement				trueBranch;
+	Statement				falseBranch;
+}
+
+class SwitchCase
+{
+	Expression				expression;
+	Statement				statement;
+}
+
+class SwitchStatement : Statement
+{
+	Expression				expression;
+	SwitchCase[]			caseBranches;
+	Statement				defaultBranch;
+}
+
+class WhileStatement : Statement
+{
+	Expression				condition;
+	Statement				statement;
+}
+
+enum ForEachDirection
+{
+	Normal,
+	Reversed,
+}
+
+class ForEachStatement : Statement
+{
+	token					name;
+	ForEachDirection		direction;
+	Expression				collection;
+	Statement				statement;
+}
+
+class TryStatement : Statement
+{
+	Statement				protectedStatement;
+	token					name;
+	Statement				catchStatement;
+	Statement				finallyStatement;
+}
+
+class BlockStatement : Statement
+{
+	Statement[]				statements;
+}
+
+class ExpressionStatement : Statement
+{
+	Expression				expression;
 }
 
 token EXP = "/^";
@@ -236,6 +400,7 @@ token EQ = "/=";
 token NE = "/!/=";
 token FAILED_THEN = "/?/?";
 token QUESTION_MARK = "/?";
+token SCOPE_DELIMITER = "::";
 token COLON = ":";
 token SEMICOLON = ";";
 token COMMA = ",";
@@ -266,8 +431,31 @@ token KEYWORD_CAST = "cast";
 token KEYWORD_FUNC = "func";
 token KEYWORD_TYPEOF = "typeof";
 token KEYWORD_TYPE = "type";
+token KEYWORD_BIND = "bind";
+token KEYWORD_OBSERVE = "observe";
+token KEYWORD_ON = "on";
+token KEYWORD_ATTACH = "attach";
+token KEYWORD_DETACH = "detach";
+token KEYWORD_VAR = "var";
+token KEYWORD_BREAK = "break";
+token KEYWORD_CONTINUE = "continue";
+token KEYWORD_RETURN = "return";
+token KEYWORD_DELETE = "delete";
+token KEYWORD_RAISE = "raise";
+token KEYWORD_IF = "if";
+token KEYWORD_ELSE = "else";
+token KEYWORD_SWITCH = "switch";
+token KEYWORD_CASE = "case";
+token KEYWORD_DEFAULT = "default";
+token KEYWORD_WHILE = "while";
+token KEYWORD_FOR = "for";
+token KEYWORD_REVERSED = "reversed";
+token KEYWORD_TRY = "try";
+token KEYWORD_CATCH = "catch";
+token KEYWORD_FINALLY = "finally";
 
 token NAME = "[a-zA-Z_]/w*";
+token ORDERED_NAME = "/$[0-9]*";
 token FLOAT = "/d+(./d+)?";
 token INTEGER = "/d+(./d+)?";
 token STRING = "('[^']*')+|(""[^""]*"")+";
@@ -281,6 +469,7 @@ rule Type WorkflowType
 	= WorkflowType : element "^" as SharedPointerType
 	= WorkflowType : element "{" "}" as EnumerableType
 	= WorkflowType : value "[" [WorkflowType : key] "]" as MapType
+	= WorkflowType : parent "::" NAME : name as ChildType
 	;
 
 rule LiteralExpression Literal
@@ -312,7 +501,9 @@ rule Expression Exp0
 	= !String
 	= !FormatString
 	= NAME : name as ReferenceExpression
+	= ORDERED_NAME : name as OrderedNameExpression
 	= "(" !WorkflowExpression ")"
+	= "[" WorkflowExpression : body "]" as OrderedLambdaExpression
 	= "let" NAME : name "in" WorkflowExpression : value "=" WorkflowExpression : exp as LetExpression
 	= "+" Exp0 as UnaryExpression with {op = "Positive"}
 	= "-" Exp0 as UnaryExpression with {op = "Negative"}
@@ -323,16 +514,25 @@ rule Expression Exp0
 		((")" with {beginBoundary = "Exclusive"}) | ("]" with {beginBoundary = "Inclusive"}))
 		as RangeExpression
 	= "{" {CtorFragment : arguments} "}" as ConstructorExpression
+	= "bind" "(" WorkflowExpression : expression ")" as BindExpression
+	= Exp0 : parent "." "observe" "(" WorkflowExpression : expression ["on" WorkflowExpression : events {"," WorkflowExpression : events}]")" as ObserveExpression with {observeType = "SimpleObserve"}
+	= Exp0 : parent "." "observe" "as" NAME : name "(" WorkflowExpression : expression ["on" WorkflowExpression : events {"," WorkflowExpression : events}]")" as ObserveExpression with {observeType = "ExtendedObserve"}
+	= Exp0 : function "(" [WorkflowExpression : arguments {"," WorkflowExpression : arguments}] ")" as CallExpression
 	= Exp0 : parent "." NAME : name as MemberExpression
 	= Exp0 : first "[" WorkflowExpression : second "]" as BinaryExpression with {op = "Index"}
-	= Exp0 : element "in" WorkflowExpression : collection as SetTestingExpression
+	= Exp0 : element "in" WorkflowExpression : collection as SetTestingExpression with {test="Normal"}
+	= Exp0 : element "not" "in" WorkflowExpression : collection as SetTestingExpression with {test="Reversed"}
 	= Exp0 : expression "of" WorkflowType : type as InferExpression
-	= Exp0 : expression "is" WorkflowType : type as TypeTestingExpression
+	= Exp0 : expression "is" WorkflowType : type as TypeTestingExpression with {test="Normal"}
+	= Exp0 : expression "is" "not" WorkflowType : type as TypeTestingExpression with {test="Reversed"}
+	= Exp0 : expression "is" "null" as NullTestingExpression with {test="Normal"}
+	= Exp0 : expression "is" "not" "null" as NullTestingExpression with {test="Reversed"}
 	= Exp0 : expression "as" WorkflowType : type as TypeCastingExpression with {strategy = "Weak"}
 	= "cast" WorkflowType : type Exp0 : expression as TypeCastingExpression with {strategy = "Strong"}
 	= "typeof" "(" WorkflowType : type ")" as TypeOfTypeExpression
 	= "type" "(" WorkflowExpression : expression ")" as TypeOfExpressionExpression
-	= Exp0 : function "(" [WorkflowExpression : arguments {"," WorkflowExpression : arguments}] ")" as CallExpression
+	= "attach" "(" WorkflowExpression : event "," WorkflowExpression : function ")" as AttachEventExpression
+	= "detach" "(" WorkflowExpression : handler ")" as DetachEventExpression
 	;
 
 rule Expression Exp1
@@ -387,4 +587,79 @@ rule Expression Exp10
 
 rule Expression WorkflowExpression
 	= !Exp10
+	;
+
+rule VariableStatement Variable
+	= "var" NAME : name [":" WorkflowType : type] "=" WorkflowExpression : expression ";" as VariableStatement
+	;
+
+rule AssignmentStatement Assignment
+	= WorkflowExpression : left "=" WorkflowExpression : right ";" as AssignmentStatement
+	;
+
+rule BreakStatement Break
+	= "break" ";" as BreakStatement
+	;
+rule ContinueStatement Continue
+	= "continue" ";" as ContinueStatement
+	;
+rule ReturnStatement Return
+	= "return" [WorkflowExpression : expression] ";" as ReturnStatement
+	;
+rule DeleteStatement Delete
+	= "delete" WorkflowExpression : expression ";" as DeleteStatement
+	;
+rule RaiseExceptionStatement RaiseException
+	= "raise" WorkflowExpression : expression ";" as RaiseExceptionStatement
+	;
+
+rule IfStatement If
+	= "if" "(" WorkflowExpression : condition ")" WorkflowStatement : trueBranch ["else" WorkflowStatement : falseBranch] as IfStatement
+	;
+rule IfCastStatement IfCast
+	= "if" "(" NAME : name ":" WorkflowType : type "=" WorkflowExpression : expression ")" WorkflowStatement : trueBranch ["else" WorkflowStatement : falseBranch] as IfCastStatement	;
+
+rule SwitchCase SwitchCaseFragment
+	= "case" WorkflowExpression : expression ":" WorkflowStatement : statement as SwitchCase
+	;
+rule SwitchStatement Switch
+	= "switch" "(" WorkflowExpression : expression ")" "{" {SwitchCaseFragment : caseBranches} ["default" ":" WorkflowStatement : defaultBranch] "}" as SwitchStatement
+	;
+
+rule WhileStatement While
+	= "while" "(" WorkflowExpression : condition ")" WorkflowStatement : statement as WhileStatement
+	;
+rule ForEachStatement ForEach
+	= "for" "(" NAME : name "in" WorkflowExpression : collection ")" WorkflowStatement : statement as ForEachStatement with {direction="Normal"}
+	= "for" "(" NAME : name "in" "reversed" WorkflowExpression : collection ")" WorkflowStatement : statement as ForEachStatement with {direction="Reversed"}
+	;
+
+rule TryStatement Try
+	= "try" WorkflowStatement : protectedStatement ["catch" "(" NAME : name ")" WorkflowStatement : catchStatement] ["finally" WorkflowStatement : finallyStatement] as TryStatement
+	;
+
+rule BlockStatement Block
+	= "{" {WorkflowStatement : statements} "}" as BlockStatement
+	;
+
+rule ExpressionStatement ExprStat
+	= WorkflowExpression : expression as ExpressionStatement
+	;
+
+rule Statement WorkflowStatement
+	= !Variable
+	= !Assignment
+	= !Break
+	= !Continue
+	= !Return
+	= !Delete
+	= !RaiseException
+	= !If
+	= !IfCast
+	= !Switch
+	= !While
+	= !ForEach
+	= !Try
+	= !Block
+	= !ExprStat
 	;
