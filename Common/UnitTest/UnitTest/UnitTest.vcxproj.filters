@@ -537,5 +537,8 @@
     <Text Include="..\TestFiles\Parsers\Parsing.AmbiguousExpression.Definition.txt">
       <Filter>Resource Files\Parsers</Filter>
     </Text>
+    <Text Include="..\TestFiles\Parsers\Parsing.WorkflowType.Definition.txt">
+      <Filter>Resource Files\Parsers</Filter>
+    </Text>
   </ItemGroup>
 </Project>
