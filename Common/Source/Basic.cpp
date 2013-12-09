@@ -226,12 +226,20 @@ DateTime
 
 	DateTime DateTime::Forward(vuint64_t milliseconds)
 	{
+#if defined VCZH_MSVC
+		return FromFileTime(filetime+milliseconds*10000);
+#elif defined VCZH_GCC
 		return FromFileTime(filetime+milliseconds/1000);
+#endif
 	}
 
 	DateTime DateTime::Backward(vuint64_t milliseconds)
 	{
+#if defined VCZH_MSVC
+		return FromFileTime(filetime-milliseconds*10000);
+#elif defined VCZH_GCC
 		return FromFileTime(filetime-milliseconds/1000);
+#endif
 	}
 
 /***********************************************************************
