@@ -7,6 +7,8 @@ classPrefix:Wf
 parser:ParseType(WorkflowType)
 parser:ParseExpression(WorkflowExpression)
 parser:ParseStatement(WorkflowStatement)
+parser:ParseDeclaration(WorkflowDeclaration)
+parser:ParseModule(WorkflowModule)
 ambiguity:enabled
 grammar:
 
@@ -386,6 +388,65 @@ class ExpressionStatement : Statement
 	Expression				expression;
 }
 
+class Declaration
+{
+}
+
+class NamespaceDeclaration : Declaration
+{
+	token					name;
+	Declaration[]			declarations;
+}
+
+class FunctionArgument
+{
+	token					name;
+	Type					type;
+}
+
+enum FunctionAnonymity
+{
+	Named,
+	Anonymous,
+}
+
+class FunctionDeclaration : Declaration
+{
+	FunctionAnonymity		anonymity;
+	token					name;
+	FunctionArgument[]		arguments;
+	Statement				statement;
+}
+
+class FunctionExpression : Expression
+{
+	FunctionDeclaration		function;
+}
+
+class NewTypeExpression : Expression
+{
+	Type					type;
+	Expression[]			arguments;
+	FunctionDeclaration[]	functions;
+}
+
+class ModuleUsingItem
+{
+	token					name;
+}
+
+class ModuleUsingPath
+{
+	ModuleUsingItem[]		items;
+}
+
+class Module
+{
+	token					name;
+	ModuleUsingPath[]		paths;
+	Declaration[]			declarations;
+}
+
 token EXP = "/^";
 token ADD = "/+";
 token SUB = "-";
@@ -424,6 +485,7 @@ token KEYWORD_FALSE = "false";
 token KEYWORD_LET = "let";
 token KEYWORD_IN = "in";
 token KEYWORD_RANGE = "range";
+token KEYWORD_NEW = "new";
 token KEYWORD_OF = "of";
 token KEYWORD_AS = "as";
 token KEYWORD_IS = "is";
@@ -453,6 +515,9 @@ token KEYWORD_REVERSED = "reversed";
 token KEYWORD_TRY = "try";
 token KEYWORD_CATCH = "catch";
 token KEYWORD_FINALLY = "finally";
+token KEYWORD_USING = "using";
+token KEYWORD_NAMESPACE = "namespace";
+token KEYWORD_MODULE = "module";
 
 token NAME = "[a-zA-Z_]/w*";
 token ORDERED_NAME = "/$[0-9]*";
@@ -504,6 +569,7 @@ rule Expression Exp0
 	= ORDERED_NAME : name as OrderedNameExpression
 	= "(" !WorkflowExpression ")"
 	= "[" WorkflowExpression : body "]" as OrderedLambdaExpression
+	= Function : function as FunctionExpression
 	= "let" NAME : name "in" WorkflowExpression : value "=" WorkflowExpression : exp as LetExpression
 	= "+" Exp0 as UnaryExpression with {op = "Positive"}
 	= "-" Exp0 as UnaryExpression with {op = "Negative"}
@@ -514,6 +580,7 @@ rule Expression Exp0
 		((")" with {beginBoundary = "Exclusive"}) | ("]" with {beginBoundary = "Inclusive"}))
 		as RangeExpression
 	= "{" {CtorFragment : arguments} "}" as ConstructorExpression
+	= "new" WorkflowType : type "(" [WorkflowExpression : arguments {"," WorkflowExpression : arguments}] ")" ["{" {Function : functions} "}"] as NewTypeExpression
 	= "bind" "(" WorkflowExpression : expression ")" as BindExpression
 	= Exp0 : parent "." "observe" "(" WorkflowExpression : expression ["on" WorkflowExpression : events {"," WorkflowExpression : events}]")" as ObserveExpression with {observeType = "SimpleObserve"}
 	= Exp0 : parent "." "observe" "as" NAME : name "(" WorkflowExpression : expression ["on" WorkflowExpression : events {"," WorkflowExpression : events}]")" as ObserveExpression with {observeType = "ExtendedObserve"}
@@ -662,4 +729,31 @@ rule Statement WorkflowStatement
 	= !Try
 	= !Block
 	= !ExprStat
+	;
+
+rule NamespaceDeclaration Namespace
+	= "namespace" NAME : name "{" {WorkflowDeclaration : declarations} "}" as NamespaceDeclaration
+	;
+
+rule FunctionArgument FunctionArgumentFragment
+	= NAME : name ":" WorkflowType : type as FunctionArgument
+	;
+rule FunctionDeclaration Function
+	= "func" NAME : name "(" [FunctionArgumentFragment : arguments {"," FunctionArgumentFragment : arguments}] ")" WorkflowStatement : statement as FunctionDeclaration with {anonymity="Named"}
+	= "func" "(" [FunctionArgumentFragment : arguments {"," FunctionArgumentFragment : arguments}] ")" WorkflowStatement : statement as FunctionDeclaration with {anonymity="Anonymous"}
+	;
+
+rule Declaration WorkflowDeclaration
+	= !Namespace
+	= !Function
+	;
+
+rule ModuleUsingItem UsingItem
+	= NAME : name as ModuleUsingItem
+	;
+rule ModuleUsingPath UsingPath
+	= "using" UsingItem : items {"::" UsingItem : items} as ModuleUsingPath
+	;
+rule Module WorkflowModule
+	= "module" NAME : name {UsingPath : paths} {WorkflowDeclaration : declarations} as Module
 	;
