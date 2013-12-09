@@ -1,4 +1,5 @@
 #include "..\CommonLibrary\FileSystemInformation.h"
+#include "..\..\Public\Source\GacUIReflection.h"
 
 using namespace vl::collections;
 using namespace vl::reflection::description;
@@ -24,7 +25,7 @@ private:
 		{
 			tree::MemoryNodeProvider* child=parent->Children()[0].Obj();
 			Ptr<tree::TreeViewItem> childItem=child->GetData().Cast<tree::TreeViewItem>();
-			if(childItem->text==L"Loading..." && !childItem->tag.IsNull())
+			if(childItem->text==L"Loading...")
 			{
 				GetApplication()->InvokeAsync([=]()
 				{
@@ -139,6 +140,8 @@ GuiMain
 
 void GuiMain()
 {
+	description::GetTypeDescriptor<GuiWindow>(); // should be called due to VC++'s static library bug
+
 	GuiWindow* window=new FileExplorerWindow;
 	GetApplication()->Run(window);
 	delete window;
