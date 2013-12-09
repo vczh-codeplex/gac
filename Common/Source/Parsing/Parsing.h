@@ -122,10 +122,11 @@ namespace vl
 			class ParsingAutoRecoverAmbiguousParser : public ParsingAmbiguousParser
 			{
 			protected:
+				vint										maxInsertedTokenCount;
 
 				void										OnErrorRecover(ParsingState& state, vint currentTokenIndex, collections::List<ParsingState::Future*>& futures, vint& begin, vint& end, collections::List<Ptr<ParsingError>>& errors)override;
 			public:
-				ParsingAutoRecoverAmbiguousParser(Ptr<ParsingTable> _table=0);
+				ParsingAutoRecoverAmbiguousParser(Ptr<ParsingTable> _table = 0, vint _maxInsertedTokenCount = -1);
 				~ParsingAutoRecoverAmbiguousParser();
 			};
 
