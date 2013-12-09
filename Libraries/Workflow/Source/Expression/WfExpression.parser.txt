@@ -8,6 +8,43 @@ parser:ParseExpression(WorkflowExpression)
 ambiguity:enabled
 grammar:
 
+class Type
+{
+}
+
+class ReferenceType : Type
+{
+	token					name;
+}
+
+class SharedPointerType : Type
+{
+	Type					element;
+}
+
+class EnumerableType : Type
+{
+	Type					element;
+}
+
+class MapType : Type
+{
+	Type					key;
+	Type					value;
+}
+
+class FunctionType : Type
+{
+	Type					result;
+	Type[]					arguments;
+}
+
+class ChildType : Type
+{
+	Type					parent;
+	token					name;
+}
+
 class Expression
 {
 }
@@ -19,29 +56,40 @@ enum LiteralValue
 	False,
 }
 
-class LiteralExpression
+class ReferenceExpression : Expression
 {
-	LiteralValue		value;
+	token					name;
+}
+
+class MemberExpression : Expression
+{
+	Expression				parent;
+	token					name;
+}
+
+class LiteralExpression : Expression
+{
+	LiteralValue			value;
 }
 
 class FloatingExpression : Expression
 {
-	token				value;
+	token					value;
 }
 
 class IntegerExpression : Expression
 {
-	token				value;
+	token					value;
 }
 
 class StringExpression : Expression
 {
-	token				value;
+	token					value;
 }
 
 class FormatExpression : Expression
 {
-	token				value;
+	token					value;
 }
 
 enum UnaryOperator
@@ -53,8 +101,8 @@ enum UnaryOperator
 
 class UnaryExpression : Expression
 {
-	UnaryOperator		op;
-	Expression			operand;
+	UnaryOperator			op;
+	Expression				operand;
 }
 
 enum BinaryOperator
@@ -83,23 +131,23 @@ enum BinaryOperator
 
 class BinaryExpression : Expression
 {
-	BinaryOperator		op;
-	Expression			first;
-	Expression			second;
+	BinaryOperator			op;
+	Expression				first;
+	Expression				second;
 }
 
 class LetExpression : Expression
 {
-	token				name;
-	Expression			value;
-	Expression			exp;
+	token					name;
+	Expression				value;
+	Expression				exp;
 }
 
 class IfExpression : Expression
 {
-	Expression			condition;
-	Expression			trueBranch;
-	Expression			falseBranch;
+	Expression				condition;
+	Expression				trueBranch;
+	Expression				falseBranch;
 }
 
 enum RangeBoundary
@@ -110,23 +158,68 @@ enum RangeBoundary
 
 class RangeExpression : Expression
 {
-	Expression			begin;
-	RangeBoundary		beginBoundary;
-	Expression			end;
-	RangeBoundary		endBoundary;
+	Expression				begin;
+	RangeBoundary			beginBoundary;
+	Expression				end;
+	RangeBoundary			endBoundary;
 }
 
-enum ElementExisting
+class SetTestingExpression : Expression
 {
-	Exists,
-	NotExists,
+	Expression				element;
+	Expression				collection;
 }
 
-class ElementExpression : Expression
+class ConstructorArgument
 {
-	ElementExisting		test;
-	Expression			element;
-	Expression			collection;
+	Expression				key;
+	Expression				value;
+}
+
+class ConstructorExpression : Expression
+{
+	ConstructorArgument[]	arguments;
+}
+
+class InferExpression : Expression
+{
+	Expression				expression;
+	Type					type;
+}
+
+enum TypeCastingStrategy
+{
+	Strong,
+	Weak,
+}
+
+class TypeCastingExpression : Expression
+{
+	TypeCastingStrategy		strategy;
+	Expression				expression;
+	Type					type;
+}
+
+class TypeTestingExpression : Expression
+{
+	Expression				expression;
+	Type					type;
+}
+
+class TypeOfTypeExpression : Expression
+{
+	Type					type;
+}
+
+class TypeOfExpressionExpression : Expression
+{
+	Expression				expression;
+}
+
+class CallExpression : Expression
+{
+	Expression				function;
+	Expression[]			arguments;
 }
 
 token EXP = "/^";
@@ -146,6 +239,7 @@ token QUESTION_MARK = "/?";
 token COLON = ":";
 token SEMICOLON = ";";
 token COMMA = ",";
+token DOT = ".";
 token OPEN_ARRAY = "/[";
 token CLOSE_ARRAY = "/]";
 token OPEN_BRACE = "/{";
@@ -165,6 +259,13 @@ token KEYWORD_FALSE = "false";
 token KEYWORD_LET = "let";
 token KEYWORD_IN = "in";
 token KEYWORD_RANGE = "range";
+token KEYWORD_OF = "of";
+token KEYWORD_AS = "as";
+token KEYWORD_IS = "is";
+token KEYWORD_CAST = "cast";
+token KEYWORD_FUNC = "func";
+token KEYWORD_TYPEOF = "typeof";
+token KEYWORD_TYPE = "type";
 
 token NAME = "[a-zA-Z_]/w*";
 token FLOAT = "/d+(./d+)?";
@@ -173,6 +274,14 @@ token STRING = "('[^']*')+|(""[^""]*"")+";
 token FORMATSTRING = "/$(('[^']*')+|(""[^""]*"")+)";
 
 discardtoken SPACE = "/s+";
+
+rule Type WorkflowType
+	= NAME : name as ReferenceType
+	= "func" "(" [WorkflowType : arguments {"," WorkflowType : arguments}] ")" ":" WorkflowType : result as FunctionType
+	= WorkflowType : element "^" as SharedPointerType
+	= WorkflowType : element "{" "}" as EnumerableType
+	= WorkflowType : value "[" [WorkflowType : key] "]" as MapType
+	;
 
 rule LiteralExpression Literal
 	= "null" as LiteralExpression with {value = "Null"}
@@ -191,16 +300,18 @@ rule StringExpression String
 rule FormatExpression FormatString
 	= FORMATSTRING : value as FormatExpression
 	;
-rule Expression Constant
+
+rule ConstructorArgument CtorFragment
+	= WorkflowExpression : key [ ":" WorkflowExpression : value] as ConstructorArgument
+	;
+
+rule Expression Exp0
 	= !Literal
 	= !Integer
 	= !FloatingPoint
 	= !String
 	= !FormatString
-	;
-
-rule Expression Exp0
-	= !Constant
+	= NAME : name as ReferenceExpression
 	= "(" !WorkflowExpression ")"
 	= "let" NAME : name "in" WorkflowExpression : value "=" WorkflowExpression : exp as LetExpression
 	= "+" Exp0 as UnaryExpression with {op = "Positive"}
@@ -211,9 +322,17 @@ rule Expression Exp0
 		WorkflowExpression : begin "," WorkflowExpression : end
 		((")" with {beginBoundary = "Exclusive"}) | ("]" with {beginBoundary = "Inclusive"}))
 		as RangeExpression
+	= "{" {CtorFragment : arguments} "}" as ConstructorExpression
+	= Exp0 : parent "." NAME : name as MemberExpression
 	= Exp0 : first "[" WorkflowExpression : second "]" as BinaryExpression with {op = "Index"}
-	= Exp0 : element "in" WorkflowExpression : collection as ElementExpression with {test = "Exists"}
-	= Exp0 : element "not" "in" WorkflowExpression : collection as ElementExpression with {test = "NotExists"}
+	= Exp0 : element "in" WorkflowExpression : collection as SetTestingExpression
+	= Exp0 : expression "of" WorkflowType : type as InferExpression
+	= Exp0 : expression "is" WorkflowType : type as TypeTestingExpression
+	= Exp0 : expression "as" WorkflowType : type as TypeCastingExpression with {strategy = "Weak"}
+	= "cast" WorkflowType : type Exp0 : expression as TypeCastingExpression with {strategy = "Strong"}
+	= "typeof" "(" WorkflowType : type ")" as TypeOfTypeExpression
+	= "type" "(" WorkflowExpression : expression ")" as TypeOfExpressionExpression
+	= Exp0 : function "(" [WorkflowExpression : arguments {"," WorkflowExpression : arguments}] ")" as CallExpression
 	;
 
 rule Expression Exp1
