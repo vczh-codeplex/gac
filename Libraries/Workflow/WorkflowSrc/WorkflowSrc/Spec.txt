@@ -43,7 +43,7 @@ x [not] in collection
 {a:b c:d e:f} of int[string]
 {x:10 y:20} of Point
 ----------------------------
-new int[10]
+new int[]
 new int[string]
 new Type(arguments)
 new Fuckable
@@ -87,10 +87,7 @@ bind(x.y.z)
 bind(a.b.c() ? d.e : f g)
 	== bind(a.observe(b on bChanged).c()?d.observe(e on eChanged):f.observe(g on gChanged))
 	== bind(a.observe as _a(_a.b.c()?d.observe as _d(_d.e on _d.eChanged):f.observe as _f(_f.g on _f.gChanged) on _a.bChanged))
-	
 ======================================================
-func Name(a : Type, b : Type) : Type <statement>
-
 { statement ... }
 
 var Name [: Type] = <expression>;
@@ -112,5 +109,12 @@ while (condition) <statement>
 for (x in (<collection> | [reversed] <range>)) <statement>
 
 try <statement> [catch(ex) <statement>] [finally <statement>]
-
+	
+======================================================
+func Name(a : Type, b : Type) : Type <statement>
+namespace Name { ... }
+======================================================
+module <module-name>
 using <type-path>; // can contain class
+
+...

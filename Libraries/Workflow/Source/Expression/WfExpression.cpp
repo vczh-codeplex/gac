@@ -386,6 +386,65 @@ L"\r\n"L"{"
 L"\r\n"L"\tExpression\t\t\t\texpression;"
 L"\r\n"L"}"
 L"\r\n"L""
+L"\r\n"L"class Declaration"
+L"\r\n"L"{"
+L"\r\n"L"}"
+L"\r\n"L""
+L"\r\n"L"class NamespaceDeclaration : Declaration"
+L"\r\n"L"{"
+L"\r\n"L"\ttoken\t\t\t\t\tname;"
+L"\r\n"L"\tDeclaration[]\t\t\tdeclarations;"
+L"\r\n"L"}"
+L"\r\n"L""
+L"\r\n"L"class FunctionArgument"
+L"\r\n"L"{"
+L"\r\n"L"\ttoken\t\t\t\t\tname;"
+L"\r\n"L"\tType\t\t\t\t\ttype;"
+L"\r\n"L"}"
+L"\r\n"L""
+L"\r\n"L"enum FunctionAnonymity"
+L"\r\n"L"{"
+L"\r\n"L"\tNamed,"
+L"\r\n"L"\tAnonymous,"
+L"\r\n"L"}"
+L"\r\n"L""
+L"\r\n"L"class FunctionDeclaration : Declaration"
+L"\r\n"L"{"
+L"\r\n"L"\tFunctionAnonymity\t\tanonymity;"
+L"\r\n"L"\ttoken\t\t\t\t\tname;"
+L"\r\n"L"\tFunctionArgument[]\t\targuments;"
+L"\r\n"L"\tStatement\t\t\t\tstatement;"
+L"\r\n"L"}"
+L"\r\n"L""
+L"\r\n"L"class FunctionExpression : Expression"
+L"\r\n"L"{"
+L"\r\n"L"\tFunctionDeclaration\t\tfunction;"
+L"\r\n"L"}"
+L"\r\n"L""
+L"\r\n"L"class NewTypeExpression : Expression"
+L"\r\n"L"{"
+L"\r\n"L"\tType\t\t\t\t\ttype;"
+L"\r\n"L"\tExpression[]\t\t\targuments;"
+L"\r\n"L"\tFunctionDeclaration[]\tfunctions;"
+L"\r\n"L"}"
+L"\r\n"L""
+L"\r\n"L"class ModuleUsingItem"
+L"\r\n"L"{"
+L"\r\n"L"\ttoken\t\t\t\t\tname;"
+L"\r\n"L"}"
+L"\r\n"L""
+L"\r\n"L"class ModuleUsingPath"
+L"\r\n"L"{"
+L"\r\n"L"\tModuleUsingItem[]\t\titems;"
+L"\r\n"L"}"
+L"\r\n"L""
+L"\r\n"L"class Module"
+L"\r\n"L"{"
+L"\r\n"L"\ttoken\t\t\t\t\tname;"
+L"\r\n"L"\tModuleUsingPath[]\t\tpaths;"
+L"\r\n"L"\tDeclaration[]\t\t\tdeclarations;"
+L"\r\n"L"}"
+L"\r\n"L""
 L"\r\n"L"token EXP = \"/^\";"
 L"\r\n"L"token ADD = \"/+\";"
 L"\r\n"L"token SUB = \"-\";"
@@ -424,6 +483,7 @@ L"\r\n"L"token KEYWORD_FALSE = \"false\";"
 L"\r\n"L"token KEYWORD_LET = \"let\";"
 L"\r\n"L"token KEYWORD_IN = \"in\";"
 L"\r\n"L"token KEYWORD_RANGE = \"range\";"
+L"\r\n"L"token KEYWORD_NEW = \"new\";"
 L"\r\n"L"token KEYWORD_OF = \"of\";"
 L"\r\n"L"token KEYWORD_AS = \"as\";"
 L"\r\n"L"token KEYWORD_IS = \"is\";"
@@ -453,6 +513,9 @@ L"\r\n"L"token KEYWORD_REVERSED = \"reversed\";"
 L"\r\n"L"token KEYWORD_TRY = \"try\";"
 L"\r\n"L"token KEYWORD_CATCH = \"catch\";"
 L"\r\n"L"token KEYWORD_FINALLY = \"finally\";"
+L"\r\n"L"token KEYWORD_USING = \"using\";"
+L"\r\n"L"token KEYWORD_NAMESPACE = \"namespace\";"
+L"\r\n"L"token KEYWORD_MODULE = \"module\";"
 L"\r\n"L""
 L"\r\n"L"token NAME = \"[a-zA-Z_]/w*\";"
 L"\r\n"L"token ORDERED_NAME = \"/$[0-9]*\";"
@@ -504,6 +567,7 @@ L"\r\n"L"\t= NAME : name as ReferenceExpression"
 L"\r\n"L"\t= ORDERED_NAME : name as OrderedNameExpression"
 L"\r\n"L"\t= \"(\" !WorkflowExpression \")\""
 L"\r\n"L"\t= \"[\" WorkflowExpression : body \"]\" as OrderedLambdaExpression"
+L"\r\n"L"\t= Function : function as FunctionExpression"
 L"\r\n"L"\t= \"let\" NAME : name \"in\" WorkflowExpression : value \"=\" WorkflowExpression : exp as LetExpression"
 L"\r\n"L"\t= \"+\" Exp0 as UnaryExpression with {op = \"Positive\"}"
 L"\r\n"L"\t= \"-\" Exp0 as UnaryExpression with {op = \"Negative\"}"
@@ -514,6 +578,7 @@ L"\r\n"L"\t\tWorkflowExpression : begin \",\" WorkflowExpression : end"
 L"\r\n"L"\t\t((\")\" with {beginBoundary = \"Exclusive\"}) | (\"]\" with {beginBoundary = \"Inclusive\"}))"
 L"\r\n"L"\t\tas RangeExpression"
 L"\r\n"L"\t= \"{\" {CtorFragment : arguments} \"}\" as ConstructorExpression"
+L"\r\n"L"\t= \"new\" WorkflowType : type \"(\" [WorkflowExpression : arguments {\",\" WorkflowExpression : arguments}] \")\" [\"{\" {Function : functions} \"}\"] as NewTypeExpression"
 L"\r\n"L"\t= \"bind\" \"(\" WorkflowExpression : expression \")\" as BindExpression"
 L"\r\n"L"\t= Exp0 : parent \".\" \"observe\" \"(\" WorkflowExpression : expression [\"on\" WorkflowExpression : events {\",\" WorkflowExpression : events}]\")\" as ObserveExpression with {observeType = \"SimpleObserve\"}"
 L"\r\n"L"\t= Exp0 : parent \".\" \"observe\" \"as\" NAME : name \"(\" WorkflowExpression : expression [\"on\" WorkflowExpression : events {\",\" WorkflowExpression : events}]\")\" as ObserveExpression with {observeType = \"ExtendedObserve\"}"
@@ -663,6 +728,33 @@ L"\r\n"L"\t= !Try"
 L"\r\n"L"\t= !Block"
 L"\r\n"L"\t= !ExprStat"
 L"\r\n"L"\t;"
+L"\r\n"L""
+L"\r\n"L"rule NamespaceDeclaration Namespace"
+L"\r\n"L"\t= \"namespace\" NAME : name \"{\" {WorkflowDeclaration : declarations} \"}\" as NamespaceDeclaration"
+L"\r\n"L"\t;"
+L"\r\n"L""
+L"\r\n"L"rule FunctionArgument FunctionArgumentFragment"
+L"\r\n"L"\t= NAME : name \":\" WorkflowType : type as FunctionArgument"
+L"\r\n"L"\t;"
+L"\r\n"L"rule FunctionDeclaration Function"
+L"\r\n"L"\t= \"func\" NAME : name \"(\" [FunctionArgumentFragment : arguments {\",\" FunctionArgumentFragment : arguments}] \")\" WorkflowStatement : statement as FunctionDeclaration with {anonymity=\"Named\"}"
+L"\r\n"L"\t= \"func\" \"(\" [FunctionArgumentFragment : arguments {\",\" FunctionArgumentFragment : arguments}] \")\" WorkflowStatement : statement as FunctionDeclaration with {anonymity=\"Anonymous\"}"
+L"\r\n"L"\t;"
+L"\r\n"L""
+L"\r\n"L"rule Declaration WorkflowDeclaration"
+L"\r\n"L"\t= !Namespace"
+L"\r\n"L"\t= !Function"
+L"\r\n"L"\t;"
+L"\r\n"L""
+L"\r\n"L"rule ModuleUsingItem UsingItem"
+L"\r\n"L"\t= NAME : name as ModuleUsingItem"
+L"\r\n"L"\t;"
+L"\r\n"L"rule ModuleUsingPath UsingPath"
+L"\r\n"L"\t= \"using\" UsingItem : items {\"::\" UsingItem : items} as ModuleUsingPath"
+L"\r\n"L"\t;"
+L"\r\n"L"rule Module WorkflowModule"
+L"\r\n"L"\t= \"module\" NAME : name {UsingPath : paths} {WorkflowDeclaration : declarations} as Module"
+L"\r\n"L"\t;"
 ;
 
 		vl::WString WfGetParserTextBuffer()
@@ -804,6 +896,19 @@ Parsing Tree Conversion Driver Implementation
 					else { member=WfForEachDirection::Normal; return false; }
 				}
 				member=WfForEachDirection::Normal;
+				return false;
+			}
+
+			bool SetMember(WfFunctionAnonymity& member, vl::Ptr<vl::parsing::ParsingTreeNode> node, const TokenList& tokens)
+			{
+				vl::Ptr<vl::parsing::ParsingTreeToken> token=node.Cast<vl::parsing::ParsingTreeToken>();
+				if(token)
+				{
+					if(token->GetValue()==L"Named") { member=WfFunctionAnonymity::Named; return true; }
+					else if(token->GetValue()==L"Anonymous") { member=WfFunctionAnonymity::Anonymous; return true; }
+					else { member=WfFunctionAnonymity::Named; return false; }
+				}
+				member=WfFunctionAnonymity::Named;
 				return false;
 			}
 
@@ -1113,6 +1218,59 @@ Parsing Tree Conversion Driver Implementation
 			void Fill(vl::Ptr<WfExpressionStatement> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
 			{
 				SetMember(tree->expression, obj->GetMember(L"expression"), tokens);
+			}
+
+			void Fill(vl::Ptr<WfDeclaration> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
+			{
+			}
+
+			void Fill(vl::Ptr<WfNamespaceDeclaration> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
+			{
+				SetMember(tree->name, obj->GetMember(L"name"), tokens);
+				SetMember(tree->declarations, obj->GetMember(L"declarations"), tokens);
+			}
+
+			void Fill(vl::Ptr<WfFunctionArgument> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
+			{
+				SetMember(tree->name, obj->GetMember(L"name"), tokens);
+				SetMember(tree->type, obj->GetMember(L"type"), tokens);
+			}
+
+			void Fill(vl::Ptr<WfFunctionDeclaration> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
+			{
+				SetMember(tree->anonymity, obj->GetMember(L"anonymity"), tokens);
+				SetMember(tree->name, obj->GetMember(L"name"), tokens);
+				SetMember(tree->arguments, obj->GetMember(L"arguments"), tokens);
+				SetMember(tree->statement, obj->GetMember(L"statement"), tokens);
+			}
+
+			void Fill(vl::Ptr<WfFunctionExpression> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
+			{
+				SetMember(tree->function, obj->GetMember(L"function"), tokens);
+			}
+
+			void Fill(vl::Ptr<WfNewTypeExpression> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
+			{
+				SetMember(tree->type, obj->GetMember(L"type"), tokens);
+				SetMember(tree->arguments, obj->GetMember(L"arguments"), tokens);
+				SetMember(tree->functions, obj->GetMember(L"functions"), tokens);
+			}
+
+			void Fill(vl::Ptr<WfModuleUsingItem> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
+			{
+				SetMember(tree->name, obj->GetMember(L"name"), tokens);
+			}
+
+			void Fill(vl::Ptr<WfModuleUsingPath> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
+			{
+				SetMember(tree->items, obj->GetMember(L"items"), tokens);
+			}
+
+			void Fill(vl::Ptr<WfModule> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
+			{
+				SetMember(tree->name, obj->GetMember(L"name"), tokens);
+				SetMember(tree->paths, obj->GetMember(L"paths"), tokens);
+				SetMember(tree->declarations, obj->GetMember(L"declarations"), tokens);
 			}
 
 			vl::Ptr<vl::parsing::ParsingTreeCustomBase> ConvertClass(vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)override
@@ -1515,6 +1673,66 @@ Parsing Tree Conversion Driver Implementation
 					Fill(tree.Cast<WfStatement>(), obj, tokens);
 					return tree;
 				}
+				else if(obj->GetType()==L"NamespaceDeclaration")
+				{
+					vl::Ptr<WfNamespaceDeclaration> tree = new WfNamespaceDeclaration;
+					vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
+					Fill(tree, obj, tokens);
+					Fill(tree.Cast<WfDeclaration>(), obj, tokens);
+					return tree;
+				}
+				else if(obj->GetType()==L"FunctionArgument")
+				{
+					vl::Ptr<WfFunctionArgument> tree = new WfFunctionArgument;
+					vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
+					Fill(tree, obj, tokens);
+					return tree;
+				}
+				else if(obj->GetType()==L"FunctionDeclaration")
+				{
+					vl::Ptr<WfFunctionDeclaration> tree = new WfFunctionDeclaration;
+					vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
+					Fill(tree, obj, tokens);
+					Fill(tree.Cast<WfDeclaration>(), obj, tokens);
+					return tree;
+				}
+				else if(obj->GetType()==L"FunctionExpression")
+				{
+					vl::Ptr<WfFunctionExpression> tree = new WfFunctionExpression;
+					vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
+					Fill(tree, obj, tokens);
+					Fill(tree.Cast<WfExpression>(), obj, tokens);
+					return tree;
+				}
+				else if(obj->GetType()==L"NewTypeExpression")
+				{
+					vl::Ptr<WfNewTypeExpression> tree = new WfNewTypeExpression;
+					vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
+					Fill(tree, obj, tokens);
+					Fill(tree.Cast<WfExpression>(), obj, tokens);
+					return tree;
+				}
+				else if(obj->GetType()==L"ModuleUsingItem")
+				{
+					vl::Ptr<WfModuleUsingItem> tree = new WfModuleUsingItem;
+					vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
+					Fill(tree, obj, tokens);
+					return tree;
+				}
+				else if(obj->GetType()==L"ModuleUsingPath")
+				{
+					vl::Ptr<WfModuleUsingPath> tree = new WfModuleUsingPath;
+					vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
+					Fill(tree, obj, tokens);
+					return tree;
+				}
+				else if(obj->GetType()==L"Module")
+				{
+					vl::Ptr<WfModule> tree = new WfModule;
+					vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
+					Fill(tree, obj, tokens);
+					return tree;
+				}
 				else 
 					return 0;
 			}
@@ -1782,6 +2000,46 @@ Parsing Tree Conversion Implementation
 			return WfConvertParsingTreeNode(node, tokens).Cast<WfExpressionStatement>();
 		}
 
+		vl::Ptr<WfNamespaceDeclaration> WfNamespaceDeclaration::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
+		{
+			return WfConvertParsingTreeNode(node, tokens).Cast<WfNamespaceDeclaration>();
+		}
+
+		vl::Ptr<WfFunctionArgument> WfFunctionArgument::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
+		{
+			return WfConvertParsingTreeNode(node, tokens).Cast<WfFunctionArgument>();
+		}
+
+		vl::Ptr<WfFunctionDeclaration> WfFunctionDeclaration::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
+		{
+			return WfConvertParsingTreeNode(node, tokens).Cast<WfFunctionDeclaration>();
+		}
+
+		vl::Ptr<WfFunctionExpression> WfFunctionExpression::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
+		{
+			return WfConvertParsingTreeNode(node, tokens).Cast<WfFunctionExpression>();
+		}
+
+		vl::Ptr<WfNewTypeExpression> WfNewTypeExpression::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
+		{
+			return WfConvertParsingTreeNode(node, tokens).Cast<WfNewTypeExpression>();
+		}
+
+		vl::Ptr<WfModuleUsingItem> WfModuleUsingItem::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
+		{
+			return WfConvertParsingTreeNode(node, tokens).Cast<WfModuleUsingItem>();
+		}
+
+		vl::Ptr<WfModuleUsingPath> WfModuleUsingPath::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
+		{
+			return WfConvertParsingTreeNode(node, tokens).Cast<WfModuleUsingPath>();
+		}
+
+		vl::Ptr<WfModule> WfModule::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
+		{
+			return WfConvertParsingTreeNode(node, tokens).Cast<WfModule>();
+		}
+
 /***********************************************************************
 Visitor Pattern Implementation
 ***********************************************************************/
@@ -2026,9 +2284,63 @@ Visitor Pattern Implementation
 			visitor->Visit(this);
 		}
 
+		void WfNamespaceDeclaration::Accept(WfDeclaration::IVisitor* visitor)
+		{
+			visitor->Visit(this);
+		}
+
+		void WfFunctionDeclaration::Accept(WfDeclaration::IVisitor* visitor)
+		{
+			visitor->Visit(this);
+		}
+
+		void WfFunctionExpression::Accept(WfExpression::IVisitor* visitor)
+		{
+			visitor->Visit(this);
+		}
+
+		void WfNewTypeExpression::Accept(WfExpression::IVisitor* visitor)
+		{
+			visitor->Visit(this);
+		}
+
 /***********************************************************************
 Parser Function
 ***********************************************************************/
+
+		vl::Ptr<vl::parsing::ParsingTreeNode> WfParseDeclarationAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors)
+		{
+			vl::parsing::tabling::ParsingState state(input, table);
+			state.Reset(L"WorkflowDeclaration");
+			vl::Ptr<vl::parsing::tabling::ParsingGeneralParser> parser=vl::parsing::tabling::CreateStrictParser(table);
+			vl::Ptr<vl::parsing::ParsingTreeNode> node=parser->Parse(state, errors);
+			return node;
+		}
+
+		vl::Ptr<vl::parsing::ParsingTreeNode> WfParseDeclarationAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)
+		{
+			vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
+			return WfParseDeclarationAsParsingTreeNode(input, table, errors);
+		}
+
+		vl::Ptr<WfDeclaration> WfParseDeclaration(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors)
+		{
+			vl::parsing::tabling::ParsingState state(input, table);
+			state.Reset(L"WorkflowDeclaration");
+			vl::Ptr<vl::parsing::tabling::ParsingGeneralParser> parser=vl::parsing::tabling::CreateStrictParser(table);
+			vl::Ptr<vl::parsing::ParsingTreeNode> node=parser->Parse(state, errors);
+			if(node && errors.Count()==0)
+			{
+				return WfConvertParsingTreeNode(node, state.GetTokens()).Cast<WfDeclaration>();
+			}
+			return 0;
+		}
+
+		vl::Ptr<WfDeclaration> WfParseDeclaration(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)
+		{
+			vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
+			return WfParseDeclaration(input, table, errors);
+		}
 
 		vl::Ptr<vl::parsing::ParsingTreeNode> WfParseExpressionAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors)
 		{
@@ -2062,6 +2374,40 @@ Parser Function
 		{
 			vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
 			return WfParseExpression(input, table, errors);
+		}
+
+		vl::Ptr<vl::parsing::ParsingTreeNode> WfParseModuleAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors)
+		{
+			vl::parsing::tabling::ParsingState state(input, table);
+			state.Reset(L"WorkflowModule");
+			vl::Ptr<vl::parsing::tabling::ParsingGeneralParser> parser=vl::parsing::tabling::CreateStrictParser(table);
+			vl::Ptr<vl::parsing::ParsingTreeNode> node=parser->Parse(state, errors);
+			return node;
+		}
+
+		vl::Ptr<vl::parsing::ParsingTreeNode> WfParseModuleAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)
+		{
+			vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
+			return WfParseModuleAsParsingTreeNode(input, table, errors);
+		}
+
+		vl::Ptr<WfModule> WfParseModule(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors)
+		{
+			vl::parsing::tabling::ParsingState state(input, table);
+			state.Reset(L"WorkflowModule");
+			vl::Ptr<vl::parsing::tabling::ParsingGeneralParser> parser=vl::parsing::tabling::CreateStrictParser(table);
+			vl::Ptr<vl::parsing::ParsingTreeNode> node=parser->Parse(state, errors);
+			if(node && errors.Count()==0)
+			{
+				return WfConvertParsingTreeNode(node, state.GetTokens()).Cast<WfModule>();
+			}
+			return 0;
+		}
+
+		vl::Ptr<WfModule> WfParseModule(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)
+		{
+			vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
+			return WfParseModule(input, table, errors);
 		}
 
 		vl::Ptr<vl::parsing::ParsingTreeNode> WfParseStatementAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors)
@@ -2218,9 +2564,20 @@ namespace vl
 			IMPL_TYPE_INFO_RENAME(WfTryStatement, Workflow::WfTryStatement)
 			IMPL_TYPE_INFO_RENAME(WfBlockStatement, Workflow::WfBlockStatement)
 			IMPL_TYPE_INFO_RENAME(WfExpressionStatement, Workflow::WfExpressionStatement)
+			IMPL_TYPE_INFO_RENAME(WfDeclaration, Workflow::WfDeclaration)
+			IMPL_TYPE_INFO_RENAME(WfNamespaceDeclaration, Workflow::WfNamespaceDeclaration)
+			IMPL_TYPE_INFO_RENAME(WfFunctionArgument, Workflow::WfFunctionArgument)
+			IMPL_TYPE_INFO_RENAME(WfFunctionAnonymity, Workflow::WfFunctionAnonymity)
+			IMPL_TYPE_INFO_RENAME(WfFunctionDeclaration, Workflow::WfFunctionDeclaration)
+			IMPL_TYPE_INFO_RENAME(WfFunctionExpression, Workflow::WfFunctionExpression)
+			IMPL_TYPE_INFO_RENAME(WfNewTypeExpression, Workflow::WfNewTypeExpression)
+			IMPL_TYPE_INFO_RENAME(WfModuleUsingItem, Workflow::WfModuleUsingItem)
+			IMPL_TYPE_INFO_RENAME(WfModuleUsingPath, Workflow::WfModuleUsingPath)
+			IMPL_TYPE_INFO_RENAME(WfModule, Workflow::WfModule)
 			IMPL_TYPE_INFO_RENAME(WfType::IVisitor, Workflow::WfType::IVisitor)
 			IMPL_TYPE_INFO_RENAME(WfExpression::IVisitor, Workflow::WfExpression::IVisitor)
 			IMPL_TYPE_INFO_RENAME(WfStatement::IVisitor, Workflow::WfStatement::IVisitor)
+			IMPL_TYPE_INFO_RENAME(WfDeclaration::IVisitor, Workflow::WfDeclaration::IVisitor)
 
 			BEGIN_CLASS_MEMBER(WfType)
 				CLASS_MEMBER_METHOD(Accept, {L"visitor"})
@@ -2827,6 +3184,100 @@ namespace vl
 				CLASS_MEMBER_FIELD(expression)
 			END_CLASS_MEMBER(WfExpressionStatement)
 
+			BEGIN_CLASS_MEMBER(WfDeclaration)
+				CLASS_MEMBER_METHOD(Accept, {L"visitor"})
+
+			END_CLASS_MEMBER(WfDeclaration)
+
+			BEGIN_CLASS_MEMBER(WfNamespaceDeclaration)
+				CLASS_MEMBER_BASE(WfDeclaration)
+
+				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<WfNamespaceDeclaration>(), NO_PARAMETER)
+
+				CLASS_MEMBER_EXTERNALMETHOD(get_name, NO_PARAMETER, vl::WString(WfNamespaceDeclaration::*)(), [](WfNamespaceDeclaration* node){ return node->name.value; })
+				CLASS_MEMBER_EXTERNALMETHOD(set_name, {L"value"}, void(WfNamespaceDeclaration::*)(const vl::WString&), [](WfNamespaceDeclaration* node, const vl::WString& value){ node->name.value = value; })
+
+				CLASS_MEMBER_PROPERTY(name, get_name, set_name)
+				CLASS_MEMBER_FIELD(declarations)
+			END_CLASS_MEMBER(WfNamespaceDeclaration)
+
+			BEGIN_CLASS_MEMBER(WfFunctionArgument)
+				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<WfFunctionArgument>(), NO_PARAMETER)
+
+				CLASS_MEMBER_EXTERNALMETHOD(get_name, NO_PARAMETER, vl::WString(WfFunctionArgument::*)(), [](WfFunctionArgument* node){ return node->name.value; })
+				CLASS_MEMBER_EXTERNALMETHOD(set_name, {L"value"}, void(WfFunctionArgument::*)(const vl::WString&), [](WfFunctionArgument* node, const vl::WString& value){ node->name.value = value; })
+
+				CLASS_MEMBER_PROPERTY(name, get_name, set_name)
+				CLASS_MEMBER_FIELD(type)
+			END_CLASS_MEMBER(WfFunctionArgument)
+
+			BEGIN_ENUM_ITEM(WfFunctionAnonymity)
+				ENUM_ITEM_NAMESPACE(WfFunctionAnonymity)
+				ENUM_NAMESPACE_ITEM(Named)
+				ENUM_NAMESPACE_ITEM(Anonymous)
+			END_ENUM_ITEM(WfFunctionAnonymity)
+
+			BEGIN_CLASS_MEMBER(WfFunctionDeclaration)
+				CLASS_MEMBER_BASE(WfDeclaration)
+
+				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<WfFunctionDeclaration>(), NO_PARAMETER)
+
+				CLASS_MEMBER_EXTERNALMETHOD(get_name, NO_PARAMETER, vl::WString(WfFunctionDeclaration::*)(), [](WfFunctionDeclaration* node){ return node->name.value; })
+				CLASS_MEMBER_EXTERNALMETHOD(set_name, {L"value"}, void(WfFunctionDeclaration::*)(const vl::WString&), [](WfFunctionDeclaration* node, const vl::WString& value){ node->name.value = value; })
+
+				CLASS_MEMBER_FIELD(anonymity)
+				CLASS_MEMBER_PROPERTY(name, get_name, set_name)
+				CLASS_MEMBER_FIELD(arguments)
+				CLASS_MEMBER_FIELD(statement)
+			END_CLASS_MEMBER(WfFunctionDeclaration)
+
+			BEGIN_CLASS_MEMBER(WfFunctionExpression)
+				CLASS_MEMBER_BASE(WfExpression)
+
+				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<WfFunctionExpression>(), NO_PARAMETER)
+
+
+				CLASS_MEMBER_FIELD(function)
+			END_CLASS_MEMBER(WfFunctionExpression)
+
+			BEGIN_CLASS_MEMBER(WfNewTypeExpression)
+				CLASS_MEMBER_BASE(WfExpression)
+
+				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<WfNewTypeExpression>(), NO_PARAMETER)
+
+
+				CLASS_MEMBER_FIELD(type)
+				CLASS_MEMBER_FIELD(arguments)
+				CLASS_MEMBER_FIELD(functions)
+			END_CLASS_MEMBER(WfNewTypeExpression)
+
+			BEGIN_CLASS_MEMBER(WfModuleUsingItem)
+				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<WfModuleUsingItem>(), NO_PARAMETER)
+
+				CLASS_MEMBER_EXTERNALMETHOD(get_name, NO_PARAMETER, vl::WString(WfModuleUsingItem::*)(), [](WfModuleUsingItem* node){ return node->name.value; })
+				CLASS_MEMBER_EXTERNALMETHOD(set_name, {L"value"}, void(WfModuleUsingItem::*)(const vl::WString&), [](WfModuleUsingItem* node, const vl::WString& value){ node->name.value = value; })
+
+				CLASS_MEMBER_PROPERTY(name, get_name, set_name)
+			END_CLASS_MEMBER(WfModuleUsingItem)
+
+			BEGIN_CLASS_MEMBER(WfModuleUsingPath)
+				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<WfModuleUsingPath>(), NO_PARAMETER)
+
+
+				CLASS_MEMBER_FIELD(items)
+			END_CLASS_MEMBER(WfModuleUsingPath)
+
+			BEGIN_CLASS_MEMBER(WfModule)
+				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<WfModule>(), NO_PARAMETER)
+
+				CLASS_MEMBER_EXTERNALMETHOD(get_name, NO_PARAMETER, vl::WString(WfModule::*)(), [](WfModule* node){ return node->name.value; })
+				CLASS_MEMBER_EXTERNALMETHOD(set_name, {L"value"}, void(WfModule::*)(const vl::WString&), [](WfModule* node, const vl::WString& value){ node->name.value = value; })
+
+				CLASS_MEMBER_PROPERTY(name, get_name, set_name)
+				CLASS_MEMBER_FIELD(paths)
+				CLASS_MEMBER_FIELD(declarations)
+			END_CLASS_MEMBER(WfModule)
+
 			BEGIN_CLASS_MEMBER(WfType::IVisitor)
 				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
 				CLASS_MEMBER_EXTERNALCTOR(Ptr<WfType::IVisitor>(Ptr<IValueInterfaceProxy>), {L"proxy"}, &interface_proxy::WfType_IVisitor::Create)
@@ -2870,6 +3321,8 @@ namespace vl
 				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(WfExpression::IVisitor::*)(WfBindExpression* node))
 				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(WfExpression::IVisitor::*)(WfObserveExpression* node))
 				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(WfExpression::IVisitor::*)(WfCallExpression* node))
+				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(WfExpression::IVisitor::*)(WfFunctionExpression* node))
+				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(WfExpression::IVisitor::*)(WfNewTypeExpression* node))
 			END_CLASS_MEMBER(WfExpression)
 
 			BEGIN_CLASS_MEMBER(WfStatement::IVisitor)
@@ -2892,6 +3345,14 @@ namespace vl
 				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(WfStatement::IVisitor::*)(WfBlockStatement* node))
 				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(WfStatement::IVisitor::*)(WfExpressionStatement* node))
 			END_CLASS_MEMBER(WfStatement)
+
+			BEGIN_CLASS_MEMBER(WfDeclaration::IVisitor)
+				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
+				CLASS_MEMBER_EXTERNALCTOR(Ptr<WfDeclaration::IVisitor>(Ptr<IValueInterfaceProxy>), {L"proxy"}, &interface_proxy::WfDeclaration_IVisitor::Create)
+
+				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(WfDeclaration::IVisitor::*)(WfNamespaceDeclaration* node))
+				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(WfDeclaration::IVisitor::*)(WfFunctionDeclaration* node))
+			END_CLASS_MEMBER(WfDeclaration)
 
 			class WfTypeLoader : public vl::Object, public ITypeLoader
 			{
@@ -2959,9 +3420,20 @@ namespace vl
 					ADD_TYPE_INFO(vl::workflow::WfTryStatement)
 					ADD_TYPE_INFO(vl::workflow::WfBlockStatement)
 					ADD_TYPE_INFO(vl::workflow::WfExpressionStatement)
+					ADD_TYPE_INFO(vl::workflow::WfDeclaration)
+					ADD_TYPE_INFO(vl::workflow::WfNamespaceDeclaration)
+					ADD_TYPE_INFO(vl::workflow::WfFunctionArgument)
+					ADD_TYPE_INFO(vl::workflow::WfFunctionAnonymity)
+					ADD_TYPE_INFO(vl::workflow::WfFunctionDeclaration)
+					ADD_TYPE_INFO(vl::workflow::WfFunctionExpression)
+					ADD_TYPE_INFO(vl::workflow::WfNewTypeExpression)
+					ADD_TYPE_INFO(vl::workflow::WfModuleUsingItem)
+					ADD_TYPE_INFO(vl::workflow::WfModuleUsingPath)
+					ADD_TYPE_INFO(vl::workflow::WfModule)
 					ADD_TYPE_INFO(vl::workflow::WfType::IVisitor)
 					ADD_TYPE_INFO(vl::workflow::WfExpression::IVisitor)
 					ADD_TYPE_INFO(vl::workflow::WfStatement::IVisitor)
+					ADD_TYPE_INFO(vl::workflow::WfDeclaration::IVisitor)
 				}
 
 				void Unload(ITypeManager* manager)
