@@ -750,58 +750,104 @@ ParsingAutoRecoverAmbiguousParser
 
 			void ParsingAutoRecoverAmbiguousParser::OnErrorRecover(ParsingState& state, vint currentTokenIndex, collections::List<ParsingState::Future*>& futures, vint& begin, vint& end, collections::List<Ptr<ParsingError>>& errors)
 			{
-				vint oldFutureCount=futures.Count();
-				while(futures.Count()-oldFutureCount<65536 && begin<end)
+				vint insertedTokenCount = 0;
+				while (insertedTokenCount++ < maxInsertedTokenCount)
 				{
-					for(vint i=begin;i<end;i++)
+					// keep all futures that consumed a token in a list
+					List<ParsingState::Future*> consumedTokenFutures;
+					vint processBegin = begin;
+					vint processEnd = end;
+					while (processEnd > processBegin)
 					{
-						if(state.TestExplore(currentTokenIndex, futures[i]))
+						// explore all tokens
+						for (vint i = processBegin; i < processEnd; i++)
 						{
-							goto FINISH_ERROR_RECOVERY;
-						}
-					}
-					
-					for(vint j=ParsingTable::UserTokenStart;j<table->GetTokenCount();j++)
-					{
-						if(j!=currentTokenIndex)
-						{
-							for(vint i=begin;i<end;i++)
+							state.Explore(ParsingTable::TokenFinish, futures[i], futures);
+							for (vint token = ParsingTable::UserTokenStart; token < state.GetTable()->GetTokenCount(); token++)
 							{
-								ParsingState::Future* now=futures[i];
-								state.Explore(j, now, futures);
+								state.Explore(token, futures[i], futures);
 							}
 						}
-					}
-					if(futures.Count()==end)
-					{
-						for(vint i=begin;i<end;i++)
+						// copy all futures that consumed a token to consumedTokenFutures
+						if (futures.Count() > processEnd)
 						{
-							ParsingState::Future* now=futures[i];
-							state.Explore(ParsingTable::LeftRecursiveReduce, now, futures);
+							CopyFrom(
+								consumedTokenFutures,
+								From(futures)
+									.Skip(processEnd)
+									.Take(futures.Count() - processEnd),
+								true
+								);
+							futures.RemoveRange(processEnd, futures.Count() - processEnd);
 						}
-					}
-					if(futures.Count()==end)
-					{
-						for(vint i=begin;i<end;i++)
-						{
-							ParsingState::Future* now=futures[i];
-							state.Explore(ParsingTable::NormalReduce, now, futures);
-						}
+
+						// explore left recursive reduce and normal reduce
+						state.ExploreLeftRecursiveReduce(futures, processBegin, processEnd - processBegin, futures);
+						state.ExploreNormalReduce(futures, processBegin, processEnd - processBegin, futures);
+
+						// if a token is consumed, then for those reduce futures, explore them until a token is consumed, and discard all failed futures
+						processBegin = processEnd;
+						processEnd = futures.Count();
 					}
 
-					begin=end;
-					end=futures.Count();
-				}
+					if (consumedTokenFutures.Count() == 0)
+					{
+						// failed to get any future that consumed a token
+						goto ERROR_RECOVERY_FAILED;
+					}
+					else
+					{
+						// try to see if the target token is reached
+						List<ParsingState::Future*> recoveryFutures;
+						FOREACH(ParsingState::Future*, future, consumedTokenFutures)
+						{
+							if (future->selectedToken == currentTokenIndex)
+							{
+								// because this is reached by error recoverying, so all futures in availableFutures should have previous futures
+								recoveryFutures.Add(future->previous);
+							}
+						}
 
-			FINISH_ERROR_RECOVERY:
-				if(begin==end && currentTokenIndex>=ParsingTable::UserTokenStart)
-				{
-					// skipped one token
+						if (recoveryFutures.Count()>0)
+						{
+							// finally reached the expected currentTokenIndex
+							// move these previous futures to the end
+							// then the original parser algorith, will use these previous futures to reach the currentTokenIndex in the next step
+							FOREACH(ParsingState::Future*, future, recoveryFutures)
+							{
+								futures.Remove(future);
+								futures.Add(future);
+							}
+							begin = futures.Count() - recoveryFutures.Count();
+							end = futures.Count();
+
+							// delete all futures in consumedTokenFutures
+							FOREACH(ParsingState::Future*, future, consumedTokenFutures)
+							{
+								delete future;
+							}
+							goto ERROR_RECOVERY_SUCCEEDED;
+						}
+						else
+						{
+							// put all futures that consumed a token from consumedTokenFutures back to future list
+							begin = futures.Count();
+							CopyFrom(futures, consumedTokenFutures, true);
+							end = futures.Count();
+						}
+					}
 				}
+				// if the maxInsertedTokenCount is exceeded, then we get here
+			ERROR_RECOVERY_FAILED:
+				begin = end = futures.Count();
+				return;
+			ERROR_RECOVERY_SUCCEEDED:
+				return;
 			}
 
-			ParsingAutoRecoverAmbiguousParser::ParsingAutoRecoverAmbiguousParser(Ptr<ParsingTable> _table)
+			ParsingAutoRecoverAmbiguousParser::ParsingAutoRecoverAmbiguousParser(Ptr<ParsingTable> _table, vint _maxInsertedTokenCount)
 				:ParsingAmbiguousParser(_table)
+				, maxInsertedTokenCount(_maxInsertedTokenCount == -1 ? 4 : _maxInsertedTokenCount)
 			{
 			}
 
