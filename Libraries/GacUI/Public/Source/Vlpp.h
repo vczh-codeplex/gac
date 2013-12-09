@@ -23,7 +23,30 @@ Macros:
 #ifndef VCZH_BASIC
 #define VCZH_BASIC
 
+#if defined _WIN64 || __x86_64_
+#define VCZH_64
+#endif
+
+#if defined _MSC_VER
+#define VCZH_MSVC
+#else
+#define VCZH_GCC
+#endif
+
+#if defined VCZH_MSVC
 #include <intrin.h>
+#elif defined VCZH_GCC
+#include <x86intrin.h>
+#include <stdint.h>
+#include <stddef.h>
+#define override
+#define abstract
+#define __thiscall
+#define __forceinline inline
+#endif
+
+#define L_(x) L__(x)
+#define L__(x) L ## x
 
 namespace vl
 {
@@ -32,21 +55,36 @@ namespace vl
 32位/64位兼容
 ***********************************************************************/
 
-#ifdef _WIN64
-#define VCZH_64
+#if defined VCZH_MSVC
+	typedef signed __int8			vint8_t;
+	typedef unsigned __int8			vuint8_t;
+	typedef signed __int16			vint16_t;
+	typedef unsigned __int16		vuint16_t;
+	typedef signed __int32			vint32_t;
+	typedef unsigned __int32		vuint32_t;
+	typedef signed __int64			vint64_t;
+	typedef unsigned __int64		vuint64_t;
+#elif defined VCZH_GCC
+	typedef int8_t					vint8_t;
+	typedef uint8_t					vuint8_t;
+	typedef int16_t					vint16_t;
+	typedef uint16_t				vuint16_t;
+	typedef int32_t					vint32_t;
+	typedef uint32_t				vuint32_t;
+	typedef int64_t					vint64_t;
+	typedef uint64_t				vuint64_t;
 #endif
 
 #ifdef VCZH_64
-	typedef __int64					vint;
-	typedef signed __int64			vsint;
-	typedef unsigned __int64		vuint;
+	typedef vint64_t				vint;
+	typedef vint64_t				vsint;
+	typedef vuint64_t				vuint;
 #else
-	typedef __int32					vint;
-	typedef signed __int32			vsint;
-	typedef unsigned __int32		vuint;
+	typedef vint32_t				vint;
+	typedef vint32_t				vsint;
+	typedef vuint32_t				vuint;
 #endif
-
-typedef signed __int64	pos_t;
+	typedef vint64_t				pos_t;
 
 #ifdef VCZH_64
 #define ITOA_S		_i64toa_s
@@ -57,8 +95,13 @@ typedef signed __int64	pos_t;
 #define UITOW_S		_ui64tow_s
 #define UI64TOA_S	_ui64toa_s
 #define UI64TOW_S	_ui64tow_s
+#if defined VCZH_MSVC
 #define INCRC(x)	(_InterlockedIncrement64(x))
 #define DECRC(x)	(_InterlockedDecrement64(x))
+#elif defined VCZH_GCC
+#define INCRC(x)	(__sync_fetch_and_add(x, 1))
+#define DECRC(x)	(__sync_fetch_and_sub(x, 1))
+#endif
 #else
 #define ITOA_S		_itoa_s
 #define ITOW_S		_itow_s
@@ -68,13 +111,13 @@ typedef signed __int64	pos_t;
 #define UITOW_S		_ui64tow_s
 #define UI64TOA_S	_ui64toa_s
 #define UI64TOW_S	_ui64tow_s
+#if defined VCZH_MSVC
 #define INCRC(x)	(_InterlockedIncrement((volatile long*)(x)))
 #define DECRC(x)	(_InterlockedDecrement((volatile long*)(x)))
+#elif defined VCZH_GCC
+#define INCRC(x)	(__sync_fetch_and_add(x, 1))
+#define DECRC(x)	(__sync_fetch_and_sub(x, 1))
 #endif
-
-#ifndef _MSC_VER
-#define override
-#define abstract
 #endif
 
 /***********************************************************************
@@ -93,17 +136,16 @@ typedef signed __int64	pos_t;
 	class Error
 	{
 	private:
-		wchar_t*			description;
+		const wchar_t*		description;
 	public:
-		Error(wchar_t* _description);
+		Error(const wchar_t* _description);
 
-		wchar_t*			Description()const;
+		const wchar_t*		Description()const;
 	};
 
-#ifdef _DEBUG
+#if defined VCZH_MSVC || defined VCZH_GCC || defined _DEBUG
 	#define CHECK_ERROR(CONDITION,DESCRIPTION) do{if(!(CONDITION))throw Error(DESCRIPTION);}while(0)
-#endif
-#ifdef NDEBUG
+#elif defined NDEBUG
 	#define CHECK_ERROR(CONDITION,DESCRIPTION)
 #endif
 
@@ -431,14 +473,14 @@ typedef signed __int64	pos_t;
 	};
 
 	template<>struct POD<bool>{static const bool Result=true;};
-	template<>struct POD<unsigned __int8>{static const bool Result=true;};
-	template<>struct POD<signed __int8>{static const bool Result=true;};
-	template<>struct POD<unsigned __int16>{static const bool Result=true;};
-	template<>struct POD<signed __int16>{static const bool Result=true;};
-	template<>struct POD<unsigned __int32>{static const bool Result=true;};
-	template<>struct POD<signed __int32>{static const bool Result=true;};
-	template<>struct POD<unsigned __int64>{static const bool Result=true;};
-	template<>struct POD<signed __int64>{static const bool Result=true;};
+	template<>struct POD<vint8_t>{static const bool Result=true;};
+	template<>struct POD<vuint8_t>{static const bool Result=true;};
+	template<>struct POD<vint16_t>{static const bool Result=true;};
+	template<>struct POD<vuint16_t>{static const bool Result=true;};
+	template<>struct POD<vint32_t>{static const bool Result=true;};
+	template<>struct POD<vuint32_t>{static const bool Result=true;};
+	template<>struct POD<vint64_t>{static const bool Result=true;};
+	template<>struct POD<vuint64_t>{static const bool Result=true;};
 	template<>struct POD<char>{static const bool Result=true;};
 	template<>struct POD<wchar_t>{static const bool Result=true;};
 	template<typename T>struct POD<T*>{static const bool Result=true;};
@@ -464,20 +506,20 @@ typedef signed __int64	pos_t;
 		vint				second;
 		vint				milliseconds;
 
-		unsigned __int64	totalMilliseconds;
-		unsigned __int64	filetime;
+		vuint64_t			totalMilliseconds;
+		vuint64_t			filetime;
 
 		static DateTime		LocalTime();
 		static DateTime		UtcTime();
 		static DateTime		FromDateTime(vint _year, vint _month, vint _day, vint _hour=0, vint _minute=0, vint _second=0, vint _milliseconds=0);
-		static DateTime		FromFileTime(unsigned __int64 filetime);
+		static DateTime		FromFileTime(vuint64_t filetime);
 
 		DateTime();
 
 		DateTime			ToLocalTime();
 		DateTime			ToUtcTime();
-		DateTime			Forward(unsigned __int64 milliseconds);
-		DateTime			Backward(unsigned __int64 milliseconds);
+		DateTime			Forward(vuint64_t milliseconds);
+		DateTime			Backward(vuint64_t milliseconds);
 
 		bool operator==(const DateTime& value)const { return filetime==value.filetime; }
 		bool operator!=(const DateTime& value)const { return filetime!=value.filetime; }
@@ -563,7 +605,7 @@ namespace vl
 	class ObjectString : public Object
 	{
 	private:
-		static const T	zero=0;
+		static const T				zero;
 
 		mutable T*					buffer;
 		mutable volatile vint*		counter;
@@ -725,7 +767,7 @@ namespace vl
 
 		ObjectString(const T* _buffer, bool copy = true)
 		{
-			CHECK_ERROR(_buffer!=0, L"ObjectString<T>::ObjectString(const T*, bool)#不能用空指针构造字符串。");
+			CHECK_ERROR(_buffer!=0, L"ObjectString<T>::ObjectString(const T*, bool)#Cannot construct a string from nullptr.");
 			if(copy)
 			{
 				counter=new vint(1);
@@ -898,7 +940,7 @@ namespace vl
 
 		T operator[](vint index)const
 		{
-			CHECK_ERROR(index>=0 && index<length, L"ObjectString:<T>:operator[](vint)#参数index越界。");
+			CHECK_ERROR(index>=0 && index<length, L"ObjectString:<T>:operator[](vint)#Argument index not in range.");
 			return buffer[start+index];
 		}
 
@@ -920,33 +962,33 @@ namespace vl
 
 		ObjectString<T> Left(vint count)const
 		{
-			CHECK_ERROR(count>=0 && count<=length, L"ObjectString<T>::Left(vint)#参数count越界。");
+			CHECK_ERROR(count>=0 && count<=length, L"ObjectString<T>::Left(vint)#Argument count not in range.");
 			return ObjectString<T>(*this, 0, count);
 		}
 
 		ObjectString<T> Right(vint count)const
 		{
-			CHECK_ERROR(count>=0 && count<=length, L"ObjectString<T>::Right(vint)#参数count越界。");
+			CHECK_ERROR(count>=0 && count<=length, L"ObjectString<T>::Right(vint)#Argument count not in range.");
 			return ObjectString<T>(*this, length-count, count);
 		}
 
 		ObjectString<T> Sub(vint index, vint count)const
 		{
-			CHECK_ERROR(index>=0 && index<=length, L"ObjectString<T>::Sub(vint, vint)#参数index越界。");
-			CHECK_ERROR(index+count>=0 && index+count<=length, L"ObjectString<T>::Sub(vint, vint)#参数count越界。");
+			CHECK_ERROR(index>=0 && index<=length, L"ObjectString<T>::Sub(vint, vint)#Argument index not in range.");
+			CHECK_ERROR(index+count>=0 && index+count<=length, L"ObjectString<T>::Sub(vint, vint)#Argument count not in range.");
 			return ObjectString<T>(*this, index, count);
 		}
 
 		ObjectString<T> Remove(vint index, vint count)const
 		{
-			CHECK_ERROR(index>=0 && index<length, L"ObjectString<T>::Remove(vint, vint)#参数index越界。");
-			CHECK_ERROR(index+count>=0 && index+count<=length, L"ObjectString<T>::Remove(vint, vint)#参数count越界。");
+			CHECK_ERROR(index>=0 && index<length, L"ObjectString<T>::Remove(vint, vint)#Argument index not in range.");
+			CHECK_ERROR(index+count>=0 && index+count<=length, L"ObjectString<T>::Remove(vint, vint)#Argument count not in range.");
 			return ObjectString<T>(*this, ObjectString<T>(), index, count);
 		}
 
 		ObjectString<T> Insert(vint index, const ObjectString<T>& string)const
 		{
-			CHECK_ERROR(index>=0 && index<=length, L"ObjectString<T>::Insert(vint)#参数count越界。");
+			CHECK_ERROR(index>=0 && index<=length, L"ObjectString<T>::Insert(vint)#Argument count not in range.");
 			return ObjectString<T>(*this, string, index, 0);
 		}
 
@@ -988,40 +1030,42 @@ namespace vl
 
 	template<typename T>
 	ObjectString<T> ObjectString<T>::Empty=ObjectString<T>();
+	template<typename T>
+	const T ObjectString<T>::zero=0;
 
 	typedef ObjectString<char>		AString;
 	typedef ObjectString<wchar_t>	WString;
 
 	extern vint					atoi_test(const AString& string, bool& success);
 	extern vint					wtoi_test(const WString& string, bool& success);
-	extern __int64				atoi64_test(const AString& string, bool& success);
-	extern __int64				wtoi64_test(const WString& string, bool& success);
+	extern vint64_t				atoi64_test(const AString& string, bool& success);
+	extern vint64_t				wtoi64_test(const WString& string, bool& success);
 	extern vuint				atou_test(const AString& string, bool& success);
 	extern vuint				wtou_test(const WString& string, bool& success);
-	extern unsigned __int64		atou64_test(const AString& string, bool& success);
-	extern unsigned __int64		wtou64_test(const WString& string, bool& success);
+	extern vuint64_t			atou64_test(const AString& string, bool& success);
+	extern vuint64_t			wtou64_test(const WString& string, bool& success);
 	extern double				atof_test(const AString& string, bool& success);
 	extern double				wtof_test(const WString& string, bool& success);
 
 	extern vint					atoi(const AString& string);
 	extern vint					wtoi(const WString& string);
-	extern __int64				atoi64(const AString& string);
-	extern __int64				wtoi64(const WString& string);
+	extern vint64_t				atoi64(const AString& string);
+	extern vint64_t				wtoi64(const WString& string);
 	extern vuint				atou(const AString& string);
 	extern vuint				wtou(const WString& string);
-	extern unsigned __int64		atou64(const AString& string);
-	extern unsigned __int64		wtou64(const WString& string);
+	extern vuint64_t			atou64(const AString& string);
+	extern vuint64_t			wtou64(const WString& string);
 	extern double				atof(const AString& string);
 	extern double				wtof(const WString& string);
 
 	extern AString				itoa(vint number);
 	extern WString				itow(vint number);
-	extern AString				i64toa(__int64 number);
-	extern WString				i64tow(__int64 number);
+	extern AString				i64toa(vint64_t number);
+	extern WString				i64tow(vint64_t number);
 	extern AString				utoa(vuint number);
 	extern WString				utow(vuint number);
-	extern AString				u64toa(unsigned __int64 number);
-	extern WString				u64tow(unsigned __int64 number);
+	extern AString				u64toa(vuint64_t number);
+	extern WString				u64tow(vuint64_t number);
 	extern AString				ftoa(double number);
 	extern WString				ftow(double number);
 
@@ -1126,1270 +1170,6 @@ namespace vl
 		const WString&				GetExpression()const;
 		vint							GetPosition()const;
 	};
-}
-
-#endif
-
-/***********************************************************************
-COLLECTIONS\PAIR.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-Data Structure::Pair
-
-Classes:
-	Pair<K, V>							：二元组
-***********************************************************************/
-
-#ifndef VCZH_COLLECTIONS_PAIR
-#define VCZH_COLLECTIONS_PAIR
-
-
-namespace vl
-{
-	namespace collections
-	{
-		template<typename K, typename V>
-		class Pair
-		{
-		public:
-			K				key;
-			V				value;
-
-			Pair()
-			{
-			}
-
-			Pair(const K& _key, const V& _value)
-			{
-				key=_key;
-				value=_value;
-			}
-
-			Pair(const Pair<K, V>& pair)
-			{
-				key=pair.key;
-				value=pair.value;
-			}
-
-			vint CompareTo(const Pair<K, V>& pair)const
-			{
-				if(key<pair.key)
-				{
-					return -1;
-				}
-				else if(key>pair.key)
-				{
-					return 1;
-				}
-				else if(value<pair.value)
-				{
-					return -1;
-				}
-				else if(value>pair.value)
-				{
-					return 1;
-				}
-				else
-				{
-					return 0;
-				}
-			}
-
-			bool operator==(const Pair<K, V>& pair)const
-			{
-				return CompareTo(pair)==0;
-			}
-
-			bool operator!=(const Pair<K, V>& pair)const
-			{
-				return CompareTo(pair)!=0;
-			}
-
-			bool operator<(const Pair<K, V>& pair)const
-			{
-				return CompareTo(pair)<0;
-			}
-
-			bool operator<=(const Pair<K, V>& pair)const
-			{
-				return CompareTo(pair)<=0;
-			}
-
-			bool operator>(const Pair<K, V>& pair)const
-			{
-				return CompareTo(pair)>0;
-			}
-
-			bool operator>=(const Pair<K, V>& pair)const
-			{
-				return CompareTo(pair)>=0;
-			}
-		};
-	}
-
-	template<typename K, typename V>
-	struct POD<collections::Pair<K, V>>
-	{
-		static const bool Result=POD<K>::Result && POD<V>::Result;
-	};
-}
-
-#endif
-
-/***********************************************************************
-COLLECTIONS\INTERFACES.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-Data Structure::Interfaces
-
-Interfaces:
-	IEnumerator<T>									：枚举器
-	IEnumerable<T>									：可枚举对象
-***********************************************************************/
-
-#ifndef VCZH_COLLECTIONS_INTERFACES
-#define VCZH_COLLECTIONS_INTERFACES
-
-
-namespace vl
-{
-	namespace collections
-	{
-
-/***********************************************************************
-接口
-***********************************************************************/
-
-		template<typename T>
-		class IEnumerator : public virtual Interface
-		{
-		public:
-			typedef T									ElementType;
-
-			virtual IEnumerator<T>*						Clone()const=0;
-			virtual const T&							Current()const=0;
-			virtual vint								Index()const=0;
-			virtual bool								Next()=0;
-			virtual void								Reset()=0;
-
-			virtual bool								Evaluated()const{return false;}
-		};
-
-		template<typename T>
-		class IEnumerable : public virtual Interface
-		{
-		public:
-			typedef T									ElementType;
-
-			virtual IEnumerator<T>*						CreateEnumerator()const=0;
-		};
-
-/***********************************************************************
-随机存取
-***********************************************************************/
-
-		namespace randomaccess_internal
-		{
-			template<typename T>
-			struct RandomAccessable
-			{
-				static const bool							CanRead = false;
-				static const bool							CanResize = false;
-			};
-
-			template<typename T>
-			struct RandomAccess
-			{
-				static vint GetCount(const T& t)
-				{
-					return t.Count();
-				}
-
-				static const typename T::ElementType& GetValue(const T& t, vint index)
-				{
-					return t.Get(index);
-				}
-
-				static void SetCount(T& t, vint count)
-				{
-					t.Resize(count);
-				}
-
-				static void SetValue(T& t, vint index, const typename T::ElementType& value)
-				{
-					t.Set(index, value);
-				}
-
-				static void AppendValue(T& t, const typename T::ElementType& value)
-				{
-					t.Add(value);
-				}
-			};
-		}
-	}
-}
-
-#endif
-
-/***********************************************************************
-COLLECTIONS\LIST.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-Data Structure::List
-
-Classes:
-	ListStore<T,PODType>				：列表存储复制算法
-	ListBase<T,K>						：列表基类
-	Array<T,K>							：数组
-	List<T,K>							：列表
-	SortedList<T,K>						：有序列表
-***********************************************************************/
-
-#ifndef VCZH_COLLECTIONS_LIST
-#define VCZH_COLLECTIONS_LIST
-
-#include <string.h>
-
-namespace vl
-{
-	namespace collections
-	{
-
-/***********************************************************************
-储存结构
-***********************************************************************/
-
-		template<typename T, bool PODType>
-		class ListStore abstract : public Object
-		{
-		};
-		
-		template<typename T>
-		class ListStore<T, false> abstract : public Object
-		{
-		protected:
-			static void CopyObjects(T* dest, const T* source, vint count)
-			{
-				if(dest<source)
-				{
-					for(vint i=0;i<count;i++)
-					{
-						dest[i]=MoveValue(source[i]);
-					}
-				}
-				else if(dest>source)
-				{
-					for(vint i=count-1;i>=0;i--)
-					{
-						dest[i]=MoveValue(source[i]);
-					}
-				}
-			}
-
-			static void ClearObjects(T* dest, vint count)
-			{
-				for(vint i=0;i<count;i++)
-				{
-					dest[i]=T();
-				}
-			}
-		public:
-		};
-		
-		template<typename T>
-		class ListStore<T, true> abstract : public Object
-		{
-		protected:
-			static void CopyObjects(T* dest, const T* source, vint count)
-			{
-				if(count)
-				{
-					memmove(dest, source, sizeof(T)*count);
-				}
-			}
-
-			static void ClearObjects(T* dest, vint count)
-			{
-			}
-		public:
-		};
-		
-		template<typename T>
-		class ArrayBase abstract : public ListStore<T,POD<T>::Result>, public virtual IEnumerable<T>
-		{
-		protected:
-			class Enumerator : public Object, public virtual IEnumerator<T>
-			{
-			private:
-				const ArrayBase<T>*				container;
-				vint							index;
-
-			public:
-				Enumerator(const ArrayBase<T>* _container, vint _index=-1)
-				{
-					container=_container;
-					index=_index;
-				}
-
-				IEnumerator<T>* Clone()const
-				{
-					return new Enumerator(container, index);
-				}
-
-				const T& Current()const
-				{
-					return container->Get(index);
-				}
-
-				vint Index()const
-				{
-					return index;
-				}
-
-				bool Next()
-				{
-					index++;
-					return index>=0 && index<container->Count();
-				}
-
-				void Reset()
-				{
-					index=-1;
-				}
-			};
-			
-			T*						buffer;
-			vint					count;
-		public:
-			ArrayBase()
-				:buffer(0)
-				,count(0)
-			{
-			}
-
-			IEnumerator<T>* CreateEnumerator()const
-			{
-				return new Enumerator(this);
-			}
-
-			vint Count()const
-			{
-				return count;
-			}
-
-			const T& Get(vint index)const
-			{
-				CHECK_ERROR(index>=0 && index<count, L"ArrayBase<T, K>::Get(vint)#参数越界。");
-				return buffer[index];
-			}
-
-			const T& operator[](vint index)const
-			{
-				CHECK_ERROR(index>=0 && index<count, L"ArrayBase<T, K>::operator[](vint)#参数index越界。");
-				return buffer[index];
-			}
-		};
-
-		template<typename T, typename K=typename KeyType<T>::Type>
-		class ListBase abstract : public ArrayBase<T>
-		{
-		protected:
-			vint					capacity;
-			bool					lessMemoryMode;
-
-			vint CalculateCapacity(vint expected)
-			{
-				vint result=capacity;
-				while(result<expected)
-				{
-					result=result*5/4+1;
-				}
-				return result;
-			}
-
-			void MakeRoom(vint index, vint _count)
-			{
-				vint newCount=count+_count;
-				if(newCount>capacity)
-				{
-					vint newCapacity=CalculateCapacity(newCount);
-					T* newBuffer=new T[newCapacity];
-					CopyObjects(newBuffer, buffer, index);
-					CopyObjects(newBuffer+index+_count, buffer+index, count-index);
-					delete[] buffer;
-					capacity=newCapacity;
-					buffer=newBuffer;
-				}
-				else
-				{
-					CopyObjects(buffer+index+_count, buffer+index, count-index);
-				}
-				count=newCount;
-			}
-
-			void ReleaseUnnecessaryBuffer(vint previousCount)
-			{
-				if(buffer && count<previousCount)
-				{
-					ClearObjects(&buffer[count], previousCount-count);
-				}
-				if(lessMemoryMode && count<=capacity/2)
-				{
-					vint newCapacity=capacity*5/8;
-					if(count<newCapacity)
-					{
-						T* newBuffer=new T[newCapacity];
-						CopyObjects(newBuffer, buffer, count);
-						delete[] buffer;
-						capacity=newCapacity;
-						buffer=newBuffer;
-					}
-				}
-			}
-		public:
-			ListBase()
-			{
-				count=0;
-				capacity=0;
-				buffer=0;
-				lessMemoryMode=true;
-			}
-
-			~ListBase()
-			{
-				delete[] buffer;
-			}
-
-			void SetLessMemoryMode(bool mode)
-			{
-				lessMemoryMode=mode;
-			}
-
-			bool RemoveAt(vint index)
-			{
-				vint previousCount=count;
-				CHECK_ERROR(index>=0 && index<count, L"ListBase<T, K>::RemoveAt(vint)#参数index越界。");
-				CopyObjects(buffer+index,buffer+index+1,count-index-1);
-				count--;
-				ReleaseUnnecessaryBuffer(previousCount);
-				return true;
-			}
-
-			bool RemoveRange(vint index, vint _count)
-			{
-				vint previousCount=count;
-				CHECK_ERROR(index>=0 && index<=count, L"ListBase<T, K>::RemoveRange(vint, vint)#参数index越界。");
-				CHECK_ERROR(index+_count>=0 && index+_count<=count, L"ListBase<T,K>::RemoveRange(vint, vint)#参数_count越界。");
-				CopyObjects(buffer+index, buffer+index+_count, count-index-_count);
-				count-=_count;
-				ReleaseUnnecessaryBuffer(previousCount);
-				return true;
-			}
-
-			bool Clear()
-			{
-				vint previousCount=count;
-				count=0;
-				if(lessMemoryMode)
-				{
-					capacity=0;
-					delete[] buffer;
-					buffer=0;
-				}
-				else
-				{
-					ReleaseUnnecessaryBuffer(previousCount);
-				}
-				return true;
-			}
-		};
-
-/***********************************************************************
-列表对象
-***********************************************************************/
-
-		template<typename T, typename K=typename KeyType<T>::Type>
-		class Array : public ArrayBase<T>
-		{
-		protected:
-			void Create(vint size)
-			{
-				if(size>0)
-				{
-					count=size;
-					buffer=new T[size];
-				}
-				else
-				{
-					count=0;
-					buffer=0;
-				}
-			}
-
-			void Destroy()
-			{
-				count=0;
-				delete[] buffer;
-				buffer=0;
-			}
-		public:
-			Array(vint size=0)
-			{
-				Create(size);
-			}
-
-			Array(const T* _buffer, vint size)
-			{
-				Create(size);
-				CopyObjects(buffer, _buffer, size);
-			}
-
-			~Array()
-			{
-				Destroy();
-			}
-
-			bool Contains(const K& item)const
-			{
-				return IndexOf(item)!=-1;
-			}
-
-			vint IndexOf(const K& item)const
-			{
-				for(vint i=0;i<count;i++)
-				{
-					if(buffer[i]==item)
-					{
-						return i;
-					}
-				}
-				return -1;
-			}
-
-			void Set(vint index, const T& item)
-			{
-				CHECK_ERROR(index>=0 && index<count, L"Array<T, K>::Set(vint)#参数index越界。");
-				buffer[index]=item;
-			}
-
-			using ArrayBase<T>::operator[];
-			T& operator[](vint index)
-			{
-				CHECK_ERROR(index>=0 && index<count, L"Array<T, K>::operator[](vint)#参数index越界。");
-				return buffer[index];
-			}
-
-			void Resize(vint size)
-			{
-				vint oldCount=count;
-				T* oldBuffer=buffer;
-				Create(size);
-				CopyObjects(buffer, oldBuffer, (count<oldCount?count:oldCount));
-				delete[] oldBuffer;
-			}
-		};
-
-		template<typename T, typename K=typename KeyType<T>::Type>
-		class List : public ListBase<T, K>
-		{
-		public:
-			List()
-			{
-			}
-
-			bool Contains(const K& item)const
-			{
-				return IndexOf(item)!=-1;
-			}
-
-			vint IndexOf(const K& item)const
-			{
-				for(vint i=0;i<count;i++)
-				{
-					if(buffer[i]==item)
-					{
-						return i;
-					}
-				}
-				return -1;
-			}
-
-			vint Add(const T& item)
-			{
-				MakeRoom(count, 1);
-				buffer[count-1]=item;
-				return count-1;
-			}
-
-			vint Insert(vint index, const T& item)
-			{
-				CHECK_ERROR(index>=0 && index<=count, L"List<T, K>::Insert(vint, const T&)#参数index越界。");
-				MakeRoom(index,1);
-				buffer[index]=item;
-				return index;
-			}
-
-			bool Remove(const K& item)
-			{
-				vint index=IndexOf(item);
-				if(index>=0 && index<count)
-				{
-					RemoveAt(index);
-					return true;
-				}
-				else
-				{
-					return false;
-				}
-			}
-
-			bool Set(vint index, const T& item)
-			{
-				CHECK_ERROR(index>=0 && index<count, L"List<T, K>::Set(vint)#参数index越界。");
-				buffer[index]=item;
-				return true;
-			}
-			
-			using ListBase<T, K>::operator[];
-			T& operator[](vint index)
-			{
-				CHECK_ERROR(index>=0 && index<count, L"List<T, K>::operator[](vint)#参数index越界。");
-				return buffer[index];
-			}
-		};
-
-		template<typename T, typename K=typename KeyType<T>::Type>
-		class SortedList : public ListBase<T, K>
-		{
-		public:
-			SortedList()
-			{
-			}
-
-			bool Contains(const K& item)const
-			{
-				return IndexOf(item)!=-1;
-			}
-
-			template<typename Key>
-			vint IndexOf(const Key& item)const
-			{
-				vint start=0;
-				vint end=count-1;
-				while(start<=end)
-				{
-					vint index=start+(end-start)/2;
-					if(buffer[index]==item)
-					{
-						return index;
-					}
-					else if(buffer[index]>item)
-					{
-						end=index-1;
-					}
-					else
-					{
-						start=index+1;
-					}
-				}
-				return -1;
-			}
-
-			vint IndexOf(const K& item)const
-			{
-				return IndexOf<K>(item);
-			}
-
-			vint Add(const T& item)
-			{
-				if(count==0)
-				{
-					MakeRoom(0, 1);
-					buffer[0]=item;
-					return 0;
-				}
-				else
-				{
-					vint start=0;
-					vint end=count-1;
-					vint index=-1;
-					while(start<=end)
-					{
-						index=(start+end)/2;
-						if(buffer[index]==item)
-						{
-							goto SORTED_LIST_INSERT;
-						}
-						else if(buffer[index]>item)
-						{
-							end=index-1;
-						}
-						else
-						{
-							start=index+1;
-						}
-					}
-					CHECK_ERROR(index>=0 && index<count, L"SortedList<T, K>::Add(const T&)#内部错误，变量index越界");
-					if(buffer[index]<item)
-					{
-						index++;
-					}
-SORTED_LIST_INSERT:
-					MakeRoom(index, 1);
-					buffer[index]=item;
-					return index;
-				}
-			}
-
-			bool Remove(const K& item)
-			{
-				vint index=IndexOf(item);
-				if(index>=0 && index<count)
-				{
-					RemoveAt(index);
-					return true;
-				}
-				else
-				{
-					return false;
-				}
-			}
-		};
-
-/***********************************************************************
-随机访问
-***********************************************************************/
-
-		namespace randomaccess_internal
-		{
-			template<typename T, typename K>
-			struct RandomAccessable<Array<T, K>>
-			{
-				static const bool							CanRead = true;
-				static const bool							CanResize = true;
-			};
-
-			template<typename T, typename K>
-			struct RandomAccessable<List<T, K>>
-			{
-				static const bool							CanRead = true;
-				static const bool							CanResize = false;
-			};
-
-			template<typename T, typename K>
-			struct RandomAccessable<SortedList<T, K>>
-			{
-				static const bool							CanRead = true;
-				static const bool							CanResize = false;
-			};
-		}
-	}
-}
-
-#endif
-
-/***********************************************************************
-COLLECTIONS\DICTIONARY.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-Data Structure::Dictionary
-
-Classes:
-	Dictionary<KT, VT, KK, VK>					：映射
-	Group<KT, VT, KK, VK>						：多重映射
-***********************************************************************/
-
-#ifndef VCZH_COLLECTIONS_DICTIONARY
-#define VCZH_COLLECTIONS_DICTIONARY
-
-
-namespace vl
-{
-	namespace collections
-	{
-		template<
-			typename KT,
-			typename VT,
-			typename KK=typename KeyType<KT>::Type, 
-			typename VK=typename KeyType<VT>::Type
-		>
-		class Dictionary : public Object, public virtual IEnumerable<Pair<KT, VT>>
-		{
-		public:
-			typedef SortedList<KT, KK>			KeyContainer;
-			typedef List<VT, VK>				ValueContainer;
-		protected:
-			class Enumerator : public Object, public virtual IEnumerator<Pair<KT, VT>>
-			{
-			private:
-				const Dictionary<KT, VT, KK, VK>*	container;
-				vint								index;
-				Pair<KT, VT>						current;
-
-				void UpdateCurrent()
-				{
-					if(index<container->Count())
-					{
-						current.key=container->Keys().Get(index);
-						current.value=container->Values().Get(index);
-					}
-				}
-			public:
-				Enumerator(const Dictionary<KT, VT, KK, VK>* _container, vint _index=-1)
-				{
-					container=_container;
-					index=_index;
-				}
-				
-				IEnumerator<Pair<KT, VT>>* Clone()const
-				{
-					return new Enumerator(container, index);
-				}
-
-				const Pair<KT, VT>& Current()const
-				{
-					return current;
-				}
-
-				vint Index()const
-				{
-					return index;
-				}
-
-				bool Next()
-				{
-					index++;
-					UpdateCurrent();
-					return index>=0 && index<container->Count();
-				}
-
-				void Reset()
-				{
-					index=-1;
-					UpdateCurrent();
-				}
-			};
-
-			KeyContainer						keys;
-			ValueContainer						values;
-		public:
-			Dictionary()
-			{
-			}
-
-			IEnumerator<Pair<KT, VT>>* CreateEnumerator()const
-			{
-				return new Enumerator(this);
-			}
-
-			void SetLessMemoryMode(bool mode)
-			{
-				keys.SetLessMemoryMode(mode);
-				values.SetLessMemoryMode(mode);
-			}
-
-			const KeyContainer& Keys()const
-			{
-				return keys;
-			}
-
-			const ValueContainer& Values()const
-			{
-				return values;
-			}
-
-			vint Count()const
-			{
-				return keys.Count();
-			}
-
-			const VT& Get(const KK& key)const
-			{
-				return values.Get(keys.IndexOf(key));
-			}
-
-			const VT& operator[](const KK& key)const
-			{
-				return values.Get(keys.IndexOf(key));
-			}
-
-			bool Set(const KT& key, const VT& value)
-			{
-				vint index=keys.IndexOf(KeyType<KT>::GetKeyValue(key));
-				if(index==-1)
-				{
-					index=keys.Add(key);
-					values.Insert(index, value);
-				}
-				else
-				{
-					values[index]=value;
-				}
-				return true;
-			}
-
-			bool Add(const Pair<KT, VT>& value)
-			{
-				return Add(value.key, value.value);
-			}
-
-			bool Add(const KT& key, const VT& value)
-			{
-				CHECK_ERROR(!keys.Contains(KeyType<KT>::GetKeyValue(key)), L"Dictionary<KT, KK, ValueContainer, VT, VK>::Add(const KT&, const VT&)#key已存在。");
-				vint index=keys.Add(key);
-				values.Insert(index, value);
-				return true;
-			}
-
-			bool Remove(const KK& key)
-			{
-				vint index=keys.IndexOf(key);
-				if(index!=-1)
-				{
-					keys.RemoveAt(index);
-					values.RemoveAt(index);
-					return true;
-				}
-				else
-				{
-					return false;
-				}
-			}
-
-			bool Clear()
-			{
-				keys.Clear();
-				values.Clear();
-				return true;
-			}
-		};
-
-		template<
-			typename KT,
-			typename VT,
-			typename KK=typename KeyType<KT>::Type,
-			typename VK=typename KeyType<VT>::Type
-		>
-		class Group : public Object, public virtual IEnumerable<Pair<KT, VT>>
-		{
-			typedef SortedList<KT, KK>		KeyContainer;
-			typedef List<VT, VK>			ValueContainer;
-		protected:
-			class Enumerator : public Object, public virtual IEnumerator<Pair<KT, VT>>
-			{
-			private:
-				const Group<KT, VT, KK, VK>*		container;
-				vint								keyIndex;
-				vint								valueIndex;
-				Pair<KT, VT>						current;
-
-				void UpdateCurrent()
-				{
-					if(keyIndex<container->Count())
-					{
-						const ValueContainer& values=container->GetByIndex(keyIndex);
-						if(valueIndex<values.Count())
-						{
-							current.key=container->Keys().Get(keyIndex);
-							current.value=values.Get(valueIndex);
-						}
-					}
-				}
-			public:
-				Enumerator(const Group<KT, VT, KK, VK>* _container, vint _keyIndex=-1, vint _valueIndex=-1)
-				{
-					container=_container;
-					keyIndex=_keyIndex;
-					valueIndex=_valueIndex;
-				}
-				
-				IEnumerator<Pair<KT, VT>>* Clone()const
-				{
-					return new Enumerator(container, keyIndex, valueIndex);
-				}
-
-				const Pair<KT, VT>& Current()const
-				{
-					return current;
-				}
-
-				vint Index()const
-				{
-					if(0<=keyIndex && keyIndex<container->Count())
-					{
-						vint index=0;
-						for(vint i=0;i<keyIndex;i++)
-						{
-							index+=container->GetByIndex(i).Count();
-						}
-						return index+valueIndex;
-					}
-					else
-					{
-						return -1;
-					}
-				}
-
-				bool Next()
-				{
-					if(keyIndex==-1)
-					{
-						keyIndex=0;
-					}
-					while(keyIndex<container->Count())
-					{
-						valueIndex++;
-						const ValueContainer& values=container->GetByIndex(keyIndex);
-						if(valueIndex<values.Count())
-						{
-							UpdateCurrent();
-							return true;
-						}
-						else
-						{
-							keyIndex++;
-							valueIndex=-1;
-						}
-					}
-					return false;
-				}
-
-				void Reset()
-				{
-					keyIndex=-1;
-					valueIndex=-1;
-					UpdateCurrent();
-				}
-			};
-
-			KeyContainer					keys;
-			List<ValueContainer*>			values;
-		public:
-			Group()
-			{
-			}
-
-			~Group()
-			{
-				Clear();
-			}
-
-			IEnumerator<Pair<KT, VT>>* CreateEnumerator()const
-			{
-				return new Enumerator(this);
-			}
-
-			const KeyContainer& Keys()const
-			{
-				return keys;
-			}
-
-			vint Count()const
-			{
-				return keys.Count();
-			}
-
-			const ValueContainer& Get(const KK& key)const
-			{
-				return *values.Get(keys.IndexOf(key));
-			}
-
-			const ValueContainer& GetByIndex(vint index)const
-			{
-				return *values.Get(index);
-			}
-
-			const ValueContainer& operator[](const KK& key)const
-			{
-				return *values.Get(keys.IndexOf(key));
-			}
-
-			bool Contains(const KK& key)const
-			{
-				return keys.Contains(key);
-			}
-
-			bool Contains(const KK& key, const VK& value)const
-			{
-				vint index=keys.IndexOf(key);
-				if(index!=-1)
-				{
-					return values.Get(index)->Contains(value);
-				}
-				else
-				{
-					return false;
-				}
-			}
-
-			bool Add(const Pair<KT, VT>& value)
-			{
-				return Add(value.key, value.value);
-			}
-
-			bool Add(const KT& key, const VT& value)
-			{
-				ValueContainer* target=0;
-				vint index=keys.IndexOf(KeyType<KT>::GetKeyValue(key));
-				if(index==-1)
-				{
-					target=new ValueContainer;
-					values.Insert(keys.Add(key), target);
-				}
-				else
-				{
-					target=values[index];
-				}
-				target->Add(value);
-				return true;
-			}
-
-			bool Remove(const KK& key)
-			{
-				vint index=keys.IndexOf(key);
-				if(index!=-1)
-				{
-					keys.RemoveAt(index);
-					List<VT, VK>* target=values[index];
-					values.RemoveAt(index);
-					delete target;
-					return true;
-				}
-				else
-				{
-					return false;
-				}
-			}
-
-			bool Remove(const KK& key, const VK& value)
-			{
-				vint index=keys.IndexOf(key);
-				if(index!=-1)
-				{
-					List<VT, VK>* target=values[index];
-					target->Remove(value);
-					if(target->Count()==0)
-					{
-						keys.RemoveAt(index);
-						values.RemoveAt(index);
-						delete target;
-					}
-					return true;
-				}
-				else
-				{
-					return false;
-				}
-			}
-
-			bool Clear()
-			{
-				for(vint i=0;i<values.Count();i++)
-				{
-					delete values[i];
-				}
-				keys.Clear();
-				values.Clear();
-				return true;
-			}
-		};
-
-/***********************************************************************
-随机访问
-***********************************************************************/
-		namespace randomaccess_internal
-		{
-			template<typename KT, typename VT, typename KK, typename VK>
-			struct RandomAccessable<Dictionary<KT, VT, KK, VK>>
-			{
-				static const bool							CanRead = true;
-				static const bool							CanResize = false;
-			};
-		
-			template<typename KT, typename VT, typename KK, typename VK>
-			struct RandomAccess<Dictionary<KT, VT, KK, VK>>
-			{
-				static vint GetCount(const Dictionary<KT, VT, KK, VK>& t)
-				{
-					return t.Count();
-				}
-
-				static Pair<KT, VT> GetValue(const Dictionary<KT, VT, KK, VK>& t, vint index)
-				{
-					return Pair<KT, VT>(t.Keys().Get(index), t.Values().Get(index));
-				}
-
-				static void AppendValue(Dictionary<KT, VT, KK, VK>& t, const Pair<KT, VT>& value)
-				{
-					t.Set(value.key, value.value);
-				}
-			};
-		}
-	}
-}
-
-#endif
-
-/***********************************************************************
-HTTPUTILITY.H
-***********************************************************************/
-#ifndef VCZH_HTTPUTILITY
-#define VCZH_HTTPUTILITY
-
-
-namespace vl
-{
-
-/***********************************************************************
-HTTP Utility
-***********************************************************************/
-
-	class HttpRequest
-	{
-		typedef collections::Array<char>					BodyBuffer;
-		typedef collections::List<WString>					StringList;
-		typedef collections::Dictionary<WString, WString>	HeaderMap;
-	public:
-		WString				server;
-		vint				port;
-		WString				query;
-		bool				secure;
-		WString				username;
-		WString				password;
-		WString				method;
-		WString				cookie;
-		BodyBuffer			body;
-		WString				contentType;
-		StringList			acceptTypes;
-		HeaderMap			extraHeaders;
-
-		HttpRequest();
-		bool				SetHost(const WString& inputQuery);
-		void				SetBodyUtf8(const WString& bodyString);
-	};
-
-	class HttpResponse
-	{
-		typedef collections::Array<char>		BodyBuffer;
-	public:
-		vint				statusCode;
-		BodyBuffer			body;
-		WString				cookie;
-
-		HttpResponse();
-		WString				GetBodyUtf8();
-	};
-
-	extern bool				HttpQuery(const HttpRequest& request, HttpResponse& response);
-	extern WString			UrlEncodeQuery(const WString& query);
 }
 
 #endif
@@ -2961,6 +1741,1270 @@ Traits
 #endif
 
 /***********************************************************************
+COLLECTIONS\PAIR.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Data Structure::Pair
+
+Classes:
+	Pair<K, V>							：二元组
+***********************************************************************/
+
+#ifndef VCZH_COLLECTIONS_PAIR
+#define VCZH_COLLECTIONS_PAIR
+
+
+namespace vl
+{
+	namespace collections
+	{
+		template<typename K, typename V>
+		class Pair
+		{
+		public:
+			K				key;
+			V				value;
+
+			Pair()
+			{
+			}
+
+			Pair(const K& _key, const V& _value)
+			{
+				key=_key;
+				value=_value;
+			}
+
+			Pair(const Pair<K, V>& pair)
+			{
+				key=pair.key;
+				value=pair.value;
+			}
+
+			vint CompareTo(const Pair<K, V>& pair)const
+			{
+				if(key<pair.key)
+				{
+					return -1;
+				}
+				else if(key>pair.key)
+				{
+					return 1;
+				}
+				else if(value<pair.value)
+				{
+					return -1;
+				}
+				else if(value>pair.value)
+				{
+					return 1;
+				}
+				else
+				{
+					return 0;
+				}
+			}
+
+			bool operator==(const Pair<K, V>& pair)const
+			{
+				return CompareTo(pair)==0;
+			}
+
+			bool operator!=(const Pair<K, V>& pair)const
+			{
+				return CompareTo(pair)!=0;
+			}
+
+			bool operator<(const Pair<K, V>& pair)const
+			{
+				return CompareTo(pair)<0;
+			}
+
+			bool operator<=(const Pair<K, V>& pair)const
+			{
+				return CompareTo(pair)<=0;
+			}
+
+			bool operator>(const Pair<K, V>& pair)const
+			{
+				return CompareTo(pair)>0;
+			}
+
+			bool operator>=(const Pair<K, V>& pair)const
+			{
+				return CompareTo(pair)>=0;
+			}
+		};
+	}
+
+	template<typename K, typename V>
+	struct POD<collections::Pair<K, V>>
+	{
+		static const bool Result=POD<K>::Result && POD<V>::Result;
+	};
+}
+
+#endif
+
+/***********************************************************************
+COLLECTIONS\INTERFACES.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Data Structure::Interfaces
+
+Interfaces:
+	IEnumerator<T>									：枚举器
+	IEnumerable<T>									：可枚举对象
+***********************************************************************/
+
+#ifndef VCZH_COLLECTIONS_INTERFACES
+#define VCZH_COLLECTIONS_INTERFACES
+
+
+namespace vl
+{
+	namespace collections
+	{
+
+/***********************************************************************
+接口
+***********************************************************************/
+
+		template<typename T>
+		class IEnumerator : public virtual Interface
+		{
+		public:
+			typedef T									ElementType;
+
+			virtual IEnumerator<T>*						Clone()const=0;
+			virtual const T&							Current()const=0;
+			virtual vint								Index()const=0;
+			virtual bool								Next()=0;
+			virtual void								Reset()=0;
+
+			virtual bool								Evaluated()const{return false;}
+		};
+
+		template<typename T>
+		class IEnumerable : public virtual Interface
+		{
+		public:
+			typedef T									ElementType;
+
+			virtual IEnumerator<T>*						CreateEnumerator()const=0;
+		};
+
+/***********************************************************************
+随机存取
+***********************************************************************/
+
+		namespace randomaccess_internal
+		{
+			template<typename T>
+			struct RandomAccessable
+			{
+				static const bool							CanRead = false;
+				static const bool							CanResize = false;
+			};
+
+			template<typename T>
+			struct RandomAccess
+			{
+				static vint GetCount(const T& t)
+				{
+					return t.Count();
+				}
+
+				static const typename T::ElementType& GetValue(const T& t, vint index)
+				{
+					return t.Get(index);
+				}
+
+				static void SetCount(T& t, vint count)
+				{
+					t.Resize(count);
+				}
+
+				static void SetValue(T& t, vint index, const typename T::ElementType& value)
+				{
+					t.Set(index, value);
+				}
+
+				static void AppendValue(T& t, const typename T::ElementType& value)
+				{
+					t.Add(value);
+				}
+			};
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+COLLECTIONS\LIST.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Data Structure::List
+
+Classes:
+	ListStore<T,PODType>				：列表存储复制算法
+	ListBase<T,K>						：列表基类
+	Array<T,K>							：数组
+	List<T,K>							：列表
+	SortedList<T,K>						：有序列表
+***********************************************************************/
+
+#ifndef VCZH_COLLECTIONS_LIST
+#define VCZH_COLLECTIONS_LIST
+
+#include <string.h>
+
+namespace vl
+{
+	namespace collections
+	{
+
+/***********************************************************************
+储存结构
+***********************************************************************/
+
+		template<typename T, bool PODType>
+		class ListStore abstract : public Object
+		{
+		};
+		
+		template<typename T>
+		class ListStore<T, false> abstract : public Object
+		{
+		protected:
+			static void CopyObjects(T* dest, const T* source, vint count)
+			{
+				if(dest<source)
+				{
+					for(vint i=0;i<count;i++)
+					{
+						dest[i]=MoveValue(source[i]);
+					}
+				}
+				else if(dest>source)
+				{
+					for(vint i=count-1;i>=0;i--)
+					{
+						dest[i]=MoveValue(source[i]);
+					}
+				}
+			}
+
+			static void ClearObjects(T* dest, vint count)
+			{
+				for(vint i=0;i<count;i++)
+				{
+					dest[i]=T();
+				}
+			}
+		public:
+		};
+		
+		template<typename T>
+		class ListStore<T, true> abstract : public Object
+		{
+		protected:
+			static void CopyObjects(T* dest, const T* source, vint count)
+			{
+				if(count)
+				{
+					memmove(dest, source, sizeof(T)*count);
+				}
+			}
+
+			static void ClearObjects(T* dest, vint count)
+			{
+			}
+		public:
+		};
+		
+		template<typename T>
+		class ArrayBase abstract : public ListStore<T,POD<T>::Result>, public virtual IEnumerable<T>
+		{
+		protected:
+			class Enumerator : public Object, public virtual IEnumerator<T>
+			{
+			private:
+				const ArrayBase<T>*				container;
+				vint							index;
+
+			public:
+				Enumerator(const ArrayBase<T>* _container, vint _index=-1)
+				{
+					container=_container;
+					index=_index;
+				}
+
+				IEnumerator<T>* Clone()const
+				{
+					return new Enumerator(container, index);
+				}
+
+				const T& Current()const
+				{
+					return container->Get(index);
+				}
+
+				vint Index()const
+				{
+					return index;
+				}
+
+				bool Next()
+				{
+					index++;
+					return index>=0 && index<container->Count();
+				}
+
+				void Reset()
+				{
+					index=-1;
+				}
+			};
+			
+			T*						buffer;
+			vint					count;
+		public:
+			ArrayBase()
+				:buffer(0)
+				,count(0)
+			{
+			}
+
+			IEnumerator<T>* CreateEnumerator()const
+			{
+				return new Enumerator(this);
+			}
+
+			vint Count()const
+			{
+				return count;
+			}
+
+			const T& Get(vint index)const
+			{
+				CHECK_ERROR(index>=0 && index<count, L"ArrayBase<T, K>::Get(vint)#Argument index not in range.");
+				return buffer[index];
+			}
+
+			const T& operator[](vint index)const
+			{
+				CHECK_ERROR(index>=0 && index<count, L"ArrayBase<T, K>::operator[](vint)#Argument index not in range.");
+				return buffer[index];
+			}
+		};
+
+		template<typename T, typename K=typename KeyType<T>::Type>
+		class ListBase abstract : public ArrayBase<T>
+		{
+		protected:
+			vint					capacity;
+			bool					lessMemoryMode;
+
+			vint CalculateCapacity(vint expected)
+			{
+				vint result=capacity;
+				while(result<expected)
+				{
+					result=result*5/4+1;
+				}
+				return result;
+			}
+
+			void MakeRoom(vint index, vint _count)
+			{
+				vint newCount=ArrayBase<T>::count+_count;
+				if(newCount>capacity)
+				{
+					vint newCapacity=CalculateCapacity(newCount);
+					T* newBuffer=new T[newCapacity];
+					ListStore<T, POD<T>::Result>::CopyObjects(newBuffer, ArrayBase<T>::buffer, index);
+					ListStore<T, POD<T>::Result>::CopyObjects(newBuffer+index+_count, ArrayBase<T>::buffer+index, ArrayBase<T>::count-index);
+					delete[] ArrayBase<T>::buffer;
+					capacity=newCapacity;
+					ArrayBase<T>::buffer=newBuffer;
+				}
+				else
+				{
+					ListStore<T, POD<T>::Result>::CopyObjects(ArrayBase<T>::buffer+index+_count, ArrayBase<T>::buffer+index, ArrayBase<T>::count-index);
+				}
+				ArrayBase<T>::count=newCount;
+			}
+
+			void ReleaseUnnecessaryBuffer(vint previousCount)
+			{
+				if(ArrayBase<T>::buffer && ArrayBase<T>::count<previousCount)
+				{
+					ListStore<T, POD<T>::Result>::ClearObjects(&ArrayBase<T>::buffer[ArrayBase<T>::count], previousCount-ArrayBase<T>::count);
+				}
+				if(lessMemoryMode && ArrayBase<T>::count<=capacity/2)
+				{
+					vint newCapacity=capacity*5/8;
+					if(ArrayBase<T>::count<newCapacity)
+					{
+						T* newBuffer=new T[newCapacity];
+						ListStore<T, POD<T>::Result>::CopyObjects(newBuffer, ArrayBase<T>::buffer, ArrayBase<T>::count);
+						delete[] ArrayBase<T>::buffer;
+						capacity=newCapacity;
+						ArrayBase<T>::buffer=newBuffer;
+					}
+				}
+			}
+		public:
+			ListBase()
+			{
+				ArrayBase<T>::count=0;
+				capacity=0;
+				ArrayBase<T>::buffer=0;
+				lessMemoryMode=true;
+			}
+
+			~ListBase()
+			{
+				delete[] ArrayBase<T>::buffer;
+			}
+
+			void SetLessMemoryMode(bool mode)
+			{
+				lessMemoryMode=mode;
+			}
+
+			bool RemoveAt(vint index)
+			{
+				vint previousCount=ArrayBase<T>::count;
+				CHECK_ERROR(index>=0 && index<ArrayBase<T>::count, L"ListBase<T, K>::RemoveAt(vint)#Argument index not in range.");
+				ListStore<T, POD<T>::Result>::CopyObjects(ArrayBase<T>::buffer+index,ArrayBase<T>::buffer+index+1,ArrayBase<T>::count-index-1);
+				ArrayBase<T>::count--;
+				ReleaseUnnecessaryBuffer(previousCount);
+				return true;
+			}
+
+			bool RemoveRange(vint index, vint _count)
+			{
+				vint previousCount=ArrayBase<T>::count;
+				CHECK_ERROR(index>=0 && index<=ArrayBase<T>::count, L"ListBase<T, K>::RemoveRange(vint, vint)#Argument index not in range.");
+				CHECK_ERROR(index+_count>=0 && index+_count<=ArrayBase<T>::count, L"ListBase<T,K>::RemoveRange(vint, vint)#Argument _count not in range.");
+				ListStore<T, POD<T>::Result>::CopyObjects(ArrayBase<T>::buffer+index, ArrayBase<T>::buffer+index+_count, ArrayBase<T>::count-index-_count);
+				ArrayBase<T>::count-=_count;
+				ReleaseUnnecessaryBuffer(previousCount);
+				return true;
+			}
+
+			bool Clear()
+			{
+				vint previousCount=ArrayBase<T>::count;
+				ArrayBase<T>::count=0;
+				if(lessMemoryMode)
+				{
+					capacity=0;
+					delete[] ArrayBase<T>::buffer;
+					ArrayBase<T>::buffer=0;
+				}
+				else
+				{
+					ReleaseUnnecessaryBuffer(previousCount);
+				}
+				return true;
+			}
+		};
+
+/***********************************************************************
+列表对象
+***********************************************************************/
+
+		template<typename T, typename K=typename KeyType<T>::Type>
+		class Array : public ArrayBase<T>
+		{
+		protected:
+			void Create(vint size)
+			{
+				if(size>0)
+				{
+					ArrayBase<T>::count=size;
+					ArrayBase<T>::buffer=new T[size];
+				}
+				else
+				{
+					ArrayBase<T>::count=0;
+					ArrayBase<T>::buffer=0;
+				}
+			}
+
+			void Destroy()
+			{
+				ArrayBase<T>::count=0;
+				delete[] ArrayBase<T>::buffer;
+				ArrayBase<T>::buffer=0;
+			}
+		public:
+			Array(vint size=0)
+			{
+				Create(size);
+			}
+
+			Array(const T* _buffer, vint size)
+			{
+				Create(size);
+				ListStore<T, POD<T>::Result>::CopyObjects(ArrayBase<T>::buffer, _buffer, size);
+			}
+
+			~Array()
+			{
+				Destroy();
+			}
+
+			bool Contains(const K& item)const
+			{
+				return IndexOf(item)!=-1;
+			}
+
+			vint IndexOf(const K& item)const
+			{
+				for(vint i=0;i<ArrayBase<T>::count;i++)
+				{
+					if(ArrayBase<T>::buffer[i]==item)
+					{
+						return i;
+					}
+				}
+				return -1;
+			}
+
+			void Set(vint index, const T& item)
+			{
+				CHECK_ERROR(index>=0 && index<ArrayBase<T>::count, L"Array<T, K>::Set(vint)#Argument index not in range.");
+				ArrayBase<T>::buffer[index]=item;
+			}
+
+			using ArrayBase<T>::operator[];
+			T& operator[](vint index)
+			{
+				CHECK_ERROR(index>=0 && index<ArrayBase<T>::count, L"Array<T, K>::operator[](vint)#Argument index not in range.");
+				return ArrayBase<T>::buffer[index];
+			}
+
+			void Resize(vint size)
+			{
+				vint oldCount=ArrayBase<T>::count;
+				T* oldBuffer=ArrayBase<T>::buffer;
+				Create(size);
+				ListStore<T, POD<T>::Result>::CopyObjects(ArrayBase<T>::buffer, oldBuffer, (ArrayBase<T>::count<oldCount?ArrayBase<T>::count:oldCount));
+				delete[] oldBuffer;
+			}
+		};
+
+		template<typename T, typename K=typename KeyType<T>::Type>
+		class List : public ListBase<T, K>
+		{
+		public:
+			List()
+			{
+			}
+
+			bool Contains(const K& item)const
+			{
+				return IndexOf(item)!=-1;
+			}
+
+			vint IndexOf(const K& item)const
+			{
+				for(vint i=0;i<ArrayBase<T>::count;i++)
+				{
+					if(ArrayBase<T>::buffer[i]==item)
+					{
+						return i;
+					}
+				}
+				return -1;
+			}
+
+			vint Add(const T& item)
+			{
+				ListBase<T, K>::MakeRoom(ArrayBase<T>::count, 1);
+				ArrayBase<T>::buffer[ArrayBase<T>::count-1]=item;
+				return ArrayBase<T>::count-1;
+			}
+
+			vint Insert(vint index, const T& item)
+			{
+				CHECK_ERROR(index>=0 && index<=ArrayBase<T>::count, L"List<T, K>::Insert(vint, const T&)#Argument index not in range.");
+				ListBase<T, K>::MakeRoom(index,1);
+				ArrayBase<T>::buffer[index]=item;
+				return index;
+			}
+
+			bool Remove(const K& item)
+			{
+				vint index=IndexOf(item);
+				if(index>=0 && index<ArrayBase<T>::count)
+				{
+					ListBase<T, K>::RemoveAt(index);
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+
+			bool Set(vint index, const T& item)
+			{
+				CHECK_ERROR(index>=0 && index<ArrayBase<T>::count, L"List<T, K>::Set(vint)#Argument index not in range.");
+				ArrayBase<T>::buffer[index]=item;
+				return true;
+			}
+			
+			using ListBase<T, K>::operator[];
+			T& operator[](vint index)
+			{
+				CHECK_ERROR(index>=0 && index<ArrayBase<T>::count, L"List<T, K>::operator[](vint)#Argument index not in range.");
+				return ArrayBase<T>::buffer[index];
+			}
+		};
+
+		template<typename T, typename K=typename KeyType<T>::Type>
+		class SortedList : public ListBase<T, K>
+		{
+		public:
+			SortedList()
+			{
+			}
+
+			bool Contains(const K& item)const
+			{
+				return IndexOf(item)!=-1;
+			}
+
+			template<typename Key>
+			vint IndexOf(const Key& item)const
+			{
+				vint start=0;
+				vint end=ArrayBase<T>::count-1;
+				while(start<=end)
+				{
+					vint index=start+(end-start)/2;
+					if(ArrayBase<T>::buffer[index]==item)
+					{
+						return index;
+					}
+					else if(ArrayBase<T>::buffer[index]>item)
+					{
+						end=index-1;
+					}
+					else
+					{
+						start=index+1;
+					}
+				}
+				return -1;
+			}
+
+			vint IndexOf(const K& item)const
+			{
+				return IndexOf<K>(item);
+			}
+
+			vint Add(const T& item)
+			{
+				if(ArrayBase<T>::count==0)
+				{
+					ListBase<T, K>::MakeRoom(0, 1);
+					ArrayBase<T>::buffer[0]=item;
+					return 0;
+				}
+				else
+				{
+					vint start=0;
+					vint end=ArrayBase<T>::count-1;
+					vint index=-1;
+					while(start<=end)
+					{
+						index=(start+end)/2;
+						if(ArrayBase<T>::buffer[index]==item)
+						{
+							goto SORTED_LIST_INSERT;
+						}
+						else if(ArrayBase<T>::buffer[index]>item)
+						{
+							end=index-1;
+						}
+						else
+						{
+							start=index+1;
+						}
+					}
+					CHECK_ERROR(index>=0 && index<ArrayBase<T>::count, L"SortedList<T, K>::Add(const T&)#Internal error, index not in range.");
+					if(ArrayBase<T>::buffer[index]<item)
+					{
+						index++;
+					}
+SORTED_LIST_INSERT:
+					ListBase<T, K>::MakeRoom(index, 1);
+					ArrayBase<T>::buffer[index]=item;
+					return index;
+				}
+			}
+
+			bool Remove(const K& item)
+			{
+				vint index=IndexOf(item);
+				if(index>=0 && index<ArrayBase<T>::count)
+				{
+					ListBase<T, K>::RemoveAt(index);
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+		};
+
+/***********************************************************************
+随机访问
+***********************************************************************/
+
+		namespace randomaccess_internal
+		{
+			template<typename T, typename K>
+			struct RandomAccessable<Array<T, K>>
+			{
+				static const bool							CanRead = true;
+				static const bool							CanResize = true;
+			};
+
+			template<typename T, typename K>
+			struct RandomAccessable<List<T, K>>
+			{
+				static const bool							CanRead = true;
+				static const bool							CanResize = false;
+			};
+
+			template<typename T, typename K>
+			struct RandomAccessable<SortedList<T, K>>
+			{
+				static const bool							CanRead = true;
+				static const bool							CanResize = false;
+			};
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+COLLECTIONS\DICTIONARY.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Data Structure::Dictionary
+
+Classes:
+	Dictionary<KT, VT, KK, VK>					：映射
+	Group<KT, VT, KK, VK>						：多重映射
+***********************************************************************/
+
+#ifndef VCZH_COLLECTIONS_DICTIONARY
+#define VCZH_COLLECTIONS_DICTIONARY
+
+
+namespace vl
+{
+	namespace collections
+	{
+		template<
+			typename KT,
+			typename VT,
+			typename KK=typename KeyType<KT>::Type, 
+			typename VK=typename KeyType<VT>::Type
+		>
+		class Dictionary : public Object, public virtual IEnumerable<Pair<KT, VT>>
+		{
+		public:
+			typedef SortedList<KT, KK>			KeyContainer;
+			typedef List<VT, VK>				ValueContainer;
+		protected:
+			class Enumerator : public Object, public virtual IEnumerator<Pair<KT, VT>>
+			{
+			private:
+				const Dictionary<KT, VT, KK, VK>*	container;
+				vint								index;
+				Pair<KT, VT>						current;
+
+				void UpdateCurrent()
+				{
+					if(index<container->Count())
+					{
+						current.key=container->Keys().Get(index);
+						current.value=container->Values().Get(index);
+					}
+				}
+			public:
+				Enumerator(const Dictionary<KT, VT, KK, VK>* _container, vint _index=-1)
+				{
+					container=_container;
+					index=_index;
+				}
+				
+				IEnumerator<Pair<KT, VT>>* Clone()const
+				{
+					return new Enumerator(container, index);
+				}
+
+				const Pair<KT, VT>& Current()const
+				{
+					return current;
+				}
+
+				vint Index()const
+				{
+					return index;
+				}
+
+				bool Next()
+				{
+					index++;
+					UpdateCurrent();
+					return index>=0 && index<container->Count();
+				}
+
+				void Reset()
+				{
+					index=-1;
+					UpdateCurrent();
+				}
+			};
+
+			KeyContainer						keys;
+			ValueContainer						values;
+		public:
+			Dictionary()
+			{
+			}
+
+			IEnumerator<Pair<KT, VT>>* CreateEnumerator()const
+			{
+				return new Enumerator(this);
+			}
+
+			void SetLessMemoryMode(bool mode)
+			{
+				keys.SetLessMemoryMode(mode);
+				values.SetLessMemoryMode(mode);
+			}
+
+			const KeyContainer& Keys()const
+			{
+				return keys;
+			}
+
+			const ValueContainer& Values()const
+			{
+				return values;
+			}
+
+			vint Count()const
+			{
+				return keys.Count();
+			}
+
+			const VT& Get(const KK& key)const
+			{
+				return values.Get(keys.IndexOf(key));
+			}
+
+			const VT& operator[](const KK& key)const
+			{
+				return values.Get(keys.IndexOf(key));
+			}
+
+			bool Set(const KT& key, const VT& value)
+			{
+				vint index=keys.IndexOf(KeyType<KT>::GetKeyValue(key));
+				if(index==-1)
+				{
+					index=keys.Add(key);
+					values.Insert(index, value);
+				}
+				else
+				{
+					values[index]=value;
+				}
+				return true;
+			}
+
+			bool Add(const Pair<KT, VT>& value)
+			{
+				return Add(value.key, value.value);
+			}
+
+			bool Add(const KT& key, const VT& value)
+			{
+				CHECK_ERROR(!keys.Contains(KeyType<KT>::GetKeyValue(key)), L"Dictionary<KT, KK, ValueContainer, VT, VK>::Add(const KT&, const VT&)#Key already exists.");
+				vint index=keys.Add(key);
+				values.Insert(index, value);
+				return true;
+			}
+
+			bool Remove(const KK& key)
+			{
+				vint index=keys.IndexOf(key);
+				if(index!=-1)
+				{
+					keys.RemoveAt(index);
+					values.RemoveAt(index);
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+
+			bool Clear()
+			{
+				keys.Clear();
+				values.Clear();
+				return true;
+			}
+		};
+
+		template<
+			typename KT,
+			typename VT,
+			typename KK=typename KeyType<KT>::Type,
+			typename VK=typename KeyType<VT>::Type
+		>
+		class Group : public Object, public virtual IEnumerable<Pair<KT, VT>>
+		{
+			typedef SortedList<KT, KK>		KeyContainer;
+			typedef List<VT, VK>			ValueContainer;
+		protected:
+			class Enumerator : public Object, public virtual IEnumerator<Pair<KT, VT>>
+			{
+			private:
+				const Group<KT, VT, KK, VK>*		container;
+				vint								keyIndex;
+				vint								valueIndex;
+				Pair<KT, VT>						current;
+
+				void UpdateCurrent()
+				{
+					if(keyIndex<container->Count())
+					{
+						const ValueContainer& values=container->GetByIndex(keyIndex);
+						if(valueIndex<values.Count())
+						{
+							current.key=container->Keys().Get(keyIndex);
+							current.value=values.Get(valueIndex);
+						}
+					}
+				}
+			public:
+				Enumerator(const Group<KT, VT, KK, VK>* _container, vint _keyIndex=-1, vint _valueIndex=-1)
+				{
+					container=_container;
+					keyIndex=_keyIndex;
+					valueIndex=_valueIndex;
+				}
+				
+				IEnumerator<Pair<KT, VT>>* Clone()const
+				{
+					return new Enumerator(container, keyIndex, valueIndex);
+				}
+
+				const Pair<KT, VT>& Current()const
+				{
+					return current;
+				}
+
+				vint Index()const
+				{
+					if(0<=keyIndex && keyIndex<container->Count())
+					{
+						vint index=0;
+						for(vint i=0;i<keyIndex;i++)
+						{
+							index+=container->GetByIndex(i).Count();
+						}
+						return index+valueIndex;
+					}
+					else
+					{
+						return -1;
+					}
+				}
+
+				bool Next()
+				{
+					if(keyIndex==-1)
+					{
+						keyIndex=0;
+					}
+					while(keyIndex<container->Count())
+					{
+						valueIndex++;
+						const ValueContainer& values=container->GetByIndex(keyIndex);
+						if(valueIndex<values.Count())
+						{
+							UpdateCurrent();
+							return true;
+						}
+						else
+						{
+							keyIndex++;
+							valueIndex=-1;
+						}
+					}
+					return false;
+				}
+
+				void Reset()
+				{
+					keyIndex=-1;
+					valueIndex=-1;
+					UpdateCurrent();
+				}
+			};
+
+			KeyContainer					keys;
+			List<ValueContainer*>			values;
+		public:
+			Group()
+			{
+			}
+
+			~Group()
+			{
+				Clear();
+			}
+
+			IEnumerator<Pair<KT, VT>>* CreateEnumerator()const
+			{
+				return new Enumerator(this);
+			}
+
+			const KeyContainer& Keys()const
+			{
+				return keys;
+			}
+
+			vint Count()const
+			{
+				return keys.Count();
+			}
+
+			const ValueContainer& Get(const KK& key)const
+			{
+				return *values.Get(keys.IndexOf(key));
+			}
+
+			const ValueContainer& GetByIndex(vint index)const
+			{
+				return *values.Get(index);
+			}
+
+			const ValueContainer& operator[](const KK& key)const
+			{
+				return *values.Get(keys.IndexOf(key));
+			}
+
+			bool Contains(const KK& key)const
+			{
+				return keys.Contains(key);
+			}
+
+			bool Contains(const KK& key, const VK& value)const
+			{
+				vint index=keys.IndexOf(key);
+				if(index!=-1)
+				{
+					return values.Get(index)->Contains(value);
+				}
+				else
+				{
+					return false;
+				}
+			}
+
+			bool Add(const Pair<KT, VT>& value)
+			{
+				return Add(value.key, value.value);
+			}
+
+			bool Add(const KT& key, const VT& value)
+			{
+				ValueContainer* target=0;
+				vint index=keys.IndexOf(KeyType<KT>::GetKeyValue(key));
+				if(index==-1)
+				{
+					target=new ValueContainer;
+					values.Insert(keys.Add(key), target);
+				}
+				else
+				{
+					target=values[index];
+				}
+				target->Add(value);
+				return true;
+			}
+
+			bool Remove(const KK& key)
+			{
+				vint index=keys.IndexOf(key);
+				if(index!=-1)
+				{
+					keys.RemoveAt(index);
+					List<VT, VK>* target=values[index];
+					values.RemoveAt(index);
+					delete target;
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+
+			bool Remove(const KK& key, const VK& value)
+			{
+				vint index=keys.IndexOf(key);
+				if(index!=-1)
+				{
+					List<VT, VK>* target=values[index];
+					target->Remove(value);
+					if(target->Count()==0)
+					{
+						keys.RemoveAt(index);
+						values.RemoveAt(index);
+						delete target;
+					}
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+
+			bool Clear()
+			{
+				for(vint i=0;i<values.Count();i++)
+				{
+					delete values[i];
+				}
+				keys.Clear();
+				values.Clear();
+				return true;
+			}
+		};
+
+/***********************************************************************
+随机访问
+***********************************************************************/
+		namespace randomaccess_internal
+		{
+			template<typename KT, typename VT, typename KK, typename VK>
+			struct RandomAccessable<Dictionary<KT, VT, KK, VK>>
+			{
+				static const bool							CanRead = true;
+				static const bool							CanResize = false;
+			};
+		
+			template<typename KT, typename VT, typename KK, typename VK>
+			struct RandomAccess<Dictionary<KT, VT, KK, VK>>
+			{
+				static vint GetCount(const Dictionary<KT, VT, KK, VK>& t)
+				{
+					return t.Count();
+				}
+
+				static Pair<KT, VT> GetValue(const Dictionary<KT, VT, KK, VK>& t, vint index)
+				{
+					return Pair<KT, VT>(t.Keys().Get(index), t.Values().Get(index));
+				}
+
+				static void AppendValue(Dictionary<KT, VT, KK, VK>& t, const Pair<KT, VT>& value)
+				{
+					t.Set(value.key, value.value);
+				}
+			};
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+HTTPUTILITY.H
+***********************************************************************/
+#ifndef VCZH_HTTPUTILITY
+#define VCZH_HTTPUTILITY
+
+
+namespace vl
+{
+
+/***********************************************************************
+HTTP Utility
+***********************************************************************/
+
+	class HttpRequest
+	{
+		typedef collections::Array<char>					BodyBuffer;
+		typedef collections::List<WString>					StringList;
+		typedef collections::Dictionary<WString, WString>	HeaderMap;
+	public:
+		WString				server;
+		vint				port;
+		WString				query;
+		bool				secure;
+		WString				username;
+		WString				password;
+		WString				method;
+		WString				cookie;
+		BodyBuffer			body;
+		WString				contentType;
+		StringList			acceptTypes;
+		HeaderMap			extraHeaders;
+
+		HttpRequest();
+		bool				SetHost(const WString& inputQuery);
+		void				SetBodyUtf8(const WString& bodyString);
+	};
+
+	class HttpResponse
+	{
+		typedef collections::Array<char>		BodyBuffer;
+	public:
+		vint				statusCode;
+		BodyBuffer			body;
+		WString				cookie;
+
+		HttpResponse();
+		WString				GetBodyUtf8();
+	};
+
+	extern bool				HttpQuery(const HttpRequest& request, HttpResponse& response);
+	extern WString			UrlEncodeQuery(const WString& query);
+}
+
+#endif
+
+/***********************************************************************
 COLLECTIONS\OPERATIONFOREACH.H
 ***********************************************************************/
 /***********************************************************************
@@ -3015,7 +3059,7 @@ IEnumerable<T>支持
 			}
 
 			EnumerableForEachIterator(const EnumerableForEachIterator<T>& enumerableIterator)
-				:enumerator(enumerableIterator.iterator)
+				:enumerator(enumerableIterator.enumerator)
 			{
 			}
 
@@ -9220,7 +9264,7 @@ namespace vl
 		{
 			Ptr<IEnumerator<T>> ator=a.CreateEnumerator();
 			Ptr<IEnumerator<U>> btor=b.CreateEnumerator();
-			while()
+			while(true)
 			{
 				bool a=ator->Next();
 				bool b=btor->Next();
@@ -9939,6 +9983,12 @@ FromIterator
 				,end(_end)
 			{
 			}
+
+			FromIteratorEnumerable(const FromIteratorEnumerable<T, I>& enumerable)
+				:begin(enumerable.begin)
+				,end(enumerable.end)
+			{
+			}
 		};
 
 		template<typename T>
@@ -10308,11 +10358,19 @@ LazyList
 		protected:
 			Ptr<IEnumerator<T>>			enumeratorPrototype;
 
+			template<typename U>
+			static U Element(const IEnumerable<U>&);
+
 			IEnumerator<T>* xs()const
 			{
 				return enumeratorPrototype->Clone();
 			}
 		public:
+			LazyList(IEnumerator<T>* enumerator)
+				:enumeratorPrototype(enumerator)
+			{
+			}
+
 			LazyList(Ptr<IEnumerator<T>> enumerator)
 				:enumeratorPrototype(enumerator)
 			{
@@ -10357,13 +10415,6 @@ LazyList
 			{
 				return new SelectEnumerator<T, FUNCTION_RESULT_TYPE(F)>(xs(), f);
 			}
-
-			template<typename F>
-			auto SelectMany(F f)const -> LazyList<decltype(From(f(T())).First())>
-			{
-				typedef decltype(From(f(T())).First()) U;
-				return Select(f).Aggregate(LazyList<U>(), [](const LazyList<U>& a, const IEnumerable<U>& b){return a.Concat(b);});
-			}
 			
 			template<typename F>
 			LazyList<T> Where(F f)const
@@ -10404,7 +10455,7 @@ LazyList
 				Ptr<IEnumerator<T>> enumerator=CreateEnumerator();
 				if(!enumerator->Next())
 				{
-					throw Error(L"LazyList<T>::Aggregate(F)#容器为空并且没有初始值，Aggregate操作失败。");
+					throw Error(L"LazyList<T>::Aggregate(F)#Aggregate failed to calculate from an empty container.");
 				}
 				T result=enumerator->Current();
 				while(enumerator->Next())
@@ -10451,7 +10502,7 @@ LazyList
 				Ptr<IEnumerator<T>> enumerator=CreateEnumerator();
 				if(!enumerator->Next())
 				{
-					throw Error(L"LazyList<T>::First(F)#容器为空并且没有初始值，Aggregate操作失败。");
+					throw Error(L"LazyList<T>::First(F)#First failed to calculate from an empty container.");
 				}
 				return enumerator->Current();
 			}
@@ -10471,7 +10522,7 @@ LazyList
 				Ptr<IEnumerator<T>> enumerator=CreateEnumerator();
 				if(!enumerator->Next())
 				{
-					throw Error(L"LazyList<T>::Last(F)#容器为空并且没有初始值，Aggregate操作失败。");
+					throw Error(L"LazyList<T>::Last(F)#Last failed to calculate from an empty container.");
 				}
 				else
 				{
@@ -10583,6 +10634,14 @@ LazyList
 			}
 
 			template<typename F>
+			FUNCTION_RESULT_TYPE(F) SelectMany(F f)const
+			{
+				typedef FUNCTION_RESULT_TYPE(F) LazyListU;
+				typedef typename LazyListU::ElementType U;
+				return Select(f).Aggregate(LazyList<U>(), [](const LazyList<U>& a, const IEnumerable<U>& b)->LazyList<U>{return a.Concat(b);});
+			}
+
+			template<typename F>
 			LazyList<Pair<FUNCTION_RESULT_TYPE(F), LazyList<T>>> GroupBy(F f)const
 			{
 				typedef FUNCTION_RESULT_TYPE(F) K;
@@ -10606,6 +10665,12 @@ LazyList
 
 		template<typename T>
 		LazyList<T> From(const IEnumerable<T>& enumerable)
+		{
+			return enumerable;
+		}
+
+		template<typename T>
+		LazyList<T> From(const LazyList<T>& enumerable)
 		{
 			return enumerable;
 		}
@@ -10667,6 +10732,9 @@ Attribute
 			class IMethodInfo;
 			class IMethodGroupInfo;
 			class IValueFunctionProxy;
+			class IValueInterfaceProxy;
+			class IValueListener;
+			class IValueSubscription;
 		}
 
 		class DescriptableObject
@@ -11474,6 +11542,25 @@ Interface Implementation Proxy
 				virtual Value					Invoke(Ptr<IValueList> arguments)=0;
 			};
 
+			class IValueListener : public virtual IDescriptable, public Description<IValueSubscription>
+			{
+			public:
+				virtual IValueSubscription*		GetSubscription() = 0;
+				virtual bool					GetStopped() = 0;
+				virtual bool					StopListening() = 0;
+			};
+
+			class IValueSubscription : public virtual IDescriptable, public Description<IValueSubscription>
+			{
+			public:
+				virtual Ptr<IValueListener>		Subscribe(Ptr<IValueFunctionProxy> callback) = 0;
+				virtual bool					Close() = 0;
+			};
+
+/***********************************************************************
+Interface Implementation Proxy (Implement)
+***********************************************************************/
+
 			class ValueInterfaceRoot : public virtual IDescriptable
 			{
 			protected:
@@ -12152,8 +12239,9 @@ namespace vl
 			public:
 				static const vint							TokenBegin=0;
 				static const vint							TokenFinish=1;
-				static const vint							TryReduce=2;
-				static const vint							UserTokenStart=3;
+				static const vint							NormalReduce=2;
+				static const vint							LeftRecursiveReduce=3;
+				static const vint							UserTokenStart=4;
 
 				class AttributeInfo : public Object
 				{
@@ -12344,6 +12432,7 @@ namespace vl
 					};
 
 					static PrefixResult						TestPrefix(Ptr<LookAheadInfo> a, Ptr<LookAheadInfo> b);
+					static void								WalkInternal(Ptr<ParsingTable> table, Ptr<LookAheadInfo> previous, vint state, collections::SortedList<vint>& walkedStates, collections::List<Ptr<LookAheadInfo>>& newInfos);
 					static void								Walk(Ptr<ParsingTable> table, Ptr<LookAheadInfo> previous, vint state, collections::List<Ptr<LookAheadInfo>>& newInfos);
 				};
 
@@ -12483,16 +12572,8 @@ namespace vl
 语法分析器
 ***********************************************************************/
 			
-			class ParsingTokenWalker : public Object, protected collections::IEnumerable<vint>
+			class ParsingTokenWalker : public Object
 			{
-			protected:
-				collections::List<regex::RegexToken>&	tokens;
-				Ptr<ParsingTable>						table;
-				vint									currentToken;
-
-				vint									GetNextIndex(vint index)const;
-				vint									GetTableTokenIndex(vint index)const;
-				collections::IEnumerator<vint>*			CreateEnumerator()const override;
 			protected:
 				class LookAheadEnumerator : public Object, public collections::IEnumerator<vint>
 				{
@@ -12513,11 +12594,42 @@ namespace vl
 					bool								Next()override;
 					void								Reset()override;
 				};
+
+				class TokenLookAhead : public Object, public collections::IEnumerable<vint>
+				{
+				protected:
+					const ParsingTokenWalker*			walker;
+				public:
+					TokenLookAhead(const ParsingTokenWalker* _talker);
+
+					collections::IEnumerator<vint>*			CreateEnumerator()const override;
+				};
+
+				class ReduceLookAhead : public Object, public collections::IEnumerable<vint>
+				{
+				protected:
+					const ParsingTokenWalker*			walker;
+				public:
+					ReduceLookAhead(const ParsingTokenWalker* _walker);
+
+					collections::IEnumerator<vint>*			CreateEnumerator()const override;
+				};
+
+			protected:
+				collections::List<regex::RegexToken>&	tokens;
+				Ptr<ParsingTable>						table;
+				vint									currentToken;
+				TokenLookAhead							tokenLookAhead;
+				ReduceLookAhead							reduceLookAhead;
+
+				vint									GetNextIndex(vint index)const;
+				vint									GetTableTokenIndex(vint index)const;
 			public:
 				ParsingTokenWalker(collections::List<regex::RegexToken>& _tokens, Ptr<ParsingTable> _table);
 				~ParsingTokenWalker();
 
-				const collections::IEnumerable<vint>&	GetLookahead()const;
+				const collections::IEnumerable<vint>&	GetTokenLookahead()const;
+				const collections::IEnumerable<vint>&	GetReduceLookahead()const;
 				void									Reset();
 				bool									Move();
 				vint									GetTableTokenIndex()const;
@@ -12603,6 +12715,7 @@ namespace vl
 					vint									currentState;
 					vint									reduceStateCount;
 					collections::List<vint>					shiftStates;
+					regex::RegexToken*						selectedRegexToken;
 					vint									selectedToken;
 					ParsingTable::TransitionItem*			selectedItem;
 					Future*									previous;
@@ -12611,6 +12724,7 @@ namespace vl
 					Future()
 						:currentState(-1)
 						,reduceStateCount(0)
+						,selectedRegexToken(0)
 						,selectedToken(-1)
 						,selectedItem(0)
 						,previous(0)
@@ -12620,13 +12734,14 @@ namespace vl
 
 					Future* Clone()
 					{
-						Future* future=new Future;
-						future->currentState=currentState;
-						future->reduceStateCount=reduceStateCount;
+						Future* future = new Future;
+						future->currentState = currentState;
+						future->reduceStateCount = reduceStateCount;
 						CopyFrom(future->shiftStates, shiftStates);
-						future->selectedToken=selectedToken;
-						future->selectedItem=selectedItem;
-						future->previous=previous;
+						future->selectedRegexToken = selectedRegexToken;
+						future->selectedToken = selectedToken;
+						future->selectedItem = selectedItem;
+						future->previous = previous;
 						return future;
 					}
 				};
@@ -12684,9 +12799,10 @@ namespace vl
 				TransitionResult							ReadToken();
 
 				bool										TestExplore(vint tableTokenIndex, Future* previous);
-				void										Explore(vint tableTokenIndex, Future* previous, collections::List<Future*>& possibilities);
-				regex::RegexToken*							ExploreStep(collections::List<Future*>& previousFutures, vint start, vint count, collections::List<Future*>& possibilities);
-				void										ExploreTryReduce(collections::List<Future*>& previousFutures, vint start, vint count, collections::List<Future*>& possibilities);
+				bool										Explore(vint tableTokenIndex, Future* previous, collections::List<Future*>& possibilities);
+				bool										ExploreStep(collections::List<Future*>& previousFutures, vint start, vint count, collections::List<Future*>& possibilities);
+				bool										ExploreNormalReduce(collections::List<Future*>& previousFutures, vint start, vint count, collections::List<Future*>& possibilities);
+				bool										ExploreLeftRecursiveReduce(collections::List<Future*>& previousFutures, vint start, vint count, collections::List<Future*>& possibilities);
 				Future*										ExploreCreateRootFuture();
 
 				Ptr<StateGroup>								TakeSnapshot();
@@ -13138,6 +13254,8 @@ Predefined Types
 			template<>struct TypeInfo<IValueDictionary>{static const wchar_t* TypeName;};
 			template<>struct TypeInfo<IValueInterfaceProxy>{static const wchar_t* TypeName;};
 			template<>struct TypeInfo<IValueFunctionProxy>{static const wchar_t* TypeName;};
+			template<>struct TypeInfo<IValueListener>{static const wchar_t* TypeName;};
+			template<>struct TypeInfo<IValueSubscription>{static const wchar_t* TypeName;};
 
 			template<>struct TypeInfo<IValueSerializer>{static const wchar_t* TypeName;};
 			template<>struct TypeInfo<ITypeInfo>{static const wchar_t* TypeName;};
@@ -20894,8 +21012,10 @@ namespace vl
 			class ParsingStrictParser : public ParsingGeneralParser
 			{
 			protected:
-
-				virtual ParsingState::TransitionResult		OnErrorRecover(ParsingState& state, vint currentTokenIndex, const regex::RegexToken* currentToken, collections::List<Ptr<ParsingError>>& errors);
+				
+				virtual bool								OnTestErrorRecoverExists();
+				virtual void								OnClearErrorRecover();
+				virtual ParsingState::TransitionResult		OnErrorRecover(ParsingState& state, vint currentTokenIndex, collections::List<Ptr<ParsingError>>& errors);
 			public:
 				ParsingStrictParser(Ptr<ParsingTable> _table=0);
 				~ParsingStrictParser();
@@ -20905,14 +21025,39 @@ namespace vl
 
 			class ParsingAutoRecoverParser : public ParsingStrictParser
 			{
-			protected:
-				collections::Array<ParsingState::Future>	recoverFutures;
-				vint										recoveringFutureIndex;
-
-				ParsingState::TransitionResult				OnErrorRecover(ParsingState& state, vint currentTokenIndex, const regex::RegexToken* currentToken, collections::List<Ptr<ParsingError>>& errors)override;
 			public:
-				ParsingAutoRecoverParser(Ptr<ParsingTable> _table=0);
+				struct RecoverFuture
+				{
+					ParsingState::Future*					future;
+					vint									insertedTokenCount;
+					vint									index;
+					vint									previousIndex;
+					vint									nextIndex;
+
+					RecoverFuture()
+						:future(0)
+						, insertedTokenCount(0)
+						, index(-1)
+						, previousIndex(-1)
+						, nextIndex(-1)
+					{
+					}
+				};
+			protected:
+				vint										maxInsertedTokenCount;
+				collections::List<RecoverFuture>			recoverFutures;
+				vint										recoveringFutureIndex;
+				
+				RecoverFuture&								GetRecoverFuture(vint index);
+				RecoverFuture&								CreateRecoverFuture(vint index, vint previousIndex);
+				bool										OnTestErrorRecoverExists()override;
+				void										OnClearErrorRecover()override;
+				ParsingState::TransitionResult				OnErrorRecover(ParsingState& state, vint currentTokenIndex, collections::List<Ptr<ParsingError>>& errors)override;
+			public:
+				ParsingAutoRecoverParser(Ptr<ParsingTable> _table = 0, vint _maxInsertedTokenCount = -1);
 				~ParsingAutoRecoverParser();
+
+				void										BeginParse()override;
 			};
 
 			class ParsingAmbiguousParser : public ParsingGeneralParser
@@ -20923,15 +21068,15 @@ namespace vl
 				DecisionList								decisions;
 				vint										consumedDecisionCount;
 
-				virtual void								OnErrorRecover(ParsingState& state, vint currentTokenIndex, const regex::RegexToken* currentToken, collections::List<ParsingState::Future*>& futures, vint& begin, vint& end, vint& insertedTokenCount, vint& skippedTokenCount, collections::List<Ptr<ParsingError>>& errors);
+				virtual void								OnErrorRecover(ParsingState& state, vint currentTokenIndex, collections::List<ParsingState::Future*>& futures, vint& begin, vint& end, collections::List<Ptr<ParsingError>>& errors);
 				vint										GetResolvableFutureLevels(collections::List<ParsingState::Future*>& futures, vint begin, vint end);
-				vint										SearchPathForOneStep(ParsingState& state, collections::List<ParsingState::Future*>& futures, collections::List<regex::RegexToken*>& tokens, vint& begin, vint& end, collections::List<Ptr<ParsingError>>& errors);
+				vint										SearchPathForOneStep(ParsingState& state, collections::List<ParsingState::Future*>& futures, vint& begin, vint& end, collections::List<Ptr<ParsingError>>& errors);
 				vint										GetConflictReduceCount(collections::List<ParsingState::Future*>& futures);
 				void										GetConflictReduceIndices(collections::List<ParsingState::Future*>& futures, vint conflictReduceCount, collections::Array<vint>& conflictReduceIndices);
 				vint										GetAffectedStackNodeCount(collections::List<ParsingState::Future*>& futures, collections::Array<vint>& conflictReduceIndices);
-				void										BuildSingleDecisionPath(ParsingState& state, ParsingState::Future* future, collections::List<regex::RegexToken*>& tokens, vint availableTokenCount, vint lastAvailableInstructionCount);
-				void										BuildAmbiguousDecisions(ParsingState& state, collections::List<ParsingState::Future*>& futures, collections::List<regex::RegexToken*>& tokens, vint begin, vint end, vint resolvableFutureLevels, collections::List<Ptr<ParsingError>>& errors);
-				void										BuildDecisions(ParsingState& state, collections::List<ParsingState::Future*>& futures, collections::List<regex::RegexToken*>& tokens, vint begin, vint end, vint resolvableFutureLevels, collections::List<Ptr<ParsingError>>& errors);
+				void										BuildSingleDecisionPath(ParsingState& state, ParsingState::Future* future, vint lastAvailableInstructionCount);
+				void										BuildAmbiguousDecisions(ParsingState& state, collections::List<ParsingState::Future*>& futures, vint begin, vint end, vint resolvableFutureLevels, collections::List<Ptr<ParsingError>>& errors);
+				void										BuildDecisions(ParsingState& state, collections::List<ParsingState::Future*>& futures, vint begin, vint end, vint resolvableFutureLevels, collections::List<Ptr<ParsingError>>& errors);
 			public:
 				ParsingAmbiguousParser(Ptr<ParsingTable> _table=0);
 				~ParsingAmbiguousParser();
@@ -20943,10 +21088,11 @@ namespace vl
 			class ParsingAutoRecoverAmbiguousParser : public ParsingAmbiguousParser
 			{
 			protected:
+				vint										maxInsertedTokenCount;
 
-				void										OnErrorRecover(ParsingState& state, vint currentTokenIndex, const regex::RegexToken* currentToken, collections::List<ParsingState::Future*>& futures, vint& begin, vint& end, vint& insertedTokenCount, vint& skippedTokenCount, collections::List<Ptr<ParsingError>>& errors)override;
+				void										OnErrorRecover(ParsingState& state, vint currentTokenIndex, collections::List<ParsingState::Future*>& futures, vint& begin, vint& end, collections::List<Ptr<ParsingError>>& errors)override;
 			public:
-				ParsingAutoRecoverAmbiguousParser(Ptr<ParsingTable> _table=0);
+				ParsingAutoRecoverAmbiguousParser(Ptr<ParsingTable> _table = 0, vint _maxInsertedTokenCount = -1);
 				~ParsingAutoRecoverAmbiguousParser();
 			};
 
@@ -21754,11 +21900,12 @@ namespace vl
 			public:
 				enum TransitionType
 				{
-					TokenBegin,		// token stream start
-					TokenFinish,	// token stream end
-					TryReduce,		// rule end
-					Epsilon,		// an epsilon transition
-					Symbol,			// a syntax symbol
+					TokenBegin,				// token stream start
+					TokenFinish,			// token stream end
+					NormalReduce,			// rule end
+					LeftRecursiveReduce,	// rule end with left recursive
+					Epsilon,				// an epsilon transition
+					Symbol,					// a syntax symbol
 				};
 
 				enum StackOperationType
@@ -21842,7 +21989,8 @@ namespace vl
 				Transition*											CreateTransition(State* start, State* end);
 				Transition*											TokenBegin(State* start, State* end);
 				Transition*											TokenFinish(State* start, State* end);
-				Transition*											TryReduce(State* start, State* end);
+				Transition*											NormalReduce(State* start, State* end);
+				Transition*											LeftRecursiveReduce(State* start, State* end);
 				Transition*											Epsilon(State* start, State* end);
 				Transition*											Symbol(State* start, State* end, ParsingSymbol* transitionSymbol);
 				Transition*											CopyTransition(State* start, State* end, Transition* oldTransition);
@@ -21900,7 +22048,6 @@ namespace vl
 			extern Ptr<Automaton>									CreateNondeterministicPDAFromEpsilonPDA(Ptr<Automaton> epsilonPDA);
 			extern Ptr<Automaton>									CreateJointPDAFromNondeterministicPDA(Ptr<Automaton> nondeterministicPDA);
 			extern void												CompactJointPDA(Ptr<Automaton> jointPDA);
-			extern void												MergeJointPDAStates(Ptr<Automaton> jointPDA);
 			extern void												MarkLeftRecursiveInJointPDA(Ptr<Automaton> jointPDA, collections::List<Ptr<ParsingError>>& errors);
 
 /***********************************************************************
@@ -22055,12 +22202,6 @@ namespace vl
 			extern vl::Ptr<vl::parsing::ParsingTreeNode> JsonParseAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
 			extern vl::Ptr<JsonNode> JsonParse(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
 			extern vl::Ptr<JsonNode> JsonParse(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
-
-			extern vl::Ptr<vl::parsing::ParsingTreeNode> JsonParseAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
-			extern vl::Ptr<vl::parsing::ParsingTreeNode> JsonParseAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
-			extern vl::Ptr<JsonNode> JsonParse(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
-			extern vl::Ptr<JsonNode> JsonParse(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
-
 		}
 	}
 }
@@ -22922,17 +23063,6 @@ namespace vl
 			extern vl::Ptr<vl::parsing::ParsingTreeNode> XmlParseElementAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
 			extern vl::Ptr<XmlElement> XmlParseElement(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
 			extern vl::Ptr<XmlElement> XmlParseElement(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
-
-			extern vl::Ptr<vl::parsing::ParsingTreeNode> XmlParseDocumentAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
-			extern vl::Ptr<vl::parsing::ParsingTreeNode> XmlParseDocumentAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
-			extern vl::Ptr<XmlDocument> XmlParseDocument(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
-			extern vl::Ptr<XmlDocument> XmlParseDocument(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
-
-			extern vl::Ptr<vl::parsing::ParsingTreeNode> XmlParseElementAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
-			extern vl::Ptr<vl::parsing::ParsingTreeNode> XmlParseElementAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
-			extern vl::Ptr<XmlElement> XmlParseElement(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
-			extern vl::Ptr<XmlElement> XmlParseElement(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
-
 		}
 	}
 }
@@ -23436,8 +23566,8 @@ namespace vl
 		{
 		protected:
 			IStream*						stream;
-			unsigned char					cache;
-			bool							cacheAvailable;
+			vuint8_t						cacheBuffer[sizeof(wchar_t)];
+			vint							cacheSize;
 
 			virtual vint					WriteString(wchar_t* _buffer, vint chars)=0;
 		public:
@@ -23452,8 +23582,8 @@ namespace vl
 		{
 		protected:
 			IStream*						stream;
-			unsigned char					cache;
-			bool							cacheAvailable;
+			vuint8_t						cacheBuffer[sizeof(wchar_t)];
+			vint							cacheSize;
 
 			virtual vint					ReadString(wchar_t* _buffer, vint chars)=0;
 		public:
@@ -23525,9 +23655,10 @@ Utf-8
 		class Utf8Decoder : public CharDecoder
 		{
 		protected:
+#if defined VCZH_MSVC
 			wchar_t							cache;
 			bool							cacheAvailable;
-
+#endif
 			vint							ReadString(wchar_t* _buffer, vint chars);
 		public:
 			Utf8Decoder();
@@ -23660,9 +23791,9 @@ namespace vl
 			void					Seek(pos_t _size);
 			void					SeekFromBegin(pos_t _size);
 			void					SeekFromEnd(pos_t _size);
-			vint						Read(void* _buffer, vint _size);
-			vint						Write(void* _buffer, vint _size);
-			vint						Peek(void* _buffer, vint _size);
+			vint					Read(void* _buffer, vint _size);
+			vint					Write(void* _buffer, vint _size);
+			vint					Peek(void* _buffer, vint _size);
 		};
 	}
 }

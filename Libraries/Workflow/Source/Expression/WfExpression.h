@@ -37,24 +37,26 @@ namespace vl
 			CLOSE_ARRAY = 18,
 			OPEN_BRACE = 19,
 			CLOSE_BRACE = 20,
-			SHL = 21,
-			SHR = 22,
-			XOR = 23,
-			AND = 24,
-			OR = 25,
-			NOT = 26,
-			NULL_VALUE = 27,
-			TRUE_VALUE = 28,
-			FALSE_VALUE = 29,
-			LET = 30,
-			IN = 31,
-			RANGE = 32,
-			NAME = 33,
-			FLOAT = 34,
-			INTEGER = 35,
-			STRING = 36,
-			FORMATSTRING = 37,
-			SPACE = 38,
+			OPEN_BRACKET = 21,
+			CLOSE_BRACKET = 22,
+			KEYWORD_SHL = 23,
+			KEYWORD_SHR = 24,
+			KEYWORD_XOR = 25,
+			KEYWORD_AND = 26,
+			KEYWORD_OR = 27,
+			KEYWORD_NOT = 28,
+			KEYWORD_NULL = 29,
+			KEYWORD_TRUE = 30,
+			KEYWORD_FALSE = 31,
+			KEYWORD_LET = 32,
+			KEYWORD_IN = 33,
+			KEYWORD_RANGE = 34,
+			NAME = 35,
+			FLOAT = 36,
+			INTEGER = 37,
+			STRING = 38,
+			FORMATSTRING = 39,
+			SPACE = 40,
 		};
 		class WfExpression;
 		class WfLiteralExpression;
@@ -264,6 +266,11 @@ namespace vl
 		extern vl::WString WfGetParserTextBuffer();
 		extern vl::Ptr<vl::parsing::ParsingTreeCustomBase> WfConvertParsingTreeNode(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 		extern vl::Ptr<vl::parsing::tabling::ParsingTable> WfLoadTable();
+
+		extern vl::Ptr<vl::parsing::ParsingTreeNode> WfParseExpressionAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
+		extern vl::Ptr<vl::parsing::ParsingTreeNode> WfParseExpressionAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
+		extern vl::Ptr<WfExpression> WfParseExpression(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
+		extern vl::Ptr<WfExpression> WfParseExpression(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
 	}
 }
 namespace vl
