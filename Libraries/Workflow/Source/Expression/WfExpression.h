@@ -123,7 +123,6 @@ namespace vl
 		class WfInferExpression;
 		class WfTypeCastingExpression;
 		class WfTypeTestingExpression;
-		class WfNullTestingExpression;
 		class WfTypeOfTypeExpression;
 		class WfTypeOfExpressionExpression;
 		class WfAttachEventExpression;
@@ -133,13 +132,11 @@ namespace vl
 		class WfCallExpression;
 		class WfStatement;
 		class WfVariableStatement;
-		class WfAssignmentStatement;
 		class WfBreakStatement;
 		class WfContinueStatement;
 		class WfReturnStatement;
 		class WfDeleteStatement;
 		class WfRaiseExceptionStatement;
-		class WfIfCastStatement;
 		class WfIfStatement;
 		class WfSwitchCase;
 		class WfSwitchStatement;
@@ -265,7 +262,6 @@ namespace vl
 				virtual void Visit(WfInferExpression* node)=0;
 				virtual void Visit(WfTypeCastingExpression* node)=0;
 				virtual void Visit(WfTypeTestingExpression* node)=0;
-				virtual void Visit(WfNullTestingExpression* node)=0;
 				virtual void Visit(WfTypeOfTypeExpression* node)=0;
 				virtual void Visit(WfTypeOfExpressionExpression* node)=0;
 				virtual void Visit(WfAttachEventExpression* node)=0;
@@ -430,6 +426,7 @@ namespace vl
 			Or,
 			Not,
 			FailedThen,
+			Assign,
 		};
 
 		class WfBinaryExpression : public WfExpression, vl::reflection::Description<WfBinaryExpression>
@@ -487,16 +484,16 @@ namespace vl
 			static vl::Ptr<WfRangeExpression> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 		};
 
-		enum class WfExpressionTesting
+		enum class WfSetTesting
 		{
-			Normal,
-			Reversed,
+			In,
+			NotIn,
 		};
 
 		class WfSetTestingExpression : public WfExpression, vl::reflection::Description<WfSetTestingExpression>
 		{
 		public:
-			WfExpressionTesting test;
+			WfSetTesting test;
 			vl::Ptr<WfExpression> element;
 			vl::Ptr<WfExpression> collection;
 
@@ -553,27 +550,24 @@ namespace vl
 			static vl::Ptr<WfTypeCastingExpression> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 		};
 
+		enum class WfTypeTesting
+		{
+			IsType,
+			IsNotType,
+			IsNull,
+			IsNotNull,
+		};
+
 		class WfTypeTestingExpression : public WfExpression, vl::reflection::Description<WfTypeTestingExpression>
 		{
 		public:
-			WfExpressionTesting test;
+			WfTypeTesting test;
 			vl::Ptr<WfExpression> expression;
 			vl::Ptr<WfType> type;
 
 			void Accept(WfExpression::IVisitor* visitor)override;
 
 			static vl::Ptr<WfTypeTestingExpression> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
-		};
-
-		class WfNullTestingExpression : public WfExpression, vl::reflection::Description<WfNullTestingExpression>
-		{
-		public:
-			WfExpressionTesting test;
-			vl::Ptr<WfExpression> expression;
-
-			void Accept(WfExpression::IVisitor* visitor)override;
-
-			static vl::Ptr<WfNullTestingExpression> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 		};
 
 		class WfTypeOfTypeExpression : public WfExpression, vl::reflection::Description<WfTypeOfTypeExpression>
@@ -665,13 +659,11 @@ namespace vl
 			{
 			public:
 				virtual void Visit(WfVariableStatement* node)=0;
-				virtual void Visit(WfAssignmentStatement* node)=0;
 				virtual void Visit(WfBreakStatement* node)=0;
 				virtual void Visit(WfContinueStatement* node)=0;
 				virtual void Visit(WfReturnStatement* node)=0;
 				virtual void Visit(WfDeleteStatement* node)=0;
 				virtual void Visit(WfRaiseExceptionStatement* node)=0;
-				virtual void Visit(WfIfCastStatement* node)=0;
 				virtual void Visit(WfIfStatement* node)=0;
 				virtual void Visit(WfSwitchStatement* node)=0;
 				virtual void Visit(WfWhileStatement* node)=0;
@@ -695,17 +687,6 @@ namespace vl
 			void Accept(WfStatement::IVisitor* visitor)override;
 
 			static vl::Ptr<WfVariableStatement> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
-		};
-
-		class WfAssignmentStatement : public WfStatement, vl::reflection::Description<WfAssignmentStatement>
-		{
-		public:
-			vl::Ptr<WfExpression> left;
-			vl::Ptr<WfExpression> right;
-
-			void Accept(WfStatement::IVisitor* visitor)override;
-
-			static vl::Ptr<WfAssignmentStatement> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 		};
 
 		class WfBreakStatement : public WfStatement, vl::reflection::Description<WfBreakStatement>
@@ -756,24 +737,12 @@ namespace vl
 			static vl::Ptr<WfRaiseExceptionStatement> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 		};
 
-		class WfIfCastStatement : public WfStatement, vl::reflection::Description<WfIfCastStatement>
+		class WfIfStatement : public WfStatement, vl::reflection::Description<WfIfStatement>
 		{
 		public:
 			vl::Ptr<WfType> type;
 			vl::parsing::ParsingToken name;
 			vl::Ptr<WfExpression> expression;
-			vl::Ptr<WfStatement> trueBranch;
-			vl::Ptr<WfStatement> falseBranch;
-
-			void Accept(WfStatement::IVisitor* visitor)override;
-
-			static vl::Ptr<WfIfCastStatement> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
-		};
-
-		class WfIfStatement : public WfStatement, vl::reflection::Description<WfIfStatement>
-		{
-		public:
-			vl::Ptr<WfExpression> condition;
 			vl::Ptr<WfStatement> trueBranch;
 			vl::Ptr<WfStatement> falseBranch;
 
@@ -1031,15 +1000,15 @@ namespace vl
 			DECL_TYPE_INFO(vl::workflow::WfIfExpression)
 			DECL_TYPE_INFO(vl::workflow::WfRangeBoundary)
 			DECL_TYPE_INFO(vl::workflow::WfRangeExpression)
-			DECL_TYPE_INFO(vl::workflow::WfExpressionTesting)
+			DECL_TYPE_INFO(vl::workflow::WfSetTesting)
 			DECL_TYPE_INFO(vl::workflow::WfSetTestingExpression)
 			DECL_TYPE_INFO(vl::workflow::WfConstructorArgument)
 			DECL_TYPE_INFO(vl::workflow::WfConstructorExpression)
 			DECL_TYPE_INFO(vl::workflow::WfInferExpression)
 			DECL_TYPE_INFO(vl::workflow::WfTypeCastingStrategy)
 			DECL_TYPE_INFO(vl::workflow::WfTypeCastingExpression)
+			DECL_TYPE_INFO(vl::workflow::WfTypeTesting)
 			DECL_TYPE_INFO(vl::workflow::WfTypeTestingExpression)
-			DECL_TYPE_INFO(vl::workflow::WfNullTestingExpression)
 			DECL_TYPE_INFO(vl::workflow::WfTypeOfTypeExpression)
 			DECL_TYPE_INFO(vl::workflow::WfTypeOfExpressionExpression)
 			DECL_TYPE_INFO(vl::workflow::WfAttachEventExpression)
@@ -1050,13 +1019,11 @@ namespace vl
 			DECL_TYPE_INFO(vl::workflow::WfCallExpression)
 			DECL_TYPE_INFO(vl::workflow::WfStatement)
 			DECL_TYPE_INFO(vl::workflow::WfVariableStatement)
-			DECL_TYPE_INFO(vl::workflow::WfAssignmentStatement)
 			DECL_TYPE_INFO(vl::workflow::WfBreakStatement)
 			DECL_TYPE_INFO(vl::workflow::WfContinueStatement)
 			DECL_TYPE_INFO(vl::workflow::WfReturnStatement)
 			DECL_TYPE_INFO(vl::workflow::WfDeleteStatement)
 			DECL_TYPE_INFO(vl::workflow::WfRaiseExceptionStatement)
-			DECL_TYPE_INFO(vl::workflow::WfIfCastStatement)
 			DECL_TYPE_INFO(vl::workflow::WfIfStatement)
 			DECL_TYPE_INFO(vl::workflow::WfSwitchCase)
 			DECL_TYPE_INFO(vl::workflow::WfSwitchStatement)
@@ -1241,11 +1208,6 @@ namespace vl
 						INVOKE_INTERFACE_PROXY(Visit, node);
 					}
 
-					void Visit(vl::workflow::WfNullTestingExpression* node)override
-					{
-						INVOKE_INTERFACE_PROXY(Visit, node);
-					}
-
 					void Visit(vl::workflow::WfTypeOfTypeExpression* node)override
 					{
 						INVOKE_INTERFACE_PROXY(Visit, node);
@@ -1311,11 +1273,6 @@ namespace vl
 						INVOKE_INTERFACE_PROXY(Visit, node);
 					}
 
-					void Visit(vl::workflow::WfAssignmentStatement* node)override
-					{
-						INVOKE_INTERFACE_PROXY(Visit, node);
-					}
-
 					void Visit(vl::workflow::WfBreakStatement* node)override
 					{
 						INVOKE_INTERFACE_PROXY(Visit, node);
@@ -1337,11 +1294,6 @@ namespace vl
 					}
 
 					void Visit(vl::workflow::WfRaiseExceptionStatement* node)override
-					{
-						INVOKE_INTERFACE_PROXY(Visit, node);
-					}
-
-					void Visit(vl::workflow::WfIfCastStatement* node)override
 					{
 						INVOKE_INTERFACE_PROXY(Visit, node);
 					}
