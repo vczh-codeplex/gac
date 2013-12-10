@@ -560,6 +560,48 @@
     <Text Include="..\TestFiles\Samples\Expression\New2.txt">
       <Filter>Resource Files\Samples\Expression</Filter>
     </Text>
+    <Text Include="..\TestFiles\Samples\Statement\Break.txt">
+      <Filter>Resource Files\Samples\Statement</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\Statement\Continue.txt">
+      <Filter>Resource Files\Samples\Statement</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\Statement\Delete.txt">
+      <Filter>Resource Files\Samples\Statement</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\Statement\Expression.txt">
+      <Filter>Resource Files\Samples\Statement</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\Statement\ForEach.txt">
+      <Filter>Resource Files\Samples\Statement</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\Statement\Raise.txt">
+      <Filter>Resource Files\Samples\Statement</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\Statement\Return.txt">
+      <Filter>Resource Files\Samples\Statement</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\Statement\Switch.txt">
+      <Filter>Resource Files\Samples\Statement</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\Statement\Try.txt">
+      <Filter>Resource Files\Samples\Statement</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\Statement\Variable.txt">
+      <Filter>Resource Files\Samples\Statement</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\Statement\While.txt">
+      <Filter>Resource Files\Samples\Statement</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\Statement\If.txt">
+      <Filter>Resource Files\Samples\Statement</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\Statement\IfCast.txt">
+      <Filter>Resource Files\Samples\Statement</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\Statement\ForEachReversed.txt">
+      <Filter>Resource Files\Samples\Statement</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Source\Expression\Codegen.bat">

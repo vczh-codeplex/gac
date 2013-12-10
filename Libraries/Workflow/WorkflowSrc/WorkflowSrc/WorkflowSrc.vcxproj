@@ -316,7 +316,21 @@
     <Text Include="..\TestFiles\Samples\IndexModule.txt" />
     <Text Include="..\TestFiles\Samples\IndexStatement.txt" />
     <Text Include="..\TestFiles\Samples\Module\HelloWorld.txt" />
+    <Text Include="..\TestFiles\Samples\Statement\Break.txt" />
+    <Text Include="..\TestFiles\Samples\Statement\Continue.txt" />
+    <Text Include="..\TestFiles\Samples\Statement\Delete.txt" />
+    <Text Include="..\TestFiles\Samples\Statement\Expression.txt" />
+    <Text Include="..\TestFiles\Samples\Statement\ForEach.txt" />
+    <Text Include="..\TestFiles\Samples\Statement\ForEachReversed.txt" />
     <Text Include="..\TestFiles\Samples\Statement\HelloWorld.txt" />
+    <Text Include="..\TestFiles\Samples\Statement\If.txt" />
+    <Text Include="..\TestFiles\Samples\Statement\IfCast.txt" />
+    <Text Include="..\TestFiles\Samples\Statement\Raise.txt" />
+    <Text Include="..\TestFiles\Samples\Statement\Return.txt" />
+    <Text Include="..\TestFiles\Samples\Statement\Switch.txt" />
+    <Text Include="..\TestFiles\Samples\Statement\Try.txt" />
+    <Text Include="..\TestFiles\Samples\Statement\Variable.txt" />
+    <Text Include="..\TestFiles\Samples\Statement\While.txt" />
     <Text Include="Spec.txt" />
   </ItemGroup>
   <ItemGroup>

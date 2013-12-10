@@ -695,7 +695,7 @@ rule DeleteStatement Delete
 	= "delete" WorkflowExpression : expression ";" as DeleteStatement
 	;
 rule RaiseExceptionStatement RaiseException
-	= "raise" WorkflowExpression : expression ";" as RaiseExceptionStatement
+	= "raise" [WorkflowExpression : expression] ";" as RaiseExceptionStatement
 	;
 
 rule IfStatement If
@@ -727,7 +727,7 @@ rule BlockStatement Block
 	;
 
 rule ExpressionStatement ExprStat
-	= WorkflowExpression : expression as ExpressionStatement
+	= WorkflowExpression : expression ";" as ExpressionStatement
 	;
 
 rule Statement WorkflowStatement
