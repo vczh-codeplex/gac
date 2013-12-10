@@ -27,11 +27,7 @@ namespace test
 		{
 			var window = new Window();
 			window.Text="This is a window!";
-
-			var button = new Button();
-			button.Text="Press Me!";
-			window.AddChild(button);
-
+			window.AddChild({Text:"Press Me!"} of Button);
 			return window;
 		}
     }

@@ -155,10 +155,15 @@ class BinaryExpression : Expression
 	Expression				second;
 }
 
-class LetExpression : Expression
+class LetVariable
 {
 	token					name;
 	Expression				value;
+}
+
+class LetExpression : Expression
+{
+	LetVariable[]			variables;
 	Expression				exp;
 }
 
@@ -568,6 +573,10 @@ rule ConstructorArgument CtorFragment
 	= WorkflowExpression : key [ ":" WorkflowExpression : value] as ConstructorArgument
 	;
 
+rule LetVariable LetVariableFragment
+	= NAME : name "=" WorkflowExpression : value as LetVariable
+	;
+
 rule Expression Exp0
 	= !Literal
 	= !Integer
@@ -579,7 +588,7 @@ rule Expression Exp0
 	= "(" !WorkflowExpression ")"
 	= "[" WorkflowExpression : body "]" as OrderedLambdaExpression
 	= Function : function as FunctionExpression
-	= "let" NAME : name "=" WorkflowExpression : value ":" WorkflowExpression : exp as LetExpression
+	= "let" LetVariableFragment : variables {"," LetVariableFragment : variables} "in" "(" WorkflowExpression : exp ")" as LetExpression
 	= "+" Exp0 as UnaryExpression with {op = "Positive"}
 	= "-" Exp0 as UnaryExpression with {op = "Negative"}
 	= "not" Exp0 as UnaryExpression with {op = "Not"}

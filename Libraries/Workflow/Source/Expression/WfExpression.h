@@ -113,6 +113,7 @@ namespace vl
 		class WfFormatExpression;
 		class WfUnaryExpression;
 		class WfBinaryExpression;
+		class WfLetVariable;
 		class WfLetExpression;
 		class WfIfExpression;
 		class WfRangeExpression;
@@ -443,11 +444,19 @@ namespace vl
 			static vl::Ptr<WfBinaryExpression> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 		};
 
-		class WfLetExpression : public WfExpression, vl::reflection::Description<WfLetExpression>
+		class WfLetVariable : public vl::parsing::ParsingTreeCustomBase, vl::reflection::Description<WfLetVariable>
 		{
 		public:
 			vl::parsing::ParsingToken name;
 			vl::Ptr<WfExpression> value;
+
+			static vl::Ptr<WfLetVariable> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
+		};
+
+		class WfLetExpression : public WfExpression, vl::reflection::Description<WfLetExpression>
+		{
+		public:
+			vl::collections::List<vl::Ptr<WfLetVariable>> variables;
 			vl::Ptr<WfExpression> exp;
 
 			void Accept(WfExpression::IVisitor* visitor)override;
@@ -1032,6 +1041,7 @@ namespace vl
 			DECL_TYPE_INFO(vl::workflow::WfUnaryExpression)
 			DECL_TYPE_INFO(vl::workflow::WfBinaryOperator)
 			DECL_TYPE_INFO(vl::workflow::WfBinaryExpression)
+			DECL_TYPE_INFO(vl::workflow::WfLetVariable)
 			DECL_TYPE_INFO(vl::workflow::WfLetExpression)
 			DECL_TYPE_INFO(vl::workflow::WfIfExpression)
 			DECL_TYPE_INFO(vl::workflow::WfRangeBoundary)
