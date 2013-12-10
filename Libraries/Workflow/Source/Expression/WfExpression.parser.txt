@@ -81,6 +81,12 @@ class MemberExpression : Expression
 	token					name;
 }
 
+class ChildExpression : Expression
+{
+	Expression				parent;
+	token					name;
+}
+
 class LiteralExpression : Expression
 {
 	LiteralValue			value;
@@ -586,6 +592,7 @@ rule Expression Exp0
 	= Exp0 : parent "." "observe" "as" NAME : name "(" WorkflowExpression : expression ["on" WorkflowExpression : events {"," WorkflowExpression : events}]")" as ObserveExpression with {observeType = "ExtendedObserve"}
 	= Exp0 : function "(" [WorkflowExpression : arguments {"," WorkflowExpression : arguments}] ")" as CallExpression
 	= Exp0 : parent "." NAME : name as MemberExpression
+	= Exp0 : parent "::" NAME : name as ChildExpression
 	= Exp0 : first "[" WorkflowExpression : second "]" as BinaryExpression with {op = "Index"}
 	= Exp0 : element "in" WorkflowExpression : collection as SetTestingExpression with {test="Normal"}
 	= Exp0 : element "not" "in" WorkflowExpression : collection as SetTestingExpression with {test="Reversed"}

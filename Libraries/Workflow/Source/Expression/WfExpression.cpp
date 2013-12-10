@@ -79,6 +79,12 @@ L"\r\n"L"\tExpression\t\t\t\tparent;"
 L"\r\n"L"\ttoken\t\t\t\t\tname;"
 L"\r\n"L"}"
 L"\r\n"L""
+L"\r\n"L"class ChildExpression : Expression"
+L"\r\n"L"{"
+L"\r\n"L"\tExpression\t\t\t\tparent;"
+L"\r\n"L"\ttoken\t\t\t\t\tname;"
+L"\r\n"L"}"
+L"\r\n"L""
 L"\r\n"L"class LiteralExpression : Expression"
 L"\r\n"L"{"
 L"\r\n"L"\tLiteralValue\t\t\tvalue;"
@@ -584,6 +590,7 @@ L"\r\n"L"\t= Exp0 : parent \".\" \"observe\" \"(\" WorkflowExpression : expressi
 L"\r\n"L"\t= Exp0 : parent \".\" \"observe\" \"as\" NAME : name \"(\" WorkflowExpression : expression [\"on\" WorkflowExpression : events {\",\" WorkflowExpression : events}]\")\" as ObserveExpression with {observeType = \"ExtendedObserve\"}"
 L"\r\n"L"\t= Exp0 : function \"(\" [WorkflowExpression : arguments {\",\" WorkflowExpression : arguments}] \")\" as CallExpression"
 L"\r\n"L"\t= Exp0 : parent \".\" NAME : name as MemberExpression"
+L"\r\n"L"\t= Exp0 : parent \"::\" NAME : name as ChildExpression"
 L"\r\n"L"\t= Exp0 : first \"[\" WorkflowExpression : second \"]\" as BinaryExpression with {op = \"Index\"}"
 L"\r\n"L"\t= Exp0 : element \"in\" WorkflowExpression : collection as SetTestingExpression with {test=\"Normal\"}"
 L"\r\n"L"\t= Exp0 : element \"not\" \"in\" WorkflowExpression : collection as SetTestingExpression with {test=\"Reversed\"}"
@@ -974,6 +981,12 @@ Parsing Tree Conversion Driver Implementation
 				SetMember(tree->name, obj->GetMember(L"name"), tokens);
 			}
 
+			void Fill(vl::Ptr<WfChildExpression> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
+			{
+				SetMember(tree->parent, obj->GetMember(L"parent"), tokens);
+				SetMember(tree->name, obj->GetMember(L"name"), tokens);
+			}
+
 			void Fill(vl::Ptr<WfLiteralExpression> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
 			{
 				SetMember(tree->value, obj->GetMember(L"value"), tokens);
@@ -1350,6 +1363,14 @@ Parsing Tree Conversion Driver Implementation
 				else if(obj->GetType()==L"MemberExpression")
 				{
 					vl::Ptr<WfMemberExpression> tree = new WfMemberExpression;
+					vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
+					Fill(tree, obj, tokens);
+					Fill(tree.Cast<WfExpression>(), obj, tokens);
+					return tree;
+				}
+				else if(obj->GetType()==L"ChildExpression")
+				{
+					vl::Ptr<WfChildExpression> tree = new WfChildExpression;
 					vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
 					Fill(tree, obj, tokens);
 					Fill(tree.Cast<WfExpression>(), obj, tokens);
@@ -1800,6 +1821,11 @@ Parsing Tree Conversion Implementation
 			return WfConvertParsingTreeNode(node, tokens).Cast<WfMemberExpression>();
 		}
 
+		vl::Ptr<WfChildExpression> WfChildExpression::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
+		{
+			return WfConvertParsingTreeNode(node, tokens).Cast<WfChildExpression>();
+		}
+
 		vl::Ptr<WfLiteralExpression> WfLiteralExpression::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
 		{
 			return WfConvertParsingTreeNode(node, tokens).Cast<WfLiteralExpression>();
@@ -2090,6 +2116,11 @@ Visitor Pattern Implementation
 		}
 
 		void WfMemberExpression::Accept(WfExpression::IVisitor* visitor)
+		{
+			visitor->Visit(this);
+		}
+
+		void WfChildExpression::Accept(WfExpression::IVisitor* visitor)
 		{
 			visitor->Visit(this);
 		}
@@ -2516,6 +2547,7 @@ namespace vl
 			IMPL_TYPE_INFO_RENAME(WfOrderedNameExpression, Workflow::WfOrderedNameExpression)
 			IMPL_TYPE_INFO_RENAME(WfOrderedLambdaExpression, Workflow::WfOrderedLambdaExpression)
 			IMPL_TYPE_INFO_RENAME(WfMemberExpression, Workflow::WfMemberExpression)
+			IMPL_TYPE_INFO_RENAME(WfChildExpression, Workflow::WfChildExpression)
 			IMPL_TYPE_INFO_RENAME(WfLiteralExpression, Workflow::WfLiteralExpression)
 			IMPL_TYPE_INFO_RENAME(WfFloatingExpression, Workflow::WfFloatingExpression)
 			IMPL_TYPE_INFO_RENAME(WfIntegerExpression, Workflow::WfIntegerExpression)
@@ -2699,6 +2731,18 @@ namespace vl
 				CLASS_MEMBER_FIELD(parent)
 				CLASS_MEMBER_PROPERTY(name, get_name, set_name)
 			END_CLASS_MEMBER(WfMemberExpression)
+
+			BEGIN_CLASS_MEMBER(WfChildExpression)
+				CLASS_MEMBER_BASE(WfExpression)
+
+				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<WfChildExpression>(), NO_PARAMETER)
+
+				CLASS_MEMBER_EXTERNALMETHOD(get_name, NO_PARAMETER, vl::WString(WfChildExpression::*)(), [](WfChildExpression* node){ return node->name.value; })
+				CLASS_MEMBER_EXTERNALMETHOD(set_name, {L"value"}, void(WfChildExpression::*)(const vl::WString&), [](WfChildExpression* node, const vl::WString& value){ node->name.value = value; })
+
+				CLASS_MEMBER_FIELD(parent)
+				CLASS_MEMBER_PROPERTY(name, get_name, set_name)
+			END_CLASS_MEMBER(WfChildExpression)
 
 			BEGIN_CLASS_MEMBER(WfLiteralExpression)
 				CLASS_MEMBER_BASE(WfExpression)
@@ -3298,6 +3342,7 @@ namespace vl
 				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(WfExpression::IVisitor::*)(WfOrderedNameExpression* node))
 				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(WfExpression::IVisitor::*)(WfOrderedLambdaExpression* node))
 				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(WfExpression::IVisitor::*)(WfMemberExpression* node))
+				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(WfExpression::IVisitor::*)(WfChildExpression* node))
 				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(WfExpression::IVisitor::*)(WfLiteralExpression* node))
 				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(WfExpression::IVisitor::*)(WfFloatingExpression* node))
 				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(WfExpression::IVisitor::*)(WfIntegerExpression* node))
@@ -3372,6 +3417,7 @@ namespace vl
 					ADD_TYPE_INFO(vl::workflow::WfOrderedNameExpression)
 					ADD_TYPE_INFO(vl::workflow::WfOrderedLambdaExpression)
 					ADD_TYPE_INFO(vl::workflow::WfMemberExpression)
+					ADD_TYPE_INFO(vl::workflow::WfChildExpression)
 					ADD_TYPE_INFO(vl::workflow::WfLiteralExpression)
 					ADD_TYPE_INFO(vl::workflow::WfFloatingExpression)
 					ADD_TYPE_INFO(vl::workflow::WfIntegerExpression)
