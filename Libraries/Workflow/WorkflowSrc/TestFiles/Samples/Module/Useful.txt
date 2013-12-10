@@ -1,0 +1,20 @@
+module test;
+
+using system::*;
+using presentation::controls::Gui*Control;
+
+func main():void
+{
+    raise "This is not a useful program.";
+}
+
+namespace test
+{
+    namespace useless{}
+    namespace useful
+    {
+        func add(x : int, y : int) : int {return x+y;}
+    }
+    func inc(x : int) : int {return x+1;}
+    func dec(x : int) : int {return x-1;}
+}
