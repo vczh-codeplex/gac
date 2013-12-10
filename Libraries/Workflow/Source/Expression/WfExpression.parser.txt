@@ -589,13 +589,13 @@ rule Expression Exp0
 	= "[" WorkflowExpression : body "]" as OrderedLambdaExpression
 	= Function : function as FunctionExpression
 	= "let" LetVariableFragment : variables {"," LetVariableFragment : variables} "in" "(" WorkflowExpression : exp ")" as LetExpression
-	= "+" Exp0 as UnaryExpression with {op = "Positive"}
-	= "-" Exp0 as UnaryExpression with {op = "Negative"}
-	= "not" Exp0 as UnaryExpression with {op = "Not"}
+	= "+" Exp0 : operand as UnaryExpression with {op = "Positive"}
+	= "-" Exp0 : operand as UnaryExpression with {op = "Negative"}
+	= "not" Exp0 : operand as UnaryExpression with {op = "Not"}
 	= "range"
 		(("(" with {beginBoundary = "Exclusive"}) | ("[" with {beginBoundary = "Inclusive"}))
 		WorkflowExpression : begin "," WorkflowExpression : end
-		((")" with {beginBoundary = "Exclusive"}) | ("]" with {beginBoundary = "Inclusive"}))
+		((")" with {endBoundary = "Exclusive"}) | ("]" with {endBoundary = "Inclusive"}))
 		as RangeExpression
 	= "{" {CtorFragment : arguments} "}" as ConstructorExpression
 	= "new" WorkflowType : type ("(" [WorkflowExpression : arguments {"," WorkflowExpression : arguments}] ")" | "{" {Function : functions} "}") as NewTypeExpression
