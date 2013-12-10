@@ -145,6 +145,7 @@ L"\r\n"L"\tAnd,"
 L"\r\n"L"\tOr,"
 L"\r\n"L"\tNot,"
 L"\r\n"L"\tFailedThen,"
+L"\r\n"L"\tAssign,"
 L"\r\n"L"}"
 L"\r\n"L""
 L"\r\n"L"class BinaryExpression : Expression"
@@ -182,15 +183,15 @@ L"\r\n"L"\tExpression\t\t\t\tend;"
 L"\r\n"L"\tRangeBoundary\t\t\tendBoundary;"
 L"\r\n"L"}"
 L"\r\n"L""
-L"\r\n"L"enum ExpressionTesting"
+L"\r\n"L"enum SetTesting"
 L"\r\n"L"{"
-L"\r\n"L"\tNormal,"
-L"\r\n"L"\tReversed,"
+L"\r\n"L"\tIn,"
+L"\r\n"L"\tNotIn,"
 L"\r\n"L"}"
 L"\r\n"L""
 L"\r\n"L"class SetTestingExpression : Expression"
 L"\r\n"L"{"
-L"\r\n"L"\tExpressionTesting\t\ttest;"
+L"\r\n"L"\tSetTesting\t\t\t\ttest;"
 L"\r\n"L"\tExpression\t\t\t\telement;"
 L"\r\n"L"\tExpression\t\t\t\tcollection;"
 L"\r\n"L"}"
@@ -225,17 +226,19 @@ L"\r\n"L"\tExpression\t\t\t\texpression;"
 L"\r\n"L"\tType\t\t\t\t\ttype;"
 L"\r\n"L"}"
 L"\r\n"L""
-L"\r\n"L"class TypeTestingExpression : Expression"
+L"\r\n"L"enum TypeTesting"
 L"\r\n"L"{"
-L"\r\n"L"\tExpressionTesting\t\ttest;"
-L"\r\n"L"\tExpression\t\t\t\texpression;"
-L"\r\n"L"\tType\t\t\t\t\ttype;"
+L"\r\n"L"\tIsType,"
+L"\r\n"L"\tIsNotType,"
+L"\r\n"L"\tIsNull,"
+L"\r\n"L"\tIsNotNull,"
 L"\r\n"L"}"
 L"\r\n"L""
-L"\r\n"L"class NullTestingExpression : Expression"
+L"\r\n"L"class TypeTestingExpression : Expression"
 L"\r\n"L"{"
-L"\r\n"L"\tExpressionTesting\t\ttest;"
+L"\r\n"L"\tTypeTesting\t\t\t\ttest;"
 L"\r\n"L"\tExpression\t\t\t\texpression;"
+L"\r\n"L"\tType\t\t\t\t\ttype;"
 L"\r\n"L"}"
 L"\r\n"L""
 L"\r\n"L"class TypeOfTypeExpression : Expression"
@@ -296,12 +299,6 @@ L"\r\n"L"\ttoken\t\t\t\t\tname;"
 L"\r\n"L"\tExpression\t\t\t\texpression;"
 L"\r\n"L"}"
 L"\r\n"L""
-L"\r\n"L"class AssignmentStatement : Statement"
-L"\r\n"L"{"
-L"\r\n"L"\tExpression\t\t\t\tleft;"
-L"\r\n"L"\tExpression\t\t\t\tright;"
-L"\r\n"L"}"
-L"\r\n"L""
 L"\r\n"L"class BreakStatement : Statement"
 L"\r\n"L"{"
 L"\r\n"L"}"
@@ -325,18 +322,11 @@ L"\r\n"L"{"
 L"\r\n"L"\tExpression\t\t\t\texpression;"
 L"\r\n"L"}"
 L"\r\n"L""
-L"\r\n"L"class IfCastStatement : Statement"
+L"\r\n"L"class IfStatement : Statement"
 L"\r\n"L"{"
 L"\r\n"L"\tType\t\t\t\t\ttype;"
 L"\r\n"L"\ttoken\t\t\t\t\tname;"
 L"\r\n"L"\tExpression\t\t\t\texpression;"
-L"\r\n"L"\tStatement\t\t\t\ttrueBranch;"
-L"\r\n"L"\tStatement\t\t\t\tfalseBranch;"
-L"\r\n"L"}"
-L"\r\n"L""
-L"\r\n"L"class IfStatement : Statement"
-L"\r\n"L"{"
-L"\r\n"L"\tExpression\t\t\t\tcondition;"
 L"\r\n"L"\tStatement\t\t\t\ttrueBranch;"
 L"\r\n"L"\tStatement\t\t\t\tfalseBranch;"
 L"\r\n"L"}"
@@ -592,13 +582,21 @@ L"\r\n"L"\t= Exp0 : function \"(\" [WorkflowExpression : arguments {\",\" Workfl
 L"\r\n"L"\t= Exp0 : parent \".\" NAME : name as MemberExpression"
 L"\r\n"L"\t= Exp0 : parent \"::\" NAME : name as ChildExpression"
 L"\r\n"L"\t= Exp0 : first \"[\" WorkflowExpression : second \"]\" as BinaryExpression with {op = \"Index\"}"
-L"\r\n"L"\t= Exp0 : element \"in\" WorkflowExpression : collection as SetTestingExpression with {test=\"Normal\"}"
-L"\r\n"L"\t= Exp0 : element \"not\" \"in\" WorkflowExpression : collection as SetTestingExpression with {test=\"Reversed\"}"
+L"\r\n"L"\t= Exp0 : element"
+L"\r\n"L"\t\t((\"in\" with {test=\"In\"}) | (\"not\" \"in\" with {test=\"NotIn\"}))"
+L"\r\n"L"\t\tWorkflowExpression : collection as SetTestingExpression"
 L"\r\n"L"\t= Exp0 : expression \"of\" WorkflowType : type as InferExpression"
-L"\r\n"L"\t= Exp0 : expression \"is\" WorkflowType : type as TypeTestingExpression with {test=\"Normal\"}"
-L"\r\n"L"\t= Exp0 : expression \"is\" \"not\" WorkflowType : type as TypeTestingExpression with {test=\"Reversed\"}"
-L"\r\n"L"\t= Exp0 : expression \"is\" \"null\" as NullTestingExpression with {test=\"Normal\"}"
-L"\r\n"L"\t= Exp0 : expression \"is\" \"not\" \"null\" as NullTestingExpression with {test=\"Reversed\"}"
+L"\r\n"L"\t= Exp0 : expression"
+L"\r\n"L"\t\t("
+L"\r\n"L"\t\t\t("
+L"\r\n"L"\t\t\t\t("
+L"\r\n"L"\t\t\t\t\t(\"is\" with {test=\"IsType\"})"
+L"\r\n"L"\t\t\t\t\t| (\"is\" \"not\" with {test=\"IsNotType\"})"
+L"\r\n"L"\t\t\t\t) WorkflowType : type as TypeTestingExpression"
+L"\r\n"L"\t\t\t)"
+L"\r\n"L"\t\t\t| (\"is\" \"null\" as TypeTestingExpression with {test=\"IsNull\"})"
+L"\r\n"L"\t\t\t| (\"is\" \"not\" \"null\" as TypeTestingExpression with {test=\"IsNotNull\"})"
+L"\r\n"L"\t\t)"
 L"\r\n"L"\t= Exp0 : expression \"as\" WorkflowType : type as TypeCastingExpression with {strategy = \"Weak\"}"
 L"\r\n"L"\t= \"cast\" WorkflowType : type Exp0 : expression as TypeCastingExpression with {strategy = \"Strong\"}"
 L"\r\n"L"\t= \"typeof\" \"(\" WorkflowType : type \")\" as TypeOfTypeExpression"
@@ -656,17 +654,17 @@ L"\r\n"L"rule Expression Exp10"
 L"\r\n"L"\t= !Exp9"
 L"\r\n"L"\t= Exp9 : condition \"?\" Exp10 : trueBranch \":\" Exp10 : falseBranch as IfExpression"
 L"\r\n"L"\t;"
+L"\r\n"L"rule Expression Exp11"
+L"\r\n"L"\t= !Exp10"
+L"\r\n"L"\t= Exp10 : first \"=\" Exp11 : second as BinaryExpression with {op = \"Assign\"}"
+L"\r\n"L"\t;"
 L"\r\n"L""
 L"\r\n"L"rule Expression WorkflowExpression"
-L"\r\n"L"\t= !Exp10"
+L"\r\n"L"\t= !Exp11"
 L"\r\n"L"\t;"
 L"\r\n"L""
 L"\r\n"L"rule VariableStatement Variable"
 L"\r\n"L"\t= \"var\" NAME : name [\":\" WorkflowType : type] \"=\" WorkflowExpression : expression \";\" as VariableStatement"
-L"\r\n"L"\t;"
-L"\r\n"L""
-L"\r\n"L"rule AssignmentStatement Assignment"
-L"\r\n"L"\t= WorkflowExpression : left \"=\" WorkflowExpression : right \";\" as AssignmentStatement"
 L"\r\n"L"\t;"
 L"\r\n"L""
 L"\r\n"L"rule BreakStatement Break"
@@ -686,10 +684,8 @@ L"\r\n"L"\t= \"raise\" WorkflowExpression : expression \";\" as RaiseExceptionSt
 L"\r\n"L"\t;"
 L"\r\n"L""
 L"\r\n"L"rule IfStatement If"
-L"\r\n"L"\t= \"if\" \"(\" WorkflowExpression : condition \")\" WorkflowStatement : trueBranch [\"else\" WorkflowStatement : falseBranch] as IfStatement"
+L"\r\n"L"\t= \"if\" \"(\" [\"var\" NAME : name \":\" WorkflowType : type \"=\"] WorkflowExpression : expression \")\" WorkflowStatement : trueBranch [\"else\" WorkflowStatement : falseBranch] as IfStatement"
 L"\r\n"L"\t;"
-L"\r\n"L"rule IfCastStatement IfCast"
-L"\r\n"L"\t= \"if\" \"(\" NAME : name \":\" WorkflowType : type \"=\" WorkflowExpression : expression \")\" WorkflowStatement : trueBranch [\"else\" WorkflowStatement : falseBranch] as IfCastStatement\t;"
 L"\r\n"L""
 L"\r\n"L"rule SwitchCase SwitchCaseFragment"
 L"\r\n"L"\t= \"case\" WorkflowExpression : expression \":\" WorkflowStatement : statement as SwitchCase"
@@ -702,8 +698,9 @@ L"\r\n"L"rule WhileStatement While"
 L"\r\n"L"\t= \"while\" \"(\" WorkflowExpression : condition \")\" WorkflowStatement : statement as WhileStatement"
 L"\r\n"L"\t;"
 L"\r\n"L"rule ForEachStatement ForEach"
-L"\r\n"L"\t= \"for\" \"(\" NAME : name \"in\" WorkflowExpression : collection \")\" WorkflowStatement : statement as ForEachStatement with {direction=\"Normal\"}"
-L"\r\n"L"\t= \"for\" \"(\" NAME : name \"in\" \"reversed\" WorkflowExpression : collection \")\" WorkflowStatement : statement as ForEachStatement with {direction=\"Reversed\"}"
+L"\r\n"L"\t= \"for\" \"(\" NAME : name "
+L"\r\n"L"\t\t((\"in\" with {direction=\"Normal\"}) | (\"in\" \"reversed\" with {direction=\"Reversed\"}))"
+L"\r\n"L"\t\tWorkflowExpression : collection \")\" WorkflowStatement : statement as ForEachStatement"
 L"\r\n"L"\t;"
 L"\r\n"L""
 L"\r\n"L"rule TryStatement Try"
@@ -720,14 +717,12 @@ L"\r\n"L"\t;"
 L"\r\n"L""
 L"\r\n"L"rule Statement WorkflowStatement"
 L"\r\n"L"\t= !Variable"
-L"\r\n"L"\t= !Assignment"
 L"\r\n"L"\t= !Break"
 L"\r\n"L"\t= !Continue"
 L"\r\n"L"\t= !Return"
 L"\r\n"L"\t= !Delete"
 L"\r\n"L"\t= !RaiseException"
 L"\r\n"L"\t= !If"
-L"\r\n"L"\t= !IfCast"
 L"\r\n"L"\t= !Switch"
 L"\r\n"L"\t= !While"
 L"\r\n"L"\t= !ForEach"
@@ -835,6 +830,7 @@ Parsing Tree Conversion Driver Implementation
 					else if(token->GetValue()==L"Or") { member=WfBinaryOperator::Or; return true; }
 					else if(token->GetValue()==L"Not") { member=WfBinaryOperator::Not; return true; }
 					else if(token->GetValue()==L"FailedThen") { member=WfBinaryOperator::FailedThen; return true; }
+					else if(token->GetValue()==L"Assign") { member=WfBinaryOperator::Assign; return true; }
 					else { member=WfBinaryOperator::Index; return false; }
 				}
 				member=WfBinaryOperator::Index;
@@ -854,16 +850,16 @@ Parsing Tree Conversion Driver Implementation
 				return false;
 			}
 
-			bool SetMember(WfExpressionTesting& member, vl::Ptr<vl::parsing::ParsingTreeNode> node, const TokenList& tokens)
+			bool SetMember(WfSetTesting& member, vl::Ptr<vl::parsing::ParsingTreeNode> node, const TokenList& tokens)
 			{
 				vl::Ptr<vl::parsing::ParsingTreeToken> token=node.Cast<vl::parsing::ParsingTreeToken>();
 				if(token)
 				{
-					if(token->GetValue()==L"Normal") { member=WfExpressionTesting::Normal; return true; }
-					else if(token->GetValue()==L"Reversed") { member=WfExpressionTesting::Reversed; return true; }
-					else { member=WfExpressionTesting::Normal; return false; }
+					if(token->GetValue()==L"In") { member=WfSetTesting::In; return true; }
+					else if(token->GetValue()==L"NotIn") { member=WfSetTesting::NotIn; return true; }
+					else { member=WfSetTesting::In; return false; }
 				}
-				member=WfExpressionTesting::Normal;
+				member=WfSetTesting::In;
 				return false;
 			}
 
@@ -877,6 +873,21 @@ Parsing Tree Conversion Driver Implementation
 					else { member=WfTypeCastingStrategy::Strong; return false; }
 				}
 				member=WfTypeCastingStrategy::Strong;
+				return false;
+			}
+
+			bool SetMember(WfTypeTesting& member, vl::Ptr<vl::parsing::ParsingTreeNode> node, const TokenList& tokens)
+			{
+				vl::Ptr<vl::parsing::ParsingTreeToken> token=node.Cast<vl::parsing::ParsingTreeToken>();
+				if(token)
+				{
+					if(token->GetValue()==L"IsType") { member=WfTypeTesting::IsType; return true; }
+					else if(token->GetValue()==L"IsNotType") { member=WfTypeTesting::IsNotType; return true; }
+					else if(token->GetValue()==L"IsNull") { member=WfTypeTesting::IsNull; return true; }
+					else if(token->GetValue()==L"IsNotNull") { member=WfTypeTesting::IsNotNull; return true; }
+					else { member=WfTypeTesting::IsType; return false; }
+				}
+				member=WfTypeTesting::IsType;
 				return false;
 			}
 
@@ -1085,12 +1096,6 @@ Parsing Tree Conversion Driver Implementation
 				SetMember(tree->type, obj->GetMember(L"type"), tokens);
 			}
 
-			void Fill(vl::Ptr<WfNullTestingExpression> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
-			{
-				SetMember(tree->test, obj->GetMember(L"test"), tokens);
-				SetMember(tree->expression, obj->GetMember(L"expression"), tokens);
-			}
-
 			void Fill(vl::Ptr<WfTypeOfTypeExpression> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
 			{
 				SetMember(tree->type, obj->GetMember(L"type"), tokens);
@@ -1143,12 +1148,6 @@ Parsing Tree Conversion Driver Implementation
 				SetMember(tree->expression, obj->GetMember(L"expression"), tokens);
 			}
 
-			void Fill(vl::Ptr<WfAssignmentStatement> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
-			{
-				SetMember(tree->left, obj->GetMember(L"left"), tokens);
-				SetMember(tree->right, obj->GetMember(L"right"), tokens);
-			}
-
 			void Fill(vl::Ptr<WfBreakStatement> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
 			{
 			}
@@ -1172,18 +1171,11 @@ Parsing Tree Conversion Driver Implementation
 				SetMember(tree->expression, obj->GetMember(L"expression"), tokens);
 			}
 
-			void Fill(vl::Ptr<WfIfCastStatement> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
+			void Fill(vl::Ptr<WfIfStatement> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
 			{
 				SetMember(tree->type, obj->GetMember(L"type"), tokens);
 				SetMember(tree->name, obj->GetMember(L"name"), tokens);
 				SetMember(tree->expression, obj->GetMember(L"expression"), tokens);
-				SetMember(tree->trueBranch, obj->GetMember(L"trueBranch"), tokens);
-				SetMember(tree->falseBranch, obj->GetMember(L"falseBranch"), tokens);
-			}
-
-			void Fill(vl::Ptr<WfIfStatement> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
-			{
-				SetMember(tree->condition, obj->GetMember(L"condition"), tokens);
 				SetMember(tree->trueBranch, obj->GetMember(L"trueBranch"), tokens);
 				SetMember(tree->falseBranch, obj->GetMember(L"falseBranch"), tokens);
 			}
@@ -1503,14 +1495,6 @@ Parsing Tree Conversion Driver Implementation
 					Fill(tree.Cast<WfExpression>(), obj, tokens);
 					return tree;
 				}
-				else if(obj->GetType()==L"NullTestingExpression")
-				{
-					vl::Ptr<WfNullTestingExpression> tree = new WfNullTestingExpression;
-					vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
-					Fill(tree, obj, tokens);
-					Fill(tree.Cast<WfExpression>(), obj, tokens);
-					return tree;
-				}
 				else if(obj->GetType()==L"TypeOfTypeExpression")
 				{
 					vl::Ptr<WfTypeOfTypeExpression> tree = new WfTypeOfTypeExpression;
@@ -1575,14 +1559,6 @@ Parsing Tree Conversion Driver Implementation
 					Fill(tree.Cast<WfStatement>(), obj, tokens);
 					return tree;
 				}
-				else if(obj->GetType()==L"AssignmentStatement")
-				{
-					vl::Ptr<WfAssignmentStatement> tree = new WfAssignmentStatement;
-					vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
-					Fill(tree, obj, tokens);
-					Fill(tree.Cast<WfStatement>(), obj, tokens);
-					return tree;
-				}
 				else if(obj->GetType()==L"BreakStatement")
 				{
 					vl::Ptr<WfBreakStatement> tree = new WfBreakStatement;
@@ -1618,14 +1594,6 @@ Parsing Tree Conversion Driver Implementation
 				else if(obj->GetType()==L"RaiseExceptionStatement")
 				{
 					vl::Ptr<WfRaiseExceptionStatement> tree = new WfRaiseExceptionStatement;
-					vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
-					Fill(tree, obj, tokens);
-					Fill(tree.Cast<WfStatement>(), obj, tokens);
-					return tree;
-				}
-				else if(obj->GetType()==L"IfCastStatement")
-				{
-					vl::Ptr<WfIfCastStatement> tree = new WfIfCastStatement;
 					vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
 					Fill(tree, obj, tokens);
 					Fill(tree.Cast<WfStatement>(), obj, tokens);
@@ -1906,11 +1874,6 @@ Parsing Tree Conversion Implementation
 			return WfConvertParsingTreeNode(node, tokens).Cast<WfTypeTestingExpression>();
 		}
 
-		vl::Ptr<WfNullTestingExpression> WfNullTestingExpression::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
-		{
-			return WfConvertParsingTreeNode(node, tokens).Cast<WfNullTestingExpression>();
-		}
-
 		vl::Ptr<WfTypeOfTypeExpression> WfTypeOfTypeExpression::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
 		{
 			return WfConvertParsingTreeNode(node, tokens).Cast<WfTypeOfTypeExpression>();
@@ -1951,11 +1914,6 @@ Parsing Tree Conversion Implementation
 			return WfConvertParsingTreeNode(node, tokens).Cast<WfVariableStatement>();
 		}
 
-		vl::Ptr<WfAssignmentStatement> WfAssignmentStatement::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
-		{
-			return WfConvertParsingTreeNode(node, tokens).Cast<WfAssignmentStatement>();
-		}
-
 		vl::Ptr<WfBreakStatement> WfBreakStatement::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
 		{
 			return WfConvertParsingTreeNode(node, tokens).Cast<WfBreakStatement>();
@@ -1979,11 +1937,6 @@ Parsing Tree Conversion Implementation
 		vl::Ptr<WfRaiseExceptionStatement> WfRaiseExceptionStatement::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
 		{
 			return WfConvertParsingTreeNode(node, tokens).Cast<WfRaiseExceptionStatement>();
-		}
-
-		vl::Ptr<WfIfCastStatement> WfIfCastStatement::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
-		{
-			return WfConvertParsingTreeNode(node, tokens).Cast<WfIfCastStatement>();
 		}
 
 		vl::Ptr<WfIfStatement> WfIfStatement::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
@@ -2200,11 +2153,6 @@ Visitor Pattern Implementation
 			visitor->Visit(this);
 		}
 
-		void WfNullTestingExpression::Accept(WfExpression::IVisitor* visitor)
-		{
-			visitor->Visit(this);
-		}
-
 		void WfTypeOfTypeExpression::Accept(WfExpression::IVisitor* visitor)
 		{
 			visitor->Visit(this);
@@ -2245,11 +2193,6 @@ Visitor Pattern Implementation
 			visitor->Visit(this);
 		}
 
-		void WfAssignmentStatement::Accept(WfStatement::IVisitor* visitor)
-		{
-			visitor->Visit(this);
-		}
-
 		void WfBreakStatement::Accept(WfStatement::IVisitor* visitor)
 		{
 			visitor->Visit(this);
@@ -2271,11 +2214,6 @@ Visitor Pattern Implementation
 		}
 
 		void WfRaiseExceptionStatement::Accept(WfStatement::IVisitor* visitor)
-		{
-			visitor->Visit(this);
-		}
-
-		void WfIfCastStatement::Accept(WfStatement::IVisitor* visitor)
 		{
 			visitor->Visit(this);
 		}
@@ -2561,15 +2499,15 @@ namespace vl
 			IMPL_TYPE_INFO_RENAME(WfIfExpression, Workflow::WfIfExpression)
 			IMPL_TYPE_INFO_RENAME(WfRangeBoundary, Workflow::WfRangeBoundary)
 			IMPL_TYPE_INFO_RENAME(WfRangeExpression, Workflow::WfRangeExpression)
-			IMPL_TYPE_INFO_RENAME(WfExpressionTesting, Workflow::WfExpressionTesting)
+			IMPL_TYPE_INFO_RENAME(WfSetTesting, Workflow::WfSetTesting)
 			IMPL_TYPE_INFO_RENAME(WfSetTestingExpression, Workflow::WfSetTestingExpression)
 			IMPL_TYPE_INFO_RENAME(WfConstructorArgument, Workflow::WfConstructorArgument)
 			IMPL_TYPE_INFO_RENAME(WfConstructorExpression, Workflow::WfConstructorExpression)
 			IMPL_TYPE_INFO_RENAME(WfInferExpression, Workflow::WfInferExpression)
 			IMPL_TYPE_INFO_RENAME(WfTypeCastingStrategy, Workflow::WfTypeCastingStrategy)
 			IMPL_TYPE_INFO_RENAME(WfTypeCastingExpression, Workflow::WfTypeCastingExpression)
+			IMPL_TYPE_INFO_RENAME(WfTypeTesting, Workflow::WfTypeTesting)
 			IMPL_TYPE_INFO_RENAME(WfTypeTestingExpression, Workflow::WfTypeTestingExpression)
-			IMPL_TYPE_INFO_RENAME(WfNullTestingExpression, Workflow::WfNullTestingExpression)
 			IMPL_TYPE_INFO_RENAME(WfTypeOfTypeExpression, Workflow::WfTypeOfTypeExpression)
 			IMPL_TYPE_INFO_RENAME(WfTypeOfExpressionExpression, Workflow::WfTypeOfExpressionExpression)
 			IMPL_TYPE_INFO_RENAME(WfAttachEventExpression, Workflow::WfAttachEventExpression)
@@ -2580,13 +2518,11 @@ namespace vl
 			IMPL_TYPE_INFO_RENAME(WfCallExpression, Workflow::WfCallExpression)
 			IMPL_TYPE_INFO_RENAME(WfStatement, Workflow::WfStatement)
 			IMPL_TYPE_INFO_RENAME(WfVariableStatement, Workflow::WfVariableStatement)
-			IMPL_TYPE_INFO_RENAME(WfAssignmentStatement, Workflow::WfAssignmentStatement)
 			IMPL_TYPE_INFO_RENAME(WfBreakStatement, Workflow::WfBreakStatement)
 			IMPL_TYPE_INFO_RENAME(WfContinueStatement, Workflow::WfContinueStatement)
 			IMPL_TYPE_INFO_RENAME(WfReturnStatement, Workflow::WfReturnStatement)
 			IMPL_TYPE_INFO_RENAME(WfDeleteStatement, Workflow::WfDeleteStatement)
 			IMPL_TYPE_INFO_RENAME(WfRaiseExceptionStatement, Workflow::WfRaiseExceptionStatement)
-			IMPL_TYPE_INFO_RENAME(WfIfCastStatement, Workflow::WfIfCastStatement)
 			IMPL_TYPE_INFO_RENAME(WfIfStatement, Workflow::WfIfStatement)
 			IMPL_TYPE_INFO_RENAME(WfSwitchCase, Workflow::WfSwitchCase)
 			IMPL_TYPE_INFO_RENAME(WfSwitchStatement, Workflow::WfSwitchStatement)
@@ -2836,6 +2772,7 @@ namespace vl
 				ENUM_NAMESPACE_ITEM(Or)
 				ENUM_NAMESPACE_ITEM(Not)
 				ENUM_NAMESPACE_ITEM(FailedThen)
+				ENUM_NAMESPACE_ITEM(Assign)
 			END_ENUM_ITEM(WfBinaryOperator)
 
 			BEGIN_CLASS_MEMBER(WfBinaryExpression)
@@ -2891,11 +2828,11 @@ namespace vl
 				CLASS_MEMBER_FIELD(endBoundary)
 			END_CLASS_MEMBER(WfRangeExpression)
 
-			BEGIN_ENUM_ITEM(WfExpressionTesting)
-				ENUM_ITEM_NAMESPACE(WfExpressionTesting)
-				ENUM_NAMESPACE_ITEM(Normal)
-				ENUM_NAMESPACE_ITEM(Reversed)
-			END_ENUM_ITEM(WfExpressionTesting)
+			BEGIN_ENUM_ITEM(WfSetTesting)
+				ENUM_ITEM_NAMESPACE(WfSetTesting)
+				ENUM_NAMESPACE_ITEM(In)
+				ENUM_NAMESPACE_ITEM(NotIn)
+			END_ENUM_ITEM(WfSetTesting)
 
 			BEGIN_CLASS_MEMBER(WfSetTestingExpression)
 				CLASS_MEMBER_BASE(WfExpression)
@@ -2952,6 +2889,14 @@ namespace vl
 				CLASS_MEMBER_FIELD(type)
 			END_CLASS_MEMBER(WfTypeCastingExpression)
 
+			BEGIN_ENUM_ITEM(WfTypeTesting)
+				ENUM_ITEM_NAMESPACE(WfTypeTesting)
+				ENUM_NAMESPACE_ITEM(IsType)
+				ENUM_NAMESPACE_ITEM(IsNotType)
+				ENUM_NAMESPACE_ITEM(IsNull)
+				ENUM_NAMESPACE_ITEM(IsNotNull)
+			END_ENUM_ITEM(WfTypeTesting)
+
 			BEGIN_CLASS_MEMBER(WfTypeTestingExpression)
 				CLASS_MEMBER_BASE(WfExpression)
 
@@ -2962,16 +2907,6 @@ namespace vl
 				CLASS_MEMBER_FIELD(expression)
 				CLASS_MEMBER_FIELD(type)
 			END_CLASS_MEMBER(WfTypeTestingExpression)
-
-			BEGIN_CLASS_MEMBER(WfNullTestingExpression)
-				CLASS_MEMBER_BASE(WfExpression)
-
-				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<WfNullTestingExpression>(), NO_PARAMETER)
-
-
-				CLASS_MEMBER_FIELD(test)
-				CLASS_MEMBER_FIELD(expression)
-			END_CLASS_MEMBER(WfNullTestingExpression)
 
 			BEGIN_CLASS_MEMBER(WfTypeOfTypeExpression)
 				CLASS_MEMBER_BASE(WfExpression)
@@ -3068,16 +3003,6 @@ namespace vl
 				CLASS_MEMBER_FIELD(expression)
 			END_CLASS_MEMBER(WfVariableStatement)
 
-			BEGIN_CLASS_MEMBER(WfAssignmentStatement)
-				CLASS_MEMBER_BASE(WfStatement)
-
-				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<WfAssignmentStatement>(), NO_PARAMETER)
-
-
-				CLASS_MEMBER_FIELD(left)
-				CLASS_MEMBER_FIELD(right)
-			END_CLASS_MEMBER(WfAssignmentStatement)
-
 			BEGIN_CLASS_MEMBER(WfBreakStatement)
 				CLASS_MEMBER_BASE(WfStatement)
 
@@ -3121,28 +3046,17 @@ namespace vl
 				CLASS_MEMBER_FIELD(expression)
 			END_CLASS_MEMBER(WfRaiseExceptionStatement)
 
-			BEGIN_CLASS_MEMBER(WfIfCastStatement)
-				CLASS_MEMBER_BASE(WfStatement)
-
-				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<WfIfCastStatement>(), NO_PARAMETER)
-
-				CLASS_MEMBER_EXTERNALMETHOD(get_name, NO_PARAMETER, vl::WString(WfIfCastStatement::*)(), [](WfIfCastStatement* node){ return node->name.value; })
-				CLASS_MEMBER_EXTERNALMETHOD(set_name, {L"value"}, void(WfIfCastStatement::*)(const vl::WString&), [](WfIfCastStatement* node, const vl::WString& value){ node->name.value = value; })
-
-				CLASS_MEMBER_FIELD(type)
-				CLASS_MEMBER_PROPERTY(name, get_name, set_name)
-				CLASS_MEMBER_FIELD(expression)
-				CLASS_MEMBER_FIELD(trueBranch)
-				CLASS_MEMBER_FIELD(falseBranch)
-			END_CLASS_MEMBER(WfIfCastStatement)
-
 			BEGIN_CLASS_MEMBER(WfIfStatement)
 				CLASS_MEMBER_BASE(WfStatement)
 
 				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<WfIfStatement>(), NO_PARAMETER)
 
+				CLASS_MEMBER_EXTERNALMETHOD(get_name, NO_PARAMETER, vl::WString(WfIfStatement::*)(), [](WfIfStatement* node){ return node->name.value; })
+				CLASS_MEMBER_EXTERNALMETHOD(set_name, {L"value"}, void(WfIfStatement::*)(const vl::WString&), [](WfIfStatement* node, const vl::WString& value){ node->name.value = value; })
 
-				CLASS_MEMBER_FIELD(condition)
+				CLASS_MEMBER_FIELD(type)
+				CLASS_MEMBER_PROPERTY(name, get_name, set_name)
+				CLASS_MEMBER_FIELD(expression)
 				CLASS_MEMBER_FIELD(trueBranch)
 				CLASS_MEMBER_FIELD(falseBranch)
 			END_CLASS_MEMBER(WfIfStatement)
@@ -3358,7 +3272,6 @@ namespace vl
 				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(WfExpression::IVisitor::*)(WfInferExpression* node))
 				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(WfExpression::IVisitor::*)(WfTypeCastingExpression* node))
 				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(WfExpression::IVisitor::*)(WfTypeTestingExpression* node))
-				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(WfExpression::IVisitor::*)(WfNullTestingExpression* node))
 				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(WfExpression::IVisitor::*)(WfTypeOfTypeExpression* node))
 				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(WfExpression::IVisitor::*)(WfTypeOfExpressionExpression* node))
 				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(WfExpression::IVisitor::*)(WfAttachEventExpression* node))
@@ -3375,13 +3288,11 @@ namespace vl
 				CLASS_MEMBER_EXTERNALCTOR(Ptr<WfStatement::IVisitor>(Ptr<IValueInterfaceProxy>), {L"proxy"}, &interface_proxy::WfStatement_IVisitor::Create)
 
 				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(WfStatement::IVisitor::*)(WfVariableStatement* node))
-				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(WfStatement::IVisitor::*)(WfAssignmentStatement* node))
 				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(WfStatement::IVisitor::*)(WfBreakStatement* node))
 				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(WfStatement::IVisitor::*)(WfContinueStatement* node))
 				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(WfStatement::IVisitor::*)(WfReturnStatement* node))
 				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(WfStatement::IVisitor::*)(WfDeleteStatement* node))
 				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(WfStatement::IVisitor::*)(WfRaiseExceptionStatement* node))
-				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(WfStatement::IVisitor::*)(WfIfCastStatement* node))
 				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(WfStatement::IVisitor::*)(WfIfStatement* node))
 				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(WfStatement::IVisitor::*)(WfSwitchStatement* node))
 				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(WfStatement::IVisitor::*)(WfWhileStatement* node))
@@ -3431,15 +3342,15 @@ namespace vl
 					ADD_TYPE_INFO(vl::workflow::WfIfExpression)
 					ADD_TYPE_INFO(vl::workflow::WfRangeBoundary)
 					ADD_TYPE_INFO(vl::workflow::WfRangeExpression)
-					ADD_TYPE_INFO(vl::workflow::WfExpressionTesting)
+					ADD_TYPE_INFO(vl::workflow::WfSetTesting)
 					ADD_TYPE_INFO(vl::workflow::WfSetTestingExpression)
 					ADD_TYPE_INFO(vl::workflow::WfConstructorArgument)
 					ADD_TYPE_INFO(vl::workflow::WfConstructorExpression)
 					ADD_TYPE_INFO(vl::workflow::WfInferExpression)
 					ADD_TYPE_INFO(vl::workflow::WfTypeCastingStrategy)
 					ADD_TYPE_INFO(vl::workflow::WfTypeCastingExpression)
+					ADD_TYPE_INFO(vl::workflow::WfTypeTesting)
 					ADD_TYPE_INFO(vl::workflow::WfTypeTestingExpression)
-					ADD_TYPE_INFO(vl::workflow::WfNullTestingExpression)
 					ADD_TYPE_INFO(vl::workflow::WfTypeOfTypeExpression)
 					ADD_TYPE_INFO(vl::workflow::WfTypeOfExpressionExpression)
 					ADD_TYPE_INFO(vl::workflow::WfAttachEventExpression)
@@ -3450,13 +3361,11 @@ namespace vl
 					ADD_TYPE_INFO(vl::workflow::WfCallExpression)
 					ADD_TYPE_INFO(vl::workflow::WfStatement)
 					ADD_TYPE_INFO(vl::workflow::WfVariableStatement)
-					ADD_TYPE_INFO(vl::workflow::WfAssignmentStatement)
 					ADD_TYPE_INFO(vl::workflow::WfBreakStatement)
 					ADD_TYPE_INFO(vl::workflow::WfContinueStatement)
 					ADD_TYPE_INFO(vl::workflow::WfReturnStatement)
 					ADD_TYPE_INFO(vl::workflow::WfDeleteStatement)
 					ADD_TYPE_INFO(vl::workflow::WfRaiseExceptionStatement)
-					ADD_TYPE_INFO(vl::workflow::WfIfCastStatement)
 					ADD_TYPE_INFO(vl::workflow::WfIfStatement)
 					ADD_TYPE_INFO(vl::workflow::WfSwitchCase)
 					ADD_TYPE_INFO(vl::workflow::WfSwitchStatement)

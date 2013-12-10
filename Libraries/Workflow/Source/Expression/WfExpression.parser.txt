@@ -147,6 +147,7 @@ enum BinaryOperator
 	Or,
 	Not,
 	FailedThen,
+	Assign,
 }
 
 class BinaryExpression : Expression
@@ -184,15 +185,15 @@ class RangeExpression : Expression
 	RangeBoundary			endBoundary;
 }
 
-enum ExpressionTesting
+enum SetTesting
 {
-	Normal,
-	Reversed,
+	In,
+	NotIn,
 }
 
 class SetTestingExpression : Expression
 {
-	ExpressionTesting		test;
+	SetTesting				test;
 	Expression				element;
 	Expression				collection;
 }
@@ -227,17 +228,19 @@ class TypeCastingExpression : Expression
 	Type					type;
 }
 
-class TypeTestingExpression : Expression
+enum TypeTesting
 {
-	ExpressionTesting		test;
-	Expression				expression;
-	Type					type;
+	IsType,
+	IsNotType,
+	IsNull,
+	IsNotNull,
 }
 
-class NullTestingExpression : Expression
+class TypeTestingExpression : Expression
 {
-	ExpressionTesting		test;
+	TypeTesting				test;
 	Expression				expression;
+	Type					type;
 }
 
 class TypeOfTypeExpression : Expression
@@ -298,12 +301,6 @@ class VariableStatement : Statement
 	Expression				expression;
 }
 
-class AssignmentStatement : Statement
-{
-	Expression				left;
-	Expression				right;
-}
-
 class BreakStatement : Statement
 {
 }
@@ -327,18 +324,11 @@ class RaiseExceptionStatement : Statement
 	Expression				expression;
 }
 
-class IfCastStatement : Statement
+class IfStatement : Statement
 {
 	Type					type;
 	token					name;
 	Expression				expression;
-	Statement				trueBranch;
-	Statement				falseBranch;
-}
-
-class IfStatement : Statement
-{
-	Expression				condition;
 	Statement				trueBranch;
 	Statement				falseBranch;
 }
@@ -594,13 +584,21 @@ rule Expression Exp0
 	= Exp0 : parent "." NAME : name as MemberExpression
 	= Exp0 : parent "::" NAME : name as ChildExpression
 	= Exp0 : first "[" WorkflowExpression : second "]" as BinaryExpression with {op = "Index"}
-	= Exp0 : element "in" WorkflowExpression : collection as SetTestingExpression with {test="Normal"}
-	= Exp0 : element "not" "in" WorkflowExpression : collection as SetTestingExpression with {test="Reversed"}
+	= Exp0 : element
+		(("in" with {test="In"}) | ("not" "in" with {test="NotIn"}))
+		WorkflowExpression : collection as SetTestingExpression
 	= Exp0 : expression "of" WorkflowType : type as InferExpression
-	= Exp0 : expression "is" WorkflowType : type as TypeTestingExpression with {test="Normal"}
-	= Exp0 : expression "is" "not" WorkflowType : type as TypeTestingExpression with {test="Reversed"}
-	= Exp0 : expression "is" "null" as NullTestingExpression with {test="Normal"}
-	= Exp0 : expression "is" "not" "null" as NullTestingExpression with {test="Reversed"}
+	= Exp0 : expression
+		(
+			(
+				(
+					("is" with {test="IsType"})
+					| ("is" "not" with {test="IsNotType"})
+				) WorkflowType : type as TypeTestingExpression
+			)
+			| ("is" "null" as TypeTestingExpression with {test="IsNull"})
+			| ("is" "not" "null" as TypeTestingExpression with {test="IsNotNull"})
+		)
 	= Exp0 : expression "as" WorkflowType : type as TypeCastingExpression with {strategy = "Weak"}
 	= "cast" WorkflowType : type Exp0 : expression as TypeCastingExpression with {strategy = "Strong"}
 	= "typeof" "(" WorkflowType : type ")" as TypeOfTypeExpression
@@ -658,17 +656,17 @@ rule Expression Exp10
 	= !Exp9
 	= Exp9 : condition "?" Exp10 : trueBranch ":" Exp10 : falseBranch as IfExpression
 	;
+rule Expression Exp11
+	= !Exp10
+	= Exp10 : first "=" Exp11 : second as BinaryExpression with {op = "Assign"}
+	;
 
 rule Expression WorkflowExpression
-	= !Exp10
+	= !Exp11
 	;
 
 rule VariableStatement Variable
 	= "var" NAME : name [":" WorkflowType : type] "=" WorkflowExpression : expression ";" as VariableStatement
-	;
-
-rule AssignmentStatement Assignment
-	= WorkflowExpression : left "=" WorkflowExpression : right ";" as AssignmentStatement
 	;
 
 rule BreakStatement Break
@@ -688,10 +686,8 @@ rule RaiseExceptionStatement RaiseException
 	;
 
 rule IfStatement If
-	= "if" "(" WorkflowExpression : condition ")" WorkflowStatement : trueBranch ["else" WorkflowStatement : falseBranch] as IfStatement
+	= "if" "(" ["var" NAME : name ":" WorkflowType : type "="] WorkflowExpression : expression ")" WorkflowStatement : trueBranch ["else" WorkflowStatement : falseBranch] as IfStatement
 	;
-rule IfCastStatement IfCast
-	= "if" "(" NAME : name ":" WorkflowType : type "=" WorkflowExpression : expression ")" WorkflowStatement : trueBranch ["else" WorkflowStatement : falseBranch] as IfCastStatement	;
 
 rule SwitchCase SwitchCaseFragment
 	= "case" WorkflowExpression : expression ":" WorkflowStatement : statement as SwitchCase
@@ -704,8 +700,9 @@ rule WhileStatement While
 	= "while" "(" WorkflowExpression : condition ")" WorkflowStatement : statement as WhileStatement
 	;
 rule ForEachStatement ForEach
-	= "for" "(" NAME : name "in" WorkflowExpression : collection ")" WorkflowStatement : statement as ForEachStatement with {direction="Normal"}
-	= "for" "(" NAME : name "in" "reversed" WorkflowExpression : collection ")" WorkflowStatement : statement as ForEachStatement with {direction="Reversed"}
+	= "for" "(" NAME : name 
+		(("in" with {direction="Normal"}) | ("in" "reversed" with {direction="Reversed"}))
+		WorkflowExpression : collection ")" WorkflowStatement : statement as ForEachStatement
 	;
 
 rule TryStatement Try
@@ -722,14 +719,12 @@ rule ExpressionStatement ExprStat
 
 rule Statement WorkflowStatement
 	= !Variable
-	= !Assignment
 	= !Break
 	= !Continue
 	= !Return
 	= !Delete
 	= !RaiseException
 	= !If
-	= !IfCast
 	= !Switch
 	= !While
 	= !ForEach
