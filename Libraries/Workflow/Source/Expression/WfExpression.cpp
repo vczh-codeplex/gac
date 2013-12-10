@@ -155,10 +155,15 @@ L"\r\n"L"\tExpression\t\t\t\tfirst;"
 L"\r\n"L"\tExpression\t\t\t\tsecond;"
 L"\r\n"L"}"
 L"\r\n"L""
-L"\r\n"L"class LetExpression : Expression"
+L"\r\n"L"class LetVariable"
 L"\r\n"L"{"
 L"\r\n"L"\ttoken\t\t\t\t\tname;"
 L"\r\n"L"\tExpression\t\t\t\tvalue;"
+L"\r\n"L"}"
+L"\r\n"L""
+L"\r\n"L"class LetExpression : Expression"
+L"\r\n"L"{"
+L"\r\n"L"\tLetVariable[]\t\t\tvariables;"
 L"\r\n"L"\tExpression\t\t\t\texp;"
 L"\r\n"L"}"
 L"\r\n"L""
@@ -568,6 +573,10 @@ L"\r\n"L"rule ConstructorArgument CtorFragment"
 L"\r\n"L"\t= WorkflowExpression : key [ \":\" WorkflowExpression : value] as ConstructorArgument"
 L"\r\n"L"\t;"
 L"\r\n"L""
+L"\r\n"L"rule LetVariable LetVariableFragment"
+L"\r\n"L"\t= NAME : name \"=\" WorkflowExpression : value as LetVariable"
+L"\r\n"L"\t;"
+L"\r\n"L""
 L"\r\n"L"rule Expression Exp0"
 L"\r\n"L"\t= !Literal"
 L"\r\n"L"\t= !Integer"
@@ -579,7 +588,7 @@ L"\r\n"L"\t= ORDERED_NAME : name as OrderedNameExpression"
 L"\r\n"L"\t= \"(\" !WorkflowExpression \")\""
 L"\r\n"L"\t= \"[\" WorkflowExpression : body \"]\" as OrderedLambdaExpression"
 L"\r\n"L"\t= Function : function as FunctionExpression"
-L"\r\n"L"\t= \"let\" NAME : name \"=\" WorkflowExpression : value \":\" WorkflowExpression : exp as LetExpression"
+L"\r\n"L"\t= \"let\" LetVariableFragment : variables {\",\" LetVariableFragment : variables} \"in\" WorkflowExpression : exp as LetExpression"
 L"\r\n"L"\t= \"+\" Exp0 as UnaryExpression with {op = \"Positive\"}"
 L"\r\n"L"\t= \"-\" Exp0 as UnaryExpression with {op = \"Negative\"}"
 L"\r\n"L"\t= \"not\" Exp0 as UnaryExpression with {op = \"Not\"}"
@@ -1059,10 +1068,15 @@ Parsing Tree Conversion Driver Implementation
 				SetMember(tree->second, obj->GetMember(L"second"), tokens);
 			}
 
-			void Fill(vl::Ptr<WfLetExpression> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
+			void Fill(vl::Ptr<WfLetVariable> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
 			{
 				SetMember(tree->name, obj->GetMember(L"name"), tokens);
 				SetMember(tree->value, obj->GetMember(L"value"), tokens);
+			}
+
+			void Fill(vl::Ptr<WfLetExpression> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
+			{
+				SetMember(tree->variables, obj->GetMember(L"variables"), tokens);
 				SetMember(tree->exp, obj->GetMember(L"exp"), tokens);
 			}
 
@@ -1459,6 +1473,13 @@ Parsing Tree Conversion Driver Implementation
 					vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
 					Fill(tree, obj, tokens);
 					Fill(tree.Cast<WfExpression>(), obj, tokens);
+					return tree;
+				}
+				else if(obj->GetType()==L"LetVariable")
+				{
+					vl::Ptr<WfLetVariable> tree = new WfLetVariable;
+					vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
+					Fill(tree, obj, tokens);
 					return tree;
 				}
 				else if(obj->GetType()==L"LetExpression")
@@ -1880,6 +1901,11 @@ Parsing Tree Conversion Implementation
 		vl::Ptr<WfBinaryExpression> WfBinaryExpression::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
 		{
 			return WfConvertParsingTreeNode(node, tokens).Cast<WfBinaryExpression>();
+		}
+
+		vl::Ptr<WfLetVariable> WfLetVariable::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
+		{
+			return WfConvertParsingTreeNode(node, tokens).Cast<WfLetVariable>();
 		}
 
 		vl::Ptr<WfLetExpression> WfLetExpression::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
@@ -2568,6 +2594,7 @@ namespace vl
 			IMPL_TYPE_INFO_RENAME(WfUnaryExpression, Workflow::WfUnaryExpression)
 			IMPL_TYPE_INFO_RENAME(WfBinaryOperator, Workflow::WfBinaryOperator)
 			IMPL_TYPE_INFO_RENAME(WfBinaryExpression, Workflow::WfBinaryExpression)
+			IMPL_TYPE_INFO_RENAME(WfLetVariable, Workflow::WfLetVariable)
 			IMPL_TYPE_INFO_RENAME(WfLetExpression, Workflow::WfLetExpression)
 			IMPL_TYPE_INFO_RENAME(WfIfExpression, Workflow::WfIfExpression)
 			IMPL_TYPE_INFO_RENAME(WfRangeBoundary, Workflow::WfRangeBoundary)
@@ -2863,16 +2890,23 @@ namespace vl
 				CLASS_MEMBER_FIELD(second)
 			END_CLASS_MEMBER(WfBinaryExpression)
 
+			BEGIN_CLASS_MEMBER(WfLetVariable)
+				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<WfLetVariable>(), NO_PARAMETER)
+
+				CLASS_MEMBER_EXTERNALMETHOD(get_name, NO_PARAMETER, vl::WString(WfLetVariable::*)(), [](WfLetVariable* node){ return node->name.value; })
+				CLASS_MEMBER_EXTERNALMETHOD(set_name, {L"value"}, void(WfLetVariable::*)(const vl::WString&), [](WfLetVariable* node, const vl::WString& value){ node->name.value = value; })
+
+				CLASS_MEMBER_PROPERTY(name, get_name, set_name)
+				CLASS_MEMBER_FIELD(value)
+			END_CLASS_MEMBER(WfLetVariable)
+
 			BEGIN_CLASS_MEMBER(WfLetExpression)
 				CLASS_MEMBER_BASE(WfExpression)
 
 				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<WfLetExpression>(), NO_PARAMETER)
 
-				CLASS_MEMBER_EXTERNALMETHOD(get_name, NO_PARAMETER, vl::WString(WfLetExpression::*)(), [](WfLetExpression* node){ return node->name.value; })
-				CLASS_MEMBER_EXTERNALMETHOD(set_name, {L"value"}, void(WfLetExpression::*)(const vl::WString&), [](WfLetExpression* node, const vl::WString& value){ node->name.value = value; })
 
-				CLASS_MEMBER_PROPERTY(name, get_name, set_name)
-				CLASS_MEMBER_FIELD(value)
+				CLASS_MEMBER_FIELD(variables)
 				CLASS_MEMBER_FIELD(exp)
 			END_CLASS_MEMBER(WfLetExpression)
 
@@ -3446,6 +3480,7 @@ namespace vl
 					ADD_TYPE_INFO(vl::workflow::WfUnaryExpression)
 					ADD_TYPE_INFO(vl::workflow::WfBinaryOperator)
 					ADD_TYPE_INFO(vl::workflow::WfBinaryExpression)
+					ADD_TYPE_INFO(vl::workflow::WfLetVariable)
 					ADD_TYPE_INFO(vl::workflow::WfLetExpression)
 					ADD_TYPE_INFO(vl::workflow::WfIfExpression)
 					ADD_TYPE_INFO(vl::workflow::WfRangeBoundary)
