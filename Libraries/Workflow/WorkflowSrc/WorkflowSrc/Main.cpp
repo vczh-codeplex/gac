@@ -4,11 +4,23 @@
 #include <windows.h>
 
 #include "..\..\..\..\Common\Source\Console.h"
-#include "..\..\Source\WorkflowVlppReferences.h"
 #include "..\..\Source\Expression\WfExpression.h"
 
 using namespace vl;
 using namespace vl::console;
+using namespace vl::parsing::tabling;
+using namespace vl::workflow;
+
+Ptr<ParsingTable> workflowTable;
+
+Ptr<ParsingTable> GetWorkflowTable()
+{
+	if (!workflowTable)
+	{
+		workflowTable = WfLoadTable();
+	}
+	return workflowTable;
+}
 
 WString GetPath()
 {
@@ -33,7 +45,7 @@ WString GetPath()
 
 int wmain(int argc, wchar_t* argv[])
 {
-	Console::SetTitle(L"Workflow UnitTest Project");
+	workflowTable = 0;
 	_CrtDumpMemoryLeaks();
 	return 0;
 }

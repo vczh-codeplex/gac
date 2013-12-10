@@ -257,9 +257,18 @@
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="TestSamples.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\..\Source\Expression\WfExpression.parser.txt" />
+    <Text Include="..\TestFiles\Samples\Declaration\HelloWorld.txt" />
+    <Text Include="..\TestFiles\Samples\Expression\HelloWorld.txt" />
+    <Text Include="..\TestFiles\Samples\IndexDeclaration.txt" />
+    <Text Include="..\TestFiles\Samples\IndexExpression.txt" />
+    <Text Include="..\TestFiles\Samples\IndexModule.txt" />
+    <Text Include="..\TestFiles\Samples\IndexStatement.txt" />
+    <Text Include="..\TestFiles\Samples\Module\HelloWorld.txt" />
+    <Text Include="..\TestFiles\Samples\Statement\HelloWorld.txt" />
     <Text Include="Spec.txt" />
   </ItemGroup>
   <ItemGroup>

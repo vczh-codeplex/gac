@@ -6,9 +6,7 @@ Parser::WfExpression
 本文件使用Vczh Parsing Generator工具自动生成
 ***********************************************************************/
 
-#include "../../../../Common/Source/Parsing/Parsing.h"
-#include "../../../../Common/Source/Parsing/ParsingDefinitions.h"
-#include "../../../../Common/Source/Parsing/ParsingAutomaton.h"
+#include "../WorkflowVlppReferences.h"
 
 namespace vl
 {
@@ -151,6 +149,9 @@ namespace vl
 		class WfFunctionDeclaration;
 		class WfFunctionExpression;
 		class WfNewTypeExpression;
+		class WfModuleUsingFragment;
+		class WfModuleUsingNameFragment;
+		class WfModuleUsingWildCardFragment;
 		class WfModuleUsingItem;
 		class WfModuleUsingPath;
 		class WfModule;
@@ -881,6 +882,7 @@ namespace vl
 			WfFunctionAnonymity anonymity;
 			vl::parsing::ParsingToken name;
 			vl::collections::List<vl::Ptr<WfFunctionArgument>> arguments;
+			vl::Ptr<WfType> returnType;
 			vl::Ptr<WfStatement> statement;
 
 			void Accept(WfDeclaration::IVisitor* visitor)override;
@@ -910,10 +912,43 @@ namespace vl
 			static vl::Ptr<WfNewTypeExpression> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 		};
 
-		class WfModuleUsingItem : public vl::parsing::ParsingTreeCustomBase, vl::reflection::Description<WfModuleUsingItem>
+		class WfModuleUsingFragment abstract : public vl::parsing::ParsingTreeCustomBase, vl::reflection::Description<WfModuleUsingFragment>
+		{
+		public:
+			class IVisitor : public vl::reflection::IDescriptable, vl::reflection::Description<IVisitor>
+			{
+			public:
+				virtual void Visit(WfModuleUsingNameFragment* node)=0;
+				virtual void Visit(WfModuleUsingWildCardFragment* node)=0;
+			};
+
+			virtual void Accept(WfModuleUsingFragment::IVisitor* visitor)=0;
+
+		};
+
+		class WfModuleUsingNameFragment : public WfModuleUsingFragment, vl::reflection::Description<WfModuleUsingNameFragment>
 		{
 		public:
 			vl::parsing::ParsingToken name;
+
+			void Accept(WfModuleUsingFragment::IVisitor* visitor)override;
+
+			static vl::Ptr<WfModuleUsingNameFragment> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
+		};
+
+		class WfModuleUsingWildCardFragment : public WfModuleUsingFragment, vl::reflection::Description<WfModuleUsingWildCardFragment>
+		{
+		public:
+
+			void Accept(WfModuleUsingFragment::IVisitor* visitor)override;
+
+			static vl::Ptr<WfModuleUsingWildCardFragment> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
+		};
+
+		class WfModuleUsingItem : public vl::parsing::ParsingTreeCustomBase, vl::reflection::Description<WfModuleUsingItem>
+		{
+		public:
+			vl::collections::List<vl::Ptr<WfModuleUsingFragment>> fragments;
 
 			static vl::Ptr<WfModuleUsingItem> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 		};
@@ -1040,6 +1075,9 @@ namespace vl
 			DECL_TYPE_INFO(vl::workflow::WfFunctionDeclaration)
 			DECL_TYPE_INFO(vl::workflow::WfFunctionExpression)
 			DECL_TYPE_INFO(vl::workflow::WfNewTypeExpression)
+			DECL_TYPE_INFO(vl::workflow::WfModuleUsingFragment)
+			DECL_TYPE_INFO(vl::workflow::WfModuleUsingNameFragment)
+			DECL_TYPE_INFO(vl::workflow::WfModuleUsingWildCardFragment)
 			DECL_TYPE_INFO(vl::workflow::WfModuleUsingItem)
 			DECL_TYPE_INFO(vl::workflow::WfModuleUsingPath)
 			DECL_TYPE_INFO(vl::workflow::WfModule)
@@ -1047,6 +1085,7 @@ namespace vl
 			DECL_TYPE_INFO(vl::workflow::WfExpression::IVisitor)
 			DECL_TYPE_INFO(vl::workflow::WfStatement::IVisitor)
 			DECL_TYPE_INFO(vl::workflow::WfDeclaration::IVisitor)
+			DECL_TYPE_INFO(vl::workflow::WfModuleUsingFragment::IVisitor)
 
 			namespace interface_proxy
 			{
@@ -1354,6 +1393,31 @@ namespace vl
 					}
 
 					void Visit(vl::workflow::WfFunctionDeclaration* node)override
+					{
+						INVOKE_INTERFACE_PROXY(Visit, node);
+					}
+
+				};
+
+				class WfModuleUsingFragment_IVisitor : public ValueInterfaceRoot, public virtual vl::workflow::WfModuleUsingFragment::IVisitor
+				{
+				public:
+					WfModuleUsingFragment_IVisitor(Ptr<IValueInterfaceProxy> proxy)
+						:ValueInterfaceRoot(proxy)
+					{
+					}
+
+					static Ptr<vl::workflow::WfModuleUsingFragment::IVisitor> Create(Ptr<IValueInterfaceProxy> proxy)
+					{
+						return new WfModuleUsingFragment_IVisitor(proxy);
+					}
+
+					void Visit(vl::workflow::WfModuleUsingNameFragment* node)override
+					{
+						INVOKE_INTERFACE_PROXY(Visit, node);
+					}
+
+					void Visit(vl::workflow::WfModuleUsingWildCardFragment* node)override
 					{
 						INVOKE_INTERFACE_PROXY(Visit, node);
 					}

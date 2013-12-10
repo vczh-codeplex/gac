@@ -49,6 +49,21 @@
     <Filter Include="Workflow\Expression">
       <UniqueIdentifier>{04d03346-ddff-4937-ba7f-e41b62b5c162}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\Samples">
+      <UniqueIdentifier>{a1ab9fe2-e49d-42fe-9e6e-32b54937e656}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Samples\Expression">
+      <UniqueIdentifier>{f343ddd1-bacd-4b33-8392-79aca300d77c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Samples\Declaration">
+      <UniqueIdentifier>{6bda0f93-e3b3-4347-943e-69e77de06f1d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Samples\Statement">
+      <UniqueIdentifier>{6f8a9882-e947-4b0f-9398-de66c43adab5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Samples\Module">
+      <UniqueIdentifier>{8a7344e7-5818-4254-b1e4-c1154667e7c7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Source\WorkflowVlppReferences.h">
@@ -368,11 +383,38 @@
     <ClCompile Include="..\..\Source\Expression\WfExpression.cpp">
       <Filter>Workflow\Expression</Filter>
     </ClCompile>
+    <ClCompile Include="TestSamples.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Spec.txt" />
     <Text Include="..\..\Source\Expression\WfExpression.parser.txt">
       <Filter>Workflow\Expression</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\IndexDeclaration.txt">
+      <Filter>Resource Files\Samples</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\IndexExpression.txt">
+      <Filter>Resource Files\Samples</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\IndexModule.txt">
+      <Filter>Resource Files\Samples</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\IndexStatement.txt">
+      <Filter>Resource Files\Samples</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\Expression\HelloWorld.txt">
+      <Filter>Resource Files\Samples\Expression</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\Declaration\HelloWorld.txt">
+      <Filter>Resource Files\Samples\Declaration</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\Module\HelloWorld.txt">
+      <Filter>Resource Files\Samples\Module</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\Statement\HelloWorld.txt">
+      <Filter>Resource Files\Samples\Statement</Filter>
     </Text>
   </ItemGroup>
   <ItemGroup>
