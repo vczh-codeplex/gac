@@ -686,27 +686,27 @@ rule RaiseExceptionStatement RaiseException
 	;
 
 rule IfStatement If
-	= "if" "(" ["var" NAME : name ":" WorkflowType : type "="] WorkflowExpression : expression ")" WorkflowStatement : trueBranch ["else" WorkflowStatement : falseBranch] as IfStatement
+	= "if" "(" ["var" NAME : name ":" WorkflowType : type "="] WorkflowExpression : expression ")" Block : trueBranch ["else" Block : falseBranch] as IfStatement
 	;
 
 rule SwitchCase SwitchCaseFragment
-	= "case" WorkflowExpression : expression ":" WorkflowStatement : statement as SwitchCase
+	= "case" WorkflowExpression : expression ":" Block : statement as SwitchCase
 	;
 rule SwitchStatement Switch
-	= "switch" "(" WorkflowExpression : expression ")" "{" {SwitchCaseFragment : caseBranches} ["default" ":" WorkflowStatement : defaultBranch] "}" as SwitchStatement
+	= "switch" "(" WorkflowExpression : expression ")" "{" {SwitchCaseFragment : caseBranches} ["default" ":" Block : defaultBranch] "}" as SwitchStatement
 	;
 
 rule WhileStatement While
-	= "while" "(" WorkflowExpression : condition ")" WorkflowStatement : statement as WhileStatement
+	= "while" "(" WorkflowExpression : condition ")" Block : statement as WhileStatement
 	;
 rule ForEachStatement ForEach
 	= "for" "(" NAME : name 
 		(("in" with {direction="Normal"}) | ("in" "reversed" with {direction="Reversed"}))
-		WorkflowExpression : collection ")" WorkflowStatement : statement as ForEachStatement
+		WorkflowExpression : collection ")" Block : statement as ForEachStatement
 	;
 
 rule TryStatement Try
-	= "try" WorkflowStatement : protectedStatement ["catch" "(" NAME : name ")" WorkflowStatement : catchStatement] ["finally" WorkflowStatement : finallyStatement] as TryStatement
+	= "try" Block : protectedStatement ["catch" "(" NAME : name ")" Block : catchStatement] ["finally" Block : finallyStatement] as TryStatement
 	;
 
 rule BlockStatement Block
@@ -741,8 +741,12 @@ rule FunctionArgument FunctionArgumentFragment
 	= NAME : name ":" WorkflowType : type as FunctionArgument
 	;
 rule FunctionDeclaration Function
-	= "func" NAME : name "(" [FunctionArgumentFragment : arguments {"," FunctionArgumentFragment : arguments}] ")" WorkflowStatement : statement as FunctionDeclaration with {anonymity="Named"}
-	= "func" "(" [FunctionArgumentFragment : arguments {"," FunctionArgumentFragment : arguments}] ")" WorkflowStatement : statement as FunctionDeclaration with {anonymity="Anonymous"}
+	= "func" 
+		(
+			(NAME : name "(" with {anonymity="Named"})
+			| ("(" with {anonymity="Anonymous"})
+		)
+		[FunctionArgumentFragment : arguments {"," FunctionArgumentFragment : arguments}] ")" Block : statement as FunctionDeclaration
 	;
 
 rule Declaration WorkflowDeclaration

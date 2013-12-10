@@ -252,7 +252,10 @@
     <ClCompile Include="..\..\..\..\Common\Source\String.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\Threading.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\UnitTest\UnitTest.cpp" />
-    <ClCompile Include="..\..\Source\Expression\WfExpression.cpp" />
+    <ClCompile Include="..\..\Source\Expression\WfExpression.cpp">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
