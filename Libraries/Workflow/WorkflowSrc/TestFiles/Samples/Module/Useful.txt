@@ -13,7 +13,27 @@ namespace test
     namespace useless{}
     namespace useful
     {
-        func add(x : int, y : int) : int {return x+y;}
+        func Sum(begin : int, end : int) : int
+        {
+            var sum : int = 0;
+            for(x in range [begin,end])
+            {
+                sum=sum+x;
+            }
+            return sum;
+        }
+
+		func CreateWindow() : Window
+		{
+			var window = new Window();
+			window.Text="This is a window!";
+
+			var button = new Button();
+			button.Text="Press Me!";
+			window.AddChild(button);
+
+			return window;
+		}
     }
     func inc(x : int) : int {return x+1;}
     func dec(x : int) : int {return x-1;}
