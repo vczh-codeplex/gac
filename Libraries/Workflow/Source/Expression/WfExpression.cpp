@@ -409,6 +409,7 @@ L"\r\n"L"{"
 L"\r\n"L"\tFunctionAnonymity\t\tanonymity;"
 L"\r\n"L"\ttoken\t\t\t\t\tname;"
 L"\r\n"L"\tFunctionArgument[]\t\targuments;"
+L"\r\n"L"\tType\t\t\t\t\treturnType;"
 L"\r\n"L"\tStatement\t\t\t\tstatement;"
 L"\r\n"L"}"
 L"\r\n"L""
@@ -424,9 +425,22 @@ L"\r\n"L"\tExpression[]\t\t\targuments;"
 L"\r\n"L"\tFunctionDeclaration[]\tfunctions;"
 L"\r\n"L"}"
 L"\r\n"L""
-L"\r\n"L"class ModuleUsingItem"
+L"\r\n"L"class ModuleUsingFragment"
+L"\r\n"L"{"
+L"\r\n"L"}"
+L"\r\n"L""
+L"\r\n"L"class ModuleUsingNameFragment : ModuleUsingFragment"
 L"\r\n"L"{"
 L"\r\n"L"\ttoken\t\t\t\t\tname;"
+L"\r\n"L"}"
+L"\r\n"L""
+L"\r\n"L"class ModuleUsingWildCardFragment : ModuleUsingFragment"
+L"\r\n"L"{"
+L"\r\n"L"}"
+L"\r\n"L""
+L"\r\n"L"class ModuleUsingItem"
+L"\r\n"L"{"
+L"\r\n"L"\tModuleUsingFragment[]\tfragments;"
 L"\r\n"L"}"
 L"\r\n"L""
 L"\r\n"L"class ModuleUsingPath"
@@ -744,7 +758,7 @@ L"\r\n"L"\t\t("
 L"\r\n"L"\t\t\t(NAME : name \"(\" with {anonymity=\"Named\"})"
 L"\r\n"L"\t\t\t| (\"(\" with {anonymity=\"Anonymous\"})"
 L"\r\n"L"\t\t)"
-L"\r\n"L"\t\t[FunctionArgumentFragment : arguments {\",\" FunctionArgumentFragment : arguments}] \")\" Block : statement as FunctionDeclaration"
+L"\r\n"L"\t\t[FunctionArgumentFragment : arguments {\",\" FunctionArgumentFragment : arguments}] \")\" \":\" WorkflowType : returnType Block : statement as FunctionDeclaration"
 L"\r\n"L"\t;"
 L"\r\n"L""
 L"\r\n"L"rule Declaration WorkflowDeclaration"
@@ -752,14 +766,18 @@ L"\r\n"L"\t= !Namespace"
 L"\r\n"L"\t= !Function"
 L"\r\n"L"\t;"
 L"\r\n"L""
+L"\r\n"L"rule ModuleUsingFragment UsingFragment"
+L"\r\n"L"\t= NAME : name as ModuleUsingNameFragment"
+L"\r\n"L"\t= \"*\" as ModuleUsingWildCardFragment"
+L"\r\n"L"\t;"
 L"\r\n"L"rule ModuleUsingItem UsingItem"
-L"\r\n"L"\t= NAME : name as ModuleUsingItem"
+L"\r\n"L"\t= UsingFragment : fragments {UsingFragment : fragments} as ModuleUsingItem"
 L"\r\n"L"\t;"
 L"\r\n"L"rule ModuleUsingPath UsingPath"
-L"\r\n"L"\t= \"using\" UsingItem : items {\"::\" UsingItem : items} as ModuleUsingPath"
+L"\r\n"L"\t= \"using\" UsingItem : items {\"::\" UsingItem : items} \";\" as ModuleUsingPath"
 L"\r\n"L"\t;"
 L"\r\n"L"rule Module WorkflowModule"
-L"\r\n"L"\t= \"module\" NAME : name {UsingPath : paths} {WorkflowDeclaration : declarations} as Module"
+L"\r\n"L"\t= \"module\" NAME : name \";\" {UsingPath : paths} {WorkflowDeclaration : declarations} as Module"
 L"\r\n"L"\t;"
 ;
 
@@ -1250,6 +1268,7 @@ Parsing Tree Conversion Driver Implementation
 				SetMember(tree->anonymity, obj->GetMember(L"anonymity"), tokens);
 				SetMember(tree->name, obj->GetMember(L"name"), tokens);
 				SetMember(tree->arguments, obj->GetMember(L"arguments"), tokens);
+				SetMember(tree->returnType, obj->GetMember(L"returnType"), tokens);
 				SetMember(tree->statement, obj->GetMember(L"statement"), tokens);
 			}
 
@@ -1265,9 +1284,22 @@ Parsing Tree Conversion Driver Implementation
 				SetMember(tree->functions, obj->GetMember(L"functions"), tokens);
 			}
 
-			void Fill(vl::Ptr<WfModuleUsingItem> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
+			void Fill(vl::Ptr<WfModuleUsingFragment> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
+			{
+			}
+
+			void Fill(vl::Ptr<WfModuleUsingNameFragment> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
 			{
 				SetMember(tree->name, obj->GetMember(L"name"), tokens);
+			}
+
+			void Fill(vl::Ptr<WfModuleUsingWildCardFragment> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
+			{
+			}
+
+			void Fill(vl::Ptr<WfModuleUsingItem> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
+			{
+				SetMember(tree->fragments, obj->GetMember(L"fragments"), tokens);
 			}
 
 			void Fill(vl::Ptr<WfModuleUsingPath> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
@@ -1705,6 +1737,22 @@ Parsing Tree Conversion Driver Implementation
 					Fill(tree.Cast<WfExpression>(), obj, tokens);
 					return tree;
 				}
+				else if(obj->GetType()==L"ModuleUsingNameFragment")
+				{
+					vl::Ptr<WfModuleUsingNameFragment> tree = new WfModuleUsingNameFragment;
+					vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
+					Fill(tree, obj, tokens);
+					Fill(tree.Cast<WfModuleUsingFragment>(), obj, tokens);
+					return tree;
+				}
+				else if(obj->GetType()==L"ModuleUsingWildCardFragment")
+				{
+					vl::Ptr<WfModuleUsingWildCardFragment> tree = new WfModuleUsingWildCardFragment;
+					vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
+					Fill(tree, obj, tokens);
+					Fill(tree.Cast<WfModuleUsingFragment>(), obj, tokens);
+					return tree;
+				}
 				else if(obj->GetType()==L"ModuleUsingItem")
 				{
 					vl::Ptr<WfModuleUsingItem> tree = new WfModuleUsingItem;
@@ -2008,6 +2056,16 @@ Parsing Tree Conversion Implementation
 			return WfConvertParsingTreeNode(node, tokens).Cast<WfNewTypeExpression>();
 		}
 
+		vl::Ptr<WfModuleUsingNameFragment> WfModuleUsingNameFragment::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
+		{
+			return WfConvertParsingTreeNode(node, tokens).Cast<WfModuleUsingNameFragment>();
+		}
+
+		vl::Ptr<WfModuleUsingWildCardFragment> WfModuleUsingWildCardFragment::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
+		{
+			return WfConvertParsingTreeNode(node, tokens).Cast<WfModuleUsingWildCardFragment>();
+		}
+
 		vl::Ptr<WfModuleUsingItem> WfModuleUsingItem::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
 		{
 			return WfConvertParsingTreeNode(node, tokens).Cast<WfModuleUsingItem>();
@@ -2273,6 +2331,16 @@ Visitor Pattern Implementation
 		}
 
 		void WfNewTypeExpression::Accept(WfExpression::IVisitor* visitor)
+		{
+			visitor->Visit(this);
+		}
+
+		void WfModuleUsingNameFragment::Accept(WfModuleUsingFragment::IVisitor* visitor)
+		{
+			visitor->Visit(this);
+		}
+
+		void WfModuleUsingWildCardFragment::Accept(WfModuleUsingFragment::IVisitor* visitor)
 		{
 			visitor->Visit(this);
 		}
@@ -2543,6 +2611,9 @@ namespace vl
 			IMPL_TYPE_INFO_RENAME(WfFunctionDeclaration, Workflow::WfFunctionDeclaration)
 			IMPL_TYPE_INFO_RENAME(WfFunctionExpression, Workflow::WfFunctionExpression)
 			IMPL_TYPE_INFO_RENAME(WfNewTypeExpression, Workflow::WfNewTypeExpression)
+			IMPL_TYPE_INFO_RENAME(WfModuleUsingFragment, Workflow::WfModuleUsingFragment)
+			IMPL_TYPE_INFO_RENAME(WfModuleUsingNameFragment, Workflow::WfModuleUsingNameFragment)
+			IMPL_TYPE_INFO_RENAME(WfModuleUsingWildCardFragment, Workflow::WfModuleUsingWildCardFragment)
 			IMPL_TYPE_INFO_RENAME(WfModuleUsingItem, Workflow::WfModuleUsingItem)
 			IMPL_TYPE_INFO_RENAME(WfModuleUsingPath, Workflow::WfModuleUsingPath)
 			IMPL_TYPE_INFO_RENAME(WfModule, Workflow::WfModule)
@@ -2550,6 +2621,7 @@ namespace vl
 			IMPL_TYPE_INFO_RENAME(WfExpression::IVisitor, Workflow::WfExpression::IVisitor)
 			IMPL_TYPE_INFO_RENAME(WfStatement::IVisitor, Workflow::WfStatement::IVisitor)
 			IMPL_TYPE_INFO_RENAME(WfDeclaration::IVisitor, Workflow::WfDeclaration::IVisitor)
+			IMPL_TYPE_INFO_RENAME(WfModuleUsingFragment::IVisitor, Workflow::WfModuleUsingFragment::IVisitor)
 
 			BEGIN_CLASS_MEMBER(WfType)
 				CLASS_MEMBER_METHOD(Accept, {L"visitor"})
@@ -3190,6 +3262,7 @@ namespace vl
 				CLASS_MEMBER_FIELD(anonymity)
 				CLASS_MEMBER_PROPERTY(name, get_name, set_name)
 				CLASS_MEMBER_FIELD(arguments)
+				CLASS_MEMBER_FIELD(returnType)
 				CLASS_MEMBER_FIELD(statement)
 			END_CLASS_MEMBER(WfFunctionDeclaration)
 
@@ -3213,13 +3286,35 @@ namespace vl
 				CLASS_MEMBER_FIELD(functions)
 			END_CLASS_MEMBER(WfNewTypeExpression)
 
+			BEGIN_CLASS_MEMBER(WfModuleUsingFragment)
+				CLASS_MEMBER_METHOD(Accept, {L"visitor"})
+
+			END_CLASS_MEMBER(WfModuleUsingFragment)
+
+			BEGIN_CLASS_MEMBER(WfModuleUsingNameFragment)
+				CLASS_MEMBER_BASE(WfModuleUsingFragment)
+
+				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<WfModuleUsingNameFragment>(), NO_PARAMETER)
+
+				CLASS_MEMBER_EXTERNALMETHOD(get_name, NO_PARAMETER, vl::WString(WfModuleUsingNameFragment::*)(), [](WfModuleUsingNameFragment* node){ return node->name.value; })
+				CLASS_MEMBER_EXTERNALMETHOD(set_name, {L"value"}, void(WfModuleUsingNameFragment::*)(const vl::WString&), [](WfModuleUsingNameFragment* node, const vl::WString& value){ node->name.value = value; })
+
+				CLASS_MEMBER_PROPERTY(name, get_name, set_name)
+			END_CLASS_MEMBER(WfModuleUsingNameFragment)
+
+			BEGIN_CLASS_MEMBER(WfModuleUsingWildCardFragment)
+				CLASS_MEMBER_BASE(WfModuleUsingFragment)
+
+				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<WfModuleUsingWildCardFragment>(), NO_PARAMETER)
+
+
+			END_CLASS_MEMBER(WfModuleUsingWildCardFragment)
+
 			BEGIN_CLASS_MEMBER(WfModuleUsingItem)
 				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<WfModuleUsingItem>(), NO_PARAMETER)
 
-				CLASS_MEMBER_EXTERNALMETHOD(get_name, NO_PARAMETER, vl::WString(WfModuleUsingItem::*)(), [](WfModuleUsingItem* node){ return node->name.value; })
-				CLASS_MEMBER_EXTERNALMETHOD(set_name, {L"value"}, void(WfModuleUsingItem::*)(const vl::WString&), [](WfModuleUsingItem* node, const vl::WString& value){ node->name.value = value; })
 
-				CLASS_MEMBER_PROPERTY(name, get_name, set_name)
+				CLASS_MEMBER_FIELD(fragments)
 			END_CLASS_MEMBER(WfModuleUsingItem)
 
 			BEGIN_CLASS_MEMBER(WfModuleUsingPath)
@@ -3314,6 +3409,14 @@ namespace vl
 				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(WfDeclaration::IVisitor::*)(WfFunctionDeclaration* node))
 			END_CLASS_MEMBER(WfDeclaration)
 
+			BEGIN_CLASS_MEMBER(WfModuleUsingFragment::IVisitor)
+				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
+				CLASS_MEMBER_EXTERNALCTOR(Ptr<WfModuleUsingFragment::IVisitor>(Ptr<IValueInterfaceProxy>), {L"proxy"}, &interface_proxy::WfModuleUsingFragment_IVisitor::Create)
+
+				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(WfModuleUsingFragment::IVisitor::*)(WfModuleUsingNameFragment* node))
+				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(WfModuleUsingFragment::IVisitor::*)(WfModuleUsingWildCardFragment* node))
+			END_CLASS_MEMBER(WfModuleUsingFragment)
+
 			class WfTypeLoader : public vl::Object, public ITypeLoader
 			{
 			public:
@@ -3386,6 +3489,9 @@ namespace vl
 					ADD_TYPE_INFO(vl::workflow::WfFunctionDeclaration)
 					ADD_TYPE_INFO(vl::workflow::WfFunctionExpression)
 					ADD_TYPE_INFO(vl::workflow::WfNewTypeExpression)
+					ADD_TYPE_INFO(vl::workflow::WfModuleUsingFragment)
+					ADD_TYPE_INFO(vl::workflow::WfModuleUsingNameFragment)
+					ADD_TYPE_INFO(vl::workflow::WfModuleUsingWildCardFragment)
 					ADD_TYPE_INFO(vl::workflow::WfModuleUsingItem)
 					ADD_TYPE_INFO(vl::workflow::WfModuleUsingPath)
 					ADD_TYPE_INFO(vl::workflow::WfModule)
@@ -3393,6 +3499,7 @@ namespace vl
 					ADD_TYPE_INFO(vl::workflow::WfExpression::IVisitor)
 					ADD_TYPE_INFO(vl::workflow::WfStatement::IVisitor)
 					ADD_TYPE_INFO(vl::workflow::WfDeclaration::IVisitor)
+					ADD_TYPE_INFO(vl::workflow::WfModuleUsingFragment::IVisitor)
 				}
 
 				void Unload(ITypeManager* manager)

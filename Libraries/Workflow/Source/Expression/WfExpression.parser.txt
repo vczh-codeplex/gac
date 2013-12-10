@@ -1,6 +1,4 @@
-include:"../../../../Common/Source/Parsing/Parsing.h"
-include:"../../../../Common/Source/Parsing/ParsingDefinitions.h"
-include:"../../../../Common/Source/Parsing/ParsingAutomaton.h"
+include:"../WorkflowVlppReferences.h"
 namespace:vl.workflow
 reflection:Workflow
 classPrefix:Wf
@@ -411,6 +409,7 @@ class FunctionDeclaration : Declaration
 	FunctionAnonymity		anonymity;
 	token					name;
 	FunctionArgument[]		arguments;
+	Type					returnType;
 	Statement				statement;
 }
 
@@ -426,9 +425,22 @@ class NewTypeExpression : Expression
 	FunctionDeclaration[]	functions;
 }
 
-class ModuleUsingItem
+class ModuleUsingFragment
+{
+}
+
+class ModuleUsingNameFragment : ModuleUsingFragment
 {
 	token					name;
+}
+
+class ModuleUsingWildCardFragment : ModuleUsingFragment
+{
+}
+
+class ModuleUsingItem
+{
+	ModuleUsingFragment[]	fragments;
 }
 
 class ModuleUsingPath
@@ -746,7 +758,7 @@ rule FunctionDeclaration Function
 			(NAME : name "(" with {anonymity="Named"})
 			| ("(" with {anonymity="Anonymous"})
 		)
-		[FunctionArgumentFragment : arguments {"," FunctionArgumentFragment : arguments}] ")" Block : statement as FunctionDeclaration
+		[FunctionArgumentFragment : arguments {"," FunctionArgumentFragment : arguments}] ")" ":" WorkflowType : returnType Block : statement as FunctionDeclaration
 	;
 
 rule Declaration WorkflowDeclaration
@@ -754,12 +766,16 @@ rule Declaration WorkflowDeclaration
 	= !Function
 	;
 
+rule ModuleUsingFragment UsingFragment
+	= NAME : name as ModuleUsingNameFragment
+	= "*" as ModuleUsingWildCardFragment
+	;
 rule ModuleUsingItem UsingItem
-	= NAME : name as ModuleUsingItem
+	= UsingFragment : fragments {UsingFragment : fragments} as ModuleUsingItem
 	;
 rule ModuleUsingPath UsingPath
-	= "using" UsingItem : items {"::" UsingItem : items} as ModuleUsingPath
+	= "using" UsingItem : items {"::" UsingItem : items} ";" as ModuleUsingPath
 	;
 rule Module WorkflowModule
-	= "module" NAME : name {UsingPath : paths} {WorkflowDeclaration : declarations} as Module
+	= "module" NAME : name ";" {UsingPath : paths} {WorkflowDeclaration : declarations} as Module
 	;
