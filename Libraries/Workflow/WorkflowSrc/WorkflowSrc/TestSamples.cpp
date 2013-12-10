@@ -52,7 +52,8 @@ TEST_CASE(TestSampleExpressions)
 	{
 		UnitTest::PrintInfo(itemName);
 		WString sample = LoadSample(L"Expression", itemName);
-		Ptr<ParsingTreeNode> node = WfParseExpressionAsParsingTreeNode(sample, table);
+		List<Ptr<ParsingError>> errors;
+		Ptr<ParsingTreeNode> node = WfParseExpressionAsParsingTreeNode(sample, table, errors);
 		TEST_ASSERT(node);
 		LogSampleParseResult(L"Expression", itemName, sample, node);
 	}
@@ -67,7 +68,8 @@ TEST_CASE(TestSampleStatements)
 	{
 		UnitTest::PrintInfo(itemName);
 		WString sample = LoadSample(L"Statement", itemName);
-		Ptr<ParsingTreeNode> node = WfParseStatementAsParsingTreeNode(sample, table);
+		List<Ptr<ParsingError>> errors;
+		Ptr<ParsingTreeNode> node = WfParseStatementAsParsingTreeNode(sample, table, errors);
 		TEST_ASSERT(node);
 		LogSampleParseResult(L"Statement", itemName, sample, node);
 	}
@@ -82,7 +84,8 @@ TEST_CASE(TestSampleDeclarations)
 	{
 		UnitTest::PrintInfo(itemName);
 		WString sample = LoadSample(L"Declaration", itemName);
-		Ptr<ParsingTreeNode> node = WfParseDeclarationAsParsingTreeNode(sample, table);
+		List<Ptr<ParsingError>> errors;
+		Ptr<ParsingTreeNode> node = WfParseDeclarationAsParsingTreeNode(sample, table, errors);
 		TEST_ASSERT(node);
 		LogSampleParseResult(L"Declaration", itemName, sample, node);
 	}
@@ -97,7 +100,8 @@ TEST_CASE(TestSampleModules)
 	{
 		UnitTest::PrintInfo(itemName);
 		WString sample = LoadSample(L"Module", itemName);
-		Ptr<ParsingTreeNode> node = WfParseModuleAsParsingTreeNode(sample, table);
+		List<Ptr<ParsingError>> errors;
+		Ptr<ParsingTreeNode> node = WfParseModuleAsParsingTreeNode(sample, table, errors);
 		TEST_ASSERT(node);
 		LogSampleParseResult(L"Module", itemName, sample, node);
 	}
