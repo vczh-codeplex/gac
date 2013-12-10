@@ -602,6 +602,18 @@
     <Text Include="..\TestFiles\Samples\Statement\ForEachReversed.txt">
       <Filter>Resource Files\Samples\Statement</Filter>
     </Text>
+    <Text Include="..\TestFiles\Samples\Declaration\Function.txt">
+      <Filter>Resource Files\Samples\Declaration</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\Declaration\Namespace.txt">
+      <Filter>Resource Files\Samples\Declaration</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\Declaration\NestedNamespace.txt">
+      <Filter>Resource Files\Samples\Declaration</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\Module\Useful.txt">
+      <Filter>Resource Files\Samples\Module</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Source\Expression\Codegen.bat">

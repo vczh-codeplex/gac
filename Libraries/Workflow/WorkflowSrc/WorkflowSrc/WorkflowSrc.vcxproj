@@ -261,7 +261,10 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\..\Source\Expression\WfExpression.parser.txt" />
+    <Text Include="..\TestFiles\Samples\Declaration\Function.txt" />
     <Text Include="..\TestFiles\Samples\Declaration\HelloWorld.txt" />
+    <Text Include="..\TestFiles\Samples\Declaration\Namespace.txt" />
+    <Text Include="..\TestFiles\Samples\Declaration\NestedNamespace.txt" />
     <Text Include="..\TestFiles\Samples\Expression\Attach.txt" />
     <Text Include="..\TestFiles\Samples\Expression\BinaryAscending.txt" />
     <Text Include="..\TestFiles\Samples\Expression\BinaryDescending.txt" />
@@ -316,6 +319,7 @@
     <Text Include="..\TestFiles\Samples\IndexModule.txt" />
     <Text Include="..\TestFiles\Samples\IndexStatement.txt" />
     <Text Include="..\TestFiles\Samples\Module\HelloWorld.txt" />
+    <Text Include="..\TestFiles\Samples\Module\Useful.txt" />
     <Text Include="..\TestFiles\Samples\Statement\Break.txt" />
     <Text Include="..\TestFiles\Samples\Statement\Continue.txt" />
     <Text Include="..\TestFiles\Samples\Statement\Delete.txt" />

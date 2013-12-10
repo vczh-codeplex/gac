@@ -1,1 +1,4 @@
 HelloWorld
+Function
+Namespace
+NestedNamespace
