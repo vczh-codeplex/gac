@@ -465,8 +465,9 @@ token LE = "/</=";
 token GE = "/>/=";
 token LT = "/<";
 token GT = "/>";
-token EQ = "/=";
+token EQ = "/=/=";
 token NE = "/!/=";
+token ASSIGN = "/=";
 token FAILED_THEN = "/?/?";
 token QUESTION_MARK = "/?";
 token SCOPE_DELIMITER = "::";
@@ -578,7 +579,7 @@ rule Expression Exp0
 	= "(" !WorkflowExpression ")"
 	= "[" WorkflowExpression : body "]" as OrderedLambdaExpression
 	= Function : function as FunctionExpression
-	= "let" NAME : name "in" WorkflowExpression : value "=" WorkflowExpression : exp as LetExpression
+	= "let" NAME : name "=" WorkflowExpression : value ":" WorkflowExpression : exp as LetExpression
 	= "+" Exp0 as UnaryExpression with {op = "Positive"}
 	= "-" Exp0 as UnaryExpression with {op = "Negative"}
 	= "not" Exp0 as UnaryExpression with {op = "Not"}
@@ -588,7 +589,7 @@ rule Expression Exp0
 		((")" with {beginBoundary = "Exclusive"}) | ("]" with {beginBoundary = "Inclusive"}))
 		as RangeExpression
 	= "{" {CtorFragment : arguments} "}" as ConstructorExpression
-	= "new" WorkflowType : type "(" [WorkflowExpression : arguments {"," WorkflowExpression : arguments}] ")" ["{" {Function : functions} "}"] as NewTypeExpression
+	= "new" WorkflowType : type ["(" [WorkflowExpression : arguments {"," WorkflowExpression : arguments}] ")"] ["{" {Function : functions} "}"] as NewTypeExpression
 	= "bind" "(" WorkflowExpression : expression ")" as BindExpression
 	= Exp0 : parent "." "observe" "(" WorkflowExpression : expression ["on" WorkflowExpression : events {"," WorkflowExpression : events}]")" as ObserveExpression with {observeType = "SimpleObserve"}
 	= Exp0 : parent "." "observe" "as" NAME : name "(" WorkflowExpression : expression ["on" WorkflowExpression : events {"," WorkflowExpression : events}]")" as ObserveExpression with {observeType = "ExtendedObserve"}
@@ -645,7 +646,7 @@ rule Expression Exp5
 	= Exp5 : first ">" Exp4 : second as BinaryExpression with {op = "GT"}
 	= Exp5 : first "<=" Exp4 : second as BinaryExpression with {op = "LE"}
 	= Exp5 : first ">=" Exp4 : second as BinaryExpression with {op = "GE"}
-	= Exp5 : first "=" Exp4 : second as BinaryExpression with {op = "EQ"}
+	= Exp5 : first "==" Exp4 : second as BinaryExpression with {op = "EQ"}
 	= Exp5 : first "!=" Exp4 : second as BinaryExpression with {op = "NE"}
 	;
 rule Expression Exp6
