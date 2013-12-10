@@ -106,6 +106,7 @@ namespace vl
 		class WfOrderedNameExpression;
 		class WfOrderedLambdaExpression;
 		class WfMemberExpression;
+		class WfChildExpression;
 		class WfLiteralExpression;
 		class WfFloatingExpression;
 		class WfIntegerExpression;
@@ -248,6 +249,7 @@ namespace vl
 				virtual void Visit(WfOrderedNameExpression* node)=0;
 				virtual void Visit(WfOrderedLambdaExpression* node)=0;
 				virtual void Visit(WfMemberExpression* node)=0;
+				virtual void Visit(WfChildExpression* node)=0;
 				virtual void Visit(WfLiteralExpression* node)=0;
 				virtual void Visit(WfFloatingExpression* node)=0;
 				virtual void Visit(WfIntegerExpression* node)=0;
@@ -325,6 +327,17 @@ namespace vl
 			void Accept(WfExpression::IVisitor* visitor)override;
 
 			static vl::Ptr<WfMemberExpression> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
+		};
+
+		class WfChildExpression : public WfExpression, vl::reflection::Description<WfChildExpression>
+		{
+		public:
+			vl::Ptr<WfExpression> parent;
+			vl::parsing::ParsingToken name;
+
+			void Accept(WfExpression::IVisitor* visitor)override;
+
+			static vl::Ptr<WfChildExpression> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 		};
 
 		class WfLiteralExpression : public WfExpression, vl::reflection::Description<WfLiteralExpression>
@@ -1004,6 +1017,7 @@ namespace vl
 			DECL_TYPE_INFO(vl::workflow::WfOrderedNameExpression)
 			DECL_TYPE_INFO(vl::workflow::WfOrderedLambdaExpression)
 			DECL_TYPE_INFO(vl::workflow::WfMemberExpression)
+			DECL_TYPE_INFO(vl::workflow::WfChildExpression)
 			DECL_TYPE_INFO(vl::workflow::WfLiteralExpression)
 			DECL_TYPE_INFO(vl::workflow::WfFloatingExpression)
 			DECL_TYPE_INFO(vl::workflow::WfIntegerExpression)
@@ -1143,6 +1157,11 @@ namespace vl
 					}
 
 					void Visit(vl::workflow::WfMemberExpression* node)override
+					{
+						INVOKE_INTERFACE_PROXY(Visit, node);
+					}
+
+					void Visit(vl::workflow::WfChildExpression* node)override
 					{
 						INVOKE_INTERFACE_PROXY(Visit, node);
 					}
