@@ -1,4 +1,4 @@
-module test;
+unit test;
 
 using system::*;
 using presentation::controls::Gui*Control;

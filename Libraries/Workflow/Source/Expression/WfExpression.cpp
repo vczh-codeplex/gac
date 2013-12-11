@@ -479,8 +479,15 @@ L"\r\n"L"{"
 L"\r\n"L"\tModuleUsingItem[]\t\titems;"
 L"\r\n"L"}"
 L"\r\n"L""
+L"\r\n"L"enum ModuleType"
+L"\r\n"L"{"
+L"\r\n"L"\tModule,"
+L"\r\n"L"\tUnit,"
+L"\r\n"L"}"
+L"\r\n"L""
 L"\r\n"L"class Module"
 L"\r\n"L"{"
+L"\r\n"L"\tModuleType\t\t\t\tmoduleType;"
 L"\r\n"L"\ttoken\t\t\t\t\tname;"
 L"\r\n"L"\tModuleUsingPath[]\t\tpaths;"
 L"\r\n"L"\tDeclaration[]\t\t\tdeclarations;"
@@ -524,6 +531,7 @@ L"\r\n"L"token TYPE_STRING = \"string\";"
 L"\r\n"L"token TYPE_CHAR = \"char\";"
 L"\r\n"L"token TYPE_BOOL = \"bool\";"
 L"\r\n"L""
+L"\r\n"L"token KEYWORD_CONST = \"const\";"
 L"\r\n"L"token KEYWORD_SHL = \"shl\";"
 L"\r\n"L"token KEYWORD_SHR = \"shr\";"
 L"\r\n"L"token KEYWORD_XOR = \"xor\";"
@@ -569,7 +577,7 @@ L"\r\n"L"token KEYWORD_FINALLY = \"finally\";"
 L"\r\n"L"token KEYWORD_USING = \"using\";"
 L"\r\n"L"token KEYWORD_NAMESPACE = \"namespace\";"
 L"\r\n"L"token KEYWORD_MODULE = \"module\";"
-L"\r\n"L"token KEYWORD_CONST = \"const\";"
+L"\r\n"L"token KEYWORD_UNIT = \"unit\";"
 L"\r\n"L""
 L"\r\n"L"token NAME = \"[a-zA-Z_]/w*\";"
 L"\r\n"L"token ORDERED_NAME = \"/$[0-9]*\";"
@@ -836,7 +844,10 @@ L"\r\n"L"rule ModuleUsingPath UsingPath"
 L"\r\n"L"\t= \"using\" UsingItem : items {\"::\" UsingItem : items} \";\" as ModuleUsingPath"
 L"\r\n"L"\t;"
 L"\r\n"L"rule Module WorkflowModule"
-L"\r\n"L"\t= \"module\" NAME : name \";\" {UsingPath : paths} {WorkflowDeclaration : declarations} as Module"
+L"\r\n"L"\t= ("
+L"\r\n"L"\t\t(\"module\" with {moduleType=\"Module\"})"
+L"\r\n"L"\t\t| (\"unit\" with {moduleType=\"Unit\"})"
+L"\r\n"L"\t\t) NAME : name \";\" {UsingPath : paths} {WorkflowDeclaration : declarations} as Module"
 L"\r\n"L"\t;"
 ;
 
@@ -1042,6 +1053,19 @@ Parsing Tree Conversion Driver Implementation
 					else { member=WfFunctionAnonymity::Named; return false; }
 				}
 				member=WfFunctionAnonymity::Named;
+				return false;
+			}
+
+			bool SetMember(WfModuleType& member, vl::Ptr<vl::parsing::ParsingTreeNode> node, const TokenList& tokens)
+			{
+				vl::Ptr<vl::parsing::ParsingTreeToken> token=node.Cast<vl::parsing::ParsingTreeToken>();
+				if(token)
+				{
+					if(token->GetValue()==L"Module") { member=WfModuleType::Module; return true; }
+					else if(token->GetValue()==L"Unit") { member=WfModuleType::Unit; return true; }
+					else { member=WfModuleType::Module; return false; }
+				}
+				member=WfModuleType::Module;
 				return false;
 			}
 
@@ -1413,6 +1437,7 @@ Parsing Tree Conversion Driver Implementation
 
 			void Fill(vl::Ptr<WfModule> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
 			{
+				SetMember(tree->moduleType, obj->GetMember(L"moduleType"), tokens);
 				SetMember(tree->name, obj->GetMember(L"name"), tokens);
 				SetMember(tree->paths, obj->GetMember(L"paths"), tokens);
 				SetMember(tree->declarations, obj->GetMember(L"declarations"), tokens);
@@ -2754,6 +2779,7 @@ namespace vl
 			IMPL_TYPE_INFO_RENAME(WfModuleUsingWildCardFragment, Workflow::WfModuleUsingWildCardFragment)
 			IMPL_TYPE_INFO_RENAME(WfModuleUsingItem, Workflow::WfModuleUsingItem)
 			IMPL_TYPE_INFO_RENAME(WfModuleUsingPath, Workflow::WfModuleUsingPath)
+			IMPL_TYPE_INFO_RENAME(WfModuleType, Workflow::WfModuleType)
 			IMPL_TYPE_INFO_RENAME(WfModule, Workflow::WfModule)
 			IMPL_TYPE_INFO_RENAME(WfType::IVisitor, Workflow::WfType::IVisitor)
 			IMPL_TYPE_INFO_RENAME(WfExpression::IVisitor, Workflow::WfExpression::IVisitor)
@@ -3499,12 +3525,19 @@ namespace vl
 				CLASS_MEMBER_FIELD(items)
 			END_CLASS_MEMBER(WfModuleUsingPath)
 
+			BEGIN_ENUM_ITEM(WfModuleType)
+				ENUM_ITEM_NAMESPACE(WfModuleType)
+				ENUM_NAMESPACE_ITEM(Module)
+				ENUM_NAMESPACE_ITEM(Unit)
+			END_ENUM_ITEM(WfModuleType)
+
 			BEGIN_CLASS_MEMBER(WfModule)
 				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<WfModule>(), NO_PARAMETER)
 
 				CLASS_MEMBER_EXTERNALMETHOD(get_name, NO_PARAMETER, vl::WString(WfModule::*)(), [](WfModule* node){ return node->name.value; })
 				CLASS_MEMBER_EXTERNALMETHOD(set_name, {L"value"}, void(WfModule::*)(const vl::WString&), [](WfModule* node, const vl::WString& value){ node->name.value = value; })
 
+				CLASS_MEMBER_FIELD(moduleType)
 				CLASS_MEMBER_PROPERTY(name, get_name, set_name)
 				CLASS_MEMBER_FIELD(paths)
 				CLASS_MEMBER_FIELD(declarations)
@@ -3674,6 +3707,7 @@ namespace vl
 					ADD_TYPE_INFO(vl::workflow::WfModuleUsingWildCardFragment)
 					ADD_TYPE_INFO(vl::workflow::WfModuleUsingItem)
 					ADD_TYPE_INFO(vl::workflow::WfModuleUsingPath)
+					ADD_TYPE_INFO(vl::workflow::WfModuleType)
 					ADD_TYPE_INFO(vl::workflow::WfModule)
 					ADD_TYPE_INFO(vl::workflow::WfType::IVisitor)
 					ADD_TYPE_INFO(vl::workflow::WfExpression::IVisitor)
