@@ -50,59 +50,60 @@ namespace vl
 			TYPE_STRING = 33,
 			TYPE_CHAR = 34,
 			TYPE_BOOL = 35,
-			KEYWORD_SHL = 36,
-			KEYWORD_SHR = 37,
-			KEYWORD_XOR = 38,
-			KEYWORD_AND = 39,
-			KEYWORD_OR = 40,
-			KEYWORD_NOT = 41,
-			KEYWORD_NULL = 42,
-			KEYWORD_TRUE = 43,
-			KEYWORD_FALSE = 44,
-			KEYWORD_LET = 45,
-			KEYWORD_IN = 46,
-			KEYWORD_RANGE = 47,
-			KEYWORD_NEW = 48,
-			KEYWORD_OF = 49,
-			KEYWORD_AS = 50,
-			KEYWORD_IS = 51,
-			KEYWORD_CAST = 52,
-			KEYWORD_FUNC = 53,
-			KEYWORD_TYPEOF = 54,
-			KEYWORD_TYPE = 55,
-			KEYWORD_BIND = 56,
-			KEYWORD_OBSERVE = 57,
-			KEYWORD_ON = 58,
-			KEYWORD_ATTACH = 59,
-			KEYWORD_DETACH = 60,
-			KEYWORD_VAR = 61,
-			KEYWORD_BREAK = 62,
-			KEYWORD_CONTINUE = 63,
-			KEYWORD_RETURN = 64,
-			KEYWORD_DELETE = 65,
-			KEYWORD_RAISE = 66,
-			KEYWORD_IF = 67,
-			KEYWORD_ELSE = 68,
-			KEYWORD_SWITCH = 69,
-			KEYWORD_CASE = 70,
-			KEYWORD_DEFAULT = 71,
-			KEYWORD_WHILE = 72,
-			KEYWORD_FOR = 73,
-			KEYWORD_REVERSED = 74,
-			KEYWORD_TRY = 75,
-			KEYWORD_CATCH = 76,
-			KEYWORD_FINALLY = 77,
-			KEYWORD_USING = 78,
-			KEYWORD_NAMESPACE = 79,
-			KEYWORD_MODULE = 80,
-			KEYWORD_CONST = 81,
-			NAME = 82,
-			ORDERED_NAME = 83,
-			FLOAT = 84,
-			INTEGER = 85,
-			STRING = 86,
-			FORMATSTRING = 87,
-			SPACE = 88,
+			KEYWORD_CONST = 36,
+			KEYWORD_SHL = 37,
+			KEYWORD_SHR = 38,
+			KEYWORD_XOR = 39,
+			KEYWORD_AND = 40,
+			KEYWORD_OR = 41,
+			KEYWORD_NOT = 42,
+			KEYWORD_NULL = 43,
+			KEYWORD_TRUE = 44,
+			KEYWORD_FALSE = 45,
+			KEYWORD_LET = 46,
+			KEYWORD_IN = 47,
+			KEYWORD_RANGE = 48,
+			KEYWORD_NEW = 49,
+			KEYWORD_OF = 50,
+			KEYWORD_AS = 51,
+			KEYWORD_IS = 52,
+			KEYWORD_CAST = 53,
+			KEYWORD_FUNC = 54,
+			KEYWORD_TYPEOF = 55,
+			KEYWORD_TYPE = 56,
+			KEYWORD_BIND = 57,
+			KEYWORD_OBSERVE = 58,
+			KEYWORD_ON = 59,
+			KEYWORD_ATTACH = 60,
+			KEYWORD_DETACH = 61,
+			KEYWORD_VAR = 62,
+			KEYWORD_BREAK = 63,
+			KEYWORD_CONTINUE = 64,
+			KEYWORD_RETURN = 65,
+			KEYWORD_DELETE = 66,
+			KEYWORD_RAISE = 67,
+			KEYWORD_IF = 68,
+			KEYWORD_ELSE = 69,
+			KEYWORD_SWITCH = 70,
+			KEYWORD_CASE = 71,
+			KEYWORD_DEFAULT = 72,
+			KEYWORD_WHILE = 73,
+			KEYWORD_FOR = 74,
+			KEYWORD_REVERSED = 75,
+			KEYWORD_TRY = 76,
+			KEYWORD_CATCH = 77,
+			KEYWORD_FINALLY = 78,
+			KEYWORD_USING = 79,
+			KEYWORD_NAMESPACE = 80,
+			KEYWORD_MODULE = 81,
+			KEYWORD_UNIT = 82,
+			NAME = 83,
+			ORDERED_NAME = 84,
+			FLOAT = 85,
+			INTEGER = 86,
+			STRING = 87,
+			FORMATSTRING = 88,
+			SPACE = 89,
 		};
 		class WfType;
 		class WfPredefinedType;
@@ -1015,9 +1016,16 @@ namespace vl
 			static vl::Ptr<WfModuleUsingPath> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 		};
 
+		enum class WfModuleType
+		{
+			Module,
+			Unit,
+		};
+
 		class WfModule : public vl::parsing::ParsingTreeCustomBase, vl::reflection::Description<WfModule>
 		{
 		public:
+			WfModuleType moduleType;
 			vl::parsing::ParsingToken name;
 			vl::collections::List<vl::Ptr<WfModuleUsingPath>> paths;
 			vl::collections::List<vl::Ptr<WfDeclaration>> declarations;
@@ -1138,6 +1146,7 @@ namespace vl
 			DECL_TYPE_INFO(vl::workflow::WfModuleUsingWildCardFragment)
 			DECL_TYPE_INFO(vl::workflow::WfModuleUsingItem)
 			DECL_TYPE_INFO(vl::workflow::WfModuleUsingPath)
+			DECL_TYPE_INFO(vl::workflow::WfModuleType)
 			DECL_TYPE_INFO(vl::workflow::WfModule)
 			DECL_TYPE_INFO(vl::workflow::WfType::IVisitor)
 			DECL_TYPE_INFO(vl::workflow::WfExpression::IVisitor)

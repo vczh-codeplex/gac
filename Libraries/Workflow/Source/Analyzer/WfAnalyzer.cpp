@@ -1,8 +1,11 @@
 #include "WfAnalyzer.h"
 
-namespace workflow
+namespace vl
 {
-	namespace analyzer
+	namespace workflow
 	{
+		namespace analyzer
+		{
+		}
 	}
 }

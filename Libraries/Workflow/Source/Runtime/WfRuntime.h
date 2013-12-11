@@ -8,9 +8,12 @@ Interfaces:
 
 #include "..\Expression\WfExpression.h"
 
-namespace workflow
+namespace vl
 {
-	namespace runtime
+	namespace workflow
 	{
+		namespace runtime
+		{
+		}
 	}
 }

@@ -1,8 +1,11 @@
 #include "WfRuntime.h"
 
-namespace workflow
+namespace vl
 {
-	namespace runtime
+	namespace workflow
 	{
+		namespace runtime
+		{
+		}
 	}
 }

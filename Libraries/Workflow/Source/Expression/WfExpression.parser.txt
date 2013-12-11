@@ -479,8 +479,15 @@ class ModuleUsingPath
 	ModuleUsingItem[]		items;
 }
 
+enum ModuleType
+{
+	Module,
+	Unit,
+}
+
 class Module
 {
+	ModuleType				moduleType;
 	token					name;
 	ModuleUsingPath[]		paths;
 	Declaration[]			declarations;
@@ -524,6 +531,7 @@ token TYPE_STRING = "string";
 token TYPE_CHAR = "char";
 token TYPE_BOOL = "bool";
 
+token KEYWORD_CONST = "const";
 token KEYWORD_SHL = "shl";
 token KEYWORD_SHR = "shr";
 token KEYWORD_XOR = "xor";
@@ -569,7 +577,7 @@ token KEYWORD_FINALLY = "finally";
 token KEYWORD_USING = "using";
 token KEYWORD_NAMESPACE = "namespace";
 token KEYWORD_MODULE = "module";
-token KEYWORD_CONST = "const";
+token KEYWORD_UNIT = "unit";
 
 token NAME = "[a-zA-Z_]/w*";
 token ORDERED_NAME = "/$[0-9]*";
@@ -836,5 +844,8 @@ rule ModuleUsingPath UsingPath
 	= "using" UsingItem : items {"::" UsingItem : items} ";" as ModuleUsingPath
 	;
 rule Module WorkflowModule
-	= "module" NAME : name ";" {UsingPath : paths} {WorkflowDeclaration : declarations} as Module
+	= (
+		("module" with {moduleType="Module"})
+		| ("unit" with {moduleType="Unit"})
+		) NAME : name ";" {UsingPath : paths} {WorkflowDeclaration : declarations} as Module
 	;
