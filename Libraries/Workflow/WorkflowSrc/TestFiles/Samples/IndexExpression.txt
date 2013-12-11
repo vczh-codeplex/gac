@@ -40,7 +40,8 @@ IsType
 IsNotType
 IsNull
 IsNotNull
-Cast
+CastStrong
+CastWeak
 TypeOfType
 TypeOfExpression
 Attach

@@ -107,8 +107,11 @@ namespace vl
 		};
 		class WfType;
 		class WfPredefinedType;
+		class WfTopQualifiedType;
 		class WfReferenceType;
+		class WfRawPointerType;
 		class WfSharedPointerType;
+		class WfNullableType;
 		class WfEnumerableType;
 		class WfMapType;
 		class WfFunctionType;
@@ -144,7 +147,6 @@ namespace vl
 		class WfObserveExpression;
 		class WfCallExpression;
 		class WfStatement;
-		class WfVariableStatement;
 		class WfBreakStatement;
 		class WfContinueStatement;
 		class WfReturnStatement;
@@ -163,6 +165,8 @@ namespace vl
 		class WfFunctionArgument;
 		class WfFunctionDeclaration;
 		class WfFunctionExpression;
+		class WfVariableDeclaration;
+		class WfVariableStatement;
 		class WfNewTypeExpression;
 		class WfModuleUsingFragment;
 		class WfModuleUsingNameFragment;
@@ -178,8 +182,11 @@ namespace vl
 			{
 			public:
 				virtual void Visit(WfPredefinedType* node)=0;
+				virtual void Visit(WfTopQualifiedType* node)=0;
 				virtual void Visit(WfReferenceType* node)=0;
+				virtual void Visit(WfRawPointerType* node)=0;
 				virtual void Visit(WfSharedPointerType* node)=0;
+				virtual void Visit(WfNullableType* node)=0;
 				virtual void Visit(WfEnumerableType* node)=0;
 				virtual void Visit(WfMapType* node)=0;
 				virtual void Visit(WfFunctionType* node)=0;
@@ -202,6 +209,7 @@ namespace vl
 			String,
 			Char,
 			Bool,
+			Namespace,
 		};
 
 		class WfPredefinedType : public WfType, vl::reflection::Description<WfPredefinedType>
@@ -214,6 +222,16 @@ namespace vl
 			static vl::Ptr<WfPredefinedType> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 		};
 
+		class WfTopQualifiedType : public WfType, vl::reflection::Description<WfTopQualifiedType>
+		{
+		public:
+			vl::parsing::ParsingToken name;
+
+			void Accept(WfType::IVisitor* visitor)override;
+
+			static vl::Ptr<WfTopQualifiedType> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
+		};
+
 		class WfReferenceType : public WfType, vl::reflection::Description<WfReferenceType>
 		{
 		public:
@@ -224,6 +242,16 @@ namespace vl
 			static vl::Ptr<WfReferenceType> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 		};
 
+		class WfRawPointerType : public WfType, vl::reflection::Description<WfRawPointerType>
+		{
+		public:
+			vl::Ptr<WfType> element;
+
+			void Accept(WfType::IVisitor* visitor)override;
+
+			static vl::Ptr<WfRawPointerType> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
+		};
+
 		class WfSharedPointerType : public WfType, vl::reflection::Description<WfSharedPointerType>
 		{
 		public:
@@ -232,6 +260,16 @@ namespace vl
 			void Accept(WfType::IVisitor* visitor)override;
 
 			static vl::Ptr<WfSharedPointerType> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
+		};
+
+		class WfNullableType : public WfType, vl::reflection::Description<WfNullableType>
+		{
+		public:
+			vl::Ptr<WfType> element;
+
+			void Accept(WfType::IVisitor* visitor)override;
+
+			static vl::Ptr<WfNullableType> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 		};
 
 		class WfEnumerableType : public WfType, vl::reflection::Description<WfEnumerableType>
@@ -714,7 +752,6 @@ namespace vl
 			class IVisitor : public vl::reflection::IDescriptable, vl::reflection::Description<IVisitor>
 			{
 			public:
-				virtual void Visit(WfVariableStatement* node)=0;
 				virtual void Visit(WfBreakStatement* node)=0;
 				virtual void Visit(WfContinueStatement* node)=0;
 				virtual void Visit(WfReturnStatement* node)=0;
@@ -727,22 +764,11 @@ namespace vl
 				virtual void Visit(WfTryStatement* node)=0;
 				virtual void Visit(WfBlockStatement* node)=0;
 				virtual void Visit(WfExpressionStatement* node)=0;
+				virtual void Visit(WfVariableStatement* node)=0;
 			};
 
 			virtual void Accept(WfStatement::IVisitor* visitor)=0;
 
-		};
-
-		class WfVariableStatement : public WfStatement, vl::reflection::Description<WfVariableStatement>
-		{
-		public:
-			vl::Ptr<WfType> type;
-			vl::parsing::ParsingToken name;
-			vl::Ptr<WfExpression> expression;
-
-			void Accept(WfStatement::IVisitor* visitor)override;
-
-			static vl::Ptr<WfVariableStatement> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 		};
 
 		class WfBreakStatement : public WfStatement, vl::reflection::Description<WfBreakStatement>
@@ -899,6 +925,7 @@ namespace vl
 			public:
 				virtual void Visit(WfNamespaceDeclaration* node)=0;
 				virtual void Visit(WfFunctionDeclaration* node)=0;
+				virtual void Visit(WfVariableDeclaration* node)=0;
 			};
 
 			virtual void Accept(WfDeclaration::IVisitor* visitor)=0;
@@ -953,6 +980,28 @@ namespace vl
 			void Accept(WfExpression::IVisitor* visitor)override;
 
 			static vl::Ptr<WfFunctionExpression> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
+		};
+
+		class WfVariableDeclaration : public WfDeclaration, vl::reflection::Description<WfVariableDeclaration>
+		{
+		public:
+			vl::Ptr<WfType> type;
+			vl::parsing::ParsingToken name;
+			vl::Ptr<WfExpression> expression;
+
+			void Accept(WfDeclaration::IVisitor* visitor)override;
+
+			static vl::Ptr<WfVariableDeclaration> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
+		};
+
+		class WfVariableStatement : public WfStatement, vl::reflection::Description<WfVariableStatement>
+		{
+		public:
+			vl::Ptr<WfVariableDeclaration> variable;
+
+			void Accept(WfStatement::IVisitor* visitor)override;
+
+			static vl::Ptr<WfVariableStatement> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 		};
 
 		class WfNewTypeExpression : public WfExpression, vl::reflection::Description<WfNewTypeExpression>
@@ -1073,8 +1122,11 @@ namespace vl
 			DECL_TYPE_INFO(vl::workflow::WfType)
 			DECL_TYPE_INFO(vl::workflow::WfPredefinedTypeName)
 			DECL_TYPE_INFO(vl::workflow::WfPredefinedType)
+			DECL_TYPE_INFO(vl::workflow::WfTopQualifiedType)
 			DECL_TYPE_INFO(vl::workflow::WfReferenceType)
+			DECL_TYPE_INFO(vl::workflow::WfRawPointerType)
 			DECL_TYPE_INFO(vl::workflow::WfSharedPointerType)
+			DECL_TYPE_INFO(vl::workflow::WfNullableType)
 			DECL_TYPE_INFO(vl::workflow::WfEnumerableType)
 			DECL_TYPE_INFO(vl::workflow::WfMapWritability)
 			DECL_TYPE_INFO(vl::workflow::WfMapType)
@@ -1119,7 +1171,6 @@ namespace vl
 			DECL_TYPE_INFO(vl::workflow::WfObserveExpression)
 			DECL_TYPE_INFO(vl::workflow::WfCallExpression)
 			DECL_TYPE_INFO(vl::workflow::WfStatement)
-			DECL_TYPE_INFO(vl::workflow::WfVariableStatement)
 			DECL_TYPE_INFO(vl::workflow::WfBreakStatement)
 			DECL_TYPE_INFO(vl::workflow::WfContinueStatement)
 			DECL_TYPE_INFO(vl::workflow::WfReturnStatement)
@@ -1140,6 +1191,8 @@ namespace vl
 			DECL_TYPE_INFO(vl::workflow::WfFunctionAnonymity)
 			DECL_TYPE_INFO(vl::workflow::WfFunctionDeclaration)
 			DECL_TYPE_INFO(vl::workflow::WfFunctionExpression)
+			DECL_TYPE_INFO(vl::workflow::WfVariableDeclaration)
+			DECL_TYPE_INFO(vl::workflow::WfVariableStatement)
 			DECL_TYPE_INFO(vl::workflow::WfNewTypeExpression)
 			DECL_TYPE_INFO(vl::workflow::WfModuleUsingFragment)
 			DECL_TYPE_INFO(vl::workflow::WfModuleUsingNameFragment)
@@ -1174,12 +1227,27 @@ namespace vl
 						INVOKE_INTERFACE_PROXY(Visit, node);
 					}
 
+					void Visit(vl::workflow::WfTopQualifiedType* node)override
+					{
+						INVOKE_INTERFACE_PROXY(Visit, node);
+					}
+
 					void Visit(vl::workflow::WfReferenceType* node)override
 					{
 						INVOKE_INTERFACE_PROXY(Visit, node);
 					}
 
+					void Visit(vl::workflow::WfRawPointerType* node)override
+					{
+						INVOKE_INTERFACE_PROXY(Visit, node);
+					}
+
 					void Visit(vl::workflow::WfSharedPointerType* node)override
+					{
+						INVOKE_INTERFACE_PROXY(Visit, node);
+					}
+
+					void Visit(vl::workflow::WfNullableType* node)override
 					{
 						INVOKE_INTERFACE_PROXY(Visit, node);
 					}
@@ -1379,11 +1447,6 @@ namespace vl
 						return new WfStatement_IVisitor(proxy);
 					}
 
-					void Visit(vl::workflow::WfVariableStatement* node)override
-					{
-						INVOKE_INTERFACE_PROXY(Visit, node);
-					}
-
 					void Visit(vl::workflow::WfBreakStatement* node)override
 					{
 						INVOKE_INTERFACE_PROXY(Visit, node);
@@ -1444,6 +1507,11 @@ namespace vl
 						INVOKE_INTERFACE_PROXY(Visit, node);
 					}
 
+					void Visit(vl::workflow::WfVariableStatement* node)override
+					{
+						INVOKE_INTERFACE_PROXY(Visit, node);
+					}
+
 				};
 
 				class WfDeclaration_IVisitor : public ValueInterfaceRoot, public virtual vl::workflow::WfDeclaration::IVisitor
@@ -1465,6 +1533,11 @@ namespace vl
 					}
 
 					void Visit(vl::workflow::WfFunctionDeclaration* node)override
+					{
+						INVOKE_INTERFACE_PROXY(Visit, node);
+					}
+
+					void Visit(vl::workflow::WfVariableDeclaration* node)override
 					{
 						INVOKE_INTERFACE_PROXY(Visit, node);
 					}
