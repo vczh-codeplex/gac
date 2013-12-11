@@ -203,7 +203,9 @@
     <ClInclude Include="..\..\..\..\Common\Source\String.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Threading.h" />
     <ClInclude Include="..\..\..\..\Common\Source\UnitTest\UnitTest.h" />
+    <ClInclude Include="..\..\Source\Analyzer\WfAnalyzer.h" />
     <ClInclude Include="..\..\Source\Expression\WfExpression.h" />
+    <ClInclude Include="..\..\Source\Runtime\WfRuntime.h" />
     <ClInclude Include="..\..\Source\WorkflowVlppReferences.h" />
   </ItemGroup>
   <ItemGroup>
@@ -252,10 +254,12 @@
     <ClCompile Include="..\..\..\..\Common\Source\String.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\Threading.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\UnitTest\UnitTest.cpp" />
+    <ClCompile Include="..\..\Source\Analyzer\WfAnalyzer.cpp" />
     <ClCompile Include="..\..\Source\Expression\WfExpression.cpp">
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Runtime\WfRuntime.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="TestSamples.cpp" />
   </ItemGroup>

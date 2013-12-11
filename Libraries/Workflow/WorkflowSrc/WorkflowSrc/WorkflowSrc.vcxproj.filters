@@ -64,6 +64,12 @@
     <Filter Include="Resource Files\Samples\Module">
       <UniqueIdentifier>{8a7344e7-5818-4254-b1e4-c1154667e7c7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Workflow\Analyzer">
+      <UniqueIdentifier>{bce49c91-dc6b-4a6e-afd3-7ddc8d03b794}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Workflow\Runtime">
+      <UniqueIdentifier>{58fa083a-09ff-40f3-ab86-f44158708dee}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Source\WorkflowVlppReferences.h">
@@ -240,6 +246,12 @@
     <ClInclude Include="..\..\Source\Expression\WfExpression.h">
       <Filter>Workflow\Expression</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Analyzer\WfAnalyzer.h">
+      <Filter>Workflow\Analyzer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Runtime\WfRuntime.h">
+      <Filter>Workflow\Runtime</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\Common\Source\Stream\Accessor.cpp">
@@ -385,6 +397,12 @@
     </ClCompile>
     <ClCompile Include="TestSamples.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Analyzer\WfAnalyzer.cpp">
+      <Filter>Workflow\Analyzer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Runtime\WfRuntime.cpp">
+      <Filter>Workflow\Runtime</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
