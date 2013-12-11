@@ -40,7 +40,9 @@ void LogSampleParseResult(const WString& sampleName, const WString& itemName, co
 	BomEncoder encoder(BomEncoder::Utf16);
 	EncoderStream encoderStream(fileStream, encoder);
 	StreamWriter writer(encoderStream);
-	Log(node.Obj(), sample, writer);
+	writer.WriteLine(sample);
+	writer.WriteLine(L"========================================================");
+	Log(node.Obj(), L"", writer);
 }
 
 TEST_CASE(TestSampleExpressions)

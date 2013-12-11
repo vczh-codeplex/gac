@@ -14,6 +14,25 @@ class Type
 {
 }
 
+enum PredefinedTypeName
+{
+	Void,
+	Object,
+	Interface,
+	Int,
+	UInt,
+	Float,
+	Double,
+	String,
+	Char,
+	Bool,
+}
+
+class PredefinedType : Type
+{
+	PredefinedTypeName		name;
+}
+
 class ReferenceType : Type
 {
 	token					name;
@@ -29,8 +48,15 @@ class EnumerableType : Type
 	Type					element;
 }
 
+enum MapWritability
+{
+	Readonly,
+	Writable,
+}
+
 class MapType : Type
 {
+	MapWritability			writability;
 	Type					key;
 	Type					value;
 }
@@ -49,13 +75,6 @@ class ChildType : Type
 
 class Expression
 {
-}
-
-enum LiteralValue
-{
-	Null,
-	True,
-	False,
 }
 
 class ReferenceExpression : Expression
@@ -83,6 +102,13 @@ class ChildExpression : Expression
 {
 	Expression				parent;
 	token					name;
+}
+
+enum LiteralValue
+{
+	Null,
+	True,
+	False,
 }
 
 class LiteralExpression : Expression
@@ -487,6 +513,17 @@ token CLOSE_BRACE = "/}";
 token OPEN_BRACKET = "/(";
 token CLOSE_BRACKET = "/)";
 
+token TYPE_VOID = "void";
+token TYPE_OBJECT = "object";
+token TYPE_INTERFACE = "interface";
+token TYPE_INT = "int";
+token TYPE_UINT = "uint";
+token TYPE_FLOAT = "float";
+token TYPE_DOUBLE = "double";
+token TYPE_STRING = "string";
+token TYPE_CHAR = "char";
+token TYPE_BOOL = "bool";
+
 token KEYWORD_SHL = "shl";
 token KEYWORD_SHR = "shr";
 token KEYWORD_XOR = "xor";
@@ -532,22 +569,34 @@ token KEYWORD_FINALLY = "finally";
 token KEYWORD_USING = "using";
 token KEYWORD_NAMESPACE = "namespace";
 token KEYWORD_MODULE = "module";
+token KEYWORD_CONST = "const";
 
 token NAME = "[a-zA-Z_]/w*";
 token ORDERED_NAME = "/$[0-9]*";
-token FLOAT = "/d+(./d+)?";
-token INTEGER = "/d+(./d+)?";
+token FLOAT = "/d+./d+";
+token INTEGER = "/d+";
 token STRING = "('[^']*')+|(""[^""]*"")+";
 token FORMATSTRING = "/$(('[^']*')+|(""[^""]*"")+)";
 
 discardtoken SPACE = "/s+";
 
 rule Type WorkflowType
+	= "void" as PredefinedType with {name="Void"}
+	= "object" as PredefinedType with {name="Object"}
+	= "interface" as PredefinedType with {name="Interface"}
+	= "int" as PredefinedType with {name="Int"}
+	= "uint" as PredefinedType with {name="UInt"}
+	= "float" as PredefinedType with {name="Float"}
+	= "double" as PredefinedType with {name="Double"}
+	= "string" as PredefinedType with {name="String"}
+	= "char" as PredefinedType with {name="Char"}
+	= "bool" as PredefinedType with {name="Bool"}
 	= NAME : name as ReferenceType
 	= "func" "(" [WorkflowType : arguments {"," WorkflowType : arguments}] ")" ":" WorkflowType : result as FunctionType
 	= WorkflowType : element "^" as SharedPointerType
 	= WorkflowType : element "{" "}" as EnumerableType
-	= WorkflowType : value "[" [WorkflowType : key] "]" as MapType
+	= WorkflowType : value "[" [WorkflowType : key] "]" as MapType with {writability="Writable"}
+	= "const" WorkflowType : value "[" [WorkflowType : key] "]" as MapType with {writability="Readonly"}
 	= WorkflowType : parent "::" NAME : name as ChildType
 	;
 
