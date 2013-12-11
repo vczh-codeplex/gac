@@ -40,60 +40,72 @@ namespace vl
 			CLOSE_BRACE = 23,
 			OPEN_BRACKET = 24,
 			CLOSE_BRACKET = 25,
-			KEYWORD_SHL = 26,
-			KEYWORD_SHR = 27,
-			KEYWORD_XOR = 28,
-			KEYWORD_AND = 29,
-			KEYWORD_OR = 30,
-			KEYWORD_NOT = 31,
-			KEYWORD_NULL = 32,
-			KEYWORD_TRUE = 33,
-			KEYWORD_FALSE = 34,
-			KEYWORD_LET = 35,
-			KEYWORD_IN = 36,
-			KEYWORD_RANGE = 37,
-			KEYWORD_NEW = 38,
-			KEYWORD_OF = 39,
-			KEYWORD_AS = 40,
-			KEYWORD_IS = 41,
-			KEYWORD_CAST = 42,
-			KEYWORD_FUNC = 43,
-			KEYWORD_TYPEOF = 44,
-			KEYWORD_TYPE = 45,
-			KEYWORD_BIND = 46,
-			KEYWORD_OBSERVE = 47,
-			KEYWORD_ON = 48,
-			KEYWORD_ATTACH = 49,
-			KEYWORD_DETACH = 50,
-			KEYWORD_VAR = 51,
-			KEYWORD_BREAK = 52,
-			KEYWORD_CONTINUE = 53,
-			KEYWORD_RETURN = 54,
-			KEYWORD_DELETE = 55,
-			KEYWORD_RAISE = 56,
-			KEYWORD_IF = 57,
-			KEYWORD_ELSE = 58,
-			KEYWORD_SWITCH = 59,
-			KEYWORD_CASE = 60,
-			KEYWORD_DEFAULT = 61,
-			KEYWORD_WHILE = 62,
-			KEYWORD_FOR = 63,
-			KEYWORD_REVERSED = 64,
-			KEYWORD_TRY = 65,
-			KEYWORD_CATCH = 66,
-			KEYWORD_FINALLY = 67,
-			KEYWORD_USING = 68,
-			KEYWORD_NAMESPACE = 69,
-			KEYWORD_MODULE = 70,
-			NAME = 71,
-			ORDERED_NAME = 72,
-			FLOAT = 73,
-			INTEGER = 74,
-			STRING = 75,
-			FORMATSTRING = 76,
-			SPACE = 77,
+			TYPE_VOID = 26,
+			TYPE_OBJECT = 27,
+			TYPE_INTERFACE = 28,
+			TYPE_INT = 29,
+			TYPE_UINT = 30,
+			TYPE_FLOAT = 31,
+			TYPE_DOUBLE = 32,
+			TYPE_STRING = 33,
+			TYPE_CHAR = 34,
+			TYPE_BOOL = 35,
+			KEYWORD_SHL = 36,
+			KEYWORD_SHR = 37,
+			KEYWORD_XOR = 38,
+			KEYWORD_AND = 39,
+			KEYWORD_OR = 40,
+			KEYWORD_NOT = 41,
+			KEYWORD_NULL = 42,
+			KEYWORD_TRUE = 43,
+			KEYWORD_FALSE = 44,
+			KEYWORD_LET = 45,
+			KEYWORD_IN = 46,
+			KEYWORD_RANGE = 47,
+			KEYWORD_NEW = 48,
+			KEYWORD_OF = 49,
+			KEYWORD_AS = 50,
+			KEYWORD_IS = 51,
+			KEYWORD_CAST = 52,
+			KEYWORD_FUNC = 53,
+			KEYWORD_TYPEOF = 54,
+			KEYWORD_TYPE = 55,
+			KEYWORD_BIND = 56,
+			KEYWORD_OBSERVE = 57,
+			KEYWORD_ON = 58,
+			KEYWORD_ATTACH = 59,
+			KEYWORD_DETACH = 60,
+			KEYWORD_VAR = 61,
+			KEYWORD_BREAK = 62,
+			KEYWORD_CONTINUE = 63,
+			KEYWORD_RETURN = 64,
+			KEYWORD_DELETE = 65,
+			KEYWORD_RAISE = 66,
+			KEYWORD_IF = 67,
+			KEYWORD_ELSE = 68,
+			KEYWORD_SWITCH = 69,
+			KEYWORD_CASE = 70,
+			KEYWORD_DEFAULT = 71,
+			KEYWORD_WHILE = 72,
+			KEYWORD_FOR = 73,
+			KEYWORD_REVERSED = 74,
+			KEYWORD_TRY = 75,
+			KEYWORD_CATCH = 76,
+			KEYWORD_FINALLY = 77,
+			KEYWORD_USING = 78,
+			KEYWORD_NAMESPACE = 79,
+			KEYWORD_MODULE = 80,
+			KEYWORD_CONST = 81,
+			NAME = 82,
+			ORDERED_NAME = 83,
+			FLOAT = 84,
+			INTEGER = 85,
+			STRING = 86,
+			FORMATSTRING = 87,
+			SPACE = 88,
 		};
 		class WfType;
+		class WfPredefinedType;
 		class WfReferenceType;
 		class WfSharedPointerType;
 		class WfEnumerableType;
@@ -164,6 +176,7 @@ namespace vl
 			class IVisitor : public vl::reflection::IDescriptable, vl::reflection::Description<IVisitor>
 			{
 			public:
+				virtual void Visit(WfPredefinedType* node)=0;
 				virtual void Visit(WfReferenceType* node)=0;
 				virtual void Visit(WfSharedPointerType* node)=0;
 				virtual void Visit(WfEnumerableType* node)=0;
@@ -174,6 +187,30 @@ namespace vl
 
 			virtual void Accept(WfType::IVisitor* visitor)=0;
 
+		};
+
+		enum class WfPredefinedTypeName
+		{
+			Void,
+			Object,
+			Interface,
+			Int,
+			UInt,
+			Float,
+			Double,
+			String,
+			Char,
+			Bool,
+		};
+
+		class WfPredefinedType : public WfType, vl::reflection::Description<WfPredefinedType>
+		{
+		public:
+			WfPredefinedTypeName name;
+
+			void Accept(WfType::IVisitor* visitor)override;
+
+			static vl::Ptr<WfPredefinedType> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 		};
 
 		class WfReferenceType : public WfType, vl::reflection::Description<WfReferenceType>
@@ -206,9 +243,16 @@ namespace vl
 			static vl::Ptr<WfEnumerableType> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 		};
 
+		enum class WfMapWritability
+		{
+			Readonly,
+			Writable,
+		};
+
 		class WfMapType : public WfType, vl::reflection::Description<WfMapType>
 		{
 		public:
+			WfMapWritability writability;
 			vl::Ptr<WfType> key;
 			vl::Ptr<WfType> value;
 
@@ -280,13 +324,6 @@ namespace vl
 
 		};
 
-		enum class WfLiteralValue
-		{
-			Null,
-			True,
-			False,
-		};
-
 		class WfReferenceExpression : public WfExpression, vl::reflection::Description<WfReferenceExpression>
 		{
 		public:
@@ -337,6 +374,13 @@ namespace vl
 			void Accept(WfExpression::IVisitor* visitor)override;
 
 			static vl::Ptr<WfChildExpression> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
+		};
+
+		enum class WfLiteralValue
+		{
+			Null,
+			True,
+			False,
 		};
 
 		class WfLiteralExpression : public WfExpression, vl::reflection::Description<WfLiteralExpression>
@@ -1019,19 +1063,22 @@ namespace vl
 		{
 #ifndef VCZH_DEBUG_NO_REFLECTION
 			DECL_TYPE_INFO(vl::workflow::WfType)
+			DECL_TYPE_INFO(vl::workflow::WfPredefinedTypeName)
+			DECL_TYPE_INFO(vl::workflow::WfPredefinedType)
 			DECL_TYPE_INFO(vl::workflow::WfReferenceType)
 			DECL_TYPE_INFO(vl::workflow::WfSharedPointerType)
 			DECL_TYPE_INFO(vl::workflow::WfEnumerableType)
+			DECL_TYPE_INFO(vl::workflow::WfMapWritability)
 			DECL_TYPE_INFO(vl::workflow::WfMapType)
 			DECL_TYPE_INFO(vl::workflow::WfFunctionType)
 			DECL_TYPE_INFO(vl::workflow::WfChildType)
 			DECL_TYPE_INFO(vl::workflow::WfExpression)
-			DECL_TYPE_INFO(vl::workflow::WfLiteralValue)
 			DECL_TYPE_INFO(vl::workflow::WfReferenceExpression)
 			DECL_TYPE_INFO(vl::workflow::WfOrderedNameExpression)
 			DECL_TYPE_INFO(vl::workflow::WfOrderedLambdaExpression)
 			DECL_TYPE_INFO(vl::workflow::WfMemberExpression)
 			DECL_TYPE_INFO(vl::workflow::WfChildExpression)
+			DECL_TYPE_INFO(vl::workflow::WfLiteralValue)
 			DECL_TYPE_INFO(vl::workflow::WfLiteralExpression)
 			DECL_TYPE_INFO(vl::workflow::WfFloatingExpression)
 			DECL_TYPE_INFO(vl::workflow::WfIntegerExpression)
@@ -1111,6 +1158,11 @@ namespace vl
 					static Ptr<vl::workflow::WfType::IVisitor> Create(Ptr<IValueInterfaceProxy> proxy)
 					{
 						return new WfType_IVisitor(proxy);
+					}
+
+					void Visit(vl::workflow::WfPredefinedType* node)override
+					{
+						INVOKE_INTERFACE_PROXY(Visit, node);
 					}
 
 					void Visit(vl::workflow::WfReferenceType* node)override

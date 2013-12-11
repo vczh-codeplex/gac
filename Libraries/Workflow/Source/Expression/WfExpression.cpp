@@ -14,6 +14,25 @@ L"\r\n"L"class Type"
 L"\r\n"L"{"
 L"\r\n"L"}"
 L"\r\n"L""
+L"\r\n"L"enum PredefinedTypeName"
+L"\r\n"L"{"
+L"\r\n"L"\tVoid,"
+L"\r\n"L"\tObject,"
+L"\r\n"L"\tInterface,"
+L"\r\n"L"\tInt,"
+L"\r\n"L"\tUInt,"
+L"\r\n"L"\tFloat,"
+L"\r\n"L"\tDouble,"
+L"\r\n"L"\tString,"
+L"\r\n"L"\tChar,"
+L"\r\n"L"\tBool,"
+L"\r\n"L"}"
+L"\r\n"L""
+L"\r\n"L"class PredefinedType : Type"
+L"\r\n"L"{"
+L"\r\n"L"\tPredefinedTypeName\t\tname;"
+L"\r\n"L"}"
+L"\r\n"L""
 L"\r\n"L"class ReferenceType : Type"
 L"\r\n"L"{"
 L"\r\n"L"\ttoken\t\t\t\t\tname;"
@@ -29,8 +48,15 @@ L"\r\n"L"{"
 L"\r\n"L"\tType\t\t\t\t\telement;"
 L"\r\n"L"}"
 L"\r\n"L""
+L"\r\n"L"enum MapWritability"
+L"\r\n"L"{"
+L"\r\n"L"\tReadonly,"
+L"\r\n"L"\tWritable,"
+L"\r\n"L"}"
+L"\r\n"L""
 L"\r\n"L"class MapType : Type"
 L"\r\n"L"{"
+L"\r\n"L"\tMapWritability\t\t\twritability;"
 L"\r\n"L"\tType\t\t\t\t\tkey;"
 L"\r\n"L"\tType\t\t\t\t\tvalue;"
 L"\r\n"L"}"
@@ -49,13 +75,6 @@ L"\r\n"L"}"
 L"\r\n"L""
 L"\r\n"L"class Expression"
 L"\r\n"L"{"
-L"\r\n"L"}"
-L"\r\n"L""
-L"\r\n"L"enum LiteralValue"
-L"\r\n"L"{"
-L"\r\n"L"\tNull,"
-L"\r\n"L"\tTrue,"
-L"\r\n"L"\tFalse,"
 L"\r\n"L"}"
 L"\r\n"L""
 L"\r\n"L"class ReferenceExpression : Expression"
@@ -83,6 +102,13 @@ L"\r\n"L"class ChildExpression : Expression"
 L"\r\n"L"{"
 L"\r\n"L"\tExpression\t\t\t\tparent;"
 L"\r\n"L"\ttoken\t\t\t\t\tname;"
+L"\r\n"L"}"
+L"\r\n"L""
+L"\r\n"L"enum LiteralValue"
+L"\r\n"L"{"
+L"\r\n"L"\tNull,"
+L"\r\n"L"\tTrue,"
+L"\r\n"L"\tFalse,"
 L"\r\n"L"}"
 L"\r\n"L""
 L"\r\n"L"class LiteralExpression : Expression"
@@ -487,6 +513,17 @@ L"\r\n"L"token CLOSE_BRACE = \"/}\";"
 L"\r\n"L"token OPEN_BRACKET = \"/(\";"
 L"\r\n"L"token CLOSE_BRACKET = \"/)\";"
 L"\r\n"L""
+L"\r\n"L"token TYPE_VOID = \"void\";"
+L"\r\n"L"token TYPE_OBJECT = \"object\";"
+L"\r\n"L"token TYPE_INTERFACE = \"interface\";"
+L"\r\n"L"token TYPE_INT = \"int\";"
+L"\r\n"L"token TYPE_UINT = \"uint\";"
+L"\r\n"L"token TYPE_FLOAT = \"float\";"
+L"\r\n"L"token TYPE_DOUBLE = \"double\";"
+L"\r\n"L"token TYPE_STRING = \"string\";"
+L"\r\n"L"token TYPE_CHAR = \"char\";"
+L"\r\n"L"token TYPE_BOOL = \"bool\";"
+L"\r\n"L""
 L"\r\n"L"token KEYWORD_SHL = \"shl\";"
 L"\r\n"L"token KEYWORD_SHR = \"shr\";"
 L"\r\n"L"token KEYWORD_XOR = \"xor\";"
@@ -532,22 +569,34 @@ L"\r\n"L"token KEYWORD_FINALLY = \"finally\";"
 L"\r\n"L"token KEYWORD_USING = \"using\";"
 L"\r\n"L"token KEYWORD_NAMESPACE = \"namespace\";"
 L"\r\n"L"token KEYWORD_MODULE = \"module\";"
+L"\r\n"L"token KEYWORD_CONST = \"const\";"
 L"\r\n"L""
 L"\r\n"L"token NAME = \"[a-zA-Z_]/w*\";"
 L"\r\n"L"token ORDERED_NAME = \"/$[0-9]*\";"
-L"\r\n"L"token FLOAT = \"/d+(./d+)?\";"
-L"\r\n"L"token INTEGER = \"/d+(./d+)?\";"
+L"\r\n"L"token FLOAT = \"/d+./d+\";"
+L"\r\n"L"token INTEGER = \"/d+\";"
 L"\r\n"L"token STRING = \"(\'[^\']*\')+|(\"\"[^\"\"]*\"\")+\";"
 L"\r\n"L"token FORMATSTRING = \"/$((\'[^\']*\')+|(\"\"[^\"\"]*\"\")+)\";"
 L"\r\n"L""
 L"\r\n"L"discardtoken SPACE = \"/s+\";"
 L"\r\n"L""
 L"\r\n"L"rule Type WorkflowType"
+L"\r\n"L"\t= \"void\" as PredefinedType with {name=\"Void\"}"
+L"\r\n"L"\t= \"object\" as PredefinedType with {name=\"Object\"}"
+L"\r\n"L"\t= \"interface\" as PredefinedType with {name=\"Interface\"}"
+L"\r\n"L"\t= \"int\" as PredefinedType with {name=\"Int\"}"
+L"\r\n"L"\t= \"uint\" as PredefinedType with {name=\"UInt\"}"
+L"\r\n"L"\t= \"float\" as PredefinedType with {name=\"Float\"}"
+L"\r\n"L"\t= \"double\" as PredefinedType with {name=\"Double\"}"
+L"\r\n"L"\t= \"string\" as PredefinedType with {name=\"String\"}"
+L"\r\n"L"\t= \"char\" as PredefinedType with {name=\"Char\"}"
+L"\r\n"L"\t= \"bool\" as PredefinedType with {name=\"Bool\"}"
 L"\r\n"L"\t= NAME : name as ReferenceType"
 L"\r\n"L"\t= \"func\" \"(\" [WorkflowType : arguments {\",\" WorkflowType : arguments}] \")\" \":\" WorkflowType : result as FunctionType"
 L"\r\n"L"\t= WorkflowType : element \"^\" as SharedPointerType"
 L"\r\n"L"\t= WorkflowType : element \"{\" \"}\" as EnumerableType"
-L"\r\n"L"\t= WorkflowType : value \"[\" [WorkflowType : key] \"]\" as MapType"
+L"\r\n"L"\t= WorkflowType : value \"[\" [WorkflowType : key] \"]\" as MapType with {writability=\"Writable\"}"
+L"\r\n"L"\t= \"const\" WorkflowType : value \"[\" [WorkflowType : key] \"]\" as MapType with {writability=\"Readonly\"}"
 L"\r\n"L"\t= WorkflowType : parent \"::\" NAME : name as ChildType"
 L"\r\n"L"\t;"
 L"\r\n"L""
@@ -809,6 +858,40 @@ Parsing Tree Conversion Driver Implementation
 		public:
 			using vl::parsing::ParsingTreeConverter::SetMember;
 
+			bool SetMember(WfPredefinedTypeName& member, vl::Ptr<vl::parsing::ParsingTreeNode> node, const TokenList& tokens)
+			{
+				vl::Ptr<vl::parsing::ParsingTreeToken> token=node.Cast<vl::parsing::ParsingTreeToken>();
+				if(token)
+				{
+					if(token->GetValue()==L"Void") { member=WfPredefinedTypeName::Void; return true; }
+					else if(token->GetValue()==L"Object") { member=WfPredefinedTypeName::Object; return true; }
+					else if(token->GetValue()==L"Interface") { member=WfPredefinedTypeName::Interface; return true; }
+					else if(token->GetValue()==L"Int") { member=WfPredefinedTypeName::Int; return true; }
+					else if(token->GetValue()==L"UInt") { member=WfPredefinedTypeName::UInt; return true; }
+					else if(token->GetValue()==L"Float") { member=WfPredefinedTypeName::Float; return true; }
+					else if(token->GetValue()==L"Double") { member=WfPredefinedTypeName::Double; return true; }
+					else if(token->GetValue()==L"String") { member=WfPredefinedTypeName::String; return true; }
+					else if(token->GetValue()==L"Char") { member=WfPredefinedTypeName::Char; return true; }
+					else if(token->GetValue()==L"Bool") { member=WfPredefinedTypeName::Bool; return true; }
+					else { member=WfPredefinedTypeName::Void; return false; }
+				}
+				member=WfPredefinedTypeName::Void;
+				return false;
+			}
+
+			bool SetMember(WfMapWritability& member, vl::Ptr<vl::parsing::ParsingTreeNode> node, const TokenList& tokens)
+			{
+				vl::Ptr<vl::parsing::ParsingTreeToken> token=node.Cast<vl::parsing::ParsingTreeToken>();
+				if(token)
+				{
+					if(token->GetValue()==L"Readonly") { member=WfMapWritability::Readonly; return true; }
+					else if(token->GetValue()==L"Writable") { member=WfMapWritability::Writable; return true; }
+					else { member=WfMapWritability::Readonly; return false; }
+				}
+				member=WfMapWritability::Readonly;
+				return false;
+			}
+
 			bool SetMember(WfLiteralValue& member, vl::Ptr<vl::parsing::ParsingTreeNode> node, const TokenList& tokens)
 			{
 				vl::Ptr<vl::parsing::ParsingTreeToken> token=node.Cast<vl::parsing::ParsingTreeToken>();
@@ -966,6 +1049,11 @@ Parsing Tree Conversion Driver Implementation
 			{
 			}
 
+			void Fill(vl::Ptr<WfPredefinedType> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
+			{
+				SetMember(tree->name, obj->GetMember(L"name"), tokens);
+			}
+
 			void Fill(vl::Ptr<WfReferenceType> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
 			{
 				SetMember(tree->name, obj->GetMember(L"name"), tokens);
@@ -983,6 +1071,7 @@ Parsing Tree Conversion Driver Implementation
 
 			void Fill(vl::Ptr<WfMapType> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
 			{
+				SetMember(tree->writability, obj->GetMember(L"writability"), tokens);
 				SetMember(tree->key, obj->GetMember(L"key"), tokens);
 				SetMember(tree->value, obj->GetMember(L"value"), tokens);
 			}
@@ -1331,7 +1420,15 @@ Parsing Tree Conversion Driver Implementation
 
 			vl::Ptr<vl::parsing::ParsingTreeCustomBase> ConvertClass(vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)override
 			{
-				if(obj->GetType()==L"ReferenceType")
+				if(obj->GetType()==L"PredefinedType")
+				{
+					vl::Ptr<WfPredefinedType> tree = new WfPredefinedType;
+					vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
+					Fill(tree, obj, tokens);
+					Fill(tree.Cast<WfType>(), obj, tokens);
+					return tree;
+				}
+				else if(obj->GetType()==L"ReferenceType")
 				{
 					vl::Ptr<WfReferenceType> tree = new WfReferenceType;
 					vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
@@ -1813,6 +1910,11 @@ Parsing Tree Conversion Driver Implementation
 Parsing Tree Conversion Implementation
 ***********************************************************************/
 
+		vl::Ptr<WfPredefinedType> WfPredefinedType::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
+		{
+			return WfConvertParsingTreeNode(node, tokens).Cast<WfPredefinedType>();
+		}
+
 		vl::Ptr<WfReferenceType> WfReferenceType::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
 		{
 			return WfConvertParsingTreeNode(node, tokens).Cast<WfReferenceType>();
@@ -2111,6 +2213,11 @@ Parsing Tree Conversion Implementation
 /***********************************************************************
 Visitor Pattern Implementation
 ***********************************************************************/
+
+		void WfPredefinedType::Accept(WfType::IVisitor* visitor)
+		{
+			visitor->Visit(this);
+		}
 
 		void WfReferenceType::Accept(WfType::IVisitor* visitor)
 		{
@@ -2572,19 +2679,22 @@ namespace vl
 			using namespace vl::workflow;
 
 			IMPL_TYPE_INFO_RENAME(WfType, Workflow::WfType)
+			IMPL_TYPE_INFO_RENAME(WfPredefinedTypeName, Workflow::WfPredefinedTypeName)
+			IMPL_TYPE_INFO_RENAME(WfPredefinedType, Workflow::WfPredefinedType)
 			IMPL_TYPE_INFO_RENAME(WfReferenceType, Workflow::WfReferenceType)
 			IMPL_TYPE_INFO_RENAME(WfSharedPointerType, Workflow::WfSharedPointerType)
 			IMPL_TYPE_INFO_RENAME(WfEnumerableType, Workflow::WfEnumerableType)
+			IMPL_TYPE_INFO_RENAME(WfMapWritability, Workflow::WfMapWritability)
 			IMPL_TYPE_INFO_RENAME(WfMapType, Workflow::WfMapType)
 			IMPL_TYPE_INFO_RENAME(WfFunctionType, Workflow::WfFunctionType)
 			IMPL_TYPE_INFO_RENAME(WfChildType, Workflow::WfChildType)
 			IMPL_TYPE_INFO_RENAME(WfExpression, Workflow::WfExpression)
-			IMPL_TYPE_INFO_RENAME(WfLiteralValue, Workflow::WfLiteralValue)
 			IMPL_TYPE_INFO_RENAME(WfReferenceExpression, Workflow::WfReferenceExpression)
 			IMPL_TYPE_INFO_RENAME(WfOrderedNameExpression, Workflow::WfOrderedNameExpression)
 			IMPL_TYPE_INFO_RENAME(WfOrderedLambdaExpression, Workflow::WfOrderedLambdaExpression)
 			IMPL_TYPE_INFO_RENAME(WfMemberExpression, Workflow::WfMemberExpression)
 			IMPL_TYPE_INFO_RENAME(WfChildExpression, Workflow::WfChildExpression)
+			IMPL_TYPE_INFO_RENAME(WfLiteralValue, Workflow::WfLiteralValue)
 			IMPL_TYPE_INFO_RENAME(WfLiteralExpression, Workflow::WfLiteralExpression)
 			IMPL_TYPE_INFO_RENAME(WfFloatingExpression, Workflow::WfFloatingExpression)
 			IMPL_TYPE_INFO_RENAME(WfIntegerExpression, Workflow::WfIntegerExpression)
@@ -2656,6 +2766,29 @@ namespace vl
 
 			END_CLASS_MEMBER(WfType)
 
+			BEGIN_ENUM_ITEM(WfPredefinedTypeName)
+				ENUM_ITEM_NAMESPACE(WfPredefinedTypeName)
+				ENUM_NAMESPACE_ITEM(Void)
+				ENUM_NAMESPACE_ITEM(Object)
+				ENUM_NAMESPACE_ITEM(Interface)
+				ENUM_NAMESPACE_ITEM(Int)
+				ENUM_NAMESPACE_ITEM(UInt)
+				ENUM_NAMESPACE_ITEM(Float)
+				ENUM_NAMESPACE_ITEM(Double)
+				ENUM_NAMESPACE_ITEM(String)
+				ENUM_NAMESPACE_ITEM(Char)
+				ENUM_NAMESPACE_ITEM(Bool)
+			END_ENUM_ITEM(WfPredefinedTypeName)
+
+			BEGIN_CLASS_MEMBER(WfPredefinedType)
+				CLASS_MEMBER_BASE(WfType)
+
+				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<WfPredefinedType>(), NO_PARAMETER)
+
+
+				CLASS_MEMBER_FIELD(name)
+			END_CLASS_MEMBER(WfPredefinedType)
+
 			BEGIN_CLASS_MEMBER(WfReferenceType)
 				CLASS_MEMBER_BASE(WfType)
 
@@ -2685,12 +2818,19 @@ namespace vl
 				CLASS_MEMBER_FIELD(element)
 			END_CLASS_MEMBER(WfEnumerableType)
 
+			BEGIN_ENUM_ITEM(WfMapWritability)
+				ENUM_ITEM_NAMESPACE(WfMapWritability)
+				ENUM_NAMESPACE_ITEM(Readonly)
+				ENUM_NAMESPACE_ITEM(Writable)
+			END_ENUM_ITEM(WfMapWritability)
+
 			BEGIN_CLASS_MEMBER(WfMapType)
 				CLASS_MEMBER_BASE(WfType)
 
 				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<WfMapType>(), NO_PARAMETER)
 
 
+				CLASS_MEMBER_FIELD(writability)
 				CLASS_MEMBER_FIELD(key)
 				CLASS_MEMBER_FIELD(value)
 			END_CLASS_MEMBER(WfMapType)
@@ -2721,13 +2861,6 @@ namespace vl
 				CLASS_MEMBER_METHOD(Accept, {L"visitor"})
 
 			END_CLASS_MEMBER(WfExpression)
-
-			BEGIN_ENUM_ITEM(WfLiteralValue)
-				ENUM_ITEM_NAMESPACE(WfLiteralValue)
-				ENUM_NAMESPACE_ITEM(Null)
-				ENUM_NAMESPACE_ITEM(True)
-				ENUM_NAMESPACE_ITEM(False)
-			END_ENUM_ITEM(WfLiteralValue)
 
 			BEGIN_CLASS_MEMBER(WfReferenceExpression)
 				CLASS_MEMBER_BASE(WfExpression)
@@ -2783,6 +2916,13 @@ namespace vl
 				CLASS_MEMBER_FIELD(parent)
 				CLASS_MEMBER_PROPERTY(name, get_name, set_name)
 			END_CLASS_MEMBER(WfChildExpression)
+
+			BEGIN_ENUM_ITEM(WfLiteralValue)
+				ENUM_ITEM_NAMESPACE(WfLiteralValue)
+				ENUM_NAMESPACE_ITEM(Null)
+				ENUM_NAMESPACE_ITEM(True)
+				ENUM_NAMESPACE_ITEM(False)
+			END_ENUM_ITEM(WfLiteralValue)
 
 			BEGIN_CLASS_MEMBER(WfLiteralExpression)
 				CLASS_MEMBER_BASE(WfExpression)
@@ -3374,6 +3514,7 @@ namespace vl
 				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
 				CLASS_MEMBER_EXTERNALCTOR(Ptr<WfType::IVisitor>(Ptr<IValueInterfaceProxy>), {L"proxy"}, &interface_proxy::WfType_IVisitor::Create)
 
+				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(WfType::IVisitor::*)(WfPredefinedType* node))
 				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(WfType::IVisitor::*)(WfReferenceType* node))
 				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(WfType::IVisitor::*)(WfSharedPointerType* node))
 				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(WfType::IVisitor::*)(WfEnumerableType* node))
@@ -3458,19 +3599,22 @@ namespace vl
 				void Load(ITypeManager* manager)
 				{
 					ADD_TYPE_INFO(vl::workflow::WfType)
+					ADD_TYPE_INFO(vl::workflow::WfPredefinedTypeName)
+					ADD_TYPE_INFO(vl::workflow::WfPredefinedType)
 					ADD_TYPE_INFO(vl::workflow::WfReferenceType)
 					ADD_TYPE_INFO(vl::workflow::WfSharedPointerType)
 					ADD_TYPE_INFO(vl::workflow::WfEnumerableType)
+					ADD_TYPE_INFO(vl::workflow::WfMapWritability)
 					ADD_TYPE_INFO(vl::workflow::WfMapType)
 					ADD_TYPE_INFO(vl::workflow::WfFunctionType)
 					ADD_TYPE_INFO(vl::workflow::WfChildType)
 					ADD_TYPE_INFO(vl::workflow::WfExpression)
-					ADD_TYPE_INFO(vl::workflow::WfLiteralValue)
 					ADD_TYPE_INFO(vl::workflow::WfReferenceExpression)
 					ADD_TYPE_INFO(vl::workflow::WfOrderedNameExpression)
 					ADD_TYPE_INFO(vl::workflow::WfOrderedLambdaExpression)
 					ADD_TYPE_INFO(vl::workflow::WfMemberExpression)
 					ADD_TYPE_INFO(vl::workflow::WfChildExpression)
+					ADD_TYPE_INFO(vl::workflow::WfLiteralValue)
 					ADD_TYPE_INFO(vl::workflow::WfLiteralExpression)
 					ADD_TYPE_INFO(vl::workflow::WfFloatingExpression)
 					ADD_TYPE_INFO(vl::workflow::WfIntegerExpression)
