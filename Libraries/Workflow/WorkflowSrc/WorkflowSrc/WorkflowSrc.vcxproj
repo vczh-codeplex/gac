@@ -269,13 +269,15 @@
     <Text Include="..\TestFiles\Samples\Declaration\HelloWorld.txt" />
     <Text Include="..\TestFiles\Samples\Declaration\Namespace.txt" />
     <Text Include="..\TestFiles\Samples\Declaration\NestedNamespace.txt" />
+    <Text Include="..\TestFiles\Samples\Declaration\Variable.txt" />
     <Text Include="..\TestFiles\Samples\Expression\Attach.txt" />
     <Text Include="..\TestFiles\Samples\Expression\BinaryAscending.txt" />
     <Text Include="..\TestFiles\Samples\Expression\BinaryDescending.txt" />
     <Text Include="..\TestFiles\Samples\Expression\Bind.txt" />
     <Text Include="..\TestFiles\Samples\Expression\Bracket.txt" />
     <Text Include="..\TestFiles\Samples\Expression\Call.txt" />
-    <Text Include="..\TestFiles\Samples\Expression\Cast.txt" />
+    <Text Include="..\TestFiles\Samples\Expression\CastStrong.txt" />
+    <Text Include="..\TestFiles\Samples\Expression\CastWeak.txt" />
     <Text Include="..\TestFiles\Samples\Expression\Child.txt" />
     <Text Include="..\TestFiles\Samples\Expression\Detach.txt" />
     <Text Include="..\TestFiles\Samples\Expression\EmptyCollection.txt" />

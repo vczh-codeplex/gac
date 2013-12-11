@@ -26,6 +26,7 @@ enum PredefinedTypeName
 	String,
 	Char,
 	Bool,
+	Namespace,
 }
 
 class PredefinedType : Type
@@ -33,12 +34,27 @@ class PredefinedType : Type
 	PredefinedTypeName		name;
 }
 
+class TopQualifiedType : Type
+{
+	token					name;
+}
+
 class ReferenceType : Type
 {
 	token					name;
 }
 
+class RawPointerType : Type
+{
+	Type					element;
+}
+
 class SharedPointerType : Type
+{
+	Type					element;
+}
+
+class NullableType : Type
 {
 	Type					element;
 }
@@ -323,13 +339,6 @@ class Statement
 {
 }
 
-class VariableStatement : Statement
-{
-	Type					type;
-	token					name;
-	Expression				expression;
-}
-
 class BreakStatement : Statement
 {
 }
@@ -447,6 +456,18 @@ class FunctionDeclaration : Declaration
 class FunctionExpression : Expression
 {
 	FunctionDeclaration		function;
+}
+
+class VariableDeclaration : Declaration
+{
+	Type					type;
+	token					name;
+	Expression				expression;
+}
+
+class VariableStatement : Statement
+{
+	VariableDeclaration		variable;
 }
 
 class NewTypeExpression : Expression
@@ -601,11 +622,14 @@ rule Type WorkflowType
 	= "bool" as PredefinedType with {name="Bool"}
 	= NAME : name as ReferenceType
 	= "func" "(" [WorkflowType : arguments {"," WorkflowType : arguments}] ")" ":" WorkflowType : result as FunctionType
+	= WorkflowType : element "*" as RawPointerType
 	= WorkflowType : element "^" as SharedPointerType
+	= WorkflowType : element "?" as NullableType
 	= WorkflowType : element "{" "}" as EnumerableType
 	= WorkflowType : value "[" [WorkflowType : key] "]" as MapType with {writability="Writable"}
 	= "const" WorkflowType : value "[" [WorkflowType : key] "]" as MapType with {writability="Readonly"}
 	= WorkflowType : parent "::" NAME : name as ChildType
+	= "::" NAME : name as TopQualifiedType
 	;
 
 rule LiteralExpression Literal
@@ -744,72 +768,30 @@ rule Expression WorkflowExpression
 	= !Exp11
 	;
 
-rule VariableStatement Variable
-	= "var" NAME : name [":" WorkflowType : type] "=" WorkflowExpression : expression ";" as VariableStatement
-	;
-
-rule BreakStatement Break
-	= "break" ";" as BreakStatement
-	;
-rule ContinueStatement Continue
-	= "continue" ";" as ContinueStatement
-	;
-rule ReturnStatement Return
-	= "return" [WorkflowExpression : expression] ";" as ReturnStatement
-	;
-rule DeleteStatement Delete
-	= "delete" WorkflowExpression : expression ";" as DeleteStatement
-	;
-rule RaiseExceptionStatement RaiseException
-	= "raise" [WorkflowExpression : expression] ";" as RaiseExceptionStatement
-	;
-
-rule IfStatement If
-	= "if" "(" ["var" NAME : name ":" WorkflowType : type "="] WorkflowExpression : expression ")" Block : trueBranch ["else" Block : falseBranch] as IfStatement
-	;
-
 rule SwitchCase SwitchCaseFragment
 	= "case" WorkflowExpression : expression ":" Block : statement as SwitchCase
 	;
-rule SwitchStatement Switch
-	= "switch" "(" WorkflowExpression : expression ")" "{" {SwitchCaseFragment : caseBranches} ["default" ":" Block : defaultBranch] "}" as SwitchStatement
-	;
 
-rule WhileStatement While
-	= "while" "(" WorkflowExpression : condition ")" Block : statement as WhileStatement
-	;
-rule ForEachStatement ForEach
-	= "for" "(" NAME : name 
-		(("in" with {direction="Normal"}) | ("in" "reversed" with {direction="Reversed"}))
-		WorkflowExpression : collection ")" Block : statement as ForEachStatement
-	;
-
-rule TryStatement Try
-	= "try" Block : protectedStatement ["catch" "(" NAME : name ")" Block : catchStatement] ["finally" Block : finallyStatement] as TryStatement
-	;
-
-rule BlockStatement Block
+rule Statement Block
 	= "{" {WorkflowStatement : statements} "}" as BlockStatement
 	;
 
-rule ExpressionStatement ExprStat
-	= WorkflowExpression : expression ";" as ExpressionStatement
-	;
-
 rule Statement WorkflowStatement
-	= !Variable
-	= !Break
-	= !Continue
-	= !Return
-	= !Delete
-	= !RaiseException
-	= !If
-	= !Switch
-	= !While
-	= !ForEach
-	= !Try
 	= !Block
-	= !ExprStat
+	= Variable : variable as VariableStatement
+	= "break" ";" as BreakStatement
+	= "continue" ";" as ContinueStatement
+	= "return" [WorkflowExpression : expression] ";" as ReturnStatement
+	= "delete" WorkflowExpression : expression ";" as DeleteStatement
+	= "raise" [WorkflowExpression : expression] ";" as RaiseExceptionStatement
+	= "if" "(" ["var" NAME : name ":" WorkflowType : type "="] WorkflowExpression : expression ")" Block : trueBranch ["else" Block : falseBranch] as IfStatement
+	= "switch" "(" WorkflowExpression : expression ")" "{" {SwitchCaseFragment : caseBranches} ["default" ":" Block : defaultBranch] "}" as SwitchStatement
+	= "while" "(" WorkflowExpression : condition ")" Block : statement as WhileStatement
+	= "for" "(" NAME : name 
+		(("in" with {direction="Normal"}) | ("in" "reversed" with {direction="Reversed"}))
+		WorkflowExpression : collection ")" Block : statement as ForEachStatement
+	= "try" Block : protectedStatement ["catch" "(" NAME : name ")" Block : catchStatement] ["finally" Block : finallyStatement] as TryStatement
+	= WorkflowExpression : expression ";" as ExpressionStatement
 	;
 
 rule NamespaceDeclaration Namespace
@@ -827,10 +809,14 @@ rule FunctionDeclaration Function
 		)
 		[FunctionArgumentFragment : arguments {"," FunctionArgumentFragment : arguments}] ")" ":" WorkflowType : returnType Block : statement as FunctionDeclaration
 	;
+rule VariableDeclaration Variable
+	= "var" NAME : name [":" WorkflowType : type] "=" WorkflowExpression : expression ";" as VariableDeclaration
+	;
 
 rule Declaration WorkflowDeclaration
 	= !Namespace
 	= !Function
+	= !Variable
 	;
 
 rule ModuleUsingFragment UsingFragment

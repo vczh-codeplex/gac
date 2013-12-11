@@ -452,9 +452,6 @@
     <Text Include="..\TestFiles\Samples\Expression\Call.txt">
       <Filter>Resource Files\Samples\Expression</Filter>
     </Text>
-    <Text Include="..\TestFiles\Samples\Expression\Cast.txt">
-      <Filter>Resource Files\Samples\Expression</Filter>
-    </Text>
     <Text Include="..\TestFiles\Samples\Expression\Child.txt">
       <Filter>Resource Files\Samples\Expression</Filter>
     </Text>
@@ -631,6 +628,15 @@
     </Text>
     <Text Include="..\TestFiles\Samples\Module\Useful.txt">
       <Filter>Resource Files\Samples\Module</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\Declaration\Variable.txt">
+      <Filter>Resource Files\Samples\Declaration</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\Expression\CastStrong.txt">
+      <Filter>Resource Files\Samples\Expression</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\Expression\CastWeak.txt">
+      <Filter>Resource Files\Samples\Expression</Filter>
     </Text>
   </ItemGroup>
   <ItemGroup>
