@@ -351,15 +351,63 @@ CreateTypeInfoFromType
 			{
 			public:
 				WfLexicalScope*				scope;
-				Ptr<ITypeInfo>				typeInfo;
+				Ptr<ITypeInfo>				result;
 
 				CreateTypeInfoFromTypeVisitor(WfLexicalScope* _scope)
 					:scope(_scope)
 				{
 				}
 
+				Ptr<ITypeInfo> Call(WfType* node)
+				{
+					node->Accept(this);
+					Ptr<ITypeInfo> typeInfo = result;
+					result = 0;
+					return typeInfo;
+				}
+
 				void Visit(WfPredefinedType* node)override
 				{
+					ITypeDescriptor* typeDescriptor = 0;
+					switch (node->name)
+					{
+					case WfPredefinedTypeName::Void:
+						typeDescriptor = description::GetTypeDescriptor<VoidValue>();
+						break;
+					case WfPredefinedTypeName::Object:
+						typeDescriptor = description::GetTypeDescriptor<Value>();
+						break;
+					case WfPredefinedTypeName::Interface:
+						typeDescriptor = description::GetTypeDescriptor<IDescriptable>();
+						break;
+					case WfPredefinedTypeName::Int:
+						typeDescriptor = description::GetTypeDescriptor<vint>();
+						break;
+					case WfPredefinedTypeName::UInt:
+						typeDescriptor = description::GetTypeDescriptor<vuint>();
+						break;
+					case WfPredefinedTypeName::Float:
+						typeDescriptor = description::GetTypeDescriptor<float>();
+						break;
+					case WfPredefinedTypeName::Double:
+						typeDescriptor = description::GetTypeDescriptor<double>();
+						break;
+					case WfPredefinedTypeName::String:
+						typeDescriptor = description::GetTypeDescriptor<WString>();
+						break;
+					case WfPredefinedTypeName::Char:
+						typeDescriptor = description::GetTypeDescriptor<wchar_t>();
+						break;
+					case WfPredefinedTypeName::Bool:
+						typeDescriptor = description::GetTypeDescriptor<bool>();
+						break;
+					}
+					if (typeDescriptor)
+					{
+						Ptr<TypeInfoImpl> typeInfo = new TypeInfoImpl(ITypeInfo::TypeDescriptor);
+						typeInfo->SetTypeDescriptor(typeDescriptor);
+						result = typeInfo;
+					}
 				}
 
 				void Visit(WfTopQualifiedType* node)override
@@ -372,26 +420,120 @@ CreateTypeInfoFromType
 
 				void Visit(WfRawPointerType* node)override
 				{
+					if (Ptr<ITypeInfo> element = Call(node->element.Obj()))
+					{
+						Ptr<TypeInfoImpl> typeInfo = new TypeInfoImpl(ITypeInfo::RawPtr);
+						typeInfo->SetElementType(element);
+						result = typeInfo;
+					}
 				}
 
 				void Visit(WfSharedPointerType* node)override
 				{
+					if (Ptr<ITypeInfo> element = Call(node->element.Obj()))
+					{
+						Ptr<TypeInfoImpl> typeInfo = new TypeInfoImpl(ITypeInfo::SharedPtr);
+						typeInfo->SetElementType(element);
+						result = typeInfo;
+					}
 				}
 
 				void Visit(WfNullableType* node)override
 				{
+					if (Ptr<ITypeInfo> element = Call(node->element.Obj()))
+					{
+						Ptr<TypeInfoImpl> typeInfo = new TypeInfoImpl(ITypeInfo::Nullable);
+						typeInfo->SetElementType(element);
+						result = typeInfo;
+					}
 				}
 
 				void Visit(WfEnumerableType* node)override
 				{
+					if (Ptr<ITypeInfo> element = Call(node->element.Obj()))
+					{
+						Ptr<TypeInfoImpl> enumerableTypeInfo = new TypeInfoImpl(ITypeInfo::TypeDescriptor);
+						enumerableTypeInfo->SetTypeDescriptor(description::GetTypeDescriptor<IValueEnumerable>());
+
+						Ptr<TypeInfoImpl> genericTypeInfo = new TypeInfoImpl(ITypeInfo::Generic);
+						genericTypeInfo->SetElementType(enumerableTypeInfo);
+						genericTypeInfo->AddGenericArgument(element);
+
+						Ptr<TypeInfoImpl> shared = new TypeInfoImpl(ITypeInfo::SharedPtr);
+						shared->SetElementType(genericTypeInfo);
+						result = shared;
+					}
 				}
 
 				void Visit(WfMapType* node)override
 				{
+					Ptr<ITypeInfo> key, value;
+					if (!(value = Call(node->value.Obj()))) return;
+					if (node->key)
+					{
+						if (!(key = Call(node->key.Obj()))) return;
+					}
+					
+					Ptr<TypeInfoImpl> mapTypeInfo = new TypeInfoImpl(ITypeInfo::TypeDescriptor);
+					if (node->writability == WfMapWritability::Writable)
+					{
+						if (node->key)
+						{
+							mapTypeInfo->SetTypeDescriptor(description::GetTypeDescriptor<IValueDictionary>());
+						}
+						else
+						{
+							mapTypeInfo->SetTypeDescriptor(description::GetTypeDescriptor<IValueList>());
+						}
+					}
+					else
+					{
+						if (node->key)
+						{
+							mapTypeInfo->SetTypeDescriptor(description::GetTypeDescriptor<IValueReadonlyDictionary>());
+						}
+						else
+						{
+							mapTypeInfo->SetTypeDescriptor(description::GetTypeDescriptor<IValueReadonlyList>());
+						}
+					}
+
+					Ptr<TypeInfoImpl> genericTypeInfo = new TypeInfoImpl(ITypeInfo::Generic);
+					genericTypeInfo->SetElementType(mapTypeInfo);
+					if (key) genericTypeInfo->AddGenericArgument(key);
+					genericTypeInfo->AddGenericArgument(value);
+
+					Ptr<TypeInfoImpl> shared = new TypeInfoImpl(ITypeInfo::SharedPtr);
+					shared->SetElementType(genericTypeInfo);
+					result = shared;
 				}
 
 				void Visit(WfFunctionType* node)override
 				{
+					if (Ptr<ITypeInfo> returnType = Call(node->result.Obj()))
+					{
+						Ptr<TypeInfoImpl> enumerableTypeInfo = new TypeInfoImpl(ITypeInfo::TypeDescriptor);
+						enumerableTypeInfo->SetTypeDescriptor(description::GetTypeDescriptor<IValueFunctionProxy>());
+
+						Ptr<TypeInfoImpl> genericTypeInfo = new TypeInfoImpl(ITypeInfo::Generic);
+						genericTypeInfo->SetElementType(enumerableTypeInfo);
+						genericTypeInfo->AddGenericArgument(returnType);
+						FOREACH(Ptr<WfType>, argument, node->arguments)
+						{
+							if (Ptr<ITypeInfo> argumentType = Call(argument.Obj()))
+							{
+								genericTypeInfo->AddGenericArgument(argumentType);
+							}
+							else
+							{
+								return;
+							}
+						}
+
+						Ptr<TypeInfoImpl> shared = new TypeInfoImpl(ITypeInfo::SharedPtr);
+						shared->SetElementType(genericTypeInfo);
+						result = shared;
+					}
 				}
 
 				void Visit(WfChildType* node)override
@@ -402,7 +544,7 @@ CreateTypeInfoFromType
 				{
 					CreateTypeInfoFromTypeVisitor visitor(scope);
 					type->Accept(&visitor);
-					return visitor.typeInfo;
+					return visitor.result;
 				}
 			};
 
