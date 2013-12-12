@@ -31,7 +31,6 @@ Scope
 				Ptr<reflection::description::ITypeInfo>		typeInfo;			// reflection type info of this symbol, nullable
 
 				WfLexicalSymbol(Ptr<WfDeclaration> declaration);
-				WfLexicalSymbol(Ptr<reflection::description::ITypeInfo> _typeInfo);
 				~WfLexicalSymbol();
 			};
 

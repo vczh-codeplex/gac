@@ -19,12 +19,6 @@ WfLexicalSymbol
 			{
 			}
 
-			WfLexicalSymbol::WfLexicalSymbol(Ptr<reflection::description::ITypeInfo> _typeInfo)
-				:type(GetTypeFromTypeInfo(_typeInfo.Obj()))
-				, typeInfo(_typeInfo)
-			{
-			}
-
 			WfLexicalSymbol::~WfLexicalSymbol()
 			{
 			}
