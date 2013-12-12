@@ -206,7 +206,7 @@ L"\r\n"L""
 L"\r\n"L"class LetExpression : Expression"
 L"\r\n"L"{"
 L"\r\n"L"\tLetVariable[]\t\t\tvariables;"
-L"\r\n"L"\tExpression\t\t\t\texp;"
+L"\r\n"L"\tExpression\t\t\t\texpression;"
 L"\r\n"L"}"
 L"\r\n"L""
 L"\r\n"L"class IfExpression : Expression"
@@ -667,7 +667,7 @@ L"\r\n"L"\t= ORDERED_NAME : name as OrderedNameExpression"
 L"\r\n"L"\t= \"(\" !WorkflowExpression \")\""
 L"\r\n"L"\t= \"[\" WorkflowExpression : body \"]\" as OrderedLambdaExpression"
 L"\r\n"L"\t= Function : function as FunctionExpression"
-L"\r\n"L"\t= \"let\" LetVariableFragment : variables {\",\" LetVariableFragment : variables} \"in\" \"(\" WorkflowExpression : exp \")\" as LetExpression"
+L"\r\n"L"\t= \"let\" LetVariableFragment : variables {\",\" LetVariableFragment : variables} \"in\" \"(\" WorkflowExpression : expression \")\" as LetExpression"
 L"\r\n"L"\t= \"+\" Exp0 : operand as UnaryExpression with {op = \"Positive\"}"
 L"\r\n"L"\t= \"-\" Exp0 : operand as UnaryExpression with {op = \"Negative\"}"
 L"\r\n"L"\t= \"not\" Exp0 : operand as UnaryExpression with {op = \"Not\"}"
@@ -1190,7 +1190,7 @@ Parsing Tree Conversion Driver Implementation
 			void Fill(vl::Ptr<WfLetExpression> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
 			{
 				SetMember(tree->variables, obj->GetMember(L"variables"), tokens);
-				SetMember(tree->exp, obj->GetMember(L"exp"), tokens);
+				SetMember(tree->expression, obj->GetMember(L"expression"), tokens);
 			}
 
 			void Fill(vl::Ptr<WfIfExpression> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
@@ -3182,7 +3182,7 @@ namespace vl
 
 
 				CLASS_MEMBER_FIELD(variables)
-				CLASS_MEMBER_FIELD(exp)
+				CLASS_MEMBER_FIELD(expression)
 			END_CLASS_MEMBER(WfLetExpression)
 
 			BEGIN_CLASS_MEMBER(WfIfExpression)

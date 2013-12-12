@@ -64,19 +64,22 @@ BuildScopeForDeclaration
 
 				void Visit(WfFunctionDeclaration* node)override
 				{
-					Ptr<WfLexicalSymbol> symbol = new WfLexicalSymbol;
-					symbol->name = node->name.value;
-					symbol->ownerDeclaration = node;
+					if (node->anonymity == WfFunctionAnonymity::Named)
 					{
-						Ptr<WfFunctionType> type = new WfFunctionType;
-						type->result = node->returnType;
-						FOREACH(Ptr<WfFunctionArgument>, argument, node->arguments)
+						Ptr<WfLexicalSymbol> symbol = new WfLexicalSymbol;
+						symbol->name = node->name.value;
+						symbol->ownerDeclaration = node;
 						{
-							type->arguments.Add(argument->type);
+							Ptr<WfFunctionType> type = new WfFunctionType;
+							type->result = node->returnType;
+							FOREACH(Ptr<WfFunctionArgument>, argument, node->arguments)
+							{
+								type->arguments.Add(argument->type);
+							}
+							symbol->type = type;
 						}
-						symbol->type = type;
+						parentScope->symbols.Add(symbol->name, symbol);
 					}
-					parentScope->symbols.Add(symbol->name, symbol);
 					
 					resultScope = new WfLexicalScope(parentScope);
 					FOREACH(Ptr<WfFunctionArgument>, argument, node->arguments)
@@ -285,12 +288,10 @@ BuildScopeForExpression
 
 				void Visit(WfReferenceExpression* node)override
 				{
-					throw 0;
 				}
 
 				void Visit(WfOrderedNameExpression* node)override
 				{
-					throw 0;
 				}
 
 				void Visit(WfOrderedLambdaExpression* node)override
@@ -300,32 +301,28 @@ BuildScopeForExpression
 
 				void Visit(WfMemberExpression* node)override
 				{
-					throw 0;
+					BuildScopeForExpression(manager, parentScope, node->parent);
 				}
 
 				void Visit(WfChildExpression* node)override
 				{
-					throw 0;
+					BuildScopeForExpression(manager, parentScope, node->parent);
 				}
 
 				void Visit(WfLiteralExpression* node)override
 				{
-					throw 0;
 				}
 
 				void Visit(WfFloatingExpression* node)override
 				{
-					throw 0;
 				}
 
 				void Visit(WfIntegerExpression* node)override
 				{
-					throw 0;
 				}
 
 				void Visit(WfStringExpression* node)override
 				{
-					throw 0;
 				}
 
 				void Visit(WfFormatExpression* node)override
@@ -335,77 +332,101 @@ BuildScopeForExpression
 
 				void Visit(WfUnaryExpression* node)override
 				{
-					throw 0;
+					BuildScopeForExpression(manager, parentScope, node->operand);
 				}
 
 				void Visit(WfBinaryExpression* node)override
 				{
-					throw 0;
+					BuildScopeForExpression(manager, parentScope, node->first);
+					BuildScopeForExpression(manager, parentScope, node->second);
 				}
 
 				void Visit(WfLetExpression* node)override
 				{
-					throw 0;
+					resultScope = new WfLexicalScope(parentScope);
+					FOREACH(Ptr<WfLetVariable>, variable, node->variables)
+					{
+						Ptr<WfLexicalSymbol> symbol = new WfLexicalSymbol;
+						symbol->name = variable->name.value;
+						symbol->ownerExpression = node;
+						resultScope->symbols.Add(symbol->name, symbol);
+					}
+
+					BuildScopeForExpression(manager, resultScope, node->expression);
 				}
 
 				void Visit(WfIfExpression* node)override
 				{
-					throw 0;
+					BuildScopeForExpression(manager, parentScope, node->condition);
+					BuildScopeForExpression(manager, parentScope, node->trueBranch);
+					BuildScopeForExpression(manager, parentScope, node->falseBranch);
 				}
 
 				void Visit(WfRangeExpression* node)override
 				{
-					throw 0;
+					BuildScopeForExpression(manager, parentScope, node->begin);
+					BuildScopeForExpression(manager, parentScope, node->end);
 				}
 
 				void Visit(WfSetTestingExpression* node)override
 				{
-					throw 0;
+					BuildScopeForExpression(manager, parentScope, node->element);
+					BuildScopeForExpression(manager, parentScope, node->collection);
 				}
 
 				void Visit(WfConstructorExpression* node)override
 				{
-					throw 0;
+					FOREACH(Ptr<WfConstructorArgument>, argument, node->arguments)
+					{
+						BuildScopeForExpression(manager, parentScope, argument->key);
+						if (argument->value)
+						{
+							BuildScopeForExpression(manager, parentScope, argument->value);
+						}
+					}
 				}
 
 				void Visit(WfInferExpression* node)override
 				{
-					throw 0;
+					BuildScopeForExpression(manager, parentScope, node->expression);
 				}
 
 				void Visit(WfTypeCastingExpression* node)override
 				{
-					throw 0;
+					BuildScopeForExpression(manager, parentScope, node->expression);
 				}
 
 				void Visit(WfTypeTestingExpression* node)override
 				{
-					throw 0;
+					if (node->expression)
+					{
+						BuildScopeForExpression(manager, parentScope, node->expression);
+					}
 				}
 
 				void Visit(WfTypeOfTypeExpression* node)override
 				{
-					throw 0;
 				}
 
 				void Visit(WfTypeOfExpressionExpression* node)override
 				{
-					throw 0;
+					BuildScopeForExpression(manager, parentScope, node->expression);
 				}
 
 				void Visit(WfAttachEventExpression* node)override
 				{
-					throw 0;
+					BuildScopeForExpression(manager, parentScope, node->event);
+					BuildScopeForExpression(manager, parentScope, node->function);
 				}
 
 				void Visit(WfDetachEventExpression* node)override
 				{
-					throw 0;
+					BuildScopeForExpression(manager, parentScope, node->handler);
 				}
 
 				void Visit(WfBindExpression* node)override
 				{
-					throw 0;
+					BuildScopeForExpression(manager, parentScope, node->expression);
 				}
 
 				void Visit(WfObserveExpression* node)override
@@ -415,17 +436,30 @@ BuildScopeForExpression
 
 				void Visit(WfCallExpression* node)override
 				{
-					throw 0;
+					BuildScopeForExpression(manager, parentScope, node->function);
+					FOREACH(Ptr<WfExpression>, argument, node->arguments)
+					{
+						BuildScopeForExpression(manager, parentScope, argument);
+					}
 				}
 
 				void Visit(WfFunctionExpression* node)override
 				{
-					throw 0;
+					BuildScopeForDeclaration(manager, parentScope, node->function);
 				}
 
 				void Visit(WfNewTypeExpression* node)override
 				{
-					throw 0;
+					FOREACH(Ptr<WfExpression>, argument, node->arguments)
+					{
+						BuildScopeForExpression(manager, parentScope, argument);
+					}
+
+					resultScope = new WfLexicalScope(parentScope);
+					FOREACH(Ptr<WfFunctionDeclaration>, function, node->functions)
+					{
+						BuildScopeForDeclaration(manager, resultScope, function);
+					}
 				}
 
 				static Ptr<WfLexicalScope> Execute(WfLexicalScopeManager* manager, Ptr<WfLexicalScope> parentScope, Ptr<WfExpression> expression)
@@ -443,7 +477,7 @@ BuildScopeForExpression
 
 			void BuildScopeForExpression(WfLexicalScopeManager* manager, Ptr<WfLexicalScope> parentScope, Ptr<WfExpression> expression)
 			{
-				//BuildScopeForExpressionVisitor::Execute(manager, parentScope, expression);
+				BuildScopeForExpressionVisitor::Execute(manager, parentScope, expression);
 			}
 		}
 	}

@@ -543,7 +543,7 @@ namespace vl
 		{
 		public:
 			vl::collections::List<vl::Ptr<WfLetVariable>> variables;
-			vl::Ptr<WfExpression> exp;
+			vl::Ptr<WfExpression> expression;
 
 			void Accept(WfExpression::IVisitor* visitor)override;
 
