@@ -79,6 +79,11 @@ Scope Manager
 
 			class WfLexicalScopeManager : public Object
 			{
+			protected:
+
+				void										BuildGlobalNameFromTypeDescriptors();
+				void										BuildGlobalNameFromModules();
+				void										BuildName(Ptr<WfLexicalScopeName> name, Ptr<WfDeclaration> declaration);
 			public:
 				collections::List<Ptr<WfModule>>			modules;
 				Ptr<WfLexicalScopeName>						globalName;

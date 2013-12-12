@@ -113,6 +113,86 @@ WfLexicalScopeName
 WfLexicalScopeManager
 ***********************************************************************/
 
+			void WfLexicalScopeManager::BuildGlobalNameFromTypeDescriptors()
+			{
+				for (vint i = 0; i < GetGlobalTypeManager()->GetTypeDescriptorCount(); i++)
+				{
+					ITypeDescriptor* typeDescriptor = GetGlobalTypeManager()->GetTypeDescriptor(i);
+					WString name = typeDescriptor->GetTypeName();
+					const wchar_t* reading = name.Buffer();
+					Ptr<WfLexicalScopeName> currentName = globalName;
+
+					while (true)
+					{
+						WString fragment;
+						const wchar_t* delimiter = wcsstr(reading, L"::");
+						if (delimiter)
+						{
+							fragment = WString(reading, delimiter - reading);
+							reading = delimiter + 2;
+						}
+						else
+						{
+							fragment = reading;
+							reading = 0;
+						}
+
+						vint index = currentName->children.Keys().IndexOf(fragment);
+						if (index == -1)
+						{
+							Ptr<WfLexicalScopeName> newName = new WfLexicalScopeName;
+							currentName->children.Add(fragment, newName);
+							currentName = newName;
+						}
+						else
+						{
+							currentName = currentName->children.Values()[index];
+						}
+
+						if (!reading)
+						{
+							currentName->typeDescriptor = typeDescriptor;
+							break;
+						}
+					}
+				}
+			}
+
+			void WfLexicalScopeManager::BuildGlobalNameFromModules()
+			{
+				FOREACH(Ptr<WfModule>, module, modules)
+				{
+					FOREACH(Ptr<WfDeclaration>, declaration, module->declarations)
+					{
+						BuildName(globalName, declaration);
+					}
+				}
+			}
+
+			void WfLexicalScopeManager::BuildName(Ptr<WfLexicalScopeName> name, Ptr<WfDeclaration> declaration)
+			{
+				vint index = name->children.Keys().IndexOf(declaration->name.value);
+				if (index == -1)
+				{
+					Ptr<WfLexicalScopeName> newName = new WfLexicalScopeName;
+					name->children.Add(declaration->name.value, newName);
+					name = newName;
+				}
+				else
+				{
+					name = name->children.Values()[index];
+				}
+
+				name->declarations.Add(declaration);
+				if (auto ns = declaration.Cast<WfNamespaceDeclaration>())
+				{
+					FOREACH(Ptr<WfDeclaration>, subDecl, ns->declarations)
+					{
+						BuildName(name, subDecl);
+					}
+				}
+			}
+
 			WfLexicalScopeManager::WfLexicalScopeManager()
 			{
 			}
@@ -123,6 +203,9 @@ WfLexicalScopeManager
 
 			void WfLexicalScopeManager::BuildGlobalName()
 			{
+				globalName = new WfLexicalScopeName;
+				BuildGlobalNameFromTypeDescriptors();
+				BuildGlobalNameFromModules();
 			}
 
 /***********************************************************************
