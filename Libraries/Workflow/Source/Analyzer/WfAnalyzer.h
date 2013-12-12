@@ -20,7 +20,7 @@ namespace vl
 			class WfLexicalScopeManager;
 
 /***********************************************************************
-Symbol
+Scope
 ***********************************************************************/
 
 			class WfLexicalSymbol : public Object
@@ -58,13 +58,35 @@ Symbol
 				Ptr<WfLexicalSymbol>						ResolveSymbol(const WString& symbolName);
 			};
 
+/***********************************************************************
+Scope Manager
+***********************************************************************/
+
+			class WfLexicalScopeName : public Object
+			{
+				typedef collections::Dictionary<WString, Ptr<WfLexicalScopeName>>		NameMap;
+				typedef collections::List<Ptr<WfDeclaration>>							DeclarationList;
+			public:
+				WfLexicalScopeName*							parent;
+				NameMap										children;
+				WString										name;
+				reflection::description::ITypeDescriptor*	typeDescriptor;		// type that form this name
+				DeclarationList								declarations;		// declarations that form this name
+
+				WfLexicalScopeName();
+				~WfLexicalScopeName();
+			};
+
 			class WfLexicalScopeManager : public Object
 			{
 			public:
 				collections::List<Ptr<WfModule>>			modules;
+				Ptr<WfLexicalScopeName>						globalName;
 
 				WfLexicalScopeManager();
 				~WfLexicalScopeManager();
+
+				void										BuildGlobalName();
 			};
 
 /***********************************************************************
