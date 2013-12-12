@@ -207,7 +207,7 @@ class LetVariable
 class LetExpression : Expression
 {
 	LetVariable[]			variables;
-	Expression				exp;
+	Expression				expression;
 }
 
 class IfExpression : Expression
@@ -668,7 +668,7 @@ rule Expression Exp0
 	= "(" !WorkflowExpression ")"
 	= "[" WorkflowExpression : body "]" as OrderedLambdaExpression
 	= Function : function as FunctionExpression
-	= "let" LetVariableFragment : variables {"," LetVariableFragment : variables} "in" "(" WorkflowExpression : exp ")" as LetExpression
+	= "let" LetVariableFragment : variables {"," LetVariableFragment : variables} "in" "(" WorkflowExpression : expression ")" as LetExpression
 	= "+" Exp0 : operand as UnaryExpression with {op = "Positive"}
 	= "-" Exp0 : operand as UnaryExpression with {op = "Negative"}
 	= "not" Exp0 : operand as UnaryExpression with {op = "Not"}
