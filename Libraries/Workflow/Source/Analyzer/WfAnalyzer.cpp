@@ -92,17 +92,37 @@ WfLexicalScope
 
 			Ptr<WfLexicalSymbol> WfLexicalScope::ResolveSymbol(const WString& symbolName)
 			{
-				WfLexicalScope* scope = this;
-				while (scope)
-				{
-					vint index = scope->symbols.Keys().IndexOf(symbolName);
-					if (index != -1)
-					{
-						return scope->symbols.Values()[index];
-					}
-					scope = scope->parentScope.Obj();
-				}
-				return 0;
+				throw 0;
+			}
+
+/***********************************************************************
+WfLexicalScopeName
+***********************************************************************/
+
+			WfLexicalScopeName::WfLexicalScopeName()
+				:parent(0)
+				, typeDescriptor(0)
+			{
+			}
+
+			WfLexicalScopeName::~WfLexicalScopeName()
+			{
+			}
+
+/***********************************************************************
+WfLexicalScopeManager
+***********************************************************************/
+
+			WfLexicalScopeManager::WfLexicalScopeManager()
+			{
+			}
+
+			WfLexicalScopeManager::~WfLexicalScopeManager()
+			{
+			}
+
+			void WfLexicalScopeManager::BuildGlobalName()
+			{
 			}
 
 /***********************************************************************
@@ -412,10 +432,12 @@ CreateTypeInfoFromType
 
 				void Visit(WfTopQualifiedType* node)override
 				{
+					throw 0;
 				}
 
 				void Visit(WfReferenceType* node)override
 				{
+					throw 0;
 				}
 
 				void Visit(WfRawPointerType* node)override
@@ -538,6 +560,7 @@ CreateTypeInfoFromType
 
 				void Visit(WfChildType* node)override
 				{
+					throw 0;
 				}
 
 				static Ptr<ITypeInfo> Execute(WfLexicalScope* scope, Ptr<WfType> type)
