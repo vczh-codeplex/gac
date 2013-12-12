@@ -81,6 +81,11 @@ Scope Manager
 
 			class WfLexicalScopeManager : public Object
 			{
+				typedef collections::Dictionary<Ptr<WfNamespaceDeclaration>, Ptr<WfLexicalScopeName>>		NamespaceNameMap;
+				typedef collections::Dictionary<Ptr<WfModule>, Ptr<WfLexicalScope>>							ModuleScopeMap;
+				typedef collections::Dictionary<Ptr<WfDeclaration>, Ptr<WfLexicalScope>>					DeclarationScopeMap;
+				typedef collections::Dictionary<Ptr<WfStatement>, Ptr<WfLexicalScope>>						StatementScopeMap;
+				typedef collections::Dictionary<Ptr<WfExpression>, Ptr<WfLexicalScope>>						ExpressionScopeMap;
 			protected:
 
 				void										BuildGlobalNameFromTypeDescriptors();
@@ -88,12 +93,20 @@ Scope Manager
 				void										BuildName(Ptr<WfLexicalScopeName> name, Ptr<WfDeclaration> declaration);
 			public:
 				collections::List<Ptr<WfModule>>			modules;
+
 				Ptr<WfLexicalScopeName>						globalName;
+				NamespaceNameMap							namespaceNames;
+
+				ModuleScopeMap								moduleScopes;		// the nearest scope for the module
+				DeclarationScopeMap							declarationScopes;	// the nearest scope for the declaration
+				StatementScopeMap							statementScopes;	// the nearest scope for the statement
+				ExpressionScopeMap							expressionScopes;	// the nearest scope for the expression
 
 				WfLexicalScopeManager();
 				~WfLexicalScopeManager();
 
 				void										BuildGlobalName();
+				void										BuildScopes();
 			};
 
 /***********************************************************************
@@ -103,6 +116,11 @@ Helper Functions
 			extern Ptr<WfType>								GetTypeFromDeclaration(Ptr<WfDeclaration> declaration);
 			extern Ptr<WfType>								GetTypeFromTypeInfo(reflection::description::ITypeInfo* typeInfo);
 			extern Ptr<reflection::description::ITypeInfo>	CreateTypeInfoFromType(WfLexicalScope* scope, Ptr<WfType> type);
+
+			extern void										BuildScopeForModule(WfLexicalScopeManager* manager, Ptr<WfModule> module);
+			extern void										BuildScopeForDeclaration(WfLexicalScopeManager* manager, Ptr<WfLexicalScope> parentScope, Ptr<WfDeclaration> declaration);
+			extern void										BuildScopeForStatement(WfLexicalScopeManager* manager, Ptr<WfLexicalScope> parentScope, Ptr<WfStatement> statement);
+			extern void										BuildScopeForExpression(WfLexicalScopeManager* manager, Ptr<WfLexicalScope> parentScope, Ptr<WfExpression> expression);
 		}
 	}
 }

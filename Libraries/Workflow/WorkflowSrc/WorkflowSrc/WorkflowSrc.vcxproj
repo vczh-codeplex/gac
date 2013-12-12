@@ -256,6 +256,8 @@
     <ClCompile Include="..\..\..\..\Common\Source\Threading.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\UnitTest\UnitTest.cpp" />
     <ClCompile Include="..\..\Source\Analyzer\WfAnalyzer.cpp" />
+    <ClCompile Include="..\..\Source\Analyzer\WfAnalyzer_BuildScope.cpp" />
+    <ClCompile Include="..\..\Source\Analyzer\WfAnalyzer_TypeInfo.cpp" />
     <ClCompile Include="..\..\Source\Expression\WfExpression.cpp">
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>

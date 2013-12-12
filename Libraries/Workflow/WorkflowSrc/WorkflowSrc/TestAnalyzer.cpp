@@ -1,27 +1,32 @@
 #include "TestFunctions.h"
 
-TEST_CASE(TestBuildGlobalName)
+void LoadMultipleSamples(WfLexicalScopeManager* manager, const WString& sampleName)
 {
 	Ptr<ParsingTable> table = GetWorkflowTable();
+	List<WString> itemNames;
+	LoadSampleIndex(sampleName, itemNames);
+	FOREACH(WString, itemName, itemNames)
+	{
+		WString sample = LoadSample(sampleName, itemName);
+
+		List<Ptr<ParsingError>> errors;
+		Ptr<ParsingTreeNode> node = WfParseModuleAsParsingTreeNode(sample, table, errors);
+		TEST_ASSERT(node);
+		LogSampleParseResult(sampleName, itemName, sample, node);
+
+		List<RegexToken> tokens;
+		Ptr<WfModule> module = WfConvertParsingTreeNode(node, tokens).Cast<WfModule>();
+		manager->modules.Add(module);
+	}
+}
+
+TEST_CASE(TestBuildGlobalName)
+{
 	LoadTypes();
 	WfLexicalScopeManager manager;
-	{
-		List<WString> itemNames;
-		LoadSampleIndex(L"AnalyzerScope", itemNames);
-		FOREACH(WString, itemName, itemNames)
-		{
-			WString sample = LoadSample(L"AnalyzerScope", itemName);
-
-			List<Ptr<ParsingError>> errors;
-			Ptr<ParsingTreeNode> node = WfParseModuleAsParsingTreeNode(sample, table, errors);
-			TEST_ASSERT(node);
-			LogSampleParseResult(L"AnalyzerScope", itemName, sample, node);
-
-			Ptr<WfModule> module = WfParseModule(sample, table);
-			manager.modules.Add(module);
-		}
-	}
+	LoadMultipleSamples(&manager, L"AnalyzerScope");
 	manager.BuildGlobalName();
+	manager.BuildScopes();
 
 	{
 		auto parent = manager.globalName;
@@ -49,6 +54,8 @@ TEST_CASE(TestBuildGlobalName)
 		auto name = parent->children[L"test"];
 		TEST_ASSERT(name->typeDescriptor == 0);
 		TEST_ASSERT(name->declarations.Count() == 2);
+		TEST_ASSERT(manager.namespaceNames[name->declarations[0].Cast<WfNamespaceDeclaration>().Obj()] == name);
+		TEST_ASSERT(manager.namespaceNames[name->declarations[1].Cast<WfNamespaceDeclaration>().Obj()] == name);
 		TEST_ASSERT(name->parent == parent.Obj());
 	}
 	{
