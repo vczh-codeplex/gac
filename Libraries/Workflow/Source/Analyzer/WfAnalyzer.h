@@ -75,6 +75,8 @@ Scope Manager
 
 				WfLexicalScopeName();
 				~WfLexicalScopeName();
+
+				Ptr<WfLexicalScopeName>						AccessChild(const WString& name);
 			};
 
 			class WfLexicalScopeManager : public Object

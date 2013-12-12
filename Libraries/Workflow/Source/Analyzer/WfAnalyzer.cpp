@@ -109,6 +109,23 @@ WfLexicalScopeName
 			{
 			}
 
+			Ptr<WfLexicalScopeName> WfLexicalScopeName::AccessChild(const WString& name)
+			{
+				vint index = children.Keys().IndexOf(name);
+				if (index == -1)
+				{
+					Ptr<WfLexicalScopeName> newName = new WfLexicalScopeName;
+					newName->name = name;
+					newName->parent = this;
+					children.Add(name, newName);
+					return newName;
+				}
+				else
+				{
+					return children.Values()[index];
+				}
+			}
+
 /***********************************************************************
 WfLexicalScopeManager
 ***********************************************************************/
@@ -137,19 +154,7 @@ WfLexicalScopeManager
 							reading = 0;
 						}
 
-						vint index = currentName->children.Keys().IndexOf(fragment);
-						if (index == -1)
-						{
-							Ptr<WfLexicalScopeName> newName = new WfLexicalScopeName;
-							newName->name = fragment;
-							currentName->children.Add(fragment, newName);
-							currentName = newName;
-						}
-						else
-						{
-							currentName = currentName->children.Values()[index];
-						}
-
+						currentName = currentName->AccessChild(fragment);
 						if (!reading)
 						{
 							currentName->typeDescriptor = typeDescriptor;
@@ -172,19 +177,7 @@ WfLexicalScopeManager
 
 			void WfLexicalScopeManager::BuildName(Ptr<WfLexicalScopeName> name, Ptr<WfDeclaration> declaration)
 			{
-				vint index = name->children.Keys().IndexOf(declaration->name.value);
-				if (index == -1)
-				{
-					Ptr<WfLexicalScopeName> newName = new WfLexicalScopeName;
-					newName->name = declaration->name.value;
-					name->children.Add(declaration->name.value, newName);
-					name = newName;
-				}
-				else
-				{
-					name = name->children.Values()[index];
-				}
-
+				name = name->AccessChild(declaration->name.value);
 				name->declarations.Add(declaration);
 				if (auto ns = declaration.Cast<WfNamespaceDeclaration>())
 				{
