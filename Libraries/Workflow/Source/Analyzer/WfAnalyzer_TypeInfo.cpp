@@ -11,51 +11,6 @@ namespace vl
 			using namespace reflection::description;
 
 /***********************************************************************
-GetTypeFromDeclaration
-***********************************************************************/
-
-			class GetTypeFromDeclarationVisitor : public Object, public WfDeclaration::IVisitor
-			{
-			public:
-				Ptr<WfType>					result;
-
-				void Visit(WfNamespaceDeclaration* node)override
-				{
-					Ptr<WfPredefinedType> type = new WfPredefinedType;
-					type->name = WfPredefinedTypeName::Namespace;
-					result = type;
-				}
-
-				void Visit(WfFunctionDeclaration* node)override
-				{
-					Ptr<WfFunctionType> type = new WfFunctionType;
-					type->result = node->returnType;
-					FOREACH(Ptr<WfFunctionArgument>, argument, node->arguments)
-					{
-						type->arguments.Add(argument->type);
-					}
-					result = type;
-				}
-
-				void Visit(WfVariableDeclaration* node)override
-				{
-					result = node->type;
-				}
-
-				static Ptr<WfType> Execute(Ptr<WfDeclaration> declaration)
-				{
-					GetTypeFromDeclarationVisitor visitor;
-					declaration->Accept(&visitor);
-					return visitor.result;
-				}
-			};
-
-			Ptr<WfType> GetTypeFromDeclaration(Ptr<WfDeclaration> declaration)
-			{
-				return GetTypeFromDeclarationVisitor::Execute(declaration);
-			}
-
-/***********************************************************************
 GetTypeFromTypeInfo
 ***********************************************************************/
 

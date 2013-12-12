@@ -14,8 +14,7 @@ namespace vl
 WfLexicalSymbol
 ***********************************************************************/
 
-			WfLexicalSymbol::WfLexicalSymbol(Ptr<WfDeclaration> declaration)
-				:type(GetTypeFromDeclaration(declaration))
+			WfLexicalSymbol::WfLexicalSymbol()
 			{
 			}
 

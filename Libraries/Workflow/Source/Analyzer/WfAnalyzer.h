@@ -26,17 +26,20 @@ Scope
 			class WfLexicalSymbol : public Object
 			{
 			public:
+				WString										name;				// name of this symbol
 				Ptr<WfType>									type;				// type of this symbol
-				Ptr<WfDeclaration>							declaration;		// declaration of this symbol, nullable
 				Ptr<reflection::description::ITypeInfo>		typeInfo;			// reflection type info of this symbol, nullable
+				Ptr<WfDeclaration>							ownerDeclaration;	// nullable
+				Ptr<WfStatement>							ownerStatement;		// nullable
+				Ptr<WfExpression>							ownerExpression;	// nullable
 
-				WfLexicalSymbol(Ptr<WfDeclaration> declaration);
+				WfLexicalSymbol();
 				~WfLexicalSymbol();
 			};
 
 			class WfLexicalScope : public Object
 			{
-				typedef collections::Dictionary<WString, Ptr<WfLexicalSymbol>>		TypeMap;
+				typedef collections::Group<WString, Ptr<WfLexicalSymbol>>		TypeGroup;
 			public:
 				WfLexicalScopeManager*						ownerManager;		// nullable and inheritable
 				Ptr<WfModule>								ownerModule;		// nullable and inheritable
@@ -45,7 +48,7 @@ Scope
 				Ptr<WfExpression>							ownerExpression;	// nullable
 
 				Ptr<WfLexicalScope>							parentScope;		// null means that this is the root scope
-				TypeMap										symbols;			// all symbols in this scope
+				TypeGroup									symbols;			// all symbols in this scope
 
 				WfLexicalScope(WfLexicalScopeManager* _ownerManager);
 				WfLexicalScope(Ptr<WfLexicalScope> _parentScope);
@@ -112,7 +115,6 @@ Scope Manager
 Helper Functions
 ***********************************************************************/
 
-			extern Ptr<WfType>								GetTypeFromDeclaration(Ptr<WfDeclaration> declaration);
 			extern Ptr<WfType>								GetTypeFromTypeInfo(reflection::description::ITypeInfo* typeInfo);
 			extern Ptr<reflection::description::ITypeInfo>	CreateTypeInfoFromType(WfLexicalScope* scope, Ptr<WfType> type);
 
