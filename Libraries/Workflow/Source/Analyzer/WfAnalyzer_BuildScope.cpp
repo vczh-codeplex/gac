@@ -35,7 +35,6 @@ BuildScopeForDeclaration
 			public:
 				WfLexicalScopeManager*					manager;
 				Ptr<WfLexicalScope>						parentScope;
-				Ptr<WfLexicalSymbol>					resultSymbol;
 				Ptr<WfLexicalScope>						resultScope;
 
 				BuildScopeForDeclarationVisitor(WfLexicalScopeManager* _manager, Ptr<WfLexicalScope> _parentScope)
@@ -46,15 +45,15 @@ BuildScopeForDeclaration
 
 				void Visit(WfNamespaceDeclaration* node)override
 				{
-					resultSymbol = new WfLexicalSymbol;
-					resultSymbol->name = node->name.value;
-					resultSymbol->ownerDeclaration = node;
+					Ptr<WfLexicalSymbol> symbol = new WfLexicalSymbol;
+					symbol->name = node->name.value;
+					symbol->ownerDeclaration = node;
 					{
 						Ptr<WfPredefinedType> type = new WfPredefinedType;
 						type->name = WfPredefinedTypeName::Namespace;
-						resultSymbol->type = type;
+						symbol->type = type;
 					}
-					parentScope->symbols.Add(resultSymbol->name, resultSymbol);
+					parentScope->symbols.Add(symbol->name, symbol);
 
 					resultScope = new WfLexicalScope(parentScope);
 					FOREACH(Ptr<WfDeclaration>, declaration, node->declarations)
@@ -65,9 +64,9 @@ BuildScopeForDeclaration
 
 				void Visit(WfFunctionDeclaration* node)override
 				{
-					resultSymbol = new WfLexicalSymbol;
-					resultSymbol->name = node->name.value;
-					resultSymbol->ownerDeclaration = node;
+					Ptr<WfLexicalSymbol> symbol = new WfLexicalSymbol;
+					symbol->name = node->name.value;
+					symbol->ownerDeclaration = node;
 					{
 						Ptr<WfFunctionType> type = new WfFunctionType;
 						type->result = node->returnType;
@@ -75,18 +74,18 @@ BuildScopeForDeclaration
 						{
 							type->arguments.Add(argument->type);
 						}
-						resultSymbol->type = type;
+						symbol->type = type;
 					}
-					parentScope->symbols.Add(resultSymbol->name, resultSymbol);
+					parentScope->symbols.Add(symbol->name, symbol);
 					
 					resultScope = new WfLexicalScope(parentScope);
 					FOREACH(Ptr<WfFunctionArgument>, argument, node->arguments)
 					{
-						Ptr<WfLexicalSymbol> symbol = new WfLexicalSymbol;
-						symbol->name = argument->name.value;
-						symbol->type = argument->type;
-						symbol->ownerDeclaration = node;
-						resultScope->symbols.Add(symbol->name, symbol);
+						Ptr<WfLexicalSymbol> argumentSymbol = new WfLexicalSymbol;
+						argumentSymbol->name = argument->name.value;
+						argumentSymbol->type = argument->type;
+						argumentSymbol->ownerDeclaration = node;
+						resultScope->symbols.Add(argumentSymbol->name, argumentSymbol);
 					}
 
 					BuildScopeForStatement(manager, resultScope, node->statement);
@@ -94,13 +93,13 @@ BuildScopeForDeclaration
 
 				void Visit(WfVariableDeclaration* node)override
 				{
-					resultSymbol = new WfLexicalSymbol;
-					resultSymbol->name = node->name.value;
-					resultSymbol->ownerDeclaration = node;
+					Ptr<WfLexicalSymbol> symbol = new WfLexicalSymbol;
+					symbol->name = node->name.value;
+					symbol->ownerDeclaration = node;
 					{
-						resultSymbol->type = node->type;
+						symbol->type = node->type;
 					}
-					parentScope->symbols.Add(resultSymbol->name, resultSymbol);
+					parentScope->symbols.Add(symbol->name, symbol);
 
 					BuildScopeForExpression(manager, parentScope, node->expression);
 				}
@@ -112,6 +111,7 @@ BuildScopeForDeclaration
 					if (visitor.resultScope)
 					{
 						manager->declarationScopes.Add(declaration, visitor.resultScope);
+						visitor.resultScope->ownerDeclaration = declaration;
 					}
 					return visitor.resultScope;
 				}
@@ -131,7 +131,6 @@ BuildScopeForStatement
 			public:
 				WfLexicalScopeManager*					manager;
 				Ptr<WfLexicalScope>						parentScope;
-				Ptr<WfLexicalSymbol>					resultSymbol;
 				Ptr<WfLexicalScope>						resultScope;
 
 				BuildScopeForStatementVisitor(WfLexicalScopeManager* _manager, Ptr<WfLexicalScope> _parentScope)
@@ -142,27 +141,28 @@ BuildScopeForStatement
 
 				void Visit(WfBreakStatement* node)override
 				{
-					throw 0;
 				}
 
 				void Visit(WfContinueStatement* node)override
 				{
-					throw 0;
 				}
 
 				void Visit(WfReturnStatement* node)override
 				{
-					throw 0;
+					if (node->expression)
+					{
+						BuildScopeForExpression(manager, parentScope, node->expression);
+					}
 				}
 
 				void Visit(WfDeleteStatement* node)override
 				{
-					throw 0;
+					BuildScopeForExpression(manager, parentScope, node->expression);
 				}
 
 				void Visit(WfRaiseExceptionStatement* node)override
 				{
-					throw 0;
+					BuildScopeForExpression(manager, parentScope, node->expression);
 				}
 
 				void Visit(WfIfStatement* node)override
@@ -172,37 +172,80 @@ BuildScopeForStatement
 
 				void Visit(WfSwitchStatement* node)override
 				{
-					throw 0;
+					BuildScopeForExpression(manager, parentScope, node->expression);
+					FOREACH(Ptr<WfSwitchCase>, switchCase, node->caseBranches)
+					{
+						BuildScopeForExpression(manager, parentScope, switchCase->expression);
+						BuildScopeForStatement(manager, parentScope, switchCase->statement);
+					}
+					if (node->defaultBranch)
+					{
+						BuildScopeForStatement(manager, parentScope, node->defaultBranch);
+					}
 				}
 
 				void Visit(WfWhileStatement* node)override
 				{
-					throw 0;
+					BuildScopeForExpression(manager, parentScope, node->condition);
+					BuildScopeForStatement(manager, parentScope, node->statement);
 				}
 
 				void Visit(WfForEachStatement* node)override
 				{
-					throw 0;
+					resultScope = new WfLexicalScope(parentScope);
+
+					Ptr<WfLexicalSymbol> symbol = new WfLexicalSymbol;
+					symbol->name = node->name.value;
+					symbol->ownerStatement = node;
+					resultScope->symbols.Add(symbol->name, symbol);
+
+					BuildScopeForExpression(manager, parentScope, node->collection);
+					BuildScopeForStatement(manager, resultScope, node->statement);
 				}
 
 				void Visit(WfTryStatement* node)override
 				{
-					throw 0;
+					BuildScopeForStatement(manager, parentScope, node->protectedStatement);
+					if (node->catchStatement)
+					{
+						resultScope = new WfLexicalScope(parentScope);
+
+						Ptr<WfLexicalSymbol> symbol = new WfLexicalSymbol;
+						symbol->name = node->name.value;
+						symbol->ownerStatement = node;
+						{
+							Ptr<WfPredefinedType> type = new WfPredefinedType;
+							type->name = WfPredefinedTypeName::Object;
+							symbol->type = type;
+						}
+						resultScope->symbols.Add(symbol->name, symbol);
+
+						BuildScopeForStatement(manager, resultScope, node->catchStatement);
+					}
+					if (node->finallyStatement)
+					{
+						BuildScopeForStatement(manager, parentScope, node->finallyStatement);
+					}
 				}
 
 				void Visit(WfBlockStatement* node)override
 				{
-					throw 0;
+					resultScope = new WfLexicalScope(parentScope);
+
+					FOREACH(Ptr<WfStatement>, statement, node->statements)
+					{
+						BuildScopeForStatement(manager, resultScope, statement);
+					}
 				}
 
 				void Visit(WfExpressionStatement* node)override
 				{
-					throw 0;
+					BuildScopeForExpression(manager, parentScope, node->expression);
 				}
 
 				void Visit(WfVariableStatement* node)override
 				{
-					throw 0;
+					BuildScopeForDeclaration(manager, parentScope, node->variable);
 				}
 
 				static Ptr<WfLexicalScope> Execute(WfLexicalScopeManager* manager, Ptr<WfLexicalScope> parentScope, Ptr<WfStatement> statement)
@@ -212,6 +255,7 @@ BuildScopeForStatement
 					if (visitor.resultScope)
 					{
 						manager->statementScopes.Add(statement, visitor.resultScope);
+						visitor.resultScope->ownerStatement = statement;
 					}
 					return visitor.resultScope;
 				}
@@ -231,7 +275,6 @@ BuildScopeForExpression
 			public:
 				WfLexicalScopeManager*					manager;
 				Ptr<WfLexicalScope>						parentScope;
-				Ptr<WfLexicalSymbol>					resultSymbol;
 				Ptr<WfLexicalScope>						resultScope;
 
 				BuildScopeForExpressionVisitor(WfLexicalScopeManager* _manager, Ptr<WfLexicalScope> _parentScope)
@@ -392,6 +435,7 @@ BuildScopeForExpression
 					if (visitor.resultScope)
 					{
 						manager->expressionScopes.Add(expression, visitor.resultScope);
+						visitor.resultScope->ownerExpression = expression;
 					}
 					return visitor.resultScope;
 				}
