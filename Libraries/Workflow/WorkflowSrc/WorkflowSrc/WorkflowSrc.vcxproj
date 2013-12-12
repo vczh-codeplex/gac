@@ -207,6 +207,7 @@
     <ClInclude Include="..\..\Source\Expression\WfExpression.h" />
     <ClInclude Include="..\..\Source\Runtime\WfRuntime.h" />
     <ClInclude Include="..\..\Source\WorkflowVlppReferences.h" />
+    <ClInclude Include="TestFunctions.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\Common\Source\Basic.cpp" />

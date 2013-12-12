@@ -6,6 +6,9 @@ Parser::WfExpression
 本文件使用Vczh Parsing Generator工具自动生成
 ***********************************************************************/
 
+#ifndef VCZH_WORKFLOW_EXPRESSIONS_WFEXPRESSION
+#define VCZH_WORKFLOW_EXPRESSIONS_WFEXPRESSION
+
 #include "../WorkflowVlppReferences.h"
 
 namespace vl
@@ -1574,3 +1577,4 @@ namespace vl
 		}
 	}
 }
+#endif

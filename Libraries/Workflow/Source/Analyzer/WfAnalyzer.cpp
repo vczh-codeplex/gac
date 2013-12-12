@@ -141,6 +141,7 @@ WfLexicalScopeManager
 						if (index == -1)
 						{
 							Ptr<WfLexicalScopeName> newName = new WfLexicalScopeName;
+							newName->name = fragment;
 							currentName->children.Add(fragment, newName);
 							currentName = newName;
 						}
@@ -175,6 +176,7 @@ WfLexicalScopeManager
 				if (index == -1)
 				{
 					Ptr<WfLexicalScopeName> newName = new WfLexicalScopeName;
+					newName->name = declaration->name.value;
 					name->children.Add(declaration->name.value, newName);
 					name = newName;
 				}
