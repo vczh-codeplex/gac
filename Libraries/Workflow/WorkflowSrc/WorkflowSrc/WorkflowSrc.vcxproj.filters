@@ -252,6 +252,9 @@
     <ClInclude Include="..\..\Source\Runtime\WfRuntime.h">
       <Filter>Workflow\Runtime</Filter>
     </ClInclude>
+    <ClInclude Include="TestFunctions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\Common\Source\Stream\Accessor.cpp">
