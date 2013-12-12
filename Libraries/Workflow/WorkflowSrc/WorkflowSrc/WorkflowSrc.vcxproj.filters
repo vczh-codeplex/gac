@@ -413,6 +413,12 @@
     <ClCompile Include="TestAnalyzer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Analyzer\WfAnalyzer_TypeInfo.cpp">
+      <Filter>Workflow\Analyzer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Analyzer\WfAnalyzer_BuildScope.cpp">
+      <Filter>Workflow\Analyzer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Spec.txt" />

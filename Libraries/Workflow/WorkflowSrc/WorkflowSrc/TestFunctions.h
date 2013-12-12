@@ -6,9 +6,10 @@
 #include "..\..\Source\Runtime\WfRuntime.h"
 
 using namespace vl;
+using namespace vl::unittest;
 using namespace vl::collections;
 using namespace vl::stream;
-using namespace vl::unittest;
+using namespace vl::regex;
 using namespace vl::parsing;
 using namespace vl::parsing::tabling;
 using namespace vl::workflow;
