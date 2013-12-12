@@ -269,6 +269,9 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\..\Source\Expression\WfExpression.parser.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerScope\ModuleA.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerScope\ModuleB.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerScope\ModuleC.txt" />
     <Text Include="..\TestFiles\Samples\Declaration\Function.txt" />
     <Text Include="..\TestFiles\Samples\Declaration\HelloWorld.txt" />
     <Text Include="..\TestFiles\Samples\Declaration\Namespace.txt" />
@@ -324,6 +327,7 @@
     <Text Include="..\TestFiles\Samples\Expression\True.txt" />
     <Text Include="..\TestFiles\Samples\Expression\TypeOfExpression.txt" />
     <Text Include="..\TestFiles\Samples\Expression\TypeOfType.txt" />
+    <Text Include="..\TestFiles\Samples\IndexAnalyzerScope.txt" />
     <Text Include="..\TestFiles\Samples\IndexDeclaration.txt" />
     <Text Include="..\TestFiles\Samples\IndexExpression.txt" />
     <Text Include="..\TestFiles\Samples\IndexModule.txt" />

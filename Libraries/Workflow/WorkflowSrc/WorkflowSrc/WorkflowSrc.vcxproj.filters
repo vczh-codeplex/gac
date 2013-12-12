@@ -70,6 +70,9 @@
     <Filter Include="Workflow\Runtime">
       <UniqueIdentifier>{58fa083a-09ff-40f3-ab86-f44158708dee}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\Samples\AnalyzerScope">
+      <UniqueIdentifier>{0f132ee3-f887-4d7b-8320-57901c76c66d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Source\WorkflowVlppReferences.h">
@@ -643,6 +646,18 @@
     </Text>
     <Text Include="..\TestFiles\Samples\Expression\CastWeak.txt">
       <Filter>Resource Files\Samples\Expression</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\IndexAnalyzerScope.txt">
+      <Filter>Resource Files\Samples</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerScope\ModuleA.txt">
+      <Filter>Resource Files\Samples\AnalyzerScope</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerScope\ModuleB.txt">
+      <Filter>Resource Files\Samples\AnalyzerScope</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerScope\ModuleC.txt">
+      <Filter>Resource Files\Samples\AnalyzerScope</Filter>
     </Text>
   </ItemGroup>
   <ItemGroup>
