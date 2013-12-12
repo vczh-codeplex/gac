@@ -263,7 +263,7 @@ BuildScopeForStatement
 
 			void BuildScopeForStatement(WfLexicalScopeManager* manager, Ptr<WfLexicalScope> parentScope, Ptr<WfStatement> statement)
 			{
-				//BuildScopeForStatementVisitor::Execute(manager, parentScope, statement);
+				BuildScopeForStatementVisitor::Execute(manager, parentScope, statement);
 			}
 
 /***********************************************************************
