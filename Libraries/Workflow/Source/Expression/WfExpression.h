@@ -930,12 +930,12 @@ namespace vl
 
 			virtual void Accept(WfDeclaration::IVisitor* visitor)=0;
 
+			vl::parsing::ParsingToken name;
 		};
 
 		class WfNamespaceDeclaration : public WfDeclaration, vl::reflection::Description<WfNamespaceDeclaration>
 		{
 		public:
-			vl::parsing::ParsingToken name;
 			vl::collections::List<vl::Ptr<WfDeclaration>> declarations;
 
 			void Accept(WfDeclaration::IVisitor* visitor)override;
@@ -962,7 +962,6 @@ namespace vl
 		{
 		public:
 			WfFunctionAnonymity anonymity;
-			vl::parsing::ParsingToken name;
 			vl::collections::List<vl::Ptr<WfFunctionArgument>> arguments;
 			vl::Ptr<WfType> returnType;
 			vl::Ptr<WfStatement> statement;
@@ -986,7 +985,6 @@ namespace vl
 		{
 		public:
 			vl::Ptr<WfType> type;
-			vl::parsing::ParsingToken name;
 			vl::Ptr<WfExpression> expression;
 
 			void Accept(WfDeclaration::IVisitor* visitor)override;

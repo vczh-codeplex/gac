@@ -424,11 +424,11 @@ L"\r\n"L"}"
 L"\r\n"L""
 L"\r\n"L"class Declaration"
 L"\r\n"L"{"
+L"\r\n"L"\ttoken\t\t\t\t\tname;"
 L"\r\n"L"}"
 L"\r\n"L""
 L"\r\n"L"class NamespaceDeclaration : Declaration"
 L"\r\n"L"{"
-L"\r\n"L"\ttoken\t\t\t\t\tname;"
 L"\r\n"L"\tDeclaration[]\t\t\tdeclarations;"
 L"\r\n"L"}"
 L"\r\n"L""
@@ -447,7 +447,6 @@ L"\r\n"L""
 L"\r\n"L"class FunctionDeclaration : Declaration"
 L"\r\n"L"{"
 L"\r\n"L"\tFunctionAnonymity\t\tanonymity;"
-L"\r\n"L"\ttoken\t\t\t\t\tname;"
 L"\r\n"L"\tFunctionArgument[]\t\targuments;"
 L"\r\n"L"\tType\t\t\t\t\treturnType;"
 L"\r\n"L"\tStatement\t\t\t\tstatement;"
@@ -461,7 +460,6 @@ L"\r\n"L""
 L"\r\n"L"class VariableDeclaration : Declaration"
 L"\r\n"L"{"
 L"\r\n"L"\tType\t\t\t\t\ttype;"
-L"\r\n"L"\ttoken\t\t\t\t\tname;"
 L"\r\n"L"\tExpression\t\t\t\texpression;"
 L"\r\n"L"}"
 L"\r\n"L""
@@ -1372,11 +1370,11 @@ Parsing Tree Conversion Driver Implementation
 
 			void Fill(vl::Ptr<WfDeclaration> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
 			{
+				SetMember(tree->name, obj->GetMember(L"name"), tokens);
 			}
 
 			void Fill(vl::Ptr<WfNamespaceDeclaration> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
 			{
-				SetMember(tree->name, obj->GetMember(L"name"), tokens);
 				SetMember(tree->declarations, obj->GetMember(L"declarations"), tokens);
 			}
 
@@ -1389,7 +1387,6 @@ Parsing Tree Conversion Driver Implementation
 			void Fill(vl::Ptr<WfFunctionDeclaration> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
 			{
 				SetMember(tree->anonymity, obj->GetMember(L"anonymity"), tokens);
-				SetMember(tree->name, obj->GetMember(L"name"), tokens);
 				SetMember(tree->arguments, obj->GetMember(L"arguments"), tokens);
 				SetMember(tree->returnType, obj->GetMember(L"returnType"), tokens);
 				SetMember(tree->statement, obj->GetMember(L"statement"), tokens);
@@ -1403,7 +1400,6 @@ Parsing Tree Conversion Driver Implementation
 			void Fill(vl::Ptr<WfVariableDeclaration> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
 			{
 				SetMember(tree->type, obj->GetMember(L"type"), tokens);
-				SetMember(tree->name, obj->GetMember(L"name"), tokens);
 				SetMember(tree->expression, obj->GetMember(L"expression"), tokens);
 			}
 
@@ -3521,7 +3517,10 @@ namespace vl
 
 			BEGIN_CLASS_MEMBER(WfDeclaration)
 				CLASS_MEMBER_METHOD(Accept, {L"visitor"})
+				CLASS_MEMBER_EXTERNALMETHOD(get_name, NO_PARAMETER, vl::WString(WfDeclaration::*)(), [](WfDeclaration* node){ return node->name.value; })
+				CLASS_MEMBER_EXTERNALMETHOD(set_name, {L"value"}, void(WfDeclaration::*)(const vl::WString&), [](WfDeclaration* node, const vl::WString& value){ node->name.value = value; })
 
+				CLASS_MEMBER_PROPERTY(name, get_name, set_name)
 			END_CLASS_MEMBER(WfDeclaration)
 
 			BEGIN_CLASS_MEMBER(WfNamespaceDeclaration)
@@ -3529,10 +3528,7 @@ namespace vl
 
 				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<WfNamespaceDeclaration>(), NO_PARAMETER)
 
-				CLASS_MEMBER_EXTERNALMETHOD(get_name, NO_PARAMETER, vl::WString(WfNamespaceDeclaration::*)(), [](WfNamespaceDeclaration* node){ return node->name.value; })
-				CLASS_MEMBER_EXTERNALMETHOD(set_name, {L"value"}, void(WfNamespaceDeclaration::*)(const vl::WString&), [](WfNamespaceDeclaration* node, const vl::WString& value){ node->name.value = value; })
 
-				CLASS_MEMBER_PROPERTY(name, get_name, set_name)
 				CLASS_MEMBER_FIELD(declarations)
 			END_CLASS_MEMBER(WfNamespaceDeclaration)
 
@@ -3557,11 +3553,8 @@ namespace vl
 
 				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<WfFunctionDeclaration>(), NO_PARAMETER)
 
-				CLASS_MEMBER_EXTERNALMETHOD(get_name, NO_PARAMETER, vl::WString(WfFunctionDeclaration::*)(), [](WfFunctionDeclaration* node){ return node->name.value; })
-				CLASS_MEMBER_EXTERNALMETHOD(set_name, {L"value"}, void(WfFunctionDeclaration::*)(const vl::WString&), [](WfFunctionDeclaration* node, const vl::WString& value){ node->name.value = value; })
 
 				CLASS_MEMBER_FIELD(anonymity)
-				CLASS_MEMBER_PROPERTY(name, get_name, set_name)
 				CLASS_MEMBER_FIELD(arguments)
 				CLASS_MEMBER_FIELD(returnType)
 				CLASS_MEMBER_FIELD(statement)
@@ -3581,11 +3574,8 @@ namespace vl
 
 				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<WfVariableDeclaration>(), NO_PARAMETER)
 
-				CLASS_MEMBER_EXTERNALMETHOD(get_name, NO_PARAMETER, vl::WString(WfVariableDeclaration::*)(), [](WfVariableDeclaration* node){ return node->name.value; })
-				CLASS_MEMBER_EXTERNALMETHOD(set_name, {L"value"}, void(WfVariableDeclaration::*)(const vl::WString&), [](WfVariableDeclaration* node, const vl::WString& value){ node->name.value = value; })
 
 				CLASS_MEMBER_FIELD(type)
-				CLASS_MEMBER_PROPERTY(name, get_name, set_name)
 				CLASS_MEMBER_FIELD(expression)
 			END_CLASS_MEMBER(WfVariableDeclaration)
 

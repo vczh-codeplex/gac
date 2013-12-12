@@ -263,6 +263,7 @@
     </ClCompile>
     <ClCompile Include="..\..\Source\Runtime\WfRuntime.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="TestAnalyzer.cpp" />
     <ClCompile Include="TestSamples.cpp" />
   </ItemGroup>
   <ItemGroup>

@@ -404,6 +404,9 @@
     <ClCompile Include="..\..\Source\Runtime\WfRuntime.cpp">
       <Filter>Workflow\Runtime</Filter>
     </ClCompile>
+    <ClCompile Include="TestAnalyzer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Spec.txt" />
