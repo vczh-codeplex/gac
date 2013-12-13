@@ -419,6 +419,9 @@
     <ClCompile Include="..\..\Source\Analyzer\WfAnalyzer_BuildScope.cpp">
       <Filter>Workflow\Analyzer</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Analyzer\WfAnalyzer_SearchOrderedName.cpp">
+      <Filter>Workflow\Analyzer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Spec.txt" />
