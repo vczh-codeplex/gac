@@ -116,6 +116,10 @@ BuildScopeForDeclaration
 						manager->declarationScopes.Add(declaration, visitor.resultScope);
 						visitor.resultScope->ownerDeclaration = declaration;
 					}
+					else
+					{
+						manager->declarationScopes.Add(declaration, parentScope);
+					}
 					return visitor.resultScope;
 				}
 			};
@@ -259,6 +263,10 @@ BuildScopeForStatement
 					{
 						manager->statementScopes.Add(statement, visitor.resultScope);
 						visitor.resultScope->ownerStatement = statement;
+					}
+					else
+					{
+						manager->statementScopes.Add(statement, parentScope);
 					}
 					return visitor.resultScope;
 				}
@@ -470,6 +478,10 @@ BuildScopeForExpression
 					{
 						manager->expressionScopes.Add(expression, visitor.resultScope);
 						visitor.resultScope->ownerExpression = expression;
+					}
+					else
+					{
+						manager->expressionScopes.Add(expression, parentScope);
 					}
 					return visitor.resultScope;
 				}
