@@ -174,7 +174,22 @@ BuildScopeForStatement
 
 				void Visit(WfIfStatement* node)override
 				{
-					throw 0;
+					resultScope = new WfLexicalScope(parentScope);
+					if (node->type)
+					{
+						Ptr<WfLexicalSymbol> symbol = new WfLexicalSymbol;
+						symbol->name = node->name.value;
+						symbol->type = node->type;
+						symbol->ownerStatement = node;
+						resultScope->symbols.Add(symbol->name, symbol);
+					}
+
+					BuildScopeForExpression(manager, resultScope, node->expression);
+					BuildScopeForStatement(manager, resultScope, node->trueBranch);
+					if (node->falseBranch)
+					{
+						BuildScopeForStatement(manager, resultScope, node->falseBranch);
+					}
 				}
 
 				void Visit(WfSwitchStatement* node)override
@@ -304,7 +319,19 @@ BuildScopeForExpression
 
 				void Visit(WfOrderedLambdaExpression* node)override
 				{
-					throw 0;
+					SortedList<vint> names;
+					SearchOrderedName(node->body, names);
+
+					resultScope = new WfLexicalScope(parentScope);
+					FOREACH(vint, name, names)
+					{
+						Ptr<WfLexicalSymbol> symbol = new WfLexicalSymbol;
+						symbol->name = L"$" + itow(name);
+						symbol->ownerExpression = node;
+						resultScope->symbols.Add(symbol->name, symbol);
+					}
+
+					BuildScopeForExpression(manager, resultScope, node->body);
 				}
 
 				void Visit(WfMemberExpression* node)override
