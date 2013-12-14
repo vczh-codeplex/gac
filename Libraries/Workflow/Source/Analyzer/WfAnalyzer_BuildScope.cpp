@@ -466,7 +466,31 @@ BuildScopeForExpression
 
 				void Visit(WfObserveExpression* node)override
 				{
-					throw 0;
+					BuildScopeForExpression(manager, parentScope, node->parent);
+					if (node->observeType == WfObserveType::SimpleObserve)
+					{
+						BuildScopeForExpression(manager, parentScope, node->expression);
+						FOREACH(Ptr<WfExpression>, event, node->events)
+						{
+							BuildScopeForExpression(manager, parentScope, event);
+						}
+					}
+					else
+					{
+						resultScope = new WfLexicalScope(parentScope);
+						{
+							Ptr<WfLexicalSymbol> symbol = new WfLexicalSymbol;
+							symbol->name = node->name.value;
+							symbol->ownerExpression = node;
+							resultScope->symbols.Add(symbol->name, symbol);
+						}
+
+						BuildScopeForExpression(manager, resultScope, node->expression);
+						FOREACH(Ptr<WfExpression>, event, node->events)
+						{
+							BuildScopeForExpression(manager, resultScope, event);
+						}
+					}
 				}
 
 				void Visit(WfCallExpression* node)override
