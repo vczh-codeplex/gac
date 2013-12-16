@@ -233,6 +233,7 @@ SearchOrderedName(Expression)
 
 				void Visit(WfFormatExpression* node)override
 				{
+					node->expandedExpression->Accept(this);
 				}
 
 				void Visit(WfUnaryExpression* node)override

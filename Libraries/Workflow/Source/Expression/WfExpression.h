@@ -469,6 +469,7 @@ namespace vl
 		{
 		public:
 			vl::parsing::ParsingToken value;
+			vl::Ptr<WfExpression> expandedExpression;
 
 			void Accept(WfExpression::IVisitor* visitor)override;
 

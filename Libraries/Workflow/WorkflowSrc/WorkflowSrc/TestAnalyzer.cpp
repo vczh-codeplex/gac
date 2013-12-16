@@ -25,7 +25,7 @@ TEST_CASE(TestBuildGlobalName)
 	LoadTypes();
 	WfLexicalScopeManager manager;
 	LoadMultipleSamples(&manager, L"AnalyzerScope");
-	manager.BuildGlobalName();
+	manager.BuildGlobalName(false);
 	manager.BuildScopes();
 
 	{

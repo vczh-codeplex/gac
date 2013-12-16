@@ -151,6 +151,7 @@ class StringExpression : Expression
 class FormatExpression : Expression
 {
 	token					value;
+	Expression				expandedExpression;
 }
 
 enum UnaryOperator
