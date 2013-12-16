@@ -127,10 +127,13 @@ Helper Functions
 			extern void										SearchOrderedName(Ptr<WfStatement> statement, collections::SortedList<vint>& names);
 			extern void										SearchOrderedName(Ptr<WfExpression> expression, collections::SortedList<vint>& names);
 			
+			struct ValidateStructureContext
+			{
+			};
 			extern void										ValidateModuleStructure(WfLexicalScopeManager* manager, Ptr<WfModule> module);
 			extern void										ValidateDeclarationStructure(WfLexicalScopeManager* manager, Ptr<WfDeclaration> declaration);
-			extern void										ValidateStatementStructure(WfLexicalScopeManager* manager, Ptr<WfStatement> statement);
-			extern void										ValidateExpressionStructure(WfLexicalScopeManager* manager, Ptr<WfExpression> expression);
+			extern void										ValidateStatementStructure(WfLexicalScopeManager* manager, ValidateStructureContext* context, Ptr<WfStatement>& statement);
+			extern void										ValidateExpressionStructure(WfLexicalScopeManager* manager, ValidateStructureContext* context, Ptr<WfExpression>& expression);
 
 			extern void										BuildScopeForModule(WfLexicalScopeManager* manager, Ptr<WfModule> module);
 			extern void										BuildScopeForDeclaration(WfLexicalScopeManager* manager, Ptr<WfLexicalScope> parentScope, Ptr<WfDeclaration> declaration);

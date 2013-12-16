@@ -148,7 +148,10 @@ BuildScopeForStatement
 
 				void Visit(WfRaiseExceptionStatement* node)override
 				{
-					BuildScopeForExpression(manager, parentScope, node->expression);
+					if (node->expression)
+					{
+						BuildScopeForExpression(manager, parentScope, node->expression);
+					}
 				}
 
 				void Visit(WfIfStatement* node)override

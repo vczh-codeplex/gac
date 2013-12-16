@@ -86,7 +86,10 @@ SearchOrderedName(Statement)
 
 				void Visit(WfRaiseExceptionStatement* node)override
 				{
-					SearchOrderedName(node->expression, names);
+					if (node->expression)
+					{
+						SearchOrderedName(node->expression, names);
+					}
 				}
 
 				void Visit(WfIfStatement* node)override
