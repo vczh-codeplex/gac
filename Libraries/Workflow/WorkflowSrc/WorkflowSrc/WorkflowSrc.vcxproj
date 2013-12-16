@@ -257,6 +257,7 @@
     <ClCompile Include="..\..\..\..\Common\Source\UnitTest\UnitTest.cpp" />
     <ClCompile Include="..\..\Source\Analyzer\WfAnalyzer.cpp" />
     <ClCompile Include="..\..\Source\Analyzer\WfAnalyzer_BuildScope.cpp" />
+    <ClCompile Include="..\..\Source\Analyzer\WfAnalyzer_Errors.cpp" />
     <ClCompile Include="..\..\Source\Analyzer\WfAnalyzer_SearchOrderedName.cpp" />
     <ClCompile Include="..\..\Source\Analyzer\WfAnalyzer_TypeInfo.cpp" />
     <ClCompile Include="..\..\Source\Analyzer\WfAnalyzer_ValidateStructure.cpp" />

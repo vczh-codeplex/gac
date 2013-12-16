@@ -428,6 +428,9 @@
     <ClCompile Include="..\..\Source\Analyzer\WfAnalyzer_ValidateStructure.cpp">
       <Filter>Workflow\Analyzer</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Analyzer\WfAnalyzer_Errors.cpp">
+      <Filter>Workflow\Analyzer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Spec.txt" />

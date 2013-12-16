@@ -98,6 +98,7 @@ Scope Manager
 				void										BuildGlobalNameFromModules();
 				void										BuildName(Ptr<WfLexicalScopeName> name, Ptr<WfDeclaration> declaration);
 			public:
+				Ptr<parsing::tabling::ParsingTable>			parsingTable;
 				ModuleList									modules;
 				ParsingErrorList							errors;
 
@@ -109,9 +110,10 @@ Scope Manager
 				StatementScopeMap							statementScopes;	// the nearest scope for the statement
 				ExpressionScopeMap							expressionScopes;	// the nearest scope for the expression
 
-				WfLexicalScopeManager();
+				WfLexicalScopeManager(Ptr<parsing::tabling::ParsingTable> _parsingTable);
 				~WfLexicalScopeManager();
 				
+				Ptr<WfModule>								AddModule(const WString& moduleCode, vint codeIndex = -1);
 				void										Clear(bool keepTypeDescriptorNames, bool deleteModules);
 				void										Rebuild(bool keepTypeDescriptorNames);
 			};
@@ -139,6 +141,18 @@ Helper Functions
 			extern void										BuildScopeForDeclaration(WfLexicalScopeManager* manager, Ptr<WfLexicalScope> parentScope, Ptr<WfDeclaration> declaration);
 			extern void										BuildScopeForStatement(WfLexicalScopeManager* manager, Ptr<WfLexicalScope> parentScope, Ptr<WfStatement> statement);
 			extern void										BuildScopeForExpression(WfLexicalScopeManager* manager, Ptr<WfLexicalScope> parentScope, Ptr<WfExpression> expression);
+
+/***********************************************************************
+Error Messages
+***********************************************************************/
+
+			struct WfErrors
+			{
+				static Ptr<parsing::ParsingError>			WrongFormatStringSyntax(Ptr<WfExpression> node);
+				static Ptr<parsing::ParsingError>			WrongSimpleObserveExpression(Ptr<WfExpression> node);
+				static Ptr<parsing::ParsingError>			WrongSimpleObserveEvent(Ptr<WfExpression> node);
+				static Ptr<parsing::ParsingError>			ObserveNotInBind(Ptr<WfExpression> node);
+			};
 		}
 	}
 }
