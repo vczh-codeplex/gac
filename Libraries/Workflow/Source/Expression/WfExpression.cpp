@@ -150,6 +150,7 @@ L"\r\n"L""
 L"\r\n"L"class FormatExpression : Expression"
 L"\r\n"L"{"
 L"\r\n"L"\ttoken\t\t\t\t\tvalue;"
+L"\r\n"L"\tExpression\t\t\t\texpandedExpression;"
 L"\r\n"L"}"
 L"\r\n"L""
 L"\r\n"L"enum UnaryOperator"
@@ -1166,6 +1167,7 @@ Parsing Tree Conversion Driver Implementation
 			void Fill(vl::Ptr<WfFormatExpression> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
 			{
 				SetMember(tree->value, obj->GetMember(L"value"), tokens);
+				SetMember(tree->expandedExpression, obj->GetMember(L"expandedExpression"), tokens);
 			}
 
 			void Fill(vl::Ptr<WfUnaryExpression> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
@@ -3110,6 +3112,7 @@ namespace vl
 				CLASS_MEMBER_EXTERNALMETHOD(set_value, {L"value"}, void(WfFormatExpression::*)(const vl::WString&), [](WfFormatExpression* node, const vl::WString& value){ node->value.value = value; })
 
 				CLASS_MEMBER_PROPERTY(value, get_value, set_value)
+				CLASS_MEMBER_FIELD(expandedExpression)
 			END_CLASS_MEMBER(WfFormatExpression)
 
 			BEGIN_ENUM_ITEM(WfUnaryOperator)

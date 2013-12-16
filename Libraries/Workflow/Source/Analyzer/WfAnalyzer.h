@@ -70,15 +70,17 @@ Scope Manager
 				typedef collections::List<Ptr<WfDeclaration>>							DeclarationList;
 			public:
 				WfLexicalScopeName*							parent;
+				bool										createdByTypeDescriptor;
 				NameMap										children;
 				WString										name;
 				reflection::description::ITypeDescriptor*	typeDescriptor;		// type that form this name
 				DeclarationList								declarations;		// declarations that form this name
 
-				WfLexicalScopeName();
+				WfLexicalScopeName(bool _createdByTypeDescriptor);
 				~WfLexicalScopeName();
 
-				Ptr<WfLexicalScopeName>						AccessChild(const WString& name);
+				Ptr<WfLexicalScopeName>						AccessChild(const WString& name, bool createdByTypeDescriptor);
+				void										RemoveNonTypeDescriptorNames();
 			};
 
 			class WfLexicalScopeManager : public Object
@@ -107,7 +109,7 @@ Scope Manager
 				WfLexicalScopeManager();
 				~WfLexicalScopeManager();
 
-				void										BuildGlobalName();
+				void										BuildGlobalName(bool keepTypeDescriptorNames);
 				void										BuildScopes();
 			};
 

@@ -92,8 +92,9 @@ WfLexicalScope
 WfLexicalScopeName
 ***********************************************************************/
 
-			WfLexicalScopeName::WfLexicalScopeName()
+			WfLexicalScopeName::WfLexicalScopeName(bool _createdByTypeDescriptor)
 				:parent(0)
+				, createdByTypeDescriptor(_createdByTypeDescriptor)
 				, typeDescriptor(0)
 			{
 			}
@@ -102,12 +103,12 @@ WfLexicalScopeName
 			{
 			}
 
-			Ptr<WfLexicalScopeName> WfLexicalScopeName::AccessChild(const WString& name)
+			Ptr<WfLexicalScopeName> WfLexicalScopeName::AccessChild(const WString& name, bool createdByTypeDescriptor)
 			{
 				vint index = children.Keys().IndexOf(name);
 				if (index == -1)
 				{
-					Ptr<WfLexicalScopeName> newName = new WfLexicalScopeName;
+					Ptr<WfLexicalScopeName> newName = new WfLexicalScopeName(createdByTypeDescriptor);
 					newName->name = name;
 					newName->parent = this;
 					children.Add(name, newName);
@@ -116,6 +117,23 @@ WfLexicalScopeName
 				else
 				{
 					return children.Values()[index];
+				}
+			}
+
+			void WfLexicalScopeName::RemoveNonTypeDescriptorNames()
+			{
+				for (vint i = children.Count() - 1; i >= 0; i--)
+				{
+					if (!children.Values()[i]->createdByTypeDescriptor)
+					{
+						children.Remove(children.Keys()[i]);
+					}
+				}
+				
+				declarations.Clear();
+				FOREACH(Ptr<WfLexicalScopeName>, name, children.Values())
+				{
+					name->RemoveNonTypeDescriptorNames();
 				}
 			}
 
@@ -147,7 +165,7 @@ WfLexicalScopeManager
 							reading = 0;
 						}
 
-						currentName = currentName->AccessChild(fragment);
+						currentName = currentName->AccessChild(fragment, true);
 						if (!reading)
 						{
 							currentName->typeDescriptor = typeDescriptor;
@@ -170,7 +188,7 @@ WfLexicalScopeManager
 
 			void WfLexicalScopeManager::BuildName(Ptr<WfLexicalScopeName> name, Ptr<WfDeclaration> declaration)
 			{
-				name = name->AccessChild(declaration->name.value);
+				name = name->AccessChild(declaration->name.value, false);
 				name->declarations.Add(declaration);
 				if (auto ns = declaration.Cast<WfNamespaceDeclaration>())
 				{
@@ -190,11 +208,18 @@ WfLexicalScopeManager
 			{
 			}
 
-			void WfLexicalScopeManager::BuildGlobalName()
+			void WfLexicalScopeManager::BuildGlobalName(bool keepTypeDescriptorNames)
 			{
-				globalName = new WfLexicalScopeName;
+				if (globalName && !keepTypeDescriptorNames)
+				{
+					globalName = 0;
+				}
+				if (!globalName)
+				{
+					globalName = new WfLexicalScopeName(true);
+					BuildGlobalNameFromTypeDescriptors();
+				}
 				namespaceNames.Clear();
-				BuildGlobalNameFromTypeDescriptors();
 				BuildGlobalNameFromModules();
 			}
 
