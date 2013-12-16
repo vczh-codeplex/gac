@@ -776,14 +776,14 @@ namespace test
 		Ptr<ParsingTable> table,
 		const WString& name,
 		const WString& rule,
-		Ptr<T>(*deserializer)(const WString&, Ptr<ParsingTable>),
+		Ptr<T>(*deserializer)(const WString&, Ptr<ParsingTable>, vint),
 		WString(*serializer)(Ptr<T>)
 		)
 	{
 		for(vint i=0;i<Count;i++)
 		{
 			Parse(table, input[i], name, rule, i, true, false);
-			Ptr<T> node=deserializer(input[i], table);
+			Ptr<T> node=deserializer(input[i], table, -1);
 			WString text=serializer(node);
 			TEST_ASSERT(text==output[i]);
 		}

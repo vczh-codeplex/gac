@@ -233,12 +233,20 @@ DateTime
 
 	DateTime DateTime::Forward(vuint64_t milliseconds)
 	{
+#if defined VCZH_MSVC
+		return FromFileTime(filetime+milliseconds*10000);
+#elif defined VCZH_GCC
 		return FromFileTime(filetime+milliseconds/1000);
+#endif
 	}
 
 	DateTime DateTime::Backward(vuint64_t milliseconds)
 	{
+#if defined VCZH_MSVC
+		return FromFileTime(filetime-milliseconds*10000);
+#elif defined VCZH_GCC
 		return FromFileTime(filetime-milliseconds/1000);
+#endif
 	}
 
 /***********************************************************************
@@ -1897,9 +1905,9 @@ ParsingGeneralParser
 				return node;
 			}
 
-			Ptr<ParsingTreeNode> ParsingGeneralParser::Parse(const WString& input, const WString& rule, collections::List<Ptr<ParsingError>>& errors)
+			Ptr<ParsingTreeNode> ParsingGeneralParser::Parse(const WString& input, const WString& rule, collections::List<Ptr<ParsingError>>& errors, vint codeIndex)
 			{
-				ParsingState state(input, table);
+				ParsingState state(input, table, codeIndex);
 				if(state.Reset(rule)==-1)
 				{
 					errors.Add(new ParsingError(L"Rule \""+rule+L"\" does not exist."));

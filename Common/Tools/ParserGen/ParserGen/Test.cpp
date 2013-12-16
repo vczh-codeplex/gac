@@ -587,24 +587,24 @@ Visitor Pattern Implementation
 Parser Function
 ***********************************************************************/
 
-			vl::Ptr<vl::parsing::ParsingTreeNode> TestXmlParseDocumentAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors)
+			vl::Ptr<vl::parsing::ParsingTreeNode> TestXmlParseDocumentAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors, vl::vint codeIndex)
 			{
-				vl::parsing::tabling::ParsingState state(input, table);
+				vl::parsing::tabling::ParsingState state(input, table, codeIndex);
 				state.Reset(L"XDocument");
 				vl::Ptr<vl::parsing::tabling::ParsingGeneralParser> parser=vl::parsing::tabling::CreateStrictParser(table);
 				vl::Ptr<vl::parsing::ParsingTreeNode> node=parser->Parse(state, errors);
 				return node;
 			}
 
-			vl::Ptr<vl::parsing::ParsingTreeNode> TestXmlParseDocumentAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)
+			vl::Ptr<vl::parsing::ParsingTreeNode> TestXmlParseDocumentAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::vint codeIndex)
 			{
 				vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
-				return TestXmlParseDocumentAsParsingTreeNode(input, table, errors);
+				return TestXmlParseDocumentAsParsingTreeNode(input, table, errors, codeIndex);
 			}
 
-			vl::Ptr<TestXmlDocument> TestXmlParseDocument(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors)
+			vl::Ptr<TestXmlDocument> TestXmlParseDocument(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors, vl::vint codeIndex)
 			{
-				vl::parsing::tabling::ParsingState state(input, table);
+				vl::parsing::tabling::ParsingState state(input, table, codeIndex);
 				state.Reset(L"XDocument");
 				vl::Ptr<vl::parsing::tabling::ParsingGeneralParser> parser=vl::parsing::tabling::CreateStrictParser(table);
 				vl::Ptr<vl::parsing::ParsingTreeNode> node=parser->Parse(state, errors);
@@ -615,30 +615,30 @@ Parser Function
 				return 0;
 			}
 
-			vl::Ptr<TestXmlDocument> TestXmlParseDocument(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)
+			vl::Ptr<TestXmlDocument> TestXmlParseDocument(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::vint codeIndex)
 			{
 				vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
-				return TestXmlParseDocument(input, table, errors);
+				return TestXmlParseDocument(input, table, errors, codeIndex);
 			}
 
-			vl::Ptr<vl::parsing::ParsingTreeNode> TestXmlParseElementAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors)
+			vl::Ptr<vl::parsing::ParsingTreeNode> TestXmlParseElementAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors, vl::vint codeIndex)
 			{
-				vl::parsing::tabling::ParsingState state(input, table);
+				vl::parsing::tabling::ParsingState state(input, table, codeIndex);
 				state.Reset(L"XElement");
 				vl::Ptr<vl::parsing::tabling::ParsingGeneralParser> parser=vl::parsing::tabling::CreateStrictParser(table);
 				vl::Ptr<vl::parsing::ParsingTreeNode> node=parser->Parse(state, errors);
 				return node;
 			}
 
-			vl::Ptr<vl::parsing::ParsingTreeNode> TestXmlParseElementAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)
+			vl::Ptr<vl::parsing::ParsingTreeNode> TestXmlParseElementAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::vint codeIndex)
 			{
 				vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
-				return TestXmlParseElementAsParsingTreeNode(input, table, errors);
+				return TestXmlParseElementAsParsingTreeNode(input, table, errors, codeIndex);
 			}
 
-			vl::Ptr<TestXmlElement> TestXmlParseElement(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors)
+			vl::Ptr<TestXmlElement> TestXmlParseElement(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors, vl::vint codeIndex)
 			{
-				vl::parsing::tabling::ParsingState state(input, table);
+				vl::parsing::tabling::ParsingState state(input, table, codeIndex);
 				state.Reset(L"XElement");
 				vl::Ptr<vl::parsing::tabling::ParsingGeneralParser> parser=vl::parsing::tabling::CreateStrictParser(table);
 				vl::Ptr<vl::parsing::ParsingTreeNode> node=parser->Parse(state, errors);
@@ -649,10 +649,10 @@ Parser Function
 				return 0;
 			}
 
-			vl::Ptr<TestXmlElement> TestXmlParseElement(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)
+			vl::Ptr<TestXmlElement> TestXmlParseElement(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::vint codeIndex)
 			{
 				vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
-				return TestXmlParseElement(input, table, errors);
+				return TestXmlParseElement(input, table, errors, codeIndex);
 			}
 
 /***********************************************************************

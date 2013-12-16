@@ -2583,24 +2583,24 @@ Visitor Pattern Implementation
 Parser Function
 ***********************************************************************/
 
-		vl::Ptr<vl::parsing::ParsingTreeNode> WfParseDeclarationAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors)
+		vl::Ptr<vl::parsing::ParsingTreeNode> WfParseDeclarationAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors, vl::vint codeIndex)
 		{
-			vl::parsing::tabling::ParsingState state(input, table);
+			vl::parsing::tabling::ParsingState state(input, table, codeIndex);
 			state.Reset(L"WorkflowDeclaration");
 			vl::Ptr<vl::parsing::tabling::ParsingGeneralParser> parser=vl::parsing::tabling::CreateStrictParser(table);
 			vl::Ptr<vl::parsing::ParsingTreeNode> node=parser->Parse(state, errors);
 			return node;
 		}
 
-		vl::Ptr<vl::parsing::ParsingTreeNode> WfParseDeclarationAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)
+		vl::Ptr<vl::parsing::ParsingTreeNode> WfParseDeclarationAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::vint codeIndex)
 		{
 			vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
-			return WfParseDeclarationAsParsingTreeNode(input, table, errors);
+			return WfParseDeclarationAsParsingTreeNode(input, table, errors, codeIndex);
 		}
 
-		vl::Ptr<WfDeclaration> WfParseDeclaration(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors)
+		vl::Ptr<WfDeclaration> WfParseDeclaration(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors, vl::vint codeIndex)
 		{
-			vl::parsing::tabling::ParsingState state(input, table);
+			vl::parsing::tabling::ParsingState state(input, table, codeIndex);
 			state.Reset(L"WorkflowDeclaration");
 			vl::Ptr<vl::parsing::tabling::ParsingGeneralParser> parser=vl::parsing::tabling::CreateStrictParser(table);
 			vl::Ptr<vl::parsing::ParsingTreeNode> node=parser->Parse(state, errors);
@@ -2611,30 +2611,30 @@ Parser Function
 			return 0;
 		}
 
-		vl::Ptr<WfDeclaration> WfParseDeclaration(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)
+		vl::Ptr<WfDeclaration> WfParseDeclaration(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::vint codeIndex)
 		{
 			vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
-			return WfParseDeclaration(input, table, errors);
+			return WfParseDeclaration(input, table, errors, codeIndex);
 		}
 
-		vl::Ptr<vl::parsing::ParsingTreeNode> WfParseExpressionAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors)
+		vl::Ptr<vl::parsing::ParsingTreeNode> WfParseExpressionAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors, vl::vint codeIndex)
 		{
-			vl::parsing::tabling::ParsingState state(input, table);
+			vl::parsing::tabling::ParsingState state(input, table, codeIndex);
 			state.Reset(L"WorkflowExpression");
 			vl::Ptr<vl::parsing::tabling::ParsingGeneralParser> parser=vl::parsing::tabling::CreateStrictParser(table);
 			vl::Ptr<vl::parsing::ParsingTreeNode> node=parser->Parse(state, errors);
 			return node;
 		}
 
-		vl::Ptr<vl::parsing::ParsingTreeNode> WfParseExpressionAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)
+		vl::Ptr<vl::parsing::ParsingTreeNode> WfParseExpressionAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::vint codeIndex)
 		{
 			vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
-			return WfParseExpressionAsParsingTreeNode(input, table, errors);
+			return WfParseExpressionAsParsingTreeNode(input, table, errors, codeIndex);
 		}
 
-		vl::Ptr<WfExpression> WfParseExpression(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors)
+		vl::Ptr<WfExpression> WfParseExpression(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors, vl::vint codeIndex)
 		{
-			vl::parsing::tabling::ParsingState state(input, table);
+			vl::parsing::tabling::ParsingState state(input, table, codeIndex);
 			state.Reset(L"WorkflowExpression");
 			vl::Ptr<vl::parsing::tabling::ParsingGeneralParser> parser=vl::parsing::tabling::CreateStrictParser(table);
 			vl::Ptr<vl::parsing::ParsingTreeNode> node=parser->Parse(state, errors);
@@ -2645,30 +2645,30 @@ Parser Function
 			return 0;
 		}
 
-		vl::Ptr<WfExpression> WfParseExpression(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)
+		vl::Ptr<WfExpression> WfParseExpression(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::vint codeIndex)
 		{
 			vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
-			return WfParseExpression(input, table, errors);
+			return WfParseExpression(input, table, errors, codeIndex);
 		}
 
-		vl::Ptr<vl::parsing::ParsingTreeNode> WfParseModuleAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors)
+		vl::Ptr<vl::parsing::ParsingTreeNode> WfParseModuleAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors, vl::vint codeIndex)
 		{
-			vl::parsing::tabling::ParsingState state(input, table);
+			vl::parsing::tabling::ParsingState state(input, table, codeIndex);
 			state.Reset(L"WorkflowModule");
 			vl::Ptr<vl::parsing::tabling::ParsingGeneralParser> parser=vl::parsing::tabling::CreateStrictParser(table);
 			vl::Ptr<vl::parsing::ParsingTreeNode> node=parser->Parse(state, errors);
 			return node;
 		}
 
-		vl::Ptr<vl::parsing::ParsingTreeNode> WfParseModuleAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)
+		vl::Ptr<vl::parsing::ParsingTreeNode> WfParseModuleAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::vint codeIndex)
 		{
 			vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
-			return WfParseModuleAsParsingTreeNode(input, table, errors);
+			return WfParseModuleAsParsingTreeNode(input, table, errors, codeIndex);
 		}
 
-		vl::Ptr<WfModule> WfParseModule(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors)
+		vl::Ptr<WfModule> WfParseModule(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors, vl::vint codeIndex)
 		{
-			vl::parsing::tabling::ParsingState state(input, table);
+			vl::parsing::tabling::ParsingState state(input, table, codeIndex);
 			state.Reset(L"WorkflowModule");
 			vl::Ptr<vl::parsing::tabling::ParsingGeneralParser> parser=vl::parsing::tabling::CreateStrictParser(table);
 			vl::Ptr<vl::parsing::ParsingTreeNode> node=parser->Parse(state, errors);
@@ -2679,30 +2679,30 @@ Parser Function
 			return 0;
 		}
 
-		vl::Ptr<WfModule> WfParseModule(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)
+		vl::Ptr<WfModule> WfParseModule(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::vint codeIndex)
 		{
 			vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
-			return WfParseModule(input, table, errors);
+			return WfParseModule(input, table, errors, codeIndex);
 		}
 
-		vl::Ptr<vl::parsing::ParsingTreeNode> WfParseStatementAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors)
+		vl::Ptr<vl::parsing::ParsingTreeNode> WfParseStatementAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors, vl::vint codeIndex)
 		{
-			vl::parsing::tabling::ParsingState state(input, table);
+			vl::parsing::tabling::ParsingState state(input, table, codeIndex);
 			state.Reset(L"WorkflowStatement");
 			vl::Ptr<vl::parsing::tabling::ParsingGeneralParser> parser=vl::parsing::tabling::CreateStrictParser(table);
 			vl::Ptr<vl::parsing::ParsingTreeNode> node=parser->Parse(state, errors);
 			return node;
 		}
 
-		vl::Ptr<vl::parsing::ParsingTreeNode> WfParseStatementAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)
+		vl::Ptr<vl::parsing::ParsingTreeNode> WfParseStatementAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::vint codeIndex)
 		{
 			vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
-			return WfParseStatementAsParsingTreeNode(input, table, errors);
+			return WfParseStatementAsParsingTreeNode(input, table, errors, codeIndex);
 		}
 
-		vl::Ptr<WfStatement> WfParseStatement(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors)
+		vl::Ptr<WfStatement> WfParseStatement(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors, vl::vint codeIndex)
 		{
-			vl::parsing::tabling::ParsingState state(input, table);
+			vl::parsing::tabling::ParsingState state(input, table, codeIndex);
 			state.Reset(L"WorkflowStatement");
 			vl::Ptr<vl::parsing::tabling::ParsingGeneralParser> parser=vl::parsing::tabling::CreateStrictParser(table);
 			vl::Ptr<vl::parsing::ParsingTreeNode> node=parser->Parse(state, errors);
@@ -2713,30 +2713,30 @@ Parser Function
 			return 0;
 		}
 
-		vl::Ptr<WfStatement> WfParseStatement(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)
+		vl::Ptr<WfStatement> WfParseStatement(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::vint codeIndex)
 		{
 			vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
-			return WfParseStatement(input, table, errors);
+			return WfParseStatement(input, table, errors, codeIndex);
 		}
 
-		vl::Ptr<vl::parsing::ParsingTreeNode> WfParseTypeAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors)
+		vl::Ptr<vl::parsing::ParsingTreeNode> WfParseTypeAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors, vl::vint codeIndex)
 		{
-			vl::parsing::tabling::ParsingState state(input, table);
+			vl::parsing::tabling::ParsingState state(input, table, codeIndex);
 			state.Reset(L"WorkflowType");
 			vl::Ptr<vl::parsing::tabling::ParsingGeneralParser> parser=vl::parsing::tabling::CreateStrictParser(table);
 			vl::Ptr<vl::parsing::ParsingTreeNode> node=parser->Parse(state, errors);
 			return node;
 		}
 
-		vl::Ptr<vl::parsing::ParsingTreeNode> WfParseTypeAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)
+		vl::Ptr<vl::parsing::ParsingTreeNode> WfParseTypeAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::vint codeIndex)
 		{
 			vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
-			return WfParseTypeAsParsingTreeNode(input, table, errors);
+			return WfParseTypeAsParsingTreeNode(input, table, errors, codeIndex);
 		}
 
-		vl::Ptr<WfType> WfParseType(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors)
+		vl::Ptr<WfType> WfParseType(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors, vl::vint codeIndex)
 		{
-			vl::parsing::tabling::ParsingState state(input, table);
+			vl::parsing::tabling::ParsingState state(input, table, codeIndex);
 			state.Reset(L"WorkflowType");
 			vl::Ptr<vl::parsing::tabling::ParsingGeneralParser> parser=vl::parsing::tabling::CreateStrictParser(table);
 			vl::Ptr<vl::parsing::ParsingTreeNode> node=parser->Parse(state, errors);
@@ -2747,10 +2747,10 @@ Parser Function
 			return 0;
 		}
 
-		vl::Ptr<WfType> WfParseType(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)
+		vl::Ptr<WfType> WfParseType(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::vint codeIndex)
 		{
 			vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;
-			return WfParseType(input, table, errors);
+			return WfParseType(input, table, errors, codeIndex);
 		}
 
 /***********************************************************************
