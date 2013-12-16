@@ -84,7 +84,7 @@ void LoadTypes()
 void UnloadTypes()
 {
 	TEST_ASSERT(GetGlobalTypeManager()->Unload());
-	TEST_ASSERT(DestroyGlobalTypeManager());
+	TEST_ASSERT(ResetGlobalTypeManager());
 }
 
 int wmain(int argc, wchar_t* argv[])

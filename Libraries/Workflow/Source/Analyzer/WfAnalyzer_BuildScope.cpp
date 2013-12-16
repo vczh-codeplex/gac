@@ -336,7 +336,10 @@ BuildScopeForExpression
 
 				void Visit(WfFormatExpression* node)override
 				{
-					BuildScopeForExpression(manager, parentScope, node->expandedExpression);
+					if (node->expandedExpression)
+					{
+						BuildScopeForExpression(manager, parentScope, node->expandedExpression);
+					}
 				}
 
 				void Visit(WfUnaryExpression* node)override
