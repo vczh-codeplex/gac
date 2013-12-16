@@ -604,8 +604,8 @@ token NAME = "[a-zA-Z_]/w*";
 token ORDERED_NAME = "/$[0-9]*";
 token FLOAT = "/d+./d+";
 token INTEGER = "/d+";
-token STRING = "('([^\\]|\\\.)*')+|(""([^\\]|\\\.)*"")+";
-token FORMATSTRING = "/$(('([^\\]|\\\.)*')+|(""([^\\]|\\\.)*"")+)";
+token STRING = "'([^'\\]|\\\.)*'|""([^""\\]|\\\.)*""";
+token FORMATSTRING = "/$('([^'\\]|\\\.)*'|""([^""\\]|\\\.)*"")";
 
 discardtoken SPACE = "/s+";
 
