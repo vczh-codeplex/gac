@@ -288,26 +288,15 @@ namespace vczh
 			extern vl::Ptr<vl::parsing::ParsingTreeCustomBase> TestXmlConvertParsingTreeNode(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 			extern vl::Ptr<vl::parsing::tabling::ParsingTable> TestXmlLoadTable();
 
-			extern vl::Ptr<vl::parsing::ParsingTreeNode> TestXmlParseDocumentAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
-			extern vl::Ptr<vl::parsing::ParsingTreeNode> TestXmlParseDocumentAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
-			extern vl::Ptr<TestXmlDocument> TestXmlParseDocument(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
-			extern vl::Ptr<TestXmlDocument> TestXmlParseDocument(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
+			extern vl::Ptr<vl::parsing::ParsingTreeNode> TestXmlParseDocumentAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors, vl::vint codeIndex = -1);
+			extern vl::Ptr<vl::parsing::ParsingTreeNode> TestXmlParseDocumentAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::vint codeIndex = -1);
+			extern vl::Ptr<TestXmlDocument> TestXmlParseDocument(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors, vl::vint codeIndex = -1);
+			extern vl::Ptr<TestXmlDocument> TestXmlParseDocument(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::vint codeIndex = -1);
 
-			extern vl::Ptr<vl::parsing::ParsingTreeNode> TestXmlParseElementAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
-			extern vl::Ptr<vl::parsing::ParsingTreeNode> TestXmlParseElementAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
-			extern vl::Ptr<TestXmlElement> TestXmlParseElement(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
-			extern vl::Ptr<TestXmlElement> TestXmlParseElement(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
-
-			extern vl::Ptr<vl::parsing::ParsingTreeNode> TestXmlParseDocumentAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
-			extern vl::Ptr<vl::parsing::ParsingTreeNode> TestXmlParseDocumentAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
-			extern vl::Ptr<TestXmlDocument> TestXmlParseDocument(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
-			extern vl::Ptr<TestXmlDocument> TestXmlParseDocument(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
-
-			extern vl::Ptr<vl::parsing::ParsingTreeNode> TestXmlParseElementAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
-			extern vl::Ptr<vl::parsing::ParsingTreeNode> TestXmlParseElementAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
-			extern vl::Ptr<TestXmlElement> TestXmlParseElement(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);
-			extern vl::Ptr<TestXmlElement> TestXmlParseElement(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
-
+			extern vl::Ptr<vl::parsing::ParsingTreeNode> TestXmlParseElementAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors, vl::vint codeIndex = -1);
+			extern vl::Ptr<vl::parsing::ParsingTreeNode> TestXmlParseElementAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::vint codeIndex = -1);
+			extern vl::Ptr<TestXmlElement> TestXmlParseElement(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors, vl::vint codeIndex = -1);
+			extern vl::Ptr<TestXmlElement> TestXmlParseElement(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::vint codeIndex = -1);
 		}
 	}
 }

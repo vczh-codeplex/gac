@@ -16,12 +16,12 @@ void WriteParserFunctions(ParsingSymbolManager* manager, const WString& prefix, 
 				writer.WriteString(L"vl::Ptr<vl::parsing::ParsingTreeNode> ");
 				writer.WriteString(config.classPrefix);
 				writer.WriteString(name);
-				writer.WriteLine(L"AsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors)");
+				writer.WriteLine(L"AsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors, vl::vint codeIndex)");
 				writer.WriteString(prefix);
 				writer.WriteLine(L"{");
 			
 				writer.WriteString(prefix);
-				writer.WriteLine(L"\tvl::parsing::tabling::ParsingState state(input, table);");
+				writer.WriteLine(L"\tvl::parsing::tabling::ParsingState state(input, table, codeIndex);");
 				writer.WriteString(prefix);
 				writer.WriteString(L"\tstate.Reset(L\"");
 				writer.WriteString(rule->GetName());
@@ -43,7 +43,7 @@ void WriteParserFunctions(ParsingSymbolManager* manager, const WString& prefix, 
 				writer.WriteString(L"vl::Ptr<vl::parsing::ParsingTreeNode> ");
 				writer.WriteString(config.classPrefix);
 				writer.WriteString(name);
-				writer.WriteLine(L"AsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)");
+				writer.WriteLine(L"AsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::vint codeIndex)");
 				writer.WriteString(prefix);
 				writer.WriteLine(L"{");
 
@@ -53,7 +53,7 @@ void WriteParserFunctions(ParsingSymbolManager* manager, const WString& prefix, 
 				writer.WriteString(L"\treturn ");
 				writer.WriteString(config.classPrefix);
 				writer.WriteString(name);
-				writer.WriteLine(L"AsParsingTreeNode(input, table, errors);");
+				writer.WriteLine(L"AsParsingTreeNode(input, table, errors, codeIndex);");
 
 				writer.WriteString(prefix);
 				writer.WriteLine(L"}");
@@ -66,12 +66,12 @@ void WriteParserFunctions(ParsingSymbolManager* manager, const WString& prefix, 
 			writer.WriteString(L" ");
 			writer.WriteString(config.classPrefix);
 			writer.WriteString(name);
-			writer.WriteLine(L"(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors)");
+			writer.WriteLine(L"(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors, vl::vint codeIndex)");
 			writer.WriteString(prefix);
 			writer.WriteLine(L"{");
 			
 			writer.WriteString(prefix);
-			writer.WriteLine(L"\tvl::parsing::tabling::ParsingState state(input, table);");
+			writer.WriteLine(L"\tvl::parsing::tabling::ParsingState state(input, table, codeIndex);");
 			writer.WriteString(prefix);
 			writer.WriteString(L"\tstate.Reset(L\"");
 			writer.WriteString(rule->GetName());
@@ -107,7 +107,7 @@ void WriteParserFunctions(ParsingSymbolManager* manager, const WString& prefix, 
 			writer.WriteString(L" ");
 			writer.WriteString(config.classPrefix);
 			writer.WriteString(name);
-			writer.WriteLine(L"(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)");
+			writer.WriteLine(L"(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::vint codeIndex)");
 			writer.WriteString(prefix);
 			writer.WriteLine(L"{");
 
@@ -117,7 +117,7 @@ void WriteParserFunctions(ParsingSymbolManager* manager, const WString& prefix, 
 			writer.WriteString(L"\treturn ");
 			writer.WriteString(config.classPrefix);
 			writer.WriteString(name);
-			writer.WriteLine(L"(input, table, errors);");
+			writer.WriteLine(L"(input, table, errors, codeIndex);");
 			writer.WriteString(prefix);
 			writer.WriteLine(L"}");
 			writer.WriteLine(L"");

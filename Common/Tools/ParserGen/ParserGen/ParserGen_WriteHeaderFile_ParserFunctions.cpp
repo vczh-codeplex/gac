@@ -12,13 +12,13 @@ void WriteParserFunctions(ParsingSymbolManager* manager, const Dictionary<WStrin
 			writer.WriteString(L"extern vl::Ptr<vl::parsing::ParsingTreeNode> ");
 			writer.WriteString(codeClassPrefix);
 			writer.WriteString(name);
-			writer.WriteLine(L"AsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);");
+			writer.WriteLine(L"AsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors, vl::vint codeIndex = -1);");
 				
 			writer.WriteString(prefix);
 			writer.WriteString(L"extern vl::Ptr<vl::parsing::ParsingTreeNode> ");
 			writer.WriteString(codeClassPrefix);
 			writer.WriteString(name);
-			writer.WriteLine(L"AsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);");
+			writer.WriteLine(L"AsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::vint codeIndex = -1);");
 
 			ParsingSymbol* type=rule->GetDescriptorSymbol();
 			writer.WriteString(prefix);
@@ -27,7 +27,7 @@ void WriteParserFunctions(ParsingSymbolManager* manager, const Dictionary<WStrin
 			writer.WriteString(L" ");
 			writer.WriteString(codeClassPrefix);
 			writer.WriteString(name);
-			writer.WriteLine(L"(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors);");
+			writer.WriteLine(L"(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::collections::List<vl::Ptr<vl::parsing::ParsingError>>& errors, vl::vint codeIndex = -1);");
 				
 			writer.WriteString(prefix);
 			writer.WriteString(L"extern ");
@@ -35,7 +35,7 @@ void WriteParserFunctions(ParsingSymbolManager* manager, const Dictionary<WStrin
 			writer.WriteString(L" ");
 			writer.WriteString(codeClassPrefix);
 			writer.WriteString(name);
-			writer.WriteLine(L"(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);");
+			writer.WriteLine(L"(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table, vl::vint codeIndex = -1);");
 		}
 	}
 }

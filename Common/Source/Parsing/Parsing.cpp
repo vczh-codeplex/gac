@@ -102,9 +102,9 @@ ParsingGeneralParser
 				return node;
 			}
 
-			Ptr<ParsingTreeNode> ParsingGeneralParser::Parse(const WString& input, const WString& rule, collections::List<Ptr<ParsingError>>& errors)
+			Ptr<ParsingTreeNode> ParsingGeneralParser::Parse(const WString& input, const WString& rule, collections::List<Ptr<ParsingError>>& errors, vint codeIndex)
 			{
-				ParsingState state(input, table);
+				ParsingState state(input, table, codeIndex);
 				if(state.Reset(rule)==-1)
 				{
 					errors.Add(new ParsingError(L"Rule \""+rule+L"\" does not exist."));
