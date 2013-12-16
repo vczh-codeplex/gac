@@ -205,6 +205,7 @@
     <ClInclude Include="..\..\..\..\Common\Source\UnitTest\UnitTest.h" />
     <ClInclude Include="..\..\Source\Analyzer\WfAnalyzer.h" />
     <ClInclude Include="..\..\Source\Expression\WfExpression.h" />
+    <ClInclude Include="..\..\Source\Expression\WfExpressionParser.h" />
     <ClInclude Include="..\..\Source\Runtime\WfRuntime.h" />
     <ClInclude Include="..\..\Source\WorkflowVlppReferences.h" />
     <ClInclude Include="TestFunctions.h" />
@@ -262,10 +263,12 @@
     <ClCompile Include="..\..\Source\Analyzer\WfAnalyzer_TypeInfo.cpp" />
     <ClCompile Include="..\..\Source\Analyzer\WfAnalyzer_ValidateStructure.cpp" />
     <ClCompile Include="..\..\Source\Expression\WfExpression.cpp">
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/bigobj %(AdditionalOptions)</AdditionalOptions>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/bigobj %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Expression\WfExpressionParser.cpp">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="..\..\Source\Runtime\WfRuntime.cpp" />
     <ClCompile Include="Main.cpp" />
@@ -273,7 +276,7 @@
     <ClCompile Include="TestSamples.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="..\..\Source\Expression\WfExpression.parser.txt" />
+    <Text Include="..\..\Source\Expression\WfExpressionParser.parser.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A0_WrongFormatStringSyntax.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A1_WrongSimpleObserveExpression.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A2_WrongSimpleObserveEvent.txt" />

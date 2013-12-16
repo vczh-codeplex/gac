@@ -93,20 +93,24 @@ namespace vl
 		{
 			ParsingTextPos	start;
 			ParsingTextPos	end;
+			vint			codeIndex;
 
 			ParsingTextRange()
+				:codeIndex(-1)
 			{
 				end.index=-1;
 				end.column=-1;
 			}
 
-			ParsingTextRange(const ParsingTextPos& _start, const ParsingTextPos& _end)
+			ParsingTextRange(const ParsingTextPos& _start, const ParsingTextPos& _end, vint _codeIndex = -1)
 				:start(_start)
-				,end(_end)
+				, end(_end)
+				, codeIndex(_codeIndex)
 			{
 			}
 
 			ParsingTextRange(const regex::RegexToken* startToken, const regex::RegexToken* endToken)
+				:codeIndex(startToken->codeIndex)
 			{
 				start.index=startToken->start;
 				start.row=startToken->rowStart;

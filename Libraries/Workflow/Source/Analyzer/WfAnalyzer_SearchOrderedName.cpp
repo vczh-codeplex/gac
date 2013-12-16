@@ -7,8 +7,6 @@ namespace vl
 		namespace analyzer
 		{
 			using namespace collections;
-			using namespace reflection;
-			using namespace reflection::description;
 
 /***********************************************************************
 SearchOrderedName(Declaration)
