@@ -698,6 +698,9 @@
     <Text Include="..\..\Source\Expression\WfExpressionParser.parser.txt">
       <Filter>Workflow\Expression</Filter>
     </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A4_BindInBind.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Source\Expression\Codegen.bat">
