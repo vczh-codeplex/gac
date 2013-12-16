@@ -20,6 +20,7 @@ Interfaces:
 #include "..\..\..\Common\Source\Threading.h"
 #include "..\..\..\Common\Source\Regex\Regex.h"
 #include "..\..\..\Common\Source\Stream\Interfaces.h"
+#include "..\..\..\Common\Source\Stream\MemoryStream.h"
 #include "..\..\..\Common\Source\Stream\FileStream.h"
 #include "..\..\..\Common\Source\Stream\CharFormat.h"
 #include "..\..\..\Common\Source\Stream\Accessor.h"

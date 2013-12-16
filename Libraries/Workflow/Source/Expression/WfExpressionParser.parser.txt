@@ -2,7 +2,7 @@ include:"../WorkflowVlppReferences.h"
 namespace:vl.workflow
 reflection:Workflow
 classPrefix:Wf
-guard:VCZH_WORKFLOW_EXPRESSIONS_WFEXPRESSION
+guard:VCZH_WORKFLOW_EXPRESSIONS_WFEXPRESSIONPARSER
 parser:ParseType(WorkflowType)
 parser:ParseExpression(WorkflowExpression)
 parser:ParseStatement(WorkflowStatement)
@@ -145,12 +145,12 @@ class IntegerExpression : Expression
 
 class StringExpression : Expression
 {
-	token					value;
+	token					value(UnescapeString);
 }
 
 class FormatExpression : Expression
 {
-	token					value;
+	token					value(UnescapeFormatString);
 	Expression				expandedExpression;
 }
 
@@ -604,8 +604,8 @@ token NAME = "[a-zA-Z_]/w*";
 token ORDERED_NAME = "/$[0-9]*";
 token FLOAT = "/d+./d+";
 token INTEGER = "/d+";
-token STRING = "('[^']*')+|(""[^""]*"")+";
-token FORMATSTRING = "/$(('[^']*')+|(""[^""]*"")+)";
+token STRING = "('([^\\]|\\\.)*')+|(""([^\\]|\\\.)*"")+";
+token FORMATSTRING = "/$(('([^\\]|\\\.)*')+|(""([^\\]|\\\.)*"")+)";
 
 discardtoken SPACE = "/s+";
 

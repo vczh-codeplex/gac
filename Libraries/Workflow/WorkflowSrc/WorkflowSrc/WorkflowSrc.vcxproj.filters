@@ -261,6 +261,9 @@
     <ClInclude Include="TestFunctions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Expression\WfExpressionParser.h">
+      <Filter>Workflow\Expression</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\Common\Source\Stream\Accessor.cpp">
@@ -431,12 +434,12 @@
     <ClCompile Include="..\..\Source\Analyzer\WfAnalyzer_Errors.cpp">
       <Filter>Workflow\Analyzer</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Expression\WfExpressionParser.cpp">
+      <Filter>Workflow\Expression</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Spec.txt" />
-    <Text Include="..\..\Source\Expression\WfExpression.parser.txt">
-      <Filter>Workflow\Expression</Filter>
-    </Text>
     <Text Include="..\TestFiles\Samples\IndexDeclaration.txt">
       <Filter>Resource Files\Samples</Filter>
     </Text>
@@ -691,6 +694,9 @@
     </Text>
     <Text Include="..\TestFiles\Samples\AnalyzerError\A3_ObserveNotInBind.txt">
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\..\Source\Expression\WfExpressionParser.parser.txt">
+      <Filter>Workflow\Expression</Filter>
     </Text>
   </ItemGroup>
   <ItemGroup>

@@ -148,10 +148,10 @@ Error Messages
 
 			struct WfErrors
 			{
-				static Ptr<parsing::ParsingError>			WrongFormatStringSyntax(Ptr<WfExpression> node);
-				static Ptr<parsing::ParsingError>			WrongSimpleObserveExpression(Ptr<WfExpression> node);
-				static Ptr<parsing::ParsingError>			WrongSimpleObserveEvent(Ptr<WfExpression> node);
-				static Ptr<parsing::ParsingError>			ObserveNotInBind(Ptr<WfExpression> node);
+				static Ptr<parsing::ParsingError>			WrongFormatStringSyntax(WfExpression* node);
+				static Ptr<parsing::ParsingError>			WrongSimpleObserveExpression(WfExpression* node);
+				static Ptr<parsing::ParsingError>			WrongSimpleObserveEvent(WfExpression* node);
+				static Ptr<parsing::ParsingError>			ObserveNotInBind(WfExpression* node);
 			};
 		}
 	}

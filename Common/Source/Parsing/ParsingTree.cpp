@@ -564,6 +564,7 @@ ParsingError
 				codeRange.end.row=_token->rowEnd;
 				codeRange.end.column=_token->columnEnd;
 				codeRange.end.index=_token->start+_token->length-1;
+				codeRange.codeIndex = _token->codeIndex;
 			}
 		}
 
