@@ -83,6 +83,7 @@ TEST_CASE(TestBuildGlobalName)
 
 TEST_CASE(TestAnalyzerError)
 {
+	LoadTypes();
 	WfLexicalScopeManager manager;
 	Ptr<ParsingTable> table = GetWorkflowTable();
 	List<WString> itemNames;
@@ -107,4 +108,5 @@ TEST_CASE(TestAnalyzerError)
 		TEST_ASSERT(manager.errors.Count() > 0);
 		TEST_ASSERT(manager.errors[0]->errorMessage.Left(index.key + 1) == errorCode + L":");
 	}
+	UnloadTypes();
 }
