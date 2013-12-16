@@ -32,6 +32,11 @@ WfErrors
 			{
 				return new ParsingError(node, L"A3: Observe expression should appear in a bind expression.");
 			}
+
+			Ptr<parsing::ParsingError> WfErrors::BindInBind(WfExpression* node)
+			{
+				return new ParsingError(node, L"A4: Bind expression should not appear in another bind expression.");
+			}
 		}
 	}
 }

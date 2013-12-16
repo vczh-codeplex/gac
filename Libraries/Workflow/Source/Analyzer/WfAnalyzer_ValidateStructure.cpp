@@ -10,6 +10,15 @@ namespace vl
 			using namespace parsing;
 
 /***********************************************************************
+ValidateStructureContext
+***********************************************************************/
+
+			ValidateStructureContext::ValidateStructureContext()
+				:currentBindExpression(0)
+			{
+			}
+
+/***********************************************************************
 ValidateStructure(Declaration)
 ***********************************************************************/
 
@@ -201,7 +210,10 @@ ValidateStructure(Expression)
 
 				void Visit(WfOrderedLambdaExpression* node)override
 				{
+					auto bind = context->currentBindExpression;
+					context->currentBindExpression = 0;
 					ValidateExpressionStructure(manager, context, node->body);
+					context->currentBindExpression = bind;
 				}
 
 				void Visit(WfMemberExpression* node)override
@@ -413,11 +425,24 @@ ValidateStructure(Expression)
 
 				void Visit(WfBindExpression* node)override
 				{
+					if (context->currentBindExpression)
+					{
+						manager->errors.Add(WfErrors::BindInBind(node));
+					}
+
+					auto bind = context->currentBindExpression;
+					context->currentBindExpression = node;
 					ValidateExpressionStructure(manager, context, node->expression);
+					context->currentBindExpression = bind;
 				}
 
 				void Visit(WfObserveExpression* node)override
 				{
+					if (!context->currentBindExpression)
+					{
+						manager->errors.Add(WfErrors::ObserveNotInBind(node));
+					}
+
 					if (node->observeType == WfObserveType::SimpleObserve)
 					{
 						if (!node->expression.Cast<WfReferenceExpression>())

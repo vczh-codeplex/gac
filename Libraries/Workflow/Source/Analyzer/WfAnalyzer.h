@@ -131,6 +131,9 @@ Helper Functions
 			
 			struct ValidateStructureContext
 			{
+				WfBindExpression*							currentBindExpression;
+
+				ValidateStructureContext();
 			};
 			extern void										ValidateModuleStructure(WfLexicalScopeManager* manager, Ptr<WfModule> module);
 			extern void										ValidateDeclarationStructure(WfLexicalScopeManager* manager, Ptr<WfDeclaration> declaration);
@@ -152,6 +155,7 @@ Error Messages
 				static Ptr<parsing::ParsingError>			WrongSimpleObserveExpression(WfExpression* node);
 				static Ptr<parsing::ParsingError>			WrongSimpleObserveEvent(WfExpression* node);
 				static Ptr<parsing::ParsingError>			ObserveNotInBind(WfExpression* node);
+				static Ptr<parsing::ParsingError>			BindInBind(WfExpression* node);
 			};
 		}
 	}
