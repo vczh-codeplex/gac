@@ -200,12 +200,23 @@ WfLexicalScopeManager
 				}
 			}
 
-			WfLexicalScopeManager::WfLexicalScopeManager()
+			WfLexicalScopeManager::WfLexicalScopeManager(Ptr<parsing::tabling::ParsingTable> _parsingTable)
+				:parsingTable(_parsingTable)
 			{
 			}
 
 			WfLexicalScopeManager::~WfLexicalScopeManager()
 			{
+			}
+
+			Ptr<WfModule> WfLexicalScopeManager::AddModule(const WString& moduleCode, vint codeIndex)
+			{
+				if (auto module = WfParseModule(moduleCode, parsingTable, errors, codeIndex))
+				{
+					modules.Add(module);
+					return module;
+				}
+				return 0;
 			}
 
 			void WfLexicalScopeManager::Clear(bool keepTypeDescriptorNames, bool deleteModules)
