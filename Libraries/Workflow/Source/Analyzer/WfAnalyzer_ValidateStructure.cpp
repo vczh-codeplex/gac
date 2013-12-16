@@ -418,6 +418,21 @@ ValidateStructure(Expression)
 
 				void Visit(WfObserveExpression* node)override
 				{
+					if (node->observeType == WfObserveType::SimpleObserve)
+					{
+						if (!node->expression.Cast<WfReferenceExpression>())
+						{
+							manager->errors.Add(WfErrors::WrongSimpleObserveExpression(node->expression.Obj()));
+						}
+						FOREACH(Ptr<WfExpression>, event, node->events)
+						{
+							if (!event.Cast<WfReferenceExpression>())
+							{
+								manager->errors.Add(WfErrors::WrongSimpleObserveEvent(event.Obj()));
+							}
+						}
+					}
+
 					ValidateExpressionStructure(manager, context, node->parent);
 					ValidateExpressionStructure(manager, context, node->expression);
 					for (vint i = 0; i < node->events.Count(); i++)

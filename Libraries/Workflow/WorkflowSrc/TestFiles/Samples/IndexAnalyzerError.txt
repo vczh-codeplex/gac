@@ -2,3 +2,4 @@ A0_WrongFormatStringSyntax
 A1_WrongSimpleObserveExpression
 A2_WrongSimpleObserveEvent
 A3_ObserveNotInBind
+A4_BindInBind
