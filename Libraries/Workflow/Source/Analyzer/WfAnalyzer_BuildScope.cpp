@@ -11,22 +11,6 @@ namespace vl
 			using namespace reflection::description;
 
 /***********************************************************************
-BuildScopeForModule
-***********************************************************************/
-
-			void BuildScopeForModule(WfLexicalScopeManager* manager, Ptr<WfModule> module)
-			{
-				Ptr<WfLexicalScope> scope = new WfLexicalScope(manager);
-				scope->ownerModule = module;
-				manager->moduleScopes.Add(module, scope);
-
-				FOREACH(Ptr<WfDeclaration>, declaration, module->declarations)
-				{
-					BuildScopeForDeclaration(manager, scope, declaration);
-				}
-			}
-
-/***********************************************************************
 BuildScopeForDeclaration
 ***********************************************************************/
 
@@ -123,11 +107,6 @@ BuildScopeForDeclaration
 					return visitor.resultScope;
 				}
 			};
-
-			void BuildScopeForDeclaration(WfLexicalScopeManager* manager, Ptr<WfLexicalScope> parentScope, Ptr<WfDeclaration> declaration)
-			{
-				BuildScopeForDeclarationVisitor::Execute(manager, parentScope, declaration);
-			}
 
 /***********************************************************************
 BuildScopeForStatement
@@ -286,11 +265,6 @@ BuildScopeForStatement
 					return visitor.resultScope;
 				}
 			};
-
-			void BuildScopeForStatement(WfLexicalScopeManager* manager, Ptr<WfLexicalScope> parentScope, Ptr<WfStatement> statement)
-			{
-				BuildScopeForStatementVisitor::Execute(manager, parentScope, statement);
-			}
 
 /***********************************************************************
 BuildScopeForExpression
@@ -537,6 +511,32 @@ BuildScopeForExpression
 					return visitor.resultScope;
 				}
 			};
+
+/***********************************************************************
+BuildScope
+***********************************************************************/
+
+			void BuildScopeForModule(WfLexicalScopeManager* manager, Ptr<WfModule> module)
+			{
+				Ptr<WfLexicalScope> scope = new WfLexicalScope(manager);
+				scope->ownerModule = module;
+				manager->moduleScopes.Add(module, scope);
+
+				FOREACH(Ptr<WfDeclaration>, declaration, module->declarations)
+				{
+					BuildScopeForDeclaration(manager, scope, declaration);
+				}
+			}
+
+			void BuildScopeForDeclaration(WfLexicalScopeManager* manager, Ptr<WfLexicalScope> parentScope, Ptr<WfDeclaration> declaration)
+			{
+				BuildScopeForDeclarationVisitor::Execute(manager, parentScope, declaration);
+			}
+
+			void BuildScopeForStatement(WfLexicalScopeManager* manager, Ptr<WfLexicalScope> parentScope, Ptr<WfStatement> statement)
+			{
+				BuildScopeForStatementVisitor::Execute(manager, parentScope, statement);
+			}
 
 			void BuildScopeForExpression(WfLexicalScopeManager* manager, Ptr<WfLexicalScope> parentScope, Ptr<WfExpression> expression)
 			{

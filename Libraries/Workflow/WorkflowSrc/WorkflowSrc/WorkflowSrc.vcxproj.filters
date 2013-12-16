@@ -73,6 +73,9 @@
     <Filter Include="Resource Files\Samples\AnalyzerScope">
       <UniqueIdentifier>{0f132ee3-f887-4d7b-8320-57901c76c66d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\Samples\AnalyzerError">
+      <UniqueIdentifier>{0ce6bcf7-5aa3-4a44-ac6b-5963e0df9a42}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Source\WorkflowVlppReferences.h">
@@ -422,6 +425,9 @@
     <ClCompile Include="..\..\Source\Analyzer\WfAnalyzer_SearchOrderedName.cpp">
       <Filter>Workflow\Analyzer</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Analyzer\WfAnalyzer_ValidateStructure.cpp">
+      <Filter>Workflow\Analyzer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Spec.txt" />
@@ -667,6 +673,21 @@
     </Text>
     <Text Include="..\TestFiles\Samples\AnalyzerScope\ModuleC.txt">
       <Filter>Resource Files\Samples\AnalyzerScope</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\IndexAnalyzerError.txt">
+      <Filter>Resource Files\Samples</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A0_WrongFormatStringSyntax.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A1_WrongSimpleObserveExpression.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A2_WrongSimpleObserveEvent.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A3_ObserveNotInBind.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
     </Text>
   </ItemGroup>
   <ItemGroup>
