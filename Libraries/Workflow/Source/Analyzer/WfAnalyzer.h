@@ -85,6 +85,8 @@ Scope Manager
 
 			class WfLexicalScopeManager : public Object
 			{
+				typedef collections::List<Ptr<WfModule>>													ModuleList;
+				typedef collections::List<Ptr<parsing::ParsingError>>										ParsingErrorList;
 				typedef collections::Dictionary<Ptr<WfNamespaceDeclaration>, Ptr<WfLexicalScopeName>>		NamespaceNameMap;
 				typedef collections::Dictionary<Ptr<WfModule>, Ptr<WfLexicalScope>>							ModuleScopeMap;
 				typedef collections::Dictionary<Ptr<WfDeclaration>, Ptr<WfLexicalScope>>					DeclarationScopeMap;
@@ -96,7 +98,8 @@ Scope Manager
 				void										BuildGlobalNameFromModules();
 				void										BuildName(Ptr<WfLexicalScopeName> name, Ptr<WfDeclaration> declaration);
 			public:
-				collections::List<Ptr<WfModule>>			modules;
+				ModuleList									modules;
+				ParsingErrorList							errors;
 
 				Ptr<WfLexicalScopeName>						globalName;
 				NamespaceNameMap							namespaceNames;
@@ -108,9 +111,9 @@ Scope Manager
 
 				WfLexicalScopeManager();
 				~WfLexicalScopeManager();
-
-				void										BuildGlobalName(bool keepTypeDescriptorNames);
-				void										BuildScopes();
+				
+				void										Clear(bool keepTypeDescriptorNames, bool deleteModules);
+				void										Rebuild(bool keepTypeDescriptorNames);
 			};
 
 /***********************************************************************
@@ -123,6 +126,11 @@ Helper Functions
 			extern void										SearchOrderedName(Ptr<WfDeclaration> declaration, collections::SortedList<vint>& names);
 			extern void										SearchOrderedName(Ptr<WfStatement> statement, collections::SortedList<vint>& names);
 			extern void										SearchOrderedName(Ptr<WfExpression> expression, collections::SortedList<vint>& names);
+			
+			extern void										ValidateModuleStructure(WfLexicalScopeManager* manager, Ptr<WfModule> module);
+			extern void										ValidateDeclarationStructure(WfLexicalScopeManager* manager, Ptr<WfDeclaration> declaration);
+			extern void										ValidateStatementStructure(WfLexicalScopeManager* manager, Ptr<WfStatement> statement);
+			extern void										ValidateExpressionStructure(WfLexicalScopeManager* manager, Ptr<WfExpression> expression);
 
 			extern void										BuildScopeForModule(WfLexicalScopeManager* manager, Ptr<WfModule> module);
 			extern void										BuildScopeForDeclaration(WfLexicalScopeManager* manager, Ptr<WfLexicalScope> parentScope, Ptr<WfDeclaration> declaration);

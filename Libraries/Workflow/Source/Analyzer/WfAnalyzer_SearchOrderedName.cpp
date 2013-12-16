@@ -49,11 +49,6 @@ SearchOrderedName(Declaration)
 				}
 			};
 
-			void SearchOrderedName(Ptr<WfDeclaration> declaration, collections::SortedList<vint>& names)
-			{
-				SearchOrderedNameDeclarationVisitor::Execute(declaration, names);
-			}
-
 /***********************************************************************
 SearchOrderedName(Statement)
 ***********************************************************************/
@@ -167,11 +162,6 @@ SearchOrderedName(Statement)
 					statement->Accept(&visitor);
 				}
 			};
-
-			void SearchOrderedName(Ptr<WfStatement> statement, collections::SortedList<vint>& names)
-			{
-				SearchOrderedNameStatementVisitor::Execute(statement, names);
-			}
 
 /***********************************************************************
 SearchOrderedName(Expression)
@@ -370,6 +360,20 @@ SearchOrderedName(Expression)
 					expression->Accept(&visitor);
 				}
 			};
+
+/***********************************************************************
+SearchOrderedName
+***********************************************************************/
+
+			void SearchOrderedName(Ptr<WfDeclaration> declaration, collections::SortedList<vint>& names)
+			{
+				SearchOrderedNameDeclarationVisitor::Execute(declaration, names);
+			}
+
+			void SearchOrderedName(Ptr<WfStatement> statement, collections::SortedList<vint>& names)
+			{
+				SearchOrderedNameStatementVisitor::Execute(statement, names);
+			}
 
 			void SearchOrderedName(Ptr<WfExpression> expression, collections::SortedList<vint>& names)
 			{

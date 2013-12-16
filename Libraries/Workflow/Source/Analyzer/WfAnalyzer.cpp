@@ -208,31 +208,50 @@ WfLexicalScopeManager
 			{
 			}
 
-			void WfLexicalScopeManager::BuildGlobalName(bool keepTypeDescriptorNames)
+			void WfLexicalScopeManager::Clear(bool keepTypeDescriptorNames, bool deleteModules)
 			{
-				if (globalName && !keepTypeDescriptorNames)
+				if (globalName)
 				{
-					globalName = 0;
+					if (keepTypeDescriptorNames)
+					{
+						globalName->RemoveNonTypeDescriptorNames();
+					}
+					else
+					{
+						globalName = 0;
+					}
 				}
+				
+				if (deleteModules)
+				{
+					modules.Clear();
+				}
+
+				errors.Clear();
+				namespaceNames.Clear();
+				moduleScopes.Clear();
+				declarationScopes.Clear();
+				statementScopes.Clear();
+				expressionScopes.Clear();
+			}
+
+			void WfLexicalScopeManager::Rebuild(bool keepTypeDescriptorNames)
+			{
+				Clear(keepTypeDescriptorNames, false);
 				if (!globalName)
 				{
 					globalName = new WfLexicalScopeName(true);
 					BuildGlobalNameFromTypeDescriptors();
 				}
-				namespaceNames.Clear();
 				BuildGlobalNameFromModules();
-			}
-
-			void WfLexicalScopeManager::BuildScopes()
-			{
-				moduleScopes.Clear();
-				declarationScopes.Clear();
-				statementScopes.Clear();
-				expressionScopes.Clear();
-
 				FOREACH(Ptr<WfModule>, module, modules)
 				{
-					BuildScopeForModule(this, module);
+					vint errorCount = errors.Count();
+					ValidateModuleStructure(this, module);
+					if (errors.Count() == errorCount)
+					{
+						BuildScopeForModule(this, module);
+					}
 				}
 			}
 		}

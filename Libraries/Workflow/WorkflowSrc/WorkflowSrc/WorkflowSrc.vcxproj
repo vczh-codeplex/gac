@@ -259,6 +259,7 @@
     <ClCompile Include="..\..\Source\Analyzer\WfAnalyzer_BuildScope.cpp" />
     <ClCompile Include="..\..\Source\Analyzer\WfAnalyzer_SearchOrderedName.cpp" />
     <ClCompile Include="..\..\Source\Analyzer\WfAnalyzer_TypeInfo.cpp" />
+    <ClCompile Include="..\..\Source\Analyzer\WfAnalyzer_ValidateStructure.cpp" />
     <ClCompile Include="..\..\Source\Expression\WfExpression.cpp">
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
@@ -272,6 +273,10 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\..\Source\Expression\WfExpression.parser.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A0_WrongFormatStringSyntax.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A1_WrongSimpleObserveExpression.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A2_WrongSimpleObserveEvent.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A3_ObserveNotInBind.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerScope\ModuleA.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerScope\ModuleB.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerScope\ModuleC.txt" />
@@ -330,6 +335,7 @@
     <Text Include="..\TestFiles\Samples\Expression\True.txt" />
     <Text Include="..\TestFiles\Samples\Expression\TypeOfExpression.txt" />
     <Text Include="..\TestFiles\Samples\Expression\TypeOfType.txt" />
+    <Text Include="..\TestFiles\Samples\IndexAnalyzerError.txt" />
     <Text Include="..\TestFiles\Samples\IndexAnalyzerScope.txt" />
     <Text Include="..\TestFiles\Samples\IndexDeclaration.txt" />
     <Text Include="..\TestFiles\Samples\IndexExpression.txt" />

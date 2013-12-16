@@ -25,8 +25,7 @@ TEST_CASE(TestBuildGlobalName)
 	LoadTypes();
 	WfLexicalScopeManager manager;
 	LoadMultipleSamples(&manager, L"AnalyzerScope");
-	manager.BuildGlobalName(false);
-	manager.BuildScopes();
+	manager.Rebuild(false);
 
 	{
 		auto parent = manager.globalName;
@@ -80,4 +79,32 @@ TEST_CASE(TestBuildGlobalName)
 	}
 
 	UnloadTypes();
+}
+
+TEST_CASE(TestAnalyzerError)
+{
+	WfLexicalScopeManager manager;
+	Ptr<ParsingTable> table = GetWorkflowTable();
+	List<WString> itemNames;
+	LoadSampleIndex(L"AnalyzerError", itemNames);
+	FOREACH(WString, itemName, itemNames)
+	{
+		UnitTest::PrintInfo(itemName);
+		WString sample = LoadSample(L"AnalyzerError", itemName);
+		List<Ptr<ParsingError>> errors;
+		Ptr<ParsingTreeNode> node = WfParseModuleAsParsingTreeNode(sample, table, errors);
+		TEST_ASSERT(node);
+		LogSampleParseResult(L"AnalyzerError", itemName, sample, node);
+
+		manager.Clear(true, true);
+		List<RegexToken> tokens;
+		Ptr<WfModule> module = WfConvertParsingTreeNode(node, tokens).Cast<WfModule>();
+		manager.modules.Add(module);
+		manager.Rebuild(true);
+
+		auto index = INVLOC.FindFirst(itemName, L"_", Locale::None);
+		WString errorCode = itemName.Left(index.key);
+		TEST_ASSERT(manager.errors.Count() > 0);
+		TEST_ASSERT(manager.errors[0]->errorMessage.Left(index.key + 1) == errorCode + L":");
+	}
 }
