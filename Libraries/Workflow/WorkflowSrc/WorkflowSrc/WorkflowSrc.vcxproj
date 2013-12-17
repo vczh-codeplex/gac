@@ -285,7 +285,6 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\A3_ObserveNotInBind.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A4_BindInBind.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A5_ConstructorMixMapAndList.txt" />
-    <Text Include="..\TestFiles\Samples\AnalyzerError\A6_ConstructorMixClassAndInterface.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\B0_VoidArgument.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\B0_VoidMapElement.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\B0_VoidVariable.txt" />
