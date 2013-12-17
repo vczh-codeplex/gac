@@ -731,28 +731,28 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\B3_RawPointerToVoid.txt">
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
     </Text>
-    <Text Include="..\TestFiles\Samples\AnalyzerError\B4_SharednterToEnumerable.txt">
+    <Text Include="..\TestFiles\Samples\AnalyzerError\B4_SharedPointerToEnumerable.txt">
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
     </Text>
-    <Text Include="..\TestFiles\Samples\AnalyzerError\B4_SharednterToMap.txt">
+    <Text Include="..\TestFiles\Samples\AnalyzerError\B4_SharedPointerToMap.txt">
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
     </Text>
-    <Text Include="..\TestFiles\Samples\AnalyzerError\B4_SharednterToString.txt">
+    <Text Include="..\TestFiles\Samples\AnalyzerError\B4_SharedPointerToString.txt">
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
     </Text>
-    <Text Include="..\TestFiles\Samples\AnalyzerError\B4_SharednterToVoid.txt">
+    <Text Include="..\TestFiles\Samples\AnalyzerError\B4_SharedPointerToVoid.txt">
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
     </Text>
-    <Text Include="..\TestFiles\Samples\AnalyzerError\B5_NullableerToEnumerable.txt">
+    <Text Include="..\TestFiles\Samples\AnalyzerError\B5_NullableToEnumerable.txt">
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
     </Text>
-    <Text Include="..\TestFiles\Samples\AnalyzerError\B5_NullableerToMap.txt">
+    <Text Include="..\TestFiles\Samples\AnalyzerError\B5_NullableToMap.txt">
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
     </Text>
-    <Text Include="..\TestFiles\Samples\AnalyzerError\B5_NullableerToString.txt">
+    <Text Include="..\TestFiles\Samples\AnalyzerError\B5_NullableToString.txt">
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
     </Text>
-    <Text Include="..\TestFiles\Samples\AnalyzerError\B5_NullableerToVoid.txt">
+    <Text Include="..\TestFiles\Samples\AnalyzerError\B5_NullableToVoid.txt">
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
     </Text>
   </ItemGroup>
