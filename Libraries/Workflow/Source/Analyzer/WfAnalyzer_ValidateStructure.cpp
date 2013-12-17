@@ -598,13 +598,25 @@ ValidateStructure(Expression)
 
 				void Visit(WfConstructorExpression* node)override
 				{
+					vint listElementCount = 0;
+					vint mapElementCount = 0;
 					FOREACH(Ptr<WfConstructorArgument>, argument, node->arguments)
 					{
 						ValidateExpressionStructure(manager, context, argument->key);
 						if (argument->value)
 						{
 							ValidateExpressionStructure(manager, context, argument->value);
+							mapElementCount++;
 						}
+						else
+						{
+							listElementCount++;
+						}
+					}
+
+					if (listElementCount*mapElementCount != 0)
+					{
+						manager->errors.Add(WfErrors::ConstructorMixMapAndList(node));
 					}
 				}
 
@@ -716,6 +728,11 @@ ValidateStructure(Expression)
 					FOREACH(Ptr<WfFunctionDeclaration>, function, node->functions)
 					{
 						ValidateDeclarationStructure(manager, function);
+					}
+
+					if (node->arguments.Count()*node->functions.Count() != 0)
+					{
+						manager->errors.Add(WfErrors::ConstructorMixClassAndInterface(node));
 					}
 				}
 
