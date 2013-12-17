@@ -166,6 +166,7 @@ Error Messages
 				static Ptr<parsing::ParsingError>			RawPointerToNonReferenceType(WfType* node);
 				static Ptr<parsing::ParsingError>			SharedPointerToNonReferenceType(WfType* node);
 				static Ptr<parsing::ParsingError>			NullableToNonReferenceType(WfType* node);
+				static Ptr<parsing::ParsingError>			ChildOfNonReferenceType(WfType* node);
 				
 				// C: Statement structural error
 

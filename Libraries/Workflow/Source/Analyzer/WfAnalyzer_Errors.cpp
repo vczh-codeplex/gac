@@ -67,6 +67,11 @@ WfErrors
 			{
 				return new ParsingError(node, L"B5: A nullable value should pointing to a reference type.");
 			}
+
+			Ptr<parsing::ParsingError> WfErrors::ChildOfNonReferenceType(WfType* node)
+			{
+				return new ParsingError(node, L"B6: Only a reference type have child types.");
+			}
 		}
 	}
 }
