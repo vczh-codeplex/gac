@@ -139,7 +139,7 @@ Helper Functions
 			};
 			extern void										ValidateTypeStructure(WfLexicalScopeManager* manager, Ptr<WfType> type, bool returnType = false);
 			extern void										ValidateModuleStructure(WfLexicalScopeManager* manager, Ptr<WfModule> module);
-			extern void										ValidateDeclarationStructure(WfLexicalScopeManager* manager, Ptr<WfDeclaration> declaration);
+			extern void										ValidateDeclarationStructure(WfLexicalScopeManager* manager, Ptr<WfDeclaration> declaration, parsing::ParsingTreeCustomBase* source = 0);
 			extern void										ValidateStatementStructure(WfLexicalScopeManager* manager, ValidateStructureContext* context, Ptr<WfStatement>& statement);
 			extern void										ValidateExpressionStructure(WfLexicalScopeManager* manager, ValidateStructureContext* context, Ptr<WfExpression>& expression);
 
@@ -154,14 +154,14 @@ Error Messages
 
 			struct WfErrors
 			{
-				// A: Expression structural error
+				// A: Expression error
 				static Ptr<parsing::ParsingError>			WrongFormatStringSyntax(WfExpression* node);
 				static Ptr<parsing::ParsingError>			WrongSimpleObserveExpression(WfExpression* node);
 				static Ptr<parsing::ParsingError>			WrongSimpleObserveEvent(WfExpression* node);
 				static Ptr<parsing::ParsingError>			ObserveNotInBind(WfExpression* node);
 				static Ptr<parsing::ParsingError>			BindInBind(WfExpression* node);
 
-				// B: Type structural error
+				// B: Type error
 				static Ptr<parsing::ParsingError>			WrongVoidType(WfType* node);
 				static Ptr<parsing::ParsingError>			WrongNamespaceType(WfType* node);
 				static Ptr<parsing::ParsingError>			WrongInterfaceType(WfType* node);
@@ -170,19 +170,18 @@ Error Messages
 				static Ptr<parsing::ParsingError>			NullableToNonReferenceType(WfType* node);
 				static Ptr<parsing::ParsingError>			ChildOfNonReferenceType(WfType* node);
 				
-				// C: Statement structural error
+				// C: Statement error
 				static Ptr<parsing::ParsingError>			BreakNotInLoop(WfStatement* node);
 				static Ptr<parsing::ParsingError>			ContinueNotInLoop(WfStatement* node);
 				static Ptr<parsing::ParsingError>			RethrowNotInCatch(WfStatement* node);
 				static Ptr<parsing::ParsingError>			TryMissCatchAndFinally(WfStatement* node);
 
-				// D: Declaration structural error
+				// D: Declaration error
+				static Ptr<parsing::ParsingError>			FunctionShouldHaveName(WfDeclaration* node);
 
-				// E: Module structural error
+				// E: Module error
 
-				// F: Semantic error (considered referencing target)
-
-				// G: Syntax Error
+				// F: Syntax Error
 			};
 		}
 	}
