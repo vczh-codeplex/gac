@@ -199,9 +199,11 @@ ValidateStructure(Declaration)
 			{
 			public:
 				WfLexicalScopeManager*					manager;
+				ParsingTreeCustomBase*					source;
 
-				ValidateStructureDeclarationVisitor(WfLexicalScopeManager* _manager)
+				ValidateStructureDeclarationVisitor(WfLexicalScopeManager* _manager, ParsingTreeCustomBase* _source)
 					:manager(_manager)
+					, source(_source)
 				{
 				}
 
@@ -215,6 +217,13 @@ ValidateStructure(Declaration)
 
 				void Visit(WfFunctionDeclaration* node)override
 				{
+					if (node->anonymity == WfFunctionAnonymity::Anonymous)
+					{
+						if (!source || !dynamic_cast<WfFunctionExpression*>(source))
+						{
+							manager->errors.Add(WfErrors::FunctionShouldHaveName(node));
+						}
+					}
 					ValidateTypeStructure(manager, node->returnType, true);
 					FOREACH(Ptr<WfFunctionArgument>, argument, node->arguments)
 					{
@@ -234,9 +243,9 @@ ValidateStructure(Declaration)
 					ValidateExpressionStructure(manager, &context, node->expression);
 				}
 
-				static void Execute(Ptr<WfDeclaration> declaration, WfLexicalScopeManager* manager)
+				static void Execute(Ptr<WfDeclaration> declaration, WfLexicalScopeManager* manager, ParsingTreeCustomBase* source)
 				{
-					ValidateStructureDeclarationVisitor visitor(manager);
+					ValidateStructureDeclarationVisitor visitor(manager, source);
 					declaration->Accept(&visitor);
 				}
 			};
@@ -380,7 +389,7 @@ ValidateStructure(Statement)
 
 				void Visit(WfVariableStatement* node)override
 				{
-					ValidateDeclarationStructure(manager, node->variable);
+					ValidateDeclarationStructure(manager, node->variable, node);
 				}
 
 				static void Execute(Ptr<WfStatement>& statement, WfLexicalScopeManager* manager, ValidateStructureContext* context)
@@ -694,7 +703,7 @@ ValidateStructure(Expression)
 
 				void Visit(WfFunctionExpression* node)override
 				{
-					ValidateDeclarationStructure(manager, node->function);
+					ValidateDeclarationStructure(manager, node->function, node);
 				}
 
 				void Visit(WfNewTypeExpression* node)override
@@ -748,9 +757,9 @@ ValidateStructure
 				}
 			}
 
-			void ValidateDeclarationStructure(WfLexicalScopeManager* manager, Ptr<WfDeclaration> declaration)
+			void ValidateDeclarationStructure(WfLexicalScopeManager* manager, Ptr<WfDeclaration> declaration, parsing::ParsingTreeCustomBase* source)
 			{
-				ValidateStructureDeclarationVisitor::Execute(declaration, manager);
+				ValidateStructureDeclarationVisitor::Execute(declaration, manager, source);
 			}
 
 			void ValidateStatementStructure(WfLexicalScopeManager* manager, ValidateStructureContext* context, Ptr<WfStatement>& statement)

@@ -29,3 +29,5 @@ C0_BreakNotInLoop
 C1_ContinueNotInLoop
 C2_RethrowNotInCatch
 C3_TryMissCatchAndFinally
+D0_AnonymousFunction
+D0_AnonymousInterfaceFunction

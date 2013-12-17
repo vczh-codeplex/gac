@@ -92,6 +92,11 @@ WfErrors
 			{
 				return new ParsingError(node, L"C3: Try statement should not appear without both catch and finally.");
 			}
+
+			Ptr<parsing::ParsingError> WfErrors::FunctionShouldHaveName(WfDeclaration* node)
+			{
+				return new ParsingError(node, L"D0: Function should have a name.");
+			}
 		}
 	}
 }
