@@ -4,7 +4,6 @@ A2_WrongSimpleObserveEvent
 A3_ObserveNotInBind
 A4_BindInBind
 A5_ConstructorMixMapAndList
-A6_ConstructorMixClassAndInterface
 B0_VoidVariable
 B0_VoidArgument
 B0_VoidMapElement
