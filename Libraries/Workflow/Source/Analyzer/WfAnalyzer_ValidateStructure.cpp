@@ -22,6 +22,77 @@ ValidateStructureContext
 ValidateStructure(Type)
 ***********************************************************************/
 
+			class ValidateReferenceTypeVisitor : public Object, public WfType::IVisitor
+			{
+			public:
+				WfLexicalScopeManager*					manager;
+				bool									result;
+
+				ValidateReferenceTypeVisitor(WfLexicalScopeManager* _manager)
+					:manager(_manager)
+					, result(true)
+				{
+				}
+				
+				void Visit(WfPredefinedType* node)override
+				{
+					if (node->name != WfPredefinedTypeName::Interface)
+					{
+						result = false;
+					}
+				}
+
+				void Visit(WfTopQualifiedType* node)override
+				{
+				}
+
+				void Visit(WfReferenceType* node)override
+				{
+				}
+
+				void Visit(WfRawPointerType* node)override
+				{
+					result = false;
+				}
+
+				void Visit(WfSharedPointerType* node)override
+				{
+					result = false;
+				}
+
+				void Visit(WfNullableType* node)override
+				{
+					result = false;
+				}
+
+				void Visit(WfEnumerableType* node)override
+				{
+					result = false;
+				}
+
+				void Visit(WfMapType* node)override
+				{
+					result = false;
+				}
+
+				void Visit(WfFunctionType* node)override
+				{
+					result = false;
+				}
+
+				void Visit(WfChildType* node)override
+				{
+					node->parent->Accept(this);
+				}
+
+				static bool Execute(Ptr<WfType> type, WfLexicalScopeManager* manager)
+				{
+					ValidateReferenceTypeVisitor visitor(manager);
+					type->Accept(&visitor);
+					return visitor.result;
+				}
+			};
+
 			class ValidateStructureTypeVisitor : public Object, public WfType::IVisitor
 			{
 			public:
@@ -34,52 +105,81 @@ ValidateStructure(Type)
 				
 				void Visit(WfPredefinedType* node)override
 				{
-					throw 0;
+					switch (node->name)
+					{
+					case WfPredefinedTypeName::Void:
+						manager->errors.Add(WfErrors::WrongVoidType(node));
+						break;
+					case WfPredefinedTypeName::Interface:
+						manager->errors.Add(WfErrors::WrongInterfaceType(node));
+						break;
+					case WfPredefinedTypeName::Namespace:
+						manager->errors.Add(WfErrors::WrongNamespaceType(node));
+						break;
+					}
 				}
 
 				void Visit(WfTopQualifiedType* node)override
 				{
-					throw 0;
 				}
 
 				void Visit(WfReferenceType* node)override
 				{
-					throw 0;
 				}
 
 				void Visit(WfRawPointerType* node)override
 				{
-					throw 0;
+					if (!ValidateReferenceTypeVisitor::Execute(node->element, manager))
+					{
+						manager->errors.Add(WfErrors::RawPointerToNonReferenceType(node));
+					}
 				}
 
 				void Visit(WfSharedPointerType* node)override
 				{
-					throw 0;
+					if (!ValidateReferenceTypeVisitor::Execute(node->element, manager))
+					{
+						manager->errors.Add(WfErrors::SharedPointerToNonReferenceType(node));
+					}
 				}
 
 				void Visit(WfNullableType* node)override
 				{
-					throw 0;
+					if (!ValidateReferenceTypeVisitor::Execute(node->element, manager))
+					{
+						manager->errors.Add(WfErrors::NullableToNonReferenceType(node));
+					}
 				}
 
 				void Visit(WfEnumerableType* node)override
 				{
-					throw 0;
+					ValidateTypeStructure(manager, node->element);
 				}
 
 				void Visit(WfMapType* node)override
 				{
-					throw 0;
+					if (node->key)
+					{
+						ValidateTypeStructure(manager, node->key);
+					}
+					ValidateTypeStructure(manager, node->value);
 				}
 
 				void Visit(WfFunctionType* node)override
 				{
-					throw 0;
+					ValidateTypeStructure(manager, node->result);
+					FOREACH(Ptr<WfType>, argument, node->arguments)
+					{
+						ValidateTypeStructure(manager, argument);
+					}
 				}
 
 				void Visit(WfChildType* node)override
 				{
-					throw 0;
+					if (!ValidateReferenceTypeVisitor::Execute(node->parent, manager))
+					{
+						manager->errors.Add(WfErrors::ChildOfNonReferenceType(node));
+					}
 				}
 
 				static void Execute(Ptr<WfType> type, WfLexicalScopeManager* manager)
