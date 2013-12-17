@@ -701,6 +701,60 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\A4_BindInBind.txt">
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
     </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\B0_VoidArgument.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\B0_VoidMapElement.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\B0_VoidVariable.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\B2_InterfaceArgument.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\B2_InterfaceMapElement.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\B2_InterfaceVariable.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\B3_RawPointerToEnumerable.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\B3_RawPointerToMap.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\B3_RawPointerToString.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\B3_RawPointerToVoid.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\B4_SharednterToEnumerable.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\B4_SharednterToMap.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\B4_SharednterToString.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\B4_SharednterToVoid.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\B5_NullableerToEnumerable.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\B5_NullableerToMap.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\B5_NullableerToString.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\B5_NullableerToVoid.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Source\Expression\Codegen.bat">

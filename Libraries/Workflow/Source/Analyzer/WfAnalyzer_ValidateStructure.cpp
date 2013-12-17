@@ -19,6 +19,77 @@ ValidateStructureContext
 			}
 
 /***********************************************************************
+ValidateStructure(Type)
+***********************************************************************/
+
+			class ValidateStructureTypeVisitor : public Object, public WfType::IVisitor
+			{
+			public:
+				WfLexicalScopeManager*					manager;
+
+				ValidateStructureTypeVisitor(WfLexicalScopeManager* _manager)
+					:manager(_manager)
+				{
+				}
+				
+				void Visit(WfPredefinedType* node)override
+				{
+					throw 0;
+				}
+
+				void Visit(WfTopQualifiedType* node)override
+				{
+					throw 0;
+				}
+
+				void Visit(WfReferenceType* node)override
+				{
+					throw 0;
+				}
+
+				void Visit(WfRawPointerType* node)override
+				{
+					throw 0;
+				}
+
+				void Visit(WfSharedPointerType* node)override
+				{
+					throw 0;
+				}
+
+				void Visit(WfNullableType* node)override
+				{
+					throw 0;
+				}
+
+				void Visit(WfEnumerableType* node)override
+				{
+					throw 0;
+				}
+
+				void Visit(WfMapType* node)override
+				{
+					throw 0;
+				}
+
+				void Visit(WfFunctionType* node)override
+				{
+					throw 0;
+				}
+
+				void Visit(WfChildType* node)override
+				{
+					throw 0;
+				}
+
+				static void Execute(Ptr<WfType> type, WfLexicalScopeManager* manager)
+				{
+					ValidateStructureTypeVisitor visitor(manager);
+					type->Accept(&visitor);
+				}
+			};
+
+/***********************************************************************
 ValidateStructure(Declaration)
 ***********************************************************************/
 
@@ -42,12 +113,21 @@ ValidateStructure(Declaration)
 
 				void Visit(WfFunctionDeclaration* node)override
 				{
+					ValidateTypeStructure(manager, node->returnType, true);
+					FOREACH(Ptr<WfFunctionArgument>, argument, node->arguments)
+					{
+						ValidateTypeStructure(manager, argument->type);
+					}
 					ValidateStructureContext context;
 					ValidateStatementStructure(manager, &context, node->statement);
 				}
 
 				void Visit(WfVariableDeclaration* node)override
 				{
+					if (node->type)
+					{
+						ValidateTypeStructure(manager, node->type);
+					}
 					ValidateStructureContext context;
 					ValidateExpressionStructure(manager, &context, node->expression);
 				}
@@ -107,6 +187,10 @@ ValidateStructure(Statement)
 
 				void Visit(WfIfStatement* node)override
 				{
+					if (node->type)
+					{
+						ValidateTypeStructure(manager, node->type);
+					}
 					ValidateExpressionStructure(manager, context, node->expression);
 					ValidateStatementStructure(manager, context, node->trueBranch);
 					if (node->falseBranch)
@@ -390,16 +474,22 @@ ValidateStructure(Expression)
 
 				void Visit(WfInferExpression* node)override
 				{
+					ValidateTypeStructure(manager, node->type);
 					ValidateExpressionStructure(manager, context, node->expression);
 				}
 
 				void Visit(WfTypeCastingExpression* node)override
 				{
+					ValidateTypeStructure(manager, node->type);
 					ValidateExpressionStructure(manager, context, node->expression);
 				}
 
 				void Visit(WfTypeTestingExpression* node)override
 				{
+					if (node->type)
+					{
+						ValidateTypeStructure(manager, node->type);
+					}
 					ValidateExpressionStructure(manager, context, node->expression);
 				}
 
@@ -482,6 +572,7 @@ ValidateStructure(Expression)
 
 				void Visit(WfNewTypeExpression* node)override
 				{
+					ValidateTypeStructure(manager, node->type);
 					for (vint i = 0; i < node->arguments.Count(); i++)
 					{
 						ValidateExpressionStructure(manager, context, node->arguments[i]);
@@ -506,6 +597,21 @@ ValidateStructure(Expression)
 /***********************************************************************
 ValidateStructure
 ***********************************************************************/
+
+			void ValidateTypeStructure(WfLexicalScopeManager* manager, Ptr<WfType> type, bool returnType)
+			{
+				if (returnType)
+				{
+					if (auto predefinedType = type.Cast<WfPredefinedType>())
+					{
+						if (predefinedType->name == WfPredefinedTypeName::Void)
+						{
+							return;
+						}
+					}
+				}
+				ValidateStructureTypeVisitor::Execute(type, manager);
+			}
 
 			void ValidateModuleStructure(WfLexicalScopeManager* manager, Ptr<WfModule> module)
 			{
