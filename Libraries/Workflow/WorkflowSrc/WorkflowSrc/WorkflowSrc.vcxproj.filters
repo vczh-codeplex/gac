@@ -755,16 +755,16 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\B5_NullableToVoid.txt">
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
     </Text>
-    <Text Include="..\TestFiles\Samples\AnalyzerError\B6_ChildOfToEnumerable.txt">
+    <Text Include="..\TestFiles\Samples\AnalyzerError\B6_ChildOfEnumerable.txt">
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
     </Text>
-    <Text Include="..\TestFiles\Samples\AnalyzerError\B6_ChildOfToMap.txt">
+    <Text Include="..\TestFiles\Samples\AnalyzerError\B6_ChildOfMap.txt">
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
     </Text>
-    <Text Include="..\TestFiles\Samples\AnalyzerError\B6_ChildOfToString.txt">
+    <Text Include="..\TestFiles\Samples\AnalyzerError\B6_ChildOfString.txt">
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
     </Text>
-    <Text Include="..\TestFiles\Samples\AnalyzerError\B6_ChildOfToVoid.txt">
+    <Text Include="..\TestFiles\Samples\AnalyzerError\B6_ChildOfVoid.txt">
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
     </Text>
   </ItemGroup>
