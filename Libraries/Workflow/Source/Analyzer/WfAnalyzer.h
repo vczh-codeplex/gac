@@ -160,6 +160,8 @@ Error Messages
 				static Ptr<parsing::ParsingError>			WrongSimpleObserveEvent(WfExpression* node);
 				static Ptr<parsing::ParsingError>			ObserveNotInBind(WfExpression* node);
 				static Ptr<parsing::ParsingError>			BindInBind(WfExpression* node);
+				static Ptr<parsing::ParsingError>			ConstructorMixMapAndList(WfExpression* node);
+				static Ptr<parsing::ParsingError>			ConstructorMixClassAndInterface(WfExpression* node);
 
 				// B: Type error
 				static Ptr<parsing::ParsingError>			WrongVoidType(WfType* node);

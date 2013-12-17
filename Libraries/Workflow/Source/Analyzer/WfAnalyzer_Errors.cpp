@@ -38,6 +38,16 @@ WfErrors
 				return new ParsingError(node, L"A4: Bind expression should not appear in another bind expression.");
 			}
 
+			Ptr<parsing::ParsingError> WfErrors::ConstructorMixMapAndList(WfExpression* node)
+			{
+				return new ParsingError(node, L"A5: Key-value pairs are not allowed in list constructor expression.");
+			}
+
+			Ptr<parsing::ParsingError> WfErrors::ConstructorMixClassAndInterface(WfExpression* node)
+			{
+				return new ParsingError(node, L"A6: Functions are not allowed in class constructor expression.");
+			}
+
 			Ptr<parsing::ParsingError> WfErrors::WrongVoidType(WfType* node)
 			{
 				return new ParsingError(node, L"B0: Void is not a type for a value.");

@@ -1,0 +1,9 @@
+module test;
+
+func main():void
+{
+	var x = new Class("argument")
+	{
+		func Function():void{}
+	};
+}
