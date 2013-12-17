@@ -300,10 +300,10 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\B5_NullableToMap.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\B5_NullableToString.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\B5_NullableToVoid.txt" />
-    <Text Include="..\TestFiles\Samples\AnalyzerError\B6_ChildOfToEnumerable.txt" />
-    <Text Include="..\TestFiles\Samples\AnalyzerError\B6_ChildOfToMap.txt" />
-    <Text Include="..\TestFiles\Samples\AnalyzerError\B6_ChildOfToString.txt" />
-    <Text Include="..\TestFiles\Samples\AnalyzerError\B6_ChildOfToVoid.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\B6_ChildOfEnumerable.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\B6_ChildOfMap.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\B6_ChildOfString.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\B6_ChildOfVoid.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerScope\ModuleA.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerScope\ModuleB.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerScope\ModuleC.txt" />
