@@ -135,6 +135,7 @@ Helper Functions
 
 				ValidateStructureContext();
 			};
+			extern void										ValidateTypeStructure(WfLexicalScopeManager* manager, Ptr<WfType> type, bool returnType = false);
 			extern void										ValidateModuleStructure(WfLexicalScopeManager* manager, Ptr<WfModule> module);
 			extern void										ValidateDeclarationStructure(WfLexicalScopeManager* manager, Ptr<WfDeclaration> declaration);
 			extern void										ValidateStatementStructure(WfLexicalScopeManager* manager, ValidateStructureContext* context, Ptr<WfStatement>& statement);
@@ -151,11 +152,30 @@ Error Messages
 
 			struct WfErrors
 			{
+				// A: Expression structural error
 				static Ptr<parsing::ParsingError>			WrongFormatStringSyntax(WfExpression* node);
 				static Ptr<parsing::ParsingError>			WrongSimpleObserveExpression(WfExpression* node);
 				static Ptr<parsing::ParsingError>			WrongSimpleObserveEvent(WfExpression* node);
 				static Ptr<parsing::ParsingError>			ObserveNotInBind(WfExpression* node);
 				static Ptr<parsing::ParsingError>			BindInBind(WfExpression* node);
+
+				// B: Type structural error
+				static Ptr<parsing::ParsingError>			WrongVoidType(WfType* node);
+				static Ptr<parsing::ParsingError>			WrongNamespaceType(WfType* node);
+				static Ptr<parsing::ParsingError>			WrongInterfaceType(WfType* node);
+				static Ptr<parsing::ParsingError>			RawPointerToNonReferenceType(WfType* node);
+				static Ptr<parsing::ParsingError>			SharedPointerToNonReferenceType(WfType* node);
+				static Ptr<parsing::ParsingError>			NullableToNonReferenceType(WfType* node);
+				
+				// C: Statement structural error
+
+				// D: Declaration structural error
+
+				// E: Module structural error
+
+				// F: Semantic error (considered referencing target)
+
+				// G: Syntax Error
 			};
 		}
 	}

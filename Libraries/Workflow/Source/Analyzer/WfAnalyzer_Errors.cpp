@@ -37,6 +37,36 @@ WfErrors
 			{
 				return new ParsingError(node, L"A4: Bind expression should not appear in another bind expression.");
 			}
+
+			Ptr<parsing::ParsingError> WfErrors::WrongVoidType(WfType* node)
+			{
+				return new ParsingError(node, L"B0: Void is not a type for a value.");
+			}
+
+			Ptr<parsing::ParsingError> WfErrors::WrongNamespaceType(WfType* node)
+			{
+				return new ParsingError(node, L"B1: Namespace is not a type for a value.");
+			}
+
+			Ptr<parsing::ParsingError> WfErrors::WrongInterfaceType(WfType* node)
+			{
+				return new ParsingError(node, L"B2: Interface is not a type for a value.");
+			}
+
+			Ptr<parsing::ParsingError> WfErrors::RawPointerToNonReferenceType(WfType* node)
+			{
+				return new ParsingError(node, L"B3: A raw pointer should pointing to a reference type.");
+			}
+
+			Ptr<parsing::ParsingError> WfErrors::SharedPointerToNonReferenceType(WfType* node)
+			{
+				return new ParsingError(node, L"B4: A shared pointer should pointing to a reference type.");
+			}
+
+			Ptr<parsing::ParsingError> WfErrors::NullableToNonReferenceType(WfType* node)
+			{
+				return new ParsingError(node, L"B5: A nullable value should pointing to a reference type.");
+			}
 		}
 	}
 }
