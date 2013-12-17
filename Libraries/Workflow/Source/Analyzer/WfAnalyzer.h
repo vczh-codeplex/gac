@@ -132,6 +132,8 @@ Helper Functions
 			struct ValidateStructureContext
 			{
 				WfBindExpression*							currentBindExpression;
+				WfStatement*								currentLoopStatement;
+				WfStatement*								currentCatchStatement;
 
 				ValidateStructureContext();
 			};
@@ -169,6 +171,10 @@ Error Messages
 				static Ptr<parsing::ParsingError>			ChildOfNonReferenceType(WfType* node);
 				
 				// C: Statement structural error
+				static Ptr<parsing::ParsingError>			BreakNotInLoop(WfStatement* node);
+				static Ptr<parsing::ParsingError>			ContinueNotInLoop(WfStatement* node);
+				static Ptr<parsing::ParsingError>			RethrowNotInCatch(WfStatement* node);
+				static Ptr<parsing::ParsingError>			TryMissCatchAndFinally(WfStatement* node);
 
 				// D: Declaration structural error
 

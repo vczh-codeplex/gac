@@ -72,6 +72,26 @@ WfErrors
 			{
 				return new ParsingError(node, L"B6: Only a reference type have child types.");
 			}
+
+			Ptr<parsing::ParsingError> WfErrors::BreakNotInLoop(WfStatement* node)
+			{
+				return new ParsingError(node, L"C0: Break statement should appear in a loop.");
+			}
+
+			Ptr<parsing::ParsingError> WfErrors::ContinueNotInLoop(WfStatement* node)
+			{
+				return new ParsingError(node, L"C1: Continue statement should appear in a loop.");
+			}
+
+			Ptr<parsing::ParsingError> WfErrors::RethrowNotInCatch(WfStatement* node)
+			{
+				return new ParsingError(node, L"C2: Re-raise exception statement should appear in catch.");
+			}
+
+			Ptr<parsing::ParsingError> WfErrors::TryMissCatchAndFinally(WfStatement* node)
+			{
+				return new ParsingError(node, L"C3: Try statement should not appear without both catch and finally.");
+			}
 		}
 	}
 }

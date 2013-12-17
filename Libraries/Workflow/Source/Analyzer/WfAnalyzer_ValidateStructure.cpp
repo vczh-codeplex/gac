@@ -15,6 +15,8 @@ ValidateStructureContext
 
 			ValidateStructureContext::ValidateStructureContext()
 				:currentBindExpression(0)
+				, currentLoopStatement(0)
+				, currentCatchStatement(0)
 			{
 			}
 
@@ -258,10 +260,18 @@ ValidateStructure(Statement)
 
 				void Visit(WfBreakStatement* node)override
 				{
+					if (!context->currentLoopStatement)
+					{
+						manager->errors.Add(WfErrors::BreakNotInLoop(node));
+					}
 				}
 
 				void Visit(WfContinueStatement* node)override
 				{
+					if (!context->currentLoopStatement)
+					{
+						manager->errors.Add(WfErrors::ContinueNotInLoop(node));
+					}
 				}
 
 				void Visit(WfReturnStatement* node)override
@@ -282,6 +292,10 @@ ValidateStructure(Statement)
 					if (node->expression)
 					{
 						ValidateExpressionStructure(manager, context, node->expression);
+					}
+					else if (!context->currentCatchStatement)
+					{
+						manager->errors.Add(WfErrors::RethrowNotInCatch(node));
 					}
 				}
 
@@ -315,14 +329,20 @@ ValidateStructure(Statement)
 
 				void Visit(WfWhileStatement* node)override
 				{
+					auto oldLoop = context->currentLoopStatement;
+					context->currentLoopStatement = node;
 					ValidateExpressionStructure(manager, context, node->condition);
 					ValidateStatementStructure(manager, context, node->statement);
+					context->currentLoopStatement = oldLoop;
 				}
 
 				void Visit(WfForEachStatement* node)override
 				{
+					auto oldLoop = context->currentLoopStatement;
+					context->currentLoopStatement = node;
 					ValidateExpressionStructure(manager, context, node->collection);
 					ValidateStatementStructure(manager, context, node->statement);
+					context->currentLoopStatement = oldLoop;
 				}
 
 				void Visit(WfTryStatement* node)override
@@ -330,11 +350,18 @@ ValidateStructure(Statement)
 					ValidateStatementStructure(manager, context, node->protectedStatement);
 					if (node->catchStatement)
 					{
+						auto oldCatch = context->currentCatchStatement;
+						context->currentCatchStatement = node->catchStatement.Obj();
 						ValidateStatementStructure(manager, context, node->catchStatement);
+						context->currentCatchStatement = oldCatch;
 					}
 					if (node->finallyStatement)
 					{
 						ValidateStatementStructure(manager, context, node->finallyStatement);
+					}
+					if (!node->catchStatement && !node->finallyStatement)
+					{
+						manager->errors.Add(WfErrors::TryMissCatchAndFinally(node));
 					}
 				}
 
@@ -394,10 +421,10 @@ ValidateStructure(Expression)
 
 				void Visit(WfOrderedLambdaExpression* node)override
 				{
-					auto bind = context->currentBindExpression;
+					auto oldBind = context->currentBindExpression;
 					context->currentBindExpression = 0;
 					ValidateExpressionStructure(manager, context, node->body);
-					context->currentBindExpression = bind;
+					context->currentBindExpression = oldBind;
 				}
 
 				void Visit(WfMemberExpression* node)override

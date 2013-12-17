@@ -25,3 +25,7 @@ B6_ChildOfMap
 B6_ChildOfString
 B6_ChildOfVoid
 B6_ChildOfEnumerable
+C0_BreakNotInLoop
+C1_ContinueNotInLoop
+C2_RethrowNotInCatch
+C3_TryMissCatchAndFinally
