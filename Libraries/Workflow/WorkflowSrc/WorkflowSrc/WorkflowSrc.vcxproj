@@ -304,6 +304,10 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\B6_ChildOfMap.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\B6_ChildOfString.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\B6_ChildOfVoid.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\C0_BreakNotInLoop.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\C1_ContinueNotInLoop.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\C2_RethrowNotInCatch.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\C3_TryMissCatchAndFinally.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerScope\ModuleA.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerScope\ModuleB.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerScope\ModuleC.txt" />
