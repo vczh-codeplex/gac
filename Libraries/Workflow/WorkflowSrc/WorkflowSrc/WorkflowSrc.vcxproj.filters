@@ -710,54 +710,6 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\B0_VoidVariable.txt">
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
     </Text>
-    <Text Include="..\TestFiles\Samples\AnalyzerError\B2_InterfaceArgument.txt">
-      <Filter>Resource Files\Samples\AnalyzerError</Filter>
-    </Text>
-    <Text Include="..\TestFiles\Samples\AnalyzerError\B2_InterfaceMapElement.txt">
-      <Filter>Resource Files\Samples\AnalyzerError</Filter>
-    </Text>
-    <Text Include="..\TestFiles\Samples\AnalyzerError\B2_InterfaceVariable.txt">
-      <Filter>Resource Files\Samples\AnalyzerError</Filter>
-    </Text>
-    <Text Include="..\TestFiles\Samples\AnalyzerError\B3_RawPointerToEnumerable.txt">
-      <Filter>Resource Files\Samples\AnalyzerError</Filter>
-    </Text>
-    <Text Include="..\TestFiles\Samples\AnalyzerError\B3_RawPointerToMap.txt">
-      <Filter>Resource Files\Samples\AnalyzerError</Filter>
-    </Text>
-    <Text Include="..\TestFiles\Samples\AnalyzerError\B3_RawPointerToString.txt">
-      <Filter>Resource Files\Samples\AnalyzerError</Filter>
-    </Text>
-    <Text Include="..\TestFiles\Samples\AnalyzerError\B3_RawPointerToVoid.txt">
-      <Filter>Resource Files\Samples\AnalyzerError</Filter>
-    </Text>
-    <Text Include="..\TestFiles\Samples\AnalyzerError\B4_SharedPointerToEnumerable.txt">
-      <Filter>Resource Files\Samples\AnalyzerError</Filter>
-    </Text>
-    <Text Include="..\TestFiles\Samples\AnalyzerError\B4_SharedPointerToMap.txt">
-      <Filter>Resource Files\Samples\AnalyzerError</Filter>
-    </Text>
-    <Text Include="..\TestFiles\Samples\AnalyzerError\B4_SharedPointerToString.txt">
-      <Filter>Resource Files\Samples\AnalyzerError</Filter>
-    </Text>
-    <Text Include="..\TestFiles\Samples\AnalyzerError\B4_SharedPointerToVoid.txt">
-      <Filter>Resource Files\Samples\AnalyzerError</Filter>
-    </Text>
-    <Text Include="..\TestFiles\Samples\AnalyzerError\B5_NullableToEnumerable.txt">
-      <Filter>Resource Files\Samples\AnalyzerError</Filter>
-    </Text>
-    <Text Include="..\TestFiles\Samples\AnalyzerError\B5_NullableToMap.txt">
-      <Filter>Resource Files\Samples\AnalyzerError</Filter>
-    </Text>
-    <Text Include="..\TestFiles\Samples\AnalyzerError\B5_NullableToVoid.txt">
-      <Filter>Resource Files\Samples\AnalyzerError</Filter>
-    </Text>
-    <Text Include="..\TestFiles\Samples\AnalyzerError\B6_ChildOfEnumerable.txt">
-      <Filter>Resource Files\Samples\AnalyzerError</Filter>
-    </Text>
-    <Text Include="..\TestFiles\Samples\AnalyzerError\B6_ChildOfMap.txt">
-      <Filter>Resource Files\Samples\AnalyzerError</Filter>
-    </Text>
     <Text Include="..\TestFiles\Samples\AnalyzerError\C0_BreakNotInLoop.txt">
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
     </Text>
@@ -785,19 +737,67 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\F1_ChildSymbolNotExists.txt">
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
     </Text>
-    <Text Include="..\TestFiles\Samples\AnalyzerError\B7_TypeDoesNotExists.txt">
+    <Text Include="..\TestFiles\Samples\AnalyzerError\B1_InterfaceArgument.txt">
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
     </Text>
-    <Text Include="..\TestFiles\Samples\AnalyzerError\B8_ClassNotForValue.txt">
+    <Text Include="..\TestFiles\Samples\AnalyzerError\B1_InterfaceMapElement.txt">
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
     </Text>
-    <Text Include="..\TestFiles\Samples\AnalyzerError\B3_RawPointerToStruct.txt">
+    <Text Include="..\TestFiles\Samples\AnalyzerError\B1_InterfaceVariable.txt">
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
     </Text>
-    <Text Include="..\TestFiles\Samples\AnalyzerError\B4_SharedPointerToStruct.txt">
+    <Text Include="..\TestFiles\Samples\AnalyzerError\B2_RawPointerToEnumerable.txt">
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
     </Text>
-    <Text Include="..\TestFiles\Samples\AnalyzerError\B5_NullableToClass.txt">
+    <Text Include="..\TestFiles\Samples\AnalyzerError\B2_RawPointerToMap.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\B2_RawPointerToString.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\B2_RawPointerToStruct.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\B2_RawPointerToVoid.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\B3_SharedPointerToEnumerable.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\B3_SharedPointerToMap.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\B3_SharedPointerToString.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\B3_SharedPointerToStruct.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\B3_SharedPointerToVoid.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\B4_NullableToClass.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\B4_NullableToEnumerable.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\B4_NullableToMap.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\B4_NullableToVoid.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\B5_ChildOfEnumerable.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\B5_ChildOfMap.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\B6_TypeDoesNotExists.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\B7_ClassNotForValue.txt">
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
     </Text>
   </ItemGroup>

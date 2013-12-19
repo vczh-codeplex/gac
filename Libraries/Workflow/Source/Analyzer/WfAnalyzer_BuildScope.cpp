@@ -32,11 +32,6 @@ BuildScopeForDeclaration
 					Ptr<WfLexicalSymbol> symbol = new WfLexicalSymbol;
 					symbol->name = node->name.value;
 					symbol->ownerDeclaration = node;
-					{
-						Ptr<WfPredefinedType> type = new WfPredefinedType;
-						type->name = WfPredefinedTypeName::Namespace;
-						symbol->type = type;
-					}
 					parentScope->symbols.Add(symbol->name, symbol);
 
 					resultScope = new WfLexicalScope(parentScope);
