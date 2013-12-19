@@ -266,7 +266,9 @@ WfLexicalScopeManager
 					globalName = new WfLexicalScopeName(true);
 					BuildGlobalNameFromTypeDescriptors();
 				}
+
 				BuildGlobalNameFromModules();
+
 				FOREACH(Ptr<WfModule>, module, modules)
 				{
 					vint errorCount = errors.Count();
@@ -274,6 +276,30 @@ WfLexicalScopeManager
 					if (errors.Count() == errorCount)
 					{
 						BuildScopeForModule(this, module);
+					}
+				}
+
+				SortedList<Ptr<WfLexicalScope>> analyzedScopes;
+				FOREACH(Ptr<WfLexicalScope>, scope,
+					From(moduleScopes.Values())
+						.Concat(declarationScopes.Values())
+						.Concat(statementScopes.Values())
+						.Concat(expressionScopes.Values()))
+				{
+					if (!analyzedScopes.Contains(scope.Obj()))
+					{
+						analyzedScopes.Add(scope);
+
+						for (vint i = 0; i < scope->symbols.Count(); i++)
+						{
+							FOREACH(Ptr<WfLexicalSymbol>, symbol, scope->symbols.GetByIndex(i))
+							{
+								if (symbol->type)
+								{
+									symbol->typeInfo = CreateTypeInfoFromType(scope.Obj(), symbol->type);
+								}
+							}
+						}
 					}
 				}
 			}
