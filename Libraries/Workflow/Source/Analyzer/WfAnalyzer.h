@@ -169,10 +169,12 @@ Error Messages
 				static Ptr<parsing::ParsingError>			WrongVoidType(WfType* node);
 				static Ptr<parsing::ParsingError>			WrongNamespaceType(WfType* node);
 				static Ptr<parsing::ParsingError>			WrongInterfaceType(WfType* node);
-				static Ptr<parsing::ParsingError>			RawPointerToNonReferenceType(WfType* node);
-				static Ptr<parsing::ParsingError>			SharedPointerToNonReferenceType(WfType* node);
-				static Ptr<parsing::ParsingError>			NullableToNonReferenceType(WfType* node);
+				static Ptr<parsing::ParsingError>			RawPointerToNonReferenceType(WfType* node, reflection::description::ITypeInfo* typeInfo = 0);
+				static Ptr<parsing::ParsingError>			SharedPointerToNonReferenceType(WfType* node, reflection::description::ITypeInfo* typeInfo = 0);
+				static Ptr<parsing::ParsingError>			NullableToNonReferenceType(WfType* node, reflection::description::ITypeInfo* typeInfo = 0);
 				static Ptr<parsing::ParsingError>			ChildOfNonReferenceType(WfType* node);
+				static Ptr<parsing::ParsingError>			TypeNotExists(WfType* node, Ptr<WfLexicalScopeName> scopeName);
+				static Ptr<parsing::ParsingError>			TypeNotForValue(WfType* node, reflection::description::ITypeInfo* typeInfo);
 				
 				// C: Statement error
 				static Ptr<parsing::ParsingError>			BreakNotInLoop(WfStatement* node);

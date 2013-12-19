@@ -63,24 +63,34 @@ WfErrors
 				return new ParsingError(node, L"B2: Interface is not a type for a value.");
 			}
 
-			Ptr<parsing::ParsingError> WfErrors::RawPointerToNonReferenceType(WfType* node)
+			Ptr<parsing::ParsingError> WfErrors::RawPointerToNonReferenceType(WfType* node, reflection::description::ITypeInfo* typeInfo)
 			{
-				return new ParsingError(node, L"B3: A raw pointer should pointing to a class or interface.");
+				return new ParsingError(node, L"B3: A raw pointer" + (typeInfo ? L" \"" + typeInfo->GetTypeFriendlyName() + L"\"" : L"") + L" should pointing to a class or interface.");
 			}
 
-			Ptr<parsing::ParsingError> WfErrors::SharedPointerToNonReferenceType(WfType* node)
+			Ptr<parsing::ParsingError> WfErrors::SharedPointerToNonReferenceType(WfType* node, reflection::description::ITypeInfo* typeInfo)
 			{
-				return new ParsingError(node, L"B4: A shared pointer should pointing to a class or interface.");
+				return new ParsingError(node, L"B4: A shared pointer" + (typeInfo ? L" \"" + typeInfo->GetTypeFriendlyName() + L"\"" : L"") + L" should pointing to a class or interface.");
 			}
 
-			Ptr<parsing::ParsingError> WfErrors::NullableToNonReferenceType(WfType* node)
+			Ptr<parsing::ParsingError> WfErrors::NullableToNonReferenceType(WfType* node, reflection::description::ITypeInfo* typeInfo)
 			{
-				return new ParsingError(node, L"B5: A nullable value should pointing to a struct.");
+				return new ParsingError(node, L"B5: A nullable value" + (typeInfo ? L" \"" + typeInfo->GetTypeFriendlyName() + L"\"" : L"") + L" should pointing to a struct.");
 			}
 
 			Ptr<parsing::ParsingError> WfErrors::ChildOfNonReferenceType(WfType* node)
 			{
 				return new ParsingError(node, L"B6: Only a reference type have child types.");
+			}
+
+			Ptr<parsing::ParsingError> WfErrors::TypeNotExists(WfType* node, Ptr<WfLexicalScopeName> scopeName)
+			{
+				return new ParsingError(node, L"B7: Type \"" + scopeName->GetFriendlyName() + L"\" does not exist.");
+			}
+
+			Ptr<parsing::ParsingError> WfErrors::TypeNotForValue(WfType* node, reflection::description::ITypeInfo* typeInfo)
+			{
+				return new ParsingError(node, L"B8: Type \"" + typeInfo->GetTypeFriendlyName() + L"\" is not a type for a value.");
 			}
 
 			Ptr<parsing::ParsingError> WfErrors::BreakNotInLoop(WfStatement* node)
