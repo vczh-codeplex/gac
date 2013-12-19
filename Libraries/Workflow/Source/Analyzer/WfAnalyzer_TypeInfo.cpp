@@ -300,7 +300,6 @@ CreateTypeInfoFromType
 
 				void Visit(WfReferenceType* node)override
 				{
-					throw 0;
 				}
 
 				void Visit(WfRawPointerType* node)override
