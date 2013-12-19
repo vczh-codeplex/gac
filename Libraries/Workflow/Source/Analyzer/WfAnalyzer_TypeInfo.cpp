@@ -427,14 +427,7 @@ CreateTypeInfoFromType
 									}
 								}
 
-								if (typeInfo->GetDecorator() == ITypeInfo::RawPtr)
-								{
-									manager->errors.Add(WfErrors::RawPointerToNonReferenceType(node, element));
-								}
-								else
-								{
-									manager->errors.Add(WfErrors::SharedPointerToNonReferenceType(node, element));
-								}
+								manager->errors.Add(WfErrors::NullableToNonReferenceType(node, element));
 							NULLABLE_CORRECT:
 								;
 							}
@@ -442,7 +435,7 @@ CreateTypeInfoFromType
 						case ITypeInfo::TypeDescriptor:
 							if (checkTypeForValue)
 							{
-								if (typeInfo->GetTypeDescriptor()->GetValueSerializer() != 0)
+								if (typeInfo->GetTypeDescriptor()->GetValueSerializer() == 0)
 								{
 									manager->errors.Add(WfErrors::TypeNotForValue(node, typeInfo.Obj()));
 								}

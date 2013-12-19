@@ -139,9 +139,17 @@ WfLexicalScopeName
 
 			WString WfLexicalScopeName::GetFriendlyName()
 			{
-				if (this)
+				if (parent)
 				{
-					return parent->GetFriendlyName() + L"::" + name;
+					WString parentName = parent->GetFriendlyName();
+					if (parentName == L"")
+					{
+						return name;
+					}
+					else
+					{
+						return parentName + L"::" + name;
+					}
 				}
 				else
 				{
