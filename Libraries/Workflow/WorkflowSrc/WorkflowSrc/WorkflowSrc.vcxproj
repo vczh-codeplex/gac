@@ -301,12 +301,9 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\B4_SharedPointerToVoid.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\B5_NullableToEnumerable.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\B5_NullableToMap.txt" />
-    <Text Include="..\TestFiles\Samples\AnalyzerError\B5_NullableToString.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\B5_NullableToVoid.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\B6_ChildOfEnumerable.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\B6_ChildOfMap.txt" />
-    <Text Include="..\TestFiles\Samples\AnalyzerError\B6_ChildOfString.txt" />
-    <Text Include="..\TestFiles\Samples\AnalyzerError\B6_ChildOfVoid.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\C0_BreakNotInLoop.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\C1_ContinueNotInLoop.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\C2_RethrowNotInCatch.txt" />

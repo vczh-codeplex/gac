@@ -137,6 +137,18 @@ WfLexicalScopeName
 				}
 			}
 
+			WString WfLexicalScopeName::GetFriendlyName()
+			{
+				if (this)
+				{
+					return parent->GetFriendlyName() + L"::" + name;
+				}
+				else
+				{
+					return L"";
+				}
+			}
+
 /***********************************************************************
 WfLexicalScopeManager
 ***********************************************************************/

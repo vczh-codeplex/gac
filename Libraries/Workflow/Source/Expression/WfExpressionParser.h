@@ -120,6 +120,7 @@ namespace vl
 		class WfFunctionType;
 		class WfChildType;
 		class WfExpression;
+		class WfTopQualifiedExpression;
 		class WfReferenceExpression;
 		class WfOrderedNameExpression;
 		class WfOrderedLambdaExpression;
@@ -331,6 +332,7 @@ namespace vl
 			class IVisitor : public vl::reflection::IDescriptable, vl::reflection::Description<IVisitor>
 			{
 			public:
+				virtual void Visit(WfTopQualifiedExpression* node)=0;
 				virtual void Visit(WfReferenceExpression* node)=0;
 				virtual void Visit(WfOrderedNameExpression* node)=0;
 				virtual void Visit(WfOrderedLambdaExpression* node)=0;
@@ -364,6 +366,16 @@ namespace vl
 
 			virtual void Accept(WfExpression::IVisitor* visitor)=0;
 
+		};
+
+		class WfTopQualifiedExpression : public WfExpression, vl::reflection::Description<WfTopQualifiedExpression>
+		{
+		public:
+			vl::parsing::ParsingToken name;
+
+			void Accept(WfExpression::IVisitor* visitor)override;
+
+			static vl::Ptr<WfTopQualifiedExpression> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 		};
 
 		class WfReferenceExpression : public WfExpression, vl::reflection::Description<WfReferenceExpression>
@@ -1135,6 +1147,7 @@ namespace vl
 			DECL_TYPE_INFO(vl::workflow::WfFunctionType)
 			DECL_TYPE_INFO(vl::workflow::WfChildType)
 			DECL_TYPE_INFO(vl::workflow::WfExpression)
+			DECL_TYPE_INFO(vl::workflow::WfTopQualifiedExpression)
 			DECL_TYPE_INFO(vl::workflow::WfReferenceExpression)
 			DECL_TYPE_INFO(vl::workflow::WfOrderedNameExpression)
 			DECL_TYPE_INFO(vl::workflow::WfOrderedLambdaExpression)
@@ -1287,6 +1300,11 @@ namespace vl
 					static Ptr<vl::workflow::WfExpression::IVisitor> Create(Ptr<IValueInterfaceProxy> proxy)
 					{
 						return new WfExpression_IVisitor(proxy);
+					}
+
+					void Visit(vl::workflow::WfTopQualifiedExpression* node)override
+					{
+						INVOKE_INTERFACE_PROXY(Visit, node);
 					}
 
 					void Visit(vl::workflow::WfReferenceExpression* node)override
