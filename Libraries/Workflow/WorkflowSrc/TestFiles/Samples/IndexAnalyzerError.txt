@@ -19,12 +19,9 @@ B4_SharedPointerToString
 B4_SharedPointerToVoid
 B4_SharedPointerToEnumerable
 B5_NullableToMap
-B5_NullableToString
 B5_NullableToVoid
 B5_NullableToEnumerable
 B6_ChildOfMap
-B6_ChildOfString
-B6_ChildOfVoid
 B6_ChildOfEnumerable
 C0_BreakNotInLoop
 C1_ContinueNotInLoop

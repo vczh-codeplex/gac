@@ -81,6 +81,7 @@ Scope Manager
 
 				Ptr<WfLexicalScopeName>						AccessChild(const WString& name, bool createdByTypeDescriptor);
 				void										RemoveNonTypeDescriptorNames();
+				WString										GetFriendlyName();
 			};
 
 			class WfLexicalScopeManager : public Object
@@ -123,6 +124,7 @@ Helper Functions
 ***********************************************************************/
 
 			extern Ptr<WfType>								GetTypeFromTypeInfo(reflection::description::ITypeInfo* typeInfo);
+			extern Ptr<WfLexicalScopeName>					GetScopeNameFromReferenceType(WfLexicalScope* scope, Ptr<WfType> type);
 			extern Ptr<reflection::description::ITypeInfo>	CreateTypeInfoFromType(WfLexicalScope* scope, Ptr<WfType> type);
 
 			extern void										SearchOrderedName(Ptr<WfDeclaration> declaration, collections::SortedList<vint>& names);
@@ -183,7 +185,11 @@ Error Messages
 
 				// E: Module error
 
-				// F: Syntax Error
+				// F: Symbol Error
+				static Ptr<parsing::ParsingError>			TopQualifiedSymbolNotExists(WfType* node, const WString& name);
+				static Ptr<parsing::ParsingError>			TopQualifiedSymbolNotExists(WfExpression* node, const WString& name);
+				static Ptr<parsing::ParsingError>			ChildSymbolNotExists(WfType* node, Ptr<WfLexicalScopeName> scopeName, const WString& name);
+				static Ptr<parsing::ParsingError>			ChildSymbolNotExists(WfExpression* node, Ptr<WfLexicalScopeName> scopeName, const WString& name);
 			};
 		}
 	}

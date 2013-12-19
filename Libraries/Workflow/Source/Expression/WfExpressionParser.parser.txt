@@ -94,6 +94,11 @@ class Expression
 {
 }
 
+class TopQualifiedExpression : Expression
+{
+	token					name;
+}
+
 class ReferenceExpression : Expression
 {
 	token					name;
@@ -708,6 +713,7 @@ rule Expression Exp0
 	= "type" "(" WorkflowExpression : expression ")" as TypeOfExpressionExpression
 	= "attach" "(" WorkflowExpression : event "," WorkflowExpression : function ")" as AttachEventExpression
 	= "detach" "(" WorkflowExpression : handler ")" as DetachEventExpression
+	= "::" NAME : name as TopQualifiedExpression
 	;
 
 rule Expression Exp1

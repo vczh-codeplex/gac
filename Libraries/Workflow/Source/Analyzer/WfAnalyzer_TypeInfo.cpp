@@ -207,6 +207,163 @@ GetTypeFromTypeInfo
 CreateTypeInfoFromType
 ***********************************************************************/
 
+			class GetScopeNameFromReferenceTypeVisitor : public Object, public WfType::IVisitor
+			{
+			public:
+				WfLexicalScope*				scope;
+				Ptr<WfLexicalScopeName>		result;
+
+				GetScopeNameFromReferenceTypeVisitor(WfLexicalScope* _scope)
+					:scope(_scope)
+				{
+				}
+
+				Ptr<WfLexicalScopeName> Call(WfType* node)
+				{
+					node->Accept(this);
+					Ptr<WfLexicalScopeName> scopeName = result;
+					result = 0;
+					return scopeName;
+				}
+
+				void Visit(WfPredefinedType* node)override
+				{
+					WString name;
+					switch (node->name)
+					{
+					case WfPredefinedTypeName::Void:
+						name = L"Void";
+						break;
+					case WfPredefinedTypeName::Object:
+						name = L"Object";
+						break;
+					case WfPredefinedTypeName::Interface:
+						name = L"Interface";
+						break;
+					case WfPredefinedTypeName::Int:
+#if defined VCZH_64
+						name = L"Int64";
+#else
+						name = L"Int32";
+#endif
+						break;
+					case WfPredefinedTypeName::UInt:
+#if defined VCZH_64
+						name = L"UInt64";
+#else
+						name = L"UInt32";
+#endif
+						break;
+					case WfPredefinedTypeName::Float:
+						name = L"Single";
+						break;
+					case WfPredefinedTypeName::Double:
+						name = L"Double";
+						break;
+					case WfPredefinedTypeName::String:
+						name = L"String";
+						break;
+					case WfPredefinedTypeName::Char:
+						name = L"Char";
+						break;
+					case WfPredefinedTypeName::Bool:
+						name = L"Boolean";
+						break;
+					default:
+						CHECK_FAIL(L"GetScopeNameFromReferenceTypeVisitor::Visit(WfPredefinedType*)#Internal error, ValidateTypeStructure function should check correctly.");
+					}
+
+					Ptr<WfTopQualifiedType> ns = new WfTopQualifiedType;
+					ns->name.value = L"system";
+
+					Ptr<WfChildType> type = new WfChildType;
+					type->parent = ns;
+					type->name.value = name;
+
+					type->Accept(this);
+				}
+
+				void Visit(WfTopQualifiedType* node)override
+				{
+					auto manager = scope->FindManager();
+					if (manager->globalName)
+					{
+						vint index = manager->globalName->children.Keys().IndexOf(node->name.value);
+						if (index != -1)
+						{
+							result = manager->globalName->children.Values()[index];
+							return;
+						}
+					}
+					manager->errors.Add(WfErrors::TopQualifiedSymbolNotExists(node, node->name.value));
+				}
+
+				void Visit(WfReferenceType* node)override
+				{
+					throw 0;
+				}
+
+				void Visit(WfRawPointerType* node)override
+				{
+					CHECK_FAIL(L"GetScopeNameFromReferenceTypeVisitor::Visit(WfRawPointerType*)#Internal error, ValidateTypeStructure function should check correctly.");
+				}
+
+				void Visit(WfSharedPointerType* node)override
+				{
+					CHECK_FAIL(L"GetScopeNameFromReferenceTypeVisitor::Visit(WfSharedPointerType*)#Internal error, ValidateTypeStructure function should check correctly.");
+				}
+
+				void Visit(WfNullableType* node)override
+				{
+					CHECK_FAIL(L"GetScopeNameFromReferenceTypeVisitor::Visit(WfNullableType*)#Internal error, ValidateTypeStructure function should check correctly.");
+				}
+
+				void Visit(WfEnumerableType* node)override
+				{
+					CHECK_FAIL(L"GetScopeNameFromReferenceTypeVisitor::Visit(WfEnumerableType*)#Internal error, ValidateTypeStructure function should check correctly.");
+				}
+
+				void Visit(WfMapType* node)override
+				{
+					CHECK_FAIL(L"GetScopeNameFromReferenceTypeVisitor::Visit(WfMapType*)#Internal error, ValidateTypeStructure function should check correctly.");
+				}
+
+				void Visit(WfFunctionType* node)override
+				{
+					CHECK_FAIL(L"GetScopeNameFromReferenceTypeVisitor::Visit(WfFunctionType*)#Internal error, ValidateTypeStructure function should check correctly.");
+				}
+
+				void Visit(WfChildType* node)override
+				{
+					if (Ptr<WfLexicalScopeName> scopeName = Call(node->parent.Obj()))
+					{
+						vint index = scopeName->children.Keys().IndexOf(node->name.value);
+						if (index != -1)
+						{
+							result = scopeName->children.Values()[index];
+							return;
+						}
+						scope->FindManager()->errors.Add(WfErrors::ChildSymbolNotExists(node, scopeName, node->name.value));
+					}
+				}
+
+				static Ptr<WfLexicalScopeName> Execute(WfLexicalScope* scope, Ptr<WfType> type)
+				{
+					GetScopeNameFromReferenceTypeVisitor visitor(scope);
+					type->Accept(&visitor);
+					return visitor.result;
+				}
+			};
+
+			Ptr<WfLexicalScopeName> GetScopeNameFromReferenceType(WfLexicalScope* scope, Ptr<WfType> type)
+			{
+				return GetScopeNameFromReferenceTypeVisitor::Execute(scope, type);
+			}
+
+/***********************************************************************
+CreateTypeInfoFromType
+***********************************************************************/
+
 			class CreateTypeInfoFromTypeVisitor : public Object, public WfType::IVisitor
 			{
 			public:
@@ -261,6 +418,8 @@ CreateTypeInfoFromType
 					case WfPredefinedTypeName::Bool:
 						typeDescriptor = description::GetTypeDescriptor<bool>();
 						break;
+					default:
+						CHECK_FAIL(L"CreateTypeInfoFromTypeVisitor::Visit(WfPredefinedType*)#Internal error, ValidateTypeStructure function should check correctly.");
 					}
 					if (typeDescriptor)
 					{

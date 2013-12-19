@@ -65,17 +65,17 @@ WfErrors
 
 			Ptr<parsing::ParsingError> WfErrors::RawPointerToNonReferenceType(WfType* node)
 			{
-				return new ParsingError(node, L"B3: A raw pointer should pointing to a reference type.");
+				return new ParsingError(node, L"B3: A raw pointer should pointing to a class or interface.");
 			}
 
 			Ptr<parsing::ParsingError> WfErrors::SharedPointerToNonReferenceType(WfType* node)
 			{
-				return new ParsingError(node, L"B4: A shared pointer should pointing to a reference type.");
+				return new ParsingError(node, L"B4: A shared pointer should pointing to a class or interface.");
 			}
 
 			Ptr<parsing::ParsingError> WfErrors::NullableToNonReferenceType(WfType* node)
 			{
-				return new ParsingError(node, L"B5: A nullable value should pointing to a reference type.");
+				return new ParsingError(node, L"B5: A nullable value should pointing to a struct.");
 			}
 
 			Ptr<parsing::ParsingError> WfErrors::ChildOfNonReferenceType(WfType* node)
@@ -106,6 +106,26 @@ WfErrors
 			Ptr<parsing::ParsingError> WfErrors::FunctionShouldHaveName(WfDeclaration* node)
 			{
 				return new ParsingError(node, L"D0: Function should have a name.");
+			}
+
+			Ptr<parsing::ParsingError> WfErrors::TopQualifiedSymbolNotExists(WfType* node, const WString& name)
+			{
+				return new ParsingError(node, L"F0: Top qualified symbol \"" + name + L"\" does not exist.");
+			}
+
+			Ptr<parsing::ParsingError> WfErrors::TopQualifiedSymbolNotExists(WfExpression* node, const WString& name)
+			{
+				return new ParsingError(node, L"F0: Top qualified symbol \"" + name + L"\" does not exist.");
+			}
+
+			Ptr<parsing::ParsingError> WfErrors::ChildSymbolNotExists(WfType* node, Ptr<WfLexicalScopeName> scopeName, const WString& name)
+			{
+				return new ParsingError(node, L"F1: Symbol \"" + name + L"\" does not exist in \"" + scopeName->GetFriendlyName() + L"\".");
+			}
+
+			Ptr<parsing::ParsingError> WfErrors::ChildSymbolNotExists(WfExpression* node, Ptr<WfLexicalScopeName> scopeName, const WString& name)
+			{
+				return new ParsingError(node, L"F1: Symbol \"" + name + L"\" does not exist in \"" + scopeName->GetFriendlyName() + L"\".");
 			}
 		}
 	}

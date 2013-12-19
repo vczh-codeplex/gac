@@ -178,6 +178,10 @@ SearchOrderedName(Expression)
 				{
 				}
 
+				void Visit(WfTopQualifiedExpression* node)override
+				{
+				}
+
 				void Visit(WfReferenceExpression* node)override
 				{
 				}

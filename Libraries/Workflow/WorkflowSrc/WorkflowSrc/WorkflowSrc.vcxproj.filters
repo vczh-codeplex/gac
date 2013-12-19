@@ -749,9 +749,6 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\B5_NullableToMap.txt">
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
     </Text>
-    <Text Include="..\TestFiles\Samples\AnalyzerError\B5_NullableToString.txt">
-      <Filter>Resource Files\Samples\AnalyzerError</Filter>
-    </Text>
     <Text Include="..\TestFiles\Samples\AnalyzerError\B5_NullableToVoid.txt">
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
     </Text>
@@ -759,12 +756,6 @@
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
     </Text>
     <Text Include="..\TestFiles\Samples\AnalyzerError\B6_ChildOfMap.txt">
-      <Filter>Resource Files\Samples\AnalyzerError</Filter>
-    </Text>
-    <Text Include="..\TestFiles\Samples\AnalyzerError\B6_ChildOfString.txt">
-      <Filter>Resource Files\Samples\AnalyzerError</Filter>
-    </Text>
-    <Text Include="..\TestFiles\Samples\AnalyzerError\B6_ChildOfVoid.txt">
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
     </Text>
     <Text Include="..\TestFiles\Samples\AnalyzerError\C0_BreakNotInLoop.txt">

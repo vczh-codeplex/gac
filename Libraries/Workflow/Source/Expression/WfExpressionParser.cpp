@@ -93,6 +93,11 @@ L"\r\n"L"class Expression"
 L"\r\n"L"{"
 L"\r\n"L"}"
 L"\r\n"L""
+L"\r\n"L"class TopQualifiedExpression : Expression"
+L"\r\n"L"{"
+L"\r\n"L"\ttoken\t\t\t\t\tname;"
+L"\r\n"L"}"
+L"\r\n"L""
 L"\r\n"L"class ReferenceExpression : Expression"
 L"\r\n"L"{"
 L"\r\n"L"\ttoken\t\t\t\t\tname;"
@@ -707,6 +712,7 @@ L"\r\n"L"\t= \"typeof\" \"(\" WorkflowType : type \")\" as TypeOfTypeExpression"
 L"\r\n"L"\t= \"type\" \"(\" WorkflowExpression : expression \")\" as TypeOfExpressionExpression"
 L"\r\n"L"\t= \"attach\" \"(\" WorkflowExpression : event \",\" WorkflowExpression : function \")\" as AttachEventExpression"
 L"\r\n"L"\t= \"detach\" \"(\" WorkflowExpression : handler \")\" as DetachEventExpression"
+L"\r\n"L"\t= \"::\" NAME : name as TopQualifiedExpression"
 L"\r\n"L"\t;"
 L"\r\n"L""
 L"\r\n"L"rule Expression Exp1"
@@ -1118,6 +1124,11 @@ Parsing Tree Conversion Driver Implementation
 
 			void Fill(vl::Ptr<WfExpression> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
 			{
+			}
+
+			void Fill(vl::Ptr<WfTopQualifiedExpression> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
+			{
+				SetMember(tree->name, obj->GetMember(L"name"), tokens);
 			}
 
 			void Fill(vl::Ptr<WfReferenceExpression> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
@@ -1537,6 +1548,14 @@ Parsing Tree Conversion Driver Implementation
 					vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
 					Fill(tree, obj, tokens);
 					Fill(tree.Cast<WfType>(), obj, tokens);
+					return tree;
+				}
+				else if(obj->GetType()==L"TopQualifiedExpression")
+				{
+					vl::Ptr<WfTopQualifiedExpression> tree = new WfTopQualifiedExpression;
+					vl::collections::CopyFrom(tree->creatorRules, obj->GetCreatorRules());
+					Fill(tree, obj, tokens);
+					Fill(tree.Cast<WfExpression>(), obj, tokens);
 					return tree;
 				}
 				else if(obj->GetType()==L"ReferenceExpression")
@@ -2031,6 +2050,11 @@ Parsing Tree Conversion Implementation
 			return WfConvertParsingTreeNode(node, tokens).Cast<WfChildType>();
 		}
 
+		vl::Ptr<WfTopQualifiedExpression> WfTopQualifiedExpression::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
+		{
+			return WfConvertParsingTreeNode(node, tokens).Cast<WfTopQualifiedExpression>();
+		}
+
 		vl::Ptr<WfReferenceExpression> WfReferenceExpression::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
 		{
 			return WfConvertParsingTreeNode(node, tokens).Cast<WfReferenceExpression>();
@@ -2351,6 +2375,11 @@ Visitor Pattern Implementation
 		}
 
 		void WfChildType::Accept(WfType::IVisitor* visitor)
+		{
+			visitor->Visit(this);
+		}
+
+		void WfTopQualifiedExpression::Accept(WfExpression::IVisitor* visitor)
 		{
 			visitor->Visit(this);
 		}
@@ -2803,6 +2832,7 @@ namespace vl
 			IMPL_TYPE_INFO_RENAME(WfFunctionType, Workflow::WfFunctionType)
 			IMPL_TYPE_INFO_RENAME(WfChildType, Workflow::WfChildType)
 			IMPL_TYPE_INFO_RENAME(WfExpression, Workflow::WfExpression)
+			IMPL_TYPE_INFO_RENAME(WfTopQualifiedExpression, Workflow::WfTopQualifiedExpression)
 			IMPL_TYPE_INFO_RENAME(WfReferenceExpression, Workflow::WfReferenceExpression)
 			IMPL_TYPE_INFO_RENAME(WfOrderedNameExpression, Workflow::WfOrderedNameExpression)
 			IMPL_TYPE_INFO_RENAME(WfOrderedLambdaExpression, Workflow::WfOrderedLambdaExpression)
@@ -3007,6 +3037,17 @@ namespace vl
 				CLASS_MEMBER_METHOD(Accept, {L"visitor"})
 
 			END_CLASS_MEMBER(WfExpression)
+
+			BEGIN_CLASS_MEMBER(WfTopQualifiedExpression)
+				CLASS_MEMBER_BASE(WfExpression)
+
+				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<WfTopQualifiedExpression>(), NO_PARAMETER)
+
+				CLASS_MEMBER_EXTERNALMETHOD(get_name, NO_PARAMETER, vl::WString(WfTopQualifiedExpression::*)(), [](WfTopQualifiedExpression* node){ return node->name.value; })
+				CLASS_MEMBER_EXTERNALMETHOD(set_name, {L"value"}, void(WfTopQualifiedExpression::*)(const vl::WString&), [](WfTopQualifiedExpression* node, const vl::WString& value){ node->name.value = value; })
+
+				CLASS_MEMBER_PROPERTY(name, get_name, set_name)
+			END_CLASS_MEMBER(WfTopQualifiedExpression)
 
 			BEGIN_CLASS_MEMBER(WfReferenceExpression)
 				CLASS_MEMBER_BASE(WfExpression)
@@ -3687,6 +3728,7 @@ namespace vl
 				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
 				CLASS_MEMBER_EXTERNALCTOR(Ptr<WfExpression::IVisitor>(Ptr<IValueInterfaceProxy>), {L"proxy"}, &interface_proxy::WfExpression_IVisitor::Create)
 
+				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(WfExpression::IVisitor::*)(WfTopQualifiedExpression* node))
 				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(WfExpression::IVisitor::*)(WfReferenceExpression* node))
 				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(WfExpression::IVisitor::*)(WfOrderedNameExpression* node))
 				CLASS_MEMBER_METHOD_OVERLOAD(Visit, {L"node"}, void(WfExpression::IVisitor::*)(WfOrderedLambdaExpression* node))
@@ -3773,6 +3815,7 @@ namespace vl
 					ADD_TYPE_INFO(vl::workflow::WfFunctionType)
 					ADD_TYPE_INFO(vl::workflow::WfChildType)
 					ADD_TYPE_INFO(vl::workflow::WfExpression)
+					ADD_TYPE_INFO(vl::workflow::WfTopQualifiedExpression)
 					ADD_TYPE_INFO(vl::workflow::WfReferenceExpression)
 					ADD_TYPE_INFO(vl::workflow::WfOrderedNameExpression)
 					ADD_TYPE_INFO(vl::workflow::WfOrderedLambdaExpression)
