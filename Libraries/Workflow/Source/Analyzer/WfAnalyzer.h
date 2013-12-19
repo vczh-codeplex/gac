@@ -167,7 +167,6 @@ Error Messages
 
 				// B: Type error
 				static Ptr<parsing::ParsingError>			WrongVoidType(WfType* node);
-				static Ptr<parsing::ParsingError>			WrongNamespaceType(WfType* node);
 				static Ptr<parsing::ParsingError>			WrongInterfaceType(WfType* node);
 				static Ptr<parsing::ParsingError>			RawPointerToNonReferenceType(WfType* node, reflection::description::ITypeInfo* typeInfo = 0);
 				static Ptr<parsing::ParsingError>			SharedPointerToNonReferenceType(WfType* node, reflection::description::ITypeInfo* typeInfo = 0);

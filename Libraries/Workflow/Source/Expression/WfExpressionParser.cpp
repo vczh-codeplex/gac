@@ -26,7 +26,6 @@ L"\r\n"L"\tDouble,"
 L"\r\n"L"\tString,"
 L"\r\n"L"\tChar,"
 L"\r\n"L"\tBool,"
-L"\r\n"L"\tNamespace,"
 L"\r\n"L"}"
 L"\r\n"L""
 L"\r\n"L"class PredefinedType : Type"
@@ -878,7 +877,6 @@ Parsing Tree Conversion Driver Implementation
 					else if(token->GetValue()==L"String") { member=WfPredefinedTypeName::String; return true; }
 					else if(token->GetValue()==L"Char") { member=WfPredefinedTypeName::Char; return true; }
 					else if(token->GetValue()==L"Bool") { member=WfPredefinedTypeName::Bool; return true; }
-					else if(token->GetValue()==L"Namespace") { member=WfPredefinedTypeName::Namespace; return true; }
 					else { member=WfPredefinedTypeName::Void; return false; }
 				}
 				member=WfPredefinedTypeName::Void;
@@ -2924,7 +2922,6 @@ namespace vl
 				ENUM_NAMESPACE_ITEM(String)
 				ENUM_NAMESPACE_ITEM(Char)
 				ENUM_NAMESPACE_ITEM(Bool)
-				ENUM_NAMESPACE_ITEM(Namespace)
 			END_ENUM_ITEM(WfPredefinedTypeName)
 
 			BEGIN_CLASS_MEMBER(WfPredefinedType)

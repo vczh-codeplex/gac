@@ -27,7 +27,6 @@ enum PredefinedTypeName
 	String,
 	Char,
 	Bool,
-	Namespace,
 }
 
 class PredefinedType : Type

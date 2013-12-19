@@ -268,15 +268,17 @@ WfLexicalScopeManager
 				}
 
 				BuildGlobalNameFromModules();
-
+				
+				vint errorCount = errors.Count();
 				FOREACH(Ptr<WfModule>, module, modules)
 				{
-					vint errorCount = errors.Count();
 					ValidateModuleStructure(this, module);
-					if (errors.Count() == errorCount)
-					{
-						BuildScopeForModule(this, module);
-					}
+				}
+
+				if (errors.Count() != errorCount) return;
+				FOREACH(Ptr<WfModule>, module, modules)
+				{
+					BuildScopeForModule(this, module);
 				}
 
 				SortedList<Ptr<WfLexicalScope>> analyzedScopes;

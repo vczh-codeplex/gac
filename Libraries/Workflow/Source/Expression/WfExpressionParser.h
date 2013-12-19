@@ -213,7 +213,6 @@ namespace vl
 			String,
 			Char,
 			Bool,
-			Namespace,
 		};
 
 		class WfPredefinedType : public WfType, vl::reflection::Description<WfPredefinedType>

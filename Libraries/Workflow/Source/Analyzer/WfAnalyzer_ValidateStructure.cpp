@@ -38,12 +38,6 @@ ValidateStructure(Type)
 				
 				void Visit(WfPredefinedType* node)override
 				{
-					switch (node->name)
-					{
-					case WfPredefinedTypeName::Namespace:
-						result = false;
-						break;
-					}
 				}
 
 				void Visit(WfTopQualifiedType* node)override
@@ -117,9 +111,6 @@ ValidateStructure(Type)
 					case WfPredefinedTypeName::Interface:
 						manager->errors.Add(WfErrors::WrongInterfaceType(node));
 						break;
-					case WfPredefinedTypeName::Namespace:
-						manager->errors.Add(WfErrors::WrongNamespaceType(node));
-						break;
 					}
 				}
 
@@ -174,7 +165,6 @@ ValidateStructure(Type)
 						case WfPredefinedTypeName::Void:
 						case WfPredefinedTypeName::Object:
 						case WfPredefinedTypeName::Interface:
-						case WfPredefinedTypeName::Namespace:
 							manager->errors.Add(WfErrors::NullableToNonReferenceType(node));
 							break;
 						}
