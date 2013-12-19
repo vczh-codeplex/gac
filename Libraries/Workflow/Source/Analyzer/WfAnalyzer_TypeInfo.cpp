@@ -347,17 +347,15 @@ CreateTypeInfoFromType
 					}
 				}
 
-				static Ptr<WfLexicalScopeName> Execute(WfLexicalScope* scope, Ptr<WfType> type)
+				static Ptr<WfLexicalScopeName> Execute(WfLexicalScope* scope, WfType* type)
 				{
-					GetScopeNameFromReferenceTypeVisitor visitor(scope);
-					type->Accept(&visitor);
-					return visitor.result;
+					return GetScopeNameFromReferenceTypeVisitor(scope).Call(type);
 				}
 			};
 
 			Ptr<WfLexicalScopeName> GetScopeNameFromReferenceType(WfLexicalScope* scope, Ptr<WfType> type)
 			{
-				return GetScopeNameFromReferenceTypeVisitor::Execute(scope, type);
+				return GetScopeNameFromReferenceTypeVisitor::Execute(scope, type.Obj());
 			}
 
 /***********************************************************************
@@ -375,12 +373,108 @@ CreateTypeInfoFromType
 				{
 				}
 
-				Ptr<ITypeInfo> Call(WfType* node)
+				Ptr<ITypeInfo> Call(WfType* node, bool checkTypeForValue)
 				{
 					node->Accept(this);
 					Ptr<ITypeInfo> typeInfo = result;
 					result = 0;
+					if (typeInfo)
+					{
+						auto manager = scope->FindManager();
+						switch (typeInfo->GetDecorator())
+						{
+						case ITypeInfo::RawPtr:
+						case ITypeInfo::SharedPtr:
+							{
+								auto element = typeInfo->GetElementType();
+								if (element->GetDecorator() == ITypeInfo::Generic)
+								{
+									element = element->GetElementType();
+								}
+
+								if (element->GetDecorator() == ITypeInfo::TypeDescriptor)
+								{
+									if (element->GetTypeDescriptor()->GetValueSerializer() == 0)
+									{
+										goto RAW_SHARED_POINTER_CORRECT;
+									}
+								}
+
+								if (typeInfo->GetDecorator() == ITypeInfo::RawPtr)
+								{
+									manager->errors.Add(WfErrors::RawPointerToNonReferenceType(node, element));
+								}
+								else
+								{
+									manager->errors.Add(WfErrors::SharedPointerToNonReferenceType(node, element));
+								}
+							RAW_SHARED_POINTER_CORRECT:
+								;
+							}
+							break;
+						case ITypeInfo::Nullable:
+							{
+								auto element = typeInfo->GetElementType();
+								if (element->GetDecorator() == ITypeInfo::Generic)
+								{
+									element = element->GetElementType();
+								}
+
+								if (element->GetDecorator() == ITypeInfo::TypeDescriptor)
+								{
+									if (element->GetTypeDescriptor()->GetValueSerializer() != 0)
+									{
+										goto NULLABLE_CORRECT;
+									}
+								}
+
+								if (typeInfo->GetDecorator() == ITypeInfo::RawPtr)
+								{
+									manager->errors.Add(WfErrors::RawPointerToNonReferenceType(node, element));
+								}
+								else
+								{
+									manager->errors.Add(WfErrors::SharedPointerToNonReferenceType(node, element));
+								}
+							NULLABLE_CORRECT:
+								;
+							}
+							break;
+						case ITypeInfo::TypeDescriptor:
+							if (checkTypeForValue)
+							{
+								if (typeInfo->GetTypeDescriptor()->GetValueSerializer() != 0)
+								{
+									manager->errors.Add(WfErrors::TypeNotForValue(node, typeInfo.Obj()));
+								}
+							}
+							break;
+						case ITypeInfo::Generic:
+							if (checkTypeForValue)
+							{
+								manager->errors.Add(WfErrors::TypeNotForValue(node, typeInfo.Obj()));
+							}
+							break;
+						}
+					}
 					return typeInfo;
+				}
+
+				void VisitReferenceType(WfType* node)
+				{
+					if (auto scopeName = GetScopeNameFromReferenceTypeVisitor::Execute(scope, node))
+					{
+						if (auto typeDescriptor = description::GetTypeDescriptor(scopeName->GetFriendlyName()))
+						{
+							Ptr<TypeInfoImpl> typeInfo = new TypeInfoImpl(ITypeInfo::TypeDescriptor);
+							typeInfo->SetTypeDescriptor(typeDescriptor);
+							result = typeInfo;
+						}
+						else
+						{
+							scope->FindManager()->errors.Add(WfErrors::TypeNotExists(node, scopeName));
+						}
+					}
 				}
 
 				void Visit(WfPredefinedType* node)override
@@ -431,17 +525,17 @@ CreateTypeInfoFromType
 
 				void Visit(WfTopQualifiedType* node)override
 				{
-					throw 0;
+					VisitReferenceType(node);
 				}
 
 				void Visit(WfReferenceType* node)override
 				{
-					throw 0;
+					VisitReferenceType(node);
 				}
 
 				void Visit(WfRawPointerType* node)override
 				{
-					if (Ptr<ITypeInfo> element = Call(node->element.Obj()))
+					if (Ptr<ITypeInfo> element = Call(node->element.Obj(), false))
 					{
 						Ptr<TypeInfoImpl> typeInfo = new TypeInfoImpl(ITypeInfo::RawPtr);
 						typeInfo->SetElementType(element);
@@ -451,7 +545,7 @@ CreateTypeInfoFromType
 
 				void Visit(WfSharedPointerType* node)override
 				{
-					if (Ptr<ITypeInfo> element = Call(node->element.Obj()))
+					if (Ptr<ITypeInfo> element = Call(node->element.Obj(), false))
 					{
 						Ptr<TypeInfoImpl> typeInfo = new TypeInfoImpl(ITypeInfo::SharedPtr);
 						typeInfo->SetElementType(element);
@@ -461,7 +555,7 @@ CreateTypeInfoFromType
 
 				void Visit(WfNullableType* node)override
 				{
-					if (Ptr<ITypeInfo> element = Call(node->element.Obj()))
+					if (Ptr<ITypeInfo> element = Call(node->element.Obj(), false))
 					{
 						Ptr<TypeInfoImpl> typeInfo = new TypeInfoImpl(ITypeInfo::Nullable);
 						typeInfo->SetElementType(element);
@@ -471,7 +565,7 @@ CreateTypeInfoFromType
 
 				void Visit(WfEnumerableType* node)override
 				{
-					if (Ptr<ITypeInfo> element = Call(node->element.Obj()))
+					if (Ptr<ITypeInfo> element = Call(node->element.Obj(), true))
 					{
 						Ptr<TypeInfoImpl> enumerableTypeInfo = new TypeInfoImpl(ITypeInfo::TypeDescriptor);
 						enumerableTypeInfo->SetTypeDescriptor(description::GetTypeDescriptor<IValueEnumerable>());
@@ -489,10 +583,10 @@ CreateTypeInfoFromType
 				void Visit(WfMapType* node)override
 				{
 					Ptr<ITypeInfo> key, value;
-					if (!(value = Call(node->value.Obj()))) return;
+					if (!(value = Call(node->value.Obj(), true))) return;
 					if (node->key)
 					{
-						if (!(key = Call(node->key.Obj()))) return;
+						if (!(key = Call(node->key.Obj(), true))) return;
 					}
 					
 					Ptr<TypeInfoImpl> mapTypeInfo = new TypeInfoImpl(ITypeInfo::TypeDescriptor);
@@ -531,7 +625,7 @@ CreateTypeInfoFromType
 
 				void Visit(WfFunctionType* node)override
 				{
-					if (Ptr<ITypeInfo> returnType = Call(node->result.Obj()))
+					if (Ptr<ITypeInfo> returnType = Call(node->result.Obj(), true))
 					{
 						Ptr<TypeInfoImpl> enumerableTypeInfo = new TypeInfoImpl(ITypeInfo::TypeDescriptor);
 						enumerableTypeInfo->SetTypeDescriptor(description::GetTypeDescriptor<IValueFunctionProxy>());
@@ -541,7 +635,7 @@ CreateTypeInfoFromType
 						genericTypeInfo->AddGenericArgument(returnType);
 						FOREACH(Ptr<WfType>, argument, node->arguments)
 						{
-							if (Ptr<ITypeInfo> argumentType = Call(argument.Obj()))
+							if (Ptr<ITypeInfo> argumentType = Call(argument.Obj(), true))
 							{
 								genericTypeInfo->AddGenericArgument(argumentType);
 							}
@@ -559,20 +653,18 @@ CreateTypeInfoFromType
 
 				void Visit(WfChildType* node)override
 				{
-					throw 0;
+					VisitReferenceType(node);
 				}
 
-				static Ptr<ITypeInfo> Execute(WfLexicalScope* scope, Ptr<WfType> type)
+				static Ptr<ITypeInfo> Execute(WfLexicalScope* scope, WfType* type)
 				{
-					CreateTypeInfoFromTypeVisitor visitor(scope);
-					type->Accept(&visitor);
-					return visitor.result;
+					return CreateTypeInfoFromTypeVisitor(scope).Call(type, true);
 				}
 			};
 
 			Ptr<reflection::description::ITypeInfo>	CreateTypeInfoFromType(WfLexicalScope* scope, Ptr<WfType> type)
 			{
-				return CreateTypeInfoFromTypeVisitor::Execute(scope, type);
+				return CreateTypeInfoFromTypeVisitor::Execute(scope, type.Obj());
 			}
 		}
 	}
