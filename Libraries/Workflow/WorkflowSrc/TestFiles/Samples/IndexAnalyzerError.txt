@@ -40,5 +40,9 @@ D1_DuplicatedVariable
 D1_OverloadedNamespace
 D1_OverloadedFunction
 D1_OverloadedVariable
+D2_DuplicatedFunctionArgument
+D2_DuplicatedLambdaFunctionArgument
+D2_DuplicatedVariable
+D2_DuplicatedLetVariable
 F0_TopQualifiedSymbolNotExists
 F1_ChildSymbolNotExists
