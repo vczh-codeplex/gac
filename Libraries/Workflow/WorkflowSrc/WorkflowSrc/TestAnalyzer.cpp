@@ -96,13 +96,13 @@ TEST_CASE(TestAnalyzerError)
 		List<Ptr<ParsingError>> errors;
 		Ptr<ParsingTreeNode> node = WfParseModuleAsParsingTreeNode(sample, table, errors);
 		TEST_ASSERT(node);
-		LogSampleParseResult(L"AnalyzerError", itemName, sample, node);
 
 		manager.Clear(true, true);
 		List<RegexToken> tokens;
 		Ptr<WfModule> module = WfConvertParsingTreeNode(node, tokens).Cast<WfModule>();
 		manager.modules.Add(module);
 		manager.Rebuild(true);
+		LogSampleParseResult(L"AnalyzerError", itemName, sample, node, &manager);
 
 		auto index = INVLOC.FindFirst(itemName, L"_", Locale::None);
 		WString errorCode = itemName.Left(index.key);

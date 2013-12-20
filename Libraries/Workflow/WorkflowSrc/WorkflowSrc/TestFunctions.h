@@ -21,7 +21,7 @@ extern Ptr<ParsingTable>	GetWorkflowTable();
 extern WString				GetPath();
 extern void					LoadSampleIndex(const WString& sampleName, List<WString>& itemNames);
 extern WString				LoadSample(const WString& sampleName, const WString& itemName);
-extern void					LogSampleParseResult(const WString& sampleName, const WString& itemName, const WString& sample, Ptr<ParsingTreeNode> node);
+extern void					LogSampleParseResult(const WString& sampleName, const WString& itemName, const WString& sample, Ptr<ParsingTreeNode> node, WfLexicalScopeManager* manager = 0);
 extern void					LoadTypes();
 extern void					UnloadTypes();
 
