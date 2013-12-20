@@ -276,19 +276,28 @@ WfLexicalScopeManager
 				}
 
 				BuildGlobalNameFromModules();
+				vint errorCount = 0;
+
+#define EXIT_IF_ERRORS_EXIST\
+				do\
+				{\
+					if (errors.Count() != errorCount) return;\
+					errorCount = errors.Count();\
+				}while (0)
 				
-				vint errorCount = errors.Count();
+				EXIT_IF_ERRORS_EXIST;
 				FOREACH(Ptr<WfModule>, module, modules)
 				{
 					ValidateModuleStructure(this, module);
 				}
-
-				if (errors.Count() != errorCount) return;
+				
+				EXIT_IF_ERRORS_EXIST;
 				FOREACH(Ptr<WfModule>, module, modules)
 				{
 					BuildScopeForModule(this, module);
 				}
-
+				
+				EXIT_IF_ERRORS_EXIST;
 				SortedList<Ptr<WfLexicalScope>> analyzedScopes;
 				FOREACH(Ptr<WfLexicalScope>, scope,
 					From(moduleScopes.Values())
@@ -312,6 +321,14 @@ WfLexicalScopeManager
 						}
 					}
 				}
+				
+				EXIT_IF_ERRORS_EXIST;
+				FOREACH(Ptr<WfModule>, module, modules)
+				{
+					ValidateModuleSemantic(this, module);
+				}
+
+#undef EXIT_IF_ERRORS_EXIST
 			}
 		}
 	}
