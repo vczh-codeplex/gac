@@ -276,13 +276,12 @@ WfLexicalScopeManager
 				}
 
 				BuildGlobalNameFromModules();
-				vint errorCount = 0;
+				vint errorCount = errors.Count();
 
 #define EXIT_IF_ERRORS_EXIST\
 				do\
 				{\
 					if (errors.Count() != errorCount) return;\
-					errorCount = errors.Count();\
 				}while (0)
 				
 				EXIT_IF_ERRORS_EXIST;
