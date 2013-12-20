@@ -60,13 +60,23 @@ WString LoadSample(const WString& sampleName, const WString& itemName)
 	return reader.ReadToEnd();
 }
 
-void LogSampleParseResult(const WString& sampleName, const WString& itemName, const WString& sample, Ptr<ParsingTreeNode> node)
+void LogSampleParseResult(const WString& sampleName, const WString& itemName, const WString& sample, Ptr<ParsingTreeNode> node, WfLexicalScopeManager* manager)
 {
 	FileStream fileStream(GetPath() + L"Parsing." + sampleName + L"." + itemName + L".txt", FileStream::WriteOnly);
 	BomEncoder encoder(BomEncoder::Utf16);
 	EncoderStream encoderStream(fileStream, encoder);
 	StreamWriter writer(encoderStream);
 	writer.WriteLine(sample);
+
+	if (manager && manager->errors.Count() > 0)
+	{
+		writer.WriteLine(L"========================================================");
+		FOREACH(Ptr<ParsingError>, error, manager->errors)
+		{
+			writer.WriteLine(L"Line: " + itow(error->codeRange.start.row + 1) + L", Column: " + itow(error->codeRange.start.column + 1) + L", Message: " + error->errorMessage);
+		}
+	}
+
 	writer.WriteLine(L"========================================================");
 	Log(node.Obj(), L"", writer);
 }
