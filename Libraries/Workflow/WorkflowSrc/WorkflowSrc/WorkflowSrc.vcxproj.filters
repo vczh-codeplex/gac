@@ -437,6 +437,9 @@
     <ClCompile Include="..\..\Source\Expression\WfExpressionParser.cpp">
       <Filter>Workflow\Expression</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Analyzer\WfAnalyzer_ValidateSemantic.cpp">
+      <Filter>Workflow\Analyzer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Spec.txt" />
