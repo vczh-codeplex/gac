@@ -261,6 +261,7 @@
     <ClCompile Include="..\..\Source\Analyzer\WfAnalyzer_Errors.cpp" />
     <ClCompile Include="..\..\Source\Analyzer\WfAnalyzer_SearchOrderedName.cpp" />
     <ClCompile Include="..\..\Source\Analyzer\WfAnalyzer_TypeInfo.cpp" />
+    <ClCompile Include="..\..\Source\Analyzer\WfAnalyzer_ValidateSemantic.cpp" />
     <ClCompile Include="..\..\Source\Analyzer\WfAnalyzer_ValidateStructure.cpp" />
     <ClCompile Include="..\..\Source\Expression\WfExpression.cpp">
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/bigobj %(AdditionalOptions)</AdditionalOptions>
