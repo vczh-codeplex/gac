@@ -406,6 +406,13 @@ WfLexicalScopeManager
 					{
 						analyzedScopes.Add(scope);
 
+						if (scope->symbols.Count() > 1)
+						{
+							if (!scope->ownerModule && !scope->ownerDeclaration.Cast<WfNamespaceDeclaration>())
+							{
+							}
+						}
+
 						for (vint i = 0; i < scope->symbols.Count(); i++)
 						{
 							FOREACH(Ptr<WfLexicalSymbol>, symbol, scope->symbols.GetByIndex(i))

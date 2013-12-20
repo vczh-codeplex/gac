@@ -34,6 +34,7 @@ ValidateSemantic(Declaration)
 
 				void Visit(WfFunctionDeclaration* node)override
 				{
+					ValidateStatementSemantic(manager, node->statement);
 				}
 
 				void Visit(WfVariableDeclaration* node)override

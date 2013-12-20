@@ -118,6 +118,21 @@ WfErrors
 				return new ParsingError(node, L"D1: Duplicated declaration \"" + node->name.value + L"\", it has already beed defined as a " + firstDeclarationCategory + L".");
 			}
 
+			Ptr<parsing::ParsingError> WfErrors::DuplicatedSymbol(WfDeclaration* node, Ptr<WfLexicalSymbol> symbol)
+			{
+				return new ParsingError(node, L"D2: Duplicated symbol \"" + symbol->name + L"\".");
+			}
+
+			Ptr<parsing::ParsingError> WfErrors::DuplicatedSymbol(WfStatement* node, Ptr<WfLexicalSymbol> symbol)
+			{
+				return new ParsingError(node, L"D2: Duplicated symbol \"" + symbol->name + L"\".");
+			}
+
+			Ptr<parsing::ParsingError> WfErrors::DuplicatedSymbol(WfExpression* node, Ptr<WfLexicalSymbol> symbol)
+			{
+				return new ParsingError(node, L"D2: Duplicated symbol \"" + symbol->name + L"\".");
+			}
+
 			Ptr<parsing::ParsingError> WfErrors::TopQualifiedSymbolNotExists(WfType* node, const WString& name)
 			{
 				return new ParsingError(node, L"F0: Top qualified symbol \"" + name + L"\" does not exist.");

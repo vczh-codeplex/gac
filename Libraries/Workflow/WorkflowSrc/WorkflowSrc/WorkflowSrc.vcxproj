@@ -322,6 +322,10 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\D1_OverloadedFunction.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\D1_OverloadedNamespace.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\D1_OverloadedVariable.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\D2_DuplicatedFunctionArgument.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\D2_DuplicatedLambdaFunctionArgument.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\D2_DuplicatedLetVariable.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\D2_DuplicatedVariable.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\F0_TopQualifiedSymbolNotExists.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\F1_ChildSymbolNotExists.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerScope\ModuleA.txt" />
