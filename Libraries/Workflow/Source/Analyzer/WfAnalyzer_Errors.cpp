@@ -113,6 +113,11 @@ WfErrors
 				return new ParsingError(node, L"D0: Function should have a name.");
 			}
 
+			Ptr<parsing::ParsingError> WfErrors::DuplicatedDeclaration(WfDeclaration* node, const WString& firstDeclarationCategory)
+			{
+				return new ParsingError(node, L"D1: Duplicated declaration \"" + node->name.value + L"\", it has already beed defined as a " + firstDeclarationCategory + L".");
+			}
+
 			Ptr<parsing::ParsingError> WfErrors::TopQualifiedSymbolNotExists(WfType* node, const WString& name)
 			{
 				return new ParsingError(node, L"F0: Top qualified symbol \"" + name + L"\" does not exist.");

@@ -34,5 +34,11 @@ C2_RethrowNotInCatch
 C3_TryMissCatchAndFinally
 D0_AnonymousFunction
 D0_AnonymousInterfaceFunction
+D1_DuplicatedNamespace
+D1_DuplicatedFunction
+D1_DuplicatedVariable
+D1_OverloadedNamespace
+D1_OverloadedFunction
+D1_OverloadedVariable
 F0_TopQualifiedSymbolNotExists
 F1_ChildSymbolNotExists
