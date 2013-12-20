@@ -98,6 +98,7 @@ Scope Manager
 				void										BuildGlobalNameFromTypeDescriptors();
 				void										BuildGlobalNameFromModules();
 				void										BuildName(Ptr<WfLexicalScopeName> name, Ptr<WfDeclaration> declaration);
+				void										ValidateScopeName(Ptr<WfLexicalScopeName> name);
 			public:
 				Ptr<parsing::tabling::ParsingTable>			parsingTable;
 				ModuleList									modules;
@@ -188,6 +189,7 @@ Error Messages
 
 				// D: Declaration error
 				static Ptr<parsing::ParsingError>			FunctionShouldHaveName(WfDeclaration* node);
+				static Ptr<parsing::ParsingError>			DuplicatedDeclaration(WfDeclaration* node, const WString& firstDeclarationCategory);
 
 				// E: Module error
 

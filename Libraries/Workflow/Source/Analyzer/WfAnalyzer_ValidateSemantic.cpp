@@ -26,6 +26,10 @@ ValidateSemantic(Declaration)
 
 				void Visit(WfNamespaceDeclaration* node)override
 				{
+					FOREACH(Ptr<WfDeclaration>, declaration, node->declarations)
+					{
+						declaration->Accept(this);
+					}
 				}
 
 				void Visit(WfFunctionDeclaration* node)override

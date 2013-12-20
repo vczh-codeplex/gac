@@ -220,6 +220,103 @@ WfLexicalScopeManager
 				}
 			}
 
+			class ValidateScopeNameDeclarationVisitor : public Object, public WfDeclaration::IVisitor
+			{
+			public:
+				enum Category
+				{
+					None,
+					Type,
+					Variable,
+					Function,
+					Namespace,
+				};
+
+				WfLexicalScopeManager*				manager;
+				Ptr<WfLexicalScopeName>				name;
+				Category							category;
+
+				ValidateScopeNameDeclarationVisitor(WfLexicalScopeManager* _manager, Ptr<WfLexicalScopeName> _name)
+					:manager(_manager)
+					, name(_name)
+					, category(_name->typeDescriptor ? Type : None)
+				{
+				}
+
+				void AddError(WfDeclaration* node)
+				{
+					WString categoryName;
+					switch (category)
+					{
+					case Type:
+						categoryName = L"type";
+						break;
+					case Variable:
+						categoryName = L"variable";
+						break;
+					case Function:
+						categoryName = L"function";
+						break;
+					case Namespace:
+						categoryName = L"namespace";
+						break;
+					default:
+						CHECK_FAIL(L"ValidateScopeNameDeclarationVisitor::AddError(WfDeclaration*)#Internal error.");
+					}
+					manager->errors.Add(WfErrors::DuplicatedDeclaration(node, categoryName));
+				}
+
+				void Visit(WfNamespaceDeclaration* node)override
+				{
+					if (category == None)
+					{
+						category = Namespace;
+					}
+					else if (category != Namespace)
+					{
+						AddError(node);
+					}
+				}
+
+				void Visit(WfFunctionDeclaration* node)override
+				{
+					if (category == None)
+					{
+						category = Function;
+					}
+					else if (category != Function)
+					{
+						AddError(node);
+					}
+				}
+
+				void Visit(WfVariableDeclaration* node)override
+				{
+					if (category == None)
+					{
+						category = Variable;
+					}
+					else
+					{
+						AddError(node);
+					}
+				}
+			};
+
+			void WfLexicalScopeManager::ValidateScopeName(Ptr<WfLexicalScopeName> name)
+			{
+				ValidateScopeNameDeclarationVisitor visitor(this, name);
+				FOREACH(Ptr<WfDeclaration>, declaration, name->declarations)
+				{
+					declaration->Accept(&visitor);
+				}
+
+				FOREACH(Ptr<WfLexicalScopeName>, child, name->children.Values())
+				{
+					ValidateScopeName(child);
+				}
+			}
+
 			WfLexicalScopeManager::WfLexicalScopeManager(Ptr<parsing::tabling::ParsingTable> _parsingTable)
 				:parsingTable(_parsingTable)
 			{
@@ -295,6 +392,7 @@ WfLexicalScopeManager
 				{
 					BuildScopeForModule(this, module);
 				}
+				ValidateScopeName(globalName);
 				
 				EXIT_IF_ERRORS_EXIST;
 				SortedList<Ptr<WfLexicalScope>> analyzedScopes;
