@@ -406,10 +406,29 @@ WfLexicalScopeManager
 					{
 						analyzedScopes.Add(scope);
 
-						if (scope->symbols.Count() > 1)
+						for (vint i = 0; i < scope->symbols.Count(); i++)
 						{
-							if (!scope->ownerModule && !scope->ownerDeclaration.Cast<WfNamespaceDeclaration>())
+							const auto& symbols = scope->symbols.GetByIndex(i);
+							if (symbols.Count() > 1)
 							{
+								if (!scope->ownerModule && !scope->ownerDeclaration.Cast<WfNamespaceDeclaration>())
+								{
+									FOREACH(Ptr<WfLexicalSymbol>, symbol, From(symbols).Skip(1))
+									{
+										if (symbol->ownerDeclaration)
+										{
+											errors.Add(WfErrors::DuplicatedSymbol(symbol->ownerDeclaration.Obj(), symbol));
+										}
+										else if (symbol->ownerStatement)
+										{
+											errors.Add(WfErrors::DuplicatedSymbol(symbol->ownerStatement.Obj(), symbol));
+										}
+										else if (symbol->ownerExpression)
+										{
+											errors.Add(WfErrors::DuplicatedSymbol(symbol->ownerExpression.Obj(), symbol));
+										}
+									}
+								}
 							}
 						}
 
