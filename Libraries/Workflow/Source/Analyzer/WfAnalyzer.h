@@ -57,7 +57,6 @@ Scope
 				WfLexicalScopeManager*						FindManager();
 				Ptr<WfModule>								FindModule();
 				Ptr<WfDeclaration>							FindDeclaration();
-				Ptr<WfLexicalSymbol>						ResolveSymbol(const WString& symbolName);
 			};
 
 /***********************************************************************
@@ -118,6 +117,8 @@ Scope Manager
 				Ptr<WfModule>								AddModule(const WString& moduleCode, vint codeIndex = -1);
 				void										Clear(bool keepTypeDescriptorNames, bool deleteModules);
 				void										Rebuild(bool keepTypeDescriptorNames);
+				void										ResolveSymbol(Ptr<WfLexicalScope> scope, const WString& symbolName, collections::List<Ptr<WfLexicalSymbol>>& symbols);
+				void										ResolveScopeName(Ptr<WfLexicalScope> scope, const WString& symbolName, collections::List<Ptr<WfLexicalScopeName>>& names);
 			};
 
 /***********************************************************************

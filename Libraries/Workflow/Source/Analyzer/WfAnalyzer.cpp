@@ -83,11 +83,6 @@ WfLexicalScope
 				return 0;
 			}
 
-			Ptr<WfLexicalSymbol> WfLexicalScope::ResolveSymbol(const WString& symbolName)
-			{
-				throw 0;
-			}
-
 /***********************************************************************
 WfLexicalScopeName
 ***********************************************************************/
@@ -452,6 +447,14 @@ WfLexicalScopeManager
 				}
 
 #undef EXIT_IF_ERRORS_EXIST
+			}
+			
+			void WfLexicalScopeManager::ResolveSymbol(Ptr<WfLexicalScope> scope, const WString& symbolName, collections::List<Ptr<WfLexicalSymbol>>& symbols)
+			{
+			}
+
+			void WfLexicalScopeManager::ResolveScopeName(Ptr<WfLexicalScope> scope, const WString& symbolName, collections::List<Ptr<WfLexicalScopeName>>& names)
+			{
 			}
 		}
 	}
