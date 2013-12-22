@@ -451,10 +451,105 @@ WfLexicalScopeManager
 			
 			void WfLexicalScopeManager::ResolveSymbol(Ptr<WfLexicalScope> scope, const WString& symbolName, collections::List<Ptr<WfLexicalSymbol>>& symbols)
 			{
+				while (scope && !scope->ownerModule && !scope->ownerDeclaration.Cast<WfNamespaceDeclaration>())
+				{
+					vint index = scope->symbols.Keys().IndexOf(symbolName);
+					if (index != -1)
+					{
+						CopyFrom(symbols, scope->symbols.GetByIndex(index), true);
+					}
+					scope = scope->parentScope;
+				}
 			}
+
+			class UsingPathToNameVisitor :public Object, public WfModuleUsingFragment::IVisitor
+			{
+			public:
+				WString					name;
+				WString					result;
+
+				UsingPathToNameVisitor(const WString& _name)
+					:name(_name)
+				{
+				}
+
+				void Visit(WfModuleUsingNameFragment* node)
+				{
+					result = node->name.value;
+				}
+
+				void Visit(WfModuleUsingWildCardFragment* node)
+				{
+					result = name;
+				}
+
+				static WString Execute(Ptr<WfModuleUsingFragment> fragment, const WString& name)
+				{
+					UsingPathToNameVisitor visitor(name);
+					fragment->Accept(&visitor);
+					return visitor.result;
+				}
+			};
 
 			void WfLexicalScopeManager::ResolveScopeName(Ptr<WfLexicalScope> scope, const WString& symbolName, collections::List<Ptr<WfLexicalScopeName>>& names)
 			{
+				while (scope)
+				{
+					if (!scope->ownerModule && !scope->ownerDeclaration.Cast<WfNamespaceDeclaration>())
+					{
+						break;
+					}
+					scope = scope->parentScope;
+				}
+
+				List<WString> namespacePath;
+				Ptr<WfModule> module;
+				while (scope)
+				{
+					if (auto ns = scope->ownerDeclaration.Cast<WfNamespaceDeclaration>())
+					{
+						namespacePath.Add(ns->name.value);
+					}
+					if (!module)
+					{
+						module = scope->ownerModule;
+					}
+					scope = scope->parentScope;
+				}
+
+				Ptr<WfLexicalScopeName> scopeName = globalName;
+				vint nsIndex = namespacePath.Count();
+				while (scopeName)
+				{
+					vint index = scopeName->children.Keys().IndexOf(symbolName);
+					if (index != -1)
+					{
+						names.Add(scopeName->children.Values()[index]);
+					}
+
+					if (--nsIndex < 0) break;
+					index = scopeName->children.Keys().IndexOf(namespacePath[nsIndex]);
+					if (index == -1) break;
+					scopeName = scopeName->children.Values()[index];
+				}
+
+				FOREACH(Ptr<WfModuleUsingPath>, path, module->paths)
+				{
+					scopeName = globalName;
+					FOREACH(Ptr<WfModuleUsingItem>, item, path->items)
+					{
+						WString name;
+						FOREACH(Ptr<WfModuleUsingFragment>, fragment, item->fragments)
+						{
+							name += UsingPathToNameVisitor::Execute(fragment, symbolName);
+						}
+						vint index = scopeName->children.Keys().IndexOf(name);
+						if (index == -1) goto USING_PATH_MATCHING_FAILED;
+						scopeName = scopeName->children.Values()[index];
+					}
+					names.Add(scopeName);
+				USING_PATH_MATCHING_FAILED:;
+				}
 			}
 		}
 	}
