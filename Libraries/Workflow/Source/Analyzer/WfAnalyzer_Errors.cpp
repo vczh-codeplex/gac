@@ -48,6 +48,11 @@ WfErrors
 				return new ParsingError(node, L"A6: Functions are not allowed in class constructor expression.");
 			}
 
+			Ptr<parsing::ParsingError> WfErrors::TypeIsNotExpression(WfExpression* node, Ptr<WfLexicalScopeName> scopeName)
+			{
+				return new ParsingError(node, L"A7: Type \"" + scopeName->GetFriendlyName() + L"\" is not an expression.");
+			}
+
 			Ptr<parsing::ParsingError> WfErrors::WrongVoidType(WfType* node)
 			{
 				return new ParsingError(node, L"B0: Void is not a type for a value.");
