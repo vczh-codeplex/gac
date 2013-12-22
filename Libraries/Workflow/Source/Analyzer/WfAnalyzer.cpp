@@ -449,7 +449,7 @@ WfLexicalScopeManager
 #undef EXIT_IF_ERRORS_EXIST
 			}
 			
-			void WfLexicalScopeManager::ResolveSymbol(Ptr<WfLexicalScope> scope, const WString& symbolName, collections::List<Ptr<WfLexicalSymbol>>& symbols)
+			void WfLexicalScopeManager::ResolveSymbol(WfLexicalScope* scope, const WString& symbolName, collections::List<Ptr<WfLexicalSymbol>>& symbols)
 			{
 				while (scope && !scope->ownerModule && !scope->ownerDeclaration.Cast<WfNamespaceDeclaration>())
 				{
@@ -458,7 +458,7 @@ WfLexicalScopeManager
 					{
 						CopyFrom(symbols, scope->symbols.GetByIndex(index), true);
 					}
-					scope = scope->parentScope;
+					scope = scope->parentScope.Obj();
 				}
 			}
 
@@ -491,15 +491,15 @@ WfLexicalScopeManager
 				}
 			};
 
-			void WfLexicalScopeManager::ResolveScopeName(Ptr<WfLexicalScope> scope, const WString& symbolName, collections::List<Ptr<WfLexicalScopeName>>& names)
+			void WfLexicalScopeManager::ResolveScopeName(WfLexicalScope* scope, const WString& symbolName, collections::List<Ptr<WfLexicalScopeName>>& names)
 			{
 				while (scope)
 				{
-					if (!scope->ownerModule && !scope->ownerDeclaration.Cast<WfNamespaceDeclaration>())
+					if (scope->ownerModule || scope->ownerDeclaration.Cast<WfNamespaceDeclaration>())
 					{
 						break;
 					}
-					scope = scope->parentScope;
+					scope = scope->parentScope.Obj();
 				}
 
 				List<WString> namespacePath;
@@ -514,7 +514,7 @@ WfLexicalScopeManager
 					{
 						module = scope->ownerModule;
 					}
-					scope = scope->parentScope;
+					scope = scope->parentScope.Obj();
 				}
 
 				Ptr<WfLexicalScopeName> scopeName = globalName;

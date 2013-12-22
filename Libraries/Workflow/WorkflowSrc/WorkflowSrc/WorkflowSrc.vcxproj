@@ -308,7 +308,8 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\B4_NullableToVoid.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\B5_ChildOfEnumerable.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\B5_ChildOfMap.txt" />
-    <Text Include="..\TestFiles\Samples\AnalyzerError\B6_TypeDoesNotExists.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\B6_FunctionIsNotType.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\F2_ReferenceNotExists.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\B7_ClassNotForValue.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\C0_BreakNotInLoop.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\C1_ContinueNotInLoop.txt" />

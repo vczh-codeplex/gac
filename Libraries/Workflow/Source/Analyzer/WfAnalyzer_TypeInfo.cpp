@@ -300,6 +300,35 @@ CreateTypeInfoFromType
 
 				void Visit(WfReferenceType* node)override
 				{
+					auto manager = scope->FindManager();
+
+					List<Ptr<WfLexicalSymbol>> symbols;
+					manager->ResolveSymbol(scope, node->name.value, symbols);
+					if (symbols.Count() > 1)
+					{
+						manager->errors.Add(WfErrors::TooManySymbol(node, symbols, node->name.value));
+						return;
+					}
+					else if (symbols.Count() == 1)
+					{
+						manager->errors.Add(WfErrors::TypeNotExists(node, symbols[0]));
+						return;
+					}
+
+					List<Ptr<WfLexicalScopeName>> scopeNames;
+					manager->ResolveScopeName(scope, node->name.value, scopeNames);
+					if (symbols.Count() > 1)
+					{
+						manager->errors.Add(WfErrors::TooManyScopeName(node, scopeNames, node->name.value));
+					}
+					else if (symbols.Count() == 1)
+					{
+						result = scopeNames[0];
+					}
+					else
+					{
+						manager->errors.Add(WfErrors::ReferenceNotExists(node, node->name.value));
+					}
 				}
 
 				void Visit(WfRawPointerType* node)override

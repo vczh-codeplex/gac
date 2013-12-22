@@ -117,8 +117,8 @@ Scope Manager
 				Ptr<WfModule>								AddModule(const WString& moduleCode, vint codeIndex = -1);
 				void										Clear(bool keepTypeDescriptorNames, bool deleteModules);
 				void										Rebuild(bool keepTypeDescriptorNames);
-				void										ResolveSymbol(Ptr<WfLexicalScope> scope, const WString& symbolName, collections::List<Ptr<WfLexicalSymbol>>& symbols);
-				void										ResolveScopeName(Ptr<WfLexicalScope> scope, const WString& symbolName, collections::List<Ptr<WfLexicalScopeName>>& names);
+				void										ResolveSymbol(WfLexicalScope* scope, const WString& symbolName, collections::List<Ptr<WfLexicalSymbol>>& symbols);
+				void										ResolveScopeName(WfLexicalScope* scope, const WString& symbolName, collections::List<Ptr<WfLexicalScopeName>>& names);
 			};
 
 /***********************************************************************
@@ -180,6 +180,7 @@ Error Messages
 				static Ptr<parsing::ParsingError>			NullableToNonReferenceType(WfType* node, reflection::description::ITypeInfo* typeInfo = 0);
 				static Ptr<parsing::ParsingError>			ChildOfNonReferenceType(WfType* node);
 				static Ptr<parsing::ParsingError>			TypeNotExists(WfType* node, Ptr<WfLexicalScopeName> scopeName);
+				static Ptr<parsing::ParsingError>			TypeNotExists(WfType* node, Ptr<WfLexicalSymbol> symbol);
 				static Ptr<parsing::ParsingError>			TypeNotForValue(WfType* node, reflection::description::ITypeInfo* typeInfo);
 				
 				// C: Statement error
@@ -203,6 +204,12 @@ Error Messages
 				static Ptr<parsing::ParsingError>			TopQualifiedSymbolNotExists(WfExpression* node, const WString& name);
 				static Ptr<parsing::ParsingError>			ChildSymbolNotExists(WfType* node, Ptr<WfLexicalScopeName> scopeName, const WString& name);
 				static Ptr<parsing::ParsingError>			ChildSymbolNotExists(WfExpression* node, Ptr<WfLexicalScopeName> scopeName, const WString& name);
+				static Ptr<parsing::ParsingError>			ReferenceNotExists(WfType* node, const WString& name);
+				static Ptr<parsing::ParsingError>			ReferenceNotExists(WfExpression* node, const WString& name);
+				static Ptr<parsing::ParsingError>			TooManySymbol(WfType* node, collections::List<Ptr<WfLexicalSymbol>>& symbols, const WString& name);
+				static Ptr<parsing::ParsingError>			TooManySymbol(WfExpression* node, collections::List<Ptr<WfLexicalSymbol>>& symbols, const WString& name);
+				static Ptr<parsing::ParsingError>			TooManyScopeName(WfType* node, collections::List<Ptr<WfLexicalScopeName>>& names, const WString& name);
+				static Ptr<parsing::ParsingError>			TooManyScopeName(WfExpression* node, collections::List<Ptr<WfLexicalScopeName>>& names, const WString& name);
 			};
 		}
 	}

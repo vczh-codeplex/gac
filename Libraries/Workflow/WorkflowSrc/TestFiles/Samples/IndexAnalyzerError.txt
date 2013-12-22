@@ -26,7 +26,7 @@ B4_NullableToEnumerable
 B4_NullableToClass
 B5_ChildOfMap
 B5_ChildOfEnumerable
-B6_TypeDoesNotExists
+B6_FunctionIsNotType
 B7_ClassNotForValue
 C0_BreakNotInLoop
 C1_ContinueNotInLoop
@@ -49,3 +49,4 @@ E0_TooManyWildCard
 E0_WildCardInWrongPlace
 F0_TopQualifiedSymbolNotExists
 F1_ChildSymbolNotExists
+F2_ReferenceNotExists
