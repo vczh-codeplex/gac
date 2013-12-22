@@ -133,6 +133,11 @@ WfErrors
 				return new ParsingError(node, L"D2: Duplicated symbol \"" + symbol->name + L"\".");
 			}
 
+			Ptr<parsing::ParsingError> WfErrors::WrongUsingPathWildCard(WfModuleUsingPath* node)
+			{
+				return new ParsingError(node, L"E0: Wild card \"*\" should only appear in the last item of the using path and should appear once.");
+			}
+
 			Ptr<parsing::ParsingError> WfErrors::TopQualifiedSymbolNotExists(WfType* node, const WString& name)
 			{
 				return new ParsingError(node, L"F0: Top qualified symbol \"" + name + L"\" does not exist.");

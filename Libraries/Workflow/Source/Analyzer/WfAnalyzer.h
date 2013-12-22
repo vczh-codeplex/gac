@@ -196,6 +196,7 @@ Error Messages
 				static Ptr<parsing::ParsingError>			DuplicatedSymbol(WfExpression* node, Ptr<WfLexicalSymbol> symbol);
 
 				// E: Module error
+				static Ptr<parsing::ParsingError>			WrongUsingPathWildCard(WfModuleUsingPath* node);
 
 				// F: Symbol Error
 				static Ptr<parsing::ParsingError>			TopQualifiedSymbolNotExists(WfType* node, const WString& name);

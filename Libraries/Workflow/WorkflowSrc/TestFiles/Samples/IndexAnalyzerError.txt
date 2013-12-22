@@ -44,5 +44,8 @@ D2_DuplicatedFunctionArgument
 D2_DuplicatedLambdaFunctionArgument
 D2_DuplicatedVariable
 D2_DuplicatedLetVariable
+E0_NoWildCard
+E0_TooManyWildCard
+E0_WildCardInWrongPlace
 F0_TopQualifiedSymbolNotExists
 F1_ChildSymbolNotExists

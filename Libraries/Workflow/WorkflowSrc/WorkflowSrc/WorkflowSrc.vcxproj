@@ -326,6 +326,9 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\D2_DuplicatedLambdaFunctionArgument.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\D2_DuplicatedLetVariable.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\D2_DuplicatedVariable.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\E0_NoWildCard.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\E0_TooManyWildCard.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\E0_WildCardInWrongPlace.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\F0_TopQualifiedSymbolNotExists.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\F1_ChildSymbolNotExists.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerScope\ModuleA.txt" />
