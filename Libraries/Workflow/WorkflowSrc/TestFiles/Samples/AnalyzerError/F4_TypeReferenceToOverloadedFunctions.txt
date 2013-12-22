@@ -1,0 +1,13 @@
+module test;
+
+func not_a_type(arg : int):void
+{
+}
+
+func not_a_type(arg : string):void
+{
+}
+
+func main():not_a_type
+{
+}

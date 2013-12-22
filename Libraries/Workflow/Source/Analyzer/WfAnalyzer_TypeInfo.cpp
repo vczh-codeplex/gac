@@ -317,11 +317,11 @@ CreateTypeInfoFromType
 
 					List<Ptr<WfLexicalScopeName>> scopeNames;
 					manager->ResolveScopeName(scope, node->name.value, scopeNames);
-					if (symbols.Count() > 1)
+					if (scopeNames.Count() > 1)
 					{
 						manager->errors.Add(WfErrors::TooManyScopeName(node, scopeNames, node->name.value));
 					}
-					else if (symbols.Count() == 1)
+					else if (scopeNames.Count() == 1)
 					{
 						result = scopeNames[0];
 					}
