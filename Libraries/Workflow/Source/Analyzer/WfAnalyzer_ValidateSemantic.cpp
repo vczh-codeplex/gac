@@ -39,6 +39,13 @@ ValidateSemantic(Declaration)
 
 				void Visit(WfVariableDeclaration* node)override
 				{
+					auto scope = manager->declarationScopes[node];
+					auto symbol = scope->symbols[node->name.value][0];
+					symbol->typeInfo = ValidateExpressionSemantic(manager, node->expression, symbol->typeInfo);
+					if (symbol->typeInfo && !symbol->type)
+					{
+						symbol->type = GetTypeFromTypeInfo(symbol->typeInfo.Obj());
+					}
 				}
 
 				static void Execute(Ptr<WfDeclaration> declaration, WfLexicalScopeManager* manager)
