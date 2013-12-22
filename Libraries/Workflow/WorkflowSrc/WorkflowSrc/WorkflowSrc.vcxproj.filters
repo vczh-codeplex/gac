@@ -797,9 +797,6 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\B5_ChildOfMap.txt">
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
     </Text>
-    <Text Include="..\TestFiles\Samples\AnalyzerError\B6_TypeDoesNotExists.txt">
-      <Filter>Resource Files\Samples\AnalyzerError</Filter>
-    </Text>
     <Text Include="..\TestFiles\Samples\AnalyzerError\B7_ClassNotForValue.txt">
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
     </Text>
@@ -840,6 +837,12 @@
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
     </Text>
     <Text Include="..\TestFiles\Samples\AnalyzerError\E0_WildCardInWrongPlace.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\B6_FunctionIsNotType.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\F2_ReferenceNotExists.txt">
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
     </Text>
   </ItemGroup>
