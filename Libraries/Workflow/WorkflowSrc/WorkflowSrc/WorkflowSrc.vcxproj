@@ -335,7 +335,6 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\F4_TypeReferenceToFunctionsByUsing.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\F4_TypeReferenceToFunctionsInLocalAndUsing.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\F4_TypeReferenceToFunctionsInNestedNamespaces.txt" />
-    <Text Include="..\TestFiles\Samples\AnalyzerError\F4_TypeReferenceToOverloadedFunctions.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerScope\ModuleA.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerScope\ModuleB.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerScope\ModuleC.txt" />

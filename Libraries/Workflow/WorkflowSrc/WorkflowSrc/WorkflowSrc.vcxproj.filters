@@ -845,9 +845,6 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\F2_ReferenceNotExists.txt">
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
     </Text>
-    <Text Include="..\TestFiles\Samples\AnalyzerError\F4_TypeReferenceToOverloadedFunctions.txt">
-      <Filter>Resource Files\Samples\AnalyzerError</Filter>
-    </Text>
     <Text Include="..\TestFiles\Samples\AnalyzerError\F4_TypeReferenceToFunctionsInNestedNamespaces.txt">
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
     </Text>
