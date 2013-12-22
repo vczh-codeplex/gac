@@ -367,7 +367,6 @@ WfLexicalScopeManager
 					BuildGlobalNameFromTypeDescriptors();
 				}
 
-				BuildGlobalNameFromModules();
 				vint errorCount = errors.Count();
 
 #define EXIT_IF_ERRORS_EXIST\
@@ -383,13 +382,14 @@ WfLexicalScopeManager
 				}
 				
 				EXIT_IF_ERRORS_EXIST;
+				BuildGlobalNameFromModules();
 				FOREACH(Ptr<WfModule>, module, modules)
 				{
 					BuildScopeForModule(this, module);
 				}
+
 				ValidateScopeName(globalName);
 				
-				EXIT_IF_ERRORS_EXIST;
 				SortedList<Ptr<WfLexicalScope>> analyzedScopes;
 				FOREACH(Ptr<WfLexicalScope>, scope,
 					From(moduleScopes.Values())
