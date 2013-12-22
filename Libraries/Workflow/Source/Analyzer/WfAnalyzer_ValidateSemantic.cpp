@@ -41,7 +41,7 @@ ValidateSemantic(Declaration)
 				{
 					auto scope = manager->declarationScopes[node];
 					auto symbol = scope->symbols[node->name.value][0];
-					symbol->typeInfo = ValidateExpressionSemantic(manager, node->expression, symbol->typeInfo);
+					symbol->typeInfo = GetExpressionType(manager, node->expression, symbol->typeInfo);
 					if (symbol->typeInfo && !symbol->type)
 					{
 						symbol->type = GetTypeFromTypeInfo(symbol->typeInfo.Obj());
@@ -137,7 +137,8 @@ ValidateSemantic(Expression)
 			public:
 				WfLexicalScopeManager*				manager;
 				Ptr<ITypeInfo>						expectedType;
-				Ptr<ITypeInfo>						result;
+				Ptr<ITypeInfo>						resultType;
+				Ptr<WfLexicalScopeName>				resultScopeName;
 
 				ValidateSemanticExpressionVisitor(WfLexicalScopeManager* _manager, Ptr<ITypeInfo> _expectedType)
 					:manager(_manager)
@@ -265,11 +266,12 @@ ValidateSemantic(Expression)
 				{
 				}
 
-				static Ptr<ITypeInfo> Execute(Ptr<WfExpression> expression, WfLexicalScopeManager* manager, Ptr<ITypeInfo> expectedType)
+				static void Execute(Ptr<WfExpression> expression, WfLexicalScopeManager* manager, Ptr<ITypeInfo> expectedType, Ptr<ITypeInfo>& resultType, Ptr<WfLexicalScopeName>& resultScopeName)
 				{
 					ValidateSemanticExpressionVisitor visitor(manager, expectedType);
 					expression->Accept(&visitor);
-					return visitor.result;
+					resultType = visitor.resultType;
+					resultScopeName = visitor.resultScopeName;
 				}
 			};
 
@@ -295,9 +297,21 @@ ValidateSemantic
 				return ValidateSemanticStatementVisitor::Execute(statement, manager);
 			}
 
-			Ptr<reflection::description::ITypeInfo> ValidateExpressionSemantic(WfLexicalScopeManager* manager, Ptr<WfExpression> expression, Ptr<reflection::description::ITypeInfo> expectedType)
+			void ValidateExpressionSemantic(WfLexicalScopeManager* manager, Ptr<WfExpression> expression, Ptr<reflection::description::ITypeInfo> expectedType, Ptr<reflection::description::ITypeInfo>& resultType, Ptr<WfLexicalScopeName>& resultScopeName)
 			{
-				return ValidateSemanticExpressionVisitor::Execute(expression, manager, expectedType);
+				ValidateSemanticExpressionVisitor::Execute(expression, manager, expectedType, resultType, resultScopeName);
+			}
+
+			Ptr<reflection::description::ITypeInfo> GetExpressionType(WfLexicalScopeManager* manager, Ptr<WfExpression> expression, Ptr<reflection::description::ITypeInfo> expectedType)
+			{
+				Ptr<ITypeInfo> resultType;
+				Ptr<WfLexicalScopeName> resultScopeName;
+				ValidateExpressionSemantic(manager, expression, expectedType, resultType, resultScopeName);
+				if (!resultType && resultScopeName)
+				{
+					manager->errors.Add(WfErrors::TypeIsNotExpression(expression.Obj(), resultScopeName));
+				}
+				return resultType;
 			}
 		}
 	}
