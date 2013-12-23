@@ -388,7 +388,7 @@ ValidateSemantic
 				ValidateExpressionSemantic(manager, expression, expectedType, resultType, resultScopeName);
 				if (!resultType && resultScopeName)
 				{
-					manager->errors.Add(WfErrors::TypeIsNotExpression(expression.Obj(), resultScopeName));
+					manager->errors.Add(WfErrors::ScopeNameIsNotExpression(expression.Obj(), resultScopeName));
 				}
 				return resultType;
 			}

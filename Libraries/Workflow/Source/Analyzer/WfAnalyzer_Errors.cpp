@@ -48,9 +48,9 @@ WfErrors
 				return new ParsingError(node, L"A6: Functions are not allowed in class constructor expression.");
 			}
 
-			Ptr<parsing::ParsingError> WfErrors::TypeIsNotExpression(WfExpression* node, Ptr<WfLexicalScopeName> scopeName)
+			Ptr<parsing::ParsingError> WfErrors::ScopeNameIsNotExpression(WfExpression* node, Ptr<WfLexicalScopeName> scopeName)
 			{
-				return new ParsingError(node, L"A7: Type \"" + scopeName->GetFriendlyName() + L"\" is not an expression.");
+				return new ParsingError(node, L"A7: Symbol \"" + scopeName->GetFriendlyName() + L"\" cannot be used as an expression.");
 			}
 
 			Ptr<parsing::ParsingError> WfErrors::ExpressionIsNotScopeName(WfExpression* node)
