@@ -111,14 +111,20 @@ ValidateSemantic(Statement)
 
 				void Visit(WfBlockStatement* node)override
 				{
+					FOREACH(Ptr<WfStatement>, statement, node->statements)
+					{
+						statement->Accept(this);
+					}
 				}
 
 				void Visit(WfExpressionStatement* node)override
 				{
+					GetExpressionType(manager, node->expression, 0);
 				}
 
 				void Visit(WfVariableStatement* node)override
 				{
+					ValidateDeclarationSemantic(manager, node->variable);
 				}
 
 				static void Execute(Ptr<WfStatement> statement, WfLexicalScopeManager* manager)

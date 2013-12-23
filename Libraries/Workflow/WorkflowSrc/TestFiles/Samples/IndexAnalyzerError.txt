@@ -27,6 +27,7 @@ B4_NullableToClass
 B5_ChildOfMap
 B5_ChildOfEnumerable
 B6_FunctionIsNotType
+B6_VariableIsNotType
 B7_ClassNotForValue
 C0_BreakNotInLoop
 C1_ContinueNotInLoop
@@ -50,6 +51,7 @@ E0_WildCardInWrongPlace
 F0_TopQualifiedSymbolNotExists
 F1_ChildSymbolNotExists
 F2_ReferenceNotExists
+F3_TypeReferenceToVariablesInNestedBlocks
 F4_TypeReferenceToFunctionsInNestedNamespaces
 F4_TypeReferenceToFunctionsInLocalAndUsing
 F4_TypeReferenceToFunctionsByUsing
