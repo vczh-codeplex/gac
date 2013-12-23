@@ -309,6 +309,7 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\B5_ChildOfEnumerable.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\B5_ChildOfMap.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\B6_FunctionIsNotType.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\B6_VariableIsNotType.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\F2_ReferenceNotExists.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\B7_ClassNotForValue.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\C0_BreakNotInLoop.txt" />
@@ -332,6 +333,7 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\E0_WildCardInWrongPlace.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\F0_TopQualifiedSymbolNotExists.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\F1_ChildSymbolNotExists.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\F3_TypeReferenceToVariablesInNestedBlocks.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\F4_TypeReferenceToFunctionsByUsing.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\F4_TypeReferenceToFunctionsInLocalAndUsing.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\F4_TypeReferenceToFunctionsInNestedNamespaces.txt" />
