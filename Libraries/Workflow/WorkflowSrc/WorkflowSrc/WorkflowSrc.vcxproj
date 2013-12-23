@@ -310,7 +310,10 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\B5_ChildOfMap.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\B6_FunctionIsNotType.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\B6_VariableIsNotType.txt" />
-    <Text Include="..\TestFiles\Samples\AnalyzerError\F2_ReferenceNotExists.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\F0_ExpressionTopQualifiedSymbolNotExists.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\F1_ExpressionChildSymbolNotExists.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\F2_ExpressionReferenceNotExists.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\F2_TypeReferenceNotExists.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\B7_ClassNotForValue.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\C0_BreakNotInLoop.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\C1_ContinueNotInLoop.txt" />
@@ -331,9 +334,13 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\E0_NoWildCard.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\E0_TooManyWildCard.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\E0_WildCardInWrongPlace.txt" />
-    <Text Include="..\TestFiles\Samples\AnalyzerError\F0_TopQualifiedSymbolNotExists.txt" />
-    <Text Include="..\TestFiles\Samples\AnalyzerError\F1_ChildSymbolNotExists.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\F0_TypeTopQualifiedSymbolNotExists.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\F1_TypeChildSymbolNotExists.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\F3_ExpressionReferenceToVariablesInNestedBlocks.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\F3_TypeReferenceToVariablesInNestedBlocks.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\F4_ExpressionReferenceToFunctionsByUsing.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\F4_ExpressionReferenceToFunctionsInLocalAndUsing.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\F4_ExpressionReferenceToFunctionsInNestedNamespaces.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\F4_TypeReferenceToFunctionsByUsing.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\F4_TypeReferenceToFunctionsInLocalAndUsing.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\F4_TypeReferenceToFunctionsInNestedNamespaces.txt" />
