@@ -286,6 +286,9 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\A3_ObserveNotInBind.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A4_BindInBind.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A5_ConstructorMixMapAndList.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A7_TypeIsNotExpression.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A8_ExpressionIsNotScopeName.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A9_ExpressionCannotResolveType.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\B0_VoidArgument.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\B0_VoidMapElement.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\B0_VoidVariable.txt" />
