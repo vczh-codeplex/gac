@@ -390,7 +390,7 @@ ValidateSemantic
 				{
 					manager->errors.Add(WfErrors::ScopeNameIsNotExpression(expression.Obj(), resultScopeName));
 				}
-				return resultType;
+				return expectedType ? expectedType : resultType;
 			}
 		}
 	}
