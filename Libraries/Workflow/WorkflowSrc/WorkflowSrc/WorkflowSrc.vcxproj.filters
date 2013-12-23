@@ -881,13 +881,13 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\F4_ExpressionReferenceToFunctionsInNestedNamespaces.txt">
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
     </Text>
-    <Text Include="..\TestFiles\Samples\AnalyzerError\A7_TypeIsNotExpression.txt">
-      <Filter>Resource Files\Samples\AnalyzerError</Filter>
-    </Text>
     <Text Include="..\TestFiles\Samples\AnalyzerError\A8_ExpressionIsNotScopeName.txt">
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
     </Text>
     <Text Include="..\TestFiles\Samples\AnalyzerError\A9_ExpressionCannotResolveType.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A7_ScopeNameIsNotExpression.txt">
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
     </Text>
   </ItemGroup>

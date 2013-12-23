@@ -173,7 +173,7 @@ Error Messages
 				static Ptr<parsing::ParsingError>			BindInBind(WfExpression* node);
 				static Ptr<parsing::ParsingError>			ConstructorMixMapAndList(WfExpression* node);
 				static Ptr<parsing::ParsingError>			ConstructorMixClassAndInterface(WfExpression* node);
-				static Ptr<parsing::ParsingError>			TypeIsNotExpression(WfExpression* node, Ptr<WfLexicalScopeName> scopeName);
+				static Ptr<parsing::ParsingError>			ScopeNameIsNotExpression(WfExpression* node, Ptr<WfLexicalScopeName> scopeName);
 				static Ptr<parsing::ParsingError>			ExpressionIsNotScopeName(WfExpression* node);
 				static Ptr<parsing::ParsingError>			ExpressionCannotResolveType(WfExpression* node, Ptr<WfLexicalSymbol> symbol);
 

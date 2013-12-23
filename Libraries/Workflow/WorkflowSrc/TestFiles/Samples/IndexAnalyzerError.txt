@@ -4,7 +4,7 @@ A2_WrongSimpleObserveEvent
 A3_ObserveNotInBind
 A4_BindInBind
 A5_ConstructorMixMapAndList
-A7_TypeIsNotExpression
+A7_ScopeNameIsNotExpression
 A8_ExpressionIsNotScopeName
 A9_ExpressionCannotResolveType
 B0_VoidVariable
