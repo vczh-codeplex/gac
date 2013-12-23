@@ -734,12 +734,6 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\A5_ConstructorMixMapAndList.txt">
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
     </Text>
-    <Text Include="..\TestFiles\Samples\AnalyzerError\F0_TopQualifiedSymbolNotExists.txt">
-      <Filter>Resource Files\Samples\AnalyzerError</Filter>
-    </Text>
-    <Text Include="..\TestFiles\Samples\AnalyzerError\F1_ChildSymbolNotExists.txt">
-      <Filter>Resource Files\Samples\AnalyzerError</Filter>
-    </Text>
     <Text Include="..\TestFiles\Samples\AnalyzerError\B1_InterfaceArgument.txt">
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
     </Text>
@@ -842,9 +836,6 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\B6_FunctionIsNotType.txt">
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
     </Text>
-    <Text Include="..\TestFiles\Samples\AnalyzerError\F2_ReferenceNotExists.txt">
-      <Filter>Resource Files\Samples\AnalyzerError</Filter>
-    </Text>
     <Text Include="..\TestFiles\Samples\AnalyzerError\F4_TypeReferenceToFunctionsInNestedNamespaces.txt">
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
     </Text>
@@ -858,6 +849,36 @@
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
     </Text>
     <Text Include="..\TestFiles\Samples\AnalyzerError\F3_TypeReferenceToVariablesInNestedBlocks.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\F0_TypeTopQualifiedSymbolNotExists.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\F1_TypeChildSymbolNotExists.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\F2_TypeReferenceNotExists.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\F0_ExpressionTopQualifiedSymbolNotExists.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\F1_ExpressionChildSymbolNotExists.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\F2_ExpressionReferenceNotExists.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\F3_ExpressionReferenceToVariablesInNestedBlocks.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\F4_ExpressionReferenceToFunctionsByUsing.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\F4_ExpressionReferenceToFunctionsInLocalAndUsing.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\F4_ExpressionReferenceToFunctionsInNestedNamespaces.txt">
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
     </Text>
   </ItemGroup>
