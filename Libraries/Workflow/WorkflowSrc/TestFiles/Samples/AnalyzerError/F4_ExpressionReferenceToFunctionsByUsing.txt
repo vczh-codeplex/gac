@@ -3,8 +3,9 @@ module test;
 using top::*_function;
 using top::nested::*;
 
-func main():not_a_type
+func main():void
 {
+	var x = not_a_type;
 }
 
 namespace top
