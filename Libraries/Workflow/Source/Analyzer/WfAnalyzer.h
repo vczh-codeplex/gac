@@ -156,6 +156,7 @@ Helper Functions
 			extern void										ValidateDeclarationSemantic(WfLexicalScopeManager* manager, Ptr<WfDeclaration> declaration);
 			extern void										ValidateStatementSemantic(WfLexicalScopeManager* manager, Ptr<WfStatement> statement);
 			extern void										ValidateExpressionSemantic(WfLexicalScopeManager* manager, Ptr<WfExpression> expression, Ptr<reflection::description::ITypeInfo> expectedType, Ptr<reflection::description::ITypeInfo>& resultType, Ptr<WfLexicalScopeName>& resultScopeName);
+			extern Ptr<WfLexicalScopeName>					GetExpressionScopeName(WfLexicalScopeManager* manager, Ptr<WfExpression> expression);
 			extern Ptr<reflection::description::ITypeInfo>	GetExpressionType(WfLexicalScopeManager* manager, Ptr<WfExpression> expression, Ptr<reflection::description::ITypeInfo> expectedType);
 
 /***********************************************************************
@@ -173,6 +174,8 @@ Error Messages
 				static Ptr<parsing::ParsingError>			ConstructorMixMapAndList(WfExpression* node);
 				static Ptr<parsing::ParsingError>			ConstructorMixClassAndInterface(WfExpression* node);
 				static Ptr<parsing::ParsingError>			TypeIsNotExpression(WfExpression* node, Ptr<WfLexicalScopeName> scopeName);
+				static Ptr<parsing::ParsingError>			ExpressionIsNotScopeName(WfExpression* node);
+				static Ptr<parsing::ParsingError>			ExpressionCannotResolveType(WfExpression* node, Ptr<WfLexicalSymbol> symbol);
 
 				// B: Type error
 				static Ptr<parsing::ParsingError>			WrongVoidType(WfType* node);

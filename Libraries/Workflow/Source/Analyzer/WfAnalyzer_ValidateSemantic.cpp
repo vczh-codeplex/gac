@@ -154,10 +154,57 @@ ValidateSemantic(Expression)
 
 				void Visit(WfTopQualifiedExpression* node)override
 				{
+					if (manager->globalName)
+					{
+						vint index = manager->globalName->children.Keys().IndexOf(node->name.value);
+						if (index != -1)
+						{
+							resultScopeName = manager->globalName->children.Values()[index];
+							return;
+						}
+					}
+					manager->errors.Add(WfErrors::TopQualifiedSymbolNotExists(node, node->name.value));
 				}
 
 				void Visit(WfReferenceExpression* node)override
 				{
+					auto scope = manager->expressionScopes[node].Obj();
+
+					List<Ptr<WfLexicalSymbol>> symbols;
+					manager->ResolveSymbol(scope, node->name.value, symbols);
+					if (symbols.Count() > 1)
+					{
+						manager->errors.Add(WfErrors::TooManySymbol(node, symbols, node->name.value));
+						return;
+					}
+					else if (symbols.Count() == 1)
+					{
+						auto symbol = symbols[0];
+						if (symbol->typeInfo)
+						{
+							resultType = symbol->typeInfo;
+						}
+						else
+						{
+							manager->errors.Add(WfErrors::ExpressionCannotResolveType(node, symbol));
+						}
+						return;
+					}
+
+					List<Ptr<WfLexicalScopeName>> scopeNames;
+					manager->ResolveScopeName(scope, node->name.value, scopeNames);
+					if (scopeNames.Count() > 1)
+					{
+						manager->errors.Add(WfErrors::TooManyScopeName(node, scopeNames, node->name.value));
+					}
+					else if (scopeNames.Count() == 1)
+					{
+						resultScopeName = scopeNames[0];
+					}
+					else
+					{
+						manager->errors.Add(WfErrors::ReferenceNotExists(node, node->name.value));
+					}
 				}
 
 				void Visit(WfOrderedNameExpression* node)override
@@ -174,6 +221,16 @@ ValidateSemantic(Expression)
 
 				void Visit(WfChildExpression* node)override
 				{
+					if (Ptr<WfLexicalScopeName> scopeName = GetExpressionScopeName(manager, node->parent))
+					{
+						vint index = scopeName->children.Keys().IndexOf(node->name.value);
+						if (index != -1)
+						{
+							resultScopeName = scopeName->children.Values()[index];
+							return;
+						}
+						manager->errors.Add(WfErrors::ChildSymbolNotExists(node, scopeName, node->name.value));
+					}
 				}
 
 				void Visit(WfLiteralExpression* node)override
@@ -276,6 +333,10 @@ ValidateSemantic(Expression)
 				{
 					ValidateSemanticExpressionVisitor visitor(manager, expectedType);
 					expression->Accept(&visitor);
+
+					if (!visitor.resultType && visitor.resultScopeName)
+					{
+					}
 					resultType = visitor.resultType;
 					resultScopeName = visitor.resultScopeName;
 				}
@@ -306,6 +367,18 @@ ValidateSemantic
 			void ValidateExpressionSemantic(WfLexicalScopeManager* manager, Ptr<WfExpression> expression, Ptr<reflection::description::ITypeInfo> expectedType, Ptr<reflection::description::ITypeInfo>& resultType, Ptr<WfLexicalScopeName>& resultScopeName)
 			{
 				ValidateSemanticExpressionVisitor::Execute(expression, manager, expectedType, resultType, resultScopeName);
+			}
+
+			Ptr<WfLexicalScopeName> GetExpressionScopeName(WfLexicalScopeManager* manager, Ptr<WfExpression> expression)
+			{
+				Ptr<ITypeInfo> resultType;
+				Ptr<WfLexicalScopeName> resultScopeName;
+				ValidateExpressionSemantic(manager, expression, 0, resultType, resultScopeName);
+				if (resultType && !resultScopeName)
+				{
+					manager->errors.Add(WfErrors::ExpressionIsNotScopeName(expression.Obj()));
+				}
+				return resultScopeName;
 			}
 
 			Ptr<reflection::description::ITypeInfo> GetExpressionType(WfLexicalScopeManager* manager, Ptr<WfExpression> expression, Ptr<reflection::description::ITypeInfo> expectedType)

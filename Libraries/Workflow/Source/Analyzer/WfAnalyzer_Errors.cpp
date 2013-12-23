@@ -53,6 +53,16 @@ WfErrors
 				return new ParsingError(node, L"A7: Type \"" + scopeName->GetFriendlyName() + L"\" is not an expression.");
 			}
 
+			Ptr<parsing::ParsingError> WfErrors::ExpressionIsNotScopeName(WfExpression* node)
+			{
+				return new ParsingError(node, L"A8: Expression does not reference to a declaration.");
+			}
+
+			Ptr<parsing::ParsingError> WfErrors::ExpressionCannotResolveType(WfExpression* node, Ptr<WfLexicalSymbol> symbol)
+			{
+				return new ParsingError(node, L"A9: Expression referencing to symbol \"" + symbol->name + L"\" failed to resolve its type.");
+			}
+
 			Ptr<parsing::ParsingError> WfErrors::WrongVoidType(WfType* node)
 			{
 				return new ParsingError(node, L"B0: Void is not a type for a value.");
