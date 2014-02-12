@@ -7,9 +7,11 @@
 #pragma comment(linker,"\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
 #include "..\..\Source\GacUI.h"
+#ifndef VCZH_DEBUG_NO_REFLECTION
 #include "..\..\Source\Reflection\GuiInstanceLoader.h"
 #include "..\..\Source\Reflection\TypeDescriptors\GuiReflectionControls.h"
 #include "..\..\Source\Reflection\TypeDescriptors\GuiReflectionEvents.h"
+#endif
 #include <Windows.h>
 
 using namespace vl::collections;
@@ -35,6 +37,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 extern void UnitTestInGuiMain();
 
+#ifndef VCZH_DEBUG_NO_REFLECTION
 template<typename TImpl>
 class MainWindow_ : public GuiWindow, public GuiInstancePartialClass<GuiWindow>, public Description<TImpl>
 {
@@ -159,6 +162,19 @@ namespace vl
 		}
 	}
 }
+#else
+class MainWindow : public GuiWindow
+{
+public:
+	MainWindow()
+		:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
+	{
+		SetText(L"MainWindow");
+		SetClientSize(Size(640, 480));
+		GetContainerComposition()->SetPreferredMinSize(Size(640, 480));
+	}
+};
+#endif
 
 /*
 Data Binding:
@@ -197,7 +213,9 @@ void GuiMain()
 #endif
 	UnitTestInGuiMain();
 
+#ifndef VCZH_DEBUG_NO_REFLECTION
 	GetInstanceLoaderManager()->SetResource(L"Resource", GuiResource::LoadFromXml(L"..\\GacUISrcCodepackedTest\\Resources\\XmlWindowResource.xml"));
+#endif
 	MainWindow window;
 	window.ForceCalculateSizeImmediately();
 	window.MoveToScreenCenter();
