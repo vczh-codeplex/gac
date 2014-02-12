@@ -582,6 +582,7 @@ GuiDefaultInstanceLoader
 			{
 				if (IEventInfo* ev = eventInfo.typeInfo.typeDescriptor->GetEventByName(eventInfo.propertyName, true))
 				{
+#ifndef VCZH_DEBUG_NO_REFLECTION
 					auto handlerType = ev->GetHandlerType();
 					if (handlerType->GetDecorator() != ITypeInfo::SharedPtr) goto UNSUPPORTED;
 
@@ -613,6 +614,7 @@ GuiDefaultInstanceLoader
 					return GuiInstanceEventInfo::Assign(argumentType->GetTypeDescriptor());
 
 				UNSUPPORTED:
+#endif
 					return GuiInstanceEventInfo::Unsupported();
 				}
 				return 0;

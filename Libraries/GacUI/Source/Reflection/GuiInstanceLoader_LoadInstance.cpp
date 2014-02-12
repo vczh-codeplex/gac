@@ -644,7 +644,8 @@ ExecuteBindingSetters
 			List<FillInstanceEventSetter>& eventSetters
 			)
 		{
-			// set all -bind attributes
+#ifndef VCZH_DEBUG_NO_REFLECTION
+			// set all event attributes
 			FOREACH(FillInstanceEventSetter, eventSetter, eventSetters)
 			{
 				// find a correct method
@@ -693,6 +694,7 @@ ExecuteBindingSetters
 					}
 				}
 			}
+#endif
 		}
 
 /***********************************************************************
