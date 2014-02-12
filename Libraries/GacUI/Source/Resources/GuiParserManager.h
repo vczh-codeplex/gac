@@ -57,7 +57,7 @@ Strong Typed Table Parser
 		{
 		protected:
 			typedef parsing::tabling::ParsingTable				Table;
-			typedef Ptr<T>(ParserFunction)(const WString&, Ptr<Table>);
+			typedef Ptr<T>(ParserFunction)(const WString&, Ptr<Table>, vint);
 		protected:
 			WString									name;
 			Ptr<Table>								table;
@@ -77,7 +77,7 @@ Strong Typed Table Parser
 				}
 				if(table)
 				{
-					return function(text, table);
+					return function(text, table, -1);
 				}
 				return 0;
 			}
@@ -118,7 +118,7 @@ Parser Manager
 			}
 
 			template<typename T>
-			bool SetTableParser(const WString& tableName, const WString& parserName, Ptr<T>(*function)(const WString&, Ptr<Table>))
+			bool SetTableParser(const WString& tableName, const WString& parserName, Ptr<T>(*function)(const WString&, Ptr<Table>, vint))
 			{
 				Ptr<IGuiParser<T>> parser=new GuiStrongTypedTableParser<T>(tableName, function);
 				return SetParser(parserName, parser);
