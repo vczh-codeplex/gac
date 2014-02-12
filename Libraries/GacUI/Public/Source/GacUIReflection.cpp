@@ -690,6 +690,7 @@ GuiDefaultInstanceLoader
 			{
 				if (IEventInfo* ev = eventInfo.typeInfo.typeDescriptor->GetEventByName(eventInfo.propertyName, true))
 				{
+#ifndef VCZH_DEBUG_NO_REFLECTION
 					auto handlerType = ev->GetHandlerType();
 					if (handlerType->GetDecorator() != ITypeInfo::SharedPtr) goto UNSUPPORTED;
 
@@ -721,6 +722,7 @@ GuiDefaultInstanceLoader
 					return GuiInstanceEventInfo::Assign(argumentType->GetTypeDescriptor());
 
 				UNSUPPORTED:
+#endif
 					return GuiInstanceEventInfo::Unsupported();
 				}
 				return 0;
@@ -1781,7 +1783,8 @@ ExecuteBindingSetters
 			List<FillInstanceEventSetter>& eventSetters
 			)
 		{
-			// set all -bind attributes
+#ifndef VCZH_DEBUG_NO_REFLECTION
+			// set all event attributes
 			FOREACH(FillInstanceEventSetter, eventSetter, eventSetters)
 			{
 				// find a correct method
@@ -1830,6 +1833,7 @@ ExecuteBindingSetters
 					}
 				}
 			}
+#endif
 		}
 
 /***********************************************************************
