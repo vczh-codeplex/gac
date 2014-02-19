@@ -333,10 +333,6 @@ ValidateSemantic(Expression)
 				{
 					ValidateSemanticExpressionVisitor visitor(manager, expectedType);
 					expression->Accept(&visitor);
-
-					if (!visitor.resultType && visitor.resultScopeName)
-					{
-					}
 					resultType = visitor.resultType;
 					resultScopeName = visitor.resultScopeName;
 				}
@@ -390,7 +386,19 @@ ValidateSemantic
 				{
 					manager->errors.Add(WfErrors::ScopeNameIsNotExpression(expression.Obj(), resultScopeName));
 				}
+				if (expectedType && resultType)
+				{
+					if (!CanConvertToType(resultType.Obj(), expectedType.Obj(), false))
+					{
+						manager->errors.Add(WfErrors::ExpressionCannotImplicitlyConvertToType(expression.Obj(), resultType.Obj(), expectedType.Obj()));
+					}
+				}
 				return expectedType ? expectedType : resultType;
+			}
+
+			bool CanConvertToType(reflection::description::ITypeInfo* fromType, reflection::description::ITypeInfo* toType, bool explicitly)
+			{
+				return true;
 			}
 		}
 	}
