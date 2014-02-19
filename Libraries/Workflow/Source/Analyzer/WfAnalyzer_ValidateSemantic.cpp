@@ -398,7 +398,108 @@ ValidateSemantic
 
 			bool CanConvertToType(reflection::description::ITypeInfo* fromType, reflection::description::ITypeInfo* toType, bool explicitly)
 			{
-				return true;
+				bool fromObject = fromType->GetDecorator() == ITypeInfo::TypeDescriptor && fromType->GetTypeDescriptor() == GetTypeDescriptor<Value>();
+				bool toObject = toType->GetDecorator() == ITypeInfo::TypeDescriptor && toType->GetTypeDescriptor() == GetTypeDescriptor<Value>();
+
+				if (fromObject && toObject)
+				{
+					return true;
+				}
+				else if (fromObject)
+				{
+					return explicitly;
+				}
+				else if (toObject)
+				{
+					return true;
+				}
+
+				switch (fromType->GetDecorator())
+				{
+				case ITypeInfo::RawPtr:
+					switch (toType->GetDecorator())
+					{
+					case ITypeInfo::RawPtr:
+						return CanConvertToType(fromType->GetElementType(), toType->GetElementType(), explicitly);
+					case ITypeInfo::SharedPtr:
+						return explicitly && CanConvertToType(fromType->GetElementType(), toType->GetElementType(), explicitly);
+					case ITypeInfo::Nullable:
+					case ITypeInfo::TypeDescriptor:
+					case ITypeInfo::Generic:
+						return false;
+					}
+					break;
+				case ITypeInfo::SharedPtr:
+					switch (toType->GetDecorator())
+					{
+					case ITypeInfo::RawPtr:
+					case ITypeInfo::SharedPtr:
+						return CanConvertToType(fromType->GetElementType(), toType->GetElementType(), explicitly);
+					case ITypeInfo::Nullable:
+					case ITypeInfo::TypeDescriptor:
+					case ITypeInfo::Generic:
+						return false;
+					}
+					break;
+				case ITypeInfo::Nullable:
+					switch (toType->GetDecorator())
+					{
+					case ITypeInfo::RawPtr:
+					case ITypeInfo::SharedPtr:
+						return false;
+					case ITypeInfo::Nullable:
+						return CanConvertToType(fromType->GetElementType(), toType->GetElementType(), explicitly);
+					case ITypeInfo::TypeDescriptor:
+						return explicitly && CanConvertToType(fromType->GetElementType(), toType, explicitly);
+					case ITypeInfo::Generic:
+						return false;
+					}
+					break;
+				case ITypeInfo::TypeDescriptor:
+					switch (toType->GetDecorator())
+					{
+					case ITypeInfo::RawPtr:
+					case ITypeInfo::SharedPtr:
+						return false;
+					case ITypeInfo::Nullable:
+						return CanConvertToType(fromType, toType->GetElementType(), explicitly);
+					case ITypeInfo::TypeDescriptor:
+						{
+							ITypeDescriptor* fromTd = fromType->GetTypeDescriptor();
+							ITypeDescriptor* toTd = toType->GetTypeDescriptor();
+							if ((fromTd->GetValueSerializer() != 0) != (toTd->GetValueSerializer() != 0))
+							{
+								return false;
+							}
+
+							if (fromTd->GetValueSerializer())
+							{
+								throw 0;
+							}
+							else
+							{
+								throw 0;
+							}
+						}
+					case ITypeInfo::Generic:
+						return explicitly && CanConvertToType(fromType, toType->GetElementType(), explicitly);
+					}
+					break;
+				case ITypeInfo::Generic:
+					switch (toType->GetDecorator())
+					{
+					case ITypeInfo::RawPtr:
+					case ITypeInfo::SharedPtr:
+					case ITypeInfo::Nullable:
+						return false;
+					case ITypeInfo::TypeDescriptor:
+						return CanConvertToType(fromType->GetElementType(), toType, explicitly);
+					case ITypeInfo::Generic:
+						throw 0;
+					}
+					break;
+				}
+				return false;
 			}
 		}
 	}
