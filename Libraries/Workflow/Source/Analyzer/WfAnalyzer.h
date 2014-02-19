@@ -159,6 +159,7 @@ Helper Functions
 			extern Ptr<WfLexicalScopeName>					GetExpressionScopeName(WfLexicalScopeManager* manager, Ptr<WfExpression> expression);
 			extern Ptr<reflection::description::ITypeInfo>	GetExpressionType(WfLexicalScopeManager* manager, Ptr<WfExpression> expression, Ptr<reflection::description::ITypeInfo> expectedType);
 			bool											CanConvertToType(reflection::description::ITypeInfo* fromType, reflection::description::ITypeInfo* toType, bool explicitly);
+			bool											IsSameType(reflection::description::ITypeInfo* fromType, reflection::description::ITypeInfo* toType);
 
 /***********************************************************************
 Error Messages

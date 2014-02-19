@@ -398,8 +398,9 @@ ValidateSemantic
 
 			bool CanConvertToType(reflection::description::ITypeInfo* fromType, reflection::description::ITypeInfo* toType, bool explicitly)
 			{
-				bool fromObject = fromType->GetDecorator() == ITypeInfo::TypeDescriptor && fromType->GetTypeDescriptor() == GetTypeDescriptor<Value>();
-				bool toObject = toType->GetDecorator() == ITypeInfo::TypeDescriptor && toType->GetTypeDescriptor() == GetTypeDescriptor<Value>();
+				ITypeDescriptor* objectType = GetTypeDescriptor<Value>();
+				bool fromObject = fromType->GetDecorator() == ITypeInfo::TypeDescriptor && fromType->GetTypeDescriptor() == objectType;
+				bool toObject = toType->GetDecorator() == ITypeInfo::TypeDescriptor && toType->GetTypeDescriptor() == objectType;
 
 				if (fromObject && toObject)
 				{
@@ -474,11 +475,23 @@ ValidateSemantic
 
 							if (fromTd->GetValueSerializer())
 							{
-								throw 0;
+								if (fromTd == toTd)
+								{
+									return true;
+								}
+								ITypeDescriptor* stringType = GetTypeDescriptor<WString>();
+								return fromTd == stringType || toTd == stringType;
 							}
 							else
 							{
-								throw 0;
+								if (fromTd->CanConvertTo(fromTd))
+								{
+									return true;
+								}
+								if (explicitly && toTd->CanConvertTo(fromTd))
+								{
+									return true;
+								}
 							}
 						}
 					case ITypeInfo::Generic:
@@ -495,9 +508,54 @@ ValidateSemantic
 					case ITypeInfo::TypeDescriptor:
 						return CanConvertToType(fromType->GetElementType(), toType, explicitly);
 					case ITypeInfo::Generic:
-						throw 0;
+						if (explicitly) return true;
+						if (fromType->GetGenericArgumentCount() != toType->GetGenericArgumentCount())
+						{
+							return false;
+						}
+						if (!CanConvertToType(fromType->GetElementType(), toType->GetElementType(), explicitly)) return false;
+						for (vint i = 0; i < fromType->GetGenericArgumentCount(); i++)
+						{
+							if (!IsSameType(fromType->GetGenericArgument(i), toType->GetGenericArgument(i)))
+							{
+								return false;
+							}
+						}
+						return true;
 					}
 					break;
+				}
+				return false;
+			}
+
+			bool IsSameType(reflection::description::ITypeInfo* fromType, reflection::description::ITypeInfo* toType)
+			{
+				if (fromType->GetDecorator() != toType->GetDecorator())
+				{
+					return false;
+				}
+				switch (fromType->GetDecorator())
+				{
+				case ITypeInfo::RawPtr:
+				case ITypeInfo::SharedPtr:
+				case ITypeInfo::Nullable:
+					return IsSameType(fromType->GetElementType(), toType->GetElementType());
+				case ITypeInfo::TypeDescriptor:
+					return fromType->GetTypeDescriptor() == toType->GetTypeDescriptor();
+				case ITypeInfo::Generic:
+					if (fromType->GetGenericArgumentCount() != toType->GetGenericArgumentCount())
+					{
+						return false;
+					}
+					if (!IsSameType(fromType->GetElementType(), toType->GetElementType())) return false;
+					for (vint i = 0; i < fromType->GetGenericArgumentCount(); i++)
+					{
+						if (!IsSameType(fromType->GetGenericArgument(i), toType->GetGenericArgument(i)))
+						{
+							return false;
+						}
+					}
+					return true;
 				}
 				return false;
 			}
