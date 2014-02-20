@@ -295,10 +295,8 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_StructToToRawPtr.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_StructToToSharedPtr.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_StructToToStruct.txt" />
-    <Text Include="..\TestFiles\Samples\AnalyzerError\A11_NullableToNullable.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A11_NullableToRawPtr.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A11_NullableToSharedPtr.txt" />
-    <Text Include="..\TestFiles\Samples\AnalyzerError\A11_NullableToStruct.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A11_RawPtrToNullable.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A11_RawPtrToStruct.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A11_SharedPtrToNullable.txt" />

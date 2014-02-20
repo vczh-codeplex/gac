@@ -3,6 +3,6 @@ using system::*;
 
 func main():void
 {
-	var x : string = null;
+	var x : string = "";
 	var y = cast Function^ x;
 }

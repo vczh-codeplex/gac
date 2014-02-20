@@ -932,16 +932,10 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_StructToToStruct.txt">
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
     </Text>
-    <Text Include="..\TestFiles\Samples\AnalyzerError\A11_NullableToNullable.txt">
-      <Filter>Resource Files\Samples\AnalyzerError</Filter>
-    </Text>
     <Text Include="..\TestFiles\Samples\AnalyzerError\A11_NullableToRawPtr.txt">
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
     </Text>
     <Text Include="..\TestFiles\Samples\AnalyzerError\A11_NullableToSharedPtr.txt">
-      <Filter>Resource Files\Samples\AnalyzerError</Filter>
-    </Text>
-    <Text Include="..\TestFiles\Samples\AnalyzerError\A11_NullableToStruct.txt">
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
     </Text>
     <Text Include="..\TestFiles\Samples\AnalyzerError\A11_RawPtrToNullable.txt">
