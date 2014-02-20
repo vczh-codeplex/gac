@@ -21,10 +21,8 @@ A10_StructToToNullable
 A10_StructToToRawPtr
 A10_StructToToSharedPtr
 A10_StructToToStruct
-A11_NullableToNullable
 A11_NullableToRawPtr
 A11_NullableToSharedPtr
-A11_NullableToStruct
 A11_RawPtrToNullable
 A11_RawPtrToStruct
 A11_SharedPtrToNullable
