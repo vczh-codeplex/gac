@@ -480,11 +480,11 @@ ValidateSemantic
 									return true;
 								}
 								ITypeDescriptor* stringType = GetTypeDescriptor<WString>();
-								return fromTd == stringType || toTd == stringType;
+								return (explicitly && fromTd == stringType) || toTd == stringType;
 							}
 							else
 							{
-								if (fromTd->CanConvertTo(fromTd))
+								if (fromTd->CanConvertTo(toTd))
 								{
 									return true;
 								}
@@ -494,6 +494,7 @@ ValidateSemantic
 								}
 							}
 						}
+						break;
 					case ITypeInfo::Generic:
 						return explicitly && CanConvertToType(fromType, toType->GetElementType(), explicitly);
 					}
