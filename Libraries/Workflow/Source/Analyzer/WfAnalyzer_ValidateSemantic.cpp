@@ -235,6 +235,60 @@ ValidateSemantic(Expression)
 
 				void Visit(WfLiteralExpression* node)override
 				{
+					if (node->value == WfLiteralValue::Null)
+					{
+						if (!expectedType)
+						{
+							manager->errors.Add(WfErrors::NullCannotResolveType(node));
+							return;
+						}
+
+						ITypeInfo* type = expectedType.Obj();
+						switch (type->GetDecorator())
+						{
+						case ITypeInfo::RawPtr:
+						case ITypeInfo::SharedPtr:
+							{
+								type = type->GetElementType();
+								if (type->GetDecorator() == ITypeInfo::Generic)
+								{
+									type = type->GetElementType();
+								}
+								if (type->GetDecorator() != ITypeInfo::TypeDescriptor)
+								{
+									goto NULL_FAILED;
+								}
+								if (type->GetTypeDescriptor()->GetValueSerializer())
+								{
+									goto NULL_FAILED;
+								}
+							}
+							break;
+						case ITypeInfo::Nullable:
+							break;
+						case ITypeInfo::TypeDescriptor:
+							if (type->GetTypeDescriptor() != description::GetTypeDescriptor<Value>())
+							{
+								goto NULL_FAILED;
+							}
+							break;
+						case ITypeInfo::Generic:
+							goto NULL_FAILED;
+						}
+
+						goto NULL_FINISHED;
+					NULL_FAILED:
+						manager->errors.Add(WfErrors::NullCannotImplicitlyConvertToType(node, type));
+					NULL_FINISHED:
+						resultType = expectedType;
+					}
+					else
+					{
+						ITypeDescriptor* typeDescriptor = description::GetTypeDescriptor<bool>();
+						Ptr<TypeInfoImpl> typeInfo = new TypeInfoImpl(ITypeInfo::TypeDescriptor);
+						typeInfo->SetTypeDescriptor(typeDescriptor);
+						resultType = typeInfo;
+					}
 				}
 
 				void Visit(WfFloatingExpression* node)override
@@ -287,6 +341,16 @@ ValidateSemantic(Expression)
 
 				void Visit(WfTypeCastingExpression* node)override
 				{
+					auto scope = manager->expressionScopes[node].Obj();
+					Ptr<ITypeInfo> type = CreateTypeInfoFromType(scope, node->type);
+					Ptr<ITypeInfo> expressionType = GetExpressionType(manager, node->expression, 0);
+					if (type && expressionType)
+					{
+						if (!CanConvertToType(expressionType.Obj(), type.Obj(), true))
+						{
+							manager->errors.Add(WfErrors::ExpressionCannotExplicitlyConvertToType(node->expression.Obj(), expressionType.Obj(), type.Obj()));
+						}
+					}
 				}
 
 				void Visit(WfTypeTestingExpression* node)override
