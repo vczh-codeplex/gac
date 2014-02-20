@@ -281,6 +281,20 @@
   <ItemGroup>
     <Text Include="..\..\Source\Expression\WfExpressionParser.parser.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A0_WrongFormatStringSyntax.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A10_BaseToDerived.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A10_NullableToNullable.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A10_NullableToRawPtr.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A10_NullableToSharedPtr.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A10_NullableToStruct.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A10_RawPtrToNullable.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A10_RawPtrToSharedPtr.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A10_RawPtrToStruct.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A10_SharedPtrToNullable.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A10_SharedPtrToStruct.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A10_StructToToNullable.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A10_StructToToRawPtr.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A10_StructToToSharedPtr.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A10_StructToToStruct.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A1_WrongSimpleObserveExpression.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A2_WrongSimpleObserveEvent.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A3_ObserveNotInBind.txt" />
