@@ -243,31 +243,14 @@ ValidateSemantic(Expression)
 							return;
 						}
 
-						ITypeInfo* type = expectedType.Obj();
-						switch (type->GetDecorator())
+						switch (expectedType->GetDecorator())
 						{
 						case ITypeInfo::RawPtr:
 						case ITypeInfo::SharedPtr:
-							{
-								type = type->GetElementType();
-								if (type->GetDecorator() == ITypeInfo::Generic)
-								{
-									type = type->GetElementType();
-								}
-								if (type->GetDecorator() != ITypeInfo::TypeDescriptor)
-								{
-									goto NULL_FAILED;
-								}
-								if (type->GetTypeDescriptor()->GetValueSerializer())
-								{
-									goto NULL_FAILED;
-								}
-							}
-							break;
 						case ITypeInfo::Nullable:
 							break;
 						case ITypeInfo::TypeDescriptor:
-							if (type->GetTypeDescriptor() != description::GetTypeDescriptor<Value>())
+							if (expectedType->GetTypeDescriptor() != description::GetTypeDescriptor<Value>())
 							{
 								goto NULL_FAILED;
 							}
@@ -278,7 +261,7 @@ ValidateSemantic(Expression)
 
 						goto NULL_FINISHED;
 					NULL_FAILED:
-						manager->errors.Add(WfErrors::NullCannotImplicitlyConvertToType(node, type));
+						manager->errors.Add(WfErrors::NullCannotImplicitlyConvertToType(node, expectedType.Obj()));
 					NULL_FINISHED:
 						resultType = expectedType;
 					}
@@ -344,11 +327,26 @@ ValidateSemantic(Expression)
 					auto scope = manager->expressionScopes[node].Obj();
 					Ptr<ITypeInfo> type = CreateTypeInfoFromType(scope, node->type);
 					Ptr<ITypeInfo> expressionType = GetExpressionType(manager, node->expression, 0);
-					if (type && expressionType)
+					if (type)
 					{
-						if (!CanConvertToType(expressionType.Obj(), type.Obj(), true))
+						if (node->strategy == WfTypeCastingStrategy::Weak)
 						{
-							manager->errors.Add(WfErrors::ExpressionCannotExplicitlyConvertToType(node->expression.Obj(), expressionType.Obj(), type.Obj()));
+							switch (type->GetDecorator())
+							{
+							case ITypeInfo::RawPtr:
+							case ITypeInfo::SharedPtr:
+							case ITypeInfo::Nullable:
+								break;
+							default:
+								manager->errors.Add(WfErrors::CannotWeakCastToType(node->expression.Obj(), type.Obj()));
+							}
+						}
+						if (expressionType)
+						{
+							if (!CanConvertToType(expressionType.Obj(), type.Obj(), true))
+							{
+								manager->errors.Add(WfErrors::ExpressionCannotExplicitlyConvertToType(node->expression.Obj(), expressionType.Obj(), type.Obj()));
+							}
 						}
 					}
 				}
