@@ -83,6 +83,11 @@ WfErrors
 				return new ParsingError(node, L"A11: Expression of type \"" + fromType->GetTypeFriendlyName() + L"\" cannot explicitly convert to \"" + toType->GetTypeFriendlyName() + L"\".");
 			}
 
+			Ptr<parsing::ParsingError> WfErrors::CannotWeakCastToType(WfExpression* node, reflection::description::ITypeInfo* toType)
+			{
+				return new ParsingError(node, L"A12: Expression cannot weakly cast to \"" + toType->GetTypeFriendlyName() + L"\" because it cannot be \"null\".");
+			}
+
 			Ptr<parsing::ParsingError> WfErrors::WrongVoidType(WfType* node)
 			{
 				return new ParsingError(node, L"B0: Void is not a type for a value.");
