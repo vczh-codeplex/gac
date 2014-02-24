@@ -215,12 +215,24 @@ WfErrors
 
 			Ptr<parsing::ParsingError> WfErrors::TooManySymbol(WfType* node, collections::List<Ptr<WfLexicalSymbol>>& symbols, const WString& name)
 			{
-				return new ParsingError(node, L"F3: Symbol \"" + name + L"\" references to too many targets.");
+				WString description;
+				FOREACH_INDEXER(Ptr<WfLexicalSymbol>, symbol, index, symbols)
+				{
+					if (index) description += L", ";
+					description += symbol->GetFriendlyName();
+				}
+				return new ParsingError(node, L"F3: Symbol \"" + name + L"\" references to too many targets: " + description + L".");
 			}
 
 			Ptr<parsing::ParsingError> WfErrors::TooManySymbol(WfExpression* node, collections::List<Ptr<WfLexicalSymbol>>& symbols, const WString& name)
 			{
-				return new ParsingError(node, L"F3: Symbol \"" + name + L"\" references to too many targets.");
+				WString description;
+				FOREACH_INDEXER(Ptr<WfLexicalSymbol>, symbol, index, symbols)
+				{
+					if (index) description += L", ";
+					description += symbol->GetFriendlyName();
+				}
+				return new ParsingError(node, L"F3: Symbol \"" + name + L"\" references to too many targets: " + description + L".");
 			}
 
 			Ptr<parsing::ParsingError> WfErrors::TooManyScopeName(WfType* node, collections::List<Ptr<WfLexicalScopeName>>& names, const WString& name)
