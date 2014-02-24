@@ -233,9 +233,9 @@ Error Messages
 				static Ptr<parsing::ParsingError>			ReferenceNotExists(WfType* node, const WString& name);
 				static Ptr<parsing::ParsingError>			ReferenceNotExists(WfExpression* node, const WString& name);
 				static Ptr<parsing::ParsingError>			TooManySymbol(WfType* node, collections::List<Ptr<WfLexicalSymbol>>& symbols, const WString& name);
-				static Ptr<parsing::ParsingError>			TooManySymbol(WfExpression* node, collections::List<Ptr<WfLexicalSymbol>>& symbols);
+				static Ptr<parsing::ParsingError>			TooManySymbol(WfExpression* node, collections::List<Ptr<WfLexicalSymbol>>& symbols, const WString& name);
 				static Ptr<parsing::ParsingError>			TooManyScopeName(WfType* node, collections::List<Ptr<WfLexicalScopeName>>& names, const WString& name);
-				static Ptr<parsing::ParsingError>			TooManyScopeName(WfExpression* node, collections::List<Ptr<WfLexicalScopeName>>& names);
+				static Ptr<parsing::ParsingError>			TooManyScopeName(WfExpression* node, collections::List<Ptr<WfLexicalScopeName>>& names, const WString& name);
 			};
 		}
 	}

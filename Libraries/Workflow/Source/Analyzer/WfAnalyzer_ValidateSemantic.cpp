@@ -399,6 +399,148 @@ ValidateSemantic(Expression)
 			};
 
 /***********************************************************************
+GetExpressionName(Expression)
+***********************************************************************/
+
+			class GetExpressionNameVisitor : public Object, public WfExpression::IVisitor
+			{
+			public:
+				WString								result;
+
+				void Visit(WfTopQualifiedExpression* node)override
+				{
+					result = node->name.value;
+				}
+
+				void Visit(WfReferenceExpression* node)override
+				{
+					result = node->name.value;
+				}
+
+				void Visit(WfOrderedNameExpression* node)override
+				{
+					result = node->name.value;
+				}
+
+				void Visit(WfOrderedLambdaExpression* node)override
+				{
+				}
+
+				void Visit(WfMemberExpression* node)override
+				{
+					result = node->name.value;
+				}
+
+				void Visit(WfChildExpression* node)override
+				{
+					result = node->name.value;
+				}
+
+				void Visit(WfLiteralExpression* node)override
+				{
+				}
+
+				void Visit(WfFloatingExpression* node)override
+				{
+				}
+
+				void Visit(WfIntegerExpression* node)override
+				{
+				}
+
+				void Visit(WfStringExpression* node)override
+				{
+				}
+
+				void Visit(WfFormatExpression* node)override
+				{
+				}
+
+				void Visit(WfUnaryExpression* node)override
+				{
+				}
+
+				void Visit(WfBinaryExpression* node)override
+				{
+				}
+
+				void Visit(WfLetExpression* node)override
+				{
+				}
+
+				void Visit(WfIfExpression* node)override
+				{
+				}
+
+				void Visit(WfRangeExpression* node)override
+				{
+				}
+
+				void Visit(WfSetTestingExpression* node)override
+				{
+				}
+
+				void Visit(WfConstructorExpression* node)override
+				{
+				}
+
+				void Visit(WfInferExpression* node)override
+				{
+				}
+
+				void Visit(WfTypeCastingExpression* node)override
+				{
+				}
+
+				void Visit(WfTypeTestingExpression* node)override
+				{
+				}
+
+				void Visit(WfTypeOfTypeExpression* node)override
+				{
+				}
+
+				void Visit(WfTypeOfExpressionExpression* node)override
+				{
+				}
+
+				void Visit(WfAttachEventExpression* node)override
+				{
+				}
+
+				void Visit(WfDetachEventExpression* node)override
+				{
+				}
+
+				void Visit(WfBindExpression* node)override
+				{
+				}
+
+				void Visit(WfObserveExpression* node)override
+				{
+				}
+
+				void Visit(WfCallExpression* node)override
+				{
+				}
+
+				void Visit(WfFunctionExpression* node)override
+				{
+				}
+
+				void Visit(WfNewTypeExpression* node)override
+				{
+				}
+
+				static WString Execute(Ptr<WfExpression> expression)
+				{
+					GetExpressionNameVisitor visitor;
+					expression->Accept(&visitor);
+					return visitor.result;
+				}
+			};
+
+/***********************************************************************
 ResolveExpressionResult
 ***********************************************************************/
 
@@ -517,7 +659,7 @@ ValidateSemantic
 					}
 					if (scopeNames.Count() > 0)
 					{
-						manager->errors.Add(WfErrors::TooManyScopeName(expression.Obj(), scopeNames));
+						manager->errors.Add(WfErrors::TooManyScopeName(expression.Obj(), scopeNames, GetExpressionNameVisitor::Execute(expression)));
 					}
 					return 0;
 				}
@@ -579,7 +721,7 @@ ValidateSemantic
 				}
 				if (symbols.Count() > 1)
 				{
-					manager->errors.Add(WfErrors::TooManySymbol(expression.Obj(), symbols));
+					manager->errors.Add(WfErrors::TooManySymbol(expression.Obj(), symbols, GetExpressionNameVisitor::Execute(expression)));
 				}
 				
 				return expectedType ? expectedType : results[0].type;

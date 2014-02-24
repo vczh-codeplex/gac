@@ -218,9 +218,9 @@ WfErrors
 				return new ParsingError(node, L"F3: Symbol \"" + name + L"\" references to too many targets.");
 			}
 
-			Ptr<parsing::ParsingError> WfErrors::TooManySymbol(WfExpression* node, collections::List<Ptr<WfLexicalSymbol>>& symbols)
+			Ptr<parsing::ParsingError> WfErrors::TooManySymbol(WfExpression* node, collections::List<Ptr<WfLexicalSymbol>>& symbols, const WString& name)
 			{
-				return new ParsingError(node, L"F3: Symbol references to too many targets.");
+				return new ParsingError(node, L"F3: Symbol \"" + name + L"\" references to too many targets.");
 			}
 
 			Ptr<parsing::ParsingError> WfErrors::TooManyScopeName(WfType* node, collections::List<Ptr<WfLexicalScopeName>>& names, const WString& name)
@@ -234,7 +234,7 @@ WfErrors
 				return new ParsingError(node, L"F4: Symbol \"" + name + L"\" references to too many declarations: " + description + L".");
 			}
 
-			Ptr<parsing::ParsingError> WfErrors::TooManyScopeName(WfExpression* node, collections::List<Ptr<WfLexicalScopeName>>& names)
+			Ptr<parsing::ParsingError> WfErrors::TooManyScopeName(WfExpression* node, collections::List<Ptr<WfLexicalScopeName>>& names, const WString& name)
 			{
 				WString description;
 				FOREACH_INDEXER(Ptr<WfLexicalScopeName>, scopeName, index, names)
@@ -242,7 +242,7 @@ WfErrors
 					if (index) description += L", ";
 					description += scopeName->GetFriendlyName();
 				}
-				return new ParsingError(node, L"F4: Symbol references to too many declarations: " + description + L".");
+				return new ParsingError(node, L"F4: Symbol \"" + name + L"\" references to too many declarations: " + description + L".");
 			}
 		}
 	}
