@@ -1,4 +1,4 @@
-ReferenceType means pointer
+ReferenceType* means pointer
 ReferenceType^ means smart pointer
 int[] is ValueList^
 int[string] is ValueDictionary^
