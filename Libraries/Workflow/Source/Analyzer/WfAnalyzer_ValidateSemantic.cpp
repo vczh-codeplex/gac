@@ -135,6 +135,154 @@ ValidateSemantic(Statement)
 			};
 
 /***********************************************************************
+IsExpressionDependOnExpectedType(Expression)
+***********************************************************************/
+
+			class IsExpressionDependOnExpectedTypeVisitor : public Object, public WfExpression::IVisitor
+			{
+			public:
+				bool								result;
+
+				IsExpressionDependOnExpectedTypeVisitor()
+					:result(false)
+				{
+				}
+
+				static bool Execute(Ptr<WfExpression> expression)
+				{
+					IsExpressionDependOnExpectedTypeVisitor visitor;
+					expression->Accept(&visitor);
+					return visitor.result;
+				}
+
+				void Visit(WfTopQualifiedExpression* node)override
+				{
+				}
+
+				void Visit(WfReferenceExpression* node)override
+				{
+				}
+
+				void Visit(WfOrderedNameExpression* node)override
+				{
+				}
+
+				void Visit(WfOrderedLambdaExpression* node)override
+				{
+					result = true;
+				}
+
+				void Visit(WfMemberExpression* node)override
+				{
+				}
+
+				void Visit(WfChildExpression* node)override
+				{
+				}
+
+				void Visit(WfLiteralExpression* node)override
+				{
+					if (node->value == WfLiteralValue::Null)
+					{
+						result = true;
+					}
+				}
+
+				void Visit(WfFloatingExpression* node)override
+				{
+				}
+
+				void Visit(WfIntegerExpression* node)override
+				{
+				}
+
+				void Visit(WfStringExpression* node)override
+				{
+				}
+
+				void Visit(WfFormatExpression* node)override
+				{
+				}
+
+				void Visit(WfUnaryExpression* node)override
+				{
+				}
+
+				void Visit(WfBinaryExpression* node)override
+				{
+				}
+
+				void Visit(WfLetExpression* node)override
+				{
+				}
+
+				void Visit(WfIfExpression* node)override
+				{
+					result = Execute(node->trueBranch) && Execute(node->falseBranch);
+				}
+
+				void Visit(WfRangeExpression* node)override
+				{
+				}
+
+				void Visit(WfSetTestingExpression* node)override
+				{
+				}
+
+				void Visit(WfConstructorExpression* node)override
+				{
+				}
+
+				void Visit(WfInferExpression* node)override
+				{
+				}
+
+				void Visit(WfTypeCastingExpression* node)override
+				{
+				}
+
+				void Visit(WfTypeTestingExpression* node)override
+				{
+				}
+
+				void Visit(WfTypeOfTypeExpression* node)override
+				{
+				}
+
+				void Visit(WfTypeOfExpressionExpression* node)override
+				{
+				}
+
+				void Visit(WfAttachEventExpression* node)override
+				{
+				}
+
+				void Visit(WfDetachEventExpression* node)override
+				{
+				}
+
+				void Visit(WfBindExpression* node)override
+				{
+				}
+
+				void Visit(WfObserveExpression* node)override
+				{
+				}
+
+				void Visit(WfCallExpression* node)override
+				{
+				}
+
+				void Visit(WfFunctionExpression* node)override
+				{
+				}
+
+				void Visit(WfNewTypeExpression* node)override
+				{
+				}
+			};
+
+/***********************************************************************
 ValidateSemantic(Expression)
 ***********************************************************************/
 
@@ -209,10 +357,73 @@ ValidateSemantic(Expression)
 
 				void Visit(WfOrderedNameExpression* node)override
 				{
+					auto scope = manager->expressionScopes[node].Obj();
+
+					List<Ptr<WfLexicalSymbol>> symbols;
+					manager->ResolveSymbol(scope, node->name.value, symbols);
+					if (symbols.Count() >= 1)
+					{
+						FOREACH(Ptr<WfLexicalSymbol>, symbol, symbols)
+						{
+							if (symbol->typeInfo)
+							{
+								results.Add(ResolveExpressionResult(symbol, symbol->typeInfo));
+							}
+						}
+					}
 				}
 
 				void Visit(WfOrderedLambdaExpression* node)override
 				{
+					if (!expectedType)
+					{
+						manager->errors.Add(WfErrors::OrderedLambdaCannotResolveType(node));
+						return;
+					}
+					{
+						ITypeInfo* type = expectedType.Obj();
+						if (type->GetDecorator() != ITypeInfo::SharedPtr) goto ORDERED_FAILED;
+						type = type->GetElementType();
+						if (type->GetDecorator() != ITypeInfo::Generic) goto ORDERED_FAILED;
+						{
+							ITypeInfo* functionType = type->GetElementType();
+							if (functionType->GetDecorator() != ITypeInfo::TypeDescriptor) goto ORDERED_FAILED;
+							if (functionType->GetTypeDescriptor() != description::GetTypeDescriptor<IValueFunctionProxy>()) goto ORDERED_FAILED;
+						}
+
+						auto scope = manager->expressionScopes[node].Obj();
+						List<Ptr<WfLexicalSymbol>> parameterSymbols;
+						CopyFrom(
+							parameterSymbols,
+							Range<vint>(0, scope->symbols.Count())
+								.Select([scope](vint index)->Ptr<WfLexicalSymbol>{return scope->symbols.GetByIndex(index)[0];})
+								.OrderBy([](Ptr<WfLexicalSymbol> a, Ptr<WfLexicalSymbol> b)
+								{
+									vint aId = wtoi(a->name.Sub(1, a->name.Length() - 1));
+									vint bId = wtoi(b->name.Sub(1, a->name.Length() - 1));
+									return aId - bId;
+								})
+							);
+						if (type->GetGenericArgumentCount() != parameterSymbols.Count() + 1)
+						{
+							goto ORDERED_FAILED;
+						}
+						results.Add(ResolveExpressionResult(expectedType));
+
+						Ptr<ITypeInfo> resultType = type->GetGenericArgument(0);
+						FOREACH_INDEXER(Ptr<WfLexicalSymbol>, symbol, index, parameterSymbols)
+						{
+							symbol->typeInfo = type->GetGenericArgument(index + 1);
+							symbol->type = GetTypeFromTypeInfo(symbol->typeInfo.Obj());
+						}
+						GetExpressionType(manager, node->body, resultType);
+					}
+
+					goto ORDERED_FINISHED;
+				ORDERED_FAILED:
+					manager->errors.Add(WfErrors::OrderedLambdaCannotImplicitlyConvertToType(node, expectedType.Obj()));
+				ORDERED_FINISHED:
+					results.Add(ResolveExpressionResult(expectedType));
 				}
 
 				void Visit(WfMemberExpression* node)override
@@ -320,6 +531,13 @@ ValidateSemantic(Expression)
 
 				void Visit(WfInferExpression* node)override
 				{
+					auto scope = manager->expressionScopes[node].Obj();
+					Ptr<ITypeInfo> type = CreateTypeInfoFromType(scope, node->type);
+					Ptr<ITypeInfo> expressionType = GetExpressionType(manager, node->expression, type);
+					if (expressionType)
+					{
+						results.Add(ResolveExpressionResult(type));
+					}
 				}
 
 				void Visit(WfTypeCastingExpression* node)override
@@ -348,6 +566,7 @@ ValidateSemantic(Expression)
 								manager->errors.Add(WfErrors::ExpressionCannotExplicitlyConvertToType(node->expression.Obj(), expressionType.Obj(), type.Obj()));
 							}
 						}
+						results.Add(ResolveExpressionResult(type));
 					}
 				}
 
