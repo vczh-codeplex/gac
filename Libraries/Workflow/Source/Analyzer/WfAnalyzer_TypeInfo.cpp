@@ -204,7 +204,7 @@ GetTypeFromTypeInfo
 			}
 
 /***********************************************************************
-CreateTypeInfoFromType
+GetScopeNameFromReferenceType
 ***********************************************************************/
 
 			class GetScopeNameFromReferenceTypeVisitor : public Object, public WfType::IVisitor
