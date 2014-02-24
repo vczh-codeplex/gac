@@ -155,11 +155,25 @@ Helper Functions
 			extern void										ValidateModuleSemantic(WfLexicalScopeManager* manager, Ptr<WfModule> module);
 			extern void										ValidateDeclarationSemantic(WfLexicalScopeManager* manager, Ptr<WfDeclaration> declaration);
 			extern void										ValidateStatementSemantic(WfLexicalScopeManager* manager, Ptr<WfStatement> statement);
-			extern void										ValidateExpressionSemantic(WfLexicalScopeManager* manager, Ptr<WfExpression> expression, Ptr<reflection::description::ITypeInfo> expectedType, Ptr<reflection::description::ITypeInfo>& resultType, Ptr<WfLexicalScopeName>& resultScopeName);
+
+			struct ResolveExpressionResult
+			{
+				Ptr<WfLexicalScopeName>						scopeName;
+				Ptr<WfLexicalSymbol>						symbol;
+				Ptr<reflection::description::ITypeInfo>		type;
+
+				ResolveExpressionResult();
+				ResolveExpressionResult(const ResolveExpressionResult& result);
+				ResolveExpressionResult(Ptr<WfLexicalScopeName> _scopeName);
+				ResolveExpressionResult(Ptr<reflection::description::ITypeInfo> _type);
+				ResolveExpressionResult(Ptr<WfLexicalSymbol> _symbol, Ptr<reflection::description::ITypeInfo> _type);
+			};
+
+			extern void										ValidateExpressionSemantic(WfLexicalScopeManager* manager, Ptr<WfExpression> expression, Ptr<reflection::description::ITypeInfo> expectedType, collections::List<ResolveExpressionResult>& results);
 			extern Ptr<WfLexicalScopeName>					GetExpressionScopeName(WfLexicalScopeManager* manager, Ptr<WfExpression> expression);
 			extern Ptr<reflection::description::ITypeInfo>	GetExpressionType(WfLexicalScopeManager* manager, Ptr<WfExpression> expression, Ptr<reflection::description::ITypeInfo> expectedType);
-			bool											CanConvertToType(reflection::description::ITypeInfo* fromType, reflection::description::ITypeInfo* toType, bool explicitly);
-			bool											IsSameType(reflection::description::ITypeInfo* fromType, reflection::description::ITypeInfo* toType);
+			extern bool										CanConvertToType(reflection::description::ITypeInfo* fromType, reflection::description::ITypeInfo* toType, bool explicitly);
+			extern bool										IsSameType(reflection::description::ITypeInfo* fromType, reflection::description::ITypeInfo* toType);
 
 /***********************************************************************
 Error Messages
@@ -219,9 +233,9 @@ Error Messages
 				static Ptr<parsing::ParsingError>			ReferenceNotExists(WfType* node, const WString& name);
 				static Ptr<parsing::ParsingError>			ReferenceNotExists(WfExpression* node, const WString& name);
 				static Ptr<parsing::ParsingError>			TooManySymbol(WfType* node, collections::List<Ptr<WfLexicalSymbol>>& symbols, const WString& name);
-				static Ptr<parsing::ParsingError>			TooManySymbol(WfExpression* node, collections::List<Ptr<WfLexicalSymbol>>& symbols, const WString& name);
+				static Ptr<parsing::ParsingError>			TooManySymbol(WfExpression* node, collections::List<Ptr<WfLexicalSymbol>>& symbols);
 				static Ptr<parsing::ParsingError>			TooManyScopeName(WfType* node, collections::List<Ptr<WfLexicalScopeName>>& names, const WString& name);
-				static Ptr<parsing::ParsingError>			TooManyScopeName(WfExpression* node, collections::List<Ptr<WfLexicalScopeName>>& names, const WString& name);
+				static Ptr<parsing::ParsingError>			TooManyScopeName(WfExpression* node, collections::List<Ptr<WfLexicalScopeName>>& names);
 			};
 		}
 	}
