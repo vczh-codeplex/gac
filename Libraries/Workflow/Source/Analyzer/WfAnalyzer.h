@@ -32,9 +32,12 @@ Scope
 				Ptr<WfDeclaration>							ownerDeclaration;	// nullable
 				Ptr<WfStatement>							ownerStatement;		// nullable
 				Ptr<WfExpression>							ownerExpression;	// nullable
+				WfLexicalScope*								ownerScope;			// scope that contains this symbol
 
-				WfLexicalSymbol();
+				WfLexicalSymbol(WfLexicalScope* _ownerScope);
 				~WfLexicalSymbol();
+				
+				WString										GetFriendlyName();
 			};
 
 			class WfLexicalScope : public Object
@@ -57,6 +60,7 @@ Scope
 				WfLexicalScopeManager*						FindManager();
 				Ptr<WfModule>								FindModule();
 				Ptr<WfDeclaration>							FindDeclaration();
+				WString										GetFriendlyName();
 			};
 
 /***********************************************************************

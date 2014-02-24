@@ -14,12 +14,18 @@ namespace vl
 WfLexicalSymbol
 ***********************************************************************/
 
-			WfLexicalSymbol::WfLexicalSymbol()
+			WfLexicalSymbol::WfLexicalSymbol(WfLexicalScope* _ownerScope)
+				:ownerScope(_ownerScope)
 			{
 			}
 
 			WfLexicalSymbol::~WfLexicalSymbol()
 			{
+			}
+
+			WString WfLexicalSymbol::GetFriendlyName()
+			{
+				return ownerScope->GetFriendlyName() + L"::" + name;
 			}
 
 /***********************************************************************
@@ -81,6 +87,26 @@ WfLexicalScope
 					scope = scope->parentScope.Obj();
 				}
 				return 0;
+			}
+
+			WString WfLexicalScope::GetFriendlyName()
+			{
+				if (ownerModule)
+				{
+					return L"<" + ownerModule->name.value + L">";
+				}
+				else if (ownerDeclaration)
+				{
+					return parentScope->GetFriendlyName() + L"::" + ownerDeclaration->name.value;
+				}
+				else if (!parentScope)
+				{
+					return L"";
+				}
+				else
+				{
+					return parentScope->GetFriendlyName() + L"::<>";
+				}
 			}
 
 /***********************************************************************
