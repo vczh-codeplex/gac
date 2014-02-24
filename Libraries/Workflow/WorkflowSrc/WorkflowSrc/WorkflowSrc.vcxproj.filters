@@ -872,15 +872,6 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\F3_ExpressionReferenceToVariablesInNestedBlocks.txt">
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
     </Text>
-    <Text Include="..\TestFiles\Samples\AnalyzerError\F4_ExpressionReferenceToFunctionsByUsing.txt">
-      <Filter>Resource Files\Samples\AnalyzerError</Filter>
-    </Text>
-    <Text Include="..\TestFiles\Samples\AnalyzerError\F4_ExpressionReferenceToFunctionsInLocalAndUsing.txt">
-      <Filter>Resource Files\Samples\AnalyzerError</Filter>
-    </Text>
-    <Text Include="..\TestFiles\Samples\AnalyzerError\F4_ExpressionReferenceToFunctionsInNestedNamespaces.txt">
-      <Filter>Resource Files\Samples\AnalyzerError</Filter>
-    </Text>
     <Text Include="..\TestFiles\Samples\AnalyzerError\A8_ExpressionIsNotScopeName.txt">
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
     </Text>
@@ -954,6 +945,15 @@
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
     </Text>
     <Text Include="..\TestFiles\Samples\AnalyzerError\A11_StructToToSharedPtr.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\F3_ExpressionReferenceToFunctionsByUsing.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\F3_ExpressionReferenceToFunctionsInLocalAndUsing.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\F3_ExpressionReferenceToFunctionsInNestedNamespaces.txt">
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
     </Text>
   </ItemGroup>

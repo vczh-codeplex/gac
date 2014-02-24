@@ -363,9 +363,9 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\F1_TypeChildSymbolNotExists.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\F3_ExpressionReferenceToVariablesInNestedBlocks.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\F3_TypeReferenceToVariablesInNestedBlocks.txt" />
-    <Text Include="..\TestFiles\Samples\AnalyzerError\F4_ExpressionReferenceToFunctionsByUsing.txt" />
-    <Text Include="..\TestFiles\Samples\AnalyzerError\F4_ExpressionReferenceToFunctionsInLocalAndUsing.txt" />
-    <Text Include="..\TestFiles\Samples\AnalyzerError\F4_ExpressionReferenceToFunctionsInNestedNamespaces.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\F3_ExpressionReferenceToFunctionsByUsing.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\F3_ExpressionReferenceToFunctionsInLocalAndUsing.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\F3_ExpressionReferenceToFunctionsInNestedNamespaces.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\F4_TypeReferenceToFunctionsByUsing.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\F4_TypeReferenceToFunctionsInLocalAndUsing.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\F4_TypeReferenceToFunctionsInNestedNamespaces.txt" />

@@ -454,6 +454,39 @@ ValidateSemantic
 			void ValidateExpressionSemantic(WfLexicalScopeManager* manager, Ptr<WfExpression> expression, Ptr<reflection::description::ITypeInfo> expectedType, collections::List<ResolveExpressionResult>& results)
 			{
 				ValidateSemanticExpressionVisitor::Execute(expression, manager, expectedType, results);
+				for (vint i = results.Count() - 1; i >= 0; i--)
+				{
+					auto result = results[i];
+					if (result.scopeName && result.scopeName->declarations.Count() > 0)
+					{
+						List<ResolveExpressionResult> replaces;
+						FOREACH(Ptr<WfDeclaration>, decl, result.scopeName->declarations)
+						{
+							vint index = manager->declarationScopes.Keys().IndexOf(decl);
+							if (index == -1) continue;
+							auto scope = manager->declarationScopes.Values()[index]->parentScope;
+
+							index = scope->symbols.Keys().IndexOf(decl->name.value);
+							if (index == -1) continue;
+							FOREACH(Ptr<WfLexicalSymbol>, symbol, scope->symbols.GetByIndex(index))
+							{
+								if (symbol->ownerDeclaration == decl && symbol->typeInfo)
+								{
+									replaces.Add(ResolveExpressionResult(symbol, symbol->typeInfo));
+								}
+							}
+						}
+
+						if (replaces.Count() > 0)
+						{
+							results.RemoveAt(i);
+							FOREACH_INDEXER(ResolveExpressionResult, replaceResult, index, replaces)
+							{
+								results.Insert(i + index, replaceResult);
+							}
+						}
+					}
+				}
 			}
 
 			Ptr<WfLexicalScopeName> GetExpressionScopeName(WfLexicalScopeManager* manager, Ptr<WfExpression> expression)
@@ -461,10 +494,19 @@ ValidateSemantic
 				List<ResolveExpressionResult> results;
 				ValidateExpressionSemantic(manager, expression, 0, results);
 				if (results.Count() == 0) return 0;
-				auto first = results[0];
-				if (first.type && !first.scopeName)
+
+				for (vint i = results.Count() - 1; i >= 0; i--)
+				{
+					auto& result = results[i];
+					if (!result.scopeName)
+					{
+						results.RemoveAt(i);
+					}
+				}
+				if (results.Count() == 0)
 				{
 					manager->errors.Add(WfErrors::ExpressionIsNotScopeName(expression.Obj()));
+					return 0;
 				}
 				else if (results.Count() > 1)
 				{
@@ -477,8 +519,9 @@ ValidateSemantic
 					{
 						manager->errors.Add(WfErrors::TooManyScopeName(expression.Obj(), scopeNames));
 					}
+					return 0;
 				}
-				return first.scopeName;
+				return results[0].scopeName;
 			}
 
 			Ptr<reflection::description::ITypeInfo> GetExpressionType(WfLexicalScopeManager* manager, Ptr<WfExpression> expression, Ptr<reflection::description::ITypeInfo> expectedType)
@@ -486,32 +529,60 @@ ValidateSemantic
 				List<ResolveExpressionResult> results;
 				ValidateExpressionSemantic(manager, expression, expectedType, results);
 				if (results.Count() == 0) return expectedType;
-				auto first = results[0];
-				if (!first.type && first.scopeName)
+
+				Ptr<WfLexicalScopeName> scopeName;
+				for (vint i = results.Count() - 1; i >= 0; i--)
 				{
-					manager->errors.Add(WfErrors::ScopeNameIsNotExpression(expression.Obj(), first.scopeName));
+					auto& result = results[i];
+					if (result.scopeName)
+					{
+						scopeName = result.scopeName;
+					}
+					if (!result.type)
+					{
+						results.RemoveAt(i);
+					}
 				}
-				else if (results.Count() > 1)
+				if (results.Count() == 0)
 				{
-					List<Ptr<WfLexicalSymbol>> symbols;
-					FOREACH(ResolveExpressionResult, result, results)
+					manager->errors.Add(WfErrors::ScopeNameIsNotExpression(expression.Obj(), scopeName));
+					return expectedType;
+				}
+
+				if (expectedType)
+				{
+					List<Ptr<ITypeInfo>> failedTypes;
+					for (vint i = results.Count() - 1; i >= 0; i--)
 					{
-						symbols.Add(result.symbol);
+						auto& result = results[i];
+						if (!CanConvertToType(result.type.Obj(), expectedType.Obj(), false))
+						{
+							failedTypes.Add(result.type);
+							results.RemoveAt(i);
+						}
 					}
-					if (symbols.Count() > 0)
+
+					if (results.Count() == 0)
 					{
-						manager->errors.Add(WfErrors::TooManySymbol(expression.Obj(), symbols));
+						FOREACH(Ptr<ITypeInfo>, type, failedTypes)
+						{
+							manager->errors.Add(WfErrors::ExpressionCannotImplicitlyConvertToType(expression.Obj(), type.Obj(), expectedType.Obj()));
+						}
+						return expectedType;
 					}
+				}
+
+				List<Ptr<WfLexicalSymbol>> symbols;
+				FOREACH(ResolveExpressionResult, result, results)
+				{
+					symbols.Add(result.symbol);
+				}
+				if (symbols.Count() > 1)
+				{
+					manager->errors.Add(WfErrors::TooManySymbol(expression.Obj(), symbols));
 				}
 				
-				if (expectedType && first.type)
-				{
-					if (!CanConvertToType(first.type.Obj(), expectedType.Obj(), false))
-					{
-						manager->errors.Add(WfErrors::ExpressionCannotImplicitlyConvertToType(expression.Obj(), first.type.Obj(), expectedType.Obj()));
-					}
-				}
-				return expectedType ? expectedType : first.type;
+				return expectedType ? expectedType : results[0].type;
 			}
 
 			bool CanConvertToType(reflection::description::ITypeInfo* fromType, reflection::description::ITypeInfo* toType, bool explicitly)
