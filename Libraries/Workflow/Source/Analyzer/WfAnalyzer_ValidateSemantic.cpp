@@ -408,7 +408,6 @@ ValidateSemantic(Expression)
 						{
 							goto ORDERED_FAILED;
 						}
-						results.Add(ResolveExpressionResult(expectedType));
 
 						Ptr<ITypeInfo> resultType = type->GetGenericArgument(0);
 						FOREACH_INDEXER(Ptr<WfLexicalSymbol>, symbol, index, parameterSymbols)
@@ -936,7 +935,10 @@ ValidateSemantic
 				List<Ptr<WfLexicalSymbol>> symbols;
 				FOREACH(ResolveExpressionResult, result, results)
 				{
-					symbols.Add(result.symbol);
+					if (result.symbol)
+					{
+						symbols.Add(result.symbol);
+					}
 				}
 				if (symbols.Count() > 1)
 				{

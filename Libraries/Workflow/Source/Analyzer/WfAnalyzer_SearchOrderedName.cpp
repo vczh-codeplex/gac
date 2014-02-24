@@ -188,7 +188,7 @@ SearchOrderedName(Expression)
 
 				void Visit(WfOrderedNameExpression* node)override
 				{
-					vint name = wtoi(node->name.value.Sub(1, node->name.value.Length()));
+					vint name = wtoi(node->name.value.Sub(1, node->name.value.Length() - 1));
 					if (!names.Contains(name))
 					{
 						names.Add(name);

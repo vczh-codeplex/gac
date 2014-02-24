@@ -286,6 +286,9 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_NullableToRawPtr.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_NullableToSharedPtr.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_NullableToStruct.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A10_OrderedLambdaToStruct.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A10_OrderedLambdaToWrongBody.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A10_OrderedLambdaToWrongFunctionType.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_RawPtrToNullable.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_RawPtrToSharedPtr.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_RawPtrToStruct.txt" />
@@ -311,6 +314,8 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\A7_ScopeNameIsNotExpression.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A8_ExpressionIsNotScopeName.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A9_ExpressionCannotResolveType.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A9_NullCannotResolveType.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A9_OrderedLambdaCannotResolveType.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\B0_VoidArgument.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\B0_VoidMapElement.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\B0_VoidVariable.txt" />
