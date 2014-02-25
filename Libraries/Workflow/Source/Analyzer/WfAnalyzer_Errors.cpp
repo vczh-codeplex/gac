@@ -98,6 +98,16 @@ WfErrors
 				return new ParsingError(node, L"A12: Expression cannot weakly cast to \"" + toType->GetTypeFriendlyName() + L"\" because it cannot be \"null\".");
 			}
 
+			Ptr<parsing::ParsingError> WfErrors::IntegerLiteralOutOfRange(WfIntegerExpression* node)
+			{
+				return new ParsingError(node, L"A13: Integer literal \"" + node->value.value + L"\" out of range.");
+			}
+
+			Ptr<parsing::ParsingError> WfErrors::CannotMergeTwoType(WfExpression* node, reflection::description::ITypeInfo* firstType, reflection::description::ITypeInfo* secondType)
+			{
+				return new ParsingError(node, L"A14: Failed to merge type \"" + firstType->GetTypeFriendlyName() + L"\" with type \"" + secondType->GetTypeFriendlyName() + L"\" together to calculate the result type.");
+			}
+
 			Ptr<parsing::ParsingError> WfErrors::WrongVoidType(WfType* node)
 			{
 				return new ParsingError(node, L"B0: Void is not a type for a value.");
