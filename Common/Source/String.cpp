@@ -102,7 +102,7 @@ namespace vl
 	{
 		char* endptr = 0;
 		vint result = strtol(string.Buffer(), &endptr, 10);
-		success = endptr == string.Buffer() + string.Length();
+		success = endptr == string.Buffer() + string.Length() && itoa(result) == string;
 		return result;
 	}
 
@@ -110,7 +110,7 @@ namespace vl
 	{
 		wchar_t* endptr = 0;
 		vint result = wcstol(string.Buffer(), &endptr, 10);
-		success = endptr == string.Buffer() + string.Length();
+		success = endptr == string.Buffer() + string.Length() && itow(result) == string;
 		return result;
 	}
 
@@ -118,7 +118,7 @@ namespace vl
 	{
 		char* endptr = 0;
 		vint64_t result = _strtoi64(string.Buffer(), &endptr, 10);
-		success = endptr == string.Buffer() + string.Length();
+		success = endptr == string.Buffer() + string.Length() && i64toa(result) == string;
 		return result;
 	}
 
@@ -126,7 +126,7 @@ namespace vl
 	{
 		wchar_t* endptr = 0;
 		vint64_t result = _wcstoi64(string.Buffer(), &endptr, 10);
-		success = endptr == string.Buffer() + string.Length();
+		success = endptr == string.Buffer() + string.Length() && i64tow(result) == string;
 		return result;
 	}
 
@@ -134,7 +134,7 @@ namespace vl
 	{
 		char* endptr = 0;
 		vuint result = strtoul(string.Buffer(), &endptr, 10);
-		success = endptr == string.Buffer() + string.Length();
+		success = endptr == string.Buffer() + string.Length() && utoa(result) == string;
 		return result;
 	}
 
@@ -142,7 +142,7 @@ namespace vl
 	{
 		wchar_t* endptr = 0;
 		vuint result = wcstoul(string.Buffer(), &endptr, 10);
-		success = endptr == string.Buffer() + string.Length();
+		success = endptr == string.Buffer() + string.Length() && utow(result) == string;
 		return result;
 	}
 
@@ -150,7 +150,7 @@ namespace vl
 	{
 		char* endptr = 0;
 		vuint64_t result = _strtoui64(string.Buffer(), &endptr, 10);
-		success = endptr == string.Buffer() + string.Length();
+		success = endptr == string.Buffer() + string.Length() && u64toa(result) == string;
 		return result;
 	}
 
@@ -158,7 +158,7 @@ namespace vl
 	{
 		wchar_t* endptr = 0;
 		vuint64_t result = _wcstoui64(string.Buffer(), &endptr, 10);
-		success = endptr == string.Buffer() + string.Length();
+		success = endptr == string.Buffer() + string.Length() && u64tow(result) == string;
 		return result;
 	}
 
