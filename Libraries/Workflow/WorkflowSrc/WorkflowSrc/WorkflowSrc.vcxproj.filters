@@ -971,6 +971,69 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_OrderedLambdaToWrongFunctionType.txt">
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
     </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A12_BaseToDerived.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A12_NullableToNullable.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A12_NullableToRawPtr.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A12_NullableToSharedPtr.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A12_NullableToStruct.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A12_OrderedLambdaToStruct.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A12_OrderedLambdaToWrongBody.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A12_OrderedLambdaToWrongFunctionType.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A12_RawPtrToNullable.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A12_RawPtrToSharedPtr.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A12_RawPtrToStruct.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A12_SharedPtrToNullable.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A12_SharedPtrToStruct.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A12_StructToToNullable.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A12_StructToToRawPtr.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A12_StructToToSharedPtr.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A12_StructToToStruct.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A13_IntegerLiteralOutOfRange.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A14_IfExpressionCannotMergeType.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A14_RangeCannotMergeType.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A9_LetExpressionCannotResolveType.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Source\Expression\Codegen.bat">
