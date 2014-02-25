@@ -374,6 +374,7 @@ BuildScopeForExpression
 						symbol->name = variable->name.value;
 						symbol->ownerExpression = node;
 						resultScope->symbols.Add(symbol->name, symbol);
+						BuildScopeForExpression(manager, resultScope, variable->value);
 					}
 
 					BuildScopeForExpression(manager, resultScope, node->expression);
