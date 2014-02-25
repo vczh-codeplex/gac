@@ -1,0 +1,8 @@
+module test;
+using system::*;
+
+func main():void
+{
+	var x = 9223372036854775807;
+	var y = 9223372036854775808;
+}

@@ -570,17 +570,29 @@ ValidateSemantic(Expression)
 
 					Ptr<ITypeInfo> firstType = GetExpressionType(manager, node->trueBranch, expectedType);
 					Ptr<ITypeInfo> secondType = GetExpressionType(manager, node->falseBranch, expectedType);
-					if (CanConvertToType(secondType.Obj(), firstType.Obj(), false))
+
+					if (firstType && !secondType)
 					{
 						results.Add(ResolveExpressionResult(firstType));
 					}
-					else if (CanConvertToType(firstType.Obj(), secondType.Obj(), false))
+					else if (!firstType && secondType)
 					{
 						results.Add(ResolveExpressionResult(secondType));
 					}
-					else
+					else if (firstType && secondType)
 					{
-						manager->errors.Add(WfErrors::CannotMergeTwoType(node, firstType.Obj(), secondType.Obj()));
+						if (CanConvertToType(secondType.Obj(), firstType.Obj(), false))
+						{
+							results.Add(ResolveExpressionResult(firstType));
+						}
+						else if (CanConvertToType(firstType.Obj(), secondType.Obj(), false))
+						{
+							results.Add(ResolveExpressionResult(secondType));
+						}
+						else
+						{
+							manager->errors.Add(WfErrors::CannotMergeTwoType(node, firstType.Obj(), secondType.Obj()));
+						}
 					}
 				}
 
@@ -589,18 +601,29 @@ ValidateSemantic(Expression)
 					Ptr<ITypeInfo> firstType = GetExpressionType(manager, node->begin, 0);
 					Ptr<ITypeInfo> secondType = GetExpressionType(manager, node->end, 0);
 					Ptr<ITypeInfo> elementType;
-					if (CanConvertToType(secondType.Obj(), firstType.Obj(), false))
+
+					if (firstType && !secondType)
 					{
 						elementType = firstType;
 					}
-					else if (CanConvertToType(firstType.Obj(), secondType.Obj(), false))
+					else if (!firstType && secondType)
 					{
 						elementType = secondType;
 					}
-					else
+					else if (firstType && secondType)
 					{
-						manager->errors.Add(WfErrors::CannotMergeTwoType(node, firstType.Obj(), secondType.Obj()));
-						return;
+						if (CanConvertToType(secondType.Obj(), firstType.Obj(), false))
+						{
+							elementType = firstType;
+						}
+						else if (CanConvertToType(firstType.Obj(), secondType.Obj(), false))
+						{
+							elementType = secondType;
+						}
+						else
+						{
+							manager->errors.Add(WfErrors::CannotMergeTwoType(node, firstType.Obj(), secondType.Obj()));
+						}
 					}
 
 					if (elementType)
