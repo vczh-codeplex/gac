@@ -486,18 +486,50 @@ ValidateSemantic(Expression)
 
 				void Visit(WfFloatingExpression* node)override
 				{
+					ITypeDescriptor* typeDescriptor = description::GetTypeDescriptor<double>();
+					Ptr<TypeInfoImpl> typeInfo = new TypeInfoImpl(ITypeInfo::TypeDescriptor);
+					typeInfo->SetTypeDescriptor(typeDescriptor);
+					results.Add(ResolveExpressionResult((Ptr<ITypeInfo>)typeInfo));
 				}
 
 				void Visit(WfIntegerExpression* node)override
 				{
+					ITypeDescriptor* typeDescriptor = 0;
+#ifndef VCZH_64
+					typeDescriptor = description::GetTypeDescriptor<vint32_t>();
+					if (typeDescriptor->GetValueSerializer()->Validate(node->value.value))
+					{
+						goto TYPE_FINISHED;
+					}
+#endif
+					typeDescriptor = description::GetTypeDescriptor<vint64_t>();
+					if (!typeDescriptor->GetValueSerializer()->Validate(node->value.value))
+					{
+						manager->errors.Add(WfErrors::IntegerLiteralOutOfRange(node));
+					}
+#ifndef VCZH_64
+				TYPE_FINISHED:
+#endif
+					Ptr<TypeInfoImpl> typeInfo = new TypeInfoImpl(ITypeInfo::TypeDescriptor);
+					typeInfo->SetTypeDescriptor(typeDescriptor);
+					results.Add(ResolveExpressionResult((Ptr<ITypeInfo>)typeInfo));
 				}
 
 				void Visit(WfStringExpression* node)override
 				{
+					ITypeDescriptor* typeDescriptor = description::GetTypeDescriptor<WString>();
+					Ptr<TypeInfoImpl> typeInfo = new TypeInfoImpl(ITypeInfo::TypeDescriptor);
+					typeInfo->SetTypeDescriptor(typeDescriptor);
+					results.Add(ResolveExpressionResult((Ptr<ITypeInfo>)typeInfo));
 				}
 
 				void Visit(WfFormatExpression* node)override
 				{
+					ITypeDescriptor* typeDescriptor = description::GetTypeDescriptor<WString>();
+					Ptr<TypeInfoImpl> typeInfo = new TypeInfoImpl(ITypeInfo::TypeDescriptor);
+					typeInfo->SetTypeDescriptor(typeDescriptor);
+					results.Add(ResolveExpressionResult((Ptr<ITypeInfo>)typeInfo));
+					GetExpressionType(manager, node->expandedExpression, typeInfo);
 				}
 
 				void Visit(WfUnaryExpression* node)override
@@ -510,14 +542,80 @@ ValidateSemantic(Expression)
 
 				void Visit(WfLetExpression* node)override
 				{
+					auto scope = manager->expressionScopes[node].Obj();
+
+					FOREACH(Ptr<WfLetVariable>, variable, node->variables)
+					{
+						auto symbol = scope->symbols[variable->name.value][0];
+						symbol->typeInfo = GetExpressionType(manager, variable->value, 0);
+						symbol->type = GetTypeFromTypeInfo(symbol->typeInfo.Obj());
+					}
+					Ptr<ITypeInfo> type = GetExpressionType(manager, node->expression, expectedType);
+					if (type)
+					{
+						results.Add(ResolveExpressionResult(type));
+					}
 				}
 
 				void Visit(WfIfExpression* node)override
 				{
+					Ptr<ITypeInfo> boolType;
+					{
+						ITypeDescriptor* typeDescriptor = description::GetTypeDescriptor<bool>();
+						Ptr<TypeInfoImpl> typeInfo = new TypeInfoImpl(ITypeInfo::TypeDescriptor);
+						typeInfo->SetTypeDescriptor(typeDescriptor);
+						boolType = typeInfo;
+					}
+					GetExpressionType(manager, node->condition, boolType);
+
+					Ptr<ITypeInfo> firstType = GetExpressionType(manager, node->trueBranch, expectedType);
+					Ptr<ITypeInfo> secondType = GetExpressionType(manager, node->falseBranch, expectedType);
+					if (CanConvertToType(secondType.Obj(), firstType.Obj(), false))
+					{
+						results.Add(ResolveExpressionResult(firstType));
+					}
+					else if (CanConvertToType(firstType.Obj(), secondType.Obj(), false))
+					{
+						results.Add(ResolveExpressionResult(secondType));
+					}
+					else
+					{
+						manager->errors.Add(WfErrors::CannotMergeTwoType(node, firstType.Obj(), secondType.Obj()));
+					}
 				}
 
 				void Visit(WfRangeExpression* node)override
 				{
+					Ptr<ITypeInfo> firstType = GetExpressionType(manager, node->begin, 0);
+					Ptr<ITypeInfo> secondType = GetExpressionType(manager, node->end, 0);
+					Ptr<ITypeInfo> elementType;
+					if (CanConvertToType(secondType.Obj(), firstType.Obj(), false))
+					{
+						elementType = firstType;
+					}
+					else if (CanConvertToType(firstType.Obj(), secondType.Obj(), false))
+					{
+						elementType = secondType;
+					}
+					else
+					{
+						manager->errors.Add(WfErrors::CannotMergeTwoType(node, firstType.Obj(), secondType.Obj()));
+						return;
+					}
+
+					if (elementType)
+					{
+						Ptr<TypeInfoImpl> enumerableType = new TypeInfoImpl(ITypeInfo::TypeDescriptor);
+						enumerableType->SetTypeDescriptor(description::GetTypeDescriptor<IValueEnumerable>());
+
+						Ptr<TypeInfoImpl> genericType = new TypeInfoImpl(ITypeInfo::Generic);
+						genericType->SetElementType(enumerableType);
+						genericType->AddGenericArgument(elementType);
+
+						Ptr<TypeInfoImpl> pointerType = new TypeInfoImpl(ITypeInfo::SharedPtr);
+						pointerType->SetElementType(genericType);
+						results.Add(ResolveExpressionResult((Ptr<ITypeInfo>)pointerType));
+					}
 				}
 
 				void Visit(WfSetTestingExpression* node)override
