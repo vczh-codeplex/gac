@@ -670,6 +670,13 @@ ValidateSemantic(Expression)
 					Ptr<ITypeInfo> expressionType = GetExpressionType(manager, node->expression, 0);
 					if (type)
 					{
+						if (expressionType)
+						{
+							if (!CanConvertToType(expressionType.Obj(), type.Obj(), true))
+							{
+								manager->errors.Add(WfErrors::ExpressionCannotExplicitlyConvertToType(node->expression.Obj(), expressionType.Obj(), type.Obj()));
+							}
+						}
 						if (node->strategy == WfTypeCastingStrategy::Weak)
 						{
 							switch (type->GetDecorator())
@@ -680,13 +687,6 @@ ValidateSemantic(Expression)
 								break;
 							default:
 								manager->errors.Add(WfErrors::CannotWeakCastToType(node->expression.Obj(), type.Obj()));
-							}
-						}
-						if (expressionType)
-						{
-							if (!CanConvertToType(expressionType.Obj(), type.Obj(), true))
-							{
-								manager->errors.Add(WfErrors::ExpressionCannotExplicitlyConvertToType(node->expression.Obj(), expressionType.Obj(), type.Obj()));
 							}
 						}
 						results.Add(ResolveExpressionResult(type));
