@@ -91,7 +91,7 @@ TEST_CASE(TestAnalyzerError)
 	WfLexicalScopeManager manager(table);
 	FOREACH(WString, itemName, itemNames)
 	{
-		if (itemName == L"F4_ExpressionReferenceToFunctionsInNestedNamespaces")
+		if (itemName == L"A13_IntegerLiteralOutOfRange")
 		{
 			int a = 0;
 		}

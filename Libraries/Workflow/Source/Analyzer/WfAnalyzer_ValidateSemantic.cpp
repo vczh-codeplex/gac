@@ -548,7 +548,10 @@ ValidateSemantic(Expression)
 					{
 						auto symbol = scope->symbols[variable->name.value][0];
 						symbol->typeInfo = GetExpressionType(manager, variable->value, 0);
-						symbol->type = GetTypeFromTypeInfo(symbol->typeInfo.Obj());
+						if (symbol->typeInfo)
+						{
+							symbol->type = GetTypeFromTypeInfo(symbol->typeInfo.Obj());
+						}
 					}
 					Ptr<ITypeInfo> type = GetExpressionType(manager, node->expression, expectedType);
 					if (type)
