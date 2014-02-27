@@ -994,15 +994,7 @@ ValidateSemantic
 				}
 				else if (results.Count() > 1)
 				{
-					List<Ptr<WfLexicalScopeName>> scopeNames;
-					FOREACH(ResolveExpressionResult, result, results)
-					{
-						scopeNames.Add(result.scopeName);
-					}
-					if (scopeNames.Count() > 0)
-					{
-						manager->errors.Add(WfErrors::TooManyScopeName(expression.Obj(), scopeNames, GetExpressionNameVisitor::Execute(expression)));
-					}
+					manager->errors.Add(WfErrors::TooManyTargets(expression.Obj(), results, GetExpressionNameVisitor::Execute(expression)));
 					return 0;
 				}
 				return results[0].scopeName;
@@ -1056,20 +1048,15 @@ ValidateSemantic
 					}
 				}
 
-				List<Ptr<WfLexicalSymbol>> symbols;
-				FOREACH(ResolveExpressionResult, result, results)
+				if (results.Count() > 1)
 				{
-					if (result.symbol)
-					{
-						symbols.Add(result.symbol);
-					}
+					manager->errors.Add(WfErrors::TooManyTargets(expression.Obj(), results, GetExpressionNameVisitor::Execute(expression)));
+					return expectedType;
 				}
-				if (symbols.Count() > 1)
+				else
 				{
-					manager->errors.Add(WfErrors::TooManySymbol(expression.Obj(), symbols, GetExpressionNameVisitor::Execute(expression)));
+					return expectedType ? expectedType : results[0].type;
 				}
-				
-				return expectedType ? expectedType : results[0].type;
 			}
 
 			bool CanConvertToType(reflection::description::ITypeInfo* fromType, reflection::description::ITypeInfo* toType, bool explicitly)

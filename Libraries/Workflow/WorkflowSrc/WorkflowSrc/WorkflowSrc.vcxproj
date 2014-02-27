@@ -401,9 +401,9 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\F3_ExpressionReferenceToFunctionsByUsing.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\F3_ExpressionReferenceToFunctionsInLocalAndUsing.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\F3_ExpressionReferenceToFunctionsInNestedNamespaces.txt" />
-    <Text Include="..\TestFiles\Samples\AnalyzerError\F4_TypeReferenceToFunctionsByUsing.txt" />
-    <Text Include="..\TestFiles\Samples\AnalyzerError\F4_TypeReferenceToFunctionsInLocalAndUsing.txt" />
-    <Text Include="..\TestFiles\Samples\AnalyzerError\F4_TypeReferenceToFunctionsInNestedNamespaces.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\F3_TypeReferenceToFunctionsByUsing.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\F3_TypeReferenceToFunctionsInLocalAndUsing.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\F3_TypeReferenceToFunctionsInNestedNamespaces.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerScope\ModuleA.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerScope\ModuleB.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerScope\ModuleC.txt" />

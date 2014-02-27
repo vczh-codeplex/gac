@@ -234,16 +234,12 @@ Error Messages
 				static Ptr<parsing::ParsingError>			WrongUsingPathWildCard(WfModuleUsingPath* node);
 
 				// F: Symbol Error
-				static Ptr<parsing::ParsingError>			TopQualifiedSymbolNotExists(WfType* node, const WString& name);
-				static Ptr<parsing::ParsingError>			TopQualifiedSymbolNotExists(WfExpression* node, const WString& name);
-				static Ptr<parsing::ParsingError>			ChildSymbolNotExists(WfType* node, Ptr<WfLexicalScopeName> scopeName, const WString& name);
-				static Ptr<parsing::ParsingError>			ChildSymbolNotExists(WfExpression* node, Ptr<WfLexicalScopeName> scopeName, const WString& name);
-				static Ptr<parsing::ParsingError>			ReferenceNotExists(WfType* node, const WString& name);
-				static Ptr<parsing::ParsingError>			ReferenceNotExists(WfExpression* node, const WString& name);
-				static Ptr<parsing::ParsingError>			TooManySymbol(WfType* node, collections::List<Ptr<WfLexicalSymbol>>& symbols, const WString& name);
-				static Ptr<parsing::ParsingError>			TooManySymbol(WfExpression* node, collections::List<Ptr<WfLexicalSymbol>>& symbols, const WString& name);
-				static Ptr<parsing::ParsingError>			TooManyScopeName(WfType* node, collections::List<Ptr<WfLexicalScopeName>>& names, const WString& name);
-				static Ptr<parsing::ParsingError>			TooManyScopeName(WfExpression* node, collections::List<Ptr<WfLexicalScopeName>>& names, const WString& name);
+				static Ptr<parsing::ParsingError>			TopQualifiedSymbolNotExists(parsing::ParsingTreeCustomBase* node, const WString& name);
+				static Ptr<parsing::ParsingError>			ChildSymbolNotExists(parsing::ParsingTreeCustomBase* node, Ptr<WfLexicalScopeName> scopeName, const WString& name);
+				static Ptr<parsing::ParsingError>			ReferenceNotExists(parsing::ParsingTreeCustomBase* node, const WString& name);
+				static Ptr<parsing::ParsingError>			TooManyTargets(parsing::ParsingTreeCustomBase* node, collections::List<ResolveExpressionResult>& results, const WString& name);
+				static Ptr<parsing::ParsingError>			TooManyTargets(parsing::ParsingTreeCustomBase* node, collections::List<Ptr<WfLexicalSymbol>>& symbols, const WString& name);
+				static Ptr<parsing::ParsingError>			TooManyTargets(parsing::ParsingTreeCustomBase* node, collections::List<Ptr<WfLexicalScopeName>>& names, const WString& name);
 			};
 		}
 	}

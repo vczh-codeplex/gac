@@ -203,78 +203,71 @@ WfErrors
 				return new ParsingError(node, L"E0: Wild card \"*\" should only appear in the last item of the using path and should appear once.");
 			}
 
-			Ptr<parsing::ParsingError> WfErrors::TopQualifiedSymbolNotExists(WfType* node, const WString& name)
+			Ptr<parsing::ParsingError> WfErrors::TopQualifiedSymbolNotExists(parsing::ParsingTreeCustomBase* node, const WString& name)
 			{
 				return new ParsingError(node, L"F0: Top qualified symbol \"" + name + L"\" does not exist.");
 			}
 
-			Ptr<parsing::ParsingError> WfErrors::TopQualifiedSymbolNotExists(WfExpression* node, const WString& name)
-			{
-				return new ParsingError(node, L"F0: Top qualified symbol \"" + name + L"\" does not exist.");
-			}
-
-			Ptr<parsing::ParsingError> WfErrors::ChildSymbolNotExists(WfType* node, Ptr<WfLexicalScopeName> scopeName, const WString& name)
+			Ptr<parsing::ParsingError> WfErrors::ChildSymbolNotExists(parsing::ParsingTreeCustomBase* node, Ptr<WfLexicalScopeName> scopeName, const WString& name)
 			{
 				return new ParsingError(node, L"F1: Symbol \"" + name + L"\" does not exist in \"" + scopeName->GetFriendlyName() + L"\".");
 			}
 
-			Ptr<parsing::ParsingError> WfErrors::ChildSymbolNotExists(WfExpression* node, Ptr<WfLexicalScopeName> scopeName, const WString& name)
-			{
-				return new ParsingError(node, L"F1: Symbol \"" + name + L"\" does not exist in \"" + scopeName->GetFriendlyName() + L"\".");
-			}
-
-			Ptr<parsing::ParsingError> WfErrors::ReferenceNotExists(WfType* node, const WString& name)
+			Ptr<parsing::ParsingError> WfErrors::ReferenceNotExists(parsing::ParsingTreeCustomBase* node, const WString& name)
 			{
 				return new ParsingError(node, L"F2: Symbol \"" + name + L"\" does not exist in the current scope.");
 			}
 
-			Ptr<parsing::ParsingError> WfErrors::ReferenceNotExists(WfExpression* node, const WString& name)
-			{
-				return new ParsingError(node, L"F2: Symbol \"" + name + L"\" does not exist in the current scope.");
-			}
-
-			Ptr<parsing::ParsingError> WfErrors::TooManySymbol(WfType* node, collections::List<Ptr<WfLexicalSymbol>>& symbols, const WString& name)
+			Ptr<parsing::ParsingError> WfErrors::TooManyTargets(parsing::ParsingTreeCustomBase* node, collections::List<ResolveExpressionResult>& results, const WString& name)
 			{
 				WString description;
-				FOREACH_INDEXER(Ptr<WfLexicalSymbol>, symbol, index, symbols)
+				FOREACH_INDEXER(ResolveExpressionResult, result, index, results)
 				{
 					if (index) description += L", ";
-					description += symbol->GetFriendlyName();
+					if (result.scopeName)
+					{
+						description += result.scopeName->GetFriendlyName();
+					}
+					else if (result.symbol)
+					{
+						description += result.symbol->GetFriendlyName();
+					}
+					else if (result.type)
+					{
+						description += L"expression of type \"" + result.type->GetTypeFriendlyName() + L"\".";
+					}
+					else
+					{
+						description += L"<unknown>";
+					}
 				}
 				return new ParsingError(node, L"F3: Symbol \"" + name + L"\" references to too many targets: " + description + L".");
 			}
 
-			Ptr<parsing::ParsingError> WfErrors::TooManySymbol(WfExpression* node, collections::List<Ptr<WfLexicalSymbol>>& symbols, const WString& name)
+			Ptr<parsing::ParsingError> WfErrors::TooManyTargets(parsing::ParsingTreeCustomBase* node, collections::List<Ptr<WfLexicalSymbol>>& symbols, const WString& name)
 			{
-				WString description;
-				FOREACH_INDEXER(Ptr<WfLexicalSymbol>, symbol, index, symbols)
-				{
-					if (index) description += L", ";
-					description += symbol->GetFriendlyName();
-				}
-				return new ParsingError(node, L"F3: Symbol \"" + name + L"\" references to too many targets: " + description + L".");
+				List<ResolveExpressionResult> results;
+				CopyFrom(
+					results,
+					From(symbols)
+					.Select([](Ptr<WfLexicalSymbol> symbol)
+					{
+						return ResolveExpressionResult(symbol, 0);
+					}));
+				return TooManyTargets(node, results, name);
 			}
 
-			Ptr<parsing::ParsingError> WfErrors::TooManyScopeName(WfType* node, collections::List<Ptr<WfLexicalScopeName>>& names, const WString& name)
+			Ptr<parsing::ParsingError> WfErrors::TooManyTargets(parsing::ParsingTreeCustomBase* node, collections::List<Ptr<WfLexicalScopeName>>& names, const WString& name)
 			{
-				WString description;
-				FOREACH_INDEXER(Ptr<WfLexicalScopeName>, scopeName, index, names)
-				{
-					if (index) description += L", ";
-					description += scopeName->GetFriendlyName();
-				}
-				return new ParsingError(node, L"F4: Symbol \"" + name + L"\" references to too many declarations: " + description + L".");
-			}
-
-			Ptr<parsing::ParsingError> WfErrors::TooManyScopeName(WfExpression* node, collections::List<Ptr<WfLexicalScopeName>>& names, const WString& name)
-			{
-				WString description;
-				FOREACH_INDEXER(Ptr<WfLexicalScopeName>, scopeName, index, names)
-				{
-					if (index) description += L", ";
-					description += scopeName->GetFriendlyName();
-				}
-				return new ParsingError(node, L"F4: Symbol \"" + name + L"\" references to too many declarations: " + description + L".");
+				List<ResolveExpressionResult> results;
+				CopyFrom(
+					results,
+					From(names)
+					.Select([](Ptr<WfLexicalScopeName> name)
+					{
+						return ResolveExpressionResult(name);
+					}));
+				return TooManyTargets(node, results, name);
 			}
 		}
 	}
