@@ -1345,6 +1345,10 @@ StructValueSeriaizer
 				}
 			};
 
+/**********************************************************************************************************************************************
+Variadic Template Argument Stuffs on Functions
+**********************************************************************************************************************************************/
+
 /***********************************************************************
 DetailTypeInfoRetriver<Func<R(TArgs...)>>
 ***********************************************************************/
@@ -1460,7 +1464,7 @@ ValueFunctionProxyWrapper<Func<R(TArgs...)>>
  
 				Value Invoke(Ptr<IValueList> arguments)override
 				{
-					if(!arguments || arguments->GetCount()!=10) throw ArgumentCountMismtatchException();
+					if(!arguments || arguments->GetCount()!=sizeof...(TArgs)) throw ArgumentCountMismtatchException();
 					return internal_helper::BoxedFunctionInvoker<R, TArgs...>::Invoke(function, arguments, typename RemoveCVR<TArgs>::Type()...);
 				}
 			};
