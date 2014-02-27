@@ -10,7 +10,7 @@ Classes:
 #define VCZH_REFLECTION_GUITYPEDESCRIPTORMACROS
 
 #include "GuiTypeDescriptorBuilder.h"
-#include "GuiTypeDescriptorBuilder_Gen.h"
+#include "GuiTypeDescriptorBuilder_Function.h"
 #include "GuiTypeDescriptorPredefined.h"
 
 /***********************************************************************

@@ -245,7 +245,7 @@
     <ClInclude Include="..\..\Source\Pointer.h" />
     <ClInclude Include="..\..\Source\Reflection\GuiTypeDescriptor.h" />
     <ClInclude Include="..\..\Source\Reflection\GuiTypeDescriptorBuilder.h" />
-    <ClInclude Include="..\..\Source\Reflection\GuiTypeDescriptorBuilder_Gen.h" />
+    <ClInclude Include="..\..\Source\Reflection\GuiTypeDescriptorBuilder_Function.h" />
     <ClInclude Include="..\..\Source\Reflection\GuiTypeDescriptorMacros.h" />
     <ClInclude Include="..\..\Source\Reflection\GuiTypeDescriptorPredefined.h" />
     <ClInclude Include="..\..\Source\Regex\Regex.h" />
