@@ -1,5 +1,5 @@
 ..\Tools\Fpmacro Function.h.fpm
-..\Tools\Fpmacro Event.h.fpm
+REM ..\Tools\Fpmacro Event.h.fpm
 ..\Tools\Fpmacro Tuple.h.fpm
 ..\Tools\Fpmacro .\Reflection\GuiTypeDescriptorBuilder_Gen.h.fpm
 ..\Tools\ParserGen.exe .\Parsing\Xml\ParsingXml_Parser.parser.txt
