@@ -11,12 +11,18 @@ Classes:
 #ifndef VCZH_EVENT
 #define VCZH_EVENT
 #include "Function.h"
-#include "Collections/List.h"
+#include "Collections\List.h"
 namespace vl
 {
 	template<typename T>
 	class Event
 	{
+	};
+ 
+	class EventHandler : public Object
+	{
+	public:
+		virtual bool							IsAttached() = 0;
 	};
  
 /***********************************************************************
@@ -26,35 +32,60 @@ vl::Event<void()>
 	class Event<void()> : public Object, private NotCopyable
 	{
 	protected:
-		collections::SortedList<Func<void()>>	functions;
+		class EventHandlerImpl : public EventHandler
+		{
+		public:
+			bool								attached;
+			Func<void()>		function;
+			EventHandlerImpl(const Func<void()>& _function)
+				:attached(true)
+				, function(_function)
+			{
+			}
+ 
+			bool IsAttached()override
+			{
+				return attached;
+			}
+		};
+ 
+		collections::SortedList<Ptr<EventHandlerImpl>>	handlers;
 	public:
-		void Add(const Func<void()>& handler)
+		Ptr<EventHandler> Add(const Func<void()>& function)
 		{
-			functions.Add(handler);
-		}
- 
-		void Remove(const Func<void()>& handler)
-		{
-			functions.Remove(handler);
+			Ptr<EventHandlerImpl> handler = new EventHandlerImpl(function);
+			handlers.Add(handler);
+			return handler;
 		}
  
 		template<typename C>
-		void Add(C* sender, void(C::*function)())
+		Ptr<EventHandler> Add(void(*function)())
 		{
-			functions.Add(Func<void()>(sender, function));
+			return Add(Func<void()>(function));
 		}
  
 		template<typename C>
-		void Remove(C* sender, void(C::*function)())
+		Ptr<EventHandler> Add(C* sender, void(C::*function)())
 		{
-			functions.Remove(Func<void()>(sender, function));
+			return Add(Func<void()>(sender, function));
+		}
+ 
+		bool Remove(Ptr<EventHandler> handler)
+		{
+			Ptr<EventHandlerImpl> impl = handler.Cast<EventHandlerImpl>();
+			if (!impl) return false;
+			vint index = handlers.IndexOf(impl);
+			if (index == -1) return false;
+			impl->attached = false;
+			handlers.RemoveAt(index);
+			return true;
 		}
  
 		void operator()()const
 		{
-			for(vint i=0;i<functions.Count();i++)
+			for(vint i = 0; i < handlers.Count(); i++)
 			{
-				functions.Get(i)();
+				handlers[i]->function();
 			}
 		}
 	};
@@ -66,35 +97,60 @@ vl::Event<void(T0)>
 	class Event<void(T0)> : public Object, private NotCopyable
 	{
 	protected:
-		collections::SortedList<Func<void(T0)>>	functions;
+		class EventHandlerImpl : public EventHandler
+		{
+		public:
+			bool								attached;
+			Func<void(T0)>		function;
+			EventHandlerImpl(const Func<void(T0)>& _function)
+				:attached(true)
+				, function(_function)
+			{
+			}
+ 
+			bool IsAttached()override
+			{
+				return attached;
+			}
+		};
+ 
+		collections::SortedList<Ptr<EventHandlerImpl>>	handlers;
 	public:
-		void Add(const Func<void(T0)>& handler)
+		Ptr<EventHandler> Add(const Func<void(T0)>& function)
 		{
-			functions.Add(handler);
-		}
- 
-		void Remove(const Func<void(T0)>& handler)
-		{
-			functions.Remove(handler);
+			Ptr<EventHandlerImpl> handler = new EventHandlerImpl(function);
+			handlers.Add(handler);
+			return handler;
 		}
  
 		template<typename C>
-		void Add(C* sender, void(C::*function)(T0))
+		Ptr<EventHandler> Add(void(*function)(T0))
 		{
-			functions.Add(Func<void(T0)>(sender, function));
+			return Add(Func<void(T0)>(function));
 		}
  
 		template<typename C>
-		void Remove(C* sender, void(C::*function)(T0))
+		Ptr<EventHandler> Add(C* sender, void(C::*function)(T0))
 		{
-			functions.Remove(Func<void(T0)>(sender, function));
+			return Add(Func<void(T0)>(sender, function));
+		}
+ 
+		bool Remove(Ptr<EventHandler> handler)
+		{
+			Ptr<EventHandlerImpl> impl = handler.Cast<EventHandlerImpl>();
+			if (!impl) return false;
+			vint index = handlers.IndexOf(impl);
+			if (index == -1) return false;
+			impl->attached = false;
+			handlers.RemoveAt(index);
+			return true;
 		}
  
 		void operator()(T0 p0)const
 		{
-			for(vint i=0;i<functions.Count();i++)
+			for(vint i = 0; i < handlers.Count(); i++)
 			{
-				functions.Get(i)(p0);
+				handlers[i]->function(p0);
 			}
 		}
 	};
@@ -106,35 +162,60 @@ vl::Event<void(T0,T1)>
 	class Event<void(T0,T1)> : public Object, private NotCopyable
 	{
 	protected:
-		collections::SortedList<Func<void(T0,T1)>>	functions;
+		class EventHandlerImpl : public EventHandler
+		{
+		public:
+			bool								attached;
+			Func<void(T0,T1)>		function;
+			EventHandlerImpl(const Func<void(T0,T1)>& _function)
+				:attached(true)
+				, function(_function)
+			{
+			}
+ 
+			bool IsAttached()override
+			{
+				return attached;
+			}
+		};
+ 
+		collections::SortedList<Ptr<EventHandlerImpl>>	handlers;
 	public:
-		void Add(const Func<void(T0,T1)>& handler)
+		Ptr<EventHandler> Add(const Func<void(T0,T1)>& function)
 		{
-			functions.Add(handler);
-		}
- 
-		void Remove(const Func<void(T0,T1)>& handler)
-		{
-			functions.Remove(handler);
+			Ptr<EventHandlerImpl> handler = new EventHandlerImpl(function);
+			handlers.Add(handler);
+			return handler;
 		}
  
 		template<typename C>
-		void Add(C* sender, void(C::*function)(T0,T1))
+		Ptr<EventHandler> Add(void(*function)(T0,T1))
 		{
-			functions.Add(Func<void(T0,T1)>(sender, function));
+			return Add(Func<void(T0,T1)>(function));
 		}
  
 		template<typename C>
-		void Remove(C* sender, void(C::*function)(T0,T1))
+		Ptr<EventHandler> Add(C* sender, void(C::*function)(T0,T1))
 		{
-			functions.Remove(Func<void(T0,T1)>(sender, function));
+			return Add(Func<void(T0,T1)>(sender, function));
+		}
+ 
+		bool Remove(Ptr<EventHandler> handler)
+		{
+			Ptr<EventHandlerImpl> impl = handler.Cast<EventHandlerImpl>();
+			if (!impl) return false;
+			vint index = handlers.IndexOf(impl);
+			if (index == -1) return false;
+			impl->attached = false;
+			handlers.RemoveAt(index);
+			return true;
 		}
  
 		void operator()(T0 p0,T1 p1)const
 		{
-			for(vint i=0;i<functions.Count();i++)
+			for(vint i = 0; i < handlers.Count(); i++)
 			{
-				functions.Get(i)(p0,p1);
+				handlers[i]->function(p0,p1);
 			}
 		}
 	};
@@ -146,35 +227,60 @@ vl::Event<void(T0,T1,T2)>
 	class Event<void(T0,T1,T2)> : public Object, private NotCopyable
 	{
 	protected:
-		collections::SortedList<Func<void(T0,T1,T2)>>	functions;
+		class EventHandlerImpl : public EventHandler
+		{
+		public:
+			bool								attached;
+			Func<void(T0,T1,T2)>		function;
+			EventHandlerImpl(const Func<void(T0,T1,T2)>& _function)
+				:attached(true)
+				, function(_function)
+			{
+			}
+ 
+			bool IsAttached()override
+			{
+				return attached;
+			}
+		};
+ 
+		collections::SortedList<Ptr<EventHandlerImpl>>	handlers;
 	public:
-		void Add(const Func<void(T0,T1,T2)>& handler)
+		Ptr<EventHandler> Add(const Func<void(T0,T1,T2)>& function)
 		{
-			functions.Add(handler);
-		}
- 
-		void Remove(const Func<void(T0,T1,T2)>& handler)
-		{
-			functions.Remove(handler);
+			Ptr<EventHandlerImpl> handler = new EventHandlerImpl(function);
+			handlers.Add(handler);
+			return handler;
 		}
  
 		template<typename C>
-		void Add(C* sender, void(C::*function)(T0,T1,T2))
+		Ptr<EventHandler> Add(void(*function)(T0,T1,T2))
 		{
-			functions.Add(Func<void(T0,T1,T2)>(sender, function));
+			return Add(Func<void(T0,T1,T2)>(function));
 		}
  
 		template<typename C>
-		void Remove(C* sender, void(C::*function)(T0,T1,T2))
+		Ptr<EventHandler> Add(C* sender, void(C::*function)(T0,T1,T2))
 		{
-			functions.Remove(Func<void(T0,T1,T2)>(sender, function));
+			return Add(Func<void(T0,T1,T2)>(sender, function));
+		}
+ 
+		bool Remove(Ptr<EventHandler> handler)
+		{
+			Ptr<EventHandlerImpl> impl = handler.Cast<EventHandlerImpl>();
+			if (!impl) return false;
+			vint index = handlers.IndexOf(impl);
+			if (index == -1) return false;
+			impl->attached = false;
+			handlers.RemoveAt(index);
+			return true;
 		}
  
 		void operator()(T0 p0,T1 p1,T2 p2)const
 		{
-			for(vint i=0;i<functions.Count();i++)
+			for(vint i = 0; i < handlers.Count(); i++)
 			{
-				functions.Get(i)(p0,p1,p2);
+				handlers[i]->function(p0,p1,p2);
 			}
 		}
 	};
@@ -186,35 +292,60 @@ vl::Event<void(T0,T1,T2,T3)>
 	class Event<void(T0,T1,T2,T3)> : public Object, private NotCopyable
 	{
 	protected:
-		collections::SortedList<Func<void(T0,T1,T2,T3)>>	functions;
+		class EventHandlerImpl : public EventHandler
+		{
+		public:
+			bool								attached;
+			Func<void(T0,T1,T2,T3)>		function;
+			EventHandlerImpl(const Func<void(T0,T1,T2,T3)>& _function)
+				:attached(true)
+				, function(_function)
+			{
+			}
+ 
+			bool IsAttached()override
+			{
+				return attached;
+			}
+		};
+ 
+		collections::SortedList<Ptr<EventHandlerImpl>>	handlers;
 	public:
-		void Add(const Func<void(T0,T1,T2,T3)>& handler)
+		Ptr<EventHandler> Add(const Func<void(T0,T1,T2,T3)>& function)
 		{
-			functions.Add(handler);
-		}
- 
-		void Remove(const Func<void(T0,T1,T2,T3)>& handler)
-		{
-			functions.Remove(handler);
+			Ptr<EventHandlerImpl> handler = new EventHandlerImpl(function);
+			handlers.Add(handler);
+			return handler;
 		}
  
 		template<typename C>
-		void Add(C* sender, void(C::*function)(T0,T1,T2,T3))
+		Ptr<EventHandler> Add(void(*function)(T0,T1,T2,T3))
 		{
-			functions.Add(Func<void(T0,T1,T2,T3)>(sender, function));
+			return Add(Func<void(T0,T1,T2,T3)>(function));
 		}
  
 		template<typename C>
-		void Remove(C* sender, void(C::*function)(T0,T1,T2,T3))
+		Ptr<EventHandler> Add(C* sender, void(C::*function)(T0,T1,T2,T3))
 		{
-			functions.Remove(Func<void(T0,T1,T2,T3)>(sender, function));
+			return Add(Func<void(T0,T1,T2,T3)>(sender, function));
+		}
+ 
+		bool Remove(Ptr<EventHandler> handler)
+		{
+			Ptr<EventHandlerImpl> impl = handler.Cast<EventHandlerImpl>();
+			if (!impl) return false;
+			vint index = handlers.IndexOf(impl);
+			if (index == -1) return false;
+			impl->attached = false;
+			handlers.RemoveAt(index);
+			return true;
 		}
  
 		void operator()(T0 p0,T1 p1,T2 p2,T3 p3)const
 		{
-			for(vint i=0;i<functions.Count();i++)
+			for(vint i = 0; i < handlers.Count(); i++)
 			{
-				functions.Get(i)(p0,p1,p2,p3);
+				handlers[i]->function(p0,p1,p2,p3);
 			}
 		}
 	};
@@ -226,35 +357,60 @@ vl::Event<void(T0,T1,T2,T3,T4)>
 	class Event<void(T0,T1,T2,T3,T4)> : public Object, private NotCopyable
 	{
 	protected:
-		collections::SortedList<Func<void(T0,T1,T2,T3,T4)>>	functions;
+		class EventHandlerImpl : public EventHandler
+		{
+		public:
+			bool								attached;
+			Func<void(T0,T1,T2,T3,T4)>		function;
+			EventHandlerImpl(const Func<void(T0,T1,T2,T3,T4)>& _function)
+				:attached(true)
+				, function(_function)
+			{
+			}
+ 
+			bool IsAttached()override
+			{
+				return attached;
+			}
+		};
+ 
+		collections::SortedList<Ptr<EventHandlerImpl>>	handlers;
 	public:
-		void Add(const Func<void(T0,T1,T2,T3,T4)>& handler)
+		Ptr<EventHandler> Add(const Func<void(T0,T1,T2,T3,T4)>& function)
 		{
-			functions.Add(handler);
-		}
- 
-		void Remove(const Func<void(T0,T1,T2,T3,T4)>& handler)
-		{
-			functions.Remove(handler);
+			Ptr<EventHandlerImpl> handler = new EventHandlerImpl(function);
+			handlers.Add(handler);
+			return handler;
 		}
  
 		template<typename C>
-		void Add(C* sender, void(C::*function)(T0,T1,T2,T3,T4))
+		Ptr<EventHandler> Add(void(*function)(T0,T1,T2,T3,T4))
 		{
-			functions.Add(Func<void(T0,T1,T2,T3,T4)>(sender, function));
+			return Add(Func<void(T0,T1,T2,T3,T4)>(function));
 		}
  
 		template<typename C>
-		void Remove(C* sender, void(C::*function)(T0,T1,T2,T3,T4))
+		Ptr<EventHandler> Add(C* sender, void(C::*function)(T0,T1,T2,T3,T4))
 		{
-			functions.Remove(Func<void(T0,T1,T2,T3,T4)>(sender, function));
+			return Add(Func<void(T0,T1,T2,T3,T4)>(sender, function));
+		}
+ 
+		bool Remove(Ptr<EventHandler> handler)
+		{
+			Ptr<EventHandlerImpl> impl = handler.Cast<EventHandlerImpl>();
+			if (!impl) return false;
+			vint index = handlers.IndexOf(impl);
+			if (index == -1) return false;
+			impl->attached = false;
+			handlers.RemoveAt(index);
+			return true;
 		}
  
 		void operator()(T0 p0,T1 p1,T2 p2,T3 p3,T4 p4)const
 		{
-			for(vint i=0;i<functions.Count();i++)
+			for(vint i = 0; i < handlers.Count(); i++)
 			{
-				functions.Get(i)(p0,p1,p2,p3,p4);
+				handlers[i]->function(p0,p1,p2,p3,p4);
 			}
 		}
 	};
@@ -266,35 +422,60 @@ vl::Event<void(T0,T1,T2,T3,T4,T5)>
 	class Event<void(T0,T1,T2,T3,T4,T5)> : public Object, private NotCopyable
 	{
 	protected:
-		collections::SortedList<Func<void(T0,T1,T2,T3,T4,T5)>>	functions;
+		class EventHandlerImpl : public EventHandler
+		{
+		public:
+			bool								attached;
+			Func<void(T0,T1,T2,T3,T4,T5)>		function;
+			EventHandlerImpl(const Func<void(T0,T1,T2,T3,T4,T5)>& _function)
+				:attached(true)
+				, function(_function)
+			{
+			}
+ 
+			bool IsAttached()override
+			{
+				return attached;
+			}
+		};
+ 
+		collections::SortedList<Ptr<EventHandlerImpl>>	handlers;
 	public:
-		void Add(const Func<void(T0,T1,T2,T3,T4,T5)>& handler)
+		Ptr<EventHandler> Add(const Func<void(T0,T1,T2,T3,T4,T5)>& function)
 		{
-			functions.Add(handler);
-		}
- 
-		void Remove(const Func<void(T0,T1,T2,T3,T4,T5)>& handler)
-		{
-			functions.Remove(handler);
+			Ptr<EventHandlerImpl> handler = new EventHandlerImpl(function);
+			handlers.Add(handler);
+			return handler;
 		}
  
 		template<typename C>
-		void Add(C* sender, void(C::*function)(T0,T1,T2,T3,T4,T5))
+		Ptr<EventHandler> Add(void(*function)(T0,T1,T2,T3,T4,T5))
 		{
-			functions.Add(Func<void(T0,T1,T2,T3,T4,T5)>(sender, function));
+			return Add(Func<void(T0,T1,T2,T3,T4,T5)>(function));
 		}
  
 		template<typename C>
-		void Remove(C* sender, void(C::*function)(T0,T1,T2,T3,T4,T5))
+		Ptr<EventHandler> Add(C* sender, void(C::*function)(T0,T1,T2,T3,T4,T5))
 		{
-			functions.Remove(Func<void(T0,T1,T2,T3,T4,T5)>(sender, function));
+			return Add(Func<void(T0,T1,T2,T3,T4,T5)>(sender, function));
+		}
+ 
+		bool Remove(Ptr<EventHandler> handler)
+		{
+			Ptr<EventHandlerImpl> impl = handler.Cast<EventHandlerImpl>();
+			if (!impl) return false;
+			vint index = handlers.IndexOf(impl);
+			if (index == -1) return false;
+			impl->attached = false;
+			handlers.RemoveAt(index);
+			return true;
 		}
  
 		void operator()(T0 p0,T1 p1,T2 p2,T3 p3,T4 p4,T5 p5)const
 		{
-			for(vint i=0;i<functions.Count();i++)
+			for(vint i = 0; i < handlers.Count(); i++)
 			{
-				functions.Get(i)(p0,p1,p2,p3,p4,p5);
+				handlers[i]->function(p0,p1,p2,p3,p4,p5);
 			}
 		}
 	};
@@ -306,35 +487,60 @@ vl::Event<void(T0,T1,T2,T3,T4,T5,T6)>
 	class Event<void(T0,T1,T2,T3,T4,T5,T6)> : public Object, private NotCopyable
 	{
 	protected:
-		collections::SortedList<Func<void(T0,T1,T2,T3,T4,T5,T6)>>	functions;
+		class EventHandlerImpl : public EventHandler
+		{
+		public:
+			bool								attached;
+			Func<void(T0,T1,T2,T3,T4,T5,T6)>		function;
+			EventHandlerImpl(const Func<void(T0,T1,T2,T3,T4,T5,T6)>& _function)
+				:attached(true)
+				, function(_function)
+			{
+			}
+ 
+			bool IsAttached()override
+			{
+				return attached;
+			}
+		};
+ 
+		collections::SortedList<Ptr<EventHandlerImpl>>	handlers;
 	public:
-		void Add(const Func<void(T0,T1,T2,T3,T4,T5,T6)>& handler)
+		Ptr<EventHandler> Add(const Func<void(T0,T1,T2,T3,T4,T5,T6)>& function)
 		{
-			functions.Add(handler);
-		}
- 
-		void Remove(const Func<void(T0,T1,T2,T3,T4,T5,T6)>& handler)
-		{
-			functions.Remove(handler);
+			Ptr<EventHandlerImpl> handler = new EventHandlerImpl(function);
+			handlers.Add(handler);
+			return handler;
 		}
  
 		template<typename C>
-		void Add(C* sender, void(C::*function)(T0,T1,T2,T3,T4,T5,T6))
+		Ptr<EventHandler> Add(void(*function)(T0,T1,T2,T3,T4,T5,T6))
 		{
-			functions.Add(Func<void(T0,T1,T2,T3,T4,T5,T6)>(sender, function));
+			return Add(Func<void(T0,T1,T2,T3,T4,T5,T6)>(function));
 		}
  
 		template<typename C>
-		void Remove(C* sender, void(C::*function)(T0,T1,T2,T3,T4,T5,T6))
+		Ptr<EventHandler> Add(C* sender, void(C::*function)(T0,T1,T2,T3,T4,T5,T6))
 		{
-			functions.Remove(Func<void(T0,T1,T2,T3,T4,T5,T6)>(sender, function));
+			return Add(Func<void(T0,T1,T2,T3,T4,T5,T6)>(sender, function));
+		}
+ 
+		bool Remove(Ptr<EventHandler> handler)
+		{
+			Ptr<EventHandlerImpl> impl = handler.Cast<EventHandlerImpl>();
+			if (!impl) return false;
+			vint index = handlers.IndexOf(impl);
+			if (index == -1) return false;
+			impl->attached = false;
+			handlers.RemoveAt(index);
+			return true;
 		}
  
 		void operator()(T0 p0,T1 p1,T2 p2,T3 p3,T4 p4,T5 p5,T6 p6)const
 		{
-			for(vint i=0;i<functions.Count();i++)
+			for(vint i = 0; i < handlers.Count(); i++)
 			{
-				functions.Get(i)(p0,p1,p2,p3,p4,p5,p6);
+				handlers[i]->function(p0,p1,p2,p3,p4,p5,p6);
 			}
 		}
 	};
@@ -346,35 +552,60 @@ vl::Event<void(T0,T1,T2,T3,T4,T5,T6,T7)>
 	class Event<void(T0,T1,T2,T3,T4,T5,T6,T7)> : public Object, private NotCopyable
 	{
 	protected:
-		collections::SortedList<Func<void(T0,T1,T2,T3,T4,T5,T6,T7)>>	functions;
+		class EventHandlerImpl : public EventHandler
+		{
+		public:
+			bool								attached;
+			Func<void(T0,T1,T2,T3,T4,T5,T6,T7)>		function;
+			EventHandlerImpl(const Func<void(T0,T1,T2,T3,T4,T5,T6,T7)>& _function)
+				:attached(true)
+				, function(_function)
+			{
+			}
+ 
+			bool IsAttached()override
+			{
+				return attached;
+			}
+		};
+ 
+		collections::SortedList<Ptr<EventHandlerImpl>>	handlers;
 	public:
-		void Add(const Func<void(T0,T1,T2,T3,T4,T5,T6,T7)>& handler)
+		Ptr<EventHandler> Add(const Func<void(T0,T1,T2,T3,T4,T5,T6,T7)>& function)
 		{
-			functions.Add(handler);
-		}
- 
-		void Remove(const Func<void(T0,T1,T2,T3,T4,T5,T6,T7)>& handler)
-		{
-			functions.Remove(handler);
+			Ptr<EventHandlerImpl> handler = new EventHandlerImpl(function);
+			handlers.Add(handler);
+			return handler;
 		}
  
 		template<typename C>
-		void Add(C* sender, void(C::*function)(T0,T1,T2,T3,T4,T5,T6,T7))
+		Ptr<EventHandler> Add(void(*function)(T0,T1,T2,T3,T4,T5,T6,T7))
 		{
-			functions.Add(Func<void(T0,T1,T2,T3,T4,T5,T6,T7)>(sender, function));
+			return Add(Func<void(T0,T1,T2,T3,T4,T5,T6,T7)>(function));
 		}
  
 		template<typename C>
-		void Remove(C* sender, void(C::*function)(T0,T1,T2,T3,T4,T5,T6,T7))
+		Ptr<EventHandler> Add(C* sender, void(C::*function)(T0,T1,T2,T3,T4,T5,T6,T7))
 		{
-			functions.Remove(Func<void(T0,T1,T2,T3,T4,T5,T6,T7)>(sender, function));
+			return Add(Func<void(T0,T1,T2,T3,T4,T5,T6,T7)>(sender, function));
+		}
+ 
+		bool Remove(Ptr<EventHandler> handler)
+		{
+			Ptr<EventHandlerImpl> impl = handler.Cast<EventHandlerImpl>();
+			if (!impl) return false;
+			vint index = handlers.IndexOf(impl);
+			if (index == -1) return false;
+			impl->attached = false;
+			handlers.RemoveAt(index);
+			return true;
 		}
  
 		void operator()(T0 p0,T1 p1,T2 p2,T3 p3,T4 p4,T5 p5,T6 p6,T7 p7)const
 		{
-			for(vint i=0;i<functions.Count();i++)
+			for(vint i = 0; i < handlers.Count(); i++)
 			{
-				functions.Get(i)(p0,p1,p2,p3,p4,p5,p6,p7);
+				handlers[i]->function(p0,p1,p2,p3,p4,p5,p6,p7);
 			}
 		}
 	};
@@ -386,35 +617,60 @@ vl::Event<void(T0,T1,T2,T3,T4,T5,T6,T7,T8)>
 	class Event<void(T0,T1,T2,T3,T4,T5,T6,T7,T8)> : public Object, private NotCopyable
 	{
 	protected:
-		collections::SortedList<Func<void(T0,T1,T2,T3,T4,T5,T6,T7,T8)>>	functions;
+		class EventHandlerImpl : public EventHandler
+		{
+		public:
+			bool								attached;
+			Func<void(T0,T1,T2,T3,T4,T5,T6,T7,T8)>		function;
+			EventHandlerImpl(const Func<void(T0,T1,T2,T3,T4,T5,T6,T7,T8)>& _function)
+				:attached(true)
+				, function(_function)
+			{
+			}
+ 
+			bool IsAttached()override
+			{
+				return attached;
+			}
+		};
+ 
+		collections::SortedList<Ptr<EventHandlerImpl>>	handlers;
 	public:
-		void Add(const Func<void(T0,T1,T2,T3,T4,T5,T6,T7,T8)>& handler)
+		Ptr<EventHandler> Add(const Func<void(T0,T1,T2,T3,T4,T5,T6,T7,T8)>& function)
 		{
-			functions.Add(handler);
-		}
- 
-		void Remove(const Func<void(T0,T1,T2,T3,T4,T5,T6,T7,T8)>& handler)
-		{
-			functions.Remove(handler);
+			Ptr<EventHandlerImpl> handler = new EventHandlerImpl(function);
+			handlers.Add(handler);
+			return handler;
 		}
  
 		template<typename C>
-		void Add(C* sender, void(C::*function)(T0,T1,T2,T3,T4,T5,T6,T7,T8))
+		Ptr<EventHandler> Add(void(*function)(T0,T1,T2,T3,T4,T5,T6,T7,T8))
 		{
-			functions.Add(Func<void(T0,T1,T2,T3,T4,T5,T6,T7,T8)>(sender, function));
+			return Add(Func<void(T0,T1,T2,T3,T4,T5,T6,T7,T8)>(function));
 		}
  
 		template<typename C>
-		void Remove(C* sender, void(C::*function)(T0,T1,T2,T3,T4,T5,T6,T7,T8))
+		Ptr<EventHandler> Add(C* sender, void(C::*function)(T0,T1,T2,T3,T4,T5,T6,T7,T8))
 		{
-			functions.Remove(Func<void(T0,T1,T2,T3,T4,T5,T6,T7,T8)>(sender, function));
+			return Add(Func<void(T0,T1,T2,T3,T4,T5,T6,T7,T8)>(sender, function));
+		}
+ 
+		bool Remove(Ptr<EventHandler> handler)
+		{
+			Ptr<EventHandlerImpl> impl = handler.Cast<EventHandlerImpl>();
+			if (!impl) return false;
+			vint index = handlers.IndexOf(impl);
+			if (index == -1) return false;
+			impl->attached = false;
+			handlers.RemoveAt(index);
+			return true;
 		}
  
 		void operator()(T0 p0,T1 p1,T2 p2,T3 p3,T4 p4,T5 p5,T6 p6,T7 p7,T8 p8)const
 		{
-			for(vint i=0;i<functions.Count();i++)
+			for(vint i = 0; i < handlers.Count(); i++)
 			{
-				functions.Get(i)(p0,p1,p2,p3,p4,p5,p6,p7,p8);
+				handlers[i]->function(p0,p1,p2,p3,p4,p5,p6,p7,p8);
 			}
 		}
 	};
@@ -426,35 +682,60 @@ vl::Event<void(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)>
 	class Event<void(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)> : public Object, private NotCopyable
 	{
 	protected:
-		collections::SortedList<Func<void(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)>>	functions;
+		class EventHandlerImpl : public EventHandler
+		{
+		public:
+			bool								attached;
+			Func<void(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)>		function;
+			EventHandlerImpl(const Func<void(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)>& _function)
+				:attached(true)
+				, function(_function)
+			{
+			}
+ 
+			bool IsAttached()override
+			{
+				return attached;
+			}
+		};
+ 
+		collections::SortedList<Ptr<EventHandlerImpl>>	handlers;
 	public:
-		void Add(const Func<void(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)>& handler)
+		Ptr<EventHandler> Add(const Func<void(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)>& function)
 		{
-			functions.Add(handler);
-		}
- 
-		void Remove(const Func<void(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)>& handler)
-		{
-			functions.Remove(handler);
+			Ptr<EventHandlerImpl> handler = new EventHandlerImpl(function);
+			handlers.Add(handler);
+			return handler;
 		}
  
 		template<typename C>
-		void Add(C* sender, void(C::*function)(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9))
+		Ptr<EventHandler> Add(void(*function)(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9))
 		{
-			functions.Add(Func<void(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)>(sender, function));
+			return Add(Func<void(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)>(function));
 		}
  
 		template<typename C>
-		void Remove(C* sender, void(C::*function)(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9))
+		Ptr<EventHandler> Add(C* sender, void(C::*function)(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9))
 		{
-			functions.Remove(Func<void(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)>(sender, function));
+			return Add(Func<void(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)>(sender, function));
+		}
+ 
+		bool Remove(Ptr<EventHandler> handler)
+		{
+			Ptr<EventHandlerImpl> impl = handler.Cast<EventHandlerImpl>();
+			if (!impl) return false;
+			vint index = handlers.IndexOf(impl);
+			if (index == -1) return false;
+			impl->attached = false;
+			handlers.RemoveAt(index);
+			return true;
 		}
  
 		void operator()(T0 p0,T1 p1,T2 p2,T3 p3,T4 p4,T5 p5,T6 p6,T7 p7,T8 p8,T9 p9)const
 		{
-			for(vint i=0;i<functions.Count();i++)
+			for(vint i = 0; i < handlers.Count(); i++)
 			{
-				functions.Get(i)(p0,p1,p2,p3,p4,p5,p6,p7,p8,p9);
+				handlers[i]->function(p0,p1,p2,p3,p4,p5,p6,p7,p8,p9);
 			}
 		}
 	};

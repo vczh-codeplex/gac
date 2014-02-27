@@ -172,25 +172,25 @@ TEST_CASE(TestEventNormalFunctions)
 	vint a=0;
 	Event<void(vint&)> e;
 
-	e.Add(EventHandler1);
-	e.Add(EventHandler1);
+	auto h1 = e.Add(EventHandler1);
 	e(a);
-	TEST_ASSERT(a==2);
+	TEST_ASSERT(a==1);
+	TEST_ASSERT(h1->IsAttached()==true);
 
-	e.Add(EventHandler2);
-	e.Add(EventHandler2);
+	auto h2 = e.Add(EventHandler2);
 	e(a);
-	TEST_ASSERT(a==8);
+	TEST_ASSERT(a==4);
+	TEST_ASSERT(h2->IsAttached()==true);
 
-	e.Remove(EventHandler1);
-	e.Remove(EventHandler1);
+	TEST_ASSERT(e.Remove(h1));
 	e(a);
-	TEST_ASSERT(a==12);
-
-	e.Remove(EventHandler2);
-	e.Remove(EventHandler2);
+	TEST_ASSERT(a==6);
+	TEST_ASSERT(h1->IsAttached()==false);
+	
+	TEST_ASSERT(e.Remove(h2));
 	e(a);
-	TEST_ASSERT(a==12);
+	TEST_ASSERT(a==6);
+	TEST_ASSERT(h2->IsAttached()==false);
 }
 
 class EhObj
@@ -213,25 +213,25 @@ TEST_CASE(TestEventMemberFunctions)
 	vint a=0;
 	Event<void(vint&)> e;
 
-	e.Add(&o, &EhObj::EventHandler1);
-	e.Add(&o, &EhObj::EventHandler1);
+	auto h1 = e.Add(&o, &EhObj::EventHandler1);
 	e(a);
-	TEST_ASSERT(a==2);
+	TEST_ASSERT(a==1);
+	TEST_ASSERT(h1->IsAttached()==true);
 
-	e.Add(&o, &EhObj::EventHandler2);
-	e.Add(&o, &EhObj::EventHandler2);
+	auto h2 = e.Add(&o, &EhObj::EventHandler2);
 	e(a);
-	TEST_ASSERT(a==8);
+	TEST_ASSERT(a==4);
+	TEST_ASSERT(h2->IsAttached()==true);
 
-	e.Remove(&o, &EhObj::EventHandler1);
-	e.Remove(&o, &EhObj::EventHandler1);
+	TEST_ASSERT(e.Remove(h1));
 	e(a);
-	TEST_ASSERT(a==12);
-
-	e.Remove(&o, &EhObj::EventHandler2);
-	e.Remove(&o, &EhObj::EventHandler2);
+	TEST_ASSERT(a==6);
+	TEST_ASSERT(h1->IsAttached()==false);
+	
+	TEST_ASSERT(e.Remove(h2));
 	e(a);
-	TEST_ASSERT(a==12);
+	TEST_ASSERT(a==6);
+	TEST_ASSERT(h2->IsAttached()==false);
 }
 
 /***********************************************************************
