@@ -990,6 +990,21 @@ TypeDescriptorImpl
 				Load();
 				return constructorGroup.Obj();
 			}
+
+/***********************************************************************
+Function Related
+***********************************************************************/
+
+			namespace internal_helper
+			{
+				void UnboxSpecifiedParameter(Ptr<IValueList> arguments, vint index)
+				{
+				}
+
+				void AddValueToList(Ptr<IValueList> arguments)
+				{
+				}
+			}
 		}
 	}
 }
