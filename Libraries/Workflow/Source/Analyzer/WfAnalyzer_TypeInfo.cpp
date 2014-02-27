@@ -306,7 +306,7 @@ GetScopeNameFromReferenceType
 					manager->ResolveSymbol(scope, node->name.value, symbols);
 					if (symbols.Count() > 1)
 					{
-						manager->errors.Add(WfErrors::TooManySymbol(node, symbols, node->name.value));
+						manager->errors.Add(WfErrors::TooManyTargets(node, symbols, node->name.value));
 						return;
 					}
 					else if (symbols.Count() == 1)
@@ -319,7 +319,7 @@ GetScopeNameFromReferenceType
 					manager->ResolveScopeName(scope, node->name.value, scopeNames);
 					if (scopeNames.Count() > 1)
 					{
-						manager->errors.Add(WfErrors::TooManyScopeName(node, scopeNames, node->name.value));
+						manager->errors.Add(WfErrors::TooManyTargets(node, scopeNames, node->name.value));
 					}
 					else if (scopeNames.Count() == 1)
 					{
