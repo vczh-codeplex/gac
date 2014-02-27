@@ -229,6 +229,12 @@ namespace vl
 		return (typename RemoveReference<T>::Type&&)value;
 	}
 
+	template<typename T>
+	typename RemoveReference<T>::Type& MoveValue(T& value)
+	{
+		return (typename RemoveReference<T>::Type&)value;
+	}
+
 /***********************************************************************
 »ù´¡
 ***********************************************************************/

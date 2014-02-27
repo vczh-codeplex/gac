@@ -52,6 +52,9 @@
     <Filter Include="Resource Files\Parsers">
       <UniqueIdentifier>{88a4d592-d2fb-49b1-8808-d56cb94e5c69}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Common\_Codegen">
+      <UniqueIdentifier>{e96165f5-e7d9-454c-bb9d-94664f58da4c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Source\Basic.cpp">
@@ -418,26 +421,26 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\Source\Common.fpm">
-      <Filter>Common\Basic</Filter>
-    </None>
-    <None Include="..\..\Source\Event.h.fpm">
-      <Filter>Common\Basic</Filter>
-    </None>
-    <None Include="..\..\Source\Function.h.fpm">
-      <Filter>Common\Basic</Filter>
-    </None>
-    <None Include="..\..\Source\GenerateCode.bat">
-      <Filter>Common\Basic</Filter>
-    </None>
-    <None Include="..\..\Source\Tuple.h.fpm">
-      <Filter>Common\Basic</Filter>
-    </None>
     <None Include="Parser.Calculator\Codegen.bat">
       <Filter>Parser.Calculator</Filter>
     </None>
     <None Include="..\..\Source\Reflection\GuiTypeDescriptorBuilder_Gen.h.fpm">
       <Filter>Common\Reflection</Filter>
+    </None>
+    <None Include="..\..\Source\Common.fpm">
+      <Filter>Common\_Codegen</Filter>
+    </None>
+    <None Include="..\..\Source\Event.h.fpm">
+      <Filter>Common\_Codegen</Filter>
+    </None>
+    <None Include="..\..\Source\Function.h.fpm">
+      <Filter>Common\_Codegen</Filter>
+    </None>
+    <None Include="..\..\Source\Tuple.h.fpm">
+      <Filter>Common\_Codegen</Filter>
+    </None>
+    <None Include="..\..\Source\GenerateCode.bat">
+      <Filter>Common\_Codegen</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
