@@ -77,11 +77,11 @@ namespace vl
 			return true;
 		}
  
-		void operator()(TArgs&&... args)const
+		void operator()(TArgs ...args)const
 		{
 			for(vint i = 0; i < handlers.Count(); i++)
 			{
-				handlers[i]->function(MoveValue(args)...);
+				handlers[i]->function(ForwardValue<TArgs>(args)...);
 			}
 		}
 	};
