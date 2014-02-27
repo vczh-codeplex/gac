@@ -623,51 +623,6 @@ TypeInfoRetriver
 				}
 			};
 
-			template<typename R, typename ...TArgs>
-			struct DetailTypeInfoRetriver<Func<R(TArgs...)>, TypeFlags::FunctionType>
-			{
-				typedef DetailTypeInfoRetriver<Func<R(TArgs...)>, TypeFlags::NonGenericType>	UpLevelRetriver;
- 
-				static const ITypeInfo::Decorator								Decorator=UpLevelRetriver::Decorator;
-				typedef IValueList												Type;
-				typedef typename UpLevelRetriver::TempValueType					TempValueType;
-				typedef typename UpLevelRetriver::ResultReferenceType			ResultReferenceType;
-				typedef typename UpLevelRetriver::ResultNonReferenceType		ResultNonReferenceType;
-
-				template<typename T>
-				struct GenericArgumentAdder
-				{
-					static void Add(Ptr<TypeInfoImpl> genericType)
-					{
-					}
-				};
-
-				template<typename T0, typename ...TNextArgs>
-				struct GenericArgumentAdder<TypeTuple<T0, TNextArgs...>>
-				{
-					static void Add(Ptr<TypeInfoImpl> genericType)
-					{
-						genericType->AddGenericArgument(TypeInfoRetriver<T0>::CreateTypeInfo());
-						GenericArgumentAdder<TypeTuple<TNextArgs...>>::Add(genericType);
-					}
-				};
- 
-				static Ptr<ITypeInfo> CreateTypeInfo()
-				{
-					Ptr<TypeInfoImpl> functionType=new TypeInfoImpl(ITypeInfo::TypeDescriptor);
-					functionType->SetTypeDescriptor(Description<IValueFunctionProxy>::GetAssociatedTypeDescriptor());
- 
-					Ptr<TypeInfoImpl> genericType=new TypeInfoImpl(ITypeInfo::Generic);
-					genericType->SetElementType(functionType);
-					genericType->AddGenericArgument(TypeInfoRetriver<R>::CreateTypeInfo());
-					GenericArgumentAdder<TypeTuple<TArgs...>>::Add(genericType);
- 
-					Ptr<TypeInfoImpl> type=new TypeInfoImpl(ITypeInfo::SharedPtr);
-					type->SetElementType(genericType);
-					return type;
-				}
-			};
-
 			template<typename T>
 			struct DetailTypeInfoRetriver<T, TypeFlags::EnumerableType>
 			{

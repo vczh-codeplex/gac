@@ -416,16 +416,13 @@
     <ClInclude Include="..\..\Source\Reflection\GuiTypeDescriptorMacros.h">
       <Filter>Common\Reflection</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Reflection\GuiTypeDescriptorBuilder_Gen.h">
+    <ClInclude Include="..\..\Source\Reflection\GuiTypeDescriptorBuilder_Function.h">
       <Filter>Common\Reflection</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Parser.Calculator\Codegen.bat">
       <Filter>Parser.Calculator</Filter>
-    </None>
-    <None Include="..\..\Source\Reflection\GuiTypeDescriptorBuilder_Gen.h.fpm">
-      <Filter>Common\Reflection</Filter>
     </None>
     <None Include="..\..\Source\Common.fpm">
       <Filter>Common\_Codegen</Filter>
@@ -440,6 +437,9 @@
       <Filter>Common\_Codegen</Filter>
     </None>
     <None Include="..\..\Source\GenerateCode.bat">
+      <Filter>Common\_Codegen</Filter>
+    </None>
+    <None Include="..\..\Source\Reflection\GuiTypeDescriptorBuilder_Gen.h.fpm">
       <Filter>Common\_Codegen</Filter>
     </None>
   </ItemGroup>
