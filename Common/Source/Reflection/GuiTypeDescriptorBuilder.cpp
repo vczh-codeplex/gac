@@ -1001,6 +1001,10 @@ Function Related
 				{
 				}
 
+				void UnboxSpecifiedParameter(MethodInfoImpl* methodInfo, collections::Array<Value>& arguments, vint index)
+				{
+				}
+
 				void AddValueToList(Ptr<IValueList> arguments)
 				{
 				}

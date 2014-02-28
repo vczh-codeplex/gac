@@ -179,7 +179,6 @@ ParameterAccessor<Func<R(TArgs...)>>
 						{
 							result=[functionProxy](TArgs ...args)
 							{
-								 
 								Ptr<IValueList> arguments=IValueList::Create();
 								internal_helper::AddValueToList(arguments, ForwardValue<TArgs>(args)...);
 								TypeInfoRetriver<R>::TempValueType proxyResult;description::UnboxParameter<R>(functionProxy->Invoke(arguments),proxyResult);return proxyResult;
@@ -189,539 +188,78 @@ ParameterAccessor<Func<R(TArgs...)>>
 				}
 			};
  
+/***********************************************************************
+CustomConstructorInfoImpl<R(TArgs...)>
+***********************************************************************/
+ 
 			template<typename T>
 			class CustomConstructorInfoImpl{};
+
+			namespace internal_helper
+			{
+				extern void UnboxSpecifiedParameter(MethodInfoImpl* methodInfo, collections::Array<Value>& arguments, vint index);
+
+				template<typename T0, typename ...TArgs>
+				void UnboxSpecifiedParameter(MethodInfoImpl* methodInfo, collections::Array<Value>& arguments, vint index, T0& p0, TArgs& ...args)
+				{
+					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments[index], p0, methodInfo->GetParameter(index)->GetType()->GetTypeDescriptor(), L"nth-argument");
+					UnboxSpecifiedParameter(methodInfo, arguments, index + 1, args...);
+				}
+
+				template<typename R, typename ...TArgs>
+				static Value InvokeBoxedConstructor(MethodInfoImpl* methodInfo, collections::Array<Value>& arguments, typename RemoveCVR<TArgs>::Type&& ...args)
+				{
+				}
+
+				template<typename T>
+				struct ConstructorArgumentAdder
+				{
+					static void Add(MethodInfoImpl* methodInfo, const wchar_t* parameterNames[], vint index)
+					{
+					}
+				};
+
+				template<typename T0, typename ...TNextArgs>
+				struct ConstructorArgumentAdder<TypeTuple<T0, TNextArgs...>>
+				{
+					static void Add(MethodInfoImpl* methodInfo, const wchar_t* parameterNames[], vint index)
+					{
+						methodInfo->AddParameter(new ParameterInfoImpl(methodInfo, parameterNames[index], TypeInfoRetriver<T0>::CreateTypeInfo()));
+						ConstructorArgumentAdder<TypeTuple<TNextArgs...>>::Add(methodInfo, parameterNames, index + 1);
+					}
+				};
+			}
+
+			template<typename R, typename ...TArgs>
+			class CustomConstructorInfoImpl<R(TArgs...)> : public MethodInfoImpl
+			{
+			protected:
+				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
+				{
+					return internal_helper::InvokeBoxedConstructor<R, TArgs...>(this, arguments, typename RemoveCVR<TArgs>::Type()...);
+				}
+ 
+				Value CreateFunctionProxyInternal(const Value& thisObject)override
+				{
+					Func<R(TArgs...)> proxy(
+						LAMBDA([](TArgs ...args)->R
+						{
+							R result = new TypeInfoRetriver<R>::Type(args...);
+							return result;
+						})
+					);
+					return BoxParameter<Func<R(TArgs...)>>(proxy);
+				}
+			public:
+				CustomConstructorInfoImpl(const wchar_t* parameterNames[])
+					:MethodInfoImpl(0, TypeInfoRetriver<R>::CreateTypeInfo(), true)
+				{
+					internal_helper::ConstructorArgumentAdder<TypeTuple<TArgs...>>::Add(this, parameterNames, 0);
+				}
+			};
+
 			template<typename TClass, typename T>
 			struct CustomMethodInfoImplSelector{};
- 
-/***********************************************************************
-Constructor: R()
-***********************************************************************/
-			template<typename R >
-			class CustomConstructorInfoImpl<R()> : public MethodInfoImpl
-			{
-			protected:
-				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
-				{
-
-					R result = new typename TypeInfoRetriver<R>::Type();
-					return BoxParameter<R>(result, GetOwnerTypeDescriptor());
-				}
- 
-				Value CreateFunctionProxyInternal(const Value& thisObject)override
-				{
-					Func<R()> proxy(
-						LAMBDA([]()->R
-						{
-							R result = new TypeInfoRetriver<R>::Type();
-							return result;
-						})
-					);
-					return BoxParameter<Func<R()>>(proxy);
-				}
-			public:
-				CustomConstructorInfoImpl(const wchar_t* parameterNames[])
-					:MethodInfoImpl(0, TypeInfoRetriver<R>::CreateTypeInfo(), true)
-				{
-
-				}
-			};
-  
-/***********************************************************************
-Constructor: R(T0)
-***********************************************************************/
-			template<typename R,typename T0>
-			class CustomConstructorInfoImpl<R(T0)> : public MethodInfoImpl
-			{
-			protected:
-				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
-				{
-					typename TypeInfoRetriver<T0>::TempValueType p0;
-					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments[0], p0, GetParameter(0)->GetType()->GetTypeDescriptor(), L"p0");
- 
-					R result = new typename TypeInfoRetriver<R>::Type(p0);
-					return BoxParameter<R>(result, GetOwnerTypeDescriptor());
-				}
- 
-				Value CreateFunctionProxyInternal(const Value& thisObject)override
-				{
-					Func<R(T0)> proxy(
-						LAMBDA([](T0 p0)->R
-						{
-							R result = new TypeInfoRetriver<R>::Type(p0);
-							return result;
-						})
-					);
-					return BoxParameter<Func<R(T0)>>(proxy);
-				}
-			public:
-				CustomConstructorInfoImpl(const wchar_t* parameterNames[])
-					:MethodInfoImpl(0, TypeInfoRetriver<R>::CreateTypeInfo(), true)
-				{
-					AddParameter(new ParameterInfoImpl(this, parameterNames[0], TypeInfoRetriver<T0>::CreateTypeInfo()));
- 
-				}
-			};
-  
-/***********************************************************************
-Constructor: R(T0,T1)
-***********************************************************************/
-			template<typename R,typename T0,typename T1>
-			class CustomConstructorInfoImpl<R(T0,T1)> : public MethodInfoImpl
-			{
-			protected:
-				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
-				{
-					typename TypeInfoRetriver<T0>::TempValueType p0;
-					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments[0], p0, GetParameter(0)->GetType()->GetTypeDescriptor(), L"p0");
- 					typename TypeInfoRetriver<T1>::TempValueType p1;
-					UnboxParameter<typename TypeInfoRetriver<T1>::TempValueType>(arguments[1], p1, GetParameter(1)->GetType()->GetTypeDescriptor(), L"p1");
- 
-					R result = new typename TypeInfoRetriver<R>::Type(p0,p1);
-					return BoxParameter<R>(result, GetOwnerTypeDescriptor());
-				}
- 
-				Value CreateFunctionProxyInternal(const Value& thisObject)override
-				{
-					Func<R(T0,T1)> proxy(
-						LAMBDA([](T0 p0,T1 p1)->R
-						{
-							R result = new TypeInfoRetriver<R>::Type(p0,p1);
-							return result;
-						})
-					);
-					return BoxParameter<Func<R(T0,T1)>>(proxy);
-				}
-			public:
-				CustomConstructorInfoImpl(const wchar_t* parameterNames[])
-					:MethodInfoImpl(0, TypeInfoRetriver<R>::CreateTypeInfo(), true)
-				{
-					AddParameter(new ParameterInfoImpl(this, parameterNames[0], TypeInfoRetriver<T0>::CreateTypeInfo()));
- 					AddParameter(new ParameterInfoImpl(this, parameterNames[1], TypeInfoRetriver<T1>::CreateTypeInfo()));
- 
-				}
-			};
-  
-/***********************************************************************
-Constructor: R(T0,T1,T2)
-***********************************************************************/
-			template<typename R,typename T0,typename T1,typename T2>
-			class CustomConstructorInfoImpl<R(T0,T1,T2)> : public MethodInfoImpl
-			{
-			protected:
-				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
-				{
-					typename TypeInfoRetriver<T0>::TempValueType p0;
-					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments[0], p0, GetParameter(0)->GetType()->GetTypeDescriptor(), L"p0");
- 					typename TypeInfoRetriver<T1>::TempValueType p1;
-					UnboxParameter<typename TypeInfoRetriver<T1>::TempValueType>(arguments[1], p1, GetParameter(1)->GetType()->GetTypeDescriptor(), L"p1");
- 					typename TypeInfoRetriver<T2>::TempValueType p2;
-					UnboxParameter<typename TypeInfoRetriver<T2>::TempValueType>(arguments[2], p2, GetParameter(2)->GetType()->GetTypeDescriptor(), L"p2");
- 
-					R result = new typename TypeInfoRetriver<R>::Type(p0,p1,p2);
-					return BoxParameter<R>(result, GetOwnerTypeDescriptor());
-				}
- 
-				Value CreateFunctionProxyInternal(const Value& thisObject)override
-				{
-					Func<R(T0,T1,T2)> proxy(
-						LAMBDA([](T0 p0,T1 p1,T2 p2)->R
-						{
-							R result = new TypeInfoRetriver<R>::Type(p0,p1,p2);
-							return result;
-						})
-					);
-					return BoxParameter<Func<R(T0,T1,T2)>>(proxy);
-				}
-			public:
-				CustomConstructorInfoImpl(const wchar_t* parameterNames[])
-					:MethodInfoImpl(0, TypeInfoRetriver<R>::CreateTypeInfo(), true)
-				{
-					AddParameter(new ParameterInfoImpl(this, parameterNames[0], TypeInfoRetriver<T0>::CreateTypeInfo()));
- 					AddParameter(new ParameterInfoImpl(this, parameterNames[1], TypeInfoRetriver<T1>::CreateTypeInfo()));
- 					AddParameter(new ParameterInfoImpl(this, parameterNames[2], TypeInfoRetriver<T2>::CreateTypeInfo()));
- 
-				}
-			};
-  
-/***********************************************************************
-Constructor: R(T0,T1,T2,T3)
-***********************************************************************/
-			template<typename R,typename T0,typename T1,typename T2,typename T3>
-			class CustomConstructorInfoImpl<R(T0,T1,T2,T3)> : public MethodInfoImpl
-			{
-			protected:
-				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
-				{
-					typename TypeInfoRetriver<T0>::TempValueType p0;
-					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments[0], p0, GetParameter(0)->GetType()->GetTypeDescriptor(), L"p0");
- 					typename TypeInfoRetriver<T1>::TempValueType p1;
-					UnboxParameter<typename TypeInfoRetriver<T1>::TempValueType>(arguments[1], p1, GetParameter(1)->GetType()->GetTypeDescriptor(), L"p1");
- 					typename TypeInfoRetriver<T2>::TempValueType p2;
-					UnboxParameter<typename TypeInfoRetriver<T2>::TempValueType>(arguments[2], p2, GetParameter(2)->GetType()->GetTypeDescriptor(), L"p2");
- 					typename TypeInfoRetriver<T3>::TempValueType p3;
-					UnboxParameter<typename TypeInfoRetriver<T3>::TempValueType>(arguments[3], p3, GetParameter(3)->GetType()->GetTypeDescriptor(), L"p3");
- 
-					R result = new typename TypeInfoRetriver<R>::Type(p0,p1,p2,p3);
-					return BoxParameter<R>(result, GetOwnerTypeDescriptor());
-				}
- 
-				Value CreateFunctionProxyInternal(const Value& thisObject)override
-				{
-					Func<R(T0,T1,T2,T3)> proxy(
-						LAMBDA([](T0 p0,T1 p1,T2 p2,T3 p3)->R
-						{
-							R result = new TypeInfoRetriver<R>::Type(p0,p1,p2,p3);
-							return result;
-						})
-					);
-					return BoxParameter<Func<R(T0,T1,T2,T3)>>(proxy);
-				}
-			public:
-				CustomConstructorInfoImpl(const wchar_t* parameterNames[])
-					:MethodInfoImpl(0, TypeInfoRetriver<R>::CreateTypeInfo(), true)
-				{
-					AddParameter(new ParameterInfoImpl(this, parameterNames[0], TypeInfoRetriver<T0>::CreateTypeInfo()));
- 					AddParameter(new ParameterInfoImpl(this, parameterNames[1], TypeInfoRetriver<T1>::CreateTypeInfo()));
- 					AddParameter(new ParameterInfoImpl(this, parameterNames[2], TypeInfoRetriver<T2>::CreateTypeInfo()));
- 					AddParameter(new ParameterInfoImpl(this, parameterNames[3], TypeInfoRetriver<T3>::CreateTypeInfo()));
- 
-				}
-			};
-  
-/***********************************************************************
-Constructor: R(T0,T1,T2,T3,T4)
-***********************************************************************/
-			template<typename R,typename T0,typename T1,typename T2,typename T3,typename T4>
-			class CustomConstructorInfoImpl<R(T0,T1,T2,T3,T4)> : public MethodInfoImpl
-			{
-			protected:
-				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
-				{
-					typename TypeInfoRetriver<T0>::TempValueType p0;
-					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments[0], p0, GetParameter(0)->GetType()->GetTypeDescriptor(), L"p0");
- 					typename TypeInfoRetriver<T1>::TempValueType p1;
-					UnboxParameter<typename TypeInfoRetriver<T1>::TempValueType>(arguments[1], p1, GetParameter(1)->GetType()->GetTypeDescriptor(), L"p1");
- 					typename TypeInfoRetriver<T2>::TempValueType p2;
-					UnboxParameter<typename TypeInfoRetriver<T2>::TempValueType>(arguments[2], p2, GetParameter(2)->GetType()->GetTypeDescriptor(), L"p2");
- 					typename TypeInfoRetriver<T3>::TempValueType p3;
-					UnboxParameter<typename TypeInfoRetriver<T3>::TempValueType>(arguments[3], p3, GetParameter(3)->GetType()->GetTypeDescriptor(), L"p3");
- 					typename TypeInfoRetriver<T4>::TempValueType p4;
-					UnboxParameter<typename TypeInfoRetriver<T4>::TempValueType>(arguments[4], p4, GetParameter(4)->GetType()->GetTypeDescriptor(), L"p4");
- 
-					R result = new typename TypeInfoRetriver<R>::Type(p0,p1,p2,p3,p4);
-					return BoxParameter<R>(result, GetOwnerTypeDescriptor());
-				}
- 
-				Value CreateFunctionProxyInternal(const Value& thisObject)override
-				{
-					Func<R(T0,T1,T2,T3,T4)> proxy(
-						LAMBDA([](T0 p0,T1 p1,T2 p2,T3 p3,T4 p4)->R
-						{
-							R result = new TypeInfoRetriver<R>::Type(p0,p1,p2,p3,p4);
-							return result;
-						})
-					);
-					return BoxParameter<Func<R(T0,T1,T2,T3,T4)>>(proxy);
-				}
-			public:
-				CustomConstructorInfoImpl(const wchar_t* parameterNames[])
-					:MethodInfoImpl(0, TypeInfoRetriver<R>::CreateTypeInfo(), true)
-				{
-					AddParameter(new ParameterInfoImpl(this, parameterNames[0], TypeInfoRetriver<T0>::CreateTypeInfo()));
- 					AddParameter(new ParameterInfoImpl(this, parameterNames[1], TypeInfoRetriver<T1>::CreateTypeInfo()));
- 					AddParameter(new ParameterInfoImpl(this, parameterNames[2], TypeInfoRetriver<T2>::CreateTypeInfo()));
- 					AddParameter(new ParameterInfoImpl(this, parameterNames[3], TypeInfoRetriver<T3>::CreateTypeInfo()));
- 					AddParameter(new ParameterInfoImpl(this, parameterNames[4], TypeInfoRetriver<T4>::CreateTypeInfo()));
- 
-				}
-			};
-  
-/***********************************************************************
-Constructor: R(T0,T1,T2,T3,T4,T5)
-***********************************************************************/
-			template<typename R,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5>
-			class CustomConstructorInfoImpl<R(T0,T1,T2,T3,T4,T5)> : public MethodInfoImpl
-			{
-			protected:
-				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
-				{
-					typename TypeInfoRetriver<T0>::TempValueType p0;
-					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments[0], p0, GetParameter(0)->GetType()->GetTypeDescriptor(), L"p0");
- 					typename TypeInfoRetriver<T1>::TempValueType p1;
-					UnboxParameter<typename TypeInfoRetriver<T1>::TempValueType>(arguments[1], p1, GetParameter(1)->GetType()->GetTypeDescriptor(), L"p1");
- 					typename TypeInfoRetriver<T2>::TempValueType p2;
-					UnboxParameter<typename TypeInfoRetriver<T2>::TempValueType>(arguments[2], p2, GetParameter(2)->GetType()->GetTypeDescriptor(), L"p2");
- 					typename TypeInfoRetriver<T3>::TempValueType p3;
-					UnboxParameter<typename TypeInfoRetriver<T3>::TempValueType>(arguments[3], p3, GetParameter(3)->GetType()->GetTypeDescriptor(), L"p3");
- 					typename TypeInfoRetriver<T4>::TempValueType p4;
-					UnboxParameter<typename TypeInfoRetriver<T4>::TempValueType>(arguments[4], p4, GetParameter(4)->GetType()->GetTypeDescriptor(), L"p4");
- 					typename TypeInfoRetriver<T5>::TempValueType p5;
-					UnboxParameter<typename TypeInfoRetriver<T5>::TempValueType>(arguments[5], p5, GetParameter(5)->GetType()->GetTypeDescriptor(), L"p5");
- 
-					R result = new typename TypeInfoRetriver<R>::Type(p0,p1,p2,p3,p4,p5);
-					return BoxParameter<R>(result, GetOwnerTypeDescriptor());
-				}
- 
-				Value CreateFunctionProxyInternal(const Value& thisObject)override
-				{
-					Func<R(T0,T1,T2,T3,T4,T5)> proxy(
-						LAMBDA([](T0 p0,T1 p1,T2 p2,T3 p3,T4 p4,T5 p5)->R
-						{
-							R result = new TypeInfoRetriver<R>::Type(p0,p1,p2,p3,p4,p5);
-							return result;
-						})
-					);
-					return BoxParameter<Func<R(T0,T1,T2,T3,T4,T5)>>(proxy);
-				}
-			public:
-				CustomConstructorInfoImpl(const wchar_t* parameterNames[])
-					:MethodInfoImpl(0, TypeInfoRetriver<R>::CreateTypeInfo(), true)
-				{
-					AddParameter(new ParameterInfoImpl(this, parameterNames[0], TypeInfoRetriver<T0>::CreateTypeInfo()));
- 					AddParameter(new ParameterInfoImpl(this, parameterNames[1], TypeInfoRetriver<T1>::CreateTypeInfo()));
- 					AddParameter(new ParameterInfoImpl(this, parameterNames[2], TypeInfoRetriver<T2>::CreateTypeInfo()));
- 					AddParameter(new ParameterInfoImpl(this, parameterNames[3], TypeInfoRetriver<T3>::CreateTypeInfo()));
- 					AddParameter(new ParameterInfoImpl(this, parameterNames[4], TypeInfoRetriver<T4>::CreateTypeInfo()));
- 					AddParameter(new ParameterInfoImpl(this, parameterNames[5], TypeInfoRetriver<T5>::CreateTypeInfo()));
- 
-				}
-			};
-  
-/***********************************************************************
-Constructor: R(T0,T1,T2,T3,T4,T5,T6)
-***********************************************************************/
-			template<typename R,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6>
-			class CustomConstructorInfoImpl<R(T0,T1,T2,T3,T4,T5,T6)> : public MethodInfoImpl
-			{
-			protected:
-				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
-				{
-					typename TypeInfoRetriver<T0>::TempValueType p0;
-					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments[0], p0, GetParameter(0)->GetType()->GetTypeDescriptor(), L"p0");
- 					typename TypeInfoRetriver<T1>::TempValueType p1;
-					UnboxParameter<typename TypeInfoRetriver<T1>::TempValueType>(arguments[1], p1, GetParameter(1)->GetType()->GetTypeDescriptor(), L"p1");
- 					typename TypeInfoRetriver<T2>::TempValueType p2;
-					UnboxParameter<typename TypeInfoRetriver<T2>::TempValueType>(arguments[2], p2, GetParameter(2)->GetType()->GetTypeDescriptor(), L"p2");
- 					typename TypeInfoRetriver<T3>::TempValueType p3;
-					UnboxParameter<typename TypeInfoRetriver<T3>::TempValueType>(arguments[3], p3, GetParameter(3)->GetType()->GetTypeDescriptor(), L"p3");
- 					typename TypeInfoRetriver<T4>::TempValueType p4;
-					UnboxParameter<typename TypeInfoRetriver<T4>::TempValueType>(arguments[4], p4, GetParameter(4)->GetType()->GetTypeDescriptor(), L"p4");
- 					typename TypeInfoRetriver<T5>::TempValueType p5;
-					UnboxParameter<typename TypeInfoRetriver<T5>::TempValueType>(arguments[5], p5, GetParameter(5)->GetType()->GetTypeDescriptor(), L"p5");
- 					typename TypeInfoRetriver<T6>::TempValueType p6;
-					UnboxParameter<typename TypeInfoRetriver<T6>::TempValueType>(arguments[6], p6, GetParameter(6)->GetType()->GetTypeDescriptor(), L"p6");
- 
-					R result = new typename TypeInfoRetriver<R>::Type(p0,p1,p2,p3,p4,p5,p6);
-					return BoxParameter<R>(result, GetOwnerTypeDescriptor());
-				}
- 
-				Value CreateFunctionProxyInternal(const Value& thisObject)override
-				{
-					Func<R(T0,T1,T2,T3,T4,T5,T6)> proxy(
-						LAMBDA([](T0 p0,T1 p1,T2 p2,T3 p3,T4 p4,T5 p5,T6 p6)->R
-						{
-							R result = new TypeInfoRetriver<R>::Type(p0,p1,p2,p3,p4,p5,p6);
-							return result;
-						})
-					);
-					return BoxParameter<Func<R(T0,T1,T2,T3,T4,T5,T6)>>(proxy);
-				}
-			public:
-				CustomConstructorInfoImpl(const wchar_t* parameterNames[])
-					:MethodInfoImpl(0, TypeInfoRetriver<R>::CreateTypeInfo(), true)
-				{
-					AddParameter(new ParameterInfoImpl(this, parameterNames[0], TypeInfoRetriver<T0>::CreateTypeInfo()));
- 					AddParameter(new ParameterInfoImpl(this, parameterNames[1], TypeInfoRetriver<T1>::CreateTypeInfo()));
- 					AddParameter(new ParameterInfoImpl(this, parameterNames[2], TypeInfoRetriver<T2>::CreateTypeInfo()));
- 					AddParameter(new ParameterInfoImpl(this, parameterNames[3], TypeInfoRetriver<T3>::CreateTypeInfo()));
- 					AddParameter(new ParameterInfoImpl(this, parameterNames[4], TypeInfoRetriver<T4>::CreateTypeInfo()));
- 					AddParameter(new ParameterInfoImpl(this, parameterNames[5], TypeInfoRetriver<T5>::CreateTypeInfo()));
- 					AddParameter(new ParameterInfoImpl(this, parameterNames[6], TypeInfoRetriver<T6>::CreateTypeInfo()));
- 
-				}
-			};
-  
-/***********************************************************************
-Constructor: R(T0,T1,T2,T3,T4,T5,T6,T7)
-***********************************************************************/
-			template<typename R,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7>
-			class CustomConstructorInfoImpl<R(T0,T1,T2,T3,T4,T5,T6,T7)> : public MethodInfoImpl
-			{
-			protected:
-				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
-				{
-					typename TypeInfoRetriver<T0>::TempValueType p0;
-					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments[0], p0, GetParameter(0)->GetType()->GetTypeDescriptor(), L"p0");
- 					typename TypeInfoRetriver<T1>::TempValueType p1;
-					UnboxParameter<typename TypeInfoRetriver<T1>::TempValueType>(arguments[1], p1, GetParameter(1)->GetType()->GetTypeDescriptor(), L"p1");
- 					typename TypeInfoRetriver<T2>::TempValueType p2;
-					UnboxParameter<typename TypeInfoRetriver<T2>::TempValueType>(arguments[2], p2, GetParameter(2)->GetType()->GetTypeDescriptor(), L"p2");
- 					typename TypeInfoRetriver<T3>::TempValueType p3;
-					UnboxParameter<typename TypeInfoRetriver<T3>::TempValueType>(arguments[3], p3, GetParameter(3)->GetType()->GetTypeDescriptor(), L"p3");
- 					typename TypeInfoRetriver<T4>::TempValueType p4;
-					UnboxParameter<typename TypeInfoRetriver<T4>::TempValueType>(arguments[4], p4, GetParameter(4)->GetType()->GetTypeDescriptor(), L"p4");
- 					typename TypeInfoRetriver<T5>::TempValueType p5;
-					UnboxParameter<typename TypeInfoRetriver<T5>::TempValueType>(arguments[5], p5, GetParameter(5)->GetType()->GetTypeDescriptor(), L"p5");
- 					typename TypeInfoRetriver<T6>::TempValueType p6;
-					UnboxParameter<typename TypeInfoRetriver<T6>::TempValueType>(arguments[6], p6, GetParameter(6)->GetType()->GetTypeDescriptor(), L"p6");
- 					typename TypeInfoRetriver<T7>::TempValueType p7;
-					UnboxParameter<typename TypeInfoRetriver<T7>::TempValueType>(arguments[7], p7, GetParameter(7)->GetType()->GetTypeDescriptor(), L"p7");
- 
-					R result = new typename TypeInfoRetriver<R>::Type(p0,p1,p2,p3,p4,p5,p6,p7);
-					return BoxParameter<R>(result, GetOwnerTypeDescriptor());
-				}
- 
-				Value CreateFunctionProxyInternal(const Value& thisObject)override
-				{
-					Func<R(T0,T1,T2,T3,T4,T5,T6,T7)> proxy(
-						LAMBDA([](T0 p0,T1 p1,T2 p2,T3 p3,T4 p4,T5 p5,T6 p6,T7 p7)->R
-						{
-							R result = new TypeInfoRetriver<R>::Type(p0,p1,p2,p3,p4,p5,p6,p7);
-							return result;
-						})
-					);
-					return BoxParameter<Func<R(T0,T1,T2,T3,T4,T5,T6,T7)>>(proxy);
-				}
-			public:
-				CustomConstructorInfoImpl(const wchar_t* parameterNames[])
-					:MethodInfoImpl(0, TypeInfoRetriver<R>::CreateTypeInfo(), true)
-				{
-					AddParameter(new ParameterInfoImpl(this, parameterNames[0], TypeInfoRetriver<T0>::CreateTypeInfo()));
- 					AddParameter(new ParameterInfoImpl(this, parameterNames[1], TypeInfoRetriver<T1>::CreateTypeInfo()));
- 					AddParameter(new ParameterInfoImpl(this, parameterNames[2], TypeInfoRetriver<T2>::CreateTypeInfo()));
- 					AddParameter(new ParameterInfoImpl(this, parameterNames[3], TypeInfoRetriver<T3>::CreateTypeInfo()));
- 					AddParameter(new ParameterInfoImpl(this, parameterNames[4], TypeInfoRetriver<T4>::CreateTypeInfo()));
- 					AddParameter(new ParameterInfoImpl(this, parameterNames[5], TypeInfoRetriver<T5>::CreateTypeInfo()));
- 					AddParameter(new ParameterInfoImpl(this, parameterNames[6], TypeInfoRetriver<T6>::CreateTypeInfo()));
- 					AddParameter(new ParameterInfoImpl(this, parameterNames[7], TypeInfoRetriver<T7>::CreateTypeInfo()));
- 
-				}
-			};
-  
-/***********************************************************************
-Constructor: R(T0,T1,T2,T3,T4,T5,T6,T7,T8)
-***********************************************************************/
-			template<typename R,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7,typename T8>
-			class CustomConstructorInfoImpl<R(T0,T1,T2,T3,T4,T5,T6,T7,T8)> : public MethodInfoImpl
-			{
-			protected:
-				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
-				{
-					typename TypeInfoRetriver<T0>::TempValueType p0;
-					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments[0], p0, GetParameter(0)->GetType()->GetTypeDescriptor(), L"p0");
- 					typename TypeInfoRetriver<T1>::TempValueType p1;
-					UnboxParameter<typename TypeInfoRetriver<T1>::TempValueType>(arguments[1], p1, GetParameter(1)->GetType()->GetTypeDescriptor(), L"p1");
- 					typename TypeInfoRetriver<T2>::TempValueType p2;
-					UnboxParameter<typename TypeInfoRetriver<T2>::TempValueType>(arguments[2], p2, GetParameter(2)->GetType()->GetTypeDescriptor(), L"p2");
- 					typename TypeInfoRetriver<T3>::TempValueType p3;
-					UnboxParameter<typename TypeInfoRetriver<T3>::TempValueType>(arguments[3], p3, GetParameter(3)->GetType()->GetTypeDescriptor(), L"p3");
- 					typename TypeInfoRetriver<T4>::TempValueType p4;
-					UnboxParameter<typename TypeInfoRetriver<T4>::TempValueType>(arguments[4], p4, GetParameter(4)->GetType()->GetTypeDescriptor(), L"p4");
- 					typename TypeInfoRetriver<T5>::TempValueType p5;
-					UnboxParameter<typename TypeInfoRetriver<T5>::TempValueType>(arguments[5], p5, GetParameter(5)->GetType()->GetTypeDescriptor(), L"p5");
- 					typename TypeInfoRetriver<T6>::TempValueType p6;
-					UnboxParameter<typename TypeInfoRetriver<T6>::TempValueType>(arguments[6], p6, GetParameter(6)->GetType()->GetTypeDescriptor(), L"p6");
- 					typename TypeInfoRetriver<T7>::TempValueType p7;
-					UnboxParameter<typename TypeInfoRetriver<T7>::TempValueType>(arguments[7], p7, GetParameter(7)->GetType()->GetTypeDescriptor(), L"p7");
- 					typename TypeInfoRetriver<T8>::TempValueType p8;
-					UnboxParameter<typename TypeInfoRetriver<T8>::TempValueType>(arguments[8], p8, GetParameter(8)->GetType()->GetTypeDescriptor(), L"p8");
- 
-					R result = new typename TypeInfoRetriver<R>::Type(p0,p1,p2,p3,p4,p5,p6,p7,p8);
-					return BoxParameter<R>(result, GetOwnerTypeDescriptor());
-				}
- 
-				Value CreateFunctionProxyInternal(const Value& thisObject)override
-				{
-					Func<R(T0,T1,T2,T3,T4,T5,T6,T7,T8)> proxy(
-						LAMBDA([](T0 p0,T1 p1,T2 p2,T3 p3,T4 p4,T5 p5,T6 p6,T7 p7,T8 p8)->R
-						{
-							R result = new TypeInfoRetriver<R>::Type(p0,p1,p2,p3,p4,p5,p6,p7,p8);
-							return result;
-						})
-					);
-					return BoxParameter<Func<R(T0,T1,T2,T3,T4,T5,T6,T7,T8)>>(proxy);
-				}
-			public:
-				CustomConstructorInfoImpl(const wchar_t* parameterNames[])
-					:MethodInfoImpl(0, TypeInfoRetriver<R>::CreateTypeInfo(), true)
-				{
-					AddParameter(new ParameterInfoImpl(this, parameterNames[0], TypeInfoRetriver<T0>::CreateTypeInfo()));
- 					AddParameter(new ParameterInfoImpl(this, parameterNames[1], TypeInfoRetriver<T1>::CreateTypeInfo()));
- 					AddParameter(new ParameterInfoImpl(this, parameterNames[2], TypeInfoRetriver<T2>::CreateTypeInfo()));
- 					AddParameter(new ParameterInfoImpl(this, parameterNames[3], TypeInfoRetriver<T3>::CreateTypeInfo()));
- 					AddParameter(new ParameterInfoImpl(this, parameterNames[4], TypeInfoRetriver<T4>::CreateTypeInfo()));
- 					AddParameter(new ParameterInfoImpl(this, parameterNames[5], TypeInfoRetriver<T5>::CreateTypeInfo()));
- 					AddParameter(new ParameterInfoImpl(this, parameterNames[6], TypeInfoRetriver<T6>::CreateTypeInfo()));
- 					AddParameter(new ParameterInfoImpl(this, parameterNames[7], TypeInfoRetriver<T7>::CreateTypeInfo()));
- 					AddParameter(new ParameterInfoImpl(this, parameterNames[8], TypeInfoRetriver<T8>::CreateTypeInfo()));
- 
-				}
-			};
-  
-/***********************************************************************
-Constructor: R(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)
-***********************************************************************/
-			template<typename R,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7,typename T8,typename T9>
-			class CustomConstructorInfoImpl<R(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)> : public MethodInfoImpl
-			{
-			protected:
-				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
-				{
-					typename TypeInfoRetriver<T0>::TempValueType p0;
-					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments[0], p0, GetParameter(0)->GetType()->GetTypeDescriptor(), L"p0");
- 					typename TypeInfoRetriver<T1>::TempValueType p1;
-					UnboxParameter<typename TypeInfoRetriver<T1>::TempValueType>(arguments[1], p1, GetParameter(1)->GetType()->GetTypeDescriptor(), L"p1");
- 					typename TypeInfoRetriver<T2>::TempValueType p2;
-					UnboxParameter<typename TypeInfoRetriver<T2>::TempValueType>(arguments[2], p2, GetParameter(2)->GetType()->GetTypeDescriptor(), L"p2");
- 					typename TypeInfoRetriver<T3>::TempValueType p3;
-					UnboxParameter<typename TypeInfoRetriver<T3>::TempValueType>(arguments[3], p3, GetParameter(3)->GetType()->GetTypeDescriptor(), L"p3");
- 					typename TypeInfoRetriver<T4>::TempValueType p4;
-					UnboxParameter<typename TypeInfoRetriver<T4>::TempValueType>(arguments[4], p4, GetParameter(4)->GetType()->GetTypeDescriptor(), L"p4");
- 					typename TypeInfoRetriver<T5>::TempValueType p5;
-					UnboxParameter<typename TypeInfoRetriver<T5>::TempValueType>(arguments[5], p5, GetParameter(5)->GetType()->GetTypeDescriptor(), L"p5");
- 					typename TypeInfoRetriver<T6>::TempValueType p6;
-					UnboxParameter<typename TypeInfoRetriver<T6>::TempValueType>(arguments[6], p6, GetParameter(6)->GetType()->GetTypeDescriptor(), L"p6");
- 					typename TypeInfoRetriver<T7>::TempValueType p7;
-					UnboxParameter<typename TypeInfoRetriver<T7>::TempValueType>(arguments[7], p7, GetParameter(7)->GetType()->GetTypeDescriptor(), L"p7");
- 					typename TypeInfoRetriver<T8>::TempValueType p8;
-					UnboxParameter<typename TypeInfoRetriver<T8>::TempValueType>(arguments[8], p8, GetParameter(8)->GetType()->GetTypeDescriptor(), L"p8");
- 					typename TypeInfoRetriver<T9>::TempValueType p9;
-					UnboxParameter<typename TypeInfoRetriver<T9>::TempValueType>(arguments[9], p9, GetParameter(9)->GetType()->GetTypeDescriptor(), L"p9");
- 
-					R result = new typename TypeInfoRetriver<R>::Type(p0,p1,p2,p3,p4,p5,p6,p7,p8,p9);
-					return BoxParameter<R>(result, GetOwnerTypeDescriptor());
-				}
- 
-				Value CreateFunctionProxyInternal(const Value& thisObject)override
-				{
-					Func<R(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)> proxy(
-						LAMBDA([](T0 p0,T1 p1,T2 p2,T3 p3,T4 p4,T5 p5,T6 p6,T7 p7,T8 p8,T9 p9)->R
-						{
-							R result = new TypeInfoRetriver<R>::Type(p0,p1,p2,p3,p4,p5,p6,p7,p8,p9);
-							return result;
-						})
-					);
-					return BoxParameter<Func<R(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)>>(proxy);
-				}
-			public:
-				CustomConstructorInfoImpl(const wchar_t* parameterNames[])
-					:MethodInfoImpl(0, TypeInfoRetriver<R>::CreateTypeInfo(), true)
-				{
-					AddParameter(new ParameterInfoImpl(this, parameterNames[0], TypeInfoRetriver<T0>::CreateTypeInfo()));
- 					AddParameter(new ParameterInfoImpl(this, parameterNames[1], TypeInfoRetriver<T1>::CreateTypeInfo()));
- 					AddParameter(new ParameterInfoImpl(this, parameterNames[2], TypeInfoRetriver<T2>::CreateTypeInfo()));
- 					AddParameter(new ParameterInfoImpl(this, parameterNames[3], TypeInfoRetriver<T3>::CreateTypeInfo()));
- 					AddParameter(new ParameterInfoImpl(this, parameterNames[4], TypeInfoRetriver<T4>::CreateTypeInfo()));
- 					AddParameter(new ParameterInfoImpl(this, parameterNames[5], TypeInfoRetriver<T5>::CreateTypeInfo()));
- 					AddParameter(new ParameterInfoImpl(this, parameterNames[6], TypeInfoRetriver<T6>::CreateTypeInfo()));
- 					AddParameter(new ParameterInfoImpl(this, parameterNames[7], TypeInfoRetriver<T7>::CreateTypeInfo()));
- 					AddParameter(new ParameterInfoImpl(this, parameterNames[8], TypeInfoRetriver<T8>::CreateTypeInfo()));
- 					AddParameter(new ParameterInfoImpl(this, parameterNames[9], TypeInfoRetriver<T9>::CreateTypeInfo()));
- 
-				}
-			};
- 
  
 /***********************************************************************
 Member Method: void()
