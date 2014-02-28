@@ -15,6 +15,7 @@ XML Representation for Code Generation:
 #include "../Locale.h"
 #include "../Exception.h"
 #include "../Function.h"
+#include "../Event.h"
 #include "../Collections/List.h"
 #include "../Collections/Dictionary.h"
 #include "../Collections/Operation.h"
@@ -304,7 +305,7 @@ ITypeDescriptor (event)
 				virtual Value					GetOwnerObject()=0;
 				virtual bool					IsAttached()=0;
 				virtual bool					Detach()=0;
-				virtual void					Invoke(const Value& thisObject, Value& arguments)=0;
+				virtual void					Invoke(const Value& thisObject, collections::Array<Value>& arguments)=0;
 			};
 
 			class IEventInfo : public virtual IMemberInfo, public Description<IEventInfo>
@@ -314,7 +315,7 @@ ITypeDescriptor (event)
 				virtual vint					GetObservingPropertyCount()=0;
 				virtual IPropertyInfo*			GetObservingProperty(vint index)=0;
 				virtual Ptr<IEventHandler>		Attach(const Value& thisObject, Ptr<IValueFunctionProxy> handler)=0;
-				virtual void					Invoke(const Value& thisObject, Value& arguments)=0;
+				virtual void					Invoke(const Value& thisObject, collections::Array<Value>& arguments)=0;
 			};
 
 /***********************************************************************

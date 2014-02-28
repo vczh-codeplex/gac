@@ -148,7 +148,7 @@ EventInfoImpl
 					Value								GetOwnerObject()override;
 					bool								IsAttached()override;
 					bool								Detach()override;
-					void								Invoke(const Value& thisObject, Value& arguments)override;
+					void								Invoke(const Value& thisObject, collections::Array<Value>& arguments)override;
 
 					Ptr<DescriptableObject>				GetTag();
 					void								SetTag(Ptr<DescriptableObject> _tag);
@@ -162,7 +162,7 @@ EventInfoImpl
 
 				virtual void							AttachInternal(DescriptableObject* thisObject, IEventHandler* eventHandler)=0;
 				virtual void							DetachInternal(DescriptableObject* thisObject, IEventHandler* eventHandler)=0;
-				virtual void							InvokeInternal(DescriptableObject* thisObject, Value& eventHandler)=0;
+				virtual void							InvokeInternal(DescriptableObject* thisObject, collections::Array<Value>& arguments)=0;
 				virtual Ptr<ITypeInfo>					GetHandlerTypeInternal()=0;
 
 				void									AddEventHandler(DescriptableObject* thisObject, Ptr<IEventHandler> eventHandler);
@@ -177,7 +177,7 @@ EventInfoImpl
 				vint									GetObservingPropertyCount()override;
 				IPropertyInfo*							GetObservingProperty(vint index)override;
 				Ptr<IEventHandler>						Attach(const Value& thisObject, Ptr<IValueFunctionProxy> handler)override;
-				void									Invoke(const Value& thisObject, Value& arguments)override;
+				void									Invoke(const Value& thisObject, collections::Array<Value>& arguments)override;
 			};
 
 /***********************************************************************
@@ -536,16 +536,18 @@ TypeInfoRetriver Helper Functions (UnboxParameter)
 CustomFieldInfoImpl
 ***********************************************************************/
 
-			template<typename TClass, typename TField, TField TClass::* FieldRef>
+			template<typename TClass, typename TField>
 			class CustomFieldInfoImpl : public FieldInfoImpl
 			{
 			protected:
+				TField TClass::*				fieldRef;
+
 				Value GetValueInternal(const Value& thisObject)override
 				{
 					TClass* object=UnboxValue<TClass*>(thisObject);
 					if(object)
 					{
-						return BoxParameter<TField>(object->*FieldRef, GetReturn()->GetTypeDescriptor());
+						return BoxParameter<TField>(object->*fieldRef, GetReturn()->GetTypeDescriptor());
 					}
 					return Value();
 				}
@@ -555,12 +557,13 @@ CustomFieldInfoImpl
 					TClass* object=UnboxValue<TClass*>(thisObject);
 					if(object)
 					{
-						UnboxParameter<TField>(newValue, object->*FieldRef, GetReturn()->GetTypeDescriptor(), L"newValue");
+						UnboxParameter<TField>(newValue, object->*fieldRef, GetReturn()->GetTypeDescriptor(), L"newValue");
 					}
 				}
 			public:
-				CustomFieldInfoImpl(ITypeDescriptor* _ownerTypeDescriptor, const WString& _name)
+				CustomFieldInfoImpl(ITypeDescriptor* _ownerTypeDescriptor, const WString& _name, TField TClass::* _fieldRef)
 					:FieldInfoImpl(_ownerTypeDescriptor, _name, TypeInfoRetriver<TField>::CreateTypeInfo())
+					, fieldRef(_fieldRef)
 				{
 				}
 			};

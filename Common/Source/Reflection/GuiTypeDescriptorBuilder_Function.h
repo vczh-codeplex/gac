@@ -207,6 +207,9 @@ MethodInfoImpl
  
 			template<typename T>
 			class CustomStaticMethodInfoImpl{};
+
+			template<typename TClass, typename T>
+			class CustomEventInfoImpl{};
  
 /***********************************************************************
 CustomConstructorInfoImpl<R(TArgs...)>
@@ -439,6 +442,110 @@ CustomStaticMethodInfoImpl<R(TArgs...)>
 				{
 					internal_helper::ConstructorArgumentAdder<TypeTuple<TArgs...>>::Add(this, parameterNames, 0);
 				}
+			};
+ 
+/***********************************************************************
+CustomEventInfoImpl<void(TArgs...)>
+***********************************************************************/
+
+			namespace internal_helper
+			{
+				extern void UnboxSpecifiedParameter(collections::Array<Value>& arguments, vint index);
+
+				template<typename T0, typename ...TArgs>
+				void UnboxSpecifiedParameter(collections::Array<Value>& arguments, vint index, T0& p0, TArgs& ...args)
+				{
+					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments[index], p0, methodInfo->GetParameter(index)->GetType()->GetTypeDescriptor(), L"nth-argument");
+					UnboxSpecifiedParameter(arguments, index + 1, args...);
+				}
+
+				template<typename ...TArgs>
+				struct BoxedEventInvoker
+				{
+					static void Invoke(Event<void(TArgs...)>& eventObject, collections::Array<Value>& arguments, typename RemoveCVR<TArgs>::Type&& ...args)
+					{
+						UnboxSpecifiedParameter(arguments, 0, args...);
+						eventObject(args...);
+					}
+				};
+			}
+
+			template<typename TClass, typename ...TArgs>
+			class CustomEventInfoImpl<TClass, void(TArgs...)> : public EventInfoImpl
+			{
+			protected:
+				Event<void(TArgs...)> TClass::*			eventRef;
+
+				void AttachInternal(DescriptableObject* thisObject, IEventHandler* eventHandler)override
+				{
+					if(thisObject)
+					{
+						if (EventHandlerImpl* handlerImpl = dynamic_cast<EventHandlerImpl*>(eventHandler))
+						{
+							TClass* object = UnboxValue<TClass*>(thisObject, GetOwnerTypeDescriptor(), L"thisObject");
+							Event<void(TArgs...)>& eventObject = object->*eventRef;
+							Ptr<EventHandler> handler = eventObject.Add(
+								Func<void(TArgs...)>([](TArgs ...args))
+								{
+								});
+							handlerImpl->SetTag(handler);
+						}
+					}
+				}
+
+				void DetachInternal(DescriptableObject* thisObject, IEventHandler* eventHandler)override
+				{
+					if(thisObject)
+					{
+						if (EventHandlerImpl* handlerImpl = dynamic_cast<EventHandlerImpl*>(eventHandler))
+						{
+							TClass* object = UnboxValue<TClass*>(thisObject, GetOwnerTypeDescriptor(), L"thisObject");
+							Event<void(TArgs...)>& eventObject = object->*eventRef;
+							Ptr<EventHandler> handler=handlerImpl->GetTag().Cast<EventHandler>();
+							if (handler)
+							{
+								eventObject.Remove(handler);
+							}
+						}
+					}
+				}
+
+				void InvokeInternal(DescriptableObject* thisObject, collections::Array<Value>& arguments)override
+				{
+					if(thisObject)
+					{
+						TClass* object = UnboxValue<TClass*>(thisObject, GetOwnerTypeDescriptor(), L"thisObject");
+						Event<void(TArgs...)>& eventObject = object->*eventRef;
+						return internal_helper::BoxedEventInvoker<TArgs...>::Invoke(eventObject, arguments, typename RemoveCVR<TArgs>::Type()...);
+					}
+				}
+
+				Ptr<ITypeInfo> GetHandlerTypeInternal()override
+				{
+					return TypeInfoRetriver<Func<void(TArgs...)>>::CreateTypeInfo();
+				}
+			public:
+				CustomEventInfoImpl(ITypeDescriptor* _ownerTypeDescriptor, const WString& _name, Event<void(TArgs...)> TClass::* _eventRef)
+					:EventInfoImpl(_ownerTypeDescriptor, _name)
+					, eventRef(_eventRef)
+				{
+				}
+
+				~CustomEventInfoImpl()
+				{
+				}
+			};
+
+			template<typename T>
+			struct CustomEventFunctionTypeRetriver
+			{
+				typedef vint								Type;
+			};
+
+			template<typename TClass, typename TEvent>
+			struct CustomEventFunctionTypeRetriver<Event<TEvent> TClass::*>
+			{
+				typedef typename TEvent						Type;
 			};
 		}
 	}
