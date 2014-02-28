@@ -304,7 +304,7 @@ CustomMethodInfoImplSelector<TClass, void()>
 				};
 				
 				template<typename TClass, typename ...TArgs>
-				struct BoxedExternalMethodInvoker<TClass, TArgs...>
+				struct BoxedExternalMethodInvoker<TClass, void, TArgs...>
 				{
 					static Value Invoke(TClass* object, void(*method)(TClass*, TArgs...), MethodInfoImpl* methodInfo, collections::Array<Value>& arguments, typename RemoveCVR<TArgs>::Type&& ...args)
 					{
