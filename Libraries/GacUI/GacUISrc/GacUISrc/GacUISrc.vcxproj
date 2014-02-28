@@ -416,7 +416,9 @@
     <ClInclude Include="..\..\..\..\Common\Source\Pointer.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptor.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorBuilder.h" />
-    <ClInclude Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorBuilder_Gen.h" />
+    <ClInclude Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorBuilder_Container.h" />
+    <ClInclude Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorBuilder_Function.h" />
+    <ClInclude Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorBuilder_Struct.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorMacros.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorPredefined.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Regex\Regex.h" />

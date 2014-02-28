@@ -179,9 +179,13 @@ ParameterAccessor<Func<R(TArgs...)>>
 						{
 							result=[functionProxy](TArgs ...args)
 							{
-								Ptr<IValueList> arguments=IValueList::Create();
+								Ptr<IValueList> arguments = IValueList::Create();
 								internal_helper::AddValueToList(arguments, ForwardValue<TArgs>(args)...);
-								TypeInfoRetriver<R>::TempValueType proxyResult;description::UnboxParameter<R>(functionProxy->Invoke(arguments),proxyResult);return proxyResult;
+
+								typedef TypeInfoRetriver<R>::TempValueType ResultType;
+								ResultType proxyResult;
+								description::UnboxParameter<ResultType>(functionProxy->Invoke(arguments), proxyResult);
+								return proxyResult;
 							};
 						}
 					}

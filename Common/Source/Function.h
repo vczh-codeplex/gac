@@ -27,10 +27,9 @@ vl::Func<R(TArgs...)>
 	{
 	};
 
-	template<typename R, typename ...TArgs>
-	class Func<R(TArgs...)> : public Object
+	namespace internal_invokers
 	{
-	protected:
+		template<typename R, typename ...TArgs>
 		class Invoker : public Object
 		{
 		public:
@@ -38,8 +37,9 @@ vl::Func<R(TArgs...)>
 		};
 
 		//------------------------------------------------------
-
-		class StaticInvoker : public Invoker
+		
+		template<typename R, typename ...TArgs>
+		class StaticInvoker : public Invoker<R, TArgs...>
 		{
 		protected:
 			R(*function)(TArgs ...args);
@@ -50,16 +50,16 @@ vl::Func<R(TArgs...)>
 			{
 			}
 
-			virtual R Invoke(TArgs&& ...args)
+			R Invoke(TArgs&& ...args)override
 			{
 				return function(ForwardValue<TArgs>(args)...);
 			}
 		};
 
 		//------------------------------------------------------
-
-		template<typename C>
-		class MemberInvoker : public Invoker
+		
+		template<typename C, typename R, typename ...TArgs>
+		class MemberInvoker : public Invoker<R, TArgs...>
 		{
 		protected:
 			C*							sender;
@@ -72,7 +72,7 @@ vl::Func<R(TArgs...)>
 			{
 			}
 
-			virtual R Invoke(TArgs&& ...args)
+			R Invoke(TArgs&& ...args)override
 			{
 				return (sender->*function)(ForwardValue<TArgs>(args)...);
 			}
@@ -80,8 +80,8 @@ vl::Func<R(TArgs...)>
 
 		//------------------------------------------------------
 
-		template<typename C>
-		class ObjectInvoker : public Invoker
+		template<typename C, typename R, typename ...TArgs>
+		class ObjectInvoker : public Invoker<R, TArgs...>
 		{
 		protected:
 			C							function;
@@ -92,7 +92,7 @@ vl::Func<R(TArgs...)>
 			{
 			}
 
-			virtual R Invoke(TArgs&& ...args)
+			R Invoke(TArgs&& ...args)override
 			{
 				return function(ForwardValue<TArgs>(args)...);
 			}
@@ -100,8 +100,30 @@ vl::Func<R(TArgs...)>
 
 		//------------------------------------------------------
 
+		template<typename C, typename ...TArgs>
+		class ObjectInvoker<C, void, TArgs...> : public Invoker<void, TArgs...>
+		{
+		protected:
+			C							function;
+
+		public:
+			ObjectInvoker(const C& _function)
+				:function(_function)
+			{
+			}
+
+			void Invoke(TArgs&& ...args)override
+			{
+				function(ForwardValue<TArgs>(args)...);
+			}
+		};
+	}
+
+	template<typename R, typename ...TArgs>
+	class Func<R(TArgs...)> : public Object
+	{
 	protected:
-		Ptr<Invoker>					invoker;
+		Ptr<internal_invokers::Invoker<R, TArgs...>>		invoker;
 	public:
 		typedef R FunctionType(TArgs...);
 		typedef R ResultType;
@@ -117,19 +139,19 @@ vl::Func<R(TArgs...)>
 
 		Func(R(*function)(TArgs...))
 		{
-			invoker=new StaticInvoker(function);
+			invoker=new internal_invokers::StaticInvoker<R, TArgs...>(function);
 		}
 
 		template<typename C>
 		Func(C* sender, R(C::*function)(TArgs...))
 		{
-			invoker=new MemberInvoker<C>(sender, function);
+			invoker=new internal_invokers::MemberInvoker<C, R, TArgs...>(sender, function);
 		}
 
 		template<typename C>
 		Func(const C& function)
 		{
-			invoker=new ObjectInvoker<C>(function);
+			invoker=new internal_invokers::ObjectInvoker<C, R, TArgs...>(function);
 		}
 
 		R operator()(TArgs ...args)const
