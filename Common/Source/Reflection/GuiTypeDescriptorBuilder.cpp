@@ -352,19 +352,22 @@ EventInfoImpl::EventHandlerImpl
 				}
 			}
 
-			void EventInfoImpl::EventHandlerImpl::Invoke(const Value& thisObject, Value& arguments)
+			void EventInfoImpl::EventHandlerImpl::Invoke(const Value& thisObject, collections::Array<Value>& arguments)
 			{
 				if(thisObject.IsNull())
 				{
 					throw ArgumentNullException(L"thisObject");
 				}
-				Ptr<IValueList> eventArgs=IValueList::Create();
-				eventArgs->Add(thisObject);
-				eventArgs->Add(arguments);
-				handler->Invoke(eventArgs);
-				if(eventArgs->GetCount()>=2)
+				Ptr<IValueList> eventArgs = IValueList::Create();
+				FOREACH(Value, argument, arguments)
 				{
-					arguments=eventArgs->Get(1);
+					eventArgs->Add(argument);
+				}
+				handler->Invoke(eventArgs);
+				arguments.Resize(eventArgs->GetCount());
+				for (vint i = 0; i < arguments.Count(); i++)
+				{
+					arguments[i] = eventArgs->Get(i);
 				}
 			}
 
@@ -473,7 +476,7 @@ EventInfoImpl
 				}
 			}
 
-			void EventInfoImpl::Invoke(const Value& thisObject, Value& arguments)
+			void EventInfoImpl::Invoke(const Value& thisObject, collections::Array<Value>& arguments)
 			{
 				if(thisObject.IsNull())
 				{
@@ -1002,6 +1005,10 @@ Function Related
 				}
 
 				void UnboxSpecifiedParameter(MethodInfoImpl* methodInfo, collections::Array<Value>& arguments, vint index)
+				{
+				}
+
+				void UnboxSpecifiedParameter(collections::Array<Value>& arguments, vint index)
 				{
 				}
 

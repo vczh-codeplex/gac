@@ -160,8 +160,8 @@ Field
 			AddProperty(\
 				new CustomFieldInfoImpl<\
 					ClassType,\
-					decltype(((ClassType*)0)->FIELDNAME), (decltype(((ClassType*)0)->FIELDNAME) ClassType::*)&ClassType::FIELDNAME>\
-					(this, L#FIELDNAME)\
+					decltype(((ClassType*)0)->FIELDNAME)\
+					>(this, L#FIELDNAME, &ClassType::FIELDNAME)\
 				);
 
 /***********************************************************************
@@ -241,6 +241,19 @@ Static Method
 
 #define CLASS_MEMBER_STATIC_METHOD(FUNCTIONNAME, PARAMETERNAMES)\
 			CLASS_MEMBER_STATIC_METHOD_OVERLOAD(FUNCTIONNAME, PARAMETERNAMES, decltype(&ClassType::FUNCTIONNAME))
+
+/***********************************************************************
+Event
+***********************************************************************/
+
+#define CLASS_MEMBER_EVENT(EVENTNAME)\
+			AddEvent(\
+				new CustomEventInfoImpl<\
+					ClassType,\
+					CustomEventFunctionTypeRetriver<decltype(&ClassType::EVENTNAME)>::Type>\
+					>(this, L#EVENTNAME, &ClassType::EVENTNAME)\
+				)\
+				);
 
 /***********************************************************************
 Property
