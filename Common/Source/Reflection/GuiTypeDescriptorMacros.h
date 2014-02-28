@@ -180,11 +180,7 @@ Constructor
 			{\
 				const wchar_t* parameterNames[]=PARAMETERNAMES;\
 				AddConstructor(\
-					new CustomMethodInfoImplSelector<\
-						void,\
-						FUNCTIONTYPE\
-						>\
-						::CustomMethodInfoImpl(parameterNames, SOURCE)\
+					new CustomStaticMethodInfoImpl<FUNCTIONTYPE>(parameterNames, SOURCE)\
 					);\
 			}
 
@@ -197,11 +193,10 @@ Method
 				const wchar_t* parameterNames[]=PARAMETERNAMES;\
 				AddMethod(\
 					L#FUNCTIONNAME,\
-					new CustomMethodInfoImplSelector<\
+					new CustomExternalMethodInfoImpl<\
 						ClassType,\
 						vl::function_lambda::LambdaRetriveType<FUNCTIONTYPE>::FunctionType\
-						>\
-						::ExternalMethodInfoImpl(parameterNames, SOURCE)\
+						>(parameterNames, SOURCE)\
 					);\
 			}
 
@@ -210,11 +205,10 @@ Method
 				const wchar_t* parameterNames[]=PARAMETERNAMES;\
 				AddMethod(\
 					L#EXPECTEDNAME,\
-					new CustomMethodInfoImplSelector<\
+					new CustomMethodInfoImpl<\
 						ClassType,\
 						vl::function_lambda::LambdaRetriveType<FUNCTIONTYPE>::FunctionType\
-						>\
-						::CustomMethodInfoImpl(parameterNames, (FUNCTIONTYPE)&ClassType::FUNCTIONNAME)\
+						>(parameterNames, (FUNCTIONTYPE)&ClassType::FUNCTIONNAME)\
 					);\
 			}
 
@@ -236,11 +230,9 @@ Static Method
 				const wchar_t* parameterNames[]=PARAMETERNAMES;\
 				AddMethod(\
 					L#FUNCTIONNAME,\
-					new CustomMethodInfoImplSelector<\
-						void,\
+					new CustomStaticMethodInfoImpl<\
 						vl::function_lambda::FunctionObjectRetriveType<FUNCTIONTYPE>::FunctionType\
-						>\
-						::CustomMethodInfoImpl(parameterNames, SOURCE)\
+						>(parameterNames, SOURCE)\
 					);\
 			}
 

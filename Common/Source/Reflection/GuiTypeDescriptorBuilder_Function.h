@@ -193,11 +193,24 @@ ParameterAccessor<Func<R(TArgs...)>>
 			};
  
 /***********************************************************************
-CustomConstructorInfoImpl<R(TArgs...)>
+MethodInfoImpl
 ***********************************************************************/
  
 			template<typename T>
 			class CustomConstructorInfoImpl{};
+ 
+			template<typename TClass, typename T>
+			class CustomMethodInfoImpl{};
+ 
+			template<typename TClass, typename T>
+			class CustomExternalMethodInfoImpl{};
+ 
+			template<typename T>
+			class CustomStaticMethodInfoImpl{};
+ 
+/***********************************************************************
+CustomConstructorInfoImpl<R(TArgs...)>
+***********************************************************************/
 
 			namespace internal_helper
 			{
@@ -269,7 +282,8 @@ CustomConstructorInfoImpl<R(TArgs...)>
 			};
  
 /***********************************************************************
-CustomMethodInfoImplSelector<TClass, void()>
+CustomMethodInfoImpl<TClass, R(TArgs...)>
+CustomStaticMethodInfoImpl<TClass, R(TArgs...)>
 ***********************************************************************/
 
 			namespace internal_helper
@@ -319,68 +333,62 @@ CustomMethodInfoImplSelector<TClass, void()>
 				};
 			}
 
-			template<typename TClass, typename T>
-			struct CustomMethodInfoImplSelector{};
-
 			template<typename TClass, typename R, typename ...TArgs>
-			struct CustomMethodInfoImplSelector<TClass, R(TArgs...)>
+			class CustomMethodInfoImpl<TClass, R(TArgs...)> : public MethodInfoImpl
 			{
-				class CustomMethodInfoImpl : public MethodInfoImpl
+			protected:
+				R(__thiscall TClass::* method)(TArgs...);
+ 
+				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
-				protected:
-					R(__thiscall TClass::* method)(TArgs...);
+					TClass* object=UnboxValue<TClass*>(thisObject, GetOwnerTypeDescriptor(), L"thisObject");
+					return internal_helper::BoxedMethodInvoker<TClass, R, TArgs...>::Invoke(object, method, this, arguments, typename RemoveCVR<TArgs>::Type()...);
+				}
  
-					Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
-					{
-						TClass* object=UnboxValue<TClass*>(thisObject, GetOwnerTypeDescriptor(), L"thisObject");
-						return internal_helper::BoxedMethodInvoker<TClass, R, TArgs...>::Invoke(object, method, this, arguments, typename RemoveCVR<TArgs>::Type()...);
-					}
- 
-					Value CreateFunctionProxyInternal(const Value& thisObject)override
-					{
-						TClass* object=UnboxValue<TClass*>(thisObject, GetOwnerTypeDescriptor(), L"thisObject");
-						Func<R(TArgs...)> proxy(object, method);
-						return BoxParameter<Func<R(TArgs...)>>(proxy);
-					}
-				public:
-					CustomMethodInfoImpl(const wchar_t* parameterNames[], R(__thiscall TClass::* _method)(TArgs...))
-						:MethodInfoImpl(0, TypeInfoRetriver<R>::CreateTypeInfo(), false)
-						,method(_method)
-					{
-						internal_helper::ConstructorArgumentAdder<TypeTuple<TArgs...>>::Add(this, parameterNames, 0);
-					}
-				};
- 
-				class ExternalMethodInfoImpl : public MethodInfoImpl
+				Value CreateFunctionProxyInternal(const Value& thisObject)override
 				{
-				protected:
-					R(*method)(TClass*, TArgs...);
- 
-					Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
-					{
-						TClass* object=UnboxValue<TClass*>(thisObject, GetOwnerTypeDescriptor(), L"thisObject");
-						return internal_helper::BoxedExternalMethodInvoker<TClass, R, TArgs...>::Invoke(object, method, this, arguments, typename RemoveCVR<TArgs>::Type()...);
-					}
- 
-					Value CreateFunctionProxyInternal(const Value& thisObject)override
-					{
-						TClass* object=UnboxValue<TClass*>(thisObject, GetOwnerTypeDescriptor(), L"thisObject");
-						Func<R(TArgs...)> proxy = Curry(Func<R(TClass*, TArgs...)>(method))(object);
-						return BoxParameter<Func<R(TArgs...)>>(proxy);
-					}
-				public:
-					ExternalMethodInfoImpl(const wchar_t* parameterNames[], R(*_method)(TClass*, TArgs...))
-						:MethodInfoImpl(0, TypeInfoRetriver<R>::CreateTypeInfo(), false)
-						,method(_method)
-					{
-						internal_helper::ConstructorArgumentAdder<TypeTuple<TArgs...>>::Add(this, parameterNames, 0);
-					}
-				};
+					TClass* object=UnboxValue<TClass*>(thisObject, GetOwnerTypeDescriptor(), L"thisObject");
+					Func<R(TArgs...)> proxy(object, method);
+					return BoxParameter<Func<R(TArgs...)>>(proxy);
+				}
+			public:
+				CustomMethodInfoImpl(const wchar_t* parameterNames[], R(__thiscall TClass::* _method)(TArgs...))
+					:MethodInfoImpl(0, TypeInfoRetriver<R>::CreateTypeInfo(), false)
+					,method(_method)
+				{
+					internal_helper::ConstructorArgumentAdder<TypeTuple<TArgs...>>::Add(this, parameterNames, 0);
+				}
 			};
  
+			template<typename TClass, typename R, typename ...TArgs>
+			class CustomExternalMethodInfoImpl<TClass, R(TArgs...)> : public MethodInfoImpl
+			{
+			protected:
+				R(*method)(TClass*, TArgs...);
+ 
+				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
+				{
+					TClass* object=UnboxValue<TClass*>(thisObject, GetOwnerTypeDescriptor(), L"thisObject");
+					return internal_helper::BoxedExternalMethodInvoker<TClass, R, TArgs...>::Invoke(object, method, this, arguments, typename RemoveCVR<TArgs>::Type()...);
+				}
+ 
+				Value CreateFunctionProxyInternal(const Value& thisObject)override
+				{
+					TClass* object=UnboxValue<TClass*>(thisObject, GetOwnerTypeDescriptor(), L"thisObject");
+					Func<R(TArgs...)> proxy = Curry(Func<R(TClass*, TArgs...)>(method))(object);
+					return BoxParameter<Func<R(TArgs...)>>(proxy);
+				}
+			public:
+				CustomExternalMethodInfoImpl(const wchar_t* parameterNames[], R(*_method)(TClass*, TArgs...))
+					:MethodInfoImpl(0, TypeInfoRetriver<R>::CreateTypeInfo(), false)
+					,method(_method)
+				{
+					internal_helper::ConstructorArgumentAdder<TypeTuple<TArgs...>>::Add(this, parameterNames, 0);
+				}
+			};
  
 /***********************************************************************
-CustomMethodInfoImplSelector<void, R(TArgs...)>
+CustomStaticMethodInfoImpl<R(TArgs...)>
 ***********************************************************************/
 
 			namespace internal_helper
@@ -409,31 +417,28 @@ CustomMethodInfoImplSelector<void, R(TArgs...)>
 			}
 
 			template<typename R, typename ...TArgs>
-			struct CustomMethodInfoImplSelector<void, R(TArgs...)>
+			class CustomStaticMethodInfoImpl<R(TArgs...)> : public MethodInfoImpl
 			{
-				class CustomMethodInfoImpl : public MethodInfoImpl
+			protected:
+				R(* method)(TArgs...);
+ 
+				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
-				protected:
-					R(* method)(TArgs...);
+					return internal_helper::BoxedStaticMethodInvoker<R, TArgs...>::Invoke(method, this, arguments, typename RemoveCVR<TArgs>::Type()...);
+				}
  
-					Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
-					{
-						return internal_helper::BoxedStaticMethodInvoker<R, TArgs...>::Invoke(method, this, arguments, typename RemoveCVR<TArgs>::Type()...);
-					}
- 
-					Value CreateFunctionProxyInternal(const Value& thisObject)override
-					{
-						Func<R(TArgs...)> proxy(method);
-						return BoxParameter<Func<R(TArgs...)>>(proxy);
-					}
-				public:
-					CustomMethodInfoImpl(const wchar_t* parameterNames[], R(* _method)(TArgs...))
-						:MethodInfoImpl(0, TypeInfoRetriver<R>::CreateTypeInfo(), true)
-						,method(_method)
-					{
-						internal_helper::ConstructorArgumentAdder<TypeTuple<TArgs...>>::Add(this, parameterNames, 0);
-					}
-				};
+				Value CreateFunctionProxyInternal(const Value& thisObject)override
+				{
+					Func<R(TArgs...)> proxy(method);
+					return BoxParameter<Func<R(TArgs...)>>(proxy);
+				}
+			public:
+				CustomStaticMethodInfoImpl(const wchar_t* parameterNames[], R(* _method)(TArgs...))
+					:MethodInfoImpl(0, TypeInfoRetriver<R>::CreateTypeInfo(), true)
+					,method(_method)
+				{
+					internal_helper::ConstructorArgumentAdder<TypeTuple<TArgs...>>::Add(this, parameterNames, 0);
+				}
 			};
 		}
 	}
