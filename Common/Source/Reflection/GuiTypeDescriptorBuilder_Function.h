@@ -207,12 +207,15 @@ CustomConstructorInfoImpl<R(TArgs...)>
 				}
 
 				template<typename R, typename ...TArgs>
-				static Value InvokeBoxedConstructor(MethodInfoImpl* methodInfo, collections::Array<Value>& arguments, typename RemoveCVR<TArgs>::Type&& ...args)
+				struct BoxedConstructorInvoker
 				{
-					UnboxSpecifiedParameter(methodInfo, arguments, 0, args...);
-					R result = new typename TypeInfoRetriver<R>::Type(args...);
-					return BoxParameter<R>(result);
-				}
+					static Value Invoke(MethodInfoImpl* methodInfo, collections::Array<Value>& arguments, typename RemoveCVR<TArgs>::Type&& ...args)
+					{
+						UnboxSpecifiedParameter(methodInfo, arguments, 0, args...);
+						R result = new typename TypeInfoRetriver<R>::Type(args...);
+						return BoxParameter<R>(result);
+					}
+				};
 
 				template<typename T>
 				struct ConstructorArgumentAdder
@@ -239,7 +242,7 @@ CustomConstructorInfoImpl<R(TArgs...)>
 			protected:
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
-					return internal_helper::InvokeBoxedConstructor<R, TArgs...>(this, arguments, typename RemoveCVR<TArgs>::Type()...);
+					return internal_helper::BoxedConstructorInvoker<R, TArgs...>::Invoke(this, arguments, typename RemoveCVR<TArgs>::Type()...);
 				}
  
 				Value CreateFunctionProxyInternal(const Value& thisObject)override
