@@ -450,6 +450,15 @@ CustomEventInfoImpl<void(TArgs...)>
 
 			namespace internal_helper
 			{
+				extern void AddValueToArray(collections::Array<Value>& arguments, vint index);
+
+				template<typename T0, typename ...TArgs>
+				void AddValueToArray(collections::Array<Value>& arguments, vint index, T0&& p0, TArgs&& ...args)
+				{
+					arguments[index] = description::BoxParameter<T0>(p0);
+					AddValueToArray(arguments, index + 1, args...);
+				}
+
 				extern void UnboxSpecifiedParameter(collections::Array<Value>& arguments, vint index);
 
 				template<typename T0, typename ...TArgs>
@@ -485,8 +494,11 @@ CustomEventInfoImpl<void(TArgs...)>
 							TClass* object = UnboxValue<TClass*>(thisObject, GetOwnerTypeDescriptor(), L"thisObject");
 							Event<void(TArgs...)>& eventObject = object->*eventRef;
 							Ptr<EventHandler> handler = eventObject.Add(
-								Func<void(TArgs...)>([](TArgs ...args))
+								Func<void(TArgs...)>([eventHandler](TArgs ...args))
 								{
+									collections::Array<Value> arguments(sizeof...(args));
+									internal_helper::AddValueToArray(arguments, 0, ForwardValue<TArgs>(args)...);
+									eventHandler->Invoke(thisObject, arguments);
 								});
 							handlerImpl->SetTag(handler);
 						}
