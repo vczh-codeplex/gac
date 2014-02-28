@@ -956,9 +956,6 @@
     <ClInclude Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorBuilder.h">
       <Filter>Common\Reflection</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorBuilder_Gen.h">
-      <Filter>Common\Reflection</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorMacros.h">
       <Filter>Common\Reflection</Filter>
     </ClInclude>
@@ -985,6 +982,15 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Reflection\GuiInstanceHelperTypes.h">
       <Filter>GacUI\Reflection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorBuilder_Container.h">
+      <Filter>Common\Reflection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorBuilder_Function.h">
+      <Filter>Common\Reflection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorBuilder_Struct.h">
+      <Filter>Common\Reflection</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
