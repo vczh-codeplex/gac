@@ -1015,6 +1015,10 @@ Function Related
 				void AddValueToList(Ptr<IValueList> arguments)
 				{
 				}
+
+				void AddValueToArray(collections::Array<Value>& arguments, vint index)
+				{
+				}
 			}
 		}
 	}
