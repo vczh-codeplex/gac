@@ -1,4 +1,4 @@
-#include "GuiTypeDescriptorBuilder.h"
+#include "GuiTypeDescriptorMacros.h"
 
 namespace vl
 {
