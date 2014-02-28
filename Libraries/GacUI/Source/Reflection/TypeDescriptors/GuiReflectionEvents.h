@@ -61,9 +61,13 @@ GuiEventInfoImpl
 								Ptr<GuiGraphicsEvent<T>::IHandler> handler=eventObject->AttachLambda(
 									[=](GuiGraphicsComposition* sender, T& arguments)
 									{
-										Value thisObject=BoxValue<GuiGraphicsComposition*>(sender, Description<GuiGraphicsComposition>::GetAssociatedTypeDescriptor());
-										Value argumentsObject=BoxValue<T*>(&arguments, Description<T>::GetAssociatedTypeDescriptor());
-										eventHandler->Invoke(thisObject, argumentsObject);
+										Value senderObject = BoxValue<GuiGraphicsComposition*>(sender, Description<GuiGraphicsComposition>::GetAssociatedTypeDescriptor());
+										Value argumentsObject = BoxValue<T*>(&arguments, Description<T>::GetAssociatedTypeDescriptor());
+
+										collections::Array<Value> eventArgs(2);
+										eventArgs[0] = senderObject;
+										eventArgs[1] = argumentsObject;
+										eventHandler->Invoke(Value::From(thisObject), eventArgs);
 									});
 								handlerImpl->SetTag(handler);
 							}
@@ -90,14 +94,14 @@ GuiEventInfoImpl
 					}
 				}
 
-				void InvokeInternal(DescriptableObject* thisObject, Value& arguments)override
+				void InvokeInternal(DescriptableObject* thisObject, collections::Array<Value>& arguments)override
 				{
 					if(thisObject)
 					{
 						GuiGraphicsEvent<T>* eventObject=eventRetriver(thisObject, false);
 						if(eventObject)
 						{
-							T* value=UnboxValue<T*>(arguments, Description<T>::GetAssociatedTypeDescriptor());
+							T* value=UnboxValue<T*>(arguments[1], Description<T>::GetAssociatedTypeDescriptor());
 							eventObject->Execute(*value);
 						}
 					}
