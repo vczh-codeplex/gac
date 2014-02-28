@@ -234,6 +234,9 @@
     <ClCompile Include="TestLocale.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Reflection\GuiTypeDescriptorBuilder_Container.h">
+      <Filter>Common\Reflection</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Source\Basic.h">
@@ -417,6 +420,9 @@
       <Filter>Common\Reflection</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Reflection\GuiTypeDescriptorBuilder_Function.h">
+      <Filter>Common\Reflection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Reflection\GuiTypeDescriptorBuilder_Struct.h">
       <Filter>Common\Reflection</Filter>
     </ClInclude>
   </ItemGroup>

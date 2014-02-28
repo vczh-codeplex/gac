@@ -173,6 +173,7 @@
     <ClCompile Include="..\..\Source\Parsing\Xml\ParsingXml_Parser.cpp" />
     <ClCompile Include="..\..\Source\Reflection\GuiTypeDescriptor.cpp" />
     <ClCompile Include="..\..\Source\Reflection\GuiTypeDescriptorBuilder.cpp" />
+    <ClCompile Include="..\..\Source\Reflection\GuiTypeDescriptorBuilder_Container.h" />
     <ClCompile Include="..\..\Source\Reflection\GuiTypeDescriptorPredefined.cpp" />
     <ClCompile Include="..\..\Source\Regex\Regex.cpp" />
     <ClCompile Include="..\..\Source\Regex\RegexAutomaton.cpp" />
@@ -246,6 +247,7 @@
     <ClInclude Include="..\..\Source\Reflection\GuiTypeDescriptor.h" />
     <ClInclude Include="..\..\Source\Reflection\GuiTypeDescriptorBuilder.h" />
     <ClInclude Include="..\..\Source\Reflection\GuiTypeDescriptorBuilder_Function.h" />
+    <ClInclude Include="..\..\Source\Reflection\GuiTypeDescriptorBuilder_Struct.h" />
     <ClInclude Include="..\..\Source\Reflection\GuiTypeDescriptorMacros.h" />
     <ClInclude Include="..\..\Source\Reflection\GuiTypeDescriptorPredefined.h" />
     <ClInclude Include="..\..\Source\Regex\Regex.h" />
