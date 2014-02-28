@@ -209,6 +209,9 @@ CustomConstructorInfoImpl<R(TArgs...)>
 				template<typename R, typename ...TArgs>
 				static Value InvokeBoxedConstructor(MethodInfoImpl* methodInfo, collections::Array<Value>& arguments, typename RemoveCVR<TArgs>::Type&& ...args)
 				{
+					UnboxSpecifiedParameter(methodInfo, arguments, 0, args...);
+					R result = new typename TypeInfoRetriver<R>::Type(args...);
+					return BoxParameter<R>(result);
 				}
 
 				template<typename T>
