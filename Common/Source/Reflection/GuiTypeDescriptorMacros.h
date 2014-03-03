@@ -250,9 +250,8 @@ Event
 			AddEvent(\
 				new CustomEventInfoImpl<\
 					ClassType,\
-					CustomEventFunctionTypeRetriver<decltype(&ClassType::EVENTNAME)>::Type>\
+					CustomEventFunctionTypeRetriver<decltype(&ClassType::EVENTNAME)>::Type\
 					>(this, L#EVENTNAME, &ClassType::EVENTNAME)\
-				)\
 				);
 
 /***********************************************************************

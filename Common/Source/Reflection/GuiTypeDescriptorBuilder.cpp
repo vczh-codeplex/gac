@@ -370,15 +370,25 @@ EventInfoImpl::EventHandlerImpl
 					arguments[i] = eventArgs->Get(i);
 				}
 			}
-
-			Ptr<DescriptableObject> EventInfoImpl::EventHandlerImpl::GetTag()
+			
+			Ptr<DescriptableObject> EventInfoImpl::EventHandlerImpl::GetDescriptableTag()
 			{
-				return tag;
+				return descriptableTag;
 			}
 
-			void EventInfoImpl::EventHandlerImpl::SetTag(Ptr<DescriptableObject> _tag)
+			void EventInfoImpl::EventHandlerImpl::SetDescriptableTag(Ptr<DescriptableObject> _tag)
 			{
-				tag=_tag;
+				descriptableTag = _tag;
+			}
+
+			Ptr<Object> EventInfoImpl::EventHandlerImpl::GetObjectTag()
+			{
+				return objectTag;
+			}
+
+			void EventInfoImpl::EventHandlerImpl::SetObjectTag(Ptr<Object> _tag)
+			{
+				objectTag = _tag;
 			}
 
 /***********************************************************************

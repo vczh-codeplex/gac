@@ -369,7 +369,7 @@ namespace test
 		}
 	};
 
-	class DictionaryHolder
+	class DictionaryHolder : public Description<DictionaryHolder>
 	{
 	public:
 		Dictionary<vint, WString>				maps;
@@ -385,6 +385,29 @@ namespace test
 			CopyFrom(maps, value);
 		}
 	};
+
+	class EventRaiser : public Description<EventRaiser>
+	{
+	protected:
+		vint									value;
+	public:
+		Event<void(vint, vint)>					ValueChanged;
+
+		EventRaiser()
+			:value(0)
+		{
+		}
+
+		vint GetValue()
+		{
+			return value;
+		}
+
+		void SetValue(vint newValue)
+		{
+			value = newValue;
+		}
+	};
 }
 using namespace test;
 
@@ -397,6 +420,7 @@ using namespace test;
 	F(test::Derived)\
 	F(test::BaseSummer)\
 	F(test::DictionaryHolder)\
+	F(test::EventRaiser)\
 	F(test::Point)\
 	F(test::Size)\
 	F(test::Rect)\
@@ -492,6 +516,13 @@ BEGIN_TYPE_INFO_NAMESPACE
 		CLASS_MEMBER_FIELD(maps2)
 		CLASS_MEMBER_PROPERTY_FAST(Maps)
 	END_CLASS_MEMBER(DictionaryHolder)
+
+	BEGIN_CLASS_MEMBER(EventRaiser)
+		CLASS_MEMBER_CONSTRUCTOR(Ptr<EventRaiser>(), NO_PARAMETER)
+
+		CLASS_MEMBER_EVENT(ValueChanged)
+		CLASS_MEMBER_PROPERTY_EVENT_FAST(Value, ValueChanged)
+	END_CLASS_MEMBER(EventRaiser)
 
 	class TestTypeLoader : public Object, public ITypeLoader
 	{

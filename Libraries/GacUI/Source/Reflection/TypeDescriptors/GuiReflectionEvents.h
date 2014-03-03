@@ -69,7 +69,7 @@ GuiEventInfoImpl
 										eventArgs[1] = argumentsObject;
 										eventHandler->Invoke(Value::From(thisObject), eventArgs);
 									});
-								handlerImpl->SetTag(handler);
+								handlerImpl->SetDescriptableTag(handler);
 							}
 						}
 					}
@@ -84,7 +84,7 @@ GuiEventInfoImpl
 							GuiGraphicsEvent<T>* eventObject=eventRetriver(thisObject, false);
 							if(eventObject)
 							{
-								Ptr<GuiGraphicsEvent<T>::IHandler> handler=handlerImpl->GetTag().Cast<GuiGraphicsEvent<T>::IHandler>();
+								Ptr<GuiGraphicsEvent<T>::IHandler> handler=handlerImpl->GetDescriptableTag().Cast<GuiGraphicsEvent<T>::IHandler>();
 								if(handler)
 								{
 									eventObject->Detach(handler);
