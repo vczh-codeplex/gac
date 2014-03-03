@@ -405,7 +405,9 @@ namespace test
 
 		void SetValue(vint newValue)
 		{
+			vint oldValue = value;
 			value = newValue;
+			ValueChanged(oldValue, value);
 		}
 	};
 }
@@ -678,6 +680,46 @@ namespace reflection_test
 		}
 	}
 
+	void TestReflectionEvent()
+	{
+		Value eventRaiser = Value::Create(L"test::EventRaiser");
+		vint oldValue = 0;
+		vint newValue = 0;
+		Value function;
+		auto eventHandler = eventRaiser.AttachEvent(
+			L"ValueChanged",
+			BoxParameter<Func<void(vint, vint)>>(LAMBDA([&](vint _oldValue, vint _newValue)
+			{
+				oldValue = _oldValue;
+				newValue = _newValue;
+			})));
+		TEST_ASSERT(eventHandler->GetOwnerObject().GetRawPtr() == eventRaiser.GetRawPtr());
+		TEST_ASSERT(eventHandler->GetOwnerEvent()->GetName() == L"ValueChanged");
+
+		TEST_ASSERT(UnboxValue<vint>(eventRaiser.GetProperty(L"Value")) == 0);
+		TEST_ASSERT(oldValue == 0);
+		TEST_ASSERT(newValue == 0);
+
+		eventRaiser.SetProperty(L"Value", 100);
+		TEST_ASSERT(UnboxValue<vint>(eventRaiser.GetProperty(L"Value")) == 100);
+		TEST_ASSERT(oldValue == 0);
+		TEST_ASSERT(newValue == 100);
+
+		eventRaiser.SetProperty(L"Value", 200);
+		TEST_ASSERT(UnboxValue<vint>(eventRaiser.GetProperty(L"Value")) == 200);
+		TEST_ASSERT(oldValue == 100);
+		TEST_ASSERT(newValue == 200);
+
+		TEST_ASSERT(eventHandler->Detach() == true);
+
+		eventRaiser.SetProperty(L"Value", 300);
+		TEST_ASSERT(UnboxValue<vint>(eventRaiser.GetProperty(L"Value")) == 300);
+		TEST_ASSERT(oldValue == 100);
+		TEST_ASSERT(newValue == 200);
+
+		TEST_ASSERT(eventHandler->Detach() == false);
+	}
+
 	void TestReflectionEnum()
 	{
 		{
@@ -932,6 +974,7 @@ using namespace reflection_test;
 TEST_CASE_REFLECTION(TestReflectionBuilder)
 TEST_CASE_REFLECTION(TestReflectionInvoke)
 TEST_CASE_REFLECTION(TestReflectionInvokeIndirect)
+TEST_CASE_REFLECTION(TestReflectionEvent)
 TEST_CASE_REFLECTION(TestReflectionEnum)
 TEST_CASE_REFLECTION(TestReflectionNullable)
 TEST_CASE_REFLECTION(TestReflectionStruct)
