@@ -685,7 +685,6 @@ namespace reflection_test
 		Value eventRaiser = Value::Create(L"test::EventRaiser");
 		vint oldValue = 0;
 		vint newValue = 0;
-		Value function;
 		auto eventHandler = eventRaiser.AttachEvent(
 			L"ValueChanged",
 			BoxParameter<Func<void(vint, vint)>>(LAMBDA([&](vint _oldValue, vint _newValue)
