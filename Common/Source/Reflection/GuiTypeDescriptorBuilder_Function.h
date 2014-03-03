@@ -464,7 +464,7 @@ CustomEventInfoImpl<void(TArgs...)>
 				template<typename T0, typename ...TArgs>
 				void UnboxSpecifiedParameter(collections::Array<Value>& arguments, vint index, T0& p0, TArgs& ...args)
 				{
-					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments[index], p0, methodInfo->GetParameter(index)->GetType()->GetTypeDescriptor(), L"nth-argument");
+					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments[index], p0, 0, L"nth-argument");
 					UnboxSpecifiedParameter(arguments, index + 1, args...);
 				}
 
@@ -491,16 +491,16 @@ CustomEventInfoImpl<void(TArgs...)>
 					{
 						if (EventHandlerImpl* handlerImpl = dynamic_cast<EventHandlerImpl*>(eventHandler))
 						{
-							TClass* object = UnboxValue<TClass*>(thisObject, GetOwnerTypeDescriptor(), L"thisObject");
+							TClass* object = UnboxValue<TClass*>(Value::From(thisObject), GetOwnerTypeDescriptor(), L"thisObject");
 							Event<void(TArgs...)>& eventObject = object->*eventRef;
 							Ptr<EventHandler> handler = eventObject.Add(
-								Func<void(TArgs...)>([eventHandler](TArgs ...args))
+								Func<void(TArgs...)>([=](TArgs ...args)
 								{
-									collections::Array<Value> arguments(sizeof...(args));
+									collections::Array<Value> arguments(sizeof...(TArgs));
 									internal_helper::AddValueToArray(arguments, 0, ForwardValue<TArgs>(args)...);
-									eventHandler->Invoke(thisObject, arguments);
-								});
-							handlerImpl->SetTag(handler);
+									eventHandler->Invoke(Value::From(thisObject), arguments);
+								}));
+							handlerImpl->SetObjectTag(handler);
 						}
 					}
 				}
@@ -511,9 +511,9 @@ CustomEventInfoImpl<void(TArgs...)>
 					{
 						if (EventHandlerImpl* handlerImpl = dynamic_cast<EventHandlerImpl*>(eventHandler))
 						{
-							TClass* object = UnboxValue<TClass*>(thisObject, GetOwnerTypeDescriptor(), L"thisObject");
+							TClass* object = UnboxValue<TClass*>(Value::From(thisObject), GetOwnerTypeDescriptor(), L"thisObject");
 							Event<void(TArgs...)>& eventObject = object->*eventRef;
-							Ptr<EventHandler> handler=handlerImpl->GetTag().Cast<EventHandler>();
+							Ptr<EventHandler> handler=handlerImpl->GetObjectTag().Cast<EventHandler>();
 							if (handler)
 							{
 								eventObject.Remove(handler);
@@ -526,7 +526,7 @@ CustomEventInfoImpl<void(TArgs...)>
 				{
 					if(thisObject)
 					{
-						TClass* object = UnboxValue<TClass*>(thisObject, GetOwnerTypeDescriptor(), L"thisObject");
+						TClass* object = UnboxValue<TClass*>(Value::From(thisObject), GetOwnerTypeDescriptor(), L"thisObject");
 						Event<void(TArgs...)>& eventObject = object->*eventRef;
 						return internal_helper::BoxedEventInvoker<TArgs...>::Invoke(eventObject, arguments, typename RemoveCVR<TArgs>::Type()...);
 					}
