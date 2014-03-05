@@ -1021,6 +1021,37 @@ GetExpressionScopeName
 			}
 
 /***********************************************************************
+GetExpressionScopeName
+***********************************************************************/
+
+			reflection::description::IEventInfo* GetExpressionEventInfo(WfLexicalScopeManager* manager, Ptr<WfExpression> expression)
+			{
+				List<ResolveExpressionResult> results;
+				ValidateExpressionSemantic(manager, expression, 0, results);
+				if (results.Count() == 0) return 0;
+
+				for (vint i = results.Count() - 1; i >= 0; i--)
+				{
+					auto& result = results[i];
+					if (!result.eventInfo)
+					{
+						results.RemoveAt(i);
+					}
+				}
+				if (results.Count() == 0)
+				{
+					manager->errors.Add(WfErrors::ExpressionIsNotEvent(expression.Obj()));
+					return 0;
+				}
+				else if (results.Count() > 1)
+				{
+					manager->errors.Add(WfErrors::TooManyTargets(expression.Obj(), results, GetExpressionNameVisitor::Execute(expression)));
+					return 0;
+				}
+				return results[0].eventInfo;
+			}
+
+/***********************************************************************
 GetExpressionType
 ***********************************************************************/
 
