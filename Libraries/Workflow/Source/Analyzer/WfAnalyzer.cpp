@@ -577,6 +577,75 @@ WfLexicalScopeManager
 				USING_PATH_MATCHING_FAILED:;
 				}
 			}
+
+/***********************************************************************
+ResolveExpressionResult
+***********************************************************************/
+
+			ResolveExpressionResult::ResolveExpressionResult()
+				:propertyInfo(0)
+				, methodInfo(0)
+				, eventInfo(0)
+			{
+			}
+
+			ResolveExpressionResult::ResolveExpressionResult(const ResolveExpressionResult& result)
+				:scopeName(result.scopeName)
+				, symbol(result.symbol)
+				, type(result.type)
+				, propertyInfo(0)
+				, methodInfo(0)
+				, eventInfo(0)
+			{
+			}
+
+			ResolveExpressionResult::ResolveExpressionResult(Ptr<WfLexicalScopeName> _scopeName)
+				:scopeName(_scopeName)
+				, propertyInfo(0)
+				, methodInfo(0)
+				, eventInfo(0)
+			{
+			}
+
+			ResolveExpressionResult::ResolveExpressionResult(Ptr<reflection::description::ITypeInfo> _type)
+				:type(_type)
+				, propertyInfo(0)
+				, methodInfo(0)
+				, eventInfo(0)
+			{
+			}
+
+			ResolveExpressionResult::ResolveExpressionResult(Ptr<WfLexicalSymbol> _symbol, Ptr<reflection::description::ITypeInfo> _type)
+				:symbol(_symbol)
+				, type(_type)
+				, propertyInfo(0)
+				, methodInfo(0)
+				, eventInfo(0)
+			{
+			}
+
+			ResolveExpressionResult::ResolveExpressionResult(reflection::description::IPropertyInfo* _propertyInfo, Ptr<reflection::description::ITypeInfo> _type)
+				:propertyInfo(_propertyInfo)
+				, methodInfo(0)
+				, eventInfo(0)
+				, type(_type)
+			{
+			}
+
+			ResolveExpressionResult::ResolveExpressionResult(reflection::description::IMethodInfo* _methodInfo, Ptr<reflection::description::ITypeInfo> _type)
+				:propertyInfo(0)
+				, methodInfo(_methodInfo)
+				, eventInfo(0)
+				, type(_type)
+			{
+			}
+
+			ResolveExpressionResult::ResolveExpressionResult(reflection::description::IEventInfo* _eventInfo)
+				:propertyInfo(0)
+				, methodInfo(0)
+				, eventInfo(_eventInfo)
+			{
+			}
 		}
 	}
 }

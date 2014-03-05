@@ -164,6 +164,9 @@ Helper Functions
 			{
 				Ptr<WfLexicalScopeName>						scopeName;
 				Ptr<WfLexicalSymbol>						symbol;
+				reflection::description::IPropertyInfo*		propertyInfo;
+				reflection::description::IMethodInfo*		methodInfo;
+				reflection::description::IEventInfo*		eventInfo;
 				Ptr<reflection::description::ITypeInfo>		type;
 
 				ResolveExpressionResult();
@@ -171,6 +174,9 @@ Helper Functions
 				ResolveExpressionResult(Ptr<WfLexicalScopeName> _scopeName);
 				ResolveExpressionResult(Ptr<reflection::description::ITypeInfo> _type);
 				ResolveExpressionResult(Ptr<WfLexicalSymbol> _symbol, Ptr<reflection::description::ITypeInfo> _type);
+				ResolveExpressionResult(reflection::description::IPropertyInfo* _propertyInfo, Ptr<reflection::description::ITypeInfo> _type);
+				ResolveExpressionResult(reflection::description::IMethodInfo* _methodInfo, Ptr<reflection::description::ITypeInfo> _type);
+				ResolveExpressionResult(reflection::description::IEventInfo* _eventInfo);
 			};
 
 			extern void										ValidateExpressionSemantic(WfLexicalScopeManager* manager, Ptr<WfExpression> expression, Ptr<reflection::description::ITypeInfo> expectedType, collections::List<ResolveExpressionResult>& results);

@@ -883,37 +883,6 @@ GetExpressionName(Expression)
 			};
 
 /***********************************************************************
-ResolveExpressionResult
-***********************************************************************/
-
-			ResolveExpressionResult::ResolveExpressionResult()
-			{
-			}
-
-			ResolveExpressionResult::ResolveExpressionResult(const ResolveExpressionResult& result)
-				:scopeName(result.scopeName)
-				, symbol(result.symbol)
-				, type(result.type)
-			{
-			}
-
-			ResolveExpressionResult::ResolveExpressionResult(Ptr<WfLexicalScopeName> _scopeName)
-				:scopeName(_scopeName)
-			{
-			}
-
-			ResolveExpressionResult::ResolveExpressionResult(Ptr<reflection::description::ITypeInfo> _type)
-				:type(_type)
-			{
-			}
-
-			ResolveExpressionResult::ResolveExpressionResult(Ptr<WfLexicalSymbol> _symbol, Ptr<reflection::description::ITypeInfo> _type)
-				:symbol(_symbol)
-				, type(_type)
-			{
-			}
-
-/***********************************************************************
 ValidateSemantic
 ***********************************************************************/
 
