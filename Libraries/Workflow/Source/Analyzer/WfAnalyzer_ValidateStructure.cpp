@@ -665,6 +665,7 @@ ValidateStructure(Expression)
 
 				void Visit(WfTypeOfTypeExpression* node)override
 				{
+					ValidateTypeStructure(manager, node->type);
 				}
 
 				void Visit(WfTypeOfExpressionExpression* node)override
