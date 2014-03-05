@@ -53,6 +53,11 @@ WfErrors
 				return new ParsingError(node, L"A7: Symbol \"" + scopeName->GetFriendlyName() + L"\" cannot be used as an expression.");
 			}
 
+			Ptr<parsing::ParsingError> WfErrors::EventIsNotExpression(WfExpression* node, reflection::description::IEventInfo* eventInfo)
+			{
+				return new ParsingError(node, L"A7: Event \"" + eventInfo->GetName() + L"\" of type \"" + eventInfo->GetOwnerTypeDescriptor()->GetTypeName() + L"\" cannot be used as an expression.");
+			}
+
 			Ptr<parsing::ParsingError> WfErrors::ExpressionIsNotScopeName(WfExpression* node)
 			{
 				return new ParsingError(node, L"A8: Expression does not reference to a declaration.");
@@ -211,6 +216,11 @@ WfErrors
 			Ptr<parsing::ParsingError> WfErrors::ChildSymbolNotExists(parsing::ParsingTreeCustomBase* node, Ptr<WfLexicalScopeName> scopeName, const WString& name)
 			{
 				return new ParsingError(node, L"F1: Symbol \"" + name + L"\" does not exist in \"" + scopeName->GetFriendlyName() + L"\".");
+			}
+
+			Ptr<parsing::ParsingError> WfErrors::MemberNotExists(parsing::ParsingTreeCustomBase* node, reflection::description::ITypeDescriptor* typeDescriptor, const WString& name)
+			{
+				return new ParsingError(node, L"F1: Member \"" + name + L"\" does not exist in \"" + typeDescriptor->GetTypeName() + L"\".");
 			}
 
 			Ptr<parsing::ParsingError> WfErrors::ReferenceNotExists(parsing::ParsingTreeCustomBase* node, const WString& name)

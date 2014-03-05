@@ -427,6 +427,53 @@ ValidateSemantic(Expression)
 
 				void Visit(WfMemberExpression* node)override
 				{
+					Ptr<ITypeInfo> type = GetExpressionType(manager, node->parent, 0);
+					if (type)
+					{
+						ITypeDescriptor* typeDescriptor = type->GetTypeDescriptor();
+						if (IPropertyInfo* info = typeDescriptor->GetPropertyByName(node->name.value, true))
+						{
+							ResolveExpressionResult result(info, CopyTypeInfo(info->GetReturn()));
+							results.Add(result);
+						}
+						if (IEventInfo* info = typeDescriptor->GetEventByName(node->name.value, true))
+						{
+							ResolveExpressionResult result(info);
+							results.Add(result);
+						}
+						if (IMethodGroupInfo* groupInfo = typeDescriptor->GetMethodGroupByName(node->name.value, true))
+						{
+							vint count = groupInfo->GetMethodCount();
+							for (vint i = 0; i < count; i++)
+							{
+								IMethodInfo* info = groupInfo->GetMethod(i);
+								Ptr<TypeInfoImpl> functionType = new TypeInfoImpl(ITypeInfo::SharedPtr);
+								{
+									Ptr<TypeInfoImpl> genericType = new TypeInfoImpl(ITypeInfo::Generic);
+									functionType->SetElementType(genericType);
+									{
+										Ptr<TypeInfoImpl> elementType = new TypeInfoImpl(ITypeInfo::TypeDescriptor);
+										elementType->SetTypeDescriptor(description::GetTypeDescriptor<IValueFunctionProxy>());
+										functionType->SetElementType(elementType);
+									}
+
+									genericType->AddGenericArgument(CopyTypeInfo(info->GetReturn()));
+									vint parameterCount = info->GetParameterCount();
+									for (vint j = 0; j < parameterCount; j++)
+									{
+										genericType->AddGenericArgument(CopyTypeInfo(info->GetParameter(j)->GetType()));
+									}
+								}
+								ResolveExpressionResult result(info, functionType);
+								results.Add(result);
+							}
+						}
+
+						if (results.Count() == 0)
+						{
+							manager->errors.Add(WfErrors::MemberNotExists(node, typeDescriptor, node->name.value));
+						}
+					}
 				}
 
 				void Visit(WfChildExpression* node)override
@@ -942,6 +989,10 @@ ValidateSemantic
 				}
 			}
 
+/***********************************************************************
+GetExpressionScopeName
+***********************************************************************/
+
 			Ptr<WfLexicalScopeName> GetExpressionScopeName(WfLexicalScopeManager* manager, Ptr<WfExpression> expression)
 			{
 				List<ResolveExpressionResult> results;
@@ -969,6 +1020,10 @@ ValidateSemantic
 				return results[0].scopeName;
 			}
 
+/***********************************************************************
+GetExpressionType
+***********************************************************************/
+
 			Ptr<reflection::description::ITypeInfo> GetExpressionType(WfLexicalScopeManager* manager, Ptr<WfExpression> expression, Ptr<reflection::description::ITypeInfo> expectedType)
 			{
 				List<ResolveExpressionResult> results;
@@ -976,12 +1031,17 @@ ValidateSemantic
 				if (results.Count() == 0) return expectedType;
 
 				Ptr<WfLexicalScopeName> scopeName;
+				IEventInfo* eventInfo = 0;
 				for (vint i = results.Count() - 1; i >= 0; i--)
 				{
 					auto& result = results[i];
-					if (result.scopeName)
+					if (result.scopeName && !scopeName)
 					{
 						scopeName = result.scopeName;
+					}
+					if (result.eventInfo && !eventInfo)
+					{
+						eventInfo = result.eventInfo;
 					}
 					if (!result.type)
 					{
@@ -990,7 +1050,14 @@ ValidateSemantic
 				}
 				if (results.Count() == 0)
 				{
-					manager->errors.Add(WfErrors::ScopeNameIsNotExpression(expression.Obj(), scopeName));
+					if (scopeName)
+					{
+						manager->errors.Add(WfErrors::ScopeNameIsNotExpression(expression.Obj(), scopeName));
+					}
+					if (eventInfo)
+					{
+						manager->errors.Add(WfErrors::EventIsNotExpression(expression.Obj(), eventInfo));
+					}
 					return expectedType;
 				}
 
@@ -1026,171 +1093,6 @@ ValidateSemantic
 				{
 					return expectedType ? expectedType : results[0].type;
 				}
-			}
-
-			bool CanConvertToType(reflection::description::ITypeInfo* fromType, reflection::description::ITypeInfo* toType, bool explicitly)
-			{
-				ITypeDescriptor* objectType = GetTypeDescriptor<Value>();
-				bool fromObject = fromType->GetDecorator() == ITypeInfo::TypeDescriptor && fromType->GetTypeDescriptor() == objectType;
-				bool toObject = toType->GetDecorator() == ITypeInfo::TypeDescriptor && toType->GetTypeDescriptor() == objectType;
-
-				if (fromObject && toObject)
-				{
-					return true;
-				}
-				else if (fromObject)
-				{
-					return explicitly;
-				}
-				else if (toObject)
-				{
-					return true;
-				}
-
-				switch (fromType->GetDecorator())
-				{
-				case ITypeInfo::RawPtr:
-					switch (toType->GetDecorator())
-					{
-					case ITypeInfo::RawPtr:
-						return CanConvertToType(fromType->GetElementType(), toType->GetElementType(), explicitly);
-					case ITypeInfo::SharedPtr:
-						return explicitly && CanConvertToType(fromType->GetElementType(), toType->GetElementType(), explicitly);
-					case ITypeInfo::Nullable:
-					case ITypeInfo::TypeDescriptor:
-					case ITypeInfo::Generic:
-						return false;
-					}
-					break;
-				case ITypeInfo::SharedPtr:
-					switch (toType->GetDecorator())
-					{
-					case ITypeInfo::RawPtr:
-					case ITypeInfo::SharedPtr:
-						return CanConvertToType(fromType->GetElementType(), toType->GetElementType(), explicitly);
-					case ITypeInfo::Nullable:
-					case ITypeInfo::TypeDescriptor:
-					case ITypeInfo::Generic:
-						return false;
-					}
-					break;
-				case ITypeInfo::Nullable:
-					switch (toType->GetDecorator())
-					{
-					case ITypeInfo::RawPtr:
-					case ITypeInfo::SharedPtr:
-						return false;
-					case ITypeInfo::Nullable:
-						return CanConvertToType(fromType->GetElementType(), toType->GetElementType(), explicitly);
-					case ITypeInfo::TypeDescriptor:
-						return explicitly && CanConvertToType(fromType->GetElementType(), toType, explicitly);
-					case ITypeInfo::Generic:
-						return false;
-					}
-					break;
-				case ITypeInfo::TypeDescriptor:
-					switch (toType->GetDecorator())
-					{
-					case ITypeInfo::RawPtr:
-					case ITypeInfo::SharedPtr:
-						return false;
-					case ITypeInfo::Nullable:
-						return CanConvertToType(fromType, toType->GetElementType(), explicitly);
-					case ITypeInfo::TypeDescriptor:
-						{
-							ITypeDescriptor* fromTd = fromType->GetTypeDescriptor();
-							ITypeDescriptor* toTd = toType->GetTypeDescriptor();
-							if ((fromTd->GetValueSerializer() != 0) != (toTd->GetValueSerializer() != 0))
-							{
-								return false;
-							}
-
-							if (fromTd->GetValueSerializer())
-							{
-								if (fromTd == toTd)
-								{
-									return true;
-								}
-								ITypeDescriptor* stringType = GetTypeDescriptor<WString>();
-								return (explicitly && fromTd == stringType) || toTd == stringType;
-							}
-							else
-							{
-								if (fromTd->CanConvertTo(toTd))
-								{
-									return true;
-								}
-								if (explicitly && toTd->CanConvertTo(fromTd))
-								{
-									return true;
-								}
-							}
-						}
-						break;
-					case ITypeInfo::Generic:
-						return explicitly && CanConvertToType(fromType, toType->GetElementType(), explicitly);
-					}
-					break;
-				case ITypeInfo::Generic:
-					switch (toType->GetDecorator())
-					{
-					case ITypeInfo::RawPtr:
-					case ITypeInfo::SharedPtr:
-					case ITypeInfo::Nullable:
-						return false;
-					case ITypeInfo::TypeDescriptor:
-						return CanConvertToType(fromType->GetElementType(), toType, explicitly);
-					case ITypeInfo::Generic:
-						if (explicitly) return true;
-						if (fromType->GetGenericArgumentCount() != toType->GetGenericArgumentCount())
-						{
-							return false;
-						}
-						if (!CanConvertToType(fromType->GetElementType(), toType->GetElementType(), explicitly)) return false;
-						for (vint i = 0; i < fromType->GetGenericArgumentCount(); i++)
-						{
-							if (!IsSameType(fromType->GetGenericArgument(i), toType->GetGenericArgument(i)))
-							{
-								return false;
-							}
-						}
-						return true;
-					}
-					break;
-				}
-				return false;
-			}
-
-			bool IsSameType(reflection::description::ITypeInfo* fromType, reflection::description::ITypeInfo* toType)
-			{
-				if (fromType->GetDecorator() != toType->GetDecorator())
-				{
-					return false;
-				}
-				switch (fromType->GetDecorator())
-				{
-				case ITypeInfo::RawPtr:
-				case ITypeInfo::SharedPtr:
-				case ITypeInfo::Nullable:
-					return IsSameType(fromType->GetElementType(), toType->GetElementType());
-				case ITypeInfo::TypeDescriptor:
-					return fromType->GetTypeDescriptor() == toType->GetTypeDescriptor();
-				case ITypeInfo::Generic:
-					if (fromType->GetGenericArgumentCount() != toType->GetGenericArgumentCount())
-					{
-						return false;
-					}
-					if (!IsSameType(fromType->GetElementType(), toType->GetElementType())) return false;
-					for (vint i = 0; i < fromType->GetGenericArgumentCount(); i++)
-					{
-						if (!IsSameType(fromType->GetGenericArgument(i), toType->GetGenericArgument(i)))
-						{
-							return false;
-						}
-					}
-					return true;
-				}
-				return false;
 			}
 		}
 	}
