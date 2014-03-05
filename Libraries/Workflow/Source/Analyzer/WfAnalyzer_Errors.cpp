@@ -63,6 +63,11 @@ WfErrors
 				return new ParsingError(node, L"A8: Expression does not reference to a declaration.");
 			}
 
+			Ptr<parsing::ParsingError> WfErrors::ExpressionIsNotEvent(WfExpression* node)
+			{
+				return new ParsingError(node, L"A8: Expression does not reference to an event.");
+			}
+
 			Ptr<parsing::ParsingError> WfErrors::ExpressionCannotResolveType(WfExpression* node, Ptr<WfLexicalSymbol> symbol)
 			{
 				return new ParsingError(node, L"A9: Expression referencing to symbol \"" + symbol->name + L"\" failed to resolve its type.");

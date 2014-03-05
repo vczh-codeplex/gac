@@ -184,6 +184,7 @@ Helper Functions
 
 			extern void										ValidateExpressionSemantic(WfLexicalScopeManager* manager, Ptr<WfExpression> expression, Ptr<reflection::description::ITypeInfo> expectedType, collections::List<ResolveExpressionResult>& results);
 			extern Ptr<WfLexicalScopeName>					GetExpressionScopeName(WfLexicalScopeManager* manager, Ptr<WfExpression> expression);
+			extern reflection::description::IEventInfo*		GetExpressionEventInfo(WfLexicalScopeManager* manager, Ptr<WfExpression> expression);
 			extern Ptr<reflection::description::ITypeInfo>	GetExpressionType(WfLexicalScopeManager* manager, Ptr<WfExpression> expression, Ptr<reflection::description::ITypeInfo> expectedType);
 
 /***********************************************************************
@@ -203,6 +204,7 @@ Error Messages
 				static Ptr<parsing::ParsingError>			ScopeNameIsNotExpression(WfExpression* node, Ptr<WfLexicalScopeName> scopeName);
 				static Ptr<parsing::ParsingError>			EventIsNotExpression(WfExpression* node, reflection::description::IEventInfo* eventInfo);
 				static Ptr<parsing::ParsingError>			ExpressionIsNotScopeName(WfExpression* node);
+				static Ptr<parsing::ParsingError>			ExpressionIsNotEvent(WfExpression* node);
 				static Ptr<parsing::ParsingError>			ExpressionCannotResolveType(WfExpression* node, Ptr<WfLexicalSymbol> symbol);
 				static Ptr<parsing::ParsingError>			NullCannotResolveType(WfExpression* node);
 				static Ptr<parsing::ParsingError>			OrderedLambdaCannotResolveType(WfExpression* node);
