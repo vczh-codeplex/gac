@@ -81,6 +81,87 @@ void LogSampleParseResult(const WString& sampleName, const WString& itemName, co
 	Log(node.Obj(), L"", writer);
 }
 
+namespace test
+{
+	class ObservableValue : public Object, public Description<ObservableValue>
+	{
+	protected:
+		vint								value;
+	public:
+		Event<void(vint, vint)>				ValueChanged;
+
+		ObservableValue()
+		{
+		}
+
+		ObservableValue(vint _value)
+			:value(_value)
+		{
+		}
+
+		vint GetValue()
+		{
+			return value;
+		}
+
+		void SetValue(vint newValue)
+		{
+			vint oldValue = value;
+			value = newValue;
+			ValueChanged(oldValue, newValue);
+		}
+	};
+}
+
+namespace vl
+{
+	namespace reflection
+	{
+		namespace description
+		{
+			using namespace test;
+
+#define UNITTEST_TYPELIST(F)\
+			F(test::ObservableValue)\
+
+			UNITTEST_TYPELIST(DECL_TYPE_INFO)
+			UNITTEST_TYPELIST(IMPL_TYPE_INFO)
+
+			BEGIN_CLASS_MEMBER(ObservableValue)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<ObservableValue>(), NO_PARAMETER)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<ObservableValue>(vint), { L"value" })
+
+				CLASS_MEMBER_EVENT(ValueChanged)
+				CLASS_MEMBER_PROPERTY_EVENT_FAST(Value, ValueChanged)
+			END_CLASS_MEMBER(ObservableValue)
+
+			class UnitTestTypeLoader : public Object, public ITypeLoader
+			{
+			public:
+				void Load(ITypeManager* manager)
+				{
+					UNITTEST_TYPELIST(ADD_TYPE_INFO)
+				}
+
+				void Unload(ITypeManager* manager)
+				{
+				}
+			};
+
+			bool LoadUnitTestTypes()
+			{
+				ITypeManager* manager = GetGlobalTypeManager();
+				if(manager)
+				{
+					Ptr<ITypeLoader> loader = new UnitTestTypeLoader;
+					return manager->AddTypeLoader(loader);
+				}
+				return false;
+			}
+		}
+	}
+}
+
 void LoadTypes()
 {
 	LoadPredefinedTypes();
@@ -88,6 +169,7 @@ void LoadTypes()
 	XmlLoadTypes();
 	JsonLoadTypes();
 	WfLoadTypes();
+	LoadUnitTestTypes();
 	TEST_ASSERT(GetGlobalTypeManager()->Load());
 }
 

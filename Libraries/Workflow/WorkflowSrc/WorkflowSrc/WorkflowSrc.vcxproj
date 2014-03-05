@@ -284,6 +284,7 @@
     <Text Include="..\..\Source\Expression\WfExpressionParser.parser.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A0_WrongFormatStringSyntax.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_BaseToDerived.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A10_FunctionMemberToNullable.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_NullableToNullable.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_NullableToRawPtr.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_NullableToSharedPtr.txt" />
@@ -308,6 +309,7 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_OrderedLambdaToStruct.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_OrderedLambdaToWrongBody.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_OrderedLambdaToWrongFunctionType.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A10_PropertyMemberToNullable.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_RawPtrToNullable.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_RawPtrToSharedPtr.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_RawPtrToStruct.txt" />
@@ -342,6 +344,7 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\A3_ObserveNotInBind.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A4_BindInBind.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A5_ConstructorMixMapAndList.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A7_EventIsNotExpression.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A7_ScopeNameIsNotExpression.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A8_ExpressionIsNotScopeName.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A9_ExpressionCannotResolveType.txt" />
@@ -374,6 +377,7 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\B6_VariableIsNotType.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\F0_ExpressionTopQualifiedSymbolNotExists.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\F1_ExpressionChildSymbolNotExists.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\F1_TypeMemberNotExists.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\F2_ExpressionReferenceNotExists.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\F2_TypeReferenceNotExists.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\B7_ClassNotForValue.txt" />

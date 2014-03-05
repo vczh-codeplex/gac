@@ -4,6 +4,7 @@ A2_WrongSimpleObserveEvent
 A3_ObserveNotInBind
 A4_BindInBind
 A5_ConstructorMixMapAndList
+A7_EventIsNotExpression
 A7_ScopeNameIsNotExpression
 A8_ExpressionIsNotScopeName
 A9_ExpressionCannotResolveType
@@ -44,6 +45,8 @@ A10_OfStructToToNullable
 A10_OfStructToToRawPtr
 A10_OfStructToToSharedPtr
 A10_OfStructToToStruct
+A10_PropertyMemberToNullable
+A10_FunctionMemberToNullable
 A11_NullableToRawPtr
 A11_NullableToSharedPtr
 A11_RawPtrToNullable
@@ -111,6 +114,7 @@ E0_WildCardInWrongPlace
 F0_TypeTopQualifiedSymbolNotExists
 F0_ExpressionTopQualifiedSymbolNotExists
 F1_TypeChildSymbolNotExists
+F1_TypeMemberNotExists
 F1_ExpressionChildSymbolNotExists
 F2_TypeReferenceNotExists
 F2_ExpressionReferenceNotExists
