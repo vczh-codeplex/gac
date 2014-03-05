@@ -524,19 +524,13 @@ ValidateSemantic(Expression)
 					}
 					else
 					{
-						ITypeDescriptor* typeDescriptor = description::GetTypeDescriptor<bool>();
-						Ptr<TypeInfoImpl> typeInfo = new TypeInfoImpl(ITypeInfo::TypeDescriptor);
-						typeInfo->SetTypeDescriptor(typeDescriptor);
-						results.Add(ResolveExpressionResult((Ptr<ITypeInfo>)typeInfo));
+						results.Add(ResolveExpressionResult(TypeInfoRetriver<bool>::CreateTypeInfo()));
 					}
 				}
 
 				void Visit(WfFloatingExpression* node)override
 				{
-					ITypeDescriptor* typeDescriptor = description::GetTypeDescriptor<double>();
-					Ptr<TypeInfoImpl> typeInfo = new TypeInfoImpl(ITypeInfo::TypeDescriptor);
-					typeInfo->SetTypeDescriptor(typeDescriptor);
-					results.Add(ResolveExpressionResult((Ptr<ITypeInfo>)typeInfo));
+					results.Add(ResolveExpressionResult(TypeInfoRetriver<double>::CreateTypeInfo()));
 				}
 
 				void Visit(WfIntegerExpression* node)override
@@ -564,18 +558,13 @@ ValidateSemantic(Expression)
 
 				void Visit(WfStringExpression* node)override
 				{
-					ITypeDescriptor* typeDescriptor = description::GetTypeDescriptor<WString>();
-					Ptr<TypeInfoImpl> typeInfo = new TypeInfoImpl(ITypeInfo::TypeDescriptor);
-					typeInfo->SetTypeDescriptor(typeDescriptor);
-					results.Add(ResolveExpressionResult((Ptr<ITypeInfo>)typeInfo));
+					results.Add(ResolveExpressionResult(TypeInfoRetriver<WString>::CreateTypeInfo()));
 				}
 
 				void Visit(WfFormatExpression* node)override
 				{
-					ITypeDescriptor* typeDescriptor = description::GetTypeDescriptor<WString>();
-					Ptr<TypeInfoImpl> typeInfo = new TypeInfoImpl(ITypeInfo::TypeDescriptor);
-					typeInfo->SetTypeDescriptor(typeDescriptor);
-					results.Add(ResolveExpressionResult((Ptr<ITypeInfo>)typeInfo));
+					Ptr<ITypeInfo> typeInfo = TypeInfoRetriver<WString>::CreateTypeInfo();
+					results.Add(ResolveExpressionResult(typeInfo));
 					GetExpressionType(manager, node->expandedExpression, typeInfo);
 				}
 
@@ -609,13 +598,7 @@ ValidateSemantic(Expression)
 
 				void Visit(WfIfExpression* node)override
 				{
-					Ptr<ITypeInfo> boolType;
-					{
-						ITypeDescriptor* typeDescriptor = description::GetTypeDescriptor<bool>();
-						Ptr<TypeInfoImpl> typeInfo = new TypeInfoImpl(ITypeInfo::TypeDescriptor);
-						typeInfo->SetTypeDescriptor(typeDescriptor);
-						boolType = typeInfo;
-					}
+					Ptr<ITypeInfo> boolType = TypeInfoRetriver<bool>::CreateTypeInfo();
 					GetExpressionType(manager, node->condition, boolType);
 
 					Ptr<ITypeInfo> firstType = GetExpressionType(manager, node->trueBranch, expectedType);
@@ -742,22 +725,34 @@ ValidateSemantic(Expression)
 
 				void Visit(WfTypeTestingExpression* node)override
 				{
+					GetExpressionType(manager, node->expression, 0);
+					results.Add(ResolveExpressionResult(TypeInfoRetriver<bool>::CreateTypeInfo()));
 				}
 
 				void Visit(WfTypeOfTypeExpression* node)override
 				{
+					results.Add(ResolveExpressionResult(TypeInfoRetriver<ITypeDescriptor*>::CreateTypeInfo()));
 				}
 
 				void Visit(WfTypeOfExpressionExpression* node)override
 				{
+					GetExpressionType(manager, node->expression, 0);
+					results.Add(ResolveExpressionResult(TypeInfoRetriver<ITypeDescriptor*>::CreateTypeInfo()));
 				}
 
 				void Visit(WfAttachEventExpression* node)override
 				{
+					IEventInfo* eventInfo = GetExpressionEventInfo(manager, node->event);
+					Ptr<ITypeInfo> functionType = CopyTypeInfo(eventInfo->GetHandlerType());
+					GetExpressionType(manager, node->function, functionType);
+					results.Add(ResolveExpressionResult(TypeInfoRetriver<Ptr<IEventHandler>>::CreateTypeInfo()));
 				}
 
 				void Visit(WfDetachEventExpression* node)override
 				{
+					Ptr<ITypeInfo> pointerType = TypeInfoRetriver<Ptr<IEventHandler>>::CreateTypeInfo();
+					GetExpressionType(manager, node->handler, pointerType);
+					results.Add(ResolveExpressionResult(TypeInfoRetriver<bool>::CreateTypeInfo()));
 				}
 
 				void Visit(WfBindExpression* node)override
