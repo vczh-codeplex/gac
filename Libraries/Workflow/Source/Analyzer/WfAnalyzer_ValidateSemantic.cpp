@@ -769,6 +769,26 @@ ValidateSemantic(Expression)
 
 				void Visit(WfFunctionExpression* node)override
 				{
+					ValidateDeclarationSemantic(manager, node->function);
+					auto scope = manager->declarationScopes[node->function.Obj()].Obj();
+
+					Ptr<TypeInfoImpl> functionType = new TypeInfoImpl(ITypeInfo::SharedPtr);
+					{
+						Ptr<TypeInfoImpl> genericType = new TypeInfoImpl(ITypeInfo::Generic);
+						functionType->SetElementType(genericType);
+						{
+							Ptr<TypeInfoImpl> elementType = new TypeInfoImpl(ITypeInfo::TypeDescriptor);
+							elementType->SetTypeDescriptor(description::GetTypeDescriptor<IValueFunctionProxy>());
+							functionType->SetElementType(elementType);
+						}
+
+						genericType->AddGenericArgument(CreateTypeInfoFromType(scope, node->function->returnType));
+						FOREACH(Ptr<WfFunctionArgument>, argument, node->function->arguments)
+						{
+							genericType->AddGenericArgument(scope->symbols[argument->name.value][0]->typeInfo);
+						}
+					}
+					results.Add(ResolveExpressionResult((Ptr<ITypeInfo>)functionType));
 				}
 
 				void Visit(WfNewTypeExpression* node)override
@@ -1016,7 +1036,7 @@ GetExpressionScopeName
 			}
 
 /***********************************************************************
-GetExpressionScopeName
+GetExpressionEventInfo
 ***********************************************************************/
 
 			reflection::description::IEventInfo* GetExpressionEventInfo(WfLexicalScopeManager* manager, Ptr<WfExpression> expression)
