@@ -454,7 +454,7 @@ ValidateSemantic(Expression)
 									{
 										Ptr<TypeInfoImpl> elementType = new TypeInfoImpl(ITypeInfo::TypeDescriptor);
 										elementType->SetTypeDescriptor(description::GetTypeDescriptor<IValueFunctionProxy>());
-										functionType->SetElementType(elementType);
+										genericType->SetElementType(elementType);
 									}
 
 									genericType->AddGenericArgument(CopyTypeInfo(info->GetReturn()));
@@ -779,7 +779,7 @@ ValidateSemantic(Expression)
 						{
 							Ptr<TypeInfoImpl> elementType = new TypeInfoImpl(ITypeInfo::TypeDescriptor);
 							elementType->SetTypeDescriptor(description::GetTypeDescriptor<IValueFunctionProxy>());
-							functionType->SetElementType(elementType);
+							genericType->SetElementType(elementType);
 						}
 
 						genericType->AddGenericArgument(CreateTypeInfoFromType(scope, node->function->returnType));
