@@ -283,7 +283,11 @@
   <ItemGroup>
     <Text Include="..\..\Source\Expression\WfExpressionParser.parser.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A0_WrongFormatStringSyntax.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A10_AnonymousLambdaToStruct.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A10_AnonymousLambdaToWrongFunctionType.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_BaseToDerived.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A10_FunctionLambdaToStruct.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A10_FunctionLambdaToWrongFunctionType.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_FunctionMemberToNullable.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_NullableToNullable.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_NullableToRawPtr.txt" />
