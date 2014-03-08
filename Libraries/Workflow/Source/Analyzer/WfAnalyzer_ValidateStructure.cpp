@@ -187,7 +187,7 @@ ValidateStructure(Type)
 
 				void Visit(WfFunctionType* node)override
 				{
-					ValidateTypeStructure(manager, node->result);
+					ValidateTypeStructure(manager, node->result, true);
 					FOREACH(Ptr<WfType>, argument, node->arguments)
 					{
 						ValidateTypeStructure(manager, argument);

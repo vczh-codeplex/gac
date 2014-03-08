@@ -323,6 +323,13 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_StructToToRawPtr.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_StructToToSharedPtr.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_StructToToStruct.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A10_WrongAttachExpression.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A10_WrongAttachExpressionToStruct.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A10_WrongDetachExpression.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A10_WrongDetachExpressionToStruct.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A10_WrongTypeOfExpressionToStruct.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A10_WrongTypeOfTypeToStruct.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A10_WrongTypeTestingToStruct.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A11_AsNullableToRawPtr.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A11_AsNullableToSharedPtr.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A11_AsRawPtrToNullable.txt" />

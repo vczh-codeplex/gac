@@ -1091,6 +1091,27 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_AnonymousLambdaToStruct.txt">
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
     </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A10_WrongAttachExpression.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A10_WrongAttachExpressionToStruct.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A10_WrongDetachExpression.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A10_WrongDetachExpressionToStruct.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A10_WrongTypeOfExpressionToStruct.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A10_WrongTypeOfTypeToStruct.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A10_WrongTypeTestingToStruct.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Source\Expression\Codegen.bat">
