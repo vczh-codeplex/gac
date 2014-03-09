@@ -766,9 +766,35 @@ ValidateSemantic(Expression)
 					Ptr<ITypeInfo> boolType = TypeInfoRetriver<bool>::CreateTypeInfo();
 					GetExpressionType(manager, node->condition, boolType);
 
-					Ptr<ITypeInfo> firstType = GetExpressionType(manager, node->trueBranch, expectedType);
-					Ptr<ITypeInfo> secondType = GetExpressionType(manager, node->falseBranch, expectedType);
+					Ptr<ITypeInfo> firstType, secondType;
 
+					if (expectedType)
+					{
+						firstType = GetExpressionType(manager, node->trueBranch, expectedType);
+						secondType = GetExpressionType(manager, node->falseBranch, expectedType);
+					}
+					else
+					{
+						bool resolveFirst = !IsExpressionDependOnExpectedType(node->trueBranch);
+						bool resolveSecond = !IsExpressionDependOnExpectedType(node->falseBranch);
+
+						if (resolveFirst == resolveSecond)
+						{
+							firstType = GetExpressionType(manager, node->trueBranch, 0);
+							secondType = GetExpressionType(manager, node->falseBranch, 0);
+						}
+						else if (resolveFirst)
+						{
+							firstType = GetExpressionType(manager, node->trueBranch, 0);
+							secondType = GetExpressionType(manager, node->falseBranch, firstType);
+						}
+						else if (resolveSecond)
+						{
+							secondType = GetExpressionType(manager, node->falseBranch, 0);
+							firstType = GetExpressionType(manager, node->trueBranch, secondType);
+						}
+					}
+					
 					if (firstType && !secondType)
 					{
 						results.Add(ResolveExpressionResult(firstType));
