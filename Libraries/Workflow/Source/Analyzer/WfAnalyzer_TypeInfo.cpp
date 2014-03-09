@@ -38,6 +38,30 @@ GetTypeFlag
 			}
 
 /***********************************************************************
+CreateTypeInfoFromTypeFlag
+***********************************************************************/
+
+			Ptr<reflection::description::ITypeInfo> CreateTypeInfoFromTypeFlag(TypeFlag flag)
+			{
+				switch (flag)
+				{
+				case TypeFlag::Bool:	return TypeInfoRetriver<bool>::CreateTypeInfo();
+				case TypeFlag::I1:		return TypeInfoRetriver<vint8_t>::CreateTypeInfo();
+				case TypeFlag::I2:		return TypeInfoRetriver<vint16_t>::CreateTypeInfo();
+				case TypeFlag::I4:		return TypeInfoRetriver<vint32_t>::CreateTypeInfo();
+				case TypeFlag::I8:		return TypeInfoRetriver<vint64_t>::CreateTypeInfo();
+				case TypeFlag::U1:		return TypeInfoRetriver<vuint8_t>::CreateTypeInfo();
+				case TypeFlag::U2:		return TypeInfoRetriver<vuint16_t>::CreateTypeInfo();
+				case TypeFlag::U4:		return TypeInfoRetriver<vuint32_t>::CreateTypeInfo();
+				case TypeFlag::U8:		return TypeInfoRetriver<vuint64_t>::CreateTypeInfo();
+				case TypeFlag::F4:		return TypeInfoRetriver<float>::CreateTypeInfo();
+				case TypeFlag::F8:		return TypeInfoRetriver<double>::CreateTypeInfo();
+				case TypeFlag::String:	return TypeInfoRetriver<WString>::CreateTypeInfo();
+				}
+				return 0;
+			}
+
+/***********************************************************************
 GetTypeFromTypeInfo
 ***********************************************************************/
 

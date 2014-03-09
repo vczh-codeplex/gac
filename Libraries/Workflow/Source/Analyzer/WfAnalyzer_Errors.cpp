@@ -120,7 +120,22 @@ WfErrors
 
 			Ptr<parsing::ParsingError> WfErrors::RangeShouldBeInteger(WfExpression* node, reflection::description::ITypeInfo* type)
 			{
-				return new ParsingError(node, L"A15: Elements in a range expression should be integer, not L\"" + type->GetTypeFriendlyName() + L"\".");
+				return new ParsingError(node, L"A15: Elements in a range expression should be integer, not \"" + type->GetTypeFriendlyName() + L"\".");
+			}
+
+			Ptr<parsing::ParsingError> WfErrors::UnaryOperatorOnWrongType(WfUnaryExpression* node, reflection::description::ITypeInfo* type)
+			{
+				return new ParsingError(node, L"A16: Unary operator cannot apply on expression of type \"" + type->GetTypeFriendlyName() + L"\".");
+			}
+
+			Ptr<parsing::ParsingError> WfErrors::BinaryOperatorOnWrongType(WfBinaryExpression* node, reflection::description::ITypeInfo* type)
+			{
+				return new ParsingError(node, L"A16: Binary operator cannot apply on expression of type \"" + type->GetTypeFriendlyName() + L"\".");
+			}
+
+			Ptr<parsing::ParsingError> WfErrors::IndexOperatorOnWrongType(WfBinaryExpression* node, reflection::description::ITypeInfo* containerType)
+			{
+				return new ParsingError(node, L"A17: Container of type \"" + containerType->GetTypeFriendlyName() + L"\" cannot be accessed using index.");
 			}
 
 			Ptr<parsing::ParsingError> WfErrors::WrongVoidType(WfType* node)

@@ -145,10 +145,19 @@ Helper Functions
 				String,
 				Others,
 				Count,
+				Unknown = -1,
+#ifdef VCZH_64
+				I = I8,
+				U = U8,
+#else
+				I = I4,
+				U = U4,
+#endif
 			};
 
 			extern TypeFlag									GetTypeFlag(reflection::description::ITypeDescriptor* typeDescriptor);
 			extern TypeFlag									GetTypeFlag(reflection::description::ITypeInfo* typeInfo);
+			extern Ptr<reflection::description::ITypeInfo>	CreateTypeInfoFromTypeFlag(TypeFlag flag);
 			extern Ptr<WfType>								GetTypeFromTypeInfo(reflection::description::ITypeInfo* typeInfo);
 			extern Ptr<WfLexicalScopeName>					GetScopeNameFromReferenceType(WfLexicalScope* scope, Ptr<WfType> type);
 			extern Ptr<reflection::description::ITypeInfo>	CreateTypeInfoFromType(WfLexicalScope* scope, Ptr<WfType> type);
@@ -239,7 +248,8 @@ Error Messages
 				static Ptr<parsing::ParsingError>			CannotMergeTwoType(WfExpression* node, reflection::description::ITypeInfo* firstType, reflection::description::ITypeInfo* secondType);
 				static Ptr<parsing::ParsingError>			RangeShouldBeInteger(WfExpression* node, reflection::description::ITypeInfo* type);
 				static Ptr<parsing::ParsingError>			UnaryOperatorOnWrongType(WfUnaryExpression* node, reflection::description::ITypeInfo* type);
-				static Ptr<parsing::ParsingError>			BinaryOperatorOnWrongType(WfUnaryExpression* node, reflection::description::ITypeInfo* type);
+				static Ptr<parsing::ParsingError>			BinaryOperatorOnWrongType(WfBinaryExpression* node, reflection::description::ITypeInfo* type);
+				static Ptr<parsing::ParsingError>			IndexOperatorOnWrongType(WfBinaryExpression* node, reflection::description::ITypeInfo* containerType);
 
 				// B: Type error
 				static Ptr<parsing::ParsingError>			WrongVoidType(WfType* node);

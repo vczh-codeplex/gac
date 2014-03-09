@@ -466,17 +466,119 @@ ValidateSemantic(Expression)
 
 				void Visit(WfBinaryExpression* node)override
 				{
-					Ptr<ITypeInfo> firstType = GetExpressionType(manager, node->first, expectedType);
-					Ptr<ITypeInfo> secondType = GetExpressionType(manager, node->second, expectedType);
 
 					if (node->op == WfBinaryOperator::Assign)
 					{
+						Ptr<ITypeInfo> variableType = GetExpressionType(manager, node->first, 0);
+						GetExpressionType(manager, node->second, variableType);
+						if (variableType)
+						{
+							results.Add(ResolveExpressionResult(variableType));
+						}
 					}
 					else if (node->op == WfBinaryOperator::Index)
 					{
+						Ptr<ITypeInfo> containerType = GetExpressionType(manager, node->first, 0);
+						if (containerType)
+						{
+							switch (containerType->GetDecorator())
+							{
+							case ITypeInfo::RawPtr:
+							case ITypeInfo::SharedPtr:
+								{
+									ITypeInfo* genericType = containerType->GetElementType();
+									Ptr<ITypeInfo> indexType;
+									Ptr<ITypeInfo> resultType;
+
+									if (genericType->GetDecorator() == ITypeInfo::Generic)
+									{
+										ITypeInfo* classType = genericType->GetElementType();
+										if (classType->GetTypeDescriptor() == description::GetTypeDescriptor<IValueReadonlyList>())
+										{
+											indexType = TypeInfoRetriver<vint>::CreateTypeInfo();
+											resultType = CopyTypeInfo(genericType->GetGenericArgument(0));
+										}
+										else if (classType->GetTypeDescriptor() == description::GetTypeDescriptor<IValueList>())
+										{
+											indexType = TypeInfoRetriver<vint>::CreateTypeInfo();
+											resultType = CopyTypeInfo(genericType->GetGenericArgument(0));
+										}
+										else if (classType->GetTypeDescriptor() == description::GetTypeDescriptor<IValueReadonlyDictionary>())
+										{
+											indexType = CopyTypeInfo(genericType->GetGenericArgument(0));
+											resultType = CopyTypeInfo(genericType->GetGenericArgument(1));
+										}
+										else if (classType->GetTypeDescriptor() == description::GetTypeDescriptor<IValueDictionary>())
+										{
+											indexType = CopyTypeInfo(genericType->GetGenericArgument(0));
+											resultType = CopyTypeInfo(genericType->GetGenericArgument(1));
+										}
+										else
+										{
+											manager->errors.Add(WfErrors::IndexOperatorOnWrongType(node, containerType.Obj()));
+										}
+									}
+									else
+									{
+										if (genericType->GetTypeDescriptor() == description::GetTypeDescriptor<IValueReadonlyList>())
+										{
+											indexType = TypeInfoRetriver<vint>::CreateTypeInfo();
+											resultType = TypeInfoRetriver<Value>::CreateTypeInfo();
+										}
+										else if (genericType->GetTypeDescriptor() == description::GetTypeDescriptor<IValueList>())
+										{
+											indexType = TypeInfoRetriver<vint>::CreateTypeInfo();
+											resultType = TypeInfoRetriver<Value>::CreateTypeInfo();
+										}
+										else if (genericType->GetTypeDescriptor() == description::GetTypeDescriptor<IValueReadonlyDictionary>())
+										{
+											indexType = TypeInfoRetriver<Value>::CreateTypeInfo();
+											resultType = TypeInfoRetriver<Value>::CreateTypeInfo();
+										}
+										else if (genericType->GetTypeDescriptor() == description::GetTypeDescriptor<IValueDictionary>())
+										{
+											indexType = TypeInfoRetriver<Value>::CreateTypeInfo();
+											resultType = TypeInfoRetriver<Value>::CreateTypeInfo();
+										}
+										else
+										{
+											manager->errors.Add(WfErrors::IndexOperatorOnWrongType(node, containerType.Obj()));
+										}
+									}
+
+									GetExpressionType(manager, node->second, indexType);
+									if (resultType)
+									{
+										results.Add(ResolveExpressionResult(resultType));
+									}
+								}
+							default:
+								manager->errors.Add(WfErrors::IndexOperatorOnWrongType(node, containerType.Obj()));
+							}
+						}
+
+						Ptr<ITypeInfo> secondType = GetExpressionType(manager, node->second, 0);
+					}
+					else if (node->op == WfBinaryOperator::Concat)
+					{
+						Ptr<ITypeInfo> stringType = TypeInfoRetriver<WString>::CreateTypeInfo();
+						GetExpressionType(manager, node->first, stringType);
+						GetExpressionType(manager, node->second, stringType);
+						results.Add(ResolveExpressionResult(stringType));
+					}
+					else if (node->op == WfBinaryOperator::FailedThen)
+					{
+						Ptr<ITypeInfo> firstType = GetExpressionType(manager, node->first, 0);
+						GetExpressionType(manager, node->second, firstType);
+						if (firstType)
+						{
+							results.Add(ResolveExpressionResult(firstType));
+						}
 					}
 					else
 					{
+						Ptr<ITypeInfo> firstType = GetExpressionType(manager, node->first, 0);
+						Ptr<ITypeInfo> secondType = GetExpressionType(manager, node->second, 0);
 						Ptr<ITypeInfo> elementType;
 						if (firstType && secondType)
 						{
@@ -497,29 +599,143 @@ ValidateSemantic(Expression)
 						if (elementType)
 						{
 							TypeFlag flag = GetTypeFlag(elementType.Obj());
+							TypeFlag* selectedTable = 0;
 							switch (node->op)
 							{
-							case WfBinaryOperator::Index:
 							case WfBinaryOperator::Exp:
 							case WfBinaryOperator::Add:
 							case WfBinaryOperator::Sub:
 							case WfBinaryOperator::Mul:
 							case WfBinaryOperator::Div:
-							case WfBinaryOperator::Concat:
+								{
+									static TypeFlag conversionTable[(vint)TypeFlag::Count] = {
+										/*Bool		*/TypeFlag::Unknown,
+										/*I1		*/TypeFlag::I,
+										/*I2		*/TypeFlag::I,
+										/*I4		*/TypeFlag::I,
+										/*I8		*/TypeFlag::I8,
+										/*U1		*/TypeFlag::U,
+										/*U2		*/TypeFlag::U,
+										/*U4		*/TypeFlag::U,
+										/*U8		*/TypeFlag::U8,
+										/*F4		*/TypeFlag::F4,
+										/*F8		*/TypeFlag::F8,
+										/*String	*/TypeFlag::Unknown,
+										/*Others	*/TypeFlag::Unknown,
+									};
+									selectedTable = conversionTable;
+								}
+								break;
 							case WfBinaryOperator::Shl:
 							case WfBinaryOperator::Shr:
+								{
+									static TypeFlag conversionTable[(vint)TypeFlag::Count] = {
+										/*Bool		*/TypeFlag::Unknown,
+										/*I1		*/TypeFlag::I,
+										/*I2		*/TypeFlag::I,
+										/*I4		*/TypeFlag::I,
+										/*I8		*/TypeFlag::I8,
+										/*U1		*/TypeFlag::U,
+										/*U2		*/TypeFlag::U,
+										/*U4		*/TypeFlag::U,
+										/*U8		*/TypeFlag::U8,
+										/*F4		*/TypeFlag::Unknown,
+										/*F8		*/TypeFlag::Unknown,
+										/*String	*/TypeFlag::Unknown,
+										/*Others	*/TypeFlag::Unknown,
+									};
+									selectedTable = conversionTable;
+								}
+								break;
 							case WfBinaryOperator::LT:
 							case WfBinaryOperator::GT:
 							case WfBinaryOperator::LE:
 							case WfBinaryOperator::GE:
+								{
+									static TypeFlag conversionTable[(vint)TypeFlag::Count] = {
+										/*Bool		*/TypeFlag::Unknown,
+										/*I1		*/TypeFlag::Bool,
+										/*I2		*/TypeFlag::Bool,
+										/*I4		*/TypeFlag::Bool,
+										/*I8		*/TypeFlag::Bool,
+										/*U1		*/TypeFlag::Bool,
+										/*U2		*/TypeFlag::Bool,
+										/*U4		*/TypeFlag::Bool,
+										/*U8		*/TypeFlag::Bool,
+										/*F4		*/TypeFlag::Bool,
+										/*F8		*/TypeFlag::Bool,
+										/*String	*/TypeFlag::Bool,
+										/*Others	*/TypeFlag::Unknown,
+									};
+									selectedTable = conversionTable;
+								}
+								break;
 							case WfBinaryOperator::EQ:
 							case WfBinaryOperator::NE:
+								{
+									switch (firstType->GetDecorator())
+									{
+									case ITypeInfo::RawPtr:
+									case ITypeInfo::SharedPtr:
+										switch (secondType->GetDecorator())
+										{
+										case ITypeInfo::RawPtr:
+										case ITypeInfo::SharedPtr:
+											results.Add(ResolveExpressionResult(TypeInfoRetriver<bool>::CreateTypeInfo()));
+											return;
+										}
+									}
+
+									static TypeFlag conversionTable[(vint)TypeFlag::Count] = {
+										/*Bool		*/TypeFlag::Unknown,
+										/*I1		*/TypeFlag::Bool,
+										/*I2		*/TypeFlag::Bool,
+										/*I4		*/TypeFlag::Bool,
+										/*I8		*/TypeFlag::Bool,
+										/*U1		*/TypeFlag::Bool,
+										/*U2		*/TypeFlag::Bool,
+										/*U4		*/TypeFlag::Bool,
+										/*U8		*/TypeFlag::Bool,
+										/*F4		*/TypeFlag::Bool,
+										/*F8		*/TypeFlag::Bool,
+										/*String	*/TypeFlag::Bool,
+										/*Others	*/TypeFlag::Unknown,
+									};
+									selectedTable = conversionTable;
+								}
+								break;
 							case WfBinaryOperator::Xor:
 							case WfBinaryOperator::And:
 							case WfBinaryOperator::Or:
-							case WfBinaryOperator::Not:
-							case WfBinaryOperator::FailedThen:
-								;
+								{
+									static TypeFlag conversionTable[(vint)TypeFlag::Count] = {
+										/*Bool		*/TypeFlag::Bool,
+										/*I1		*/TypeFlag::Unknown,
+										/*I2		*/TypeFlag::Unknown,
+										/*I4		*/TypeFlag::Unknown,
+										/*I8		*/TypeFlag::Unknown,
+										/*U1		*/TypeFlag::Unknown,
+										/*U2		*/TypeFlag::Unknown,
+										/*U4		*/TypeFlag::Unknown,
+										/*U8		*/TypeFlag::Unknown,
+										/*F4		*/TypeFlag::Unknown,
+										/*F8		*/TypeFlag::Unknown,
+										/*String	*/TypeFlag::Unknown,
+										/*Others	*/TypeFlag::Unknown,
+									};
+									selectedTable = conversionTable;
+								}
+								break;
+							}
+
+							TypeFlag resultFlag = selectedTable[(vint)flag];
+							if (resultFlag == TypeFlag::Unknown)
+							{
+								manager->errors.Add(WfErrors::BinaryOperatorOnWrongType(node, elementType.Obj()));
+							}
+							else
+							{
+								results.Add(ResolveExpressionResult(CreateTypeInfoFromTypeFlag(resultFlag)));
 							}
 						}
 					}
