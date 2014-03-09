@@ -513,6 +513,22 @@ ValidateSemantic(Expression)
 
 					if (elementType)
 					{
+						TypeFlag flag = GetTypeFlag(elementType.Obj());
+						switch (flag)
+						{
+						case TypeFlag::I1:
+						case TypeFlag::I2:
+						case TypeFlag::I4:
+						case TypeFlag::I8:
+						case TypeFlag::U1:
+						case TypeFlag::U2:
+						case TypeFlag::U4:
+						case TypeFlag::U8:
+							;
+						default:
+							manager->errors.Add(WfErrors::RangeShouldBeInteger(node, elementType.Obj()));
+						}
+
 						Ptr<TypeInfoImpl> enumerableType = new TypeInfoImpl(ITypeInfo::TypeDescriptor);
 						enumerableType->SetTypeDescriptor(description::GetTypeDescriptor<IValueEnumerable>());
 
