@@ -507,13 +507,15 @@ namespace vl
 
 		enum class WfBinaryOperator
 		{
+			Assign,
 			Index,
+			Concat,
+			FailedThen,
 			Exp,
 			Add,
 			Sub,
 			Mul,
 			Div,
-			Concat,
 			Shl,
 			Shr,
 			LT,
@@ -525,9 +527,6 @@ namespace vl
 			Xor,
 			And,
 			Or,
-			Not,
-			FailedThen,
-			Assign,
 		};
 
 		class WfBinaryExpression : public WfExpression, vl::reflection::Description<WfBinaryExpression>

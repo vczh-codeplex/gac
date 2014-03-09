@@ -172,13 +172,15 @@ L"\r\n"L"}"
 L"\r\n"L""
 L"\r\n"L"enum BinaryOperator"
 L"\r\n"L"{"
+L"\r\n"L"\tAssign,"
 L"\r\n"L"\tIndex,"
+L"\r\n"L"\tConcat,"
+L"\r\n"L"\tFailedThen,"
 L"\r\n"L"\tExp,"
 L"\r\n"L"\tAdd,"
 L"\r\n"L"\tSub,"
 L"\r\n"L"\tMul,"
 L"\r\n"L"\tDiv,"
-L"\r\n"L"\tConcat,"
 L"\r\n"L"\tShl,"
 L"\r\n"L"\tShr,"
 L"\r\n"L"\tLT,"
@@ -190,9 +192,6 @@ L"\r\n"L"\tNE,"
 L"\r\n"L"\tXor,"
 L"\r\n"L"\tAnd,"
 L"\r\n"L"\tOr,"
-L"\r\n"L"\tNot,"
-L"\r\n"L"\tFailedThen,"
-L"\r\n"L"\tAssign,"
 L"\r\n"L"}"
 L"\r\n"L""
 L"\r\n"L"class BinaryExpression : Expression"
@@ -929,13 +928,15 @@ Parsing Tree Conversion Driver Implementation
 				vl::Ptr<vl::parsing::ParsingTreeToken> token=node.Cast<vl::parsing::ParsingTreeToken>();
 				if(token)
 				{
-					if(token->GetValue()==L"Index") { member=WfBinaryOperator::Index; return true; }
+					if(token->GetValue()==L"Assign") { member=WfBinaryOperator::Assign; return true; }
+					else if(token->GetValue()==L"Index") { member=WfBinaryOperator::Index; return true; }
+					else if(token->GetValue()==L"Concat") { member=WfBinaryOperator::Concat; return true; }
+					else if(token->GetValue()==L"FailedThen") { member=WfBinaryOperator::FailedThen; return true; }
 					else if(token->GetValue()==L"Exp") { member=WfBinaryOperator::Exp; return true; }
 					else if(token->GetValue()==L"Add") { member=WfBinaryOperator::Add; return true; }
 					else if(token->GetValue()==L"Sub") { member=WfBinaryOperator::Sub; return true; }
 					else if(token->GetValue()==L"Mul") { member=WfBinaryOperator::Mul; return true; }
 					else if(token->GetValue()==L"Div") { member=WfBinaryOperator::Div; return true; }
-					else if(token->GetValue()==L"Concat") { member=WfBinaryOperator::Concat; return true; }
 					else if(token->GetValue()==L"Shl") { member=WfBinaryOperator::Shl; return true; }
 					else if(token->GetValue()==L"Shr") { member=WfBinaryOperator::Shr; return true; }
 					else if(token->GetValue()==L"LT") { member=WfBinaryOperator::LT; return true; }
@@ -947,12 +948,9 @@ Parsing Tree Conversion Driver Implementation
 					else if(token->GetValue()==L"Xor") { member=WfBinaryOperator::Xor; return true; }
 					else if(token->GetValue()==L"And") { member=WfBinaryOperator::And; return true; }
 					else if(token->GetValue()==L"Or") { member=WfBinaryOperator::Or; return true; }
-					else if(token->GetValue()==L"Not") { member=WfBinaryOperator::Not; return true; }
-					else if(token->GetValue()==L"FailedThen") { member=WfBinaryOperator::FailedThen; return true; }
-					else if(token->GetValue()==L"Assign") { member=WfBinaryOperator::Assign; return true; }
-					else { member=WfBinaryOperator::Index; return false; }
+					else { member=WfBinaryOperator::Assign; return false; }
 				}
-				member=WfBinaryOperator::Index;
+				member=WfBinaryOperator::Assign;
 				return false;
 			}
 
@@ -3181,13 +3179,15 @@ namespace vl
 
 			BEGIN_ENUM_ITEM(WfBinaryOperator)
 				ENUM_ITEM_NAMESPACE(WfBinaryOperator)
+				ENUM_NAMESPACE_ITEM(Assign)
 				ENUM_NAMESPACE_ITEM(Index)
+				ENUM_NAMESPACE_ITEM(Concat)
+				ENUM_NAMESPACE_ITEM(FailedThen)
 				ENUM_NAMESPACE_ITEM(Exp)
 				ENUM_NAMESPACE_ITEM(Add)
 				ENUM_NAMESPACE_ITEM(Sub)
 				ENUM_NAMESPACE_ITEM(Mul)
 				ENUM_NAMESPACE_ITEM(Div)
-				ENUM_NAMESPACE_ITEM(Concat)
 				ENUM_NAMESPACE_ITEM(Shl)
 				ENUM_NAMESPACE_ITEM(Shr)
 				ENUM_NAMESPACE_ITEM(LT)
@@ -3199,9 +3199,6 @@ namespace vl
 				ENUM_NAMESPACE_ITEM(Xor)
 				ENUM_NAMESPACE_ITEM(And)
 				ENUM_NAMESPACE_ITEM(Or)
-				ENUM_NAMESPACE_ITEM(Not)
-				ENUM_NAMESPACE_ITEM(FailedThen)
-				ENUM_NAMESPACE_ITEM(Assign)
 			END_ENUM_ITEM(WfBinaryOperator)
 
 			BEGIN_CLASS_MEMBER(WfBinaryExpression)

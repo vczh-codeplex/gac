@@ -173,13 +173,15 @@ class UnaryExpression : Expression
 
 enum BinaryOperator
 {
+	Assign,
 	Index,
+	Concat,
+	FailedThen,
 	Exp,
 	Add,
 	Sub,
 	Mul,
 	Div,
-	Concat,
 	Shl,
 	Shr,
 	LT,
@@ -191,9 +193,6 @@ enum BinaryOperator
 	Xor,
 	And,
 	Or,
-	Not,
-	FailedThen,
-	Assign,
 }
 
 class BinaryExpression : Expression
