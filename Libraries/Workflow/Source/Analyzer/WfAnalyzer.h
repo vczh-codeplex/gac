@@ -129,6 +129,26 @@ Scope Manager
 Helper Functions
 ***********************************************************************/
 
+			enum class TypeFlag
+			{
+				Bool,
+				I1,
+				I2,
+				I4,
+				I8,
+				U1,
+				U2,
+				U4,
+				U8,
+				F4,
+				F8,
+				String,
+				Others,
+				Count,
+			};
+
+			extern TypeFlag									GetTypeFlag(reflection::description::ITypeDescriptor* typeDescriptor);
+			extern TypeFlag									GetTypeFlag(reflection::description::ITypeInfo* typeInfo);
 			extern Ptr<WfType>								GetTypeFromTypeInfo(reflection::description::ITypeInfo* typeInfo);
 			extern Ptr<WfLexicalScopeName>					GetScopeNameFromReferenceType(WfLexicalScope* scope, Ptr<WfType> type);
 			extern Ptr<reflection::description::ITypeInfo>	CreateTypeInfoFromType(WfLexicalScope* scope, Ptr<WfType> type);
