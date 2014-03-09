@@ -238,6 +238,8 @@ Error Messages
 				static Ptr<parsing::ParsingError>			IntegerLiteralOutOfRange(WfIntegerExpression* node);
 				static Ptr<parsing::ParsingError>			CannotMergeTwoType(WfExpression* node, reflection::description::ITypeInfo* firstType, reflection::description::ITypeInfo* secondType);
 				static Ptr<parsing::ParsingError>			RangeShouldBeInteger(WfExpression* node, reflection::description::ITypeInfo* type);
+				static Ptr<parsing::ParsingError>			UnaryOperatorOnWrongType(WfUnaryExpression* node, reflection::description::ITypeInfo* type);
+				static Ptr<parsing::ParsingError>			BinaryOperatorOnWrongType(WfUnaryExpression* node, reflection::description::ITypeInfo* type);
 
 				// B: Type error
 				static Ptr<parsing::ParsingError>			WrongVoidType(WfType* node);

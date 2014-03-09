@@ -422,10 +422,107 @@ ValidateSemantic(Expression)
 
 				void Visit(WfUnaryExpression* node)override
 				{
+					Ptr<ITypeInfo> typeInfo = GetExpressionType(manager, node->operand, expectedType);
+					if (typeInfo)
+					{
+						TypeFlag flag = GetTypeFlag(typeInfo.Obj());
+						switch (node->op)
+						{
+						case WfUnaryOperator::Not:
+							if (flag != TypeFlag::Bool)
+							{
+								manager->errors.Add(WfErrors::UnaryOperatorOnWrongType(node, typeInfo.Obj()));
+							}
+							break;
+						case WfUnaryOperator::Positive:
+							switch (flag)
+							{
+							case TypeFlag::Bool:
+							case TypeFlag::String:
+							case TypeFlag::Others:
+								manager->errors.Add(WfErrors::UnaryOperatorOnWrongType(node, typeInfo.Obj()));
+								break;
+							}
+							break;
+						case WfUnaryOperator::Negative:
+							switch (flag)
+							{
+							case TypeFlag::Bool:
+							case TypeFlag::U1:
+							case TypeFlag::U2:
+							case TypeFlag::U4:
+							case TypeFlag::U8:
+							case TypeFlag::String:
+							case TypeFlag::Others:
+								manager->errors.Add(WfErrors::UnaryOperatorOnWrongType(node, typeInfo.Obj()));
+								break;
+							}
+							break;
+						}
+
+						results.Add(ResolveExpressionResult(typeInfo));
+					}
 				}
 
 				void Visit(WfBinaryExpression* node)override
 				{
+					Ptr<ITypeInfo> firstType = GetExpressionType(manager, node->first, expectedType);
+					Ptr<ITypeInfo> secondType = GetExpressionType(manager, node->second, expectedType);
+
+					if (node->op == WfBinaryOperator::Assign)
+					{
+					}
+					else if (node->op == WfBinaryOperator::Index)
+					{
+					}
+					else
+					{
+						Ptr<ITypeInfo> elementType;
+						if (firstType && secondType)
+						{
+							if (CanConvertToType(secondType.Obj(), firstType.Obj(), false))
+							{
+								elementType = firstType;
+							}
+							else if (CanConvertToType(firstType.Obj(), secondType.Obj(), false))
+							{
+								elementType = secondType;
+							}
+							else
+							{
+								manager->errors.Add(WfErrors::CannotMergeTwoType(node, firstType.Obj(), secondType.Obj()));
+							}
+						}
+
+						if (elementType)
+						{
+							TypeFlag flag = GetTypeFlag(elementType.Obj());
+							switch (node->op)
+							{
+							case WfBinaryOperator::Index:
+							case WfBinaryOperator::Exp:
+							case WfBinaryOperator::Add:
+							case WfBinaryOperator::Sub:
+							case WfBinaryOperator::Mul:
+							case WfBinaryOperator::Div:
+							case WfBinaryOperator::Concat:
+							case WfBinaryOperator::Shl:
+							case WfBinaryOperator::Shr:
+							case WfBinaryOperator::LT:
+							case WfBinaryOperator::GT:
+							case WfBinaryOperator::LE:
+							case WfBinaryOperator::GE:
+							case WfBinaryOperator::EQ:
+							case WfBinaryOperator::NE:
+							case WfBinaryOperator::Xor:
+							case WfBinaryOperator::And:
+							case WfBinaryOperator::Or:
+							case WfBinaryOperator::Not:
+							case WfBinaryOperator::FailedThen:
+								;
+							}
+						}
+					}
 				}
 
 				void Visit(WfLetExpression* node)override
