@@ -11,6 +11,33 @@ namespace vl
 			using namespace reflection::description;
 
 /***********************************************************************
+GetTypeFlag
+***********************************************************************/
+
+			TypeFlag GetTypeFlag(reflection::description::ITypeDescriptor* typeDescriptor)
+			{
+				if (typeDescriptor == GetTypeDescriptor<bool>())		return TypeFlag::Bool;
+				if (typeDescriptor == GetTypeDescriptor<vint8_t>())		return TypeFlag::I1;
+				if (typeDescriptor == GetTypeDescriptor<vint16_t>())	return TypeFlag::I2;
+				if (typeDescriptor == GetTypeDescriptor<vint32_t>())	return TypeFlag::I4;
+				if (typeDescriptor == GetTypeDescriptor<vint64_t>())	return TypeFlag::I8;
+				if (typeDescriptor == GetTypeDescriptor<vuint8_t>())	return TypeFlag::U1;
+				if (typeDescriptor == GetTypeDescriptor<vuint16_t>())	return TypeFlag::U2;
+				if (typeDescriptor == GetTypeDescriptor<vuint32_t>())	return TypeFlag::U4;
+				if (typeDescriptor == GetTypeDescriptor<vuint64_t>())	return TypeFlag::U8;
+				if (typeDescriptor == GetTypeDescriptor<float>())		return TypeFlag::F4;
+				if (typeDescriptor == GetTypeDescriptor<double>())		return TypeFlag::F8;
+				if (typeDescriptor == GetTypeDescriptor<WString>())		return TypeFlag::String;
+				return TypeFlag::Others;
+			}
+
+			TypeFlag GetTypeFlag(reflection::description::ITypeInfo* typeInfo)
+			{
+				ITypeDescriptor* td = typeInfo->GetTypeDescriptor();
+				return GetTypeFlag(td);
+			}
+
+/***********************************************************************
 GetTypeFromTypeInfo
 ***********************************************************************/
 
@@ -811,12 +838,30 @@ CanConvertToType
 
 							if (fromTd->GetValueSerializer())
 							{
-								if (fromTd == toTd)
-								{
-									return true;
-								}
-								ITypeDescriptor* stringType = GetTypeDescriptor<WString>();
-								return (explicitly && fromTd == stringType) || toTd == stringType;
+								if (fromTd == toTd) return true;
+								TypeFlag fromFlag = GetTypeFlag(fromTd);
+								TypeFlag toFlag = GetTypeFlag(toTd);
+								static vint conversionTable[(vint)TypeFlag::Count][(vint)TypeFlag::Count] = {
+									/*Bool		*/{1, /**/ 0, 0, 0, 0, /**/ 0, 0, 0, 0, /**/ 0, 0, /**/ 1, 0},
+									//-------------------------------------------------------------------------
+									/*I1		*/{0, /**/ 1, 1, 1, 1, /**/ 2, 2, 2, 2, /**/ 1, 1, /**/ 1, 0},
+									/*I2		*/{0, /**/ 2, 1, 1, 1, /**/ 2, 2, 2, 2, /**/ 1, 1, /**/ 1, 0},
+									/*I4		*/{0, /**/ 2, 2, 1, 1, /**/ 2, 2, 2, 2, /**/ 2, 1, /**/ 1, 0},
+									/*I8		*/{0, /**/ 2, 2, 2, 1, /**/ 2, 2, 2, 2, /**/ 2, 1, /**/ 1, 0},
+									//-------------------------------------------------------------------------
+									/*U1		*/{0, /**/ 2, 2, 2, 2, /**/ 1, 1, 1, 1, /**/ 1, 1, /**/ 1, 0},
+									/*U2		*/{0, /**/ 2, 2, 2, 2, /**/ 2, 1, 1, 1, /**/ 1, 1, /**/ 1, 0},
+									/*U4		*/{0, /**/ 2, 2, 2, 2, /**/ 2, 2, 1, 1, /**/ 2, 1, /**/ 1, 0},
+									/*U8		*/{0, /**/ 2, 2, 2, 2, /**/ 2, 2, 2, 1, /**/ 2, 1, /**/ 1, 0},
+									//-------------------------------------------------------------------------
+									/*F4		*/{0, /**/ 2, 2, 2, 2, /**/ 2, 2, 2, 2, /**/ 1, 1, /**/ 1, 0},
+									/*F8		*/{0, /**/ 2, 2, 2, 2, /**/ 2, 2, 2, 2, /**/ 0, 1, /**/ 1, 0},
+									//-------------------------------------------------------------------------
+									/*String	*/{2, /**/ 2, 2, 2, 2, /**/ 2, 2, 2, 2, /**/ 2, 2, /**/ 1, 2},
+									/*Others	*/{0, /**/ 0, 0, 0, 0, /**/ 0, 0, 0, 0, /**/ 0, 0, /**/ 1, 0},
+								};
+								vint conversion = conversionTable[(vint)fromFlag][(vint)toFlag];
+								return conversion == 1 || (explicitly && conversion == 2);
 							}
 							else
 							{

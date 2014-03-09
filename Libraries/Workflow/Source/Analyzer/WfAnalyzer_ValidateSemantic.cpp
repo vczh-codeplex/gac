@@ -231,6 +231,7 @@ IsExpressionDependOnExpectedType(Expression)
 
 				void Visit(WfConstructorExpression* node)override
 				{
+					result = node->arguments.Count() == 0;
 				}
 
 				void Visit(WfInferExpression* node)override
