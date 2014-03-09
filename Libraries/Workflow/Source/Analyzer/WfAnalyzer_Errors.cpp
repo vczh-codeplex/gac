@@ -118,6 +118,11 @@ WfErrors
 				return new ParsingError(node, L"A14: Failed to merge type \"" + firstType->GetTypeFriendlyName() + L"\" with type \"" + secondType->GetTypeFriendlyName() + L"\" together to calculate the result type.");
 			}
 
+			Ptr<parsing::ParsingError> WfErrors::RangeShouldBeInteger(WfExpression* node, reflection::description::ITypeInfo* type)
+			{
+				return new ParsingError(node, L"A15: Elements in a range expression should be integer, not L\"" + type->GetTypeFriendlyName() + L"\".");
+			}
+
 			Ptr<parsing::ParsingError> WfErrors::WrongVoidType(WfType* node)
 			{
 				return new ParsingError(node, L"B0: Void is not a type for a value.");
