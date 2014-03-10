@@ -682,7 +682,11 @@ rule Expression Exp0
 		((")" with {endBoundary = "Exclusive"}) | ("]" with {endBoundary = "Inclusive"}))
 		as RangeExpression
 	= "{" {CtorFragment : arguments} "}" as ConstructorExpression
-	= "new" WorkflowType : type ("(" [WorkflowExpression : arguments {"," WorkflowExpression : arguments}] ")" | "{" {Function : functions} "}") as NewTypeExpression
+	= "new" WorkflowType : type
+		(
+			"(" [WorkflowExpression : arguments {"," WorkflowExpression : arguments}] ")" 
+			| "{" {Function : functions} "}"
+		) as NewTypeExpression
 	= "bind" "(" WorkflowExpression : expression ")" as BindExpression
 	= Exp0 : parent "." "observe" "(" WorkflowExpression : expression ["on" WorkflowExpression : events {"," WorkflowExpression : events}]")" as ObserveExpression with {observeType = "SimpleObserve"}
 	= Exp0 : parent "." "observe" "as" NAME : name "(" WorkflowExpression : expression ["on" WorkflowExpression : events {"," WorkflowExpression : events}]")" as ObserveExpression with {observeType = "ExtendedObserve"}
