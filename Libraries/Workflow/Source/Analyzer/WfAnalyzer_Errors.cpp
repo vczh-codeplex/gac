@@ -170,7 +170,7 @@ WfErrors
 
 			Ptr<parsing::ParsingError> WfErrors::FunctionArgumentTypeMismatched(WfExpression* node, vint index, reflection::description::ITypeInfo* fromType, reflection::description::ITypeInfo* toType)
 			{
-				return new ParsingError(node, L"A21: The " + itow(index) = L"-th argument of type \"" + fromType->GetTypeFriendlyName() + L"\" cannot implicitly convert to \"" + toType->GetTypeFriendlyName() + L"\".");
+				return new ParsingError(node, L"A21: The " + itow(index) + L"-th argument of type \"" + fromType->GetTypeFriendlyName() + L"\" cannot implicitly convert to \"" + toType->GetTypeFriendlyName() + L"\".");
 			}
 
 			Ptr<parsing::ParsingError> WfErrors::CannotPickOverloadedFunctions(WfExpression* node, collections::List<ResolveExpressionResult>& results)
