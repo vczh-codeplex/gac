@@ -464,78 +464,76 @@ ValidateSemantic(Expression)
 						Ptr<ITypeInfo> containerType = GetExpressionType(manager, node->first, 0);
 						if (containerType)
 						{
-							switch (containerType->GetDecorator())
+							if (containerType->GetDecorator() == ITypeInfo::SharedPtr)
 							{
-							case ITypeInfo::RawPtr:
-							case ITypeInfo::SharedPtr:
-								{
-									ITypeInfo* genericType = containerType->GetElementType();
-									Ptr<ITypeInfo> indexType;
-									Ptr<ITypeInfo> resultType;
+								ITypeInfo* genericType = containerType->GetElementType();
+								Ptr<ITypeInfo> indexType;
+								Ptr<ITypeInfo> resultType;
 
-									if (genericType->GetDecorator() == ITypeInfo::Generic)
+								if (genericType->GetDecorator() == ITypeInfo::Generic)
+								{
+									ITypeInfo* classType = genericType->GetElementType();
+									if (classType->GetTypeDescriptor() == description::GetTypeDescriptor<IValueReadonlyList>())
 									{
-										ITypeInfo* classType = genericType->GetElementType();
-										if (classType->GetTypeDescriptor() == description::GetTypeDescriptor<IValueReadonlyList>())
-										{
-											indexType = TypeInfoRetriver<vint>::CreateTypeInfo();
-											resultType = CopyTypeInfo(genericType->GetGenericArgument(0));
-										}
-										else if (classType->GetTypeDescriptor() == description::GetTypeDescriptor<IValueList>())
-										{
-											indexType = TypeInfoRetriver<vint>::CreateTypeInfo();
-											resultType = CopyTypeInfo(genericType->GetGenericArgument(0));
-										}
-										else if (classType->GetTypeDescriptor() == description::GetTypeDescriptor<IValueReadonlyDictionary>())
-										{
-											indexType = CopyTypeInfo(genericType->GetGenericArgument(0));
-											resultType = CopyTypeInfo(genericType->GetGenericArgument(1));
-										}
-										else if (classType->GetTypeDescriptor() == description::GetTypeDescriptor<IValueDictionary>())
-										{
-											indexType = CopyTypeInfo(genericType->GetGenericArgument(0));
-											resultType = CopyTypeInfo(genericType->GetGenericArgument(1));
-										}
-										else
-										{
-											manager->errors.Add(WfErrors::IndexOperatorOnWrongType(node, containerType.Obj()));
-										}
+										indexType = TypeInfoRetriver<vint>::CreateTypeInfo();
+										resultType = CopyTypeInfo(genericType->GetGenericArgument(0));
+									}
+									else if (classType->GetTypeDescriptor() == description::GetTypeDescriptor<IValueList>())
+									{
+										indexType = TypeInfoRetriver<vint>::CreateTypeInfo();
+										resultType = CopyTypeInfo(genericType->GetGenericArgument(0));
+									}
+									else if (classType->GetTypeDescriptor() == description::GetTypeDescriptor<IValueReadonlyDictionary>())
+									{
+										indexType = CopyTypeInfo(genericType->GetGenericArgument(0));
+										resultType = CopyTypeInfo(genericType->GetGenericArgument(1));
+									}
+									else if (classType->GetTypeDescriptor() == description::GetTypeDescriptor<IValueDictionary>())
+									{
+										indexType = CopyTypeInfo(genericType->GetGenericArgument(0));
+										resultType = CopyTypeInfo(genericType->GetGenericArgument(1));
 									}
 									else
 									{
-										if (genericType->GetTypeDescriptor() == description::GetTypeDescriptor<IValueReadonlyList>())
-										{
-											indexType = TypeInfoRetriver<vint>::CreateTypeInfo();
-											resultType = TypeInfoRetriver<Value>::CreateTypeInfo();
-										}
-										else if (genericType->GetTypeDescriptor() == description::GetTypeDescriptor<IValueList>())
-										{
-											indexType = TypeInfoRetriver<vint>::CreateTypeInfo();
-											resultType = TypeInfoRetriver<Value>::CreateTypeInfo();
-										}
-										else if (genericType->GetTypeDescriptor() == description::GetTypeDescriptor<IValueReadonlyDictionary>())
-										{
-											indexType = TypeInfoRetriver<Value>::CreateTypeInfo();
-											resultType = TypeInfoRetriver<Value>::CreateTypeInfo();
-										}
-										else if (genericType->GetTypeDescriptor() == description::GetTypeDescriptor<IValueDictionary>())
-										{
-											indexType = TypeInfoRetriver<Value>::CreateTypeInfo();
-											resultType = TypeInfoRetriver<Value>::CreateTypeInfo();
-										}
-										else
-										{
-											manager->errors.Add(WfErrors::IndexOperatorOnWrongType(node, containerType.Obj()));
-										}
-									}
-
-									GetExpressionType(manager, node->second, indexType);
-									if (resultType)
-									{
-										results.Add(ResolveExpressionResult(resultType));
+										manager->errors.Add(WfErrors::IndexOperatorOnWrongType(node, containerType.Obj()));
 									}
 								}
-							default:
+								else
+								{
+									if (genericType->GetTypeDescriptor() == description::GetTypeDescriptor<IValueReadonlyList>())
+									{
+										indexType = TypeInfoRetriver<vint>::CreateTypeInfo();
+										resultType = TypeInfoRetriver<Value>::CreateTypeInfo();
+									}
+									else if (genericType->GetTypeDescriptor() == description::GetTypeDescriptor<IValueList>())
+									{
+										indexType = TypeInfoRetriver<vint>::CreateTypeInfo();
+										resultType = TypeInfoRetriver<Value>::CreateTypeInfo();
+									}
+									else if (genericType->GetTypeDescriptor() == description::GetTypeDescriptor<IValueReadonlyDictionary>())
+									{
+										indexType = TypeInfoRetriver<Value>::CreateTypeInfo();
+										resultType = TypeInfoRetriver<Value>::CreateTypeInfo();
+									}
+									else if (genericType->GetTypeDescriptor() == description::GetTypeDescriptor<IValueDictionary>())
+									{
+										indexType = TypeInfoRetriver<Value>::CreateTypeInfo();
+										resultType = TypeInfoRetriver<Value>::CreateTypeInfo();
+									}
+									else
+									{
+										manager->errors.Add(WfErrors::IndexOperatorOnWrongType(node, containerType.Obj()));
+									}
+								}
+
+								GetExpressionType(manager, node->second, indexType);
+								if (resultType)
+								{
+									results.Add(ResolveExpressionResult(resultType));
+								}
+							}
+							else
+							{
 								manager->errors.Add(WfErrors::IndexOperatorOnWrongType(node, containerType.Obj()));
 							}
 						}
@@ -1164,39 +1162,36 @@ ValidateSemantic(Expression)
 					{
 						bool failed = false;
 						auto result = functions[i];
-						switch (result.type->GetDecorator())
+						if (result.type->GetDecorator() == ITypeInfo::SharedPtr)
 						{
-						case ITypeInfo::RawPtr:
-						case ITypeInfo::SharedPtr:
-							{
-								ITypeInfo* genericType = result.type->GetElementType();
-								if (genericType->GetDecorator() != ITypeInfo::Generic) goto FUNCTION_TYPE_FAILED;
-								ITypeInfo* functionType = genericType->GetElementType();
-								if (functionType->GetDecorator() != ITypeInfo::TypeDescriptor || functionType->GetTypeDescriptor() != functionFd) goto FUNCTION_TYPE_FAILED;
+							ITypeInfo* genericType = result.type->GetElementType();
+							if (genericType->GetDecorator() != ITypeInfo::Generic) goto FUNCTION_TYPE_FAILED;
+							ITypeInfo* functionType = genericType->GetElementType();
+							if (functionType->GetDecorator() != ITypeInfo::TypeDescriptor || functionType->GetTypeDescriptor() != functionFd) goto FUNCTION_TYPE_FAILED;
 								
-								if (genericType->GetGenericArgumentCount() != types.Count() + 1)
+							if (genericType->GetGenericArgumentCount() != types.Count() + 1)
+							{
+								functionErrors.Add(WfErrors::FunctionArgumentCountMismatched(node, result));
+								failed = true;
+							}
+							else
+							{
+								for (vint j = 0; j < types.Count(); j++)
 								{
-									functionErrors.Add(WfErrors::FunctionArgumentCountMismatched(node, result));
-									failed = true;
-								}
-								else
-								{
-									for (vint j = 0; j < types.Count(); j++)
+									if (resolvables[j] && types[j])
 									{
-										if (resolvables[j] && types[j])
+										ITypeInfo* argumentType = genericType->GetGenericArgument(j + 1);
+										if (!CanConvertToType(types[j].Obj(), argumentType, false))
 										{
-											ITypeInfo* argumentType = genericType->GetGenericArgument(j + 1);
-											if (!CanConvertToType(types[j].Obj(), argumentType, false))
-											{
-												functionErrors.Add(WfErrors::FunctionArgumentTypeMismatched(node, result, i + 1, types[j].Obj(), argumentType));
-												failed = true;
-											}
+											functionErrors.Add(WfErrors::FunctionArgumentTypeMismatched(node, result, i + 1, types[j].Obj(), argumentType));
+											failed = true;
 										}
 									}
 								}
 							}
-							break;
-						default:
+						}
+						else
+						{
 							goto FUNCTION_TYPE_FAILED;
 						}
 
@@ -1263,6 +1258,15 @@ ValidateSemantic(Expression)
 
 				void Visit(WfNewTypeExpression* node)override
 				{
+					auto scope = manager->expressionScopes[node].Obj();
+					Ptr<ITypeInfo> type = CreateTypeInfoFromType(scope, node->type);
+
+					if (node->functions.Count() == 0)
+					{
+					}
+					else
+					{
+					}
 				}
 
 				static void Execute(Ptr<WfExpression> expression, WfLexicalScopeManager* manager, Ptr<ITypeInfo> expectedType, List<ResolveExpressionResult>& results)
@@ -1487,18 +1491,13 @@ GetEnumerableExpressionItemType
 				{
 					if (collectionType->GetTypeDescriptor()->CanConvertTo(description::GetTypeDescriptor<IValueEnumerable>()))
 					{
-						switch (collectionType->GetDecorator())
+						if (collectionType->GetDecorator() == ITypeInfo::SharedPtr)
 						{
-						case ITypeInfo::RawPtr:
-						case ITypeInfo::SharedPtr:
+							ITypeInfo* genericType = collectionType->GetElementType();
+							if (genericType->GetDecorator() == ITypeInfo::Generic && genericType->GetGenericArgumentCount() == 1)
 							{
-								ITypeInfo* genericType = collectionType->GetElementType();
-								if (genericType->GetDecorator() == ITypeInfo::Generic && genericType->GetGenericArgumentCount() == 1)
-								{
-									return CopyTypeInfo(genericType->GetGenericArgument(0));
-								}
+								return CopyTypeInfo(genericType->GetGenericArgument(0));
 							}
-							break;
 						}
 						return TypeInfoRetriver<Value>::CreateTypeInfo();
 					}
