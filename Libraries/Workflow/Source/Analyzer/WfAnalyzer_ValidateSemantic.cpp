@@ -1080,6 +1080,28 @@ ValidateSemantic(Expression)
 					{
 						if (node->observeType == WfObserveType::SimpleObserve)
 						{
+							ITypeDescriptor* td = parentType->GetTypeDescriptor();
+							{
+								auto ref = node->expression.Cast<WfReferenceExpression>();
+								IPropertyInfo* info = td->GetPropertyByName(ref->name.value, true);
+								if (info)
+								{
+									observeeType = CopyTypeInfo(info->GetReturn());
+								}
+								else
+								{
+									manager->errors.Add(WfErrors::MemberNotExists(ref.Obj(), td, ref->name.value));
+								}
+							}
+							FOREACH(Ptr<WfExpression>, eventExpr, node->events)
+							{
+								auto ref = eventExpr.Cast<WfReferenceExpression>();
+								IEventInfo* info = td->GetEventByName(ref->name.value, true);
+								if (!info)
+								{
+									manager->errors.Add(WfErrors::MemberNotExists(ref.Obj(), td, ref->name.value));
+								}
+							}
 						}
 						else
 						{
