@@ -1068,6 +1068,8 @@ ValidateSemantic(Expression)
 
 				void Visit(WfBindExpression* node)override
 				{
+					GetExpressionType(manager, node->expression, 0);
+					results.Add(ResolveExpressionResult(TypeInfoRetriver<Ptr<IValueSubscription>>::CreateTypeInfo()));
 				}
 
 				void Visit(WfObserveExpression* node)override
