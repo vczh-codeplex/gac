@@ -87,6 +87,9 @@ A14_IncompatibleMap
 A15_RangeOfBoolean
 A17_IndexNotEnumerableObject
 A18_SetTestingInNotEnumerableObject
+A19_CallStruct
+A20_CallWrongArgumentCount
+A21_CallWrongArgument
 B0_VoidVariable
 B0_VoidArgument
 B0_VoidMapElement

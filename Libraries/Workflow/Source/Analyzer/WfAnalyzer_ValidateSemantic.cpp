@@ -1162,6 +1162,7 @@ ValidateSemantic(Expression)
 					ITypeDescriptor* functionFd = description::GetTypeDescriptor<IValueFunctionProxy>();
 					for (vint i = functions.Count() - 1; i >= 0; i--)
 					{
+						bool failed = false;
 						auto result = functions[i];
 						switch (result.type->GetDecorator())
 						{
@@ -1170,10 +1171,9 @@ ValidateSemantic(Expression)
 							{
 								ITypeInfo* genericType = result.type->GetElementType();
 								if (genericType->GetDecorator() != ITypeInfo::Generic) goto FUNCTION_TYPE_FAILED;
-								ITypeInfo* functionType = result.type->GetElementType();
+								ITypeInfo* functionType = genericType->GetElementType();
 								if (functionType->GetDecorator() != ITypeInfo::TypeDescriptor || functionType->GetTypeDescriptor() != functionFd) goto FUNCTION_TYPE_FAILED;
 								
-								bool failed = false;
 								if (genericType->GetGenericArgumentCount() != types.Count() + 1)
 								{
 									functionErrors.Add(WfErrors::FunctionArgumentCountMismatched(node, result.type.Obj()));
@@ -1194,11 +1194,6 @@ ValidateSemantic(Expression)
 										}
 									}
 								}
-
-								if (failed)
-								{
-									functions.RemoveAt(i);
-								}
 							}
 							break;
 						default:
@@ -1208,8 +1203,12 @@ ValidateSemantic(Expression)
 						goto FUNCTION_TYPE_FINISHED;
 					FUNCTION_TYPE_FAILED:
 						nonFunctionErrors.Add(WfErrors::ExpressionIsNotFunction(node->function.Obj(), result.type.Obj()));
+						failed = true;
 					FUNCTION_TYPE_FINISHED:
-						;
+						if (failed)
+						{
+							functions.RemoveAt(i);
+						}
 					}
 
 					if (functions.Count() > 1)
