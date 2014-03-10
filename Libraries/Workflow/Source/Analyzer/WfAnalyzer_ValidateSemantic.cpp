@@ -349,29 +349,12 @@ ValidateSemantic(Expression)
 						if (!expectedType)
 						{
 							manager->errors.Add(WfErrors::NullCannotResolveType(node));
-							return;
 						}
-
-						switch (expectedType->GetDecorator())
+						else if (!IsNullAcceptableType(expectedType.Obj()))
 						{
-						case ITypeInfo::RawPtr:
-						case ITypeInfo::SharedPtr:
-						case ITypeInfo::Nullable:
-							break;
-						case ITypeInfo::TypeDescriptor:
-							if (expectedType->GetTypeDescriptor() != description::GetTypeDescriptor<Value>())
-							{
-								goto NULL_FAILED;
-							}
-							break;
-						case ITypeInfo::Generic:
-							goto NULL_FAILED;
+							manager->errors.Add(WfErrors::NullCannotImplicitlyConvertToType(node, expectedType.Obj()));
 						}
 
-						goto NULL_FINISHED;
-					NULL_FAILED:
-						manager->errors.Add(WfErrors::NullCannotImplicitlyConvertToType(node, expectedType.Obj()));
-					NULL_FINISHED:
 						results.Add(ResolveExpressionResult(expectedType));
 					}
 					else
@@ -954,22 +937,9 @@ ValidateSemantic(Expression)
 						{
 						case WfTypeTesting::IsNull:
 						case WfTypeTesting::IsNotNull:
+							if (!IsNullAcceptableType(type.Obj()))
 							{
-								switch (expectedType->GetDecorator())
-								{
-								case ITypeInfo::RawPtr:
-								case ITypeInfo::SharedPtr:
-								case ITypeInfo::Nullable:
-									break;
-								case ITypeInfo::TypeDescriptor:
-									if (expectedType->GetTypeDescriptor() == description::GetTypeDescriptor<Value>())
-									{
-										break;
-									}
-								case ITypeInfo::Generic:
-									manager->errors.Add(WfErrors::NullCannotImplicitlyConvertToType(node->expression.Obj(), type.Obj()));
-									break;
-								}
+								manager->errors.Add(WfErrors::NullCannotImplicitlyConvertToType(node->expression.Obj(), type.Obj()));
 							}
 							break;
 						}
