@@ -1,6 +1,7 @@
 A0_WrongFormatStringSyntax
 A1_WrongSimpleObserveExpression
 A2_WrongSimpleObserveEvent
+A2_EmptyExtendedObserveEvent
 A3_ObserveNotInBind
 A4_BindInBind
 A5_ConstructorMixMapAndList

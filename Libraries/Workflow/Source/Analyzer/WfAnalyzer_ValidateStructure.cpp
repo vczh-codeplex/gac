@@ -718,6 +718,13 @@ ValidateStructure(Expression)
 							}
 						}
 					}
+					else
+					{
+						if (node->events.Count() == 0)
+						{
+							manager->errors.Add(WfErrors::EmptyExtendedObserveEvent(node));
+						}
+					}
 
 					ValidateExpressionStructure(manager, context, node->parent);
 					ValidateExpressionStructure(manager, context, node->expression);

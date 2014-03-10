@@ -359,6 +359,7 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\A17_IndexNotEnumerableObject.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A18_SetTestingInNotEnumerableObject.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A1_WrongSimpleObserveExpression.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A2_EmptyExtendedObserveEvent.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A2_WrongSimpleObserveEvent.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A3_ObserveNotInBind.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A4_BindInBind.txt" />
