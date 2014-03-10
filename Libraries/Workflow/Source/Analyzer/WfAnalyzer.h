@@ -213,6 +213,8 @@ Helper Functions
 				ResolveExpressionResult(reflection::description::IPropertyInfo* _propertyInfo, Ptr<reflection::description::ITypeInfo> _type);
 				ResolveExpressionResult(reflection::description::IMethodInfo* _methodInfo, Ptr<reflection::description::ITypeInfo> _type);
 				ResolveExpressionResult(reflection::description::IEventInfo* _eventInfo);
+
+				WString										GetFriendlyName();
 			};
 
 			extern void										ValidateExpressionSemantic(WfLexicalScopeManager* manager, Ptr<WfExpression> expression, Ptr<reflection::description::ITypeInfo> expectedType, collections::List<ResolveExpressionResult>& results);
@@ -259,6 +261,10 @@ Error Messages
 				static Ptr<parsing::ParsingError>			BinaryOperatorOnWrongType(WfBinaryExpression* node, reflection::description::ITypeInfo* type);
 				static Ptr<parsing::ParsingError>			IndexOperatorOnWrongType(WfBinaryExpression* node, reflection::description::ITypeInfo* containerType);
 				static Ptr<parsing::ParsingError>			ExpressionIsNotCollection(WfExpression* node, reflection::description::ITypeInfo* type);
+				static Ptr<parsing::ParsingError>			ExpressionIsNotFunction(WfExpression* node, reflection::description::ITypeInfo* type);
+				static Ptr<parsing::ParsingError>			FunctionArgumentCountMismatched(WfCallExpression* node, reflection::description::ITypeInfo* type);
+				static Ptr<parsing::ParsingError>			FunctionArgumentTypeMismatched(WfExpression* node, vint index, reflection::description::ITypeInfo* fromType, reflection::description::ITypeInfo* toType);
+				static Ptr<parsing::ParsingError>			CannotPickOverloadedFunctions(WfExpression* node, collections::List<ResolveExpressionResult>& results);
 
 				// B: Type error
 				static Ptr<parsing::ParsingError>			WrongVoidType(WfType* node);

@@ -158,6 +158,32 @@ WfErrors
 				return new ParsingError(node, L"A18: Expression of type \"" + type->GetTypeFriendlyName() + L"\" is not an enumerable type.");
 			}
 
+			Ptr<parsing::ParsingError> WfErrors::ExpressionIsNotFunction(WfExpression* node, reflection::description::ITypeInfo* type)
+			{
+				return new ParsingError(node, L"A19: Expression of type \"" + type->GetTypeFriendlyName() + L"\" is not an invokable function type.");
+			}
+
+			Ptr<parsing::ParsingError> WfErrors::FunctionArgumentCountMismatched(WfCallExpression* node, reflection::description::ITypeInfo* type)
+			{
+				return new ParsingError(node, L"A20: Function of type \"" + type->GetTypeFriendlyName() + L"\" is not allowed to call with " + itow(node->arguments.Count()) + L" arguments.");
+			}
+
+			Ptr<parsing::ParsingError> WfErrors::FunctionArgumentTypeMismatched(WfExpression* node, vint index, reflection::description::ITypeInfo* fromType, reflection::description::ITypeInfo* toType)
+			{
+				return new ParsingError(node, L"A21: The " + itow(index) = L"-th argument of type \"" + fromType->GetTypeFriendlyName() + L"\" cannot implicitly convert to \"" + toType->GetTypeFriendlyName() + L"\".");
+			}
+
+			Ptr<parsing::ParsingError> WfErrors::CannotPickOverloadedFunctions(WfExpression* node, collections::List<ResolveExpressionResult>& results)
+			{
+				WString description;
+				FOREACH_INDEXER(ResolveExpressionResult, result, index, results)
+				{
+					if (index) description += L"\r\n\t";
+					description += result.GetFriendlyName();
+				}
+				return new ParsingError(node, L"A22: Cannot decide which function to call in multiple targets: " + description + L".");
+			}
+
 			Ptr<parsing::ParsingError> WfErrors::WrongVoidType(WfType* node)
 			{
 				return new ParsingError(node, L"B0: Void is not a type for a value.");
@@ -278,35 +304,8 @@ WfErrors
 				WString description;
 				FOREACH_INDEXER(ResolveExpressionResult, result, index, results)
 				{
-					if (index) description += L", ";
-					if (result.scopeName)
-					{
-						description += result.scopeName->GetFriendlyName();
-					}
-					else if (result.symbol)
-					{
-						description += result.symbol->GetFriendlyName();
-					}
-					else if (result.propertyInfo)
-					{
-						description += L"property " + result.propertyInfo->GetName() + L" in " + result.propertyInfo->GetOwnerTypeDescriptor()->GetTypeName();
-					}
-					else if (result.methodInfo)
-					{
-						description += L"method " + result.methodInfo->GetName() + L" in " + result.propertyInfo->GetOwnerTypeDescriptor()->GetTypeName();
-					}
-					else if (result.eventInfo)
-					{
-						description += L"event " + result.eventInfo->GetName() + L" in " + result.propertyInfo->GetOwnerTypeDescriptor()->GetTypeName();
-					}
-					else if (result.type)
-					{
-						description += L"expression of type \"" + result.type->GetTypeFriendlyName() + L"\".";
-					}
-					else
-					{
-						description += L"<unknown>";
-					}
+					if (index) description += L"\r\n\t";
+					description += result.GetFriendlyName();
 				}
 				return new ParsingError(node, L"F3: Symbol \"" + name + L"\" references to too many targets: " + description + L".");
 			}

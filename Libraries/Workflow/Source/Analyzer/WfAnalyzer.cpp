@@ -646,6 +646,43 @@ ResolveExpressionResult
 				, eventInfo(_eventInfo)
 			{
 			}
+
+			WString ResolveExpressionResult::GetFriendlyName()
+			{
+				WString typeName;
+				if (type)
+				{
+					typeName= + L" of type \"" + type->GetTypeFriendlyName() + L"\".";
+				}
+				if (scopeName)
+				{
+					return scopeName->GetFriendlyName();
+				}
+				else if (symbol)
+				{
+					return symbol->GetFriendlyName() + typeName;
+				}
+				else if (propertyInfo)
+				{
+					return L"property " + propertyInfo->GetName() + L" in " + propertyInfo->GetOwnerTypeDescriptor()->GetTypeName() + typeName;
+				}
+				else if (methodInfo)
+				{
+					return L"method " + methodInfo->GetName() + L" in " + propertyInfo->GetOwnerTypeDescriptor()->GetTypeName() + typeName;
+				}
+				else if (eventInfo)
+				{
+					return L"event " + eventInfo->GetName() + L" in " + propertyInfo->GetOwnerTypeDescriptor()->GetTypeName();
+				}
+				else if (type)
+				{
+					return L"expression" + typeName;
+				}
+				else
+				{
+					return L"<unknown>";
+				}
+			}
 		}
 	}
 }
