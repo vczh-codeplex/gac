@@ -78,6 +78,11 @@ WfErrors
 				return new ParsingError(node, L"A9: Expression \"null\" failed to resolve its type.");
 			}
 
+			Ptr<parsing::ParsingError> WfErrors::ConstructorCannotResolveType(WfExpression* node)
+			{
+				return new ParsingError(node, L"A9: Expression \"{}\" failed to resolve its type.");
+			}
+
 			Ptr<parsing::ParsingError> WfErrors::OrderedLambdaCannotResolveType(WfExpression* node)
 			{
 				return new ParsingError(node, L"A9: Ordered lambda expression failed to resolve its type.");
@@ -86,6 +91,11 @@ WfErrors
 			Ptr<parsing::ParsingError> WfErrors::NullCannotImplicitlyConvertToType(WfExpression* node, reflection::description::ITypeInfo* toType)
 			{
 				return new ParsingError(node, L"A10: Expression \"null\" cannot implicitly convert to \"" + toType->GetTypeFriendlyName() + L"\".");
+			}
+
+			Ptr<parsing::ParsingError> WfErrors::ConstructorCannotImplicitlyConvertToType(WfExpression* node, reflection::description::ITypeInfo* toType)
+			{
+				return new ParsingError(node, L"A10: Expression \"{}\" cannot implicitly convert to \"" + toType->GetTypeFriendlyName() + L"\".");
 			}
 
 			Ptr<parsing::ParsingError> WfErrors::OrderedLambdaCannotImplicitlyConvertToType(WfExpression* node, reflection::description::ITypeInfo* toType)

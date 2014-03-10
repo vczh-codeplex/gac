@@ -885,6 +885,99 @@ ValidateSemantic(Expression)
 
 				void Visit(WfConstructorExpression* node)override
 				{
+					if (node->arguments.Count() == 0)
+					{
+						if (expectedType)
+						{
+							ITypeDescriptor* td = expectedType->GetTypeDescriptor();
+							if (!td->CanConvertTo(description::GetTypeDescriptor<IValueEnumerable>()) && !td->CanConvertTo(description::GetTypeDescriptor<IValueReadonlyDictionary>()))
+							{
+								manager->errors.Add(WfErrors::ConstructorCannotImplicitlyConvertToType(node, expectedType.Obj()));
+							}
+							results.Add(ResolveExpressionResult(expectedType));
+						}
+						else
+						{
+							manager->errors.Add(WfErrors::ConstructorCannotResolveType(node));
+						}
+					}
+					else
+					{
+						bool map = node->arguments[0]->value;
+						Ptr<ITypeInfo> keyType, valueType;
+						FOREACH(Ptr<WfConstructorArgument>, argument, node->arguments)
+						{
+							{
+								Ptr<ITypeInfo> newKeyType = GetExpressionType(manager, argument->key, 0);
+								if (!keyType)
+								{
+									keyType = newKeyType;
+								}
+								else if (auto mergedType = GetMergedType(keyType, newKeyType))
+								{
+									keyType = mergedType;
+								}
+								else
+								{
+									manager->errors.Add(WfErrors::CannotMergeTwoType(node, keyType.Obj(), newKeyType.Obj()));
+								}
+							}
+							if (map)
+							{
+								Ptr<ITypeInfo> newValueType = GetExpressionType(manager, argument->value, 0);
+								if (!valueType)
+								{
+									valueType = newValueType;
+								}
+								else if (auto mergedType = GetMergedType(valueType, newValueType))
+								{
+									valueType = mergedType;
+								}
+								else
+								{
+									manager->errors.Add(WfErrors::CannotMergeTwoType(node, valueType.Obj(), newValueType.Obj()));
+								}
+							}
+						}
+
+						if (map)
+						{
+							if (keyType && valueType)
+							{
+								Ptr<TypeInfoImpl> pointerType = new TypeInfoImpl(ITypeInfo::SharedPtr);
+								{
+									Ptr<TypeInfoImpl> genericType = new TypeInfoImpl(ITypeInfo::Generic);
+									pointerType->SetElementType(genericType);
+									{
+										Ptr<TypeInfoImpl> classType = new TypeInfoImpl(ITypeInfo::TypeDescriptor);
+										classType->SetTypeDescriptor(description::GetTypeDescriptor<IValueDictionary>());
+										genericType->SetElementType(genericType);
+									}
+									genericType->AddGenericArgument(keyType);
+									genericType->AddGenericArgument(valueType);
+								}
+								results.Add(ResolveExpressionResult((Ptr<ITypeInfo>)pointerType));
+							}
+						}
+						else
+						{
+							if (keyType)
+							{
+								Ptr<TypeInfoImpl> pointerType = new TypeInfoImpl(ITypeInfo::SharedPtr);
+								{
+									Ptr<TypeInfoImpl> genericType = new TypeInfoImpl(ITypeInfo::Generic);
+									pointerType->SetElementType(genericType);
+									{
+										Ptr<TypeInfoImpl> classType = new TypeInfoImpl(ITypeInfo::TypeDescriptor);
+										classType->SetTypeDescriptor(description::GetTypeDescriptor<IValueList>());
+										genericType->SetElementType(genericType);
+									}
+									genericType->AddGenericArgument(keyType);
+								}
+								results.Add(ResolveExpressionResult((Ptr<ITypeInfo>)pointerType));
+							}
+						}
+					}
 				}
 
 				void Visit(WfInferExpression* node)override
