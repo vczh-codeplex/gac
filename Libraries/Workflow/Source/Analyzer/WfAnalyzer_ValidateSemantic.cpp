@@ -1074,6 +1074,33 @@ ValidateSemantic(Expression)
 
 				void Visit(WfObserveExpression* node)override
 				{
+					Ptr<ITypeInfo> parentType = GetExpressionType(manager, node->parent, 0);
+					Ptr<ITypeInfo> observeeType;
+					if (parentType)
+					{
+						if (node->observeType == WfObserveType::SimpleObserve)
+						{
+						}
+						else
+						{
+							auto scope = manager->expressionScopes[node].Obj();
+							auto symbol = scope->symbols[node->name.value][0];
+							symbol->typeInfo = parentType;
+							symbol->type = GetTypeFromTypeInfo(parentType.Obj());
+
+							observeeType = GetExpressionType(manager, node->expression, 0);
+							FOREACH(Ptr<WfExpression>, eventExpr, node->events)
+							{
+								GetExpressionEventInfo(manager, eventExpr);
+							}
+
+						}
+					}
+
+					if (observeeType)
+					{
+						results.Add(ResolveExpressionResult(observeeType));
+					}
 				}
 
 				void Visit(WfCallExpression* node)override

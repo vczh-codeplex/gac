@@ -28,6 +28,11 @@ WfErrors
 				return new ParsingError(node, L"A2: Simple observe expression should react to an event under the observed object.");
 			}
 
+			Ptr<parsing::ParsingError> WfErrors::EmptyExtendedObserveEvent(WfExpression* node)
+			{
+				return new ParsingError(node, L"A2: Extended observe expression should react to at least one event.");
+			}
+
 			Ptr<parsing::ParsingError> WfErrors::ObserveNotInBind(WfExpression* node)
 			{
 				return new ParsingError(node, L"A3: Observe expression should appear in a bind expression.");

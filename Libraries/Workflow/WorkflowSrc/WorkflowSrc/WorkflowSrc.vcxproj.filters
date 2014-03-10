@@ -1139,6 +1139,9 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\A14_IncompatibleMap.txt">
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
     </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A2_EmptyExtendedObserveEvent.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Source\Expression\Codegen.bat">
