@@ -821,6 +821,7 @@ CanConvertToType
 					switch (toType->GetDecorator())
 					{
 					case ITypeInfo::RawPtr:
+						return explicitly && CanConvertToType(fromType->GetElementType(), toType->GetElementType(), explicitly);
 					case ITypeInfo::SharedPtr:
 						return CanConvertToType(fromType->GetElementType(), toType->GetElementType(), explicitly);
 					case ITypeInfo::Nullable:

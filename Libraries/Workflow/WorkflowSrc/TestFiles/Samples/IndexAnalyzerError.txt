@@ -26,6 +26,7 @@ A10_RawPtrToNullable
 A10_RawPtrToSharedPtr
 A10_RawPtrToStruct
 A10_SharedPtrToNullable
+A10_SharedPtrToRaw
 A10_SharedPtrToStruct
 A10_StructToToNullable
 A10_StructToToRawPtr
@@ -47,6 +48,7 @@ A10_OfRawPtrToNullable
 A10_OfRawPtrToSharedPtr
 A10_OfRawPtrToStruct
 A10_OfSharedPtrToNullable
+A10_OfSharedToRaw
 A10_OfSharedPtrToStruct
 A10_OfStructToToNullable
 A10_OfStructToToRawPtr
