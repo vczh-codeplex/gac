@@ -398,6 +398,11 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\B6_VariableIsNotType.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\F0_ExpressionTopQualifiedSymbolNotExists.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\F1_ExpressionChildSymbolNotExists.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\F1_ObservedDefaultEventNotExists.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\F1_ObservedEventNotExists.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\F1_ObservedEventNotExists2.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\F1_ObservedPropertyNotExists.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\F1_ObservedPropertyNotExists2.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\F1_TypeMemberNotExists.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\F2_ExpressionReferenceNotExists.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\F2_TypeReferenceNotExists.txt" />
