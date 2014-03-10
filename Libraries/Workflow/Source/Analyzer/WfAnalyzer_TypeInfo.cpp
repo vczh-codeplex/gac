@@ -969,6 +969,26 @@ IsSameType
 				}
 				return false;
 			}
+
+/***********************************************************************
+GetMergedType
+***********************************************************************/
+
+			Ptr<reflection::description::ITypeInfo>	GetMergedType(Ptr<reflection::description::ITypeInfo> firstType, Ptr<reflection::description::ITypeInfo> secondType)
+			{
+				if (CanConvertToType(secondType.Obj(), firstType.Obj(), false))
+				{
+					return firstType;
+				}
+				else if (CanConvertToType(firstType.Obj(), secondType.Obj(), false))
+				{
+					return secondType;
+				}
+				else
+				{
+					return 0;
+				}
+			}
 		}
 	}
 }

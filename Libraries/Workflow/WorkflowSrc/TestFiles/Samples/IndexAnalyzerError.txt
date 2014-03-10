@@ -78,6 +78,10 @@ A12_StructToStruct
 A13_IntegerLiteralOutOfRange
 A14_IfExpressionCannotMergeType
 A14_RangeCannotMergeType
+A14_SetTestingInWrongCollection
+A15_RangeOfBoolean
+A17_IndexNotEnumerableObject
+A17_SetTestingInNotEnumerableObject
 B0_VoidVariable
 B0_VoidArgument
 B0_VoidMapElement

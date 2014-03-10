@@ -138,6 +138,11 @@ WfErrors
 				return new ParsingError(node, L"A17: Container of type \"" + containerType->GetTypeFriendlyName() + L"\" cannot be accessed using index.");
 			}
 
+			Ptr<parsing::ParsingError> WfErrors::ExpressionIsNotCollection(WfExpression* node, reflection::description::ITypeInfo* type)
+			{
+				return new ParsingError(node, L"A18: Expression of type \"" + type->GetTypeFriendlyName() + L"\" is not an enumerable type.");
+			}
+
 			Ptr<parsing::ParsingError> WfErrors::WrongVoidType(WfType* node)
 			{
 				return new ParsingError(node, L"B0: Void is not a type for a value.");

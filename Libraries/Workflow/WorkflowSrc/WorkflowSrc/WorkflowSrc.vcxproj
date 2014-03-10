@@ -351,6 +351,10 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\A13_IntegerLiteralOutOfRange.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A14_IfExpressionCannotMergeType.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A14_RangeCannotMergeType.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A14_SetTestingInWrongCollection.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A15_RangeOfBoolean.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A17_IndexNotEnumerableObject.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A17_SetTestingInNotEnumerableObject.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A1_WrongSimpleObserveExpression.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A2_WrongSimpleObserveEvent.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A3_ObserveNotInBind.txt" />
