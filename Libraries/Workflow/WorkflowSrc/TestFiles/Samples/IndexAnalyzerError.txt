@@ -11,7 +11,9 @@ A9_ExpressionCannotResolveType
 A9_LetExpressionCannotResolveType
 A9_NullCannotResolveType
 A9_OrderedLambdaCannotResolveType
+A9_ConstructorCannotResolveType
 A10_BaseToDerived
+A10_ConstructorToStruct
 A10_NullableToNullable
 A10_NullableToRawPtr
 A10_NullableToSharedPtr
@@ -79,6 +81,8 @@ A13_IntegerLiteralOutOfRange
 A14_IfExpressionCannotMergeType
 A14_RangeCannotMergeType
 A14_SetTestingInWrongCollection
+A14_IncompatibleList
+A14_IncompatibleMap
 A15_RangeOfBoolean
 A17_IndexNotEnumerableObject
 A18_SetTestingInNotEnumerableObject

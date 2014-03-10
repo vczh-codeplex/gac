@@ -287,6 +287,7 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_AnonymousLambdaToStruct.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_AnonymousLambdaToWrongFunctionType.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_BaseToDerived.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A10_ConstructorToStruct.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_FunctionLambdaToStruct.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_FunctionLambdaToWrongFunctionType.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_FunctionMemberToNullable.txt" />
@@ -350,6 +351,8 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\A12_StructToStruct.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A13_IntegerLiteralOutOfRange.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A14_IfExpressionCannotMergeType.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A14_IncompatibleList.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A14_IncompatibleMap.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A14_RangeCannotMergeType.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A14_SetTestingInWrongCollection.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A15_RangeOfBoolean.txt" />
@@ -363,6 +366,7 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\A7_EventIsNotExpression.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A7_ScopeNameIsNotExpression.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A8_ExpressionIsNotScopeName.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A9_ConstructorCannotResolveType.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A9_ExpressionCannotResolveType.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A9_LetExpressionCannotResolveType.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A9_NullCannotResolveType.txt" />
