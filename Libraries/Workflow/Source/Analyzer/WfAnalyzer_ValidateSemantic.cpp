@@ -1128,7 +1128,6 @@ ValidateSemantic(Expression)
 							{
 								GetExpressionEventInfo(manager, eventExpr);
 							}
-
 						}
 					}
 
