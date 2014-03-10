@@ -1158,17 +1158,83 @@ ValidateSemantic(Expression)
 						}
 					}
 
-					List<ResolveExpressionResult> removed;
-					List<Ptr<parsing::ParsingError>> errors;
+					List<Ptr<parsing::ParsingError>> functionErrors, nonFunctionErrors;
+					ITypeDescriptor* functionFd = description::GetTypeDescriptor<IValueFunctionProxy>();
 					for (vint i = functions.Count() - 1; i >= 0; i--)
 					{
 						auto result = functions[i];
+						switch (result.type->GetDecorator())
+						{
+						case ITypeInfo::RawPtr:
+						case ITypeInfo::SharedPtr:
+							{
+								ITypeInfo* genericType = result.type->GetElementType();
+								if (genericType->GetDecorator() != ITypeInfo::Generic) goto FUNCTION_TYPE_FAILED;
+								ITypeInfo* functionType = result.type->GetElementType();
+								if (functionType->GetDecorator() != ITypeInfo::TypeDescriptor || functionType->GetTypeDescriptor() != functionFd) goto FUNCTION_TYPE_FAILED;
+								
+								bool failed = false;
+								if (genericType->GetGenericArgumentCount() != types.Count() + 1)
+								{
+									functionErrors.Add(WfErrors::FunctionArgumentCountMismatched(node, result.type.Obj()));
+									failed = true;
+								}
+								else
+								{
+									for (vint j = 0; j < types.Count(); j++)
+									{
+										if (resolvables[j] && types[j])
+										{
+											ITypeInfo* argumentType = genericType->GetGenericArgument(j + 1);
+											if (!CanConvertToType(types[j].Obj(), argumentType, false))
+											{
+												functionErrors.Add(WfErrors::FunctionArgumentTypeMismatched(node, i + 1, types[j].Obj(), argumentType));
+												failed = true;
+											}
+										}
+									}
+								}
+
+								if (failed)
+								{
+									functions.RemoveAt(i);
+								}
+							}
+							break;
+						default:
+							goto FUNCTION_TYPE_FAILED;
+						}
+
+						goto FUNCTION_TYPE_FINISHED;
+					FUNCTION_TYPE_FAILED:
+						nonFunctionErrors.Add(WfErrors::ExpressionIsNotFunction(node->function.Obj(), result.type.Obj()));
+					FUNCTION_TYPE_FINISHED:
+						;
 					}
 
-					if (functions.Count() == 0)
+					if (functions.Count() > 1)
 					{
-						CopyFrom(manager->errors, errors, true);
-						return;
+						manager->errors.Add(WfErrors::CannotPickOverloadedFunctions(node, functions));
+					}
+
+					if (functions.Count() == 1)
+					{
+						Ptr<ITypeInfo> functionType = functions[0].type;
+						ITypeInfo* genericType = functionType->GetElementType();
+						for (vint i = 0; i < types.Count(); i++)
+						{
+							if (!resolvables[i])
+							{
+								ITypeInfo* argumentType = genericType->GetGenericArgument(i + 1);
+								GetExpressionType(manager, node->arguments[i], CopyTypeInfo(argumentType));
+							}
+						}
+
+						results.Add(ResolveExpressionResult(CopyTypeInfo(genericType->GetGenericArgument(0))));
+					}
+					else
+					{
+						CopyFrom(manager->errors, (functionErrors.Count() > 0 ? functionErrors : nonFunctionErrors), true);
 					}
 				}
 
@@ -1401,9 +1467,13 @@ GetExpressionType(s)
 					manager->errors.Add(WfErrors::TooManyTargets(expression.Obj(), results, GetExpressionName(expression)));
 					return expectedType;
 				}
-				else
+				else if (results.Count() == 1)
 				{
 					return expectedType ? expectedType : results[0].type;
+				}
+				else
+				{
+					return expectedType;
 				}
 			}
 
