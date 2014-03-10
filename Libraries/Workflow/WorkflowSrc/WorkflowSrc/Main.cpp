@@ -87,6 +87,7 @@ namespace test
 	{
 	protected:
 		vint								value;
+		WString								name;
 	public:
 		Event<void(vint, vint)>				ValueChanged;
 
@@ -109,6 +110,16 @@ namespace test
 			vint oldValue = value;
 			value = newValue;
 			ValueChanged(oldValue, newValue);
+		}
+
+		WString GetName()
+		{
+			return name;
+		}
+
+		void SetName(const WString& newName)
+		{
+			name = newName;
 		}
 	};
 }
@@ -133,6 +144,7 @@ namespace vl
 
 				CLASS_MEMBER_EVENT(ValueChanged)
 				CLASS_MEMBER_PROPERTY_EVENT_FAST(Value, ValueChanged)
+				CLASS_MEMBER_PROPERTY_FAST(Name)
 			END_CLASS_MEMBER(ObservableValue)
 
 			class UnitTestTypeLoader : public Object, public ITypeLoader

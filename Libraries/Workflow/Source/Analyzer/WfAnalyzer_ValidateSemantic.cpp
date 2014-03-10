@@ -1093,13 +1093,26 @@ ValidateSemantic(Expression)
 									manager->errors.Add(WfErrors::MemberNotExists(ref.Obj(), td, ref->name.value));
 								}
 							}
-							FOREACH(Ptr<WfExpression>, eventExpr, node->events)
+
+							if (node->events.Count() == 0)
 							{
-								auto ref = eventExpr.Cast<WfReferenceExpression>();
-								IEventInfo* info = td->GetEventByName(ref->name.value, true);
+								auto ref = node->expression.Cast<WfReferenceExpression>();
+								IEventInfo* info = td->GetEventByName(ref->name.value + L"Changed", true);
 								if (!info)
 								{
-									manager->errors.Add(WfErrors::MemberNotExists(ref.Obj(), td, ref->name.value));
+									manager->errors.Add(WfErrors::MemberNotExists(ref.Obj(), td, ref->name.value + L"Changed"));
+								}
+							}
+							else
+							{
+								FOREACH(Ptr<WfExpression>, eventExpr, node->events)
+								{
+									auto ref = eventExpr.Cast<WfReferenceExpression>();
+									IEventInfo* info = td->GetEventByName(ref->name.value, true);
+									if (!info)
+									{
+										manager->errors.Add(WfErrors::MemberNotExists(ref.Obj(), td, ref->name.value));
+									}
 								}
 							}
 						}
