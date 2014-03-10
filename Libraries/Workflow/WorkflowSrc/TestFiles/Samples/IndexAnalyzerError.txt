@@ -81,7 +81,7 @@ A14_RangeCannotMergeType
 A14_SetTestingInWrongCollection
 A15_RangeOfBoolean
 A17_IndexNotEnumerableObject
-A17_SetTestingInNotEnumerableObject
+A18_SetTestingInNotEnumerableObject
 B0_VoidVariable
 B0_VoidArgument
 B0_VoidMapElement

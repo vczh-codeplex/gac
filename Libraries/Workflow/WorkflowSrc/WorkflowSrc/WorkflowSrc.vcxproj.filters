@@ -1124,7 +1124,7 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\A17_IndexNotEnumerableObject.txt">
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
     </Text>
-    <Text Include="..\TestFiles\Samples\AnalyzerError\A17_SetTestingInNotEnumerableObject.txt">
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A18_SetTestingInNotEnumerableObject.txt">
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
     </Text>
   </ItemGroup>

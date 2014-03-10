@@ -989,6 +989,26 @@ GetMergedType
 					return 0;
 				}
 			}
+
+/***********************************************************************
+GetMergedType
+***********************************************************************/
+
+			bool IsNullAcceptableType(reflection::description::ITypeInfo* type)
+			{
+				switch (type->GetDecorator())
+				{
+				case ITypeInfo::RawPtr:
+				case ITypeInfo::SharedPtr:
+				case ITypeInfo::Nullable:
+					return true;
+				case ITypeInfo::TypeDescriptor:
+					return type->GetTypeDescriptor() == description::GetTypeDescriptor<Value>();
+				case ITypeInfo::Generic:
+					return false;
+				}
+				return false;
+			}
 		}
 	}
 }
