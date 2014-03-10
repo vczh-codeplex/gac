@@ -308,6 +308,7 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_OfRawPtrToStruct.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_OfSharedPtrToNullable.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_OfSharedPtrToStruct.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A10_OfSharedToRaw.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_OfStructToToNullable.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_OfStructToToRawPtr.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_OfStructToToSharedPtr.txt" />
@@ -320,6 +321,7 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_RawPtrToSharedPtr.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_RawPtrToStruct.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_SharedPtrToNullable.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A10_SharedPtrToRaw.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_SharedPtrToStruct.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_StructToToNullable.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_StructToToRawPtr.txt" />
