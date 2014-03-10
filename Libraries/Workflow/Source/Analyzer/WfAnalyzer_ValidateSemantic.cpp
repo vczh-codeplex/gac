@@ -1139,6 +1139,37 @@ ValidateSemantic(Expression)
 
 				void Visit(WfCallExpression* node)override
 				{
+					List<ResolveExpressionResult> functions;
+					GetExpressionTypes(manager, node->function, 0, functions);
+
+					List<bool> resolvables;
+					List<Ptr<ITypeInfo>> types;
+					FOREACH(Ptr<WfExpression>, argument, node->arguments)
+					{
+						if (IsExpressionDependOnExpectedType(argument))
+						{
+							resolvables.Add(false);
+							types.Add(0);
+						}
+						else
+						{
+							resolvables.Add(true);
+							types.Add(GetExpressionType(manager, argument, 0));
+						}
+					}
+
+					List<ResolveExpressionResult> removed;
+					List<Ptr<parsing::ParsingError>> errors;
+					for (vint i = functions.Count() - 1; i >= 0; i--)
+					{
+						auto result = functions[i];
+					}
+
+					if (functions.Count() == 0)
+					{
+						CopyFrom(manager->errors, errors, true);
+						return;
+					}
 				}
 
 				void Visit(WfFunctionExpression* node)override
@@ -1299,14 +1330,13 @@ GetExpressionEventInfo
 			}
 
 /***********************************************************************
-GetExpressionType
+GetExpressionType(s)
 ***********************************************************************/
 
-			Ptr<reflection::description::ITypeInfo> GetExpressionType(WfLexicalScopeManager* manager, Ptr<WfExpression> expression, Ptr<reflection::description::ITypeInfo> expectedType)
+			void GetExpressionTypes(WfLexicalScopeManager* manager, Ptr<WfExpression> expression, Ptr<reflection::description::ITypeInfo> expectedType, collections::List<ResolveExpressionResult>& results)
 			{
-				List<ResolveExpressionResult> results;
 				ValidateExpressionSemantic(manager, expression, expectedType, results);
-				if (results.Count() == 0) return expectedType;
+				if (results.Count() == 0) return;
 
 				Ptr<WfLexicalScopeName> scopeName;
 				IEventInfo* eventInfo = 0;
@@ -1336,7 +1366,6 @@ GetExpressionType
 					{
 						manager->errors.Add(WfErrors::EventIsNotExpression(expression.Obj(), eventInfo));
 					}
-					return expectedType;
 				}
 
 				if (expectedType)
@@ -1358,9 +1387,14 @@ GetExpressionType
 						{
 							manager->errors.Add(WfErrors::ExpressionCannotImplicitlyConvertToType(expression.Obj(), type.Obj(), expectedType.Obj()));
 						}
-						return expectedType;
 					}
 				}
+			}
+
+			Ptr<reflection::description::ITypeInfo> GetExpressionType(WfLexicalScopeManager* manager, Ptr<WfExpression> expression, Ptr<reflection::description::ITypeInfo> expectedType)
+			{
+				List<ResolveExpressionResult> results;
+				GetExpressionTypes(manager, expression, expectedType, results);
 
 				if (results.Count() > 1)
 				{

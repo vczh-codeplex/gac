@@ -287,6 +287,18 @@ WfErrors
 					{
 						description += result.symbol->GetFriendlyName();
 					}
+					else if (result.propertyInfo)
+					{
+						description += L"property " + result.propertyInfo->GetName() + L" in " + result.propertyInfo->GetOwnerTypeDescriptor()->GetTypeName();
+					}
+					else if (result.methodInfo)
+					{
+						description += L"method " + result.methodInfo->GetName() + L" in " + result.propertyInfo->GetOwnerTypeDescriptor()->GetTypeName();
+					}
+					else if (result.eventInfo)
+					{
+						description += L"event " + result.eventInfo->GetName() + L" in " + result.propertyInfo->GetOwnerTypeDescriptor()->GetTypeName();
+					}
 					else if (result.type)
 					{
 						description += L"expression of type \"" + result.type->GetTypeFriendlyName() + L"\".";
