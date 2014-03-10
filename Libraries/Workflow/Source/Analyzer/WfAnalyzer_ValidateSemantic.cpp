@@ -1135,14 +1135,11 @@ ValidateSemantic(Expression)
 					}
 				}
 
-				void Visit(WfCallExpression* node)override
+				Ptr<ITypeInfo> SelectFunction(WfExpression* node, Ptr<WfExpression> functionExpression, List<ResolveExpressionResult>& functions, List<Ptr<WfExpression>>& arguments)
 				{
-					List<ResolveExpressionResult> functions;
-					GetExpressionTypes(manager, node->function, 0, functions);
-
 					List<bool> resolvables;
 					List<Ptr<ITypeInfo>> types;
-					FOREACH(Ptr<WfExpression>, argument, node->arguments)
+					FOREACH(Ptr<WfExpression>, argument, arguments)
 					{
 						if (IsExpressionDependOnExpectedType(argument))
 						{
@@ -1171,7 +1168,7 @@ ValidateSemantic(Expression)
 								
 							if (genericType->GetGenericArgumentCount() != types.Count() + 1)
 							{
-								functionErrors.Add(WfErrors::FunctionArgumentCountMismatched(node, result));
+								functionErrors.Add(WfErrors::FunctionArgumentCountMismatched(node, arguments.Count(), result));
 								failed = true;
 							}
 							else
@@ -1197,7 +1194,7 @@ ValidateSemantic(Expression)
 
 						goto FUNCTION_TYPE_FINISHED;
 					FUNCTION_TYPE_FAILED:
-						nonFunctionErrors.Add(WfErrors::ExpressionIsNotFunction(node->function.Obj(), result.type.Obj()));
+						nonFunctionErrors.Add(WfErrors::ExpressionIsNotFunction(functionExpression.Obj(), result.type.Obj()));
 						failed = true;
 					FUNCTION_TYPE_FINISHED:
 						if (failed)
@@ -1220,15 +1217,28 @@ ValidateSemantic(Expression)
 							if (!resolvables[i])
 							{
 								ITypeInfo* argumentType = genericType->GetGenericArgument(i + 1);
-								GetExpressionType(manager, node->arguments[i], CopyTypeInfo(argumentType));
+								GetExpressionType(manager, arguments[i], CopyTypeInfo(argumentType));
 							}
 						}
 
-						results.Add(ResolveExpressionResult(CopyTypeInfo(genericType->GetGenericArgument(0))));
+						return CopyTypeInfo(genericType->GetGenericArgument(0));
 					}
 					else
 					{
 						CopyFrom(manager->errors, (functionErrors.Count() > 0 ? functionErrors : nonFunctionErrors), true);
+					}
+					return 0;
+				}
+
+				void Visit(WfCallExpression* node)override
+				{
+					List<ResolveExpressionResult> functions;
+					GetExpressionTypes(manager, node->function, 0, functions);
+
+					Ptr<ITypeInfo> resultType = SelectFunction(node, node->function, functions, node->arguments);
+					if (resultType)
+					{
+						results.Add(ResolveExpressionResult(resultType));
 					}
 				}
 
@@ -1260,12 +1270,58 @@ ValidateSemantic(Expression)
 				{
 					auto scope = manager->expressionScopes[node].Obj();
 					Ptr<ITypeInfo> type = CreateTypeInfoFromType(scope, node->type);
+					if (type)
+					{
+						ITypeDescriptor* td = type->GetTypeDescriptor();
 
-					if (node->functions.Count() == 0)
-					{
-					}
-					else
-					{
+						if (node->functions.Count() == 0)
+						{
+						}
+						else
+						{
+							IMethodGroupInfo* ctors = td->GetConstructorGroup();
+							if (!ctors || ctors->GetMethodCount() == 0)
+							{
+								manager->errors.Add(WfErrors::ClassContainsNoConstructor(node, type.Obj()));
+							}
+							else
+							{
+								List<ResolveExpressionResult> functions;
+								for (vint i = 0; i < ctors->GetMethodCount(); i++)
+								{
+									IMethodInfo* info = ctors->GetMethod(i);
+									Ptr<TypeInfoImpl> functionType = new TypeInfoImpl(ITypeInfo::SharedPtr);
+									{
+										Ptr<TypeInfoImpl> genericType = new TypeInfoImpl(ITypeInfo::Generic);
+										functionType->SetElementType(genericType);
+										{
+											Ptr<TypeInfoImpl> elementType = new TypeInfoImpl(ITypeInfo::TypeDescriptor);
+											elementType->SetTypeDescriptor(description::GetTypeDescriptor<IValueFunctionProxy>());
+											genericType->SetElementType(elementType);
+										}
+
+										genericType->AddGenericArgument(CopyTypeInfo(info->GetReturn()));
+										vint parameterCount = info->GetParameterCount();
+										for (vint j = 0; j < parameterCount; j++)
+										{
+											genericType->AddGenericArgument(CopyTypeInfo(info->GetParameter(j)->GetType()));
+										}
+									}
+									functions.Add(ResolveExpressionResult(info, functionType));
+								}
+
+								Ptr<ITypeInfo> resultType = SelectFunction(node, 0, functions, node->arguments);
+								if (resultType)
+								{
+									if (!CanConvertToType(resultType.Obj(), type.Obj(), false))
+									{
+										manager->errors.Add(WfErrors::ConstructorReturnTypeMismatched(node, functions[0], resultType.Obj(), type.Obj()));
+									}
+								}
+							}
+						}
+
+						results.Add(ResolveExpressionResult(type));
 					}
 				}
 

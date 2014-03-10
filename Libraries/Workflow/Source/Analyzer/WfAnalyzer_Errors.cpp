@@ -163,14 +163,14 @@ WfErrors
 				return new ParsingError(node, L"A19: Expression of type \"" + type->GetTypeFriendlyName() + L"\" is not an invokable function type.");
 			}
 
-			Ptr<parsing::ParsingError> WfErrors::FunctionArgumentCountMismatched(WfCallExpression* node, const ResolveExpressionResult& function)
+			Ptr<parsing::ParsingError> WfErrors::FunctionArgumentCountMismatched(WfExpression* node, vint expectedCount, const ResolveExpressionResult& function)
 			{
-				return new ParsingError(node, L"A20: Function " + function.GetFriendlyName() + L"\" is not allowed to call with " + itow(node->arguments.Count()) + L" arguments.");
+				return new ParsingError(node, L"A20: Function " + function.GetFriendlyName() + L"\" is not allowed to call with " + itow(expectedCount) + L" arguments.");
 			}
 
 			Ptr<parsing::ParsingError> WfErrors::FunctionArgumentTypeMismatched(WfExpression* node, const ResolveExpressionResult& function, vint index, reflection::description::ITypeInfo* fromType, reflection::description::ITypeInfo* toType)
 			{
-				return new ParsingError(node, L"A21: The " + itow(index) + L"-th argument of function " + function.GetFriendlyName() + L" cannot implicitly from \"" + fromType->GetTypeFriendlyName() + L"\" to \"" + toType->GetTypeFriendlyName() + L"\".");
+				return new ParsingError(node, L"A21: The " + itow(index) + L"-th argument of function " + function.GetFriendlyName() + L" cannot implicitly convert from \"" + fromType->GetTypeFriendlyName() + L"\" to \"" + toType->GetTypeFriendlyName() + L"\".");
 			}
 
 			Ptr<parsing::ParsingError> WfErrors::CannotPickOverloadedFunctions(WfExpression* node, collections::List<ResolveExpressionResult>& results)
@@ -182,6 +182,16 @@ WfErrors
 					description += result.GetFriendlyName();
 				}
 				return new ParsingError(node, L"A22: Cannot decide which function to call in multiple targets: " + description + L".");
+			}
+
+			Ptr<parsing::ParsingError> WfErrors::ClassContainsNoConstructor(WfExpression* node, reflection::description::ITypeInfo* type)
+			{
+				return new ParsingError(node, L"A23: Type \"" + type->GetTypeFriendlyName() + L"\" does not contain any constructor.");
+			}
+
+			Ptr<parsing::ParsingError> WfErrors::ConstructorReturnTypeMismatched(WfExpression* node, const ResolveExpressionResult& function, reflection::description::ITypeInfo* fromType, reflection::description::ITypeInfo* toType)
+			{
+				return new ParsingError(node, L"A21: The return type of " + function.GetFriendlyName() + L" cannot implicitly convert from \"" + fromType->GetTypeFriendlyName() + L"\" to \"" + toType->GetTypeFriendlyName() + L"\".");
 			}
 
 			Ptr<parsing::ParsingError> WfErrors::WrongVoidType(WfType* node)
