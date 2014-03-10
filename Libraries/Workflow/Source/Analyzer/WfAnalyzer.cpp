@@ -647,12 +647,12 @@ ResolveExpressionResult
 			{
 			}
 
-			WString ResolveExpressionResult::GetFriendlyName()
+			WString ResolveExpressionResult::GetFriendlyName()const
 			{
 				WString typeName;
 				if (type)
 				{
-					typeName= + L" of type \"" + type->GetTypeFriendlyName() + L"\".";
+					typeName= + L" of type \"" + type->GetTypeFriendlyName() + L"\"";
 				}
 				if (scopeName)
 				{

@@ -163,14 +163,14 @@ WfErrors
 				return new ParsingError(node, L"A19: Expression of type \"" + type->GetTypeFriendlyName() + L"\" is not an invokable function type.");
 			}
 
-			Ptr<parsing::ParsingError> WfErrors::FunctionArgumentCountMismatched(WfCallExpression* node, reflection::description::ITypeInfo* type)
+			Ptr<parsing::ParsingError> WfErrors::FunctionArgumentCountMismatched(WfCallExpression* node, const ResolveExpressionResult& function)
 			{
-				return new ParsingError(node, L"A20: Function of type \"" + type->GetTypeFriendlyName() + L"\" is not allowed to call with " + itow(node->arguments.Count()) + L" arguments.");
+				return new ParsingError(node, L"A20: Function " + function.GetFriendlyName() + L"\" is not allowed to call with " + itow(node->arguments.Count()) + L" arguments.");
 			}
 
-			Ptr<parsing::ParsingError> WfErrors::FunctionArgumentTypeMismatched(WfExpression* node, vint index, reflection::description::ITypeInfo* fromType, reflection::description::ITypeInfo* toType)
+			Ptr<parsing::ParsingError> WfErrors::FunctionArgumentTypeMismatched(WfExpression* node, const ResolveExpressionResult& function, vint index, reflection::description::ITypeInfo* fromType, reflection::description::ITypeInfo* toType)
 			{
-				return new ParsingError(node, L"A21: The " + itow(index) + L"-th argument of type \"" + fromType->GetTypeFriendlyName() + L"\" cannot implicitly convert to \"" + toType->GetTypeFriendlyName() + L"\".");
+				return new ParsingError(node, L"A21: The " + itow(index) + L"-th argument of function " + function.GetFriendlyName() + L" cannot implicitly from \"" + fromType->GetTypeFriendlyName() + L"\" to \"" + toType->GetTypeFriendlyName() + L"\".");
 			}
 
 			Ptr<parsing::ParsingError> WfErrors::CannotPickOverloadedFunctions(WfExpression* node, collections::List<ResolveExpressionResult>& results)
@@ -178,7 +178,7 @@ WfErrors
 				WString description;
 				FOREACH_INDEXER(ResolveExpressionResult, result, index, results)
 				{
-					if (index) description += L"\r\n\t";
+					description += L"\r\n\t";
 					description += result.GetFriendlyName();
 				}
 				return new ParsingError(node, L"A22: Cannot decide which function to call in multiple targets: " + description + L".");
@@ -304,7 +304,7 @@ WfErrors
 				WString description;
 				FOREACH_INDEXER(ResolveExpressionResult, result, index, results)
 				{
-					if (index) description += L"\r\n\t";
+					description += L"\r\n\t";
 					description += result.GetFriendlyName();
 				}
 				return new ParsingError(node, L"F3: Symbol \"" + name + L"\" references to too many targets: " + description + L".");

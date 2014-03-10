@@ -1176,7 +1176,7 @@ ValidateSemantic(Expression)
 								
 								if (genericType->GetGenericArgumentCount() != types.Count() + 1)
 								{
-									functionErrors.Add(WfErrors::FunctionArgumentCountMismatched(node, result.type.Obj()));
+									functionErrors.Add(WfErrors::FunctionArgumentCountMismatched(node, result));
 									failed = true;
 								}
 								else
@@ -1188,7 +1188,7 @@ ValidateSemantic(Expression)
 											ITypeInfo* argumentType = genericType->GetGenericArgument(j + 1);
 											if (!CanConvertToType(types[j].Obj(), argumentType, false))
 											{
-												functionErrors.Add(WfErrors::FunctionArgumentTypeMismatched(node, i + 1, types[j].Obj(), argumentType));
+												functionErrors.Add(WfErrors::FunctionArgumentTypeMismatched(node, result, i + 1, types[j].Obj(), argumentType));
 												failed = true;
 											}
 										}

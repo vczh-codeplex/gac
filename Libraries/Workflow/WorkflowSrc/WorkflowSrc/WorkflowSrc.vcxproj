@@ -362,6 +362,7 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\A1_WrongSimpleObserveExpression.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A20_CallWrongArgumentCount.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A21_CallWrongArgument.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A22_CannotPickOverloadedFunctions.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A2_EmptyExtendedObserveEvent.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A2_WrongSimpleObserveEvent.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A3_ObserveNotInBind.txt" />
