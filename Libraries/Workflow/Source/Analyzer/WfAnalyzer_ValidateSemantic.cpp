@@ -951,7 +951,7 @@ ValidateSemantic(Expression)
 									{
 										Ptr<TypeInfoImpl> classType = new TypeInfoImpl(ITypeInfo::TypeDescriptor);
 										classType->SetTypeDescriptor(description::GetTypeDescriptor<IValueDictionary>());
-										genericType->SetElementType(genericType);
+										genericType->SetElementType(classType);
 									}
 									genericType->AddGenericArgument(keyType);
 									genericType->AddGenericArgument(valueType);
@@ -970,7 +970,7 @@ ValidateSemantic(Expression)
 									{
 										Ptr<TypeInfoImpl> classType = new TypeInfoImpl(ITypeInfo::TypeDescriptor);
 										classType->SetTypeDescriptor(description::GetTypeDescriptor<IValueList>());
-										genericType->SetElementType(genericType);
+										genericType->SetElementType(classType);
 									}
 									genericType->AddGenericArgument(keyType);
 								}
