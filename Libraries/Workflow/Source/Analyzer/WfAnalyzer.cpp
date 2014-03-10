@@ -668,7 +668,14 @@ ResolveExpressionResult
 				}
 				else if (methodInfo)
 				{
-					return L"method " + methodInfo->GetName() + L" in " + propertyInfo->GetOwnerTypeDescriptor()->GetTypeName() + typeName;
+					if (methodInfo->GetName() == L"")
+					{
+						return L"constructor in " + propertyInfo->GetOwnerTypeDescriptor()->GetTypeName() + typeName;
+					}
+					else
+					{
+						return L"method " + methodInfo->GetName() + L" in " + propertyInfo->GetOwnerTypeDescriptor()->GetTypeName() + typeName;
+					}
 				}
 				else if (eventInfo)
 				{
