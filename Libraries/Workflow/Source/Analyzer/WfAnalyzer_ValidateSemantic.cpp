@@ -582,15 +582,7 @@ ValidateSemantic(Expression)
 						Ptr<ITypeInfo> elementType;
 						if (firstType && secondType)
 						{
-							if (CanConvertToType(secondType.Obj(), firstType.Obj(), false))
-							{
-								elementType = firstType;
-							}
-							else if (CanConvertToType(firstType.Obj(), secondType.Obj(), false))
-							{
-								elementType = secondType;
-							}
-							else
+							if (!(elementType = GetMergedType(firstType, secondType)))
 							{
 								manager->errors.Add(WfErrors::CannotMergeTwoType(node, firstType.Obj(), secondType.Obj()));
 							}
@@ -805,13 +797,9 @@ ValidateSemantic(Expression)
 					}
 					else if (firstType && secondType)
 					{
-						if (CanConvertToType(secondType.Obj(), firstType.Obj(), false))
+						if (auto mergedType = GetMergedType(firstType, secondType))
 						{
-							results.Add(ResolveExpressionResult(firstType));
-						}
-						else if (CanConvertToType(firstType.Obj(), secondType.Obj(), false))
-						{
-							results.Add(ResolveExpressionResult(secondType));
+							results.Add(ResolveExpressionResult(mergedType));
 						}
 						else
 						{
@@ -836,15 +824,7 @@ ValidateSemantic(Expression)
 					}
 					else if (firstType && secondType)
 					{
-						if (CanConvertToType(secondType.Obj(), firstType.Obj(), false))
-						{
-							elementType = firstType;
-						}
-						else if (CanConvertToType(firstType.Obj(), secondType.Obj(), false))
-						{
-							elementType = secondType;
-						}
-						else
+						if (!(elementType = GetMergedType(firstType, secondType)))
 						{
 							manager->errors.Add(WfErrors::CannotMergeTwoType(node, firstType.Obj(), secondType.Obj()));
 						}
@@ -883,6 +863,41 @@ ValidateSemantic(Expression)
 
 				void Visit(WfSetTestingExpression* node)override
 				{
+					Ptr<ITypeInfo> elementType = GetExpressionType(manager, node->element, 0);
+
+					if (auto range = node->collection.Cast<WfRangeExpression>())
+					{
+						Ptr<ITypeInfo> beginType = GetExpressionType(manager, range->begin, 0);
+						Ptr<ITypeInfo> endType = GetExpressionType(manager, range->end, 0);
+
+						if (elementType && beginType)
+						{
+							if (!GetMergedType(elementType, beginType))
+							{
+								manager->errors.Add(WfErrors::CannotMergeTwoType(node, elementType.Obj(), beginType.Obj()));
+							}
+						}
+						if (elementType && endType)
+						{
+							if (!GetMergedType(elementType, endType))
+							{
+								manager->errors.Add(WfErrors::CannotMergeTwoType(node, elementType.Obj(), endType.Obj()));
+							}
+						}
+					}
+					else
+					{
+						Ptr<ITypeInfo> itemType = GetEnumerableExpressionItemType(manager, node->collection, 0);
+						if (elementType && itemType)
+						{
+							if (!GetMergedType(elementType, itemType))
+							{
+								manager->errors.Add(WfErrors::CannotMergeTwoType(node, elementType.Obj(), itemType.Obj()));
+							}
+						}
+					}
+
+					results.Add(ResolveExpressionResult(TypeInfoRetriver<bool>::CreateTypeInfo()));
 				}
 
 				void Visit(WfConstructorExpression* node)override
@@ -932,7 +947,33 @@ ValidateSemantic(Expression)
 
 				void Visit(WfTypeTestingExpression* node)override
 				{
-					GetExpressionType(manager, node->expression, 0);
+					Ptr<ITypeInfo> type = GetExpressionType(manager, node->expression, 0);
+					if (type)
+					{
+						switch (node->test)
+						{
+						case WfTypeTesting::IsNull:
+						case WfTypeTesting::IsNotNull:
+							{
+								switch (expectedType->GetDecorator())
+								{
+								case ITypeInfo::RawPtr:
+								case ITypeInfo::SharedPtr:
+								case ITypeInfo::Nullable:
+									break;
+								case ITypeInfo::TypeDescriptor:
+									if (expectedType->GetTypeDescriptor() == description::GetTypeDescriptor<Value>())
+									{
+										break;
+									}
+								case ITypeInfo::Generic:
+									manager->errors.Add(WfErrors::NullCannotImplicitlyConvertToType(node->expression.Obj(), type.Obj()));
+									break;
+								}
+							}
+							break;
+						}
+					}
 					results.Add(ResolveExpressionResult(TypeInfoRetriver<bool>::CreateTypeInfo()));
 				}
 
@@ -1204,6 +1245,38 @@ GetExpressionType
 				{
 					return expectedType ? expectedType : results[0].type;
 				}
+			}
+
+/***********************************************************************
+GetEnumerableExpressionItemType
+***********************************************************************/
+
+			Ptr<reflection::description::ITypeInfo>	GetEnumerableExpressionItemType(WfLexicalScopeManager* manager, Ptr<WfExpression> expression, Ptr<reflection::description::ITypeInfo> expectedType)
+			{
+				Ptr<ITypeInfo> collectionType = GetExpressionType(manager, expression, expectedType);
+				if (collectionType)
+				{
+					if (collectionType->GetTypeDescriptor()->CanConvertTo(description::GetTypeDescriptor<IValueEnumerable>()))
+					{
+						switch (collectionType->GetDecorator())
+						{
+						case ITypeInfo::RawPtr:
+						case ITypeInfo::SharedPtr:
+							{
+								ITypeInfo* genericType = collectionType->GetElementType();
+								if (genericType->GetDecorator() == ITypeInfo::Generic && genericType->GetGenericArgumentCount() == 1)
+								{
+									return CopyTypeInfo(genericType->GetGenericArgument(0));
+								}
+							}
+							break;
+						}
+						return TypeInfoRetriver<Value>::CreateTypeInfo();
+					}
+
+					manager->errors.Add(WfErrors::ExpressionIsNotCollection(expression.Obj(), collectionType.Obj()));
+				}
+				return 0;
 			}
 		}
 	}
