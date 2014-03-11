@@ -292,6 +292,17 @@ WfErrors
 				return new ParsingError(node, L"D2: Duplicated symbol \"" + symbol->name + L"\".");
 			}
 
+			Ptr<parsing::ParsingError> WfErrors::InterfaceMethodNotImplemented(WfNewTypeExpression* node, reflection::description::IMethodInfo* method)
+			{
+				ResolveExpressionResult result(method, CreateTypeInfoFromMethodInfo(method));
+				return new ParsingError(node, L"D3: Interface method not implemented: " + result.GetFriendlyName() + L".");
+			}
+
+			Ptr<parsing::ParsingError> WfErrors::InterfaceMethodNotFound(WfFunctionDeclaration* node, reflection::description::ITypeInfo* interfaceType, reflection::description::ITypeInfo* methodType)
+			{
+				return new ParsingError(node, L"D4: Interface \"" + interfaceType->GetTypeFriendlyName() + L"\" does not contain method \"" + node->name.value + L"\" which is in type \"" + methodType->GetTypeFriendlyName() + L"\".");
+			}
+
 			Ptr<parsing::ParsingError> WfErrors::WrongUsingPathWildCard(WfModuleUsingPath* node)
 			{
 				return new ParsingError(node, L"E0: Wild card \"*\" should only appear in the last item of the using path and should appear once.");

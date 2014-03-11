@@ -204,6 +204,7 @@
     <ClInclude Include="..\..\..\..\Common\Source\Stream\RecorderStream.h" />
     <ClInclude Include="..\..\..\..\Common\Source\String.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Threading.h" />
+    <ClInclude Include="..\..\..\..\Common\Source\Tuple.h" />
     <ClInclude Include="..\..\..\..\Common\Source\UnitTest\UnitTest.h" />
     <ClInclude Include="..\..\Source\Analyzer\WfAnalyzer.h" />
     <ClInclude Include="..\..\Source\Expression\WfExpression.h" />

@@ -405,6 +405,83 @@ namespace vl
 		};
 
 /***********************************************************************
+¸¨Öúº¯Êý
+***********************************************************************/
+
+		template<
+			typename TKey,
+			typename TValueFirst,
+			typename TValueSecond,
+			typename TDiscardFirst,		// TKey * [TValueFirst] -> void
+			typename TDiscardSecond,	// TKey * [TValueSecond] -> void
+			typename TAccept			// TKey * [TValueFirst] * [TValueSecond] -> void
+		>
+		void GroupInnerJoin(
+			const Group<TKey, TValueFirst>& first,
+			const Group<TKey, TValueSecond>& second,
+			const TDiscardFirst& discardFirst,
+			const TDiscardSecond& discardSecond,
+			const TAccept& accept
+			)
+		{
+			vint firstIndex = 0;
+			vint secondIndex = 0;
+			vint firstCount = first.Keys().Count();
+			vint secondCount = second.Keys().Count();
+			while (true)
+			{
+				if (firstIndex < firstCount)
+				{
+					WString firstKey = first.Keys()[firstIndex];
+					const List<TValueFirst>& firstValues = first.GetByIndex(firstIndex);
+
+					if (secondIndex < secondCount)
+					{
+						WString secondKey = second.Keys()[secondIndex];
+						const List<TValueSecond>& secondValues = second.GetByIndex(secondIndex);
+
+						if (firstKey < secondKey)
+						{
+							discardFirst(firstKey, firstValues);
+							firstIndex++;
+						}
+						else if (firstKey > secondKey)
+						{
+							discardSecond(secondKey, secondValues);
+							secondIndex++;
+						}
+						else
+						{
+							accept(firstKey, firstValues, secondValues);
+							firstIndex++;
+							secondIndex++;
+						}
+					}
+					else
+					{
+						discardFirst(firstKey, firstValues);
+						firstIndex++;
+					}
+				}
+				else
+				{
+					if (secondIndex < secondCount)
+					{
+						WString secondKey = second.Keys()[secondIndex];
+						const List<TValueSecond>& secondValues = second.GetByIndex(secondIndex);
+
+						discardSecond(secondKey, secondValues);
+						secondIndex++;
+					}
+					else
+					{
+						break;
+					}
+				}
+			}
+		}
+
+/***********************************************************************
 Ëæ»ú·ÃÎÊ
 ***********************************************************************/
 		namespace randomaccess_internal
