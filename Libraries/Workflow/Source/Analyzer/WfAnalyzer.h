@@ -158,14 +158,17 @@ Helper Functions
 			extern TypeFlag									GetTypeFlag(reflection::description::ITypeDescriptor* typeDescriptor);
 			extern TypeFlag									GetTypeFlag(reflection::description::ITypeInfo* typeInfo);
 			extern Ptr<reflection::description::ITypeInfo>	CreateTypeInfoFromTypeFlag(TypeFlag flag);
+
 			extern Ptr<WfType>								GetTypeFromTypeInfo(reflection::description::ITypeInfo* typeInfo);
 			extern Ptr<WfLexicalScopeName>					GetScopeNameFromReferenceType(WfLexicalScope* scope, Ptr<WfType> type);
 			extern Ptr<reflection::description::ITypeInfo>	CreateTypeInfoFromType(WfLexicalScope* scope, Ptr<WfType> type);
+
 			extern Ptr<reflection::description::ITypeInfo>	CopyTypeInfo(reflection::description::ITypeInfo* typeInfo);
 			extern bool										CanConvertToType(reflection::description::ITypeInfo* fromType, reflection::description::ITypeInfo* toType, bool explicitly);
 			extern bool										IsSameType(reflection::description::ITypeInfo* fromType, reflection::description::ITypeInfo* toType);
 			extern Ptr<reflection::description::ITypeInfo>	GetMergedType(Ptr<reflection::description::ITypeInfo> firstType, Ptr<reflection::description::ITypeInfo> secondType);
 			extern bool										IsNullAcceptableType(reflection::description::ITypeInfo* type);
+
 			extern Ptr<reflection::description::ITypeInfo>	CreateTypeInfoFromMethodInfo(reflection::description::IMethodInfo* info);
 
 			extern bool										IsExpressionDependOnExpectedType(Ptr<WfExpression> expression);
@@ -293,6 +296,8 @@ Error Messages
 				static Ptr<parsing::ParsingError>			DuplicatedSymbol(WfDeclaration* node, Ptr<WfLexicalSymbol> symbol);
 				static Ptr<parsing::ParsingError>			DuplicatedSymbol(WfStatement* node, Ptr<WfLexicalSymbol> symbol);
 				static Ptr<parsing::ParsingError>			DuplicatedSymbol(WfExpression* node, Ptr<WfLexicalSymbol> symbol);
+				static Ptr<parsing::ParsingError>			InterfaceMethodNotImplemented(WfNewTypeExpression* node, reflection::description::IMethodInfo* method);
+				static Ptr<parsing::ParsingError>			InterfaceMethodNotFound(WfFunctionDeclaration* node, reflection::description::ITypeInfo* interfaceType, reflection::description::ITypeInfo* methodType);
 
 				// E: Module error
 				static Ptr<parsing::ParsingError>			WrongUsingPathWildCard(WfModuleUsingPath* node);

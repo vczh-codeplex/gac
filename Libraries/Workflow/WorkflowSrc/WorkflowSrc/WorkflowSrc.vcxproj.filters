@@ -270,6 +270,9 @@
     <ClInclude Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorBuilder_Struct.h">
       <Filter>Common\Reflection</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Tuple.h">
+      <Filter>Common\Basic</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\Common\Source\Stream\Accessor.cpp">

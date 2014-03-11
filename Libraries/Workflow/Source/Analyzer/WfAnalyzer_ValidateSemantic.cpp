@@ -1249,6 +1249,17 @@ ValidateSemantic(Expression)
 					results.Add(ResolveExpressionResult((Ptr<ITypeInfo>)functionType));
 				}
 
+				Ptr<ITypeInfo> GetFunctionDeclarationType(WfLexicalScope* scope,Ptr<WfFunctionDeclaration> decl)
+				{
+					Ptr<WfLexicalSymbol> symbol = From(manager->declarationScopes[decl.Obj()]->parentScope->symbols[decl->name.value])
+						.Where([decl](Ptr<WfLexicalSymbol> symbol)
+						{
+							return symbol->ownerDeclaration == decl;
+						})
+						.First();
+					return symbol->typeInfo;
+				}
+
 				void Visit(WfNewTypeExpression* node)override
 				{
 					auto scope = manager->expressionScopes[node].Obj();
@@ -1305,11 +1316,96 @@ ValidateSemantic(Expression)
 								{
 									manager->errors.Add(WfErrors::InterfaceContainsNoConstructor(node, type.Obj()));
 								}
+								
+								Group<WString, IMethodInfo*> interfaceMethods;
+								Group<WString, Ptr<WfFunctionDeclaration>> implementMethods;
 
 								FOREACH(Ptr<WfFunctionDeclaration>, function, node->functions)
 								{
 									ValidateDeclarationSemantic(manager, function);
+									implementMethods.Add(function->name.value, function);
 								}
+
+								{
+									List<ITypeDescriptor*> types;
+									types.Add(td);
+									vint begin = 0;
+
+									while (begin < types.Count())
+									{
+										ITypeDescriptor* currentType = types[begin++];
+										vint count = currentType->GetBaseTypeDescriptorCount();
+										for (vint i = 0; i < count; i++)
+										{
+											types.Add(currentType->GetBaseTypeDescriptor(i));
+										}
+
+										count = currentType->GetMethodGroupCount();
+										for (vint i = 0; i < count; i++)
+										{
+											IMethodGroupInfo* group = currentType->GetMethodGroup(i);
+											vint methodCount = group->GetMethodCount();
+											for (vint j = 0; j < methodCount; j++)
+											{
+												interfaceMethods.Add(group->GetName(), group->GetMethod(j));
+											}
+										}
+									}
+								}
+
+								auto discardFirst = [=](const WString& key, const List<IMethodInfo*>& methods)
+									{
+										FOREACH(IMethodInfo*, method, methods)
+										{
+											manager->errors.Add(WfErrors::InterfaceMethodNotImplemented(node, method));
+										}
+									};
+								auto discardSecond = [=](const WString& key, const List<Ptr<WfFunctionDeclaration>>& methods)
+									{
+										FOREACH(Ptr<WfFunctionDeclaration>, decl, methods)
+										{
+											Ptr<ITypeInfo> declType = GetFunctionDeclarationType(scope, decl);
+											manager->errors.Add(WfErrors::InterfaceMethodNotFound(decl.Obj(), type.Obj(), declType.Obj()));
+										}
+									};
+
+								GroupInnerJoin(
+									interfaceMethods,
+									implementMethods,
+									discardFirst,
+									discardSecond,
+									[=](const WString& key, const List<IMethodInfo*>& interfaces, const List<Ptr<WfFunctionDeclaration>>& implements)
+									{
+										Group<WString, IMethodInfo*> typedInterfaceMethods;
+										Group<WString, Ptr<WfFunctionDeclaration>> typedImplementMethods;
+
+										FOREACH(IMethodInfo*, method, interfaces)
+										{
+											Ptr<ITypeInfo> methodType = CreateTypeInfoFromMethodInfo(method);
+											typedInterfaceMethods.Add(methodType->GetTypeFriendlyName(), method);
+										}
+
+										FOREACH(Ptr<WfFunctionDeclaration>, decl, implements)
+										{
+											Ptr<ITypeInfo> methodType = GetFunctionDeclarationType(scope, decl);
+											typedImplementMethods.Add(methodType->GetTypeFriendlyName(), decl);
+										}
+
+										GroupInnerJoin(
+											typedInterfaceMethods,
+											typedImplementMethods,
+											discardFirst,
+											discardSecond,
+											[=](const WString& key, const List<IMethodInfo*>& interfaces, const List<Ptr<WfFunctionDeclaration>>& implements)
+											{
+												if (interfaces.Count() > 1)
+												{
+												}
+												if (implements.Count() > 1)
+												{
+												}
+											});
+									});
 							}
 						}
 						if (selectedType)

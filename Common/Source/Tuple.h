@@ -5,8 +5,8 @@ Framework::Tuple
 	
 本文件使用Vczh Functional Macro工具自动生成
 ***********************************************************************/
-#ifndef VCZH_EVENT
-#define VCZH_EVENT
+#ifndef VCZH_TUPLE
+#define VCZH_TUPLE
 namespace vl
 {
 	class TupleNullItem
