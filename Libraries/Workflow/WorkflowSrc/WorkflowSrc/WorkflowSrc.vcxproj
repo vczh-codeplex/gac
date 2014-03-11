@@ -365,7 +365,11 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\A1_WrongSimpleObserveExpression.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A20_CallWrongArgumentCount.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A21_CallWrongArgument.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A22_CannotPickOverloadedConstructor.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A22_CannotPickOverloadedFunctions.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A23_ImplementStruct.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A23_NewStruct.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A24_CallRawConstructorToShared.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A2_EmptyExtendedObserveEvent.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A2_WrongSimpleObserveEvent.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A3_ObserveNotInBind.txt" />
@@ -403,6 +407,9 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\B5_ChildOfMap.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\B6_FunctionIsNotType.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\B6_VariableIsNotType.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\D3_ImplementMissFunction.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\D4_ImplementUnexistsFunction.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\D6_ImplementDuplicateFunction.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\F0_ExpressionTopQualifiedSymbolNotExists.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\F1_ExpressionChildSymbolNotExists.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\F1_ObservedDefaultEventNotExists.txt" />

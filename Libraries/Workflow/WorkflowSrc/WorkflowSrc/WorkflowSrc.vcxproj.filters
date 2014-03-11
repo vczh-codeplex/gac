@@ -1178,6 +1178,27 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_OfSharedToRaw.txt">
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
     </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A22_CannotPickOverloadedConstructor.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A23_NewStruct.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A23_ImplementStruct.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A24_CallRawConstructorToShared.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\D3_ImplementMissFunction.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\D4_ImplementUnexistsFunction.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\AnalyzerError\D6_ImplementDuplicateFunction.txt">
+      <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Source\Expression\Codegen.bat">

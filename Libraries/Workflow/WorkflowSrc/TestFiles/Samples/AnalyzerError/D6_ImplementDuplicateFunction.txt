@@ -1,0 +1,24 @@
+module test;
+using system::*;
+
+func main():void
+{
+	new ReadonlyList^
+	{
+		func Get(index : int) : object
+		{
+		}
+
+		func Get(index : int) : object
+		{
+		}
+
+		func Contains(value : object) : object
+		{
+		}
+
+		func IndexOf(value : object) : int
+		{
+		}
+	};
+}
