@@ -303,6 +303,22 @@ WfErrors
 				return new ParsingError(node, L"D4: Interface \"" + interfaceType->GetTypeFriendlyName() + L"\" does not contain method \"" + node->name.value + L"\" which is in type \"" + methodType->GetTypeFriendlyName() + L"\".");
 			}
 
+			Ptr<parsing::ParsingError> WfErrors::CannotPickOverloadedInterfaceMethods(WfExpression* node, collections::List<ResolveExpressionResult>& results)
+			{
+				WString description;
+				FOREACH_INDEXER(ResolveExpressionResult, result, index, results)
+				{
+					description += L"\r\n\t";
+					description += result.GetFriendlyName();
+				}
+				return new ParsingError(node, L"D5: Cannot decide which function to implement in multiple targets: " + description + L".");
+			}
+
+			Ptr<parsing::ParsingError> WfErrors::CannotPickOverloadedImplementMethods(WfFunctionDeclaration* node, reflection::description::ITypeInfo* type)
+			{
+				return new ParsingError(node, L"D6: There are some other methods named \"" + node->name.value + L"\" whose types are also \"" + type->GetTypeFriendlyName() + L"\".");
+			}
+
 			Ptr<parsing::ParsingError> WfErrors::WrongUsingPathWildCard(WfModuleUsingPath* node)
 			{
 				return new ParsingError(node, L"E0: Wild card \"*\" should only appear in the last item of the using path and should appear once.");

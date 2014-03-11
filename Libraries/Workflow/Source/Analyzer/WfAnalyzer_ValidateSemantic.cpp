@@ -1400,9 +1400,18 @@ ValidateSemantic(Expression)
 											{
 												if (interfaces.Count() > 1)
 												{
+													List<ResolveExpressionResult> functions;
+													FOREACH(IMethodInfo*, method, interfaces)
+													{
+														functions.Add(ResolveExpressionResult(method, CreateTypeInfoFromMethodInfo(method)));
+														manager->errors.Add(WfErrors::CannotPickOverloadedInterfaceMethods(node, functions));
+													}
 												}
 												if (implements.Count() > 1)
 												{
+													auto decl = implements[0];
+													Ptr<ITypeInfo> methodType = GetFunctionDeclarationType(scope, decl);
+													manager->errors.Add(WfErrors::CannotPickOverloadedImplementMethods(decl.Obj(), methodType.Obj()));
 												}
 											});
 									});
