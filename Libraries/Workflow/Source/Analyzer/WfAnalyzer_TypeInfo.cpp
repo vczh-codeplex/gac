@@ -515,7 +515,7 @@ CreateTypeInfoFromType
 						case ITypeInfo::TypeDescriptor:
 							if (checkTypeForValue)
 							{
-								if (typeInfo->GetTypeDescriptor()->GetValueSerializer() == 0)
+								if (typeInfo->GetTypeDescriptor()->GetValueSerializer() == 0 && typeInfo->GetTypeDescriptor() != description::GetTypeDescriptor<Value>())
 								{
 									manager->errors.Add(WfErrors::TypeNotForValue(node, typeInfo.Obj()));
 								}
