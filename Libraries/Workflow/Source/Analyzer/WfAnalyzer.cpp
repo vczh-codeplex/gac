@@ -438,17 +438,24 @@ WfLexicalScopeManager
 									{
 										FOREACH(Ptr<WfLexicalSymbol>, symbol, From(symbols))
 										{
-											if (symbol->ownerDeclaration)
+											if (symbol->creatorDeclaration)
 											{
-												errors.Add(WfErrors::DuplicatedSymbol(symbol->ownerDeclaration.Obj(), symbol));
+												if (!symbol->creatorDeclaration.Cast<WfFunctionDeclaration>())
+												{
+													errors.Add(WfErrors::DuplicatedSymbol(symbol->creatorDeclaration.Obj(), symbol));
+												}
 											}
-											else if (symbol->ownerStatement)
+											else if (symbol->creatorArgument)
 											{
-												errors.Add(WfErrors::DuplicatedSymbol(symbol->ownerStatement.Obj(), symbol));
+												errors.Add(WfErrors::DuplicatedSymbol(symbol->creatorArgument.Obj(), symbol));
 											}
-											else if (symbol->ownerExpression)
+											else if (symbol->creatorStatement)
 											{
-												errors.Add(WfErrors::DuplicatedSymbol(symbol->ownerExpression.Obj(), symbol));
+												errors.Add(WfErrors::DuplicatedSymbol(symbol->creatorStatement.Obj(), symbol));
+											}
+											else if (symbol->creatorExpression)
+											{
+												errors.Add(WfErrors::DuplicatedSymbol(symbol->creatorExpression.Obj(), symbol));
 											}
 										}
 									}

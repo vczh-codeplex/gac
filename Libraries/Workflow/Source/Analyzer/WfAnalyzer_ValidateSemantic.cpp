@@ -1254,7 +1254,7 @@ ValidateSemantic(Expression)
 					Ptr<WfLexicalSymbol> symbol = From(manager->declarationScopes[decl.Obj()]->parentScope->symbols[decl->name.value])
 						.Where([decl](Ptr<WfLexicalSymbol> symbol)
 						{
-							return symbol->ownerDeclaration == decl;
+							return symbol->creatorDeclaration == decl;
 						})
 						.First();
 					return symbol->typeInfo;
@@ -1476,7 +1476,7 @@ ValidateSemantic
 							if (index == -1) continue;
 							FOREACH(Ptr<WfLexicalSymbol>, symbol, scope->symbols.GetByIndex(index))
 							{
-								if (symbol->ownerDeclaration == decl && symbol->typeInfo)
+								if (symbol->creatorDeclaration == decl && symbol->typeInfo)
 								{
 									replaces.Add(ResolveExpressionResult(symbol, symbol->typeInfo));
 								}
