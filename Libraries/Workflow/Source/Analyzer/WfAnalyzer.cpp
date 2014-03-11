@@ -674,22 +674,22 @@ ResolveExpressionResult
 				}
 				else if (propertyInfo)
 				{
-					return L"property " + propertyInfo->GetName() + L" in " + propertyInfo->GetOwnerTypeDescriptor()->GetTypeName() + typeName;
+					return L"property \"" + propertyInfo->GetName() + L"\" in \"" + propertyInfo->GetOwnerTypeDescriptor()->GetTypeName() + L"\"" + typeName;
 				}
 				else if (methodInfo)
 				{
 					if (methodInfo->GetName() == L"")
 					{
-						return L"constructor in " + methodInfo->GetOwnerTypeDescriptor()->GetTypeName() + typeName;
+						return L"constructor in " + methodInfo->GetOwnerTypeDescriptor()->GetTypeName() + L"\"" + typeName;
 					}
 					else
 					{
-						return L"method " + methodInfo->GetName() + L" in " + methodInfo->GetOwnerTypeDescriptor()->GetTypeName() + typeName;
+						return L"method \"" + methodInfo->GetName() + L"\" in \"" + methodInfo->GetOwnerTypeDescriptor()->GetTypeName() + L"\"" + typeName;
 					}
 				}
 				else if (eventInfo)
 				{
-					return L"event " + eventInfo->GetName() + L" in " + eventInfo->GetOwnerTypeDescriptor()->GetTypeName();
+					return L"event \"" + eventInfo->GetName() + L"\" in \"" + eventInfo->GetOwnerTypeDescriptor()->GetTypeName() + L"\"";
 				}
 				else if (type)
 				{
