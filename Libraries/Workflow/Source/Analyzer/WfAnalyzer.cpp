@@ -670,16 +670,16 @@ ResolveExpressionResult
 				{
 					if (methodInfo->GetName() == L"")
 					{
-						return L"constructor in " + propertyInfo->GetOwnerTypeDescriptor()->GetTypeName() + typeName;
+						return L"constructor in " + methodInfo->GetOwnerTypeDescriptor()->GetTypeName() + typeName;
 					}
 					else
 					{
-						return L"method " + methodInfo->GetName() + L" in " + propertyInfo->GetOwnerTypeDescriptor()->GetTypeName() + typeName;
+						return L"method " + methodInfo->GetName() + L" in " + methodInfo->GetOwnerTypeDescriptor()->GetTypeName() + typeName;
 					}
 				}
 				else if (eventInfo)
 				{
-					return L"event " + eventInfo->GetName() + L" in " + propertyInfo->GetOwnerTypeDescriptor()->GetTypeName();
+					return L"event " + eventInfo->GetName() + L" in " + eventInfo->GetOwnerTypeDescriptor()->GetTypeName();
 				}
 				else if (type)
 				{

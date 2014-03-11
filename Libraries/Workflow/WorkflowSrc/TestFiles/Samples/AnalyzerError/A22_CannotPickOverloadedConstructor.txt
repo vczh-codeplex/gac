@@ -3,5 +3,5 @@ using test::*;
 
 func main():void
 {
-	new ObservableValue^(0);
+	new ObservableValue^(0, null);
 }
