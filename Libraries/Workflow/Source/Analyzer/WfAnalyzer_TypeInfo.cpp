@@ -992,7 +992,7 @@ GetMergedType
 			}
 
 /***********************************************************************
-GetMergedType
+IsNullAcceptableType
 ***********************************************************************/
 
 			bool IsNullAcceptableType(reflection::description::ITypeInfo* type)
@@ -1009,6 +1009,32 @@ GetMergedType
 					return false;
 				}
 				return false;
+			}
+
+/***********************************************************************
+CreateTypeInfoFromMethodInfo
+***********************************************************************/
+
+			Ptr<reflection::description::ITypeInfo> CreateTypeInfoFromMethodInfo(reflection::description::IMethodInfo* info)
+			{
+				Ptr<TypeInfoImpl> functionType = new TypeInfoImpl(ITypeInfo::SharedPtr);
+				{
+					Ptr<TypeInfoImpl> genericType = new TypeInfoImpl(ITypeInfo::Generic);
+					functionType->SetElementType(genericType);
+					{
+						Ptr<TypeInfoImpl> elementType = new TypeInfoImpl(ITypeInfo::TypeDescriptor);
+						elementType->SetTypeDescriptor(description::GetTypeDescriptor<IValueFunctionProxy>());
+						genericType->SetElementType(elementType);
+					}
+
+					genericType->AddGenericArgument(CopyTypeInfo(info->GetReturn()));
+					vint parameterCount = info->GetParameterCount();
+					for (vint j = 0; j < parameterCount; j++)
+					{
+						genericType->AddGenericArgument(CopyTypeInfo(info->GetParameter(j)->GetType()));
+					}
+				}
+				return functionType;
 			}
 		}
 	}

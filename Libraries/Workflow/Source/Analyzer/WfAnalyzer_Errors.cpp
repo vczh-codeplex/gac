@@ -8,6 +8,8 @@ namespace vl
 		{
 			using namespace collections;
 			using namespace parsing;
+			using namespace reflection;
+			using namespace reflection::description;
 
 /***********************************************************************
 WfErrors
@@ -186,12 +188,18 @@ WfErrors
 
 			Ptr<parsing::ParsingError> WfErrors::ClassContainsNoConstructor(WfExpression* node, reflection::description::ITypeInfo* type)
 			{
-				return new ParsingError(node, L"A23: Type \"" + type->GetTypeFriendlyName() + L"\" does not contain any constructor.");
+				return new ParsingError(node, L"A23: Class \"" + type->GetTypeFriendlyName() + L"\" does not contain any constructor.");
+			}
+
+			Ptr<parsing::ParsingError> WfErrors::InterfaceContainsNoConstructor(WfExpression* node, reflection::description::ITypeInfo* type)
+			{
+				Ptr<ITypeInfo> proxy = TypeInfoRetriver<Ptr<IValueInterfaceProxy>>::CreateTypeInfo();
+				return new ParsingError(node, L"A23: Interface \"" + type->GetTypeFriendlyName() + L"\" does not contain any constructor receiving an \"" + proxy->GetTypeFriendlyName() + L"\".");
 			}
 
 			Ptr<parsing::ParsingError> WfErrors::ConstructorReturnTypeMismatched(WfExpression* node, const ResolveExpressionResult& function, reflection::description::ITypeInfo* fromType, reflection::description::ITypeInfo* toType)
 			{
-				return new ParsingError(node, L"A21: The return type of " + function.GetFriendlyName() + L" cannot implicitly convert from \"" + fromType->GetTypeFriendlyName() + L"\" to \"" + toType->GetTypeFriendlyName() + L"\".");
+				return new ParsingError(node, L"A24: The return type of " + function.GetFriendlyName() + L" cannot implicitly convert from \"" + fromType->GetTypeFriendlyName() + L"\" to \"" + toType->GetTypeFriendlyName() + L"\".");
 			}
 
 			Ptr<parsing::ParsingError> WfErrors::WrongVoidType(WfType* node)
