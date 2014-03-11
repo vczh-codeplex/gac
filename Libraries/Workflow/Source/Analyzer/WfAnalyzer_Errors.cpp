@@ -282,6 +282,11 @@ WfErrors
 				return new ParsingError(node, L"D2: Duplicated symbol \"" + symbol->name + L"\".");
 			}
 
+			Ptr<parsing::ParsingError> WfErrors::DuplicatedSymbol(WfFunctionArgument* node, Ptr<WfLexicalSymbol> symbol)
+			{
+				return new ParsingError(node, L"D2: Duplicated symbol \"" + symbol->name + L"\".");
+			}
+
 			Ptr<parsing::ParsingError> WfErrors::DuplicatedSymbol(WfStatement* node, Ptr<WfLexicalSymbol> symbol)
 			{
 				return new ParsingError(node, L"D2: Duplicated symbol \"" + symbol->name + L"\".");

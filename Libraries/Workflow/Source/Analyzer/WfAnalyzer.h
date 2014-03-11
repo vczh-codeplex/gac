@@ -29,9 +29,10 @@ Scope
 				WString										name;				// name of this symbol
 				Ptr<WfType>									type;				// type of this symbol
 				Ptr<reflection::description::ITypeInfo>		typeInfo;			// reflection type info of this symbol, nullable
-				Ptr<WfDeclaration>							ownerDeclaration;	// nullable
-				Ptr<WfStatement>							ownerStatement;		// nullable
-				Ptr<WfExpression>							ownerExpression;	// nullable
+				Ptr<WfDeclaration>							creatorDeclaration;	// nullable
+				Ptr<WfStatement>							creatorStatement;	// nullable
+				Ptr<WfExpression>							creatorExpression;	// nullable
+				Ptr<WfFunctionArgument>						creatorArgument;	// nullable
 				WfLexicalScope*								ownerScope;			// scope that contains this symbol
 
 				WfLexicalSymbol(WfLexicalScope* _ownerScope);
@@ -294,6 +295,7 @@ Error Messages
 				static Ptr<parsing::ParsingError>			FunctionShouldHaveName(WfDeclaration* node);
 				static Ptr<parsing::ParsingError>			DuplicatedDeclaration(WfDeclaration* node, const WString& firstDeclarationCategory);
 				static Ptr<parsing::ParsingError>			DuplicatedSymbol(WfDeclaration* node, Ptr<WfLexicalSymbol> symbol);
+				static Ptr<parsing::ParsingError>			DuplicatedSymbol(WfFunctionArgument* node, Ptr<WfLexicalSymbol> symbol);
 				static Ptr<parsing::ParsingError>			DuplicatedSymbol(WfStatement* node, Ptr<WfLexicalSymbol> symbol);
 				static Ptr<parsing::ParsingError>			DuplicatedSymbol(WfExpression* node, Ptr<WfLexicalSymbol> symbol);
 				static Ptr<parsing::ParsingError>			InterfaceMethodNotImplemented(WfNewTypeExpression* node, reflection::description::IMethodInfo* method);
