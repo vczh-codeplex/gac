@@ -100,6 +100,16 @@ namespace test
 		{
 		}
 
+		ObservableValue(vint _value, Nullable<double> x)
+			:value(_value)
+		{
+		}
+
+		ObservableValue(vint _value, Nullable<bool> x)
+			:value(_value)
+		{
+		}
+
 		vint GetValue()
 		{
 			return value;
@@ -132,6 +142,7 @@ namespace vl
 		{
 			using namespace test;
 
+#define _ ,
 #define UNITTEST_TYPELIST(F)\
 			F(test::ObservableValue)\
 
@@ -141,6 +152,8 @@ namespace vl
 			BEGIN_CLASS_MEMBER(ObservableValue)
 				CLASS_MEMBER_CONSTRUCTOR(Ptr<ObservableValue>(), NO_PARAMETER)
 				CLASS_MEMBER_CONSTRUCTOR(Ptr<ObservableValue>(vint), { L"value" })
+				CLASS_MEMBER_CONSTRUCTOR(ObservableValue*(vint, Nullable<double>), { L"value" _ L"x" })
+				CLASS_MEMBER_CONSTRUCTOR(ObservableValue*(vint, Nullable<bool>), { L"value" _ L"x" })
 
 				CLASS_MEMBER_EVENT(ValueChanged)
 				CLASS_MEMBER_PROPERTY_EVENT_FAST(Value, ValueChanged)
@@ -170,6 +183,8 @@ namespace vl
 				}
 				return false;
 			}
+
+#undef _
 		}
 	}
 }

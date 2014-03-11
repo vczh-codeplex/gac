@@ -93,6 +93,10 @@ A19_CallStruct
 A20_CallWrongArgumentCount
 A21_CallWrongArgument
 A22_CannotPickOverloadedFunctions
+A22_CannotPickOverloadedConstructor
+A23_NewStruct
+A23_ImplementStruct
+A24_CallRawConstructorToShared
 B0_VoidVariable
 B0_VoidArgument
 B0_VoidMapElement
@@ -134,6 +138,9 @@ D2_DuplicatedFunctionArgument
 D2_DuplicatedLambdaFunctionArgument
 D2_DuplicatedVariable
 D2_DuplicatedLetVariable
+D3_ImplementMissFunction
+D4_ImplementUnexistsFunction
+D6_ImplementDuplicateFunction
 E0_NoWildCard
 E0_TooManyWildCard
 E0_WildCardInWrongPlace
