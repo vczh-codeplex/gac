@@ -862,7 +862,7 @@ Interface Implementation Proxy
 			class IValueSubscription : public virtual IDescriptable, public Description<IValueSubscription>
 			{
 			public:
-				virtual Ptr<IValueListener>		Subscribe(Ptr<IValueFunctionProxy> callback) = 0;
+				virtual Ptr<IValueListener>		Subscribe(const Func<void(Value)>& callback) = 0;
 				virtual bool					Close() = 0;
 			};
 

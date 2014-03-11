@@ -615,7 +615,7 @@ Interface Implementation Proxy (Implement)
 						return new description_IValueSubscription(proxy);
 					}
 
-					Ptr<IValueListener> Subscribe(Ptr<IValueFunctionProxy> callback)override
+					Ptr<IValueListener> Subscribe(const Func<void(Value)>& callback)override
 					{
 						return INVOKEGET_INTERFACE_PROXY(Subscribe, callback);
 					}
@@ -921,7 +921,9 @@ LoadPredefinedTypes
 					ADD_TYPE_INFO(IValueDictionary)
 					ADD_TYPE_INFO(IValueInterfaceProxy)
 					ADD_TYPE_INFO(IValueFunctionProxy)
-
+					
+					ADD_TYPE_INFO(IValueListener)
+					ADD_TYPE_INFO(IValueSubscription)
 					ADD_TYPE_INFO(IValueSerializer)
 					ADD_TYPE_INFO(ITypeInfo)
 					ADD_TYPE_INFO(ITypeInfo::Decorator)
