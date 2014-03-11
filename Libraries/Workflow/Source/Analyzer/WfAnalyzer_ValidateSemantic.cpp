@@ -299,24 +299,7 @@ ValidateSemantic(Expression)
 							for (vint i = 0; i < count; i++)
 							{
 								IMethodInfo* info = groupInfo->GetMethod(i);
-								Ptr<TypeInfoImpl> functionType = new TypeInfoImpl(ITypeInfo::SharedPtr);
-								{
-									Ptr<TypeInfoImpl> genericType = new TypeInfoImpl(ITypeInfo::Generic);
-									functionType->SetElementType(genericType);
-									{
-										Ptr<TypeInfoImpl> elementType = new TypeInfoImpl(ITypeInfo::TypeDescriptor);
-										elementType->SetTypeDescriptor(description::GetTypeDescriptor<IValueFunctionProxy>());
-										genericType->SetElementType(elementType);
-									}
-
-									genericType->AddGenericArgument(CopyTypeInfo(info->GetReturn()));
-									vint parameterCount = info->GetParameterCount();
-									for (vint j = 0; j < parameterCount; j++)
-									{
-										genericType->AddGenericArgument(CopyTypeInfo(info->GetParameter(j)->GetType()));
-									}
-								}
-								ResolveExpressionResult result(info, functionType);
+								ResolveExpressionResult result(info, CreateTypeInfoFromMethodInfo(info));
 								results.Add(result);
 							}
 						}
@@ -1273,54 +1256,69 @@ ValidateSemantic(Expression)
 					if (type)
 					{
 						ITypeDescriptor* td = type->GetTypeDescriptor();
-
-						if (node->functions.Count() == 0)
+						ITypeDescriptor* proxyTd = description::GetTypeDescriptor<IValueInterfaceProxy>();
+						IMethodGroupInfo* ctors = td->GetConstructorGroup();
+						Ptr<ITypeInfo> selectedType;
+						ResolveExpressionResult selectedFunction;
+						if (!ctors || ctors->GetMethodCount() == 0)
 						{
+							manager->errors.Add(WfErrors::ClassContainsNoConstructor(node, type.Obj()));
 						}
 						else
 						{
-							IMethodGroupInfo* ctors = td->GetConstructorGroup();
-							if (!ctors || ctors->GetMethodCount() == 0)
-							{
-								manager->errors.Add(WfErrors::ClassContainsNoConstructor(node, type.Obj()));
-							}
-							else
+							if (node->functions.Count() == 0)
 							{
 								List<ResolveExpressionResult> functions;
 								for (vint i = 0; i < ctors->GetMethodCount(); i++)
 								{
 									IMethodInfo* info = ctors->GetMethod(i);
-									Ptr<TypeInfoImpl> functionType = new TypeInfoImpl(ITypeInfo::SharedPtr);
-									{
-										Ptr<TypeInfoImpl> genericType = new TypeInfoImpl(ITypeInfo::Generic);
-										functionType->SetElementType(genericType);
-										{
-											Ptr<TypeInfoImpl> elementType = new TypeInfoImpl(ITypeInfo::TypeDescriptor);
-											elementType->SetTypeDescriptor(description::GetTypeDescriptor<IValueFunctionProxy>());
-											genericType->SetElementType(elementType);
-										}
-
-										genericType->AddGenericArgument(CopyTypeInfo(info->GetReturn()));
-										vint parameterCount = info->GetParameterCount();
-										for (vint j = 0; j < parameterCount; j++)
-										{
-											genericType->AddGenericArgument(CopyTypeInfo(info->GetParameter(j)->GetType()));
-										}
-									}
-									functions.Add(ResolveExpressionResult(info, functionType));
+									functions.Add(ResolveExpressionResult(info, CreateTypeInfoFromMethodInfo(info)));
 								}
 
-								Ptr<ITypeInfo> resultType = SelectFunction(node, 0, functions, node->arguments);
-								if (resultType)
+								selectedType = SelectFunction(node, 0, functions, node->arguments);
+								if (selectedType)
 								{
-									if (!CanConvertToType(resultType.Obj(), type.Obj(), false))
+									selectedFunction = functions[0];
+								}
+							}
+							else
+							{
+								for (vint i = 0; i < ctors->GetMethodCount(); i++)
+								{
+									IMethodInfo* info = ctors->GetMethod(i);
+									if (info->GetParameterCount() == 1)
 									{
-										manager->errors.Add(WfErrors::ConstructorReturnTypeMismatched(node, functions[0], resultType.Obj(), type.Obj()));
+										ITypeInfo* parameterType = info->GetParameter(0)->GetType();
+										if (parameterType->GetDecorator() == ITypeInfo::SharedPtr)
+										{
+											parameterType = parameterType->GetElementType();
+											if (parameterType->GetDecorator() == ITypeInfo::TypeDescriptor && parameterType->GetTypeDescriptor() == proxyTd)
+											{
+												selectedType = CopyTypeInfo(info->GetReturn());
+												selectedFunction = ResolveExpressionResult(info, CreateTypeInfoFromMethodInfo(info));
+												break;
+											}
+										}
 									}
+								}
+								if (!selectedType)
+								{
+									manager->errors.Add(WfErrors::InterfaceContainsNoConstructor(node, type.Obj()));
+								}
+
+								FOREACH(Ptr<WfFunctionDeclaration>, function, node->functions)
+								{
+									ValidateDeclarationSemantic(manager, function);
 								}
 							}
 						}
-
+						if (selectedType)
+						{
+							if (!CanConvertToType(selectedType.Obj(), type.Obj(), false))
+							{
+								manager->errors.Add(WfErrors::ConstructorReturnTypeMismatched(node, selectedFunction, selectedType.Obj(), type.Obj()));
+							}
+						}
 						results.Add(ResolveExpressionResult(type));
 					}
 				}
