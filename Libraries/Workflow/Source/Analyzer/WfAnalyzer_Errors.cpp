@@ -202,6 +202,11 @@ WfErrors
 				return new ParsingError(node, L"A24: The return type of " + function.GetFriendlyName() + L" cannot implicitly convert from \"" + fromType->GetTypeFriendlyName() + L"\" to \"" + toType->GetTypeFriendlyName() + L"\".");
 			}
 
+			Ptr<parsing::ParsingError> WfErrors::ExpressionIsNotLeftValue(WfExpression* node)
+			{
+				return new ParsingError(node, L"A25: Expression is not assignable.");
+			}
+
 			Ptr<parsing::ParsingError> WfErrors::WrongVoidType(WfType* node)
 			{
 				return new ParsingError(node, L"B0: Void is not a type for a value.");

@@ -617,28 +617,31 @@ ResolveExpressionResult
 			{
 			}
 
-			ResolveExpressionResult::ResolveExpressionResult(Ptr<reflection::description::ITypeInfo> _type)
+			ResolveExpressionResult::ResolveExpressionResult(Ptr<reflection::description::ITypeInfo> _type, Ptr<reflection::description::ITypeInfo> _leftValueType)
 				:type(_type)
+				, leftValueType(_leftValueType)
 				, propertyInfo(0)
 				, methodInfo(0)
 				, eventInfo(0)
 			{
 			}
 
-			ResolveExpressionResult::ResolveExpressionResult(Ptr<WfLexicalSymbol> _symbol, Ptr<reflection::description::ITypeInfo> _type)
+			ResolveExpressionResult::ResolveExpressionResult(Ptr<WfLexicalSymbol> _symbol, Ptr<reflection::description::ITypeInfo> _type, Ptr<reflection::description::ITypeInfo> _leftValueType)
 				:symbol(_symbol)
 				, type(_type)
+				, leftValueType(_leftValueType)
 				, propertyInfo(0)
 				, methodInfo(0)
 				, eventInfo(0)
 			{
 			}
 
-			ResolveExpressionResult::ResolveExpressionResult(reflection::description::IPropertyInfo* _propertyInfo, Ptr<reflection::description::ITypeInfo> _type)
+			ResolveExpressionResult::ResolveExpressionResult(reflection::description::IPropertyInfo* _propertyInfo, Ptr<reflection::description::ITypeInfo> _type, Ptr<reflection::description::ITypeInfo> _leftValueType)
 				:propertyInfo(_propertyInfo)
 				, methodInfo(0)
 				, eventInfo(0)
 				, type(_type)
+				, leftValueType(_leftValueType)
 			{
 			}
 

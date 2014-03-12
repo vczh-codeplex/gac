@@ -178,7 +178,14 @@ ValidateSemantic(Expression)
 						{
 							if (symbol->typeInfo)
 							{
-								results.Add(ResolveExpressionResult(symbol, symbol->typeInfo));
+								if (symbol->creatorDeclaration.Cast<WfVariableDeclaration>())
+								{
+									results.Add(ResolveExpressionResult(symbol, symbol->typeInfo, symbol->typeInfo));
+								}
+								else
+								{
+									results.Add(ResolveExpressionResult(symbol, symbol->typeInfo));
+								}
 							}
 						}
 
@@ -285,7 +292,20 @@ ValidateSemantic(Expression)
 						ITypeDescriptor* typeDescriptor = type->GetTypeDescriptor();
 						if (IPropertyInfo* info = typeDescriptor->GetPropertyByName(node->name.value, true))
 						{
-							ResolveExpressionResult result(info, CopyTypeInfo(info->GetReturn()));
+							Ptr<ITypeInfo> getterType = CopyTypeInfo(info->GetReturn());
+							Ptr<ITypeInfo> setterType;
+							if (info->IsWritable())
+							{
+								setterType = getterType;
+								if (IMethodInfo* setter = info->GetSetter())
+								{
+									if (setter->GetParameterCount() == 1 && !IsSameType(getterType.Obj(), setter->GetParameter(0)->GetType()))
+									{
+										setterType = CopyTypeInfo(setter->GetParameter(0)->GetType());
+									}
+								}
+							}
+							ResolveExpressionResult result(info, getterType, setterType);
 							results.Add(result);
 						}
 						if (IEventInfo* info = typeDescriptor->GetEventByName(node->name.value, true))
@@ -435,7 +455,7 @@ ValidateSemantic(Expression)
 
 					if (node->op == WfBinaryOperator::Assign)
 					{
-						Ptr<ITypeInfo> variableType = GetExpressionType(manager, node->first, 0);
+						Ptr<ITypeInfo> variableType = GetLeftValueExpressionType(manager, node->first);
 						GetExpressionType(manager, node->second, variableType);
 						if (variableType)
 						{
@@ -452,6 +472,7 @@ ValidateSemantic(Expression)
 								ITypeInfo* genericType = containerType->GetElementType();
 								Ptr<ITypeInfo> indexType;
 								Ptr<ITypeInfo> resultType;
+								bool leftValue = false;
 
 								if (genericType->GetDecorator() == ITypeInfo::Generic)
 								{
@@ -465,6 +486,7 @@ ValidateSemantic(Expression)
 									{
 										indexType = TypeInfoRetriver<vint>::CreateTypeInfo();
 										resultType = CopyTypeInfo(genericType->GetGenericArgument(0));
+										leftValue = true;
 									}
 									else if (classType->GetTypeDescriptor() == description::GetTypeDescriptor<IValueReadonlyDictionary>())
 									{
@@ -475,6 +497,7 @@ ValidateSemantic(Expression)
 									{
 										indexType = CopyTypeInfo(genericType->GetGenericArgument(0));
 										resultType = CopyTypeInfo(genericType->GetGenericArgument(1));
+										leftValue = true;
 									}
 									else
 									{
@@ -492,6 +515,7 @@ ValidateSemantic(Expression)
 									{
 										indexType = TypeInfoRetriver<vint>::CreateTypeInfo();
 										resultType = TypeInfoRetriver<Value>::CreateTypeInfo();
+										leftValue = true;
 									}
 									else if (genericType->GetTypeDescriptor() == description::GetTypeDescriptor<IValueReadonlyDictionary>())
 									{
@@ -502,6 +526,7 @@ ValidateSemantic(Expression)
 									{
 										indexType = TypeInfoRetriver<Value>::CreateTypeInfo();
 										resultType = TypeInfoRetriver<Value>::CreateTypeInfo();
+										leftValue = true;
 									}
 									else
 									{
@@ -512,7 +537,14 @@ ValidateSemantic(Expression)
 								GetExpressionType(manager, node->second, indexType);
 								if (resultType)
 								{
-									results.Add(ResolveExpressionResult(resultType));
+									if (leftValue)
+									{
+										results.Add(ResolveExpressionResult(resultType, resultType));
+									}
+									else
+									{
+										results.Add(ResolveExpressionResult(resultType));
+									}
 								}
 							}
 							else
@@ -1558,7 +1590,7 @@ GetExpressionEventInfo
 			}
 
 /***********************************************************************
-GetExpressionType(s)
+GetExpressionTypes/GetExpressionType/GetLeftValueExpressionType
 ***********************************************************************/
 
 			void GetExpressionTypes(WfLexicalScopeManager* manager, Ptr<WfExpression> expression, Ptr<reflection::description::ITypeInfo> expectedType, collections::List<ResolveExpressionResult>& results)
@@ -1637,6 +1669,29 @@ GetExpressionType(s)
 				{
 					return expectedType;
 				}
+			}
+
+			Ptr<reflection::description::ITypeInfo>	GetLeftValueExpressionType(WfLexicalScopeManager* manager, Ptr<WfExpression> expression)
+			{
+				List<ResolveExpressionResult> results;
+				GetExpressionTypes(manager, expression, 0, results);
+
+				if (results.Count() > 1)
+				{
+					manager->errors.Add(WfErrors::TooManyTargets(expression.Obj(), results, GetExpressionName(expression)));
+				}
+				else if (results.Count() == 1)
+				{
+					if (results[0].leftValueType)
+					{
+						return results[0].leftValueType;
+					}
+					else
+					{
+						manager->errors.Add(WfErrors::ExpressionIsNotLeftValue(expression.Obj()));
+					}
+				}
+				return 0;
 			}
 
 /***********************************************************************
