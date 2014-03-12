@@ -287,6 +287,8 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\A0_WrongFormatStringSyntax.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_AnonymousLambdaToStruct.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_AnonymousLambdaToWrongFunctionType.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A10_AssignToList.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A10_AssignToVariable.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_BaseToDerived.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_ConstructorToStruct.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_FunctionLambdaToStruct.txt" />
@@ -370,6 +372,10 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\A23_ImplementStruct.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A23_NewStruct.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A24_CallRawConstructorToShared.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A25_AssignToConstant.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A25_AssignToFunctionCall.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A25_AssignToReadonlyList.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A25_AssignToReadonlyProperty.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A2_EmptyExtendedObserveEvent.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A2_WrongSimpleObserveEvent.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A3_ObserveNotInBind.txt" />
