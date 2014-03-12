@@ -274,12 +274,12 @@ WfErrors
 
 			Ptr<parsing::ParsingError> WfErrors::ReturnMissExpression(WfStatement* node, reflection::description::ITypeInfo* type)
 			{
-				return new ParsingError(node, L"C3: Return statement requires an expression of type \"" + type->GetTypeFriendlyName() + L"\".");
+				return new ParsingError(node, L"C4: Return statement requires an expression of type \"" + type->GetTypeFriendlyName() + L"\".");
 			}
 
 			Ptr<parsing::ParsingError> WfErrors::DeleteNonRawPointer(WfStatement* node, reflection::description::ITypeInfo* type)
 			{
-				return new ParsingError(node, L"C3: Delete statement cannot apply on an expression of type \"" + type->GetTypeFriendlyName() + L"\", which is expected to be a raw pointer.");
+				return new ParsingError(node, L"C5: Delete statement cannot apply on an expression of type \"" + type->GetTypeFriendlyName() + L"\", which is expected to be a raw pointer.");
 			}
 
 			Ptr<parsing::ParsingError> WfErrors::FunctionShouldHaveName(WfDeclaration* node)

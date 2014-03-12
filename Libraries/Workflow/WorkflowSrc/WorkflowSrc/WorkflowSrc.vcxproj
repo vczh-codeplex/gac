@@ -334,6 +334,7 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_WrongAttachExpressionToStruct.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_WrongDetachExpression.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_WrongDetachExpressionToStruct.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A10_WrongIfVariable.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_WrongTypeOfExpressionToStruct.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_WrongTypeOfTypeToStruct.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A10_WrongTypeTestingToStruct.txt" />
@@ -358,10 +359,12 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\A14_IfExpressionCannotMergeType.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A14_IncompatibleList.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A14_IncompatibleMap.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A14_IncompatibleSwitch.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A14_RangeCannotMergeType.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A14_SetTestingInWrongCollection.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A15_RangeOfBoolean.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A17_IndexNotEnumerableObject.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A18_ForInNotEnumerableObject.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A18_SetTestingInNotEnumerableObject.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A19_CallStruct.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A1_WrongSimpleObserveExpression.txt" />
@@ -413,6 +416,8 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\B5_ChildOfMap.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\B6_FunctionIsNotType.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\B6_VariableIsNotType.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\C4_ReturnMissExpression.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\C5_DeleteNonRawPointer.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\D3_ImplementMissFunction.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\D4_ImplementUnexistsFunction.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\D6_ImplementDuplicateFunction.txt" />

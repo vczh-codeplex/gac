@@ -60,6 +60,7 @@ A10_WrongAttachExpression
 A10_WrongAttachExpressionToStruct
 A10_WrongDetachExpression
 A10_WrongDetachExpressionToStruct
+A10_WrongIfVariable
 A10_WrongTypeOfExpressionToStruct
 A10_WrongTypeOfTypeToStruct
 A10_WrongTypeTestingToStruct
@@ -88,8 +89,10 @@ A14_RangeCannotMergeType
 A14_SetTestingInWrongCollection
 A14_IncompatibleList
 A14_IncompatibleMap
+A14_IncompatibleSwitch
 A15_RangeOfBoolean
 A17_IndexNotEnumerableObject
+A18_ForInNotEnumerableObject
 A18_SetTestingInNotEnumerableObject
 A19_CallStruct
 A20_CallWrongArgumentCount
@@ -132,6 +135,8 @@ C0_BreakNotInLoop
 C1_ContinueNotInLoop
 C2_RethrowNotInCatch
 C3_TryMissCatchAndFinally
+C4_ReturnMissExpression
+C5_DeleteNonRawPointer
 D0_AnonymousFunction
 D0_AnonymousInterfaceFunction
 D1_DuplicatedNamespace
