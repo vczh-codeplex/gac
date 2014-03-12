@@ -86,7 +86,7 @@ ValueFunctionProxyWrapper<Func<R(TArgs...)>>
 				template<typename T0, typename ...TArgs>
 				void UnboxSpecifiedParameter(Ptr<IValueList> arguments, vint index, T0& p0, TArgs& ...args)
 				{
-					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments->Get(index), p0, 0, L"nth-argument");
+					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments->Get(index), p0, 0, itow(index + 1) + L"-th argument");
 					UnboxSpecifiedParameter(arguments, index + 1, args...);
 				}
 
@@ -222,7 +222,7 @@ CustomConstructorInfoImpl<R(TArgs...)>
 				template<typename T0, typename ...TArgs>
 				void UnboxSpecifiedParameter(MethodInfoImpl* methodInfo, collections::Array<Value>& arguments, vint index, T0& p0, TArgs& ...args)
 				{
-					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments[index], p0, methodInfo->GetParameter(index)->GetType()->GetTypeDescriptor(), L"nth-argument");
+					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments[index], p0, methodInfo->GetParameter(index)->GetType()->GetTypeDescriptor(), itow(index) + L"-th argument");
 					UnboxSpecifiedParameter(methodInfo, arguments, index + 1, args...);
 				}
 
@@ -464,7 +464,7 @@ CustomEventInfoImpl<void(TArgs...)>
 				template<typename T0, typename ...TArgs>
 				void UnboxSpecifiedParameter(collections::Array<Value>& arguments, vint index, T0& p0, TArgs& ...args)
 				{
-					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments[index], p0, 0, L"nth-argument");
+					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments[index], p0, 0, itow(index) + L"-th argument");
 					UnboxSpecifiedParameter(arguments, index + 1, args...);
 				}
 
