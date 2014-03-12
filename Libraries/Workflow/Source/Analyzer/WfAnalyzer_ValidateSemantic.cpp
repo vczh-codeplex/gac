@@ -382,15 +382,12 @@ ValidateSemantic(Expression)
 						{
 							Ptr<ITypeInfo> getterType = CopyTypeInfo(info->GetReturn());
 							Ptr<ITypeInfo> setterType;
-							if (info->IsWritable())
+							if (IMethodInfo* setter = info->GetSetter())
 							{
 								setterType = getterType;
-								if (IMethodInfo* setter = info->GetSetter())
+								if (setter->GetParameterCount() == 1 && !IsSameType(getterType.Obj(), setter->GetParameter(0)->GetType()))
 								{
-									if (setter->GetParameterCount() == 1 && !IsSameType(getterType.Obj(), setter->GetParameter(0)->GetType()))
-									{
-										setterType = CopyTypeInfo(setter->GetParameter(0)->GetType());
-									}
+									setterType = CopyTypeInfo(setter->GetParameter(0)->GetType());
 								}
 							}
 							ResolveExpressionResult result(info, getterType, setterType);
