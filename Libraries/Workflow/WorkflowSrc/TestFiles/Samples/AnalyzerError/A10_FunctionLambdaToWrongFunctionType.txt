@@ -2,8 +2,8 @@ module test;
 
 func main():void
 {
-	var x : func(string, bool):int = func self(x:int):string
+	var x : func(string, bool):int = func self(y:int):string
 	{
-		return x;
+		return y;
 	};
 }

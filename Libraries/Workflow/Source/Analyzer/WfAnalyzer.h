@@ -293,6 +293,8 @@ Error Messages
 				static Ptr<parsing::ParsingError>			ContinueNotInLoop(WfStatement* node);
 				static Ptr<parsing::ParsingError>			RethrowNotInCatch(WfStatement* node);
 				static Ptr<parsing::ParsingError>			TryMissCatchAndFinally(WfStatement* node);
+				static Ptr<parsing::ParsingError>			ReturnMissExpression(WfStatement* node, reflection::description::ITypeInfo* type);
+				static Ptr<parsing::ParsingError>			DeleteNonRawPointer(WfStatement* node, reflection::description::ITypeInfo* type);
 
 				// D: Declaration error
 				static Ptr<parsing::ParsingError>			FunctionShouldHaveName(WfDeclaration* node);

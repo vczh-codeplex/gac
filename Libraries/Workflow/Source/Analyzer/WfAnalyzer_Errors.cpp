@@ -272,6 +272,16 @@ WfErrors
 				return new ParsingError(node, L"C3: Try statement should not appear without both catch and finally.");
 			}
 
+			Ptr<parsing::ParsingError> WfErrors::ReturnMissExpression(WfStatement* node, reflection::description::ITypeInfo* type)
+			{
+				return new ParsingError(node, L"C3: Return statement requires an expression of type \"" + type->GetTypeFriendlyName() + L"\".");
+			}
+
+			Ptr<parsing::ParsingError> WfErrors::DeleteNonRawPointer(WfStatement* node, reflection::description::ITypeInfo* type)
+			{
+				return new ParsingError(node, L"C3: Delete statement cannot apply on an expression of type \"" + type->GetTypeFriendlyName() + L"\", which is expected to be a raw pointer.");
+			}
+
 			Ptr<parsing::ParsingError> WfErrors::FunctionShouldHaveName(WfDeclaration* node)
 			{
 				return new ParsingError(node, L"D0: Function should have a name.");
