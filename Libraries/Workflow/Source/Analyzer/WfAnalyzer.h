@@ -209,13 +209,14 @@ Helper Functions
 				reflection::description::IMethodInfo*		methodInfo;
 				reflection::description::IEventInfo*		eventInfo;
 				Ptr<reflection::description::ITypeInfo>		type;
+				Ptr<reflection::description::ITypeInfo>		leftValueType;
 
 				ResolveExpressionResult();
 				ResolveExpressionResult(const ResolveExpressionResult& result);
 				ResolveExpressionResult(Ptr<WfLexicalScopeName> _scopeName);
-				ResolveExpressionResult(Ptr<reflection::description::ITypeInfo> _type);
-				ResolveExpressionResult(Ptr<WfLexicalSymbol> _symbol, Ptr<reflection::description::ITypeInfo> _type);
-				ResolveExpressionResult(reflection::description::IPropertyInfo* _propertyInfo, Ptr<reflection::description::ITypeInfo> _type);
+				ResolveExpressionResult(Ptr<reflection::description::ITypeInfo> _type, Ptr<reflection::description::ITypeInfo> _leftValueType = 0);
+				ResolveExpressionResult(Ptr<WfLexicalSymbol> _symbol, Ptr<reflection::description::ITypeInfo> _type, Ptr<reflection::description::ITypeInfo> _leftValueType = 0);
+				ResolveExpressionResult(reflection::description::IPropertyInfo* _propertyInfo, Ptr<reflection::description::ITypeInfo> _type, Ptr<reflection::description::ITypeInfo> _leftValueType = 0);
 				ResolveExpressionResult(reflection::description::IMethodInfo* _methodInfo, Ptr<reflection::description::ITypeInfo> _type);
 				ResolveExpressionResult(reflection::description::IEventInfo* _eventInfo);
 
@@ -228,6 +229,7 @@ Helper Functions
 			extern reflection::description::IEventInfo*		GetExpressionEventInfo(WfLexicalScopeManager* manager, Ptr<WfExpression> expression);
 			extern void										GetExpressionTypes(WfLexicalScopeManager* manager, Ptr<WfExpression> expression, Ptr<reflection::description::ITypeInfo> expectedType, collections::List<ResolveExpressionResult>& results);
 			extern Ptr<reflection::description::ITypeInfo>	GetExpressionType(WfLexicalScopeManager* manager, Ptr<WfExpression> expression, Ptr<reflection::description::ITypeInfo> expectedType);
+			extern Ptr<reflection::description::ITypeInfo>	GetLeftValueExpressionType(WfLexicalScopeManager* manager, Ptr<WfExpression> expression);
 			extern Ptr<reflection::description::ITypeInfo>	GetEnumerableExpressionItemType(WfLexicalScopeManager* manager, Ptr<WfExpression> expression, Ptr<reflection::description::ITypeInfo> expectedType);
 
 /***********************************************************************
@@ -273,6 +275,7 @@ Error Messages
 				static Ptr<parsing::ParsingError>			ClassContainsNoConstructor(WfExpression* node, reflection::description::ITypeInfo* type);
 				static Ptr<parsing::ParsingError>			InterfaceContainsNoConstructor(WfExpression* node, reflection::description::ITypeInfo* type);
 				static Ptr<parsing::ParsingError>			ConstructorReturnTypeMismatched(WfExpression* node, const ResolveExpressionResult& function, reflection::description::ITypeInfo* fromType, reflection::description::ITypeInfo* toType);
+				static Ptr<parsing::ParsingError>			ExpressionIsNotLeftValue(WfExpression* node);
 
 				// B: Type error
 				static Ptr<parsing::ParsingError>			WrongVoidType(WfType* node);
