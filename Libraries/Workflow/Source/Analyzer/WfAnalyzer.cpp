@@ -179,6 +179,112 @@ WfLexicalScopeName
 			}
 
 /***********************************************************************
+ResolveExpressionResult
+***********************************************************************/
+
+			ResolveExpressionResult::ResolveExpressionResult()
+				:propertyInfo(0)
+				, methodInfo(0)
+				, eventInfo(0)
+			{
+			}
+
+			ResolveExpressionResult::ResolveExpressionResult(Ptr<WfLexicalScopeName> _scopeName)
+				:scopeName(_scopeName)
+				, propertyInfo(0)
+				, methodInfo(0)
+				, eventInfo(0)
+			{
+			}
+
+			ResolveExpressionResult::ResolveExpressionResult(Ptr<reflection::description::ITypeInfo> _type, Ptr<reflection::description::ITypeInfo> _leftValueType)
+				:type(_type)
+				, leftValueType(_leftValueType)
+				, propertyInfo(0)
+				, methodInfo(0)
+				, eventInfo(0)
+			{
+			}
+
+			ResolveExpressionResult::ResolveExpressionResult(Ptr<WfLexicalSymbol> _symbol, Ptr<reflection::description::ITypeInfo> _type, Ptr<reflection::description::ITypeInfo> _leftValueType)
+				:symbol(_symbol)
+				, type(_type)
+				, leftValueType(_leftValueType)
+				, propertyInfo(0)
+				, methodInfo(0)
+				, eventInfo(0)
+			{
+			}
+
+			ResolveExpressionResult::ResolveExpressionResult(reflection::description::IPropertyInfo* _propertyInfo, Ptr<reflection::description::ITypeInfo> _type, Ptr<reflection::description::ITypeInfo> _leftValueType)
+				:propertyInfo(_propertyInfo)
+				, methodInfo(0)
+				, eventInfo(0)
+				, type(_type)
+				, leftValueType(_leftValueType)
+			{
+			}
+
+			ResolveExpressionResult::ResolveExpressionResult(reflection::description::IMethodInfo* _methodInfo, Ptr<reflection::description::ITypeInfo> _type)
+				:propertyInfo(0)
+				, methodInfo(_methodInfo)
+				, eventInfo(0)
+				, type(_type)
+			{
+			}
+
+			ResolveExpressionResult::ResolveExpressionResult(reflection::description::IEventInfo* _eventInfo)
+				:propertyInfo(0)
+				, methodInfo(0)
+				, eventInfo(_eventInfo)
+			{
+			}
+
+			WString ResolveExpressionResult::GetFriendlyName()const
+			{
+				WString typeName;
+				if (type)
+				{
+					typeName= + L" of type \"" + type->GetTypeFriendlyName() + L"\"";
+				}
+				if (scopeName)
+				{
+					return scopeName->GetFriendlyName();
+				}
+				else if (symbol)
+				{
+					return symbol->GetFriendlyName() + typeName;
+				}
+				else if (propertyInfo)
+				{
+					return L"property \"" + propertyInfo->GetName() + L"\" in \"" + propertyInfo->GetOwnerTypeDescriptor()->GetTypeName() + L"\"" + typeName;
+				}
+				else if (methodInfo)
+				{
+					if (methodInfo->GetName() == L"")
+					{
+						return L"constructor in " + methodInfo->GetOwnerTypeDescriptor()->GetTypeName() + L"\"" + typeName;
+					}
+					else
+					{
+						return L"method \"" + methodInfo->GetName() + L"\" in \"" + methodInfo->GetOwnerTypeDescriptor()->GetTypeName() + L"\"" + typeName;
+					}
+				}
+				else if (eventInfo)
+				{
+					return L"event \"" + eventInfo->GetName() + L"\" in \"" + eventInfo->GetOwnerTypeDescriptor()->GetTypeName() + L"\"";
+				}
+				else if (type)
+				{
+					return L"expression" + typeName;
+				}
+				else
+				{
+					return L"<unknown>";
+				}
+			}
+
+/***********************************************************************
 WfLexicalScopeManager
 ***********************************************************************/
 
@@ -585,122 +691,6 @@ WfLexicalScopeManager
 					}
 					names.Add(scopeName);
 				USING_PATH_MATCHING_FAILED:;
-				}
-			}
-
-/***********************************************************************
-ResolveExpressionResult
-***********************************************************************/
-
-			ResolveExpressionResult::ResolveExpressionResult()
-				:propertyInfo(0)
-				, methodInfo(0)
-				, eventInfo(0)
-			{
-			}
-
-			ResolveExpressionResult::ResolveExpressionResult(const ResolveExpressionResult& result)
-				:scopeName(result.scopeName)
-				, symbol(result.symbol)
-				, type(result.type)
-				, propertyInfo(0)
-				, methodInfo(0)
-				, eventInfo(0)
-			{
-			}
-
-			ResolveExpressionResult::ResolveExpressionResult(Ptr<WfLexicalScopeName> _scopeName)
-				:scopeName(_scopeName)
-				, propertyInfo(0)
-				, methodInfo(0)
-				, eventInfo(0)
-			{
-			}
-
-			ResolveExpressionResult::ResolveExpressionResult(Ptr<reflection::description::ITypeInfo> _type, Ptr<reflection::description::ITypeInfo> _leftValueType)
-				:type(_type)
-				, leftValueType(_leftValueType)
-				, propertyInfo(0)
-				, methodInfo(0)
-				, eventInfo(0)
-			{
-			}
-
-			ResolveExpressionResult::ResolveExpressionResult(Ptr<WfLexicalSymbol> _symbol, Ptr<reflection::description::ITypeInfo> _type, Ptr<reflection::description::ITypeInfo> _leftValueType)
-				:symbol(_symbol)
-				, type(_type)
-				, leftValueType(_leftValueType)
-				, propertyInfo(0)
-				, methodInfo(0)
-				, eventInfo(0)
-			{
-			}
-
-			ResolveExpressionResult::ResolveExpressionResult(reflection::description::IPropertyInfo* _propertyInfo, Ptr<reflection::description::ITypeInfo> _type, Ptr<reflection::description::ITypeInfo> _leftValueType)
-				:propertyInfo(_propertyInfo)
-				, methodInfo(0)
-				, eventInfo(0)
-				, type(_type)
-				, leftValueType(_leftValueType)
-			{
-			}
-
-			ResolveExpressionResult::ResolveExpressionResult(reflection::description::IMethodInfo* _methodInfo, Ptr<reflection::description::ITypeInfo> _type)
-				:propertyInfo(0)
-				, methodInfo(_methodInfo)
-				, eventInfo(0)
-				, type(_type)
-			{
-			}
-
-			ResolveExpressionResult::ResolveExpressionResult(reflection::description::IEventInfo* _eventInfo)
-				:propertyInfo(0)
-				, methodInfo(0)
-				, eventInfo(_eventInfo)
-			{
-			}
-
-			WString ResolveExpressionResult::GetFriendlyName()const
-			{
-				WString typeName;
-				if (type)
-				{
-					typeName= + L" of type \"" + type->GetTypeFriendlyName() + L"\"";
-				}
-				if (scopeName)
-				{
-					return scopeName->GetFriendlyName();
-				}
-				else if (symbol)
-				{
-					return symbol->GetFriendlyName() + typeName;
-				}
-				else if (propertyInfo)
-				{
-					return L"property \"" + propertyInfo->GetName() + L"\" in \"" + propertyInfo->GetOwnerTypeDescriptor()->GetTypeName() + L"\"" + typeName;
-				}
-				else if (methodInfo)
-				{
-					if (methodInfo->GetName() == L"")
-					{
-						return L"constructor in " + methodInfo->GetOwnerTypeDescriptor()->GetTypeName() + L"\"" + typeName;
-					}
-					else
-					{
-						return L"method \"" + methodInfo->GetName() + L"\" in \"" + methodInfo->GetOwnerTypeDescriptor()->GetTypeName() + L"\"" + typeName;
-					}
-				}
-				else if (eventInfo)
-				{
-					return L"event \"" + eventInfo->GetName() + L"\" in \"" + eventInfo->GetOwnerTypeDescriptor()->GetTypeName() + L"\"";
-				}
-				else if (type)
-				{
-					return L"expression" + typeName;
-				}
-				else
-				{
-					return L"<unknown>";
 				}
 			}
 		}

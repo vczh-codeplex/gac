@@ -645,8 +645,6 @@ ValidateSemantic(Expression)
 								manager->errors.Add(WfErrors::IndexOperatorOnWrongType(node, containerType.Obj()));
 							}
 						}
-
-						Ptr<ITypeInfo> secondType = GetExpressionType(manager, node->second, 0);
 					}
 					else if (node->op == WfBinaryOperator::Concat)
 					{
@@ -1147,7 +1145,11 @@ ValidateSemantic(Expression)
 				void Visit(WfAttachEventExpression* node)override
 				{
 					IEventInfo* eventInfo = GetExpressionEventInfo(manager, node->event);
-					Ptr<ITypeInfo> functionType = CopyTypeInfo(eventInfo->GetHandlerType());
+					Ptr<ITypeInfo> functionType;
+					if (eventInfo)
+					{
+						functionType = CopyTypeInfo(eventInfo->GetHandlerType());
+					}
 					GetExpressionType(manager, node->function, functionType);
 					results.Add(ResolveExpressionResult(TypeInfoRetriver<Ptr<IEventHandler>>::CreateTypeInfo()));
 				}
@@ -1333,6 +1335,7 @@ ValidateSemantic(Expression)
 					Ptr<ITypeInfo> resultType = SelectFunction(node, node->function, functions, node->arguments);
 					if (resultType)
 					{
+						manager->expressionResolvings.Add(node->function, functions[0]);
 						results.Add(ResolveExpressionResult(resultType));
 					}
 				}
@@ -1536,7 +1539,7 @@ ValidateSemantic(Expression)
 								manager->errors.Add(WfErrors::ConstructorReturnTypeMismatched(node, selectedFunction, selectedType.Obj(), type.Obj()));
 							}
 						}
-						results.Add(ResolveExpressionResult(type));
+						results.Add(ResolveExpressionResult(selectedFunction.methodInfo, type));
 					}
 				}
 
@@ -1635,7 +1638,10 @@ GetExpressionScopeName
 					manager->errors.Add(WfErrors::TooManyTargets(expression.Obj(), results, GetExpressionName(expression)));
 					return 0;
 				}
-				return results[0].scopeName;
+
+				auto result = results[0];
+				manager->expressionResolvings.Add(expression, result);
+				return result.scopeName;
 			}
 
 /***********************************************************************
@@ -1666,7 +1672,10 @@ GetExpressionEventInfo
 					manager->errors.Add(WfErrors::TooManyTargets(expression.Obj(), results, GetExpressionName(expression)));
 					return 0;
 				}
-				return results[0].eventInfo;
+
+				auto result = results[0];
+				manager->expressionResolvings.Add(expression, result);
+				return result.eventInfo;
 			}
 
 /***********************************************************************
@@ -1743,7 +1752,10 @@ GetExpressionTypes/GetExpressionType/GetLeftValueExpressionType
 				}
 				else if (results.Count() == 1)
 				{
-					return expectedType ? expectedType : results[0].type;
+					auto result = results[0];
+					result.expectedType = expectedType;
+					manager->expressionResolvings.Add(expression, result);
+					return expectedType ? expectedType : result.type;
 				}
 				else
 				{
@@ -1764,7 +1776,9 @@ GetExpressionTypes/GetExpressionType/GetLeftValueExpressionType
 				{
 					if (results[0].leftValueType)
 					{
-						return results[0].leftValueType;
+						auto result = results[0];
+						manager->expressionResolvings.Add(expression, result);
+						return result.leftValueType;
 					}
 					else
 					{
