@@ -88,6 +88,28 @@ Scope Manager
 				WString										GetFriendlyName();
 			};
 
+			struct ResolveExpressionResult
+			{
+				Ptr<WfLexicalScopeName>						scopeName;
+				Ptr<WfLexicalSymbol>						symbol;
+				reflection::description::IPropertyInfo*		propertyInfo;
+				reflection::description::IMethodInfo*		methodInfo;
+				reflection::description::IEventInfo*		eventInfo;
+				Ptr<reflection::description::ITypeInfo>		type;
+				Ptr<reflection::description::ITypeInfo>		leftValueType;
+				Ptr<reflection::description::ITypeInfo>		expectedType;
+
+				ResolveExpressionResult();
+				ResolveExpressionResult(Ptr<WfLexicalScopeName> _scopeName);
+				ResolveExpressionResult(Ptr<reflection::description::ITypeInfo> _type, Ptr<reflection::description::ITypeInfo> _leftValueType = 0);
+				ResolveExpressionResult(Ptr<WfLexicalSymbol> _symbol, Ptr<reflection::description::ITypeInfo> _type, Ptr<reflection::description::ITypeInfo> _leftValueType = 0);
+				ResolveExpressionResult(reflection::description::IPropertyInfo* _propertyInfo, Ptr<reflection::description::ITypeInfo> _type, Ptr<reflection::description::ITypeInfo> _leftValueType = 0);
+				ResolveExpressionResult(reflection::description::IMethodInfo* _methodInfo, Ptr<reflection::description::ITypeInfo> _type);
+				ResolveExpressionResult(reflection::description::IEventInfo* _eventInfo);
+
+				WString										GetFriendlyName()const;
+			};
+
 			class WfLexicalScopeManager : public Object
 			{
 				typedef collections::List<Ptr<WfModule>>													ModuleList;
@@ -97,6 +119,7 @@ Scope Manager
 				typedef collections::Dictionary<Ptr<WfDeclaration>, Ptr<WfLexicalScope>>					DeclarationScopeMap;
 				typedef collections::Dictionary<Ptr<WfStatement>, Ptr<WfLexicalScope>>						StatementScopeMap;
 				typedef collections::Dictionary<Ptr<WfExpression>, Ptr<WfLexicalScope>>						ExpressionScopeMap;
+				typedef collections::Dictionary<Ptr<WfExpression>, ResolveExpressionResult>					ExpressionResolvingMap;
 			protected:
 
 				void										BuildGlobalNameFromTypeDescriptors();
@@ -111,10 +134,11 @@ Scope Manager
 				Ptr<WfLexicalScopeName>						globalName;
 				NamespaceNameMap							namespaceNames;
 
-				ModuleScopeMap								moduleScopes;		// the nearest scope for the module
-				DeclarationScopeMap							declarationScopes;	// the nearest scope for the declaration
-				StatementScopeMap							statementScopes;	// the nearest scope for the statement
-				ExpressionScopeMap							expressionScopes;	// the nearest scope for the expression
+				ModuleScopeMap								moduleScopes;			// the nearest scope for the module
+				DeclarationScopeMap							declarationScopes;		// the nearest scope for the declaration
+				StatementScopeMap							statementScopes;		// the nearest scope for the statement
+				ExpressionScopeMap							expressionScopes;		// the nearest scope for the expression
+				ExpressionResolvingMap						expressionResolvings;	// the resolving result for the expression
 
 				WfLexicalScopeManager(Ptr<parsing::tabling::ParsingTable> _parsingTable);
 				~WfLexicalScopeManager();
@@ -200,29 +224,6 @@ Helper Functions
 			extern void										ValidateModuleSemantic(WfLexicalScopeManager* manager, Ptr<WfModule> module);
 			extern void										ValidateDeclarationSemantic(WfLexicalScopeManager* manager, Ptr<WfDeclaration> declaration);
 			extern void										ValidateStatementSemantic(WfLexicalScopeManager* manager, Ptr<WfStatement> statement);
-
-			struct ResolveExpressionResult
-			{
-				Ptr<WfLexicalScopeName>						scopeName;
-				Ptr<WfLexicalSymbol>						symbol;
-				reflection::description::IPropertyInfo*		propertyInfo;
-				reflection::description::IMethodInfo*		methodInfo;
-				reflection::description::IEventInfo*		eventInfo;
-				Ptr<reflection::description::ITypeInfo>		type;
-				Ptr<reflection::description::ITypeInfo>		leftValueType;
-
-				ResolveExpressionResult();
-				ResolveExpressionResult(const ResolveExpressionResult& result);
-				ResolveExpressionResult(Ptr<WfLexicalScopeName> _scopeName);
-				ResolveExpressionResult(Ptr<reflection::description::ITypeInfo> _type, Ptr<reflection::description::ITypeInfo> _leftValueType = 0);
-				ResolveExpressionResult(Ptr<WfLexicalSymbol> _symbol, Ptr<reflection::description::ITypeInfo> _type, Ptr<reflection::description::ITypeInfo> _leftValueType = 0);
-				ResolveExpressionResult(reflection::description::IPropertyInfo* _propertyInfo, Ptr<reflection::description::ITypeInfo> _type, Ptr<reflection::description::ITypeInfo> _leftValueType = 0);
-				ResolveExpressionResult(reflection::description::IMethodInfo* _methodInfo, Ptr<reflection::description::ITypeInfo> _type);
-				ResolveExpressionResult(reflection::description::IEventInfo* _eventInfo);
-
-				WString										GetFriendlyName()const;
-			};
-
 			extern void										ValidateExpressionSemantic(WfLexicalScopeManager* manager, Ptr<WfExpression> expression, Ptr<reflection::description::ITypeInfo> expectedType, collections::List<ResolveExpressionResult>& results);
 
 			extern Ptr<WfLexicalScopeName>					GetExpressionScopeName(WfLexicalScopeManager* manager, Ptr<WfExpression> expression);
