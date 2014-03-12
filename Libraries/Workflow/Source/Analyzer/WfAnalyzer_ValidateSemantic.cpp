@@ -1688,7 +1688,7 @@ GetExpressionTypes/GetExpressionType/GetLeftValueExpressionType
 					}
 					else
 					{
-						manager->errors.Add(WfErrors::ExpressionIsNotLeftValue(expression.Obj()));
+						manager->errors.Add(WfErrors::ExpressionIsNotLeftValue(expression.Obj(), results[0]));
 					}
 				}
 				return 0;

@@ -202,9 +202,9 @@ WfErrors
 				return new ParsingError(node, L"A24: The return type of " + function.GetFriendlyName() + L" cannot implicitly convert from \"" + fromType->GetTypeFriendlyName() + L"\" to \"" + toType->GetTypeFriendlyName() + L"\".");
 			}
 
-			Ptr<parsing::ParsingError> WfErrors::ExpressionIsNotLeftValue(WfExpression* node)
+			Ptr<parsing::ParsingError> WfErrors::ExpressionIsNotLeftValue(WfExpression* node, const ResolveExpressionResult& result)
 			{
-				return new ParsingError(node, L"A25: Expression is not assignable.");
+				return new ParsingError(node, L"A25: Expression " + result.GetFriendlyName() + L" is not assignable.");
 			}
 
 			Ptr<parsing::ParsingError> WfErrors::WrongVoidType(WfType* node)
