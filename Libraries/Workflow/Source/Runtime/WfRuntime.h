@@ -6,7 +6,7 @@ Workflow::Runtime
 Interfaces:
 **********************************************************************/
 
-#include "..\Expression\WfExpression.h"
+#include "../WorkflowVlppReferences.h"
 
 namespace vl
 {
