@@ -79,34 +79,122 @@ ValidateSemantic(Statement)
 
 				void Visit(WfReturnStatement* node)override
 				{
+					auto scope = manager->statementScopes[node].Obj();
+					auto decl = scope->FindDeclaration().Cast<WfFunctionDeclaration>();
+					auto returnType = CreateTypeInfoFromType(scope, decl->returnType);
+					if (node->expression)
+					{
+						GetExpressionType(manager, node->expression, returnType);
+					}
+					else if (returnType->GetDecorator() != ITypeInfo::TypeDescriptor || returnType->GetTypeDescriptor() != description::GetTypeDescriptor<void>())
+					{
+						manager->errors.Add(WfErrors::ReturnMissExpression(node, returnType.Obj()));
+					}
 				}
 
 				void Visit(WfDeleteStatement* node)override
 				{
+					Ptr<ITypeInfo> type = GetExpressionType(manager, node->expression, 0);
+					if (type)
+					{
+						if (type->GetDecorator() != ITypeInfo::RawPtr)
+						{
+							manager->errors.Add(WfErrors::DeleteNonRawPointer(node, type.Obj()));
+						}
+					}
 				}
 
 				void Visit(WfRaiseExceptionStatement* node)override
 				{
+					Ptr<ITypeInfo> stringType = TypeInfoRetriver<WString>::CreateTypeInfo();
+					GetExpressionType(manager, node->expression, stringType);
 				}
 
 				void Visit(WfIfStatement* node)override
 				{
+					if (node->type)
+					{
+						auto scope = manager->statementScopes[node].Obj();
+						auto symbol = scope->symbols[node->name.value][0];
+						if (!IsNullAcceptableType(symbol->typeInfo.Obj()))
+						{
+							manager->errors.Add(WfErrors::NullCannotImplicitlyConvertToType(node->expression.Obj(), symbol->typeInfo.Obj()));
+						}
+						GetExpressionType(manager, node->expression, symbol->typeInfo);
+					}
+					else
+					{
+						Ptr<ITypeInfo> boolType = TypeInfoRetriver<bool>::CreateTypeInfo();
+						GetExpressionType(manager, node->expression, boolType);
+					}
+					ValidateStatementSemantic(manager, node->trueBranch);
+					if (node->falseBranch)
+					{
+						ValidateStatementSemantic(manager, node->falseBranch);
+					}
 				}
 
 				void Visit(WfSwitchStatement* node)override
 				{
+					Ptr<ITypeInfo> type = GetExpressionType(manager, node->expression, 0);
+					FOREACH(Ptr<WfSwitchCase>, switchCase, node->caseBranches)
+					{
+						Ptr<ITypeInfo> caseType;
+						if (IsExpressionDependOnExpectedType(switchCase->expression))
+						{
+							caseType = GetExpressionType(manager, switchCase->expression, type);
+						}
+						else
+						{
+							caseType = GetExpressionType(manager, switchCase->expression, 0);
+						}
+
+						if (type && caseType)
+						{
+							if (!GetMergedType(type, caseType))
+							{
+								manager->errors.Add(WfErrors::CannotMergeTwoType(switchCase->expression.Obj(), type.Obj(), caseType.Obj()));
+							}
+						}
+						ValidateStatementSemantic(manager, switchCase->statement);
+					}
+					if (node->defaultBranch)
+					{
+						ValidateStatementSemantic(manager, node->defaultBranch);
+					}
 				}
 
 				void Visit(WfWhileStatement* node)override
 				{
+					Ptr<ITypeInfo> boolType = TypeInfoRetriver<bool>::CreateTypeInfo();
+					GetExpressionType(manager, node->condition, boolType);
+					ValidateStatementSemantic(manager, node->statement);
 				}
 
 				void Visit(WfForEachStatement* node)override
 				{
+					Ptr<ITypeInfo> elementType = GetEnumerableExpressionItemType(manager, node->collection, 0);
+					if (elementType)
+					{
+						auto scope = manager->statementScopes[node].Obj();
+						auto symbol = scope->symbols[node->name.value][0];
+						symbol->typeInfo = elementType;
+						symbol->type = GetTypeFromTypeInfo(elementType.Obj());
+					}
+					ValidateStatementSemantic(manager, node->statement);
 				}
 
 				void Visit(WfTryStatement* node)override
 				{
+					ValidateStatementSemantic(manager, node->protectedStatement);
+					if (node->catchStatement)
+					{
+						ValidateStatementSemantic(manager, node->catchStatement);
+					}
+					if (node->finallyStatement)
+					{
+						ValidateStatementSemantic(manager, node->finallyStatement);
+					}
 				}
 
 				void Visit(WfBlockStatement* node)override
@@ -415,9 +503,14 @@ ValidateSemantic(Expression)
 						switch (node->op)
 						{
 						case WfUnaryOperator::Not:
-							if (flag != TypeFlag::Bool)
+							switch (flag)
 							{
+							case TypeFlag::F4:
+							case TypeFlag::F8:
+							case TypeFlag::String:
+							case TypeFlag::Others:
 								manager->errors.Add(WfErrors::UnaryOperatorOnWrongType(node, typeInfo.Obj()));
+								break;
 							}
 							break;
 						case WfUnaryOperator::Positive:
@@ -661,21 +754,8 @@ ValidateSemantic(Expression)
 							case WfBinaryOperator::EQ:
 							case WfBinaryOperator::NE:
 								{
-									switch (firstType->GetDecorator())
-									{
-									case ITypeInfo::RawPtr:
-									case ITypeInfo::SharedPtr:
-										switch (secondType->GetDecorator())
-										{
-										case ITypeInfo::RawPtr:
-										case ITypeInfo::SharedPtr:
-											results.Add(ResolveExpressionResult(TypeInfoRetriver<bool>::CreateTypeInfo()));
-											return;
-										}
-									}
-
 									static TypeFlag conversionTable[(vint)TypeFlag::Count] = {
-										/*Bool		*/TypeFlag::Unknown,
+										/*Bool		*/TypeFlag::Bool,
 										/*I1		*/TypeFlag::Bool,
 										/*I2		*/TypeFlag::Bool,
 										/*I4		*/TypeFlag::Bool,
@@ -698,14 +778,14 @@ ValidateSemantic(Expression)
 								{
 									static TypeFlag conversionTable[(vint)TypeFlag::Count] = {
 										/*Bool		*/TypeFlag::Bool,
-										/*I1		*/TypeFlag::Unknown,
-										/*I2		*/TypeFlag::Unknown,
-										/*I4		*/TypeFlag::Unknown,
-										/*I8		*/TypeFlag::Unknown,
-										/*U1		*/TypeFlag::Unknown,
-										/*U2		*/TypeFlag::Unknown,
-										/*U4		*/TypeFlag::Unknown,
-										/*U8		*/TypeFlag::Unknown,
+										/*I1		*/TypeFlag::I1,
+										/*I2		*/TypeFlag::I2,
+										/*I4		*/TypeFlag::I4,
+										/*I8		*/TypeFlag::I8,
+										/*U1		*/TypeFlag::U1,
+										/*U2		*/TypeFlag::U2,
+										/*U4		*/TypeFlag::U4,
+										/*U8		*/TypeFlag::U8,
 										/*F4		*/TypeFlag::Unknown,
 										/*F8		*/TypeFlag::Unknown,
 										/*String	*/TypeFlag::Unknown,
