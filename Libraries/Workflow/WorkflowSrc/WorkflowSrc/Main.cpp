@@ -131,6 +131,11 @@ namespace test
 		{
 			name = newName;
 		}
+
+		WString GetDisplayName()
+		{
+			return L"This is " + name;
+		}
 	};
 }
 
@@ -147,9 +152,9 @@ namespace vl
 			F(test::ObservableValue)\
 
 			UNITTEST_TYPELIST(DECL_TYPE_INFO)
-			UNITTEST_TYPELIST(IMPL_TYPE_INFO)
+				UNITTEST_TYPELIST(IMPL_TYPE_INFO)
 
-			BEGIN_CLASS_MEMBER(ObservableValue)
+				BEGIN_CLASS_MEMBER(ObservableValue)
 				CLASS_MEMBER_CONSTRUCTOR(Ptr<ObservableValue>(), NO_PARAMETER)
 				CLASS_MEMBER_CONSTRUCTOR(Ptr<ObservableValue>(vint), { L"value" })
 				CLASS_MEMBER_CONSTRUCTOR(ObservableValue*(vint, Nullable<double>), { L"value" _ L"x" })
@@ -158,6 +163,7 @@ namespace vl
 				CLASS_MEMBER_EVENT(ValueChanged)
 				CLASS_MEMBER_PROPERTY_EVENT_FAST(Value, ValueChanged)
 				CLASS_MEMBER_PROPERTY_FAST(Name)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(DisplayName);
 			END_CLASS_MEMBER(ObservableValue)
 
 			class UnitTestTypeLoader : public Object, public ITypeLoader

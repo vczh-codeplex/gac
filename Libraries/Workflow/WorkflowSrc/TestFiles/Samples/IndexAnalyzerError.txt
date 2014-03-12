@@ -63,6 +63,8 @@ A10_WrongDetachExpressionToStruct
 A10_WrongTypeOfExpressionToStruct
 A10_WrongTypeOfTypeToStruct
 A10_WrongTypeTestingToStruct
+A10_AssignToList
+A10_AssignToVariable
 A11_NullableToRawPtr
 A11_NullableToSharedPtr
 A11_RawPtrToNullable
@@ -97,6 +99,10 @@ A22_CannotPickOverloadedConstructor
 A23_NewStruct
 A23_ImplementStruct
 A24_CallRawConstructorToShared
+A25_AssignToConstant
+A25_AssignToFunctionCall
+A25_AssignToReadonlyList
+A25_AssignToReadonlyProperty
 B0_VoidVariable
 B0_VoidArgument
 B0_VoidMapElement
