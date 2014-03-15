@@ -83,6 +83,12 @@ void LogSampleParseResult(const WString& sampleName, const WString& itemName, co
 
 namespace test
 {
+	struct Point
+	{
+		int									x;
+		int									y;
+	};
+
 	class ObservableValue : public Object, public Description<ObservableValue>
 	{
 	protected:
@@ -149,12 +155,18 @@ namespace vl
 
 #define _ ,
 #define UNITTEST_TYPELIST(F)\
+			F(test::Point)\
 			F(test::ObservableValue)\
 
 			UNITTEST_TYPELIST(DECL_TYPE_INFO)
 				UNITTEST_TYPELIST(IMPL_TYPE_INFO)
 
-				BEGIN_CLASS_MEMBER(ObservableValue)
+			BEGIN_STRUCT_MEMBER(Point)
+				STRUCT_MEMBER(x)
+				STRUCT_MEMBER(y)
+			END_STRUCT_MEMBER(Point)
+
+			BEGIN_CLASS_MEMBER(ObservableValue)
 				CLASS_MEMBER_CONSTRUCTOR(Ptr<ObservableValue>(), NO_PARAMETER)
 				CLASS_MEMBER_CONSTRUCTOR(Ptr<ObservableValue>(vint), { L"value" })
 				CLASS_MEMBER_CONSTRUCTOR(ObservableValue*(vint, Nullable<double>), { L"value" _ L"x" })

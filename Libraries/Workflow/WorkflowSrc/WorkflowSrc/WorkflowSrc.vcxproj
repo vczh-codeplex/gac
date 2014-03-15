@@ -375,10 +375,15 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\A23_ImplementStruct.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A23_NewStruct.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A24_CallRawConstructorToShared.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A25_AssignToArgument.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A25_AssignToCapturedVariable.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A25_AssignToConstant.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A25_AssignToFunctionCall.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A25_AssignToLambdaArgument.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A25_AssignToOrderedLambdaArgument.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A25_AssignToReadonlyList.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A25_AssignToReadonlyProperty.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A25_AssignToStructField.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A2_EmptyExtendedObserveEvent.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A2_WrongSimpleObserveEvent.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A3_ObserveNotInBind.txt" />
