@@ -266,7 +266,32 @@ ValidateSemantic(Expression)
 						{
 							if (symbol->typeInfo)
 							{
+								bool writable = false;
 								if (symbol->creatorDeclaration.Cast<WfVariableDeclaration>())
+								{
+									auto currentScope = scope;
+									while (currentScope)
+									{
+										vint index = currentScope->symbols.Keys().IndexOf(symbol->name);
+										if (index != -1 && currentScope->symbols.GetByIndex(index).Contains(symbol.Obj()))
+										{
+											writable = true;
+											break;
+										}
+
+										if (currentScope->ownerDeclaration.Cast<WfFunctionDeclaration>())
+										{
+											break;
+										}
+										if (currentScope->ownerExpression.Cast<WfOrderedLambdaExpression>())
+										{
+											break;
+										}
+										currentScope = currentScope->parentScope.Obj();
+									}
+								}
+
+								if (writable)
 								{
 									results.Add(ResolveExpressionResult(symbol, symbol->typeInfo, symbol->typeInfo));
 								}

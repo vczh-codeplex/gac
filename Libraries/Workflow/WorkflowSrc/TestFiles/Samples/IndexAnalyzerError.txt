@@ -110,6 +110,7 @@ A25_AssignToArgument
 A25_AssignToLambdaArgument
 A25_AssignToOrderedLambdaArgument
 A25_AssignToCapturedVariable
+A25_AssignToCapturedVariable2
 A25_AssignToStructField
 B0_VoidVariable
 B0_VoidArgument

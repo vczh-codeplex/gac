@@ -377,6 +377,7 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\A24_CallRawConstructorToShared.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A25_AssignToArgument.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A25_AssignToCapturedVariable.txt" />
+    <Text Include="..\TestFiles\Samples\AnalyzerError\A25_AssignToCapturedVariable2.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A25_AssignToConstant.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A25_AssignToFunctionCall.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\A25_AssignToLambdaArgument.txt" />
