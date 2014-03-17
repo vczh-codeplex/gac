@@ -26,7 +26,7 @@ namespace vl
 			}
 		}
 
-		bool IsChars(const wchar_t*& input, wchar_t* chars, wchar_t& c)
+		bool IsChars(const wchar_t*& input, const wchar_t* chars, wchar_t& c)
 		{
 			const wchar_t* position=wcschr(chars, *input);
 			if(position)
@@ -40,7 +40,7 @@ namespace vl
 			}
 		}
 
-		bool IsStr(const wchar_t*& input, wchar_t* str)
+		bool IsStr(const wchar_t*& input, const wchar_t* str)
 		{
 			size_t len=wcslen(str);
 			if(wcsncmp(input, str, len)==0)
@@ -54,7 +54,7 @@ namespace vl
 			}
 		}
 
-		bool IsChars(const wchar_t*& input, wchar_t* chars)
+		bool IsChars(const wchar_t*& input, const wchar_t* chars)
 		{
 			wchar_t c;
 			return IsChars(input, chars, c);
