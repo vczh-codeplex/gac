@@ -22,7 +22,7 @@ PureInterpretor
 			startState=dfa->states.IndexOf(dfa->startState);
 
 			//Ìî³ä×Ö·ûÓ³Éä±í
-			for(vint i=0;i<sizeof(charMap)/sizeof(*charMap);i++)
+			for(vint i=0;i<SupportedCharCount;i++)
 			{
 				charMap[i]=charSetCount-1;
 			}
@@ -107,6 +107,9 @@ PureInterpretor
 					result.finalState=currentState;
 				}
 				if(!*read)break;
+#ifdef VCZH_GCC
+				if(*read>=SupportedCharCount)break;
+#endif
 				vint charIndex=charMap[*read++];
 				currentState=transition[currentState][charIndex];
 			}

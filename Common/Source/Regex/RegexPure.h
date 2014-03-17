@@ -28,7 +28,9 @@ namespace vl
 		class PureInterpretor : public Object
 		{
 		protected:
-			vint				charMap[1<<(8*sizeof(wchar_t))];	// char -> char set index
+			static const vint	SupportedCharCount = 1 << 16;		// in gcc in linux it will only supports UCS-2
+
+			vint				charMap[SupportedCharCount];		// char -> char set index
 			vint**				transition;							// (state * char set index) -> state*
 			bool*				finalState;							// state -> bool
 			vint*				relatedFinalState;					// sate -> (finalState or -1)
