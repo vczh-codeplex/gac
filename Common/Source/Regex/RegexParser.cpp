@@ -147,13 +147,16 @@ namespace vl
 			{
 				return 0;
 			}
-			LoopExpression* expression=new LoopExpression;
-			expression->min=min;
-			expression->max=max;
-			expression->preferLong=!IsChar(input, L'?');
-			return expression;
+
+			{
+				LoopExpression* expression=new LoopExpression;
+				expression->min=min;
+				expression->max=max;
+				expression->preferLong=!IsChar(input, L'?');
+				return expression;
+			}
 		THROW_EXCEPTION:
-				throw ArgumentException(L"Regular expression syntax error: Illegal loop expression.", L"vl::regex_internal::ParseLoop", L"input");
+			throw ArgumentException(L"Regular expression syntax error: Illegal loop expression.", L"vl::regex_internal::ParseLoop", L"input");
 		}
 
 		Ptr<Expression> ParseCharSet(const wchar_t*& input)
