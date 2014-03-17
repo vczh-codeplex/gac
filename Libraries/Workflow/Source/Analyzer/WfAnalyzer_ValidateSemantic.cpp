@@ -777,22 +777,30 @@ ValidateSemantic(Expression)
 							case WfBinaryOperator::EQ:
 							case WfBinaryOperator::NE:
 								{
-									static TypeFlag conversionTable[(vint)TypeFlag::Count] = {
-										/*Bool		*/TypeFlag::Bool,
-										/*I1		*/TypeFlag::Bool,
-										/*I2		*/TypeFlag::Bool,
-										/*I4		*/TypeFlag::Bool,
-										/*I8		*/TypeFlag::Bool,
-										/*U1		*/TypeFlag::Bool,
-										/*U2		*/TypeFlag::Bool,
-										/*U4		*/TypeFlag::Bool,
-										/*U8		*/TypeFlag::Bool,
-										/*F4		*/TypeFlag::Bool,
-										/*F8		*/TypeFlag::Bool,
-										/*String	*/TypeFlag::Bool,
-										/*Others	*/TypeFlag::Unknown,
-									};
-									selectedTable = conversionTable;
+									switch (elementType->GetDecorator())
+									{
+									case ITypeInfo::RawPtr:
+									case ITypeInfo::SharedPtr:
+										results.Add(ResolveExpressionResult(TypeInfoRetriver<bool>::CreateTypeInfo()));
+										return;
+									default:
+										static TypeFlag conversionTable[(vint)TypeFlag::Count] = {
+											/*Bool		*/TypeFlag::Bool,
+											/*I1		*/TypeFlag::Bool,
+											/*I2		*/TypeFlag::Bool,
+											/*I4		*/TypeFlag::Bool,
+											/*I8		*/TypeFlag::Bool,
+											/*U1		*/TypeFlag::Bool,
+											/*U2		*/TypeFlag::Bool,
+											/*U4		*/TypeFlag::Bool,
+											/*U8		*/TypeFlag::Bool,
+											/*F4		*/TypeFlag::Bool,
+											/*F8		*/TypeFlag::Bool,
+											/*String	*/TypeFlag::Bool,
+											/*Others	*/TypeFlag::Unknown,
+										};
+										selectedTable = conversionTable;
+									}
 								}
 								break;
 							case WfBinaryOperator::Xor:
