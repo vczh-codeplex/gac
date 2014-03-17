@@ -492,6 +492,22 @@ namespace vl
 	extern WString				wlower(const WString& string);
 	extern AString				aupper(const AString& string);
 	extern WString				wupper(const WString& string);
+
+#if defined VCZH_GCC
+	extern void					_itoa_s(vint32_t value, char* buffer, size_t size, vint radix);
+	extern void					_itow_s(vint32_t value, wchar_t* buffer, size_t size, vint radix);
+	extern void					_i64toa_s(vint64_t value, char* buffer, size_t size, vint radix);
+	extern void					_i64tow_s(vint64_t value, wchar_t* buffer, size_t size, vint radix);
+	extern void					_uitoa_s(vuint32_t value, char* buffer, size_t size, vint radix);
+	extern void					_uitow_s(vuint32_t value, wchar_t* buffer, size_t size, vint radix);
+	extern void					_ui64toa_s(vuint64_t value, char* buffer, size_t size, vint radix);
+	extern void					_ui64tow_s(vuint64_t value, wchar_t* buffer, size_t size, vint radix);
+	extern void					_gcvt_s(char* buffer, size_t size, double value, vint numberOfDigits);
+	extern void					_strlwr_s(char* buffer, size_t size);
+	extern void					_strupr_s(char* buffer, size_t size);
+	extern void					_wcslwr_s(wchar_t* buffer, size_t size);
+	extern void					_wcsupr_s(wchar_t* buffer, size_t size);
+#endif
 }
 
 #endif
