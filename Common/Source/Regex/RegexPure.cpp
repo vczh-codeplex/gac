@@ -1,4 +1,7 @@
 #include "RegexPure.h"
+#if defined VCZH_GCC
+#include <wchar.h>
+#endif
 
 namespace vl
 {
