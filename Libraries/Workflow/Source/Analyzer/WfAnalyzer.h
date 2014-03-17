@@ -6,7 +6,11 @@ Workflow::Analyzer
 Interfaces:
 **********************************************************************/
 
+#ifndef VCZH_WORKFLOW_ANALYZER_WFANALYZER
+#define VCZH_WORKFLOW_ANALYZER_WFANALYZER
+
 #include "..\Expression\WfExpression.h"
+#include "..\Runtime\WfRuntime.h"
 
 namespace vl
 {
@@ -151,7 +155,7 @@ Scope Manager
 			};
 
 /***********************************************************************
-Helper Functions
+Type Analyzing
 ***********************************************************************/
 
 			enum class TypeFlag
@@ -201,6 +205,10 @@ Helper Functions
 			extern void										SearchOrderedName(Ptr<WfDeclaration> declaration, collections::SortedList<vint>& names);
 			extern void										SearchOrderedName(Ptr<WfStatement> statement, collections::SortedList<vint>& names);
 			extern void										SearchOrderedName(Ptr<WfExpression> expression, collections::SortedList<vint>& names);
+
+/***********************************************************************
+Structure Analyzing
+***********************************************************************/
 			
 			struct ValidateStructureContext
 			{
@@ -216,10 +224,18 @@ Helper Functions
 			extern void										ValidateStatementStructure(WfLexicalScopeManager* manager, ValidateStructureContext* context, Ptr<WfStatement>& statement);
 			extern void										ValidateExpressionStructure(WfLexicalScopeManager* manager, ValidateStructureContext* context, Ptr<WfExpression>& expression);
 
+/***********************************************************************
+Scope Analyzing
+***********************************************************************/
+
 			extern void										BuildScopeForModule(WfLexicalScopeManager* manager, Ptr<WfModule> module);
 			extern void										BuildScopeForDeclaration(WfLexicalScopeManager* manager, Ptr<WfLexicalScope> parentScope, Ptr<WfDeclaration> declaration, parsing::ParsingTreeCustomBase* source = 0);
 			extern void										BuildScopeForStatement(WfLexicalScopeManager* manager, Ptr<WfLexicalScope> parentScope, Ptr<WfStatement> statement);
 			extern void										BuildScopeForExpression(WfLexicalScopeManager* manager, Ptr<WfLexicalScope> parentScope, Ptr<WfExpression> expression);
+
+/***********************************************************************
+Semantic Analyzing
+***********************************************************************/
 
 			extern void										ValidateModuleSemantic(WfLexicalScopeManager* manager, Ptr<WfModule> module);
 			extern void										ValidateDeclarationSemantic(WfLexicalScopeManager* manager, Ptr<WfDeclaration> declaration);
@@ -232,6 +248,12 @@ Helper Functions
 			extern Ptr<reflection::description::ITypeInfo>	GetExpressionType(WfLexicalScopeManager* manager, Ptr<WfExpression> expression, Ptr<reflection::description::ITypeInfo> expectedType);
 			extern Ptr<reflection::description::ITypeInfo>	GetLeftValueExpressionType(WfLexicalScopeManager* manager, Ptr<WfExpression> expression);
 			extern Ptr<reflection::description::ITypeInfo>	GetEnumerableExpressionItemType(WfLexicalScopeManager* manager, Ptr<WfExpression> expression, Ptr<reflection::description::ITypeInfo> expectedType);
+
+/***********************************************************************
+Code Generation
+***********************************************************************/
+
+			extern Ptr<runtime::WfAssembly>					GenerateAssembly(WfLexicalScopeManager* manager, collections::List<Ptr<WfModule>> modules);
 
 /***********************************************************************
 Error Messages
@@ -324,3 +346,5 @@ Error Messages
 		}
 	}
 }
+
+#endif

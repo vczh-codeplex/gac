@@ -2,7 +2,7 @@ include:"../WorkflowVlppReferences.h"
 namespace:vl.workflow
 reflection:Workflow
 classPrefix:Wf
-guard:VCZH_WORKFLOW_EXPRESSIONS_WFEXPRESSIONPARSER
+guard:VCZH_WORKFLOW_EXPRESSION_WFEXPRESSIONPARSER
 parser:ParseType(WorkflowType)
 parser:ParseExpression(WorkflowExpression)
 parser:ParseStatement(WorkflowStatement)
