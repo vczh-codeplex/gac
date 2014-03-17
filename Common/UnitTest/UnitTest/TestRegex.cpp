@@ -9,6 +9,9 @@
 #include "../../Source/Stream/CharFormat.h"
 #include "../../Source/Stream/Accessor.h"
 #include "../../Source/Collections/OperationCopyFrom.h"
+#if defined VCZH_GCC
+#include <wchar.h>
+#endif
 
 using namespace vl;
 using namespace vl::regex;
