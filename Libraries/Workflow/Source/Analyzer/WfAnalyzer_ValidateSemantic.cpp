@@ -269,25 +269,28 @@ ValidateSemantic(Expression)
 								bool writable = false;
 								if (symbol->creatorDeclaration.Cast<WfVariableDeclaration>())
 								{
-									auto currentScope = scope;
-									while (currentScope)
+									if (!symbol->ownerScope->ownerDeclaration.Cast<WfNamespaceDeclaration>())
 									{
-										vint index = currentScope->symbols.Keys().IndexOf(symbol->name);
-										if (index != -1 && currentScope->symbols.GetByIndex(index).Contains(symbol.Obj()))
+										auto currentScope = scope;
+										while (currentScope)
 										{
-											writable = true;
-											break;
-										}
+											vint index = currentScope->symbols.Keys().IndexOf(symbol->name);
+											if (index != -1 && currentScope->symbols.GetByIndex(index).Contains(symbol.Obj()))
+											{
+												writable = true;
+												break;
+											}
 
-										if (currentScope->ownerDeclaration.Cast<WfFunctionDeclaration>())
-										{
-											break;
+											if (currentScope->ownerDeclaration.Cast<WfFunctionDeclaration>())
+											{
+												break;
+											}
+											if (currentScope->ownerExpression.Cast<WfOrderedLambdaExpression>())
+											{
+												break;
+											}
+											currentScope = currentScope->parentScope.Obj();
 										}
-										if (currentScope->ownerExpression.Cast<WfOrderedLambdaExpression>())
-										{
-											break;
-										}
-										currentScope = currentScope->parentScope.Obj();
 									}
 								}
 
