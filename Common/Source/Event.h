@@ -9,7 +9,7 @@ Classes:
 #ifndef VCZH_EVENT
 #define VCZH_EVENT
 #include "Function.h"
-#include "Collections\List.h"
+#include "Collections/List.h"
 namespace vl
 {
 	template<typename T>

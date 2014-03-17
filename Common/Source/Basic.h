@@ -230,13 +230,13 @@ namespace vl
 	}
 
 	template<typename T>
-	typename T&& ForwardValue(typename RemoveReference<T>::Type&& value)
+	T&& ForwardValue(typename RemoveReference<T>::Type&& value)
 	{
 		return (T&&)value;
 	}
 
 	template<typename T>
-	typename T&& ForwardValue(typename RemoveReference<T>::Type& value)
+	T&& ForwardValue(typename RemoveReference<T>::Type& value)
 	{
 		return (T&&)value;
 	}
