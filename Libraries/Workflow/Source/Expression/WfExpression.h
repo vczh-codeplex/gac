@@ -6,8 +6,8 @@ Parser::WfExpression
 Interfaces:
 ***********************************************************************/
 
-#ifndef VCZH_WORKFLOW_EXPRESSIONS_WFEXPRESSION
-#define VCZH_WORKFLOW_EXPRESSIONS_WFEXPRESSION
+#ifndef VCZH_WORKFLOW_EXPRESSION_WFEXPRESSION
+#define VCZH_WORKFLOW_EXPRESSION_WFEXPRESSION
 
 #include "WfExpressionParser.h"
 
