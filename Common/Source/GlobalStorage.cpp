@@ -1,5 +1,5 @@
 #include "GlobalStorage.h"
-#include "Collections\Dictionary.h"
+#include "Collections/Dictionary.h"
 
 namespace vl
 {
