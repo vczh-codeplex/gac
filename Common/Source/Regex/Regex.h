@@ -139,6 +139,7 @@ namespace vl
 			vint										codeIndex;
 			
 			RegexTokens(regex_internal::PureInterpretor* _pure, const collections::Array<vint>& _stateTokens, const WString& _code, vint _codeIndex);
+			RegexTokens(const RegexTokens& tokens);
 		public:
 
 			collections::IEnumerator<RegexToken>*		CreateEnumerator()const;
@@ -195,7 +196,6 @@ namespace vl
 			collections::Array<vint>					stateTokens;
 		public:
 			RegexLexer(const collections::IEnumerable<WString>& tokens);
-			RegexLexer(const RegexLexer& lexer);
 			~RegexLexer();
 
 			RegexTokens									Parse(const WString& code, vint codeIndex=-1)const;
