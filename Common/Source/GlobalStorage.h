@@ -39,7 +39,7 @@ namespace vl
 	{\
 	public:\
 		NAME()\
-			:vl::GlobalStorage(L#NAME)\
+			:vl::GlobalStorage(L ## #NAME)\
 		{\
 			InitializeClearResource();\
 		}\
