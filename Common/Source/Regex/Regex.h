@@ -195,6 +195,7 @@ namespace vl
 			collections::Array<vint>					stateTokens;
 		public:
 			RegexLexer(const collections::IEnumerable<WString>& tokens);
+			RegexLexer(const RegexLexer& lexer);
 			~RegexLexer();
 
 			RegexTokens									Parse(const WString& code, vint codeIndex=-1)const;
