@@ -556,6 +556,14 @@ RegexTokens
 		{
 		}
 
+		RegexTokens::RegexTokens(const RegexTokens& tokens)
+			:pure(tokens.pure)
+			,stateTokens(tokens.stateTokens)
+			,code(tokens.code)
+			,codeIndex(tokens.codeIndex)
+		{
+		}
+
 		IEnumerator<RegexToken>* RegexTokens::CreateEnumerator()const
 		{
 			return new RegexTokenEnumerator(pure, stateTokens, code.Buffer(), codeIndex);
@@ -869,13 +877,6 @@ RegexLexer
 				void* userData=bigDfa->states[i]->userData;
 				stateTokens[i]=(vint)userData;
 			}
-		}
-
-		RegexLexer::RegexLexer(const RegexLexer& lexer)
-			:pure(lexer.pure)
-		{
-			CopyFrom(ids, lexer.ids);
-			CopyFrom(stateTokens, lexer.stateTokens);
 		}
 
 		RegexLexer::~RegexLexer()
