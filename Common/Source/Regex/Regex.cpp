@@ -871,6 +871,13 @@ RegexLexer
 			}
 		}
 
+		RegexLexer::RegexLexer(const RegexLexer& lexer)
+			:pure(lexer.pure)
+		{
+			CopyFrom(ids, lexer.ids);
+			CopyFrom(stateTokens, lexer.stateTokens);
+		}
+
 		RegexLexer::~RegexLexer()
 		{
 			if(pure)delete pure;
