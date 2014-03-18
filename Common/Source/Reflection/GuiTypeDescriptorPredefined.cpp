@@ -3,6 +3,28 @@
 #include "GuiTypeDescriptorMacros.h"
 #include "../Regex/Regex.h"
 
+#ifdef VCZH_GCC
+// copied from $(PROGRAM_FILES)\Microsoft Visual Studio 12.0\VC\include\limits.h
+#define _I8_MIN     (-127i8 - 1)    /* minimum signed 8 bit value */
+#define _I8_MAX       127i8         /* maximum signed 8 bit value */
+#define _UI8_MAX      0xffui8       /* maximum unsigned 8 bit value */
+
+#define _I16_MIN    (-32767i16 - 1) /* minimum signed 16 bit value */
+#define _I16_MAX      32767i16      /* maximum signed 16 bit value */
+#define _UI16_MAX     0xffffui16    /* maximum unsigned 16 bit value */
+
+#define _I32_MIN    (-2147483647i32 - 1) /* minimum signed 32 bit value */
+#define _I32_MAX      2147483647i32 /* maximum signed 32 bit value */
+#define _UI32_MAX     0xffffffffui32 /* maximum unsigned 32 bit value */
+
+/* minimum signed 64 bit value */
+#define _I64_MIN    (-9223372036854775807i64 - 1)
+/* maximum signed 64 bit value */
+#define _I64_MAX      9223372036854775807i64
+/* maximum unsigned 64 bit value */
+#define _UI64_MAX     0xffffffffffffffffui64
+#endif
+
 namespace vl
 {
 	using namespace collections;
