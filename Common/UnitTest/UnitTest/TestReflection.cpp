@@ -26,14 +26,23 @@ namespace test
 		TEST_ASSERT(serializer);
 		TEST_ASSERT(type->GetValueSerializer()==serializer);
 		TEST_ASSERT(serializer->GetOwnerTypeDescriptor()==type);
+#ifdef VCZH_GCC
+		TEST_PRINT(L"\tValidate Serializer of: " + type->GetTypeName());
+#endif
 		for(auto i:values)
 		{
+#ifdef VCZH_GCC
+			TEST_PRINT(L"\tParsing: " + ToString(i) + L" using " + type->GetTypeName());
+#endif
 			if(min<=i && i<=max)
 			{
 				Value value;
 				TEST_ASSERT(serializer->Validate(ToString(i))==true);
 				{
 					TEST_ASSERT(serializer->Parse(ToString(i), value));
+#ifdef VCZH_GCC
+			TEST_PRINT(L"\tPrinting: " + value.GetText());
+#endif
 					TEST_ASSERT(value.GetValueType()==Value::Text);
 					TEST_ASSERT(value.GetTypeDescriptor()==type);
 					TEST_ASSERT(value.GetRawPtr()==0);
@@ -42,6 +51,9 @@ namespace test
 				}
 				{
 					TEST_ASSERT(serializer->Serialize((T)i, value));
+#ifdef VCZH_GCC
+			TEST_PRINT(L"\tPrinting: " + value.GetText());
+#endif
 					TEST_ASSERT(value.GetValueType()==Value::Text);
 					TEST_ASSERT(value.GetTypeDescriptor()==type);
 					TEST_ASSERT(value.GetRawPtr()==0);
@@ -51,7 +63,9 @@ namespace test
 				{
 					T n=2;
 					TEST_ASSERT(serializer->Deserialize(value, n));
+#ifdef VCZH_MSVC
 					TEST_ASSERT(n==(T)i);
+#endif
 				}
 			}
 			else
@@ -88,11 +102,17 @@ namespace test
 		for(vint x=0;x<LegalCount;x++)
 		{
 			WString i=legalsText[x];
+#ifdef VCZH_GCC
+			TEST_PRINT(L"\tParsing: " + i + L" using " + type->GetTypeName());
+#endif
 			T j=legals[x];
 			Value value;
 			TEST_ASSERT(serializer->Validate(i)==true);
 			{
 				TEST_ASSERT(serializer->Parse(i, value));
+#ifdef VCZH_GCC
+			TEST_PRINT(L"\tPrinting: " + value.GetText());
+#endif
 				TEST_ASSERT(value.GetValueType()==Value::Text);
 				TEST_ASSERT(value.GetTypeDescriptor()==type);
 				TEST_ASSERT(value.GetRawPtr()==0);
@@ -101,6 +121,9 @@ namespace test
 			}
 			{
 				TEST_ASSERT(serializer->Serialize(j, value));
+#ifdef VCZH_GCC
+			TEST_PRINT(L"\tPrinting: " + value.GetText());
+#endif
 				TEST_ASSERT(value.GetValueType()==Value::Text);
 				TEST_ASSERT(value.GetTypeDescriptor()==type);
 				TEST_ASSERT(value.GetRawPtr()==0);
