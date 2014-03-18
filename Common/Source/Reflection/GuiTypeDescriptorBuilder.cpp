@@ -313,8 +313,9 @@ EventInfoImpl::EventHandlerImpl
 
 			EventInfoImpl::EventHandlerImpl::EventHandlerImpl(EventInfoImpl* _ownerEvent, DescriptableObject* _ownerObject, Ptr<IValueFunctionProxy> _handler)
 				:ownerEvent(_ownerEvent)
-				,ownerObject(_ownerObject)
-				,handler(_handler)
+				, ownerObject(_ownerObject)
+				, handler(_handler)
+				, attached(true)
 			{
 			}
 
