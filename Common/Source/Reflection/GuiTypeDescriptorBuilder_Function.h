@@ -46,7 +46,7 @@ DetailTypeInfoRetriver<Func<R(TArgs...)>>
 			template<typename R, typename ...TArgs>
 			struct DetailTypeInfoRetriver<Func<R(TArgs...)>, TypeFlags::FunctionType>
 			{
-				typedef DetailTypeInfoRetriver<Func<R(TArgs...)>, TypeFlags::NonGenericType>	UpLevelRetriver;
+				typedef DetailTypeInfoRetriver<const Func<R(TArgs...)>, TypeFlags::NonGenericType>	UpLevelRetriver;
  
 				static const ITypeInfo::Decorator								Decorator=UpLevelRetriver::Decorator;
 				typedef IValueList												Type;
@@ -193,6 +193,11 @@ ParameterAccessor<Func<R(TArgs...)>>
 						}
 					}
 				}
+			};
+ 
+			template<typename R, typename ...TArgs>
+			struct ParameterAccessor<const Func<R(TArgs...)>, TypeFlags::FunctionType> : ParameterAccessor<Func<R(TArgs...)>, TypeFlags::FunctionType>
+			{
 			};
  
 /***********************************************************************

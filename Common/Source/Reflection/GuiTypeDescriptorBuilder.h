@@ -554,7 +554,7 @@ TypeInfoRetriver Helper Functions (UnboxParameter)
 			};
 
 			template<typename T>
-			Value BoxParameter(T& object, ITypeDescriptor* typeDescriptor=0)
+			Value BoxParameter(typename TypeInfoRetriver<T>::ResultReferenceType object, ITypeDescriptor* typeDescriptor=0)
 			{
 				return ParameterAccessor<typename TypeInfoRetriver<T>::ResultNonReferenceType, TypeInfoRetriver<T>::TypeFlag>::BoxParameter(object, typeDescriptor);
 			}
