@@ -14,7 +14,7 @@ VLPP_REFLECTION_OBJS = $(OBJ)GuiTypeDescriptor.o $(OBJ)GuiTypeDescriptorBuilder.
 
 VLPP_OBJS = $(OBJ)Basic.o $(OBJ)String.o $(OBJ)Console.o $(OBJ)GlobalStorage.o $(OBJ)Exception.o $(OBJ)Locale.o $(OBJ)UnitTest.o $(VLPP_STREAM_OBJS) $(VLPP_REGEX_OBJS) $(VLPP_REFLECTION_OBJS)
 
-UNITTEST_OBJS = $(OBJ)TestBasic.o $(OBJ)TestString.o $(OBJ)TestList.o $(OBJ)TestFunction.o $(OBJ)TestGlobalStorage.o $(OBJ)TestStream.o $(OBJ)TestRegex.o
+UNITTEST_OBJS = $(OBJ)TestBasic.o $(OBJ)TestString.o $(OBJ)TestList.o $(OBJ)TestFunction.o $(OBJ)TestGlobalStorage.o $(OBJ)TestStream.o $(OBJ)TestRegex.o $(OBJ)TestReflection.o
 
 all:
 	echo =====================================
