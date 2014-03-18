@@ -1,9 +1,13 @@
 #include "Locale.h"
+#if defined VCZH_MSVC
 #include <Windows.h>
+#endif
 
 namespace vl
 {
 	using namespace collections;
+
+#if defined VCZH_MSVC
 
 	extern SYSTEMTIME DateTimeToSystemTime(const DateTime& dateTime);
 
@@ -58,6 +62,8 @@ namespace vl
 		return result;
 	}
 
+#endif
+
 /***********************************************************************
 Locale
 ***********************************************************************/
@@ -92,14 +98,18 @@ Locale
 
 	void Locale::Enumerate(collections::List<Locale>& locales)
 	{
+#if defined VCZH_MSVC
 		EnumSystemLocalesEx(&Locale_EnumLocalesProcEx, LOCALE_ALL, (LPARAM)&locales, NULL);
+#elif defined VCZH_GCC
+		locales.Add(L"en-us");
+#endif
 	}
 
 	const WString& Locale::GetName()const
 	{
 		return localeName;
 	}
-
+#if defined VCZH_MSVC
 	void Locale::GetShortDateFormats(collections::List<WString>& formats)const
 	{
 		EnumDateFormatsExEx(&Locale_EnumDateFormatsProcExEx, localeName.Buffer(), DATE_SHORTDATE, (LPARAM)&formats);
@@ -293,4 +303,5 @@ Locale
 		int result=FindNLSStringEx(localeName.Buffer(), FIND_ENDSWITH | TranslateNormalization(normalization), text.Buffer(), (int)text.Length(), find.Buffer(), (int)find.Length(), NULL, NULL, NULL, NULL);
 		return result!=-1;
 	}
+#endif
 }
