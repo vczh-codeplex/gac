@@ -36,7 +36,7 @@ namespace vl
 		static void					Enumerate(collections::List<Locale>& locales);
 
 		const WString&				GetName()const;
-
+#if defined VCZH_MSVC
 		void						GetShortDateFormats(collections::List<WString>& formats)const;
 		void						GetLongDateFormats(collections::List<WString>& formats)const;
 		void						GetYearMonthDateFormats(collections::List<WString>& formats)const;
@@ -84,6 +84,7 @@ namespace vl
 		collections::Pair<vint, vint>			FindLast(const WString& text, const WString& find, Normalization normalization)const;
 		bool									StartsWith(const WString& text, const WString& find, Normalization normalization)const;
 		bool									EndsWidth(const WString& text, const WString& find, Normalization normalization)const;
+#endif
 	};
 
 #define INVLOC vl::Locale::Invariant()
