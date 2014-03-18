@@ -49,7 +49,7 @@ Attribute
 		class DescriptableObject
 		{
 			template<typename T, typename Enabled>
-			friend struct ReferenceCounterOperator;
+			friend struct vl::ReferenceCounterOperator;
 			template<typename T>
 			friend class Description;
 			friend class DescriptableValue;
