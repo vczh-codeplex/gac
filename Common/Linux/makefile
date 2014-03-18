@@ -16,7 +16,7 @@ VLPP_PARSING_OBJS = $(OBJ)Parsing.o $(OBJ)ParsingAnalyzer.o $(OBJ)ParsingAutomat
 
 VLPP_OBJS = $(OBJ)Basic.o $(OBJ)String.o $(OBJ)Console.o $(OBJ)GlobalStorage.o $(OBJ)Exception.o $(OBJ)Locale.o $(OBJ)UnitTest.o $(VLPP_STREAM_OBJS) $(VLPP_REGEX_OBJS) $(VLPP_REFLECTION_OBJS) $(VLPP_PARSING_OBJS)
 
-UNITTEST_OBJS = $(OBJ)TestBasic.o $(OBJ)TestString.o $(OBJ)TestList.o $(OBJ)TestFunction.o $(OBJ)TestGlobalStorage.o $(OBJ)TestStream.o $(OBJ)TestRegex.o $(OBJ)TestReflection.o
+UNITTEST_OBJS = $(OBJ)TestBasic.o $(OBJ)TestString.o $(OBJ)TestList.o $(OBJ)TestFunction.o $(OBJ)TestGlobalStorage.o $(OBJ)TestStream.o $(OBJ)TestRegex.o $(OBJ)TestReflection.o $(OBJ)TestParsing.o $(OBJ)Parser.Calculator.o
 
 all:
 	echo =====================================
@@ -76,6 +76,8 @@ all:
 	$(CPPBOM)	-o $(OBJ)TestStream.o			-c $(UNITTEST)TestStream.cpp
 	$(CPPBOM)	-o $(OBJ)TestRegex.o			-c $(UNITTEST)TestRegex.cpp
 	$(CPPBOM)	-o $(OBJ)TestReflection.o		-c $(UNITTEST)TestReflection.cpp
+	$(CPPBOM)	-o $(OBJ)TestParsing.o			-c $(UNITTEST)TestParsing.cpp
+	$(CPPBOM)	-o $(OBJ)Parser.Calculator.o		-c $(UNITTEST)Parser.Calculator/Parser.Calculator.cpp
 	$(CPP)		-o $(OBJ)Main.o				-c Main.cpp 
 	$(CPP)		-o $(BIN)UnitTest $(OBJ)Main.o $(VLPP_OBJS) $(UNITTEST_OBJS)
 
