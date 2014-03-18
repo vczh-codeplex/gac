@@ -35,8 +35,8 @@ Type
 #define BEGIN_TYPE_INFO_NAMESPACE namespace vl{namespace reflection{namespace description{
 #define END_TYPE_INFO_NAMESPACE }}}
 #define DECL_TYPE_INFO(TYPENAME) template<>struct TypeInfo<TYPENAME>{static const wchar_t* TypeName;};
-#define IMPL_TYPE_INFO(TYPENAME) const wchar_t* TypeInfo<TYPENAME>::TypeName = L#TYPENAME;
-#define IMPL_TYPE_INFO_RENAME(TYPENAME, EXPECTEDNAME) const wchar_t* TypeInfo<TYPENAME>::TypeName = L#EXPECTEDNAME;
+#define IMPL_TYPE_INFO(TYPENAME) const wchar_t* TypeInfo<TYPENAME>::TypeName = L ## #TYPENAME;
+#define IMPL_TYPE_INFO_RENAME(TYPENAME, EXPECTEDNAME) const wchar_t* TypeInfo<TYPENAME>::TypeName = L ## #EXPECTEDNAME;
 #define ADD_TYPE_INFO(TYPENAME)\
 			{\
 				Ptr<ITypeDescriptor> type=new CustomTypeDescriptorSelector<TYPENAME>::CustomTypeDescriptorImpl();\
@@ -44,16 +44,16 @@ Type
 			}
 
 #define INVOKE_INTERFACE_PROXY(METHODNAME, ...)\
-	proxy->Invoke(L#METHODNAME, IValueList::Create(collections::From((collections::Array<Value>&)(Value_xs(), __VA_ARGS__))))
+	proxy->Invoke(L ## #METHODNAME, IValueList::Create(collections::From((collections::Array<Value>&)(Value_xs(), __VA_ARGS__))))
 
 #define INVOKE_INTERFACE_PROXY_NOPARAM(METHODNAME)\
-	proxy->Invoke(L#METHODNAME, IValueList::Create())
+	proxy->Invoke(L ## #METHODNAME, IValueList::Create())
 
 #define INVOKEGET_INTERFACE_PROXY(METHODNAME, ...)\
-	UnboxValue<decltype(METHODNAME(__VA_ARGS__))>(proxy->Invoke(L#METHODNAME, IValueList::Create(collections::From((collections::Array<Value>&)(Value_xs(), __VA_ARGS__)))))
+	UnboxValue<decltype(METHODNAME(__VA_ARGS__))>(proxy->Invoke(L ## #METHODNAME, IValueList::Create(collections::From((collections::Array<Value>&)(Value_xs(), __VA_ARGS__)))))
 
 #define INVOKEGET_INTERFACE_PROXY_NOPARAMS(METHODNAME)\
-	UnboxValue<decltype(METHODNAME())>(proxy->Invoke(L#METHODNAME, IValueList::Create()))
+	UnboxValue<decltype(METHODNAME())>(proxy->Invoke(L ## #METHODNAME, IValueList::Create()))
 
 /***********************************************************************
 Enum
@@ -83,9 +83,9 @@ Enum
 			};
 
 #define ENUM_ITEM_NAMESPACE(TYPENAME) typedef TYPENAME EnumItemNamespace;
-#define ENUM_ITEM(ITEMNAME) candidates.Add(L#ITEMNAME, ITEMNAME);
-#define ENUM_NAMESPACE_ITEM(ITEMNAME) candidates.Add(L#ITEMNAME, EnumItemNamespace::ITEMNAME);
-#define ENUM_CLASS_ITEM(ITEMNAME) candidates.Add(L#ITEMNAME, EnumType::ITEMNAME);
+#define ENUM_ITEM(ITEMNAME) candidates.Add(L ## #ITEMNAME, ITEMNAME);
+#define ENUM_NAMESPACE_ITEM(ITEMNAME) candidates.Add(L ## #ITEMNAME, EnumItemNamespace::ITEMNAME);
+#define ENUM_CLASS_ITEM(ITEMNAME) candidates.Add(L ## #ITEMNAME, EnumType::ITEMNAME);
 
 /***********************************************************************
 Struct
@@ -115,7 +115,7 @@ Struct
 			};
 
 #define STRUCT_MEMBER(FIELDNAME)\
-	fieldSerializers.Add(L#FIELDNAME, new FieldSerializer<decltype(((StructType*)0)->FIELDNAME)>(GetOwnerTypeDescriptor(), &StructType::FIELDNAME, L#FIELDNAME));
+	fieldSerializers.Add(L ## #FIELDNAME, new FieldSerializer<decltype(((StructType*)0)->FIELDNAME)>(GetOwnerTypeDescriptor(), &StructType::FIELDNAME, L ## #FIELDNAME));
 
 /***********************************************************************
 Class
@@ -161,7 +161,7 @@ Field
 				new CustomFieldInfoImpl<\
 					ClassType,\
 					decltype(((ClassType*)0)->FIELDNAME)\
-					>(this, L#FIELDNAME, &ClassType::FIELDNAME)\
+					>(this, L ## #FIELDNAME, &ClassType::FIELDNAME)\
 				);
 
 /***********************************************************************
@@ -192,7 +192,7 @@ Method
 			{\
 				const wchar_t* parameterNames[]=PARAMETERNAMES;\
 				AddMethod(\
-					L#FUNCTIONNAME,\
+					L ## #FUNCTIONNAME,\
 					new CustomExternalMethodInfoImpl<\
 						ClassType,\
 						vl::function_lambda::LambdaRetriveType<FUNCTIONTYPE>::FunctionType\
@@ -204,7 +204,7 @@ Method
 			{\
 				const wchar_t* parameterNames[]=PARAMETERNAMES;\
 				AddMethod(\
-					L#EXPECTEDNAME,\
+					L ## #EXPECTEDNAME,\
 					new CustomMethodInfoImpl<\
 						ClassType,\
 						vl::function_lambda::LambdaRetriveType<FUNCTIONTYPE>::FunctionType\
@@ -229,7 +229,7 @@ Static Method
 			{\
 				const wchar_t* parameterNames[]=PARAMETERNAMES;\
 				AddMethod(\
-					L#FUNCTIONNAME,\
+					L ## #FUNCTIONNAME,\
 					new CustomStaticMethodInfoImpl<\
 						vl::function_lambda::FunctionObjectRetriveType<FUNCTIONTYPE>::FunctionType\
 						>(parameterNames, SOURCE)\
@@ -251,7 +251,7 @@ Event
 				new CustomEventInfoImpl<\
 					ClassType,\
 					CustomEventFunctionTypeRetriver<decltype(&ClassType::EVENTNAME)>::Type\
-					>(this, L#EVENTNAME, &ClassType::EVENTNAME)\
+					>(this, L ## #EVENTNAME, &ClassType::EVENTNAME)\
 				);
 
 /***********************************************************************
@@ -262,8 +262,8 @@ Property
 			AddProperty(\
 				new PropertyInfoImpl(\
 					this,\
-					L#PROPERTYNAME,\
-					dynamic_cast<MethodInfoImpl*>(GetMethodGroupByName(L#GETTER, true)->GetMethod(0)),\
+					L ## #PROPERTYNAME,\
+					dynamic_cast<MethodInfoImpl*>(GetMethodGroupByName(L ## #GETTER, true)->GetMethod(0)),\
 					0,\
 					0\
 					)\
@@ -273,9 +273,9 @@ Property
 			AddProperty(\
 				new PropertyInfoImpl(\
 					this,\
-					L#PROPERTYNAME,\
-					dynamic_cast<MethodInfoImpl*>(GetMethodGroupByName(L#GETTER, true)->GetMethod(0)),\
-					dynamic_cast<MethodInfoImpl*>(GetMethodGroupByName(L#SETTER, true)->GetMethod(0)),\
+					L ## #PROPERTYNAME,\
+					dynamic_cast<MethodInfoImpl*>(GetMethodGroupByName(L ## #GETTER, true)->GetMethod(0)),\
+					dynamic_cast<MethodInfoImpl*>(GetMethodGroupByName(L ## #SETTER, true)->GetMethod(0)),\
 					0\
 					)\
 				);
@@ -284,10 +284,10 @@ Property
 			AddProperty(\
 				new PropertyInfoImpl(\
 					this,\
-					L#PROPERTYNAME,\
-					dynamic_cast<MethodInfoImpl*>(GetMethodGroupByName(L#GETTER, true)->GetMethod(0)),\
-					dynamic_cast<MethodInfoImpl*>(GetMethodGroupByName(L#SETTER, true)->GetMethod(0)),\
-					dynamic_cast<EventInfoImpl*>(GetEventByName(L#EVENT, true))\
+					L ## #PROPERTYNAME,\
+					dynamic_cast<MethodInfoImpl*>(GetMethodGroupByName(L ## #GETTER, true)->GetMethod(0)),\
+					dynamic_cast<MethodInfoImpl*>(GetMethodGroupByName(L ## #SETTER, true)->GetMethod(0)),\
+					dynamic_cast<EventInfoImpl*>(GetEventByName(L ## #EVENT, true))\
 					)\
 				);
 
@@ -295,10 +295,10 @@ Property
 			AddProperty(\
 				new PropertyInfoImpl(\
 					this,\
-					L#PROPERTYNAME,\
-					dynamic_cast<MethodInfoImpl*>(GetMethodGroupByName(L#GETTER, true)->GetMethod(0)),\
+					L ## #PROPERTYNAME,\
+					dynamic_cast<MethodInfoImpl*>(GetMethodGroupByName(L ## #GETTER, true)->GetMethod(0)),\
 					0,\
-					dynamic_cast<EventInfoImpl*>(GetEventByName(L#EVENT, true))\
+					dynamic_cast<EventInfoImpl*>(GetEventByName(L ## #EVENT, true))\
 					)\
 				);
 
