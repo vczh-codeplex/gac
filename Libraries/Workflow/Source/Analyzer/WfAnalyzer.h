@@ -253,6 +253,42 @@ Semantic Analyzing
 Code Generation
 ***********************************************************************/
 
+			class WfCodegenFunctionContext
+			{
+				typedef collections::Dictionary<WfVariableDeclaration*, vint>		VariableIndexMap;
+				typedef collections::Dictionary<WfFunctionExpression*, vint>		LambdaIndexMap;
+				typedef collections::Dictionary<WfOrderedLambdaExpression*, vint>	OrderedLambdaIndexMap;
+			public:
+				Ptr<runtime::WfAssemblyFunction>	function;
+				VariableIndexMap					capturedVariables;
+				VariableIndexMap					localVariables;
+				LambdaIndexMap						lambdas;
+				OrderedLambdaIndexMap				orderedLambdas;
+			};
+
+			class WfCodegenContext
+			{
+				typedef collections::Dictionary<WfVariableDeclaration*, vint>		VariableIndexMap;
+				typedef collections::Dictionary<WfFunctionDeclaration*, vint>		FunctionIndexMap;
+			public:
+				Ptr<runtime::WfAssembly>			assembly;
+				WfLexicalScopeManager*				manager;
+				VariableIndexMap					globalVariables;
+				FunctionIndexMap					globalFunctions;
+				Ptr<WfCodegenFunctionContext>		functionContext;
+
+				WfCodegenContext(Ptr<runtime::WfAssembly> _assembly, WfLexicalScopeManager* _manager)
+					:assembly(_assembly)
+					, manager(_manager)
+				{
+
+				}
+			};
+
+			extern void										GenerateGlobalDeclarationMetadata(WfCodegenContext& context, Ptr<WfDeclaration> declaration, const WString& namePrefix = L"");
+			extern void										GenerateDeclarationInstructions(WfCodegenContext& context, Ptr<WfDeclaration> declaration);
+			extern void										GenerateStatementInstructions(WfCodegenContext& context, Ptr<WfStatement> statement);
+			extern void										GenerateExpressionInstructions(WfCodegenContext& context, Ptr<WfExpression> expression);
 			extern Ptr<runtime::WfAssembly>					GenerateAssembly(WfLexicalScopeManager* manager, collections::List<Ptr<WfModule>> modules);
 
 /***********************************************************************
