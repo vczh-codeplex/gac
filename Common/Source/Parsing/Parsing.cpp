@@ -856,7 +856,7 @@ ParsingAutoRecoverAmbiguousParser
 			}
 
 /***********************************************************************
-¸¨Öúº¯Êý
+Helper Functions
 ***********************************************************************/
 
 			Ptr<ParsingGeneralParser> CreateStrictParser(Ptr<ParsingTable> table)
@@ -917,12 +917,12 @@ ParsingAutoRecoverAmbiguousParser
 }
 
 /***********************************************************************
-·´Éä
+Reflection
 ***********************************************************************/
 
 #ifndef VCZH_DEBUG_NO_REFLECTION
 
-#include "..\Reflection\GuiTypeDescriptorMacros.h"
+#include "../Reflection/GuiTypeDescriptorMacros.h"
 
 namespace vl
 {
