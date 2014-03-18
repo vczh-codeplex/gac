@@ -10,9 +10,6 @@
 #include "../../Source/Stream/Accessor.h"
 #include "../../Source/Stream/CharFormat.h"
 #include "../../Source/Pointer.h"
-#if defined VCZH_GCC
-#include <wchar.h>
-#endif
 
 using namespace vl;
 using namespace vl::stream;
