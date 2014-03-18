@@ -91,10 +91,6 @@ TEST_CASE(TestAnalyzerError)
 	WfLexicalScopeManager manager(table);
 	FOREACH(WString, itemName, itemNames)
 	{
-		if (itemName == L"A13_IntegerLiteralOutOfRange")
-		{
-			int a = 0;
-		}
 		UnitTest::PrintInfo(itemName);
 		WString sample = LoadSample(L"AnalyzerError", itemName);
 		List<Ptr<ParsingError>> errors;

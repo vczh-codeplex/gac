@@ -289,7 +289,7 @@ Code Generation
 			extern void										GenerateDeclarationInstructions(WfCodegenContext& context, Ptr<WfDeclaration> declaration);
 			extern void										GenerateStatementInstructions(WfCodegenContext& context, Ptr<WfStatement> statement);
 			extern void										GenerateExpressionInstructions(WfCodegenContext& context, Ptr<WfExpression> expression);
-			extern Ptr<runtime::WfAssembly>					GenerateAssembly(WfLexicalScopeManager* manager, collections::List<Ptr<WfModule>> modules);
+			extern Ptr<runtime::WfAssembly>					GenerateAssembly(WfLexicalScopeManager* manager);
 
 /***********************************************************************
 Error Messages

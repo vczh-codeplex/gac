@@ -81,6 +81,14 @@ void LogSampleParseResult(const WString& sampleName, const WString& itemName, co
 	Log(node.Obj(), L"", writer);
 }
 
+void LogSampleCodegenResult(const WString& sampleName, const WString& itemName, Ptr<WfAssembly> assembly)
+{
+	FileStream fileStream(GetPath() + L"Assembly." + sampleName + L"." + itemName + L".txt", FileStream::WriteOnly);
+	BomEncoder encoder(BomEncoder::Utf16);
+	EncoderStream encoderStream(fileStream, encoder);
+	StreamWriter writer(encoderStream);
+}
+
 namespace test
 {
 	struct Point
