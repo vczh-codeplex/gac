@@ -64,12 +64,12 @@ Enum
 			struct CustomTypeDescriptorSelector<TYPENAME>\
 			{\
 			public:\
-				class CustomEnumValueSerializer : public EnumValueSeriaizer<TYPENAME, FLAG>\
+				class CustomEnumValueSerializer : public EnumValueSerializer<TYPENAME, FLAG>\
 				{\
 					typedef TYPENAME EnumType;\
 				public:\
 					CustomEnumValueSerializer(ITypeDescriptor* _ownerTypeDescriptor)\
-						:EnumValueSeriaizer(_ownerTypeDescriptor, DEFAULTVALUE)\
+						:EnumValueSerializer(_ownerTypeDescriptor, DEFAULTVALUE)\
 					{
 
 #define BEGIN_ENUM_ITEM_DEFAULT_VALUE(TYPENAME, DEFAULTVALUE) BEGIN_ENUM_ITEM_FLAG(TYPENAME, TYPENAME::DEFAULTVALUE, false)
@@ -96,12 +96,12 @@ Struct
 			struct CustomTypeDescriptorSelector<TYPENAME>\
 			{\
 			public:\
-				class CustomStructValueSerializer : public StructValueSeriaizer<TYPENAME>\
+				class CustomStructValueSerializer : public StructValueSerializer<TYPENAME>\
 				{\
 					typedef TYPENAME StructType;\
 				public:\
 					CustomStructValueSerializer(ITypeDescriptor* _ownerTypeDescriptor)\
-						:StructValueSeriaizer(_ownerTypeDescriptor)\
+						:StructValueSerializer(_ownerTypeDescriptor)\
 					{\
 					}\
 				protected:\

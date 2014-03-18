@@ -602,11 +602,11 @@ CustomFieldInfoImpl
 			};
 
 /***********************************************************************
-StructValueSeriaizer
+StructValueSerializer
 ***********************************************************************/
 
 			template<typename T>
-			class StructValueSeriaizer : public GeneralValueSeriaizer<T>
+			class StructValueSerializer : public GeneralValueSerializer<T>
 			{
 			public:
 				class FieldSerializerBase : public Object
@@ -800,8 +800,8 @@ StructValueSeriaizer
 					return true;
 				}
 			public:
-				StructValueSeriaizer(ITypeDescriptor* _ownedTypeDescriptor)
-					:GeneralValueSeriaizer(_ownedTypeDescriptor)
+				StructValueSerializer(ITypeDescriptor* _ownedTypeDescriptor)
+					:GeneralValueSerializer<T>(_ownedTypeDescriptor)
 					,loaded(false)
 				{
 				}
@@ -822,7 +822,7 @@ StructValueSeriaizer
 			public:
 				StructTypeDescriptor()
 				{
-					typedSerializer=serializer.Cast<TSerializer>();
+					typedSerializer=SerializableTypeDescriptor<TSerializer>::serializer.Cast<TSerializer>();
 				}
 
 				vint GetPropertyCount()override

@@ -469,11 +469,11 @@ ObjectTypeDescriptor
 BoolValueSerializer
 ***********************************************************************/
 
-			class BoolValueSeriaizer : public EnumValueSeriaizer<bool, false>
+			class BoolValueSerializer : public EnumValueSerializer<bool, false>
 			{
 			public:
-				BoolValueSeriaizer(ITypeDescriptor* _ownerTypeDescriptor)
-					:EnumValueSeriaizer(_ownerTypeDescriptor, false)
+				BoolValueSerializer(ITypeDescriptor* _ownerTypeDescriptor)
+					:EnumValueSerializer(_ownerTypeDescriptor, false)
 				{
 					candidates.Add(L"true", true);
 					candidates.Add(L"false", false);
@@ -484,7 +484,7 @@ BoolValueSerializer
 DateTimeValueSerializer
 ***********************************************************************/
 
-			class DateTimeValueSerializer : public GeneralValueSeriaizer<DateTime>
+			class DateTimeValueSerializer : public GeneralValueSerializer<DateTime>
 			{
 			protected:
 				Regex				regexDateTime;
@@ -524,7 +524,7 @@ DateTimeValueSerializer
 				}
 			public:
 				DateTimeValueSerializer(ITypeDescriptor* _ownerTypeDescriptor)
-					:GeneralValueSeriaizer(_ownerTypeDescriptor)
+					:GeneralValueSerializer<DateTime>(_ownerTypeDescriptor)
 					,regexDateTime(L"(<Y>/d/d/d/d)-(<M>/d/d)-(<D>/d/d) (<h>/d/d):(<m>/d/d):(<s>/d/d).(<ms>/d/d/d)")
 				{
 				}
@@ -907,7 +907,7 @@ LoadPredefinedTypes
 					AddSerializableType<TypedDefaultValueSerializer<wchar_t>>(manager);
 					AddSerializableType<TypedDefaultValueSerializer<WString>>(manager);
 					AddSerializableType<TypedDefaultValueSerializer<Locale>>(manager);
-					AddSerializableType<BoolValueSeriaizer>(manager);
+					AddSerializableType<BoolValueSerializer>(manager);
 					AddSerializableType<DateTimeValueSerializer>(manager);
 					ADD_TYPE_INFO(VoidValue)
 					ADD_TYPE_INFO(IDescriptable)
