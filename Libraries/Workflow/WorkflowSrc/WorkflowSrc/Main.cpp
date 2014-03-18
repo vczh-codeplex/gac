@@ -187,7 +187,13 @@ void LogSampleCodegenResult(const WString& sampleName, const WString& itemName, 
 		}
 	};
 
+	auto formatValue = [&formatFlag](const Value& value)->WString
+	{
+		return L"<" + value.GetText() + L", " + formatFlag(value.GetValueType()) + L", " + value.GetTypeDescriptor()->GetTypeName() + L">";
+	};
+
 #define LOG(NAME)						case WfInsCode::NAME: writer.WriteLine(formatText(itow(index), 5) + L": " + formatText(L"    " L ## #NAME, 18)); break;
+#define LOG_VALUE(NAME)					case WfInsCode::NAME: writer.WriteLine(formatText(itow(index), 5) + L": " + formatText(L"    " L ## #NAME, 18) + L": value = " + formatValue(ins.valueParameter)); break;
 #define LOG_FUNCTION(NAME)				case WfInsCode::NAME: writer.WriteLine(formatText(itow(index), 5) + L": " + formatText(L"    " L ## #NAME, 18) + L": func = " + itow(ins.indexParameter) + L"(" + assembly->functions[ins.indexParameter]->name + L")"); break;
 #define LOG_FUNCTION_COUNT(NAME)		case WfInsCode::NAME: writer.WriteLine(formatText(itow(index), 5) + L": " + formatText(L"    " L ## #NAME, 18) + L": func = " + itow(ins.indexParameter) + L"(" + assembly->functions[ins.indexParameter]->name + L"), stackPatternCount = " + itow(ins.countParameter)); break;
 #define LOG_VARIABLE(NAME)				case WfInsCode::NAME: writer.WriteLine(formatText(itow(index), 5) + L": " + formatText(L"    " L ## #NAME, 18) + L": var = " + itow(ins.indexParameter)); break;
@@ -202,57 +208,23 @@ void LogSampleCodegenResult(const WString& sampleName, const WString& itemName, 
 	{
 		switch (ins.code)
 		{
-			LOG(Nop)
-			LOG(LoadValue)
-			LOG_FUNCTION(LoadFunction)
-			LOG_FUNCTION_COUNT(LoadLambda)
-			LOG(LoadException)
-			LOG_VARIABLE(LoadLocalVar)
-			LOG_VARIABLE(LoadGlobalVar)
-			LOG_VARIABLE(StoreLocalVar)
-			LOG_VARIABLE(StoreGlobalVar)
-			LOG(Pop)
-			LOG(Return)
-			LOG_COUNT(CreateArray)
-			LOG_COUNT(CreateMap)
-			LOG_FLAG_TYPEDESCRIPTOR(ConvertToType)
-			LOG_FLAG_TYPEDESCRIPTOR(AssertAsType)
-			LOG_FLAG_TYPEDESCRIPTOR(TestType)
-			LOG_LABEL(Jump)
-			LOG_LABEL(JumpIf)
-			LOG_FUNCTION_COUNT(Invoke)
-			LOG_METHOD_COUNT(InvokeMethod)
-			LOG_EVENT(AttachEvent)
-			LOG(DetachEvent)
-			LOG_LABEL(InstallTry)
-			LOG_LABEL(UninstallTry)
-			LOG(RaiseException)
-			LOG_TYPE(CompareLiteral)
-			LOG(CompareReference)
-			LOG_TYPE(OpNot)
-			LOG_TYPE(OpPositive)
-			LOG_TYPE(OpNegative)
-			LOG(OpConcat)
-			LOG_TYPE(OpExp)
-			LOG_TYPE(OpAdd)
-			LOG_TYPE(OpSub)
-			LOG_TYPE(OpMul)
-			LOG_TYPE(OpDiv)
-			LOG_TYPE(OpShl)
-			LOG_TYPE(OpShr)
-			LOG(OpXor)
-			LOG(OpAnd)
-			LOG(OpOr)
-			LOG(OpLT)
-			LOG(OpGT)
-			LOG(OpLE)
-			LOG(OpGE)
-			LOG(OpEQ)
-			LOG(OpNE)
+			INSTRUCTION_CASES(
+				LOG,
+				LOG_VALUE,
+				LOG_FUNCTION,
+				LOG_FUNCTION_COUNT,
+				LOG_VARIABLE,
+				LOG_COUNT,
+				LOG_FLAG_TYPEDESCRIPTOR,
+				LOG_METHOD_COUNT,
+				LOG_EVENT,
+				LOG_LABEL,
+				LOG_TYPE)
 		}
 	}
 
 #undef LOG
+#undef LOG_VALUE
 #undef LOG_FUNCTION
 #undef LOG_FUNCTION_COUNT
 #undef LOG_VARIABLE
