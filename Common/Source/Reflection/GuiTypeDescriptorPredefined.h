@@ -393,67 +393,67 @@ Predefined Types
 			template<>struct TypeInfo<ITypeDescriptor>{static const wchar_t* TypeName;};
 
 			template<>
-			struct TypedValueSerializerProvider<unsigned __int8>
+			struct TypedValueSerializerProvider<vuint8_t>
 			{
-				static unsigned __int8 GetDefaultValue();
-				static bool Serialize(const unsigned __int8& input, WString& output);
-				static bool Deserialize(const WString& input, unsigned __int8& output);
+				static vuint8_t GetDefaultValue();
+				static bool Serialize(const vuint8_t& input, WString& output);
+				static bool Deserialize(const WString& input, vuint8_t& output);
 			};
 
 			template<>
-			struct TypedValueSerializerProvider<unsigned __int16>
+			struct TypedValueSerializerProvider<vuint16_t>
 			{
-				static unsigned __int16 GetDefaultValue();
-				static bool Serialize(const unsigned __int16& input, WString& output);
-				static bool Deserialize(const WString& input, unsigned __int16& output);
+				static vuint16_t GetDefaultValue();
+				static bool Serialize(const vuint16_t& input, WString& output);
+				static bool Deserialize(const WString& input, vuint16_t& output);
 			};
 
 			template<>
-			struct TypedValueSerializerProvider<unsigned __int32>
+			struct TypedValueSerializerProvider<vuint32_t>
 			{
-				static unsigned __int32 GetDefaultValue();
-				static bool Serialize(const unsigned __int32& input, WString& output);
-				static bool Deserialize(const WString& input, unsigned __int32& output);
+				static vuint32_t GetDefaultValue();
+				static bool Serialize(const vuint32_t& input, WString& output);
+				static bool Deserialize(const WString& input, vuint32_t& output);
 			};
 
 			template<>
-			struct TypedValueSerializerProvider<unsigned __int64>
+			struct TypedValueSerializerProvider<vuint64_t>
 			{
-				static unsigned __int64 GetDefaultValue();
-				static bool Serialize(const unsigned __int64& input, WString& output);
-				static bool Deserialize(const WString& input, unsigned __int64& output);
+				static vuint64_t GetDefaultValue();
+				static bool Serialize(const vuint64_t& input, WString& output);
+				static bool Deserialize(const WString& input, vuint64_t& output);
 			};
 
 			template<>
-			struct TypedValueSerializerProvider<signed __int8>
+			struct TypedValueSerializerProvider<vint8_t>
 			{
-				static signed __int8 GetDefaultValue();
-				static bool Serialize(const signed __int8& input, WString& output);
-				static bool Deserialize(const WString& input, signed __int8& output);
+				static vint8_t GetDefaultValue();
+				static bool Serialize(const vint8_t& input, WString& output);
+				static bool Deserialize(const WString& input, vint8_t& output);
 			};
 
 			template<>
-			struct TypedValueSerializerProvider<signed __int16>
+			struct TypedValueSerializerProvider<vint16_t>
 			{
-				static signed __int16 GetDefaultValue();
-				static bool Serialize(const signed __int16& input, WString& output);
-				static bool Deserialize(const WString& input, signed __int16& output);
+				static vint16_t GetDefaultValue();
+				static bool Serialize(const vint16_t& input, WString& output);
+				static bool Deserialize(const WString& input, vint16_t& output);
 			};
 
 			template<>
-			struct TypedValueSerializerProvider<signed __int32>
+			struct TypedValueSerializerProvider<vint32_t>
 			{
-				static signed __int32 GetDefaultValue();
-				static bool Serialize(const signed __int32& input, WString& output);
-				static bool Deserialize(const WString& input, signed __int32& output);
+				static vint32_t GetDefaultValue();
+				static bool Serialize(const vint32_t& input, WString& output);
+				static bool Deserialize(const WString& input, vint32_t& output);
 			};
 
 			template<>
-			struct TypedValueSerializerProvider<signed __int64>
+			struct TypedValueSerializerProvider<vint64_t>
 			{
-				static signed __int64 GetDefaultValue();
-				static bool Serialize(const signed __int64& input, WString& output);
-				static bool Deserialize(const WString& input, signed __int64& output);
+				static vint64_t GetDefaultValue();
+				static bool Serialize(const vint64_t& input, WString& output);
+				static bool Deserialize(const WString& input, vint64_t& output);
 			};
 
 			template<>
