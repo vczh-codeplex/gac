@@ -447,7 +447,7 @@ BEGIN_TYPE_INFO_NAMESPACE
 		CLASS_MEMBER_FIELD(season)
 		CLASS_MEMBER_CONSTRUCTOR(Ptr<Base>(), NO_PARAMETER)
 		CLASS_MEMBER_CONSTRUCTOR(Ptr<Base>(vint), {L"_a"})
-		CLASS_MEMBER_EXTERNALCTOR(Ptr<Base>(vint, vint), {L"_a"_ L"_b"}, &Base::Create)
+		CLASS_MEMBER_EXTERNALCTOR(Ptr<Base>(vint, vint), {L"_a" _ L"_b"}, &Base::Create)
 	END_CLASS_MEMBER(test::Base)
 
 	BEGIN_CLASS_MEMBER(test::Derived)
