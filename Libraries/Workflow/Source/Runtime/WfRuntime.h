@@ -26,7 +26,7 @@ Instruction
 			{
 				// Instruction		// param				: <Stack-Pattern> -> <Stack-Pattern> in the order of <bottom ---- top>
 				Nop,				// 						: () -> ()										;
-				LoadValue,			// 						: () -> Value									;
+				LoadValue,			// value				: () -> Value									;
 				LoadFunction,		// function				: () -> Value									;
 				LoadLambda,			// function, count		: Value-1, ..., Value-count -> Value			;
 				LoadException,		// 						: () -> Value									;
@@ -74,6 +74,55 @@ Instruction
 				OpNE,				// 						: <int> -> <bool>								;
 			};
 
+#define INSTRUCTION_CASES(APPLY, APPLY_VALUE, APPLY_FUNCTION, APPLY_FUNCTION_COUNT, APPLY_VARIABLE, APPLY_COUNT, APPLY_FLAG_TYPEDESCRIPTOR, APPLY_METHOD_COUNT, APPLY_EVENT, APPLY_LABEL, APPLY_TYPE)\
+			APPLY(Nop)\
+			APPLY_VALUE(LoadValue)\
+			APPLY_FUNCTION(LoadFunction)\
+			APPLY_FUNCTION_COUNT(LoadLambda)\
+			APPLY(LoadException)\
+			APPLY_VARIABLE(LoadLocalVar)\
+			APPLY_VARIABLE(LoadGlobalVar)\
+			APPLY_VARIABLE(StoreLocalVar)\
+			APPLY_VARIABLE(StoreGlobalVar)\
+			APPLY(Pop)\
+			APPLY(Return)\
+			APPLY_COUNT(CreateArray)\
+			APPLY_COUNT(CreateMap)\
+			APPLY_FLAG_TYPEDESCRIPTOR(ConvertToType)\
+			APPLY_FLAG_TYPEDESCRIPTOR(AssertAsType)\
+			APPLY_FLAG_TYPEDESCRIPTOR(TestType)\
+			APPLY_LABEL(Jump)\
+			APPLY_LABEL(JumpIf)\
+			APPLY_FUNCTION_COUNT(Invoke)\
+			APPLY_METHOD_COUNT(InvokeMethod)\
+			APPLY_EVENT(AttachEvent)\
+			APPLY(DetachEvent)\
+			APPLY_LABEL(InstallTry)\
+			APPLY_LABEL(UninstallTry)\
+			APPLY(RaiseException)\
+			APPLY_TYPE(CompareLiteral)\
+			APPLY(CompareReference)\
+			APPLY_TYPE(OpNot)\
+			APPLY_TYPE(OpPositive)\
+			APPLY_TYPE(OpNegative)\
+			APPLY(OpConcat)\
+			APPLY_TYPE(OpExp)\
+			APPLY_TYPE(OpAdd)\
+			APPLY_TYPE(OpSub)\
+			APPLY_TYPE(OpMul)\
+			APPLY_TYPE(OpDiv)\
+			APPLY_TYPE(OpShl)\
+			APPLY_TYPE(OpShr)\
+			APPLY(OpXor)\
+			APPLY(OpAnd)\
+			APPLY(OpOr)\
+			APPLY(OpLT)\
+			APPLY(OpGT)\
+			APPLY(OpLE)\
+			APPLY(OpGE)\
+			APPLY(OpEQ)\
+			APPLY(OpNE)\
+
 			enum class WfInsType
 			{
 				Bool,
@@ -94,6 +143,7 @@ Instruction
 			struct WfInstruction
 			{
 				WfInsCode											code;
+				reflection::description::Value						valueParameter;
 				WfInsType											typeParameter = WfInsType::Unknown;
 				reflection::description::Value::ValueType			flagParameter = reflection::description::Value::Null;
 				reflection::description::ITypeDescriptor*			typeDescriptorParameter = 0;
@@ -101,6 +151,43 @@ Instruction
 				vint												countParameter = 0;
 				reflection::description::IMethodInfo*				methodParameter = 0;
 				reflection::description::IEventInfo*				eventParameter = 0;
+
+				#define CTOR(NAME)						static WfInstruction NAME();
+				#define CTOR_VALUE(NAME)				static WfInstruction NAME(const reflection::description::Value& value);
+				#define CTOR_FUNCTION(NAME)				static WfInstruction NAME(vint function);
+				#define CTOR_FUNCTION_COUNT(NAME)		static WfInstruction NAME(vint function, vint count);
+				#define CTOR_VARIABLE(NAME)				static WfInstruction NAME(vint variable);
+				#define CTOR_COUNT(NAME)				static WfInstruction NAME(vint count);
+				#define CTOR_FLAG_TYPEDESCRIPTOR(NAME)	static WfInstruction NAME(reflection::description::Value::ValueType flag, reflection::description::ITypeDescriptor* typeDescriptor);
+				#define CTOR_METHOD_COUNT(NAME)			static WfInstruction NAME(reflection::description::IMethodInfo* methodInfo, vint count);
+				#define CTOR_EVENT(NAME)				static WfInstruction NAME(reflection::description::IEventInfo* eventInfo);
+				#define CTOR_LABEL(NAME)				static WfInstruction NAME(vint label);
+				#define CTOR_TYPE(NAME)					static WfInstruction NAME(WfInsType type);
+
+				INSTRUCTION_CASES(
+					CTOR,
+					CTOR_VALUE,
+					CTOR_FUNCTION,
+					CTOR_FUNCTION_COUNT,
+					CTOR_VARIABLE,
+					CTOR_COUNT,
+					CTOR_FLAG_TYPEDESCRIPTOR,
+					CTOR_METHOD_COUNT,
+					CTOR_EVENT,
+					CTOR_LABEL,
+					CTOR_TYPE)
+
+				#undef CTOR
+				#undef CTOR_VALUE
+				#undef CTOR_FUNCTION
+				#undef CTOR_FUNCTION_COUNT
+				#undef CTOR_VARIABLE
+				#undef CTOR_COUNT
+				#undef CTOR_FLAG_TYPEDESCRIPTOR
+				#undef CTOR_METHOD_COUNT
+				#undef CTOR_EVENT
+				#undef CTOR_LABEL
+				#undef CTOR_TYPE
 			};
 
 			struct WfAssemblyFunction
