@@ -79,21 +79,33 @@ Locale
 
 	Locale Locale::Invariant()
 	{
+#if defined VCZH_MSVC
 		return Locale(LOCALE_NAME_INVARIANT);
+#elif defined VCZH_GCC
+		return Locale(L"");
+#endif
 	}
 
 	Locale Locale::SystemDefault()
 	{
+#if defined VCZH_MSVC
 		wchar_t buffer[LOCALE_NAME_MAX_LENGTH+1]={0};
 		GetSystemDefaultLocaleName(buffer, LOCALE_NAME_MAX_LENGTH);
 		return Locale(buffer);
+#elif defined VCZH_GCC
+		return Locale(L"en-us");
+#endif
 	}
 
 	Locale Locale::UserDefault()
 	{
+#if defined VCZH_MSVC
 		wchar_t buffer[LOCALE_NAME_MAX_LENGTH+1]={0};
 		GetUserDefaultLocaleName(buffer, LOCALE_NAME_MAX_LENGTH);
 		return Locale(buffer);
+#elif defined VCZH_GCC
+		return Locale(L"en-us");
+#endif
 	}
 
 	void Locale::Enumerate(collections::List<Locale>& locales)
