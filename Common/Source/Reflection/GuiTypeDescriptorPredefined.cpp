@@ -126,14 +126,14 @@ TypeName
 			const wchar_t* TypeInfo<IDescriptable>::TypeName			= L"system::Interface";
 			const wchar_t* TypeInfo<DescriptableObject>::TypeName		= L"system::ReferenceType";
 			const wchar_t* TypeInfo<Value>::TypeName					= L"system::Object";
-			const wchar_t* TypeInfo<unsigned __int8>::TypeName			= L"system::UInt8";
-			const wchar_t* TypeInfo<unsigned __int16>::TypeName			= L"system::UInt16";
-			const wchar_t* TypeInfo<unsigned __int32>::TypeName			= L"system::UInt32";
-			const wchar_t* TypeInfo<unsigned __int64>::TypeName			= L"system::UInt64";
-			const wchar_t* TypeInfo<signed __int8>::TypeName			= L"system::Int8";
-			const wchar_t* TypeInfo<signed __int16>::TypeName			= L"system::Int16";
-			const wchar_t* TypeInfo<signed __int32>::TypeName			= L"system::Int32";
-			const wchar_t* TypeInfo<signed __int64>::TypeName			= L"system::Int64";
+			const wchar_t* TypeInfo<vuint8_t>::TypeName					= L"system::UInt8";
+			const wchar_t* TypeInfo<vuint16_t>::TypeName				= L"system::UInt16";
+			const wchar_t* TypeInfo<vuint32_t>::TypeName				= L"system::UInt32";
+			const wchar_t* TypeInfo<vuint64_t>::TypeName				= L"system::UInt64";
+			const wchar_t* TypeInfo<vint8_t>::TypeName					= L"system::Int8";
+			const wchar_t* TypeInfo<vint16_t>::TypeName					= L"system::Int16";
+			const wchar_t* TypeInfo<vint32_t>::TypeName					= L"system::Int32";
+			const wchar_t* TypeInfo<vint64_t>::TypeName					= L"system::Int64";
 			const wchar_t* TypeInfo<float>::TypeName					= L"system::Single";
 			const wchar_t* TypeInfo<double>::TypeName					= L"system::Double";
 			const wchar_t* TypeInfo<bool>::TypeName						= L"system::Boolean";
@@ -169,90 +169,90 @@ TypeName
 TypedValueSerializerProvider
 ***********************************************************************/
 
-			unsigned __int8 TypedValueSerializerProvider<unsigned __int8>::GetDefaultValue()
+			vuint8_t TypedValueSerializerProvider<vuint8_t>::GetDefaultValue()
 			{
 				return 0;
 			}
 
-			bool TypedValueSerializerProvider<unsigned __int8>::Serialize(const unsigned __int8& input, WString& output)
+			bool TypedValueSerializerProvider<vuint8_t>::Serialize(const vuint8_t& input, WString& output)
 			{
 				output=u64tow(input);
 				return true;
 			}
 
-			bool TypedValueSerializerProvider<unsigned __int8>::Deserialize(const WString& input, unsigned __int8& output)
+			bool TypedValueSerializerProvider<vuint8_t>::Deserialize(const WString& input, vuint8_t& output)
 			{
 				bool success=false;
-				unsigned __int64 result=wtou64_test(input, success);
+				vuint64_t result=wtou64_test(input, success);
 				if(!success) return false;
 				if(result>_UI8_MAX) return false;
-				output=(unsigned __int8)result;
+				output=(vuint8_t)result;
 				return true;
 			}
 
 			//---------------------------------------
 
-			unsigned __int16 TypedValueSerializerProvider<unsigned __int16>::GetDefaultValue()
+			vuint16_t TypedValueSerializerProvider<vuint16_t>::GetDefaultValue()
 			{
 				return 0;
 			}
 
-			bool TypedValueSerializerProvider<unsigned __int16>::Serialize(const unsigned __int16& input, WString& output)
+			bool TypedValueSerializerProvider<vuint16_t>::Serialize(const vuint16_t& input, WString& output)
 			{
 				output=u64tow(input);
 				return true;
 			}
 
-			bool TypedValueSerializerProvider<unsigned __int16>::Deserialize(const WString& input, unsigned __int16& output)
+			bool TypedValueSerializerProvider<vuint16_t>::Deserialize(const WString& input, vuint16_t& output)
 			{
 				bool success=false;
-				unsigned __int64 result=wtou64_test(input, success);
+				vuint64_t result=wtou64_test(input, success);
 				if(!success) return false;
 				if(result>_UI16_MAX) return false;
-				output=(unsigned __int16)result;
+				output=(vuint16_t)result;
 				return true;
 			}
 
 			//---------------------------------------
 
-			unsigned __int32 TypedValueSerializerProvider<unsigned __int32>::GetDefaultValue()
+			vuint32_t TypedValueSerializerProvider<vuint32_t>::GetDefaultValue()
 			{
 				return 0;
 			}
 
-			bool TypedValueSerializerProvider<unsigned __int32>::Serialize(const unsigned __int32& input, WString& output)
+			bool TypedValueSerializerProvider<vuint32_t>::Serialize(const vuint32_t& input, WString& output)
 			{
 				output=u64tow(input);
 				return true;
 			}
 
-			bool TypedValueSerializerProvider<unsigned __int32>::Deserialize(const WString& input, unsigned __int32& output)
+			bool TypedValueSerializerProvider<vuint32_t>::Deserialize(const WString& input, vuint32_t& output)
 			{
 				bool success=false;
-				unsigned __int64 result=wtou64_test(input, success);
+				vuint64_t result=wtou64_test(input, success);
 				if(!success) return false;
 				if(result>_UI32_MAX) return false;
-				output=(unsigned __int32)result;
+				output=(vuint32_t)result;
 				return true;
 			}
 
 			//---------------------------------------
 
-			unsigned __int64 TypedValueSerializerProvider<unsigned __int64>::GetDefaultValue()
+			vuint64_t TypedValueSerializerProvider<vuint64_t>::GetDefaultValue()
 			{
 				return 0;
 			}
 
-			bool TypedValueSerializerProvider<unsigned __int64>::Serialize(const unsigned __int64& input, WString& output)
+			bool TypedValueSerializerProvider<vuint64_t>::Serialize(const vuint64_t& input, WString& output)
 			{
 				output=u64tow(input);
 				return true;
 			}
 
-			bool TypedValueSerializerProvider<unsigned __int64>::Deserialize(const WString& input, unsigned __int64& output)
+			bool TypedValueSerializerProvider<vuint64_t>::Deserialize(const WString& input, vuint64_t& output)
 			{
 				bool success=false;
-				unsigned __int64 result=wtou64_test(input, success);
+				vuint64_t result=wtou64_test(input, success);
 				if(!success) return false;
 				output=result;
 				return true;
@@ -260,90 +260,90 @@ TypedValueSerializerProvider
 
 			//---------------------------------------
 
-			signed __int8 TypedValueSerializerProvider<signed __int8>::GetDefaultValue()
+			vint8_t TypedValueSerializerProvider<vint8_t>::GetDefaultValue()
 			{
 				return 0;
 			}
 
-			bool TypedValueSerializerProvider<signed __int8>::Serialize(const signed __int8& input, WString& output)
+			bool TypedValueSerializerProvider<vint8_t>::Serialize(const vint8_t& input, WString& output)
 			{
 				output=i64tow(input);
 				return true;
 			}
 
-			bool TypedValueSerializerProvider<signed __int8>::Deserialize(const WString& input, signed __int8& output)
+			bool TypedValueSerializerProvider<vint8_t>::Deserialize(const WString& input, vint8_t& output)
 			{
 				bool success=false;
-				signed __int64 result=wtoi64_test(input, success);
+				vint64_t result=wtoi64_test(input, success);
 				if(!success) return false;
 				if(result<_I8_MIN || result>_I8_MAX) return false;
-				output=(signed __int8)result;
+				output=(vint8_t)result;
 				return true;
 			}
 
 			//---------------------------------------
 
-			signed __int16 TypedValueSerializerProvider<signed __int16>::GetDefaultValue()
+			vint16_t TypedValueSerializerProvider<vint16_t>::GetDefaultValue()
 			{
 				return 0;
 			}
 
-			bool TypedValueSerializerProvider<signed __int16>::Serialize(const signed __int16& input, WString& output)
+			bool TypedValueSerializerProvider<vint16_t>::Serialize(const vint16_t& input, WString& output)
 			{
 				output=i64tow(input);
 				return true;
 			}
 
-			bool TypedValueSerializerProvider<signed __int16>::Deserialize(const WString& input, signed __int16& output)
+			bool TypedValueSerializerProvider<vint16_t>::Deserialize(const WString& input, vint16_t& output)
 			{
 				bool success=false;
-				signed __int64 result=wtoi64_test(input, success);
+				vint64_t result=wtoi64_test(input, success);
 				if(!success) return false;
 				if(result<_I16_MIN || result>_I16_MAX) return false;
-				output=(signed __int16)result;
+				output=(vint16_t)result;
 				return true;
 			}
 
 			//---------------------------------------
 
-			signed __int32 TypedValueSerializerProvider<signed __int32>::GetDefaultValue()
+			vint32_t TypedValueSerializerProvider<vint32_t>::GetDefaultValue()
 			{
 				return 0;
 			}
 
-			bool TypedValueSerializerProvider<signed __int32>::Serialize(const signed __int32& input, WString& output)
+			bool TypedValueSerializerProvider<vint32_t>::Serialize(const vint32_t& input, WString& output)
 			{
 				output=i64tow(input);
 				return true;
 			}
 
-			bool TypedValueSerializerProvider<signed __int32>::Deserialize(const WString& input, signed __int32& output)
+			bool TypedValueSerializerProvider<vint32_t>::Deserialize(const WString& input, vint32_t& output)
 			{
 				bool success=false;
-				signed __int64 result=wtoi64_test(input, success);
+				vint64_t result=wtoi64_test(input, success);
 				if(!success) return false;
 				if(result<_I32_MIN || result>_I32_MAX) return false;
-				output=(signed __int32)result;
+				output=(vint32_t)result;
 				return true;
 			}
 
 			//---------------------------------------
 
-			signed __int64 TypedValueSerializerProvider<signed __int64>::GetDefaultValue()
+			vint64_t TypedValueSerializerProvider<vint64_t>::GetDefaultValue()
 			{
 				return 0;
 			}
 
-			bool TypedValueSerializerProvider<signed __int64>::Serialize(const signed __int64& input, WString& output)
+			bool TypedValueSerializerProvider<vint64_t>::Serialize(const vint64_t& input, WString& output)
 			{
 				output=i64tow(input);
 				return true;
 			}
 
-			bool TypedValueSerializerProvider<signed __int64>::Deserialize(const WString& input, signed __int64& output)
+			bool TypedValueSerializerProvider<vint64_t>::Deserialize(const WString& input, vint64_t& output)
 			{
 				bool success=false;
-				signed __int64 result=wtoi64_test(input, success);
+				vint64_t result=wtoi64_test(input, success);
 				if(!success) return false;
 				output=result;
 				return true;
@@ -894,14 +894,14 @@ LoadPredefinedTypes
 				void Load(ITypeManager* manager)override
 				{
 					manager->SetTypeDescriptor(TypeInfo<Value>::TypeName, new ObjectTypeDescriptor);
-					AddSerializableType<TypedDefaultValueSerializer<unsigned __int8>>(manager);
-					AddSerializableType<TypedDefaultValueSerializer<unsigned __int16>>(manager);
-					AddSerializableType<TypedDefaultValueSerializer<unsigned __int32>>(manager);
-					AddSerializableType<TypedDefaultValueSerializer<unsigned __int64>>(manager);
-					AddSerializableType<TypedDefaultValueSerializer<signed __int8>>(manager);
-					AddSerializableType<TypedDefaultValueSerializer<signed __int16>>(manager);
-					AddSerializableType<TypedDefaultValueSerializer<signed __int32>>(manager);
-					AddSerializableType<TypedDefaultValueSerializer<signed __int64>>(manager);
+					AddSerializableType<TypedDefaultValueSerializer<vuint8_t>>(manager);
+					AddSerializableType<TypedDefaultValueSerializer<vuint16_t>>(manager);
+					AddSerializableType<TypedDefaultValueSerializer<vuint32_t>>(manager);
+					AddSerializableType<TypedDefaultValueSerializer<vuint64_t>>(manager);
+					AddSerializableType<TypedDefaultValueSerializer<vint8_t>>(manager);
+					AddSerializableType<TypedDefaultValueSerializer<vint16_t>>(manager);
+					AddSerializableType<TypedDefaultValueSerializer<vint32_t>>(manager);
+					AddSerializableType<TypedDefaultValueSerializer<vint64_t>>(manager);
 					AddSerializableType<TypedDefaultValueSerializer<float>>(manager);
 					AddSerializableType<TypedDefaultValueSerializer<double>>(manager);
 					AddSerializableType<TypedDefaultValueSerializer<wchar_t>>(manager);
