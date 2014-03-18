@@ -902,7 +902,7 @@ LoadPredefinedTypes
 				template<typename TSerializer>
 				void AddSerializableType(ITypeManager* manager)
 				{
-					manager->SetTypeDescriptor(TypeInfo<TSerializer::ValueType>::TypeName, new SerializableTypeDescriptor<TSerializer>);
+					manager->SetTypeDescriptor(typename TypeInfo<typename TSerializer::ValueType>::TypeName, new SerializableTypeDescriptor<TSerializer>);
 				}
 
 				void Load(ITypeManager* manager)override
