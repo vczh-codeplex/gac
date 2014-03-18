@@ -91,7 +91,7 @@ Enumerable Wrappers
 			template<typename T>
 			collections::LazyList<T> GetLazyList(Ptr<IValueEnumerator> value)
 			{
-				return collections:::LazyList<T>(new TypedEnumerator<T>(value));
+				return collections::LazyList<T>(new TypedEnumerator<T>(value));
 			}
 
 			template<typename T>
@@ -562,7 +562,7 @@ ParameterAccessor<TContainer>
 				{
 					typedef typename T::ElementType ElementType;
 					Ptr<IValueEnumerable> listProxy=UnboxValue<Ptr<IValueEnumerable>>(value, typeDescriptor, valueName);
-					result=IValueEnumerable::GetLazyList(listProxy);
+					result=GetLazyList(listProxy);
 				}
 			};
 
@@ -579,7 +579,7 @@ ParameterAccessor<TContainer>
 				{
 					typedef typename T::ElementType ElementType;
 					Ptr<IValueReadonlyList> listProxy=UnboxValue<Ptr<IValueReadonlyList>>(value, typeDescriptor, valueName);
-					LazyList<ElementType> lazyList=listProxy->GetLazyList<ElementType>();
+					LazyList<ElementType> lazyList=GetLazyList<ElementType>(listProxy);
 					collections::CopyFrom(result, lazyList);
 				}
 			};
@@ -619,7 +619,7 @@ ParameterAccessor<TContainer>
 					typedef typename ValueContainer::ElementType		ValueType;
 
 					Ptr<IValueReadonlyDictionary> dictionaryProxy=UnboxValue<Ptr<IValueReadonlyDictionary>>(value, typeDescriptor, valueName);
-					collections::LazyList<collections::Pair<KeyType, ValueType>> lazyList=dictionaryProxy->GetLazyList<KeyType, ValueType>();
+					collections::LazyList<collections::Pair<KeyType, ValueType>> lazyList=GetLazyList<KeyType, ValueType>(dictionaryProxy);
 					collections::CopyFrom(result, lazyList);
 				}
 			};

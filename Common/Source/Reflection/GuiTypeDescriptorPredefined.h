@@ -172,7 +172,7 @@ TypedValueSerializer
 			{
 			public:
 				TypedDefaultValueSerializer(ITypeDescriptor* _ownedTypeDescriptor)
-					:TypedValueSerializer(_ownedTypeDescriptor, TypedValueSerializerProvider<T>::GetDefaultValue())
+					:TypedValueSerializer<T>(_ownedTypeDescriptor, TypedValueSerializerProvider<T>::GetDefaultValue())
 				{
 				}
 			};
