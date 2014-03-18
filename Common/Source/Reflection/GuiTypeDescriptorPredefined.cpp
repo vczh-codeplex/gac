@@ -3,20 +3,6 @@
 #include "GuiTypeDescriptorMacros.h"
 #include "../Regex/Regex.h"
 
-#ifdef VCZH_GCC
-#define _I8_MIN     -128
-#define _I8_MAX     127
-#define _UI8_MAX    255
-
-#define _I16_MIN    -32768
-#define _I16_MAX    32767
-#define _UI16_MAX   65535
-
-#define _I32_MIN    -2147483648
-#define _I32_MAX    2147483647
-#define _UI32_MAX   4194967295
-#endif
-
 namespace vl
 {
 	using namespace collections;
