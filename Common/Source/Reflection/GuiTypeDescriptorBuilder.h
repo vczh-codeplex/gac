@@ -514,6 +514,36 @@ TypeInfoRetriver Helper Functions (BoxValue, UnboxValue)
 				return ValueAccessor<T, TypeInfoRetriver<T>::Decorator>::UnboxValue(value, typeDescriptor, valueName);
 			}
 
+			class Value_xs
+			{
+			protected:
+				collections::Array<Value>	arguments;
+			public:
+				Value_xs()
+				{
+				}
+
+				template<typename T>
+				Value_xs& operator,(const T& value)
+				{
+					arguments.Resize(arguments.Count()+1);
+					arguments[arguments.Count()-1]=BoxValue<T>(value);
+					return *this;
+				}
+
+				Value_xs& operator,(const Value& value)
+				{
+					arguments.Resize(arguments.Count()+1);
+					arguments[arguments.Count()-1]=value;
+					return *this;
+				}
+
+				operator collections::Array<Value>&()
+				{
+					return arguments;
+				}
+			};
+
 /***********************************************************************
 TypeInfoRetriver Helper Functions (UnboxParameter)
 ***********************************************************************/

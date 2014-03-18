@@ -19,6 +19,114 @@ namespace vl
 		{
 
 /***********************************************************************
+Enumerable Wrappers
+***********************************************************************/
+
+			template<typename T>
+			class TypedEnumerator : public Object, public collections::IEnumerator<T>
+			{
+			private:
+				Ptr<IValueEnumerable>		enumerable;
+				Ptr<IValueEnumerator>		enumerator;
+				vint						index;
+				T							value;
+
+			public:
+				TypedEnumerator(Ptr<IValueEnumerable> _enumerable, vint _index, const T& _value)
+					:enumerable(_enumerable)
+					,index(_index)
+					,value(_value)
+				{
+					enumerator=enumerable->CreateEnumerator();
+					vint current=-1;
+					while(current++<index)
+					{
+						enumerator->Next();
+					}
+				}
+
+				TypedEnumerator(Ptr<IValueEnumerable> _enumerable)
+					:enumerable(_enumerable)
+					,index(-1)
+				{
+					Reset();
+				}
+
+				collections::IEnumerator<T>* Clone()const override
+				{
+					return new TypedEnumerator<T>(enumerable, index, value);
+				}
+
+				const T& Current()const override
+				{
+					return value;
+				}
+
+				vint Index()const override
+				{
+					return index;
+				}
+
+				bool Next() override
+				{
+					if(enumerator->Next())
+					{
+						index++;
+						value=UnboxValue<T>(enumerator->GetCurrent());
+						return true;
+					}
+					else
+					{
+						return false;
+					}
+				}
+
+				void Reset() override
+				{
+					index=-1;
+					enumerator=enumerable->CreateEnumerator();
+				}
+			};
+
+			template<typename T>
+			collections::LazyList<T> GetLazyList(Ptr<IValueEnumerator> value)
+			{
+				return collections:::LazyList<T>(new TypedEnumerator<T>(value));
+			}
+
+			template<typename T>
+			collections::LazyList<T> GetLazyList(Ptr<IValueReadonlyList> value)
+			{
+				return collections::Range<vint>(0, value->GetCount())
+					.Select([value](vint i)
+					{
+						return UnboxValue<T>(value->Get(i));
+					});
+			}
+
+			template<typename T>
+			collections::LazyList<T> GetLazyList(Ptr<IValueList> value)
+			{
+				return GetLazyList<T>(Ptr<IValueReadonlyList>(value));
+			}
+
+			template<typename K, typename V>
+			collections::LazyList<collections::Pair<K, V>> GetLazyList(Ptr<IValueReadonlyDictionary> value)
+			{
+				return collections::Range<vint>(0, value->GetCount())
+					.Select([value](vint i)
+					{
+						return collections::Pair<K, V>(UnboxValue<K>(value->GetKeys()->Get(i)), UnboxValue<V>(value->GetValues()->Get(i)));
+					});
+			}
+
+			template<typename T>
+			collections::LazyList<T> GetLazyList(Ptr<IValueDictionary> value)
+			{
+				return GetLazyList<T>(Ptr<IValueReadonlyDictionary>(value));
+			}
+
+/***********************************************************************
 Collection Wrappers
 ***********************************************************************/
 
@@ -489,7 +597,7 @@ ParameterAccessor<TContainer>
 				{
 					typedef typename T::ElementType ElementType;
 					Ptr<IValueList> listProxy=UnboxValue<Ptr<IValueList>>(value, typeDescriptor, valueName);
-					collections::LazyList<ElementType> lazyList=listProxy->GetLazyList<ElementType>();
+					collections::LazyList<ElementType> lazyList=GetLazyList<ElementType>(listProxy);
 					collections::CopyFrom(result, lazyList);
 				}
 			};
@@ -533,7 +641,7 @@ ParameterAccessor<TContainer>
 					typedef typename ValueContainer::ElementType		ValueType;
 
 					Ptr<IValueDictionary> dictionaryProxy=UnboxValue<Ptr<IValueDictionary>>(value, typeDescriptor, valueName);
-					collections::LazyList<collections::Pair<KeyType, ValueType>> lazyList=dictionaryProxy->GetLazyList<KeyType, ValueType>();
+					collections::LazyList<collections::Pair<KeyType, ValueType>> lazyList=GetLazyList<KeyType, ValueType>(dictionaryProxy);
 					collections::CopyFrom(result, lazyList);
 				}
 			};
