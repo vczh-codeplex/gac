@@ -181,8 +181,11 @@ ParameterAccessor<Func<R(TArgs...)>>
 							{
 								Ptr<IValueList> arguments = IValueList::Create();
 								internal_helper::AddValueToList(arguments, ForwardValue<TArgs>(args)...);
-
+#if defined VCZH_MSVC
 								typedef TypeInfoRetriver<R>::TempValueType ResultType;
+#elif defined VCZH_GCC
+								typedef typename TypeInfoRetriver<R>::TempValueType ResultType;
+#endif
 								ResultType proxyResult;
 								description::UnboxParameter<ResultType>(functionProxy->Invoke(arguments), proxyResult);
 								return proxyResult;
@@ -557,7 +560,7 @@ CustomEventInfoImpl<void(TArgs...)>
 			template<typename TClass, typename TEvent>
 			struct CustomEventFunctionTypeRetriver<Event<TEvent> TClass::*>
 			{
-				typedef typename TEvent						Type;
+				typedef TEvent								Type;
 			};
 		}
 	}

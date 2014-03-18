@@ -40,11 +40,11 @@ TypeInfo
 			}
 
 /***********************************************************************
-GeneralValueSeriaizer
+GeneralValueSerializer
 ***********************************************************************/
 
 			template<typename T>
-			class GeneralValueSeriaizer : public Object, public ITypedValueSerializer<T>
+			class GeneralValueSerializer : public Object, public ITypedValueSerializer<T>
 			{
 			protected:
 				ITypeDescriptor*							ownedTypeDescriptor;
@@ -55,7 +55,7 @@ GeneralValueSeriaizer
 			public:
 				typedef T ValueType;
 
-				GeneralValueSeriaizer(ITypeDescriptor* _ownedTypeDescriptor)
+				GeneralValueSerializer(ITypeDescriptor* _ownedTypeDescriptor)
 					:ownedTypeDescriptor(_ownedTypeDescriptor)
 				{
 				}
@@ -140,7 +140,7 @@ TypedValueSerializer
 			};
 
 			template<typename T>
-			class TypedValueSerializer : public GeneralValueSeriaizer<T>
+			class TypedValueSerializer : public GeneralValueSerializer<T>
 			{
 			protected:
 				T											defaultValue;
@@ -161,7 +161,7 @@ TypedValueSerializer
 				}
 			public:
 				TypedValueSerializer(ITypeDescriptor* _ownedTypeDescriptor, const T& _defaultValue)
-					:GeneralValueSeriaizer(_ownedTypeDescriptor)
+					:GeneralValueSerializer<T>(_ownedTypeDescriptor)
 					, defaultValue(_defaultValue)
 				{
 				}
@@ -178,7 +178,7 @@ TypedValueSerializer
 			};
 
 /***********************************************************************
-EnumValueSeriaizer
+EnumValueSerializer
 ***********************************************************************/
 
 			template<typename T, bool CanMerge>
@@ -250,7 +250,7 @@ EnumValueSeriaizer
 			};
 
 			template<typename T, bool CanMerge>
-			class EnumValueSeriaizer : public GeneralValueSeriaizer<T>
+			class EnumValueSerializer : public GeneralValueSerializer<T>
 			{
 			protected:
 				T											defaultValue;
@@ -271,8 +271,8 @@ EnumValueSeriaizer
 					return EnumValueSerializerProvider<T, CanMerge>::Deserialize(candidates, input, output);
 				}
 			public:
-				EnumValueSeriaizer(ITypeDescriptor* _ownedTypeDescriptor, const T& _defaultValue)
-					:GeneralValueSeriaizer(_ownedTypeDescriptor)
+				EnumValueSerializer(ITypeDescriptor* _ownedTypeDescriptor, const T& _defaultValue)
+					:GeneralValueSerializer<T>(_ownedTypeDescriptor)
 					, defaultValue(_defaultValue)
 				{
 				}
