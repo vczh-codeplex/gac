@@ -6,7 +6,6 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <wctype.h>
-#include <wchar.h>
 #define _strtoi64 strtoll
 #define _strtoui64 strtoull
 #define _wcstoi64 wcstoll

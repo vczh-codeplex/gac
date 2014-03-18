@@ -3,9 +3,6 @@
 #include "RegexPure.h"
 #include "RegexRich.h"
 #include "../Collections/OperationCopyFrom.h"
-#if defined VCZH_GCC
-#include <wchar.h>
-#endif
 
 namespace vl
 {

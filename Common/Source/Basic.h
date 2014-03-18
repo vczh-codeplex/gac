@@ -31,6 +31,7 @@ Macros:
 #include <x86intrin.h>
 #include <stdint.h>
 #include <stddef.h>
+#include <wchar.h>
 #define override
 #define abstract
 #define __thiscall

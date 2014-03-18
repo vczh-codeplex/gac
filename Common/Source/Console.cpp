@@ -2,7 +2,6 @@
 #if defined VCZH_MSVC
 #include <Windows.h>
 #elif defined VCZH_GCC
-#include <wchar.h>
 #include <iostream>
 #include <string>
 using namespace std;

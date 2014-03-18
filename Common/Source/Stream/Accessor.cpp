@@ -1,8 +1,5 @@
 #include <string.h>
 #include "Accessor.h"
-#if defined VCZH_GCC
-#include <wchar.h>
-#endif
 
 namespace vl
 {
