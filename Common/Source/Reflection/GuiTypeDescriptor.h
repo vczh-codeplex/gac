@@ -812,6 +812,7 @@ Collection Wrappers
 
 #define WRAPPER_POINTER ValueReadonlyDictionaryWrapper<T>::wrapperPointer
 #define KEY_VALUE_TYPE typename ValueReadonlyDictionaryWrapper<T>::KeyValueType
+#define VALUE_TYPE typename ValueReadonlyDictionaryWrapper<T>::ValueType
 #define KEY_KEY_TYPE typename ValueReadonlyDictionaryWrapper<T>::KeyKeyType
 			
 			template<typename T>
@@ -825,14 +826,14 @@ Collection Wrappers
 
 				void Set(const Value& key, const Value& value)override
 				{
-					KeyValueType item=UnboxValue<KeyValueType>(key);
-					ValueType result=UnboxValue<ValueType>(value);
+					KEY_VALUE_TYPE item=UnboxValue<KEY_VALUE_TYPE>(key);
+					VALUE_TYPE result=UnboxValue<VALUE_TYPE>(value);
 					WRAPPER_POINTER->Set(item, result);
 				}
 
 				bool Remove(const Value& key)override
 				{
-					KeyKeyType item=UnboxValue<KeyKeyType>(key);
+					KEY_KEY_TYPE item=UnboxValue<KEY_KEY_TYPE>(key);
 					return WRAPPER_POINTER->Remove(item);
 				}
 
@@ -843,6 +844,7 @@ Collection Wrappers
 			};
 #undef WRAPPER_POINTER
 #undef KEY_VALUE_TYPE
+#undef VALUE_TYPE
 #undef KEY_KEY_TYPE
 #pragma warning(pop)
 
