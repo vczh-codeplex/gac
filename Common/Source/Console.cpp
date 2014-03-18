@@ -36,7 +36,6 @@ Console
 				delete codePageBuffer;
 			}
 #elif defined VCZH_GCC
-			//wprintf(L"%.*s", (int)length, string);
 			wstring s(string, string+length);
 			wcout<<s<<ends;
 #endif
@@ -83,10 +82,6 @@ Console
 			}
 			return result;
 #elif defined VCZH_GCC
-			//wchar_t buffer[1024];
-			//memset(buffer, 0, sizeof(buffer));
-			//wscanf(L"%1023s\n", buffer);
-			//return buffer;
 			wstring s;
 			getline(wcin, s, L'\n');
 			return s.c_str();

@@ -27,12 +27,12 @@ namespace vl
 
 	void _i64toa_s(vint64_t value, char* buffer, size_t size, vint radix)
 	{
-		sprintf(buffer, "%dll", value);
+		sprintf(buffer, "%lld", value);
 	}
 
 	void _i64tow_s(vint64_t value, wchar_t* buffer, size_t size, vint radix)
 	{
-		swprintf(buffer, size - 1, L"%dll", value);
+		swprintf(buffer, size - 1, L"%lld", value);
 	}
 
 	void _uitoa_s(vuint32_t value, char* buffer, size_t size, vint radix)
@@ -47,17 +47,17 @@ namespace vl
 
 	void _ui64toa_s(vuint64_t value, char* buffer, size_t size, vint radix)
 	{
-		sprintf(buffer, "%ull", value);
+		sprintf(buffer, "%llu", value);
 	}
 
 	void _ui64tow_s(vuint64_t value, wchar_t* buffer, size_t size, vint radix)
 	{
-		swprintf(buffer, size - 1, L"%ull", value);
+		swprintf(buffer, size - 1, L"%llu", value);
 	}
 
 	void _gcvt_s(char* buffer, size_t size, double value, vint numberOfDigits)
 	{
-		sprintf(buffer, "%fl", value);
+		sprintf(buffer, "%f", value);
 	}
 
 	void _strlwr_s(char* buffer, size_t size)
@@ -295,8 +295,8 @@ namespace vl
 
 	AString ftoa(double number)
 	{
-		char buffer[100];
-		_gcvt_s(buffer, 100, number, 30);
+		char buffer[320];
+		_gcvt_s(buffer, 320, number, 30);
 		vint len = (vint)strlen(buffer);
 		if (buffer[len - 1] == '.')
 		{

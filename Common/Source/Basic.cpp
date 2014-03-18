@@ -159,7 +159,9 @@ DateTime
 		timeinfo.tm_hour = _hour;
 		timeinfo.tm_min = _minute;
 		timeinfo.tm_sec = _second;
-		return ConvertTMToDateTime(&timeinfo);
+		DateTime dt = ConvertTMToDateTime(&timeinfo);
+		dt.milliseconds = _milliseconds;
+		return dt;
 #endif
 	}
 
