@@ -39,19 +39,19 @@ Macros:
 
 #define _I8_MIN     ((vint8_t)0x80)
 #define _I8_MAX     ((vint8_t)0x7F)
-#define _UI8_MAX    ((vunt8_t)0xFF)
+#define _UI8_MAX    ((vuint8_t)0xFF)
 
 #define _I16_MIN    ((vint16_t)0x8000)
 #define _I16_MAX    ((vint16_t)0x7FFF)
-#define _UI16_MAX   ((vint16_t)0xFFFF)
+#define _UI16_MAX   ((vuint16_t)0xFFFF)
 
 #define _I32_MIN    ((vint32_t)0x80000000)
 #define _I32_MAX    ((vint32_t)0x7FFFFFFF)
-#define _UI32_MAX   ((vint32_t)0xFFFFFFFF)
+#define _UI32_MAX   ((vuint32_t)0xFFFFFFFF)
 
 #define _I64_MIN    ((vint64_t)0x8000000000000000L)
 #define _I64_MAX    ((vint64_t)0x7FFFFFFFFFFFFFFFL)
-#define _UI64_MAX   ((vint64_t)0xFFFFFFFFFFFFFFFFL)
+#define _UI64_MAX   ((vuint64_t)0xFFFFFFFFFFFFFFFFL)
 #endif
 
 #define L_(x) L__(x)
