@@ -30,17 +30,17 @@ Instruction
 				LoadFunction,		// function				: () -> Value									;
 				LoadLambda,			// function, count		: Value-1, ..., Value-count -> Value			;
 				LoadException,		// 						: () -> Value									;
-				LoadLocalVar,		// 						: int -> Value									;
-				LoadGlobalVar,		// 						: int -> Value									;
-				StoreLocalVar,		// index				: Value -> ()									;
-				StoreGlobalVar,		// index				: Value -> ()									;
+				LoadLocalVar,		// variable				: () -> Value									;
+				LoadGlobalVar,		// variable				: () -> Value									;
+				StoreLocalVar,		// variable				: Value -> ()									;
+				StoreGlobalVar,		// variable				: Value -> ()									;
 				Pop,				//						: Value -> ()									;
 				Return,				// 						: Value -> Value								; (exit function)
 				CreateArray,		// count				: Value-1, ..., Value-count -> <array>			;
-				CreateMap,			// count				: Value-1, ..., Value-count*2 -> <map>			;
-				ConvertToType,		// flag, type			: Value -> Value								;
-				AssertAsType,		// flag, type			: Value -> Value								;
-				TestType,			// flag, type			: Value -> <bool>								;
+				CreateMap,			// count				: Value-1, ..., Value-count -> <map>			;
+				ConvertToType,		// flag, typeDescriptor	: Value -> Value								;
+				AssertAsType,		// flag, typeDescriptor	: Value -> Value								;
+				TestType,			// flag, typeDescriptor	: Value -> <bool>								;
 				Jump,				// label				: () -> ()										;
 				JumpIf,				// label				: () -> ()										;
 				Invoke,				// function, count		: Value-1, ..., Value-n -> Value				;
@@ -96,8 +96,9 @@ Instruction
 				WfInsCode											code;
 				WfInsType											typeParameter = WfInsType::Unknown;
 				reflection::description::Value::ValueType			flagParameter = reflection::description::Value::Null;
-				vint												intParameter = 0;
-				vint												labelParameter = 0;
+				reflection::description::ITypeDescriptor*			typeDescriptorParameter = 0;
+				vint												indexParameter = 0;
+				vint												countParameter = 0;
 				reflection::description::IMethodInfo*				methodParameter = 0;
 				reflection::description::IEventInfo*				eventParameter = 0;
 			};
