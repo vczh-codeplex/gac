@@ -331,7 +331,7 @@ TypeFlagTester
 			struct TypeFlagTester<TDerived, TypeFlags::FunctionType>
 			{
 				template<typename T>
-				static void* Inherit(Func<T>* source){}
+				static void* Inherit(const Func<T>* source){}
 				static char Inherit(void* source){}
 				static char Inherit(const void* source){}
 
@@ -489,7 +489,7 @@ TypeInfoRetriver
 
 				static Ptr<ITypeInfo> CreateTypeInfo()
 				{
-					return DetailTypeInfoRetriver<T, TypeFlag>::CreateTypeInfo();
+					return DetailTypeInfoRetriver<typename RemoveCVR<T>::Type, TypeFlag>::CreateTypeInfo();
 				}
 			};
 
