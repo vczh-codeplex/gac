@@ -562,7 +562,7 @@ ParameterAccessor<TContainer>
 				{
 					typedef typename T::ElementType ElementType;
 					Ptr<IValueEnumerable> listProxy=UnboxValue<Ptr<IValueEnumerable>>(value, typeDescriptor, valueName);
-					result=GetLazyList(listProxy);
+					result=GetLazyList<T>(listProxy);
 				}
 			};
 
@@ -579,7 +579,7 @@ ParameterAccessor<TContainer>
 				{
 					typedef typename T::ElementType ElementType;
 					Ptr<IValueReadonlyList> listProxy=UnboxValue<Ptr<IValueReadonlyList>>(value, typeDescriptor, valueName);
-					LazyList<ElementType> lazyList=GetLazyList<ElementType>(listProxy);
+					collections::LazyList<ElementType> lazyList=GetLazyList<ElementType>(listProxy);
 					collections::CopyFrom(result, lazyList);
 				}
 			};
