@@ -822,7 +822,8 @@ StructValueSerializer
 			public:
 				StructTypeDescriptor()
 				{
-					typedSerializer=SerializableTypeDescriptor<TSerializer>::serializer.Cast<TSerializer>();
+					auto serializer = SerializableTypeDescriptor<TSerializer>::serializer;
+					typedSerializer = serializer.template Cast<TSerializer>();
 				}
 
 				vint GetPropertyCount()override
@@ -832,7 +833,8 @@ StructValueSerializer
 
 				IPropertyInfo* GetProperty(vint index)override
 				{
-					return typedSerializer->GetFieldSerializers().Values().Get(index).Cast<IPropertyInfo>().Obj();
+					auto serializer = typedSerializer->GetFieldSerializers().Values().Get(index);
+					return serializer.template Cast<IPropertyInfo>().Obj();
 				}
 
 				bool IsPropertyExists(const WString& name, bool inheritable)override
