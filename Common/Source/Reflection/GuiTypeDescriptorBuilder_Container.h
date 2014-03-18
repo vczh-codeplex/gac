@@ -255,7 +255,7 @@ ParameterAccessor<TContainer>
 					typedef typename ValueContainer::ElementType		ValueType;
 
 					Ptr<IValueReadonlyDictionary> dictionaryProxy=UnboxValue<Ptr<IValueReadonlyDictionary>>(value, typeDescriptor, valueName);
-					collections::LazyList<Pair<KeyType, ValueType>> lazyList=dictionaryProxy->GetLazyList<KeyType, ValueType>();
+					collections::LazyList<collections::Pair<KeyType, ValueType>> lazyList=dictionaryProxy->GetLazyList<KeyType, ValueType>();
 					collections::CopyFrom(result, lazyList);
 				}
 			};
@@ -277,7 +277,7 @@ ParameterAccessor<TContainer>
 					typedef typename ValueContainer::ElementType		ValueType;
 
 					Ptr<IValueDictionary> dictionaryProxy=UnboxValue<Ptr<IValueDictionary>>(value, typeDescriptor, valueName);
-					collections::LazyList<Pair<KeyType, ValueType>> lazyList=dictionaryProxy->GetLazyList<KeyType, ValueType>();
+					collections::LazyList<collections::Pair<KeyType, ValueType>> lazyList=dictionaryProxy->GetLazyList<KeyType, ValueType>();
 					collections::CopyFrom(result, lazyList);
 				}
 			};
