@@ -101,7 +101,7 @@ Locale
 #if defined VCZH_MSVC
 		EnumSystemLocalesEx(&Locale_EnumLocalesProcEx, LOCALE_ALL, (LPARAM)&locales, NULL);
 #elif defined VCZH_GCC
-		locales.Add(L"en-us");
+		locales.Add(Locale(L"en-us"));
 #endif
 	}
 
