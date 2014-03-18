@@ -87,6 +87,47 @@ void LogSampleCodegenResult(const WString& sampleName, const WString& itemName, 
 	BomEncoder encoder(BomEncoder::Utf16);
 	EncoderStream encoderStream(fileStream, encoder);
 	StreamWriter writer(encoderStream);
+	
+	writer.WriteLine(L"========================================================");
+	writer.WriteLine(L"Global Variables:");
+	writer.WriteLine(L"========================================================");
+	FOREACH(WString, name, assembly->variableNames)
+	{
+		writer.WriteLine(name);
+	}
+	writer.WriteLine(L"");
+	
+	writer.WriteLine(L"========================================================");
+	writer.WriteLine(L"Functions:");
+	writer.WriteLine(L"========================================================");
+	FOREACH(Ptr<WfAssemblyFunction>, function, assembly->functions)
+	{
+		writer.WriteLine(function->name + L" (" + itow(function->firstInstruction) + L" .. " + itow(function->lastInstruction) + L")");
+
+		writer.WriteLine(L"    Arguments:");
+		FOREACH(WString, name, function->argumentNames)
+		{
+			writer.WriteLine(L"        " + name);
+		}
+
+		writer.WriteLine(L"    Captured Variables:");
+		FOREACH(WString, name, function->capturedVariableNames)
+		{
+			writer.WriteLine(L"        " + name);
+		}
+
+		writer.WriteLine(L"    Local Variables:");
+		FOREACH(WString, name, function->localVariableNames)
+		{
+			writer.WriteLine(L"        " + name);
+		}
+
+		writer.WriteLine(L"");
+	}
+	
+	writer.WriteLine(L"========================================================");
+	writer.WriteLine(L"Instructions:");
+	writer.WriteLine(L"========================================================");
 }
 
 namespace test
