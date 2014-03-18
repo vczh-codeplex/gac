@@ -12,7 +12,9 @@ VLPP_REGEX_OBJS = $(OBJ)Regex.o $(OBJ)RegexAutomaton.o $(OBJ)RegexData.o $(OBJ)R
 
 VLPP_REFLECTION_OBJS = $(OBJ)GuiTypeDescriptor.o $(OBJ)GuiTypeDescriptorBuilder.o $(OBJ)GuiTypeDescriptorPredefined.o
 
-VLPP_OBJS = $(OBJ)Basic.o $(OBJ)String.o $(OBJ)Console.o $(OBJ)GlobalStorage.o $(OBJ)Exception.o $(OBJ)Locale.o $(OBJ)UnitTest.o $(VLPP_STREAM_OBJS) $(VLPP_REGEX_OBJS) $(VLPP_REFLECTION_OBJS)
+VLPP_PARSING_OBJS = $(OBJ)Parsing.o $(OBJ)ParsingAnalyzer.o $(OBJ)ParsingAutomaton.o $(OBJ)ParsingAutomaton_Closure.o $(OBJ)ParsingAutomaton_EPDA.o $(OBJ)ParsingAutomaton_GenerateTable.o $(OBJ)ParsingAutomaton_JPDA.o $(OBJ)ParsingAutomaton_MergeStates.o $(OBJ)ParsingAutomaton_NPDA.o $(OBJ)ParsingDefinitions.o $(OBJ)ParsingDefinitions_CreateParserDefinition.o $(OBJ)ParsingLogging.o $(OBJ)ParsingState.o $(OBJ)ParsingTable.o $(OBJ)ParsingTree.o $(OBJ)ParsingJson.o $(OBJ)ParsingJson_Parser.o $(OBJ)ParsingXml.o $(OBJ)ParsingXml_Parser.o
+
+VLPP_OBJS = $(OBJ)Basic.o $(OBJ)String.o $(OBJ)Console.o $(OBJ)GlobalStorage.o $(OBJ)Exception.o $(OBJ)Locale.o $(OBJ)UnitTest.o $(VLPP_STREAM_OBJS) $(VLPP_REGEX_OBJS) $(VLPP_REFLECTION_OBJS) $(VLPP_PARSING_OBJS)
 
 UNITTEST_OBJS = $(OBJ)TestBasic.o $(OBJ)TestString.o $(OBJ)TestList.o $(OBJ)TestFunction.o $(OBJ)TestGlobalStorage.o $(OBJ)TestStream.o $(OBJ)TestRegex.o $(OBJ)TestReflection.o
 
@@ -47,6 +49,25 @@ all:
 	$(CPP)		-o $(OBJ)GuiTypeDescriptor.o		-c $(VLPP)Reflection/GuiTypeDescriptor.cpp
 	$(CPP)		-o $(OBJ)GuiTypeDescriptorBuilder.o	-c $(VLPP)Reflection/GuiTypeDescriptorBuilder.cpp
 	$(CPP)		-o $(OBJ)GuiTypeDescriptorPredefined.o	-c $(VLPP)Reflection/GuiTypeDescriptorPredefined.cpp
+	$(CPP)		-o $(OBJ)Parsing.o			-c $(VLPP)Parsing/Parsing.cpp
+	$(CPP)		-o $(OBJ)ParsingAnalyzer.o		-c $(VLPP)Parsing/ParsingAnalyzer.cpp
+	$(CPP)		-o $(OBJ)ParsingAutomaton.o		-c $(VLPP)Parsing/ParsingAutomaton.cpp
+	$(CPP)		-o $(OBJ)ParsingAutomaton_Closure.o		-c $(VLPP)Parsing/ParsingAutomaton_Closure.cpp
+	$(CPP)		-o $(OBJ)ParsingAutomaton_EPDA.o		-c $(VLPP)Parsing/ParsingAutomaton_EPDA.cpp
+	$(CPP)		-o $(OBJ)ParsingAutomaton_GenerateTable.o	-c $(VLPP)Parsing/ParsingAutomaton_GenerateTable.cpp
+	$(CPP)		-o $(OBJ)ParsingAutomaton_JPDA.o		-c $(VLPP)Parsing/ParsingAutomaton_JPDA.cpp
+	$(CPP)		-o $(OBJ)ParsingAutomaton_MergeStates.o		-c $(VLPP)Parsing/ParsingAutomaton_MergeStates.cpp
+	$(CPP)		-o $(OBJ)ParsingAutomaton_NPDA.o		-c $(VLPP)Parsing/ParsingAutomaton_NPDA.cpp
+	$(CPP)		-o $(OBJ)ParsingDefinitions.o		-c $(VLPP)Parsing/ParsingDefinitions.cpp
+	$(CPP)		-o $(OBJ)ParsingDefinitions_CreateParserDefinition.o		-c $(VLPP)Parsing/ParsingDefinitions_CreateParserDefinition.cpp
+	$(CPP)		-o $(OBJ)ParsingLogging.o		-c $(VLPP)Parsing/ParsingLogging.cpp
+	$(CPP)		-o $(OBJ)ParsingState.o			-c $(VLPP)Parsing/ParsingState.cpp
+	$(CPP)		-o $(OBJ)ParsingTable.o			-c $(VLPP)Parsing/ParsingTable.cpp
+	$(CPP)		-o $(OBJ)ParsingTree.o			-c $(VLPP)Parsing/ParsingTree.cpp
+	$(CPP)		-o $(OBJ)ParsingJson.o			-c $(VLPP)Parsing/Json/ParsingJson.cpp
+	$(CPP)		-o $(OBJ)ParsingJson_Parser.o		-c $(VLPP)Parsing/Json/ParsingJson_Parser.cpp
+	$(CPP)		-o $(OBJ)ParsingXml.o			-c $(VLPP)Parsing/Xml/ParsingXml.cpp
+	$(CPP)		-o $(OBJ)ParsingXml_Parser.o		-c $(VLPP)Parsing/Xml/ParsingXml_Parser.cpp
 	$(CPP)		-o $(OBJ)TestBasic.o			-c $(UNITTEST)TestBasic.cpp
 	$(CPP)		-o $(OBJ)TestString.o			-c $(UNITTEST)TestString.cpp
 	$(CPP)		-o $(OBJ)TestList.o			-c $(UNITTEST)TestList.cpp

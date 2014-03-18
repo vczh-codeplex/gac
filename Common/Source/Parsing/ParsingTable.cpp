@@ -10,6 +10,12 @@ namespace vl
 			using namespace collections;
 			using namespace regex;
 
+			const vint ParsingTable::TokenBegin;
+			const vint ParsingTable::TokenFinish;
+			const vint ParsingTable::NormalReduce;
+			const vint ParsingTable::LeftRecursiveReduce;
+			const vint ParsingTable::UserTokenStart;
+
 /***********************************************************************
 ParsingTable::AttributeInfoList
 ***********************************************************************/

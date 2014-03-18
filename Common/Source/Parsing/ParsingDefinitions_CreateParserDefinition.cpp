@@ -483,6 +483,8 @@ namespace vl
 				}
 			}
 
+			extern Ptr<ParsingTreeCustomBase> Deserialize(Ptr<ParsingTreeObject> node);
+
 			template<typename T>
 			void SetArray(List<Ptr<T>>& target, Ptr<ParsingTreeNode> node)
 			{

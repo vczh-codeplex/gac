@@ -761,7 +761,14 @@ ParsingTreeBuilder
 					{
 						if(processingAmbiguityBranch) return false;
 						processingAmbiguityBranch=true;
-						ambiguityBranchCreatedObject=createdObject?createdObject->Clone():0;
+						if(createdObject)
+						{
+							ambiguityBranchCreatedObject=createdObject->Clone();
+						}
+						else
+						{
+							ambiguityBranchCreatedObject=0;
+						}
 						ambiguityBranchOperationTarget=operationTarget->Clone().Cast<ParsingTreeObject>();
 						ambiguityBranchNodeStack.Clear();
 						ambiguityBranchSharedNodeCount=nodeStack.Count()-result.ambiguityAffectedStackNodeCount+1;
@@ -777,7 +784,14 @@ ParsingTreeBuilder
 						if(!processingAmbiguityBranch) return false;
 						if(nodeStack.Count()!=ambiguityBranchSharedNodeCount) return false;
 						ambiguityNodes.Add(operationTarget);
-						createdObject=ambiguityBranchCreatedObject?ambiguityBranchCreatedObject->Clone():0;
+						if(ambiguityBranchCreatedObject)
+						{
+							createdObject=ambiguityBranchCreatedObject->Clone();
+						}
+						else
+						{
+							createdObject=0;
+						}
 						operationTarget=ambiguityBranchOperationTarget->Clone().Cast<ParsingTreeObject>();
 						for(vint i=0;i<ambiguityBranchNodeStack.Count();i++)
 						{

@@ -346,7 +346,8 @@ ParsingTreeObject
 		Ptr<ParsingTreeNode> ParsingTreeObject::GetMember(const WString& name)
 		{
 			vint index=members.Keys().IndexOf(name);
-			return index==-1?0:members.Values().Get(index);
+			if(index==-1) return 0;
+			return members.Values().Get(index);
 		}
 
 		bool ParsingTreeObject::SetMember(const WString& name, Ptr<ParsingTreeNode> node)

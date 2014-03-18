@@ -126,7 +126,7 @@ API
 				}
 			}
 
-			unsigned __int16 GetHex(wchar_t c)
+			vuint16_t GetHex(wchar_t c)
 			{
 				if(L'0'<=c && c<=L'9')
 				{
@@ -166,7 +166,7 @@ API
 								if((h1=reading[0]) && (h2=reading[1]) && (h3=reading[2]) && (h4=reading[3]))
 								{
 									reading+=4;
-									wchar_t h=(wchar_t)(unsigned __int16)(
+									wchar_t h=(wchar_t)(vuint16_t)(
 										(GetHex(h1)<<12) +
 										(GetHex(h2)<<8) +
 										(GetHex(h3)<<4) +
