@@ -921,7 +921,7 @@ IValueList
 			Ptr<IValueList> IValueList::Create(Ptr<IValueReadonlyList> values)
 			{
 				Ptr<List<Value>> list=new List<Value>;
-				CopyFrom(*list.Obj(), values->GetLazyList<Value>());
+				CopyFrom(*list.Obj(), GetLazyList<Value>(values));
 				return new ValueListWrapper<Ptr<List<Value>>>(list);
 			}
 
@@ -945,7 +945,7 @@ IValueDictionary
 			Ptr<IValueDictionary> IValueDictionary::Create(Ptr<IValueReadonlyDictionary> values)
 			{
 				Ptr<Dictionary<Value, Value>> dictionary=new Dictionary<Value, Value>;
-				CopyFrom(*dictionary.Obj(), values->GetLazyList<Value, Value>());
+				CopyFrom(*dictionary.Obj(), GetLazyList<Value, Value>(values));
 				return new ValueDictionaryWrapper<Ptr<Dictionary<Value, Value>>>(dictionary);
 			}
 
