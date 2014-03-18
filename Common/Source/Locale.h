@@ -10,7 +10,7 @@ Interfaces:
 #define VCZH_LOCALE
 
 #include "String.h"
-#include "Collections\List.h"
+#include "Collections/List.h"
 
 namespace vl
 {
