@@ -236,14 +236,14 @@ namespace test
 									if(result.shiftReduceRanges && showInput)
 									{
 										ParsingState::ShiftReduceRange range=result.shiftReduceRanges->Get(shiftReduceRangeIndex++);
-										writer.WriteString(L"    ¡¾");
+										writer.WriteString(L"    [");
 										if (range.shiftToken && range.reduceToken)
 										{
 											vint start=range.shiftToken->start;
 											vint end=range.reduceToken->start+range.reduceToken->length;
 											writer.WriteString(input.Sub(start, end-start));
 										}
-										writer.WriteLine(L"¡¿");
+										writer.WriteLine(L"]");
 									}
 									break;
 								case ParsingTable::Instruction::LeftRecursiveReduce:
@@ -258,14 +258,14 @@ namespace test
 								if(result.shiftReduceRanges && showInput)
 								{
 									ParsingState::ShiftReduceRange range=result.shiftReduceRanges->Get(shiftReduceRangeIndex++);
-									writer.WriteString(L"¡¾");
+									writer.WriteString(L"[");
 									if (range.shiftToken && range.reduceToken)
 									{
 										vint start=range.shiftToken->start;
 										vint end=range.reduceToken->start+range.reduceToken->length;
 										writer.WriteString(input.Sub(start, end-start));
 									}
-									writer.WriteLine(L"¡¿");
+									writer.WriteLine(L"]");
 								}
 							}
 						}
