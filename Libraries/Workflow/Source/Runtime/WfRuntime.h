@@ -34,6 +34,7 @@ Instruction
 				LoadGlobalVar,		// 						: int -> Value									;
 				StoreLocalVar,		// index				: Value -> ()									;
 				StoreGlobalVar,		// index				: Value -> ()									;
+				Pop,				//						: Value -> ()									;
 				Return,				// 						: Value -> Value								; (exit function)
 				CreateArray,		// count				: Value-1, ..., Value-count -> <array>			;
 				CreateMap,			// count				: Value-1, ..., Value-count*2 -> <map>			;
@@ -105,7 +106,8 @@ Instruction
 			{
 				WString												name;
 				collections::List<WString>							argumentNames;
-				collections::List<WString>							variableNames;
+				collections::List<WString>							capturedVariableNames;
+				collections::List<WString>							localVariableNames;
 				vint												firstInstruction = -1;
 				vint												lastInstruction = -1;
 			};
