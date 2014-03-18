@@ -669,6 +669,8 @@ Collection Wrappers
 				}
 			};
 
+#define WRAPPER_POINTER ValueEnumerableWrapper<T>::wrapperPointer
+
 			template<typename T>
 			class ValueReadonlyListWrapper : public ValueEnumerableWrapper<T>, public virtual IValueReadonlyList
 			{
@@ -685,24 +687,24 @@ Collection Wrappers
 
 				vint GetCount()override
 				{
-					return wrapperPointer->Count();
+					return WRAPPER_POINTER->Count();
 				}
 
 				Value Get(vint index)override
 				{
-					return BoxValue<ElementType>(wrapperPointer->Get(index));
+					return BoxValue<ElementType>(WRAPPER_POINTER->Get(index));
 				}
 
 				bool Contains(const Value& value)override
 				{
 					ElementKeyType item=UnboxValue<ElementKeyType>(value);
-					return wrapperPointer->Contains(item);
+					return WRAPPER_POINTER->Contains(item);
 				}
 
 				vint IndexOf(const Value& value)override
 				{
 					ElementKeyType item=UnboxValue<ElementKeyType>(value);
-					return wrapperPointer->IndexOf(item);
+					return WRAPPER_POINTER->IndexOf(item);
 				}
 			};
 
@@ -723,37 +725,39 @@ Collection Wrappers
 				void Set(vint index, const Value& value)override
 				{
 					ElementType item=UnboxValue<ElementType>(value);
-					wrapperPointer->Set(index, item);
+					WRAPPER_POINTER->Set(index, item);
 				}
 
 				vint Add(const Value& value)override
 				{
 					ElementType item=UnboxValue<ElementType>(value);
-					return wrapperPointer->Add(item);
+					return WRAPPER_POINTER->Add(item);
 				}
 
 				vint Insert(vint index, const Value& value)override
 				{
 					ElementType item=UnboxValue<ElementType>(value);
-					return wrapperPointer->Insert(index, item);
+					return WRAPPER_POINTER->Insert(index, item);
 				}
 
 				bool Remove(const Value& value)override
 				{
 					ElementKeyType item=UnboxValue<ElementKeyType>(value);
-					return wrapperPointer->Remove(item);
+					return WRAPPER_POINTER->Remove(item);
 				}
 
 				bool RemoveAt(vint index)override
 				{
-					return wrapperPointer->RemoveAt(index);
+					return WRAPPER_POINTER->RemoveAt(index);
 				}
 
 				void Clear()override
 				{
-					wrapperPointer->Clear();
+					WRAPPER_POINTER->Clear();
 				}
 			};
+
+#undef WRAPPER_POINTER
 
 			template<typename T>
 			class ValueReadonlyDictionaryWrapper : public virtual Object, public virtual IValueReadonlyDictionary
@@ -805,6 +809,10 @@ Collection Wrappers
 					return BoxValue<ValueType>(result);
 				}
 			};
+
+#define WRAPPER_POINTER ValueReadonlyDictionaryWrapper<T>::wrapperPointer
+#define KEY_VALUE_TYPE typename ValueReadonlyDictionaryWrapper<T>::KeyValueType
+#define KEY_KEY_TYPE typename ValueReadonlyDictionaryWrapper<T>::KeyKeyType
 			
 			template<typename T>
 			class ValueDictionaryWrapper : public virtual ValueReadonlyDictionaryWrapper<T>, public virtual IValueDictionary
@@ -819,20 +827,23 @@ Collection Wrappers
 				{
 					KeyValueType item=UnboxValue<KeyValueType>(key);
 					ValueType result=UnboxValue<ValueType>(value);
-					wrapperPointer->Set(item, result);
+					WRAPPER_POINTER->Set(item, result);
 				}
 
 				bool Remove(const Value& key)override
 				{
 					KeyKeyType item=UnboxValue<KeyKeyType>(key);
-					return wrapperPointer->Remove(item);
+					return WRAPPER_POINTER->Remove(item);
 				}
 
 				void Clear()override
 				{
-					wrapperPointer->Clear();
+					WRAPPER_POINTER->Clear();
 				}
 			};
+#undef WRAPPER_POINTER
+#undef KEY_VALUE_TYPE
+#undef KEY_KEY_TYPE
 #pragma warning(pop)
 
 /***********************************************************************
