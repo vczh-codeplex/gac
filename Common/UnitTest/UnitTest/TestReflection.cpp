@@ -136,7 +136,7 @@ namespace test
 	template<typename T>
 	void TestInt()
 	{
-		signed __int64 values[]=
+		vint64_t values[]=
 		{
 			_I64_MIN,
 			_I64_MIN+1,
@@ -158,13 +158,13 @@ namespace test
 			_I64_MAX-1,
 			_I64_MAX,
 		};
-		TestNumber<T, signed __int64, sizeof(values)/sizeof(*values), &i64tow>(values, std::numeric_limits<T>::min(), std::numeric_limits<T>::max());
+		TestNumber<T, vint64_t, sizeof(values)/sizeof(*values), &i64tow>(values, std::numeric_limits<T>::min(), std::numeric_limits<T>::max());
 	}
 	
 	template<typename T>
 	void TestUInt()
 	{
-		unsigned __int64 values[]=
+		vuint64_t values[]=
 		{
 			0,
 			1,
@@ -177,7 +177,7 @@ namespace test
 			_UI64_MAX-1,
 			_UI64_MAX,
 		};
-		TestNumber<T, unsigned __int64, sizeof(values)/sizeof(*values), &u64tow>(values, std::numeric_limits<T>::min(), std::numeric_limits<T>::max());
+		TestNumber<T, vuint64_t, sizeof(values)/sizeof(*values), &u64tow>(values, std::numeric_limits<T>::min(), std::numeric_limits<T>::max());
 	}
 
 	template<typename T>
@@ -234,14 +234,14 @@ using namespace test;
 TEST_CASE(TestReflectionPredefinedType)
 {
 	TEST_ASSERT(LoadPredefinedTypes());
-	TestInt<signed __int8>();
-	TestInt<signed __int16>();
-	TestInt<signed __int32>();
-	TestInt<signed __int64>();
-	TestUInt<unsigned __int8>();
-	TestUInt<unsigned __int16>();
-	TestUInt<unsigned __int32>();
-	TestUInt<unsigned __int64>();
+	TestInt<vint8_t>();
+	TestInt<vint16_t>();
+	TestInt<vint32_t>();
+	TestInt<vint64_t>();
+	TestUInt<vuint8_t>();
+	TestUInt<vuint16_t>();
+	TestUInt<vuint32_t>();
+	TestUInt<vuint64_t>();
 	TestFloat<float>();
 	TestFloat<double>();
 	TestBool();
