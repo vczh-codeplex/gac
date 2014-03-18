@@ -5,6 +5,7 @@
 #include "../../Source/Stream/CharFormat.h"
 #include "../../Source/Collections/Operation.h"
 #include <limits>
+#include <float.h>
 
 using namespace vl;
 using namespace vl::collections;
