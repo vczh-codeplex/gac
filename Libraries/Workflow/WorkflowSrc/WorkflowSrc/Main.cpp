@@ -128,6 +128,140 @@ void LogSampleCodegenResult(const WString& sampleName, const WString& itemName, 
 	writer.WriteLine(L"========================================================");
 	writer.WriteLine(L"Instructions:");
 	writer.WriteLine(L"========================================================");
+
+	auto formatText = [](const WString& text, vint length)
+	{
+		WString result = text;
+		while (result.Length() < length)
+		{
+			result += L" ";
+		}
+		return result;
+	};
+
+	auto formatFlag = [](Value::ValueType type)->WString
+	{
+		switch (type)
+		{
+		case Value::RawPtr:
+			return L"RawPtr";
+		case Value::SharedPtr:
+			return L"SharedPtr";
+		case Value::Text:
+			return L"Text";
+		default:
+			return L"Null";
+		}
+	};
+
+	auto formatType = [](WfInsType type)->WString
+	{
+		switch (type)
+		{
+		case WfInsType::Bool:
+			return L"Bool";
+		case WfInsType::I1:
+			return L"I1";
+		case WfInsType::I2:
+			return L"I2";
+		case WfInsType::I4:
+			return L"I4";
+		case WfInsType::I8:
+			return L"I8";
+		case WfInsType::U1:
+			return L"U1";
+		case WfInsType::U2:
+			return L"U2";
+		case WfInsType::U4:
+			return L"U4";
+		case WfInsType::U8:
+			return L"U8";
+		case WfInsType::F4:
+			return L"F4";
+		case WfInsType::F8:
+			return L"F8";
+		case WfInsType::String:
+			return L"Bool";
+		default:
+			return L"Unknown";
+		}
+	};
+
+#define LOG(NAME)						case WfInsCode::NAME: writer.WriteLine(formatText(itow(index), 5) + L": " + formatText(L"    " L ## #NAME, 18)); break;
+#define LOG_FUNCTION(NAME)				case WfInsCode::NAME: writer.WriteLine(formatText(itow(index), 5) + L": " + formatText(L"    " L ## #NAME, 18) + L": func = " + itow(ins.indexParameter) + L"(" + assembly->functions[ins.indexParameter]->name + L")"); break;
+#define LOG_FUNCTION_COUNT(NAME)		case WfInsCode::NAME: writer.WriteLine(formatText(itow(index), 5) + L": " + formatText(L"    " L ## #NAME, 18) + L": func = " + itow(ins.indexParameter) + L"(" + assembly->functions[ins.indexParameter]->name + L"), stackPatternCount = " + itow(ins.countParameter)); break;
+#define LOG_VARIABLE(NAME)				case WfInsCode::NAME: writer.WriteLine(formatText(itow(index), 5) + L": " + formatText(L"    " L ## #NAME, 18) + L": var = " + itow(ins.indexParameter)); break;
+#define LOG_COUNT(NAME)					case WfInsCode::NAME: writer.WriteLine(formatText(itow(index), 5) + L": " + formatText(L"    " L ## #NAME, 18) + L": stackPatternCount = " + itow(ins.countParameter)); break;
+#define LOG_FLAG_TYPEDESCRIPTOR(NAME)	case WfInsCode::NAME: writer.WriteLine(formatText(itow(index), 5) + L": " + formatText(L"    " L ## #NAME, 18) + L": flag = " + formatFlag(ins.flagParameter) + L", typeDescriptor = " + ins.typeDescriptorParameter->GetTypeName()); break;
+#define LOG_METHOD_COUNT(NAME)			case WfInsCode::NAME: writer.WriteLine(formatText(itow(index), 5) + L": " + formatText(L"    " L ## #NAME, 18) + L": methodInfo = " + ins.methodParameter->GetName() + L"<" + ins.methodParameter->GetOwnerTypeDescriptor()->GetTypeName() + L">, stackPatternCount = " + itow(ins.countParameter)); break;
+#define LOG_EVENT(NAME)					case WfInsCode::NAME: writer.WriteLine(formatText(itow(index), 5) + L": " + formatText(L"    " L ## #NAME, 18) + L": eventInfo = " + ins.eventParameter->GetName() + L"<" + ins.eventParameter->GetOwnerTypeDescriptor()->GetTypeName() + L">"); break;
+#define LOG_LABEL(NAME)					case WfInsCode::NAME: writer.WriteLine(formatText(itow(index), 5) + L": " + formatText(L"    " L ## #NAME, 18) + L": label = " + itow(ins.indexParameter)); break;
+#define LOG_TYPE(NAME)					case WfInsCode::NAME: writer.WriteLine(formatText(itow(index), 5) + L": " + formatText(L"    " L ## #NAME, 18) + L": type = " + formatType(ins.typeParameter)); break;
+
+	FOREACH_INDEXER(WfInstruction, ins, index, assembly->instructions)
+	{
+		switch (ins.code)
+		{
+			LOG(Nop)
+			LOG(LoadValue)
+			LOG_FUNCTION(LoadFunction)
+			LOG_FUNCTION_COUNT(LoadLambda)
+			LOG(LoadException)
+			LOG_VARIABLE(LoadLocalVar)
+			LOG_VARIABLE(LoadGlobalVar)
+			LOG_VARIABLE(StoreLocalVar)
+			LOG_VARIABLE(StoreGlobalVar)
+			LOG(Pop)
+			LOG(Return)
+			LOG_COUNT(CreateArray)
+			LOG_COUNT(CreateMap)
+			LOG_FLAG_TYPEDESCRIPTOR(ConvertToType)
+			LOG_FLAG_TYPEDESCRIPTOR(AssertAsType)
+			LOG_FLAG_TYPEDESCRIPTOR(TestType)
+			LOG_LABEL(Jump)
+			LOG_LABEL(JumpIf)
+			LOG_FUNCTION_COUNT(Invoke)
+			LOG_METHOD_COUNT(InvokeMethod)
+			LOG_EVENT(AttachEvent)
+			LOG(DetachEvent)
+			LOG_LABEL(InstallTry)
+			LOG_LABEL(UninstallTry)
+			LOG(RaiseException)
+			LOG_TYPE(CompareLiteral)
+			LOG(CompareReference)
+			LOG_TYPE(OpNot)
+			LOG_TYPE(OpPositive)
+			LOG_TYPE(OpNegative)
+			LOG(OpConcat)
+			LOG_TYPE(OpExp)
+			LOG_TYPE(OpAdd)
+			LOG_TYPE(OpSub)
+			LOG_TYPE(OpMul)
+			LOG_TYPE(OpDiv)
+			LOG_TYPE(OpShl)
+			LOG_TYPE(OpShr)
+			LOG(OpXor)
+			LOG(OpAnd)
+			LOG(OpOr)
+			LOG(OpLT)
+			LOG(OpGT)
+			LOG(OpLE)
+			LOG(OpGE)
+			LOG(OpEQ)
+			LOG(OpNE)
+		}
+	}
+
+#undef LOG
+#undef LOG_FUNCTION
+#undef LOG_FUNCTION_COUNT
+#undef LOG_VARIABLE
+#undef LOG_COUNT
+#undef LOG_FLAG_TYPEDESCRIPTOR
+#undef LOG_METHOD_COUNT
+#undef LOG_EVENT
+#undef LOG_LABEL
+#undef LOG_TYPE
 }
 
 namespace test
