@@ -508,12 +508,22 @@ DateTimeValueSerializer
 					return DateTime();
 				}
 
+				WString Format(vint number, vint length)
+				{
+					WString result = itow(number);
+					while (result.Length() < length)
+					{
+						result = L"0" + result;
+					}
+					return result;
+				}
+
 				bool Serialize(const DateTime& input, WString& output)override
 				{
-					WString ms=itow(input.milliseconds);
-					while(ms.Length()<3) ms=L"0"+ms;
-
-					output=INVLOC.FormatDate(L"yyyy-MM-dd", input)+L" "+INVLOC.FormatTime(L"HH:mm:ss", input)+L"."+ms;
+					output = 
+						Format(input.year, 4) + L"-" + Format(input.month, 2) + L"-" + Format(input.day, 2) + L" " + 
+						Format(input.hour, 2) + L":" + Format(input.minute, 2) + L":" + Format(input.second, 2) + L"." + 
+						Format(input.milliseconds, 3);
 					return true;
 				}
 
