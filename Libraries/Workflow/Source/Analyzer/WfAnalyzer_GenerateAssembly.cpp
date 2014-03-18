@@ -81,10 +81,15 @@ GenerateInstructions(Declaration)
 
 				void Visit(WfFunctionDeclaration* node)override
 				{
+					auto meta = context.assembly->functions[context.globalFunctions[node]];
+
 					auto functionContext = MakePtr<WfCodegenFunctionContext>();
-					functionContext->function = context.assembly->functions[context.globalFunctions[node]];
+					functionContext->function = meta;
 					context.functionContext = functionContext;
+					
+					meta->firstInstruction = context.assembly->instructions.Count();
 					GenerateStatementInstructions(context, node->statement);
+					meta->lastInstruction = context.assembly->instructions.Count() - 1;
 					context.functionContext = 0;
 				}
 
