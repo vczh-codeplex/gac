@@ -76,6 +76,9 @@
     <Filter Include="Resource Files\Samples\AnalyzerError">
       <UniqueIdentifier>{0ce6bcf7-5aa3-4a44-ac6b-5963e0df9a42}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\Samples\Codegen">
+      <UniqueIdentifier>{7239e246-b4d0-45e5-8553-bfa76622b1f7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Source\WorkflowVlppReferences.h">
@@ -454,6 +457,9 @@
     </ClCompile>
     <ClCompile Include="..\..\Source\Analyzer\WfAnalyzer_GenerateAssembly.cpp">
       <Filter>Workflow\Analyzer</Filter>
+    </ClCompile>
+    <ClCompile Include="TestCodegen.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1252,6 +1258,12 @@
     </Text>
     <Text Include="..\TestFiles\Samples\AnalyzerError\A25_AssignToCapturedVariable2.txt">
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\IndexCodegen.txt">
+      <Filter>Resource Files\Samples</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\Codegen\HelloWorld.txt">
+      <Filter>Resource Files\Samples\Codegen</Filter>
     </Text>
   </ItemGroup>
   <ItemGroup>

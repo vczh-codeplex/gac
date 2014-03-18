@@ -315,11 +315,11 @@ GenerateInstructions(Expression)
 GenerateAssembly
 ***********************************************************************/
 
-			Ptr<runtime::WfAssembly> GenerateAssembly(WfLexicalScopeManager* manager, collections::List<Ptr<WfModule>> modules)
+			Ptr<runtime::WfAssembly> GenerateAssembly(WfLexicalScopeManager* manager)
 			{
 				auto assembly = MakePtr<WfAssembly>();
 				WfCodegenContext context(assembly, manager);
-				FOREACH(Ptr<WfModule>, module, modules)
+				FOREACH(Ptr<WfModule>, module, manager->modules)
 				{
 					FOREACH(Ptr<WfDeclaration>, decl, module->declarations)
 					{
@@ -327,7 +327,7 @@ GenerateAssembly
 					}
 				}
 				
-				FOREACH(Ptr<WfModule>, module, modules)
+				FOREACH(Ptr<WfModule>, module, manager->modules)
 				{
 					FOREACH(Ptr<WfDeclaration>, decl, module->declarations)
 					{
