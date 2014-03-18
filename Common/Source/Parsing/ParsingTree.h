@@ -512,7 +512,7 @@ namespace vl
 			template<typename T>
 			Ptr<T> Obj(Ptr<T> node)
 			{
-				return Node(node).Cast<T>();
+				return Node(node).template Cast<T>();
 			}
 			
 			void									InitializeQueryCache(ParsingScopeSymbol* symbol, ParsingScopeFinder* _previousFinder=0);

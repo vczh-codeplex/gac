@@ -1,0 +1,13 @@
+.bashrc
+export PATH=/home/vczh/Downloads/TEE-CLC-11.0.0:$PATH;
+export TF_AUTO_SAVE_CREDENTIALS=0;
+export VLPP_LINUX=~/code/gac/Common/Linux;
+
+.vimrc
+set tabstop=4
+set number
+set hlsearch
+set fileencodings=utf-8,ucs-bom,cp936
+
+make > make_log 2>&1
+gedit make_log &

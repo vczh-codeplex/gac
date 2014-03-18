@@ -169,14 +169,14 @@ ParsingDefinitionTypeWriter
 				Ptr<ParsingDefinitionSubType> subType=new ParsingDefinitionSubType;
 				subType->parentType=type;
 				subType->subTypeName=subTypeName;
-				return subType;
+				return ParsingDefinitionTypeWriter(subType);
 			}
 
 			ParsingDefinitionTypeWriter ParsingDefinitionTypeWriter::Array()const
 			{
 				Ptr<ParsingDefinitionArrayType> arrayType=new ParsingDefinitionArrayType;
 				arrayType->elementType=type;
-				return arrayType;
+				return ParsingDefinitionTypeWriter(arrayType);
 			}
 
 			Ptr<ParsingDefinitionType> ParsingDefinitionTypeWriter::Type()const
@@ -192,7 +192,7 @@ ParsingDefinitionTypeWriter
 			ParsingDefinitionTypeWriter TokenType()
 			{
 				Ptr<ParsingDefinitionTokenType> type=new ParsingDefinitionTokenType;
-				return type;
+				return ParsingDefinitionTypeWriter(type);
 			}
 
 /***********************************************************************
@@ -313,7 +313,7 @@ ParsingDefinitionGrammarWriter
 				Ptr<ParsingDefinitionSequenceGrammar> sequence=new ParsingDefinitionSequenceGrammar;
 				sequence->first=grammar;
 				sequence->second=next.Grammar();
-				return sequence;
+				return ParsingDefinitionGrammarWriter(sequence);
 			}
 
 			ParsingDefinitionGrammarWriter ParsingDefinitionGrammarWriter::operator|(const ParsingDefinitionGrammarWriter& next)const
@@ -321,14 +321,14 @@ ParsingDefinitionGrammarWriter
 				Ptr<ParsingDefinitionAlternativeGrammar> alternative=new ParsingDefinitionAlternativeGrammar;
 				alternative->first=grammar;
 				alternative->second=next.Grammar();
-				return alternative;
+				return ParsingDefinitionGrammarWriter(alternative);
 			}
 
 			ParsingDefinitionGrammarWriter ParsingDefinitionGrammarWriter::operator*()const
 			{
 				Ptr<ParsingDefinitionLoopGrammar> loop=new ParsingDefinitionLoopGrammar;
 				loop->grammar=grammar;
-				return loop;
+				return ParsingDefinitionGrammarWriter(loop);
 			}
 
 			ParsingDefinitionGrammarWriter ParsingDefinitionGrammarWriter::As(const ParsingDefinitionTypeWriter& type)const
@@ -336,7 +336,7 @@ ParsingDefinitionGrammarWriter
 				Ptr<ParsingDefinitionCreateGrammar> create=new ParsingDefinitionCreateGrammar;
 				create->grammar=grammar;
 				create->type=type.Type();
-				return create;
+				return ParsingDefinitionGrammarWriter(create);
 			}
 
 			ParsingDefinitionGrammarWriter ParsingDefinitionGrammarWriter::operator[](const WString& memberName)const
@@ -344,14 +344,14 @@ ParsingDefinitionGrammarWriter
 				Ptr<ParsingDefinitionAssignGrammar> assign=new ParsingDefinitionAssignGrammar;
 				assign->grammar=grammar;
 				assign->memberName=memberName;
-				return assign;
+				return ParsingDefinitionGrammarWriter(assign);
 			}
 
 			ParsingDefinitionGrammarWriter ParsingDefinitionGrammarWriter::operator!()const
 			{
 				Ptr<ParsingDefinitionUseGrammar> use=new ParsingDefinitionUseGrammar;
 				use->grammar=grammar;
-				return use;
+				return ParsingDefinitionGrammarWriter(use);
 			}
 
 			ParsingDefinitionGrammarWriter ParsingDefinitionGrammarWriter::Set(const WString& memberName, const WString& value)const
@@ -360,7 +360,7 @@ ParsingDefinitionGrammarWriter
 				setter->grammar=grammar;
 				setter->memberName=memberName;
 				setter->value=value;
-				return setter;
+				return ParsingDefinitionGrammarWriter(setter);
 			}
 
 			Ptr<ParsingDefinitionGrammar> ParsingDefinitionGrammarWriter::Grammar()const
@@ -372,21 +372,21 @@ ParsingDefinitionGrammarWriter
 			{
 				Ptr<ParsingDefinitionPrimitiveGrammar> grammar=new ParsingDefinitionPrimitiveGrammar;
 				grammar->name=name;
-				return grammar;
+				return ParsingDefinitionGrammarWriter(grammar);
 			}
 
 			ParsingDefinitionGrammarWriter Text(const WString& text)
 			{
 				Ptr<ParsingDefinitionTextGrammar> grammar=new ParsingDefinitionTextGrammar;
 				grammar->text=text;
-				return grammar;
+				return ParsingDefinitionGrammarWriter(grammar);
 			}
 
 			ParsingDefinitionGrammarWriter Opt(const ParsingDefinitionGrammarWriter& writer)
 			{
 				Ptr<ParsingDefinitionOptionalGrammar> grammar=new ParsingDefinitionOptionalGrammar;
 				grammar->grammar=writer.Grammar();
-				return grammar;
+				return ParsingDefinitionGrammarWriter(grammar);
 			}
 
 /***********************************************************************

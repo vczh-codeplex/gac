@@ -23,6 +23,7 @@ namespace vl
 ***********************************************************************/
 
 			class ParsingSymbol;
+			class ParsingSymbolManager;
 
 			struct DefinitionTypeScopePair
 			{
