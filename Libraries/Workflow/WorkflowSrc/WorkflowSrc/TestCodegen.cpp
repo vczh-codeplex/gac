@@ -54,3 +54,31 @@ TEST_CASE(TestCodegen)
 
 	UnloadTypes();
 }
+
+TEST_CASE(TestWorkflow)
+{
+	LoadTypes();
+	List<Ptr<ParsingError>> errors;
+	List<WString> moduleCodes;
+	moduleCodes.Add(LR"workflow(
+module test;
+
+func main():string
+{
+	return "Hello, world!";
+}
+)workflow");
+
+	auto table = GetWorkflowTable();
+	auto assembly = Compile(table, moduleCodes, errors);
+	TEST_ASSERT(errors.Count() == 0);
+
+	WfRuntimeThreadContext context(assembly);
+	context.PushStackFrame(assembly->functionByName[L"main"]);
+	context.ExecuteToEnd();
+
+	Value result;
+	TEST_ASSERT(context.PopValue(result) == WfRuntimeThreadContextError::Success);
+	TEST_ASSERT(result.GetText() == L"Hello, world!");
+	UnloadTypes();
+}
