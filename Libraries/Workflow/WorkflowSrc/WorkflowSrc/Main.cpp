@@ -40,7 +40,7 @@ WString GetPath()
 	return WString(buffer, pos+1)+L"..\\TestFiles\\";
 #endif
 #elif defined VCZH_GCC
-	return WString(buffer, pos+1)+L"../TestFiles/";
+	return L"../TestFiles/";
 #endif
 }
 
