@@ -255,7 +255,7 @@ Code Generation
 
 			class WfCodegenFunctionContext
 			{
-				typedef collections::Dictionary<WfVariableDeclaration*, vint>		VariableIndexMap;
+				typedef collections::Dictionary<WfLexicalSymbol*, vint>				VariableIndexMap;
 				typedef collections::Dictionary<WfFunctionExpression*, vint>		LambdaIndexMap;
 				typedef collections::Dictionary<WfOrderedLambdaExpression*, vint>	OrderedLambdaIndexMap;
 			public:
