@@ -46,7 +46,11 @@ WString GetPath()
 
 void LoadSampleIndex(const WString& sampleName, List<WString>& itemNames)
 {
+#if defined VCZH_MSVC
 	FileStream fileStream(GetPath() + L"Samples\\Index" + sampleName + L".txt", FileStream::ReadOnly);
+#elif defined VCZH_GCC
+	FileStream fileStream(GetPath() + L"Samples/Index" + sampleName + L".txt", FileStream::ReadOnly);
+#endif
 	BomDecoder decoder;
 	DecoderStream decoderStream(fileStream, decoder);
 	StreamReader reader(decoderStream);
@@ -59,7 +63,11 @@ void LoadSampleIndex(const WString& sampleName, List<WString>& itemNames)
 
 WString LoadSample(const WString& sampleName, const WString& itemName)
 {
+#if defined VCZH_MSVC
 	FileStream fileStream(GetPath() + L"Samples\\" + sampleName + L"\\" + itemName + L".txt", FileStream::ReadOnly);
+#elif defined VCZH_GCC
+	FileStream fileStream(GetPath() + L"Samples/" + sampleName + L"/" + itemName + L".txt", FileStream::ReadOnly);
+#endif
 	BomDecoder decoder;
 	DecoderStream decoderStream(fileStream, decoder);
 	StreamReader reader(decoderStream);
