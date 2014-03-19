@@ -6,6 +6,8 @@ namespace vl
 	{
 		namespace runtime
 		{
+			using namespace reflection;
+			using namespace reflection::description;
 
 /***********************************************************************
 WfInstruction
@@ -136,6 +138,85 @@ WfInstruction
 			#undef CTOR_EVENT
 			#undef CTOR_LABEL
 			#undef CTOR_TYPE
+
+/***********************************************************************
+WfRuntimeGlobalContext
+***********************************************************************/
+
+			WfRuntimeGlobalContext::WfRuntimeGlobalContext(Ptr<WfAssembly> _assembly)
+				:assembly(_assembly)
+			{
+				globalVariables = new WfRuntimeVariableContext;
+				globalVariables->variables.Resize(assembly->variableNames.Count());
+			}
+
+/***********************************************************************
+WfInstruction
+***********************************************************************/
+
+			WfRuntimeThreadContext::WfRuntimeThreadContext(Ptr<WfRuntimeGlobalContext> _context)
+				:globalContext(_context)
+			{
+				stack.SetLessMemoryMode(false);
+				stackFrames.SetLessMemoryMode(false);
+			}
+
+			WfRuntimeThreadContext::WfRuntimeThreadContext(Ptr<WfAssembly> _assembly)
+				:globalContext(new WfRuntimeGlobalContext(_assembly))
+			{
+				stack.SetLessMemoryMode(false);
+				stackFrames.SetLessMemoryMode(false);
+			}
+
+			WfRuntimeStackFrame& WfRuntimeThreadContext::GetCurrentStackFrame()
+			{
+				return stackFrames[stackFrames.Count() - 1];
+			}
+
+			void WfRuntimeThreadContext::PushStackFrame(vint functionIndex, vint fixedVariableCount, Ptr<WfRuntimeVariableContext> capturedVariables)
+			{
+				WfRuntimeStackFrame frame;
+				frame.capturedVariables = capturedVariables;
+				frame.functionIndex = functionIndex;
+				frame.nextInstructionIndex = globalContext->assembly->functions[functionIndex]->lastInstruction;
+				frame.stackBase = stack.Count();
+				frame.fixedVariableCount = fixedVariableCount;
+				frame.freeStackBase = frame.stackBase + frame.fixedVariableCount;
+				stackFrames.Add(frame);
+
+				for (vint i = 0; i < fixedVariableCount; i++)
+				{
+					stack.Add(Value());
+				}
+			}
+
+			bool WfRuntimeThreadContext::PopStackFrame()
+			{
+				if (stackFrames.Count() == 0) return false;
+				WfRuntimeStackFrame frame = GetCurrentStackFrame();
+				stackFrames.RemoveAt(stackFrames.Count() - 1);
+
+				if (stack.Count() > frame.stackBase)
+				{
+					stack.RemoveRange(frame.stackBase, stack.Count() - frame.stackBase);
+				}
+				return true;
+			}
+
+			void WfRuntimeThreadContext::PushValue(const reflection::description::Value& value)
+			{
+				stack.Add(value);
+			}
+
+			bool WfRuntimeThreadContext::PopValue(reflection::description::Value& value)
+			{
+				if (stackFrames.Count() == 0) return false;
+				WfRuntimeStackFrame& frame = GetCurrentStackFrame();
+				if (stackFrames.Count() <= frame.freeStackBase) return false;
+				value = stack[stack.Count() - 1];
+				stack.RemoveAt(stack.Count() - 1);
+				return true;
+			}
 		}
 	}
 }

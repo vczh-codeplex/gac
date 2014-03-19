@@ -279,6 +279,7 @@
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="..\..\Source\Runtime\WfRuntime.cpp" />
+    <ClCompile Include="..\..\Source\Runtime\WfRuntime_Execution.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="TestAnalyzer.cpp" />
     <ClCompile Include="TestCodegen.cpp" />

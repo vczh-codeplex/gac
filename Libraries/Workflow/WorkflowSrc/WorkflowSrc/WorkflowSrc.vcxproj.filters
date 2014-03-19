@@ -461,6 +461,9 @@
     <ClCompile Include="TestCodegen.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Runtime\WfRuntime_Execution.cpp">
+      <Filter>Workflow\Runtime</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Spec.txt" />

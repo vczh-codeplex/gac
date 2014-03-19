@@ -200,11 +200,6 @@ Instruction
 				vint												lastInstruction = -1;
 			};
 
-			struct WfGlobalContext
-			{
-				collections::Array<reflection::description::Value>	variables;
-			};
-
 			struct WfAssembly
 			{
 				collections::List<WString>							variableNames;
@@ -212,10 +207,53 @@ Instruction
 				collections::List<WfInstruction>					instructions;
 			};
 
-			struct WfRuntimeContext
+/***********************************************************************
+Runtime
+***********************************************************************/
+
+			struct WfRuntimeVariableContext
 			{
-				Ptr<WfAssembly>										assembly;
-				Ptr<WfGlobalContext>								context;
+				typedef collections::Array<reflection::description::Value>		VariableArray;
+
+				VariableArray					variables;
+			};
+
+			struct WfRuntimeGlobalContext
+			{
+				Ptr<WfAssembly>					assembly;
+				Ptr<WfRuntimeVariableContext>	globalVariables;
+
+				WfRuntimeGlobalContext(Ptr<WfAssembly> _assembly);
+			};
+
+			struct WfRuntimeStackFrame
+			{
+				Ptr<WfRuntimeVariableContext>	capturedVariables;
+				vint							functionIndex = -1;
+				vint							nextInstructionIndex = -1;
+				vint							stackBase = 0;
+				vint							fixedVariableCount = 0;
+				vint							freeStackBase = 0;
+			};
+
+			struct WfRuntimeThreadContext
+			{
+				typedef collections::List<reflection::description::Value>		VariableList;
+				typedef collections::List<WfRuntimeStackFrame>					StackFrameList;
+
+				Ptr<WfRuntimeGlobalContext>		globalContext;
+				reflection::description::Value	exceptionValue;
+				VariableList					stack;
+				StackFrameList					stackFrames;
+
+				WfRuntimeThreadContext(Ptr<WfRuntimeGlobalContext> _context);
+				WfRuntimeThreadContext(Ptr<WfAssembly> _assembly);
+
+				WfRuntimeStackFrame&			GetCurrentStackFrame();
+				void							PushStackFrame(vint functionIndex, vint fixedVariableCount, Ptr<WfRuntimeVariableContext> capturedVariables = 0);
+				bool							PopStackFrame();
+				void							PushValue(const reflection::description::Value& value);
+				bool							PopValue(reflection::description::Value& value);
 			};
 		}
 	}
