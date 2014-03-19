@@ -6,7 +6,7 @@
 #endif
 
 #include "TestFunctions.h"
-#include "..\..\..\..\Common\Source\Console.h"
+#include "../../../../Common/Source/Console.h"
 
 Ptr<ParsingTable> workflowTable;
 
@@ -40,7 +40,7 @@ WString GetPath()
 	return WString(buffer, pos+1)+L"..\\TestFiles\\";
 #endif
 #elif defined VCZH_GCC
-	return WString(buffer, pos+1)+L"..\\TestFiles\\";
+	return WString(buffer, pos+1)+L"../TestFiles/";
 #endif
 }
 
