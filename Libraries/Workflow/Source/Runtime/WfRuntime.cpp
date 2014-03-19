@@ -278,6 +278,11 @@ WfRuntimeThreadContext
 				exceptionValue = exception;
 				return WfRuntimeThreadContextError::Success;
 			}
+
+			void WfRuntimeThreadContext::ExecuteToEnd()
+			{
+				while (Execute() != WfRuntimeExecutionAction::Nop);
+			}
 		}
 	}
 }

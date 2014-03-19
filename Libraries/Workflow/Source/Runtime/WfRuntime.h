@@ -298,6 +298,7 @@ Runtime
 				WfRuntimeThreadContextError		RaiseException(const reflection::description::Value& exception);
 
 				WfRuntimeExecutionAction		Execute();
+				void							ExecuteToEnd();
 			};
 		}
 	}
