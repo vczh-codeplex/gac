@@ -385,7 +385,11 @@ void UnloadTypes()
 	TEST_ASSERT(ResetGlobalTypeManager());
 }
 
+#if defined VCZH_MSVC
 int wmain(int argc, wchar_t* argv[])
+#elif defined VCZH_GCC
+int main()
+#endif
 {
 	workflowTable = 0;
 #ifdef VCZH_MSVC
