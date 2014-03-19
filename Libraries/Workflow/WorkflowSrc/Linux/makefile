@@ -84,9 +84,10 @@ all:
 	$(CPP)		-o $(OBJ)WfAnalyzer_TypeInfo.o		-c $(WORKFLOW)Analyzer/WfAnalyzer_TypeInfo.cpp
 	$(CPP)		-o $(OBJ)WfAnalyzer_ValidateSemantic.o	-c $(WORKFLOW)Analyzer/WfAnalyzer_ValidateSemantic.cpp
 	$(CPP)		-o $(OBJ)WfAnalyzer_ValidateStructure.o	-c $(WORKFLOW)Analyzer/WfAnalyzer_ValidateStructure.cpp
-	$(CPP)		-o $(OBJ)TestBasic.o			-c $(UNITTEST)TestSamples.cpp
-	$(CPP)		-o $(OBJ)TestString.o			-c $(UNITTEST)TestAnalyzer.cpp
-	$(CPP)		-o $(OBJ)TestList.o			-c $(UNITTEST)TestCodegen.cpp
+	$(CPP)		-o $(OBJ)Main.o				-c $(UNITTEST)Main.cpp
+	$(CPP)		-o $(OBJ)TestSamples.o			-c $(UNITTEST)TestSamples.cpp
+	$(CPP)		-o $(OBJ)TestAnalyzer.o			-c $(UNITTEST)TestAnalyzer.cpp
+	$(CPP)		-o $(OBJ)TestCodegen.o			-c $(UNITTEST)TestCodegen.cpp
 	$(CPP)		-o $(BIN)UnitTest $(OBJ)Main.o $(VLPP_OBJS) $(WORKFLOW_OBJS) $(UNITTEST_OBJS)
 
 clean:
