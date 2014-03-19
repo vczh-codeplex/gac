@@ -10,9 +10,10 @@ TEST_CASE(TestCodegen)
 	WfLexicalScopeManager manager(table);
 	FOREACH(WString, codegenName, codegenNames)
 	{
-		auto pair = INVLOC.FindFirst(codegenName, L"=", Locale::None);
-		WString itemName = codegenName.Sub(0, pair.key);
-		WString itemResult = codegenName.Sub(pair.key + pair.value, codegenName.Length() - pair.key - pair.value);
+		const wchar_t* reading = codegenName.Buffer();
+		vint index = wcschr(reading, L'=') - reading;
+		WString itemName = codegenName.Sub(0, index);
+		WString itemResult = codegenName.Sub(index + 1, codegenName.Length() - index - 1);
 
 		UnitTest::PrintInfo(itemName);
 		WString sample = LoadSample(L"Codegen", itemName);
