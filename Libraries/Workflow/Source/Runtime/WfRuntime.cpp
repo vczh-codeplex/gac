@@ -175,6 +175,10 @@ WfRuntimeThreadContext
 
 			WfRuntimeThreadContextError WfRuntimeThreadContext::PushStackFrame(vint functionIndex, Ptr<WfRuntimeVariableContext> capturedVariables)
 			{
+				if (stackFrames.Count() == 0 && stack.Count() != 0)
+				{
+					return WfRuntimeThreadContextError::StackCorrupted;
+				}
 				if (functionIndex < 0 || functionIndex >= globalContext->assembly->functions.Count())
 				{
 					return WfRuntimeThreadContextError::WrongFunctionIndex;
@@ -198,7 +202,7 @@ WfRuntimeThreadContext
 				WfRuntimeStackFrame frame;
 				frame.capturedVariables = capturedVariables;
 				frame.functionIndex = functionIndex;
-				frame.nextInstructionIndex = globalContext->assembly->functions[functionIndex]->lastInstruction;
+				frame.nextInstructionIndex = globalContext->assembly->functions[functionIndex]->firstInstruction;
 				frame.stackBase = stack.Count();
 
 				frame.fixedVariableCount = meta->argumentNames.Count() + meta->localVariableNames.Count();
@@ -255,11 +259,23 @@ WfRuntimeThreadContext
 
 			WfRuntimeThreadContextError WfRuntimeThreadContext::PopValue(reflection::description::Value& value)
 			{
-				if (stackFrames.Count() == 0) return WfRuntimeThreadContextError::EmptyStack;
-				WfRuntimeStackFrame& frame = GetCurrentStackFrame();
-				if (stackFrames.Count() <= frame.freeStackBase) return WfRuntimeThreadContextError::StackCorrupted;
+				if (stackFrames.Count() == 0)
+				{
+					if (stack.Count() == 0) return WfRuntimeThreadContextError::EmptyStack;
+				}
+				else
+				{
+					WfRuntimeStackFrame& frame = GetCurrentStackFrame();
+					if (stackFrames.Count() <= frame.freeStackBase) return WfRuntimeThreadContextError::StackCorrupted;
+				}
 				value = stack[stack.Count() - 1];
 				stack.RemoveAt(stack.Count() - 1);
+				return WfRuntimeThreadContextError::Success;
+			}
+
+			WfRuntimeThreadContextError WfRuntimeThreadContext::RaiseException(const reflection::description::Value& exception)
+			{
+				exceptionValue = exception;
 				return WfRuntimeThreadContextError::Success;
 			}
 		}
