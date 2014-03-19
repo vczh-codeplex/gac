@@ -203,6 +203,7 @@ Instruction
 			struct WfAssembly
 			{
 				collections::List<WString>							variableNames;
+				collections::Dictionary<WString, vint>				functionByName;
 				collections::List<Ptr<WfAssemblyFunction>>			functions;
 				collections::List<WfInstruction>					instructions;
 			};
@@ -259,6 +260,18 @@ Runtime
 				Nop,
 			};
 
+			enum class WfRuntimeThreadContextError
+			{
+				Success,
+				WrongFunctionIndex,
+				WrongCapturedVariableCount,
+				EmptyStackFrame,
+				EmptyTrapFrame,
+				TrapFrameCorrupted,
+				EmptyStack,
+				StackCorrupted,
+			};
+
 			struct WfRuntimeThreadContext
 			{
 				typedef collections::List<reflection::description::Value>		VariableList;
@@ -276,12 +289,12 @@ Runtime
 				WfRuntimeThreadContext(Ptr<WfAssembly> _assembly);
 
 				WfRuntimeStackFrame&			GetCurrentStackFrame();
-				void							PushStackFrame(vint functionIndex, vint fixedVariableCount, Ptr<WfRuntimeVariableContext> capturedVariables = 0);
-				bool							PopStackFrame();
-				void							PushTrapFrame(vint instructionIndex);
-				bool							PopTrapFrame();
-				void							PushValue(const reflection::description::Value& value);
-				bool							PopValue(reflection::description::Value& value);
+				WfRuntimeThreadContextError		PushStackFrame(vint functionIndex, Ptr<WfRuntimeVariableContext> capturedVariables = 0);
+				WfRuntimeThreadContextError		PopStackFrame();
+				WfRuntimeThreadContextError		PushTrapFrame(vint instructionIndex);
+				WfRuntimeThreadContextError		PopTrapFrame();
+				WfRuntimeThreadContextError		PushValue(const reflection::description::Value& value);
+				WfRuntimeThreadContextError		PopValue(reflection::description::Value& value);
 
 				WfRuntimeExecutionAction		Execute();
 			};
