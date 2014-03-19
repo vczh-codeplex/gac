@@ -47,6 +47,7 @@ GenerateGlobalDeclarationMetadata
 					}
 
 					vint index = context.assembly->functions.Add(meta);
+					context.assembly->functionByName.Add(meta->name, index);
 					context.globalFunctions.Add(node, index);
 				}
 

@@ -173,31 +173,52 @@ WfRuntimeThreadContext
 				return stackFrames[stackFrames.Count() - 1];
 			}
 
-			void WfRuntimeThreadContext::PushStackFrame(vint functionIndex, vint fixedVariableCount, Ptr<WfRuntimeVariableContext> capturedVariables)
+			WfRuntimeThreadContextError WfRuntimeThreadContext::PushStackFrame(vint functionIndex, Ptr<WfRuntimeVariableContext> capturedVariables)
 			{
+				if (functionIndex < 0 || functionIndex >= globalContext->assembly->functions.Count())
+				{
+					return WfRuntimeThreadContextError::WrongFunctionIndex;
+				}
+				auto meta = globalContext->assembly->functions[functionIndex];
+				if (meta->capturedVariableNames.Count() == 0)
+				{
+					if (capturedVariables)
+					{
+						return WfRuntimeThreadContextError::WrongCapturedVariableCount;
+					}
+				}
+				else
+				{
+					if (!capturedVariables || capturedVariables->variables.Count() != meta->capturedVariableNames.Count())
+					{
+						return WfRuntimeThreadContextError::WrongCapturedVariableCount;
+					}
+				}
+
 				WfRuntimeStackFrame frame;
 				frame.capturedVariables = capturedVariables;
 				frame.functionIndex = functionIndex;
 				frame.nextInstructionIndex = globalContext->assembly->functions[functionIndex]->lastInstruction;
 				frame.stackBase = stack.Count();
-				frame.fixedVariableCount = fixedVariableCount;
+
+				frame.fixedVariableCount = meta->argumentNames.Count() + meta->localVariableNames.Count();
 				frame.freeStackBase = frame.stackBase + frame.fixedVariableCount;
 				stackFrames.Add(frame);
 
-				for (vint i = 0; i < fixedVariableCount; i++)
+				for (vint i = 0; i < frame.fixedVariableCount; i++)
 				{
 					stack.Add(Value());
 				}
-
 				if (status == WfRuntimeExecutionStatus::Finished)
 				{
 					status = WfRuntimeExecutionStatus::Ready;
 				}
+				return WfRuntimeThreadContextError::Success;
 			}
 
-			bool WfRuntimeThreadContext::PopStackFrame()
+			WfRuntimeThreadContextError WfRuntimeThreadContext::PopStackFrame()
 			{
-				if (stackFrames.Count() == 0) return false;
+				if (stackFrames.Count() == 0) return WfRuntimeThreadContextError::EmptyStackFrame;
 				WfRuntimeStackFrame frame = GetCurrentStackFrame();
 				stackFrames.RemoveAt(stackFrames.Count() - 1);
 
@@ -205,39 +226,41 @@ WfRuntimeThreadContext
 				{
 					stack.RemoveRange(frame.stackBase, stack.Count() - frame.stackBase);
 				}
-				return true;
+				return WfRuntimeThreadContextError::Success;
 			}
 
-			void WfRuntimeThreadContext::PushTrapFrame(vint instructionIndex)
+			WfRuntimeThreadContextError WfRuntimeThreadContext::PushTrapFrame(vint instructionIndex)
 			{
 				WfRuntimeTrapFrame frame;
 				frame.stackFrameIndex = stackFrames.Count() - 1;
 				frame.instructionIndex = instructionIndex;
 				trapFrames.Add(frame);
+				return WfRuntimeThreadContextError::Success;
 			}
 
-			bool WfRuntimeThreadContext::PopTrapFrame()
+			WfRuntimeThreadContextError WfRuntimeThreadContext::PopTrapFrame()
 			{
-				if (trapFrames.Count() == 0) return false;
+				if (trapFrames.Count() == 0) return WfRuntimeThreadContextError::EmptyTrapFrame;
 				WfRuntimeTrapFrame& frame = trapFrames[trapFrames.Count() - 1];
-				if (frame.stackFrameIndex != stackFrames.Count() - 1) return false;
+				if (frame.stackFrameIndex != stackFrames.Count() - 1) return WfRuntimeThreadContextError::TrapFrameCorrupted;
 				trapFrames.RemoveAt(trapFrames.Count() - 1);
-				return true;
+				return WfRuntimeThreadContextError::Success;
 			}
 
-			void WfRuntimeThreadContext::PushValue(const reflection::description::Value& value)
+			WfRuntimeThreadContextError WfRuntimeThreadContext::PushValue(const reflection::description::Value& value)
 			{
 				stack.Add(value);
+				return WfRuntimeThreadContextError::Success;
 			}
 
-			bool WfRuntimeThreadContext::PopValue(reflection::description::Value& value)
+			WfRuntimeThreadContextError WfRuntimeThreadContext::PopValue(reflection::description::Value& value)
 			{
-				if (stackFrames.Count() == 0) return false;
+				if (stackFrames.Count() == 0) return WfRuntimeThreadContextError::EmptyStack;
 				WfRuntimeStackFrame& frame = GetCurrentStackFrame();
-				if (stackFrames.Count() <= frame.freeStackBase) return false;
+				if (stackFrames.Count() <= frame.freeStackBase) return WfRuntimeThreadContextError::StackCorrupted;
 				value = stack[stack.Count() - 1];
 				stack.RemoveAt(stack.Count() - 1);
-				return true;
+				return WfRuntimeThreadContextError::Success;
 			}
 		}
 	}
