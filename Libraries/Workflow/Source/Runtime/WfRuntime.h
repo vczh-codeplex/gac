@@ -236,15 +236,41 @@ Runtime
 				vint							freeStackBase = 0;
 			};
 
+			struct WfRuntimeTrapFrame
+			{
+				vint							stackFrameIndex = -1;
+				vint							instructionIndex = -1;
+			};
+
+			enum class WfRuntimeExecutionStatus
+			{
+				Ready,
+				Executing,
+				RaisedException,
+				Finished,
+			};
+
+			enum class WfRuntimeExecutionAction
+			{
+				ExecuteInstruction,
+				UnwrapStack,
+				EnterStackFrame,
+				ExitStackFrame,
+				Nop,
+			};
+
 			struct WfRuntimeThreadContext
 			{
 				typedef collections::List<reflection::description::Value>		VariableList;
 				typedef collections::List<WfRuntimeStackFrame>					StackFrameList;
+				typedef collections::List<WfRuntimeTrapFrame>					TrapFrameList;
 
 				Ptr<WfRuntimeGlobalContext>		globalContext;
 				reflection::description::Value	exceptionValue;
 				VariableList					stack;
 				StackFrameList					stackFrames;
+				TrapFrameList					trapFrames;
+				WfRuntimeExecutionStatus		status = WfRuntimeExecutionStatus::Finished;
 
 				WfRuntimeThreadContext(Ptr<WfRuntimeGlobalContext> _context);
 				WfRuntimeThreadContext(Ptr<WfAssembly> _assembly);
@@ -252,8 +278,12 @@ Runtime
 				WfRuntimeStackFrame&			GetCurrentStackFrame();
 				void							PushStackFrame(vint functionIndex, vint fixedVariableCount, Ptr<WfRuntimeVariableContext> capturedVariables = 0);
 				bool							PopStackFrame();
+				void							PushTrapFrame(vint instructionIndex);
+				bool							PopTrapFrame();
 				void							PushValue(const reflection::description::Value& value);
 				bool							PopValue(reflection::description::Value& value);
+
+				WfRuntimeExecutionAction		Execute();
 			};
 		}
 	}

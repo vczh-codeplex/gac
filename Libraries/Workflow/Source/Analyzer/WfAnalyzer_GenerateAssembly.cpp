@@ -7,6 +7,8 @@ namespace vl
 		namespace analyzer
 		{
 			using namespace collections;
+			using namespace regex;
+			using namespace parsing;
 			using namespace reflection;
 			using namespace reflection::description;
 			using namespace runtime;
@@ -411,6 +413,44 @@ GenerateAssembly
 					}
 				}
 				return assembly;
+			}
+
+/***********************************************************************
+Compile
+***********************************************************************/
+
+			Ptr<runtime::WfAssembly> Compile(Ptr<parsing::tabling::ParsingTable> table, WfLexicalScopeManager* manager, collections::List<WString>& moduleCodes, collections::List<Ptr<parsing::ParsingError>>& errors)
+			{
+				manager->Clear(true, true);
+				FOREACH_INDEXER(WString, code, index, moduleCodes)
+				{
+					Ptr<ParsingTreeNode> node = WfParseModuleAsParsingTreeNode(code, table, errors);
+					if (node)
+					{
+						List<RegexToken> tokens;
+						Ptr<WfModule> module = WfConvertParsingTreeNode(node, tokens).Cast<WfModule>();
+						if (module)
+						{
+							manager->modules.Add(module);
+						}
+					}
+				}
+				if (errors.Count() > 0) return 0;
+
+				manager->Rebuild(true);
+				if (manager->errors.Count() > 0)
+				{
+					CopyFrom(errors, manager->errors);
+					return 0;
+				}
+
+				return GenerateAssembly(manager);
+			}
+
+			Ptr<runtime::WfAssembly> Compile(Ptr<parsing::tabling::ParsingTable> table, collections::List<WString>& moduleCodes, collections::List<Ptr<parsing::ParsingError>>& errors)
+			{
+				WfLexicalScopeManager manager(table);
+				return Compile(table, &manager, moduleCodes, errors);
 			}
 		}
 	}

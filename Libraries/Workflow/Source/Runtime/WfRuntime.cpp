@@ -151,7 +151,7 @@ WfRuntimeGlobalContext
 			}
 
 /***********************************************************************
-WfInstruction
+WfRuntimeThreadContext
 ***********************************************************************/
 
 			WfRuntimeThreadContext::WfRuntimeThreadContext(Ptr<WfRuntimeGlobalContext> _context)
@@ -188,6 +188,11 @@ WfInstruction
 				{
 					stack.Add(Value());
 				}
+
+				if (status == WfRuntimeExecutionStatus::Finished)
+				{
+					status = WfRuntimeExecutionStatus::Ready;
+				}
 			}
 
 			bool WfRuntimeThreadContext::PopStackFrame()
@@ -200,6 +205,23 @@ WfInstruction
 				{
 					stack.RemoveRange(frame.stackBase, stack.Count() - frame.stackBase);
 				}
+				return true;
+			}
+
+			void WfRuntimeThreadContext::PushTrapFrame(vint instructionIndex)
+			{
+				WfRuntimeTrapFrame frame;
+				frame.stackFrameIndex = stackFrames.Count() - 1;
+				frame.instructionIndex = instructionIndex;
+				trapFrames.Add(frame);
+			}
+
+			bool WfRuntimeThreadContext::PopTrapFrame()
+			{
+				if (trapFrames.Count() == 0) return false;
+				WfRuntimeTrapFrame& frame = trapFrames[trapFrames.Count() - 1];
+				if (frame.stackFrameIndex != stackFrames.Count() - 1) return false;
+				trapFrames.RemoveAt(trapFrames.Count() - 1);
 				return true;
 			}
 
