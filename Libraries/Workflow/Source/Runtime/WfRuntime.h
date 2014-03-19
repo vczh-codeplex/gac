@@ -295,6 +295,7 @@ Runtime
 				WfRuntimeThreadContextError		PopTrapFrame();
 				WfRuntimeThreadContextError		PushValue(const reflection::description::Value& value);
 				WfRuntimeThreadContextError		PopValue(reflection::description::Value& value);
+				WfRuntimeThreadContextError		RaiseException(const reflection::description::Value& exception);
 
 				WfRuntimeExecutionAction		Execute();
 			};
