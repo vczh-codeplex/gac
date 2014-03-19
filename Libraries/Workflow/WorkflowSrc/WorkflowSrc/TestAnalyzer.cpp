@@ -104,10 +104,11 @@ TEST_CASE(TestAnalyzerError)
 		manager.Rebuild(true);
 		LogSampleParseResult(L"AnalyzerError", itemName, sample, node, &manager);
 
-		auto index = INVLOC.FindFirst(itemName, L"_", Locale::None);
-		WString errorCode = itemName.Left(index.key);
+		const wchar_t* reading = itemName.Buffer();
+		vint index = wcschr(reading, L'_') - reading;
+		WString errorCode = itemName.Left(index);
 		TEST_ASSERT(manager.errors.Count() > 0);
-		TEST_ASSERT(manager.errors[0]->errorMessage.Left(index.key + 1) == errorCode + L":");
+		TEST_ASSERT(manager.errors[0]->errorMessage.Left(index + 1) == errorCode + L":");
 	}
 
 	UnloadTypes();
