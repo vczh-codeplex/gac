@@ -1,9 +1,9 @@
 #ifndef WORKFLOW_UNITTEST_TESTFUNCTIONS
 #define WORKFLOW_UNITTEST_TESTFUNCTIONS
 
-#include "..\..\..\..\Common\Source\UnitTest\UnitTest.h"
-#include "..\..\Source\Analyzer\WfAnalyzer.h"
-#include "..\..\Source\Runtime\WfRuntime.h"
+#include "../../../../Common/Source/UnitTest/UnitTest.h"
+#include "../../Source/Analyzer/WfAnalyzer.h"
+#include "../../Source/Runtime/WfRuntime.h"
 
 using namespace vl;
 using namespace vl::unittest;
