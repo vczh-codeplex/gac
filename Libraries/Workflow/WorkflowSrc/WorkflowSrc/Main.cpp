@@ -1,7 +1,9 @@
+#ifdef _MSC_VER
 #define _CRTDBG_MAP_ALLOC
 #include <stdlib.h>
 #include <crtdbg.h>
 #include <windows.h>
+#endif
 
 #include "TestFunctions.h"
 #include "..\..\..\..\Common\Source\Console.h"
@@ -19,6 +21,7 @@ Ptr<ParsingTable> GetWorkflowTable()
 
 WString GetPath()
 {
+#if defined VCZH_MSVC
 	wchar_t buffer[65536];
 	GetModuleFileName(NULL, buffer, sizeof(buffer)/sizeof(*buffer));
 	vint pos=-1;
@@ -34,6 +37,9 @@ WString GetPath()
 #ifdef _WIN64
 	return WString(buffer, pos+1)+L"..\\..\\TestFiles\\";
 #else
+	return WString(buffer, pos+1)+L"..\\TestFiles\\";
+#endif
+#elif defined VCZH_GCC
 	return WString(buffer, pos+1)+L"..\\TestFiles\\";
 #endif
 }
@@ -382,6 +388,8 @@ void UnloadTypes()
 int wmain(int argc, wchar_t* argv[])
 {
 	workflowTable = 0;
+#ifdef VCZH_MSVC
 	_CrtDumpMemoryLeaks();
+#endif
 	return 0;
 }
