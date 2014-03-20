@@ -80,52 +80,19 @@ WfRuntimeThreadContext
 					}\
 				} while (0)\
 
-#define EXECUTE_WITH_TYPE_CASE_END						default: INTERNAL_ERROR(L"unexpected type argument.");
-#define EXECUTE_WITH_TYPE_CONCAT(A, B)					A##B
-#define EXECUTE_WITH_TYPE_CONCATX(A, B)					EXECUTE_WITH_TYPE_CONCAT(A, B)
-
-#define EXECUTE_WITH_TYPE_CASE_Bool						return OpNot<bool>::Do(*this);
-#define EXECUTE_WITH_TYPE_CASE_I1						return OpNot<vint8_t>::Do(*this);
-#define EXECUTE_WITH_TYPE_CASE_I2						return OpNot<vint16_t>::Do(*this);
-#define EXECUTE_WITH_TYPE_CASE_I4						return OpNot<vint32_t>::Do(*this);
-#define EXECUTE_WITH_TYPE_CASE_I8						return OpNot<vint64_t>::Do(*this);
-#define EXECUTE_WITH_TYPE_CASE_U1						return OpNot<vuint8_t>::Do(*this);
-#define EXECUTE_WITH_TYPE_CASE_U2						return OpNot<vuint16_t>::Do(*this);
-#define EXECUTE_WITH_TYPE_CASE_U4						return OpNot<vuint32_t>::Do(*this);
-#define EXECUTE_WITH_TYPE_CASE_U8						return OpNot<vuint64_t>::Do(*this);
-#define EXECUTE_WITH_TYPE_CASE_String					return OpNot<WString>::Do(*this);
-
-#define EXECUTE_WITH_TYPE_CASE_10_END					EXECUTE_WITH_TYPE_CASE_END
-#define EXECUTE_WITH_TYPE_CASE_9_END					EXECUTE_WITH_TYPE_CASE_END
-#define EXECUTE_WITH_TYPE_CASE_8_END					EXECUTE_WITH_TYPE_CASE_END
-#define EXECUTE_WITH_TYPE_CASE_7_END					EXECUTE_WITH_TYPE_CASE_END
-#define EXECUTE_WITH_TYPE_CASE_6_END					EXECUTE_WITH_TYPE_CASE_END
-#define EXECUTE_WITH_TYPE_CASE_5_END					EXECUTE_WITH_TYPE_CASE_END
-#define EXECUTE_WITH_TYPE_CASE_4_END					EXECUTE_WITH_TYPE_CASE_END
-#define EXECUTE_WITH_TYPE_CASE_3_END					EXECUTE_WITH_TYPE_CASE_END
-#define EXECUTE_WITH_TYPE_CASE_2_END					EXECUTE_WITH_TYPE_CASE_END
-#define EXECUTE_WITH_TYPE_CASE_1_END					EXECUTE_WITH_TYPE_CASE_END
-
-#define EXECUTE_WITH_TYPE_CASE_10_(TYPE)				case WfInsType::TYPE: EXECUTE_WITH_TYPE_CASE_##TYPE
-#define EXECUTE_WITH_TYPE_CASE_9_(TYPE)					case WfInsType::TYPE: EXECUTE_WITH_TYPE_CASE_##TYPE EXECUTE_WITH_TYPE_CASE_10_
-#define EXECUTE_WITH_TYPE_CASE_8_(TYPE)					case WfInsType::TYPE: EXECUTE_WITH_TYPE_CASE_##TYPE EXECUTE_WITH_TYPE_CASE_9_
-#define EXECUTE_WITH_TYPE_CASE_7_(TYPE)					case WfInsType::TYPE: EXECUTE_WITH_TYPE_CASE_##TYPE EXECUTE_WITH_TYPE_CASE_8_
-#define EXECUTE_WITH_TYPE_CASE_6_(TYPE)					case WfInsType::TYPE: EXECUTE_WITH_TYPE_CASE_##TYPE EXECUTE_WITH_TYPE_CASE_7_
-#define EXECUTE_WITH_TYPE_CASE_5_(TYPE)					case WfInsType::TYPE: EXECUTE_WITH_TYPE_CASE_##TYPE EXECUTE_WITH_TYPE_CASE_6_
-#define EXECUTE_WITH_TYPE_CASE_4_(TYPE)					case WfInsType::TYPE: EXECUTE_WITH_TYPE_CASE_##TYPE EXECUTE_WITH_TYPE_CASE_5_
-#define EXECUTE_WITH_TYPE_CASE_3_(TYPE)					case WfInsType::TYPE: EXECUTE_WITH_TYPE_CASE_##TYPE EXECUTE_WITH_TYPE_CASE_4_
-#define EXECUTE_WITH_TYPE_CASE_2_(TYPE)					case WfInsType::TYPE: EXECUTE_WITH_TYPE_CASE_##TYPE EXECUTE_WITH_TYPE_CASE_3_
-#define EXECUTE_WITH_TYPE_CASE_1_(TYPE)					case WfInsType::TYPE: EXECUTE_WITH_TYPE_CASE_##TYPE EXECUTE_WITH_TYPE_CASE_2_
-#define EXECUTE_WITH_TYPE_CASE_(TYPE)					EXECUTE_WITH_TYPE_CASE_1_(TYPE)
-
-
-#define EXECUTE_WITH_TYPE(TYPE_LIST, OPERATION)\
-				do{\
-					switch (ins.typeParameter)\
-					{\
-						EXECUTE_WITH_TYPE_CONCATX(EXECUTE_WITH_TYPE_CASE_##TYPE_LIST,END)\
-					}\
-				} while (0)\
+#define TYPE_OF_Bool							bool
+#define TYPE_OF_I1								vint8_t
+#define TYPE_OF_I2								vint16_t
+#define TYPE_OF_I4								vint32_t
+#define TYPE_OF_I8								vint64_t
+#define TYPE_OF_U1								vuint8_t
+#define TYPE_OF_U2								vuint16_t
+#define TYPE_OF_U4								vuint32_t
+#define TYPE_OF_U8								vuint64_t
+#define TYPE_OF_String							WString
+#define EXECUTE(OPERATION, TYPE)				case WfInsType::TYPE: return OPERATION<TYPE_OF_##TYPE>::Do(*this);
+#define BEGIN_TYPE								switch(ins.typeParameter) {
+#define END_TYPE								default: INTERNAL_ERROR(L"unexpected type argument."); }
 
 				switch (status)
 				{
@@ -316,7 +283,17 @@ WfRuntimeThreadContext
 						case WfInsCode::CompareReference:
 							throw 0;
 						case WfInsCode::OpNot:
-							EXECUTE_WITH_TYPE((Bool)(I1)(I2)(I4)(I8)(U1)(U2)(U4)(U8), OpNot);
+							BEGIN_TYPE
+								EXECUTE(OpNot, Bool)
+								EXECUTE(OpNot, I1)
+								EXECUTE(OpNot, I2)
+								EXECUTE(OpNot, I4)
+								EXECUTE(OpNot, I8)
+								EXECUTE(OpNot, U1)
+								EXECUTE(OpNot, U2)
+								EXECUTE(OpNot, U4)
+								EXECUTE(OpNot, U8)
+							END_TYPE
 						case WfInsCode::OpPositive:
 							throw 0;
 						case WfInsCode::OpNegative:
@@ -368,6 +345,22 @@ WfRuntimeThreadContext
 					break;
 				}
 				return WfRuntimeExecutionAction::Nop;
+
+#undef INTERNAL_ERROR
+#undef CONTEXT_ACTION
+#undef TYPE_OF_Bool
+#undef TYPE_OF_I1
+#undef TYPE_OF_I2
+#undef TYPE_OF_I4
+#undef TYPE_OF_I8
+#undef TYPE_OF_U1
+#undef TYPE_OF_U2
+#undef TYPE_OF_U4
+#undef TYPE_OF_U8
+#undef TYPE_OF_String
+#undef EXECUTE
+#undef BEGIN_TYPE
+#undef END_TYPE
 			}
 		}
 	}
