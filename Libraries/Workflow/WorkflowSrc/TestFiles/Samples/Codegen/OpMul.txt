@@ -15,7 +15,8 @@ func main():string
 	var f32 = cast float 1.5;
 	var f64 = cast double 3;
 	var s = cast string "text";
-	return not b 
-		& ", " & not i8 & ", " & not i16 & ", " & not i32 & ", " & not i64
-		& ", " & not u8 & ", " & not u16 & ", " & not u32 & ", " & not u64;
+	return
+		i8*i16 & ", " & i16*i32 & ", " & i32*i64 & ", " &
+		u8*u16 & ", " & u16*u32 & ", " & u32*u64 & ", " &
+		f32*f64;
 }
