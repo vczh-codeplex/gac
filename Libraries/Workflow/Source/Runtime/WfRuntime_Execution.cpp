@@ -31,68 +31,31 @@ WfRuntimeThreadContext (Operations)
 
 #define UNARY_OPERATOR(NAME, OPERATOR)\
 			template<typename T>\
-			struct NAME\
+			WfRuntimeExecutionAction OPERATOR_##NAME(WfRuntimeThreadContext& context)\
 			{\
-				static WfRuntimeExecutionAction Do(WfRuntimeThreadContext& context)\
-				{\
-					Value result;\
-					CONTEXT_ACTION(PopValue(result), L"failed to pop a value from the stack.");\
-					T value = OPERATOR UnboxValue<T>(result);\
-					context.PushValue(BoxValue(value));\
-					return WfRuntimeExecutionAction::ExecuteInstruction;\
-				}\
-			};\
-			
-#define UNARY_OPERATOR_SPECIALIZATION(NAME, TYPE, OPERATOR)\
-			template<>\
-			struct NAME<TYPE>\
-			{\
-				static WfRuntimeExecutionAction Do(WfRuntimeThreadContext& context)\
-				{\
-					Value result;\
-					CONTEXT_ACTION(PopValue(result), L"failed to pop a value from the stack.");\
-					TYPE value = OPERATOR UnboxValue<TYPE>(result);\
-					context.PushValue(BoxValue(value));\
-					return WfRuntimeExecutionAction::ExecuteInstruction;\
-				}\
-			};\
-
-			//-------------------------------------------------------------------------------
+				Value result;\
+				CONTEXT_ACTION(PopValue(result), L"failed to pop a value from the stack.");\
+				T value = OPERATOR UnboxValue<T>(result);\
+				context.PushValue(BoxValue(value));\
+				return WfRuntimeExecutionAction::ExecuteInstruction;\
+			}\
 
 #define BINARY_OPERATOR(NAME, OPERATOR)\
 			template<typename T>\
-			struct NAME\
+			WfRuntimeExecutionAction OPERATOR_##NAME(WfRuntimeThreadContext& context)\
 			{\
-				static WfRuntimeExecutionAction Do(WfRuntimeThreadContext& context)\
-				{\
-					Value first, second;\
-					CONTEXT_ACTION(PopValue(second), L"failed to pop a value from the stack.");\
-					CONTEXT_ACTION(PopValue(first), L"failed to pop a value from the stack.");\
-					T value = UnboxValue<T>(first) OPERATOR UnboxValue<T>(second);\
-					context.PushValue(BoxValue(value));\
-					return WfRuntimeExecutionAction::ExecuteInstruction;\
-				}\
-			};\
-			
-#define BINARY_OPERATOR_SPECIALIZATION(NAME, TYPE, OPERATOR)\
-			template<>\
-			struct NAME<TYPE>\
-			{\
-				static WfRuntimeExecutionAction Do(WfRuntimeThreadContext& context)\
-				{\
-					Value first, second;\
-					CONTEXT_ACTION(PopValue(second), L"failed to pop a value from the stack.");\
-					CONTEXT_ACTION(PopValue(first), L"failed to pop a value from the stack.");\
-					TYPE value = UnboxValue<TYPE>(first) OPERATOR UnboxValue<TYPE>(second);\
-					context.PushValue(BoxValue(value));\
-					return WfRuntimeExecutionAction::ExecuteInstruction;\
-				}\
-			};\
+				Value first, second;\
+				CONTEXT_ACTION(PopValue(second), L"failed to pop a value from the stack.");\
+				CONTEXT_ACTION(PopValue(first), L"failed to pop a value from the stack.");\
+				T value = UnboxValue<T>(first) OPERATOR UnboxValue<T>(second);\
+				context.PushValue(BoxValue(value));\
+				return WfRuntimeExecutionAction::ExecuteInstruction;\
+			}\
 
 			//-------------------------------------------------------------------------------
 
 			UNARY_OPERATOR(OpNot, ~)
-			UNARY_OPERATOR_SPECIALIZATION(OpNot, bool, !)
+			UNARY_OPERATOR(OpNot_Bool, !)
 			UNARY_OPERATOR(OpPositive, +)
 			UNARY_OPERATOR(OpNegative, -)
 
@@ -103,9 +66,9 @@ WfRuntimeThreadContext (Operations)
 			BINARY_OPERATOR(OpShl, <<)
 			BINARY_OPERATOR(OpShr, >>)
 			BINARY_OPERATOR(OpAnd, &)
-			BINARY_OPERATOR_SPECIALIZATION(OpAnd, bool, &&)
+			BINARY_OPERATOR(OpAnd_Bool, &&)
 			BINARY_OPERATOR(OpOr, |)
-			BINARY_OPERATOR_SPECIALIZATION(OpOr, bool, ||)
+			BINARY_OPERATOR(OpOr_Bool, ||)
 			BINARY_OPERATOR(OpXor, ^)
 
 			//-------------------------------------------------------------------------------
@@ -113,9 +76,7 @@ WfRuntimeThreadContext (Operations)
 #undef INTERNAL_ERROR
 #undef CONTEXT_ACTION
 #undef UNARY_OPERATOR
-#undef UNARY_OPERATOR_SPECIALIZATION
 #undef BINARY_OPERATOR
-#undef BINARY_OPERATOR_SPECIALIZATION
 
 /***********************************************************************
 WfRuntimeThreadContext
@@ -149,7 +110,7 @@ WfRuntimeThreadContext
 #define TYPE_OF_F4								float
 #define TYPE_OF_F8								double
 #define TYPE_OF_String							WString
-#define EXECUTE(OPERATION, TYPE)				case WfInsType::TYPE: return OPERATION<TYPE_OF_##TYPE>::Do(*this);
+#define EXECUTE(OPERATION, TYPE)				case WfInsType::TYPE: return OPERATOR_##OPERATION<TYPE_OF_##TYPE>(*this);
 #define BEGIN_TYPE								switch(ins.typeParameter) {
 #define END_TYPE								default: INTERNAL_ERROR(L"unexpected type argument."); }
 
@@ -343,7 +304,7 @@ WfRuntimeThreadContext
 							throw 0;
 						case WfInsCode::OpNot:
 							BEGIN_TYPE
-								EXECUTE(OpNot, Bool)
+								EXECUTE(OpNot_Bool, Bool)
 								EXECUTE(OpNot, I1)
 								EXECUTE(OpNot, I2)
 								EXECUTE(OpNot, I4)
@@ -469,7 +430,7 @@ WfRuntimeThreadContext
 							END_TYPE
 						case WfInsCode::OpAnd:
 							BEGIN_TYPE
-								EXECUTE(OpAnd, Bool)
+								EXECUTE(OpAnd_Bool, Bool)
 								EXECUTE(OpAnd, I1)
 								EXECUTE(OpAnd, I2)
 								EXECUTE(OpAnd, I4)
@@ -481,7 +442,7 @@ WfRuntimeThreadContext
 							END_TYPE
 						case WfInsCode::OpOr:
 							BEGIN_TYPE
-								EXECUTE(OpOr, Bool)
+								EXECUTE(OpOr_Bool, Bool)
 								EXECUTE(OpOr, I1)
 								EXECUTE(OpOr, I2)
 								EXECUTE(OpOr, I4)
