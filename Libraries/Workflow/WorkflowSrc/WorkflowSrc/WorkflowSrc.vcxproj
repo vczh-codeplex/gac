@@ -475,12 +475,17 @@
     <Text Include="..\TestFiles\Samples\AnalyzerScope\ModuleC.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\HelloWorld.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\OpAdd.txt" />
+    <Text Include="..\TestFiles\Samples\Codegen\OpAnd.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\OpDiv.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\OpMul.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\OpNegative.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\OpNot.txt" />
+    <Text Include="..\TestFiles\Samples\Codegen\OpOr.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\OpPositive.txt" />
+    <Text Include="..\TestFiles\Samples\Codegen\OpShl.txt" />
+    <Text Include="..\TestFiles\Samples\Codegen\OpShr.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\OpSub.txt" />
+    <Text Include="..\TestFiles\Samples\Codegen\OpXor.txt" />
     <Text Include="..\TestFiles\Samples\Declaration\Function.txt" />
     <Text Include="..\TestFiles\Samples\Declaration\HelloWorld.txt" />
     <Text Include="..\TestFiles\Samples\Declaration\Namespace.txt" />
