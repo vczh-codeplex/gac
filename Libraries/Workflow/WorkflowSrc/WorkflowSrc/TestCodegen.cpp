@@ -37,7 +37,7 @@ TEST_CASE(TestCodegen)
 		TEST_ASSERT(context.status == WfRuntimeExecutionStatus::Finished);
 
 		vint functionIndex = assembly->functionByName[L"main"];
-		context.PushStackFrame(functionIndex);
+		context.PushStackFrame(functionIndex, 0);
 		TEST_ASSERT(context.status == WfRuntimeExecutionStatus::Ready);
 
 		while (context.status != WfRuntimeExecutionStatus::Finished)
@@ -75,7 +75,7 @@ func main():string
 	TEST_ASSERT(errors.Count() == 0);
 
 	WfRuntimeThreadContext context(assembly);
-	context.PushStackFrame(assembly->functionByName[L"main"]);
+	context.PushStackFrame(assembly->functionByName[L"main"], 0);
 	context.ExecuteToEnd();
 
 	Value result;

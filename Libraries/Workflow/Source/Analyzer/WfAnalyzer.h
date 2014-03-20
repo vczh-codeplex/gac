@@ -268,8 +268,8 @@ Code Generation
 
 			class WfCodegenContext
 			{
-				typedef collections::Dictionary<WfVariableDeclaration*, vint>		VariableIndexMap;
-				typedef collections::Dictionary<WfFunctionDeclaration*, vint>		FunctionIndexMap;
+				typedef collections::Dictionary<WfLexicalSymbol*, vint>				VariableIndexMap;
+				typedef collections::Dictionary<WfLexicalSymbol*, vint>				FunctionIndexMap;
 			public:
 				Ptr<runtime::WfAssembly>			assembly;
 				WfLexicalScopeManager*				manager;
@@ -288,7 +288,9 @@ Code Generation
 			extern void										GenerateGlobalDeclarationMetadata(WfCodegenContext& context, Ptr<WfDeclaration> declaration, const WString& namePrefix = L"");
 			extern void										GenerateDeclarationInstructions(WfCodegenContext& context, Ptr<WfDeclaration> declaration);
 			extern void										GenerateStatementInstructions(WfCodegenContext& context, Ptr<WfStatement> statement);
-			extern void										GenerateExpressionInstructions(WfCodegenContext& context, Ptr<WfExpression> expression);
+			extern Ptr<reflection::description::ITypeInfo>	GenerateExpressionInstructions(WfCodegenContext& context, Ptr<WfExpression> expression, Ptr<reflection::description::ITypeInfo> expectedType = 0);
+			extern void										GenerateTypeCastInstructions(WfCodegenContext& context, Ptr<reflection::description::ITypeInfo> expectedType);
+			extern runtime::WfInsType						GetInstructionTypeArgument(Ptr<reflection::description::ITypeInfo> expectedType);
 			extern Ptr<runtime::WfAssembly>					GenerateAssembly(WfLexicalScopeManager* manager);
 			extern Ptr<runtime::WfAssembly>					Compile(Ptr<parsing::tabling::ParsingTable> table, WfLexicalScopeManager* manager, collections::List<WString>& moduleCodes, collections::List<Ptr<parsing::ParsingError>>& errors);
 			extern Ptr<runtime::WfAssembly>					Compile(Ptr<parsing::tabling::ParsingTable> table, collections::List<WString>& moduleCodes, collections::List<Ptr<parsing::ParsingError>>& errors);

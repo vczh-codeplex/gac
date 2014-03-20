@@ -493,15 +493,28 @@ ValidateSemantic(Expression)
 					{
 						goto TYPE_FINISHED;
 					}
+
+					typeDescriptor = description::GetTypeDescriptor<vuint32_t>();
+					if (typeDescriptor->GetValueSerializer()->Validate(node->value.value))
+					{
+						goto TYPE_FINISHED;
+					}
 #endif
 					typeDescriptor = description::GetTypeDescriptor<vint64_t>();
-					if (!typeDescriptor->GetValueSerializer()->Validate(node->value.value))
+					if (typeDescriptor->GetValueSerializer()->Validate(node->value.value))
 					{
-						manager->errors.Add(WfErrors::IntegerLiteralOutOfRange(node));
+						goto TYPE_FINISHED;
 					}
-#ifndef VCZH_64
+
+					typeDescriptor = description::GetTypeDescriptor<vuint64_t>();
+					if (typeDescriptor->GetValueSerializer()->Validate(node->value.value))
+					{
+						goto TYPE_FINISHED;
+					}
+
+					manager->errors.Add(WfErrors::IntegerLiteralOutOfRange(node));
+
 				TYPE_FINISHED:
-#endif
 					Ptr<TypeInfoImpl> typeInfo = new TypeInfoImpl(ITypeInfo::TypeDescriptor);
 					typeInfo->SetTypeDescriptor(typeDescriptor);
 					results.Add(ResolveExpressionResult((Ptr<ITypeInfo>)typeInfo));

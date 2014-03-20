@@ -44,7 +44,7 @@ Instruction
 				Jump,				// label				: () -> ()										;
 				JumpIf,				// label				: () -> ()										;
 				Invoke,				// function, count		: Value-1, ..., Value-n -> Value				;
-				InvokeMethod,		// IMethodInfo*, count	: Value-this, Value-1, ..., Value-n -> Value	;
+				InvokeMethod,		// IMethodInfo*, count	: Value-1, ..., Value-n, Value-this -> Value	;
 				AttachEvent,		// IEventInfo*			: Value-this, <function> -> <Listener>			;
 				DetachEvent,		// 						: <Listener> -> bool							;
 				InstallTry,			// label				: () -> ()										;
@@ -63,9 +63,9 @@ Instruction
 				OpDiv,				// I48/U48/F48			: Value, Value -> Value							;
 				OpShl,				// I48/U48				: Value, Value -> Value							;
 				OpShr,				// I48/U48				: Value, Value -> Value							;
-				OpXor,				// 						: <bool>, <bool> -> <bool>						;
-				OpAnd,				// 						: <bool>, <bool> -> <bool>						;
-				OpOr,				// 						: <bool>, <bool> -> <bool>						;
+				OpXor,				// B/I1248/U1248		: <bool>, <bool> -> <bool>						;
+				OpAnd,				// B/I1248/U1248		: <bool>, <bool> -> <bool>						;
+				OpOr,				// B/I1248/U1248		: <bool>, <bool> -> <bool>						;
 				OpLT,				// 						: <int> -> <bool>								;
 				OpGT,				// 						: <int> -> <bool>								;
 				OpLE,				// 						: <int> -> <bool>								;
@@ -113,9 +113,9 @@ Instruction
 			APPLY_TYPE(OpDiv)\
 			APPLY_TYPE(OpShl)\
 			APPLY_TYPE(OpShr)\
-			APPLY(OpXor)\
-			APPLY(OpAnd)\
-			APPLY(OpOr)\
+			APPLY_TYPE(OpXor)\
+			APPLY_TYPE(OpAnd)\
+			APPLY_TYPE(OpOr)\
 			APPLY(OpLT)\
 			APPLY(OpGT)\
 			APPLY(OpLE)\
@@ -264,6 +264,7 @@ Runtime
 			{
 				Success,
 				WrongFunctionIndex,
+				WrongArgumentCount,
 				WrongCapturedVariableCount,
 				EmptyStackFrame,
 				EmptyTrapFrame,
@@ -289,7 +290,7 @@ Runtime
 				WfRuntimeThreadContext(Ptr<WfAssembly> _assembly);
 
 				WfRuntimeStackFrame&			GetCurrentStackFrame();
-				WfRuntimeThreadContextError		PushStackFrame(vint functionIndex, Ptr<WfRuntimeVariableContext> capturedVariables = 0);
+				WfRuntimeThreadContextError		PushStackFrame(vint functionIndex, vint argumentCount, Ptr<WfRuntimeVariableContext> capturedVariables = 0);
 				WfRuntimeThreadContextError		PopStackFrame();
 				WfRuntimeThreadContextError		PushTrapFrame(vint instructionIndex);
 				WfRuntimeThreadContextError		PopTrapFrame();
