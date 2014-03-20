@@ -173,7 +173,7 @@ WfRuntimeThreadContext
 				return stackFrames[stackFrames.Count() - 1];
 			}
 
-			WfRuntimeThreadContextError WfRuntimeThreadContext::PushStackFrame(vint functionIndex, Ptr<WfRuntimeVariableContext> capturedVariables)
+			WfRuntimeThreadContextError WfRuntimeThreadContext::PushStackFrame(vint functionIndex, vint argumentCount, Ptr<WfRuntimeVariableContext> capturedVariables)
 			{
 				if (stackFrames.Count() == 0 && stack.Count() != 0)
 				{
@@ -184,6 +184,10 @@ WfRuntimeThreadContext
 					return WfRuntimeThreadContextError::WrongFunctionIndex;
 				}
 				auto meta = globalContext->assembly->functions[functionIndex];
+				if (meta->argumentNames.Count() != argumentCount)
+				{
+					return WfRuntimeThreadContextError::WrongArgumentCount;
+				}
 				if (meta->capturedVariableNames.Count() == 0)
 				{
 					if (capturedVariables)
@@ -203,13 +207,13 @@ WfRuntimeThreadContext
 				frame.capturedVariables = capturedVariables;
 				frame.functionIndex = functionIndex;
 				frame.nextInstructionIndex = globalContext->assembly->functions[functionIndex]->firstInstruction;
-				frame.stackBase = stack.Count();
+				frame.stackBase = stack.Count() - argumentCount;
 
 				frame.fixedVariableCount = meta->argumentNames.Count() + meta->localVariableNames.Count();
 				frame.freeStackBase = frame.stackBase + frame.fixedVariableCount;
 				stackFrames.Add(frame);
 
-				for (vint i = 0; i < frame.fixedVariableCount; i++)
+				for (vint i = 0; i < meta->localVariableNames.Count(); i++)
 				{
 					stack.Add(Value());
 				}

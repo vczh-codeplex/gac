@@ -48,13 +48,24 @@ GenerateGlobalDeclarationMetadata
 
 					vint index = context.assembly->functions.Add(meta);
 					context.assembly->functionByName.Add(meta->name, index);
-					context.globalFunctions.Add(node, index);
+
+					auto scope = context.manager->declarationScopes[node]->parentScope.Obj();
+					auto symbol = From(scope->symbols[node->name.value])
+						.Where([=](Ptr<WfLexicalSymbol> symbol)
+						{
+							return symbol->creatorDeclaration == node;
+						})
+						.First();
+					context.globalFunctions.Add(symbol.Obj(), index);
 				}
 
 				void Visit(WfVariableDeclaration* node)override
 				{
 					vint index = context.assembly->variableNames.Add(namePrefix + node->name.value);
-					context.globalVariables.Add(node, index);
+
+					auto scope = context.manager->declarationScopes[node].Obj();
+					auto symbol = scope->symbols[node->name.value][0];
+					context.globalVariables.Add(symbol.Obj(), index);
 				}
 			};
 
@@ -84,7 +95,14 @@ GenerateInstructions(Declaration)
 
 				void Visit(WfFunctionDeclaration* node)override
 				{
-					auto meta = context.assembly->functions[context.globalFunctions[node]];
+					auto scope = context.manager->declarationScopes[node]->parentScope.Obj();
+					auto symbol = From(scope->symbols[node->name.value])
+						.Where([=](Ptr<WfLexicalSymbol> symbol)
+						{
+							return symbol->creatorDeclaration == node;
+						})
+						.First();
+					auto meta = context.assembly->functions[context.globalFunctions[symbol.Obj()]];
 
 					auto functionContext = MakePtr<WfCodegenFunctionContext>();
 					functionContext->function = meta;
@@ -194,12 +212,21 @@ GenerateInstructions(Statement)
 
 				void Visit(WfExpressionStatement* node)override
 				{
-					throw 0;
+					GenerateExpressionInstructions(context, node->expression);
+					INSTRUCTION(Ins::Pop());
 				}
 
 				void Visit(WfVariableStatement* node)override
 				{
-					throw 0;
+					auto manager = context.manager;
+					auto scope = manager->declarationScopes[node->variable.Obj()];
+					auto symbol = scope->symbols[node->variable->name.value][0].Obj();
+					auto function = context.functionContext->function;
+					vint index = function->argumentNames.Count() + function->localVariableNames.Add(node->variable->name.value);
+					context.functionContext->localVariables.Add(symbol, index);
+
+					GenerateExpressionInstructions(context, node->variable->expression);
+					INSTRUCTION(Ins::StoreLocalVar(index));
 				}
 			};
 
@@ -230,7 +257,34 @@ GenerateInstructions(Expression)
 
 				void Visit(WfReferenceExpression* node)override
 				{
-					throw 0;
+					auto result = context.manager->expressionResolvings[node];
+					if (result.symbol)
+					{
+						vint index = -1;
+
+						if ((index = context.globalFunctions.Keys().IndexOf(result.symbol.Obj())) != -1)
+						{
+							throw 0;
+						}
+						if ((index = context.globalVariables.Keys().IndexOf(result.symbol.Obj())) != -1)
+						{
+							throw 0;
+						}
+						if ((index = context.functionContext->capturedVariables.Keys().IndexOf(result.symbol.Obj())) != -1)
+						{
+							throw 0;
+						}
+						if ((index = context.functionContext->localVariables.Keys().IndexOf(result.symbol.Obj())) != -1)
+						{
+							vint argumentCount = context.functionContext->function->argumentNames.Count();
+							vint variableIndex = context.functionContext->localVariables.Values()[index];
+							INSTRUCTION(Ins::LoadLocalVar(argumentCount + variableIndex));
+						}
+					}
+					else
+					{
+						throw 0;
+					}
 				}
 
 				void Visit(WfOrderedNameExpression* node)override
@@ -255,17 +309,41 @@ GenerateInstructions(Expression)
 
 				void Visit(WfLiteralExpression* node)override
 				{
-					throw 0;
+					switch (node->value)
+					{
+					case WfLiteralValue::Null:
+						INSTRUCTION(Ins::LoadValue(Value()));
+						break;
+					case WfLiteralValue::True:
+						INSTRUCTION(Ins::LoadValue(BoxValue(true)));
+						break;
+					case WfLiteralValue::False:
+						INSTRUCTION(Ins::LoadValue(BoxValue(false)));
+						break;
+					}
 				}
 
 				void Visit(WfFloatingExpression* node)override
 				{
-					throw 0;
+					INSTRUCTION(Ins::LoadValue(BoxValue(wtof(node->value.value))));
 				}
 
 				void Visit(WfIntegerExpression* node)override
 				{
-					throw 0;
+					auto result = context.manager->expressionResolvings[node];
+					auto td = result.type->GetTypeDescriptor();
+					if (td == description::GetTypeDescriptor<vint32_t>())
+					{
+						INSTRUCTION(Ins::LoadValue(BoxValue((vint32_t)wtoi(node->value.value))));
+					}
+					else if (td == description::GetTypeDescriptor<vint64_t>())
+					{
+						INSTRUCTION(Ins::LoadValue(BoxValue((vint64_t)wtoi64(node->value.value))));
+					}
+					else if (td == description::GetTypeDescriptor<vuint64_t>())
+					{
+						INSTRUCTION(Ins::LoadValue(BoxValue((vuint64_t)wtou64(node->value.value))));
+					}
 				}
 
 				void Visit(WfStringExpression* node)override
@@ -280,12 +358,102 @@ GenerateInstructions(Expression)
 
 				void Visit(WfUnaryExpression* node)override
 				{
-					throw 0;
+					auto type = GenerateExpressionInstructions(context, node->operand);
+					switch (node->op)
+					{
+					case WfUnaryOperator::Not:
+						INSTRUCTION(Ins::OpNot(GetInstructionTypeArgument(type)));
+						break;
+					case WfUnaryOperator::Positive:
+						INSTRUCTION(Ins::OpPositive(GetInstructionTypeArgument(type)));
+						break;
+					case WfUnaryOperator::Negative:
+						INSTRUCTION(Ins::OpNegative(GetInstructionTypeArgument(type)));
+						break;
+					}
 				}
 
 				void Visit(WfBinaryExpression* node)override
 				{
-					throw 0;
+					if (node->op == WfBinaryOperator::Assign)
+					{
+					}
+					else if (node->op == WfBinaryOperator::Index)
+					{
+					}
+					else if (node->op == WfBinaryOperator::Concat)
+					{
+						auto type = TypeInfoRetriver<WString>::CreateTypeInfo();
+						GenerateExpressionInstructions(context, node->first, type);
+						GenerateExpressionInstructions(context, node->second, type);
+						INSTRUCTION(Ins::OpConcat());
+					}
+					else if (node->op == WfBinaryOperator::FailedThen)
+					{
+					}
+					else
+					{
+						auto firstResult = context.manager->expressionResolvings[node->first.Obj()];
+						auto secondResult = context.manager->expressionResolvings[node->second.Obj()];
+						auto firstType = firstResult.expectedType ? firstResult.expectedType : firstResult.type;
+						auto secondType = secondResult.expectedType ? secondResult.expectedType : secondResult.type;
+						auto mergedType = GetMergedType(firstType, secondType);
+
+						GenerateExpressionInstructions(context, node->first, mergedType);
+						GenerateExpressionInstructions(context, node->second, mergedType);
+
+						switch (node->op)
+						{
+						case WfBinaryOperator::Exp:
+							INSTRUCTION(Ins::OpExp(GetInstructionTypeArgument(mergedType)));
+							break;
+						case WfBinaryOperator::Add:
+							INSTRUCTION(Ins::OpAdd(GetInstructionTypeArgument(mergedType)));
+							break;
+						case WfBinaryOperator::Sub:
+							INSTRUCTION(Ins::OpSub(GetInstructionTypeArgument(mergedType)));
+							break;
+						case WfBinaryOperator::Mul:
+							INSTRUCTION(Ins::OpMul(GetInstructionTypeArgument(mergedType)));
+							break;
+						case WfBinaryOperator::Div:
+							INSTRUCTION(Ins::OpDiv(GetInstructionTypeArgument(mergedType)));
+							break;
+						case WfBinaryOperator::Shl:
+							INSTRUCTION(Ins::OpShl(GetInstructionTypeArgument(mergedType)));
+							break;
+						case WfBinaryOperator::Shr:
+							INSTRUCTION(Ins::OpShr(GetInstructionTypeArgument(mergedType)));
+							break;
+						case WfBinaryOperator::LT:
+							INSTRUCTION(Ins::OpLT());
+							break;
+						case WfBinaryOperator::GT:
+							INSTRUCTION(Ins::OpGT());
+							break;
+						case WfBinaryOperator::LE:
+							INSTRUCTION(Ins::OpLE());
+							break;
+						case WfBinaryOperator::GE:
+							INSTRUCTION(Ins::OpGE());
+							break;
+						case WfBinaryOperator::EQ:
+							INSTRUCTION(Ins::OpEQ());
+							break;
+						case WfBinaryOperator::NE:
+							INSTRUCTION(Ins::OpNE());
+							break;
+						case WfBinaryOperator::Xor:
+							INSTRUCTION(Ins::OpXor(GetInstructionTypeArgument(mergedType)));
+							break;
+						case WfBinaryOperator::And:
+							INSTRUCTION(Ins::OpAnd(GetInstructionTypeArgument(mergedType)));
+							break;
+						case WfBinaryOperator::Or:
+							INSTRUCTION(Ins::OpOr(GetInstructionTypeArgument(mergedType)));
+							break;
+						}
+					}
 				}
 
 				void Visit(WfLetExpression* node)override
@@ -320,11 +488,13 @@ GenerateInstructions(Expression)
 
 				void Visit(WfTypeCastingExpression* node)override
 				{
-					throw 0;
+					auto result = context.manager->expressionResolvings[node];
+					GenerateExpressionInstructions(context, node->expression, result.type);
 				}
 
 				void Visit(WfTypeTestingExpression* node)override
 				{
+					throw 0;
 				}
 
 				void Visit(WfTypeOfTypeExpression* node)override
@@ -373,10 +543,71 @@ GenerateInstructions(Expression)
 				}
 			};
 
-			void GenerateExpressionInstructions(WfCodegenContext& context, Ptr<WfExpression> expression)
+			Ptr<reflection::description::ITypeInfo> GenerateExpressionInstructions(WfCodegenContext& context, Ptr<WfExpression> expression, Ptr<reflection::description::ITypeInfo> expectedType)
 			{
 				GenerateExpressionInstructionsVisitor visitor(context);
 				expression->Accept(&visitor);
+
+				auto result = context.manager->expressionResolvings[expression.Obj()];
+				auto type = result.type;
+
+				if (result.expectedType && !IsSameType(type.Obj(), result.expectedType.Obj()))
+				{
+					type = result.expectedType;
+					GenerateTypeCastInstructions(context, type);
+				}
+
+				if (expectedType && !IsSameType(type.Obj(), expectedType.Obj()))
+				{
+					type = expectedType;
+					GenerateTypeCastInstructions(context, type);
+				}
+
+				return type;
+			}
+
+/***********************************************************************
+GenerateTypeCastInstructions
+***********************************************************************/
+
+			void GenerateTypeCastInstructions(WfCodegenContext& context, Ptr<reflection::description::ITypeInfo> expectedType)
+			{
+				switch (expectedType->GetDecorator())
+				{
+				case ITypeInfo::RawPtr:
+					INSTRUCTION(Ins::ConvertToType(Value::RawPtr, expectedType->GetTypeDescriptor()));
+					break;
+				case ITypeInfo::SharedPtr:
+					INSTRUCTION(Ins::ConvertToType(Value::SharedPtr, expectedType->GetTypeDescriptor()));
+					break;
+				case ITypeInfo::Nullable:
+				case ITypeInfo::TypeDescriptor:
+				case ITypeInfo::Generic:
+					INSTRUCTION(Ins::ConvertToType(Value::Text, expectedType->GetTypeDescriptor()));
+					break;
+				}
+			}
+
+/***********************************************************************
+GenerateTypeCastInstructions
+***********************************************************************/
+
+			runtime::WfInsType GetInstructionTypeArgument(Ptr<reflection::description::ITypeInfo> expectedType)
+			{
+				auto td = expectedType->GetTypeDescriptor();
+				if (td == GetTypeDescriptor<bool>()) return WfInsType::Bool;
+				if (td == GetTypeDescriptor<vint8_t>()) return WfInsType::I1;
+				if (td == GetTypeDescriptor<vint16_t>()) return WfInsType::I2;
+				if (td == GetTypeDescriptor<vint32_t>()) return WfInsType::I4;
+				if (td == GetTypeDescriptor<vint64_t>()) return WfInsType::I8;
+				if (td == GetTypeDescriptor<vuint8_t>()) return WfInsType::U1;
+				if (td == GetTypeDescriptor<vuint16_t>()) return WfInsType::U2;
+				if (td == GetTypeDescriptor<vuint32_t>()) return WfInsType::U4;
+				if (td == GetTypeDescriptor<vuint64_t>()) return WfInsType::U8;
+				if (td == GetTypeDescriptor<float>()) return WfInsType::F4;
+				if (td == GetTypeDescriptor<double>()) return WfInsType::F8;
+				if (td == GetTypeDescriptor<WString>()) return WfInsType::String;
+				return WfInsType::Unknown;
 			}
 
 /***********************************************************************
