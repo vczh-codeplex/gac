@@ -393,11 +393,31 @@ GenerateInstructions(Expression)
 					}
 					else
 					{
-						auto firstResult = context.manager->expressionResolvings[node->first.Obj()];
-						auto secondResult = context.manager->expressionResolvings[node->second.Obj()];
-						auto firstType = firstResult.expectedType ? firstResult.expectedType : firstResult.type;
-						auto secondType = secondResult.expectedType ? secondResult.expectedType : secondResult.type;
-						auto mergedType = GetMergedType(firstType, secondType);
+
+						Ptr<ITypeInfo> mergedType;
+						switch (node->op)
+						{
+						case WfBinaryOperator::Exp:
+						case WfBinaryOperator::Add:
+						case WfBinaryOperator::Sub:
+						case WfBinaryOperator::Mul:
+						case WfBinaryOperator::Div:
+						case WfBinaryOperator::Shl:
+						case WfBinaryOperator::Shr:
+							{
+								auto result = context.manager->expressionResolvings[node];
+								mergedType = result.type;
+							}
+							break;
+						default:
+							{
+								auto firstResult = context.manager->expressionResolvings[node->first.Obj()];
+								auto secondResult = context.manager->expressionResolvings[node->second.Obj()];
+								auto firstType = firstResult.expectedType ? firstResult.expectedType : firstResult.type;
+								auto secondType = secondResult.expectedType ? secondResult.expectedType : secondResult.type;
+								mergedType = GetMergedType(firstType, secondType);
+							}
+						}
 
 						GenerateExpressionInstructions(context, node->first, mergedType);
 						GenerateExpressionInstructions(context, node->second, mergedType);
