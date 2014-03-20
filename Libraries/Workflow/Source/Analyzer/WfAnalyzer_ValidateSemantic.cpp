@@ -521,7 +521,7 @@ ValidateSemantic(Expression)
 
 				void Visit(WfUnaryExpression* node)override
 				{
-					Ptr<ITypeInfo> typeInfo = GetExpressionType(manager, node->operand, expectedType);
+					Ptr<ITypeInfo> typeInfo = GetExpressionType(manager, node->operand, 0);
 					if (typeInfo)
 					{
 						TypeFlag flag = GetTypeFlag(typeInfo.Obj());
