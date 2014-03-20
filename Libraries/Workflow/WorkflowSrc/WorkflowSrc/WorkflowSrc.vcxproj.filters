@@ -1289,6 +1289,21 @@
     <Text Include="..\TestFiles\Samples\Codegen\OpDiv.txt">
       <Filter>Resource Files\Samples\Codegen</Filter>
     </Text>
+    <Text Include="..\TestFiles\Samples\Codegen\OpShr.txt">
+      <Filter>Resource Files\Samples\Codegen</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\Codegen\OpShl.txt">
+      <Filter>Resource Files\Samples\Codegen</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\Codegen\OpAnd.txt">
+      <Filter>Resource Files\Samples\Codegen</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\Codegen\OpOr.txt">
+      <Filter>Resource Files\Samples\Codegen</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\Codegen\OpXor.txt">
+      <Filter>Resource Files\Samples\Codegen</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Source\Expression\Codegen.bat">
