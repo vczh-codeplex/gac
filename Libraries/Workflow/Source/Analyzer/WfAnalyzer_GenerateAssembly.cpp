@@ -446,21 +446,27 @@ GenerateInstructions(Expression)
 							INSTRUCTION(Ins::OpShr(GetInstructionTypeArgument(mergedType)));
 							break;
 						case WfBinaryOperator::LT:
+							INSTRUCTION(Ins::CompareLiteral(GetInstructionTypeArgument(mergedType)));
 							INSTRUCTION(Ins::OpLT());
 							break;
 						case WfBinaryOperator::GT:
+							INSTRUCTION(Ins::CompareLiteral(GetInstructionTypeArgument(mergedType)));
 							INSTRUCTION(Ins::OpGT());
 							break;
 						case WfBinaryOperator::LE:
+							INSTRUCTION(Ins::CompareLiteral(GetInstructionTypeArgument(mergedType)));
 							INSTRUCTION(Ins::OpLE());
 							break;
 						case WfBinaryOperator::GE:
+							INSTRUCTION(Ins::CompareLiteral(GetInstructionTypeArgument(mergedType)));
 							INSTRUCTION(Ins::OpGE());
 							break;
 						case WfBinaryOperator::EQ:
+							INSTRUCTION(Ins::CompareLiteral(GetInstructionTypeArgument(mergedType)));
 							INSTRUCTION(Ins::OpEQ());
 							break;
 						case WfBinaryOperator::NE:
+							INSTRUCTION(Ins::CompareLiteral(GetInstructionTypeArgument(mergedType)));
 							INSTRUCTION(Ins::OpNE());
 							break;
 						case WfBinaryOperator::Xor:
