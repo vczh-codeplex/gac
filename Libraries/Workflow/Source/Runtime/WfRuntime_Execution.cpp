@@ -70,6 +70,29 @@ WfRuntimeThreadContext (Operations)
 			BINARY_OPERATOR(OpOr, |)
 			BINARY_OPERATOR(OpOr_Bool, ||)
 			BINARY_OPERATOR(OpXor, ^)
+			
+			template<typename T>
+			WfRuntimeExecutionAction OPERATOR_OpCompare(WfRuntimeThreadContext& context)
+			{
+				Value first, second;
+				CONTEXT_ACTION(PopValue(second), L"failed to pop a value from the stack.");
+				CONTEXT_ACTION(PopValue(first), L"failed to pop a value from the stack.");
+				T firstValue = UnboxValue<T>(first);
+				T secondValue = UnboxValue<T>(second);
+				if (firstValue < secondValue)
+				{
+					context.PushValue(BoxValue((vint)-1));
+				}
+				else if (firstValue > secondValue)
+				{
+					context.PushValue(BoxValue((vint)1));
+				}
+				else
+				{
+					context.PushValue(BoxValue((vint)0));
+				}
+				return WfRuntimeExecutionAction::ExecuteInstruction;
+			}
 
 			//-------------------------------------------------------------------------------
 
@@ -299,7 +322,20 @@ WfRuntimeThreadContext
 								return WfRuntimeExecutionAction::ExecuteInstruction;
 							}
 						case WfInsCode::CompareLiteral:
-							throw 0;
+							BEGIN_TYPE
+								EXECUTE(OpCompare, Bool)
+								EXECUTE(OpCompare, I1)
+								EXECUTE(OpCompare, I2)
+								EXECUTE(OpCompare, I4)
+								EXECUTE(OpCompare, I8)
+								EXECUTE(OpCompare, U1)
+								EXECUTE(OpCompare, U2)
+								EXECUTE(OpCompare, U4)
+								EXECUTE(OpCompare, U8)
+								EXECUTE(OpCompare, F4)
+								EXECUTE(OpCompare, F8)
+								EXECUTE(OpCompare, String)
+							END_TYPE
 						case WfInsCode::CompareReference:
 							throw 0;
 						case WfInsCode::OpNot:
@@ -453,17 +489,59 @@ WfRuntimeThreadContext
 								EXECUTE(OpOr, U8)
 							END_TYPE
 						case WfInsCode::OpLT:
-							throw 0;
+							{
+								Value result;
+								CONTEXT_ACTION(PopValue(result), L"failed to pop a value from the stack.");
+								vint value = UnboxValue<vint>(result);
+								PushValue(BoxValue(value < 0));
+								return WfRuntimeExecutionAction::ExecuteInstruction;
+							}
+							break;
 						case WfInsCode::OpGT:
-							throw 0;
+							{
+								Value result;
+								CONTEXT_ACTION(PopValue(result), L"failed to pop a value from the stack.");
+								vint value = UnboxValue<vint>(result);
+								PushValue(BoxValue(value > 0));
+								return WfRuntimeExecutionAction::ExecuteInstruction;
+							}
+							break;
 						case WfInsCode::OpLE:
-							throw 0;
+							{
+								Value result;
+								CONTEXT_ACTION(PopValue(result), L"failed to pop a value from the stack.");
+								vint value = UnboxValue<vint>(result);
+								PushValue(BoxValue(value <= 0));
+								return WfRuntimeExecutionAction::ExecuteInstruction;
+							}
+							break;
 						case WfInsCode::OpGE:
-							throw 0;
+							{
+								Value result;
+								CONTEXT_ACTION(PopValue(result), L"failed to pop a value from the stack.");
+								vint value = UnboxValue<vint>(result);
+								PushValue(BoxValue(value >= 0));
+								return WfRuntimeExecutionAction::ExecuteInstruction;
+							}
+							break;
 						case WfInsCode::OpEQ:
-							throw 0;
+							{
+								Value result;
+								CONTEXT_ACTION(PopValue(result), L"failed to pop a value from the stack.");
+								vint value = UnboxValue<vint>(result);
+								PushValue(BoxValue(value == 0));
+								return WfRuntimeExecutionAction::ExecuteInstruction;
+							}
+							break;
 						case WfInsCode::OpNE:
-							throw 0;
+							{
+								Value result;
+								CONTEXT_ACTION(PopValue(result), L"failed to pop a value from the stack.");
+								vint value = UnboxValue<vint>(result);
+								PushValue(BoxValue(value != 0));
+								return WfRuntimeExecutionAction::ExecuteInstruction;
+							}
+							break;
 						}
 					}
 					break;
