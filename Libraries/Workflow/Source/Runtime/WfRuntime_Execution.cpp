@@ -10,6 +10,57 @@ namespace vl
 			using namespace reflection::description;
 
 /***********************************************************************
+WfRuntimeThreadContext (Operations)
+***********************************************************************/
+
+#define INTERNAL_ERROR(MESSAGE)\
+				do{\
+					context.RaiseException(BoxValue<WString>(L"Internal error: " MESSAGE));\
+					return WfRuntimeExecutionAction::Nop; \
+				} while (0)\
+
+#define CONTEXT_ACTION(ACTION, MESSAGE)\
+				do{\
+					if ((context.ACTION) != WfRuntimeThreadContextError::Success)\
+					{\
+						INTERNAL_ERROR(MESSAGE);\
+					}\
+				} while (0)\
+
+			//-------------------------------------------------------------------------------
+
+			template<typename T>
+			struct OpNot
+			{
+				static WfRuntimeExecutionAction Do(WfRuntimeThreadContext& context)
+				{
+					Value result;
+					CONTEXT_ACTION(PopValue(result), L"failed to pop a value from the stack.");
+					T value = ~UnboxValue<T>(result);
+					context.PushValue(BoxValue(value));
+					return WfRuntimeExecutionAction::ExecuteInstruction;
+				}
+			};
+
+			template<>
+			struct OpNot<bool>
+			{
+				static WfRuntimeExecutionAction Do(WfRuntimeThreadContext& context)
+				{
+					Value result;
+					CONTEXT_ACTION(PopValue(result), L"failed to pop a value from the stack.");
+					bool value = !UnboxValue<bool>(result);
+					context.PushValue(BoxValue(value));
+					return WfRuntimeExecutionAction::ExecuteInstruction;
+				}
+			};
+
+			//-------------------------------------------------------------------------------
+
+#undef INTERNAL_ERROR
+#undef CONTEXT_ACTION
+
+/***********************************************************************
 WfRuntimeThreadContext
 ***********************************************************************/
 
@@ -22,10 +73,59 @@ WfRuntimeThreadContext
 				} while (0)\
 
 #define CONTEXT_ACTION(ACTION, MESSAGE)\
-				if ((ACTION) != WfRuntimeThreadContextError::Success)\
-				{\
-					INTERNAL_ERROR(MESSAGE);\
-				}\
+				do{\
+					if ((ACTION) != WfRuntimeThreadContextError::Success)\
+					{\
+						INTERNAL_ERROR(MESSAGE);\
+					}\
+				} while (0)\
+
+#define EXECUTE_WITH_TYPE_CASE_END			default: INTERNAL_ERROR(L"unexpected type argument.");
+#define EXECUTE_CONCAT(A, B)				A##B
+#define EXECUTE_CONCATX(A, B)				EXECUTE_CONCAT(A, B)
+
+#define EXECUTE_WITH_TYPE_CASE_Bool			return OpNot<bool>::Do(*this);
+#define EXECUTE_WITH_TYPE_CASE_I1			return OpNot<vint8_t>::Do(*this);
+#define EXECUTE_WITH_TYPE_CASE_I2			return OpNot<vint16_t>::Do(*this);
+#define EXECUTE_WITH_TYPE_CASE_I4			return OpNot<vint32_t>::Do(*this);
+#define EXECUTE_WITH_TYPE_CASE_I8			return OpNot<vint64_t>::Do(*this);
+#define EXECUTE_WITH_TYPE_CASE_U1			return OpNot<vuint8_t>::Do(*this);
+#define EXECUTE_WITH_TYPE_CASE_U2			return OpNot<vuint16_t>::Do(*this);
+#define EXECUTE_WITH_TYPE_CASE_U4			return OpNot<vuint32_t>::Do(*this);
+#define EXECUTE_WITH_TYPE_CASE_U8			return OpNot<vuint64_t>::Do(*this);
+#define EXECUTE_WITH_TYPE_CASE_String		return OpNot<WString>::Do(*this);
+
+#define EXECUTE_WITH_TYPE_CASE_10_END		EXECUTE_WITH_TYPE_CASE_END
+#define EXECUTE_WITH_TYPE_CASE_9_END		EXECUTE_WITH_TYPE_CASE_END
+#define EXECUTE_WITH_TYPE_CASE_8_END		EXECUTE_WITH_TYPE_CASE_END
+#define EXECUTE_WITH_TYPE_CASE_7_END		EXECUTE_WITH_TYPE_CASE_END
+#define EXECUTE_WITH_TYPE_CASE_6_END		EXECUTE_WITH_TYPE_CASE_END
+#define EXECUTE_WITH_TYPE_CASE_5_END		EXECUTE_WITH_TYPE_CASE_END
+#define EXECUTE_WITH_TYPE_CASE_4_END		EXECUTE_WITH_TYPE_CASE_END
+#define EXECUTE_WITH_TYPE_CASE_3_END		EXECUTE_WITH_TYPE_CASE_END
+#define EXECUTE_WITH_TYPE_CASE_2_END		EXECUTE_WITH_TYPE_CASE_END
+#define EXECUTE_WITH_TYPE_CASE_1_END		EXECUTE_WITH_TYPE_CASE_END
+
+#define EXECUTE_WITH_TYPE_CASE_10_(TYPE)	case WfInsType::TYPE: EXECUTE_WITH_TYPE_CASE_##TYPE
+#define EXECUTE_WITH_TYPE_CASE_9_(TYPE)		case WfInsType::TYPE: EXECUTE_WITH_TYPE_CASE_##TYPE EXECUTE_WITH_TYPE_CASE_10_
+#define EXECUTE_WITH_TYPE_CASE_8_(TYPE)		case WfInsType::TYPE: EXECUTE_WITH_TYPE_CASE_##TYPE EXECUTE_WITH_TYPE_CASE_9_
+#define EXECUTE_WITH_TYPE_CASE_7_(TYPE)		case WfInsType::TYPE: EXECUTE_WITH_TYPE_CASE_##TYPE EXECUTE_WITH_TYPE_CASE_8_
+#define EXECUTE_WITH_TYPE_CASE_6_(TYPE)		case WfInsType::TYPE: EXECUTE_WITH_TYPE_CASE_##TYPE EXECUTE_WITH_TYPE_CASE_7_
+#define EXECUTE_WITH_TYPE_CASE_5_(TYPE)		case WfInsType::TYPE: EXECUTE_WITH_TYPE_CASE_##TYPE EXECUTE_WITH_TYPE_CASE_6_
+#define EXECUTE_WITH_TYPE_CASE_4_(TYPE)		case WfInsType::TYPE: EXECUTE_WITH_TYPE_CASE_##TYPE EXECUTE_WITH_TYPE_CASE_5_
+#define EXECUTE_WITH_TYPE_CASE_3_(TYPE)		case WfInsType::TYPE: EXECUTE_WITH_TYPE_CASE_##TYPE EXECUTE_WITH_TYPE_CASE_4_
+#define EXECUTE_WITH_TYPE_CASE_2_(TYPE)		case WfInsType::TYPE: EXECUTE_WITH_TYPE_CASE_##TYPE EXECUTE_WITH_TYPE_CASE_3_
+#define EXECUTE_WITH_TYPE_CASE_1_(TYPE)		case WfInsType::TYPE: EXECUTE_WITH_TYPE_CASE_##TYPE EXECUTE_WITH_TYPE_CASE_2_
+
+#define EXECUTE_WITH_TYPE_CASE_(TYPE)		EXECUTE_WITH_TYPE_CASE_1_(TYPE)
+
+#define EXECUTE_WITH_TYPE(TYPE_LIST, OPERATION)\
+				do{\
+					switch (ins.typeParameter)\
+					{\
+						EXECUTE_CONCATX(EXECUTE_WITH_TYPE_CASE_##TYPE_LIST,END)\
+					}\
+				} while (0)\
 
 				switch (status)
 				{
@@ -205,13 +305,18 @@ WfRuntimeThreadContext
 						case WfInsCode::UninstallTry:
 							throw 0;
 						case WfInsCode::RaiseException:
-							throw 0;
+							{
+								Value result;
+								CONTEXT_ACTION(PopValue(result), L"failed to pop a value from the stack.");
+								RaiseException(result);
+								return WfRuntimeExecutionAction::ExecuteInstruction;
+							}
 						case WfInsCode::CompareLiteral:
 							throw 0;
 						case WfInsCode::CompareReference:
 							throw 0;
 						case WfInsCode::OpNot:
-							throw 0;
+							EXECUTE_WITH_TYPE((Bool)(I1)(I2)(I4)(I8)(U1)(U2)(U4)(U8), OpNot);
 						case WfInsCode::OpPositive:
 							throw 0;
 						case WfInsCode::OpNegative:
@@ -263,9 +368,6 @@ WfRuntimeThreadContext
 					break;
 				}
 				return WfRuntimeExecutionAction::Nop;
-
-#undef INTERNAL_ERROR
-#undef CONTEXT_ACTION
 			}
 		}
 	}
