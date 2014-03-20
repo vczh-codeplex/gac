@@ -270,7 +270,7 @@ WfRuntimeThreadContext
 				else
 				{
 					WfRuntimeStackFrame& frame = GetCurrentStackFrame();
-					if (stackFrames.Count() <= frame.freeStackBase) return WfRuntimeThreadContextError::StackCorrupted;
+					if (stack.Count() <= frame.freeStackBase) return WfRuntimeThreadContextError::StackCorrupted;
 				}
 				value = stack[stack.Count() - 1];
 				stack.RemoveAt(stack.Count() - 1);
@@ -280,6 +280,67 @@ WfRuntimeThreadContext
 			WfRuntimeThreadContextError WfRuntimeThreadContext::RaiseException(const reflection::description::Value& exception)
 			{
 				exceptionValue = exception;
+				return WfRuntimeThreadContextError::Success;
+			}
+
+			WfRuntimeThreadContextError WfRuntimeThreadContext::LoadGlobalVariable(vint variableIndex, reflection::description::Value& value)
+			{
+				if (variableIndex < 0 || variableIndex >= globalContext->globalVariables->variables.Count())
+				{
+					return WfRuntimeThreadContextError::WrongVariableIndex;
+				}
+
+				value = globalContext->globalVariables->variables[variableIndex];
+				return WfRuntimeThreadContextError::Success;
+			}
+
+			WfRuntimeThreadContextError WfRuntimeThreadContext::StoreGlobalVariable(vint variableIndex, const reflection::description::Value& value)
+			{
+				if (variableIndex < 0 || variableIndex >= globalContext->globalVariables->variables.Count())
+				{
+					return WfRuntimeThreadContextError::WrongVariableIndex;
+				}
+
+				globalContext->globalVariables->variables[variableIndex] = value;
+				return WfRuntimeThreadContextError::Success;
+			}
+
+			WfRuntimeThreadContextError WfRuntimeThreadContext::LoadCapturedVariable(vint variableIndex, reflection::description::Value& value)
+			{
+				if (stackFrames.Count() == 0) return WfRuntimeThreadContextError::EmptyStackFrame;
+				auto frame = GetCurrentStackFrame();
+				if (variableIndex < 0 || variableIndex >= frame.capturedVariables->variables.Count())
+				{
+					return WfRuntimeThreadContextError::WrongVariableIndex;
+				}
+
+				value = frame.capturedVariables->variables[variableIndex];
+				return WfRuntimeThreadContextError::Success;
+			}
+
+			WfRuntimeThreadContextError WfRuntimeThreadContext::LoadLocalVariable(vint variableIndex, reflection::description::Value& value)
+			{
+				if (stackFrames.Count() == 0) return WfRuntimeThreadContextError::EmptyStackFrame;
+				auto frame = GetCurrentStackFrame();
+				if (variableIndex < 0 || variableIndex >= frame.fixedVariableCount)
+				{
+					return WfRuntimeThreadContextError::WrongVariableIndex;
+				}
+
+				value = stack[frame.stackBase + variableIndex];
+				return WfRuntimeThreadContextError::Success;
+			}
+
+			WfRuntimeThreadContextError WfRuntimeThreadContext::StoreLocalVariable(vint variableIndex, const reflection::description::Value& value)
+			{
+				if (stackFrames.Count() == 0) return WfRuntimeThreadContextError::EmptyStackFrame;
+				auto frame = GetCurrentStackFrame();
+				if (variableIndex < 0 || variableIndex >= frame.fixedVariableCount)
+				{
+					return WfRuntimeThreadContextError::WrongVariableIndex;
+				}
+
+				stack[frame.stackBase + variableIndex] = value;
 				return WfRuntimeThreadContextError::Success;
 			}
 

@@ -51,20 +51,57 @@ WfRuntimeThreadContext
 							PushValue(ins.valueParameter);
 							return WfRuntimeExecutionAction::ExecuteInstruction;
 						case WfInsCode::LoadFunction:
-							break;
+							throw 0;
 						case WfInsCode::LoadLambda:
-							break;
+							throw 0;
 						case WfInsCode::LoadException:
-							break;
+							throw 0;
 						case WfInsCode::LoadLocalVar:
+							{
+								Value result;
+								CONTEXT_ACTION(LoadLocalVariable(ins.indexParameter, result), L"illegal local variable index.");
+								PushValue(result);
+								return WfRuntimeExecutionAction::ExecuteInstruction;
+							}
+							break;
+						case WfInsCode::LoadCapturedVar:
+							{
+								Value result;
+								CONTEXT_ACTION(LoadCapturedVariable(ins.indexParameter, result), L"illegal captured variable index.");
+								PushValue(result);
+								return WfRuntimeExecutionAction::ExecuteInstruction;
+							}
 							break;
 						case WfInsCode::LoadGlobalVar:
+							{
+								Value result;
+								CONTEXT_ACTION(LoadGlobalVariable(ins.indexParameter, result), L"illegal global variable index.");
+								PushValue(result);
+								return WfRuntimeExecutionAction::ExecuteInstruction;
+							}
 							break;
 						case WfInsCode::StoreLocalVar:
+							{
+								Value result;
+								CONTEXT_ACTION(PopValue(result), L"failed to pop a value from the stack.");
+								CONTEXT_ACTION(StoreLocalVariable(ins.indexParameter, result), L"illegal local variable index.");
+								return WfRuntimeExecutionAction::ExecuteInstruction;
+							}
 							break;
 						case WfInsCode::StoreGlobalVar:
+							{
+								Value result;
+								CONTEXT_ACTION(PopValue(result), L"failed to pop a value from the stack.");
+								CONTEXT_ACTION(StoreGlobalVariable(ins.indexParameter, result), L"illegal global variable index.");
+								return WfRuntimeExecutionAction::ExecuteInstruction;
+							}
 							break;
 						case WfInsCode::Pop:
+							{
+								Value result;
+								CONTEXT_ACTION(PopValue(result), L"failed to pop a value from the stack.");
+								return WfRuntimeExecutionAction::ExecuteInstruction;
+							}
 							break;
 						case WfInsCode::Return:
 							{
@@ -80,77 +117,77 @@ WfRuntimeThreadContext
 							}
 							break;
 						case WfInsCode::CreateArray:
-							break;
+							throw 0;
 						case WfInsCode::CreateMap:
-							break;
+							throw 0;
 						case WfInsCode::ConvertToType:
-							break;
+							throw 0;
 						case WfInsCode::AssertAsType:
-							break;
+							throw 0;
 						case WfInsCode::TestType:
-							break;
+							throw 0;
 						case WfInsCode::Jump:
-							break;
+							throw 0;
 						case WfInsCode::JumpIf:
-							break;
+							throw 0;
 						case WfInsCode::Invoke:
-							break;
+							throw 0;
 						case WfInsCode::InvokeMethod:
-							break;
+							throw 0;
 						case WfInsCode::AttachEvent:
-							break;
+							throw 0;
 						case WfInsCode::DetachEvent:
-							break;
+							throw 0;
 						case WfInsCode::InstallTry:
-							break;
+							throw 0;
 						case WfInsCode::UninstallTry:
-							break;
+							throw 0;
 						case WfInsCode::RaiseException:
-							break;
+							throw 0;
 						case WfInsCode::CompareLiteral:
-							break;
+							throw 0;
 						case WfInsCode::CompareReference:
-							break;
+							throw 0;
 						case WfInsCode::OpNot:
-							break;
+							throw 0;
 						case WfInsCode::OpPositive:
-							break;
+							throw 0;
 						case WfInsCode::OpNegative:
-							break;
+							throw 0;
 						case WfInsCode::OpConcat:
-							break;
+							throw 0;
 						case WfInsCode::OpExp:
-							break;
+							throw 0;
 						case WfInsCode::OpAdd:
-							break;
+							throw 0;
 						case WfInsCode::OpSub:
-							break;
+							throw 0;
 						case WfInsCode::OpMul:
-							break;
+							throw 0;
 						case WfInsCode::OpDiv:
-							break;
+							throw 0;
 						case WfInsCode::OpShl:
-							break;
+							throw 0;
 						case WfInsCode::OpShr:
-							break;
+							throw 0;
 						case WfInsCode::OpXor:
-							break;
+							throw 0;
 						case WfInsCode::OpAnd:
-							break;
+							throw 0;
 						case WfInsCode::OpOr:
-							break;
+							throw 0;
 						case WfInsCode::OpLT:
-							break;
+							throw 0;
 						case WfInsCode::OpGT:
-							break;
+							throw 0;
 						case WfInsCode::OpLE:
-							break;
+							throw 0;
 						case WfInsCode::OpGE:
-							break;
+							throw 0;
 						case WfInsCode::OpEQ:
-							break;
+							throw 0;
 						case WfInsCode::OpNE:
-							break;
+							throw 0;
 						}
 					}
 					break;
