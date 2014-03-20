@@ -29,36 +29,93 @@ WfRuntimeThreadContext (Operations)
 
 			//-------------------------------------------------------------------------------
 
-			template<typename T>
-			struct OpNot
-			{
-				static WfRuntimeExecutionAction Do(WfRuntimeThreadContext& context)
-				{
-					Value result;
-					CONTEXT_ACTION(PopValue(result), L"failed to pop a value from the stack.");
-					T value = ~UnboxValue<T>(result);
-					context.PushValue(BoxValue(value));
-					return WfRuntimeExecutionAction::ExecuteInstruction;
-				}
-			};
+#define UNARY_OPERATOR(NAME, OPERATOR)\
+			template<typename T>\
+			struct NAME\
+			{\
+				static WfRuntimeExecutionAction Do(WfRuntimeThreadContext& context)\
+				{\
+					Value result;\
+					CONTEXT_ACTION(PopValue(result), L"failed to pop a value from the stack.");\
+					T value = OPERATOR UnboxValue<T>(result);\
+					context.PushValue(BoxValue(value));\
+					return WfRuntimeExecutionAction::ExecuteInstruction;\
+				}\
+			};\
+			
+#define UNARY_OPERATOR_SPECIALIZATION(NAME, TYPE, OPERATOR)\
+			template<>\
+			struct NAME<TYPE>\
+			{\
+				static WfRuntimeExecutionAction Do(WfRuntimeThreadContext& context)\
+				{\
+					Value result;\
+					CONTEXT_ACTION(PopValue(result), L"failed to pop a value from the stack.");\
+					TYPE value = OPERATOR UnboxValue<TYPE>(result);\
+					context.PushValue(BoxValue(value));\
+					return WfRuntimeExecutionAction::ExecuteInstruction;\
+				}\
+			};\
 
-			template<>
-			struct OpNot<bool>
-			{
-				static WfRuntimeExecutionAction Do(WfRuntimeThreadContext& context)
-				{
-					Value result;
-					CONTEXT_ACTION(PopValue(result), L"failed to pop a value from the stack.");
-					bool value = !UnboxValue<bool>(result);
-					context.PushValue(BoxValue(value));
-					return WfRuntimeExecutionAction::ExecuteInstruction;
-				}
-			};
+			//-------------------------------------------------------------------------------
+
+#define BINARY_OPERATOR(NAME, OPERATOR)\
+			template<typename T>\
+			struct NAME\
+			{\
+				static WfRuntimeExecutionAction Do(WfRuntimeThreadContext& context)\
+				{\
+					Value first, second;\
+					CONTEXT_ACTION(PopValue(second), L"failed to pop a value from the stack.");\
+					CONTEXT_ACTION(PopValue(first), L"failed to pop a value from the stack.");\
+					T value = UnboxValue<T>(first) OPERATOR UnboxValue<T>(second);\
+					context.PushValue(BoxValue(value));\
+					return WfRuntimeExecutionAction::ExecuteInstruction;\
+				}\
+			};\
+			
+#define BINARY_OPERATOR_SPECIALIZATION(NAME, TYPE, OPERATOR)\
+			template<>\
+			struct NAME<TYPE>\
+			{\
+				static WfRuntimeExecutionAction Do(WfRuntimeThreadContext& context)\
+				{\
+					Value first, second;\
+					CONTEXT_ACTION(PopValue(second), L"failed to pop a value from the stack.");\
+					CONTEXT_ACTION(PopValue(first), L"failed to pop a value from the stack.");\
+					TYPE value = UnboxValue<TYPE>(first) OPERATOR UnboxValue<TYPE>(second);\
+					context.PushValue(BoxValue(value));\
+					return WfRuntimeExecutionAction::ExecuteInstruction;\
+				}\
+			};\
+
+			//-------------------------------------------------------------------------------
+
+			UNARY_OPERATOR(OpNot, ~)
+			UNARY_OPERATOR_SPECIALIZATION(OpNot, bool, !)
+			UNARY_OPERATOR(OpPositive, +)
+			UNARY_OPERATOR(OpNegative, -)
+
+			BINARY_OPERATOR(OpAdd, +)
+			BINARY_OPERATOR(OpSub, -)
+			BINARY_OPERATOR(OpMul, *)
+			BINARY_OPERATOR(OpDiv, /)
+			BINARY_OPERATOR(OpShl, <<)
+			BINARY_OPERATOR(OpShr, >>)
+			BINARY_OPERATOR(OpAnd, &)
+			BINARY_OPERATOR_SPECIALIZATION(OpAnd, bool, &&)
+			BINARY_OPERATOR(OpOr, |)
+			BINARY_OPERATOR_SPECIALIZATION(OpOr, bool, ||)
+			BINARY_OPERATOR(OpXor, ^)
 
 			//-------------------------------------------------------------------------------
 
 #undef INTERNAL_ERROR
 #undef CONTEXT_ACTION
+#undef UNARY_OPERATOR
+#undef UNARY_OPERATOR_SPECIALIZATION
+#undef BINARY_OPERATOR
+#undef BINARY_OPERATOR_SPECIALIZATION
 
 /***********************************************************************
 WfRuntimeThreadContext
@@ -89,6 +146,8 @@ WfRuntimeThreadContext
 #define TYPE_OF_U2								vuint16_t
 #define TYPE_OF_U4								vuint32_t
 #define TYPE_OF_U8								vuint64_t
+#define TYPE_OF_F4								float
+#define TYPE_OF_F8								double
 #define TYPE_OF_String							WString
 #define EXECUTE(OPERATION, TYPE)				case WfInsType::TYPE: return OPERATION<TYPE_OF_##TYPE>::Do(*this);
 #define BEGIN_TYPE								switch(ins.typeParameter) {
@@ -295,9 +354,23 @@ WfRuntimeThreadContext
 								EXECUTE(OpNot, U8)
 							END_TYPE
 						case WfInsCode::OpPositive:
-							throw 0;
+							BEGIN_TYPE
+								EXECUTE(OpPositive, I1)
+								EXECUTE(OpPositive, I2)
+								EXECUTE(OpPositive, I4)
+								EXECUTE(OpPositive, I8)
+								EXECUTE(OpPositive, U1)
+								EXECUTE(OpPositive, U2)
+								EXECUTE(OpPositive, U4)
+								EXECUTE(OpPositive, U8)
+							END_TYPE
 						case WfInsCode::OpNegative:
-							throw 0;
+							BEGIN_TYPE
+								EXECUTE(OpNegative, I1)
+								EXECUTE(OpNegative, I2)
+								EXECUTE(OpNegative, I4)
+								EXECUTE(OpNegative, I8)
+							END_TYPE
 						case WfInsCode::OpConcat:
 							{
 								Value first, second;
@@ -309,23 +382,115 @@ WfRuntimeThreadContext
 						case WfInsCode::OpExp:
 							throw 0;
 						case WfInsCode::OpAdd:
-							throw 0;
+							BEGIN_TYPE
+								EXECUTE(OpAdd, I1)
+								EXECUTE(OpAdd, I2)
+								EXECUTE(OpAdd, I4)
+								EXECUTE(OpAdd, I8)
+								EXECUTE(OpAdd, U1)
+								EXECUTE(OpAdd, U2)
+								EXECUTE(OpAdd, U4)
+								EXECUTE(OpAdd, U8)
+								EXECUTE(OpAdd, F4)
+								EXECUTE(OpAdd, F8)
+							END_TYPE
 						case WfInsCode::OpSub:
-							throw 0;
+							BEGIN_TYPE
+								EXECUTE(OpSub, I1)
+								EXECUTE(OpSub, I2)
+								EXECUTE(OpSub, I4)
+								EXECUTE(OpSub, I8)
+								EXECUTE(OpSub, U1)
+								EXECUTE(OpSub, U2)
+								EXECUTE(OpSub, U4)
+								EXECUTE(OpSub, U8)
+								EXECUTE(OpSub, F4)
+								EXECUTE(OpSub, F8)
+							END_TYPE
 						case WfInsCode::OpMul:
-							throw 0;
+							BEGIN_TYPE
+								EXECUTE(OpMul, I1)
+								EXECUTE(OpMul, I2)
+								EXECUTE(OpMul, I4)
+								EXECUTE(OpMul, I8)
+								EXECUTE(OpMul, U1)
+								EXECUTE(OpMul, U2)
+								EXECUTE(OpMul, U4)
+								EXECUTE(OpMul, U8)
+								EXECUTE(OpMul, F4)
+								EXECUTE(OpMul, F8)
+							END_TYPE
 						case WfInsCode::OpDiv:
-							throw 0;
+							BEGIN_TYPE
+								EXECUTE(OpDiv, I1)
+								EXECUTE(OpDiv, I2)
+								EXECUTE(OpDiv, I4)
+								EXECUTE(OpDiv, I8)
+								EXECUTE(OpDiv, U1)
+								EXECUTE(OpDiv, U2)
+								EXECUTE(OpDiv, U4)
+								EXECUTE(OpDiv, U8)
+								EXECUTE(OpDiv, F4)
+								EXECUTE(OpDiv, F8)
+							END_TYPE
 						case WfInsCode::OpShl:
-							throw 0;
+							BEGIN_TYPE
+								EXECUTE(OpShl, I1)
+								EXECUTE(OpShl, I2)
+								EXECUTE(OpShl, I4)
+								EXECUTE(OpShl, I8)
+								EXECUTE(OpShl, U1)
+								EXECUTE(OpShl, U2)
+								EXECUTE(OpShl, U4)
+								EXECUTE(OpShl, U8)
+							END_TYPE
 						case WfInsCode::OpShr:
-							throw 0;
+							BEGIN_TYPE
+								EXECUTE(OpShr, I1)
+								EXECUTE(OpShr, I2)
+								EXECUTE(OpShr, I4)
+								EXECUTE(OpShr, I8)
+								EXECUTE(OpShr, U1)
+								EXECUTE(OpShr, U2)
+								EXECUTE(OpShr, U4)
+								EXECUTE(OpShr, U8)
+							END_TYPE
 						case WfInsCode::OpXor:
-							throw 0;
+							BEGIN_TYPE
+								EXECUTE(OpXor, Bool)
+								EXECUTE(OpXor, I1)
+								EXECUTE(OpXor, I2)
+								EXECUTE(OpXor, I4)
+								EXECUTE(OpXor, I8)
+								EXECUTE(OpXor, U1)
+								EXECUTE(OpXor, U2)
+								EXECUTE(OpXor, U4)
+								EXECUTE(OpXor, U8)
+							END_TYPE
 						case WfInsCode::OpAnd:
-							throw 0;
+							BEGIN_TYPE
+								EXECUTE(OpAnd, Bool)
+								EXECUTE(OpAnd, I1)
+								EXECUTE(OpAnd, I2)
+								EXECUTE(OpAnd, I4)
+								EXECUTE(OpAnd, I8)
+								EXECUTE(OpAnd, U1)
+								EXECUTE(OpAnd, U2)
+								EXECUTE(OpAnd, U4)
+								EXECUTE(OpAnd, U8)
+							END_TYPE
 						case WfInsCode::OpOr:
-							throw 0;
+							BEGIN_TYPE
+								EXECUTE(OpOr, Bool)
+								EXECUTE(OpOr, I1)
+								EXECUTE(OpOr, I2)
+								EXECUTE(OpOr, I4)
+								EXECUTE(OpOr, I8)
+								EXECUTE(OpOr, U1)
+								EXECUTE(OpOr, U2)
+								EXECUTE(OpOr, U4)
+								EXECUTE(OpOr, U8)
+							END_TYPE
 						case WfInsCode::OpLT:
 							throw 0;
 						case WfInsCode::OpGT:
@@ -357,6 +522,8 @@ WfRuntimeThreadContext
 #undef TYPE_OF_U2
 #undef TYPE_OF_U4
 #undef TYPE_OF_U8
+#undef TYPE_OF_F4
+#undef TYPE_OF_F8
 #undef TYPE_OF_String
 #undef EXECUTE
 #undef BEGIN_TYPE
