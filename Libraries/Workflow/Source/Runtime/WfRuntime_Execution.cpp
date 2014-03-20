@@ -45,8 +45,6 @@ WfRuntimeThreadContext
 
 						switch (ins.code)
 						{
-						case WfInsCode::Nop:
-							break;
 						case WfInsCode::LoadValue:
 							PushValue(ins.valueParameter);
 							return WfRuntimeExecutionAction::ExecuteInstruction;
@@ -63,7 +61,6 @@ WfRuntimeThreadContext
 								PushValue(result);
 								return WfRuntimeExecutionAction::ExecuteInstruction;
 							}
-							break;
 						case WfInsCode::LoadCapturedVar:
 							{
 								Value result;
@@ -71,7 +68,6 @@ WfRuntimeThreadContext
 								PushValue(result);
 								return WfRuntimeExecutionAction::ExecuteInstruction;
 							}
-							break;
 						case WfInsCode::LoadGlobalVar:
 							{
 								Value result;
@@ -79,7 +75,6 @@ WfRuntimeThreadContext
 								PushValue(result);
 								return WfRuntimeExecutionAction::ExecuteInstruction;
 							}
-							break;
 						case WfInsCode::StoreLocalVar:
 							{
 								Value result;
@@ -87,7 +82,6 @@ WfRuntimeThreadContext
 								CONTEXT_ACTION(StoreLocalVariable(ins.indexParameter, result), L"illegal local variable index.");
 								return WfRuntimeExecutionAction::ExecuteInstruction;
 							}
-							break;
 						case WfInsCode::StoreGlobalVar:
 							{
 								Value result;
@@ -95,14 +89,12 @@ WfRuntimeThreadContext
 								CONTEXT_ACTION(StoreGlobalVariable(ins.indexParameter, result), L"illegal global variable index.");
 								return WfRuntimeExecutionAction::ExecuteInstruction;
 							}
-							break;
 						case WfInsCode::Pop:
 							{
 								Value result;
 								CONTEXT_ACTION(PopValue(result), L"failed to pop a value from the stack.");
 								return WfRuntimeExecutionAction::ExecuteInstruction;
 							}
-							break;
 						case WfInsCode::Return:
 							{
 								Value result;
@@ -115,13 +107,83 @@ WfRuntimeThreadContext
 								}
 								return WfRuntimeExecutionAction::ExitStackFrame;
 							}
-							break;
 						case WfInsCode::CreateArray:
 							throw 0;
 						case WfInsCode::CreateMap:
 							throw 0;
 						case WfInsCode::ConvertToType:
-							throw 0;
+							{
+								Value result, converted;
+								CONTEXT_ACTION(PopValue(result), L"failed to pop a value from the stack.");
+
+								switch (ins.flagParameter)
+								{
+								case Value::Null:
+									INTERNAL_ERROR(L"failed to do type conversion.");
+								case Value::RawPtr:
+									if (result.GetValueType() == Value::Text)
+									{
+										INTERNAL_ERROR(L"failed to do type conversion.");
+									}
+									else if (result.GetRawPtr())
+									{
+										if (result.GetTypeDescriptor()->CanConvertTo(ins.typeDescriptorParameter))
+										{
+											converted = Value::From(result.GetRawPtr());
+										}
+										else
+										{
+											INTERNAL_ERROR(L"failed to do type conversion.");
+										}
+									}
+									break;
+								case Value::SharedPtr:
+									if (result.GetValueType() == Value::Text)
+									{
+										INTERNAL_ERROR(L"failed to do type conversion.");
+									}
+									else if (result.GetRawPtr())
+									{
+										if (result.GetTypeDescriptor()->CanConvertTo(ins.typeDescriptorParameter))
+										{
+											converted = Value::From(Ptr<DescriptableObject>(result.GetRawPtr()));
+										}
+										else
+										{
+											INTERNAL_ERROR(L"failed to do type conversion.");
+										}
+									}
+									break;
+								case Value::Text:
+									if (result.GetValueType() != Value::Text)
+									{
+										INTERNAL_ERROR(L"failed to do type conversion.");
+									}
+									else if (ins.typeDescriptorParameter == GetTypeDescriptor<void>())
+									{
+										if (result.GetText() != L"")
+										{
+											INTERNAL_ERROR(L"failed to do type conversion.");
+										}
+									}
+									else
+									{
+										auto serializer = ins.typeDescriptorParameter->GetValueSerializer();
+										if (!serializer)
+										{
+											INTERNAL_ERROR(L"failed to do type conversion.");
+										}
+										if (!serializer->Parse(result.GetText(), converted))
+										{
+											INTERNAL_ERROR(L"failed to do type conversion.");
+										}
+									}
+									break;
+								}
+
+								PushValue(converted);
+								return WfRuntimeExecutionAction::ExecuteInstruction;
+							}
 						case WfInsCode::AssertAsType:
 							throw 0;
 						case WfInsCode::TestType:
@@ -155,7 +217,13 @@ WfRuntimeThreadContext
 						case WfInsCode::OpNegative:
 							throw 0;
 						case WfInsCode::OpConcat:
-							throw 0;
+							{
+								Value first, second;
+								CONTEXT_ACTION(PopValue(second), L"failed to pop a value from the stack.");
+								CONTEXT_ACTION(PopValue(first), L"failed to pop a value from the stack.");
+								PushValue(BoxValue(first.GetText() + second.GetText()));
+								return WfRuntimeExecutionAction::ExecuteInstruction;
+							}
 						case WfInsCode::OpExp:
 							throw 0;
 						case WfInsCode::OpAdd:
