@@ -31,6 +31,7 @@ Instruction
 				LoadLambda,			// function, count		: Value-1, ..., Value-count -> Value			;
 				LoadException,		// 						: () -> Value									;
 				LoadLocalVar,		// variable				: () -> Value									;
+				LoadCapturedVar,	// variable				: () -> Value									;
 				LoadGlobalVar,		// variable				: () -> Value									;
 				StoreLocalVar,		// variable				: Value -> ()									;
 				StoreGlobalVar,		// variable				: Value -> ()									;
@@ -81,6 +82,7 @@ Instruction
 			APPLY_FUNCTION_COUNT(LoadLambda)\
 			APPLY(LoadException)\
 			APPLY_VARIABLE(LoadLocalVar)\
+			APPLY_VARIABLE(LoadCapturedVar)\
 			APPLY_VARIABLE(LoadGlobalVar)\
 			APPLY_VARIABLE(StoreLocalVar)\
 			APPLY_VARIABLE(StoreGlobalVar)\
@@ -263,13 +265,14 @@ Runtime
 			enum class WfRuntimeThreadContextError
 			{
 				Success,
+				WrongVariableIndex,
 				WrongFunctionIndex,
 				WrongArgumentCount,
 				WrongCapturedVariableCount,
 				EmptyStackFrame,
 				EmptyTrapFrame,
-				TrapFrameCorrupted,
 				EmptyStack,
+				TrapFrameCorrupted,
 				StackCorrupted,
 			};
 
@@ -297,6 +300,12 @@ Runtime
 				WfRuntimeThreadContextError		PushValue(const reflection::description::Value& value);
 				WfRuntimeThreadContextError		PopValue(reflection::description::Value& value);
 				WfRuntimeThreadContextError		RaiseException(const reflection::description::Value& exception);
+
+				WfRuntimeThreadContextError		LoadGlobalVariable(vint variableIndex, reflection::description::Value& value);
+				WfRuntimeThreadContextError		StoreGlobalVariable(vint variableIndex, const reflection::description::Value& value);
+				WfRuntimeThreadContextError		LoadCapturedVariable(vint variableIndex, reflection::description::Value& value);
+				WfRuntimeThreadContextError		LoadLocalVariable(vint variableIndex, reflection::description::Value& value);
+				WfRuntimeThreadContextError		StoreLocalVariable(vint variableIndex, const reflection::description::Value& value);
 
 				WfRuntimeExecutionAction		Execute();
 				void							ExecuteToEnd();
