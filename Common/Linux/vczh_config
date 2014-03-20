@@ -2,6 +2,8 @@
 export PATH=/home/vczh/Downloads/TEE-CLC-11.0.0:$PATH;
 export TF_AUTO_SAVE_CREDENTIALS=0;
 export VLPP_LINUX=~/code/gac/Common/Linux;
+export WORKFLOW_LINUX=~/code/gac/Libraries/Workflow/WorkflowSrc/Linux;
+export PS1="\[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\u@\h:\$ "
 
 .vimrc
 set tabstop=4
