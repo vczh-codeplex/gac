@@ -33,7 +33,7 @@ void WriteParserText(const WString& parserText, TextWriter& writer)
 		StringReader reader(parserText);
 		while(!reader.IsEnd())
 		{
-			writer.WriteString(L"L\"\\r\\n\"");
+			writer.WriteString(L"L\"\\r\\n\" ");
 			WString line=reader.ReadLine();
 			WriteCppString(line, writer);
 			writer.WriteLine(L"");
