@@ -13,6 +13,13 @@ namespace vl
 WfInstruction
 ***********************************************************************/
 
+			WfInstruction::WfInstruction()
+				:flagParameter(Value::Null)
+				, typeDescriptorParameter(0)
+			{
+
+			}
+
 			#define CTOR(NAME)\
 				WfInstruction WfInstruction::NAME()\
 				{\

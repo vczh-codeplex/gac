@@ -144,15 +144,23 @@ Instruction
 
 			struct WfInstruction
 			{
-				WfInsCode											code;
+				WfInsCode											code = WfInsCode::Nop;
 				reflection::description::Value						valueParameter;
-				WfInsType											typeParameter = WfInsType::Unknown;
-				reflection::description::Value::ValueType			flagParameter = reflection::description::Value::Null;
-				reflection::description::ITypeDescriptor*			typeDescriptorParameter = 0;
-				vint												indexParameter = 0;
 				vint												countParameter = 0;
-				reflection::description::IMethodInfo*				methodParameter = 0;
-				reflection::description::IEventInfo*				eventParameter = 0;
+				union
+				{
+					struct
+					{
+						reflection::description::Value::ValueType		flagParameter;
+						reflection::description::ITypeDescriptor*		typeDescriptorParameter;
+					};
+					WfInsType											typeParameter;
+					vint												indexParameter;
+					reflection::description::IMethodInfo*				methodParameter;
+					reflection::description::IEventInfo*				eventParameter;
+				};
+
+				WfInstruction();
 
 				#define CTOR(NAME)						static WfInstruction NAME();
 				#define CTOR_VALUE(NAME)				static WfInstruction NAME(const reflection::description::Value& value);
