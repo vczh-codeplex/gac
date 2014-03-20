@@ -58,6 +58,14 @@ namespace vl
 	void _gcvt_s(char* buffer, size_t size, double value, vint numberOfDigits)
 	{
 		sprintf(buffer, "%f", value);
+		char* point = strchr(buffer, '.');
+		if(!point) return;
+		char* zero = buffer + strlen(buffer);
+		while(zero[-1] == '0')
+		{
+			*--zero = '\0';
+		}
+		if(zero[-1] == '.') *--zero = '\0';
 	}
 
 	void _strlwr_s(char* buffer, size_t size)

@@ -49,6 +49,8 @@ TEST_CASE(TestCodegen)
 		
 		Value result;
 		TEST_ASSERT(context.PopValue(result) == WfRuntimeThreadContextError::Success);
+		UnitTest::PrintInfo(L"    expected: " + itemResult);
+		UnitTest::PrintInfo(L"    actual: " + result.GetText());
 		TEST_ASSERT(result.GetText() == itemResult);
 		TEST_ASSERT(context.PopValue(result) == WfRuntimeThreadContextError::EmptyStack);
 	}
