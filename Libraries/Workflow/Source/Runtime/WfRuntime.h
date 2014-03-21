@@ -52,8 +52,8 @@ Instruction
 				InstallTry,			// label				: () -> ()										;
 				UninstallTry,		// label				: () -> ()										;
 				RaiseException,		// 						: Value -> ()									; (trap)
-				CompareLiteral,		// I48/U48/F48/S		: Value, Value -> <bool>						;
-				CompareReference,	// 						: Value, Value -> <int>							;
+				CompareLiteral,		// I48/U48/F48/S		: Value, Value -> <int>							;
+				CompareReference,	// 						: Value, Value -> <bool>						;
 				OpNot,				// B/I1248/U1248		: Value -> Value								;
 				OpPositive,			// I1248/U1248			: Value -> Value								;
 				OpNegative,			// I1248				: Value -> Value								;

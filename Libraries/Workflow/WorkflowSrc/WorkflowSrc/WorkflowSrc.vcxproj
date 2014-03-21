@@ -477,6 +477,7 @@
     <Text Include="..\TestFiles\Samples\Codegen\OpAdd.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\OpAnd.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\OpCompare.txt" />
+    <Text Include="..\TestFiles\Samples\Codegen\OpCompareReference.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\OpDiv.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\OpMul.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\OpNegative.txt" />

@@ -203,7 +203,11 @@ void LogSampleCodegenResult(const WString& sampleName, const WString& itemName, 
 
 	auto formatValue = [&formatFlag](const Value& value)->WString
 	{
-		return L"<" + value.GetText() + L", " + formatFlag(value.GetValueType()) + L", " + value.GetTypeDescriptor()->GetTypeName() + L">";
+		return L"<" +
+			value.GetText() + L", " +
+			formatFlag(value.GetValueType()) +
+			(value.GetTypeDescriptor() ? L", " + value.GetTypeDescriptor()->GetTypeName() : L"") +
+			L">";
 	};
 
 #define LOG(NAME)						case WfInsCode::NAME: writer.WriteLine(formatText(itow(index), 5) + L": " + formatText(L"    " L ## #NAME, 18)); break;

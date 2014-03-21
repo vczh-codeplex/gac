@@ -6,6 +6,7 @@ namespace vl
 	{
 		namespace runtime
 		{
+			using namespace collections;
 			using namespace reflection;
 			using namespace reflection::description;
 
@@ -33,9 +34,9 @@ WfRuntimeThreadContext (Operations)
 			template<typename T>\
 			WfRuntimeExecutionAction OPERATOR_##NAME(WfRuntimeThreadContext& context)\
 			{\
-				Value result;\
-				CONTEXT_ACTION(PopValue(result), L"failed to pop a value from the stack.");\
-				T value = OPERATOR UnboxValue<T>(result);\
+				Value operand;\
+				CONTEXT_ACTION(PopValue(operand), L"failed to pop a value from the stack.");\
+				T value = OPERATOR UnboxValue<T>(operand);\
 				context.PushValue(BoxValue(value));\
 				return WfRuntimeExecutionAction::ExecuteInstruction;\
 			}\
@@ -166,51 +167,51 @@ WfRuntimeThreadContext
 							throw 0;
 						case WfInsCode::LoadLocalVar:
 							{
-								Value result;
-								CONTEXT_ACTION(LoadLocalVariable(ins.indexParameter, result), L"illegal local variable index.");
-								PushValue(result);
+								Value operand;
+								CONTEXT_ACTION(LoadLocalVariable(ins.indexParameter, operand), L"illegal local variable index.");
+								PushValue(operand);
 								return WfRuntimeExecutionAction::ExecuteInstruction;
 							}
 						case WfInsCode::LoadCapturedVar:
 							{
-								Value result;
-								CONTEXT_ACTION(LoadCapturedVariable(ins.indexParameter, result), L"illegal captured variable index.");
-								PushValue(result);
+								Value operand;
+								CONTEXT_ACTION(LoadCapturedVariable(ins.indexParameter, operand), L"illegal captured variable index.");
+								PushValue(operand);
 								return WfRuntimeExecutionAction::ExecuteInstruction;
 							}
 						case WfInsCode::LoadGlobalVar:
 							{
-								Value result;
-								CONTEXT_ACTION(LoadGlobalVariable(ins.indexParameter, result), L"illegal global variable index.");
-								PushValue(result);
+								Value operand;
+								CONTEXT_ACTION(LoadGlobalVariable(ins.indexParameter, operand), L"illegal global variable index.");
+								PushValue(operand);
 								return WfRuntimeExecutionAction::ExecuteInstruction;
 							}
 						case WfInsCode::StoreLocalVar:
 							{
-								Value result;
-								CONTEXT_ACTION(PopValue(result), L"failed to pop a value from the stack.");
-								CONTEXT_ACTION(StoreLocalVariable(ins.indexParameter, result), L"illegal local variable index.");
+								Value operand;
+								CONTEXT_ACTION(PopValue(operand), L"failed to pop a value from the stack.");
+								CONTEXT_ACTION(StoreLocalVariable(ins.indexParameter, operand), L"illegal local variable index.");
 								return WfRuntimeExecutionAction::ExecuteInstruction;
 							}
 						case WfInsCode::StoreGlobalVar:
 							{
-								Value result;
-								CONTEXT_ACTION(PopValue(result), L"failed to pop a value from the stack.");
-								CONTEXT_ACTION(StoreGlobalVariable(ins.indexParameter, result), L"illegal global variable index.");
+								Value operand;
+								CONTEXT_ACTION(PopValue(operand), L"failed to pop a value from the stack.");
+								CONTEXT_ACTION(StoreGlobalVariable(ins.indexParameter, operand), L"illegal global variable index.");
 								return WfRuntimeExecutionAction::ExecuteInstruction;
 							}
 						case WfInsCode::Pop:
 							{
-								Value result;
-								CONTEXT_ACTION(PopValue(result), L"failed to pop a value from the stack.");
+								Value operand;
+								CONTEXT_ACTION(PopValue(operand), L"failed to pop a value from the stack.");
 								return WfRuntimeExecutionAction::ExecuteInstruction;
 							}
 						case WfInsCode::Return:
 							{
-								Value result;
-								CONTEXT_ACTION(PopValue(result), L"failed to pop the function result.");
+								Value operand;
+								CONTEXT_ACTION(PopValue(operand), L"failed to pop the function result.");
 								CONTEXT_ACTION(PopStackFrame(), L"failed to pop the the stack frame.");
-								PushValue(result);
+								PushValue(operand);
 								if (stackFrames.Count() == 0)
 								{
 									status = WfRuntimeExecutionStatus::Finished;
@@ -307,7 +308,22 @@ WfRuntimeThreadContext
 						case WfInsCode::GetProperty:
 							throw 0;
 						case WfInsCode::InvokeMethod:
-							throw 0;
+							{
+								Value thisValue;
+								CONTEXT_ACTION(PopValue(thisValue), L"failed to pop a value from the stack.");
+
+								Array<Value> arguments(ins.countParameter);
+								for (vint i = 0; i < ins.countParameter; i++)
+								{
+									Value argument;
+									CONTEXT_ACTION(PopValue(argument), L"failed to pop a value from the stack.");
+									arguments[ins.countParameter - i - 1] = argument;
+								}
+
+								Value result = ins.methodParameter->Invoke(thisValue, arguments);
+								PushValue(result);
+								return WfRuntimeExecutionAction::ExecuteInstruction;
+							}
 						case WfInsCode::AttachEvent:
 							throw 0;
 						case WfInsCode::DetachEvent:
@@ -318,9 +334,9 @@ WfRuntimeThreadContext
 							throw 0;
 						case WfInsCode::RaiseException:
 							{
-								Value result;
-								CONTEXT_ACTION(PopValue(result), L"failed to pop a value from the stack.");
-								RaiseException(result);
+								Value operand;
+								CONTEXT_ACTION(PopValue(operand), L"failed to pop a value from the stack.");
+								RaiseException(operand);
 								return WfRuntimeExecutionAction::ExecuteInstruction;
 							}
 						case WfInsCode::CompareLiteral:
@@ -339,7 +355,14 @@ WfRuntimeThreadContext
 								EXECUTE(OpCompare, String)
 							END_TYPE
 						case WfInsCode::CompareReference:
-							throw 0;
+							{
+								Value first, second;
+								CONTEXT_ACTION(PopValue(second), L"failed to pop a value from the stack.");
+								CONTEXT_ACTION(PopValue(first), L"failed to pop a value from the stack.");
+								bool result = first.GetRawPtr() == second.GetRawPtr();
+								PushValue(BoxValue(result));
+								return WfRuntimeExecutionAction::ExecuteInstruction;
+							}
 						case WfInsCode::OpNot:
 							BEGIN_TYPE
 								EXECUTE(OpNot_Bool, Bool)
@@ -492,54 +515,54 @@ WfRuntimeThreadContext
 							END_TYPE
 						case WfInsCode::OpLT:
 							{
-								Value result;
-								CONTEXT_ACTION(PopValue(result), L"failed to pop a value from the stack.");
-								vint value = UnboxValue<vint>(result);
+								Value operand;
+								CONTEXT_ACTION(PopValue(operand), L"failed to pop a value from the stack.");
+								vint value = UnboxValue<vint>(operand);
 								PushValue(BoxValue(value < 0));
 								return WfRuntimeExecutionAction::ExecuteInstruction;
 							}
 							break;
 						case WfInsCode::OpGT:
 							{
-								Value result;
-								CONTEXT_ACTION(PopValue(result), L"failed to pop a value from the stack.");
-								vint value = UnboxValue<vint>(result);
+								Value operand;
+								CONTEXT_ACTION(PopValue(operand), L"failed to pop a value from the stack.");
+								vint value = UnboxValue<vint>(operand);
 								PushValue(BoxValue(value > 0));
 								return WfRuntimeExecutionAction::ExecuteInstruction;
 							}
 							break;
 						case WfInsCode::OpLE:
 							{
-								Value result;
-								CONTEXT_ACTION(PopValue(result), L"failed to pop a value from the stack.");
-								vint value = UnboxValue<vint>(result);
+								Value operand;
+								CONTEXT_ACTION(PopValue(operand), L"failed to pop a value from the stack.");
+								vint value = UnboxValue<vint>(operand);
 								PushValue(BoxValue(value <= 0));
 								return WfRuntimeExecutionAction::ExecuteInstruction;
 							}
 							break;
 						case WfInsCode::OpGE:
 							{
-								Value result;
-								CONTEXT_ACTION(PopValue(result), L"failed to pop a value from the stack.");
-								vint value = UnboxValue<vint>(result);
+								Value operand;
+								CONTEXT_ACTION(PopValue(operand), L"failed to pop a value from the stack.");
+								vint value = UnboxValue<vint>(operand);
 								PushValue(BoxValue(value >= 0));
 								return WfRuntimeExecutionAction::ExecuteInstruction;
 							}
 							break;
 						case WfInsCode::OpEQ:
 							{
-								Value result;
-								CONTEXT_ACTION(PopValue(result), L"failed to pop a value from the stack.");
-								vint value = UnboxValue<vint>(result);
+								Value operand;
+								CONTEXT_ACTION(PopValue(operand), L"failed to pop a value from the stack.");
+								vint value = UnboxValue<vint>(operand);
 								PushValue(BoxValue(value == 0));
 								return WfRuntimeExecutionAction::ExecuteInstruction;
 							}
 							break;
 						case WfInsCode::OpNE:
 							{
-								Value result;
-								CONTEXT_ACTION(PopValue(result), L"failed to pop a value from the stack.");
-								vint value = UnboxValue<vint>(result);
+								Value operand;
+								CONTEXT_ACTION(PopValue(operand), L"failed to pop a value from the stack.");
+								vint value = UnboxValue<vint>(operand);
 								PushValue(BoxValue(value != 0));
 								return WfRuntimeExecutionAction::ExecuteInstruction;
 							}
