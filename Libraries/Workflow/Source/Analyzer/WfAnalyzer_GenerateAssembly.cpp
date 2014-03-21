@@ -393,7 +393,6 @@ GenerateInstructions(Expression)
 					}
 					else
 					{
-
 						Ptr<ITypeInfo> mergedType;
 						switch (node->op)
 						{
@@ -415,6 +414,20 @@ GenerateInstructions(Expression)
 								auto secondResult = context.manager->expressionResolvings[node->second.Obj()];
 								auto firstType = firstResult.expectedType ? firstResult.expectedType : firstResult.type;
 								auto secondType = secondResult.expectedType ? secondResult.expectedType : secondResult.type;
+								if (node->op == WfBinaryOperator::EQ || node->op == WfBinaryOperator::NE)
+								{
+									if (firstType->GetDecorator() == ITypeInfo::RawPtr || firstType->GetDecorator() == ITypeInfo::SharedPtr)
+									{
+										GenerateExpressionInstructions(context, node->first);
+										GenerateExpressionInstructions(context, node->second);
+										INSTRUCTION(Ins::CompareReference());
+										if (node->op == WfBinaryOperator::NE)
+										{
+											INSTRUCTION(Ins::OpNot(WfInsType::Bool));
+										}
+										return;
+									}
+								}
 								mergedType = GetMergedType(firstType, secondType);
 							}
 						}
@@ -520,7 +533,24 @@ GenerateInstructions(Expression)
 
 				void Visit(WfTypeTestingExpression* node)override
 				{
-					throw 0;
+					switch (node->test)
+					{
+					case WfTypeTesting::IsNull:
+						GenerateExpressionInstructions(context, node->expression);
+						INSTRUCTION(Ins::LoadValue(Value()));
+						INSTRUCTION(Ins::CompareReference());
+						break;
+					case WfTypeTesting::IsNotNull:
+						GenerateExpressionInstructions(context, node->expression);
+						INSTRUCTION(Ins::LoadValue(Value()));
+						INSTRUCTION(Ins::CompareReference());
+						INSTRUCTION(Ins::OpNot(WfInsType::Bool));
+						break;
+					case WfTypeTesting::IsType:
+						throw 0;
+					case WfTypeTesting::IsNotType:
+						throw 0;
+					}
 				}
 
 				void Visit(WfTypeOfTypeExpression* node)override
@@ -565,7 +595,20 @@ GenerateInstructions(Expression)
 
 				void Visit(WfNewTypeExpression* node)override
 				{
-					throw 0;
+					if (node->functions.Count() == 0)
+					{
+						auto result = context.manager->expressionResolvings[node];
+						FOREACH(Ptr<WfExpression>, argument, node->arguments)
+						{
+							GenerateExpressionInstructions(context, argument);
+						}
+						INSTRUCTION(Ins::LoadValue(Value()));
+						INSTRUCTION(Ins::InvokeMethod(result.methodInfo, node->arguments.Count()));
+					}
+					else
+					{
+						throw 0;
+					}
 				}
 			};
 
