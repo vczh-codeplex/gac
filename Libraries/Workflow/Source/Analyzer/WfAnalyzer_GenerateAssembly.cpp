@@ -377,9 +377,11 @@ GenerateInstructions(Expression)
 				{
 					if (node->op == WfBinaryOperator::Assign)
 					{
+						throw 0;
 					}
 					else if (node->op == WfBinaryOperator::Index)
 					{
+						throw 0;
 					}
 					else if (node->op == WfBinaryOperator::Concat)
 					{
@@ -390,6 +392,7 @@ GenerateInstructions(Expression)
 					}
 					else if (node->op == WfBinaryOperator::FailedThen)
 					{
+						throw 0;
 					}
 					else
 					{
