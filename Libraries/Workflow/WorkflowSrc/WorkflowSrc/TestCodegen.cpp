@@ -14,6 +14,20 @@ TEST_CASE(TestCodegen)
 		vint index = wcschr(reading, L'=') - reading;
 		WString itemName = codegenName.Sub(0, index);
 		WString itemResult = codegenName.Sub(index + 1, codegenName.Length() - index - 1);
+		if (itemName.Length() > 3 && itemName.Sub(itemName.Length() - 3, 3) == L"@32")
+		{
+#ifdef VCZH_64
+			continue;
+#endif
+			itemName = itemName.Sub(0, itemName.Length() - 3);
+		}
+		else if (itemName.Length() > 3 && itemName.Sub(itemName.Length() - 3, 3) == L"@64")
+		{
+#ifndef VCZH_64
+			continue;
+#endif
+			itemName = itemName.Sub(0, itemName.Length() - 3);
+		}
 
 		UnitTest::PrintInfo(itemName);
 		WString sample = LoadSample(L"Codegen", itemName);
