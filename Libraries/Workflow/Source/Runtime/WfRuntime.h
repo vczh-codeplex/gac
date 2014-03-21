@@ -45,6 +45,7 @@ Instruction
 				Jump,				// label				: () -> ()										;
 				JumpIf,				// label				: () -> ()										;
 				Invoke,				// function, count		: Value-1, ..., Value-n -> Value				;
+				GetProperty,		// IPropertyInfo*		: Value-this -> Value							;
 				InvokeMethod,		// IMethodInfo*, count	: Value-1, ..., Value-n, Value-this -> Value	;
 				AttachEvent,		// IEventInfo*			: Value-this, <function> -> <Listener>			;
 				DetachEvent,		// 						: <Listener> -> bool							;
@@ -75,7 +76,7 @@ Instruction
 				OpNE,				// 						: <int> -> <bool>								;
 			};
 
-#define INSTRUCTION_CASES(APPLY, APPLY_VALUE, APPLY_FUNCTION, APPLY_FUNCTION_COUNT, APPLY_VARIABLE, APPLY_COUNT, APPLY_FLAG_TYPEDESCRIPTOR, APPLY_METHOD_COUNT, APPLY_EVENT, APPLY_LABEL, APPLY_TYPE)\
+#define INSTRUCTION_CASES(APPLY, APPLY_VALUE, APPLY_FUNCTION, APPLY_FUNCTION_COUNT, APPLY_VARIABLE, APPLY_COUNT, APPLY_FLAG_TYPEDESCRIPTOR, APPLY_PROPERTY, APPLY_METHOD_COUNT, APPLY_EVENT, APPLY_LABEL, APPLY_TYPE)\
 			APPLY(Nop)\
 			APPLY_VALUE(LoadValue)\
 			APPLY_FUNCTION(LoadFunction)\
@@ -96,6 +97,7 @@ Instruction
 			APPLY_LABEL(Jump)\
 			APPLY_LABEL(JumpIf)\
 			APPLY_FUNCTION_COUNT(Invoke)\
+			APPLY_PROPERTY(GetProperty)\
 			APPLY_METHOD_COUNT(InvokeMethod)\
 			APPLY_EVENT(AttachEvent)\
 			APPLY(DetachEvent)\
@@ -156,6 +158,7 @@ Instruction
 					};
 					WfInsType											typeParameter;
 					vint												indexParameter;
+					reflection::description::IPropertyInfo*				propertyParameter;
 					reflection::description::IMethodInfo*				methodParameter;
 					reflection::description::IEventInfo*				eventParameter;
 				};
@@ -169,6 +172,7 @@ Instruction
 				#define CTOR_VARIABLE(NAME)				static WfInstruction NAME(vint variable);
 				#define CTOR_COUNT(NAME)				static WfInstruction NAME(vint count);
 				#define CTOR_FLAG_TYPEDESCRIPTOR(NAME)	static WfInstruction NAME(reflection::description::Value::ValueType flag, reflection::description::ITypeDescriptor* typeDescriptor);
+				#define CTOR_PROPERTY(NAME)				static WfInstruction NAME(reflection::description::IPropertyInfo* propertyInfo);
 				#define CTOR_METHOD_COUNT(NAME)			static WfInstruction NAME(reflection::description::IMethodInfo* methodInfo, vint count);
 				#define CTOR_EVENT(NAME)				static WfInstruction NAME(reflection::description::IEventInfo* eventInfo);
 				#define CTOR_LABEL(NAME)				static WfInstruction NAME(vint label);
@@ -182,6 +186,7 @@ Instruction
 					CTOR_VARIABLE,
 					CTOR_COUNT,
 					CTOR_FLAG_TYPEDESCRIPTOR,
+					CTOR_PROPERTY,
 					CTOR_METHOD_COUNT,
 					CTOR_EVENT,
 					CTOR_LABEL,
@@ -194,6 +199,7 @@ Instruction
 				#undef CTOR_VARIABLE
 				#undef CTOR_COUNT
 				#undef CTOR_FLAG_TYPEDESCRIPTOR
+				#undef CTOR_PROPERTY
 				#undef CTOR_METHOD_COUNT
 				#undef CTOR_EVENT
 				#undef CTOR_LABEL

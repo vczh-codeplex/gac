@@ -213,6 +213,7 @@ void LogSampleCodegenResult(const WString& sampleName, const WString& itemName, 
 #define LOG_VARIABLE(NAME)				case WfInsCode::NAME: writer.WriteLine(formatText(itow(index), 5) + L": " + formatText(L"    " L ## #NAME, 18) + L": var = " + itow(ins.indexParameter)); break;
 #define LOG_COUNT(NAME)					case WfInsCode::NAME: writer.WriteLine(formatText(itow(index), 5) + L": " + formatText(L"    " L ## #NAME, 18) + L": stackPatternCount = " + itow(ins.countParameter)); break;
 #define LOG_FLAG_TYPEDESCRIPTOR(NAME)	case WfInsCode::NAME: writer.WriteLine(formatText(itow(index), 5) + L": " + formatText(L"    " L ## #NAME, 18) + L": flag = " + formatFlag(ins.flagParameter) + L", typeDescriptor = " + ins.typeDescriptorParameter->GetTypeName()); break;
+#define LOG_PROPERTY(NAME)				case WfInsCode::NAME: writer.WriteLine(formatText(itow(index), 5) + L": " + formatText(L"    " L ## #NAME, 18) + L": propertyInfo = " + ins.propertyParameter->GetName() + L"<" + ins.propertyParameter->GetOwnerTypeDescriptor()->GetTypeName() + L">"); break;
 #define LOG_METHOD_COUNT(NAME)			case WfInsCode::NAME: writer.WriteLine(formatText(itow(index), 5) + L": " + formatText(L"    " L ## #NAME, 18) + L": methodInfo = " + ins.methodParameter->GetName() + L"<" + ins.methodParameter->GetOwnerTypeDescriptor()->GetTypeName() + L">, stackPatternCount = " + itow(ins.countParameter)); break;
 #define LOG_EVENT(NAME)					case WfInsCode::NAME: writer.WriteLine(formatText(itow(index), 5) + L": " + formatText(L"    " L ## #NAME, 18) + L": eventInfo = " + ins.eventParameter->GetName() + L"<" + ins.eventParameter->GetOwnerTypeDescriptor()->GetTypeName() + L">"); break;
 #define LOG_LABEL(NAME)					case WfInsCode::NAME: writer.WriteLine(formatText(itow(index), 5) + L": " + formatText(L"    " L ## #NAME, 18) + L": label = " + itow(ins.indexParameter)); break;
@@ -230,6 +231,7 @@ void LogSampleCodegenResult(const WString& sampleName, const WString& itemName, 
 				LOG_VARIABLE,
 				LOG_COUNT,
 				LOG_FLAG_TYPEDESCRIPTOR,
+				LOG_PROPERTY,
 				LOG_METHOD_COUNT,
 				LOG_EVENT,
 				LOG_LABEL,
@@ -244,6 +246,7 @@ void LogSampleCodegenResult(const WString& sampleName, const WString& itemName, 
 #undef LOG_VARIABLE
 #undef LOG_COUNT
 #undef LOG_FLAG_TYPEDESCRIPTOR
+#undef LOG_PROPERTY
 #undef LOG_METHOD_COUNT
 #undef LOG_EVENT
 #undef LOG_LABEL

@@ -304,6 +304,8 @@ WfRuntimeThreadContext
 							throw 0;
 						case WfInsCode::Invoke:
 							throw 0;
+						case WfInsCode::GetProperty:
+							throw 0;
 						case WfInsCode::InvokeMethod:
 							throw 0;
 						case WfInsCode::AttachEvent:

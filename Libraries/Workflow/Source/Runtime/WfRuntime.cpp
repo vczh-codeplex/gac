@@ -84,6 +84,15 @@ WfInstruction
 					return ins;\
 				}\
 
+			#define CTOR_PROPERTY(NAME)\
+				WfInstruction WfInstruction::NAME(reflection::description::IPropertyInfo* propertyInfo)\
+				{\
+					WfInstruction ins;\
+					ins.code = WfInsCode::NAME;\
+					ins.propertyParameter = propertyInfo;\
+					return ins;\
+				}\
+
 			#define CTOR_METHOD_COUNT(NAME)\
 				WfInstruction WfInstruction::NAME(reflection::description::IMethodInfo* methodInfo, vint count)\
 				{\
@@ -129,6 +138,7 @@ WfInstruction
 				CTOR_VARIABLE,
 				CTOR_COUNT,
 				CTOR_FLAG_TYPEDESCRIPTOR,
+				CTOR_PROPERTY,
 				CTOR_METHOD_COUNT,
 				CTOR_EVENT,
 				CTOR_LABEL,
@@ -141,6 +151,7 @@ WfInstruction
 			#undef CTOR_VARIABLE
 			#undef CTOR_COUNT
 			#undef CTOR_FLAG_TYPEDESCRIPTOR
+			#undef CTOR_PROPERTY
 			#undef CTOR_METHOD_COUNT
 			#undef CTOR_EVENT
 			#undef CTOR_LABEL
