@@ -811,7 +811,7 @@ GuiTableCompositionInstanceLoader
 					if (propertyValue.propertyName == L"Rows")
 					{
 						List<GuiCellOption> options;
-						CopyFrom(options, UnboxValue<Ptr<IValueList>>(propertyValue.propertyValue)->GetLazyList<GuiCellOption>());
+						CopyFrom(options, GetLazyList<GuiCellOption>(UnboxValue<Ptr<IValueList>>(propertyValue.propertyValue)));
 						container->SetRowsAndColumns(options.Count(), container->GetColumns());
 						FOREACH_INDEXER(GuiCellOption, option, index, options)
 						{
@@ -822,7 +822,7 @@ GuiTableCompositionInstanceLoader
 					else if (propertyValue.propertyName == L"Columns")
 					{
 						List<GuiCellOption> options;
-						CopyFrom(options, UnboxValue<Ptr<IValueList>>(propertyValue.propertyValue)->GetLazyList<GuiCellOption>());
+						CopyFrom(options, GetLazyList<GuiCellOption>(UnboxValue<Ptr<IValueList>>(propertyValue.propertyValue)));
 						container->SetRowsAndColumns(container->GetRows(), options.Count());
 						FOREACH_INDEXER(GuiCellOption, option, index, options)
 						{
