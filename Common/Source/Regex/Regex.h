@@ -139,8 +139,8 @@ namespace vl
 			vint										codeIndex;
 			
 			RegexTokens(regex_internal::PureInterpretor* _pure, const collections::Array<vint>& _stateTokens, const WString& _code, vint _codeIndex);
-			RegexTokens(const RegexTokens& tokens);
 		public:
+			RegexTokens(const RegexTokens& tokens);
 
 			collections::IEnumerator<RegexToken>*		CreateEnumerator()const;
 			void										ReadToEnd(collections::List<RegexToken>& tokens, bool(*discard)(vint)=0)const;

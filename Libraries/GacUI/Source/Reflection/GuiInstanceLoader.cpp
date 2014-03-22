@@ -321,7 +321,7 @@ GuiDefaultInstanceLoader
 			{
 				if (IMethodInfo* method = GetDefaultConstructor(typeInfo.typeDescriptor))
 				{
-					return method->Invoke(Value(), (Value::xs()));
+					return method->Invoke(Value(), (Value_xs()));
 				}
 				return Value();
 			}
@@ -666,7 +666,7 @@ GuiResourceInstanceLoader
 					{
 						if (auto method = GuiDefaultInstanceLoader::GetDefaultConstructor(typeDescriptor))
 						{
-							return method->Invoke(Value(), (Value::xs()));
+							return method->Invoke(Value(), (Value_xs()));
 						}
 					}
 
