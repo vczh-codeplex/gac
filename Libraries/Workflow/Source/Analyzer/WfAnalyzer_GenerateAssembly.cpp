@@ -299,7 +299,23 @@ GenerateInstructions(Expression)
 
 				void Visit(WfMemberExpression* node)override
 				{
-					throw 0;
+					auto result = context.manager->expressionResolvings[node];
+					if (result.propertyInfo)
+					{
+						GenerateExpressionInstructions(context, node->parent);
+						if (result.propertyInfo->GetGetter())
+						{
+							INSTRUCTION(Ins::InvokeMethod(result.propertyInfo->GetGetter(), 0));
+						}
+						else
+						{
+							INSTRUCTION(Ins::GetProperty(result.propertyInfo));
+						}
+					}
+					else
+					{
+						throw 0;
+					}
 				}
 
 				void Visit(WfChildExpression* node)override
@@ -377,11 +393,33 @@ GenerateInstructions(Expression)
 				{
 					if (node->op == WfBinaryOperator::Assign)
 					{
-						throw 0;
+						if (auto binary = node->first.Cast<WfBinaryExpression>())
+						{
+							auto result = context.manager->expressionResolvings[binary->first.Obj()];
+							auto containerType = result.expectedType ? result.expectedType : result.type;
+							auto methodInfo = containerType->GetTypeDescriptor()->GetMethodGroupByName(L"Set", true)->GetMethod(0);
+							GenerateExpressionInstructions(context, binary->second);
+							GenerateExpressionInstructions(context, node->second);
+							GenerateExpressionInstructions(context, binary->first);
+							INSTRUCTION(Ins::InvokeMethod(methodInfo, 1));
+						}
+						else if (auto member = node->first.Cast<WfMemberExpression>())
+						{
+							throw 0;
+						}
+						else
+						{
+							throw 0;
+						}
 					}
 					else if (node->op == WfBinaryOperator::Index)
 					{
-						throw 0;
+						auto result = context.manager->expressionResolvings[node->first.Obj()];
+						auto containerType = result.expectedType ? result.expectedType : result.type;
+						auto methodInfo = containerType->GetTypeDescriptor()->GetMethodGroupByName(L"Get", true)->GetMethod(0);
+						GenerateExpressionInstructions(context, node->second);
+						GenerateExpressionInstructions(context, node->first);
+						INSTRUCTION(Ins::InvokeMethod(methodInfo, 1));
 					}
 					else if (node->op == WfBinaryOperator::Concat)
 					{
@@ -520,7 +558,30 @@ GenerateInstructions(Expression)
 
 				void Visit(WfConstructorExpression* node)override
 				{
-					throw 0;
+					auto result = context.manager->expressionResolvings[node];
+
+					if (result.type->GetTypeDescriptor() == description::GetTypeDescriptor<IValueEnumerable>()
+						|| result.type->GetTypeDescriptor() == description::GetTypeDescriptor<IValueReadonlyList>()
+						|| result.type->GetTypeDescriptor() == description::GetTypeDescriptor<IValueList>())
+					{
+						Ptr<ITypeInfo> keyType = CopyTypeInfo(result.type->GetElementType()->GetGenericArgument(0));
+						FOREACH(Ptr<WfConstructorArgument>, argument, node->arguments)
+						{
+							GenerateExpressionInstructions(context, argument->key, keyType);
+						}
+						INSTRUCTION(Ins::CreateArray(node->arguments.Count()));
+					}
+					else
+					{
+						Ptr<ITypeInfo> keyType = CopyTypeInfo(result.type->GetElementType()->GetGenericArgument(0));
+						Ptr<ITypeInfo> valueType = CopyTypeInfo(result.type->GetElementType()->GetGenericArgument(1));
+						FOREACH(Ptr<WfConstructorArgument>, argument, node->arguments)
+						{
+							GenerateExpressionInstructions(context, argument->key, keyType);
+							GenerateExpressionInstructions(context, argument->value, valueType);
+						}
+						INSTRUCTION(Ins::CreateArray(node->arguments.Count() * 2));
+					}
 				}
 
 				void Visit(WfInferExpression* node)override
@@ -588,7 +649,34 @@ GenerateInstructions(Expression)
 
 				void Visit(WfCallExpression* node)override
 				{
-					throw 0;
+					auto result = context.manager->expressionResolvings[node->function.Obj()];
+					if (result.methodInfo)
+					{
+						FOREACH(Ptr<WfExpression>, argument, node->arguments)
+						{
+							GenerateExpressionInstructions(context, argument);
+						}
+
+						if (result.methodInfo->IsStatic())
+						{
+							INSTRUCTION(Ins::LoadValue(Value()));
+						}
+						else
+						{
+							auto member = node->function.Cast<WfMemberExpression>();
+							GenerateExpressionInstructions(context, member->parent);
+						}
+
+						INSTRUCTION(Ins::InvokeMethod(result.methodInfo, node->arguments.Count()));
+					}
+					else if (result.symbol)
+					{
+						throw 0;
+					}
+					else
+					{
+						throw 0;
+					}
 				}
 
 				void Visit(WfFunctionExpression* node)override
