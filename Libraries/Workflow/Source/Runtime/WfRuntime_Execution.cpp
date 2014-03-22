@@ -320,6 +320,8 @@ WfRuntimeThreadContext
 							throw 0;
 						case WfInsCode::TestType:
 							throw 0;
+						case WfInsCode::GetType:
+							throw 0;
 						case WfInsCode::Jump:
 							throw 0;
 						case WfInsCode::JumpIf:
