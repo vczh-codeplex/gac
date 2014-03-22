@@ -474,6 +474,8 @@
     <Text Include="..\TestFiles\Samples\AnalyzerScope\ModuleB.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerScope\ModuleC.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\HelloWorld.txt" />
+    <Text Include="..\TestFiles\Samples\Codegen\ListProcessing.txt" />
+    <Text Include="..\TestFiles\Samples\Codegen\MapProcessing.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\OpAdd.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\OpAnd.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\OpCompare.txt" />
