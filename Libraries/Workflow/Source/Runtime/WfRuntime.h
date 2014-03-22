@@ -37,8 +37,8 @@ Instruction
 				StoreGlobalVar,		// variable				: Value -> ()									;
 				Pop,				//						: Value -> ()									;
 				Return,				// 						: Value -> Value								; (exit function)
-				CreateArray,		// count				: Value-1, ..., Value-count -> <array>			;
-				CreateMap,			// count				: Value-1, ..., Value-count -> <map>			;
+				CreateArray,		// count				: Value-1, ..., Value-count -><array>			; {1 2 3} -> <3 2 1>
+				CreateMap,			// count				: Value-1, ..., Value-count -> <map>			; {1:2 3:4} -> <3 4 1 2>
 				ConvertToType,		// flag, typeDescriptor	: Value -> Value								;
 				AssertAsType,		// flag, typeDescriptor	: Value -> Value								;
 				TestType,			// flag, typeDescriptor	: Value -> <bool>								;

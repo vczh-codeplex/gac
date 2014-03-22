@@ -219,9 +219,30 @@ WfRuntimeThreadContext
 								return WfRuntimeExecutionAction::ExitStackFrame;
 							}
 						case WfInsCode::CreateArray:
-							throw 0;
+							{
+								auto list = IValueList::Create();
+								Value operand;
+								for (vint i = 0; i < ins.countParameter; i++)
+								{
+									CONTEXT_ACTION(PopValue(operand), L"failed to pop the function result.");
+									list->Add(operand);
+								}
+								PushValue(Value::From(list));
+								return WfRuntimeExecutionAction::ExitStackFrame;
+							}
 						case WfInsCode::CreateMap:
-							throw 0;
+							{
+								auto map = IValueDictionary::Create();
+								Value key, value;
+								for (vint i = 0; i < ins.countParameter; i+=2)
+								{
+									CONTEXT_ACTION(PopValue(value), L"failed to pop the function result.");
+									CONTEXT_ACTION(PopValue(key), L"failed to pop the function result.");
+									map->Set(key, value);
+								}
+								PushValue(Value::From(map));
+								return WfRuntimeExecutionAction::ExitStackFrame;
+							}
 						case WfInsCode::ConvertToType:
 							{
 								Value result, converted;
