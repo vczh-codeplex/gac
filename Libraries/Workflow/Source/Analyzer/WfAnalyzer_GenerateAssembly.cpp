@@ -401,7 +401,7 @@ GenerateInstructions(Expression)
 							GenerateExpressionInstructions(context, binary->second);
 							GenerateExpressionInstructions(context, node->second);
 							GenerateExpressionInstructions(context, binary->first);
-							INSTRUCTION(Ins::InvokeMethod(methodInfo, 1));
+							INSTRUCTION(Ins::InvokeMethod(methodInfo, 2));
 						}
 						else if (auto member = node->first.Cast<WfMemberExpression>())
 						{
@@ -565,7 +565,7 @@ GenerateInstructions(Expression)
 						|| result.type->GetTypeDescriptor() == description::GetTypeDescriptor<IValueList>())
 					{
 						Ptr<ITypeInfo> keyType = CopyTypeInfo(result.type->GetElementType()->GetGenericArgument(0));
-						FOREACH(Ptr<WfConstructorArgument>, argument, node->arguments)
+						FOREACH(Ptr<WfConstructorArgument>, argument, From(node->arguments).Reverse())
 						{
 							GenerateExpressionInstructions(context, argument->key, keyType);
 						}
@@ -575,12 +575,12 @@ GenerateInstructions(Expression)
 					{
 						Ptr<ITypeInfo> keyType = CopyTypeInfo(result.type->GetElementType()->GetGenericArgument(0));
 						Ptr<ITypeInfo> valueType = CopyTypeInfo(result.type->GetElementType()->GetGenericArgument(1));
-						FOREACH(Ptr<WfConstructorArgument>, argument, node->arguments)
+						FOREACH(Ptr<WfConstructorArgument>, argument, From(node->arguments).Reverse())
 						{
 							GenerateExpressionInstructions(context, argument->key, keyType);
 							GenerateExpressionInstructions(context, argument->value, valueType);
 						}
-						INSTRUCTION(Ins::CreateArray(node->arguments.Count() * 2));
+						INSTRUCTION(Ins::CreateMap(node->arguments.Count() * 2));
 					}
 				}
 
