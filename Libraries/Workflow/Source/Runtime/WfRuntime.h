@@ -42,6 +42,7 @@ Instruction
 				ConvertToType,		// flag, typeDescriptor	: Value -> Value								;
 				AssertAsType,		// flag, typeDescriptor	: Value -> Value								;
 				TestType,			// flag, typeDescriptor	: Value -> <bool>								;
+				GetType,			//						: Value -> <ITypeDescriptor*>					;
 				Jump,				// label				: () -> ()										;
 				JumpIf,				// label				: () -> ()										;
 				Invoke,				// function, count		: Value-1, ..., Value-n -> Value				;
@@ -94,6 +95,7 @@ Instruction
 			APPLY_FLAG_TYPEDESCRIPTOR(ConvertToType)\
 			APPLY_FLAG_TYPEDESCRIPTOR(AssertAsType)\
 			APPLY_FLAG_TYPEDESCRIPTOR(TestType)\
+			APPLY(GetType)\
 			APPLY_LABEL(Jump)\
 			APPLY_LABEL(JumpIf)\
 			APPLY_FUNCTION_COUNT(Invoke)\

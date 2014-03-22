@@ -250,50 +250,52 @@ GenerateInstructions(Expression)
 				{
 				}
 
+				void VisitReferenceExpression(WfExpression* node)
+				{
+					auto result = context.manager->expressionResolvings[node];
+					vint index = -1;
+					if ((index = context.globalFunctions.Keys().IndexOf(result.symbol.Obj())) != -1)
+					{
+						vint functionIndex = context.globalFunctions.Values()[index];
+						INSTRUCTION(Ins::LoadFunction(functionIndex));
+					}
+					else if ((index = context.globalVariables.Keys().IndexOf(result.symbol.Obj())) != -1)
+					{
+						vint variableIndex = context.globalVariables.Values()[index];
+						INSTRUCTION(Ins::LoadGlobalVar(variableIndex));
+					}
+					else if ((index = context.functionContext->capturedVariables.Keys().IndexOf(result.symbol.Obj())) != -1)
+					{
+						vint variableIndex = context.functionContext->capturedVariables.Values()[index];
+						INSTRUCTION(Ins::LoadCapturedVar(variableIndex));
+					}
+					else if ((index = context.functionContext->localVariables.Keys().IndexOf(result.symbol.Obj())) != -1)
+					{
+						vint argumentCount = context.functionContext->function->argumentNames.Count();
+						vint variableIndex = context.functionContext->localVariables.Values()[index];
+						INSTRUCTION(Ins::LoadLocalVar(argumentCount + variableIndex));
+					}
+				}
+
 				void Visit(WfTopQualifiedExpression* node)override
 				{
-					throw 0;
+					VisitReferenceExpression(node);
 				}
 
 				void Visit(WfReferenceExpression* node)override
 				{
-					auto result = context.manager->expressionResolvings[node];
-					if (result.symbol)
-					{
-						vint index = -1;
-
-						if ((index = context.globalFunctions.Keys().IndexOf(result.symbol.Obj())) != -1)
-						{
-							throw 0;
-						}
-						if ((index = context.globalVariables.Keys().IndexOf(result.symbol.Obj())) != -1)
-						{
-							throw 0;
-						}
-						if ((index = context.functionContext->capturedVariables.Keys().IndexOf(result.symbol.Obj())) != -1)
-						{
-							throw 0;
-						}
-						if ((index = context.functionContext->localVariables.Keys().IndexOf(result.symbol.Obj())) != -1)
-						{
-							vint argumentCount = context.functionContext->function->argumentNames.Count();
-							vint variableIndex = context.functionContext->localVariables.Values()[index];
-							INSTRUCTION(Ins::LoadLocalVar(argumentCount + variableIndex));
-						}
-					}
-					else
-					{
-						throw 0;
-					}
+					VisitReferenceExpression(node);
 				}
 
 				void Visit(WfOrderedNameExpression* node)override
 				{
+					// next version
 					throw 0;
 				}
 
 				void Visit(WfOrderedLambdaExpression* node)override
 				{
+					// next version
 					throw 0;
 				}
 
@@ -320,7 +322,7 @@ GenerateInstructions(Expression)
 
 				void Visit(WfChildExpression* node)override
 				{
-					throw 0;
+					VisitReferenceExpression(node);
 				}
 
 				void Visit(WfLiteralExpression* node)override
@@ -369,7 +371,7 @@ GenerateInstructions(Expression)
 
 				void Visit(WfFormatExpression* node)override
 				{
-					throw 0;
+					GenerateExpressionInstructions(context, node->expandedExpression);
 				}
 
 				void Visit(WfUnaryExpression* node)override
@@ -409,7 +411,20 @@ GenerateInstructions(Expression)
 						}
 						else
 						{
-							throw 0;
+							GenerateExpressionInstructions(context, node->second);
+							auto result = context.manager->expressionResolvings[node->first.Obj()];
+							vint index = -1;
+							if ((index = context.globalVariables.Keys().IndexOf(result.symbol.Obj())) != -1)
+							{
+								vint variableIndex = context.globalVariables.Values()[index];
+								INSTRUCTION(Ins::StoreGlobalVar(variableIndex));
+							}
+							else if ((index = context.functionContext->localVariables.Keys().IndexOf(result.symbol.Obj())) != -1)
+							{
+								vint argumentCount = context.functionContext->function->argumentNames.Count();
+								vint variableIndex = context.functionContext->localVariables.Values()[index];
+								INSTRUCTION(Ins::StoreLocalVar(argumentCount + variableIndex));
+							}
 						}
 					}
 					else if (node->op == WfBinaryOperator::Index)
@@ -639,11 +654,13 @@ GenerateInstructions(Expression)
 
 				void Visit(WfBindExpression* node)override
 				{
+					// next version
 					throw 0;
 				}
 
 				void Visit(WfObserveExpression* node)override
 				{
+					// next version
 					throw 0;
 				}
 
@@ -681,6 +698,7 @@ GenerateInstructions(Expression)
 
 				void Visit(WfFunctionExpression* node)override
 				{
+					// next version
 					throw 0;
 				}
 
