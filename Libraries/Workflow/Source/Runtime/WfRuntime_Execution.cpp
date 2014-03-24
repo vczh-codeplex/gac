@@ -160,6 +160,76 @@ WfRuntimeThreadContext (Operations)
 
 			//-------------------------------------------------------------------------------
 
+			bool OPERATOR_OpConvertToType(const Value& result, Value& converted, const WfInstruction& ins)
+			{
+				switch (ins.flagParameter)
+				{
+				case Value::Null:
+					return false;
+				case Value::RawPtr:
+					if (result.GetValueType() == Value::Text)
+					{
+						return false;
+					}
+					else if (result.GetRawPtr())
+					{
+						if (result.GetTypeDescriptor()->CanConvertTo(ins.typeDescriptorParameter))
+						{
+							converted = Value::From(result.GetRawPtr());
+						}
+						else
+						{
+							return false;
+						}
+					}
+					break;
+				case Value::SharedPtr:
+					if (result.GetValueType() == Value::Text)
+					{
+						return false;
+					}
+					else if (result.GetRawPtr())
+					{
+						if (result.GetTypeDescriptor()->CanConvertTo(ins.typeDescriptorParameter))
+						{
+							converted = Value::From(Ptr<DescriptableObject>(result.GetRawPtr()));
+						}
+						else
+						{
+							return false;
+						}
+					}
+					break;
+				case Value::Text:
+					if (result.GetValueType() != Value::Text)
+					{
+						return false;
+					}
+					else if (ins.typeDescriptorParameter == GetTypeDescriptor<void>())
+					{
+						if (result.GetText() != L"")
+						{
+							return false;
+						}
+					}
+					else
+					{
+						auto serializer = ins.typeDescriptorParameter->GetValueSerializer();
+						if (!serializer)
+						{
+							return false;
+						}
+						if (!serializer->Parse(result.GetText(), converted))
+						{
+							return false;
+						}
+					}
+					break;
+				}
+
+				return true;
+			}
+
 #undef INTERNAL_ERROR
 #undef CONTEXT_ACTION
 #undef UNARY_OPERATOR
@@ -321,79 +391,44 @@ WfRuntimeThreadContext
 							{
 								Value result, converted;
 								CONTEXT_ACTION(PopValue(result), L"failed to pop a value from the stack.");
-
-								switch (ins.flagParameter)
+								if (OPERATOR_OpConvertToType(result, converted, ins))
 								{
-								case Value::Null:
-									INTERNAL_ERROR(L"failed to do type conversion.");
-								case Value::RawPtr:
-									if (result.GetValueType() == Value::Text)
-									{
-										INTERNAL_ERROR(L"failed to do type conversion.");
-									}
-									else if (result.GetRawPtr())
-									{
-										if (result.GetTypeDescriptor()->CanConvertTo(ins.typeDescriptorParameter))
-										{
-											converted = Value::From(result.GetRawPtr());
-										}
-										else
-										{
-											INTERNAL_ERROR(L"failed to do type conversion.");
-										}
-									}
-									break;
-								case Value::SharedPtr:
-									if (result.GetValueType() == Value::Text)
-									{
-										INTERNAL_ERROR(L"failed to do type conversion.");
-									}
-									else if (result.GetRawPtr())
-									{
-										if (result.GetTypeDescriptor()->CanConvertTo(ins.typeDescriptorParameter))
-										{
-											converted = Value::From(Ptr<DescriptableObject>(result.GetRawPtr()));
-										}
-										else
-										{
-											INTERNAL_ERROR(L"failed to do type conversion.");
-										}
-									}
-									break;
-								case Value::Text:
-									if (result.GetValueType() != Value::Text)
-									{
-										INTERNAL_ERROR(L"failed to do type conversion.");
-									}
-									else if (ins.typeDescriptorParameter == GetTypeDescriptor<void>())
-									{
-										if (result.GetText() != L"")
-										{
-											INTERNAL_ERROR(L"failed to do type conversion.");
-										}
-									}
-									else
-									{
-										auto serializer = ins.typeDescriptorParameter->GetValueSerializer();
-										if (!serializer)
-										{
-											INTERNAL_ERROR(L"failed to do type conversion.");
-										}
-										if (!serializer->Parse(result.GetText(), converted))
-										{
-											INTERNAL_ERROR(L"failed to do type conversion.");
-										}
-									}
-									break;
+									PushValue(converted);
+									return WfRuntimeExecutionAction::ExecuteInstruction;
 								}
-
-								PushValue(converted);
-								return WfRuntimeExecutionAction::ExecuteInstruction;
+								else
+								{
+									INTERNAL_ERROR(L"failed to do type conversion.");
+								}
 							}
 						case WfInsCode::TryConvertToType:
-							throw 0;
+							{
+								Value result, converted;
+								CONTEXT_ACTION(PopValue(result), L"failed to pop a value from the stack.");
+								if (OPERATOR_OpConvertToType(result, converted, ins))
+								{
+									PushValue(BoxValue(true));
+								}
+								else
+								{
+									PushValue(BoxValue(false));
+								}
+								return WfRuntimeExecutionAction::ExecuteInstruction;
+							}
 						case WfInsCode::TestType:
-							throw 0;
+							{
+								Value operand;
+								CONTEXT_ACTION(PopValue(operand), L"failed to pop a value from the stack.");
+								if (operand.GetTypeDescriptor() && operand.GetValueType() == ins.flagParameter && operand.GetTypeDescriptor()->CanConvertTo(ins.typeDescriptorParameter))
+								{
+									PushValue(BoxValue(true));
+								}
+								else
+								{
+									PushValue(BoxValue(false));
+								}
+								return WfRuntimeExecutionAction::ExecuteInstruction;
+							}
 						case WfInsCode::GetType:
 							{
 								Value operand;
