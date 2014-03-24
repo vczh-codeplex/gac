@@ -145,17 +145,19 @@ GenerateInstructions(Statement)
 
 				void Visit(WfBreakStatement* node)override
 				{
+					// TODO: Statement
 					throw 0;
 				}
 
 				void Visit(WfContinueStatement* node)override
 				{
+					// TODO: Statement
 					throw 0;
 				}
 
 				void Visit(WfReturnStatement* node)override
 				{
-					// todo: inline try-finally
+					// TODO: inline try-finally
 					if (node->expression)
 					{
 						GenerateExpressionInstructions(context, node->expression);
@@ -169,36 +171,43 @@ GenerateInstructions(Statement)
 
 				void Visit(WfDeleteStatement* node)override
 				{
+					// TODO: Statement
 					throw 0;
 				}
 
 				void Visit(WfRaiseExceptionStatement* node)override
 				{
+					// TODO: Statement
 					throw 0;
 				}
 
 				void Visit(WfIfStatement* node)override
 				{
+					// TODO: Statement
 					throw 0;
 				}
 
 				void Visit(WfSwitchStatement* node)override
 				{
+					// TODO: Statement
 					throw 0;
 				}
 
 				void Visit(WfWhileStatement* node)override
 				{
+					// TODO: Statement
 					throw 0;
 				}
 
 				void Visit(WfForEachStatement* node)override
 				{
+					// TODO: Statement
 					throw 0;
 				}
 
 				void Visit(WfTryStatement* node)override
 				{
+					// TODO: Statement
 					throw 0;
 				}
 
@@ -316,6 +325,7 @@ GenerateInstructions(Expression)
 					}
 					else
 					{
+						// TODO: Method
 						throw 0;
 					}
 				}
@@ -407,6 +417,7 @@ GenerateInstructions(Expression)
 						}
 						else if (auto member = node->first.Cast<WfMemberExpression>())
 						{
+							// TODO: Property and Method
 							throw 0;
 						}
 						else
@@ -445,6 +456,7 @@ GenerateInstructions(Expression)
 					}
 					else if (node->op == WfBinaryOperator::FailedThen)
 					{
+						// TODO: FailedThen
 						throw 0;
 					}
 					else
@@ -553,11 +565,13 @@ GenerateInstructions(Expression)
 
 				void Visit(WfLetExpression* node)override
 				{
+					// TODO: LetExpression
 					throw 0;
 				}
 
 				void Visit(WfIfExpression* node)override
 				{
+					// TODO: IfExpression
 					throw 0;
 				}
 
@@ -722,9 +736,22 @@ GenerateInstructions(Expression)
 						INSTRUCTION(Ins::OpNot(WfInsType::Bool));
 						break;
 					case WfTypeTesting::IsType:
-						throw 0;
+						{
+							auto scope = context.manager->expressionScopes[node].Obj();
+							auto type = CreateTypeInfoFromType(scope, node->type);
+							GenerateExpressionInstructions(context, node->expression);
+							GenerateTypeTestingInstructions(context, type);
+						}
+						break;
 					case WfTypeTesting::IsNotType:
-						throw 0;
+						{
+							auto scope = context.manager->expressionScopes[node].Obj();
+							auto type = CreateTypeInfoFromType(scope, node->type);
+							GenerateExpressionInstructions(context, node->expression);
+							GenerateTypeTestingInstructions(context, type);
+							INSTRUCTION(Ins::OpNot(WfInsType::Bool));
+						}
+						break;
 					}
 				}
 
@@ -793,10 +820,12 @@ GenerateInstructions(Expression)
 					}
 					else if (result.symbol)
 					{
+						// TODO: Call function in variable
 						throw 0;
 					}
 					else
 					{
+						// TODO: Call function from expression
 						throw 0;
 					}
 				}
@@ -889,6 +918,28 @@ GenerateTypeCastInstructions
 						INSTRUCTION(Ins::TryConvertToType(Value::Text, expectedType->GetTypeDescriptor()));
 						break;
 					}
+				}
+			}
+
+/***********************************************************************
+GetInstructionTypeArgument
+***********************************************************************/
+
+			void GenerateTypeTestingInstructions(WfCodegenContext& context, Ptr<reflection::description::ITypeInfo> expectedType)
+			{
+				switch (expectedType->GetDecorator())
+				{
+				case ITypeInfo::RawPtr:
+					INSTRUCTION(Ins::TestType(Value::RawPtr, expectedType->GetTypeDescriptor()));
+					break;
+				case ITypeInfo::SharedPtr:
+					INSTRUCTION(Ins::TestType(Value::SharedPtr, expectedType->GetTypeDescriptor()));
+					break;
+				case ITypeInfo::Nullable:
+				case ITypeInfo::TypeDescriptor:
+				case ITypeInfo::Generic:
+					INSTRUCTION(Ins::TestType(Value::Text, expectedType->GetTypeDescriptor()));
+					break;
 				}
 			}
 
