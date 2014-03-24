@@ -1,0 +1,12 @@
+module test;
+using system::*;
+
+func Fab(n : int) : int
+{
+	return n <= 2 ? 1 : Fab(n-1) + Fab(n-2);
+}
+
+func main():string
+{
+	return Fab(1) & ", " & Fab(2) & ", " & Fab(3) & ", " & Fab(4) & ", " &  Fab(5);
+}

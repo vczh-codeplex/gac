@@ -1631,7 +1631,12 @@ ValidateSemantic
 						{
 							vint index = manager->declarationScopes.Keys().IndexOf(decl);
 							if (index == -1) continue;
-							auto scope = manager->declarationScopes.Values()[index]->parentScope;
+							auto scope = manager->declarationScopes.Values()[index];
+							bool isVariable = decl.Cast<WfVariableDeclaration>();
+							if (!isVariable)
+							{
+								scope = scope->parentScope;
+							}
 
 							index = scope->symbols.Keys().IndexOf(decl->name.value);
 							if (index == -1) continue;
@@ -1639,7 +1644,14 @@ ValidateSemantic
 							{
 								if (symbol->creatorDeclaration == decl && symbol->typeInfo)
 								{
-									replaces.Add(ResolveExpressionResult(symbol, symbol->typeInfo));
+									if (isVariable)
+									{
+										replaces.Add(ResolveExpressionResult(symbol, symbol->typeInfo, symbol->typeInfo));
+									}
+									else
+									{
+										replaces.Add(ResolveExpressionResult(symbol, symbol->typeInfo));
+									}
 								}
 							}
 						}

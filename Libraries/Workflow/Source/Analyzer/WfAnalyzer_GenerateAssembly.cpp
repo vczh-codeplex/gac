@@ -95,8 +95,8 @@ GenerateInstructions(Declaration)
 
 				void Visit(WfFunctionDeclaration* node)override
 				{
-					auto scope = context.manager->declarationScopes[node]->parentScope.Obj();
-					auto symbol = From(scope->symbols[node->name.value])
+					auto scope = context.manager->declarationScopes[node];
+					auto symbol = From(scope->parentScope->symbols[node->name.value])
 						.Where([=](Ptr<WfLexicalSymbol> symbol)
 						{
 							return symbol->creatorDeclaration == node;
@@ -107,6 +107,11 @@ GenerateInstructions(Declaration)
 					auto functionContext = MakePtr<WfCodegenFunctionContext>();
 					functionContext->function = meta;
 					context.functionContext = functionContext;
+					FOREACH_INDEXER(Ptr<WfFunctionArgument>, argument, index, node->arguments)
+					{
+						auto argumentSymbol = scope->symbols[argument->name.value][0];
+						functionContext->arguments.Add(argumentSymbol.Obj(), index);
+					}
 					
 					meta->firstInstruction = context.assembly->instructions.Count();
 					GenerateStatementInstructions(context, node->statement);
@@ -284,6 +289,22 @@ GenerateInstructions(Expression)
 						vint variableIndex = context.functionContext->localVariables.Values()[index];
 						INSTRUCTION(Ins::LoadLocalVar(argumentCount + variableIndex));
 					}
+					else if ((index = context.functionContext->arguments.Keys().IndexOf(result.symbol.Obj())) != -1)
+					{
+						vint variableIndex = context.functionContext->arguments.Values()[index];
+						INSTRUCTION(Ins::LoadLocalVar(variableIndex));
+					}
+					else if ((index = context.functionContext->localVariables.Keys().IndexOf(result.symbol.Obj())) != -1)
+					{
+						vint argumentCount = context.functionContext->function->argumentNames.Count();
+						vint variableIndex = context.functionContext->localVariables.Values()[index];
+						INSTRUCTION(Ins::LoadLocalVar(argumentCount + variableIndex));
+					}
+					else
+					{
+						// next version: named lambda reference
+						throw 0;
+					}
 				}
 
 				void Visit(WfTopQualifiedExpression* node)override
@@ -417,7 +438,7 @@ GenerateInstructions(Expression)
 						}
 						else if (auto member = node->first.Cast<WfMemberExpression>())
 						{
-							// TODO: Property and Method
+							// TODO: Property
 							throw 0;
 						}
 						else
@@ -798,14 +819,14 @@ GenerateInstructions(Expression)
 
 				void Visit(WfCallExpression* node)override
 				{
+					FOREACH(Ptr<WfExpression>, argument, node->arguments)
+					{
+						GenerateExpressionInstructions(context, argument);
+					}
+
 					auto result = context.manager->expressionResolvings[node->function.Obj()];
 					if (result.methodInfo)
 					{
-						FOREACH(Ptr<WfExpression>, argument, node->arguments)
-						{
-							GenerateExpressionInstructions(context, argument);
-						}
-
 						if (result.methodInfo->IsStatic())
 						{
 							INSTRUCTION(Ins::LoadValue(Value()));
@@ -817,17 +838,23 @@ GenerateInstructions(Expression)
 						}
 
 						INSTRUCTION(Ins::InvokeMethod(result.methodInfo, node->arguments.Count()));
+						return;
 					}
 					else if (result.symbol)
 					{
-						// TODO: Call function in variable
-						throw 0;
+						vint index = context.globalFunctions.Keys().IndexOf(result.symbol.Obj());
+						if (index != -1)
+						{
+							vint functionIndex = context.globalFunctions.Values()[index];
+							INSTRUCTION(Ins::Invoke(functionIndex, node->arguments.Count()));
+						}
 					}
-					else
-					{
-						// TODO: Call function from expression
-						throw 0;
-					}
+
+					INSTRUCTION(Ins::CreateArray(node->arguments.Count()));
+					GenerateExpressionInstructions(context, node->function);
+					auto td = description::GetTypeDescriptor<IValueFunctionProxy>();
+					auto method = td->GetMethodGroupByName(L"Invoke", true)->GetMethod(0);
+					INSTRUCTION(Ins::InvokeMethod(method, 1));
 				}
 
 				void Visit(WfFunctionExpression* node)override

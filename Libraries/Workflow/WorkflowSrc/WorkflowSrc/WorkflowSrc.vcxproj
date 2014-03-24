@@ -474,6 +474,7 @@
     <Text Include="..\TestFiles\Samples\AnalyzerScope\ModuleB.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerScope\ModuleC.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\ElementInSet.txt" />
+    <Text Include="..\TestFiles\Samples\Codegen\GlobalVariable.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\HelloWorld.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\ListProcessing.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\MapProcessing.txt" />
@@ -491,6 +492,7 @@
     <Text Include="..\TestFiles\Samples\Codegen\OpShr.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\OpSub.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\OpXor.txt" />
+    <Text Include="..\TestFiles\Samples\Codegen\RecursiveFunction.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\TypeOf.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\TypeTesting.txt" />
     <Text Include="..\TestFiles\Samples\Declaration\Function.txt" />
