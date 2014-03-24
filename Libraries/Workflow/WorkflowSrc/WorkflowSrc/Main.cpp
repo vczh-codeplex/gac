@@ -210,11 +210,50 @@ void LogSampleCodegenResult(const WString& sampleName, const WString& itemName, 
 			L">";
 	};
 
+	auto formatVarName = [assembly](const WfInstruction& ins, vint index)->WString
+	{
+		switch (ins.code)
+		{
+		case WfInsCode::LoadGlobalVar:
+		case WfInsCode::StoreGlobalVar:
+			return L"(" + assembly->variableNames[ins.indexParameter] + L")";
+		case WfInsCode::LoadLocalVar:
+		case WfInsCode::StoreLocalVar:
+			{
+				auto function=From(assembly->functions)
+					.Where([&ins,index](Ptr<WfAssemblyFunction> function)
+					{
+						return function->firstInstruction <= index && index <= function->lastInstruction;
+					})
+					.First();
+				if (ins.indexParameter < function->argumentNames.Count())
+				{
+					return L"(" + function->argumentNames[ins.indexParameter] + L")";
+				}
+				else
+				{
+					return L"(" + function->localVariableNames[ins.indexParameter - function->argumentNames.Count()] + L")";
+				}
+			}
+		case WfInsCode::LoadCapturedVar:
+			{
+				auto function=From(assembly->functions)
+					.Where([&ins,index](Ptr<WfAssemblyFunction> function)
+					{
+						return function->firstInstruction <= index && index <= function->lastInstruction;
+					})
+					.First();
+				return L"(" + function->capturedVariableNames[ins.indexParameter] + L")";
+			}
+		}
+		return L"";
+	};
+
 #define LOG(NAME)						case WfInsCode::NAME: writer.WriteLine(formatText(itow(index), 5) + L": " + formatText(L"    " L ## #NAME, 18)); break;
 #define LOG_VALUE(NAME)					case WfInsCode::NAME: writer.WriteLine(formatText(itow(index), 5) + L": " + formatText(L"    " L ## #NAME, 18) + L": value = " + formatValue(ins.valueParameter)); break;
 #define LOG_FUNCTION(NAME)				case WfInsCode::NAME: writer.WriteLine(formatText(itow(index), 5) + L": " + formatText(L"    " L ## #NAME, 18) + L": func = " + itow(ins.indexParameter) + L"(" + assembly->functions[ins.indexParameter]->name + L")"); break;
 #define LOG_FUNCTION_COUNT(NAME)		case WfInsCode::NAME: writer.WriteLine(formatText(itow(index), 5) + L": " + formatText(L"    " L ## #NAME, 18) + L": func = " + itow(ins.indexParameter) + L"(" + assembly->functions[ins.indexParameter]->name + L"), stackPatternCount = " + itow(ins.countParameter)); break;
-#define LOG_VARIABLE(NAME)				case WfInsCode::NAME: writer.WriteLine(formatText(itow(index), 5) + L": " + formatText(L"    " L ## #NAME, 18) + L": var = " + itow(ins.indexParameter)); break;
+#define LOG_VARIABLE(NAME)				case WfInsCode::NAME: writer.WriteLine(formatText(itow(index), 5) + L": " + formatText(L"    " L ## #NAME, 18) + L": var = " + itow(ins.indexParameter) + formatVarName(ins, index)); break;
 #define LOG_COUNT(NAME)					case WfInsCode::NAME: writer.WriteLine(formatText(itow(index), 5) + L": " + formatText(L"    " L ## #NAME, 18) + L": stackPatternCount = " + itow(ins.countParameter)); break;
 #define LOG_FLAG_TYPEDESCRIPTOR(NAME)	case WfInsCode::NAME: writer.WriteLine(formatText(itow(index), 5) + L": " + formatText(L"    " L ## #NAME, 18) + L": flag = " + formatFlag(ins.flagParameter) + L", typeDescriptor = " + ins.typeDescriptorParameter->GetTypeName()); break;
 #define LOG_PROPERTY(NAME)				case WfInsCode::NAME: writer.WriteLine(formatText(itow(index), 5) + L": " + formatText(L"    " L ## #NAME, 18) + L": propertyInfo = " + ins.propertyParameter->GetName() + L"<" + ins.propertyParameter->GetOwnerTypeDescriptor()->GetTypeName() + L">"); break;
