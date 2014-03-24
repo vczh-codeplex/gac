@@ -1331,6 +1331,9 @@
     <Text Include="..\TestFiles\Samples\Codegen\GlobalVariable.txt">
       <Filter>Resource Files\Samples\Codegen</Filter>
     </Text>
+    <Text Include="..\TestFiles\Samples\Codegen\LetIn.txt">
+      <Filter>Resource Files\Samples\Codegen</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Source\Expression\Codegen.bat">

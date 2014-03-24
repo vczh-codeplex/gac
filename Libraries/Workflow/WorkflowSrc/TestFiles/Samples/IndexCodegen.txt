@@ -21,3 +21,4 @@ ElementInSet=true, false, true, false, true, false, false, true, true, false
 TypeTesting=true, false, true, false
 GlobalVariable=30, 10
 RecursiveFunction=1, 1, 2, 3, 5
+LetIn=30
