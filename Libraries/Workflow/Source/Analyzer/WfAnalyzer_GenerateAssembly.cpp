@@ -563,12 +563,98 @@ GenerateInstructions(Expression)
 
 				void Visit(WfRangeExpression* node)override
 				{
-					throw 0;
+					auto result = context.manager->expressionResolvings[node];
+					auto elementType = result.type->GetElementType()->GetGenericArgument(0);
+					auto type = GetInstructionTypeArgument(elementType);
+					
+					GenerateExpressionInstructions(context, node->begin, elementType);
+					if (node->beginBoundary == WfRangeBoundary::Exclusive)
+					{
+						INSTRUCTION(Ins::LoadValue(BoxValue<vint>(1)));
+						INSTRUCTION(Ins::OpAdd(type));
+					}
+					
+					GenerateExpressionInstructions(context, node->end, elementType);
+					if (node->endBoundary == WfRangeBoundary::Exclusive)
+					{
+						INSTRUCTION(Ins::LoadValue(BoxValue<vint>(1)));
+						INSTRUCTION(Ins::OpSub(type));
+					}
+
+					INSTRUCTION(Ins::CreateRange(type));
 				}
 
 				void Visit(WfSetTestingExpression* node)override
 				{
-					throw 0;
+					if (auto range = node->collection.Cast<WfRangeExpression>())
+					{
+						auto resultElement = context.manager->expressionResolvings[node];
+						auto resultBegin = context.manager->expressionResolvings[range->begin.Obj()];
+						auto resultEnd = context.manager->expressionResolvings[range->end.Obj()];
+						auto typeElement = resultElement.expectedType ? resultElement.expectedType : resultElement.type;
+						auto typeBegin = resultBegin.expectedType ? resultBegin.expectedType : resultBegin.type;
+						auto typeEnd = resultEnd.expectedType ? resultEnd.expectedType : resultEnd.type;
+						auto typeLeft = GetMergedType(typeElement, typeBegin);
+						auto typeRight = GetMergedType(typeElement, typeEnd);
+
+						auto function = context.functionContext->function;
+						vint index = function->argumentNames.Count() + function->localVariableNames.Add(L"<anonymous-range-test>");
+						GenerateExpressionInstructions(context, node->element);
+						INSTRUCTION(Ins::StoreLocalVar(index));
+						
+						INSTRUCTION(Ins::LoadLocalVar(index));
+						GenerateExpressionInstructions(context, range->begin, typeLeft);
+						if (!IsSameType(typeElement.Obj(), typeLeft.Obj()))
+						{
+							GenerateTypeCastInstructions(context, typeLeft, true);
+						}
+						INSTRUCTION(Ins::CompareLiteral(GetInstructionTypeArgument(typeLeft)));
+						if (range->beginBoundary == WfRangeBoundary::Exclusive)
+						{
+							INSTRUCTION(Ins::OpGT());
+						}
+						else
+						{
+							INSTRUCTION(Ins::OpGE());
+						}
+
+						GenerateExpressionInstructions(context, range->end, typeRight);
+						INSTRUCTION(Ins::LoadLocalVar(index));
+						if (!IsSameType(typeElement.Obj(), typeRight.Obj()))
+						{
+							GenerateTypeCastInstructions(context, typeRight, true);
+						}
+						INSTRUCTION(Ins::CompareLiteral(GetInstructionTypeArgument(typeRight)));
+						if (range->endBoundary == WfRangeBoundary::Exclusive)
+						{
+							INSTRUCTION(Ins::OpLT());
+						}
+						else
+						{
+							INSTRUCTION(Ins::OpLE());
+						}
+
+						INSTRUCTION(Ins::OpAnd(WfInsType::Bool));
+					}
+					else
+					{
+						auto result = context.manager->expressionResolvings[node->collection.Obj()];
+						auto type = result.expectedType ? result.expectedType : result.type;
+
+						GenerateExpressionInstructions(context, node->element);
+						GenerateExpressionInstructions(context, node->collection);
+
+						auto tdList = description::GetTypeDescriptor<IValueReadonlyList>();
+						if (result.type->GetTypeDescriptor()->CanConvertTo(tdList))
+						{
+							auto method = tdList->GetMethodGroupByName(L"Contains", true)->GetMethod(0);
+							INSTRUCTION(Ins::InvokeMethod(method, 1));
+						}
+						else
+						{
+							INSTRUCTION(Ins::TestElementInSet());
+						}
+					}
 				}
 
 				void Visit(WfConstructorExpression* node)override
@@ -601,7 +687,7 @@ GenerateInstructions(Expression)
 
 				void Visit(WfInferExpression* node)override
 				{
-					throw 0;
+					GenerateExpressionInstructions(context, node->expression);
 				}
 
 				void Visit(WfTypeCastingExpression* node)override
@@ -735,6 +821,7 @@ GenerateInstructions(Expression)
 					}
 					else
 					{
+						// next version
 						throw 0;
 					}
 				}

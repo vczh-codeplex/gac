@@ -243,6 +243,8 @@ WfRuntimeThreadContext
 								PushValue(Value::From(map));
 								return WfRuntimeExecutionAction::ExitStackFrame;
 							}
+						case WfInsCode::CreateRange:
+							throw 0;
 						case WfInsCode::ConvertToType:
 							{
 								Value result, converted;
@@ -367,6 +369,8 @@ WfRuntimeThreadContext
 								RaiseException(operand);
 								return WfRuntimeExecutionAction::ExecuteInstruction;
 							}
+						case WfInsCode::TestElementInSet:
+							throw 0;
 						case WfInsCode::CompareLiteral:
 							BEGIN_TYPE
 								EXECUTE(OpCompare, Bool)

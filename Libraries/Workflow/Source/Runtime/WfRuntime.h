@@ -37,8 +37,9 @@ Instruction
 				StoreGlobalVar,		// variable				: Value -> ()									;
 				Pop,				//						: Value -> ()									;
 				Return,				// 						: Value -> Value								; (exit function)
-				CreateArray,		// count				: Value-1, ..., Value-count -><array>			; {1 2 3} -> <3 2 1>
+				CreateArray,		// count				: Value-1, ..., Value-count -> <array>			; {1 2 3} -> <3 2 1>
 				CreateMap,			// count				: Value-1, ..., Value-count -> <map>			; {1:2 3:4} -> <3 4 1 2>
+				CreateRange,		// I1248/U1248			: Value-begin, Value-end -> <enumerable>		;
 				ConvertToType,		// flag, typeDescriptor	: Value -> Value								;
 				TryConvertToType,	// flag, typeDescriptor	: Value -> Value								;
 				TestType,			// flag, typeDescriptor	: Value -> <bool>								;
@@ -53,6 +54,7 @@ Instruction
 				InstallTry,			// label				: () -> ()										;
 				UninstallTry,		// label				: () -> ()										;
 				RaiseException,		// 						: Value -> ()									; (trap)
+				TestElementInSet,	//						: Value-element, Value-set -> bool				;
 				CompareLiteral,		// I48/U48/F48/S		: Value, Value -> <int>							;
 				CompareReference,	// 						: Value, Value -> <bool>						;
 				OpNot,				// B/I1248/U1248		: Value -> Value								;
@@ -92,6 +94,7 @@ Instruction
 			APPLY(Return)\
 			APPLY_COUNT(CreateArray)\
 			APPLY_COUNT(CreateMap)\
+			APPLY_TYPE(CreateRange)\
 			APPLY_FLAG_TYPEDESCRIPTOR(ConvertToType)\
 			APPLY_FLAG_TYPEDESCRIPTOR(TryConvertToType)\
 			APPLY_FLAG_TYPEDESCRIPTOR(TestType)\
@@ -106,6 +109,7 @@ Instruction
 			APPLY_LABEL(InstallTry)\
 			APPLY_LABEL(UninstallTry)\
 			APPLY(RaiseException)\
+			APPLY(TestElementInSet)\
 			APPLY_TYPE(CompareLiteral)\
 			APPLY(CompareReference)\
 			APPLY_TYPE(OpNot)\
