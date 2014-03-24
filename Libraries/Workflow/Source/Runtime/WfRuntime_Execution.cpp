@@ -97,6 +97,69 @@ WfRuntimeThreadContext (Operations)
 
 			//-------------------------------------------------------------------------------
 
+			template<typename T>
+			class WfRuntimeRange : public Object, public IValueEnumerable
+			{
+			protected:
+				T						begin;
+				T						end;
+
+				class Enumerator : public Object, public IValueEnumerator
+				{
+				protected:
+					T					begin;
+					T					end;
+					T					current;
+				public:
+					Enumerator(T _begin, T _end)
+						:begin(_begin), end(_end), current(_begin - 1)
+					{
+					}
+
+					Value GetCurrent()
+					{
+						return BoxValue<T>(current);
+					}
+
+					vint GetIndex()
+					{
+						return (vint)(current - begin);
+					}
+
+					bool Next()
+					{
+						if (current >= end) return false;
+						current++;
+						return true;
+					}
+				};
+			public:
+				WfRuntimeRange(T _begin, T _end)
+					:begin(_begin), end(_end)
+				{
+				}
+
+				Ptr<IValueEnumerator> CreateEnumerator()override
+				{
+					return MakePtr<Enumerator>(begin, end);
+				}
+			};
+			
+			template<typename T>
+			WfRuntimeExecutionAction OPERATOR_OpCreateRange(WfRuntimeThreadContext& context)
+			{
+				Value first, second;
+				CONTEXT_ACTION(PopValue(second), L"failed to pop a value from the stack.");
+				CONTEXT_ACTION(PopValue(first), L"failed to pop a value from the stack.");
+				T firstValue = UnboxValue<T>(first);
+				T secondValue = UnboxValue<T>(second);
+				auto enumerable = MakePtr<WfRuntimeRange<T>>(firstValue, secondValue);
+				context.PushValue(Value::From(enumerable));
+				return WfRuntimeExecutionAction::ExecuteInstruction;
+			}
+
+			//-------------------------------------------------------------------------------
+
 #undef INTERNAL_ERROR
 #undef CONTEXT_ACTION
 #undef UNARY_OPERATOR
@@ -244,7 +307,16 @@ WfRuntimeThreadContext
 								return WfRuntimeExecutionAction::ExitStackFrame;
 							}
 						case WfInsCode::CreateRange:
-							throw 0;
+							BEGIN_TYPE
+								EXECUTE(OpCreateRange, I1)
+								EXECUTE(OpCreateRange, I2)
+								EXECUTE(OpCreateRange, I4)
+								EXECUTE(OpCreateRange, I8)
+								EXECUTE(OpCreateRange, U1)
+								EXECUTE(OpCreateRange, U2)
+								EXECUTE(OpCreateRange, U4)
+								EXECUTE(OpCreateRange, U8)
+							END_TYPE
 						case WfInsCode::ConvertToType:
 							{
 								Value result, converted;
@@ -321,7 +393,24 @@ WfRuntimeThreadContext
 						case WfInsCode::TryConvertToType:
 							throw 0;
 						case WfInsCode::TestType:
-							throw 0;
+							{
+								Value element, set;
+								CONTEXT_ACTION(PopValue(set), L"failed to pop a value from the stack.");
+								CONTEXT_ACTION(PopValue(element), L"failed to pop a value from the stack.");
+
+								auto enumerable = UnboxValue<Ptr<IValueEnumerable>>(set);
+								auto enumerator = enumerable->CreateEnumerator();
+								while (enumerator->Next())
+								{
+									if (enumerator->GetCurrent() == element)
+									{
+										PushValue(BoxValue(true));
+										return WfRuntimeExecutionAction::ExecuteInstruction;
+									}
+								}
+								PushValue(BoxValue(false));
+								return WfRuntimeExecutionAction::ExecuteInstruction;
+							}
 						case WfInsCode::GetType:
 							{
 								Value operand;
