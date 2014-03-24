@@ -588,7 +588,7 @@ GenerateInstructions(Expression)
 				{
 					if (auto range = node->collection.Cast<WfRangeExpression>())
 					{
-						auto resultElement = context.manager->expressionResolvings[node];
+						auto resultElement = context.manager->expressionResolvings[node->element.Obj()];
 						auto resultBegin = context.manager->expressionResolvings[range->begin.Obj()];
 						auto resultEnd = context.manager->expressionResolvings[range->end.Obj()];
 						auto typeElement = resultElement.expectedType ? resultElement.expectedType : resultElement.type;
@@ -603,11 +603,11 @@ GenerateInstructions(Expression)
 						INSTRUCTION(Ins::StoreLocalVar(index));
 						
 						INSTRUCTION(Ins::LoadLocalVar(index));
-						GenerateExpressionInstructions(context, range->begin, typeLeft);
 						if (!IsSameType(typeElement.Obj(), typeLeft.Obj()))
 						{
 							GenerateTypeCastInstructions(context, typeLeft, true);
 						}
+						GenerateExpressionInstructions(context, range->begin, typeLeft);
 						INSTRUCTION(Ins::CompareLiteral(GetInstructionTypeArgument(typeLeft)));
 						if (range->beginBoundary == WfRangeBoundary::Exclusive)
 						{
