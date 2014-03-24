@@ -606,8 +606,18 @@ GenerateInstructions(Expression)
 
 				void Visit(WfTypeCastingExpression* node)override
 				{
-					auto result = context.manager->expressionResolvings[node];
-					GenerateExpressionInstructions(context, node->expression, result.type);
+					if (node->strategy == WfTypeCastingStrategy::Strong)
+					{
+						auto result = context.manager->expressionResolvings[node];
+						GenerateExpressionInstructions(context, node->expression, result.type);
+					}
+					else
+					{
+						auto scope = context.manager->expressionScopes[node].Obj();
+						auto type = CreateTypeInfoFromType(scope, node->type);
+						GenerateExpressionInstructions(context, node->expression);
+						GenerateTypeCastInstructions(context, type, false);
+					}
 				}
 
 				void Visit(WfTypeTestingExpression* node)override
@@ -634,22 +644,31 @@ GenerateInstructions(Expression)
 
 				void Visit(WfTypeOfTypeExpression* node)override
 				{
-					throw 0;
+					auto scope = context.manager->expressionScopes[node].Obj();
+					auto type = CreateTypeInfoFromType(scope, node->type);
+					auto value = Value::From(type->GetTypeDescriptor());
+					INSTRUCTION(Ins::LoadValue(value));
 				}
 
 				void Visit(WfTypeOfExpressionExpression* node)override
 				{
-					throw 0;
+					GenerateExpressionInstructions(context, node->expression);
+					INSTRUCTION(Ins::GetType());
 				}
 
 				void Visit(WfAttachEventExpression* node)override
 				{
-					throw 0;
+					auto result = context.manager->expressionResolvings[node->event.Obj()];
+					auto parent = node->event.Cast<WfMemberExpression>()->parent;
+					GenerateExpressionInstructions(context, parent);
+					GenerateExpressionInstructions(context, node->function);
+					INSTRUCTION(Ins::AttachEvent(result.eventInfo));
 				}
 
 				void Visit(WfDetachEventExpression* node)override
 				{
-					throw 0;
+					GenerateExpressionInstructions(context, node->handler);
+					INSTRUCTION(Ins::DetachEvent());
 				}
 
 				void Visit(WfBindExpression* node)override
@@ -732,13 +751,13 @@ GenerateInstructions(Expression)
 				if (result.expectedType && !IsSameType(type.Obj(), result.expectedType.Obj()))
 				{
 					type = result.expectedType;
-					GenerateTypeCastInstructions(context, type);
+					GenerateTypeCastInstructions(context, type, true);
 				}
 
 				if (expectedType && !IsSameType(type.Obj(), expectedType.Obj()))
 				{
 					type = expectedType;
-					GenerateTypeCastInstructions(context, type);
+					GenerateTypeCastInstructions(context, type, true);
 				}
 
 				return type;
@@ -748,21 +767,41 @@ GenerateInstructions(Expression)
 GenerateTypeCastInstructions
 ***********************************************************************/
 
-			void GenerateTypeCastInstructions(WfCodegenContext& context, Ptr<reflection::description::ITypeInfo> expectedType)
+			void GenerateTypeCastInstructions(WfCodegenContext& context, Ptr<reflection::description::ITypeInfo> expectedType, bool strongCast)
 			{
-				switch (expectedType->GetDecorator())
+				if (strongCast)
 				{
-				case ITypeInfo::RawPtr:
-					INSTRUCTION(Ins::ConvertToType(Value::RawPtr, expectedType->GetTypeDescriptor()));
-					break;
-				case ITypeInfo::SharedPtr:
-					INSTRUCTION(Ins::ConvertToType(Value::SharedPtr, expectedType->GetTypeDescriptor()));
-					break;
-				case ITypeInfo::Nullable:
-				case ITypeInfo::TypeDescriptor:
-				case ITypeInfo::Generic:
-					INSTRUCTION(Ins::ConvertToType(Value::Text, expectedType->GetTypeDescriptor()));
-					break;
+					switch (expectedType->GetDecorator())
+					{
+					case ITypeInfo::RawPtr:
+						INSTRUCTION(Ins::ConvertToType(Value::RawPtr, expectedType->GetTypeDescriptor()));
+						break;
+					case ITypeInfo::SharedPtr:
+						INSTRUCTION(Ins::ConvertToType(Value::SharedPtr, expectedType->GetTypeDescriptor()));
+						break;
+					case ITypeInfo::Nullable:
+					case ITypeInfo::TypeDescriptor:
+					case ITypeInfo::Generic:
+						INSTRUCTION(Ins::ConvertToType(Value::Text, expectedType->GetTypeDescriptor()));
+						break;
+					}
+				}
+				else
+				{
+					switch (expectedType->GetDecorator())
+					{
+					case ITypeInfo::RawPtr:
+						INSTRUCTION(Ins::TryConvertToType(Value::RawPtr, expectedType->GetTypeDescriptor()));
+						break;
+					case ITypeInfo::SharedPtr:
+						INSTRUCTION(Ins::TryConvertToType(Value::SharedPtr, expectedType->GetTypeDescriptor()));
+						break;
+					case ITypeInfo::Nullable:
+					case ITypeInfo::TypeDescriptor:
+					case ITypeInfo::Generic:
+						INSTRUCTION(Ins::TryConvertToType(Value::Text, expectedType->GetTypeDescriptor()));
+						break;
+					}
 				}
 			}
 

@@ -255,11 +255,12 @@ ParameterAccessor<TStruct>
 			{
 				static Value BoxValue(const T& object, ITypeDescriptor* typeDescriptor)
 				{
+					typedef ITypedValueSerializer<typename RemoveCVR<T>::Type> TSerializer;
 					if(!typeDescriptor)
 					{
 						typeDescriptor=GetTypeDescriptor<typename TypeInfoRetriver<T>::Type>();
 					}
-					ITypedValueSerializer<T>* serializer=dynamic_cast<ITypedValueSerializer<T>*>(typeDescriptor->GetValueSerializer());
+					TSerializer* serializer=dynamic_cast<TSerializer*>(typeDescriptor->GetValueSerializer());
 					Value result;
 					serializer->Serialize(object, result);
 					return result;

@@ -316,12 +316,17 @@ WfRuntimeThreadContext
 								PushValue(converted);
 								return WfRuntimeExecutionAction::ExecuteInstruction;
 							}
-						case WfInsCode::AssertAsType:
+						case WfInsCode::TryConvertToType:
 							throw 0;
 						case WfInsCode::TestType:
 							throw 0;
 						case WfInsCode::GetType:
-							throw 0;
+							{
+								Value operand;
+								CONTEXT_ACTION(PopValue(operand), L"failed to pop a value from the stack.");
+								PushValue(Value::From(operand.GetTypeDescriptor()));
+								return WfRuntimeExecutionAction::ExecuteInstruction;
+							}
 						case WfInsCode::Jump:
 							throw 0;
 						case WfInsCode::JumpIf:

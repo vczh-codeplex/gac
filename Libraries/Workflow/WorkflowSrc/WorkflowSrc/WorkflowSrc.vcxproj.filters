@@ -1316,6 +1316,9 @@
     <Text Include="..\TestFiles\Samples\Codegen\MapProcessing.txt">
       <Filter>Resource Files\Samples\Codegen</Filter>
     </Text>
+    <Text Include="..\TestFiles\Samples\Codegen\TypeOf.txt">
+      <Filter>Resource Files\Samples\Codegen</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Source\Expression\Codegen.bat">
