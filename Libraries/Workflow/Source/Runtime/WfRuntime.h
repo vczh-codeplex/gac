@@ -40,7 +40,7 @@ Instruction
 				CreateArray,		// count				: Value-1, ..., Value-count -><array>			; {1 2 3} -> <3 2 1>
 				CreateMap,			// count				: Value-1, ..., Value-count -> <map>			; {1:2 3:4} -> <3 4 1 2>
 				ConvertToType,		// flag, typeDescriptor	: Value -> Value								;
-				AssertAsType,		// flag, typeDescriptor	: Value -> Value								;
+				TryConvertToType,	// flag, typeDescriptor	: Value -> Value								;
 				TestType,			// flag, typeDescriptor	: Value -> <bool>								;
 				GetType,			//						: Value -> <ITypeDescriptor*>					;
 				Jump,				// label				: () -> ()										;
@@ -93,7 +93,7 @@ Instruction
 			APPLY_COUNT(CreateArray)\
 			APPLY_COUNT(CreateMap)\
 			APPLY_FLAG_TYPEDESCRIPTOR(ConvertToType)\
-			APPLY_FLAG_TYPEDESCRIPTOR(AssertAsType)\
+			APPLY_FLAG_TYPEDESCRIPTOR(TryConvertToType)\
 			APPLY_FLAG_TYPEDESCRIPTOR(TestType)\
 			APPLY(GetType)\
 			APPLY_LABEL(Jump)\
