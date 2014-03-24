@@ -182,7 +182,7 @@ GenerateInstructions(Statement)
 
 				void Visit(WfRaiseExceptionStatement* node)override
 				{
-					// TODO: Statement
+					// next version
 					throw 0;
 				}
 
@@ -212,7 +212,7 @@ GenerateInstructions(Statement)
 
 				void Visit(WfTryStatement* node)override
 				{
-					// TODO: Statement
+					// next version
 					throw 0;
 				}
 
@@ -472,7 +472,7 @@ GenerateInstructions(Expression)
 					}
 					else if (node->op == WfBinaryOperator::FailedThen)
 					{
-						// TODO: FailedThen
+						// next version: FailedThen
 						throw 0;
 					}
 					else
@@ -581,8 +581,25 @@ GenerateInstructions(Expression)
 
 				void Visit(WfLetExpression* node)override
 				{
-					// TODO: LetExpression
-					throw 0;
+					auto scope = context.manager->expressionScopes[node].Obj();
+					Array<vint> variableIndices(node->variables.Count());
+					auto function = context.functionContext->function;
+					FOREACH_INDEXER(Ptr<WfLetVariable>, var, index, node->variables)
+					{
+						auto symbol = scope->symbols[var->name.value][0];
+						vint variableIndex = function->argumentNames.Count() + function->localVariableNames.Add(L"<let>" + var->name.value);
+						context.functionContext->localVariables.Add(symbol.Obj(), variableIndex);
+						variableIndices[index] = variableIndex;
+
+						GenerateExpressionInstructions(context, var->value);
+						INSTRUCTION(Ins::StoreLocalVar(variableIndex));
+					}
+					GenerateExpressionInstructions(context, node->expression);
+					FOREACH_INDEXER(Ptr<WfLetVariable>, var, index, node->variables)
+					{
+						INSTRUCTION(Ins::LoadValue(Value()));
+						INSTRUCTION(Ins::StoreLocalVar(variableIndices[index]));
+					}
 				}
 
 				void Visit(WfIfExpression* node)override
@@ -671,6 +688,8 @@ GenerateInstructions(Expression)
 						}
 
 						INSTRUCTION(Ins::OpAnd(WfInsType::Bool));
+						INSTRUCTION(Ins::LoadValue(Value()));
+						INSTRUCTION(Ins::StoreLocalVar(index));
 					}
 					else
 					{
