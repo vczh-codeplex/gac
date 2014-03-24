@@ -35,6 +35,7 @@ Instruction
 				LoadGlobalVar,		// variable				: () -> Value									;
 				StoreLocalVar,		// variable				: Value -> ()									;
 				StoreGlobalVar,		// variable				: Value -> ()									;
+				Duplicate,			// count				: () -> Value									; copy stack[stack.Count()-1-count]
 				Pop,				//						: Value -> ()									;
 				Return,				// 						: Value -> Value								; (exit function)
 				CreateArray,		// count				: Value-1, ..., Value-count -> <array>			; {1 2 3} -> <3 2 1>
@@ -90,6 +91,7 @@ Instruction
 			APPLY_VARIABLE(LoadGlobalVar)\
 			APPLY_VARIABLE(StoreLocalVar)\
 			APPLY_VARIABLE(StoreGlobalVar)\
+			APPLY_COUNT(Duplicate)\
 			APPLY(Pop)\
 			APPLY(Return)\
 			APPLY_COUNT(CreateArray)\
@@ -285,6 +287,7 @@ Runtime
 			enum class WfRuntimeThreadContextError
 			{
 				Success,
+				WrongStackItemIndex,
 				WrongVariableIndex,
 				WrongFunctionIndex,
 				WrongArgumentCount,
@@ -321,6 +324,7 @@ Runtime
 				WfRuntimeThreadContextError		PopValue(reflection::description::Value& value);
 				WfRuntimeThreadContextError		RaiseException(const reflection::description::Value& exception);
 
+				WfRuntimeThreadContextError		LoadStackValue(vint stackItemIndex, reflection::description::Value& value);
 				WfRuntimeThreadContextError		LoadGlobalVariable(vint variableIndex, reflection::description::Value& value);
 				WfRuntimeThreadContextError		StoreGlobalVariable(vint variableIndex, const reflection::description::Value& value);
 				WfRuntimeThreadContextError		LoadCapturedVariable(vint variableIndex, reflection::description::Value& value);
