@@ -963,7 +963,7 @@ ValidateSemantic(Expression)
 						case TypeFlag::U2:
 						case TypeFlag::U4:
 						case TypeFlag::U8:
-							;
+							break;
 						default:
 							manager->errors.Add(WfErrors::RangeShouldBeInteger(node, elementType.Obj()));
 						}

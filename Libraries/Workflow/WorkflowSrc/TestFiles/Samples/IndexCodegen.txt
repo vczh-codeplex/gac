@@ -17,3 +17,4 @@ OpCompareReference=false, true, false, false, true, true, false, false, true, tr
 ListProcessing=5, 1, 5, 6, 1, 6
 MapProcessing=5, 1, 5, 6, 1, 6
 TypeOf=true, false, false, true, system::Boolean, system::String
+ElementInSet=true, false, true, false, true, false, false, true, true, false
