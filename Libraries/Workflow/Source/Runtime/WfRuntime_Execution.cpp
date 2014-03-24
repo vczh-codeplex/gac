@@ -333,6 +333,14 @@ WfRuntimeThreadContext
 								CONTEXT_ACTION(StoreGlobalVariable(ins.indexParameter, operand), L"illegal global variable index.");
 								return WfRuntimeExecutionAction::ExecuteInstruction;
 							}
+						case WfInsCode::Duplicate:
+							{
+								vint index = stack.Count() - 1 - ins.countParameter;
+								Value operand;
+								CONTEXT_ACTION(LoadStackValue(index, operand), L"failed to duplicate a value from the stack.");
+								PushValue(operand);
+								return WfRuntimeExecutionAction::ExecuteInstruction;
+							}
 						case WfInsCode::Pop:
 							{
 								Value operand;
@@ -441,7 +449,10 @@ WfRuntimeThreadContext
 						case WfInsCode::JumpIf:
 							throw 0;
 						case WfInsCode::Invoke:
-							throw 0;
+							{
+								CONTEXT_ACTION(PushStackFrame(ins.indexParameter, ins.countParameter), L"failed to invoke a function.");
+								return WfRuntimeExecutionAction::EnterStackFrame;
+							}
 						case WfInsCode::GetProperty:
 							throw 0;
 						case WfInsCode::InvokeMethod:

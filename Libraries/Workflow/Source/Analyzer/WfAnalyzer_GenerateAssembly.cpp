@@ -285,20 +285,13 @@ GenerateInstructions(Expression)
 					}
 					else if ((index = context.functionContext->localVariables.Keys().IndexOf(result.symbol.Obj())) != -1)
 					{
-						vint argumentCount = context.functionContext->function->argumentNames.Count();
 						vint variableIndex = context.functionContext->localVariables.Values()[index];
-						INSTRUCTION(Ins::LoadLocalVar(argumentCount + variableIndex));
+						INSTRUCTION(Ins::LoadLocalVar(variableIndex));
 					}
 					else if ((index = context.functionContext->arguments.Keys().IndexOf(result.symbol.Obj())) != -1)
 					{
 						vint variableIndex = context.functionContext->arguments.Values()[index];
 						INSTRUCTION(Ins::LoadLocalVar(variableIndex));
-					}
-					else if ((index = context.functionContext->localVariables.Keys().IndexOf(result.symbol.Obj())) != -1)
-					{
-						vint argumentCount = context.functionContext->function->argumentNames.Count();
-						vint variableIndex = context.functionContext->localVariables.Values()[index];
-						INSTRUCTION(Ins::LoadLocalVar(argumentCount + variableIndex));
 					}
 					else
 					{
@@ -432,9 +425,11 @@ GenerateInstructions(Expression)
 							auto containerType = result.expectedType ? result.expectedType : result.type;
 							auto methodInfo = containerType->GetTypeDescriptor()->GetMethodGroupByName(L"Set", true)->GetMethod(0);
 							GenerateExpressionInstructions(context, binary->second);
+							INSTRUCTION(Ins::Duplicate(0));
 							GenerateExpressionInstructions(context, node->second);
 							GenerateExpressionInstructions(context, binary->first);
 							INSTRUCTION(Ins::InvokeMethod(methodInfo, 2));
+							INSTRUCTION(Ins::Pop());
 						}
 						else if (auto member = node->first.Cast<WfMemberExpression>())
 						{
@@ -444,6 +439,7 @@ GenerateInstructions(Expression)
 						else
 						{
 							GenerateExpressionInstructions(context, node->second);
+							INSTRUCTION(Ins::Duplicate(0));
 							auto result = context.manager->expressionResolvings[node->first.Obj()];
 							vint index = -1;
 							if ((index = context.globalVariables.Keys().IndexOf(result.symbol.Obj())) != -1)
@@ -453,9 +449,8 @@ GenerateInstructions(Expression)
 							}
 							else if ((index = context.functionContext->localVariables.Keys().IndexOf(result.symbol.Obj())) != -1)
 							{
-								vint argumentCount = context.functionContext->function->argumentNames.Count();
 								vint variableIndex = context.functionContext->localVariables.Values()[index];
-								INSTRUCTION(Ins::StoreLocalVar(argumentCount + variableIndex));
+								INSTRUCTION(Ins::StoreLocalVar(variableIndex));
 							}
 						}
 					}
@@ -847,6 +842,7 @@ GenerateInstructions(Expression)
 						{
 							vint functionIndex = context.globalFunctions.Values()[index];
 							INSTRUCTION(Ins::Invoke(functionIndex, node->arguments.Count()));
+							return;
 						}
 					}
 

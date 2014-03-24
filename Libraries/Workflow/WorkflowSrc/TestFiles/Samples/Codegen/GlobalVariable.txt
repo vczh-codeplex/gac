@@ -7,7 +7,7 @@ func Add(y : int) : int
 {
 	var z = x;
 	x = x + y;
-	return x;
+	return z;
 }
 
 func main():string

@@ -193,9 +193,20 @@ WfRuntimeThreadContext
 
 			WfRuntimeThreadContextError WfRuntimeThreadContext::PushStackFrame(vint functionIndex, vint argumentCount, Ptr<WfRuntimeVariableContext> capturedVariables)
 			{
-				if (stackFrames.Count() == 0 && stack.Count() != 0)
+				if (stackFrames.Count() == 0)
 				{
-					return WfRuntimeThreadContextError::StackCorrupted;
+					if (stack.Count() != 0)
+					{
+						return WfRuntimeThreadContextError::StackCorrupted;
+					}
+				}
+				else
+				{
+					auto& frame = GetCurrentStackFrame();
+					if (stack.Count() - frame.freeStackBase < argumentCount)
+					{
+						return WfRuntimeThreadContextError::StackCorrupted;
+					}
 				}
 				if (functionIndex < 0 || functionIndex >= globalContext->assembly->functions.Count())
 				{
@@ -298,6 +309,19 @@ WfRuntimeThreadContext
 			WfRuntimeThreadContextError WfRuntimeThreadContext::RaiseException(const reflection::description::Value& exception)
 			{
 				exceptionValue = exception;
+				return WfRuntimeThreadContextError::Success;
+			}
+
+			WfRuntimeThreadContextError WfRuntimeThreadContext::LoadStackValue(vint stackItemIndex, reflection::description::Value& value)
+			{
+				if (stackFrames.Count() == 0) return WfRuntimeThreadContextError::EmptyStackFrame;
+				auto frame = GetCurrentStackFrame();
+				if (stackItemIndex < frame.freeStackBase || stackItemIndex >= stack.Count())
+				{
+					return WfRuntimeThreadContextError::WrongVariableIndex;
+				}
+
+				value = stack[stackItemIndex];
 				return WfRuntimeThreadContextError::Success;
 			}
 
