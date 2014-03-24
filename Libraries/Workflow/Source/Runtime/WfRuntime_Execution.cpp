@@ -445,9 +445,20 @@ WfRuntimeThreadContext
 								return WfRuntimeExecutionAction::ExecuteInstruction;
 							}
 						case WfInsCode::Jump:
-							throw 0;
+							{
+								stackFrame.nextInstructionIndex = ins.indexParameter;
+								return WfRuntimeExecutionAction::ExecuteInstruction;
+							}
 						case WfInsCode::JumpIf:
-							throw 0;
+							{
+								Value operand;
+								CONTEXT_ACTION(PopValue(operand), L"failed to pop a value from the stack.");
+								if (UnboxValue<bool>(operand))
+								{
+									stackFrame.nextInstructionIndex = ins.indexParameter;
+								}
+								return WfRuntimeExecutionAction::ExecuteInstruction;
+							}
 						case WfInsCode::Invoke:
 							{
 								CONTEXT_ACTION(PushStackFrame(ins.indexParameter, ins.countParameter), L"failed to invoke a function.");
