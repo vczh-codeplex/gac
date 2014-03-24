@@ -393,24 +393,7 @@ WfRuntimeThreadContext
 						case WfInsCode::TryConvertToType:
 							throw 0;
 						case WfInsCode::TestType:
-							{
-								Value element, set;
-								CONTEXT_ACTION(PopValue(set), L"failed to pop a value from the stack.");
-								CONTEXT_ACTION(PopValue(element), L"failed to pop a value from the stack.");
-
-								auto enumerable = UnboxValue<Ptr<IValueEnumerable>>(set);
-								auto enumerator = enumerable->CreateEnumerator();
-								while (enumerator->Next())
-								{
-									if (enumerator->GetCurrent() == element)
-									{
-										PushValue(BoxValue(true));
-										return WfRuntimeExecutionAction::ExecuteInstruction;
-									}
-								}
-								PushValue(BoxValue(false));
-								return WfRuntimeExecutionAction::ExecuteInstruction;
-							}
+							throw 0;
 						case WfInsCode::GetType:
 							{
 								Value operand;
@@ -459,7 +442,24 @@ WfRuntimeThreadContext
 								return WfRuntimeExecutionAction::ExecuteInstruction;
 							}
 						case WfInsCode::TestElementInSet:
-							throw 0;
+							{
+								Value element, set;
+								CONTEXT_ACTION(PopValue(set), L"failed to pop a value from the stack.");
+								CONTEXT_ACTION(PopValue(element), L"failed to pop a value from the stack.");
+
+								auto enumerable = UnboxValue<Ptr<IValueEnumerable>>(set);
+								auto enumerator = enumerable->CreateEnumerator();
+								while (enumerator->Next())
+								{
+									if (enumerator->GetCurrent() == element)
+									{
+										PushValue(BoxValue(true));
+										return WfRuntimeExecutionAction::ExecuteInstruction;
+									}
+								}
+								PushValue(BoxValue(false));
+								return WfRuntimeExecutionAction::ExecuteInstruction;
+							}
 						case WfInsCode::CompareLiteral:
 							BEGIN_TYPE
 								EXECUTE(OpCompare, Bool)

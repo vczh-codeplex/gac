@@ -618,12 +618,12 @@ GenerateInstructions(Expression)
 							INSTRUCTION(Ins::OpGE());
 						}
 
-						GenerateExpressionInstructions(context, range->end, typeRight);
 						INSTRUCTION(Ins::LoadLocalVar(index));
 						if (!IsSameType(typeElement.Obj(), typeRight.Obj()))
 						{
 							GenerateTypeCastInstructions(context, typeRight, true);
 						}
+						GenerateExpressionInstructions(context, range->end, typeRight);
 						INSTRUCTION(Ins::CompareLiteral(GetInstructionTypeArgument(typeRight)));
 						if (range->endBoundary == WfRangeBoundary::Exclusive)
 						{
