@@ -136,7 +136,7 @@ GenerateInstructions(Statement)
 
 			typedef WfInstruction Ins;
 
-#define INSTRUCTION(X) context.assembly->instructions.Add(X);
+#define INSTRUCTION(X) context.assembly->instructions.Add(X)
 
 			class GenerateStatementInstructionsVisitor : public Object, public WfStatement::IVisitor
 			{
@@ -587,8 +587,14 @@ GenerateInstructions(Expression)
 
 				void Visit(WfIfExpression* node)override
 				{
-					// TODO: IfExpression
-					throw 0;
+					auto result = context.manager->expressionResolvings[node];
+					GenerateExpressionInstructions(context, node->condition);
+					vint fillTrueIndex = INSTRUCTION(Ins::JumpIf(-1));
+					GenerateExpressionInstructions(context, node->falseBranch, result.type);
+					vint fillEndIndex = INSTRUCTION(Ins::Jump(-1));
+					context.assembly->instructions[fillTrueIndex].indexParameter = context.assembly->instructions.Count();
+					GenerateExpressionInstructions(context, node->trueBranch, result.type);
+					context.assembly->instructions[fillEndIndex].indexParameter = context.assembly->instructions.Count();
 				}
 
 				void Visit(WfRangeExpression* node)override
@@ -965,6 +971,8 @@ GetInstructionTypeArgument
 					break;
 				}
 			}
+
+#undef INSTRUCTION
 
 /***********************************************************************
 GenerateTypeCastInstructions
