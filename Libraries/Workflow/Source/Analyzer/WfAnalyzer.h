@@ -261,6 +261,7 @@ Code Generation
 			public:
 				Ptr<runtime::WfAssemblyFunction>	function;
 				VariableIndexMap					capturedVariables;
+				VariableIndexMap					arguments;
 				VariableIndexMap					localVariables;
 				LambdaIndexMap						lambdas;
 				OrderedLambdaIndexMap				orderedLambdas;
