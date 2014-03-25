@@ -473,6 +473,7 @@
     <Text Include="..\TestFiles\Samples\AnalyzerScope\ModuleA.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerScope\ModuleB.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerScope\ModuleC.txt" />
+    <Text Include="..\TestFiles\Samples\Codegen\ControlFlow.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\ElementInSet.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\GlobalVariable.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\HelloWorld.txt" />
