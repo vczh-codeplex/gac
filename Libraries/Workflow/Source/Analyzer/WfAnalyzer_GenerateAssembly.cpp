@@ -253,7 +253,7 @@ GenerateInstructions(Statement)
 
 				void Visit(WfDeleteStatement* node)override
 				{
-					// TODO: Statement
+					// next version
 					throw 0;
 				}
 

@@ -378,6 +378,7 @@ WfRuntimeThreadContext
 									return WfRuntimeExecutionAction::ExecuteInstruction;
 								}
 							case WfInsCode::LoadException:
+								// next version
 								throw 0;
 							case WfInsCode::LoadLocalVar:
 								{
@@ -476,6 +477,9 @@ WfRuntimeThreadContext
 									EXECUTE(OpCreateRange, U4)
 									EXECUTE(OpCreateRange, U8)
 								END_TYPE
+							case WfInsCode::DeleteRawPtr:
+								// next version
+								throw 0;
 							case WfInsCode::ConvertToType:
 								{
 									Value result, converted;
@@ -604,8 +608,10 @@ WfRuntimeThreadContext
 									return WfRuntimeExecutionAction::ExecuteInstruction;
 								}
 							case WfInsCode::AttachEvent:
+								// TODO
 								throw 0;
 							case WfInsCode::DetachEvent:
+								// TODO
 								throw 0;
 							case WfInsCode::InstallTry:
 								throw 0;
@@ -700,6 +706,7 @@ WfRuntimeThreadContext
 									return WfRuntimeExecutionAction::ExecuteInstruction;
 								}
 							case WfInsCode::OpExp:
+								// next version
 								throw 0;
 							case WfInsCode::OpAdd:
 								BEGIN_TYPE
