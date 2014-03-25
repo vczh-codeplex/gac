@@ -28,7 +28,7 @@ Instruction
 				Nop,				// 						: () -> ()										;
 				LoadValue,			// value				: () -> Value									;
 				LoadFunction,		// function				: () -> Value									;
-				LoadLambda,			// function, count		: Value-count, ..., Value-1 -> Value			;
+				LoadLambda,			// function, count		: Value-1, ..., Value-count -> Value			;
 				LoadException,		// 						: () -> Value									;
 				LoadLocalVar,		// variable				: () -> Value									;
 				LoadCapturedVar,	// variable				: () -> Value									;

@@ -195,7 +195,7 @@ WfRuntimeThreadContext
 			{
 				if (stackFrames.Count() == 0)
 				{
-					if (stack.Count() != 0)
+					if (stack.Count() < argumentCount)
 					{
 						return WfRuntimeThreadContextError::StackCorrupted;
 					}
