@@ -253,18 +253,23 @@ Semantic Analyzing
 Code Generation
 ***********************************************************************/
 
+			struct WfCodegenLambdaContext
+			{
+				WfFunctionExpression*				functionExpression = 0;
+				WfOrderedLambdaExpression*			orderedLambdaExpression = 0;
+				WfMemberExpression*					methodReferenceExpression = 0;
+			};
+
 			class WfCodegenFunctionContext
 			{
 				typedef collections::Dictionary<WfLexicalSymbol*, vint>				VariableIndexMap;
-				typedef collections::Dictionary<WfFunctionExpression*, vint>		LambdaIndexMap;
-				typedef collections::Dictionary<WfOrderedLambdaExpression*, vint>	OrderedLambdaIndexMap;
+				typedef collections::Dictionary<vint, WfCodegenLambdaContext>		ClosureIndexMap;
 			public:
 				Ptr<runtime::WfAssemblyFunction>	function;
 				VariableIndexMap					capturedVariables;
 				VariableIndexMap					arguments;
 				VariableIndexMap					localVariables;
-				LambdaIndexMap						lambdas;
-				OrderedLambdaIndexMap				orderedLambdas;
+				ClosureIndexMap						closuresToCodegen;
 			};
 
 			class WfCodegenContext
