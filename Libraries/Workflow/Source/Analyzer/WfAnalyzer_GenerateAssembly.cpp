@@ -291,7 +291,7 @@ GenerateInstructions(Statement)
 						INSTRUCTION(Ins::LoadValue(Value()));
 						INSTRUCTION(Ins::StoreLocalVar(variableIndex));
 					}
-					vint fillEndIndex = INSTRUCTION(Ins::JumpIf(-1));
+					vint fillEndIndex = INSTRUCTION(Ins::Jump(-1));
 					context.assembly->instructions[fillElseIndex].indexParameter = context.assembly->instructions.Count();
 
 					if (node->falseBranch)
@@ -340,6 +340,7 @@ GenerateInstructions(Statement)
 						caseInstructions.Add(INSTRUCTION(Ins::JumpIf(-1)));
 
 						GenerateStatementInstructions(context, switchCase->statement);
+						breakInstructions.Add(INSTRUCTION(Ins::Jump(-1)));
 						caseLabelIndices.Add(context.assembly->instructions.Count());
 					}
 
@@ -408,7 +409,7 @@ GenerateInstructions(Statement)
 					{
 						auto typeArgument = GetInstructionTypeArgument(symbol->typeInfo);
 						vint beginIndex = function->argumentNames.Count() + function->localVariableNames.Add(L"<for-begin>" + node->name.value);
-						vint endIndex = function->argumentNames.Count() + function->localVariableNames.Add(L"<for-begin>" + node->name.value);
+						vint endIndex = function->argumentNames.Count() + function->localVariableNames.Add(L"<for-end>" + node->name.value);
 						GenerateExpressionInstructions(context, range->begin, symbol->typeInfo);
 						if (range->beginBoundary == WfRangeBoundary::Exclusive)
 						{
