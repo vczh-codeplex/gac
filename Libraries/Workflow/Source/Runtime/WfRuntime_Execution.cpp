@@ -16,7 +16,7 @@ WfRuntimeThreadContext (Operations)
 
 #define INTERNAL_ERROR(MESSAGE)\
 				do{\
-					context.RaiseException(BoxValue<WString>(L"Internal error: " MESSAGE));\
+					context.RaiseException(BoxValue<WString>(L"Internal error: " MESSAGE), true);\
 					return WfRuntimeExecutionAction::Nop; \
 				} while (0)\
 
@@ -243,7 +243,7 @@ WfRuntimeThreadContext
 			{
 #define INTERNAL_ERROR(MESSAGE)\
 				do{\
-					RaiseException(BoxValue<WString>(L"Internal error: " MESSAGE));\
+					RaiseException(BoxValue<WString>(L"Internal error: " MESSAGE), true);\
 					return WfRuntimeExecutionAction::Nop; \
 				} while (0)\
 
@@ -501,7 +501,7 @@ WfRuntimeThreadContext
 							{
 								Value operand;
 								CONTEXT_ACTION(PopValue(operand), L"failed to pop a value from the stack.");
-								RaiseException(operand);
+								RaiseException(operand, false);
 								return WfRuntimeExecutionAction::ExecuteInstruction;
 							}
 						case WfInsCode::TestElementInSet:

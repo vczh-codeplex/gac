@@ -273,6 +273,7 @@ Runtime
 				Executing,
 				RaisedException,
 				Finished,
+				FatalError,
 			};
 
 			enum class WfRuntimeExecutionAction
@@ -322,7 +323,7 @@ Runtime
 				WfRuntimeThreadContextError		PopTrapFrame();
 				WfRuntimeThreadContextError		PushValue(const reflection::description::Value& value);
 				WfRuntimeThreadContextError		PopValue(reflection::description::Value& value);
-				WfRuntimeThreadContextError		RaiseException(const reflection::description::Value& exception);
+				WfRuntimeThreadContextError		RaiseException(const reflection::description::Value& exception, bool fatalError);
 
 				WfRuntimeThreadContextError		LoadStackValue(vint stackItemIndex, reflection::description::Value& value);
 				WfRuntimeThreadContextError		LoadGlobalVariable(vint variableIndex, reflection::description::Value& value);
