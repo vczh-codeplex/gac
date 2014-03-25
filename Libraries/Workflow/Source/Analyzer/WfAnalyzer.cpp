@@ -693,6 +693,25 @@ WfLexicalScopeManager
 				USING_PATH_MATCHING_FAILED:;
 				}
 			}
+
+/***********************************************************************
+WfCodegenFunctionContext
+***********************************************************************/
+
+			Ptr<WfCodegenLoopContext> WfCodegenFunctionContext::GetCurrentLoopContext()
+			{
+				return loopContextStack[loopContextStack.Count() - 1];
+			}
+
+/***********************************************************************
+WfCodegenContext
+***********************************************************************/
+
+			WfCodegenContext::WfCodegenContext(Ptr<runtime::WfAssembly> _assembly, WfLexicalScopeManager* _manager)
+				:assembly(_assembly)
+				, manager(_manager)
+			{
+			}
 		}
 	}
 }

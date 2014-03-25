@@ -260,19 +260,30 @@ Code Generation
 				WfMemberExpression*					methodReferenceExpression = 0;
 			};
 
-			class WfCodegenFunctionContext
+			class WfCodegenLoopContext : public Object
+			{
+			public:
+				collections::List<vint>				continueInstructions;
+				collections::List<vint>				breakInstructions;
+			};
+
+			class WfCodegenFunctionContext : public Object
 			{
 				typedef collections::Dictionary<WfLexicalSymbol*, vint>				VariableIndexMap;
 				typedef collections::Dictionary<vint, WfCodegenLambdaContext>		ClosureIndexMap;
+				typedef collections::List<Ptr<WfCodegenLoopContext>>				LoopContextList;
 			public:
 				Ptr<runtime::WfAssemblyFunction>	function;
 				VariableIndexMap					capturedVariables;
 				VariableIndexMap					arguments;
 				VariableIndexMap					localVariables;
 				ClosureIndexMap						closuresToCodegen;
+				LoopContextList						loopContextStack;
+
+				Ptr<WfCodegenLoopContext>			GetCurrentLoopContext();
 			};
 
-			class WfCodegenContext
+			class WfCodegenContext : public Object
 			{
 				typedef collections::Dictionary<WfLexicalSymbol*, vint>				VariableIndexMap;
 				typedef collections::Dictionary<WfLexicalSymbol*, vint>				FunctionIndexMap;
@@ -283,12 +294,7 @@ Code Generation
 				FunctionIndexMap					globalFunctions;
 				Ptr<WfCodegenFunctionContext>		functionContext;
 
-				WfCodegenContext(Ptr<runtime::WfAssembly> _assembly, WfLexicalScopeManager* _manager)
-					:assembly(_assembly)
-					, manager(_manager)
-				{
-
-				}
+				WfCodegenContext(Ptr<runtime::WfAssembly> _assembly, WfLexicalScopeManager* _manager);
 			};
 
 			extern void										GenerateGlobalDeclarationMetadata(WfCodegenContext& context, Ptr<WfDeclaration> declaration, const WString& namePrefix = L"");
