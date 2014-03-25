@@ -79,6 +79,10 @@ GenerateGlobalDeclarationMetadata
 GenerateInstructions(Declaration)
 ***********************************************************************/
 
+			typedef WfInstruction Ins;
+
+#define INSTRUCTION(X) context.assembly->instructions.Add(X)
+
 			class GenerateInstructionsVisitor : public Object, public WfDeclaration::IVisitor
 			{
 			public:
@@ -115,6 +119,20 @@ GenerateInstructions(Declaration)
 					
 					meta->firstInstruction = context.assembly->instructions.Count();
 					GenerateStatementInstructions(context, node->statement);
+					auto returnType = symbol->typeInfo->GetElementType()->GetGenericArgument(0);
+					if (returnType->GetDecorator() == ITypeInfo::TypeDescriptor && returnType->GetTypeDescriptor()->GetValueSerializer())
+					{
+						auto serializer = returnType->GetTypeDescriptor()->GetValueSerializer();
+						auto defaultText = serializer->GetDefaultText();
+						Value result;
+						serializer->Parse(defaultText, result);
+						INSTRUCTION(Ins::LoadValue(result));
+					}
+					else
+					{
+						INSTRUCTION(Ins::LoadValue(Value()));
+					}
+					INSTRUCTION(Ins::Return());
 					meta->lastInstruction = context.assembly->instructions.Count() - 1;
 					context.functionContext = 0;
 
@@ -135,10 +153,6 @@ GenerateInstructions(Declaration)
 /***********************************************************************
 GenerateInstructions(Closure)
 ***********************************************************************/
-
-			typedef WfInstruction Ins;
-
-#define INSTRUCTION(X) context.assembly->instructions.Add(X)
 
 			void GenerateClosureInstructions_Method(WfCodegenContext& context, vint functionIndex, WfMemberExpression* expression)
 			{
@@ -272,7 +286,7 @@ GenerateInstructions(Statement)
 
 				void Visit(WfForEachStatement* node)override
 				{
-					// TODO: Statement
+					// TODO: implement reverse
 					throw 0;
 				}
 
