@@ -64,7 +64,7 @@ func Sum5(start : int, end : int) : int
 			}
 		default:
 			{
-				current = current + end;
+				result = result + current;
 			}
 		}
 		current = current + 1;
