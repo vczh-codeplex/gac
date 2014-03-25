@@ -280,14 +280,137 @@ GenerateInstructions(Statement)
 
 				void Visit(WfWhileStatement* node)override
 				{
-					// TODO: Statement
-					throw 0;
+					vint continueLabelIndex = -1;
+					vint breakLabelIndex = -1;
+					vint loopLabelIndex = -1;
+					auto loopContext = MakePtr<WfCodegenLoopContext>();
+					context.functionContext->loopContextStack.Add(loopContext);
+
+					loopLabelIndex = context.assembly->instructions.Count();
+					continueLabelIndex = context.assembly->instructions.Count();
+					GenerateExpressionInstructions(context, node->condition);
+					INSTRUCTION(Ins::OpNot(WfInsType::Bool));
+					loopContext->breakInstructions.Add(INSTRUCTION(Ins::JumpIf(-1)));
+					GenerateStatementInstructions(context, node->statement);
+					INSTRUCTION(Ins::Jump(loopLabelIndex));
+					breakLabelIndex = context.assembly->instructions.Count();
+
+					FOREACH(vint, index, loopContext->continueInstructions)
+					{
+						context.assembly->instructions[index].indexParameter = continueLabelIndex;
+					}
+					FOREACH(vint, index, loopContext->breakInstructions)
+					{
+						context.assembly->instructions[index].indexParameter = breakLabelIndex;
+					}
+					context.functionContext->loopContextStack.RemoveAt(context.functionContext->loopContextStack.Count() - 1);
 				}
 
 				void Visit(WfForEachStatement* node)override
 				{
-					// TODO: implement reverse
-					throw 0;
+					vint continueLabelIndex = -1;
+					vint breakLabelIndex = -1;
+					vint loopLabelIndex = -1;
+					auto loopContext = MakePtr<WfCodegenLoopContext>();
+					context.functionContext->loopContextStack.Add(loopContext);
+
+					auto scope = context.manager->statementScopes[node].Obj();
+					auto symbol = scope->symbols[node->name.value][0];
+					auto function = context.functionContext->function;
+					vint elementIndex = function->argumentNames.Count() + function->localVariableNames.Add(L"<for>" + node->name.value);
+					context.functionContext->localVariables.Add(symbol.Obj(), elementIndex);
+
+					if (auto range = node->collection.Cast<WfRangeExpression>())
+					{
+						auto typeArgument = GetInstructionTypeArgument(symbol->typeInfo);
+						vint beginIndex = function->argumentNames.Count() + function->localVariableNames.Add(L"<for-begin>" + node->name.value);
+						vint endIndex = function->argumentNames.Count() + function->localVariableNames.Add(L"<for-begin>" + node->name.value);
+						GenerateExpressionInstructions(context, range->begin, symbol->typeInfo);
+						if (range->beginBoundary == WfRangeBoundary::Exclusive)
+						{
+							INSTRUCTION(Ins::LoadValue(BoxValue<vint>(1)));
+							INSTRUCTION(Ins::OpAdd(typeArgument));
+						}
+						INSTRUCTION(Ins::StoreLocalVar(beginIndex));
+						GenerateExpressionInstructions(context, range->end, symbol->typeInfo);
+						if (range->endBoundary == WfRangeBoundary::Exclusive)
+						{
+							INSTRUCTION(Ins::LoadValue(BoxValue<vint>(1)));
+							INSTRUCTION(Ins::OpSub(typeArgument));
+						}
+						INSTRUCTION(Ins::StoreLocalVar(endIndex));
+
+						if (node->direction == WfForEachDirection::Normal)
+						{
+							INSTRUCTION(Ins::LoadLocalVar(beginIndex));
+							INSTRUCTION(Ins::StoreLocalVar(elementIndex));
+							loopLabelIndex = INSTRUCTION(Ins::LoadLocalVar(elementIndex));
+							INSTRUCTION(Ins::LoadLocalVar(endIndex));
+							INSTRUCTION(Ins::CompareLiteral(typeArgument));
+							INSTRUCTION(Ins::OpGT());
+							loopContext->breakInstructions.Add(INSTRUCTION(Ins::JumpIf(-1)));
+						}
+						else
+						{
+							INSTRUCTION(Ins::LoadLocalVar(endIndex));
+							INSTRUCTION(Ins::StoreLocalVar(elementIndex));
+							loopLabelIndex = INSTRUCTION(Ins::LoadLocalVar(elementIndex));
+							INSTRUCTION(Ins::LoadLocalVar(beginIndex));
+							INSTRUCTION(Ins::CompareLiteral(typeArgument));
+							INSTRUCTION(Ins::OpLT());
+							loopContext->breakInstructions.Add(INSTRUCTION(Ins::JumpIf(-1)));
+						}
+						GenerateStatementInstructions(context, node->statement);
+						continueLabelIndex = context.assembly->instructions.Count();
+						if (node->direction == WfForEachDirection::Normal)
+						{
+							INSTRUCTION(Ins::LoadLocalVar(elementIndex));
+							INSTRUCTION(Ins::LoadLocalVar(endIndex));
+							INSTRUCTION(Ins::CompareLiteral(typeArgument));
+							INSTRUCTION(Ins::OpEQ());
+							loopContext->breakInstructions.Add(INSTRUCTION(Ins::JumpIf(-1)));
+							INSTRUCTION(Ins::LoadLocalVar(elementIndex));
+							INSTRUCTION(Ins::LoadValue(BoxValue<vint>(1)));
+							INSTRUCTION(Ins::OpAdd(typeArgument));
+							INSTRUCTION(Ins::StoreLocalVar(elementIndex));
+						}
+						else
+						{
+							INSTRUCTION(Ins::LoadLocalVar(elementIndex));
+							INSTRUCTION(Ins::LoadLocalVar(beginIndex));
+							INSTRUCTION(Ins::CompareLiteral(typeArgument));
+							INSTRUCTION(Ins::OpEQ());
+							loopContext->breakInstructions.Add(INSTRUCTION(Ins::JumpIf(-1)));
+							INSTRUCTION(Ins::LoadLocalVar(elementIndex));
+							INSTRUCTION(Ins::LoadValue(BoxValue<vint>(1)));
+							INSTRUCTION(Ins::OpSub(typeArgument));
+							INSTRUCTION(Ins::StoreLocalVar(elementIndex));
+						}
+						INSTRUCTION(Ins::Jump(loopLabelIndex));
+
+						breakLabelIndex = context.assembly->instructions.Count();
+						INSTRUCTION(Ins::LoadValue(Value()));
+						INSTRUCTION(Ins::StoreLocalVar(beginIndex));
+						INSTRUCTION(Ins::LoadValue(Value()));
+						INSTRUCTION(Ins::StoreLocalVar(endIndex));
+					}
+					else
+					{
+						// TODO: implement enumerable and reverse enumerable
+						throw 0;
+					}
+					INSTRUCTION(Ins::LoadValue(Value()));
+					INSTRUCTION(Ins::StoreLocalVar(elementIndex));
+
+					FOREACH(vint, index, loopContext->continueInstructions)
+					{
+						context.assembly->instructions[index].indexParameter = continueLabelIndex;
+					}
+					FOREACH(vint, index, loopContext->breakInstructions)
+					{
+						context.assembly->instructions[index].indexParameter = breakLabelIndex;
+					}
+					context.functionContext->loopContextStack.RemoveAt(context.functionContext->loopContextStack.Count() - 1);
 				}
 
 				void Visit(WfTryStatement* node)override

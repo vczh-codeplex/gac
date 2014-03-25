@@ -216,8 +216,9 @@ Instruction
 				#undef CTOR_TYPE
 			};
 
-			struct WfAssemblyFunction
+			class WfAssemblyFunction : public Object
 			{
+			public:
 				WString												name;
 				collections::List<WString>							argumentNames;
 				collections::List<WString>							capturedVariableNames;
@@ -226,8 +227,9 @@ Instruction
 				vint												lastInstruction = -1;
 			};
 
-			struct WfAssembly
+			class WfAssembly : public Object
 			{
+			public:
 				collections::List<WString>							variableNames;
 				collections::Dictionary<WString, vint>				functionByName;
 				collections::List<Ptr<WfAssemblyFunction>>			functions;
@@ -238,15 +240,17 @@ Instruction
 Runtime
 ***********************************************************************/
 
-			struct WfRuntimeVariableContext
+			class WfRuntimeVariableContext : public Object
 			{
 				typedef collections::Array<reflection::description::Value>		VariableArray;
 
+			public:
 				VariableArray					variables;
 			};
 
-			struct WfRuntimeGlobalContext
+			class WfRuntimeGlobalContext : public Object
 			{
+			public:
 				Ptr<WfAssembly>					assembly;
 				Ptr<WfRuntimeVariableContext>	globalVariables;
 
