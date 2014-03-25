@@ -659,19 +659,16 @@ FieldInfoImpl
 				{
 					throw ArgumentNullException(L"thisObject");
 				}
-				else if(!thisObject.CanConvertTo(ownerTypeDescriptor, Value::RawPtr))
-				{
-					throw ArgumentTypeMismtatchException(L"thisObject", ownerTypeDescriptor, Value::RawPtr, thisObject);
-				}
-				DescriptableObject* rawThisObject=thisObject.GetRawPtr();
-				if(rawThisObject)
-				{
-					return GetValueInternal(thisObject);
-				}
 				else
 				{
-					return Value();
+					auto td = thisObject.GetTypeDescriptor();
+					auto valueType = td->GetValueSerializer() ? Value::Text : Value::RawPtr;
+					if(!thisObject.CanConvertTo(ownerTypeDescriptor, valueType))
+					{
+						throw ArgumentTypeMismtatchException(L"thisObject", ownerTypeDescriptor, valueType, thisObject);
+					}
 				}
+				return GetValueInternal(thisObject);
 			}
 
 			void FieldInfoImpl::SetValue(Value& thisObject, const Value& newValue)
@@ -680,19 +677,20 @@ FieldInfoImpl
 				{
 					throw ArgumentNullException(L"thisObject");
 				}
-				else if(!thisObject.CanConvertTo(ownerTypeDescriptor, Value::RawPtr))
+				else
 				{
-					throw ArgumentTypeMismtatchException(L"thisObject", ownerTypeDescriptor, Value::RawPtr, thisObject);
+					auto td = thisObject.GetTypeDescriptor();
+					auto valueType = td->GetValueSerializer() ? Value::Text : Value::RawPtr;
+					if(!thisObject.CanConvertTo(ownerTypeDescriptor, valueType))
+					{
+						throw ArgumentTypeMismtatchException(L"thisObject", ownerTypeDescriptor, valueType, thisObject);
+					}
 				}
 				if(!newValue.CanConvertTo(returnInfo.Obj()))
 				{
 					throw ArgumentTypeMismtatchException(L"newValue", returnInfo.Obj(), newValue);
 				}
-				DescriptableObject* rawThisObject=thisObject.GetRawPtr();
-				if(rawThisObject)
-				{
-					SetValueInternal(thisObject, newValue);
-				}
+				SetValueInternal(thisObject, newValue);
 			}
 
 /***********************************************************************

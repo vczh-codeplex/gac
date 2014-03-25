@@ -433,8 +433,13 @@ GenerateInstructions(Expression)
 						}
 						else if (auto member = node->first.Cast<WfMemberExpression>())
 						{
-							// TODO: Property
-							throw 0;
+							auto result = context.manager->expressionResolvings[member.Obj()];
+							auto methodInfo = result.propertyInfo->GetSetter();
+							GenerateExpressionInstructions(context, node->second);
+							INSTRUCTION(Ins::Duplicate(0));
+							GenerateExpressionInstructions(context, member->parent);
+							INSTRUCTION(Ins::InvokeMethod(methodInfo, 1));
+							INSTRUCTION(Ins::Pop());
 						}
 						else
 						{

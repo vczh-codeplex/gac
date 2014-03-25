@@ -465,7 +465,13 @@ WfRuntimeThreadContext
 								return WfRuntimeExecutionAction::EnterStackFrame;
 							}
 						case WfInsCode::GetProperty:
-							throw 0;
+							{
+								Value operand;
+								CONTEXT_ACTION(PopValue(operand), L"failed to pop a value from the stack.");
+								Value result = ins.propertyParameter->GetValue(operand);
+								PushValue(result);
+								return WfRuntimeExecutionAction::ExecuteInstruction;
+							}
 						case WfInsCode::InvokeMethod:
 							{
 								Value thisValue;
