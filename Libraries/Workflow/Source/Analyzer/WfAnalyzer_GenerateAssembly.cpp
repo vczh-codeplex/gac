@@ -117,6 +117,8 @@ GenerateInstructions(Declaration)
 					GenerateStatementInstructions(context, node->statement);
 					meta->lastInstruction = context.assembly->instructions.Count() - 1;
 					context.functionContext = 0;
+
+					GenerateClosureInstructions(context, functionContext);
 				}
 
 				void Visit(WfVariableDeclaration* node)override
@@ -131,12 +133,73 @@ GenerateInstructions(Declaration)
 			}
 
 /***********************************************************************
-GenerateInstructions(Statement)
+GenerateInstructions(Closure)
 ***********************************************************************/
 
 			typedef WfInstruction Ins;
 
 #define INSTRUCTION(X) context.assembly->instructions.Add(X)
+
+			void GenerateClosureInstructions_Method(WfCodegenContext& context, vint functionIndex, WfMemberExpression* expression)
+			{
+				auto result = context.manager->expressionResolvings[expression];
+				auto methodInfo = result.methodInfo;
+				auto meta = context.assembly->functions[functionIndex];
+
+				for (vint j = 0; j < methodInfo->GetParameterCount(); j++)
+				{
+					meta->argumentNames.Add(methodInfo->GetParameter(j)->GetName());
+				}
+				meta->capturedVariableNames.Add(L"<this>");
+
+				meta->firstInstruction = context.assembly->instructions.Count();
+				for (vint j = 0; j < methodInfo->GetParameterCount(); j++)
+				{
+					INSTRUCTION(Ins::LoadLocalVar(j));
+				}
+				INSTRUCTION(Ins::LoadCapturedVar(0));
+				INSTRUCTION(Ins::InvokeMethod(methodInfo, methodInfo->GetParameterCount()));
+				INSTRUCTION(Ins::Return());
+				meta->lastInstruction = context.assembly->instructions.Count() - 1;
+			}
+
+			void GenerateClosureInstructions_Function(WfCodegenContext& context, vint functionIndex, WfFunctionExpression* expression)
+			{
+				// next version
+				throw 0;
+			}
+
+			void GenerateClosureInstructions_Ordered(WfCodegenContext& context, vint functionIndex, WfOrderedLambdaExpression* expression)
+			{
+				// next version
+				throw 0;
+			}
+
+			void GenerateClosureInstructions(WfCodegenContext& context, Ptr<WfCodegenFunctionContext> functionContext)
+			{
+				for (vint i = 0; i < functionContext->closuresToCodegen.Count(); i++)
+				{
+					vint functionIndex = functionContext->closuresToCodegen.Keys()[i];
+					auto closure = functionContext->closuresToCodegen.Values()[i];
+
+					if (closure.methodReferenceExpression)
+					{
+						GenerateClosureInstructions_Method(context, functionIndex, closure.methodReferenceExpression);
+					}
+					else if (closure.functionExpression)
+					{
+						GenerateClosureInstructions_Function(context, functionIndex, closure.functionExpression);
+					}
+					else if (closure.orderedLambdaExpression)
+					{
+						GenerateClosureInstructions_Ordered(context, functionIndex, closure.orderedLambdaExpression);
+					}
+				}
+			}
+
+/***********************************************************************
+GenerateInstructions(Statement)
+***********************************************************************/
 
 			class GenerateStatementInstructionsVisitor : public Object, public WfStatement::IVisitor
 			{
