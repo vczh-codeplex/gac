@@ -948,11 +948,8 @@ GenerateInstructions(Expression)
 						}
 					}
 
-					INSTRUCTION(Ins::CreateArray(node->arguments.Count()));
 					GenerateExpressionInstructions(context, node->function);
-					auto td = description::GetTypeDescriptor<IValueFunctionProxy>();
-					auto method = td->GetMethodGroupByName(L"Invoke", true)->GetMethod(0);
-					INSTRUCTION(Ins::InvokeMethod(method, 1));
+					INSTRUCTION(Ins::InvokeProxy(node->arguments.Count()));
 				}
 
 				void Visit(WfFunctionExpression* node)override
