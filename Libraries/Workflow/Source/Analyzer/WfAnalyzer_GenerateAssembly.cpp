@@ -259,7 +259,7 @@ GenerateInstructions(Statement)
 
 				void Visit(WfRaiseExceptionStatement* node)override
 				{
-					// next version: inline try-finally
+					// next version: inline exit code
 					// next version
 					throw 0;
 				}
@@ -271,6 +271,7 @@ GenerateInstructions(Statement)
 					GenerateExpressionInstructions(context, node->expression);
 					if (node->name.value != L"")
 					{
+						// TODO: test
 						auto scope = context.manager->statementScopes[node];
 						auto symbol = scope->symbols[node->name.value][0];
 						auto function = context.functionContext->function;
@@ -302,8 +303,63 @@ GenerateInstructions(Statement)
 
 				void Visit(WfSwitchStatement* node)override
 				{
-					// TODO: Statement
-					throw 0;
+					auto function = context.functionContext->function;
+					vint variableIndex = function->argumentNames.Count() + function->localVariableNames.Add(L"<switch>");
+					GenerateExpressionInstructions(context, node->expression);
+					INSTRUCTION(Ins::StoreLocalVar(variableIndex));
+
+					List<vint> caseInstructions, caseLabelIndices, breakInstructions;
+					auto expressionResult = context.manager->expressionResolvings[node->expression.Obj()];
+					auto expressionType = expressionResult.expectedType ? expressionResult.expectedType : expressionResult.type;
+					FOREACH(Ptr<WfSwitchCase>, switchCase, node->caseBranches)
+					{
+						auto caseResult = context.manager->expressionResolvings[switchCase->expression.Obj()];
+						auto caseType = caseResult.expectedType ? caseResult.expectedType : caseResult.type;
+						auto mergedType = GetMergedType(expressionType, caseType);
+
+						INSTRUCTION(Ins::LoadLocalVar(variableIndex));
+						if (!IsSameType(expressionType.Obj(), mergedType.Obj()))
+						{
+							GenerateTypeCastInstructions(context, mergedType, true);
+						}
+						GenerateExpressionInstructions(context, switchCase->expression);
+						if (!IsSameType(caseType.Obj(), mergedType.Obj()))
+						{
+							GenerateTypeCastInstructions(context, mergedType, true);
+						}
+						if (mergedType->GetDecorator() == ITypeInfo::RawPtr || mergedType->GetDecorator() == ITypeInfo::SharedPtr)
+						{
+							INSTRUCTION(Ins::CompareReference());
+							INSTRUCTION(Ins::OpNot(WfInsType::Bool));
+						}
+						else
+						{
+							INSTRUCTION(Ins::CompareLiteral(GetInstructionTypeArgument(mergedType)));
+							INSTRUCTION(Ins::OpNE());
+						}
+						caseInstructions.Add(INSTRUCTION(Ins::JumpIf(-1)));
+
+						GenerateStatementInstructions(context, switchCase->statement);
+						caseLabelIndices.Add(context.assembly->instructions.Count());
+					}
+
+					if (node->defaultBranch)
+					{
+						GenerateStatementInstructions(context, node->defaultBranch);
+					}
+					
+					vint breakLabelIndex = context.assembly->instructions.Count();
+					for (vint i = 0; i < caseInstructions.Count(); i++)
+					{
+						context.assembly->instructions[caseInstructions[i]].indexParameter = caseLabelIndices[i];
+					}
+					FOREACH(vint, index, breakInstructions)
+					{
+						context.assembly->instructions[index].indexParameter = breakLabelIndex;
+					}
+					// next version: mark exit code
+					INSTRUCTION(Ins::LoadValue(Value()));
+					INSTRUCTION(Ins::StoreLocalVar(variableIndex));
 				}
 
 				void Visit(WfWhileStatement* node)override
@@ -417,6 +473,7 @@ GenerateInstructions(Statement)
 						INSTRUCTION(Ins::Jump(loopLabelIndex));
 
 						breakLabelIndex = context.assembly->instructions.Count();
+						// next version: mark exit code
 						INSTRUCTION(Ins::LoadValue(Value()));
 						INSTRUCTION(Ins::StoreLocalVar(beginIndex));
 						INSTRUCTION(Ins::LoadValue(Value()));
@@ -427,6 +484,7 @@ GenerateInstructions(Statement)
 						// TODO: implement enumerable and reverse enumerable
 						throw 0;
 					}
+					// next version: mark exit code
 					INSTRUCTION(Ins::LoadValue(Value()));
 					INSTRUCTION(Ins::StoreLocalVar(elementIndex));
 

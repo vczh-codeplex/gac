@@ -78,19 +78,42 @@ WfRuntimeThreadContext (Operators)
 				Value first, second;
 				CONTEXT_ACTION(PopValue(second), L"failed to pop a value from the stack.");
 				CONTEXT_ACTION(PopValue(first), L"failed to pop a value from the stack.");
-				T firstValue = UnboxValue<T>(first);
-				T secondValue = UnboxValue<T>(second);
-				if (firstValue < secondValue)
+
+				bool firstNull = first.GetValueType() == Value::Null;
+				bool secondNull = second.GetValueType() == Value::Null;
+				if (firstNull)
 				{
-					context.PushValue(BoxValue((vint)-1));
-				}
-				else if (firstValue > secondValue)
-				{
-					context.PushValue(BoxValue((vint)1));
+					if (secondNull)
+					{
+						context.PushValue(BoxValue((vint)0));
+					}
+					else
+					{
+						context.PushValue(BoxValue((vint)-1));
+					}
 				}
 				else
 				{
-					context.PushValue(BoxValue((vint)0));
+					if (secondNull)
+					{context.PushValue(BoxValue((vint)1));
+					}
+					else
+					{
+						T firstValue = UnboxValue<T>(first);
+						T secondValue = UnboxValue<T>(second);
+						if (firstValue < secondValue)
+						{
+							context.PushValue(BoxValue((vint)-1));
+						}
+						else if (firstValue > secondValue)
+						{
+							context.PushValue(BoxValue((vint)1));
+						}
+						else
+						{
+							context.PushValue(BoxValue((vint)0));
+						}
+					}
 				}
 				return WfRuntimeExecutionAction::ExecuteInstruction;
 			}
