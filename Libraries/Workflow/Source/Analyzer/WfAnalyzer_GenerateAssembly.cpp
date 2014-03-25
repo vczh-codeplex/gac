@@ -339,8 +339,17 @@ GenerateInstructions(Expression)
 					}
 					else
 					{
-						// TODO: Method
-						throw 0;
+						auto meta = MakePtr<WfAssemblyFunction>();
+						meta->name = result.methodInfo->GetName() + L"<" + result.methodInfo->GetOwnerTypeDescriptor()->GetTypeName() + L">";
+						vint functionIndex = context.assembly->functions.Add(meta);
+						context.assembly->functionByName.Add(meta->name, functionIndex);
+						
+						WfCodegenLambdaContext lc;
+						lc.methodReferenceExpression = node;
+						context.functionContext->closuresToCodegen.Add(functionIndex, lc);
+
+						GenerateExpressionInstructions(context, node->parent);
+						INSTRUCTION(Ins::LoadLambda(functionIndex, 1));
 					}
 				}
 
