@@ -213,19 +213,21 @@ GenerateInstructions(Statement)
 
 				void Visit(WfBreakStatement* node)override
 				{
+					// next version: inline try-finally
 					// TODO: Statement
 					throw 0;
 				}
 
 				void Visit(WfContinueStatement* node)override
 				{
+					// next version: inline try-finally
 					// TODO: Statement
 					throw 0;
 				}
 
 				void Visit(WfReturnStatement* node)override
 				{
-					// TODO: inline try-finally
+					// next version: inline try-finally
 					if (node->expression)
 					{
 						GenerateExpressionInstructions(context, node->expression);
@@ -245,6 +247,7 @@ GenerateInstructions(Statement)
 
 				void Visit(WfRaiseExceptionStatement* node)override
 				{
+					// next version: inline try-finally
 					// next version
 					throw 0;
 				}
