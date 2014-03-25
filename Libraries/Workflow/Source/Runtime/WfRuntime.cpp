@@ -246,7 +246,7 @@ WfRuntimeThreadContext
 				{
 					stack.Add(Value());
 				}
-				if (status == WfRuntimeExecutionStatus::Finished)
+				if (status == WfRuntimeExecutionStatus::Finished || status == WfRuntimeExecutionStatus::FatalError)
 				{
 					status = WfRuntimeExecutionStatus::Ready;
 				}
@@ -306,9 +306,10 @@ WfRuntimeThreadContext
 				return WfRuntimeThreadContextError::Success;
 			}
 
-			WfRuntimeThreadContextError WfRuntimeThreadContext::RaiseException(const reflection::description::Value& exception)
+			WfRuntimeThreadContextError WfRuntimeThreadContext::RaiseException(const reflection::description::Value& exception, bool fatalError)
 			{
 				exceptionValue = exception;
+				status = fatalError ? WfRuntimeExecutionStatus::FatalError : WfRuntimeExecutionStatus::RaisedException;
 				return WfRuntimeThreadContextError::Success;
 			}
 
