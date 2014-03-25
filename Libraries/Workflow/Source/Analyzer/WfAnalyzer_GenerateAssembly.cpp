@@ -228,15 +228,13 @@ GenerateInstructions(Statement)
 				void Visit(WfBreakStatement* node)override
 				{
 					// next version: inline try-finally
-					// TODO: Statement
-					throw 0;
+					context.functionContext->GetCurrentLoopContext()->breakInstructions.Add(INSTRUCTION(Ins::Jump(-1)));
 				}
 
 				void Visit(WfContinueStatement* node)override
 				{
 					// next version: inline try-finally
-					// TODO: Statement
-					throw 0;
+					context.functionContext->GetCurrentLoopContext()->continueInstructions.Add(INSTRUCTION(Ins::Jump(-1)));
 				}
 
 				void Visit(WfReturnStatement* node)override
@@ -268,8 +266,38 @@ GenerateInstructions(Statement)
 
 				void Visit(WfIfStatement* node)override
 				{
-					// TODO: Statement
-					throw 0;
+					vint variableIndex = -1;
+
+					GenerateExpressionInstructions(context, node->expression);
+					if (node->name.value != L"")
+					{
+						auto scope = context.manager->statementScopes[node];
+						auto symbol = scope->symbols[node->name.value][0];
+						auto function = context.functionContext->function;
+						variableIndex = function->argumentNames.Count() + function->localVariableNames.Add(L"<if>" + node->name.value);
+						context.functionContext->localVariables.Add(symbol.Obj(), variableIndex);
+						INSTRUCTION(Ins::StoreLocalVar(variableIndex));
+						INSTRUCTION(Ins::LoadLocalVar(variableIndex));
+						INSTRUCTION(Ins::LoadValue(Value()));
+						INSTRUCTION(Ins::CompareReference());
+					}
+					INSTRUCTION(Ins::OpNot(WfInsType::Bool));
+					vint fillElseIndex = INSTRUCTION(Ins::JumpIf(-1));
+
+					GenerateStatementInstructions(context, node->trueBranch);
+					if (variableIndex != -1)
+					{
+						INSTRUCTION(Ins::LoadValue(Value()));
+						INSTRUCTION(Ins::StoreLocalVar(variableIndex));
+					}
+					vint fillEndIndex = INSTRUCTION(Ins::JumpIf(-1));
+					context.assembly->instructions[fillElseIndex].indexParameter = context.assembly->instructions.Count();
+
+					if (node->falseBranch)
+					{
+						GenerateStatementInstructions(context, node->falseBranch);
+					}
+					context.assembly->instructions[fillEndIndex].indexParameter = context.assembly->instructions.Count();
 				}
 
 				void Visit(WfSwitchStatement* node)override
