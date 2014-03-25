@@ -553,6 +553,39 @@ WfRuntimeThreadContext
 									PushValue(result);
 									return WfRuntimeExecutionAction::ExecuteInstruction;
 								}
+							case WfInsCode::InvokeProxy:
+								{
+									Value thisValue;
+									CONTEXT_ACTION(PopValue(thisValue), L"failed to pop a value from the stack.");
+									auto proxy = UnboxValue<Ptr<IValueFunctionProxy>>(thisValue);
+									if (!proxy)
+									{
+										INTERNAL_ERROR(L"failed to invoke a null function proxy.");
+										return WfRuntimeExecutionAction::Nop;
+									}
+
+									if (auto lambda = proxy.Cast<WfRuntimeLambda>())
+									{
+										if (lambda->globalContext == globalContext)
+										{
+											CONTEXT_ACTION(PushStackFrame(lambda->functionIndex, ins.countParameter, lambda->capturedVariables), L"failed to invoke a function.");
+											return WfRuntimeExecutionAction::EnterStackFrame;
+										}
+									}
+
+									List<Value> arguments;
+									for (vint i = 0; i < ins.countParameter; i++)
+									{
+										Value argument;
+										CONTEXT_ACTION(PopValue(argument), L"failed to pop a value from the stack.");
+										arguments.Insert(0, argument);
+									}
+
+									Ptr<IValueList> list = new ValueListWrapper<List<Value>*>(&arguments);
+									Value result = proxy->Invoke(list);
+									PushValue(result);
+									return WfRuntimeExecutionAction::ExecuteInstruction;
+								}
 							case WfInsCode::InvokeMethod:
 								{
 									Value thisValue;
