@@ -379,21 +379,19 @@ WfRuntimeThreadContext
 							case WfInsCode::LoadValue:
 								PushValue(ins.valueParameter);
 								return WfRuntimeExecutionAction::ExecuteInstruction;
-							case WfInsCode::LoadFunction:
+							case WfInsCode::LoadClosure:
 								{
-									auto lambda = MakePtr<WfRuntimeLambda>(globalContext, nullptr, ins.indexParameter);
-									PushValue(Value::From(lambda));
-									return WfRuntimeExecutionAction::ExecuteInstruction;
-								}
-							case WfInsCode::LoadLambda:
-								{
-									auto capturedVariables = MakePtr<WfRuntimeVariableContext>();
-									capturedVariables->variables.Resize(ins.countParameter);
-									Value operand;
-									for (vint i = 0; i < ins.countParameter; i++)
+									Ptr<WfRuntimeVariableContext> capturedVariables;
+									if (ins.countParameter > 0)
 									{
-										CONTEXT_ACTION(PopValue(operand), L"failed to pop a value from the stack.");
-										capturedVariables->variables[ins.countParameter - 1 - i] = operand;
+										capturedVariables = new WfRuntimeVariableContext;
+										capturedVariables->variables.Resize(ins.countParameter);
+										Value operand;
+										for (vint i = 0; i < ins.countParameter; i++)
+										{
+											CONTEXT_ACTION(PopValue(operand), L"failed to pop a value from the stack.");
+											capturedVariables->variables[ins.countParameter - 1 - i] = operand;
+										}
 									}
 
 									auto lambda = MakePtr<WfRuntimeLambda>(globalContext, capturedVariables, ins.indexParameter);
