@@ -550,8 +550,9 @@ GenerateInstructions(Statement)
 					}
 					else
 					{
-						// TODO: implement enumerable and reverse enumerable
-						throw 0;
+						// TODO: implement reverse enumerable
+						vint enumerableIndex = function->argumentNames.Count() + function->localVariableNames.Add(L"<for-enumerable>" + node->name.value);
+						vint enumeratorIndex = function->argumentNames.Count() + function->localVariableNames.Add(L"<for-enumerator>" + node->name.value);
 					}
 					// next version: mark exit code
 					INSTRUCTION(Ins::LoadValue(Value()));
