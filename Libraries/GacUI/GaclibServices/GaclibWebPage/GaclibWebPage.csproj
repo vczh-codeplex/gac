@@ -185,6 +185,7 @@
     <Content Include="Content\Demos\Controls.TextBox.Editor\DXGUI_34.jpg" />
     <Content Include="Content\Demos\Controls.TextBox.Editor\Main.cpp" />
     <Content Include="Content\Demos\Demos.Editor.Toolstrip.Document.jpg" />
+    <Content Include="Content\Demos\Demos.Persistant.DirectCode.Scripting.jpg" />
     <Content Include="Content\Demos\Demos.Persistant.LoadFromXml.Controls.jpg" />
     <Content Include="Content\Demos\Editor.Toolstrip.Document\DocumentEditorWindow.cpp" />
     <Content Include="Content\Demos\Editor.Toolstrip.Document\DocumentEditorWindow.h" />
@@ -246,6 +247,9 @@
     <Content Include="Content\Demos\Index.xml">
       <SubType>Designer</SubType>
     </Content>
+    <Content Include="Content\Demos\Persistant.DirectCode.Scripting\DXGUI_89.jpg" />
+    <Content Include="Content\Demos\Persistant.DirectCode.Scripting\DXGUI_90.jpg" />
+    <Content Include="Content\Demos\Persistant.DirectCode.Scripting\Main.cpp" />
     <Content Include="Content\Demos\Persistant.DirectCode.SimpleWindow\DXGUI_62.jpg" />
     <Content Include="Content\Demos\Persistant.DirectCode.SimpleWindow\DXGUI_63.jpg" />
     <Content Include="Content\Demos\Persistant.DirectCode.SimpleWindow\Main.cpp" />
@@ -255,6 +259,7 @@
     <Content Include="Content\Demos\Persistant.LoadFromXml.Controls\DXGUI_87.jpg" />
     <Content Include="Content\Demos\Persistant.LoadFromXml.Controls\DXGUI_88.jpg" />
     <Content Include="Content\Demos\Persistant.LoadFromXml.Controls\Main.cpp" />
+    <Content Include="Content\Demos\Persistant.LoadFromXml.Controls\XmlWindowResource.xml" />
     <Content Include="Content\Demos\Rendering.RawAPI.Direct2D\DXGUI_58.jpg" />
     <Content Include="Content\Demos\Rendering.RawAPI.Direct2D\Main.cpp" />
     <Content Include="Content\Demos\Rendering.RawAPI.GDI\DXGUI_59.jpg" />
