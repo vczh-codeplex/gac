@@ -151,6 +151,7 @@
     <ClCompile Include="..\..\Source\Console.cpp" />
     <ClCompile Include="..\..\Source\Exception.cpp" />
     <ClCompile Include="..\..\Source\GlobalStorage.cpp" />
+    <ClCompile Include="..\..\Source\HttpUtility.cpp" />
     <ClCompile Include="..\..\Source\Locale.cpp" />
     <ClCompile Include="..\..\Source\Parsing\Json\ParsingJson.cpp" />
     <ClCompile Include="..\..\Source\Parsing\Json\ParsingJson_Parser.cpp" />
@@ -230,6 +231,7 @@
     <ClInclude Include="..\..\Source\Exception.h" />
     <ClInclude Include="..\..\Source\Function.h" />
     <ClInclude Include="..\..\Source\GlobalStorage.h" />
+    <ClInclude Include="..\..\Source\HttpUtility.h" />
     <ClInclude Include="..\..\Source\Lazy.h" />
     <ClInclude Include="..\..\Source\Locale.h" />
     <ClInclude Include="..\..\Source\Parsing\Json\ParsingJson.h" />

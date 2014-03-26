@@ -1,8 +1,9 @@
+#include "Threading.h"
+#include "Collections\List.h"
+
 #ifdef VCZH_MSVC
 #include <Windows.h>
 #include <intrin.h>
-#include "Threading.h"
-#include "Collections\List.h"
 
 namespace vl
 {
