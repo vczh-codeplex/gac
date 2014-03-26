@@ -1,10 +1,10 @@
 #ifndef VCZH_HTTPUTILITY
 #define VCZH_HTTPUTILITY
 
-#ifdef VCZH_MSVC
-
 #include "String.h"
 #include "Collections\Dictionary.h"
+
+#ifdef VCZH_MSVC
 
 namespace vl
 {

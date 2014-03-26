@@ -237,6 +237,9 @@
     <ClCompile Include="..\..\Source\Reflection\GuiTypeDescriptorBuilder_Container.h">
       <Filter>Common\Reflection</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\HttpUtility.cpp">
+      <Filter>Common\Basic</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Source\Basic.h">
@@ -424,6 +427,9 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Reflection\GuiTypeDescriptorBuilder_Struct.h">
       <Filter>Common\Reflection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\HttpUtility.h">
+      <Filter>Common\Basic</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

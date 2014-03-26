@@ -14,11 +14,11 @@ Classes:
 #ifndef VCZH_THREADING
 #define VCZH_THREADING
 
-#ifdef VCZH_MSVC
-
 #include "Basic.h"
 #include "String.h"
 #include "Function.h"
+
+#ifdef VCZH_MSVC
 
 namespace vl
 {
