@@ -1991,6 +1991,17 @@ Runtime
 				WfRuntimeExecutionAction		Execute();
 				void							ExecuteToEnd();
 			};
+
+			extern Ptr<reflection::description::IValueFunctionProxy>		LoadFunction(Ptr<WfRuntimeGlobalContext> context, const WString& name);
+
+			template<typename TFunction>
+			Func<TFunction> LoadFunction(Ptr<WfRuntimeGlobalContext> context, const WString& name)
+			{
+				auto proxy = LoadFunction(context, name);
+				Func<TFunction> function;
+				UnboxParameter<Func<TFunction>>(Value::From(proxy), function);
+				return function;
+			}
 		}
 	}
 }
