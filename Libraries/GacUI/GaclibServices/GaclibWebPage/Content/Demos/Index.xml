@@ -242,7 +242,7 @@
       <image src="DXGUI_87.jpg" />
       <image src="DXGUI_88.jpg" />
       <cpp src="Main.cpp" />
-      <xml src="XmlWindowResource.xml"/>
+      <cpp src="XmlWindowResource.xml"/>
       <description>This demo shows how to load windows or controls from an XML resource.</description>
     </demo>
     <demo name="DirectCode.Scripting">
