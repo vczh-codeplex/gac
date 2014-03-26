@@ -28,12 +28,20 @@
                 <p>This feature is similar to XAML in WPF, which containing loading windows and controls from an XML resource, data binding, view model supports, customizable control template, etc. This feature is already under development, and an editor will be provided in future releases.</p>
             </li>
             <li>
+                <strong>Reflection and scripting</strong>
+                <p>GacUI provides libraries which enable you to make your C++ classes reflectable, so that they can be accessed using the Workflow script and the XML resource.</p>
+            </li>
+            <li>
                 <strong>MVC concept supports</strong>
                 <p>GacUI is built with the MVC pattern, from the control framework to specific controls. MVC decouples controls from styles. And for controls in the toolstrip control package, like menu, menubar and toolbar, MVC decouples controls from command states.</p>
                 <p>For some repeated items containers like list view, tree view or combo box, GacUI provides specific MVC supports to decouple data source, item style and item arranger.</p>
                 <p>This features is important for displaying large data set. For example, if an item is displayed as a button, the list view control will only creates buttons for visible items. Invisible items doesn't really create buttons for displaying them. When user scrolls, data source, item style and item arranger will cooperate together to display correct items in correct positions.</p>
                 <p>If the data is too large to store in the memory, this mechanism enables programmers to load necessary data only from files. The application can use only a little memory to show such large data smoothly. MVC supporting makes programmers very easy to do that.</p>
                 <p>MVC supports also included in the <b>XML resource supports</b>.</p>
+            </li>
+            <li>
+                <strong>Crossing platforms</strong>
+                <p>Part of this library is compilable under <strong>Linux</strong>. See <a href="@Url.Action("GettingStart")">the Getting Start section</a> for details.</p>
             </li>
         </ul>
     </td>
@@ -54,18 +62,6 @@
                     <p>@Model.LatestUpdateDemo.Description</p>
                     <a class="ReadMoreLink" href="@url">Read more...</a>
                 }
-                </td>
-            </tr>
-            <tr class="GuideTableBody">
-                <td align="left" valign="top">
-                    <strong>We provide mirror sites for people in different regions.</strong>
-                    <p>
-                    @foreach(var site in Model.MirrorSites)
-                    {
-                        <a href="@site.Url" target="_blank">@site.Url</a><br />
-                        @:&nbsp;&nbsp;&nbsp;&nbsp;(@site.Description)<br />
-                    }
-                    </p>
                 </td>
             </tr>
             <tr class="GuideTableSeparator">
