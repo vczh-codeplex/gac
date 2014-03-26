@@ -3088,6 +3088,8 @@ HTTPUTILITY.H
 #define VCZH_HTTPUTILITY
 
 
+#ifdef VCZH_MSVC
+
 namespace vl
 {
 
@@ -3134,6 +3136,8 @@ HTTP Utility
 	extern bool				HttpQuery(const HttpRequest& request, HttpResponse& response);
 	extern WString			UrlEncodeQuery(const WString& query);
 }
+
+#endif
 
 #endif
 
@@ -14041,6 +14045,8 @@ Classes:
 #define VCZH_THREADING
 
 
+#ifdef VCZH_MSVC
+
 namespace vl
 {
 
@@ -14379,6 +14385,8 @@ RepeatingTaskExecutor
 		}
 	};
 }
+
+#endif
 
 #endif
 

@@ -1999,7 +1999,7 @@ Runtime
 			{
 				auto proxy = LoadFunction(context, name);
 				Func<TFunction> function;
-				UnboxParameter<Func<TFunction>>(Value::From(proxy), function);
+				reflection::description::UnboxParameter<Func<TFunction>>(reflection::description::Value::From(proxy), function);
 				return function;
 			}
 		}

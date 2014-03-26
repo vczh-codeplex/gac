@@ -445,6 +445,8 @@ ParsingException
 /***********************************************************************
 HttpUtility.cpp
 ***********************************************************************/
+
+#ifdef VCZH_MSVC
 #include <winhttp.h>
 
 #pragma comment(lib, "WinHttp.lib")
@@ -781,6 +783,7 @@ Utilities
 		return result;
 	}
 }
+#endif
 
 /***********************************************************************
 Locale.cpp
@@ -22077,6 +22080,8 @@ namespace vl
 Threading.cpp
 ***********************************************************************/
 
+#ifdef VCZH_MSVC
+
 namespace vl
 {
 	using namespace threading_internal;
@@ -22927,3 +22932,4 @@ SpinLock
 		_InterlockedExchange(&token, 0);
 	}
 }
+#endif
