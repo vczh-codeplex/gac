@@ -478,6 +478,7 @@
     <Text Include="..\TestFiles\Samples\Codegen\Event.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\GlobalVariable.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\HelloWorld.txt" />
+    <Text Include="..\TestFiles\Samples\Codegen\IfNotNull.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\LetIn.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\ListProcessing.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\MapProcessing.txt" />
