@@ -1,3 +1,4 @@
+#ifdef VCZH_MSVC
 #include <Windows.h>
 #include <intrin.h>
 #include "Threading.h"
@@ -853,3 +854,4 @@ SpinLock
 		_InterlockedExchange(&token, 0);
 	}
 }
+#endif

@@ -1,3 +1,4 @@
+#ifdef VCZH_MSVC
 #include "HttpUtility.h"
 #include "Collections\OperationForEach.h"
 #include <Windows.h>
@@ -337,3 +338,4 @@ Utilities
 		return result;
 	}
 }
+#endif

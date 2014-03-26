@@ -14,7 +14,7 @@ VLPP_REFLECTION_OBJS = $(OBJ)GuiTypeDescriptor.o $(OBJ)GuiTypeDescriptorBuilder.
 
 VLPP_PARSING_OBJS = $(OBJ)Parsing.o $(OBJ)ParsingAnalyzer.o $(OBJ)ParsingAutomaton.o $(OBJ)ParsingAutomaton_Closure.o $(OBJ)ParsingAutomaton_EPDA.o $(OBJ)ParsingAutomaton_GenerateTable.o $(OBJ)ParsingAutomaton_JPDA.o $(OBJ)ParsingAutomaton_MergeStates.o $(OBJ)ParsingAutomaton_NPDA.o $(OBJ)ParsingDefinitions.o $(OBJ)ParsingDefinitions_CreateParserDefinition.o $(OBJ)ParsingLogging.o $(OBJ)ParsingState.o $(OBJ)ParsingTable.o $(OBJ)ParsingTree.o $(OBJ)ParsingJson.o $(OBJ)ParsingJson_Parser.o $(OBJ)ParsingXml.o $(OBJ)ParsingXml_Parser.o
 
-VLPP_OBJS = $(OBJ)Basic.o $(OBJ)String.o $(OBJ)Console.o $(OBJ)GlobalStorage.o $(OBJ)Exception.o $(OBJ)Locale.o $(OBJ)UnitTest.o $(VLPP_STREAM_OBJS) $(VLPP_REGEX_OBJS) $(VLPP_REFLECTION_OBJS) $(VLPP_PARSING_OBJS)
+VLPP_OBJS = $(OBJ)Basic.o $(OBJ)String.o $(OBJ)Console.o $(OBJ)GlobalStorage.o $(OBJ)Exception.o $(OBJ)Locale.o $(OBJ)HttpUtility.o $(OBJ)Threading.o $(OBJ)UnitTest.o $(VLPP_STREAM_OBJS) $(VLPP_REGEX_OBJS) $(VLPP_REFLECTION_OBJS) $(VLPP_PARSING_OBJS)
 
 UNITTEST_OBJS = $(OBJ)TestBasic.o $(OBJ)TestString.o $(OBJ)TestList.o $(OBJ)TestFunction.o $(OBJ)TestGlobalStorage.o $(OBJ)TestStream.o $(OBJ)TestRegex.o $(OBJ)TestReflection.o $(OBJ)TestParsing.o $(OBJ)Parser.Calculator.o
 
@@ -29,6 +29,8 @@ all:
 	$(CPP)		-o $(OBJ)GlobalStorage.o		-c $(VLPP)GlobalStorage.cpp
 	$(CPP)		-o $(OBJ)Exception.o			-c $(VLPP)Exception.cpp
 	$(CPP)		-o $(OBJ)Locale.o			-c $(VLPP)Locale.cpp
+	$(CPP)		-o $(OBJ)HttpUtility.o			-c $(VLPP)HttpUtility.cpp
+	$(CPP)		-o $(OBJ)Threading.o			-c $(VLPP)Threading.cpp
 	$(CPP)		-o $(OBJ)UnitTest.o			-c $(VLPP)UnitTest/UnitTest.cpp
 	$(CPP)		-o $(OBJ)Accessor.o			-c $(VLPP)Stream/Accessor.cpp
 	$(CPP)		-o $(OBJ)BroadcastStream.o		-c $(VLPP)Stream/BroadcastStream.cpp
