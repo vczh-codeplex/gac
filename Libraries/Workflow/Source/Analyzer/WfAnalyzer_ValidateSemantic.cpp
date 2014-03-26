@@ -454,6 +454,28 @@ ValidateSemantic(Expression)
 							results.Add(ResolveExpressionResult(scopeName->children.Values()[index]));
 							return;
 						}
+
+						if (scopeName->typeDescriptor)
+						{
+							if (auto group = scopeName->typeDescriptor->GetMethodGroupByName(node->name.value, true))
+							{
+								bool found = false;
+								for (vint i = 0; i < group->GetMethodCount(); i++)
+								{
+									auto info = group->GetMethod(i);
+									if (info->IsStatic())
+									{
+										found = true;
+										results.Add(ResolveExpressionResult(info, CreateTypeInfoFromMethodInfo(info)));
+									}
+								}
+
+								if (found)
+								{
+									return;
+								}
+							}
+						}
 						manager->errors.Add(WfErrors::ChildSymbolNotExists(node, scopeName, node->name.value));
 					}
 				}

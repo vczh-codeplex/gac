@@ -497,6 +497,7 @@
     <Text Include="..\TestFiles\Samples\Codegen\OpXor.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\Property.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\RecursiveFunction.txt" />
+    <Text Include="..\TestFiles\Samples\Codegen\StaticMethod.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\TypeOf.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\TypeTesting.txt" />
     <Text Include="..\TestFiles\Samples\Declaration\Function.txt" />
