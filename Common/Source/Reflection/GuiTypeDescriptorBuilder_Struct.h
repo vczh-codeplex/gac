@@ -268,7 +268,8 @@ ParameterAccessor<TStruct>
 
 				static T UnboxValue(const Value& value, ITypeDescriptor* typeDescriptor, const WString& valueName)
 				{
-					ITypedValueSerializer<T>* serializer=dynamic_cast<ITypedValueSerializer<T>*>(value.GetTypeDescriptor()->GetValueSerializer());
+					ITypeDescriptor* valueTd = value.GetTypeDescriptor();
+					ITypedValueSerializer<T>* serializer = valueTd ? dynamic_cast<ITypedValueSerializer<T>*>(valueTd->GetValueSerializer()) : 0;
 					if(!serializer)
 					{
 						if(!typeDescriptor)

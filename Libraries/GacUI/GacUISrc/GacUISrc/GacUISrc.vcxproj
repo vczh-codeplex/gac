@@ -269,7 +269,14 @@
     <ClCompile Include="..\..\..\Workflow\Source\Analyzer\WfAnalyzer_ValidateSemantic.cpp" />
     <ClCompile Include="..\..\..\Workflow\Source\Analyzer\WfAnalyzer_ValidateStructure.cpp" />
     <ClCompile Include="..\..\..\Workflow\Source\Expression\WfExpression.cpp" />
-    <ClCompile Include="..\..\..\Workflow\Source\Expression\WfExpressionParser.cpp" />
+    <ClCompile Include="..\..\..\Workflow\Source\Expression\WfExpressionParser.cpp">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='DebugNoReflection|Win32'">/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='DebugNoReflection|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
     <ClCompile Include="..\..\..\Workflow\Source\Runtime\WfRuntime.cpp" />
     <ClCompile Include="..\..\..\Workflow\Source\Runtime\WfRuntime_Execution.cpp" />
     <ClCompile Include="..\..\Source\Controls\GuiApplication.cpp" />
