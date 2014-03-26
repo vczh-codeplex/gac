@@ -1,6 +1,8 @@
 #ifndef VCZH_HTTPUTILITY
 #define VCZH_HTTPUTILITY
 
+#ifdef VCZH_MSVC
+
 #include "String.h"
 #include "Collections\Dictionary.h"
 
@@ -50,5 +52,7 @@ HTTP Utility
 	extern bool				HttpQuery(const HttpRequest& request, HttpResponse& response);
 	extern WString			UrlEncodeQuery(const WString& query);
 }
+
+#endif
 
 #endif
