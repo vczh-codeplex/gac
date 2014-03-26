@@ -550,9 +550,39 @@ GenerateInstructions(Statement)
 					}
 					else
 					{
-						// TODO: implement reverse enumerable
 						vint enumerableIndex = function->argumentNames.Count() + function->localVariableNames.Add(L"<for-enumerable>" + node->name.value);
 						vint enumeratorIndex = function->argumentNames.Count() + function->localVariableNames.Add(L"<for-enumerator>" + node->name.value);
+						auto methodCreateEnumerator = description::GetTypeDescriptor<IValueEnumerable>()->GetMethodGroupByName(L"CreateEnumerator", true)->GetMethod(0);
+						auto methodNext = description::GetTypeDescriptor<IValueEnumerator>()->GetMethodGroupByName(L"Next", true)->GetMethod(0);
+						auto methodGetCurrent = description::GetTypeDescriptor<IValueEnumerator>()->GetMethodGroupByName(L"GetCurrent", true)->GetMethod(0);
+
+						GenerateExpressionInstructions(context, node->collection);
+						if (node->direction == WfForEachDirection::Reversed)
+						{
+							INSTRUCTION(Ins::ReverseEnumerable());
+						}
+						INSTRUCTION(Ins::StoreLocalVar(enumerableIndex));
+						INSTRUCTION(Ins::LoadLocalVar(enumerableIndex));
+						INSTRUCTION(Ins::InvokeMethod(methodCreateEnumerator, 0));
+						INSTRUCTION(Ins::StoreLocalVar(enumeratorIndex));
+						
+						loopLabelIndex = INSTRUCTION(Ins::LoadLocalVar(elementIndex));
+						INSTRUCTION(Ins::LoadLocalVar(enumeratorIndex));
+						INSTRUCTION(Ins::InvokeMethod(methodNext, 0));
+						loopContext->breakInstructions.Add(INSTRUCTION(Ins::JumpIf(-1)));
+						INSTRUCTION(Ins::LoadLocalVar(enumeratorIndex));
+						INSTRUCTION(Ins::InvokeMethod(methodGetCurrent, 0));
+						INSTRUCTION(Ins::StoreLocalVar(elementIndex));
+						GenerateStatementInstructions(context, node->statement);
+						continueLabelIndex = context.assembly->instructions.Count();
+						INSTRUCTION(Ins::Jump(loopLabelIndex));
+
+						breakLabelIndex = context.assembly->instructions.Count();
+						// next version: mark exit code
+						INSTRUCTION(Ins::LoadValue(Value()));
+						INSTRUCTION(Ins::StoreLocalVar(enumerableIndex));
+						INSTRUCTION(Ins::LoadValue(Value()));
+						INSTRUCTION(Ins::StoreLocalVar(enumeratorIndex));
 					}
 					// next version: mark exit code
 					INSTRUCTION(Ins::LoadValue(Value()));
@@ -1457,16 +1487,16 @@ GenerateAssembly
 					}
 				}
 
-				for (vint i = 0; i < assembly->instructions.Count(); i++)
-				{
-					WfInstruction& ins = assembly->instructions[i];
-					switch (ins.code)
-					{
-					case WfInsCode::LoadClosure:
-						ins.countParameter = assembly->functions[ins.indexParameter]->capturedVariableNames.Count();
-						break;
-					}
-				}
+				//for (vint i = 0; i < assembly->instructions.Count(); i++)
+				//{
+				//	WfInstruction& ins = assembly->instructions[i];
+				//	switch (ins.code)
+				//	{
+				//	case WfInsCode::LoadClosure:
+				//		ins.countParameter = assembly->functions[ins.indexParameter]->capturedVariableNames.Count();
+				//		break;
+				//	}
+				//}
 				return assembly;
 			}
 

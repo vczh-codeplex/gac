@@ -40,6 +40,7 @@ Instruction
 				CreateArray,		// count				: Value-count, ..., Value-1 -> <array>			; {1 2 3} -> <3 2 1>
 				CreateMap,			// count				: Value-count, ..., Value-1 -> <map>			; {1:2 3:4} -> <3 4 1 2>
 				CreateRange,		// I1248/U1248			: Value-begin, Value-end -> <enumerable>		;
+				ReverseEnumerable,	//						: Value -> Value								;
 				DeleteRawPtr,		//						: Value -> ()									;
 				ConvertToType,		// flag, typeDescriptor	: Value -> Value								;
 				TryConvertToType,	// flag, typeDescriptor	: Value -> Value								;
@@ -97,6 +98,7 @@ Instruction
 			APPLY_COUNT(CreateArray)\
 			APPLY_COUNT(CreateMap)\
 			APPLY_TYPE(CreateRange)\
+			APPLY(ReverseEnumerable)\
 			APPLY(DeleteRawPtr)\
 			APPLY_FLAG_TYPEDESCRIPTOR(ConvertToType)\
 			APPLY_FLAG_TYPEDESCRIPTOR(TryConvertToType)\

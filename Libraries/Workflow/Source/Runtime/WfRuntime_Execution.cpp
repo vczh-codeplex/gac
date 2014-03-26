@@ -258,6 +258,66 @@ WfRuntimeThreadContext (Range)
 			}
 			
 /***********************************************************************
+WfRuntimeThreadContext (ReverseEnumerable)
+***********************************************************************/
+
+			class WfRuntimeReverseEnumerable : public Object, public IValueEnumerable
+			{
+			protected:
+				Ptr<IValueList>			list;
+
+				class Enumerator : public Object, public IValueEnumerator
+				{
+				protected:
+					Ptr<IValueList>			list;
+					vint					index;
+				public:
+					Enumerator(Ptr<IValueList> _list)
+						:list(_list), index(_list->GetCount())
+					{
+					}
+
+					Value GetCurrent()
+					{
+						return list->Get(index);
+					}
+
+					vint GetIndex()
+					{
+						return list->GetCount() - 1 - index;
+					}
+
+					bool Next()
+					{
+						if (index <= 0) return false;
+						index--;
+						return true;
+					}
+				};
+			public:
+				WfRuntimeReverseEnumerable(Ptr<IValueList> _list)
+					:list(_list)
+				{
+				}
+
+				Ptr<IValueEnumerator> CreateEnumerator()override
+				{
+					return MakePtr<Enumerator>(list);
+				}
+			};
+			
+			Value OPERATOR_OpReverseEnumerable(Value operand)
+			{
+				auto enumerable = UnboxValue<Ptr<IValueEnumerable>>(operand);
+				auto list = enumerable.Cast<IValueList>();
+				if (!list)
+				{
+					list = IValueList::Create(GetLazyList<Value>(enumerable));
+				}
+				return Value::From(MakePtr<WfRuntimeReverseEnumerable>(list));
+			}
+			
+/***********************************************************************
 WfRuntimeThreadContext (Lambda)
 ***********************************************************************/
 
@@ -498,6 +558,14 @@ WfRuntimeThreadContext
 									EXECUTE(OpCreateRange, U4)
 									EXECUTE(OpCreateRange, U8)
 								END_TYPE
+							case WfInsCode::ReverseEnumerable:
+								{
+									Value operand;
+									CONTEXT_ACTION(PopValue(operand), L"failed to pop a value from the stack.");
+									Value reversedEnumerable = OPERATOR_OpReverseEnumerable(operand);
+									PushValue(reversedEnumerable);
+									return WfRuntimeExecutionAction::ExecuteInstruction;
+								}
 							case WfInsCode::DeleteRawPtr:
 								// next version
 								throw 0;
