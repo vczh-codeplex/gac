@@ -103,6 +103,11 @@ GenerateInstructions(Initialize)
 
 				void Visit(WfVariableDeclaration* node)override
 				{
+					auto scope = context.manager->declarationScopes[node].Obj();
+					auto symbol = scope->symbols[node->name.value][0];
+					vint variableIndex = context.globalVariables[symbol.Obj()];
+					GenerateExpressionInstructions(context, node->expression);
+					INSTRUCTION(Ins::StoreGlobalVar(variableIndex));
 				}
 			};
 

@@ -650,8 +650,10 @@ WfRuntimeThreadContext
 									return WfRuntimeExecutionAction::ExecuteInstruction;
 								}
 							case WfInsCode::InstallTry:
+								// next version
 								throw 0;
 							case WfInsCode::UninstallTry:
+								// next version
 								throw 0;
 							case WfInsCode::RaiseException:
 								{
