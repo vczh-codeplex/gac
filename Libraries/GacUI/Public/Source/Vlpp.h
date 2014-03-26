@@ -39,10 +39,27 @@ Macros:
 #include <x86intrin.h>
 #include <stdint.h>
 #include <stddef.h>
+#include <wchar.h>
 #define override
 #define abstract
 #define __thiscall
 #define __forceinline inline
+
+#define _I8_MIN     ((vint8_t)0x80)
+#define _I8_MAX     ((vint8_t)0x7F)
+#define _UI8_MAX    ((vuint8_t)0xFF)
+
+#define _I16_MIN    ((vint16_t)0x8000)
+#define _I16_MAX    ((vint16_t)0x7FFF)
+#define _UI16_MAX   ((vuint16_t)0xFFFF)
+
+#define _I32_MIN    ((vint32_t)0x80000000)
+#define _I32_MAX    ((vint32_t)0x7FFFFFFF)
+#define _UI32_MAX   ((vuint32_t)0xFFFFFFFF)
+
+#define _I64_MIN    ((vint64_t)0x8000000000000000L)
+#define _I64_MAX    ((vint64_t)0x7FFFFFFFFFFFFFFFL)
+#define _UI64_MAX   ((vuint64_t)0xFFFFFFFFFFFFFFFFL)
 #endif
 
 #define L_(x) L__(x)
@@ -238,13 +255,13 @@ namespace vl
 	}
 
 	template<typename T>
-	typename T&& ForwardValue(typename RemoveReference<T>::Type&& value)
+	T&& ForwardValue(typename RemoveReference<T>::Type&& value)
 	{
 		return (T&&)value;
 	}
 
 	template<typename T>
-	typename T&& ForwardValue(typename RemoveReference<T>::Type& value)
+	T&& ForwardValue(typename RemoveReference<T>::Type& value)
 	{
 		return (T&&)value;
 	}
@@ -1094,6 +1111,22 @@ namespace vl
 	extern WString				wlower(const WString& string);
 	extern AString				aupper(const AString& string);
 	extern WString				wupper(const WString& string);
+
+#if defined VCZH_GCC
+	extern void					_itoa_s(vint32_t value, char* buffer, size_t size, vint radix);
+	extern void					_itow_s(vint32_t value, wchar_t* buffer, size_t size, vint radix);
+	extern void					_i64toa_s(vint64_t value, char* buffer, size_t size, vint radix);
+	extern void					_i64tow_s(vint64_t value, wchar_t* buffer, size_t size, vint radix);
+	extern void					_uitoa_s(vuint32_t value, char* buffer, size_t size, vint radix);
+	extern void					_uitow_s(vuint32_t value, wchar_t* buffer, size_t size, vint radix);
+	extern void					_ui64toa_s(vuint64_t value, char* buffer, size_t size, vint radix);
+	extern void					_ui64tow_s(vuint64_t value, wchar_t* buffer, size_t size, vint radix);
+	extern void					_gcvt_s(char* buffer, size_t size, double value, vint numberOfDigits);
+	extern void					_strlwr_s(char* buffer, size_t size);
+	extern void					_strupr_s(char* buffer, size_t size);
+	extern void					_wcslwr_s(wchar_t* buffer, size_t size);
+	extern void					_wcsupr_s(wchar_t* buffer, size_t size);
+#endif
 }
 
 #endif
@@ -1715,6 +1748,12 @@ ComPtr
 			return reference;
 		}
 	};
+
+	template<typename T, typename ...TArgs>
+	Ptr<T> MakePtr(TArgs ...args)
+	{
+		return new T(args...);
+	}
 
 /***********************************************************************
 Traits
@@ -2930,6 +2969,83 @@ namespace vl
 		};
 
 /***********************************************************************
+辅助函数
+***********************************************************************/
+
+		template<
+			typename TKey,
+			typename TValueFirst,
+			typename TValueSecond,
+			typename TDiscardFirst,		// TKey * [TValueFirst] -> void
+			typename TDiscardSecond,	// TKey * [TValueSecond] -> void
+			typename TAccept			// TKey * [TValueFirst] * [TValueSecond] -> void
+		>
+		void GroupInnerJoin(
+			const Group<TKey, TValueFirst>& first,
+			const Group<TKey, TValueSecond>& second,
+			const TDiscardFirst& discardFirst,
+			const TDiscardSecond& discardSecond,
+			const TAccept& accept
+			)
+		{
+			vint firstIndex = 0;
+			vint secondIndex = 0;
+			vint firstCount = first.Keys().Count();
+			vint secondCount = second.Keys().Count();
+			while (true)
+			{
+				if (firstIndex < firstCount)
+				{
+					WString firstKey = first.Keys()[firstIndex];
+					const List<TValueFirst>& firstValues = first.GetByIndex(firstIndex);
+
+					if (secondIndex < secondCount)
+					{
+						WString secondKey = second.Keys()[secondIndex];
+						const List<TValueSecond>& secondValues = second.GetByIndex(secondIndex);
+
+						if (firstKey < secondKey)
+						{
+							discardFirst(firstKey, firstValues);
+							firstIndex++;
+						}
+						else if (firstKey > secondKey)
+						{
+							discardSecond(secondKey, secondValues);
+							secondIndex++;
+						}
+						else
+						{
+							accept(firstKey, firstValues, secondValues);
+							firstIndex++;
+							secondIndex++;
+						}
+					}
+					else
+					{
+						discardFirst(firstKey, firstValues);
+						firstIndex++;
+					}
+				}
+				else
+				{
+					if (secondIndex < secondCount)
+					{
+						WString secondKey = second.Keys()[secondIndex];
+						const List<TValueSecond>& secondValues = second.GetByIndex(secondIndex);
+
+						discardSecond(secondKey, secondValues);
+						secondIndex++;
+					}
+					else
+					{
+						break;
+					}
+				}
+			}
+		}
+
+/***********************************************************************
 随机访问
 ***********************************************************************/
 		namespace randomaccess_internal
@@ -3156,7 +3272,7 @@ namespace vl
 		static void					Enumerate(collections::List<Locale>& locales);
 
 		const WString&				GetName()const;
-
+#if defined VCZH_MSVC
 		void						GetShortDateFormats(collections::List<WString>& formats)const;
 		void						GetLongDateFormats(collections::List<WString>& formats)const;
 		void						GetYearMonthDateFormats(collections::List<WString>& formats)const;
@@ -3204,6 +3320,7 @@ namespace vl
 		collections::Pair<vint, vint>			FindLast(const WString& text, const WString& find, Normalization normalization)const;
 		bool									StartsWith(const WString& text, const WString& find, Normalization normalization)const;
 		bool									EndsWidth(const WString& text, const WString& find, Normalization normalization)const;
+#endif
 	};
 
 #define INVLOC vl::Locale::Invariant()
@@ -3352,6 +3469,7 @@ namespace vl
 			
 			RegexTokens(regex_internal::PureInterpretor* _pure, const collections::Array<vint>& _stateTokens, const WString& _code, vint _codeIndex);
 		public:
+			RegexTokens(const RegexTokens& tokens);
 
 			collections::IEnumerator<RegexToken>*		CreateEnumerator()const;
 			void										ReadToEnd(collections::List<RegexToken>& tokens, bool(*discard)(vint)=0)const;
@@ -4170,6 +4288,97 @@ vl::function_combining::Combining<R1(TArgs...), R2(TArgs...), R(R1,R2)>
 		typedef typename Func<T>::ResultType R;
 		return Curry<Func<T>(Func<R(R,R)>,Func<T>,Func<T>)>(Combine)(converter);
 	}
+}
+#endif
+
+/***********************************************************************
+EVENT.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Framework::Event
+
+Classes:
+	Event<function-type>									：事件对象
+***********************************************************************/
+#ifndef VCZH_EVENT
+#define VCZH_EVENT
+namespace vl
+{
+	template<typename T>
+	class Event
+	{
+	};
+ 
+	class EventHandler : public Object
+	{
+	public:
+		virtual bool							IsAttached() = 0;
+	};
+
+	template<typename ...TArgs>
+	class Event<void(TArgs...)> : public Object, private NotCopyable
+	{
+	protected:
+		class EventHandlerImpl : public EventHandler
+		{
+		public:
+			bool								attached;
+			Func<void(TArgs...)>				function;
+
+			EventHandlerImpl(const Func<void(TArgs...)>& _function)
+				:attached(true)
+				, function(_function)
+			{
+			}
+ 
+			bool IsAttached()override
+			{
+				return attached;
+			}
+		};
+ 
+		collections::SortedList<Ptr<EventHandlerImpl>>	handlers;
+	public:
+		Ptr<EventHandler> Add(const Func<void(TArgs...)>& function)
+		{
+			Ptr<EventHandlerImpl> handler = new EventHandlerImpl(function);
+			handlers.Add(handler);
+			return handler;
+		}
+ 
+		template<typename C>
+		Ptr<EventHandler> Add(void(*function)(TArgs...))
+		{
+			return Add(Func<void(TArgs...)>(function));
+		}
+ 
+		template<typename C>
+		Ptr<EventHandler> Add(C* sender, void(C::*function)(TArgs...))
+		{
+			return Add(Func<void(TArgs...)>(sender, function));
+		}
+ 
+		bool Remove(Ptr<EventHandler> handler)
+		{
+			Ptr<EventHandlerImpl> impl = handler.Cast<EventHandlerImpl>();
+			if (!impl) return false;
+			vint index = handlers.IndexOf(impl);
+			if (index == -1) return false;
+			impl->attached = false;
+			handlers.RemoveAt(index);
+			return true;
+		}
+ 
+		void operator()(TArgs ...args)const
+		{
+			for(vint i = 0; i < handlers.Count(); i++)
+			{
+				handlers[i]->function(ForwardValue<TArgs>(args)...);
+			}
+		}
+	};
 }
 #endif
 
@@ -5838,7 +6047,7 @@ Attribute
 		class DescriptableObject
 		{
 			template<typename T, typename Enabled>
-			friend struct ReferenceCounterOperator;
+			friend struct vl::ReferenceCounterOperator;
 			template<typename T>
 			friend class Description;
 			friend class DescriptableValue;
@@ -5924,12 +6133,13 @@ ReferenceCounterOperator
 	namespace reflection
 	{
 
+		namespace description
+		{
+
 /***********************************************************************
 Value
 ***********************************************************************/
 
-		namespace description
-		{
 			class Value : public Object
 			{
 			public:
@@ -5988,42 +6198,6 @@ Value
 				Value							Invoke(const WString& name, collections::Array<Value>& arguments)const;
 				Ptr<IEventHandler>				AttachEvent(const WString& name, const Value& function)const;
 				bool							DeleteRawPtr();
-
-				template<typename T>
-				void SetProperty(const WString& name, const T& newValue)
-				{
-					return SetProperty(name, BoxValue<T>(newValue));
-				}
-
-				class xs
-				{
-				protected:
-					collections::Array<Value>	arguments;
-				public:
-					xs()
-					{
-					}
-
-					template<typename T>
-					xs& operator,(const T& value)
-					{
-						arguments.Resize(arguments.Count()+1);
-						arguments[arguments.Count()-1]=BoxValue<T>(value);
-						return *this;
-					}
-
-					xs& operator,(const Value& value)
-					{
-						arguments.Resize(arguments.Count()+1);
-						arguments[arguments.Count()-1]=value;
-						return *this;
-					}
-
-					operator collections::Array<Value>&()
-					{
-						return arguments;
-					}
-				};
 			};
 
 			class IValueSerializer : public virtual IDescriptable, public Description<IValueSerializer>
@@ -6094,7 +6268,7 @@ ITypeDescriptor (event)
 				virtual Value					GetOwnerObject()=0;
 				virtual bool					IsAttached()=0;
 				virtual bool					Detach()=0;
-				virtual void					Invoke(const Value& thisObject, Value& arguments)=0;
+				virtual void					Invoke(const Value& thisObject, collections::Array<Value>& arguments)=0;
 			};
 
 			class IEventInfo : public virtual IMemberInfo, public Description<IEventInfo>
@@ -6104,7 +6278,7 @@ ITypeDescriptor (event)
 				virtual vint					GetObservingPropertyCount()=0;
 				virtual IPropertyInfo*			GetObservingProperty(vint index)=0;
 				virtual Ptr<IEventHandler>		Attach(const Value& thisObject, Ptr<IValueFunctionProxy> handler)=0;
-				virtual void					Invoke(const Value& thisObject, Value& arguments)=0;
+				virtual void					Invoke(const Value& thisObject, collections::Array<Value>& arguments)=0;
 			};
 
 /***********************************************************************
@@ -6238,82 +6412,10 @@ Collections
 
 			class IValueEnumerable : public virtual IDescriptable, public Description<IValueEnumerable>
 			{
-			private:
-				template<typename T>
-				class TypedEnumerator : public Object, public collections::IEnumerator<T>
-				{
-				private:
-					Ptr<IValueEnumerable>		enumerable;
-					Ptr<IValueEnumerator>		enumerator;
-					vint						index;
-					T							value;
-
-				public:
-					TypedEnumerator(Ptr<IValueEnumerable> _enumerable, vint _index, const T& _value)
-						:enumerable(_enumerable)
-						,index(_index)
-						,value(_value)
-					{
-						enumerator=enumerable->CreateEnumerator();
-						vint current=-1;
-						while(current++<index)
-						{
-							enumerator->Next();
-						}
-					}
-
-					TypedEnumerator(Ptr<IValueEnumerable> _enumerable)
-						:enumerable(_enumerable)
-						,index(-1)
-					{
-						Reset();
-					}
-
-					collections::IEnumerator<T>* Clone()const override
-					{
-						return new TypedEnumerable<T>(enumerable, index, value);
-					}
-
-					const T& Current()const override
-					{
-						return value;
-					}
-
-					vint Index()const override
-					{
-						return index;
-					}
-
-					bool Next() override
-					{
-						if(enumerator->Next())
-						{
-							index++;
-							value=UnboxValue<T>(enumerator->GetCurrent());
-							return true;
-						}
-						else
-						{
-							return false;
-						}
-					}
-
-					void Reset() override
-					{
-						index=-1;
-						enumerator=enumerable->CreateEnumerator();
-					}
-				};
 			public:
 				virtual Ptr<IValueEnumerator>	CreateEnumerator()=0;
 
 				static Ptr<IValueEnumerable>	Create(collections::LazyList<Value> values);
-
-				template<typename T>
-				static collections::LazyList<T> GetLazyList(Ptr<IValueEnumerator> value)
-				{
-					return collections:::LazyList<T>(new TypedEnumerator<T>(value));
-				}
 			};
 
 			class IValueReadonlyList : public virtual IValueEnumerable, public Description<IValueReadonlyList>
@@ -6323,16 +6425,6 @@ Collections
 				virtual Value					Get(vint index)=0;
 				virtual bool					Contains(const Value& value)=0;
 				virtual vint					IndexOf(const Value& value)=0;
-
-				template<typename T>
-				collections::LazyList<T> GetLazyList()
-				{
-					return collections::Range<vint>(0, GetCount())
-						.Select([this](vint i)
-						{
-							return UnboxValue<T>(Get(i));
-						});
-				}
 			};
 
 			class IValueList : public virtual IValueReadonlyList, public Description<IValueList>
@@ -6357,16 +6449,6 @@ Collections
 				virtual IValueReadonlyList*		GetValues()=0;
 				virtual vint					GetCount()=0;
 				virtual Value					Get(const Value& key)=0;
-
-				template<typename K, typename V>
-				collections::LazyList<collections::Pair<K, V>> GetLazyList()
-				{
-					return collections::Range<vint>(0, GetCount())
-						.Select([this](vint i)
-						{
-							return collections::Pair<K, V>(UnboxValue<K>(GetKeys()->Get(i)), UnboxValue<V>(GetValues()->Get(i)));
-						});
-				}
 			};
 
 			class IValueDictionary : public virtual IValueReadonlyDictionary, public Description<IValueDictionary>
@@ -6380,249 +6462,6 @@ Collections
 				static Ptr<IValueDictionary>	Create(Ptr<IValueReadonlyDictionary> values);
 				static Ptr<IValueDictionary>	Create(collections::LazyList<collections::Pair<Value, Value>> values);
 			};
-
-/***********************************************************************
-Collection Wrappers
-***********************************************************************/
-
-			namespace trait_helper
-			{
-				template<typename T>
-				struct RemovePtr
-				{
-					typedef T					Type;
-				};
-				
-				template<typename T>
-				struct RemovePtr<T*>
-				{
-					typedef T					Type;
-				};
-				
-				template<typename T>
-				struct RemovePtr<Ptr<T>>
-				{
-					typedef T					Type;
-				};
-			}
-
-#pragma warning(push)
-#pragma warning(disable:4250)
-			template<typename T>
-			class ValueEnumeratorWrapper : public Object, public virtual IValueEnumerator
-			{
-			protected:
-				typedef typename trait_helper::RemovePtr<T>::Type		ContainerType;
-				typedef typename ContainerType::ElementType				ElementType;
-
-				T								wrapperPointer;
-			public:
-				ValueEnumeratorWrapper(const T& _wrapperPointer)
-					:wrapperPointer(_wrapperPointer)
-				{
-				}
-
-				Value GetCurrent()override
-				{
-					return BoxValue<ElementType>(wrapperPointer->Current());
-				}
-
-				vint GetIndex()override
-				{
-					return wrapperPointer->Index();
-				}
-
-				bool Next()override
-				{
-					return wrapperPointer->Next();
-				}
-			};
-
-			template<typename T>
-			class ValueEnumerableWrapper : public Object, public virtual IValueEnumerable
-			{
-			protected:
-				typedef typename trait_helper::RemovePtr<T>::Type		ContainerType;
-				typedef typename ContainerType::ElementType				ElementType;
-
-				T								wrapperPointer;
-			public:
-				ValueEnumerableWrapper(const T& _wrapperPointer)
-					:wrapperPointer(_wrapperPointer)
-				{
-				}
-
-				Ptr<IValueEnumerator> CreateEnumerator()override
-				{
-					return new ValueEnumeratorWrapper<Ptr<collections::IEnumerator<ElementType>>>(wrapperPointer->CreateEnumerator());
-				}
-			};
-
-			template<typename T>
-			class ValueReadonlyListWrapper : public ValueEnumerableWrapper<T>, public virtual IValueReadonlyList
-			{
-			protected:
-				typedef typename trait_helper::RemovePtr<T>::Type		ContainerType;
-				typedef typename ContainerType::ElementType				ElementType;
-				typedef typename KeyType<ElementType>::Type				ElementKeyType;
-
-			public:
-				ValueReadonlyListWrapper(const T& _wrapperPointer)
-					:ValueEnumerableWrapper(_wrapperPointer)
-				{
-				}
-
-				vint GetCount()override
-				{
-					return wrapperPointer->Count();
-				}
-
-				Value Get(vint index)override
-				{
-					return BoxValue<ElementType>(wrapperPointer->Get(index));
-				}
-
-				bool Contains(const Value& value)override
-				{
-					ElementKeyType item=UnboxValue<ElementKeyType>(value);
-					return wrapperPointer->Contains(item);
-				}
-
-				vint IndexOf(const Value& value)override
-				{
-					ElementKeyType item=UnboxValue<ElementKeyType>(value);
-					return wrapperPointer->IndexOf(item);
-				}
-			};
-
-			template<typename T>
-			class ValueListWrapper : public ValueReadonlyListWrapper<T>, public virtual IValueList
-			{
-			protected:
-				typedef typename trait_helper::RemovePtr<T>::Type		ContainerType;
-				typedef typename ContainerType::ElementType				ElementType;
-				typedef typename KeyType<ElementType>::Type				ElementKeyType;
-
-			public:
-				ValueListWrapper(const T& _wrapperPointer)
-					:ValueReadonlyListWrapper(_wrapperPointer)
-				{
-				}
-
-				void Set(vint index, const Value& value)override
-				{
-					ElementType item=UnboxValue<ElementType>(value);
-					wrapperPointer->Set(index, item);
-				}
-
-				vint Add(const Value& value)override
-				{
-					ElementType item=UnboxValue<ElementType>(value);
-					return wrapperPointer->Add(item);
-				}
-
-				vint Insert(vint index, const Value& value)override
-				{
-					ElementType item=UnboxValue<ElementType>(value);
-					return wrapperPointer->Insert(index, item);
-				}
-
-				bool Remove(const Value& value)override
-				{
-					ElementKeyType item=UnboxValue<ElementKeyType>(value);
-					return wrapperPointer->Remove(item);
-				}
-
-				bool RemoveAt(vint index)override
-				{
-					return wrapperPointer->RemoveAt(index);
-				}
-
-				void Clear()override
-				{
-					wrapperPointer->Clear();
-				}
-			};
-
-			template<typename T>
-			class ValueReadonlyDictionaryWrapper : public virtual Object, public virtual IValueReadonlyDictionary
-			{
-			protected:
-				typedef typename trait_helper::RemovePtr<T>::Type		ContainerType;
-				typedef typename ContainerType::KeyContainer			KeyContainer;
-				typedef typename ContainerType::ValueContainer			ValueContainer;
-				typedef typename KeyContainer::ElementType				KeyValueType;
-				typedef typename KeyType<KeyValueType>::Type			KeyKeyType;
-				typedef typename ValueContainer::ElementType			ValueType;
-
-				T								wrapperPointer;
-				Ptr<IValueReadonlyList>			keys;
-				Ptr<IValueReadonlyList>			values;
-			public:
-				ValueReadonlyDictionaryWrapper(const T& _wrapperPointer)
-					:wrapperPointer(_wrapperPointer)
-				{
-				}
-
-				IValueReadonlyList* GetKeys()override
-				{
-					if(!keys)
-					{
-						keys=new ValueReadonlyListWrapper<const KeyContainer*>(&wrapperPointer->Keys());
-					}
-					return keys.Obj();
-				}
-
-				IValueReadonlyList* GetValues()override
-				{
-					if(!values)
-					{
-						values=new ValueReadonlyListWrapper<const ValueContainer*>(&wrapperPointer->Values());
-					}
-					return values.Obj();
-				}
-
-				vint GetCount()override
-				{
-					return wrapperPointer->Count();
-				}
-
-				Value Get(const Value& key)override
-				{
-					KeyKeyType item=UnboxValue<KeyKeyType>(key);
-					ValueType result=wrapperPointer->Get(item);
-					return BoxValue<ValueType>(result);
-				}
-			};
-			
-			template<typename T>
-			class ValueDictionaryWrapper : public virtual ValueReadonlyDictionaryWrapper<T>, public virtual IValueDictionary
-			{
-			public:
-				ValueDictionaryWrapper(const T& _wrapperPointer)
-					:ValueReadonlyDictionaryWrapper(_wrapperPointer)
-				{
-				}
-
-				void Set(const Value& key, const Value& value)override
-				{
-					KeyValueType item=UnboxValue<KeyValueType>(key);
-					ValueType result=UnboxValue<ValueType>(value);
-					wrapperPointer->Set(item, result);
-				}
-
-				bool Remove(const Value& key)override
-				{
-					KeyKeyType item=UnboxValue<KeyKeyType>(key);
-					return wrapperPointer->Remove(item);
-				}
-
-				void Clear()override
-				{
-					wrapperPointer->Clear();
-				}
-			};
-#pragma warning(pop)
 
 /***********************************************************************
 Interface Implementation Proxy
@@ -6651,7 +6490,7 @@ Interface Implementation Proxy
 			class IValueSubscription : public virtual IDescriptable, public Description<IValueSubscription>
 			{
 			public:
-				virtual Ptr<IValueListener>		Subscribe(Ptr<IValueFunctionProxy> callback) = 0;
+				virtual Ptr<IValueListener>		Subscribe(const Func<void(Value)>& callback) = 0;
 				virtual bool					Close() = 0;
 			};
 
@@ -7294,7 +7133,7 @@ namespace vl
 			template<typename T>
 			Ptr<T> Obj(Ptr<T> node)
 			{
-				return Node(node).Cast<T>();
+				return Node(node).template Cast<T>();
 			}
 			
 			void									InitializeQueryCache(ParsingScopeSymbol* symbol, ParsingScopeFinder* _previousFinder=0);
@@ -8019,11 +7858,11 @@ TypeInfo
 			}
 
 /***********************************************************************
-GeneralValueSeriaizer
+GeneralValueSerializer
 ***********************************************************************/
 
 			template<typename T>
-			class GeneralValueSeriaizer : public Object, public ITypedValueSerializer<T>
+			class GeneralValueSerializer : public Object, public ITypedValueSerializer<T>
 			{
 			protected:
 				ITypeDescriptor*							ownedTypeDescriptor;
@@ -8034,7 +7873,7 @@ GeneralValueSeriaizer
 			public:
 				typedef T ValueType;
 
-				GeneralValueSeriaizer(ITypeDescriptor* _ownedTypeDescriptor)
+				GeneralValueSerializer(ITypeDescriptor* _ownedTypeDescriptor)
 					:ownedTypeDescriptor(_ownedTypeDescriptor)
 				{
 				}
@@ -8119,7 +7958,7 @@ TypedValueSerializer
 			};
 
 			template<typename T>
-			class TypedValueSerializer : public GeneralValueSeriaizer<T>
+			class TypedValueSerializer : public GeneralValueSerializer<T>
 			{
 			protected:
 				T											defaultValue;
@@ -8140,7 +7979,7 @@ TypedValueSerializer
 				}
 			public:
 				TypedValueSerializer(ITypeDescriptor* _ownedTypeDescriptor, const T& _defaultValue)
-					:GeneralValueSeriaizer(_ownedTypeDescriptor)
+					:GeneralValueSerializer<T>(_ownedTypeDescriptor)
 					, defaultValue(_defaultValue)
 				{
 				}
@@ -8151,13 +7990,13 @@ TypedValueSerializer
 			{
 			public:
 				TypedDefaultValueSerializer(ITypeDescriptor* _ownedTypeDescriptor)
-					:TypedValueSerializer(_ownedTypeDescriptor, TypedValueSerializerProvider<T>::GetDefaultValue())
+					:TypedValueSerializer<T>(_ownedTypeDescriptor, TypedValueSerializerProvider<T>::GetDefaultValue())
 				{
 				}
 			};
 
 /***********************************************************************
-EnumValueSeriaizer
+EnumValueSerializer
 ***********************************************************************/
 
 			template<typename T, bool CanMerge>
@@ -8229,7 +8068,7 @@ EnumValueSeriaizer
 			};
 
 			template<typename T, bool CanMerge>
-			class EnumValueSeriaizer : public GeneralValueSeriaizer<T>
+			class EnumValueSerializer : public GeneralValueSerializer<T>
 			{
 			protected:
 				T											defaultValue;
@@ -8250,8 +8089,8 @@ EnumValueSeriaizer
 					return EnumValueSerializerProvider<T, CanMerge>::Deserialize(candidates, input, output);
 				}
 			public:
-				EnumValueSeriaizer(ITypeDescriptor* _ownedTypeDescriptor, const T& _defaultValue)
-					:GeneralValueSeriaizer(_ownedTypeDescriptor)
+				EnumValueSerializer(ITypeDescriptor* _ownedTypeDescriptor, const T& _defaultValue)
+					:GeneralValueSerializer<T>(_ownedTypeDescriptor)
 					, defaultValue(_defaultValue)
 				{
 				}
@@ -8332,14 +8171,14 @@ Predefined Types
 			template<>struct TypeInfo<IDescriptable>{static const wchar_t* TypeName;};
 			template<>struct TypeInfo<DescriptableObject>{static const wchar_t* TypeName;};
 			template<>struct TypeInfo<Value>{static const wchar_t* TypeName;};
-			template<>struct TypeInfo<unsigned __int8>{static const wchar_t* TypeName;};
-			template<>struct TypeInfo<unsigned __int16>{static const wchar_t* TypeName;};
-			template<>struct TypeInfo<unsigned __int32>{static const wchar_t* TypeName;};
-			template<>struct TypeInfo<unsigned __int64>{static const wchar_t* TypeName;};
-			template<>struct TypeInfo<signed __int8>{static const wchar_t* TypeName;};
-			template<>struct TypeInfo<signed __int16>{static const wchar_t* TypeName;};
-			template<>struct TypeInfo<signed __int32>{static const wchar_t* TypeName;};
-			template<>struct TypeInfo<signed __int64>{static const wchar_t* TypeName;};
+			template<>struct TypeInfo<vuint8_t>{static const wchar_t* TypeName;};
+			template<>struct TypeInfo<vuint16_t>{static const wchar_t* TypeName;};
+			template<>struct TypeInfo<vuint32_t>{static const wchar_t* TypeName;};
+			template<>struct TypeInfo<vuint64_t>{static const wchar_t* TypeName;};
+			template<>struct TypeInfo<vint8_t>{static const wchar_t* TypeName;};
+			template<>struct TypeInfo<vint16_t>{static const wchar_t* TypeName;};
+			template<>struct TypeInfo<vint32_t>{static const wchar_t* TypeName;};
+			template<>struct TypeInfo<vint64_t>{static const wchar_t* TypeName;};
 			template<>struct TypeInfo<float>{static const wchar_t* TypeName;};
 			template<>struct TypeInfo<double>{static const wchar_t* TypeName;};
 			template<>struct TypeInfo<bool>{static const wchar_t* TypeName;};
@@ -8372,67 +8211,67 @@ Predefined Types
 			template<>struct TypeInfo<ITypeDescriptor>{static const wchar_t* TypeName;};
 
 			template<>
-			struct TypedValueSerializerProvider<unsigned __int8>
+			struct TypedValueSerializerProvider<vuint8_t>
 			{
-				static unsigned __int8 GetDefaultValue();
-				static bool Serialize(const unsigned __int8& input, WString& output);
-				static bool Deserialize(const WString& input, unsigned __int8& output);
+				static vuint8_t GetDefaultValue();
+				static bool Serialize(const vuint8_t& input, WString& output);
+				static bool Deserialize(const WString& input, vuint8_t& output);
 			};
 
 			template<>
-			struct TypedValueSerializerProvider<unsigned __int16>
+			struct TypedValueSerializerProvider<vuint16_t>
 			{
-				static unsigned __int16 GetDefaultValue();
-				static bool Serialize(const unsigned __int16& input, WString& output);
-				static bool Deserialize(const WString& input, unsigned __int16& output);
+				static vuint16_t GetDefaultValue();
+				static bool Serialize(const vuint16_t& input, WString& output);
+				static bool Deserialize(const WString& input, vuint16_t& output);
 			};
 
 			template<>
-			struct TypedValueSerializerProvider<unsigned __int32>
+			struct TypedValueSerializerProvider<vuint32_t>
 			{
-				static unsigned __int32 GetDefaultValue();
-				static bool Serialize(const unsigned __int32& input, WString& output);
-				static bool Deserialize(const WString& input, unsigned __int32& output);
+				static vuint32_t GetDefaultValue();
+				static bool Serialize(const vuint32_t& input, WString& output);
+				static bool Deserialize(const WString& input, vuint32_t& output);
 			};
 
 			template<>
-			struct TypedValueSerializerProvider<unsigned __int64>
+			struct TypedValueSerializerProvider<vuint64_t>
 			{
-				static unsigned __int64 GetDefaultValue();
-				static bool Serialize(const unsigned __int64& input, WString& output);
-				static bool Deserialize(const WString& input, unsigned __int64& output);
+				static vuint64_t GetDefaultValue();
+				static bool Serialize(const vuint64_t& input, WString& output);
+				static bool Deserialize(const WString& input, vuint64_t& output);
 			};
 
 			template<>
-			struct TypedValueSerializerProvider<signed __int8>
+			struct TypedValueSerializerProvider<vint8_t>
 			{
-				static signed __int8 GetDefaultValue();
-				static bool Serialize(const signed __int8& input, WString& output);
-				static bool Deserialize(const WString& input, signed __int8& output);
+				static vint8_t GetDefaultValue();
+				static bool Serialize(const vint8_t& input, WString& output);
+				static bool Deserialize(const WString& input, vint8_t& output);
 			};
 
 			template<>
-			struct TypedValueSerializerProvider<signed __int16>
+			struct TypedValueSerializerProvider<vint16_t>
 			{
-				static signed __int16 GetDefaultValue();
-				static bool Serialize(const signed __int16& input, WString& output);
-				static bool Deserialize(const WString& input, signed __int16& output);
+				static vint16_t GetDefaultValue();
+				static bool Serialize(const vint16_t& input, WString& output);
+				static bool Deserialize(const WString& input, vint16_t& output);
 			};
 
 			template<>
-			struct TypedValueSerializerProvider<signed __int32>
+			struct TypedValueSerializerProvider<vint32_t>
 			{
-				static signed __int32 GetDefaultValue();
-				static bool Serialize(const signed __int32& input, WString& output);
-				static bool Deserialize(const WString& input, signed __int32& output);
+				static vint32_t GetDefaultValue();
+				static bool Serialize(const vint32_t& input, WString& output);
+				static bool Deserialize(const WString& input, vint32_t& output);
 			};
 
 			template<>
-			struct TypedValueSerializerProvider<signed __int64>
+			struct TypedValueSerializerProvider<vint64_t>
 			{
-				static signed __int64 GetDefaultValue();
-				static bool Serialize(const signed __int64& input, WString& output);
-				static bool Deserialize(const WString& input, signed __int64& output);
+				static vint64_t GetDefaultValue();
+				static bool Serialize(const vint64_t& input, WString& output);
+				static bool Deserialize(const WString& input, vint64_t& output);
 			};
 
 			template<>
@@ -8628,7 +8467,8 @@ EventInfoImpl
 					EventInfoImpl*						ownerEvent;
 					DescriptableObject*					ownerObject;
 					Ptr<IValueFunctionProxy>			handler;
-					Ptr<DescriptableObject>				tag;
+					Ptr<DescriptableObject>				descriptableTag;
+					Ptr<Object>							objectTag;
 					bool								attached;
 				public:
 					EventHandlerImpl(EventInfoImpl* _ownerEvent, DescriptableObject* _ownerObject, Ptr<IValueFunctionProxy> _handler);
@@ -8638,10 +8478,12 @@ EventInfoImpl
 					Value								GetOwnerObject()override;
 					bool								IsAttached()override;
 					bool								Detach()override;
-					void								Invoke(const Value& thisObject, Value& arguments)override;
+					void								Invoke(const Value& thisObject, collections::Array<Value>& arguments)override;
 
-					Ptr<DescriptableObject>				GetTag();
-					void								SetTag(Ptr<DescriptableObject> _tag);
+					Ptr<DescriptableObject>				GetDescriptableTag();
+					void								SetDescriptableTag(Ptr<DescriptableObject> _tag);
+					Ptr<Object>							GetObjectTag();
+					void								SetObjectTag(Ptr<Object> _tag);
 				};
 
 			protected:
@@ -8652,7 +8494,7 @@ EventInfoImpl
 
 				virtual void							AttachInternal(DescriptableObject* thisObject, IEventHandler* eventHandler)=0;
 				virtual void							DetachInternal(DescriptableObject* thisObject, IEventHandler* eventHandler)=0;
-				virtual void							InvokeInternal(DescriptableObject* thisObject, Value& eventHandler)=0;
+				virtual void							InvokeInternal(DescriptableObject* thisObject, collections::Array<Value>& arguments)=0;
 				virtual Ptr<ITypeInfo>					GetHandlerTypeInternal()=0;
 
 				void									AddEventHandler(DescriptableObject* thisObject, Ptr<IEventHandler> eventHandler);
@@ -8667,7 +8509,7 @@ EventInfoImpl
 				vint									GetObservingPropertyCount()override;
 				IPropertyInfo*							GetObservingProperty(vint index)override;
 				Ptr<IEventHandler>						Attach(const Value& thisObject, Ptr<IValueFunctionProxy> handler)override;
-				void									Invoke(const Value& thisObject, Value& arguments)override;
+				void									Invoke(const Value& thisObject, collections::Array<Value>& arguments)override;
 			};
 
 /***********************************************************************
@@ -8818,7 +8660,7 @@ TypeFlagTester
 			struct TypeFlagTester<TDerived, TypeFlags::FunctionType>
 			{
 				template<typename T>
-				static void* Inherit(Func<T>* source){}
+				static void* Inherit(const Func<T>* source){}
 				static char Inherit(void* source){}
 				static char Inherit(const void* source){}
 
@@ -8976,7 +8818,7 @@ TypeInfoRetriver
 
 				static Ptr<ITypeInfo> CreateTypeInfo()
 				{
-					return DetailTypeInfoRetriver<T, TypeFlag>::CreateTypeInfo();
+					return DetailTypeInfoRetriver<typename RemoveCVR<T>::Type, TypeFlag>::CreateTypeInfo();
 				}
 			};
 
@@ -9000,6 +8842,36 @@ TypeInfoRetriver Helper Functions (BoxValue, UnboxValue)
 			{
 				return ValueAccessor<T, TypeInfoRetriver<T>::Decorator>::UnboxValue(value, typeDescriptor, valueName);
 			}
+
+			class Value_xs
+			{
+			protected:
+				collections::Array<Value>	arguments;
+			public:
+				Value_xs()
+				{
+				}
+
+				template<typename T>
+				Value_xs& operator,(const T& value)
+				{
+					arguments.Resize(arguments.Count()+1);
+					arguments[arguments.Count()-1]=BoxValue<T>(value);
+					return *this;
+				}
+
+				Value_xs& operator,(const Value& value)
+				{
+					arguments.Resize(arguments.Count()+1);
+					arguments[arguments.Count()-1]=value;
+					return *this;
+				}
+
+				operator collections::Array<Value>&()
+				{
+					return arguments;
+				}
+			};
 
 /***********************************************************************
 TypeInfoRetriver Helper Functions (UnboxParameter)
@@ -9026,16 +8898,18 @@ TypeInfoRetriver Helper Functions (UnboxParameter)
 CustomFieldInfoImpl
 ***********************************************************************/
 
-			template<typename TClass, typename TField, TField TClass::* FieldRef>
+			template<typename TClass, typename TField>
 			class CustomFieldInfoImpl : public FieldInfoImpl
 			{
 			protected:
+				TField TClass::*				fieldRef;
+
 				Value GetValueInternal(const Value& thisObject)override
 				{
 					TClass* object=UnboxValue<TClass*>(thisObject);
 					if(object)
 					{
-						return BoxParameter<TField>(object->*FieldRef, GetReturn()->GetTypeDescriptor());
+						return BoxParameter<TField>(object->*fieldRef, GetReturn()->GetTypeDescriptor());
 					}
 					return Value();
 				}
@@ -9045,22 +8919,23 @@ CustomFieldInfoImpl
 					TClass* object=UnboxValue<TClass*>(thisObject);
 					if(object)
 					{
-						UnboxParameter<TField>(newValue, object->*FieldRef, GetReturn()->GetTypeDescriptor(), L"newValue");
+						UnboxParameter<TField>(newValue, object->*fieldRef, GetReturn()->GetTypeDescriptor(), L"newValue");
 					}
 				}
 			public:
-				CustomFieldInfoImpl(ITypeDescriptor* _ownerTypeDescriptor, const WString& _name)
+				CustomFieldInfoImpl(ITypeDescriptor* _ownerTypeDescriptor, const WString& _name, TField TClass::* _fieldRef)
 					:FieldInfoImpl(_ownerTypeDescriptor, _name, TypeInfoRetriver<TField>::CreateTypeInfo())
+					, fieldRef(_fieldRef)
 				{
 				}
 			};
 
 /***********************************************************************
-StructValueSeriaizer
+StructValueSerializer
 ***********************************************************************/
 
 			template<typename T>
-			class StructValueSeriaizer : public GeneralValueSeriaizer<T>
+			class StructValueSerializer : public GeneralValueSerializer<T>
 			{
 			public:
 				class FieldSerializerBase : public Object
@@ -9254,8 +9129,8 @@ StructValueSeriaizer
 					return true;
 				}
 			public:
-				StructValueSeriaizer(ITypeDescriptor* _ownedTypeDescriptor)
-					:GeneralValueSeriaizer(_ownedTypeDescriptor)
+				StructValueSerializer(ITypeDescriptor* _ownedTypeDescriptor)
+					:GeneralValueSerializer<T>(_ownedTypeDescriptor)
 					,loaded(false)
 				{
 				}
@@ -9276,7 +9151,8 @@ StructValueSeriaizer
 			public:
 				StructTypeDescriptor()
 				{
-					typedSerializer=serializer.Cast<TSerializer>();
+					auto serializer = SerializableTypeDescriptor<TSerializer>::serializer;
+					typedSerializer = serializer.template Cast<TSerializer>();
 				}
 
 				vint GetPropertyCount()override
@@ -9286,7 +9162,8 @@ StructValueSeriaizer
 
 				IPropertyInfo* GetProperty(vint index)override
 				{
-					return typedSerializer->GetFieldSerializers().Values().Get(index).Cast<IPropertyInfo>().Obj();
+					auto serializer = typedSerializer->GetFieldSerializers().Values().Get(index);
+					return serializer.template Cast<IPropertyInfo>().Obj();
 				}
 
 				bool IsPropertyExists(const WString& name, bool inheritable)override
@@ -9566,11 +9443,12 @@ ParameterAccessor<TStruct>
 			{
 				static Value BoxValue(const T& object, ITypeDescriptor* typeDescriptor)
 				{
+					typedef ITypedValueSerializer<typename RemoveCVR<T>::Type> TSerializer;
 					if(!typeDescriptor)
 					{
 						typeDescriptor=GetTypeDescriptor<typename TypeInfoRetriver<T>::Type>();
 					}
-					ITypedValueSerializer<T>* serializer=dynamic_cast<ITypedValueSerializer<T>*>(typeDescriptor->GetValueSerializer());
+					TSerializer* serializer=dynamic_cast<TSerializer*>(typeDescriptor->GetValueSerializer());
 					Value result;
 					serializer->Serialize(object, result);
 					return result;
@@ -9669,7 +9547,7 @@ DetailTypeInfoRetriver<Func<R(TArgs...)>>
 			template<typename R, typename ...TArgs>
 			struct DetailTypeInfoRetriver<Func<R(TArgs...)>, TypeFlags::FunctionType>
 			{
-				typedef DetailTypeInfoRetriver<Func<R(TArgs...)>, TypeFlags::NonGenericType>	UpLevelRetriver;
+				typedef DetailTypeInfoRetriver<const Func<R(TArgs...)>, TypeFlags::NonGenericType>	UpLevelRetriver;
  
 				static const ITypeInfo::Decorator								Decorator=UpLevelRetriver::Decorator;
 				typedef IValueList												Type;
@@ -9709,7 +9587,7 @@ ValueFunctionProxyWrapper<Func<R(TArgs...)>>
 				template<typename T0, typename ...TArgs>
 				void UnboxSpecifiedParameter(Ptr<IValueList> arguments, vint index, T0& p0, TArgs& ...args)
 				{
-					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments->Get(index), p0, 0, L"nth-argument");
+					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments->Get(index), p0, 0, itow(index + 1) + L"-th argument");
 					UnboxSpecifiedParameter(arguments, index + 1, args...);
 				}
 
@@ -9804,8 +9682,11 @@ ParameterAccessor<Func<R(TArgs...)>>
 							{
 								Ptr<IValueList> arguments = IValueList::Create();
 								internal_helper::AddValueToList(arguments, ForwardValue<TArgs>(args)...);
-
+#if defined VCZH_MSVC
 								typedef TypeInfoRetriver<R>::TempValueType ResultType;
+#elif defined VCZH_GCC
+								typedef typename TypeInfoRetriver<R>::TempValueType ResultType;
+#endif
 								ResultType proxyResult;
 								description::UnboxParameter<ResultType>(functionProxy->Invoke(arguments), proxyResult);
 								return proxyResult;
@@ -9815,12 +9696,33 @@ ParameterAccessor<Func<R(TArgs...)>>
 				}
 			};
  
+			template<typename R, typename ...TArgs>
+			struct ParameterAccessor<const Func<R(TArgs...)>, TypeFlags::FunctionType> : ParameterAccessor<Func<R(TArgs...)>, TypeFlags::FunctionType>
+			{
+			};
+ 
 /***********************************************************************
-CustomConstructorInfoImpl<R(TArgs...)>
+MethodInfoImpl
 ***********************************************************************/
  
 			template<typename T>
 			class CustomConstructorInfoImpl{};
+ 
+			template<typename TClass, typename T>
+			class CustomMethodInfoImpl{};
+ 
+			template<typename TClass, typename T>
+			class CustomExternalMethodInfoImpl{};
+ 
+			template<typename T>
+			class CustomStaticMethodInfoImpl{};
+
+			template<typename TClass, typename T>
+			class CustomEventInfoImpl{};
+ 
+/***********************************************************************
+CustomConstructorInfoImpl<R(TArgs...)>
+***********************************************************************/
 
 			namespace internal_helper
 			{
@@ -9829,7 +9731,7 @@ CustomConstructorInfoImpl<R(TArgs...)>
 				template<typename T0, typename ...TArgs>
 				void UnboxSpecifiedParameter(MethodInfoImpl* methodInfo, collections::Array<Value>& arguments, vint index, T0& p0, TArgs& ...args)
 				{
-					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments[index], p0, methodInfo->GetParameter(index)->GetType()->GetTypeDescriptor(), L"nth-argument");
+					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments[index], p0, methodInfo->GetParameter(index)->GetType()->GetTypeDescriptor(), itow(index) + L"-th argument");
 					UnboxSpecifiedParameter(methodInfo, arguments, index + 1, args...);
 				}
 
@@ -9877,7 +9779,11 @@ CustomConstructorInfoImpl<R(TArgs...)>
 					Func<R(TArgs...)> proxy(
 						LAMBDA([](TArgs ...args)->R
 						{
+#if defined VCZH_MSVC
 							R result = new TypeInfoRetriver<R>::Type(args...);
+#elif defined VCZH_GCC
+							R result = new typename TypeInfoRetriver<R>::Type(args...);
+#endif
 							return result;
 						})
 					);
@@ -9892,7 +9798,8 @@ CustomConstructorInfoImpl<R(TArgs...)>
 			};
  
 /***********************************************************************
-CustomMethodInfoImplSelector<TClass, void()>
+CustomMethodInfoImpl<TClass, R(TArgs...)>
+CustomStaticMethodInfoImpl<TClass, R(TArgs...)>
 ***********************************************************************/
 
 			namespace internal_helper
@@ -9942,68 +9849,62 @@ CustomMethodInfoImplSelector<TClass, void()>
 				};
 			}
 
-			template<typename TClass, typename T>
-			struct CustomMethodInfoImplSelector{};
-
 			template<typename TClass, typename R, typename ...TArgs>
-			struct CustomMethodInfoImplSelector<TClass, R(TArgs...)>
+			class CustomMethodInfoImpl<TClass, R(TArgs...)> : public MethodInfoImpl
 			{
-				class CustomMethodInfoImpl : public MethodInfoImpl
+			protected:
+				R(__thiscall TClass::* method)(TArgs...);
+ 
+				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
-				protected:
-					R(__thiscall TClass::* method)(TArgs...);
+					TClass* object=UnboxValue<TClass*>(thisObject, GetOwnerTypeDescriptor(), L"thisObject");
+					return internal_helper::BoxedMethodInvoker<TClass, R, TArgs...>::Invoke(object, method, this, arguments, typename RemoveCVR<TArgs>::Type()...);
+				}
  
-					Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
-					{
-						TClass* object=UnboxValue<TClass*>(thisObject, GetOwnerTypeDescriptor(), L"thisObject");
-						return internal_helper::BoxedMethodInvoker<TClass, R, TArgs...>::Invoke(object, method, this, arguments, typename RemoveCVR<TArgs>::Type()...);
-					}
- 
-					Value CreateFunctionProxyInternal(const Value& thisObject)override
-					{
-						TClass* object=UnboxValue<TClass*>(thisObject, GetOwnerTypeDescriptor(), L"thisObject");
-						Func<R(TArgs...)> proxy(object, method);
-						return BoxParameter<Func<R(TArgs...)>>(proxy);
-					}
-				public:
-					CustomMethodInfoImpl(const wchar_t* parameterNames[], R(__thiscall TClass::* _method)(TArgs...))
-						:MethodInfoImpl(0, TypeInfoRetriver<R>::CreateTypeInfo(), false)
-						,method(_method)
-					{
-						internal_helper::ConstructorArgumentAdder<TypeTuple<TArgs...>>::Add(this, parameterNames, 0);
-					}
-				};
- 
-				class ExternalMethodInfoImpl : public MethodInfoImpl
+				Value CreateFunctionProxyInternal(const Value& thisObject)override
 				{
-				protected:
-					R(*method)(TClass*, TArgs...);
- 
-					Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
-					{
-						TClass* object=UnboxValue<TClass*>(thisObject, GetOwnerTypeDescriptor(), L"thisObject");
-						return internal_helper::BoxedExternalMethodInvoker<TClass, R, TArgs...>::Invoke(object, method, this, arguments, typename RemoveCVR<TArgs>::Type()...);
-					}
- 
-					Value CreateFunctionProxyInternal(const Value& thisObject)override
-					{
-						TClass* object=UnboxValue<TClass*>(thisObject, GetOwnerTypeDescriptor(), L"thisObject");
-						Func<R(TArgs...)> proxy = Curry(Func<R(TClass*, TArgs...)>(method))(object);
-						return BoxParameter<Func<R(TArgs...)>>(proxy);
-					}
-				public:
-					ExternalMethodInfoImpl(const wchar_t* parameterNames[], R(*_method)(TClass*, TArgs...))
-						:MethodInfoImpl(0, TypeInfoRetriver<R>::CreateTypeInfo(), false)
-						,method(_method)
-					{
-						internal_helper::ConstructorArgumentAdder<TypeTuple<TArgs...>>::Add(this, parameterNames, 0);
-					}
-				};
+					TClass* object=UnboxValue<TClass*>(thisObject, GetOwnerTypeDescriptor(), L"thisObject");
+					Func<R(TArgs...)> proxy(object, method);
+					return BoxParameter<Func<R(TArgs...)>>(proxy);
+				}
+			public:
+				CustomMethodInfoImpl(const wchar_t* parameterNames[], R(__thiscall TClass::* _method)(TArgs...))
+					:MethodInfoImpl(0, TypeInfoRetriver<R>::CreateTypeInfo(), false)
+					,method(_method)
+				{
+					internal_helper::ConstructorArgumentAdder<TypeTuple<TArgs...>>::Add(this, parameterNames, 0);
+				}
 			};
  
+			template<typename TClass, typename R, typename ...TArgs>
+			class CustomExternalMethodInfoImpl<TClass, R(TArgs...)> : public MethodInfoImpl
+			{
+			protected:
+				R(*method)(TClass*, TArgs...);
+ 
+				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
+				{
+					TClass* object=UnboxValue<TClass*>(thisObject, GetOwnerTypeDescriptor(), L"thisObject");
+					return internal_helper::BoxedExternalMethodInvoker<TClass, R, TArgs...>::Invoke(object, method, this, arguments, typename RemoveCVR<TArgs>::Type()...);
+				}
+ 
+				Value CreateFunctionProxyInternal(const Value& thisObject)override
+				{
+					TClass* object=UnboxValue<TClass*>(thisObject, GetOwnerTypeDescriptor(), L"thisObject");
+					Func<R(TArgs...)> proxy = Curry(Func<R(TClass*, TArgs...)>(method))(object);
+					return BoxParameter<Func<R(TArgs...)>>(proxy);
+				}
+			public:
+				CustomExternalMethodInfoImpl(const wchar_t* parameterNames[], R(*_method)(TClass*, TArgs...))
+					:MethodInfoImpl(0, TypeInfoRetriver<R>::CreateTypeInfo(), false)
+					,method(_method)
+				{
+					internal_helper::ConstructorArgumentAdder<TypeTuple<TArgs...>>::Add(this, parameterNames, 0);
+				}
+			};
  
 /***********************************************************************
-CustomMethodInfoImplSelector<void, R(TArgs...)>
+CustomStaticMethodInfoImpl<R(TArgs...)>
 ***********************************************************************/
 
 			namespace internal_helper
@@ -10032,31 +9933,144 @@ CustomMethodInfoImplSelector<void, R(TArgs...)>
 			}
 
 			template<typename R, typename ...TArgs>
-			struct CustomMethodInfoImplSelector<void, R(TArgs...)>
+			class CustomStaticMethodInfoImpl<R(TArgs...)> : public MethodInfoImpl
 			{
-				class CustomMethodInfoImpl : public MethodInfoImpl
+			protected:
+				R(* method)(TArgs...);
+ 
+				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
-				protected:
-					R(* method)(TArgs...);
+					return internal_helper::BoxedStaticMethodInvoker<R, TArgs...>::Invoke(method, this, arguments, typename RemoveCVR<TArgs>::Type()...);
+				}
  
-					Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
-					{
-						return internal_helper::BoxedStaticMethodInvoker<R, TArgs...>::Invoke(method, this, arguments, typename RemoveCVR<TArgs>::Type()...);
-					}
+				Value CreateFunctionProxyInternal(const Value& thisObject)override
+				{
+					Func<R(TArgs...)> proxy(method);
+					return BoxParameter<Func<R(TArgs...)>>(proxy);
+				}
+			public:
+				CustomStaticMethodInfoImpl(const wchar_t* parameterNames[], R(* _method)(TArgs...))
+					:MethodInfoImpl(0, TypeInfoRetriver<R>::CreateTypeInfo(), true)
+					,method(_method)
+				{
+					internal_helper::ConstructorArgumentAdder<TypeTuple<TArgs...>>::Add(this, parameterNames, 0);
+				}
+			};
  
-					Value CreateFunctionProxyInternal(const Value& thisObject)override
+/***********************************************************************
+CustomEventInfoImpl<void(TArgs...)>
+***********************************************************************/
+
+			namespace internal_helper
+			{
+				extern void AddValueToArray(collections::Array<Value>& arguments, vint index);
+
+				template<typename T0, typename ...TArgs>
+				void AddValueToArray(collections::Array<Value>& arguments, vint index, T0&& p0, TArgs&& ...args)
+				{
+					arguments[index] = description::BoxParameter<T0>(p0);
+					AddValueToArray(arguments, index + 1, args...);
+				}
+
+				extern void UnboxSpecifiedParameter(collections::Array<Value>& arguments, vint index);
+
+				template<typename T0, typename ...TArgs>
+				void UnboxSpecifiedParameter(collections::Array<Value>& arguments, vint index, T0& p0, TArgs& ...args)
+				{
+					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments[index], p0, 0, itow(index) + L"-th argument");
+					UnboxSpecifiedParameter(arguments, index + 1, args...);
+				}
+
+				template<typename ...TArgs>
+				struct BoxedEventInvoker
+				{
+					static void Invoke(Event<void(TArgs...)>& eventObject, collections::Array<Value>& arguments, typename RemoveCVR<TArgs>::Type&& ...args)
 					{
-						Func<R(TArgs...)> proxy(method);
-						return BoxParameter<Func<R(TArgs...)>>(proxy);
-					}
-				public:
-					CustomMethodInfoImpl(const wchar_t* parameterNames[], R(* _method)(TArgs...))
-						:MethodInfoImpl(0, TypeInfoRetriver<R>::CreateTypeInfo(), true)
-						,method(_method)
-					{
-						internal_helper::ConstructorArgumentAdder<TypeTuple<TArgs...>>::Add(this, parameterNames, 0);
+						UnboxSpecifiedParameter(arguments, 0, args...);
+						eventObject(args...);
 					}
 				};
+			}
+
+			template<typename TClass, typename ...TArgs>
+			class CustomEventInfoImpl<TClass, void(TArgs...)> : public EventInfoImpl
+			{
+			protected:
+				Event<void(TArgs...)> TClass::*			eventRef;
+
+				void AttachInternal(DescriptableObject* thisObject, IEventHandler* eventHandler)override
+				{
+					if(thisObject)
+					{
+						if (EventHandlerImpl* handlerImpl = dynamic_cast<EventHandlerImpl*>(eventHandler))
+						{
+							TClass* object = UnboxValue<TClass*>(Value::From(thisObject), GetOwnerTypeDescriptor(), L"thisObject");
+							Event<void(TArgs...)>& eventObject = object->*eventRef;
+							Ptr<EventHandler> handler = eventObject.Add(
+								Func<void(TArgs...)>([=](TArgs ...args)
+								{
+									collections::Array<Value> arguments(sizeof...(TArgs));
+									internal_helper::AddValueToArray(arguments, 0, ForwardValue<TArgs>(args)...);
+									eventHandler->Invoke(Value::From(thisObject), arguments);
+								}));
+							handlerImpl->SetObjectTag(handler);
+						}
+					}
+				}
+
+				void DetachInternal(DescriptableObject* thisObject, IEventHandler* eventHandler)override
+				{
+					if(thisObject)
+					{
+						if (EventHandlerImpl* handlerImpl = dynamic_cast<EventHandlerImpl*>(eventHandler))
+						{
+							TClass* object = UnboxValue<TClass*>(Value::From(thisObject), GetOwnerTypeDescriptor(), L"thisObject");
+							Event<void(TArgs...)>& eventObject = object->*eventRef;
+							Ptr<EventHandler> handler=handlerImpl->GetObjectTag().Cast<EventHandler>();
+							if (handler)
+							{
+								eventObject.Remove(handler);
+							}
+						}
+					}
+				}
+
+				void InvokeInternal(DescriptableObject* thisObject, collections::Array<Value>& arguments)override
+				{
+					if(thisObject)
+					{
+						TClass* object = UnboxValue<TClass*>(Value::From(thisObject), GetOwnerTypeDescriptor(), L"thisObject");
+						Event<void(TArgs...)>& eventObject = object->*eventRef;
+						return internal_helper::BoxedEventInvoker<TArgs...>::Invoke(eventObject, arguments, typename RemoveCVR<TArgs>::Type()...);
+					}
+				}
+
+				Ptr<ITypeInfo> GetHandlerTypeInternal()override
+				{
+					return TypeInfoRetriver<Func<void(TArgs...)>>::CreateTypeInfo();
+				}
+			public:
+				CustomEventInfoImpl(ITypeDescriptor* _ownerTypeDescriptor, const WString& _name, Event<void(TArgs...)> TClass::* _eventRef)
+					:EventInfoImpl(_ownerTypeDescriptor, _name)
+					, eventRef(_eventRef)
+				{
+				}
+
+				~CustomEventInfoImpl()
+				{
+				}
+			};
+
+			template<typename T>
+			struct CustomEventFunctionTypeRetriver
+			{
+				typedef vint								Type;
+			};
+
+			template<typename TClass, typename TEvent>
+			struct CustomEventFunctionTypeRetriver<Event<TEvent> TClass::*>
+			{
+				typedef TEvent								Type;
 			};
 		}
 	}
@@ -10085,6 +10099,370 @@ namespace vl
 	{
 		namespace description
 		{
+
+/***********************************************************************
+Enumerable Wrappers
+***********************************************************************/
+
+			template<typename T>
+			class TypedEnumerator : public Object, public collections::IEnumerator<T>
+			{
+			private:
+				Ptr<IValueEnumerable>		enumerable;
+				Ptr<IValueEnumerator>		enumerator;
+				vint						index;
+				T							value;
+
+			public:
+				TypedEnumerator(Ptr<IValueEnumerable> _enumerable, vint _index, const T& _value)
+					:enumerable(_enumerable)
+					,index(_index)
+					,value(_value)
+				{
+					enumerator=enumerable->CreateEnumerator();
+					vint current=-1;
+					while(current++<index)
+					{
+						enumerator->Next();
+					}
+				}
+
+				TypedEnumerator(Ptr<IValueEnumerable> _enumerable)
+					:enumerable(_enumerable)
+					,index(-1)
+				{
+					Reset();
+				}
+
+				collections::IEnumerator<T>* Clone()const override
+				{
+					return new TypedEnumerator<T>(enumerable, index, value);
+				}
+
+				const T& Current()const override
+				{
+					return value;
+				}
+
+				vint Index()const override
+				{
+					return index;
+				}
+
+				bool Next() override
+				{
+					if(enumerator->Next())
+					{
+						index++;
+						value=UnboxValue<T>(enumerator->GetCurrent());
+						return true;
+					}
+					else
+					{
+						return false;
+					}
+				}
+
+				void Reset() override
+				{
+					index=-1;
+					enumerator=enumerable->CreateEnumerator();
+				}
+			};
+
+			template<typename T>
+			collections::LazyList<T> GetLazyList(Ptr<IValueEnumerable> value)
+			{
+				return collections::LazyList<T>(new TypedEnumerator<T>(value));
+			}
+
+			template<typename T>
+			collections::LazyList<T> GetLazyList(Ptr<IValueReadonlyList> value)
+			{
+				return collections::Range<vint>(0, value->GetCount())
+					.Select([value](vint i)
+					{
+						return UnboxValue<T>(value->Get(i));
+					});
+			}
+
+			template<typename T>
+			collections::LazyList<T> GetLazyList(Ptr<IValueList> value)
+			{
+				return GetLazyList<T>(Ptr<IValueReadonlyList>(value));
+			}
+
+			template<typename K, typename V>
+			collections::LazyList<collections::Pair<K, V>> GetLazyList(Ptr<IValueReadonlyDictionary> value)
+			{
+				return collections::Range<vint>(0, value->GetCount())
+					.Select([value](vint i)
+					{
+						return collections::Pair<K, V>(UnboxValue<K>(value->GetKeys()->Get(i)), UnboxValue<V>(value->GetValues()->Get(i)));
+					});
+			}
+
+			template<typename T>
+			collections::LazyList<T> GetLazyList(Ptr<IValueDictionary> value)
+			{
+				return GetLazyList<T>(Ptr<IValueReadonlyDictionary>(value));
+			}
+
+/***********************************************************************
+Collection Wrappers
+***********************************************************************/
+
+			namespace trait_helper
+			{
+				template<typename T>
+				struct RemovePtr
+				{
+					typedef T					Type;
+				};
+				
+				template<typename T>
+				struct RemovePtr<T*>
+				{
+					typedef T					Type;
+				};
+				
+				template<typename T>
+				struct RemovePtr<Ptr<T>>
+				{
+					typedef T					Type;
+				};
+			}
+
+#pragma warning(push)
+#pragma warning(disable:4250)
+			template<typename T>
+			class ValueEnumeratorWrapper : public Object, public virtual IValueEnumerator
+			{
+			protected:
+				typedef typename trait_helper::RemovePtr<T>::Type		ContainerType;
+				typedef typename ContainerType::ElementType				ElementType;
+
+				T								wrapperPointer;
+			public:
+				ValueEnumeratorWrapper(const T& _wrapperPointer)
+					:wrapperPointer(_wrapperPointer)
+				{
+				}
+
+				Value GetCurrent()override
+				{
+					return BoxValue<ElementType>(wrapperPointer->Current());
+				}
+
+				vint GetIndex()override
+				{
+					return wrapperPointer->Index();
+				}
+
+				bool Next()override
+				{
+					return wrapperPointer->Next();
+				}
+			};
+
+			template<typename T>
+			class ValueEnumerableWrapper : public Object, public virtual IValueEnumerable
+			{
+			protected:
+				typedef typename trait_helper::RemovePtr<T>::Type		ContainerType;
+				typedef typename ContainerType::ElementType				ElementType;
+
+				T								wrapperPointer;
+			public:
+				ValueEnumerableWrapper(const T& _wrapperPointer)
+					:wrapperPointer(_wrapperPointer)
+				{
+				}
+
+				Ptr<IValueEnumerator> CreateEnumerator()override
+				{
+					return new ValueEnumeratorWrapper<Ptr<collections::IEnumerator<ElementType>>>(wrapperPointer->CreateEnumerator());
+				}
+			};
+
+#define WRAPPER_POINTER ValueEnumerableWrapper<T>::wrapperPointer
+
+			template<typename T>
+			class ValueReadonlyListWrapper : public ValueEnumerableWrapper<T>, public virtual IValueReadonlyList
+			{
+			protected:
+				typedef typename trait_helper::RemovePtr<T>::Type		ContainerType;
+				typedef typename ContainerType::ElementType				ElementType;
+				typedef typename KeyType<ElementType>::Type				ElementKeyType;
+
+			public:
+				ValueReadonlyListWrapper(const T& _wrapperPointer)
+					:ValueEnumerableWrapper<T>(_wrapperPointer)
+				{
+				}
+
+				vint GetCount()override
+				{
+					return WRAPPER_POINTER->Count();
+				}
+
+				Value Get(vint index)override
+				{
+					return BoxValue<ElementType>(WRAPPER_POINTER->Get(index));
+				}
+
+				bool Contains(const Value& value)override
+				{
+					ElementKeyType item=UnboxValue<ElementKeyType>(value);
+					return WRAPPER_POINTER->Contains(item);
+				}
+
+				vint IndexOf(const Value& value)override
+				{
+					ElementKeyType item=UnboxValue<ElementKeyType>(value);
+					return WRAPPER_POINTER->IndexOf(item);
+				}
+			};
+
+			template<typename T>
+			class ValueListWrapper : public ValueReadonlyListWrapper<T>, public virtual IValueList
+			{
+			protected:
+				typedef typename trait_helper::RemovePtr<T>::Type		ContainerType;
+				typedef typename ContainerType::ElementType				ElementType;
+				typedef typename KeyType<ElementType>::Type				ElementKeyType;
+
+			public:
+				ValueListWrapper(const T& _wrapperPointer)
+					:ValueReadonlyListWrapper<T>(_wrapperPointer)
+				{
+				}
+
+				void Set(vint index, const Value& value)override
+				{
+					ElementType item=UnboxValue<ElementType>(value);
+					WRAPPER_POINTER->Set(index, item);
+				}
+
+				vint Add(const Value& value)override
+				{
+					ElementType item=UnboxValue<ElementType>(value);
+					return WRAPPER_POINTER->Add(item);
+				}
+
+				vint Insert(vint index, const Value& value)override
+				{
+					ElementType item=UnboxValue<ElementType>(value);
+					return WRAPPER_POINTER->Insert(index, item);
+				}
+
+				bool Remove(const Value& value)override
+				{
+					ElementKeyType item=UnboxValue<ElementKeyType>(value);
+					return WRAPPER_POINTER->Remove(item);
+				}
+
+				bool RemoveAt(vint index)override
+				{
+					return WRAPPER_POINTER->RemoveAt(index);
+				}
+
+				void Clear()override
+				{
+					WRAPPER_POINTER->Clear();
+				}
+			};
+
+#undef WRAPPER_POINTER
+
+			template<typename T>
+			class ValueReadonlyDictionaryWrapper : public virtual Object, public virtual IValueReadonlyDictionary
+			{
+			protected:
+				typedef typename trait_helper::RemovePtr<T>::Type		ContainerType;
+				typedef typename ContainerType::KeyContainer			KeyContainer;
+				typedef typename ContainerType::ValueContainer			ValueContainer;
+				typedef typename KeyContainer::ElementType				KeyValueType;
+				typedef typename KeyType<KeyValueType>::Type			KeyKeyType;
+				typedef typename ValueContainer::ElementType			ValueType;
+
+				T								wrapperPointer;
+				Ptr<IValueReadonlyList>			keys;
+				Ptr<IValueReadonlyList>			values;
+			public:
+				ValueReadonlyDictionaryWrapper(const T& _wrapperPointer)
+					:wrapperPointer(_wrapperPointer)
+				{
+				}
+
+				IValueReadonlyList* GetKeys()override
+				{
+					if(!keys)
+					{
+						keys=new ValueReadonlyListWrapper<const KeyContainer*>(&wrapperPointer->Keys());
+					}
+					return keys.Obj();
+				}
+
+				IValueReadonlyList* GetValues()override
+				{
+					if(!values)
+					{
+						values=new ValueReadonlyListWrapper<const ValueContainer*>(&wrapperPointer->Values());
+					}
+					return values.Obj();
+				}
+
+				vint GetCount()override
+				{
+					return wrapperPointer->Count();
+				}
+
+				Value Get(const Value& key)override
+				{
+					KeyKeyType item=UnboxValue<KeyKeyType>(key);
+					ValueType result=wrapperPointer->Get(item);
+					return BoxValue<ValueType>(result);
+				}
+			};
+
+#define WRAPPER_POINTER ValueReadonlyDictionaryWrapper<T>::wrapperPointer
+#define KEY_VALUE_TYPE typename ValueReadonlyDictionaryWrapper<T>::KeyValueType
+#define VALUE_TYPE typename ValueReadonlyDictionaryWrapper<T>::ValueType
+#define KEY_KEY_TYPE typename ValueReadonlyDictionaryWrapper<T>::KeyKeyType
+			
+			template<typename T>
+			class ValueDictionaryWrapper : public virtual ValueReadonlyDictionaryWrapper<T>, public virtual IValueDictionary
+			{
+			public:
+				ValueDictionaryWrapper(const T& _wrapperPointer)
+					:ValueReadonlyDictionaryWrapper<T>(_wrapperPointer)
+				{
+				}
+
+				void Set(const Value& key, const Value& value)override
+				{
+					KEY_VALUE_TYPE item=UnboxValue<KEY_VALUE_TYPE>(key);
+					VALUE_TYPE result=UnboxValue<VALUE_TYPE>(value);
+					WRAPPER_POINTER->Set(item, result);
+				}
+
+				bool Remove(const Value& key)override
+				{
+					KEY_KEY_TYPE item=UnboxValue<KEY_KEY_TYPE>(key);
+					return WRAPPER_POINTER->Remove(item);
+				}
+
+				void Clear()override
+				{
+					WRAPPER_POINTER->Clear();
+				}
+			};
+#undef WRAPPER_POINTER
+#undef KEY_VALUE_TYPE
+#undef VALUE_TYPE
+#undef KEY_KEY_TYPE
+#pragma warning(pop)
 
 /***********************************************************************
 DetailTypeInfoRetriver<TContainer>
@@ -10266,7 +10644,7 @@ ParameterAccessor<TContainer>
 				{
 					typedef typename T::ElementType ElementType;
 					Ptr<IValueEnumerable> listProxy=UnboxValue<Ptr<IValueEnumerable>>(value, typeDescriptor, valueName);
-					result=IValueEnumerable::GetLazyList(listProxy);
+					result=GetLazyList<T>(listProxy);
 				}
 			};
 
@@ -10283,7 +10661,7 @@ ParameterAccessor<TContainer>
 				{
 					typedef typename T::ElementType ElementType;
 					Ptr<IValueReadonlyList> listProxy=UnboxValue<Ptr<IValueReadonlyList>>(value, typeDescriptor, valueName);
-					LazyList<ElementType> lazyList=listProxy->GetLazyList<ElementType>();
+					collections::LazyList<ElementType> lazyList=GetLazyList<ElementType>(listProxy);
 					collections::CopyFrom(result, lazyList);
 				}
 			};
@@ -10301,7 +10679,7 @@ ParameterAccessor<TContainer>
 				{
 					typedef typename T::ElementType ElementType;
 					Ptr<IValueList> listProxy=UnboxValue<Ptr<IValueList>>(value, typeDescriptor, valueName);
-					collections::LazyList<ElementType> lazyList=listProxy->GetLazyList<ElementType>();
+					collections::LazyList<ElementType> lazyList=GetLazyList<ElementType>(listProxy);
 					collections::CopyFrom(result, lazyList);
 				}
 			};
@@ -10323,7 +10701,7 @@ ParameterAccessor<TContainer>
 					typedef typename ValueContainer::ElementType		ValueType;
 
 					Ptr<IValueReadonlyDictionary> dictionaryProxy=UnboxValue<Ptr<IValueReadonlyDictionary>>(value, typeDescriptor, valueName);
-					collections::LazyList<Pair<KeyType, ValueType>> lazyList=dictionaryProxy->GetLazyList<KeyType, ValueType>();
+					collections::LazyList<collections::Pair<KeyType, ValueType>> lazyList=GetLazyList<KeyType, ValueType>(dictionaryProxy);
 					collections::CopyFrom(result, lazyList);
 				}
 			};
@@ -10345,7 +10723,7 @@ ParameterAccessor<TContainer>
 					typedef typename ValueContainer::ElementType		ValueType;
 
 					Ptr<IValueDictionary> dictionaryProxy=UnboxValue<Ptr<IValueDictionary>>(value, typeDescriptor, valueName);
-					collections::LazyList<Pair<KeyType, ValueType>> lazyList=dictionaryProxy->GetLazyList<KeyType, ValueType>();
+					collections::LazyList<collections::Pair<KeyType, ValueType>> lazyList=GetLazyList<KeyType, ValueType>(dictionaryProxy);
 					collections::CopyFrom(result, lazyList);
 				}
 			};
@@ -10390,8 +10768,8 @@ Type
 #define BEGIN_TYPE_INFO_NAMESPACE namespace vl{namespace reflection{namespace description{
 #define END_TYPE_INFO_NAMESPACE }}}
 #define DECL_TYPE_INFO(TYPENAME) template<>struct TypeInfo<TYPENAME>{static const wchar_t* TypeName;};
-#define IMPL_TYPE_INFO(TYPENAME) const wchar_t* TypeInfo<TYPENAME>::TypeName = L#TYPENAME;
-#define IMPL_TYPE_INFO_RENAME(TYPENAME, EXPECTEDNAME) const wchar_t* TypeInfo<TYPENAME>::TypeName = L#EXPECTEDNAME;
+#define IMPL_TYPE_INFO(TYPENAME) const wchar_t* TypeInfo<TYPENAME>::TypeName = L ## #TYPENAME;
+#define IMPL_TYPE_INFO_RENAME(TYPENAME, EXPECTEDNAME) const wchar_t* TypeInfo<TYPENAME>::TypeName = L ## #EXPECTEDNAME;
 #define ADD_TYPE_INFO(TYPENAME)\
 			{\
 				Ptr<ITypeDescriptor> type=new CustomTypeDescriptorSelector<TYPENAME>::CustomTypeDescriptorImpl();\
@@ -10399,16 +10777,16 @@ Type
 			}
 
 #define INVOKE_INTERFACE_PROXY(METHODNAME, ...)\
-	proxy->Invoke(L#METHODNAME, IValueList::Create(collections::From((collections::Array<Value>&)(Value::xs(), __VA_ARGS__))))
+	proxy->Invoke(L ## #METHODNAME, IValueList::Create(collections::From((collections::Array<Value>&)(Value_xs(), __VA_ARGS__))))
 
 #define INVOKE_INTERFACE_PROXY_NOPARAM(METHODNAME)\
-	proxy->Invoke(L#METHODNAME, IValueList::Create())
+	proxy->Invoke(L ## #METHODNAME, IValueList::Create())
 
 #define INVOKEGET_INTERFACE_PROXY(METHODNAME, ...)\
-	UnboxValue<decltype(METHODNAME(__VA_ARGS__))>(proxy->Invoke(L#METHODNAME, IValueList::Create(collections::From((collections::Array<Value>&)(Value::xs(), __VA_ARGS__)))))
+	UnboxValue<decltype(METHODNAME(__VA_ARGS__))>(proxy->Invoke(L ## #METHODNAME, IValueList::Create(collections::From((collections::Array<Value>&)(Value_xs(), __VA_ARGS__)))))
 
 #define INVOKEGET_INTERFACE_PROXY_NOPARAMS(METHODNAME)\
-	UnboxValue<decltype(METHODNAME())>(proxy->Invoke(L#METHODNAME, IValueList::Create()))
+	UnboxValue<decltype(METHODNAME())>(proxy->Invoke(L ## #METHODNAME, IValueList::Create()))
 
 /***********************************************************************
 Enum
@@ -10419,12 +10797,12 @@ Enum
 			struct CustomTypeDescriptorSelector<TYPENAME>\
 			{\
 			public:\
-				class CustomEnumValueSerializer : public EnumValueSeriaizer<TYPENAME, FLAG>\
+				class CustomEnumValueSerializer : public EnumValueSerializer<TYPENAME, FLAG>\
 				{\
 					typedef TYPENAME EnumType;\
 				public:\
 					CustomEnumValueSerializer(ITypeDescriptor* _ownerTypeDescriptor)\
-						:EnumValueSeriaizer(_ownerTypeDescriptor, DEFAULTVALUE)\
+						:EnumValueSerializer(_ownerTypeDescriptor, DEFAULTVALUE)\
 					{
 
 #define BEGIN_ENUM_ITEM_DEFAULT_VALUE(TYPENAME, DEFAULTVALUE) BEGIN_ENUM_ITEM_FLAG(TYPENAME, TYPENAME::DEFAULTVALUE, false)
@@ -10438,9 +10816,9 @@ Enum
 			};
 
 #define ENUM_ITEM_NAMESPACE(TYPENAME) typedef TYPENAME EnumItemNamespace;
-#define ENUM_ITEM(ITEMNAME) candidates.Add(L#ITEMNAME, ITEMNAME);
-#define ENUM_NAMESPACE_ITEM(ITEMNAME) candidates.Add(L#ITEMNAME, EnumItemNamespace::ITEMNAME);
-#define ENUM_CLASS_ITEM(ITEMNAME) candidates.Add(L#ITEMNAME, EnumType::ITEMNAME);
+#define ENUM_ITEM(ITEMNAME) candidates.Add(L ## #ITEMNAME, ITEMNAME);
+#define ENUM_NAMESPACE_ITEM(ITEMNAME) candidates.Add(L ## #ITEMNAME, EnumItemNamespace::ITEMNAME);
+#define ENUM_CLASS_ITEM(ITEMNAME) candidates.Add(L ## #ITEMNAME, EnumType::ITEMNAME);
 
 /***********************************************************************
 Struct
@@ -10451,12 +10829,12 @@ Struct
 			struct CustomTypeDescriptorSelector<TYPENAME>\
 			{\
 			public:\
-				class CustomStructValueSerializer : public StructValueSeriaizer<TYPENAME>\
+				class CustomStructValueSerializer : public StructValueSerializer<TYPENAME>\
 				{\
 					typedef TYPENAME StructType;\
 				public:\
 					CustomStructValueSerializer(ITypeDescriptor* _ownerTypeDescriptor)\
-						:StructValueSeriaizer(_ownerTypeDescriptor)\
+						:StructValueSerializer(_ownerTypeDescriptor)\
 					{\
 					}\
 				protected:\
@@ -10470,7 +10848,7 @@ Struct
 			};
 
 #define STRUCT_MEMBER(FIELDNAME)\
-	fieldSerializers.Add(L#FIELDNAME, new FieldSerializer<decltype(((StructType*)0)->FIELDNAME)>(GetOwnerTypeDescriptor(), &StructType::FIELDNAME, L#FIELDNAME));
+	fieldSerializers.Add(L ## #FIELDNAME, new FieldSerializer<decltype(((StructType*)0)->FIELDNAME)>(GetOwnerTypeDescriptor(), &StructType::FIELDNAME, L ## #FIELDNAME));
 
 /***********************************************************************
 Class
@@ -10515,8 +10893,8 @@ Field
 			AddProperty(\
 				new CustomFieldInfoImpl<\
 					ClassType,\
-					decltype(((ClassType*)0)->FIELDNAME), (decltype(((ClassType*)0)->FIELDNAME) ClassType::*)&ClassType::FIELDNAME>\
-					(this, L#FIELDNAME)\
+					decltype(((ClassType*)0)->FIELDNAME)\
+					>(this, L ## #FIELDNAME, &ClassType::FIELDNAME)\
 				);
 
 /***********************************************************************
@@ -10524,6 +10902,7 @@ Constructor
 ***********************************************************************/
 
 #define NO_PARAMETER {L""}
+#define PROTECT_PARAMETERS(...) __VA_ARGS__
 
 #define CLASS_MEMBER_CONSTRUCTOR(FUNCTIONTYPE, PARAMETERNAMES)\
 			{\
@@ -10535,11 +10914,7 @@ Constructor
 			{\
 				const wchar_t* parameterNames[]=PARAMETERNAMES;\
 				AddConstructor(\
-					new CustomMethodInfoImplSelector<\
-						void,\
-						FUNCTIONTYPE\
-						>\
-						::CustomMethodInfoImpl(parameterNames, SOURCE)\
+					new CustomStaticMethodInfoImpl<FUNCTIONTYPE>(parameterNames, SOURCE)\
 					);\
 			}
 
@@ -10551,12 +10926,11 @@ Method
 			{\
 				const wchar_t* parameterNames[]=PARAMETERNAMES;\
 				AddMethod(\
-					L#FUNCTIONNAME,\
-					new CustomMethodInfoImplSelector<\
+					L ## #FUNCTIONNAME,\
+					new CustomExternalMethodInfoImpl<\
 						ClassType,\
 						vl::function_lambda::LambdaRetriveType<FUNCTIONTYPE>::FunctionType\
-						>\
-						::ExternalMethodInfoImpl(parameterNames, SOURCE)\
+						>(parameterNames, SOURCE)\
 					);\
 			}
 
@@ -10564,23 +10938,22 @@ Method
 			{\
 				const wchar_t* parameterNames[]=PARAMETERNAMES;\
 				AddMethod(\
-					L#EXPECTEDNAME,\
-					new CustomMethodInfoImplSelector<\
+					L ## #EXPECTEDNAME,\
+					new CustomMethodInfoImpl<\
 						ClassType,\
 						vl::function_lambda::LambdaRetriveType<FUNCTIONTYPE>::FunctionType\
-						>\
-						::CustomMethodInfoImpl(parameterNames, (FUNCTIONTYPE)&ClassType::FUNCTIONNAME)\
+						>(parameterNames, (FUNCTIONTYPE)&ClassType::FUNCTIONNAME)\
 					);\
 			}
 
 #define CLASS_MEMBER_METHOD_OVERLOAD(FUNCTIONNAME, PARAMETERNAMES, FUNCTIONTYPE)\
-			CLASS_MEMBER_METHOD_OVERLOAD_RENAME(FUNCTIONNAME, FUNCTIONNAME, PARAMETERNAMES, FUNCTIONTYPE)
+			CLASS_MEMBER_METHOD_OVERLOAD_RENAME(FUNCTIONNAME, FUNCTIONNAME, PROTECT_PARAMETERS(PARAMETERNAMES), FUNCTIONTYPE)
 
 #define CLASS_MEMBER_METHOD_RENAME(EXPECTEDNAME, FUNCTIONNAME, PARAMETERNAMES)\
-			CLASS_MEMBER_METHOD_OVERLOAD_RENAME(EXPECTEDNAME, FUNCTIONNAME, PARAMETERNAMES, decltype(&ClassType::FUNCTIONNAME))
+			CLASS_MEMBER_METHOD_OVERLOAD_RENAME(EXPECTEDNAME, FUNCTIONNAME, PROTECT_PARAMETERS(PARAMETERNAMES), decltype(&ClassType::FUNCTIONNAME))
 
 #define CLASS_MEMBER_METHOD(FUNCTIONNAME, PARAMETERNAMES)\
-			CLASS_MEMBER_METHOD_OVERLOAD(FUNCTIONNAME, PARAMETERNAMES, decltype(&ClassType::FUNCTIONNAME))
+			CLASS_MEMBER_METHOD_OVERLOAD(FUNCTIONNAME, PROTECT_PARAMETERS(PARAMETERNAMES), decltype(&ClassType::FUNCTIONNAME))
 
 /***********************************************************************
 Static Method
@@ -10590,20 +10963,30 @@ Static Method
 			{\
 				const wchar_t* parameterNames[]=PARAMETERNAMES;\
 				AddMethod(\
-					L#FUNCTIONNAME,\
-					new CustomMethodInfoImplSelector<\
-						void,\
+					L ## #FUNCTIONNAME,\
+					new CustomStaticMethodInfoImpl<\
 						vl::function_lambda::FunctionObjectRetriveType<FUNCTIONTYPE>::FunctionType\
-						>\
-						::CustomMethodInfoImpl(parameterNames, SOURCE)\
+						>(parameterNames, SOURCE)\
 					);\
 			}
 
 #define CLASS_MEMBER_STATIC_METHOD_OVERLOAD(FUNCTIONNAME, PARAMETERNAMES, FUNCTIONTYPE)\
-			CLASS_MEMBER_STATIC_EXTERNALMETHOD(FUNCTIONNAME, PARAMETERNAMES, FUNCTIONTYPE, (FUNCTIONTYPE)&ClassType::FUNCTIONNAME)
+			CLASS_MEMBER_STATIC_EXTERNALMETHOD(FUNCTIONNAME, PROTECT_PARAMETERS(PARAMETERNAMES), FUNCTIONTYPE, (FUNCTIONTYPE)&ClassType::FUNCTIONNAME)
 
 #define CLASS_MEMBER_STATIC_METHOD(FUNCTIONNAME, PARAMETERNAMES)\
-			CLASS_MEMBER_STATIC_METHOD_OVERLOAD(FUNCTIONNAME, PARAMETERNAMES, decltype(&ClassType::FUNCTIONNAME))
+			CLASS_MEMBER_STATIC_METHOD_OVERLOAD(FUNCTIONNAME, PROTECT_PARAMETERS(PARAMETERNAMES), decltype(&ClassType::FUNCTIONNAME))
+
+/***********************************************************************
+Event
+***********************************************************************/
+
+#define CLASS_MEMBER_EVENT(EVENTNAME)\
+			AddEvent(\
+				new CustomEventInfoImpl<\
+					ClassType,\
+					CustomEventFunctionTypeRetriver<decltype(&ClassType::EVENTNAME)>::Type\
+					>(this, L ## #EVENTNAME, &ClassType::EVENTNAME)\
+				);
 
 /***********************************************************************
 Property
@@ -10613,8 +10996,8 @@ Property
 			AddProperty(\
 				new PropertyInfoImpl(\
 					this,\
-					L#PROPERTYNAME,\
-					dynamic_cast<MethodInfoImpl*>(GetMethodGroupByName(L#GETTER, true)->GetMethod(0)),\
+					L ## #PROPERTYNAME,\
+					dynamic_cast<MethodInfoImpl*>(GetMethodGroupByName(L ## #GETTER, true)->GetMethod(0)),\
 					0,\
 					0\
 					)\
@@ -10624,9 +11007,9 @@ Property
 			AddProperty(\
 				new PropertyInfoImpl(\
 					this,\
-					L#PROPERTYNAME,\
-					dynamic_cast<MethodInfoImpl*>(GetMethodGroupByName(L#GETTER, true)->GetMethod(0)),\
-					dynamic_cast<MethodInfoImpl*>(GetMethodGroupByName(L#SETTER, true)->GetMethod(0)),\
+					L ## #PROPERTYNAME,\
+					dynamic_cast<MethodInfoImpl*>(GetMethodGroupByName(L ## #GETTER, true)->GetMethod(0)),\
+					dynamic_cast<MethodInfoImpl*>(GetMethodGroupByName(L ## #SETTER, true)->GetMethod(0)),\
 					0\
 					)\
 				);
@@ -10635,10 +11018,10 @@ Property
 			AddProperty(\
 				new PropertyInfoImpl(\
 					this,\
-					L#PROPERTYNAME,\
-					dynamic_cast<MethodInfoImpl*>(GetMethodGroupByName(L#GETTER, true)->GetMethod(0)),\
-					dynamic_cast<MethodInfoImpl*>(GetMethodGroupByName(L#SETTER, true)->GetMethod(0)),\
-					dynamic_cast<EventInfoImpl*>(GetEventByName(L#EVENT, true))\
+					L ## #PROPERTYNAME,\
+					dynamic_cast<MethodInfoImpl*>(GetMethodGroupByName(L ## #GETTER, true)->GetMethod(0)),\
+					dynamic_cast<MethodInfoImpl*>(GetMethodGroupByName(L ## #SETTER, true)->GetMethod(0)),\
+					dynamic_cast<EventInfoImpl*>(GetEventByName(L ## #EVENT, true))\
 					)\
 				);
 
@@ -10646,10 +11029,10 @@ Property
 			AddProperty(\
 				new PropertyInfoImpl(\
 					this,\
-					L#PROPERTYNAME,\
-					dynamic_cast<MethodInfoImpl*>(GetMethodGroupByName(L#GETTER, true)->GetMethod(0)),\
+					L ## #PROPERTYNAME,\
+					dynamic_cast<MethodInfoImpl*>(GetMethodGroupByName(L ## #GETTER, true)->GetMethod(0)),\
 					0,\
-					dynamic_cast<EventInfoImpl*>(GetEventByName(L#EVENT, true))\
+					dynamic_cast<EventInfoImpl*>(GetEventByName(L ## #EVENT, true))\
 					)\
 				);
 
@@ -11404,6 +11787,7 @@ namespace vl
 ***********************************************************************/
 
 			class ParsingSymbol;
+			class ParsingSymbolManager;
 
 			struct DefinitionTypeScopePair
 			{
@@ -12956,7 +13340,13 @@ namespace vl
 		class PureInterpretor : public Object
 		{
 		protected:
-			vint				charMap[1<<(8*sizeof(wchar_t))];	// char -> char set index
+#if defined VCZH_MSVC
+			static const vint	SupportedCharCount = 0x10000;		// UTF-16
+#elif defined VCZH_GCC
+			static const vint	SupportedCharCount = 0x110000;		// UTF-32
+#endif
+
+			vint				charMap[SupportedCharCount];		// char -> char set index
 			vint**				transition;							// (state * char set index) -> state*
 			bool*				finalState;							// state -> bool
 			vint*				relatedFinalState;					// sate -> (finalState or -1)
@@ -13975,4 +14365,319 @@ RepeatingTaskExecutor
 	};
 }
 
+#endif
+
+/***********************************************************************
+TUPLE.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Framework::Tuple
+	
+本文件使用Vczh Functional Macro工具自动生成
+***********************************************************************/
+#ifndef VCZH_TUPLE
+#define VCZH_TUPLE
+namespace vl
+{
+	class TupleNullItem
+	{
+	};
+	template<typename T0 = TupleNullItem,typename T1 = TupleNullItem,typename T2 = TupleNullItem,typename T3 = TupleNullItem,typename T4 = TupleNullItem,typename T5 = TupleNullItem,typename T6 = TupleNullItem,typename T7 = TupleNullItem,typename T8 = TupleNullItem,typename T9 = TupleNullItem,typename T10 = TupleNullItem>
+	class Tuple
+	{
+	};
+ 
+/***********************************************************************
+vl::Tuple<T0>
+***********************************************************************/
+	template<typename T0>
+	class Tuple<T0> : public Object
+	{
+	public:
+		T0 f0;
+ 
+		Tuple()
+		{
+		}
+ 
+		Tuple(T0 p0)
+			:f0(p0)
+		{
+		}
+ 
+		bool operator==(const Tuple<T0>& value)
+		{
+			return f0==value.f0;
+		}
+ 
+		bool operator!=(const Tuple<T0>& value)
+		{
+			return !(f0==value.f0);
+		}
+	};
+  
+/***********************************************************************
+vl::Tuple<T0,T1>
+***********************************************************************/
+	template<typename T0,typename T1>
+	class Tuple<T0,T1> : public Object
+	{
+	public:
+		T0 f0;T1 f1;
+ 
+		Tuple()
+		{
+		}
+ 
+		Tuple(T0 p0,T1 p1)
+			:f0(p0),f1(p1)
+		{
+		}
+ 
+		bool operator==(const Tuple<T0,T1>& value)
+		{
+			return f0==value.f0 && f1==value.f1;
+		}
+ 
+		bool operator!=(const Tuple<T0,T1>& value)
+		{
+			return !(f0==value.f0 && f1==value.f1);
+		}
+	};
+  
+/***********************************************************************
+vl::Tuple<T0,T1,T2>
+***********************************************************************/
+	template<typename T0,typename T1,typename T2>
+	class Tuple<T0,T1,T2> : public Object
+	{
+	public:
+		T0 f0;T1 f1;T2 f2;
+ 
+		Tuple()
+		{
+		}
+ 
+		Tuple(T0 p0,T1 p1,T2 p2)
+			:f0(p0),f1(p1),f2(p2)
+		{
+		}
+ 
+		bool operator==(const Tuple<T0,T1,T2>& value)
+		{
+			return f0==value.f0 && f1==value.f1 && f2==value.f2;
+		}
+ 
+		bool operator!=(const Tuple<T0,T1,T2>& value)
+		{
+			return !(f0==value.f0 && f1==value.f1 && f2==value.f2);
+		}
+	};
+  
+/***********************************************************************
+vl::Tuple<T0,T1,T2,T3>
+***********************************************************************/
+	template<typename T0,typename T1,typename T2,typename T3>
+	class Tuple<T0,T1,T2,T3> : public Object
+	{
+	public:
+		T0 f0;T1 f1;T2 f2;T3 f3;
+ 
+		Tuple()
+		{
+		}
+ 
+		Tuple(T0 p0,T1 p1,T2 p2,T3 p3)
+			:f0(p0),f1(p1),f2(p2),f3(p3)
+		{
+		}
+ 
+		bool operator==(const Tuple<T0,T1,T2,T3>& value)
+		{
+			return f0==value.f0 && f1==value.f1 && f2==value.f2 && f3==value.f3;
+		}
+ 
+		bool operator!=(const Tuple<T0,T1,T2,T3>& value)
+		{
+			return !(f0==value.f0 && f1==value.f1 && f2==value.f2 && f3==value.f3);
+		}
+	};
+  
+/***********************************************************************
+vl::Tuple<T0,T1,T2,T3,T4>
+***********************************************************************/
+	template<typename T0,typename T1,typename T2,typename T3,typename T4>
+	class Tuple<T0,T1,T2,T3,T4> : public Object
+	{
+	public:
+		T0 f0;T1 f1;T2 f2;T3 f3;T4 f4;
+ 
+		Tuple()
+		{
+		}
+ 
+		Tuple(T0 p0,T1 p1,T2 p2,T3 p3,T4 p4)
+			:f0(p0),f1(p1),f2(p2),f3(p3),f4(p4)
+		{
+		}
+ 
+		bool operator==(const Tuple<T0,T1,T2,T3,T4>& value)
+		{
+			return f0==value.f0 && f1==value.f1 && f2==value.f2 && f3==value.f3 && f4==value.f4;
+		}
+ 
+		bool operator!=(const Tuple<T0,T1,T2,T3,T4>& value)
+		{
+			return !(f0==value.f0 && f1==value.f1 && f2==value.f2 && f3==value.f3 && f4==value.f4);
+		}
+	};
+  
+/***********************************************************************
+vl::Tuple<T0,T1,T2,T3,T4,T5>
+***********************************************************************/
+	template<typename T0,typename T1,typename T2,typename T3,typename T4,typename T5>
+	class Tuple<T0,T1,T2,T3,T4,T5> : public Object
+	{
+	public:
+		T0 f0;T1 f1;T2 f2;T3 f3;T4 f4;T5 f5;
+ 
+		Tuple()
+		{
+		}
+ 
+		Tuple(T0 p0,T1 p1,T2 p2,T3 p3,T4 p4,T5 p5)
+			:f0(p0),f1(p1),f2(p2),f3(p3),f4(p4),f5(p5)
+		{
+		}
+ 
+		bool operator==(const Tuple<T0,T1,T2,T3,T4,T5>& value)
+		{
+			return f0==value.f0 && f1==value.f1 && f2==value.f2 && f3==value.f3 && f4==value.f4 && f5==value.f5;
+		}
+ 
+		bool operator!=(const Tuple<T0,T1,T2,T3,T4,T5>& value)
+		{
+			return !(f0==value.f0 && f1==value.f1 && f2==value.f2 && f3==value.f3 && f4==value.f4 && f5==value.f5);
+		}
+	};
+  
+/***********************************************************************
+vl::Tuple<T0,T1,T2,T3,T4,T5,T6>
+***********************************************************************/
+	template<typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6>
+	class Tuple<T0,T1,T2,T3,T4,T5,T6> : public Object
+	{
+	public:
+		T0 f0;T1 f1;T2 f2;T3 f3;T4 f4;T5 f5;T6 f6;
+ 
+		Tuple()
+		{
+		}
+ 
+		Tuple(T0 p0,T1 p1,T2 p2,T3 p3,T4 p4,T5 p5,T6 p6)
+			:f0(p0),f1(p1),f2(p2),f3(p3),f4(p4),f5(p5),f6(p6)
+		{
+		}
+ 
+		bool operator==(const Tuple<T0,T1,T2,T3,T4,T5,T6>& value)
+		{
+			return f0==value.f0 && f1==value.f1 && f2==value.f2 && f3==value.f3 && f4==value.f4 && f5==value.f5 && f6==value.f6;
+		}
+ 
+		bool operator!=(const Tuple<T0,T1,T2,T3,T4,T5,T6>& value)
+		{
+			return !(f0==value.f0 && f1==value.f1 && f2==value.f2 && f3==value.f3 && f4==value.f4 && f5==value.f5 && f6==value.f6);
+		}
+	};
+  
+/***********************************************************************
+vl::Tuple<T0,T1,T2,T3,T4,T5,T6,T7>
+***********************************************************************/
+	template<typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7>
+	class Tuple<T0,T1,T2,T3,T4,T5,T6,T7> : public Object
+	{
+	public:
+		T0 f0;T1 f1;T2 f2;T3 f3;T4 f4;T5 f5;T6 f6;T7 f7;
+ 
+		Tuple()
+		{
+		}
+ 
+		Tuple(T0 p0,T1 p1,T2 p2,T3 p3,T4 p4,T5 p5,T6 p6,T7 p7)
+			:f0(p0),f1(p1),f2(p2),f3(p3),f4(p4),f5(p5),f6(p6),f7(p7)
+		{
+		}
+ 
+		bool operator==(const Tuple<T0,T1,T2,T3,T4,T5,T6,T7>& value)
+		{
+			return f0==value.f0 && f1==value.f1 && f2==value.f2 && f3==value.f3 && f4==value.f4 && f5==value.f5 && f6==value.f6 && f7==value.f7;
+		}
+ 
+		bool operator!=(const Tuple<T0,T1,T2,T3,T4,T5,T6,T7>& value)
+		{
+			return !(f0==value.f0 && f1==value.f1 && f2==value.f2 && f3==value.f3 && f4==value.f4 && f5==value.f5 && f6==value.f6 && f7==value.f7);
+		}
+	};
+  
+/***********************************************************************
+vl::Tuple<T0,T1,T2,T3,T4,T5,T6,T7,T8>
+***********************************************************************/
+	template<typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7,typename T8>
+	class Tuple<T0,T1,T2,T3,T4,T5,T6,T7,T8> : public Object
+	{
+	public:
+		T0 f0;T1 f1;T2 f2;T3 f3;T4 f4;T5 f5;T6 f6;T7 f7;T8 f8;
+ 
+		Tuple()
+		{
+		}
+ 
+		Tuple(T0 p0,T1 p1,T2 p2,T3 p3,T4 p4,T5 p5,T6 p6,T7 p7,T8 p8)
+			:f0(p0),f1(p1),f2(p2),f3(p3),f4(p4),f5(p5),f6(p6),f7(p7),f8(p8)
+		{
+		}
+ 
+		bool operator==(const Tuple<T0,T1,T2,T3,T4,T5,T6,T7,T8>& value)
+		{
+			return f0==value.f0 && f1==value.f1 && f2==value.f2 && f3==value.f3 && f4==value.f4 && f5==value.f5 && f6==value.f6 && f7==value.f7 && f8==value.f8;
+		}
+ 
+		bool operator!=(const Tuple<T0,T1,T2,T3,T4,T5,T6,T7,T8>& value)
+		{
+			return !(f0==value.f0 && f1==value.f1 && f2==value.f2 && f3==value.f3 && f4==value.f4 && f5==value.f5 && f6==value.f6 && f7==value.f7 && f8==value.f8);
+		}
+	};
+  
+/***********************************************************************
+vl::Tuple<T0,T1,T2,T3,T4,T5,T6,T7,T8,T9>
+***********************************************************************/
+	template<typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7,typename T8,typename T9>
+	class Tuple<T0,T1,T2,T3,T4,T5,T6,T7,T8,T9> : public Object
+	{
+	public:
+		T0 f0;T1 f1;T2 f2;T3 f3;T4 f4;T5 f5;T6 f6;T7 f7;T8 f8;T9 f9;
+ 
+		Tuple()
+		{
+		}
+ 
+		Tuple(T0 p0,T1 p1,T2 p2,T3 p3,T4 p4,T5 p5,T6 p6,T7 p7,T8 p8,T9 p9)
+			:f0(p0),f1(p1),f2(p2),f3(p3),f4(p4),f5(p5),f6(p6),f7(p7),f8(p8),f9(p9)
+		{
+		}
+ 
+		bool operator==(const Tuple<T0,T1,T2,T3,T4,T5,T6,T7,T8,T9>& value)
+		{
+			return f0==value.f0 && f1==value.f1 && f2==value.f2 && f3==value.f3 && f4==value.f4 && f5==value.f5 && f6==value.f6 && f7==value.f7 && f8==value.f8 && f9==value.f9;
+		}
+ 
+		bool operator!=(const Tuple<T0,T1,T2,T3,T4,T5,T6,T7,T8,T9>& value)
+		{
+			return !(f0==value.f0 && f1==value.f1 && f2==value.f2 && f3==value.f3 && f4==value.f4 && f5==value.f5 && f6==value.f6 && f7==value.f7 && f8==value.f8 && f9==value.f9);
+		}
+	};
+ 
+}
 #endif

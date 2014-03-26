@@ -5,6 +5,7 @@
   </projects>
   <categories>
     <category name="vlpp" pattern="\Common\Source\"/>
+    <category name="workflow" pattern="\Workflow\Source\"/>
     <category name="gacui" pattern="\GacUI\Source\">
       <except pattern="\Windows\" />
       <except pattern="\WindowsDirect2D\" />
@@ -18,6 +19,7 @@
   </categories>
   <output path="Source\">
     <codepair category="vlpp" filename="Vlpp" />
+    <codepair category="workflow" filename="VlppWorkflow" />
     <codepair category="gacui" filename="GacUI" />
     <codepair category="windows" filename="GacUIWindows" />
     <codepair category="reflection" filename="GacUIReflection" />

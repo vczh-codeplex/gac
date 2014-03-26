@@ -27,6 +27,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Source", "Source", "{695AA4
 		..\Public\Source\GacUIWindows.h = ..\Public\Source\GacUIWindows.h
 		..\Public\Source\Vlpp.cpp = ..\Public\Source\Vlpp.cpp
 		..\Public\Source\Vlpp.h = ..\Public\Source\Vlpp.h
+		..\Public\Source\VlppWorkflow.cpp = ..\Public\Source\VlppWorkflow.cpp
+		..\Public\Source\VlppWorkflow.h = ..\Public\Source\VlppWorkflow.h
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GacUISrcCodepackedTest", "GacUISrcCodepackedTest\GacUISrcCodepackedTest.vcxproj", "{EB5A22FF-03D9-45A9-BF76-8083D46A643B}"

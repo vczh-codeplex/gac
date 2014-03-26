@@ -233,6 +233,7 @@
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='DebugNoReflection|Win32'">/bigobj %(AdditionalOptions)</AdditionalOptions>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="..\..\Public\Source\VlppWorkflow.cpp" />
     <ClCompile Include="FileSystemInformation.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="SetupBasicWindow.cpp" />
@@ -258,6 +259,7 @@
     <ClInclude Include="..\..\Public\Source\GacUIReflection.h" />
     <ClInclude Include="..\..\Public\Source\GacUIWindows.h" />
     <ClInclude Include="..\..\Public\Source\Vlpp.h" />
+    <ClInclude Include="..\..\Public\Source\VlppWorkflow.h" />
     <ClInclude Include="FileSystemInformation.h" />
   </ItemGroup>
   <ItemGroup>

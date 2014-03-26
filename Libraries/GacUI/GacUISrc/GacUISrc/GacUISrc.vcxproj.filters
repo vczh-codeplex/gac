@@ -100,6 +100,18 @@
     <Filter Include="GacUI\Resources">
       <UniqueIdentifier>{ff392072-6eb8-4bc4-8468-a928af679d20}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Workflow">
+      <UniqueIdentifier>{b71b56d2-82ab-4079-a7a5-1a1fa46c567b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Workflow\Analyzer">
+      <UniqueIdentifier>{16dedf07-3fe8-47af-b960-91fb4100abeb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Workflow\Expression">
+      <UniqueIdentifier>{1e5e40e6-27bd-4f68-a13e-3aaa32de2904}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Workflow\Runtime">
+      <UniqueIdentifier>{5f113591-a02a-4766-b47b-67fa8630ae28}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\Common\Source\Basic.cpp">
@@ -530,6 +542,45 @@
     </ClCompile>
     <ClCompile Include="..\..\Source\Reflection\GuiInstanceLoader_Log.cpp">
       <Filter>GacUI\Reflection</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Workflow\Source\Analyzer\WfAnalyzer.cpp">
+      <Filter>Workflow\Analyzer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Workflow\Source\Analyzer\WfAnalyzer_BuildScope.cpp">
+      <Filter>Workflow\Analyzer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Workflow\Source\Analyzer\WfAnalyzer_Errors.cpp">
+      <Filter>Workflow\Analyzer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Workflow\Source\Analyzer\WfAnalyzer_GenerateAssembly.cpp">
+      <Filter>Workflow\Analyzer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Workflow\Source\Analyzer\WfAnalyzer_Misc.cpp">
+      <Filter>Workflow\Analyzer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Workflow\Source\Analyzer\WfAnalyzer_SearchOrderedName.cpp">
+      <Filter>Workflow\Analyzer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Workflow\Source\Analyzer\WfAnalyzer_TypeInfo.cpp">
+      <Filter>Workflow\Analyzer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Workflow\Source\Analyzer\WfAnalyzer_ValidateSemantic.cpp">
+      <Filter>Workflow\Analyzer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Workflow\Source\Analyzer\WfAnalyzer_ValidateStructure.cpp">
+      <Filter>Workflow\Analyzer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Workflow\Source\Expression\WfExpressionParser.cpp">
+      <Filter>Workflow\Expression</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Workflow\Source\Expression\WfExpression.cpp">
+      <Filter>Workflow\Expression</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Workflow\Source\Runtime\WfRuntime.cpp">
+      <Filter>Workflow\Runtime</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Workflow\Source\Runtime\WfRuntime_Execution.cpp">
+      <Filter>Workflow\Runtime</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -991,6 +1042,21 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorBuilder_Struct.h">
       <Filter>Common\Reflection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Workflow\Source\Analyzer\WfAnalyzer.h">
+      <Filter>Workflow\Analyzer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Workflow\Source\WorkflowVlppReferences.h">
+      <Filter>Workflow</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Workflow\Source\Expression\WfExpressionParser.h">
+      <Filter>Workflow\Expression</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Workflow\Source\Expression\WfExpression.h">
+      <Filter>Workflow\Expression</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Workflow\Source\Runtime\WfRuntime.h">
+      <Filter>Workflow\Runtime</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
