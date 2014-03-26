@@ -89,7 +89,7 @@ Enumerable Wrappers
 			};
 
 			template<typename T>
-			collections::LazyList<T> GetLazyList(Ptr<IValueEnumerator> value)
+			collections::LazyList<T> GetLazyList(Ptr<IValueEnumerable> value)
 			{
 				return collections::LazyList<T>(new TypedEnumerator<T>(value));
 			}
