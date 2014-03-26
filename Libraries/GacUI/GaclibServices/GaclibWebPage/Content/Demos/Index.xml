@@ -242,7 +242,15 @@
       <image src="DXGUI_87.jpg" />
       <image src="DXGUI_88.jpg" />
       <cpp src="Main.cpp" />
+      <xml src="XmlWindowResource.xml"/>
       <description>This demo shows how to load windows or controls from an XML resource.</description>
+    </demo>
+    <demo name="DirectCode.Scripting">
+      <date>2013/11/14</date>
+      <image src="DXGUI_89.jpg" />
+      <image src="DXGUI_90.jpg" />
+      <cpp src="Main.cpp" />
+      <description>This demo shows how to create GUI using Workflow script.</description>
     </demo>
   </category>
 </demos>
