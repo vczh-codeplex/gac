@@ -13,6 +13,10 @@ namespace vl
 			using namespace reflection::description;
 			using namespace runtime;
 
+			typedef WfInstruction Ins;
+
+#define INSTRUCTION(X) context.assembly->instructions.Add(X)
+
 /***********************************************************************
 GenerateGlobalDeclarationMetadata
 ***********************************************************************/
@@ -76,19 +80,48 @@ GenerateGlobalDeclarationMetadata
 			}
 
 /***********************************************************************
-GenerateInstructions(Declaration)
+GenerateInstructions(Initialize)
 ***********************************************************************/
 
-			typedef WfInstruction Ins;
-
-#define INSTRUCTION(X) context.assembly->instructions.Add(X)
-
-			class GenerateInstructionsVisitor : public Object, public WfDeclaration::IVisitor
+			class GenerateInitializeInstructionsVisitor : public Object, public WfDeclaration::IVisitor
 			{
 			public:
 				WfCodegenContext&						context;
 
-				GenerateInstructionsVisitor(WfCodegenContext& _context)
+				GenerateInitializeInstructionsVisitor(WfCodegenContext& _context)
+					:context(_context)
+				{
+				}
+
+				void Visit(WfNamespaceDeclaration* node)override
+				{
+				}
+
+				void Visit(WfFunctionDeclaration* node)override
+				{
+				}
+
+				void Visit(WfVariableDeclaration* node)override
+				{
+				}
+			};
+
+			void GenerateInitializeInstructions(WfCodegenContext& context, Ptr<WfDeclaration> declaration)
+			{
+				GenerateInitializeInstructionsVisitor visitor(context);
+				declaration->Accept(&visitor);
+			}
+
+/***********************************************************************
+GenerateInstructions(Declaration)
+***********************************************************************/
+
+			class GenerateDeclarationInstructionsVisitor : public Object, public WfDeclaration::IVisitor
+			{
+			public:
+				WfCodegenContext&						context;
+
+				GenerateDeclarationInstructionsVisitor(WfCodegenContext& _context)
 					:context(_context)
 				{
 				}
@@ -146,7 +179,7 @@ GenerateInstructions(Declaration)
 
 			void GenerateDeclarationInstructions(WfCodegenContext& context, Ptr<WfDeclaration> declaration)
 			{
-				GenerateInstructionsVisitor visitor(context);
+				GenerateDeclarationInstructionsVisitor visitor(context);
 				declaration->Accept(&visitor);
 			}
 
@@ -1331,8 +1364,6 @@ GetInstructionTypeArgument
 				}
 			}
 
-#undef INSTRUCTION
-
 /***********************************************************************
 GenerateTypeCastInstructions
 ***********************************************************************/
@@ -1370,7 +1401,33 @@ GenerateAssembly
 						GenerateGlobalDeclarationMetadata(context, decl);
 					}
 				}
-				
+
+				{
+					auto meta = MakePtr<WfAssemblyFunction>();
+					meta->name = L"<initialize>";
+					vint functionIndex = assembly->functions.Add(meta);
+					assembly->functionByName.Add(meta->name, functionIndex);
+
+					auto functionContext = MakePtr<WfCodegenFunctionContext>();
+					functionContext->function = meta;
+					context.functionContext = functionContext;
+					
+					meta->firstInstruction = assembly->instructions.Count();
+					FOREACH(Ptr<WfModule>, module, manager->modules)
+					{
+						FOREACH(Ptr<WfDeclaration>, decl, module->declarations)
+						{
+							GenerateInitializeInstructions(context, decl);
+						}
+					}
+					INSTRUCTION(Ins::LoadValue(Value()));
+					INSTRUCTION(Ins::Return());
+					meta->lastInstruction = assembly->instructions.Count() - 1;
+
+					context.functionContext = 0;
+					GenerateClosureInstructions(context, functionContext);
+				}
+
 				FOREACH(Ptr<WfModule>, module, manager->modules)
 				{
 					FOREACH(Ptr<WfDeclaration>, decl, module->declarations)
@@ -1391,6 +1448,8 @@ GenerateAssembly
 				}
 				return assembly;
 			}
+
+#undef INSTRUCTION
 
 /***********************************************************************
 Compile

@@ -50,16 +50,33 @@ TEST_CASE(TestCodegen)
 		WfRuntimeThreadContext context(assembly);
 		TEST_ASSERT(context.status == WfRuntimeExecutionStatus::Finished);
 
-		vint functionIndex = assembly->functionByName[L"main"];
-		context.PushStackFrame(functionIndex, 0);
-		TEST_ASSERT(context.status == WfRuntimeExecutionStatus::Ready);
-
-		while (context.status != WfRuntimeExecutionStatus::Finished)
 		{
-			auto action = context.Execute();
-			TEST_ASSERT(action != WfRuntimeExecutionAction::Nop);
+			vint functionIndex = assembly->functionByName[L"<initialize>"];
+			context.PushStackFrame(functionIndex, 0);
+			TEST_ASSERT(context.status == WfRuntimeExecutionStatus::Ready);
+
+			while (context.status != WfRuntimeExecutionStatus::Finished)
+			{
+				auto action = context.Execute();
+				TEST_ASSERT(action != WfRuntimeExecutionAction::Nop);
+			}
+			TEST_ASSERT(context.Execute() == WfRuntimeExecutionAction::Nop);
+			Value result;
+			TEST_ASSERT(context.PopValue(result) == WfRuntimeThreadContextError::Success);
 		}
-		TEST_ASSERT(context.Execute() == WfRuntimeExecutionAction::Nop);
+
+		{
+			vint functionIndex = assembly->functionByName[L"main"];
+			context.PushStackFrame(functionIndex, 0);
+			TEST_ASSERT(context.status == WfRuntimeExecutionStatus::Ready);
+
+			while (context.status != WfRuntimeExecutionStatus::Finished)
+			{
+				auto action = context.Execute();
+				TEST_ASSERT(action != WfRuntimeExecutionAction::Nop);
+			}
+			TEST_ASSERT(context.Execute() == WfRuntimeExecutionAction::Nop);
+		}
 		
 		Value result;
 		TEST_ASSERT(context.PopValue(result) == WfRuntimeThreadContextError::Success);
@@ -91,6 +108,8 @@ func main():string
 	TEST_ASSERT(errors.Count() == 0);
 
 	WfRuntimeThreadContext context(assembly);
+	context.PushStackFrame(assembly->functionByName[L"<initialize>"], 0);
+	context.ExecuteToEnd();
 	context.PushStackFrame(assembly->functionByName[L"main"], 0);
 	context.ExecuteToEnd();
 
