@@ -302,16 +302,19 @@ namespace vl
 		ObjectBox<T>& operator=(const T& _object)
 		{
 			object=_object;
+			return *this;
 		}
 
 		ObjectBox<T>& operator=(const ObjectBox<T>& value)
 		{
 			object=value.object;
+			return *this;
 		}
 
 		ObjectBox<T>& operator=(ObjectBox<T>&& value)
 		{
 			object=MoveValue(value.object);
+			return *this;
 		}
 
 		const T& Unbox()
