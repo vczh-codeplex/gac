@@ -625,7 +625,7 @@ GenerateInstructions(Expression)
 					if ((index = context.globalFunctions.Keys().IndexOf(result.symbol.Obj())) != -1)
 					{
 						vint functionIndex = context.globalFunctions.Values()[index];
-						INSTRUCTION(Ins::LoadClosure(functionIndex, 1));
+						INSTRUCTION(Ins::LoadClosure(functionIndex, 0));
 					}
 					else if ((index = context.globalVariables.Keys().IndexOf(result.symbol.Obj())) != -1)
 					{
@@ -658,7 +658,7 @@ GenerateInstructions(Expression)
 						lc.staticMethodReferenceExpression = node;
 						context.functionContext->closuresToCodegen.Add(functionIndex, lc);
 
-						INSTRUCTION(Ins::LoadClosure(functionIndex, 1));
+						INSTRUCTION(Ins::LoadClosure(functionIndex, 0));
 					}
 					else
 					{
