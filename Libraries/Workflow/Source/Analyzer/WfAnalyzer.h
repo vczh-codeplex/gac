@@ -258,6 +258,7 @@ Code Generation
 				WfFunctionExpression*				functionExpression = 0;
 				WfOrderedLambdaExpression*			orderedLambdaExpression = 0;
 				WfMemberExpression*					methodReferenceExpression = 0;
+				WfExpression*						staticMethodReferenceExpression = 0;
 			};
 
 			class WfCodegenLoopContext : public Object

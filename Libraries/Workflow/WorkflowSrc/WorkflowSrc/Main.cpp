@@ -331,6 +331,13 @@ namespace test
 		{
 		}
 
+		static Ptr<ObservableValue> Create(vint value, const WString& name)
+		{
+			auto ov = MakePtr<ObservableValue>(value);
+			ov->name = name;
+			return ov;
+		}
+
 		vint GetValue()
 		{
 			return value;
@@ -386,6 +393,7 @@ namespace vl
 				CLASS_MEMBER_CONSTRUCTOR(Ptr<ObservableValue>(vint), { L"value" })
 				CLASS_MEMBER_CONSTRUCTOR(ObservableValue*(vint, Nullable<double>), { L"value" _ L"x" })
 				CLASS_MEMBER_CONSTRUCTOR(ObservableValue*(vint, Nullable<bool>), { L"value" _ L"x" })
+				CLASS_MEMBER_STATIC_METHOD(Create, { L"value" _ L"name" })
 
 				CLASS_MEMBER_EVENT(ValueChanged)
 				CLASS_MEMBER_PROPERTY_EVENT_FAST(Value, ValueChanged)
