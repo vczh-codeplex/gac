@@ -185,28 +185,6 @@ Features:
 
 void GuiMain()
 {
-	//{
-	//	FileStream fileStream(L"Reflection.txt", FileStream::WriteOnly);
-	//	BomEncoder encoder(BomEncoder::Utf16);
-	//	EncoderStream encoderStream(fileStream, encoder);
-	//	StreamWriter writer(encoderStream);
-	//	LogTypeManager(writer);
-	//}
-	//{
-	//	FileStream fileStream(L"Instance.txt", FileStream::WriteOnly);
-	//	BomEncoder encoder(BomEncoder::Utf16);
-	//	EncoderStream encoderStream(fileStream, encoder);
-	//	StreamWriter writer(encoderStream);
-	//	LogInstanceLoaderManager(writer);
-	//}
-	//UnitTestInGuiMain();
-
-	//GetInstanceLoaderManager()->SetResource(L"Resource", GuiResource::LoadFromXml(L"..\\GacUISrcCodepackedTest\\Resources\\XmlWindowResource.xml"));
-	//MainWindow window;
-	//window.ForceCalculateSizeImmediately();
-	//window.MoveToScreenCenter();
-	//GetApplication()->Run(&window);
-
 	List<Ptr<ParsingError>> errors;
 	List<WString> codes;
 	codes.Add(LR"workflow(
@@ -217,10 +195,28 @@ using presentation::*;
 using presentation::controls::*;
 using presentation::compositions::*;
 
+var window : GuiWindow* = null;
+
+func button_Clicked(sender : GuiGraphicsComposition*, arguments : GuiEventArgs*) : void
+{
+	var button = cast GuiButton* (sender.RelatedControl);
+	button.Text = "Well done!";
+}
+
 func CreateWindow() : GuiWindow*
 {
-	var window = new GuiWindow*();
+	window = new GuiWindow*();
 	window.Text = "Scriptable GacUI!";
+	window.ContainerComposition.PreferredMinSize = cast Size "x:300 y:200";
+
+	var button = new GuiButton*();
+	button.Text = "Click Me!";
+	button.BoundsComposition.AlignmentToParent = cast Margin "left:50 top:50 right:50 bottom:50";
+	attach(button.Clicked, button_Clicked);
+	window.AddChild(button);
+
+	window.ForceCalculateSizeImmediately();
+	window.MoveToScreenCenter();
 	return window;
 }
 
