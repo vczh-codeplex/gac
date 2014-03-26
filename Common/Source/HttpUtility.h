@@ -2,7 +2,7 @@
 #define VCZH_HTTPUTILITY
 
 #include "String.h"
-#include "Collections\Dictionary.h"
+#include "Collections/Dictionary.h"
 
 #ifdef VCZH_MSVC
 
