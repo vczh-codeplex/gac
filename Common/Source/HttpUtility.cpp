@@ -1,5 +1,5 @@
 #include "HttpUtility.h"
-#include "Collections\OperationForEach.h"
+#include "Collections/OperationForEach.h"
 
 #ifdef VCZH_MSVC
 #include <Windows.h>
