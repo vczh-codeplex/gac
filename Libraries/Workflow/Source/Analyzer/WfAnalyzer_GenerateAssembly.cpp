@@ -569,6 +569,7 @@ GenerateInstructions(Statement)
 						loopLabelIndex = INSTRUCTION(Ins::LoadLocalVar(elementIndex));
 						INSTRUCTION(Ins::LoadLocalVar(enumeratorIndex));
 						INSTRUCTION(Ins::InvokeMethod(methodNext, 0));
+						INSTRUCTION(Ins::OpNot(WfInsType::Bool));
 						loopContext->breakInstructions.Add(INSTRUCTION(Ins::JumpIf(-1)));
 						INSTRUCTION(Ins::LoadLocalVar(enumeratorIndex));
 						INSTRUCTION(Ins::InvokeMethod(methodGetCurrent, 0));
