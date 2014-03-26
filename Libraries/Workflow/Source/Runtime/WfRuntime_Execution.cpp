@@ -381,6 +381,17 @@ WfRuntimeThreadContext (Lambda)
 #undef BINARY_OPERATOR
 
 /***********************************************************************
+Helper Functions
+***********************************************************************/
+
+			Ptr<reflection::description::IValueFunctionProxy> LoadFunction(Ptr<WfRuntimeGlobalContext> context, const WString& name)
+			{
+				vint functionIndex = context->assembly->functionByName[name];
+				auto lambda = MakePtr<WfRuntimeLambda>(context, nullptr, functionIndex);
+				return lambda;
+			}
+
+/***********************************************************************
 WfRuntimeThreadContext
 ***********************************************************************/
 
