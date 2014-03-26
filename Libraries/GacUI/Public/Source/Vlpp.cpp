@@ -166,7 +166,9 @@ DateTime
 		timeinfo.tm_hour = _hour;
 		timeinfo.tm_min = _minute;
 		timeinfo.tm_sec = _second;
-		return ConvertTMToDateTime(&timeinfo);
+		DateTime dt = ConvertTMToDateTime(&timeinfo);
+		dt.milliseconds = _milliseconds;
+		return dt;
 #endif
 	}
 
@@ -263,7 +265,6 @@ Console.cpp
 ***********************************************************************/
 #if defined VCZH_MSVC
 #elif defined VCZH_GCC
-#include <wchar.h>
 #include <iostream>
 #include <string>
 using namespace std;
@@ -298,7 +299,6 @@ Console
 				delete codePageBuffer;
 			}
 #elif defined VCZH_GCC
-			//wprintf(L"%.*s", (int)length, string);
 			wstring s(string, string+length);
 			wcout<<s<<ends;
 #endif
@@ -345,10 +345,6 @@ Console
 			}
 			return result;
 #elif defined VCZH_GCC
-			//wchar_t buffer[1024];
-			//memset(buffer, 0, sizeof(buffer));
-			//wscanf(L"%1023s\n", buffer);
-			//return buffer;
 			wstring s;
 			getline(wcin, s, L'\n');
 			return s.c_str();
@@ -789,10 +785,14 @@ Utilities
 /***********************************************************************
 Locale.cpp
 ***********************************************************************/
+#if defined VCZH_MSVC
+#endif
 
 namespace vl
 {
 	using namespace collections;
+
+#if defined VCZH_MSVC
 
 	extern SYSTEMTIME DateTimeToSystemTime(const DateTime& dateTime);
 
@@ -847,6 +847,8 @@ namespace vl
 		return result;
 	}
 
+#endif
+
 /***********************************************************************
 Locale
 ***********************************************************************/
@@ -862,33 +864,49 @@ Locale
 
 	Locale Locale::Invariant()
 	{
+#if defined VCZH_MSVC
 		return Locale(LOCALE_NAME_INVARIANT);
+#elif defined VCZH_GCC
+		return Locale(L"");
+#endif
 	}
 
 	Locale Locale::SystemDefault()
 	{
+#if defined VCZH_MSVC
 		wchar_t buffer[LOCALE_NAME_MAX_LENGTH+1]={0};
 		GetSystemDefaultLocaleName(buffer, LOCALE_NAME_MAX_LENGTH);
 		return Locale(buffer);
+#elif defined VCZH_GCC
+		return Locale(L"en-us");
+#endif
 	}
 
 	Locale Locale::UserDefault()
 	{
+#if defined VCZH_MSVC
 		wchar_t buffer[LOCALE_NAME_MAX_LENGTH+1]={0};
 		GetUserDefaultLocaleName(buffer, LOCALE_NAME_MAX_LENGTH);
 		return Locale(buffer);
+#elif defined VCZH_GCC
+		return Locale(L"en-us");
+#endif
 	}
 
 	void Locale::Enumerate(collections::List<Locale>& locales)
 	{
+#if defined VCZH_MSVC
 		EnumSystemLocalesEx(&Locale_EnumLocalesProcEx, LOCALE_ALL, (LPARAM)&locales, NULL);
+#elif defined VCZH_GCC
+		locales.Add(Locale(L"en-us"));
+#endif
 	}
 
 	const WString& Locale::GetName()const
 	{
 		return localeName;
 	}
-
+#if defined VCZH_MSVC
 	void Locale::GetShortDateFormats(collections::List<WString>& formats)const
 	{
 		EnumDateFormatsExEx(&Locale_EnumDateFormatsProcExEx, localeName.Buffer(), DATE_SHORTDATE, (LPARAM)&formats);
@@ -1082,6 +1100,7 @@ Locale
 		int result=FindNLSStringEx(localeName.Buffer(), FIND_ENDSWITH | TranslateNormalization(normalization), text.Buffer(), (int)text.Length(), find.Buffer(), (int)find.Length(), NULL, NULL, NULL, NULL);
 		return result!=-1;
 	}
+#endif
 }
 
 /***********************************************************************
@@ -1212,7 +1231,7 @@ API
 				}
 			}
 
-			unsigned __int16 GetHex(wchar_t c)
+			vuint16_t GetHex(wchar_t c)
 			{
 				if(L'0'<=c && c<=L'9')
 				{
@@ -1252,7 +1271,7 @@ API
 								if((h1=reading[0]) && (h2=reading[1]) && (h3=reading[2]) && (h4=reading[3]))
 								{
 									reading+=4;
-									wchar_t h=(wchar_t)(unsigned __int16)(
+									wchar_t h=(wchar_t)(vuint16_t)(
 										(GetHex(h1)<<12) +
 										(GetHex(h2)<<8) +
 										(GetHex(h3)<<4) +
@@ -1310,93 +1329,93 @@ ParserText
 ***********************************************************************/
 
 const wchar_t parserTextBuffer[] = 
-L"\r\n"L""
-L"\r\n"L"class Node"
-L"\r\n"L"{"
-L"\r\n"L"}"
-L"\r\n"L""
-L"\r\n"L"class Literal:Node"
-L"\r\n"L"{"
-L"\r\n"L"\tenum Value"
-L"\r\n"L"\t{"
-L"\r\n"L"\t\tTrue,"
-L"\r\n"L"\t\tFalse,"
-L"\r\n"L"\t\tNull,"
-L"\r\n"L"\t}"
-L"\r\n"L""
-L"\r\n"L"\tValue value;"
-L"\r\n"L"}"
-L"\r\n"L""
-L"\r\n"L"class String:Node"
-L"\r\n"L"{"
-L"\r\n"L"\ttoken content(JsonUnescapingString)\t\t\t\t@Color(\"String\");"
-L"\r\n"L"}"
-L"\r\n"L""
-L"\r\n"L"class Number:Node"
-L"\r\n"L"{"
-L"\r\n"L"\ttoken content;"
-L"\r\n"L"}"
-L"\r\n"L""
-L"\r\n"L"class Array:Node"
-L"\r\n"L"{"
-L"\r\n"L"\tNode[] items;"
-L"\r\n"L"}"
-L"\r\n"L""
-L"\r\n"L"class ObjectField:Node"
-L"\r\n"L"{"
-L"\r\n"L"\ttoken name(JsonUnescapingString)\t\t\t\t@Color(\"AttName\");"
-L"\r\n"L"\tNode value;"
-L"\r\n"L"}"
-L"\r\n"L""
-L"\r\n"L"class Object:Node"
-L"\r\n"L"{"
-L"\r\n"L"\tObjectField[] fields;"
-L"\r\n"L"}"
-L"\r\n"L""
-L"\r\n"L"token TRUEVALUE = \"true\"\t\t\t\t\t\t\t@Color(\"Keyword\");"
-L"\r\n"L"token FALSEVALUE = \"false\"\t\t\t\t\t\t\t@Color(\"Keyword\");"
-L"\r\n"L"token NULLVALUE = \"null\"\t\t\t\t\t\t\t@Color(\"Keyword\");"
-L"\r\n"L"token OBJOPEN = \"\\{\"\t\t\t\t\t\t\t\t@Color(\"Boundary\");"
-L"\r\n"L"token OBJCLOSE = \"\\}\"\t\t\t\t\t\t\t\t@Color(\"Boundary\");"
-L"\r\n"L"token ARROPEN = \"\\[\"\t\t\t\t\t\t\t\t@Color(\"Boundary\");"
-L"\r\n"L"token ARRCLOSE = \"\\]\"\t\t\t\t\t\t\t\t@Color(\"Boundary\");"
-L"\r\n"L"token COMMA = \",\";"
-L"\r\n"L"token COLON = \":\";"
-L"\r\n"L"token NUMBER = \"[\\-]?\\d+(.\\d+)?([eE][+\\-]?\\d+)?\"\t@Color(\"Number\");"
-L"\r\n"L"token STRING = \"\"\"([^\\\\\"\"]|\\\\[^u]|\\\\u\\d{4})*\"\"\"\t\t@ContextColor();"
-L"\r\n"L""
-L"\r\n"L"discardtoken SPACE = \"\\s+\";"
-L"\r\n"L""
-L"\r\n"L"rule Node JLiteral"
-L"\r\n"L"\t= STRING:content as String"
-L"\r\n"L"\t= NUMBER:content as Number"
-L"\r\n"L"\t= \"true\" as Literal with {value = \"True\"}"
-L"\r\n"L"\t= \"false\" as Literal with {value = \"False\"}"
-L"\r\n"L"\t= \"null\" as Literal with {value = \"Null\"}"
-L"\r\n"L"\t;"
-L"\r\n"L""
-L"\r\n"L"rule ObjectField JField"
-L"\r\n"L"\t= STRING:name \":\" JValue:value as ObjectField"
-L"\r\n"L"\t;"
-L"\r\n"L""
-L"\r\n"L"rule Object JObject"
-L"\r\n"L"\t= \"{\" [JField:fields {\",\" JField:fields} ] \"}\" as Object"
-L"\r\n"L"\t;"
-L"\r\n"L""
-L"\r\n"L"rule Array JArray"
-L"\r\n"L"\t= \"[\" [JValue:items {\",\" JValue:items} ] \"]\" as Array"
-L"\r\n"L"\t;"
-L"\r\n"L""
-L"\r\n"L"rule Node JValue"
-L"\r\n"L"\t= !JLiteral"
-L"\r\n"L"\t= !JObject"
-L"\r\n"L"\t= !JArray"
-L"\r\n"L"\t;"
-L"\r\n"L""
-L"\r\n"L"rule Node JRoot"
-L"\r\n"L"\t= !JObject"
-L"\r\n"L"\t= !JArray"
-L"\r\n"L"\t;"
+L"\r\n" L""
+L"\r\n" L"class Node"
+L"\r\n" L"{"
+L"\r\n" L"}"
+L"\r\n" L""
+L"\r\n" L"class Literal:Node"
+L"\r\n" L"{"
+L"\r\n" L"\tenum Value"
+L"\r\n" L"\t{"
+L"\r\n" L"\t\tTrue,"
+L"\r\n" L"\t\tFalse,"
+L"\r\n" L"\t\tNull,"
+L"\r\n" L"\t}"
+L"\r\n" L""
+L"\r\n" L"\tValue value;"
+L"\r\n" L"}"
+L"\r\n" L""
+L"\r\n" L"class String:Node"
+L"\r\n" L"{"
+L"\r\n" L"\ttoken content(JsonUnescapingString)\t\t\t\t@Color(\"String\");"
+L"\r\n" L"}"
+L"\r\n" L""
+L"\r\n" L"class Number:Node"
+L"\r\n" L"{"
+L"\r\n" L"\ttoken content;"
+L"\r\n" L"}"
+L"\r\n" L""
+L"\r\n" L"class Array:Node"
+L"\r\n" L"{"
+L"\r\n" L"\tNode[] items;"
+L"\r\n" L"}"
+L"\r\n" L""
+L"\r\n" L"class ObjectField:Node"
+L"\r\n" L"{"
+L"\r\n" L"\ttoken name(JsonUnescapingString)\t\t\t\t@Color(\"AttName\");"
+L"\r\n" L"\tNode value;"
+L"\r\n" L"}"
+L"\r\n" L""
+L"\r\n" L"class Object:Node"
+L"\r\n" L"{"
+L"\r\n" L"\tObjectField[] fields;"
+L"\r\n" L"}"
+L"\r\n" L""
+L"\r\n" L"token TRUEVALUE = \"true\"\t\t\t\t\t\t\t@Color(\"Keyword\");"
+L"\r\n" L"token FALSEVALUE = \"false\"\t\t\t\t\t\t\t@Color(\"Keyword\");"
+L"\r\n" L"token NULLVALUE = \"null\"\t\t\t\t\t\t\t@Color(\"Keyword\");"
+L"\r\n" L"token OBJOPEN = \"\\{\"\t\t\t\t\t\t\t\t@Color(\"Boundary\");"
+L"\r\n" L"token OBJCLOSE = \"\\}\"\t\t\t\t\t\t\t\t@Color(\"Boundary\");"
+L"\r\n" L"token ARROPEN = \"\\[\"\t\t\t\t\t\t\t\t@Color(\"Boundary\");"
+L"\r\n" L"token ARRCLOSE = \"\\]\"\t\t\t\t\t\t\t\t@Color(\"Boundary\");"
+L"\r\n" L"token COMMA = \",\";"
+L"\r\n" L"token COLON = \":\";"
+L"\r\n" L"token NUMBER = \"[\\-]?\\d+(.\\d+)?([eE][+\\-]?\\d+)?\"\t@Color(\"Number\");"
+L"\r\n" L"token STRING = \"\"\"([^\\\\\"\"]|\\\\[^u]|\\\\u\\d{4})*\"\"\"\t\t@ContextColor();"
+L"\r\n" L""
+L"\r\n" L"discardtoken SPACE = \"\\s+\";"
+L"\r\n" L""
+L"\r\n" L"rule Node JLiteral"
+L"\r\n" L"\t= STRING:content as String"
+L"\r\n" L"\t= NUMBER:content as Number"
+L"\r\n" L"\t= \"true\" as Literal with {value = \"True\"}"
+L"\r\n" L"\t= \"false\" as Literal with {value = \"False\"}"
+L"\r\n" L"\t= \"null\" as Literal with {value = \"Null\"}"
+L"\r\n" L"\t;"
+L"\r\n" L""
+L"\r\n" L"rule ObjectField JField"
+L"\r\n" L"\t= STRING:name \":\" JValue:value as ObjectField"
+L"\r\n" L"\t;"
+L"\r\n" L""
+L"\r\n" L"rule Object JObject"
+L"\r\n" L"\t= \"{\" [JField:fields {\",\" JField:fields} ] \"}\" as Object"
+L"\r\n" L"\t;"
+L"\r\n" L""
+L"\r\n" L"rule Array JArray"
+L"\r\n" L"\t= \"[\" [JValue:items {\",\" JValue:items} ] \"]\" as Array"
+L"\r\n" L"\t;"
+L"\r\n" L""
+L"\r\n" L"rule Node JValue"
+L"\r\n" L"\t= !JLiteral"
+L"\r\n" L"\t= !JObject"
+L"\r\n" L"\t= !JArray"
+L"\r\n" L"\t;"
+L"\r\n" L""
+L"\r\n" L"rule Node JRoot"
+L"\r\n" L"\t= !JObject"
+L"\r\n" L"\t= !JArray"
+L"\r\n" L"\t;"
 ;
 
 			vl::WString JsonGetParserTextBuffer()
@@ -2659,7 +2678,7 @@ ParsingAutoRecoverAmbiguousParser
 			}
 
 /***********************************************************************
-辅助函数
+Helper Functions
 ***********************************************************************/
 
 			Ptr<ParsingGeneralParser> CreateStrictParser(Ptr<ParsingTable> table)
@@ -2720,7 +2739,7 @@ ParsingAutoRecoverAmbiguousParser
 }
 
 /***********************************************************************
-反射
+Reflection
 ***********************************************************************/
 
 #ifndef VCZH_DEBUG_NO_REFLECTION
@@ -6455,14 +6474,14 @@ ParsingDefinitionTypeWriter
 				Ptr<ParsingDefinitionSubType> subType=new ParsingDefinitionSubType;
 				subType->parentType=type;
 				subType->subTypeName=subTypeName;
-				return subType;
+				return ParsingDefinitionTypeWriter(subType);
 			}
 
 			ParsingDefinitionTypeWriter ParsingDefinitionTypeWriter::Array()const
 			{
 				Ptr<ParsingDefinitionArrayType> arrayType=new ParsingDefinitionArrayType;
 				arrayType->elementType=type;
-				return arrayType;
+				return ParsingDefinitionTypeWriter(arrayType);
 			}
 
 			Ptr<ParsingDefinitionType> ParsingDefinitionTypeWriter::Type()const
@@ -6478,7 +6497,7 @@ ParsingDefinitionTypeWriter
 			ParsingDefinitionTypeWriter TokenType()
 			{
 				Ptr<ParsingDefinitionTokenType> type=new ParsingDefinitionTokenType;
-				return type;
+				return ParsingDefinitionTypeWriter(type);
 			}
 
 /***********************************************************************
@@ -6599,7 +6618,7 @@ ParsingDefinitionGrammarWriter
 				Ptr<ParsingDefinitionSequenceGrammar> sequence=new ParsingDefinitionSequenceGrammar;
 				sequence->first=grammar;
 				sequence->second=next.Grammar();
-				return sequence;
+				return ParsingDefinitionGrammarWriter(sequence);
 			}
 
 			ParsingDefinitionGrammarWriter ParsingDefinitionGrammarWriter::operator|(const ParsingDefinitionGrammarWriter& next)const
@@ -6607,14 +6626,14 @@ ParsingDefinitionGrammarWriter
 				Ptr<ParsingDefinitionAlternativeGrammar> alternative=new ParsingDefinitionAlternativeGrammar;
 				alternative->first=grammar;
 				alternative->second=next.Grammar();
-				return alternative;
+				return ParsingDefinitionGrammarWriter(alternative);
 			}
 
 			ParsingDefinitionGrammarWriter ParsingDefinitionGrammarWriter::operator*()const
 			{
 				Ptr<ParsingDefinitionLoopGrammar> loop=new ParsingDefinitionLoopGrammar;
 				loop->grammar=grammar;
-				return loop;
+				return ParsingDefinitionGrammarWriter(loop);
 			}
 
 			ParsingDefinitionGrammarWriter ParsingDefinitionGrammarWriter::As(const ParsingDefinitionTypeWriter& type)const
@@ -6622,7 +6641,7 @@ ParsingDefinitionGrammarWriter
 				Ptr<ParsingDefinitionCreateGrammar> create=new ParsingDefinitionCreateGrammar;
 				create->grammar=grammar;
 				create->type=type.Type();
-				return create;
+				return ParsingDefinitionGrammarWriter(create);
 			}
 
 			ParsingDefinitionGrammarWriter ParsingDefinitionGrammarWriter::operator[](const WString& memberName)const
@@ -6630,14 +6649,14 @@ ParsingDefinitionGrammarWriter
 				Ptr<ParsingDefinitionAssignGrammar> assign=new ParsingDefinitionAssignGrammar;
 				assign->grammar=grammar;
 				assign->memberName=memberName;
-				return assign;
+				return ParsingDefinitionGrammarWriter(assign);
 			}
 
 			ParsingDefinitionGrammarWriter ParsingDefinitionGrammarWriter::operator!()const
 			{
 				Ptr<ParsingDefinitionUseGrammar> use=new ParsingDefinitionUseGrammar;
 				use->grammar=grammar;
-				return use;
+				return ParsingDefinitionGrammarWriter(use);
 			}
 
 			ParsingDefinitionGrammarWriter ParsingDefinitionGrammarWriter::Set(const WString& memberName, const WString& value)const
@@ -6646,7 +6665,7 @@ ParsingDefinitionGrammarWriter
 				setter->grammar=grammar;
 				setter->memberName=memberName;
 				setter->value=value;
-				return setter;
+				return ParsingDefinitionGrammarWriter(setter);
 			}
 
 			Ptr<ParsingDefinitionGrammar> ParsingDefinitionGrammarWriter::Grammar()const
@@ -6658,21 +6677,21 @@ ParsingDefinitionGrammarWriter
 			{
 				Ptr<ParsingDefinitionPrimitiveGrammar> grammar=new ParsingDefinitionPrimitiveGrammar;
 				grammar->name=name;
-				return grammar;
+				return ParsingDefinitionGrammarWriter(grammar);
 			}
 
 			ParsingDefinitionGrammarWriter Text(const WString& text)
 			{
 				Ptr<ParsingDefinitionTextGrammar> grammar=new ParsingDefinitionTextGrammar;
 				grammar->text=text;
-				return grammar;
+				return ParsingDefinitionGrammarWriter(grammar);
 			}
 
 			ParsingDefinitionGrammarWriter Opt(const ParsingDefinitionGrammarWriter& writer)
 			{
 				Ptr<ParsingDefinitionOptionalGrammar> grammar=new ParsingDefinitionOptionalGrammar;
 				grammar->grammar=writer.Grammar();
-				return grammar;
+				return ParsingDefinitionGrammarWriter(grammar);
 			}
 
 /***********************************************************************
@@ -7266,6 +7285,8 @@ namespace vl
 					target=DeserializeString(token);
 				}
 			}
+
+			extern Ptr<ParsingTreeCustomBase> Deserialize(Ptr<ParsingTreeObject> node);
 
 			template<typename T>
 			void SetArray(List<Ptr<T>>& target, Ptr<ParsingTreeNode> node)
@@ -9346,7 +9367,14 @@ ParsingTreeBuilder
 					{
 						if(processingAmbiguityBranch) return false;
 						processingAmbiguityBranch=true;
-						ambiguityBranchCreatedObject=createdObject?createdObject->Clone():0;
+						if(createdObject)
+						{
+							ambiguityBranchCreatedObject=createdObject->Clone();
+						}
+						else
+						{
+							ambiguityBranchCreatedObject=0;
+						}
 						ambiguityBranchOperationTarget=operationTarget->Clone().Cast<ParsingTreeObject>();
 						ambiguityBranchNodeStack.Clear();
 						ambiguityBranchSharedNodeCount=nodeStack.Count()-result.ambiguityAffectedStackNodeCount+1;
@@ -9362,7 +9390,14 @@ ParsingTreeBuilder
 						if(!processingAmbiguityBranch) return false;
 						if(nodeStack.Count()!=ambiguityBranchSharedNodeCount) return false;
 						ambiguityNodes.Add(operationTarget);
-						createdObject=ambiguityBranchCreatedObject?ambiguityBranchCreatedObject->Clone():0;
+						if(ambiguityBranchCreatedObject)
+						{
+							createdObject=ambiguityBranchCreatedObject->Clone();
+						}
+						else
+						{
+							createdObject=0;
+						}
 						operationTarget=ambiguityBranchOperationTarget->Clone().Cast<ParsingTreeObject>();
 						for(vint i=0;i<ambiguityBranchNodeStack.Count();i++)
 						{
@@ -9693,6 +9728,14 @@ namespace vl
 		{
 			using namespace collections;
 			using namespace regex;
+
+#ifdef VCZH_GCC
+			const vint ParsingTable::TokenBegin;
+			const vint ParsingTable::TokenFinish;
+			const vint ParsingTable::NormalReduce;
+			const vint ParsingTable::LeftRecursiveReduce;
+			const vint ParsingTable::UserTokenStart;
+#endif
 
 /***********************************************************************
 ParsingTable::AttributeInfoList
@@ -10455,7 +10498,8 @@ ParsingTreeObject
 		Ptr<ParsingTreeNode> ParsingTreeObject::GetMember(const WString& name)
 		{
 			vint index=members.Keys().IndexOf(name);
-			return index==-1?0:members.Values().Get(index);
+			if(index==-1) return 0;
+			return members.Values().Get(index);
 		}
 
 		bool ParsingTreeObject::SetMember(const WString& name, Ptr<ParsingTreeNode> node)
@@ -11558,76 +11602,76 @@ ParserText
 ***********************************************************************/
 
 const wchar_t parserTextBuffer[] = 
-L"\r\n"L""
-L"\r\n"L"class Node"
-L"\r\n"L"{"
-L"\r\n"L"}"
-L"\r\n"L""
-L"\r\n"L"class Text : Node"
-L"\r\n"L"{"
-L"\r\n"L"\ttoken content;"
-L"\r\n"L"}"
-L"\r\n"L""
-L"\r\n"L"class CData : Node"
-L"\r\n"L"{"
-L"\r\n"L"\ttoken content (XmlUnescapeCData);"
-L"\r\n"L"}"
-L"\r\n"L""
-L"\r\n"L"class Attribute : Node"
-L"\r\n"L"{"
-L"\r\n"L"\ttoken name\t\t\t\t\t\t\t\t\t@Color(\"AttName\");"
-L"\r\n"L"\ttoken value (XmlUnescapeAttributeValue)\t\t@Color(\"AttValue\");"
-L"\r\n"L"}"
-L"\r\n"L""
-L"\r\n"L"class Comment : Node"
-L"\r\n"L"{"
-L"\r\n"L"\ttoken content (XmlUnescapeComment);"
-L"\r\n"L"}"
-L"\r\n"L""
-L"\r\n"L"class Element : Node"
-L"\r\n"L"{"
-L"\r\n"L"\ttoken name\t\t\t\t\t\t\t\t\t@Color(\"TagName\");"
-L"\r\n"L"\ttoken closingName\t\t\t\t\t\t\t@Color(\"TagName\");"
-L"\r\n"L"\tAttribute[] attributes;"
-L"\r\n"L"\tNode[] subNodes (XmlMergeTextFragment);"
-L"\r\n"L"}"
-L"\r\n"L""
-L"\r\n"L"class Instruction : Node"
-L"\r\n"L"{"
-L"\r\n"L"\ttoken name\t\t\t\t\t\t\t\t\t@Color(\"TagName\");"
-L"\r\n"L"\tAttribute[] attributes;"
-L"\r\n"L"}"
-L"\r\n"L""
-L"\r\n"L"class Document : Node"
-L"\r\n"L"{"
-L"\r\n"L"\tNode[] prologs;"
-L"\r\n"L"\tElement rootElement;"
-L"\r\n"L"}"
-L"\r\n"L""
-L"\r\n"L"token INSTRUCTION_OPEN = \"/</?\"\t\t\t@Color(\"Boundary\");"
-L"\r\n"L"token INSTRUCTION_CLOSE = \"/?/>\"\t\t@Color(\"Boundary\");"
-L"\r\n"L"token COMPLEX_ELEMENT_OPEN = \"/<//\"\t\t@Color(\"Boundary\");"
-L"\r\n"L"token SINGLE_ELEMENT_CLOSE = \"///>\"\t\t@Color(\"Boundary\");"
-L"\r\n"L"token ELEMENT_OPEN = \"/<\"\t\t\t\t@Color(\"Boundary\");"
-L"\r\n"L"token ELEMENT_CLOSE = \"/>\"\t\t\t\t@Color(\"Boundary\");"
-L"\r\n"L"token EQUAL = \"/=\";"
-L"\r\n"L""
-L"\r\n"L"token NAME = \"[a-zA-Z0-9:._/-]+\"\t\t\t\t\t\t\t\t@ContextColor();"
-L"\r\n"L"token ATTVALUE = \"\"\"[^<>\"\"]*\"\"|\'[^<>\']*\'\"\t\t\t\t\t\t@ContextColor();"
-L"\r\n"L"token COMMENT = \"/</!--([^/->]|-[^/->]|--[^>])*--/>\"\t\t\t@Color(\"Comment\");"
-L"\r\n"L"token CDATA = \"/</!/[CDATA/[([^/]]|/][^/]]|/]/][^>])*/]/]/>\";"
-L"\r\n"L"token TEXT = \"([^<>=\"\"\' /r/n/ta-zA-Z0-9:._/-])+|\"\"|\'\";"
-L"\r\n"L""
-L"\r\n"L"discardtoken SPACE = \"/s+\";"
-L"\r\n"L""
-L"\r\n"L"rule Attribute XAttribute = NAME:name \"=\" ATTVALUE:value as Attribute;"
-L"\r\n"L"rule Text XText = (NAME:content | EQUAL:content | ATTVALUE:content | TEXT:content) as Text;"
-L"\r\n"L"rule CData XCData = CDATA:content as CData;"
-L"\r\n"L"rule Comment XComment = COMMENT:content as Comment;"
-L"\r\n"L"rule Element XElement = \"<\" NAME:name {XAttribute:attributes} (\"/>\" | \">\" {XSubNode:subNodes} \"</\" NAME:closingName \">\") as Element;"
-L"\r\n"L"rule Node XSubNode = !XText | !XCData | !XComment | !XElement;"
-L"\r\n"L"rule Instruction XInstruction = \"<?\" NAME:name {XAttribute:attributes} \"?>\" as Instruction;"
-L"\r\n"L"rule Document XDocument = {XInstruction:prologs | XComment:prologs} XElement:rootElement as Document;"
+L"\r\n" L""
+L"\r\n" L"class Node"
+L"\r\n" L"{"
+L"\r\n" L"}"
+L"\r\n" L""
+L"\r\n" L"class Text : Node"
+L"\r\n" L"{"
+L"\r\n" L"\ttoken content;"
+L"\r\n" L"}"
+L"\r\n" L""
+L"\r\n" L"class CData : Node"
+L"\r\n" L"{"
+L"\r\n" L"\ttoken content (XmlUnescapeCData);"
+L"\r\n" L"}"
+L"\r\n" L""
+L"\r\n" L"class Attribute : Node"
+L"\r\n" L"{"
+L"\r\n" L"\ttoken name\t\t\t\t\t\t\t\t\t@Color(\"AttName\");"
+L"\r\n" L"\ttoken value (XmlUnescapeAttributeValue)\t\t@Color(\"AttValue\");"
+L"\r\n" L"}"
+L"\r\n" L""
+L"\r\n" L"class Comment : Node"
+L"\r\n" L"{"
+L"\r\n" L"\ttoken content (XmlUnescapeComment);"
+L"\r\n" L"}"
+L"\r\n" L""
+L"\r\n" L"class Element : Node"
+L"\r\n" L"{"
+L"\r\n" L"\ttoken name\t\t\t\t\t\t\t\t\t@Color(\"TagName\");"
+L"\r\n" L"\ttoken closingName\t\t\t\t\t\t\t@Color(\"TagName\");"
+L"\r\n" L"\tAttribute[] attributes;"
+L"\r\n" L"\tNode[] subNodes (XmlMergeTextFragment);"
+L"\r\n" L"}"
+L"\r\n" L""
+L"\r\n" L"class Instruction : Node"
+L"\r\n" L"{"
+L"\r\n" L"\ttoken name\t\t\t\t\t\t\t\t\t@Color(\"TagName\");"
+L"\r\n" L"\tAttribute[] attributes;"
+L"\r\n" L"}"
+L"\r\n" L""
+L"\r\n" L"class Document : Node"
+L"\r\n" L"{"
+L"\r\n" L"\tNode[] prologs;"
+L"\r\n" L"\tElement rootElement;"
+L"\r\n" L"}"
+L"\r\n" L""
+L"\r\n" L"token INSTRUCTION_OPEN = \"/</?\"\t\t\t@Color(\"Boundary\");"
+L"\r\n" L"token INSTRUCTION_CLOSE = \"/?/>\"\t\t@Color(\"Boundary\");"
+L"\r\n" L"token COMPLEX_ELEMENT_OPEN = \"/<//\"\t\t@Color(\"Boundary\");"
+L"\r\n" L"token SINGLE_ELEMENT_CLOSE = \"///>\"\t\t@Color(\"Boundary\");"
+L"\r\n" L"token ELEMENT_OPEN = \"/<\"\t\t\t\t@Color(\"Boundary\");"
+L"\r\n" L"token ELEMENT_CLOSE = \"/>\"\t\t\t\t@Color(\"Boundary\");"
+L"\r\n" L"token EQUAL = \"/=\";"
+L"\r\n" L""
+L"\r\n" L"token NAME = \"[a-zA-Z0-9:._/-]+\"\t\t\t\t\t\t\t\t@ContextColor();"
+L"\r\n" L"token ATTVALUE = \"\"\"[^<>\"\"]*\"\"|\'[^<>\']*\'\"\t\t\t\t\t\t@ContextColor();"
+L"\r\n" L"token COMMENT = \"/</!--([^/->]|-[^/->]|--[^>])*--/>\"\t\t\t@Color(\"Comment\");"
+L"\r\n" L"token CDATA = \"/</!/[CDATA/[([^/]]|/][^/]]|/]/][^>])*/]/]/>\";"
+L"\r\n" L"token TEXT = \"([^<>=\"\"\' /r/n/ta-zA-Z0-9:._/-])+|\"\"|\'\";"
+L"\r\n" L""
+L"\r\n" L"discardtoken SPACE = \"/s+\";"
+L"\r\n" L""
+L"\r\n" L"rule Attribute XAttribute = NAME:name \"=\" ATTVALUE:value as Attribute;"
+L"\r\n" L"rule Text XText = (NAME:content | EQUAL:content | ATTVALUE:content | TEXT:content) as Text;"
+L"\r\n" L"rule CData XCData = CDATA:content as CData;"
+L"\r\n" L"rule Comment XComment = COMMENT:content as Comment;"
+L"\r\n" L"rule Element XElement = \"<\" NAME:name {XAttribute:attributes} (\"/>\" | \">\" {XSubNode:subNodes} \"</\" NAME:closingName \">\") as Element;"
+L"\r\n" L"rule Node XSubNode = !XText | !XCData | !XComment | !XElement;"
+L"\r\n" L"rule Instruction XInstruction = \"<?\" NAME:name {XAttribute:attributes} \"?>\" as Instruction;"
+L"\r\n" L"rule Document XDocument = {XInstruction:prologs | XComment:prologs} XElement:rootElement as Document;"
 ;
 
 			vl::WString XmlGetParserTextBuffer()
@@ -13033,7 +13077,7 @@ IValueList
 			Ptr<IValueList> IValueList::Create(Ptr<IValueReadonlyList> values)
 			{
 				Ptr<List<Value>> list=new List<Value>;
-				CopyFrom(*list.Obj(), values->GetLazyList<Value>());
+				CopyFrom(*list.Obj(), GetLazyList<Value>(values));
 				return new ValueListWrapper<Ptr<List<Value>>>(list);
 			}
 
@@ -13057,7 +13101,7 @@ IValueDictionary
 			Ptr<IValueDictionary> IValueDictionary::Create(Ptr<IValueReadonlyDictionary> values)
 			{
 				Ptr<Dictionary<Value, Value>> dictionary=new Dictionary<Value, Value>;
-				CopyFrom(*dictionary.Obj(), values->GetLazyList<Value, Value>());
+				CopyFrom(*dictionary.Obj(), GetLazyList<Value, Value>(values));
 				return new ValueDictionaryWrapper<Ptr<Dictionary<Value, Value>>>(dictionary);
 			}
 
@@ -13388,8 +13432,9 @@ EventInfoImpl::EventHandlerImpl
 
 			EventInfoImpl::EventHandlerImpl::EventHandlerImpl(EventInfoImpl* _ownerEvent, DescriptableObject* _ownerObject, Ptr<IValueFunctionProxy> _handler)
 				:ownerEvent(_ownerEvent)
-				,ownerObject(_ownerObject)
-				,handler(_handler)
+				, ownerObject(_ownerObject)
+				, handler(_handler)
+				, attached(true)
 			{
 			}
 
@@ -13427,30 +13472,43 @@ EventInfoImpl::EventHandlerImpl
 				}
 			}
 
-			void EventInfoImpl::EventHandlerImpl::Invoke(const Value& thisObject, Value& arguments)
+			void EventInfoImpl::EventHandlerImpl::Invoke(const Value& thisObject, collections::Array<Value>& arguments)
 			{
 				if(thisObject.IsNull())
 				{
 					throw ArgumentNullException(L"thisObject");
 				}
-				Ptr<IValueList> eventArgs=IValueList::Create();
-				eventArgs->Add(thisObject);
-				eventArgs->Add(arguments);
-				handler->Invoke(eventArgs);
-				if(eventArgs->GetCount()>=2)
+				Ptr<IValueList> eventArgs = IValueList::Create();
+				FOREACH(Value, argument, arguments)
 				{
-					arguments=eventArgs->Get(1);
+					eventArgs->Add(argument);
+				}
+				handler->Invoke(eventArgs);
+				arguments.Resize(eventArgs->GetCount());
+				for (vint i = 0; i < arguments.Count(); i++)
+				{
+					arguments[i] = eventArgs->Get(i);
 				}
 			}
-
-			Ptr<DescriptableObject> EventInfoImpl::EventHandlerImpl::GetTag()
+			
+			Ptr<DescriptableObject> EventInfoImpl::EventHandlerImpl::GetDescriptableTag()
 			{
-				return tag;
+				return descriptableTag;
 			}
 
-			void EventInfoImpl::EventHandlerImpl::SetTag(Ptr<DescriptableObject> _tag)
+			void EventInfoImpl::EventHandlerImpl::SetDescriptableTag(Ptr<DescriptableObject> _tag)
 			{
-				tag=_tag;
+				descriptableTag = _tag;
+			}
+
+			Ptr<Object> EventInfoImpl::EventHandlerImpl::GetObjectTag()
+			{
+				return objectTag;
+			}
+
+			void EventInfoImpl::EventHandlerImpl::SetObjectTag(Ptr<Object> _tag)
+			{
+				objectTag = _tag;
 			}
 
 /***********************************************************************
@@ -13548,7 +13606,7 @@ EventInfoImpl
 				}
 			}
 
-			void EventInfoImpl::Invoke(const Value& thisObject, Value& arguments)
+			void EventInfoImpl::Invoke(const Value& thisObject, collections::Array<Value>& arguments)
 			{
 				if(thisObject.IsNull())
 				{
@@ -13720,19 +13778,16 @@ FieldInfoImpl
 				{
 					throw ArgumentNullException(L"thisObject");
 				}
-				else if(!thisObject.CanConvertTo(ownerTypeDescriptor, Value::RawPtr))
-				{
-					throw ArgumentTypeMismtatchException(L"thisObject", ownerTypeDescriptor, Value::RawPtr, thisObject);
-				}
-				DescriptableObject* rawThisObject=thisObject.GetRawPtr();
-				if(rawThisObject)
-				{
-					return GetValueInternal(thisObject);
-				}
 				else
 				{
-					return Value();
+					auto td = thisObject.GetTypeDescriptor();
+					auto valueType = td->GetValueSerializer() ? Value::Text : Value::RawPtr;
+					if(!thisObject.CanConvertTo(ownerTypeDescriptor, valueType))
+					{
+						throw ArgumentTypeMismtatchException(L"thisObject", ownerTypeDescriptor, valueType, thisObject);
+					}
 				}
+				return GetValueInternal(thisObject);
 			}
 
 			void FieldInfoImpl::SetValue(Value& thisObject, const Value& newValue)
@@ -13741,19 +13796,20 @@ FieldInfoImpl
 				{
 					throw ArgumentNullException(L"thisObject");
 				}
-				else if(!thisObject.CanConvertTo(ownerTypeDescriptor, Value::RawPtr))
+				else
 				{
-					throw ArgumentTypeMismtatchException(L"thisObject", ownerTypeDescriptor, Value::RawPtr, thisObject);
+					auto td = thisObject.GetTypeDescriptor();
+					auto valueType = td->GetValueSerializer() ? Value::Text : Value::RawPtr;
+					if(!thisObject.CanConvertTo(ownerTypeDescriptor, valueType))
+					{
+						throw ArgumentTypeMismtatchException(L"thisObject", ownerTypeDescriptor, valueType, thisObject);
+					}
 				}
 				if(!newValue.CanConvertTo(returnInfo.Obj()))
 				{
 					throw ArgumentTypeMismtatchException(L"newValue", returnInfo.Obj(), newValue);
 				}
-				DescriptableObject* rawThisObject=thisObject.GetRawPtr();
-				if(rawThisObject)
-				{
-					SetValueInternal(thisObject, newValue);
-				}
+				SetValueInternal(thisObject, newValue);
 			}
 
 /***********************************************************************
@@ -14080,7 +14136,15 @@ Function Related
 				{
 				}
 
+				void UnboxSpecifiedParameter(collections::Array<Value>& arguments, vint index)
+				{
+				}
+
 				void AddValueToList(Ptr<IValueList> arguments)
+				{
+				}
+
+				void AddValueToArray(collections::Array<Value>& arguments, vint index)
 				{
 				}
 			}
@@ -14217,14 +14281,14 @@ TypeName
 			const wchar_t* TypeInfo<IDescriptable>::TypeName			= L"system::Interface";
 			const wchar_t* TypeInfo<DescriptableObject>::TypeName		= L"system::ReferenceType";
 			const wchar_t* TypeInfo<Value>::TypeName					= L"system::Object";
-			const wchar_t* TypeInfo<unsigned __int8>::TypeName			= L"system::UInt8";
-			const wchar_t* TypeInfo<unsigned __int16>::TypeName			= L"system::UInt16";
-			const wchar_t* TypeInfo<unsigned __int32>::TypeName			= L"system::UInt32";
-			const wchar_t* TypeInfo<unsigned __int64>::TypeName			= L"system::UInt64";
-			const wchar_t* TypeInfo<signed __int8>::TypeName			= L"system::Int8";
-			const wchar_t* TypeInfo<signed __int16>::TypeName			= L"system::Int16";
-			const wchar_t* TypeInfo<signed __int32>::TypeName			= L"system::Int32";
-			const wchar_t* TypeInfo<signed __int64>::TypeName			= L"system::Int64";
+			const wchar_t* TypeInfo<vuint8_t>::TypeName					= L"system::UInt8";
+			const wchar_t* TypeInfo<vuint16_t>::TypeName				= L"system::UInt16";
+			const wchar_t* TypeInfo<vuint32_t>::TypeName				= L"system::UInt32";
+			const wchar_t* TypeInfo<vuint64_t>::TypeName				= L"system::UInt64";
+			const wchar_t* TypeInfo<vint8_t>::TypeName					= L"system::Int8";
+			const wchar_t* TypeInfo<vint16_t>::TypeName					= L"system::Int16";
+			const wchar_t* TypeInfo<vint32_t>::TypeName					= L"system::Int32";
+			const wchar_t* TypeInfo<vint64_t>::TypeName					= L"system::Int64";
 			const wchar_t* TypeInfo<float>::TypeName					= L"system::Single";
 			const wchar_t* TypeInfo<double>::TypeName					= L"system::Double";
 			const wchar_t* TypeInfo<bool>::TypeName						= L"system::Boolean";
@@ -14260,90 +14324,90 @@ TypeName
 TypedValueSerializerProvider
 ***********************************************************************/
 
-			unsigned __int8 TypedValueSerializerProvider<unsigned __int8>::GetDefaultValue()
+			vuint8_t TypedValueSerializerProvider<vuint8_t>::GetDefaultValue()
 			{
 				return 0;
 			}
 
-			bool TypedValueSerializerProvider<unsigned __int8>::Serialize(const unsigned __int8& input, WString& output)
+			bool TypedValueSerializerProvider<vuint8_t>::Serialize(const vuint8_t& input, WString& output)
 			{
 				output=u64tow(input);
 				return true;
 			}
 
-			bool TypedValueSerializerProvider<unsigned __int8>::Deserialize(const WString& input, unsigned __int8& output)
+			bool TypedValueSerializerProvider<vuint8_t>::Deserialize(const WString& input, vuint8_t& output)
 			{
 				bool success=false;
-				unsigned __int64 result=wtou64_test(input, success);
+				vuint64_t result=wtou64_test(input, success);
 				if(!success) return false;
 				if(result>_UI8_MAX) return false;
-				output=(unsigned __int8)result;
+				output=(vuint8_t)result;
 				return true;
 			}
 
 			//---------------------------------------
 
-			unsigned __int16 TypedValueSerializerProvider<unsigned __int16>::GetDefaultValue()
+			vuint16_t TypedValueSerializerProvider<vuint16_t>::GetDefaultValue()
 			{
 				return 0;
 			}
 
-			bool TypedValueSerializerProvider<unsigned __int16>::Serialize(const unsigned __int16& input, WString& output)
+			bool TypedValueSerializerProvider<vuint16_t>::Serialize(const vuint16_t& input, WString& output)
 			{
 				output=u64tow(input);
 				return true;
 			}
 
-			bool TypedValueSerializerProvider<unsigned __int16>::Deserialize(const WString& input, unsigned __int16& output)
+			bool TypedValueSerializerProvider<vuint16_t>::Deserialize(const WString& input, vuint16_t& output)
 			{
 				bool success=false;
-				unsigned __int64 result=wtou64_test(input, success);
+				vuint64_t result=wtou64_test(input, success);
 				if(!success) return false;
 				if(result>_UI16_MAX) return false;
-				output=(unsigned __int16)result;
+				output=(vuint16_t)result;
 				return true;
 			}
 
 			//---------------------------------------
 
-			unsigned __int32 TypedValueSerializerProvider<unsigned __int32>::GetDefaultValue()
+			vuint32_t TypedValueSerializerProvider<vuint32_t>::GetDefaultValue()
 			{
 				return 0;
 			}
 
-			bool TypedValueSerializerProvider<unsigned __int32>::Serialize(const unsigned __int32& input, WString& output)
+			bool TypedValueSerializerProvider<vuint32_t>::Serialize(const vuint32_t& input, WString& output)
 			{
 				output=u64tow(input);
 				return true;
 			}
 
-			bool TypedValueSerializerProvider<unsigned __int32>::Deserialize(const WString& input, unsigned __int32& output)
+			bool TypedValueSerializerProvider<vuint32_t>::Deserialize(const WString& input, vuint32_t& output)
 			{
 				bool success=false;
-				unsigned __int64 result=wtou64_test(input, success);
+				vuint64_t result=wtou64_test(input, success);
 				if(!success) return false;
 				if(result>_UI32_MAX) return false;
-				output=(unsigned __int32)result;
+				output=(vuint32_t)result;
 				return true;
 			}
 
 			//---------------------------------------
 
-			unsigned __int64 TypedValueSerializerProvider<unsigned __int64>::GetDefaultValue()
+			vuint64_t TypedValueSerializerProvider<vuint64_t>::GetDefaultValue()
 			{
 				return 0;
 			}
 
-			bool TypedValueSerializerProvider<unsigned __int64>::Serialize(const unsigned __int64& input, WString& output)
+			bool TypedValueSerializerProvider<vuint64_t>::Serialize(const vuint64_t& input, WString& output)
 			{
 				output=u64tow(input);
 				return true;
 			}
 
-			bool TypedValueSerializerProvider<unsigned __int64>::Deserialize(const WString& input, unsigned __int64& output)
+			bool TypedValueSerializerProvider<vuint64_t>::Deserialize(const WString& input, vuint64_t& output)
 			{
 				bool success=false;
-				unsigned __int64 result=wtou64_test(input, success);
+				vuint64_t result=wtou64_test(input, success);
 				if(!success) return false;
 				output=result;
 				return true;
@@ -14351,90 +14415,90 @@ TypedValueSerializerProvider
 
 			//---------------------------------------
 
-			signed __int8 TypedValueSerializerProvider<signed __int8>::GetDefaultValue()
+			vint8_t TypedValueSerializerProvider<vint8_t>::GetDefaultValue()
 			{
 				return 0;
 			}
 
-			bool TypedValueSerializerProvider<signed __int8>::Serialize(const signed __int8& input, WString& output)
+			bool TypedValueSerializerProvider<vint8_t>::Serialize(const vint8_t& input, WString& output)
 			{
 				output=i64tow(input);
 				return true;
 			}
 
-			bool TypedValueSerializerProvider<signed __int8>::Deserialize(const WString& input, signed __int8& output)
+			bool TypedValueSerializerProvider<vint8_t>::Deserialize(const WString& input, vint8_t& output)
 			{
 				bool success=false;
-				signed __int64 result=wtoi64_test(input, success);
+				vint64_t result=wtoi64_test(input, success);
 				if(!success) return false;
 				if(result<_I8_MIN || result>_I8_MAX) return false;
-				output=(signed __int8)result;
+				output=(vint8_t)result;
 				return true;
 			}
 
 			//---------------------------------------
 
-			signed __int16 TypedValueSerializerProvider<signed __int16>::GetDefaultValue()
+			vint16_t TypedValueSerializerProvider<vint16_t>::GetDefaultValue()
 			{
 				return 0;
 			}
 
-			bool TypedValueSerializerProvider<signed __int16>::Serialize(const signed __int16& input, WString& output)
+			bool TypedValueSerializerProvider<vint16_t>::Serialize(const vint16_t& input, WString& output)
 			{
 				output=i64tow(input);
 				return true;
 			}
 
-			bool TypedValueSerializerProvider<signed __int16>::Deserialize(const WString& input, signed __int16& output)
+			bool TypedValueSerializerProvider<vint16_t>::Deserialize(const WString& input, vint16_t& output)
 			{
 				bool success=false;
-				signed __int64 result=wtoi64_test(input, success);
+				vint64_t result=wtoi64_test(input, success);
 				if(!success) return false;
 				if(result<_I16_MIN || result>_I16_MAX) return false;
-				output=(signed __int16)result;
+				output=(vint16_t)result;
 				return true;
 			}
 
 			//---------------------------------------
 
-			signed __int32 TypedValueSerializerProvider<signed __int32>::GetDefaultValue()
+			vint32_t TypedValueSerializerProvider<vint32_t>::GetDefaultValue()
 			{
 				return 0;
 			}
 
-			bool TypedValueSerializerProvider<signed __int32>::Serialize(const signed __int32& input, WString& output)
+			bool TypedValueSerializerProvider<vint32_t>::Serialize(const vint32_t& input, WString& output)
 			{
 				output=i64tow(input);
 				return true;
 			}
 
-			bool TypedValueSerializerProvider<signed __int32>::Deserialize(const WString& input, signed __int32& output)
+			bool TypedValueSerializerProvider<vint32_t>::Deserialize(const WString& input, vint32_t& output)
 			{
 				bool success=false;
-				signed __int64 result=wtoi64_test(input, success);
+				vint64_t result=wtoi64_test(input, success);
 				if(!success) return false;
 				if(result<_I32_MIN || result>_I32_MAX) return false;
-				output=(signed __int32)result;
+				output=(vint32_t)result;
 				return true;
 			}
 
 			//---------------------------------------
 
-			signed __int64 TypedValueSerializerProvider<signed __int64>::GetDefaultValue()
+			vint64_t TypedValueSerializerProvider<vint64_t>::GetDefaultValue()
 			{
 				return 0;
 			}
 
-			bool TypedValueSerializerProvider<signed __int64>::Serialize(const signed __int64& input, WString& output)
+			bool TypedValueSerializerProvider<vint64_t>::Serialize(const vint64_t& input, WString& output)
 			{
 				output=i64tow(input);
 				return true;
 			}
 
-			bool TypedValueSerializerProvider<signed __int64>::Deserialize(const WString& input, signed __int64& output)
+			bool TypedValueSerializerProvider<vint64_t>::Deserialize(const WString& input, vint64_t& output)
 			{
 				bool success=false;
-				signed __int64 result=wtoi64_test(input, success);
+				vint64_t result=wtoi64_test(input, success);
 				if(!success) return false;
 				output=result;
 				return true;
@@ -14560,11 +14624,11 @@ ObjectTypeDescriptor
 BoolValueSerializer
 ***********************************************************************/
 
-			class BoolValueSeriaizer : public EnumValueSeriaizer<bool, false>
+			class BoolValueSerializer : public EnumValueSerializer<bool, false>
 			{
 			public:
-				BoolValueSeriaizer(ITypeDescriptor* _ownerTypeDescriptor)
-					:EnumValueSeriaizer(_ownerTypeDescriptor, false)
+				BoolValueSerializer(ITypeDescriptor* _ownerTypeDescriptor)
+					:EnumValueSerializer(_ownerTypeDescriptor, false)
 				{
 					candidates.Add(L"true", true);
 					candidates.Add(L"false", false);
@@ -14575,7 +14639,7 @@ BoolValueSerializer
 DateTimeValueSerializer
 ***********************************************************************/
 
-			class DateTimeValueSerializer : public GeneralValueSeriaizer<DateTime>
+			class DateTimeValueSerializer : public GeneralValueSerializer<DateTime>
 			{
 			protected:
 				Regex				regexDateTime;
@@ -14585,12 +14649,22 @@ DateTimeValueSerializer
 					return DateTime();
 				}
 
+				WString Format(vint number, vint length)
+				{
+					WString result = itow(number);
+					while (result.Length() < length)
+					{
+						result = L"0" + result;
+					}
+					return result;
+				}
+
 				bool Serialize(const DateTime& input, WString& output)override
 				{
-					WString ms=itow(input.milliseconds);
-					while(ms.Length()<3) ms=L"0"+ms;
-
-					output=INVLOC.FormatDate(L"yyyy-MM-dd", input)+L" "+INVLOC.FormatTime(L"HH:mm:ss", input)+L"."+ms;
+					output = 
+						Format(input.year, 4) + L"-" + Format(input.month, 2) + L"-" + Format(input.day, 2) + L" " + 
+						Format(input.hour, 2) + L":" + Format(input.minute, 2) + L":" + Format(input.second, 2) + L"." + 
+						Format(input.milliseconds, 3);
 					return true;
 				}
 
@@ -14615,7 +14689,7 @@ DateTimeValueSerializer
 				}
 			public:
 				DateTimeValueSerializer(ITypeDescriptor* _ownerTypeDescriptor)
-					:GeneralValueSeriaizer(_ownerTypeDescriptor)
+					:GeneralValueSerializer<DateTime>(_ownerTypeDescriptor)
 					,regexDateTime(L"(<Y>/d/d/d/d)-(<M>/d/d)-(<D>/d/d) (<h>/d/d):(<m>/d/d):(<s>/d/d).(<ms>/d/d/d)")
 				{
 				}
@@ -14706,7 +14780,7 @@ Interface Implementation Proxy (Implement)
 						return new description_IValueSubscription(proxy);
 					}
 
-					Ptr<IValueListener> Subscribe(Ptr<IValueFunctionProxy> callback)override
+					Ptr<IValueListener> Subscribe(const Func<void(Value)>& callback)override
 					{
 						return INVOKEGET_INTERFACE_PROXY(Subscribe, callback);
 					}
@@ -14979,26 +15053,26 @@ LoadPredefinedTypes
 				template<typename TSerializer>
 				void AddSerializableType(ITypeManager* manager)
 				{
-					manager->SetTypeDescriptor(TypeInfo<TSerializer::ValueType>::TypeName, new SerializableTypeDescriptor<TSerializer>);
+					manager->SetTypeDescriptor(TypeInfo<typename TSerializer::ValueType>::TypeName, new SerializableTypeDescriptor<TSerializer>);
 				}
 
 				void Load(ITypeManager* manager)override
 				{
 					manager->SetTypeDescriptor(TypeInfo<Value>::TypeName, new ObjectTypeDescriptor);
-					AddSerializableType<TypedDefaultValueSerializer<unsigned __int8>>(manager);
-					AddSerializableType<TypedDefaultValueSerializer<unsigned __int16>>(manager);
-					AddSerializableType<TypedDefaultValueSerializer<unsigned __int32>>(manager);
-					AddSerializableType<TypedDefaultValueSerializer<unsigned __int64>>(manager);
-					AddSerializableType<TypedDefaultValueSerializer<signed __int8>>(manager);
-					AddSerializableType<TypedDefaultValueSerializer<signed __int16>>(manager);
-					AddSerializableType<TypedDefaultValueSerializer<signed __int32>>(manager);
-					AddSerializableType<TypedDefaultValueSerializer<signed __int64>>(manager);
+					AddSerializableType<TypedDefaultValueSerializer<vuint8_t>>(manager);
+					AddSerializableType<TypedDefaultValueSerializer<vuint16_t>>(manager);
+					AddSerializableType<TypedDefaultValueSerializer<vuint32_t>>(manager);
+					AddSerializableType<TypedDefaultValueSerializer<vuint64_t>>(manager);
+					AddSerializableType<TypedDefaultValueSerializer<vint8_t>>(manager);
+					AddSerializableType<TypedDefaultValueSerializer<vint16_t>>(manager);
+					AddSerializableType<TypedDefaultValueSerializer<vint32_t>>(manager);
+					AddSerializableType<TypedDefaultValueSerializer<vint64_t>>(manager);
 					AddSerializableType<TypedDefaultValueSerializer<float>>(manager);
 					AddSerializableType<TypedDefaultValueSerializer<double>>(manager);
 					AddSerializableType<TypedDefaultValueSerializer<wchar_t>>(manager);
 					AddSerializableType<TypedDefaultValueSerializer<WString>>(manager);
 					AddSerializableType<TypedDefaultValueSerializer<Locale>>(manager);
-					AddSerializableType<BoolValueSeriaizer>(manager);
+					AddSerializableType<BoolValueSerializer>(manager);
 					AddSerializableType<DateTimeValueSerializer>(manager);
 					ADD_TYPE_INFO(VoidValue)
 					ADD_TYPE_INFO(IDescriptable)
@@ -15012,7 +15086,9 @@ LoadPredefinedTypes
 					ADD_TYPE_INFO(IValueDictionary)
 					ADD_TYPE_INFO(IValueInterfaceProxy)
 					ADD_TYPE_INFO(IValueFunctionProxy)
-
+					
+					ADD_TYPE_INFO(IValueListener)
+					ADD_TYPE_INFO(IValueSubscription)
 					ADD_TYPE_INFO(IValueSerializer)
 					ADD_TYPE_INFO(ITypeInfo)
 					ADD_TYPE_INFO(ITypeInfo::Decorator)
@@ -15595,6 +15671,14 @@ RegexTokens
 			,stateTokens(_stateTokens)
 			,code(_code)
 			,codeIndex(_codeIndex)
+		{
+		}
+
+		RegexTokens::RegexTokens(const RegexTokens& tokens)
+			:pure(tokens.pure)
+			,stateTokens(tokens.stateTokens)
+			,code(tokens.code)
+			,codeIndex(tokens.codeIndex)
 		{
 		}
 
@@ -17345,7 +17429,7 @@ namespace vl
 			}
 		}
 
-		bool IsChars(const wchar_t*& input, wchar_t* chars, wchar_t& c)
+		bool IsChars(const wchar_t*& input, const wchar_t* chars, wchar_t& c)
 		{
 			const wchar_t* position=wcschr(chars, *input);
 			if(position)
@@ -17359,7 +17443,7 @@ namespace vl
 			}
 		}
 
-		bool IsStr(const wchar_t*& input, wchar_t* str)
+		bool IsStr(const wchar_t*& input, const wchar_t* str)
 		{
 			size_t len=wcslen(str);
 			if(wcsncmp(input, str, len)==0)
@@ -17373,7 +17457,7 @@ namespace vl
 			}
 		}
 
-		bool IsChars(const wchar_t*& input, wchar_t* chars)
+		bool IsChars(const wchar_t*& input, const wchar_t* chars)
 		{
 			wchar_t c;
 			return IsChars(input, chars, c);
@@ -17466,13 +17550,16 @@ namespace vl
 			{
 				return 0;
 			}
-			LoopExpression* expression=new LoopExpression;
-			expression->min=min;
-			expression->max=max;
-			expression->preferLong=!IsChar(input, L'?');
-			return expression;
+
+			{
+				LoopExpression* expression=new LoopExpression;
+				expression->min=min;
+				expression->max=max;
+				expression->preferLong=!IsChar(input, L'?');
+				return expression;
+			}
 		THROW_EXCEPTION:
-				throw ArgumentException(L"Regular expression syntax error: Illegal loop expression.", L"vl::regex_internal::ParseLoop", L"input");
+			throw ArgumentException(L"Regular expression syntax error: Illegal loop expression.", L"vl::regex_internal::ParseLoop", L"input");
 		}
 
 		Ptr<Expression> ParseCharSet(const wchar_t*& input)
@@ -18037,7 +18124,7 @@ PureInterpretor
 			startState=dfa->states.IndexOf(dfa->startState);
 
 			//填充字符映射表
-			for(vint i=0;i<sizeof(charMap)/sizeof(*charMap);i++)
+			for(vint i=0;i<SupportedCharCount;i++)
 			{
 				charMap[i]=charSetCount-1;
 			}
@@ -18122,6 +18209,9 @@ PureInterpretor
 					result.finalState=currentState;
 				}
 				if(!*read)break;
+#ifdef VCZH_GCC
+				if(*read>=SupportedCharCount)break;
+#endif
 				vint charIndex=charMap[*read++];
 				currentState=transition[currentState][charIndex];
 			}
@@ -18860,8 +18950,6 @@ RegexNode
 /***********************************************************************
 Stream\Accessor.cpp
 ***********************************************************************/
-#if defined VCZH_GCC
-#endif
 
 namespace vl
 {
@@ -21625,12 +21713,12 @@ namespace vl
 
 	void _i64toa_s(vint64_t value, char* buffer, size_t size, vint radix)
 	{
-		sprintf(buffer, "%dll", value);
+		sprintf(buffer, "%lld", value);
 	}
 
 	void _i64tow_s(vint64_t value, wchar_t* buffer, size_t size, vint radix)
 	{
-		swprintf(buffer, size - 1, L"%dll", value);
+		swprintf(buffer, size - 1, L"%lld", value);
 	}
 
 	void _uitoa_s(vuint32_t value, char* buffer, size_t size, vint radix)
@@ -21645,17 +21733,25 @@ namespace vl
 
 	void _ui64toa_s(vuint64_t value, char* buffer, size_t size, vint radix)
 	{
-		sprintf(buffer, "%ull", value);
+		sprintf(buffer, "%llu", value);
 	}
 
 	void _ui64tow_s(vuint64_t value, wchar_t* buffer, size_t size, vint radix)
 	{
-		swprintf(buffer, size - 1, L"%ull", value);
+		swprintf(buffer, size - 1, L"%llu", value);
 	}
 
 	void _gcvt_s(char* buffer, size_t size, double value, vint numberOfDigits)
 	{
-		sprintf(buffer, "%fl", value);
+		sprintf(buffer, "%f", value);
+		char* point = strchr(buffer, '.');
+		if(!point) return;
+		char* zero = buffer + strlen(buffer);
+		while(zero[-1] == '0')
+		{
+			*--zero = '\0';
+		}
+		if(zero[-1] == '.') *--zero = '\0';
 	}
 
 	void _strlwr_s(char* buffer, size_t size)
@@ -21893,8 +21989,8 @@ namespace vl
 
 	AString ftoa(double number)
 	{
-		char buffer[100];
-		_gcvt_s(buffer, 100, number, 30);
+		char buffer[320];
+		_gcvt_s(buffer, 320, number, 30);
 		vint len = (vint)strlen(buffer);
 		if (buffer[len - 1] == '.')
 		{

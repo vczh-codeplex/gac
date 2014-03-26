@@ -429,7 +429,7 @@ GuiDefaultInstanceLoader
 			{
 				if (IMethodInfo* method = GetDefaultConstructor(typeInfo.typeDescriptor))
 				{
-					return method->Invoke(Value(), (Value::xs()));
+					return method->Invoke(Value(), (Value_xs()));
 				}
 				return Value();
 			}
@@ -774,7 +774,7 @@ GuiResourceInstanceLoader
 					{
 						if (auto method = GuiDefaultInstanceLoader::GetDefaultConstructor(typeDescriptor))
 						{
-							return method->Invoke(Value(), (Value::xs()));
+							return method->Invoke(Value(), (Value_xs()));
 						}
 					}
 
@@ -3453,7 +3453,7 @@ GuiTableCompositionInstanceLoader
 					if (propertyValue.propertyName == L"Rows")
 					{
 						List<GuiCellOption> options;
-						CopyFrom(options, UnboxValue<Ptr<IValueList>>(propertyValue.propertyValue)->GetLazyList<GuiCellOption>());
+						CopyFrom(options, GetLazyList<GuiCellOption>(UnboxValue<Ptr<IValueList>>(propertyValue.propertyValue)));
 						container->SetRowsAndColumns(options.Count(), container->GetColumns());
 						FOREACH_INDEXER(GuiCellOption, option, index, options)
 						{
@@ -3464,7 +3464,7 @@ GuiTableCompositionInstanceLoader
 					else if (propertyValue.propertyName == L"Columns")
 					{
 						List<GuiCellOption> options;
-						CopyFrom(options, UnboxValue<Ptr<IValueList>>(propertyValue.propertyValue)->GetLazyList<GuiCellOption>());
+						CopyFrom(options, GetLazyList<GuiCellOption>(UnboxValue<Ptr<IValueList>>(propertyValue.propertyValue)));
 						container->SetRowsAndColumns(container->GetRows(), options.Count());
 						FOREACH_INDEXER(GuiCellOption, option, index, options)
 						{
