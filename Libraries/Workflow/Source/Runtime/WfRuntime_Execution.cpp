@@ -631,11 +631,24 @@ WfRuntimeThreadContext
 									return WfRuntimeExecutionAction::ExecuteInstruction;
 								}
 							case WfInsCode::AttachEvent:
-								// TODO
-								throw 0;
+								{
+									Value thisValue, function;
+									CONTEXT_ACTION(PopValue(function), L"failed to pop a value from the stack.");
+									CONTEXT_ACTION(PopValue(thisValue), L"failed to pop a value from the stack.");
+									auto proxy = UnboxValue<Ptr<IValueFunctionProxy>>(function);
+									auto handler = ins.eventParameter->Attach(thisValue, proxy);
+									PushValue(Value::From(handler));
+									return WfRuntimeExecutionAction::ExecuteInstruction;
+								}
 							case WfInsCode::DetachEvent:
-								// TODO
-								throw 0;
+								{
+									Value operand;
+									CONTEXT_ACTION(PopValue(operand), L"failed to pop a value from the stack.");
+									auto handler = UnboxValue<Ptr<IEventHandler>>(operand);
+									auto result = handler->Detach();
+									PushValue(BoxValue(result));
+									return WfRuntimeExecutionAction::ExecuteInstruction;
+								}
 							case WfInsCode::InstallTry:
 								throw 0;
 							case WfInsCode::UninstallTry:
