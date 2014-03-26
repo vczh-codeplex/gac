@@ -335,18 +335,22 @@ GenerateInstructions(Statement)
 					GenerateExpressionInstructions(context, node->expression);
 					if (node->name.value != L"")
 					{
-						// TODO: test
 						auto scope = context.manager->statementScopes[node];
 						auto symbol = scope->symbols[node->name.value][0];
 						auto function = context.functionContext->function;
 						variableIndex = function->argumentNames.Count() + function->localVariableNames.Add(L"<if>" + node->name.value);
 						context.functionContext->localVariables.Add(symbol.Obj(), variableIndex);
+
+						GenerateTypeCastInstructions(context, symbol->typeInfo, false);
 						INSTRUCTION(Ins::StoreLocalVar(variableIndex));
 						INSTRUCTION(Ins::LoadLocalVar(variableIndex));
 						INSTRUCTION(Ins::LoadValue(Value()));
 						INSTRUCTION(Ins::CompareReference());
 					}
-					INSTRUCTION(Ins::OpNot(WfInsType::Bool));
+					else
+					{
+						INSTRUCTION(Ins::OpNot(WfInsType::Bool));
+					}
 					vint fillElseIndex = INSTRUCTION(Ins::JumpIf(-1));
 
 					GenerateStatementInstructions(context, node->trueBranch);
@@ -1311,38 +1315,41 @@ GenerateTypeCastInstructions
 
 			void GenerateTypeCastInstructions(WfCodegenContext& context, Ptr<reflection::description::ITypeInfo> expectedType, bool strongCast)
 			{
-				if (strongCast)
+				if (expectedType->GetTypeDescriptor() != GetTypeDescriptor<Value>())
 				{
-					switch (expectedType->GetDecorator())
+					if (strongCast)
 					{
-					case ITypeInfo::RawPtr:
-						INSTRUCTION(Ins::ConvertToType(Value::RawPtr, expectedType->GetTypeDescriptor()));
-						break;
-					case ITypeInfo::SharedPtr:
-						INSTRUCTION(Ins::ConvertToType(Value::SharedPtr, expectedType->GetTypeDescriptor()));
-						break;
-					case ITypeInfo::Nullable:
-					case ITypeInfo::TypeDescriptor:
-					case ITypeInfo::Generic:
-						INSTRUCTION(Ins::ConvertToType(Value::Text, expectedType->GetTypeDescriptor()));
-						break;
+						switch (expectedType->GetDecorator())
+						{
+						case ITypeInfo::RawPtr:
+							INSTRUCTION(Ins::ConvertToType(Value::RawPtr, expectedType->GetTypeDescriptor()));
+							break;
+						case ITypeInfo::SharedPtr:
+							INSTRUCTION(Ins::ConvertToType(Value::SharedPtr, expectedType->GetTypeDescriptor()));
+							break;
+						case ITypeInfo::Nullable:
+						case ITypeInfo::TypeDescriptor:
+						case ITypeInfo::Generic:
+							INSTRUCTION(Ins::ConvertToType(Value::Text, expectedType->GetTypeDescriptor()));
+							break;
+						}
 					}
-				}
-				else
-				{
-					switch (expectedType->GetDecorator())
+					else
 					{
-					case ITypeInfo::RawPtr:
-						INSTRUCTION(Ins::TryConvertToType(Value::RawPtr, expectedType->GetTypeDescriptor()));
-						break;
-					case ITypeInfo::SharedPtr:
-						INSTRUCTION(Ins::TryConvertToType(Value::SharedPtr, expectedType->GetTypeDescriptor()));
-						break;
-					case ITypeInfo::Nullable:
-					case ITypeInfo::TypeDescriptor:
-					case ITypeInfo::Generic:
-						INSTRUCTION(Ins::TryConvertToType(Value::Text, expectedType->GetTypeDescriptor()));
-						break;
+						switch (expectedType->GetDecorator())
+						{
+						case ITypeInfo::RawPtr:
+							INSTRUCTION(Ins::TryConvertToType(Value::RawPtr, expectedType->GetTypeDescriptor()));
+							break;
+						case ITypeInfo::SharedPtr:
+							INSTRUCTION(Ins::TryConvertToType(Value::SharedPtr, expectedType->GetTypeDescriptor()));
+							break;
+						case ITypeInfo::Nullable:
+						case ITypeInfo::TypeDescriptor:
+						case ITypeInfo::Generic:
+							INSTRUCTION(Ins::TryConvertToType(Value::Text, expectedType->GetTypeDescriptor()));
+							break;
+						}
 					}
 				}
 			}
@@ -1353,19 +1360,27 @@ GetInstructionTypeArgument
 
 			void GenerateTypeTestingInstructions(WfCodegenContext& context, Ptr<reflection::description::ITypeInfo> expectedType)
 			{
-				switch (expectedType->GetDecorator())
+				if (expectedType->GetTypeDescriptor() != GetTypeDescriptor<Value>())
 				{
-				case ITypeInfo::RawPtr:
-					INSTRUCTION(Ins::TestType(Value::RawPtr, expectedType->GetTypeDescriptor()));
-					break;
-				case ITypeInfo::SharedPtr:
-					INSTRUCTION(Ins::TestType(Value::SharedPtr, expectedType->GetTypeDescriptor()));
-					break;
-				case ITypeInfo::Nullable:
-				case ITypeInfo::TypeDescriptor:
-				case ITypeInfo::Generic:
-					INSTRUCTION(Ins::TestType(Value::Text, expectedType->GetTypeDescriptor()));
-					break;
+					switch (expectedType->GetDecorator())
+					{
+					case ITypeInfo::RawPtr:
+						INSTRUCTION(Ins::TestType(Value::RawPtr, expectedType->GetTypeDescriptor()));
+						break;
+					case ITypeInfo::SharedPtr:
+						INSTRUCTION(Ins::TestType(Value::SharedPtr, expectedType->GetTypeDescriptor()));
+						break;
+					case ITypeInfo::Nullable:
+					case ITypeInfo::TypeDescriptor:
+					case ITypeInfo::Generic:
+						INSTRUCTION(Ins::TestType(Value::Text, expectedType->GetTypeDescriptor()));
+						break;
+					}
+				}
+				else
+				{
+					INSTRUCTION(Ins::Pop());
+					INSTRUCTION(Ins::LoadValue(BoxValue(true)));
 				}
 			}
 

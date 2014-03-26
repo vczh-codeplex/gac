@@ -521,11 +521,11 @@ WfRuntimeThreadContext
 									CONTEXT_ACTION(PopValue(result), L"failed to pop a value from the stack.");
 									if (OPERATOR_OpConvertToType(result, converted, ins))
 									{
-										PushValue(BoxValue(true));
+										PushValue(converted);
 									}
 									else
 									{
-										PushValue(BoxValue(false));
+										PushValue(Value());
 									}
 									return WfRuntimeExecutionAction::ExecuteInstruction;
 								}
