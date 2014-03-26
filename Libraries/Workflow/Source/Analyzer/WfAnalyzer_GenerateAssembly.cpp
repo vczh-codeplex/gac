@@ -625,7 +625,7 @@ GenerateInstructions(Expression)
 					if ((index = context.globalFunctions.Keys().IndexOf(result.symbol.Obj())) != -1)
 					{
 						vint functionIndex = context.globalFunctions.Values()[index];
-						INSTRUCTION(Ins::LoadFunction(functionIndex));
+						INSTRUCTION(Ins::LoadClosure(functionIndex, 1));
 					}
 					else if ((index = context.globalVariables.Keys().IndexOf(result.symbol.Obj())) != -1)
 					{
@@ -658,7 +658,7 @@ GenerateInstructions(Expression)
 						lc.staticMethodReferenceExpression = node;
 						context.functionContext->closuresToCodegen.Add(functionIndex, lc);
 
-						INSTRUCTION(Ins::LoadFunction(functionIndex));
+						INSTRUCTION(Ins::LoadClosure(functionIndex, 1));
 					}
 					else
 					{
@@ -716,7 +716,7 @@ GenerateInstructions(Expression)
 						context.functionContext->closuresToCodegen.Add(functionIndex, lc);
 
 						GenerateExpressionInstructions(context, node->parent);
-						INSTRUCTION(Ins::LoadLambda(functionIndex, 1));
+						INSTRUCTION(Ins::LoadClosure(functionIndex, 1));
 					}
 				}
 
@@ -1446,7 +1446,7 @@ GenerateAssembly
 					WfInstruction& ins = assembly->instructions[i];
 					switch (ins.code)
 					{
-					case WfInsCode::LoadLambda:
+					case WfInsCode::LoadClosure:
 						ins.countParameter = assembly->functions[ins.indexParameter]->capturedVariableNames.Count();
 						break;
 					}
