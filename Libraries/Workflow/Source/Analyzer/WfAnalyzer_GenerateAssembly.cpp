@@ -136,31 +136,24 @@ GenerateInstructions(Initialize)
 GenerateInstructions(Declaration)
 ***********************************************************************/
 
-			void GenerateFunctionDeclarationInstructions(WfCodegenContext& context, WfFunctionDeclaration* node, WfLexicalScope* scope, Ptr<WfAssemblyFunction> meta, Ptr<WfLexicalSymbol> recursiveLambdaSymbol)
+			void GenerateFunctionInstructions(WfCodegenContext& context, WfLexicalScope* scope, Ptr<WfAssemblyFunction> meta, Ptr<ITypeInfo> returnType, Ptr<WfLexicalSymbol> recursiveLambdaSymbol, const List<Ptr<WfLexicalSymbol>>& argumentSymbols, const List<Ptr<WfLexicalSymbol>>& capturedSymbols, Ptr<WfStatement> statementBody, Ptr<WfExpression> expressionBody)
 			{
 				auto functionContext = MakePtr<WfCodegenFunctionContext>();
 				functionContext->function = meta;
 				context.functionContext = functionContext;
 				{
-					FOREACH_INDEXER(Ptr<WfFunctionArgument>, argument, index, node->arguments)
+					FOREACH_INDEXER(Ptr<WfLexicalSymbol>, argumentSymbol, index, argumentSymbols)
 					{
-						auto argumentSymbol = scope->symbols[argument->name.value][0];
 						functionContext->arguments.Add(argumentSymbol.Obj(), index);
 					}
-				}
-				{
-					vint index = context.manager->functionLambdaCaptures.Keys().IndexOf(node);
-					if (index != -1)
+					FOREACH_INDEXER(Ptr<WfLexicalSymbol>, capturedSymbol, index, capturedSymbols)
 					{
-						FOREACH_INDEXER(Ptr<WfLexicalSymbol>, symbol, index, context.manager->functionLambdaCaptures.GetByIndex(index))
-						{
-							functionContext->capturedVariables.Add(symbol.Obj(), index);
-						}
+						functionContext->capturedVariables.Add(capturedSymbol.Obj(), index);
 					}
 				}
 				if (recursiveLambdaSymbol)
 				{
-					vint variableIndex = meta->argumentNames.Count() + meta->localVariableNames.Add(L"<recursive-lambda>" + node->name.value);
+					vint variableIndex = meta->argumentNames.Count() + meta->localVariableNames.Add(L"<recursive-lambda>" + recursiveLambdaSymbol->name);
 					functionContext->localVariables.Add(recursiveLambdaSymbol.Obj(), variableIndex);
 				}
 					
@@ -174,8 +167,14 @@ GenerateInstructions(Declaration)
 					INSTRUCTION(Ins::LoadClosure(context.assembly->functions.IndexOf(meta.Obj()), functionContext->capturedVariables.Count()));
 					INSTRUCTION(Ins::StoreLocalVar(functionContext->localVariables[recursiveLambdaSymbol.Obj()]));
 				}
-				GenerateStatementInstructions(context, node->statement);
-				auto returnType = CreateTypeInfoFromType(scope, node->returnType);
+				if (statementBody)
+				{
+					GenerateStatementInstructions(context, statementBody);
+				}
+				if (expressionBody)
+				{
+					GenerateExpressionInstructions(context, expressionBody);
+				}
 				if (returnType->GetDecorator() == ITypeInfo::TypeDescriptor && returnType->GetTypeDescriptor()->GetValueSerializer())
 				{
 					auto serializer = returnType->GetTypeDescriptor()->GetValueSerializer();
@@ -193,6 +192,30 @@ GenerateInstructions(Declaration)
 				context.functionContext = 0;
 
 				GenerateClosureInstructions(context, functionContext);
+			}
+
+			void GenerateFunctionDeclarationInstructions(WfCodegenContext& context, WfFunctionDeclaration* node, WfLexicalScope* scope, Ptr<WfAssemblyFunction> meta, Ptr<WfLexicalSymbol> recursiveLambdaSymbol)
+			{
+				List<Ptr<WfLexicalSymbol>> argumentSymbols, capturedSymbols;
+				{
+					FOREACH(Ptr<WfFunctionArgument>, argument, node->arguments)
+					{
+						auto symbol = scope->symbols[argument->name.value][0];
+						argumentSymbols.Add(symbol);
+					}
+
+					vint index = context.manager->functionLambdaCaptures.Keys().IndexOf(node);
+					if (index != -1)
+					{
+						FOREACH(Ptr<WfLexicalSymbol>, symbol, context.manager->functionLambdaCaptures.GetByIndex(index))
+						{
+							capturedSymbols.Add(symbol);
+						}
+					}
+				}
+
+				auto returnType = CreateTypeInfoFromType(scope, node->returnType);
+				GenerateFunctionInstructions(context, scope, meta, returnType, recursiveLambdaSymbol, argumentSymbols, capturedSymbols, node->statement, 0);
 			}
 
 			class GenerateDeclarationInstructionsVisitor : public Object, public WfDeclaration::IVisitor
@@ -297,8 +320,40 @@ GenerateInstructions(Closure)
 
 			void GenerateClosureInstructions_Ordered(WfCodegenContext& context, vint functionIndex, WfOrderedLambdaExpression* expression)
 			{
-				// next version
-				throw 0;
+				auto scope = context.manager->expressionScopes[expression].Obj();
+				List<Ptr<WfLexicalSymbol>> argumentSymbols, capturedSymbols;
+				CopyFrom(
+					argumentSymbols,
+					Range<vint>(0, scope->symbols.Count())
+						.Select([scope](vint index)->Ptr<WfLexicalSymbol>{return scope->symbols.GetByIndex(index)[0];})
+						.OrderBy([](Ptr<WfLexicalSymbol> a, Ptr<WfLexicalSymbol> b)
+						{
+							vint aId = wtoi(a->name.Sub(1, a->name.Length() - 1));
+							vint bId = wtoi(b->name.Sub(1, a->name.Length() - 1));
+							return aId - bId;
+						})
+					);
+
+				auto meta = context.assembly->functions[functionIndex];
+				FOREACH(Ptr<WfLexicalSymbol>, symbol, argumentSymbols)
+				{
+					meta->argumentNames.Add(symbol->name);
+				}
+				{
+					vint index = context.manager->orderedLambdaCaptures.Keys().IndexOf(expression);
+					if (index != -1)
+					{
+						FOREACH(Ptr<WfLexicalSymbol>, symbol, context.manager->functionLambdaCaptures.GetByIndex(index))
+						{
+							meta->capturedVariableNames.Add(L"<captured>" + symbol->name);
+							capturedSymbols.Add(symbol);
+						}
+					}
+				}
+
+				auto result = context.manager->expressionResolvings[expression];
+				auto returnType = CopyTypeInfo(result.type->GetElementType()->GetGenericArgument(0));
+				GenerateFunctionInstructions(context, scope, meta, returnType, 0, argumentSymbols, capturedSymbols, 0, expression->body);
 			}
 
 			void GenerateClosureInstructions(WfCodegenContext& context, Ptr<WfCodegenFunctionContext> functionContext)
@@ -773,14 +828,34 @@ GenerateInstructions(Expression)
 
 				void Visit(WfOrderedNameExpression* node)override
 				{
-					// next version
-					throw 0;
+					VisitReferenceExpression(node);
 				}
 
 				void Visit(WfOrderedLambdaExpression* node)override
 				{
-					// next version
-					throw 0;
+					auto meta = MakePtr<WfAssemblyFunction>();
+					meta->name = L"<lambda:> in " + context.functionContext->function->name;
+					vint functionIndex = context.assembly->functions.Add(meta);
+					context.assembly->functionByName.Add(meta->name, functionIndex);
+
+					WfCodegenLambdaContext lc;
+					lc.orderedLambdaExpression = node;
+					context.functionContext->closuresToCodegen.Add(functionIndex, lc);
+
+					vint index = context.manager->orderedLambdaCaptures.Keys().IndexOf(node);
+					if (index != -1)
+					{
+						const auto& symbols = context.manager->orderedLambdaCaptures.GetByIndex(index);
+						FOREACH(Ptr<WfLexicalSymbol>, symbol, symbols)
+						{
+							GenerateLoadSymbolInstructions(symbol.Obj());
+						}
+						INSTRUCTION(Ins::LoadClosure(functionIndex, symbols.Count()));
+					}
+					else
+					{
+						INSTRUCTION(Ins::LoadClosure(functionIndex, 0));
+					}
 				}
 
 				void Visit(WfMemberExpression* node)override
