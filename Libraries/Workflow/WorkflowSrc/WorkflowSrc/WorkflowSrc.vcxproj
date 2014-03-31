@@ -500,6 +500,7 @@
     <Text Include="..\TestFiles\Samples\Codegen\OpShr.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\OpSub.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\OpXor.txt" />
+    <Text Include="..\TestFiles\Samples\Codegen\OrderedLambda.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\Property.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\RecursiveFunction.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\StaticMethod.txt" />
