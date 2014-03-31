@@ -375,13 +375,25 @@ ValidateSemantic(Expression)
 					else
 					{
 						ITypeInfo* type = expectedType.Obj();
-						if (type->GetDecorator() != ITypeInfo::SharedPtr) goto ORDERED_FAILED;
+						if (type->GetDecorator() != ITypeInfo::SharedPtr)
+						{
+							goto ORDERED_FAILED;
+						}
 						type = type->GetElementType();
-						if (type->GetDecorator() != ITypeInfo::Generic) goto ORDERED_FAILED;
+						if (type->GetDecorator() != ITypeInfo::Generic)
+						{
+							goto ORDERED_FAILED;
+						}
 						{
 							ITypeInfo* functionType = type->GetElementType();
-							if (functionType->GetDecorator() != ITypeInfo::TypeDescriptor) goto ORDERED_FAILED;
-							if (functionType->GetTypeDescriptor() != description::GetTypeDescriptor<IValueFunctionProxy>()) goto ORDERED_FAILED;
+							if (functionType->GetDecorator() != ITypeInfo::TypeDescriptor)
+							{
+								goto ORDERED_FAILED;
+							}
+							if (functionType->GetTypeDescriptor() != description::GetTypeDescriptor<IValueFunctionProxy>())
+							{
+								goto ORDERED_FAILED;
+							}
 						}
 
 						if (type->GetGenericArgumentCount() != parameterSymbols.Count() + 1)
