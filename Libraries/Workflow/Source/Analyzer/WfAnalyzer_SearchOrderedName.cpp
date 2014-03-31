@@ -15,10 +15,12 @@ SearchOrderedName(Declaration)
 			class SearchOrderedNameDeclarationVisitor : public Object, public WfDeclaration::IVisitor
 			{
 			public:
+				WfLexicalScope*							scope;
 				SortedList<vint>&						names;
 
-				SearchOrderedNameDeclarationVisitor(SortedList<vint>& _names)
-					:names(_names)
+				SearchOrderedNameDeclarationVisitor(WfLexicalScope* _scope, SortedList<vint>& _names)
+					:scope(_scope)
+					, names(_names)
 				{
 				}
 
@@ -26,23 +28,23 @@ SearchOrderedName(Declaration)
 				{
 					FOREACH(Ptr<WfDeclaration>, declaration, node->declarations)
 					{
-						SearchOrderedName(declaration, names);
+						SearchOrderedName(scope, declaration, names);
 					}
 				}
 
 				void Visit(WfFunctionDeclaration* node)override
 				{
-					SearchOrderedName(node->statement, names);
+					SearchOrderedName(scope, node->statement, names);
 				}
 
 				void Visit(WfVariableDeclaration* node)override
 				{
-					SearchOrderedName(node->expression, names);
+					SearchOrderedName(scope, node->expression, names);
 				}
 
-				static void Execute(Ptr<WfDeclaration> declaration, SortedList<vint>& names)
+				static void Execute(WfLexicalScope* scope, Ptr<WfDeclaration> declaration, SortedList<vint>& names)
 				{
-					SearchOrderedNameDeclarationVisitor visitor(names);
+					SearchOrderedNameDeclarationVisitor visitor(scope, names);
 					declaration->Accept(&visitor);
 				}
 			};
@@ -54,10 +56,12 @@ SearchOrderedName(Statement)
 			class SearchOrderedNameStatementVisitor : public Object, public WfStatement::IVisitor
 			{
 			public:
+				WfLexicalScope*							scope;
 				SortedList<vint>&						names;
 
-				SearchOrderedNameStatementVisitor(SortedList<vint>& _names)
-					:names(_names)
+				SearchOrderedNameStatementVisitor(WfLexicalScope* _scope, SortedList<vint>& _names)
+					:scope(_scope)
+					, names(_names)
 				{
 				}
 
@@ -73,26 +77,26 @@ SearchOrderedName(Statement)
 				{
 					if (node->expression)
 					{
-						SearchOrderedName(node->expression, names);
+						SearchOrderedName(scope, node->expression, names);
 					}
 				}
 
 				void Visit(WfDeleteStatement* node)override
 				{
-					SearchOrderedName(node->expression, names);
+					SearchOrderedName(scope, node->expression, names);
 				}
 
 				void Visit(WfRaiseExceptionStatement* node)override
 				{
 					if (node->expression)
 					{
-						SearchOrderedName(node->expression, names);
+						SearchOrderedName(scope, node->expression, names);
 					}
 				}
 
 				void Visit(WfIfStatement* node)override
 				{
-					SearchOrderedName(node->expression, names);
+					SearchOrderedName(scope, node->expression, names);
 					node->trueBranch->Accept(this);
 					if (node->falseBranch)
 					{
@@ -102,10 +106,10 @@ SearchOrderedName(Statement)
 
 				void Visit(WfSwitchStatement* node)override
 				{
-					SearchOrderedName(node->expression, names);
+					SearchOrderedName(scope, node->expression, names);
 					FOREACH(Ptr<WfSwitchCase>, switchCase, node->caseBranches)
 					{
-						SearchOrderedName(switchCase->expression, names);
+						SearchOrderedName(scope, switchCase->expression, names);
 						switchCase->statement->Accept(this);
 					}
 					if (node->defaultBranch)
@@ -116,13 +120,13 @@ SearchOrderedName(Statement)
 
 				void Visit(WfWhileStatement* node)override
 				{
-					SearchOrderedName(node->condition, names);
+					SearchOrderedName(scope, node->condition, names);
 					node->statement->Accept(this);
 				}
 
 				void Visit(WfForEachStatement* node)override
 				{
-					SearchOrderedName(node->collection, names);
+					SearchOrderedName(scope, node->collection, names);
 					node->statement->Accept(this);
 				}
 
@@ -149,17 +153,17 @@ SearchOrderedName(Statement)
 
 				void Visit(WfExpressionStatement* node)override
 				{
-					SearchOrderedName(node->expression, names);
+					SearchOrderedName(scope, node->expression, names);
 				}
 
 				void Visit(WfVariableStatement* node)override
 				{
-					SearchOrderedName(node->variable.Cast<WfDeclaration>(), names);
+					SearchOrderedName(scope, node->variable.Cast<WfDeclaration>(), names);
 				}
 
-				static void Execute(Ptr<WfStatement> statement, SortedList<vint>& names)
+				static void Execute(WfLexicalScope* scope, Ptr<WfStatement> statement, SortedList<vint>& names)
 				{
-					SearchOrderedNameStatementVisitor visitor(names);
+					SearchOrderedNameStatementVisitor visitor(scope, names);
 					statement->Accept(&visitor);
 				}
 			};
@@ -171,10 +175,12 @@ SearchOrderedName(Expression)
 			class SearchOrderedNameExpressionVisitor : public Object, public WfExpression::IVisitor
 			{
 			public:
+				WfLexicalScope*							scope;
 				SortedList<vint>&						names;
 
-				SearchOrderedNameExpressionVisitor(SortedList<vint>& _names)
-					:names(_names)
+				SearchOrderedNameExpressionVisitor(WfLexicalScope* _scope, SortedList<vint>& _names)
+					:scope(_scope)
+					, names(_names)
 				{
 				}
 
@@ -191,6 +197,15 @@ SearchOrderedName(Expression)
 					vint name = wtoi(node->name.value.Sub(1, node->name.value.Length() - 1));
 					if (!names.Contains(name))
 					{
+						WfLexicalScope* currentScope = scope;
+						while (currentScope)
+						{
+							if (currentScope->symbols.Keys().Contains(node->name.value))
+							{
+								return;
+							}
+							currentScope = currentScope->parentScope.Obj();
+						}
 						names.Add(name);
 					}
 				}
@@ -346,7 +361,7 @@ SearchOrderedName(Expression)
 
 				void Visit(WfFunctionExpression* node)override
 				{
-					SearchOrderedName(node->function.Cast<WfDeclaration>(), names);
+					SearchOrderedName(scope, node->function.Cast<WfDeclaration>(), names);
 				}
 
 				void Visit(WfNewTypeExpression* node)override
@@ -358,13 +373,13 @@ SearchOrderedName(Expression)
 
 					FOREACH(Ptr<WfFunctionDeclaration>, function, node->functions)
 					{
-						SearchOrderedName(function.Cast<WfDeclaration>(), names);
+						SearchOrderedName(scope, function.Cast<WfDeclaration>(), names);
 					}
 				}
 
-				static void Execute(Ptr<WfExpression> expression, SortedList<vint>& names)
+				static void Execute(WfLexicalScope* scope, Ptr<WfExpression> expression, SortedList<vint>& names)
 				{
-					SearchOrderedNameExpressionVisitor visitor(names);
+					SearchOrderedNameExpressionVisitor visitor(scope, names);
 					expression->Accept(&visitor);
 				}
 			};
@@ -373,19 +388,19 @@ SearchOrderedName(Expression)
 SearchOrderedName
 ***********************************************************************/
 
-			void SearchOrderedName(Ptr<WfDeclaration> declaration, collections::SortedList<vint>& names)
+			void SearchOrderedName(WfLexicalScope* scope, Ptr<WfDeclaration> declaration, collections::SortedList<vint>& names)
 			{
-				SearchOrderedNameDeclarationVisitor::Execute(declaration, names);
+				SearchOrderedNameDeclarationVisitor::Execute(scope, declaration, names);
 			}
 
-			void SearchOrderedName(Ptr<WfStatement> statement, collections::SortedList<vint>& names)
+			void SearchOrderedName(WfLexicalScope* scope, Ptr<WfStatement> statement, collections::SortedList<vint>& names)
 			{
-				SearchOrderedNameStatementVisitor::Execute(statement, names);
+				SearchOrderedNameStatementVisitor::Execute(scope, statement, names);
 			}
 
-			void SearchOrderedName(Ptr<WfExpression> expression, collections::SortedList<vint>& names)
+			void SearchOrderedName(WfLexicalScope* scope, Ptr<WfExpression> expression, collections::SortedList<vint>& names)
 			{
-				SearchOrderedNameExpressionVisitor::Execute(expression, names);
+				SearchOrderedNameExpressionVisitor::Execute(scope, expression, names);
 			}
 		}
 	}
