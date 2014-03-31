@@ -17,18 +17,20 @@ IsExpressionDependOnExpectedType(Expression)
 			class IsExpressionDependOnExpectedTypeVisitor : public Object, public WfExpression::IVisitor
 			{
 			public:
+				WfLexicalScopeManager*				manager;
 				bool								result;
 
-				IsExpressionDependOnExpectedTypeVisitor()
-					:result(false)
+				IsExpressionDependOnExpectedTypeVisitor(WfLexicalScopeManager* _manager)
+					:manager(_manager)
+					, result(false)
 				{
 				}
 
-				static bool Execute(Ptr<WfExpression> expression)
+				bool Execute(Ptr<WfExpression> expression)
 				{
-					IsExpressionDependOnExpectedTypeVisitor visitor;
-					expression->Accept(&visitor);
-					return visitor.result;
+					result = false;
+					expression->Accept(this);
+					return result;
 				}
 
 				void Visit(WfTopQualifiedExpression* node)override
@@ -45,7 +47,8 @@ IsExpressionDependOnExpectedType(Expression)
 
 				void Visit(WfOrderedLambdaExpression* node)override
 				{
-					result = true;
+					auto scope = manager->expressionScopes[node].Obj();
+					result = scope->symbols.Count() > 0;
 				}
 
 				void Visit(WfMemberExpression* node)override
@@ -159,9 +162,9 @@ IsExpressionDependOnExpectedType(Expression)
 				}
 			};
 
-			bool IsExpressionDependOnExpectedType(Ptr<WfExpression> expression)
+			bool IsExpressionDependOnExpectedType(WfLexicalScopeManager* manager, Ptr<WfExpression> expression)
 			{
-				IsExpressionDependOnExpectedTypeVisitor visitor;
+				IsExpressionDependOnExpectedTypeVisitor visitor(manager);
 				expression->Accept(&visitor);
 				return visitor.result;
 			}

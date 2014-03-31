@@ -200,7 +200,7 @@ Type Analyzing
 
 			extern Ptr<reflection::description::ITypeInfo>	CreateTypeInfoFromMethodInfo(reflection::description::IMethodInfo* info);
 
-			extern bool										IsExpressionDependOnExpectedType(Ptr<WfExpression> expression);
+			extern bool										IsExpressionDependOnExpectedType(WfLexicalScopeManager* manager, Ptr<WfExpression> expression);
 			extern WString									GetExpressionName(Ptr<WfExpression> expression);
 			extern void										SearchOrderedName(Ptr<WfDeclaration> declaration, collections::SortedList<vint>& names);
 			extern void										SearchOrderedName(Ptr<WfStatement> statement, collections::SortedList<vint>& names);
