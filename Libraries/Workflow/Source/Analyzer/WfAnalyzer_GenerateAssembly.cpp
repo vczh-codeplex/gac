@@ -21,6 +21,24 @@ namespace vl
 GenerateGlobalDeclarationMetadata
 ***********************************************************************/
 
+			void GenerateFunctionDeclarationMetadata(WfCodegenContext& context, WfFunctionDeclaration* node, Ptr<WfAssemblyFunction> meta)
+			{
+				FOREACH(Ptr<WfFunctionArgument>, argument, node->arguments)
+				{
+					meta->argumentNames.Add(argument->name.value);
+				}
+				{
+					vint index = context.manager->functionLambdaCaptures.Keys().IndexOf(node);
+					if (index != -1)
+					{
+						FOREACH(Ptr<WfLexicalSymbol>, symbol, context.manager->functionLambdaCaptures.GetByIndex(index))
+						{
+							meta->capturedVariableNames.Add(L"<captured>" + symbol->name);
+						}
+					}
+				}
+			}
+
 			class GenerateGlobalDeclarationMetadataVisitor : public Object, public WfDeclaration::IVisitor
 			{
 			public:
@@ -45,35 +63,21 @@ GenerateGlobalDeclarationMetadata
 				{
 					auto meta = MakePtr<WfAssemblyFunction>();
 					meta->name = namePrefix + node->name.value;
-					FOREACH(Ptr<WfFunctionArgument>, argument, node->arguments)
-					{
-						meta->argumentNames.Add(argument->name.value);
-					}
-					{
-						vint index = context.manager->functionLambdaCaptures.Keys().IndexOf(node);
-						if (index != -1)
-						{
-							FOREACH(Ptr<WfLexicalSymbol>, symbol, context.manager->functionLambdaCaptures.GetByIndex(index))
-							{
-								meta->capturedVariableNames.Add(L"<captured>" + symbol->name);
-							}
-						}
-					}
-					{
-						vint index = context.assembly->functions.Add(meta);
-						context.assembly->functionByName.Add(meta->name, index);
+					GenerateFunctionDeclarationMetadata(context, node, meta);
 
-						auto scope = context.manager->declarationScopes[node]->parentScope.Obj();
-						auto symbol = From(scope->symbols[node->name.value])
-							.Where([=](Ptr<WfLexicalSymbol> symbol)
-							{
-								return symbol->creatorDeclaration == node;
-							})
-							.First(0);
-						if (symbol)
+					vint index = context.assembly->functions.Add(meta);
+					context.assembly->functionByName.Add(meta->name, index);
+
+					auto scope = context.manager->declarationScopes[node]->parentScope.Obj();
+					auto symbol = From(scope->symbols[node->name.value])
+						.Where([=](Ptr<WfLexicalSymbol> symbol)
 						{
-							context.globalFunctions.Add(symbol.Obj(), index);
-						}
+							return symbol->creatorDeclaration == node;
+						})
+						.First(0);
+					if (symbol)
+					{
+						context.globalFunctions.Add(symbol.Obj(), index);
 					}
 				}
 
@@ -135,6 +139,51 @@ GenerateInstructions(Initialize)
 GenerateInstructions(Declaration)
 ***********************************************************************/
 
+			void GenerateFunctionDeclarationInstructions(WfCodegenContext& context, WfFunctionDeclaration* node, WfLexicalScope* scope, Ptr<WfAssemblyFunction> meta)
+			{
+				auto functionContext = MakePtr<WfCodegenFunctionContext>();
+				functionContext->function = meta;
+				context.functionContext = functionContext;
+				{
+					FOREACH_INDEXER(Ptr<WfFunctionArgument>, argument, index, node->arguments)
+					{
+						auto argumentSymbol = scope->symbols[argument->name.value][0];
+						functionContext->arguments.Add(argumentSymbol.Obj(), index);
+					}
+				}
+				{
+					vint index = context.manager->functionLambdaCaptures.Keys().IndexOf(node);
+					if (index != -1)
+					{
+						FOREACH_INDEXER(Ptr<WfLexicalSymbol>, symbol, index, context.manager->functionLambdaCaptures.GetByIndex(index))
+						{
+							functionContext->capturedVariables.Add(symbol.Obj(), index);
+						}
+					}
+				}
+					
+				meta->firstInstruction = context.assembly->instructions.Count();
+				GenerateStatementInstructions(context, node->statement);
+				auto returnType = CreateTypeInfoFromType(scope, node->returnType);
+				if (returnType->GetDecorator() == ITypeInfo::TypeDescriptor && returnType->GetTypeDescriptor()->GetValueSerializer())
+				{
+					auto serializer = returnType->GetTypeDescriptor()->GetValueSerializer();
+					auto defaultText = serializer->GetDefaultText();
+					Value result;
+					serializer->Parse(defaultText, result);
+					INSTRUCTION(Ins::LoadValue(result));
+				}
+				else
+				{
+					INSTRUCTION(Ins::LoadValue(Value()));
+				}
+				INSTRUCTION(Ins::Return());
+				meta->lastInstruction = context.assembly->instructions.Count() - 1;
+				context.functionContext = 0;
+
+				GenerateClosureInstructions(context, functionContext);
+			}
+
 			class GenerateDeclarationInstructionsVisitor : public Object, public WfDeclaration::IVisitor
 			{
 			public:
@@ -151,7 +200,7 @@ GenerateInstructions(Declaration)
 
 				void Visit(WfFunctionDeclaration* node)override
 				{
-					auto scope = context.manager->declarationScopes[node];
+					auto scope = context.manager->declarationScopes[node].Obj();
 					auto symbol = From(scope->parentScope->symbols[node->name.value])
 						.Where([=](Ptr<WfLexicalSymbol> symbol)
 						{
@@ -159,48 +208,7 @@ GenerateInstructions(Declaration)
 						})
 						.First();
 					auto meta = context.assembly->functions[context.globalFunctions[symbol.Obj()]];
-
-					auto functionContext = MakePtr<WfCodegenFunctionContext>();
-					functionContext->function = meta;
-					context.functionContext = functionContext;
-					{
-						FOREACH_INDEXER(Ptr<WfFunctionArgument>, argument, index, node->arguments)
-						{
-							auto argumentSymbol = scope->symbols[argument->name.value][0];
-							functionContext->arguments.Add(argumentSymbol.Obj(), index);
-						}
-					}
-					{
-						vint index = context.manager->functionLambdaCaptures.Keys().IndexOf(node);
-						if (index != -1)
-						{
-							FOREACH_INDEXER(Ptr<WfLexicalSymbol>, symbol, index, context.manager->functionLambdaCaptures.GetByIndex(index))
-							{
-								functionContext->capturedVariables.Add(symbol.Obj(), index);
-							}
-						}
-					}
-					
-					meta->firstInstruction = context.assembly->instructions.Count();
-					GenerateStatementInstructions(context, node->statement);
-					auto returnType = symbol->typeInfo->GetElementType()->GetGenericArgument(0);
-					if (returnType->GetDecorator() == ITypeInfo::TypeDescriptor && returnType->GetTypeDescriptor()->GetValueSerializer())
-					{
-						auto serializer = returnType->GetTypeDescriptor()->GetValueSerializer();
-						auto defaultText = serializer->GetDefaultText();
-						Value result;
-						serializer->Parse(defaultText, result);
-						INSTRUCTION(Ins::LoadValue(result));
-					}
-					else
-					{
-						INSTRUCTION(Ins::LoadValue(Value()));
-					}
-					INSTRUCTION(Ins::Return());
-					meta->lastInstruction = context.assembly->instructions.Count() - 1;
-					context.functionContext = 0;
-
-					GenerateClosureInstructions(context, functionContext);
+					GenerateFunctionDeclarationInstructions(context, node, scope, meta);
 				}
 
 				void Visit(WfVariableDeclaration* node)override
@@ -265,8 +273,10 @@ GenerateInstructions(Closure)
 
 			void GenerateClosureInstructions_Function(WfCodegenContext& context, vint functionIndex, WfFunctionExpression* expression)
 			{
-				// next version
-				throw 0;
+				auto scope = context.manager->declarationScopes[expression->function.Obj()].Obj();
+				auto meta = context.assembly->functions[functionIndex];
+				GenerateFunctionDeclarationMetadata(context, expression->function.Obj(), meta);
+				GenerateFunctionDeclarationInstructions(context, expression->function.Obj(), scope, meta);
 			}
 
 			void GenerateClosureInstructions_Ordered(WfCodegenContext& context, vint functionIndex, WfOrderedLambdaExpression* expression)

@@ -281,13 +281,11 @@ ValidateSemantic(Expression)
 										{
 											captured = true;
 											manager->functionLambdaCaptures.Add(node.Obj(), symbol);
-											break;
 										}
 										if (auto node = currentScope->ownerExpression.Cast<WfOrderedLambdaExpression>())
 										{
 											captured = true;
 											manager->orderedLambdaCaptures.Add(node.Obj(), symbol);
-											break;
 										}
 										currentScope = currentScope->parentScope.Obj();
 									}

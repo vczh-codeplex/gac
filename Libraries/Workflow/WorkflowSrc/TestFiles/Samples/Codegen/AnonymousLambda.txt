@@ -1,7 +1,7 @@
 module test;
 using system::*;
 
-func Adder(x : int) : func(int):func(int):func():int
+func Adder(x : int) : func(int):func():int
 {
 	return func(y : int):func():int
 	{
