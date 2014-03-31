@@ -74,11 +74,8 @@ GenerateGlobalDeclarationMetadata
 						{
 							return symbol->creatorDeclaration == node;
 						})
-						.First(0);
-					if (symbol)
-					{
-						context.globalFunctions.Add(symbol.Obj(), index);
-					}
+						.First();
+					context.globalFunctions.Add(symbol.Obj(), index);
 				}
 
 				void Visit(WfVariableDeclaration* node)override
@@ -139,7 +136,7 @@ GenerateInstructions(Initialize)
 GenerateInstructions(Declaration)
 ***********************************************************************/
 
-			void GenerateFunctionDeclarationInstructions(WfCodegenContext& context, WfFunctionDeclaration* node, WfLexicalScope* scope, Ptr<WfAssemblyFunction> meta)
+			void GenerateFunctionDeclarationInstructions(WfCodegenContext& context, WfFunctionDeclaration* node, WfLexicalScope* scope, Ptr<WfAssemblyFunction> meta, Ptr<WfLexicalSymbol> recursiveLambdaSymbol)
 			{
 				auto functionContext = MakePtr<WfCodegenFunctionContext>();
 				functionContext->function = meta;
@@ -161,8 +158,22 @@ GenerateInstructions(Declaration)
 						}
 					}
 				}
+				if (recursiveLambdaSymbol)
+				{
+					vint variableIndex = meta->argumentNames.Count() + meta->localVariableNames.Add(L"<recursive-lambda>" + node->name.value);
+					functionContext->localVariables.Add(recursiveLambdaSymbol.Obj(), variableIndex);
+				}
 					
 				meta->firstInstruction = context.assembly->instructions.Count();
+				if (recursiveLambdaSymbol)
+				{
+					for (vint i = 0; i < functionContext->capturedVariables.Count(); i++)
+					{
+						INSTRUCTION(Ins::LoadCapturedVar(i));
+					}
+					INSTRUCTION(Ins::LoadClosure(context.assembly->functions.IndexOf(meta.Obj()), functionContext->capturedVariables.Count()));
+					INSTRUCTION(Ins::StoreLocalVar(functionContext->localVariables[recursiveLambdaSymbol.Obj()]));
+				}
 				GenerateStatementInstructions(context, node->statement);
 				auto returnType = CreateTypeInfoFromType(scope, node->returnType);
 				if (returnType->GetDecorator() == ITypeInfo::TypeDescriptor && returnType->GetTypeDescriptor()->GetValueSerializer())
@@ -208,7 +219,7 @@ GenerateInstructions(Declaration)
 						})
 						.First();
 					auto meta = context.assembly->functions[context.globalFunctions[symbol.Obj()]];
-					GenerateFunctionDeclarationInstructions(context, node, scope, meta);
+					GenerateFunctionDeclarationInstructions(context, node, scope, meta, 0);
 				}
 
 				void Visit(WfVariableDeclaration* node)override
@@ -276,7 +287,12 @@ GenerateInstructions(Closure)
 				auto scope = context.manager->declarationScopes[expression->function.Obj()].Obj();
 				auto meta = context.assembly->functions[functionIndex];
 				GenerateFunctionDeclarationMetadata(context, expression->function.Obj(), meta);
-				GenerateFunctionDeclarationInstructions(context, expression->function.Obj(), scope, meta);
+				Ptr<WfLexicalSymbol> recursiveLambdaSymbol;
+				if (expression->function->name.value != L"")
+				{
+					recursiveLambdaSymbol = scope->symbols[expression->function->name.value][0];
+				}
+				GenerateFunctionDeclarationInstructions(context, expression->function.Obj(), scope, meta, recursiveLambdaSymbol);
 			}
 
 			void GenerateClosureInstructions_Ordered(WfCodegenContext& context, vint functionIndex, WfOrderedLambdaExpression* expression)
@@ -717,11 +733,6 @@ GenerateInstructions(Expression)
 					{
 						vint variableIndex = context.functionContext->arguments.Values()[index];
 						INSTRUCTION(Ins::LoadLocalVar(variableIndex));
-					}
-					else
-					{
-						// next version: named lambda reference
-						throw 0;
 					}
 				}
 
