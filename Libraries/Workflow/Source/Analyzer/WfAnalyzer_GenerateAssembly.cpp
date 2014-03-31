@@ -55,7 +55,7 @@ GenerateGlobalDeclarationMetadata
 						{
 							FOREACH(Ptr<WfLexicalSymbol>, symbol, context.manager->functionLambdaCaptures.GetByIndex(index))
 							{
-								meta->capturedVariableNames.Add(symbol->name);
+								meta->capturedVariableNames.Add(L"<captured>" + symbol->name);
 							}
 						}
 					}
@@ -163,10 +163,22 @@ GenerateInstructions(Declaration)
 					auto functionContext = MakePtr<WfCodegenFunctionContext>();
 					functionContext->function = meta;
 					context.functionContext = functionContext;
-					FOREACH_INDEXER(Ptr<WfFunctionArgument>, argument, index, node->arguments)
 					{
-						auto argumentSymbol = scope->symbols[argument->name.value][0];
-						functionContext->arguments.Add(argumentSymbol.Obj(), index);
+						FOREACH_INDEXER(Ptr<WfFunctionArgument>, argument, index, node->arguments)
+						{
+							auto argumentSymbol = scope->symbols[argument->name.value][0];
+							functionContext->arguments.Add(argumentSymbol.Obj(), index);
+						}
+					}
+					{
+						vint index = context.manager->functionLambdaCaptures.Keys().IndexOf(node);
+						if (index != -1)
+						{
+							FOREACH_INDEXER(Ptr<WfLexicalSymbol>, symbol, index, context.manager->functionLambdaCaptures.GetByIndex(index))
+							{
+								functionContext->capturedVariables.Add(symbol.Obj(), index);
+							}
+						}
 					}
 					
 					meta->firstInstruction = context.assembly->instructions.Count();
@@ -668,52 +680,63 @@ GenerateInstructions(Expression)
 				{
 				}
 
-				void VisitReferenceExpression(WfExpression* node)
+				void GenerateLoadSymbolInstructions(WfLexicalSymbol* symbol)
 				{
-					auto result = context.manager->expressionResolvings[node];
 					vint index = -1;
-					if ((index = context.globalFunctions.Keys().IndexOf(result.symbol.Obj())) != -1)
+					if ((index = context.globalFunctions.Keys().IndexOf(symbol)) != -1)
 					{
 						vint functionIndex = context.globalFunctions.Values()[index];
 						INSTRUCTION(Ins::LoadClosure(functionIndex, 0));
 					}
-					else if ((index = context.globalVariables.Keys().IndexOf(result.symbol.Obj())) != -1)
+					else if ((index = context.globalVariables.Keys().IndexOf(symbol)) != -1)
 					{
 						vint variableIndex = context.globalVariables.Values()[index];
 						INSTRUCTION(Ins::LoadGlobalVar(variableIndex));
 					}
-					else if ((index = context.functionContext->capturedVariables.Keys().IndexOf(result.symbol.Obj())) != -1)
+					else if ((index = context.functionContext->capturedVariables.Keys().IndexOf(symbol)) != -1)
 					{
 						vint variableIndex = context.functionContext->capturedVariables.Values()[index];
 						INSTRUCTION(Ins::LoadCapturedVar(variableIndex));
 					}
-					else if ((index = context.functionContext->localVariables.Keys().IndexOf(result.symbol.Obj())) != -1)
+					else if ((index = context.functionContext->localVariables.Keys().IndexOf(symbol)) != -1)
 					{
 						vint variableIndex = context.functionContext->localVariables.Values()[index];
 						INSTRUCTION(Ins::LoadLocalVar(variableIndex));
 					}
-					else if ((index = context.functionContext->arguments.Keys().IndexOf(result.symbol.Obj())) != -1)
+					else if ((index = context.functionContext->arguments.Keys().IndexOf(symbol)) != -1)
 					{
 						vint variableIndex = context.functionContext->arguments.Values()[index];
 						INSTRUCTION(Ins::LoadLocalVar(variableIndex));
-					}
-					else if (result.methodInfo && result.methodInfo->IsStatic())
-					{
-						auto meta = MakePtr<WfAssemblyFunction>();
-						meta->name = result.methodInfo->GetName() + L"<" + result.methodInfo->GetOwnerTypeDescriptor()->GetTypeName() + L">";
-						vint functionIndex = context.assembly->functions.Add(meta);
-						context.assembly->functionByName.Add(meta->name, functionIndex);
-						
-						WfCodegenLambdaContext lc;
-						lc.staticMethodReferenceExpression = node;
-						context.functionContext->closuresToCodegen.Add(functionIndex, lc);
-
-						INSTRUCTION(Ins::LoadClosure(functionIndex, 0));
 					}
 					else
 					{
 						// next version: named lambda reference
 						throw 0;
+					}
+				}
+
+				void VisitReferenceExpression(WfExpression* node)
+				{
+					auto result = context.manager->expressionResolvings[node];
+					if (result.symbol)
+					{
+						GenerateLoadSymbolInstructions(result.symbol.Obj());
+					}
+					else
+					{
+						if (result.methodInfo && result.methodInfo->IsStatic())
+						{
+							auto meta = MakePtr<WfAssemblyFunction>();
+							meta->name = result.methodInfo->GetName() + L"<" + result.methodInfo->GetOwnerTypeDescriptor()->GetTypeName() + L">";
+							vint functionIndex = context.assembly->functions.Add(meta);
+							context.assembly->functionByName.Add(meta->name, functionIndex);
+						
+							WfCodegenLambdaContext lc;
+							lc.staticMethodReferenceExpression = node;
+							context.functionContext->closuresToCodegen.Add(functionIndex, lc);
+
+							INSTRUCTION(Ins::LoadClosure(functionIndex, 0));
+						}
 					}
 				}
 
@@ -1308,8 +1331,29 @@ GenerateInstructions(Expression)
 
 				void Visit(WfFunctionExpression* node)override
 				{
-					// next version
-					throw 0;
+					auto meta = MakePtr<WfAssemblyFunction>();
+					meta->name = L"<lambda:" + node->function->name.value + L"> in " + context.functionContext->function->name;
+					vint functionIndex = context.assembly->functions.Add(meta);
+					context.assembly->functionByName.Add(meta->name, functionIndex);
+
+					WfCodegenLambdaContext lc;
+					lc.functionExpression = node;
+					context.functionContext->closuresToCodegen.Add(functionIndex, lc);
+
+					vint index = context.manager->functionLambdaCaptures.Keys().IndexOf(node->function.Obj());
+					if (index != -1)
+					{
+						const auto& symbols = context.manager->functionLambdaCaptures.GetByIndex(index);
+						FOREACH(Ptr<WfLexicalSymbol>, symbol, symbols)
+						{
+							GenerateLoadSymbolInstructions(symbol.Obj());
+						}
+						INSTRUCTION(Ins::LoadClosure(functionIndex, symbols.Count()));
+					}
+					else
+					{
+						INSTRUCTION(Ins::LoadClosure(functionIndex, 0));
+					}
 				}
 
 				void Visit(WfNewTypeExpression* node)override
@@ -1501,17 +1545,6 @@ GenerateAssembly
 						GenerateDeclarationInstructions(context, decl);
 					}
 				}
-
-				//for (vint i = 0; i < assembly->instructions.Count(); i++)
-				//{
-				//	WfInstruction& ins = assembly->instructions[i];
-				//	switch (ins.code)
-				//	{
-				//	case WfInsCode::LoadClosure:
-				//		ins.countParameter = assembly->functions[ins.indexParameter]->capturedVariableNames.Count();
-				//		break;
-				//	}
-				//}
 				return assembly;
 			}
 

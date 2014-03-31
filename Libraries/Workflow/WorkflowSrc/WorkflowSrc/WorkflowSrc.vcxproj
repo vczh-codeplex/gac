@@ -473,6 +473,7 @@
     <Text Include="..\TestFiles\Samples\AnalyzerScope\ModuleA.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerScope\ModuleB.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerScope\ModuleC.txt" />
+    <Text Include="..\TestFiles\Samples\Codegen\AnonymousLambda.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\ControlFlow.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\ElementInSet.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\Event.txt" />
