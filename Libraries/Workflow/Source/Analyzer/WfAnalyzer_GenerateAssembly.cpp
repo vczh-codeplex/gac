@@ -174,6 +174,8 @@ GenerateInstructions(Declaration)
 				if (expressionBody)
 				{
 					GenerateExpressionInstructions(context, expressionBody);
+					// next version: inline try-finally
+					INSTRUCTION(Ins::Return());
 				}
 				if (returnType->GetDecorator() == ITypeInfo::TypeDescriptor && returnType->GetTypeDescriptor()->GetValueSerializer())
 				{
@@ -343,7 +345,7 @@ GenerateInstructions(Closure)
 					vint index = context.manager->orderedLambdaCaptures.Keys().IndexOf(expression);
 					if (index != -1)
 					{
-						FOREACH(Ptr<WfLexicalSymbol>, symbol, context.manager->functionLambdaCaptures.GetByIndex(index))
+						FOREACH(Ptr<WfLexicalSymbol>, symbol, context.manager->orderedLambdaCaptures.GetByIndex(index))
 						{
 							meta->capturedVariableNames.Add(L"<captured>" + symbol->name);
 							capturedSymbols.Add(symbol);

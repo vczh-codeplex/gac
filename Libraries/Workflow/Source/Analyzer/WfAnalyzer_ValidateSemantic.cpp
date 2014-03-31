@@ -254,6 +254,52 @@ ValidateSemantic(Expression)
 					manager->errors.Add(WfErrors::TopQualifiedSymbolNotExists(node, node->name.value));
 				}
 
+				void VisitSymbol(WfLexicalScope* scope, Ptr<WfLexicalSymbol> symbol)
+				{
+					if (symbol->typeInfo)
+					{
+						bool captured = false;
+						if (!symbol->ownerScope->ownerDeclaration.Cast<WfNamespaceDeclaration>())
+						{
+							auto currentScope = scope;
+							while (currentScope)
+							{
+								vint index = currentScope->symbols.Keys().IndexOf(symbol->name);
+								if (index != -1 && currentScope->symbols.GetByIndex(index).Contains(symbol.Obj()))
+								{
+									break;
+								}
+								if (auto node = currentScope->ownerDeclaration.Cast<WfFunctionDeclaration>())
+								{
+									captured = true;
+									manager->functionLambdaCaptures.Add(node.Obj(), symbol);
+								}
+								if (auto node = currentScope->ownerExpression.Cast<WfOrderedLambdaExpression>())
+								{
+									captured = true;
+									manager->orderedLambdaCaptures.Add(node.Obj(), symbol);
+								}
+								currentScope = currentScope->parentScope.Obj();
+							}
+						}
+
+						bool writable = false;
+						if (symbol->creatorDeclaration.Cast<WfVariableDeclaration>())
+						{
+							writable = !captured;
+						}
+
+						if (writable)
+						{
+							results.Add(ResolveExpressionResult(symbol, symbol->typeInfo, symbol->typeInfo));
+						}
+						else
+						{
+							results.Add(ResolveExpressionResult(symbol, symbol->typeInfo));
+						}
+					}
+				}
+
 				void Visit(WfReferenceExpression* node)override
 				{
 					auto scope = manager->expressionScopes[node].Obj();
@@ -264,48 +310,7 @@ ValidateSemantic(Expression)
 					{
 						FOREACH(Ptr<WfLexicalSymbol>, symbol, symbols)
 						{
-							if (symbol->typeInfo)
-							{
-								bool captured = false;
-								if (!symbol->ownerScope->ownerDeclaration.Cast<WfNamespaceDeclaration>())
-								{
-									auto currentScope = scope;
-									while (currentScope)
-									{
-										vint index = currentScope->symbols.Keys().IndexOf(symbol->name);
-										if (index != -1 && currentScope->symbols.GetByIndex(index).Contains(symbol.Obj()))
-										{
-											break;
-										}
-										if (auto node = currentScope->ownerDeclaration.Cast<WfFunctionDeclaration>())
-										{
-											captured = true;
-											manager->functionLambdaCaptures.Add(node.Obj(), symbol);
-										}
-										if (auto node = currentScope->ownerExpression.Cast<WfOrderedLambdaExpression>())
-										{
-											captured = true;
-											manager->orderedLambdaCaptures.Add(node.Obj(), symbol);
-										}
-										currentScope = currentScope->parentScope.Obj();
-									}
-								}
-
-								bool writable = false;
-								if (symbol->creatorDeclaration.Cast<WfVariableDeclaration>())
-								{
-									writable = !captured;
-								}
-
-								if (writable)
-								{
-									results.Add(ResolveExpressionResult(symbol, symbol->typeInfo, symbol->typeInfo));
-								}
-								else
-								{
-									results.Add(ResolveExpressionResult(symbol, symbol->typeInfo));
-								}
-							}
+							VisitSymbol(scope, symbol);
 						}
 
 						if (results.Count() == 0)
@@ -339,15 +344,9 @@ ValidateSemantic(Expression)
 
 					List<Ptr<WfLexicalSymbol>> symbols;
 					manager->ResolveSymbol(scope, node->name.value, symbols);
-					if (symbols.Count() >= 1)
+					FOREACH(Ptr<WfLexicalSymbol>, symbol, symbols)
 					{
-						FOREACH(Ptr<WfLexicalSymbol>, symbol, symbols)
-						{
-							if (symbol->typeInfo)
-							{
-								results.Add(ResolveExpressionResult(symbol, symbol->typeInfo));
-							}
-						}
+						VisitSymbol(scope, symbol);
 					}
 				}
 

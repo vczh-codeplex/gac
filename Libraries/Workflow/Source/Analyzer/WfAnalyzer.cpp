@@ -488,6 +488,9 @@ WfLexicalScopeManager
 				declarationScopes.Clear();
 				statementScopes.Clear();
 				expressionScopes.Clear();
+				expressionResolvings.Clear();
+				functionLambdaCaptures.Clear();
+				orderedLambdaCaptures.Clear();
 			}
 
 			void WfLexicalScopeManager::Rebuild(bool keepTypeDescriptorNames)

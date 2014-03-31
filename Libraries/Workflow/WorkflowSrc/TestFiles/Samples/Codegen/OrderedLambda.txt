@@ -8,7 +8,7 @@ func Apply(f : func(int):int, arg : int) : int
 
 func Adder(x : int) : func(int):int
 {
-	return [Apply([$1+$2], $1)];
+	return [$1 * 0 + Apply([$1+$2], x)];
 }
 
 func main():string
