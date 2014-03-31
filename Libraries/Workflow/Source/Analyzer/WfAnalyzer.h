@@ -124,6 +124,8 @@ Scope Manager
 				typedef collections::Dictionary<Ptr<WfStatement>, Ptr<WfLexicalScope>>						StatementScopeMap;
 				typedef collections::Dictionary<Ptr<WfExpression>, Ptr<WfLexicalScope>>						ExpressionScopeMap;
 				typedef collections::Dictionary<Ptr<WfExpression>, ResolveExpressionResult>					ExpressionResolvingMap;
+				typedef collections::Group<WfFunctionDeclaration*, Ptr<WfLexicalSymbol>>					FunctionLambdaCaptureGroup;
+				typedef collections::Group<WfOrderedLambdaExpression*, Ptr<WfLexicalSymbol>>				OrderedLambdaCaptureGroup;
 			protected:
 
 				void										BuildGlobalNameFromTypeDescriptors();
@@ -138,11 +140,13 @@ Scope Manager
 				Ptr<WfLexicalScopeName>						globalName;
 				NamespaceNameMap							namespaceNames;
 
-				ModuleScopeMap								moduleScopes;			// the nearest scope for the module
-				DeclarationScopeMap							declarationScopes;		// the nearest scope for the declaration
-				StatementScopeMap							statementScopes;		// the nearest scope for the statement
-				ExpressionScopeMap							expressionScopes;		// the nearest scope for the expression
-				ExpressionResolvingMap						expressionResolvings;	// the resolving result for the expression
+				ModuleScopeMap								moduleScopes;				// the nearest scope for the module
+				DeclarationScopeMap							declarationScopes;			// the nearest scope for the declaration
+				StatementScopeMap							statementScopes;			// the nearest scope for the statement
+				ExpressionScopeMap							expressionScopes;			// the nearest scope for the expression
+				ExpressionResolvingMap						expressionResolvings;		// the resolving result for the expression
+				FunctionLambdaCaptureGroup					functionLambdaCaptures;		// all captured symbol in an lambda expression
+				OrderedLambdaCaptureGroup					orderedLambdaCaptures;		// all captured symbol in an lambda expression
 
 				WfLexicalScopeManager(Ptr<parsing::tabling::ParsingTable> _parsingTable);
 				~WfLexicalScopeManager();

@@ -266,32 +266,37 @@ ValidateSemantic(Expression)
 						{
 							if (symbol->typeInfo)
 							{
+								bool captured = false;
+								if (!symbol->ownerScope->ownerDeclaration.Cast<WfNamespaceDeclaration>())
+								{
+									auto currentScope = scope;
+									while (currentScope)
+									{
+										vint index = currentScope->symbols.Keys().IndexOf(symbol->name);
+										if (index != -1 && currentScope->symbols.GetByIndex(index).Contains(symbol.Obj()))
+										{
+											break;
+										}
+										if (auto node = currentScope->ownerDeclaration.Cast<WfFunctionDeclaration>())
+										{
+											captured = true;
+											manager->functionLambdaCaptures.Add(node.Obj(), symbol);
+											break;
+										}
+										if (auto node = currentScope->ownerExpression.Cast<WfOrderedLambdaExpression>())
+										{
+											captured = true;
+											manager->orderedLambdaCaptures.Add(node.Obj(), symbol);
+											break;
+										}
+										currentScope = currentScope->parentScope.Obj();
+									}
+								}
+
 								bool writable = false;
 								if (symbol->creatorDeclaration.Cast<WfVariableDeclaration>())
 								{
-									if (!symbol->ownerScope->ownerDeclaration.Cast<WfNamespaceDeclaration>())
-									{
-										auto currentScope = scope;
-										while (currentScope)
-										{
-											vint index = currentScope->symbols.Keys().IndexOf(symbol->name);
-											if (index != -1 && currentScope->symbols.GetByIndex(index).Contains(symbol.Obj()))
-											{
-												writable = true;
-												break;
-											}
-
-											if (currentScope->ownerDeclaration.Cast<WfFunctionDeclaration>())
-											{
-												break;
-											}
-											if (currentScope->ownerExpression.Cast<WfOrderedLambdaExpression>())
-											{
-												break;
-											}
-											currentScope = currentScope->parentScope.Obj();
-										}
-									}
+									writable = !captured;
 								}
 
 								if (writable)
