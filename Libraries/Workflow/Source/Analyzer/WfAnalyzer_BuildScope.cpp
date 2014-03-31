@@ -306,7 +306,7 @@ BuildScopeForExpression
 				void Visit(WfOrderedLambdaExpression* node)override
 				{
 					SortedList<vint> names;
-					SearchOrderedName(node->body, names);
+					SearchOrderedName(parentScope.Obj(), node->body, names);
 
 					resultScope = new WfLexicalScope(parentScope);
 					FOREACH(vint, name, names)
