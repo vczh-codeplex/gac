@@ -49,18 +49,32 @@ GenerateGlobalDeclarationMetadata
 					{
 						meta->argumentNames.Add(argument->name.value);
 					}
-
-					vint index = context.assembly->functions.Add(meta);
-					context.assembly->functionByName.Add(meta->name, index);
-
-					auto scope = context.manager->declarationScopes[node]->parentScope.Obj();
-					auto symbol = From(scope->symbols[node->name.value])
-						.Where([=](Ptr<WfLexicalSymbol> symbol)
+					{
+						vint index = context.manager->functionLambdaCaptures.Keys().IndexOf(node);
+						if (index != -1)
 						{
-							return symbol->creatorDeclaration == node;
-						})
-						.First();
-					context.globalFunctions.Add(symbol.Obj(), index);
+							FOREACH(Ptr<WfLexicalSymbol>, symbol, context.manager->functionLambdaCaptures.GetByIndex(index))
+							{
+								meta->capturedVariableNames.Add(symbol->name);
+							}
+						}
+					}
+					{
+						vint index = context.assembly->functions.Add(meta);
+						context.assembly->functionByName.Add(meta->name, index);
+
+						auto scope = context.manager->declarationScopes[node]->parentScope.Obj();
+						auto symbol = From(scope->symbols[node->name.value])
+							.Where([=](Ptr<WfLexicalSymbol> symbol)
+							{
+								return symbol->creatorDeclaration == node;
+							})
+							.First(0);
+						if (symbol)
+						{
+							context.globalFunctions.Add(symbol.Obj(), index);
+						}
+					}
 				}
 
 				void Visit(WfVariableDeclaration* node)override
