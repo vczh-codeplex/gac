@@ -1358,6 +1358,9 @@
     <Text Include="..\TestFiles\Samples\Codegen\AnonymousLambda.txt">
       <Filter>Resource Files\Samples\Codegen</Filter>
     </Text>
+    <Text Include="..\TestFiles\Samples\Codegen\NamedLambda.txt">
+      <Filter>Resource Files\Samples\Codegen</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Source\Expression\Codegen.bat">

@@ -30,3 +30,4 @@ ControlFlow=55, 55, 55, 55, 55
 IfNotNull={1} is a list, {1:2} is not a list
 ForEach=[1, 2, 3, 4, 5][5, 4, 3, 2, 1]
 AnonymousLambda=2, 3, 3, 4
+NamedLambda=1, 1, 2, 3, 5
