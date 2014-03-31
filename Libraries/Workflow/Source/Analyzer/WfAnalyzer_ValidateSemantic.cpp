@@ -140,7 +140,7 @@ ValidateSemantic(Statement)
 					FOREACH(Ptr<WfSwitchCase>, switchCase, node->caseBranches)
 					{
 						Ptr<ITypeInfo> caseType;
-						if (IsExpressionDependOnExpectedType(switchCase->expression))
+						if (IsExpressionDependOnExpectedType(manager, switchCase->expression))
 						{
 							caseType = GetExpressionType(manager, switchCase->expression, type);
 						}
@@ -350,11 +350,26 @@ ValidateSemantic(Expression)
 
 				void Visit(WfOrderedLambdaExpression* node)override
 				{
-					if (!expectedType)
+					auto scope = manager->expressionScopes[node].Obj();
+					List<Ptr<WfLexicalSymbol>> parameterSymbols;
+					CopyFrom(
+						parameterSymbols,
+						Range<vint>(0, scope->symbols.Count())
+							.Select([scope](vint index)->Ptr<WfLexicalSymbol>{return scope->symbols.GetByIndex(index)[0];})
+							.OrderBy([](Ptr<WfLexicalSymbol> a, Ptr<WfLexicalSymbol> b)
+							{
+								vint aId = wtoi(a->name.Sub(1, a->name.Length() - 1));
+								vint bId = wtoi(b->name.Sub(1, a->name.Length() - 1));
+								return aId - bId;
+							})
+						);
+
+					if (!expectedType && parameterSymbols.Count() > 0)
 					{
 						manager->errors.Add(WfErrors::OrderedLambdaCannotResolveType(node));
 						return;
 					}
+					else
 					{
 						ITypeInfo* type = expectedType.Obj();
 						if (type->GetDecorator() != ITypeInfo::SharedPtr) goto ORDERED_FAILED;
@@ -366,19 +381,6 @@ ValidateSemantic(Expression)
 							if (functionType->GetTypeDescriptor() != description::GetTypeDescriptor<IValueFunctionProxy>()) goto ORDERED_FAILED;
 						}
 
-						auto scope = manager->expressionScopes[node].Obj();
-						List<Ptr<WfLexicalSymbol>> parameterSymbols;
-						CopyFrom(
-							parameterSymbols,
-							Range<vint>(0, scope->symbols.Count())
-								.Select([scope](vint index)->Ptr<WfLexicalSymbol>{return scope->symbols.GetByIndex(index)[0];})
-								.OrderBy([](Ptr<WfLexicalSymbol> a, Ptr<WfLexicalSymbol> b)
-								{
-									vint aId = wtoi(a->name.Sub(1, a->name.Length() - 1));
-									vint bId = wtoi(b->name.Sub(1, a->name.Length() - 1));
-									return aId - bId;
-								})
-							);
 						if (type->GetGenericArgumentCount() != parameterSymbols.Count() + 1)
 						{
 							goto ORDERED_FAILED;
@@ -909,8 +911,8 @@ ValidateSemantic(Expression)
 					}
 					else
 					{
-						bool resolveFirst = !IsExpressionDependOnExpectedType(node->trueBranch);
-						bool resolveSecond = !IsExpressionDependOnExpectedType(node->falseBranch);
+						bool resolveFirst = !IsExpressionDependOnExpectedType(manager, node->trueBranch);
+						bool resolveSecond = !IsExpressionDependOnExpectedType(manager, node->falseBranch);
 
 						if (resolveFirst == resolveSecond)
 						{
@@ -1306,7 +1308,7 @@ ValidateSemantic(Expression)
 					List<Ptr<ITypeInfo>> types;
 					FOREACH(Ptr<WfExpression>, argument, arguments)
 					{
-						if (IsExpressionDependOnExpectedType(argument))
+						if (IsExpressionDependOnExpectedType(manager, argument))
 						{
 							resolvables.Add(false);
 							types.Add(0);
