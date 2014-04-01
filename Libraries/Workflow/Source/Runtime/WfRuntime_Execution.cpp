@@ -991,6 +991,10 @@ WfRuntimeThreadContext
 						}
 						break;
 					case WfRuntimeExecutionStatus::RaisedException:
+						{
+							// next version
+							throw 0;
+						}
 						break;
 					}
 					return WfRuntimeExecutionAction::Nop;

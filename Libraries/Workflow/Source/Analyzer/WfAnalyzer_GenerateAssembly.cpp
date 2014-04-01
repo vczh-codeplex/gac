@@ -464,8 +464,16 @@ GenerateInstructions(Statement)
 
 				void Visit(WfRaiseExceptionStatement* node)override
 				{
+					if (node->expression)
+					{
+						GenerateExpressionInstructions(context, node->expression);
+					}
+					else
+					{
+						INSTRUCTION(Ins::LoadException());
+					}
 					InlineScopeExitCode(WfCodegenScopeType::TryCatch, false);
-					// next version
+					INSTRUCTION(Ins::RaiseException());
 					throw 0;
 				}
 
@@ -749,8 +757,51 @@ GenerateInstructions(Statement)
 
 				void Visit(WfTryStatement* node)override
 				{
-					// next version
-					throw 0;
+					auto catchContext = context.functionContext->PushScopeContext(WfCodegenScopeType::TryCatch);
+					catchContext->exitStatement = node->finallyStatement;
+					List<vint> catchInstructions, finallyInstructions;
+
+					catchInstructions.Add(INSTRUCTION(Ins::InstallTry(-1)));
+					GenerateStatementInstructions(context, node->protectedStatement);
+					catchInstructions.Add(INSTRUCTION(Ins::UninstallTry(-1)));
+					finallyInstructions.Add(INSTRUCTION(Ins::Jump(-1)));
+					
+					vint catchLabelIndex = context.assembly->instructions.Count();
+					FOREACH(vint, index, catchInstructions)
+					{
+						context.assembly->instructions[index].indexParameter = catchLabelIndex;
+					}
+					INSTRUCTION(Ins::UninstallTry(catchLabelIndex));
+					if (node->catchStatement)
+					{
+						auto scope = context.manager->statementScopes[node].Obj();
+						auto symbol = scope->symbols[node->name.value][0].Obj();
+						auto function = context.functionContext->function;
+						vint index = function->argumentNames.Count() + function->localVariableNames.Add(L"<catch>" + node->name.value);
+						context.functionContext->localVariables.Add(symbol, index);
+
+						INSTRUCTION(Ins::LoadException());
+						INSTRUCTION(Ins::StoreLocalVar(index));
+						GenerateStatementInstructions(context, node->catchStatement);
+						finallyInstructions.Add(INSTRUCTION(Ins::Jump(-1)));
+					}
+					else
+					{
+						INSTRUCTION(Ins::LoadException());
+						ApplyCurrentScopeExitCode();
+						INSTRUCTION(Ins::RaiseException());
+					}
+					
+					vint finallyLabelIndex = context.assembly->instructions.Count();
+					FOREACH(vint, index, finallyInstructions)
+					{
+						context.assembly->instructions[index].indexParameter = finallyLabelIndex;
+					}
+					if (node->finallyStatement)
+					{
+						GenerateStatementInstructions(context, node->finallyStatement);
+					}
+					context.functionContext->PopScopeContext();
 				}
 
 				void Visit(WfBlockStatement* node)override
