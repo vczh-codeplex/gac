@@ -1,4 +1,5 @@
 #include "WfRuntime.h"
+#include <math.h>
 
 namespace vl
 {
@@ -71,6 +72,19 @@ WfRuntimeThreadContext (Operators)
 			BINARY_OPERATOR(OpOr, |)
 			BINARY_OPERATOR(OpOr_Bool, ||)
 			BINARY_OPERATOR(OpXor, ^)
+
+			template<typename T>
+			WfRuntimeExecutionAction OPERATOR_OpExp(WfRuntimeThreadContext& context)
+			{
+				Value first, second;
+				CONTEXT_ACTION(PopValue(second), L"failed to pop a value from the stack.");
+				CONTEXT_ACTION(PopValue(first), L"failed to pop a value from the stack.");
+				T firstValue = UnboxValue<T>(first);
+				T secondValue = UnboxValue<T>(second);
+				T value = exp(secondValue * log(firstValue));
+				context.PushValue(BoxValue(value));
+				return WfRuntimeExecutionAction::ExecuteInstruction;
+			}
 			
 			template<typename T>
 			WfRuntimeExecutionAction OPERATOR_OpCompare(WfRuntimeThreadContext& context)
@@ -828,7 +842,10 @@ WfRuntimeThreadContext
 									return WfRuntimeExecutionAction::ExecuteInstruction;
 								}
 							case WfInsCode::OpExp:
-								// next version
+								BEGIN_TYPE
+									EXECUTE(OpExp, F4)
+									EXECUTE(OpExp, F8)
+								END_TYPE
 								throw 0;
 							case WfInsCode::OpAdd:
 								BEGIN_TYPE
