@@ -1155,6 +1155,7 @@ GenerateInstructions(Expression)
 					else if (node->op == WfBinaryOperator::FailedThen)
 					{
 						// next version: FailedThen
+						// UninstallTry pop unnecessary values according to InstallTry's record
 						throw 0;
 					}
 					else
