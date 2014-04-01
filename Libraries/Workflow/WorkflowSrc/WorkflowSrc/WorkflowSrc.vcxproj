@@ -478,6 +478,7 @@
     <Text Include="..\TestFiles\Samples\Codegen\Delete.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\ElementInSet.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\Event.txt" />
+    <Text Include="..\TestFiles\Samples\Codegen\FailedThen.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\ForEach.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\GlobalVariable.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\HelloWorld.txt" />

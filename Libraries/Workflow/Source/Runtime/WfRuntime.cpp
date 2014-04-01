@@ -284,15 +284,27 @@ namespace vl
 				WfRuntimeTrapFrame frame;
 				frame.stackFrameIndex = stackFrames.Count() - 1;
 				frame.instructionIndex = instructionIndex;
+				frame.stackPatternCount = stack.Count();
 				trapFrames.Add(frame);
 				return WfRuntimeThreadContextError::Success;
 			}
 
-			WfRuntimeThreadContextError WfRuntimeThreadContext::PopTrapFrame()
+			WfRuntimeThreadContextError WfRuntimeThreadContext::PopTrapFrame(vint saveStackPatternCount)
 			{
 				if (trapFrames.Count() == 0) return WfRuntimeThreadContextError::EmptyTrapFrame;
 				WfRuntimeTrapFrame& frame = trapFrames[trapFrames.Count() - 1];
 				if (frame.stackFrameIndex != stackFrames.Count() - 1) return WfRuntimeThreadContextError::TrapFrameCorrupted;
+
+				vint stackPopCount = stack.Count() - frame.stackPatternCount - saveStackPatternCount;
+				if (stackPopCount < 0)
+				{
+					return WfRuntimeThreadContextError::StackCorrupted;
+				}
+				else if (stackPopCount>0)
+				{
+					stack.RemoveRange(stack.Count() - stackPopCount, stackPopCount);
+				}
+
 				trapFrames.RemoveAt(trapFrames.Count() - 1);
 				return WfRuntimeThreadContextError::Success;
 			}
