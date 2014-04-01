@@ -464,6 +464,15 @@
     <ClCompile Include="..\..\Source\Runtime\WfRuntime_Execution.cpp">
       <Filter>Workflow\Runtime</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Analyzer\WfAnalyzer_GenerateDeclaration.cpp">
+      <Filter>Workflow\Analyzer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Analyzer\WfAnalyzer_GenerateStatement.cpp">
+      <Filter>Workflow\Analyzer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Analyzer\WfAnalyzer_GenerateExpression.cpp">
+      <Filter>Workflow\Analyzer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Spec.txt" />
