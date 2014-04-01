@@ -484,8 +484,10 @@ WfRuntimeThreadContext
 									return WfRuntimeExecutionAction::ExecuteInstruction;
 								}
 							case WfInsCode::LoadException:
-								// next version
-								throw 0;
+								{
+									PushValue(exceptionValue);
+									return WfRuntimeExecutionAction::ExecuteInstruction;
+								}
 							case WfInsCode::LoadLocalVar:
 								{
 									Value operand;

@@ -474,7 +474,6 @@ GenerateInstructions(Statement)
 					}
 					InlineScopeExitCode(WfCodegenScopeType::TryCatch, true);
 					INSTRUCTION(Ins::RaiseException());
-					throw 0;
 				}
 
 				void Visit(WfIfStatement* node)override
