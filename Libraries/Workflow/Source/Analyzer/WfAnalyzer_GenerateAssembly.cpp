@@ -174,7 +174,6 @@ GenerateInstructions(Declaration)
 				if (expressionBody)
 				{
 					GenerateExpressionInstructions(context, expressionBody);
-					// next version: inline try-finally
 					INSTRUCTION(Ins::Return());
 				}
 				if (returnType->GetDecorator() == ITypeInfo::TypeDescriptor && returnType->GetTypeDescriptor()->GetValueSerializer())
@@ -388,6 +387,8 @@ GenerateInstructions(Closure)
 GenerateInstructions(Statement)
 ***********************************************************************/
 
+#define EXIT_CODE(X) do{context.functionContext->GetCurrentScopeContext()->exitInstructions.Add(X);}while(0)
+
 			class GenerateStatementInstructionsVisitor : public Object, public WfStatement::IVisitor
 			{
 			public:
@@ -398,21 +399,52 @@ GenerateInstructions(Statement)
 				{
 				}
 
+				void ApplyExitCode(Ptr<WfCodegenScopeContext> scopeContext)
+				{
+					if (scopeContext->exitInstructions.Count() > 0)
+					{
+						CopyFrom(context.assembly->instructions, scopeContext->exitInstructions, true);
+					}
+					if (scopeContext->exitStatement)
+					{
+						GenerateStatementInstructions(context, scopeContext->exitStatement);
+					}
+				}
+
+				void ApplyCurrentScopeExitCode()
+				{
+					auto scopeContext = context.functionContext->GetCurrentScopeContext();
+					ApplyExitCode(scopeContext);
+				}
+
+				void InlineScopeExitCode(WfCodegenScopeType untilScopeType, bool exclusive)
+				{
+					vint index = context.functionContext->scopeContextStack.Count() - 1;
+					while (index >= 0)
+					{
+						auto scopeContext = context.functionContext->scopeContextStack[index];
+						if (exclusive && scopeContext->type == untilScopeType) break;
+						ApplyExitCode(scopeContext);
+						if (!exclusive && scopeContext->type == untilScopeType) break;
+						index--;
+					}
+				}
+
 				void Visit(WfBreakStatement* node)override
 				{
-					// next version: inline try-finally
-					context.functionContext->GetCurrentLoopContext()->breakInstructions.Add(INSTRUCTION(Ins::Jump(-1)));
+					InlineScopeExitCode(WfCodegenScopeType::Loop, true);
+					context.functionContext->GetCurrentScopeContext()->breakInstructions.Add(INSTRUCTION(Ins::Jump(-1)));
 				}
 
 				void Visit(WfContinueStatement* node)override
 				{
-					// next version: inline try-finally
-					context.functionContext->GetCurrentLoopContext()->continueInstructions.Add(INSTRUCTION(Ins::Jump(-1)));
+					InlineScopeExitCode(WfCodegenScopeType::Loop, false);
+					context.functionContext->GetCurrentScopeContext()->continueInstructions.Add(INSTRUCTION(Ins::Jump(-1)));
 				}
 
 				void Visit(WfReturnStatement* node)override
 				{
-					// next version: inline try-finally
+					InlineScopeExitCode(WfCodegenScopeType::Function, true);
 					if (node->expression)
 					{
 						GenerateExpressionInstructions(context, node->expression);
@@ -432,7 +464,7 @@ GenerateInstructions(Statement)
 
 				void Visit(WfRaiseExceptionStatement* node)override
 				{
-					// next version: inline exit code
+					InlineScopeExitCode(WfCodegenScopeType::TryCatch, false);
 					// next version
 					throw 0;
 				}
@@ -484,6 +516,11 @@ GenerateInstructions(Statement)
 					vint variableIndex = function->argumentNames.Count() + function->localVariableNames.Add(L"<switch>");
 					GenerateExpressionInstructions(context, node->expression);
 					INSTRUCTION(Ins::StoreLocalVar(variableIndex));
+					auto switchContext = context.functionContext->PushScopeContext(WfCodegenScopeType::Switch);
+					{
+						EXIT_CODE(Ins::LoadValue(Value()));
+						EXIT_CODE(Ins::StoreLocalVar(variableIndex));
+					}
 
 					List<vint> caseInstructions, caseLabelIndices, breakInstructions;
 					auto expressionResult = context.manager->expressionResolvings[node->expression.Obj()];
@@ -535,9 +572,8 @@ GenerateInstructions(Statement)
 					{
 						context.assembly->instructions[index].indexParameter = breakLabelIndex;
 					}
-					// next version: mark exit code
-					INSTRUCTION(Ins::LoadValue(Value()));
-					INSTRUCTION(Ins::StoreLocalVar(variableIndex));
+					ApplyCurrentScopeExitCode();
+					context.functionContext->PopScopeContext();
 				}
 
 				void Visit(WfWhileStatement* node)override
@@ -545,8 +581,7 @@ GenerateInstructions(Statement)
 					vint continueLabelIndex = -1;
 					vint breakLabelIndex = -1;
 					vint loopLabelIndex = -1;
-					auto loopContext = MakePtr<WfCodegenLoopContext>();
-					context.functionContext->loopContextStack.Add(loopContext);
+					auto loopContext = context.functionContext->PushScopeContext(WfCodegenScopeType::Loop);
 
 					loopLabelIndex = context.assembly->instructions.Count();
 					continueLabelIndex = context.assembly->instructions.Count();
@@ -565,7 +600,7 @@ GenerateInstructions(Statement)
 					{
 						context.assembly->instructions[index].indexParameter = breakLabelIndex;
 					}
-					context.functionContext->loopContextStack.RemoveAt(context.functionContext->loopContextStack.Count() - 1);
+					context.functionContext->PopScopeContext();
 				}
 
 				void Visit(WfForEachStatement* node)override
@@ -573,13 +608,16 @@ GenerateInstructions(Statement)
 					vint continueLabelIndex = -1;
 					vint breakLabelIndex = -1;
 					vint loopLabelIndex = -1;
-					auto loopContext = MakePtr<WfCodegenLoopContext>();
-					context.functionContext->loopContextStack.Add(loopContext);
+					auto loopContext = context.functionContext->PushScopeContext(WfCodegenScopeType::Loop);
 
 					auto scope = context.manager->statementScopes[node].Obj();
 					auto symbol = scope->symbols[node->name.value][0];
 					auto function = context.functionContext->function;
 					vint elementIndex = function->argumentNames.Count() + function->localVariableNames.Add(L"<for>" + node->name.value);
+					{
+						EXIT_CODE(Ins::LoadValue(Value()));
+						EXIT_CODE(Ins::StoreLocalVar(elementIndex));
+					}
 					context.functionContext->localVariables.Add(symbol.Obj(), elementIndex);
 
 					if (auto range = node->collection.Cast<WfRangeExpression>())
@@ -587,6 +625,12 @@ GenerateInstructions(Statement)
 						auto typeArgument = GetInstructionTypeArgument(symbol->typeInfo);
 						vint beginIndex = function->argumentNames.Count() + function->localVariableNames.Add(L"<for-begin>" + node->name.value);
 						vint endIndex = function->argumentNames.Count() + function->localVariableNames.Add(L"<for-end>" + node->name.value);
+						{
+							EXIT_CODE(Ins::LoadValue(Value()));
+							EXIT_CODE(Ins::StoreLocalVar(beginIndex));
+							EXIT_CODE(Ins::LoadValue(Value()));
+							EXIT_CODE(Ins::StoreLocalVar(endIndex));
+						}
 						GenerateExpressionInstructions(context, range->begin, symbol->typeInfo);
 						if (range->beginBoundary == WfRangeBoundary::Exclusive)
 						{
@@ -651,16 +695,17 @@ GenerateInstructions(Statement)
 						INSTRUCTION(Ins::Jump(loopLabelIndex));
 
 						breakLabelIndex = context.assembly->instructions.Count();
-						// next version: mark exit code
-						INSTRUCTION(Ins::LoadValue(Value()));
-						INSTRUCTION(Ins::StoreLocalVar(beginIndex));
-						INSTRUCTION(Ins::LoadValue(Value()));
-						INSTRUCTION(Ins::StoreLocalVar(endIndex));
 					}
 					else
 					{
 						vint enumerableIndex = function->argumentNames.Count() + function->localVariableNames.Add(L"<for-enumerable>" + node->name.value);
 						vint enumeratorIndex = function->argumentNames.Count() + function->localVariableNames.Add(L"<for-enumerator>" + node->name.value);
+						{
+							EXIT_CODE(Ins::LoadValue(Value()));
+							EXIT_CODE(Ins::StoreLocalVar(enumerableIndex));
+							EXIT_CODE(Ins::LoadValue(Value()));
+							EXIT_CODE(Ins::StoreLocalVar(enumeratorIndex));
+						}
 						auto methodCreateEnumerator = description::GetTypeDescriptor<IValueEnumerable>()->GetMethodGroupByName(L"CreateEnumerator", true)->GetMethod(0);
 						auto methodNext = description::GetTypeDescriptor<IValueEnumerator>()->GetMethodGroupByName(L"Next", true)->GetMethod(0);
 						auto methodGetCurrent = description::GetTypeDescriptor<IValueEnumerator>()->GetMethodGroupByName(L"GetCurrent", true)->GetMethod(0);
@@ -688,15 +733,8 @@ GenerateInstructions(Statement)
 						INSTRUCTION(Ins::Jump(loopLabelIndex));
 
 						breakLabelIndex = context.assembly->instructions.Count();
-						// next version: mark exit code
-						INSTRUCTION(Ins::LoadValue(Value()));
-						INSTRUCTION(Ins::StoreLocalVar(enumerableIndex));
-						INSTRUCTION(Ins::LoadValue(Value()));
-						INSTRUCTION(Ins::StoreLocalVar(enumeratorIndex));
 					}
-					// next version: mark exit code
-					INSTRUCTION(Ins::LoadValue(Value()));
-					INSTRUCTION(Ins::StoreLocalVar(elementIndex));
+					ApplyCurrentScopeExitCode();
 
 					FOREACH(vint, index, loopContext->continueInstructions)
 					{
@@ -706,7 +744,7 @@ GenerateInstructions(Statement)
 					{
 						context.assembly->instructions[index].indexParameter = breakLabelIndex;
 					}
-					context.functionContext->loopContextStack.RemoveAt(context.functionContext->loopContextStack.Count() - 1);
+					context.functionContext->PopScopeContext();
 				}
 
 				void Visit(WfTryStatement* node)override
@@ -742,6 +780,8 @@ GenerateInstructions(Statement)
 					INSTRUCTION(Ins::StoreLocalVar(index));
 				}
 			};
+
+#undef EXIT_CODE
 
 			void GenerateStatementInstructions(WfCodegenContext& context, Ptr<WfStatement> statement)
 			{

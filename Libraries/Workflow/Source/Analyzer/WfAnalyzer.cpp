@@ -701,9 +701,27 @@ WfLexicalScopeManager
 WfCodegenFunctionContext
 ***********************************************************************/
 
-			Ptr<WfCodegenLoopContext> WfCodegenFunctionContext::GetCurrentLoopContext()
+			WfCodegenFunctionContext::WfCodegenFunctionContext()
 			{
-				return loopContextStack[loopContextStack.Count() - 1];
+				scopeContextStack.Add(new WfCodegenScopeContext);
+			}
+
+			Ptr<WfCodegenScopeContext> WfCodegenFunctionContext::GetCurrentScopeContext()
+			{
+				return scopeContextStack[scopeContextStack.Count() - 1];
+			}
+
+			Ptr<WfCodegenScopeContext> WfCodegenFunctionContext::PushScopeContext(WfCodegenScopeType type)
+			{
+				auto context = MakePtr<WfCodegenScopeContext>();
+				context->type = type;
+				scopeContextStack.Add(context);
+				return context;
+			}
+
+			void WfCodegenFunctionContext::PopScopeContext()
+			{
+				scopeContextStack.RemoveAt(scopeContextStack.Count() - 1);
 			}
 
 /***********************************************************************

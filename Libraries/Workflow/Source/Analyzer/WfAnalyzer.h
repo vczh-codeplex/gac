@@ -265,27 +265,45 @@ Code Generation
 				WfExpression*						staticMethodReferenceExpression = 0;
 			};
 
-			class WfCodegenLoopContext : public Object
+			enum class WfCodegenScopeType
 			{
+				Function,	// contains the whole function
+				Switch,		// contains all switchs
+				Loop,		// contains all loops
+				TryCatch,	// contains try and catch, not finally
+			};
+
+			class WfCodegenScopeContext : public Object
+			{
+				typedef collections::List<vint>										InstructionIndexList;
+				typedef collections::List<runtime::WfInstruction>					InstructionList;
 			public:
-				collections::List<vint>				continueInstructions;
-				collections::List<vint>				breakInstructions;
+				WfCodegenScopeType					type = WfCodegenScopeType::Function;
+				InstructionIndexList				continueInstructions;
+				InstructionIndexList				breakInstructions;
+				
+				InstructionList						exitInstructions;
+				Ptr<WfStatement>					exitStatement;
 			};
 
 			class WfCodegenFunctionContext : public Object
 			{
 				typedef collections::Dictionary<WfLexicalSymbol*, vint>				VariableIndexMap;
 				typedef collections::Dictionary<vint, WfCodegenLambdaContext>		ClosureIndexMap;
-				typedef collections::List<Ptr<WfCodegenLoopContext>>				LoopContextList;
+				typedef collections::List<Ptr<WfCodegenScopeContext>>				ScopeContextList;
 			public:
 				Ptr<runtime::WfAssemblyFunction>	function;
 				VariableIndexMap					capturedVariables;
 				VariableIndexMap					arguments;
 				VariableIndexMap					localVariables;
 				ClosureIndexMap						closuresToCodegen;
-				LoopContextList						loopContextStack;
+				ScopeContextList					scopeContextStack;
 
-				Ptr<WfCodegenLoopContext>			GetCurrentLoopContext();
+				WfCodegenFunctionContext();
+
+				Ptr<WfCodegenScopeContext>			GetCurrentScopeContext();
+				Ptr<WfCodegenScopeContext>			PushScopeContext(WfCodegenScopeType type);
+				void								PopScopeContext();
 			};
 
 			class WfCodegenContext : public Object
