@@ -801,7 +801,7 @@ WfRuntimeThreadContext
 									Value first, second;
 									CONTEXT_ACTION(PopValue(second), L"failed to pop a value from the stack.");
 									CONTEXT_ACTION(PopValue(first), L"failed to pop a value from the stack.");
-									bool result = first.GetRawPtr() == second.GetRawPtr();
+									bool result = first.GetValueType() != Value::Text && second.GetValueType() != Value::Text && first.GetRawPtr() == second.GetRawPtr();
 									PushValue(BoxValue(result));
 									return WfRuntimeExecutionAction::ExecuteInstruction;
 								}

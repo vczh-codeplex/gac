@@ -470,7 +470,21 @@ GenerateInstructions(Statement)
 					}
 					else
 					{
-						INSTRUCTION(Ins::LoadException());
+						auto scope = context.manager->statementScopes[node];
+						while (scope)
+						{
+							if (auto tryCatch = scope->ownerStatement.Cast<WfTryStatement>())
+							{
+								if (tryCatch->name.value != L"")
+								{
+									auto symbol = scope->symbols[tryCatch->name.value][0].Obj();
+									vint index = context.functionContext->localVariables[symbol];
+									INSTRUCTION(Ins::LoadLocalVar(index));
+									break;
+								}
+							}
+							scope = scope->parentScope;
+						}
 					}
 					InlineScopeExitCode(WfCodegenScopeType::TryCatch, true);
 					INSTRUCTION(Ins::RaiseException());
@@ -816,7 +830,7 @@ GenerateInstructions(Statement)
 						INSTRUCTION(Ins::LoadLocalVar(variableIndex));
 						INSTRUCTION(Ins::LoadValue(Value()));
 						INSTRUCTION(Ins::CompareReference());
-						vint finishInstruction = INSTRUCTION(Ins::Jump(-1));
+						vint finishInstruction = INSTRUCTION(Ins::JumpIf(-1));
 						INSTRUCTION(Ins::LoadLocalVar(variableIndex));
 						INSTRUCTION(Ins::RaiseException());
 						context.assembly->instructions[finishInstruction].indexParameter = context.assembly->instructions.Count();
