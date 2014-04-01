@@ -70,6 +70,11 @@ TEST_CASE(TestCodegen)
 			context.PushStackFrame(functionIndex, 0);
 			TEST_ASSERT(context.status == WfRuntimeExecutionStatus::Ready);
 
+			if (itemName == L"TryCatch")
+			{
+				int a = 0;
+			}
+
 			while (context.status != WfRuntimeExecutionStatus::Finished)
 			{
 				auto action = context.Execute();
