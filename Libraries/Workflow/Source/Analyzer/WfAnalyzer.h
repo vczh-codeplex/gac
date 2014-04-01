@@ -300,8 +300,9 @@ Code Generation
 				ScopeContextList					scopeContextStack;
 
 				WfCodegenFunctionContext();
-
+				
 				Ptr<WfCodegenScopeContext>			GetCurrentScopeContext();
+				Ptr<WfCodegenScopeContext>			GetCurrentScopeContext(WfCodegenScopeType type);
 				Ptr<WfCodegenScopeContext>			PushScopeContext(WfCodegenScopeType type);
 				void								PopScopeContext();
 			};

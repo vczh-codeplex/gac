@@ -433,13 +433,13 @@ GenerateInstructions(Statement)
 				void Visit(WfBreakStatement* node)override
 				{
 					InlineScopeExitCode(WfCodegenScopeType::Loop, true);
-					context.functionContext->GetCurrentScopeContext()->breakInstructions.Add(INSTRUCTION(Ins::Jump(-1)));
+					context.functionContext->GetCurrentScopeContext(WfCodegenScopeType::Loop)->breakInstructions.Add(INSTRUCTION(Ins::Jump(-1)));
 				}
 
 				void Visit(WfContinueStatement* node)override
 				{
 					InlineScopeExitCode(WfCodegenScopeType::Loop, false);
-					context.functionContext->GetCurrentScopeContext()->continueInstructions.Add(INSTRUCTION(Ins::Jump(-1)));
+					context.functionContext->GetCurrentScopeContext(WfCodegenScopeType::Loop)->continueInstructions.Add(INSTRUCTION(Ins::Jump(-1)));
 				}
 
 				void Visit(WfReturnStatement* node)override
@@ -758,12 +758,12 @@ GenerateInstructions(Statement)
 				void Visit(WfTryStatement* node)override
 				{
 					auto catchContext = context.functionContext->PushScopeContext(WfCodegenScopeType::TryCatch);
+					EXIT_CODE(Ins::UninstallTry());
 					catchContext->exitStatement = node->finallyStatement;
 					List<vint> catchInstructions, finallyInstructions;
 
 					catchInstructions.Add(INSTRUCTION(Ins::InstallTry(-1)));
 					GenerateStatementInstructions(context, node->protectedStatement);
-					catchInstructions.Add(INSTRUCTION(Ins::UninstallTry(-1)));
 					finallyInstructions.Add(INSTRUCTION(Ins::Jump(-1)));
 					
 					vint catchLabelIndex = context.assembly->instructions.Count();
@@ -771,7 +771,7 @@ GenerateInstructions(Statement)
 					{
 						context.assembly->instructions[index].indexParameter = catchLabelIndex;
 					}
-					INSTRUCTION(Ins::UninstallTry(catchLabelIndex));
+					INSTRUCTION(Ins::UninstallTry());
 					if (node->catchStatement)
 					{
 						auto scope = context.manager->statementScopes[node].Obj();

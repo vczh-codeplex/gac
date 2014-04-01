@@ -711,6 +711,19 @@ WfCodegenFunctionContext
 				return scopeContextStack[scopeContextStack.Count() - 1];
 			}
 
+			Ptr<WfCodegenScopeContext> WfCodegenFunctionContext::GetCurrentScopeContext(WfCodegenScopeType type)
+			{
+				for (vint i = scopeContextStack.Count() - 1; i >= 0; i--)
+				{
+					auto context = scopeContextStack[i];
+					if (context->type == type)
+					{
+						return context;
+					}
+				}
+				return 0;
+			}
+
 			Ptr<WfCodegenScopeContext> WfCodegenFunctionContext::PushScopeContext(WfCodegenScopeType type)
 			{
 				auto context = MakePtr<WfCodegenScopeContext>();

@@ -525,7 +525,7 @@ WfRuntimeThreadContext
 								{
 									Value operand;
 									CONTEXT_ACTION(PopValue(operand), L"failed to pop the function result.");
-									CONTEXT_ACTION(PopStackFrame(), L"failed to pop the the stack frame.");
+									CONTEXT_ACTION(PopStackFrame(), L"failed to pop the stack frame.");
 									PushValue(operand);
 									if (stackFrames.Count() == 0)
 									{
@@ -727,11 +727,18 @@ WfRuntimeThreadContext
 									return WfRuntimeExecutionAction::ExecuteInstruction;
 								}
 							case WfInsCode::InstallTry:
-								// next version
-								throw 0;
+								CONTEXT_ACTION(PushTrapFrame(ins.indexParameter), L"failed to push a trap frame");
+								return WfRuntimeExecutionAction::ExecuteInstruction;
 							case WfInsCode::UninstallTry:
-								// next version
-								throw 0;
+								{
+									if (trapFrames.Count() == 0)
+									{
+										INTERNAL_ERROR(L"failed to pop the trap frame.");
+									}
+									auto frame = GetCurrentTrapFrame();
+									CONTEXT_ACTION(PopTrapFrame(), L"failed to pop the trap frame.");
+									return WfRuntimeExecutionAction::ExecuteInstruction;
+								}
 							case WfInsCode::RaiseException:
 								{
 									Value operand;
