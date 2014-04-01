@@ -319,7 +319,7 @@ namespace vl
 				return WfRuntimeThreadContextError::Success;
 			}
 
-			WfRuntimeThreadContextError WfRuntimeThreadContext::RaiseException(const reflection::description::Value& exception, bool fatalError)
+			WfRuntimeThreadContextError WfRuntimeThreadContext::RaiseException(const WString& exception, bool fatalError)
 			{
 				exceptionValue = exception;
 				status = fatalError ? WfRuntimeExecutionStatus::FatalError : WfRuntimeExecutionStatus::RaisedException;

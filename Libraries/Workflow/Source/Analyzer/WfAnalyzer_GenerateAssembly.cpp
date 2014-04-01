@@ -754,8 +754,61 @@ GenerateInstructions(Statement)
 					context.functionContext->PopScopeContext();
 				}
 
+				void VisitTryCatch(WfTryStatement* node)
+				{
+					if (!node->catchStatement)
+					{
+						GenerateStatementInstructions(context, node->protectedStatement);
+					}
+					else
+					{
+						GenerateStatementInstructions(context, node->protectedStatement);
+					}
+				}
+
+				void VisitTryFinally(WfTryStatement* node)
+				{
+					if (!node->finallyStatement)
+					{
+						VisitTryCatch(node);
+					}
+					else
+					{
+						auto catchContext = context.functionContext->PushScopeContext(WfCodegenScopeType::TryCatch);
+						EXIT_CODE(Ins::UninstallTry());
+						catchContext->exitStatement = node->finallyStatement;
+
+						vint variableIndex = context.functionContext->function->localVariableNames.Add(L"<try-finally-exception>");
+						INSTRUCTION(Ins::LoadValue(Value()));
+						INSTRUCTION(Ins::StoreLocalVar(variableIndex));
+						vint trapInstruction = INSTRUCTION(Ins::InstallTry(-1));
+						VisitTryCatch(node);
+						vint untrapInstruction = INSTRUCTION(Ins::Jump(-1));
+
+						context.assembly->instructions[trapInstruction].indexParameter = context.assembly->instructions.Count();
+						INSTRUCTION(Ins::LoadException());
+						INSTRUCTION(Ins::StoreLocalVar(variableIndex));
+
+						context.assembly->instructions[untrapInstruction].indexParameter = context.assembly->instructions.Count();
+						INSTRUCTION(Ins::UninstallTry());
+						GenerateStatementInstructions(context, node->finallyStatement);
+
+						INSTRUCTION(Ins::LoadLocalVar(variableIndex));
+						INSTRUCTION(Ins::LoadValue(Value()));
+						INSTRUCTION(Ins::CompareReference());
+						vint finishInstruction = INSTRUCTION(Ins::Jump(-1));
+						INSTRUCTION(Ins::LoadLocalVar(variableIndex));
+						INSTRUCTION(Ins::RaiseException());
+						context.assembly->instructions[finishInstruction].indexParameter = context.assembly->instructions.Count();
+
+						context.functionContext->PopScopeContext();
+					}
+				}
+
 				void Visit(WfTryStatement* node)override
 				{
+					VisitTryFinally(node);
+					return;
 					auto catchContext = context.functionContext->PushScopeContext(WfCodegenScopeType::TryCatch);
 					EXIT_CODE(Ins::UninstallTry());
 					catchContext->exitStatement = node->finallyStatement;
