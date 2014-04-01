@@ -55,7 +55,7 @@ Instruction
 				AttachEvent,		// IEventInfo*			: Value-this, <function> -> <Listener>			;
 				DetachEvent,		// 						: <Listener> -> bool							;
 				InstallTry,			// label				: () -> ()										;
-				UninstallTry,		// label				: () -> ()										;
+				UninstallTry,		//						: () -> ()										;
 				RaiseException,		// 						: Value -> ()									; (trap)
 				TestElementInSet,	//						: Value-element, Value-set -> bool				;
 				CompareLiteral,		// I48/U48/F48/S		: Value, Value -> <int>							;
@@ -113,7 +113,7 @@ Instruction
 			APPLY_EVENT(AttachEvent)\
 			APPLY(DetachEvent)\
 			APPLY_LABEL(InstallTry)\
-			APPLY_LABEL(UninstallTry)\
+			APPLY(UninstallTry)\
 			APPLY(RaiseException)\
 			APPLY(TestElementInSet)\
 			APPLY_TYPE(CompareLiteral)\
@@ -327,6 +327,7 @@ Runtime
 				WfRuntimeStackFrame&			GetCurrentStackFrame();
 				WfRuntimeThreadContextError		PushStackFrame(vint functionIndex, vint argumentCount, Ptr<WfRuntimeVariableContext> capturedVariables = 0);
 				WfRuntimeThreadContextError		PopStackFrame();
+				WfRuntimeTrapFrame&				GetCurrentTrapFrame();
 				WfRuntimeThreadContextError		PushTrapFrame(vint instructionIndex);
 				WfRuntimeThreadContextError		PopTrapFrame();
 				WfRuntimeThreadContextError		PushValue(const reflection::description::Value& value);
