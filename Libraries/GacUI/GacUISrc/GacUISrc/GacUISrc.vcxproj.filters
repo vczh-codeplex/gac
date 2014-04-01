@@ -582,6 +582,15 @@
     <ClCompile Include="..\..\..\Workflow\Source\Runtime\WfRuntime_Execution.cpp">
       <Filter>Workflow\Runtime</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\Workflow\Source\Analyzer\WfAnalyzer_GenerateDeclaration.cpp">
+      <Filter>Workflow\Analyzer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Workflow\Source\Analyzer\WfAnalyzer_GenerateExpression.cpp">
+      <Filter>Workflow\Analyzer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Workflow\Source\Analyzer\WfAnalyzer_GenerateStatement.cpp">
+      <Filter>Workflow\Analyzer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Common\Source\Basic.h">

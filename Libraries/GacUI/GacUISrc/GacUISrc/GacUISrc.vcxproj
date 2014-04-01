@@ -263,6 +263,9 @@
     <ClCompile Include="..\..\..\Workflow\Source\Analyzer\WfAnalyzer_BuildScope.cpp" />
     <ClCompile Include="..\..\..\Workflow\Source\Analyzer\WfAnalyzer_Errors.cpp" />
     <ClCompile Include="..\..\..\Workflow\Source\Analyzer\WfAnalyzer_GenerateAssembly.cpp" />
+    <ClCompile Include="..\..\..\Workflow\Source\Analyzer\WfAnalyzer_GenerateDeclaration.cpp" />
+    <ClCompile Include="..\..\..\Workflow\Source\Analyzer\WfAnalyzer_GenerateExpression.cpp" />
+    <ClCompile Include="..\..\..\Workflow\Source\Analyzer\WfAnalyzer_GenerateStatement.cpp" />
     <ClCompile Include="..\..\..\Workflow\Source\Analyzer\WfAnalyzer_Misc.cpp" />
     <ClCompile Include="..\..\..\Workflow\Source\Analyzer\WfAnalyzer_SearchOrderedName.cpp" />
     <ClCompile Include="..\..\..\Workflow\Source\Analyzer\WfAnalyzer_TypeInfo.cpp" />
