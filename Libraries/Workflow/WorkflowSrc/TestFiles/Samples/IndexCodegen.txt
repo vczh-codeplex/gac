@@ -32,3 +32,4 @@ ForEach=[1, 2, 3, 4, 5][5, 4, 3, 2, 1]
 AnonymousLambda=2, 3, 3, 4
 NamedLambda=1, 1, 2, 3, 5
 OrderedLambda=2, 3, 3, 4
+TryFinally=3115

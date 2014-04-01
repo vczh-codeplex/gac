@@ -106,8 +106,11 @@ ValidateSemantic(Statement)
 
 				void Visit(WfRaiseExceptionStatement* node)override
 				{
-					Ptr<ITypeInfo> stringType = TypeInfoRetriver<WString>::CreateTypeInfo();
-					GetExpressionType(manager, node->expression, stringType);
+					if (node->expression)
+					{
+						Ptr<ITypeInfo> stringType = TypeInfoRetriver<WString>::CreateTypeInfo();
+						GetExpressionType(manager, node->expression, stringType);
+					}
 				}
 
 				void Visit(WfIfStatement* node)override
