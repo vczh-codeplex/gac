@@ -224,7 +224,7 @@ BuildScopeForStatement
 						symbol->creatorStatement = node;
 						{
 							Ptr<WfPredefinedType> type = new WfPredefinedType;
-							type->name = WfPredefinedTypeName::Object;
+							type->name = WfPredefinedTypeName::String;
 							symbol->type = type;
 						}
 						resultScope->symbols.Add(symbol->name, symbol);

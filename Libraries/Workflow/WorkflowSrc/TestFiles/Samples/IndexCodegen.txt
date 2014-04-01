@@ -33,3 +33,4 @@ AnonymousLambda=2, 3, 3, 4
 NamedLambda=1, 1, 2, 3, 5
 OrderedLambda=2, 3, 3, 4
 TryFinally=3115
+TryCatch=[test1::catch][test2::catch][test2::finally][test3::catch1][test3::finally1][test3::catch2][test3::finally2]
