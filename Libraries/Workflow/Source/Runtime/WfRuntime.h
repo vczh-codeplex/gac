@@ -315,7 +315,7 @@ Runtime
 				typedef collections::List<WfRuntimeTrapFrame>					TrapFrameList;
 
 				Ptr<WfRuntimeGlobalContext>		globalContext;
-				reflection::description::Value	exceptionValue;
+				WString							exceptionValue;
 				VariableList					stack;
 				StackFrameList					stackFrames;
 				TrapFrameList					trapFrames;
@@ -332,7 +332,7 @@ Runtime
 				WfRuntimeThreadContextError		PopTrapFrame();
 				WfRuntimeThreadContextError		PushValue(const reflection::description::Value& value);
 				WfRuntimeThreadContextError		PopValue(reflection::description::Value& value);
-				WfRuntimeThreadContextError		RaiseException(const reflection::description::Value& exception, bool fatalError);
+				WfRuntimeThreadContextError		RaiseException(const WString& exception, bool fatalError);
 
 				WfRuntimeThreadContextError		LoadStackValue(vint stackItemIndex, reflection::description::Value& value);
 				WfRuntimeThreadContextError		LoadGlobalVariable(vint variableIndex, reflection::description::Value& value);

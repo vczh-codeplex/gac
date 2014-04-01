@@ -17,7 +17,7 @@ WfRuntimeThreadContext (Operators)
 
 #define INTERNAL_ERROR(MESSAGE)\
 				do{\
-					context.RaiseException(BoxValue<WString>(L"Internal error: " MESSAGE), true);\
+					context.RaiseException(WString(L"Internal error: " MESSAGE), true);\
 					return WfRuntimeExecutionAction::Nop; \
 				} while (0)\
 
@@ -377,7 +377,7 @@ WfRuntimeThreadContext (Lambda)
 						}
 						else
 						{
-							message = L"Exception from external function: " + context.exceptionValue.GetText();
+							message = L"Exception from external function: " + context.exceptionValue;
 						}
 					}
 					else
@@ -413,7 +413,7 @@ WfRuntimeThreadContext
 			{
 #define INTERNAL_ERROR(MESSAGE)\
 				do{\
-					RaiseException(BoxValue<WString>(L"Internal error: " MESSAGE), true);\
+					RaiseException(WString(L"Internal error: " MESSAGE), true);\
 					return WfRuntimeExecutionAction::Nop; \
 				} while (0)\
 
@@ -485,7 +485,7 @@ WfRuntimeThreadContext
 								}
 							case WfInsCode::LoadException:
 								{
-									PushValue(exceptionValue);
+									PushValue(BoxValue(exceptionValue));
 									return WfRuntimeExecutionAction::ExecuteInstruction;
 								}
 							case WfInsCode::LoadLocalVar:
@@ -759,7 +759,7 @@ WfRuntimeThreadContext
 								{
 									Value operand;
 									CONTEXT_ACTION(PopValue(operand), L"failed to pop a value from the stack.");
-									RaiseException(operand, false);
+									RaiseException(operand.GetText(), false);
 									return WfRuntimeExecutionAction::ExecuteInstruction;
 								}
 							case WfInsCode::TestElementInSet:
@@ -1039,12 +1039,12 @@ WfRuntimeThreadContext
 				}
 				catch (const Exception& ex)
 				{
-					RaiseException(BoxValue<WString>(ex.Message()), false);
+					RaiseException(ex.Message(), false);
 					return WfRuntimeExecutionAction::ExecuteInstruction;
 				}
 				catch (const Error& ex)
 				{
-					RaiseException(BoxValue<WString>(ex.Description()), false);
+					RaiseException(ex.Description(), false);
 					return WfRuntimeExecutionAction::ExecuteInstruction;
 				}
 
