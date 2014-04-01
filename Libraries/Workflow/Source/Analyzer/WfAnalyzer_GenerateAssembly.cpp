@@ -763,6 +763,7 @@ GenerateInstructions(Statement)
 
 					catchInstructions.Add(INSTRUCTION(Ins::InstallTry(-1)));
 					GenerateStatementInstructions(context, node->protectedStatement);
+					INSTRUCTION(Ins::UninstallTry());
 					finallyInstructions.Add(INSTRUCTION(Ins::Jump(-1)));
 					
 					vint catchLabelIndex = context.assembly->instructions.Count();
@@ -770,7 +771,6 @@ GenerateInstructions(Statement)
 					{
 						context.assembly->instructions[index].indexParameter = catchLabelIndex;
 					}
-					INSTRUCTION(Ins::UninstallTry());
 					if (node->catchStatement)
 					{
 						auto scope = context.manager->statementScopes[node].Obj();

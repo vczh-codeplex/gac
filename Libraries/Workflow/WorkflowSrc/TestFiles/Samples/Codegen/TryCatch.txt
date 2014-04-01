@@ -64,10 +64,38 @@ func test3():void
 	}
 }
 
+func test4():void
+{
+	try
+	{
+		try
+		{
+		}
+		catch(ex)
+		{
+			log = log & "[" & ex & "1]";
+			raise;
+		}
+		finally
+		{
+			log = log & "[test4::finally1]";
+		}
+	}
+	catch(ex)
+	{
+		log = log & "[" & ex & "2]";
+	}
+	finally
+	{
+		log = log & "[test4::finally2]";
+	}
+}
+
 func main():string
 {
 	test1();
 	test2();
 	test3();
+	test4();
 	return log;
 }
