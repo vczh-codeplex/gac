@@ -432,19 +432,19 @@ GenerateInstructions(Statement)
 
 				void Visit(WfBreakStatement* node)override
 				{
-					InlineScopeExitCode(WfCodegenScopeType::Loop, true);
+					InlineScopeExitCode(WfCodegenScopeType::Loop, false);
 					context.functionContext->GetCurrentScopeContext(WfCodegenScopeType::Loop)->breakInstructions.Add(INSTRUCTION(Ins::Jump(-1)));
 				}
 
 				void Visit(WfContinueStatement* node)override
 				{
-					InlineScopeExitCode(WfCodegenScopeType::Loop, false);
+					InlineScopeExitCode(WfCodegenScopeType::Loop, true);
 					context.functionContext->GetCurrentScopeContext(WfCodegenScopeType::Loop)->continueInstructions.Add(INSTRUCTION(Ins::Jump(-1)));
 				}
 
 				void Visit(WfReturnStatement* node)override
 				{
-					InlineScopeExitCode(WfCodegenScopeType::Function, true);
+					InlineScopeExitCode(WfCodegenScopeType::Function, false);
 					if (node->expression)
 					{
 						GenerateExpressionInstructions(context, node->expression);
@@ -472,7 +472,7 @@ GenerateInstructions(Statement)
 					{
 						INSTRUCTION(Ins::LoadException());
 					}
-					InlineScopeExitCode(WfCodegenScopeType::TryCatch, false);
+					InlineScopeExitCode(WfCodegenScopeType::TryCatch, true);
 					INSTRUCTION(Ins::RaiseException());
 					throw 0;
 				}
