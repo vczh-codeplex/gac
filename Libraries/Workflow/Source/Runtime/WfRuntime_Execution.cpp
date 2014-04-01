@@ -594,8 +594,12 @@ WfRuntimeThreadContext
 									return WfRuntimeExecutionAction::ExecuteInstruction;
 								}
 							case WfInsCode::DeleteRawPtr:
-								// next version
-								throw 0;
+								{
+									Value operand;
+									CONTEXT_ACTION(PopValue(operand), L"failed to pop a value from the stack.");
+									operand.DeleteRawPtr();
+									return WfRuntimeExecutionAction::ExecuteInstruction;
+								}
 							case WfInsCode::ConvertToType:
 								{
 									Value result, converted;

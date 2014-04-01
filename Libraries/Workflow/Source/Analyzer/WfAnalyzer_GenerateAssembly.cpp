@@ -458,8 +458,8 @@ GenerateInstructions(Statement)
 
 				void Visit(WfDeleteStatement* node)override
 				{
-					// next version
-					throw 0;
+					GenerateExpressionInstructions(context, node->expression);
+					INSTRUCTION(Ins::DeleteRawPtr());
 				}
 
 				void Visit(WfRaiseExceptionStatement* node)override
@@ -783,6 +783,7 @@ GenerateInstructions(Statement)
 						GenerateStatementInstructions(context, node->protectedStatement);
 						INSTRUCTION(Ins::UninstallTry());
 						vint finishInstruction = INSTRUCTION(Ins::Jump(-1));
+						context.functionContext->PopScopeContext();
 						
 						context.assembly->instructions[trapInstruction].indexParameter = context.assembly->instructions.Count();
 						auto scope = context.manager->statementScopes[node].Obj();
@@ -795,7 +796,6 @@ GenerateInstructions(Statement)
 						GenerateStatementInstructions(context, node->catchStatement);
 						
 						context.assembly->instructions[finishInstruction].indexParameter = context.assembly->instructions.Count();
-						context.functionContext->PopScopeContext();
 					}
 				}
 
@@ -819,6 +819,7 @@ GenerateInstructions(Statement)
 						VisitTryCatch(node);
 						INSTRUCTION(Ins::UninstallTry());
 						vint untrapInstruction = INSTRUCTION(Ins::Jump(-1));
+						context.functionContext->PopScopeContext();
 
 						context.assembly->instructions[trapInstruction].indexParameter = context.assembly->instructions.Count();
 						INSTRUCTION(Ins::LoadException());
@@ -834,8 +835,6 @@ GenerateInstructions(Statement)
 						INSTRUCTION(Ins::LoadLocalVar(variableIndex));
 						INSTRUCTION(Ins::RaiseException());
 						context.assembly->instructions[finishInstruction].indexParameter = context.assembly->instructions.Count();
-
-						context.functionContext->PopScopeContext();
 					}
 				}
 
