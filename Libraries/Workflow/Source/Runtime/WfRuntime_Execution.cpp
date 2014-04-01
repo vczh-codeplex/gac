@@ -1017,9 +1017,21 @@ WfRuntimeThreadContext
 						}
 						break;
 					case WfRuntimeExecutionStatus::RaisedException:
+						if (trapFrames.Count() > 0)
 						{
-							// next version
-							throw 0;
+							auto trapFrame = GetCurrentTrapFrame();
+							if (trapFrame.stackFrameIndex == stackFrames.Count() - 1)
+							{
+								CONTEXT_ACTION(PopTrapFrame(), L"failed to pop the trap frame");
+								GetCurrentStackFrame().nextInstructionIndex = trapFrame.instructionIndex;
+								status = WfRuntimeExecutionStatus::Executing;
+								return WfRuntimeExecutionAction::UnwrapStack;
+							}
+							else if (stackFrames.Count() > 0)
+							{
+								CONTEXT_ACTION(PopStackFrame(), L"failed to pop the stack frame.");
+								return WfRuntimeExecutionAction::UnwrapStack;
+							}
 						}
 						break;
 					}
