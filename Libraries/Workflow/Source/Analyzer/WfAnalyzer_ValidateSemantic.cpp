@@ -761,6 +761,25 @@ ValidateSemantic(Expression)
 							switch (node->op)
 							{
 							case WfBinaryOperator::Exp:
+								{
+									static TypeFlag conversionTable[(vint)TypeFlag::Count] = {
+										/*Bool		*/TypeFlag::Unknown,
+										/*I1		*/TypeFlag::F4,
+										/*I2		*/TypeFlag::F4,
+										/*I4		*/TypeFlag::F8,
+										/*I8		*/TypeFlag::F8,
+										/*U1		*/TypeFlag::F4,
+										/*U2		*/TypeFlag::F4,
+										/*U4		*/TypeFlag::F8,
+										/*U8		*/TypeFlag::F8,
+										/*F4		*/TypeFlag::F4,
+										/*F8		*/TypeFlag::F8,
+										/*String	*/TypeFlag::Unknown,
+										/*Others	*/TypeFlag::Unknown,
+									};
+									selectedTable = conversionTable;
+								}
+								break;
 							case WfBinaryOperator::Add:
 							case WfBinaryOperator::Sub:
 							case WfBinaryOperator::Mul:
