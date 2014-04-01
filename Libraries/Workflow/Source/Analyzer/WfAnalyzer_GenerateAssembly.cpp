@@ -777,11 +777,11 @@ GenerateInstructions(Statement)
 					else
 					{
 						auto catchContext = context.functionContext->PushScopeContext(WfCodegenScopeType::TryCatch);
-						EXIT_CODE(Ins::UninstallTry());
+						EXIT_CODE(Ins::UninstallTry(0));
 
 						vint trapInstruction = INSTRUCTION(Ins::InstallTry(-1));
 						GenerateStatementInstructions(context, node->protectedStatement);
-						INSTRUCTION(Ins::UninstallTry());
+						INSTRUCTION(Ins::UninstallTry(0));
 						vint finishInstruction = INSTRUCTION(Ins::Jump(-1));
 						context.functionContext->PopScopeContext();
 						
@@ -808,7 +808,7 @@ GenerateInstructions(Statement)
 					else
 					{
 						auto catchContext = context.functionContext->PushScopeContext(WfCodegenScopeType::TryCatch);
-						EXIT_CODE(Ins::UninstallTry());
+						EXIT_CODE(Ins::UninstallTry(0));
 						catchContext->exitStatement = node->finallyStatement;
 						
 						auto function = context.functionContext->function;
@@ -817,7 +817,7 @@ GenerateInstructions(Statement)
 						INSTRUCTION(Ins::StoreLocalVar(variableIndex));
 						vint trapInstruction = INSTRUCTION(Ins::InstallTry(-1));
 						VisitTryCatch(node);
-						INSTRUCTION(Ins::UninstallTry());
+						INSTRUCTION(Ins::UninstallTry(0));
 						vint untrapInstruction = INSTRUCTION(Ins::Jump(-1));
 						context.functionContext->PopScopeContext();
 
@@ -1154,9 +1154,15 @@ GenerateInstructions(Expression)
 					}
 					else if (node->op == WfBinaryOperator::FailedThen)
 					{
-						// next version: FailedThen
-						// UninstallTry pop unnecessary values according to InstallTry's record
-						throw 0;
+						vint trapInstruction = INSTRUCTION(Ins::InstallTry(-1));
+						GenerateExpressionInstructions(context, node->first);
+						INSTRUCTION(Ins::UninstallTry(1));
+						vint finishInstruction = INSTRUCTION(Ins::Jump(-1));
+
+						context.assembly->instructions[trapInstruction].indexParameter = context.assembly->instructions.Count();
+						GenerateExpressionInstructions(context, node->second);
+
+						context.assembly->instructions[finishInstruction].indexParameter = context.assembly->instructions.Count();
 					}
 					else
 					{

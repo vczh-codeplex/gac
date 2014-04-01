@@ -756,7 +756,7 @@ WfRuntimeThreadContext
 										INTERNAL_ERROR(L"failed to pop the trap frame.");
 									}
 									auto frame = GetCurrentTrapFrame();
-									CONTEXT_ACTION(PopTrapFrame(), L"failed to pop the trap frame.");
+									CONTEXT_ACTION(PopTrapFrame(ins.countParameter), L"failed to pop the trap frame.");
 									return WfRuntimeExecutionAction::ExecuteInstruction;
 								}
 							case WfInsCode::RaiseException:
@@ -1026,7 +1026,7 @@ WfRuntimeThreadContext
 							auto trapFrame = GetCurrentTrapFrame();
 							if (trapFrame.stackFrameIndex == stackFrames.Count() - 1)
 							{
-								CONTEXT_ACTION(PopTrapFrame(), L"failed to pop the trap frame");
+								CONTEXT_ACTION(PopTrapFrame(0), L"failed to pop the trap frame");
 								GetCurrentStackFrame().nextInstructionIndex = trapFrame.instructionIndex;
 								status = WfRuntimeExecutionStatus::Executing;
 								return WfRuntimeExecutionAction::UnwrapStack;

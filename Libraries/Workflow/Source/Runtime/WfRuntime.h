@@ -55,7 +55,7 @@ Instruction
 				AttachEvent,		// IEventInfo*			: Value-this, <function> -> <Listener>			;
 				DetachEvent,		// 						: <Listener> -> bool							;
 				InstallTry,			// label				: () -> ()										;
-				UninstallTry,		//						: () -> ()										;
+				UninstallTry,		// count				: () -> ()										;
 				RaiseException,		// 						: Value -> ()									; (trap)
 				TestElementInSet,	//						: Value-element, Value-set -> bool				;
 				CompareLiteral,		// I48/U48/F48/S		: Value, Value -> <int>							;
@@ -113,7 +113,7 @@ Instruction
 			APPLY_EVENT(AttachEvent)\
 			APPLY(DetachEvent)\
 			APPLY_LABEL(InstallTry)\
-			APPLY(UninstallTry)\
+			APPLY_COUNT(UninstallTry)\
 			APPLY(RaiseException)\
 			APPLY(TestElementInSet)\
 			APPLY_TYPE(CompareLiteral)\
@@ -273,6 +273,7 @@ Runtime
 			{
 				vint							stackFrameIndex = -1;
 				vint							instructionIndex = -1;
+				vint							stackPatternCount = -1;
 			};
 
 			enum class WfRuntimeExecutionStatus
@@ -329,7 +330,7 @@ Runtime
 				WfRuntimeThreadContextError		PopStackFrame();
 				WfRuntimeTrapFrame&				GetCurrentTrapFrame();
 				WfRuntimeThreadContextError		PushTrapFrame(vint instructionIndex);
-				WfRuntimeThreadContextError		PopTrapFrame();
+				WfRuntimeThreadContextError		PopTrapFrame(vint saveStackPatternCount);
 				WfRuntimeThreadContextError		PushValue(const reflection::description::Value& value);
 				WfRuntimeThreadContextError		PopValue(reflection::description::Value& value);
 				WfRuntimeThreadContextError		RaiseException(const WString& exception, bool fatalError);

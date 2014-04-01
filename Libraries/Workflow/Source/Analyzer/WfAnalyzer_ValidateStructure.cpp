@@ -567,6 +567,7 @@ ValidateStructure(Expression)
 								binary->first = current;
 								binary->second = expression;
 								binary->op = WfBinaryOperator::Concat;
+								current = binary;
 							}
 
 							node->expandedExpression = current;
