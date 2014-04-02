@@ -259,6 +259,7 @@ Code Generation
 
 			struct WfCodegenLambdaContext
 			{
+				WfFunctionDeclaration*				functionDeclaration = 0;
 				WfFunctionExpression*				functionExpression = 0;
 				WfOrderedLambdaExpression*			orderedLambdaExpression = 0;
 				WfMemberExpression*					methodReferenceExpression = 0;

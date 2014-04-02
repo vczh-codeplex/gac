@@ -388,6 +388,30 @@ WfRuntimeThreadContext (Lambda)
 					throw TypeDescriptorException(message);
 				}
 			};
+			
+/***********************************************************************
+WfRuntimeThreadContext (Lambda)
+***********************************************************************/
+
+			class WfRuntimeInterface : public Object, public IValueInterfaceProxy
+			{
+				typedef collections::Dictionary<WString, Ptr<IValueFunctionProxy>>		FunctionMap;
+			public:
+				FunctionMap							functions;
+
+				Value Invoke(const WString& name, Ptr<IValueList> arguments)override
+				{
+					vint index = functions.Keys().IndexOf(name);
+					if (index == -1)
+					{
+						throw TypeDescriptorException(L"Internal error: failed to invoke the interface method \"" + name + L"\"");
+					}
+					else
+					{
+						return functions.Values()[index]->Invoke(arguments);
+					}
+				}
+			};
 
 #undef INTERNAL_ERROR
 #undef CONTEXT_ACTION
@@ -559,7 +583,7 @@ WfRuntimeThreadContext
 										list->Add(operand);
 									}
 									PushValue(Value::From(list));
-									return WfRuntimeExecutionAction::ExitStackFrame;
+									return WfRuntimeExecutionAction::ExecuteInstruction;
 								}
 							case WfInsCode::CreateMap:
 								{
@@ -572,7 +596,22 @@ WfRuntimeThreadContext
 										map->Set(key, value);
 									}
 									PushValue(Value::From(map));
-									return WfRuntimeExecutionAction::ExitStackFrame;
+									return WfRuntimeExecutionAction::ExecuteInstruction;
+								}
+							case WfInsCode::CreateInterface:
+								{
+									auto proxy = MakePtr<WfRuntimeInterface>();
+									Value key, value;
+									for (vint i = 0; i < ins.countParameter; i+=2)
+									{
+										CONTEXT_ACTION(PopValue(value), L"failed to pop a value from the stack.");
+										CONTEXT_ACTION(PopValue(key), L"failed to pop a value from the stack.");
+										auto name = UnboxValue<WString>(key);
+										auto func = UnboxValue<Ptr<IValueFunctionProxy>>(value);
+										proxy->functions.Add(name, func);
+									}
+									PushValue(Value::From(proxy));
+									return WfRuntimeExecutionAction::ExecuteInstruction;
 								}
 							case WfInsCode::CreateRange:
 								BEGIN_TYPE
