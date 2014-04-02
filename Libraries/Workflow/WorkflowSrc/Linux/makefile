@@ -17,7 +17,7 @@ VLPP_PARSING_OBJS = $(OBJ)Parsing.o $(OBJ)ParsingAnalyzer.o $(OBJ)ParsingAutomat
 
 VLPP_OBJS = $(OBJ)Basic.o $(OBJ)String.o $(OBJ)Console.o $(OBJ)GlobalStorage.o $(OBJ)Exception.o $(OBJ)Locale.o $(OBJ)UnitTest.o $(VLPP_STREAM_OBJS) $(VLPP_REGEX_OBJS) $(VLPP_REFLECTION_OBJS) $(VLPP_PARSING_OBJS)
 
-WORKFLOW_OBJS = $(OBJ)WfExpression.o $(OBJ)WfExpressionParser.o $(OBJ)WfRuntime.o $(OBJ)WfRuntime_Execution.o $(OBJ)WfAnalyzer.o $(OBJ)WfAnalyzer_BuildScope.o $(OBJ)WfAnalyzer_Errors.o $(OBJ)WfAnalyzer_GenerateAssembly.o $(OBJ)WfAnalyzer_Misc.o $(OBJ)WfAnalyzer_SearchOrderedName.o $(OBJ)WfAnalyzer_TypeInfo.o $(OBJ)WfAnalyzer_ValidateSemantic.o $(OBJ)WfAnalyzer_ValidateStructure.o
+WORKFLOW_OBJS = $(OBJ)WfExpression.o $(OBJ)WfExpressionParser.o $(OBJ)WfRuntime.o $(OBJ)WfRuntime_Execution.o $(OBJ)WfAnalyzer.o $(OBJ)WfAnalyzer_BuildScope.o $(OBJ)WfAnalyzer_Errors.o $(OBJ)WfAnalyzer_GenerateAssembly.o $(OBJ)WfAnalyzer_GenerateDeclaration.o $(OBJ)WfAnalyzer_GenerateStatement.o $(OBJ)WfAnalyzer_GenerateExpression.o $(OBJ)WfAnalyzer_Misc.o $(OBJ)WfAnalyzer_SearchOrderedName.o $(OBJ)WfAnalyzer_TypeInfo.o $(OBJ)WfAnalyzer_ValidateSemantic.o $(OBJ)WfAnalyzer_ValidateStructure.o
 
 UNITTEST_OBJS = $(OBJ)TestSamples.o $(OBJ)TestAnalyzer.o $(OBJ)TestCodegen.o $(OBJ)Main.o
 
@@ -79,6 +79,9 @@ all:
 	$(CPP)		-o $(OBJ)WfAnalyzer_BuildScope.o	-c $(WORKFLOW)Analyzer/WfAnalyzer_BuildScope.cpp
 	$(CPP)		-o $(OBJ)WfAnalyzer_Errors.o		-c $(WORKFLOW)Analyzer/WfAnalyzer_Errors.cpp
 	$(CPP)		-o $(OBJ)WfAnalyzer_GenerateAssembly.o	-c $(WORKFLOW)Analyzer/WfAnalyzer_GenerateAssembly.cpp
+	$(CPP)		-o $(OBJ)WfAnalyzer_GenerateDeclaration.o	-c $(WORKFLOW)Analyzer/WfAnalyzer_GenerateDeclaration.cpp
+	$(CPP)		-o $(OBJ)WfAnalyzer_GenerateStatement.o		-c $(WORKFLOW)Analyzer/WfAnalyzer_GenerateStatement.cpp
+	$(CPP)		-o $(OBJ)WfAnalyzer_GenerateExpression.o	-c $(WORKFLOW)Analyzer/WfAnalyzer_GenerateExpression.cpp
 	$(CPP)		-o $(OBJ)WfAnalyzer_Misc.o		-c $(WORKFLOW)Analyzer/WfAnalyzer_Misc.cpp
 	$(CPP)		-o $(OBJ)WfAnalyzer_SearchOrderedName.o	-c $(WORKFLOW)Analyzer/WfAnalyzer_SearchOrderedName.cpp
 	$(CPP)		-o $(OBJ)WfAnalyzer_TypeInfo.o		-c $(WORKFLOW)Analyzer/WfAnalyzer_TypeInfo.cpp
