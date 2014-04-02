@@ -1,0 +1,58 @@
+module test;
+using system::*;
+
+func Show(xs : int{}) : string
+{
+	var s = "";
+	for(x in xs)
+	{
+		if(s == "")
+		{
+			s = s & x;
+		}
+		else
+		{
+			s = s & ", " & x;
+		}
+	}
+	return s;
+}
+
+func main():string
+{
+	var begin = 1;
+	var end = 5;
+	var index = {-1};
+	return Show(
+		cast int{} new Enumerable^
+		{
+			func CreateEnumerator() : Enumerator^
+			{
+				return new Enumerator^
+				{
+					func GetCurrent() : object
+					{
+						return begin + index[0];
+					}
+
+					func GetIndex() : int
+					{
+						return index[0];
+					}
+
+					func Next() : bool
+					{
+						if(index[0] == end - begin)
+						{
+							return false;
+						}
+						else
+						{
+							index[0] = index[0] + 1;
+							return true;
+						}
+					}
+				};
+			}
+		});
+}

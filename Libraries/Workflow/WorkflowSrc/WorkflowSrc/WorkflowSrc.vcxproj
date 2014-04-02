@@ -491,6 +491,7 @@
     <Text Include="..\TestFiles\Samples\Codegen\MapProcessing.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\MethodClosure.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\NamedLambda.txt" />
+    <Text Include="..\TestFiles\Samples\Codegen\NewInterface.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\OpAdd.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\OpAnd.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\OpCompare.txt" />
