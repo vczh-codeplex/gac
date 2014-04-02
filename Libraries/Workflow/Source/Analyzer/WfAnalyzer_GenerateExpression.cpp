@@ -702,18 +702,16 @@ GenerateInstructions(Expression)
 					INSTRUCTION(Ins::InvokeProxy(node->arguments.Count()));
 				}
 
-				void Visit(WfFunctionExpression* node)override
+				void VisitFunction(WfFunctionDeclaration* decl, WfCodegenLambdaContext lc, const WString& name)
 				{
 					auto meta = MakePtr<WfAssemblyFunction>();
-					meta->name = L"<lambda:" + node->function->name.value + L"> in " + context.functionContext->function->name;
+					meta->name = name;
 					vint functionIndex = context.assembly->functions.Add(meta);
 					context.assembly->functionByName.Add(meta->name, functionIndex);
 
-					WfCodegenLambdaContext lc;
-					lc.functionExpression = node;
 					context.functionContext->closuresToCodegen.Add(functionIndex, lc);
 
-					vint index = context.manager->functionLambdaCaptures.Keys().IndexOf(node->function.Obj());
+					vint index = context.manager->functionLambdaCaptures.Keys().IndexOf(decl);
 					if (index != -1)
 					{
 						const auto& symbols = context.manager->functionLambdaCaptures.GetByIndex(index);
@@ -729,11 +727,19 @@ GenerateInstructions(Expression)
 					}
 				}
 
+				void Visit(WfFunctionExpression* node)override
+				{
+					WfCodegenLambdaContext lc;
+					lc.functionExpression = node;
+					WString name = L"<lambda:" + node->function->name.value + L"> in " + context.functionContext->function->name;
+					VisitFunction(node->function.Obj(), lc, name);
+				}
+
 				void Visit(WfNewTypeExpression* node)override
 				{
+					auto result = context.manager->expressionResolvings[node];
 					if (node->functions.Count() == 0)
 					{
-						auto result = context.manager->expressionResolvings[node];
 						FOREACH(Ptr<WfExpression>, argument, node->arguments)
 						{
 							GenerateExpressionInstructions(context, argument);
@@ -743,8 +749,17 @@ GenerateInstructions(Expression)
 					}
 					else
 					{
-						// next version
-						throw 0;
+						FOREACH(Ptr<WfFunctionDeclaration>, decl, node->functions)
+						{
+							INSTRUCTION(Ins::LoadValue(BoxValue(decl->name.value)));
+							WfCodegenLambdaContext lc;
+							lc.functionDeclaration = decl.Obj();
+							WString name = L"<method:" + decl->name.value + L"<" + result.type->GetTypeDescriptor()->GetTypeName() + L">> in " + context.functionContext->function->name;
+							VisitFunction(decl.Obj(), lc, name);
+						}
+						INSTRUCTION(Ins::CreateInterface(node->functions.Count() * 2));
+						INSTRUCTION(Ins::LoadValue(Value()));
+						INSTRUCTION(Ins::InvokeMethod(result.methodInfo, 1));
 					}
 				}
 			};

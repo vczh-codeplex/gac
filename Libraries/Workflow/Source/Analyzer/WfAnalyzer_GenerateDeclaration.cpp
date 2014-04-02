@@ -306,17 +306,17 @@ GenerateInstructions(Closure)
 				meta->lastInstruction = context.assembly->instructions.Count() - 1;
 			}
 
-			void GenerateClosureInstructions_Function(WfCodegenContext& context, vint functionIndex, WfFunctionExpression* expression)
+			void GenerateClosureInstructions_Function(WfCodegenContext& context, vint functionIndex, WfFunctionDeclaration* declaration, bool createInterface)
 			{
-				auto scope = context.manager->declarationScopes[expression->function.Obj()].Obj();
+				auto scope = context.manager->declarationScopes[declaration].Obj();
 				auto meta = context.assembly->functions[functionIndex];
-				GenerateFunctionDeclarationMetadata(context, expression->function.Obj(), meta);
+				GenerateFunctionDeclarationMetadata(context, declaration, meta);
 				Ptr<WfLexicalSymbol> recursiveLambdaSymbol;
-				if (expression->function->name.value != L"")
+				if (!createInterface && declaration->name.value != L"")
 				{
-					recursiveLambdaSymbol = scope->symbols[expression->function->name.value][0];
+					recursiveLambdaSymbol = scope->symbols[declaration->name.value][0];
 				}
-				GenerateFunctionDeclarationInstructions(context, expression->function.Obj(), scope, meta, recursiveLambdaSymbol);
+				GenerateFunctionDeclarationInstructions(context, declaration, scope, meta, recursiveLambdaSymbol);
 			}
 
 			void GenerateClosureInstructions_Ordered(WfCodegenContext& context, vint functionIndex, WfOrderedLambdaExpression* expression)
@@ -374,11 +374,15 @@ GenerateInstructions(Closure)
 					}
 					else if (closure.functionExpression)
 					{
-						GenerateClosureInstructions_Function(context, functionIndex, closure.functionExpression);
+						GenerateClosureInstructions_Function(context, functionIndex, closure.functionExpression->function.Obj(), false);
 					}
 					else if (closure.orderedLambdaExpression)
 					{
 						GenerateClosureInstructions_Ordered(context, functionIndex, closure.orderedLambdaExpression);
+					}
+					else if (closure.functionDeclaration)
+					{
+						GenerateClosureInstructions_Function(context, functionIndex, closure.functionDeclaration, true);
 					}
 				}
 			}

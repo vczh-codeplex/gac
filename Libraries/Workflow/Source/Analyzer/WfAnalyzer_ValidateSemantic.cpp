@@ -275,12 +275,20 @@ ValidateSemantic(Expression)
 								if (auto node = currentScope->ownerDeclaration.Cast<WfFunctionDeclaration>())
 								{
 									captured = true;
-									manager->functionLambdaCaptures.Add(node.Obj(), symbol);
+									vint index = manager->functionLambdaCaptures.Keys().IndexOf(node.Obj());
+									if (index == -1 || !manager->functionLambdaCaptures.GetByIndex(index).Contains(symbol.Obj()))
+									{
+										manager->functionLambdaCaptures.Add(node.Obj(), symbol);
+									}
 								}
 								if (auto node = currentScope->ownerExpression.Cast<WfOrderedLambdaExpression>())
 								{
 									captured = true;
-									manager->orderedLambdaCaptures.Add(node.Obj(), symbol);
+									vint index = manager->orderedLambdaCaptures.Keys().IndexOf(node.Obj());
+									if (index == -1 || !manager->orderedLambdaCaptures.GetByIndex(index).Contains(symbol.Obj()))
+									{
+										manager->orderedLambdaCaptures.Add(node.Obj(), symbol);
+									}
 								}
 								currentScope = currentScope->parentScope.Obj();
 							}
