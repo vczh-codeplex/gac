@@ -9,7 +9,8 @@ int, uint, float, char, string, bool
 ref, data
 external, storage, query, in, out
 var
-requires:, index:, unique:, hash:, group:, ordered:
+failed: set: update: delete:
+requires: index: unique: hash: group: ordered: ...
 
 ========================================================
 Types
@@ -86,7 +87,7 @@ Fibonacci(2, 1);
 
 query Fibonacci_(in index : int, number : int)
 	:- Fibonacci(index, number)
-	:- index >= 3, Fibonacci(index-1, var a), Fibonacci(index-2, var b), a + b == number, set Fibonacci(index, number)
+	:- index >= 3, Fibonacci(index-1, var a), Fibonacci(index-2, var b), a + b == number, set: Fibonacci(index, number)
 	;
 
 ========================================================
@@ -122,17 +123,30 @@ storage Score(student : int, test : int, score : int)
 	;
 
 query CommitScore(in student : int, in test : int, in score : int)
-	:- update Score(student, test, var newScore), newScore == score
-	:- set Score(student, test, score)
+	:- update: Score(student, test, var newScore), set: newScore = score
+	:- set: Score(student, test, score)
 	;
 
 query DiscardTest(in test : int)
-	:- delete Score(_, test, _)
+	:- delete: Score(_, test, _)
 	;
 
 ========================================================
 Collections (List Comprehension)
 ========================================================
+
+query OddNumbers(xs : int[], odds: int[])
+	:- odds == (collect: contains(xs, var x) where: x % 2 == 0 select: x)
+	;
+
+query TopStudents(in test : int, in count : int, out students : (name, score)[])
+	:- students == (
+		collect: Score(var student, test, var score) and Student(var student, var name)
+		orderby: score
+		skip: 0
+		top: count
+		select: (name, score))
+	;
 
 ========================================================
 Pattern Matching
@@ -210,8 +224,8 @@ ExpressionType(Function{"sqrt"}, Func{1});
 ExpressionType(Function{"exp"}, Func{2});
 ExpressionType(expr : Call, Float)
 	:-	ExpressionType(expr.name, var functionType)
-	,	Func{var argumentCount} == functionType unless set Error(expr, "Cannot invoke non-function value.")
-	,	var argumentCount == expr.arguments.Length unless set Error(expr, "Argument count doesn't match the function type.")
+	,	Func{var argumentCount} == functionType failed: set: Error(expr, "Cannot invoke non-function value.")
+	,	var argumentCount == expr.arguments.Length failed: set: Error(expr, "Argument count doesn't match the function type.")
 	,	all(expr.arguments, query (argument):- ExpressionType(argument, Float);)
 	;
 
