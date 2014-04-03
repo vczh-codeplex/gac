@@ -97,6 +97,12 @@ storage Test(test : int, string : name)
 	;
 
 storage Student(student : int, string : name)
+	requires:
+		unique:(student)
+	index:
+		hash:(student),
+		hash:(name)
+	;
 
 storage Score(student : int, test : int, score : int)
 	requires:
