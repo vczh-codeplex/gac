@@ -140,15 +140,28 @@ TypeName(Array{element}, out name)
 	:- name == "array of " & TypeName(element);
 
 ========================================================
-Graph Nodes
+Example (Actors and Couples)
 ========================================================
+
+ref data Actor
+{
+	name : string;
+}
+
+ref data Movie
+{
+	name : string;
+}
+
+storage Perform(actor : Actor, movie : Movie);
+storage Couple(man : Actor, woman : Actor);
+
+query CouplePerformMovie(man : Actor, woman : Actor, movie : Movie)
+	:- Couple(man, woman), Perform(man, movie), Perform(woman, movie)
+	;
 
 ========================================================
 Example (Expression Evaluation)
-========================================================
-
-========================================================
-Example (Actors and Couples)
 ========================================================
 
 ========================================================
