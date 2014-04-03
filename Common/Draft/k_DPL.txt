@@ -46,6 +46,11 @@ storage Father(child : Person, father : Person);
 // variable defined in one ":-" cannot be used in another
 // variable defined after "," cannot be used before ","
 // in: input argument only
+// a new variable in a condition should be initialized in all condition
+//		e.g. f(var a) or g(var a) is right
+//		e.g. f(var a) and g(var a) is right
+//		e.g. f(var a) or g(var b) is wrong
+//		e.g. f(var a) and g(var b) is right
 
 query Ancestor(person : Person, ancestor : Person)
 	:- Father(person, ancestor) 
