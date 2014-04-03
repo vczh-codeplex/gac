@@ -25,8 +25,8 @@ int, uint, float, char, string, bool (all in highest precision)
 // ref data automatically contains "identifier : int"
 // comparing ref data only cares about identifier
 // [ref] data is immutable
-// data constructor: Person{"vczh"}, Person{name:"vczh"}
-// ref data constructor: ref Person{name:"vczh"}
+// data constructor: Person{"vczh"}, Person{name:"vczh"}, X (equivalent to X{})
+// ref data constructor: ref Person{"vczh"}, ref Person{name:"vczh"}
 
 ========================================================
 External Functions
@@ -131,7 +131,7 @@ Pattern Matching
 
 struct Type{}
 struct Int : Type{}
-struct Array : Type{element : Type}
+struct Array : Type{element : Type;}
 
 query TypeName(type : Type, out name : string);
 
@@ -163,6 +163,47 @@ query CouplePerformMovie(man : Actor, woman : Actor, movie : Movie)
 ========================================================
 Example (Expression Evaluation)
 ========================================================
+
+enum Operator
+{
+	Add, Sub, Mul, Div
+}
+/* equivalent to 
+abstract data Operator{};
+data Add : Operator{};
+...
+*/
+
+abstract ref data Expr{}
+ref data Number : Expr{value : double;}
+ref data Binary : Expr{first : Expr; second : Expr; op : Operator;}
+ref data Function : Expr{name : string;}
+ref data Call : Expr{name : Expr; arguments : Expr[];}
+
+data Type{}
+data Float : Type{}
+data Func : Type{argument : int;}
+
+query all<T>(xs : T{}, subQuery : query (item : T));
+all({}, subQuery);
+all({x:xs}, subQuery)
+	:- subQuery(x), all(xs, subQuery)
+	;
+
+storage ExpressionType(expr : Expr, out type : Type);
+
+ExpressionType(Number, Float);
+ExpressionType(Binary, Float);
+ExpressionType(Function{"sqrt"}, Func{1});
+ExpressionType(Function{"exp"}, Func{2});
+ExpressionType(expr : Call, type)
+	:-	ExpressionType(expr.name, var functionType)
+	,	Func{var argumentCount} == functionType unless set Error(expr, "Cannot invoke non-function value.")
+	,	var argumentCount == expr.arguments.Length unless set Error(expr, "Argument count doesn't match the function type.")
+	,	all(expr.arguments, query (argument):- ExpressionType(argument, Float);)
+	;
+
+storage Error(expr : Expr, error : string);
 
 ========================================================
 Example (Pascal)
