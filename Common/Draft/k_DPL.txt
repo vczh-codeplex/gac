@@ -79,14 +79,14 @@ storage Fibonacci(in index : int, number : int)
 	:- index >= 3, Fibonacci(index-1, var a), Fibonacci(index-2, var b), a + b == number
 	;
 
-store Fibonacci(1, 1);
-store Fibonacci(2, 1);
+Fibonacci(1, 1);
+Fibonacci(2, 1);
 
 ========================================================
 Indices
 ========================================================
 
-storage Test(test : int, string : name)
+storage Test(test : int, name : string)
 	requires:
 		test >= 0,
 		unique:(test),
@@ -96,7 +96,7 @@ storage Test(test : int, string : name)
 		hash:(name)
 	;
 
-storage Student(student : int, string : name)
+storage Student(student : int, name : string)
 	requires:
 		unique:(student)
 	index:
@@ -111,7 +111,7 @@ storage Score(student : int, test : int, score : int)
 	index
 		hash:(student),
 		hash:(test),
-		group:(student, test, ordered:(score)),
+		group:(student, test, ordered:(score))
 	;
 
 ========================================================
@@ -121,6 +121,16 @@ Collections
 ========================================================
 Pattern Matching
 ========================================================
+
+struct Type{}
+struct Int : Type{}
+struct Array : Type{element : Type}
+
+query TypeName(type : Type, out name : string);
+
+TypeName(Int, "int");
+TypeName(Array{element}, out name)
+	:- name == "array of " & TypeName(element);
 
 ========================================================
 Graph Nodes
