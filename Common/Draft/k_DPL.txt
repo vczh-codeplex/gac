@@ -79,8 +79,8 @@ storage Fibonacci(in index : int, number : int)
 	:- index >= 3, Fibonacci(index-1, var a), Fibonacci(index-2, var b), a + b == number
 	;
 
-set Fibonacci(1, 1);
-set Fibonacci(2, 1);
+Fibonacci(1, 1);
+Fibonacci(2, 1);
 
 =========equivalent to============
 
