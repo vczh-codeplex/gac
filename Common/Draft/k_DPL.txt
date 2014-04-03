@@ -191,19 +191,29 @@ all({x:xs}, subQuery)
 	;
 
 storage ExpressionType(expr : Expr, out type : Type);
+storage Error(expr : Expr, error : string);
 
 ExpressionType(Number, Float);
-ExpressionType(Binary, Float);
+ExpressionType(Binary{a, b, op}, Float)
+	:-	ExpressionType(a, Float) and :- ExpressionType(b, Float)
+	;
 ExpressionType(Function{"sqrt"}, Func{1});
 ExpressionType(Function{"exp"}, Func{2});
-ExpressionType(expr : Call, type)
+ExpressionType(expr : Call, Float)
 	:-	ExpressionType(expr.name, var functionType)
 	,	Func{var argumentCount} == functionType unless set Error(expr, "Cannot invoke non-function value.")
 	,	var argumentCount == expr.arguments.Length unless set Error(expr, "Argument count doesn't match the function type.")
 	,	all(expr.arguments, query (argument):- ExpressionType(argument, Float);)
 	;
 
-storage Error(expr : Expr, error : string);
+query Evaluate(expr : Expr, out result : float);
+Evaluate(Number{value}, value);
+Evaluate(Binary{a, b, Add}, Evaluate(a)+Evaluate(b));
+Evaluate(Binary{a, b, Sub}, Evaluate(a)-Evaluate(b));
+Evaluate(Binary{a, b, Mul}, Evaluate(a)*Evaluate(b));
+Evaluate(Binary{a, b, Div}, Evaluate(a)/Evaluate(b));
+Evaluate(Call{Function{"sqrt"}, {a}}, sqrt(Evaluate(a)));
+Evaluate(Call{Function{"exp"}, {a, b}}, exp(Evaluate(a), Evaluate(b)));
 
 ========================================================
 Example (Pascal)
