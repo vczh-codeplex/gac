@@ -121,8 +121,17 @@ storage Score(student : int, test : int, score : int)
 		group:(student, test, ordered:(score))
 	;
 
+query CommitScore(in student : int, in test : int, in score : int)
+	:- update Score(student, test, var newScore), newScore == score
+	:- set Score(student, test, score)
+	;
+
+query DiscardTest(in test : int)
+	:- delete Score(_, test, _)
+	;
+
 ========================================================
-Collections
+Collections (List Comprehension)
 ========================================================
 
 ========================================================
