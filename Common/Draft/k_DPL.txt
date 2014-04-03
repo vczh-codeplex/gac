@@ -136,16 +136,26 @@ Collections (List Comprehension)
 ========================================================
 
 query OddNumbers(xs : int[], odds: int[])
-	:- odds == (collect: contains(xs, var x) where: x % 2 == 0 select: x)
+	:- odds == (collect:- contains(xs, var x); where:- x % 2 == 0; select: x;)
 	;
 
 query TopStudents(in test : int, in count : int, out students : (name, score)[])
 	:- students == (
-		collect: Score(var student, test, var score) and Student(var student, var name)
-		orderby: score
-		skip: 0
-		top: count
-		select: (name, score))
+		collect:- Score(var student, test, var score), Student(var student, var name);
+		orderby: score;
+		skip: 0;
+		top: count;
+		select: (name, score);)
+	;
+
+query TopStudents(in test : int, in count : int, out students : (name, score)[])
+	:- students == (
+		collect:- Score(var student, test, var score);
+		orderby: score;
+		skip: 0;
+		top: count;
+		collect:- Student(student, var name);
+		select: (name, score);)
 	;
 
 ========================================================
