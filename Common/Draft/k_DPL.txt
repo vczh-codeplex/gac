@@ -150,28 +150,30 @@ storage Score(student : int, test : int, score : int)
 Collections (List Comprehension)
 ========================================================
 
+query Contains<T>(in collection : T[], item : T);
+query OrderBy<T>(in collection : T[], in order : query(a : T, b : T), result : T[]);
+query Skip<T>(in collection : T[], in count : int, result : T[]);
+query Top<T>(in collection : T[], in count : int, result : T[]);
+query Transform<T, U>(in collection : T[], in selector : query(in a : T, b : U), result : U[]);
+
 query OddNumbers(xs : int[], odds: int[])
-	:- odds == (collect:- contains(xs, var x); where:- x % 2 == 0; select: x;)
+	:- odds == (collect:- Contains(xs, var x); where:- x % 2 == 0; select: x;)
 	;
 
 query TopStudents(in test : int, in count : int, out students : (name, score)[])
-	:- students == (
-		collect:- Score(var student, test, var score), Student(var student, var name);
-		orderby: score;
-		skip: 0;
-		top: count;
-		select: (name, score);)
+	:- students ==
+		collect:- Score(var student, test, var score), Student(student, var name);
+		->OrderBy(query (a, b) :- a.score < b.score)
+		->Skip(0)
+		->Top(count)
+		->Transform(query (in a, b) :- b == (a.name, a.score))
 	;
 
-query TopStudents(in test : int, in count : int, out students : (name, score)[])
-	:- students == (
-		collect:- Score(var student, test, var score);
-		orderby: score;
-		skip: 0;
-		top: count;
-		collect:- Student(student, var name);
-		select: (name, score);)
-	;
+==========================================
+
+query Skip<T>(in collection : T[], in count : int, result : T[])
+Skip(collection, 0, {});
+Skip({x:xs}, count, result) :- count > 0, Skip(xs, count - 1, var ys), result == {x:ys};
 
 ========================================================
 Pattern Matching
