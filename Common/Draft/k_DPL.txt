@@ -150,17 +150,17 @@ storage Score(student : int, test : int, score : int)
 Collections (List Comprehension)
 ========================================================
 
-query Contains<T>(in collection : T[], item : T);
-query OrderBy<T>(in collection : T[], in order : query(a : T, b : T), result : T[]);
-query Skip<T>(in collection : T[], in count : int, result : T[]);
-query Top<T>(in collection : T[], in count : int, result : T[]);
-query Transform<T, U>(in collection : T[], in selector : query(in a : T, b : U), result : U[]);
+query Contains<T>(in collection : {T}, item : T);
+query OrderBy<T>(in collection : {T}, in order : query(a : T, b : T), result : {T});
+query Skip<T>(in collection : {T}, in count : int, result : {T});
+query Top<T>(in collection : {T}, in count : int, result : {T});
+query Transform<T, U>(in collection : {T}, in selector : query(in a : T, b : U), result : {U});
 
-query OddNumbers(xs : int[], odds: int[])
+query OddNumbers(xs : {int}, odds: {int})
 	:- odds == (collect:- Contains(xs, var x); where:- x % 2 == 0; select: x;)
 	;
 
-query TopStudents(in test : int, in count : int, out students : (name, score)[])
+query TopStudents(in test : int, in count : int, out students : {(name, score)})
 	:- students ==
 		collect:- Score(var student, test, var score), Student(student, var name);
 		->OrderBy(query (a, b) :- a.score < b.score)
@@ -171,7 +171,7 @@ query TopStudents(in test : int, in count : int, out students : (name, score)[])
 
 ==========================================
 
-query Skip<T>(in collection : T[], in count : int, result : T[])
+query Skip<T>(in collection : {T}, in count : int, result : {T})
 Skip(collection, 0, {});
 Skip({x:xs}, count, result) :- count > 0, Skip(xs, count - 1, var ys), result == {x:ys};
 
@@ -238,7 +238,7 @@ abstract ref data Expr{}
 ref data Number : Expr{value : double;}
 ref data Binary : Expr{first : Expr; second : Expr; op : Operator;}
 ref data Function : Expr{name : string;}
-ref data Call : Expr{name : Expr; arguments : Expr[];}
+ref data Call : Expr{name : Expr; arguments : {Expr};}
 
 data Type{}
 data Float : Type{}
