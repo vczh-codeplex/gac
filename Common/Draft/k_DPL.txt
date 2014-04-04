@@ -7,10 +7,7 @@ Keywords
 ========================================================
 int, uint, float, char, string, bool
 ref, data
-external, storage, query, in, out
-var
-failed: set: update: delete:
-requires: index: unique: hash: group: ordered: ...
+external, storage, query, in, out, var
 
 ========================================================
 Types
@@ -26,27 +23,66 @@ int, uint, float, char, string, bool (all in highest precision)
 // ref data automatically contains "identifier : int"
 // comparing ref data only cares about identifier
 // [ref] data is immutable
-// data constructor: Person{"vczh"}, Person{name:"vczh"}, X (equivalent to X{})
-// ref data constructor: ref Person{"vczh"}, ref Person{name:"vczh"}
+// data constructor: Person (for empty struct), Person{"vczh"}
+// ref data constructor: ref Person{"vczh"}
 
 ========================================================
-External Functions
+Queries (External Functions)
 ========================================================
 
+// external function
 external MarryWith(husband : Person, wife : Person);
 external Square(in number : int, squared : int);
-external Sqrt(int number: int, sqrt : int)
+external Sqrt(in number: int, sqrt : int);
 
 ========================================================
-Queries
+Queries (Storages)
 ========================================================
 
-storage Father(child : Person, father : Person);
+storage Father(child : Person, father : Person)
+	requires:
+		unique:(child)
+	;
+
+query Create(child : Person, father : Person)
+	:- set: Father(child, father)
+	;
+
+query Request(child : Person, father : Person)
+	:- Father(child, father)
+	;
+
+query Delete(child : Person, father : Person)
+	:- delete: Father(child, var theFather) :- theFather == father;
+	;
+
+query Update(child : Person, oldFather : Person, newfather : Person)
+	:- update: Father(child, var theFather) set: theFather = newFather :- theFather == father;
+	;
+
+====================================
+
+storage Fibonacci(in index : int, number : int)
+	requires:
+		index >= 1,
+		unique:(index)
+	index:
+		ordered:(index)
+	:- index >= 3, Fibonacci(index-1, var a), Fibonacci(index-2, var b), a + b == number
+	;
+
+Fibonacci(1, 1);
+Fibonacci(2, 1);
+
+========================================================
+Queries (Predicates)
+========================================================
 
 // variable defined in one ":-" cannot be used in another
 // variable defined after "," cannot be used before ","
 // in: input argument only
 // a new variable in a condition should be initialized in all condition
+// if it is referenced after ","
 //		e.g. f(var a) or g(var a) is right
 //		e.g. f(var a) and g(var a) is right
 //		e.g. f(var a) or g(var b) is wrong
@@ -70,29 +106,6 @@ query VectorLength(in v : vector<float>, length : float)
 	:- var x2 == Square(v.x), var y2 == Square(v.y), length == Sqrt(x2+y2)
 	:- Sqrt(Square(v.x) + Square(v.y), length)
 	:- length == Sqrt(v.x * v.x + v.y * v.y)
-	;
-
-========================================================
-Storages
-========================================================
-
-storage Fibonacci(in index : int, number : int)
-	requires:
-		index >= 1,
-		unique:(index)
-	index:
-		ordered:(index)
-	:- index >= 3, Fibonacci(index-1, var a), Fibonacci(index-2, var b), a + b == number
-	;
-
-Fibonacci(1, 1);
-Fibonacci(2, 1);
-
-=========equivalent to============
-
-query Fibonacci_(in index : int, number : int)
-	:- Fibonacci(index, number)
-	:- index >= 3, Fibonacci(index-1, var a), Fibonacci(index-2, var b), a + b == number, set: Fibonacci(index, number)
 	;
 
 ========================================================
@@ -125,15 +138,6 @@ storage Score(student : int, test : int, score : int)
 		hash:(student),
 		hash:(test),
 		group:(student, test, ordered:(score))
-	;
-
-query CommitScore(in student : int, in test : int, in score : int)
-	:- update: Score(student, test, var newScore), set: newScore = score
-	:- set: Score(student, test, score)
-	;
-
-query DiscardTest(in test : int)
-	:- delete: Score(_, test, _)
 	;
 
 ========================================================
@@ -176,6 +180,16 @@ query TypeName(type : Type, out name : string);
 TypeName(Int, "int");
 TypeName(Array{element}, out name)
 	:- name == "array of " & TypeName(element);
+
+<pattern>
+	::- "_"
+	::- <constant>
+	::- <identifier> ":" <pattern>
+	::- "(" <pattern> "," ... ")"
+	::- <type>
+	::- <type> "{" <pattern> "," ... "}"
+	::- <type> "{" <identifier> ":" <pattern> "," ... "}"
+	::= {<pattern>:<pattern>}
 
 ========================================================
 Example (Actors and Couples)
