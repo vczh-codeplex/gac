@@ -15,7 +15,7 @@ Types
 
 int, uint, float, char, string, bool (all in highest precision)
 
-[ref] data <type-name> [: <parent-type>]
+[abstract] [ref] data <type-name> [: <parent-type>]
 {
 	<field-name> : <type>;
 }
