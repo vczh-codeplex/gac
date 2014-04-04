@@ -17,7 +17,7 @@ int, uint, float, char, string, bool (all in highest precision)
 
 [abstract] [ref] data <type-name> [: <parent-type>]
 {
-	<field-name> : <type>;
+	[shared | owned] <field-name> : <type>;
 }
 
 // ref data automatically contains "identifier : int"
@@ -73,6 +73,12 @@ storage Fibonacci(in index : int, number : int)
 
 Fibonacci(1, 1);
 Fibonacci(2, 1);
+
+// all ref data types automatically has a storage:
+//		storage <type>(instances : <type>)
+
+// all storage X(a, b, c) automatically has a constraint:
+//		unique:(a, b, c)
 
 ========================================================
 Queries (Predicates)
