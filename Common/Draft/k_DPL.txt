@@ -96,7 +96,7 @@ Queries (Predicates)
 
 query Ancestor(person : Person, ancestor : Person)
 	:- Father(person, ancestor) 
-	:- Father(person, out father), Ancestor(father, ancestor)
+	:- Father(person, var father), Ancestor(father, ancestor)
 	;
 
 query Ancestor(person : Person, ancestor : Person)
