@@ -788,6 +788,169 @@ GenerateInstructions(Expression)
 
 				return type;
 			}
+
+/***********************************************************************
+GetObservingDependency
+***********************************************************************/
+
+			class GetObservingDependencyVisitor : public Object, public WfExpression::IVisitor
+			{
+			public:
+				WfLexicalScopeManager*				manager;
+				WfObserveExpression*				observe;
+				WfObservingDependency&				dependency;
+
+				GetObservingDependencyVisitor(WfLexicalScopeManager* _manager, WfObserveExpression* _observe, WfObservingDependency& _dependency)
+					:manager(_manager)
+					, observe(_observe)
+					, dependency(_dependency)
+				{
+				}
+
+				void Visit(WfTopQualifiedExpression* node)override
+				{
+				}
+
+				void Visit(WfReferenceExpression* node)override
+				{
+				}
+
+				void Visit(WfOrderedNameExpression* node)override
+				{
+				}
+
+				void Visit(WfOrderedLambdaExpression* node)override
+				{
+				}
+
+				void Visit(WfMemberExpression* node)override
+				{
+					// check
+				}
+
+				void Visit(WfChildExpression* node)override
+				{
+				}
+
+				void Visit(WfLiteralExpression* node)override
+				{
+				}
+
+				void Visit(WfFloatingExpression* node)override
+				{
+				}
+
+				void Visit(WfIntegerExpression* node)override
+				{
+				}
+
+				void Visit(WfStringExpression* node)override
+				{
+				}
+
+				void Visit(WfFormatExpression* node)override
+				{
+					// check
+				}
+
+				void Visit(WfUnaryExpression* node)override
+				{
+					// check
+				}
+
+				void Visit(WfBinaryExpression* node)override
+				{
+					// check
+				}
+
+				void Visit(WfLetExpression* node)override
+				{
+					// check
+				}
+
+				void Visit(WfIfExpression* node)override
+				{
+					// check
+				}
+
+				void Visit(WfRangeExpression* node)override
+				{
+					// check
+				}
+
+				void Visit(WfSetTestingExpression* node)override
+				{
+					// check
+				}
+
+				void Visit(WfConstructorExpression* node)override
+				{
+					// check
+				}
+
+				void Visit(WfInferExpression* node)override
+				{
+					// check
+				}
+
+				void Visit(WfTypeCastingExpression* node)override
+				{
+					// check
+				}
+
+				void Visit(WfTypeTestingExpression* node)override
+				{
+					// check
+				}
+
+				void Visit(WfTypeOfTypeExpression* node)override
+				{
+				}
+
+				void Visit(WfTypeOfExpressionExpression* node)override
+				{
+					// check
+				}
+
+				void Visit(WfAttachEventExpression* node)override
+				{
+					// check
+				}
+
+				void Visit(WfDetachEventExpression* node)override
+				{
+					// check
+				}
+
+				void Visit(WfBindExpression* node)override
+				{
+				}
+
+				void Visit(WfObserveExpression* node)override
+				{
+					// check
+				}
+
+				void Visit(WfCallExpression* node)override
+				{
+					// check
+				}
+
+				void Visit(WfFunctionExpression* node)override
+				{
+				}
+
+				void Visit(WfNewTypeExpression* node)override
+				{
+					// check
+				}
+			};
+
+			void GetObservingDependency(WfCodegenContext& context, Ptr<WfExpression> expression, WfObserveExpression* observe, WfObservingDependency& dependency)
+			{
+				GetObservingDependencyVisitor visitor(context.manager, observe, dependency);
+				expression->Accept(&visitor);
+			}
 		}
 	}
 }
