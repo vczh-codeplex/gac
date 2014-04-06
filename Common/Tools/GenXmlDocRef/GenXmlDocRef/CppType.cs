@@ -73,11 +73,10 @@ namespace GenXmlDocRef
                 index--;
                 return false;
             }
-            else
-            {
-                index++;
-                return true;
-            }
+
+            ParseString(input, ref index, "enum");
+            index++;
+            return true;
         }
 
         private static bool ParsePrimitiveType(string[] input, ref int index, ref CppType result)
@@ -111,7 +110,7 @@ namespace GenXmlDocRef
             }
         }
 
-        private static bool ParseType(string[] input, ref int index, ref CppType result)
+        private static bool ParseType(string raw, string[] input, ref int index, ref CppType result)
         {
             if (ParsePrimitiveType(input, ref index, ref result))
             {
@@ -125,7 +124,7 @@ namespace GenXmlDocRef
                     {
                         if (result.CallingConversion != "" && input[index - 1] == "<")
                         {
-                            throw new ArgumentException("Token \"(\" is missing.");
+                            throw new ArgumentException(string.Format("Token \"(\" is missing in {0}.", raw));
                         }
                         string endToken = input[index - 1] == "<" ? ">" : ")";
                         CppDecoration decoration = input[index - 1] == "<" ? CppDecoration.Template : CppDecoration.Function;
@@ -133,7 +132,7 @@ namespace GenXmlDocRef
                         while (true)
                         {
                             CppType argument = null;
-                            if (ParseType(input, ref index, ref argument))
+                            if (ParseType(raw, input, ref index, ref argument))
                             {
                                 arguments.Add(argument);
                                 if (ParseString(input, ref index, endToken))
@@ -142,12 +141,12 @@ namespace GenXmlDocRef
                                 }
                                 else if (!ParseString(input, ref index, ","))
                                 {
-                                    throw new ArgumentException("Token \",\" is missing.");
+                                    throw new ArgumentException(string.Format("Token \",\" is missing in {0}.", raw));
                                 }
                             }
                             else
                             {
-                                throw new ArgumentException("Type is missing.");
+                                throw new ArgumentException(string.Format("Type is missing in {0}.", raw));
                             }
                         }
                         result.Decoration = decoration;
@@ -195,7 +194,7 @@ namespace GenXmlDocRef
             index = 0;
             string[] tokens = pieces.Where(s => !string.IsNullOrWhiteSpace(s)).ToArray();
             CppType type = null;
-            if (!ParseType(tokens, ref index, ref type))
+            if (!ParseType(input, tokens, ref index, ref type))
             {
                 throw new ArgumentException(string.Format("Completely not understand what type is {0}.", input));
             }
