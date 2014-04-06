@@ -676,12 +676,20 @@ ValidateStructure(Expression)
 
 				void Visit(WfAttachEventExpression* node)override
 				{
+					if (context->currentBindExpression)
+					{
+						manager->errors.Add(WfErrors::AttachInBind(node));
+					}
 					ValidateExpressionStructure(manager, context, node->event);
 					ValidateExpressionStructure(manager, context, node->function);
 				}
 
 				void Visit(WfDetachEventExpression* node)override
 				{
+					if (context->currentBindExpression)
+					{
+						manager->errors.Add(WfErrors::DetachInBind(node));
+					}
 					ValidateExpressionStructure(manager, context, node->handler);
 				}
 

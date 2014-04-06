@@ -45,6 +45,16 @@ WfErrors
 				return new ParsingError(node, L"A4: Bind expression should not appear in another bind expression.");
 			}
 
+			Ptr<parsing::ParsingError> WfErrors::AttachInBind(WfExpression* node)
+			{
+				return new ParsingError(node, L"A4: Attach expression should not appear in another bind expression.");
+			}
+
+			Ptr<parsing::ParsingError> WfErrors::DetachInBind(WfExpression* node)
+			{
+				return new ParsingError(node, L"A4: Detach expression should not appear in another bind expression.");
+			}
+
 			Ptr<parsing::ParsingError> WfErrors::ConstructorMixMapAndList(WfExpression* node)
 			{
 				return new ParsingError(node, L"A5: Key-value pairs are not allowed in list constructor expression.");
