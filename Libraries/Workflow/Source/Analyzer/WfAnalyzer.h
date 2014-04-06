@@ -324,9 +324,23 @@ Code Generation
 
 			class WfObservingDependency : public Object
 			{
-				typedef collections::Dictionary<WfExpression*, WfExpression*>		DependencyMap;
+				typedef collections::Group<WfExpression*, WfExpression*>			DependencyGroup;
+				typedef collections::List<WfExpression*>							ObserveList;
 			public:
-				DependencyMap						dependencies;
+				ObserveList							inputObserves;
+				ObserveList							outputObserves;
+				DependencyGroup&					dependencies;
+				
+				WfObservingDependency(WfObservingDependency& dependency);
+				WfObservingDependency(DependencyGroup& _dependencies);
+				WfObservingDependency(DependencyGroup& _dependencies, ObserveList& _inputObserves);
+				
+				void								Prepare(WfExpression* observe);
+				void								AddInternal(WfExpression* observe, WfExpression* dependedObserve);
+				void								Add(WfExpression* observe);
+				void								Add(WfExpression* observe, WfObservingDependency& dependency);
+				void								TurnToInput();
+				void								Cleanup();
 			};
 
 			extern void										GenerateGlobalDeclarationMetadata(WfCodegenContext& context, Ptr<WfDeclaration> declaration, const WString& namePrefix = L"");
@@ -337,7 +351,7 @@ Code Generation
 			extern void										GenerateStatementInstructions(WfCodegenContext& context, Ptr<WfStatement> statement);
 
 			extern Ptr<reflection::description::ITypeInfo>	GenerateExpressionInstructions(WfCodegenContext& context, Ptr<WfExpression> expression, Ptr<reflection::description::ITypeInfo> expectedType = 0);
-			extern void										GetObservingDependency(WfCodegenContext& context, Ptr<WfExpression> expression, WfObserveExpression* observe, WfObservingDependency& dependency);
+			extern void										GetObservingDependency(WfLexicalScopeManager* manager, Ptr<WfExpression> expression, WfObservingDependency& dependency);
 
 			extern void										GenerateTypeCastInstructions(WfCodegenContext& context, Ptr<reflection::description::ITypeInfo> expectedType, bool strongCast);
 			extern void										GenerateTypeTestingInstructions(WfCodegenContext& context, Ptr<reflection::description::ITypeInfo> expectedType);
@@ -359,6 +373,8 @@ Error Messages
 				static Ptr<parsing::ParsingError>			EmptyExtendedObserveEvent(WfExpression* node);
 				static Ptr<parsing::ParsingError>			ObserveNotInBind(WfExpression* node);
 				static Ptr<parsing::ParsingError>			BindInBind(WfExpression* node);
+				static Ptr<parsing::ParsingError>			AttachInBind(WfExpression* node);
+				static Ptr<parsing::ParsingError>			DetachInBind(WfExpression* node);
 				static Ptr<parsing::ParsingError>			ConstructorMixMapAndList(WfExpression* node);
 				static Ptr<parsing::ParsingError>			ConstructorMixClassAndInterface(WfExpression* node);
 				static Ptr<parsing::ParsingError>			ScopeNameIsNotExpression(WfExpression* node, Ptr<WfLexicalScopeName> scopeName);

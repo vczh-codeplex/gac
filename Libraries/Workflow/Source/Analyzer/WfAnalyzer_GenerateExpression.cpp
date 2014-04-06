@@ -654,14 +654,15 @@ GenerateInstructions(Expression)
 
 				void Visit(WfBindExpression* node)override
 				{
-					// next version
+					Group<WfExpression*, WfExpression*> group;
+					WfObservingDependency dependency(group);
+					GetObservingDependency(context.manager, node->expression, dependency);
+					dependency.Cleanup();
 					throw 0;
 				}
 
 				void Visit(WfObserveExpression* node)override
 				{
-					// next version
-					throw 0;
 				}
 
 				void Visit(WfCallExpression* node)override
@@ -790,6 +791,86 @@ GenerateInstructions(Expression)
 			}
 
 /***********************************************************************
+WfObservingDependency
+***********************************************************************/
+
+			WfObservingDependency::WfObservingDependency(WfObservingDependency& dependency)
+				:dependencies(dependency.dependencies)
+			{
+				CopyFrom(inputObserves, dependency.inputObserves);
+			}
+
+			WfObservingDependency::WfObservingDependency(DependencyGroup& _dependencies)
+				:dependencies(_dependencies)
+			{
+			}
+
+			WfObservingDependency::WfObservingDependency(DependencyGroup& _dependencies, ObserveList& _inputObserves)
+				:dependencies(_dependencies)
+			{
+				CopyFrom(inputObserves, _inputObserves);
+			}
+
+			void WfObservingDependency::Prepare(WfExpression* observe)
+			{
+				AddInternal(observe, 0);
+
+				if (!outputObserves.Contains(observe))
+				{
+					outputObserves.Add(observe);
+				}
+			}
+
+			void WfObservingDependency::AddInternal(WfExpression* observe, WfExpression* dependedObserve)
+			{
+				auto index = dependencies.Keys().IndexOf(observe);
+				if (index == -1)
+				{
+					dependencies.Add(observe, dependedObserve);
+				}
+				else if (!dependencies.GetByIndex(index).Contains(dependedObserve))
+				{
+					dependencies.Add(observe, dependedObserve);
+				}
+			}
+
+			void WfObservingDependency::Add(WfExpression* observe)
+			{
+				Add(observe, *this);
+			}
+
+			void WfObservingDependency::Add(WfExpression* observe, WfObservingDependency& dependency)
+			{
+				Prepare(observe);
+				FOREACH(WfExpression*, dependedObserve, dependency.inputObserves)
+				{
+					AddInternal(observe, dependedObserve);
+				}
+			}
+
+			void WfObservingDependency::TurnToInput()
+			{
+				if (outputObserves.Count() > 0)
+				{
+					CopyFrom(inputObserves, outputObserves);
+					outputObserves.Clear();
+				}
+			}
+
+			void WfObservingDependency::Cleanup()
+			{
+				vint count = dependencies.Keys().Count();
+				for (vint i = 0; i < count; i++)
+				{
+					const auto& values = dependencies.GetByIndex(i);
+					if (values.Contains(0) && values.Count()>1)
+					{
+						dependencies.Remove(dependencies.Keys()[i], 0);
+					}
+				}
+			}
+
+/***********************************************************************
 GetObservingDependency
 ***********************************************************************/
 
@@ -797,12 +878,10 @@ GetObservingDependency
 			{
 			public:
 				WfLexicalScopeManager*				manager;
-				WfObserveExpression*				observe;
 				WfObservingDependency&				dependency;
 
-				GetObservingDependencyVisitor(WfLexicalScopeManager* _manager, WfObserveExpression* _observe, WfObservingDependency& _dependency)
+				GetObservingDependencyVisitor(WfLexicalScopeManager* _manager, WfObservingDependency& _dependency)
 					:manager(_manager)
-					, observe(_observe)
 					, dependency(_dependency)
 				{
 				}
@@ -825,7 +904,20 @@ GetObservingDependency
 
 				void Visit(WfMemberExpression* node)override
 				{
-					// check
+					WfObservingDependency parent(dependency);
+					GetObservingDependency(manager, node->parent, parent);
+					parent.TurnToInput();
+
+					auto memberResult = manager->expressionResolvings[node];
+					if (memberResult.propertyInfo)
+					{
+						auto td = memberResult.propertyInfo->GetOwnerTypeDescriptor();
+						auto ev = td->GetEventByName(memberResult.propertyInfo->GetName() + L"Changed", true);
+						if (ev)
+						{
+							dependency.Add(node, parent);
+						}
+					}
 				}
 
 				void Visit(WfChildExpression* node)override
@@ -850,57 +942,82 @@ GetObservingDependency
 
 				void Visit(WfFormatExpression* node)override
 				{
-					// check
+					GetObservingDependency(manager, node->expandedExpression, dependency);
 				}
 
 				void Visit(WfUnaryExpression* node)override
 				{
-					// check
+					GetObservingDependency(manager, node->operand, dependency);
 				}
 
 				void Visit(WfBinaryExpression* node)override
 				{
-					// check
+					GetObservingDependency(manager, node->first, dependency);
+					GetObservingDependency(manager, node->second, dependency);
 				}
 
 				void Visit(WfLetExpression* node)override
 				{
-					// check
+					auto result = MakePtr<WfObservingDependency>(dependency);
+					FOREACH(Ptr<WfLetVariable>, var, node->variables)
+					{
+						GetObservingDependency(manager, var->value, *result.Obj());
+						result->TurnToInput();
+						result = MakePtr<WfObservingDependency>(*result.Obj());
+					}
+					GetObservingDependency(manager, node->expression, *result.Obj());
+					CopyFrom(dependency.outputObserves, result->outputObserves);
 				}
 
 				void Visit(WfIfExpression* node)override
 				{
-					// check
+					WfObservingDependency condition(dependency);
+					GetObservingDependency(manager, node->condition, condition);
+					condition.TurnToInput();
+
+					WfObservingDependency trueBranch(condition), falseBranch(condition);
+					GetObservingDependency(manager, node->trueBranch, trueBranch);
+					GetObservingDependency(manager, node->falseBranch, falseBranch);
+					CopyFrom(dependency.outputObserves, From(trueBranch.outputObserves).Concat(falseBranch.outputObserves));
 				}
 
 				void Visit(WfRangeExpression* node)override
 				{
-					// check
+					GetObservingDependency(manager, node->begin, dependency);
+					GetObservingDependency(manager, node->end, dependency);
 				}
 
 				void Visit(WfSetTestingExpression* node)override
 				{
-					// check
+					GetObservingDependency(manager, node->element, dependency);
+					GetObservingDependency(manager, node->collection, dependency);
 				}
 
 				void Visit(WfConstructorExpression* node)override
 				{
-					// check
+					FOREACH(Ptr<WfConstructorArgument>, argument, node->arguments)
+					{
+						GetObservingDependency(manager, argument->key, dependency);
+						if (argument->value)
+						{
+							GetObservingDependency(manager, argument->value, dependency);
+						}
+					}
 				}
 
 				void Visit(WfInferExpression* node)override
 				{
-					// check
+					GetObservingDependency(manager, node->expression, dependency);
 				}
 
 				void Visit(WfTypeCastingExpression* node)override
 				{
-					// check
+					GetObservingDependency(manager, node->expression, dependency);
 				}
 
 				void Visit(WfTypeTestingExpression* node)override
 				{
-					// check
+					GetObservingDependency(manager, node->expression, dependency);
 				}
 
 				void Visit(WfTypeOfTypeExpression* node)override
@@ -909,17 +1026,15 @@ GetObservingDependency
 
 				void Visit(WfTypeOfExpressionExpression* node)override
 				{
-					// check
+					GetObservingDependency(manager, node->expression, dependency);
 				}
 
 				void Visit(WfAttachEventExpression* node)override
 				{
-					// check
 				}
 
 				void Visit(WfDetachEventExpression* node)override
 				{
-					// check
 				}
 
 				void Visit(WfBindExpression* node)override
@@ -928,12 +1043,22 @@ GetObservingDependency
 
 				void Visit(WfObserveExpression* node)override
 				{
-					// check
+					WfObservingDependency parent(dependency);
+					GetObservingDependency(manager, node->parent, parent);
+					parent.TurnToInput();
+
+					dependency.Add(node, parent);
+					dependency.TurnToInput();
+					GetObservingDependency(manager, node->expression, dependency);
 				}
 
 				void Visit(WfCallExpression* node)override
 				{
-					// check
+					GetObservingDependency(manager, node->function, dependency);
+					FOREACH(Ptr<WfExpression>, argument, node->arguments)
+					{
+						GetObservingDependency(manager, argument, dependency);
+					}
 				}
 
 				void Visit(WfFunctionExpression* node)override
@@ -942,13 +1067,16 @@ GetObservingDependency
 
 				void Visit(WfNewTypeExpression* node)override
 				{
-					// check
+					FOREACH(Ptr<WfExpression>, argument, node->arguments)
+					{
+						GetObservingDependency(manager, argument, dependency);
+					}
 				}
 			};
 
-			void GetObservingDependency(WfCodegenContext& context, Ptr<WfExpression> expression, WfObserveExpression* observe, WfObservingDependency& dependency)
+			void GetObservingDependency(WfLexicalScopeManager* manager, Ptr<WfExpression> expression, WfObservingDependency& dependency)
 			{
-				GetObservingDependencyVisitor visitor(context.manager, observe, dependency);
+				GetObservingDependencyVisitor visitor(manager, dependency);
 				expression->Accept(&visitor);
 			}
 		}
