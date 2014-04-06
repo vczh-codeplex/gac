@@ -37,3 +37,4 @@ TryCatch=[test1::catch][test2::catch][test2::finally][test3::catch1][test3::fina
 Delete=false, false, false, false, true
 FailedThen=-1, 110
 NewInterface=[1, 2, 3, 4, 5][5, 4, 3, 2, 1]
+BindSimple=
