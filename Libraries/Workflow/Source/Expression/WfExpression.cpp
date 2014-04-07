@@ -62,6 +62,11 @@ Unescaping Functions
 			UnescapeStringInternal(value, false);
 		}
 
+		void EscapeString(const WString& text, TextWriter& writer)
+		{
+			throw 0;
+		}
+
 /***********************************************************************
 Print (Type)
 ***********************************************************************/
@@ -212,66 +217,217 @@ Print (Expression)
 
 			void Visit(WfTopQualifiedExpression* node)override
 			{
+				writer.WriteString(L"::");
+				writer.WriteString(node->name.value);
 			}
 
 			void Visit(WfReferenceExpression* node)override
 			{
+				writer.WriteString(node->name.value);
 			}
 
 			void Visit(WfOrderedNameExpression* node)override
 			{
+				writer.WriteString(node->name.value);
 			}
 
 			void Visit(WfOrderedLambdaExpression* node)override
 			{
+				writer.WriteString(L"[");
+				WfPrint(node->body, indent, writer);
+				writer.WriteString(L"]");
 			}
 
 			void Visit(WfMemberExpression* node)override
 			{
+				WfPrint(node->parent, indent, writer);
+				writer.WriteString(L".");
+				writer.WriteString(node->name.value);
 			}
 
 			void Visit(WfChildExpression* node)override
 			{
+				WfPrint(node->parent, indent, writer);
+				writer.WriteString(L"::");
+				writer.WriteString(node->name.value);
 			}
 
 			void Visit(WfLiteralExpression* node)override
 			{
+				switch (node->value)
+				{
+				case WfLiteralValue::Null:
+					writer.WriteString(L"null");
+					break;
+				case WfLiteralValue::True:
+					writer.WriteString(L"true");
+					break;
+				case WfLiteralValue::False:
+					writer.WriteString(L"false");
+					break;
+				}
 			}
 
 			void Visit(WfFloatingExpression* node)override
 			{
+				writer.WriteString(node->value.value);
 			}
 
 			void Visit(WfIntegerExpression* node)override
 			{
+				writer.WriteString(node->value.value);
 			}
 
 			void Visit(WfStringExpression* node)override
 			{
+				EscapeString(node->value.value, writer);
 			}
 
 			void Visit(WfFormatExpression* node)override
 			{
+				if (node->expandedExpression)
+				{
+					WfPrint(node->expandedExpression, indent, writer);
+				}
+				else
+				{
+					writer.WriteString(L"$");
+					EscapeString(node->value.value, writer);
+				}
 			}
 
 			void Visit(WfUnaryExpression* node)override
 			{
+				writer.WriteString(L"(");
+				switch (node->op)
+				{
+				case WfUnaryOperator::Positive:
+					writer.WriteString(L"+");
+					break;
+				case WfUnaryOperator::Negative:
+					writer.WriteString(L"-");
+					break;
+				case WfUnaryOperator::Not:
+					writer.WriteString(L"!");
+					break;
+				}
+				WfPrint(node->operand, indent, writer);
+				writer.WriteString(L")");
 			}
 
 			void Visit(WfBinaryExpression* node)override
 			{
+				if (node->op == WfBinaryOperator::Index)
+				{
+					WfPrint(node->first, indent, writer);
+					writer.WriteString(L"[");
+					WfPrint(node->second, indent, writer);
+					writer.WriteString(L"]");
+				}
+				else
+				{
+					writer.WriteString(L"(");
+					WfPrint(node->first, indent, writer);
+					switch (node->op)
+					{
+					case WfBinaryOperator::Assign:
+						writer.WriteString(L" = ");
+						break;
+					case WfBinaryOperator::Concat:
+						writer.WriteString(L" & ");
+						break;
+					case WfBinaryOperator::FailedThen:
+						writer.WriteString(L" ?? ");
+						break;
+					case WfBinaryOperator::Exp:
+						writer.WriteString(L" ^ ");
+						break;
+					case WfBinaryOperator::Add:
+						writer.WriteString(L" + ");
+						break;
+					case WfBinaryOperator::Sub:
+						writer.WriteString(L" - ");
+						break;
+					case WfBinaryOperator::Mul:
+						writer.WriteString(L" * ");
+						break;
+					case WfBinaryOperator::Div:
+						writer.WriteString(L" / ");
+						break;
+					case WfBinaryOperator::Shl:
+						writer.WriteString(L" shl ");
+						break;
+					case WfBinaryOperator::Shr:
+						writer.WriteString(L" shr ");
+						break;
+					case WfBinaryOperator::LT:
+						writer.WriteString(L" < ");
+						break;
+					case WfBinaryOperator::GT:
+						writer.WriteString(L" > ");
+						break;
+					case WfBinaryOperator::LE:
+						writer.WriteString(L" <= ");
+						break;
+					case WfBinaryOperator::GE:
+						writer.WriteString(L" >= ");
+						break;
+					case WfBinaryOperator::EQ:
+						writer.WriteString(L" == ");
+						break;
+					case WfBinaryOperator::NE:
+						writer.WriteString(L" != ");
+						break;
+					case WfBinaryOperator::Xor:
+						writer.WriteString(L" xor ");
+						break;
+					case WfBinaryOperator::And:
+						writer.WriteString(L" and ");
+						break;
+					case WfBinaryOperator::Or:
+						writer.WriteString(L" or ");
+						break;
+					}
+					WfPrint(node->second, indent, writer);
+					writer.WriteString(L")");
+				}
 			}
 
 			void Visit(WfLetExpression* node)override
 			{
+				writer.WriteString(L"let ");
+				FOREACH_INDEXER(Ptr<WfLetVariable>, var, index, node->variables)
+				{
+					if (index > 0)
+					{
+						writer.WriteString(L", ");
+					}
+					writer.WriteString(var->name.value);
+					writer.WriteString(L" = ");
+					WfPrint(var->value, indent, writer);
+				}
+				writer.WriteString(L" in (");
+				WfPrint(node->expression, indent, writer);
+				writer.WriteString(L")");
 			}
 
 			void Visit(WfIfExpression* node)override
 			{
+				WfPrint(node->condition, indent, writer);
+				writer.WriteString(L" ? ");
+				WfPrint(node->trueBranch, indent, writer);
+				writer.WriteString(L" : ");
+				WfPrint(node->falseBranch, indent, writer);
 			}
 
 			void Visit(WfRangeExpression* node)override
 			{
+				writer.WriteString(L"range ");
+				writer.WriteString(node->beginBoundary == WfRangeBoundary::Exclusive ? L"(" : L"[");
+				WfPrint(node->begin, indent, writer);
+				writer.WriteString(L", ");
+				WfPrint(node->end, indent, writer);
+				writer.WriteString(node->endBoundary == WfRangeBoundary::Exclusive ? L")" : L"]");
 			}
 
 			void Visit(WfSetTestingExpression* node)override
