@@ -64,7 +64,32 @@ Unescaping Functions
 
 		void EscapeString(const WString& text, TextWriter& writer)
 		{
-			throw 0;
+			writer.WriteChar(L'\"');
+			const wchar_t* reading = text.Buffer();
+			while (wchar_t c = *reading++)
+			{
+				switch (c)
+				{
+				case '\r':
+					writer.WriteString(L"\\r");
+					break;
+				case '\n':
+					writer.WriteString(L"\\n");
+					break;
+				case '\t':
+					writer.WriteString(L"\\t");
+					break;
+				case '\"':
+					writer.WriteString(L"\\\"");
+					break;
+				case '\\':
+					writer.WriteString(L"\\\\");
+					break;
+				default:
+					writer.WriteChar(c);
+				}
+			}
+			writer.WriteChar(L'\"');
 		}
 
 /***********************************************************************
