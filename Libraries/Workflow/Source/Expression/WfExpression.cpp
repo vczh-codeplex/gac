@@ -357,14 +357,62 @@ Print (Declaration)
 
 			void Visit(WfNamespaceDeclaration* node)override
 			{
+				writer.WriteLine(L"namespace " + node->name.value);
+				writer.WriteString(indent);
+				writer.WriteLine(L"{");
+				FOREACH_INDEXER(Ptr<WfDeclaration>, decl, index, node->declarations)
+				{
+					if (index > 0)
+					{
+						writer.WriteLine(L"");
+					}
+					WfPrint(decl, indent + L"    ", writer);
+				}
+				writer.WriteString(indent);
+				writer.WriteLine(L"}");
 			}
 
 			void Visit(WfFunctionDeclaration* node)override
 			{
+				writer.WriteString(L"func ");
+				if (node->anonymity == WfFunctionAnonymity::Named)
+				{
+					writer.WriteString(node->name.value);
+				}
+
+				writer.WriteString(L"(");
+				FOREACH_INDEXER(Ptr<WfFunctionArgument>, argument, index, node->arguments)
+				{
+					if (index > 0)
+					{
+						writer.WriteString(L", ");
+					}
+					writer.WriteString(argument->name.value);
+					writer.WriteString(L" : ");
+					WfPrint(argument->type, indent, writer);
+				}
+				writer.WriteString(L")");
+
+				writer.WriteString(L" : ");
+				WfPrint(node->returnType, indent, writer);
+				writer.WriteLine(L"");
+
+				writer.WriteString(indent);
+				WfPrint(node->statement, indent, writer);
 			}
 
 			void Visit(WfVariableDeclaration* node)override
 			{
+				writer.WriteString(L"var ");
+				writer.WriteString(node->name.value);
+				if (node->type)
+				{
+					writer.WriteString(L" : ");
+					WfPrint(node->type, indent, writer);
+				}
+				writer.WriteString(L" = ");
+				WfPrint(node->expression, indent, writer);
+				writer.WriteLine(L";");
 			}
 		};
 
@@ -393,6 +441,7 @@ Print (Module)
 
 			FOREACH(Ptr<WfModuleUsingPath>, path, node->paths)
 			{
+				writer.WriteString(indent);
 				writer.WriteString(L"using ");
 				FOREACH_INDEXER(Ptr<WfModuleUsingItem>, item, index, path->items)
 				{
@@ -418,6 +467,7 @@ Print (Module)
 			FOREACH(Ptr<WfDeclaration>, decl, node->declarations)
 			{
 				writer.WriteLine(L"");
+				writer.WriteString(indent);
 				WfPrint(decl, indent, writer);
 			}
 		}
