@@ -79,42 +79,113 @@ Print (Type)
 
 			void Visit(WfPredefinedType* node)override
 			{
+				switch (node->name)
+				{
+				case WfPredefinedTypeName::Void:
+					writer.WriteString(L"void");
+					break;
+				case WfPredefinedTypeName::Object:
+					writer.WriteString(L"object");
+					break;
+				case WfPredefinedTypeName::Interface:
+					writer.WriteString(L"interface");
+					break;
+				case WfPredefinedTypeName::Int:
+					writer.WriteString(L"int");
+					break;
+				case WfPredefinedTypeName::UInt:
+					writer.WriteString(L"uint");
+					break;
+				case WfPredefinedTypeName::Float:
+					writer.WriteString(L"float");
+					break;
+				case WfPredefinedTypeName::Double:
+					writer.WriteString(L"double");
+					break;
+				case WfPredefinedTypeName::String:
+					writer.WriteString(L"string");
+					break;
+				case WfPredefinedTypeName::Char:
+					writer.WriteString(L"char");
+					break;
+				case WfPredefinedTypeName::Bool:
+					writer.WriteString(L"bool");
+					break;
+				}
 			}
 
 			void Visit(WfTopQualifiedType* node)override
 			{
+				writer.WriteString(L"::" + node->name.value);
 			}
 
 			void Visit(WfReferenceType* node)override
 			{
+				writer.WriteString(node->name.value);
 			}
 
 			void Visit(WfRawPointerType* node)override
 			{
+				WfPrint(node->element, indent, writer);
+				writer.WriteString(L"*");
 			}
 
 			void Visit(WfSharedPointerType* node)override
 			{
+				WfPrint(node->element, indent, writer);
+				writer.WriteString(L"^");
 			}
 
 			void Visit(WfNullableType* node)override
 			{
+				WfPrint(node->element, indent, writer);
+				writer.WriteString(L"?");
 			}
 
 			void Visit(WfEnumerableType* node)override
 			{
+				WfPrint(node->element, indent, writer);
+				writer.WriteString(L"{}");
 			}
 
 			void Visit(WfMapType* node)override
 			{
+				if (node->writability == WfMapWritability::Readonly)
+				{
+					writer.WriteString(L"const ");
+				}
+				WfPrint(node->value, indent, writer);
+				writer.WriteString(L"[");
+				if (node->key)
+				{
+					WfPrint(node->key, indent, writer);
+				}
+				writer.WriteString(L"]");
 			}
 
 			void Visit(WfFunctionType* node)override
 			{
+				writer.WriteString(L"func ");
+				writer.WriteString(L"(");
+				FOREACH_INDEXER(Ptr<WfType>, type, index, node->arguments)
+				{
+					if (index > 0)
+					{
+						writer.WriteString(L", ");
+					}
+					WfPrint(type, indent, writer);
+				}
+				writer.WriteString(L")");
+
+				writer.WriteString(L" : ");
+				WfPrint(node->result, indent, writer);
 			}
 
 			void Visit(WfChildType* node)override
 			{
+				WfPrint(node->parent, indent, writer);
+				writer.WriteString(L"::");
+				writer.WriteString(node->name.value);
 			}
 		};
 
