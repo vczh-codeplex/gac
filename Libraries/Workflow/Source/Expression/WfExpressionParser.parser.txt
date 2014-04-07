@@ -317,6 +317,7 @@ class DetachEventExpression : Expression
 class BindExpression : Expression
 {
 	Expression				expression;
+	Expression				expandedExpression;
 }
 
 enum ObserveType

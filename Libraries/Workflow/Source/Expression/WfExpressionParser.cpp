@@ -316,6 +316,7 @@ L"\r\n" L""
 L"\r\n" L"class BindExpression : Expression"
 L"\r\n" L"{"
 L"\r\n" L"\tExpression\t\t\t\texpression;"
+L"\r\n" L"\tExpression\t\t\t\texpandedExpression;"
 L"\r\n" L"}"
 L"\r\n" L""
 L"\r\n" L"enum ObserveType"
@@ -681,7 +682,11 @@ L"\r\n" L"\t\tWorkflowExpression : begin \",\" WorkflowExpression : end"
 L"\r\n" L"\t\t((\")\" with {endBoundary = \"Exclusive\"}) | (\"]\" with {endBoundary = \"Inclusive\"}))"
 L"\r\n" L"\t\tas RangeExpression"
 L"\r\n" L"\t= \"{\" {CtorFragment : arguments} \"}\" as ConstructorExpression"
-L"\r\n" L"\t= \"new\" WorkflowType : type (\"(\" [WorkflowExpression : arguments {\",\" WorkflowExpression : arguments}] \")\" | \"{\" {Function : functions} \"}\") as NewTypeExpression"
+L"\r\n" L"\t= \"new\" WorkflowType : type"
+L"\r\n" L"\t\t("
+L"\r\n" L"\t\t\t\"(\" [WorkflowExpression : arguments {\",\" WorkflowExpression : arguments}] \")\" "
+L"\r\n" L"\t\t\t| \"{\" {Function : functions} \"}\""
+L"\r\n" L"\t\t) as NewTypeExpression"
 L"\r\n" L"\t= \"bind\" \"(\" WorkflowExpression : expression \")\" as BindExpression"
 L"\r\n" L"\t= Exp0 : parent \".\" \"observe\" \"(\" WorkflowExpression : expression [\"on\" WorkflowExpression : events {\",\" WorkflowExpression : events}]\")\" as ObserveExpression with {observeType = \"SimpleObserve\"}"
 L"\r\n" L"\t= Exp0 : parent \".\" \"observe\" \"as\" NAME : name \"(\" WorkflowExpression : expression [\"on\" WorkflowExpression : events {\",\" WorkflowExpression : events}]\")\" as ObserveExpression with {observeType = \"ExtendedObserve\"}"
@@ -1288,6 +1293,7 @@ Parsing Tree Conversion Driver Implementation
 			void Fill(vl::Ptr<WfBindExpression> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
 			{
 				SetMember(tree->expression, obj->GetMember(L"expression"), tokens);
+				SetMember(tree->expandedExpression, obj->GetMember(L"expandedExpression"), tokens);
 			}
 
 			void Fill(vl::Ptr<WfObserveExpression> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
@@ -3385,6 +3391,7 @@ namespace vl
 
 
 				CLASS_MEMBER_FIELD(expression)
+				CLASS_MEMBER_FIELD(expandedExpression)
 			END_CLASS_MEMBER(WfBindExpression)
 
 			BEGIN_ENUM_ITEM(WfObserveType)

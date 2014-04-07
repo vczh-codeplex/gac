@@ -241,10 +241,32 @@ Scope Analyzing
 Semantic Analyzing
 ***********************************************************************/
 
+			class WfObservingDependency : public Object
+			{
+				typedef collections::Group<WfExpression*, WfExpression*>			DependencyGroup;
+				typedef collections::List<WfExpression*>							ObserveList;
+			public:
+				ObserveList							inputObserves;
+				ObserveList							outputObserves;
+				DependencyGroup&					dependencies;
+				
+				WfObservingDependency(WfObservingDependency& dependency);
+				WfObservingDependency(DependencyGroup& _dependencies);
+				WfObservingDependency(DependencyGroup& _dependencies, ObserveList& _inputObserves);
+				
+				void								Prepare(WfExpression* observe);
+				void								AddInternal(WfExpression* observe, WfExpression* dependedObserve);
+				void								Add(WfExpression* observe);
+				void								Add(WfExpression* observe, WfObservingDependency& dependency);
+				void								TurnToInput();
+				void								Cleanup();
+			};
+
 			extern void										ValidateModuleSemantic(WfLexicalScopeManager* manager, Ptr<WfModule> module);
 			extern void										ValidateDeclarationSemantic(WfLexicalScopeManager* manager, Ptr<WfDeclaration> declaration);
 			extern void										ValidateStatementSemantic(WfLexicalScopeManager* manager, Ptr<WfStatement> statement);
 			extern void										ValidateExpressionSemantic(WfLexicalScopeManager* manager, Ptr<WfExpression> expression, Ptr<reflection::description::ITypeInfo> expectedType, collections::List<ResolveExpressionResult>& results);
+			extern void										GetObservingDependency(WfLexicalScopeManager* manager, Ptr<WfExpression> expression, WfObservingDependency& dependency);
 
 			extern Ptr<WfLexicalScopeName>					GetExpressionScopeName(WfLexicalScopeManager* manager, Ptr<WfExpression> expression);
 			extern reflection::description::IEventInfo*		GetExpressionEventInfo(WfLexicalScopeManager* manager, Ptr<WfExpression> expression);
@@ -322,37 +344,12 @@ Code Generation
 				WfCodegenContext(Ptr<runtime::WfAssembly> _assembly, WfLexicalScopeManager* _manager);
 			};
 
-			class WfObservingDependency : public Object
-			{
-				typedef collections::Group<WfExpression*, WfExpression*>			DependencyGroup;
-				typedef collections::List<WfExpression*>							ObserveList;
-			public:
-				ObserveList							inputObserves;
-				ObserveList							outputObserves;
-				DependencyGroup&					dependencies;
-				
-				WfObservingDependency(WfObservingDependency& dependency);
-				WfObservingDependency(DependencyGroup& _dependencies);
-				WfObservingDependency(DependencyGroup& _dependencies, ObserveList& _inputObserves);
-				
-				void								Prepare(WfExpression* observe);
-				void								AddInternal(WfExpression* observe, WfExpression* dependedObserve);
-				void								Add(WfExpression* observe);
-				void								Add(WfExpression* observe, WfObservingDependency& dependency);
-				void								TurnToInput();
-				void								Cleanup();
-			};
-
 			extern void										GenerateGlobalDeclarationMetadata(WfCodegenContext& context, Ptr<WfDeclaration> declaration, const WString& namePrefix = L"");
 			extern void										GenerateClosureInstructions(WfCodegenContext& context, Ptr<WfCodegenFunctionContext> functionContext);
 			extern void										GenerateInitializeInstructions(WfCodegenContext& context, Ptr<WfDeclaration> declaration);
 			extern void										GenerateDeclarationInstructions(WfCodegenContext& context, Ptr<WfDeclaration> declaration);
-
 			extern void										GenerateStatementInstructions(WfCodegenContext& context, Ptr<WfStatement> statement);
-
 			extern Ptr<reflection::description::ITypeInfo>	GenerateExpressionInstructions(WfCodegenContext& context, Ptr<WfExpression> expression, Ptr<reflection::description::ITypeInfo> expectedType = 0);
-			extern void										GetObservingDependency(WfLexicalScopeManager* manager, Ptr<WfExpression> expression, WfObservingDependency& dependency);
-
 			extern void										GenerateTypeCastInstructions(WfCodegenContext& context, Ptr<reflection::description::ITypeInfo> expectedType, bool strongCast);
 			extern void										GenerateTypeTestingInstructions(WfCodegenContext& context, Ptr<reflection::description::ITypeInfo> expectedType);
 			extern runtime::WfInsType						GetInstructionTypeArgument(Ptr<reflection::description::ITypeInfo> expectedType);
