@@ -15,6 +15,11 @@ namespace vl
 {
 	namespace workflow
 	{
+		extern void			WfPrint(Ptr<WfType> node, const WString& indent, stream::TextWriter& writer);
+		extern void			WfPrint(Ptr<WfExpression> node, const WString& indent, stream::TextWriter& writer);
+		extern void			WfPrint(Ptr<WfStatement> node, const WString& indent, stream::TextWriter& writer);
+		extern void			WfPrint(Ptr<WfDeclaration> node, const WString& indent, stream::TextWriter& writer);
+		extern void			WfPrint(Ptr<WfModule> node, const WString& indent, stream::TextWriter& writer);
 	}
 }
 #endif
