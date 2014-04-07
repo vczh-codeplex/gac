@@ -723,6 +723,7 @@ namespace vl
 		{
 		public:
 			vl::Ptr<WfExpression> expression;
+			vl::Ptr<WfExpression> expandedExpression;
 
 			void Accept(WfExpression::IVisitor* visitor)override;
 

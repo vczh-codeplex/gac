@@ -554,9 +554,16 @@ Print (Expression)
 
 			void Visit(WfBindExpression* node)override
 			{
-				writer.WriteString(L"bind(");
-				WfPrint(node->expression, indent, writer);
-				writer.WriteString(L")");
+				if (node->expandedExpression)
+				{
+					WfPrint(node->expandedExpression, indent, writer);
+				}
+				else
+				{
+					writer.WriteString(L"bind(");
+					WfPrint(node->expression, indent, writer);
+					writer.WriteString(L")");
+				}
 			}
 
 			void Visit(WfObserveExpression* node)override
@@ -633,12 +640,12 @@ Print (Statement)
 
 			void Visit(WfBreakStatement* node)override
 			{
-				writer.WriteLine(L"break;");
+				writer.WriteString(L"break;");
 			}
 
 			void Visit(WfContinueStatement* node)override
 			{
-				writer.WriteLine(L"continue;");
+				writer.WriteString(L"continue;");
 			}
 
 			void Visit(WfReturnStatement* node)override
@@ -647,11 +654,11 @@ Print (Statement)
 				{
 					writer.WriteString(L"return ");
 					WfPrint(node->expression, indent, writer);
-					writer.WriteLine(L";");
+					writer.WriteString(L";");
 				}
 				else
 				{
-					writer.WriteLine(L"return;");
+					writer.WriteString(L"return;");
 				}
 			}
 
@@ -659,7 +666,7 @@ Print (Statement)
 			{
 				writer.WriteString(L"delete ");
 				WfPrint(node->expression, indent, writer);
-				writer.WriteLine(L";");
+				writer.WriteString(L";");
 			}
 
 			void Visit(WfRaiseExceptionStatement* node)override
@@ -668,11 +675,11 @@ Print (Statement)
 				{
 					writer.WriteString(L"raise ");
 					WfPrint(node->expression, indent, writer);
-					writer.WriteLine(L";");
+					writer.WriteString(L";");
 				}
 				else
 				{
-					writer.WriteLine(L"raise;");
+					writer.WriteString(L"raise;");
 				}
 			}
 
@@ -694,6 +701,7 @@ Print (Statement)
 				WfPrint(node->trueBranch, indent, writer);
 				if (node->falseBranch)
 				{
+					writer.WriteLine(L"");
 					writer.WriteString(indent);
 					writer.WriteLine(L"else");
 					writer.WriteString(indent);
@@ -718,6 +726,7 @@ Print (Statement)
 					writer.WriteLine(L":");
 					writer.WriteString(indent + L"    ");
 					WfPrint(switchCase->statement, indent + L"    ", writer);
+					writer.WriteLine(L"");
 				}
 				if (node->defaultBranch)
 				{
@@ -725,10 +734,11 @@ Print (Statement)
 					writer.WriteLine(L"default:");
 					writer.WriteString(indent + L"    ");
 					WfPrint(node->defaultBranch, indent + L"    ", writer);
+					writer.WriteLine(L"");
 				}
 
 				writer.WriteString(indent);
-				writer.WriteLine(L"}");
+				writer.WriteString(L"}");
 			}
 
 			void Visit(WfWhileStatement* node)override
@@ -763,6 +773,7 @@ Print (Statement)
 
 				if (node->catchStatement)
 				{
+					writer.WriteLine(L"");
 					writer.WriteString(indent);
 					writer.WriteString(L"catch (");
 					writer.WriteString(node->name.value);
@@ -773,6 +784,7 @@ Print (Statement)
 
 				if (node->finallyStatement)
 				{
+					writer.WriteLine(L"");
 					writer.WriteString(indent);
 					writer.WriteLine(L"finally");
 					writer.WriteString(indent);
@@ -787,15 +799,16 @@ Print (Statement)
 				{
 					writer.WriteString(indent + L"    ");
 					WfPrint(statement, indent + L"    ", writer);
+					writer.WriteLine(L"");
 				}
 				writer.WriteString(indent);
-				writer.WriteLine(L"}");
+				writer.WriteString(L"}");
 			}
 
 			void Visit(WfExpressionStatement* node)override
 			{
 				WfPrint(node->expression, indent, writer);
-				writer.WriteLine(L";");
+				writer.WriteString(L";");
 			}
 
 			void Visit(WfVariableStatement* node)override
@@ -835,11 +848,12 @@ Print (Declaration)
 					if (index > 0)
 					{
 						writer.WriteLine(L"");
+						writer.WriteLine(L"");
 					}
 					WfPrint(decl, indent + L"    ", writer);
 				}
 				writer.WriteString(indent);
-				writer.WriteLine(L"}");
+				writer.WriteString(L"}");
 			}
 
 			void Visit(WfFunctionDeclaration* node)override
@@ -882,7 +896,7 @@ Print (Declaration)
 				}
 				writer.WriteString(L" = ");
 				WfPrint(node->expression, indent, writer);
-				writer.WriteLine(L";");
+				writer.WriteString(L";");
 			}
 		};
 
@@ -939,6 +953,7 @@ Print (Module)
 				writer.WriteLine(L"");
 				writer.WriteString(indent);
 				WfPrint(decl, indent, writer);
+				writer.WriteLine(L"");
 			}
 		}
 	}
