@@ -432,54 +432,152 @@ Print (Expression)
 
 			void Visit(WfSetTestingExpression* node)override
 			{
+				WfPrint(node->element, indent, writer);
+				if (node->test == WfSetTesting::NotIn)
+				{
+					writer.WriteString(L" not");
+				}
+				writer.WriteString(L" in ");
+				WfPrint(node->collection, indent, writer);
 			}
 
 			void Visit(WfConstructorExpression* node)override
 			{
+				writer.WriteString(L"{");
+				FOREACH_INDEXER(Ptr<WfConstructorArgument>, argument, index, node->arguments)
+				{
+					if (index > 0)
+					{
+						writer.WriteString(L" ");
+					}
+					WfPrint(argument->key, indent, writer);
+					if (argument->value)
+					{
+						writer.WriteString(L" : ");
+						WfPrint(argument->value, indent, writer);
+					}
+				}
+				writer.WriteString(L"}");
 			}
 
 			void Visit(WfInferExpression* node)override
 			{
+				WfPrint(node->expression, indent, writer);
+				writer.WriteString(L" of ");
+				WfPrint(node->type, indent, writer);
 			}
 
 			void Visit(WfTypeCastingExpression* node)override
 			{
+				writer.WriteString(L"cast ");
+				WfPrint(node->type, indent, writer);
+				writer.WriteString(L" ");
+				WfPrint(node->expression, indent, writer);
 			}
 
 			void Visit(WfTypeTestingExpression* node)override
 			{
+				WfPrint(node->expression, indent, writer);
+				switch (node->test)
+				{
+				case WfTypeTesting::IsType:
+					writer.WriteString(L" is ");
+					WfPrint(node->type, indent, writer);
+					break;
+				case WfTypeTesting::IsNotType:
+					writer.WriteString(L" is not ");
+					WfPrint(node->type, indent, writer);
+					break;
+				case WfTypeTesting::IsNull:
+					writer.WriteString(L" is null");
+					break;
+				case WfTypeTesting::IsNotNull:
+					writer.WriteString(L" is not null");
+					break;
+				}
 			}
 
 			void Visit(WfTypeOfTypeExpression* node)override
 			{
+				writer.WriteString(L"typeof(");
+				WfPrint(node->type, indent, writer);
+				writer.WriteString(L")");
 			}
 
 			void Visit(WfTypeOfExpressionExpression* node)override
 			{
+				writer.WriteString(L"type(");
+				WfPrint(node->expression, indent, writer);
+				writer.WriteString(L")");
 			}
 
 			void Visit(WfAttachEventExpression* node)override
 			{
+				writer.WriteString(L"attach(");
+				WfPrint(node->event, indent, writer);
+				writer.WriteString(L", ");
+				WfPrint(node->function, indent, writer);
+				writer.WriteString(L")");
 			}
 
 			void Visit(WfDetachEventExpression* node)override
 			{
+				writer.WriteString(L"detach(");
+				WfPrint(node->handler, indent, writer);
+				writer.WriteString(L")");
 			}
 
 			void Visit(WfBindExpression* node)override
 			{
+				writer.WriteString(L"bind(");
+				WfPrint(node->expression, indent, writer);
+				writer.WriteString(L")");
 			}
 
 			void Visit(WfObserveExpression* node)override
 			{
+				WfPrint(node->parent, indent, writer);
+				writer.WriteString(L".observe");
+				if (node->observeType == WfObserveType::ExtendedObserve)
+				{
+					writer.WriteString(L" as ");
+					writer.WriteString(node->name.value);
+				}
+				writer.WriteString(L"(");
+				WfPrint(node->expression, indent, writer);
+				if (node->events.Count() > 0)
+				{
+					writer.WriteString(L" on ");
+					FOREACH_INDEXER(Ptr<WfExpression>, argument, index, node->events)
+					{
+						if (index > 0)
+						{
+							writer.WriteString(L", ");
+						}
+						WfPrint(argument, indent, writer);
+					}
+				}
+				writer.WriteString(L")");
 			}
 
 			void Visit(WfCallExpression* node)override
 			{
+				WfPrint(node->function, indent, writer);
+				writer.WriteString(L"(");
+				FOREACH_INDEXER(Ptr<WfExpression>, argument, index, node->arguments)
+				{
+					if (index > 0)
+					{
+						writer.WriteString(L", ");
+					}
+					WfPrint(argument, indent, writer);
+				}
+				writer.WriteString(L")");
 			}
 
 			void Visit(WfFunctionExpression* node)override
 			{
+				WfPrint(Ptr<WfDeclaration>(node->function), indent, writer);
 			}
 
 			void Visit(WfNewTypeExpression* node)override
