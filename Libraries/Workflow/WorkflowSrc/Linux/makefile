@@ -17,7 +17,7 @@ VLPP_PARSING_OBJS = $(OBJ)Parsing.o $(OBJ)ParsingAnalyzer.o $(OBJ)ParsingAutomat
 
 VLPP_OBJS = $(OBJ)Basic.o $(OBJ)String.o $(OBJ)Console.o $(OBJ)GlobalStorage.o $(OBJ)Exception.o $(OBJ)Locale.o $(OBJ)UnitTest.o $(VLPP_STREAM_OBJS) $(VLPP_REGEX_OBJS) $(VLPP_REFLECTION_OBJS) $(VLPP_PARSING_OBJS)
 
-WORKFLOW_OBJS = $(OBJ)WfExpression.o $(OBJ)WfExpressionParser.o $(OBJ)WfRuntime.o $(OBJ)WfRuntime_Execution.o $(OBJ)WfAnalyzer.o $(OBJ)WfAnalyzer_BuildScope.o $(OBJ)WfAnalyzer_Errors.o $(OBJ)WfAnalyzer_GenerateAssembly.o $(OBJ)WfAnalyzer_GenerateDeclaration.o $(OBJ)WfAnalyzer_GenerateStatement.o $(OBJ)WfAnalyzer_GenerateExpression.o $(OBJ)WfAnalyzer_Misc.o $(OBJ)WfAnalyzer_SearchOrderedName.o $(OBJ)WfAnalyzer_TypeInfo.o $(OBJ)WfAnalyzer_ValidateSemantic.o $(OBJ)WfAnalyzer_ValidateStructure.o
+WORKFLOW_OBJS = $(OBJ)WfExpression.o $(OBJ)WfExpressionParser.o $(OBJ)WfRuntime.o $(OBJ)WfRuntime_Execution.o $(OBJ)WfAnalyzer.o $(OBJ)WfAnalyzer_BuildScope.o $(OBJ)WfAnalyzer_Errors.o $(OBJ)WfAnalyzer_GenerateAssembly.o $(OBJ)WfAnalyzer_GenerateDeclaration.o $(OBJ)WfAnalyzer_GenerateStatement.o $(OBJ)WfAnalyzer_GenerateExpression.o $(OBJ)WfAnalyzer_Misc.o $(OBJ)WfAnalyzer_SearchOrderedName.o $(OBJ)WfAnalyzer_TypeInfo.o $(OBJ)WfAnalyzer_ValidateSemantic.o $(OBJ)WfAnalyzer_ValidateStructure.o $(OBJ)WfAnalyzer_GenerateBind.o
 
 UNITTEST_OBJS = $(OBJ)TestSamples.o $(OBJ)TestAnalyzer.o $(OBJ)TestCodegen.o $(OBJ)Main.o
 
@@ -87,6 +87,7 @@ all:
 	$(CPP)		-o $(OBJ)WfAnalyzer_TypeInfo.o		-c $(WORKFLOW)Analyzer/WfAnalyzer_TypeInfo.cpp
 	$(CPP)		-o $(OBJ)WfAnalyzer_ValidateSemantic.o	-c $(WORKFLOW)Analyzer/WfAnalyzer_ValidateSemantic.cpp
 	$(CPP)		-o $(OBJ)WfAnalyzer_ValidateStructure.o	-c $(WORKFLOW)Analyzer/WfAnalyzer_ValidateStructure.cpp
+	$(CPP)		-o $(OBJ)WfAnalyzer_GenerateBind.o	-c $(WORKFLOW)Analyzer/WfAnalyzer_GenerateBind.cpp
 	$(CPP)		-o $(OBJ)Main.o				-c $(UNITTEST)Main.cpp
 	$(CPP)		-o $(OBJ)TestSamples.o			-c $(UNITTEST)TestSamples.cpp
 	$(CPP)		-o $(OBJ)TestAnalyzer.o			-c $(UNITTEST)TestAnalyzer.cpp
