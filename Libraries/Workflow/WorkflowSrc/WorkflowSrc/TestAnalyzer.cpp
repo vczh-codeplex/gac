@@ -12,11 +12,21 @@ void LoadMultipleSamples(WfLexicalScopeManager* manager, const WString& sampleNa
 		List<Ptr<ParsingError>> errors;
 		Ptr<ParsingTreeNode> node = WfParseModuleAsParsingTreeNode(sample, table, errors);
 		TEST_ASSERT(node);
-		LogSampleParseResult(sampleName, itemName, sample, node);
 
 		List<RegexToken> tokens;
 		Ptr<WfModule> module = WfConvertParsingTreeNode(node, tokens).Cast<WfModule>();
 		manager->modules.Add(module);
+
+		MemoryStream stream;
+		{
+			StreamWriter writer(stream);
+			WfPrint(module, L"", writer);
+		}
+		{
+			stream.SeekFromBegin(0);
+			StreamReader reader(stream);
+			LogSampleParseResult(sampleName, itemName, reader.ReadToEnd(), node);
+		}
 	}
 }
 
@@ -102,7 +112,16 @@ TEST_CASE(TestAnalyzerError)
 		Ptr<WfModule> module = WfConvertParsingTreeNode(node, tokens).Cast<WfModule>();
 		manager.modules.Add(module);
 		manager.Rebuild(true);
-		LogSampleParseResult(L"AnalyzerError", itemName, sample, node, &manager);
+		MemoryStream stream;
+		{
+			StreamWriter writer(stream);
+			WfPrint(module, L"", writer);
+		}
+		{
+			stream.SeekFromBegin(0);
+			StreamReader reader(stream);
+			LogSampleParseResult(L"AnalyzerError", itemName, reader.ReadToEnd(), node);
+		}
 
 		const wchar_t* reading = itemName.Buffer();
 		vint index = wcschr(reading, L'_') - reading;
