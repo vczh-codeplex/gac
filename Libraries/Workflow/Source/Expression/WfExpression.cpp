@@ -354,54 +354,174 @@ Print (Statement)
 
 			void Visit(WfBreakStatement* node)override
 			{
+				writer.WriteLine(L"break;");
 			}
 
 			void Visit(WfContinueStatement* node)override
 			{
+				writer.WriteLine(L"continue;");
 			}
 
 			void Visit(WfReturnStatement* node)override
 			{
+				if (node->expression)
+				{
+					writer.WriteString(L"return ");
+					WfPrint(node->expression, indent, writer);
+					writer.WriteLine(L";");
+				}
+				else
+				{
+					writer.WriteLine(L"return;");
+				}
 			}
 
 			void Visit(WfDeleteStatement* node)override
 			{
+				writer.WriteString(L"delete ");
+				WfPrint(node->expression, indent, writer);
+				writer.WriteLine(L";");
 			}
 
 			void Visit(WfRaiseExceptionStatement* node)override
 			{
+				if (node->expression)
+				{
+					writer.WriteString(L"raise ");
+					WfPrint(node->expression, indent, writer);
+					writer.WriteLine(L";");
+				}
+				else
+				{
+					writer.WriteLine(L"raise;");
+				}
 			}
 
 			void Visit(WfIfStatement* node)override
 			{
+				writer.WriteString(L"if (");
+				if (node->type)
+				{
+					writer.WriteString(L"var ");
+					writer.WriteString(node->name.value);
+					writer.WriteString(L" : ");
+					WfPrint(node->type, indent, writer);
+					writer.WriteString(L" = ");
+				}
+				WfPrint(node->expression, indent, writer);
+				writer.WriteLine(L")");
+
+				writer.WriteString(indent);
+				WfPrint(node->trueBranch, indent, writer);
+				if (node->falseBranch)
+				{
+					writer.WriteString(indent);
+					writer.WriteLine(L"else");
+					writer.WriteString(indent);
+					WfPrint(node->trueBranch, indent, writer);
+				}
 			}
 
 			void Visit(WfSwitchStatement* node)override
 			{
+				writer.WriteString(L"switch (");
+				WfPrint(node->expression, indent, writer);
+				writer.WriteLine(L")");
+
+				writer.WriteString(indent);
+				writer.WriteLine(L"{");
+
+				FOREACH(Ptr<WfSwitchCase>, switchCase, node->caseBranches)
+				{
+					writer.WriteString(indent);
+					writer.WriteString(L"case ");
+					WfPrint(switchCase->expression, indent, writer);
+					writer.WriteLine(L":");
+					writer.WriteString(indent + L"    ");
+					WfPrint(switchCase->statement, indent + L"    ", writer);
+				}
+				if (node->defaultBranch)
+				{
+					writer.WriteString(indent);
+					writer.WriteLine(L"default:");
+					writer.WriteString(indent + L"    ");
+					WfPrint(node->defaultBranch, indent + L"    ", writer);
+				}
+
+				writer.WriteString(indent);
+				writer.WriteLine(L"}");
 			}
 
 			void Visit(WfWhileStatement* node)override
 			{
+				writer.WriteString(L"while (");
+				WfPrint(node->condition, indent, writer);
+				writer.WriteLine(L")");
+				writer.WriteString(indent);
+				WfPrint(node->statement, indent, writer);
 			}
 
 			void Visit(WfForEachStatement* node)override
 			{
+				writer.WriteString(L"for (");
+				writer.WriteString(node->name.value);
+				writer.WriteString(L" in ");
+				if (node->direction == WfForEachDirection::Reversed)
+				{
+					writer.WriteString(L"reversed ");
+				}
+				WfPrint(node->collection, indent, writer);
+				writer.WriteLine(L")");
+				writer.WriteString(indent);
+				WfPrint(node->statement, indent, writer);
 			}
 
 			void Visit(WfTryStatement* node)override
 			{
+				writer.WriteLine(L"try");
+				writer.WriteString(indent);
+				WfPrint(node->protectedStatement, indent, writer);
+
+				if (node->catchStatement)
+				{
+					writer.WriteString(indent);
+					writer.WriteString(L"catch (");
+					writer.WriteString(node->name.value);
+					writer.WriteLine(L")");
+					writer.WriteString(indent);
+					WfPrint(node->catchStatement, indent, writer);
+				}
+
+				if (node->finallyStatement)
+				{
+					writer.WriteString(indent);
+					writer.WriteLine(L"finally");
+					writer.WriteString(indent);
+					WfPrint(node->finallyStatement, indent, writer);
+				}
 			}
 
 			void Visit(WfBlockStatement* node)override
 			{
+				writer.WriteLine(L"{");
+				FOREACH(Ptr<WfStatement>, statement, node->statements)
+				{
+					writer.WriteString(indent + L"    ");
+					WfPrint(statement, indent + L"    ", writer);
+				}
+				writer.WriteString(indent);
+				writer.WriteLine(L"}");
 			}
 
 			void Visit(WfExpressionStatement* node)override
 			{
+				WfPrint(node->expression, indent, writer);
+				writer.WriteLine(L";");
 			}
 
 			void Visit(WfVariableStatement* node)override
 			{
+				WfPrint(Ptr<WfDeclaration>(node->variable), indent, writer);
 			}
 		};
 
