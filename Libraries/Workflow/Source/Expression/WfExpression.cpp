@@ -5,6 +5,7 @@ namespace vl
 	namespace workflow
 	{
 		using namespace stream;
+		using namespace collections;
 
 /***********************************************************************
 Unescaping Functions
@@ -379,7 +380,46 @@ Print (Module)
 
 		void WfPrint(Ptr<WfModule> node, const WString& indent, stream::TextWriter& writer)
 		{
+			writer.WriteString(indent);
+			switch (node->moduleType)
+			{
+			case WfModuleType::Module:
+				writer.WriteLine(L"module " + node->name.value + L";");
+				break;
+			case WfModuleType::Unit:
+				writer.WriteLine(L"unit " + node->name.value + L";");
+				break;
+			}
 
+			FOREACH(Ptr<WfModuleUsingPath>, path, node->paths)
+			{
+				writer.WriteString(L"using ");
+				FOREACH_INDEXER(Ptr<WfModuleUsingItem>, item, index, path->items)
+				{
+					if (index > 0)
+					{
+						writer.WriteString(L"::");
+					}
+					FOREACH(Ptr<WfModuleUsingFragment>, fragment, item->fragments)
+					{
+						if (auto name = fragment.Cast<WfModuleUsingNameFragment>())
+						{
+							writer.WriteString(name->name.value);
+						}
+						else
+						{
+							writer.WriteString(L"*");
+						}
+					}
+				}
+				writer.WriteLine(L";");
+			}
+
+			FOREACH(Ptr<WfDeclaration>, decl, node->declarations)
+			{
+				writer.WriteLine(L"");
+				WfPrint(decl, indent, writer);
+			}
 		}
 	}
 }
