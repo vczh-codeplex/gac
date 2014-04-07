@@ -591,6 +591,9 @@
     <ClCompile Include="..\..\..\Workflow\Source\Analyzer\WfAnalyzer_GenerateStatement.cpp">
       <Filter>Workflow\Analyzer</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\Workflow\Source\Analyzer\WfAnalyzer_GenerateBind.cpp">
+      <Filter>Workflow\Analyzer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Common\Source\Basic.h">
