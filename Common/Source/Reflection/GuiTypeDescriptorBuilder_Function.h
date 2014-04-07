@@ -69,6 +69,12 @@ DetailTypeInfoRetriver<Func<R(TArgs...)>>
 					return type;
 				}
 			};
+
+			template<typename R, typename ...TArgs>
+			struct DetailTypeInfoRetriver<const Func<R(TArgs...)>, TypeFlags::FunctionType>
+				: DetailTypeInfoRetriver<Func<R(TArgs...)>, TypeFlags::FunctionType>
+			{
+			};
  
 /***********************************************************************
 ValueFunctionProxyWrapper<Func<R(TArgs...)>>

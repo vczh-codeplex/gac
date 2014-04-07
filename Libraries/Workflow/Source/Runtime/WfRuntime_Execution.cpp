@@ -377,7 +377,7 @@ WfRuntimeThreadContext (Lambda)
 						}
 						else
 						{
-							message = L"Exception from external function: " + context.exceptionValue;
+							message = context.exceptionValue;
 						}
 					}
 					else
