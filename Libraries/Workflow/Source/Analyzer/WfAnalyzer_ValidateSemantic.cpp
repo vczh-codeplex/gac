@@ -1286,7 +1286,90 @@ ValidateSemantic(Expression)
 						WfObservingDependency dependency(group);
 						GetObservingDependency(manager, node->expression, dependency);
 						dependency.Cleanup();
-						throw 0;
+						
+						auto newSubscription = MakePtr<WfNewTypeExpression>();
+						node->expandedExpression = newSubscription;
+						{
+							auto systemType = MakePtr<WfTopQualifiedType>();
+							systemType->name.value = L"system";
+
+							auto subType = MakePtr<WfChildType>();
+							subType->parent = systemType;
+							subType->name.value = L"Subscription";
+
+							auto ptrType = MakePtr<WfSharedPointerType>();
+							ptrType->element = subType;
+							newSubscription->type = ptrType;
+						}
+						{
+							auto func = MakePtr<WfFunctionDeclaration>();
+							newSubscription->functions.Add(func);
+							func->name.value = L"Subscribe";
+							{
+								auto systemType = MakePtr<WfTopQualifiedType>();
+								systemType->name.value = L"system";
+
+								auto subType = MakePtr<WfChildType>();
+								subType->parent = systemType;
+								subType->name.value = L"Listener";
+
+								auto ptrType = MakePtr<WfSharedPointerType>();
+								ptrType->element = subType;
+								func->returnType = ptrType;
+							}
+							{
+								auto funcType = MakePtr<WfFunctionType>();
+								{
+									auto type = MakePtr<WfPredefinedType>();
+									type->name = WfPredefinedTypeName::Void;
+									funcType->result = type;
+								}
+								{
+									auto type = MakePtr<WfPredefinedType>();
+									type->name = WfPredefinedTypeName::Object;
+									funcType->arguments.Add(type);
+								}
+
+								auto argument = MakePtr<WfFunctionArgument>();
+								argument->name.value = L"<subscription-callback>";
+								argument->type = funcType;
+								func->arguments.Add(argument);
+							}
+							{
+								auto ex = MakePtr<WfStringExpression>();
+								ex->value.value = L"This function is not implemented.";
+
+								auto raise = MakePtr<WfRaiseExceptionStatement>();
+								raise->expression = ex;
+								func->statement = raise;
+							}
+						}
+						{
+							auto func = MakePtr<WfFunctionDeclaration>();
+							newSubscription->functions.Add(func);
+							func->name.value = L"Close";
+							{
+								auto type = MakePtr<WfPredefinedType>();
+								type->name = WfPredefinedTypeName::Bool;
+								func->returnType = type;
+							}
+							{
+								auto ex = MakePtr<WfStringExpression>();
+								ex->value.value = L"This function is not implemented.";
+
+								auto raise = MakePtr<WfRaiseExceptionStatement>();
+								raise->expression = ex;
+								func->statement = raise;
+							}
+						}
+
+						auto parentScope = manager->expressionScopes[node];
+						BuildScopeForExpression(manager, parentScope, node->expandedExpression);
+						if (manager->CheckScopes())
+						{
+							GetExpressionType(manager, node->expandedExpression, 0);
+						}
+
 					}
 				}
 
