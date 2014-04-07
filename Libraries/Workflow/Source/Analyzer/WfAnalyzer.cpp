@@ -484,6 +484,8 @@ WfLexicalScopeManager
 
 				errors.Clear();
 				namespaceNames.Clear();
+				analyzedScopes.Clear();
+
 				moduleScopes.Clear();
 				declarationScopes.Clear();
 				statementScopes.Clear();
@@ -493,39 +495,9 @@ WfLexicalScopeManager
 				orderedLambdaCaptures.Clear();
 			}
 
-			void WfLexicalScopeManager::Rebuild(bool keepTypeDescriptorNames)
+			bool WfLexicalScopeManager::CheckScopes()
 			{
-				Clear(keepTypeDescriptorNames, false);
-				if (!globalName)
-				{
-					globalName = new WfLexicalScopeName(true);
-					BuildGlobalNameFromTypeDescriptors();
-				}
-
 				vint errorCount = errors.Count();
-
-#define EXIT_IF_ERRORS_EXIST\
-				do\
-				{\
-					if (errors.Count() != errorCount) return;\
-				}while (0)
-				
-				EXIT_IF_ERRORS_EXIST;
-				FOREACH(Ptr<WfModule>, module, modules)
-				{
-					ValidateModuleStructure(this, module);
-				}
-				
-				EXIT_IF_ERRORS_EXIST;
-				BuildGlobalNameFromModules();
-				FOREACH(Ptr<WfModule>, module, modules)
-				{
-					BuildScopeForModule(this, module);
-				}
-
-				ValidateScopeName(globalName);
-				
-				SortedList<Ptr<WfLexicalScope>> analyzedScopes;
 				FOREACH(Ptr<WfLexicalScope>, scope,
 					From(moduleScopes.Values())
 						.Concat(declarationScopes.Values())
@@ -584,6 +556,40 @@ WfLexicalScopeManager
 						}
 					}
 				}
+				return errors.Count() == errorCount;
+			}
+
+			void WfLexicalScopeManager::Rebuild(bool keepTypeDescriptorNames)
+			{
+				Clear(keepTypeDescriptorNames, false);
+				if (!globalName)
+				{
+					globalName = new WfLexicalScopeName(true);
+					BuildGlobalNameFromTypeDescriptors();
+				}
+
+				vint errorCount = errors.Count();
+
+#define EXIT_IF_ERRORS_EXIST\
+				do\
+				{\
+					if (errors.Count() != errorCount) return;\
+				}while (0)
+				
+				EXIT_IF_ERRORS_EXIST;
+				FOREACH(Ptr<WfModule>, module, modules)
+				{
+					ValidateModuleStructure(this, module);
+				}
+				
+				EXIT_IF_ERRORS_EXIST;
+				BuildGlobalNameFromModules();
+				FOREACH(Ptr<WfModule>, module, modules)
+				{
+					BuildScopeForModule(this, module);
+				}
+				ValidateScopeName(globalName);
+				CheckScopes();
 				
 				EXIT_IF_ERRORS_EXIST;
 				FOREACH(Ptr<WfModule>, module, modules)

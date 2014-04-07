@@ -119,6 +119,7 @@ Scope Manager
 				typedef collections::List<Ptr<WfModule>>													ModuleList;
 				typedef collections::List<Ptr<parsing::ParsingError>>										ParsingErrorList;
 				typedef collections::Dictionary<Ptr<WfNamespaceDeclaration>, Ptr<WfLexicalScopeName>>		NamespaceNameMap;
+				typedef collections::SortedList<Ptr<WfLexicalScope>>										ScopeSortedList;
 				typedef collections::Dictionary<Ptr<WfModule>, Ptr<WfLexicalScope>>							ModuleScopeMap;
 				typedef collections::Dictionary<Ptr<WfDeclaration>, Ptr<WfLexicalScope>>					DeclarationScopeMap;
 				typedef collections::Dictionary<Ptr<WfStatement>, Ptr<WfLexicalScope>>						StatementScopeMap;
@@ -139,6 +140,7 @@ Scope Manager
 
 				Ptr<WfLexicalScopeName>						globalName;
 				NamespaceNameMap							namespaceNames;
+				ScopeSortedList								analyzedScopes;
 
 				ModuleScopeMap								moduleScopes;				// the nearest scope for the module
 				DeclarationScopeMap							declarationScopes;			// the nearest scope for the declaration
@@ -153,6 +155,7 @@ Scope Manager
 				
 				Ptr<WfModule>								AddModule(const WString& moduleCode, vint codeIndex = -1);
 				void										Clear(bool keepTypeDescriptorNames, bool deleteModules);
+				bool										CheckScopes();
 				void										Rebuild(bool keepTypeDescriptorNames);
 				void										ResolveSymbol(WfLexicalScope* scope, const WString& symbolName, collections::List<Ptr<WfLexicalSymbol>>& symbols);
 				void										ResolveScopeName(WfLexicalScope* scope, const WString& symbolName, collections::List<Ptr<WfLexicalScopeName>>& names);

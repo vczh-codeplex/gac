@@ -614,6 +614,39 @@ Print (Expression)
 
 			void Visit(WfNewTypeExpression* node)override
 			{
+				writer.WriteString(L"new ");
+				WfPrint(node->type, indent, writer);
+				if (node->functions.Count() == 0)
+				{
+					writer.WriteString(L"(");
+					FOREACH_INDEXER(Ptr<WfExpression>, argument, index, node->arguments)
+					{
+						if (index > 0)
+						{
+							writer.WriteString(L", ");
+						}
+						WfPrint(argument, indent, writer);
+					}
+					writer.WriteString(L")");
+				}
+				else
+				{
+					writer.WriteLine(L"");
+					writer.WriteString(indent);
+					writer.WriteLine(L"{");
+					FOREACH_INDEXER(Ptr<WfFunctionDeclaration>, function, index, node->functions)
+					{
+						if (index > 0)
+						{
+							writer.WriteLine(L"");
+						}
+						writer.WriteString(indent + L"    ");
+						WfPrint(Ptr<WfDeclaration>(function), indent + L"    ", writer);
+						writer.WriteLine(L"");
+					}
+					writer.WriteString(indent);
+					writer.WriteString(L"}");
+				}
 			}
 		};
 
