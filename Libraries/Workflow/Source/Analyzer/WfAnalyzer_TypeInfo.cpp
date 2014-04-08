@@ -134,7 +134,7 @@ GetTypeFromTypeInfo
 						Ptr<WfType> parentType;
 						FOREACH(WString, fragment, fragments)
 						{
-							if (parentType)
+							if (!parentType)
 							{
 								Ptr<WfTopQualifiedType> type = new WfTopQualifiedType;
 								type->name.value = fragment;
@@ -152,14 +152,13 @@ GetTypeFromTypeInfo
 					}
 				case ITypeInfo::Generic:
 					{
-						ITypeInfo* genericType = typeInfo->GetElementType();
-						if (genericType->GetDecorator() == ITypeInfo::TypeDescriptor)
+						if (typeInfo->GetElementType()->GetDecorator() == ITypeInfo::TypeDescriptor)
 						{
-							if (genericType->GetTypeDescriptor() == GetTypeDescriptor<IValueEnumerable>())
+							if (typeInfo->GetTypeDescriptor() == GetTypeDescriptor<IValueEnumerable>())
 							{
-								if (genericType->GetGenericArgumentCount() == 1)
+								if (typeInfo->GetGenericArgumentCount() == 1)
 								{
-									if (Ptr<WfType> elementType = GetTypeFromTypeInfo(genericType->GetGenericArgument(0)))
+									if (Ptr<WfType> elementType = GetTypeFromTypeInfo(typeInfo->GetGenericArgument(0)))
 									{
 										Ptr<WfEnumerableType> type = new WfEnumerableType;
 										type->element = elementType;
@@ -167,11 +166,11 @@ GetTypeFromTypeInfo
 									}
 								}
 							}
-							else if (genericType->GetTypeDescriptor() == GetTypeDescriptor<IValueReadonlyList>())
+							else if (typeInfo->GetTypeDescriptor() == GetTypeDescriptor<IValueReadonlyList>())
 							{
-								if (genericType->GetGenericArgumentCount() == 1)
+								if (typeInfo->GetGenericArgumentCount() == 1)
 								{
-									if (Ptr<WfType> valueType = GetTypeFromTypeInfo(genericType->GetGenericArgument(0)))
+									if (Ptr<WfType> valueType = GetTypeFromTypeInfo(typeInfo->GetGenericArgument(0)))
 									{
 										Ptr<WfMapType> type = new WfMapType;
 										type->writability = WfMapWritability::Readonly;
@@ -180,11 +179,11 @@ GetTypeFromTypeInfo
 									}
 								}
 							}
-							else if (genericType->GetTypeDescriptor() == GetTypeDescriptor<IValueList>())
+							else if (typeInfo->GetTypeDescriptor() == GetTypeDescriptor<IValueList>())
 							{
-								if (genericType->GetGenericArgumentCount() == 1)
+								if (typeInfo->GetGenericArgumentCount() == 1)
 								{
-									if (Ptr<WfType> valueType = GetTypeFromTypeInfo(genericType->GetGenericArgument(0)))
+									if (Ptr<WfType> valueType = GetTypeFromTypeInfo(typeInfo->GetGenericArgument(0)))
 									{
 										Ptr<WfMapType> type = new WfMapType;
 										type->writability = WfMapWritability::Writable;
@@ -193,12 +192,12 @@ GetTypeFromTypeInfo
 									}
 								}
 							}
-							else if (genericType->GetTypeDescriptor() == GetTypeDescriptor<IValueReadonlyDictionary>())
+							else if (typeInfo->GetTypeDescriptor() == GetTypeDescriptor<IValueReadonlyDictionary>())
 							{
-								if (genericType->GetGenericArgumentCount() == 2)
+								if (typeInfo->GetGenericArgumentCount() == 2)
 								{
-									if (Ptr<WfType> keyType = GetTypeFromTypeInfo(genericType->GetGenericArgument(0)))
-									if (Ptr<WfType> valueType = GetTypeFromTypeInfo(genericType->GetGenericArgument(1)))
+									if (Ptr<WfType> keyType = GetTypeFromTypeInfo(typeInfo->GetGenericArgument(0)))
+									if (Ptr<WfType> valueType = GetTypeFromTypeInfo(typeInfo->GetGenericArgument(1)))
 									{
 										Ptr<WfMapType> type = new WfMapType;
 										type->writability = WfMapWritability::Readonly;
@@ -208,12 +207,12 @@ GetTypeFromTypeInfo
 									}
 								}
 							}
-							else if (genericType->GetTypeDescriptor() == GetTypeDescriptor<IValueDictionary>())
+							else if (typeInfo->GetTypeDescriptor() == GetTypeDescriptor<IValueDictionary>())
 							{
-								if (genericType->GetGenericArgumentCount() == 2)
+								if (typeInfo->GetGenericArgumentCount() == 2)
 								{
-									if (Ptr<WfType> keyType = GetTypeFromTypeInfo(genericType->GetGenericArgument(0)))
-									if (Ptr<WfType> valueType = GetTypeFromTypeInfo(genericType->GetGenericArgument(1)))
+									if (Ptr<WfType> keyType = GetTypeFromTypeInfo(typeInfo->GetGenericArgument(0)))
+									if (Ptr<WfType> valueType = GetTypeFromTypeInfo(typeInfo->GetGenericArgument(1)))
 									{
 										Ptr<WfMapType> type = new WfMapType;
 										type->writability = WfMapWritability::Writable;
@@ -223,17 +222,17 @@ GetTypeFromTypeInfo
 									}
 								}
 							}
-							else if (genericType->GetTypeDescriptor() == GetTypeDescriptor<IValueFunctionProxy>())
+							else if (typeInfo->GetTypeDescriptor() == GetTypeDescriptor<IValueFunctionProxy>())
 							{
-								if (genericType->GetGenericArgumentCount() >= 1)
+								if (typeInfo->GetGenericArgumentCount() >= 1)
 								{
-									if (Ptr<WfType> returnType = GetTypeFromTypeInfo(genericType->GetGenericArgument(0)))
+									if (Ptr<WfType> returnType = GetTypeFromTypeInfo(typeInfo->GetGenericArgument(0)))
 									{
 										Ptr<WfFunctionType> type = new WfFunctionType;
-										type->result = type;
-										for (vint i = 1; i < genericType->GetGenericArgumentCount(); i++)
+										type->result = GetTypeFromTypeInfo(typeInfo->GetGenericArgument(0));
+										for (vint i = 1; i < typeInfo->GetGenericArgumentCount(); i++)
 										{
-											if (Ptr<WfType> argumentType = GetTypeFromTypeInfo(genericType->GetGenericArgument(i)))
+											if (Ptr<WfType> argumentType = GetTypeFromTypeInfo(typeInfo->GetGenericArgument(i)))
 											{
 												type->arguments.Add(argumentType);
 											}
