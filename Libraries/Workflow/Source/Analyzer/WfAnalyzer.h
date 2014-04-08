@@ -273,6 +273,7 @@ Semantic Analyzing
 			extern void										GetObservingDependency(WfLexicalScopeManager* manager, Ptr<WfExpression> expression, WfObservingDependency& dependency);
 			extern Ptr<WfExpression>						ExpandObserveExpression(Ptr<WfExpression> expression, collections::Dictionary<WfExpression*, WString>& cacheNames, bool useCache = true);
 			extern Ptr<WfExpression>						CopyExpression(Ptr<WfExpression> expression);
+			extern Ptr<WfStatement>							ExpandObserveStatement(Ptr<WfStatement> statement, collections::Dictionary<WfExpression*, WString>& cacheNames);
 			extern Ptr<WfStatement>							CopyStatement(Ptr<WfStatement> statement);
 			extern void										ExpandBindExpression(WfLexicalScopeManager* manager, WfBindExpression* node);
 
