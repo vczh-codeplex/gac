@@ -221,6 +221,7 @@ Structure Analyzing
 			struct ValidateStructureContext
 			{
 				WfBindExpression*							currentBindExpression;
+				WfObserveExpression*						currentObserveExpression;
 				WfStatement*								currentLoopStatement;
 				WfStatement*								currentCatchStatement;
 
@@ -377,6 +378,7 @@ Error Messages
 				static Ptr<parsing::ParsingError>			WrongSimpleObserveEvent(WfExpression* node);
 				static Ptr<parsing::ParsingError>			EmptyObserveEvent(WfExpression* node);
 				static Ptr<parsing::ParsingError>			ObserveNotInBind(WfExpression* node);
+				static Ptr<parsing::ParsingError>			ObserveInObserveEvent(WfExpression* node);
 				static Ptr<parsing::ParsingError>			BindInBind(WfExpression* node);
 				static Ptr<parsing::ParsingError>			AttachInBind(WfExpression* node);
 				static Ptr<parsing::ParsingError>			DetachInBind(WfExpression* node);

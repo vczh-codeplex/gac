@@ -15,6 +15,7 @@ ValidateStructureContext
 
 			ValidateStructureContext::ValidateStructureContext()
 				:currentBindExpression(0)
+				, currentObserveExpression(0)
 				, currentLoopStatement(0)
 				, currentCatchStatement(0)
 			{
@@ -712,6 +713,10 @@ ValidateStructure(Expression)
 					{
 						manager->errors.Add(WfErrors::ObserveNotInBind(node));
 					}
+					if (context->currentObserveExpression)
+					{
+						manager->errors.Add(WfErrors::ObserveInObserveEvent(node));
+					}
 
 					if (node->observeType == WfObserveType::SimpleObserve)
 					{
@@ -734,10 +739,12 @@ ValidateStructure(Expression)
 
 					ValidateExpressionStructure(manager, context, node->parent);
 					ValidateExpressionStructure(manager, context, node->expression);
+					context->currentObserveExpression = node;
 					for (vint i = 0; i < node->events.Count(); i++)
 					{
 						ValidateExpressionStructure(manager, context, node->events[i]);
 					}
+					context->currentObserveExpression = 0;
 				}
 
 				void Visit(WfCallExpression* node)override
