@@ -31,26 +31,26 @@ WfObservingDependency
 				CopyFrom(inputObserves, _inputObserves);
 			}
 
+			void WfObservingDependency::AddInternal(WfExpression* observe, WfExpression* dependedObserve)
+			{
+				auto index = dependencies.Keys().IndexOf(dependedObserve);
+				if (index == -1)
+				{
+					dependencies.Add(dependedObserve, observe);
+				}
+				else if (!dependencies.GetByIndex(index).Contains(observe))
+				{
+					dependencies.Add(dependedObserve, observe);
+				}
+			}
+
 			void WfObservingDependency::Prepare(WfExpression* observe)
 			{
-				AddInternal(observe, 0);
+				AddInternal(0, observe);
 
 				if (!outputObserves.Contains(observe))
 				{
 					outputObserves.Add(observe);
-				}
-			}
-
-			void WfObservingDependency::AddInternal(WfExpression* observe, WfExpression* dependedObserve)
-			{
-				auto index = dependencies.Keys().IndexOf(observe);
-				if (index == -1)
-				{
-					dependencies.Add(observe, dependedObserve);
-				}
-				else if (!dependencies.GetByIndex(index).Contains(dependedObserve))
-				{
-					dependencies.Add(observe, dependedObserve);
 				}
 			}
 
@@ -325,6 +325,70 @@ ExpandBindExpression
 					lambdaExpr->function = lambda;
 					callLambda->function = lambdaExpr;
 				}
+
+				Group<WfExpression*, WString> observeNames;
+				FOREACH_INDEXER(WfExpression*, observe, observeIndex, dependency.dependencies.Keys())
+				{
+					List<IEventInfo*> events;
+					if (auto observeExpr = dynamic_cast<WfObserveExpression*>(observe))
+					{
+						FOREACH(Ptr<WfExpression>, eventExpr, observeExpr->events)
+						{
+							auto result = manager->expressionResolvings[eventExpr.Obj()];
+							events.Add(result.eventInfo);
+						}
+					}
+					else if (auto memberExpr = dynamic_cast<WfMemberExpression*>(observe))
+					{
+						auto result = manager->expressionResolvings[memberExpr];
+						auto td = result.propertyInfo->GetOwnerTypeDescriptor();
+						auto ev = td->GetEventByName(result.propertyInfo->GetName() + L"Changed", true);
+						events.Add(ev);
+					}
+
+					FOREACH_INDEXER(IEventInfo*, ev, eventIndex, events)
+					{
+						WString handlerName = L"<bind-observe>" + itow(observeIndex) + L"_" + itow(eventIndex);
+						WString callbackName = L"<bind-callback>" + itow(observeIndex) + L"_" + itow(eventIndex);
+						observeNames.Add(observe, handlerName);
+						{
+							auto variable = MakePtr<WfVariableDeclaration>();
+							variable->name.value = handlerName;
+					
+							auto variableStat = MakePtr<WfVariableStatement>();
+							variableStat->variable = variable;
+							lambdaBlock->statements.Add(variableStat);
+
+							auto nullExpr = MakePtr<WfLiteralExpression>();
+							nullExpr->value = WfLiteralValue::Null;
+
+							auto inferExpr = MakePtr<WfInferExpression>();
+							inferExpr->expression = nullExpr;
+							inferExpr->type = GetTypeFromTypeInfo(TypeInfoRetriver<Ptr<IEventHandler>>::CreateTypeInfo().Obj());
+
+							auto ctorArg = MakePtr<WfConstructorArgument>();
+							ctorArg->key = inferExpr;
+
+							auto ctorExpr = MakePtr<WfConstructorExpression>();
+							ctorExpr->arguments.Add(ctorArg);
+
+							variable->expression = ctorExpr;
+						}
+						{
+							auto variable = MakePtr<WfVariableDeclaration>();
+							variable->name.value = callbackName;
+							variable->type = GetTypeFromTypeInfo(ev->GetHandlerType());
+					
+							auto variableStat = MakePtr<WfVariableStatement>();
+							variableStat->variable = variable;
+							lambdaBlock->statements.Add(variableStat);
+
+							auto nullExpr = MakePtr<WfLiteralExpression>();
+							nullExpr->value = WfLiteralValue::Null;
+							variable->expression = nullExpr;
+						}
+					}
+				}
 						
 				auto newSubscription = MakePtr<WfNewTypeExpression>();
 				{
@@ -347,7 +411,7 @@ ExpandBindExpression
 					{
 						auto typeInfo = TypeInfoRetriver<Func<void(Value)>>::CreateTypeInfo();
 						auto argument = MakePtr<WfFunctionArgument>();
-						argument->name.value = L"<subscription-callback>";
+						argument->name.value = L"<bind-callback>";
 						argument->type = GetTypeFromTypeInfo(typeInfo.Obj());
 						func->arguments.Add(argument);
 					}
