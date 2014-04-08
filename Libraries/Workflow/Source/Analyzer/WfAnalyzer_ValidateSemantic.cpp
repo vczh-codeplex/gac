@@ -1277,10 +1277,11 @@ ValidateSemantic(Expression)
 
 				void Visit(WfBindExpression* node)override
 				{
-					auto type = GetExpressionType(manager, node->expression, 0);
+					vint errorCount = manager->errors.Count();
+					GetExpressionType(manager, node->expression, 0);
 					results.Add(ResolveExpressionResult(TypeInfoRetriver<Ptr<IValueSubscription>>::CreateTypeInfo()));
 
-					if (type)
+					if (manager->errors.Count() == errorCount)
 					{
 						ExpandBindExpression(manager, node);
 						auto parentScope = manager->expressionScopes[node];
