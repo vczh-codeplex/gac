@@ -317,6 +317,163 @@ GetObservingDependency
 			}
 
 /***********************************************************************
+ExpandObserveExpression
+***********************************************************************/
+
+			class ExpandObserveExpressionVisitor : public Object, public WfExpression::IVisitor
+			{
+			public:
+				Dictionary<WfExpression*, WString>&		cacheNames;
+				Ptr<WfExpression>						result;
+
+				ExpandObserveExpressionVisitor(Dictionary<WfExpression*, WString>& _cacheNames)
+					:cacheNames(_cacheNames)
+				{
+				}
+
+				void Visit(WfTopQualifiedExpression* node)override
+				{
+					auto expr = MakePtr<WfTopQualifiedExpression>();
+					expr->name.value = node->name.value;
+					result = expr;
+				}
+
+				void Visit(WfReferenceExpression* node)override
+				{
+				}
+
+				void Visit(WfOrderedNameExpression* node)override
+				{
+				}
+
+				void Visit(WfOrderedLambdaExpression* node)override
+				{
+				}
+
+				void Visit(WfMemberExpression* node)override
+				{
+				}
+
+				void Visit(WfChildExpression* node)override
+				{
+				}
+
+				void Visit(WfLiteralExpression* node)override
+				{
+				}
+
+				void Visit(WfFloatingExpression* node)override
+				{
+				}
+
+				void Visit(WfIntegerExpression* node)override
+				{
+				}
+
+				void Visit(WfStringExpression* node)override
+				{
+				}
+
+				void Visit(WfFormatExpression* node)override
+				{
+				}
+
+				void Visit(WfUnaryExpression* node)override
+				{
+				}
+
+				void Visit(WfBinaryExpression* node)override
+				{
+				}
+
+				void Visit(WfLetExpression* node)override
+				{
+				}
+
+				void Visit(WfIfExpression* node)override
+				{
+				}
+
+				void Visit(WfRangeExpression* node)override
+				{
+				}
+
+				void Visit(WfSetTestingExpression* node)override
+				{
+				}
+
+				void Visit(WfConstructorExpression* node)override
+				{
+				}
+
+				void Visit(WfInferExpression* node)override
+				{
+				}
+
+				void Visit(WfTypeCastingExpression* node)override
+				{
+				}
+
+				void Visit(WfTypeTestingExpression* node)override
+				{
+				}
+
+				void Visit(WfTypeOfTypeExpression* node)override
+				{
+				}
+
+				void Visit(WfTypeOfExpressionExpression* node)override
+				{
+				}
+
+				void Visit(WfAttachEventExpression* node)override
+				{
+				}
+
+				void Visit(WfDetachEventExpression* node)override
+				{
+				}
+
+				void Visit(WfBindExpression* node)override
+				{
+				}
+
+				void Visit(WfObserveExpression* node)override
+				{
+				}
+
+				void Visit(WfCallExpression* node)override
+				{
+				}
+
+				void Visit(WfFunctionExpression* node)override
+				{
+				}
+
+				void Visit(WfNewTypeExpression* node)override
+				{
+				}
+			};
+
+			Ptr<WfExpression> ExpandObserveExpression(Ptr<WfExpression> expression, collections::Dictionary<WfExpression*, WString>& cacheNames, bool useCache)
+			{
+				if (useCache)
+				{
+					vint index = cacheNames.Keys().IndexOf(expression.Obj());
+					if (index != -1)
+					{
+						auto ref = MakePtr<WfReferenceExpression>();
+						ref->name.value = cacheNames.Values()[index];
+						return ref;
+					}
+				}
+
+				ExpandObserveExpressionVisitor visitor(cacheNames);
+				expression->Accept(&visitor);
+				return visitor.result;
+			}
+
+/***********************************************************************
 ExpandBindExpression
 ***********************************************************************/
 
