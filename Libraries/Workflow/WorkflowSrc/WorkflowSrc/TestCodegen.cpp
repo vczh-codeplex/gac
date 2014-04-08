@@ -60,7 +60,7 @@ TEST_CASE(TestCodegen)
 		TEST_ASSERT(context.status == WfRuntimeExecutionStatus::Finished);
 
 		{
-			vint functionIndex = assembly->functionByName[L"<initialize>"];
+			vint functionIndex = assembly->functionByName[L"<initialize>"][0];
 			context.PushStackFrame(functionIndex, 0);
 			TEST_ASSERT(context.status == WfRuntimeExecutionStatus::Ready);
 
@@ -75,7 +75,7 @@ TEST_CASE(TestCodegen)
 		}
 
 		{
-			vint functionIndex = assembly->functionByName[L"main"];
+			vint functionIndex = assembly->functionByName[L"main"][0];
 			context.PushStackFrame(functionIndex, 0);
 			TEST_ASSERT(context.status == WfRuntimeExecutionStatus::Ready);
 
@@ -117,9 +117,9 @@ func main():string
 	TEST_ASSERT(errors.Count() == 0);
 
 	WfRuntimeThreadContext context(assembly);
-	context.PushStackFrame(assembly->functionByName[L"<initialize>"], 0);
+	context.PushStackFrame(assembly->functionByName[L"<initialize>"][0], 0);
 	context.ExecuteToEnd();
-	context.PushStackFrame(assembly->functionByName[L"main"], 0);
+	context.PushStackFrame(assembly->functionByName[L"main"][0], 0);
 	context.ExecuteToEnd();
 
 	Value result;
