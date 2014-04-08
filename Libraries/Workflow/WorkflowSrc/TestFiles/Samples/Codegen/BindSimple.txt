@@ -20,7 +20,6 @@ func main() : string
 	x.Value = 10;
 	y.Value = 20;
 	z.Value = 30;
-	subscription.Close();
 
 	return s;
 }
