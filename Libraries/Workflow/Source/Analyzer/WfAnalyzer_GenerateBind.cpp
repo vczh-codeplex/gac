@@ -310,62 +310,57 @@ ExpandBindExpression
 				WfObservingDependency dependency(group);
 				GetObservingDependency(manager, node->expression, dependency);
 				dependency.Cleanup();
+
+				auto lambdaBlock = MakePtr<WfBlockStatement>();
+				{
+					auto lambda = MakePtr<WfFunctionDeclaration>();
+					auto typeInfo = TypeInfoRetriver<Ptr<IValueSubscription>>::CreateTypeInfo();
+					lambda->returnType = GetTypeFromTypeInfo(typeInfo.Obj());
+					lambda->statement = lambdaBlock;
+
+					auto callLambda = MakePtr<WfCallExpression>();
+					node->expandedExpression = callLambda;
+
+					auto lambdaExpr = MakePtr<WfFunctionExpression>();
+					lambdaExpr->function = lambda;
+					callLambda->function = lambdaExpr;
+				}
 						
 				auto newSubscription = MakePtr<WfNewTypeExpression>();
-				node->expandedExpression = newSubscription;
 				{
-					auto systemType = MakePtr<WfTopQualifiedType>();
-					systemType->name.value = L"system";
-
-					auto subType = MakePtr<WfChildType>();
-					subType->parent = systemType;
-					subType->name.value = L"Subscription";
-
-					auto ptrType = MakePtr<WfSharedPointerType>();
-					ptrType->element = subType;
-					newSubscription->type = ptrType;
+					auto returnStat = MakePtr<WfReturnStatement>();
+					returnStat->expression = newSubscription;
+					lambdaBlock->statements.Add(returnStat);
+				}
+				{
+					auto typeInfo = TypeInfoRetriver<Ptr<IValueSubscription>>::CreateTypeInfo();
+					newSubscription->type = GetTypeFromTypeInfo(typeInfo.Obj());
 				}
 				{
 					auto func = MakePtr<WfFunctionDeclaration>();
 					newSubscription->functions.Add(func);
 					func->name.value = L"Subscribe";
 					{
-						auto systemType = MakePtr<WfTopQualifiedType>();
-						systemType->name.value = L"system";
-
-						auto subType = MakePtr<WfChildType>();
-						subType->parent = systemType;
-						subType->name.value = L"Listener";
-
-						auto ptrType = MakePtr<WfSharedPointerType>();
-						ptrType->element = subType;
-						func->returnType = ptrType;
+						auto typeInfo = TypeInfoRetriver<Ptr<IValueListener>>::CreateTypeInfo();
+						func->returnType = GetTypeFromTypeInfo(typeInfo.Obj());
 					}
 					{
-						auto funcType = MakePtr<WfFunctionType>();
-						{
-							auto type = MakePtr<WfPredefinedType>();
-							type->name = WfPredefinedTypeName::Void;
-							funcType->result = type;
-						}
-						{
-							auto type = MakePtr<WfPredefinedType>();
-							type->name = WfPredefinedTypeName::Object;
-							funcType->arguments.Add(type);
-						}
-
+						auto typeInfo = TypeInfoRetriver<Func<void(Value)>>::CreateTypeInfo();
 						auto argument = MakePtr<WfFunctionArgument>();
 						argument->name.value = L"<subscription-callback>";
-						argument->type = funcType;
+						argument->type = GetTypeFromTypeInfo(typeInfo.Obj());
 						func->arguments.Add(argument);
 					}
 					{
-						auto ex = MakePtr<WfStringExpression>();
-						ex->value.value = L"This function is not implemented.";
+						auto literal = MakePtr<WfLiteralExpression>();
+						literal->value = WfLiteralValue::Null;
 
-						auto raise = MakePtr<WfRaiseExceptionStatement>();
-						raise->expression = ex;
-						func->statement = raise;
+						auto returnStat = MakePtr<WfReturnStatement>();
+						returnStat->expression = literal;
+
+						auto block = MakePtr<WfBlockStatement>();
+						block->statements.Add(returnStat);
+						func->statement = block;
 					}
 				}
 				{
@@ -373,17 +368,19 @@ ExpandBindExpression
 					newSubscription->functions.Add(func);
 					func->name.value = L"Close";
 					{
-						auto type = MakePtr<WfPredefinedType>();
-						type->name = WfPredefinedTypeName::Bool;
-						func->returnType = type;
+						auto typeInfo = TypeInfoRetriver<bool>::CreateTypeInfo();
+						func->returnType = GetTypeFromTypeInfo(typeInfo.Obj());
 					}
 					{
-						auto ex = MakePtr<WfStringExpression>();
-						ex->value.value = L"This function is not implemented.";
+						auto literal = MakePtr<WfLiteralExpression>();
+						literal->value = WfLiteralValue::False;
 
-						auto raise = MakePtr<WfRaiseExceptionStatement>();
-						raise->expression = ex;
-						func->statement = raise;
+						auto returnStat = MakePtr<WfReturnStatement>();
+						returnStat->expression = literal;
+
+						auto block = MakePtr<WfBlockStatement>();
+						block->statements.Add(returnStat);
+						func->statement = block;
 					}
 				}
 			}
