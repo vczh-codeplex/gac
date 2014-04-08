@@ -1347,6 +1347,69 @@ ExpandBindExpression
 						lambdaBlock->statements.Add(stat);
 					}
 				}
+				{
+					auto func = MakePtr<WfFunctionDeclaration>();
+					func->returnType = GetTypeFromTypeInfo(TypeInfoRetriver<void>::CreateTypeInfo().Obj());
+					
+					auto block = MakePtr<WfBlockStatement>();
+					func->statement = block;
+					{
+						auto var = MakePtr<WfVariableDeclaration>();
+						var->name.value = L"<bind-activator-result>";
+						var->expression = ExpandObserveExpression(node->expression.Obj(), cacheNames);
+
+						auto varStat = MakePtr<WfVariableStatement>();
+						varStat->variable = var;
+						block->statements.Add(varStat);
+					}
+					{
+						auto ref = MakePtr<WfReferenceExpression>();
+						ref->name.value = L"<bind-listeners>";
+
+						auto values = MakePtr<WfMemberExpression>();
+						values->parent = ref;
+						values->name.value = L"Values";
+
+						auto forStat = MakePtr<WfForEachStatement>();
+						block->statements.Add(forStat);
+						forStat->name.value = L"<bind-callback>";
+						forStat->collection = values;
+						forStat->direction = WfForEachDirection::Normal;
+
+						auto forBlock = MakePtr<WfBlockStatement>();
+						forStat->statement = forBlock;
+
+						auto refResult = MakePtr<WfReferenceExpression>();
+						refResult->name.value = L"<bind-activator-result>";
+
+						auto refFunction = MakePtr<WfReferenceExpression>();
+						refFunction->name.value = L"<bind-callback>";
+
+						auto cast = MakePtr<WfTypeCastingExpression>();
+						cast->expression = refFunction;
+						cast->type = GetTypeFromTypeInfo(TypeInfoRetriver<Func<void(Value)>>::CreateTypeInfo().Obj());
+						cast->strategy = WfTypeCastingStrategy::Strong;
+
+						auto call = MakePtr<WfCallExpression>();
+						call->function = cast;
+						call->arguments.Add(refResult);
+
+						auto stat = MakePtr<WfExpressionStatement>();
+						stat->expression = call;
+						forBlock->statements.Add(stat);
+					}
+					
+					auto funcExpr = MakePtr<WfFunctionExpression>();
+					funcExpr->function = func;
+
+					auto var = MakePtr<WfVariableDeclaration>();
+					var->name.value = L"<bind-activator>";
+					var->expression = funcExpr;
+
+					auto varStat = MakePtr<WfVariableStatement>();
+					varStat->variable = var;
+					lambdaBlock->statements.Add(varStat);
+				}
 				FOREACH_INDEXER(WfExpression*, observe, index, callbackNames.Keys())
 				{
 					WString cachedName = cacheNames[observeParents[observe]];
@@ -1366,9 +1429,18 @@ ExpandBindExpression
 									func->arguments.Add(arg);
 								}
 							}
+							auto block = MakePtr<WfBlockStatement>();
+							func->statement = block;
 							{
-								auto block = MakePtr<WfBlockStatement>();
-								func->statement = block;
+								auto ref = MakePtr<WfReferenceExpression>();
+								ref->name.value = L"<bind-activator>";
+
+								auto call = MakePtr<WfCallExpression>();
+								call->function = ref;
+
+								auto stat = MakePtr<WfExpressionStatement>();
+								stat->expression = call;
+								block->statements.Add(stat);
 							}
 
 							auto funcExpr = MakePtr<WfFunctionExpression>();
