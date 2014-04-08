@@ -557,9 +557,21 @@ ExpandBindExpression
 					newListener->functions.Add(CreateListenerGetStoppedFunction());
 					newListener->functions.Add(CreateListenerStopListeningFunction());
 
+					auto variable = MakePtr<WfVariableDeclaration>();
+					variable->name.value = L"<listener-shared>";
+					variable->expression = newListener;
+					
+					auto variableStat = MakePtr<WfVariableStatement>();
+					variableStat->variable = variable;
+					block->statements.Add(variableStat);
+				}
+				{
+					auto listenerRef = MakePtr<WfReferenceExpression>();
+					listenerRef->name.value = L"<listener-shared>";
+
 					auto castExpr = MakePtr<WfTypeCastingExpression>();
 					castExpr->strategy = WfTypeCastingStrategy::Strong;
-					castExpr->expression = newListener;
+					castExpr->expression = listenerRef;
 					castExpr->type = GetTypeFromTypeInfo(TypeInfoRetriver<IValueListener*>::CreateTypeInfo().Obj());
 
 					auto assign = MakePtr<WfBinaryExpression>();
@@ -572,7 +584,8 @@ ExpandBindExpression
 					block->statements.Add(stat);
 				}
 				{
-					auto listenerRef = CreateBindVariableReference(L"<listener>");
+					auto listenerRef = MakePtr<WfReferenceExpression>();
+					listenerRef->name.value = L"<listener-shared>";
 
 					auto callbackRef = MakePtr<WfReferenceExpression>();
 					callbackRef->name.value = L"<bind-callback>";
@@ -594,8 +607,11 @@ ExpandBindExpression
 					block->statements.Add(stat);
 				}
 				{
+					auto listenerRef = MakePtr<WfReferenceExpression>();
+					listenerRef->name.value = L"<listener-shared>";
+
 					auto returnStat = MakePtr<WfReturnStatement>();
-					returnStat->expression = CreateBindVariableReference(L"<listener>");
+					returnStat->expression = listenerRef;
 					block->statements.Add(returnStat);
 				}
 				return func;
@@ -763,11 +779,23 @@ ExpandBindExpression
 				}
 				newSubscription->functions.Add(CreateBindSubscribeFunction());
 				newSubscription->functions.Add(CreateBindCloseFunction(variableTypes, handlerNames));
-				
+
 				{
+					auto variable = MakePtr<WfVariableDeclaration>();
+					variable->name.value = L"<subscription-shared>";
+					variable->expression = newSubscription;
+					
+					auto variableStat = MakePtr<WfVariableStatement>();
+					variableStat->variable = variable;
+					lambdaBlock->statements.Add(variableStat);
+				}
+				{
+					auto subscriptionRef = MakePtr<WfReferenceExpression>();
+					subscriptionRef->name.value = L"<subscription-shared>";
+
 					auto castExpr = MakePtr<WfTypeCastingExpression>();
 					castExpr->strategy = WfTypeCastingStrategy::Strong;
-					castExpr->expression = newSubscription;
+					castExpr->expression = subscriptionRef;
 					castExpr->type = GetTypeFromTypeInfo(TypeInfoRetriver<IValueSubscription*>::CreateTypeInfo().Obj());
 
 					auto assign = MakePtr<WfBinaryExpression>();
@@ -780,8 +808,11 @@ ExpandBindExpression
 					lambdaBlock->statements.Add(stat);
 				}
 				{
+					auto subscriptionRef = MakePtr<WfReferenceExpression>();
+					subscriptionRef->name.value = L"<subscription-shared>";
+
 					auto returnStat = MakePtr<WfReturnStatement>();
-					returnStat->expression = CreateBindVariableReference(L"<subscription>");
+					returnStat->expression = subscriptionRef;
 					lambdaBlock->statements.Add(returnStat);
 				}
 			}
