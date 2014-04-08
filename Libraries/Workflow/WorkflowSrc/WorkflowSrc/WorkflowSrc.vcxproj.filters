@@ -1169,9 +1169,6 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\A2_EmptyExtendedObserveEvent.txt">
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
     </Text>
-    <Text Include="..\TestFiles\Samples\AnalyzerError\F1_ObservedDefaultEventNotExists.txt">
-      <Filter>Resource Files\Samples\AnalyzerError</Filter>
-    </Text>
     <Text Include="..\TestFiles\Samples\AnalyzerError\F1_ObservedEventNotExists.txt">
       <Filter>Resource Files\Samples\AnalyzerError</Filter>
     </Text>

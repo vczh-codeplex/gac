@@ -727,12 +727,9 @@ ValidateStructure(Expression)
 							}
 						}
 					}
-					else
+					if (node->events.Count() == 0)
 					{
-						if (node->events.Count() == 0)
-						{
-							manager->errors.Add(WfErrors::EmptyExtendedObserveEvent(node));
-						}
+						manager->errors.Add(WfErrors::EmptyObserveEvent(node));
 					}
 
 					ValidateExpressionStructure(manager, context, node->parent);

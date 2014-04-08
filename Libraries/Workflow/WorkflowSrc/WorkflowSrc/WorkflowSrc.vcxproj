@@ -436,7 +436,6 @@
     <Text Include="..\TestFiles\Samples\AnalyzerError\D6_ImplementDuplicateFunction.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\F0_ExpressionTopQualifiedSymbolNotExists.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\F1_ExpressionChildSymbolNotExists.txt" />
-    <Text Include="..\TestFiles\Samples\AnalyzerError\F1_ObservedDefaultEventNotExists.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\F1_ObservedEventNotExists.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\F1_ObservedEventNotExists2.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerError\F1_ObservedPropertyNotExists.txt" />

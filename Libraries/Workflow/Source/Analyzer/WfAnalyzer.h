@@ -273,7 +273,6 @@ Semantic Analyzing
 			extern void										GetObservingDependency(WfLexicalScopeManager* manager, Ptr<WfExpression> expression, WfObservingDependency& dependency);
 			extern Ptr<WfExpression>						ExpandObserveExpression(WfExpression* expression, collections::Dictionary<WfExpression*, WString>& cacheNames, bool useCache = true);
 			extern Ptr<WfExpression>						CopyExpression(Ptr<WfExpression> expression);
-			extern Ptr<WfStatement>							ExpandObserveStatement(Ptr<WfStatement> statement, collections::Dictionary<WfExpression*, WString>& cacheNames);
 			extern Ptr<WfStatement>							CopyStatement(Ptr<WfStatement> statement);
 			extern void										ExpandBindExpression(WfLexicalScopeManager* manager, WfBindExpression* node);
 
@@ -376,7 +375,7 @@ Error Messages
 				static Ptr<parsing::ParsingError>			WrongFormatStringSyntax(WfExpression* node);
 				static Ptr<parsing::ParsingError>			WrongSimpleObserveExpression(WfExpression* node);
 				static Ptr<parsing::ParsingError>			WrongSimpleObserveEvent(WfExpression* node);
-				static Ptr<parsing::ParsingError>			EmptyExtendedObserveEvent(WfExpression* node);
+				static Ptr<parsing::ParsingError>			EmptyObserveEvent(WfExpression* node);
 				static Ptr<parsing::ParsingError>			ObserveNotInBind(WfExpression* node);
 				static Ptr<parsing::ParsingError>			BindInBind(WfExpression* node);
 				static Ptr<parsing::ParsingError>			AttachInBind(WfExpression* node);
