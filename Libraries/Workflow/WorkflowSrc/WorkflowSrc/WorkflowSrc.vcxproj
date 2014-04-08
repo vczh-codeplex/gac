@@ -477,6 +477,7 @@
     <Text Include="..\TestFiles\Samples\AnalyzerScope\ModuleB.txt" />
     <Text Include="..\TestFiles\Samples\AnalyzerScope\ModuleC.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\AnonymousLambda.txt" />
+    <Text Include="..\TestFiles\Samples\Codegen\BindComplex.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\BindSimple.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\ControlFlow.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\Delete.txt" />
