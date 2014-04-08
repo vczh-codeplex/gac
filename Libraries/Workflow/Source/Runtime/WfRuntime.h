@@ -235,7 +235,7 @@ Instruction
 			{
 			public:
 				collections::List<WString>							variableNames;
-				collections::Dictionary<WString, vint>				functionByName;
+				collections::Group<WString, vint>					functionByName;
 				collections::List<Ptr<WfAssemblyFunction>>			functions;
 				collections::List<WfInstruction>					instructions;
 			};

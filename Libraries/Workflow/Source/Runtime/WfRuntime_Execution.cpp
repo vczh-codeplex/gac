@@ -424,7 +424,9 @@ Helper Functions
 
 			Ptr<reflection::description::IValueFunctionProxy> LoadFunction(Ptr<WfRuntimeGlobalContext> context, const WString& name)
 			{
-				vint functionIndex = context->assembly->functionByName[name];
+				const auto& names = context->assembly->functionByName[name];
+				CHECK_ERROR(names.Count() == 1, L"vl::workflow::runtime::LoadFunction(Ptr<WfRUntimeGlobalContext>, const WString&)#Multiple functions are found.");
+				vint functionIndex = names[0];
 				auto lambda = MakePtr<WfRuntimeLambda>(context, nullptr, functionIndex);
 				return lambda;
 			}
