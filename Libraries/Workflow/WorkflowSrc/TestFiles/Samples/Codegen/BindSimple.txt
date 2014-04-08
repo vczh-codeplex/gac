@@ -6,7 +6,7 @@ var s = "";
 
 func Callback(value : object) : void
 {
-	s = s & "[" & (cast int value) & "]";
+	s = $"$(s)[$(cast int value)]";
 }
 
 func main() : string
