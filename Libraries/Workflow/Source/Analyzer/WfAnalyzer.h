@@ -199,6 +199,7 @@ Type Analyzing
 			extern Ptr<WfLexicalScopeName>					GetScopeNameFromReferenceType(WfLexicalScope* scope, Ptr<WfType> type);
 			extern Ptr<reflection::description::ITypeInfo>	CreateTypeInfoFromType(WfLexicalScope* scope, Ptr<WfType> type);
 
+			extern Ptr<WfType>								CopyType(Ptr<WfType> type);
 			extern Ptr<reflection::description::ITypeInfo>	CopyTypeInfo(reflection::description::ITypeInfo* typeInfo);
 			extern bool										CanConvertToType(reflection::description::ITypeInfo* fromType, reflection::description::ITypeInfo* toType, bool explicitly);
 			extern bool										IsSameType(reflection::description::ITypeInfo* fromType, reflection::description::ITypeInfo* toType);
@@ -271,6 +272,8 @@ Semantic Analyzing
 			extern void										ValidateExpressionSemantic(WfLexicalScopeManager* manager, Ptr<WfExpression> expression, Ptr<reflection::description::ITypeInfo> expectedType, collections::List<ResolveExpressionResult>& results);
 			extern void										GetObservingDependency(WfLexicalScopeManager* manager, Ptr<WfExpression> expression, WfObservingDependency& dependency);
 			extern Ptr<WfExpression>						ExpandObserveExpression(Ptr<WfExpression> expression, collections::Dictionary<WfExpression*, WString>& cacheNames, bool useCache = true);
+			extern Ptr<WfExpression>						CopyExpression(Ptr<WfExpression> expression);
+			extern Ptr<WfStatement>							CopyStatement(Ptr<WfStatement> statement);
 			extern void										ExpandBindExpression(WfLexicalScopeManager* manager, WfBindExpression* node);
 
 			extern Ptr<WfLexicalScopeName>					GetExpressionScopeName(WfLexicalScopeManager* manager, Ptr<WfExpression> expression);
