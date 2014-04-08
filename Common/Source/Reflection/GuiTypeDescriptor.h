@@ -481,7 +481,7 @@ Interface Implementation Proxy
 				virtual Value					Invoke(Ptr<IValueList> arguments)=0;
 			};
 
-			class IValueListener : public virtual IDescriptable, public Description<IValueSubscription>
+			class IValueListener : public virtual IDescriptable, public Description<IValueListener>
 			{
 			public:
 				virtual IValueSubscription*		GetSubscription() = 0;
