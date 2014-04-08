@@ -584,9 +584,6 @@ ExpandBindExpression
 					block->statements.Add(stat);
 				}
 				{
-					auto listenerRef = MakePtr<WfReferenceExpression>();
-					listenerRef->name.value = L"<listener-shared>";
-
 					auto callbackRef = MakePtr<WfReferenceExpression>();
 					callbackRef->name.value = L"<bind-callback>";
 
@@ -599,7 +596,7 @@ ExpandBindExpression
 
 					auto call = MakePtr<WfCallExpression>();
 					call->function = func;
-					call->arguments.Add(listenerRef);
+					call->arguments.Add(CreateBindVariableReference(L"<listener>"));
 					call->arguments.Add(callbackRef);
 
 					auto stat = MakePtr<WfExpressionStatement>();
@@ -662,7 +659,7 @@ ExpandBindExpression
 
 							auto stat = MakePtr<WfExpressionStatement>();
 							stat->expression = detach;
-							ifBlock->statements.Add(stat);
+							//ifBlock->statements.Add(stat);
 						}
 					}
 					FOREACH_INDEXER(WString, name, index, variableTypes.Keys())
@@ -674,6 +671,21 @@ ExpandBindExpression
 
 						auto stat = MakePtr<WfExpressionStatement>();
 						stat->expression = assign;
+						ifBlock->statements.Add(stat);
+					}
+					{
+						auto ref = MakePtr<WfReferenceExpression>();
+						ref->name.value = L"<bind-listeners>";
+
+						auto func = MakePtr<WfMemberExpression>();
+						func->parent = ref;
+						func->name.value = L"Clear";
+
+						auto call = MakePtr<WfCallExpression>();
+						call->function = func;
+
+						auto stat = MakePtr<WfExpressionStatement>();
+						stat->expression = call;
 						ifBlock->statements.Add(stat);
 					}
 					{
@@ -760,7 +772,7 @@ ExpandBindExpression
 
 				lambdaBlock->statements.Add(CreateBindWritableVariable(L"<bind-closed>", TypeInfoRetriver<bool>::CreateTypeInfo().Obj()));
 				{
-					auto typeInfo = TypeInfoRetriver<Dictionary<Ptr<IValueListener>, Func<void(Value)>>>::CreateTypeInfo();
+					auto typeInfo = TypeInfoRetriver<Dictionary<IValueListener*, Func<void(Value)>>>::CreateTypeInfo();
 					auto variable = MakePtr<WfVariableDeclaration>();
 					variable->name.value = L"<bind-listeners>";
 					variable->type = GetTypeFromTypeInfo(typeInfo.Obj());
