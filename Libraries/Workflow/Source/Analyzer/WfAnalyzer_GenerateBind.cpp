@@ -333,14 +333,7 @@ ExpandObserveExpression
 
 				Ptr<WfExpression> Copy(Ptr<WfExpression> expr)
 				{
-					if (expr)
-					{
-						return ExpandObserveExpression(expr, cacheNames);
-					}
-					else
-					{
-						return 0;
-					}
+					return ExpandObserveExpression(expr, cacheNames);
 				}
 
 				void Visit(WfTopQualifiedExpression* node)override
@@ -593,7 +586,7 @@ ExpandObserveExpression
 						newArg->name.value = arg->name.value;
 						func->arguments.Add(newArg);
 					}
-					func->statement = CopyStatement(decl->statement);
+					func->statement = ExpandObserveStatement(decl->statement, cacheNames);
 					return func;
 				}
 
@@ -622,48 +615,192 @@ ExpandObserveExpression
 
 			Ptr<WfExpression> ExpandObserveExpression(Ptr<WfExpression> expression, collections::Dictionary<WfExpression*, WString>& cacheNames, bool useCache)
 			{
-				if (useCache)
-				{
-					vint index = cacheNames.Keys().IndexOf(expression.Obj());
-					if (index != -1)
-					{
-						auto ref = MakePtr<WfReferenceExpression>();
-						ref->name.value = cacheNames.Values()[index];
-						return ref;
-					}
-				}
-
-				ExpandObserveExpressionVisitor visitor(cacheNames);
-				expression->Accept(&visitor);
-				return visitor.result;
-			}
-
-			Ptr<WfExpression> CopyExpression(Ptr<WfExpression> expression)
-			{
 				if (expression)
 				{
-					Dictionary<WfExpression*, WString> cacheNames;
-					return ExpandObserveExpression(expression, cacheNames);
+					if (useCache)
+					{
+						vint index = cacheNames.Keys().IndexOf(expression.Obj());
+						if (index != -1)
+						{
+							auto ref = MakePtr<WfReferenceExpression>();
+							ref->name.value = cacheNames.Values()[index];
+							return ref;
+						}
+					}
+
+					ExpandObserveExpressionVisitor visitor(cacheNames);
+					expression->Accept(&visitor);
+					return visitor.result;
 				}
 				else
 				{
 					return 0;
 				}
+			}
+
+			Ptr<WfExpression> CopyExpression(Ptr<WfExpression> expression)
+			{
+				Dictionary<WfExpression*, WString> cacheNames;
+				return ExpandObserveExpression(expression, cacheNames);
 			}
 
 /***********************************************************************
 CopyStatement
 ***********************************************************************/
 
-			Ptr<WfStatement> CopyStatement(Ptr<WfStatement> statement)
+			class ExpandObserveStatementVisitor : public Object, public WfStatement::IVisitor
+			{
+			public:
+				Dictionary<WfExpression*, WString>&		cacheNames;
+				Ptr<WfStatement>						result;
+
+				ExpandObserveStatementVisitor(Dictionary<WfExpression*, WString>& _cacheNames)
+					:cacheNames(_cacheNames)
+				{
+				}
+
+				Ptr<WfExpression> Copy(Ptr<WfExpression> expr)
+				{
+					return ExpandObserveExpression(expr, cacheNames);
+				}
+
+				Ptr<WfStatement> Copy(Ptr<WfStatement> expr)
+				{
+					return ExpandObserveStatement(expr, cacheNames);
+				}
+
+				void Visit(WfBreakStatement* node)override
+				{
+					auto stat = MakePtr<WfBreakStatement>();
+					result = stat;
+				}
+
+				void Visit(WfContinueStatement* node)override
+				{
+					auto stat = MakePtr<WfContinueStatement>();
+					result = stat;
+				}
+
+				void Visit(WfReturnStatement* node)override
+				{
+					auto stat = MakePtr<WfReturnStatement>();
+					stat->expression = Copy(node->expression);
+					result = stat;
+				}
+
+				void Visit(WfDeleteStatement* node)override
+				{
+					auto stat = MakePtr<WfDeleteStatement>();
+					stat->expression = Copy(node->expression);
+					result = stat;
+				}
+
+				void Visit(WfRaiseExceptionStatement* node)override
+				{
+					auto stat = MakePtr<WfRaiseExceptionStatement>();
+					stat->expression = Copy(node->expression);
+					result = stat;
+				}
+
+				void Visit(WfIfStatement* node)override
+				{
+					auto stat = MakePtr<WfIfStatement>();
+					stat->name.value = node->name.value;
+					stat->type = CopyType(node->type);
+					stat->expression = Copy(node->expression);
+					stat->trueBranch = Copy(node->trueBranch);
+					stat->falseBranch = Copy(node->falseBranch);
+					result = stat;
+				}
+
+				void Visit(WfSwitchStatement* node)override
+				{
+					auto stat = MakePtr<WfSwitchStatement>();
+					stat->expression = Copy(node->expression);
+					stat->defaultBranch = Copy(node->defaultBranch);
+					FOREACH(Ptr<WfSwitchCase>, switchCase, node->caseBranches)
+					{
+						auto newCase = MakePtr<WfSwitchCase>();
+						newCase->expression = Copy(switchCase->expression);
+						newCase->statement = Copy(switchCase->statement);
+						stat->caseBranches.Add(newCase);
+					}
+					result = stat;
+				}
+
+				void Visit(WfWhileStatement* node)override
+				{
+					auto stat = MakePtr<WfWhileStatement>();
+					stat->condition = Copy(node->condition);
+					stat->statement = Copy(node->statement);
+					result = stat;
+				}
+
+				void Visit(WfForEachStatement* node)override
+				{
+					auto stat = MakePtr<WfForEachStatement>();
+					stat->name.value = node->name.value;
+					stat->direction = node->direction;
+					stat->collection = Copy(node->collection);
+					stat->statement = Copy(node->statement);
+					result = stat;
+				}
+
+				void Visit(WfTryStatement* node)override
+				{
+					auto stat = MakePtr<WfTryStatement>();
+					stat->name.value = node->name.value;
+					stat->protectedStatement = Copy(node->protectedStatement);
+					stat->catchStatement = Copy(node->catchStatement);
+					stat->finallyStatement = Copy(node->finallyStatement);
+					result = stat;
+				}
+
+				void Visit(WfBlockStatement* node)override
+				{
+					auto stat = MakePtr<WfBlockStatement>();
+					result = stat;
+				}
+
+				void Visit(WfExpressionStatement* node)override
+				{
+					auto stat = MakePtr<WfExpressionStatement>();
+					stat->expression = Copy(node->expression);
+					result = stat;
+				}
+
+				void Visit(WfVariableStatement* node)override
+				{
+					auto var = MakePtr<WfVariableDeclaration>();
+					var->name.value = node->variable->name.value;
+					var->type = CopyType(node->variable->type);
+					var->expression = Copy(node->variable->expression);
+
+					auto stat = MakePtr<WfVariableStatement>();
+					stat->variable = var;
+					result = stat;
+				}
+
+			};
+
+			Ptr<WfStatement> ExpandObserveStatement(Ptr<WfStatement> statement, collections::Dictionary<WfExpression*, WString>& cacheNames)
 			{
 				if (statement)
 				{
+					ExpandObserveStatementVisitor visitor(cacheNames);
+					statement->Accept(&visitor);
+					return visitor.result;
 				}
 				else
 				{
 					return 0;
 				}
+			}
+
+			Ptr<WfStatement> CopyStatement(Ptr<WfStatement> statement)
+			{
+				Dictionary<WfExpression*, WString> cacheNames;
+				return ExpandObserveStatement(statement, cacheNames);
 			}
 
 /***********************************************************************
