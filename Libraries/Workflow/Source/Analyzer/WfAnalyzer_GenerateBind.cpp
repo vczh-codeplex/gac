@@ -810,7 +810,7 @@ CopyStatement
 			}
 
 /***********************************************************************
-ExpandBindExpression
+DecodeObserveExpression
 ***********************************************************************/
 
 			void DecodeObserveExpression(WfLexicalScopeManager* manager, WfExpression* observe, List<IEventInfo*>& events, WfExpression*& parent)
@@ -833,6 +833,10 @@ ExpandBindExpression
 					events.Add(ev);
 				}
 			}
+
+/***********************************************************************
+CreateBindDefaultValue
+***********************************************************************/
 
 			Ptr<WfExpression> CreateBindDefaultValue(ITypeInfo* elementType)
 			{
@@ -861,6 +865,10 @@ ExpandBindExpression
 				}
 			}
 
+/***********************************************************************
+CreateBindWritableVariable
+***********************************************************************/
+
 			Ptr<WfVariableStatement> CreateBindWritableVariable(const WString& name, ITypeInfo* elementType)
 			{
 				auto ctorArg = MakePtr<WfConstructorArgument>();
@@ -877,6 +885,10 @@ ExpandBindExpression
 				variableStat->variable = variable;
 				return variableStat;
 			}
+
+/***********************************************************************
+IValueListener::GetSubscription
+***********************************************************************/
 
 			Ptr<WfFunctionDeclaration> CreateListenerGetSubscriptionFunction()
 			{
@@ -896,6 +908,10 @@ ExpandBindExpression
 				}
 				return func;
 			}
+
+/***********************************************************************
+IValueListener::GetStopped
+***********************************************************************/
 
 			Ptr<WfFunctionDeclaration> CreateListenerGetStoppedFunction()
 			{
@@ -934,6 +950,10 @@ ExpandBindExpression
 				}
 				return func;
 			}
+
+/***********************************************************************
+IValueListener::StopListening
+***********************************************************************/
 
 			Ptr<WfFunctionDeclaration> CreateListenerStopListeningFunction()
 			{
@@ -1004,6 +1024,10 @@ ExpandBindExpression
 				}
 				return func;
 			}
+
+/***********************************************************************
+IValueSubscription::Subscribe
+***********************************************************************/
 
 			Ptr<WfFunctionDeclaration> CreateBindSubscribeFunction()
 			{
@@ -1091,6 +1115,10 @@ ExpandBindExpression
 				return func;
 			}
 
+/***********************************************************************
+ExpandObserveEvent
+***********************************************************************/
+
 			Ptr<WfExpression> ExpandObserveEvent(WfLexicalScopeManager* manager, const WString& cacheName, WfExpression* observe, vint eventIndex)
 			{
 				if (auto observeExpr = dynamic_cast<WfObserveExpression*>(observe))
@@ -1128,6 +1156,10 @@ ExpandBindExpression
 				}
 			}
 
+/***********************************************************************
+CreateBindAttachStatement
+***********************************************************************/
+
 			void CreateBindAttachStatement(Ptr<WfBlockStatement> block, WfLexicalScopeManager* manager, WfExpression* observe, const WString& cachedName, Group<WfExpression*, WString>& callbackNames, Group<WfExpression*, WString>& handlerNames)
 			{
 				vint index = callbackNames.Keys().IndexOf(observe);
@@ -1148,6 +1180,10 @@ ExpandBindExpression
 				}
 			}
 
+/***********************************************************************
+CreateBindDetachStatement
+***********************************************************************/
+
 			void CreateBindDetachStatement(Ptr<WfBlockStatement> block, WfExpression* observe, Group<WfExpression*, WString>& handlerNames)
 			{
 				vint index = handlerNames.Keys().IndexOf(observe);
@@ -1162,6 +1198,10 @@ ExpandBindExpression
 				}
 			}
 
+/***********************************************************************
+CreateBindCacheAssignStatement
+***********************************************************************/
+
 			void CreateBindCacheAssignStatement(Ptr<WfBlockStatement> block, WfExpression* parent, Dictionary<WfExpression*, WString>& cacheNames)
 			{
 				auto name = cacheNames[parent];
@@ -1175,6 +1215,10 @@ ExpandBindExpression
 				stat->expression = assign;
 				block->statements.Add(stat);
 			}
+
+/***********************************************************************
+IValueSubscription::Close
+***********************************************************************/
 
 			Ptr<WfFunctionDeclaration> CreateBindCloseFunction(const Dictionary<WString, Ptr<ITypeInfo>>& variableTypes, Group<WfExpression*, WString>& handlerNames)
 			{
@@ -1262,6 +1306,10 @@ ExpandBindExpression
 
 				return func;
 			}
+
+/***********************************************************************
+ExpandBindExpression
+***********************************************************************/
 
 			void ExpandBindExpression(WfLexicalScopeManager* manager, WfBindExpression* node)
 			{
