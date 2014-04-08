@@ -79,8 +79,10 @@ WfObservingDependency
 
 			void WfObservingDependency::Cleanup()
 			{
-				vint count = dependencies.Keys().Count();
 				SortedList<WfExpression*> all;
+				CopyFrom(all, From(dependencies.Keys()).Distinct());
+
+				vint count = dependencies.Keys().Count();
 				for (vint i = 0; i < count; i++)
 				{
 					const auto& values = dependencies.GetByIndex(i);
@@ -88,18 +90,13 @@ WfObservingDependency
 					{
 						dependencies.Remove(dependencies.Keys()[i], 0);
 					}
-					FOREACH(WfExpression*, observe, values)
+
+					FOREACH(WfExpression*, value, values)
 					{
-						if (!all.Contains(observe))
-						{
-							all.Add(observe);
-						}
+						all.Remove(value);
 					}
 				}
-				FOREACH(WfExpression*, observe, dependencies.Keys())
-				{
-					all.Remove(observe);
-				}
+
 				FOREACH(WfExpression*, observe, all)
 				{
 					dependencies.Add(0, observe);
@@ -333,7 +330,7 @@ ExpandObserveExpression
 
 				Ptr<WfExpression> Copy(Ptr<WfExpression> expr)
 				{
-					return ExpandObserveExpression(expr, cacheNames);
+					return ExpandObserveExpression(expr.Obj(), cacheNames);
 				}
 
 				void Visit(WfTopQualifiedExpression* node)override
@@ -613,13 +610,13 @@ ExpandObserveExpression
 				}
 			};
 
-			Ptr<WfExpression> ExpandObserveExpression(Ptr<WfExpression> expression, collections::Dictionary<WfExpression*, WString>& cacheNames, bool useCache)
+			Ptr<WfExpression> ExpandObserveExpression(WfExpression* expression, collections::Dictionary<WfExpression*, WString>& cacheNames, bool useCache)
 			{
 				if (expression)
 				{
 					if (useCache)
 					{
-						vint index = cacheNames.Keys().IndexOf(expression.Obj());
+						vint index = cacheNames.Keys().IndexOf(expression);
 						if (index != -1)
 						{
 							auto ref = MakePtr<WfReferenceExpression>();
@@ -641,7 +638,7 @@ ExpandObserveExpression
 			Ptr<WfExpression> CopyExpression(Ptr<WfExpression> expression)
 			{
 				Dictionary<WfExpression*, WString> cacheNames;
-				return ExpandObserveExpression(expression, cacheNames);
+				return ExpandObserveExpression(expression.Obj(), cacheNames);
 			}
 
 /***********************************************************************
@@ -661,7 +658,7 @@ CopyStatement
 
 				Ptr<WfExpression> Copy(Ptr<WfExpression> expr)
 				{
-					return ExpandObserveExpression(expr, cacheNames);
+					return ExpandObserveExpression(expr.Obj(), cacheNames);
 				}
 
 				Ptr<WfStatement> Copy(Ptr<WfStatement> expr)
@@ -1218,6 +1215,7 @@ ExpandBindExpression
 					callLambda->function = lambdaExpr;
 				}
 
+				Dictionary<WfExpression*, WfExpression*> observeParents;
 				Dictionary<WfExpression*, WString> cacheNames;
 				Group<WfExpression*, WString> handlerNames, callbackNames;
 				Dictionary<WString, Ptr<ITypeInfo>> variableTypes;
@@ -1230,7 +1228,8 @@ ExpandBindExpression
 					DecodeObserveExpression(manager, observe, events, parent);
 
 					WString cacheName = L"<bind-cache>" + itow(observeIndex);
-					cacheNames.Add(observe, cacheName);
+					cacheNames.Add(parent, cacheName);
+					observeParents.Add(observe, parent);
 					{
 						auto elementType = manager->expressionResolvings[parent].type;
 						variableTypes.Add(cacheName, elementType);
@@ -1241,7 +1240,7 @@ ExpandBindExpression
 					{
 						WString handlerName = L"<bind-observe>" + itow(observeIndex) + L"_" + itow(eventIndex);
 						{
-							handlerNames.Add(observe, handlerName);
+							handlerNames.Add(parent, handlerName);
 							auto elementType = TypeInfoRetriver<Ptr<IEventHandler>>::CreateTypeInfo();
 							variableTypes.Add(handlerName, elementType);
 							lambdaBlock->statements.Add(CreateBindWritableVariable(handlerName, elementType.Obj()));
@@ -1249,7 +1248,7 @@ ExpandBindExpression
 						
 						WString callbackName = L"<bind-callback>" + itow(observeIndex) + L"_" + itow(eventIndex);
 						{
-							callbackNames.Add(observe, callbackName);
+							callbackNames.Add(parent, callbackName);
 							auto elementType = CopyTypeInfo(ev->GetHandlerType());
 							variableTypes.Add(callbackName, elementType);
 							lambdaBlock->statements.Add(CreateBindWritableVariable(callbackName, elementType.Obj()));
@@ -1270,6 +1269,57 @@ ExpandBindExpression
 					lambdaBlock->statements.Add(variableStat);
 				}
 				lambdaBlock->statements.Add(CreateBindWritableVariable(L"<subscription>", TypeInfoRetriver<IValueSubscription*>::CreateTypeInfo().Obj()));
+
+				{
+					Group<WfExpression*, WfExpression*> dependencies;
+					FOREACH_INDEXER(WfExpression*, key, index, dependency.dependencies.Keys())
+					{
+						FOREACH(WfExpression*, value, dependency.dependencies.GetByIndex(index))
+						{
+							if (value)
+							{
+								dependencies.Add(value, key);
+							}
+						}
+					}
+					
+					List<WfExpression*> sorted, all;
+					CopyFrom(all, dependency.dependencies.Keys());
+					all.Remove(0);
+					sorted.Add(0);
+					for (vint i = 0; i < sorted.Count(); i++)
+					{
+						auto observe = sorted[i];
+						for (vint j = dependencies.Count() - 1; j >= 0; j--)
+						{
+							auto key = dependencies.Keys()[j];
+							if (From(dependencies.GetByIndex(j))
+								.All([&all](WfExpression* value){return !all.Contains(value); })
+								)
+							{
+								all.Remove(key);
+								dependencies.Remove(key);
+								sorted.Add(key);
+							}
+						}
+					}
+					sorted.Remove(0);
+
+					FOREACH(WfExpression*, observe, sorted)
+					{
+						auto parent = observeParents[observe];
+						auto name = cacheNames[parent];
+
+						auto assign = MakePtr<WfBinaryExpression>();
+						assign->op = WfBinaryOperator::Assign;
+						assign->first = CreateBindVariableReference(name);
+						assign->second = ExpandObserveExpression(parent, cacheNames, false);
+
+						auto stat = MakePtr<WfExpressionStatement>();
+						stat->expression = assign;
+						lambdaBlock->statements.Add(stat);
+					}
+				}
 						
 				auto newSubscription = MakePtr<WfNewTypeExpression>();
 				{
