@@ -600,8 +600,29 @@ CreateInstance
 				{
 					typeName = scope->typeName;
 					instance = scope->rootInstance;
-					instanceLoader=GetInstanceLoaderManager()->GetLoader(typeName);
+					instanceLoader = GetInstanceLoaderManager()->GetLoader(typeName);
 				}
+				else
+				{
+					auto contextCtor = source.context->instance;
+					env->scope->errors.Add(
+						L"Failed to find type \"" +
+						(contextCtor->typeNamespace == L"" 
+							? contextCtor->typeName
+							: contextCtor->typeNamespace + L":" + contextCtor->typeName
+							) +
+						L"\".");
+				}
+			}
+			else
+			{
+				env->scope->errors.Add(
+					L"Failed to find type \"" +
+					(ctor->typeNamespace == L"" 
+						? ctor->typeName
+						: ctor->typeNamespace + L":" + ctor->typeName
+						) +
+					L"\".");
 			}
 
 			if(instance.GetRawPtr() && instanceLoader)
@@ -626,6 +647,26 @@ ExecuteBindingSetters
 				if (!bindingSetter.binder->SetPropertyValue(env, bindingSetter.loader, bindingSetter.propertyValue))
 				{
 					bindingSetter.propertyValue.propertyValue.DeleteRawPtr();
+				}
+				else
+				{
+					auto binding = bindingSetter.binder->GetBindingName();
+					auto key = bindingSetter.propertyValue.propertyName;
+					auto value = bindingSetter.propertyValue.propertyValue;
+					env->scope->errors.Add(
+						L"Failed to set property \"" +
+						key +
+						L"\" of \"" +
+						env->context->instance->typeName +
+						L"\" using binding \"" +
+						binding +
+						L"\" and value \"" +
+						(
+							value.GetValueType() == Value::Null ? WString(L"null") :
+							value.GetValueType() == Value::Text ? value.GetText() :
+							(L"<" + value.GetTypeDescriptor()->GetTypeName() + L">")
+						) +
+						L"\".");
 				}
 			}
 		}
@@ -688,6 +729,28 @@ ExecuteBindingSetters
 							eventSetter.loader->SetEventValue(propertyValue);
 						}
 					}
+					else
+					{
+						env->scope->errors.Add(
+							L"Event handler \"" +
+							eventSetter.handlerName +
+							L"\" exists but the type does not match the event \"" +
+							eventSetter.propertyValue.propertyName +
+							L"\" of \"" +
+							env->context->instance->typeName +
+							L"\".");
+					}
+				}
+				else
+				{
+					env->scope->errors.Add(
+						L"Failed to find event handler \"" +
+						eventSetter.handlerName +
+						L"\" when setting event \"" +
+						eventSetter.propertyValue.propertyName +
+						L"\" of \"" +
+						env->context->instance->typeName +
+						L"\".");
 				}
 			}
 #endif
