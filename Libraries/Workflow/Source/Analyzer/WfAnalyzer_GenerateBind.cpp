@@ -1242,6 +1242,65 @@ CreateBindCacheAssignStatement
 			}
 
 /***********************************************************************
+IValueSubscription::Update
+***********************************************************************/
+
+			Ptr<WfFunctionDeclaration> CreateBindUpdateFunction(const Dictionary<WString, Ptr<ITypeInfo>>& variableTypes, Group<WfExpression*, WString>& handlerNames)
+			{
+				auto func = MakePtr<WfFunctionDeclaration>();
+				func->name.value = L"Update";
+				{
+					auto typeInfo = TypeInfoRetriver<bool>::CreateTypeInfo();
+					func->returnType = GetTypeFromTypeInfo(typeInfo.Obj());
+				}
+
+				auto block = MakePtr<WfBlockStatement>();
+				func->statement = block;
+				{
+					auto ifStat = MakePtr<WfIfStatement>();
+					block->statements.Add(ifStat);
+					{
+						auto notExpr = MakePtr<WfUnaryExpression>();
+						notExpr->op = WfUnaryOperator::Not;
+						notExpr->operand = CreateBindVariableReference(L"<bind-closed>");
+						ifStat->expression = notExpr;
+					}
+
+					auto ifBlock = MakePtr<WfBlockStatement>();
+					ifStat->trueBranch = ifBlock;
+					{
+						auto ref = MakePtr<WfReferenceExpression>();
+						ref->name.value = L"<bind-activator>";
+
+						auto call = MakePtr<WfCallExpression>();
+						call->function = ref;
+
+						auto stat = MakePtr<WfExpressionStatement>();
+						stat->expression = call;
+						ifBlock->statements.Add(stat);
+					}
+					{
+						auto literal = MakePtr<WfLiteralExpression>();
+						literal->value = WfLiteralValue::True;
+
+						auto returnStat = MakePtr<WfReturnStatement>();
+						returnStat->expression = literal;
+						ifBlock->statements.Add(returnStat);
+					}
+				}
+				{
+					auto literal = MakePtr<WfLiteralExpression>();
+					literal->value = WfLiteralValue::False;
+
+					auto returnStat = MakePtr<WfReturnStatement>();
+					returnStat->expression = literal;
+					block->statements.Add(returnStat);
+				}
+
+				return func;
+			}
+
+/***********************************************************************
 IValueSubscription::Close
 ***********************************************************************/
 
@@ -1609,6 +1668,7 @@ ExpandBindExpression
 					newSubscription->type = GetTypeFromTypeInfo(typeInfo.Obj());
 				}
 				newSubscription->functions.Add(CreateBindSubscribeFunction());
+				newSubscription->functions.Add(CreateBindUpdateFunction(variableTypes, handlerNames));
 				newSubscription->functions.Add(CreateBindCloseFunction(variableTypes, handlerNames));
 
 				{

@@ -859,6 +859,11 @@ Interface Implementation Proxy (Implement)
 						return INVOKEGET_INTERFACE_PROXY(Subscribe, callback);
 					}
 
+					bool Update()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(Update);
+					}
+
 					bool Close()override
 					{
 						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(Close);

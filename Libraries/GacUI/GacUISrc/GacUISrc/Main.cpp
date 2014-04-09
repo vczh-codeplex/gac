@@ -213,15 +213,12 @@ func AddRow(table : GuiTableComposition*, row : int, title : string) : GuiSingle
 		cell.SetSite(row, 1, 1, 1);
 
 		var textBox = new GuiSinglelineTextBox*();
-		textBox.Text = 0;
 		textBox.BoundsComposition.AlignmentToParent = cast Margin "left:0 top:0 right:0 bottom:0";
 		textBox.BoundsComposition.PreferredMinSize = cast Size $"x:0 y:$(textBox.Font.size * 2)";
 		cell.AddChild(textBox.BoundsComposition);
 		return textBox;
 	}
 }
-
-var subscription : Subscription^ = null;
 
 func CreateWindow() : GuiWindow*
 {
@@ -245,23 +242,21 @@ func CreateWindow() : GuiWindow*
 	var textBox1 = AddRow(table, 0, "A = ");
 	var textBox2 = AddRow(table, 1, "B = ");
 	var textBox3 = AddRow(table, 2, "A + B = ");
+	textBox1.Text = 1;
+	textBox2.Text = 2;
 	textBox3.Readonly = true;
 
-	subscription = bind(cast int (textBox1.Text) + cast int (textBox2.Text) ?? "<error>");
-	subscription.Subscribe(func(value : object):void
-	{
-		textBox3.Text = cast string value;
-	});
+	window
+		.AddSubscription(bind(cast int textBox1.Text + cast int textBox2.Text ?? "<error>"))
+		.Subscribe(func(value : object):void
+		{
+			textBox3.Text = cast string value;
+		})
+		.Update();
 
 	window.ForceCalculateSizeImmediately();
 	window.MoveToScreenCenter();
 	return window;
-}
-
-func CleanUp():void
-{
-	subscription.Close();
-	subscription = null;
 }
 
 )workflow");
@@ -274,10 +269,8 @@ func CleanUp():void
 
 	auto initializeFunction = LoadFunction<void()>(globalContext, L"<initialize>");
 	auto createWindowFunction = LoadFunction<GuiWindow*()>(globalContext, L"CreateWindow");
-	auto cleanUpFunction = LoadFunction<void()>(globalContext, L"CleanUp");
 
 	initializeFunction();
 	Ptr<GuiWindow> window = createWindowFunction();
 	GetApplication()->Run(window.Obj());
-	cleanUpFunction();
 }

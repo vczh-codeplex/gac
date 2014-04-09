@@ -27,9 +27,11 @@ Control Host
 			/// </summary>
 			class GuiControlHost : public GuiControl, private INativeWindowListener, public Description<GuiControlHost>
 			{
+				typedef collections::List<Ptr<description::IValueSubscription>>		SubscriptionList;
 			protected:
 				compositions::GuiGraphicsHost*					host;
 				collections::SortedList<GuiComponent*>			components;
+				SubscriptionList								subscriptions;
 
 				virtual void									OnNativeWindowChanged();
 				virtual void									OnVisualStatusChanged();
@@ -138,14 +140,30 @@ Control Host
 
 				/// <summary>Add a component. When this control host is disposing, all attached components will be deleted.</summary>
 				/// <returns>Returns true if this operation succeeded.</returns>
+				/// <param name="component">The component to add.</param>
 				bool											AddComponent(GuiComponent* component);
 				/// <summary>Remove a component.</summary>
 				/// <returns>Returns true if this operation succeeded.</returns>
+				/// <param name="component">The component to remove.</param>
 				bool											RemoveComponent(GuiComponent* component);
 				/// <summary>Test does the window contain the component.</summary>
 				/// <returns>Returns true if the window contains the component.</returns>
 				/// <param name="component">The component to test.</param>
 				bool											ContainsComponent(GuiComponent* component);
+
+				/// <summary>Add a subscription. When this control host is disposing, all attached subscriptions will be deleted.</summary>
+				/// <returns>Returns null if this operation failed.</returns>
+				/// <param name="subscription">The subscription to test.</param>
+				Ptr<description::IValueSubscription>			AddSubscription(Ptr<description::IValueSubscription> subscription);
+				/// <summary>Remove a subscription.</summary>
+				/// <returns>Returns true if this operation succeeded.</returns>
+				/// <param name="subscription">The subscription to test.</param>
+				bool											RemoveSubscription(Ptr<description::IValueSubscription> subscription);
+				/// <summary>Test does the window contain the subscription.</summary>
+				/// <returns>Returns true if the window contains the subscription.</returns>
+				/// <param name="subscription">The subscription to test.</param>
+				bool											ContainsSubscription(Ptr<description::IValueSubscription> subscription);
+
 				/// <summary>Get the <see cref="compositions::IGuiShortcutKeyManager"/> attached with this control host.</summary>
 				/// <returns>The shortcut key manager.</returns>
 				compositions::IGuiShortcutKeyManager*			GetShortcutKeyManager();
