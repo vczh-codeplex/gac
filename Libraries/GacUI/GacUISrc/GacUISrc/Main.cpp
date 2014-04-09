@@ -69,7 +69,7 @@ namespace demos
 		GuiSinglelineTextBox* textBox2;
 		GuiSinglelineTextBox* textBox3;
 
-	void InitializeComponents()
+		void InitializeComponents()
 		{
 			if (InitializeFromResource())
 			{
@@ -103,6 +103,7 @@ namespace demos
 	public:
 		MainWindow()
 		{
+			InitializeComponents();
 		}
 	};
 }
