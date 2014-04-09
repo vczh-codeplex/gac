@@ -317,6 +317,26 @@ GetObservingDependency
 			}
 
 /***********************************************************************
+CreateBindVariableReference
+***********************************************************************/
+
+			Ptr<WfExpression> CreateBindVariableReference(const WString& name)
+			{
+				auto ref = MakePtr<WfReferenceExpression>();
+				ref->name.value = name;
+
+				auto zero = MakePtr<WfIntegerExpression>();
+				zero->value.value = L"0";
+
+				auto index = MakePtr<WfBinaryExpression>();
+				index->op = WfBinaryOperator::Index;
+				index->first = ref;
+				index->second = zero;
+
+				return index;
+			}
+
+/***********************************************************************
 ExpandObserveExpression
 ***********************************************************************/
 
@@ -324,16 +344,18 @@ ExpandObserveExpression
 			{
 			public:
 				Dictionary<WfExpression*, WString>&		cacheNames;
+				Dictionary<WString, WString>&			referenceReplacement;
 				Ptr<WfExpression>						result;
 
-				ExpandObserveExpressionVisitor(Dictionary<WfExpression*, WString>& _cacheNames)
+				ExpandObserveExpressionVisitor(Dictionary<WfExpression*, WString>& _cacheNames, collections::Dictionary<WString, WString>& _referenceReplacement)
 					:cacheNames(_cacheNames)
+					, referenceReplacement(_referenceReplacement)
 				{
 				}
 
 				Ptr<WfExpression> Expand(Ptr<WfExpression> expr)
 				{
-					return ExpandObserveExpression(expr.Obj(), cacheNames);
+					return ExpandObserveExpression(expr.Obj(), cacheNames, referenceReplacement);
 				}
 
 				void Visit(WfTopQualifiedExpression* node)override
@@ -345,9 +367,17 @@ ExpandObserveExpression
 
 				void Visit(WfReferenceExpression* node)override
 				{
-					auto expr = MakePtr<WfReferenceExpression>();
-					expr->name.value = node->name.value;
-					result = expr;
+					vint index = referenceReplacement.Keys().IndexOf(node->name.value);
+					if (index == -1)
+					{
+						auto expr = MakePtr<WfReferenceExpression>();
+						expr->name.value = node->name.value;
+						result = expr;
+					}
+					else
+					{
+						result = CreateBindVariableReference(referenceReplacement.Values()[index]);
+					}
 				}
 
 				void Visit(WfOrderedNameExpression* node)override
@@ -435,15 +465,28 @@ ExpandObserveExpression
 
 				void Visit(WfLetExpression* node)override
 				{
+					Dictionary<WString, WString> overrided;
 					auto expr = MakePtr<WfLetExpression>();
+
 					FOREACH(Ptr<WfLetVariable>, var, node->variables)
 					{
+						auto key = var->name.value;
+						vint index = referenceReplacement.Keys().IndexOf(key);
+						if (index != -1)
+						{
+							auto value = referenceReplacement.Values()[index];
+							referenceReplacement.Remove(key);
+							overrided.Add(key, value);
+						}
+
 						auto newVar = MakePtr<WfLetVariable>();
-						newVar->name.value = var->name.value;
+						newVar->name.value = key;
 						newVar->value = Expand(var->value);
 						expr->variables.Add(newVar);
 					}
 					expr->expression = Expand(node->expression);
+
+					CopyFrom(referenceReplacement, overrided, true);
 					result = expr;
 				}
 
@@ -634,23 +677,7 @@ ExpandObserveExpression
 				}
 			};
 
-			Ptr<WfExpression> CreateBindVariableReference(const WString& name)
-			{
-				auto ref = MakePtr<WfReferenceExpression>();
-				ref->name.value = name;
-
-				auto zero = MakePtr<WfIntegerExpression>();
-				zero->value.value = L"0";
-
-				auto index = MakePtr<WfBinaryExpression>();
-				index->op = WfBinaryOperator::Index;
-				index->first = ref;
-				index->second = zero;
-
-				return index;
-			}
-
-			Ptr<WfExpression> ExpandObserveExpression(WfExpression* expression, collections::Dictionary<WfExpression*, WString>& cacheNames, bool useCache)
+			Ptr<WfExpression> ExpandObserveExpression(WfExpression* expression, collections::Dictionary<WfExpression*, WString>& cacheNames, collections::Dictionary<WString, WString>& referenceReplacement, bool useCache)
 			{
 				if (expression)
 				{
@@ -663,7 +690,7 @@ ExpandObserveExpression
 						}
 					}
 
-					ExpandObserveExpressionVisitor visitor(cacheNames);
+					ExpandObserveExpressionVisitor visitor(cacheNames, referenceReplacement);
 					expression->Accept(&visitor);
 					return visitor.result;
 				}
@@ -676,7 +703,8 @@ ExpandObserveExpression
 			Ptr<WfExpression> CopyExpression(Ptr<WfExpression> expression)
 			{
 				Dictionary<WfExpression*, WString> cacheNames;
-				return ExpandObserveExpression(expression.Obj(), cacheNames);
+				Dictionary<WString, WString> referenceReplacement;
+				return ExpandObserveExpression(expression.Obj(), cacheNames, referenceReplacement);
 			}
 
 /***********************************************************************
@@ -1132,14 +1160,10 @@ ExpandObserveEvent
 					}
 					else
 					{
-						auto var = MakePtr<WfLetVariable>();
-						var->name.value = observeExpr->name.value;
-						var->value = CreateBindVariableReference(cacheName);
-
-						auto expr = MakePtr<WfLetExpression>();
-						expr->variables.Add(var);
-						expr->expression = CopyExpression(observeExpr->events[eventIndex]);
-						return expr;
+						Dictionary<WfExpression*, WString> cacheNames;
+						Dictionary<WString, WString> referenceReplacement;
+						referenceReplacement.Add(observeExpr->name.value, cacheName);
+						return ExpandObserveExpression(observeExpr->events[eventIndex].Obj(), cacheNames, referenceReplacement);
 					}
 				}
 				else
@@ -1209,7 +1233,8 @@ CreateBindCacheAssignStatement
 				auto assign = MakePtr<WfBinaryExpression>();
 				assign->op = WfBinaryOperator::Assign;
 				assign->first = CreateBindVariableReference(name);
-				assign->second = ExpandObserveExpression(parent, cacheNames, false);
+				Dictionary<WString, WString> referenceReplacement;
+				assign->second = ExpandObserveExpression(parent, cacheNames, referenceReplacement, false);
 
 				auto stat = MakePtr<WfExpressionStatement>();
 				stat->expression = assign;
@@ -1438,7 +1463,8 @@ ExpandBindExpression
 					{
 						auto var = MakePtr<WfVariableDeclaration>();
 						var->name.value = L"<bind-activator-result>";
-						var->expression = ExpandObserveExpression(node->expression.Obj(), cacheNames);
+						Dictionary<WString, WString> referenceReplacement;
+						var->expression = ExpandObserveExpression(node->expression.Obj(), cacheNames, referenceReplacement);
 
 						auto varStat = MakePtr<WfVariableStatement>();
 						varStat->variable = var;

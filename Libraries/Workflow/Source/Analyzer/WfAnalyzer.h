@@ -272,7 +272,7 @@ Semantic Analyzing
 			extern void										ValidateStatementSemantic(WfLexicalScopeManager* manager, Ptr<WfStatement> statement);
 			extern void										ValidateExpressionSemantic(WfLexicalScopeManager* manager, Ptr<WfExpression> expression, Ptr<reflection::description::ITypeInfo> expectedType, collections::List<ResolveExpressionResult>& results);
 			extern void										GetObservingDependency(WfLexicalScopeManager* manager, Ptr<WfExpression> expression, WfObservingDependency& dependency);
-			extern Ptr<WfExpression>						ExpandObserveExpression(WfExpression* expression, collections::Dictionary<WfExpression*, WString>& cacheNames, bool useCache = true);
+			extern Ptr<WfExpression>						ExpandObserveExpression(WfExpression* expression, collections::Dictionary<WfExpression*, WString>& cacheNames, collections::Dictionary<WString, WString>& referenceReplacement, bool useCache = true);
 			extern Ptr<WfExpression>						CopyExpression(Ptr<WfExpression> expression);
 			extern Ptr<WfStatement>							CopyStatement(Ptr<WfStatement> statement);
 			extern void										ExpandBindExpression(WfLexicalScopeManager* manager, WfBindExpression* node);
