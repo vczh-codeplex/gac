@@ -209,10 +209,6 @@ LoadInstancePropertyValue
 			List<FillInstanceEventSetter>& eventSetters
 			)
 		{
-			if (propertyValue.propertyName == L"Tag")
-			{
-				int a = 0;
-			}
 			vint loadedValueCount = 0;
 			// try to look for a loader to handle this property
 			while(propertyLoader && loadedValueCount<input.Count())

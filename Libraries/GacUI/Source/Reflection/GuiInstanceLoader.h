@@ -26,10 +26,12 @@ Instance Environment
 		class GuiInstanceContextScope : public Object, public Description<GuiInstanceContextScope>
 		{
 			typedef collections::Dictionary<WString, description::Value>		ValueMap;
+			typedef collections::List<WString>									ErrorList;
 		public:
 			WString									typeName;
 			description::Value						rootInstance;
 			ValueMap								referenceValues;
+			ErrorList								errors;
 		};
 
 		class GuiInstanceEnvironment : public Object, public Description<GuiInstanceEnvironment>
