@@ -493,6 +493,7 @@ Interface Implementation Proxy
 			{
 			public:
 				virtual Ptr<IValueListener>		Subscribe(const Func<void(Value)>& callback) = 0;
+				virtual bool					Update() = 0;
 				virtual bool					Close() = 0;
 			};
 

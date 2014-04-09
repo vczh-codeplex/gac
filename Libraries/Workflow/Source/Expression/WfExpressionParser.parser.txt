@@ -662,7 +662,7 @@ rule LetVariable LetVariableFragment
 	= NAME : name "=" WorkflowExpression : value as LetVariable
 	;
 
-rule Expression Exp0
+rule Expression ExpPrimitive
 	= !Literal
 	= !Integer
 	= !FloatingPoint
@@ -674,9 +674,6 @@ rule Expression Exp0
 	= "[" WorkflowExpression : body "]" as OrderedLambdaExpression
 	= Function : function as FunctionExpression
 	= "let" LetVariableFragment : variables {"," LetVariableFragment : variables} "in" "(" WorkflowExpression : expression ")" as LetExpression
-	= "+" Exp0 : operand as UnaryExpression with {op = "Positive"}
-	= "-" Exp0 : operand as UnaryExpression with {op = "Negative"}
-	= "not" Exp0 : operand as UnaryExpression with {op = "Not"}
 	= "range"
 		(("(" with {beginBoundary = "Exclusive"}) | ("[" with {beginBoundary = "Inclusive"}))
 		WorkflowExpression : begin "," WorkflowExpression : end
@@ -689,17 +686,17 @@ rule Expression Exp0
 			| "{" {Function : functions} "}"
 		) as NewTypeExpression
 	= "bind" "(" WorkflowExpression : expression ")" as BindExpression
-	= Exp0 : parent "." "observe" "(" WorkflowExpression : expression ["on" WorkflowExpression : events {"," WorkflowExpression : events}]")" as ObserveExpression with {observeType = "SimpleObserve"}
-	= Exp0 : parent "." "observe" "as" NAME : name "(" WorkflowExpression : expression ["on" WorkflowExpression : events {"," WorkflowExpression : events}]")" as ObserveExpression with {observeType = "ExtendedObserve"}
-	= Exp0 : function "(" [WorkflowExpression : arguments {"," WorkflowExpression : arguments}] ")" as CallExpression
-	= Exp0 : parent "." NAME : name as MemberExpression
-	= Exp0 : parent "::" NAME : name as ChildExpression
-	= Exp0 : first "[" WorkflowExpression : second "]" as BinaryExpression with {op = "Index"}
-	= Exp0 : element
+	= ExpPrimitive : parent "." "observe" "(" WorkflowExpression : expression ["on" WorkflowExpression : events {"," WorkflowExpression : events}]")" as ObserveExpression with {observeType = "SimpleObserve"}
+	= ExpPrimitive : parent "." "observe" "as" NAME : name "(" WorkflowExpression : expression ["on" WorkflowExpression : events {"," WorkflowExpression : events}]")" as ObserveExpression with {observeType = "ExtendedObserve"}
+	= ExpPrimitive : function "(" [WorkflowExpression : arguments {"," WorkflowExpression : arguments}] ")" as CallExpression
+	= ExpPrimitive : parent "." NAME : name as MemberExpression
+	= ExpPrimitive : parent "::" NAME : name as ChildExpression
+	= ExpPrimitive : first "[" WorkflowExpression : second "]" as BinaryExpression with {op = "Index"}
+	= ExpPrimitive : element
 		(("in" with {test="In"}) | ("not" "in" with {test="NotIn"}))
 		WorkflowExpression : collection as SetTestingExpression
-	= Exp0 : expression "of" WorkflowType : type as InferExpression
-	= Exp0 : expression
+	= ExpPrimitive : expression "of" WorkflowType : type as InferExpression
+	= ExpPrimitive : expression
 		(
 			(
 				(
@@ -710,13 +707,20 @@ rule Expression Exp0
 			| ("is" "null" as TypeTestingExpression with {test="IsNull"})
 			| ("is" "not" "null" as TypeTestingExpression with {test="IsNotNull"})
 		)
-	= Exp0 : expression "as" WorkflowType : type as TypeCastingExpression with {strategy = "Weak"}
-	= "cast" WorkflowType : type Exp0 : expression as TypeCastingExpression with {strategy = "Strong"}
+	= ExpPrimitive : expression "as" WorkflowType : type as TypeCastingExpression with {strategy = "Weak"}
 	= "typeof" "(" WorkflowType : type ")" as TypeOfTypeExpression
 	= "type" "(" WorkflowExpression : expression ")" as TypeOfExpressionExpression
 	= "attach" "(" WorkflowExpression : event "," WorkflowExpression : function ")" as AttachEventExpression
 	= "detach" "(" WorkflowExpression : handler ")" as DetachEventExpression
 	= "::" NAME : name as TopQualifiedExpression
+	;
+
+rule Expression Exp0
+	= !ExpPrimitive
+	= "+" Exp0 : operand as UnaryExpression with {op = "Positive"}
+	= "-" Exp0 : operand as UnaryExpression with {op = "Negative"}
+	= "not" Exp0 : operand as UnaryExpression with {op = "Not"}
+	= "cast" WorkflowType : type Exp0 : expression as TypeCastingExpression with {strategy = "Strong"}
 	;
 
 rule Expression Exp1
