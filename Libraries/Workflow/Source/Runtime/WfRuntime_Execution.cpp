@@ -652,7 +652,9 @@ WfRuntimeThreadContext
 									}
 									else
 									{
-										INTERNAL_ERROR(L"failed to do type conversion.");
+										WString from = result.IsNull() ? L"<null>" : L"<" + result.GetText() + L"> of " + result.GetTypeDescriptor()->GetTypeName();
+										WString to = ins.typeDescriptorParameter->GetTypeName();
+										throw TypeDescriptorException(L"Failed to convert from \"" + from + L"\" to \"" + to + L"\".");
 									}
 								}
 							case WfInsCode::TryConvertToType:
