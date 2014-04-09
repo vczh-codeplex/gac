@@ -642,6 +642,8 @@ ExpandObserveExpression
 				Ptr<WfFunctionDeclaration> CopyFunction(Ptr<WfFunctionDeclaration> decl)
 				{
 					auto func = MakePtr<WfFunctionDeclaration>();
+					func->name.value = decl->name.value;
+					func->anonymity = decl->anonymity;
 					func->returnType = CopyType(decl->returnType);
 					FOREACH(Ptr<WfFunctionArgument>, arg, decl->arguments)
 					{
@@ -922,6 +924,7 @@ IValueListener::GetSubscription
 			{
 				auto func = MakePtr<WfFunctionDeclaration>();
 				func->name.value = L"GetSubscription";
+				func->anonymity = WfFunctionAnonymity::Named;
 				{
 					auto typeInfo = TypeInfoRetriver<IValueSubscription*>::CreateTypeInfo();
 					func->returnType = GetTypeFromTypeInfo(typeInfo.Obj());
@@ -945,6 +948,7 @@ IValueListener::GetStopped
 			{
 				auto func = MakePtr<WfFunctionDeclaration>();
 				func->name.value = L"GetStopped";
+				func->anonymity = WfFunctionAnonymity::Named;
 				{
 					auto typeInfo = TypeInfoRetriver<bool>::CreateTypeInfo();
 					func->returnType = GetTypeFromTypeInfo(typeInfo.Obj());
@@ -987,6 +991,7 @@ IValueListener::StopListening
 			{
 				auto func = MakePtr<WfFunctionDeclaration>();
 				func->name.value = L"StopListening";
+				func->anonymity = WfFunctionAnonymity::Named;
 				{
 					auto typeInfo = TypeInfoRetriver<bool>::CreateTypeInfo();
 					func->returnType = GetTypeFromTypeInfo(typeInfo.Obj());
@@ -1061,6 +1066,7 @@ IValueSubscription::Subscribe
 			{
 				auto func = MakePtr<WfFunctionDeclaration>();
 				func->name.value = L"Subscribe";
+				func->anonymity = WfFunctionAnonymity::Named;
 				{
 					auto typeInfo = TypeInfoRetriver<Ptr<IValueListener>>::CreateTypeInfo();
 					func->returnType = GetTypeFromTypeInfo(typeInfo.Obj());
@@ -1249,6 +1255,7 @@ IValueSubscription::Update
 			{
 				auto func = MakePtr<WfFunctionDeclaration>();
 				func->name.value = L"Update";
+				func->anonymity = WfFunctionAnonymity::Named;
 				{
 					auto typeInfo = TypeInfoRetriver<bool>::CreateTypeInfo();
 					func->returnType = GetTypeFromTypeInfo(typeInfo.Obj());
@@ -1308,6 +1315,7 @@ IValueSubscription::Close
 			{
 				auto func = MakePtr<WfFunctionDeclaration>();
 				func->name.value = L"Close";
+				func->anonymity = WfFunctionAnonymity::Named;
 				{
 					auto typeInfo = TypeInfoRetriver<bool>::CreateTypeInfo();
 					func->returnType = GetTypeFromTypeInfo(typeInfo.Obj());
@@ -1405,6 +1413,7 @@ ExpandBindExpression
 				auto lambdaBlock = MakePtr<WfBlockStatement>();
 				{
 					auto lambda = MakePtr<WfFunctionDeclaration>();
+					lambda->anonymity = WfFunctionAnonymity::Anonymous;
 					auto typeInfo = TypeInfoRetriver<Ptr<IValueSubscription>>::CreateTypeInfo();
 					lambda->returnType = GetTypeFromTypeInfo(typeInfo.Obj());
 					lambda->statement = lambdaBlock;
@@ -1515,6 +1524,7 @@ ExpandBindExpression
 				}
 				{
 					auto func = MakePtr<WfFunctionDeclaration>();
+					func->anonymity = WfFunctionAnonymity::Anonymous;
 					func->returnType = GetTypeFromTypeInfo(TypeInfoRetriver<void>::CreateTypeInfo().Obj());
 					
 					auto block = MakePtr<WfBlockStatement>();
@@ -1582,6 +1592,7 @@ ExpandBindExpression
 					FOREACH_INDEXER(WString, callbackName, eventIndex, callbackNames.GetByIndex(index))
 					{
 						auto func = MakePtr<WfFunctionDeclaration>();
+						func->anonymity = WfFunctionAnonymity::Anonymous;
 						{
 							auto genericType = variableTypes[callbackName]->GetElementType();
 							func->returnType = GetTypeFromTypeInfo(genericType->GetGenericArgument(0));
