@@ -466,9 +466,6 @@ Instance Scope Wrapper
 		template<typename T>
 		class GuiInstancePartialClass
 		{
-			template<typename T>
-			friend class GuiInstance;
-
 			typedef collections::Dictionary<WString, description::Value>	ValueMap;
 		private:
 			WString									className;
@@ -505,16 +502,6 @@ Instance Scope Wrapper
 			Ptr<GuiInstanceContextScope> GetScope()
 			{
 				return scope;
-			}
-		};
-
-		template<typename T>
-		class GuiInstance : public Object, public GuiInstancePartialClass<T>
-		{
-		public:
-			GuiInstance(Ptr<GuiResource> _resource, const WString& path) :GuiInstancePartialClass<T>(_resource)
-			{
-				LoadFromResource(path);
 			}
 		};
 

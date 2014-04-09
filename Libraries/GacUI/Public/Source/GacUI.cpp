@@ -2544,6 +2544,8 @@ namespace vl
 		{
 			using namespace elements;
 			using namespace compositions;
+			using namespace reflection::description;
+			using namespace collections;
 
 /***********************************************************************
 GuiControlHost
@@ -2710,6 +2712,11 @@ GuiControlHost
 
 			void GuiControlHost::Closed()
 			{
+				FOREACH(Ptr<IValueSubscription>, subscription, subscriptions)
+				{
+					subscription->Close();
+				}
+				subscriptions.Clear();
 				WindowClosed.Execute(GetNotifyEventArguments());
 			}
 
@@ -2961,6 +2968,29 @@ GuiControlHost
 			bool GuiControlHost::ContainsComponent(GuiComponent* component)
 			{
 				return components.Contains(component);
+			}
+
+			Ptr<description::IValueSubscription> GuiControlHost::AddSubscription(Ptr<description::IValueSubscription> subscription)
+			{
+				if (subscriptions.Contains(subscription.Obj()))
+				{
+					return 0;
+				}
+				else
+				{
+					subscriptions.Add(subscription);
+					return subscription;
+				}
+			}
+
+			bool GuiControlHost::RemoveSubscription(Ptr<description::IValueSubscription> subscription)
+			{
+				return subscriptions.Remove(subscription.Obj());
+			}
+
+			bool GuiControlHost::ContainsSubscription(Ptr<description::IValueSubscription> subscription)
+			{
+				return subscriptions.Contains(subscription.Obj());
 			}
 
 			compositions::IGuiShortcutKeyManager* GuiControlHost::GetShortcutKeyManager()

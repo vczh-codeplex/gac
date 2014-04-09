@@ -4822,9 +4822,11 @@ Control Host
 
 			class GuiControlHost : public GuiControl, private INativeWindowListener, public Description<GuiControlHost>
 			{
+				typedef collections::List<Ptr<description::IValueSubscription>>		SubscriptionList;
 			protected:
 				compositions::GuiGraphicsHost*					host;
 				collections::SortedList<GuiComponent*>			components;
+				SubscriptionList								subscriptions;
 
 				virtual void									OnNativeWindowChanged();
 				virtual void									OnVisualStatusChanged();
@@ -4888,6 +4890,11 @@ Control Host
 				bool											AddComponent(GuiComponent* component);
 				bool											RemoveComponent(GuiComponent* component);
 				bool											ContainsComponent(GuiComponent* component);
+
+				Ptr<description::IValueSubscription>			AddSubscription(Ptr<description::IValueSubscription> subscription);
+				bool											RemoveSubscription(Ptr<description::IValueSubscription> subscription);
+				bool											ContainsSubscription(Ptr<description::IValueSubscription> subscription);
+
 				compositions::IGuiShortcutKeyManager*			GetShortcutKeyManager();
 				void											SetShortcutKeyManager(compositions::IGuiShortcutKeyManager* value);
 				compositions::GuiGraphicsAnimationManager*		GetAnimationManager();
