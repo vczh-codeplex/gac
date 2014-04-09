@@ -246,13 +246,12 @@ func CreateWindow() : GuiWindow*
 	textBox2.Text = 2;
 	textBox3.Readonly = true;
 
-	window
-		.AddSubscription(bind(cast int textBox1.Text + cast int textBox2.Text ?? "<error>"))
-		.Subscribe(func(value : object):void
-		{
-			textBox3.Text = cast string value;
-		})
-		.Update();
+	var subscription = window.AddSubscription(bind(cast int textBox1.Text + cast int textBox2.Text ?? "<error>"));
+	subscription.Subscribe(func(value : object):void
+	{
+		textBox3.Text = cast string value;
+	});
+	subscription.Update();
 
 	window.ForceCalculateSizeImmediately();
 	window.MoveToScreenCenter();

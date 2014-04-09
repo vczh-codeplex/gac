@@ -987,6 +987,7 @@ Collections
 				CLASS_MEMBER_BASE(IDescriptable)
 				CLASS_MEMBER_EXTERNALCTOR(Ptr<IValueSubscription>(Ptr<IValueInterfaceProxy>), {L"proxy"}, &interface_proxy::description_IValueSubscription::Create)
 				CLASS_MEMBER_METHOD(Subscribe, { L"callback" })
+				CLASS_MEMBER_METHOD(Update, NO_PARAMETER)
 				CLASS_MEMBER_METHOD(Close, NO_PARAMETER)
 			END_CLASS_MEMBER(IValueSubscription)
 
