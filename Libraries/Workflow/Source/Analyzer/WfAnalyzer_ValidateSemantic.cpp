@@ -743,10 +743,13 @@ ValidateSemantic(Expression)
 					else if (node->op == WfBinaryOperator::FailedThen)
 					{
 						Ptr<ITypeInfo> firstType = GetExpressionType(manager, node->first, 0);
-						GetExpressionType(manager, node->second, firstType);
-						if (firstType)
+						bool depend = IsExpressionDependOnExpectedType(manager, node->second);
+						Ptr<ITypeInfo> secondType = GetExpressionType(manager, node->second, (depend ? firstType : 0));
+
+						if (firstType && secondType)
 						{
-							results.Add(ResolveExpressionResult(firstType));
+							auto mergedType = GetMergedType(firstType, secondType);
+							results.Add(ResolveExpressionResult(mergedType ? mergedType : firstType));
 						}
 					}
 					else
