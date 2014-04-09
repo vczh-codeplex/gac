@@ -195,29 +195,73 @@ using presentation::*;
 using presentation::controls::*;
 using presentation::compositions::*;
 
-var window : GuiWindow* = null;
-
-func button_Clicked(sender : GuiGraphicsComposition*, arguments : GuiEventArgs*) : void
+func AddRow(table : GuiTableComposition*, row : int, title : string) : GuiSinglelineTextBox*
 {
-	var button = cast GuiButton* (sender.RelatedControl);
-	button.Text = "Well done!";
+	{
+		var cell = new GuiCellComposition*();
+		table.AddChild(cell);
+		cell.SetSite(row, 0, 1, 1);
+
+		var label = new GuiLabel*();
+		label.Text = title;
+		label.BoundsComposition.AlignmentToParent = cast Margin "left:0 top:0 right:0 bottom:0";
+		cell.AddChild(label.BoundsComposition);
+	}
+	{
+		var cell = new GuiCellComposition*();
+		table.AddChild(cell);
+		cell.SetSite(row, 1, 1, 1);
+
+		var textBox = new GuiSinglelineTextBox*();
+		textBox.Text = 0;
+		textBox.BoundsComposition.AlignmentToParent = cast Margin "left:0 top:0 right:0 bottom:0";
+		textBox.BoundsComposition.PreferredMinSize = cast Size $"x:0 y:$(textBox.Font.size * 2)";
+		cell.AddChild(textBox.BoundsComposition);
+		return textBox;
+	}
 }
+
+var subscription : Subscription^ = null;
 
 func CreateWindow() : GuiWindow*
 {
-	window = new GuiWindow*();
+	var window = new GuiWindow*();
 	window.Text = "Scriptable GacUI!";
 	window.ContainerComposition.PreferredMinSize = cast Size "x:300 y:200";
 
-	var button = new GuiButton*();
-	button.Text = "Click Me!";
-	button.BoundsComposition.AlignmentToParent = cast Margin "left:50 top:50 right:50 bottom:50";
-	attach(button.Clicked, button_Clicked);
-	window.AddChild(button);
+	var table = new GuiTableComposition*();
+	window.ContainerComposition.AddChild(table);
+	table.AlignmentToParent = cast Margin "left:0 top:0 right:0 bottom:0";
+	table.CellPadding = 5;
+	table.SetRowsAndColumns(4, 2);
+
+	for(row in range[0, 2])
+	{
+		table.SetRowOption(row, cast GuiCellOption "composeType:MinSize");
+	}
+	table.SetColumnOption(0, cast GuiCellOption "composeType:MinSize");
+	table.SetColumnOption(1, cast GuiCellOption "composeType:Percentage percentage:1.0");
+
+	var textBox1 = AddRow(table, 0, "A = ");
+	var textBox2 = AddRow(table, 1, "B = ");
+	var textBox3 = AddRow(table, 2, "A + B = ");
+	textBox3.Readonly = true;
+
+	subscription = bind($"$(cast int (textBox1.Text) + cast int (textBox2.Text))" ?? "<error>");
+	subscription.Subscribe(func(value : object):void
+	{
+		textBox3.Text = cast string value;
+	});
 
 	window.ForceCalculateSizeImmediately();
 	window.MoveToScreenCenter();
 	return window;
+}
+
+func CleanUp():void
+{
+	subscription.Close();
+	subscription = null;
 }
 
 )workflow");
@@ -230,7 +274,10 @@ func CreateWindow() : GuiWindow*
 
 	auto initializeFunction = LoadFunction<void()>(globalContext, L"<initialize>");
 	auto createWindowFunction = LoadFunction<GuiWindow*()>(globalContext, L"CreateWindow");
+	auto cleanUpFunction = LoadFunction<void()>(globalContext, L"CleanUp");
+
 	initializeFunction();
 	Ptr<GuiWindow> window = createWindowFunction();
 	GetApplication()->Run(window.Obj());
+	cleanUpFunction();
 }
