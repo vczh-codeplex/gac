@@ -313,6 +313,7 @@ namespace test
 		Event<void(vint, vint)>				ValueChanged;
 
 		ObservableValue()
+			:value(0)
 		{
 		}
 
