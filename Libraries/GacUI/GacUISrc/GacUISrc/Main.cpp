@@ -247,7 +247,7 @@ func CreateWindow() : GuiWindow*
 	var textBox3 = AddRow(table, 2, "A + B = ");
 	textBox3.Readonly = true;
 
-	subscription = bind($"$(cast int (textBox1.Text) + cast int (textBox2.Text))" ?? "<error>");
+	subscription = bind(cast int (textBox1.Text) + cast int (textBox2.Text) ?? "<error>");
 	subscription.Subscribe(func(value : object):void
 	{
 		textBox3.Text = cast string value;

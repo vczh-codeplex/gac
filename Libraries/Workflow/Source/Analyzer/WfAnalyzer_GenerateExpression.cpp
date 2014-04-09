@@ -292,13 +292,14 @@ GenerateInstructions(Expression)
 					}
 					else if (node->op == WfBinaryOperator::FailedThen)
 					{
+						auto result = context.manager->expressionResolvings[node];
 						vint trapInstruction = INSTRUCTION(Ins::InstallTry(-1));
-						GenerateExpressionInstructions(context, node->first);
+						GenerateExpressionInstructions(context, node->first, result.type);
 						INSTRUCTION(Ins::UninstallTry(1));
 						vint finishInstruction = INSTRUCTION(Ins::Jump(-1));
 
 						context.assembly->instructions[trapInstruction].indexParameter = context.assembly->instructions.Count();
-						GenerateExpressionInstructions(context, node->second);
+						GenerateExpressionInstructions(context, node->second, result.type);
 
 						context.assembly->instructions[finishInstruction].indexParameter = context.assembly->instructions.Count();
 					}
