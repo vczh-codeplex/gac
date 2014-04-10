@@ -115,12 +115,23 @@ GuiReferenceInstanceBinder
 GuiWorkflowGlobalContext
 ***********************************************************************/
 
+		struct WorkflowDataBinding
+		{
+			Value						instance;
+			IPropertyInfo*				propertyInfo;
+			Ptr<WfBindExpression>		bindExpression;
+		};
+
 		class GuiWorkflowGlobalContext : public Object, public IGuiInstanceBindingContext
 		{
 		public:
 			WString GetContextName()override
 			{
 				return L"WORKFLOW-GLOBAL-CONTEXT";
+			}
+
+			void Initialize(Ptr<GuiInstanceEnvironment> env)override
+			{
 			}
 		};
 
@@ -131,9 +142,31 @@ GuiScriptInstanceBinder
 		class GuiScriptInstanceBinder : public GuiTextInstanceBinderBase
 		{
 		public:
+			virtual WString TranslateExpression(const WString& input) = 0;
+
 			void GetRequiredContexts(collections::List<WString>& contextNames)override
 			{
 				contextNames.Add(L"WORKFLOW-GLOBAL-CONTEXT");
+			}
+
+			bool SetPropertyValue(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, IGuiInstanceLoader::PropertyValue& propertyValue)override
+			{
+				if (propertyValue.propertyValue.GetValueType() == Value::Text)
+				{
+					WString expressionCode = TranslateExpression(propertyValue.propertyValue.GetText());
+					auto parser = GetParserManager()->GetParser<WfExpression>(L"WORKFLOW-EXPRESSION");
+					auto expression = parser->TypedParse(expressionCode).Cast<WfBindExpression>();
+					if (!expression)
+					{
+						env->scope->errors.Add(L"Failed to parse the workflow expression \"" + expressionCode + L"\".");
+						return false;
+					}
+
+
+
+					return true;
+				}
+				return false;
 			}
 		};
 
@@ -149,9 +182,9 @@ GuiBindInstanceBinder
 				return L"bind";
 			}
 
-			bool SetPropertyValue(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, IGuiInstanceLoader::PropertyValue& propertyValue)override
+			WString TranslateExpression(const WString& input)override
 			{
-				return false;
+				return L"bind(" + input + L")";
 			}
 		};
 
@@ -167,9 +200,9 @@ GuiFormatInstanceBinder
 				return L"format";
 			}
 
-			bool SetPropertyValue(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, IGuiInstanceLoader::PropertyValue& propertyValue)override
+			WString TranslateExpression(const WString& input)override
 			{
-				return false;
+				return L"bind($\"" + input + L"\")";
 			}
 		};
 
