@@ -140,12 +140,20 @@ LoadValueVisitor
 
 				void Visit(GuiConstructorRepr* repr)override
 				{
+					vint errorCount = env->scope->errors.Count();
 					FOREACH(ITypeDescriptor*, typeDescriptor, acceptableTypes)
 					{
 						WString _typeName;
-						loadedValue=CreateInstance(env, repr, typeDescriptor, _typeName, bindingSetters, eventSetters);
+						loadedValue = CreateInstance(env, repr, typeDescriptor, _typeName, bindingSetters, eventSetters);
 						if (!loadedValue.IsNull())
 						{
+							for (vint i = env->scope->errors.Count() - 1; i >= errorCount; i--)
+							{
+								if (wcsstr(env->scope->errors[i].Buffer(), L"because the expected type is"))
+								{
+									env->scope->errors.RemoveAt(i);
+								}
+							}
 							result = true;
 							return;
 						}
@@ -229,7 +237,16 @@ LoadInstancePropertyValue
 					case GuiInstancePropertyInfo::SupportSet:
 						if (input.Count() != 1) return false;
 						if (constructorArgument) return false;
-						if (binding != L"set") return false;
+						if (binding != L"set")
+						{
+							env->scope->errors.Add(
+								L"Collection property \"" +
+								propertyValue.propertyName +
+								L"\" of type \"" +
+								propertyValue.instanceValue.GetTypeDescriptor()->GetTypeName() +
+								L"\" can only be retrived using binding \"set\".");
+							return false;
+						}
 						{
 							// set binding: get the property value and apply another property list on it
 							if(Ptr<GuiAttSetterRepr> propertyAttSetter=input[0].Cast<GuiAttSetterRepr>())
@@ -250,27 +267,59 @@ LoadInstancePropertyValue
 						}
 						break;
 					case GuiInstancePropertyInfo::SupportCollection:
-						if (binding != L"") return false;
+						if (binding != L"")
+						{
+							env->scope->errors.Add(
+								L"Collection property \"" +
+								propertyValue.propertyName +
+								L"\" of type \"" +
+								propertyValue.instanceValue.GetTypeDescriptor()->GetTypeName() +
+								L"\" cannot be assigned using binding.");
+							return false;
+						}
 						{
 							FOREACH_INDEXER(Ptr<GuiValueRepr>, valueRepr, index, input)
 							{
 								if (valueRepr)
 								{
 									// default binding: set the value directly
+									vint errorCount = env->scope->errors.Count();
 									if (LoadValueVisitor::LoadValue(valueRepr, env, propertyInfo->acceptableTypes, bindingSetters, eventSetters, propertyValue.propertyValue))
 									{
 										input[index] = 0;
 										loadedValueCount++;
 										output.Add(Pair<Value, IGuiInstanceLoader*>(propertyValue.propertyValue, propertyLoader));
 									}
+									else if (propertyInfo->tryParent)
+									{
+										env->scope->errors.RemoveRange(errorCount, env->scope->errors.Count() - errorCount);
+									}
 								}
 							}
 						}
 						break;
 					case GuiInstancePropertyInfo::SupportAssign:
-						if (input.Count() != 1) return false;
+						if (input.Count() != 1)
+						{
+							env->scope->errors.Add(
+								L"Assignable property \"" +
+								propertyValue.propertyName +
+								L"\" of type \"" +
+								propertyValue.instanceValue.GetTypeDescriptor()->GetTypeName() +
+								L"\" cannot be assigned using multiple values.");
+							return false;
+						}
 						if (constructorArgument && binding != L"") return false;
-						if (binding == L"set") return false;
+						if (binding == L"set")
+						{
+							env->scope->errors.Add(
+								L"Collection property \"" +
+								propertyValue.propertyName +
+								L"\" of type \"" +
+								propertyValue.instanceValue.GetTypeDescriptor()->GetTypeName() +
+								L"\" cannot be retrived using binding \"set\".");
+							return false;
+						}
 						{
 							FOREACH_INDEXER(Ptr<GuiValueRepr>, valueRepr, index, input)
 							{
@@ -301,6 +350,17 @@ LoadInstancePropertyValue
 											bindingSetters.Add(bindingSetter);
 										}
 									}
+									else
+									{
+										env->scope->errors.Add(
+											L"Collection property \"" +
+											propertyValue.propertyName +
+											L"\" of type \"" +
+											propertyValue.instanceValue.GetTypeDescriptor()->GetTypeName() +
+											L"\" cannot be assigned using binding \"" +
+											binding +
+											L"\" because the appropriate IGuiInstanceBinder for this binding cannot be found.");
+									}
 
 									if (canRemoveLoadedValue)
 									{
@@ -312,7 +372,16 @@ LoadInstancePropertyValue
 						}
 						break;
 					case GuiInstancePropertyInfo::SupportArray:
-						if (binding != L"") return false;
+						if (binding != L"")
+						{
+							env->scope->errors.Add(
+								L"Array property \"" +
+								propertyValue.propertyName +
+								L"\" of type \"" +
+								propertyValue.instanceValue.GetTypeDescriptor()->GetTypeName() +
+								L"\" cannot be assigned using binding.");
+							return false;
+						}
 						{
 							auto list = IValueList::Create();
 							FOREACH_INDEXER(Ptr<GuiValueRepr>, valueRepr, index, input)
@@ -444,6 +513,17 @@ FillInstance
 					eventSetter.handlerName = handlerName;
 					eventSetters.Add(eventSetter);
 				}
+				else
+				{
+					env->scope->errors.Add(
+						L"Failed to attach event \"" +
+						eventName +
+						L"\" of type \"" +
+						typeName +
+						L"\" with the handler \"" +
+						handlerName +
+						L"\" because no IGuiInstanceLoader supports this event.");
+				}
 			}
 		}
 
@@ -471,8 +551,8 @@ CreateInstance
 				// found the correct loader, prepare a TypeInfo
 				IGuiInstanceLoader* loader=source.loader;
 				instanceLoader = source.loader;
-				typeName=source.typeName;
-				ITypeDescriptor* typeDescriptor=GetInstanceLoaderManager()->GetTypeDescriptorForType(source.typeName);
+				typeName = source.typeName;
+				ITypeDescriptor* typeDescriptor = GetInstanceLoaderManager()->GetTypeDescriptorForType(source.typeName);
 				
 				// see if the constructor contains only a single text value
 				Ptr<GuiTextRepr> singleTextValue;
@@ -511,6 +591,15 @@ CreateInstance
 							{
 								deserialized = true;
 							}
+							else
+							{
+								env->scope->errors.Add(
+									L"Failed to deserialize object of type \"" +
+									source.typeName +
+									L"\" from string \"" +
+									singleTextValue->text +
+									L"\".");
+							}
 						}
 						else if (loader->IsCreatable(typeInfo))
 						{
@@ -535,6 +624,12 @@ CreateInstance
 										if (index == -1)
 										{
 											// if a required parameter doesn't exist, fail
+											env->scope->errors.Add(
+												L"Failed to create object of type \"" +
+												source.typeName +
+												L"\" because the required constructor parameter \"" +
+												propertyName +
+												L"\" is missing.");
 											goto SKIP_CREATE_INSTANCE;
 										}
 										requiredParameters.Add(propertyName);
@@ -546,6 +641,12 @@ CreateInstance
 										if (setterValue->binding != L"")
 										{
 											// if the constructor argument uses binding, fail
+											env->scope->errors.Add(
+												L"Failed to create object of type \"" +
+												source.typeName +
+												L"\" because the required constructor parameter \"" +
+												propertyName +
+												L"\" is not allowed to use binding.");
 											goto SKIP_CREATE_INSTANCE;
 										}
 
@@ -570,12 +671,18 @@ CreateInstance
 							{
 								if (!constructorArguments.Contains(propertyName))
 								{
+									env->scope->errors.Add(
+										L"Failed to create object of type \"" +
+										source.typeName +
+										L"\" because the required constructor parameter \"" +
+										propertyName +
+										L"\" is missing.");
 									goto SKIP_CREATE_INSTANCE;
 								}
 							}
 
 							// create the instance
-							instance=loader->CreateInstance(typeInfo, constructorArguments);
+							instance = loader->CreateInstance(typeInfo, constructorArguments);
 						SKIP_CREATE_INSTANCE:
 							// delete all arguments if the constructing fails
 							if (instance.IsNull())
@@ -589,8 +696,25 @@ CreateInstance
 								}
 							}
 						}
-						loader=GetInstanceLoaderManager()->GetParentLoader(loader);
+						loader = GetInstanceLoaderManager()->GetParentLoader(loader);
 					}
+
+					if (instance.IsNull())
+					{
+						env->scope->errors.Add(
+							L"Failed to create object of type \"" +
+							source.typeName +
+							L"\".");
+					}
+				}
+				else
+				{
+					env->scope->errors.Add(
+						L"Failed to create object of type \"" +
+						source.typeName +
+						L"\" because the expected type is \"" +
+						expectedType->GetTypeName() +
+						L"\".");
 				}
 			}
 			else if(source.context)

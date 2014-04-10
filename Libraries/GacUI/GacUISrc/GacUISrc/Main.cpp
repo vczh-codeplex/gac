@@ -68,6 +68,7 @@ namespace demos
 		GuiSinglelineTextBox* textBox1;
 		GuiSinglelineTextBox* textBox2;
 		GuiSinglelineTextBox* textBox3;
+		GuiMultilineTextBox* textBoxError;
 
 		void InitializeComponents()
 		{
@@ -76,6 +77,7 @@ namespace demos
 				GUI_INSTANCE_REFERENCE(textBox1);
 				GUI_INSTANCE_REFERENCE(textBox2);
 				GUI_INSTANCE_REFERENCE(textBox3);
+				GUI_INSTANCE_REFERENCE(textBoxError);
 			}
 		}
 	public:
@@ -85,6 +87,7 @@ namespace demos
 			,textBox1(0)
 			,textBox2(0)
 			,textBox3(0)
+			,textBoxError(0)
 		{
 		}
 	};
@@ -104,6 +107,15 @@ namespace demos
 		MainWindow()
 		{
 			InitializeComponents();
+			if (textBoxError && GetScope())
+			{
+				WString errorText;
+				FOREACH(WString, error, GetScope()->errors)
+				{
+					errorText += error + L"\r\n";
+				}
+				textBoxError->SetText(errorText);
+			}
 		}
 	};
 }
