@@ -18,15 +18,32 @@
     <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="UI\DemoPartialClasses.cpp">
+      <Filter>Resource Files</Filter>
+    </ClCompile>
+    <ClCompile Include="UI\MainWindow.cpp">
+      <Filter>Resource Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Xml Include="XmlWindowResourceDataBinding.xml">
+    <Xml Include="UI\XmlWindowResourceDataBinding.xml">
       <Filter>Resource Files</Filter>
     </Xml>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Codegen.bat">
+    <None Include="UI\Codegen.bat">
       <Filter>Resource Files</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="UI\MainWindow.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="UI\Demo.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="UI\DemoPartialClasses.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
