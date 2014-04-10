@@ -181,6 +181,39 @@ GuiWorkflowGlobalContext
 							subBlock->statements.Add(stat);
 						}
 						{
+							auto callback = MakePtr<WfFunctionDeclaration>();
+							callback->anonymity = WfFunctionAnonymity::Anonymous;
+							callback->returnType = GetTypeFromTypeInfo(TypeInfoRetriver<void>::CreateTypeInfo().Obj());;
+							{
+								auto arg = MakePtr<WfFunctionArgument>();
+								arg->name.value = L"<value>";
+								arg->type = GetTypeFromTypeInfo(TypeInfoRetriver<Value>::CreateTypeInfo().Obj());
+								callback->arguments.Add(arg);
+							}
+							auto callbackBlock = MakePtr<WfBlockStatement>();
+							callback->statement = callbackBlock;
+							{
+							}
+
+							auto funcExpr = MakePtr<WfFunctionExpression>();
+							funcExpr->function = callback;
+
+							auto refThis = MakePtr<WfReferenceExpression>();
+							refThis->name.value = L"<subscription>";
+
+							auto member = MakePtr<WfMemberExpression>();
+							member->parent = refThis;
+							member->name.value = L"Subscribe";
+
+							auto call = MakePtr<WfCallExpression>();
+							call->function = member;
+							call->arguments.Add(funcExpr);
+
+							auto stat = MakePtr<WfExpressionStatement>();
+							stat->expression = call;
+							subBlock->statements.Add(stat);
+						}
+						{
 							auto refThis = MakePtr<WfReferenceExpression>();
 							refThis->name.value = L"<subscription>";
 
