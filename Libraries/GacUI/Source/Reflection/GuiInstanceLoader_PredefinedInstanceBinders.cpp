@@ -327,8 +327,6 @@ GuiWorkflowGlobalContext
 				manager.modules.Add(module);
 				manager.Rebuild(false);
 
-				env->scope->errors.Add(L"Print code for reference:");
-				env->scope->errors.Add(moduleCode);
 				if (manager.errors.Count() > 0)
 				{
 					env->scope->errors.Add(L"Unexpected errors are encountered when initializing data binding.");
@@ -336,6 +334,8 @@ GuiWorkflowGlobalContext
 					{
 						env->scope->errors.Add(error->errorMessage);
 					}
+					env->scope->errors.Add(L"Print code for reference:");
+					env->scope->errors.Add(moduleCode);
 					return;
 				}
 
