@@ -148,13 +148,73 @@ GuiWorkflowGlobalContext
 
 					auto block = MakePtr<WfBlockStatement>();
 					func->statement = block;
-
 					module->declarations.Add(func);
+
+					Dictionary<DescriptableObject*, WString> valueNames;
+					FOREACH_INDEXER(WString, name, index, env->scope->referenceValues.Keys())
+					{
+						auto value = env->scope->referenceValues.Values()[index];
+						valueNames.Add(value.GetRawPtr(), name);
+					}
+					FOREACH(WorkflowDataBinding, dataBinding, dataBindings)
+					{
+						auto subBlock = MakePtr<WfBlockStatement>();
+						block->statements.Add(subBlock);
+						{
+							auto refThis = MakePtr<WfReferenceExpression>();
+							refThis->name.value = L"<this>";
+
+							auto member = MakePtr<WfMemberExpression>();
+							member->parent = refThis;
+							member->name.value = L"AddSubscription";
+
+							auto call = MakePtr<WfCallExpression>();
+							call->function = member;
+							call->arguments.Add(dataBinding.bindExpression);
+
+							auto var = MakePtr<WfVariableDeclaration>();
+							var->name.value = L"<subscription>";
+							var->expression = call;
+
+							auto stat = MakePtr<WfVariableStatement>();
+							stat->variable = var;
+							subBlock->statements.Add(stat);
+						}
+						{
+							auto refThis = MakePtr<WfReferenceExpression>();
+							refThis->name.value = L"<subscription>";
+
+							auto member = MakePtr<WfMemberExpression>();
+							member->parent = refThis;
+							member->name.value = L"Update";
+
+							auto call = MakePtr<WfCallExpression>();
+							call->function = member;
+
+							auto stat = MakePtr<WfExpressionStatement>();
+							stat->expression = call;
+							subBlock->statements.Add(stat);
+						}
+					}
+				}
+
+				WString moduleCode;
+				{
+					stream::MemoryStream stream;
+					{
+						stream::StreamWriter writer(stream);
+						WfPrint(module, L"", writer);
+					}
+					stream.SeekFromBegin(0);
+					stream::StreamReader reader(stream);
+					moduleCode = reader.ReadToEnd();
 				}
 				
 				WfLexicalScopeManager manager(0);
 				manager.modules.Add(module);
 				manager.Rebuild(false);
+					env->scope->errors.Add(L"Print code for reference:");
+					env->scope->errors.Add(moduleCode);
 				if (manager.errors.Count() > 0)
 				{
 					env->scope->errors.Add(L"Unexpected errors are encountered when initializing data binding.");
