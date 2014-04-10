@@ -995,14 +995,18 @@ GuiInstanceLoaderManager
 
 					Ptr<GuiInstanceEnvironment> env = new GuiInstanceEnvironment(context, resolver);
 					auto loadingSource = FindInstanceLoadingSource(env, context->instance.Obj());
-					if (!loadingSource.loader) return false;
-					parentTypes.Add(context->className.Value(), loadingSource.typeName);
+					if (loadingSource.loader)
+					{
+						parentTypes.Add(context->className.Value(), loadingSource.typeName);
+					}
 				}
 				
 				FOREACH(WString, className, classes.Keys())
 				{
 					auto context = classes[className];
-					auto parentType = parentTypes[className];
+					vint index = parentTypes.Keys().IndexOf(className);
+					if (index == -1) continue;
+					auto parentType = parentTypes.Values()[index];
 
 					Ptr<IGuiInstanceLoader> loader = new GuiResourceInstanceLoader(resource, context);
 					if (GetGlobalTypeManager()->GetTypeDescriptor(context->className.Value()))
