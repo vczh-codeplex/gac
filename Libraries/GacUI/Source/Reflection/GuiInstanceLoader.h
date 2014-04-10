@@ -179,6 +179,7 @@ Instance Binder
 		{
 		public:
 			virtual WString							GetContextName() = 0;
+			virtual void							Initialize(Ptr<GuiInstanceEnvironment> env) = 0;
 		};
 
 		class IGuiInstanceBindingContextFactory : public IDescriptable, public Description<IGuiInstanceBindingContextFactory>

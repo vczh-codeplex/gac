@@ -794,18 +794,41 @@ ExecuteBindingSetters
 			// set all binding attributes
 			FOREACH(FillInstanceBindingSetter, bindingSetter, bindingSetters)
 			{
-				if (!bindingSetter.binder->SetPropertyValue(env, bindingSetter.loader, bindingSetter.propertyValue))
+				List<WString> contextNames;
+				bindingSetter.binder->GetRequiredContexts(contextNames);
+				bool failed = false;
+				FOREACH(WString, contextName, contextNames)
 				{
-					auto binding = bindingSetter.binder->GetBindingName();
-					auto key = bindingSetter.propertyValue.propertyName;
+					if (!env->scope->bindingContexts.Keys().Contains(contextName))
+					{
+						auto factory = GetInstanceLoaderManager()->GetInstanceBindingContextFactory(contextName);
+						if (factory)
+						{
+							env->scope->bindingContexts.Add(contextName, factory->CreateContext());
+						}
+						else
+						{
+							env->scope->errors.Add(
+								L"Failed to create binding context \"" +
+								contextName +
+								L"\" which is required by binding \"" +
+								bindingSetter.binder->GetBindingName() +
+								L"\".");
+							failed = true;
+						}
+					}
+				}
+
+				if (failed || !bindingSetter.binder->SetPropertyValue(env, bindingSetter.loader, bindingSetter.propertyValue))
+				{
 					auto value = bindingSetter.propertyValue.propertyValue;
 					env->scope->errors.Add(
 						L"Failed to set property \"" +
-						key +
+						 bindingSetter.propertyValue.propertyName +
 						L"\" of \"" +
 						env->context->instance->typeName +
 						L"\" using binding \"" +
-						binding +
+						bindingSetter.binder->GetBindingName() +
 						L"\" and value \"" +
 						(
 							value.GetValueType() == Value::Null ? WString(L"null") :
@@ -815,6 +838,12 @@ ExecuteBindingSetters
 						L"\".");
 					bindingSetter.propertyValue.propertyValue.DeleteRawPtr();
 				}
+			}
+
+			// initialize all binding context
+			FOREACH(Ptr<IGuiInstanceBindingContext>, context, env->scope->bindingContexts.Values())
+			{
+				context->Initialize(env);
 			}
 		}
 
@@ -980,7 +1009,7 @@ InitializeInstance
 			// search for a correct loader
 			GuiConstructorRepr* ctor = context->instance.Obj();
 			Ptr<GuiInstanceEnvironment> env = new GuiInstanceEnvironment(context, resolver);
-			InstanceLoadingSource source=FindInstanceLoadingSource(env, ctor);
+			InstanceLoadingSource source = FindInstanceLoadingSource(env, ctor);
 
 			// initialize the instance
 			if(source.loader)
