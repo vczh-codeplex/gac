@@ -19,4 +19,14 @@
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <Xml Include="XmlWindowResourceDataBinding.xml">
+      <Filter>Resource Files</Filter>
+    </Xml>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Codegen.bat">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
 </Project>
