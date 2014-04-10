@@ -123,7 +123,7 @@ LoadValueVisitor
 				{
 					FOREACH(ITypeDescriptor*, typeDescriptor, acceptableTypes)
 					{
-						if(IValueSerializer* serializer=typeDescriptor->GetValueSerializer())
+						if (IValueSerializer* serializer = typeDescriptor->GetValueSerializer())
 						{
 							if (serializer->Parse(repr->text, loadedValue))
 							{
@@ -131,6 +131,16 @@ LoadValueVisitor
 								return;
 							}
 						}
+					}
+					
+					FOREACH(ITypeDescriptor*, typeDescriptor, acceptableTypes)
+					{
+						env->scope->errors.Add(
+							L"Failed to deserialize object of type \"" +
+							typeDescriptor->GetTypeName() +
+							L"\" from string \"" +
+							repr->text +
+							L"\".");
 					}
 				}
 
@@ -219,7 +229,7 @@ LoadInstancePropertyValue
 		{
 			vint loadedValueCount = 0;
 			// try to look for a loader to handle this property
-			while(propertyLoader && loadedValueCount<input.Count())
+			while (propertyLoader && loadedValueCount < input.Count())
 			{
 				if (auto propertyInfo = propertyLoader->GetPropertyType(propertyValue))
 				{
@@ -229,13 +239,28 @@ LoadInstancePropertyValue
 					}
 					if (propertyInfo->support == GuiInstancePropertyInfo::NotSupport)
 					{
-						break;
+						env->scope->errors.Add(
+							L"Property \"" +
+							propertyValue.propertyName +
+							L"\" of type \"" +
+							propertyValue.instanceValue.GetTypeDescriptor()->GetTypeName() +
+							L"\" is not supported.");
+						return false;
 					}
 
 					switch (propertyInfo->support)
 					{
 					case GuiInstancePropertyInfo::SupportSet:
-						if (input.Count() != 1) return false;
+						if (input.Count() != 1)
+						{
+							env->scope->errors.Add(
+								L"Collection property \"" +
+								propertyValue.propertyName +
+								L"\" of type \"" +
+								propertyValue.instanceValue.GetTypeDescriptor()->GetTypeName() +
+								L"\" can only be assigned with a single value.");
+							return false;
+						}
 						if (constructorArgument) return false;
 						if (binding != L"set")
 						{
@@ -412,9 +437,10 @@ LoadInstancePropertyValue
 				}
 				else
 				{
-					propertyLoader=GetInstanceLoaderManager()->GetParentLoader(propertyLoader);
+					propertyLoader = GetInstanceLoaderManager()->GetParentLoader(propertyLoader);
 				}
 			}
+
 			return true;
 		}
 
@@ -765,14 +791,10 @@ ExecuteBindingSetters
 			List<FillInstanceBindingSetter>& bindingSetters
 			)
 		{
-			// set all -bind attributes
+			// set all binding attributes
 			FOREACH(FillInstanceBindingSetter, bindingSetter, bindingSetters)
 			{
 				if (!bindingSetter.binder->SetPropertyValue(env, bindingSetter.loader, bindingSetter.propertyValue))
-				{
-					bindingSetter.propertyValue.propertyValue.DeleteRawPtr();
-				}
-				else
 				{
 					auto binding = bindingSetter.binder->GetBindingName();
 					auto key = bindingSetter.propertyValue.propertyName;
@@ -791,6 +813,7 @@ ExecuteBindingSetters
 							(L"<" + value.GetTypeDescriptor()->GetTypeName() + L">")
 						) +
 						L"\".");
+					bindingSetter.propertyValue.propertyValue.DeleteRawPtr();
 				}
 			}
 		}
