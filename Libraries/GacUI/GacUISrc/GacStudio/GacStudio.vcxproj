@@ -171,6 +171,12 @@
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/bigobj %(AdditionalOptions)</AdditionalOptions>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="..\..\Public\Source\VlppWorkflow.cpp">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="UI\GacStudioUIPartialClasses.cpp" />
     <ClCompile Include="UI\GsMainWindow.cpp" />
@@ -182,6 +188,7 @@
     <ClInclude Include="..\..\Public\Source\GacUIReflection.h" />
     <ClInclude Include="..\..\Public\Source\GacUIWindows.h" />
     <ClInclude Include="..\..\Public\Source\Vlpp.h" />
+    <ClInclude Include="..\..\Public\Source\VlppWorkflow.h" />
     <ClInclude Include="UI\GacStudioUI.h" />
     <ClInclude Include="UI\GacStudioUIPartialClasses.h" />
     <ClInclude Include="UI\GsMainWindow.h" />

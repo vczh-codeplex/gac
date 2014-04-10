@@ -57,6 +57,9 @@
     <ClCompile Include="UI\GsNewFileWindow.cpp">
       <Filter>UI</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Public\Source\VlppWorkflow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Public\Source\GacUI.h">
@@ -85,6 +88,9 @@
     </ClInclude>
     <ClInclude Include="UI\GsNewFileWindow.h">
       <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Public\Source\VlppWorkflow.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
