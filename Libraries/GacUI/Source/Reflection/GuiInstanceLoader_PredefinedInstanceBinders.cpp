@@ -228,6 +228,8 @@ GuiWorkflowGlobalContext
 
 				auto assembly = GenerateAssembly(&manager);
 				globalContext = new WfRuntimeGlobalContext(assembly);
+				
+				LoadFunction<void()>(globalContext, L"<initialize>")();
 				FOREACH(WString, name, env->scope->referenceValues.Keys())
 				{
 					vint index = assembly->variableNames.IndexOf(name);
@@ -237,8 +239,6 @@ GuiWorkflowGlobalContext
 					vint index = assembly->variableNames.IndexOf(L"<this>");
 					globalContext->globalVariables->variables[index] = env->scope->rootInstance;
 				}
-
-				LoadFunction<void()>(globalContext, L"<initialize>")();
 				LoadFunction<void()>(globalContext, L"<initialize-data-binding>")();
 			}
 

@@ -115,6 +115,7 @@ namespace demos
 					errorText += error + L"\r\n";
 				}
 				textBoxError->SetText(errorText);
+				textBoxError->Select(TextPos(), TextPos());
 			}
 		}
 	};
