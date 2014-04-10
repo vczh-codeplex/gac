@@ -11,6 +11,7 @@ namespace vl
 		using namespace reflection::description;
 		using namespace workflow;
 		using namespace workflow::analyzer;
+		using namespace workflow::runtime;
 
 /***********************************************************************
 GuiTextInstanceBinderBase
@@ -126,7 +127,8 @@ GuiWorkflowGlobalContext
 		class GuiWorkflowGlobalContext : public Object, public IGuiInstanceBindingContext
 		{
 		public:
-			List<WorkflowDataBinding>	dataBindings;
+			List<WorkflowDataBinding>		dataBindings;
+			Ptr<WfRuntimeGlobalContext>		globalContext;
 
 			WString GetContextName()override
 			{
@@ -135,6 +137,69 @@ GuiWorkflowGlobalContext
 
 			void Initialize(Ptr<GuiInstanceEnvironment> env)override
 			{
+				auto module = MakePtr<WfModule>();
+				CreateVariablesForReferenceValues(module, env);
+				CreateVariable(module, L"<this>", env->scope->rootInstance);
+				{
+					auto func = MakePtr<WfFunctionDeclaration>();
+					func->anonymity = WfFunctionAnonymity::Named;
+					func->name.value = L"<initialize-data-binding>";
+					func->returnType = GetTypeFromTypeInfo(TypeInfoRetriver<void>::CreateTypeInfo().Obj());
+
+					auto block = MakePtr<WfBlockStatement>();
+					func->statement = block;
+
+					module->declarations.Add(func);
+				}
+				
+				WfLexicalScopeManager manager(0);
+				manager.modules.Add(module);
+				manager.Rebuild(false);
+				if (manager.errors.Count() > 0)
+				{
+					env->scope->errors.Add(L"Unexpected errors are encountered when initializing data binding.");
+					FOREACH(Ptr<parsing::ParsingError>, error, manager.errors)
+					{
+						env->scope->errors.Add(error->errorMessage);
+					}
+					return;
+				}
+
+				auto assembly = GenerateAssembly(&manager);
+				globalContext = new WfRuntimeGlobalContext(assembly);
+				FOREACH(WString, name, env->scope->referenceValues.Keys())
+				{
+					vint index = assembly->variableNames.IndexOf(name);
+					globalContext->globalVariables->variables[index] = env->scope->referenceValues.Values()[index];
+				}
+				{
+					vint index = assembly->variableNames.IndexOf(L"<this>");
+					globalContext->globalVariables->variables[index] = env->scope->rootInstance;
+				}
+
+				LoadFunction<void()>(globalContext, L"<initialize>")();
+				LoadFunction<void()>(globalContext, L"<initialize-data-binding>")();
+			}
+
+			static void CreateVariable(Ptr<WfModule> module, const WString& name, const Value& value)
+			{
+				auto var = MakePtr<WfVariableDeclaration>();
+				var->name.value = name;
+				{
+					Ptr<TypeInfoImpl> elementType = new TypeInfoImpl(ITypeInfo::TypeDescriptor);
+					elementType->SetTypeDescriptor(value.GetTypeDescriptor());
+
+					Ptr<TypeInfoImpl> pointerType = new TypeInfoImpl(ITypeInfo::RawPtr);
+					pointerType->SetElementType(elementType);
+
+					var->type = GetTypeFromTypeInfo(pointerType.Obj());
+				}
+
+				auto literal = MakePtr<WfLiteralExpression>();
+				literal->value = WfLiteralValue::Null;
+				var->expression = literal;
+
+				module->declarations.Add(var);
 			}
 
 			static void CreateVariablesForReferenceValues(Ptr<WfModule> module, Ptr<GuiInstanceEnvironment> env)
@@ -142,23 +207,7 @@ GuiWorkflowGlobalContext
 				FOREACH_INDEXER(WString, name, index, env->scope->referenceValues.Keys())
 				{
 					auto value = env->scope->referenceValues.Values()[index];
-					auto var = MakePtr<WfVariableDeclaration>();
-					var->name.value = name;
-					{
-						Ptr<TypeInfoImpl> elementType = new TypeInfoImpl(ITypeInfo::TypeDescriptor);
-						elementType->SetTypeDescriptor(value.GetTypeDescriptor());
-
-						Ptr<TypeInfoImpl> pointerType = new TypeInfoImpl(ITypeInfo::RawPtr);
-						pointerType->SetElementType(elementType);
-
-						var->type = GetTypeFromTypeInfo(pointerType.Obj());
-					}
-
-					auto literal = MakePtr<WfLiteralExpression>();
-					literal->value = WfLiteralValue::Null;
-					var->expression = literal;
-
-					module->declarations.Add(var);
+					CreateVariable(module, name, value);
 				}
 			}
 		};
@@ -209,6 +258,8 @@ GuiScriptInstanceBinder
 						GuiWorkflowGlobalContext::CreateVariablesForReferenceValues(module, env);
 						{
 							auto func = MakePtr<WfFunctionDeclaration>();
+							func->anonymity = WfFunctionAnonymity::Named;
+							func->name.value = L"<initialize-data-binding>";
 							func->returnType = GetTypeFromTypeInfo(TypeInfoRetriver<void>::CreateTypeInfo().Obj());
 
 							auto stat = MakePtr<WfExpressionStatement>();

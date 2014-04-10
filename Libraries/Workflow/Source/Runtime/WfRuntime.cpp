@@ -157,16 +157,16 @@ namespace vl
 #undef CTOR_LABEL
 #undef CTOR_TYPE
 
-				/***********************************************************************
-				WfRuntimeGlobalContext
-				***********************************************************************/
+			/***********************************************************************
+			WfRuntimeGlobalContext
+			***********************************************************************/
 
-				WfRuntimeGlobalContext::WfRuntimeGlobalContext(Ptr<WfAssembly> _assembly)
-				:assembly(_assembly)
+			WfRuntimeGlobalContext::WfRuntimeGlobalContext(Ptr<WfAssembly> _assembly)
+			:assembly(_assembly)
 			{
-					globalVariables = new WfRuntimeVariableContext;
-					globalVariables->variables.Resize(assembly->variableNames.Count());
-				}
+				globalVariables = new WfRuntimeVariableContext;
+				globalVariables->variables.Resize(assembly->variableNames.Count());
+			}
 
 			/***********************************************************************
 			WfRuntimeThreadContext
