@@ -820,6 +820,29 @@ GuiCustomControl
 			{
 			}
 
+			Ptr<description::IValueSubscription> GuiCustomControl::AddSubscription(Ptr<description::IValueSubscription> subscription)
+			{
+				if (subscriptions.Contains(subscription.Obj()))
+				{
+					return 0;
+				}
+				else
+				{
+					subscriptions.Add(subscription);
+					return subscription;
+				}
+			}
+
+			bool GuiCustomControl::RemoveSubscription(Ptr<description::IValueSubscription> subscription)
+			{
+				return subscriptions.Remove(subscription.Obj());
+			}
+
+			bool GuiCustomControl::ContainsSubscription(Ptr<description::IValueSubscription> subscription)
+			{
+				return subscriptions.Contains(subscription.Obj());
+			}
+
 /***********************************************************************
 GuiComponent
 ***********************************************************************/

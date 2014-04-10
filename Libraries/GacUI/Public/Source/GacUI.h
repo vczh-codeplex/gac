@@ -4366,6 +4366,10 @@ Basic Construction
 
 			class GuiCustomControl : public GuiControl, public Description<GuiCustomControl>
 			{
+				typedef collections::List<Ptr<description::IValueSubscription>>		SubscriptionList;
+			protected:
+				SubscriptionList								subscriptions;
+
 			public:
 				class IStyleController : virtual public GuiControl::IStyleController, public Description<IStyleController>
 				{
@@ -4382,6 +4386,10 @@ Basic Construction
 			public:
 				GuiCustomControl(IStyleController* _styleController);
 				~GuiCustomControl();
+
+				Ptr<description::IValueSubscription>			AddSubscription(Ptr<description::IValueSubscription> subscription);
+				bool											RemoveSubscription(Ptr<description::IValueSubscription> subscription);
+				bool											ContainsSubscription(Ptr<description::IValueSubscription> subscription);
 			};
 
 			class GuiComponent : public Object, public Description<GuiComponent>
