@@ -98,6 +98,10 @@
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/bigobj %(AdditionalOptions)</AdditionalOptions>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\Libraries\GacUI\Public\Source\VlppWorkflow.cpp">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/bigobj %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -105,6 +109,7 @@
     <ClInclude Include="..\..\..\..\Libraries\GacUI\Public\Source\GacUIReflection.h" />
     <ClInclude Include="..\..\..\..\Libraries\GacUI\Public\Source\GacUIWindows.h" />
     <ClInclude Include="..\..\..\..\Libraries\GacUI\Public\Source\Vlpp.h" />
+    <ClInclude Include="..\..\..\..\Libraries\GacUI\Public\Source\VlppWorkflow.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

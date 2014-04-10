@@ -42,6 +42,9 @@
     <ClCompile Include="SignInWindow.cpp">
       <Filter>GeneratedCode</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\Libraries\GacUI\Public\Source\VlppWorkflow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Libraries\GacUI\Public\Source\GacUI.h">
@@ -64,6 +67,9 @@
     </ClInclude>
     <ClInclude Include="SignInWindow.h">
       <Filter>GeneratedCode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Libraries\GacUI\Public\Source\VlppWorkflow.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
