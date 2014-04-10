@@ -83,6 +83,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="UI\DemoPartialClasses.cpp" />
+    <ClCompile Include="UI\MainWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\GacUIReflectionStaticLibrary\GacUIReflectionStaticLibrary.vcxproj">
@@ -90,10 +92,15 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Xml Include="XmlWindowResourceDataBinding.xml" />
+    <Xml Include="UI\XmlWindowResourceDataBinding.xml" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Codegen.bat" />
+    <None Include="UI\Codegen.bat" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="UI\Demo.h" />
+    <ClInclude Include="UI\DemoPartialClasses.h" />
+    <ClInclude Include="UI\MainWindow.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
