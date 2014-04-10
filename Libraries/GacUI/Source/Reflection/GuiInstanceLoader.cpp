@@ -713,6 +713,7 @@ GuiInstanceLoaderManager
 		{
 		protected:
 			typedef Dictionary<WString, Ptr<IGuiInstanceBinder>>				BinderMap;
+			typedef Dictionary<WString, Ptr<IGuiInstanceBindingContextFactory>>	BindingContextFactoryMap;
 
 			struct VirtualTypeInfo
 			{
@@ -734,6 +735,7 @@ GuiInstanceLoaderManager
 
 			Ptr<IGuiInstanceLoader>					rootLoader;
 			BinderMap								binders;
+			BindingContextFactoryMap				bindingContextFactories;
 			VirtualTypeInfoMap						typeInfos;
 			ResourceMap								resources;
 
@@ -859,6 +861,19 @@ GuiInstanceLoaderManager
 			void Unload()override
 			{
 				instanceLoaderManager = 0;
+			}
+
+			bool AddInstanceBindingContextFactory(Ptr<IGuiInstanceBindingContextFactory> factory)override
+			{
+				if (bindingContextFactories.Keys().Contains(factory->GetContextName())) return false;
+				bindingContextFactories.Add(factory->GetContextName(), factory);
+				return true;
+			}
+
+			IGuiInstanceBindingContextFactory* GetInstanceBindingContextFactory(const WString& contextName)override
+			{
+				vint index = bindingContextFactories.Keys().IndexOf(contextName);
+				return index == -1 ? 0 : bindingContextFactories.Values()[index].Obj();
 			}
 
 			bool AddInstanceBinder(Ptr<IGuiInstanceBinder> binder)override

@@ -1,5 +1,7 @@
 #include "GuiInstanceLoader.h"
 #include "TypeDescriptors\GuiReflectionControls.h"
+#include "..\Resources\GuiParserManager.h"
+#include "..\..\..\Workflow\Source\Expression\WfExpressionParser.h"
 
 namespace vl
 {
@@ -7,6 +9,7 @@ namespace vl
 	{
 		using namespace collections;
 		using namespace reflection::description;
+		using namespace workflow;
 
 /***********************************************************************
 GuiTextInstanceBinderBase
@@ -19,6 +22,10 @@ GuiTextInstanceBinderBase
 		public:
 			GuiTextInstanceBinderBase()
 				:stringTypeDescriptor(description::GetTypeDescriptor<WString>())
+			{
+			}
+
+			void GetRequiredContexts(collections::List<WString>& contextNames)override
 			{
 			}
 
@@ -105,6 +112,68 @@ GuiReferenceInstanceBinder
 		};
 
 /***********************************************************************
+GuiWorkflowGlobalContext
+***********************************************************************/
+
+		class GuiWorkflowGlobalContext : public Object, public IGuiInstanceBindingContext
+		{
+		public:
+			WString GetContextName()override
+			{
+				return L"WORKFLOW-GLOBAL-CONTEXT";
+			}
+		};
+
+/***********************************************************************
+GuiScriptInstanceBinder
+***********************************************************************/
+
+		class GuiScriptInstanceBinder : public GuiTextInstanceBinderBase
+		{
+		public:
+			void GetRequiredContexts(collections::List<WString>& contextNames)override
+			{
+				contextNames.Add(L"WORKFLOW-GLOBAL-CONTEXT");
+			}
+		};
+
+/***********************************************************************
+GuiBindInstanceBinder
+***********************************************************************/
+
+		class GuiBindInstanceBinder : public GuiScriptInstanceBinder
+		{
+		public:
+			WString GetBindingName()override
+			{
+				return L"bind";
+			}
+
+			bool SetPropertyValue(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, IGuiInstanceLoader::PropertyValue& propertyValue)override
+			{
+				return false;
+			}
+		};
+
+/***********************************************************************
+GuiFormatInstanceBinder
+***********************************************************************/
+
+		class GuiFormatInstanceBinder : public GuiScriptInstanceBinder
+		{
+		public:
+			WString GetBindingName()override
+			{
+				return L"format";
+			}
+
+			bool SetPropertyValue(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, IGuiInstanceLoader::PropertyValue& propertyValue)override
+			{
+				return false;
+			}
+		};
+
+/***********************************************************************
 GuiPredefinedInstanceBindersPlugin
 ***********************************************************************/
 
@@ -113,14 +182,27 @@ GuiPredefinedInstanceBindersPlugin
 		public:
 			void Load()override
 			{
+				WfLoadTypes();
 			}
 
 			void AfterLoad()override
 			{
-				IGuiInstanceLoaderManager* manager=GetInstanceLoaderManager();
+				{
+					IGuiParserManager* manager = GetParserManager();
+					manager->SetParsingTable(L"WORKFLOW", &WfLoadTable);
+					manager->SetTableParser(L"WORKFLOW", L"WORKFLOW-EXPRESSION", &WfParseExpression);
+					manager->SetTableParser(L"WORKFLOW", L"WORKFLOW-MODULE", &WfParseModule);
+				}
+				{
+					IGuiInstanceLoaderManager* manager=GetInstanceLoaderManager();
 
-				manager->AddInstanceBinder(new GuiResourceInstanceBinder);
-				manager->AddInstanceBinder(new GuiReferenceInstanceBinder);
+					manager->AddInstanceBindingContextFactory(new GuiInstanceBindingContextFactory<GuiWorkflowGlobalContext>(L"WORKFLOW-GLOBAL-CONTEXT"));
+
+					manager->AddInstanceBinder(new GuiResourceInstanceBinder);
+					manager->AddInstanceBinder(new GuiReferenceInstanceBinder);
+					manager->AddInstanceBinder(new GuiBindInstanceBinder);
+					manager->AddInstanceBinder(new GuiFormatInstanceBinder);
+				}
 			}
 
 			void Unload()override
