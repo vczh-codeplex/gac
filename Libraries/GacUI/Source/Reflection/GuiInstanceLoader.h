@@ -272,6 +272,28 @@ Instance Scope Wrapper
 				}
 				return false;
 			}
+
+			template<typename TControl>
+			void LoadInstanceReference(const WString& name, TControl*& reference)
+			{
+				reference = 0;
+				vint index = scope->referenceValues.Keys().IndexOf(name);
+				if (index == -1)
+				{
+					scope->errors.Add(L"Failed to find instance reference \"" + name + L"\".");
+					return;
+				}
+
+				auto value = scope->referenceValues.Values()[index];
+				auto td = description::GetTypeDescriptor<TControl>();
+				if (!value.GetTypeDescriptor() || !value.GetTypeDescriptor()->CanConvertTo(td))
+				{
+					scope->errors.Add(L"Failed to convert instance reference \"" + name + L"\" to \"" + td->GetTypeName() + L"\".");
+					return;
+				}
+
+				reference = description::UnboxValue<TControl*>(value);
+			}
 		public:
 			GuiInstancePartialClass(const WString& _className)
 				:className(_className)
@@ -288,7 +310,7 @@ Instance Scope Wrapper
 			}
 		};
 
-#define GUI_INSTANCE_REFERENCE(NAME) this->NAME=vl::reflection::description::UnboxValue<decltype(NAME)>(this->GetScope()->referenceValues[L#NAME])
+#define GUI_INSTANCE_REFERENCE(NAME) LoadInstanceReference(L#NAME, this->NAME)
 	}
 }
 
