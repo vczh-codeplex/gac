@@ -1016,6 +1016,7 @@ InitializeInstance
 			{
 				if (auto scope = InitializeInstanceFromConstructor(env, ctor, source.loader, source.typeName, instance, false, bindingSetters, eventSetters))
 				{
+					scope->rootInstance = instance;
 					ExecuteBindingSetters(env, bindingSetters);
 					ExecuteEventSetters(instance, env, eventSetters);
 					return scope;
