@@ -1,7 +1,7 @@
 #include "GuiInstanceLoader.h"
 #include "TypeDescriptors\GuiReflectionControls.h"
 #include "..\Resources\GuiParserManager.h"
-#include "..\..\..\Workflow\Source\Expression\WfExpressionParser.h"
+#include "..\..\..\Workflow\Source\Analyzer\WfAnalyzer.h"
 
 namespace vl
 {
@@ -10,6 +10,7 @@ namespace vl
 		using namespace collections;
 		using namespace reflection::description;
 		using namespace workflow;
+		using namespace workflow::analyzer;
 
 /***********************************************************************
 GuiTextInstanceBinderBase
@@ -125,6 +126,8 @@ GuiWorkflowGlobalContext
 		class GuiWorkflowGlobalContext : public Object, public IGuiInstanceBindingContext
 		{
 		public:
+			List<WorkflowDataBinding>	dataBindings;
+
 			WString GetContextName()override
 			{
 				return L"WORKFLOW-GLOBAL-CONTEXT";
@@ -132,6 +135,31 @@ GuiWorkflowGlobalContext
 
 			void Initialize(Ptr<GuiInstanceEnvironment> env)override
 			{
+			}
+
+			static void CreateVariablesForReferenceValues(Ptr<WfModule> module, Ptr<GuiInstanceEnvironment> env)
+			{
+				FOREACH_INDEXER(WString, name, index, env->scope->referenceValues.Keys())
+				{
+					auto value = env->scope->referenceValues.Values()[index];
+					auto var = MakePtr<WfVariableDeclaration>();
+					var->name.value = name;
+					{
+						Ptr<TypeInfoImpl> elementType = new TypeInfoImpl(ITypeInfo::TypeDescriptor);
+						elementType->SetTypeDescriptor(value.GetTypeDescriptor());
+
+						Ptr<TypeInfoImpl> pointerType = new TypeInfoImpl(ITypeInfo::RawPtr);
+						pointerType->SetElementType(elementType);
+
+						var->type = GetTypeFromTypeInfo(pointerType.Obj());
+					}
+
+					auto literal = MakePtr<WfLiteralExpression>();
+					literal->value = WfLiteralValue::Null;
+					var->expression = literal;
+
+					module->declarations.Add(var);
+				}
 			}
 		};
 
@@ -162,9 +190,79 @@ GuiScriptInstanceBinder
 						return false;
 					}
 
+					bool failed = false;
+					auto td = propertyValue.instanceValue.GetTypeDescriptor();
+					auto propertyInfo = td->GetPropertyByName(propertyValue.propertyName, true);
+					if (!propertyInfo)
+					{
+						env->scope->errors.Add(L"Property \"" + propertyValue.propertyName + L"\" does not exist in type \"" + td->GetTypeName() + L"\".");
+						failed = true;
+					}
+					else if (!propertyInfo->IsReadable() || !propertyInfo->IsWritable())
+					{
+						env->scope->errors.Add(L"Property \"" + propertyValue.propertyName + L"\" of type \"" + td->GetTypeName() + L"\" should be both readable and writable.");
+						failed = true;
+					}
 
+					{
+						auto module = MakePtr<WfModule>();
+						GuiWorkflowGlobalContext::CreateVariablesForReferenceValues(module, env);
+						{
+							auto func = MakePtr<WfFunctionDeclaration>();
+							func->returnType = GetTypeFromTypeInfo(TypeInfoRetriver<void>::CreateTypeInfo().Obj());
 
-					return true;
+							auto stat = MakePtr<WfExpressionStatement>();
+							stat->expression = expression;
+							func->statement = stat;
+
+							module->declarations.Add(func);
+						}
+
+						WfLexicalScopeManager manager(0);
+						manager.modules.Add(module);
+						manager.Rebuild(false);
+						if (manager.errors.Count() > 0)
+						{
+							env->scope->errors.Add(L"Failed to analyze the workflow expression \"" + expressionCode + L"\".");
+							FOREACH(Ptr<parsing::ParsingError>, error, manager.errors)
+							{
+								env->scope->errors.Add(error->errorMessage);
+							}
+							failed = true;
+						}
+						else if (propertyInfo)
+						{
+							auto result = manager.expressionResolvings[expression->expression.Obj()];
+							if (result.type)
+							{
+								ITypeInfo* propertyType = propertyInfo->GetReturn();
+								if (propertyInfo->GetSetter() && propertyInfo->GetSetter()->GetParameterCount() == 1)
+								{
+									propertyType = propertyInfo->GetSetter()->GetParameter(0)->GetType();
+								}
+								if (!CanConvertToType(result.type.Obj(), propertyType, false))
+								{
+									env->scope->errors.Add(L"Failed to analyze the workflow expression \"" + expressionCode + L"\".");
+									env->scope->errors.Add(
+										WfErrors::ExpressionCannotImplicitlyConvertToType(expression->expression.Obj(), result.type.Obj(), propertyType)
+										->errorMessage);
+									failed = true;
+								}
+							}
+						}
+					}
+
+					if (!failed)
+					{
+						WorkflowDataBinding dataBinding;
+						dataBinding.instance = propertyValue.instanceValue;
+						dataBinding.propertyInfo = propertyInfo;
+						dataBinding.bindExpression = expression;
+
+						auto context = env->scope->bindingContexts[L"WORKFLOW-GLOBAL-CONTEXT"].Cast<GuiWorkflowGlobalContext>();
+						context->dataBindings.Add(dataBinding);
+					}
+					return !failed;
 				}
 				return false;
 			}
