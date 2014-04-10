@@ -23,14 +23,18 @@ namespace vl
 Instance Environment
 ***********************************************************************/
 
+		class IGuiInstanceBindingContext;
+
 		class GuiInstanceContextScope : public Object, public Description<GuiInstanceContextScope>
 		{
-			typedef collections::Dictionary<WString, description::Value>		ValueMap;
-			typedef collections::List<WString>									ErrorList;
+			typedef collections::Dictionary<WString, description::Value>					ValueMap;
+			typedef collections::List<WString>												ErrorList;
+			typedef collections::Dictionary<WString, Ptr<IGuiInstanceBindingContext>>		BindingContextMap;
 		public:
 			WString									typeName;
 			description::Value						rootInstance;
 			ValueMap								referenceValues;
+			BindingContextMap						bindingContexts;
 			ErrorList								errors;
 		};
 
@@ -171,10 +175,46 @@ Instance Loader
 Instance Binder
 ***********************************************************************/
 
+		class IGuiInstanceBindingContext : public IDescriptable, public Description<IGuiInstanceBindingContext>
+		{
+		public:
+			virtual WString							GetContextName() = 0;
+		};
+
+		class IGuiInstanceBindingContextFactory : public IDescriptable, public Description<IGuiInstanceBindingContextFactory>
+		{
+		public:
+			virtual WString							GetContextName() = 0;
+			virtual Ptr<IGuiInstanceBindingContext>	CreateContext() = 0;
+		};
+
+		template<typename T>
+		class GuiInstanceBindingContextFactory : public IGuiInstanceBindingContextFactory
+		{
+		protected:
+			WString									contextName;
+		public:
+			GuiInstanceBindingContextFactory(const WString& _contextName)
+				:contextName(_contextName)
+			{
+			}
+
+			WString GetContextName()override
+			{
+				return contextName;
+			}
+
+			Ptr<IGuiInstanceBindingContext> CreateContext()override
+			{
+				return new T;
+			}
+		};
+
 		class IGuiInstanceBinder : public IDescriptable, public Description<IGuiInstanceBinder>
 		{
 		public:
 			virtual WString							GetBindingName() = 0;
+			virtual void							GetRequiredContexts(collections::List<WString>& contextNames) = 0;
 			virtual void							GetExpectedValueTypes(collections::List<description::ITypeDescriptor*>& expectedTypes) = 0;
 			virtual bool							SetPropertyValue(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, IGuiInstanceLoader::PropertyValue& propertyValue) = 0;
 		};
@@ -186,17 +226,19 @@ Instance Loader Manager
 		class IGuiInstanceLoaderManager : public IDescriptable, public Description<IGuiInstanceLoaderManager>
 		{
 		public:
-			virtual bool							AddInstanceBinder(Ptr<IGuiInstanceBinder> binder) = 0;
-			virtual IGuiInstanceBinder*				GetInstanceBinder(const WString& bindingName) = 0;
-			virtual bool							CreateVirtualType(const WString& parentType, Ptr<IGuiInstanceLoader> loader) = 0;
-			virtual bool							SetLoader(Ptr<IGuiInstanceLoader> loader) = 0;
-			virtual IGuiInstanceLoader*				GetLoader(const WString& typeName) = 0;
-			virtual IGuiInstanceLoader*				GetParentLoader(IGuiInstanceLoader* loader) = 0;
-			virtual description::ITypeDescriptor*	GetTypeDescriptorForType(const WString& typeName) = 0;
-			virtual void							GetVirtualTypes(collections::List<WString>& typeNames) = 0;
-			virtual WString							GetParentTypeForVirtualType(const WString& virtualType) = 0;
-			virtual bool							SetResource(const WString& name, Ptr<GuiResource> resource) = 0;
-			virtual Ptr<GuiResource>				GetResource(const WString& name) = 0;
+			virtual bool								AddInstanceBindingContextFactory(Ptr<IGuiInstanceBindingContextFactory> factory) = 0;
+			virtual IGuiInstanceBindingContextFactory*	GetInstanceBindingContextFactory(const WString& contextName) = 0;
+			virtual bool								AddInstanceBinder(Ptr<IGuiInstanceBinder> binder) = 0;
+			virtual IGuiInstanceBinder*					GetInstanceBinder(const WString& bindingName) = 0;
+			virtual bool								CreateVirtualType(const WString& parentType, Ptr<IGuiInstanceLoader> loader) = 0;
+			virtual bool								SetLoader(Ptr<IGuiInstanceLoader> loader) = 0;
+			virtual IGuiInstanceLoader*					GetLoader(const WString& typeName) = 0;
+			virtual IGuiInstanceLoader*					GetParentLoader(IGuiInstanceLoader* loader) = 0;
+			virtual description::ITypeDescriptor*		GetTypeDescriptorForType(const WString& typeName) = 0;
+			virtual void								GetVirtualTypes(collections::List<WString>& typeNames) = 0;
+			virtual WString								GetParentTypeForVirtualType(const WString& virtualType) = 0;
+			virtual bool								SetResource(const WString& name, Ptr<GuiResource> resource) = 0;
+			virtual Ptr<GuiResource>					GetResource(const WString& name) = 0;
 		};
 
 		struct InstanceLoadingSource
