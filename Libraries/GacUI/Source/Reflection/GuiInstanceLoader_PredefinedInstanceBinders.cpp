@@ -213,8 +213,9 @@ GuiWorkflowGlobalContext
 				WfLexicalScopeManager manager(0);
 				manager.modules.Add(module);
 				manager.Rebuild(false);
-					env->scope->errors.Add(L"Print code for reference:");
-					env->scope->errors.Add(moduleCode);
+
+				env->scope->errors.Add(L"Print code for reference:");
+				env->scope->errors.Add(moduleCode);
 				if (manager.errors.Count() > 0)
 				{
 					env->scope->errors.Add(L"Unexpected errors are encountered when initializing data binding.");
@@ -365,6 +366,8 @@ GuiScriptInstanceBinder
 
 					if (!failed)
 					{
+						expression->expandedExpression = 0;
+
 						WorkflowDataBinding dataBinding;
 						dataBinding.instance = propertyValue.instanceValue;
 						dataBinding.propertyInfo = propertyInfo;
