@@ -159,6 +159,10 @@ Type Declaration
 				CLASS_MEMBER_BASE(GuiControl)
 				CONTROL_CONSTRUCTOR_CONTROLLER(GuiCustomControl)
 				CONTROL_CONSTRUCTOR_DEFAULT(GuiCustomControl, &g::NewCustomControl)
+
+				CLASS_MEMBER_METHOD(AddSubscription, {L"subscription"})
+				CLASS_MEMBER_METHOD(RemoveSubscription, {L"subscription"})
+				CLASS_MEMBER_METHOD(ContainsSubscription, {L"subscription"})
 			END_CLASS_MEMBER(GuiCustomControl)
 
 			BEGIN_CLASS_MEMBER(GuiCustomControl::IStyleController)
