@@ -246,11 +246,25 @@
       <description>This demo shows how to load windows or controls from an XML resource.</description>
     </demo>
     <demo name="DirectCode.Scripting">
-      <date>2013/11/14</date>
+      <date>2014/3/26</date>
       <image src="DXGUI_89.jpg" />
       <image src="DXGUI_90.jpg" />
       <cpp src="Main.cpp" />
       <description>This demo shows how to create GUI using Workflow script.</description>
+    </demo>
+    <demo name="LoadFromXml.DataBinding">
+      <date>2014/4/11</date>
+      <image src="DXGUI_91.jpg" />
+      <image src="DXGUI_92.jpg" />
+      <cpp src="Main.cpp" />
+      <cpp src="Codegen.bat" />
+      <cpp src="XmlWindowResourceDataBinding.xml" />
+      <cpp src="(Generated)Demo.h" />
+      <cpp src="(Generated, Modifiable)MainWindow.h" />
+      <cpp src="(Generated, Modifiable)MainWindow.cpp" />
+      <cpp src="(Generated)DemoPartialClasses.h" />
+      <cpp src="(Generated)DemoPartialClasses.cpp" />
+      <description>This demo shows how to create GUI using an XML resource, perform data binding using Workflow script expression, and generate C++ code from the XML.</description>
     </demo>
   </category>
 </demos>
