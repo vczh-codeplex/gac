@@ -6,6 +6,7 @@
 <script type="text/javascript" src="@Url.Content("~/Content/SyntaxHighlighter/scripts/shCore.js")" ></script>
 <script type="text/javascript" src="@Url.Content("~/Content/SyntaxHighlighter/scripts/shBrushCpp.js")" ></script>
 <script type="text/javascript" src="@Url.Content("~/Content/SyntaxHighlighter/scripts/shBrushXml.js")" ></script>
+<script type="text/javascript" src="@Url.Content("~/Content/SyntaxHighlighter/scripts/shBrushPlain.js")"></script>
 <link rel="Stylesheet" type="text/css" href="@Url.Content("~/Content/SyntaxHighlighter/styles/shCore.css")" />
 <link rel="Stylesheet" type="text/css" href="@Url.Content("~/Content/SyntaxHighlighter/styles/shThemeRDark.css")" />
 <tr>
@@ -31,9 +32,14 @@
             string fileName = Path.GetFileName(cppName);
             string anchorName = fileName.ToUpper().Replace('.', '_');
             string ext = Path.GetExtension(fileName).Substring(1);
-            if (ext == "h")
+            switch(ext)
             {
-                ext = "cpp";
+                case "h":
+                    ext = "cpp";
+                    break;
+                case "bat":
+                    ext = "text";
+                    break;
             }
             <strong><a name="@anchorName">@fileName</a></strong>
             <div class="CppCode"><pre class="brush: @ext; gutter: false;">@Model.CppCodes[cppName]</pre></div>
