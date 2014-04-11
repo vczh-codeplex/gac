@@ -47,12 +47,12 @@ Data Binding:
 	GuiVirtualListView
 	GuiVirtualTreeView
 	GuiVirtualDataGrid
+	GuiTab
+	GuiComboBoxListControl
 
 Features:
-	Component Xml Layout	: Object Inception, Object Schema
-	Expression				: "bind" Binder
+	View Model				: View model interface declaration
 	Data Binding			: Data structure declaration
-	Scripting				: Event subscription, code behind
 	Control Template		: Template definition and referencing
 	Data Service and Query
 */
