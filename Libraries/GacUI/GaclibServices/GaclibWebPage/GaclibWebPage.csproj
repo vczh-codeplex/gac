@@ -380,6 +380,12 @@
   <ItemGroup>
     <Content Include="Content\Demos\Persistant.LoadFromXml.DataBinding\Codegen.bat" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Home\GettingStart_1.cshtml" />
+    <Content Include="Views\Home\GettingStart_2.cshtml" />
+    <Content Include="Views\Home\GettingStart_3.cshtml" />
+    <Content Include="Views\Home\GettingStart_4.cshtml" />
+  </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>

@@ -22,6 +22,30 @@ namespace GaclibWebPage.Controllers
             return View(model);
         }
 
+        public ActionResult GettingStart_1(NavigationBarModel model)
+        {
+            model.ActiveButton = NavigationButtons.GettingStart;
+            return View(model);
+        }
+
+        public ActionResult GettingStart_2(NavigationBarModel model)
+        {
+            model.ActiveButton = NavigationButtons.GettingStart;
+            return View(model);
+        }
+
+        public ActionResult GettingStart_3(NavigationBarModel model)
+        {
+            model.ActiveButton = NavigationButtons.GettingStart;
+            return View(model);
+        }
+
+        public ActionResult GettingStart_4(NavigationBarModel model)
+        {
+            model.ActiveButton = NavigationButtons.GettingStart;
+            return View(model);
+        }
+
         public ActionResult Demos()
         {
             DemoPageModel model = new DemoPageModel(Server.MapPath(DemoPageModel.DefaultXmlIndexPath));

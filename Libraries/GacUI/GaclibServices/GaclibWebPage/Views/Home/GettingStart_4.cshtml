@@ -1,18 +1,20 @@
 ﻿@model GaclibWebPage.Models.NavigationBarModel
 
 @{
-    ViewBag.Title = "GacLib - Getting Start";
+    ViewBag.Title = "GacLib - Getting Start - Step 4";
 }
-<script type="text/javascript" src="@Url.Content("~/Content/SyntaxHighlighter/scripts/shCore.js")" ></script>
-<script type="text/javascript" src="@Url.Content("~/Content/SyntaxHighlighter/scripts/shBrushCpp.js")" ></script>
+<script type="text/javascript" src="@Url.Content("~/Content/SyntaxHighlighter/scripts/shCore.js")"></script>
+<script type="text/javascript" src="@Url.Content("~/Content/SyntaxHighlighter/scripts/shBrushCpp.js")"></script>
 <link rel="Stylesheet" type="text/css" href="@Url.Content("~/Content/SyntaxHighlighter/styles/shCore.css")" />
 <link rel="Stylesheet" type="text/css" href="@Url.Content("~/Content/SyntaxHighlighter/styles/shThemeRDark.css")" />
 <tr>
     <td align="left" valign="top" colspan="6">
-        <h1>Introduction</h1>
+        <h1>Step 4. Build and run!</h1>
         <p>
-            Creating a GacUI program is pretty easy. GacUI is released by source code, what you need to do is adding those source files into your project, and writing WinMain and GuiMain, then it is done! If you are new to GacUI, we recommended you to follow the instructions below to build your first GacUI program:
+            Build the program and run!<br /><br />
+            <img src="@Url.Content("~/Content/GettingStart/HelloWorld.jpg")" alt="Hello, world!" />
         </p>
+        <h1>See also ...</h1>
         <ul>
             <li>Step 1. <a href="@Url.Action("GettingStart_1", "Home")">Create a Visual C++ Project will GacUI source code.</a></li>
             <li>Step 2. <a href="@Url.Action("GettingStart_2", "Home")">Write your first GacUI program using C++.</a></li>
