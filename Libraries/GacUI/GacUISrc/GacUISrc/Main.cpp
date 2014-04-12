@@ -41,7 +41,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 extern void UnitTestInGuiMain();
 
 /*
-Data Binding:
+Data Binding: IValueObservableList/ItemTemplate
 	GuiSelectableListControl
 	GuiVirtualTextList
 	GuiVirtualListView
@@ -53,7 +53,8 @@ Data Binding:
 Features:
 	View Model				: View model interface declaration
 	Data Binding			: Data structure declaration
-	Control Template		: Template definition and referencing
+	Control Template		: Interface methods to events, or prepare predefined classes
+	Workflow as Code Behind
 	Data Service and Query
 */
 
