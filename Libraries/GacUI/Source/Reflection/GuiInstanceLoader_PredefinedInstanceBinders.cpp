@@ -158,7 +158,19 @@ GuiWorkflowGlobalContext
 					}
 					FOREACH(WorkflowDataBinding, dataBinding, dataBindings)
 					{
-						WString subscribee = valueNames[dataBinding.instance.GetRawPtr()];
+						vint index = valueNames.Keys().IndexOf(dataBinding.instance.GetRawPtr());
+						WString subscribee;
+						if (index == -1)
+						{
+							subscribee = L"<temp>" + itow(valueNames.Count());
+							valueNames.Add(dataBinding.instance.GetRawPtr(), subscribee);
+							env->scope->referenceValues.Add(subscribee, dataBinding.instance);
+							CreateVariable(module, subscribee, dataBinding.instance);
+						}
+						else
+						{
+							subscribee = valueNames.Values()[index];
+						}
 						auto subBlock = MakePtr<WfBlockStatement>();
 						block->statements.Add(subBlock);
 						{
@@ -343,10 +355,10 @@ GuiWorkflowGlobalContext
 				globalContext = new WfRuntimeGlobalContext(assembly);
 				
 				LoadFunction<void()>(globalContext, L"<initialize>")();
-				FOREACH(WString, name, env->scope->referenceValues.Keys())
+				FOREACH_INDEXER(WString, name, index, env->scope->referenceValues.Keys())
 				{
-					vint index = assembly->variableNames.IndexOf(name);
-					globalContext->globalVariables->variables[index] = env->scope->referenceValues.Values()[index];
+					vint variableIndex = assembly->variableNames.IndexOf(name);
+					globalContext->globalVariables->variables[variableIndex] = env->scope->referenceValues.Values()[index];
 				}
 				{
 					vint index = assembly->variableNames.IndexOf(L"<this>");
