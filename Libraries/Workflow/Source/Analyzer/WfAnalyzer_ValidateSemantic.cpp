@@ -1305,12 +1305,13 @@ ValidateSemantic(Expression)
 						if (node->observeType == WfObserveType::SimpleObserve)
 						{
 							ITypeDescriptor* td = parentType->GetTypeDescriptor();
+							IPropertyInfo* propertyInfo = 0;
 							{
 								auto ref = node->expression.Cast<WfReferenceExpression>();
-								IPropertyInfo* info = td->GetPropertyByName(ref->name.value, true);
-								if (info)
+								propertyInfo = td->GetPropertyByName(ref->name.value, true);
+								if (propertyInfo)
 								{
-									observeeType = CopyTypeInfo(info->GetReturn());
+									observeeType = CopyTypeInfo(propertyInfo->GetReturn());
 								}
 								else
 								{
@@ -1320,11 +1321,17 @@ ValidateSemantic(Expression)
 
 							if (node->events.Count() == 0)
 							{
-								auto ref = node->expression.Cast<WfReferenceExpression>();
-								IEventInfo* info = td->GetEventByName(ref->name.value + L"Changed", true);
-								if (!info)
+								if (propertyInfo)
 								{
-									manager->errors.Add(WfErrors::MemberNotExists(ref.Obj(), td, ref->name.value + L"Changed"));
+									IEventInfo* eventInfo = propertyInfo->GetValueChangedEvent();
+									if (!eventInfo)
+									{
+										eventInfo = td->GetEventByName(propertyInfo->GetName() + L"Changed", true);
+									}
+									if (!eventInfo)
+									{
+										manager->errors.Add(WfErrors::MemberNotExists(node->expression.Obj(), td, propertyInfo->GetName() + L"Changed"));
+									}
 								}
 							}
 							else
