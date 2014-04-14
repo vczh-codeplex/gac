@@ -88,6 +88,13 @@ Instance Namespace
 			WString									postfix;
 		};
 
+		class GuiInstanceParameter : public Object, public Description<GuiInstanceParameter>
+		{
+		public:
+			WString									name;
+			WString									className;
+		};
+
 /***********************************************************************
 Instance Context
 ***********************************************************************/
@@ -103,6 +110,7 @@ Instance Context
 				NamespaceList						namespaces;
 			};
 			typedef collections::Dictionary<WString, Ptr<NamespaceInfo>>		NamespaceMap;
+			typedef collections::List<Ptr<GuiInstanceParameter>>				ParameterList;
 
 			class ElementName : public Object
 			{
@@ -123,6 +131,7 @@ Instance Context
 			Ptr<GuiConstructorRepr>					instance;
 			NamespaceMap							namespaces;
 			Nullable<WString>						className;
+			ParameterList							parameters;
 
 			static void								CollectDefaultAttributes(GuiAttSetterRepr::ValueList& values, Ptr<parsing::xml::XmlElement> xml);
 			static void								CollectAttributes(GuiAttSetterRepr::SetteValuerMap& setters, Ptr<parsing::xml::XmlElement> xml);

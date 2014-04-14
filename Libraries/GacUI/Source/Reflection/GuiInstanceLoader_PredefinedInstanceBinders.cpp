@@ -121,7 +121,7 @@ GuiWorkflowGlobalContext
 		{
 			Value						instance;
 			IPropertyInfo*				propertyInfo;
-			Ptr<WfBindExpression>		bindExpression;
+			Ptr<WfExpression>			bindExpression; // WfBindExpression for bind, else for assign
 		};
 
 		class GuiWorkflowGlobalContext : public Object, public IGuiInstanceBindingContext
@@ -171,154 +171,176 @@ GuiWorkflowGlobalContext
 						{
 							subscribee = valueNames.Values()[index];
 						}
-						auto subBlock = MakePtr<WfBlockStatement>();
-						block->statements.Add(subBlock);
+
+						if (dataBinding.bindExpression.Cast<WfBindExpression>())
 						{
-							auto refThis = MakePtr<WfReferenceExpression>();
-							refThis->name.value = L"<this>";
-
-							auto member = MakePtr<WfMemberExpression>();
-							member->parent = refThis;
-							member->name.value = L"AddSubscription";
-
-							auto call = MakePtr<WfCallExpression>();
-							call->function = member;
-							call->arguments.Add(dataBinding.bindExpression);
-
-							auto var = MakePtr<WfVariableDeclaration>();
-							var->name.value = L"<subscription>";
-							var->expression = call;
-
-							auto stat = MakePtr<WfVariableStatement>();
-							stat->variable = var;
-							subBlock->statements.Add(stat);
-						}
-						{
-							auto callback = MakePtr<WfFunctionDeclaration>();
-							callback->anonymity = WfFunctionAnonymity::Anonymous;
-							callback->returnType = GetTypeFromTypeInfo(TypeInfoRetriver<void>::CreateTypeInfo().Obj());;
+							auto subBlock = MakePtr<WfBlockStatement>();
+							block->statements.Add(subBlock);
 							{
-								auto arg = MakePtr<WfFunctionArgument>();
-								arg->name.value = L"<value>";
-								arg->type = GetTypeFromTypeInfo(TypeInfoRetriver<Value>::CreateTypeInfo().Obj());
-								callback->arguments.Add(arg);
-							}
-							auto callbackBlock = MakePtr<WfBlockStatement>();
-							callback->statement = callbackBlock;
-							{
-								auto refSubscribee = MakePtr<WfReferenceExpression>();
-								refSubscribee->name.value = subscribee;
+								auto refThis = MakePtr<WfReferenceExpression>();
+								refThis->name.value = L"<this>";
 
 								auto member = MakePtr<WfMemberExpression>();
-								member->parent = refSubscribee;
-								member->name.value = dataBinding.propertyInfo->GetName();
+								member->parent = refThis;
+								member->name.value = L"AddSubscription";
+
+								auto call = MakePtr<WfCallExpression>();
+								call->function = member;
+								call->arguments.Add(dataBinding.bindExpression);
 
 								auto var = MakePtr<WfVariableDeclaration>();
-								var->name.value = L"<old>";
-								var->expression = member;
+								var->name.value = L"<subscription>";
+								var->expression = call;
 
 								auto stat = MakePtr<WfVariableStatement>();
 								stat->variable = var;
-								callbackBlock->statements.Add(stat);
+								subBlock->statements.Add(stat);
 							}
 							{
-								ITypeInfo* propertyType = dataBinding.propertyInfo->GetReturn();
-								if (dataBinding.propertyInfo->GetSetter() && dataBinding.propertyInfo->GetSetter()->GetParameterCount() == 1)
+								auto callback = MakePtr<WfFunctionDeclaration>();
+								callback->anonymity = WfFunctionAnonymity::Anonymous;
+								callback->returnType = GetTypeFromTypeInfo(TypeInfoRetriver<void>::CreateTypeInfo().Obj());;
 								{
-									propertyType = dataBinding.propertyInfo->GetSetter()->GetParameter(0)->GetType();
+									auto arg = MakePtr<WfFunctionArgument>();
+									arg->name.value = L"<value>";
+									arg->type = GetTypeFromTypeInfo(TypeInfoRetriver<Value>::CreateTypeInfo().Obj());
+									callback->arguments.Add(arg);
+								}
+								auto callbackBlock = MakePtr<WfBlockStatement>();
+								callback->statement = callbackBlock;
+								{
+									auto refSubscribee = MakePtr<WfReferenceExpression>();
+									refSubscribee->name.value = subscribee;
+
+									auto member = MakePtr<WfMemberExpression>();
+									member->parent = refSubscribee;
+									member->name.value = dataBinding.propertyInfo->GetName();
+
+									auto var = MakePtr<WfVariableDeclaration>();
+									var->name.value = L"<old>";
+									var->expression = member;
+
+									auto stat = MakePtr<WfVariableStatement>();
+									stat->variable = var;
+									callbackBlock->statements.Add(stat);
+								}
+								{
+									ITypeInfo* propertyType = dataBinding.propertyInfo->GetReturn();
+									if (dataBinding.propertyInfo->GetSetter() && dataBinding.propertyInfo->GetSetter()->GetParameterCount() == 1)
+									{
+										propertyType = dataBinding.propertyInfo->GetSetter()->GetParameter(0)->GetType();
+									}
+
+									auto refValue = MakePtr<WfReferenceExpression>();
+									refValue->name.value = L"<value>";
+
+									auto cast = MakePtr<WfTypeCastingExpression>();
+									cast->strategy = WfTypeCastingStrategy::Strong;
+									cast->expression = refValue;
+									cast->type = GetTypeFromTypeInfo(propertyType);
+
+									auto var = MakePtr<WfVariableDeclaration>();
+									var->name.value = L"<new>";
+									var->expression = cast;
+
+									auto stat = MakePtr<WfVariableStatement>();
+									stat->variable = var;
+									callbackBlock->statements.Add(stat);
+								}
+								{
+									auto refOld = MakePtr<WfReferenceExpression>();
+									refOld->name.value = L"<old>";
+
+									auto refNew = MakePtr<WfReferenceExpression>();
+									refNew->name.value = L"<new>";
+
+									auto compare = MakePtr<WfBinaryExpression>();
+									compare->op = WfBinaryOperator::EQ;
+									compare->first = refOld;
+									compare->second = refNew;
+
+									auto ifStat = MakePtr<WfIfStatement>();
+									ifStat->expression = compare;
+									callbackBlock->statements.Add(ifStat);
+
+									auto ifBlock = MakePtr<WfBlockStatement>();
+									ifStat->trueBranch = ifBlock;
+
+									auto returnStat = MakePtr<WfReturnStatement>();
+									ifBlock->statements.Add(returnStat);
+								}
+								{
+									auto refSubscribee = MakePtr<WfReferenceExpression>();
+									refSubscribee->name.value = subscribee;
+
+									auto member = MakePtr<WfMemberExpression>();
+									member->parent = refSubscribee;
+									member->name.value = dataBinding.propertyInfo->GetName();
+
+									auto refNew = MakePtr<WfReferenceExpression>();
+									refNew->name.value = L"<new>";
+
+									auto assign = MakePtr<WfBinaryExpression>();
+									assign->op = WfBinaryOperator::Assign;
+									assign->first = member;
+									assign->second = refNew;
+
+									auto stat = MakePtr<WfExpressionStatement>();
+									stat->expression = assign;
+									callbackBlock->statements.Add(stat);
 								}
 
-								auto refValue = MakePtr<WfReferenceExpression>();
-								refValue->name.value = L"<value>";
+								auto funcExpr = MakePtr<WfFunctionExpression>();
+								funcExpr->function = callback;
 
-								auto cast = MakePtr<WfTypeCastingExpression>();
-								cast->strategy = WfTypeCastingStrategy::Strong;
-								cast->expression = refValue;
-								cast->type = GetTypeFromTypeInfo(propertyType);
-
-								auto var = MakePtr<WfVariableDeclaration>();
-								var->name.value = L"<new>";
-								var->expression = cast;
-
-								auto stat = MakePtr<WfVariableStatement>();
-								stat->variable = var;
-								callbackBlock->statements.Add(stat);
-							}
-							{
-								auto refOld = MakePtr<WfReferenceExpression>();
-								refOld->name.value = L"<old>";
-
-								auto refNew = MakePtr<WfReferenceExpression>();
-								refNew->name.value = L"<new>";
-
-								auto compare = MakePtr<WfBinaryExpression>();
-								compare->op = WfBinaryOperator::EQ;
-								compare->first = refOld;
-								compare->second = refNew;
-
-								auto ifStat = MakePtr<WfIfStatement>();
-								ifStat->expression = compare;
-								callbackBlock->statements.Add(ifStat);
-
-								auto ifBlock = MakePtr<WfBlockStatement>();
-								ifStat->trueBranch = ifBlock;
-
-								auto returnStat = MakePtr<WfReturnStatement>();
-								ifBlock->statements.Add(returnStat);
-							}
-							{
-								auto refSubscribee = MakePtr<WfReferenceExpression>();
-								refSubscribee->name.value = subscribee;
+								auto refThis = MakePtr<WfReferenceExpression>();
+								refThis->name.value = L"<subscription>";
 
 								auto member = MakePtr<WfMemberExpression>();
-								member->parent = refSubscribee;
-								member->name.value = dataBinding.propertyInfo->GetName();
+								member->parent = refThis;
+								member->name.value = L"Subscribe";
 
-								auto refNew = MakePtr<WfReferenceExpression>();
-								refNew->name.value = L"<new>";
-
-								auto assign = MakePtr<WfBinaryExpression>();
-								assign->op = WfBinaryOperator::Assign;
-								assign->first = member;
-								assign->second = refNew;
+								auto call = MakePtr<WfCallExpression>();
+								call->function = member;
+								call->arguments.Add(funcExpr);
 
 								auto stat = MakePtr<WfExpressionStatement>();
-								stat->expression = assign;
-								callbackBlock->statements.Add(stat);
+								stat->expression = call;
+								subBlock->statements.Add(stat);
 							}
+							{
+								auto refThis = MakePtr<WfReferenceExpression>();
+								refThis->name.value = L"<subscription>";
 
-							auto funcExpr = MakePtr<WfFunctionExpression>();
-							funcExpr->function = callback;
+								auto member = MakePtr<WfMemberExpression>();
+								member->parent = refThis;
+								member->name.value = L"Update";
 
-							auto refThis = MakePtr<WfReferenceExpression>();
-							refThis->name.value = L"<subscription>";
+								auto call = MakePtr<WfCallExpression>();
+								call->function = member;
 
-							auto member = MakePtr<WfMemberExpression>();
-							member->parent = refThis;
-							member->name.value = L"Subscribe";
-
-							auto call = MakePtr<WfCallExpression>();
-							call->function = member;
-							call->arguments.Add(funcExpr);
-
-							auto stat = MakePtr<WfExpressionStatement>();
-							stat->expression = call;
-							subBlock->statements.Add(stat);
+								auto stat = MakePtr<WfExpressionStatement>();
+								stat->expression = call;
+								subBlock->statements.Add(stat);
+							}
 						}
+						else
 						{
-							auto refThis = MakePtr<WfReferenceExpression>();
-							refThis->name.value = L"<subscription>";
+							auto refSubscribee = MakePtr<WfReferenceExpression>();
+							refSubscribee->name.value = subscribee;
 
 							auto member = MakePtr<WfMemberExpression>();
-							member->parent = refThis;
-							member->name.value = L"Update";
+							member->parent = refSubscribee;
+							member->name.value = dataBinding.propertyInfo->GetName();
 
-							auto call = MakePtr<WfCallExpression>();
-							call->function = member;
+							auto assign = MakePtr<WfBinaryExpression>();
+							assign->op = WfBinaryOperator::Assign;
+							assign->first = member;
+							assign->second = dataBinding.bindExpression;
 
 							auto stat = MakePtr<WfExpressionStatement>();
-							stat->expression = call;
-							subBlock->statements.Add(stat);
+							stat->expression = assign;
+							block->statements.Add(stat);
 						}
 					}
 				}
@@ -350,6 +372,14 @@ GuiWorkflowGlobalContext
 					env->scope->errors.Add(moduleCode);
 					return;
 				}
+#ifdef _DEBUG
+				else
+				{
+					// for debug only, always show code in error
+					env->scope->errors.Add(L"Print code for reference (debug mode only):");
+					env->scope->errors.Add(moduleCode);
+				}
+#endif
 
 				auto assembly = GenerateAssembly(&manager);
 				globalContext = new WfRuntimeGlobalContext(assembly);
@@ -418,7 +448,7 @@ GuiScriptInstanceBinder
 				{
 					WString expressionCode = TranslateExpression(propertyValue.propertyValue.GetText());
 					auto parser = GetParserManager()->GetParser<WfExpression>(L"WORKFLOW-EXPRESSION");
-					auto expression = parser->TypedParse(expressionCode).Cast<WfBindExpression>();
+					auto expression = parser->TypedParse(expressionCode);
 					if (!expression)
 					{
 						env->scope->errors.Add(L"Failed to parse the workflow expression \"" + expressionCode + L"\".");
@@ -469,7 +499,8 @@ GuiScriptInstanceBinder
 						}
 						else if (propertyInfo)
 						{
-							auto result = manager.expressionResolvings[expression->expression.Obj()];
+							auto bind = expression.Cast<WfBindExpression>();
+							auto result = manager.expressionResolvings[(bind ? bind->expression : expression).Obj()];
 							if (result.type)
 							{
 								ITypeInfo* propertyType = propertyInfo->GetReturn();
@@ -481,7 +512,7 @@ GuiScriptInstanceBinder
 								{
 									env->scope->errors.Add(L"Failed to analyze the workflow expression \"" + expressionCode + L"\".");
 									env->scope->errors.Add(
-										WfErrors::ExpressionCannotImplicitlyConvertToType(expression->expression.Obj(), result.type.Obj(), propertyType)
+										WfErrors::ExpressionCannotImplicitlyConvertToType(expression.Obj(), result.type.Obj(), propertyType)
 										->errorMessage);
 									failed = true;
 								}
@@ -491,8 +522,18 @@ GuiScriptInstanceBinder
 
 					if (!failed)
 					{
-						expression->expandedExpression = 0;
-
+						{
+							auto expr = expression;
+							if (auto bind = expr.Cast<WfBindExpression>())
+							{
+								bind->expandedExpression = 0;
+								expr = bind->expression;
+							}
+							if (auto format = expr.Cast<WfFormatExpression>())
+							{
+								format->expandedExpression = 0;
+							}
+						}
 						WorkflowDataBinding dataBinding;
 						dataBinding.instance = propertyValue.instanceValue;
 						dataBinding.propertyInfo = propertyInfo;
@@ -504,6 +545,24 @@ GuiScriptInstanceBinder
 					return !failed;
 				}
 				return false;
+			}
+		};
+
+/***********************************************************************
+GuiEvalInstanceBinder
+***********************************************************************/
+
+		class GuiEvalInstanceBinder : public GuiScriptInstanceBinder
+		{
+		public:
+			WString GetBindingName()override
+			{
+				return L"eval";
+			}
+
+			WString TranslateExpression(const WString& input)override
+			{
+				return input;
 			}
 		};
 
@@ -570,6 +629,7 @@ GuiPredefinedInstanceBindersPlugin
 
 					manager->AddInstanceBinder(new GuiResourceInstanceBinder);
 					manager->AddInstanceBinder(new GuiReferenceInstanceBinder);
+					manager->AddInstanceBinder(new GuiEvalInstanceBinder);
 					manager->AddInstanceBinder(new GuiBindInstanceBinder);
 					manager->AddInstanceBinder(new GuiFormatInstanceBinder);
 				}

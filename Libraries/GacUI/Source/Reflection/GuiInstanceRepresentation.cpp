@@ -308,9 +308,24 @@ GuiInstanceContext
 				}
 
 				// load instance
-				if(Ptr<XmlElement> element=XmlGetElements(xml->rootElement).First(0))
+				FOREACH(Ptr<XmlElement>, element, XmlGetElements(xml->rootElement))
 				{
-					context->instance=LoadCtor(element);
+					if (element->name.value == L"ref.Parameter")
+					{
+						auto attName = XmlGetAttribute(element, L"Name");
+						auto attClass = XmlGetAttribute(element, L"Class");
+						if (attName && attClass)
+						{
+							auto parameter = MakePtr<GuiInstanceParameter>();
+							parameter->name = attName->value.value;
+							parameter->className = attClass->value.value;
+							context->parameters.Add(parameter);
+						}
+					}
+					else if (!context->instance)
+					{
+						context->instance=LoadCtor(element);
+					}
 				}
 			}
 

@@ -71,8 +71,6 @@ namespace demos
 		virtual void		SetSecond(vint value) = 0;
 		virtual vint		GetSum() = 0;
 
-		Event<void()>		FirstChanged;
-		Event<void()>		SecondChanged;
 		Event<void()>		SumChanged;
 	};
 
@@ -140,7 +138,7 @@ namespace demos
 			if (first != value)
 			{
 				first = value;
-				FirstChanged();
+				SumChanged();
 			}
 		}
 
@@ -154,7 +152,7 @@ namespace demos
 			if (second != value)
 			{
 				second = value;
-				SecondChanged();
+				SumChanged();
 			}
 		}
 
@@ -204,13 +202,10 @@ namespace vl
 
 			BEGIN_CLASS_MEMBER(demos::IViewModel)
 				CLASS_MEMBER_BASE(IDescriptable)
-
-				CLASS_MEMBER_EVENT(FirstChanged)
-				CLASS_MEMBER_EVENT(SecondChanged)
 				CLASS_MEMBER_EVENT(SumChanged)
 
-				CLASS_MEMBER_PROPERTY_EVENT_FAST(First, FirstChanged)
-				CLASS_MEMBER_PROPERTY_EVENT_FAST(Second, SecondChanged)
+				CLASS_MEMBER_PROPERTY_FAST(First)
+				CLASS_MEMBER_PROPERTY_FAST(Second)
 				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(Sum, SumChanged)
 			END_CLASS_MEMBER(demos::IViewModel)
 
