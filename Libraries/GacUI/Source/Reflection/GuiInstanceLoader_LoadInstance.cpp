@@ -397,7 +397,7 @@ LoadInstancePropertyValue
 												}
 												else
 												{
-													output.Add(Pair<Value, IGuiInstanceLoader*>(propertyValue.propertyValue, propertyLoader));
+													output.Add(Pair<Value, IGuiInstanceLoader*>(translatedValue, propertyLoader));
 												}
 											}
 											else

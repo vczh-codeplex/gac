@@ -376,13 +376,14 @@ ValidateSemantic(Expression)
 								return aId - bId;
 							})
 						);
+					Ptr<ITypeInfo> resultType = expectedType;
 
 					if (!expectedType && parameterSymbols.Count() > 0)
 					{
 						manager->errors.Add(WfErrors::OrderedLambdaCannotResolveType(node));
 						return;
 					}
-					else
+					else if (expectedType)
 					{
 						ITypeInfo* type = expectedType.Obj();
 						if (type->GetDecorator() != ITypeInfo::SharedPtr)
@@ -419,12 +420,32 @@ ValidateSemantic(Expression)
 						}
 						GetExpressionType(manager, node->body, resultType);
 					}
+					else
+					{
+						auto bodyType = GetExpressionType(manager, node->body, 0);
+						if (bodyType)
+						{
+							Ptr<TypeInfoImpl> funcType = new TypeInfoImpl(ITypeInfo::TypeDescriptor);
+							funcType->SetTypeDescriptor(description::GetTypeDescriptor<IValueFunctionProxy>());
+
+							Ptr<TypeInfoImpl> genericType = new TypeInfoImpl(ITypeInfo::Generic);
+							genericType->SetElementType(funcType);
+							genericType->AddGenericArgument(bodyType);
+
+							Ptr<TypeInfoImpl> pointerType = new TypeInfoImpl(ITypeInfo::SharedPtr);
+							pointerType->SetElementType(genericType);
+							resultType = pointerType;
+						}
+					}
 
 					goto ORDERED_FINISHED;
 				ORDERED_FAILED:
 					manager->errors.Add(WfErrors::OrderedLambdaCannotImplicitlyConvertToType(node, expectedType.Obj()));
 				ORDERED_FINISHED:
-					results.Add(ResolveExpressionResult(expectedType));
+					if (resultType)
+					{
+						results.Add(ResolveExpressionResult(resultType));
+					}
 				}
 
 				void Visit(WfMemberExpression* node)override
