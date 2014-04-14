@@ -9,6 +9,8 @@ namespace vl
 		{
 			using namespace elements;
 			using namespace compositions;
+			using namespace collections;
+			using namespace reflection::description;
 
 /***********************************************************************
 GuiControl::EmptyStyleController
@@ -385,19 +387,19 @@ GuiControl
 			}
 
 /***********************************************************************
-GuiCustomControl
+GuiInstanceRootObject
 ***********************************************************************/
 
-			GuiCustomControl::GuiCustomControl(IStyleController* _styleController)
-				:GuiControl(_styleController)
+			void GuiInstanceRootObject::ClearSubscriptions()
 			{
+				FOREACH(Ptr<IValueSubscription>, subscription, subscriptions)
+				{
+					subscription->Close();
+				}
+				subscriptions.Clear();
 			}
 
-			GuiCustomControl::~GuiCustomControl()
-			{
-			}
-
-			Ptr<description::IValueSubscription> GuiCustomControl::AddSubscription(Ptr<description::IValueSubscription> subscription)
+			Ptr<description::IValueSubscription> GuiInstanceRootObject::AddSubscription(Ptr<description::IValueSubscription> subscription)
 			{
 				if (subscriptions.Contains(subscription.Obj()))
 				{
@@ -410,14 +412,28 @@ GuiCustomControl
 				}
 			}
 
-			bool GuiCustomControl::RemoveSubscription(Ptr<description::IValueSubscription> subscription)
+			bool GuiInstanceRootObject::RemoveSubscription(Ptr<description::IValueSubscription> subscription)
 			{
 				return subscriptions.Remove(subscription.Obj());
 			}
 
-			bool GuiCustomControl::ContainsSubscription(Ptr<description::IValueSubscription> subscription)
+			bool GuiInstanceRootObject::ContainsSubscription(Ptr<description::IValueSubscription> subscription)
 			{
 				return subscriptions.Contains(subscription.Obj());
+			}
+
+/***********************************************************************
+GuiCustomControl
+***********************************************************************/
+
+			GuiCustomControl::GuiCustomControl(IStyleController* _styleController)
+				:GuiControl(_styleController)
+			{
+			}
+
+			GuiCustomControl::~GuiCustomControl()
+			{
+				ClearSubscriptions();
 			}
 
 /***********************************************************************

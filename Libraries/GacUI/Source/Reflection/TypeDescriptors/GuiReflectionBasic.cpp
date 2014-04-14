@@ -666,6 +666,7 @@ Type Declaration
 
 			BEGIN_CLASS_MEMBER(GuiControlHost)
 				CLASS_MEMBER_BASE(GuiControl)
+				CLASS_MEMBER_BASE(GuiInstanceRootObject)
 				CLASS_MEMBER_CONSTRUCTOR(GuiControlHost*(GuiControl::IStyleController*), {L"styleController"})
 
 				CLASS_MEMBER_GUIEVENT(WindowGotFocus)
@@ -695,9 +696,6 @@ Type Declaration
 				CLASS_MEMBER_METHOD(AddComponent, {L"component"})
 				CLASS_MEMBER_METHOD(RemoveComponent, {L"component"})
 				CLASS_MEMBER_METHOD(ContainsComponent, {L"component"})
-				CLASS_MEMBER_METHOD(AddSubscription, {L"subscription"})
-				CLASS_MEMBER_METHOD(RemoveSubscription, {L"subscription"})
-				CLASS_MEMBER_METHOD(ContainsSubscription, {L"subscription"})
 				CLASS_MEMBER_METHOD(Show, NO_PARAMETER)
 				CLASS_MEMBER_METHOD(ShowDeactivated, NO_PARAMETER)
 				CLASS_MEMBER_METHOD(ShowRestored, NO_PARAMETER)
