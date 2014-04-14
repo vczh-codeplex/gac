@@ -640,7 +640,7 @@ GuiEvalInstanceBinder
 					auto proxy = UnboxValue<Ptr<IValueFunctionProxy>>(variable);
 					auto translated = proxy->Invoke(IValueList::Create());
 
-					// the global context contains a closure variable <initialize-data-binding> which captured
+					// the global context contains a closure variable <initialize-data-binding> which captured the context
 					// clear all variables to break the circle references
 					globalContext->globalVariables = 0;
 					return translated;
