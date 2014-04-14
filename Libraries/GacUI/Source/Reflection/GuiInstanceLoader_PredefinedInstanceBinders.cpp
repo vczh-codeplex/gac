@@ -395,11 +395,7 @@ GuiWorkflowGlobalContext
 				globalContext = new WfRuntimeGlobalContext(assembly);
 				
 				LoadFunction<void()>(globalContext, L"<initialize>")();
-				FOREACH_INDEXER(WString, name, index, env->scope->referenceValues.Keys())
-				{
-					vint variableIndex = assembly->variableNames.IndexOf(name);
-					globalContext->globalVariables->variables[variableIndex] = env->scope->referenceValues.Values()[index];
-				}
+				SetVariablesForReferenceValues(globalContext, env);
 				{
 					vint index = assembly->variableNames.IndexOf(L"<this>");
 					globalContext->globalVariables->variables[index] = env->scope->rootInstance;
@@ -434,6 +430,15 @@ GuiWorkflowGlobalContext
 				{
 					auto value = env->scope->referenceValues.Values()[index];
 					CreateVariable(module, name, value);
+				}
+			}
+
+			static void SetVariablesForReferenceValues(Ptr<WfRuntimeGlobalContext> context, Ptr<GuiInstanceEnvironment> env)
+			{
+				FOREACH_INDEXER(WString, name, index, env->scope->referenceValues.Keys())
+				{
+					vint variableIndex = context->assembly->variableNames.IndexOf(name);
+					context->globalVariables->variables[variableIndex] = env->scope->referenceValues.Values()[index];
 				}
 			}
 		};
@@ -577,6 +582,54 @@ GuiEvalInstanceBinder
 
 			description::Value GetValue(Ptr<GuiInstanceEnvironment> env, const description::Value& propertyValue)override
 			{
+				if (propertyValue.GetValueType() == Value::Text)
+				{
+					WString expressionCode = TranslateExpression(propertyValue.GetText());
+					auto parser = GetParserManager()->GetParser<WfExpression>(L"WORKFLOW-EXPRESSION");
+					auto expression = parser->TypedParse(expressionCode);
+					if (!expression)
+					{
+						env->scope->errors.Add(L"Failed to parse the workflow expression \"" + expressionCode + L"\".");
+						return Value();
+					}
+
+					auto module = MakePtr<WfModule>();
+					GuiWorkflowGlobalContext::CreateVariablesForReferenceValues(module, env);
+					{
+						auto lambda = MakePtr<WfOrderedLambdaExpression>();
+						lambda->body = expression;
+
+						auto var = MakePtr<WfVariableDeclaration>();
+						var->name.value = L"<initialize-data-binding>";
+						var->expression = lambda;
+
+						module->declarations.Add(var);
+					}
+
+					WfLexicalScopeManager manager(0);
+					manager.modules.Add(module);
+					manager.Rebuild(false);
+					if (manager.errors.Count() > 0)
+					{
+						env->scope->errors.Add(L"Failed to analyze the workflow expression \"" + expressionCode + L"\".");
+						FOREACH(Ptr<parsing::ParsingError>, error, manager.errors)
+						{
+							env->scope->errors.Add(error->errorMessage);
+						}
+						return Value();
+					}
+
+					auto assembly = GenerateAssembly(&manager);
+					auto globalContext = MakePtr<WfRuntimeGlobalContext>(assembly);
+				
+					LoadFunction<void()>(globalContext, L"<initialize>")();
+					GuiWorkflowGlobalContext::SetVariablesForReferenceValues(globalContext, env);
+					vint variableIndex = assembly->variableNames.IndexOf(L"<initialize-data-binding>");
+					auto variable = globalContext->globalVariables->variables[variableIndex];
+					auto proxy = UnboxValue<Ptr<IValueFunctionProxy>>(variable);
+					auto translated = proxy->Invoke(IValueList::Create());
+					return translated;
+				}
 				return Value();
 			}
 
