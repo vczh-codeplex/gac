@@ -786,6 +786,45 @@ CreateInstance
 ExecuteBindingSetters
 ***********************************************************************/
 
+		void ExecuteParameters(Ptr<GuiInstanceEnvironment> env)
+		{
+			auto td = env->scope->rootInstance.GetTypeDescriptor();
+			FOREACH(Ptr<GuiInstanceParameter>, parameter, env->context->parameters)
+			{
+				auto info = td->GetPropertyByName(parameter->name, true);
+				if (!info)
+				{
+					env->scope->errors.Add(L"Cannot find parameter \"" + parameter->name + L"\" in properties of \"" + td->GetTypeName() + L"\".");
+					continue;
+				}
+
+				auto parameterTd = GetTypeDescriptor(parameter->className);
+				if (!parameterTd)
+				{
+					env->scope->errors.Add(L"Cannot find type \"" + parameter->className + L"\" of parameter \"" + parameter->name + L"\".");
+				}
+
+				auto value = info->GetValue(env->scope->rootInstance);
+				if (parameterTd && !value.GetTypeDescriptor()->CanConvertTo(parameterTd))
+				{
+					env->scope->errors.Add(L"Value of parameter \"" + parameter->name + L"\" is not \"" + parameterTd->GetTypeName() + L"\" which is required.");
+				}
+
+				if (env->scope->referenceValues.Keys().Contains(parameter->name))
+				{
+					env->scope->errors.Add(L"Parameter \"" + parameter->name + L"\" conflict with an existing named object.");
+				}
+				else
+				{
+					env->scope->referenceValues.Add(parameter->name, value);
+				}
+			}
+		}
+
+/***********************************************************************
+ExecuteBindingSetters
+***********************************************************************/
+
 		void ExecuteBindingSetters(
 			Ptr<GuiInstanceEnvironment> env,
 			List<FillInstanceBindingSetter>& bindingSetters
@@ -949,9 +988,10 @@ LoadInstance
 			
 			if (!instance.IsNull())
 			{
+				env->scope->rootInstance = instance;
+				ExecuteParameters(env);
 				ExecuteBindingSetters(env, bindingSetters);
 				ExecuteEventSetters(instance, env, eventSetters);
-				env->scope->rootInstance = instance;
 				return env->scope;
 			}
 			return 0;
@@ -992,12 +1032,20 @@ InitializeInstance
 
 			if (ctor->instanceName)
 			{
-				env->scope->referenceValues.Add(ctor->instanceName.Value(), instance);
+				WString name = ctor->instanceName.Value();
+				if (env->scope->referenceValues.Keys().Contains(name))
+				{
+					env->scope->errors.Add(L"Parameter \"" + name + L"\" conflict with an existing named object.");
+				}
+				else
+				{
+					env->scope->referenceValues.Add(name, instance);
+				}
 			}
 			return env->scope;
 		}
 
-		extern Ptr<GuiInstanceContextScope> InitializeInstanceFromContext(
+		Ptr<GuiInstanceContextScope> InitializeInstanceFromContext(
 			Ptr<GuiInstanceContext> context,
 			Ptr<GuiResourcePathResolver> resolver,
 			description::Value instance
@@ -1017,6 +1065,7 @@ InitializeInstance
 				if (auto scope = InitializeInstanceFromConstructor(env, ctor, source.loader, source.typeName, instance, false, bindingSetters, eventSetters))
 				{
 					scope->rootInstance = instance;
+					ExecuteParameters(env);
 					ExecuteBindingSetters(env, bindingSetters);
 					ExecuteEventSetters(instance, env, eventSetters);
 					return scope;
