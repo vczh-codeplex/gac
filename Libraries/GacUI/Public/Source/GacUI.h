@@ -4363,12 +4363,22 @@ Basic Construction
 					return dynamic_cast<T*>(QueryService(T::Identifier));
 				}
 			};
-
-			class GuiCustomControl : public GuiControl, public Description<GuiCustomControl>
+			
+			class GuiInstanceRootObject abstract : public Description<GuiInstanceRootObject>
 			{
 				typedef collections::List<Ptr<description::IValueSubscription>>		SubscriptionList;
 			protected:
 				SubscriptionList								subscriptions;
+
+				void											ClearSubscriptions();
+			public:
+				Ptr<description::IValueSubscription>			AddSubscription(Ptr<description::IValueSubscription> subscription);
+				bool											RemoveSubscription(Ptr<description::IValueSubscription> subscription);
+				bool											ContainsSubscription(Ptr<description::IValueSubscription> subscription);
+			};
+
+			class GuiCustomControl : public GuiControl, public GuiInstanceRootObject, public Description<GuiCustomControl>
+			{
 
 			public:
 				class IStyleController : virtual public GuiControl::IStyleController, public Description<IStyleController>
@@ -4386,10 +4396,6 @@ Basic Construction
 			public:
 				GuiCustomControl(IStyleController* _styleController);
 				~GuiCustomControl();
-
-				Ptr<description::IValueSubscription>			AddSubscription(Ptr<description::IValueSubscription> subscription);
-				bool											RemoveSubscription(Ptr<description::IValueSubscription> subscription);
-				bool											ContainsSubscription(Ptr<description::IValueSubscription> subscription);
 			};
 
 			class GuiComponent : public Object, public Description<GuiComponent>
@@ -4828,13 +4834,11 @@ namespace vl
 Control Host
 ***********************************************************************/
 
-			class GuiControlHost : public GuiControl, private INativeWindowListener, public Description<GuiControlHost>
+			class GuiControlHost : public GuiControl, public GuiInstanceRootObject, private INativeWindowListener, public Description<GuiControlHost>
 			{
-				typedef collections::List<Ptr<description::IValueSubscription>>		SubscriptionList;
 			protected:
 				compositions::GuiGraphicsHost*					host;
 				collections::SortedList<GuiComponent*>			components;
-				SubscriptionList								subscriptions;
 
 				virtual void									OnNativeWindowChanged();
 				virtual void									OnVisualStatusChanged();
@@ -4898,10 +4902,6 @@ Control Host
 				bool											AddComponent(GuiComponent* component);
 				bool											RemoveComponent(GuiComponent* component);
 				bool											ContainsComponent(GuiComponent* component);
-
-				Ptr<description::IValueSubscription>			AddSubscription(Ptr<description::IValueSubscription> subscription);
-				bool											RemoveSubscription(Ptr<description::IValueSubscription> subscription);
-				bool											ContainsSubscription(Ptr<description::IValueSubscription> subscription);
 
 				compositions::IGuiShortcutKeyManager*			GetShortcutKeyManager();
 				void											SetShortcutKeyManager(compositions::IGuiShortcutKeyManager* value);

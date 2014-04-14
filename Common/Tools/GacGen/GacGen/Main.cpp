@@ -950,43 +950,46 @@ Main
 void GuiMain()
 {
 	Console::WriteLine(L"Vczh GacUI Resource Code Generator for C++");
-	PrintSuccessMessage(L"gacgen>Files : " + itow(arguments->Count()));
-
-	FOREACH(WString, inputPath, *arguments)
+	if (arguments->Count() != 1)
 	{
-		PrintSuccessMessage(L"gacgen>Making : " + inputPath);
-		auto resource = GuiResource::LoadFromXml(arguments->Get(0));
-		if (!resource)
-		{
-			PrintErrorMessage(L"error> Failed to load resource.");
-			return;
-		}
-
-		auto config = CodegenConfig::LoadConfig(resource);
-		if (!config)
-		{
-			PrintErrorMessage(L"error> Failed to load config.");
-			return;
-		}
-
-		Regex regexClassName(L"((<namespace>[^:]+)::)*(<type>[^:]+)");
-		Ptr<GuiResourcePathResolver> resolver = new GuiResourcePathResolver(resource, resource->GetWorkingDirectory());
-		Dictionary<WString, Ptr<Instance>> instances;
-		SearchAllInstances(regexClassName, resolver, resource, instances);
-		
-		FOREACH(Ptr<Instance>, instance, instances.Values())
-		{
-			Ptr<GuiInstanceEnvironment> env = new GuiInstanceEnvironment(instance->context, resolver);
-			SearchAllEventHandlers(config, instances, instance, env, instance->eventHandlers);
-		}
-
-		FOREACH(Ptr<Instance>, instance, instances.Values())
-		{
-			WriteControlClassHeaderFile(config, instance);
-			WriteControlClassCppFile(config, instance);
-		}
-		WritePartialClassHeaderFile(config, instances);
-		WritePartialClassCppFile(config, instances);
-		WriteGlobalHeaderFile(config, instances);
+		PrintErrorMessage(L"GacGen.exe only accept 1 input file.");
+		return;
 	}
+
+	WString inputPath = arguments->Get(0);
+	PrintSuccessMessage(L"gacgen>Making : " + inputPath);
+	auto resource = GuiResource::LoadFromXml(arguments->Get(0));
+	if (!resource)
+	{
+		PrintErrorMessage(L"error> Failed to load resource.");
+		return;
+	}
+	GetInstanceLoaderManager()->SetResource(L"GACGEN", resource);
+
+	auto config = CodegenConfig::LoadConfig(resource);
+	if (!config)
+	{
+		PrintErrorMessage(L"error> Failed to load config.");
+		return;
+	}
+
+	Regex regexClassName(L"((<namespace>[^:]+)::)*(<type>[^:]+)");
+	Ptr<GuiResourcePathResolver> resolver = new GuiResourcePathResolver(resource, resource->GetWorkingDirectory());
+	Dictionary<WString, Ptr<Instance>> instances;
+	SearchAllInstances(regexClassName, resolver, resource, instances);
+		
+	FOREACH(Ptr<Instance>, instance, instances.Values())
+	{
+		Ptr<GuiInstanceEnvironment> env = new GuiInstanceEnvironment(instance->context, resolver);
+		SearchAllEventHandlers(config, instances, instance, env, instance->eventHandlers);
+	}
+
+	FOREACH(Ptr<Instance>, instance, instances.Values())
+	{
+		WriteControlClassHeaderFile(config, instance);
+		WriteControlClassCppFile(config, instance);
+	}
+	WritePartialClassHeaderFile(config, instances);
+	WritePartialClassCppFile(config, instances);
+	WriteGlobalHeaderFile(config, instances);
 }

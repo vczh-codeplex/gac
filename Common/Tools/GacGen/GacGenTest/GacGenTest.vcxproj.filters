@@ -36,14 +36,17 @@
     <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CodeplexClientPartialClasses.cpp">
-      <Filter>GeneratedCode</Filter>
-    </ClCompile>
-    <ClCompile Include="SignInWindow.cpp">
-      <Filter>GeneratedCode</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\Libraries\GacUI\Public\Source\VlppWorkflow.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CalculatorControl.cpp">
+      <Filter>GeneratedCode</Filter>
+    </ClCompile>
+    <ClCompile Include="HelloWorldPartialClasses.cpp">
+      <Filter>GeneratedCode</Filter>
+    </ClCompile>
+    <ClCompile Include="MainWindow.cpp">
+      <Filter>GeneratedCode</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -59,17 +62,20 @@
     <ClInclude Include="..\..\..\..\Libraries\GacUI\Public\Source\Vlpp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CodeplexClient.h">
-      <Filter>GeneratedCode</Filter>
-    </ClInclude>
-    <ClInclude Include="CodeplexClientPartialClasses.h">
-      <Filter>GeneratedCode</Filter>
-    </ClInclude>
-    <ClInclude Include="SignInWindow.h">
-      <Filter>GeneratedCode</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\Libraries\GacUI\Public\Source\VlppWorkflow.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MainWindow.h">
+      <Filter>GeneratedCode</Filter>
+    </ClInclude>
+    <ClInclude Include="CalculatorControl.h">
+      <Filter>GeneratedCode</Filter>
+    </ClInclude>
+    <ClInclude Include="HelloWorld.h">
+      <Filter>GeneratedCode</Filter>
+    </ClInclude>
+    <ClInclude Include="HelloWorldPartialClasses.h">
+      <Filter>GeneratedCode</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
