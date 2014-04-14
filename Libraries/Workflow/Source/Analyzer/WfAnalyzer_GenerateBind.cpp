@@ -147,7 +147,11 @@ GetObservingDependency
 						if (memberResult.propertyInfo)
 						{
 							auto td = memberResult.propertyInfo->GetOwnerTypeDescriptor();
-							auto ev = td->GetEventByName(memberResult.propertyInfo->GetName() + L"Changed", true);
+							auto ev = memberResult.propertyInfo->GetValueChangedEvent();
+							if (!ev)
+							{
+								ev = td->GetEventByName(memberResult.propertyInfo->GetName() + L"Changed", true);
+							}
 							if (ev)
 							{
 								dependency.Add(node, parent);
@@ -859,7 +863,11 @@ DecodeObserveExpression
 					parent = memberExpr->parent.Obj();
 					auto result = manager->expressionResolvings[memberExpr];
 					auto td = result.propertyInfo->GetOwnerTypeDescriptor();
-					auto ev = td->GetEventByName(result.propertyInfo->GetName() + L"Changed", true);
+					auto ev = result.propertyInfo->GetValueChangedEvent();
+					if (!ev)
+					{
+						ev = td->GetEventByName(result.propertyInfo->GetName() + L"Changed", true);
+					}
 					events.Add(ev);
 				}
 			}
@@ -1176,7 +1184,13 @@ ExpandObserveEvent
 				{
 					auto memberExpr = dynamic_cast<WfMemberExpression*>(observe);
 					auto result = manager->expressionResolvings[memberExpr];
-					auto eventName = result.propertyInfo->GetName() + L"Changed";
+					auto td = result.propertyInfo->GetOwnerTypeDescriptor();
+					auto ev = result.propertyInfo->GetValueChangedEvent();
+					if (!ev)
+					{
+						ev = td->GetEventByName(result.propertyInfo->GetName() + L"Changed", true);
+					}
+					auto eventName = ev->GetName();
 
 					auto expr = MakePtr<WfMemberExpression>();
 					expr->parent = CreateBindVariableReference(cacheName);
