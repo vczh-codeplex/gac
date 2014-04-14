@@ -14,11 +14,16 @@ namespace demos
 
 	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 
-	CalculatorControl::CalculatorControl()
+	CalculatorControl::CalculatorControl(Ptr<demos::IControlViewModel> ViewModel)
 	{
-		InitializeComponents();
+		InitializeComponents(ViewModel);
 	}
 }
+
+
+
+
+
 
 
 

@@ -22,11 +22,16 @@ namespace demos
 		// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
 		// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 	public:
-		CalculatorControl();
+		CalculatorControl(Ptr<demos::IControlViewModel> ViewModel);
 	};
 }
 
 #endif
+
+
+
+
+
 
 
 
