@@ -170,6 +170,13 @@ Instance Namespace
 			WString									postfix;
 		};
 
+		class GuiInstanceParameter : public Object, public Description<GuiInstanceParameter>
+		{
+		public:
+			WString									name;
+			WString									className;
+		};
+
 /***********************************************************************
 Instance Context
 ***********************************************************************/
@@ -185,6 +192,7 @@ Instance Context
 				NamespaceList						namespaces;
 			};
 			typedef collections::Dictionary<WString, Ptr<NamespaceInfo>>		NamespaceMap;
+			typedef collections::List<Ptr<GuiInstanceParameter>>				ParameterList;
 
 			class ElementName : public Object
 			{
@@ -205,6 +213,7 @@ Instance Context
 			Ptr<GuiConstructorRepr>					instance;
 			NamespaceMap							namespaces;
 			Nullable<WString>						className;
+			ParameterList							parameters;
 
 			static void								CollectDefaultAttributes(GuiAttSetterRepr::ValueList& values, Ptr<parsing::xml::XmlElement> xml);
 			static void								CollectAttributes(GuiAttSetterRepr::SetteValuerMap& setters, Ptr<parsing::xml::XmlElement> xml);
@@ -435,8 +444,10 @@ Instance Binder
 		{
 		public:
 			virtual WString							GetBindingName() = 0;
+			virtual bool							ApplicableToConstructorArgument() = 0;
 			virtual void							GetRequiredContexts(collections::List<WString>& contextNames) = 0;
 			virtual void							GetExpectedValueTypes(collections::List<description::ITypeDescriptor*>& expectedTypes) = 0;
+			virtual description::Value				GetValue(Ptr<GuiInstanceEnvironment> env, const description::Value& propertyValue) = 0;
 			virtual bool							SetPropertyValue(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, IGuiInstanceLoader::PropertyValue& propertyValue) = 0;
 		};
 
@@ -1057,6 +1068,7 @@ Type List
 #define GUIREFLECTIONCONTROLS_TYPELIST(F)\
 			F(presentation::controls::GuiApplication)\
 			F(presentation::theme::ITheme)\
+			F(presentation::controls::GuiInstanceRootObject)\
 			F(presentation::controls::GuiCustomControl)\
 			F(presentation::controls::GuiCustomControl::IStyleController)\
 			F(presentation::controls::GuiLabel)\
