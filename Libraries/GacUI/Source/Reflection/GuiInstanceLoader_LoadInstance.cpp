@@ -68,7 +68,12 @@ Helper Functions Declarations
 			description::ITypeDescriptor* expectedType,
 			WString& typeName,
 			List<FillInstanceBindingSetter>& bindingSetters,
-			List<FillInstanceEventSetter>& eventSetters
+			List<FillInstanceEventSetter>& eventSetters,
+			bool isRootInstance
+			);
+
+		void ExecuteParameters(
+			Ptr<GuiInstanceEnvironment> env
 			);
 
 		void ExecuteBindingSetters(
@@ -82,7 +87,7 @@ Helper Functions Declarations
 			List<FillInstanceEventSetter>& eventSetters
 			);
 
-		Ptr<GuiInstanceContextScope> InitializeInstanceFromConstructor(
+		void InitializeInstanceFromConstructor(
 			Ptr<GuiInstanceEnvironment> env,
 			GuiConstructorRepr* ctor,
 			IGuiInstanceLoader* instanceLoader,
@@ -154,7 +159,7 @@ LoadValueVisitor
 					FOREACH(ITypeDescriptor*, typeDescriptor, acceptableTypes)
 					{
 						WString _typeName;
-						loadedValue = CreateInstance(env, repr, typeDescriptor, _typeName, bindingSetters, eventSetters);
+						loadedValue = CreateInstance(env, repr, typeDescriptor, _typeName, bindingSetters, eventSetters, false);
 						if (!loadedValue.IsNull())
 						{
 							for (vint i = env->scope->errors.Count() - 1; i >= errorCount; i--)
@@ -563,7 +568,8 @@ CreateInstance
 			description::ITypeDescriptor* expectedType,
 			WString& typeName,
 			List<FillInstanceBindingSetter>& bindingSetters,
-			List<FillInstanceEventSetter>& eventSetters
+			List<FillInstanceEventSetter>& eventSetters,
+			bool isRootInstance
 			)
 		{
 			// search for a correct loader
@@ -777,6 +783,11 @@ CreateInstance
 
 			if(instance.GetRawPtr() && instanceLoader)
 			{
+				if (isRootInstance)
+				{
+					env->scope->rootInstance = instance;
+					ExecuteParameters(env);
+				}
 				InitializeInstanceFromConstructor(env, ctor, instanceLoader, typeName, instance, deserialized, bindingSetters, eventSetters);
 			}
 			return instance;
@@ -984,12 +995,10 @@ LoadInstance
 			Ptr<GuiInstanceEnvironment> env = new GuiInstanceEnvironment(context, resolver);
 			List<FillInstanceBindingSetter> bindingSetters;
 			List<FillInstanceEventSetter> eventSetters;
-			Value instance = CreateInstance(env, context->instance.Obj(), expectedType, env->scope->typeName, bindingSetters, eventSetters);
+			Value instance = CreateInstance(env, context->instance.Obj(), expectedType, env->scope->typeName, bindingSetters, eventSetters, true);
 			
 			if (!instance.IsNull())
 			{
-				env->scope->rootInstance = instance;
-				ExecuteParameters(env);
 				ExecuteBindingSetters(env, bindingSetters);
 				ExecuteEventSetters(instance, env, eventSetters);
 				return env->scope;
@@ -1016,7 +1025,7 @@ LoadInstance
 InitializeInstance
 ***********************************************************************/
 
-		Ptr<GuiInstanceContextScope> InitializeInstanceFromConstructor(
+		void InitializeInstanceFromConstructor(
 			Ptr<GuiInstanceEnvironment> env,
 			GuiConstructorRepr* ctor,
 			IGuiInstanceLoader* instanceLoader,
@@ -1042,7 +1051,6 @@ InitializeInstance
 					env->scope->referenceValues.Add(name, instance);
 				}
 			}
-			return env->scope;
 		}
 
 		Ptr<GuiInstanceContextScope> InitializeInstanceFromContext(
@@ -1062,14 +1070,12 @@ InitializeInstance
 			// initialize the instance
 			if(source.loader)
 			{
-				if (auto scope = InitializeInstanceFromConstructor(env, ctor, source.loader, source.typeName, instance, false, bindingSetters, eventSetters))
-				{
-					scope->rootInstance = instance;
-					ExecuteParameters(env);
-					ExecuteBindingSetters(env, bindingSetters);
-					ExecuteEventSetters(instance, env, eventSetters);
-					return scope;
-				}
+				env->scope->rootInstance = instance;
+				ExecuteParameters(env);
+				InitializeInstanceFromConstructor(env, ctor, source.loader, source.typeName, instance, false, bindingSetters, eventSetters);
+				ExecuteBindingSetters(env, bindingSetters);
+				ExecuteEventSetters(instance, env, eventSetters);
+				return env->scope;
 			}
 			return 0;
 		}
