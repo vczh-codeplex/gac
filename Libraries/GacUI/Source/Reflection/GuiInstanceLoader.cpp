@@ -664,9 +664,32 @@ GuiResourceInstanceLoader
 				{
 					if (auto typeDescriptor = GetGlobalTypeManager()->GetTypeDescriptor(typeInfo.typeName))
 					{
-						if (auto method = GuiDefaultInstanceLoader::GetDefaultConstructor(typeDescriptor))
+						SortedList<WString> argumentNames;
 						{
-							return method->Invoke(Value(), (Value_xs()));
+							List<WString> names;
+							GetConstructorParameters(typeInfo, names);
+							CopyFrom(argumentNames, names);
+						}
+						auto group = typeDescriptor->GetConstructorGroup();
+						for (vint i = 0; i < group->GetMethodCount(); i++)
+						{
+							auto method = group->GetMethod(i);
+							List<WString> parameterNames;
+							for (vint j = 0; j < method->GetParameterCount(); j++)
+							{
+								parameterNames.Add(method->GetParameter(j)->GetName());
+							}
+
+							auto f = [](const WString& a, const WString& b){return WString::Compare(a, b); };
+							if (CompareEnumerable(argumentNames, From(parameterNames).OrderBy(f)) == 0)
+							{
+								Array<Value> arguments(constructorArguments.Count());
+								for (vint j = 0; j < arguments.Count(); j++)
+								{
+									arguments[j] = constructorArguments[parameterNames[j]][0];
+								}
+								return method->Invoke(Value(), arguments);
+							}
 						}
 					}
 
@@ -695,6 +718,41 @@ GuiResourceInstanceLoader
 					return scope;
 				}
 				return false;
+			}
+
+			void GetConstructorParameters(const TypeInfo& typeInfo, collections::List<WString>& propertyNames)
+			{
+				if (typeInfo.typeName == context->className.Value())
+				{
+					FOREACH(Ptr<GuiInstanceParameter>, parameter, context->parameters)
+					{
+						if (description::GetTypeDescriptor(parameter->className))
+						{
+							propertyNames.Add(parameter->name);
+						}
+					}
+				}
+			}
+
+			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)
+			{
+				if (propertyInfo.typeInfo.typeName == context->className.Value())
+				{
+					FOREACH(Ptr<GuiInstanceParameter>, parameter, context->parameters)
+					{
+						if (parameter->name == propertyInfo.propertyName)
+						{
+							if (auto td = description::GetTypeDescriptor(parameter->className))
+							{
+								auto info = GuiInstancePropertyInfo::Assign(td);
+								info->required = true;
+								info->constructorParameter = true;
+								return info;
+							}
+						}
+					}
+				}
+				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
 			}
 		};
 

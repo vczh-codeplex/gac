@@ -87,7 +87,7 @@ namespace demos
 	class CalculatorControl_ : public GuiCustomControl, public GuiInstancePartialClass<GuiCustomControl>, public Description<TImpl>
 	{
 	private:
-		Ptr<IControlViewModel>	_ViewModel;
+		Ptr<IControlViewModel>	ViewModel_;
 	protected:
 		GuiSinglelineTextBox*	textBox1;
 		GuiSinglelineTextBox*	textBox2;
@@ -95,7 +95,7 @@ namespace demos
 
 		void InitializeComponents(Ptr<IControlViewModel> ViewModel)
 		{
-			_ViewModel = ViewModel;
+			ViewModel_ = ViewModel;
 			if (InitializeFromResource())
 			{
 				GUI_INSTANCE_REFERENCE(textBox1);
@@ -104,7 +104,7 @@ namespace demos
 			}
 			else
 			{
-				_ViewModel = 0;
+				ViewModel_ = 0;
 			}
 		}
 	public:
@@ -119,7 +119,7 @@ namespace demos
 
 		Ptr<IControlViewModel> GetViewModel()
 		{
-			return _ViewModel;
+			return ViewModel_;
 		}
 	};
 
@@ -127,14 +127,14 @@ namespace demos
 	class MainWindow_ : public GuiWindow, public GuiInstancePartialClass<GuiWindow>, public Description<TImpl>
 	{
 	private:
-		Ptr<IWindowViewModel>	_ViewModel;
+		Ptr<IWindowViewModel>	ViewModel_;
 	protected:
 		CalculatorControl*		calculator;
 		GuiMultilineTextBox*	textBoxError;
 
 		void InitializeComponents(Ptr<IWindowViewModel> ViewModel)
 		{
-			_ViewModel = ViewModel;
+			ViewModel_ = ViewModel;
 			if (InitializeFromResource())
 			{
 				GUI_INSTANCE_REFERENCE(calculator);
@@ -142,7 +142,7 @@ namespace demos
 			}
 			else
 			{
-				_ViewModel = 0;
+				ViewModel_ = 0;
 			}
 		}
 	public:
@@ -156,7 +156,7 @@ namespace demos
 
 		Ptr<IWindowViewModel> GetViewModel()
 		{
-			return _ViewModel;
+			return ViewModel_;
 		}
 	};
 
