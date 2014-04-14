@@ -253,13 +253,33 @@ Basic Construction
 					return dynamic_cast<T*>(QueryService(T::Identifier));
 				}
 			};
-
-			/// <summary>Represnets a user customizable control.</summary>
-			class GuiCustomControl : public GuiControl, public Description<GuiCustomControl>
+			
+			/// <summary>Represnets a root GUI object.</summary>
+			class GuiInstanceRootObject abstract : public Description<GuiInstanceRootObject>
 			{
 				typedef collections::List<Ptr<description::IValueSubscription>>		SubscriptionList;
 			protected:
 				SubscriptionList								subscriptions;
+
+				void											ClearSubscriptions();
+			public:
+				/// <summary>Add a subscription. When this control host is disposing, all attached subscriptions will be deleted.</summary>
+				/// <returns>Returns null if this operation failed.</returns>
+				/// <param name="subscription">The subscription to test.</param>
+				Ptr<description::IValueSubscription>			AddSubscription(Ptr<description::IValueSubscription> subscription);
+				/// <summary>Remove a subscription.</summary>
+				/// <returns>Returns true if this operation succeeded.</returns>
+				/// <param name="subscription">The subscription to test.</param>
+				bool											RemoveSubscription(Ptr<description::IValueSubscription> subscription);
+				/// <summary>Test does the window contain the subscription.</summary>
+				/// <returns>Returns true if the window contains the subscription.</returns>
+				/// <param name="subscription">The subscription to test.</param>
+				bool											ContainsSubscription(Ptr<description::IValueSubscription> subscription);
+			};
+
+			/// <summary>Represnets a user customizable control.</summary>
+			class GuiCustomControl : public GuiControl, public GuiInstanceRootObject, public Description<GuiCustomControl>
+			{
 
 			public:
 				/// <summary>Style controller interface for <see cref="GuiCustomControl"/>.</summary>
@@ -283,19 +303,6 @@ Basic Construction
 				/// <param name="_styleController">The style controller.</param>
 				GuiCustomControl(IStyleController* _styleController);
 				~GuiCustomControl();
-
-				/// <summary>Add a subscription. When this control host is disposing, all attached subscriptions will be deleted.</summary>
-				/// <returns>Returns null if this operation failed.</returns>
-				/// <param name="subscription">The subscription to test.</param>
-				Ptr<description::IValueSubscription>			AddSubscription(Ptr<description::IValueSubscription> subscription);
-				/// <summary>Remove a subscription.</summary>
-				/// <returns>Returns true if this operation succeeded.</returns>
-				/// <param name="subscription">The subscription to test.</param>
-				bool											RemoveSubscription(Ptr<description::IValueSubscription> subscription);
-				/// <summary>Test does the window contain the subscription.</summary>
-				/// <returns>Returns true if the window contains the subscription.</returns>
-				/// <param name="subscription">The subscription to test.</param>
-				bool											ContainsSubscription(Ptr<description::IValueSubscription> subscription);
 			};
 
 			/// <summary>

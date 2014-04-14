@@ -127,6 +127,18 @@ GuiReferenceInstanceBinder
 GuiWorkflowGlobalContext
 ***********************************************************************/
 
+		WString WorkflowModuleToString(Ptr<WfModule> module)
+		{
+			stream::MemoryStream stream;
+			{
+				stream::StreamWriter writer(stream);
+				WfPrint(module, L"", writer);
+			}
+			stream.SeekFromBegin(0);
+			stream::StreamReader reader(stream);
+			return reader.ReadToEnd();
+		}
+
 		struct WorkflowDataBinding
 		{
 			Value						instance;
@@ -355,18 +367,7 @@ GuiWorkflowGlobalContext
 					}
 				}
 
-				WString moduleCode;
-				{
-					stream::MemoryStream stream;
-					{
-						stream::StreamWriter writer(stream);
-						WfPrint(module, L"", writer);
-					}
-					stream.SeekFromBegin(0);
-					stream::StreamReader reader(stream);
-					moduleCode = reader.ReadToEnd();
-				}
-				
+				WString moduleCode = WorkflowModuleToString(module);
 				WfLexicalScopeManager manager(0);
 				manager.modules.Add(module);
 				manager.Rebuild(false);
@@ -500,6 +501,7 @@ GuiScriptInstanceBinder
 							module->declarations.Add(func);
 						}
 
+						WString moduleCode = WorkflowModuleToString(module);
 						WfLexicalScopeManager manager(0);
 						manager.modules.Add(module);
 						manager.Rebuild(false);
@@ -606,6 +608,7 @@ GuiEvalInstanceBinder
 						module->declarations.Add(var);
 					}
 
+					WString moduleCode = WorkflowModuleToString(module);
 					WfLexicalScopeManager manager(0);
 					manager.modules.Add(module);
 					manager.Rebuild(false);
@@ -618,6 +621,14 @@ GuiEvalInstanceBinder
 						}
 						return Value();
 					}
+#ifdef _DEBUG
+					else
+					{
+						// for debug only, always show code in error
+						env->scope->errors.Add(L"Print code for reference (debug mode only):");
+						env->scope->errors.Add(moduleCode);
+					}
+#endif
 
 					auto assembly = GenerateAssembly(&manager);
 					auto globalContext = MakePtr<WfRuntimeGlobalContext>(assembly);
@@ -628,6 +639,10 @@ GuiEvalInstanceBinder
 					auto variable = globalContext->globalVariables->variables[variableIndex];
 					auto proxy = UnboxValue<Ptr<IValueFunctionProxy>>(variable);
 					auto translated = proxy->Invoke(IValueList::Create());
+
+					// the global context contains a closure variable <initialize-data-binding> which captured
+					// clear all variables to break the circle references
+					globalContext->globalVariables = 0;
 					return translated;
 				}
 				return Value();

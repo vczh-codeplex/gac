@@ -155,14 +155,17 @@ Type Declaration
 				CLASS_MEMBER_METHOD(CreateRadioTextListItemStyle, NO_PARAMETER)
 			END_CLASS_MEMBER(ITheme)
 
-			BEGIN_CLASS_MEMBER(GuiCustomControl)
-				CLASS_MEMBER_BASE(GuiControl)
-				CONTROL_CONSTRUCTOR_CONTROLLER(GuiCustomControl)
-				CONTROL_CONSTRUCTOR_DEFAULT(GuiCustomControl, &g::NewCustomControl)
-
+			BEGIN_CLASS_MEMBER(GuiInstanceRootObject)
 				CLASS_MEMBER_METHOD(AddSubscription, {L"subscription"})
 				CLASS_MEMBER_METHOD(RemoveSubscription, {L"subscription"})
 				CLASS_MEMBER_METHOD(ContainsSubscription, {L"subscription"})
+			END_CLASS_MEMBER(GuiInstanceRootObject)
+
+			BEGIN_CLASS_MEMBER(GuiCustomControl)
+				CLASS_MEMBER_BASE(GuiControl)
+				CLASS_MEMBER_BASE(GuiInstanceRootObject)
+				CONTROL_CONSTRUCTOR_CONTROLLER(GuiCustomControl)
+				CONTROL_CONSTRUCTOR_DEFAULT(GuiCustomControl, &g::NewCustomControl)
 			END_CLASS_MEMBER(GuiCustomControl)
 
 			BEGIN_CLASS_MEMBER(GuiCustomControl::IStyleController)
