@@ -232,6 +232,15 @@ LoadInstancePropertyValue
 			List<FillInstanceEventSetter>& eventSetters
 			)
 		{
+			WString instanceType;
+			if (propertyValue.instanceValue.IsNull())
+			{
+				instanceType = propertyLoader->GetTypeName();
+			}
+			else
+			{
+				instanceType = propertyValue.instanceValue.GetTypeDescriptor()->GetTypeName();
+			}
 			vint loadedValueCount = 0;
 			// try to look for a loader to handle this property
 			while (propertyLoader && loadedValueCount < input.Count())
@@ -262,7 +271,7 @@ LoadInstancePropertyValue
 								L"Collection property \"" +
 								propertyValue.propertyName +
 								L"\" of type \"" +
-								propertyValue.instanceValue.GetTypeDescriptor()->GetTypeName() +
+								instanceType +
 								L"\" can only be assigned with a single value.");
 							return false;
 						}
@@ -273,7 +282,7 @@ LoadInstancePropertyValue
 								L"Collection property \"" +
 								propertyValue.propertyName +
 								L"\" of type \"" +
-								propertyValue.instanceValue.GetTypeDescriptor()->GetTypeName() +
+								instanceType +
 								L"\" can only be retrived using binding \"set\".");
 							return false;
 						}
@@ -303,7 +312,7 @@ LoadInstancePropertyValue
 								L"Collection property \"" +
 								propertyValue.propertyName +
 								L"\" of type \"" +
-								propertyValue.instanceValue.GetTypeDescriptor()->GetTypeName() +
+								instanceType +
 								L"\" cannot be assigned using binding.");
 							return false;
 						}
@@ -335,18 +344,17 @@ LoadInstancePropertyValue
 								L"Assignable property \"" +
 								propertyValue.propertyName +
 								L"\" of type \"" +
-								propertyValue.instanceValue.GetTypeDescriptor()->GetTypeName() +
+								instanceType +
 								L"\" cannot be assigned using multiple values.");
 							return false;
 						}
-						if (constructorArgument && binding != L"") return false;
 						if (binding == L"set")
 						{
 							env->scope->errors.Add(
-								L"Collection property \"" +
+								L"Assignable property \"" +
 								propertyValue.propertyName +
 								L"\" of type \"" +
-								propertyValue.instanceValue.GetTypeDescriptor()->GetTypeName() +
+								instanceType +
 								L"\" cannot be retrived using binding \"set\".");
 							return false;
 						}
@@ -373,20 +381,42 @@ LoadInstancePropertyValue
 										if (LoadValueVisitor::LoadValue(valueRepr, env, binderExpectedTypes, bindingSetters, eventSetters, propertyValue.propertyValue))
 										{
 											canRemoveLoadedValue = true;
-											FillInstanceBindingSetter bindingSetter;
-											bindingSetter.binder = binder;
-											bindingSetter.loader = propertyLoader;
-											bindingSetter.propertyValue = propertyValue;
-											bindingSetters.Add(bindingSetter);
+											if (constructorArgument)
+											{
+												auto translatedValue = binder->GetValue(env, propertyValue.propertyValue);
+												if (translatedValue.IsNull())
+												{
+													env->scope->errors.Add(
+														L"Assignable property \"" +
+														propertyValue.propertyName +
+														L"\" of type \"" +
+														instanceType +
+														L"\" cannot be assigned using binding \"" +
+														binding +
+														L"\" because the value translation failed.");
+												}
+												else
+												{
+													output.Add(Pair<Value, IGuiInstanceLoader*>(propertyValue.propertyValue, propertyLoader));
+												}
+											}
+											else
+											{
+												FillInstanceBindingSetter bindingSetter;
+												bindingSetter.binder = binder;
+												bindingSetter.loader = propertyLoader;
+												bindingSetter.propertyValue = propertyValue;
+												bindingSetters.Add(bindingSetter);
+											}
 										}
 									}
 									else
 									{
 										env->scope->errors.Add(
-											L"Collection property \"" +
+											L"Assignable property \"" +
 											propertyValue.propertyName +
 											L"\" of type \"" +
-											propertyValue.instanceValue.GetTypeDescriptor()->GetTypeName() +
+											instanceType +
 											L"\" cannot be assigned using binding \"" +
 											binding +
 											L"\" because the appropriate IGuiInstanceBinder for this binding cannot be found.");
@@ -408,7 +438,7 @@ LoadInstancePropertyValue
 								L"Array property \"" +
 								propertyValue.propertyName +
 								L"\" of type \"" +
-								propertyValue.instanceValue.GetTypeDescriptor()->GetTypeName() +
+								instanceType +
 								L"\" cannot be assigned using binding.");
 							return false;
 						}
@@ -672,14 +702,34 @@ CreateInstance
 										auto setterValue = ctor->setters.Values()[index];
 										if (setterValue->binding != L"")
 										{
-											// if the constructor argument uses binding, fail
-											env->scope->errors.Add(
-												L"Failed to create object of type \"" +
-												source.typeName +
-												L"\" because the required constructor parameter \"" +
-												propertyName +
-												L"\" is not allowed to use binding.");
-											goto SKIP_CREATE_INSTANCE;
+											if (IGuiInstanceBinder* binder = GetInstanceLoaderManager()->GetInstanceBinder(setterValue->binding))
+											{
+												if (!binder->ApplicableToConstructorArgument())
+												{
+													// if the constructor argument uses binding, fail
+													env->scope->errors.Add(
+														L"Failed to create object of type \"" +
+														source.typeName +
+														L"\" because the required constructor parameter \"" +
+														propertyName +
+														L"\" is not allowed to use binding \"" +
+														setterValue->binding +
+														L"\" which does not applicable to constructor parameters.");
+													goto SKIP_CREATE_INSTANCE;
+												}
+											}
+											else
+											{
+												env->scope->errors.Add(
+													L"Failed to create object of type \"" +
+													source.typeName +
+													L"\" because the required constructor parameter \"" +
+													propertyName +
+													L"\" is not allowed to use binding \"" +
+													setterValue->binding +
+													L"\" because the appropriate IGuiInstanceBinder for this binding cannot be found.");
+												goto SKIP_CREATE_INSTANCE;
+											}
 										}
 
 										// load the parameter
