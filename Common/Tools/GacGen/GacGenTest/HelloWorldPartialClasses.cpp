@@ -23,12 +23,14 @@ namespace vl
 				CLASS_MEMBER_BASE(vl::presentation::controls::GuiCustomControl)
 				CLASS_MEMBER_CONSTRUCTOR(demos::CalculatorControl*(), NO_PARAMETER)
 
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ViewModel)
 			END_CLASS_MEMBER(demos::CalculatorControl)
 
 			BEGIN_CLASS_MEMBER(demos::MainWindow)
 				CLASS_MEMBER_BASE(vl::presentation::controls::GuiWindow)
 				CLASS_MEMBER_CONSTRUCTOR(demos::MainWindow*(), NO_PARAMETER)
 
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ViewModel)
 			END_CLASS_MEMBER(demos::MainWindow)
 
 			class HelloWorldResourceLoader : public Object, public ITypeLoader

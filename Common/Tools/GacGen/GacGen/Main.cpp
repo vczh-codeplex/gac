@@ -541,7 +541,19 @@ void WriteControlClassHeaderFileContent(Ptr<CodegenConfig> config, Ptr<Instance>
 	writer.WriteLine(L"");
 	WriteControlClassHeaderFileEventHandlers(config, instance, prefix, writer);
 	writer.WriteLine(prefix + L"public:");
-	writer.WriteLine(prefix + L"\t" + instance->typeName + L"();");
+	writer.WriteString(prefix + L"\t" + instance->typeName + L"(");
+	FOREACH_INDEXER(Ptr<GuiInstanceParameter>, parameter, index, instance->context->parameters)
+	{
+		if (index > 0)
+		{
+			writer.WriteString(L", ");
+		}
+		writer.WriteString(L"Ptr<");
+		writer.WriteString(parameter->className);
+		writer.WriteString(L"> ");
+		writer.WriteString(parameter->name);
+	}
+	writer.WriteLine(L");");
 	writer.WriteLine(prefix + L"};");
 	WriteNamespaceEnd(instance->namespaces, writer);
 	writer.WriteLine(L"");
@@ -554,9 +566,30 @@ void WriteControlClassCppFileContent(Ptr<CodegenConfig> config, Ptr<Instance> in
 	WString prefix = WriteNamespaceBegin(instance->namespaces, writer);
 	WriteControlClassCppFileEventHandlers(config, instance, prefix, existingEventHandlers, additionalLines, writer);
 	writer.WriteLine(L"");
-	writer.WriteLine(prefix + instance->typeName + L"::" + instance->typeName + L"()");
+	writer.WriteString(prefix + instance->typeName + L"::" + instance->typeName + L"(");
+	FOREACH_INDEXER(Ptr<GuiInstanceParameter>, parameter, index, instance->context->parameters)
+	{
+		if (index > 0)
+		{
+			writer.WriteString(L", ");
+		}
+		writer.WriteString(L"Ptr<");
+		writer.WriteString(parameter->className);
+		writer.WriteString(L"> ");
+		writer.WriteString(parameter->name);
+	}
+	writer.WriteLine(L")");
 	writer.WriteLine(prefix + L"{");
-	writer.WriteLine(prefix + L"\tInitializeComponents();");
+	writer.WriteString(prefix + L"\tInitializeComponents(");
+	FOREACH_INDEXER(Ptr<GuiInstanceParameter>, parameter, index, instance->context->parameters)
+	{
+		if (index > 0)
+		{
+			writer.WriteString(L", ");
+		}
+		writer.WriteString(parameter->name);
+	}
+	writer.WriteLine(L");");
 	writer.WriteLine(prefix + L"}");
 	WriteNamespaceEnd(instance->namespaces, writer);
 	writer.WriteLine(L"");
@@ -784,19 +817,58 @@ void WritePartialClassHeaderFile(Ptr<CodegenConfig> config, Dictionary<WString, 
 		writer.WriteLine(prefix + L"template<typename TImpl>");
 		writer.WriteLine(prefix + L"class " + instance->typeName + L"_ : public " + GetCppTypeName(instance->baseType) + L", public vl::presentation::GuiInstancePartialClass<vl::" + instance->baseType->GetTypeName() + L">, public vl::reflection::Description<TImpl>");
 		writer.WriteLine(prefix + L"{");
+		writer.WriteLine(prefix + L"private:");
+		FOREACH_INDEXER(Ptr<GuiInstanceParameter>, parameter, index, instance->context->parameters)
+		{
+			writer.WriteString(prefix + L"\t");
+			writer.WriteString(L"Ptr<");
+			writer.WriteString(parameter->className);
+			writer.WriteString(L"> ");
+			writer.WriteString(parameter->name);
+			writer.WriteLine(L"_;");
+		}
 		writer.WriteLine(prefix + L"protected:");
 		FOREACH(WString, field, instance->fields.Keys())
 		{
 			writer.WriteLine(prefix + L"\t" + GetCppTypeName(config, instances, instance, instance->fields[field]) + L"* " + field + L";");
 		}
 		writer.WriteLine(L"");
-		writer.WriteLine(L"\t\tvoid InitializeComponents()");
+		writer.WriteString(L"\t\tvoid InitializeComponents(");
+		FOREACH_INDEXER(Ptr<GuiInstanceParameter>, parameter, index, instance->context->parameters)
+		{
+			if (index > 0)
+			{
+				writer.WriteString(L", ");
+			}
+			writer.WriteString(L"Ptr<");
+			writer.WriteString(parameter->className);
+			writer.WriteString(L"> ");
+			writer.WriteString(parameter->name);
+		}
+		writer.WriteLine(L")");
 		writer.WriteLine(prefix + L"\t{");
+		FOREACH_INDEXER(Ptr<GuiInstanceParameter>, parameter, index, instance->context->parameters)
+		{
+			writer.WriteString(prefix + L"\t\t");
+			writer.WriteString(parameter->name);
+			writer.WriteString(L"_ = ");
+			writer.WriteString(parameter->name);
+			writer.WriteLine(L";");
+		}
 		writer.WriteLine(prefix + L"\t\tif (InitializeFromResource())");
 		writer.WriteLine(prefix + L"\t\t{");
 		FOREACH(WString, field, instance->fields.Keys())
 		{
 			writer.WriteLine(prefix + L"\t\t\tGUI_INSTANCE_REFERENCE(" + field + L");");
+		}
+		writer.WriteLine(prefix + L"\t\t}");
+		writer.WriteLine(prefix + L"\t\telse");
+		writer.WriteLine(prefix + L"\t\t{");
+		FOREACH_INDEXER(Ptr<GuiInstanceParameter>, parameter, index, instance->context->parameters)
+		{
+			writer.WriteString(prefix + L"\t\t\t");
+			writer.WriteString(parameter->name);
+			writer.WriteLine(L"_ = 0;");
 		}
 		writer.WriteLine(prefix + L"\t\t}");
 		writer.WriteLine(prefix + L"\t}");
@@ -817,6 +889,19 @@ void WritePartialClassHeaderFile(Ptr<CodegenConfig> config, Dictionary<WString, 
 		}
 		writer.WriteLine(prefix + L"\t{");
 		writer.WriteLine(prefix + L"\t}");
+		FOREACH_INDEXER(Ptr<GuiInstanceParameter>, parameter, index, instance->context->parameters)
+		{
+			writer.WriteLine(L"");
+			writer.WriteString(prefix + L"\t");
+			writer.WriteString(L"Ptr<");
+			writer.WriteString(parameter->className);
+			writer.WriteString(L"> Get");
+			writer.WriteString(parameter->name);
+			writer.WriteLine(L"()");
+			writer.WriteLine(prefix + L"\t{");
+			writer.WriteLine(prefix + L"\t\treturn " + parameter->name + L"_;");
+			writer.WriteLine(prefix + L"\t}");
+		}
 		writer.WriteLine(prefix + L"};");
 		writer.WriteLine(L"");
 		writer.WriteLine(prefix + L"class " + instance->typeName + L";");
@@ -875,11 +960,27 @@ void WritePartialClassCppFile(Ptr<CodegenConfig> config, Dictionary<WString, Ptr
 		writer.WriteLine(prefix + L"BEGIN_CLASS_MEMBER(" + instance->GetFullName() + L")");
 		writer.WriteLine(prefix + L"\tCLASS_MEMBER_BASE(" + GetCppTypeName(instance->baseType) + L")");
 		writer.WriteLine(prefix + L"\tCLASS_MEMBER_CONSTRUCTOR(" + instance->GetFullName() + L"*(), NO_PARAMETER)");
-		writer.WriteLine(L"");
-		FOREACH(WString, name, instance->eventHandlers.Keys())
+
+		if (instance->eventHandlers.Count() > 0)
 		{
-			writer.WriteLine(prefix + L"\tCLASS_MEMBER_GUIEVENT_HANDLER(" + name + L", " + GetCppTypeName(instance->eventHandlers[name]) + L")");
+			writer.WriteLine(L"");
+			FOREACH(WString, name, instance->eventHandlers.Keys())
+			{
+				writer.WriteLine(prefix + L"\tCLASS_MEMBER_GUIEVENT_HANDLER(" + name + L", " + GetCppTypeName(instance->eventHandlers[name]) + L")");
+			}
 		}
+		
+		if (instance->context->parameters.Count() > 0)
+		{
+			writer.WriteLine(L"");
+			FOREACH_INDEXER(Ptr<GuiInstanceParameter>, parameter, index, instance->context->parameters)
+			{
+				writer.WriteString(prefix + L"\tCLASS_MEMBER_PROPERTY_READONLY_FAST(");
+				writer.WriteString(parameter->name);
+				writer.WriteLine(L")");
+			}
+		}
+
 		writer.WriteLine(prefix + L"END_CLASS_MEMBER(" + instance->GetFullName() + L")");
 		writer.WriteLine(L"");
 	}
