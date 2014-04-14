@@ -27,6 +27,11 @@ GuiTextInstanceBinderBase
 			{
 			}
 
+			bool ApplicableToConstructorArgument()override
+			{
+				return false;
+			}
+
 			void GetRequiredContexts(collections::List<WString>& contextNames)override
 			{
 			}
@@ -34,6 +39,11 @@ GuiTextInstanceBinderBase
 			void GetExpectedValueTypes(collections::List<description::ITypeDescriptor*>& expectedTypes)override
 			{
 				expectedTypes.Add(stringTypeDescriptor);
+			}
+
+			description::Value GetValue(Ptr<GuiInstanceEnvironment> env, const description::Value& propertyValue)override
+			{
+				return Value();
 			}
 		};
 
@@ -558,6 +568,16 @@ GuiEvalInstanceBinder
 			WString GetBindingName()override
 			{
 				return L"eval";
+			}
+
+			bool ApplicableToConstructorArgument()override
+			{
+				return true;
+			}
+
+			description::Value GetValue(Ptr<GuiInstanceEnvironment> env, const description::Value& propertyValue)override
+			{
+				return Value();
 			}
 
 			WString TranslateExpression(const WString& input)override

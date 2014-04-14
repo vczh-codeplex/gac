@@ -215,8 +215,10 @@ Instance Binder
 		{
 		public:
 			virtual WString							GetBindingName() = 0;
+			virtual bool							ApplicableToConstructorArgument() = 0;
 			virtual void							GetRequiredContexts(collections::List<WString>& contextNames) = 0;
 			virtual void							GetExpectedValueTypes(collections::List<description::ITypeDescriptor*>& expectedTypes) = 0;
+			virtual description::Value				GetValue(Ptr<GuiInstanceEnvironment> env, const description::Value& propertyValue) = 0;
 			virtual bool							SetPropertyValue(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, IGuiInstanceLoader::PropertyValue& propertyValue) = 0;
 		};
 
