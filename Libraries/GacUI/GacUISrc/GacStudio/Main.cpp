@@ -9,6 +9,7 @@
 #include "UI\GacStudioUI.h"
 #include <Windows.h>
 
+using namespace vl::collections;
 using namespace gacstudio::user_interface;
 
 int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int CmdShow)
@@ -22,7 +23,9 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 void GuiMain()
 {
-	GetInstanceLoaderManager()->SetResource(L"GacStudioUI", GuiResource::LoadFromXml(L"..\\GacStudio\\UI\\Resources.xml"));
+	List<WString> errors;
+	auto resource = GuiResource::LoadFromXml(L"..\\GacStudio\\UI\\Resources.xml", errors);
+	GetInstanceLoaderManager()->SetResource(L"GacStudioUI", resource);
 	MainWindow window;
 	window.ForceCalculateSizeImmediately();
 	window.MoveToScreenCenter();
