@@ -464,7 +464,7 @@ GuiScriptInstanceBinder
 				{
 					WString expressionCode = TranslateExpression(propertyValue.propertyValue.GetText());
 					auto parser = GetParserManager()->GetParser<WfExpression>(L"WORKFLOW-EXPRESSION");
-					auto expression = parser->TypedParse(expressionCode);
+					auto expression = parser->TypedParse(expressionCode, env->scope->errors);
 					if (!expression)
 					{
 						env->scope->errors.Add(L"Failed to parse the workflow expression \"" + expressionCode + L"\".");
@@ -588,7 +588,7 @@ GuiEvalInstanceBinder
 				{
 					WString expressionCode = TranslateExpression(propertyValue.GetText());
 					auto parser = GetParserManager()->GetParser<WfExpression>(L"WORKFLOW-EXPRESSION");
-					auto expression = parser->TypedParse(expressionCode);
+					auto expression = parser->TypedParse(expressionCode, env->scope->errors);
 					if (!expression)
 					{
 						env->scope->errors.Add(L"Failed to parse the workflow expression \"" + expressionCode + L"\".");

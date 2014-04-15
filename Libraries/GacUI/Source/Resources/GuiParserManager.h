@@ -28,18 +28,19 @@ Parser
 			/// <summary>Parse a text.</summary>
 			/// <returns>The parsed object. Returns null if failed to parse.</returns>
 			/// <param name="text">The text.</param>
-			virtual Ptr<Object>						Parse(const WString& text)=0;
+			/// <param name="errors">All collected errors during loading a resource.</param>
+			virtual Ptr<Object>						Parse(const WString& text, collections::List<WString>& errors)=0;
 		};
 
 		template<typename T>
 		class IGuiParser : public IGuiGeneralParser
 		{
 		public:
-			virtual Ptr<T>							TypedParse(const WString& text)=0;
+			virtual Ptr<T>							TypedParse(const WString& text, collections::List<WString>& errors)=0;
 
-			Ptr<Object> Parse(const WString& text)override
+			Ptr<Object> Parse(const WString& text, collections::List<WString>& errors)override
 			{
-				return TypedParse(text);
+				return TypedParse(text, errors);
 			}
 		};
 
@@ -57,7 +58,7 @@ Strong Typed Table Parser
 		{
 		protected:
 			typedef parsing::tabling::ParsingTable				Table;
-			typedef Ptr<T>(ParserFunction)(const WString&, Ptr<Table>, vint);
+			typedef Ptr<T>(ParserFunction)(const WString&, Ptr<Table>, collections::List<Ptr<parsing::ParsingError>>&, vint);
 		protected:
 			WString									name;
 			Ptr<Table>								table;
@@ -69,14 +70,24 @@ Strong Typed Table Parser
 			{
 			}
 
-			Ptr<T> TypedParse(const WString& text)override
+			Ptr<T> TypedParse(const WString& text, collections::List<WString>& errors)override
 			{
 				if(!table)
 				{
-					table=GetParserManager()->GetParsingTable(name);
+					table = GetParserManager()->GetParsingTable(name);
 				}
 				if(table)
 				{
+					collections::List<Ptr<parsing::ParsingError>> parsingErrors;
+					for (vint i = 0; i < parsingErrors.Count(); i++)
+					{
+						auto error = parsingErors[i];
+						errors.Add(
+							L"Format: " + name +
+							L", Row: " + itow(error->codeRange.start.row + 1) +
+							L", Column: " + itow(error->codeRange.start.column + 1) +
+							L", Message: " + error->errorMessage);
+					}
 					return function(text, table, -1);
 				}
 				return 0;
@@ -118,7 +129,7 @@ Parser Manager
 			}
 
 			template<typename T>
-			bool SetTableParser(const WString& tableName, const WString& parserName, Ptr<T>(*function)(const WString&, Ptr<Table>, vint))
+			bool SetTableParser(const WString& tableName, const WString& parserName, Ptr<T>(*function)(const WString&, Ptr<Table>, collections::List<Ptr<parsing::ParsingError>>&, vint))
 			{
 				Ptr<IGuiParser<T>> parser=new GuiStrongTypedTableParser<T>(tableName, function);
 				return SetParser(parserName, parser);

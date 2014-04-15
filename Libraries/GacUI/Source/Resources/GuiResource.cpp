@@ -190,7 +190,7 @@ GuiResourceItem
 GuiResourceFolder
 ***********************************************************************/
 
-		void GuiResourceFolder::LoadResourceFolderXml(DelayLoadingList& delayLoadings, const WString& containingFolder, Ptr<parsing::xml::XmlElement> folderXml)
+		void GuiResourceFolder::LoadResourceFolderXml(DelayLoadingList& delayLoadings, const WString& containingFolder, Ptr<parsing::xml::XmlElement> folderXml, collections::List<WString>& errors)
 		{
 			ClearItems();
 			ClearFolders();
@@ -203,7 +203,15 @@ GuiResourceFolder
 				}
 				if(element->name.value==L"Folder")
 				{
-					if(name!=L"")
+					if (name == L"")
+					{
+						errors.Add(L"A resource folder should have a name.");
+						errors.Add(
+							L"Format: RESOURCE, Row: " + itow(element->codeRange.start.row + 1) +
+							L", Column: " + itow(element->codeRange.start.column + 1) +
+							L", Message: A resource folder should have a name.");
+					}
+					else
 					{
 						Ptr<GuiResourceFolder> folder=new GuiResourceFolder;
 						if(AddFolder(name, folder))
@@ -220,16 +228,24 @@ GuiResourceFolder
 									{
 										if(auto parser=GetParserManager()->GetParser<XmlDocument>(L"XML"))
 										{
-											if(auto xml=parser->TypedParse(text))
+											if(auto xml=parser->TypedParse(text, errors))
 											{
 												newContainingFolder=GetFolderPath(filePath);
 												newFolderXml=xml->rootElement;
 											}
 										}
 									}
+									else
+									{
+										errors.Add(L"Failed to load file \"" + filePath + L"\".");
+									}
 								}
 							}
-							folder->LoadResourceFolderXml(delayLoadings, newContainingFolder, newFolderXml);
+							folder->LoadResourceFolderXml(delayLoadings, newContainingFolder, newFolderXml, errors);
+						}
+						else
+						{
+							errors.Add(L"Duplicated resource folder name \"" + name + L"\".");
 						}
 					}
 				}
@@ -257,26 +273,34 @@ GuiResourceFolder
 
 						if(typeResolver)
 						{
-							WString preloadType=typeResolver->GetPreloadType();
-							if(preloadType!=L"")
+							WString preloadType = typeResolver->GetPreloadType();
+							if (preloadType != L"")
 							{
-								preloadResolver=GetResourceResolverManager()->GetTypeResolver(preloadType);
+								preloadResolver = GetResourceResolverManager()->GetTypeResolver(preloadType);
+								if (!preloadResolver)
+								{
+									errors.Add(L"Unknown resource resolver \"" + preloadType + L"\" of resource type \"" + type + L"\".");
+								}
 							}
+						}
+						else
+						{
+							errors.Add(L"Unknown resource type \"" + type + L"\".");
 						}
 
 						if(typeResolver && preloadResolver)
 						{
 							Ptr<DescriptableObject> resource;
-							if(filePath==L"")
+							if (filePath == L"")
 							{
-								resource=preloadResolver->ResolveResource(element);
+								resource = preloadResolver->ResolveResource(element, errors);
 							}
 							else
 							{
-								resource=preloadResolver->ResolveResource(filePath);
+								resource = preloadResolver->ResolveResource(filePath, errors);
 							}
 
-							if(typeResolver!=preloadResolver)
+							if (typeResolver != preloadResolver)
 							{
 								if(typeResolver->IsDelayLoad())
 								{
@@ -288,7 +312,7 @@ GuiResourceFolder
 								}
 								else if(resource)
 								{
-									resource=typeResolver->ResolveResource(resource, 0);
+									resource = typeResolver->ResolveResource(resource, 0, errors);
 								}
 							}
 							item->SetContent(resource);
@@ -298,6 +322,10 @@ GuiResourceFolder
 						{
 							RemoveItem(name);
 						}
+					}
+					else
+					{
+						errors.Add(L"Duplicated resource item name \"" + name + L"\".");
 					}
 				}
 			}
@@ -445,44 +473,57 @@ GuiResource
 			return workingDirectory;
 		}
 
-		Ptr<GuiResource> GuiResource::LoadFromXml(const WString& filePath)
+		Ptr<GuiResource> GuiResource::LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, const WString& workingDirectory, collections::List<WString>& errors)
+		{
+			Ptr<GuiResource> resource = new GuiResource;
+			resource->workingDirectory = workingDirectory;
+			DelayLoadingList delayLoadings;
+			resource->LoadResourceFolderXml(delayLoadings, resource->workingDirectory, xml->rootElement, errors);
+
+			FOREACH(DelayLoading, delay, delayLoadings)
+			{
+				WString type = delay.type;
+				WString folder = delay.workingDirectory;
+				Ptr<GuiResourceItem> item = delay.preloadResource;
+
+				IGuiResourceTypeResolver* typeResolver = GetResourceResolverManager()->GetTypeResolver(type);
+				if (!typeResolver)
+				{
+					errors.Add(L"Unknown resource type \"" + type + L"\".");
+				}
+				else if (item->GetContent())
+				{
+					Ptr<GuiResourcePathResolver> pathResolver = new GuiResourcePathResolver(resource, folder);
+					Ptr<DescriptableObject> resource = typeResolver->ResolveResource(item->GetContent(), pathResolver, errors);
+					if(resource)
+					{
+						item->SetContent(resource);
+					}
+				}
+			}
+			return resource;
+		}
+
+		Ptr<GuiResource> GuiResource::LoadFromXml(const WString& filePath, collections::List<WString>& errors)
 		{
 			Ptr<XmlDocument> xml;
-			Ptr<GuiResource> resource;
 			if(auto parser=GetParserManager()->GetParser<XmlDocument>(L"XML"))
 			{
 				WString text;
 				if(LoadTextFile(filePath, text))
 				{
-					xml=parser->TypedParse(text);
+					xml = parser->TypedParse(text, errors);
+				}
+				else
+				{
+					errors.Add(L"Failed to load file \"" + filePath + L"\".");
 				}
 			}
 			if(xml)
 			{
-				resource=new GuiResource;
-				resource->workingDirectory=GetFolderPath(filePath);
-				DelayLoadingList delayLoadings;
-				resource->LoadResourceFolderXml(delayLoadings, resource->workingDirectory, xml->rootElement);
-
-				FOREACH(DelayLoading, delay, delayLoadings)
-				{
-					WString type=delay.type;
-					WString folder=delay.workingDirectory;
-					Ptr<GuiResourceItem> item=delay.preloadResource;
-
-					IGuiResourceTypeResolver* typeResolver=GetResourceResolverManager()->GetTypeResolver(type);
-					if(typeResolver && item->GetContent())
-					{
-						Ptr<GuiResourcePathResolver> pathResolver=new GuiResourcePathResolver(resource, folder);
-						Ptr<DescriptableObject> resource=typeResolver->ResolveResource(item->GetContent(), pathResolver);
-						if(resource)
-						{
-							item->SetContent(resource);
-						}
-					}
-				}
+				return LoadFromXml(xml, GetFolderPath(filePath), errors);
 			}
-			return resource;
+			return 0;
 		}
 
 		Ptr<DocumentModel> GuiResource::GetDocumentByPath(const WString& path)

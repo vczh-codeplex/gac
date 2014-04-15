@@ -27,13 +27,15 @@ document_operation_visitors::DeserializeNodeVisitor
 				vint								paragraphIndex;
 				Ptr<GuiResourcePathResolver>		resolver;
 				Regex								regexAttributeApply;
+				List<WString>&						errors;
 
-				DeserializeNodeVisitor(Ptr<DocumentModel> _model, Ptr<DocumentParagraphRun> _paragraph, vint _paragraphIndex, Ptr<GuiResourcePathResolver> _resolver)
+				DeserializeNodeVisitor(Ptr<DocumentModel> _model, Ptr<DocumentParagraphRun> _paragraph, vint _paragraphIndex, Ptr<GuiResourcePathResolver> _resolver, List<WString>& _errors)
 					:model(_model)
-					,container(_paragraph)
-					,paragraphIndex(_paragraphIndex)
-					,resolver(_resolver)
-					,regexAttributeApply(L"/{@(<value>[^{}]+)/}")
+					, container(_paragraph)
+					, paragraphIndex(_paragraphIndex)
+					, resolver(_resolver)
+					, regexAttributeApply(L"/{@(<value>[^{}]+)/}")
+					, errors(_errors)
 				{
 				}
 
@@ -120,6 +122,10 @@ document_operation_visitors::DeserializeNodeVisitor
 								{
 									run->frameIndex=wtoi(att->value.value);
 								}
+								else
+								{
+									errors.Add(L"Unknown attribute in <img> \"" + att->name.value + L"\".");
+								}
 							}
 							container->runs.Add(run);
 						}
@@ -147,6 +153,10 @@ document_operation_visitors::DeserializeNodeVisitor
 							else if(att->name.value==L"bkcolor")
 							{
 								sp->backgroundColor=Color::Parse(att->value.value);
+							}
+							else
+							{
+								errors.Add(L"Unknown attribute in <font> \"" + att->name.value + L"\".");
 							}
 						}
 						container->runs.Add(run);
@@ -257,6 +267,7 @@ document_operation_visitors::DeserializeNodeVisitor
 					}
 					else
 					{
+						errors.Add(L"Unknown tag in document resource \"" + node->name.value + L"\".");
 						FOREACH(Ptr<XmlNode>, sub, node->subNodes)
 						{
 							sub->Accept(this);
@@ -290,7 +301,7 @@ document_operation_visitors::DeserializeNodeVisitor
 DocumentModel
 ***********************************************************************/
 
-		Ptr<DocumentModel> DocumentModel::LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, Ptr<GuiResourcePathResolver> resolver)
+		Ptr<DocumentModel> DocumentModel::LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)
 		{
 			Ptr<DocumentModel> model=new DocumentModel;
 			if(xml->rootElement->name.value==L"Doc")
@@ -389,7 +400,7 @@ DocumentModel
 							}
 						}
 						model->paragraphs.Add(paragraph);
-						DeserializeNodeVisitor visitor(model, paragraph, i, resolver);
+						DeserializeNodeVisitor visitor(model, paragraph, i, resolver, errors);
 						p->Accept(&visitor);
 					}
 				}
@@ -397,13 +408,13 @@ DocumentModel
 			return model;
 		}
 
-		Ptr<DocumentModel> DocumentModel::LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, const WString& workingDirectory)
+		Ptr<DocumentModel> DocumentModel::LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, const WString& workingDirectory, collections::List<WString>& errors)
 		{
 			Ptr<GuiResourcePathResolver> resolver=new GuiResourcePathResolver(0, workingDirectory);
-			return LoadFromXml(xml, resolver);
+			return LoadFromXml(xml, resolver, errors);
 		}
 
-		Ptr<DocumentModel> DocumentModel::LoadFromXml(const WString& filePath)
+		Ptr<DocumentModel> DocumentModel::LoadFromXml(const WString& filePath, collections::List<WString>& errors)
 		{
 			Ptr<XmlDocument> xml;
 			Ptr<DocumentModel> document;
@@ -412,12 +423,16 @@ DocumentModel
 				WString text;
 				if(LoadTextFile(filePath, text))
 				{
-					xml=parser->TypedParse(text);
+					xml = parser->TypedParse(text, errors);
+				}
+				else
+				{
+					errors.Add(L"Failed to load file \"" + filePath + L"\".");
 				}
 			}
 			if(xml)
 			{
-				document=DocumentModel::LoadFromXml(xml, GetFolderPath(filePath));
+				document = DocumentModel::LoadFromXml(xml, GetFolderPath(filePath), errors);
 			}
 			return document;
 		}

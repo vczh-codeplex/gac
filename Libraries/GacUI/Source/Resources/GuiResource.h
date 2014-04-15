@@ -183,7 +183,7 @@ Resource Structure
 			ItemMap									items;
 			FolderMap								folders;
 
-			void									LoadResourceFolderXml(DelayLoadingList& delayLoadings, const WString& containingFolder, Ptr<parsing::xml::XmlElement> folderXml);
+			void									LoadResourceFolderXml(DelayLoadingList& delayLoadings, const WString& containingFolder, Ptr<parsing::xml::XmlElement> folderXml, collections::List<WString>& errors);
 		public:
 			/// <summary>Create a resource folder.</summary>
 			GuiResourceFolder();
@@ -257,8 +257,16 @@ Resource
 
 			/// <summary>Load a resource from an xml file. If the xml file refers other files, they will be loaded as well.</summary>
 			/// <returns>The loaded resource.</returns>
+			/// <param name="xml">The xml document.</param>
+			/// <param name="workingDirectory">The working directory for loading image files.</param>
+			/// <param name="errors">All collected errors during loading a resource.</param>
+			static Ptr<GuiResource>					LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, const WString& workingDirectory, collections::List<WString>& errors);
+
+			/// <summary>Load a resource from an xml file. If the xml file refers other files, they will be loaded as well.</summary>
+			/// <returns>The loaded resource.</returns>
 			/// <param name="filepath">The file path of the xml file.</param>
-			static Ptr<GuiResource>					LoadFromXml(const WString& filePath);
+			/// <param name="errors">All collected errors during loading a resource.</param>
+			static Ptr<GuiResource>					LoadFromXml(const WString& filePath, collections::List<WString>& errors);
 			
 			/// <summary>Get a contained document model using a path like "Packages\Application\Name". If the path does not exists or the type does not match, an exception will be thrown.</summary>
 			/// <returns>The containd resource object.</returns>
@@ -351,18 +359,21 @@ Resource Type Resolver
 			/// <summary>Load a resource for a type inside an xml element.</summary>
 			/// <returns>The resource.</returns>
 			/// <param name="element">The xml element.</param>
-			virtual Ptr<DescriptableObject>					ResolveResource(Ptr<parsing::xml::XmlElement> element)=0;
+			/// <param name="errors">All collected errors during loading a resource.</param>
+			virtual Ptr<DescriptableObject>					ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)=0;
 
 			/// <summary>Load a resource for a type from a file.</summary>
 			/// <returns>The resource.</returns>
 			/// <param name="path">The file path.</param>
-			virtual Ptr<DescriptableObject>					ResolveResource(const WString& path)=0;
+			/// <param name="errors">All collected errors during loading a resource.</param>
+			virtual Ptr<DescriptableObject>					ResolveResource(const WString& path, collections::List<WString>& errors)=0;
 
 			/// <summary>Load a resource for a type from a resource loaded by the preload type resolver.</summary>
 			/// <returns>The resource.</returns>
 			/// <param name="resource">The resource.</param>
 			/// <param name="resolver">The path resolver. This is only for delay load resource.</param>
-			virtual Ptr<DescriptableObject>					ResolveResource(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver)=0;
+			/// <param name="errors">All collected errors during loading a resource.</param>
+			virtual Ptr<DescriptableObject>					ResolveResource(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)=0;
 		};
 
 /***********************************************************************

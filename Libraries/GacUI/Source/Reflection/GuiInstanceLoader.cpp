@@ -193,10 +193,14 @@ GuiInstanceContext::ElementName Parser
 			{
 			}
 
-			Ptr<ElementName> TypedParse(const WString& text)override
+			Ptr<ElementName> TypedParse(const WString& text, collections::List<WString>& errors)override
 			{
 				Ptr<RegexMatch> match = regexElementName.MatchHead(text);
-				if (match && match->Result().Length() != text.Length()) return 0;
+				if (match && match->Result().Length() != text.Length())
+				{
+					errors.Add(L"Failed to parse an element name \"" + text + L"\".");
+					return 0;
+				}
 
 				Ptr<ElementName> elementName = new ElementName;
 				if (match->Groups().Keys().Contains(L"namespaceName"))
@@ -241,17 +245,19 @@ Instance Type Resolver
 				return false;
 			}
 
-			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element)
+			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)
 			{
+				errors.Add(L"Internal error: Instance resource needs resource preloading.");
 				return 0;
 			}
 
-			Ptr<DescriptableObject> ResolveResource(const WString& path)
+			Ptr<DescriptableObject> ResolveResource(const WString& path, collections::List<WString>& errors)
 			{
+				errors.Add(L"Internal error: Instance resource needs resource preloading.");
 				return 0;
 			}
 
-			Ptr<DescriptableObject> ResolveResource(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver)
+			Ptr<DescriptableObject> ResolveResource(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)
 			{
 				Ptr<XmlDocument> xml = resource.Cast<XmlDocument>();
 				if (xml)

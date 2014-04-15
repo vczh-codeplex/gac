@@ -347,7 +347,9 @@ void GuiMain()
 {
 	//UnitTestInGuiMain();
 
-	GetInstanceLoaderManager()->SetResource(L"Demo", GuiResource::LoadFromXml(L"..\\GacUISrcCodepackedTest\\Resources\\XmlWindowResourceDataBinding.xml"));
+	List<WString> errors;
+	auto resource = GuiResource::LoadFromXml(L"..\\GacUISrcCodepackedTest\\Resources\\XmlWindowResourceDataBinding.xml", errors);
+	GetInstanceLoaderManager()->SetResource(L"Demo", resource);
 	demos::MainWindow window(new demos::WindowViewModel);
 	window.ForceCalculateSizeImmediately();
 	window.MoveToScreenCenter();
