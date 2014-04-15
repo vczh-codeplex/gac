@@ -25,17 +25,25 @@ namespace vl
 			IMPL_TYPE_INFO(demos::MainWindow)
 
 			BEGIN_CLASS_MEMBER(demos::IControlViewModel)
-				CLASS_MEMBER_BASE(IDescriptable)
+				CLASS_MEMBER_PROPERTY_FAST(First)
+				CLASS_MEMBER_PROPERTY_FAST(Second)
+				CLASS_MEMBER_EVENT(SumChanged)
+				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(Sum, SumChanged)
 			END_CLASS_MEMBER(demos::IControlViewModel)
 
 			BEGIN_CLASS_MEMBER(demos::IWindowViewModel)
-				CLASS_MEMBER_BASE(IDescriptable)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ControlViewModel)
 			END_CLASS_MEMBER(demos::IWindowViewModel)
 
 			BEGIN_CLASS_MEMBER(demos::MyClass)
+				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<demos::MyClass>(), NO_PARAMETER)
+				CLASS_MEMBER_FIELD(point)
+				CLASS_MEMBER_FIELD(next)
 			END_CLASS_MEMBER(demos::MyClass)
 
 			BEGIN_STRUCT_MEMBER(demos::MyStruct)
+				STRUCT_MEMBER(x)
+				STRUCT_MEMBER(y)
 			END_STRUCT_MEMBER(demos::MyStruct)
 
 			BEGIN_CLASS_MEMBER(demos::CalculatorControl)

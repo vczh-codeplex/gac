@@ -267,7 +267,7 @@ void SearchAllFields(Ptr<GuiInstanceEnvironment> env, Ptr<GuiInstanceContext> co
 SearchAllSchemas
 ***********************************************************************/
 
-void SearchAllSchemas(const Regex& regexClassName, Ptr<GuiResourceFolder> folder, Dictionary<WString, Ptr<InstanceSchema>>& typeSchemas)
+void SearchAllSchemas(const Regex& regexClassName, Ptr<GuiResourceFolder> folder, Dictionary<WString, Ptr<InstanceSchema>>& typeSchemas, List<WString>& typeSchemaOrder)
 {
 	FOREACH(Ptr<GuiResourceItem>, item, folder->GetItems())
 	{
@@ -298,12 +298,13 @@ void SearchAllSchemas(const Regex& regexClassName, Ptr<GuiResourceFolder> folder
 			}
 			instance->typeName = match->Groups()[L"type"][0].Value();
 			instance->schema = typeSchema;
+			typeSchemaOrder.Add(typeSchema->typeName);
 			typeSchemas.Add(typeSchema->typeName, instance);
 		}
 	}
 	FOREACH(Ptr<GuiResourceFolder>, subFolder, folder->GetFolders())
 	{
-		SearchAllSchemas(regexClassName, subFolder, typeSchemas);
+		SearchAllSchemas(regexClassName, subFolder, typeSchemas, typeSchemaOrder);
 	}
 }
 
@@ -865,7 +866,7 @@ void WriteControlClassCppFile(Ptr<CodegenConfig> config, Ptr<Instance> instance)
 Codegen::PartialClass
 ***********************************************************************/
 
-void WritePartialClassHeaderFile(Ptr<CodegenConfig> config, Dictionary<WString, Ptr<InstanceSchema>>& typeSchemas, Dictionary<WString, Ptr<Instance>>& instances)
+void WritePartialClassHeaderFile(Ptr<CodegenConfig> config, Dictionary<WString, Ptr<InstanceSchema>>& typeSchemas, List<WString>& typeSchemaOrder, Dictionary<WString, Ptr<Instance>>& instances)
 {
 	WString fileName = config->GetPartialClassHeaderFileName();
 	OPEN_FILE_WITH_COMMENT(L"Partial Classes", true);
@@ -876,8 +877,9 @@ void WritePartialClassHeaderFile(Ptr<CodegenConfig> config, Dictionary<WString, 
 	writer.WriteLine(L"#include \"" + config->include + L"\"");
 	writer.WriteLine(L"");
 
-	FOREACH(Ptr<InstanceSchema>, instance, typeSchemas.Values())
+	FOREACH(WString, typeSchemaName, typeSchemaOrder)
 	{
+		auto instance = typeSchemas[typeSchemaName];
 		WString prefix = WriteNamespaceBegin(instance->namespaces, writer);
 		if (auto data = instance->schema.Cast<GuiInstanceDataSchema>())
 		{
@@ -894,6 +896,10 @@ void WritePartialClassHeaderFile(Ptr<CodegenConfig> config, Dictionary<WString, 
 			{
 				writer.WriteLine(prefix + L"public:");
 			}
+			FOREACH(Ptr<GuiInstancePropertySchame>, prop, data->properties)
+			{
+				writer.WriteLine(prefix + L"\t" + prop->typeName + L" " + prop->name + L";");
+			}
 			writer.WriteLine(prefix + L"};");
 		}
 		else if (auto itf = instance->schema.Cast<GuiInstanceInterfaceSchema>())
@@ -901,6 +907,19 @@ void WritePartialClassHeaderFile(Ptr<CodegenConfig> config, Dictionary<WString, 
 			writer.WriteLine(prefix + L"class " + instance->typeName + L" : public vl::reflection::IDescriptable, public vl::reflection::Description<" + instance->typeName + L">");
 			writer.WriteLine(prefix + L"{");
 			writer.WriteLine(prefix + L"public:");
+			FOREACH(Ptr<GuiInstancePropertySchame>, prop, itf->properties)
+			{
+				writer.WriteLine(L"");
+				writer.WriteLine(prefix + L"\tvirtual " + prop->typeName + L" Get" + prop->name + L"() = 0;");
+				if (!prop->readonly)
+				{
+					writer.WriteLine(prefix + L"\tvirtual void Set" + prop->name + L"(const " + prop->typeName + L"& value) = 0;");
+				}
+				if (prop->observable)
+				{
+					writer.WriteLine(prefix + L"\tvl::Event<void()> " + prop->name + L"Changed;");
+				}
+			}
 			writer.WriteLine(prefix + L"};");
 		}
 		WriteNamespaceEnd(instance->namespaces, writer);
@@ -1038,7 +1057,7 @@ void WritePartialClassHeaderFile(Ptr<CodegenConfig> config, Dictionary<WString, 
 	writer.WriteLine(L"#endif");
 }
 
-void WritePartialClassCppFile(Ptr<CodegenConfig> config, Dictionary<WString, Ptr<InstanceSchema>>& typeSchemas, Dictionary<WString, Ptr<Instance>>& instances)
+void WritePartialClassCppFile(Ptr<CodegenConfig> config, Dictionary<WString, Ptr<InstanceSchema>>& typeSchemas, List<WString>& typeSchemaOrder, Dictionary<WString, Ptr<Instance>>& instances)
 {
 	WString fileName = config->GetPartialClassCppFileName();
 	OPEN_FILE_WITH_COMMENT(L"Partial Classes", true);
@@ -1068,18 +1087,52 @@ void WritePartialClassCppFile(Ptr<CodegenConfig> config, Dictionary<WString, Ptr
 			if (data->referenceType)
 			{
 				writer.WriteLine(prefix + L"BEGIN_CLASS_MEMBER(" + instance->GetFullName() + L")");
+				writer.WriteLine(prefix + L"\tCLASS_MEMBER_CONSTRUCTOR(vl::Ptr<" + instance->GetFullName() + L">(), NO_PARAMETER)");
+				FOREACH(Ptr<GuiInstancePropertySchame>, prop, data->properties)
+				{
+					writer.WriteLine(prefix + L"\tCLASS_MEMBER_FIELD(" + prop->name + L")");
+				}
 				writer.WriteLine(prefix + L"END_CLASS_MEMBER(" + instance->GetFullName() + L")");
 			}
 			else
 			{
 				writer.WriteLine(prefix + L"BEGIN_STRUCT_MEMBER(" + instance->GetFullName() + L")");
+				FOREACH(Ptr<GuiInstancePropertySchame>, prop, data->properties)
+				{
+					writer.WriteLine(prefix + L"\tSTRUCT_MEMBER(" + prop->name + L")");
+				}
 				writer.WriteLine(prefix + L"END_STRUCT_MEMBER(" + instance->GetFullName() + L")");
 			}
 		}
 		else if (auto itf = instance->schema.Cast<GuiInstanceInterfaceSchema>())
 		{
 			writer.WriteLine(prefix + L"BEGIN_CLASS_MEMBER(" + instance->GetFullName() + L")");
-			writer.WriteLine(prefix + L"\tCLASS_MEMBER_BASE(IDescriptable)");
+			FOREACH(Ptr<GuiInstancePropertySchame>, prop, itf->properties)
+			{
+				if (prop->observable)
+				{
+					writer.WriteLine(prefix + L"\tCLASS_MEMBER_EVENT(" + prop->name + L"Changed)");
+					if (prop->readonly)
+					{
+						writer.WriteLine(prefix + L"\tCLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(" + prop->name + L", " + prop->name + L"Changed)");
+					}
+					else
+					{
+						writer.WriteLine(prefix + L"\tCLASS_MEMBER_PROPERTY_EVENT_FAST(" + prop->name + L", " + prop->name + L"Changed)");
+					}
+				}
+				else
+				{
+					if (prop->readonly)
+					{
+						writer.WriteLine(prefix + L"\tCLASS_MEMBER_PROPERTY_READONLY_FAST(" + prop->name + L")");
+					}
+					else
+					{
+						writer.WriteLine(prefix + L"\tCLASS_MEMBER_PROPERTY_FAST(" + prop->name + L")");
+					}
+				}
+			}
 			writer.WriteLine(prefix + L"END_CLASS_MEMBER(" + instance->GetFullName() + L")");
 		}
 		writer.WriteLine(L"");
@@ -1250,8 +1303,9 @@ void GuiMain()
 	Regex regexClassName(L"((<namespace>[^:]+)::)*(<type>[^:]+)");
 	Ptr<GuiResourcePathResolver> resolver = new GuiResourcePathResolver(resource, resource->GetWorkingDirectory());
 	Dictionary<WString, Ptr<InstanceSchema>> typeSchemas;
+	List<WString> typeSchemaOrder;
 	Dictionary<WString, Ptr<Instance>> instances;
-	SearchAllSchemas(regexClassName, resource, typeSchemas);
+	SearchAllSchemas(regexClassName, resource, typeSchemas, typeSchemaOrder);
 	SearchAllInstances(regexClassName, resolver, resource, instances);
 		
 	FOREACH(Ptr<Instance>, instance, instances.Values())
@@ -1265,7 +1319,7 @@ void GuiMain()
 		WriteControlClassHeaderFile(config, instance);
 		WriteControlClassCppFile(config, instance);
 	}
-	WritePartialClassHeaderFile(config, typeSchemas, instances);
-	WritePartialClassCppFile(config, typeSchemas, instances);
+	WritePartialClassHeaderFile(config, typeSchemas, typeSchemaOrder, instances);
+	WritePartialClassCppFile(config, typeSchemas, typeSchemaOrder, instances);
 	WriteGlobalHeaderFile(config, instances);
 }
