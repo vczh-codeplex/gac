@@ -215,12 +215,12 @@ Instance Context
 			Nullable<WString>						className;
 			ParameterList							parameters;
 
-			static void								CollectDefaultAttributes(GuiAttSetterRepr::ValueList& values, Ptr<parsing::xml::XmlElement> xml);
-			static void								CollectAttributes(GuiAttSetterRepr::SetteValuerMap& setters, Ptr<parsing::xml::XmlElement> xml);
-			static void								CollectEvents(GuiAttSetterRepr::EventHandlerMap& eventHandlers, Ptr<parsing::xml::XmlElement> xml);
-			static void								FillAttSetter(Ptr<GuiAttSetterRepr> setter, Ptr<parsing::xml::XmlElement> xml);
-			static Ptr<GuiConstructorRepr>			LoadCtor(Ptr<parsing::xml::XmlElement> xml);
-			static Ptr<GuiInstanceContext>			LoadFromXml(Ptr<parsing::xml::XmlDocument> xml);
+			static void								CollectDefaultAttributes(GuiAttSetterRepr::ValueList& values, Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
+			static void								CollectAttributes(GuiAttSetterRepr::SetteValuerMap& setters, Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
+			static void								CollectEvents(GuiAttSetterRepr::EventHandlerMap& eventHandlers, Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
+			static void								FillAttSetter(Ptr<GuiAttSetterRepr> setter, Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
+			static Ptr<GuiConstructorRepr>			LoadCtor(Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
+			static Ptr<GuiInstanceContext>			LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, collections::List<WString>& errors);
 		};
 	}
 }
@@ -385,7 +385,7 @@ Instance Loader
 			virtual bool							IsDeserializable(const TypeInfo& typeInfo);
 			virtual description::Value				Deserialize(const TypeInfo& typeInfo, const WString& text);
 			virtual bool							IsCreatable(const TypeInfo& typeInfo);
-			virtual description::Value				CreateInstance(const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments);
+			virtual description::Value				CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments);
 			virtual bool							IsInitializable(const TypeInfo& typeInfo);
 			virtual Ptr<GuiInstanceContextScope>	InitializeInstance(const TypeInfo& typeInfo, description::Value instance);
 
@@ -520,8 +520,14 @@ Instance Loader Manager
 Instance Scope Wrapper
 ***********************************************************************/
 
+		class IGuiInstancePartialClass
+		{
+		public:
+			virtual Ptr<GuiInstanceContextScope> GetScope() = 0;
+		};
+
 		template<typename T>
-		class GuiInstancePartialClass
+		class GuiInstancePartialClass : public IGuiInstancePartialClass
 		{
 			typedef collections::Dictionary<WString, description::Value>	ValueMap;
 		private:
@@ -3222,6 +3228,88 @@ Type Loader
 
 			extern bool						LoadGuiEventTypes();
 		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+GUIINSTANCESCHEMAREPRESENTATION.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+GacUI Reflection: Instance Schema Representation
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_REFLECTION_GUIINSTANCESCHEMAREPRESENTATION
+#define VCZH_PRESENTATION_REFLECTION_GUIINSTANCESCHEMAREPRESENTATION
+
+
+namespace vl
+{
+	namespace presentation
+	{
+		class GuiInstanceTypeSchema : public Object, public Description<GuiInstanceTypeSchema>
+		{
+		public:
+			WString										typeName;
+
+			void										LoadFromXml(Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
+		};
+
+		class GuiInstancePropertySchame :public Object, public Description<GuiInstancePropertySchame>
+		{
+		public:
+			WString										name;
+			WString										typeName;
+			bool										readonly = false;
+			bool										observable = false;
+
+			static Ptr<GuiInstancePropertySchame>		LoadFromXml(Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
+		};
+
+/***********************************************************************
+Instance Struct/Class Schema
+***********************************************************************/
+
+		class GuiInstanceDataSchema : public GuiInstanceTypeSchema, public Description<GuiInstanceDataSchema>
+		{
+			typedef collections::List<Ptr<GuiInstancePropertySchame>>	PropertyList;
+		public:
+			bool										referenceType = false;
+			PropertyList								properties;
+
+			static Ptr<GuiInstanceDataSchema>			LoadFromXml(Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
+		};
+
+/***********************************************************************
+Instance Interface Schema
+***********************************************************************/
+
+		class GuiInstanceInterfaceSchema : public GuiInstanceTypeSchema, public Description<GuiInstanceInterfaceSchema>
+		{
+			typedef collections::List<Ptr<GuiInstancePropertySchame>>	PropertyList;
+		public:
+			PropertyList								properties;
+
+			static Ptr<GuiInstanceInterfaceSchema>		LoadFromXml(Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
+		};
+
+/***********************************************************************
+Instance Schema Representation
+***********************************************************************/
+
+		class GuiInstanceSchema : public Object, public Description<GuiInstanceSchema>
+		{
+			typedef collections::List<Ptr<GuiInstanceTypeSchema>>		TypeSchemaList;
+		public:
+			TypeSchemaList								schemas;
+
+			static Ptr<GuiInstanceSchema>				LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, collections::List<WString>& errors);
+		};
 	}
 }
 

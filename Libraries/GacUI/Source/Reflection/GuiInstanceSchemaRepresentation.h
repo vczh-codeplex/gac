@@ -18,6 +18,20 @@ namespace vl
 		class GuiInstanceTypeSchema : public Object, public Description<GuiInstanceTypeSchema>
 		{
 		public:
+			WString										typeName;
+
+			void										LoadFromXml(Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
+		};
+
+		class GuiInstancePropertySchame :public Object, public Description<GuiInstancePropertySchame>
+		{
+		public:
+			WString										name;
+			WString										typeName;
+			bool										readonly = false;
+			bool										observable = false;
+
+			static Ptr<GuiInstancePropertySchame>		LoadFromXml(Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
 		};
 
 /***********************************************************************
@@ -26,7 +40,11 @@ Instance Struct/Class Schema
 
 		class GuiInstanceDataSchema : public GuiInstanceTypeSchema, public Description<GuiInstanceDataSchema>
 		{
+			typedef collections::List<Ptr<GuiInstancePropertySchame>>	PropertyList;
 		public:
+			bool										referenceType = false;
+			PropertyList								properties;
+
 			static Ptr<GuiInstanceDataSchema>			LoadFromXml(Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
 		};
 
@@ -36,7 +54,10 @@ Instance Interface Schema
 
 		class GuiInstanceInterfaceSchema : public GuiInstanceTypeSchema, public Description<GuiInstanceInterfaceSchema>
 		{
+			typedef collections::List<Ptr<GuiInstancePropertySchame>>	PropertyList;
 		public:
+			PropertyList								properties;
+
 			static Ptr<GuiInstanceInterfaceSchema>		LoadFromXml(Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
 		};
 
