@@ -132,8 +132,9 @@ void SetupDocumentElementLayoutWindow(GuiControlHost* controlHost, GuiGraphicsCo
 				text=writer.ReadToEnd();
 			}
 			auto table=XmlLoadTable();
+			List<WString> errors;
 			Ptr<XmlDocument> xml=XmlParseDocument(text, table);
-			document=DocumentModel::LoadFromXml(xml, L"Resources\\");
+			document = DocumentModel::LoadFromXml(xml, L"Resources\\", errors);
 		}
 		GetApplication()->InvokeInMainThreadAndWait([=]()
 		{
@@ -163,7 +164,8 @@ void SetupDocumentViewerLayoutWindow(GuiControlHost* controlHost, GuiGraphicsCom
 	});
 	container->AddChild(documentControl->GetBoundsComposition());
 
-	Ptr<GuiResource> resource=GuiResource::LoadFromXml(L"Resources\\XmlResource.xml");
+	List<WString> errors;
+	Ptr<GuiResource> resource = GuiResource::LoadFromXml(L"Resources\\XmlResource.xml", errors);
 	Ptr<DocumentModel> document=resource->GetValueByPath(L"XmlDoc.xml").Cast<DocumentModel>();
 	documentControl->SetDocument(document);
 }
@@ -180,8 +182,9 @@ void SetupDocumentLabelLayoutWindow(GuiControlHost* controlHost, GuiGraphicsComp
 			controlHost->GetText());
 	});
 	container->AddChild(documentControl->GetBoundsComposition());
-
-	Ptr<GuiResource> resource=GuiResource::LoadFromXml(L"Resources\\XmlResource.xml");
+	
+	List<WString> errors;
+	Ptr<GuiResource> resource = GuiResource::LoadFromXml(L"Resources\\XmlResource.xml", errors);
 	Ptr<DocumentModel> document=resource->GetValueByPath(L"XmlDoc.xml").Cast<DocumentModel>();
 	documentControl->SetDocument(document);
 }
