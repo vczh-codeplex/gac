@@ -365,6 +365,7 @@
     <ClCompile Include="..\..\Source\Reflection\GuiInstanceLoader_PredefinedInstanceBinders.cpp" />
     <ClCompile Include="..\..\Source\Reflection\GuiInstanceLoader_PredefinedInstanceLoaders.cpp" />
     <ClCompile Include="..\..\Source\Reflection\GuiInstanceRepresentation.cpp" />
+    <ClCompile Include="..\..\Source\Reflection\GuiInstanceSchemaRepresentation.cpp" />
     <ClCompile Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionBasic.cpp">
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
@@ -553,6 +554,7 @@
     <ClInclude Include="..\..\Source\Reflection\GuiInstanceHelperTypes.h" />
     <ClInclude Include="..\..\Source\Reflection\GuiInstanceLoader.h" />
     <ClInclude Include="..\..\Source\Reflection\GuiInstanceRepresentation.h" />
+    <ClInclude Include="..\..\Source\Reflection\GuiInstanceSchemaRepresentation.h" />
     <ClInclude Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionBasic.h" />
     <ClInclude Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionCompositions.h" />
     <ClInclude Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionControls.h" />

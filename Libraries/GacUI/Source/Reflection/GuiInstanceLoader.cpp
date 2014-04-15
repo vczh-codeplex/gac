@@ -1,6 +1,7 @@
 #include "GuiInstanceLoader.h"
 #include "TypeDescriptors\GuiReflectionEvents.h"
 #include "..\Resources\GuiParserManager.h"
+#include "GuiInstanceSchemaRepresentation.h"
 
 namespace vl
 {
@@ -264,6 +265,52 @@ Instance Type Resolver
 				{
 					Ptr<GuiInstanceContext> context = GuiInstanceContext::LoadFromXml(xml, errors);
 					return context;
+				}
+				return 0;
+			}
+		};
+
+/***********************************************************************
+Instance Schema Type Resolver
+***********************************************************************/
+
+		class GuiResourceInstanceSchemaTypeResolver : public Object, public IGuiResourceTypeResolver
+		{
+		public:
+			WString GetType()
+			{
+				return L"InstanceSchema";
+			}
+
+			WString GetPreloadType()
+			{
+				return L"Xml";
+			}
+
+			bool IsDelayLoad()
+			{
+				return false;
+			}
+
+			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)
+			{
+				errors.Add(L"Internal error: Instance schema resource needs resource preloading.");
+				return 0;
+			}
+
+			Ptr<DescriptableObject> ResolveResource(const WString& path, collections::List<WString>& errors)
+			{
+				errors.Add(L"Internal error: Instance schema resource needs resource preloading.");
+				return 0;
+			}
+
+			Ptr<DescriptableObject> ResolveResource(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)
+			{
+				Ptr<XmlDocument> xml = resource.Cast<XmlDocument>();
+				if (xml)
+				{
+					Ptr<GuiInstanceSchema> schema = GuiInstanceSchema::LoadFromXml(xml, errors);
+					return schema;
 				}
 				return 0;
 			}
@@ -929,6 +976,7 @@ GuiInstanceLoaderManager
 				{
 					IGuiResourceResolverManager* manager = GetResourceResolverManager();
 					manager->SetTypeResolver(new GuiResourceInstanceTypeResolver);
+					manager->SetTypeResolver(new GuiResourceInstanceSchemaTypeResolver);
 				}
 				{
 					IGuiParserManager* manager = GetParserManager();
