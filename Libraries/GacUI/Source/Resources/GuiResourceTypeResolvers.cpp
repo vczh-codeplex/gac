@@ -34,23 +34,29 @@ Image Type Resolver
 				return false;
 			}
 
-			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element)
+			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)
 			{
+				errors.Add(L"Image resource should be an image file.");
 				return 0;
 			}
 
-			Ptr<DescriptableObject> ResolveResource(const WString& path)
+			Ptr<DescriptableObject> ResolveResource(const WString& path, collections::List<WString>& errors)
 			{
-				Ptr<INativeImage> image=GetCurrentController()->ImageService()->CreateImageFromFile(path);
+				Ptr<INativeImage> image = GetCurrentController()->ImageService()->CreateImageFromFile(path);
 				if(image)
 				{
 					return new GuiImageData(image, 0);
 				}
-				return 0;
+				else
+				{
+					errors.Add(L"Failed to load file \"" + path + L"\".");
+					return 0;
+				}
 			}
 
-			Ptr<DescriptableObject> ResolveResource(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver)
+			Ptr<DescriptableObject> ResolveResource(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)
 			{
+				errors.Add(L"Internal error: Image resource doesn't need resource preloading.");
 				return 0;
 			}
 		};
@@ -77,23 +83,28 @@ Text Type Resolver
 				return false;
 			}
 
-			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element)
+			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)
 			{
 				return new GuiTextData(XmlGetValue(element));
 			}
 
-			Ptr<DescriptableObject> ResolveResource(const WString& path)
+			Ptr<DescriptableObject> ResolveResource(const WString& path, collections::List<WString>& errors)
 			{
 				WString text;
 				if(LoadTextFile(path, text))
 				{
 					return new GuiTextData(text);
 				}
-				return 0;
+				else
+				{
+					errors.Add(L"Failed to load file \"" + path + L"\".");
+					return 0;
+				}
 			}
 
-			Ptr<DescriptableObject> ResolveResource(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver)
+			Ptr<DescriptableObject> ResolveResource(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)
 			{
+				errors.Add(L"Internal error: Text resource doesn't need resource preloading.");
 				return 0;
 			}
 		};
@@ -120,7 +131,7 @@ Xml Type Resolver
 				return false;
 			}
 
-			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element)
+			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)
 			{
 				Ptr<XmlElement> root=XmlGetElements(element).First(0);
 				if(root)
@@ -132,21 +143,26 @@ Xml Type Resolver
 				return 0;
 			}
 
-			Ptr<DescriptableObject> ResolveResource(const WString& path)
+			Ptr<DescriptableObject> ResolveResource(const WString& path, collections::List<WString>& errors)
 			{
 				if(auto parser=GetParserManager()->GetParser<XmlDocument>(L"XML"))
 				{
 					WString text;
 					if(LoadTextFile(path, text))
 					{
-						return parser->TypedParse(text);
+						return parser->TypedParse(text, errors);
+					}
+					else
+					{
+						errors.Add(L"Failed to load file \"" + path + L"\".");
 					}
 				}
 				return 0;
 			}
 
-			Ptr<DescriptableObject> ResolveResource(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver)
+			Ptr<DescriptableObject> ResolveResource(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)
 			{
+				errors.Add(L"Internal error: Xml resource doesn't need resource preloading.");
 				return 0;
 			}
 		};
@@ -173,22 +189,24 @@ Doc Type Resolver
 				return true;
 			}
 
-			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element)
+			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)
 			{
+				errors.Add(L"Internal error: Doc resource needs resource preloading.");
 				return 0;
 			}
 
-			Ptr<DescriptableObject> ResolveResource(const WString& path)
+			Ptr<DescriptableObject> ResolveResource(const WString& path, collections::List<WString>& errors)
 			{
+				errors.Add(L"Internal error: Doc resource needs resource preloading.");
 				return 0;
 			}
 
-			Ptr<DescriptableObject> ResolveResource(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver)
+			Ptr<DescriptableObject> ResolveResource(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)
 			{
-				Ptr<XmlDocument> xml=resource.Cast<XmlDocument>();
+				Ptr<XmlDocument> xml = resource.Cast<XmlDocument>();
 				if(xml)
 				{
-					Ptr<DocumentModel> model=DocumentModel::LoadFromXml(xml, resolver);
+					Ptr<DocumentModel> model=DocumentModel::LoadFromXml(xml, resolver, errors);
 					return model;
 				}
 				return 0;
