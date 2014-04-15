@@ -234,7 +234,7 @@ IGuiInstanceLoader
 			return false;
 		}
 
-		description::Value IGuiInstanceLoader::CreateInstance(const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)
+		description::Value IGuiInstanceLoader::CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)
 		{
 			return Value();
 		}
@@ -301,10 +301,14 @@ GuiInstanceContext::ElementName Parser
 			{
 			}
 
-			Ptr<ElementName> TypedParse(const WString& text)override
+			Ptr<ElementName> TypedParse(const WString& text, collections::List<WString>& errors)override
 			{
 				Ptr<RegexMatch> match = regexElementName.MatchHead(text);
-				if (match && match->Result().Length() != text.Length()) return 0;
+				if (match && match->Result().Length() != text.Length())
+				{
+					errors.Add(L"Failed to parse an element name \"" + text + L"\".");
+					return 0;
+				}
 
 				Ptr<ElementName> elementName = new ElementName;
 				if (match->Groups().Keys().Contains(L"namespaceName"))
@@ -349,23 +353,71 @@ Instance Type Resolver
 				return false;
 			}
 
-			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element)
+			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)
 			{
+				errors.Add(L"Internal error: Instance resource needs resource preloading.");
 				return 0;
 			}
 
-			Ptr<DescriptableObject> ResolveResource(const WString& path)
+			Ptr<DescriptableObject> ResolveResource(const WString& path, collections::List<WString>& errors)
 			{
+				errors.Add(L"Internal error: Instance resource needs resource preloading.");
 				return 0;
 			}
 
-			Ptr<DescriptableObject> ResolveResource(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver)
+			Ptr<DescriptableObject> ResolveResource(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)
 			{
 				Ptr<XmlDocument> xml = resource.Cast<XmlDocument>();
 				if (xml)
 				{
-					Ptr<GuiInstanceContext> context = GuiInstanceContext::LoadFromXml(xml);
+					Ptr<GuiInstanceContext> context = GuiInstanceContext::LoadFromXml(xml, errors);
 					return context;
+				}
+				return 0;
+			}
+		};
+
+/***********************************************************************
+Instance Schema Type Resolver
+***********************************************************************/
+
+		class GuiResourceInstanceSchemaTypeResolver : public Object, public IGuiResourceTypeResolver
+		{
+		public:
+			WString GetType()
+			{
+				return L"InstanceSchema";
+			}
+
+			WString GetPreloadType()
+			{
+				return L"Xml";
+			}
+
+			bool IsDelayLoad()
+			{
+				return false;
+			}
+
+			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)
+			{
+				errors.Add(L"Internal error: Instance schema resource needs resource preloading.");
+				return 0;
+			}
+
+			Ptr<DescriptableObject> ResolveResource(const WString& path, collections::List<WString>& errors)
+			{
+				errors.Add(L"Internal error: Instance schema resource needs resource preloading.");
+				return 0;
+			}
+
+			Ptr<DescriptableObject> ResolveResource(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)
+			{
+				Ptr<XmlDocument> xml = resource.Cast<XmlDocument>();
+				if (xml)
+				{
+					Ptr<GuiInstanceSchema> schema = GuiInstanceSchema::LoadFromXml(xml, errors);
+					return schema;
 				}
 				return 0;
 			}
@@ -425,13 +477,17 @@ GuiDefaultInstanceLoader
 				return GetDefaultConstructor(typeInfo.typeDescriptor) != 0;
 			}
 
-			description::Value CreateInstance(const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
+			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
 			{
 				if (IMethodInfo* method = GetDefaultConstructor(typeInfo.typeDescriptor))
 				{
 					return method->Invoke(Value(), (Value_xs()));
 				}
-				return Value();
+				else
+				{
+					env->scope->errors.Add(L"Failed to create \"" + typeInfo.typeName + L"\" because no there is no default constructor.");
+					return Value();
+				}
 			}
 
 			bool IsInitializable(const TypeInfo& typeInfo)override
@@ -766,7 +822,7 @@ GuiResourceInstanceLoader
 				return typeInfo.typeName == context->className.Value();
 			}
 
-			description::Value CreateInstance(const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
+			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
 			{
 				if (typeInfo.typeName == context->className.Value())
 				{
@@ -796,7 +852,16 @@ GuiResourceInstanceLoader
 								{
 									arguments[j] = constructorArguments[parameterNames[j]][0];
 								}
-								return method->Invoke(Value(), arguments);
+								Value result = method->Invoke(Value(), arguments);
+
+								if (auto partialClass = dynamic_cast<IGuiInstancePartialClass*>(result.GetRawPtr()))
+								{
+									if (auto partialScope = partialClass->GetScope())
+									{
+										CopyFrom(env->scope->errors, partialScope->errors, true);
+									}
+								}
+								return result;
 							}
 						}
 					}
@@ -806,6 +871,7 @@ GuiResourceInstanceLoader
 
 					if (scope)
 					{
+						CopyFrom(env->scope->errors, scope->errors, true);
 						return scope->rootInstance;
 					}
 				}
@@ -1017,6 +1083,7 @@ GuiInstanceLoaderManager
 				{
 					IGuiResourceResolverManager* manager = GetResourceResolverManager();
 					manager->SetTypeResolver(new GuiResourceInstanceTypeResolver);
+					manager->SetTypeResolver(new GuiResourceInstanceSchemaTypeResolver);
 				}
 				{
 					IGuiParserManager* manager = GetParserManager();
@@ -1980,7 +2047,7 @@ CreateInstance
 							}
 
 							// create the instance
-							instance = loader->CreateInstance(typeInfo, constructorArguments);
+							instance = loader->CreateInstance(env, typeInfo, constructorArguments);
 						SKIP_CREATE_INSTANCE:
 							// delete all arguments if the constructing fails
 							if (instance.IsNull())
@@ -3052,6 +3119,8 @@ GuiReferenceInstanceBinder
 GuiWorkflowGlobalContext
 ***********************************************************************/
 
+#define ERROR_CODE_PREFIX L"========<" + env->scope->rootInstance.GetTypeDescriptor()->GetTypeName() + L">======== "
+
 		WString WorkflowModuleToString(Ptr<WfModule> module)
 		{
 			stream::MemoryStream stream;
@@ -3299,12 +3368,12 @@ GuiWorkflowGlobalContext
 
 				if (manager.errors.Count() > 0)
 				{
-					env->scope->errors.Add(L"Unexpected errors are encountered when initializing data binding.");
+					env->scope->errors.Add(ERROR_CODE_PREFIX L"Unexpected errors are encountered when initializing data binding.");
 					FOREACH(Ptr<parsing::ParsingError>, error, manager.errors)
 					{
 						env->scope->errors.Add(error->errorMessage);
 					}
-					env->scope->errors.Add(L"Print code for reference:");
+					env->scope->errors.Add(ERROR_CODE_PREFIX L"Print code for reference:");
 					env->scope->errors.Add(moduleCode);
 					return;
 				}
@@ -3312,7 +3381,7 @@ GuiWorkflowGlobalContext
 				else
 				{
 					// for debug only, always show code in error
-					env->scope->errors.Add(L"Print code for reference (debug mode only):");
+					env->scope->errors.Add(ERROR_CODE_PREFIX L"Print code for reference (debug mode only):");
 					env->scope->errors.Add(moduleCode);
 				}
 #endif
@@ -3389,10 +3458,10 @@ GuiScriptInstanceBinder
 				{
 					WString expressionCode = TranslateExpression(propertyValue.propertyValue.GetText());
 					auto parser = GetParserManager()->GetParser<WfExpression>(L"WORKFLOW-EXPRESSION");
-					auto expression = parser->TypedParse(expressionCode);
+					auto expression = parser->TypedParse(expressionCode, env->scope->errors);
 					if (!expression)
 					{
-						env->scope->errors.Add(L"Failed to parse the workflow expression \"" + expressionCode + L"\".");
+						env->scope->errors.Add(ERROR_CODE_PREFIX L"Failed to parse the workflow expression \"" + expressionCode + L"\".");
 						return false;
 					}
 
@@ -3401,12 +3470,12 @@ GuiScriptInstanceBinder
 					auto propertyInfo = td->GetPropertyByName(propertyValue.propertyName, true);
 					if (!propertyInfo)
 					{
-						env->scope->errors.Add(L"Property \"" + propertyValue.propertyName + L"\" does not exist in type \"" + td->GetTypeName() + L"\".");
+						env->scope->errors.Add(ERROR_CODE_PREFIX L"Property \"" + propertyValue.propertyName + L"\" does not exist in type \"" + td->GetTypeName() + L"\".");
 						failed = true;
 					}
 					else if (!propertyInfo->IsReadable() || !propertyInfo->IsWritable())
 					{
-						env->scope->errors.Add(L"Property \"" + propertyValue.propertyName + L"\" of type \"" + td->GetTypeName() + L"\" should be both readable and writable.");
+						env->scope->errors.Add(ERROR_CODE_PREFIX L"Property \"" + propertyValue.propertyName + L"\" of type \"" + td->GetTypeName() + L"\" should be both readable and writable.");
 						failed = true;
 					}
 
@@ -3432,7 +3501,7 @@ GuiScriptInstanceBinder
 						manager.Rebuild(false);
 						if (manager.errors.Count() > 0)
 						{
-							env->scope->errors.Add(L"Failed to analyze the workflow expression \"" + expressionCode + L"\".");
+							env->scope->errors.Add(ERROR_CODE_PREFIX L"Failed to analyze the workflow expression \"" + expressionCode + L"\".");
 							FOREACH(Ptr<parsing::ParsingError>, error, manager.errors)
 							{
 								env->scope->errors.Add(error->errorMessage);
@@ -3452,7 +3521,7 @@ GuiScriptInstanceBinder
 								}
 								if (!CanConvertToType(result.type.Obj(), propertyType, false))
 								{
-									env->scope->errors.Add(L"Failed to analyze the workflow expression \"" + expressionCode + L"\".");
+									env->scope->errors.Add(ERROR_CODE_PREFIX L"Failed to analyze the workflow expression \"" + expressionCode + L"\".");
 									env->scope->errors.Add(
 										WfErrors::ExpressionCannotImplicitlyConvertToType(expression.Obj(), result.type.Obj(), propertyType)
 										->errorMessage);
@@ -3513,10 +3582,10 @@ GuiEvalInstanceBinder
 				{
 					WString expressionCode = TranslateExpression(propertyValue.GetText());
 					auto parser = GetParserManager()->GetParser<WfExpression>(L"WORKFLOW-EXPRESSION");
-					auto expression = parser->TypedParse(expressionCode);
+					auto expression = parser->TypedParse(expressionCode, env->scope->errors);
 					if (!expression)
 					{
-						env->scope->errors.Add(L"Failed to parse the workflow expression \"" + expressionCode + L"\".");
+						env->scope->errors.Add(ERROR_CODE_PREFIX L"Failed to parse the workflow expression \"" + expressionCode + L"\".");
 						return Value();
 					}
 
@@ -3539,7 +3608,7 @@ GuiEvalInstanceBinder
 					manager.Rebuild(false);
 					if (manager.errors.Count() > 0)
 					{
-						env->scope->errors.Add(L"Failed to analyze the workflow expression \"" + expressionCode + L"\".");
+						env->scope->errors.Add(ERROR_CODE_PREFIX L"Failed to analyze the workflow expression \"" + expressionCode + L"\".");
 						FOREACH(Ptr<parsing::ParsingError>, error, manager.errors)
 						{
 							env->scope->errors.Add(error->errorMessage);
@@ -3550,7 +3619,7 @@ GuiEvalInstanceBinder
 					else
 					{
 						// for debug only, always show code in error
-						env->scope->errors.Add(L"Print code for reference (debug mode only):");
+						env->scope->errors.Add(ERROR_CODE_PREFIX L"Print code for reference (debug mode only):");
 						env->scope->errors.Add(moduleCode);
 					}
 #endif
@@ -3578,6 +3647,8 @@ GuiEvalInstanceBinder
 				return input;
 			}
 		};
+
+#undef ERROR_CODE_PREFIX
 
 /***********************************************************************
 GuiBindInstanceBinder
@@ -3699,7 +3770,7 @@ GuiVrtualTypeInstanceLoader
 				return typeName==typeInfo.typeName;
 			}
 
-			description::Value CreateInstance(const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
+			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
 			{
 				if(typeName==typeInfo.typeName)
 				{
@@ -4043,7 +4114,7 @@ GuiToolstripButtonInstanceLoader
 				return typeInfo.typeName == GetTypeName();
 			}
 
-			description::Value CreateInstance(const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
+			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
 			{
 				if (typeInfo.typeName == GetTypeName())
 				{
@@ -4101,7 +4172,7 @@ GuiListViewInstanceLoader
 				return typeInfo.typeName == GetTypeName();
 			}
 
-			description::Value CreateInstance(const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
+			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
 			{
 				if (typeInfo.typeName == GetTypeName())
 				{
@@ -4245,7 +4316,7 @@ GuiTreeViewInstanceLoader
 				return typeInfo.typeName == GetTypeName();
 			}
 
-			description::Value CreateInstance(const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
+			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
 			{
 				if (typeInfo.typeName == GetTypeName())
 				{
@@ -4334,7 +4405,7 @@ GuiComboBoxInstanceLoader
 				return typeInfo.typeName == GetTypeName();
 			}
 
-			description::Value CreateInstance(const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
+			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
 			{
 				if (typeInfo.typeName == GetTypeName())
 				{
@@ -4553,7 +4624,7 @@ GuiTextItemInstanceLoader
 				return typeInfo.typeName == GetTypeName();
 			}
 
-			description::Value CreateInstance(const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
+			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
 			{
 				if (typeInfo.typeName == GetTypeName())
 				{
@@ -4635,7 +4706,7 @@ GuiTreeNodeInstanceLoader
 				return typeInfo.typeName == GetTypeName();
 			}
 
-			description::Value CreateInstance(const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
+			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
 			{
 				if (typeInfo.typeName == GetTypeName())
 				{
@@ -4811,7 +4882,7 @@ namespace vl
 GuiInstanceContext
 ***********************************************************************/
 
-		void GuiInstanceContext::CollectDefaultAttributes(GuiAttSetterRepr::ValueList& values, Ptr<parsing::xml::XmlElement> xml)
+		void GuiInstanceContext::CollectDefaultAttributes(GuiAttSetterRepr::ValueList& values, Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors)
 		{
 			if(auto parser=GetParserManager()->GetParser<ElementName>(L"INSTANCE-ELEMENT-NAME"))
 			{
@@ -4835,12 +4906,12 @@ GuiInstanceContext
 				// collect default attributes
 				FOREACH(Ptr<XmlElement>, element, XmlGetElements(xml))
 				{
-					if(auto name=parser->TypedParse(element->name.value))
+					if(auto name=parser->TypedParse(element->name.value, errors))
 					{
 						if(name->IsCtorName())
 						{
 							// collect constructor values in the default attribute setter
-							auto ctor=LoadCtor(element);
+							auto ctor=LoadCtor(element, errors);
 							if(ctor)
 							{
 								values.Add(ctor);
@@ -4851,14 +4922,14 @@ GuiInstanceContext
 			}
 		}
 
-		void GuiInstanceContext::CollectAttributes(GuiAttSetterRepr::SetteValuerMap& setters, Ptr<parsing::xml::XmlElement> xml)
+		void GuiInstanceContext::CollectAttributes(GuiAttSetterRepr::SetteValuerMap& setters, Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors)
 		{
 			if(auto parser=GetParserManager()->GetParser<ElementName>(L"INSTANCE-ELEMENT-NAME"))
 			{
 				Ptr<GuiAttSetterRepr::SetterValue> defaultValue=new GuiAttSetterRepr::SetterValue;
 
 				// collect default attributes
-				CollectDefaultAttributes(defaultValue->values, xml);
+				CollectDefaultAttributes(defaultValue->values, xml, errors);
 				if(defaultValue->values.Count()>0)
 				{
 					setters.Add(L"", defaultValue);
@@ -4867,12 +4938,16 @@ GuiInstanceContext
 				// collect values
 				FOREACH(Ptr<XmlElement>, element, XmlGetElements(xml))
 				{
-					if(auto name=parser->TypedParse(element->name.value))
+					if(auto name=parser->TypedParse(element->name.value, errors))
 					{
 						if(name->IsPropertyElementName())
 						{
 							// collect a value as a new attribute setter
-							if(!setters.Keys().Contains(name->name))
+							if (setters.Keys().Contains(name->name))
+							{
+								errors.Add(L"Duplicated attribute name \"" + name->name + L"\".");
+							}
+							else
 							{
 								Ptr<GuiAttSetterRepr::SetterValue> sv=new GuiAttSetterRepr::SetterValue;
 								sv->binding=name->binding;
@@ -4881,14 +4956,14 @@ GuiInstanceContext
 								{
 									// if the binding is "set", it means that this element is a complete setter element
 									Ptr<GuiAttSetterRepr> setter=new GuiAttSetterRepr;
-									FillAttSetter(setter, element);
+									FillAttSetter(setter, element, errors);
 									sv->values.Add(setter);
 								}
 								else
 								{
 									// if the binding is not "set", then this is a single-value attribute or a colection attribute
 									// fill all data into this attribute
-									CollectDefaultAttributes(sv->values, element);
+									CollectDefaultAttributes(sv->values, element, errors);
 								}
 
 								if(sv->values.Count()>0)
@@ -4902,19 +4977,23 @@ GuiInstanceContext
 			}
 		}
 
-		void GuiInstanceContext::CollectEvents(GuiAttSetterRepr::EventHandlerMap& eventHandlers, Ptr<parsing::xml::XmlElement> xml)
+		void GuiInstanceContext::CollectEvents(GuiAttSetterRepr::EventHandlerMap& eventHandlers, Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors)
 		{
 			if(auto parser=GetParserManager()->GetParser<ElementName>(L"INSTANCE-ELEMENT-NAME"))
 			{
 				// collect values
 				FOREACH(Ptr<XmlElement>, element, XmlGetElements(xml))
 				{
-					if(auto name=parser->TypedParse(element->name.value))
+					if(auto name=parser->TypedParse(element->name.value, errors))
 					{
 						if(name->IsEventElementName())
 						{
 							// collect a value as a new attribute setter
-							if(!eventHandlers.Keys().Contains(name->name))
+							if (eventHandlers.Keys().Contains(name->name))
+							{
+								errors.Add(L"Duplicated event name \"" + name->name + L"\".");
+							}
+							else
 							{
 								// test if there is only one text value in the xml
 								if(element->subNodes.Count()==1)
@@ -4935,17 +5014,21 @@ GuiInstanceContext
 			}
 		}
 
-		void GuiInstanceContext::FillAttSetter(Ptr<GuiAttSetterRepr> setter, Ptr<parsing::xml::XmlElement> xml)
+		void GuiInstanceContext::FillAttSetter(Ptr<GuiAttSetterRepr> setter, Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors)
 		{
 			if(auto parser=GetParserManager()->GetParser<ElementName>(L"INSTANCE-ELEMENT-NAME"))
 			{
 				// collect attributes as setters
 				FOREACH(Ptr<XmlAttribute>, att, xml->attributes)
 				{
-					if(auto name=parser->TypedParse(att->name.value))
+					if(auto name=parser->TypedParse(att->name.value, errors))
 					if(name->IsPropertyAttributeName())
 					{
-						if(!setter->setters.Keys().Contains(name->name))
+						if (setter->setters.Keys().Contains(name->name))
+						{
+							errors.Add(L"Duplicated attribute name \"" + name->name + L"\".");
+						}
+						else
 						{
 							Ptr<GuiAttSetterRepr::SetterValue> sv=new GuiAttSetterRepr::SetterValue;
 							sv->binding=name->binding;
@@ -4966,15 +5049,15 @@ GuiInstanceContext
 				}
 
 				// collect attributes and events
-				CollectAttributes(setter->setters, xml);
-				CollectEvents(setter->eventHandlers, xml);
+				CollectAttributes(setter->setters, xml, errors);
+				CollectEvents(setter->eventHandlers, xml, errors);
 			}
 		}
 
-		Ptr<GuiConstructorRepr> GuiInstanceContext::LoadCtor(Ptr<parsing::xml::XmlElement> xml)
+		Ptr<GuiConstructorRepr> GuiInstanceContext::LoadCtor(Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors)
 		{
 			if(auto parser=GetParserManager()->GetParser<ElementName>(L"INSTANCE-ELEMENT-NAME"))
-			if(auto name=parser->TypedParse(xml->name.value))
+			if(auto name=parser->TypedParse(xml->name.value, errors))
 			if(name->IsCtorName())
 			{
 				Ptr<GuiConstructorRepr> ctor=new GuiConstructorRepr;
@@ -4984,7 +5067,7 @@ GuiInstanceContext
 				// collect reference attributes
 				FOREACH(Ptr<XmlAttribute>, att, xml->attributes)
 				{
-					if(auto name=parser->TypedParse(att->name.value))
+					if(auto name=parser->TypedParse(att->name.value, errors))
 					if(name->IsReferenceAttributeName())
 					{
 						if (name->name == L"Name")
@@ -4994,13 +5077,17 @@ GuiInstanceContext
 					}
 				}
 				// collect attributes as setters
-				FillAttSetter(ctor, xml);
+				FillAttSetter(ctor, xml, errors);
 				return ctor;
+			}
+			else
+			{
+				errors.Add(L"Wrong constructor name \"" + xml->name.value + L"\".");
 			}
 			return 0;
 		}
 
-		Ptr<GuiInstanceContext> GuiInstanceContext::LoadFromXml(Ptr<parsing::xml::XmlDocument> xml)
+		Ptr<GuiInstanceContext> GuiInstanceContext::LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, collections::List<WString>& errors)
 		{
 			Ptr<GuiInstanceContext> context=new GuiInstanceContext;
 			if(xml->rootElement->name.value==L"Instance")
@@ -5122,12 +5209,163 @@ GuiInstanceContext
 					}
 					else if (!context->instance)
 					{
-						context->instance=LoadCtor(element);
+						context->instance=LoadCtor(element, errors);
 					}
 				}
 			}
 
 			return context->instance?context:0;
+		}
+	}
+}
+
+/***********************************************************************
+GuiInstanceSchemaRepresentation.cpp
+***********************************************************************/
+
+namespace vl
+{
+	namespace presentation
+	{
+		using namespace collections;
+		using namespace parsing::xml;
+
+/***********************************************************************
+GuiInstanceTypeSchema
+***********************************************************************/
+
+		void GuiInstanceTypeSchema::LoadFromXml(Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors)
+		{
+			if (auto attName = XmlGetAttribute(xml, L"ref.Class"))
+			{
+				typeName = attName->value.value;
+			}
+			else
+			{
+				errors.Add(L"Missing attribute \"ref.Class\" in <" + xml->name.value + L">.");
+			}
+		}
+
+/***********************************************************************
+GuiInstancePropertySchame
+***********************************************************************/
+
+		Ptr<GuiInstancePropertySchame> GuiInstancePropertySchame::LoadFromXml(Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors)
+		{
+			auto schema = MakePtr<GuiInstancePropertySchame>();
+			if (auto attName = XmlGetAttribute(xml, L"Name"))
+			{
+				schema->name = attName->value.value;
+			}
+			else
+			{
+				errors.Add(L"Missing attribute \"Name\" in <" + xml->name.value + L">.");
+			}
+			if (auto attName = XmlGetAttribute(xml, L"Type"))
+			{
+				schema->typeName = attName->value.value;
+			}
+			else
+			{
+				errors.Add(L"Missing attribute \"Type\" in <" + xml->name.value + L">.");
+			}
+			if (auto attReadonly = XmlGetAttribute(xml, L"Readonly"))
+			{
+				schema->readonly = attReadonly->name.value == L"true";
+			}
+			if (auto attObservable = XmlGetAttribute(xml, L"Observable"))
+			{
+				schema->observable = attObservable->name.value == L"true";
+			}
+			return schema;
+		}
+
+/***********************************************************************
+GuiInstanceDataSchema
+***********************************************************************/
+
+		Ptr<GuiInstanceDataSchema> GuiInstanceDataSchema::LoadFromXml(Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors)
+		{
+			auto schema = MakePtr<GuiInstanceDataSchema>();
+			schema->GuiInstanceTypeSchema::LoadFromXml(xml, errors);
+			schema->referenceType = xml->name.value == L"Class";
+			FOREACH(Ptr<XmlElement>, memberElement, XmlGetElements(xml))
+			{
+				if (memberElement->name.value == L"Property")
+				{
+					auto prop = GuiInstancePropertySchame::LoadFromXml(memberElement, errors);
+					if (prop->readonly)
+					{
+						errors.Add(
+							L"Property \"" + prop->name +
+							L"\" should not be readonly in data type \"" + schema->typeName +
+							L"\"."
+							);
+					}
+					if (prop->observable)
+					{
+						errors.Add(
+							L"Property \"" + prop->name +
+							L"\" should not be observable in data type \"" + schema->typeName +
+							L"\"."
+							);
+					}
+					schema->properties.Add(prop);
+				}
+				else
+				{
+					errors.Add(L"Unknown member type \"" + memberElement->name.value + L"\" in <" + xml->name.value + L">.");
+				}
+			}
+			return schema;
+		}
+
+/***********************************************************************
+GuiInstanceSchema
+***********************************************************************/
+
+		Ptr<GuiInstanceInterfaceSchema> GuiInstanceInterfaceSchema::LoadFromXml(Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors)
+		{
+			auto schema = MakePtr<GuiInstanceInterfaceSchema>();
+			schema->GuiInstanceTypeSchema::LoadFromXml(xml, errors);
+			FOREACH(Ptr<XmlElement>, memberElement, XmlGetElements(xml))
+			{
+				if (memberElement->name.value == L"Property")
+				{
+					auto prop = GuiInstancePropertySchame::LoadFromXml(memberElement, errors);
+					schema->properties.Add(prop);
+				}
+				else
+				{
+					errors.Add(L"Unknown member type \"" + memberElement->name.value + L"\" in <" + xml->name.value + L">.");
+				}
+			}
+			return schema;
+		}
+
+/***********************************************************************
+GuiInstanceSchema
+***********************************************************************/
+
+		Ptr<GuiInstanceSchema> GuiInstanceSchema::LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, collections::List<WString>& errors)
+		{
+			auto schema = MakePtr<GuiInstanceSchema>();
+			FOREACH(Ptr<XmlElement>, schemaElement, XmlGetElements(xml->rootElement))
+			{
+				if (schemaElement->name.value == L"Struct" || schemaElement->name.value == L"Class")
+				{
+					schema->schemas.Add(GuiInstanceDataSchema::LoadFromXml(schemaElement, errors));
+				}
+				else if (schemaElement->name.value == L"Interface")
+				{
+					schema->schemas.Add(GuiInstanceInterfaceSchema::LoadFromXml(schemaElement, errors));
+				}
+				else
+				{
+					errors.Add(L"Unknown schema type \"" + schemaElement->name.value + L"\".");
+				}
+			}
+			return schema;
 		}
 	}
 }
@@ -5207,7 +5445,8 @@ External Functions
 				Ptr<XmlDocument> xml=XmlParseDocument(xmlText, table);
 				if(!xml) return 0;
 
-				return DocumentModel::LoadFromXml(xml, GetFolderPath(path));
+				List<WString> errors;
+				return DocumentModel::LoadFromXml(xml, GetFolderPath(path), errors);
 			}
 
 /***********************************************************************
@@ -5585,7 +5824,7 @@ Type Declaration
 				CLASS_MEMBER_FIELD(styles)
 
 				CLASS_MEMBER_METHOD_OVERLOAD(GetText, {L"skipNonTextContent"}, WString(DocumentModel::*)(bool))
-				CLASS_MEMBER_STATIC_METHOD_OVERLOAD(LoadFromXml, {L"filePath"}, Ptr<DocumentModel>(*)(const WString&))
+				CLASS_MEMBER_STATIC_METHOD_OVERLOAD(LoadFromXml, {L"filePath" _ L"errors"}, Ptr<DocumentModel>(*)(const WString&, List<WString>&))
 				CLASS_MEMBER_METHOD_OVERLOAD(SaveToXml, {L"filePath"}, bool(DocumentModel::*)(const WString&))
 			END_CLASS_MEMBER(DocumentModel)
 
@@ -5625,7 +5864,7 @@ Type Declaration
 
 			BEGIN_CLASS_MEMBER(GuiResource)
 				CLASS_MEMBER_CONSTRUCTOR(Ptr<GuiResource>(), NO_PARAMETER)
-				CLASS_MEMBER_EXTERNALCTOR(Ptr<GuiResource>(const WString&), {L"filePath"}, &GuiResource::LoadFromXml);
+				CLASS_MEMBER_EXTERNALCTOR(Ptr<GuiResource>(const WString&, List<WString>&), {L"filePath" _ L"errors"}, &GuiResource::LoadFromXml);
 
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(WorkingDirectory)
 
