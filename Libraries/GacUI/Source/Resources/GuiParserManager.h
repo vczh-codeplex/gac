@@ -79,16 +79,17 @@ Strong Typed Table Parser
 				if(table)
 				{
 					collections::List<Ptr<parsing::ParsingError>> parsingErrors;
+					auto result = function(text, table, parsingErrors, -1);
 					for (vint i = 0; i < parsingErrors.Count(); i++)
 					{
-						auto error = parsingErors[i];
+						auto error = parsingErrors[i];
 						errors.Add(
 							L"Format: " + name +
 							L", Row: " + itow(error->codeRange.start.row + 1) +
 							L", Column: " + itow(error->codeRange.start.column + 1) +
 							L", Message: " + error->errorMessage);
 					}
-					return function(text, table, -1);
+					return result;
 				}
 				return 0;
 			}

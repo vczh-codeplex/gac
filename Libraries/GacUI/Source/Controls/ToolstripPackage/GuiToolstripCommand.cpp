@@ -8,6 +8,7 @@ namespace vl
 	{
 		namespace controls
 		{
+			using namespace collections;
 			using namespace compositions;
 			using namespace regex;
 
@@ -56,8 +57,9 @@ GuiToolstripCommand
 
 			void GuiToolstripCommand::BuildShortcut(const WString& builderText)
 			{
+				List<WString> errors;
 				if (auto parser = GetParserManager()->GetParser<ShortcutBuilder>(L"SHORTCUT"))
-				if (Ptr<ShortcutBuilder> builder = parser->TypedParse(builderText))
+				if (Ptr<ShortcutBuilder> builder = parser->TypedParse(builderText, errors))
 				{
 					if (shortcutOwner)
 					{
@@ -203,10 +205,14 @@ GuiToolstripCommand::ShortcutBuilder Parser
 				{
 				}
 
-				Ptr<ShortcutBuilder> TypedParse(const WString& text)override
+				Ptr<ShortcutBuilder> TypedParse(const WString& text, collections::List<WString>& errors)override
 				{
 					Ptr<RegexMatch> match=regexShortcut.MatchHead(text);
-					if(match && match->Result().Length()!=text.Length()) return 0;
+					if (match && match->Result().Length() != text.Length())
+					{
+						errors.Add(L"Failed to parse a shortcut \"" + text + L"\".");
+						return 0;
+					}
 
 					Ptr<ShortcutBuilder> builder = new ShortcutBuilder;
 					builder->text = text;

@@ -71,7 +71,8 @@ External Functions
 				Ptr<XmlDocument> xml=XmlParseDocument(xmlText, table);
 				if(!xml) return 0;
 
-				return DocumentModel::LoadFromXml(xml, GetFolderPath(path));
+				List<WString> errors;
+				return DocumentModel::LoadFromXml(xml, GetFolderPath(path), errors);
 			}
 
 /***********************************************************************
@@ -449,7 +450,7 @@ Type Declaration
 				CLASS_MEMBER_FIELD(styles)
 
 				CLASS_MEMBER_METHOD_OVERLOAD(GetText, {L"skipNonTextContent"}, WString(DocumentModel::*)(bool))
-				CLASS_MEMBER_STATIC_METHOD_OVERLOAD(LoadFromXml, {L"filePath"}, Ptr<DocumentModel>(*)(const WString&))
+				CLASS_MEMBER_STATIC_METHOD_OVERLOAD(LoadFromXml, {L"filePath" _ L"errors"}, Ptr<DocumentModel>(*)(const WString&, List<WString>&))
 				CLASS_MEMBER_METHOD_OVERLOAD(SaveToXml, {L"filePath"}, bool(DocumentModel::*)(const WString&))
 			END_CLASS_MEMBER(DocumentModel)
 
@@ -489,7 +490,7 @@ Type Declaration
 
 			BEGIN_CLASS_MEMBER(GuiResource)
 				CLASS_MEMBER_CONSTRUCTOR(Ptr<GuiResource>(), NO_PARAMETER)
-				CLASS_MEMBER_EXTERNALCTOR(Ptr<GuiResource>(const WString&), {L"filePath"}, &GuiResource::LoadFromXml);
+				CLASS_MEMBER_EXTERNALCTOR(Ptr<GuiResource>(const WString&, List<WString>&), {L"filePath" _ L"errors"}, &GuiResource::LoadFromXml);
 
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(WorkingDirectory)
 
