@@ -15,38 +15,38 @@ private:
 	vint			first = 0;
 	vint			second = 0;
 public:
-	//vint GetFirst()override
-	//{
-	//	return first;
-	//}
+	vint GetFirst()override
+	{
+		return first;
+	}
 
-	//void SetFirst(vint value)override
-	//{
-	//	if (first != value)
-	//	{
-	//		first = value;
-	//		SumChanged();
-	//	}
-	//}
+	void SetFirst(const vint& value)override
+	{
+		if (first != value)
+		{
+			first = value;
+			SumChanged();
+		}
+	}
 
-	//vint GetSecond()override
-	//{
-	//	return second;
-	//}
+	vint GetSecond()override
+	{
+		return second;
+	}
 
-	//void SetSecond(vint value)override
-	//{
-	//	if (second != value)
-	//	{
-	//		second = value;
-	//		SumChanged();
-	//	}
-	//}
+	void SetSecond(const vint& value)override
+	{
+		if (second != value)
+		{
+			second = value;
+			SumChanged();
+		}
+	}
 
-	//vint GetSum()override
-	//{
-	//	return first + second;
-	//}
+	vint GetSum()override
+	{
+		return first + second;
+	}
 };
 
 class WindowViewModel : public Object, public virtual IWindowViewModel
@@ -59,10 +59,10 @@ public:
 		controlViewModel = new ControlViewModel;
 	}
 
-	//Ptr<IControlViewModel> GetControlViewModel()override
-	//{
-	//	return controlViewModel;
-	//}
+	Ptr<IControlViewModel> GetControlViewModel()override
+	{
+		return controlViewModel;
+	}
 };
 
 void GuiMain()

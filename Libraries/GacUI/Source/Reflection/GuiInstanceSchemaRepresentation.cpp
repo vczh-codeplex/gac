@@ -48,11 +48,11 @@ GuiInstancePropertySchame
 			}
 			if (auto attReadonly = XmlGetAttribute(xml, L"Readonly"))
 			{
-				schema->readonly = attReadonly->name.value == L"true";
+				schema->readonly = attReadonly->value.value == L"true";
 			}
 			if (auto attObservable = XmlGetAttribute(xml, L"Observable"))
 			{
-				schema->observable = attObservable->name.value == L"true";
+				schema->observable = attObservable->value.value == L"true";
 			}
 			return schema;
 		}

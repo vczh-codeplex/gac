@@ -18,6 +18,15 @@ namespace demos
 	class IControlViewModel : public vl::reflection::IDescriptable, public vl::reflection::Description<IControlViewModel>
 	{
 	public:
+
+		virtual vint GetFirst() = 0;
+		virtual void SetFirst(const vint& value) = 0;
+
+		virtual vint GetSecond() = 0;
+		virtual void SetSecond(const vint& value) = 0;
+
+		virtual vint GetSum() = 0;
+		vl::Event<void()> SumChanged;
 	};
 }
 
@@ -26,6 +35,17 @@ namespace demos
 	class IWindowViewModel : public vl::reflection::IDescriptable, public vl::reflection::Description<IWindowViewModel>
 	{
 	public:
+
+		virtual Ptr<IControlViewModel> GetControlViewModel() = 0;
+	};
+}
+
+namespace demos
+{
+	struct MyStruct
+	{
+		vint x;
+		vint y;
 	};
 }
 
@@ -34,13 +54,8 @@ namespace demos
 	class MyClass : public vl::Object, public vl::reflection::Description<MyClass>
 	{
 	public:
-	};
-}
-
-namespace demos
-{
-	struct MyStruct
-	{
+		demos::MyStruct point;
+		Ptr<demos::MyClass> next;
 	};
 }
 
