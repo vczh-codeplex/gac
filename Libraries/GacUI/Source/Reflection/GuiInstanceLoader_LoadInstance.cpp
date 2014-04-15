@@ -764,7 +764,7 @@ CreateInstance
 							}
 
 							// create the instance
-							instance = loader->CreateInstance(typeInfo, constructorArguments);
+							instance = loader->CreateInstance(env, typeInfo, constructorArguments);
 						SKIP_CREATE_INSTANCE:
 							// delete all arguments if the constructing fails
 							if (instance.IsNull())

@@ -156,7 +156,7 @@ Instance Loader
 			virtual bool							IsDeserializable(const TypeInfo& typeInfo);
 			virtual description::Value				Deserialize(const TypeInfo& typeInfo, const WString& text);
 			virtual bool							IsCreatable(const TypeInfo& typeInfo);
-			virtual description::Value				CreateInstance(const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments);
+			virtual description::Value				CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments);
 			virtual bool							IsInitializable(const TypeInfo& typeInfo);
 			virtual Ptr<GuiInstanceContextScope>	InitializeInstance(const TypeInfo& typeInfo, description::Value instance);
 
@@ -291,8 +291,14 @@ Instance Loader Manager
 Instance Scope Wrapper
 ***********************************************************************/
 
+		class IGuiInstancePartialClass
+		{
+		public:
+			virtual Ptr<GuiInstanceContextScope> GetScope() = 0;
+		};
+
 		template<typename T>
-		class GuiInstancePartialClass
+		class GuiInstancePartialClass : public IGuiInstancePartialClass
 		{
 			typedef collections::Dictionary<WString, description::Value>	ValueMap;
 		private:
