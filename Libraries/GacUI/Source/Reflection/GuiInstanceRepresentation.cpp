@@ -13,7 +13,7 @@ namespace vl
 GuiInstanceContext
 ***********************************************************************/
 
-		void GuiInstanceContext::CollectDefaultAttributes(GuiAttSetterRepr::ValueList& values, Ptr<parsing::xml::XmlElement> xml)
+		void GuiInstanceContext::CollectDefaultAttributes(GuiAttSetterRepr::ValueList& values, Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors)
 		{
 			if(auto parser=GetParserManager()->GetParser<ElementName>(L"INSTANCE-ELEMENT-NAME"))
 			{
@@ -37,12 +37,12 @@ GuiInstanceContext
 				// collect default attributes
 				FOREACH(Ptr<XmlElement>, element, XmlGetElements(xml))
 				{
-					if(auto name=parser->TypedParse(element->name.value))
+					if(auto name=parser->TypedParse(element->name.value, errors))
 					{
 						if(name->IsCtorName())
 						{
 							// collect constructor values in the default attribute setter
-							auto ctor=LoadCtor(element);
+							auto ctor=LoadCtor(element, errors);
 							if(ctor)
 							{
 								values.Add(ctor);
@@ -53,14 +53,14 @@ GuiInstanceContext
 			}
 		}
 
-		void GuiInstanceContext::CollectAttributes(GuiAttSetterRepr::SetteValuerMap& setters, Ptr<parsing::xml::XmlElement> xml)
+		void GuiInstanceContext::CollectAttributes(GuiAttSetterRepr::SetteValuerMap& setters, Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors)
 		{
 			if(auto parser=GetParserManager()->GetParser<ElementName>(L"INSTANCE-ELEMENT-NAME"))
 			{
 				Ptr<GuiAttSetterRepr::SetterValue> defaultValue=new GuiAttSetterRepr::SetterValue;
 
 				// collect default attributes
-				CollectDefaultAttributes(defaultValue->values, xml);
+				CollectDefaultAttributes(defaultValue->values, xml, errors);
 				if(defaultValue->values.Count()>0)
 				{
 					setters.Add(L"", defaultValue);
@@ -69,12 +69,16 @@ GuiInstanceContext
 				// collect values
 				FOREACH(Ptr<XmlElement>, element, XmlGetElements(xml))
 				{
-					if(auto name=parser->TypedParse(element->name.value))
+					if(auto name=parser->TypedParse(element->name.value, errors))
 					{
 						if(name->IsPropertyElementName())
 						{
 							// collect a value as a new attribute setter
-							if(!setters.Keys().Contains(name->name))
+							if (setters.Keys().Contains(name->name))
+							{
+								errors.Add(L"Duplicated attribute name \"" + name->name + L"\".");
+							}
+							else
 							{
 								Ptr<GuiAttSetterRepr::SetterValue> sv=new GuiAttSetterRepr::SetterValue;
 								sv->binding=name->binding;
@@ -83,14 +87,14 @@ GuiInstanceContext
 								{
 									// if the binding is "set", it means that this element is a complete setter element
 									Ptr<GuiAttSetterRepr> setter=new GuiAttSetterRepr;
-									FillAttSetter(setter, element);
+									FillAttSetter(setter, element, errors);
 									sv->values.Add(setter);
 								}
 								else
 								{
 									// if the binding is not "set", then this is a single-value attribute or a colection attribute
 									// fill all data into this attribute
-									CollectDefaultAttributes(sv->values, element);
+									CollectDefaultAttributes(sv->values, element, errors);
 								}
 
 								if(sv->values.Count()>0)
@@ -104,19 +108,23 @@ GuiInstanceContext
 			}
 		}
 
-		void GuiInstanceContext::CollectEvents(GuiAttSetterRepr::EventHandlerMap& eventHandlers, Ptr<parsing::xml::XmlElement> xml)
+		void GuiInstanceContext::CollectEvents(GuiAttSetterRepr::EventHandlerMap& eventHandlers, Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors)
 		{
 			if(auto parser=GetParserManager()->GetParser<ElementName>(L"INSTANCE-ELEMENT-NAME"))
 			{
 				// collect values
 				FOREACH(Ptr<XmlElement>, element, XmlGetElements(xml))
 				{
-					if(auto name=parser->TypedParse(element->name.value))
+					if(auto name=parser->TypedParse(element->name.value, errors))
 					{
 						if(name->IsEventElementName())
 						{
 							// collect a value as a new attribute setter
-							if(!eventHandlers.Keys().Contains(name->name))
+							if (eventHandlers.Keys().Contains(name->name))
+							{
+								errors.Add(L"Duplicated event name \"" + name->name + L"\".");
+							}
+							else
 							{
 								// test if there is only one text value in the xml
 								if(element->subNodes.Count()==1)
@@ -137,17 +145,21 @@ GuiInstanceContext
 			}
 		}
 
-		void GuiInstanceContext::FillAttSetter(Ptr<GuiAttSetterRepr> setter, Ptr<parsing::xml::XmlElement> xml)
+		void GuiInstanceContext::FillAttSetter(Ptr<GuiAttSetterRepr> setter, Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors)
 		{
 			if(auto parser=GetParserManager()->GetParser<ElementName>(L"INSTANCE-ELEMENT-NAME"))
 			{
 				// collect attributes as setters
 				FOREACH(Ptr<XmlAttribute>, att, xml->attributes)
 				{
-					if(auto name=parser->TypedParse(att->name.value))
+					if(auto name=parser->TypedParse(att->name.value, errors))
 					if(name->IsPropertyAttributeName())
 					{
-						if(!setter->setters.Keys().Contains(name->name))
+						if (setter->setters.Keys().Contains(name->name))
+						{
+							errors.Add(L"Duplicated attribute name \"" + name->name + L"\".");
+						}
+						else
 						{
 							Ptr<GuiAttSetterRepr::SetterValue> sv=new GuiAttSetterRepr::SetterValue;
 							sv->binding=name->binding;
@@ -168,15 +180,15 @@ GuiInstanceContext
 				}
 
 				// collect attributes and events
-				CollectAttributes(setter->setters, xml);
-				CollectEvents(setter->eventHandlers, xml);
+				CollectAttributes(setter->setters, xml, errors);
+				CollectEvents(setter->eventHandlers, xml, errors);
 			}
 		}
 
-		Ptr<GuiConstructorRepr> GuiInstanceContext::LoadCtor(Ptr<parsing::xml::XmlElement> xml)
+		Ptr<GuiConstructorRepr> GuiInstanceContext::LoadCtor(Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors)
 		{
 			if(auto parser=GetParserManager()->GetParser<ElementName>(L"INSTANCE-ELEMENT-NAME"))
-			if(auto name=parser->TypedParse(xml->name.value))
+			if(auto name=parser->TypedParse(xml->name.value, errors))
 			if(name->IsCtorName())
 			{
 				Ptr<GuiConstructorRepr> ctor=new GuiConstructorRepr;
@@ -186,7 +198,7 @@ GuiInstanceContext
 				// collect reference attributes
 				FOREACH(Ptr<XmlAttribute>, att, xml->attributes)
 				{
-					if(auto name=parser->TypedParse(att->name.value))
+					if(auto name=parser->TypedParse(att->name.value, errors))
 					if(name->IsReferenceAttributeName())
 					{
 						if (name->name == L"Name")
@@ -196,13 +208,17 @@ GuiInstanceContext
 					}
 				}
 				// collect attributes as setters
-				FillAttSetter(ctor, xml);
+				FillAttSetter(ctor, xml, errors);
 				return ctor;
+			}
+			else
+			{
+				errors.Add(L"Wrong constructor name \"" + xml->name.value + L"\".");
 			}
 			return 0;
 		}
 
-		Ptr<GuiInstanceContext> GuiInstanceContext::LoadFromXml(Ptr<parsing::xml::XmlDocument> xml)
+		Ptr<GuiInstanceContext> GuiInstanceContext::LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, collections::List<WString>& errors)
 		{
 			Ptr<GuiInstanceContext> context=new GuiInstanceContext;
 			if(xml->rootElement->name.value==L"Instance")
@@ -324,7 +340,7 @@ GuiInstanceContext
 					}
 					else if (!context->instance)
 					{
-						context->instance=LoadCtor(element);
+						context->instance=LoadCtor(element, errors);
 					}
 				}
 			}

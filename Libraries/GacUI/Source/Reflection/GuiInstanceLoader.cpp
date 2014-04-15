@@ -262,7 +262,7 @@ Instance Type Resolver
 				Ptr<XmlDocument> xml = resource.Cast<XmlDocument>();
 				if (xml)
 				{
-					Ptr<GuiInstanceContext> context = GuiInstanceContext::LoadFromXml(xml);
+					Ptr<GuiInstanceContext> context = GuiInstanceContext::LoadFromXml(xml, errors);
 					return context;
 				}
 				return 0;
