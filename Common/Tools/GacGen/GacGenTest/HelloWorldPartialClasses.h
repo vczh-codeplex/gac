@@ -15,6 +15,37 @@ DO NOT MODIFY
 
 namespace demos
 {
+	class IControlViewModel : public vl::reflection::IDescriptable, public vl::reflection::Description<IControlViewModel>
+	{
+	public:
+	};
+}
+
+namespace demos
+{
+	class IWindowViewModel : public vl::reflection::IDescriptable, public vl::reflection::Description<IWindowViewModel>
+	{
+	public:
+	};
+}
+
+namespace demos
+{
+	class MyClass : public vl::Object, public vl::reflection::Description<MyClass>
+	{
+	public:
+	};
+}
+
+namespace demos
+{
+	struct MyStruct
+	{
+	};
+}
+
+namespace demos
+{
 	template<typename TImpl>
 	class CalculatorControl_ : public vl::presentation::controls::GuiCustomControl, public vl::presentation::GuiInstancePartialClass<vl::presentation::controls::GuiCustomControl>, public vl::reflection::Description<TImpl>
 	{
@@ -106,6 +137,10 @@ namespace vl
 	{
 		namespace description
 		{
+			DECL_TYPE_INFO(demos::IControlViewModel)
+			DECL_TYPE_INFO(demos::IWindowViewModel)
+			DECL_TYPE_INFO(demos::MyClass)
+			DECL_TYPE_INFO(demos::MyStruct)
 			DECL_TYPE_INFO(demos::CalculatorControl)
 			DECL_TYPE_INFO(demos::MainWindow)
 		}

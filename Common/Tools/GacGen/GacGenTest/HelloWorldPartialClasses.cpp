@@ -16,28 +16,53 @@ namespace vl
 	{
 		namespace description
 		{
+			#define _ ,
+			IMPL_TYPE_INFO(demos::IControlViewModel)
+			IMPL_TYPE_INFO(demos::IWindowViewModel)
+			IMPL_TYPE_INFO(demos::MyClass)
+			IMPL_TYPE_INFO(demos::MyStruct)
 			IMPL_TYPE_INFO(demos::CalculatorControl)
 			IMPL_TYPE_INFO(demos::MainWindow)
 
+			BEGIN_CLASS_MEMBER(demos::IControlViewModel)
+				CLASS_MEMBER_BASE(IDescriptable)
+			END_CLASS_MEMBER(demos::IControlViewModel)
+
+			BEGIN_CLASS_MEMBER(demos::IWindowViewModel)
+				CLASS_MEMBER_BASE(IDescriptable)
+			END_CLASS_MEMBER(demos::IWindowViewModel)
+
+			BEGIN_CLASS_MEMBER(demos::MyClass)
+			END_CLASS_MEMBER(demos::MyClass)
+
+			BEGIN_STRUCT_MEMBER(demos::MyStruct)
+			END_STRUCT_MEMBER(demos::MyStruct)
+
 			BEGIN_CLASS_MEMBER(demos::CalculatorControl)
 				CLASS_MEMBER_BASE(vl::presentation::controls::GuiCustomControl)
-				CLASS_MEMBER_CONSTRUCTOR(demos::CalculatorControl*(), NO_PARAMETER)
+				CLASS_MEMBER_CONSTRUCTOR(demos::CalculatorControl*(Ptr<demos::IControlViewModel>), { L"ViewModel" })
 
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(ViewModel)
 			END_CLASS_MEMBER(demos::CalculatorControl)
 
 			BEGIN_CLASS_MEMBER(demos::MainWindow)
 				CLASS_MEMBER_BASE(vl::presentation::controls::GuiWindow)
-				CLASS_MEMBER_CONSTRUCTOR(demos::MainWindow*(), NO_PARAMETER)
+				CLASS_MEMBER_CONSTRUCTOR(demos::MainWindow*(Ptr<demos::IWindowViewModel>), { L"ViewModel" })
 
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(ViewModel)
 			END_CLASS_MEMBER(demos::MainWindow)
+
+			#undef _
 
 			class HelloWorldResourceLoader : public Object, public ITypeLoader
 			{
 			public:
 				void Load(ITypeManager* manager)
 				{
+					ADD_TYPE_INFO(demos::IControlViewModel)
+					ADD_TYPE_INFO(demos::IWindowViewModel)
+					ADD_TYPE_INFO(demos::MyClass)
+					ADD_TYPE_INFO(demos::MyStruct)
 					ADD_TYPE_INFO(demos::CalculatorControl)
 					ADD_TYPE_INFO(demos::MainWindow)
 				}
