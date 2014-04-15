@@ -41,7 +41,7 @@ GuiVrtualTypeInstanceLoader
 				return typeName==typeInfo.typeName;
 			}
 
-			description::Value CreateInstance(const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
+			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
 			{
 				if(typeName==typeInfo.typeName)
 				{
@@ -385,7 +385,7 @@ GuiToolstripButtonInstanceLoader
 				return typeInfo.typeName == GetTypeName();
 			}
 
-			description::Value CreateInstance(const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
+			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
 			{
 				if (typeInfo.typeName == GetTypeName())
 				{
@@ -443,7 +443,7 @@ GuiListViewInstanceLoader
 				return typeInfo.typeName == GetTypeName();
 			}
 
-			description::Value CreateInstance(const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
+			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
 			{
 				if (typeInfo.typeName == GetTypeName())
 				{
@@ -587,7 +587,7 @@ GuiTreeViewInstanceLoader
 				return typeInfo.typeName == GetTypeName();
 			}
 
-			description::Value CreateInstance(const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
+			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
 			{
 				if (typeInfo.typeName == GetTypeName())
 				{
@@ -676,7 +676,7 @@ GuiComboBoxInstanceLoader
 				return typeInfo.typeName == GetTypeName();
 			}
 
-			description::Value CreateInstance(const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
+			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
 			{
 				if (typeInfo.typeName == GetTypeName())
 				{
@@ -895,7 +895,7 @@ GuiTextItemInstanceLoader
 				return typeInfo.typeName == GetTypeName();
 			}
 
-			description::Value CreateInstance(const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
+			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
 			{
 				if (typeInfo.typeName == GetTypeName())
 				{
@@ -977,7 +977,7 @@ GuiTreeNodeInstanceLoader
 				return typeInfo.typeName == GetTypeName();
 			}
 
-			description::Value CreateInstance(const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
+			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
 			{
 				if (typeInfo.typeName == GetTypeName())
 				{

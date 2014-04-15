@@ -127,6 +127,8 @@ GuiReferenceInstanceBinder
 GuiWorkflowGlobalContext
 ***********************************************************************/
 
+#define ERROR_CODE_PREFIX L"========<" + env->scope->rootInstance.GetTypeDescriptor()->GetTypeName() + L">======== "
+
 		WString WorkflowModuleToString(Ptr<WfModule> module)
 		{
 			stream::MemoryStream stream;
@@ -374,12 +376,12 @@ GuiWorkflowGlobalContext
 
 				if (manager.errors.Count() > 0)
 				{
-					env->scope->errors.Add(L"Unexpected errors are encountered when initializing data binding.");
+					env->scope->errors.Add(ERROR_CODE_PREFIX L"Unexpected errors are encountered when initializing data binding.");
 					FOREACH(Ptr<parsing::ParsingError>, error, manager.errors)
 					{
 						env->scope->errors.Add(error->errorMessage);
 					}
-					env->scope->errors.Add(L"Print code for reference:");
+					env->scope->errors.Add(ERROR_CODE_PREFIX L"Print code for reference:");
 					env->scope->errors.Add(moduleCode);
 					return;
 				}
@@ -387,7 +389,7 @@ GuiWorkflowGlobalContext
 				else
 				{
 					// for debug only, always show code in error
-					env->scope->errors.Add(L"Print code for reference (debug mode only):");
+					env->scope->errors.Add(ERROR_CODE_PREFIX L"Print code for reference (debug mode only):");
 					env->scope->errors.Add(moduleCode);
 				}
 #endif
@@ -467,7 +469,7 @@ GuiScriptInstanceBinder
 					auto expression = parser->TypedParse(expressionCode, env->scope->errors);
 					if (!expression)
 					{
-						env->scope->errors.Add(L"Failed to parse the workflow expression \"" + expressionCode + L"\".");
+						env->scope->errors.Add(ERROR_CODE_PREFIX L"Failed to parse the workflow expression \"" + expressionCode + L"\".");
 						return false;
 					}
 
@@ -476,12 +478,12 @@ GuiScriptInstanceBinder
 					auto propertyInfo = td->GetPropertyByName(propertyValue.propertyName, true);
 					if (!propertyInfo)
 					{
-						env->scope->errors.Add(L"Property \"" + propertyValue.propertyName + L"\" does not exist in type \"" + td->GetTypeName() + L"\".");
+						env->scope->errors.Add(ERROR_CODE_PREFIX L"Property \"" + propertyValue.propertyName + L"\" does not exist in type \"" + td->GetTypeName() + L"\".");
 						failed = true;
 					}
 					else if (!propertyInfo->IsReadable() || !propertyInfo->IsWritable())
 					{
-						env->scope->errors.Add(L"Property \"" + propertyValue.propertyName + L"\" of type \"" + td->GetTypeName() + L"\" should be both readable and writable.");
+						env->scope->errors.Add(ERROR_CODE_PREFIX L"Property \"" + propertyValue.propertyName + L"\" of type \"" + td->GetTypeName() + L"\" should be both readable and writable.");
 						failed = true;
 					}
 
@@ -507,7 +509,7 @@ GuiScriptInstanceBinder
 						manager.Rebuild(false);
 						if (manager.errors.Count() > 0)
 						{
-							env->scope->errors.Add(L"Failed to analyze the workflow expression \"" + expressionCode + L"\".");
+							env->scope->errors.Add(ERROR_CODE_PREFIX L"Failed to analyze the workflow expression \"" + expressionCode + L"\".");
 							FOREACH(Ptr<parsing::ParsingError>, error, manager.errors)
 							{
 								env->scope->errors.Add(error->errorMessage);
@@ -527,7 +529,7 @@ GuiScriptInstanceBinder
 								}
 								if (!CanConvertToType(result.type.Obj(), propertyType, false))
 								{
-									env->scope->errors.Add(L"Failed to analyze the workflow expression \"" + expressionCode + L"\".");
+									env->scope->errors.Add(ERROR_CODE_PREFIX L"Failed to analyze the workflow expression \"" + expressionCode + L"\".");
 									env->scope->errors.Add(
 										WfErrors::ExpressionCannotImplicitlyConvertToType(expression.Obj(), result.type.Obj(), propertyType)
 										->errorMessage);
@@ -591,7 +593,7 @@ GuiEvalInstanceBinder
 					auto expression = parser->TypedParse(expressionCode, env->scope->errors);
 					if (!expression)
 					{
-						env->scope->errors.Add(L"Failed to parse the workflow expression \"" + expressionCode + L"\".");
+						env->scope->errors.Add(ERROR_CODE_PREFIX L"Failed to parse the workflow expression \"" + expressionCode + L"\".");
 						return Value();
 					}
 
@@ -614,7 +616,7 @@ GuiEvalInstanceBinder
 					manager.Rebuild(false);
 					if (manager.errors.Count() > 0)
 					{
-						env->scope->errors.Add(L"Failed to analyze the workflow expression \"" + expressionCode + L"\".");
+						env->scope->errors.Add(ERROR_CODE_PREFIX L"Failed to analyze the workflow expression \"" + expressionCode + L"\".");
 						FOREACH(Ptr<parsing::ParsingError>, error, manager.errors)
 						{
 							env->scope->errors.Add(error->errorMessage);
@@ -625,7 +627,7 @@ GuiEvalInstanceBinder
 					else
 					{
 						// for debug only, always show code in error
-						env->scope->errors.Add(L"Print code for reference (debug mode only):");
+						env->scope->errors.Add(ERROR_CODE_PREFIX L"Print code for reference (debug mode only):");
 						env->scope->errors.Add(moduleCode);
 					}
 #endif
@@ -653,6 +655,8 @@ GuiEvalInstanceBinder
 				return input;
 			}
 		};
+
+#undef ERROR_CODE_PREFIX
 
 /***********************************************************************
 GuiBindInstanceBinder

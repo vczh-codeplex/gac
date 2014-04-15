@@ -126,7 +126,7 @@ IGuiInstanceLoader
 			return false;
 		}
 
-		description::Value IGuiInstanceLoader::CreateInstance(const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)
+		description::Value IGuiInstanceLoader::CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)
 		{
 			return Value();
 		}
@@ -323,13 +323,17 @@ GuiDefaultInstanceLoader
 				return GetDefaultConstructor(typeInfo.typeDescriptor) != 0;
 			}
 
-			description::Value CreateInstance(const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
+			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
 			{
 				if (IMethodInfo* method = GetDefaultConstructor(typeInfo.typeDescriptor))
 				{
 					return method->Invoke(Value(), (Value_xs()));
 				}
-				return Value();
+				else
+				{
+					env->scope->errors.Add(L"Failed to create \"" + typeInfo.typeName + L"\" because no there is no default constructor.");
+					return Value();
+				}
 			}
 
 			bool IsInitializable(const TypeInfo& typeInfo)override
@@ -664,7 +668,7 @@ GuiResourceInstanceLoader
 				return typeInfo.typeName == context->className.Value();
 			}
 
-			description::Value CreateInstance(const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
+			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
 			{
 				if (typeInfo.typeName == context->className.Value())
 				{
@@ -694,7 +698,16 @@ GuiResourceInstanceLoader
 								{
 									arguments[j] = constructorArguments[parameterNames[j]][0];
 								}
-								return method->Invoke(Value(), arguments);
+								Value result = method->Invoke(Value(), arguments);
+
+								if (auto partialClass = dynamic_cast<IGuiInstancePartialClass*>(result.GetRawPtr()))
+								{
+									if (auto partialScope = partialClass->GetScope())
+									{
+										CopyFrom(env->scope->errors, partialScope->errors, true);
+									}
+								}
+								return result;
 							}
 						}
 					}
@@ -704,6 +717,7 @@ GuiResourceInstanceLoader
 
 					if (scope)
 					{
+						CopyFrom(env->scope->errors, scope->errors, true);
 						return scope->rootInstance;
 					}
 				}
