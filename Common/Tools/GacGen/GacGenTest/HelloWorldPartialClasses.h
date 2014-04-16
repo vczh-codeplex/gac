@@ -45,6 +45,8 @@ namespace demos
 	class ISuperWindowViewModel : public virtual demos::IWindowViewModel, public vl::reflection::Description<ISuperWindowViewModel>
 	{
 	public:
+
+		virtual void DoSomething(vint first, vint second) = 0;
 	};
 }
 
