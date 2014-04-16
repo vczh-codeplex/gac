@@ -922,6 +922,23 @@ void WritePartialClassHeaderFile(Ptr<CodegenConfig> config, Dictionary<WString, 
 					writer.WriteLine(prefix + L"\tvl::Event<void()> " + prop->name + L"Changed;");
 				}
 			}
+			if (itf->methods.Count() > 0)
+			{
+				writer.WriteLine(L"");
+				FOREACH(Ptr<GuiInstanceMethodSchema>, method, itf->methods)
+				{
+					writer.WriteString(prefix + L"\tvirtual " + method->returnType + L" " + method->name + L"(");
+					FOREACH_INDEXER(Ptr<GuiInstancePropertySchame>, argument, index, method->arguments)
+					{
+						if (index > 0)
+						{
+							writer.WriteString(L", ");
+						}
+						writer.WriteString(argument->typeName + L" " + argument->name);
+					}
+					writer.WriteLine(L") = 0;");
+				}
+			}
 			writer.WriteLine(prefix + L"};");
 		}
 		WriteNamespaceEnd(instance->namespaces, writer);
