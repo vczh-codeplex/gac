@@ -838,6 +838,7 @@ GuiInstanceLoaderManager
 		{
 		protected:
 			typedef Dictionary<WString, Ptr<IGuiInstanceBinder>>				BinderMap;
+			typedef Dictionary<WString, Ptr<IGuiInstanceEventBinder>>			EventBinderMap;
 			typedef Dictionary<WString, Ptr<IGuiInstanceBindingContextFactory>>	BindingContextFactoryMap;
 
 			struct VirtualTypeInfo
@@ -860,6 +861,7 @@ GuiInstanceLoaderManager
 
 			Ptr<IGuiInstanceLoader>					rootLoader;
 			BinderMap								binders;
+			EventBinderMap							eventBinders;
 			BindingContextFactoryMap				bindingContextFactories;
 			VirtualTypeInfoMap						typeInfos;
 			ResourceMap								resources;
@@ -1013,6 +1015,19 @@ GuiInstanceLoaderManager
 			{
 				vint index = binders.Keys().IndexOf(bindingName);
 				return index == -1 ? 0 : binders.Values()[index].Obj();
+			}
+
+			bool AddInstanceEventBinder(Ptr<IGuiInstanceEventBinder> binder)override
+			{
+				if (eventBinders.Keys().Contains(binder->GetBindingName())) return false;
+				eventBinders.Add(binder->GetBindingName(), binder);
+				return true;
+			}
+
+			IGuiInstanceEventBinder* GetInstanceEventBinder(const WString& bindingName)override
+			{
+				vint index = eventBinders.Keys().IndexOf(bindingName);
+				return index == -1 ? 0 : eventBinders.Values()[index].Obj();
 			}
 
 			bool CreateVirtualType(const WString& parentType, Ptr<IGuiInstanceLoader> loader)override

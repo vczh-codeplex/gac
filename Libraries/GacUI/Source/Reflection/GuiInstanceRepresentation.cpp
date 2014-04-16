@@ -131,11 +131,17 @@ GuiInstanceContext
 								{
 									if(Ptr<XmlText> text=element->subNodes[0].Cast<XmlText>())
 									{
-										eventHandlers.Add(name->name, text->content.value);
+										auto value = MakePtr<GuiAttSetterRepr::EventValue>();
+										value->binding = name->binding;
+										value->value = text->content.value;
+										eventHandlers.Add(name->name, value);
 									}
 									else if(Ptr<XmlCData> text=element->subNodes[0].Cast<XmlCData>())
 									{
-										eventHandlers.Add(name->name, text->content.value);
+										auto value = MakePtr<GuiAttSetterRepr::EventValue>();
+										value->binding = name->binding;
+										value->value = text->content.value;
+										eventHandlers.Add(name->name, value);
 									}
 								}
 							}
@@ -174,7 +180,10 @@ GuiInstanceContext
 					{
 						if (!setter->eventHandlers.Keys().Contains(name->name))
 						{
-							setter->eventHandlers.Add(name->name, att->value.value);
+							auto value = MakePtr<GuiAttSetterRepr::EventValue>();
+							value->binding = name->binding;
+							value->value = att->value.value;
+							setter->eventHandlers.Add(name->name, value);
 						}
 					}
 				}
