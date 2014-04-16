@@ -689,6 +689,21 @@ GuiEvalInstanceEventBinder
 						func->anonymity = WfFunctionAnonymity::Named;
 						func->name.value = L"<event-handler>";
 						func->returnType = GetTypeFromTypeInfo(TypeInfoRetriver<void>::CreateTypeInfo().Obj());
+
+						auto td = propertyValue.instanceValue.GetTypeDescriptor();
+						auto eventInfo = td->GetEventByName(propertyValue.propertyName, true);
+						if (eventInfo)
+						{
+							vint count = eventInfo->GetHandlerType()->GetElementType()->GetGenericArgumentCount() - 1;
+							auto type = TypeInfoRetriver<Value>::CreateTypeInfo();
+							for (vint i = 0; i < count; i++)
+							{
+								auto arg = MakePtr<WfFunctionArgument>();
+								arg->name.value = L"<argument>" + itow(i + 1);
+								arg->type = GetTypeFromTypeInfo(type.Obj());
+								func->arguments.Add(arg);
+							}
+						}
 						
 						auto block = MakePtr<WfBlockStatement>();
 						block->statements.Add(statement);
@@ -724,7 +739,7 @@ GuiEvalInstanceEventBinder
 				
 					LoadFunction<void()>(globalContext, L"<initialize>")();
 					GuiWorkflowGlobalContext::SetVariablesForReferenceValues(globalContext, env);
-					auto eventHandler = LoadFunction<void()>(globalContext, L"<event-handler>");
+					auto eventHandler = LoadFunction(globalContext, L"<event-handler>");
 					handler = BoxValue(eventHandler);
 
 					propertyValue.propertyValue = handler;
