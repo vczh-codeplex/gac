@@ -656,6 +656,84 @@ GuiEvalInstanceBinder
 			}
 		};
 
+/***********************************************************************
+GuiEvalInstanceEventBinder
+***********************************************************************/
+
+		class GuiEvalInstanceEventBinder : public Object, public IGuiInstanceEventBinder
+		{
+		public:
+			WString GetBindingName()override
+			{
+				return L"eval";
+			}
+
+			bool AttachEvent(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, IGuiInstanceLoader::PropertyValue& propertyValue)
+			{
+				auto handler = propertyValue.propertyValue;
+				if (handler.GetValueType() == Value::Text)
+				{
+					WString statementCode = handler.GetText();
+					auto parser = GetParserManager()->GetParser<WfStatement>(L"WORKFLOW-STATEMENT");
+					auto statement = parser->TypedParse(statementCode, env->scope->errors);
+					if (!statement)
+					{
+						env->scope->errors.Add(ERROR_CODE_PREFIX L"Failed to parse the workflow statement \"" + statementCode + L"\".");
+						return false;
+					}
+
+					auto module = MakePtr<WfModule>();
+					GuiWorkflowGlobalContext::CreateVariablesForReferenceValues(module, env);
+					{
+						auto func = MakePtr<WfFunctionDeclaration>();
+						func->anonymity = WfFunctionAnonymity::Named;
+						func->name.value = L"<event-handler>";
+						func->returnType = GetTypeFromTypeInfo(TypeInfoRetriver<void>::CreateTypeInfo().Obj());
+						
+						auto block = MakePtr<WfBlockStatement>();
+						block->statements.Add(statement);
+						func->statement = block;
+
+						module->declarations.Add(func);
+					}
+
+					WString moduleCode = WorkflowModuleToString(module);
+					WfLexicalScopeManager manager(0);
+					manager.modules.Add(module);
+					manager.Rebuild(false);
+					if (manager.errors.Count() > 0)
+					{
+						env->scope->errors.Add(ERROR_CODE_PREFIX L"Failed to analyze the workflow statement \"" + statementCode + L"\".");
+						FOREACH(Ptr<parsing::ParsingError>, error, manager.errors)
+						{
+							env->scope->errors.Add(error->errorMessage);
+						}
+						return false;
+					}
+#ifdef _DEBUG
+					else
+					{
+						// for debug only, always show code in error
+						env->scope->errors.Add(ERROR_CODE_PREFIX L"Print code for reference (debug mode only):");
+						env->scope->errors.Add(moduleCode);
+					}
+#endif
+
+					auto assembly = GenerateAssembly(&manager);
+					auto globalContext = MakePtr<WfRuntimeGlobalContext>(assembly);
+				
+					LoadFunction<void()>(globalContext, L"<initialize>")();
+					GuiWorkflowGlobalContext::SetVariablesForReferenceValues(globalContext, env);
+					auto eventHandler = LoadFunction<void()>(globalContext, L"<event-handler>");
+					handler = BoxValue(eventHandler);
+
+					propertyValue.propertyValue = handler;
+					return loader->SetEventValue(propertyValue);
+				}
+				return false;
+			}
+		};
+
 #undef ERROR_CODE_PREFIX
 
 /***********************************************************************
@@ -712,6 +790,7 @@ GuiPredefinedInstanceBindersPlugin
 					IGuiParserManager* manager = GetParserManager();
 					manager->SetParsingTable(L"WORKFLOW", &WfLoadTable);
 					manager->SetTableParser(L"WORKFLOW", L"WORKFLOW-EXPRESSION", &WfParseExpression);
+					manager->SetTableParser(L"WORKFLOW", L"WORKFLOW-STATEMENT", &WfParseStatement);
 					manager->SetTableParser(L"WORKFLOW", L"WORKFLOW-MODULE", &WfParseModule);
 				}
 				{
@@ -722,6 +801,7 @@ GuiPredefinedInstanceBindersPlugin
 					manager->AddInstanceBinder(new GuiResourceInstanceBinder);
 					manager->AddInstanceBinder(new GuiReferenceInstanceBinder);
 					manager->AddInstanceBinder(new GuiEvalInstanceBinder);
+					manager->AddInstanceEventBinder(new GuiEvalInstanceEventBinder);
 					manager->AddInstanceBinder(new GuiBindInstanceBinder);
 					manager->AddInstanceBinder(new GuiFormatInstanceBinder);
 				}

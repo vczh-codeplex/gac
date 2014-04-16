@@ -987,6 +987,21 @@ ExecuteBindingSetters
 			{
 				if (eventSetter.binder)
 				{
+					auto propertyValue = eventSetter.propertyValue;
+					propertyValue.propertyValue = BoxValue(eventSetter.handlerName);
+					if (!eventSetter.binder->AttachEvent(env, eventSetter.loader, propertyValue))
+					{
+						env->scope->errors.Add(
+							L"Failed to attach event \"" +
+							propertyValue.propertyName +
+							L"\" of type \"" +
+							propertyValue.instanceValue.GetTypeDescriptor()->GetTypeName() +
+							L"\" with the handler \"" +
+							propertyValue.propertyValue.GetText() +
+							L"\" using event binding \"" +
+							eventSetter.binder->GetBindingName() +
+							L"\".");
+					}
 				}
 				else if (auto group = createdInstance.GetTypeDescriptor()->GetMethodGroupByName(eventSetter.handlerName, true))
 				{
