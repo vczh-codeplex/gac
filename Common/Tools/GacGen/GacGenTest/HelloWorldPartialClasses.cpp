@@ -18,20 +18,29 @@ namespace vl
 		{
 			#define _ ,
 			IMPL_TYPE_INFO(demos::IControlViewModel)
+			IMPL_TYPE_INFO(demos::ISuperWindowViewModel)
 			IMPL_TYPE_INFO(demos::IWindowViewModel)
 			IMPL_TYPE_INFO(demos::MyClass)
 			IMPL_TYPE_INFO(demos::MyStruct)
+			IMPL_TYPE_INFO(demos::MySuperClass)
 			IMPL_TYPE_INFO(demos::CalculatorControl)
 			IMPL_TYPE_INFO(demos::MainWindow)
 
 			BEGIN_CLASS_MEMBER(demos::IControlViewModel)
+				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
 				CLASS_MEMBER_PROPERTY_FAST(First)
 				CLASS_MEMBER_PROPERTY_FAST(Second)
 				CLASS_MEMBER_EVENT(SumChanged)
 				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(Sum, SumChanged)
 			END_CLASS_MEMBER(demos::IControlViewModel)
 
+			BEGIN_CLASS_MEMBER(demos::ISuperWindowViewModel)
+				CLASS_MEMBER_BASE(demos::IWindowViewModel)
+				CLASS_MEMBER_METHOD(DoSomething, { L"first" _ L"second" });
+			END_CLASS_MEMBER(demos::ISuperWindowViewModel)
+
 			BEGIN_CLASS_MEMBER(demos::IWindowViewModel)
+				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(ControlViewModel)
 			END_CLASS_MEMBER(demos::IWindowViewModel)
 
@@ -45,6 +54,12 @@ namespace vl
 				STRUCT_MEMBER(x)
 				STRUCT_MEMBER(y)
 			END_STRUCT_MEMBER(demos::MyStruct)
+
+			BEGIN_CLASS_MEMBER(demos::MySuperClass)
+				CLASS_MEMBER_BASE(demos::MyClass)
+				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<demos::MySuperClass>(), NO_PARAMETER)
+				CLASS_MEMBER_FIELD(speed)
+			END_CLASS_MEMBER(demos::MySuperClass)
 
 			BEGIN_CLASS_MEMBER(demos::CalculatorControl)
 				CLASS_MEMBER_BASE(vl::presentation::controls::GuiCustomControl)
@@ -68,9 +83,11 @@ namespace vl
 				void Load(ITypeManager* manager)
 				{
 					ADD_TYPE_INFO(demos::IControlViewModel)
+					ADD_TYPE_INFO(demos::ISuperWindowViewModel)
 					ADD_TYPE_INFO(demos::IWindowViewModel)
 					ADD_TYPE_INFO(demos::MyClass)
 					ADD_TYPE_INFO(demos::MyStruct)
+					ADD_TYPE_INFO(demos::MySuperClass)
 					ADD_TYPE_INFO(demos::CalculatorControl)
 					ADD_TYPE_INFO(demos::MainWindow)
 				}

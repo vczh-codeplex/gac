@@ -885,7 +885,8 @@ void WritePartialClassHeaderFile(Ptr<CodegenConfig> config, Dictionary<WString, 
 		{
 			if (data->referenceType)
 			{
-				writer.WriteLine(prefix + L"class " + instance->typeName + L" : public vl::Object, public vl::reflection::Description<" + instance->typeName + L">");
+				WString parent = data->parentType == L"" ? L"vl::Object" : data->parentType;
+				writer.WriteLine(prefix + L"class " + instance->typeName + L" : public " + parent + L", public vl::reflection::Description<" + instance->typeName + L">");
 			}
 			else
 			{
@@ -904,7 +905,8 @@ void WritePartialClassHeaderFile(Ptr<CodegenConfig> config, Dictionary<WString, 
 		}
 		else if (auto itf = instance->schema.Cast<GuiInstanceInterfaceSchema>())
 		{
-			writer.WriteLine(prefix + L"class " + instance->typeName + L" : public vl::reflection::IDescriptable, public vl::reflection::Description<" + instance->typeName + L">");
+			WString parent = itf->parentType == L"" ? L"vl::reflection::IDescriptable" : itf->parentType;
+			writer.WriteLine(prefix + L"class " + instance->typeName + L" : public virtual " + parent + L", public vl::reflection::Description<" + instance->typeName + L">");
 			writer.WriteLine(prefix + L"{");
 			writer.WriteLine(prefix + L"public:");
 			FOREACH(Ptr<GuiInstancePropertySchame>, prop, itf->properties)
@@ -1087,6 +1089,10 @@ void WritePartialClassCppFile(Ptr<CodegenConfig> config, Dictionary<WString, Ptr
 			if (data->referenceType)
 			{
 				writer.WriteLine(prefix + L"BEGIN_CLASS_MEMBER(" + instance->GetFullName() + L")");
+				if (data->parentType != L"")
+				{
+					writer.WriteLine(prefix + L"\tCLASS_MEMBER_BASE(" + data->parentType + L")");
+				}
 				writer.WriteLine(prefix + L"\tCLASS_MEMBER_CONSTRUCTOR(vl::Ptr<" + instance->GetFullName() + L">(), NO_PARAMETER)");
 				FOREACH(Ptr<GuiInstancePropertySchame>, prop, data->properties)
 				{
@@ -1107,6 +1113,8 @@ void WritePartialClassCppFile(Ptr<CodegenConfig> config, Dictionary<WString, Ptr
 		else if (auto itf = instance->schema.Cast<GuiInstanceInterfaceSchema>())
 		{
 			writer.WriteLine(prefix + L"BEGIN_CLASS_MEMBER(" + instance->GetFullName() + L")");
+			WString parent = itf->parentType == L"" ? L"vl::reflection::IDescriptable" : itf->parentType;
+			writer.WriteLine(prefix + L"\tCLASS_MEMBER_BASE(" + parent + L")");
 			FOREACH(Ptr<GuiInstancePropertySchame>, prop, itf->properties)
 			{
 				if (prop->observable)
@@ -1132,6 +1140,28 @@ void WritePartialClassCppFile(Ptr<CodegenConfig> config, Dictionary<WString, Ptr
 						writer.WriteLine(prefix + L"\tCLASS_MEMBER_PROPERTY_FAST(" + prop->name + L")");
 					}
 				}
+			}
+			FOREACH(Ptr<GuiInstanceMethodSchema>, method, itf->methods)
+			{
+				writer.WriteString(prefix + L"\tCLASS_MEMBER_METHOD(" + method->name + L", ");
+				if (method->arguments.Count() == 0)
+				{
+					writer.WriteString(L"NO_PARAMETER");
+				}
+				else
+				{
+					writer.WriteString(L"{ ");
+					FOREACH_INDEXER(Ptr<GuiInstancePropertySchame>, argument, index, method->arguments)
+					{
+						if (index > 0)
+						{
+							writer.WriteString(L" _ ");
+						}
+						writer.WriteString(L"L\"" + argument->name + L"\"");
+					}
+					writer.WriteString(L" }");
+				}
+				writer.WriteLine(L");");
 			}
 			writer.WriteLine(prefix + L"END_CLASS_MEMBER(" + instance->GetFullName() + L")");
 		}

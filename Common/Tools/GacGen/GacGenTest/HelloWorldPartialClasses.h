@@ -15,7 +15,7 @@ DO NOT MODIFY
 
 namespace demos
 {
-	class IControlViewModel : public vl::reflection::IDescriptable, public vl::reflection::Description<IControlViewModel>
+	class IControlViewModel : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IControlViewModel>
 	{
 	public:
 
@@ -32,11 +32,19 @@ namespace demos
 
 namespace demos
 {
-	class IWindowViewModel : public vl::reflection::IDescriptable, public vl::reflection::Description<IWindowViewModel>
+	class IWindowViewModel : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IWindowViewModel>
 	{
 	public:
 
 		virtual Ptr<IControlViewModel> GetControlViewModel() = 0;
+	};
+}
+
+namespace demos
+{
+	class ISuperWindowViewModel : public virtual demos::IWindowViewModel, public vl::reflection::Description<ISuperWindowViewModel>
+	{
+	public:
 	};
 }
 
@@ -56,6 +64,15 @@ namespace demos
 	public:
 		demos::MyStruct point;
 		Ptr<demos::MyClass> next;
+	};
+}
+
+namespace demos
+{
+	class MySuperClass : public demos::MyClass, public vl::reflection::Description<MySuperClass>
+	{
+	public:
+		demos::MyStruct speed;
 	};
 }
 
@@ -153,9 +170,11 @@ namespace vl
 		namespace description
 		{
 			DECL_TYPE_INFO(demos::IControlViewModel)
+			DECL_TYPE_INFO(demos::ISuperWindowViewModel)
 			DECL_TYPE_INFO(demos::IWindowViewModel)
 			DECL_TYPE_INFO(demos::MyClass)
 			DECL_TYPE_INFO(demos::MyStruct)
+			DECL_TYPE_INFO(demos::MySuperClass)
 			DECL_TYPE_INFO(demos::CalculatorControl)
 			DECL_TYPE_INFO(demos::MainWindow)
 		}
