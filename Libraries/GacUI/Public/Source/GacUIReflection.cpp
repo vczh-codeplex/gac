@@ -945,6 +945,7 @@ GuiInstanceLoaderManager
 		{
 		protected:
 			typedef Dictionary<WString, Ptr<IGuiInstanceBinder>>				BinderMap;
+			typedef Dictionary<WString, Ptr<IGuiInstanceEventBinder>>			EventBinderMap;
 			typedef Dictionary<WString, Ptr<IGuiInstanceBindingContextFactory>>	BindingContextFactoryMap;
 
 			struct VirtualTypeInfo
@@ -967,6 +968,7 @@ GuiInstanceLoaderManager
 
 			Ptr<IGuiInstanceLoader>					rootLoader;
 			BinderMap								binders;
+			EventBinderMap							eventBinders;
 			BindingContextFactoryMap				bindingContextFactories;
 			VirtualTypeInfoMap						typeInfos;
 			ResourceMap								resources;
@@ -1120,6 +1122,19 @@ GuiInstanceLoaderManager
 			{
 				vint index = binders.Keys().IndexOf(bindingName);
 				return index == -1 ? 0 : binders.Values()[index].Obj();
+			}
+
+			bool AddInstanceEventBinder(Ptr<IGuiInstanceEventBinder> binder)override
+			{
+				if (eventBinders.Keys().Contains(binder->GetBindingName())) return false;
+				eventBinders.Add(binder->GetBindingName(), binder);
+				return true;
+			}
+
+			IGuiInstanceEventBinder* GetInstanceEventBinder(const WString& bindingName)override
+			{
+				vint index = eventBinders.Keys().IndexOf(bindingName);
+				return index == -1 ? 0 : eventBinders.Values()[index].Obj();
 			}
 
 			bool CreateVirtualType(const WString& parentType, Ptr<IGuiInstanceLoader> loader)override
@@ -1311,13 +1326,15 @@ Helper Functions Declarations
 
 		struct FillInstanceEventSetter
 		{
+			IGuiInstanceEventBinder*			binder;
 			IGuiInstanceLoader*					loader;
 			Ptr<GuiInstanceEventInfo>			eventInfo;
 			IGuiInstanceLoader::PropertyValue	propertyValue;
 			WString								handlerName;
 
 			FillInstanceEventSetter()
-				:loader(0)
+				:binder(0)
+				,loader(0)
 			{
 			}
 		};
@@ -1818,10 +1835,9 @@ FillInstance
 			}
 
 			// attach events
-			for (vint i = 0; i < attSetter->eventHandlers.Count(); i++)
+			FOREACH_INDEXER(WString, eventName, index, attSetter->eventHandlers.Keys())
 			{
-				WString eventName = attSetter->eventHandlers.Keys()[i];
-				WString handlerName = attSetter->eventHandlers.Values()[i];
+				auto handler = attSetter->eventHandlers.Values()[index];
 
 				IGuiInstanceLoader::PropertyInfo propertyInfo(
 					typeInfo,
@@ -1846,15 +1862,36 @@ FillInstance
 					}
 				}
 
+				IGuiInstanceEventBinder* binder = 0;
+				if (handler->binding != L"")
+				{
+					binder = GetInstanceLoaderManager()->GetInstanceEventBinder(handler->binding);
+					if (!binder)
+					{
+						env->scope->errors.Add(
+							L"Failed to attach event \"" +
+							eventName +
+							L"\" of type \"" +
+							typeName +
+							L"\" with the handler \"" +
+							handler->value +
+							L"\" using event binding \"" +
+							handler->binding +
+							L"\" because the appropriate IGuiInstanceEventBinder for this binding cannot be found.");
+						continue;
+					}
+				}
+
 				if (eventInfo)
 				{
 					FillInstanceEventSetter eventSetter;
+					eventSetter.binder = binder;
 					eventSetter.loader = eventLoader;
 					eventSetter.eventInfo = eventInfo;
 					eventSetter.propertyValue.typeInfo = propertyInfo.typeInfo;
 					eventSetter.propertyValue.propertyName = propertyInfo.propertyName;
 					eventSetter.propertyValue.instanceValue = createdInstance;
-					eventSetter.handlerName = handlerName;
+					eventSetter.handlerName = handler->value;
 					eventSetters.Add(eventSetter);
 				}
 				else
@@ -1865,7 +1902,9 @@ FillInstance
 						L"\" of type \"" +
 						typeName +
 						L"\" with the handler \"" +
-						handlerName +
+						handler->value +
+						L"\" using event binding \"" +
+						handler->binding +
 						L"\" because no IGuiInstanceLoader supports this event.");
 				}
 			}
@@ -2244,9 +2283,12 @@ ExecuteBindingSetters
 			// set all event attributes
 			FOREACH(FillInstanceEventSetter, eventSetter, eventSetters)
 			{
-				// find a correct method
-				if (auto group = createdInstance.GetTypeDescriptor()->GetMethodGroupByName(eventSetter.handlerName, true))
+				if (eventSetter.binder)
 				{
+				}
+				else if (auto group = createdInstance.GetTypeDescriptor()->GetMethodGroupByName(eventSetter.handlerName, true))
+				{
+					// find a correct method
 					vint count = group->GetMethodCount();
 					IMethodInfo* selectedMethod = 0;
 					for (vint i = 0; i < count; i++)
@@ -5000,11 +5042,17 @@ GuiInstanceContext
 								{
 									if(Ptr<XmlText> text=element->subNodes[0].Cast<XmlText>())
 									{
-										eventHandlers.Add(name->name, text->content.value);
+										auto value = MakePtr<GuiAttSetterRepr::EventValue>();
+										value->binding = name->binding;
+										value->value = text->content.value;
+										eventHandlers.Add(name->name, value);
 									}
 									else if(Ptr<XmlCData> text=element->subNodes[0].Cast<XmlCData>())
 									{
-										eventHandlers.Add(name->name, text->content.value);
+										auto value = MakePtr<GuiAttSetterRepr::EventValue>();
+										value->binding = name->binding;
+										value->value = text->content.value;
+										eventHandlers.Add(name->name, value);
 									}
 								}
 							}
@@ -5043,7 +5091,10 @@ GuiInstanceContext
 					{
 						if (!setter->eventHandlers.Keys().Contains(name->name))
 						{
-							setter->eventHandlers.Add(name->name, att->value.value);
+							auto value = MakePtr<GuiAttSetterRepr::EventValue>();
+							value->binding = name->binding;
+							value->value = att->value.value;
+							setter->eventHandlers.Add(name->name, value);
 						}
 					}
 				}

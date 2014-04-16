@@ -27,6 +27,8 @@ namespace demos
 
 		virtual vint GetSum() = 0;
 		vl::Event<void()> SumChanged;
+
+		virtual vint GetProduct() = 0;
 	};
 }
 
@@ -89,6 +91,8 @@ namespace demos
 		vl::presentation::controls::GuiSinglelineTextBox* textBox1;
 		vl::presentation::controls::GuiSinglelineTextBox* textBox2;
 		vl::presentation::controls::GuiSinglelineTextBox* textBox3;
+		vl::presentation::controls::GuiSinglelineTextBox* textBox4;
+		vl::presentation::controls::GuiSinglelineTextBox* textBox5;
 
 		void InitializeComponents(Ptr<demos::IControlViewModel> ViewModel)
 		{
@@ -98,6 +102,8 @@ namespace demos
 				GUI_INSTANCE_REFERENCE(textBox1);
 				GUI_INSTANCE_REFERENCE(textBox2);
 				GUI_INSTANCE_REFERENCE(textBox3);
+				GUI_INSTANCE_REFERENCE(textBox4);
+				GUI_INSTANCE_REFERENCE(textBox5);
 			}
 			else
 			{
@@ -111,6 +117,8 @@ namespace demos
 			,textBox1(0)
 			,textBox2(0)
 			,textBox3(0)
+			,textBox4(0)
+			,textBox5(0)
 		{
 		}
 
@@ -194,6 +202,7 @@ namespace demos
 	protected:
 
 		// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+		void button_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
 		// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 	public:
 		CalculatorControl(Ptr<demos::IControlViewModel> ViewModel);
@@ -205,6 +214,10 @@ CalculatorControl.cpp :
 namespace demos
 {
 	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	void CalculatorControl::button_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
+	{
+	}
 
 	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 

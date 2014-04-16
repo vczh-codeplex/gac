@@ -432,14 +432,18 @@ public:
 
 	void Visit(GuiAttSetterRepr* repr)
 	{
-		FOREACH(WString, eventName, repr->eventHandlers.Keys())
+		FOREACH_INDEXER(WString, eventName, index, repr->eventHandlers.Keys())
 		{
-			if (!eventHandlers.Keys().Contains(eventName))
+			auto handler = repr->eventHandlers.Values()[index];
+			if (handler->binding == L"")
 			{
-				IGuiInstanceLoader* loader = 0;
-				if (auto info = GetEventInfo(typeInfo, eventName, loader))
+				if (!eventHandlers.Keys().Contains(eventName))
 				{
-					eventHandlers.Add(repr->eventHandlers[eventName], info->argumentType);
+					IGuiInstanceLoader* loader = 0;
+					if (auto info = GetEventInfo(typeInfo, eventName, loader))
+					{
+						eventHandlers.Add(handler->value, info->argumentType);
+					}
 				}
 			}
 		}

@@ -47,6 +47,11 @@ public:
 	{
 		return first + second;
 	}
+
+	vint GetProduct()override
+	{
+		return first * second;
+	}
 };
 
 class WindowViewModel : public Object, public virtual IWindowViewModel

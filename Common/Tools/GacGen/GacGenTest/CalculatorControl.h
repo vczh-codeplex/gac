@@ -20,6 +20,7 @@ namespace demos
 	protected:
 
 		// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+		void button_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
 		// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 	public:
 		CalculatorControl(Ptr<demos::IControlViewModel> ViewModel);
@@ -27,6 +28,7 @@ namespace demos
 }
 
 #endif
+
 
 
 
