@@ -32,6 +32,7 @@ namespace vl
 				CLASS_MEMBER_PROPERTY_FAST(Second)
 				CLASS_MEMBER_EVENT(SumChanged)
 				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(Sum, SumChanged)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Product)
 			END_CLASS_MEMBER(demos::IControlViewModel)
 
 			BEGIN_CLASS_MEMBER(demos::ISuperWindowViewModel)
@@ -64,6 +65,8 @@ namespace vl
 			BEGIN_CLASS_MEMBER(demos::CalculatorControl)
 				CLASS_MEMBER_BASE(vl::presentation::controls::GuiCustomControl)
 				CLASS_MEMBER_CONSTRUCTOR(demos::CalculatorControl*(Ptr<demos::IControlViewModel>), { L"ViewModel" })
+
+				CLASS_MEMBER_GUIEVENT_HANDLER(button_Clicked, vl::presentation::compositions::GuiEventArgs)
 
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(ViewModel)
 			END_CLASS_MEMBER(demos::CalculatorControl)

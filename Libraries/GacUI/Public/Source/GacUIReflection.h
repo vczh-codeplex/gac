@@ -138,9 +138,15 @@ Instance Representation
 				WString								binding;
 				ValueList							values;
 			};
+
+			struct EventValue
+			{
+				WString								binding;
+				WString								value;
+			};
 			
 			typedef collections::Dictionary<WString, Ptr<SetterValue>>			SetteValuerMap;
-			typedef collections::Dictionary<WString, WString>					EventHandlerMap;
+			typedef collections::Dictionary<WString, Ptr<EventValue>>			EventHandlerMap;
 		public:
 			SetteValuerMap							setters;					// empty key means default property
 			EventHandlerMap							eventHandlers;
@@ -206,8 +212,8 @@ Instance Context
 				bool IsReferenceAttributeName(){ return namespaceName==L"" && category==L"ref" && name!=L"" && binding==L""; }
 				bool IsPropertyAttributeName(){ return namespaceName==L"" && category==L"" && name!=L""; }
 				bool IsPropertyElementName(){ return namespaceName==L"" && category==L"att" && name!=L""; }
-				bool IsEventAttributeName(){ return namespaceName==L"" && category==L"ev" && name!=L"" && binding==L""; }
-				bool IsEventElementName(){ return namespaceName==L"" && category==L"ev" && name!=L"" && binding==L""; }
+				bool IsEventAttributeName(){ return namespaceName==L"" && category==L"ev" && name!=L""; }
+				bool IsEventElementName(){ return namespaceName==L"" && category==L"ev" && name!=L""; }
 			};
 		public:
 			Ptr<GuiConstructorRepr>					instance;
@@ -451,6 +457,12 @@ Instance Binder
 			virtual bool							SetPropertyValue(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, IGuiInstanceLoader::PropertyValue& propertyValue) = 0;
 		};
 
+		class IGuiInstanceEventBinder : public IDescriptable, public Description<IGuiInstanceEventBinder>
+		{
+		public:
+			virtual WString							GetBindingName() = 0;
+		};
+
 /***********************************************************************
 Instance Loader Manager
 ***********************************************************************/
@@ -462,6 +474,8 @@ Instance Loader Manager
 			virtual IGuiInstanceBindingContextFactory*	GetInstanceBindingContextFactory(const WString& contextName) = 0;
 			virtual bool								AddInstanceBinder(Ptr<IGuiInstanceBinder> binder) = 0;
 			virtual IGuiInstanceBinder*					GetInstanceBinder(const WString& bindingName) = 0;
+			virtual bool								AddInstanceEventBinder(Ptr<IGuiInstanceEventBinder> binder) = 0;
+			virtual IGuiInstanceEventBinder*			GetInstanceEventBinder(const WString& bindingName) = 0;
 			virtual bool								CreateVirtualType(const WString& parentType, Ptr<IGuiInstanceLoader> loader) = 0;
 			virtual bool								SetLoader(Ptr<IGuiInstanceLoader> loader) = 0;
 			virtual IGuiInstanceLoader*					GetLoader(const WString& typeName) = 0;
