@@ -28,13 +28,15 @@ Helper Functions Declarations
 
 		struct FillInstanceEventSetter
 		{
+			IGuiInstanceEventBinder*			binder;
 			IGuiInstanceLoader*					loader;
 			Ptr<GuiInstanceEventInfo>			eventInfo;
 			IGuiInstanceLoader::PropertyValue	propertyValue;
 			WString								handlerName;
 
 			FillInstanceEventSetter()
-				:loader(0)
+				:binder(0)
+				,loader(0)
 			{
 			}
 		};
@@ -535,10 +537,9 @@ FillInstance
 			}
 
 			// attach events
-			for (vint i = 0; i < attSetter->eventHandlers.Count(); i++)
+			FOREACH_INDEXER(WString, eventName, index, attSetter->eventHandlers.Keys())
 			{
-				WString eventName = attSetter->eventHandlers.Keys()[i];
-				WString handlerName = attSetter->eventHandlers.Values()[i];
+				auto handler = attSetter->eventHandlers.Values()[index];
 
 				IGuiInstanceLoader::PropertyInfo propertyInfo(
 					typeInfo,
@@ -563,15 +564,36 @@ FillInstance
 					}
 				}
 
+				IGuiInstanceEventBinder* binder = 0;
+				if (handler->binding != L"")
+				{
+					binder = GetInstanceLoaderManager()->GetInstanceEventBinder(handler->binding);
+					if (!binder)
+					{
+						env->scope->errors.Add(
+							L"Failed to attach event \"" +
+							eventName +
+							L"\" of type \"" +
+							typeName +
+							L"\" with the handler \"" +
+							handler->value +
+							L"\" using event binding \"" +
+							handler->binding +
+							L"\" because the appropriate IGuiInstanceEventBinder for this binding cannot be found.");
+						continue;
+					}
+				}
+
 				if (eventInfo)
 				{
 					FillInstanceEventSetter eventSetter;
+					eventSetter.binder = binder;
 					eventSetter.loader = eventLoader;
 					eventSetter.eventInfo = eventInfo;
 					eventSetter.propertyValue.typeInfo = propertyInfo.typeInfo;
 					eventSetter.propertyValue.propertyName = propertyInfo.propertyName;
 					eventSetter.propertyValue.instanceValue = createdInstance;
-					eventSetter.handlerName = handlerName;
+					eventSetter.handlerName = handler->value;
 					eventSetters.Add(eventSetter);
 				}
 				else
@@ -582,7 +604,9 @@ FillInstance
 						L"\" of type \"" +
 						typeName +
 						L"\" with the handler \"" +
-						handlerName +
+						handler->value +
+						L"\" using event binding \"" +
+						handler->binding +
 						L"\" because no IGuiInstanceLoader supports this event.");
 				}
 			}
@@ -961,9 +985,12 @@ ExecuteBindingSetters
 			// set all event attributes
 			FOREACH(FillInstanceEventSetter, eventSetter, eventSetters)
 			{
-				// find a correct method
-				if (auto group = createdInstance.GetTypeDescriptor()->GetMethodGroupByName(eventSetter.handlerName, true))
+				if (eventSetter.binder)
 				{
+				}
+				else if (auto group = createdInstance.GetTypeDescriptor()->GetMethodGroupByName(eventSetter.handlerName, true))
+				{
+					// find a correct method
 					vint count = group->GetMethodCount();
 					IMethodInfo* selectedMethod = 0;
 					for (vint i = 0; i < count; i++)

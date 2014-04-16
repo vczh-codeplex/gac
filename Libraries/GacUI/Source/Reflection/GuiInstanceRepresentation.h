@@ -56,9 +56,15 @@ Instance Representation
 				WString								binding;
 				ValueList							values;
 			};
+
+			struct EventValue
+			{
+				WString								binding;
+				WString								value;
+			};
 			
 			typedef collections::Dictionary<WString, Ptr<SetterValue>>			SetteValuerMap;
-			typedef collections::Dictionary<WString, WString>					EventHandlerMap;
+			typedef collections::Dictionary<WString, Ptr<EventValue>>			EventHandlerMap;
 		public:
 			SetteValuerMap							setters;					// empty key means default property
 			EventHandlerMap							eventHandlers;
@@ -124,8 +130,8 @@ Instance Context
 				bool IsReferenceAttributeName(){ return namespaceName==L"" && category==L"ref" && name!=L"" && binding==L""; }
 				bool IsPropertyAttributeName(){ return namespaceName==L"" && category==L"" && name!=L""; }
 				bool IsPropertyElementName(){ return namespaceName==L"" && category==L"att" && name!=L""; }
-				bool IsEventAttributeName(){ return namespaceName==L"" && category==L"ev" && name!=L"" && binding==L""; }
-				bool IsEventElementName(){ return namespaceName==L"" && category==L"ev" && name!=L"" && binding==L""; }
+				bool IsEventAttributeName(){ return namespaceName==L"" && category==L"ev" && name!=L""; }
+				bool IsEventElementName(){ return namespaceName==L"" && category==L"ev" && name!=L""; }
 			};
 		public:
 			Ptr<GuiConstructorRepr>					instance;

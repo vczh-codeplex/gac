@@ -70,6 +70,7 @@ namespace demos
 		virtual vint		GetSecond() = 0;
 		virtual void		SetSecond(vint value) = 0;
 		virtual vint		GetSum() = 0;
+		virtual vint		GetProduct() = 0;
 
 		Event<void()>		SumChanged;
 	};
@@ -92,6 +93,8 @@ namespace demos
 		GuiSinglelineTextBox*	textBox1;
 		GuiSinglelineTextBox*	textBox2;
 		GuiSinglelineTextBox*	textBox3;
+		GuiSinglelineTextBox*	textBox4;
+		GuiSinglelineTextBox*	textBox5;
 
 		void InitializeComponents(Ptr<IControlViewModel> ViewModel)
 		{
@@ -101,6 +104,8 @@ namespace demos
 				GUI_INSTANCE_REFERENCE(textBox1);
 				GUI_INSTANCE_REFERENCE(textBox2);
 				GUI_INSTANCE_REFERENCE(textBox3);
+				GUI_INSTANCE_REFERENCE(textBox4);
+				GUI_INSTANCE_REFERENCE(textBox5);
 			}
 			else
 			{
@@ -114,6 +119,8 @@ namespace demos
 			,textBox1(0)
 			,textBox2(0)
 			,textBox3(0)
+			,textBox4(0)
+			,textBox5(0)
 		{
 		}
 
@@ -203,6 +210,11 @@ namespace demos
 		{
 			return first + second;
 		}
+
+		vint GetProduct()override
+		{
+			return first * second;
+		}
 	};
 
 	class WindowViewModel : public Object, public virtual IWindowViewModel
@@ -226,6 +238,11 @@ namespace demos
 		friend class CalculatorControl_<CalculatorControl>;
 		friend struct CustomTypeDescriptorSelector<CalculatorControl>;
 	protected:
+
+		void button_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+		{
+			textBox4->SetText(itow(GetViewModel()->GetProduct()));
+		}
 
 	public:
 		CalculatorControl(Ptr<IControlViewModel> ViewModel)
@@ -295,6 +312,7 @@ namespace vl
 				CLASS_MEMBER_CONSTRUCTOR(demos::CalculatorControl*(Ptr<demos::IControlViewModel>), { L"ViewModel" })
 
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(ViewModel)
+				CLASS_MEMBER_GUIEVENT_HANDLER(button_Clicked, GuiEventArgs)
 			END_CLASS_MEMBER(demos::CalculatorControl)
 
 			BEGIN_CLASS_MEMBER(demos::MainWindow)
