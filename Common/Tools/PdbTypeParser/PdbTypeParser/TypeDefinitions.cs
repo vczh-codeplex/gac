@@ -64,7 +64,24 @@ namespace PdbTypeParser
 
     public class GacType
     {
-        public string Name { get; set; }
+        private string name = "";
+        public string Name
+        {
+            get
+            {
+                return this.name;
+            }
+            set
+            {
+                this.name = value;
+                while (true)
+                {
+                    string replaced = this.name.Replace("> >", ">>");
+                    if (replaced == this.name) break;
+                    this.name = replaced;
+                }
+            }
+        }
         public GacTypeKind Kind { get; set; }
         public GacType ElementType { get; set; }
         public int ArrayLength { get; set; }
@@ -75,7 +92,7 @@ namespace PdbTypeParser
 
         public override string ToString()
         {
-            return this.Name;
+            return this.name;
         }
     }
 
