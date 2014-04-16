@@ -15,14 +15,6 @@ namespace vl
 {
 	namespace presentation
 	{
-		class GuiInstanceTypeSchema : public Object, public Description<GuiInstanceTypeSchema>
-		{
-		public:
-			WString										typeName;
-
-			void										LoadFromXml(Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
-		};
-
 		class GuiInstancePropertySchame :public Object, public Description<GuiInstancePropertySchame>
 		{
 		public:
@@ -34,16 +26,25 @@ namespace vl
 			static Ptr<GuiInstancePropertySchame>		LoadFromXml(Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
 		};
 
+		class GuiInstanceTypeSchema : public Object, public Description<GuiInstanceTypeSchema>
+		{
+			typedef collections::List<Ptr<GuiInstancePropertySchame>>	PropertyList;
+		public:
+			WString										typeName;
+			WString										parentType;
+			PropertyList								properties;
+
+			void										LoadFromXml(Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
+		};
+
 /***********************************************************************
 Instance Struct/Class Schema
 ***********************************************************************/
 
 		class GuiInstanceDataSchema : public GuiInstanceTypeSchema, public Description<GuiInstanceDataSchema>
 		{
-			typedef collections::List<Ptr<GuiInstancePropertySchame>>	PropertyList;
 		public:
 			bool										referenceType = false;
-			PropertyList								properties;
 
 			static Ptr<GuiInstanceDataSchema>			LoadFromXml(Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
 		};
@@ -52,11 +53,22 @@ Instance Struct/Class Schema
 Instance Interface Schema
 ***********************************************************************/
 
-		class GuiInstanceInterfaceSchema : public GuiInstanceTypeSchema, public Description<GuiInstanceInterfaceSchema>
+		class GuiInstanceMethodSchema : public Object, public Description<GuiInstanceMethodSchema>
 		{
 			typedef collections::List<Ptr<GuiInstancePropertySchame>>	PropertyList;
 		public:
-			PropertyList								properties;
+			WString										name;
+			WString										returnType;
+			PropertyList								arguments;
+
+			static Ptr<GuiInstanceMethodSchema>			LoadFromXml(Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
+		};
+
+		class GuiInstanceInterfaceSchema : public GuiInstanceTypeSchema, public Description<GuiInstanceInterfaceSchema>
+		{
+			typedef collections::List<Ptr<GuiInstanceMethodSchema>>		MethodList;
+		public:
+			MethodList									methods;
 
 			static Ptr<GuiInstanceInterfaceSchema>		LoadFromXml(Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
 		};
