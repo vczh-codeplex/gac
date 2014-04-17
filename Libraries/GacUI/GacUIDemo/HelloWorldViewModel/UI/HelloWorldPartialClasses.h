@@ -43,12 +43,18 @@ namespace helloworld
 	private:
 		Ptr<helloworld::IViewModel> ViewModel_;
 	protected:
+		vl::presentation::controls::GuiButton* buttonSignUp;
+		vl::presentation::controls::GuiSinglelineTextBox* textBoxPassword;
+		vl::presentation::controls::GuiSinglelineTextBox* textBoxUserName;
 
 		void InitializeComponents(Ptr<helloworld::IViewModel> ViewModel)
 		{
 			ViewModel_ = ViewModel;
 			if (InitializeFromResource())
 			{
+				GUI_INSTANCE_REFERENCE(buttonSignUp);
+				GUI_INSTANCE_REFERENCE(textBoxPassword);
+				GUI_INSTANCE_REFERENCE(textBoxUserName);
 			}
 			else
 			{
@@ -59,6 +65,9 @@ namespace helloworld
 		SignUpWindow_()
 			:vl::presentation::controls::GuiWindow(vl::presentation::theme::GetCurrentTheme()->CreateWindowStyle())
 			,vl::presentation::GuiInstancePartialClass<vl::presentation::controls::GuiWindow>(L"helloworld::SignUpWindow")
+			,buttonSignUp(0)
+			,textBoxPassword(0)
+			,textBoxUserName(0)
 		{
 		}
 

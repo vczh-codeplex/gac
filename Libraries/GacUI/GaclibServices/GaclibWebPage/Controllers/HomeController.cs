@@ -46,6 +46,12 @@ namespace GaclibWebPage.Controllers
             return View(model);
         }
 
+        public ActionResult GettingStart_5(GettingStartPageModel model)
+        {
+            model.ActiveButton = NavigationButtons.GettingStart;
+            return View(model);
+        }
+
         public ActionResult Demos()
         {
             DemoPageModel model = new DemoPageModel(Server.MapPath(DemoPageModel.DefaultXmlIndexPath));
