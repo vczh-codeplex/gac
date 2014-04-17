@@ -111,6 +111,7 @@
     </Compile>
     <Compile Include="Models\DemoPageModel.cs" />
     <Compile Include="Models\DownloadPageModel.cs" />
+    <Compile Include="Models\GettingStartPageModel.cs" />
     <Compile Include="Models\IndividualDemoPageModel.cs" />
     <Compile Include="Models\DocumentPageModel.cs" />
     <Compile Include="Models\IndexPageModel.cs" />
@@ -188,6 +189,7 @@
     <Content Include="Content\Demos\Demos.Persistant.DirectCode.Scripting.jpg" />
     <Content Include="Content\Demos\Demos.Persistant.LoadFromXml.Controls.jpg" />
     <Content Include="Content\Demos\Demos.Persistant.LoadFromXml.DataBinding.jpg" />
+    <Content Include="Content\Demos\Demos.Persistant.LoadFromXml.ViewModel.jpg" />
     <Content Include="Content\Demos\Editor.Toolstrip.Document\DocumentEditorWindow.cpp" />
     <Content Include="Content\Demos\Editor.Toolstrip.Document\DocumentEditorWindow.h" />
     <Content Include="Content\Demos\Editor.Toolstrip.Document\DocumentEditorWindow_Initialization.cpp" />
@@ -270,6 +272,16 @@
     <Content Include="Content\Demos\Persistant.LoadFromXml.DataBinding\DXGUI_92.jpg" />
     <Content Include="Content\Demos\Persistant.LoadFromXml.DataBinding\Main.cpp" />
     <Content Include="Content\Demos\Persistant.LoadFromXml.DataBinding\XmlWindowResourceDataBinding.xml" />
+    <Content Include="Content\Demos\Persistant.LoadFromXml.ViewModel\%28Generated%29Demo.h" />
+    <Content Include="Content\Demos\Persistant.LoadFromXml.ViewModel\%28Generated%29DemoPartialClasses.cpp" />
+    <Content Include="Content\Demos\Persistant.LoadFromXml.ViewModel\%28Generated%29DemoPartialClasses.h" />
+    <Content Include="Content\Demos\Persistant.LoadFromXml.ViewModel\%28Generated, Modifiable%29CalculatorControl.cpp" />
+    <Content Include="Content\Demos\Persistant.LoadFromXml.ViewModel\%28Generated, Modifiable%29CalculatorControl.h" />
+    <Content Include="Content\Demos\Persistant.LoadFromXml.ViewModel\%28Generated, Modifiable%29MainWindow.cpp" />
+    <Content Include="Content\Demos\Persistant.LoadFromXml.ViewModel\%28Generated, Modifiable%29MainWindow.h" />
+    <Content Include="Content\Demos\Persistant.LoadFromXml.ViewModel\DXGUI_93.jpg" />
+    <Content Include="Content\Demos\Persistant.LoadFromXml.ViewModel\Main.cpp" />
+    <Content Include="Content\Demos\Persistant.LoadFromXml.ViewModel\XmlWindowResourceViewModel.xml" />
     <Content Include="Content\Demos\Rendering.RawAPI.Direct2D\DXGUI_58.jpg" />
     <Content Include="Content\Demos\Rendering.RawAPI.Direct2D\Main.cpp" />
     <Content Include="Content\Demos\Rendering.RawAPI.GDI\DXGUI_59.jpg" />
@@ -385,6 +397,9 @@
     <Content Include="Views\Home\GettingStart_2.cshtml" />
     <Content Include="Views\Home\GettingStart_3.cshtml" />
     <Content Include="Views\Home\GettingStart_4.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Content\Demos\Persistant.LoadFromXml.ViewModel\Codegen.bat" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
