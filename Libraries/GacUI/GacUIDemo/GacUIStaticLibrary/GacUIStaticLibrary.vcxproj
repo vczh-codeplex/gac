@@ -137,6 +137,7 @@
   <ItemGroup>
     <Xml Include="..\Resources\document2.xml" />
     <Xml Include="..\Resources\HelloWorld.xml" />
+    <Xml Include="..\Resources\HelloWorldViewModel.xml" />
     <Xml Include="..\Resources\XmlDoc.xml" />
     <Xml Include="..\Resources\XmlDocDemo.xml" />
     <Xml Include="..\Resources\XmlResource.xml" />

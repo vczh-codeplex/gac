@@ -97,9 +97,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HelloWorldXml", "HelloWorld
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Persistant.LoadFromXml.ViewModel", "Persistant.LoadFromXml.ViewModel\Persistant.LoadFromXml.ViewModel.vcxproj", "{CA0D3C94-22D7-4322-AF0B-5F00EE1104A5}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HelloWorldViewModel", "HelloWorldViewModel\HelloWorldViewModel.vcxproj", "{52034B63-5ADD-4F23-86AD-45494779B825}"
+EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 40
+		SccNumberOfProjects = 41
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = https://tfs.codeplex.com/tfs/tfs02
 		SccLocalPath0 = .
@@ -255,6 +257,9 @@ Global
 		SccProjectTopLevelParentUniqueName39 = GacUIDemo.sln
 		SccProjectName39 = Persistant.LoadFromXml.ViewModel
 		SccLocalPath39 = Persistant.LoadFromXml.ViewModel
+		SccProjectUniqueName40 = HelloWorldViewModel\\HelloWorldViewModel.vcxproj
+		SccProjectName40 = HelloWorldViewModel
+		SccLocalPath40 = HelloWorldViewModel
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -417,6 +422,10 @@ Global
 		{CA0D3C94-22D7-4322-AF0B-5F00EE1104A5}.Debug|Win32.Build.0 = Debug|Win32
 		{CA0D3C94-22D7-4322-AF0B-5F00EE1104A5}.Release|Win32.ActiveCfg = Release|Win32
 		{CA0D3C94-22D7-4322-AF0B-5F00EE1104A5}.Release|Win32.Build.0 = Release|Win32
+		{52034B63-5ADD-4F23-86AD-45494779B825}.Debug|Win32.ActiveCfg = Debug|Win32
+		{52034B63-5ADD-4F23-86AD-45494779B825}.Debug|Win32.Build.0 = Debug|Win32
+		{52034B63-5ADD-4F23-86AD-45494779B825}.Release|Win32.ActiveCfg = Release|Win32
+		{52034B63-5ADD-4F23-86AD-45494779B825}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

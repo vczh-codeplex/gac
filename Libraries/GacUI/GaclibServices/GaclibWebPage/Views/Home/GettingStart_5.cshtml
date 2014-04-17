@@ -1,0 +1,122 @@
+﻿@model GaclibWebPage.Models.GettingStartPageModel
+
+@{
+    ViewBag.Title = "GacLib - Getting Started - Step 4";
+}
+<script type="text/javascript" src="@Url.Content("~/Content/SyntaxHighlighter/scripts/shCore.js")"></script>
+<script type="text/javascript" src="@Url.Content("~/Content/SyntaxHighlighter/scripts/shBrushCpp.js")"></script>
+<script type="text/javascript" src="@Url.Content("~/Content/SyntaxHighlighter/scripts/shBrushXml.js")"></script>
+<script type="text/javascript" src="@Url.Content("~/Content/SyntaxHighlighter/scripts/shBrushPlain.js")"></script>
+<link rel="Stylesheet" type="text/css" href="@Url.Content("~/Content/SyntaxHighlighter/styles/shCore.css")" />
+<link rel="Stylesheet" type="text/css" href="@Url.Content("~/Content/SyntaxHighlighter/styles/shThemeRDark.css")" />
+<tr>
+    <td align="left" valign="top" colspan="6">
+        <h1>Step 3. @Model.TutorialTitles[4]</h1>
+        <p>
+            The following code can be found in <strong>Libraries\GacUI\GacUIDemo\HelloWorldXml\HelloWorldViewModel.vcxproj</strong> if you <a href="@Url.Action("Download")">DOWNLOAD</a> the latest source code.
+        </p>
+        <p>Let's start from an empty xml window resource:</p>
+        <div class="cpp">
+            <pre class="brush: xml; gutter: false;">
+&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;Resource&gt;
+  &lt;Folder name="GacGenConfig"&gt;
+    &lt;Text name="Include"&gt;..\..\..\Public\Source\GacUIReflection.h&lt;/Text&gt;
+    &lt;Text name="Name"&gt;HelloWorld&lt;/Text&gt;
+    &lt;Text name="Prefix"&gt;&lt;/Text&gt;
+  &lt;/Folder&gt;
+  &lt;Folder name="MainWindow"&gt;
+  &lt;/Folder&gt;
+&lt;/Resource&gt;
+            </pre>
+        </div>
+        <p>
+            The xml window resource contains two folder. The <strong>GacGenConfig</strong> folder is always necessary. This folder contains some configuration for <string>GacGen.exe</string> to generate code. All other resource folders and resource items' name can be changed as you like.
+        </p>
+        <p>
+            To apply the MVVM pattern, we should first define a view model. GacGen.exe supports generating struct/class/interface for view model with reflection automatically enabled. Here we start to define a view model for a "Sign Up" window. Add the following definition inside the <strong>MainWindow</strong> resource folder:
+        </p>
+        <div class="cpp">
+            <pre class="brush: xml; gutter: false;">
+&lt;InstanceSchema name="ViewModelResource"&gt;
+    &lt;Schemas&gt;
+    &lt;Interface ref.Class="helloworld::IViewModel"&gt;
+        &lt;Property Name="UserName" Type="WString"/&gt;
+        &lt;Property Name="UserNameError" Type="WString" Readonly="true" Observable="true"/&gt;
+        &lt;Property Name="Password" Type="WString"/&gt;
+        &lt;Property Name="PasswordError" Type="WString" Readonly="true" Observable="true"/&gt;
+        &lt;Method Name="Commit" Type="bool"&gt;
+        &lt;Argument Name="signIn" Type="bool"/&gt;
+        &lt;/Method&gt;
+    &lt;/Interface&gt;
+    &lt;/Schemas&gt;
+&lt;/InstanceSchema&gt;
+            </pre>
+        </div>
+        <p>
+            By executing the following Codegen.bat:
+        </p>
+        <div class="cpp">
+            <pre class="brush: text; gutter: false;">
+..\..\..\Public\Source\GacGen.exe HelloWorldViewModel.xml
+copy HelloWorldViewModel.xml ..\..\Resources\HelloWorldViewModel.xml
+pause
+            </pre>
+        </div>
+        <p>
+            The following reflectable interface will be generated in <strong>HelloWorldPartialClasses.h</strong>:
+        </p>
+        <div class="cpp">
+            <pre class="brush: cpp; gutter: false;">
+namespace helloworld
+{
+	class IViewModel : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<iviewmodel>
+	{
+	public:
+		virtual WString GetUserName() = 0;
+		virtual void SetUserName(const WString& value) = 0;
+
+		virtual WString GetUserNameError() = 0;
+		vl::Event&lt;void()&gt; UserNameErrorChanged;
+
+		virtual WString GetPassword() = 0;
+		virtual void SetPassword(const WString& value) = 0;
+
+		virtual WString GetPasswordError() = 0;
+		vl::Event&lt;void()&gt; PasswordErrorChanged;
+
+		virtual bool Commit(bool signIn) = 0;
+	};
+}
+            </pre>
+        </div>
+        <p>
+            Then we begin to add a window which requires <strong>helloworld::IViewModel</strong> to be a required parameter:
+        </p>
+        <div class="cpp">
+            <pre class="brush: xml; gutter: false;">
+    &lt;Instance name="MainWindowResource"&gt;
+      &lt;Instance ref.Class="helloworld::SignUpWindow"&gt;
+        &lt;ref.Parameter Name="ViewModel" Class="helloworld::IViewModel"/&gt;
+        &lt;Window Text="Let's Sign Up!"&gt;
+          
+        &lt;/Window&gt;
+      &lt;/Instance&gt;
+    &lt;/Instance&gt;
+            </pre>
+        </div>
+        <p>
+            Fill the window with controls!
+        </p>
+        <h1>See also ...</h1>
+        <ul>
+            @for (int index = 0; index < Model.TutorialTitles.Length; index++)
+            {
+                <li>Step @(index + 1). <a href="@Url.Action("GettingStart_" + (index + 1).ToString(), "Home")">@Model.TutorialTitles[index]</a></li>
+            }
+        </ul>
+    </td>
+</tr>
+<script type="text/javascript">
+    SyntaxHighlighter.all()
+</script>
