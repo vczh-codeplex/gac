@@ -1,4 +1,4 @@
-﻿@model GaclibWebPage.Models.NavigationBarModel
+﻿@model GaclibWebPage.Models.GettingStartPageModel
 
 @{
     ViewBag.Title = "GacLib - Getting Start - Step 1";
@@ -9,7 +9,7 @@
 <link rel="Stylesheet" type="text/css" href="@Url.Content("~/Content/SyntaxHighlighter/styles/shThemeRDark.css")" />
 <tr>
     <td align="left" valign="top" colspan="6">
-        <h1>Step 1. Create a Visual C++ Project will GacUI source code.</h1>
+        <h1>Step 1. @Model.TutorialTitles[0]</h1>
         <p>
             GacUI provides two way to get the source code. The first one is to download the release. The second one is to download the latest source code. If you want to rely on a well tested and stablized GacUI version, use the release. If you want to try some unreleased feature, try the latest source code.
         </p>
@@ -75,10 +75,10 @@
         </p>
         <h1>See also ...</h1>
         <ul>
-            <li>Step 1. <a href="@Url.Action("GettingStart_1", "Home")">Create a Visual C++ Project will GacUI source code.</a></li>
-            <li>Step 2. <a href="@Url.Action("GettingStart_2", "Home")">Write your first GacUI program using C++.</a></li>
-            <li>Step 3. <a href="@Url.Action("GettingStart_3", "Home")">Write your second GacUI program using XML.</a></li>
-            <li>Step 4. <a href="@Url.Action("GettingStart_4", "Home")">Build and run!</a></li>
+            @for (int index = 0; index < Model.TutorialTitles.Length; index++)
+            {
+                <li>Step @(index + 1). <a href="@Url.Action("GettingStart_" + (index + 1).ToString(), "Home")">@Model.TutorialTitles[index]</a></li>
+            }
         </ul>
     </td>
 </tr>

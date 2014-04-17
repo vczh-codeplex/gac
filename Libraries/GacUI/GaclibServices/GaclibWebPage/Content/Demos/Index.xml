@@ -266,5 +266,20 @@
       <cpp src="(Generated)DemoPartialClasses.cpp" />
       <description>This demo shows how to create GUI using an XML resource, perform data binding using Workflow script expression, and generate C++ code from the XML.</description>
     </demo>
+    <demo name="LoadFromXml.ViewModel">
+      <date>2014/4/17</date>
+      <image src="DXGUI_93.jpg" />
+      <cpp src="Main.cpp" />
+      <cpp src="Codegen.bat" />
+      <cpp src="XmlWindowResourceViewModel.xml" />
+      <cpp src="(Generated)Demo.h" />
+      <cpp src="(Generated, Modifiable)CalculatorControl.h" />
+      <cpp src="(Generated, Modifiable)CalculatorControl.cpp" />
+      <cpp src="(Generated, Modifiable)MainWindow.h" />
+      <cpp src="(Generated, Modifiable)MainWindow.cpp" />
+      <cpp src="(Generated)DemoPartialClasses.h" />
+      <cpp src="(Generated)DemoPartialClasses.cpp" />
+      <description>This demo shows how to apply MVVM (Model-View-ViewModel) pattern using the XML window resource and GacGen.exe.</description>
+    </demo>
   </category>
 </demos>

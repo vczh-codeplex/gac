@@ -7,11 +7,12 @@ namespace GaclibWebPage.Models
 {
     public class DownloadPageModel : NavigationBarModel
     {
-        public DownloadVersionUrls[] Versions { get; set; }
+        public DownloadVersionUrls[] Versions { get; private set; }
 
         public DownloadPageModel()
         {
             this.Versions = new DownloadVersionUrls[] { 
+                new DownloadVersionUrls{ Version="0.7.2.0", Url="https://gac.codeplex.com/releases/view/121015" },
                 new DownloadVersionUrls{ Version="0.7.1.0", Url="https://gac.codeplex.com/releases/view/120775" },
                 new DownloadVersionUrls{ Version="0.7.0.0", Url="https://gac.codeplex.com/releases/view/120100" },
                 new DownloadVersionUrls{ Version="0.6.0.0", Url="https://gac.codeplex.com/releases/view/114806" },

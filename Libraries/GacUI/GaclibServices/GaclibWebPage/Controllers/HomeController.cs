@@ -16,31 +16,31 @@ namespace GaclibWebPage.Controllers
             return View(model);
         }
 
-        public ActionResult GettingStart(NavigationBarModel model)
+        public ActionResult GettingStart(GettingStartPageModel model)
         {
             model.ActiveButton = NavigationButtons.GettingStart;
             return View(model);
         }
 
-        public ActionResult GettingStart_1(NavigationBarModel model)
+        public ActionResult GettingStart_1(GettingStartPageModel model)
         {
             model.ActiveButton = NavigationButtons.GettingStart;
             return View(model);
         }
 
-        public ActionResult GettingStart_2(NavigationBarModel model)
+        public ActionResult GettingStart_2(GettingStartPageModel model)
         {
             model.ActiveButton = NavigationButtons.GettingStart;
             return View(model);
         }
 
-        public ActionResult GettingStart_3(NavigationBarModel model)
+        public ActionResult GettingStart_3(GettingStartPageModel model)
         {
             model.ActiveButton = NavigationButtons.GettingStart;
             return View(model);
         }
 
-        public ActionResult GettingStart_4(NavigationBarModel model)
+        public ActionResult GettingStart_4(GettingStartPageModel model)
         {
             model.ActiveButton = NavigationButtons.GettingStart;
             return View(model);
