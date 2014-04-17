@@ -87,7 +87,9 @@
     <ClCompile Include="UI\SignUpWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Xml Include="UI\HelloWorldViewModel.xml" />
+    <Xml Include="UI\HelloWorldViewModel.xml">
+      <SubType>Designer</SubType>
+    </Xml>
   </ItemGroup>
   <ItemGroup>
     <None Include="UI\Codegen.bat" />

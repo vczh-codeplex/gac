@@ -296,6 +296,10 @@
     <Content Include="Content\GacLib_LogoAndTitle.gif" />
     <Content Include="Content\GacLib_LogoAndTitle_Large.png" />
     <Content Include="Content\GettingStart\HelloWorld.jpg" />
+    <Content Include="Content\GettingStart\ViewModel_1.jpg" />
+    <Content Include="Content\GettingStart\ViewModel_2.jpg" />
+    <Content Include="Content\GettingStart\ViewModel_3.jpg" />
+    <Content Include="Content\GettingStart\ViewModel_4.jpg" />
     <Content Include="Content\PageStyle.css" />
     <Content Include="Content\SyntaxHighlighter\scripts\shAutoloader.js" />
     <Content Include="Content\SyntaxHighlighter\scripts\shBrushAppleScript.js" />

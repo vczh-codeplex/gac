@@ -84,7 +84,6 @@ public:
 	{
 		return !signIn;
 	}
-
 };
 
 void GuiMain()
