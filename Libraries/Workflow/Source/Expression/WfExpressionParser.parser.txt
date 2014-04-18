@@ -1,6 +1,6 @@
 include:"../WorkflowVlppReferences.h"
 namespace:vl.workflow
-reflection:Workflow
+reflection:workflow
 classPrefix:Wf
 guard:VCZH_WORKFLOW_EXPRESSION_WFEXPRESSIONPARSER
 parser:ParseType(WorkflowType)
