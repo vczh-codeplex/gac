@@ -712,11 +712,11 @@ Interface Implementation Proxy (Implement)
 					}
 				};
 
-				class description_IValueObservableList :public description_IValueList, public virtual IValueObservableList
+				class description_IValueObservableList :public description_IValueReadonlyList, public virtual IValueObservableList
 				{
 				public:
 					description_IValueObservableList(Ptr<IValueInterfaceProxy> proxy)
-						:description_IValueList(proxy)
+						:description_IValueReadonlyList(proxy)
 					{
 					}
 
@@ -960,7 +960,7 @@ Collections
 			END_CLASS_MEMBER(IValueList)
 
 			BEGIN_CLASS_MEMBER(IValueObservableList)
-				CLASS_MEMBER_BASE(IValueList)
+				CLASS_MEMBER_BASE(IValueReadonlyList)
 				CLASS_MEMBER_EXTERNALCTOR(Ptr<IValueObservableList>(Ptr<IValueInterfaceProxy>), {L"proxy"}, &interface_proxy::description_IValueObservableList::Create)
 
 				CLASS_MEMBER_EVENT(ItemChanged)
