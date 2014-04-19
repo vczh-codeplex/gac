@@ -444,7 +444,7 @@ Collections
 				static Ptr<IValueList>			Create(collections::LazyList<Value> values);
 			};
 
-			class IValueObservableList : public virtual IValueList, public Description<IValueObservableList>
+			class IValueObservableList : public virtual IValueReadonlyList, public Description<IValueObservableList>
 			{
 				typedef void ItemChangedProc(vint index, vint oldCount, vint newCount);
 			public:
