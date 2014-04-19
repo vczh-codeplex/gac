@@ -88,7 +88,7 @@ GuiVirtualTreeListControl NodeProvider
 					virtual INodeProvider*			GetChild(vint index)=0;
 					/// <summary>Increase the reference counter. Use [M:vl.presentation.controls.tree.INodeProvider.Release] to decrease the reference counter.</summary>
 					virtual void					Increase()=0;
-					/// <summary>Decrease the reference counter. If the counter is zero, the node will be deleted.use [M:vl.presentation.controls.tree.INodeProvider.Increase] to increase the reference counter.</summary>
+					/// <summary>Decrease the reference counter. If the counter is zero, the node will be deleted. Use [M:vl.presentation.controls.tree.INodeProvider.Increase] to increase the reference counter.</summary>
 					virtual void					Release()=0;
 				};
 				
@@ -587,6 +587,10 @@ TreeView
 				/// <summary>Get the <see cref="tree::TreeViewItemRootProvider"/> as a node root providerl.</summary>
 				/// <returns>The <see cref="tree::TreeViewItemRootProvider"/> as a node root provider.</returns>
 				Ptr<tree::TreeViewItemRootProvider>						Nodes();
+
+				/// <summary>Get the selected item.</summary>
+				/// <returns>Returns the selected item. If there are multiple selected items, or there is no selected item, null will be returned.</returns>
+				Ptr<tree::TreeViewItem>									GetSelectedItem();
 			};
 
 			namespace tree

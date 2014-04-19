@@ -99,14 +99,14 @@ description::Value
 		namespace description
 		{
 			Value::Value(DescriptableObject* value)
-				:valueType(RawPtr)
+				:valueType(value ? RawPtr :Null)
 				,rawPtr(value)
 				,typeDescriptor(0)
 			{
 			}
 
 			Value::Value(Ptr<DescriptableObject> value)
-				:valueType(SharedPtr)
+				:valueType(value ? SharedPtr : Null)
 				,rawPtr(value.Obj())
 				,sharedPtr(value)
 				,typeDescriptor(0)

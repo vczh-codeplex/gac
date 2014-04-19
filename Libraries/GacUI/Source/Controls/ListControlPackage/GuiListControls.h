@@ -508,6 +508,13 @@ Selectable List Control
 				/// <summary>Get indices of all selected items.</summary>
 				/// <returns>Indices of all selected items.</returns>
 				const collections::SortedList<vint>&			GetSelectedItems();
+				/// <summary>Get the index of the selected item.</summary>
+				/// <returns>Returns the index of the selected item. If there are multiple selected items, or there is no selected item, -1 will be returned.</returns>
+				vint											GetSelectedItemIndex();
+				/// <summary>Get the text of the selected item.</summary>
+				/// <returns>Returns the text of the selected item. If there are multiple selected items, or there is no selected item, or <see cref="GuiListControl::IItemPrimaryTextView"/> is not a valid view for the item provider, an empty string will be returned.</returns>
+				WString											GetSelectedItemText();
+
 				/// <summary>Get the selection status of an item.</summary>
 				/// <returns>The selection status of an item.</returns>
 				/// <param name="itemIndex">The index of the item.</param>

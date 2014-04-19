@@ -1709,6 +1709,13 @@ GuiListView
 			{
 				return *items;
 			}
+
+			Ptr<list::ListViewItem> GuiListView::GetSelectedItem()
+			{
+				vint index = GetSelectedItemIndex();
+				if (index == -1) return 0;
+				return items->Get(index);
+			}
 		}
 	}
 }

@@ -540,6 +540,8 @@ Type Declaration
 
 				CLASS_MEMBER_PROPERTY_FAST(MultiSelect)
 				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(SelectedItems, SelectionChanged)
+				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(SelectedItemIndex, SelectionChanged)
+				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(SelectedItemText, SelectionChanged)
 
 				CLASS_MEMBER_METHOD(GetSelected, {L"itemIndex"})
 				CLASS_MEMBER_METHOD(SetSelected, {L"itemIndex" _ L"value"})
@@ -668,6 +670,7 @@ Type Declaration
 				CONTROL_CONSTRUCTOR_DEFAULT(GuiTextList, &g::NewTextList)
 
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(Items)
+				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(SelectedItem, SelectionChanged)
 			END_CLASS_MEMBER(GuiTextList)
 
 			BEGIN_CLASS_MEMBER(ListViewItemStyleProviderBase)
@@ -880,6 +883,7 @@ Type Declaration
 				CLASS_MEMBER_PROPERTY_READONLY(DataColumns, GetDataColumns)
 				CLASS_MEMBER_PROPERTY_READONLY(Columns, GetColumns)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(Items)
+				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(SelectedItem, SelectionChanged)
 			END_CLASS_MEMBER(GuiListView)
 
 			BEGIN_CLASS_MEMBER(IGuiMenuService)
@@ -1142,6 +1146,7 @@ Type Declaration
 
 				CLASS_MEMBER_METHOD_RENAME(GetNodes, Nodes, NO_PARAMETER)
 				CLASS_MEMBER_PROPERTY_READONLY(Nodes, GetNodes)
+				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(SelectedItem, SelectionChanged)
 			END_CLASS_MEMBER(GuiTreeView)
 
 			BEGIN_CLASS_MEMBER(TreeViewNodeItemStyleProvider)

@@ -597,6 +597,9 @@
     <ClCompile Include="..\..\Source\Reflection\GuiInstanceSchemaRepresentation.cpp">
       <Filter>GacUI\Reflection</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Controls\ListControlPackage\GuiBindableListControl.cpp">
+      <Filter>GacUI\Controls\ListControlPackage</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Common\Source\Basic.h">
@@ -1075,6 +1078,9 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Reflection\GuiInstanceSchemaRepresentation.h">
       <Filter>GacUI\Reflection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Controls\ListControlPackage\GuiBindableListControl.h">
+      <Filter>GacUI\Controls\ListControlPackage</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

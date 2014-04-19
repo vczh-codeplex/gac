@@ -812,6 +812,10 @@ ListView
 				/// <summary>Get all list view items.</summary>
 				/// <returns>All list view items.</returns>
 				list::ListViewItemProvider&								GetItems();
+
+				/// <summary>Get the selected item.</summary>
+				/// <returns>Returns the selected item. If there are multiple selected items, or there is no selected item, null will be returned.</returns>
+				Ptr<list::ListViewItem>									GetSelectedItem();
 			};
 		}
 	}

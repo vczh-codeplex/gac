@@ -579,6 +579,26 @@ GuiSelectableListControl
 				return selectedItems;
 			}
 
+			vint GuiSelectableListControl::GetSelectedItemIndex()
+			{
+				return selectedItems.Count() == 1 ? selectedItems[0] : -1;
+			}
+
+			WString GuiSelectableListControl::GetSelectedItemText()
+			{
+				vint index = GetSelectedItemIndex();
+				if (index != -1)
+				{
+					if (auto view = dynamic_cast<IItemPrimaryTextView*>(itemProvider->RequestView(IItemPrimaryTextView::Identifier)))
+					{
+						WString result = view->GetPrimaryTextViewText(index);
+						itemProvider->ReleaseView(view);
+						return result;
+					}
+				}
+				return L"";
+			}
+
 			bool GuiSelectableListControl::GetSelected(vint itemIndex)
 			{
 				return selectedItems.Contains(itemIndex);

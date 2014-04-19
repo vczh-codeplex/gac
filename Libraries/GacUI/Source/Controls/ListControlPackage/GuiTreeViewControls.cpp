@@ -1298,6 +1298,24 @@ GuiTreeView
 			{
 				return nodes;
 			}
+
+			Ptr<tree::TreeViewItem> GuiTreeView::GetSelectedItem()
+			{
+				Ptr<tree::TreeViewItem> result;
+				vint index = GetSelectedItemIndex();
+				if (index != -1)
+				{
+					if (auto node = nodeItemView->RequestNode(index))
+					{
+						if (auto memoryNode = dynamic_cast<tree::MemoryNodeProvider*>(node))
+						{
+							result = memoryNode->GetData().Cast<tree::TreeViewItem>();
+						}
+						nodeItemView->ReleaseNode(node);
+					}
+				}
+				return result;
+			}
 		}
 	}
 }

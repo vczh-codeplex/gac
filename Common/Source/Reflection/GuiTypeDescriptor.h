@@ -444,6 +444,13 @@ Collections
 				static Ptr<IValueList>			Create(collections::LazyList<Value> values);
 			};
 
+			class IValueObservableList : public virtual IValueList, public Description<IValueObservableList>
+			{
+				typedef void ItemChangedProc(vint index, vint oldCount, vint newCount);
+			public:
+				Event<ItemChangedProc>			ItemChanged;
+			};
+
 			class IValueReadonlyDictionary : public virtual IDescriptable, public Description<IValueReadonlyDictionary>
 			{
 			public:
