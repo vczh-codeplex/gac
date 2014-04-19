@@ -222,6 +222,10 @@ TextList Control
 				/// <summary>Get all text items.</summary>
 				/// <returns>All text items.</returns>
 				list::TextItemProvider&							GetItems();
+
+				/// <summary>Get the selected item.</summary>
+				/// <returns>Returns the selected item. If there are multiple selected items, or there is no selected item, null will be returned.</returns>
+				Ptr<list::TextItem>								GetSelectedItem();
 			};
 		}
 	}

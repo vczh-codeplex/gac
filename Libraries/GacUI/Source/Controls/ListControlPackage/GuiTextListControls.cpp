@@ -356,6 +356,13 @@ GuiTextList
 			{
 				return *items;
 			}
+
+			Ptr<list::TextItem> GuiTextList::GetSelectedItem()
+			{
+				vint index = GetSelectedItemIndex();
+				if (index == -1) return 0;
+				return items->Get(index);
+			}
 		}
 	}
 }
