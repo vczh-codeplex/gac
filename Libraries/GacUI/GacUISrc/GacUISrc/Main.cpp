@@ -68,6 +68,8 @@ namespace demos
 	{
 	public:
 		virtual Ptr<IValueObservableList>		GetSeasons() = 0;
+
+		virtual void							AddSeason() = 0;
 	};
 
 	class MainWindow;
@@ -134,6 +136,8 @@ namespace vl
 
 			BEGIN_CLASS_MEMBER(demos::IViewModel)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(Seasons)
+
+				CLASS_MEMBER_METHOD(AddSeason, NO_PARAMETER)
 			END_CLASS_MEMBER(demos::IViewModel)
 
 			BEGIN_CLASS_MEMBER(demos::MainWindow)
@@ -187,9 +191,22 @@ namespace demos
 	protected:
 		list::ObservableList<WString>		seasons;
 	public:
+		ViewModel()
+		{
+			seasons.Add(L"Spring");
+			seasons.Add(L"Summer");
+			seasons.Add(L"Autumn");
+			seasons.Add(L"Winter");
+		}
+
 		Ptr<IValueObservableList> GetSeasons()override
 		{
 			return seasons.GetWrapper();
+		}
+
+		void AddSeason()override
+		{
+			seasons.Add(L"Unknown Season No." + itow(seasons.Count() + 1));
 		}
 	};
 }
