@@ -6,8 +6,8 @@ Koncept Language Vczh Library++ 3.0 References
 Interfaces:
 ***********************************************************************/
 
-#ifndef VCZH_SCRIPTING_KONCEPT_KONCEPTVLPPREFERENCES
-#define VCZH_SCRIPTING_KONCEPT_KONCEPTVLPPREFERENCES
+#ifndef VCZH_SCRIPTING_WORKFLOW_WORKFLOWVLPPREFERENCES
+#define VCZH_SCRIPTING_WORKFLOW_WORKFLOWVLPPREFERENCES
 
 #include "../../../Common/Source/Basic.h"
 #include "../../../Common/Source/String.h"
