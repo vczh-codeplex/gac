@@ -204,6 +204,10 @@ Type List
 			F(presentation::controls::GuiDateComboBox)\
 			F(presentation::controls::GuiStringGrid)\
 			F(presentation::controls::list::StringGridProvider)\
+			F(presentation::controls::GuiBindableTextList)\
+			F(presentation::controls::GuiBindableListView)\
+			F(presentation::controls::GuiBindableTreeView)\
+			F(presentation::controls::GuiBindableDataGrid)\
 
 			GUIREFLECTIONCONTROLS_TYPELIST(DECL_TYPE_INFO)
 
