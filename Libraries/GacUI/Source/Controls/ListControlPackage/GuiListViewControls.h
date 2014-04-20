@@ -693,6 +693,8 @@ ListView
 				public:
 					/// <summary>Column text.</summary>
 					WString											text;
+					/// <summary>sub item text property name.</summary>
+					WString											textProperty;
 					/// <summary>Column size.</summary>
 					vint											size;
 					/// <summary>Column dropdown popup.</summary>
