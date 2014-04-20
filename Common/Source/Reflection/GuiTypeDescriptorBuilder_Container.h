@@ -243,6 +243,16 @@ Collection Wrappers
 			};
 
 			template<typename T>
+			class ValueObservableListWrapper : public ValueReadonlyListWrapper<T>, public virtual IValueObservableList
+			{
+			public:
+				ValueObservableListWrapper(const T& _wrapperPointer)
+					:ValueReadonlyListWrapper<T>(_wrapperPointer)
+				{
+				}
+			};
+
+			template<typename T>
 			class ValueListWrapper : public ValueReadonlyListWrapper<T>, public virtual IValueList
 			{
 			protected:
