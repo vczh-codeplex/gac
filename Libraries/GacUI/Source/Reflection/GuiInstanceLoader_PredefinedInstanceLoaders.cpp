@@ -500,9 +500,6 @@ GuiListViewInstanceLoader
 					propertyNames.Add(L"View");
 					propertyNames.Add(L"IconSize");
 				}
-				propertyNames.Add(L"Items");
-				propertyNames.Add(L"Columns");
-				propertyNames.Add(L"DataColumns");
 			}
 
 			void GetConstructorParameters(const TypeInfo& typeInfo, List<WString>& propertyNames)override
@@ -528,44 +525,11 @@ GuiListViewInstanceLoader
 					info->constructorParameter = true;
 					return info;
 				}
-				else if (propertyInfo.propertyName == L"Items")
-				{
-					return GuiInstancePropertyInfo::Collection(description::GetTypeDescriptor<list::ListViewItem>());
-				}
-				else if (propertyInfo.propertyName == L"Columns")
-				{
-					return GuiInstancePropertyInfo::Collection(description::GetTypeDescriptor<list::ListViewColumn>());
-				}
-				else if (propertyInfo.propertyName == L"DataColumns")
-				{
-					return GuiInstancePropertyInfo::Collection(description::GetTypeDescriptor<vint>());
-				}
 				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
 			}
 
 			bool SetPropertyValue(PropertyValue& propertyValue)override
 			{
-				if (GuiListView* container = dynamic_cast<GuiListView*>(propertyValue.instanceValue.GetRawPtr()))
-				{
-					if (propertyValue.propertyName == L"Items")
-					{
-						auto item = UnboxValue<Ptr<list::ListViewItem>>(propertyValue.propertyValue);
-						container->GetItems().Add(item);
-						return true;
-					}
-					else if (propertyValue.propertyName == L"Columns")
-					{
-						auto item = UnboxValue<Ptr<list::ListViewColumn>>(propertyValue.propertyValue);
-						container->GetItems().GetColumns().Add(item);
-						return true;
-					}
-					else if (propertyValue.propertyName == L"DataColumns")
-					{
-						auto item = UnboxValue<vint>(propertyValue.propertyValue);
-						container->GetItems().GetDataColumns().Add(item);
-						return true;
-					}
-				}
 				return false;
 			}
 		};
