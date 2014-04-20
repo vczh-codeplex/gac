@@ -1798,6 +1798,10 @@ Type Declaration
 			BEGIN_CLASS_MEMBER(GuiBindableTextList)
 				CLASS_MEMBER_BASE(GuiVirtualTextList)
 				CLASS_MEMBER_CONSTRUCTOR(GuiBindableTextList*(GuiBindableTextList::IStyleProvider*, list::TextItemStyleProvider::ITextItemStyleProvider*, Ptr<IValueEnumerable>), {L"styleProvider" _ L"itemStyleProvider" _ L"itemSource"})
+
+				CLASS_MEMBER_PROPERTY_GUIEVENT_FAST(TextProperty)
+				CLASS_MEMBER_PROPERTY_GUIEVENT_FAST(CheckedProperty)
+				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(SelectedItem, SelectionChanged)
 			END_CLASS_MEMBER(GuiBindableTextList)
 
 			BEGIN_CLASS_MEMBER(GuiBindableListView)

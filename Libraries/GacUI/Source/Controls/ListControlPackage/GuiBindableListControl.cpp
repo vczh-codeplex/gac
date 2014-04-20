@@ -6,88 +6,207 @@ namespace vl
 	{
 		namespace controls
 		{
+			using namespace list;
+			using namespace tree;
+			using namespace reflection::description;
+
+			Value ReadProperty(const Value& thisObject, const WString& propertyName)
+			{
+				if (!thisObject.IsNull() && propertyName != L"")
+				{
+					auto td = thisObject.GetTypeDescriptor();
+					auto info = td->GetPropertyByName(propertyName, true);
+					if (info && info->IsReadable())
+					{
+						return info->GetValue(thisObject);
+					}
+					else
+					{
+						return Value();
+					}
+				}
+				return thisObject;
+			}
+
+			void WriteProperty(Value& thisObject, const WString& propertyName, const Value& newValue)
+			{
+				if (!thisObject.IsNull() && propertyName != L"")
+				{
+					auto td = thisObject.GetTypeDescriptor();
+					auto info = td->GetPropertyByName(propertyName, true);
+					if (info && info->IsWritable())
+					{
+						info->SetValue(thisObject, newValue);
+					}
+				}
+			}
 
 /***********************************************************************
 GuiBindableTextList::ItemSource
 ***********************************************************************/
 
-			GuiBindableTextList::ItemSource::ItemSource(Ptr<description::IValueEnumerable> itemSource)
+			GuiBindableTextList::ItemSource::ItemSource(Ptr<description::IValueEnumerable> _itemSource)
 			{
-				throw 0;
+				if (auto ol = _itemSource.Cast<IValueObservableList>())
+				{
+					itemSource = ol;
+					itemChangedEventHandler = ol->ItemChanged.Add([this](vint start, vint oldCount, vint newCount)
+					{
+						InvokeOnItemModified(start, oldCount, newCount);
+					});
+				}
+				else if (auto rl = _itemSource.Cast<IValueReadonlyList>())
+				{
+					itemSource = rl;
+				}
+				else
+				{
+					itemSource = IValueList::Create(GetLazyList<Value>(_itemSource));
+				}
 			}
 
 			GuiBindableTextList::ItemSource::~ItemSource()
 			{
-				throw 0;
+				if (itemChangedEventHandler)
+				{
+					auto ol = itemSource.Cast<IValueObservableList>();
+					ol->ItemChanged.Remove(itemChangedEventHandler);
+				}
+			}
+
+			description::Value GuiBindableTextList::ItemSource::Get(vint index)
+			{
+				return itemSource->Get(index);
+			}
+
+			void GuiBindableTextList::ItemSource::UpdateBindingProperties()
+			{
+				InvokeOnItemModified(0, Count(), Count());
 			}
 					
 			// ===================== GuiListControl::IItemProvider =====================
-
-			bool GuiBindableTextList::ItemSource::AttachCallback(IItemProviderCallback* value)
-			{
-				throw 0;
-			}
-			
-			bool GuiBindableTextList::ItemSource::DetachCallback(IItemProviderCallback* value)
-			{
-				throw 0;
-			}
 			
 			vint GuiBindableTextList::ItemSource::Count()
 			{
-				throw 0;
+				return itemSource->GetCount();
 			}
 			
 			IDescriptable* GuiBindableTextList::ItemSource::RequestView(const WString& identifier)
 			{
-				throw 0;
+				if (identifier == GuiListControl::IItemPrimaryTextView::Identifier)
+				{
+					return (GuiListControl::IItemPrimaryTextView*)this;
+				}
+				else if (identifier == TextItemStyleProvider::ITextItemView::Identifier)
+				{
+					return (TextItemStyleProvider::ITextItemView*)this;
+				}
+				else
+				{
+					return 0;
+				}
 			}
 			
 			void GuiBindableTextList::ItemSource::ReleaseView(IDescriptable* view)
 			{
-				throw 0;
 			}
 					
 			// ===================== GuiListControl::IItemPrimaryTextView =====================
 
 			WString GuiBindableTextList::ItemSource::GetPrimaryTextViewText(vint itemIndex)
 			{
-				throw 0;
+				return GetText(itemIndex);
 			}
 			
 			bool GuiBindableTextList::ItemSource::ContainsPrimaryText(vint itemIndex)
 			{
-				throw 0;
+				return 0 <= itemIndex && itemIndex < itemSource->GetCount();
 			}
 					
 			// ===================== list::TextItemStyleProvider::ITextItemView =====================
 
 			WString GuiBindableTextList::ItemSource::GetText(vint itemIndex)
 			{
-				throw 0;
+				if (0 <= itemIndex && itemIndex < itemSource->GetCount())
+				{
+					return ReadProperty(itemSource->Get(itemIndex), textProperty).GetText();
+				}
+				return L"";
 			}
 			
 			bool GuiBindableTextList::ItemSource::GetChecked(vint itemIndex)
 			{
-				throw 0;
+				if (0 <= itemIndex && itemIndex < itemSource->GetCount())
+				{
+					auto value = ReadProperty(itemSource->Get(itemIndex), checkedProperty);
+					if (value.GetTypeDescriptor() == description::GetTypeDescriptor<bool>())
+					{
+						return UnboxValue<bool>(value);
+					}
+				}
+				return false;
 			}
 			
 			void GuiBindableTextList::ItemSource::SetCheckedSilently(vint itemIndex, bool value)
 			{
-				throw 0;
+				if (0 <= itemIndex && itemIndex < itemSource->GetCount())
+				{
+					WriteProperty(itemSource->Get(itemIndex), checkedProperty, BoxValue(value));
+				}
 			}
 
 /***********************************************************************
 GuiBindableTextList
 ***********************************************************************/
 
-			GuiBindableTextList::GuiBindableTextList(IStyleProvider* _styleProvider, list::TextItemStyleProvider::ITextItemStyleProvider* _itemStyleProvider, Ptr<description::IValueEnumerable> itemSource)
-				:GuiVirtualTextList(_styleProvider, _itemStyleProvider, new ItemSource(itemSource))
+			GuiBindableTextList::GuiBindableTextList(IStyleProvider* _styleProvider, list::TextItemStyleProvider::ITextItemStyleProvider* _itemStyleProvider, Ptr<description::IValueEnumerable> _itemSource)
+				:GuiVirtualTextList(_styleProvider, _itemStyleProvider, new ItemSource(_itemSource))
 			{
+				itemSource = dynamic_cast<ItemSource*>(GetItemProvider());
+
+				TextPropertyChanged.SetAssociatedComposition(boundsComposition);
+				TextPropertyChanged.SetAssociatedComposition(boundsComposition);
 			}
 
 			GuiBindableTextList::~GuiBindableTextList()
 			{
+			}
+
+			const WString& GuiBindableTextList::GetTextProperty()
+			{
+				return itemSource->textProperty;
+			}
+
+			void GuiBindableTextList::SetTextProperty(const WString& value)
+			{
+				if (itemSource->textProperty != value)
+				{
+					itemSource->textProperty = value;
+					itemSource->UpdateBindingProperties();
+					TextPropertyChanged.Execute(GetNotifyEventArguments());
+				}
+			}
+
+			const WString& GuiBindableTextList::GetCheckedProperty()
+			{
+				return itemSource->checkedProperty;
+			}
+
+			void GuiBindableTextList::SetCheckedProperty(const WString& value)
+			{
+				if (itemSource->checkedProperty != value)
+				{
+					itemSource->checkedProperty = value;
+					itemSource->UpdateBindingProperties();
+					CheckedPropertyChanged.Execute(GetNotifyEventArguments());
+				}
+			}
+
+			description::Value GuiBindableTextList::GetSelectedItem()
+			{
+				vint index = GetSelectedItemIndex();
+				if (index == -1) return Value();
+				return itemSource->Get(index);
 			}
 
 /***********************************************************************
@@ -105,16 +224,6 @@ GuiBindableListView::ItemSource
 			}
 
 			// ===================== GuiListControl::IItemProvider =====================
-
-			bool GuiBindableListView::ItemSource::AttachCallback(IItemProviderCallback* value)
-			{
-				throw 0;
-			}
-
-			bool GuiBindableListView::ItemSource::DetachCallback(IItemProviderCallback* value)
-			{
-				throw 0;
-			}
 
 			vint GuiBindableListView::ItemSource::Count()
 			{
@@ -221,9 +330,10 @@ GuiBindableListView::ItemSource
 GuiBindableListView
 ***********************************************************************/
 
-			GuiBindableListView::GuiBindableListView(IStyleProvider* _styleProvider, Ptr<description::IValueEnumerable> itemSource)
-				:GuiVirtualListView(_styleProvider, new ItemSource(itemSource))
+			GuiBindableListView::GuiBindableListView(IStyleProvider* _styleProvider, Ptr<description::IValueEnumerable> _itemSource)
+				:GuiVirtualListView(_styleProvider, new ItemSource(_itemSource))
 			{
+				itemSource = dynamic_cast<ItemSource*>(GetItemProvider());
 			}
 
 			GuiBindableListView::~GuiBindableListView()
@@ -234,7 +344,7 @@ GuiBindableListView
 GuiBindableTreeView::ItemSource
 ***********************************************************************/
 
-			GuiBindableTreeView::ItemSource::ItemSource(Ptr<description::IValueEnumerable> itemSource)
+			GuiBindableTreeView::ItemSource::ItemSource(Ptr<description::IValueEnumerable> _itemSource)
 			{
 				throw 0;
 			}
@@ -304,9 +414,10 @@ GuiBindableTreeView::ItemSource
 GuiBindableTreeView
 ***********************************************************************/
 
-			GuiBindableTreeView::GuiBindableTreeView(IStyleProvider* _styleProvider, Ptr<description::IValueEnumerable> itemSource)
-				:GuiVirtualTreeView(_styleProvider, new ItemSource(itemSource))
+			GuiBindableTreeView::GuiBindableTreeView(IStyleProvider* _styleProvider, Ptr<description::IValueEnumerable> _itemSource)
+				:GuiVirtualTreeView(_styleProvider, new ItemSource(_itemSource))
 			{
+				itemSource = dynamic_cast<ItemSource*>(GetNodeRootProvider());
 			}
 
 			GuiBindableTreeView::~GuiBindableTreeView()
@@ -433,9 +544,10 @@ GuiBindableDataGrid::ItemSource
 GuiBindableDataGrid
 ***********************************************************************/
 
-			GuiBindableDataGrid::GuiBindableDataGrid(IStyleProvider* _styleProvider, Ptr<description::IValueEnumerable> itemSource)
-				:GuiVirtualDataGrid(_styleProvider, new ItemSource(itemSource))
+			GuiBindableDataGrid::GuiBindableDataGrid(IStyleProvider* _styleProvider, Ptr<description::IValueEnumerable> _itemSource)
+				:GuiVirtualDataGrid(_styleProvider, new ItemSource(_itemSource))
 			{
+				itemSource = dynamic_cast<ItemSource*>(GetDataProvider());
 			}
 
 			GuiBindableDataGrid::~GuiBindableDataGrid()

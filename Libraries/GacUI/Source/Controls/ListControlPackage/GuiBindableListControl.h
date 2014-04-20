@@ -30,40 +30,73 @@ GuiBindableTextList
 			{
 			protected:
 				class ItemSource
-					: public Object
-					, public virtual GuiListControl::IItemProvider
+					: public list::ItemProviderBase
 					, protected list::TextItemStyleProvider::ITextItemView
 				{
 				public:
-					ItemSource(Ptr<description::IValueEnumerable> itemSource);
+					WString											textProperty;
+					WString											checkedProperty;
+					Ptr<EventHandler>								itemChangedEventHandler;
+					Ptr<description::IValueReadonlyList>			itemSource;
+
+				public:
+					ItemSource(Ptr<description::IValueEnumerable> _itemSource);
 					~ItemSource();
+
+					description::Value								Get(vint index);
+					void											UpdateBindingProperties();
 					
 					// ===================== GuiListControl::IItemProvider =====================
 
-					bool								AttachCallback(IItemProviderCallback* value)override;
-					bool								DetachCallback(IItemProviderCallback* value)override;
-					vint								Count()override;
-					IDescriptable*						RequestView(const WString& identifier)override;
-					void								ReleaseView(IDescriptable* view)override;
+					vint											Count()override;
+					IDescriptable*									RequestView(const WString& identifier)override;
+					void											ReleaseView(IDescriptable* view)override;
 					
 					// ===================== GuiListControl::IItemPrimaryTextView =====================
 
-					WString								GetPrimaryTextViewText(vint itemIndex)override;
-					bool								ContainsPrimaryText(vint itemIndex)override;
+					WString											GetPrimaryTextViewText(vint itemIndex)override;
+					bool											ContainsPrimaryText(vint itemIndex)override;
 					
 					// ===================== list::TextItemStyleProvider::ITextItemView =====================
 
-					WString								GetText(vint itemIndex)override;
-					bool								GetChecked(vint itemIndex)override;
-					void								SetCheckedSilently(vint itemIndex, bool value)override;
+					WString											GetText(vint itemIndex)override;
+					bool											GetChecked(vint itemIndex)override;
+					void											SetCheckedSilently(vint itemIndex, bool value)override;
 				};
+
+			protected:
+				ItemSource*											itemSource;
+
 			public:
 				/// <summary>Create a bindable Text list control.</summary>
 				/// <param name="_styleProvider">The style provider for this control.</param>
 				/// <param name="_itemStyleProvider">The item style provider callback for this control.</param>
-				/// <param name="itemSource">The item source.</param>
-				GuiBindableTextList(IStyleProvider* _styleProvider, list::TextItemStyleProvider::ITextItemStyleProvider* _itemStyleProvider, Ptr<description::IValueEnumerable> itemSource);
+				/// <param name="_itemSource">The item source.</param>
+				GuiBindableTextList(IStyleProvider* _styleProvider, list::TextItemStyleProvider::ITextItemStyleProvider* _itemStyleProvider, Ptr<description::IValueEnumerable> _itemSource);
 				~GuiBindableTextList();
+				
+				/// <summary>Text property name changed event.</summary>
+				compositions::GuiNotifyEvent						TextPropertyChanged;
+				/// <summary>Checked property name changed event.</summary>
+				compositions::GuiNotifyEvent						CheckedPropertyChanged;
+				
+				/// <summary>Get the text property name to get the item text from an item.</summary>
+				/// <returns>The text property name.</returns>
+				const WString&										GetTextProperty();
+				/// <summary>Set the text property name to get the item text from an item.</summary>
+				/// <param name="value">The text property name.</param>
+				void												SetTextProperty(const WString& value);
+				
+				/// <summary>Get the checked property name to get the check state from an item.</summary>
+				/// <returns>The checked property name.</returns>
+				const WString&										GetCheckedProperty();
+				/// <summary>Set the checked property name to get the check state from an item.</summary>
+				/// <param name="value">The checked property name.</param>
+				void												SetCheckedProperty(const WString& value);
+
+				/// <summary>Get the selected item.</summary>
+				/// <returns>Returns the selected item. If there are multiple selected items, or there is no selected item, null will be returned.</returns>
+				description::Value									GetSelectedItem();
 			};
 
 /***********************************************************************
@@ -75,8 +108,7 @@ GuiBindableListView
 			{
 			protected:
 				class ItemSource
-					: public Object
-					, public virtual GuiListControl::IItemProvider
+					: public list::ItemProviderBase
 					, protected virtual list::ListViewItemStyleProvider::IListViewItemView
 					, protected virtual list::ListViewColumnItemArranger::IColumnItemView
 				{
@@ -86,42 +118,44 @@ GuiBindableListView
 					
 					// ===================== GuiListControl::IItemProvider =====================
 
-					bool								AttachCallback(IItemProviderCallback* value)override;
-					bool								DetachCallback(IItemProviderCallback* value)override;
-					vint								Count()override;
-					IDescriptable*						RequestView(const WString& identifier)override;
-					void								ReleaseView(IDescriptable* view)override;
+					vint											Count()override;
+					IDescriptable*									RequestView(const WString& identifier)override;
+					void											ReleaseView(IDescriptable* view)override;
 
 					// ===================== GuiListControl::IItemPrimaryTextView =====================
 
-					WString								GetPrimaryTextViewText(vint itemIndex)override;
-					bool								ContainsPrimaryText(vint itemIndex)override;
+					WString											GetPrimaryTextViewText(vint itemIndex)override;
+					bool											ContainsPrimaryText(vint itemIndex)override;
 
 					// ===================== list::ListViewItemStyleProvider::IListViewItemView =====================
 
-					Ptr<GuiImageData>					GetSmallImage(vint itemIndex)override;
-					Ptr<GuiImageData>					GetLargeImage(vint itemIndex)override;
-					WString								GetText(vint itemIndex)override;
-					WString								GetSubItem(vint itemIndex, vint index)override;
-					vint								GetDataColumnCount()override;
-					vint								GetDataColumn(vint index)override;
+					Ptr<GuiImageData>								GetSmallImage(vint itemIndex)override;
+					Ptr<GuiImageData>								GetLargeImage(vint itemIndex)override;
+					WString											GetText(vint itemIndex)override;
+					WString											GetSubItem(vint itemIndex, vint index)override;
+					vint											GetDataColumnCount()override;
+					vint											GetDataColumn(vint index)override;
 
 					// ===================== list::ListViewColumnItemArranger::IColumnItemView =====================
 						
-					bool								AttachCallback(list::ListViewColumnItemArranger::IColumnItemViewCallback* value)override;
-					bool								DetachCallback(list::ListViewColumnItemArranger::IColumnItemViewCallback* value)override;
-					vint								GetColumnCount()override;
-					WString								GetColumnText(vint index)override;
-					vint								GetColumnSize(vint index)override;
-					void								SetColumnSize(vint index, vint value)override;
-					GuiMenu*							GetDropdownPopup(vint index)override;
-					GuiListViewColumnHeader::ColumnSortingState			GetSortingState(vint index)override;
+					bool											AttachCallback(list::ListViewColumnItemArranger::IColumnItemViewCallback* value)override;
+					bool											DetachCallback(list::ListViewColumnItemArranger::IColumnItemViewCallback* value)override;
+					vint											GetColumnCount()override;
+					WString											GetColumnText(vint index)override;
+					vint											GetColumnSize(vint index)override;
+					void											SetColumnSize(vint index, vint value)override;
+					GuiMenu*										GetDropdownPopup(vint index)override;
+					GuiListViewColumnHeader::ColumnSortingState		GetSortingState(vint index)override;
 				};
+
+			protected:
+				ItemSource*											itemSource;
+
 			public:
 				/// <summary>Create a bindable List view control.</summary>
 				/// <param name="_styleProvider">The style provider for this control.</param>
-				/// <param name="itemSource">The item source.</param>
-				GuiBindableListView(IStyleProvider* _styleProvider, Ptr<description::IValueEnumerable> itemSource);
+				/// <param name="_itemSource">The item source.</param>
+				GuiBindableListView(IStyleProvider* _styleProvider, Ptr<description::IValueEnumerable> _itemSource);
 				~GuiBindableListView();
 			};
 
@@ -144,28 +178,32 @@ GuiBindableTreeView
 
 					// ===================== tree::INodeRootProvider =====================
 
-					tree::INodeProvider*			GetRootNode()override;
-					bool							CanGetNodeByVisibleIndex()override;
-					tree::INodeProvider*			GetNodeByVisibleIndex(vint index)override;
-					bool							AttachCallback(tree::INodeProviderCallback* value)override;
-					bool							DetachCallback(tree::INodeProviderCallback* value)override;
-					IDescriptable*					RequestView(const WString& identifier)override;
-					void							ReleaseView(IDescriptable* view)override;
+					tree::INodeProvider*							GetRootNode()override;
+					bool											CanGetNodeByVisibleIndex()override;
+					tree::INodeProvider*							GetNodeByVisibleIndex(vint index)override;
+					bool											AttachCallback(tree::INodeProviderCallback* value)override;
+					bool											DetachCallback(tree::INodeProviderCallback* value)override;
+					IDescriptable*									RequestView(const WString& identifier)override;
+					void											ReleaseView(IDescriptable* view)override;
 
 					// ===================== tree::INodeItemPrimaryTextView =====================
 
-					WString							GetPrimaryTextViewText(tree::INodeProvider* node)override;
+					WString											GetPrimaryTextViewText(tree::INodeProvider* node)override;
 
 					// ===================== tree::ITreeViewItemView =====================
 
-					Ptr<GuiImageData>				GetNodeImage(tree::INodeProvider* node)override;
-					WString							GetNodeText(tree::INodeProvider* node)override;
+					Ptr<GuiImageData>								GetNodeImage(tree::INodeProvider* node)override;
+					WString											GetNodeText(tree::INodeProvider* node)override;
 				};
+
+			protected:
+				ItemSource*											itemSource;
+
 			public:
 				/// <summary>Create a bindable Tree view control.</summary>
 				/// <param name="_styleProvider">The style provider for this control.</param>
-				/// <param name="itemSource">The item source.</param>
-				GuiBindableTreeView(IStyleProvider* _styleProvider, Ptr<description::IValueEnumerable> itemSource);
+				/// <param name="_itemSource">The item source.</param>
+				GuiBindableTreeView(IStyleProvider* _styleProvider, Ptr<description::IValueEnumerable> _itemSource);
 				~GuiBindableTreeView();
 			};
 
@@ -187,33 +225,37 @@ GuiBindableDataGrid
 
 					// ===================== list::IDataProvider =====================
 
-					void							SetCommandExecutor(list::IDataProviderCommandExecutor* value)override;
-					vint							GetColumnCount()override;
-					WString							GetColumnText(vint column)override;
-					vint							GetColumnSize(vint column)override;
-					void							SetColumnSize(vint column, vint value)override;
-					GuiMenu*						GetColumnPopup(vint column)override;
-					bool							IsColumnSortable(vint column)override;
-					void							SortByColumn(vint column, bool ascending)override;
-					vint							GetSortedColumn()override;
-					bool							IsSortOrderAscending()override;
+					void											SetCommandExecutor(list::IDataProviderCommandExecutor* value)override;
+					vint											GetColumnCount()override;
+					WString											GetColumnText(vint column)override;
+					vint											GetColumnSize(vint column)override;
+					void											SetColumnSize(vint column, vint value)override;
+					GuiMenu*										GetColumnPopup(vint column)override;
+					bool											IsColumnSortable(vint column)override;
+					void											SortByColumn(vint column, bool ascending)override;
+					vint											GetSortedColumn()override;
+					bool											IsSortOrderAscending()override;
 					
-					vint							GetRowCount()override;
-					Ptr<GuiImageData>				GetRowLargeImage(vint row)override;
-					Ptr<GuiImageData>				GetRowSmallImage(vint row)override;
-					vint							GetCellSpan(vint row, vint column)override;
-					WString							GetCellText(vint row, vint column)override;
-					list::IDataVisualizerFactory*	GetCellDataVisualizerFactory(vint row, vint column)override;
-					void							VisualizeCell(vint row, vint column, list::IDataVisualizer* dataVisualizer)override;
-					list::IDataEditorFactory*		GetCellDataEditorFactory(vint row, vint column)override;
-					void							BeforeEditCell(vint row, vint column, list::IDataEditor* dataEditor)override;
-					void							SaveCellData(vint row, vint column, list::IDataEditor* dataEditor)override;
+					vint											GetRowCount()override;
+					Ptr<GuiImageData>								GetRowLargeImage(vint row)override;
+					Ptr<GuiImageData>								GetRowSmallImage(vint row)override;
+					vint											GetCellSpan(vint row, vint column)override;
+					WString											GetCellText(vint row, vint column)override;
+					list::IDataVisualizerFactory*					GetCellDataVisualizerFactory(vint row, vint column)override;
+					void											VisualizeCell(vint row, vint column, list::IDataVisualizer* dataVisualizer)override;
+					list::IDataEditorFactory*						GetCellDataEditorFactory(vint row, vint column)override;
+					void											BeforeEditCell(vint row, vint column, list::IDataEditor* dataEditor)override;
+					void											SaveCellData(vint row, vint column, list::IDataEditor* dataEditor)override;
 				};
+
+			protected:
+				ItemSource*											itemSource;
+
 			public:
 				/// <summary>Create a bindable Data grid control.</summary>
 				/// <param name="_styleProvider">The style provider for this control.</param>
-				/// <param name="itemSource">The item source.</param>
-				GuiBindableDataGrid(IStyleProvider* _styleProvider, Ptr<description::IValueEnumerable> itemSource);
+				/// <param name="_itemSource">The item source.</param>
+				GuiBindableDataGrid(IStyleProvider* _styleProvider, Ptr<description::IValueEnumerable> _itemSource);
 				~GuiBindableDataGrid();
 			};
 		}

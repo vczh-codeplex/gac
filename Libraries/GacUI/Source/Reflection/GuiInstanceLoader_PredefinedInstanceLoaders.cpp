@@ -721,6 +721,74 @@ GuiComboBoxInstanceLoader
 		};
 
 /***********************************************************************
+GuiBindableTextListInstanceLoader
+***********************************************************************/
+
+		class GuiBindableTextListInstanceLoader : public Object, public IGuiInstanceLoader
+		{
+			typedef Func<list::TextItemStyleProvider::ITextItemStyleProvider*()>		ItemStyleProviderFactory;
+		protected:
+			WString							typeName;
+			ItemStyleProviderFactory		itemStyleProviderFactory;
+
+		public:
+			GuiBindableTextListInstanceLoader(const WString& type, const ItemStyleProviderFactory& factory)
+				:typeName(L"presentation::controls::GuiBindable" + type + L"TextList")
+				, itemStyleProviderFactory(factory)
+			{
+			}
+
+			WString GetTypeName()override
+			{
+				return typeName;
+			}
+
+			bool IsCreatable(const TypeInfo& typeInfo)override
+			{
+				return typeInfo.typeName == GetTypeName();
+			}
+
+			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
+			{
+				if (typeInfo.typeName == GetTypeName())
+				{
+					vint indexItemSource = constructorArguments.Keys().IndexOf(L"ItemSource");
+					if (indexItemSource != -1)
+					{
+						auto itemSource = UnboxValue<Ptr<IValueEnumerable>>(constructorArguments.GetByIndex(indexItemSource)[0]);
+						auto control = new GuiBindableTextList(GetCurrentTheme()->CreateTextListStyle(), itemStyleProviderFactory(), itemSource);
+						return Value::From(control);
+					}
+				}
+				return Value();
+			}
+
+			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			{
+			}
+
+			void GetConstructorParameters(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			{
+				if (typeInfo.typeName == GetTypeName())
+				{
+					propertyNames.Add(L"ItemSource");
+				}
+			}
+
+			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
+			{
+				 if (propertyInfo.propertyName == L"ItemSource")
+				{
+					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<IValueEnumerable>());
+					info->constructorParameter = true;
+					info->required = true;
+					return info;
+				}
+				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
+			}
+		};
+
+/***********************************************************************
 GuiCompositionInstanceLoader
 ***********************************************************************/
 
@@ -1097,6 +1165,9 @@ GuiPredefinedInstanceLoadersPlugin
 				manager->SetLoader(new GuiToolstripButtonInstanceLoader);
 				manager->SetLoader(new GuiListViewInstanceLoader);
 				manager->SetLoader(new GuiTreeViewInstanceLoader);
+				manager->SetLoader(new GuiBindableTextListInstanceLoader(L"", [](){return GetCurrentTheme()->CreateTextListItemStyle(); }));
+				manager->SetLoader(new GuiBindableTextListInstanceLoader(L"Check", [](){return GetCurrentTheme()->CreateCheckTextListItemStyle(); }));
+				manager->SetLoader(new GuiBindableTextListInstanceLoader(L"Radio", [](){return GetCurrentTheme()->CreateRadioTextListItemStyle(); }));
 
 				manager->SetLoader(new GuiCompositionInstanceLoader);
 				manager->SetLoader(new GuiTableCompositionInstanceLoader);
