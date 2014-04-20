@@ -41,16 +41,6 @@ External Functions
 				return thisObject->GetItemContent<ListViewItemStyleProvider::IListViewItemContent>(itemStyleController);
 			}
 
-			ListViewDataColumns& GuiListView_GetDataColumns(GuiListView* thisObject)
-			{
-				return thisObject->GetItems().GetDataColumns();
-			}
-
-			ListViewColumns& GuiListView_GetColumns(GuiListView* thisObject)
-			{
-				return thisObject->GetItems().GetColumns();
-			}
-
 			Ptr<RepeatingParsingExecutor> CreateRepeatingParsingExecutor(const WString& grammar, bool enableAmbiguity, const WString& rule, Ptr<ILanguageProvider> provider)
 			{
 			    Ptr<ParsingGeneralParser> parser=CreateBootstrapStrictParser();
@@ -877,11 +867,8 @@ Type Declaration
 				CLASS_MEMBER_BASE(GuiVirtualListView)
 				CONTROL_CONSTRUCTOR_PROVIDER(GuiListView)
 
-				CLASS_MEMBER_EXTERNALMETHOD(GetDataColumns, NO_PARAMETER, ListViewDataColumns&(GuiListView::*)(), &GuiListView_GetDataColumns)
-				CLASS_MEMBER_EXTERNALMETHOD(GetColumns, NO_PARAMETER, ListViewColumns&(GuiListView::*)(), &GuiListView_GetColumns)
-
-				CLASS_MEMBER_PROPERTY_READONLY(DataColumns, GetDataColumns)
-				CLASS_MEMBER_PROPERTY_READONLY(Columns, GetColumns)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(DataColumns)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Columns)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(Items)
 				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(SelectedItem, SelectionChanged)
 			END_CLASS_MEMBER(GuiListView)

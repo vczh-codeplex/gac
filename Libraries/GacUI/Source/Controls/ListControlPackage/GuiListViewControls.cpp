@@ -1710,6 +1710,16 @@ GuiListView
 				return *items;
 			}
 
+			list::ListViewDataColumns& GuiListView::GetDataColumns()
+			{
+				return items->GetDataColumns();
+			}
+
+			list::ListViewColumns& GuiListView::GetColumns()
+			{
+				return items->GetColumns();
+			}
+
 			Ptr<list::ListViewItem> GuiListView::GetSelectedItem()
 			{
 				vint index = GetSelectedItemIndex();

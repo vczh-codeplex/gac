@@ -812,6 +812,12 @@ ListView
 				/// <summary>Get all list view items.</summary>
 				/// <returns>All list view items.</returns>
 				list::ListViewItemProvider&								GetItems();
+				/// <summary>Get all data columns indices in columns.</summary>
+				/// <returns>All data columns indices in columns.</returns>
+				list::ListViewDataColumns&								GetDataColumns();
+				/// <summary>Get all columns.</summary>
+				/// <returns>All columns.</returns>
+				list::ListViewColumns&									GetColumns();
 
 				/// <summary>Get the selected item.</summary>
 				/// <returns>Returns the selected item. If there are multiple selected items, or there is no selected item, null will be returned.</returns>
