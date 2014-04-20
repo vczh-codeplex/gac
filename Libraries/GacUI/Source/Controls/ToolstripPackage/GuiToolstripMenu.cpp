@@ -27,17 +27,32 @@ GuiToolstripCollection
 				InvokeUpdateLayout();
 			}
 
-			bool GuiToolstripCollection::RemoveAtInternal(vint index, GuiControl* const& control)
+			bool GuiToolstripCollection::QueryInsert(vint index, GuiControl* const& child)
+			{
+				return true;
+			}
+
+			bool GuiToolstripCollection::QueryRemove(vint index, GuiControl* const& child)
+			{
+				return true;
+			}
+
+			void GuiToolstripCollection::BeforeInsert(vint index, GuiControl* const& child)
+			{
+
+			}
+
+			void GuiToolstripCollection::BeforeRemove(vint index, GuiControl* const& child)
 			{
 				GuiStackItemComposition* stackItem=stackComposition->GetStackItems().Get(index);
 
 				stackComposition->RemoveChild(stackItem);
-				stackItem->RemoveChild(control->GetBoundsComposition());
+				stackItem->RemoveChild(child->GetBoundsComposition());
 				delete stackItem;
 
 				if(subComponentMeasurer)
 				{
-					GuiMenuButton* menuButton=dynamic_cast<GuiMenuButton*>(control);
+					GuiMenuButton* menuButton=dynamic_cast<GuiMenuButton*>(child);
 					if(menuButton)
 					{
 						GuiSubComponentMeasurer::IMeasuringSource* measuringSource=
@@ -50,23 +65,19 @@ GuiToolstripCollection
 						}
 					}
 				}
-				delete control;
-				items.RemoveAt(index);
-				InvokeUpdateLayout();
-				return true;
+				delete child;
 			}
 
-			bool GuiToolstripCollection::InsertInternal(vint index, GuiControl* const& control)
+			void GuiToolstripCollection::AfterInsert(vint index, GuiControl* const& child)
 			{
-				items.Insert(index, control);
 				GuiStackItemComposition* stackItem=new GuiStackItemComposition;
-				control->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-				stackItem->AddChild(control->GetBoundsComposition());
+				child->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				stackItem->AddChild(child->GetBoundsComposition());
 				stackComposition->InsertChild(index, stackItem);
 
 				if(subComponentMeasurer)
 				{
-					GuiMenuButton* menuButton=dynamic_cast<GuiMenuButton*>(control);
+					GuiMenuButton* menuButton=dynamic_cast<GuiMenuButton*>(child);
 					if(menuButton)
 					{
 						GuiSubComponentMeasurer::IMeasuringSource* measuringSource=
@@ -82,7 +93,11 @@ GuiToolstripCollection
 					}
 				}
 				InvokeUpdateLayout();
-				return true;
+			}
+
+			void GuiToolstripCollection::AfterRemove(vint index, vint count)
+			{
+				InvokeUpdateLayout();
 			}
 
 			GuiToolstripCollection::GuiToolstripCollection(IContentCallback* _contentCallback, compositions::GuiStackComposition* _stackComposition, Ptr<compositions::GuiSubComponentMeasurer> _subComponentMeasurer)

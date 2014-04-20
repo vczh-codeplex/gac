@@ -658,16 +658,30 @@ List interface common implementation
 					{
 					}
 
-					virtual bool InsertInternal(vint index, const T& value)
+					virtual bool QueryInsert(vint index, const T& value)
 					{
-						items.Insert(index, value);
 						return true;
 					}
 
-					virtual bool RemoveAtInternal(vint index, const T& value)
+					virtual void BeforeInsert(vint index, const T& value)
 					{
-						items.RemoveAt(index);
+					}
+
+					virtual void AfterInsert(vint index, const T& value)
+					{
+					}
+
+					virtual bool QueryRemove(vint index, const T& value)
+					{
 						return true;
+					}
+
+					virtual void BeforeRemove(vint index, const T& value)
+					{
+					}
+
+					virtual void AfterRemove(vint index, vint count)
+					{
 					}
 					
 				public:
@@ -741,47 +755,63 @@ List interface common implementation
 
 					bool RemoveAt(vint index)
 					{
-						if(RemoveAtInternal(index, items[index]))
+						if (0 <= index && index < items.Count() && QueryRemove(index, items[index]))
 						{
+							BeforeRemove(index, items[index]);
+							T item = items[index];
+							items.RemoveAt(index);
+							AfterRemove(index, 1);
 							NotifyUpdateInternal(index, 1, 0);
 							return true;
 						}
-						else
-						{
-							return false;
-						}
+						return false;
 					}
 
 					bool RemoveRange(vint index, vint count)
 					{
 						if(count<=0) return false;
-						if(0<=index && index<items.Count() && index+count<=items.Count())
+						if (0 <= index && index<items.Count() && index + count <= items.Count())
 						{
-							while(count-->0)
+							for (vint i = 0; i < count; i++)
 							{
-								RemoveAt(index+count);
+								if (!QueryRemove(index + 1, items[index + i])) return false;
 							}
+							for (vint i = 0; i < count; i++)
+							{
+								BeforeRemove(index + i, items[index + i]);
+							}
+							items.RemoveRange(index, count);
+							AfterRemove(index, count);
+							NotifyUpdateInternal(index, count, 0);
 							return true;
 						}
-						else
-						{
-							return false;
-						}
+						return false;
 					}
 
 					bool Clear()
 					{
-						while(items.Count()>0)
+						vint count = items.Count();
+						for (vint i = 0; i < count; i++)
 						{
-							RemoveAt(items.Count()-1);
+							if (!QueryRemove(i, items[i])) return false;
 						}
+						for (vint i = 0; i < count; i++)
+						{
+							BeforeRemove(i, items[i]);
+						}
+						items.Clear();
+						AfterRemove(0, count);
+						NotifyUpdateInternal(0, count, 0);
 						return true;
 					}
 
 					vint Insert(vint index, const T& item)
 					{
-						if(InsertInternal(index, item))
+						if (0 <= index && index <= items.Count() && QueryInsert(index, item))
 						{
+							BeforeInsert(index, item);
+							items.Insert(index, item);
+							AfterInsert(index, item);
 							NotifyUpdateInternal(index, 0, 1);
 							return index;
 						}
@@ -793,14 +823,23 @@ List interface common implementation
 
 					bool Set(vint index, const T& item)
 					{
-						if(Insert(index, item))
+						if (0 <= index && index < items.Count())
 						{
-							return RemoveAt(index+1);
+							if (QueryRemove(index, items[index]) && QueryInsert(index, item))
+							{
+								BeforeRemove(index, items[index]);
+								items.RemoveAt(index);
+								AfterRemove(index, 1);
+
+								BeforeInsert(index, item);
+								items.Insert(index, item);
+								AfterInsert(index, item);
+
+								NotifyUpdateInternal(index, 1, 1);
+								return true;
+							}
 						}
-						else
-						{
-							return false;
-						}
+						return false;
 					}
 				};
 			}
