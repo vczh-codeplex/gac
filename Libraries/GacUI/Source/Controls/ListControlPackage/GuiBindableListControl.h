@@ -25,6 +25,7 @@ namespace vl
 GuiBindableTextList
 ***********************************************************************/
 
+			/// <summary>A bindable Text list control.</summary>
 			class GuiBindableTextList : public GuiVirtualTextList, public Description<GuiBindableTextList>
 			{
 			protected:
@@ -57,6 +58,10 @@ GuiBindableTextList
 					void								SetCheckedSilently(vint itemIndex, bool value)override;
 				};
 			public:
+				/// <summary>Create a bindable Text list control.</summary>
+				/// <param name="_styleProvider">The style provider for this control.</param>
+				/// <param name="_itemStyleProvider">The item style provider callback for this control.</param>
+				/// <param name="itemSource">The item source.</param>
 				GuiBindableTextList(IStyleProvider* _styleProvider, list::TextItemStyleProvider::ITextItemStyleProvider* _itemStyleProvider, Ptr<description::IValueEnumerable> itemSource);
 				~GuiBindableTextList();
 			};
@@ -64,7 +69,8 @@ GuiBindableTextList
 /***********************************************************************
 GuiBindableListView
 ***********************************************************************/
-
+			
+			/// <summary>A bindable List view control.</summary>
 			class GuiBindableListView : public GuiVirtualListView, public Description<GuiBindableListView>
 			{
 			protected:
@@ -112,6 +118,9 @@ GuiBindableListView
 					GuiListViewColumnHeader::ColumnSortingState			GetSortingState(vint index)override;
 				};
 			public:
+				/// <summary>Create a bindable List view control.</summary>
+				/// <param name="_styleProvider">The style provider for this control.</param>
+				/// <param name="itemSource">The item source.</param>
 				GuiBindableListView(IStyleProvider* _styleProvider, Ptr<description::IValueEnumerable> itemSource);
 				~GuiBindableListView();
 			};
@@ -119,7 +128,8 @@ GuiBindableListView
 /***********************************************************************
 GuiBindableTreeView
 ***********************************************************************/
-
+			
+			/// <summary>A bindable Tree view control.</summary>
 			class GuiBindableTreeView : public GuiVirtualTreeView, public Description<GuiBindableTreeView>
 			{
 			protected:
@@ -152,6 +162,9 @@ GuiBindableTreeView
 					WString							GetNodeText(tree::INodeProvider* node)override;
 				};
 			public:
+				/// <summary>Create a bindable Tree view control.</summary>
+				/// <param name="_styleProvider">The style provider for this control.</param>
+				/// <param name="itemSource">The item source.</param>
 				GuiBindableTreeView(IStyleProvider* _styleProvider, Ptr<description::IValueEnumerable> itemSource);
 				~GuiBindableTreeView();
 			};
@@ -159,7 +172,8 @@ GuiBindableTreeView
 /***********************************************************************
 GuiBindableDataGrid
 ***********************************************************************/
-
+			
+			/// <summary>A bindable Data grid control.</summary>
 			class GuiBindableDataGrid : public GuiVirtualDataGrid, public Description<GuiBindableDataGrid>
 			{
 			protected:
@@ -196,6 +210,9 @@ GuiBindableDataGrid
 					void							SaveCellData(vint row, vint column, list::IDataEditor* dataEditor)override;
 				};
 			public:
+				/// <summary>Create a bindable Data grid control.</summary>
+				/// <param name="_styleProvider">The style provider for this control.</param>
+				/// <param name="itemSource">The item source.</param>
 				GuiBindableDataGrid(IStyleProvider* _styleProvider, Ptr<description::IValueEnumerable> itemSource);
 				~GuiBindableDataGrid();
 			};
