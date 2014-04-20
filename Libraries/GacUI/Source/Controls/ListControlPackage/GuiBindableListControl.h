@@ -141,6 +141,8 @@ GuiBindableListView
 					, protected virtual list::ListViewItemStyleProvider::IListViewItemView
 					, protected virtual list::ListViewColumnItemArranger::IColumnItemView
 				{
+					friend class ListViewDataColumns;
+					friend class ListViewColumns;
 					typedef collections::List<list::ListViewColumnItemArranger::IColumnItemViewCallback*>		ColumnItemViewCallbackList;
 				protected:
 					ListViewDataColumns								dataColumns;

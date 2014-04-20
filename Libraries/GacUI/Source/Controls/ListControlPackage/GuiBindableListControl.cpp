@@ -213,7 +213,7 @@ GuiBindableTextList
 GuiBindableListView::ListViewDataColumns
 ***********************************************************************/
 
-			void ListViewDataColumns::NotifyUpdateInternal(vint start, vint count, vint newCount)
+			void GuiBindableListView::ListViewDataColumns::NotifyUpdateInternal(vint start, vint count, vint newCount)
 			{
 				itemProvider->NotifyUpdate(0, itemProvider->Count());
 			}
@@ -231,7 +231,7 @@ GuiBindableListView::ListViewDataColumns
 GuiBindableListView::ListViewColumns
 ***********************************************************************/
 
-			void ListViewColumns::NotifyUpdateInternal(vint start, vint count, vint newCount)
+			void GuiBindableListView::ListViewColumns::NotifyUpdateInternal(vint start, vint count, vint newCount)
 			{
 				for(vint i=0;i<itemProvider->columnItemViewCallbacks.Count();i++)
 				{
