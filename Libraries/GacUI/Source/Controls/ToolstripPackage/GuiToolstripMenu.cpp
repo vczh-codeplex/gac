@@ -39,7 +39,6 @@ GuiToolstripCollection
 
 			void GuiToolstripCollection::BeforeInsert(vint index, GuiControl* const& child)
 			{
-
 			}
 
 			void GuiToolstripCollection::BeforeRemove(vint index, GuiControl* const& child)
