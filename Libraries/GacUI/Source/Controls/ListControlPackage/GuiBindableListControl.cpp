@@ -11,8 +11,15 @@ namespace vl
 GuiBindableTextList
 ***********************************************************************/
 
-			GuiBindableTextList::GuiBindableTextList(IStyleProvider* _styleProvider, list::TextItemStyleProvider::ITextItemStyleProvider* _itemStyleProvider)
-				:GuiVirtualTextList(_styleProvider, _itemStyleProvider, 0)
+			// GuiListControl::IItemPrimaryTextView
+			// GuiListControl::IItemPrimaryTextView
+			GuiListControl::IItemProvider* CreateTextListDataSource(const GuiBindableTextList::DataBindingConfig& config)
+			{
+				return 0;
+			}
+
+			GuiBindableTextList::GuiBindableTextList(IStyleProvider* _styleProvider, list::TextItemStyleProvider::ITextItemStyleProvider* _itemStyleProvider, const GuiBindableTextList::DataBindingConfig& config)
+				:GuiVirtualTextList(_styleProvider, _itemStyleProvider, CreateTextListDataSource(config))
 			{
 			}
 
@@ -24,8 +31,16 @@ GuiBindableTextList
 GuiBindableListView
 ***********************************************************************/
 
-			GuiBindableListView::GuiBindableListView(IStyleProvider* _styleProvider)
-				:GuiVirtualListView(_styleProvider, 0)
+			//ListViewItemStyleProvider::IListViewItemView
+			// ListViewColumnItemArranger::IColumnItemView
+			// GuiListControl::IItemPrimaryTextView
+			GuiListControl::IItemProvider* CreateListViewDataSource(const GuiBindableListView::DataBindingConfig& config)
+			{
+				return 0;
+			}
+
+			GuiBindableListView::GuiBindableListView(IStyleProvider* _styleProvider, const GuiBindableListView::DataBindingConfig& config)
+				:GuiVirtualListView(_styleProvider, CreateListViewDataSource(config))
 			{
 			}
 
@@ -37,8 +52,15 @@ GuiBindableListView
 GuiBindableTreeView
 ***********************************************************************/
 
-			GuiBindableTreeView::GuiBindableTreeView(IStyleProvider* _styleProvider)
-				:GuiVirtualTreeView(_styleProvider, 0)
+			// tree::ITreeViewItemView
+			// tree:;INodeItemPrimaryTextView
+			Ptr<tree::INodeRootProvider> CreateTreeViewDataSource(const GuiBindableTreeView::DataBindingConfig& config)
+			{
+				return 0;
+			}
+
+			GuiBindableTreeView::GuiBindableTreeView(IStyleProvider* _styleProvider, const GuiBindableTreeView::DataBindingConfig& config)
+				:GuiVirtualTreeView(_styleProvider, CreateTreeViewDataSource(config))
 			{
 			}
 
@@ -50,8 +72,13 @@ GuiBindableTreeView
 GuiBindableDataGrid
 ***********************************************************************/
 
-			GuiBindableDataGrid::GuiBindableDataGrid(IStyleProvider* _styleProvider)
-				:GuiVirtualDataGrid(_styleProvider, (list::IDataProvider*)0)
+			list::IDataProvider* CreateDataGridDataSource(const GuiBindableDataGrid::DataBindingConfig& config)
+			{
+				return 0;
+			}
+
+			GuiBindableDataGrid::GuiBindableDataGrid(IStyleProvider* _styleProvider, const GuiBindableDataGrid::DataBindingConfig& config)
+				:GuiVirtualDataGrid(_styleProvider, CreateDataGridDataSource(config))
 			{
 			}
 
