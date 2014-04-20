@@ -28,7 +28,14 @@ GuiBindableTextList
 			class GuiBindableTextList : public GuiVirtualTextList
 			{
 			public:
-				GuiBindableTextList(IStyleProvider* _styleProvider, list::TextItemStyleProvider::ITextItemStyleProvider* _itemStyleProvider);
+				struct DataBindingConfig
+				{
+					Ptr<description::IValueEnumerable>		itemSource;
+					WString									textProperty;
+					WString									checkedProperty;
+				};
+
+				GuiBindableTextList(IStyleProvider* _styleProvider, list::TextItemStyleProvider::ITextItemStyleProvider* _itemStyleProvider, const DataBindingConfig& config);
 				~GuiBindableTextList();
 			};
 
@@ -39,7 +46,12 @@ GuiBindableListView
 			class GuiBindableListView : public GuiVirtualListView
 			{
 			public:
-				GuiBindableListView(IStyleProvider* _styleProvider);
+				struct DataBindingConfig
+				{
+					Ptr<description::IValueEnumerable>		itemSource;
+				};
+
+				GuiBindableListView(IStyleProvider* _styleProvider, const DataBindingConfig& config);
 				~GuiBindableListView();
 			};
 
@@ -50,7 +62,12 @@ GuiBindableTreeView
 			class GuiBindableTreeView : public GuiVirtualTreeView
 			{
 			public:
-				GuiBindableTreeView(IStyleProvider* _styleProvider);
+				struct DataBindingConfig
+				{
+					Ptr<description::IValueEnumerable>		itemSource;
+				};
+
+				GuiBindableTreeView(IStyleProvider* _styleProvider, const DataBindingConfig& config);
 				~GuiBindableTreeView();
 			};
 
@@ -61,7 +78,12 @@ GuiBindableDataGrid
 			class GuiBindableDataGrid : public GuiVirtualDataGrid
 			{
 			public:
-				GuiBindableDataGrid(IStyleProvider* _styleProvider);
+				struct DataBindingConfig
+				{
+					Ptr<description::IValueEnumerable>		itemSource;
+				};
+
+				GuiBindableDataGrid(IStyleProvider* _styleProvider, const DataBindingConfig& config);
 				~GuiBindableDataGrid();
 			};
 		}
