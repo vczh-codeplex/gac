@@ -210,46 +210,123 @@ GuiBindableTextList
 			}
 
 /***********************************************************************
+GuiBindableListView::ListViewDataColumns
+***********************************************************************/
+
+			void ListViewDataColumns::NotifyUpdateInternal(vint start, vint count, vint newCount)
+			{
+				itemProvider->NotifyUpdate(0, itemProvider->Count());
+			}
+
+			GuiBindableListView::ListViewDataColumns::ListViewDataColumns()
+				:itemProvider(0)
+			{
+			}
+
+			GuiBindableListView::ListViewDataColumns::~ListViewDataColumns()
+			{
+			}
+
+/***********************************************************************
+GuiBindableListView::ListViewColumns
+***********************************************************************/
+
+			void ListViewColumns::NotifyUpdateInternal(vint start, vint count, vint newCount)
+			{
+				for(vint i=0;i<itemProvider->columnItemViewCallbacks.Count();i++)
+				{
+					itemProvider->columnItemViewCallbacks[i]->OnColumnChanged();
+				}
+				itemProvider->NotifyUpdate(0, itemProvider->Count());
+			}
+
+			GuiBindableListView::ListViewColumns::ListViewColumns()
+				:itemProvider(0)
+			{
+			}
+
+			GuiBindableListView::ListViewColumns::~ListViewColumns()
+			{
+			}
+
+/***********************************************************************
 GuiBindableListView::ItemSource
 ***********************************************************************/
 
 			GuiBindableListView::ItemSource::ItemSource(Ptr<description::IValueEnumerable> itemSource)
 			{
-				throw 0;
+				columns.itemProvider = this;
+				dataColumns.itemProvider = this;
 			}
 
 			GuiBindableListView::ItemSource::~ItemSource()
 			{
-				throw 0;
+			}
+
+			bool GuiBindableListView::ItemSource::NotifyUpdate(vint start, vint count)
+			{
+				if (start<0 || start >= itemSource->GetCount() || count <= 0 || start + count > itemSource->GetCount())
+				{
+					return false;
+				}
+				else
+				{
+					InvokeOnItemModified(start, count, count);
+					return true;
+				}
+			}
+
+			GuiBindableListView::ListViewDataColumns& GuiBindableListView::ItemSource::GetDataColumns()
+			{
+				return dataColumns;
+			}
+
+			GuiBindableListView::ListViewColumns& GuiBindableListView::ItemSource::GetColumns()
+			{
+				return columns;
 			}
 
 			// ===================== GuiListControl::IItemProvider =====================
 
 			vint GuiBindableListView::ItemSource::Count()
 			{
-				throw 0;
+				return itemSource->GetCount();
 			}
 
 			IDescriptable* GuiBindableListView::ItemSource::RequestView(const WString& identifier)
 			{
-				throw 0;
+				if(identifier==ListViewItemStyleProvider::IListViewItemView::Identifier)
+				{
+					return (ListViewItemStyleProvider::IListViewItemView*)this;
+				}
+				else if(identifier==ListViewColumnItemArranger::IColumnItemView::Identifier)
+				{
+					return (ListViewColumnItemArranger::IColumnItemView*)this;
+				}
+				else if(identifier==GuiListControl::IItemPrimaryTextView::Identifier)
+				{
+					return (GuiListControl::IItemPrimaryTextView*)this;
+				}
+				else
+				{
+					return 0;
+				}
 			}
 
 			void GuiBindableListView::ItemSource::ReleaseView(IDescriptable* view)
 			{
-				throw 0;
 			}
 
 			// ===================== GuiListControl::IItemPrimaryTextView =====================
 
 			WString GuiBindableListView::ItemSource::GetPrimaryTextViewText(vint itemIndex)
 			{
-				throw 0;
+				return GetText(itemIndex);
 			}
 
 			bool GuiBindableListView::ItemSource::ContainsPrimaryText(vint itemIndex)
 			{
-				throw 0;
+				return true;
 			}
 
 			// ===================== list::ListViewItemStyleProvider::IListViewItemView =====================
@@ -276,54 +353,106 @@ GuiBindableListView::ItemSource
 
 			vint GuiBindableListView::ItemSource::GetDataColumnCount()
 			{
-				throw 0;
+				return dataColumns.Count();
 			}
 
 			vint GuiBindableListView::ItemSource::GetDataColumn(vint index)
 			{
-				throw 0;
+				return dataColumns[index];
 			}
 
 			// ===================== list::ListViewColumnItemArranger::IColumnItemView =====================
-						
-			bool GuiBindableListView::ItemSource::AttachCallback(list::ListViewColumnItemArranger::IColumnItemViewCallback* value)
+
+			bool GuiBindableListView::ItemSource::AttachCallback(ListViewColumnItemArranger::IColumnItemViewCallback* value)
 			{
-				throw 0;
+				if(columnItemViewCallbacks.Contains(value))
+				{
+					return false;
+				}
+				else
+				{
+					columnItemViewCallbacks.Add(value);
+					return true;
+				}
 			}
 
-			bool GuiBindableListView::ItemSource::DetachCallback(list::ListViewColumnItemArranger::IColumnItemViewCallback* value)
+			bool GuiBindableListView::ItemSource::DetachCallback(ListViewColumnItemArranger::IColumnItemViewCallback* value)
 			{
-				throw 0;
+				vint index=columnItemViewCallbacks.IndexOf(value);
+				if(index==-1)
+				{
+					return false;
+				}
+				else
+				{
+					columnItemViewCallbacks.Remove(value);
+					return true;
+				}
 			}
 
 			vint GuiBindableListView::ItemSource::GetColumnCount()
 			{
-				throw 0;
+				return columns.Count();
 			}
 
 			WString GuiBindableListView::ItemSource::GetColumnText(vint index)
 			{
-				throw 0;
+				if(index<0 || index>=columns.Count())
+				{
+					return L"";
+				}
+				else
+				{
+					return columns[index]->text;
+				}
 			}
 
 			vint GuiBindableListView::ItemSource::GetColumnSize(vint index)
 			{
-				throw 0;
+				if(index<0 || index>=columns.Count())
+				{
+					return 0;
+				}
+				else
+				{
+					return columns[index]->size;
+				}
 			}
 
 			void GuiBindableListView::ItemSource::SetColumnSize(vint index, vint value)
 			{
-				throw 0;
+				if(index>=0 && index<columns.Count())
+				{
+					columns[index]->size=value;
+					for(vint i=0;i<columnItemViewCallbacks.Count();i++)
+					{
+						columnItemViewCallbacks[i]->OnColumnChanged();
+					}
+				}
 			}
 
 			GuiMenu* GuiBindableListView::ItemSource::GetDropdownPopup(vint index)
 			{
-				throw 0;
+				if(index<0 || index>=columns.Count())
+				{
+					return 0;
+				}
+				else
+				{
+					return columns[index]->dropdownPopup;
+				}
 			}
 
 			GuiListViewColumnHeader::ColumnSortingState GuiBindableListView::ItemSource::GetSortingState(vint index)
 			{
-				throw 0;
+				if(index<0 || index>=columns.Count())
+				{
+					return GuiListViewColumnHeader::NotSorted;
+				}
+				else
+				{
+					return columns[index]->sortingState;
+				}
 			}
 
 /***********************************************************************
@@ -338,6 +467,16 @@ GuiBindableListView
 
 			GuiBindableListView::~GuiBindableListView()
 			{
+			}
+
+			GuiBindableListView::ListViewDataColumns& GuiBindableListView::GetDataColumns()
+			{
+				return itemSource->GetDataColumns();
+			}
+
+			GuiBindableListView::ListViewColumns& GuiBindableListView::GetColumns()
+			{
+				return itemSource->GetColumns();
 			}
 
 /***********************************************************************

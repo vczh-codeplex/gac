@@ -851,6 +851,7 @@ Type Declaration
 				CLASS_MEMBER_CONSTRUCTOR(Ptr<ListViewColumn>(const WString&, vint), {L"text" _ L"size"})
 
 				CLASS_MEMBER_FIELD(text)
+				CLASS_MEMBER_FIELD(textProperty)
 				CLASS_MEMBER_FIELD(size)
 				CLASS_MEMBER_FIELD(dropdownPopup)
 				CLASS_MEMBER_FIELD(sortingState)
@@ -1794,6 +1795,9 @@ Type Declaration
 			BEGIN_CLASS_MEMBER(GuiBindableListView)
 				CLASS_MEMBER_BASE(GuiVirtualListView)
 				CLASS_MEMBER_CONSTRUCTOR(GuiBindableListView*(GuiBindableListView::IStyleProvider*, Ptr<IValueEnumerable>), {L"styleProvider" _ L"itemSource"})
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(DataColumns)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Columns)
 			END_CLASS_MEMBER(GuiBindableListView)
 
 			BEGIN_CLASS_MEMBER(GuiBindableTreeView)

@@ -107,14 +107,54 @@ GuiBindableListView
 			class GuiBindableListView : public GuiVirtualListView, public Description<GuiBindableListView>
 			{
 			protected:
+				class ItemSource;
+			public:
+				class ListViewDataColumns : public list::ItemsBase<vint>
+				{
+					friend class ItemSource;
+				protected:
+					ItemSource*										itemProvider;
+
+					void NotifyUpdateInternal(vint start, vint count, vint newCount)override;
+				public:
+					/// <summary>Create a container.</summary>
+					ListViewDataColumns();
+					~ListViewDataColumns();
+				};
+				
+				class ListViewColumns : public list::ItemsBase<Ptr<list::ListViewColumn>>
+				{
+					friend class ItemSource;
+				protected:
+					ItemSource*										itemProvider;
+
+					void NotifyUpdateInternal(vint start, vint count, vint newCount)override;
+				public:
+					/// <summary>Create a container.</summary>
+					ListViewColumns();
+					~ListViewColumns();
+				};
+
+			protected:
 				class ItemSource
 					: public list::ItemProviderBase
 					, protected virtual list::ListViewItemStyleProvider::IListViewItemView
 					, protected virtual list::ListViewColumnItemArranger::IColumnItemView
 				{
+					typedef collections::List<list::ListViewColumnItemArranger::IColumnItemViewCallback*>		ColumnItemViewCallbackList;
+				protected:
+					ListViewDataColumns								dataColumns;
+					ListViewColumns									columns;
+					ColumnItemViewCallbackList						columnItemViewCallbacks;
+					Ptr<description::IValueReadonlyList>			itemSource;
+
 				public:
 					ItemSource(Ptr<description::IValueEnumerable> itemSource);
 					~ItemSource();
+
+					bool											NotifyUpdate(vint start, vint count);
+					ListViewDataColumns&							GetDataColumns();
+					ListViewColumns&								GetColumns();
 					
 					// ===================== GuiListControl::IItemProvider =====================
 
@@ -157,6 +197,13 @@ GuiBindableListView
 				/// <param name="_itemSource">The item source.</param>
 				GuiBindableListView(IStyleProvider* _styleProvider, Ptr<description::IValueEnumerable> _itemSource);
 				~GuiBindableListView();
+
+				/// <summary>Get all data columns indices in columns.</summary>
+				/// <returns>All data columns indices in columns.</returns>
+				ListViewDataColumns&								GetDataColumns();
+				/// <summary>Get all columns.</summary>
+				/// <returns>All columns.</returns>
+				ListViewColumns&									GetColumns();
 			};
 
 /***********************************************************************
