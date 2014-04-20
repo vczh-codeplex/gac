@@ -1795,6 +1795,26 @@ Type Declaration
 				CLASS_MEMBER_METHOD(SetColumnText, {L"column" _ L"value"})
 			END_CLASS_MEMBER(StringGridProvider)
 
+			BEGIN_CLASS_MEMBER(GuiBindableTextList)
+				CLASS_MEMBER_BASE(GuiVirtualTextList)
+				CLASS_MEMBER_CONSTRUCTOR(GuiBindableTextList*(GuiBindableTextList::IStyleProvider*, list::TextItemStyleProvider::ITextItemStyleProvider*, Ptr<IValueEnumerable>), {L"styleProvider" _ L"itemStyleProvider" _ L"itemSource"})
+			END_CLASS_MEMBER(GuiBindableTextList)
+
+			BEGIN_CLASS_MEMBER(GuiBindableListView)
+				CLASS_MEMBER_BASE(GuiVirtualListView)
+				CLASS_MEMBER_CONSTRUCTOR(GuiBindableListView*(GuiBindableListView::IStyleProvider*, Ptr<IValueEnumerable>), {L"styleProvider" _ L"itemSource"})
+			END_CLASS_MEMBER(GuiBindableListView)
+
+			BEGIN_CLASS_MEMBER(GuiBindableTreeView)
+				CLASS_MEMBER_BASE(GuiVirtualTreeView)
+				CLASS_MEMBER_CONSTRUCTOR(GuiBindableTreeView*(GuiBindableTreeView::IStyleProvider*, Ptr<IValueEnumerable>), {L"styleProvider" _ L"itemSource"})
+			END_CLASS_MEMBER(GuiBindableTreeView)
+
+			BEGIN_CLASS_MEMBER(GuiBindableDataGrid)
+				CLASS_MEMBER_BASE(GuiVirtualDataGrid)
+				CLASS_MEMBER_CONSTRUCTOR(GuiBindableDataGrid*(GuiBindableDataGrid::IStyleProvider*, Ptr<IValueEnumerable>), {L"styleProvider" _ L"itemSource"})
+			END_CLASS_MEMBER(GuiBindableDataGrid)
+
 #undef INTERFACE_IDENTIFIER
 #undef CONTROL_CONSTRUCTOR_CONTROLLER
 #undef INTERFACE_EXTERNALCTOR
