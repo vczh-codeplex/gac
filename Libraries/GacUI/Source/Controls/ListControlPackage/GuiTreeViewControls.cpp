@@ -410,30 +410,36 @@ MemoryNodeProvider::NodeCollection
 					}
 				}
 
-				bool MemoryNodeProvider::NodeCollection::InsertInternal(vint index, Ptr<MemoryNodeProvider> const& child)
+				bool MemoryNodeProvider::NodeCollection::QueryInsert(vint index, Ptr<MemoryNodeProvider> const& child)
 				{
-					if(child->parent==0)
-					{
-						OnBeforeChildModified(index, 0, 1);
-						child->parent=ownerProvider;
-						items.Insert(index, child);
-						OnAfterChildModified(index, 0, 1);
-						return true;
-					}
-					return false;
+					return child->parent == 0;
 				}
 
-				bool MemoryNodeProvider::NodeCollection::RemoveAtInternal(vint index, Ptr<MemoryNodeProvider> const& child)
+				bool MemoryNodeProvider::NodeCollection::QueryRemove(vint index, Ptr<MemoryNodeProvider> const& child)
 				{
-					if(child->parent==ownerProvider)
-					{
-						OnBeforeChildModified(index, 1, 0);
-						child->parent=0;
-						items.RemoveAt(index);
-						OnAfterChildModified(index, 1, 0);
-						return true;
-					}
-					return false;
+					return child->parent == ownerProvider;
+				}
+
+				void MemoryNodeProvider::NodeCollection::BeforeInsert(vint index, Ptr<MemoryNodeProvider> const& child)
+				{
+					OnBeforeChildModified(index, 0, 1);
+					child->parent = ownerProvider;
+				}
+
+				void MemoryNodeProvider::NodeCollection::BeforeRemove(vint index, Ptr<MemoryNodeProvider> const& child)
+				{
+					OnBeforeChildModified(index, 1, 0);
+					child->parent = 0;
+				}
+
+				void MemoryNodeProvider::NodeCollection::AfterInsert(vint index, Ptr<MemoryNodeProvider> const& child)
+				{
+					OnAfterChildModified(index, 0, 1);
+				}
+
+				void MemoryNodeProvider::NodeCollection::AfterRemove(vint index, vint count)
+				{
+					OnAfterChildModified(index, count, 0);
 				}
 
 				MemoryNodeProvider::NodeCollection::NodeCollection()

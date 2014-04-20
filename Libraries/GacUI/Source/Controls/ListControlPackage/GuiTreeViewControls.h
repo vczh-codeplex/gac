@@ -304,8 +304,12 @@ GuiVirtualTreeListControl Predefined NodeProvider
 
 						void						OnBeforeChildModified(vint start, vint count, vint newCount);
 						void						OnAfterChildModified(vint start, vint count, vint newCount);
-						bool						InsertInternal(vint index, Ptr<MemoryNodeProvider> const& child)override;
-						bool						RemoveAtInternal(vint index, Ptr<MemoryNodeProvider> const& child)override;
+						bool						QueryInsert(vint index, Ptr<MemoryNodeProvider> const& child)override;
+						bool						QueryRemove(vint index, Ptr<MemoryNodeProvider> const& child)override;
+						void						BeforeInsert(vint index, Ptr<MemoryNodeProvider> const& child)override;
+						void						BeforeRemove(vint index, Ptr<MemoryNodeProvider> const& child)override;
+						void						AfterInsert(vint index, Ptr<MemoryNodeProvider> const& child)override;
+						void						AfterRemove(vint index, vint count)override;
 
 						NodeCollection();
 					public:
