@@ -842,6 +842,31 @@ List interface common implementation
 						return false;
 					}
 				};
+
+				template<typename T>
+				class ObservableList : public ItemsBase<T>
+				{
+				protected:
+					Ptr<description::IValueObservableList>		observableList;
+
+					void NotifyUpdateInternal(vint start, vint count, vint newCount)override
+					{
+						if (observableList)
+						{
+							observableList->ItemChanged(start, count, newCount);
+						}
+					}
+				public:
+
+					Ptr<description::IValueObservableList> GetWrapper()
+					{
+						if (!observableList)
+						{
+							observableList = new description::ValueObservableListWrapper<ObservableList<T>*>(this);
+						}
+						return observableList;
+					}
+				};
 			}
 		}
 	}
