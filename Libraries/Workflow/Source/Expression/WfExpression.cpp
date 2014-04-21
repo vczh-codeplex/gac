@@ -488,24 +488,26 @@ Print (Expression)
 			void Visit(WfInferExpression* node)override
 			{
 				WfPrint(node->expression, indent, writer);
-				writer.WriteString(L" of ");
+				writer.WriteString(L" of (");
 				WfPrint(node->type, indent, writer);
+				writer.WriteString(L")");
 			}
 
 			void Visit(WfTypeCastingExpression* node)override
 			{
 				if (node->strategy == WfTypeCastingStrategy::Strong)
 				{
-					writer.WriteString(L"cast ");
+					writer.WriteString(L"cast (");
 					WfPrint(node->type, indent, writer);
-					writer.WriteString(L" ");
+					writer.WriteString(L") ");
 					WfPrint(node->expression, indent, writer);
 				}
 				else
 				{
 					WfPrint(node->expression, indent, writer);
-					writer.WriteString(L" as ");
+					writer.WriteString(L" as (");
 					WfPrint(node->type, indent, writer);
+					writer.WriteString(L")");
 				}
 			}
 
@@ -515,12 +517,14 @@ Print (Expression)
 				switch (node->test)
 				{
 				case WfTypeTesting::IsType:
-					writer.WriteString(L" is ");
+					writer.WriteString(L" is (");
 					WfPrint(node->type, indent, writer);
+					writer.WriteString(L")");
 					break;
 				case WfTypeTesting::IsNotType:
-					writer.WriteString(L" is not ");
+					writer.WriteString(L" is not (");
 					WfPrint(node->type, indent, writer);
+					writer.WriteString(L")");
 					break;
 				case WfTypeTesting::IsNull:
 					writer.WriteString(L" is null");
@@ -623,8 +627,9 @@ Print (Expression)
 
 			void Visit(WfNewTypeExpression* node)override
 			{
-				writer.WriteString(L"new ");
+				writer.WriteString(L"new (");
 				WfPrint(node->type, indent, writer);
+				writer.WriteString(L")");
 				if (node->functions.Count() == 0)
 				{
 					writer.WriteString(L"(");
