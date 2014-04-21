@@ -268,6 +268,7 @@ GuiBindableTreeView
 					NodeList										children;
 
 					void											PrepareChildren();
+					void											UnprepareChildren();
 				public:
 					ItemSourceNode(const description::Value& _itemSource, ItemSourceNode* _parent);
 					ItemSourceNode(const description::Value& _itemSource, ItemSource* _rootProvider);
@@ -301,7 +302,7 @@ GuiBindableTreeView
 					ItemSource(const description::Value& _itemSource);
 					~ItemSource();
 
-					void											UpdateBindingProperties();
+					void											UpdateBindingProperties(bool updateChildrenProperty);
 
 					// ===================== tree::INodeRootProvider =====================
 
