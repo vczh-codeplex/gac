@@ -217,7 +217,7 @@ namespace demos
 	protected:
 		WString								season;
 		WString								description;
-		list::ObservableList<Ptr<Season>>	children;
+		list::ObservableList<Ptr<ISeason>>	children;
 
 	public:
 		Season(const WString& _season, const WString& _description)
@@ -251,7 +251,7 @@ namespace demos
 	{
 	protected:
 		list::ObservableList<WString>					seasons;
-		list::ObservableList<Ptr<Season>>				complexSeasons;
+		list::ObservableList<Ptr<ISeason>>				complexSeasons;
 		Ptr<Season>										treeSeasons;
 
 	public:
@@ -302,7 +302,7 @@ namespace demos
 		void AddTreeSeason()override
 		{
 			auto first = UnboxValue<Ptr<ISeason>>(treeSeasons->GetChildren()->Get(0)).Cast<Season>();
-			first->Add(new Season(L"Unknown Season No." + itow(seasons.Count() + 1), L"N/A"));
+			first->Add(new Season(L"Unknown Season No." + itow(first->GetChildren()->GetCount() + 1), L"N/A"));
 		}
 	};
 }
