@@ -1805,7 +1805,11 @@ Type Declaration
 
 			BEGIN_CLASS_MEMBER(GuiBindableTreeView)
 				CLASS_MEMBER_BASE(GuiVirtualTreeView)
-				CLASS_MEMBER_CONSTRUCTOR(GuiBindableTreeView*(GuiBindableTreeView::IStyleProvider*, Ptr<IValueEnumerable>), {L"styleProvider" _ L"itemSource"})
+				CLASS_MEMBER_CONSTRUCTOR(GuiBindableTreeView*(GuiBindableTreeView::IStyleProvider*, const Value&), {L"styleProvider" _ L"itemSource"})
+				
+				CLASS_MEMBER_PROPERTY_GUIEVENT_FAST(TextProperty)
+				CLASS_MEMBER_PROPERTY_GUIEVENT_FAST(ImageProperty)
+				CLASS_MEMBER_PROPERTY_GUIEVENT_FAST(ChildrenProperty)
 			END_CLASS_MEMBER(GuiBindableTreeView)
 
 			BEGIN_CLASS_MEMBER(GuiBindableDataGrid)
