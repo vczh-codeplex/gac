@@ -633,6 +633,7 @@ L"\r\n" L"\t= WorkflowType : value \"[\" [WorkflowType : key] \"]\" as MapType w
 L"\r\n" L"\t= \"const\" WorkflowType : value \"[\" [WorkflowType : key] \"]\" as MapType with {writability=\"Readonly\"}"
 L"\r\n" L"\t= WorkflowType : parent \"::\" NAME : name as ChildType"
 L"\r\n" L"\t= \"::\" NAME : name as TopQualifiedType"
+L"\r\n" L"\t= \"(\" !WorkflowType \")\""
 L"\r\n" L"\t;"
 L"\r\n" L""
 L"\r\n" L"rule LiteralExpression Literal"
