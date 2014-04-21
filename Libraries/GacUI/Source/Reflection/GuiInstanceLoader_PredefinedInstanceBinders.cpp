@@ -385,14 +385,14 @@ GuiWorkflowGlobalContext
 					env->scope->errors.Add(moduleCode);
 					return;
 				}
-#ifdef _DEBUG
-				else
-				{
-					// for debug only, always show code in error
-					env->scope->errors.Add(ERROR_CODE_PREFIX L"Print code for reference (debug mode only):");
-					env->scope->errors.Add(moduleCode);
-				}
-#endif
+//#ifdef _DEBUG
+//				else
+//				{
+//					// for debug only, always show code in error
+//					env->scope->errors.Add(ERROR_CODE_PREFIX L"Print code for reference (debug mode only):");
+//					env->scope->errors.Add(moduleCode);
+//				}
+//#endif
 
 				auto assembly = GenerateAssembly(&manager);
 				globalContext = new WfRuntimeGlobalContext(assembly);
@@ -623,14 +623,14 @@ GuiEvalInstanceBinder
 						}
 						return Value();
 					}
-#ifdef _DEBUG
-					else
-					{
-						// for debug only, always show code in error
-						env->scope->errors.Add(ERROR_CODE_PREFIX L"Print code for reference (debug mode only):");
-						env->scope->errors.Add(moduleCode);
-					}
-#endif
+//#ifdef _DEBUG
+//					else
+//					{
+//						// for debug only, always show code in error
+//						env->scope->errors.Add(ERROR_CODE_PREFIX L"Print code for reference (debug mode only):");
+//						env->scope->errors.Add(moduleCode);
+//					}
+//#endif
 
 					auto assembly = GenerateAssembly(&manager);
 					auto globalContext = MakePtr<WfRuntimeGlobalContext>(assembly);
@@ -725,14 +725,14 @@ GuiEvalInstanceEventBinder
 						}
 						return false;
 					}
-#ifdef _DEBUG
-					else
-					{
-						// for debug only, always show code in error
-						env->scope->errors.Add(ERROR_CODE_PREFIX L"Print code for reference (debug mode only):");
-						env->scope->errors.Add(moduleCode);
-					}
-#endif
+//#ifdef _DEBUG
+//					else
+//					{
+//						// for debug only, always show code in error
+//						env->scope->errors.Add(ERROR_CODE_PREFIX L"Print code for reference (debug mode only):");
+//						env->scope->errors.Add(moduleCode);
+//					}
+//#endif
 
 					auto assembly = GenerateAssembly(&manager);
 					auto globalContext = MakePtr<WfRuntimeGlobalContext>(assembly);

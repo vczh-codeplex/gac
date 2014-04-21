@@ -494,10 +494,19 @@ Print (Expression)
 
 			void Visit(WfTypeCastingExpression* node)override
 			{
-				writer.WriteString(L"cast ");
-				WfPrint(node->type, indent, writer);
-				writer.WriteString(L" ");
-				WfPrint(node->expression, indent, writer);
+				if (node->strategy == WfTypeCastingStrategy::Strong)
+				{
+					writer.WriteString(L"cast ");
+					WfPrint(node->type, indent, writer);
+					writer.WriteString(L" ");
+					WfPrint(node->expression, indent, writer);
+				}
+				else
+				{
+					WfPrint(node->expression, indent, writer);
+					writer.WriteString(L" as ");
+					WfPrint(node->type, indent, writer);
+				}
 			}
 
 			void Visit(WfTypeTestingExpression* node)override

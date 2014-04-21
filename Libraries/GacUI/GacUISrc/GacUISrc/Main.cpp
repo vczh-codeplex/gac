@@ -174,6 +174,7 @@ namespace vl
 				void Load(ITypeManager* manager)
 				{
 					ADD_TYPE_INFO(demos::IViewModel)
+					ADD_TYPE_INFO(demos::Season)
 					ADD_TYPE_INFO(demos::MainWindow)
 				}
 
