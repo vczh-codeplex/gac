@@ -634,6 +634,7 @@ rule Type WorkflowType
 	= "const" WorkflowType : value "[" [WorkflowType : key] "]" as MapType with {writability="Readonly"}
 	= WorkflowType : parent "::" NAME : name as ChildType
 	= "::" NAME : name as TopQualifiedType
+	= "(" !WorkflowType ")"
 	;
 
 rule LiteralExpression Literal
