@@ -254,14 +254,36 @@ GuiBindableListView::ListViewColumns
 GuiBindableListView::ItemSource
 ***********************************************************************/
 
-			GuiBindableListView::ItemSource::ItemSource(Ptr<description::IValueEnumerable> itemSource)
+			GuiBindableListView::ItemSource::ItemSource(Ptr<description::IValueEnumerable> _itemSource)
 			{
+				if (auto ol = _itemSource.Cast<IValueObservableList>())
+				{
+					itemSource = ol;
+					itemChangedEventHandler = ol->ItemChanged.Add([this](vint start, vint oldCount, vint newCount)
+					{
+						InvokeOnItemModified(start, oldCount, newCount);
+					});
+				}
+				else if (auto rl = _itemSource.Cast<IValueReadonlyList>())
+				{
+					itemSource = rl;
+				}
+				else
+				{
+					itemSource = IValueList::Create(GetLazyList<Value>(_itemSource));
+				}
+
 				columns.itemProvider = this;
 				dataColumns.itemProvider = this;
 			}
 
 			GuiBindableListView::ItemSource::~ItemSource()
 			{
+				if (itemChangedEventHandler)
+				{
+					auto ol = itemSource.Cast<IValueObservableList>();
+					ol->ItemChanged.Remove(itemChangedEventHandler);
+				}
 			}
 
 			description::Value GuiBindableListView::ItemSource::Get(vint index)
@@ -640,7 +662,7 @@ GuiBindableTreeView
 GuiBindableDataGrid::ItemSource
 ***********************************************************************/
 
-			GuiBindableDataGrid::ItemSource::ItemSource(Ptr<description::IValueEnumerable> itemSource)
+			GuiBindableDataGrid::ItemSource::ItemSource(Ptr<description::IValueEnumerable> _itemSource)
 			{
 				throw 0;
 			}

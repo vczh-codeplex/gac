@@ -33,11 +33,13 @@ GuiBindableTextList
 					: public list::ItemProviderBase
 					, protected list::TextItemStyleProvider::ITextItemView
 				{
+				protected:
+					Ptr<EventHandler>								itemChangedEventHandler;
+					Ptr<description::IValueReadonlyList>			itemSource;
+
 				public:
 					WString											textProperty;
 					WString											checkedProperty;
-					Ptr<EventHandler>								itemChangedEventHandler;
-					Ptr<description::IValueReadonlyList>			itemSource;
 
 				public:
 					ItemSource(Ptr<description::IValueEnumerable> _itemSource);
@@ -148,6 +150,7 @@ GuiBindableListView
 					ListViewDataColumns								dataColumns;
 					ListViewColumns									columns;
 					ColumnItemViewCallbackList						columnItemViewCallbacks;
+					Ptr<EventHandler>								itemChangedEventHandler;
 					Ptr<description::IValueReadonlyList>			itemSource;
 
 				public:
@@ -155,7 +158,7 @@ GuiBindableListView
 					WString											smallImageProperty;
 
 				public:
-					ItemSource(Ptr<description::IValueEnumerable> itemSource);
+					ItemSource(Ptr<description::IValueEnumerable> _itemSource);
 					~ItemSource();
 					
 					description::Value								Get(vint index);
@@ -251,7 +254,7 @@ GuiBindableTreeView
 					, protected virtual tree::ITreeViewItemView
 				{
 				public:
-					ItemSource(Ptr<description::IValueEnumerable> itemSource);
+					ItemSource(Ptr<description::IValueEnumerable> _itemSource);
 					~ItemSource();
 
 					// ===================== tree::INodeRootProvider =====================
@@ -298,7 +301,7 @@ GuiBindableDataGrid
 					, public virtual list::IDataProvider
 				{
 				public:
-					ItemSource(Ptr<description::IValueEnumerable> itemSource);
+					ItemSource(Ptr<description::IValueEnumerable> _itemSource);
 					~ItemSource();
 
 					// ===================== list::IDataProvider =====================
