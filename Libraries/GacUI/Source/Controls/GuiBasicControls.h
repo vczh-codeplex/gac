@@ -867,45 +867,6 @@ List interface common implementation
 						return observableList;
 					}
 				};
-
-				template<typename T>
-				class ValueObservableList : public ItemsBase<T>, public virtual IValueObservableList
-				{
-					typedef typename KeyType<T>::Type ElementKeyType;
-				protected:
-					void NotifyUpdateInternal(vint start, vint count, vint newCount)override
-					{
-						ItemChanged(start, count, newCount);
-					}
-				public:
-
-					Ptr<description::IValueEnumerator> CreateEnumerator()override
-					{
-						return new description::ValueEnumeratorWrapper<Ptr<collections::IEnumerator<T>>>(ItemsBase<T>::CreateEnumerator());
-					}
-
-					vint GetCount()override
-					{
-						return ItemsBase<T>::Count();
-					}
-
-					description::Value Get(vint index)override
-					{
-						return description::BoxValue<ElementType>(ItemsBase<T>::Get(index));
-					}
-
-					bool Contains(const description::Value& value)override
-					{
-						ElementKeyType item = UnboxValue<ElementKeyType>(value);
-						return ItemsBase<T>::Contains(item);
-					}
-
-					vint IndexOf(const description::Value& value)override
-					{
-						ElementKeyType item = UnboxValue<ElementKeyType>(value);
-						return ItemsBase<T>::IndexOf(item);
-					}
-				};
 			}
 		}
 	}

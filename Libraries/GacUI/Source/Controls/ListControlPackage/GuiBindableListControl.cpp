@@ -631,6 +631,21 @@ GuiBindableTreeView::ItemSourceNode
 				}
 			}
 
+			void GuiBindableTreeView::ItemSourceNode::UnprepareChildren()
+			{
+				if (itemChangedEventHandler)
+				{
+					auto ol = childrenVirtualList.Cast<IValueObservableList>();
+					ol->ItemChanged.Remove(itemChangedEventHandler);
+				}
+				childrenVirtualList = 0;
+				FOREACH(Ptr<ItemSourceNode>, node, children)
+				{
+					node->UnprepareChildren();
+				}
+				children.Clear();
+			}
+
 			GuiBindableTreeView::ItemSourceNode::ItemSourceNode(const description::Value& _itemSource, ItemSourceNode* _parent)
 				:itemSource(_itemSource)
 				, rootProvider(_parent->rootProvider)
@@ -649,21 +664,17 @@ GuiBindableTreeView::ItemSourceNode
 
 			GuiBindableTreeView::ItemSourceNode::~ItemSourceNode()
 			{
-				if (itemChangedEventHandler)
-				{
-					auto ol = childrenVirtualList.Cast<IValueObservableList>();
-					ol->ItemChanged.Remove(itemChangedEventHandler);
-				}
+				UnprepareChildren();
 			}
 
 			bool GuiBindableTreeView::ItemSourceNode::GetExpanding()
 			{
-				return expanding;
+				return this == rootProvider->rootNode.Obj() ? true : expanding;
 			}
 
 			void GuiBindableTreeView::ItemSourceNode::SetExpanding(bool value)
 			{
-				if (expanding != value)
+				if (this != rootProvider->rootNode.Obj() && expanding != value)
 				{
 					expanding = value;
 					if (expanding)
@@ -735,11 +746,16 @@ GuiBindableTreeView::ItemSource
 			{
 			}
 
-			void GuiBindableTreeView::ItemSource::UpdateBindingProperties()
+			void GuiBindableTreeView::ItemSource::UpdateBindingProperties(bool updateChildrenProperty)
 			{
-				vint count = rootNode->GetChildCount();
-				OnBeforeItemModified(rootNode.Obj(), 0, count, count);
-				OnAfterItemModified(rootNode.Obj(), 0, count, count);
+				vint oldCount = rootNode->GetChildCount();
+				if (updateChildrenProperty)
+				{
+					rootNode->UnprepareChildren();
+				}
+				vint newCount = rootNode->GetChildCount();
+				OnBeforeItemModified(rootNode.Obj(), 0, oldCount, newCount);
+				OnAfterItemModified(rootNode.Obj(), 0, oldCount, newCount);
 			}
 
 			// ===================== tree::INodeRootProvider =====================
@@ -828,7 +844,7 @@ GuiBindableTreeView
 				if (itemSource->textProperty != value)
 				{
 					itemSource->textProperty = value;
-					itemSource->UpdateBindingProperties();
+					itemSource->UpdateBindingProperties(false);
 					TextPropertyChanged.Execute(GetNotifyEventArguments());
 				}
 			}
@@ -843,7 +859,7 @@ GuiBindableTreeView
 				if (itemSource->imageProperty != value)
 				{
 					itemSource->imageProperty = value;
-					itemSource->UpdateBindingProperties();
+					itemSource->UpdateBindingProperties(false);
 					ImagePropertyChanged.Execute(GetNotifyEventArguments());
 				}
 			}
@@ -858,7 +874,7 @@ GuiBindableTreeView
 				if (itemSource->childrenProperty != value)
 				{
 					itemSource->childrenProperty = value;
-					itemSource->UpdateBindingProperties();
+					itemSource->UpdateBindingProperties(true);
 					ChildrenPropertyChanged.Execute(GetNotifyEventArguments());
 				}
 			}

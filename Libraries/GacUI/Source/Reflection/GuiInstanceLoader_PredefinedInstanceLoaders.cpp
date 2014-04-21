@@ -684,7 +684,10 @@ GuiTreeViewInstanceLoader
 			{
 				if (propertyInfo.propertyName == L"Nodes")
 				{
-					return GuiInstancePropertyInfo::Collection(description::GetTypeDescriptor<tree::MemoryNodeProvider>());
+					if (!bindable)
+					{
+						return GuiInstancePropertyInfo::Collection(description::GetTypeDescriptor<tree::MemoryNodeProvider>());
+					}
 				}
 				else if (propertyInfo.propertyName == L"ItemSource")
 				{
@@ -698,12 +701,9 @@ GuiTreeViewInstanceLoader
 				}
 				else if (propertyInfo.propertyName == L"IconSize")
 				{
-					if (!bindable)
-					{
-						auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<Size>());
-						info->constructorParameter = true;
-						return info;
-					}
+					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<Size>());
+					info->constructorParameter = true;
+					return info;
 				}
 				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
 			}
