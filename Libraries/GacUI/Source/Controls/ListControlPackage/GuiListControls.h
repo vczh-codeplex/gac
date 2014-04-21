@@ -106,6 +106,19 @@ List Control
 					virtual bool								ContainsPrimaryText(vint itemIndex)=0;
 				};
 
+				/// <summary>Binding view for <see cref="IItemProvider"/>.</summary>
+				class IItemBindingView : public virtual IDescriptable, public Description<IItemPrimaryTextView>
+				{
+				public:
+					/// <summary>The identifier for this view.</summary>
+					static const wchar_t* const					Identifier;
+
+					/// <summary>Get the binding value of an item.</summary>
+					/// <returns>The binding value of an item.</returns>
+					/// <param name="itemIndex">The index of the item.</param>
+					virtual description::Value					GetBindingValue(vint itemIndex)=0;
+				};
+
 				//-----------------------------------------------------------
 				// Provider Interfaces
 				//-----------------------------------------------------------
