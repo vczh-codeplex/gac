@@ -668,6 +668,11 @@ GuiBindableTreeView::ItemSourceNode
 				UnprepareChildren();
 			}
 
+			description::Value GuiBindableTreeView::ItemSourceNode::GetItemSource()
+			{
+				return itemSource;
+			}
+
 			bool GuiBindableTreeView::ItemSourceNode::GetExpanding()
 			{
 				return this == rootProvider->rootNode.Obj() ? true : expanding;
@@ -799,7 +804,7 @@ GuiBindableTreeView::ItemSource
 			{
 				if (auto itemSourceNode = dynamic_cast<ItemSourceNode*>(node))
 				{
-					auto value = ReadProperty(itemSourceNode->itemSource, imageProperty);
+					auto value = ReadProperty(itemSourceNode->GetItemSource(), imageProperty);
 					if (value.GetTypeDescriptor() == description::GetTypeDescriptor<GuiImageData>())
 					{
 						return UnboxValue<Ptr<GuiImageData>>(value);
@@ -812,7 +817,7 @@ GuiBindableTreeView::ItemSource
 			{
 				if (auto itemSourceNode = dynamic_cast<ItemSourceNode*>(node))
 				{
-					return ReadProperty(itemSourceNode->itemSource, textProperty).GetText();
+					return ReadProperty(itemSourceNode->GetItemSource(), textProperty).GetText();
 				}
 				return L"";
 			}
@@ -878,6 +883,23 @@ GuiBindableTreeView
 					itemSource->UpdateBindingProperties(true);
 					ChildrenPropertyChanged.Execute(GetNotifyEventArguments());
 				}
+			}
+
+			description::Value GuiBindableTreeView::GetSelectedItem()
+			{
+				vint index = GetSelectedItemIndex();
+				if (index == -1) return Value();
+
+				Value result;
+				if (auto node = nodeItemView->RequestNode(index))
+				{
+					if (auto itemSourceNode = dynamic_cast<ItemSourceNode*>(node))
+					{
+						result = itemSourceNode->GetItemSource();
+					}
+					nodeItemView->ReleaseNode(node);
+				}
+				return result;
 			}
 
 /***********************************************************************
