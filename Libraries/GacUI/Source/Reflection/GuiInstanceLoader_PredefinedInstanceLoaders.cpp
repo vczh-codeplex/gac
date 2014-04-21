@@ -434,6 +434,7 @@ GuiListViewInstanceLoader
 		{
 		protected:
 			bool				bindable;
+
 		public:
 			GuiListViewInstanceLoader(bool _bindable)
 				:bindable(_bindable)
@@ -566,12 +567,15 @@ GuiListViewInstanceLoader
 					info->constructorParameter = true;
 					return info;
 				}
-				else if (bindable && propertyInfo.propertyName == L"ItemSource")
+				else if (propertyInfo.propertyName == L"ItemSource")
 				{
-					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<IValueEnumerable>());
-					info->constructorParameter = true;
-					info->required = true;
-					return info;
+					if (bindable)
+					{
+						auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<IValueEnumerable>());
+						info->constructorParameter = true;
+						info->required = true;
+						return info;
+					}
 				}
 				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
 			}
@@ -588,10 +592,25 @@ GuiTreeViewInstanceLoader
 
 		class GuiTreeViewInstanceLoader : public Object, public IGuiInstanceLoader
 		{
+		protected:
+			bool				bindable;
+
 		public:
+			GuiTreeViewInstanceLoader(bool _bindable)
+				:bindable(_bindable)
+			{
+			}
+
 			WString GetTypeName()override
 			{
-				return description::GetTypeDescriptor<GuiTreeView>()->GetTypeName();
+				if (bindable)
+				{
+					return description::GetTypeDescriptor<GuiBindableTreeView>()->GetTypeName();
+				}
+				else
+				{
+					return description::GetTypeDescriptor<GuiTreeView>()->GetTypeName();
+				}
 			}
 
 			bool IsCreatable(const TypeInfo& typeInfo)override
@@ -603,7 +622,23 @@ GuiTreeViewInstanceLoader
 			{
 				if (typeInfo.typeName == GetTypeName())
 				{
-					GuiTreeView* treeView = new GuiTreeView(GetCurrentTheme()->CreateTreeViewStyle());
+					vint indexItemSource = constructorArguments.Keys().IndexOf(L"ItemSource");
+
+					GuiVirtualTreeView* treeView = 0;
+					if (bindable)
+					{
+						if (indexItemSource == -1)
+						{
+							return Value();
+						}
+
+						auto itemSource = constructorArguments.GetByIndex(indexItemSource)[0];
+						treeView = new GuiBindableTreeView(GetCurrentTheme()->CreateTreeViewStyle(), itemSource);
+					}
+					else
+					{
+						treeView = new GuiTreeView(GetCurrentTheme()->CreateTreeViewStyle());
+					}
 
 					vint indexIconSize = constructorArguments.Keys().IndexOf(L"IconSize");
 					if (indexIconSize != -1)
@@ -622,8 +657,15 @@ GuiTreeViewInstanceLoader
 				if (typeInfo.typeName == GetTypeName())
 				{
 					propertyNames.Add(L"IconSize");
+					if (bindable)
+					{
+						propertyNames.Add(L"ItemSource");
+					}
 				}
-				propertyNames.Add(L"Nodes");
+				if (!bindable)
+				{
+					propertyNames.Add(L"Nodes");
+				}
 			}
 
 			void GetConstructorParameters(const TypeInfo& typeInfo, List<WString>& propertyNames)override
@@ -631,6 +673,10 @@ GuiTreeViewInstanceLoader
 				if (typeInfo.typeName == GetTypeName())
 				{
 					propertyNames.Add(L"IconSize");
+					if (bindable)
+					{
+						propertyNames.Add(L"ItemSource");
+					}
 				}
 			}
 
@@ -640,11 +686,24 @@ GuiTreeViewInstanceLoader
 				{
 					return GuiInstancePropertyInfo::Collection(description::GetTypeDescriptor<tree::MemoryNodeProvider>());
 				}
+				else if (propertyInfo.propertyName == L"ItemSource")
+				{
+					if (bindable)
+					{
+						auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<Value>());
+						info->constructorParameter = true;
+						info->required = true;
+						return info;
+					}
+				}
 				else if (propertyInfo.propertyName == L"IconSize")
 				{
-					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<Size>());
-					info->constructorParameter = true;
-					return info;
+					if (!bindable)
+					{
+						auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<Size>());
+						info->constructorParameter = true;
+						return info;
+					}
 				}
 				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
 			}
@@ -1176,11 +1235,10 @@ GuiPredefinedInstanceLoadersPlugin
 				manager->SetLoader(new GuiToolstripToolBarInstanceLoader);
 				manager->SetLoader(new GuiToolstripButtonInstanceLoader);
 				manager->SetLoader(new GuiListViewInstanceLoader(false));
-				manager->SetLoader(new GuiTreeViewInstanceLoader);
+				manager->SetLoader(new GuiTreeViewInstanceLoader(false));
 				manager->SetLoader(new GuiBindableTextListInstanceLoader(L"", [](){return GetCurrentTheme()->CreateTextListItemStyle(); }));
-				manager->SetLoader(new GuiBindableTextListInstanceLoader(L"Check", [](){return GetCurrentTheme()->CreateCheckTextListItemStyle(); }));
-				manager->SetLoader(new GuiBindableTextListInstanceLoader(L"Radio", [](){return GetCurrentTheme()->CreateRadioTextListItemStyle(); }));
 				manager->SetLoader(new GuiListViewInstanceLoader(true));
+				manager->SetLoader(new GuiTreeViewInstanceLoader(true));
 
 				manager->SetLoader(new GuiCompositionInstanceLoader);
 				manager->SetLoader(new GuiTableCompositionInstanceLoader);
@@ -1207,6 +1265,10 @@ GuiPredefinedInstanceLoadersPlugin
 				ADD_VIRTUAL_TYPE(ProgressBar,				GuiScroll,				g::NewProgressBar);
 				ADD_VIRTUAL_TYPE(CheckTextList,				GuiTextList,			g::NewCheckTextList);
 				ADD_VIRTUAL_TYPE(RadioTextList,				GuiTextList,			g::NewRadioTextList);
+
+				auto bindableTextListName = description::GetTypeDescriptor<GuiBindableTextList>()->GetTypeName();
+				manager->CreateVirtualType(bindableTextListName, new GuiBindableTextListInstanceLoader(L"Check", [](){return GetCurrentTheme()->CreateCheckTextListItemStyle(); }));
+				manager->CreateVirtualType(bindableTextListName, new GuiBindableTextListInstanceLoader(L"Radio", [](){return GetCurrentTheme()->CreateRadioTextListItemStyle(); }));
 
 #undef ADD_VIRTUAL_TYPE
 #undef ADD_VIRTUAL_TYPE_LOADER

@@ -248,22 +248,64 @@ GuiBindableTreeView
 			class GuiBindableTreeView : public GuiVirtualTreeView, public Description<GuiBindableTreeView>
 			{
 			protected:
-				class ItemSource
+				class ItemSource;
+
+				class ItemSourceNode
 					: public Object
-					, public virtual tree::INodeRootProvider
+					, public virtual tree::INodeProvider
+				{
+					friend class ItemSource;
+					typedef collections::List<Ptr<ItemSourceNode>>	NodeList;
+				protected:
+					description::Value								itemSource;
+					ItemSource*										rootProvider;
+					ItemSourceNode*									parent;
+					tree::INodeProviderCallback*					callback;
+					bool											expanding = false;
+
+					Ptr<EventHandler>								itemChangedEventHandler;
+					Ptr<description::IValueReadonlyList>			childrenVirtualList;
+					NodeList										children;
+
+					void											PrepareChildren();
+				public:
+					ItemSourceNode(const description::Value& _itemSource, ItemSourceNode* _parent);
+					ItemSourceNode(const description::Value& _itemSource, ItemSource* _rootProvider);
+					~ItemSourceNode();
+
+					// ===================== tree::INodeProvider =====================
+
+					bool											GetExpanding()override;
+					void											SetExpanding(bool value)override;
+					vint											CalculateTotalVisibleNodes()override;
+
+					vint											GetChildCount()override;
+					tree::INodeProvider*							GetParent()override;
+					tree::INodeProvider*							GetChild(vint index)override;
+					void											Increase()override;
+					void											Release()override;
+				};
+
+				class ItemSource
+					: public tree::NodeRootProviderBase
 					, protected virtual tree::ITreeViewItemView
 				{
+					friend class ItemSourceNode;
 				public:
-					ItemSource(Ptr<description::IValueEnumerable> _itemSource);
+					WString											textProperty;
+					WString											imageProperty;
+					WString											childrenProperty;
+					Ptr<ItemSourceNode>								rootNode;
+
+				public:
+					ItemSource(const description::Value& _itemSource);
 					~ItemSource();
+
+					void											UpdateBindingProperties();
 
 					// ===================== tree::INodeRootProvider =====================
 
 					tree::INodeProvider*							GetRootNode()override;
-					bool											CanGetNodeByVisibleIndex()override;
-					tree::INodeProvider*							GetNodeByVisibleIndex(vint index)override;
-					bool											AttachCallback(tree::INodeProviderCallback* value)override;
-					bool											DetachCallback(tree::INodeProviderCallback* value)override;
 					IDescriptable*									RequestView(const WString& identifier)override;
 					void											ReleaseView(IDescriptable* view)override;
 
@@ -284,8 +326,36 @@ GuiBindableTreeView
 				/// <summary>Create a bindable Tree view control.</summary>
 				/// <param name="_styleProvider">The style provider for this control.</param>
 				/// <param name="_itemSource">The item source.</param>
-				GuiBindableTreeView(IStyleProvider* _styleProvider, Ptr<description::IValueEnumerable> _itemSource);
+				GuiBindableTreeView(IStyleProvider* _styleProvider, const description::Value& _itemSource);
 				~GuiBindableTreeView();
+				
+				/// <summary>Text property name changed event.</summary>
+				compositions::GuiNotifyEvent						TextPropertyChanged;
+				/// <summary>Image property name changed event.</summary>
+				compositions::GuiNotifyEvent						ImagePropertyChanged;
+				/// <summary>Children property name changed event.</summary>
+				compositions::GuiNotifyEvent						ChildrenPropertyChanged;
+				
+				/// <summary>Get the text property name to get the item text from an item.</summary>
+				/// <returns>The text property name.</returns>
+				const WString&										GetTextProperty();
+				/// <summary>Set the text property name to get the item text from an item.</summary>
+				/// <param name="value">The text property name.</param>
+				void												SetTextProperty(const WString& value);
+				
+				/// <summary>Get the image property name to get the image from an item.</summary>
+				/// <returns>The image property name.</returns>
+				const WString&										GetImageProperty();
+				/// <summary>Set the image property name to get the image from an item.</summary>
+				/// <param name="value">The image property name.</param>
+				void												SetImageProperty(const WString& value);
+				
+				/// <summary>Get the children property name to get the children from an item.</summary>
+				/// <returns>The children property name.</returns>
+				const WString&										GetChildrenProperty();
+				/// <summary>Set the children property name to get the children from an item.</summary>
+				/// <param name="value">The children property name.</param>
+				void												SetChildrenProperty(const WString& value);
 			};
 
 /***********************************************************************

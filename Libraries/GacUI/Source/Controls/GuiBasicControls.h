@@ -867,6 +867,23 @@ List interface common implementation
 						return observableList;
 					}
 				};
+
+				template<typename T>
+				class ValueObservableList : public ItemsBase<T>, public description::ValueObservableListWrapper<ValueObservableList<T>*>
+				{
+				protected:
+					void NotifyUpdateInternal(vint start, vint count, vint newCount)override
+					{
+						ItemChanged(start, count, newCount);
+					}
+				public:
+					typedef T ElementType;
+
+					ValueObservableList()
+						:description::ValueObservableListWrapper<ValueObservableList<T>*>(this)
+					{
+					}
+				};
 			}
 		}
 	}

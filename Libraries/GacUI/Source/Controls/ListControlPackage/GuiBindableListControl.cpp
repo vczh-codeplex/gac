@@ -7,6 +7,7 @@ namespace vl
 	{
 		namespace controls
 		{
+			using namespace collections;
 			using namespace list;
 			using namespace tree;
 			using namespace reflection::description;
@@ -549,6 +550,7 @@ GuiBindableListView
 				if (itemSource->largeImageProperty != value)
 				{
 					itemSource->largeImageProperty = value;
+					itemSource->UpdateBindingProperties();
 					LargeImagePropertyChanged.Execute(GetNotifyEventArguments());
 				}
 			}
@@ -563,6 +565,7 @@ GuiBindableListView
 				if (itemSource->smallImageProperty != value)
 				{
 					itemSource->smallImageProperty = value;
+					itemSource->UpdateBindingProperties();
 					SmallImagePropertyChanged.Execute(GetNotifyEventArguments());
 				}
 			}
@@ -575,87 +578,289 @@ GuiBindableListView
 			}
 
 /***********************************************************************
+GuiBindableTreeView::ItemSourceNode
+***********************************************************************/
+
+			void GuiBindableTreeView::ItemSourceNode::PrepareChildren()
+			{
+				if (!childrenVirtualList)
+				{
+					auto value = ReadProperty(itemSource, rootProvider->childrenProperty);
+					if (auto td = value.GetTypeDescriptor())
+					{
+						if (td->CanConvertTo(description::GetTypeDescriptor<IValueObservableList>()))
+						{
+							auto ol = UnboxValue<Ptr<IValueObservableList>>(value);
+							itemChangedEventHandler = ol->ItemChanged.Add([this](vint start, vint oldCount, vint newCount)
+							{
+								callback->OnBeforeItemModified(this, start, oldCount, newCount);
+								children.RemoveRange(start, oldCount);
+								for (vint i = 0; i < newCount; i++)
+								{
+									Value value = childrenVirtualList->Get(start + i);
+									auto node = new ItemSourceNode(value, this);
+									children.Insert(start + i, node);
+								}
+								callback->OnAfterItemModified(this, start, oldCount, newCount);
+							});
+							childrenVirtualList = ol;
+						}
+						else if (td->CanConvertTo(description::GetTypeDescriptor<IValueReadonlyList>()))
+						{
+							childrenVirtualList = UnboxValue<Ptr<IValueReadonlyList>>(value);
+						}
+						else if (td->CanConvertTo(description::GetTypeDescriptor<IValueEnumerable>()))
+						{
+							auto e = UnboxValue<Ptr<IValueEnumerable>>(value);
+							childrenVirtualList = IValueList::Create(GetLazyList<Value>(e));
+						}
+					}
+
+					if (!childrenVirtualList)
+					{
+						childrenVirtualList = IValueList::Create();
+					}
+
+					vint count = childrenVirtualList->GetCount();
+					for (vint i = 0; i < count; i++)
+					{
+						Value value = childrenVirtualList->Get(i);
+						auto node = new ItemSourceNode(value, this);
+						children.Add(node);
+					}
+				}
+			}
+
+			GuiBindableTreeView::ItemSourceNode::ItemSourceNode(const description::Value& _itemSource, ItemSourceNode* _parent)
+				:itemSource(_itemSource)
+				, rootProvider(_parent->rootProvider)
+				, parent(_parent)
+				, callback(_parent->callback)
+			{
+			}
+
+			GuiBindableTreeView::ItemSourceNode::ItemSourceNode(const description::Value& _itemSource, ItemSource* _rootProvider)
+				:itemSource(_itemSource)
+				, rootProvider(_rootProvider)
+				, parent(0)
+				, callback(_rootProvider)
+			{
+			}
+
+			GuiBindableTreeView::ItemSourceNode::~ItemSourceNode()
+			{
+				if (itemChangedEventHandler)
+				{
+					auto ol = childrenVirtualList.Cast<IValueObservableList>();
+					ol->ItemChanged.Remove(itemChangedEventHandler);
+				}
+			}
+
+			bool GuiBindableTreeView::ItemSourceNode::GetExpanding()
+			{
+				return expanding;
+			}
+
+			void GuiBindableTreeView::ItemSourceNode::SetExpanding(bool value)
+			{
+				if (expanding != value)
+				{
+					expanding = value;
+					if (expanding)
+					{
+						callback->OnItemExpanded(this);
+					}
+					else
+					{
+						callback->OnItemCollapsed(this);
+					}
+				}
+			}
+
+			vint GuiBindableTreeView::ItemSourceNode::CalculateTotalVisibleNodes()
+			{
+				if (!expanding)
+				{
+					return 1;
+				}
+
+				PrepareChildren();
+				vint count = 1;
+				FOREACH(Ptr<ItemSourceNode>, child, children)
+				{
+					count += child->CalculateTotalVisibleNodes();
+				}
+				return count;
+			}
+
+			vint GuiBindableTreeView::ItemSourceNode::GetChildCount()
+			{
+				PrepareChildren();
+				return children.Count();
+			}
+
+			tree::INodeProvider* GuiBindableTreeView::ItemSourceNode::GetParent()
+			{
+				return parent;
+			}
+
+			tree::INodeProvider* GuiBindableTreeView::ItemSourceNode::GetChild(vint index)
+			{
+				PrepareChildren();
+				if (0 <= index && index < children.Count())
+				{
+					return children[index].Obj();
+				}
+				return 0;
+			}
+
+			void GuiBindableTreeView::ItemSourceNode::Increase()
+			{
+			}
+
+			void GuiBindableTreeView::ItemSourceNode::Release()
+			{
+			}
+
+/***********************************************************************
 GuiBindableTreeView::ItemSource
 ***********************************************************************/
 
-			GuiBindableTreeView::ItemSource::ItemSource(Ptr<description::IValueEnumerable> _itemSource)
+			GuiBindableTreeView::ItemSource::ItemSource(const description::Value& _itemSource)
 			{
-				throw 0;
+				rootNode = new ItemSourceNode(_itemSource, this);
 			}
 
 			GuiBindableTreeView::ItemSource::~ItemSource()
 			{
-				throw 0;
+			}
+
+			void GuiBindableTreeView::ItemSource::UpdateBindingProperties()
+			{
+				vint count = rootNode->GetChildCount();
+				OnBeforeItemModified(rootNode.Obj(), 0, count, count);
+				OnAfterItemModified(rootNode.Obj(), 0, count, count);
 			}
 
 			// ===================== tree::INodeRootProvider =====================
 
 			tree::INodeProvider* GuiBindableTreeView::ItemSource::GetRootNode()
 			{
-				throw 0;
-			}
-
-			bool GuiBindableTreeView::ItemSource::CanGetNodeByVisibleIndex()
-			{
-				throw 0;
-			}
-
-			tree::INodeProvider* GuiBindableTreeView::ItemSource::GetNodeByVisibleIndex(vint index)
-			{
-				throw 0;
-			}
-
-			bool GuiBindableTreeView::ItemSource::AttachCallback(tree::INodeProviderCallback* value)
-			{
-				throw 0;
-			}
-
-			bool GuiBindableTreeView::ItemSource::DetachCallback(tree::INodeProviderCallback* value)
-			{
-				throw 0;
+				return rootNode.Obj();
 			}
 
 			IDescriptable* GuiBindableTreeView::ItemSource::RequestView(const WString& identifier)
 			{
-				throw 0;
+				if(identifier==INodeItemPrimaryTextView::Identifier)
+				{
+					return (INodeItemPrimaryTextView*)this;
+				}
+				else if(identifier==ITreeViewItemView::Identifier)
+				{
+					return (ITreeViewItemView*)this;
+				}
+				else
+				{
+					return 0;
+				}
 			}
 
 			void GuiBindableTreeView::ItemSource::ReleaseView(IDescriptable* view)
 			{
-				throw 0;
 			}
 
 			// ===================== tree::INodeItemPrimaryTextView =====================
 
 			WString GuiBindableTreeView::ItemSource::GetPrimaryTextViewText(tree::INodeProvider* node)
 			{
-				throw 0;
+				return GetNodeText(node);
 			}
 
 			// ===================== tree::ITreeViewItemView =====================
 
 			Ptr<GuiImageData> GuiBindableTreeView::ItemSource::GetNodeImage(tree::INodeProvider* node)
 			{
-				throw 0;
+				if (auto itemSourceNode = dynamic_cast<ItemSourceNode*>(node))
+				{
+					auto value = ReadProperty(itemSourceNode->itemSource, imageProperty);
+					if (value.GetTypeDescriptor() == description::GetTypeDescriptor<GuiImageData>())
+					{
+						return UnboxValue<Ptr<GuiImageData>>(value);
+					}
+				}
+				return 0;
 			}
 
 			WString GuiBindableTreeView::ItemSource::GetNodeText(tree::INodeProvider* node)
 			{
-				throw 0;
+				if (auto itemSourceNode = dynamic_cast<ItemSourceNode*>(node))
+				{
+					return ReadProperty(itemSourceNode->itemSource, textProperty).GetText();
+				}
+				return L"";
 			}
 
 /***********************************************************************
 GuiBindableTreeView
 ***********************************************************************/
 
-			GuiBindableTreeView::GuiBindableTreeView(IStyleProvider* _styleProvider, Ptr<description::IValueEnumerable> _itemSource)
+			GuiBindableTreeView::GuiBindableTreeView(IStyleProvider* _styleProvider, const description::Value& _itemSource)
 				:GuiVirtualTreeView(_styleProvider, new ItemSource(_itemSource))
 			{
 				itemSource = dynamic_cast<ItemSource*>(GetNodeRootProvider());
+
+				TextPropertyChanged.SetAssociatedComposition(boundsComposition);
+				ImagePropertyChanged.SetAssociatedComposition(boundsComposition);
+				ChildrenPropertyChanged.SetAssociatedComposition(boundsComposition);
 			}
 
 			GuiBindableTreeView::~GuiBindableTreeView()
 			{
+			}
+
+			const WString& GuiBindableTreeView::GetTextProperty()
+			{
+				return itemSource->textProperty;
+			}
+
+			void GuiBindableTreeView::SetTextProperty(const WString& value)
+			{
+				if (itemSource->textProperty != value)
+				{
+					itemSource->textProperty = value;
+					itemSource->UpdateBindingProperties();
+					TextPropertyChanged.Execute(GetNotifyEventArguments());
+				}
+			}
+
+			const WString& GuiBindableTreeView::GetImageProperty()
+			{
+				return itemSource->imageProperty;
+			}
+
+			void GuiBindableTreeView::SetImageProperty(const WString& value)
+			{
+				if (itemSource->imageProperty != value)
+				{
+					itemSource->imageProperty = value;
+					itemSource->UpdateBindingProperties();
+					ImagePropertyChanged.Execute(GetNotifyEventArguments());
+				}
+			}
+
+			const WString& GuiBindableTreeView::GetChildrenProperty()
+			{
+				return itemSource->childrenProperty;
+			}
+
+			void GuiBindableTreeView::SetChildrenProperty(const WString& value)
+			{
+				if (itemSource->childrenProperty != value)
+				{
+					itemSource->childrenProperty = value;
+					itemSource->UpdateBindingProperties();
+					ChildrenPropertyChanged.Execute(GetNotifyEventArguments());
+				}
 			}
 
 /***********************************************************************
