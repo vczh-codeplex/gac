@@ -31,6 +31,7 @@ GuiBindableTextList
 			protected:
 				class ItemSource
 					: public list::ItemProviderBase
+					, protected GuiListControl::IItemBindingView
 					, protected list::TextItemStyleProvider::ITextItemView
 				{
 				protected:
@@ -53,6 +54,10 @@ GuiBindableTextList
 					vint											Count()override;
 					IDescriptable*									RequestView(const WString& identifier)override;
 					void											ReleaseView(IDescriptable* view)override;
+					
+					// ===================== GuiListControl::IItemBindingView =====================
+
+					description::Value								GetBindingValue(vint itemIndex)override;
 					
 					// ===================== GuiListControl::IItemPrimaryTextView =====================
 
@@ -140,6 +145,7 @@ GuiBindableListView
 			protected:
 				class ItemSource
 					: public list::ItemProviderBase
+					, protected GuiListControl::IItemBindingView
 					, protected virtual list::ListViewItemStyleProvider::IListViewItemView
 					, protected virtual list::ListViewColumnItemArranger::IColumnItemView
 				{
@@ -172,6 +178,10 @@ GuiBindableListView
 					vint											Count()override;
 					IDescriptable*									RequestView(const WString& identifier)override;
 					void											ReleaseView(IDescriptable* view)override;
+					
+					// ===================== GuiListControl::IItemBindingView =====================
+
+					description::Value								GetBindingValue(vint itemIndex)override;
 
 					// ===================== GuiListControl::IItemPrimaryTextView =====================
 
@@ -291,6 +301,7 @@ GuiBindableTreeView
 
 				class ItemSource
 					: public tree::NodeRootProviderBase
+					, protected virtual tree::INodeItemBindingView
 					, protected virtual tree::ITreeViewItemView
 				{
 					friend class ItemSourceNode;
@@ -311,6 +322,10 @@ GuiBindableTreeView
 					tree::INodeProvider*							GetRootNode()override;
 					IDescriptable*									RequestView(const WString& identifier)override;
 					void											ReleaseView(IDescriptable* view)override;
+
+					// ===================== tree::INodeItemBindingView =====================
+
+					description::Value								GetBindingValue(tree::INodeProvider* node)override;
 
 					// ===================== tree::INodeItemPrimaryTextView =====================
 

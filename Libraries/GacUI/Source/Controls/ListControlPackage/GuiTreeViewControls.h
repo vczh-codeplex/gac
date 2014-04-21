@@ -162,6 +162,19 @@ GuiVirtualTreeListControl NodeProvider
 					virtual WString					GetPrimaryTextViewText(INodeProvider* node)=0;
 				};
 
+				/// <summary>The Binding view for <see cref="INodeRootProvider"/>.</summary>
+				class INodeItemBindingView : public virtual IDescriptable, public Description<INodeItemPrimaryTextView>
+				{
+				public:
+					/// <summary>The identifier of this view.</summary>
+					static const wchar_t* const		Identifier;
+					
+					/// <summary>Get the binding value of a node.</summary>
+					/// <returns>The binding value of a node.</returns>
+					/// <param name="node">The node.</param>
+					virtual description::Value		GetBindingValue(INodeProvider* node)=0;
+				};
+
 				/// <summary>This is a general implementation to convert an <see cref="INodeRootProvider"/> to a <see cref="GuiListControl::IItemProvider"/>. It requires the <see cref="INodeItemPrimaryTextView"/> to provide a <see cref="GuiListControl::IItemPrimaryTextView"/>.</summary>
 				class NodeItemProvider
 					: public list::ItemProviderBase

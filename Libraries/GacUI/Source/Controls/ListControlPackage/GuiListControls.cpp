@@ -11,6 +11,7 @@ namespace vl
 			using namespace compositions;
 
 			const wchar_t* const GuiListControl::IItemPrimaryTextView::Identifier = L"vl::presnetation::controls::GuiListControl::IItemPrimaryTextView";
+			const wchar_t* const GuiListControl::IItemBindingView::Identifier = L"vl::presnetation::controls::GuiListControl::IItemBindingView";
 
 /***********************************************************************
 GuiListControl::ItemCallback

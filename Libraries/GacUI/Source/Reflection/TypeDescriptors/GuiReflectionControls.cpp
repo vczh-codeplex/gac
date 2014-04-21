@@ -440,6 +440,14 @@ Type Declaration
 				CLASS_MEMBER_METHOD(ContainsPrimaryText, {L"itemIndex"})
 			END_CLASS_MEMBER(GuiListControl::IItemPrimaryTextView)
 
+			BEGIN_CLASS_MEMBER(GuiListControl::IItemBindingView)
+				CLASS_MEMBER_BASE(IDescriptable)
+				INTERFACE_EXTERNALCTOR(GuiListControl, IItemBindingView)
+				INTERFACE_IDENTIFIER(GuiListControl::IItemBindingView)
+
+				CLASS_MEMBER_METHOD(GetBindingValue, {L"itemIndex"})
+			END_CLASS_MEMBER(GuiListControl::IItemBindingView)
+
 			BEGIN_ENUM_ITEM(GuiListControl::KeyDirection)
 				ENUM_ITEM_NAMESPACE(GuiListControl)
 				ENUM_NAMESPACE_ITEM(Up)
@@ -991,6 +999,14 @@ Type Declaration
 
 				CLASS_MEMBER_METHOD(GetPrimaryTextViewText, {L"node"})
 			END_CLASS_MEMBER(INodeItemPrimaryTextView)
+
+			BEGIN_CLASS_MEMBER(INodeItemBindingView)
+				CLASS_MEMBER_BASE(IDescriptable)
+				INTERFACE_EXTERNALCTOR(tree, INodeItemBindingView)
+				INTERFACE_IDENTIFIER(INodeItemBindingView)
+
+				CLASS_MEMBER_METHOD(GetBindingValue, {L"node"})
+			END_CLASS_MEMBER(INodeItemBindingView)
 
 			BEGIN_CLASS_MEMBER(NodeItemProvider)
 				CLASS_MEMBER_BASE(ItemProviderBase)

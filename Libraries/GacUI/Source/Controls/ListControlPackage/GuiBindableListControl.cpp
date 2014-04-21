@@ -95,7 +95,11 @@ GuiBindableTextList::ItemSource
 			
 			IDescriptable* GuiBindableTextList::ItemSource::RequestView(const WString& identifier)
 			{
-				if (identifier == GuiListControl::IItemPrimaryTextView::Identifier)
+				if (identifier == GuiListControl::IItemBindingView::Identifier)
+				{
+					return (GuiListControl::IItemBindingView*)this;
+				}
+				else if (identifier == GuiListControl::IItemPrimaryTextView::Identifier)
 				{
 					return (GuiListControl::IItemPrimaryTextView*)this;
 				}
@@ -111,6 +115,17 @@ GuiBindableTextList::ItemSource
 			
 			void GuiBindableTextList::ItemSource::ReleaseView(IDescriptable* view)
 			{
+			}
+					
+			// ===================== GuiListControl::IItemBindingView =====================
+
+			description::Value GuiBindableTextList::ItemSource::GetBindingValue(vint itemIndex)
+			{
+				if (0 <= itemIndex && itemIndex < itemSource->GetCount())
+				{
+					return itemSource->Get(itemIndex);
+				}
+				return Value();
 			}
 					
 			// ===================== GuiListControl::IItemPrimaryTextView =====================
@@ -329,7 +344,11 @@ GuiBindableListView::ItemSource
 
 			IDescriptable* GuiBindableListView::ItemSource::RequestView(const WString& identifier)
 			{
-				if(identifier==ListViewItemStyleProvider::IListViewItemView::Identifier)
+				if (identifier == GuiListControl::IItemBindingView::Identifier)
+				{
+					return (GuiListControl::IItemBindingView*)this;
+				}
+				else if(identifier==ListViewItemStyleProvider::IListViewItemView::Identifier)
 				{
 					return (ListViewItemStyleProvider::IListViewItemView*)this;
 				}
@@ -349,6 +368,17 @@ GuiBindableListView::ItemSource
 
 			void GuiBindableListView::ItemSource::ReleaseView(IDescriptable* view)
 			{
+			}
+					
+			// ===================== GuiListControl::IItemBindingView =====================
+
+			description::Value GuiBindableListView::ItemSource::GetBindingValue(vint itemIndex)
+			{
+				if (0 <= itemIndex && itemIndex < itemSource->GetCount())
+				{
+					return itemSource->Get(itemIndex);
+				}
+				return Value();
 			}
 
 			// ===================== GuiListControl::IItemPrimaryTextView =====================
@@ -773,7 +803,11 @@ GuiBindableTreeView::ItemSource
 
 			IDescriptable* GuiBindableTreeView::ItemSource::RequestView(const WString& identifier)
 			{
-				if(identifier==INodeItemPrimaryTextView::Identifier)
+				if(identifier==INodeItemBindingView::Identifier)
+				{
+					return (INodeItemBindingView*)this;
+				}
+				else if(identifier==INodeItemPrimaryTextView::Identifier)
 				{
 					return (INodeItemPrimaryTextView*)this;
 				}
@@ -789,6 +823,17 @@ GuiBindableTreeView::ItemSource
 
 			void GuiBindableTreeView::ItemSource::ReleaseView(IDescriptable* view)
 			{
+			}
+
+			// ===================== tree::INodeItemBindingView =====================
+
+			description::Value GuiBindableTreeView::ItemSource::GetBindingValue(tree::INodeProvider* node)
+			{
+				if (auto itemSourceNode = dynamic_cast<ItemSourceNode*>(node))
+				{
+					return itemSourceNode->GetItemSource();
+				}
+				return Value();
 			}
 
 			// ===================== tree::INodeItemPrimaryTextView =====================
