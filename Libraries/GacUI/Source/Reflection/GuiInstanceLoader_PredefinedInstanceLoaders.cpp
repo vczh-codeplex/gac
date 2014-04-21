@@ -432,10 +432,24 @@ GuiListViewInstanceLoader
 
 		class GuiListViewInstanceLoader : public Object, public IGuiInstanceLoader
 		{
+		protected:
+			bool				bindable;
 		public:
+			GuiListViewInstanceLoader(bool _bindable)
+				:bindable(_bindable)
+			{
+			}
+
 			WString GetTypeName()override
 			{
-				return description::GetTypeDescriptor<GuiListView>()->GetTypeName();
+				if (bindable)
+				{
+					return description::GetTypeDescriptor<GuiBindableListView>()->GetTypeName();
+				}
+				else
+				{
+					return description::GetTypeDescriptor<GuiListView>()->GetTypeName();
+				}
 			}
 
 			bool IsCreatable(const TypeInfo& typeInfo)override
@@ -447,9 +461,20 @@ GuiListViewInstanceLoader
 			{
 				if (typeInfo.typeName == GetTypeName())
 				{
+					Ptr<IValueEnumerable> itemSource;
 					ListViewViewType viewType = ListViewViewType::Detail;
 					Size iconSize;
 					{
+						vint itemSourceIndex = constructorArguments.Keys().IndexOf(L"ItemSource");
+						if (itemSourceIndex != -1)
+						{
+							itemSource = UnboxValue<Ptr<IValueEnumerable>>(constructorArguments.GetByIndex(itemSourceIndex)[0]);
+						}
+						else if (bindable)
+						{
+							return Value();
+						}
+
 						vint indexView = constructorArguments.Keys().IndexOf(L"View");
 						if (indexView != -1)
 						{
@@ -463,7 +488,15 @@ GuiListViewInstanceLoader
 						}
 					}
 
-					auto listView = new GuiListView(GetCurrentTheme()->CreateListViewStyle());
+					GuiVirtualListView* listView = 0;
+					if (bindable)
+					{
+						listView = new GuiBindableListView(GetCurrentTheme()->CreateListViewStyle(), itemSource);
+					}
+					else
+					{
+						listView = new GuiListView(GetCurrentTheme()->CreateListViewStyle());
+					}
 					switch (viewType)
 					{
 #define VIEW_TYPE_CASE(NAME)\
@@ -499,6 +532,10 @@ GuiListViewInstanceLoader
 				{
 					propertyNames.Add(L"View");
 					propertyNames.Add(L"IconSize");
+					if (bindable)
+					{
+						propertyNames.Add(L"ItemSource");
+					}
 				}
 			}
 
@@ -508,6 +545,10 @@ GuiListViewInstanceLoader
 				{
 					propertyNames.Add(L"View");
 					propertyNames.Add(L"IconSize");
+					if (bindable)
+					{
+						propertyNames.Add(L"ItemSource");
+					}
 				}
 			}
 
@@ -523,6 +564,13 @@ GuiListViewInstanceLoader
 				{
 					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<Size>());
 					info->constructorParameter = true;
+					return info;
+				}
+				else if (bindable && propertyInfo.propertyName == L"ItemSource")
+				{
+					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<IValueEnumerable>());
+					info->constructorParameter = true;
+					info->required = true;
 					return info;
 				}
 				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
@@ -1127,11 +1175,12 @@ GuiPredefinedInstanceLoadersPlugin
 				manager->SetLoader(new GuiToolstripMenuBarInstanceLoader);
 				manager->SetLoader(new GuiToolstripToolBarInstanceLoader);
 				manager->SetLoader(new GuiToolstripButtonInstanceLoader);
-				manager->SetLoader(new GuiListViewInstanceLoader);
+				manager->SetLoader(new GuiListViewInstanceLoader(false));
 				manager->SetLoader(new GuiTreeViewInstanceLoader);
 				manager->SetLoader(new GuiBindableTextListInstanceLoader(L"", [](){return GetCurrentTheme()->CreateTextListItemStyle(); }));
 				manager->SetLoader(new GuiBindableTextListInstanceLoader(L"Check", [](){return GetCurrentTheme()->CreateCheckTextListItemStyle(); }));
 				manager->SetLoader(new GuiBindableTextListInstanceLoader(L"Radio", [](){return GetCurrentTheme()->CreateRadioTextListItemStyle(); }));
+				manager->SetLoader(new GuiListViewInstanceLoader(true));
 
 				manager->SetLoader(new GuiCompositionInstanceLoader);
 				manager->SetLoader(new GuiTableCompositionInstanceLoader);
