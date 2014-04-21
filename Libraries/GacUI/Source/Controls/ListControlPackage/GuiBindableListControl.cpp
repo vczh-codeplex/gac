@@ -637,6 +637,7 @@ GuiBindableTreeView::ItemSourceNode
 				{
 					auto ol = childrenVirtualList.Cast<IValueObservableList>();
 					ol->ItemChanged.Remove(itemChangedEventHandler);
+					itemChangedEventHandler = 0;
 				}
 				childrenVirtualList = 0;
 				FOREACH(Ptr<ItemSourceNode>, node, children)
@@ -690,7 +691,7 @@ GuiBindableTreeView::ItemSourceNode
 
 			vint GuiBindableTreeView::ItemSourceNode::CalculateTotalVisibleNodes()
 			{
-				if (!expanding)
+				if (!GetExpanding())
 				{
 					return 1;
 				}
