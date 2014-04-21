@@ -151,9 +151,15 @@ GuiBindableListView
 					Ptr<description::IValueReadonlyList>			itemSource;
 
 				public:
+					WString											largeImageProperty;
+					WString											smallImageProperty;
+
+				public:
 					ItemSource(Ptr<description::IValueEnumerable> itemSource);
 					~ItemSource();
-
+					
+					description::Value								Get(vint index);
+					void											UpdateBindingProperties();
 					bool											NotifyUpdate(vint start, vint count);
 					ListViewDataColumns&							GetDataColumns();
 					ListViewColumns&								GetColumns();
@@ -206,6 +212,29 @@ GuiBindableListView
 				/// <summary>Get all columns.</summary>
 				/// <returns>All columns.</returns>
 				ListViewColumns&									GetColumns();
+				
+				/// <summary>Large image property name changed event.</summary>
+				compositions::GuiNotifyEvent						LargeImagePropertyChanged;
+				/// <summary>Small image property name changed event.</summary>
+				compositions::GuiNotifyEvent						SmallImagePropertyChanged;
+				
+				/// <summary>Get the large image property name to get the large image from an item.</summary>
+				/// <returns>The large image property name.</returns>
+				const WString&										GetLargeImageProperty();
+				/// <summary>Set the large image property name to get the large image from an item.</summary>
+				/// <param name="value">The large image property name.</param>
+				void												SetLargeImageProperty(const WString& value);
+				
+				/// <summary>Get the small image property name to get the small image from an item.</summary>
+				/// <returns>The small image property name.</returns>
+				const WString&										GetSmallImageProperty();
+				/// <summary>Set the small image property name to get the small image from an item.</summary>
+				/// <param name="value">The small image property name.</param>
+				void												SetSmallImageProperty(const WString& value);
+
+				/// <summary>Get the selected item.</summary>
+				/// <returns>Returns the selected item. If there are multiple selected items, or there is no selected item, null will be returned.</returns>
+				description::Value									GetSelectedItem();
 			};
 
 /***********************************************************************

@@ -1,4 +1,5 @@
 #include "GuiBindableListControl.h"
+#include "..\..\Reflection\TypeDescriptors\GuiReflectionBasic.h"
 
 namespace vl
 {
@@ -263,6 +264,16 @@ GuiBindableListView::ItemSource
 			{
 			}
 
+			description::Value GuiBindableListView::ItemSource::Get(vint index)
+			{
+				return itemSource->Get(index);
+			}
+
+			void GuiBindableListView::ItemSource::UpdateBindingProperties()
+			{
+				InvokeOnItemModified(0, Count(), Count());
+			}
+
 			bool GuiBindableListView::ItemSource::NotifyUpdate(vint start, vint count)
 			{
 				if (start<0 || start >= itemSource->GetCount() || count <= 0 || start + count > itemSource->GetCount())
@@ -333,22 +344,46 @@ GuiBindableListView::ItemSource
 
 			Ptr<GuiImageData> GuiBindableListView::ItemSource::GetSmallImage(vint itemIndex)
 			{
-				throw 0;
+				if (0 <= itemIndex && itemIndex < itemSource->GetCount())
+				{
+					auto value = ReadProperty(itemSource->Get(itemIndex), smallImageProperty);
+					if (value.GetTypeDescriptor() == description::GetTypeDescriptor<GuiImageData>())
+					{
+						return UnboxValue<Ptr<GuiImageData>>(value);
+					}
+				}
+				return 0;
 			}
 
 			Ptr<GuiImageData> GuiBindableListView::ItemSource::GetLargeImage(vint itemIndex)
 			{
-				throw 0;
+				if (0 <= itemIndex && itemIndex < itemSource->GetCount())
+				{
+					auto value = ReadProperty(itemSource->Get(itemIndex), largeImageProperty);
+					if (value.GetTypeDescriptor() == description::GetTypeDescriptor<GuiImageData>())
+					{
+						return UnboxValue<Ptr<GuiImageData>>(value);
+					}
+				}
+				return 0;
 			}
 
 			WString GuiBindableListView::ItemSource::GetText(vint itemIndex)
 			{
-				throw 0;
+				if (0 <= itemIndex && itemIndex < itemSource->GetCount() && columns.Count()>0)
+				{
+					return ReadProperty(itemSource->Get(itemIndex), columns[0]->textProperty).GetText();
+				}
+				return L"";
 			}
 
 			WString GuiBindableListView::ItemSource::GetSubItem(vint itemIndex, vint index)
 			{
-				throw 0;
+				if (0 <= itemIndex && itemIndex < itemSource->GetCount() && 0 <= index && index < columns.Count() - 1)
+				{
+					return ReadProperty(itemSource->Get(itemIndex), columns[index + 1]->textProperty).GetText();
+				}
+				return L"";
 			}
 
 			vint GuiBindableListView::ItemSource::GetDataColumnCount()
@@ -463,6 +498,9 @@ GuiBindableListView
 				:GuiVirtualListView(_styleProvider, new ItemSource(_itemSource))
 			{
 				itemSource = dynamic_cast<ItemSource*>(GetItemProvider());
+
+				LargeImagePropertyChanged.SetAssociatedComposition(boundsComposition);
+				SmallImagePropertyChanged.SetAssociatedComposition(boundsComposition);
 			}
 
 			GuiBindableListView::~GuiBindableListView()
@@ -477,6 +515,41 @@ GuiBindableListView
 			GuiBindableListView::ListViewColumns& GuiBindableListView::GetColumns()
 			{
 				return itemSource->GetColumns();
+			}
+
+			const WString& GuiBindableListView::GetLargeImageProperty()
+			{
+				return itemSource->largeImageProperty;
+			}
+
+			void GuiBindableListView::SetLargeImageProperty(const WString& value)
+			{
+				if (itemSource->largeImageProperty != value)
+				{
+					itemSource->largeImageProperty = value;
+					LargeImagePropertyChanged.Execute(GetNotifyEventArguments());
+				}
+			}
+
+			const WString& GuiBindableListView::GetSmallImageProperty()
+			{
+				return itemSource->smallImageProperty;
+			}
+
+			void GuiBindableListView::SetSmallImageProperty(const WString& value)
+			{
+				if (itemSource->smallImageProperty != value)
+				{
+					itemSource->smallImageProperty = value;
+					SmallImagePropertyChanged.Execute(GetNotifyEventArguments());
+				}
+			}
+
+			description::Value GuiBindableListView::GetSelectedItem()
+			{
+				vint index = GetSelectedItemIndex();
+				if (index == -1) return Value();
+				return itemSource->Get(index);
 			}
 
 /***********************************************************************

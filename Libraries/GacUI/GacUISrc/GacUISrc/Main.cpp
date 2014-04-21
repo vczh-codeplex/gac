@@ -68,8 +68,17 @@ namespace demos
 	{
 	public:
 		virtual Ptr<IValueObservableList>		GetSeasons() = 0;
+		virtual Ptr<IValueObservableList>		GetComplexSeasons() = 0;
 
 		virtual void							AddSeason() = 0;
+		virtual void							AddComplexSeason() = 0;
+	};
+
+	class Season : public Object, public Description<Season>
+	{
+	public:
+		WString									season;
+		WString									description;
 	};
 
 	class MainWindow;
@@ -131,14 +140,26 @@ namespace vl
 			DECL_TYPE_INFO(demos::IViewModel)
 			IMPL_TYPE_INFO(demos::IViewModel)
 
+			DECL_TYPE_INFO(demos::Season)
+			IMPL_TYPE_INFO(demos::Season)
+
 			DECL_TYPE_INFO(demos::MainWindow)
 			IMPL_TYPE_INFO(demos::MainWindow)
 
 			BEGIN_CLASS_MEMBER(demos::IViewModel)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(Seasons)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ComplexSeasons)
 
 				CLASS_MEMBER_METHOD(AddSeason, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(AddComplexSeason, NO_PARAMETER)
 			END_CLASS_MEMBER(demos::IViewModel)
+
+			BEGIN_CLASS_MEMBER(demos::Season)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<demos::Season>(),NO_PARAMETER)
+
+				CLASS_MEMBER_FIELD(season)
+				CLASS_MEMBER_FIELD(description)
+			END_CLASS_MEMBER(demos::Season)
 
 			BEGIN_CLASS_MEMBER(demos::MainWindow)
 				CLASS_MEMBER_BASE(GuiWindow)
@@ -189,7 +210,8 @@ namespace demos
 	class ViewModel : public Object, public virtual IViewModel
 	{
 	protected:
-		list::ObservableList<WString>		seasons;
+		list::ObservableList<WString>			seasons;
+		list::ObservableList<Ptr<Season>>		complexSeasons;
 	public:
 		ViewModel()
 		{
@@ -197,6 +219,30 @@ namespace demos
 			seasons.Add(L"Summer");
 			seasons.Add(L"Autumn");
 			seasons.Add(L"Winter");
+			{
+				auto season = MakePtr<Season>();
+				season->season = L"Spring";
+				season->description = L"Mar - May";
+				complexSeasons.Add(season);
+			}
+			{
+				auto season = MakePtr<Season>();
+				season->season = L"Summer";
+				season->description = L"Jun - Aug";
+				complexSeasons.Add(season);
+			}
+			{
+				auto season = MakePtr<Season>();
+				season->season = L"Autumn";
+				season->description = L"Sep - Nov";
+				complexSeasons.Add(season);
+			}
+			{
+				auto season = MakePtr<Season>();
+				season->season = L"Winter";
+				season->description = L"Dec - Feb";
+				complexSeasons.Add(season);
+			}
 		}
 
 		Ptr<IValueObservableList> GetSeasons()override
@@ -204,9 +250,22 @@ namespace demos
 			return seasons.GetWrapper();
 		}
 
+		Ptr<IValueObservableList> GetComplexSeasons()override
+		{
+			return complexSeasons.GetWrapper();
+		}
+
 		void AddSeason()override
 		{
 			seasons.Add(L"Unknown Season No." + itow(seasons.Count() + 1));
+		}
+
+		void AddComplexSeason()override
+		{
+			auto season = MakePtr<Season>();
+			season->season = L"Unknown Season No." + itow(seasons.Count() + 1);
+			season->description = L"N/A";
+			complexSeasons.Add(season);
 		}
 	};
 }
