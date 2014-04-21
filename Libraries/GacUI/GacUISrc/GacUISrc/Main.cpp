@@ -69,7 +69,7 @@ namespace demos
 	public:
 		WString										season;
 		WString										description;
-		Ptr<list::ValueObservableList<Ptr<Season>>>	children;
+		Ptr<IValueObservableList>					children;
 	};
 
 	class IViewModel : public virtual IDescriptable, public Description<IViewModel>
@@ -77,7 +77,7 @@ namespace demos
 	public:
 		virtual Ptr<IValueObservableList>		GetSeasons() = 0;
 		virtual Ptr<IValueObservableList>		GetComplexSeasons() = 0;
-		virtual Ptr<IValueObservableList>		GetTreeSeasons() = 0;
+		virtual Ptr<Season>						GetTreeSeasons() = 0;
 
 		virtual void							AddSeason() = 0;
 		virtual void							AddComplexSeason() = 0;
@@ -216,6 +216,7 @@ namespace demos
 {
 	class ViewModel : public Object, public virtual IViewModel
 	{
+		typedef list::ValueObservableList<Ptr<Season>>	SeasonList;
 	protected:
 		list::ObservableList<WString>					seasons;
 		list::ObservableList<Ptr<Season>>				complexSeasons;
@@ -259,25 +260,25 @@ namespace demos
 				auto season = MakePtr<Season>();
 				season->season = L"Spring";
 				season->description = L"Mar - May";
-				treeSeasons->children->Add(season);
+				treeSeasons->children.Cast<SeasonList>()->Add(season);
 			}
 			{
 				auto season = MakePtr<Season>();
 				season->season = L"Summer";
 				season->description = L"Jun - Aug";
-				treeSeasons->children->Add(season);
+				treeSeasons->children.Cast<SeasonList>()->Add(season);
 			}
 			{
 				auto season = MakePtr<Season>();
 				season->season = L"Autumn";
 				season->description = L"Sep - Nov";
-				treeSeasons->children->Add(season);
+				treeSeasons->children.Cast<SeasonList>()->Add(season);
 			}
 			{
 				auto season = MakePtr<Season>();
 				season->season = L"Winter";
 				season->description = L"Dec - Feb";
-				treeSeasons->children->Add(season);
+				treeSeasons->children.Cast<SeasonList>()->Add(season);
 			}
 		}
 
@@ -291,7 +292,7 @@ namespace demos
 			return complexSeasons.GetWrapper();
 		}
 
-		Ptr<IValueObservableList> GetTreeSeasons()override
+		Ptr<Season> GetTreeSeasons()override
 		{
 			return treeSeasons;
 		}
@@ -314,7 +315,7 @@ namespace demos
 			auto season = MakePtr<Season>();
 			season->season = L"Unknown Season No." + itow(seasons.Count() + 1);
 			season->description = L"N/A";
-			treeSeasons->children->Add(season);
+			treeSeasons->children.Cast<SeasonList>()->Add(season);
 		}
 	};
 }
