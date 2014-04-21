@@ -274,6 +274,8 @@ GuiBindableTreeView
 					ItemSourceNode(const description::Value& _itemSource, ItemSource* _rootProvider);
 					~ItemSourceNode();
 
+					description::Value								GetItemSource();
+
 					// ===================== tree::INodeProvider =====================
 
 					bool											GetExpanding()override;
@@ -357,6 +359,10 @@ GuiBindableTreeView
 				/// <summary>Set the children property name to get the children from an item.</summary>
 				/// <param name="value">The children property name.</param>
 				void												SetChildrenProperty(const WString& value);
+
+				/// <summary>Get the selected item.</summary>
+				/// <returns>Returns the selected item. If there are multiple selected items, or there is no selected item, null will be returned.</returns>
+				description::Value									GetSelectedItem();
 			};
 
 /***********************************************************************
