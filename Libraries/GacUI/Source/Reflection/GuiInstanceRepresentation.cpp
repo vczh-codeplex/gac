@@ -415,7 +415,15 @@ GuiInstanceStyle
 			auto style = MakePtr<GuiInstanceStyle>();
 			if (auto pathAttr = XmlGetAttribute(xml, L"ref.Path"))
 			{
-				style->path = pathAttr->value.value;
+				auto parser = GetParserManager()->GetParser<GuiIqQuery>(L"INSTANCE-QUERY");
+				if (auto query = parser->TypedParse(pathAttr->value.value, errors))
+				{
+					style->query = query;
+				}
+				else
+				{
+					return 0;
+				}
 			}
 			else
 			{

@@ -470,7 +470,7 @@ GuiScriptInstanceBinder
 					auto expression = parser->TypedParse(expressionCode, env->scope->errors);
 					if (!expression)
 					{
-						env->scope->errors.Add(ERROR_CODE_PREFIX L"Failed to parse the workflow expression \"" + expressionCode + L"\".");
+						env->scope->errors.Add(ERROR_CODE_PREFIX L"Failed to parse the workflow expression.");
 						return false;
 					}
 
@@ -679,7 +679,7 @@ GuiEvalInstanceEventBinder
 					auto statement = parser->TypedParse(statementCode, env->scope->errors);
 					if (!statement)
 					{
-						env->scope->errors.Add(ERROR_CODE_PREFIX L"Failed to parse the workflow statement \"" + statementCode + L"\".");
+						env->scope->errors.Add(ERROR_CODE_PREFIX L"Failed to parse the workflow statement.");
 						return false;
 					}
 
