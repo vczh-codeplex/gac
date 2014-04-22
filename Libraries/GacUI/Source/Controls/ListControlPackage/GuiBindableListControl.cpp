@@ -1,5 +1,4 @@
 #include "GuiBindableListControl.h"
-#include "..\..\Reflection\TypeDescriptors\GuiReflectionBasic.h"
 
 namespace vl
 {
@@ -400,10 +399,7 @@ GuiBindableListView::ItemSource
 				if (0 <= itemIndex && itemIndex < itemSource->GetCount())
 				{
 					auto value = ReadProperty(itemSource->Get(itemIndex), smallImageProperty);
-					if (value.GetTypeDescriptor() == description::GetTypeDescriptor<GuiImageData>())
-					{
-						return UnboxValue<Ptr<GuiImageData>>(value);
-					}
+					return value.GetSharedPtr().Cast<GuiImageData>();
 				}
 				return 0;
 			}
@@ -413,10 +409,7 @@ GuiBindableListView::ItemSource
 				if (0 <= itemIndex && itemIndex < itemSource->GetCount())
 				{
 					auto value = ReadProperty(itemSource->Get(itemIndex), largeImageProperty);
-					if (value.GetTypeDescriptor() == description::GetTypeDescriptor<GuiImageData>())
-					{
-						return UnboxValue<Ptr<GuiImageData>>(value);
-					}
+					return value.GetSharedPtr().Cast<GuiImageData>();
 				}
 				return 0;
 			}
@@ -850,10 +843,7 @@ GuiBindableTreeView::ItemSource
 				if (auto itemSourceNode = dynamic_cast<ItemSourceNode*>(node))
 				{
 					auto value = ReadProperty(itemSourceNode->GetItemSource(), imageProperty);
-					if (value.GetTypeDescriptor() == description::GetTypeDescriptor<GuiImageData>())
-					{
-						return UnboxValue<Ptr<GuiImageData>>(value);
-					}
+					return value.GetSharedPtr().Cast<GuiImageData>();
 				}
 				return 0;
 			}

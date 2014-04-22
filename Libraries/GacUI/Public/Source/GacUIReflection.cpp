@@ -3434,14 +3434,14 @@ GuiWorkflowGlobalContext
 					env->scope->errors.Add(moduleCode);
 					return;
 				}
-#ifdef _DEBUG
-				else
-				{
-					// for debug only, always show code in error
-					env->scope->errors.Add(ERROR_CODE_PREFIX L"Print code for reference (debug mode only):");
-					env->scope->errors.Add(moduleCode);
-				}
-#endif
+//#ifdef _DEBUG
+//				else
+//				{
+//					// for debug only, always show code in error
+//					env->scope->errors.Add(ERROR_CODE_PREFIX L"Print code for reference (debug mode only):");
+//					env->scope->errors.Add(moduleCode);
+//				}
+//#endif
 
 				auto assembly = GenerateAssembly(&manager);
 				globalContext = new WfRuntimeGlobalContext(assembly);
@@ -3672,14 +3672,14 @@ GuiEvalInstanceBinder
 						}
 						return Value();
 					}
-#ifdef _DEBUG
-					else
-					{
-						// for debug only, always show code in error
-						env->scope->errors.Add(ERROR_CODE_PREFIX L"Print code for reference (debug mode only):");
-						env->scope->errors.Add(moduleCode);
-					}
-#endif
+//#ifdef _DEBUG
+//					else
+//					{
+//						// for debug only, always show code in error
+//						env->scope->errors.Add(ERROR_CODE_PREFIX L"Print code for reference (debug mode only):");
+//						env->scope->errors.Add(moduleCode);
+//					}
+//#endif
 
 					auto assembly = GenerateAssembly(&manager);
 					auto globalContext = MakePtr<WfRuntimeGlobalContext>(assembly);
@@ -3774,14 +3774,14 @@ GuiEvalInstanceEventBinder
 						}
 						return false;
 					}
-#ifdef _DEBUG
-					else
-					{
-						// for debug only, always show code in error
-						env->scope->errors.Add(ERROR_CODE_PREFIX L"Print code for reference (debug mode only):");
-						env->scope->errors.Add(moduleCode);
-					}
-#endif
+//#ifdef _DEBUG
+//					else
+//					{
+//						// for debug only, always show code in error
+//						env->scope->errors.Add(ERROR_CODE_PREFIX L"Print code for reference (debug mode only):");
+//						env->scope->errors.Add(moduleCode);
+//					}
+//#endif
 
 					auto assembly = GenerateAssembly(&manager);
 					auto globalContext = MakePtr<WfRuntimeGlobalContext>(assembly);
@@ -4313,10 +4313,25 @@ GuiListViewInstanceLoader
 
 		class GuiListViewInstanceLoader : public Object, public IGuiInstanceLoader
 		{
+		protected:
+			bool				bindable;
+
 		public:
+			GuiListViewInstanceLoader(bool _bindable)
+				:bindable(_bindable)
+			{
+			}
+
 			WString GetTypeName()override
 			{
-				return description::GetTypeDescriptor<GuiListView>()->GetTypeName();
+				if (bindable)
+				{
+					return description::GetTypeDescriptor<GuiBindableListView>()->GetTypeName();
+				}
+				else
+				{
+					return description::GetTypeDescriptor<GuiListView>()->GetTypeName();
+				}
 			}
 
 			bool IsCreatable(const TypeInfo& typeInfo)override
@@ -4328,9 +4343,20 @@ GuiListViewInstanceLoader
 			{
 				if (typeInfo.typeName == GetTypeName())
 				{
+					Ptr<IValueEnumerable> itemSource;
 					ListViewViewType viewType = ListViewViewType::Detail;
 					Size iconSize;
 					{
+						vint itemSourceIndex = constructorArguments.Keys().IndexOf(L"ItemSource");
+						if (itemSourceIndex != -1)
+						{
+							itemSource = UnboxValue<Ptr<IValueEnumerable>>(constructorArguments.GetByIndex(itemSourceIndex)[0]);
+						}
+						else if (bindable)
+						{
+							return Value();
+						}
+
 						vint indexView = constructorArguments.Keys().IndexOf(L"View");
 						if (indexView != -1)
 						{
@@ -4344,7 +4370,15 @@ GuiListViewInstanceLoader
 						}
 					}
 
-					auto listView = new GuiListView(GetCurrentTheme()->CreateListViewStyle());
+					GuiVirtualListView* listView = 0;
+					if (bindable)
+					{
+						listView = new GuiBindableListView(GetCurrentTheme()->CreateListViewStyle(), itemSource);
+					}
+					else
+					{
+						listView = new GuiListView(GetCurrentTheme()->CreateListViewStyle());
+					}
 					switch (viewType)
 					{
 #define VIEW_TYPE_CASE(NAME)\
@@ -4380,10 +4414,11 @@ GuiListViewInstanceLoader
 				{
 					propertyNames.Add(L"View");
 					propertyNames.Add(L"IconSize");
+					if (bindable)
+					{
+						propertyNames.Add(L"ItemSource");
+					}
 				}
-				propertyNames.Add(L"Items");
-				propertyNames.Add(L"Columns");
-				propertyNames.Add(L"DataColumns");
 			}
 
 			void GetConstructorParameters(const TypeInfo& typeInfo, List<WString>& propertyNames)override
@@ -4392,6 +4427,10 @@ GuiListViewInstanceLoader
 				{
 					propertyNames.Add(L"View");
 					propertyNames.Add(L"IconSize");
+					if (bindable)
+					{
+						propertyNames.Add(L"ItemSource");
+					}
 				}
 			}
 
@@ -4409,44 +4448,21 @@ GuiListViewInstanceLoader
 					info->constructorParameter = true;
 					return info;
 				}
-				else if (propertyInfo.propertyName == L"Items")
+				else if (propertyInfo.propertyName == L"ItemSource")
 				{
-					return GuiInstancePropertyInfo::Collection(description::GetTypeDescriptor<list::ListViewItem>());
-				}
-				else if (propertyInfo.propertyName == L"Columns")
-				{
-					return GuiInstancePropertyInfo::Collection(description::GetTypeDescriptor<list::ListViewColumn>());
-				}
-				else if (propertyInfo.propertyName == L"DataColumns")
-				{
-					return GuiInstancePropertyInfo::Collection(description::GetTypeDescriptor<vint>());
+					if (bindable)
+					{
+						auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<IValueEnumerable>());
+						info->constructorParameter = true;
+						info->required = true;
+						return info;
+					}
 				}
 				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
 			}
 
 			bool SetPropertyValue(PropertyValue& propertyValue)override
 			{
-				if (GuiListView* container = dynamic_cast<GuiListView*>(propertyValue.instanceValue.GetRawPtr()))
-				{
-					if (propertyValue.propertyName == L"Items")
-					{
-						auto item = UnboxValue<Ptr<list::ListViewItem>>(propertyValue.propertyValue);
-						container->GetItems().Add(item);
-						return true;
-					}
-					else if (propertyValue.propertyName == L"Columns")
-					{
-						auto item = UnboxValue<Ptr<list::ListViewColumn>>(propertyValue.propertyValue);
-						container->GetItems().GetColumns().Add(item);
-						return true;
-					}
-					else if (propertyValue.propertyName == L"DataColumns")
-					{
-						auto item = UnboxValue<vint>(propertyValue.propertyValue);
-						container->GetItems().GetDataColumns().Add(item);
-						return true;
-					}
-				}
 				return false;
 			}
 		};
@@ -4457,10 +4473,25 @@ GuiTreeViewInstanceLoader
 
 		class GuiTreeViewInstanceLoader : public Object, public IGuiInstanceLoader
 		{
+		protected:
+			bool				bindable;
+
 		public:
+			GuiTreeViewInstanceLoader(bool _bindable)
+				:bindable(_bindable)
+			{
+			}
+
 			WString GetTypeName()override
 			{
-				return description::GetTypeDescriptor<GuiTreeView>()->GetTypeName();
+				if (bindable)
+				{
+					return description::GetTypeDescriptor<GuiBindableTreeView>()->GetTypeName();
+				}
+				else
+				{
+					return description::GetTypeDescriptor<GuiTreeView>()->GetTypeName();
+				}
 			}
 
 			bool IsCreatable(const TypeInfo& typeInfo)override
@@ -4472,7 +4503,23 @@ GuiTreeViewInstanceLoader
 			{
 				if (typeInfo.typeName == GetTypeName())
 				{
-					GuiTreeView* treeView = new GuiTreeView(GetCurrentTheme()->CreateTreeViewStyle());
+					vint indexItemSource = constructorArguments.Keys().IndexOf(L"ItemSource");
+
+					GuiVirtualTreeView* treeView = 0;
+					if (bindable)
+					{
+						if (indexItemSource == -1)
+						{
+							return Value();
+						}
+
+						auto itemSource = constructorArguments.GetByIndex(indexItemSource)[0];
+						treeView = new GuiBindableTreeView(GetCurrentTheme()->CreateTreeViewStyle(), itemSource);
+					}
+					else
+					{
+						treeView = new GuiTreeView(GetCurrentTheme()->CreateTreeViewStyle());
+					}
 
 					vint indexIconSize = constructorArguments.Keys().IndexOf(L"IconSize");
 					if (indexIconSize != -1)
@@ -4491,8 +4538,15 @@ GuiTreeViewInstanceLoader
 				if (typeInfo.typeName == GetTypeName())
 				{
 					propertyNames.Add(L"IconSize");
+					if (bindable)
+					{
+						propertyNames.Add(L"ItemSource");
+					}
 				}
-				propertyNames.Add(L"Nodes");
+				if (!bindable)
+				{
+					propertyNames.Add(L"Nodes");
+				}
 			}
 
 			void GetConstructorParameters(const TypeInfo& typeInfo, List<WString>& propertyNames)override
@@ -4500,6 +4554,10 @@ GuiTreeViewInstanceLoader
 				if (typeInfo.typeName == GetTypeName())
 				{
 					propertyNames.Add(L"IconSize");
+					if (bindable)
+					{
+						propertyNames.Add(L"ItemSource");
+					}
 				}
 			}
 
@@ -4507,7 +4565,20 @@ GuiTreeViewInstanceLoader
 			{
 				if (propertyInfo.propertyName == L"Nodes")
 				{
-					return GuiInstancePropertyInfo::Collection(description::GetTypeDescriptor<tree::MemoryNodeProvider>());
+					if (!bindable)
+					{
+						return GuiInstancePropertyInfo::Collection(description::GetTypeDescriptor<tree::MemoryNodeProvider>());
+					}
+				}
+				else if (propertyInfo.propertyName == L"ItemSource")
+				{
+					if (bindable)
+					{
+						auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<Value>());
+						info->constructorParameter = true;
+						info->required = true;
+						return info;
+					}
 				}
 				else if (propertyInfo.propertyName == L"IconSize")
 				{
@@ -4593,6 +4664,74 @@ GuiComboBoxInstanceLoader
 				 if (propertyInfo.propertyName == L"ListControl")
 				{
 					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<GuiSelectableListControl>());
+					info->constructorParameter = true;
+					info->required = true;
+					return info;
+				}
+				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
+			}
+		};
+
+/***********************************************************************
+GuiBindableTextListInstanceLoader
+***********************************************************************/
+
+		class GuiBindableTextListInstanceLoader : public Object, public IGuiInstanceLoader
+		{
+			typedef Func<list::TextItemStyleProvider::ITextItemStyleProvider*()>		ItemStyleProviderFactory;
+		protected:
+			WString							typeName;
+			ItemStyleProviderFactory		itemStyleProviderFactory;
+
+		public:
+			GuiBindableTextListInstanceLoader(const WString& type, const ItemStyleProviderFactory& factory)
+				:typeName(L"presentation::controls::GuiBindable" + type + L"TextList")
+				, itemStyleProviderFactory(factory)
+			{
+			}
+
+			WString GetTypeName()override
+			{
+				return typeName;
+			}
+
+			bool IsCreatable(const TypeInfo& typeInfo)override
+			{
+				return typeInfo.typeName == GetTypeName();
+			}
+
+			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
+			{
+				if (typeInfo.typeName == GetTypeName())
+				{
+					vint indexItemSource = constructorArguments.Keys().IndexOf(L"ItemSource");
+					if (indexItemSource != -1)
+					{
+						auto itemSource = UnboxValue<Ptr<IValueEnumerable>>(constructorArguments.GetByIndex(indexItemSource)[0]);
+						auto control = new GuiBindableTextList(GetCurrentTheme()->CreateTextListStyle(), itemStyleProviderFactory(), itemSource);
+						return Value::From(control);
+					}
+				}
+				return Value();
+			}
+
+			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			{
+			}
+
+			void GetConstructorParameters(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			{
+				if (typeInfo.typeName == GetTypeName())
+				{
+					propertyNames.Add(L"ItemSource");
+				}
+			}
+
+			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
+			{
+				 if (propertyInfo.propertyName == L"ItemSource")
+				{
+					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<IValueEnumerable>());
 					info->constructorParameter = true;
 					info->required = true;
 					return info;
@@ -4976,8 +5115,11 @@ GuiPredefinedInstanceLoadersPlugin
 				manager->SetLoader(new GuiToolstripMenuBarInstanceLoader);
 				manager->SetLoader(new GuiToolstripToolBarInstanceLoader);
 				manager->SetLoader(new GuiToolstripButtonInstanceLoader);
-				manager->SetLoader(new GuiListViewInstanceLoader);
-				manager->SetLoader(new GuiTreeViewInstanceLoader);
+				manager->SetLoader(new GuiListViewInstanceLoader(false));
+				manager->SetLoader(new GuiTreeViewInstanceLoader(false));
+				manager->SetLoader(new GuiBindableTextListInstanceLoader(L"", [](){return GetCurrentTheme()->CreateTextListItemStyle(); }));
+				manager->SetLoader(new GuiListViewInstanceLoader(true));
+				manager->SetLoader(new GuiTreeViewInstanceLoader(true));
 
 				manager->SetLoader(new GuiCompositionInstanceLoader);
 				manager->SetLoader(new GuiTableCompositionInstanceLoader);
@@ -5004,6 +5146,10 @@ GuiPredefinedInstanceLoadersPlugin
 				ADD_VIRTUAL_TYPE(ProgressBar,				GuiScroll,				g::NewProgressBar);
 				ADD_VIRTUAL_TYPE(CheckTextList,				GuiTextList,			g::NewCheckTextList);
 				ADD_VIRTUAL_TYPE(RadioTextList,				GuiTextList,			g::NewRadioTextList);
+
+				auto bindableTextListName = description::GetTypeDescriptor<GuiBindableTextList>()->GetTypeName();
+				manager->CreateVirtualType(bindableTextListName, new GuiBindableTextListInstanceLoader(L"Check", [](){return GetCurrentTheme()->CreateCheckTextListItemStyle(); }));
+				manager->CreateVirtualType(bindableTextListName, new GuiBindableTextListInstanceLoader(L"Radio", [](){return GetCurrentTheme()->CreateRadioTextListItemStyle(); }));
 
 #undef ADD_VIRTUAL_TYPE
 #undef ADD_VIRTUAL_TYPE_LOADER
@@ -6629,16 +6775,6 @@ External Functions
 				return thisObject->GetItemContent<ListViewItemStyleProvider::IListViewItemContent>(itemStyleController);
 			}
 
-			ListViewDataColumns& GuiListView_GetDataColumns(GuiListView* thisObject)
-			{
-				return thisObject->GetItems().GetDataColumns();
-			}
-
-			ListViewColumns& GuiListView_GetColumns(GuiListView* thisObject)
-			{
-				return thisObject->GetItems().GetColumns();
-			}
-
 			Ptr<RepeatingParsingExecutor> CreateRepeatingParsingExecutor(const WString& grammar, bool enableAmbiguity, const WString& rule, Ptr<ILanguageProvider> provider)
 			{
 			    Ptr<ParsingGeneralParser> parser=CreateBootstrapStrictParser();
@@ -7038,6 +7174,14 @@ Type Declaration
 				CLASS_MEMBER_METHOD(ContainsPrimaryText, {L"itemIndex"})
 			END_CLASS_MEMBER(GuiListControl::IItemPrimaryTextView)
 
+			BEGIN_CLASS_MEMBER(GuiListControl::IItemBindingView)
+				CLASS_MEMBER_BASE(IDescriptable)
+				INTERFACE_EXTERNALCTOR(GuiListControl, IItemBindingView)
+				INTERFACE_IDENTIFIER(GuiListControl::IItemBindingView)
+
+				CLASS_MEMBER_METHOD(GetBindingValue, {L"itemIndex"})
+			END_CLASS_MEMBER(GuiListControl::IItemBindingView)
+
 			BEGIN_ENUM_ITEM(GuiListControl::KeyDirection)
 				ENUM_ITEM_NAMESPACE(GuiListControl)
 				ENUM_NAMESPACE_ITEM(Up)
@@ -7128,6 +7272,8 @@ Type Declaration
 
 				CLASS_MEMBER_PROPERTY_FAST(MultiSelect)
 				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(SelectedItems, SelectionChanged)
+				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(SelectedItemIndex, SelectionChanged)
+				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(SelectedItemText, SelectionChanged)
 
 				CLASS_MEMBER_METHOD(GetSelected, {L"itemIndex"})
 				CLASS_MEMBER_METHOD(SetSelected, {L"itemIndex" _ L"value"})
@@ -7256,6 +7402,7 @@ Type Declaration
 				CONTROL_CONSTRUCTOR_DEFAULT(GuiTextList, &g::NewTextList)
 
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(Items)
+				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(SelectedItem, SelectionChanged)
 			END_CLASS_MEMBER(GuiTextList)
 
 			BEGIN_CLASS_MEMBER(ListViewItemStyleProviderBase)
@@ -7446,6 +7593,7 @@ Type Declaration
 				CLASS_MEMBER_CONSTRUCTOR(Ptr<ListViewColumn>(const WString&, vint), {L"text" _ L"size"})
 
 				CLASS_MEMBER_FIELD(text)
+				CLASS_MEMBER_FIELD(textProperty)
 				CLASS_MEMBER_FIELD(size)
 				CLASS_MEMBER_FIELD(dropdownPopup)
 				CLASS_MEMBER_FIELD(sortingState)
@@ -7462,12 +7610,10 @@ Type Declaration
 				CLASS_MEMBER_BASE(GuiVirtualListView)
 				CONTROL_CONSTRUCTOR_PROVIDER(GuiListView)
 
-				CLASS_MEMBER_EXTERNALMETHOD(GetDataColumns, NO_PARAMETER, ListViewDataColumns&(GuiListView::*)(), &GuiListView_GetDataColumns)
-				CLASS_MEMBER_EXTERNALMETHOD(GetColumns, NO_PARAMETER, ListViewColumns&(GuiListView::*)(), &GuiListView_GetColumns)
-
-				CLASS_MEMBER_PROPERTY_READONLY(DataColumns, GetDataColumns)
-				CLASS_MEMBER_PROPERTY_READONLY(Columns, GetColumns)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(DataColumns)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Columns)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(Items)
+				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(SelectedItem, SelectionChanged)
 			END_CLASS_MEMBER(GuiListView)
 
 			BEGIN_CLASS_MEMBER(IGuiMenuService)
@@ -7587,6 +7733,14 @@ Type Declaration
 
 				CLASS_MEMBER_METHOD(GetPrimaryTextViewText, {L"node"})
 			END_CLASS_MEMBER(INodeItemPrimaryTextView)
+
+			BEGIN_CLASS_MEMBER(INodeItemBindingView)
+				CLASS_MEMBER_BASE(IDescriptable)
+				INTERFACE_EXTERNALCTOR(tree, INodeItemBindingView)
+				INTERFACE_IDENTIFIER(INodeItemBindingView)
+
+				CLASS_MEMBER_METHOD(GetBindingValue, {L"node"})
+			END_CLASS_MEMBER(INodeItemBindingView)
 
 			BEGIN_CLASS_MEMBER(NodeItemProvider)
 				CLASS_MEMBER_BASE(ItemProviderBase)
@@ -7730,6 +7884,7 @@ Type Declaration
 
 				CLASS_MEMBER_METHOD_RENAME(GetNodes, Nodes, NO_PARAMETER)
 				CLASS_MEMBER_PROPERTY_READONLY(Nodes, GetNodes)
+				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(SelectedItem, SelectionChanged)
 			END_CLASS_MEMBER(GuiTreeView)
 
 			BEGIN_CLASS_MEMBER(TreeViewNodeItemStyleProvider)
@@ -8377,6 +8532,41 @@ Type Declaration
 				CLASS_MEMBER_METHOD(GetColumnText, {L"column"})
 				CLASS_MEMBER_METHOD(SetColumnText, {L"column" _ L"value"})
 			END_CLASS_MEMBER(StringGridProvider)
+
+			BEGIN_CLASS_MEMBER(GuiBindableTextList)
+				CLASS_MEMBER_BASE(GuiVirtualTextList)
+				CLASS_MEMBER_CONSTRUCTOR(GuiBindableTextList*(GuiBindableTextList::IStyleProvider*, list::TextItemStyleProvider::ITextItemStyleProvider*, Ptr<IValueEnumerable>), {L"styleProvider" _ L"itemStyleProvider" _ L"itemSource"})
+
+				CLASS_MEMBER_PROPERTY_GUIEVENT_FAST(TextProperty)
+				CLASS_MEMBER_PROPERTY_GUIEVENT_FAST(CheckedProperty)
+				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(SelectedItem, SelectionChanged)
+			END_CLASS_MEMBER(GuiBindableTextList)
+
+			BEGIN_CLASS_MEMBER(GuiBindableListView)
+				CLASS_MEMBER_BASE(GuiVirtualListView)
+				CLASS_MEMBER_CONSTRUCTOR(GuiBindableListView*(GuiBindableListView::IStyleProvider*, Ptr<IValueEnumerable>), {L"styleProvider" _ L"itemSource"})
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(DataColumns)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Columns)
+				CLASS_MEMBER_PROPERTY_GUIEVENT_FAST(LargeImageProperty)
+				CLASS_MEMBER_PROPERTY_GUIEVENT_FAST(SmallImageProperty)
+				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(SelectedItem, SelectionChanged)
+			END_CLASS_MEMBER(GuiBindableListView)
+
+			BEGIN_CLASS_MEMBER(GuiBindableTreeView)
+				CLASS_MEMBER_BASE(GuiVirtualTreeView)
+				CLASS_MEMBER_CONSTRUCTOR(GuiBindableTreeView*(GuiBindableTreeView::IStyleProvider*, const Value&), {L"styleProvider" _ L"itemSource"})
+				
+				CLASS_MEMBER_PROPERTY_GUIEVENT_FAST(TextProperty)
+				CLASS_MEMBER_PROPERTY_GUIEVENT_FAST(ImageProperty)
+				CLASS_MEMBER_PROPERTY_GUIEVENT_FAST(ChildrenProperty)
+				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(SelectedItem, SelectionChanged)
+			END_CLASS_MEMBER(GuiBindableTreeView)
+
+			BEGIN_CLASS_MEMBER(GuiBindableDataGrid)
+				CLASS_MEMBER_BASE(GuiVirtualDataGrid)
+				CLASS_MEMBER_CONSTRUCTOR(GuiBindableDataGrid*(GuiBindableDataGrid::IStyleProvider*, Ptr<IValueEnumerable>), {L"styleProvider" _ L"itemSource"})
+			END_CLASS_MEMBER(GuiBindableDataGrid)
 
 #undef INTERFACE_IDENTIFIER
 #undef CONTROL_CONSTRUCTOR_CONTROLLER

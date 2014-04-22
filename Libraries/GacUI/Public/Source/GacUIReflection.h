@@ -1119,6 +1119,7 @@ Type List
 			F(presentation::controls::GuiListControl::IItemProviderCallback)\
 			F(presentation::controls::GuiListControl::IItemArrangerCallback)\
 			F(presentation::controls::GuiListControl::IItemPrimaryTextView)\
+			F(presentation::controls::GuiListControl::IItemBindingView)\
 			F(presentation::controls::GuiListControl::KeyDirection)\
 			F(presentation::controls::GuiListControl::IItemProvider)\
 			F(presentation::controls::GuiListControl::IItemStyleController)\
@@ -1180,6 +1181,7 @@ Type List
 			F(presentation::controls::tree::INodeRootProvider)\
 			F(presentation::controls::tree::INodeItemView)\
 			F(presentation::controls::tree::INodeItemPrimaryTextView)\
+			F(presentation::controls::tree::INodeItemBindingView)\
 			F(presentation::controls::tree::NodeItemProvider)\
 			F(presentation::controls::tree::INodeItemStyleController)\
 			F(presentation::controls::tree::INodeItemStyleProvider)\
@@ -1265,6 +1267,10 @@ Type List
 			F(presentation::controls::GuiDateComboBox)\
 			F(presentation::controls::GuiStringGrid)\
 			F(presentation::controls::list::StringGridProvider)\
+			F(presentation::controls::GuiBindableTextList)\
+			F(presentation::controls::GuiBindableListView)\
+			F(presentation::controls::GuiBindableTreeView)\
+			F(presentation::controls::GuiBindableDataGrid)\
 
 			GUIREFLECTIONCONTROLS_TYPELIST(DECL_TYPE_INFO)
 
@@ -1594,6 +1600,25 @@ Interface Proxy
 					bool ContainsPrimaryText(vint itemIndex)override
 					{
 						return INVOKEGET_INTERFACE_PROXY(ContainsPrimaryText, itemIndex);
+					}
+				};
+
+				class GuiListControl_IItemBindingView : public ValueInterfaceRoot, public virtual GuiListControl::IItemBindingView
+				{
+				public:
+					GuiListControl_IItemBindingView(Ptr<IValueInterfaceProxy> _proxy)
+						:ValueInterfaceRoot(_proxy)
+					{
+					}
+
+					static Ptr<GuiListControl::IItemBindingView> Create(Ptr<IValueInterfaceProxy> proxy)
+					{
+						return new GuiListControl_IItemBindingView(proxy);
+					}
+
+					description::Value GetBindingValue(vint itemIndex)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetBindingValue, itemIndex);
 					}
 				};
 
@@ -2366,6 +2391,25 @@ Interface Proxy
 					WString GetPrimaryTextViewText(tree::INodeProvider* node)override
 					{
 						return INVOKEGET_INTERFACE_PROXY(GetPrimaryTextViewText, node);
+					}
+				};
+
+				class tree_INodeItemBindingView: public ValueInterfaceRoot, public virtual tree::INodeItemBindingView
+				{
+				public:
+					tree_INodeItemBindingView(Ptr<IValueInterfaceProxy> _proxy)
+						:ValueInterfaceRoot(_proxy)
+					{
+					}
+
+					static Ptr<tree::INodeItemBindingView> Create(Ptr<IValueInterfaceProxy> proxy)
+					{
+						return new tree_INodeItemBindingView(proxy);
+					}
+
+					description::Value GetBindingValue(tree::INodeProvider* node)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetBindingValue, node);
 					}
 				};
 

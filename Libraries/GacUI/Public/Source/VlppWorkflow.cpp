@@ -10636,16 +10636,27 @@ Print (Expression)
 			void Visit(WfInferExpression* node)override
 			{
 				WfPrint(node->expression, indent, writer);
-				writer.WriteString(L" of ");
+				writer.WriteString(L" of (");
 				WfPrint(node->type, indent, writer);
+				writer.WriteString(L")");
 			}
 
 			void Visit(WfTypeCastingExpression* node)override
 			{
-				writer.WriteString(L"cast ");
-				WfPrint(node->type, indent, writer);
-				writer.WriteString(L" ");
-				WfPrint(node->expression, indent, writer);
+				if (node->strategy == WfTypeCastingStrategy::Strong)
+				{
+					writer.WriteString(L"cast (");
+					WfPrint(node->type, indent, writer);
+					writer.WriteString(L") ");
+					WfPrint(node->expression, indent, writer);
+				}
+				else
+				{
+					WfPrint(node->expression, indent, writer);
+					writer.WriteString(L" as (");
+					WfPrint(node->type, indent, writer);
+					writer.WriteString(L")");
+				}
 			}
 
 			void Visit(WfTypeTestingExpression* node)override
@@ -10654,12 +10665,14 @@ Print (Expression)
 				switch (node->test)
 				{
 				case WfTypeTesting::IsType:
-					writer.WriteString(L" is ");
+					writer.WriteString(L" is (");
 					WfPrint(node->type, indent, writer);
+					writer.WriteString(L")");
 					break;
 				case WfTypeTesting::IsNotType:
-					writer.WriteString(L" is not ");
+					writer.WriteString(L" is not (");
 					WfPrint(node->type, indent, writer);
+					writer.WriteString(L")");
 					break;
 				case WfTypeTesting::IsNull:
 					writer.WriteString(L" is null");
@@ -10762,8 +10775,9 @@ Print (Expression)
 
 			void Visit(WfNewTypeExpression* node)override
 			{
-				writer.WriteString(L"new ");
+				writer.WriteString(L"new (");
 				WfPrint(node->type, indent, writer);
+				writer.WriteString(L")");
 				if (node->functions.Count() == 0)
 				{
 					writer.WriteString(L"(");
@@ -11777,6 +11791,7 @@ L"\r\n" L"\t= WorkflowType : value \"[\" [WorkflowType : key] \"]\" as MapType w
 L"\r\n" L"\t= \"const\" WorkflowType : value \"[\" [WorkflowType : key] \"]\" as MapType with {writability=\"Readonly\"}"
 L"\r\n" L"\t= WorkflowType : parent \"::\" NAME : name as ChildType"
 L"\r\n" L"\t= \"::\" NAME : name as TopQualifiedType"
+L"\r\n" L"\t= \"(\" !WorkflowType \")\""
 L"\r\n" L"\t;"
 L"\r\n" L""
 L"\r\n" L"rule LiteralExpression Literal"
@@ -13968,94 +13983,94 @@ namespace vl
 #ifndef VCZH_DEBUG_NO_REFLECTION
 			using namespace vl::workflow;
 
-			IMPL_TYPE_INFO_RENAME(WfType, Workflow::WfType)
-			IMPL_TYPE_INFO_RENAME(WfPredefinedTypeName, Workflow::WfPredefinedTypeName)
-			IMPL_TYPE_INFO_RENAME(WfPredefinedType, Workflow::WfPredefinedType)
-			IMPL_TYPE_INFO_RENAME(WfTopQualifiedType, Workflow::WfTopQualifiedType)
-			IMPL_TYPE_INFO_RENAME(WfReferenceType, Workflow::WfReferenceType)
-			IMPL_TYPE_INFO_RENAME(WfRawPointerType, Workflow::WfRawPointerType)
-			IMPL_TYPE_INFO_RENAME(WfSharedPointerType, Workflow::WfSharedPointerType)
-			IMPL_TYPE_INFO_RENAME(WfNullableType, Workflow::WfNullableType)
-			IMPL_TYPE_INFO_RENAME(WfEnumerableType, Workflow::WfEnumerableType)
-			IMPL_TYPE_INFO_RENAME(WfMapWritability, Workflow::WfMapWritability)
-			IMPL_TYPE_INFO_RENAME(WfMapType, Workflow::WfMapType)
-			IMPL_TYPE_INFO_RENAME(WfFunctionType, Workflow::WfFunctionType)
-			IMPL_TYPE_INFO_RENAME(WfChildType, Workflow::WfChildType)
-			IMPL_TYPE_INFO_RENAME(WfExpression, Workflow::WfExpression)
-			IMPL_TYPE_INFO_RENAME(WfTopQualifiedExpression, Workflow::WfTopQualifiedExpression)
-			IMPL_TYPE_INFO_RENAME(WfReferenceExpression, Workflow::WfReferenceExpression)
-			IMPL_TYPE_INFO_RENAME(WfOrderedNameExpression, Workflow::WfOrderedNameExpression)
-			IMPL_TYPE_INFO_RENAME(WfOrderedLambdaExpression, Workflow::WfOrderedLambdaExpression)
-			IMPL_TYPE_INFO_RENAME(WfMemberExpression, Workflow::WfMemberExpression)
-			IMPL_TYPE_INFO_RENAME(WfChildExpression, Workflow::WfChildExpression)
-			IMPL_TYPE_INFO_RENAME(WfLiteralValue, Workflow::WfLiteralValue)
-			IMPL_TYPE_INFO_RENAME(WfLiteralExpression, Workflow::WfLiteralExpression)
-			IMPL_TYPE_INFO_RENAME(WfFloatingExpression, Workflow::WfFloatingExpression)
-			IMPL_TYPE_INFO_RENAME(WfIntegerExpression, Workflow::WfIntegerExpression)
-			IMPL_TYPE_INFO_RENAME(WfStringExpression, Workflow::WfStringExpression)
-			IMPL_TYPE_INFO_RENAME(WfFormatExpression, Workflow::WfFormatExpression)
-			IMPL_TYPE_INFO_RENAME(WfUnaryOperator, Workflow::WfUnaryOperator)
-			IMPL_TYPE_INFO_RENAME(WfUnaryExpression, Workflow::WfUnaryExpression)
-			IMPL_TYPE_INFO_RENAME(WfBinaryOperator, Workflow::WfBinaryOperator)
-			IMPL_TYPE_INFO_RENAME(WfBinaryExpression, Workflow::WfBinaryExpression)
-			IMPL_TYPE_INFO_RENAME(WfLetVariable, Workflow::WfLetVariable)
-			IMPL_TYPE_INFO_RENAME(WfLetExpression, Workflow::WfLetExpression)
-			IMPL_TYPE_INFO_RENAME(WfIfExpression, Workflow::WfIfExpression)
-			IMPL_TYPE_INFO_RENAME(WfRangeBoundary, Workflow::WfRangeBoundary)
-			IMPL_TYPE_INFO_RENAME(WfRangeExpression, Workflow::WfRangeExpression)
-			IMPL_TYPE_INFO_RENAME(WfSetTesting, Workflow::WfSetTesting)
-			IMPL_TYPE_INFO_RENAME(WfSetTestingExpression, Workflow::WfSetTestingExpression)
-			IMPL_TYPE_INFO_RENAME(WfConstructorArgument, Workflow::WfConstructorArgument)
-			IMPL_TYPE_INFO_RENAME(WfConstructorExpression, Workflow::WfConstructorExpression)
-			IMPL_TYPE_INFO_RENAME(WfInferExpression, Workflow::WfInferExpression)
-			IMPL_TYPE_INFO_RENAME(WfTypeCastingStrategy, Workflow::WfTypeCastingStrategy)
-			IMPL_TYPE_INFO_RENAME(WfTypeCastingExpression, Workflow::WfTypeCastingExpression)
-			IMPL_TYPE_INFO_RENAME(WfTypeTesting, Workflow::WfTypeTesting)
-			IMPL_TYPE_INFO_RENAME(WfTypeTestingExpression, Workflow::WfTypeTestingExpression)
-			IMPL_TYPE_INFO_RENAME(WfTypeOfTypeExpression, Workflow::WfTypeOfTypeExpression)
-			IMPL_TYPE_INFO_RENAME(WfTypeOfExpressionExpression, Workflow::WfTypeOfExpressionExpression)
-			IMPL_TYPE_INFO_RENAME(WfAttachEventExpression, Workflow::WfAttachEventExpression)
-			IMPL_TYPE_INFO_RENAME(WfDetachEventExpression, Workflow::WfDetachEventExpression)
-			IMPL_TYPE_INFO_RENAME(WfBindExpression, Workflow::WfBindExpression)
-			IMPL_TYPE_INFO_RENAME(WfObserveType, Workflow::WfObserveType)
-			IMPL_TYPE_INFO_RENAME(WfObserveExpression, Workflow::WfObserveExpression)
-			IMPL_TYPE_INFO_RENAME(WfCallExpression, Workflow::WfCallExpression)
-			IMPL_TYPE_INFO_RENAME(WfStatement, Workflow::WfStatement)
-			IMPL_TYPE_INFO_RENAME(WfBreakStatement, Workflow::WfBreakStatement)
-			IMPL_TYPE_INFO_RENAME(WfContinueStatement, Workflow::WfContinueStatement)
-			IMPL_TYPE_INFO_RENAME(WfReturnStatement, Workflow::WfReturnStatement)
-			IMPL_TYPE_INFO_RENAME(WfDeleteStatement, Workflow::WfDeleteStatement)
-			IMPL_TYPE_INFO_RENAME(WfRaiseExceptionStatement, Workflow::WfRaiseExceptionStatement)
-			IMPL_TYPE_INFO_RENAME(WfIfStatement, Workflow::WfIfStatement)
-			IMPL_TYPE_INFO_RENAME(WfSwitchCase, Workflow::WfSwitchCase)
-			IMPL_TYPE_INFO_RENAME(WfSwitchStatement, Workflow::WfSwitchStatement)
-			IMPL_TYPE_INFO_RENAME(WfWhileStatement, Workflow::WfWhileStatement)
-			IMPL_TYPE_INFO_RENAME(WfForEachDirection, Workflow::WfForEachDirection)
-			IMPL_TYPE_INFO_RENAME(WfForEachStatement, Workflow::WfForEachStatement)
-			IMPL_TYPE_INFO_RENAME(WfTryStatement, Workflow::WfTryStatement)
-			IMPL_TYPE_INFO_RENAME(WfBlockStatement, Workflow::WfBlockStatement)
-			IMPL_TYPE_INFO_RENAME(WfExpressionStatement, Workflow::WfExpressionStatement)
-			IMPL_TYPE_INFO_RENAME(WfDeclaration, Workflow::WfDeclaration)
-			IMPL_TYPE_INFO_RENAME(WfNamespaceDeclaration, Workflow::WfNamespaceDeclaration)
-			IMPL_TYPE_INFO_RENAME(WfFunctionArgument, Workflow::WfFunctionArgument)
-			IMPL_TYPE_INFO_RENAME(WfFunctionAnonymity, Workflow::WfFunctionAnonymity)
-			IMPL_TYPE_INFO_RENAME(WfFunctionDeclaration, Workflow::WfFunctionDeclaration)
-			IMPL_TYPE_INFO_RENAME(WfFunctionExpression, Workflow::WfFunctionExpression)
-			IMPL_TYPE_INFO_RENAME(WfVariableDeclaration, Workflow::WfVariableDeclaration)
-			IMPL_TYPE_INFO_RENAME(WfVariableStatement, Workflow::WfVariableStatement)
-			IMPL_TYPE_INFO_RENAME(WfNewTypeExpression, Workflow::WfNewTypeExpression)
-			IMPL_TYPE_INFO_RENAME(WfModuleUsingFragment, Workflow::WfModuleUsingFragment)
-			IMPL_TYPE_INFO_RENAME(WfModuleUsingNameFragment, Workflow::WfModuleUsingNameFragment)
-			IMPL_TYPE_INFO_RENAME(WfModuleUsingWildCardFragment, Workflow::WfModuleUsingWildCardFragment)
-			IMPL_TYPE_INFO_RENAME(WfModuleUsingItem, Workflow::WfModuleUsingItem)
-			IMPL_TYPE_INFO_RENAME(WfModuleUsingPath, Workflow::WfModuleUsingPath)
-			IMPL_TYPE_INFO_RENAME(WfModuleType, Workflow::WfModuleType)
-			IMPL_TYPE_INFO_RENAME(WfModule, Workflow::WfModule)
-			IMPL_TYPE_INFO_RENAME(WfType::IVisitor, Workflow::WfType::IVisitor)
-			IMPL_TYPE_INFO_RENAME(WfExpression::IVisitor, Workflow::WfExpression::IVisitor)
-			IMPL_TYPE_INFO_RENAME(WfStatement::IVisitor, Workflow::WfStatement::IVisitor)
-			IMPL_TYPE_INFO_RENAME(WfDeclaration::IVisitor, Workflow::WfDeclaration::IVisitor)
-			IMPL_TYPE_INFO_RENAME(WfModuleUsingFragment::IVisitor, Workflow::WfModuleUsingFragment::IVisitor)
+			IMPL_TYPE_INFO_RENAME(WfType, workflow::WfType)
+			IMPL_TYPE_INFO_RENAME(WfPredefinedTypeName, workflow::WfPredefinedTypeName)
+			IMPL_TYPE_INFO_RENAME(WfPredefinedType, workflow::WfPredefinedType)
+			IMPL_TYPE_INFO_RENAME(WfTopQualifiedType, workflow::WfTopQualifiedType)
+			IMPL_TYPE_INFO_RENAME(WfReferenceType, workflow::WfReferenceType)
+			IMPL_TYPE_INFO_RENAME(WfRawPointerType, workflow::WfRawPointerType)
+			IMPL_TYPE_INFO_RENAME(WfSharedPointerType, workflow::WfSharedPointerType)
+			IMPL_TYPE_INFO_RENAME(WfNullableType, workflow::WfNullableType)
+			IMPL_TYPE_INFO_RENAME(WfEnumerableType, workflow::WfEnumerableType)
+			IMPL_TYPE_INFO_RENAME(WfMapWritability, workflow::WfMapWritability)
+			IMPL_TYPE_INFO_RENAME(WfMapType, workflow::WfMapType)
+			IMPL_TYPE_INFO_RENAME(WfFunctionType, workflow::WfFunctionType)
+			IMPL_TYPE_INFO_RENAME(WfChildType, workflow::WfChildType)
+			IMPL_TYPE_INFO_RENAME(WfExpression, workflow::WfExpression)
+			IMPL_TYPE_INFO_RENAME(WfTopQualifiedExpression, workflow::WfTopQualifiedExpression)
+			IMPL_TYPE_INFO_RENAME(WfReferenceExpression, workflow::WfReferenceExpression)
+			IMPL_TYPE_INFO_RENAME(WfOrderedNameExpression, workflow::WfOrderedNameExpression)
+			IMPL_TYPE_INFO_RENAME(WfOrderedLambdaExpression, workflow::WfOrderedLambdaExpression)
+			IMPL_TYPE_INFO_RENAME(WfMemberExpression, workflow::WfMemberExpression)
+			IMPL_TYPE_INFO_RENAME(WfChildExpression, workflow::WfChildExpression)
+			IMPL_TYPE_INFO_RENAME(WfLiteralValue, workflow::WfLiteralValue)
+			IMPL_TYPE_INFO_RENAME(WfLiteralExpression, workflow::WfLiteralExpression)
+			IMPL_TYPE_INFO_RENAME(WfFloatingExpression, workflow::WfFloatingExpression)
+			IMPL_TYPE_INFO_RENAME(WfIntegerExpression, workflow::WfIntegerExpression)
+			IMPL_TYPE_INFO_RENAME(WfStringExpression, workflow::WfStringExpression)
+			IMPL_TYPE_INFO_RENAME(WfFormatExpression, workflow::WfFormatExpression)
+			IMPL_TYPE_INFO_RENAME(WfUnaryOperator, workflow::WfUnaryOperator)
+			IMPL_TYPE_INFO_RENAME(WfUnaryExpression, workflow::WfUnaryExpression)
+			IMPL_TYPE_INFO_RENAME(WfBinaryOperator, workflow::WfBinaryOperator)
+			IMPL_TYPE_INFO_RENAME(WfBinaryExpression, workflow::WfBinaryExpression)
+			IMPL_TYPE_INFO_RENAME(WfLetVariable, workflow::WfLetVariable)
+			IMPL_TYPE_INFO_RENAME(WfLetExpression, workflow::WfLetExpression)
+			IMPL_TYPE_INFO_RENAME(WfIfExpression, workflow::WfIfExpression)
+			IMPL_TYPE_INFO_RENAME(WfRangeBoundary, workflow::WfRangeBoundary)
+			IMPL_TYPE_INFO_RENAME(WfRangeExpression, workflow::WfRangeExpression)
+			IMPL_TYPE_INFO_RENAME(WfSetTesting, workflow::WfSetTesting)
+			IMPL_TYPE_INFO_RENAME(WfSetTestingExpression, workflow::WfSetTestingExpression)
+			IMPL_TYPE_INFO_RENAME(WfConstructorArgument, workflow::WfConstructorArgument)
+			IMPL_TYPE_INFO_RENAME(WfConstructorExpression, workflow::WfConstructorExpression)
+			IMPL_TYPE_INFO_RENAME(WfInferExpression, workflow::WfInferExpression)
+			IMPL_TYPE_INFO_RENAME(WfTypeCastingStrategy, workflow::WfTypeCastingStrategy)
+			IMPL_TYPE_INFO_RENAME(WfTypeCastingExpression, workflow::WfTypeCastingExpression)
+			IMPL_TYPE_INFO_RENAME(WfTypeTesting, workflow::WfTypeTesting)
+			IMPL_TYPE_INFO_RENAME(WfTypeTestingExpression, workflow::WfTypeTestingExpression)
+			IMPL_TYPE_INFO_RENAME(WfTypeOfTypeExpression, workflow::WfTypeOfTypeExpression)
+			IMPL_TYPE_INFO_RENAME(WfTypeOfExpressionExpression, workflow::WfTypeOfExpressionExpression)
+			IMPL_TYPE_INFO_RENAME(WfAttachEventExpression, workflow::WfAttachEventExpression)
+			IMPL_TYPE_INFO_RENAME(WfDetachEventExpression, workflow::WfDetachEventExpression)
+			IMPL_TYPE_INFO_RENAME(WfBindExpression, workflow::WfBindExpression)
+			IMPL_TYPE_INFO_RENAME(WfObserveType, workflow::WfObserveType)
+			IMPL_TYPE_INFO_RENAME(WfObserveExpression, workflow::WfObserveExpression)
+			IMPL_TYPE_INFO_RENAME(WfCallExpression, workflow::WfCallExpression)
+			IMPL_TYPE_INFO_RENAME(WfStatement, workflow::WfStatement)
+			IMPL_TYPE_INFO_RENAME(WfBreakStatement, workflow::WfBreakStatement)
+			IMPL_TYPE_INFO_RENAME(WfContinueStatement, workflow::WfContinueStatement)
+			IMPL_TYPE_INFO_RENAME(WfReturnStatement, workflow::WfReturnStatement)
+			IMPL_TYPE_INFO_RENAME(WfDeleteStatement, workflow::WfDeleteStatement)
+			IMPL_TYPE_INFO_RENAME(WfRaiseExceptionStatement, workflow::WfRaiseExceptionStatement)
+			IMPL_TYPE_INFO_RENAME(WfIfStatement, workflow::WfIfStatement)
+			IMPL_TYPE_INFO_RENAME(WfSwitchCase, workflow::WfSwitchCase)
+			IMPL_TYPE_INFO_RENAME(WfSwitchStatement, workflow::WfSwitchStatement)
+			IMPL_TYPE_INFO_RENAME(WfWhileStatement, workflow::WfWhileStatement)
+			IMPL_TYPE_INFO_RENAME(WfForEachDirection, workflow::WfForEachDirection)
+			IMPL_TYPE_INFO_RENAME(WfForEachStatement, workflow::WfForEachStatement)
+			IMPL_TYPE_INFO_RENAME(WfTryStatement, workflow::WfTryStatement)
+			IMPL_TYPE_INFO_RENAME(WfBlockStatement, workflow::WfBlockStatement)
+			IMPL_TYPE_INFO_RENAME(WfExpressionStatement, workflow::WfExpressionStatement)
+			IMPL_TYPE_INFO_RENAME(WfDeclaration, workflow::WfDeclaration)
+			IMPL_TYPE_INFO_RENAME(WfNamespaceDeclaration, workflow::WfNamespaceDeclaration)
+			IMPL_TYPE_INFO_RENAME(WfFunctionArgument, workflow::WfFunctionArgument)
+			IMPL_TYPE_INFO_RENAME(WfFunctionAnonymity, workflow::WfFunctionAnonymity)
+			IMPL_TYPE_INFO_RENAME(WfFunctionDeclaration, workflow::WfFunctionDeclaration)
+			IMPL_TYPE_INFO_RENAME(WfFunctionExpression, workflow::WfFunctionExpression)
+			IMPL_TYPE_INFO_RENAME(WfVariableDeclaration, workflow::WfVariableDeclaration)
+			IMPL_TYPE_INFO_RENAME(WfVariableStatement, workflow::WfVariableStatement)
+			IMPL_TYPE_INFO_RENAME(WfNewTypeExpression, workflow::WfNewTypeExpression)
+			IMPL_TYPE_INFO_RENAME(WfModuleUsingFragment, workflow::WfModuleUsingFragment)
+			IMPL_TYPE_INFO_RENAME(WfModuleUsingNameFragment, workflow::WfModuleUsingNameFragment)
+			IMPL_TYPE_INFO_RENAME(WfModuleUsingWildCardFragment, workflow::WfModuleUsingWildCardFragment)
+			IMPL_TYPE_INFO_RENAME(WfModuleUsingItem, workflow::WfModuleUsingItem)
+			IMPL_TYPE_INFO_RENAME(WfModuleUsingPath, workflow::WfModuleUsingPath)
+			IMPL_TYPE_INFO_RENAME(WfModuleType, workflow::WfModuleType)
+			IMPL_TYPE_INFO_RENAME(WfModule, workflow::WfModule)
+			IMPL_TYPE_INFO_RENAME(WfType::IVisitor, workflow::WfType::IVisitor)
+			IMPL_TYPE_INFO_RENAME(WfExpression::IVisitor, workflow::WfExpression::IVisitor)
+			IMPL_TYPE_INFO_RENAME(WfStatement::IVisitor, workflow::WfStatement::IVisitor)
+			IMPL_TYPE_INFO_RENAME(WfDeclaration::IVisitor, workflow::WfDeclaration::IVisitor)
+			IMPL_TYPE_INFO_RENAME(WfModuleUsingFragment::IVisitor, workflow::WfModuleUsingFragment::IVisitor)
 
 			BEGIN_CLASS_MEMBER(WfType)
 				CLASS_MEMBER_METHOD(Accept, {L"visitor"})
