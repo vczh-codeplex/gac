@@ -35,8 +35,6 @@ Instance Representation
 				virtual void						Visit(GuiConstructorRepr* repr)=0;
 			};
 
-			bool									fromStyle = false;
-
 			virtual void							Accept(IVisitor* visitor)=0;
 		};
 
@@ -57,12 +55,14 @@ Instance Representation
 			{
 				WString								binding;
 				ValueList							values;
+				bool								fromStyle = false;
 			};
 
 			struct EventValue
 			{
 				WString								binding;
 				WString								value;
+				bool								fromStyle = false;
 			};
 			
 			typedef collections::Dictionary<WString, Ptr<SetterValue>>			SetteValuerMap;

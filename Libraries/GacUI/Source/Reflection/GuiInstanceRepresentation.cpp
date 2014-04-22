@@ -377,6 +377,39 @@ GuiInstanceContext
 GuiInstanceStyle
 ***********************************************************************/
 
+		namespace visitors
+		{
+			class SetStyleMarkVisitor : public Object, public GuiValueRepr::IVisitor
+			{
+			public:
+				void Visit(GuiTextRepr* repr)override
+				{
+				}
+
+				void Visit(GuiAttSetterRepr* repr)override
+				{
+					FOREACH(Ptr<GuiAttSetterRepr::SetterValue>, value, repr->setters.Values())
+					{
+						value->fromStyle = true;
+						FOREACH(Ptr<GuiValueRepr>, subValue, value->values)
+						{
+							subValue->Accept(this);
+						}
+					}
+					FOREACH(Ptr<GuiAttSetterRepr::EventValue>, value, repr->eventHandlers.Values())
+					{
+						value->fromStyle = true;
+					}
+				}
+
+				void Visit(GuiConstructorRepr* repr)override
+				{
+					Visit((GuiAttSetterRepr*)repr);
+				}
+			};
+		}
+		using namespace visitors;
+
 		Ptr<GuiInstanceStyle> GuiInstanceStyle::LoadFromXml(Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors)
 		{
 			auto style = MakePtr<GuiInstanceStyle>();
@@ -390,6 +423,9 @@ GuiInstanceStyle
 			}
 			style->setter = MakePtr<GuiAttSetterRepr>();
 			GuiInstanceContext::FillAttSetter(style->setter, xml, errors);
+
+			SetStyleMarkVisitor visitor;
+			style->setter->Accept(&visitor);
 			return style;
 		}
 
