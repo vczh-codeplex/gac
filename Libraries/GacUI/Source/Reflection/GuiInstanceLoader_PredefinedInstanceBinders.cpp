@@ -808,8 +808,8 @@ GuiPredefinedInstanceBindersPlugin
 					manager->SetTableParser(L"WORKFLOW", L"WORKFLOW-EXPRESSION", &WfParseExpression);
 					manager->SetTableParser(L"WORKFLOW", L"WORKFLOW-STATEMENT", &WfParseStatement);
 					manager->SetTableParser(L"WORKFLOW", L"WORKFLOW-MODULE", &WfParseModule);
-					manager->SetParsingTable(L"INSTANCEQUERY", &GuiIqLoadTable);
-					manager->SetTableParser(L"INSTANCEQUERY", L"INSTANCEQUERY", &GuiIqParse);
+					manager->SetParsingTable(L"INSTANCE-QUERY", &GuiIqLoadTable);
+					manager->SetTableParser(L"INSTANCE-QUERY", L"INSTANCE-QUERY", &GuiIqParse);
 				}
 				{
 					IGuiInstanceLoaderManager* manager=GetInstanceLoaderManager();
