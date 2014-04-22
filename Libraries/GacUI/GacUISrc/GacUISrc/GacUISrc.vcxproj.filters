@@ -112,6 +112,9 @@
     <Filter Include="Workflow\Runtime">
       <UniqueIdentifier>{5f113591-a02a-4766-b47b-67fa8630ae28}</UniqueIdentifier>
     </Filter>
+    <Filter Include="GacUI\Reflection\InstanceQuery">
+      <UniqueIdentifier>{9e11adec-8541-460e-b5bc-8c650b171018}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\Common\Source\Basic.cpp">
@@ -600,6 +603,9 @@
     <ClCompile Include="..\..\Source\Controls\ListControlPackage\GuiBindableListControl.cpp">
       <Filter>GacUI\Controls\ListControlPackage</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Reflection\InstanceQuery\GuiInstanceQuery_Parser.cpp">
+      <Filter>GacUI\Reflection\InstanceQuery</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Common\Source\Basic.h">
@@ -1082,5 +1088,18 @@
     <ClInclude Include="..\..\Source\Controls\ListControlPackage\GuiBindableListControl.h">
       <Filter>GacUI\Controls\ListControlPackage</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Reflection\InstanceQuery\GuiInstanceQuery_Parser.h">
+      <Filter>GacUI\Reflection\InstanceQuery</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\..\Source\Reflection\InstanceQuery\GuiInstanceQuery_Parser.parser.txt">
+      <Filter>GacUI\Reflection\InstanceQuery</Filter>
+    </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\Source\Reflection\InstanceQuery\Codegen.bat">
+      <Filter>GacUI\Reflection\InstanceQuery</Filter>
+    </None>
   </ItemGroup>
 </Project>
