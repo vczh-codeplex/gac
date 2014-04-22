@@ -367,6 +367,7 @@
     <ClCompile Include="..\..\Source\Reflection\GuiInstanceLoader_PredefinedInstanceLoaders.cpp" />
     <ClCompile Include="..\..\Source\Reflection\GuiInstanceRepresentation.cpp" />
     <ClCompile Include="..\..\Source\Reflection\GuiInstanceSchemaRepresentation.cpp" />
+    <ClCompile Include="..\..\Source\Reflection\InstanceQuery\GuiInstanceQuery_Parser.cpp" />
     <ClCompile Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionBasic.cpp">
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
@@ -557,6 +558,7 @@
     <ClInclude Include="..\..\Source\Reflection\GuiInstanceLoader.h" />
     <ClInclude Include="..\..\Source\Reflection\GuiInstanceRepresentation.h" />
     <ClInclude Include="..\..\Source\Reflection\GuiInstanceSchemaRepresentation.h" />
+    <ClInclude Include="..\..\Source\Reflection\InstanceQuery\GuiInstanceQuery_Parser.h" />
     <ClInclude Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionBasic.h" />
     <ClInclude Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionCompositions.h" />
     <ClInclude Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionControls.h" />
@@ -566,6 +568,12 @@
     <ClInclude Include="..\..\Source\Resources\GuiParserManager.h" />
     <ClInclude Include="..\..\Source\Resources\GuiResource.h" />
     <ClInclude Include="FileSystemInformation.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\..\Source\Reflection\InstanceQuery\GuiInstanceQuery_Parser.parser.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\Source\Reflection\InstanceQuery\Codegen.bat" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

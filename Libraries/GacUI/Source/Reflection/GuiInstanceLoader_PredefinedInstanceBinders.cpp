@@ -1,5 +1,6 @@
 #include "GuiInstanceLoader.h"
 #include "TypeDescriptors\GuiReflectionControls.h"
+#include "InstanceQuery\GuiInstanceQuery_Parser.h"
 #include "..\Resources\GuiParserManager.h"
 #include "..\..\..\Workflow\Source\Analyzer\WfAnalyzer.h"
 
@@ -807,6 +808,8 @@ GuiPredefinedInstanceBindersPlugin
 					manager->SetTableParser(L"WORKFLOW", L"WORKFLOW-EXPRESSION", &WfParseExpression);
 					manager->SetTableParser(L"WORKFLOW", L"WORKFLOW-STATEMENT", &WfParseStatement);
 					manager->SetTableParser(L"WORKFLOW", L"WORKFLOW-MODULE", &WfParseModule);
+					manager->SetParsingTable(L"INSTANCEQUERY", &GuiIqLoadTable);
+					manager->SetTableParser(L"INSTANCEQUERY", L"INSTANCEQUERY", &GuiIqParse);
 				}
 				{
 					IGuiInstanceLoaderManager* manager=GetInstanceLoaderManager();
