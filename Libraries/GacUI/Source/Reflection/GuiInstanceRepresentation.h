@@ -10,6 +10,7 @@ Interfaces:
 #define VCZH_PRESENTATION_REFLECTION_GUIINSTANCEREPRESENTATION
 
 #include "..\Resources\GuiResource.h"
+#include "InstanceQuery\GuiInstanceQuery_Parser.h"
 
 namespace vl
 {
@@ -162,7 +163,7 @@ Instance Style Context
 		class GuiInstanceStyle : public Object, public Description<GuiInstanceStyle>
 		{
 		public:
-			WString									path;
+			Ptr<GuiIqQuery>							query;
 			Ptr<GuiAttSetterRepr>					setter;
 
 			static Ptr<GuiInstanceStyle>			LoadFromXml(Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);

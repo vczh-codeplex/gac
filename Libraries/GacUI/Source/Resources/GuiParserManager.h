@@ -80,6 +80,11 @@ Strong Typed Table Parser
 				{
 					collections::List<Ptr<parsing::ParsingError>> parsingErrors;
 					auto result = function(text, table, parsingErrors, -1);
+					if (!result)
+					{
+						errors.Add(L"Failed to parse the following input as format \"" + name + L"\":");
+						errors.Add(text);
+					}
 					for (vint i = 0; i < parsingErrors.Count(); i++)
 					{
 						auto error = parsingErrors[i];
