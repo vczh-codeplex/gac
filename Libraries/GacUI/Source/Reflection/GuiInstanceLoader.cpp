@@ -827,10 +827,28 @@ GuiResourceInstanceLoader
 				if (typeInfo.typeName == context->className.Value())
 				{
 					Ptr<GuiResourcePathResolver> resolver = new GuiResourcePathResolver(resource, resource->GetWorkingDirectory());
+
+					List<WString> errors;
+					if (context->stylePaths.Count() > 0)
+					{
+						List<Ptr<GuiInstanceStyle>> styles;
+						FOREACH(WString, path, context->stylePaths)
+						{
+						}
+						context->stylePaths.Clear();
+					}
+
 					auto scope = InitializeInstanceFromContext(context, resolver, instance);
+					if (scope)
+					{
+						for (vint i = 0; i < errors.Count(); i++)
+						{
+							scope->errors.Insert(i, errors[i]);
+						}
+					}
 					return scope;
 				}
-				return false;
+				return 0;
 			}
 
 			void GetConstructorParameters(const TypeInfo& typeInfo, collections::List<WString>& propertyNames)
