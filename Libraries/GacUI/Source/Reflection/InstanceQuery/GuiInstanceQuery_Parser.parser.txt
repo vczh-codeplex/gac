@@ -79,12 +79,14 @@ rule PrimaryQuery QPrimaryFragment
 		["." NAME : referenceName] as PrimaryQuery
 	;
 
+rule PrimaryQuery QPrimaryAttributed
+	= !QPrimaryFragment with {attributeNameOption="Any"}
+	= "@" [NAME : attributeName] ":" !QPrimaryFragment with {attributeNameOption="Specified"}
+	;
+
 rule PrimaryQuery QPrimary
-	= !QPrimaryFragment
-	= "@" (
-			(NAME : attributeName with {attributeNameOption="Specified"})
-			| ("*" with {attributeNameOption="Any"})
-		) ":" !QPrimaryFragment
+	= ("/" with {childOption="Direct"}) !QPrimaryAttributed
+	= ("//" with {childOption="Indirect"}) !QPrimaryAttributed
 	= "(" !QueryRoot ")"
 	;
 
