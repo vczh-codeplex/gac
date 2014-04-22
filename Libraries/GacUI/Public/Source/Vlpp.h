@@ -6449,6 +6449,13 @@ Collections
 				static Ptr<IValueList>			Create(collections::LazyList<Value> values);
 			};
 
+			class IValueObservableList : public virtual IValueReadonlyList, public Description<IValueObservableList>
+			{
+				typedef void ItemChangedProc(vint index, vint oldCount, vint newCount);
+			public:
+				Event<ItemChangedProc>			ItemChanged;
+			};
+
 			class IValueReadonlyDictionary : public virtual IDescriptable, public Description<IValueReadonlyDictionary>
 			{
 			public:
@@ -8199,6 +8206,7 @@ Predefined Types
 			template<>struct TypeInfo<IValueEnumerable>{static const wchar_t* TypeName;};
 			template<>struct TypeInfo<IValueReadonlyList>{static const wchar_t* TypeName;};
 			template<>struct TypeInfo<IValueList>{static const wchar_t* TypeName;};
+			template<>struct TypeInfo<IValueObservableList>{static const wchar_t* TypeName;};
 			template<>struct TypeInfo<IValueReadonlyDictionary>{static const wchar_t* TypeName;};
 			template<>struct TypeInfo<IValueDictionary>{static const wchar_t* TypeName;};
 			template<>struct TypeInfo<IValueInterfaceProxy>{static const wchar_t* TypeName;};
@@ -10362,6 +10370,16 @@ Collection Wrappers
 				{
 					ElementKeyType item=UnboxValue<ElementKeyType>(value);
 					return WRAPPER_POINTER->IndexOf(item);
+				}
+			};
+
+			template<typename T>
+			class ValueObservableListWrapper : public ValueReadonlyListWrapper<T>, public virtual IValueObservableList
+			{
+			public:
+				ValueObservableListWrapper(const T& _wrapperPointer)
+					:ValueReadonlyListWrapper<T>(_wrapperPointer)
+				{
 				}
 			};
 
