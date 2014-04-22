@@ -332,7 +332,9 @@ void GuiMain()
 	auto resource = GuiResource::LoadFromXml(L"..\\GacUISrcCodepackedTest\\Resources\\XmlWindowResourceDataBinding.xml", errors);
 	GetInstanceLoaderManager()->SetResource(L"Demo", resource);
 	demos::MainWindow window(new demos::ViewModel);
+
 	auto scope = window.GetScope().Obj();
+	CopyFrom(errors, scope->errors, true);
 
 	window.ForceCalculateSizeImmediately();
 	window.MoveToScreenCenter();

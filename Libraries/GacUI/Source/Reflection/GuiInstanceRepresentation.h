@@ -35,6 +35,8 @@ Instance Representation
 				virtual void						Visit(GuiConstructorRepr* repr)=0;
 			};
 
+			bool									fromStyle = false;
+
 			virtual void							Accept(IVisitor* visitor)=0;
 		};
 
@@ -105,6 +107,8 @@ Instance Namespace
 Instance Context
 ***********************************************************************/
 
+		class GuiInstanceStyleContext;
+
 		class GuiInstanceContext : public Object, public Description<GuiInstanceContext>
 		{
 		public:
@@ -117,6 +121,7 @@ Instance Context
 			};
 			typedef collections::Dictionary<WString, Ptr<NamespaceInfo>>		NamespaceMap;
 			typedef collections::List<Ptr<GuiInstanceParameter>>				ParameterList;
+			typedef collections::List<Ptr<GuiInstanceStyleContext>>				StyleContextList;
 
 			class ElementName : public Object
 			{
@@ -139,12 +144,37 @@ Instance Context
 			Nullable<WString>						className;
 			ParameterList							parameters;
 
+			collections::List<WString>				stylePaths;
+			StyleContextList						styles;
+
 			static void								CollectDefaultAttributes(GuiAttSetterRepr::ValueList& values, Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
 			static void								CollectAttributes(GuiAttSetterRepr::SetteValuerMap& setters, Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
 			static void								CollectEvents(GuiAttSetterRepr::EventHandlerMap& eventHandlers, Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
 			static void								FillAttSetter(Ptr<GuiAttSetterRepr> setter, Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
 			static Ptr<GuiConstructorRepr>			LoadCtor(Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
 			static Ptr<GuiInstanceContext>			LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, collections::List<WString>& errors);
+		};
+
+/***********************************************************************
+Instance Style Context
+***********************************************************************/
+
+		class GuiInstanceStyle : public Object, public Description<GuiInstanceStyle>
+		{
+		public:
+			WString									path;
+			Ptr<GuiAttSetterRepr>					setter;
+
+			static Ptr<GuiInstanceStyle>			LoadFromXml(Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
+		};
+
+		class GuiInstanceStyleContext : public Object, public Description<GuiInstanceStyleContext>
+		{
+			typedef collections::List<Ptr<GuiInstanceStyle>>		StyleList;
+		public:
+			StyleList								styles;
+
+			static Ptr<GuiInstanceStyleContext>		LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, collections::List<WString>& errors);
 		};
 	}
 }

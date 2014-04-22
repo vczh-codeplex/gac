@@ -227,15 +227,45 @@ GuiInstanceContext
 			return 0;
 		}
 
+		void SplitBySemicolon(const WString& input, List<WString>& fragments)
+		{
+			const wchar_t* attValue = input.Buffer();
+			while(*attValue)
+			{
+				// split the value by ';'
+				const wchar_t* attSemicolon = wcschr(attValue, L';');
+				WString pattern;
+				if(attSemicolon)
+				{
+					pattern = WString(attValue, attSemicolon - attValue);
+					attValue = attSemicolon + 1;
+				}
+				else
+				{
+					vint len = wcslen(attValue);
+					pattern = WString(attValue, len);
+					attValue += len;
+				}
+
+				fragments.Add(pattern);
+			}
+		}
+
 		Ptr<GuiInstanceContext> GuiInstanceContext::LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, collections::List<WString>& errors)
 		{
 			Ptr<GuiInstanceContext> context=new GuiInstanceContext;
 			if(xml->rootElement->name.value==L"Instance")
 			{
 				// load type name
-				if(Ptr<XmlAttribute> att=XmlGetAttribute(xml->rootElement, L"ref.Class"))
+				if (auto classAttr = XmlGetAttribute(xml->rootElement, L"ref.Class"))
 				{
-					context->className=att->value.value;
+					context->className = classAttr->value.value;
+				}
+
+				// load style names
+				if (auto styleAttr = XmlGetAttribute(xml->rootElement, L"ref.Styles"))
+				{
+					SplitBySemicolon(styleAttr->value.value, context->stylePaths);
 				}
 
 				// load namespaces
@@ -296,25 +326,11 @@ GuiInstanceContext
 							info=context->namespaces.Values()[index];
 						}
 
-						// extract all patterns in the namespace
-						const wchar_t* attValue=att->value.value.Buffer();
-						while(*attValue)
+						// extract all patterns in the namespace, split the value by ';'
+						List<WString> patterns;
+						SplitBySemicolon(att->value.value, patterns);
+						FOREACH(WString, pattern, patterns)
 						{
-							// split the value by ';'
-							const wchar_t* attSemicolon=wcschr(attValue, L';');
-							WString pattern;
-							if(attSemicolon)
-							{
-								pattern=WString(attValue, attSemicolon-attValue);
-								attValue=attSemicolon+1;
-							}
-							else
-							{
-								vint len=wcslen(attValue);
-								pattern=WString(attValue, len);
-								attValue+=len;
-							}
-
 							// add the pattern to the namespace
 							Ptr<GuiInstanceNamespace> ns=new GuiInstanceNamespace;
 							Pair<vint, vint> star=INVLOC.FindFirst(pattern, L"*", Locale::None);
@@ -355,6 +371,50 @@ GuiInstanceContext
 			}
 
 			return context->instance?context:0;
+		}
+
+/***********************************************************************
+GuiInstanceStyle
+***********************************************************************/
+
+		Ptr<GuiInstanceStyle> GuiInstanceStyle::LoadFromXml(Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors)
+		{
+			auto style = MakePtr<GuiInstanceStyle>();
+			if (auto pathAttr = XmlGetAttribute(xml, L"ref.Path"))
+			{
+				style->path = pathAttr->value.value;
+			}
+			else
+			{
+				errors.Add(L"Missing attribute \"ref.Path\" in <Style>.");
+			}
+			style->setter = MakePtr<GuiAttSetterRepr>();
+			GuiInstanceContext::FillAttSetter(style->setter, xml, errors);
+			return style;
+		}
+
+/***********************************************************************
+GuiInstanceStyleContext
+***********************************************************************/
+
+		Ptr<GuiInstanceStyleContext> GuiInstanceStyleContext::LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, collections::List<WString>& errors)
+		{
+			auto context = MakePtr<GuiInstanceStyleContext>();
+			FOREACH(Ptr<XmlElement>, styleElement, XmlGetElements(xml->rootElement))
+			{
+				if (styleElement->name.value == L"Style")
+				{
+					if (auto style = GuiInstanceStyle::LoadFromXml(styleElement, errors))
+					{
+						context->styles.Add(style);
+					}
+				}
+				else
+				{
+					errors.Add(L"Unknown style type \"" + styleElement->name.value + L"\".");
+				}
+			}
+			return context;
 		}
 	}
 }

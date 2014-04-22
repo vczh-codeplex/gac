@@ -271,6 +271,52 @@ Instance Type Resolver
 		};
 
 /***********************************************************************
+Instance Style Resolver
+***********************************************************************/
+
+		class GuiResourceInstanceStyleResolver : public Object, public IGuiResourceTypeResolver
+		{
+		public:
+			WString GetType()
+			{
+				return L"InstanceStyle";
+			}
+
+			WString GetPreloadType()
+			{
+				return L"Xml";
+			}
+
+			bool IsDelayLoad()
+			{
+				return false;
+			}
+
+			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)
+			{
+				errors.Add(L"Internal error: Instance style resource needs resource preloading.");
+				return 0;
+			}
+
+			Ptr<DescriptableObject> ResolveResource(const WString& path, collections::List<WString>& errors)
+			{
+				errors.Add(L"Internal error: Instance style resource needs resource preloading.");
+				return 0;
+			}
+
+			Ptr<DescriptableObject> ResolveResource(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)
+			{
+				Ptr<XmlDocument> xml = resource.Cast<XmlDocument>();
+				if (xml)
+				{
+					Ptr<GuiInstanceStyleContext> context = GuiInstanceStyleContext::LoadFromXml(xml, errors);
+					return context;
+				}
+				return 0;
+			}
+		};
+
+/***********************************************************************
 Instance Schema Type Resolver
 ***********************************************************************/
 
@@ -978,6 +1024,7 @@ GuiInstanceLoaderManager
 				{
 					IGuiResourceResolverManager* manager = GetResourceResolverManager();
 					manager->SetTypeResolver(new GuiResourceInstanceTypeResolver);
+					manager->SetTypeResolver(new GuiResourceInstanceStyleResolver);
 					manager->SetTypeResolver(new GuiResourceInstanceSchemaTypeResolver);
 				}
 				{
