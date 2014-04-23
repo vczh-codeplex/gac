@@ -744,6 +744,38 @@ GuiResourceInstanceLoader
 		protected:
 			Ptr<GuiResource>						resource;
 			Ptr<GuiInstanceContext>					context;
+
+			void InitializeContext(Ptr<GuiResourcePathResolver> resolver, List<WString>& errors)
+			{
+				if (context->stylePaths.Count() > 0)
+				{
+					List<Ptr<GuiInstanceStyle>> styles;
+					FOREACH(WString, uri, context->stylePaths)
+					{
+						WString protocol, path;
+						if (IsResourceUrl(uri, protocol, path))
+						{
+							if (auto styleContext = resolver->ResolveResource(protocol, path).Cast<GuiInstanceStyleContext>())
+							{
+								CopyFrom(styles, styleContext->styles, true);
+							}
+							else
+							{
+								errors.Add(L"Failed to find the style referred in attribute \"ref.Styles\": \"" + uri + L"\".");
+							}
+						}
+						else
+						{
+							errors.Add(L"Invalid path in attribute \"ref.Styles\": \"" + uri + L"\".");
+						}
+					}
+					context->stylePaths.Clear();
+
+					FOREACH(Ptr<GuiInstanceStyle>, styles, styles)
+					{
+					}
+				}
+			}
 		public:
 			GuiResourceInstanceLoader(Ptr<GuiResource> _resource, Ptr<GuiInstanceContext> _context)
 				:resource(_resource)
@@ -767,6 +799,7 @@ GuiResourceInstanceLoader
 				{
 					if (auto typeDescriptor = GetGlobalTypeManager()->GetTypeDescriptor(typeInfo.typeName))
 					{
+						InitializeContext(env->resolver, env->scope->errors);
 						SortedList<WString> argumentNames;
 						{
 							List<WString> names;
@@ -827,16 +860,8 @@ GuiResourceInstanceLoader
 				if (typeInfo.typeName == context->className.Value())
 				{
 					Ptr<GuiResourcePathResolver> resolver = new GuiResourcePathResolver(resource, resource->GetWorkingDirectory());
-
 					List<WString> errors;
-					if (context->stylePaths.Count() > 0)
-					{
-						List<Ptr<GuiInstanceStyle>> styles;
-						FOREACH(WString, path, context->stylePaths)
-						{
-						}
-						context->stylePaths.Clear();
-					}
+					InitializeContext(resolver, errors);
 
 					auto scope = InitializeInstanceFromContext(context, resolver, instance);
 					if (scope)
