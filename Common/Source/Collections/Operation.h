@@ -368,12 +368,12 @@ LazyList
 
 			LazyList<T> Intersect(const IEnumerable<T>& remains)const
 			{
-				return new IntersectExceptEnumerator<T, true>(xs(), remains);
+				return LazyList<T>(new IntersectExceptEnumerator<T, true>(xs(), remains)).Distinct();
 			}
 
 			LazyList<T> Except(const IEnumerable<T>& remains)const
 			{
-				return new IntersectExceptEnumerator<T, false>(xs(), remains);
+				return LazyList<T>(new IntersectExceptEnumerator<T, false>(xs(), remains)).Distinct();
 			}
 
 			LazyList<T> Union(const IEnumerable<T>& remains)const
