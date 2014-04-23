@@ -14,10 +14,10 @@ ExecuteQueryVisitor
 		{
 		public:
 			Ptr<GuiInstanceContext>				context;
-			List<Ptr<GuiAttSetterRepr>>&		input;
-			List<Ptr<GuiAttSetterRepr>>&		output;
+			List<Ptr<GuiConstructorRepr>>&		input;
+			List<Ptr<GuiConstructorRepr>>&		output;
 
-			ExecuteQueryVisitor(Ptr<GuiInstanceContext> _context, List<Ptr<GuiAttSetterRepr>>& _input, List<Ptr<GuiAttSetterRepr>>& _output)
+			ExecuteQueryVisitor(Ptr<GuiInstanceContext> _context, List<Ptr<GuiConstructorRepr>>& _input, List<Ptr<GuiConstructorRepr>>& _output)
 				:context(_context), input(_input), output(_output)
 			{
 			}
@@ -86,7 +86,7 @@ ExecuteQueryVisitor
 			{
 				if (&input)
 				{
-					FOREACH(Ptr<GuiAttSetterRepr>, setter, input)
+					FOREACH(Ptr<GuiConstructorRepr>, setter, input)
 					{
 						Traverse(node, setter);
 					}
@@ -99,14 +99,14 @@ ExecuteQueryVisitor
 
 			void Visit(GuiIqCascadeQuery* node)override
 			{
-				List<Ptr<GuiAttSetterRepr>> temp;
+				List<Ptr<GuiConstructorRepr>> temp;
 				ExecuteQuery(node->parent, context, input, temp);
 				ExecuteQuery(node->child, context, temp, output);
 			}
 
 			void Visit(GuiIqSetQuery* node)override
 			{
-				List<Ptr<GuiAttSetterRepr>> first, second;
+				List<Ptr<GuiConstructorRepr>> first, second;
 				ExecuteQuery(node->first, context, input, first);
 				ExecuteQuery(node->second, context, input, second);
 
@@ -132,15 +132,61 @@ ExecuteQueryVisitor
 ExecuteQuery
 ***********************************************************************/
 
-		void ExecuteQuery(Ptr<GuiIqQuery> query, Ptr<GuiInstanceContext> context, collections::List<Ptr<GuiAttSetterRepr>>& input, collections::List<Ptr<GuiAttSetterRepr>>& output)
+		void ExecuteQuery(Ptr<GuiIqQuery> query, Ptr<GuiInstanceContext> context, collections::List<Ptr<GuiConstructorRepr>>& input, collections::List<Ptr<GuiConstructorRepr>>& output)
 		{
 			ExecuteQueryVisitor visitor(context, input, output);
 			query->Accept(&visitor);
 		}
 
-		void ExecuteQuery(Ptr<GuiIqQuery> query, Ptr<GuiInstanceContext> context, collections::List<Ptr<GuiAttSetterRepr>>& output)
+		void ExecuteQuery(Ptr<GuiIqQuery> query, Ptr<GuiInstanceContext> context, collections::List<Ptr<GuiConstructorRepr>>& output)
 		{
-			ExecuteQuery(query, context, *(List<Ptr<GuiAttSetterRepr>>*)0, output);
+			ExecuteQuery(query, context, *(List<Ptr<GuiConstructorRepr>>*)0, output);
+		}
+
+/***********************************************************************
+ApplyStyle
+***********************************************************************/
+
+		void ApplyStyleInternal(Ptr<GuiAttSetterRepr> src, Ptr<GuiAttSetterRepr> dst)
+		{
+			FOREACH_INDEXER(WString, attribute, srcIndex, src->setters.Keys())
+			{
+				auto srcValue = src->setters.Values()[srcIndex];
+				vint dstIndex = dst->setters.Keys().IndexOf(attribute);
+				if (dstIndex == -1)
+				{
+					dst->setters.Add(attribute, srcValue);
+				}
+				else
+				{
+					auto dstValue = dst->setters.Values()[dstIndex];
+					if (srcValue->binding == dstValue->binding)
+					{
+						if (srcValue->binding == L"set")
+						{
+							ApplyStyleInternal(srcValue->values[0].Cast<GuiAttSetterRepr>(), dstValue->values[0].Cast<GuiAttSetterRepr>());
+						}
+						else
+						{
+							CopyFrom(dstValue->values, srcValue->values, true);
+						}
+					}
+				}
+			}
+
+			FOREACH_INDEXER(WString, eventName, srcIndex, src->eventHandlers.Keys())
+			{
+				if (!dst->eventHandlers.Keys().Contains(eventName))
+				{
+					auto srcValue = src->eventHandlers.Values()[srcIndex];
+					dst->eventHandlers.Add(eventName, srcValue);
+				}
+			}
+		}
+
+		void ApplyStyle(Ptr<GuiInstanceStyle> style, Ptr<GuiConstructorRepr> ctor)
+		{
+			ApplyStyleInternal(style->setter, ctor);
 		}
 	}
 }

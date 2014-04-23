@@ -774,11 +774,11 @@ GuiResourceInstanceLoader
 
 					FOREACH(Ptr<GuiInstanceStyle>, style, styles)
 					{
-						List<Ptr<GuiAttSetterRepr>> output;
+						List<Ptr<GuiConstructorRepr>> output;
 						ExecuteQuery(style->query, context, output);
-						FOREACH(Ptr<GuiAttSetterRepr>, setter, output)
+						FOREACH(Ptr<GuiConstructorRepr>, ctor, output)
 						{
-							// apply style on setter
+							ApplyStyle(style, ctor);
 						}
 					}
 				}

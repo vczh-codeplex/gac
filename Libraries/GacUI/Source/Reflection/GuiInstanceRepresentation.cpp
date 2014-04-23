@@ -384,13 +384,14 @@ GuiInstanceStyle
 			public:
 				void Visit(GuiTextRepr* repr)override
 				{
+					repr->fromStyle = true;
 				}
 
 				void Visit(GuiAttSetterRepr* repr)override
 				{
+					repr->fromStyle = true;
 					FOREACH(Ptr<GuiAttSetterRepr::SetterValue>, value, repr->setters.Values())
 					{
-						value->fromStyle = true;
 						FOREACH(Ptr<GuiValueRepr>, subValue, value->values)
 						{
 							subValue->Accept(this);
