@@ -94,7 +94,7 @@ public:
 
 	void AddComplexSeason()override
 	{
-		complexSeasons.Add(new Season(L"Unknown Season No." + itow(seasons.Count() + 1), L"N/A"));
+		complexSeasons.Add(new Season(L"Unknown Season No." + itow(complexSeasons.Count() + 1), L"N/A"));
 	}
 
 	void AddTreeSeason()override
