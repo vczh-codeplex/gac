@@ -1,6 +1,7 @@
 #include "GuiInstanceLoader.h"
 #include "TypeDescriptors\GuiReflectionEvents.h"
 #include "..\Resources\GuiParserManager.h"
+#include "InstanceQuery\GuiInstanceQuery.h"
 #include "GuiInstanceSchemaRepresentation.h"
 
 namespace vl
@@ -771,8 +772,14 @@ GuiResourceInstanceLoader
 					}
 					context->stylePaths.Clear();
 
-					FOREACH(Ptr<GuiInstanceStyle>, styles, styles)
+					FOREACH(Ptr<GuiInstanceStyle>, style, styles)
 					{
+						List<Ptr<GuiAttSetterRepr>> output;
+						ExecuteQuery(style->query, context, output);
+						FOREACH(Ptr<GuiAttSetterRepr>, setter, output)
+						{
+							// apply style on setter
+						}
 					}
 				}
 			}

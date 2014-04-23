@@ -606,6 +606,9 @@
     <ClCompile Include="..\..\Source\Reflection\InstanceQuery\GuiInstanceQuery_Parser.cpp">
       <Filter>GacUI\Reflection\InstanceQuery</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Reflection\InstanceQuery\GuiInstanceQuery.cpp">
+      <Filter>GacUI\Reflection\InstanceQuery</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Common\Source\Basic.h">
@@ -1089,6 +1092,9 @@
       <Filter>GacUI\Controls\ListControlPackage</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Reflection\InstanceQuery\GuiInstanceQuery_Parser.h">
+      <Filter>GacUI\Reflection\InstanceQuery</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Reflection\InstanceQuery\GuiInstanceQuery.h">
       <Filter>GacUI\Reflection\InstanceQuery</Filter>
     </ClInclude>
   </ItemGroup>
