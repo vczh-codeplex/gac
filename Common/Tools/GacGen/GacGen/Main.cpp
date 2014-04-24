@@ -5,6 +5,10 @@ using namespace vl::collections;
 using namespace vl::regex;
 using namespace vl::stream;
 using namespace vl::reflection::description;
+using namespace vl::parsing;
+using namespace vl::parsing::tabling;
+using namespace vl::workflow;
+using namespace vl::workflow::analyzer;
 
 Array<WString>* arguments = 0;
 
@@ -88,6 +92,9 @@ public:
 	WString										include;
 	WString										name;
 	WString										prefix;
+
+	Ptr<ParsingTable>							workflowTable;
+	Ptr<WfLexicalScopeManager>					workflowManager;
 
 	static bool LoadConfigString(Ptr<GuiResource> resource, const WString& name, WString& value)
 	{
@@ -213,8 +220,68 @@ IGuiInstanceLoader::TypeInfo GetCppTypeInfo(Ptr<CodegenConfig> config, Dictionar
 	return IGuiInstanceLoader::TypeInfo(typeName, typeDescriptor);
 }
 
-WString GetCppTypeNameFromWorkflowType(const WString& workflowType)
+/***********************************************************************
+WorkflowTypeTransformation
+***********************************************************************/
+
+WString GetCppTypeNameFromWorkflowType(Ptr<CodegenConfig> config, const WString& workflowType)
 {
+	if (!config->workflowTable)
+	{
+		config->workflowTable = WfLoadTable();
+	}
+	if (!config->workflowManager)
+	{
+		config->workflowManager = new WfLexicalScopeManager(config->workflowTable);
+		const wchar_t* moduleCode = LR"workflow(
+module TypeConversion;
+
+using presentation::controls::Gui*;
+using presentation::elements::Gui*Element;
+using presentation::compositions::Gui*Composition;
+using presentation::compositions::Gui*;
+using system::*;
+using system::reflection::*;
+using presentation::*;
+using presentation::Gui*;
+using presentation::controls::*;
+using presentation::controls::list::*;
+using presentation::controls::tree::*;
+using presentation::elements::*;
+using presentation::elements::Gui*;
+using presentation::elements::text*;
+using presentation::compositions::*;
+
+)workflow";
+		auto module = config->workflowManager->AddModule(moduleCode);
+		if (!module)
+		{
+			PrintErrorMessage(L"Internal error: wrong module code.");
+		}
+		config->workflowManager->Rebuild(true);
+	}
+
+	auto type = WfParseType(workflowType, config->workflowTable);
+	if (!type)
+	{
+		PrintErrorMessage(L"Invalid workflow type: \"" + workflowType + L"\".");
+		return L"vint";
+	}
+
+	auto module = config->workflowManager->modules[0];
+	auto scope = config->workflowManager->moduleScopes[module.Obj()];
+	analyzer::ValidateTypeStructure(config->workflowManager.Obj(), type, true);
+	if (config->workflowManager->errors.Count() > 0)
+	{
+		PrintErrorMessage(L"Invalid workflow type: \"" + workflowType + L"\".");
+		FOREACH(Ptr<ParsingError>, error, config->workflowManager->errors)
+		{
+			PrintErrorMessage(error->errorMessage);
+		}
+		config->workflowManager->errors.Clear();
+		return L"vint";
+	}
+
 	return workflowType;
 }
 
@@ -908,7 +975,7 @@ void WritePartialClassHeaderFile(Ptr<CodegenConfig> config, Dictionary<WString, 
 			}
 			FOREACH(Ptr<GuiInstancePropertySchame>, prop, data->properties)
 			{
-				writer.WriteLine(prefix + L"\t" + GetCppTypeNameFromWorkflowType(prop->typeName) + L" " + prop->name + L";");
+				writer.WriteLine(prefix + L"\t" + GetCppTypeNameFromWorkflowType(config, prop->typeName) + L" " + prop->name + L";");
 			}
 			writer.WriteLine(prefix + L"};");
 		}
@@ -921,10 +988,10 @@ void WritePartialClassHeaderFile(Ptr<CodegenConfig> config, Dictionary<WString, 
 			FOREACH(Ptr<GuiInstancePropertySchame>, prop, itf->properties)
 			{
 				writer.WriteLine(L"");
-				writer.WriteLine(prefix + L"\tvirtual " + GetCppTypeNameFromWorkflowType(prop->typeName) + L" Get" + prop->name + L"() = 0;");
+				writer.WriteLine(prefix + L"\tvirtual " + GetCppTypeNameFromWorkflowType(config, prop->typeName) + L" Get" + prop->name + L"() = 0;");
 				if (!prop->readonly)
 				{
-					writer.WriteLine(prefix + L"\tvirtual void Set" + prop->name + L"(const " + GetCppTypeNameFromWorkflowType(prop->typeName) + L"& value) = 0;");
+					writer.WriteLine(prefix + L"\tvirtual void Set" + prop->name + L"(const " + GetCppTypeNameFromWorkflowType(config, prop->typeName) + L"& value) = 0;");
 				}
 				if (prop->observable)
 				{
@@ -936,14 +1003,14 @@ void WritePartialClassHeaderFile(Ptr<CodegenConfig> config, Dictionary<WString, 
 				writer.WriteLine(L"");
 				FOREACH(Ptr<GuiInstanceMethodSchema>, method, itf->methods)
 				{
-					writer.WriteString(prefix + L"\tvirtual " + GetCppTypeNameFromWorkflowType(method->returnType) + L" " + method->name + L"(");
+					writer.WriteString(prefix + L"\tvirtual " + GetCppTypeNameFromWorkflowType(config, method->returnType) + L" " + method->name + L"(");
 					FOREACH_INDEXER(Ptr<GuiInstancePropertySchame>, argument, index, method->arguments)
 					{
 						if (index > 0)
 						{
 							writer.WriteString(L", ");
 						}
-						writer.WriteString(GetCppTypeNameFromWorkflowType(argument->typeName) + L" " + argument->name);
+						writer.WriteString(GetCppTypeNameFromWorkflowType(config, argument->typeName) + L" " + argument->name);
 					}
 					writer.WriteLine(L") = 0;");
 				}

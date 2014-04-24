@@ -19,16 +19,16 @@ namespace demos
 	{
 	public:
 
-		virtual vint GetFirst() = 0;
-		virtual void SetFirst(const vint& value) = 0;
+		virtual int GetFirst() = 0;
+		virtual void SetFirst(const int& value) = 0;
 
-		virtual vint GetSecond() = 0;
-		virtual void SetSecond(const vint& value) = 0;
+		virtual int GetSecond() = 0;
+		virtual void SetSecond(const int& value) = 0;
 
-		virtual vint GetSum() = 0;
+		virtual int GetSum() = 0;
 		vl::Event<void()> SumChanged;
 
-		virtual vint GetProduct() = 0;
+		virtual int GetProduct() = 0;
 	};
 }
 
@@ -38,7 +38,7 @@ namespace demos
 	{
 	public:
 
-		virtual Ptr<IControlViewModel> GetControlViewModel() = 0;
+		virtual demos::IControlViewModel^ GetControlViewModel() = 0;
 	};
 }
 
@@ -48,7 +48,7 @@ namespace demos
 	{
 	public:
 
-		virtual void DoSomething(vint first, vint second) = 0;
+		virtual void DoSomething(int first, int second) = 0;
 	};
 }
 
@@ -56,8 +56,8 @@ namespace demos
 {
 	struct MyStruct
 	{
-		vint x;
-		vint y;
+		int x;
+		int y;
 	};
 }
 
@@ -67,7 +67,7 @@ namespace demos
 	{
 	public:
 		demos::MyStruct point;
-		Ptr<demos::MyClass> next;
+		demos::MyClass^ next;
 	};
 }
 
