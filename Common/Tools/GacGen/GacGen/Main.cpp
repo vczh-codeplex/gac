@@ -213,6 +213,11 @@ IGuiInstanceLoader::TypeInfo GetCppTypeInfo(Ptr<CodegenConfig> config, Dictionar
 	return IGuiInstanceLoader::TypeInfo(typeName, typeDescriptor);
 }
 
+WString GetCppTypeNameFromWorkflowType(const WString& workflowType)
+{
+	return workflowType;
+}
+
 /***********************************************************************
 SearchAllFields
 ***********************************************************************/
@@ -903,7 +908,7 @@ void WritePartialClassHeaderFile(Ptr<CodegenConfig> config, Dictionary<WString, 
 			}
 			FOREACH(Ptr<GuiInstancePropertySchame>, prop, data->properties)
 			{
-				writer.WriteLine(prefix + L"\t" + prop->typeName + L" " + prop->name + L";");
+				writer.WriteLine(prefix + L"\t" + GetCppTypeNameFromWorkflowType(prop->typeName) + L" " + prop->name + L";");
 			}
 			writer.WriteLine(prefix + L"};");
 		}
@@ -916,10 +921,10 @@ void WritePartialClassHeaderFile(Ptr<CodegenConfig> config, Dictionary<WString, 
 			FOREACH(Ptr<GuiInstancePropertySchame>, prop, itf->properties)
 			{
 				writer.WriteLine(L"");
-				writer.WriteLine(prefix + L"\tvirtual " + prop->typeName + L" Get" + prop->name + L"() = 0;");
+				writer.WriteLine(prefix + L"\tvirtual " + GetCppTypeNameFromWorkflowType(prop->typeName) + L" Get" + prop->name + L"() = 0;");
 				if (!prop->readonly)
 				{
-					writer.WriteLine(prefix + L"\tvirtual void Set" + prop->name + L"(const " + prop->typeName + L"& value) = 0;");
+					writer.WriteLine(prefix + L"\tvirtual void Set" + prop->name + L"(const " + GetCppTypeNameFromWorkflowType(prop->typeName) + L"& value) = 0;");
 				}
 				if (prop->observable)
 				{
@@ -931,14 +936,14 @@ void WritePartialClassHeaderFile(Ptr<CodegenConfig> config, Dictionary<WString, 
 				writer.WriteLine(L"");
 				FOREACH(Ptr<GuiInstanceMethodSchema>, method, itf->methods)
 				{
-					writer.WriteString(prefix + L"\tvirtual " + method->returnType + L" " + method->name + L"(");
+					writer.WriteString(prefix + L"\tvirtual " + GetCppTypeNameFromWorkflowType(method->returnType) + L" " + method->name + L"(");
 					FOREACH_INDEXER(Ptr<GuiInstancePropertySchame>, argument, index, method->arguments)
 					{
 						if (index > 0)
 						{
 							writer.WriteString(L", ");
 						}
-						writer.WriteString(argument->typeName + L" " + argument->name);
+						writer.WriteString(GetCppTypeNameFromWorkflowType(argument->typeName) + L" " + argument->name);
 					}
 					writer.WriteLine(L") = 0;");
 				}

@@ -27,14 +27,3 @@ namespace demos
 }
 
 #endif
-
-
-
-
-
-
-
-
-
-
-
