@@ -41,10 +41,10 @@
 &lt;InstanceSchema name="ViewModelResource"&gt;
     &lt;Schemas&gt;
     &lt;Interface ref.Class="helloworld::IViewModel"&gt;
-        &lt;Property Name="UserName" Type="WString"/&gt;
-        &lt;Property Name="UserNameError" Type="WString" Readonly="true" Observable="true"/&gt;
-        &lt;Property Name="Password" Type="WString"/&gt;
-        &lt;Property Name="PasswordError" Type="WString" Readonly="true" Observable="true"/&gt;
+        &lt;Property Name="UserName" Type="string"/&gt;
+        &lt;Property Name="UserNameError" Type="string" Readonly="true" Observable="true"/&gt;
+        &lt;Property Name="Password" Type="string"/&gt;
+        &lt;Property Name="PasswordError" Type="string" Readonly="true" Observable="true"/&gt;
         &lt;Method Name="Commit" Type="bool"&gt;
         &lt;Argument Name="signIn" Type="bool"/&gt;
         &lt;/Method&gt;
@@ -74,13 +74,13 @@ namespace helloworld
 	{
 	public:
 		virtual WString GetUserName() = 0;
-		virtual void SetUserName(const WString& value) = 0;
+		virtual void SetUserName(WString value) = 0;
 
 		virtual WString GetUserNameError() = 0;
 		vl::Event&lt;void()&gt; UserNameErrorChanged;
 
 		virtual WString GetPassword() = 0;
-		virtual void SetPassword(const WString& value) = 0;
+		virtual void SetPassword(WString value) = 0;
 
 		virtual WString GetPasswordError() = 0;
 		vl::Event&lt;void()&gt; PasswordErrorChanged;
