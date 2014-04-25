@@ -1,5 +1,7 @@
 #include "DocumentEditorWindow.h"
 
+using namespace vl::collections;
+
 void SetImage(GuiToolstripCommand* command, const WString& imagePath)
 {
 	command->SetImage(new GuiImageData(GetCurrentController()->ImageService()->CreateImageFromFile(imagePath), 0));
@@ -203,11 +205,11 @@ void DocumentEditorWindow::InitializeMenuBar()
 
 void DocumentEditorWindow::InitializeToolBar()
 {
-	toolbar=g::NewToolbar();
-	toolbar->GetBoundsComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
-	toolbar->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+	ToolBar=g::NewToolBar();
+	ToolBar->GetBoundsComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+	ToolBar->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 
-	toolbar->GetBuilder()
+	ToolBar->GetBuilder()
 		->Button(commandFileNew)
 		->Button(commandFileOpen)
 		->Button(commandFileSave)
@@ -271,7 +273,7 @@ void DocumentEditorWindow::InitializeComponents()
 		cell->SetInternalMargin(Margin(1, 0, 1, 0));
 		
 		InitializeToolBar();
-		cell->AddChild(toolbar->GetBoundsComposition());
+		cell->AddChild(ToolBar->GetBoundsComposition());
 	}
 
 	// create the text box
@@ -287,7 +289,8 @@ void DocumentEditorWindow::InitializeComponents()
 		textBox->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 		cell->AddChild(textBox->GetBoundsComposition());
 
-		Ptr<DocumentModel> model=DocumentModel::LoadFromXml(GetResourceFolder()+L"XmlDocDemo.xml");
+		List<WString> errors;
+		Ptr<DocumentModel> model = DocumentModel::LoadFromXml(GetResourceFolder() + L"XmlDocDemo.xml", errors);
 		textBox->SetDocument(model);
 	}
 

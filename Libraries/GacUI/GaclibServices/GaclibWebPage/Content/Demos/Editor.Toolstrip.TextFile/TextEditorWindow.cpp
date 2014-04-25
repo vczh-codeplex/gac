@@ -11,11 +11,11 @@ void TextEditorWindow::UpdateWindowTitle()
 {
 	if(fileName==L"")
 	{
-		this->SetText(L"Controls.Toolstrip.TextEditor[UNTITLED]");
+		this->SetText(L"Editor.Toolstrip.TextFile[UNTITLED]");
 	}
 	else
 	{
-		this->SetText(L"Controls.Toolstrip.TextEditor["+fileName+L"]");
+		this->SetText(L"Editor.Toolstrip.TextFile["+fileName+L"]");
 	}
 }
 

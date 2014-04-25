@@ -7,7 +7,7 @@ class TextEditorWindow : public GuiWindow
 {
 private:
 	GuiToolstripMenuBar*			menuBar;
-	GuiToolstripToolbar*			toolbar;
+	GuiToolstripToolBar*			ToolBar;
 	GuiMultilineTextBox*			textBox;
 	GuiShortcutKeyManager*			shortcutKeyManager;
 

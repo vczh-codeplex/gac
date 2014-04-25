@@ -1,8 +1,9 @@
-#include "..\..\Public\Source\GacUIIncludes.h"
+#include "..\..\Public\Source\GacUI.h"
 #include <Windows.h>
 
 using namespace vl::parsing::xml;
 using namespace vl::stream;
+using namespace vl::collections;
 
 int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int CmdShow)
 {
@@ -40,7 +41,8 @@ public:
 		SetClientSize(Size(440, 280));
 		GetContainerComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 		MoveToScreenCenter();
-		Ptr<GuiResource> resource=GuiResource::LoadFromXml(L"..\\Resources\\XmlResource.xml");
+		List<WString> errors;
+		Ptr<GuiResource> resource = GuiResource::LoadFromXml(L"..\\Resources\\XmlResource.xml", errors);
 
 		{
 			GuiButton* tooltipButton=g::NewButton();
@@ -65,12 +67,12 @@ public:
 			L"Tooltips/SaveAs",
 		};
 
-		GuiToolstripToolbar* toolbar=g::NewToolbar();
+		GuiToolstripToolBar* toolbar=g::NewToolBar();
 		toolbar->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, -1));
 		AddChild(toolbar);
 		for(vint i=0;i<4;i++)
 		{
-			GuiToolstripButton* button=g::NewToolbarButton();
+			GuiToolstripButton* button=g::NewToolBarButton();
 			button->SetImage(resource->GetValueByPath(images[i]).Cast<GuiImageData>());
 			AddTooltip(button, resource, paths[i], 100);
 			toolbar->GetToolstripItems().Add(button);
