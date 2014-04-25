@@ -19,14 +19,3 @@ namespace demos
 		InitializeComponents(ViewModel);
 	}
 }
-
-
-
-
-
-
-
-
-
-
-

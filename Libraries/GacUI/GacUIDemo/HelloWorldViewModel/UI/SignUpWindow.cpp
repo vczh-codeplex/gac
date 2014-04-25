@@ -19,4 +19,3 @@ namespace helloworld
 		InitializeComponents(ViewModel);
 	}
 }
-

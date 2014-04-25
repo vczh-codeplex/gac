@@ -20,13 +20,13 @@ namespace helloworld
 	public:
 
 		virtual WString GetUserName() = 0;
-		virtual void SetUserName(const WString& value) = 0;
+		virtual void SetUserName(WString value) = 0;
 
 		virtual WString GetUserNameError() = 0;
 		vl::Event<void()> UserNameErrorChanged;
 
 		virtual WString GetPassword() = 0;
-		virtual void SetPassword(const WString& value) = 0;
+		virtual void SetPassword(WString value) = 0;
 
 		virtual WString GetPasswordError() = 0;
 		vl::Event<void()> PasswordErrorChanged;
