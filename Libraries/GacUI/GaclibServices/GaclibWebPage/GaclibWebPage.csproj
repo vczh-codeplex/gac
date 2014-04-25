@@ -133,8 +133,6 @@
     <Content Include="Content\Demos\Controls.DataGrid.FileExplorer\DXGUI_65.jpg" />
     <Content Include="Content\Demos\Controls.DataGrid.FileExplorer\DXGUI_66.jpg" />
     <Content Include="Content\Demos\Controls.DataGrid.FileExplorer\DXGUI_67.jpg" />
-    <Content Include="Content\Demos\Controls.DataGrid.FileExplorer\FileSystemInformation.cpp" />
-    <Content Include="Content\Demos\Controls.DataGrid.FileExplorer\FileSystemInformation.h" />
     <Content Include="Content\Demos\Controls.DataGrid.FileExplorer\Main.cpp" />
     <Content Include="Content\Demos\Controls.DataGrid.TableEditor\DXGUI_73.jpg" />
     <Content Include="Content\Demos\Controls.DataGrid.TableEditor\DXGUI_74.jpg" />
@@ -171,18 +169,10 @@
     <Content Include="Content\Demos\Controls.Tab.TextBoxPage\DXGUI_32.jpg" />
     <Content Include="Content\Demos\Controls.Tab.TextBoxPage\DXGUI_33.jpg" />
     <Content Include="Content\Demos\Controls.Tab.TextBoxPage\Main.cpp" />
-    <Content Include="Content\Demos\Controls.TextBox.AdvancedColorizer\DXGUI_57.jpg" />
-    <Content Include="Content\Demos\Controls.TextBox.AdvancedColorizer\Main.cpp" />
     <Content Include="Content\Demos\Controls.TextBox.Colorizer\DXGUI_35.jpg" />
     <Content Include="Content\Demos\Controls.TextBox.Colorizer\DXGUI_36.jpg" />
     <Content Include="Content\Demos\Controls.TextBox.Colorizer\DXGUI_37.jpg" />
     <Content Include="Content\Demos\Controls.TextBox.Colorizer\Main.cpp" />
-    <Content Include="Content\Demos\Controls.TextBox.ContextColorizer\DXGUI_78.jpg" />
-    <Content Include="Content\Demos\Controls.TextBox.ContextColorizer\DXGUI_79.jpg" />
-    <Content Include="Content\Demos\Controls.TextBox.ContextColorizer\DXGUI_80.jpg" />
-    <Content Include="Content\Demos\Controls.TextBox.ContextColorizer\DXGUI_81.jpg" />
-    <Content Include="Content\Demos\Controls.TextBox.ContextColorizer\DXGUI_82.jpg" />
-    <Content Include="Content\Demos\Controls.TextBox.ContextColorizer\Main.cpp" />
     <Content Include="Content\Demos\Controls.TextBox.Editor\DXGUI_34.jpg" />
     <Content Include="Content\Demos\Controls.TextBox.Editor\Main.cpp" />
     <Content Include="Content\Demos\Demos.Editor.Toolstrip.Document.jpg" />

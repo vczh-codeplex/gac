@@ -1,7 +1,8 @@
 #ifndef GACUI_DEMO_FILE_SYSTEM_INFORMATION
 #define GACUI_DEMO_FILE_SYSTEM_INFORMATION
 
-#include "..\..\Public\Source\GacUI.h"
+#include "..\..\Public\Source\GacUIWindows.h"
+#include <Windows.h>
 #include <ShlObj.h>
 
 using namespace vl;
@@ -13,6 +14,7 @@ File System Operations
 
 extern WString GetWindowsDirectory();
 extern void SearchDirectoriesAndFiles(const WString& path, List<WString>& directories, List<WString>& files);
+extern bool IsFileDirectory(const WString& fullPath);
 extern Ptr<GuiImageData> GetFileIcon(const WString& fullPath, UINT uFlags);
 extern WString GetFileDisplayName(const WString& fullPath);
 extern WString GetFileTypeName(const WString& fullPath);
@@ -30,6 +32,7 @@ class FileProperties
 private:
 	Ptr<GuiImageData>	smallIcon;
 	Ptr<GuiImageData>	bigIcon;
+	bool				isDirectory;
 	WString				displayName;
 	WString				typeName;
 	FILETIME			lastWriteTime;
@@ -44,6 +47,7 @@ public:
 
 	Ptr<GuiImageData>	GetSmallIcon();
 	Ptr<GuiImageData>	GetBigIcon();
+	bool				IsDirectory();
 	WString				GetDisplayName();
 	WString				GetTypeName();
 	FILETIME			GetLastWriteTime();
