@@ -9,6 +9,7 @@
   <Folder name="ProjectImages" content="Link">ProjectImages\Folder.xml</Folder>
   <Folder name="FileImages" content="Link">FileImages\Folder.xml</Folder>
   <Folder name="UI">
+    <InstanceSchema content="File">ViewModels\SolutionModel.xml</InstanceSchema>
     <Instance content="File">UserInterfaces\MainWindow.xml</Instance>
     <Instance content="File">UserInterfaces\NewProjectWindow.xml</Instance>
     <Instance content="File">UserInterfaces\NewFileWindow.xml</Instance>

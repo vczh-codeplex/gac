@@ -19,7 +19,7 @@ namespace ui
 
 	void MainWindow::commandFileNewFile_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
 	{
-		auto window = new NewFileWindow;
+		auto window = new NewFileWindow(GetViewModel());
 		window->ForceCalculateSizeImmediately();
 		window->MoveToScreenCenter();
 		window->ShowModalAndDelete(this, []()
@@ -29,7 +29,7 @@ namespace ui
 
 	void MainWindow::commandFileNewProject_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
 	{
-		auto window = new NewProjectWindow;
+		auto window = new NewProjectWindow(GetViewModel());
 		window->ForceCalculateSizeImmediately();
 		window->MoveToScreenCenter();
 		window->ShowModalAndDelete(this, []()
@@ -55,9 +55,8 @@ namespace ui
 
 	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 
-	MainWindow::MainWindow()
+	MainWindow::MainWindow(Ptr<vm::IStudioModel> ViewModel)
 	{
-		InitializeComponents();
+		InitializeComponents(ViewModel);
 	}
 }
-

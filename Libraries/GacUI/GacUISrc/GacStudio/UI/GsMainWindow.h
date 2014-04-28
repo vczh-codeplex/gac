@@ -29,7 +29,7 @@ namespace ui
 		void commandFileSave_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
 		// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 	public:
-		MainWindow();
+		MainWindow(Ptr<vm::IStudioModel> ViewModel);
 	};
 }
 

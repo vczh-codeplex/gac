@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Schemas>
+  <Interface ref.Class="vm::IFileFactoryModel">
+    <Property Name="Image" Type="presentation::GuiImageData^"/>
+    <Property Name="Name" Type="string"/>
+    <Property Name="Category" Type="string"/>
+    <Property Name="Description" Type="string"/>
+    <Property Name="Id" Type="string"/>
+  </Interface>
+
+  <Interface ref.Class="vm::IProjectFactoryModel">
+    <Property Name="Image" Type="presentation::GuiImageData^"/>
+    <Property Name="Name" Type="string"/>
+    <Property Name="Description" Type="string"/>
+    <Property Name="Id" Type="string"/>
+  </Interface>
+
+  <Interface ref.Class="vm::IStudioModel">
+    <Method Name="GetProjectModels" Type="vm::IFileFactoryModel^{}"/>
+    <Method Name="GetFileModels" Type="vm::IFileFactoryModel^{}">
+      <Argument Name="category" Type="string"/>
+    </Method>
+  </Interface>
+</Schemas>

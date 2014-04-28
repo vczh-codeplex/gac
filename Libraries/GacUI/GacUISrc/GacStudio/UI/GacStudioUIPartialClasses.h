@@ -13,12 +13,67 @@ DO NOT MODIFY
 
 #include "..\..\..\Public\Source\GacUIReflection.h"
 
+namespace vm
+{
+	class IFileFactoryModel : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IFileFactoryModel>
+	{
+	public:
+
+		virtual Ptr<presentation::GuiImageData> GetImage() = 0;
+		virtual void SetImage(Ptr<presentation::GuiImageData> value) = 0;
+
+		virtual WString GetName() = 0;
+		virtual void SetName(WString value) = 0;
+
+		virtual WString GetCategory() = 0;
+		virtual void SetCategory(WString value) = 0;
+
+		virtual WString GetDescription() = 0;
+		virtual void SetDescription(WString value) = 0;
+
+		virtual WString GetId() = 0;
+		virtual void SetId(WString value) = 0;
+	};
+}
+
+namespace vm
+{
+	class IProjectFactoryModel : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IProjectFactoryModel>
+	{
+	public:
+
+		virtual Ptr<presentation::GuiImageData> GetImage() = 0;
+		virtual void SetImage(Ptr<presentation::GuiImageData> value) = 0;
+
+		virtual WString GetName() = 0;
+		virtual void SetName(WString value) = 0;
+
+		virtual WString GetDescription() = 0;
+		virtual void SetDescription(WString value) = 0;
+
+		virtual WString GetId() = 0;
+		virtual void SetId(WString value) = 0;
+	};
+}
+
+namespace vm
+{
+	class IStudioModel : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IStudioModel>
+	{
+	public:
+
+		virtual collections::LazyList<Ptr<vm::IFileFactoryModel>> GetProjectModels() = 0;
+		virtual collections::LazyList<Ptr<vm::IFileFactoryModel>> GetFileModels(WString category) = 0;
+	};
+}
+
 namespace ui
 {
 	template<typename TImpl>
 	class MainWindow_ : public vl::presentation::controls::GuiWindow, public vl::presentation::GuiInstancePartialClass<vl::presentation::controls::GuiWindow>, public vl::reflection::Description<TImpl>
 	{
 	private:
+		Ptr<vm::IStudioModel> ViewModel_;
 	protected:
 		vl::presentation::controls::GuiToolstripCommand* commandFileExit;
 		vl::presentation::controls::GuiToolstripCommand* commandFileNewFile;
@@ -28,8 +83,9 @@ namespace ui
 		vl::presentation::controls::GuiToolstripCommand* commandFileSave;
 		vl::presentation::controls::GuiToolstripCommand* commandFileSaveAll;
 
-		void InitializeComponents()
+		void InitializeComponents(Ptr<vm::IStudioModel> ViewModel)
 		{
+			ViewModel_ = ViewModel;
 			if (InitializeFromResource())
 			{
 				GUI_INSTANCE_REFERENCE(commandFileExit);
@@ -42,6 +98,7 @@ namespace ui
 			}
 			else
 			{
+				ViewModel_ = 0;
 			}
 		}
 	public:
@@ -57,6 +114,11 @@ namespace ui
 			,commandFileSaveAll(0)
 		{
 		}
+
+		Ptr<vm::IStudioModel> GetViewModel()
+		{
+			return ViewModel_;
+		}
 	};
 
 	class MainWindow;
@@ -68,6 +130,7 @@ namespace ui
 	class NewFileWindow_ : public vl::presentation::controls::GuiWindow, public vl::presentation::GuiInstancePartialClass<vl::presentation::controls::GuiWindow>, public vl::reflection::Description<TImpl>
 	{
 	private:
+		Ptr<vm::IStudioModel> ViewModel_;
 	protected:
 		vl::presentation::controls::GuiButton* buttonCancel;
 		vl::presentation::controls::GuiButton* buttonCreate;
@@ -76,8 +139,9 @@ namespace ui
 		vl::presentation::controls::GuiSinglelineTextBox* textBoxProjectName;
 		vl::presentation::controls::GuiTreeView* treeViewProjectTemplate;
 
-		void InitializeComponents()
+		void InitializeComponents(Ptr<vm::IStudioModel> ViewModel)
 		{
+			ViewModel_ = ViewModel;
 			if (InitializeFromResource())
 			{
 				GUI_INSTANCE_REFERENCE(buttonCancel);
@@ -89,6 +153,7 @@ namespace ui
 			}
 			else
 			{
+				ViewModel_ = 0;
 			}
 		}
 	public:
@@ -103,6 +168,11 @@ namespace ui
 			,treeViewProjectTemplate(0)
 		{
 		}
+
+		Ptr<vm::IStudioModel> GetViewModel()
+		{
+			return ViewModel_;
+		}
 	};
 
 	class NewFileWindow;
@@ -114,6 +184,7 @@ namespace ui
 	class NewProjectWindow_ : public vl::presentation::controls::GuiWindow, public vl::presentation::GuiInstancePartialClass<vl::presentation::controls::GuiWindow>, public vl::reflection::Description<TImpl>
 	{
 	private:
+		Ptr<vm::IStudioModel> ViewModel_;
 	protected:
 		vl::presentation::controls::GuiButton* buttonBrowse;
 		vl::presentation::controls::GuiButton* buttonCancel;
@@ -124,8 +195,9 @@ namespace ui
 		vl::presentation::controls::GuiSinglelineTextBox* textBoxProjectName;
 		vl::presentation::controls::GuiSinglelineTextBox* textBoxSolutionName;
 
-		void InitializeComponents()
+		void InitializeComponents(Ptr<vm::IStudioModel> ViewModel)
 		{
+			ViewModel_ = ViewModel;
 			if (InitializeFromResource())
 			{
 				GUI_INSTANCE_REFERENCE(buttonBrowse);
@@ -139,6 +211,7 @@ namespace ui
 			}
 			else
 			{
+				ViewModel_ = 0;
 			}
 		}
 	public:
@@ -155,6 +228,11 @@ namespace ui
 			,textBoxSolutionName(0)
 		{
 		}
+
+		Ptr<vm::IStudioModel> GetViewModel()
+		{
+			return ViewModel_;
+		}
 	};
 
 	class NewProjectWindow;
@@ -166,6 +244,9 @@ namespace vl
 	{
 		namespace description
 		{
+			DECL_TYPE_INFO(vm::IFileFactoryModel)
+			DECL_TYPE_INFO(vm::IProjectFactoryModel)
+			DECL_TYPE_INFO(vm::IStudioModel)
 			DECL_TYPE_INFO(ui::MainWindow)
 			DECL_TYPE_INFO(ui::NewFileWindow)
 			DECL_TYPE_INFO(ui::NewProjectWindow)
@@ -193,7 +274,7 @@ namespace ui
 		void commandFileSave_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
 		// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 	public:
-		MainWindow();
+		MainWindow(Ptr<vm::IStudioModel> ViewModel);
 	};
 }
 
@@ -233,9 +314,9 @@ namespace ui
 
 	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 
-	MainWindow::MainWindow()
+	MainWindow::MainWindow(Ptr<vm::IStudioModel> ViewModel)
 	{
-		InitializeComponents();
+		InitializeComponents(ViewModel);
 	}
 }
 
@@ -254,7 +335,7 @@ namespace ui
 		void buttonCreate_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
 		// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 	public:
-		NewFileWindow();
+		NewFileWindow(Ptr<vm::IStudioModel> ViewModel);
 	};
 }
 
@@ -274,9 +355,9 @@ namespace ui
 
 	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 
-	NewFileWindow::NewFileWindow()
+	NewFileWindow::NewFileWindow(Ptr<vm::IStudioModel> ViewModel)
 	{
-		InitializeComponents();
+		InitializeComponents(ViewModel);
 	}
 }
 
@@ -296,7 +377,7 @@ namespace ui
 		void buttonCreate_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
 		// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 	public:
-		NewProjectWindow();
+		NewProjectWindow(Ptr<vm::IStudioModel> ViewModel);
 	};
 }
 
@@ -320,9 +401,9 @@ namespace ui
 
 	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 
-	NewProjectWindow::NewProjectWindow()
+	NewProjectWindow::NewProjectWindow(Ptr<vm::IStudioModel> ViewModel)
 	{
-		InitializeComponents();
+		InitializeComponents(ViewModel);
 	}
 }
 

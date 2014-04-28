@@ -25,7 +25,7 @@ namespace ui
 		void buttonCreate_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
 		// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 	public:
-		NewProjectWindow();
+		NewProjectWindow(Ptr<vm::IStudioModel> ViewModel);
 	};
 }
 

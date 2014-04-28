@@ -66,6 +66,9 @@
     <ClCompile Include="..\..\Public\Source\VlppWorkflow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Studio\SolutionModel.cpp">
+      <Filter>Studio</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Public\Source\GacUI.h">
@@ -98,6 +101,9 @@
     <ClInclude Include="..\..\Public\Source\VlppWorkflow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Studio\SolutionModel.h">
+      <Filter>Studio</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Xml Include="UI\Resources.xml">
@@ -120,6 +126,9 @@
     </Xml>
     <Xml Include="UI\UserInterfaces\NewFileWindow.xml">
       <Filter>Resource Files\UserInterfaces</Filter>
+    </Xml>
+    <Xml Include="UI\ViewModels\SolutionModel.xml">
+      <Filter>Resource Files\ViewModels</Filter>
     </Xml>
   </ItemGroup>
   <ItemGroup>

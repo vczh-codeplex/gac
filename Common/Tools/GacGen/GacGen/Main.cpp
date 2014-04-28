@@ -435,18 +435,18 @@ public:
 
 	void Visit(WfMapType* node)override
 	{
-		auto key = Call(node->key);
-		auto value = node->value ? Call(node->value) : L"";
-		if (key != L"" && (!node->value || value != L""))
+		auto key = node->key ? Call(node->key) : L"";
+		auto value = Call(node->value);
+		if (value != L"" && (!node->key || key != L""))
 		{
 			if (node->writability == WfMapWritability::Readonly)
 			{
 				result = L"const ";
 			}
 
-			if (value == L"")
+			if (key == L"")
 			{
-				result += L"collections::List<" + key + L">&";
+				result += L"collections::List<" + value + L">&";
 			}
 			else
 			{
