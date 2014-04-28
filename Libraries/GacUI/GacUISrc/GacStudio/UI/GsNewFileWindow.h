@@ -11,24 +11,21 @@ GacUI::NewFileWindow
 
 #include "GacStudioUIPartialClasses.h"
 
-namespace gacstudio
+namespace ui
 {
-	namespace user_interface
+	class NewFileWindow : public NewFileWindow_<NewFileWindow>
 	{
-		class NewFileWindow : public NewFileWindow_<NewFileWindow>
-		{
-			friend class NewFileWindow_<NewFileWindow>;
-			friend struct vl::reflection::description::CustomTypeDescriptorSelector<NewFileWindow>;
-		protected:
+		friend class NewFileWindow_<NewFileWindow>;
+		friend struct vl::reflection::description::CustomTypeDescriptorSelector<NewFileWindow>;
+	protected:
 
-			// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
-			void buttonCancel_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
-			void buttonCreate_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
-			// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
-		public:
-			NewFileWindow();
-		};
-	}
+		// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+		void buttonCancel_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
+		void buttonCreate_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
+		// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+	public:
+		NewFileWindow();
+	};
 }
 
 #endif

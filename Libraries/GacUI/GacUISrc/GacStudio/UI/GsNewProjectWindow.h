@@ -11,26 +11,22 @@ GacUI::NewProjectWindow
 
 #include "GacStudioUIPartialClasses.h"
 
-namespace gacstudio
+namespace ui
 {
-	namespace user_interface
+	class NewProjectWindow : public NewProjectWindow_<NewProjectWindow>
 	{
-		class NewProjectWindow : public NewProjectWindow_<NewProjectWindow>
-		{
-			friend class NewProjectWindow_<NewProjectWindow>;
-			friend struct vl::reflection::description::CustomTypeDescriptorSelector<NewProjectWindow>;
-		protected:
+		friend class NewProjectWindow_<NewProjectWindow>;
+		friend struct vl::reflection::description::CustomTypeDescriptorSelector<NewProjectWindow>;
+	protected:
 
-			// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
-			void buttonBrowse_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
-			void buttonCancel_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
-			void buttonCreate_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
-			// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
-		public:
-			NewProjectWindow();
-		};
-	}
+		// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+		void buttonBrowse_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
+		void buttonCancel_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
+		void buttonCreate_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
+		// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+	public:
+		NewProjectWindow();
+	};
 }
 
 #endif
-

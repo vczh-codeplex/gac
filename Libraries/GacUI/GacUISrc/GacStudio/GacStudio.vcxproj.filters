@@ -28,6 +28,12 @@
     <Filter Include="Resource Files\FileImages">
       <UniqueIdentifier>{43132756-5ca4-4b30-8e92-1596444db029}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\UserInterfaces">
+      <UniqueIdentifier>{b8517627-a37e-4522-b250-de6f7807919b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\ViewModels">
+      <UniqueIdentifier>{e3bad062-1f39-4ddc-b4bf-5ac80ef5ddec}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -105,6 +111,15 @@
     </Xml>
     <Xml Include="UI\FileImages\Folder.xml">
       <Filter>Resource Files\FileImages</Filter>
+    </Xml>
+    <Xml Include="UI\UserInterfaces\MainWindow.xml">
+      <Filter>Resource Files\UserInterfaces</Filter>
+    </Xml>
+    <Xml Include="UI\UserInterfaces\NewProjectWindow.xml">
+      <Filter>Resource Files\UserInterfaces</Filter>
+    </Xml>
+    <Xml Include="UI\UserInterfaces\NewFileWindow.xml">
+      <Filter>Resource Files\UserInterfaces</Filter>
     </Xml>
   </ItemGroup>
   <ItemGroup>

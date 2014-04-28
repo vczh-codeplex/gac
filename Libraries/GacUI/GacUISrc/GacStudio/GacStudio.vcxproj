@@ -202,6 +202,9 @@
     <Xml Include="UI\Resources.xml">
       <SubType>Designer</SubType>
     </Xml>
+    <Xml Include="UI\UserInterfaces\MainWindow.xml" />
+    <Xml Include="UI\UserInterfaces\NewFileWindow.xml" />
+    <Xml Include="UI\UserInterfaces\NewProjectWindow.xml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="UI\Codegen.bat" />
