@@ -43,8 +43,9 @@ namespace vl
 
 			BEGIN_CLASS_MEMBER(vm::IStudioModel)
 				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
-				CLASS_MEMBER_METHOD(GetProjectModels, NO_PARAMETER);
-				CLASS_MEMBER_METHOD(GetFileModels, { L"category" });
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ProjectModels)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(FileModels)
+				CLASS_MEMBER_PROPERTY_FAST(FileCategory)
 			END_CLASS_MEMBER(vm::IStudioModel)
 
 			BEGIN_CLASS_MEMBER(ui::MainWindow)

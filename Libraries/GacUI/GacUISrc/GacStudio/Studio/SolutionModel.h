@@ -56,15 +56,20 @@ namespace vm
 	class StudioModel : public Object, public virtual IStudioModel
 	{
 	protected:
-		List<Ptr<IProjectFactoryModel>>			projectFactories;
-		List<Ptr<IFileFactoryModel>>			fileFactories;
+		List<Ptr<IProjectFactoryModel>>					projectFactories;
+		List<Ptr<IFileFactoryModel>>					fileFactories;
+		WString											fileCategory;
+		list::ObservableList<Ptr<IFileFactoryModel>>	filteredFileFactories;
 
 	public:
 		StudioModel();
 		~StudioModel();
 
 		LazyList<Ptr<IProjectFactoryModel>>		GetProjectModels()override;
-		LazyList<Ptr<IFileFactoryModel>>		GetFileModels(WString category)override;
+		Ptr<description::IValueObservableList>	GetFileModels()override;
+
+		WString									GetFileCategory()override;
+		void									SetFileCategory(WString value)override;
 	};
 }
 
