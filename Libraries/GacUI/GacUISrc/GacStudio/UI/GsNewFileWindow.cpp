@@ -22,9 +22,8 @@ namespace ui
 
 	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 
-	NewFileWindow::NewFileWindow()
+	NewFileWindow::NewFileWindow(Ptr<vm::IStudioModel> ViewModel)
 	{
-		InitializeComponents();
+		InitializeComponents(ViewModel);
 	}
 }
-

@@ -178,6 +178,7 @@
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Studio\SolutionModel.cpp" />
     <ClCompile Include="UI\GacStudioUIPartialClasses.cpp" />
     <ClCompile Include="UI\GsMainWindow.cpp" />
     <ClCompile Include="UI\GsNewFileWindow.cpp" />
@@ -189,6 +190,7 @@
     <ClInclude Include="..\..\Public\Source\GacUIWindows.h" />
     <ClInclude Include="..\..\Public\Source\Vlpp.h" />
     <ClInclude Include="..\..\Public\Source\VlppWorkflow.h" />
+    <ClInclude Include="Studio\SolutionModel.h" />
     <ClInclude Include="UI\GacStudioUI.h" />
     <ClInclude Include="UI\GacStudioUIPartialClasses.h" />
     <ClInclude Include="UI\GsMainWindow.h" />
@@ -205,6 +207,7 @@
     <Xml Include="UI\UserInterfaces\MainWindow.xml" />
     <Xml Include="UI\UserInterfaces\NewFileWindow.xml" />
     <Xml Include="UI\UserInterfaces\NewProjectWindow.xml" />
+    <Xml Include="UI\ViewModels\SolutionModel.xml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="UI\Codegen.bat" />
