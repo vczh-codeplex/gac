@@ -2,6 +2,9 @@
 <Instance ref.Class="ui::NewFileWindow">
   <ref.Parameter Name="ViewModel" Class="vm::IStudioModel"/>
   <Window Text="New File" ClientSize="x:640 y:480">
+    <att.ViewModel-set>
+      <att.FileCategory-bind>cast string treeViewProjectTemplate.SelectedItem.tag ?? ''</att.FileCategory-bind>
+    </att.ViewModel-set>
     <att.BoundsComposition-set PreferredMinSize="x:640 y:480"/>
 
     <Table AlignmentToParent="left:0 top:0 right:0 bottom:0" CellPadding="5">
@@ -45,7 +48,7 @@
       <Cell Site="row:1 column:1">
         <BindableListView ref.Name="listViewFileTemplate" View="BigIcon" HorizontalAlwaysVisible="false" VerticalAlwaysVisible="false">
           <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
-          <att.ItemSource-eval>ViewModel.GetFileModels('')</att.ItemSource-eval>
+          <att.ItemSource-eval>ViewModel.FileModels</att.ItemSource-eval>
           <att.LargeImageProperty>Image</att.LargeImageProperty>
           <att.Columns>
             <ListViewColumn text="Name" textProperty="Name"/>

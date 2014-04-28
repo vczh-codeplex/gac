@@ -1,5 +1,7 @@
 #include "SolutionModel.h"
 
+using namespace vl::reflection::description;
+
 namespace vm
 {
 /***********************************************************************
@@ -277,6 +279,8 @@ StudioModel
 		fileFactories.Add(new XmlFileFactory);
 		fileFactories.Add(new ParserFileFactory);
 		fileFactories.Add(new ParserTestFileFactory);
+
+		CopyFrom(filteredFileFactories, fileFactories);
 	}
 
 	StudioModel::~StudioModel()
@@ -288,19 +292,32 @@ StudioModel
 		return projectFactories;
 	}
 
-	LazyList<Ptr<IFileFactoryModel>> StudioModel::GetFileModels(WString category)
+	Ptr<IValueObservableList> StudioModel::GetFileModels()
 	{
-		if (category == L"")
+		return filteredFileFactories.GetWrapper();
+	}
+
+	WString StudioModel::GetFileCategory()
+	{
+		return fileCategory;
+	}
+
+	void StudioModel::SetFileCategory(WString value)
+	{
+		fileCategory = value;
+		LazyList<Ptr<IFileFactoryModel>> source;
+		if (fileCategory == L"")
 		{
-			return fileFactories;
+			source = fileFactories;
 		}
 		else
 		{
-			return From(fileFactories)
+			source = From(fileFactories)
 				.Where([=](Ptr<IFileFactoryModel> model)
 				{
-					return model->GetCategory() == category;
+					return model->GetCategory() == fileCategory;
 				});
 		}
+		CopyFrom(filteredFileFactories, source);
 	}
 }

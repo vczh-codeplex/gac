@@ -54,7 +54,11 @@ namespace vm
 	public:
 
 		virtual collections::LazyList<Ptr<vm::IProjectFactoryModel>> GetProjectModels() = 0;
-		virtual collections::LazyList<Ptr<vm::IFileFactoryModel>> GetFileModels(WString category) = 0;
+
+		virtual Ptr<presentation::description::IValueObservableList> GetFileModels() = 0;
+
+		virtual WString GetFileCategory() = 0;
+		virtual void SetFileCategory(WString value) = 0;
 	};
 }
 

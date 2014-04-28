@@ -331,6 +331,10 @@ public:
 			{
 				result = L"Locale";
 			}
+			else if (typeName == L"system::ObservableList")
+			{
+				result = L"presentation::description::IValueObservableList";
+			}
 			else if (typeName.Length() >= 11 && typeName.Left(11) == L"system::Xml")
 			{
 				result = L"parsing::xml::" + typeName.Right(typeName.Length() - 8);

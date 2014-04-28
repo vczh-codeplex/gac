@@ -16,9 +16,8 @@
   </Interface>
 
   <Interface ref.Class="vm::IStudioModel">
-    <Method Name="GetProjectModels" Type="vm::IProjectFactoryModel^{}"/>
-    <Method Name="GetFileModels" Type="vm::IFileFactoryModel^{}">
-      <Argument Name="category" Type="string"/>
-    </Method>
+    <Property Name="ProjectModels" Type="vm::IProjectFactoryModel^{}" Readonly="true"/>
+    <Property Name="FileModels" Type="system::ObservableList^" Readonly="true"/>
+    <Property Name="FileCategory" Type="string"/>
   </Interface>
 </Schemas>
