@@ -20,19 +20,14 @@ namespace vm
 	public:
 
 		virtual Ptr<presentation::GuiImageData> GetImage() = 0;
-		virtual void SetImage(Ptr<presentation::GuiImageData> value) = 0;
 
 		virtual WString GetName() = 0;
-		virtual void SetName(WString value) = 0;
 
 		virtual WString GetCategory() = 0;
-		virtual void SetCategory(WString value) = 0;
 
 		virtual WString GetDescription() = 0;
-		virtual void SetDescription(WString value) = 0;
 
 		virtual WString GetId() = 0;
-		virtual void SetId(WString value) = 0;
 	};
 }
 
@@ -43,16 +38,12 @@ namespace vm
 	public:
 
 		virtual Ptr<presentation::GuiImageData> GetImage() = 0;
-		virtual void SetImage(Ptr<presentation::GuiImageData> value) = 0;
 
 		virtual WString GetName() = 0;
-		virtual void SetName(WString value) = 0;
 
 		virtual WString GetDescription() = 0;
-		virtual void SetDescription(WString value) = 0;
 
 		virtual WString GetId() = 0;
-		virtual void SetId(WString value) = 0;
 	};
 }
 
@@ -62,7 +53,7 @@ namespace vm
 	{
 	public:
 
-		virtual collections::LazyList<Ptr<vm::IFileFactoryModel>> GetProjectModels() = 0;
+		virtual collections::LazyList<Ptr<vm::IProjectFactoryModel>> GetProjectModels() = 0;
 		virtual collections::LazyList<Ptr<vm::IFileFactoryModel>> GetFileModels(WString category) = 0;
 	};
 }
