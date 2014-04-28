@@ -1,0 +1,1 @@
+MSBuild Codepack\Codepack\Codepack.csproj /p:Configuration=Release
