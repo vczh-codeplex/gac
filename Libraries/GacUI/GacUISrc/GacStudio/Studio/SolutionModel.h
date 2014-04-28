@@ -30,7 +30,7 @@ namespace vm
 
 		Ptr<GuiImageData>			GetImage()override;
 		WString						GetName()override;
-		WString						GetCategory() = 0;
+		WString						GetCategory()override;
 		WString						GetDescription()override;
 		WString						GetId()override;
 	};

@@ -125,7 +125,7 @@ namespace ui
 	protected:
 		vl::presentation::controls::GuiButton* buttonCancel;
 		vl::presentation::controls::GuiButton* buttonCreate;
-		vl::presentation::controls::GuiListView* listViewFileTemplate;
+		vl::presentation::controls::GuiBindableListView* listViewFileTemplate;
 		vl::presentation::controls::GuiSinglelineTextBox* textBoxLocation;
 		vl::presentation::controls::GuiSinglelineTextBox* textBoxProjectName;
 		vl::presentation::controls::GuiTreeView* treeViewProjectTemplate;
@@ -181,7 +181,7 @@ namespace ui
 		vl::presentation::controls::GuiButton* buttonCancel;
 		vl::presentation::controls::GuiButton* buttonCreate;
 		vl::presentation::controls::GuiComboBoxListControl* comboSolution;
-		vl::presentation::controls::GuiListView* listViewProjectTemplate;
+		vl::presentation::controls::GuiBindableListView* listViewProjectTemplate;
 		vl::presentation::controls::GuiSinglelineTextBox* textBoxLocation;
 		vl::presentation::controls::GuiSinglelineTextBox* textBoxProjectName;
 		vl::presentation::controls::GuiSinglelineTextBox* textBoxSolutionName;
