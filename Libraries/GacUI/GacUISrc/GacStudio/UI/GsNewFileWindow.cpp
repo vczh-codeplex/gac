@@ -8,26 +8,23 @@ GacUI::NewFileWindow
 
 #include "GacStudioUI.h"
 
-namespace gacstudio
+namespace ui
 {
-	namespace user_interface
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	void NewFileWindow::buttonCancel_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
 	{
-		// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+	}
 
-		void NewFileWindow::buttonCancel_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
-		{
-		}
+	void NewFileWindow::buttonCreate_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
+	{
+	}
 
-		void NewFileWindow::buttonCreate_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
-		{
-		}
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 
-		// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
-
-		NewFileWindow::NewFileWindow()
-		{
-			InitializeComponents();
-		}
+	NewFileWindow::NewFileWindow()
+	{
+		InitializeComponents();
 	}
 }
 

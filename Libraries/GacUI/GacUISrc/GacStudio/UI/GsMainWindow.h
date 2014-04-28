@@ -11,33 +11,26 @@ GacUI::MainWindow
 
 #include "GacStudioUIPartialClasses.h"
 
-namespace gacstudio
+namespace ui
 {
-	namespace user_interface
+	class MainWindow : public MainWindow_<MainWindow>
 	{
-		class MainWindow : public MainWindow_<MainWindow>
-		{
-			friend class MainWindow_<MainWindow>;
-			friend struct vl::reflection::description::CustomTypeDescriptorSelector<MainWindow>;
-		protected:
+		friend class MainWindow_<MainWindow>;
+		friend struct vl::reflection::description::CustomTypeDescriptorSelector<MainWindow>;
+	protected:
 
-			// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
-			void commandFileExit_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
-			void commandFileNewFile_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
-			void commandFileNewProject_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
-			void commandFileOpenFile_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
-			void commandFileOpenProject_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
-			void commandFileSaveAll_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
-			void commandFileSave_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
-			// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
-		public:
-			MainWindow();
-		};
-	}
+		// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+		void commandFileExit_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
+		void commandFileNewFile_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
+		void commandFileNewProject_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
+		void commandFileOpenFile_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
+		void commandFileOpenProject_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
+		void commandFileSaveAll_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
+		void commandFileSave_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
+		// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+	public:
+		MainWindow();
+	};
 }
 
 #endif
-
-
-
-

@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Instance ref.Class="ui::NewProjectWindow">
+  <Window Text="New Project" ClientSize="x:640 y:480">
+    <att.BoundsComposition-set PreferredMinSize="x:640 y:480"/>
+
+    <Table AlignmentToParent="left:0 top:0 right:0 bottom:0" CellPadding="5">
+      <att.Rows>
+        <CellOption>composeType:MinSize</CellOption>
+        <CellOption>composeType:Percentage percentage:1.0</CellOption>
+        <CellOption>composeType:MinSize</CellOption>
+        <CellOption>composeType:MinSize</CellOption>
+        <CellOption>composeType:MinSize</CellOption>
+        <CellOption>composeType:MinSize</CellOption>
+        <CellOption>composeType:MinSize</CellOption>
+      </att.Rows>
+      <att.Columns>
+        <CellOption>composeType:MinSize</CellOption>
+        <CellOption>composeType:Percentage percentage:1.0</CellOption>
+        <CellOption>composeType:MinSize</CellOption>
+        <CellOption>composeType:MinSize</CellOption>
+      </att.Columns>
+
+      <Cell Site="row:0 column:0" Margin="left:4 top:4 right:4 bottom:4">
+        <Label Text="Select Project Template to Use:"/>
+      </Cell>
+
+      <Cell Site="row:1 column:0 rowSpan:1 columnSpan:2">
+        <ListView ref.Name="listViewProjectTemplate" View="BigIcon" HorizontalAlwaysVisible="false" VerticalAlwaysVisible="false">
+          <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
+          <att.Items>
+            <ListViewItem text="GacUI Resource" largeImage-uri="res://ProjectImages/Dialog.png">
+              <att.tag>
+                <String>GACUI_RESOURCE_PROJECT</String>
+              </att.tag>
+            </ListViewItem>
+            <ListViewItem text="Parser" largeImage-uri="res://ProjectImages/Parser.png">
+              <att.tag>
+                <String>PARSER_PROJECT</String>
+              </att.tag>
+            </ListViewItem>
+          </att.Items>
+        </ListView>
+      </Cell>
+      <Cell Site="row:1 column:2 rowSpan:1 columnSpan:2">
+        <DocumentViewer EditMode="Selectable" HorizontalAlwaysVisible="false" VerticalAlwaysVisible="false">
+          <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
+          <att.Text>This is the project description.</att.Text>
+        </DocumentViewer>
+      </Cell>
+
+      <Cell Site="row:2 column:0" Margin="left:4 top:4 right:4 bottom:4">
+        <Label Text="Project Name:"/>
+      </Cell>
+      <Cell Site="row:2 column:1 rowSpan:1 columnSpan:3">
+        <SinglelineTextBox ref.Name="textBoxProjectName" Text="MyProject">
+          <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
+        </SinglelineTextBox>
+      </Cell>
+
+      <Cell Site="row:3 column:0" Margin="left:4 top:4 right:4 bottom:4">
+        <Label Text="Location:"/>
+      </Cell>
+      <Cell Site="row:3 column:1 rowSpan:1 columnSpan:2">
+        <SinglelineTextBox ref.Name="textBoxLocation">
+          <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
+        </SinglelineTextBox>
+      </Cell>
+      <Cell Site="row:3 column:3">
+        <Button ref.Name="buttonBrowse" Text="Browse..." ev.Clicked="buttonBrowse_Clicked">
+          <att.BoundsComposition-set AlignmentToParent="left:-1 top:0 right:0 bottom:0" PreferredMinSize="x:100 y:24"/>
+        </Button>
+      </Cell>
+
+      <Cell Site="row:4 column:0" Margin="left:4 top:4 right:4 bottom:4">
+        <Label Text="Solution:"/>
+      </Cell>
+      <Cell Site="row:4 column:1 rowSpan:1 columnSpan:3">
+        <ComboBox ref.Name="comboSolution" SelectedIndex="1">
+          <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
+          <att.ListControl>
+            <TextList HorizontalAlwaysVisible="false" VerticalAlwaysVisible="false">
+              <att.Items>
+                <TextItem Text="Create New Solution"/>
+                <TextItem Text="Add To Solution"/>
+              </att.Items>
+            </TextList>
+          </att.ListControl>
+        </ComboBox>
+      </Cell>
+
+      <Cell Site="row:5 column:0" Margin="left:4 top:4 right:4 bottom:4">
+        <Label Text="Solution Name:"/>
+      </Cell>
+      <Cell Site="row:5 column:1 rowSpan:1 columnSpan:3">
+        <SinglelineTextBox ref.Name="textBoxSolutionName" Text="MySolution">
+          <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
+        </SinglelineTextBox>
+      </Cell>
+
+      <Cell Site="row:6 column:2">
+        <Button ref.Name="buttonCreate" Text="Create" Enabled="false" ev.Clicked="buttonCreate_Clicked">
+          <att.BoundsComposition-set AlignmentToParent="left:-1 top:0 right:0 bottom:0" PreferredMinSize="x:100 y:24"/>
+        </Button>
+      </Cell>
+      <Cell Site="row:6 column:3">
+        <Button ref.Name="buttonCancel" Text="Cancel" ev.Clicked="buttonCancel_Clicked">
+          <att.BoundsComposition-set AlignmentToParent="left:-1 top:0 right:0 bottom:0" PreferredMinSize="x:100 y:24"/>
+        </Button>
+      </Cell>
+    </Table>
+  </Window>
+</Instance>

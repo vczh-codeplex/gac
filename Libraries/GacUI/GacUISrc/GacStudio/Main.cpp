@@ -10,7 +10,7 @@
 #include <Windows.h>
 
 using namespace vl::collections;
-using namespace gacstudio::user_interface;
+using namespace ui;
 
 int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int CmdShow)
 {

@@ -8,31 +8,27 @@ GacUI::NewProjectWindow
 
 #include "GacStudioUI.h"
 
-namespace gacstudio
+namespace ui
 {
-	namespace user_interface
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	void NewProjectWindow::buttonBrowse_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
 	{
-		// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+	}
 
-		void NewProjectWindow::buttonBrowse_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
-		{
-		}
+	void NewProjectWindow::buttonCancel_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
+	{
+	}
 
-		void NewProjectWindow::buttonCancel_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
-		{
-		}
+	void NewProjectWindow::buttonCreate_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
+	{
+	}
 
-		void NewProjectWindow::buttonCreate_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
-		{
-		}
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 
-		// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
-
-		NewProjectWindow::NewProjectWindow()
-		{
-			InitializeComponents();
-		}
+	NewProjectWindow::NewProjectWindow()
+	{
+		InitializeComponents();
 	}
 }
-
 
