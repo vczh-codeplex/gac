@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Schemas>
   <Interface ref.Class="vm::IFileFactoryModel">
-    <Property Name="Image" Type="presentation::GuiImageData^"/>
-    <Property Name="Name" Type="string"/>
-    <Property Name="Category" Type="string"/>
-    <Property Name="Description" Type="string"/>
-    <Property Name="Id" Type="string"/>
+    <Property Name="Image" Type="presentation::GuiImageData^" Readonly="true"/>
+    <Property Name="Name" Type="string" Readonly="true"/>
+    <Property Name="Category" Type="string" Readonly="true"/>
+    <Property Name="Description" Type="string" Readonly="true"/>
+    <Property Name="Id" Type="string" Readonly="true"/>
   </Interface>
 
   <Interface ref.Class="vm::IProjectFactoryModel">
-    <Property Name="Image" Type="presentation::GuiImageData^"/>
-    <Property Name="Name" Type="string"/>
-    <Property Name="Description" Type="string"/>
-    <Property Name="Id" Type="string"/>
+    <Property Name="Image" Type="presentation::GuiImageData^" Readonly="true"/>
+    <Property Name="Name" Type="string" Readonly="true"/>
+    <Property Name="Description" Type="string" Readonly="true"/>
+    <Property Name="Id" Type="string" Readonly="true"/>
   </Interface>
 
   <Interface ref.Class="vm::IStudioModel">
-    <Method Name="GetProjectModels" Type="vm::IFileFactoryModel^{}"/>
+    <Method Name="GetProjectModels" Type="vm::IProjectFactoryModel^{}"/>
     <Method Name="GetFileModels" Type="vm::IFileFactoryModel^{}">
       <Argument Name="category" Type="string"/>
     </Method>
