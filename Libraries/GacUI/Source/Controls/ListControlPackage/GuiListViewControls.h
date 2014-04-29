@@ -741,6 +741,7 @@ ListView
 					: public ListProvider<Ptr<ListViewItem>>
 					, protected virtual ListViewItemStyleProvider::IListViewItemView
 					, protected virtual ListViewColumnItemArranger::IColumnItemView
+					, protected GuiListControl::IItemBindingView
 					, public Description<ListViewItemProvider>
 				{
 					friend class ListViewColumns;
@@ -768,6 +769,8 @@ ListView
 					void												SetColumnSize(vint index, vint value)override;
 					GuiMenu*											GetDropdownPopup(vint index)override;
 					GuiListViewColumnHeader::ColumnSortingState			GetSortingState(vint index)override;
+
+					description::Value									GetBindingValue(vint itemIndex)override;
 				public:
 					ListViewItemProvider();
 					~ListViewItemProvider();

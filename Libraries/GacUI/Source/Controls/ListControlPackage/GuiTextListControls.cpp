@@ -9,6 +9,7 @@ namespace vl
 			using namespace collections;
 			using namespace elements;
 			using namespace compositions;
+			using namespace reflection::description;
 
 			namespace list
 			{
@@ -250,6 +251,11 @@ TextItemProvider
 					items[itemIndex]->checked=value;
 				}
 
+				description::Value TextItemProvider::GetBindingValue(vint itemIndex)
+				{
+					return Value::From(Get(itemIndex));
+				}
+
 				TextItemProvider::TextItemProvider()
 					:listControl(0)
 				{
@@ -285,6 +291,10 @@ TextItemProvider
 					{
 						return (GuiListControl::IItemPrimaryTextView*)this;
 					}
+					else if(identifier==GuiListControl::IItemBindingView::Identifier)
+					{
+						return (GuiListControl::IItemBindingView*)this;
+					}
 					else
 					{
 						return 0;
@@ -311,18 +321,6 @@ GuiTextList
 
 			GuiVirtualTextList::~GuiVirtualTextList()
 			{
-			}
-
-			Ptr<GuiListControl::IItemStyleProvider> GuiVirtualTextList::SetStyleProvider(Ptr<GuiListControl::IItemStyleProvider> value)
-			{
-				if(value.Cast<list::TextItemStyleProvider>())
-				{
-					return GuiSelectableListControl::SetStyleProvider(value);
-				}
-				else
-				{
-					return 0;
-				}
 			}
 
 			Ptr<GuiListControl::IItemStyleProvider> GuiVirtualTextList::ChangeItemStyle(list::TextItemStyleProvider::ITextItemStyleProvider* itemStyleProvider)

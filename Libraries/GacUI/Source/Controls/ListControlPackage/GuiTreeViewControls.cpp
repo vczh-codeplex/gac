@@ -8,6 +8,7 @@ namespace vl
 		{
 			using namespace elements;
 			using namespace compositions;
+			using namespace reflection::description;
 
 			namespace tree
 			{
@@ -916,6 +917,11 @@ TreeViewItemRootProvider
 					return L"";
 				}
 
+				description::Value TreeViewItemRootProvider::GetBindingValue(INodeProvider* node)
+				{
+					return Value::From(GetTreeViewData(node));
+				}
+
 				TreeViewItemRootProvider::TreeViewItemRootProvider()
 				{
 				}
@@ -933,6 +939,10 @@ TreeViewItemRootProvider
 					else if(identifier==INodeItemPrimaryTextView::Identifier)
 					{
 						return (INodeItemPrimaryTextView*)this;
+					}
+					else if(identifier==INodeItemBindingView::Identifier)
+					{
+						return (INodeItemBindingView*)this;
 					}
 					else
 					{

@@ -153,7 +153,11 @@ TextList Data Source
 				};
 
 				/// <summary>Item provider for <see cref="GuiVirtualTextList"/> or <see cref="GuiSelectableListControl"/>.</summary>
-				class TextItemProvider : public ListProvider<Ptr<TextItem>>, protected TextItemStyleProvider::ITextItemView, public Description<TextItemProvider>
+				class TextItemProvider
+					: public ListProvider<Ptr<TextItem>>
+					, protected TextItemStyleProvider::ITextItemView
+					, protected GuiListControl::IItemBindingView
+					, public Description<TextItemProvider>
 				{
 					friend class GuiTextList;
 				protected:
@@ -164,6 +168,7 @@ TextList Data Source
 					WString										GetText(vint itemIndex)override;
 					bool										GetChecked(vint itemIndex)override;
 					void										SetCheckedSilently(vint itemIndex, bool value)override;
+					description::Value							GetBindingValue(vint itemIndex)override;
 				public:
 					TextItemProvider();
 					~TextItemProvider();
@@ -200,7 +205,6 @@ TextList Control
 				/// <summary>Item checked changed event.</summary>
 				compositions::GuiItemNotifyEvent				ItemChecked;
 				
-				Ptr<GuiListControl::IItemStyleProvider>			SetStyleProvider(Ptr<GuiListControl::IItemStyleProvider> value)override;
 				/// <summary>Set the item style provider.</summary>
 				/// <returns>The old item style provider.</returns>
 				/// <param name="itemStyleProvider">The new item style provider.</param>
