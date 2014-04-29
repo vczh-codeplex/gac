@@ -9,6 +9,7 @@ namespace vl
 			using namespace elements;
 			using namespace compositions;
 			using namespace collections;
+			using namespace reflection::description;
 
 			namespace list
 			{
@@ -1622,6 +1623,11 @@ ListViewItemProvider
 					}
 				}
 
+				description::Value ListViewItemProvider::GetBindingValue(vint itemIndex)
+				{
+					return Value::From(Get(itemIndex));
+				}
+
 				ListViewItemProvider::ListViewItemProvider()
 				{
 					columns.itemProvider=this;
@@ -1645,6 +1651,10 @@ ListViewItemProvider
 					else if(identifier==GuiListControl::IItemPrimaryTextView::Identifier)
 					{
 						return (GuiListControl::IItemPrimaryTextView*)this;
+					}
+					else if(identifier==GuiListControl::IItemBindingView::Identifier)
+					{
+						return (GuiListControl::IItemBindingView*)this;
 					}
 					else
 					{

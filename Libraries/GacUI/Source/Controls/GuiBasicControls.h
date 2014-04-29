@@ -306,7 +306,7 @@ Basic Construction
 			};
 			
 			/// <summary>Represnets a user customizable template.</summary>
-			class GuiTemplate : public GuiBoundsComposition, public GuiInstanceRootObject, public Description<GuiTemplate>
+			class GuiTemplate : public compositions::GuiBoundsComposition, public GuiInstanceRootObject, public Description<GuiTemplate>
 			{
 			public:
 				/// <summary>Create a template.</summary>

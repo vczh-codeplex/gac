@@ -530,6 +530,7 @@ TreeView
 				class TreeViewItemRootProvider
 					: public MemoryNodeRootProvider
 					, protected virtual ITreeViewItemView
+					, protected virtual INodeItemBindingView
 					, public Description<TreeViewItemRootProvider>
 				{
 				protected:
@@ -537,6 +538,7 @@ TreeView
 					WString							GetPrimaryTextViewText(INodeProvider* node)override;
 					Ptr<GuiImageData>				GetNodeImage(INodeProvider* node)override;
 					WString							GetNodeText(INodeProvider* node)override;
+					description::Value				GetBindingValue(INodeProvider* node)override;
 				public:
 					/// <summary>Create a item root provider.</summary>
 					TreeViewItemRootProvider();
