@@ -304,6 +304,15 @@ Basic Construction
 				GuiCustomControl(IStyleController* _styleController);
 				~GuiCustomControl();
 			};
+			
+			/// <summary>Represnets a user customizable template.</summary>
+			class GuiTemplate : public GuiBoundsComposition, public GuiInstanceRootObject, public Description<GuiTemplate>
+			{
+			public:
+				/// <summary>Create a template.</summary>
+				GuiTemplate();
+				~GuiTemplate();
+			};
 
 			/// <summary>
 			/// Represnets a component.

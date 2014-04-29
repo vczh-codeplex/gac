@@ -25,6 +25,7 @@ namespace vl
 			IMPL_TYPE_INFO(demos::MySuperClass)
 			IMPL_TYPE_INFO(demos::CalculatorControl)
 			IMPL_TYPE_INFO(demos::MainWindow)
+			IMPL_TYPE_INFO(demos::MyComposition)
 
 			BEGIN_CLASS_MEMBER(demos::IControlViewModel)
 				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
@@ -78,6 +79,11 @@ namespace vl
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(ViewModel)
 			END_CLASS_MEMBER(demos::MainWindow)
 
+			BEGIN_CLASS_MEMBER(demos::MyComposition)
+				CLASS_MEMBER_BASE(vl::presentation::compositions::GuiBoundsComposition)
+				CLASS_MEMBER_CONSTRUCTOR(demos::MyComposition*(), NO_PARAMETER)
+			END_CLASS_MEMBER(demos::MyComposition)
+
 			#undef _
 
 			class HelloWorldResourceLoader : public Object, public ITypeLoader
@@ -93,6 +99,7 @@ namespace vl
 					ADD_TYPE_INFO(demos::MySuperClass)
 					ADD_TYPE_INFO(demos::CalculatorControl)
 					ADD_TYPE_INFO(demos::MainWindow)
+					ADD_TYPE_INFO(demos::MyComposition)
 				}
 
 				void Unload(ITypeManager* manager)

@@ -48,6 +48,9 @@
     <ClCompile Include="MainWindow.cpp">
       <Filter>GeneratedCode</Filter>
     </ClCompile>
+    <ClCompile Include="MyComposition.cpp">
+      <Filter>GeneratedCode</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Libraries\GacUI\Public\Source\GacUI.h">
@@ -75,6 +78,9 @@
       <Filter>GeneratedCode</Filter>
     </ClInclude>
     <ClInclude Include="HelloWorldPartialClasses.h">
+      <Filter>GeneratedCode</Filter>
+    </ClInclude>
+    <ClInclude Include="MyComposition.h">
       <Filter>GeneratedCode</Filter>
     </ClInclude>
   </ItemGroup>
