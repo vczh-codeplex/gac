@@ -112,8 +112,8 @@ namespace demos
 		}
 	public:
 		CalculatorControl_()
-			:vl::presentation::controls::GuiCustomControl(vl::presentation::theme::GetCurrentTheme()->CreateCustomControlStyle())
-			,vl::presentation::GuiInstancePartialClass<vl::presentation::controls::GuiCustomControl>(L"demos::CalculatorControl")
+			:vl::presentation::GuiInstancePartialClass<vl::presentation::controls::GuiCustomControl>(L"demos::CalculatorControl")
+			,vl::presentation::controls::GuiCustomControl(vl::presentation::theme::GetCurrentTheme()->CreateCustomControlStyle())
 			,textBox1(0)
 			,textBox2(0)
 			,textBox3(0)
@@ -157,8 +157,8 @@ namespace demos
 		}
 	public:
 		MainWindow_()
-			:vl::presentation::controls::GuiWindow(vl::presentation::theme::GetCurrentTheme()->CreateWindowStyle())
-			,vl::presentation::GuiInstancePartialClass<vl::presentation::controls::GuiWindow>(L"demos::MainWindow")
+			:vl::presentation::GuiInstancePartialClass<vl::presentation::controls::GuiWindow>(L"demos::MainWindow")
+			,vl::presentation::controls::GuiWindow(vl::presentation::theme::GetCurrentTheme()->CreateWindowStyle())
 			,calculator(0)
 			,textBoxError(0)
 		{
@@ -171,6 +171,33 @@ namespace demos
 	};
 
 	class MainWindow;
+}
+
+namespace demos
+{
+	template<typename TImpl>
+	class MyComposition_ : public vl::presentation::compositions::GuiBoundsComposition, public vl::presentation::GuiInstancePartialClass<vl::presentation::compositions::GuiBoundsComposition>, public vl::reflection::Description<TImpl>
+	{
+	private:
+	protected:
+
+		void InitializeComponents()
+		{
+			if (InitializeFromResource())
+			{
+			}
+			else
+			{
+			}
+		}
+	public:
+		MyComposition_()
+			:vl::presentation::GuiInstancePartialClass<vl::presentation::compositions::GuiBoundsComposition>(L"demos::MyComposition")
+		{
+		}
+	};
+
+	class MyComposition;
 }
 
 namespace vl
@@ -187,6 +214,7 @@ namespace vl
 			DECL_TYPE_INFO(demos::MySuperClass)
 			DECL_TYPE_INFO(demos::CalculatorControl)
 			DECL_TYPE_INFO(demos::MainWindow)
+			DECL_TYPE_INFO(demos::MyComposition)
 		}
 	}
 }
@@ -255,6 +283,37 @@ namespace demos
 	MainWindow::MainWindow(Ptr<demos::IWindowViewModel> ViewModel)
 	{
 		InitializeComponents(ViewModel);
+	}
+}
+
+
+MyComposition.h :
+namespace demos
+{
+	class MyComposition : public MyComposition_<MyComposition>
+	{
+		friend class MyComposition_<MyComposition>;
+		friend struct vl::reflection::description::CustomTypeDescriptorSelector<MyComposition>;
+	protected:
+
+		// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+		// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+	public:
+		MyComposition();
+	};
+}
+
+
+MyComposition.cpp :
+namespace demos
+{
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+
+	MyComposition::MyComposition()
+	{
+		InitializeComponents();
 	}
 }
 

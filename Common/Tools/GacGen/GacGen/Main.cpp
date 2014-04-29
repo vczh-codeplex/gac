@@ -673,7 +673,7 @@ void SearchAllInstances(const Regex& regexClassName, Ptr<GuiResourcePathResolver
 		auto loadingSource = FindInstanceLoadingSource(env, context->instance.Obj());
 		if (!loadingSource.loader) continue;
 		auto typeDescriptor = GetGlobalTypeManager()->GetTypeDescriptor(loadingSource.typeName);
-		if (typeDescriptor != GetTypeDescriptor<GuiWindow>() && typeDescriptor != GetTypeDescriptor<GuiCustomControl>()) continue;
+		if (!typeDescriptor) continue;
 
 		Ptr<Instance> instance = new Instance;
 		instance->context = context;
@@ -1360,15 +1360,15 @@ void WritePartialClassHeaderFile(Ptr<CodegenConfig> config, Dictionary<WString, 
 		writer.WriteLine(prefix + L"\t}");
 		writer.WriteLine(prefix + L"public:");
 		writer.WriteLine(prefix + L"\t" + instance->typeName + L"_()");
+		writer.WriteLine(prefix + L"\t\t:vl::presentation::GuiInstancePartialClass<" + GetCppTypeName(instance->baseType) + L">(L\"" + instance->GetFullName() + L"\")");
 		if (instance->baseType == GetTypeDescriptor<GuiWindow>())
 		{
-			writer.WriteLine(prefix + L"\t\t:" + GetCppTypeName(instance->baseType) + L"(vl::presentation::theme::GetCurrentTheme()->CreateWindowStyle())");
+			writer.WriteLine(prefix + L"\t\t," + GetCppTypeName(instance->baseType) + L"(vl::presentation::theme::GetCurrentTheme()->CreateWindowStyle())");
 		}
 		else if (instance->baseType == GetTypeDescriptor<GuiCustomControl>())
 		{
-			writer.WriteLine(prefix + L"\t\t:" + GetCppTypeName(instance->baseType) + L"(vl::presentation::theme::GetCurrentTheme()->CreateCustomControlStyle())");
+			writer.WriteLine(prefix + L"\t\t," + GetCppTypeName(instance->baseType) + L"(vl::presentation::theme::GetCurrentTheme()->CreateCustomControlStyle())");
 		}
-		writer.WriteLine(prefix + L"\t\t,vl::presentation::GuiInstancePartialClass<" + GetCppTypeName(instance->baseType) + L">(L\"" + instance->GetFullName() + L"\")");
 		FOREACH(WString, field, instance->fields.Keys())
 		{
 			writer.WriteLine(prefix + L"\t\t," + field + L"(0)");

@@ -13,5 +13,6 @@ DO NOT MODIFY
 
 #include "CalculatorControl.h"
 #include "MainWindow.h"
+#include "MyComposition.h"
 
 #endif
