@@ -20,11 +20,13 @@ namespace vl
 
 #ifndef VCZH_DEBUG_NO_REFLECTION
 
-/***********************************************************************
-Type List
-***********************************************************************/
+			/***********************************************************************
+						Type List
+						***********************************************************************/
 
 #define GUIREFLECTIONCOMPOSITION_TYPELIST(F)\
+			F(presentation::controls::GuiTemplate)\
+			F(presentation::controls::GuiTemplate::IFactory)\
 			F(presentation::compositions::GuiStackComposition)\
 			F(presentation::compositions::GuiStackComposition::Direction)\
 			F(presentation::compositions::GuiStackItemComposition)\
@@ -55,6 +57,25 @@ Interface Proxy
 #pragma warning(disable:4250)
 			namespace interface_proxy
 			{
+				class GuiTemplate_IFactory : public ValueInterfaceRoot, public virtual GuiTemplate::IFactory
+				{
+				public:
+					GuiTemplate_IFactory(Ptr<IValueInterfaceProxy> _proxy)
+						:ValueInterfaceRoot(_proxy)
+					{
+					}
+
+					static Ptr<GuiTemplate::IFactory> Create(Ptr<IValueInterfaceProxy> proxy)
+					{
+						return new GuiTemplate_IFactory(proxy);
+					}
+
+					GuiTemplate* CreateTemplate(const Value& viewModel)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(CreateTemplate, viewModel);
+					}
+				};
+
 				class GuiSubComponentMeasurer_IMeasuringSource : public ValueInterfaceRoot, public virtual GuiSubComponentMeasurer::IMeasuringSource
 				{
 				public:
