@@ -219,8 +219,12 @@ List Control
 					virtual void								DestroyItemStyle(IItemStyleController* style)=0;
 					/// <summary>Bind an item to an item style controller.</summary>
 					/// <param name="style">The item style controller.</param>
-					/// <param name="itemIndex">The item style id.</param>
+					/// <param name="itemIndex">The item index.</param>
 					virtual void								Install(IItemStyleController* style, vint itemIndex)=0;
+					/// <summary>Update the visual affect of an item style controller to a new item index.</summary>
+					/// <param name="style">The item style controller.</param>
+					/// <param name="value">The new item index.</param>
+					virtual void								SetStyleIndex(IItemStyleController* style, vint value)=0;
 				};
 				
 				/// <summary>Item arranger for a <see cref="GuiListControl"/>. Item arranger decides how to arrange and item controls. When implementing an item arranger, <see cref="IItemArrangerCallback"/> is suggested to use when calculating locations and sizes for item controls.</summary>

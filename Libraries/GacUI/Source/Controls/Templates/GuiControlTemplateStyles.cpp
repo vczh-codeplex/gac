@@ -8,6 +8,7 @@ namespace vl
 		{
 			using namespace compositions;
 			using namespace controls;
+			using namespace reflection::description;
 
 /***********************************************************************
 GuiListItemTemplate_ItemStyleProvider
@@ -55,6 +56,43 @@ GuiListItemTemplate_ItemStyleProvider
 			{
 				if (auto controller = dynamic_cast<GuiListItemTemplate_ItemStyleController*>(style))
 				{
+					Value viewModel;
+					if (bindingView)
+					{
+						viewModel = bindingView->GetBindingValue(itemIndex);
+					}
+					
+					GuiTemplate* itemTemplate = factory->CreateTemplate(viewModel);
+					if (auto listItemTemplate = dynamic_cast<GuiListItemTemplate*>(itemTemplate))
+					{
+						controller->SetTemplate(listItemTemplate);
+					}
+					else
+					{
+						delete itemTemplate;
+					}
+				}
+			}
+
+			void GuiListItemTemplate_ItemStyleProvider::SetStyleIndex(controls::GuiListControl::IItemStyleController* style, vint value)
+			{
+				if (auto controller = dynamic_cast<GuiListItemTemplate_ItemStyleController*>(style))
+				{
+					if (auto itemTemplate = controller->GetTemplate())
+					{
+						itemTemplate->SetIndex(value);
+					}
+				}
+			}
+
+			void GuiListItemTemplate_ItemStyleProvider::SetStyleSelected(controls::GuiListControl::IItemStyleController* style, bool value)
+			{
+				if (auto controller = dynamic_cast<GuiListItemTemplate_ItemStyleController*>(style))
+				{
+					if (auto itemTemplate = controller->GetTemplate())
+					{
+						itemTemplate->SetSelected(value);
+					}
 				}
 			}
 
@@ -73,6 +111,11 @@ GuiListItemTemplate_ItemStyleController
 			GuiListItemTemplate_ItemStyleController::~GuiListItemTemplate_ItemStyleController()
 			{
 				SafeDeleteComposition(itemTemplate);
+			}
+
+			GuiListItemTemplate* GuiListItemTemplate_ItemStyleController::GetTemplate()
+			{
+				return itemTemplate;
 			}
 
 			void GuiListItemTemplate_ItemStyleController::SetTemplate(GuiListItemTemplate* _itemTemplate)

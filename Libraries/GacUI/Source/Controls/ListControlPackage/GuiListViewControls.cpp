@@ -238,6 +238,10 @@ ListViewItemStyleProvider
 					itemStyle->Install(listViewItemView, itemIndex);
 				}
 
+				void ListViewItemStyleProvider::SetStyleIndex(GuiListControl::IItemStyleController* style, vint value)
+				{
+				}
+
 				ListViewItemStyleProvider::IListViewItemContentProvider* ListViewItemStyleProvider::GetItemContentProvider()
 				{
 					return listViewItemContentProvider.Obj();

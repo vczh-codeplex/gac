@@ -691,6 +691,11 @@ Interface Proxy
 					{
 						INVOKE_INTERFACE_PROXY(Install, style, itemIndex);
 					}
+
+					void SetStyleIndex(GuiListControl::IItemStyleController* style, vint value)override
+					{
+						INVOKE_INTERFACE_PROXY(SetStyleIndex, style, value);
+					}
 				};
 
 				class GuiListControl_IItemArranger : public virtual GuiListControl_IItemProviderCallback, public virtual GuiListControl::IItemArranger
