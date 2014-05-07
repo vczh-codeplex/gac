@@ -1964,6 +1964,11 @@ Interface Proxy
 					{
 						INVOKE_INTERFACE_PROXY(Install, style, itemIndex);
 					}
+
+					void SetStyleIndex(GuiListControl::IItemStyleController* style, vint value)override
+					{
+						INVOKE_INTERFACE_PROXY(SetStyleIndex, style, value);
+					}
 				};
 
 				class GuiListControl_IItemArranger : public virtual GuiListControl_IItemProviderCallback, public virtual GuiListControl::IItemArranger
@@ -3294,7 +3299,7 @@ Type Loader
 
 #endif
 
-			extern bool						LoadGuiControlsTypes();
+			extern bool						LoadGuiControlTypes();
 		}
 	}
 }
@@ -3620,6 +3625,83 @@ Instance Schema Representation
 
 			static Ptr<GuiInstanceSchema>				LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, collections::List<WString>& errors);
 		};
+	}
+}
+
+#endif
+
+/***********************************************************************
+TYPEDESCRIPTORS\GUIREFLECTIONTEMPLATES.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+GacUI Reflection: Basic
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_REFLECTION_GUIREFLECTIOTEMPLATES
+#define VCZH_PRESENTATION_REFLECTION_GUIREFLECTIOTEMPLATES
+
+
+namespace vl
+{
+	namespace reflection
+	{
+		namespace description
+		{
+
+#ifndef VCZH_DEBUG_NO_REFLECTION
+
+/***********************************************************************
+Type List
+***********************************************************************/
+
+#define GUIREFLECTIONTEMPLATES_TYPELIST(F)\
+			F(presentation::templates::GuiTemplate)\
+			F(presentation::templates::GuiTemplate::IFactory)\
+			F(presentation::templates::GuiListItemTemplate)\
+
+			GUIREFLECTIONTEMPLATES_TYPELIST(DECL_TYPE_INFO)
+
+/***********************************************************************
+Interface Proxy
+***********************************************************************/
+
+#pragma warning(push)
+#pragma warning(disable:4250)
+			namespace interface_proxy
+			{
+				class GuiTemplate_IFactory : public ValueInterfaceRoot, public virtual GuiTemplate::IFactory
+				{
+				public:
+					GuiTemplate_IFactory(Ptr<IValueInterfaceProxy> _proxy)
+						:ValueInterfaceRoot(_proxy)
+					{
+					}
+
+					static Ptr<GuiTemplate::IFactory> Create(Ptr<IValueInterfaceProxy> proxy)
+					{
+						return new GuiTemplate_IFactory(proxy);
+					}
+
+					GuiTemplate* CreateTemplate(const Value& viewModel)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(CreateTemplate, viewModel);
+					}
+				};
+			}
+#pragma warning(pop)
+
+/***********************************************************************
+Type Loader
+***********************************************************************/
+
+#endif
+
+			extern bool						LoadGuiTemplateTypes();
+		}
 	}
 }
 
