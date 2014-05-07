@@ -93,9 +93,9 @@ namespace demos
 	class SeasonItemTemplate_ : public GuiListItemTemplate, public GuiInstancePartialClass<GuiListItemTemplate>, public Description<TImpl>
 	{
 	private:
-		Ptr<TextItem> ViewModel_;
+		Ptr<demos::ISeason> ViewModel_;
 	protected:
-		void InitializeComponents(Ptr<TextItem> ViewModel)
+		void InitializeComponents(Ptr<demos::ISeason> ViewModel)
 		{
 			ViewModel_ = ViewModel;
 			if (InitializeFromResource())
@@ -113,7 +113,7 @@ namespace demos
 		{
 		}
 
-		Ptr<TextItem> GetViewModel()
+		Ptr<demos::ISeason> GetViewModel()
 		{
 			return ViewModel_;
 		}
@@ -167,7 +167,7 @@ namespace demos
 	class SeasonItemTemplate : public SeasonItemTemplate_<SeasonItemTemplate>
 	{
 	public:
-		SeasonItemTemplate(Ptr<TextItem> ViewModel)
+		SeasonItemTemplate(Ptr<demos::ISeason> ViewModel)
 		{
 			InitializeComponents(ViewModel);
 		}
@@ -212,7 +212,7 @@ namespace vl
 
 			BEGIN_CLASS_MEMBER(demos::SeasonItemTemplate)
 				CLASS_MEMBER_BASE(GuiListItemTemplate)
-				CLASS_MEMBER_CONSTRUCTOR(demos::SeasonItemTemplate*(Ptr<TextItem>), {L"ViewModel"})
+				CLASS_MEMBER_CONSTRUCTOR(demos::SeasonItemTemplate*(Ptr<demos::ISeason>), {L"ViewModel"})
 
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(ViewModel)
 			END_CLASS_MEMBER(demos::SeasonItemTemplate)
@@ -303,17 +303,17 @@ namespace demos
 	class ViewModel : public Object, public virtual IViewModel
 	{
 	protected:
-		list::ObservableList<WString>					seasons;
+		list::ObservableList<Ptr<ISeason>>				seasons;
 		list::ObservableList<Ptr<ISeason>>				complexSeasons;
 		Ptr<Season>										treeSeasons;
 
 	public:
 		ViewModel()
 		{
-			seasons.Add(L"Spring");
-			seasons.Add(L"Summer");
-			seasons.Add(L"Autumn");
-			seasons.Add(L"Winter");
+			seasons.Add(new Season(L"Spring", L"Mar - May"));
+			seasons.Add(new Season(L"Summer", L"Jun - Aug"));
+			seasons.Add(new Season(L"Autumn", L"Sep - Nov"));
+			seasons.Add(new Season(L"Winter", L"Dec - Feb"));
 
 			complexSeasons.Add(new Season(L"Spring", L"Mar - May"));
 			complexSeasons.Add(new Season(L"Summer", L"Jun - Aug"));
@@ -344,7 +344,7 @@ namespace demos
 
 		void AddSeason()override
 		{
-			seasons.Add(L"Unknown Season No." + itow(seasons.Count() + 1));
+			seasons.Add(new Season(L"Unknown Season No." + itow(seasons.Count() + 1), L"N/A"));
 		}
 
 		void AddComplexSeason()override
