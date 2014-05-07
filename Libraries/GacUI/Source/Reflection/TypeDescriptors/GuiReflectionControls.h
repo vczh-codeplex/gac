@@ -2021,7 +2021,7 @@ Type Loader
 
 #endif
 
-			extern bool						LoadGuiControlsTypes();
+			extern bool						LoadGuiControlTypes();
 		}
 	}
 }

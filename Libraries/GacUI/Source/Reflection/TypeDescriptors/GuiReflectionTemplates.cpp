@@ -1,4 +1,5 @@
 #include "GuiReflectionTemplates.h"
+#include "GuiReflectionEvents.h"
 
 namespace vl
 {

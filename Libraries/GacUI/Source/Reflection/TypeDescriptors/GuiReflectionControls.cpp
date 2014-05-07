@@ -1858,7 +1858,7 @@ Type Loader
 
 #endif
 
-			bool LoadGuiControlsTypes()
+			bool LoadGuiControlTypes()
 			{
 #ifndef VCZH_DEBUG_NO_REFLECTION
 				ITypeManager* manager=GetGlobalTypeManager();
