@@ -2,6 +2,7 @@
 #include "GuiReflectionElements.h"
 #include "GuiReflectionCompositions.h"
 #include "GuiReflectionControls.h"
+#include "GuiReflectionTemplates.h"
 #include "GuiReflectionEvents.h"
 
 namespace vl
@@ -22,7 +23,8 @@ namespace vl
 					LoadGuiBasicTypes();
 					LoadGuiElementTypes();
 					LoadGuiCompositionTypes();
-					LoadGuiControlsTypes();
+					LoadGuiControlTypes();
+					LoadGuiTemplateTypes();
 					LoadGuiEventTypes();
 				}
 				
