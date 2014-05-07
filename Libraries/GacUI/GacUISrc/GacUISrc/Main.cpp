@@ -11,6 +11,7 @@
 #include "..\..\Source\Reflection\GuiInstanceLoader.h"
 #include "..\..\Source\Reflection\TypeDescriptors\GuiReflectionControls.h"
 #include "..\..\Source\Reflection\TypeDescriptors\GuiReflectionEvents.h"
+#include "..\..\Source\Reflection\TypeDescriptors\GuiReflectionTemplates.h"
 #include <Windows.h>
 
 using namespace vl::collections;
@@ -20,6 +21,8 @@ using namespace vl::parsing;
 using namespace vl::workflow;
 using namespace vl::workflow::analyzer;
 using namespace vl::workflow::runtime;
+using namespace vl::presentation::controls::list;
+using namespace vl::presentation::templates;
 
 #define GUI_GRAPHICS_RENDERER_DIRECT2D
 
@@ -87,6 +90,36 @@ namespace demos
 	class MainWindow;
 
 	template<typename TImpl>
+	class SeasonItemTemplate_ : public GuiListItemTemplate, public GuiInstancePartialClass<GuiListItemTemplate>, public Description<TImpl>
+	{
+	private:
+		Ptr<TextItem> ViewModel_;
+	protected:
+		void InitializeComponents(Ptr<TextItem> ViewModel)
+		{
+			ViewModel_ = ViewModel;
+			if (InitializeFromResource())
+			{
+			}
+			else
+			{
+				ViewModel = 0;
+			}
+		}
+	public:
+		SeasonItemTemplate_()
+			:GuiListItemTemplate()
+			, GuiInstancePartialClass<GuiListItemTemplate>(L"demos::SeasonItemTemplate")
+		{
+		}
+
+		Ptr<TextItem> GetViewModel()
+		{
+			return ViewModel_;
+		}
+	};
+
+	template<typename TImpl>
 	class MainWindow_ : public GuiWindow, public GuiInstancePartialClass<GuiWindow>, public Description<TImpl>
 	{
 	private:
@@ -130,6 +163,15 @@ namespace demos
 			InitializeComponents(ViewModel);
 		}
 	};
+	
+	class SeasonItemTemplate : public SeasonItemTemplate_<SeasonItemTemplate>
+	{
+	public:
+		SeasonItemTemplate(Ptr<TextItem> ViewModel)
+		{
+			InitializeComponents(ViewModel);
+		}
+	};
 }
 
 namespace vl
@@ -145,6 +187,9 @@ namespace vl
 
 			DECL_TYPE_INFO(demos::ISeason)
 			IMPL_TYPE_INFO(demos::ISeason)
+
+			DECL_TYPE_INFO(demos::SeasonItemTemplate)
+			IMPL_TYPE_INFO(demos::SeasonItemTemplate)
 
 			DECL_TYPE_INFO(demos::MainWindow)
 			IMPL_TYPE_INFO(demos::MainWindow)
@@ -165,6 +210,13 @@ namespace vl
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(Children)
 			END_CLASS_MEMBER(demos::ISeason)
 
+			BEGIN_CLASS_MEMBER(demos::SeasonItemTemplate)
+				CLASS_MEMBER_BASE(GuiListItemTemplate)
+				CLASS_MEMBER_CONSTRUCTOR(demos::SeasonItemTemplate*(Ptr<TextItem>), {L"ViewModel"})
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ViewModel)
+			END_CLASS_MEMBER(demos::SeasonItemTemplate)
+
 			BEGIN_CLASS_MEMBER(demos::MainWindow)
 				CLASS_MEMBER_BASE(GuiWindow)
 				CLASS_MEMBER_CONSTRUCTOR(demos::MainWindow*(Ptr<demos::IViewModel>), {L"ViewModel"})
@@ -179,6 +231,7 @@ namespace vl
 				{
 					ADD_TYPE_INFO(demos::IViewModel)
 					ADD_TYPE_INFO(demos::ISeason)
+					ADD_TYPE_INFO(demos::SeasonItemTemplate)
 					ADD_TYPE_INFO(demos::MainWindow)
 				}
 
