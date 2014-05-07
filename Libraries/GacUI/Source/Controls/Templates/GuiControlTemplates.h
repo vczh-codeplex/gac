@@ -35,6 +35,52 @@ namespace vl
 				GuiTemplate();
 				~GuiTemplate();
 			};
+
+#define GUI_TEMPLATE_PROPERTY_DECL(CLASS, TYPE, NAME)\
+			private:\
+				TYPE NAME##_;\
+			public:\
+				TYPE Get##NAME();\
+				void Set##NAME(const TYPE& value);\
+				compositions::GuiNotifyEvent NAME##Changed;\
+
+#define GUI_TEMPLATE_PROPERTY_IMPL(CLASS, TYPE, NAME)\
+			TYPE CLASS::Get##NAME()\
+			{\
+				return NAME##_;\
+			}\
+			void CLASS::Set##NAME(const TYPE& value)\
+			{\
+				if (NAME##_ != value)\
+				{\
+					NAME##_ = value;\
+					NAME##Changed.Execute(compositions::GuiEventArgs(this));\
+				}\
+			}\
+
+#define GUI_TEMPLATE_PROPERTY_EVENT_INIT(CLASS, TYPE, NAME)\
+			NAME##Changed.SetAssociatedComposition(this);
+
+/***********************************************************************
+Control Template
+***********************************************************************/
+
+/***********************************************************************
+Item Template
+***********************************************************************/
+
+			class GuiListItemTemplate : public GuiTemplate
+			{
+			public:
+				GuiListItemTemplate();
+				~GuiListItemTemplate();
+				
+#define GuiListItemTemplate_PROPERTIES(F)\
+				F(GuiListItemTemplate, bool, Selected)\
+				F(GuiListItemTemplate, vint, Index)\
+
+				GuiListItemTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
+			};
 		}
 	}
 }

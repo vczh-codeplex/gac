@@ -948,7 +948,6 @@ GuiBindableDataGrid::ItemSource
 
 			GuiBindableDataGrid::ItemSource::~ItemSource()
 			{
-				throw 0;
 			}
 
 			// ===================== list::IDataProvider =====================
