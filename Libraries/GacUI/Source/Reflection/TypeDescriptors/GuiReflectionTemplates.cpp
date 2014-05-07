@@ -35,6 +35,7 @@ Type Declaration
 			
 			BEGIN_CLASS_MEMBER(GuiTemplate::IFactory)
 				INTERFACE_EXTERNALCTOR(GuiTemplate, IFactory)
+				CLASS_MEMBER_EXTERNALCTOR(Ptr<GuiTemplate::IFactory>(const List<ITypeDescriptor*>&), { L"types" }, &GuiTemplate::IFactory::CreateTemplateFactory)
 
 				CLASS_MEMBER_METHOD(CreateTemplate, NO_PARAMETER)
 			END_CLASS_MEMBER(GuiTemplate::IFactory)
