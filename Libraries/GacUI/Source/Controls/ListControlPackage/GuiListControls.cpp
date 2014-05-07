@@ -1128,7 +1128,8 @@ RangedItemArrangerBase
 				}
 
 				RangedItemArrangerBase::RangedItemArrangerBase()
-					:callback(0)
+					:listControl(0)
+					,callback(0)
 					,startIndex(0)
 				{
 				}
@@ -1199,7 +1200,15 @@ RangedItemArrangerBase
 								callback->ReleaseItem(style);
 							}
 						}
+
 						visibleStyles.RemoveRange(0, visibleCount);
+						if (listControl && listControl->GetStyleProvider())
+						{
+							for (vint i = 0; i < visibleStyles.Count(); i++)
+							{
+								listControl->GetStyleProvider()->SetStyleIndex(visibleStyles[i], startIndex + i);
+							}
+						}
 
 						callback->OnTotalSizeChanged();
 						callback->SetViewLocation(viewBounds.LeftTop());
@@ -1208,10 +1217,12 @@ RangedItemArrangerBase
 
 				void RangedItemArrangerBase::AttachListControl(GuiListControl* value)
 				{
+					listControl = value;
 				}
 
 				void RangedItemArrangerBase::DetachListControl()
 				{
+					listControl = 0;
 				}
 
 				GuiListControl::IItemArrangerCallback* RangedItemArrangerBase::GetCallback()

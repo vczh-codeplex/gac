@@ -641,6 +641,7 @@ Predefined ItemArranger
 				{
 					typedef collections::List<GuiListControl::IItemStyleController*>		StyleList;
 				protected:
+					GuiListControl*								listControl;
 					GuiListControl::IItemArrangerCallback*		callback;
 					GuiListControl::IItemProvider*				itemProvider;
 					Rect										viewBounds;
