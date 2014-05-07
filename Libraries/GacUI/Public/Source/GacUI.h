@@ -5624,6 +5624,7 @@ List Control
 					virtual IItemStyleController*				CreateItemStyle(vint styleId)=0;
 					virtual void								DestroyItemStyle(IItemStyleController* style)=0;
 					virtual void								Install(IItemStyleController* style, vint itemIndex)=0;
+					virtual void								SetStyleIndex(IItemStyleController* style, vint value)=0;
 				};
 				
 				class IItemArranger : public virtual IItemProviderCallback, public Description<IItemArranger>
@@ -5891,6 +5892,7 @@ Predefined ItemArranger
 				{
 					typedef collections::List<GuiListControl::IItemStyleController*>		StyleList;
 				protected:
+					GuiListControl*								listControl;
 					GuiListControl::IItemArrangerCallback*		callback;
 					GuiListControl::IItemProvider*				itemProvider;
 					Rect										viewBounds;
@@ -6137,6 +6139,7 @@ TextList Style Provider
 					GuiListControl::IItemStyleController*		CreateItemStyle(vint styleId)override;
 					void										DestroyItemStyle(GuiListControl::IItemStyleController* style)override;
 					void										Install(GuiListControl::IItemStyleController* style, vint itemIndex)override;
+					void										SetStyleIndex(GuiListControl::IItemStyleController* style, vint value)override;
 					void										SetStyleSelected(GuiListControl::IItemStyleController* style, bool value)override;
 				};
 
@@ -6162,7 +6165,11 @@ TextList Data Source
 					bool										GetChecked();
 				};
 
-				class TextItemProvider : public ListProvider<Ptr<TextItem>>, protected TextItemStyleProvider::ITextItemView, public Description<TextItemProvider>
+				class TextItemProvider
+					: public ListProvider<Ptr<TextItem>>
+					, protected TextItemStyleProvider::ITextItemView
+					, protected GuiListControl::IItemBindingView
+					, public Description<TextItemProvider>
 				{
 					friend class GuiTextList;
 				protected:
@@ -6173,6 +6180,7 @@ TextList Data Source
 					WString										GetText(vint itemIndex)override;
 					bool										GetChecked(vint itemIndex)override;
 					void										SetCheckedSilently(vint itemIndex, bool value)override;
+					description::Value							GetBindingValue(vint itemIndex)override;
 				public:
 					TextItemProvider();
 					~TextItemProvider();
@@ -6197,7 +6205,6 @@ TextList Control
 
 				compositions::GuiItemNotifyEvent				ItemChecked;
 				
-				Ptr<GuiListControl::IItemStyleProvider>			SetStyleProvider(Ptr<GuiListControl::IItemStyleProvider> value)override;
 				Ptr<GuiListControl::IItemStyleProvider>			ChangeItemStyle(list::TextItemStyleProvider::ITextItemStyleProvider* itemStyleProvider);
 			};
 			
@@ -6579,6 +6586,7 @@ ListView ItemStyleProvider
 					GuiListControl::IItemStyleController*		CreateItemStyle(vint styleId)override;
 					void										DestroyItemStyle(GuiListControl::IItemStyleController* style)override;
 					void										Install(GuiListControl::IItemStyleController* style, vint itemIndex)override;
+					void										SetStyleIndex(GuiListControl::IItemStyleController* style, vint value)override;
 
 					IListViewItemContentProvider*				GetItemContentProvider();
 
@@ -6959,6 +6967,7 @@ ListView
 					: public ListProvider<Ptr<ListViewItem>>
 					, protected virtual ListViewItemStyleProvider::IListViewItemView
 					, protected virtual ListViewColumnItemArranger::IColumnItemView
+					, protected GuiListControl::IItemBindingView
 					, public Description<ListViewItemProvider>
 				{
 					friend class ListViewColumns;
@@ -6986,6 +6995,8 @@ ListView
 					void												SetColumnSize(vint index, vint value)override;
 					GuiMenu*											GetDropdownPopup(vint index)override;
 					GuiListViewColumnHeader::ColumnSortingState			GetSortingState(vint index)override;
+
+					description::Value									GetBindingValue(vint itemIndex)override;
 				public:
 					ListViewItemProvider();
 					~ListViewItemProvider();
@@ -7211,6 +7222,7 @@ GuiVirtualTreeListControl NodeProvider
 					GuiListControl::IItemStyleController*			CreateItemStyle(vint styleId)override;
 					void											DestroyItemStyle(GuiListControl::IItemStyleController* style)override;
 					void											Install(GuiListControl::IItemStyleController* style, vint itemIndex)override;
+					void											SetStyleIndex(GuiListControl::IItemStyleController* style, vint value)override;
 					void											SetStyleSelected(GuiListControl::IItemStyleController* style, bool value)override;
 				};
 			}
@@ -7395,6 +7407,7 @@ TreeView
 				class TreeViewItemRootProvider
 					: public MemoryNodeRootProvider
 					, protected virtual ITreeViewItemView
+					, protected virtual INodeItemBindingView
 					, public Description<TreeViewItemRootProvider>
 				{
 				protected:
@@ -7402,6 +7415,7 @@ TreeView
 					WString							GetPrimaryTextViewText(INodeProvider* node)override;
 					Ptr<GuiImageData>				GetNodeImage(INodeProvider* node)override;
 					WString							GetNodeText(INodeProvider* node)override;
+					description::Value				GetBindingValue(INodeProvider* node)override;
 				public:
 					TreeViewItemRootProvider();
 					~TreeViewItemRootProvider();
@@ -13858,6 +13872,172 @@ List
 #endif
 
 /***********************************************************************
+CONTROLS\TEMPLATES\GUICONTROLTEMPLATES.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+GacUI::Template System
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_CONTROLS_TEMPLATES_GUICONTROLTEMPLATES
+#define VCZH_PRESENTATION_CONTROLS_TEMPLATES_GUICONTROLTEMPLATES
+
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace templates
+		{
+			class GuiTemplate : public compositions::GuiBoundsComposition, public controls::GuiInstanceRootObject, public Description<GuiTemplate>
+			{
+			public:
+				class IFactory : public IDescriptable, public Description<IFactory>
+				{
+				public:
+					virtual GuiTemplate*				CreateTemplate(const description::Value& viewModel) = 0;
+
+					static Ptr<IFactory>				CreateTemplateFactory(const collections::List<description::ITypeDescriptor*>& types);
+				};
+
+				GuiTemplate();
+				~GuiTemplate();
+			};
+
+#define GUI_TEMPLATE_PROPERTY_DECL(CLASS, TYPE, NAME)\
+			private:\
+				TYPE NAME##_;\
+			public:\
+				TYPE Get##NAME();\
+				void Set##NAME(const TYPE& value);\
+				compositions::GuiNotifyEvent NAME##Changed;\
+
+#define GUI_TEMPLATE_PROPERTY_IMPL(CLASS, TYPE, NAME)\
+			TYPE CLASS::Get##NAME()\
+			{\
+				return NAME##_;\
+			}\
+			void CLASS::Set##NAME(const TYPE& value)\
+			{\
+				if (NAME##_ != value)\
+				{\
+					NAME##_ = value;\
+					NAME##Changed.Execute(compositions::GuiEventArgs(this));\
+				}\
+			}\
+
+#define GUI_TEMPLATE_PROPERTY_EVENT_INIT(CLASS, TYPE, NAME)\
+			NAME##Changed.SetAssociatedComposition(this);
+
+/***********************************************************************
+Control Template
+***********************************************************************/
+
+/***********************************************************************
+Item Template
+***********************************************************************/
+
+			class GuiListItemTemplate : public GuiTemplate
+			{
+			public:
+				GuiListItemTemplate();
+				~GuiListItemTemplate();
+				
+#define GuiListItemTemplate_PROPERTIES(F)\
+				F(GuiListItemTemplate, bool, Selected)\
+				F(GuiListItemTemplate, vint, Index)\
+
+				GuiListItemTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
+			};
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+CONTROLS\TEMPLATES\GUICONTROLTEMPLATESTYLES.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+GacUI::Template System
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_CONTROLS_TEMPLATES_GUICONTROLTEMPLATESTYLES
+#define VCZH_PRESENTATION_CONTROLS_TEMPLATES_GUICONTROLTEMPLATESTYLES
+
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace templates
+		{
+
+/***********************************************************************
+Control Template
+***********************************************************************/
+
+/***********************************************************************
+Item Template (GuiListItemTemplate)
+***********************************************************************/
+
+			class GuiListItemTemplate_ItemStyleProvider : public Object, public virtual controls::GuiSelectableListControl::IItemStyleProvider
+			{
+			protected:
+				Ptr<GuiTemplate::IFactory>							factory;
+				controls::GuiListControl*							listControl;
+				controls::GuiListControl::IItemBindingView*			bindingView;
+
+			public:
+				GuiListItemTemplate_ItemStyleProvider(Ptr<GuiTemplate::IFactory> _factory);
+				~GuiListItemTemplate_ItemStyleProvider();
+
+				void												AttachListControl(controls::GuiListControl* value)override;
+				void												DetachListControl()override;
+				vint												GetItemStyleId(vint itemIndex)override;
+				controls::GuiListControl::IItemStyleController*		CreateItemStyle(vint styleId)override;
+				void												DestroyItemStyle(controls::GuiListControl::IItemStyleController* style)override;
+				void												Install(controls::GuiListControl::IItemStyleController* style, vint itemIndex)override;
+				void												SetStyleIndex(controls::GuiListControl::IItemStyleController* style, vint value)override;
+				void												SetStyleSelected(controls::GuiListControl::IItemStyleController* style, bool value)override;
+			};
+
+			class GuiListItemTemplate_ItemStyleController : public Object, public virtual controls::GuiListControl::IItemStyleController
+			{
+			protected:
+				GuiListItemTemplate_ItemStyleProvider*				itemStyleProvider;
+				GuiListItemTemplate*								itemTemplate;
+				bool												installed;
+
+			public:
+				GuiListItemTemplate_ItemStyleController(GuiListItemTemplate_ItemStyleProvider* _itemStyleProvider);
+				~GuiListItemTemplate_ItemStyleController();
+
+				GuiListItemTemplate*								GetTemplate();
+				void												SetTemplate(GuiListItemTemplate* _itemTemplate);
+
+				controls::GuiListControl::IItemStyleProvider*		GetStyleProvider()override;
+				vint												GetItemStyleId()override;
+				compositions::GuiBoundsComposition*					GetBoundsComposition()override;
+				bool												IsCacheable()override;
+				bool												IsInstalled()override;
+				void												OnInstalled()override;
+				void												OnUninstalled()override;
+			};
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
 RESOURCES\GUIPARSERMANAGER.H
 ***********************************************************************/
 /***********************************************************************
@@ -14025,6 +14205,7 @@ using namespace vl::presentation::elements;
 using namespace vl::presentation::compositions;
 using namespace vl::presentation::controls;
 using namespace vl::presentation::theme;
+using namespace vl::presentation::templates;
 
 extern int SetupWindowsGDIRenderer();
 extern int SetupWindowsDirect2DRenderer();
