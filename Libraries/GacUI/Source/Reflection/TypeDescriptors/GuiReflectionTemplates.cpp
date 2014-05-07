@@ -30,6 +30,7 @@ Type Declaration
 	CLASS_MEMBER_PROPERTY_GUIEVENT_FAST(NAME)
 
 			BEGIN_CLASS_MEMBER(GuiTemplate)
+				CLASS_MEMBER_BASE(GuiBoundsComposition)
 				CLASS_MEMBER_CONSTRUCTOR(GuiTemplate*(), NO_PARAMETER)
 			END_CLASS_MEMBER(GuiTemplate)
 			
@@ -41,6 +42,7 @@ Type Declaration
 			END_CLASS_MEMBER(GuiTemplate::IFactory)
 
 			BEGIN_CLASS_MEMBER(GuiListItemTemplate)
+				CLASS_MEMBER_BASE(GuiTemplate)
 				CLASS_MEMBER_CONSTRUCTOR(GuiListItemTemplate*(), NO_PARAMETER)
 
 				GuiListItemTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_REFLECTION)

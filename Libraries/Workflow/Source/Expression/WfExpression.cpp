@@ -379,6 +379,9 @@ Print (Expression)
 					case WfBinaryOperator::Div:
 						writer.WriteString(L" / ");
 						break;
+					case WfBinaryOperator::Mod:
+						writer.WriteString(L" % ");
+						break;
 					case WfBinaryOperator::Shl:
 						writer.WriteString(L" shl ");
 						break;

@@ -181,6 +181,7 @@ L"\r\n" L"\tAdd,"
 L"\r\n" L"\tSub,"
 L"\r\n" L"\tMul,"
 L"\r\n" L"\tDiv,"
+L"\r\n" L"\tMod,"
 L"\r\n" L"\tShl,"
 L"\r\n" L"\tShr,"
 L"\r\n" L"\tLT,"
@@ -522,6 +523,7 @@ L"\r\n" L"token ADD = \"/+\";"
 L"\r\n" L"token SUB = \"-\";"
 L"\r\n" L"token MUL = \"/*\";"
 L"\r\n" L"token DIV = \"//\";"
+L"\r\n" L"token MOD = \"%\";"
 L"\r\n" L"token CONCAT = \"&\";"
 L"\r\n" L"token LE = \"/</=\";"
 L"\r\n" L"token GE = \"/>/=\";"
@@ -731,6 +733,7 @@ L"\r\n" L"rule Expression Exp2"
 L"\r\n" L"\t= !Exp1"
 L"\r\n" L"\t= Exp2 : first \"*\" Exp1 : second as BinaryExpression with {op = \"Mul\"}"
 L"\r\n" L"\t= Exp2 : first \"/\" Exp1 : second as BinaryExpression with {op = \"Div\"}"
+L"\r\n" L"\t= Exp2 : first \"%\" Exp1 : second as BinaryExpression with {op = \"Mod\"}"
 L"\r\n" L"\t;"
 L"\r\n" L"rule Expression Exp3"
 L"\r\n" L"\t= !Exp2"
@@ -947,6 +950,7 @@ Parsing Tree Conversion Driver Implementation
 					else if(token->GetValue()==L"Sub") { member=WfBinaryOperator::Sub; return true; }
 					else if(token->GetValue()==L"Mul") { member=WfBinaryOperator::Mul; return true; }
 					else if(token->GetValue()==L"Div") { member=WfBinaryOperator::Div; return true; }
+					else if(token->GetValue()==L"Mod") { member=WfBinaryOperator::Mod; return true; }
 					else if(token->GetValue()==L"Shl") { member=WfBinaryOperator::Shl; return true; }
 					else if(token->GetValue()==L"Shr") { member=WfBinaryOperator::Shr; return true; }
 					else if(token->GetValue()==L"LT") { member=WfBinaryOperator::LT; return true; }
@@ -3199,6 +3203,7 @@ namespace vl
 				ENUM_NAMESPACE_ITEM(Sub)
 				ENUM_NAMESPACE_ITEM(Mul)
 				ENUM_NAMESPACE_ITEM(Div)
+				ENUM_NAMESPACE_ITEM(Mod)
 				ENUM_NAMESPACE_ITEM(Shl)
 				ENUM_NAMESPACE_ITEM(Shr)
 				ENUM_NAMESPACE_ITEM(LT)

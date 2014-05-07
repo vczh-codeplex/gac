@@ -65,6 +65,7 @@ WfRuntimeThreadContext (Operators)
 			BINARY_OPERATOR(OpSub, -)
 			BINARY_OPERATOR(OpMul, *)
 			BINARY_OPERATOR(OpDiv, /)
+			BINARY_OPERATOR(OpMod, %)
 			BINARY_OPERATOR(OpShl, <<)
 			BINARY_OPERATOR(OpShr, >>)
 			BINARY_OPERATOR(OpAnd, &)
@@ -947,6 +948,17 @@ WfRuntimeThreadContext
 									EXECUTE(OpDiv, U8)
 									EXECUTE(OpDiv, F4)
 									EXECUTE(OpDiv, F8)
+								END_TYPE
+							case WfInsCode::OpMod:
+								BEGIN_TYPE
+									EXECUTE(OpMod, I1)
+									EXECUTE(OpMod, I2)
+									EXECUTE(OpMod, I4)
+									EXECUTE(OpMod, I8)
+									EXECUTE(OpMod, U1)
+									EXECUTE(OpMod, U2)
+									EXECUTE(OpMod, U4)
+									EXECUTE(OpMod, U8)
 								END_TYPE
 							case WfInsCode::OpShl:
 								BEGIN_TYPE
