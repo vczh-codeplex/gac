@@ -178,6 +178,12 @@ Instance Style Context
 
 			static Ptr<GuiInstanceStyleContext>		LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, collections::List<WString>& errors);
 		};
+
+/***********************************************************************
+Helper Functions
+***********************************************************************/
+
+		extern void									SplitBySemicolon(const WString& input, collections::List<WString>& fragments);
 	}
 }
 

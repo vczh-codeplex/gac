@@ -427,6 +427,187 @@ GuiToolstripButtonInstanceLoader
 		};
 
 /***********************************************************************
+GuiSelectableListControlInstanceLoader
+***********************************************************************/
+
+		class GuiSelectableListControlInstanceLoader : public Object, public IGuiInstanceLoader
+		{
+		public:
+			GuiSelectableListControlInstanceLoader()
+			{
+			}
+
+			WString GetTypeName()override
+			{
+				return description::GetTypeDescriptor<GuiSelectableListControl>()->GetTypeName();
+			}
+
+			bool IsCreatable(const TypeInfo& typeInfo)override
+			{
+				return false;
+			}
+
+			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
+			{
+				return Value();
+			}
+
+			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			{
+				propertyNames.Add(L"ItemTemplate");
+			}
+
+			void GetConstructorParameters(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			{
+			}
+
+			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
+			{
+				if (propertyInfo.propertyName == L"ItemTemplate")
+				{
+					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<WString>());
+					return info;
+				}
+				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
+			}
+
+			bool SetPropertyValue(PropertyValue& propertyValue)override
+			{
+				if (GuiSelectableListControl* container = dynamic_cast<GuiSelectableListControl*>(propertyValue.instanceValue.GetRawPtr()))
+				{
+					if (propertyValue.propertyName == L"ItemTemplate")
+					{
+						List<ITypeDescriptor*> types;
+						List<WString> typeNames;
+						SplitBySemicolon(propertyValue.propertyValue.GetText(), typeNames);
+						CopyFrom(
+							types,
+							From(typeNames)
+								.Select(&description::GetTypeDescriptor)
+								.Where([](ITypeDescriptor* type){return type != 0; })
+							);
+
+						auto factory = GuiTemplate::IFactory::CreateTemplateFactory(types);
+						auto styleProvider = new GuiListItemTemplate_ItemStyleProvider(factory);
+						container->SetStyleProvider(styleProvider);
+						return true;
+					}
+				}
+				return false;
+			}
+		};
+
+/***********************************************************************
+GuiVirtualTreeViewInstanceLoader
+***********************************************************************/
+
+		class GuiVirtualTreeViewInstanceLoader : public Object, public IGuiInstanceLoader
+		{
+		public:
+			GuiVirtualTreeViewInstanceLoader()
+			{
+			}
+
+			WString GetTypeName()override
+			{
+				return description::GetTypeDescriptor<GuiVirtualTreeView>()->GetTypeName();
+			}
+
+			bool IsCreatable(const TypeInfo& typeInfo)override
+			{
+				return false;
+			}
+
+			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
+			{
+				return Value();
+			}
+
+			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			{
+				propertyNames.Add(L"ItemTemplate");
+			}
+
+			void GetConstructorParameters(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			{
+			}
+
+			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
+			{
+				if (propertyInfo.propertyName == L"ItemTemplate")
+				{
+					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<WString>());
+					return info;
+				}
+				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
+			}
+
+			bool SetPropertyValue(PropertyValue& propertyValue)override
+			{
+				if (propertyValue.propertyName == L"ItemTemplate")
+				{
+					return true;
+				}
+				return false;
+			}
+		};
+
+/***********************************************************************
+GuiVirtualDataGridInstanceLoader
+***********************************************************************/
+
+		class GuiVirtualDataGridInstanceLoader : public Object, public IGuiInstanceLoader
+		{
+		public:
+			GuiVirtualDataGridInstanceLoader()
+			{
+			}
+
+			WString GetTypeName()override
+			{
+				return description::GetTypeDescriptor<GuiVirtualDataGrid>()->GetTypeName();
+			}
+
+			bool IsCreatable(const TypeInfo& typeInfo)override
+			{
+				return false;
+			}
+
+			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
+			{
+				return Value();
+			}
+
+			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			{
+				propertyNames.Add(L"ItemTemplate");
+			}
+
+			void GetConstructorParameters(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			{
+			}
+
+			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
+			{
+				if (propertyInfo.propertyName == L"ItemTemplate")
+				{
+					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<WString>());
+					return info;
+				}
+				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
+			}
+
+			bool SetPropertyValue(PropertyValue& propertyValue)override
+			{
+				if (propertyValue.propertyName == L"ItemTemplate")
+				{
+					return true;
+				}
+				return false;
+			}
+		};
+
+/***********************************************************************
 GuiListViewInstanceLoader
 ***********************************************************************/
 
@@ -1234,6 +1415,9 @@ GuiPredefinedInstanceLoadersPlugin
 				manager->SetLoader(new GuiToolstripMenuBarInstanceLoader);
 				manager->SetLoader(new GuiToolstripToolBarInstanceLoader);
 				manager->SetLoader(new GuiToolstripButtonInstanceLoader);
+				manager->SetLoader(new GuiSelectableListControlInstanceLoader);
+				manager->SetLoader(new GuiVirtualTreeViewInstanceLoader);
+				manager->SetLoader(new GuiVirtualDataGridInstanceLoader);
 				manager->SetLoader(new GuiListViewInstanceLoader(false));
 				manager->SetLoader(new GuiTreeViewInstanceLoader(false));
 				manager->SetLoader(new GuiBindableTextListInstanceLoader(L"", [](){return GetCurrentTheme()->CreateTextListItemStyle(); }));

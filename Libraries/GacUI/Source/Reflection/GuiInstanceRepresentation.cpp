@@ -227,30 +227,6 @@ GuiInstanceContext
 			return 0;
 		}
 
-		void SplitBySemicolon(const WString& input, List<WString>& fragments)
-		{
-			const wchar_t* attValue = input.Buffer();
-			while(*attValue)
-			{
-				// split the value by ';'
-				const wchar_t* attSemicolon = wcschr(attValue, L';');
-				WString pattern;
-				if(attSemicolon)
-				{
-					pattern = WString(attValue, attSemicolon - attValue);
-					attValue = attSemicolon + 1;
-				}
-				else
-				{
-					vint len = wcslen(attValue);
-					pattern = WString(attValue, len);
-					attValue += len;
-				}
-
-				fragments.Add(pattern);
-			}
-		}
-
 		Ptr<GuiInstanceContext> GuiInstanceContext::LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, collections::List<WString>& errors)
 		{
 			Ptr<GuiInstanceContext> context=new GuiInstanceContext;
@@ -462,6 +438,34 @@ GuiInstanceStyleContext
 				}
 			}
 			return context;
+		}
+
+/***********************************************************************
+Helper Functions
+***********************************************************************/
+
+		void SplitBySemicolon(const WString& input, collections::List<WString>& fragments)
+		{
+			const wchar_t* attValue = input.Buffer();
+			while(*attValue)
+			{
+				// split the value by ';'
+				const wchar_t* attSemicolon = wcschr(attValue, L';');
+				WString pattern;
+				if(attSemicolon)
+				{
+					pattern = WString(attValue, attSemicolon - attValue);
+					attValue = attSemicolon + 1;
+				}
+				else
+				{
+					vint len = wcslen(attValue);
+					pattern = WString(attValue, len);
+					attValue += len;
+				}
+
+				fragments.Add(pattern);
+			}
 		}
 	}
 }
