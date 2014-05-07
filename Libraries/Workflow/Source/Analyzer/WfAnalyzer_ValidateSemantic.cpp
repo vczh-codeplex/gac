@@ -835,6 +835,7 @@ ValidateSemantic(Expression)
 									selectedTable = conversionTable;
 								}
 								break;
+							case WfBinaryOperator::Mod:
 							case WfBinaryOperator::Shl:
 							case WfBinaryOperator::Shr:
 								{

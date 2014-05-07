@@ -313,6 +313,7 @@ GenerateInstructions(Expression)
 						case WfBinaryOperator::Sub:
 						case WfBinaryOperator::Mul:
 						case WfBinaryOperator::Div:
+						case WfBinaryOperator::Mod:
 						case WfBinaryOperator::Shl:
 						case WfBinaryOperator::Shr:
 							{
@@ -363,6 +364,9 @@ GenerateInstructions(Expression)
 							break;
 						case WfBinaryOperator::Div:
 							INSTRUCTION(Ins::OpDiv(GetInstructionTypeArgument(mergedType)));
+							break;
+						case WfBinaryOperator::Mod:
+							INSTRUCTION(Ins::OpMod(GetInstructionTypeArgument(mergedType)));
 							break;
 						case WfBinaryOperator::Shl:
 							INSTRUCTION(Ins::OpShl(GetInstructionTypeArgument(mergedType)));

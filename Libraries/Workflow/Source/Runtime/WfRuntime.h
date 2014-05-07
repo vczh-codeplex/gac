@@ -70,6 +70,7 @@ Instruction
 				OpSub,				// I48/U48/F48			: Value, Value -> Value							;
 				OpMul,				// I48/U48/F48			: Value, Value -> Value							;
 				OpDiv,				// I48/U48/F48			: Value, Value -> Value							;
+				OpMod,				// I48/U48				: Value, Value -> Value							;
 				OpShl,				// I48/U48				: Value, Value -> Value							;
 				OpShr,				// I48/U48				: Value, Value -> Value							;
 				OpXor,				// B/I1248/U1248		: <bool>, <bool> -> <bool>						;
@@ -129,6 +130,7 @@ Instruction
 			APPLY_TYPE(OpSub)\
 			APPLY_TYPE(OpMul)\
 			APPLY_TYPE(OpDiv)\
+			APPLY_TYPE(OpMod)\
 			APPLY_TYPE(OpShl)\
 			APPLY_TYPE(OpShr)\
 			APPLY_TYPE(OpXor)\

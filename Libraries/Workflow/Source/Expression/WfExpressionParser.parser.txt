@@ -182,6 +182,7 @@ enum BinaryOperator
 	Sub,
 	Mul,
 	Div,
+	Mod,
 	Shl,
 	Shr,
 	LT,
@@ -523,6 +524,7 @@ token ADD = "/+";
 token SUB = "-";
 token MUL = "/*";
 token DIV = "//";
+token MOD = "%";
 token CONCAT = "&";
 token LE = "/</=";
 token GE = "/>/=";
@@ -732,6 +734,7 @@ rule Expression Exp2
 	= !Exp1
 	= Exp2 : first "*" Exp1 : second as BinaryExpression with {op = "Mul"}
 	= Exp2 : first "/" Exp1 : second as BinaryExpression with {op = "Div"}
+	= Exp2 : first "%" Exp1 : second as BinaryExpression with {op = "Mod"}
 	;
 rule Expression Exp3
 	= !Exp2
