@@ -26,7 +26,7 @@ Control Template
 Item Template (GuiListItemTemplate)
 ***********************************************************************/
 
-			class GuiListItemTemplate_ItemStyleProvider : public Object, public virtual controls::GuiListControl::IItemStyleProvider
+			class GuiListItemTemplate_ItemStyleProvider : public Object, public virtual controls::GuiSelectableListControl::IItemStyleProvider
 			{
 			protected:
 				Ptr<GuiTemplate::IFactory>							factory;
@@ -43,6 +43,8 @@ Item Template (GuiListItemTemplate)
 				controls::GuiListControl::IItemStyleController*		CreateItemStyle(vint styleId)override;
 				void												DestroyItemStyle(controls::GuiListControl::IItemStyleController* style)override;
 				void												Install(controls::GuiListControl::IItemStyleController* style, vint itemIndex)override;
+				void												SetStyleIndex(controls::GuiListControl::IItemStyleController* style, vint value)override;
+				void												SetStyleSelected(controls::GuiListControl::IItemStyleController* style, bool value)override;
 			};
 
 			class GuiListItemTemplate_ItemStyleController : public Object, public virtual controls::GuiListControl::IItemStyleController
@@ -56,6 +58,7 @@ Item Template (GuiListItemTemplate)
 				GuiListItemTemplate_ItemStyleController(GuiListItemTemplate_ItemStyleProvider* _itemStyleProvider);
 				~GuiListItemTemplate_ItemStyleController();
 
+				GuiListItemTemplate*								GetTemplate();
 				void												SetTemplate(GuiListItemTemplate* _itemTemplate);
 
 				controls::GuiListControl::IItemStyleProvider*		GetStyleProvider()override;

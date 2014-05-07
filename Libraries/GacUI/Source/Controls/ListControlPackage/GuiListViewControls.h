@@ -283,6 +283,7 @@ ListView ItemStyleProvider
 					GuiListControl::IItemStyleController*		CreateItemStyle(vint styleId)override;
 					void										DestroyItemStyle(GuiListControl::IItemStyleController* style)override;
 					void										Install(GuiListControl::IItemStyleController* style, vint itemIndex)override;
+					void										SetStyleIndex(GuiListControl::IItemStyleController* style, vint value)override;
 
 					/// <summary>Get the item content provider.</summary>
 					/// <returns>The item content provider.</returns>

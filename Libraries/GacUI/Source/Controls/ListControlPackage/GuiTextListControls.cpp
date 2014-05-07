@@ -177,6 +177,10 @@ TextItemStyleProvider
 					textStyle->SetChecked(textItemView->GetChecked(itemIndex));
 				}
 
+				void TextItemStyleProvider::SetStyleIndex(GuiListControl::IItemStyleController* style, vint value)
+				{
+				}
+
 				void TextItemStyleProvider::SetStyleSelected(GuiListControl::IItemStyleController* style, bool value)
 				{
 					TextItemStyleController* textStyle=dynamic_cast<TextItemStyleController*>(style);

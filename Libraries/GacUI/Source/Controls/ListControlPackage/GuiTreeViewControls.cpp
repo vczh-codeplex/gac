@@ -360,6 +360,10 @@ NodeItemProvider
 					}
 				}
 
+				void NodeItemStyleProvider::SetStyleIndex(GuiListControl::IItemStyleController* style, vint value)
+				{
+				}
+
 				void NodeItemStyleProvider::SetStyleSelected(GuiListControl::IItemStyleController* style, bool value)
 				{
 					if(nodeItemView)
