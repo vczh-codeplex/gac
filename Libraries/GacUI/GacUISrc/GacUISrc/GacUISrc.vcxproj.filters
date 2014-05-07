@@ -115,6 +115,9 @@
     <Filter Include="GacUI\Reflection\InstanceQuery">
       <UniqueIdentifier>{9e11adec-8541-460e-b5bc-8c650b171018}</UniqueIdentifier>
     </Filter>
+    <Filter Include="GacUI\Controls\Templates">
+      <UniqueIdentifier>{9e56fefd-e958-41a3-954b-d905fca4d2e5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\Common\Source\Basic.cpp">
@@ -609,6 +612,15 @@
     <ClCompile Include="..\..\Source\Reflection\InstanceQuery\GuiInstanceQuery.cpp">
       <Filter>GacUI\Reflection\InstanceQuery</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Controls\Templates\GuiControlTemplates.cpp">
+      <Filter>GacUI\Controls\Templates</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Controls\Templates\GuiControlTemplateStyles.cpp">
+      <Filter>GacUI\Controls\Templates</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionTemplates.cpp">
+      <Filter>GacUI\Reflection\TypeDescriptors</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Common\Source\Basic.h">
@@ -1096,6 +1108,15 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Reflection\InstanceQuery\GuiInstanceQuery.h">
       <Filter>GacUI\Reflection\InstanceQuery</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Controls\Templates\GuiControlTemplates.h">
+      <Filter>GacUI\Controls\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Controls\Templates\GuiControlTemplateStyles.h">
+      <Filter>GacUI\Controls\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionTemplates.h">
+      <Filter>GacUI\Reflection\TypeDescriptors</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -43,16 +43,6 @@ Type Declaration
 #define INTERFACE_EXTERNALCTOR(CONTROL, INTERFACE)\
 	CLASS_MEMBER_EXTERNALCTOR(decltype(interface_proxy::CONTROL##_##INTERFACE::Create(0))(Ptr<IValueInterfaceProxy>), {L"proxy"}, &interface_proxy::CONTROL##_##INTERFACE::Create)
 
-			BEGIN_CLASS_MEMBER(GuiTemplate)
-				CLASS_MEMBER_CONSTRUCTOR(GuiTemplate*(), NO_PARAMETER)
-			END_CLASS_MEMBER(GuiTemplate)
-			
-			BEGIN_CLASS_MEMBER(GuiTemplate::IFactory)
-				INTERFACE_EXTERNALCTOR(GuiTemplate, IFactory)
-
-				CLASS_MEMBER_METHOD(CreateTemplate, NO_PARAMETER)
-			END_CLASS_MEMBER(GuiTemplate::IFactory)
-
 			BEGIN_CLASS_MEMBER(GuiStackComposition)
 				CLASS_MEMBER_BASE(GuiBoundsComposition)
 				CLASS_MEMBER_CONSTRUCTOR(GuiStackComposition*(), NO_PARAMETER)

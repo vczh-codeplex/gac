@@ -280,6 +280,7 @@ GuiInstanceContext
 						L"presentation::elements::Gui*Element;"
 						L"presentation::compositions::Gui*Composition;"
 						L"presentation::compositions::Gui*;"
+						L"presentation::templates::Gui*;"
 						L"system::*;"
 						L"system::reflection::*;"
 						L"presentation::*;"
@@ -290,7 +291,8 @@ GuiInstanceContext
 						L"presentation::elements::*;"
 						L"presentation::elements::Gui*;"
 						L"presentation::elements::text*;"
-						L"presentation::compositions::*";
+						L"presentation::compositions::*"
+						L"presentation::templates::*";
 					namespaceAttributes.Add(att);
 				}
 				FOREACH(Ptr<XmlAttribute>, att, namespaceAttributes)

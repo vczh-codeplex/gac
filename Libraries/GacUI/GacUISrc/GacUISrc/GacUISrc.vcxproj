@@ -317,6 +317,8 @@
     <ClCompile Include="..\..\Source\Controls\Styles\Win8Styles\GuiWin8StylesCommon.cpp" />
     <ClCompile Include="..\..\Source\Controls\Styles\Win8Styles\GuiWin8TabStyles.cpp" />
     <ClCompile Include="..\..\Source\Controls\Styles\Win8Styles\GuiWin8ToolstripStyles.cpp" />
+    <ClCompile Include="..\..\Source\Controls\Templates\GuiControlTemplates.cpp" />
+    <ClCompile Include="..\..\Source\Controls\Templates\GuiControlTemplateStyles.cpp" />
     <ClCompile Include="..\..\Source\Controls\TextEditorPackage\GuiDocumentViewer.cpp" />
     <ClCompile Include="..\..\Source\Controls\TextEditorPackage\GuiTextAutoComplete.cpp" />
     <ClCompile Include="..\..\Source\Controls\TextEditorPackage\GuiTextColorizer.cpp" />
@@ -396,6 +398,7 @@
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='DebugNoReflection|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionPlugin.cpp" />
+    <ClCompile Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionTemplates.cpp" />
     <ClCompile Include="..\..\Source\Resources\GuiDocument.cpp" />
     <ClCompile Include="..\..\Source\Resources\GuiDocument_Edit.cpp" />
     <ClCompile Include="..\..\Source\Resources\GuiDocument_Load.cpp" />
@@ -508,6 +511,8 @@
     <ClInclude Include="..\..\Source\Controls\Styles\Win8Styles\GuiWin8StylesCommon.h" />
     <ClInclude Include="..\..\Source\Controls\Styles\Win8Styles\GuiWin8TabStyles.h" />
     <ClInclude Include="..\..\Source\Controls\Styles\Win8Styles\GuiWin8ToolstripStyles.h" />
+    <ClInclude Include="..\..\Source\Controls\Templates\GuiControlTemplates.h" />
+    <ClInclude Include="..\..\Source\Controls\Templates\GuiControlTemplateStyles.h" />
     <ClInclude Include="..\..\Source\Controls\TextEditorPackage\GuiDocumentViewer.h" />
     <ClInclude Include="..\..\Source\Controls\TextEditorPackage\GuiTextAutoComplete.h" />
     <ClInclude Include="..\..\Source\Controls\TextEditorPackage\GuiTextColorizer.h" />
@@ -566,6 +571,7 @@
     <ClInclude Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionControls.h" />
     <ClInclude Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionElements.h" />
     <ClInclude Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionEvents.h" />
+    <ClInclude Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionTemplates.h" />
     <ClInclude Include="..\..\Source\Resources\GuiDocument.h" />
     <ClInclude Include="..\..\Source\Resources\GuiParserManager.h" />
     <ClInclude Include="..\..\Source\Resources\GuiResource.h" />

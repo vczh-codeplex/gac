@@ -509,6 +509,7 @@ using presentation::controls::Gui*;
 using presentation::elements::Gui*Element;
 using presentation::compositions::Gui*Composition;
 using presentation::compositions::Gui*;
+using presentation::templates::Gui*;
 using system::*;
 using system::reflection::*;
 using presentation::*;
@@ -520,6 +521,7 @@ using presentation::elements::*;
 using presentation::elements::Gui*;
 using presentation::elements::text*;
 using presentation::compositions::*;
+using presentation::templates::*;
 
 )workflow";
 		auto module = config->workflowManager->AddModule(moduleCode);
