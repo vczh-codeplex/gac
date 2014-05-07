@@ -116,6 +116,7 @@ GuiBindableListView
 			protected:
 				class ItemSource;
 			public:
+				/// <summary>List view data column container.</summary>
 				class ListViewDataColumns : public list::ItemsBase<vint>
 				{
 					friend class ItemSource;
@@ -129,6 +130,7 @@ GuiBindableListView
 					~ListViewDataColumns();
 				};
 				
+				/// <summary>List view column container.</summary>
 				class ListViewColumns : public list::ItemsBase<Ptr<list::ListViewColumn>>
 				{
 					friend class ItemSource;
