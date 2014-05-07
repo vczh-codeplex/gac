@@ -26,6 +26,9 @@ Type Declaration
 #define INTERFACE_EXTERNALCTOR(CONTROL, INTERFACE)\
 	CLASS_MEMBER_EXTERNALCTOR(decltype(interface_proxy::CONTROL##_##INTERFACE::Create(0))(Ptr<IValueInterfaceProxy>), {L"proxy"}, &interface_proxy::CONTROL##_##INTERFACE::Create)
 
+#define GUI_TEMPLATE_PROPERTY_REFLECTION(CLASS, TYPE, NAME)\
+	CLASS_MEMBER_PROPERTY_GUIEVENT_FAST(NAME)
+
 			BEGIN_CLASS_MEMBER(GuiTemplate)
 				CLASS_MEMBER_CONSTRUCTOR(GuiTemplate*(), NO_PARAMETER)
 			END_CLASS_MEMBER(GuiTemplate)
@@ -35,6 +38,12 @@ Type Declaration
 
 				CLASS_MEMBER_METHOD(CreateTemplate, NO_PARAMETER)
 			END_CLASS_MEMBER(GuiTemplate::IFactory)
+
+			BEGIN_CLASS_MEMBER(GuiListItemTemplate)
+				CLASS_MEMBER_CONSTRUCTOR(GuiListItemTemplate*(), NO_PARAMETER)
+
+				GuiListItemTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_REFLECTION)
+			END_CLASS_MEMBER(GuiListItemTemplate)
 
 #undef INTERFACE_EXTERNALCTOR
 #undef _
