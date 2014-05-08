@@ -176,5 +176,8 @@
     <Xml Include="..\Resources\XmlWindowResourceListViewModel.xml">
       <Filter>Resource Files</Filter>
     </Xml>
+    <Xml Include="..\Resources\XmlWindowResourceItemTemplate.xml">
+      <Filter>Resource Files</Filter>
+    </Xml>
   </ItemGroup>
 </Project>
