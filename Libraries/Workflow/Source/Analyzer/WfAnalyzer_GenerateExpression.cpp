@@ -341,7 +341,27 @@ GenerateInstructions(Expression)
 										return;
 									}
 								}
+
 								mergedType = GetMergedType(firstType, secondType);
+								if (node->op == WfBinaryOperator::EQ || node->op == WfBinaryOperator::NE)
+								{
+									if (mergedType->GetTypeDescriptor()->GetValueSerializer())
+									{
+										auto structType = mergedType->GetDecorator() == ITypeInfo::Nullable ? CopyTypeInfo(mergedType->GetElementType()) : mergedType;
+										auto insType = GetInstructionTypeArgument(structType);
+										if (insType == WfInsType::Unknown)
+										{
+											GenerateExpressionInstructions(context, node->first);
+											GenerateExpressionInstructions(context, node->second);
+											INSTRUCTION(Ins::CompareStruct());
+											if (node->op == WfBinaryOperator::NE)
+											{
+												INSTRUCTION(Ins::OpNot(WfInsType::Bool));
+											}
+											return;
+										}
+									}
+								}
 							}
 						}
 

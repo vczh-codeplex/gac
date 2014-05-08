@@ -844,6 +844,34 @@ WfRuntimeThreadContext
 									EXECUTE(OpCompare, F8)
 									EXECUTE(OpCompare, String)
 								END_TYPE
+							case WfInsCode::CompareStruct:
+								{
+									Value first, second;
+									CONTEXT_ACTION(PopValue(second), L"failed to pop a value from the stack.");
+									CONTEXT_ACTION(PopValue(first), L"failed to pop a value from the stack.");
+									if (!first.IsNull() && !first.GetTypeDescriptor()->GetValueSerializer())
+									{
+										INTERNAL_ERROR(L"type" + first.GetTypeDescriptor()->GetTypeName() + L" is not a struct.");
+									}
+									if (!second.IsNull() && !second.GetTypeDescriptor()->GetValueSerializer())
+									{
+										INTERNAL_ERROR(L"type" + second.GetTypeDescriptor()->GetTypeName() + L" is not a struct.");
+									}
+
+									if (first.GetValueType() != second.GetValueType())
+									{
+										PushValue(BoxValue(false));
+									}
+									else if (first.IsNull())
+									{
+										PushValue(BoxValue(true));
+									}
+									else
+									{
+										PushValue(BoxValue(first.GetText() == second.GetText()));
+									}
+									return WfRuntimeExecutionAction::ExecuteInstruction;
+								}
 							case WfInsCode::CompareReference:
 								{
 									Value first, second;
