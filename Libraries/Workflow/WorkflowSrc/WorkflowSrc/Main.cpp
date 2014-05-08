@@ -300,8 +300,8 @@ namespace test
 {
 	struct Point
 	{
-		int									x;
-		int									y;
+		int									x = 0;
+		int									y = 0;
 	};
 
 	class ObservableValue : public Object, public Description<ObservableValue>

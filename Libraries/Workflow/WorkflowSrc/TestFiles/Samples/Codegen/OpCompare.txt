@@ -1,5 +1,6 @@
 module test;
 using system::*;
+using test::*;
 
 func main():string
 {
@@ -15,10 +16,22 @@ func main():string
 	var f32 = cast float 1.5;
 	var f64 = cast double 3;
 	var s = cast string "text";
+
+	var p0 = cast Point "x:0";
+	var p1 = cast Point "y:0";
+	var p2 = cast Point "y:0 x:0";
+	var p3 = cast Point "";
+	var p4 = cast Point "x:1 y:1";
+	var q1 : Point? = p2;
+	var q2 : Point? = p4;
+	var q3 : Point? = null;
+
 	return
 		(i8<i16) & ", " & (i16>i32) & ", " & (i32==i64) & ", " &
 		(u8<=u16) & ", " & (u16>=u32) & ", " & (u32!=u64) & ", " &
 		(f32<f64) & ", " & (f32>f64) & ", " & (f32==f64) & ", " &
 		(b==true) & ", " & (b!=false) & ", " &
-		(s=="string") & ", " & (s!="string");
+		(s=="string") & ", " & (s!="string") & ", " &
+		(p0==p1) & ", " & (p1==p2) & ", " & (p2==p3) & ", " & (p3==p4) & ", " &
+		(q1==q3) & ", " & (q2==q3) & ", " & (q3==q3);
 }
