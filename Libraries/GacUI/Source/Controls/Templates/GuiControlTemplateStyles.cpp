@@ -65,6 +65,7 @@ GuiListItemTemplate_ItemStyleProvider
 					GuiTemplate* itemTemplate = factory->CreateTemplate(viewModel);
 					if (auto listItemTemplate = dynamic_cast<GuiListItemTemplate*>(itemTemplate))
 					{
+						listItemTemplate->SetIndex(itemIndex);
 						controller->SetTemplate(listItemTemplate);
 					}
 					else
