@@ -3514,10 +3514,10 @@ GuiWorkflowGlobalContext
 					}
 				}
 
-				WString moduleCode = WorkflowModuleToString(module);
 				WfLexicalScopeManager manager(0);
 				manager.modules.Add(module);
 				manager.Rebuild(false);
+				WString moduleCode = WorkflowModuleToString(module);
 
 				if (manager.errors.Count() > 0)
 				{
@@ -4406,6 +4406,187 @@ GuiToolstripButtonInstanceLoader
 		};
 
 /***********************************************************************
+GuiSelectableListControlInstanceLoader
+***********************************************************************/
+
+		class GuiSelectableListControlInstanceLoader : public Object, public IGuiInstanceLoader
+		{
+		public:
+			GuiSelectableListControlInstanceLoader()
+			{
+			}
+
+			WString GetTypeName()override
+			{
+				return description::GetTypeDescriptor<GuiSelectableListControl>()->GetTypeName();
+			}
+
+			bool IsCreatable(const TypeInfo& typeInfo)override
+			{
+				return false;
+			}
+
+			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
+			{
+				return Value();
+			}
+
+			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			{
+				propertyNames.Add(L"ItemTemplate");
+			}
+
+			void GetConstructorParameters(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			{
+			}
+
+			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
+			{
+				if (propertyInfo.propertyName == L"ItemTemplate")
+				{
+					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<WString>());
+					return info;
+				}
+				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
+			}
+
+			bool SetPropertyValue(PropertyValue& propertyValue)override
+			{
+				if (GuiSelectableListControl* container = dynamic_cast<GuiSelectableListControl*>(propertyValue.instanceValue.GetRawPtr()))
+				{
+					if (propertyValue.propertyName == L"ItemTemplate")
+					{
+						List<ITypeDescriptor*> types;
+						List<WString> typeNames;
+						SplitBySemicolon(propertyValue.propertyValue.GetText(), typeNames);
+						CopyFrom(
+							types,
+							From(typeNames)
+								.Select(&description::GetTypeDescriptor)
+								.Where([](ITypeDescriptor* type){return type != 0; })
+							);
+
+						auto factory = GuiTemplate::IFactory::CreateTemplateFactory(types);
+						auto styleProvider = new GuiListItemTemplate_ItemStyleProvider(factory);
+						container->SetStyleProvider(styleProvider);
+						return true;
+					}
+				}
+				return false;
+			}
+		};
+
+/***********************************************************************
+GuiVirtualTreeViewInstanceLoader
+***********************************************************************/
+
+		class GuiVirtualTreeViewInstanceLoader : public Object, public IGuiInstanceLoader
+		{
+		public:
+			GuiVirtualTreeViewInstanceLoader()
+			{
+			}
+
+			WString GetTypeName()override
+			{
+				return description::GetTypeDescriptor<GuiVirtualTreeView>()->GetTypeName();
+			}
+
+			bool IsCreatable(const TypeInfo& typeInfo)override
+			{
+				return false;
+			}
+
+			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
+			{
+				return Value();
+			}
+
+			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			{
+				propertyNames.Add(L"ItemTemplate");
+			}
+
+			void GetConstructorParameters(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			{
+			}
+
+			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
+			{
+				if (propertyInfo.propertyName == L"ItemTemplate")
+				{
+					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<WString>());
+					return info;
+				}
+				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
+			}
+
+			bool SetPropertyValue(PropertyValue& propertyValue)override
+			{
+				if (propertyValue.propertyName == L"ItemTemplate")
+				{
+					return true;
+				}
+				return false;
+			}
+		};
+
+/***********************************************************************
+GuiVirtualDataGridInstanceLoader
+***********************************************************************/
+
+		class GuiVirtualDataGridInstanceLoader : public Object, public IGuiInstanceLoader
+		{
+		public:
+			GuiVirtualDataGridInstanceLoader()
+			{
+			}
+
+			WString GetTypeName()override
+			{
+				return description::GetTypeDescriptor<GuiVirtualDataGrid>()->GetTypeName();
+			}
+
+			bool IsCreatable(const TypeInfo& typeInfo)override
+			{
+				return false;
+			}
+
+			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
+			{
+				return Value();
+			}
+
+			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			{
+				propertyNames.Add(L"ItemTemplate");
+			}
+
+			void GetConstructorParameters(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			{
+			}
+
+			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
+			{
+				if (propertyInfo.propertyName == L"ItemTemplate")
+				{
+					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<WString>());
+					return info;
+				}
+				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
+			}
+
+			bool SetPropertyValue(PropertyValue& propertyValue)override
+			{
+				if (propertyValue.propertyName == L"ItemTemplate")
+				{
+					return true;
+				}
+				return false;
+			}
+		};
+
+/***********************************************************************
 GuiListViewInstanceLoader
 ***********************************************************************/
 
@@ -5213,6 +5394,9 @@ GuiPredefinedInstanceLoadersPlugin
 				manager->SetLoader(new GuiToolstripMenuBarInstanceLoader);
 				manager->SetLoader(new GuiToolstripToolBarInstanceLoader);
 				manager->SetLoader(new GuiToolstripButtonInstanceLoader);
+				manager->SetLoader(new GuiSelectableListControlInstanceLoader);
+				manager->SetLoader(new GuiVirtualTreeViewInstanceLoader);
+				manager->SetLoader(new GuiVirtualDataGridInstanceLoader);
 				manager->SetLoader(new GuiListViewInstanceLoader(false));
 				manager->SetLoader(new GuiTreeViewInstanceLoader(false));
 				manager->SetLoader(new GuiBindableTextListInstanceLoader(L"", [](){return GetCurrentTheme()->CreateTextListItemStyle(); }));
@@ -5492,30 +5676,6 @@ GuiInstanceContext
 			return 0;
 		}
 
-		void SplitBySemicolon(const WString& input, List<WString>& fragments)
-		{
-			const wchar_t* attValue = input.Buffer();
-			while(*attValue)
-			{
-				// split the value by ';'
-				const wchar_t* attSemicolon = wcschr(attValue, L';');
-				WString pattern;
-				if(attSemicolon)
-				{
-					pattern = WString(attValue, attSemicolon - attValue);
-					attValue = attSemicolon + 1;
-				}
-				else
-				{
-					vint len = wcslen(attValue);
-					pattern = WString(attValue, len);
-					attValue += len;
-				}
-
-				fragments.Add(pattern);
-			}
-		}
-
 		Ptr<GuiInstanceContext> GuiInstanceContext::LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, collections::List<WString>& errors)
 		{
 			Ptr<GuiInstanceContext> context=new GuiInstanceContext;
@@ -5727,6 +5887,34 @@ GuiInstanceStyleContext
 				}
 			}
 			return context;
+		}
+
+/***********************************************************************
+Helper Functions
+***********************************************************************/
+
+		void SplitBySemicolon(const WString& input, collections::List<WString>& fragments)
+		{
+			const wchar_t* attValue = input.Buffer();
+			while(*attValue)
+			{
+				// split the value by ';'
+				const wchar_t* attSemicolon = wcschr(attValue, L';');
+				WString pattern;
+				if(attSemicolon)
+				{
+					pattern = WString(attValue, attSemicolon - attValue);
+					attValue = attSemicolon + 1;
+				}
+				else
+				{
+					vint len = wcslen(attValue);
+					pattern = WString(attValue, len);
+					attValue += len;
+				}
+
+				fragments.Add(pattern);
+			}
 		}
 	}
 }
@@ -9981,6 +10169,8 @@ Type Declaration
 	CLASS_MEMBER_PROPERTY_GUIEVENT_FAST(NAME)
 
 			BEGIN_CLASS_MEMBER(GuiTemplate)
+				CLASS_MEMBER_BASE(GuiBoundsComposition)
+				CLASS_MEMBER_BASE(GuiInstanceRootObject)
 				CLASS_MEMBER_CONSTRUCTOR(GuiTemplate*(), NO_PARAMETER)
 			END_CLASS_MEMBER(GuiTemplate)
 			
@@ -9992,6 +10182,7 @@ Type Declaration
 			END_CLASS_MEMBER(GuiTemplate::IFactory)
 
 			BEGIN_CLASS_MEMBER(GuiListItemTemplate)
+				CLASS_MEMBER_BASE(GuiTemplate)
 				CLASS_MEMBER_CONSTRUCTOR(GuiListItemTemplate*(), NO_PARAMETER)
 
 				GuiListItemTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_REFLECTION)

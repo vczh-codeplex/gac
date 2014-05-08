@@ -22552,7 +22552,24 @@ GuiTemplate
 							}
 						}
 					}
-					return 0;
+					
+					WString message = L"Unable to create a template from types {";
+					FOREACH_INDEXER(ITypeDescriptor*, type, index, types)
+					{
+						if (index > 0) message += L", ";
+						message += type->GetTypeName();
+					}
+					message += L"} using view model: ";
+					if (viewModel.IsNull())
+					{
+						message += L"null.";
+					}
+					else
+					{
+						message += viewModel.GetTypeDescriptor()->GetTypeName() + L".";
+					}
+
+					throw TypeDescriptorException(message);
 				}
 			};
 
@@ -22658,6 +22675,7 @@ GuiListItemTemplate_ItemStyleProvider
 					GuiTemplate* itemTemplate = factory->CreateTemplate(viewModel);
 					if (auto listItemTemplate = dynamic_cast<GuiListItemTemplate*>(itemTemplate))
 					{
+						listItemTemplate->SetIndex(itemIndex);
 						controller->SetTemplate(listItemTemplate);
 					}
 					else

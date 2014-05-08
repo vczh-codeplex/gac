@@ -2181,14 +2181,9 @@ GetObservingDependency
 
 				void Visit(WfIfExpression* node)override
 				{
-					WfObservingDependency condition(dependency);
-					GetObservingDependency(manager, node->condition, condition);
-					condition.TurnToInput();
-
-					WfObservingDependency trueBranch(condition), falseBranch(condition);
-					GetObservingDependency(manager, node->trueBranch, trueBranch);
-					GetObservingDependency(manager, node->falseBranch, falseBranch);
-					CopyFrom(dependency.outputObserves, From(trueBranch.outputObserves).Concat(falseBranch.outputObserves));
+					GetObservingDependency(manager, node->condition, dependency);
+					GetObservingDependency(manager, node->trueBranch, dependency);
+					GetObservingDependency(manager, node->falseBranch, dependency);
 				}
 
 				void Visit(WfRangeExpression* node)override
@@ -4419,6 +4414,7 @@ GenerateInstructions(Expression)
 						case WfBinaryOperator::Sub:
 						case WfBinaryOperator::Mul:
 						case WfBinaryOperator::Div:
+						case WfBinaryOperator::Mod:
 						case WfBinaryOperator::Shl:
 						case WfBinaryOperator::Shr:
 							{
@@ -4446,7 +4442,27 @@ GenerateInstructions(Expression)
 										return;
 									}
 								}
+
 								mergedType = GetMergedType(firstType, secondType);
+								if (node->op == WfBinaryOperator::EQ || node->op == WfBinaryOperator::NE)
+								{
+									if (mergedType->GetTypeDescriptor()->GetValueSerializer())
+									{
+										auto structType = mergedType->GetDecorator() == ITypeInfo::Nullable ? CopyTypeInfo(mergedType->GetElementType()) : mergedType;
+										auto insType = GetInstructionTypeArgument(structType);
+										if (insType == WfInsType::Unknown)
+										{
+											GenerateExpressionInstructions(context, node->first);
+											GenerateExpressionInstructions(context, node->second);
+											INSTRUCTION(Ins::CompareStruct());
+											if (node->op == WfBinaryOperator::NE)
+											{
+												INSTRUCTION(Ins::OpNot(WfInsType::Bool));
+											}
+											return;
+										}
+									}
+								}
 							}
 						}
 
@@ -4469,6 +4485,9 @@ GenerateInstructions(Expression)
 							break;
 						case WfBinaryOperator::Div:
 							INSTRUCTION(Ins::OpDiv(GetInstructionTypeArgument(mergedType)));
+							break;
+						case WfBinaryOperator::Mod:
+							INSTRUCTION(Ins::OpMod(GetInstructionTypeArgument(mergedType)));
 							break;
 						case WfBinaryOperator::Shl:
 							INSTRUCTION(Ins::OpShl(GetInstructionTypeArgument(mergedType)));
@@ -8124,6 +8143,7 @@ ValidateSemantic(Expression)
 									selectedTable = conversionTable;
 								}
 								break;
+							case WfBinaryOperator::Mod:
 							case WfBinaryOperator::Shl:
 							case WfBinaryOperator::Shr:
 								{
@@ -8171,30 +8191,8 @@ ValidateSemantic(Expression)
 							case WfBinaryOperator::EQ:
 							case WfBinaryOperator::NE:
 								{
-									switch (elementType->GetDecorator())
-									{
-									case ITypeInfo::RawPtr:
-									case ITypeInfo::SharedPtr:
-										results.Add(ResolveExpressionResult(TypeInfoRetriver<bool>::CreateTypeInfo()));
-										return;
-									default:
-										static TypeFlag conversionTable[(vint)TypeFlag::Count] = {
-											/*Bool		*/TypeFlag::Bool,
-											/*I1		*/TypeFlag::Bool,
-											/*I2		*/TypeFlag::Bool,
-											/*I4		*/TypeFlag::Bool,
-											/*I8		*/TypeFlag::Bool,
-											/*U1		*/TypeFlag::Bool,
-											/*U2		*/TypeFlag::Bool,
-											/*U4		*/TypeFlag::Bool,
-											/*U8		*/TypeFlag::Bool,
-											/*F4		*/TypeFlag::Bool,
-											/*F8		*/TypeFlag::Bool,
-											/*String	*/TypeFlag::Bool,
-											/*Others	*/TypeFlag::Unknown,
-										};
-										selectedTable = conversionTable;
-									}
+									results.Add(ResolveExpressionResult(TypeInfoRetriver<bool>::CreateTypeInfo()));
+									return;
 								}
 								break;
 							case WfBinaryOperator::Xor:
@@ -10527,6 +10525,9 @@ Print (Expression)
 					case WfBinaryOperator::Div:
 						writer.WriteString(L" / ");
 						break;
+					case WfBinaryOperator::Mod:
+						writer.WriteString(L" % ");
+						break;
 					case WfBinaryOperator::Shl:
 						writer.WriteString(L" shl ");
 						break;
@@ -11339,6 +11340,7 @@ L"\r\n" L"\tAdd,"
 L"\r\n" L"\tSub,"
 L"\r\n" L"\tMul,"
 L"\r\n" L"\tDiv,"
+L"\r\n" L"\tMod,"
 L"\r\n" L"\tShl,"
 L"\r\n" L"\tShr,"
 L"\r\n" L"\tLT,"
@@ -11680,6 +11682,7 @@ L"\r\n" L"token ADD = \"/+\";"
 L"\r\n" L"token SUB = \"-\";"
 L"\r\n" L"token MUL = \"/*\";"
 L"\r\n" L"token DIV = \"//\";"
+L"\r\n" L"token MOD = \"%\";"
 L"\r\n" L"token CONCAT = \"&\";"
 L"\r\n" L"token LE = \"/</=\";"
 L"\r\n" L"token GE = \"/>/=\";"
@@ -11889,6 +11892,7 @@ L"\r\n" L"rule Expression Exp2"
 L"\r\n" L"\t= !Exp1"
 L"\r\n" L"\t= Exp2 : first \"*\" Exp1 : second as BinaryExpression with {op = \"Mul\"}"
 L"\r\n" L"\t= Exp2 : first \"/\" Exp1 : second as BinaryExpression with {op = \"Div\"}"
+L"\r\n" L"\t= Exp2 : first \"%\" Exp1 : second as BinaryExpression with {op = \"Mod\"}"
 L"\r\n" L"\t;"
 L"\r\n" L"rule Expression Exp3"
 L"\r\n" L"\t= !Exp2"
@@ -12105,6 +12109,7 @@ Parsing Tree Conversion Driver Implementation
 					else if(token->GetValue()==L"Sub") { member=WfBinaryOperator::Sub; return true; }
 					else if(token->GetValue()==L"Mul") { member=WfBinaryOperator::Mul; return true; }
 					else if(token->GetValue()==L"Div") { member=WfBinaryOperator::Div; return true; }
+					else if(token->GetValue()==L"Mod") { member=WfBinaryOperator::Mod; return true; }
 					else if(token->GetValue()==L"Shl") { member=WfBinaryOperator::Shl; return true; }
 					else if(token->GetValue()==L"Shr") { member=WfBinaryOperator::Shr; return true; }
 					else if(token->GetValue()==L"LT") { member=WfBinaryOperator::LT; return true; }
@@ -14357,6 +14362,7 @@ namespace vl
 				ENUM_NAMESPACE_ITEM(Sub)
 				ENUM_NAMESPACE_ITEM(Mul)
 				ENUM_NAMESPACE_ITEM(Div)
+				ENUM_NAMESPACE_ITEM(Mod)
 				ENUM_NAMESPACE_ITEM(Shl)
 				ENUM_NAMESPACE_ITEM(Shr)
 				ENUM_NAMESPACE_ITEM(LT)
@@ -15570,6 +15576,7 @@ WfRuntimeThreadContext (Operators)
 			BINARY_OPERATOR(OpSub, -)
 			BINARY_OPERATOR(OpMul, *)
 			BINARY_OPERATOR(OpDiv, /)
+			BINARY_OPERATOR(OpMod, %)
 			BINARY_OPERATOR(OpShl, <<)
 			BINARY_OPERATOR(OpShr, >>)
 			BINARY_OPERATOR(OpAnd, &)
@@ -16348,6 +16355,34 @@ WfRuntimeThreadContext
 									EXECUTE(OpCompare, F8)
 									EXECUTE(OpCompare, String)
 								END_TYPE
+							case WfInsCode::CompareStruct:
+								{
+									Value first, second;
+									CONTEXT_ACTION(PopValue(second), L"failed to pop a value from the stack.");
+									CONTEXT_ACTION(PopValue(first), L"failed to pop a value from the stack.");
+									if (!first.IsNull() && !first.GetTypeDescriptor()->GetValueSerializer())
+									{
+										INTERNAL_ERROR(L"type" + first.GetTypeDescriptor()->GetTypeName() + L" is not a struct.");
+									}
+									if (!second.IsNull() && !second.GetTypeDescriptor()->GetValueSerializer())
+									{
+										INTERNAL_ERROR(L"type" + second.GetTypeDescriptor()->GetTypeName() + L" is not a struct.");
+									}
+
+									if (first.GetValueType() != second.GetValueType())
+									{
+										PushValue(BoxValue(false));
+									}
+									else if (first.IsNull())
+									{
+										PushValue(BoxValue(true));
+									}
+									else
+									{
+										PushValue(BoxValue(first.GetText() == second.GetText()));
+									}
+									return WfRuntimeExecutionAction::ExecuteInstruction;
+								}
 							case WfInsCode::CompareReference:
 								{
 									Value first, second;
@@ -16452,6 +16487,17 @@ WfRuntimeThreadContext
 									EXECUTE(OpDiv, U8)
 									EXECUTE(OpDiv, F4)
 									EXECUTE(OpDiv, F8)
+								END_TYPE
+							case WfInsCode::OpMod:
+								BEGIN_TYPE
+									EXECUTE(OpMod, I1)
+									EXECUTE(OpMod, I2)
+									EXECUTE(OpMod, I4)
+									EXECUTE(OpMod, I8)
+									EXECUTE(OpMod, U1)
+									EXECUTE(OpMod, U2)
+									EXECUTE(OpMod, U4)
+									EXECUTE(OpMod, U8)
 								END_TYPE
 							case WfInsCode::OpShl:
 								BEGIN_TYPE
