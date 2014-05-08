@@ -211,14 +211,9 @@ GetObservingDependency
 
 				void Visit(WfIfExpression* node)override
 				{
-					WfObservingDependency condition(dependency);
-					GetObservingDependency(manager, node->condition, condition);
-					condition.TurnToInput();
-
-					WfObservingDependency trueBranch(condition), falseBranch(condition);
-					GetObservingDependency(manager, node->trueBranch, trueBranch);
-					GetObservingDependency(manager, node->falseBranch, falseBranch);
-					CopyFrom(dependency.outputObserves, From(trueBranch.outputObserves).Concat(falseBranch.outputObserves));
+					GetObservingDependency(manager, node->condition, dependency);
+					GetObservingDependency(manager, node->trueBranch, dependency);
+					GetObservingDependency(manager, node->falseBranch, dependency);
 				}
 
 				void Visit(WfRangeExpression* node)override
