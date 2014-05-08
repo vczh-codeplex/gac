@@ -7906,9 +7906,12 @@ GeneralValueSerializer
 
 				bool Parse(const WString& input, Value& output)
 				{
-					if(Validate(input))
+					T value;
+					if(Deserialize(input, value))
 					{
-						output=Value::From(input, ownedTypeDescriptor);
+						WString text;
+						Serialize(value, text);
+						output = Value::From(text, ownedTypeDescriptor);
 						return true;
 					}
 					return false;
