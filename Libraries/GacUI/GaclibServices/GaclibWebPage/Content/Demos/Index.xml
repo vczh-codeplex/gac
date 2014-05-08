@@ -281,5 +281,33 @@
       <cpp src="(Generated)DemoPartialClasses.cpp" />
       <description>This demo shows how to apply MVVM (Model-View-ViewModel) pattern using the XML window resource and GacGen.exe.</description>
     </demo>
+    <demo name="LoadFromXml.ListViewModel">
+      <date>2014/5/1</date>
+      <image src="DXGUI_94.jpg"/>
+      <cpp src="Main.cpp" />
+      <cpp src="Codegen.bat" />
+      <cpp src="XmlWindowResourceListViewModel.xml" />
+      <cpp src="(Generated)Demo.h" />
+      <cpp src="(Generated, Modifiable)MainWindow.h" />
+      <cpp src="(Generated, Modifiable)MainWindow.cpp" />
+      <cpp src="(Generated)DemoPartialClasses.h" />
+      <cpp src="(Generated)DemoPartialClasses.cpp" />
+      <description>This demo shows how to do item source binding to list/list view/tree view controls.</description>
+    </demo>
+    <demo name="LoadFromXml.ItemTemplate">
+      <date>2014/5/8</date>
+      <image src="DXGUI_95.jpg"/>
+      <cpp src="Main.cpp" />
+      <cpp src="Codegen.bat" />
+      <cpp src="XmlWindowResourceItemTemplate.xml" />
+      <cpp src="(Generated)Demo.h" />
+      <cpp src="(Generated, Modifiable)SeasonItemTemplate.h" />
+      <cpp src="(Generated, Modifiable)SeasonItemTemplate.cpp" />
+      <cpp src="(Generated, Modifiable)MainWindow.h" />
+      <cpp src="(Generated, Modifiable)MainWindow.cpp" />
+      <cpp src="(Generated)DemoPartialClasses.h" />
+      <cpp src="(Generated)DemoPartialClasses.cpp" />
+      <description>This demo shows how to apply a customized item template (skin) to a list control using XML.</description>
+    </demo>
   </category>
 </demos>
