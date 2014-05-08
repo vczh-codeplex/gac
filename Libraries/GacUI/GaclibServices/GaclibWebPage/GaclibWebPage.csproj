@@ -61,20 +61,10 @@
     <Reference Include="Microsoft.WindowsAzure.StorageClient, Version=1.7.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System.Data.Entity" />
     <Reference Include="System.Data.Services.Client" />
-    <Reference Include="System.Web.Mvc, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <Private>True</Private>
-    </Reference>
+    <Reference Include="System.Web.Helpers, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="System.Web.Mvc, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System.Web.Providers">
       <HintPath>..\packages\System.Web.Providers.Core.1.0\lib\net40\System.Web.Providers.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Web.Razor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System.Web.WebPages, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System.Web.Helpers, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
@@ -86,12 +76,10 @@
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.Web.WebPages.Deployment, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System.Web.WebPages.Razor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
-      <Private>True</Private>
-    </Reference>
+    <Reference Include="System.Web.Razor, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="System.Web.WebPages, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="System.Web.WebPages.Deployment, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="System.Web.WebPages.Razor, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Web" />
     <Reference Include="System.Web.Extensions" />
@@ -179,6 +167,8 @@
     <Content Include="Content\Demos\Demos.Persistant.DirectCode.Scripting.jpg" />
     <Content Include="Content\Demos\Demos.Persistant.LoadFromXml.Controls.jpg" />
     <Content Include="Content\Demos\Demos.Persistant.LoadFromXml.DataBinding.jpg" />
+    <Content Include="Content\Demos\Demos.Persistant.LoadFromXml.ItemTemplate.jpg" />
+    <Content Include="Content\Demos\Demos.Persistant.LoadFromXml.ListViewModel.jpg" />
     <Content Include="Content\Demos\Demos.Persistant.LoadFromXml.ViewModel.jpg" />
     <Content Include="Content\Demos\Editor.Toolstrip.Document\DocumentEditorWindow.cpp" />
     <Content Include="Content\Demos\Editor.Toolstrip.Document\DocumentEditorWindow.h" />
@@ -262,6 +252,24 @@
     <Content Include="Content\Demos\Persistant.LoadFromXml.DataBinding\DXGUI_92.jpg" />
     <Content Include="Content\Demos\Persistant.LoadFromXml.DataBinding\Main.cpp" />
     <Content Include="Content\Demos\Persistant.LoadFromXml.DataBinding\XmlWindowResourceDataBinding.xml" />
+    <Content Include="Content\Demos\Persistant.LoadFromXml.ItemTemplate\%28Generated%29Demo.h" />
+    <Content Include="Content\Demos\Persistant.LoadFromXml.ItemTemplate\%28Generated%29DemoPartialClasses.cpp" />
+    <Content Include="Content\Demos\Persistant.LoadFromXml.ItemTemplate\%28Generated%29DemoPartialClasses.h" />
+    <Content Include="Content\Demos\Persistant.LoadFromXml.ItemTemplate\%28Generated, Modifiable%29MainWindow.cpp" />
+    <Content Include="Content\Demos\Persistant.LoadFromXml.ItemTemplate\%28Generated, Modifiable%29MainWindow.h" />
+    <Content Include="Content\Demos\Persistant.LoadFromXml.ItemTemplate\%28Generated, Modifiable%29SeasonItemTemplate.cpp" />
+    <Content Include="Content\Demos\Persistant.LoadFromXml.ItemTemplate\%28Generated, Modifiable%29SeasonItemTemplate.h" />
+    <Content Include="Content\Demos\Persistant.LoadFromXml.ItemTemplate\DXGUI_95.jpg" />
+    <Content Include="Content\Demos\Persistant.LoadFromXml.ItemTemplate\Main.cpp" />
+    <Content Include="Content\Demos\Persistant.LoadFromXml.ItemTemplate\XmlWindowResourceItemTemplate.xml" />
+    <Content Include="Content\Demos\Persistant.LoadFromXml.ListViewModel\%28Generated%29Demo.h" />
+    <Content Include="Content\Demos\Persistant.LoadFromXml.ListViewModel\%28Generated%29DemoPartialClasses.cpp" />
+    <Content Include="Content\Demos\Persistant.LoadFromXml.ListViewModel\%28Generated%29DemoPartialClasses.h" />
+    <Content Include="Content\Demos\Persistant.LoadFromXml.ListViewModel\%28Generated, Modifiable%29MainWindow.cpp" />
+    <Content Include="Content\Demos\Persistant.LoadFromXml.ListViewModel\%28Generated, Modifiable%29MainWindow.h" />
+    <Content Include="Content\Demos\Persistant.LoadFromXml.ListViewModel\DXGUI_94.jpg" />
+    <Content Include="Content\Demos\Persistant.LoadFromXml.ListViewModel\Main.cpp" />
+    <Content Include="Content\Demos\Persistant.LoadFromXml.ListViewModel\XmlWindowResourceListViewModel.xml" />
     <Content Include="Content\Demos\Persistant.LoadFromXml.ViewModel\%28Generated%29Demo.h" />
     <Content Include="Content\Demos\Persistant.LoadFromXml.ViewModel\%28Generated%29DemoPartialClasses.cpp" />
     <Content Include="Content\Demos\Persistant.LoadFromXml.ViewModel\%28Generated%29DemoPartialClasses.h" />
@@ -397,6 +405,12 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Home\GettingStart_5.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Content\Demos\Persistant.LoadFromXml.ItemTemplate\Codegen.bat" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Content\Demos\Persistant.LoadFromXml.ListViewModel\Codegen.bat" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
