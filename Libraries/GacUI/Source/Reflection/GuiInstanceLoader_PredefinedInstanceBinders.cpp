@@ -370,10 +370,10 @@ GuiWorkflowGlobalContext
 					}
 				}
 
-				WString moduleCode = WorkflowModuleToString(module);
 				WfLexicalScopeManager manager(0);
 				manager.modules.Add(module);
 				manager.Rebuild(false);
+				WString moduleCode = WorkflowModuleToString(module);
 
 				if (manager.errors.Count() > 0)
 				{
