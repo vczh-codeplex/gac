@@ -29,6 +29,7 @@ Item Template (GuiListItemTemplate)
 			class GuiListItemTemplate_ItemStyleProvider
 				: public Object
 				, public virtual controls::GuiSelectableListControl::IItemStyleProvider
+				, public Description<GuiListItemTemplate_ItemStyleProvider>
 			{
 			protected:
 				Ptr<GuiTemplate::IFactory>							factory;
@@ -52,6 +53,7 @@ Item Template (GuiListItemTemplate)
 			class GuiListItemTemplate_ItemStyleController
 				: public Object
 				, public virtual controls::GuiListControl::IItemStyleController
+				, public Description<GuiListItemTemplate_ItemStyleController>
 			{
 			protected:
 				GuiListItemTemplate_ItemStyleProvider*				itemStyleProvider;
@@ -81,12 +83,21 @@ Item Template (GuiTreeItemTemplate)
 			class GuiTreeItemTemplate_ItemStyleProvider
 				: public Object
 				, public virtual controls::tree::INodeItemStyleProvider
+				, protected virtual controls::tree::INodeProviderCallback
+				, public Description<GuiTreeItemTemplate_ItemStyleProvider>
 			{
 			protected:
 				Ptr<GuiTemplate::IFactory>							factory;
 				controls::GuiVirtualTreeListControl*				treeListControl;
 				controls::tree::INodeItemBindingView*				bindingView;
 				controls::GuiListControl::IItemStyleProvider*		itemStyleProvider;
+				
+				void												UpdateExpandingButton(controls::tree::INodeProvider* node);
+				void												OnAttached(controls::tree::INodeRootProvider* provider)override;
+				void												OnBeforeItemModified(controls::tree::INodeProvider* parentNode, vint start, vint count, vint newCount)override;
+				void												OnAfterItemModified(controls::tree::INodeProvider* parentNode, vint start, vint count, vint newCount)override;
+				void												OnItemExpanded(controls::tree::INodeProvider* node)override;
+				void												OnItemCollapsed(controls::tree::INodeProvider* node)override;
 
 			public:
 				GuiTreeItemTemplate_ItemStyleProvider(Ptr<GuiTemplate::IFactory> _factory);
@@ -109,6 +120,7 @@ Item Template (GuiTreeItemTemplate)
 			class GuiTreeItemTemplate_ItemStyleController
 				: public GuiListItemTemplate_ItemStyleController
 				, public virtual controls::tree::INodeItemStyleController
+				, public Description<GuiTreeItemTemplate_ItemStyleController>
 			{
 			protected:
 				GuiTreeItemTemplate_ItemStyleProvider*				nodeStyleProvider;
