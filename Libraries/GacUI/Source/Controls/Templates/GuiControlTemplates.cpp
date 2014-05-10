@@ -98,6 +98,22 @@ GuiListItemTemplate
 			GuiListItemTemplate::~GuiListItemTemplate()
 			{
 			}
+
+/***********************************************************************
+GuiTreeItemTemplate
+***********************************************************************/
+
+			GuiTreeItemTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_IMPL)
+
+			GuiTreeItemTemplate::GuiTreeItemTemplate()
+				:Expanding_(false)
+			{
+				GuiTreeItemTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_EVENT_INIT)
+			}
+
+			GuiTreeItemTemplate::~GuiTreeItemTemplate()
+			{
+			}
 		}
 	}
 }

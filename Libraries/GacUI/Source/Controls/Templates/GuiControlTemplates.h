@@ -83,6 +83,18 @@ Item Template
 
 				GuiListItemTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
 			};
+
+			class GuiTreeItemTemplate : public GuiListItemTemplate
+			{
+			public:
+				GuiTreeItemTemplate();
+				~GuiTreeItemTemplate();
+				
+#define GuiTreeItemTemplate_PROPERTIES(F)\
+				F(GuiTreeItemTemplate, bool, Expanding)\
+
+				GuiTreeItemTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
+			};
 		}
 	}
 }
