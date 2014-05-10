@@ -1035,6 +1035,7 @@ Type Declaration
 				CLASS_MEMBER_METHOD(CreateItemStyle, {L"styleId"})
 				CLASS_MEMBER_METHOD(DestroyItemStyle, {L"style"})
 				CLASS_MEMBER_METHOD(Install, {L"style" _ L"node"})
+				CLASS_MEMBER_METHOD(SetStyleIndex, {L"style" _ L"value"})
 				CLASS_MEMBER_METHOD(SetStyleSelected, {L"style" _ L"value"})
 			END_CLASS_MEMBER(INodeItemStyleProvider)
 

@@ -258,7 +258,12 @@ GuiVirtualTreeListControl NodeProvider
 					/// <summary>Bind a node to a node item style controller.</summary>
 					/// <param name="style">The node item style controller.</param>
 					/// <param name="node">The node item style id.</param>
-					virtual void									Install(INodeItemStyleController* style, INodeProvider* node)=0;
+					/// <param name="itemIndex">The item index.</param>
+					virtual void									Install(INodeItemStyleController* style, INodeProvider* node, vint itemIndex)=0;
+					/// <summary>Update the visual affect of a node item style controller to a new item index.</summary>
+					/// <param name="style">The node item style controller.</param>
+					/// <param name="value">The new item index.</param>
+					virtual void									SetStyleIndex(INodeItemStyleController* style, vint value)=0;
 					/// <summary>Change the visual affect of a node item style controller to be selected or unselected.</summary>
 					/// <param name="style">The node item style controller.</param>
 					/// <param name="value">Set to true if the node item is expected to be rendered as selected.</param>
@@ -677,7 +682,8 @@ TreeView
 					vint									GetItemStyleId(INodeProvider* node)override;
 					INodeItemStyleController*				CreateItemStyle(vint styleId)override;
 					void									DestroyItemStyle(INodeItemStyleController* style)override;
-					void									Install(INodeItemStyleController* style, INodeProvider* node)override;
+					void									Install(INodeItemStyleController* style, INodeProvider* node, vint itemIndex)override;
+					void									SetStyleIndex(INodeItemStyleController* style, vint value)override;
 					void									SetStyleSelected(INodeItemStyleController* style, bool value)override;
 				};
 			}

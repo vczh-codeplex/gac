@@ -1424,9 +1424,14 @@ Interface Proxy
 						INVOKE_INTERFACE_PROXY(DestroyItemStyle, style);
 					}
 
-					void Install(tree::INodeItemStyleController* style, tree::INodeProvider* node)override
+					void Install(tree::INodeItemStyleController* style, tree::INodeProvider* node, vint itemIndex)override
 					{
-						INVOKE_INTERFACE_PROXY(Install, style, node);
+						INVOKE_INTERFACE_PROXY(Install, style, node, itemIndex);
+					}
+
+					void SetStyleIndex(tree::INodeItemStyleController* style, vint value)override
+					{
+						INVOKE_INTERFACE_PROXY(SetStyleIndex, style, value);
 					}
 
 					void SetStyleSelected(tree::INodeItemStyleController* style, bool value)override
