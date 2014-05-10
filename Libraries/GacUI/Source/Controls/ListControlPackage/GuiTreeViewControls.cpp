@@ -354,7 +354,7 @@ NodeItemProvider
 							INodeProvider* node=nodeItemView->RequestNode(itemIndex);
 							if(node)
 							{
-								nodeItemStyleProvider->Install(nodeStyle, node);
+								nodeItemStyleProvider->Install(nodeStyle, node, itemIndex);
 							}
 						}
 					}
@@ -362,6 +362,14 @@ NodeItemProvider
 
 				void NodeItemStyleProvider::SetStyleIndex(GuiListControl::IItemStyleController* style, vint value)
 				{
+					if(nodeItemView)
+					{
+						INodeItemStyleController* nodeStyle=dynamic_cast<INodeItemStyleController*>(style);
+						if(nodeStyle)
+						{
+							nodeItemStyleProvider->SetStyleIndex(nodeStyle, value);
+						}
+					}
 				}
 
 				void NodeItemStyleProvider::SetStyleSelected(GuiListControl::IItemStyleController* style, bool value)
@@ -989,7 +997,68 @@ TreeViewItemRootProvider
 						memoryNode->NotifyDataModified();
 					}
 				}
+			}
 
+/***********************************************************************
+GuiVirtualTreeView
+***********************************************************************/
+
+			GuiVirtualTreeView::GuiVirtualTreeView(IStyleProvider* _styleProvider, Ptr<tree::INodeRootProvider> _nodeRootProvider)
+				:GuiVirtualTreeListControl(_styleProvider, _nodeRootProvider)
+			{
+				styleProvider=dynamic_cast<IStyleProvider*>(styleController->GetStyleProvider());
+				SetNodeStyleProvider(new tree::TreeViewNodeItemStyleProvider);
+				SetArranger(new list::FixedHeightItemArranger);
+			}
+
+			GuiVirtualTreeView::~GuiVirtualTreeView()
+			{
+			}
+
+			GuiVirtualTreeView::IStyleProvider* GuiVirtualTreeView::GetTreeViewStyleProvider()
+			{
+				return styleProvider;
+			}
+
+/***********************************************************************
+GuiTreeView
+***********************************************************************/
+
+			GuiTreeView::GuiTreeView(IStyleProvider* _styleProvider)
+				:GuiVirtualTreeView(_styleProvider, new tree::TreeViewItemRootProvider)
+			{
+				nodes = nodeItemProvider->GetRoot().Cast<tree::TreeViewItemRootProvider>();
+			}
+
+			GuiTreeView::~GuiTreeView()
+			{
+			}
+
+			Ptr<tree::TreeViewItemRootProvider> GuiTreeView::Nodes()
+			{
+				return nodes;
+			}
+
+			Ptr<tree::TreeViewItem> GuiTreeView::GetSelectedItem()
+			{
+				Ptr<tree::TreeViewItem> result;
+				vint index = GetSelectedItemIndex();
+				if (index != -1)
+				{
+					if (auto node = nodeItemView->RequestNode(index))
+					{
+						if (auto memoryNode = dynamic_cast<tree::MemoryNodeProvider*>(node))
+						{
+							result = memoryNode->GetData().Cast<tree::TreeViewItem>();
+						}
+						nodeItemView->ReleaseNode(node);
+					}
+				}
+				return result;
+			}
+
+			namespace tree
+			{
 /***********************************************************************
 TreeViewNodeItemStyleProvider::ItemController
 ***********************************************************************/
@@ -1261,13 +1330,17 @@ TreeViewNodeItemStyleProvider
 					}
 				}
 
-				void TreeViewNodeItemStyleProvider::Install(INodeItemStyleController* style, INodeProvider* node)
+				void TreeViewNodeItemStyleProvider::Install(INodeItemStyleController* style, INodeProvider* node, vint itemIndex)
 				{
 					ItemController* itemController=dynamic_cast<ItemController*>(style);
 					if(itemController)
 					{
 						itemController->Install(node);
 					}
+				}
+
+				void TreeViewNodeItemStyleProvider::SetStyleIndex(INodeItemStyleController* style, vint value)
+				{
 				}
 
 				void TreeViewNodeItemStyleProvider::SetStyleSelected(INodeItemStyleController* style, bool value)
@@ -1278,64 +1351,6 @@ TreeViewNodeItemStyleProvider
 						itemController->SetSelected(value);
 					}
 				}
-			}
-
-/***********************************************************************
-GuiVirtualTreeView
-***********************************************************************/
-
-			GuiVirtualTreeView::GuiVirtualTreeView(IStyleProvider* _styleProvider, Ptr<tree::INodeRootProvider> _nodeRootProvider)
-				:GuiVirtualTreeListControl(_styleProvider, _nodeRootProvider)
-			{
-				styleProvider=dynamic_cast<IStyleProvider*>(styleController->GetStyleProvider());
-				SetNodeStyleProvider(new tree::TreeViewNodeItemStyleProvider);
-				SetArranger(new list::FixedHeightItemArranger);
-			}
-
-			GuiVirtualTreeView::~GuiVirtualTreeView()
-			{
-			}
-
-			GuiVirtualTreeView::IStyleProvider* GuiVirtualTreeView::GetTreeViewStyleProvider()
-			{
-				return styleProvider;
-			}
-
-/***********************************************************************
-GuiTreeView
-***********************************************************************/
-
-			GuiTreeView::GuiTreeView(IStyleProvider* _styleProvider)
-				:GuiVirtualTreeView(_styleProvider, new tree::TreeViewItemRootProvider)
-			{
-				nodes=nodeItemProvider->GetRoot().Cast<tree::TreeViewItemRootProvider>();
-			}
-
-			GuiTreeView::~GuiTreeView()
-			{
-			}
-
-			Ptr<tree::TreeViewItemRootProvider> GuiTreeView::Nodes()
-			{
-				return nodes;
-			}
-
-			Ptr<tree::TreeViewItem> GuiTreeView::GetSelectedItem()
-			{
-				Ptr<tree::TreeViewItem> result;
-				vint index = GetSelectedItemIndex();
-				if (index != -1)
-				{
-					if (auto node = nodeItemView->RequestNode(index))
-					{
-						if (auto memoryNode = dynamic_cast<tree::MemoryNodeProvider*>(node))
-						{
-							result = memoryNode->GetData().Cast<tree::TreeViewItem>();
-						}
-						nodeItemView->ReleaseNode(node);
-					}
-				}
-				return result;
 			}
 		}
 	}

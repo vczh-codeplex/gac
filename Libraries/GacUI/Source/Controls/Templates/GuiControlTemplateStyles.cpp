@@ -33,6 +33,10 @@ GuiListItemTemplate_ItemStyleProvider
 
 			void GuiListItemTemplate_ItemStyleProvider::DetachListControl()
 			{
+				if (listControl && bindingView)
+				{
+					listControl->GetItemProvider()->ReleaseView(bindingView);
+				}
 				listControl = 0;
 				bindingView = 0;
 			}
@@ -158,6 +162,138 @@ GuiListItemTemplate_ItemStyleController
 			void GuiListItemTemplate_ItemStyleController::OnUninstalled()
 			{
 				installed = false;
+			}
+
+/***********************************************************************
+GuiTreeItemTemplate_ItemStyleProvider
+***********************************************************************/
+
+			GuiTreeItemTemplate_ItemStyleProvider::GuiTreeItemTemplate_ItemStyleProvider(Ptr<GuiTemplate::IFactory> _factory)
+				:factory(_factory)
+				, treeListControl(0)
+				, bindingView(0)
+				, itemStyleProvider(0)
+			{
+
+			}
+
+			GuiTreeItemTemplate_ItemStyleProvider::~GuiTreeItemTemplate_ItemStyleProvider()
+			{
+			}
+				
+			void GuiTreeItemTemplate_ItemStyleProvider::BindItemStyleProvider(controls::GuiListControl::IItemStyleProvider* styleProvider)
+			{
+				itemStyleProvider = styleProvider;
+			}
+
+			controls::GuiListControl::IItemStyleProvider* GuiTreeItemTemplate_ItemStyleProvider::GetBindedItemStyleProvider()
+			{
+				return itemStyleProvider;
+			}
+
+			void GuiTreeItemTemplate_ItemStyleProvider::AttachListControl(GuiListControl* value)
+			{
+				treeListControl = dynamic_cast<GuiVirtualTreeListControl*>(value);
+				if (treeListControl)
+				{
+					bindingView = dynamic_cast<tree::INodeItemBindingView*>(treeListControl->GetNodeRootProvider()->RequestView(tree::INodeItemBindingView::Identifier));
+				}
+			}
+
+			void GuiTreeItemTemplate_ItemStyleProvider::DetachListControl()
+			{
+				if (treeListControl && bindingView)
+				{
+					treeListControl->GetNodeRootProvider()->ReleaseView(bindingView);
+				}
+				treeListControl = 0;
+				bindingView = 0;
+			}
+
+			vint GuiTreeItemTemplate_ItemStyleProvider::GetItemStyleId(controls::tree::INodeProvider* node)
+			{
+				return 0;
+			}
+
+			controls::tree::INodeItemStyleController* GuiTreeItemTemplate_ItemStyleProvider::CreateItemStyle(vint styleId)
+			{
+				return new GuiTreeItemTemplate_ItemStyleController(this);
+			}
+
+			void GuiTreeItemTemplate_ItemStyleProvider::DestroyItemStyle(controls::tree::INodeItemStyleController* style)
+			{
+				delete style;
+			}
+
+			void GuiTreeItemTemplate_ItemStyleProvider::Install(controls::tree::INodeItemStyleController* style, controls::tree::INodeProvider* node, vint itemIndex)
+			{
+				if (auto controller = dynamic_cast<GuiTreeItemTemplate_ItemStyleController*>(style))
+				{
+					Value viewModel;
+					if (bindingView)
+					{
+						viewModel = bindingView->GetBindingValue(node);
+					}
+					
+					GuiTemplate* itemTemplate = factory->CreateTemplate(viewModel);
+					if (auto treeItemTemplate = dynamic_cast<GuiTreeItemTemplate*>(itemTemplate))
+					{
+						treeItemTemplate->SetIndex(itemIndex);
+						controller->SetTemplate(treeItemTemplate);
+					}
+					else
+					{
+						delete itemTemplate;
+					}
+				}
+			}
+
+			void GuiTreeItemTemplate_ItemStyleProvider::SetStyleIndex(controls::tree::INodeItemStyleController* style, vint value)
+			{
+				if (auto controller = dynamic_cast<GuiTreeItemTemplate_ItemStyleController*>(style))
+				{
+					if (auto itemTemplate = controller->GetTemplate())
+					{
+						itemTemplate->SetIndex(value);
+					}
+				}
+			}
+
+			void GuiTreeItemTemplate_ItemStyleProvider::SetStyleSelected(controls::tree::INodeItemStyleController* style, bool value)
+			{
+				if (auto controller = dynamic_cast<GuiTreeItemTemplate_ItemStyleController*>(style))
+				{
+					if (auto itemTemplate = controller->GetTemplate())
+					{
+						itemTemplate->SetSelected(value);
+					}
+				}
+			}
+
+/***********************************************************************
+GuiTreeItemTemplate_ItemStyleController
+***********************************************************************/
+
+			GuiTreeItemTemplate_ItemStyleController::GuiTreeItemTemplate_ItemStyleController(GuiTreeItemTemplate_ItemStyleProvider* _nodeStyleProvider)
+				:GuiListItemTemplate_ItemStyleController(0)
+				, nodeStyleProvider(_nodeStyleProvider)
+			{
+
+			}
+
+			GuiTreeItemTemplate_ItemStyleController::~GuiTreeItemTemplate_ItemStyleController()
+			{
+
+			}
+
+			controls::GuiListControl::IItemStyleProvider* GuiTreeItemTemplate_ItemStyleController::GetStyleProvider()
+			{
+				return nodeStyleProvider->GetBindedItemStyleProvider();
+			}
+
+			controls::tree::INodeItemStyleProvider* GuiTreeItemTemplate_ItemStyleController::GetNodeStyleProvider()
+			{
+				return nodeStyleProvider;
 			}
 		}
 	}
