@@ -168,6 +168,47 @@ GuiListItemTemplate_ItemStyleController
 GuiTreeItemTemplate_ItemStyleProvider
 ***********************************************************************/
 
+			void GuiTreeItemTemplate_ItemStyleProvider::UpdateExpandingButton(controls::tree::INodeProvider* node)
+			{
+				vint index=treeListControl->GetNodeItemView()->CalculateNodeVisibilityIndex(node);
+				if(index!=-1)
+				{
+					if(auto style = treeListControl->GetArranger()->GetVisibleStyle(index))
+					{
+						if (auto controller = dynamic_cast<GuiTreeItemTemplate_ItemStyleController*>(style))
+						{
+							if (auto itemTemplate = dynamic_cast<GuiTreeItemTemplate*>(controller->GetTemplate()))
+							{
+								itemTemplate->SetExpanding(node->GetExpanding());
+							}
+						}
+					}
+				}
+			}
+
+			void GuiTreeItemTemplate_ItemStyleProvider::OnAttached(controls::tree::INodeRootProvider* provider)
+			{
+			}
+
+			void GuiTreeItemTemplate_ItemStyleProvider::OnBeforeItemModified(controls::tree::INodeProvider* parentNode, vint start, vint count, vint newCount)
+			{
+			}
+
+			void GuiTreeItemTemplate_ItemStyleProvider::OnAfterItemModified(controls::tree::INodeProvider* parentNode, vint start, vint count, vint newCount)
+			{
+				UpdateExpandingButton(parentNode);
+			}
+
+			void GuiTreeItemTemplate_ItemStyleProvider::OnItemExpanded(controls::tree::INodeProvider* node)
+			{
+				UpdateExpandingButton(node);
+			}
+
+			void GuiTreeItemTemplate_ItemStyleProvider::OnItemCollapsed(controls::tree::INodeProvider* node)
+			{
+				UpdateExpandingButton(node);
+			}
+
 			GuiTreeItemTemplate_ItemStyleProvider::GuiTreeItemTemplate_ItemStyleProvider(Ptr<GuiTemplate::IFactory> _factory)
 				:factory(_factory)
 				, treeListControl(0)
@@ -196,15 +237,20 @@ GuiTreeItemTemplate_ItemStyleProvider
 				treeListControl = dynamic_cast<GuiVirtualTreeListControl*>(value);
 				if (treeListControl)
 				{
+					treeListControl->GetNodeRootProvider()->AttachCallback(this);
 					bindingView = dynamic_cast<tree::INodeItemBindingView*>(treeListControl->GetNodeRootProvider()->RequestView(tree::INodeItemBindingView::Identifier));
 				}
 			}
 
 			void GuiTreeItemTemplate_ItemStyleProvider::DetachListControl()
 			{
-				if (treeListControl && bindingView)
+				if (treeListControl)
 				{
-					treeListControl->GetNodeRootProvider()->ReleaseView(bindingView);
+					treeListControl->GetNodeRootProvider()->DetachCallback(this);
+					if (bindingView)
+					{
+						treeListControl->GetNodeRootProvider()->ReleaseView(bindingView);
+					}
 				}
 				treeListControl = 0;
 				bindingView = 0;
