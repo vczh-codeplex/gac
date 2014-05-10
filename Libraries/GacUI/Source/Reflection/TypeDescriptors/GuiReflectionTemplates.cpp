@@ -49,6 +49,13 @@ Type Declaration
 				GuiListItemTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_REFLECTION)
 			END_CLASS_MEMBER(GuiListItemTemplate)
 
+			BEGIN_CLASS_MEMBER(GuiTreeItemTemplate)
+				CLASS_MEMBER_BASE(GuiListItemTemplate)
+				CLASS_MEMBER_CONSTRUCTOR(GuiTreeItemTemplate*(), NO_PARAMETER)
+
+				GuiTreeItemTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_REFLECTION)
+			END_CLASS_MEMBER(GuiTreeItemTemplate)
+
 #undef INTERFACE_EXTERNALCTOR
 #undef _
 

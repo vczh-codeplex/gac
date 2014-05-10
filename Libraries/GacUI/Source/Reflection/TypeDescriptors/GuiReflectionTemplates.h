@@ -28,6 +28,7 @@ Type List
 			F(presentation::templates::GuiTemplate)\
 			F(presentation::templates::GuiTemplate::IFactory)\
 			F(presentation::templates::GuiListItemTemplate)\
+			F(presentation::templates::GuiTreeItemTemplate)\
 
 			GUIREFLECTIONTEMPLATES_TYPELIST(DECL_TYPE_INFO)
 
