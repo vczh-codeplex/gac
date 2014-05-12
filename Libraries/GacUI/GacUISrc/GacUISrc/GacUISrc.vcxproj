@@ -124,7 +124,7 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <GenerateXMLDocumentationFiles>true</GenerateXMLDocumentationFiles>
       <SDLCheck>true</SDLCheck>
-      <BrowseInformation>true</BrowseInformation>
+      <BrowseInformation>false</BrowseInformation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
