@@ -17,6 +17,32 @@ namespace vl
 	{
 		namespace templates
 		{
+
+#define GUI_TEMPLATE_PROPERTY_DECL(CLASS, TYPE, NAME)\
+			private:\
+				TYPE NAME##_;\
+			public:\
+				TYPE Get##NAME();\
+				void Set##NAME(TYPE const& value);\
+				compositions::GuiNotifyEvent NAME##Changed;\
+
+#define GUI_TEMPLATE_PROPERTY_IMPL(CLASS, TYPE, NAME)\
+			TYPE CLASS::Get##NAME()\
+			{\
+				return NAME##_;\
+			}\
+			void CLASS::Set##NAME(TYPE const& value)\
+			{\
+				if (NAME##_ != value)\
+				{\
+					NAME##_ = value;\
+					NAME##Changed.Execute(compositions::GuiEventArgs(this));\
+				}\
+			}\
+
+#define GUI_TEMPLATE_PROPERTY_EVENT_INIT(CLASS, TYPE, NAME)\
+			NAME##Changed.SetAssociatedComposition(this);
+
 			/// <summary>Represents a user customizable template.</summary>
 			class GuiTemplate : public compositions::GuiBoundsComposition, public controls::GuiInstanceRootObject, public Description<GuiTemplate>
 			{
@@ -36,42 +62,37 @@ namespace vl
 				/// <summary>Create a template.</summary>
 				GuiTemplate();
 				~GuiTemplate();
+				
+#define GuiTemplate_PROPERTIES(F)\
+				F(GuiTemplate, FontProperties, Font)\
+				F(GuiTemplate, bool, VisuallyEnabled)\
+
+				GuiTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
 			};
-
-#define GUI_TEMPLATE_PROPERTY_DECL(CLASS, TYPE, NAME)\
-			private:\
-				TYPE NAME##_;\
-			public:\
-				TYPE Get##NAME();\
-				void Set##NAME(const TYPE& value);\
-				compositions::GuiNotifyEvent NAME##Changed;\
-
-#define GUI_TEMPLATE_PROPERTY_IMPL(CLASS, TYPE, NAME)\
-			TYPE CLASS::Get##NAME()\
-			{\
-				return NAME##_;\
-			}\
-			void CLASS::Set##NAME(const TYPE& value)\
-			{\
-				if (NAME##_ != value)\
-				{\
-					NAME##_ = value;\
-					NAME##Changed.Execute(compositions::GuiEventArgs(this));\
-				}\
-			}\
-
-#define GUI_TEMPLATE_PROPERTY_EVENT_INIT(CLASS, TYPE, NAME)\
-			NAME##Changed.SetAssociatedComposition(this);
 
 /***********************************************************************
 Control Template
 ***********************************************************************/
 
+			class GuiControlTemplate : public GuiTemplate, public Description<GuiControlTemplate>
+			{
+			public:
+				GuiControlTemplate();
+				~GuiControlTemplate();
+				
+#define GuiControlTemplate_PROPERTIES(F)\
+				F(GuiControlTemplate, WString, Text)\
+				F(GuiControlTemplate, compositions::GuiGraphicsComposition*, ContainerComposition)\
+				F(GuiControlTemplate, compositions::GuiGraphicsComposition*, FocusableComposition)\
+
+				GuiControlTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
+			};
+
 /***********************************************************************
 Item Template
 ***********************************************************************/
 
-			class GuiListItemTemplate : public GuiTemplate
+			class GuiListItemTemplate : public GuiTemplate, public Description<GuiListItemTemplate>
 			{
 			public:
 				GuiListItemTemplate();
@@ -84,7 +105,7 @@ Item Template
 				GuiListItemTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
 			};
 
-			class GuiTreeItemTemplate : public GuiListItemTemplate
+			class GuiTreeItemTemplate : public GuiListItemTemplate, public Description<GuiTreeItemTemplate>
 			{
 			public:
 				GuiTreeItemTemplate();

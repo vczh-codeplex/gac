@@ -27,6 +27,7 @@ Type List
 #define GUIREFLECTIONTEMPLATES_TYPELIST(F)\
 			F(presentation::templates::GuiTemplate)\
 			F(presentation::templates::GuiTemplate::IFactory)\
+			F(presentation::templates::GuiControlTemplate)\
 			F(presentation::templates::GuiListItemTemplate)\
 			F(presentation::templates::GuiTreeItemTemplate)\
 

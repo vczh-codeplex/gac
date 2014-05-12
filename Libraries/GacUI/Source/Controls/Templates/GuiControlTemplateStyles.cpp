@@ -11,6 +11,54 @@ namespace vl
 			using namespace reflection::description;
 
 /***********************************************************************
+GuiControlTemplate_StyleProvider
+***********************************************************************/
+
+			GuiControlTemplate_StyleProvider::GuiControlTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory)
+				:controlTemplate(0)
+			{
+				GuiTemplate* itemTemplate = factory->CreateTemplate(Value());
+				if (!(controlTemplate = dynamic_cast<GuiControlTemplate*>(itemTemplate)))
+				{
+					delete itemTemplate;
+				}
+			}
+
+			GuiControlTemplate_StyleProvider::~GuiControlTemplate_StyleProvider()
+			{
+			}
+
+			compositions::GuiBoundsComposition* GuiControlTemplate_StyleProvider::GetBoundsComposition()
+			{
+				return controlTemplate;
+			}
+
+			compositions::GuiGraphicsComposition* GuiControlTemplate_StyleProvider::GetContainerComposition()
+			{
+				return controlTemplate->GetContainerComposition();
+			}
+
+			void GuiControlTemplate_StyleProvider::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
+			{
+				controlTemplate->SetFocusableComposition(value);
+			}
+
+			void GuiControlTemplate_StyleProvider::SetText(const WString& value)
+			{
+				controlTemplate->SetText(value);
+			}
+
+			void GuiControlTemplate_StyleProvider::SetFont(const FontProperties& value)
+			{
+				controlTemplate->SetFont(value);
+			}
+
+			void GuiControlTemplate_StyleProvider::SetVisuallyEnabled(bool value)
+			{
+				controlTemplate->SetVisuallyEnabled(value);
+			}
+
+/***********************************************************************
 GuiListItemTemplate_ItemStyleProvider
 ***********************************************************************/
 
