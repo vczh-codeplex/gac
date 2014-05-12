@@ -81,6 +81,7 @@ GuiTemplate
 			GuiTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_IMPL)
 
 			GuiTemplate::GuiTemplate()
+				:VisuallyEnabled_(true)
 			{
 				GuiTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_EVENT_INIT)
 			}
@@ -96,6 +97,8 @@ GuiControlTemplate
 			GuiControlTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_IMPL)
 
 			GuiControlTemplate::GuiControlTemplate()
+				:ContainerComposition_(this)
+				, FocusableComposition_(0)
 			{
 				GuiControlTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_EVENT_INIT)
 			}
