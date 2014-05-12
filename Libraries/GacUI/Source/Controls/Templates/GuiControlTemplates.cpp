@@ -10,7 +10,7 @@ namespace vl
 			using namespace collections;
 
 /***********************************************************************
-GuiTemplate
+GuiTemplate::IFactory
 ***********************************************************************/
 
 			class GuiTemplateReflectableFactory : public Object, public virtual GuiTemplate::IFactory
@@ -74,11 +74,33 @@ GuiTemplate
 				return new GuiTemplateReflectableFactory(types);
 			}
 
+/***********************************************************************
+GuiTemplate
+***********************************************************************/
+
+			GuiTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_IMPL)
+
 			GuiTemplate::GuiTemplate()
 			{
+				GuiTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_EVENT_INIT)
 			}
 
 			GuiTemplate::~GuiTemplate()
+			{
+			}
+
+/***********************************************************************
+GuiControlTemplate
+***********************************************************************/
+
+			GuiControlTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_IMPL)
+
+			GuiControlTemplate::GuiControlTemplate()
+			{
+				GuiControlTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_EVENT_INIT)
+			}
+
+			GuiControlTemplate::~GuiControlTemplate()
 			{
 			}
 

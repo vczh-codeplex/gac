@@ -33,6 +33,8 @@ Type Declaration
 				CLASS_MEMBER_BASE(GuiBoundsComposition)
 				CLASS_MEMBER_BASE(GuiInstanceRootObject)
 				CLASS_MEMBER_CONSTRUCTOR(GuiTemplate*(), NO_PARAMETER)
+
+				GuiTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_REFLECTION)
 			END_CLASS_MEMBER(GuiTemplate)
 			
 			BEGIN_CLASS_MEMBER(GuiTemplate::IFactory)
@@ -41,6 +43,13 @@ Type Declaration
 
 				CLASS_MEMBER_METHOD(CreateTemplate, NO_PARAMETER)
 			END_CLASS_MEMBER(GuiTemplate::IFactory)
+
+			BEGIN_CLASS_MEMBER(GuiControlTemplate)
+				CLASS_MEMBER_BASE(GuiTemplate)
+				CLASS_MEMBER_CONSTRUCTOR(GuiControlTemplate*(), NO_PARAMETER)
+
+				GuiControlTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_REFLECTION)
+			END_CLASS_MEMBER(GuiControlTemplate)
 
 			BEGIN_CLASS_MEMBER(GuiListItemTemplate)
 				CLASS_MEMBER_BASE(GuiTemplate)

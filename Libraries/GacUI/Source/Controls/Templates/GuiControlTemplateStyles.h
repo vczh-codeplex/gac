@@ -17,10 +17,32 @@ namespace vl
 	{
 		namespace templates
 		{
+#pragma warning(push)
+#pragma warning(disable:4250)
 
 /***********************************************************************
 Control Template
 ***********************************************************************/
+
+			class GuiControlTemplate_StyleProvider
+				: public Object
+				, public virtual controls::GuiControl::IStyleController
+				, public Description<GuiControlTemplate_StyleProvider>
+			{
+			protected:
+				GuiControlTemplate*									controlTemplate;
+
+			public:
+				GuiControlTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
+				~GuiControlTemplate_StyleProvider();
+
+				compositions::GuiBoundsComposition*					GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*				GetContainerComposition()override;
+				void												SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+				void												SetText(const WString& value)override;
+				void												SetFont(const FontProperties& value)override;
+				void												SetVisuallyEnabled(bool value)override;
+			};
 
 /***********************************************************************
 Item Template (GuiListItemTemplate)
@@ -115,8 +137,6 @@ Item Template (GuiTreeItemTemplate)
 				void												SetStyleSelected(controls::tree::INodeItemStyleController* style, bool value)override;
 			};
 			
-#pragma warning(push)
-#pragma warning(disable:4250)
 			class GuiTreeItemTemplate_ItemStyleController
 				: public GuiListItemTemplate_ItemStyleController
 				, public virtual controls::tree::INodeItemStyleController
@@ -132,6 +152,11 @@ Item Template (GuiTreeItemTemplate)
 				controls::GuiListControl::IItemStyleProvider*		GetStyleProvider()override;
 				controls::tree::INodeItemStyleProvider*				GetNodeStyleProvider()override;
 			};
+
+/***********************************************************************
+Helper Functions
+***********************************************************************/
+
 #pragma warning(pop)
 		}
 	}
