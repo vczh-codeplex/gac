@@ -38,7 +38,8 @@ Instance Representation
 
 			bool									fromStyle = false;
 
-			virtual void							Accept(IVisitor* visitor)=0;
+			virtual void							Accept(IVisitor* visitor) = 0;
+			virtual Ptr<GuiValueRepr>				Clone() = 0;
 		};
 
 		class GuiTextRepr : public GuiValueRepr, public Description<GuiTextRepr>
@@ -47,6 +48,7 @@ Instance Representation
 			WString									text;
 
 			void									Accept(IVisitor* visitor)override{visitor->Visit(this);}
+			Ptr<GuiValueRepr>						Clone()override;
 		};
 
 		class GuiAttSetterRepr : public GuiValueRepr, public Description<GuiAttSetterRepr>
@@ -74,6 +76,8 @@ Instance Representation
 			EventHandlerMap							eventHandlers;
 
 			void									Accept(IVisitor* visitor)override{visitor->Visit(this);}
+			void									CloneBody(Ptr<GuiAttSetterRepr> repr);
+			Ptr<GuiValueRepr>						Clone()override;
 		};
 
 		class GuiConstructorRepr : public GuiAttSetterRepr, public Description<GuiConstructorRepr>
@@ -85,6 +89,7 @@ Instance Representation
 			Nullable<WString>						instanceName;
 
 			void									Accept(IVisitor* visitor)override{visitor->Visit(this);}
+			Ptr<GuiValueRepr>						Clone()override;
 		};
 
 /***********************************************************************

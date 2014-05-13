@@ -186,7 +186,7 @@ ApplyStyle
 
 		void ApplyStyle(Ptr<GuiInstanceStyle> style, Ptr<GuiConstructorRepr> ctor)
 		{
-			ApplyStyleInternal(style->setter, ctor);
+			ApplyStyleInternal(style->setter->Clone().Cast<GuiAttSetterRepr>(), ctor);
 		}
 	}
 }
