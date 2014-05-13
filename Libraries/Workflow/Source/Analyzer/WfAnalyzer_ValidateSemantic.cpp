@@ -765,7 +765,7 @@ ValidateSemantic(Expression)
 					{
 						Ptr<ITypeInfo> firstType = GetExpressionType(manager, node->first, 0);
 						bool depend = IsExpressionDependOnExpectedType(manager, node->second);
-						Ptr<ITypeInfo> secondType = GetExpressionType(manager, node->second, (depend ? firstType : 0));
+						Ptr<ITypeInfo> secondType = GetExpressionType(manager, node->second, (depend ? firstType : nullptr));
 
 						if (firstType && secondType)
 						{
