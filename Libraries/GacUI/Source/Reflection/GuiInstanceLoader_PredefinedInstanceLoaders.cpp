@@ -93,7 +93,7 @@ GuiControlInstanceLoader
 						}
 						else if (auto composition = dynamic_cast<GuiGraphicsComposition*>(propertyValue.propertyValue.GetRawPtr()))
 						{
-							container->GetBoundsComposition()->AddChild(composition);
+							container->GetContainerComposition()->AddChild(composition);
 							return true;
 						}
 					}

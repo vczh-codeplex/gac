@@ -10,6 +10,61 @@ namespace vl
 		using namespace parsing::xml;
 
 /***********************************************************************
+GuiTextRepr
+***********************************************************************/
+
+		Ptr<GuiValueRepr> GuiTextRepr::Clone()
+		{
+			auto repr = MakePtr<GuiTextRepr>();
+			repr->fromStyle = fromStyle;
+			repr->text = text;
+			return repr;
+		}
+
+/***********************************************************************
+GuiAttSetterRepr
+***********************************************************************/
+
+		void GuiAttSetterRepr::CloneBody(Ptr<GuiAttSetterRepr> repr)
+		{
+			CopyFrom(repr->eventHandlers, eventHandlers);
+			FOREACH(WString, name, setters.Keys())
+			{
+				Ptr<SetterValue> src = setters[name];
+				Ptr<SetterValue> dst = new SetterValue;
+				dst->binding = src->binding;
+				FOREACH(Ptr<GuiValueRepr>, value, src->values)
+				{
+					dst->values.Add(value->Clone());
+				}
+				repr->setters.Add(name, dst);
+			}
+		}
+
+		Ptr<GuiValueRepr> GuiAttSetterRepr::Clone()
+		{
+			auto repr = MakePtr<GuiAttSetterRepr>();
+			repr->fromStyle = fromStyle;
+			CloneBody(repr);
+			return repr;
+		}
+
+/***********************************************************************
+GuiConstructorRepr
+***********************************************************************/
+
+		Ptr<GuiValueRepr> GuiConstructorRepr::Clone()
+		{
+			auto repr = MakePtr<GuiConstructorRepr>();
+			repr->fromStyle = fromStyle;
+			repr->typeNamespace = typeNamespace;
+			repr->typeName = typeName;
+			repr->instanceName = instanceName;
+			CloneBody(repr);
+			return repr;
+		}
+
+/***********************************************************************
 GuiInstanceContext
 ***********************************************************************/
 
