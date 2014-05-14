@@ -155,18 +155,11 @@ Type Declaration
 				CLASS_MEMBER_BASE(GuiControl)
 				CLASS_MEMBER_BASE(GuiInstanceRootObject)
 				CONTROL_CONSTRUCTOR_CONTROLLER(GuiCustomControl)
-				CONTROL_CONSTRUCTOR_DEFAULT(GuiCustomControl, &g::NewCustomControl)
 			END_CLASS_MEMBER(GuiCustomControl)
-
-			BEGIN_CLASS_MEMBER(GuiCustomControl::IStyleController)
-				CLASS_MEMBER_BASE(GuiControl::IStyleController)
-				INTERFACE_EXTERNALCTOR(GuiCustomControl, IStyleController)
-			END_CLASS_MEMBER(GuiCustomControl::IStyleController)
 
 			BEGIN_CLASS_MEMBER(GuiLabel)
 				CLASS_MEMBER_BASE(GuiControl)
 				CONTROL_CONSTRUCTOR_CONTROLLER(GuiLabel)
-				CONTROL_CONSTRUCTOR_DEFAULT(GuiLabel, &g::NewLabel)
 
 				CLASS_MEMBER_PROPERTY_FAST(TextColor)
 			END_CLASS_MEMBER(GuiLabel)
@@ -182,7 +175,6 @@ Type Declaration
 			BEGIN_CLASS_MEMBER(GuiButton)
 				CLASS_MEMBER_BASE(GuiControl)
 				CONTROL_CONSTRUCTOR_CONTROLLER(GuiButton)
-				CONTROL_CONSTRUCTOR_DEFAULT(GuiButton, &g::NewButton)
 
 				CLASS_MEMBER_GUIEVENT(Clicked)
 
@@ -333,7 +325,6 @@ Type Declaration
 			BEGIN_CLASS_MEMBER(GuiScrollContainer)
 				CLASS_MEMBER_BASE(GuiScrollView)
 				CONTROL_CONSTRUCTOR_PROVIDER(GuiScrollContainer)
-				CONTROL_CONSTRUCTOR_DEFAULT(GuiScrollContainer, &g::NewScrollContainer)
 
 				CLASS_MEMBER_PROPERTY_FAST(ExtendToFullWidth)
 			END_CLASS_MEMBER(GuiScrollContainer)
@@ -341,7 +332,6 @@ Type Declaration
 			BEGIN_CLASS_MEMBER(GuiWindow)
 				CLASS_MEMBER_BASE(GuiControlHost)
 				CONTROL_CONSTRUCTOR_CONTROLLER(GuiWindow)
-				CONTROL_CONSTRUCTOR_DEFAULT(GuiWindow, &g::NewWindow)
 
 				CLASS_MEMBER_GUIEVENT(ClipboardUpdated)
 
@@ -665,7 +655,6 @@ Type Declaration
 			BEGIN_CLASS_MEMBER(GuiTextList)
 				CLASS_MEMBER_BASE(GuiVirtualTextList)
 				CLASS_MEMBER_CONSTRUCTOR(GuiTextList*(GuiSelectableListControl::IStyleProvider* _ TextItemStyleProvider::ITextItemStyleProvider*), {L"styleProvider" _ L"itemStyleProvider"})
-				CONTROL_CONSTRUCTOR_DEFAULT(GuiTextList, &g::NewTextList)
 
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(Items)
 				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(SelectedItem, SelectionChanged)
@@ -1147,7 +1136,6 @@ Type Declaration
 			BEGIN_CLASS_MEMBER(GuiTreeView)
 				CLASS_MEMBER_BASE(GuiVirtualTreeView)
 				CONTROL_CONSTRUCTOR_PROVIDER(GuiTreeView)
-				CONTROL_CONSTRUCTOR_DEFAULT(GuiTreeView, &g::NewTreeView)
 
 				CLASS_MEMBER_METHOD_RENAME(GetNodes, Nodes, NO_PARAMETER)
 				CLASS_MEMBER_PROPERTY_READONLY(Nodes, GetNodes)
@@ -1215,7 +1203,6 @@ Type Declaration
 			BEGIN_CLASS_MEMBER(GuiToolstripMenuBar)
 				CLASS_MEMBER_BASE(GuiMenuBar)
 				CONTROL_CONSTRUCTOR_CONTROLLER(GuiToolstripMenuBar)
-				CONTROL_CONSTRUCTOR_DEFAULT(GuiToolstripMenuBar, g::NewMenuBar)
 				
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(ToolstripItems)
 			END_CLASS_MEMBER(GuiToolstripMenuBar)
@@ -1223,7 +1210,6 @@ Type Declaration
 			BEGIN_CLASS_MEMBER(GuiToolstripToolBar)
 				CLASS_MEMBER_BASE(GuiControl)
 				CONTROL_CONSTRUCTOR_CONTROLLER(GuiToolstripToolBar)
-				CONTROL_CONSTRUCTOR_DEFAULT(GuiToolstripToolBar, &g::NewToolBar)
 				
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(ToolstripItems)
 			END_CLASS_MEMBER(GuiToolstripToolBar)
@@ -1294,14 +1280,12 @@ Type Declaration
 				CLASS_MEMBER_BASE(GuiScrollContainer)
 				CLASS_MEMBER_BASE(GuiDocumentCommonInterface)
 				CONTROL_CONSTRUCTOR_PROVIDER(GuiDocumentViewer)
-				CONTROL_CONSTRUCTOR_DEFAULT(GuiDocumentViewer, &g::NewDocumentViewer)
 			END_CLASS_MEMBER(GuiDocumentViewer)
 
 			BEGIN_CLASS_MEMBER(GuiDocumentLabel)
 				CLASS_MEMBER_BASE(GuiControl)
 				CLASS_MEMBER_BASE(GuiDocumentCommonInterface)
 				CONTROL_CONSTRUCTOR_CONTROLLER(GuiDocumentLabel)
-				CONTROL_CONSTRUCTOR_DEFAULT(GuiDocumentLabel, &g::NewDocumentLabel)
 			END_CLASS_MEMBER(GuiDocumentLabel)
 
 			BEGIN_CLASS_MEMBER(GuiTextBoxCommonInterface)
@@ -1425,14 +1409,12 @@ Type Declaration
 				CLASS_MEMBER_BASE(GuiScrollView)
 				CLASS_MEMBER_BASE(GuiTextBoxCommonInterface)
 				CONTROL_CONSTRUCTOR_PROVIDER(GuiMultilineTextBox)
-				CONTROL_CONSTRUCTOR_DEFAULT(GuiMultilineTextBox, &g::NewMultilineTextBox)
 			END_CLASS_MEMBER(GuiMultilineTextBox)
 
 			BEGIN_CLASS_MEMBER(GuiSinglelineTextBox)
 				CLASS_MEMBER_BASE(GuiControl)
 				CLASS_MEMBER_BASE(GuiTextBoxCommonInterface)
 				CONTROL_CONSTRUCTOR_PROVIDER(GuiSinglelineTextBox)
-				CONTROL_CONSTRUCTOR_DEFAULT(GuiSinglelineTextBox, &g::NewTextBox)
 
 				CLASS_MEMBER_PROPERTY_FAST(PasswordChar)
 			END_CLASS_MEMBER(GuiSinglelineTextBox)
@@ -1741,7 +1723,6 @@ Type Declaration
 			BEGIN_CLASS_MEMBER(GuiDatePicker)
 				CLASS_MEMBER_BASE(GuiControl)
 				CONTROL_CONSTRUCTOR_PROVIDER(GuiDatePicker)
-				CONTROL_CONSTRUCTOR_DEFAULT(GuiDatePicker, &g::NewDatePicker)
 
 				CLASS_MEMBER_PROPERTY_EVENT_FAST(Date, DateChanged)
 				CLASS_MEMBER_PROPERTY_EVENT_FAST(DateFormat, DateFormatChanged)
@@ -1767,7 +1748,6 @@ Type Declaration
 			BEGIN_CLASS_MEMBER(GuiDateComboBox)
 				CLASS_MEMBER_BASE(GuiComboBoxBase)
 				CLASS_MEMBER_CONSTRUCTOR(GuiDateComboBox*(GuiDateComboBox::IStyleController* _ GuiDatePicker*), {L"styleController" _ L"datePicker"})
-				CONTROL_CONSTRUCTOR_DEFAULT(GuiDateComboBox, &g::NewDateComboBox)
 
 				CLASS_MEMBER_PROPERTY_EVENT_FAST(SelectedDate, SelectedDateChanged)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(DatePicker)
@@ -1776,7 +1756,6 @@ Type Declaration
 			BEGIN_CLASS_MEMBER(GuiStringGrid)
 				CLASS_MEMBER_BASE(GuiVirtualDataGrid)
 				CONTROL_CONSTRUCTOR_PROVIDER(GuiStringGrid)
-				CONTROL_CONSTRUCTOR_DEFAULT(GuiStringGrid, &g::NewStringGrid)
 
 				CLASS_MEMBER_METHOD_RENAME(GetGrids, Grids, NO_PARAMETER)
 				CLASS_MEMBER_PROPERTY_READONLY(Grids, GetGrids)

@@ -30,7 +30,6 @@ Type List
 			F(presentation::theme::ITheme)\
 			F(presentation::controls::GuiInstanceRootObject)\
 			F(presentation::controls::GuiCustomControl)\
-			F(presentation::controls::GuiCustomControl::IStyleController)\
 			F(presentation::controls::GuiLabel)\
 			F(presentation::controls::GuiLabel::IStyleController)\
 			F(presentation::controls::GuiButton)\

@@ -19,16 +19,37 @@ namespace vl
 GuiVrtualTypeInstanceLoader
 ***********************************************************************/
 
-		class GuiVrtualTypeInstanceLoader : public Object, public IGuiInstanceLoader
+		Ptr<GuiTemplate::IFactory> CreateTemplateFactory(const Value& typeValue)
+		{
+			List<ITypeDescriptor*> types;
+			List<WString> typeNames;
+			SplitBySemicolon(typeValue.GetText(), typeNames);
+			CopyFrom(
+				types,
+				From(typeNames)
+					.Select(&description::GetTypeDescriptor)
+					.Where([](ITypeDescriptor* type){return type != 0; })
+				);
+
+			return GuiTemplate::IFactory::CreateTemplateFactory(types);
+		}
+
+		class GuiTemplateControlInstanceLoader : public Object, public IGuiInstanceLoader
 		{
 		protected:
-			WString							typeName;
-			Func<Value()>					constructor;
+			WString										typeName;
+			Func<Value()>								defaultConstructor;
+			Func<Value(Ptr<GuiTemplate::IFactory>)>		templateConstructor;
 		public:
-			GuiVrtualTypeInstanceLoader(const WString& _typeName, const Func<Value()>& _constructor)
+			GuiTemplateControlInstanceLoader(const WString& _typeName, const Func<Value()>& _defaultConstructor, const Func<Value(Ptr<GuiTemplate::IFactory>)>& _templateConstructor)
 				:typeName(_typeName)
-				,constructor(_constructor)
+				, defaultConstructor(_defaultConstructor)
+				, templateConstructor(_templateConstructor)
 			{
+				if (typeName == L"")
+				{
+
+				}
 			}
 
 			WString GetTypeName()override
@@ -38,16 +59,41 @@ GuiVrtualTypeInstanceLoader
 
 			bool IsCreatable(const TypeInfo& typeInfo)override
 			{
-				return typeName==typeInfo.typeName;
+				return typeName == typeInfo.typeName;
 			}
 
 			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
 			{
 				if(typeName==typeInfo.typeName)
 				{
-					return constructor();
+					vint indexControlTemplate = constructorArguments.Keys().IndexOf(L"ControlTemplate");
+					if (indexControlTemplate == -1)
+					{
+						return defaultConstructor();
+					}
+					else
+					{
+						auto factory = CreateTemplateFactory(constructorArguments.GetByIndex(indexControlTemplate)[0]);
+						return templateConstructor(factory);
+					}
 				}
 				return Value();
+			}
+
+			void GetConstructorParameters(const TypeInfo& typeInfo, collections::List<WString>& propertyNames)override
+			{
+				propertyNames.Add(L"ControlTemplate");
+			}
+
+			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
+			{
+				if (propertyInfo.propertyName == L"ControlTemplate")
+				{
+					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<WString>());
+					info->constructorParameter = true;
+					return info;
+				}
+				return 0;
 			}
 		};
 
@@ -294,9 +340,37 @@ GuiToolstripMenuBarInstanceLoader
 				return description::GetTypeDescriptor<GuiToolstripMenuBar>()->GetTypeName();
 			}
 
+			bool IsCreatable(const TypeInfo& typeInfo)override
+			{
+				return GetTypeName() == typeInfo.typeName;
+			}
+
+			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
+			{
+				if(GetTypeName() == typeInfo.typeName)
+				{
+					vint indexControlTemplate = constructorArguments.Keys().IndexOf(L"ControlTemplate");
+					if (indexControlTemplate == -1)
+					{
+						return Value::From(new GuiToolstripMenuBar(GetCurrentTheme()->CreateMenuBarStyle()));
+					}
+					else
+					{
+						auto factory = CreateTemplateFactory(constructorArguments.GetByIndex(indexControlTemplate)[0]);
+						return Value::From(new GuiToolstripMenuBar(new GuiControlTemplate_StyleProvider(factory)));
+					}
+				}
+				return Value();
+			}
+
 			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
 			{
 				propertyNames.Add(L"");
+			}
+
+			void GetConstructorParameters(const TypeInfo& typeInfo, collections::List<WString>& propertyNames)override
+			{
+				propertyNames.Add(L"ControlTemplate");
 			}
 
 			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
@@ -304,6 +378,12 @@ GuiToolstripMenuBarInstanceLoader
 				if (propertyInfo.propertyName == L"")
 				{
 					return GuiInstancePropertyInfo::CollectionWithParent(description::GetTypeDescriptor<GuiControl>());
+				}
+				else if (propertyInfo.propertyName == L"ControlTemplate")
+				{
+					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<WString>());
+					info->constructorParameter = true;
+					return info;
 				}
 				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
 			}
@@ -337,9 +417,37 @@ GuiToolstripToolBarInstanceLoader
 				return description::GetTypeDescriptor<GuiToolstripToolBar>()->GetTypeName();
 			}
 
+			bool IsCreatable(const TypeInfo& typeInfo)override
+			{
+				return GetTypeName() == typeInfo.typeName;
+			}
+
+			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
+			{
+				if(GetTypeName() == typeInfo.typeName)
+				{
+					vint indexControlTemplate = constructorArguments.Keys().IndexOf(L"ControlTemplate");
+					if (indexControlTemplate == -1)
+					{
+						return Value::From(new GuiToolstripToolBar(GetCurrentTheme()->CreateToolBarStyle()));
+					}
+					else
+					{
+						auto factory = CreateTemplateFactory(constructorArguments.GetByIndex(indexControlTemplate)[0]);
+						return Value::From(new GuiToolstripToolBar(new GuiControlTemplate_StyleProvider(factory)));
+					}
+				}
+				return Value();
+			}
+
 			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
 			{
 				propertyNames.Add(L"");
+			}
+
+			void GetConstructorParameters(const TypeInfo& typeInfo, collections::List<WString>& propertyNames)override
+			{
+				propertyNames.Add(L"ControlTemplate");
 			}
 
 			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
@@ -347,6 +455,12 @@ GuiToolstripToolBarInstanceLoader
 				if (propertyInfo.propertyName == L"")
 				{
 					return GuiInstancePropertyInfo::CollectionWithParent(description::GetTypeDescriptor<GuiControl>());
+				}
+				else if (propertyInfo.propertyName == L"ControlTemplate")
+				{
+					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<WString>());
+					info->constructorParameter = true;
+					return info;
 				}
 				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
 			}
@@ -442,23 +556,9 @@ GuiSelectableListControlInstanceLoader
 				return description::GetTypeDescriptor<GuiSelectableListControl>()->GetTypeName();
 			}
 
-			bool IsCreatable(const TypeInfo& typeInfo)override
-			{
-				return false;
-			}
-
-			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
-			{
-				return Value();
-			}
-
 			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
 			{
 				propertyNames.Add(L"ItemTemplate");
-			}
-
-			void GetConstructorParameters(const TypeInfo& typeInfo, List<WString>& propertyNames)override
-			{
 			}
 
 			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
@@ -477,17 +577,7 @@ GuiSelectableListControlInstanceLoader
 				{
 					if (propertyValue.propertyName == L"ItemTemplate")
 					{
-						List<ITypeDescriptor*> types;
-						List<WString> typeNames;
-						SplitBySemicolon(propertyValue.propertyValue.GetText(), typeNames);
-						CopyFrom(
-							types,
-							From(typeNames)
-								.Select(&description::GetTypeDescriptor)
-								.Where([](ITypeDescriptor* type){return type != 0; })
-							);
-
-						auto factory = GuiTemplate::IFactory::CreateTemplateFactory(types);
+						auto factory = CreateTemplateFactory(propertyValue.propertyValue);
 						auto styleProvider = new GuiListItemTemplate_ItemStyleProvider(factory);
 						container->SetStyleProvider(styleProvider);
 						return true;
@@ -513,23 +603,9 @@ GuiVirtualTreeViewInstanceLoader
 				return description::GetTypeDescriptor<GuiVirtualTreeView>()->GetTypeName();
 			}
 
-			bool IsCreatable(const TypeInfo& typeInfo)override
-			{
-				return false;
-			}
-
-			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
-			{
-				return Value();
-			}
-
 			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
 			{
 				propertyNames.Add(L"ItemTemplate");
-			}
-
-			void GetConstructorParameters(const TypeInfo& typeInfo, List<WString>& propertyNames)override
-			{
 			}
 
 			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
@@ -568,23 +644,9 @@ GuiVirtualDataGridInstanceLoader
 				return description::GetTypeDescriptor<GuiVirtualDataGrid>()->GetTypeName();
 			}
 
-			bool IsCreatable(const TypeInfo& typeInfo)override
-			{
-				return false;
-			}
-
-			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
-			{
-				return Value();
-			}
-
 			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
 			{
 				propertyNames.Add(L"ItemTemplate");
-			}
-
-			void GetConstructorParameters(const TypeInfo& typeInfo, List<WString>& propertyNames)override
-			{
 			}
 
 			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
@@ -1015,10 +1077,6 @@ GuiBindableTextListInstanceLoader
 				return Value();
 			}
 
-			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
-			{
-			}
-
 			void GetConstructorParameters(const TypeInfo& typeInfo, List<WString>& propertyNames)override
 			{
 				if (typeInfo.typeName == GetTypeName())
@@ -1399,12 +1457,42 @@ GuiPredefinedInstanceLoadersPlugin
 		new LOADER\
 		)
 
-#define ADD_VIRTUAL_TYPE(VIRTUALTYPENAME, TYPENAME, CONSTRUCTOR)\
+#define ADD_TEMPLATE_CONTROL(TYPENAME, CONSTRUCTOR, TEMPLATE)\
+	manager->SetLoader(\
+		new GuiTemplateControlInstanceLoader(\
+			L"presentation::controls::" L#TYPENAME,\
+			[](){return Value::From(CONSTRUCTOR());},\
+			[](Ptr<GuiTemplate::IFactory> factory){return Value::From(new TYPENAME(new TEMPLATE##_StyleProvider(factory))); }\
+			)\
+		)
+
+#define ADD_VIRTUAL_CONTROL(VIRTUALTYPENAME, TYPENAME, CONSTRUCTOR, TEMPLATE)\
 	manager->CreateVirtualType(\
 		description::GetTypeDescriptor<TYPENAME>()->GetTypeName(),\
-		new GuiVrtualTypeInstanceLoader(\
+		new GuiTemplateControlInstanceLoader(\
 			L"presentation::controls::Gui" L#VIRTUALTYPENAME,\
-			[](){return Value::From(CONSTRUCTOR());})\
+			[](){return Value::From(CONSTRUCTOR());},\
+			[](Ptr<GuiTemplate::IFactory> factory){return Value::From(new TYPENAME(new TEMPLATE##_StyleProvider(factory))); }\
+			)\
+		)
+
+#define ADD_TEMPLATE_CONTROL_X(TYPENAME, CONSTRUCTOR, TEMPLATE)\
+	manager->SetLoader(\
+		new GuiTemplateControlInstanceLoader(\
+			L"presentation::controls::" L#TYPENAME,\
+			[](){return Value::From(CONSTRUCTOR());},\
+			[](Ptr<GuiTemplate::IFactory> factory)->Value{throw 0; }\
+			)\
+		)
+
+#define ADD_VIRTUAL_CONTROL_X(VIRTUALTYPENAME, TYPENAME, CONSTRUCTOR, TEMPLATE)\
+	manager->CreateVirtualType(\
+		description::GetTypeDescriptor<TYPENAME>()->GetTypeName(),\
+		new GuiTemplateControlInstanceLoader(\
+			L"presentation::controls::Gui" L#VIRTUALTYPENAME,\
+			[](){return Value::From(CONSTRUCTOR());},\
+			[](Ptr<GuiTemplate::IFactory> factory)->Value{throw 0; }\
+			)\
 		)
 
 				manager->SetLoader(new GuiControlInstanceLoader);
@@ -1433,22 +1521,36 @@ GuiPredefinedInstanceLoadersPlugin
 				ADD_VIRTUAL_TYPE_LOADER(GuiComboBoxListControl,						GuiComboBoxInstanceLoader);
 				ADD_VIRTUAL_TYPE_LOADER(tree::MemoryNodeProvider,					GuiTreeNodeInstanceLoader);
 
-				ADD_VIRTUAL_TYPE(GroupBox,					GuiControl,				g::NewGroupBox);
-				ADD_VIRTUAL_TYPE(MenuSplitter,				GuiControl,				g::NewMenuSplitter);
-				ADD_VIRTUAL_TYPE(MenuBarButton,				GuiToolstripButton,		g::NewMenuBarButton);
-				ADD_VIRTUAL_TYPE(MenuItemButton,			GuiToolstripButton,		g::NewMenuItemButton);
-				ADD_VIRTUAL_TYPE(ToolstripDropdownButton,	GuiToolstripButton,		g::NewToolBarDropdownButton);
-				ADD_VIRTUAL_TYPE(ToolstripSplitButton,		GuiToolstripButton,		g::NewToolBarSplitButton);
-				ADD_VIRTUAL_TYPE(ToolstripSplitter,			GuiControl,				g::NewToolBarSplitter);
-				ADD_VIRTUAL_TYPE(CheckBox,					GuiSelectableButton,	g::NewCheckBox);
-				ADD_VIRTUAL_TYPE(RadioButton,				GuiSelectableButton,	g::NewRadioButton);
-				ADD_VIRTUAL_TYPE(HScroll,					GuiScroll,				g::NewHScroll);
-				ADD_VIRTUAL_TYPE(VScroll,					GuiScroll,				g::NewVScroll);
-				ADD_VIRTUAL_TYPE(HTracker,					GuiScroll,				g::NewHTracker);
-				ADD_VIRTUAL_TYPE(VTracker,					GuiScroll,				g::NewVTracker);
-				ADD_VIRTUAL_TYPE(ProgressBar,				GuiScroll,				g::NewProgressBar);
-				ADD_VIRTUAL_TYPE(CheckTextList,				GuiTextList,			g::NewCheckTextList);
-				ADD_VIRTUAL_TYPE(RadioTextList,				GuiTextList,			g::NewRadioTextList);
+				ADD_TEMPLATE_CONTROL	(GuiCustomControl,			g::NewCustomControl,	GuiControlTemplate);
+				ADD_TEMPLATE_CONTROL_X	(GuiLabel,					g::NewLabel,			GuiControlTemplate);
+				ADD_TEMPLATE_CONTROL_X	(GuiButton,					g::NewButton,			GuiControlTemplate);
+				ADD_TEMPLATE_CONTROL_X	(GuiScrollContainer,		g::NewScrollContainer,	GuiControlTemplate);
+				ADD_TEMPLATE_CONTROL_X	(GuiWindow,					g::NewWindow,			GuiControlTemplate);
+				ADD_TEMPLATE_CONTROL_X	(GuiTextList,				g::NewTextList,			GuiControlTemplate);
+				ADD_TEMPLATE_CONTROL_X	(GuiDocumentViewer,			g::NewDocumentViewer,	GuiControlTemplate);
+				ADD_TEMPLATE_CONTROL	(GuiDocumentLabel,			g::NewDocumentLabel,	GuiControlTemplate);
+				ADD_TEMPLATE_CONTROL_X	(GuiMultilineTextBox,		g::NewMultilineTextBox,	GuiControlTemplate);
+				ADD_TEMPLATE_CONTROL_X	(GuiSinglelineTextBox,		g::NewTextBox,			GuiControlTemplate);
+				ADD_TEMPLATE_CONTROL_X	(GuiDatePicker,				g::NewDatePicker,		GuiControlTemplate);
+				ADD_TEMPLATE_CONTROL_X	(GuiDateComboBox,			g::NewDateComboBox,		GuiControlTemplate);
+				ADD_TEMPLATE_CONTROL_X	(GuiStringGrid,				g::NewStringGrid,		GuiControlTemplate);
+
+				ADD_VIRTUAL_CONTROL		(GroupBox,					GuiControl,				g::NewGroupBox,					GuiControlTemplate);
+				ADD_VIRTUAL_CONTROL		(MenuSplitter,				GuiControl,				g::NewMenuSplitter,				GuiControlTemplate);
+				ADD_VIRTUAL_CONTROL_X	(MenuBarButton,				GuiToolstripButton,		g::NewMenuBarButton,			GuiControlTemplate);
+				ADD_VIRTUAL_CONTROL_X	(MenuItemButton,			GuiToolstripButton,		g::NewMenuItemButton,			GuiControlTemplate);
+				ADD_VIRTUAL_CONTROL_X	(ToolstripDropdownButton,	GuiToolstripButton,		g::NewToolBarDropdownButton,	GuiControlTemplate);
+				ADD_VIRTUAL_CONTROL_X	(ToolstripSplitButton,		GuiToolstripButton,		g::NewToolBarSplitButton,		GuiControlTemplate);
+				ADD_VIRTUAL_CONTROL		(ToolstripSplitter,			GuiControl,				g::NewToolBarSplitter,			GuiControlTemplate);
+				ADD_VIRTUAL_CONTROL_X	(CheckBox,					GuiSelectableButton,	g::NewCheckBox,					GuiControlTemplate);
+				ADD_VIRTUAL_CONTROL_X	(RadioButton,				GuiSelectableButton,	g::NewRadioButton,				GuiControlTemplate);
+				ADD_VIRTUAL_CONTROL_X	(HScroll,					GuiScroll,				g::NewHScroll,					GuiControlTemplate);
+				ADD_VIRTUAL_CONTROL_X	(VScroll,					GuiScroll,				g::NewVScroll,					GuiControlTemplate);
+				ADD_VIRTUAL_CONTROL_X	(HTracker,					GuiScroll,				g::NewHTracker,					GuiControlTemplate);
+				ADD_VIRTUAL_CONTROL_X	(VTracker,					GuiScroll,				g::NewVTracker,					GuiControlTemplate);
+				ADD_VIRTUAL_CONTROL_X	(ProgressBar,				GuiScroll,				g::NewProgressBar,				GuiControlTemplate);
+				ADD_VIRTUAL_CONTROL_X	(CheckTextList,				GuiTextList,			g::NewCheckTextList,			GuiControlTemplate);
+				ADD_VIRTUAL_CONTROL_X	(RadioTextList,				GuiTextList,			g::NewRadioTextList,			GuiControlTemplate);
 
 				auto bindableTextListName = description::GetTypeDescriptor<GuiBindableTextList>()->GetTypeName();
 				manager->CreateVirtualType(bindableTextListName, new GuiBindableTextListInstanceLoader(L"Check", [](){return GetCurrentTheme()->CreateCheckTextListItemStyle(); }));
