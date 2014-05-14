@@ -55,6 +55,13 @@ ExecuteQueryVisitor
 									output.Add(ctor);
 								}
 							}
+							if (node->childOption == GuiIqChildOption::Indirect)
+							{
+								if (auto setter = value.Cast<GuiAttSetterRepr>())
+								{
+									Traverse(node, setter);
+								}
+							}
 						}
 					}
 				}
@@ -64,20 +71,9 @@ ExecuteQueryVisitor
 					{
 						output.Add(context->instance);
 					}
-					setter = context->instance;
-				}
-
-				if (node->childOption == GuiIqChildOption::Indirect)
-				{
-					FOREACH(Ptr<GuiAttSetterRepr::SetterValue>, setterValue, setter->setters.Values())
+					if (node->childOption == GuiIqChildOption::Indirect)
 					{
-						FOREACH(Ptr<GuiValueRepr>, value, setterValue->values)
-						{
-							if (auto setter = value.Cast<GuiAttSetterRepr>())
-							{
-								Traverse(node, setter);
-							}
-						}
+						Traverse(node, context->instance);
 					}
 				}
 			}
