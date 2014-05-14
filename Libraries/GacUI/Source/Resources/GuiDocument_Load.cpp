@@ -267,7 +267,10 @@ document_operation_visitors::DeserializeNodeVisitor
 					}
 					else
 					{
-						errors.Add(L"Unknown tag in document resource \"" + node->name.value + L"\".");
+						if (node->name.value != L"nop")
+						{
+							errors.Add(L"Unknown tag in document resource \"" + node->name.value + L"\".");
+						}
 						FOREACH(Ptr<XmlNode>, sub, node->subNodes)
 						{
 							sub->Accept(this);
