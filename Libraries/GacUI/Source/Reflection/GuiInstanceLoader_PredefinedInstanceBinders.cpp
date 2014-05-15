@@ -370,7 +370,7 @@ GuiWorkflowGlobalContext
 					}
 				}
 
-				WfLexicalScopeManager manager(0);
+				WfLexicalScopeManager manager(GetParserManager()->GetParsingTable(L"WORKFLOW"));
 				manager.modules.Add(module);
 				manager.Rebuild(false);
 				WString moduleCode = WorkflowModuleToString(module);
@@ -505,7 +505,7 @@ GuiScriptInstanceBinder
 						}
 
 						WString moduleCode = WorkflowModuleToString(module);
-						WfLexicalScopeManager manager(0);
+						WfLexicalScopeManager manager(GetParserManager()->GetParsingTable(L"WORKFLOW"));
 						manager.modules.Add(module);
 						manager.Rebuild(false);
 						if (manager.errors.Count() > 0)
@@ -612,7 +612,7 @@ GuiEvalInstanceBinder
 					}
 
 					WString moduleCode = WorkflowModuleToString(module);
-					WfLexicalScopeManager manager(0);
+					WfLexicalScopeManager manager(GetParserManager()->GetParsingTable(L"WORKFLOW"));
 					manager.modules.Add(module);
 					manager.Rebuild(false);
 					if (manager.errors.Count() > 0)
@@ -714,7 +714,7 @@ GuiEvalInstanceEventBinder
 					}
 
 					WString moduleCode = WorkflowModuleToString(module);
-					WfLexicalScopeManager manager(0);
+					WfLexicalScopeManager manager(GetParserManager()->GetParsingTable(L"WORKFLOW"));
 					manager.modules.Add(module);
 					manager.Rebuild(false);
 					if (manager.errors.Count() > 0)
