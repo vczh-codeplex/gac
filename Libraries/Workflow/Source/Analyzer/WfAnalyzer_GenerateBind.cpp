@@ -198,15 +198,11 @@ GetObservingDependency
 
 				void Visit(WfLetExpression* node)override
 				{
-					auto result = MakePtr<WfObservingDependency>(dependency);
 					FOREACH(Ptr<WfLetVariable>, var, node->variables)
 					{
-						GetObservingDependency(manager, var->value, *result.Obj());
-						result->TurnToInput();
-						result = MakePtr<WfObservingDependency>(*result.Obj());
+						GetObservingDependency(manager, var->value, dependency);
 					}
-					GetObservingDependency(manager, node->expression, *result.Obj());
-					CopyFrom(dependency.outputObserves, result->outputObserves);
+					GetObservingDependency(manager, node->expression, dependency);
 				}
 
 				void Visit(WfIfExpression* node)override
