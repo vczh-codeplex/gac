@@ -327,11 +327,17 @@ Instance Scope Wrapper
 						if (scope = loader->InitializeInstance(typeInfo, value))
 						{
 #ifdef _DEBUG
-							CHECK_ERROR(scope->errors.Count() == 0, L"vl::presentation::GuiInstancePartialClass<T>::InitializeFromResource()#There is something wrong with the xml.");
+							CHECK_ERROR(scope->errors.Count() == 0, L"vl::presentation::GuiInstancePartialClass<T>::InitializeFromResource()#There is something wrong with the resource.");
 #endif
 							return true;
 						}
 					}
+#ifdef _DEBUG
+					else
+					{
+						CHECK_FAIL(L"vl::presentation::GuiInstancePartialClass<T>::InitializeFromResource()#Cannot initialize this instance from the resource.");
+					}
+#endif
 				}
 				return false;
 			}

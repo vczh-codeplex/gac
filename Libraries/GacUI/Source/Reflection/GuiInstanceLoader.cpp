@@ -198,7 +198,7 @@ GuiInstanceContext::ElementName Parser
 			Ptr<ElementName> TypedParse(const WString& text, collections::List<WString>& errors)override
 			{
 				Ptr<RegexMatch> match = regexElementName.MatchHead(text);
-				if (match && match->Result().Length() != text.Length())
+				if (!match || match->Result().Length() != text.Length())
 				{
 					errors.Add(L"Failed to parse an element name \"" + text + L"\".");
 					return 0;
