@@ -1526,7 +1526,7 @@ GuiPredefinedInstanceLoadersPlugin
 
 				ADD_TEMPLATE_CONTROL	(GuiCustomControl,			g::NewCustomControl,	GuiControlTemplate);
 				ADD_TEMPLATE_CONTROL_X	(GuiLabel,					g::NewLabel,			GuiControlTemplate);
-				ADD_TEMPLATE_CONTROL_X	(GuiButton,					g::NewButton,			GuiControlTemplate);
+				ADD_TEMPLATE_CONTROL	(GuiButton,					g::NewButton,			GuiButtonTemplate);
 				ADD_TEMPLATE_CONTROL_X	(GuiScrollContainer,		g::NewScrollContainer,	GuiControlTemplate);
 				ADD_TEMPLATE_CONTROL_X	(GuiWindow,					g::NewWindow,			GuiControlTemplate);
 				ADD_TEMPLATE_CONTROL_X	(GuiTextList,				g::NewTextList,			GuiControlTemplate);
@@ -1545,8 +1545,8 @@ GuiPredefinedInstanceLoadersPlugin
 				ADD_VIRTUAL_CONTROL_X	(ToolstripDropdownButton,	GuiToolstripButton,		g::NewToolBarDropdownButton,	GuiControlTemplate);
 				ADD_VIRTUAL_CONTROL_X	(ToolstripSplitButton,		GuiToolstripButton,		g::NewToolBarSplitButton,		GuiControlTemplate);
 				ADD_VIRTUAL_CONTROL		(ToolstripSplitter,			GuiControl,				g::NewToolBarSplitter,			GuiControlTemplate);
-				ADD_VIRTUAL_CONTROL_X	(CheckBox,					GuiSelectableButton,	g::NewCheckBox,					GuiControlTemplate);
-				ADD_VIRTUAL_CONTROL_X	(RadioButton,				GuiSelectableButton,	g::NewRadioButton,				GuiControlTemplate);
+				ADD_VIRTUAL_CONTROL		(CheckBox,					GuiSelectableButton,	g::NewCheckBox,					GuiSelectableButtonTemplate);
+				ADD_VIRTUAL_CONTROL		(RadioButton,				GuiSelectableButton,	g::NewRadioButton,				GuiSelectableButtonTemplate);
 				ADD_VIRTUAL_CONTROL_X	(HScroll,					GuiScroll,				g::NewHScroll,					GuiControlTemplate);
 				ADD_VIRTUAL_CONTROL_X	(VScroll,					GuiScroll,				g::NewVScroll,					GuiControlTemplate);
 				ADD_VIRTUAL_CONTROL_X	(HTracker,					GuiScroll,				g::NewHTracker,					GuiControlTemplate);

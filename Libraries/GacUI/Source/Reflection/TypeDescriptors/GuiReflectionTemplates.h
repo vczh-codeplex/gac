@@ -28,6 +28,8 @@ Type List
 			F(presentation::templates::GuiTemplate)\
 			F(presentation::templates::GuiTemplate::IFactory)\
 			F(presentation::templates::GuiControlTemplate)\
+			F(presentation::templates::GuiButtonTemplate)\
+			F(presentation::templates::GuiSelectableButtonTemplate)\
 			F(presentation::templates::GuiListItemTemplate)\
 			F(presentation::templates::GuiTreeItemTemplate)\
 

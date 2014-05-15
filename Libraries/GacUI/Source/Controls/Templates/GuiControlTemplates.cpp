@@ -8,6 +8,8 @@ namespace vl
 		{
 			using namespace description;
 			using namespace collections;
+			using namespace controls;
+			using namespace compositions;
 
 /***********************************************************************
 GuiTemplate::IFactory
@@ -104,6 +106,38 @@ GuiControlTemplate
 			}
 
 			GuiControlTemplate::~GuiControlTemplate()
+			{
+			}
+
+/***********************************************************************
+GuiButtonTemplate
+***********************************************************************/
+
+			GuiButtonTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_IMPL)
+
+			GuiButtonTemplate::GuiButtonTemplate()
+				:State_(GuiButton::Normal)
+			{
+				GuiButtonTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_EVENT_INIT)
+			}
+
+			GuiButtonTemplate::~GuiButtonTemplate()
+			{
+			}
+
+/***********************************************************************
+GuiSelectableButtonTemplate
+***********************************************************************/
+
+			GuiSelectableButtonTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_IMPL)
+
+			GuiSelectableButtonTemplate::GuiSelectableButtonTemplate()
+				:Selected_(false)
+			{
+				GuiSelectableButtonTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_EVENT_INIT)
+			}
+
+			GuiSelectableButtonTemplate::~GuiSelectableButtonTemplate()
 			{
 			}
 
