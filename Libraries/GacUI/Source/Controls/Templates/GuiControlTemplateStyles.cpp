@@ -21,6 +21,7 @@ GuiControlTemplate_StyleProvider
 				if (!(controlTemplate = dynamic_cast<GuiControlTemplate*>(itemTemplate)))
 				{
 					delete itemTemplate;
+					CHECK_FAIL(L"GuiControlTemplate_StyleProvider::GuiControlTemplate_StyleProvider()#An instance of GuiTemplate is expected.");
 				}
 			}
 
@@ -56,6 +57,50 @@ GuiControlTemplate_StyleProvider
 			void GuiControlTemplate_StyleProvider::SetVisuallyEnabled(bool value)
 			{
 				controlTemplate->SetVisuallyEnabled(value);
+			}
+
+/***********************************************************************
+GuiButtonTemplate_StyleProvider
+***********************************************************************/
+
+			GuiButtonTemplate_StyleProvider::GuiButtonTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory)
+				:GuiControlTemplate_StyleProvider(factory)
+			{
+				if (!(controlTemplate = dynamic_cast<GuiButtonTemplate*>(GetBoundsComposition())))
+				{
+					CHECK_FAIL(L"GuiButtonTemplate_StyleProvider::GuiButtonTemplate_StyleProvider()#An instance of GuiButtonTemplate is expected.");
+				}
+			}
+
+			GuiButtonTemplate_StyleProvider::~GuiButtonTemplate_StyleProvider()
+			{
+			}
+
+			void GuiButtonTemplate_StyleProvider::Transfer(controls::GuiButton::ControlState value)
+			{
+				controlTemplate->SetState(value);
+			}
+
+/***********************************************************************
+GuiSelectableButtonTemplate_StyleProvider
+***********************************************************************/
+
+			GuiSelectableButtonTemplate_StyleProvider::GuiSelectableButtonTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory)
+				:GuiButtonTemplate_StyleProvider(factory)
+			{
+				if (!(controlTemplate = dynamic_cast<GuiSelectableButtonTemplate*>(GetBoundsComposition())))
+				{
+					CHECK_FAIL(L"GuiButtonTemplate_StyleProvider::GuiButtonTemplate_StyleProvider()#An instance of GuiSelectableButtonTemplate is expected.");
+				}
+			}
+
+			GuiSelectableButtonTemplate_StyleProvider::~GuiSelectableButtonTemplate_StyleProvider()
+			{
+			}
+
+			void GuiSelectableButtonTemplate_StyleProvider::SetSelected(bool value)
+			{
+				controlTemplate->SetSelected(value);
 			}
 
 /***********************************************************************

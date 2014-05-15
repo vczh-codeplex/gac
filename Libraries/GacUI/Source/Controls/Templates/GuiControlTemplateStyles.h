@@ -44,6 +44,36 @@ Control Template
 				void												SetVisuallyEnabled(bool value)override;
 			};
 
+			class GuiButtonTemplate_StyleProvider
+				: public GuiControlTemplate_StyleProvider
+				, public virtual controls::GuiButton::IStyleController
+				, public Description<GuiButtonTemplate_StyleProvider>
+			{
+			protected:
+				GuiButtonTemplate*									controlTemplate;
+
+			public:
+				GuiButtonTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
+				~GuiButtonTemplate_StyleProvider();
+
+				void												Transfer(controls::GuiButton::ControlState value)override;
+			};
+
+			class GuiSelectableButtonTemplate_StyleProvider
+				: public GuiButtonTemplate_StyleProvider
+				, public virtual controls::GuiSelectableButton::IStyleController
+				, public Description<GuiSelectableButtonTemplate_StyleProvider>
+			{
+			protected:
+				GuiSelectableButtonTemplate*						controlTemplate;
+
+			public:
+				GuiSelectableButtonTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
+				~GuiSelectableButtonTemplate_StyleProvider();
+
+				void												SetSelected(bool value)override;
+			};
+
 /***********************************************************************
 Item Template (GuiListItemTemplate)
 ***********************************************************************/

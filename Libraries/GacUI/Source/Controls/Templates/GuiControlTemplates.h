@@ -88,6 +88,30 @@ Control Template
 				GuiControlTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
 			};
 
+			class GuiButtonTemplate : public GuiControlTemplate, public Description<GuiButtonTemplate>
+			{
+			public:
+				GuiButtonTemplate();
+				~GuiButtonTemplate();
+
+#define GuiButtonTemplate_PROPERTIES(F)\
+				F(GuiButtonTemplate, controls::GuiButton::ControlState, State)\
+
+				GuiButtonTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
+			};
+
+			class GuiSelectableButtonTemplate : public GuiButtonTemplate, public Description<GuiSelectableButtonTemplate>
+			{
+			public:
+				GuiSelectableButtonTemplate();
+				~GuiSelectableButtonTemplate();
+
+#define GuiSelectableButtonTemplate_PROPERTIES(F)\
+				F(GuiSelectableButtonTemplate, bool, Selected)\
+
+				GuiSelectableButtonTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
+			};
+
 /***********************************************************************
 Item Template
 ***********************************************************************/

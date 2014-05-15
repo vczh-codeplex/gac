@@ -116,6 +116,7 @@ namespace demos
 	F(ToolstripTemplate, GuiControlTemplate)\
 	F(ToolstripSplitterTemplate, GuiControlTemplate)\
 	F(MenuSplitterTemplate, GuiControlTemplate)\
+	F(ButtonTemplate, GuiButtonTemplate)\
 
 	DEMO_TEMPLATES(CONTROL_TEMPLATE_DECL)
 
@@ -148,6 +149,7 @@ namespace vl
 			F(demos::ToolstripTemplate)\
 			F(demos::ToolstripSplitterTemplate)\
 			F(demos::MenuSplitterTemplate)\
+			F(demos::ButtonTemplate)\
 
 			DEMO_TYPES(DECL_TYPE_INFO)
 			DEMO_TYPES(IMPL_TYPE_INFO)
