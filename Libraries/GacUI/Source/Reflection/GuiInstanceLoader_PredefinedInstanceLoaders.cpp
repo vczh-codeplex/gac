@@ -1405,6 +1405,7 @@ GuiTreeNodeInstanceLoader
 						{
 							item->text = UnboxValue<WString>(propertyValue.propertyValue);
 							container->NotifyDataModified();
+							return true;
 						}
 					}
 					else if (propertyValue.propertyName == L"Image")
@@ -1413,6 +1414,7 @@ GuiTreeNodeInstanceLoader
 						{
 							item->image = UnboxValue<Ptr<GuiImageData>>(propertyValue.propertyValue);
 							container->NotifyDataModified();
+							return true;
 						}
 					}
 					else if (propertyValue.propertyName == L"Tag")
@@ -1420,6 +1422,7 @@ GuiTreeNodeInstanceLoader
 						if (auto item = container->GetData().Cast<tree::TreeViewItem>())
 						{
 							item->tag = propertyValue.propertyValue;
+							return true;
 						}
 					}
 					else if (propertyValue.propertyName == L"")
