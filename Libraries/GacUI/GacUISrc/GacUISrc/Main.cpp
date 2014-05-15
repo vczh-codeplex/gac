@@ -113,6 +113,9 @@ namespace demos
 
 #define DEMO_TEMPLATES(F)\
 	F(GroupBoxTemplate, GuiControlTemplate)\
+	F(ToolstripTemplate, GuiControlTemplate)\
+	F(ToolstripSplitterTemplate, GuiControlTemplate)\
+	F(MenuSplitterTemplate, GuiControlTemplate)\
 
 	DEMO_TEMPLATES(CONTROL_TEMPLATE_DECL)
 
@@ -142,6 +145,9 @@ namespace vl
 #define DEMO_TYPES(F)\
 			F(demos::MainWindow)\
 			F(demos::GroupBoxTemplate)\
+			F(demos::ToolstripTemplate)\
+			F(demos::ToolstripSplitterTemplate)\
+			F(demos::MenuSplitterTemplate)\
 
 			DEMO_TYPES(DECL_TYPE_INFO)
 			DEMO_TYPES(IMPL_TYPE_INFO)
