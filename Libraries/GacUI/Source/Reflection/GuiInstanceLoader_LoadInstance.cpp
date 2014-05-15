@@ -948,9 +948,9 @@ ExecuteBindingSetters
 					auto value = bindingSetter.propertyValue.propertyValue;
 					env->scope->errors.Add(
 						L"Failed to set property \"" +
-						 bindingSetter.propertyValue.propertyName +
+						bindingSetter.propertyValue.propertyName +
 						L"\" of \"" +
-						env->context->instance->typeName +
+						bindingSetter.propertyValue.instanceValue.GetTypeDescriptor()->GetTypeName() +
 						L"\" using binding \"" +
 						bindingSetter.binder->GetBindingName() +
 						L"\" and value \"" +
