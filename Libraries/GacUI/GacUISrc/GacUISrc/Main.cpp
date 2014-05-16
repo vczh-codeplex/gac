@@ -117,6 +117,8 @@ namespace demos
 	F(ToolstripSplitterTemplate, GuiControlTemplate)\
 	F(MenuSplitterTemplate, GuiControlTemplate)\
 	F(ButtonTemplate, GuiButtonTemplate)\
+	F(CheckBoxTemplate, GuiSelectableButtonTemplate)\
+	F(RadioButtonTemplate, GuiSelectableButtonTemplate)\
 
 	DEMO_TEMPLATES(CONTROL_TEMPLATE_DECL)
 
@@ -150,6 +152,8 @@ namespace vl
 			F(demos::ToolstripSplitterTemplate)\
 			F(demos::MenuSplitterTemplate)\
 			F(demos::ButtonTemplate)\
+			F(demos::CheckBoxTemplate)\
+			F(demos::RadioButtonTemplate)\
 
 			DEMO_TYPES(DECL_TYPE_INFO)
 			DEMO_TYPES(IMPL_TYPE_INFO)
