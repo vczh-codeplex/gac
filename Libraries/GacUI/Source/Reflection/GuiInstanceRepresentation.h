@@ -87,6 +87,7 @@ Instance Representation
 			WString									typeNamespace;
 			WString									typeName;
 			Nullable<WString>						instanceName;
+			Nullable<WString>						styleName;
 
 			void									Accept(IVisitor* visitor)override{visitor->Visit(this);}
 			Ptr<GuiValueRepr>						Clone()override;

@@ -60,6 +60,7 @@ GuiConstructorRepr
 			repr->typeNamespace = typeNamespace;
 			repr->typeName = typeName;
 			repr->instanceName = instanceName;
+			repr->styleName = styleName;
 			CloneBody(repr);
 			return repr;
 		}
@@ -268,6 +269,10 @@ GuiInstanceContext
 						if (name->name == L"Name")
 						{
 							ctor->instanceName = att->value.value;
+						}
+						else if (name->name == L"Style")
+						{
+							ctor->styleName = att->value.value;
 						}
 					}
 				}
