@@ -32,9 +32,11 @@ ExecuteQueryVisitor
 				{
 					return false;
 				}
-				if (node->referenceName.value != L"" && (!ctor->instanceName || node->referenceName.value != ctor->instanceName.Value()))
+				if (node->referenceName.value != L"")
 				{
-					return false;
+					bool instanceName = ctor->instanceName && node->referenceName.value == ctor->instanceName.Value();
+					bool styleName = ctor->styleName && node->referenceName.value == ctor->styleName.Value();
+					return instanceName || styleName;
 				}
 				return true;
 			}
