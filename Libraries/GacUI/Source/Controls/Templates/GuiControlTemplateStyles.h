@@ -44,6 +44,16 @@ Control Template
 				void												SetVisuallyEnabled(bool value)override;
 			};
 
+			class GuiWindowTemplate_StyleProvider
+				: public GuiControlTemplate_StyleProvider
+				, public controls::GuiWindow::DefaultBehaviorStyleController
+				, public Description<GuiWindowTemplate_StyleProvider>
+			{
+			public:
+				GuiWindowTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
+				~GuiWindowTemplate_StyleProvider();
+			};
+
 			class GuiButtonTemplate_StyleProvider
 				: public GuiControlTemplate_StyleProvider
 				, public virtual controls::GuiButton::IStyleController
@@ -72,6 +82,29 @@ Control Template
 				~GuiSelectableButtonTemplate_StyleProvider();
 
 				void												SetSelected(bool value)override;
+			};
+
+			class GuiToolstripButtonTemplate_StyleProvider
+				: public GuiSelectableButtonTemplate_StyleProvider
+				, public virtual controls::GuiMenuButton::IStyleController
+				, public Description<GuiToolstripButtonTemplate_StyleProvider>
+			{
+			protected:
+				Ptr<GuiTemplate::IFactory>									subMenuTemplateFactory;
+				GuiToolstripButtonTemplate*									controlTemplate;
+
+				void														controlTemplate_SubMenuTemplateChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+			public:
+				GuiToolstripButtonTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
+				~GuiToolstripButtonTemplate_StyleProvider();
+				
+				controls::GuiMenu::IStyleController*						CreateSubMenuStyleController()override;
+				void														SetSubMenuExisting(bool value)override;
+				void														SetSubMenuOpening(bool value)override;
+				controls::GuiButton*										GetSubMenuHost()override;
+				void														SetImage(Ptr<GuiImageData> value)override;
+				void														SetShortcutText(const WString& value)override;
+				compositions::GuiSubComponentMeasurer::IMeasuringSource*	GetMeasuringSource()override;
 			};
 
 /***********************************************************************
@@ -186,6 +219,9 @@ Item Template (GuiTreeItemTemplate)
 /***********************************************************************
 Helper Functions
 ***********************************************************************/
+
+			extern void												SplitBySemicolon(const WString& input, collections::List<WString>& fragments);
+			extern Ptr<GuiTemplate::IFactory>						CreateTemplateFactory(const WString& typeValues);
 
 #pragma warning(pop)
 		}

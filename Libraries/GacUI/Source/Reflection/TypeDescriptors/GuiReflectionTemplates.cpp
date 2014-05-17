@@ -51,6 +51,13 @@ Type Declaration
 				GuiControlTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_REFLECTION)
 			END_CLASS_MEMBER(GuiControlTemplate)
 
+			BEGIN_CLASS_MEMBER(GuiWindowTemplate)
+				CLASS_MEMBER_BASE(GuiControlTemplate)
+				CLASS_MEMBER_CONSTRUCTOR(GuiWindowTemplate*(), NO_PARAMETER)
+
+				GuiControlTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_REFLECTION)
+			END_CLASS_MEMBER(GuiWindowTemplate)
+
 			BEGIN_CLASS_MEMBER(GuiButtonTemplate)
 				CLASS_MEMBER_BASE(GuiControlTemplate)
 				CLASS_MEMBER_CONSTRUCTOR(GuiButtonTemplate*(), NO_PARAMETER)
@@ -64,6 +71,13 @@ Type Declaration
 
 				GuiSelectableButtonTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_REFLECTION)
 			END_CLASS_MEMBER(GuiSelectableButtonTemplate)
+
+			BEGIN_CLASS_MEMBER(GuiToolstripButtonTemplate)
+				CLASS_MEMBER_BASE(GuiSelectableButtonTemplate)
+				CLASS_MEMBER_CONSTRUCTOR(GuiToolstripButtonTemplate*(), NO_PARAMETER)
+
+				GuiToolstripButtonTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_REFLECTION)
+			END_CLASS_MEMBER(GuiToolstripButtonTemplate)
 
 			BEGIN_CLASS_MEMBER(GuiListItemTemplate)
 				CLASS_MEMBER_BASE(GuiTemplate)

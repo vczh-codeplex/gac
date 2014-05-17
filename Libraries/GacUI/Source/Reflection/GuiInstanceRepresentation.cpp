@@ -1,5 +1,6 @@
 #include "GuiInstanceRepresentation.h"
 #include "..\Resources\GuiParserManager.h"
+#include "..\Controls\Templates\GuiControlTemplateStyles.h"
 
 namespace vl
 {
@@ -8,6 +9,7 @@ namespace vl
 		using namespace collections;
 		using namespace parsing;
 		using namespace parsing::xml;
+		using namespace templates;
 
 /***********************************************************************
 GuiTextRepr
@@ -498,34 +500,6 @@ GuiInstanceStyleContext
 				}
 			}
 			return context;
-		}
-
-/***********************************************************************
-Helper Functions
-***********************************************************************/
-
-		void SplitBySemicolon(const WString& input, collections::List<WString>& fragments)
-		{
-			const wchar_t* attValue = input.Buffer();
-			while(*attValue)
-			{
-				// split the value by ';'
-				const wchar_t* attSemicolon = wcschr(attValue, L';');
-				WString pattern;
-				if(attSemicolon)
-				{
-					pattern = WString(attValue, attSemicolon - attValue);
-					attValue = attSemicolon + 1;
-				}
-				else
-				{
-					vint len = wcslen(attValue);
-					pattern = WString(attValue, len);
-					attValue += len;
-				}
-
-				fragments.Add(pattern);
-			}
 		}
 	}
 }

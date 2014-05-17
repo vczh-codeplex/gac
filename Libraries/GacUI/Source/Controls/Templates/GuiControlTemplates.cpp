@@ -110,6 +110,18 @@ GuiControlTemplate
 			}
 
 /***********************************************************************
+GuiWindowTemplate
+***********************************************************************/
+
+			GuiWindowTemplate::GuiWindowTemplate()
+			{
+			}
+
+			GuiWindowTemplate::~GuiWindowTemplate()
+			{
+			}
+
+/***********************************************************************
 GuiButtonTemplate
 ***********************************************************************/
 
@@ -138,6 +150,24 @@ GuiSelectableButtonTemplate
 			}
 
 			GuiSelectableButtonTemplate::~GuiSelectableButtonTemplate()
+			{
+			}
+
+/***********************************************************************
+GuiToolstripButtonTemplate
+***********************************************************************/
+
+			GuiToolstripButtonTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_IMPL)
+
+			GuiToolstripButtonTemplate::GuiToolstripButtonTemplate()
+				:SubMenuExisting_(false)
+				, SubMenuOpening_(false)
+				, SubMenuHost_(0)
+			{
+				GuiToolstripButtonTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_EVENT_INIT)
+			}
+
+			GuiToolstripButtonTemplate::~GuiToolstripButtonTemplate()
 			{
 			}
 

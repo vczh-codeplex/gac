@@ -19,21 +19,6 @@ namespace vl
 GuiVrtualTypeInstanceLoader
 ***********************************************************************/
 
-		Ptr<GuiTemplate::IFactory> CreateTemplateFactory(const Value& typeValue)
-		{
-			List<ITypeDescriptor*> types;
-			List<WString> typeNames;
-			SplitBySemicolon(typeValue.GetText(), typeNames);
-			CopyFrom(
-				types,
-				From(typeNames)
-					.Select(&description::GetTypeDescriptor)
-					.Where([](ITypeDescriptor* type){return type != 0; })
-				);
-
-			return GuiTemplate::IFactory::CreateTemplateFactory(types);
-		}
-
 		class GuiTemplateControlInstanceLoader : public Object, public IGuiInstanceLoader
 		{
 		protected:
@@ -73,7 +58,7 @@ GuiVrtualTypeInstanceLoader
 					}
 					else
 					{
-						auto factory = CreateTemplateFactory(constructorArguments.GetByIndex(indexControlTemplate)[0]);
+						auto factory = CreateTemplateFactory(constructorArguments.GetByIndex(indexControlTemplate)[0].GetText());
 						return templateConstructor(factory);
 					}
 				}
@@ -356,7 +341,7 @@ GuiToolstripMenuBarInstanceLoader
 					}
 					else
 					{
-						auto factory = CreateTemplateFactory(constructorArguments.GetByIndex(indexControlTemplate)[0]);
+						auto factory = CreateTemplateFactory(constructorArguments.GetByIndex(indexControlTemplate)[0].GetText());
 						return Value::From(new GuiToolstripMenuBar(new GuiControlTemplate_StyleProvider(factory)));
 					}
 				}
@@ -433,7 +418,7 @@ GuiToolstripToolBarInstanceLoader
 					}
 					else
 					{
-						auto factory = CreateTemplateFactory(constructorArguments.GetByIndex(indexControlTemplate)[0]);
+						auto factory = CreateTemplateFactory(constructorArguments.GetByIndex(indexControlTemplate)[0].GetText());
 						return Value::From(new GuiToolstripToolBar(new GuiControlTemplate_StyleProvider(factory)));
 					}
 				}
@@ -577,7 +562,7 @@ GuiSelectableListControlInstanceLoader
 				{
 					if (propertyValue.propertyName == L"ItemTemplate")
 					{
-						auto factory = CreateTemplateFactory(propertyValue.propertyValue);
+						auto factory = CreateTemplateFactory(propertyValue.propertyValue.GetText());
 						auto styleProvider = new GuiListItemTemplate_ItemStyleProvider(factory);
 						container->SetStyleProvider(styleProvider);
 						return true;
@@ -1528,7 +1513,7 @@ GuiPredefinedInstanceLoadersPlugin
 				ADD_TEMPLATE_CONTROL_X	(GuiLabel,					g::NewLabel,			GuiControlTemplate);
 				ADD_TEMPLATE_CONTROL	(GuiButton,					g::NewButton,			GuiButtonTemplate);
 				ADD_TEMPLATE_CONTROL_X	(GuiScrollContainer,		g::NewScrollContainer,	GuiControlTemplate);
-				ADD_TEMPLATE_CONTROL_X	(GuiWindow,					g::NewWindow,			GuiControlTemplate);
+				ADD_TEMPLATE_CONTROL	(GuiWindow,					g::NewWindow,			GuiWindowTemplate);
 				ADD_TEMPLATE_CONTROL_X	(GuiTextList,				g::NewTextList,			GuiControlTemplate);
 				ADD_TEMPLATE_CONTROL_X	(GuiDocumentViewer,			g::NewDocumentViewer,	GuiControlTemplate);
 				ADD_TEMPLATE_CONTROL	(GuiDocumentLabel,			g::NewDocumentLabel,	GuiControlTemplate);
@@ -1540,10 +1525,10 @@ GuiPredefinedInstanceLoadersPlugin
 
 				ADD_VIRTUAL_CONTROL		(GroupBox,					GuiControl,				g::NewGroupBox,					GuiControlTemplate);
 				ADD_VIRTUAL_CONTROL		(MenuSplitter,				GuiControl,				g::NewMenuSplitter,				GuiControlTemplate);
-				ADD_VIRTUAL_CONTROL_X	(MenuBarButton,				GuiToolstripButton,		g::NewMenuBarButton,			GuiControlTemplate);
-				ADD_VIRTUAL_CONTROL_X	(MenuItemButton,			GuiToolstripButton,		g::NewMenuItemButton,			GuiControlTemplate);
-				ADD_VIRTUAL_CONTROL_X	(ToolstripDropdownButton,	GuiToolstripButton,		g::NewToolBarDropdownButton,	GuiControlTemplate);
-				ADD_VIRTUAL_CONTROL_X	(ToolstripSplitButton,		GuiToolstripButton,		g::NewToolBarSplitButton,		GuiControlTemplate);
+				ADD_VIRTUAL_CONTROL		(MenuBarButton,				GuiToolstripButton,		g::NewMenuBarButton,			GuiToolstripButtonTemplate);
+				ADD_VIRTUAL_CONTROL		(MenuItemButton,			GuiToolstripButton,		g::NewMenuItemButton,			GuiToolstripButtonTemplate);
+				ADD_VIRTUAL_CONTROL		(ToolstripDropdownButton,	GuiToolstripButton,		g::NewToolBarDropdownButton,	GuiToolstripButtonTemplate);
+				ADD_VIRTUAL_CONTROL		(ToolstripSplitButton,		GuiToolstripButton,		g::NewToolBarSplitButton,		GuiToolstripButtonTemplate);
 				ADD_VIRTUAL_CONTROL		(ToolstripSplitter,			GuiControl,				g::NewToolBarSplitter,			GuiControlTemplate);
 				ADD_VIRTUAL_CONTROL		(CheckBox,					GuiSelectableButton,	g::NewCheckBox,					GuiSelectableButtonTemplate);
 				ADD_VIRTUAL_CONTROL		(RadioButton,				GuiSelectableButton,	g::NewRadioButton,				GuiSelectableButtonTemplate);

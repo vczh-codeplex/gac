@@ -9,6 +9,7 @@ namespace vl
 			using namespace compositions;
 			using namespace controls;
 			using namespace reflection::description;
+			using namespace collections;
 
 /***********************************************************************
 GuiControlTemplate_StyleProvider
@@ -60,6 +61,19 @@ GuiControlTemplate_StyleProvider
 			}
 
 /***********************************************************************
+GuiWindowTemplate_StyleProvider
+***********************************************************************/
+
+			GuiWindowTemplate_StyleProvider::GuiWindowTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory)
+				:GuiControlTemplate_StyleProvider(factory)
+			{
+			}
+
+			GuiWindowTemplate_StyleProvider::~GuiWindowTemplate_StyleProvider()
+			{
+			}
+
+/***********************************************************************
 GuiButtonTemplate_StyleProvider
 ***********************************************************************/
 
@@ -101,6 +115,68 @@ GuiSelectableButtonTemplate_StyleProvider
 			void GuiSelectableButtonTemplate_StyleProvider::SetSelected(bool value)
 			{
 				controlTemplate->SetSelected(value);
+			}
+
+/***********************************************************************
+GuiToolstripButtonTemplate_StyleProvider
+***********************************************************************/
+
+			void GuiToolstripButtonTemplate_StyleProvider::controlTemplate_SubMenuTemplateChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				subMenuTemplateFactory = 0;
+			}
+
+			GuiToolstripButtonTemplate_StyleProvider::GuiToolstripButtonTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory)
+				:GuiSelectableButtonTemplate_StyleProvider(factory)
+			{
+				if (!(controlTemplate = dynamic_cast<GuiToolstripButtonTemplate*>(GetBoundsComposition())))
+				{
+					CHECK_FAIL(L"GuiButtonTemplate_StyleProvider::GuiButtonTemplate_StyleProvider()#An instance of GuiSelectableButtonTemplate is expected.");
+				}
+				controlTemplate->SubMenuTemplateChanged.AttachMethod(this, &GuiToolstripButtonTemplate_StyleProvider::controlTemplate_SubMenuTemplateChanged);
+			}
+
+			GuiToolstripButtonTemplate_StyleProvider::~GuiToolstripButtonTemplate_StyleProvider()
+			{
+			}
+				
+			controls::GuiMenu::IStyleController* GuiToolstripButtonTemplate_StyleProvider::CreateSubMenuStyleController()
+			{
+				if (!subMenuTemplateFactory)
+				{
+					subMenuTemplateFactory = CreateTemplateFactory(controlTemplate->GetSubMenuTemplate());
+				}
+				return new GuiWindowTemplate_StyleProvider(subMenuTemplateFactory);
+			}
+
+			void GuiToolstripButtonTemplate_StyleProvider::SetSubMenuExisting(bool value)
+			{
+				controlTemplate->SetSubMenuExisting(value);
+			}
+
+			void GuiToolstripButtonTemplate_StyleProvider::SetSubMenuOpening(bool value)
+			{
+				controlTemplate->SetSubMenuOpening(value);
+			}
+
+			controls::GuiButton* GuiToolstripButtonTemplate_StyleProvider::GetSubMenuHost()
+			{
+				return controlTemplate->GetSubMenuHost();
+			}
+
+			void GuiToolstripButtonTemplate_StyleProvider::SetImage(Ptr<GuiImageData> value)
+			{
+				controlTemplate->SetImage(value);
+			}
+
+			void GuiToolstripButtonTemplate_StyleProvider::SetShortcutText(const WString& value)
+			{
+				controlTemplate->SetShortcutText(value);
+			}
+
+			compositions::GuiSubComponentMeasurer::IMeasuringSource* GuiToolstripButtonTemplate_StyleProvider::GetMeasuringSource()
+			{
+				return 0;
 			}
 
 /***********************************************************************
@@ -433,6 +509,49 @@ GuiTreeItemTemplate_ItemStyleController
 			controls::tree::INodeItemStyleProvider* GuiTreeItemTemplate_ItemStyleController::GetNodeStyleProvider()
 			{
 				return nodeStyleProvider;
+			}
+
+/***********************************************************************
+Helper Functions
+***********************************************************************/
+
+			void SplitBySemicolon(const WString& input, collections::List<WString>& fragments)
+			{
+				const wchar_t* attValue = input.Buffer();
+				while(*attValue)
+				{
+					// split the value by ';'
+					const wchar_t* attSemicolon = wcschr(attValue, L';');
+					WString pattern;
+					if(attSemicolon)
+					{
+						pattern = WString(attValue, attSemicolon - attValue);
+						attValue = attSemicolon + 1;
+					}
+					else
+					{
+						vint len = wcslen(attValue);
+						pattern = WString(attValue, len);
+						attValue += len;
+					}
+
+					fragments.Add(pattern);
+				}
+			}
+
+			Ptr<GuiTemplate::IFactory> CreateTemplateFactory(const WString& typeValues)
+			{
+				List<ITypeDescriptor*> types;
+				List<WString> typeNames;
+				SplitBySemicolon(typeValues, typeNames);
+				CopyFrom(
+					types,
+					From(typeNames)
+						.Select(&description::GetTypeDescriptor)
+						.Where([](ITypeDescriptor* type){return type != 0; })
+					);
+
+				return GuiTemplate::IFactory::CreateTemplateFactory(types);
 			}
 		}
 	}
