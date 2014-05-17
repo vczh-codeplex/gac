@@ -88,6 +88,13 @@ Control Template
 				GuiControlTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
 			};
 
+			class GuiWindowTemplate : public GuiControlTemplate, public Description<GuiWindowTemplate>
+			{
+			public:
+				GuiWindowTemplate();
+				~GuiWindowTemplate();
+			};
+
 			class GuiButtonTemplate : public GuiControlTemplate, public Description<GuiButtonTemplate>
 			{
 			public:
@@ -110,6 +117,23 @@ Control Template
 				F(GuiSelectableButtonTemplate, bool, Selected)\
 
 				GuiSelectableButtonTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
+			};
+
+			class GuiToolstripButtonTemplate : public GuiSelectableButtonTemplate, public Description<GuiToolstripButtonTemplate>
+			{
+			public:
+				GuiToolstripButtonTemplate();
+				~GuiToolstripButtonTemplate();
+
+#define GuiToolstripButtonTemplate_PROPERTIES(F)\
+				F(GuiToolstripButtonTemplate, WString, SubMenuTemplate)\
+				F(GuiToolstripButtonTemplate, bool, SubMenuExisting)\
+				F(GuiToolstripButtonTemplate, bool, SubMenuOpening)\
+				F(GuiToolstripButtonTemplate, controls::GuiButton*, SubMenuHost)\
+				F(GuiToolstripButtonTemplate, Ptr<GuiImageData>, Image)\
+				F(GuiToolstripButtonTemplate, WString, ShortcutText)\
+
+				GuiToolstripButtonTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
 			};
 
 /***********************************************************************
