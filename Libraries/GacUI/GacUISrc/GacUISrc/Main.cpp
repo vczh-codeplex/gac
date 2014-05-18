@@ -232,6 +232,6 @@ void GuiMain()
 
 	window.ForceCalculateSizeImmediately();
 	window.MoveToScreenCenter();
-	GetApplication()->Run(&window);
+	//GetApplication()->Run(&window);
 #endif
 }
