@@ -802,12 +802,8 @@ GuiFormatInstanceBinder
 GuiPredefinedInstanceBindersPlugin
 ***********************************************************************/
 
-		WfLexicalScopeManager* sharedWorkflowManager = 0;
-
-		WfLexicalScopeManager* GetSharedWorkflowManager()
-		{
-			return sharedWorkflowManager;
-		}
+		class GuiPredefinedInstanceBindersPlugin;
+		GuiPredefinedInstanceBindersPlugin* predefinedInstanceBinderPlugin = 0;
 
 		class GuiPredefinedInstanceBindersPlugin : public Object, public IGuiPlugin
 		{
@@ -847,15 +843,28 @@ GuiPredefinedInstanceBindersPlugin
 					manager->AddInstanceBinder(new GuiBindInstanceBinder);
 					manager->AddInstanceBinder(new GuiFormatInstanceBinder);
 				}
-				workflowManager = new WfLexicalScopeManager(GetParserManager()->GetParsingTable(L"WORKFLOW"));
-				sharedWorkflowManager = workflowManager.Obj();
+				predefinedInstanceBinderPlugin = this;
 			}
 
 			void Unload()override
 			{
-				sharedWorkflowManager = 0;
+				predefinedInstanceBinderPlugin = 0;
+			}
+
+			WfLexicalScopeManager* GetWorkflowManager()
+			{
+				if (!workflowManager)
+				{
+					workflowManager = new WfLexicalScopeManager(GetParserManager()->GetParsingTable(L"WORKFLOW"));
+				}
+				return workflowManager.Obj();
 			}
 		};
 		GUI_REGISTER_PLUGIN(GuiPredefinedInstanceBindersPlugin)
+
+		WfLexicalScopeManager* GetSharedWorkflowManager()
+		{
+			return predefinedInstanceBinderPlugin->GetWorkflowManager();
+		}
 	}
 }
