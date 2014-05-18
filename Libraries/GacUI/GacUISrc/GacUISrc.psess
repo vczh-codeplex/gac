@@ -36,7 +36,7 @@
   </PostinstrumentEvent>
   <Binaries>
     <ProjBinary>
-      <Path>Release\GacUISrc.exe</Path>
+      <Path>Debug\GacUISrc.exe</Path>
       <ArgumentTimestamp>01/01/0001 00:00:00</ArgumentTimestamp>
       <Instrument>true</Instrument>
       <Sample>true</Sample>
@@ -48,7 +48,7 @@
       <LaunchProject>true</LaunchProject>
       <OverrideProjectSettings>false</OverrideProjectSettings>
       <LaunchMethod>Executable</LaunchMethod>
-      <ExecutablePath>Release\GacUISrc.exe</ExecutablePath>
+      <ExecutablePath>Debug\GacUISrc.exe</ExecutablePath>
       <StartupDirectory>GacUISrc\</StartupDirectory>
       <Arguments>
       </Arguments>
@@ -73,6 +73,9 @@
     </Report>
     <Report>
       <Path>GacUISrc140518(1).vsp</Path>
+    </Report>
+    <Report>
+      <Path>GacUISrc140519.vsp</Path>
     </Report>
   </Reports>
   <Launches>
