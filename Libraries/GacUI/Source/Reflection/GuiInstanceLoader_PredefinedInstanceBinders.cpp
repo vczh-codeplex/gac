@@ -14,6 +14,8 @@ namespace vl
 		using namespace workflow::analyzer;
 		using namespace workflow::runtime;
 
+		extern WfLexicalScopeManager*			GetSharedWorkflowManager();
+
 /***********************************************************************
 GuiTextInstanceBinderBase
 ***********************************************************************/
@@ -153,11 +155,9 @@ GuiWorkflowGlobalContext
 		{
 		public:
 			List<WorkflowDataBinding>		dataBindings;
-			WfLexicalScopeManager			sharedManager;
 			Ptr<WfRuntimeGlobalContext>		globalContext;
 
 			GuiWorkflowGlobalContext()
-				:sharedManager(GetParserManager()->GetParsingTable(L"WORKFLOW"))
 			{
 			}
 
@@ -376,15 +376,15 @@ GuiWorkflowGlobalContext
 					}
 				}
 
-				sharedManager.Clear(true, true);
-				sharedManager.modules.Add(module);
-				sharedManager.Rebuild(true);
+				GetSharedWorkflowManager()->Clear(true, true);
+				GetSharedWorkflowManager()->modules.Add(module);
+				GetSharedWorkflowManager()->Rebuild(true);
 				WString moduleCode = WorkflowModuleToString(module);
 
-				if (sharedManager.errors.Count() > 0)
+				if (GetSharedWorkflowManager()->errors.Count() > 0)
 				{
 					env->scope->errors.Add(ERROR_CODE_PREFIX L"Unexpected errors are encountered when initializing data binding.");
-					FOREACH(Ptr<parsing::ParsingError>, error, sharedManager.errors)
+					FOREACH(Ptr<parsing::ParsingError>, error, GetSharedWorkflowManager()->errors)
 					{
 						env->scope->errors.Add(error->errorMessage);
 					}
@@ -401,7 +401,7 @@ GuiWorkflowGlobalContext
 //				}
 //#endif
 
-				auto assembly = GenerateAssembly(&sharedManager);
+				auto assembly = GenerateAssembly(GetSharedWorkflowManager());
 				globalContext = new WfRuntimeGlobalContext(assembly);
 				
 				LoadFunction<void()>(globalContext, L"<initialize>")();
@@ -469,7 +469,6 @@ GuiScriptInstanceBinder
 
 			bool SetPropertyValue(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, IGuiInstanceLoader::PropertyValue& propertyValue)override
 			{
-				auto workflowContext = env->scope->bindingContexts[L"WORKFLOW-GLOBAL-CONTEXT"].Cast<GuiWorkflowGlobalContext>();
 				if (propertyValue.propertyValue.GetValueType() == Value::Text)
 				{
 					WString expressionCode = TranslateExpression(propertyValue.propertyValue.GetText());
@@ -512,13 +511,13 @@ GuiScriptInstanceBinder
 						}
 
 						WString moduleCode = WorkflowModuleToString(module);
-						workflowContext->sharedManager.Clear(true, true);
-						workflowContext->sharedManager.modules.Add(module);
-						workflowContext->sharedManager.Rebuild(true);
-						if (workflowContext->sharedManager.errors.Count() > 0)
+						GetSharedWorkflowManager()->Clear(true, true);
+						GetSharedWorkflowManager()->modules.Add(module);
+						GetSharedWorkflowManager()->Rebuild(true);
+						if (GetSharedWorkflowManager()->errors.Count() > 0)
 						{
 							env->scope->errors.Add(ERROR_CODE_PREFIX L"Failed to analyze the workflow expression \"" + expressionCode + L"\".");
-							FOREACH(Ptr<parsing::ParsingError>, error, workflowContext->sharedManager.errors)
+							FOREACH(Ptr<parsing::ParsingError>, error, GetSharedWorkflowManager()->errors)
 							{
 								env->scope->errors.Add(error->errorMessage);
 							}
@@ -527,7 +526,7 @@ GuiScriptInstanceBinder
 						else if (propertyInfo)
 						{
 							auto bind = expression.Cast<WfBindExpression>();
-							auto result = workflowContext->sharedManager.expressionResolvings[(bind ? bind->expression : expression).Obj()];
+							auto result = GetSharedWorkflowManager()->expressionResolvings[(bind ? bind->expression : expression).Obj()];
 							if (result.type)
 							{
 								ITypeInfo* propertyType = propertyInfo->GetReturn();
@@ -594,7 +593,6 @@ GuiEvalInstanceBinder
 
 			description::Value GetValue(Ptr<GuiInstanceEnvironment> env, const description::Value& propertyValue)override
 			{
-				auto workflowContext = env->scope->bindingContexts[L"WORKFLOW-GLOBAL-CONTEXT"].Cast<GuiWorkflowGlobalContext>();
 				if (propertyValue.GetValueType() == Value::Text)
 				{
 					WString expressionCode = TranslateExpression(propertyValue.GetText());
@@ -620,13 +618,13 @@ GuiEvalInstanceBinder
 					}
 
 					WString moduleCode = WorkflowModuleToString(module);
-					workflowContext->sharedManager.Clear(true, true);
-					workflowContext->sharedManager.modules.Add(module);
-					workflowContext->sharedManager.Rebuild(true);
-					if (workflowContext->sharedManager.errors.Count() > 0)
+					GetSharedWorkflowManager()->Clear(true, true);
+					GetSharedWorkflowManager()->modules.Add(module);
+					GetSharedWorkflowManager()->Rebuild(true);
+					if (GetSharedWorkflowManager()->errors.Count() > 0)
 					{
 						env->scope->errors.Add(ERROR_CODE_PREFIX L"Failed to analyze the workflow expression \"" + expressionCode + L"\".");
-						FOREACH(Ptr<parsing::ParsingError>, error, workflowContext->sharedManager.errors)
+						FOREACH(Ptr<parsing::ParsingError>, error, GetSharedWorkflowManager()->errors)
 						{
 							env->scope->errors.Add(error->errorMessage);
 						}
@@ -641,7 +639,7 @@ GuiEvalInstanceBinder
 //					}
 //#endif
 
-					auto assembly = GenerateAssembly(&workflowContext->sharedManager);
+					auto assembly = GenerateAssembly(GetSharedWorkflowManager());
 					auto globalContext = MakePtr<WfRuntimeGlobalContext>(assembly);
 				
 					LoadFunction<void()>(globalContext, L"<initialize>")();
@@ -679,12 +677,10 @@ GuiEvalInstanceEventBinder
 
 			void GetRequiredContexts(collections::List<WString>& contextNames)override
 			{
-				contextNames.Add(L"WORKFLOW-GLOBAL-CONTEXT");
 			}
 
 			bool AttachEvent(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, IGuiInstanceLoader::PropertyValue& propertyValue)
 			{
-				auto workflowContext = env->scope->bindingContexts[L"WORKFLOW-GLOBAL-CONTEXT"].Cast<GuiWorkflowGlobalContext>();
 				auto handler = propertyValue.propertyValue;
 				if (handler.GetValueType() == Value::Text)
 				{
@@ -728,13 +724,13 @@ GuiEvalInstanceEventBinder
 					}
 
 					WString moduleCode = WorkflowModuleToString(module);
-					workflowContext->sharedManager.Clear(true, true);
-					workflowContext->sharedManager.modules.Add(module);
-					workflowContext->sharedManager.Rebuild(true);
-					if (workflowContext->sharedManager.errors.Count() > 0)
+					GetSharedWorkflowManager()->Clear(true, true);
+					GetSharedWorkflowManager()->modules.Add(module);
+					GetSharedWorkflowManager()->Rebuild(true);
+					if (GetSharedWorkflowManager()->errors.Count() > 0)
 					{
 						env->scope->errors.Add(ERROR_CODE_PREFIX L"Failed to analyze the workflow statement \"" + statementCode + L"\".");
-						FOREACH(Ptr<parsing::ParsingError>, error, workflowContext->sharedManager.errors)
+						FOREACH(Ptr<parsing::ParsingError>, error, GetSharedWorkflowManager()->errors)
 						{
 							env->scope->errors.Add(error->errorMessage);
 						}
@@ -749,7 +745,7 @@ GuiEvalInstanceEventBinder
 //					}
 //#endif
 
-					auto assembly = GenerateAssembly(&workflowContext->sharedManager);
+					auto assembly = GenerateAssembly(GetSharedWorkflowManager());
 					auto globalContext = MakePtr<WfRuntimeGlobalContext>(assembly);
 				
 					LoadFunction<void()>(globalContext, L"<initialize>")();
@@ -806,9 +802,23 @@ GuiFormatInstanceBinder
 GuiPredefinedInstanceBindersPlugin
 ***********************************************************************/
 
+		WfLexicalScopeManager* sharedWorkflowManager = 0;
+
+		WfLexicalScopeManager* GetSharedWorkflowManager()
+		{
+			return sharedWorkflowManager;
+		}
+
 		class GuiPredefinedInstanceBindersPlugin : public Object, public IGuiPlugin
 		{
+		protected:
+			Ptr<WfLexicalScopeManager>		workflowManager;
+
 		public:
+			GuiPredefinedInstanceBindersPlugin()
+			{
+			}
+
 			void Load()override
 			{
 				WfLoadTypes();
@@ -837,10 +847,13 @@ GuiPredefinedInstanceBindersPlugin
 					manager->AddInstanceBinder(new GuiBindInstanceBinder);
 					manager->AddInstanceBinder(new GuiFormatInstanceBinder);
 				}
+				workflowManager = new WfLexicalScopeManager(GetParserManager()->GetParsingTable(L"WORKFLOW"));
+				sharedWorkflowManager = workflowManager.Obj();
 			}
 
 			void Unload()override
 			{
+				sharedWorkflowManager = 0;
 			}
 		};
 		GUI_REGISTER_PLUGIN(GuiPredefinedInstanceBindersPlugin)
