@@ -78,6 +78,13 @@ Helper Functions Declarations
 			Ptr<GuiInstanceEnvironment> env
 			);
 
+		bool PrepareBindingContext(
+			Ptr<GuiInstanceEnvironment> env,
+			collections::List<WString>& contextNames,
+			const WString& dependerType,
+			const WString& dependerName
+			);
+
 		void ExecuteBindingSetters(
 			Ptr<GuiInstanceEnvironment> env,
 			List<FillInstanceBindingSetter>& bindingSetters
@@ -377,38 +384,45 @@ LoadInstancePropertyValue
 									}
 									else if (IGuiInstanceBinder* binder=GetInstanceLoaderManager()->GetInstanceBinder(binding))
 									{
-										// other binding: provide the property value to the specified binder
-										List<ITypeDescriptor*> binderExpectedTypes;
-										binder->GetExpectedValueTypes(binderExpectedTypes);
-										if (LoadValueVisitor::LoadValue(valueRepr, env, binderExpectedTypes, bindingSetters, eventSetters, propertyValue.propertyValue))
+										List<WString> contextNames;
+										binder->GetRequiredContexts(contextNames);
+										bool success = PrepareBindingContext(env, contextNames, L"property binding", binder->GetBindingName());
+
+										if (success)
 										{
-											canRemoveLoadedValue = true;
-											if (constructorArgument)
+											// other binding: provide the property value to the specified binder
+											List<ITypeDescriptor*> binderExpectedTypes;
+											binder->GetExpectedValueTypes(binderExpectedTypes);
+											if (LoadValueVisitor::LoadValue(valueRepr, env, binderExpectedTypes, bindingSetters, eventSetters, propertyValue.propertyValue))
 											{
-												auto translatedValue = binder->GetValue(env, propertyValue.propertyValue);
-												if (translatedValue.IsNull())
+												canRemoveLoadedValue = true;
+												if (constructorArgument)
 												{
-													env->scope->errors.Add(
-														L"Assignable property \"" +
-														propertyValue.propertyName +
-														L"\" of type \"" +
-														instanceType +
-														L"\" cannot be assigned using binding \"" +
-														binding +
-														L"\" because the value translation failed.");
+													auto translatedValue = binder->GetValue(env, propertyValue.propertyValue);
+													if (translatedValue.IsNull())
+													{
+														env->scope->errors.Add(
+															L"Assignable property \"" +
+															propertyValue.propertyName +
+															L"\" of type \"" +
+															instanceType +
+															L"\" cannot be assigned using binding \"" +
+															binding +
+															L"\" because the value translation failed.");
+													}
+													else
+													{
+														output.Add(Pair<Value, IGuiInstanceLoader*>(translatedValue, propertyLoader));
+													}
 												}
 												else
 												{
-													output.Add(Pair<Value, IGuiInstanceLoader*>(translatedValue, propertyLoader));
+													FillInstanceBindingSetter bindingSetter;
+													bindingSetter.binder = binder;
+													bindingSetter.loader = propertyLoader;
+													bindingSetter.propertyValue = propertyValue;
+													bindingSetters.Add(bindingSetter);
 												}
-											}
-											else
-											{
-												FillInstanceBindingSetter bindingSetter;
-												bindingSetter.binder = binder;
-												bindingSetter.loader = propertyLoader;
-												bindingSetter.propertyValue = propertyValue;
-												bindingSetters.Add(bindingSetter);
 											}
 										}
 									}
@@ -910,6 +924,40 @@ ExecuteBindingSetters
 ExecuteBindingSetters
 ***********************************************************************/
 
+		bool PrepareBindingContext(
+			Ptr<GuiInstanceEnvironment> env,
+			collections::List<WString>& contextNames,
+			const WString& dependerType,
+			const WString& dependerName
+			)
+		{
+			bool success = true;
+			FOREACH(WString, contextName, contextNames)
+			{
+				if (!env->scope->bindingContexts.Keys().Contains(contextName))
+				{
+					auto factory = GetInstanceLoaderManager()->GetInstanceBindingContextFactory(contextName);
+					if (factory)
+					{
+						env->scope->bindingContexts.Add(contextName, factory->CreateContext());
+					}
+					else
+					{
+						env->scope->errors.Add(
+							L"Failed to create binding context \"" +
+							contextName +
+							L"\" which is required by " +
+							dependerType +
+							L" \"" +
+							dependerName +
+							L"\".");
+						success = false;
+					}
+				}
+			}
+			return success;
+		}
+
 		void ExecuteBindingSetters(
 			Ptr<GuiInstanceEnvironment> env,
 			List<FillInstanceBindingSetter>& bindingSetters
@@ -920,30 +968,9 @@ ExecuteBindingSetters
 			{
 				List<WString> contextNames;
 				bindingSetter.binder->GetRequiredContexts(contextNames);
-				bool failed = false;
-				FOREACH(WString, contextName, contextNames)
-				{
-					if (!env->scope->bindingContexts.Keys().Contains(contextName))
-					{
-						auto factory = GetInstanceLoaderManager()->GetInstanceBindingContextFactory(contextName);
-						if (factory)
-						{
-							env->scope->bindingContexts.Add(contextName, factory->CreateContext());
-						}
-						else
-						{
-							env->scope->errors.Add(
-								L"Failed to create binding context \"" +
-								contextName +
-								L"\" which is required by binding \"" +
-								bindingSetter.binder->GetBindingName() +
-								L"\".");
-							failed = true;
-						}
-					}
-				}
+				bool success = PrepareBindingContext(env, contextNames, L"property binding", bindingSetter.binder->GetBindingName());
 
-				if (failed || !bindingSetter.binder->SetPropertyValue(env, bindingSetter.loader, bindingSetter.propertyValue))
+				if (!success || !bindingSetter.binder->SetPropertyValue(env, bindingSetter.loader, bindingSetter.propertyValue))
 				{
 					auto value = bindingSetter.propertyValue.propertyValue;
 					env->scope->errors.Add(
@@ -987,9 +1014,13 @@ ExecuteBindingSetters
 			{
 				if (eventSetter.binder)
 				{
+					List<WString> contextNames;
+					eventSetter.binder->GetRequiredContexts(contextNames);
 					auto propertyValue = eventSetter.propertyValue;
 					propertyValue.propertyValue = BoxValue(eventSetter.handlerName);
-					if (!eventSetter.binder->AttachEvent(env, eventSetter.loader, propertyValue))
+					bool success = PrepareBindingContext(env, contextNames, L"event binding", eventSetter.binder->GetBindingName());
+
+					if (!success || !eventSetter.binder->AttachEvent(env, eventSetter.loader, propertyValue))
 					{
 						env->scope->errors.Add(
 							L"Failed to attach event \"" +
