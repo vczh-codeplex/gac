@@ -71,6 +71,9 @@
     <Report>
       <Path>GacUISrc140518.vsp</Path>
     </Report>
+    <Report>
+      <Path>GacUISrc140518(1).vsp</Path>
+    </Report>
   </Reports>
   <Launches>
     <ProjBinary>
