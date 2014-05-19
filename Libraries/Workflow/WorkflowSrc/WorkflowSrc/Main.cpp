@@ -14,7 +14,11 @@ Ptr<ParsingTable> GetWorkflowTable()
 {
 	if (!workflowTable)
 	{
+		unittest::UnitTest::PrintInfo(L"GetWorkFlowTable()");
 		workflowTable = WfLoadTable();
+		unittest::UnitTest::PrintInfo(L"Finished WfLoadTable()");
+		unittest::UnitTest::PrintInfo(L"Finished serializing parsing table");
+		unittest::UnitTest::PrintInfo(L"Finished deserializing parsing table");
 	}
 	return workflowTable;
 }
