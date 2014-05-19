@@ -191,6 +191,18 @@ ParsingTable::TransitionItem
 			}
 
 /***********************************************************************
+ParsingTable (Serialization)
+***********************************************************************/
+
+			ParsingTable::ParsingTable(stream::IStream& input)
+			{
+			}
+
+			void ParsingTable::Serialize(stream::IStream& output)
+			{
+			}
+
+/***********************************************************************
 ParsingTable
 ***********************************************************************/
 
