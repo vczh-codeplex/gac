@@ -194,6 +194,70 @@ ParsingTable::TransitionItem
 ParsingTable (Serialization)
 ***********************************************************************/
 
+			/*
+			[bool ambiguity]
+			[Ptr<AttributeInfoList>[] attributeInfos
+				[Ptr<AttributeInfo>[] attributes
+					[string name]
+					[string[] arguments
+						[string <item>]
+					]
+				]
+			]
+			[TreeTypeInfo[] treeTypeInfos
+				[string type]
+				[int32 attributeIndex]
+			]
+			[TreeFieldInfo[] treeFieldInfos
+				[string type]
+				[string field]
+				[int32 attributeIndex]
+			]
+			[TokenInfo[] tokenInfos
+				[string name]
+				[string regex]
+				[int32 regexTokenIndex]
+				[int32 attributeIndex]
+			]
+			[TokenInfo[] discardTokenInfos
+				...
+			]
+			[StateInfo[] stateInfos
+				[string ruleName]
+				[string stateName]
+				[string stateExpression]
+			]
+			[RuleInfo[] ruleInfos
+				[string name]
+				[string type]
+				[string ambiguousType]
+				[int32 rootStartState]
+				[int32 attributeIndex]
+			]
+			[Ptr<TransitionBag>[] transitionBags
+				[Ptr<TransitionItem>[] transitionItems
+					[int32 token]
+					[int32 targetState]
+					[Ptr<LookAheadInfo>[] lookAheads
+						[int32[] tokens
+							[int32 <item>]
+						]
+						[int32 state]
+					]
+					[in32t[] stackPattern
+						[int32 <item>]
+					]
+					[Instruction[] instructions
+						[int32 instructionType]
+						[int32 stateParameter]
+						[string nameParameter]
+						[string value]
+						[string creatorRule]
+					]
+				]
+			]
+			*/
+
 			ParsingTable::ParsingTable(stream::IStream& input)
 			{
 			}
