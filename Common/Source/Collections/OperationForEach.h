@@ -1,6 +1,6 @@
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: ³Âè÷å«(vczh)
+Developer: Zihan Chen(vczh)
 Data Structure::Operations
 
 À©Õ¹£º

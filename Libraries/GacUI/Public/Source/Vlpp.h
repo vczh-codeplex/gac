@@ -8,7 +8,7 @@ BASIC.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Framework::Basic
 
 Classes:
@@ -623,7 +623,7 @@ STRING.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Data Structure::String
 
 Classes:
@@ -1139,7 +1139,7 @@ CONSOLE.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 UI::Console
 
 ***********************************************************************/
@@ -1173,7 +1173,7 @@ EXCEPTION.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Framework::Exception
 
 Classes:
@@ -1232,7 +1232,7 @@ POINTER.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Data Structure::Smart Pointer
 
 Classes:
@@ -1804,7 +1804,7 @@ COLLECTIONS\PAIR.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Data Structure::Pair
 
 Classes:
@@ -1912,7 +1912,7 @@ COLLECTIONS\INTERFACES.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Data Structure::Interfaces
 
 Interfaces:
@@ -2009,7 +2009,7 @@ COLLECTIONS\LIST.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Data Structure::List
 
 Classes:
@@ -2568,7 +2568,7 @@ COLLECTIONS\DICTIONARY.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Data Structure::Dictionary
 
 Classes:
@@ -3149,7 +3149,7 @@ COLLECTIONS\OPERATIONFOREACH.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Data Structure::Operations
 
 扩展：
@@ -3245,7 +3245,7 @@ LOCALE.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Framework::Locale
 
 Interfaces:
@@ -3340,7 +3340,7 @@ REGEX\REGEX.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Regex::Regular Expression
 
 Classes:
@@ -3548,7 +3548,7 @@ STREAM\INTERFACES.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Stream::Interfaces
 
 Interfaces:
@@ -3608,7 +3608,7 @@ STREAM\ACCESSOR.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Stream::Accessor
 
 Classes:
@@ -3767,7 +3767,7 @@ COLLECTIONS\OPERATIONCOPYFROM.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Data Structure::Operations
 
 ***********************************************************************/
@@ -3931,7 +3931,7 @@ FUNCTION.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Framework::Function
 
 Classes:
@@ -4303,7 +4303,7 @@ EVENT.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Framework::Event
 
 Classes:
@@ -4394,7 +4394,7 @@ COLLECTIONS\OPERATIONENUMERABLE.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Data Structure::Operations
 
 ***********************************************************************/
@@ -4629,7 +4629,7 @@ COLLECTIONS\OPERATIONSELECT.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Data Structure::Operations
 
 ***********************************************************************/
@@ -4710,7 +4710,7 @@ COLLECTIONS\OPERATIONWHERE.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Data Structure::Operations
 
 ***********************************************************************/
@@ -4792,7 +4792,7 @@ COLLECTIONS\OPERATIONCONCAT.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Data Structure::Operations
 
 ***********************************************************************/
@@ -4899,7 +4899,7 @@ COLLECTIONS\OPERATIONSEQUENCE.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Data Structure::Operations
 
 ***********************************************************************/
@@ -5337,7 +5337,7 @@ COLLECTIONS\OPERATIONSET.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Data Structure::Operations
 
 ***********************************************************************/
@@ -5427,7 +5427,7 @@ COLLECTIONS\OPERATIONPAIR.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Data Structure::Operations
 
 ***********************************************************************/
@@ -5515,7 +5515,7 @@ COLLECTIONS\OPERATIONSTRING.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Data Structure::Operations
 
 ***********************************************************************/
@@ -5560,7 +5560,7 @@ COLLECTIONS\OPERATION.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Data Structure::Operations
 
 Functions:
@@ -6016,7 +6016,7 @@ REFLECTION\GUITYPEDESCRIPTOR.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Framework::Reflection
 
 XML Representation for Code Generation:
@@ -6640,7 +6640,7 @@ PARSING\PARSINGTREE.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Parsing::Parsing Tree
 
 Classes:
@@ -7169,7 +7169,7 @@ PARSING\PARSINGTABLE.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Parsing::Table
 
 Classes:
@@ -7507,7 +7507,7 @@ PARSING\PARSINGSTATE.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Parsing::State
 
 Classes:
@@ -7834,7 +7834,7 @@ REFLECTION\GUITYPEDESCRIPTORPREDEFINED.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Framework::Reflection
 
 XML Representation for Code Generation:
@@ -8349,7 +8349,7 @@ REFLECTION\GUITYPEDESCRIPTORBUILDER.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Framework::Reflection
 
 Interfaces:
@@ -9220,7 +9220,7 @@ REFLECTION\GUITYPEDESCRIPTORBUILDER_STRUCT.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Framework::Reflection
 	
 Interfaces:
@@ -9548,7 +9548,7 @@ REFLECTION\GUITYPEDESCRIPTORBUILDER_FUNCTION.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Framework::Reflection
 	
 Interfaces:
@@ -10135,7 +10135,7 @@ REFLECTION\GUITYPEDESCRIPTORBUILDER_CONTAINER.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Framework::Reflection
 	
 Interfaces:
@@ -10800,7 +10800,7 @@ REFLECTION\GUITYPEDESCRIPTORMACROS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Framework::Reflection
 
 Classes:
@@ -11127,7 +11127,7 @@ PARSING\PARSING.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Parsing::Parser
 
 Classes:
@@ -11320,7 +11320,7 @@ PARSING\PARSINGDEFINITIONS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Parsing::Definitions
 
 Classes:
@@ -11827,7 +11827,7 @@ PARSING\PARSINGANALYZER.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Parsing::Analyzing
 
 Classes:
@@ -12004,7 +12004,7 @@ PARSING\PARSINGAUTOMATON.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Parsing::Automaton
 
 Classes:
@@ -12230,7 +12230,7 @@ PARSING\JSON\PARSINGJSON_PARSER.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Parser::ParsingJson_Parser
 
 本文件使用Vczh Parsing Generator工具自动生成
@@ -12444,7 +12444,7 @@ PARSING\JSON\PARSINGJSON.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Parser::ParsingJson_Parser
 
 ***********************************************************************/
@@ -12474,7 +12474,7 @@ STREAM\MEMORYSTREAM.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Stream::MemoryStream
 
 Interfaces:
@@ -12530,7 +12530,7 @@ REGEX\REGEXDATA.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Regex::Basic Data Structure
 
 Classes:
@@ -12591,7 +12591,7 @@ REGEX\REGEXAUTOMATON.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Regex::RegexAutomaton
 
 Classes:
@@ -12692,7 +12692,7 @@ REGEX\REGEXEXPRESSION.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Regex::RegexExpression
 
 Classes:
@@ -13075,7 +13075,7 @@ PARSING\XML\PARSINGXML_PARSER.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Parser::ParsingXml_Parser
 
 本文件使用Vczh Parsing Generator工具自动生成
@@ -13310,7 +13310,7 @@ PARSING\XML\PARSINGXML.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Parser::ParsingXml
 
 ***********************************************************************/
@@ -13375,7 +13375,7 @@ REGEX\REGEXPURE.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Regex::RegexInterpretor
 
 Classes:
@@ -13440,7 +13440,7 @@ REGEX\REGEXRICH.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Regex::RegexInterpretor
 
 Classes:
@@ -13512,7 +13512,7 @@ REGEX\REGEXWRITER.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Regex::RegexWriter
 
 Classes:
@@ -13567,7 +13567,7 @@ STREAM\BROADCASTSTREAM.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Stream::BroadcastStream
 
 Interfaces:
@@ -13620,7 +13620,7 @@ STREAM\CACHESTREAM.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Stream::CacheStream
 
 Interfaces:
@@ -13683,7 +13683,7 @@ STREAM\CHARFORMAT.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Stream::CharFormat
 
 Classes:
@@ -13914,7 +13914,7 @@ STREAM\FILESTREAM.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Stream::FileStream
 
 Interfaces:
@@ -13972,7 +13972,7 @@ STREAM\MEMORYWRAPPERSTREAM.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Stream::MemoryWrapperStream
 
 Interfaces:
@@ -14023,7 +14023,7 @@ STREAM\RECORDERSTREAM.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Stream::RecorderStream
 
 Interfaces:
@@ -14073,7 +14073,7 @@ THREADING.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Framework::Threading
 
 Classes:
@@ -14438,7 +14438,7 @@ TUPLE.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Framework::Tuple
 	
 本文件使用Vczh Functional Macro工具自动生成

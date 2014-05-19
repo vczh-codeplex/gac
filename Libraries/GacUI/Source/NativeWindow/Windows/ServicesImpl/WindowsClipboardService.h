@@ -1,6 +1,6 @@
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: іВиче«(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Native Window::Windows Implementation
 
 Interfaces:

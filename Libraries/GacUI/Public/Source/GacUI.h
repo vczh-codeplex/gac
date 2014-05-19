@@ -9,7 +9,7 @@ GACVLPPREFERENCES.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI Vczh Library++ 3.0 References
 
 Interfaces:
@@ -25,7 +25,7 @@ GUITYPES.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Common Types
 
 Classes:
@@ -567,7 +567,7 @@ GRAPHICSELEMENT\GUIGRAPHICSELEMENTINTERFACES.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Element System and Infrastructure Interfaces
 
 Interfaces:
@@ -649,7 +649,7 @@ GRAPHICSELEMENT\GUIGRAPHICSDOCUMENTINTERFACES.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Element System and Infrastructure Interfaces
 
 Interfaces:
@@ -766,7 +766,7 @@ NATIVEWINDOW\GUINATIVEWINDOW.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Native Window
 
 Interfaces:
@@ -1550,7 +1550,7 @@ GRAPHICSELEMENT\GUIGRAPHICSRESOURCEMANAGER.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Element System and Infrastructure Interfaces
 
 Interfaces:
@@ -1776,7 +1776,7 @@ RESOURCES\GUIRESOURCE.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Resource
 
 Interfaces:
@@ -2022,7 +2022,7 @@ RESOURCES\GUIDOCUMENT.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Resource
 
 Interfaces:
@@ -2287,7 +2287,7 @@ GRAPHICSELEMENT\GUIGRAPHICSELEMENT.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Element System and Infrastructure Interfaces
 
 Interfaces:
@@ -2566,7 +2566,7 @@ GRAPHICSELEMENT\GUIGRAPHICSTEXTELEMENT.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Element System
 
 Interfaces:
@@ -2779,7 +2779,7 @@ GRAPHICSELEMENT\GUIGRAPHICSDOCUMENTELEMENT.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Element System
 
 Interfaces:
@@ -2913,7 +2913,7 @@ GRAPHICSCOMPOSITION\GUIGRAPHICSEVENTRECEIVER.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Event Model
 
 Interfaces:
@@ -3318,7 +3318,7 @@ GRAPHICSCOMPOSITION\GUIGRAPHICSCOMPOSITIONBASE.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Composition System
 
 Interfaces:
@@ -3472,7 +3472,7 @@ GRAPHICSCOMPOSITION\GUIGRAPHICSBASICCOMPOSITION.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Composition System
 
 Interfaces:
@@ -3541,7 +3541,7 @@ GRAPHICSCOMPOSITION\GUIGRAPHICSTABLECOMPOSITION.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Composition System
 
 Interfaces:
@@ -3728,7 +3728,7 @@ GRAPHICSCOMPOSITION\GUIGRAPHICSSTACKCOMPOSITION.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Composition System
 
 Interfaces:
@@ -3831,7 +3831,7 @@ GRAPHICSCOMPOSITION\GUIGRAPHICSSPECIALIZEDCOMPOSITION.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Composition System
 
 Interfaces:
@@ -3916,7 +3916,7 @@ GRAPHICSCOMPOSITION\GUIGRAPHICSCOMPOSITION.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Composition System
 
 Interfaces:
@@ -4004,7 +4004,7 @@ GRAPHICSELEMENT\GUIGRAPHICSHOST.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Graphics Composition Host
 
 Interfaces:
@@ -4224,7 +4224,7 @@ CONTROLS\GUIBASICCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Control System
 
 Interfaces:
@@ -4381,20 +4381,6 @@ Basic Construction
 
 			class GuiCustomControl : public GuiControl, public GuiInstanceRootObject, public Description<GuiCustomControl>
 			{
-
-			public:
-				class IStyleController : virtual public GuiControl::IStyleController, public Description<IStyleController>
-				{
-				public:
-				};
-
-#pragma warning(push)
-#pragma warning(disable:4250)
-				class EmptyStyleController : public GuiControl::EmptyStyleController, public virtual IStyleController, public Description<EmptyStyleController>
-				{
-				};
-#pragma warning(pop)
-
 			public:
 				GuiCustomControl(IStyleController* _styleController);
 				~GuiCustomControl();
@@ -4879,7 +4865,7 @@ CONTROLS\GUIWINDOWCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Control System
 
 Interfaces:
@@ -5119,7 +5105,7 @@ CONTROLS\GUIAPPLICATION.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Application Framework
 
 Interfaces:
@@ -5271,7 +5257,7 @@ CONTROLS\GUICONTAINERCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Control System
 
 Interfaces:
@@ -5501,7 +5487,7 @@ CONTROLS\LISTCONTROLPACKAGE\GUILISTCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Control System
 
 Interfaces:
@@ -6056,7 +6042,7 @@ CONTROLS\LISTCONTROLPACKAGE\GUITEXTLISTCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Control System
 
 Interfaces:
@@ -6231,7 +6217,7 @@ CONTROLS\TOOLSTRIPPACKAGE\GUIMENUCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Control System
 
 Interfaces:
@@ -6400,7 +6386,7 @@ CONTROLS\LISTCONTROLPACKAGE\GUILISTVIEWCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Control System
 
 Interfaces:
@@ -7043,7 +7029,7 @@ CONTROLS\LISTCONTROLPACKAGE\GUITREEVIEWCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Control System
 
 Interfaces:
@@ -7202,7 +7188,8 @@ GuiVirtualTreeListControl NodeProvider
 					virtual vint									GetItemStyleId(INodeProvider* node)=0;
 					virtual INodeItemStyleController*				CreateItemStyle(vint styleId)=0;
 					virtual void									DestroyItemStyle(INodeItemStyleController* style)=0;
-					virtual void									Install(INodeItemStyleController* style, INodeProvider* node)=0;
+					virtual void									Install(INodeItemStyleController* style, INodeProvider* node, vint itemIndex)=0;
+					virtual void									SetStyleIndex(INodeItemStyleController* style, vint value)=0;
 					virtual void									SetStyleSelected(INodeItemStyleController* style, bool value)=0;
 				};
 				
@@ -7523,7 +7510,8 @@ TreeView
 					vint									GetItemStyleId(INodeProvider* node)override;
 					INodeItemStyleController*				CreateItemStyle(vint styleId)override;
 					void									DestroyItemStyle(INodeItemStyleController* style)override;
-					void									Install(INodeItemStyleController* style, INodeProvider* node)override;
+					void									Install(INodeItemStyleController* style, INodeProvider* node, vint itemIndex)override;
+					void									SetStyleIndex(INodeItemStyleController* style, vint value)override;
 					void									SetStyleSelected(INodeItemStyleController* style, bool value)override;
 				};
 			}
@@ -7551,7 +7539,7 @@ CONTROLS\LISTCONTROLPACKAGE\GUICOMBOCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Control System
 
 Interfaces:
@@ -7650,7 +7638,7 @@ CONTROLS\GUIDATETIMECONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Control System
 
 Interfaces:
@@ -7800,7 +7788,7 @@ CONTROLS\TEXTEDITORPACKAGE\GUITEXTGENERALOPERATIONS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Control System
 
 Interfaces:
@@ -8062,7 +8050,7 @@ CONTROLS\TEXTEDITORPACKAGE\GUITEXTCOLORIZER.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Control System
 
 Interfaces:
@@ -8220,7 +8208,7 @@ CONTROLS\TEXTEDITORPACKAGE\GUITEXTAUTOCOMPLETE.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Control System
 
 Interfaces:
@@ -8383,7 +8371,7 @@ CONTROLS\TEXTEDITORPACKAGE\GUITEXTUNDOREDO.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Control System
 
 Interfaces:
@@ -8560,7 +8548,7 @@ CONTROLS\TEXTEDITORPACKAGE\GUITEXTCOMMONINTERFACE.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Control System
 
 Interfaces:
@@ -8735,7 +8723,7 @@ CONTROLS\TEXTEDITORPACKAGE\GUITEXTCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Control System
 
 Interfaces:
@@ -8904,7 +8892,7 @@ CONTROLS\TEXTEDITORPACKAGE\GUIDOCUMENTVIEWER.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Control System
 
 Interfaces:
@@ -9080,7 +9068,7 @@ CONTROLS\LISTCONTROLPACKAGE\GUIDATAGRIDINTERFACES.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Control System
 
 Interfaces:
@@ -9269,7 +9257,7 @@ CONTROLS\LISTCONTROLPACKAGE\GUIDATAGRIDSTRUCTURED.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Control System
 
 Interfaces:
@@ -9680,7 +9668,7 @@ CONTROLS\LISTCONTROLPACKAGE\GUIDATAGRIDEXTENSIONS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Control System
 
 Interfaces:
@@ -9968,7 +9956,7 @@ CONTROLS\LISTCONTROLPACKAGE\GUIDATAGRIDCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Control System
 
 Interfaces:
@@ -10276,7 +10264,7 @@ CONTROLS\LISTCONTROLPACKAGE\GUIBINDABLELISTCONTROL.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Control System
 
 Interfaces:
@@ -10650,7 +10638,7 @@ CONTROLS\TOOLSTRIPPACKAGE\GUITOOLSTRIPCOMMAND.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Control System
 
 Interfaces:
@@ -10727,7 +10715,7 @@ CONTROLS\TOOLSTRIPPACKAGE\GUITOOLSTRIPMENU.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Control System
 
 Interfaces:
@@ -10918,7 +10906,7 @@ CONTROLS\STYLES\GUITHEMESTYLEFACTORY.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Control Styles::Common Style Helpers
 
 Interfaces:
@@ -11050,7 +11038,7 @@ CONTROLS\STYLES\GUIWIN7STYLES.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Control Styles::Windows7 Styles
 
 Clases:
@@ -11134,7 +11122,7 @@ CONTROLS\STYLES\GUIWIN8STYLES.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Control Styles::Windows8 Styles
 
 Clases:
@@ -11218,7 +11206,7 @@ CONTROLS\STYLES\GUICOMMONSTYLES.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Control Styles::Common Style Helpers
 
 Interfaces:
@@ -11486,7 +11474,7 @@ CONTROLS\STYLES\WIN7STYLES\GUIWIN7STYLESCOMMON.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Control Styles::Windows7 Styles
 
 Clases:
@@ -11684,7 +11672,7 @@ CONTROLS\STYLES\WIN7STYLES\GUIWIN7CONTROLSTYLES.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Control Styles::Windows7 Styles
 
 Clases:
@@ -11831,7 +11819,7 @@ CONTROLS\STYLES\WIN7STYLES\GUIWIN7BUTTONSTYLES.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Control Styles::Windows7 Styles
 
 Clases:
@@ -11939,7 +11927,7 @@ CONTROLS\STYLES\WIN7STYLES\GUIWIN7MENUSTYLES.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Control Styles::Windows7 Styles
 
 Clases:
@@ -12096,7 +12084,7 @@ CONTROLS\STYLES\WIN7STYLES\GUIWIN7TABSTYLES.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Control Styles::Windows7 Styles
 
 Clases:
@@ -12192,7 +12180,7 @@ CONTROLS\STYLES\WIN7STYLES\GUIWIN7TOOLSTRIPSTYLES.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Control Styles::Windows7 Styles
 
 Clases:
@@ -12314,7 +12302,7 @@ CONTROLS\STYLES\WIN7STYLES\GUIWIN7SCROLLABLESTYLES.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Control Styles::Windows7 Styles
 
 Clases:
@@ -12508,7 +12496,7 @@ CONTROLS\STYLES\WIN7STYLES\GUIWIN7LISTSTYLES.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Control Styles::Windows7 Styles
 
 Clases:
@@ -12747,7 +12735,7 @@ CONTROLS\STYLES\WIN8STYLES\GUIWIN8STYLESCOMMON.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Control Styles::Windows8 Styles
 
 Clases:
@@ -12939,7 +12927,7 @@ CONTROLS\STYLES\WIN8STYLES\GUIWIN8CONTROLSTYLES.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Control Styles::Windows8 Styles
 
 Clases:
@@ -13085,7 +13073,7 @@ CONTROLS\STYLES\WIN8STYLES\GUIWIN8BUTTONSTYLES.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Control Styles::Windows8 Styles
 
 Clases:
@@ -13193,7 +13181,7 @@ CONTROLS\STYLES\WIN8STYLES\GUIWIN8MENUSTYLES.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Control Styles::Windows8 Styles
 
 Clases:
@@ -13351,7 +13339,7 @@ CONTROLS\STYLES\WIN8STYLES\GUIWIN8TABSTYLES.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Control Styles::Windows8 Styles
 
 Clases:
@@ -13408,7 +13396,7 @@ CONTROLS\STYLES\WIN8STYLES\GUIWIN8TOOLSTRIPSTYLES.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Control Styles::Windows8 Styles
 
 Clases:
@@ -13540,7 +13528,7 @@ CONTROLS\STYLES\WIN8STYLES\GUIWIN8SCROLLABLESTYLES.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Control Styles::Windows8 Styles
 
 Clases:
@@ -13742,7 +13730,7 @@ CONTROLS\STYLES\WIN8STYLES\GUIWIN8LISTSTYLES.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Control Styles::Windows8 Styles
 
 Clases:
@@ -13876,7 +13864,7 @@ CONTROLS\TEMPLATES\GUICONTROLTEMPLATES.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Template System
 
 Interfaces:
@@ -13892,6 +13880,32 @@ namespace vl
 	{
 		namespace templates
 		{
+
+#define GUI_TEMPLATE_PROPERTY_DECL(CLASS, TYPE, NAME)\
+			private:\
+				TYPE NAME##_;\
+			public:\
+				TYPE Get##NAME();\
+				void Set##NAME(TYPE const& value);\
+				compositions::GuiNotifyEvent NAME##Changed;\
+
+#define GUI_TEMPLATE_PROPERTY_IMPL(CLASS, TYPE, NAME)\
+			TYPE CLASS::Get##NAME()\
+			{\
+				return NAME##_;\
+			}\
+			void CLASS::Set##NAME(TYPE const& value)\
+			{\
+				if (NAME##_ != value)\
+				{\
+					NAME##_ = value;\
+					NAME##Changed.Execute(compositions::GuiEventArgs(this));\
+				}\
+			}\
+
+#define GUI_TEMPLATE_PROPERTY_EVENT_INIT(CLASS, TYPE, NAME)\
+			NAME##Changed.SetAssociatedComposition(this);
+
 			class GuiTemplate : public compositions::GuiBoundsComposition, public controls::GuiInstanceRootObject, public Description<GuiTemplate>
 			{
 			public:
@@ -13905,42 +13919,85 @@ namespace vl
 
 				GuiTemplate();
 				~GuiTemplate();
+				
+#define GuiTemplate_PROPERTIES(F)\
+				F(GuiTemplate, FontProperties, Font)\
+				F(GuiTemplate, bool, VisuallyEnabled)\
+
+				GuiTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
 			};
-
-#define GUI_TEMPLATE_PROPERTY_DECL(CLASS, TYPE, NAME)\
-			private:\
-				TYPE NAME##_;\
-			public:\
-				TYPE Get##NAME();\
-				void Set##NAME(const TYPE& value);\
-				compositions::GuiNotifyEvent NAME##Changed;\
-
-#define GUI_TEMPLATE_PROPERTY_IMPL(CLASS, TYPE, NAME)\
-			TYPE CLASS::Get##NAME()\
-			{\
-				return NAME##_;\
-			}\
-			void CLASS::Set##NAME(const TYPE& value)\
-			{\
-				if (NAME##_ != value)\
-				{\
-					NAME##_ = value;\
-					NAME##Changed.Execute(compositions::GuiEventArgs(this));\
-				}\
-			}\
-
-#define GUI_TEMPLATE_PROPERTY_EVENT_INIT(CLASS, TYPE, NAME)\
-			NAME##Changed.SetAssociatedComposition(this);
 
 /***********************************************************************
 Control Template
 ***********************************************************************/
 
+			class GuiControlTemplate : public GuiTemplate, public Description<GuiControlTemplate>
+			{
+			public:
+				GuiControlTemplate();
+				~GuiControlTemplate();
+				
+#define GuiControlTemplate_PROPERTIES(F)\
+				F(GuiControlTemplate, WString, Text)\
+				F(GuiControlTemplate, compositions::GuiGraphicsComposition*, ContainerComposition)\
+				F(GuiControlTemplate, compositions::GuiGraphicsComposition*, FocusableComposition)\
+
+				GuiControlTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
+			};
+
+			class GuiWindowTemplate : public GuiControlTemplate, public Description<GuiWindowTemplate>
+			{
+			public:
+				GuiWindowTemplate();
+				~GuiWindowTemplate();
+			};
+
+			class GuiButtonTemplate : public GuiControlTemplate, public Description<GuiButtonTemplate>
+			{
+			public:
+				GuiButtonTemplate();
+				~GuiButtonTemplate();
+
+#define GuiButtonTemplate_PROPERTIES(F)\
+				F(GuiButtonTemplate, controls::GuiButton::ControlState, State)\
+
+				GuiButtonTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
+			};
+
+			class GuiSelectableButtonTemplate : public GuiButtonTemplate, public Description<GuiSelectableButtonTemplate>
+			{
+			public:
+				GuiSelectableButtonTemplate();
+				~GuiSelectableButtonTemplate();
+
+#define GuiSelectableButtonTemplate_PROPERTIES(F)\
+				F(GuiSelectableButtonTemplate, bool, Selected)\
+
+				GuiSelectableButtonTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
+			};
+
+			class GuiToolstripButtonTemplate : public GuiSelectableButtonTemplate, public Description<GuiToolstripButtonTemplate>
+			{
+			public:
+				GuiToolstripButtonTemplate();
+				~GuiToolstripButtonTemplate();
+
+#define GuiToolstripButtonTemplate_PROPERTIES(F)\
+				F(GuiToolstripButtonTemplate, WString, SubMenuTemplate)\
+				F(GuiToolstripButtonTemplate, bool, SubMenuExisting)\
+				F(GuiToolstripButtonTemplate, bool, SubMenuOpening)\
+				F(GuiToolstripButtonTemplate, controls::GuiButton*, SubMenuHost)\
+				F(GuiToolstripButtonTemplate, Ptr<GuiImageData>, Image)\
+				F(GuiToolstripButtonTemplate, WString, ShortcutText)\
+
+				GuiToolstripButtonTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
+			};
+
 /***********************************************************************
 Item Template
 ***********************************************************************/
 
-			class GuiListItemTemplate : public GuiTemplate
+			class GuiListItemTemplate : public GuiTemplate, public Description<GuiListItemTemplate>
 			{
 			public:
 				GuiListItemTemplate();
@@ -13951,6 +14008,18 @@ Item Template
 				F(GuiListItemTemplate, vint, Index)\
 
 				GuiListItemTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
+			};
+
+			class GuiTreeItemTemplate : public GuiListItemTemplate, public Description<GuiTreeItemTemplate>
+			{
+			public:
+				GuiTreeItemTemplate();
+				~GuiTreeItemTemplate();
+				
+#define GuiTreeItemTemplate_PROPERTIES(F)\
+				F(GuiTreeItemTemplate, bool, Expanding)\
+
+				GuiTreeItemTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
 			};
 		}
 	}
@@ -13963,7 +14032,7 @@ CONTROLS\TEMPLATES\GUICONTROLTEMPLATESTYLES.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Template System
 
 Interfaces:
@@ -13979,16 +14048,104 @@ namespace vl
 	{
 		namespace templates
 		{
+#pragma warning(push)
+#pragma warning(disable:4250)
 
 /***********************************************************************
 Control Template
 ***********************************************************************/
 
+			class GuiControlTemplate_StyleProvider
+				: public Object
+				, public virtual controls::GuiControl::IStyleController
+				, public Description<GuiControlTemplate_StyleProvider>
+			{
+			protected:
+				GuiControlTemplate*									controlTemplate;
+
+			public:
+				GuiControlTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
+				~GuiControlTemplate_StyleProvider();
+
+				compositions::GuiBoundsComposition*					GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*				GetContainerComposition()override;
+				void												SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+				void												SetText(const WString& value)override;
+				void												SetFont(const FontProperties& value)override;
+				void												SetVisuallyEnabled(bool value)override;
+			};
+
+			class GuiWindowTemplate_StyleProvider
+				: public GuiControlTemplate_StyleProvider
+				, public controls::GuiWindow::DefaultBehaviorStyleController
+				, public Description<GuiWindowTemplate_StyleProvider>
+			{
+			public:
+				GuiWindowTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
+				~GuiWindowTemplate_StyleProvider();
+			};
+
+			class GuiButtonTemplate_StyleProvider
+				: public GuiControlTemplate_StyleProvider
+				, public virtual controls::GuiButton::IStyleController
+				, public Description<GuiButtonTemplate_StyleProvider>
+			{
+			protected:
+				GuiButtonTemplate*									controlTemplate;
+
+			public:
+				GuiButtonTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
+				~GuiButtonTemplate_StyleProvider();
+
+				void												Transfer(controls::GuiButton::ControlState value)override;
+			};
+
+			class GuiSelectableButtonTemplate_StyleProvider
+				: public GuiButtonTemplate_StyleProvider
+				, public virtual controls::GuiSelectableButton::IStyleController
+				, public Description<GuiSelectableButtonTemplate_StyleProvider>
+			{
+			protected:
+				GuiSelectableButtonTemplate*						controlTemplate;
+
+			public:
+				GuiSelectableButtonTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
+				~GuiSelectableButtonTemplate_StyleProvider();
+
+				void												SetSelected(bool value)override;
+			};
+
+			class GuiToolstripButtonTemplate_StyleProvider
+				: public GuiSelectableButtonTemplate_StyleProvider
+				, public virtual controls::GuiMenuButton::IStyleController
+				, public Description<GuiToolstripButtonTemplate_StyleProvider>
+			{
+			protected:
+				Ptr<GuiTemplate::IFactory>									subMenuTemplateFactory;
+				GuiToolstripButtonTemplate*									controlTemplate;
+
+				void														controlTemplate_SubMenuTemplateChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+			public:
+				GuiToolstripButtonTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
+				~GuiToolstripButtonTemplate_StyleProvider();
+				
+				controls::GuiMenu::IStyleController*						CreateSubMenuStyleController()override;
+				void														SetSubMenuExisting(bool value)override;
+				void														SetSubMenuOpening(bool value)override;
+				controls::GuiButton*										GetSubMenuHost()override;
+				void														SetImage(Ptr<GuiImageData> value)override;
+				void														SetShortcutText(const WString& value)override;
+				compositions::GuiSubComponentMeasurer::IMeasuringSource*	GetMeasuringSource()override;
+			};
+
 /***********************************************************************
 Item Template (GuiListItemTemplate)
 ***********************************************************************/
 
-			class GuiListItemTemplate_ItemStyleProvider : public Object, public virtual controls::GuiSelectableListControl::IItemStyleProvider
+			class GuiListItemTemplate_ItemStyleProvider
+				: public Object
+				, public virtual controls::GuiSelectableListControl::IItemStyleProvider
+				, public Description<GuiListItemTemplate_ItemStyleProvider>
 			{
 			protected:
 				Ptr<GuiTemplate::IFactory>							factory;
@@ -14009,7 +14166,10 @@ Item Template (GuiListItemTemplate)
 				void												SetStyleSelected(controls::GuiListControl::IItemStyleController* style, bool value)override;
 			};
 
-			class GuiListItemTemplate_ItemStyleController : public Object, public virtual controls::GuiListControl::IItemStyleController
+			class GuiListItemTemplate_ItemStyleController
+				: public Object
+				, public virtual controls::GuiListControl::IItemStyleController
+				, public Description<GuiListItemTemplate_ItemStyleController>
 			{
 			protected:
 				GuiListItemTemplate_ItemStyleProvider*				itemStyleProvider;
@@ -14031,6 +14191,70 @@ Item Template (GuiListItemTemplate)
 				void												OnInstalled()override;
 				void												OnUninstalled()override;
 			};
+
+/***********************************************************************
+Item Template (GuiTreeItemTemplate)
+***********************************************************************/
+
+			class GuiTreeItemTemplate_ItemStyleProvider
+				: public Object
+				, public virtual controls::tree::INodeItemStyleProvider
+				, protected virtual controls::tree::INodeProviderCallback
+				, public Description<GuiTreeItemTemplate_ItemStyleProvider>
+			{
+			protected:
+				Ptr<GuiTemplate::IFactory>							factory;
+				controls::GuiVirtualTreeListControl*				treeListControl;
+				controls::tree::INodeItemBindingView*				bindingView;
+				controls::GuiListControl::IItemStyleProvider*		itemStyleProvider;
+				
+				void												UpdateExpandingButton(controls::tree::INodeProvider* node);
+				void												OnAttached(controls::tree::INodeRootProvider* provider)override;
+				void												OnBeforeItemModified(controls::tree::INodeProvider* parentNode, vint start, vint count, vint newCount)override;
+				void												OnAfterItemModified(controls::tree::INodeProvider* parentNode, vint start, vint count, vint newCount)override;
+				void												OnItemExpanded(controls::tree::INodeProvider* node)override;
+				void												OnItemCollapsed(controls::tree::INodeProvider* node)override;
+
+			public:
+				GuiTreeItemTemplate_ItemStyleProvider(Ptr<GuiTemplate::IFactory> _factory);
+				~GuiTreeItemTemplate_ItemStyleProvider();
+				
+				void												BindItemStyleProvider(controls::GuiListControl::IItemStyleProvider* styleProvider)override;
+				controls::GuiListControl::IItemStyleProvider*		GetBindedItemStyleProvider()override;
+				void												AttachListControl(controls::GuiListControl* value)override;
+				void												DetachListControl()override;
+				vint												GetItemStyleId(controls::tree::INodeProvider* node)override;
+				controls::tree::INodeItemStyleController*			CreateItemStyle(vint styleId)override;
+				void												DestroyItemStyle(controls::tree::INodeItemStyleController* style)override;
+				void												Install(controls::tree::INodeItemStyleController* style, controls::tree::INodeProvider* node, vint itemIndex)override;
+				void												SetStyleIndex(controls::tree::INodeItemStyleController* style, vint value)override;
+				void												SetStyleSelected(controls::tree::INodeItemStyleController* style, bool value)override;
+			};
+			
+			class GuiTreeItemTemplate_ItemStyleController
+				: public GuiListItemTemplate_ItemStyleController
+				, public virtual controls::tree::INodeItemStyleController
+				, public Description<GuiTreeItemTemplate_ItemStyleController>
+			{
+			protected:
+				GuiTreeItemTemplate_ItemStyleProvider*				nodeStyleProvider;
+
+			public:
+				GuiTreeItemTemplate_ItemStyleController(GuiTreeItemTemplate_ItemStyleProvider* _nodeStyleProvider);
+				~GuiTreeItemTemplate_ItemStyleController();
+				
+				controls::GuiListControl::IItemStyleProvider*		GetStyleProvider()override;
+				controls::tree::INodeItemStyleProvider*				GetNodeStyleProvider()override;
+			};
+
+/***********************************************************************
+Helper Functions
+***********************************************************************/
+
+			extern void												SplitBySemicolon(const WString& input, collections::List<WString>& fragments);
+			extern Ptr<GuiTemplate::IFactory>						CreateTemplateFactory(const WString& typeValues);
+
+#pragma warning(pop)
 		}
 	}
 }
@@ -14042,7 +14266,7 @@ RESOURCES\GUIPARSERMANAGER.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI::Resource
 
 Interfaces:
@@ -14173,7 +14397,7 @@ GACUI.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI Header Files and Common Namespaces
 
 Global Objects:

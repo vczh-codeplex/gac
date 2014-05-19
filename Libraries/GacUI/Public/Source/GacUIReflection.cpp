@@ -304,7 +304,7 @@ GuiInstanceContext::ElementName Parser
 			Ptr<ElementName> TypedParse(const WString& text, collections::List<WString>& errors)override
 			{
 				Ptr<RegexMatch> match = regexElementName.MatchHead(text);
-				if (match && match->Result().Length() != text.Length())
+				if (!match || match->Result().Length() != text.Length())
 				{
 					errors.Add(L"Failed to parse an element name \"" + text + L"\".");
 					return 0;
@@ -1472,6 +1472,13 @@ Helper Functions Declarations
 			Ptr<GuiInstanceEnvironment> env
 			);
 
+		bool PrepareBindingContext(
+			Ptr<GuiInstanceEnvironment> env,
+			collections::List<WString>& contextNames,
+			const WString& dependerType,
+			const WString& dependerName
+			);
+
 		void ExecuteBindingSetters(
 			Ptr<GuiInstanceEnvironment> env,
 			List<FillInstanceBindingSetter>& bindingSetters
@@ -1771,38 +1778,45 @@ LoadInstancePropertyValue
 									}
 									else if (IGuiInstanceBinder* binder=GetInstanceLoaderManager()->GetInstanceBinder(binding))
 									{
-										// other binding: provide the property value to the specified binder
-										List<ITypeDescriptor*> binderExpectedTypes;
-										binder->GetExpectedValueTypes(binderExpectedTypes);
-										if (LoadValueVisitor::LoadValue(valueRepr, env, binderExpectedTypes, bindingSetters, eventSetters, propertyValue.propertyValue))
+										List<WString> contextNames;
+										binder->GetRequiredContexts(contextNames);
+										bool success = PrepareBindingContext(env, contextNames, L"property binding", binder->GetBindingName());
+
+										if (success)
 										{
-											canRemoveLoadedValue = true;
-											if (constructorArgument)
+											// other binding: provide the property value to the specified binder
+											List<ITypeDescriptor*> binderExpectedTypes;
+											binder->GetExpectedValueTypes(binderExpectedTypes);
+											if (LoadValueVisitor::LoadValue(valueRepr, env, binderExpectedTypes, bindingSetters, eventSetters, propertyValue.propertyValue))
 											{
-												auto translatedValue = binder->GetValue(env, propertyValue.propertyValue);
-												if (translatedValue.IsNull())
+												canRemoveLoadedValue = true;
+												if (constructorArgument)
 												{
-													env->scope->errors.Add(
-														L"Assignable property \"" +
-														propertyValue.propertyName +
-														L"\" of type \"" +
-														instanceType +
-														L"\" cannot be assigned using binding \"" +
-														binding +
-														L"\" because the value translation failed.");
+													auto translatedValue = binder->GetValue(env, propertyValue.propertyValue);
+													if (translatedValue.IsNull())
+													{
+														env->scope->errors.Add(
+															L"Assignable property \"" +
+															propertyValue.propertyName +
+															L"\" of type \"" +
+															instanceType +
+															L"\" cannot be assigned using binding \"" +
+															binding +
+															L"\" because the value translation failed.");
+													}
+													else
+													{
+														output.Add(Pair<Value, IGuiInstanceLoader*>(translatedValue, propertyLoader));
+													}
 												}
 												else
 												{
-													output.Add(Pair<Value, IGuiInstanceLoader*>(translatedValue, propertyLoader));
+													FillInstanceBindingSetter bindingSetter;
+													bindingSetter.binder = binder;
+													bindingSetter.loader = propertyLoader;
+													bindingSetter.propertyValue = propertyValue;
+													bindingSetters.Add(bindingSetter);
 												}
-											}
-											else
-											{
-												FillInstanceBindingSetter bindingSetter;
-												bindingSetter.binder = binder;
-												bindingSetter.loader = propertyLoader;
-												bindingSetter.propertyValue = propertyValue;
-												bindingSetters.Add(bindingSetter);
 											}
 										}
 									}
@@ -2304,6 +2318,40 @@ ExecuteBindingSetters
 ExecuteBindingSetters
 ***********************************************************************/
 
+		bool PrepareBindingContext(
+			Ptr<GuiInstanceEnvironment> env,
+			collections::List<WString>& contextNames,
+			const WString& dependerType,
+			const WString& dependerName
+			)
+		{
+			bool success = true;
+			FOREACH(WString, contextName, contextNames)
+			{
+				if (!env->scope->bindingContexts.Keys().Contains(contextName))
+				{
+					auto factory = GetInstanceLoaderManager()->GetInstanceBindingContextFactory(contextName);
+					if (factory)
+					{
+						env->scope->bindingContexts.Add(contextName, factory->CreateContext());
+					}
+					else
+					{
+						env->scope->errors.Add(
+							L"Failed to create binding context \"" +
+							contextName +
+							L"\" which is required by " +
+							dependerType +
+							L" \"" +
+							dependerName +
+							L"\".");
+						success = false;
+					}
+				}
+			}
+			return success;
+		}
+
 		void ExecuteBindingSetters(
 			Ptr<GuiInstanceEnvironment> env,
 			List<FillInstanceBindingSetter>& bindingSetters
@@ -2314,37 +2362,16 @@ ExecuteBindingSetters
 			{
 				List<WString> contextNames;
 				bindingSetter.binder->GetRequiredContexts(contextNames);
-				bool failed = false;
-				FOREACH(WString, contextName, contextNames)
-				{
-					if (!env->scope->bindingContexts.Keys().Contains(contextName))
-					{
-						auto factory = GetInstanceLoaderManager()->GetInstanceBindingContextFactory(contextName);
-						if (factory)
-						{
-							env->scope->bindingContexts.Add(contextName, factory->CreateContext());
-						}
-						else
-						{
-							env->scope->errors.Add(
-								L"Failed to create binding context \"" +
-								contextName +
-								L"\" which is required by binding \"" +
-								bindingSetter.binder->GetBindingName() +
-								L"\".");
-							failed = true;
-						}
-					}
-				}
+				bool success = PrepareBindingContext(env, contextNames, L"property binding", bindingSetter.binder->GetBindingName());
 
-				if (failed || !bindingSetter.binder->SetPropertyValue(env, bindingSetter.loader, bindingSetter.propertyValue))
+				if (!success || !bindingSetter.binder->SetPropertyValue(env, bindingSetter.loader, bindingSetter.propertyValue))
 				{
 					auto value = bindingSetter.propertyValue.propertyValue;
 					env->scope->errors.Add(
 						L"Failed to set property \"" +
-						 bindingSetter.propertyValue.propertyName +
+						bindingSetter.propertyValue.propertyName +
 						L"\" of \"" +
-						env->context->instance->typeName +
+						bindingSetter.propertyValue.instanceValue.GetTypeDescriptor()->GetTypeName() +
 						L"\" using binding \"" +
 						bindingSetter.binder->GetBindingName() +
 						L"\" and value \"" +
@@ -2381,9 +2408,13 @@ ExecuteBindingSetters
 			{
 				if (eventSetter.binder)
 				{
+					List<WString> contextNames;
+					eventSetter.binder->GetRequiredContexts(contextNames);
 					auto propertyValue = eventSetter.propertyValue;
 					propertyValue.propertyValue = BoxValue(eventSetter.handlerName);
-					if (!eventSetter.binder->AttachEvent(env, eventSetter.loader, propertyValue))
+					bool success = PrepareBindingContext(env, contextNames, L"event binding", eventSetter.binder->GetBindingName());
+
+					if (!success || !eventSetter.binder->AttachEvent(env, eventSetter.loader, propertyValue))
 					{
 						env->scope->errors.Add(
 							L"Failed to attach event \"" +
@@ -3158,6 +3189,8 @@ namespace vl
 		using namespace workflow::analyzer;
 		using namespace workflow::runtime;
 
+		extern WfLexicalScopeManager*			GetSharedWorkflowManager();
+
 /***********************************************************************
 GuiTextInstanceBinderBase
 ***********************************************************************/
@@ -3298,6 +3331,10 @@ GuiWorkflowGlobalContext
 		public:
 			List<WorkflowDataBinding>		dataBindings;
 			Ptr<WfRuntimeGlobalContext>		globalContext;
+
+			GuiWorkflowGlobalContext()
+			{
+			}
 
 			WString GetContextName()override
 			{
@@ -3514,15 +3551,15 @@ GuiWorkflowGlobalContext
 					}
 				}
 
-				WfLexicalScopeManager manager(0);
-				manager.modules.Add(module);
-				manager.Rebuild(false);
+				GetSharedWorkflowManager()->Clear(true, true);
+				GetSharedWorkflowManager()->modules.Add(module);
+				GetSharedWorkflowManager()->Rebuild(true);
 				WString moduleCode = WorkflowModuleToString(module);
 
-				if (manager.errors.Count() > 0)
+				if (GetSharedWorkflowManager()->errors.Count() > 0)
 				{
 					env->scope->errors.Add(ERROR_CODE_PREFIX L"Unexpected errors are encountered when initializing data binding.");
-					FOREACH(Ptr<parsing::ParsingError>, error, manager.errors)
+					FOREACH(Ptr<parsing::ParsingError>, error, GetSharedWorkflowManager()->errors)
 					{
 						env->scope->errors.Add(error->errorMessage);
 					}
@@ -3539,7 +3576,7 @@ GuiWorkflowGlobalContext
 //				}
 //#endif
 
-				auto assembly = GenerateAssembly(&manager);
+				auto assembly = GenerateAssembly(GetSharedWorkflowManager());
 				globalContext = new WfRuntimeGlobalContext(assembly);
 				
 				LoadFunction<void()>(globalContext, L"<initialize>")();
@@ -3649,13 +3686,13 @@ GuiScriptInstanceBinder
 						}
 
 						WString moduleCode = WorkflowModuleToString(module);
-						WfLexicalScopeManager manager(0);
-						manager.modules.Add(module);
-						manager.Rebuild(false);
-						if (manager.errors.Count() > 0)
+						GetSharedWorkflowManager()->Clear(true, true);
+						GetSharedWorkflowManager()->modules.Add(module);
+						GetSharedWorkflowManager()->Rebuild(true);
+						if (GetSharedWorkflowManager()->errors.Count() > 0)
 						{
 							env->scope->errors.Add(ERROR_CODE_PREFIX L"Failed to analyze the workflow expression \"" + expressionCode + L"\".");
-							FOREACH(Ptr<parsing::ParsingError>, error, manager.errors)
+							FOREACH(Ptr<parsing::ParsingError>, error, GetSharedWorkflowManager()->errors)
 							{
 								env->scope->errors.Add(error->errorMessage);
 							}
@@ -3664,7 +3701,7 @@ GuiScriptInstanceBinder
 						else if (propertyInfo)
 						{
 							auto bind = expression.Cast<WfBindExpression>();
-							auto result = manager.expressionResolvings[(bind ? bind->expression : expression).Obj()];
+							auto result = GetSharedWorkflowManager()->expressionResolvings[(bind ? bind->expression : expression).Obj()];
 							if (result.type)
 							{
 								ITypeInfo* propertyType = propertyInfo->GetReturn();
@@ -3756,13 +3793,13 @@ GuiEvalInstanceBinder
 					}
 
 					WString moduleCode = WorkflowModuleToString(module);
-					WfLexicalScopeManager manager(0);
-					manager.modules.Add(module);
-					manager.Rebuild(false);
-					if (manager.errors.Count() > 0)
+					GetSharedWorkflowManager()->Clear(true, true);
+					GetSharedWorkflowManager()->modules.Add(module);
+					GetSharedWorkflowManager()->Rebuild(true);
+					if (GetSharedWorkflowManager()->errors.Count() > 0)
 					{
 						env->scope->errors.Add(ERROR_CODE_PREFIX L"Failed to analyze the workflow expression \"" + expressionCode + L"\".");
-						FOREACH(Ptr<parsing::ParsingError>, error, manager.errors)
+						FOREACH(Ptr<parsing::ParsingError>, error, GetSharedWorkflowManager()->errors)
 						{
 							env->scope->errors.Add(error->errorMessage);
 						}
@@ -3777,7 +3814,7 @@ GuiEvalInstanceBinder
 //					}
 //#endif
 
-					auto assembly = GenerateAssembly(&manager);
+					auto assembly = GenerateAssembly(GetSharedWorkflowManager());
 					auto globalContext = MakePtr<WfRuntimeGlobalContext>(assembly);
 				
 					LoadFunction<void()>(globalContext, L"<initialize>")();
@@ -3811,6 +3848,10 @@ GuiEvalInstanceEventBinder
 			WString GetBindingName()override
 			{
 				return L"eval";
+			}
+
+			void GetRequiredContexts(collections::List<WString>& contextNames)override
+			{
 			}
 
 			bool AttachEvent(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, IGuiInstanceLoader::PropertyValue& propertyValue)
@@ -3858,13 +3899,13 @@ GuiEvalInstanceEventBinder
 					}
 
 					WString moduleCode = WorkflowModuleToString(module);
-					WfLexicalScopeManager manager(0);
-					manager.modules.Add(module);
-					manager.Rebuild(false);
-					if (manager.errors.Count() > 0)
+					GetSharedWorkflowManager()->Clear(true, true);
+					GetSharedWorkflowManager()->modules.Add(module);
+					GetSharedWorkflowManager()->Rebuild(true);
+					if (GetSharedWorkflowManager()->errors.Count() > 0)
 					{
 						env->scope->errors.Add(ERROR_CODE_PREFIX L"Failed to analyze the workflow statement \"" + statementCode + L"\".");
-						FOREACH(Ptr<parsing::ParsingError>, error, manager.errors)
+						FOREACH(Ptr<parsing::ParsingError>, error, GetSharedWorkflowManager()->errors)
 						{
 							env->scope->errors.Add(error->errorMessage);
 						}
@@ -3879,7 +3920,7 @@ GuiEvalInstanceEventBinder
 //					}
 //#endif
 
-					auto assembly = GenerateAssembly(&manager);
+					auto assembly = GenerateAssembly(GetSharedWorkflowManager());
 					auto globalContext = MakePtr<WfRuntimeGlobalContext>(assembly);
 				
 					LoadFunction<void()>(globalContext, L"<initialize>")();
@@ -3936,9 +3977,19 @@ GuiFormatInstanceBinder
 GuiPredefinedInstanceBindersPlugin
 ***********************************************************************/
 
+		class GuiPredefinedInstanceBindersPlugin;
+		GuiPredefinedInstanceBindersPlugin* predefinedInstanceBinderPlugin = 0;
+
 		class GuiPredefinedInstanceBindersPlugin : public Object, public IGuiPlugin
 		{
+		protected:
+			Ptr<WfLexicalScopeManager>		workflowManager;
+
 		public:
+			GuiPredefinedInstanceBindersPlugin()
+			{
+			}
+
 			void Load()override
 			{
 				WfLoadTypes();
@@ -3967,13 +4018,29 @@ GuiPredefinedInstanceBindersPlugin
 					manager->AddInstanceBinder(new GuiBindInstanceBinder);
 					manager->AddInstanceBinder(new GuiFormatInstanceBinder);
 				}
+				predefinedInstanceBinderPlugin = this;
 			}
 
 			void Unload()override
 			{
+				predefinedInstanceBinderPlugin = 0;
+			}
+
+			WfLexicalScopeManager* GetWorkflowManager()
+			{
+				if (!workflowManager)
+				{
+					workflowManager = new WfLexicalScopeManager(GetParserManager()->GetParsingTable(L"WORKFLOW"));
+				}
+				return workflowManager.Obj();
 			}
 		};
 		GUI_REGISTER_PLUGIN(GuiPredefinedInstanceBindersPlugin)
+
+		WfLexicalScopeManager* GetSharedWorkflowManager()
+		{
+			return predefinedInstanceBinderPlugin->GetWorkflowManager();
+		}
 	}
 }
 
@@ -3998,16 +4065,22 @@ namespace vl
 GuiVrtualTypeInstanceLoader
 ***********************************************************************/
 
-		class GuiVrtualTypeInstanceLoader : public Object, public IGuiInstanceLoader
+		class GuiTemplateControlInstanceLoader : public Object, public IGuiInstanceLoader
 		{
 		protected:
-			WString							typeName;
-			Func<Value()>					constructor;
+			WString										typeName;
+			Func<Value()>								defaultConstructor;
+			Func<Value(Ptr<GuiTemplate::IFactory>)>		templateConstructor;
 		public:
-			GuiVrtualTypeInstanceLoader(const WString& _typeName, const Func<Value()>& _constructor)
+			GuiTemplateControlInstanceLoader(const WString& _typeName, const Func<Value()>& _defaultConstructor, const Func<Value(Ptr<GuiTemplate::IFactory>)>& _templateConstructor)
 				:typeName(_typeName)
-				,constructor(_constructor)
+				, defaultConstructor(_defaultConstructor)
+				, templateConstructor(_templateConstructor)
 			{
+				if (typeName == L"")
+				{
+
+				}
 			}
 
 			WString GetTypeName()override
@@ -4017,16 +4090,41 @@ GuiVrtualTypeInstanceLoader
 
 			bool IsCreatable(const TypeInfo& typeInfo)override
 			{
-				return typeName==typeInfo.typeName;
+				return typeName == typeInfo.typeName;
 			}
 
 			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
 			{
 				if(typeName==typeInfo.typeName)
 				{
-					return constructor();
+					vint indexControlTemplate = constructorArguments.Keys().IndexOf(L"ControlTemplate");
+					if (indexControlTemplate == -1)
+					{
+						return defaultConstructor();
+					}
+					else
+					{
+						auto factory = CreateTemplateFactory(constructorArguments.GetByIndex(indexControlTemplate)[0].GetText());
+						return templateConstructor(factory);
+					}
 				}
 				return Value();
+			}
+
+			void GetConstructorParameters(const TypeInfo& typeInfo, collections::List<WString>& propertyNames)override
+			{
+				propertyNames.Add(L"ControlTemplate");
+			}
+
+			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
+			{
+				if (propertyInfo.propertyName == L"ControlTemplate")
+				{
+					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<WString>());
+					info->constructorParameter = true;
+					return info;
+				}
+				return 0;
 			}
 		};
 
@@ -4072,7 +4170,7 @@ GuiControlInstanceLoader
 						}
 						else if (auto composition = dynamic_cast<GuiGraphicsComposition*>(propertyValue.propertyValue.GetRawPtr()))
 						{
-							container->GetBoundsComposition()->AddChild(composition);
+							container->GetContainerComposition()->AddChild(composition);
 							return true;
 						}
 					}
@@ -4273,9 +4371,37 @@ GuiToolstripMenuBarInstanceLoader
 				return description::GetTypeDescriptor<GuiToolstripMenuBar>()->GetTypeName();
 			}
 
+			bool IsCreatable(const TypeInfo& typeInfo)override
+			{
+				return GetTypeName() == typeInfo.typeName;
+			}
+
+			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
+			{
+				if(GetTypeName() == typeInfo.typeName)
+				{
+					vint indexControlTemplate = constructorArguments.Keys().IndexOf(L"ControlTemplate");
+					if (indexControlTemplate == -1)
+					{
+						return Value::From(new GuiToolstripMenuBar(GetCurrentTheme()->CreateMenuBarStyle()));
+					}
+					else
+					{
+						auto factory = CreateTemplateFactory(constructorArguments.GetByIndex(indexControlTemplate)[0].GetText());
+						return Value::From(new GuiToolstripMenuBar(new GuiControlTemplate_StyleProvider(factory)));
+					}
+				}
+				return Value();
+			}
+
 			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
 			{
 				propertyNames.Add(L"");
+			}
+
+			void GetConstructorParameters(const TypeInfo& typeInfo, collections::List<WString>& propertyNames)override
+			{
+				propertyNames.Add(L"ControlTemplate");
 			}
 
 			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
@@ -4283,6 +4409,12 @@ GuiToolstripMenuBarInstanceLoader
 				if (propertyInfo.propertyName == L"")
 				{
 					return GuiInstancePropertyInfo::CollectionWithParent(description::GetTypeDescriptor<GuiControl>());
+				}
+				else if (propertyInfo.propertyName == L"ControlTemplate")
+				{
+					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<WString>());
+					info->constructorParameter = true;
+					return info;
 				}
 				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
 			}
@@ -4316,9 +4448,37 @@ GuiToolstripToolBarInstanceLoader
 				return description::GetTypeDescriptor<GuiToolstripToolBar>()->GetTypeName();
 			}
 
+			bool IsCreatable(const TypeInfo& typeInfo)override
+			{
+				return GetTypeName() == typeInfo.typeName;
+			}
+
+			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
+			{
+				if(GetTypeName() == typeInfo.typeName)
+				{
+					vint indexControlTemplate = constructorArguments.Keys().IndexOf(L"ControlTemplate");
+					if (indexControlTemplate == -1)
+					{
+						return Value::From(new GuiToolstripToolBar(GetCurrentTheme()->CreateToolBarStyle()));
+					}
+					else
+					{
+						auto factory = CreateTemplateFactory(constructorArguments.GetByIndex(indexControlTemplate)[0].GetText());
+						return Value::From(new GuiToolstripToolBar(new GuiControlTemplate_StyleProvider(factory)));
+					}
+				}
+				return Value();
+			}
+
 			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
 			{
 				propertyNames.Add(L"");
+			}
+
+			void GetConstructorParameters(const TypeInfo& typeInfo, collections::List<WString>& propertyNames)override
+			{
+				propertyNames.Add(L"ControlTemplate");
 			}
 
 			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
@@ -4326,6 +4486,12 @@ GuiToolstripToolBarInstanceLoader
 				if (propertyInfo.propertyName == L"")
 				{
 					return GuiInstancePropertyInfo::CollectionWithParent(description::GetTypeDescriptor<GuiControl>());
+				}
+				else if (propertyInfo.propertyName == L"ControlTemplate")
+				{
+					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<WString>());
+					info->constructorParameter = true;
+					return info;
 				}
 				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
 			}
@@ -4421,23 +4587,9 @@ GuiSelectableListControlInstanceLoader
 				return description::GetTypeDescriptor<GuiSelectableListControl>()->GetTypeName();
 			}
 
-			bool IsCreatable(const TypeInfo& typeInfo)override
-			{
-				return false;
-			}
-
-			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
-			{
-				return Value();
-			}
-
 			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
 			{
 				propertyNames.Add(L"ItemTemplate");
-			}
-
-			void GetConstructorParameters(const TypeInfo& typeInfo, List<WString>& propertyNames)override
-			{
 			}
 
 			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
@@ -4456,17 +4608,7 @@ GuiSelectableListControlInstanceLoader
 				{
 					if (propertyValue.propertyName == L"ItemTemplate")
 					{
-						List<ITypeDescriptor*> types;
-						List<WString> typeNames;
-						SplitBySemicolon(propertyValue.propertyValue.GetText(), typeNames);
-						CopyFrom(
-							types,
-							From(typeNames)
-								.Select(&description::GetTypeDescriptor)
-								.Where([](ITypeDescriptor* type){return type != 0; })
-							);
-
-						auto factory = GuiTemplate::IFactory::CreateTemplateFactory(types);
+						auto factory = CreateTemplateFactory(propertyValue.propertyValue.GetText());
 						auto styleProvider = new GuiListItemTemplate_ItemStyleProvider(factory);
 						container->SetStyleProvider(styleProvider);
 						return true;
@@ -4492,23 +4634,9 @@ GuiVirtualTreeViewInstanceLoader
 				return description::GetTypeDescriptor<GuiVirtualTreeView>()->GetTypeName();
 			}
 
-			bool IsCreatable(const TypeInfo& typeInfo)override
-			{
-				return false;
-			}
-
-			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
-			{
-				return Value();
-			}
-
 			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
 			{
 				propertyNames.Add(L"ItemTemplate");
-			}
-
-			void GetConstructorParameters(const TypeInfo& typeInfo, List<WString>& propertyNames)override
-			{
 			}
 
 			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
@@ -4547,23 +4675,9 @@ GuiVirtualDataGridInstanceLoader
 				return description::GetTypeDescriptor<GuiVirtualDataGrid>()->GetTypeName();
 			}
 
-			bool IsCreatable(const TypeInfo& typeInfo)override
-			{
-				return false;
-			}
-
-			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
-			{
-				return Value();
-			}
-
 			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
 			{
 				propertyNames.Add(L"ItemTemplate");
-			}
-
-			void GetConstructorParameters(const TypeInfo& typeInfo, List<WString>& propertyNames)override
-			{
 			}
 
 			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
@@ -4994,10 +5108,6 @@ GuiBindableTextListInstanceLoader
 				return Value();
 			}
 
-			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
-			{
-			}
-
 			void GetConstructorParameters(const TypeInfo& typeInfo, List<WString>& propertyNames)override
 			{
 				if (typeInfo.typeName == GetTypeName())
@@ -5326,6 +5436,7 @@ GuiTreeNodeInstanceLoader
 						{
 							item->text = UnboxValue<WString>(propertyValue.propertyValue);
 							container->NotifyDataModified();
+							return true;
 						}
 					}
 					else if (propertyValue.propertyName == L"Image")
@@ -5334,6 +5445,7 @@ GuiTreeNodeInstanceLoader
 						{
 							item->image = UnboxValue<Ptr<GuiImageData>>(propertyValue.propertyValue);
 							container->NotifyDataModified();
+							return true;
 						}
 					}
 					else if (propertyValue.propertyName == L"Tag")
@@ -5341,6 +5453,7 @@ GuiTreeNodeInstanceLoader
 						if (auto item = container->GetData().Cast<tree::TreeViewItem>())
 						{
 							item->tag = propertyValue.propertyValue;
+							return true;
 						}
 					}
 					else if (propertyValue.propertyName == L"")
@@ -5378,12 +5491,42 @@ GuiPredefinedInstanceLoadersPlugin
 		new LOADER\
 		)
 
-#define ADD_VIRTUAL_TYPE(VIRTUALTYPENAME, TYPENAME, CONSTRUCTOR)\
+#define ADD_TEMPLATE_CONTROL(TYPENAME, CONSTRUCTOR, TEMPLATE)\
+	manager->SetLoader(\
+		new GuiTemplateControlInstanceLoader(\
+			L"presentation::controls::" L#TYPENAME,\
+			[](){return Value::From(CONSTRUCTOR());},\
+			[](Ptr<GuiTemplate::IFactory> factory){return Value::From(new TYPENAME(new TEMPLATE##_StyleProvider(factory))); }\
+			)\
+		)
+
+#define ADD_VIRTUAL_CONTROL(VIRTUALTYPENAME, TYPENAME, CONSTRUCTOR, TEMPLATE)\
 	manager->CreateVirtualType(\
 		description::GetTypeDescriptor<TYPENAME>()->GetTypeName(),\
-		new GuiVrtualTypeInstanceLoader(\
+		new GuiTemplateControlInstanceLoader(\
 			L"presentation::controls::Gui" L#VIRTUALTYPENAME,\
-			[](){return Value::From(CONSTRUCTOR());})\
+			[](){return Value::From(CONSTRUCTOR());},\
+			[](Ptr<GuiTemplate::IFactory> factory){return Value::From(new TYPENAME(new TEMPLATE##_StyleProvider(factory))); }\
+			)\
+		)
+
+#define ADD_TEMPLATE_CONTROL_X(TYPENAME, CONSTRUCTOR, TEMPLATE)\
+	manager->SetLoader(\
+		new GuiTemplateControlInstanceLoader(\
+			L"presentation::controls::" L#TYPENAME,\
+			[](){return Value::From(CONSTRUCTOR());},\
+			[](Ptr<GuiTemplate::IFactory> factory)->Value{throw 0; }\
+			)\
+		)
+
+#define ADD_VIRTUAL_CONTROL_X(VIRTUALTYPENAME, TYPENAME, CONSTRUCTOR, TEMPLATE)\
+	manager->CreateVirtualType(\
+		description::GetTypeDescriptor<TYPENAME>()->GetTypeName(),\
+		new GuiTemplateControlInstanceLoader(\
+			L"presentation::controls::Gui" L#VIRTUALTYPENAME,\
+			[](){return Value::From(CONSTRUCTOR());},\
+			[](Ptr<GuiTemplate::IFactory> factory)->Value{throw 0; }\
+			)\
 		)
 
 				manager->SetLoader(new GuiControlInstanceLoader);
@@ -5412,22 +5555,36 @@ GuiPredefinedInstanceLoadersPlugin
 				ADD_VIRTUAL_TYPE_LOADER(GuiComboBoxListControl,						GuiComboBoxInstanceLoader);
 				ADD_VIRTUAL_TYPE_LOADER(tree::MemoryNodeProvider,					GuiTreeNodeInstanceLoader);
 
-				ADD_VIRTUAL_TYPE(GroupBox,					GuiControl,				g::NewGroupBox);
-				ADD_VIRTUAL_TYPE(MenuSplitter,				GuiControl,				g::NewMenuSplitter);
-				ADD_VIRTUAL_TYPE(MenuBarButton,				GuiToolstripButton,		g::NewMenuBarButton);
-				ADD_VIRTUAL_TYPE(MenuItemButton,			GuiToolstripButton,		g::NewMenuItemButton);
-				ADD_VIRTUAL_TYPE(ToolstripDropdownButton,	GuiToolstripButton,		g::NewToolBarDropdownButton);
-				ADD_VIRTUAL_TYPE(ToolstripSplitButton,		GuiToolstripButton,		g::NewToolBarSplitButton);
-				ADD_VIRTUAL_TYPE(ToolstripSplitter,			GuiControl,				g::NewToolBarSplitter);
-				ADD_VIRTUAL_TYPE(CheckBox,					GuiSelectableButton,	g::NewCheckBox);
-				ADD_VIRTUAL_TYPE(RadioButton,				GuiSelectableButton,	g::NewRadioButton);
-				ADD_VIRTUAL_TYPE(HScroll,					GuiScroll,				g::NewHScroll);
-				ADD_VIRTUAL_TYPE(VScroll,					GuiScroll,				g::NewVScroll);
-				ADD_VIRTUAL_TYPE(HTracker,					GuiScroll,				g::NewHTracker);
-				ADD_VIRTUAL_TYPE(VTracker,					GuiScroll,				g::NewVTracker);
-				ADD_VIRTUAL_TYPE(ProgressBar,				GuiScroll,				g::NewProgressBar);
-				ADD_VIRTUAL_TYPE(CheckTextList,				GuiTextList,			g::NewCheckTextList);
-				ADD_VIRTUAL_TYPE(RadioTextList,				GuiTextList,			g::NewRadioTextList);
+				ADD_TEMPLATE_CONTROL	(GuiCustomControl,			g::NewCustomControl,	GuiControlTemplate);
+				ADD_TEMPLATE_CONTROL_X	(GuiLabel,					g::NewLabel,			GuiControlTemplate);
+				ADD_TEMPLATE_CONTROL	(GuiButton,					g::NewButton,			GuiButtonTemplate);
+				ADD_TEMPLATE_CONTROL_X	(GuiScrollContainer,		g::NewScrollContainer,	GuiControlTemplate);
+				ADD_TEMPLATE_CONTROL	(GuiWindow,					g::NewWindow,			GuiWindowTemplate);
+				ADD_TEMPLATE_CONTROL_X	(GuiTextList,				g::NewTextList,			GuiControlTemplate);
+				ADD_TEMPLATE_CONTROL_X	(GuiDocumentViewer,			g::NewDocumentViewer,	GuiControlTemplate);
+				ADD_TEMPLATE_CONTROL	(GuiDocumentLabel,			g::NewDocumentLabel,	GuiControlTemplate);
+				ADD_TEMPLATE_CONTROL_X	(GuiMultilineTextBox,		g::NewMultilineTextBox,	GuiControlTemplate);
+				ADD_TEMPLATE_CONTROL_X	(GuiSinglelineTextBox,		g::NewTextBox,			GuiControlTemplate);
+				ADD_TEMPLATE_CONTROL_X	(GuiDatePicker,				g::NewDatePicker,		GuiControlTemplate);
+				ADD_TEMPLATE_CONTROL_X	(GuiDateComboBox,			g::NewDateComboBox,		GuiControlTemplate);
+				ADD_TEMPLATE_CONTROL_X	(GuiStringGrid,				g::NewStringGrid,		GuiControlTemplate);
+
+				ADD_VIRTUAL_CONTROL		(GroupBox,					GuiControl,				g::NewGroupBox,					GuiControlTemplate);
+				ADD_VIRTUAL_CONTROL		(MenuSplitter,				GuiControl,				g::NewMenuSplitter,				GuiControlTemplate);
+				ADD_VIRTUAL_CONTROL		(MenuBarButton,				GuiToolstripButton,		g::NewMenuBarButton,			GuiToolstripButtonTemplate);
+				ADD_VIRTUAL_CONTROL		(MenuItemButton,			GuiToolstripButton,		g::NewMenuItemButton,			GuiToolstripButtonTemplate);
+				ADD_VIRTUAL_CONTROL		(ToolstripDropdownButton,	GuiToolstripButton,		g::NewToolBarDropdownButton,	GuiToolstripButtonTemplate);
+				ADD_VIRTUAL_CONTROL		(ToolstripSplitButton,		GuiToolstripButton,		g::NewToolBarSplitButton,		GuiToolstripButtonTemplate);
+				ADD_VIRTUAL_CONTROL		(ToolstripSplitter,			GuiControl,				g::NewToolBarSplitter,			GuiControlTemplate);
+				ADD_VIRTUAL_CONTROL		(CheckBox,					GuiSelectableButton,	g::NewCheckBox,					GuiSelectableButtonTemplate);
+				ADD_VIRTUAL_CONTROL		(RadioButton,				GuiSelectableButton,	g::NewRadioButton,				GuiSelectableButtonTemplate);
+				ADD_VIRTUAL_CONTROL_X	(HScroll,					GuiScroll,				g::NewHScroll,					GuiControlTemplate);
+				ADD_VIRTUAL_CONTROL_X	(VScroll,					GuiScroll,				g::NewVScroll,					GuiControlTemplate);
+				ADD_VIRTUAL_CONTROL_X	(HTracker,					GuiScroll,				g::NewHTracker,					GuiControlTemplate);
+				ADD_VIRTUAL_CONTROL_X	(VTracker,					GuiScroll,				g::NewVTracker,					GuiControlTemplate);
+				ADD_VIRTUAL_CONTROL_X	(ProgressBar,				GuiScroll,				g::NewProgressBar,				GuiControlTemplate);
+				ADD_VIRTUAL_CONTROL_X	(CheckTextList,				GuiTextList,			g::NewCheckTextList,			GuiControlTemplate);
+				ADD_VIRTUAL_CONTROL_X	(RadioTextList,				GuiTextList,			g::NewRadioTextList,			GuiControlTemplate);
 
 				auto bindableTextListName = description::GetTypeDescriptor<GuiBindableTextList>()->GetTypeName();
 				manager->CreateVirtualType(bindableTextListName, new GuiBindableTextListInstanceLoader(L"Check", [](){return GetCurrentTheme()->CreateCheckTextListItemStyle(); }));
@@ -5457,6 +5614,63 @@ namespace vl
 		using namespace collections;
 		using namespace parsing;
 		using namespace parsing::xml;
+		using namespace templates;
+
+/***********************************************************************
+GuiTextRepr
+***********************************************************************/
+
+		Ptr<GuiValueRepr> GuiTextRepr::Clone()
+		{
+			auto repr = MakePtr<GuiTextRepr>();
+			repr->fromStyle = fromStyle;
+			repr->text = text;
+			return repr;
+		}
+
+/***********************************************************************
+GuiAttSetterRepr
+***********************************************************************/
+
+		void GuiAttSetterRepr::CloneBody(Ptr<GuiAttSetterRepr> repr)
+		{
+			CopyFrom(repr->eventHandlers, eventHandlers);
+			FOREACH(WString, name, setters.Keys())
+			{
+				Ptr<SetterValue> src = setters[name];
+				Ptr<SetterValue> dst = new SetterValue;
+				dst->binding = src->binding;
+				FOREACH(Ptr<GuiValueRepr>, value, src->values)
+				{
+					dst->values.Add(value->Clone());
+				}
+				repr->setters.Add(name, dst);
+			}
+		}
+
+		Ptr<GuiValueRepr> GuiAttSetterRepr::Clone()
+		{
+			auto repr = MakePtr<GuiAttSetterRepr>();
+			repr->fromStyle = fromStyle;
+			CloneBody(repr);
+			return repr;
+		}
+
+/***********************************************************************
+GuiConstructorRepr
+***********************************************************************/
+
+		Ptr<GuiValueRepr> GuiConstructorRepr::Clone()
+		{
+			auto repr = MakePtr<GuiConstructorRepr>();
+			repr->fromStyle = fromStyle;
+			repr->typeNamespace = typeNamespace;
+			repr->typeName = typeName;
+			repr->instanceName = instanceName;
+			repr->styleName = styleName;
+			CloneBody(repr);
+			return repr;
+		}
 
 /***********************************************************************
 GuiInstanceContext
@@ -5662,6 +5876,10 @@ GuiInstanceContext
 						if (name->name == L"Name")
 						{
 							ctor->instanceName = att->value.value;
+						}
+						else if (name->name == L"Style")
+						{
+							ctor->styleName = att->value.value;
 						}
 					}
 				}
@@ -5887,34 +6105,6 @@ GuiInstanceStyleContext
 				}
 			}
 			return context;
-		}
-
-/***********************************************************************
-Helper Functions
-***********************************************************************/
-
-		void SplitBySemicolon(const WString& input, collections::List<WString>& fragments)
-		{
-			const wchar_t* attValue = input.Buffer();
-			while(*attValue)
-			{
-				// split the value by ';'
-				const wchar_t* attSemicolon = wcschr(attValue, L';');
-				WString pattern;
-				if(attSemicolon)
-				{
-					pattern = WString(attValue, attSemicolon - attValue);
-					attValue = attSemicolon + 1;
-				}
-				else
-				{
-					vint len = wcslen(attValue);
-					pattern = WString(attValue, len);
-					attValue += len;
-				}
-
-				fragments.Add(pattern);
-			}
 		}
 	}
 }
@@ -6142,9 +6332,11 @@ ExecuteQueryVisitor
 				{
 					return false;
 				}
-				if (node->referenceName.value != L"" && (!ctor->instanceName || node->referenceName.value != ctor->instanceName.Value()))
+				if (node->referenceName.value != L"")
 				{
-					return false;
+					bool instanceName = ctor->instanceName && node->referenceName.value == ctor->instanceName.Value();
+					bool styleName = ctor->styleName && node->referenceName.value == ctor->styleName.Value();
+					return instanceName || styleName;
 				}
 				return true;
 			}
@@ -6165,6 +6357,13 @@ ExecuteQueryVisitor
 									output.Add(ctor);
 								}
 							}
+							if (node->childOption == GuiIqChildOption::Indirect)
+							{
+								if (auto setter = value.Cast<GuiAttSetterRepr>())
+								{
+									Traverse(node, setter);
+								}
+							}
 						}
 					}
 				}
@@ -6174,20 +6373,9 @@ ExecuteQueryVisitor
 					{
 						output.Add(context->instance);
 					}
-					setter = context->instance;
-				}
-
-				if (node->childOption == GuiIqChildOption::Indirect)
-				{
-					FOREACH(Ptr<GuiAttSetterRepr::SetterValue>, setterValue, setter->setters.Values())
+					if (node->childOption == GuiIqChildOption::Indirect)
 					{
-						FOREACH(Ptr<GuiValueRepr>, value, setterValue->values)
-						{
-							if (auto setter = value.Cast<GuiAttSetterRepr>())
-							{
-								Traverse(node, setter);
-							}
-						}
+						Traverse(node, context->instance);
 					}
 				}
 			}
@@ -6296,7 +6484,7 @@ ApplyStyle
 
 		void ApplyStyle(Ptr<GuiInstanceStyle> style, Ptr<GuiConstructorRepr> ctor)
 		{
-			ApplyStyleInternal(style->setter, ctor);
+			ApplyStyleInternal(style->setter->Clone().Cast<GuiAttSetterRepr>(), ctor);
 		}
 	}
 }
@@ -7941,18 +8129,11 @@ Type Declaration
 				CLASS_MEMBER_BASE(GuiControl)
 				CLASS_MEMBER_BASE(GuiInstanceRootObject)
 				CONTROL_CONSTRUCTOR_CONTROLLER(GuiCustomControl)
-				CONTROL_CONSTRUCTOR_DEFAULT(GuiCustomControl, &g::NewCustomControl)
 			END_CLASS_MEMBER(GuiCustomControl)
-
-			BEGIN_CLASS_MEMBER(GuiCustomControl::IStyleController)
-				CLASS_MEMBER_BASE(GuiControl::IStyleController)
-				INTERFACE_EXTERNALCTOR(GuiCustomControl, IStyleController)
-			END_CLASS_MEMBER(GuiCustomControl::IStyleController)
 
 			BEGIN_CLASS_MEMBER(GuiLabel)
 				CLASS_MEMBER_BASE(GuiControl)
 				CONTROL_CONSTRUCTOR_CONTROLLER(GuiLabel)
-				CONTROL_CONSTRUCTOR_DEFAULT(GuiLabel, &g::NewLabel)
 
 				CLASS_MEMBER_PROPERTY_FAST(TextColor)
 			END_CLASS_MEMBER(GuiLabel)
@@ -7968,7 +8149,6 @@ Type Declaration
 			BEGIN_CLASS_MEMBER(GuiButton)
 				CLASS_MEMBER_BASE(GuiControl)
 				CONTROL_CONSTRUCTOR_CONTROLLER(GuiButton)
-				CONTROL_CONSTRUCTOR_DEFAULT(GuiButton, &g::NewButton)
 
 				CLASS_MEMBER_GUIEVENT(Clicked)
 
@@ -8119,7 +8299,6 @@ Type Declaration
 			BEGIN_CLASS_MEMBER(GuiScrollContainer)
 				CLASS_MEMBER_BASE(GuiScrollView)
 				CONTROL_CONSTRUCTOR_PROVIDER(GuiScrollContainer)
-				CONTROL_CONSTRUCTOR_DEFAULT(GuiScrollContainer, &g::NewScrollContainer)
 
 				CLASS_MEMBER_PROPERTY_FAST(ExtendToFullWidth)
 			END_CLASS_MEMBER(GuiScrollContainer)
@@ -8127,7 +8306,6 @@ Type Declaration
 			BEGIN_CLASS_MEMBER(GuiWindow)
 				CLASS_MEMBER_BASE(GuiControlHost)
 				CONTROL_CONSTRUCTOR_CONTROLLER(GuiWindow)
-				CONTROL_CONSTRUCTOR_DEFAULT(GuiWindow, &g::NewWindow)
 
 				CLASS_MEMBER_GUIEVENT(ClipboardUpdated)
 
@@ -8451,7 +8629,6 @@ Type Declaration
 			BEGIN_CLASS_MEMBER(GuiTextList)
 				CLASS_MEMBER_BASE(GuiVirtualTextList)
 				CLASS_MEMBER_CONSTRUCTOR(GuiTextList*(GuiSelectableListControl::IStyleProvider* _ TextItemStyleProvider::ITextItemStyleProvider*), {L"styleProvider" _ L"itemStyleProvider"})
-				CONTROL_CONSTRUCTOR_DEFAULT(GuiTextList, &g::NewTextList)
 
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(Items)
 				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(SelectedItem, SelectionChanged)
@@ -8820,7 +8997,8 @@ Type Declaration
 				CLASS_MEMBER_METHOD(GetItemStyleId, {L"node"})
 				CLASS_MEMBER_METHOD(CreateItemStyle, {L"styleId"})
 				CLASS_MEMBER_METHOD(DestroyItemStyle, {L"style"})
-				CLASS_MEMBER_METHOD(Install, {L"style" _ L"node"})
+				CLASS_MEMBER_METHOD(Install, {L"style" _ L"node" _ L"index"})
+				CLASS_MEMBER_METHOD(SetStyleIndex, {L"style" _ L"value"})
 				CLASS_MEMBER_METHOD(SetStyleSelected, {L"style" _ L"value"})
 			END_CLASS_MEMBER(INodeItemStyleProvider)
 
@@ -8932,7 +9110,6 @@ Type Declaration
 			BEGIN_CLASS_MEMBER(GuiTreeView)
 				CLASS_MEMBER_BASE(GuiVirtualTreeView)
 				CONTROL_CONSTRUCTOR_PROVIDER(GuiTreeView)
-				CONTROL_CONSTRUCTOR_DEFAULT(GuiTreeView, &g::NewTreeView)
 
 				CLASS_MEMBER_METHOD_RENAME(GetNodes, Nodes, NO_PARAMETER)
 				CLASS_MEMBER_PROPERTY_READONLY(Nodes, GetNodes)
@@ -9000,7 +9177,6 @@ Type Declaration
 			BEGIN_CLASS_MEMBER(GuiToolstripMenuBar)
 				CLASS_MEMBER_BASE(GuiMenuBar)
 				CONTROL_CONSTRUCTOR_CONTROLLER(GuiToolstripMenuBar)
-				CONTROL_CONSTRUCTOR_DEFAULT(GuiToolstripMenuBar, g::NewMenuBar)
 				
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(ToolstripItems)
 			END_CLASS_MEMBER(GuiToolstripMenuBar)
@@ -9008,7 +9184,6 @@ Type Declaration
 			BEGIN_CLASS_MEMBER(GuiToolstripToolBar)
 				CLASS_MEMBER_BASE(GuiControl)
 				CONTROL_CONSTRUCTOR_CONTROLLER(GuiToolstripToolBar)
-				CONTROL_CONSTRUCTOR_DEFAULT(GuiToolstripToolBar, &g::NewToolBar)
 				
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(ToolstripItems)
 			END_CLASS_MEMBER(GuiToolstripToolBar)
@@ -9079,14 +9254,12 @@ Type Declaration
 				CLASS_MEMBER_BASE(GuiScrollContainer)
 				CLASS_MEMBER_BASE(GuiDocumentCommonInterface)
 				CONTROL_CONSTRUCTOR_PROVIDER(GuiDocumentViewer)
-				CONTROL_CONSTRUCTOR_DEFAULT(GuiDocumentViewer, &g::NewDocumentViewer)
 			END_CLASS_MEMBER(GuiDocumentViewer)
 
 			BEGIN_CLASS_MEMBER(GuiDocumentLabel)
 				CLASS_MEMBER_BASE(GuiControl)
 				CLASS_MEMBER_BASE(GuiDocumentCommonInterface)
 				CONTROL_CONSTRUCTOR_CONTROLLER(GuiDocumentLabel)
-				CONTROL_CONSTRUCTOR_DEFAULT(GuiDocumentLabel, &g::NewDocumentLabel)
 			END_CLASS_MEMBER(GuiDocumentLabel)
 
 			BEGIN_CLASS_MEMBER(GuiTextBoxCommonInterface)
@@ -9210,14 +9383,12 @@ Type Declaration
 				CLASS_MEMBER_BASE(GuiScrollView)
 				CLASS_MEMBER_BASE(GuiTextBoxCommonInterface)
 				CONTROL_CONSTRUCTOR_PROVIDER(GuiMultilineTextBox)
-				CONTROL_CONSTRUCTOR_DEFAULT(GuiMultilineTextBox, &g::NewMultilineTextBox)
 			END_CLASS_MEMBER(GuiMultilineTextBox)
 
 			BEGIN_CLASS_MEMBER(GuiSinglelineTextBox)
 				CLASS_MEMBER_BASE(GuiControl)
 				CLASS_MEMBER_BASE(GuiTextBoxCommonInterface)
 				CONTROL_CONSTRUCTOR_PROVIDER(GuiSinglelineTextBox)
-				CONTROL_CONSTRUCTOR_DEFAULT(GuiSinglelineTextBox, &g::NewTextBox)
 
 				CLASS_MEMBER_PROPERTY_FAST(PasswordChar)
 			END_CLASS_MEMBER(GuiSinglelineTextBox)
@@ -9526,7 +9697,6 @@ Type Declaration
 			BEGIN_CLASS_MEMBER(GuiDatePicker)
 				CLASS_MEMBER_BASE(GuiControl)
 				CONTROL_CONSTRUCTOR_PROVIDER(GuiDatePicker)
-				CONTROL_CONSTRUCTOR_DEFAULT(GuiDatePicker, &g::NewDatePicker)
 
 				CLASS_MEMBER_PROPERTY_EVENT_FAST(Date, DateChanged)
 				CLASS_MEMBER_PROPERTY_EVENT_FAST(DateFormat, DateFormatChanged)
@@ -9552,7 +9722,6 @@ Type Declaration
 			BEGIN_CLASS_MEMBER(GuiDateComboBox)
 				CLASS_MEMBER_BASE(GuiComboBoxBase)
 				CLASS_MEMBER_CONSTRUCTOR(GuiDateComboBox*(GuiDateComboBox::IStyleController* _ GuiDatePicker*), {L"styleController" _ L"datePicker"})
-				CONTROL_CONSTRUCTOR_DEFAULT(GuiDateComboBox, &g::NewDateComboBox)
 
 				CLASS_MEMBER_PROPERTY_EVENT_FAST(SelectedDate, SelectedDateChanged)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(DatePicker)
@@ -9561,7 +9730,6 @@ Type Declaration
 			BEGIN_CLASS_MEMBER(GuiStringGrid)
 				CLASS_MEMBER_BASE(GuiVirtualDataGrid)
 				CONTROL_CONSTRUCTOR_PROVIDER(GuiStringGrid)
-				CONTROL_CONSTRUCTOR_DEFAULT(GuiStringGrid, &g::NewStringGrid)
 
 				CLASS_MEMBER_METHOD_RENAME(GetGrids, Grids, NO_PARAMETER)
 				CLASS_MEMBER_PROPERTY_READONLY(Grids, GetGrids)
@@ -10172,6 +10340,8 @@ Type Declaration
 				CLASS_MEMBER_BASE(GuiBoundsComposition)
 				CLASS_MEMBER_BASE(GuiInstanceRootObject)
 				CLASS_MEMBER_CONSTRUCTOR(GuiTemplate*(), NO_PARAMETER)
+
+				GuiTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_REFLECTION)
 			END_CLASS_MEMBER(GuiTemplate)
 			
 			BEGIN_CLASS_MEMBER(GuiTemplate::IFactory)
@@ -10181,12 +10351,54 @@ Type Declaration
 				CLASS_MEMBER_METHOD(CreateTemplate, NO_PARAMETER)
 			END_CLASS_MEMBER(GuiTemplate::IFactory)
 
+			BEGIN_CLASS_MEMBER(GuiControlTemplate)
+				CLASS_MEMBER_BASE(GuiTemplate)
+				CLASS_MEMBER_CONSTRUCTOR(GuiControlTemplate*(), NO_PARAMETER)
+
+				GuiControlTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_REFLECTION)
+			END_CLASS_MEMBER(GuiControlTemplate)
+
+			BEGIN_CLASS_MEMBER(GuiWindowTemplate)
+				CLASS_MEMBER_BASE(GuiControlTemplate)
+				CLASS_MEMBER_CONSTRUCTOR(GuiWindowTemplate*(), NO_PARAMETER)
+
+				GuiControlTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_REFLECTION)
+			END_CLASS_MEMBER(GuiWindowTemplate)
+
+			BEGIN_CLASS_MEMBER(GuiButtonTemplate)
+				CLASS_MEMBER_BASE(GuiControlTemplate)
+				CLASS_MEMBER_CONSTRUCTOR(GuiButtonTemplate*(), NO_PARAMETER)
+
+				GuiButtonTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_REFLECTION)
+			END_CLASS_MEMBER(GuiButtonTemplate)
+
+			BEGIN_CLASS_MEMBER(GuiSelectableButtonTemplate)
+				CLASS_MEMBER_BASE(GuiButtonTemplate)
+				CLASS_MEMBER_CONSTRUCTOR(GuiSelectableButtonTemplate*(), NO_PARAMETER)
+
+				GuiSelectableButtonTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_REFLECTION)
+			END_CLASS_MEMBER(GuiSelectableButtonTemplate)
+
+			BEGIN_CLASS_MEMBER(GuiToolstripButtonTemplate)
+				CLASS_MEMBER_BASE(GuiSelectableButtonTemplate)
+				CLASS_MEMBER_CONSTRUCTOR(GuiToolstripButtonTemplate*(), NO_PARAMETER)
+
+				GuiToolstripButtonTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_REFLECTION)
+			END_CLASS_MEMBER(GuiToolstripButtonTemplate)
+
 			BEGIN_CLASS_MEMBER(GuiListItemTemplate)
 				CLASS_MEMBER_BASE(GuiTemplate)
 				CLASS_MEMBER_CONSTRUCTOR(GuiListItemTemplate*(), NO_PARAMETER)
 
 				GuiListItemTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_REFLECTION)
 			END_CLASS_MEMBER(GuiListItemTemplate)
+
+			BEGIN_CLASS_MEMBER(GuiTreeItemTemplate)
+				CLASS_MEMBER_BASE(GuiListItemTemplate)
+				CLASS_MEMBER_CONSTRUCTOR(GuiTreeItemTemplate*(), NO_PARAMETER)
+
+				GuiTreeItemTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_REFLECTION)
+			END_CLASS_MEMBER(GuiTreeItemTemplate)
 
 #undef INTERFACE_EXTERNALCTOR
 #undef _

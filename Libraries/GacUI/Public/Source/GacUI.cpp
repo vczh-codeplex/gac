@@ -12007,7 +12007,7 @@ NodeItemProvider
 							INodeProvider* node=nodeItemView->RequestNode(itemIndex);
 							if(node)
 							{
-								nodeItemStyleProvider->Install(nodeStyle, node);
+								nodeItemStyleProvider->Install(nodeStyle, node, itemIndex);
 							}
 						}
 					}
@@ -12015,6 +12015,14 @@ NodeItemProvider
 
 				void NodeItemStyleProvider::SetStyleIndex(GuiListControl::IItemStyleController* style, vint value)
 				{
+					if(nodeItemView)
+					{
+						INodeItemStyleController* nodeStyle=dynamic_cast<INodeItemStyleController*>(style);
+						if(nodeStyle)
+						{
+							nodeItemStyleProvider->SetStyleIndex(nodeStyle, value);
+						}
+					}
 				}
 
 				void NodeItemStyleProvider::SetStyleSelected(GuiListControl::IItemStyleController* style, bool value)
@@ -12642,7 +12650,68 @@ TreeViewItemRootProvider
 						memoryNode->NotifyDataModified();
 					}
 				}
+			}
 
+/***********************************************************************
+GuiVirtualTreeView
+***********************************************************************/
+
+			GuiVirtualTreeView::GuiVirtualTreeView(IStyleProvider* _styleProvider, Ptr<tree::INodeRootProvider> _nodeRootProvider)
+				:GuiVirtualTreeListControl(_styleProvider, _nodeRootProvider)
+			{
+				styleProvider=dynamic_cast<IStyleProvider*>(styleController->GetStyleProvider());
+				SetNodeStyleProvider(new tree::TreeViewNodeItemStyleProvider);
+				SetArranger(new list::FixedHeightItemArranger);
+			}
+
+			GuiVirtualTreeView::~GuiVirtualTreeView()
+			{
+			}
+
+			GuiVirtualTreeView::IStyleProvider* GuiVirtualTreeView::GetTreeViewStyleProvider()
+			{
+				return styleProvider;
+			}
+
+/***********************************************************************
+GuiTreeView
+***********************************************************************/
+
+			GuiTreeView::GuiTreeView(IStyleProvider* _styleProvider)
+				:GuiVirtualTreeView(_styleProvider, new tree::TreeViewItemRootProvider)
+			{
+				nodes = nodeItemProvider->GetRoot().Cast<tree::TreeViewItemRootProvider>();
+			}
+
+			GuiTreeView::~GuiTreeView()
+			{
+			}
+
+			Ptr<tree::TreeViewItemRootProvider> GuiTreeView::Nodes()
+			{
+				return nodes;
+			}
+
+			Ptr<tree::TreeViewItem> GuiTreeView::GetSelectedItem()
+			{
+				Ptr<tree::TreeViewItem> result;
+				vint index = GetSelectedItemIndex();
+				if (index != -1)
+				{
+					if (auto node = nodeItemView->RequestNode(index))
+					{
+						if (auto memoryNode = dynamic_cast<tree::MemoryNodeProvider*>(node))
+						{
+							result = memoryNode->GetData().Cast<tree::TreeViewItem>();
+						}
+						nodeItemView->ReleaseNode(node);
+					}
+				}
+				return result;
+			}
+
+			namespace tree
+			{
 /***********************************************************************
 TreeViewNodeItemStyleProvider::ItemController
 ***********************************************************************/
@@ -12914,13 +12983,17 @@ TreeViewNodeItemStyleProvider
 					}
 				}
 
-				void TreeViewNodeItemStyleProvider::Install(INodeItemStyleController* style, INodeProvider* node)
+				void TreeViewNodeItemStyleProvider::Install(INodeItemStyleController* style, INodeProvider* node, vint itemIndex)
 				{
 					ItemController* itemController=dynamic_cast<ItemController*>(style);
 					if(itemController)
 					{
 						itemController->Install(node);
 					}
+				}
+
+				void TreeViewNodeItemStyleProvider::SetStyleIndex(INodeItemStyleController* style, vint value)
+				{
 				}
 
 				void TreeViewNodeItemStyleProvider::SetStyleSelected(INodeItemStyleController* style, bool value)
@@ -12931,64 +13004,6 @@ TreeViewNodeItemStyleProvider
 						itemController->SetSelected(value);
 					}
 				}
-			}
-
-/***********************************************************************
-GuiVirtualTreeView
-***********************************************************************/
-
-			GuiVirtualTreeView::GuiVirtualTreeView(IStyleProvider* _styleProvider, Ptr<tree::INodeRootProvider> _nodeRootProvider)
-				:GuiVirtualTreeListControl(_styleProvider, _nodeRootProvider)
-			{
-				styleProvider=dynamic_cast<IStyleProvider*>(styleController->GetStyleProvider());
-				SetNodeStyleProvider(new tree::TreeViewNodeItemStyleProvider);
-				SetArranger(new list::FixedHeightItemArranger);
-			}
-
-			GuiVirtualTreeView::~GuiVirtualTreeView()
-			{
-			}
-
-			GuiVirtualTreeView::IStyleProvider* GuiVirtualTreeView::GetTreeViewStyleProvider()
-			{
-				return styleProvider;
-			}
-
-/***********************************************************************
-GuiTreeView
-***********************************************************************/
-
-			GuiTreeView::GuiTreeView(IStyleProvider* _styleProvider)
-				:GuiVirtualTreeView(_styleProvider, new tree::TreeViewItemRootProvider)
-			{
-				nodes=nodeItemProvider->GetRoot().Cast<tree::TreeViewItemRootProvider>();
-			}
-
-			GuiTreeView::~GuiTreeView()
-			{
-			}
-
-			Ptr<tree::TreeViewItemRootProvider> GuiTreeView::Nodes()
-			{
-				return nodes;
-			}
-
-			Ptr<tree::TreeViewItem> GuiTreeView::GetSelectedItem()
-			{
-				Ptr<tree::TreeViewItem> result;
-				vint index = GetSelectedItemIndex();
-				if (index != -1)
-				{
-					if (auto node = nodeItemView->RequestNode(index))
-					{
-						if (auto memoryNode = dynamic_cast<tree::MemoryNodeProvider*>(node))
-						{
-							result = memoryNode->GetData().Cast<tree::TreeViewItem>();
-						}
-						nodeItemView->ReleaseNode(node);
-					}
-				}
-				return result;
 			}
 		}
 	}
@@ -22512,9 +22527,11 @@ namespace vl
 		{
 			using namespace description;
 			using namespace collections;
+			using namespace controls;
+			using namespace compositions;
 
 /***********************************************************************
-GuiTemplate
+GuiTemplate::IFactory
 ***********************************************************************/
 
 			class GuiTemplateReflectableFactory : public Object, public virtual GuiTemplate::IFactory
@@ -22578,11 +22595,98 @@ GuiTemplate
 				return new GuiTemplateReflectableFactory(types);
 			}
 
+/***********************************************************************
+GuiTemplate
+***********************************************************************/
+
+			GuiTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_IMPL)
+
 			GuiTemplate::GuiTemplate()
+				:VisuallyEnabled_(true)
 			{
+				GuiTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_EVENT_INIT)
 			}
 
 			GuiTemplate::~GuiTemplate()
+			{
+			}
+
+/***********************************************************************
+GuiControlTemplate
+***********************************************************************/
+
+			GuiControlTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_IMPL)
+
+			GuiControlTemplate::GuiControlTemplate()
+				:ContainerComposition_(this)
+				, FocusableComposition_(0)
+			{
+				GuiControlTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_EVENT_INIT)
+			}
+
+			GuiControlTemplate::~GuiControlTemplate()
+			{
+			}
+
+/***********************************************************************
+GuiWindowTemplate
+***********************************************************************/
+
+			GuiWindowTemplate::GuiWindowTemplate()
+			{
+			}
+
+			GuiWindowTemplate::~GuiWindowTemplate()
+			{
+			}
+
+/***********************************************************************
+GuiButtonTemplate
+***********************************************************************/
+
+			GuiButtonTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_IMPL)
+
+			GuiButtonTemplate::GuiButtonTemplate()
+				:State_(GuiButton::Normal)
+			{
+				GuiButtonTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_EVENT_INIT)
+			}
+
+			GuiButtonTemplate::~GuiButtonTemplate()
+			{
+			}
+
+/***********************************************************************
+GuiSelectableButtonTemplate
+***********************************************************************/
+
+			GuiSelectableButtonTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_IMPL)
+
+			GuiSelectableButtonTemplate::GuiSelectableButtonTemplate()
+				:Selected_(false)
+			{
+				GuiSelectableButtonTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_EVENT_INIT)
+			}
+
+			GuiSelectableButtonTemplate::~GuiSelectableButtonTemplate()
+			{
+			}
+
+/***********************************************************************
+GuiToolstripButtonTemplate
+***********************************************************************/
+
+			GuiToolstripButtonTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_IMPL)
+
+			GuiToolstripButtonTemplate::GuiToolstripButtonTemplate()
+				:SubMenuExisting_(false)
+				, SubMenuOpening_(false)
+				, SubMenuHost_(0)
+			{
+				GuiToolstripButtonTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_EVENT_INIT)
+			}
+
+			GuiToolstripButtonTemplate::~GuiToolstripButtonTemplate()
 			{
 			}
 
@@ -22602,6 +22706,22 @@ GuiListItemTemplate
 			GuiListItemTemplate::~GuiListItemTemplate()
 			{
 			}
+
+/***********************************************************************
+GuiTreeItemTemplate
+***********************************************************************/
+
+			GuiTreeItemTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_IMPL)
+
+			GuiTreeItemTemplate::GuiTreeItemTemplate()
+				:Expanding_(false)
+			{
+				GuiTreeItemTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_EVENT_INIT)
+			}
+
+			GuiTreeItemTemplate::~GuiTreeItemTemplate()
+			{
+			}
 		}
 	}
 }
@@ -22619,6 +22739,175 @@ namespace vl
 			using namespace compositions;
 			using namespace controls;
 			using namespace reflection::description;
+			using namespace collections;
+
+/***********************************************************************
+GuiControlTemplate_StyleProvider
+***********************************************************************/
+
+			GuiControlTemplate_StyleProvider::GuiControlTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory)
+				:controlTemplate(0)
+			{
+				GuiTemplate* itemTemplate = factory->CreateTemplate(Value());
+				if (!(controlTemplate = dynamic_cast<GuiControlTemplate*>(itemTemplate)))
+				{
+					delete itemTemplate;
+					CHECK_FAIL(L"GuiControlTemplate_StyleProvider::GuiControlTemplate_StyleProvider()#An instance of GuiTemplate is expected.");
+				}
+			}
+
+			GuiControlTemplate_StyleProvider::~GuiControlTemplate_StyleProvider()
+			{
+			}
+
+			compositions::GuiBoundsComposition* GuiControlTemplate_StyleProvider::GetBoundsComposition()
+			{
+				return controlTemplate;
+			}
+
+			compositions::GuiGraphicsComposition* GuiControlTemplate_StyleProvider::GetContainerComposition()
+			{
+				return controlTemplate->GetContainerComposition();
+			}
+
+			void GuiControlTemplate_StyleProvider::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
+			{
+				controlTemplate->SetFocusableComposition(value);
+			}
+
+			void GuiControlTemplate_StyleProvider::SetText(const WString& value)
+			{
+				controlTemplate->SetText(value);
+			}
+
+			void GuiControlTemplate_StyleProvider::SetFont(const FontProperties& value)
+			{
+				controlTemplate->SetFont(value);
+			}
+
+			void GuiControlTemplate_StyleProvider::SetVisuallyEnabled(bool value)
+			{
+				controlTemplate->SetVisuallyEnabled(value);
+			}
+
+/***********************************************************************
+GuiWindowTemplate_StyleProvider
+***********************************************************************/
+
+			GuiWindowTemplate_StyleProvider::GuiWindowTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory)
+				:GuiControlTemplate_StyleProvider(factory)
+			{
+			}
+
+			GuiWindowTemplate_StyleProvider::~GuiWindowTemplate_StyleProvider()
+			{
+			}
+
+/***********************************************************************
+GuiButtonTemplate_StyleProvider
+***********************************************************************/
+
+			GuiButtonTemplate_StyleProvider::GuiButtonTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory)
+				:GuiControlTemplate_StyleProvider(factory)
+			{
+				if (!(controlTemplate = dynamic_cast<GuiButtonTemplate*>(GetBoundsComposition())))
+				{
+					CHECK_FAIL(L"GuiButtonTemplate_StyleProvider::GuiButtonTemplate_StyleProvider()#An instance of GuiButtonTemplate is expected.");
+				}
+			}
+
+			GuiButtonTemplate_StyleProvider::~GuiButtonTemplate_StyleProvider()
+			{
+			}
+
+			void GuiButtonTemplate_StyleProvider::Transfer(controls::GuiButton::ControlState value)
+			{
+				controlTemplate->SetState(value);
+			}
+
+/***********************************************************************
+GuiSelectableButtonTemplate_StyleProvider
+***********************************************************************/
+
+			GuiSelectableButtonTemplate_StyleProvider::GuiSelectableButtonTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory)
+				:GuiButtonTemplate_StyleProvider(factory)
+			{
+				if (!(controlTemplate = dynamic_cast<GuiSelectableButtonTemplate*>(GetBoundsComposition())))
+				{
+					CHECK_FAIL(L"GuiButtonTemplate_StyleProvider::GuiButtonTemplate_StyleProvider()#An instance of GuiSelectableButtonTemplate is expected.");
+				}
+			}
+
+			GuiSelectableButtonTemplate_StyleProvider::~GuiSelectableButtonTemplate_StyleProvider()
+			{
+			}
+
+			void GuiSelectableButtonTemplate_StyleProvider::SetSelected(bool value)
+			{
+				controlTemplate->SetSelected(value);
+			}
+
+/***********************************************************************
+GuiToolstripButtonTemplate_StyleProvider
+***********************************************************************/
+
+			void GuiToolstripButtonTemplate_StyleProvider::controlTemplate_SubMenuTemplateChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				subMenuTemplateFactory = 0;
+			}
+
+			GuiToolstripButtonTemplate_StyleProvider::GuiToolstripButtonTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory)
+				:GuiSelectableButtonTemplate_StyleProvider(factory)
+			{
+				if (!(controlTemplate = dynamic_cast<GuiToolstripButtonTemplate*>(GetBoundsComposition())))
+				{
+					CHECK_FAIL(L"GuiButtonTemplate_StyleProvider::GuiButtonTemplate_StyleProvider()#An instance of GuiSelectableButtonTemplate is expected.");
+				}
+				controlTemplate->SubMenuTemplateChanged.AttachMethod(this, &GuiToolstripButtonTemplate_StyleProvider::controlTemplate_SubMenuTemplateChanged);
+			}
+
+			GuiToolstripButtonTemplate_StyleProvider::~GuiToolstripButtonTemplate_StyleProvider()
+			{
+			}
+				
+			controls::GuiMenu::IStyleController* GuiToolstripButtonTemplate_StyleProvider::CreateSubMenuStyleController()
+			{
+				if (!subMenuTemplateFactory)
+				{
+					subMenuTemplateFactory = CreateTemplateFactory(controlTemplate->GetSubMenuTemplate());
+				}
+				return new GuiWindowTemplate_StyleProvider(subMenuTemplateFactory);
+			}
+
+			void GuiToolstripButtonTemplate_StyleProvider::SetSubMenuExisting(bool value)
+			{
+				controlTemplate->SetSubMenuExisting(value);
+			}
+
+			void GuiToolstripButtonTemplate_StyleProvider::SetSubMenuOpening(bool value)
+			{
+				controlTemplate->SetSubMenuOpening(value);
+			}
+
+			controls::GuiButton* GuiToolstripButtonTemplate_StyleProvider::GetSubMenuHost()
+			{
+				return controlTemplate->GetSubMenuHost();
+			}
+
+			void GuiToolstripButtonTemplate_StyleProvider::SetImage(Ptr<GuiImageData> value)
+			{
+				controlTemplate->SetImage(value);
+			}
+
+			void GuiToolstripButtonTemplate_StyleProvider::SetShortcutText(const WString& value)
+			{
+				controlTemplate->SetShortcutText(value);
+			}
+
+			compositions::GuiSubComponentMeasurer::IMeasuringSource* GuiToolstripButtonTemplate_StyleProvider::GetMeasuringSource()
+			{
+				return 0;
+			}
 
 /***********************************************************************
 GuiListItemTemplate_ItemStyleProvider
@@ -22643,6 +22932,10 @@ GuiListItemTemplate_ItemStyleProvider
 
 			void GuiListItemTemplate_ItemStyleProvider::DetachListControl()
 			{
+				if (listControl && bindingView)
+				{
+					listControl->GetItemProvider()->ReleaseView(bindingView);
+				}
 				listControl = 0;
 				bindingView = 0;
 			}
@@ -22768,6 +23061,227 @@ GuiListItemTemplate_ItemStyleController
 			void GuiListItemTemplate_ItemStyleController::OnUninstalled()
 			{
 				installed = false;
+			}
+
+/***********************************************************************
+GuiTreeItemTemplate_ItemStyleProvider
+***********************************************************************/
+
+			void GuiTreeItemTemplate_ItemStyleProvider::UpdateExpandingButton(controls::tree::INodeProvider* node)
+			{
+				vint index=treeListControl->GetNodeItemView()->CalculateNodeVisibilityIndex(node);
+				if(index!=-1)
+				{
+					if(auto style = treeListControl->GetArranger()->GetVisibleStyle(index))
+					{
+						if (auto controller = dynamic_cast<GuiTreeItemTemplate_ItemStyleController*>(style))
+						{
+							if (auto itemTemplate = dynamic_cast<GuiTreeItemTemplate*>(controller->GetTemplate()))
+							{
+								itemTemplate->SetExpanding(node->GetExpanding());
+							}
+						}
+					}
+				}
+			}
+
+			void GuiTreeItemTemplate_ItemStyleProvider::OnAttached(controls::tree::INodeRootProvider* provider)
+			{
+			}
+
+			void GuiTreeItemTemplate_ItemStyleProvider::OnBeforeItemModified(controls::tree::INodeProvider* parentNode, vint start, vint count, vint newCount)
+			{
+			}
+
+			void GuiTreeItemTemplate_ItemStyleProvider::OnAfterItemModified(controls::tree::INodeProvider* parentNode, vint start, vint count, vint newCount)
+			{
+				UpdateExpandingButton(parentNode);
+			}
+
+			void GuiTreeItemTemplate_ItemStyleProvider::OnItemExpanded(controls::tree::INodeProvider* node)
+			{
+				UpdateExpandingButton(node);
+			}
+
+			void GuiTreeItemTemplate_ItemStyleProvider::OnItemCollapsed(controls::tree::INodeProvider* node)
+			{
+				UpdateExpandingButton(node);
+			}
+
+			GuiTreeItemTemplate_ItemStyleProvider::GuiTreeItemTemplate_ItemStyleProvider(Ptr<GuiTemplate::IFactory> _factory)
+				:factory(_factory)
+				, treeListControl(0)
+				, bindingView(0)
+				, itemStyleProvider(0)
+			{
+
+			}
+
+			GuiTreeItemTemplate_ItemStyleProvider::~GuiTreeItemTemplate_ItemStyleProvider()
+			{
+			}
+				
+			void GuiTreeItemTemplate_ItemStyleProvider::BindItemStyleProvider(controls::GuiListControl::IItemStyleProvider* styleProvider)
+			{
+				itemStyleProvider = styleProvider;
+			}
+
+			controls::GuiListControl::IItemStyleProvider* GuiTreeItemTemplate_ItemStyleProvider::GetBindedItemStyleProvider()
+			{
+				return itemStyleProvider;
+			}
+
+			void GuiTreeItemTemplate_ItemStyleProvider::AttachListControl(GuiListControl* value)
+			{
+				treeListControl = dynamic_cast<GuiVirtualTreeListControl*>(value);
+				if (treeListControl)
+				{
+					treeListControl->GetNodeRootProvider()->AttachCallback(this);
+					bindingView = dynamic_cast<tree::INodeItemBindingView*>(treeListControl->GetNodeRootProvider()->RequestView(tree::INodeItemBindingView::Identifier));
+				}
+			}
+
+			void GuiTreeItemTemplate_ItemStyleProvider::DetachListControl()
+			{
+				if (treeListControl)
+				{
+					treeListControl->GetNodeRootProvider()->DetachCallback(this);
+					if (bindingView)
+					{
+						treeListControl->GetNodeRootProvider()->ReleaseView(bindingView);
+					}
+				}
+				treeListControl = 0;
+				bindingView = 0;
+			}
+
+			vint GuiTreeItemTemplate_ItemStyleProvider::GetItemStyleId(controls::tree::INodeProvider* node)
+			{
+				return 0;
+			}
+
+			controls::tree::INodeItemStyleController* GuiTreeItemTemplate_ItemStyleProvider::CreateItemStyle(vint styleId)
+			{
+				return new GuiTreeItemTemplate_ItemStyleController(this);
+			}
+
+			void GuiTreeItemTemplate_ItemStyleProvider::DestroyItemStyle(controls::tree::INodeItemStyleController* style)
+			{
+				delete style;
+			}
+
+			void GuiTreeItemTemplate_ItemStyleProvider::Install(controls::tree::INodeItemStyleController* style, controls::tree::INodeProvider* node, vint itemIndex)
+			{
+				if (auto controller = dynamic_cast<GuiTreeItemTemplate_ItemStyleController*>(style))
+				{
+					Value viewModel;
+					if (bindingView)
+					{
+						viewModel = bindingView->GetBindingValue(node);
+					}
+					
+					GuiTemplate* itemTemplate = factory->CreateTemplate(viewModel);
+					if (auto treeItemTemplate = dynamic_cast<GuiTreeItemTemplate*>(itemTemplate))
+					{
+						treeItemTemplate->SetIndex(itemIndex);
+						controller->SetTemplate(treeItemTemplate);
+					}
+					else
+					{
+						delete itemTemplate;
+					}
+				}
+			}
+
+			void GuiTreeItemTemplate_ItemStyleProvider::SetStyleIndex(controls::tree::INodeItemStyleController* style, vint value)
+			{
+				if (auto controller = dynamic_cast<GuiTreeItemTemplate_ItemStyleController*>(style))
+				{
+					if (auto itemTemplate = controller->GetTemplate())
+					{
+						itemTemplate->SetIndex(value);
+					}
+				}
+			}
+
+			void GuiTreeItemTemplate_ItemStyleProvider::SetStyleSelected(controls::tree::INodeItemStyleController* style, bool value)
+			{
+				if (auto controller = dynamic_cast<GuiTreeItemTemplate_ItemStyleController*>(style))
+				{
+					if (auto itemTemplate = controller->GetTemplate())
+					{
+						itemTemplate->SetSelected(value);
+					}
+				}
+			}
+
+/***********************************************************************
+GuiTreeItemTemplate_ItemStyleController
+***********************************************************************/
+
+			GuiTreeItemTemplate_ItemStyleController::GuiTreeItemTemplate_ItemStyleController(GuiTreeItemTemplate_ItemStyleProvider* _nodeStyleProvider)
+				:GuiListItemTemplate_ItemStyleController(0)
+				, nodeStyleProvider(_nodeStyleProvider)
+			{
+
+			}
+
+			GuiTreeItemTemplate_ItemStyleController::~GuiTreeItemTemplate_ItemStyleController()
+			{
+
+			}
+
+			controls::GuiListControl::IItemStyleProvider* GuiTreeItemTemplate_ItemStyleController::GetStyleProvider()
+			{
+				return nodeStyleProvider->GetBindedItemStyleProvider();
+			}
+
+			controls::tree::INodeItemStyleProvider* GuiTreeItemTemplate_ItemStyleController::GetNodeStyleProvider()
+			{
+				return nodeStyleProvider;
+			}
+
+/***********************************************************************
+Helper Functions
+***********************************************************************/
+
+			void SplitBySemicolon(const WString& input, collections::List<WString>& fragments)
+			{
+				const wchar_t* attValue = input.Buffer();
+				while(*attValue)
+				{
+					// split the value by ';'
+					const wchar_t* attSemicolon = wcschr(attValue, L';');
+					WString pattern;
+					if(attSemicolon)
+					{
+						pattern = WString(attValue, attSemicolon - attValue);
+						attValue = attSemicolon + 1;
+					}
+					else
+					{
+						vint len = wcslen(attValue);
+						pattern = WString(attValue, len);
+						attValue += len;
+					}
+
+					fragments.Add(pattern);
+				}
+			}
+
+			Ptr<GuiTemplate::IFactory> CreateTemplateFactory(const WString& typeValues)
+			{
+				List<ITypeDescriptor*> types;
+				List<WString> typeNames;
+				SplitBySemicolon(typeValues, typeNames);
+				CopyFrom(
+					types,
+					From(typeNames)
+						.Select(&description::GetTypeDescriptor)
+						.Where([](ITypeDescriptor* type){return type != 0; })
+					);
+
+				return GuiTemplate::IFactory::CreateTemplateFactory(types);
 			}
 		}
 	}
@@ -37611,7 +38125,10 @@ document_operation_visitors::DeserializeNodeVisitor
 					}
 					else
 					{
-						errors.Add(L"Unknown tag in document resource \"" + node->name.value + L"\".");
+						if (node->name.value != L"nop")
+						{
+							errors.Add(L"Unknown tag in document resource \"" + node->name.value + L"\".");
+						}
 						FOREACH(Ptr<XmlNode>, sub, node->subNodes)
 						{
 							sub->Accept(this);
