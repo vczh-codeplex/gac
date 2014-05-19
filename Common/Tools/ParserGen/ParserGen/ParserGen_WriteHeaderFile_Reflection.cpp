@@ -100,7 +100,7 @@ void WriteTypeReflectionDeclaration(ParsingSymbolManager* manager, const WString
 		}
 	}
 	writer.WriteString(prefix);
-	writer.WriteLine(L"\t}");
+	writer.WriteLine(L"}");
 	writer.WriteLine(L"#endif");
 
 	writer.WriteLine(L"");

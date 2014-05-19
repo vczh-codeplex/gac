@@ -1,6 +1,6 @@
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: іВиче«(vczh)
+Developer: Zihan Chen(vczh)
 GacUI Reflection: Instance Schema Representation
 
 Interfaces:

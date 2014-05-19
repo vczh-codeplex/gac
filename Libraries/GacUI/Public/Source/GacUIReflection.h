@@ -11,7 +11,7 @@ GUIINSTANCEHELPERTYPES.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI Reflection: Instance Helper Types
 
 Interfaces:
@@ -83,7 +83,7 @@ INSTANCEQUERY\GUIINSTANCEQUERY_PARSER.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Parser::GuiInstanceQuery_Parser
 
 本文件使用Vczh Parsing Generator工具自动生成
@@ -264,7 +264,7 @@ GUIINSTANCEREPRESENTATION.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI Reflection: Instance Representation
 
 Interfaces:
@@ -300,7 +300,8 @@ Instance Representation
 
 			bool									fromStyle = false;
 
-			virtual void							Accept(IVisitor* visitor)=0;
+			virtual void							Accept(IVisitor* visitor) = 0;
+			virtual Ptr<GuiValueRepr>				Clone() = 0;
 		};
 
 		class GuiTextRepr : public GuiValueRepr, public Description<GuiTextRepr>
@@ -309,6 +310,7 @@ Instance Representation
 			WString									text;
 
 			void									Accept(IVisitor* visitor)override{visitor->Visit(this);}
+			Ptr<GuiValueRepr>						Clone()override;
 		};
 
 		class GuiAttSetterRepr : public GuiValueRepr, public Description<GuiAttSetterRepr>
@@ -336,6 +338,8 @@ Instance Representation
 			EventHandlerMap							eventHandlers;
 
 			void									Accept(IVisitor* visitor)override{visitor->Visit(this);}
+			void									CloneBody(Ptr<GuiAttSetterRepr> repr);
+			Ptr<GuiValueRepr>						Clone()override;
 		};
 
 		class GuiConstructorRepr : public GuiAttSetterRepr, public Description<GuiConstructorRepr>
@@ -345,8 +349,10 @@ Instance Representation
 			WString									typeNamespace;
 			WString									typeName;
 			Nullable<WString>						instanceName;
+			Nullable<WString>						styleName;
 
 			void									Accept(IVisitor* visitor)override{visitor->Visit(this);}
+			Ptr<GuiValueRepr>						Clone()override;
 		};
 
 /***********************************************************************
@@ -440,12 +446,6 @@ Instance Style Context
 
 			static Ptr<GuiInstanceStyleContext>		LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, collections::List<WString>& errors);
 		};
-
-/***********************************************************************
-Helper Functions
-***********************************************************************/
-
-		extern void									SplitBySemicolon(const WString& input, collections::List<WString>& fragments);
 	}
 }
 
@@ -456,7 +456,7 @@ GUIINSTANCELOADER.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI Reflection: Instance Loader
 
 Interfaces:
@@ -679,6 +679,7 @@ Instance Binder
 		{
 		public:
 			virtual WString							GetBindingName() = 0;
+			virtual void							GetRequiredContexts(collections::List<WString>& contextNames) = 0;
 			virtual bool							AttachEvent(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, IGuiInstanceLoader::PropertyValue& propertyValue) = 0;
 		};
 
@@ -779,9 +780,18 @@ Instance Scope Wrapper
 						auto value = description::Value::From(dynamic_cast<T*>(this));
 						if (scope = loader->InitializeInstance(typeInfo, value))
 						{
+#ifdef _DEBUG
+							CHECK_ERROR(scope->errors.Count() == 0, L"vl::presentation::GuiInstancePartialClass<T>::InitializeFromResource()#There is something wrong with the resource.");
+#endif
 							return true;
 						}
 					}
+#ifdef _DEBUG
+					else
+					{
+						CHECK_FAIL(L"vl::presentation::GuiInstancePartialClass<T>::InitializeFromResource()#Cannot initialize this instance from the resource.");
+					}
+#endif
 				}
 				return false;
 			}
@@ -834,7 +844,7 @@ TYPEDESCRIPTORS\GUIREFLECTIONBASIC.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI Reflection: Basic
 
 Interfaces:
@@ -1045,7 +1055,7 @@ TYPEDESCRIPTORS\GUIREFLECTIONELEMENTS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI Reflection: Elements
 
 Interfaces:
@@ -1109,7 +1119,7 @@ TYPEDESCRIPTORS\GUIREFLECTIONCOMPOSITIONS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI Reflection: Compositions
 
 Interfaces:
@@ -1281,7 +1291,7 @@ TYPEDESCRIPTORS\GUIREFLECTIONCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI Reflection: Basic
 
 Interfaces:
@@ -1309,7 +1319,6 @@ Type List
 			F(presentation::theme::ITheme)\
 			F(presentation::controls::GuiInstanceRootObject)\
 			F(presentation::controls::GuiCustomControl)\
-			F(presentation::controls::GuiCustomControl::IStyleController)\
 			F(presentation::controls::GuiLabel)\
 			F(presentation::controls::GuiLabel::IStyleController)\
 			F(presentation::controls::GuiButton)\
@@ -2703,9 +2712,14 @@ Interface Proxy
 						INVOKE_INTERFACE_PROXY(DestroyItemStyle, style);
 					}
 
-					void Install(tree::INodeItemStyleController* style, tree::INodeProvider* node)override
+					void Install(tree::INodeItemStyleController* style, tree::INodeProvider* node, vint itemIndex)override
 					{
-						INVOKE_INTERFACE_PROXY(Install, style, node);
+						INVOKE_INTERFACE_PROXY(Install, style, node, itemIndex);
+					}
+
+					void SetStyleIndex(tree::INodeItemStyleController* style, vint value)override
+					{
+						INVOKE_INTERFACE_PROXY(SetStyleIndex, style, value);
 					}
 
 					void SetStyleSelected(tree::INodeItemStyleController* style, bool value)override
@@ -3317,7 +3331,7 @@ TYPEDESCRIPTORS\GUIREFLECTIONEVENTS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI Reflection: Events
 
 Interfaces:
@@ -3520,7 +3534,7 @@ INSTANCEQUERY\GUIINSTANCEQUERY.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI Reflection: Instance Query
 
 Interfaces:
@@ -3547,7 +3561,7 @@ GUIINSTANCESCHEMAREPRESENTATION.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI Reflection: Instance Schema Representation
 
 Interfaces:
@@ -3641,7 +3655,7 @@ TYPEDESCRIPTORS\GUIREFLECTIONTEMPLATES.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 GacUI Reflection: Basic
 
 Interfaces:
@@ -3667,7 +3681,13 @@ Type List
 #define GUIREFLECTIONTEMPLATES_TYPELIST(F)\
 			F(presentation::templates::GuiTemplate)\
 			F(presentation::templates::GuiTemplate::IFactory)\
+			F(presentation::templates::GuiControlTemplate)\
+			F(presentation::templates::GuiWindowTemplate)\
+			F(presentation::templates::GuiButtonTemplate)\
+			F(presentation::templates::GuiSelectableButtonTemplate)\
+			F(presentation::templates::GuiToolstripButtonTemplate)\
 			F(presentation::templates::GuiListItemTemplate)\
+			F(presentation::templates::GuiTreeItemTemplate)\
 
 			GUIREFLECTIONTEMPLATES_TYPELIST(DECL_TYPE_INFO)
 

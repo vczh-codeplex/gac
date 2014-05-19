@@ -1,4 +1,4 @@
-#include "GuiInstanceQuery_Parser.h"
+﻿#include "GuiInstanceQuery_Parser.h"
 
 namespace vl
 {

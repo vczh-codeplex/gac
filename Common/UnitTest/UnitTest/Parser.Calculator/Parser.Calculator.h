@@ -1,6 +1,6 @@
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Parser::Parser.Calculator
 
 本文件使用Vczh Parsing Generator工具自动生成

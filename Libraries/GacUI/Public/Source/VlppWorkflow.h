@@ -9,7 +9,7 @@ WORKFLOWVLPPREFERENCES.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Koncept Language Vczh Library++ 3.0 References
 
 Interfaces:
@@ -26,7 +26,7 @@ EXPRESSION\WFEXPRESSIONPARSER.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Parser::WfExpressionParser
 
 本文件使用Vczh Parsing Generator工具自动生成
@@ -1629,7 +1629,7 @@ EXPRESSION\WFEXPRESSION.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Parser::WfExpression
 
 Interfaces:
@@ -1657,7 +1657,7 @@ RUNTIME\WFRUNTIME.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Workflow::Runtime
 
 Interfaces:
@@ -2029,7 +2029,7 @@ ANALYZER\WFANALYZER.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
+Developer: Zihan Chen(vczh)
 Workflow::Analyzer
 
 Interfaces:

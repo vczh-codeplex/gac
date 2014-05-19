@@ -1,6 +1,6 @@
 /***********************************************************************
 Vczh Library++ 3.0
-Developer: іВиче«(vczh)
+Developer: Zihan Chen(vczh)
 GacUI Vczh Library++ 3.0 References
 
 Interfaces:

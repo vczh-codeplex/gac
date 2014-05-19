@@ -18,7 +18,7 @@ extern WString GetPath();
 namespace test
 {
 	template<typename T, typename TValue, vint Count, WString(*ToString)(TValue)>
-	void TestNumber(TValue(&values)[Count], TValue min, TValue max)
+	void TestNumber(TValue(&values)[Count], TValue min, TValue max, bool testGetText)
 	{
 		ITypeDescriptor* type=GetTypeDescriptor<T>();
 		ITypedValueSerializer<T>* serializer=GetValueSerializer<T>();
@@ -41,24 +41,30 @@ namespace test
 				{
 					TEST_ASSERT(serializer->Parse(ToString(i), value));
 #ifdef VCZH_GCC
-			TEST_PRINT(L"\tPrinting: " + value.GetText());
+					TEST_PRINT(L"\tPrinting: " + value.GetText());
 #endif
 					TEST_ASSERT(value.GetValueType()==Value::Text);
 					TEST_ASSERT(value.GetTypeDescriptor()==type);
 					TEST_ASSERT(value.GetRawPtr()==0);
 					TEST_ASSERT(value.GetSharedPtr().Obj()==0);
-					TEST_ASSERT(value.GetText()==ToString(i));
+					if (testGetText)
+					{
+						TEST_ASSERT(value.GetText()==ToString(i));
+					}
 				}
 				{
 					TEST_ASSERT(serializer->Serialize((T)i, value));
 #ifdef VCZH_GCC
-			TEST_PRINT(L"\tPrinting: " + value.GetText());
+					TEST_PRINT(L"\tPrinting: " + value.GetText());
 #endif
 					TEST_ASSERT(value.GetValueType()==Value::Text);
 					TEST_ASSERT(value.GetTypeDescriptor()==type);
 					TEST_ASSERT(value.GetRawPtr()==0);
 					TEST_ASSERT(value.GetSharedPtr().Obj()==0);
-					TEST_ASSERT(value.GetText()==ToString((T)i));
+					if (testGetText)
+					{
+						TEST_ASSERT(value.GetText()==ToString(i));
+					}
 				}
 				{
 					T n=2;
@@ -182,7 +188,7 @@ namespace test
 			_I64_MAX-1,
 			_I64_MAX,
 		};
-		TestNumber<T, vint64_t, sizeof(values)/sizeof(*values), &i64tow>(values, std::numeric_limits<T>::min(), std::numeric_limits<T>::max());
+		TestNumber<T, vint64_t, sizeof(values)/sizeof(*values), &i64tow>(values, std::numeric_limits<T>::min(), std::numeric_limits<T>::max(), true);
 	}
 	
 	template<typename T>
@@ -201,7 +207,7 @@ namespace test
 			_UI64_MAX-1,
 			_UI64_MAX,
 		};
-		TestNumber<T, vuint64_t, sizeof(values)/sizeof(*values), &u64tow>(values, std::numeric_limits<T>::min(), std::numeric_limits<T>::max());
+		TestNumber<T, vuint64_t, sizeof(values)/sizeof(*values), &u64tow>(values, std::numeric_limits<T>::min(), std::numeric_limits<T>::max(), true);
 	}
 
 	template<typename T>
@@ -221,7 +227,7 @@ namespace test
 			FLT_MAX,
 			DBL_MAX,
 		};
-		TestNumber<T, double, sizeof(values)/sizeof(*values), &ftow>(values, -std::numeric_limits<T>::max(), std::numeric_limits<T>::max());
+		TestNumber<T, double, sizeof(values)/sizeof(*values), &ftow>(values, -std::numeric_limits<T>::max(), std::numeric_limits<T>::max(), false);
 	}
 
 	void TestBool()
