@@ -15,10 +15,22 @@ Ptr<ParsingTable> GetWorkflowTable()
 	if (!workflowTable)
 	{
 		unittest::UnitTest::PrintInfo(L"GetWorkFlowTable()");
-		workflowTable = WfLoadTable();
+		auto table = WfLoadTable();
 		unittest::UnitTest::PrintInfo(L"Finished WfLoadTable()");
+
+		MemoryStream stream;
+		table->Serialize(stream);
+		stream.SeekFromBegin(0);
 		unittest::UnitTest::PrintInfo(L"Finished serializing parsing table");
+
+		Ptr<ParsingTable> deserializedTable = new ParsingTable(stream);
+		TEST_ASSERT(stream.Position() == stream.Size());
 		unittest::UnitTest::PrintInfo(L"Finished deserializing parsing table");
+
+		deserializedTable->Initialize();
+		unittest::UnitTest::PrintInfo(L"Finished initializing parsing table");
+
+		workflowTable = deserializedTable;
 	}
 	return workflowTable;
 }
