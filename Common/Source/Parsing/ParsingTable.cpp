@@ -194,6 +194,313 @@ ParsingTable::TransitionItem
 ParsingTable (Serialization)
 ***********************************************************************/
 
+			namespace serialization
+			{
+				struct Reader
+				{
+					stream::IStream& input;
+
+					Reader(stream::IStream& _input)
+						:input(_input)
+					{
+					}
+				};
+				
+				struct Writer
+				{
+					stream::IStream& output;
+
+					Writer(stream::IStream& _output)
+						:output(_output)
+					{
+					}
+				};
+
+				template<typename T>
+				struct Serialization
+				{
+					template<typename TIO>
+					static bool IO(TIO& io, T& value);
+				};
+
+				template<typename T>
+				Reader& operator<<(Reader& reader, T& value)
+				{
+					if (!Serialization<T>::IO(reader, value))
+					{
+						CHECK_FAIL(L"Deserialization failed.");
+					}
+					return reader;
+				}
+
+				template<typename T>
+				Writer& operator<<(Writer& writer, T& value)
+				{
+					if (!Serialization<T>::IO(writer, value))
+					{
+						CHECK_FAIL(L"Serialization failed.");
+					}
+					return writer;
+				}
+
+				//---------------------------------------------
+
+				template<>
+				struct Serialization<vint32_t>
+				{
+					static bool IO(Reader& reader, vint32_t& value)
+					{
+						return reader.input.Read(&value, sizeof(value)) == sizeof(value);
+					}
+					
+					static bool IO(Writer& writer, vint32_t& value)
+					{
+						return writer.output.Write(&value, sizeof(value)) == sizeof(value);
+					}
+				};
+
+				template<>
+				struct Serialization<vint64_t>
+				{
+					static bool IO(Reader& reader, vint64_t& value)
+					{
+						vint32_t v = 0;
+						if (!Serialization<vint32_t>::IO(reader, v)) return false;
+						value = (vint64_t)v;
+						return true;
+					}
+					
+					static bool IO(Writer& writer, vint64_t& value)
+					{
+						vint32_t v = (vint32_t)value;
+						return Serialization<vint32_t>::IO(writer, v);
+					}
+				};
+
+				template<>
+				struct Serialization<bool>
+				{
+					static bool IO(Reader& reader, bool& value)
+					{
+						vint32_t v = 0;
+						if (!Serialization<vint32_t>::IO(reader, v)) return false;
+						value = v == -1;
+						return true;
+					}
+					
+					static bool IO(Writer& writer, bool& value)
+					{
+						vint32_t v = value ? -1 : 0;
+						return Serialization<vint32_t>::IO(writer, v);
+					}
+				};
+
+				template<typename T>
+				struct Serialization<Ptr<T>>
+				{
+					static bool IO(Reader& reader, Ptr<T>& value)
+					{
+						return Serialization<T>::IO(reader, *value.Obj());
+					}
+					
+					static bool IO(Writer& writer, Ptr<T>& value)
+					{
+						value = new T;
+						return Serialization<T>::IO(writer, *value.Obj());
+					}
+				};
+
+				template<>
+				struct Serialization<WString>
+				{
+					static bool IO(Reader& reader, WString& value)
+					{
+						vint32_t count = -1;
+						reader << count;
+
+						Array<wchar_t> buffer(count + 1);
+						if (!reader.input.Read((void*)&buffer[0], count*sizeof(wchar_t)) != count*sizeof(wchar_t)) return false;
+						buffer[count + 1] = 0;
+
+						value = &buffer[0];
+						return true;
+					}
+					
+					static bool IO(Writer& writer, WString& value)
+					{
+						vint32_t count = (vint32_t)value.Length();
+						writer << count;
+						return writer.output.Write((void*)value.Buffer(), count*sizeof(wchar_t)) == count*sizeof(wchar_t);
+					}
+				};
+
+				template<typename T>
+				struct Serialization<List<T>>
+				{
+					static bool IO(Reader& reader, List<T>& value)
+					{
+						vint32_t count = -1;
+						reader << count;
+						value.Clear();
+						for (vint i = 0; i < count; i++)
+						{
+							T t;
+							reader << t;
+							value.Add(t);
+						}
+						return true;
+					}
+					
+					static bool IO(Writer& writer, List<T>& value)
+					{
+						vint32_t count = (vint32_t)value.Count();
+						writer << count;
+						for (vint i = 0; i < count; i++)
+						{
+							writer << value[i];
+						}
+						return true;
+					}
+				};
+
+				template<typename T>
+				struct Serialization<Array<T>>
+				{
+					static bool IO(Reader& reader, Array<T>& value)
+					{
+						vint32_t count = -1;
+						reader << count;
+						value.Resize(count);
+						for (vint i = 0; i < count; i++)
+						{
+							reader << value[i];
+						}
+						return true;
+					}
+					
+					static bool IO(Writer& writer, Array<T>& value)
+					{
+						vint32_t count = (vint32_t)value.Count();
+						writer << count;
+						for (vint i = 0; i < count; i++)
+						{
+							writer << value[i];
+						}
+						return true;
+					}
+				};
+
+#define BEGIN_SERIALIZATION(TYPE)\
+				template<>\
+				struct Serialization<TYPE>\
+				{\
+					template<typename TIO>\
+					static bool IO(TIO& op, TYPE& value)\
+					{\
+						op\
+
+#define SERIALIZE(FIELD)\
+						<< value.FIELD\
+
+#define END_SERIALIZATION\
+						;\
+						return true;\
+					}\
+				};\
+
+				//---------------------------------------------
+
+				BEGIN_SERIALIZATION(ParsingTable::AttributeInfo)
+					SERIALIZE(name)
+					SERIALIZE(arguments)
+				END_SERIALIZATION
+
+				BEGIN_SERIALIZATION(ParsingTable::AttributeInfoList)
+					SERIALIZE(attributes)
+				END_SERIALIZATION
+
+				BEGIN_SERIALIZATION(ParsingTable::TreeTypeInfo)
+					SERIALIZE(type)
+					SERIALIZE(attributeIndex)
+				END_SERIALIZATION
+
+				BEGIN_SERIALIZATION(ParsingTable::TreeFieldInfo)
+					SERIALIZE(type)
+					SERIALIZE(field)
+					SERIALIZE(attributeIndex)
+				END_SERIALIZATION
+
+				BEGIN_SERIALIZATION(ParsingTable::TokenInfo)
+					SERIALIZE(name)
+					SERIALIZE(regex)
+					SERIALIZE(regexTokenIndex)
+					SERIALIZE(attributeIndex)
+				END_SERIALIZATION
+
+				BEGIN_SERIALIZATION(ParsingTable::StateInfo)
+					SERIALIZE(ruleName)
+					SERIALIZE(stateName)
+					SERIALIZE(stateExpression)
+				END_SERIALIZATION
+
+				BEGIN_SERIALIZATION(ParsingTable::RuleInfo)
+					SERIALIZE(name)
+					SERIALIZE(type)
+					SERIALIZE(ambiguousType)
+					SERIALIZE(rootStartState)
+					SERIALIZE(attributeIndex)
+				END_SERIALIZATION
+
+				BEGIN_SERIALIZATION(ParsingTable::Instruction)
+					SERIALIZE(instructionType)
+					SERIALIZE(stateParameter)
+					SERIALIZE(nameParameter)
+					SERIALIZE(value)
+					SERIALIZE(creatorRule)
+				END_SERIALIZATION
+
+				template<>
+				struct Serialization<ParsingTable::Instruction::InstructionType>
+				{
+					static bool IO(Reader& reader, ParsingTable::Instruction::InstructionType& value)
+					{
+						vint32_t v = 0;
+						if (!Serialization<vint32_t>::IO(reader, v)) return false;
+						value = (ParsingTable::Instruction::InstructionType)v;
+						return true;
+					}
+
+					static bool IO(Writer& writer, ParsingTable::Instruction::InstructionType& value)
+					{
+						vint32_t v = (vint32_t)value;
+						return Serialization<vint32_t>::IO(writer, v);
+					}
+				};
+
+				BEGIN_SERIALIZATION(ParsingTable::LookAheadInfo)
+					SERIALIZE(tokens)
+					SERIALIZE(state)
+				END_SERIALIZATION
+
+				BEGIN_SERIALIZATION(ParsingTable::TransitionItem)
+					SERIALIZE(token)
+					SERIALIZE(targetState)
+					SERIALIZE(lookAheads)
+					SERIALIZE(stackPattern)
+					SERIALIZE(instructions)
+				END_SERIALIZATION
+
+				BEGIN_SERIALIZATION(ParsingTable::TransitionBag)
+					SERIALIZE(transitionItems)
+				END_SERIALIZATION
+
+				//---------------------------------------------
+
+#undef BEGIN_SERIALIZATION
+#undef SERIALIZE
+#undef END_SERIALIZATION
+			}
+
 			/*
 			[bool ambiguity]
 			[Ptr<AttributeInfoList>[] attributeInfos
@@ -258,12 +565,36 @@ ParsingTable (Serialization)
 			]
 			*/
 
+			using namespace serialization;
+
+			template<typename TIO>
+			void ParsingTable::IO(TIO& io)
+			{
+				io
+					<< ambiguity
+					<< attributeInfos
+					<< treeTypeInfos
+					<< treeFieldInfos
+					<< tokenCount
+					<< stateCount
+					<< tokenInfos
+					<< discardTokenInfos
+					<< stateInfos
+					<< ruleInfos
+					<< transitionBags
+					;
+			}
+
 			ParsingTable::ParsingTable(stream::IStream& input)
 			{
+				Reader reader(input);
+				IO(reader);
 			}
 
 			void ParsingTable::Serialize(stream::IStream& output)
 			{
+				Writer writer(output);
+				IO(writer);
 			}
 
 /***********************************************************************
