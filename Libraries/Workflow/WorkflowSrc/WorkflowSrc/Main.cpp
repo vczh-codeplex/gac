@@ -10,25 +10,40 @@
 
 Ptr<ParsingTable> workflowTable;
 
+#define BEGIN_TIMER\
+		DateTime beginTime = DateTime::LocalTime();\
+		DateTime endTime;\
+
+#define PRINT_TIMER\
+		endTime = DateTime::LocalTime();\
+		unittest::UnitTest::PrintInfo(L"Time elasped: " + ftow((endTime.totalMilliseconds - beginTime.totalMilliseconds) / 1000.0) + L" seconds");\
+		beginTime = endTime;\
+
 Ptr<ParsingTable> GetWorkflowTable()
 {
 	if (!workflowTable)
 	{
+		BEGIN_TIMER
+
 		unittest::UnitTest::PrintInfo(L"GetWorkFlowTable()");
 		auto table = WfLoadTable();
 		unittest::UnitTest::PrintInfo(L"Finished WfLoadTable()");
+		PRINT_TIMER
 
 		MemoryStream stream;
 		table->Serialize(stream);
 		stream.SeekFromBegin(0);
-		unittest::UnitTest::PrintInfo(L"Finished serializing parsing table");
+		unittest::UnitTest::PrintInfo(L"Finished serializing parsing table: " + i64tow(stream.Size()) + L" bytes");
+		PRINT_TIMER
 
 		Ptr<ParsingTable> deserializedTable = new ParsingTable(stream);
 		TEST_ASSERT(stream.Position() == stream.Size());
 		unittest::UnitTest::PrintInfo(L"Finished deserializing parsing table");
+		PRINT_TIMER
 
 		deserializedTable->Initialize();
 		unittest::UnitTest::PrintInfo(L"Finished initializing parsing table");
+		PRINT_TIMER
 
 		workflowTable = deserializedTable;
 	}
