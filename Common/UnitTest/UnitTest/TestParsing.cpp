@@ -56,6 +56,8 @@ namespace test
 
 	Ptr<ParsingTable> CreateTable(Ptr<ParsingDefinition> definition, const WString& name, bool enableAmbiguity=false)
 	{
+		unittest::UnitTest::PrintInfo(L"Building parser <" + name + L">");
+
 		ParsingSymbolManager symbolManager;
 		List<Ptr<ParsingError>> errors;
 		ValidateDefinition(definition, &symbolManager, errors);
@@ -84,7 +86,19 @@ namespace test
 			TEST_ASSERT(errors.Count()==0);
 		}
 
-		return table;
+		unittest::UnitTest::PrintInfo(L"Serializing ...");
+		MemoryStream stream;
+		table->Serialize(stream);
+		stream.SeekFromBegin(0);
+		
+		unittest::UnitTest::PrintInfo(L"Deserializing ...");
+		Ptr<ParsingTable> deserializedTable = new ParsingTable(stream);
+		TEST_ASSERT(stream.Position() == stream.Size());
+
+		unittest::UnitTest::PrintInfo(L"Initializing ...");
+		deserializedTable->Initialize();
+
+		return deserializedTable;
 	}
 
 	enum TokenStreamStatus

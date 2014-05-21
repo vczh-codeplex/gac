@@ -226,20 +226,14 @@ ParsingTable (Serialization)
 				template<typename T>
 				Reader& operator<<(Reader& reader, T& value)
 				{
-					if (!Serialization<T>::IO(reader, value))
-					{
-						CHECK_FAIL(L"Deserialization failed.");
-					}
+					Serialization<T>::IO(reader, value);
 					return reader;
 				}
 
 				template<typename T>
 				Writer& operator<<(Writer& writer, T& value)
 				{
-					if (!Serialization<T>::IO(writer, value))
-					{
-						CHECK_FAIL(L"Serialization failed.");
-					}
+					Serialization<T>::IO(writer, value);
 					return writer;
 				}
 
@@ -248,96 +242,119 @@ ParsingTable (Serialization)
 				template<>
 				struct Serialization<vint32_t>
 				{
-					static bool IO(Reader& reader, vint32_t& value)
+					static void IO(Reader& reader, vint32_t& value)
 					{
-						return reader.input.Read(&value, sizeof(value)) == sizeof(value);
+						if (reader.input.Read(&value, sizeof(value)) != sizeof(value))
+						{
+							CHECK_FAIL(L"Deserialization failed.");
+						}
 					}
 					
-					static bool IO(Writer& writer, vint32_t& value)
+					static void IO(Writer& writer, vint32_t& value)
 					{
-						return writer.output.Write(&value, sizeof(value)) == sizeof(value);
+						if (writer.output.Write(&value, sizeof(value)) != sizeof(value))
+						{
+							CHECK_FAIL(L"Serialization failed.");
+						}
 					}
 				};
 
 				template<>
 				struct Serialization<vint64_t>
 				{
-					static bool IO(Reader& reader, vint64_t& value)
+					static void IO(Reader& reader, vint64_t& value)
 					{
 						vint32_t v = 0;
-						if (!Serialization<vint32_t>::IO(reader, v)) return false;
+						Serialization<vint32_t>::IO(reader, v);;
 						value = (vint64_t)v;
-						return true;
 					}
 					
-					static bool IO(Writer& writer, vint64_t& value)
+					static void IO(Writer& writer, vint64_t& value)
 					{
 						vint32_t v = (vint32_t)value;
-						return Serialization<vint32_t>::IO(writer, v);
+						Serialization<vint32_t>::IO(writer, v);
 					}
 				};
 
 				template<>
 				struct Serialization<bool>
 				{
-					static bool IO(Reader& reader, bool& value)
+					static void IO(Reader& reader, bool& value)
 					{
 						vint32_t v = 0;
-						if (!Serialization<vint32_t>::IO(reader, v)) return false;
+						Serialization<vint32_t>::IO(reader, v);
 						value = v == -1;
-						return true;
 					}
 					
-					static bool IO(Writer& writer, bool& value)
+					static void IO(Writer& writer, bool& value)
 					{
 						vint32_t v = value ? -1 : 0;
-						return Serialization<vint32_t>::IO(writer, v);
+						Serialization<vint32_t>::IO(writer, v);
 					}
 				};
 
 				template<typename T>
 				struct Serialization<Ptr<T>>
 				{
-					static bool IO(Reader& reader, Ptr<T>& value)
+					static void IO(Reader& reader, Ptr<T>& value)
 					{
-						return Serialization<T>::IO(reader, *value.Obj());
+						bool notNull = false;
+						reader << notNull;
+						if (notNull)
+						{
+							value = new T;
+							Serialization<T>::IO(reader, *value.Obj());
+						}
+						else
+						{
+							value = 0;
+						}
 					}
 					
-					static bool IO(Writer& writer, Ptr<T>& value)
+					static void IO(Writer& writer, Ptr<T>& value)
 					{
-						value = new T;
-						return Serialization<T>::IO(writer, *value.Obj());
+						bool notNull = value;
+						writer << notNull;
+						if (notNull)
+						{
+							Serialization<T>::IO(writer, *value.Obj());
+						}
 					}
 				};
 
 				template<>
 				struct Serialization<WString>
 				{
-					static bool IO(Reader& reader, WString& value)
+					static void IO(Reader& reader, WString& value)
 					{
 						vint32_t count = -1;
 						reader << count;
 
 						Array<wchar_t> buffer(count + 1);
-						if (!reader.input.Read((void*)&buffer[0], count*sizeof(wchar_t)) != count*sizeof(wchar_t)) return false;
-						buffer[count + 1] = 0;
+						if (reader.input.Read((void*)&buffer[0], count*sizeof(wchar_t)) != count*sizeof(wchar_t))
+						{
+							CHECK_FAIL(L"Deserialization failed.");
+						}
+						buffer[count] = 0;
 
 						value = &buffer[0];
-						return true;
 					}
 					
-					static bool IO(Writer& writer, WString& value)
+					static void IO(Writer& writer, WString& value)
 					{
 						vint32_t count = (vint32_t)value.Length();
 						writer << count;
-						return writer.output.Write((void*)value.Buffer(), count*sizeof(wchar_t)) == count*sizeof(wchar_t);
+						if (writer.output.Write((void*)value.Buffer(), count*sizeof(wchar_t)) != count*sizeof(wchar_t))
+						{
+							CHECK_FAIL(L"Serialization failed.");
+						}
 					}
 				};
 
 				template<typename T>
 				struct Serialization<List<T>>
 				{
-					static bool IO(Reader& reader, List<T>& value)
+					static void IO(Reader& reader, List<T>& value)
 					{
 						vint32_t count = -1;
 						reader << count;
@@ -348,10 +365,9 @@ ParsingTable (Serialization)
 							reader << t;
 							value.Add(t);
 						}
-						return true;
 					}
 					
-					static bool IO(Writer& writer, List<T>& value)
+					static void IO(Writer& writer, List<T>& value)
 					{
 						vint32_t count = (vint32_t)value.Count();
 						writer << count;
@@ -359,14 +375,13 @@ ParsingTable (Serialization)
 						{
 							writer << value[i];
 						}
-						return true;
 					}
 				};
 
 				template<typename T>
 				struct Serialization<Array<T>>
 				{
-					static bool IO(Reader& reader, Array<T>& value)
+					static void IO(Reader& reader, Array<T>& value)
 					{
 						vint32_t count = -1;
 						reader << count;
@@ -375,10 +390,9 @@ ParsingTable (Serialization)
 						{
 							reader << value[i];
 						}
-						return true;
 					}
 					
-					static bool IO(Writer& writer, Array<T>& value)
+					static void IO(Writer& writer, Array<T>& value)
 					{
 						vint32_t count = (vint32_t)value.Count();
 						writer << count;
@@ -386,7 +400,6 @@ ParsingTable (Serialization)
 						{
 							writer << value[i];
 						}
-						return true;
 					}
 				};
 
@@ -395,7 +408,7 @@ ParsingTable (Serialization)
 				struct Serialization<TYPE>\
 				{\
 					template<typename TIO>\
-					static bool IO(TIO& op, TYPE& value)\
+					static void IO(TIO& op, TYPE& value)\
 					{\
 						op\
 
@@ -404,7 +417,6 @@ ParsingTable (Serialization)
 
 #define END_SERIALIZATION\
 						;\
-						return true;\
 					}\
 				};\
 
@@ -462,18 +474,17 @@ ParsingTable (Serialization)
 				template<>
 				struct Serialization<ParsingTable::Instruction::InstructionType>
 				{
-					static bool IO(Reader& reader, ParsingTable::Instruction::InstructionType& value)
+					static void IO(Reader& reader, ParsingTable::Instruction::InstructionType& value)
 					{
 						vint32_t v = 0;
-						if (!Serialization<vint32_t>::IO(reader, v)) return false;
+						Serialization<vint32_t>::IO(reader, v);
 						value = (ParsingTable::Instruction::InstructionType)v;
-						return true;
 					}
 
-					static bool IO(Writer& writer, ParsingTable::Instruction::InstructionType& value)
+					static void IO(Writer& writer, ParsingTable::Instruction::InstructionType& value)
 					{
 						vint32_t v = (vint32_t)value;
-						return Serialization<vint32_t>::IO(writer, v);
+						Serialization<vint32_t>::IO(writer, v);
 					}
 				};
 
