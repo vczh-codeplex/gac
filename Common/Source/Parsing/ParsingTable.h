@@ -37,7 +37,7 @@ namespace vl
 					WString									name;
 					collections::List<WString>				arguments;
 
-					AttributeInfo(const WString& _name)
+					AttributeInfo(const WString& _name = L"")
 						:name(_name)
 					{
 					}
@@ -280,6 +280,9 @@ namespace vl
 				collections::Dictionary<WString, vint>								ruleMap;
 				collections::Dictionary<WString, vint>								treeTypeInfoMap;
 				collections::Dictionary<collections::Pair<WString, WString>, vint>	treeFieldInfoMap;
+
+				template<typename TIO>
+				void IO(TIO& io);
 
 			public:
 				ParsingTable(vint _attributeInfoCount, vint _treeTypeInfoCount, vint _treeFieldInfoCount, vint _tokenCount, vint _discardTokenCount, vint _stateCount, vint _ruleCount);
