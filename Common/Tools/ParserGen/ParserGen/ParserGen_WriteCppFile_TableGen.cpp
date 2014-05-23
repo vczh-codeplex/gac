@@ -129,7 +129,7 @@ void WriteParserFunctions(ParsingSymbolManager* manager, const WString& prefix, 
 Parsing Table Generation
 ***********************************************************************/
 
-void WriteTable(const WString& parserCode, bool enableAmbiguity, const WString& prefix, const WString& codeClassPrefix, TextWriter& writer)
+void WriteTable(const WString& parserCode, bool enableAmbiguity, bool enableSerialization, const WString& prefix, const WString& codeClassPrefix, TextWriter& writer)
 {
 	writer.WriteString(prefix);
 	writer.WriteString(L"vl::Ptr<vl::parsing::tabling::ParsingTable> ");
@@ -137,19 +137,29 @@ void WriteTable(const WString& parserCode, bool enableAmbiguity, const WString& 
 	writer.WriteLine(L"LoadTable()");
 	writer.WriteString(prefix);
 	writer.WriteLine(L"{");
-
-	writer.WriteString(prefix+L"    ");
-	writer.WriteLine(L"vl::Ptr<vl::parsing::tabling::ParsingGeneralParser> parser=vl::parsing::tabling::CreateBootstrapStrictParser();");
-	writer.WriteString(prefix+L"    ");
-	writer.WriteLine(L"vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;");
-	writer.WriteString(prefix+L"    ");
-	writer.WriteLine(L"vl::Ptr<vl::parsing::ParsingTreeNode> definitionNode=parser->Parse(parserTextBuffer, L\"ParserDecl\", errors);");
-	writer.WriteString(prefix+L"    ");
-	writer.WriteLine(L"vl::Ptr<vl::parsing::definitions::ParsingDefinition> definition=vl::parsing::definitions::DeserializeDefinition(definitionNode);");
-	writer.WriteString(prefix+L"    ");
-	writer.WriteLine(L"vl::Ptr<vl::parsing::tabling::ParsingTable> table=vl::parsing::analyzing::GenerateTable(definition, "+WString(enableAmbiguity?L"true":L"false")+L", errors);");
-	writer.WriteString(prefix+L"    ");
-	writer.WriteLine(L"return table;");
+	if (enableSerialization)
+	{
+		writer.WriteLine(prefix + L"\tvl::stream::MemoryStream stream;");
+		writer.WriteLine(prefix + L"\t" + codeClassPrefix + L"GetParserBuffer(stream);");
+		writer.WriteLine(prefix + L"\tvl::Ptr<vl::parsing::tabling::ParsingTable> table=new vl::parsing::tabling::ParsingTable(stream);");
+		writer.WriteLine(prefix + L"\ttable->Initialize();");
+		writer.WriteLine(prefix + L"\treturn table;");
+	}
+	else
+	{
+		writer.WriteString(prefix+L"    ");
+		writer.WriteLine(L"vl::Ptr<vl::parsing::tabling::ParsingGeneralParser> parser=vl::parsing::tabling::CreateBootstrapStrictParser();");
+		writer.WriteString(prefix+L"    ");
+		writer.WriteLine(L"vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;");
+		writer.WriteString(prefix+L"    ");
+		writer.WriteLine(L"vl::Ptr<vl::parsing::ParsingTreeNode> definitionNode=parser->Parse(parserTextBuffer, L\"ParserDecl\", errors);");
+		writer.WriteString(prefix+L"    ");
+		writer.WriteLine(L"vl::Ptr<vl::parsing::definitions::ParsingDefinition> definition=vl::parsing::definitions::DeserializeDefinition(definitionNode);");
+		writer.WriteString(prefix+L"    ");
+		writer.WriteLine(L"vl::Ptr<vl::parsing::tabling::ParsingTable> table=vl::parsing::analyzing::GenerateTable(definition, "+WString(enableAmbiguity?L"true":L"false")+L", errors);");
+		writer.WriteString(prefix+L"    ");
+		writer.WriteLine(L"return table;");
+	}
 
 	writer.WriteString(prefix);
 	writer.WriteLine(L"}");

@@ -10,6 +10,7 @@ bool CodegenConfig::ReadConfig(StreamReader& reader)
 	Regex regexReflection(L"^reflection:((<namespace>[^.]+)(.(<namespace>[^.]+))*)?$");
 	Regex regexParser(L"^parser:(<name>/w+)/((<rule>/w+)/)$");
 	Regex regexAmbiguity(L"^ambiguity:(<value>enabled|disabled)$");
+	Regex regexSerialization(L"^serialization:(<value>enabled|disabled)$");
 
 	while(!reader.IsEnd())
 	{
@@ -60,6 +61,11 @@ bool CodegenConfig::ReadConfig(StreamReader& reader)
 		{
 			WString value=match->Groups().Get(L"value").Get(0).Value();
 			ambiguity=value==L"enabled";
+		}
+		else if((match=regexSerialization.Match(line)) && match->Success())
+		{
+			WString value=match->Groups().Get(L"value").Get(0).Value();
+			serialization=value==L"enabled";
 		}
 		else
 		{
