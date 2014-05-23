@@ -975,3 +975,21 @@ TEST_CASE(TestFromIterator)
 	CopyFrom(list, FromArray(numbers));
 	CHECK_LIST_ITEMS(list, {1 _ 2 _ 3 _ 4 _ 5});
 }
+
+TEST_CASE(TestPushOnlyAllocator)
+{
+	PushOnlyAllocator<vint> ints(10);
+	for (vint i = 0; i < 100; i++)
+	{
+		auto create = ints.Create();
+		auto get = ints.Get(i);
+		TEST_ASSERT(create == get);
+	}
+	for (vint i = 0; i < 100; i++)
+	{
+		if (i % 10 != 0)
+		{
+			TEST_ASSERT(ints.Get(i) - ints.Get(i - 1) == 1);
+		}
+	}
+}
