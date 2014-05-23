@@ -580,7 +580,7 @@ SORTED_LIST_INSERT:
 				static void Dispose(void** root)
 				{
 					if (!root) return;
-					for (vint i = 0; i < 3; i++)
+					for (vint i = 0; i < 4; i++)
 					{
 						Accessor<Index - 1>::Dispose((void**)root[i]);
 					}
