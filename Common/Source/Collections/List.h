@@ -524,6 +524,99 @@ SORTED_LIST_INSERT:
 		};
 
 /***********************************************************************
+ÌØÊâÈÝÆ÷
+***********************************************************************/
+
+		template<typename T>
+		class PushOnlyAllocator : public Object
+		{
+		protected:
+			vint				blockSize;
+			vint				allocatedSize;
+			List<T*>			blocks;
+
+		public:
+			PushOnlyAllocator(vint _blockSize = 65536)
+				:blockSize(_blockSize)
+				, allocatedSize(0)
+			{
+			}
+
+			~PushOnlyAllocator()
+			{
+				for (vint i = 0; i < blocks.Count(); i++)
+				{
+					delete[] blocks[i];
+				}
+			}
+
+			T* Get(vint index)
+			{
+				if (index >= allocatedSize)
+				{
+					return 0;
+				}
+				vint row = index / blockSize;
+				vint column = index % blockSize;
+				return &blocks[row][column];
+			}
+
+			T* Create()
+			{
+				if (allocatedSize == blocks.Count()*blockSize)
+				{
+					blocks.Add(new T[blockSize]);
+				}
+				vint index = allocatedSize++;
+				return Get(index);
+			}
+		};
+
+		namespace bom_helper
+		{
+			template<vint Index = 4>
+			struct Disposer
+			{
+				static void Dispose(void** root)
+				{
+					if (!root) return;
+					for (vint i = 0; i < 3; i++)
+					{
+						Disposer<Index - 1>::Dispose((void**)root[i]);
+					}
+					delete[] root;
+				}
+			};
+
+			template<>
+			struct Disposer<0>
+			{
+				static void Dispose(void** root)
+				{
+					delete[] root;
+				}
+			};
+		}
+
+		template<typename T>
+		class ByteObjectMap : public Object
+		{
+		protected:
+			void**				root;
+
+		public:
+			ByteObjectMap()
+				:root(0)
+			{
+			}
+
+			~ByteObjectMap()
+			{
+				bom_helper::Disposer<>::Dispose(root);
+			}
+		};
+
+/***********************************************************************
 Ëæ»ú·ÃÎÊ
 ***********************************************************************/
 
