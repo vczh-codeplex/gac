@@ -9,6 +9,7 @@
 #include "../../Source/Stream/CacheStream.h"
 #include "../../Source/Stream/Accessor.h"
 #include "../../Source/Stream/CharFormat.h"
+#include "../../Source/Stream/CompressionStream.h"
 #include "../../Source/Pointer.h"
 
 using namespace vl;
@@ -681,4 +682,12 @@ TEST_CASE(TestEncoding)
 		BomDecoder decoder;
 		TestEncodingInternal(encoder, decoder, BomEncoder::Utf16BE, true);
 	}
+}
+
+/***********************************************************************
+压缩测试
+***********************************************************************/
+
+TEST_CASE(TestLzwEncoding)
+{
 }

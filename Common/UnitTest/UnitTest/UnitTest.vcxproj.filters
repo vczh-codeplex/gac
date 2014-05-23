@@ -240,6 +240,9 @@
     <ClCompile Include="..\..\Source\HttpUtility.cpp">
       <Filter>Common\Basic</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Stream\CompressionStream.cpp">
+      <Filter>Common\Stream</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Source\Basic.h">
@@ -430,6 +433,9 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\HttpUtility.h">
       <Filter>Common\Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Stream\CompressionStream.h">
+      <Filter>Common\Stream</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
