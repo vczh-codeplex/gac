@@ -9,6 +9,7 @@ parser:ParseStatement(WorkflowStatement)
 parser:ParseDeclaration(WorkflowDeclaration)
 parser:ParseModule(WorkflowModule)
 ambiguity:enabled
+serialization:enabled
 grammar:
 
 class Type

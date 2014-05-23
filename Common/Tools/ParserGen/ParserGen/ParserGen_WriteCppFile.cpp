@@ -18,6 +18,15 @@ void WriteCppFile(const WString& name, const WString& parserCode, Ptr<ParsingDef
 	writer.WriteLine(L"");
 	WriteGetParserTextBuffer(&manager, prefix, config.classPrefix, writer);
 
+	if (config.serialization)
+	{
+		writer.WriteLine(L"/***********************************************************************");
+		writer.WriteLine(L"SerializedTable");
+		writer.WriteLine(L"***********************************************************************/");
+		writer.WriteLine(L"");
+		WriteSerializedTable(table, prefix, config.classPrefix, writer);
+	}
+
 	writer.WriteLine(L"/***********************************************************************");
 	writer.WriteLine(L"Unescaping Function Foward Declarations");
 	writer.WriteLine(L"***********************************************************************/");
@@ -53,7 +62,7 @@ void WriteCppFile(const WString& name, const WString& parserCode, Ptr<ParsingDef
 	writer.WriteLine(L"***********************************************************************/");
 	writer.WriteLine(L"");
 
-	WriteTable(parserCode, config.ambiguity, prefix, config.classPrefix, writer);
+	WriteTable(parserCode, config.ambiguity, config.serialization, prefix, config.classPrefix, writer);
 
 	WriteFileEnd(config, writer);
 

@@ -40,34 +40,43 @@ void WriteFileEnd(const CodegenConfig& config, StreamWriter& writer)
 	}
 }
 
-void WriteCppString(const WString& text, TextWriter& writer)
+void WriteCppString(const WString& text, TextWriter& writer, bool rawString)
 {
-	writer.WriteString(L"L\"");
-	for(vint i=0;i<text.Length();i++)
+	if (rawString)
 	{
-		switch(text[i])
-		{
-		case L'\r':
-			writer.WriteString(L"\\r");
-			break;
-		case L'\n':
-			writer.WriteString(L"\\n");
-			break;
-		case L'\t':
-			writer.WriteString(L"\\t");
-			break;
-		case L'\\':
-			writer.WriteString(L"\\\\");
-			break;
-		case L'\'':
-			writer.WriteString(L"\\\'");
-			break;
-		case L'\"':
-			writer.WriteString(L"\\\"");
-			break;
-		default:
-			writer.WriteChar(text[i]);
-		}
+		writer.WriteString(L"LR\"VLPP_PARSER_GEN(");
+		writer.WriteString(text);
+		writer.WriteString(L")VLPP_PARSER_GEN\"");
 	}
-	writer.WriteString(L"\"");
+	else
+	{
+		writer.WriteString(L"L\"");
+		for(vint i=0;i<text.Length();i++)
+		{
+			switch(text[i])
+			{
+			case L'\r':
+				writer.WriteString(L"\\r");
+				break;
+			case L'\n':
+				writer.WriteString(L"\\n");
+				break;
+			case L'\t':
+				writer.WriteString(L"\\t");
+				break;
+			case L'\\':
+				writer.WriteString(L"\\\\");
+				break;
+			case L'\'':
+				writer.WriteString(L"\\\'");
+				break;
+			case L'\"':
+				writer.WriteString(L"\\\"");
+				break;
+			default:
+				writer.WriteChar(text[i]);
+			}
+		}
+		writer.WriteString(L"\"");
+	}
 }

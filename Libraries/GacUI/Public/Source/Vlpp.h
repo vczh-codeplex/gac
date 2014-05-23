@@ -7205,7 +7205,7 @@ namespace vl
 					WString									name;
 					collections::List<WString>				arguments;
 
-					AttributeInfo(const WString& _name)
+					AttributeInfo(const WString& _name = L"")
 						:name(_name)
 					{
 					}
@@ -7428,25 +7428,36 @@ namespace vl
 				};
 
 			protected:
+				// metadata
 				bool																ambiguity;
-				Ptr<regex::RegexLexer>												lexer;
-				collections::Array<Ptr<TransitionBag>>								transitionBags;
-				vint																tokenCount;
-				vint																stateCount;
 				collections::Array<Ptr<AttributeInfoList>>							attributeInfos;
 				collections::Array<TreeTypeInfo>									treeTypeInfos;
 				collections::Array<TreeFieldInfo>									treeFieldInfos;
+
+				// LALR table
+				vint																tokenCount;			// tokenInfos.Count() + discardTokenInfos.Count()
+				vint																stateCount;			// stateInfos.Count()
 				collections::Array<TokenInfo>										tokenInfos;
 				collections::Array<TokenInfo>										discardTokenInfos;
 				collections::Array<StateInfo>										stateInfos;
 				collections::Array<RuleInfo>										ruleInfos;
+				collections::Array<Ptr<TransitionBag>>								transitionBags;
+
+				// generated data
+				Ptr<regex::RegexLexer>												lexer;
 				collections::Dictionary<WString, vint>								ruleMap;
 				collections::Dictionary<WString, vint>								treeTypeInfoMap;
 				collections::Dictionary<collections::Pair<WString, WString>, vint>	treeFieldInfoMap;
 
+				template<typename TIO>
+				void IO(TIO& io);
+
 			public:
 				ParsingTable(vint _attributeInfoCount, vint _treeTypeInfoCount, vint _treeFieldInfoCount, vint _tokenCount, vint _discardTokenCount, vint _stateCount, vint _ruleCount);
+				ParsingTable(stream::IStream& input);
 				~ParsingTable();
+
+				void										Serialize(stream::IStream& output);
 
 				bool										GetAmbiguity();
 				void										SetAmbiguity(bool value);

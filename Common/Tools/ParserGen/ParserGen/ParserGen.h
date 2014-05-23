@@ -31,9 +31,11 @@ public:
 	WString							classPrefix;
 	WString							guard;
 	bool							ambiguity;
+	bool							serialization;
 
 	CodegenConfig()
 		:ambiguity(false)
+		, serialization(false)
 	{
 	}
 
@@ -47,7 +49,7 @@ Code Generation
 extern void							WriteFileComment(const WString& name, StreamWriter& writer);
 extern WString						WriteFileBegin(const CodegenConfig& config, StreamWriter& writer);
 extern void							WriteFileEnd(const CodegenConfig& config, StreamWriter& writer);
-extern void							WriteCppString(const WString& text, TextWriter& writer);
+extern void							WriteCppString(const WString& text, TextWriter& writer, bool rawString = false);
 
 extern void							PrintType(ParsingDefinitionType* _type, ParsingSymbol* _scope, ParsingSymbolManager* _manager, const WString& _codeClassPrefix, TextWriter& _writer);
 extern void							PrintTypeForValue(ParsingDefinitionType* _type, ParsingSymbol* _scope, ParsingSymbolManager* _manager, const WString& _codeClassPrefix, TextWriter& _writer);
@@ -73,12 +75,13 @@ extern void							WriteTypeReflectionDeclaration(ParsingSymbolManager* manager, 
 
 extern void							WriteGetParserTextBuffer(ParsingSymbolManager* manager, const WString& prefix, const WString& codeClassPrefix, TextWriter& writer);
 extern void							WriteParserText(const WString& parserText, TextWriter& writer);
+extern void							WriteSerializedTable(Ptr<ParsingTable> table, const WString& prefix, const WString& codeClassPrefix, TextWriter& writer);
 extern void							WriteUnescapingFunctionForwardDeclarations(Ptr<ParsingDefinition> definition, ParsingSymbolManager* manager, const WString& prefix, const WString& codeClassPrefix, TextWriter& writer);
 extern void							WriteNodeConverterClassImpl(Ptr<ParsingDefinition> definition, ParsingSymbolManager* manager, const WString& prefix, const WString& codeClassPrefix, TextWriter& writer);
 extern void							WriteConvertImpl(ParsingSymbolManager* manager, const WString& prefix, const WString& codeClassPrefix, TextWriter& writer);
 extern void							WriteVisitorImpl(ParsingSymbolManager* manager, const WString& prefix, const WString& codeClassPrefix, TextWriter& writer);
 extern void							WriteParserFunctions(ParsingSymbolManager* manager, const WString& prefix, const CodegenConfig& config, TextWriter& writer);
-extern void							WriteTable(const WString& parserCode, bool enableAmbiguity, const WString& prefix, const WString& codeClassPrefix, TextWriter& writer);
+extern void							WriteTable(const WString& parserCode, bool enableAmbiguity, bool enableSerialization, const WString& prefix, const WString& codeClassPrefix, TextWriter& writer);
 extern void							WriteTypeReflectionImplementation(ParsingSymbolManager* manager, const WString& prefix, const CodegenConfig& config, TextWriter& writer);
 
 extern void							WriteHeaderFile(const WString& name, Ptr<ParsingDefinition> definition, Ptr<ParsingTable> table, const CodegenConfig& config, StreamWriter& writer);
