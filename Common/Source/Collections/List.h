@@ -577,7 +577,7 @@ SORTED_LIST_INSERT:
 			template<vint Index = 4>
 			struct Accessor
 			{
-				static void Dispose(void** root)
+				static __forceinline void Dispose(void** root)
 				{
 					if (!root) return;
 					for (vint i = 0; i < 4; i++)
@@ -587,14 +587,14 @@ SORTED_LIST_INSERT:
 					delete[] root;
 				}
 
-				static void* Get(void** root, vuint8_t index)
+				static __forceinline void* Get(void** root, vuint8_t index)
 				{
 					vint fragmentIndex = (index >> (2 * (Index - 1))) % 4;
 					void**& fragmentRoot = ((void***)root)[fragmentIndex];
 					return fragmentRoot ? Accessor<Index - 1>::Get(fragmentRoot, index) : 0;
 				}
 
-				static void Set(void**& root, vuint8_t index, void* value)
+				static __forceinline void Set(void**& root, vuint8_t index, void* value)
 				{
 					if (!root)
 					{
@@ -610,16 +610,16 @@ SORTED_LIST_INSERT:
 			template<>
 			struct Accessor<0>
 			{
-				static void Dispose(void** root)
+				static __forceinline void Dispose(void** root)
 				{
 				}
 
-				static void* Get(void** root, vuint8_t index)
+				static __forceinline void* Get(void** root, vuint8_t index)
 				{
 					return (void*)root;
 				}
 
-				static void Set(void**& root, vuint8_t index, void* value)
+				static __forceinline void Set(void**& root, vuint8_t index, void* value)
 				{
 					((void*&)root) = value;
 				}
