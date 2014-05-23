@@ -993,3 +993,19 @@ TEST_CASE(TestPushOnlyAllocator)
 		}
 	}
 }
+
+TEST_CASE(TestByteObjectMap)
+{
+	PushOnlyAllocator<vint> ints(256);
+	ByteObjectMap<vint> map;
+
+	for (vint i = 0; i < 256; i++)
+	{
+		map.Set((vuint8_t)i, ints.Create());
+	}
+
+	for (vint i = 0; i < 256; i++)
+	{
+		TEST_ASSERT(map.Get((vuint8_t)i) == ints.Get(i));
+	}
+}
