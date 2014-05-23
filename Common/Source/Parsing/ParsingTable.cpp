@@ -281,15 +281,24 @@ ParsingTable (Serialization)
 				{
 					static void IO(Reader& reader, bool& value)
 					{
-						vint32_t v = 0;
-						Serialization<vint32_t>::IO(reader, v);
-						value = v == -1;
+						vint8_t v = 0;
+						if (reader.input.Read(&v, sizeof(v)) != sizeof(v))
+						{
+							CHECK_FAIL(L"Deserialization failed.");
+						}
+						else
+						{
+							value = v == -1;
+						}
 					}
 					
 					static void IO(Writer& writer, bool& value)
 					{
-						vint32_t v = value ? -1 : 0;
-						Serialization<vint32_t>::IO(writer, v);
+						vint8_t v = value ? -1 : 0;
+						if (writer.output.Write(&v, sizeof(v)) != sizeof(v))
+						{
+							CHECK_FAIL(L"Serialization failed.");
+						}
 					}
 				};
 
