@@ -575,25 +575,53 @@ SORTED_LIST_INSERT:
 		namespace bom_helper
 		{
 			template<vint Index = 4>
-			struct Disposer
+			struct Accessor
 			{
 				static void Dispose(void** root)
 				{
 					if (!root) return;
 					for (vint i = 0; i < 3; i++)
 					{
-						Disposer<Index - 1>::Dispose((void**)root[i]);
+						Accessor<Index - 1>::Dispose((void**)root[i]);
 					}
 					delete[] root;
+				}
+
+				static void* Get(void** root, vuint8_t index)
+				{
+					vint fragmentIndex = (index >> (2 * (Index - 1))) % 4;
+					void**& fragmentRoot = ((void***)root)[fragmentIndex];
+					return fragmentRoot ? Accessor<Index - 1>::Get(fragmentRoot, index) : 0;
+				}
+
+				static void Set(void**& root, vuint8_t index, void* value)
+				{
+					if (!root)
+					{
+						root = new void*[4];
+						memset(root, 0, sizeof(void*)* 4);
+					}
+					vint fragmentIndex = (index >> (2 * (Index - 1))) % 4;
+					void**& fragmentRoot = ((void***)root)[fragmentIndex];
+					Accessor<Index - 1>::Set(fragmentRoot, index, value);
 				}
 			};
 
 			template<>
-			struct Disposer<0>
+			struct Accessor<0>
 			{
 				static void Dispose(void** root)
 				{
-					delete[] root;
+				}
+
+				static void* Get(void** root, vuint8_t index)
+				{
+					return (void*)root;
+				}
+
+				static void Set(void**& root, vuint8_t index, void* value)
+				{
+					((void*&)root) = value;
 				}
 			};
 		}
@@ -612,7 +640,17 @@ SORTED_LIST_INSERT:
 
 			~ByteObjectMap()
 			{
-				bom_helper::Disposer<>::Dispose(root);
+				bom_helper::Accessor<>::Dispose(root);
+			}
+
+			T* Get(vuint8_t index)
+			{
+				return (T*)bom_helper::Accessor<>::Get(root, index);
+			}
+
+			void Set(vuint8_t index, T* value)
+			{
+				bom_helper::Accessor<>::Set(root, index, value);
 			}
 		};
 
