@@ -59,9 +59,20 @@ LzwEncoder
 
 		LzwEncoder::LzwEncoder()
 			:stream(0)
+			, nextIndex(256)
 			, bufferUsedBits(0)
+			, indexBits(8)
 		{
 			root = allocator.Create();
+			root->code = -1;
+			prefix = root;
+
+			for (vint i = 0; i < nextIndex; i++)
+			{
+				Code* code = allocator.Create();
+				code->code = i;
+				root->children.Set((vuint8_t)i, code);
+			}
 		}
 
 		LzwEncoder::~LzwEncoder()
@@ -75,12 +86,43 @@ LzwEncoder
 
 		void LzwEncoder::Close()
 		{
+			if (prefix != root)
+			{
+				WriteNumber(prefix->code, indexBits);
+				prefix = root;
+			}
 			Flush();
 		}
 
 		vint LzwEncoder::Write(void* _buffer, vint _size)
 		{
-			throw 0;
+			vuint8_t* bytes = (vuint8_t*)_buffer;
+			for (vint i = 0; i < _size; i++)
+			{
+				vuint8_t byte = bytes[i];
+				Code* next = prefix->children.Get(byte);
+				if (next)
+				{
+					prefix = next;
+				}
+				else
+				{
+					WriteNumber(prefix->code, indexBits);
+					WriteNumber(byte, 8);
+
+					Code* code = allocator.Create();
+					code->code = nextIndex;
+					prefix->children.Set(byte, code);
+					prefix = root->children.Get(byte);
+
+					if ((nextIndex & (nextIndex + 1)) == 0)
+					{
+						indexBits++;
+					}
+					nextIndex++;
+				}
+			}
+			return _size;
 		}
 
 /***********************************************************************

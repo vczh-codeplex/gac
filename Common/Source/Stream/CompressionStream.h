@@ -40,9 +40,12 @@ Compression
 			IStream*								stream;
 			lzw::Code::Allocator					allocator;
 			lzw::Code*								root;
+			vint									nextIndex;
 
 			vuint8_t								buffer[BufferSize];
 			vint									bufferUsedBits;
+			lzw::Code*								prefix;
+			vuint									indexBits;
 
 			void									Flush();
 			void									WriteNumber(vint number, vint bitSize);
