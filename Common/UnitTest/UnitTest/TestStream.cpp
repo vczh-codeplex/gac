@@ -699,6 +699,8 @@ void TestLzwEncodingInternal(const char* input)
 		TEST_ASSERT(encoderStream.Write((void*)input, size) == size);
 	}
 	stream.SeekFromBegin(0);
+	unittest::UnitTest::PrintInfo(L"    [" + atow(input) + L"]");
+	unittest::UnitTest::PrintInfo(L"    " + itow(size) + L" -> " + i64tow(stream.Size()));
 	{
 		Array<char> output(size + 1);
 		LzwDecoder decoder;

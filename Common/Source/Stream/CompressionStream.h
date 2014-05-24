@@ -23,6 +23,9 @@ Compression
 
 		namespace lzw
 		{
+			static const vint						BufferSize = 1024;
+			static const vint						MaxDictionarySize = 1 << 24;
+
 			struct Code
 			{
 				typedef collections::PushOnlyAllocator<Code>	Allocator;
@@ -35,14 +38,12 @@ Compression
 		class LzwEncoder :public Object, public IEncoder
 		{
 		protected:
-			static const vint						BufferSize = 1024;
-
 			IStream*								stream;
 			lzw::Code::Allocator					allocator;
 			lzw::Code*								root;
 			vint									nextIndex;
 
-			vuint8_t								buffer[BufferSize];
+			vuint8_t								buffer[lzw::BufferSize];
 			vint									bufferUsedBits;
 			lzw::Code*								prefix;
 			vuint									indexBits;
@@ -63,6 +64,12 @@ Compression
 		protected:
 			IStream*								stream;
 
+			vuint8_t								inputBuffer[lzw::BufferSize];
+			vint									inputBufferSize;
+			vint									inputBufferUsedBits;
+			collections::Array<vuint8_t>			outputBuffer;
+
+			bool									ReadNumber(vint& number, vint bitSize);
 		public:
 			LzwDecoder();
 			~LzwDecoder();
