@@ -528,7 +528,7 @@ SORTED_LIST_INSERT:
 ***********************************************************************/
 
 		template<typename T>
-		class PushOnlyAllocator : public Object
+		class PushOnlyAllocator : public Object, private NotCopyable
 		{
 		protected:
 			vint				blockSize;
@@ -627,7 +627,7 @@ SORTED_LIST_INSERT:
 		}
 
 		template<typename T>
-		class ByteObjectMap : public Object
+		class ByteObjectMap : public Object, private NotCopyable
 		{
 		protected:
 			void**				root;
