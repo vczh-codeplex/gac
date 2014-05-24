@@ -30,23 +30,35 @@ Compression
 			{
 				typedef collections::PushOnlyAllocator<Code>	Allocator;
 
-				vint								code;
+				vuint8_t							byte = 0;
+				vint								code = 1;
+				Code*								parent = 0;
 				collections::ByteObjectMap<Code>	children;
 			};
 		}
 
-		class LzwEncoder :public Object, public IEncoder
+		class LzwBase : public Object
 		{
 		protected:
-			IStream*								stream;
 			lzw::Code::Allocator					allocator;
 			lzw::Code*								root;
 			vint									nextIndex;
+			vuint									indexBits;
+
+			lzw::Code*								CreateCode(lzw::Code* parent, vuint8_t byte);
+
+			LzwBase();
+			~LzwBase();
+		};
+
+		class LzwEncoder : public LzwBase, public IEncoder
+		{
+		protected:
+			IStream*								stream;
 
 			vuint8_t								buffer[lzw::BufferSize];
 			vint									bufferUsedBits;
 			lzw::Code*								prefix;
-			vuint									indexBits;
 
 			void									Flush();
 			void									WriteNumber(vint number, vint bitSize);
@@ -59,15 +71,20 @@ Compression
 			vint									Write(void* _buffer, vint _size)override;
 		};
 
-		class LzwDecoder :public Object, public IDecoder
+		class LzwDecoder :public LzwBase, public IDecoder
 		{
 		protected:
 			IStream*								stream;
+			collections::List<lzw::Code*>			dictionary;
+			vint									lastIndex;
 
 			vuint8_t								inputBuffer[lzw::BufferSize];
 			vint									inputBufferSize;
 			vint									inputBufferUsedBits;
+
 			collections::Array<vuint8_t>			outputBuffer;
+			vint									outputBufferSize;
+			vint									outputBufferUsedBytes;
 
 			bool									ReadNumber(vint& number, vint bitSize);
 		public:

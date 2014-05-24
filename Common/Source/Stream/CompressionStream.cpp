@@ -7,6 +7,54 @@ namespace vl
 		using namespace lzw;
 
 /***********************************************************************
+LzwBase
+***********************************************************************/
+
+		lzw::Code* LzwBase::CreateCode(lzw::Code* prefix, vuint8_t byte)
+		{
+			if (nextIndex < MaxDictionarySize)
+			{
+				Code* code = allocator.Create();
+				code->byte = byte;
+				code->code = nextIndex;
+				code->parent = prefix;
+				prefix->children.Set(byte, code);
+
+				if ((nextIndex & (nextIndex - 1)) == 0)
+				{
+					indexBits++;
+				}
+				nextIndex++;
+
+				return code;
+			}
+			else
+			{
+				return 0;
+			}
+		}
+
+		LzwBase::LzwBase()
+			:nextIndex(256)
+			, indexBits(8)
+		{
+			root = allocator.Create();
+
+			for (vint i = 0; i < nextIndex; i++)
+			{
+				Code* code = allocator.Create();
+				code->byte = (vuint8_t)i;
+				code->code = i;
+				code->parent = root;
+				root->children.Set((vuint8_t)i, code);
+			}
+		}
+
+		LzwBase::~LzwBase()
+		{
+		}
+
+/***********************************************************************
 LzwEncoder
 ***********************************************************************/
 
@@ -60,20 +108,9 @@ LzwEncoder
 
 		LzwEncoder::LzwEncoder()
 			:stream(0)
-			, nextIndex(256)
 			, bufferUsedBits(0)
-			, indexBits(8)
 		{
-			root = allocator.Create();
-			root->code = -1;
 			prefix = root;
-
-			for (vint i = 0; i < nextIndex; i++)
-			{
-				Code* code = allocator.Create();
-				code->code = i;
-				root->children.Set((vuint8_t)i, code);
-			}
 		}
 
 		LzwEncoder::~LzwEncoder()
@@ -112,15 +149,7 @@ LzwEncoder
 
 					if (nextIndex < MaxDictionarySize)
 					{
-						Code* code = allocator.Create();
-						code->code = nextIndex;
-						prefix->children.Set(byte, code);
-
-						if ((nextIndex & (nextIndex - 1)) == 0)
-						{
-							indexBits++;
-						}
-						nextIndex++;
+						CreateCode(prefix, byte);
 					}
 					prefix = root->children.Get(byte);
 				}
@@ -172,13 +201,20 @@ LzwDecoder
 
 		LzwDecoder::LzwDecoder()
 			:stream(0)
+			, lastIndex(-1)
 			, inputBufferSize(0)
 			, inputBufferUsedBits(0)
+			, outputBufferSize(0)
+			, outputBufferUsedBytes(0)
 		{
 		}
 
 		LzwDecoder::~LzwDecoder()
 		{
+			for (vint i = 0; i < nextIndex; i++)
+			{
+				dictionary.Add(root->children.Get((vuint8_t)i));
+			}
 		}
 
 		void LzwDecoder::Setup(IStream* _stream)
@@ -192,7 +228,65 @@ LzwDecoder
 
 		vint LzwDecoder::Read(void* _buffer, vint _size)
 		{
-			return 0;
+			vint written = 0;
+			vuint8_t* bytes = (vuint8_t*)_buffer;
+			while (written < _size)
+			{
+				vint expect = _size - written;
+				vint remain = outputBufferSize - outputBufferUsedBytes;
+				if (remain == 0)
+				{
+					vint index = 0;
+					if (!ReadNumber(index, indexBits))
+					{
+						break;
+					}
+
+					Code* prefix = dictionary[index];
+					{
+						vint size = 0;
+						Code* current = prefix;
+						while (current != root)
+						{
+							size++;
+							current = current->parent;
+						}
+
+						if (outputBufferSize < size)
+						{
+							outputBufferSize = size;
+							outputBuffer.Resize(outputBufferSize);
+						}
+
+						size = 0;
+						current = prefix;
+						while (current != root)
+						{
+							size++;
+							outputBuffer[outputBufferSize - size] = prefix->byte;
+							current = current->parent;
+						}
+					}
+
+					if (lastIndex != -1 && nextIndex < MaxDictionarySize)
+					{
+						dictionary.Add(CreateCode(prefix, outputBuffer[0]));
+					}
+					lastIndex = index;
+				}
+				else
+				{
+					if (remain > expect)
+					{
+						remain = expect;
+					}
+					memcpy(bytes + written, &outputBuffer[outputBufferUsedBytes], remain);
+
+					outputBufferUsedBytes += remain;
+					written += remain;
+				}
+			}
+			return written;
 		}
 	}
 }
