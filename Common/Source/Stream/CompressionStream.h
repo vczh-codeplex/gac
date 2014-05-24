@@ -46,6 +46,7 @@ Compression
 			vint									nextIndex;
 			vuint									indexBits;
 
+			void									UpdateIndexBits();
 			lzw::Code*								CreateCode(lzw::Code* parent, vuint8_t byte);
 
 			LzwBase();
@@ -77,7 +78,7 @@ Compression
 		protected:
 			IStream*								stream;
 			collections::List<lzw::Code*>			dictionary;
-			vint									lastIndex;
+			lzw::Code*								lastCode;
 
 			vuint8_t								inputBuffer[lzw::BufferSize];
 			vint									inputBufferSize;
@@ -88,6 +89,8 @@ Compression
 			vint									outputBufferUsedBytes;
 
 			bool									ReadNumber(vint& number, vint bitSize);
+			void									PrepareOutputBuffer(vint size);
+			void									ExpandCodeToOutputBuffer(lzw::Code* code);
 		public:
 			LzwDecoder();
 			~LzwDecoder();
