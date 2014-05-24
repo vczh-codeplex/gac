@@ -60,6 +60,11 @@ LzwBase
 					CreateCode(root, (vuint8_t)i);
 				}
 			}
+
+			if (indexBits < 8)
+			{
+				eofIndex = nextIndex++;
+			}
 		}
 
 		LzwBase::~LzwBase()
@@ -149,7 +154,13 @@ LzwEncoder
 				WriteNumber(prefix->code, indexBits);
 				prefix = root;
 			}
-			WriteNumber(0, indexBits);
+
+			vint remain = 8 - bufferUsedBits % 8;
+			if (remain != 8 && remain >= indexBits)
+			{
+				CHECK_ERROR(eofIndex != -1, L"LzwEncoder::Close()#Internal error.");
+				WriteNumber(eofIndex, indexBits);
+			}
 			Flush();
 		}
 
@@ -250,7 +261,6 @@ LzwDecoder
 
 		LzwDecoder::LzwDecoder()
 		{
-			dictionary.Add(0);
 			for (vint i = 0; i < 256; i++)
 			{
 				dictionary.Add(root->children.Get((vuint8_t)i));
@@ -260,13 +270,16 @@ LzwDecoder
 		LzwDecoder::LzwDecoder(bool (&existingBytes)[256])
 			:LzwBase(existingBytes)
 		{
-			dictionary.Add(0);
 			for (vint i = 0; i < 256; i++)
 			{
 				if (existingBytes[i])
 				{
 					dictionary.Add(root->children.Get((vuint8_t)i));
 				}
+			}
+			if (eofIndex != -1)
+			{
+				dictionary.Add(0);
 			}
 		}
 
@@ -294,7 +307,7 @@ LzwDecoder
 				if (remain == 0)
 				{
 					vint index = 0;
-					if (!ReadNumber(index, indexBits) || index == 0)
+					if (!ReadNumber(index, indexBits) || index == eofIndex)
 					{
 						break;
 					}
