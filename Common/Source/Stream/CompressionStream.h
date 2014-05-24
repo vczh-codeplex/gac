@@ -31,8 +31,9 @@ Compression
 				typedef collections::PushOnlyAllocator<Code>	Allocator;
 
 				vuint8_t							byte = 0;
-				vint								code = 1;
+				vint								code = -1;
 				Code*								parent = 0;
+				vint								size = 0;
 				collections::ByteObjectMap<Code>	children;
 			};
 		}

@@ -18,12 +18,13 @@ LzwBase
 				code->byte = byte;
 				code->code = nextIndex;
 				code->parent = prefix;
+				code->size = prefix->size + 1;
 				prefix->children.Set(byte, code);
-
-				if ((nextIndex & (nextIndex - 1)) == 0)
-				{
-					indexBits++;
-				}
+				
+			if ((nextIndex & (nextIndex - 1)) == 0)
+			{
+				indexBits++;
+			}
 				nextIndex++;
 
 				return code;
@@ -46,6 +47,7 @@ LzwBase
 				code->byte = (vuint8_t)i;
 				code->code = i;
 				code->parent = root;
+				code->size = 1;
 				root->children.Set((vuint8_t)i, code);
 			}
 		}
@@ -187,9 +189,11 @@ LzwDecoder
 				}
 
 				vuint8_t byte = inputBuffer[inputBufferUsedBits / 8];
-				byte >>= (8 - inputBufferUsedBits % 8 - bitStep) & lowMarks[bitStep];
+				byte >>= (8 - inputBufferUsedBits % 8 - bitStep);
+				byte &= lowMarks[bitStep];
 				number |= byte << writtenBits;
 
+				inputBufferUsedBits += bitStep;
 				remainBits -= bitStep;
 				writtenBits += bitStep;
 				vint remain = bitSize - writtenBits;
@@ -207,14 +211,14 @@ LzwDecoder
 			, outputBufferSize(0)
 			, outputBufferUsedBytes(0)
 		{
-		}
-
-		LzwDecoder::~LzwDecoder()
-		{
 			for (vint i = 0; i < nextIndex; i++)
 			{
 				dictionary.Add(root->children.Get((vuint8_t)i));
 			}
+		}
+
+		LzwDecoder::~LzwDecoder()
+		{
 		}
 
 		void LzwDecoder::Setup(IStream* _stream)
@@ -244,32 +248,28 @@ LzwDecoder
 
 					Code* prefix = dictionary[index];
 					{
-						vint size = 0;
+						if (outputBufferSize < prefix->size)
+						{
+							outputBuffer.Resize(prefix->size);
+						}
+						outputBufferSize = prefix->size;
+					
+						vuint8_t* outputByte = &outputBuffer[0] + outputBufferSize;
 						Code* current = prefix;
 						while (current != root)
 						{
-							size++;
+							*(--outputByte) = prefix->byte;
 							current = current->parent;
 						}
-
-						if (outputBufferSize < size)
-						{
-							outputBufferSize = size;
-							outputBuffer.Resize(outputBufferSize);
-						}
-
-						size = 0;
-						current = prefix;
-						while (current != root)
-						{
-							size++;
-							outputBuffer[outputBufferSize - size] = prefix->byte;
-							current = current->parent;
-						}
+						outputBufferUsedBytes = 0;
 					}
 
-					if (lastIndex != -1 && nextIndex < MaxDictionarySize)
+					if (nextIndex < MaxDictionarySize)
 					{
+						if (lastIndex != -1)
+						{
+							prefix = dictionary[lastIndex];
+						}
 						dictionary.Add(CreateCode(prefix, outputBuffer[0]));
 					}
 					lastIndex = index;
