@@ -2532,6 +2532,141 @@ SORTED_LIST_INSERT:
 		};
 
 /***********************************************************************
+特殊容器
+***********************************************************************/
+
+		template<typename T>
+		class PushOnlyAllocator : public Object, private NotCopyable
+		{
+		protected:
+			vint				blockSize;
+			vint				allocatedSize;
+			List<T*>			blocks;
+
+		public:
+			PushOnlyAllocator(vint _blockSize = 65536)
+				:blockSize(_blockSize)
+				, allocatedSize(0)
+			{
+			}
+
+			~PushOnlyAllocator()
+			{
+				for (vint i = 0; i < blocks.Count(); i++)
+				{
+					delete[] blocks[i];
+				}
+			}
+
+			T* Get(vint index)
+			{
+				if (index >= allocatedSize)
+				{
+					return 0;
+				}
+				vint row = index / blockSize;
+				vint column = index % blockSize;
+				return &blocks[row][column];
+			}
+
+			T* Create()
+			{
+				if (allocatedSize == blocks.Count()*blockSize)
+				{
+					blocks.Add(new T[blockSize]);
+				}
+				vint index = allocatedSize++;
+				return Get(index);
+			}
+		};
+
+		namespace bom_helper
+		{
+			template<vint Index = 4>
+			struct Accessor
+			{
+				static __forceinline void Dispose(void** root)
+				{
+					if (!root) return;
+					for (vint i = 0; i < 4; i++)
+					{
+						Accessor<Index - 1>::Dispose((void**)root[i]);
+					}
+					delete[] root;
+				}
+
+				static __forceinline void* Get(void** root, vuint8_t index)
+				{
+					if (!root)
+					{
+						return 0;
+					}
+					vint fragmentIndex = (index >> (2 * (Index - 1))) % 4;
+					void**& fragmentRoot = ((void***)root)[fragmentIndex];
+					return fragmentRoot ? Accessor<Index - 1>::Get(fragmentRoot, index) : 0;
+				}
+
+				static __forceinline void Set(void**& root, vuint8_t index, void* value)
+				{
+					if (!root)
+					{
+						root = new void*[4];
+						memset(root, 0, sizeof(void*)* 4);
+					}
+					vint fragmentIndex = (index >> (2 * (Index - 1))) % 4;
+					void**& fragmentRoot = ((void***)root)[fragmentIndex];
+					Accessor<Index - 1>::Set(fragmentRoot, index, value);
+				}
+			};
+
+			template<>
+			struct Accessor<0>
+			{
+				static __forceinline void Dispose(void** root)
+				{
+				}
+
+				static __forceinline void* Get(void** root, vuint8_t index)
+				{
+					return (void*)root;
+				}
+
+				static __forceinline void Set(void**& root, vuint8_t index, void* value)
+				{
+					((void*&)root) = value;
+				}
+			};
+		}
+
+		template<typename T>
+		class ByteObjectMap : public Object, private NotCopyable
+		{
+		protected:
+			void**				root;
+
+		public:
+			ByteObjectMap()
+				:root(0)
+			{
+			}
+
+			~ByteObjectMap()
+			{
+				bom_helper::Accessor<>::Dispose(root);
+			}
+
+			T* Get(vuint8_t index)
+			{
+				return (T*)bom_helper::Accessor<>::Get(root, index);
+			}
+
+			void Set(vuint8_t index, T* value)
+			{
+				bom_helper::Accessor<>::Set(root, index, value);
+			}
+		};
+
+/***********************************************************************
 随机访问
 ***********************************************************************/
 
