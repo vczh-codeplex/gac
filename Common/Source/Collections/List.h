@@ -589,6 +589,10 @@ SORTED_LIST_INSERT:
 
 				static __forceinline void* Get(void** root, vuint8_t index)
 				{
+					if (!root)
+					{
+						return 0;
+					}
 					vint fragmentIndex = (index >> (2 * (Index - 1))) % 4;
 					void**& fragmentRoot = ((void***)root)[fragmentIndex];
 					return fragmentRoot ? Accessor<Index - 1>::Get(fragmentRoot, index) : 0;

@@ -688,6 +688,39 @@ TEST_CASE(TestEncoding)
 压缩测试
 ***********************************************************************/
 
+void TestLzwEncodingInternal(const char* input)
+{
+	MemoryStream stream;
+	vint size = strlen(input);
+	{
+		LzwEncoder encoder;
+		EncoderStream encoderStream(stream, encoder);
+		vint size = strlen(input);
+		TEST_ASSERT(encoderStream.Write((void*)input, size) == size);
+	}
+	stream.SeekFromBegin(0);
+	{
+		Array<char> output(size + 1);
+		LzwDecoder decoder;
+		DecoderStream decoderStream(stream, decoder);
+		TEST_ASSERT(decoderStream.Read(&output[0], size) == size);
+		TEST_ASSERT(decoderStream.Read(&output[0], size) == 0);
+		output[size] = 0;
+		TEST_ASSERT(strcmp(input, &output[0]) == 0);
+	}
+}
+
 TEST_CASE(TestLzwEncoding)
 {
+	const char* buffer[] =
+	{
+		"",
+		"0000000000000000000000000000000000000000",
+		"Vczh is genius!Vczh is genius!Vczh is genius!",
+	};
+
+	for (vint i = 0; i < sizeof(buffer) / sizeof(*buffer); i++)
+	{
+		TestLzwEncodingInternal(buffer[i]);
+	}
 }

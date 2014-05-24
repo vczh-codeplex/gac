@@ -21,7 +21,7 @@ LzwEncoder
 			while (written < bufferUsedSize)
 			{
 				vint size = stream->Write(buffer + written, bufferUsedSize - written);
-				CHECK_ERROR(size == 0, L"LzwEncoder::Flush()#Failed to flush the lzw buffer.");
+				CHECK_ERROR(size != 0, L"LzwEncoder::Flush()#Failed to flush the lzw buffer.");
 				written += size;
 			}
 			bufferUsedBits = 0;
@@ -42,13 +42,14 @@ LzwEncoder
 				}
 
 				vint writeStart = bufferUsedBits % 8;
-				vuint8_t byte = buffer[bufferUsedBits / 8];
+				vint byteIndex = bufferUsedBits / 8;
+				vuint8_t byte = buffer[byteIndex];
 				byte &= highMarks[writeStart];
 
 				vuint8_t content = (vuint8_t)((number >> bitStart)&lowMarks[bitStep]) << (8 - writeStart - bitStep);
 				byte |= content;
 
-				buffer[bufferUsedBits] = byte;
+				buffer[byteIndex] = byte;
 				bufferUsedBits += bitStep;
 
 				bitStart += bitStep;
@@ -108,14 +109,13 @@ LzwEncoder
 				else
 				{
 					WriteNumber(prefix->code, indexBits);
-					WriteNumber(byte, 8);
 
 					Code* code = allocator.Create();
 					code->code = nextIndex;
 					prefix->children.Set(byte, code);
 					prefix = root->children.Get(byte);
 
-					if ((nextIndex & (nextIndex + 1)) == 0)
+					if ((nextIndex & (nextIndex - 1)) == 0)
 					{
 						indexBits++;
 					}
@@ -145,12 +145,11 @@ LzwDecoder
 
 		void LzwDecoder::Close()
 		{
-			throw 0;
 		}
 
 		vint LzwDecoder::Read(void* _buffer, vint _size)
 		{
-			throw 0;
+			return 0;
 		}
 	}
 }
