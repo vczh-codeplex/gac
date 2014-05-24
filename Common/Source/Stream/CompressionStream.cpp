@@ -94,6 +94,10 @@ LzwEncoder
 		{
 			vint bitStart = 0;
 			vint bitStep = 8 - bufferUsedBits % 8;
+			if (bitStep > bitSize)
+			{
+				bitStep = bitSize;
+			}
 			while (bitStart < bitSize)
 			{
 				if(bufferUsedBits == BufferSize * 8)
@@ -145,6 +149,7 @@ LzwEncoder
 				WriteNumber(prefix->code, indexBits);
 				prefix = root;
 			}
+			WriteNumber(0, indexBits);
 			Flush();
 		}
 
@@ -189,6 +194,10 @@ LzwDecoder
 			vint remainBits = inputBufferSize * 8 - inputBufferUsedBits;
 			vint writtenBits = 0;
 			vint bitStep = 8 - inputBufferUsedBits % 8;
+			if (bitStep > bitSize)
+			{
+				bitStep = bitSize;
+			}
 			while (writtenBits < bitSize)
 			{
 				if (remainBits == 0)
@@ -241,6 +250,7 @@ LzwDecoder
 
 		LzwDecoder::LzwDecoder()
 		{
+			dictionary.Add(0);
 			for (vint i = 0; i < 256; i++)
 			{
 				dictionary.Add(root->children.Get((vuint8_t)i));
@@ -250,6 +260,7 @@ LzwDecoder
 		LzwDecoder::LzwDecoder(bool (&existingBytes)[256])
 			:LzwBase(existingBytes)
 		{
+			dictionary.Add(0);
 			for (vint i = 0; i < 256; i++)
 			{
 				if (existingBytes[i])
@@ -283,7 +294,7 @@ LzwDecoder
 				if (remain == 0)
 				{
 					vint index = 0;
-					if (!ReadNumber(index, indexBits))
+					if (!ReadNumber(index, indexBits) || index == 0)
 					{
 						break;
 					}

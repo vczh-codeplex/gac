@@ -43,7 +43,7 @@ Compression
 		protected:
 			lzw::Code::Allocator					allocator;
 			lzw::Code*								root;
-			vint									nextIndex = 0;
+			vint									nextIndex = 1;
 			vuint									indexBits = 1;
 
 			void									UpdateIndexBits();
