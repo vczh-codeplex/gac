@@ -12,7 +12,7 @@ LzwBase
 
 		void LzwBase::UpdateIndexBits()
 		{
-			if ((nextIndex & (nextIndex - 1)) == 0)
+			if (nextIndex >=2 && (nextIndex & (nextIndex - 1)) == 0)
 			{
 				indexBits++;
 			}
@@ -39,19 +39,26 @@ LzwBase
 		}
 
 		LzwBase::LzwBase()
-			:nextIndex(256)
-			, indexBits(8)
 		{
 			root = allocator.Create();
 
-			for (vint i = 0; i < nextIndex; i++)
+			for (vint i = 0; i < 256; i++)
 			{
-				Code* code = allocator.Create();
-				code->byte = (vuint8_t)i;
-				code->code = i;
-				code->parent = root;
-				code->size = 1;
-				root->children.Set((vuint8_t)i, code);
+				UpdateIndexBits();
+				CreateCode(root, (vuint8_t)i);
+			}
+		}
+
+		LzwBase::LzwBase(bool (&existingBytes)[256])
+		{
+			root = allocator.Create();
+			for (vint i = 0; i < 256; i++)
+			{
+				if (existingBytes[i])
+				{
+					UpdateIndexBits();
+					CreateCode(root, (vuint8_t)i);
+				}
 			}
 		}
 
@@ -112,8 +119,12 @@ LzwEncoder
 		}
 
 		LzwEncoder::LzwEncoder()
-			:stream(0)
-			, bufferUsedBits(0)
+		{
+			prefix = root;
+		}
+
+		LzwEncoder::LzwEncoder(bool (&existingBytes)[256])
+			:LzwBase(existingBytes)
 		{
 			prefix = root;
 		}
@@ -229,16 +240,22 @@ LzwDecoder
 		}
 
 		LzwDecoder::LzwDecoder()
-			:stream(0)
-			, lastCode(0)
-			, inputBufferSize(0)
-			, inputBufferUsedBits(0)
-			, outputBufferSize(0)
-			, outputBufferUsedBytes(0)
 		{
-			for (vint i = 0; i < nextIndex; i++)
+			for (vint i = 0; i < 256; i++)
 			{
 				dictionary.Add(root->children.Get((vuint8_t)i));
+			}
+		}
+
+		LzwDecoder::LzwDecoder(bool (&existingBytes)[256])
+			:LzwBase(existingBytes)
+		{
+			for (vint i = 0; i < 256; i++)
+			{
+				if (existingBytes[i])
+				{
+					dictionary.Add(root->children.Get((vuint8_t)i));
+				}
 			}
 		}
 

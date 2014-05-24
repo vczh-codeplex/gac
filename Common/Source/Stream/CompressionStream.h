@@ -43,29 +43,31 @@ Compression
 		protected:
 			lzw::Code::Allocator					allocator;
 			lzw::Code*								root;
-			vint									nextIndex;
-			vuint									indexBits;
+			vint									nextIndex = 0;
+			vuint									indexBits = 1;
 
 			void									UpdateIndexBits();
 			lzw::Code*								CreateCode(lzw::Code* parent, vuint8_t byte);
 
 			LzwBase();
+			LzwBase(bool (&existingBytes)[256]);
 			~LzwBase();
 		};
 
 		class LzwEncoder : public LzwBase, public IEncoder
 		{
 		protected:
-			IStream*								stream;
+			IStream*								stream = 0;
 
 			vuint8_t								buffer[lzw::BufferSize];
-			vint									bufferUsedBits;
+			vint									bufferUsedBits = 0;
 			lzw::Code*								prefix;
 
 			void									Flush();
 			void									WriteNumber(vint number, vint bitSize);
 		public:
 			LzwEncoder();
+			LzwEncoder(bool (&existingBytes)[256]);
 			~LzwEncoder();
 
 			void									Setup(IStream* _stream)override;
@@ -76,23 +78,24 @@ Compression
 		class LzwDecoder :public LzwBase, public IDecoder
 		{
 		protected:
-			IStream*								stream;
+			IStream*								stream = 0;
 			collections::List<lzw::Code*>			dictionary;
-			lzw::Code*								lastCode;
+			lzw::Code*								lastCode = 0;
 
 			vuint8_t								inputBuffer[lzw::BufferSize];
-			vint									inputBufferSize;
-			vint									inputBufferUsedBits;
+			vint									inputBufferSize = 0;
+			vint									inputBufferUsedBits = 0;
 
 			collections::Array<vuint8_t>			outputBuffer;
-			vint									outputBufferSize;
-			vint									outputBufferUsedBytes;
+			vint									outputBufferSize = 0;
+			vint									outputBufferUsedBytes = 0;
 
 			bool									ReadNumber(vint& number, vint bitSize);
 			void									PrepareOutputBuffer(vint size);
 			void									ExpandCodeToOutputBuffer(lzw::Code* code);
 		public:
 			LzwDecoder();
+			LzwDecoder(bool (&existingBytes)[256]);
 			~LzwDecoder();
 
 			void									Setup(IStream* _stream)override;
