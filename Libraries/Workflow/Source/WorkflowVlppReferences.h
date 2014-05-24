@@ -25,6 +25,7 @@ Interfaces:
 #include "../../../Common/Source/Stream/FileStream.h"
 #include "../../../Common/Source/Stream/CharFormat.h"
 #include "../../../Common/Source/Stream/Accessor.h"
+#include "../../../Common/Source/Stream/CompressionStream.h"
 #include "../../../Common/Source/Parsing/Xml/ParsingXml.h"
 #include "../../../Common/Source/Parsing/Json/ParsingJson.h"
 #include "../../../Common/Source/Reflection/GuiTypeDescriptorMacros.h"

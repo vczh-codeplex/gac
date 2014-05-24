@@ -276,6 +276,9 @@
     <ClInclude Include="..\..\..\..\Common\Source\Tuple.h">
       <Filter>Common\Basic</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Stream\CompressionStream.h">
+      <Filter>Common\Stream</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\Common\Source\Stream\Accessor.cpp">
@@ -475,6 +478,9 @@
     </ClCompile>
     <ClCompile Include="..\..\Source\Analyzer\WfAnalyzer_GenerateBind.cpp">
       <Filter>Workflow\Analyzer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Source\Stream\CompressionStream.cpp">
+      <Filter>Common\Stream</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

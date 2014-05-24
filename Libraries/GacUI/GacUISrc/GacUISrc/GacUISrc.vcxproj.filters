@@ -621,6 +621,9 @@
     <ClCompile Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionTemplates.cpp">
       <Filter>GacUI\Reflection\TypeDescriptors</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Source\Stream\CompressionStream.cpp">
+      <Filter>Common\Stream</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Common\Source\Basic.h">
@@ -1117,6 +1120,9 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Reflection\TypeDescriptors\GuiReflectionTemplates.h">
       <Filter>GacUI\Reflection\TypeDescriptors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Stream\CompressionStream.h">
+      <Filter>Common\Stream</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
