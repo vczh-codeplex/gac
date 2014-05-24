@@ -688,12 +688,11 @@ TEST_CASE(TestEncoding)
 压缩测试
 ***********************************************************************/
 
-void TestLzwEncodingInternal(const char* input)
+void TestLzwEncodingWithEncoderAndDecoder(const char* input, LzwEncoder& encoder, LzwDecoder& decoder)
 {
 	MemoryStream stream;
 	vint size = strlen(input);
 	{
-		LzwEncoder encoder;
 		EncoderStream encoderStream(stream, encoder);
 		vint size = strlen(input);
 		TEST_ASSERT(encoderStream.Write((void*)input, size) == size);
@@ -703,13 +702,33 @@ void TestLzwEncodingInternal(const char* input)
 	unittest::UnitTest::PrintInfo(L"    " + itow(size) + L" -> " + i64tow(stream.Size()));
 	{
 		Array<char> output(size + 1);
-		LzwDecoder decoder;
 		DecoderStream decoderStream(stream, decoder);
 		TEST_ASSERT(decoderStream.Read(&output[0], size) == size);
 		TEST_ASSERT(decoderStream.Read(&output[0], size) == 0);
 		output[size] = 0;
 		TEST_ASSERT(strcmp(input, &output[0]) == 0);
 	}
+}
+
+void TestLzwEncodingDefault(const char* input)
+{
+	LzwEncoder encoder;
+	LzwDecoder decoder;
+	TestLzwEncodingWithEncoderAndDecoder(input, encoder, decoder);
+}
+
+void TestLzwEncodingPrepared(const char* input)
+{
+	bool existingBytes[256] = { 0 };
+	const char* current = input;
+	while (vuint8_t c = (vuint8_t)*current++)
+	{
+		existingBytes[c] = true;
+	}
+
+	LzwEncoder encoder(existingBytes);
+	LzwDecoder decoder(existingBytes);
+	TestLzwEncodingWithEncoderAndDecoder(input, encoder, decoder);
 }
 
 TEST_CASE(TestLzwEncoding)
@@ -723,6 +742,7 @@ TEST_CASE(TestLzwEncoding)
 
 	for (vint i = 0; i < sizeof(buffer) / sizeof(*buffer); i++)
 	{
-		TestLzwEncodingInternal(buffer[i]);
+		TestLzwEncodingDefault(buffer[i]);
+		TestLzwEncodingPrepared(buffer[i]);
 	}
 }
