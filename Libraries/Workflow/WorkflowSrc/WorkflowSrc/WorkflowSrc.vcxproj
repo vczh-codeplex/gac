@@ -197,6 +197,7 @@
     <ClInclude Include="..\..\..\..\Common\Source\Stream\BroadcastStream.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Stream\CacheStream.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Stream\CharFormat.h" />
+    <ClInclude Include="..\..\..\..\Common\Source\Stream\CompressionStream.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Stream\FileStream.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Stream\Interfaces.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Stream\MemoryStream.h" />
@@ -252,6 +253,7 @@
     <ClCompile Include="..\..\..\..\Common\Source\Stream\BroadcastStream.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\Stream\CacheStream.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\Stream\CharFormat.cpp" />
+    <ClCompile Include="..\..\..\..\Common\Source\Stream\CompressionStream.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\Stream\FileStream.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\Stream\MemoryStream.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\Stream\MemoryWrapperStream.cpp" />
