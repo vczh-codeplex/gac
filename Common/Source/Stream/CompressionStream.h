@@ -43,8 +43,9 @@ Compression
 		protected:
 			lzw::Code::Allocator					allocator;
 			lzw::Code*								root;
-			vint									nextIndex = 1;
-			vuint									indexBits = 1;
+			vint									eofIndex = -1;
+			vint									nextIndex = 0;
+			vint									indexBits = 1;
 
 			void									UpdateIndexBits();
 			lzw::Code*								CreateCode(lzw::Code* parent, vuint8_t byte);
