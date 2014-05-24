@@ -110,16 +110,19 @@ LzwEncoder
 				{
 					WriteNumber(prefix->code, indexBits);
 
-					Code* code = allocator.Create();
-					code->code = nextIndex;
-					prefix->children.Set(byte, code);
-					prefix = root->children.Get(byte);
-
-					if ((nextIndex & (nextIndex - 1)) == 0)
+					if (nextIndex < MaxDictionarySize)
 					{
-						indexBits++;
+						Code* code = allocator.Create();
+						code->code = nextIndex;
+						prefix->children.Set(byte, code);
+
+						if ((nextIndex & (nextIndex - 1)) == 0)
+						{
+							indexBits++;
+						}
+						nextIndex++;
 					}
-					nextIndex++;
+					prefix = root->children.Get(byte);
 				}
 			}
 			return _size;
@@ -129,8 +132,48 @@ LzwEncoder
 LzwDecoder
 ***********************************************************************/
 
+		bool LzwDecoder::ReadNumber(vint& number, vint bitSize)
+		{
+			number = 0;
+			if (inputBufferSize == -1)
+			{
+				return false;
+			}
+
+			vint remainBits = inputBufferSize * 8 - inputBufferUsedBits;
+			vint writtenBits = 0;
+			vint bitStep = 8 - inputBufferUsedBits % 8;
+			while (writtenBits < bitSize)
+			{
+				if (remainBits == 0)
+				{
+					inputBufferSize = stream->Read(inputBuffer, BufferSize);
+					if (inputBufferSize == 0)
+					{
+						inputBufferSize = -1;
+						return false;
+					}
+					remainBits = inputBufferSize * 8;
+					inputBufferUsedBits = 0;
+				}
+
+				vuint8_t byte = inputBuffer[inputBufferUsedBits / 8];
+				byte >>= (8 - inputBufferUsedBits % 8 - bitStep) & lowMarks[bitStep];
+				number |= byte << writtenBits;
+
+				remainBits -= bitStep;
+				writtenBits += bitStep;
+				vint remain = bitSize - writtenBits;
+				bitStep = remain < 8 ? remain : 8;
+			}
+
+			return true;
+		}
+
 		LzwDecoder::LzwDecoder()
 			:stream(0)
+			, inputBufferSize(0)
+			, inputBufferUsedBits(0)
 		{
 		}
 
