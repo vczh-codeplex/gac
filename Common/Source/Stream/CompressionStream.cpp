@@ -22,12 +22,12 @@ LzwBase
 		{
 			if (nextIndex < MaxDictionarySize)
 			{
-				Code* code = allocator.Create();
+				Code* code = codeAllocator.Create();
 				code->byte = byte;
 				code->code = nextIndex;
 				code->parent = prefix;
 				code->size = prefix->size + 1;
-				prefix->children.Set(byte, code);
+				prefix->children.Set(byte, code, mapAllocator);
 				nextIndex++;
 
 				return code;
@@ -39,8 +39,10 @@ LzwBase
 		}
 
 		LzwBase::LzwBase()
+			:codeAllocator(65536)
+			, mapAllocator(1048576)
 		{
-			root = allocator.Create();
+			root = codeAllocator.Create();
 
 			for (vint i = 0; i < 256; i++)
 			{
@@ -51,7 +53,7 @@ LzwBase
 
 		LzwBase::LzwBase(bool (&existingBytes)[256])
 		{
-			root = allocator.Create();
+			root = codeAllocator.Create();
 			for (vint i = 0; i < 256; i++)
 			{
 				if (existingBytes[i])

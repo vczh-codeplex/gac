@@ -1,5 +1,6 @@
 ﻿#include <string.h>
 #include "../../Source/UnitTest/UnitTest.h"
+#include "../../Source/Console.h"
 #include "../../Source/Stream/Interfaces.h"
 #include "../../Source/Stream/MemoryWrapperStream.h"
 #include "../../Source/Stream/MemoryStream.h"
@@ -746,3 +747,71 @@ TEST_CASE(TestLzwEncoding)
 		TestLzwEncodingPrepared(buffer[i]);
 	}
 }
+
+#if defined VCZH_MSVC && defined NDEBUG
+
+namespace lzw_helper
+{
+	void Copy(IStream& dst, IStream& src, Array<vuint8_t>& buffer, vint totalSize)
+	{
+		vint BufferSize = buffer.Count();
+		while (true)
+		{
+			vint size = src.Read(&buffer[0], BufferSize);
+			if (size == 0)
+			{
+				break;
+			}
+			dst.Write(&buffer[0], size);
+		}
+	}
+}
+using namespace lzw_helper;
+
+TEST_CASE(TestLzwSpeed)
+{
+	const vint BufferSize = 33554432;
+	Array<vuint8_t> buffer(BufferSize);
+	MemoryStream compressedStream(BufferSize), decompressedStream(BufferSize);
+	unittest::UnitTest::PrintInfo(L"    Reading UnitTest.pdb ...");
+	{
+		FileStream fileStream(GetPath() + L"../Release/UnitTest.pdb", FileStream::ReadOnly);
+		Copy(decompressedStream, fileStream, buffer, (vint)fileStream.Size());
+	}
+
+	decompressedStream.SeekFromBegin(0);
+	vint totalSize = (vint)decompressedStream.Size();
+	
+	unittest::UnitTest::PrintInfo(L"    Compressing UnitTest.pdb ...");
+	{
+		DateTime begin = DateTime::LocalTime();
+
+		LzwEncoder encoder;
+		EncoderStream encoderStream(compressedStream, encoder);
+		Copy(encoderStream, decompressedStream, buffer, totalSize);
+
+		DateTime end = DateTime::LocalTime();
+
+		double time = (end.totalMilliseconds - begin.totalMilliseconds) / 1000.0;
+		unittest::UnitTest::PrintInfo(L"    Time elasped: " + ftow(time) + L" seconds");
+		unittest::UnitTest::PrintInfo(L"    Performance: " + ftow(totalSize / time / (1 << 20)) + L" MB/s");
+	}
+
+	compressedStream.SeekFromBegin(0);
+	unittest::UnitTest::PrintInfo(L"    " + i64tow(totalSize) + L" -> " + i64tow(compressedStream.Size()));
+
+	unittest::UnitTest::PrintInfo(L"    Decompressing UnitTest.pdb ...");
+	{
+		DateTime begin = DateTime::LocalTime();
+
+		LzwDecoder decoder;
+		DecoderStream decoderStream(compressedStream, decoder);
+		Copy(decompressedStream, decoderStream, buffer, totalSize);
+
+		DateTime end = DateTime::LocalTime();
+		double time = (end.totalMilliseconds - begin.totalMilliseconds) / 1000.0;
+		unittest::UnitTest::PrintInfo(L"    Time elasped: " + ftow(time) + L" seconds");
+		unittest::UnitTest::PrintInfo(L"    Performance: " + ftow(totalSize / time / (1 << 20)) + L" MB/s");
+	}
+}
+#endif

@@ -531,9 +531,9 @@ SORTED_LIST_INSERT:
 		class PushOnlyAllocator : public Object, private NotCopyable
 		{
 		protected:
-			vint				blockSize;
-			vint				allocatedSize;
-			List<T*>			blocks;
+			vint							blockSize;
+			vint							allocatedSize;
+			List<T*>						blocks;
 
 		public:
 			PushOnlyAllocator(vint _blockSize = 65536)
@@ -574,56 +574,47 @@ SORTED_LIST_INSERT:
 
 		namespace bom_helper
 		{
+			struct TreeNode
+			{
+				TreeNode*					nodes[4];
+			};
+
 			template<vint Index = 4>
 			struct Accessor
 			{
-				static __forceinline void Dispose(void** root)
-				{
-					if (!root) return;
-					for (vint i = 0; i < 4; i++)
-					{
-						Accessor<Index - 1>::Dispose((void**)root[i]);
-					}
-					delete[] root;
-				}
-
-				static __forceinline void* Get(void** root, vuint8_t index)
+				static __forceinline void* Get(TreeNode* root, vuint8_t index)
 				{
 					if (!root)
 					{
 						return 0;
 					}
 					vint fragmentIndex = (index >> (2 * (Index - 1))) % 4;
-					void**& fragmentRoot = ((void***)root)[fragmentIndex];
+					TreeNode* fragmentRoot = root->nodes[fragmentIndex];
 					return fragmentRoot ? Accessor<Index - 1>::Get(fragmentRoot, index) : 0;
 				}
 
-				static __forceinline void Set(void**& root, vuint8_t index, void* value)
+				static __forceinline void Set(TreeNode*& root, vuint8_t index, void* value, PushOnlyAllocator<TreeNode>& allocator)
 				{
 					if (!root)
 					{
-						root = new void*[4];
-						memset(root, 0, sizeof(void*)* 4);
+						root = allocator.Create();
+						memset(root->nodes, 0, sizeof(root->nodes));
 					}
 					vint fragmentIndex = (index >> (2 * (Index - 1))) % 4;
-					void**& fragmentRoot = ((void***)root)[fragmentIndex];
-					Accessor<Index - 1>::Set(fragmentRoot, index, value);
+					TreeNode*& fragmentRoot = root->nodes[fragmentIndex];
+					Accessor<Index - 1>::Set(fragmentRoot, index, value, allocator);
 				}
 			};
 
 			template<>
 			struct Accessor<0>
 			{
-				static __forceinline void Dispose(void** root)
-				{
-				}
-
-				static __forceinline void* Get(void** root, vuint8_t index)
+				static __forceinline void* Get(TreeNode* root, vuint8_t index)
 				{
 					return (void*)root;
 				}
 
-				static __forceinline void Set(void**& root, vuint8_t index, void* value)
+				static __forceinline void Set(TreeNode*& root, vuint8_t index, void* value, PushOnlyAllocator<TreeNode>& allocator)
 				{
 					((void*&)root) = value;
 				}
@@ -633,8 +624,10 @@ SORTED_LIST_INSERT:
 		template<typename T>
 		class ByteObjectMap : public Object, private NotCopyable
 		{
+		public:
+			typedef PushOnlyAllocator<bom_helper::TreeNode>			Allocator;
 		protected:
-			void**				root;
+			bom_helper::TreeNode*			root;
 
 		public:
 			ByteObjectMap()
@@ -644,7 +637,6 @@ SORTED_LIST_INSERT:
 
 			~ByteObjectMap()
 			{
-				bom_helper::Accessor<>::Dispose(root);
 			}
 
 			T* Get(vuint8_t index)
@@ -652,9 +644,9 @@ SORTED_LIST_INSERT:
 				return (T*)bom_helper::Accessor<>::Get(root, index);
 			}
 
-			void Set(vuint8_t index, T* value)
+			void Set(vuint8_t index, T* value, Allocator& allocator)
 			{
-				bom_helper::Accessor<>::Set(root, index, value);
+				bom_helper::Accessor<>::Set(root, index, value, allocator);
 			}
 		};
 
