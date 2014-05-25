@@ -28,7 +28,8 @@ Compression
 
 			struct Code
 			{
-				typedef collections::PushOnlyAllocator<Code>	Allocator;
+				typedef collections::PushOnlyAllocator<Code>			CodeAllocator;
+				typedef collections::ByteObjectMap<Code>::Allocator		MapAllocator;
 
 				vuint8_t							byte = 0;
 				vint								code = -1;
@@ -41,7 +42,8 @@ Compression
 		class LzwBase : public Object
 		{
 		protected:
-			lzw::Code::Allocator					allocator;
+			lzw::Code::CodeAllocator				codeAllocator;
+			lzw::Code::MapAllocator					mapAllocator;
 			lzw::Code*								root;
 			vint									eofIndex = -1;
 			vint									nextIndex = 0;

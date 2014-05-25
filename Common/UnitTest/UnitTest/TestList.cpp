@@ -998,10 +998,11 @@ TEST_CASE(TestByteObjectMap)
 {
 	PushOnlyAllocator<vint> ints(256);
 	ByteObjectMap<vint> map;
+	ByteObjectMap<vint>::Allocator mapAllocator;
 
 	for (vint i = 0; i < 256; i++)
 	{
-		map.Set((vuint8_t)i, ints.Create());
+		map.Set((vuint8_t)i, ints.Create(), mapAllocator);
 	}
 
 	for (vint i = 0; i < 256; i++)
