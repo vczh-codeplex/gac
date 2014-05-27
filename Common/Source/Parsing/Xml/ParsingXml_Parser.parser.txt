@@ -5,6 +5,7 @@ namespace:vl.parsing.xml
 reflection:system
 classPrefix:Xml
 guard:VCZH_PARSING_XML_PARSINGXML_PARSER
+serialization:enabled
 parser:ParseDocument(XDocument)
 parser:ParseElement(XElement)
 grammar:
