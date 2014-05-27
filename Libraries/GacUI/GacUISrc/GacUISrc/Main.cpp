@@ -225,7 +225,11 @@ void GuiMain()
 	List<WString> errors;
 	auto resource = GuiResource::LoadFromXml(L"..\\GacUISrcCodepackedTest\\Resources\\XmlWindowResourceDataBinding.xml", errors);
 	GetInstanceLoaderManager()->SetResource(L"Demo", resource);
+	
+	DateTime begin = DateTime::LocalTime();
 	demos::MainWindow window;
+	DateTime end = DateTime::LocalTime();
+	window.SetText(window.GetText() + L" " + i64tow(end.totalMilliseconds - begin.totalMilliseconds) + L" milliseconds");
 
 	auto scope = window.GetScope().Obj();
 	CopyFrom(errors, scope->errors, true);

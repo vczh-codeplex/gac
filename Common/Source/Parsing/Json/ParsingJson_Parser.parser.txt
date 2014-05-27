@@ -5,6 +5,7 @@ namespace:vl.parsing.json
 reflection:system
 classPrefix:Json
 guard:VCZH_PARSING_JSON_PARSINGJSON_PARSER
+serialization:enabled
 parser:Parse(JRoot)
 grammar:
 

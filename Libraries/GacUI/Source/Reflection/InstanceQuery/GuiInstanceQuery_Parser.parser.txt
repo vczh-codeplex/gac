@@ -5,6 +5,7 @@ namespace:vl.presentation
 reflection:presentation
 classPrefix:GuiIq
 guard:VCZH_PRESENTATION_REFLECTION_INSTANCEQUERY_GUIINSTANCEQUERY_PARSER
+serialization:enabled
 parser:Parse(QueryRoot)
 grammar:
 
