@@ -230,6 +230,7 @@ void GuiMain()
 	demos::MainWindow window;
 	DateTime end = DateTime::LocalTime();
 	window.SetText(window.GetText() + L" " + i64tow(end.totalMilliseconds - begin.totalMilliseconds) + L" milliseconds");
+	return;
 
 	auto scope = window.GetScope().Obj();
 	CopyFrom(errors, scope->errors, true);
