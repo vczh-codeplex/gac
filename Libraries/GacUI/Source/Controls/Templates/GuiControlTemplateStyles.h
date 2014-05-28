@@ -44,6 +44,22 @@ Control Template
 				void												SetVisuallyEnabled(bool value)override;
 			};
 
+			class GuiLabelTemplate_StyleProvider
+				: public GuiControlTemplate_StyleProvider
+				, public controls::GuiLabel::IStyleController
+				, public Description<GuiLabelTemplate_StyleProvider>
+			{
+			protected:
+				GuiLabelTemplate*									controlTemplate;
+
+			public:
+				GuiLabelTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
+				~GuiLabelTemplate_StyleProvider();
+
+				Color												GetDefaultTextColor()override;
+				void												SetTextColor(Color value)override;
+			};
+
 			class GuiWindowTemplate_StyleProvider
 				: public GuiControlTemplate_StyleProvider
 				, public controls::GuiWindow::DefaultBehaviorStyleController

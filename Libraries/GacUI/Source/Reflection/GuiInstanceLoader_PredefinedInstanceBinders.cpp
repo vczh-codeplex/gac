@@ -494,7 +494,7 @@ GuiScriptInstanceBinder
 						failed = true;
 					}
 
-					{
+					/*{
 						auto module = MakePtr<WfModule>();
 						GuiWorkflowGlobalContext::CreateVariablesForReferenceValues(module, env);
 						{
@@ -544,7 +544,7 @@ GuiScriptInstanceBinder
 								}
 							}
 						}
-					}
+					}*/
 
 					if (!failed)
 					{

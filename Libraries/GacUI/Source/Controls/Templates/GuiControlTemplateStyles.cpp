@@ -61,6 +61,33 @@ GuiControlTemplate_StyleProvider
 			}
 
 /***********************************************************************
+GuiLabelTemplate_StyleProvider
+***********************************************************************/
+
+			GuiLabelTemplate_StyleProvider::GuiLabelTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory)
+				:GuiControlTemplate_StyleProvider(factory)
+			{
+				if (!(controlTemplate = dynamic_cast<GuiLabelTemplate*>(GetBoundsComposition())))
+				{
+					CHECK_FAIL(L"GuiLabelTemplate_StyleProvider::GuiLabelTemplate_StyleProvider()#An instance of GuiLabelTemplate is expected.");
+				}
+			}
+
+			GuiLabelTemplate_StyleProvider::~GuiLabelTemplate_StyleProvider()
+			{
+			}
+
+			Color GuiLabelTemplate_StyleProvider::GetDefaultTextColor()
+			{
+				return controlTemplate->GetDefaultTextColor();
+			}
+
+			void GuiLabelTemplate_StyleProvider::SetTextColor(Color value)
+			{
+				controlTemplate->SetTextColor(value);
+			}
+
+/***********************************************************************
 GuiWindowTemplate_StyleProvider
 ***********************************************************************/
 

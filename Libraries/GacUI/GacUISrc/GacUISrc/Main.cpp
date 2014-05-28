@@ -119,6 +119,8 @@ namespace demos
 	F(ButtonTemplate, GuiButtonTemplate)\
 	F(CheckBoxTemplate, GuiSelectableButtonTemplate)\
 	F(RadioButtonTemplate, GuiSelectableButtonTemplate)\
+	F(DocumentLabelTemplate, GuiControlTemplate)\
+	F(LabelTemplate, GuiLabelTemplate)\
 
 	DEMO_TEMPLATES(CONTROL_TEMPLATE_DECL)
 
@@ -154,6 +156,8 @@ namespace vl
 			F(demos::ButtonTemplate)\
 			F(demos::CheckBoxTemplate)\
 			F(demos::RadioButtonTemplate)\
+			F(demos::DocumentLabelTemplate)\
+			F(demos::LabelTemplate)\
 
 			DEMO_TYPES(DECL_TYPE_INFO)
 			DEMO_TYPES(IMPL_TYPE_INFO)
@@ -230,7 +234,6 @@ void GuiMain()
 	demos::MainWindow window;
 	DateTime end = DateTime::LocalTime();
 	window.SetText(window.GetText() + L" " + i64tow(end.totalMilliseconds - begin.totalMilliseconds) + L" milliseconds");
-	return;
 
 	auto scope = window.GetScope().Obj();
 	CopyFrom(errors, scope->errors, true);

@@ -1510,7 +1510,7 @@ GuiPredefinedInstanceLoadersPlugin
 				ADD_VIRTUAL_TYPE_LOADER(tree::MemoryNodeProvider,					GuiTreeNodeInstanceLoader);
 
 				ADD_TEMPLATE_CONTROL	(GuiCustomControl,			g::NewCustomControl,	GuiControlTemplate);
-				ADD_TEMPLATE_CONTROL_X	(GuiLabel,					g::NewLabel,			GuiControlTemplate);
+				ADD_TEMPLATE_CONTROL	(GuiLabel,					g::NewLabel,			GuiLabelTemplate);
 				ADD_TEMPLATE_CONTROL	(GuiButton,					g::NewButton,			GuiButtonTemplate);
 				ADD_TEMPLATE_CONTROL_X	(GuiScrollContainer,		g::NewScrollContainer,	GuiControlTemplate);
 				ADD_TEMPLATE_CONTROL	(GuiWindow,					g::NewWindow,			GuiWindowTemplate);

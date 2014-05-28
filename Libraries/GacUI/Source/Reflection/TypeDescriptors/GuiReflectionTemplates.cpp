@@ -51,6 +51,13 @@ Type Declaration
 				GuiControlTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_REFLECTION)
 			END_CLASS_MEMBER(GuiControlTemplate)
 
+			BEGIN_CLASS_MEMBER(GuiLabelTemplate)
+				CLASS_MEMBER_BASE(GuiControlTemplate)
+				CLASS_MEMBER_CONSTRUCTOR(GuiLabelTemplate*(), NO_PARAMETER)
+
+				GuiLabelTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_REFLECTION)
+			END_CLASS_MEMBER(GuiLabelTemplate)
+
 			BEGIN_CLASS_MEMBER(GuiWindowTemplate)
 				CLASS_MEMBER_BASE(GuiControlTemplate)
 				CLASS_MEMBER_CONSTRUCTOR(GuiWindowTemplate*(), NO_PARAMETER)
