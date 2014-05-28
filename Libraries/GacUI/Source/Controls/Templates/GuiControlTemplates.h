@@ -88,7 +88,7 @@ Control Template
 				GuiControlTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
 			};
 
-			class GuiLabelTemplate :public GuiTemplate, public Description<GuiLabelTemplate>
+			class GuiLabelTemplate :public GuiControlTemplate, public Description<GuiLabelTemplate>
 			{
 			public:
 				GuiLabelTemplate();
