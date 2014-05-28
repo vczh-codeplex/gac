@@ -110,6 +110,21 @@ GuiControlTemplate
 			}
 
 /***********************************************************************
+GuiLabelTemplate
+***********************************************************************/
+
+			GuiLabelTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_IMPL)
+
+			GuiLabelTemplate::GuiLabelTemplate()
+			{
+				GuiLabelTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_EVENT_INIT)
+			}
+
+			GuiLabelTemplate::~GuiLabelTemplate()
+			{
+			}
+
+/***********************************************************************
 GuiWindowTemplate
 ***********************************************************************/
 

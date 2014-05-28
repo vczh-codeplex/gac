@@ -88,6 +88,19 @@ Control Template
 				GuiControlTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
 			};
 
+			class GuiLabelTemplate :public GuiTemplate, public Description<GuiLabelTemplate>
+			{
+			public:
+				GuiLabelTemplate();
+				~GuiLabelTemplate();
+
+#define GuiLabelTemplate_PROPERTIES(F)\
+				F(GuiLabelTemplate, Color, DefaultTextColor)\
+				F(GuiLabelTemplate, Color, TextColor)\
+
+				GuiLabelTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
+			};
+
 			class GuiWindowTemplate : public GuiControlTemplate, public Description<GuiWindowTemplate>
 			{
 			public:
