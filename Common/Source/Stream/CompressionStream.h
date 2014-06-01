@@ -10,7 +10,6 @@ Classes:
 #define VCZH_STREAM_COMPRESSIONSTREAM
 
 #include "Interfaces.h"
-#include "..\Collections\List.h"
 
 namespace vl
 {
