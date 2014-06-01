@@ -237,11 +237,19 @@ Instruction
 
 			class WfAssembly : public Object
 			{
+			protected:
+				template<typename TIO>
+				void IO(TIO& io);
 			public:
 				collections::List<WString>							variableNames;
 				collections::Group<WString, vint>					functionByName;
 				collections::List<Ptr<WfAssemblyFunction>>			functions;
 				collections::List<WfInstruction>					instructions;
+
+				WfAssembly();
+				WfAssembly(stream::IStream& input);
+
+				void												Serialize(stream::IStream& output);
 			};
 
 /***********************************************************************
