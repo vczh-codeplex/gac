@@ -55,6 +55,13 @@ TEST_CASE(TestCodegen)
 		Ptr<WfAssembly> assembly = GenerateAssembly(&manager);
 		TEST_ASSERT(assembly);
 		LogSampleCodegenResult(L"Codegen", itemName, assembly);
+		{
+			MemoryStream stream;
+			assembly->Serialize(stream);
+			UnitTest::PrintInfo(L"    serialized: " + i64tow(stream.Size()) + L" bytes");
+			stream.SeekFromBegin(0);
+			assembly = new WfAssembly(stream);
+		}
 
 		WfRuntimeThreadContext context(assembly);
 		TEST_ASSERT(context.status == WfRuntimeExecutionStatus::Finished);

@@ -2,6 +2,181 @@
 
 namespace vl
 {
+	namespace stream
+	{
+		namespace internal
+		{
+			using namespace vl::reflection;
+			using namespace vl::reflection::description;
+			using namespace vl::workflow::runtime;
+
+			BEGIN_SERIALIZATION(WfAssemblyFunction)
+				SERIALIZE(name)
+				SERIALIZE(argumentNames)
+				SERIALIZE(capturedVariableNames)
+				SERIALIZE(localVariableNames)
+				SERIALIZE(firstInstruction)
+				SERIALIZE(lastInstruction)
+			END_SERIALIZATION
+
+			SERIALIZE_ENUM(WfInsCode)
+			SERIALIZE_ENUM(WfInsType)
+			SERIALIZE_ENUM(Value::ValueType)
+
+			template<>
+			struct Serialization<ITypeDescriptor*>
+			{
+				static void IO(Reader& reader, ITypeDescriptor*& value)
+				{
+					WString id;
+					reader << id;
+					value = GetTypeDescriptor(id);
+					CHECK_ERROR(value, L"Failed to load type.");
+				}
+					
+				static void IO(Writer& writer, ITypeDescriptor*& value)
+				{
+					WString id = value->GetTypeName();
+					writer << id;
+				}
+			};
+
+			template<>
+			struct Serialization<IMethodInfo*>
+			{
+				static void IO(Reader& reader, IMethodInfo*& value)
+				{
+				}
+					
+				static void IO(Writer& writer, IMethodInfo*& value)
+				{
+				}
+			};
+
+			template<>
+			struct Serialization<IPropertyInfo*>
+			{
+				static void IO(Reader& reader, IPropertyInfo*& value)
+				{
+					ITypeDescriptor* type = 0;
+					WString name;
+					reader << type << name;
+					value = type->GetPropertyByName(name, false);
+					CHECK_ERROR(value, L"Failed to load property.");
+				}
+					
+				static void IO(Writer& writer, IPropertyInfo*& value)
+				{
+					WString id = value->GetOwnerTypeDescriptor()->GetTypeName();
+					WString name = value->GetName();
+					writer << id << name;
+				}
+			};
+
+			template<>
+			struct Serialization<IEventInfo*>
+			{
+				static void IO(Reader& reader, IEventInfo*& value)
+				{
+					ITypeDescriptor* type = 0;
+					WString name;
+					reader << type << name;
+					value = type->GetEventByName(name, false);
+					CHECK_ERROR(value, L"Failed to load event.");
+				}
+					
+				static void IO(Writer& writer, IEventInfo*& value)
+				{
+					WString id = value->GetOwnerTypeDescriptor()->GetTypeName();
+					WString name = value->GetName();
+					writer << id << name;
+				}
+			};
+
+			template<>
+			struct Serialization<Value>
+			{
+				static void IO(Reader& reader, Value& value)
+				{
+					WString id, text;
+					reader << id << text;
+					if (id == L"")
+					{
+						value = Value();
+					}
+					else
+					{
+						auto type = GetTypeDescriptor(id);
+						type->GetValueSerializer()->Parse(text, value);
+					}
+				}
+					
+				static void IO(Writer& writer, Value& value)
+				{
+					WString id;
+					if (value.GetTypeDescriptor())
+					{
+						id = value.GetTypeDescriptor()->GetTypeName();
+					}
+					WString text = value.GetText();
+					writer << id << text;
+				}
+			};
+
+			template<>
+			struct Serialization<WfInstruction>
+			{
+				template<typename TIO>
+				static void IO(TIO& io, WfInstruction& value)
+				{
+					io << value.code;
+#define STREAMIO(NAME)						case WfInsCode::NAME: break;
+#define STREAMIO_VALUE(NAME)				case WfInsCode::NAME: io << value.valueParameter; break;
+#define STREAMIO_FUNCTION(NAME)				case WfInsCode::NAME: io << value.indexParameter; break;
+#define STREAMIO_FUNCTION_COUNT(NAME)		case WfInsCode::NAME: io << value.indexParameter << value.countParameter; break;
+#define STREAMIO_VARIABLE(NAME)				case WfInsCode::NAME: io << value.indexParameter; break;
+#define STREAMIO_COUNT(NAME)				case WfInsCode::NAME: io << value.countParameter; break;
+#define STREAMIO_FLAG_TYPEDESCRIPTOR(NAME)	case WfInsCode::NAME: io << value.flagParameter << value.typeDescriptorParameter; break;
+#define STREAMIO_PROPERTY(NAME)				case WfInsCode::NAME: io << value.propertyParameter; break;
+#define STREAMIO_METHOD_COUNT(NAME)			case WfInsCode::NAME: io << value.methodParameter << value.countParameter; break;
+#define STREAMIO_EVENT(NAME)				case WfInsCode::NAME: io << value.eventParameter; break;
+#define STREAMIO_LABEL(NAME)				case WfInsCode::NAME: io << value.indexParameter; break;
+#define STREAMIO_TYPE(NAME)					case WfInsCode::NAME: io << value.typeParameter; break;
+
+					switch (value.code)
+					{
+						INSTRUCTION_CASES(
+							STREAMIO,
+							STREAMIO_VALUE,
+							STREAMIO_FUNCTION,
+							STREAMIO_FUNCTION_COUNT,
+							STREAMIO_VARIABLE,
+							STREAMIO_COUNT,
+							STREAMIO_FLAG_TYPEDESCRIPTOR,
+							STREAMIO_PROPERTY,
+							STREAMIO_METHOD_COUNT,
+							STREAMIO_EVENT,
+							STREAMIO_LABEL,
+							STREAMIO_TYPE)
+					}
+
+#undef STREAMIO
+#undef STREAMIO_VALUE
+#undef STREAMIO_FUNCTION
+#undef STREAMIO_FUNCTION_COUNT
+#undef STREAMIO_VARIABLE
+#undef STREAMIO_COUNT
+#undef STREAMIO_FLAG_TYPEDESCRIPTOR
+#undef STREAMIO_PROPERTY
+#undef STREAMIO_METHOD_COUNT
+#undef STREAMIO_EVENT
+#undef STREAMIO_LABEL
+#undef STREAMIO_TYPE
+				}
+			};
+		}
+	}
+
 	namespace workflow
 	{
 		namespace runtime
@@ -9,9 +184,9 @@ namespace vl
 			using namespace reflection;
 			using namespace reflection::description;
 
-			/***********************************************************************
-			WfInstruction
-			***********************************************************************/
+/***********************************************************************
+WfInstruction
+***********************************************************************/
 
 			WfInstruction::WfInstruction()
 				:flagParameter(Value::Null)
@@ -157,9 +332,40 @@ namespace vl
 #undef CTOR_LABEL
 #undef CTOR_TYPE
 
-			/***********************************************************************
-			WfRuntimeGlobalContext
-			***********************************************************************/
+/***********************************************************************
+WfAssembly
+***********************************************************************/
+
+			template<typename TIO>
+			void WfAssembly::IO(TIO& io)
+			{
+				io
+					<< variableNames
+					<< functionByName
+					<< functions
+					<< instructions
+					;
+			}
+
+			WfAssembly::WfAssembly()
+			{
+			}
+
+			WfAssembly::WfAssembly(stream::IStream& input)
+			{
+				stream::internal::Reader reader(input);
+				IO(reader);
+			}
+
+			void WfAssembly::Serialize(stream::IStream& output)
+			{
+				stream::internal::Writer writer(output);
+				IO(writer);
+			}
+
+/***********************************************************************
+WfRuntimeGlobalContext
+***********************************************************************/
 
 			WfRuntimeGlobalContext::WfRuntimeGlobalContext(Ptr<WfAssembly> _assembly)
 			:assembly(_assembly)
@@ -168,9 +374,9 @@ namespace vl
 				globalVariables->variables.Resize(assembly->variableNames.Count());
 			}
 
-			/***********************************************************************
-			WfRuntimeThreadContext
-			***********************************************************************/
+/***********************************************************************
+WfRuntimeThreadContext
+***********************************************************************/
 
 			WfRuntimeThreadContext::WfRuntimeThreadContext(Ptr<WfRuntimeGlobalContext> _context)
 				:globalContext(_context)

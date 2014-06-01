@@ -13,6 +13,7 @@ Interfaces:
 #include "../Basic.h"
 #include "../String.h"
 #include "../Collections/List.h"
+#include "../Collections/Dictionary.h"
 
 namespace vl
 {
@@ -80,7 +81,7 @@ namespace vl
 			struct Serialization
 			{
 				template<typename TIO>
-				static bool IO(TIO& io, T& value);
+				static void IO(TIO& io, T& value);
 			};
 
 			template<typename T>
@@ -272,6 +273,69 @@ namespace vl
 				}
 			};
 
+			template<typename K, typename V>
+			struct Serialization<collections::Dictionary<K, V>>
+			{
+				static void IO(Reader& reader, collections::Dictionary<K, V>& value)
+				{
+					vint32_t count = -1;
+					reader << count;
+					value.Clear();
+					for (vint i = 0; i < count; i++)
+					{
+						K k;
+						V v;
+						reader << k << ;
+						value.Add(k, v);
+					}
+				}
+					
+				static void IO(Writer& writer, collections::Dictionary<K, V>& value)
+				{
+					vint32_t count = (vint32_t)value.Count();
+					writer << count;
+					for (vint i = 0; i < count; i++)
+					{
+						K k = value.Keys()[i];
+						V v = value.Values()[i];
+						writer << k << v;
+					}
+				}
+			};
+
+			template<typename K, typename V>
+			struct Serialization<collections::Group<K, V>>
+			{
+				static void IO(Reader& reader, collections::Group<K, V>& value)
+				{
+					vint32_t count = -1;
+					reader << count;
+					value.Clear();
+					for (vint i = 0; i < count; i++)
+					{
+						K k;
+						collections::List<V> v;
+						reader << k << v;
+						for (vint j = 0; j < v.Count(); j++)
+						{
+							value.Add(k, v[j]);
+						}
+					}
+				}
+					
+				static void IO(Writer& writer, collections::Group<K, V>& value)
+				{
+					vint32_t count = (vint32_t)value.Count();
+					writer << count;
+					for (vint i = 0; i < count; i++)
+					{
+						K k = value.Keys()[i];
+						collections::List<V>& v = const_cast<collections::List<V>&>(value.GetByIndex(i));
+						writer << k << v;
+					}
+				}
+			};
+
 			//---------------------------------------------
 
 #define BEGIN_SERIALIZATION(TYPE)\
@@ -290,6 +354,23 @@ namespace vl
 						;\
 					}\
 				};\
+
+#define SERIALIZE_ENUM(TYPE)\
+			template<>\
+			struct Serialization<TYPE>\
+			{\
+				static void IO(Reader& reader, TYPE& value)\
+				{\
+					vint32_t v = 0;\
+					Serialization<vint32_t>::IO(reader, v);\
+					value = (TYPE)v;\
+				}\
+				static void IO(Writer& writer, TYPE& value)\
+				{\
+					vint32_t v = (vint32_t)value;\
+					Serialization<vint32_t>::IO(writer, v);\
+				}\
+			};\
 
 		}
 	}

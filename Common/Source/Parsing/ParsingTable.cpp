@@ -62,22 +62,7 @@ ParsingTable (Serialization)
 				SERIALIZE(creatorRule)
 			END_SERIALIZATION
 
-			template<>
-			struct Serialization<ParsingTable::Instruction::InstructionType>
-			{
-				static void IO(Reader& reader, ParsingTable::Instruction::InstructionType& value)
-				{
-					vint32_t v = 0;
-					Serialization<vint32_t>::IO(reader, v);
-					value = (ParsingTable::Instruction::InstructionType)v;
-				}
-
-				static void IO(Writer& writer, ParsingTable::Instruction::InstructionType& value)
-				{
-					vint32_t v = (vint32_t)value;
-					Serialization<vint32_t>::IO(writer, v);
-				}
-			};
+			SERIALIZE_ENUM(ParsingTable::Instruction::InstructionType)
 
 			BEGIN_SERIALIZATION(ParsingTable::LookAheadInfo)
 				SERIALIZE(tokens)
@@ -284,70 +269,6 @@ ParsingTable::TransitionItem
 				default:			return 0;
 				}
 			}
-
-			/*
-			[bool ambiguity]
-			[Ptr<AttributeInfoList>[] attributeInfos
-				[Ptr<AttributeInfo>[] attributes
-					[string name]
-					[string[] arguments
-						[string <item>]
-					]
-				]
-			]
-			[TreeTypeInfo[] treeTypeInfos
-				[string type]
-				[int32 attributeIndex]
-			]
-			[TreeFieldInfo[] treeFieldInfos
-				[string type]
-				[string field]
-				[int32 attributeIndex]
-			]
-			[TokenInfo[] tokenInfos
-				[string name]
-				[string regex]
-				[int32 regexTokenIndex]
-				[int32 attributeIndex]
-			]
-			[TokenInfo[] discardTokenInfos
-				...
-			]
-			[StateInfo[] stateInfos
-				[string ruleName]
-				[string stateName]
-				[string stateExpression]
-			]
-			[RuleInfo[] ruleInfos
-				[string name]
-				[string type]
-				[string ambiguousType]
-				[int32 rootStartState]
-				[int32 attributeIndex]
-			]
-			[Ptr<TransitionBag>[] transitionBags
-				[Ptr<TransitionItem>[] transitionItems
-					[int32 token]
-					[int32 targetState]
-					[Ptr<LookAheadInfo>[] lookAheads
-						[int32[] tokens
-							[int32 <item>]
-						]
-						[int32 state]
-					]
-					[in32t[] stackPattern
-						[int32 <item>]
-					]
-					[Instruction[] instructions
-						[int32 instructionType]
-						[int32 stateParameter]
-						[string nameParameter]
-						[string value]
-						[string creatorRule]
-					]
-				]
-			]
-			*/
 
 			template<typename TIO>
 			void ParsingTable::IO(TIO& io)
