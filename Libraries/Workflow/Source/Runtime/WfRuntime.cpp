@@ -6,9 +6,10 @@ namespace vl
 	{
 		namespace internal
 		{
-			using namespace vl::reflection;
-			using namespace vl::reflection::description;
-			using namespace vl::workflow::runtime;
+			using namespace reflection;
+			using namespace reflection::description;
+			using namespace workflow::runtime;
+			using namespace collections;
 
 			BEGIN_SERIALIZATION(WfAssemblyFunction)
 				SERIALIZE(name)
@@ -46,10 +47,57 @@ namespace vl
 			{
 				static void IO(Reader& reader, IMethodInfo*& value)
 				{
+					ITypeDescriptor* type = 0;
+					WString name;
+					List<WString> parameters;
+					reader << type << name << parameters;
+					auto group =
+						name == L"#ctor" ? type->GetConstructorGroup() :
+						type->GetMethodGroupByName(name, false);
+					CHECK_ERROR(group, L"Failed to load method.");
+
+					value = 0;
+					vint count = group->GetMethodCount();
+					for (vint i = 0; i < count; i++)
+					{
+						auto method = group->GetMethod(i);
+						if (method->GetParameterCount() == parameters.Count())
+						{
+							bool found = true;
+							for (vint j = 0; j < parameters.Count(); j++)
+							{
+								if (method->GetParameter(j)->GetName() != parameters[j])
+								{
+									found = false;
+									break;
+								}
+							}
+
+							if (found)
+							{
+								CHECK_ERROR(!value, L"Failed to load method.");
+								value = method;
+							}
+						}
+					}
+					CHECK_ERROR(value, L"Failed to load method.");
 				}
 					
 				static void IO(Writer& writer, IMethodInfo*& value)
 				{
+					auto type = value->GetOwnerTypeDescriptor();
+					WString name =
+						value->GetOwnerMethodGroup() == type->GetConstructorGroup() ? L"#ctor" :
+						value->GetName();
+					writer << type << name;
+
+					List<WString> parameters;
+					vint count = value->GetParameterCount();
+					for (vint i = 0; i < count; i++)
+					{
+						parameters.Add(value->GetParameter(i)->GetName());
+					}
+					writer << parameters;
 				}
 			};
 
@@ -67,9 +115,9 @@ namespace vl
 					
 				static void IO(Writer& writer, IPropertyInfo*& value)
 				{
-					WString id = value->GetOwnerTypeDescriptor()->GetTypeName();
+					auto type = value->GetOwnerTypeDescriptor();
 					WString name = value->GetName();
-					writer << id << name;
+					writer << type << name;
 				}
 			};
 
@@ -87,9 +135,9 @@ namespace vl
 					
 				static void IO(Writer& writer, IEventInfo*& value)
 				{
-					WString id = value->GetOwnerTypeDescriptor()->GetTypeName();
+					auto type = value->GetOwnerTypeDescriptor();
 					WString name = value->GetName();
-					writer << id << name;
+					writer << type << name;
 				}
 			};
 
@@ -107,7 +155,16 @@ namespace vl
 					else
 					{
 						auto type = GetTypeDescriptor(id);
-						type->GetValueSerializer()->Parse(text, value);
+						if (type == GetTypeDescriptor<ITypeDescriptor>())
+						{
+							type = GetTypeDescriptor(text);
+							CHECK_ERROR(type, L"Failed to load type.");
+							value = Value::From(type);
+						}
+						else
+						{
+							type->GetValueSerializer()->Parse(text, value);
+						}
 					}
 				}
 					
@@ -118,8 +175,18 @@ namespace vl
 					{
 						id = value.GetTypeDescriptor()->GetTypeName();
 					}
-					WString text = value.GetText();
-					writer << id << text;
+					writer << id;
+
+					if (value.GetTypeDescriptor() == GetTypeDescriptor<ITypeDescriptor>())
+					{
+						WString text = UnboxValue<ITypeDescriptor*>(value)->GetTypeName();
+						writer << text;
+					}
+					else
+					{
+						WString text = value.GetText();
+						writer << text;
+					}
 				}
 			};
 
