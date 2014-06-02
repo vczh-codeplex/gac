@@ -130,7 +130,11 @@ WindowsImageFrame
 
 				IWICImagingFactory* factory = GetWICImagingFactory();
 				HRESULT hr = factory->CreateEncoder(formatGUID, NULL, &encoder);
-				if (!SUCCEEDED(hr)) goto FAILURE;
+				if (!SUCCEEDED(hr))
+				{
+					hr = factory->CreateEncoder(GUID_ContainerFormatPng, NULL, &encoder);
+					if (!SUCCEEDED(hr)) goto FAILURE;
+				}
 				
 				memoryStream = SHCreateMemStream(NULL, NULL);
 				if (!memoryStream) goto FAILURE;
@@ -146,6 +150,9 @@ WindowsImageFrame
 					hr = encoder->CreateNewFrame(&frameEncode, NULL);
 					if (!SUCCEEDED(hr)) goto FRAME_FAILURE;
 
+					hr = frameEncode->Initialize(NULL);
+					if (!SUCCEEDED(hr)) goto FRAME_FAILURE;
+
 					hr = frameEncode->WriteSource(frameDecode, NULL);
 					if (!SUCCEEDED(hr)) goto FRAME_FAILURE;
 
@@ -157,7 +164,6 @@ WindowsImageFrame
 					continue;
 				FRAME_FAILURE:
 					if (frameEncode) frameEncode->Release();
-					if (frameDecode) frameDecode->Release();
 					goto FAILURE;
 				}
 
@@ -276,6 +282,10 @@ WindowsImage
 				GUID formatGUID;
 				HRESULT hr = bitmapDecoder->GetContainerFormat(&formatGUID);
 				if (!SUCCEEDED(hr)) return false;
+				for (vint i = 0; i < GetFrameCount(); i++)
+				{
+					GetFrame(i);
+				}
 				return SaveBitmapToStream(formatGUID, frames, stream);
 			}
 

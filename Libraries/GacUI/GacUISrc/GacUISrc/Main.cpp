@@ -230,7 +230,7 @@ void GuiMain()
 	auto resource = GuiResource::LoadFromXml(L"..\\GacUISrcCodepackedTest\\Resources\\XmlWindowResourceDataBinding.xml", errors);
 	{
 		auto xml = resource->SaveToXml();
-		resource = GuiResource::LoadFromXml(xml, L"..\\GacUISrcCodepackedTest\\Resources\\", errors);
+		//resource = GuiResource::LoadFromXml(xml, L"..\\GacUISrcCodepackedTest\\Resources\\", errors);
 	}
 	GetInstanceLoaderManager()->SetResource(L"Demo", resource);
 	
