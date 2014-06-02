@@ -54,7 +54,6 @@ namespace vl
 				FormatType									GetFormat()override;
 				vint										GetFrameCount()override;
 				INativeImageFrame*							GetFrame(vint index)override;
-				bool										SaveToStream(stream::IStream& stream)override;
 			};
 
 			class WindowsBitmapImage : public Object, public INativeImage
@@ -71,7 +70,6 @@ namespace vl
 				FormatType									GetFormat()override;
 				vint										GetFrameCount()override;
 				INativeImageFrame*							GetFrame(vint index)override;
-				bool										SaveToStream(stream::IStream& stream)override;
 			};
 
 			class WindowsImageService : public Object, public INativeImageService

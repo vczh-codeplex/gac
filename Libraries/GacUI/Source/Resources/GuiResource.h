@@ -63,6 +63,7 @@ Resource Image
 		class GuiImageData : public Object, public Description<GuiImageData>
 		{
 		protected:
+			collections::Array<vuint8_t>	binary;
 			Ptr<INativeImage>				image;
 			vint							frameIndex;
 
@@ -81,6 +82,9 @@ Resource Image
 			/// <summary>Get the specified frame index.</summary>
 			/// <returns>The specified frame index.</returns>
 			vint							GetFrameIndex();
+			/// <summary>Get the binary data.</summary>
+			/// <returns>The binary data.</returns>
+			collections::Array<vuint8_t>&	GetBinary();
 		};
 
 /***********************************************************************
