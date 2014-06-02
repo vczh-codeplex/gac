@@ -579,6 +579,22 @@ GuiInstanceContext
 				xmlParameter->attributes.Add(attClass);
 			}
 
+			if (stylePaths.Count() > 0)
+			{
+				auto attStyles = MakePtr<XmlAttribute>();
+				attStyles->name.value = L"ref.Styles";
+				xmlInstance->attributes.Add(attStyles);
+
+				for (vint j = 0; j < stylePaths.Count(); j++)
+				{
+					if (j != 0)
+					{
+						attStyles->value.value += L";";
+					}
+					attStyles->value.value += stylePaths[j];
+				}
+			}
+
 			instance->FillXml(xmlInstance, fillStyleValues);
 
 			auto doc = MakePtr<XmlDocument>();
