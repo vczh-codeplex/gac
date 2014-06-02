@@ -211,7 +211,7 @@ namespace vl
 void GuiMain()
 {
 #ifndef VCZH_DEBUG_NO_REFLECTION
-	//UnitTestInGuiMain();
+	UnitTestInGuiMain();
 	//{
 	//	FileStream fileStream(L"Reflection.txt", FileStream::WriteOnly);
 	//	BomEncoder encoder(BomEncoder::Utf16);

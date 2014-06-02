@@ -1,11 +1,13 @@
 #include "..\..\Source\GacUI.h"
 #include "..\..\Source\NativeWindow\Windows\WinNativeWindow.h"
-#include "..\..\Source\Reflection\InstanceQuery\GuiInstanceQuery_Parser.h"
+#include "..\..\Source\Reflection\InstanceQuery\GuiInstanceQuery.h"
 #include "..\..\Source\Resources\GuiParserManager.h"
 #include <Windows.h>
 #include <msctf.h>
 
 using namespace vl::collections;
+using namespace vl::stream;
+using namespace vl::presentation;
 
 void UnitTestInGuiMain()
 {
@@ -95,6 +97,19 @@ void UnitTestInGuiMain()
 			auto query = parser->TypedParse(queryCode, errors);
 			ASSERT(query);
 			ASSERT(errors.Count() == 0);
+			
+			MemoryStream stream;
+			WString queryText;
+			{
+				StreamWriter writer(stream);
+				GuiIqPrint(query, writer);
+			}
+			stream.SeekFromBegin(0);
+			{
+				StreamReader reader(stream);
+				queryText = reader.ReadToEnd();
+			}
+			ASSERT(queryText == queryCode);
 		}
 	}
 }
