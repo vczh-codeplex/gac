@@ -145,15 +145,30 @@ WindowsImageFrame
 				for (vint i = 0; i < frames.Count(); i++)
 				{
 					IWICBitmapFrameEncode* frameEncode = 0;
+					IPropertyBag2* propertyBag = 0;
 					IWICBitmap* frameDecode = frames[i]->GetFrameBitmap();
 
-					hr = encoder->CreateNewFrame(&frameEncode, NULL);
+					hr = encoder->CreateNewFrame(&frameEncode, &propertyBag);
 					if (!SUCCEEDED(hr))
 					{
 						break;
 					}
 
-					hr = frameEncode->Initialize(NULL);
+					hr = frameEncode->Initialize(propertyBag);
+					if (!SUCCEEDED(hr)) goto FRAME_FAILURE;
+
+					GUID pixelFormatGUID;
+					hr = frameDecode->GetPixelFormat(&pixelFormatGUID);
+					if (!SUCCEEDED(hr)) goto FRAME_FAILURE;
+
+					hr = frameEncode->SetPixelFormat(&pixelFormatGUID);
+					if (!SUCCEEDED(hr)) goto FRAME_FAILURE;
+
+					UINT width, height;
+					hr = frameDecode->GetSize(&width, &height);
+					if (!SUCCEEDED(hr)) goto FRAME_FAILURE;
+
+					hr = frameEncode->SetSize(width, height);
 					if (!SUCCEEDED(hr)) goto FRAME_FAILURE;
 
 					hr = frameEncode->WriteSource(frameDecode, NULL);
@@ -162,10 +177,12 @@ WindowsImageFrame
 					hr = frameEncode->Commit();
 					if (!SUCCEEDED(hr)) goto FRAME_FAILURE;
 
+					propertyBag->Release();
 					frameEncode->Release();
 
 					continue;
 				FRAME_FAILURE:
+					if (propertyBag) propertyBag->Release();
 					if (frameEncode) frameEncode->Release();
 					goto FAILURE;
 				}
