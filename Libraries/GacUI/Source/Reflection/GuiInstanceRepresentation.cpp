@@ -1,6 +1,7 @@
 #include "GuiInstanceRepresentation.h"
 #include "..\Resources\GuiParserManager.h"
 #include "..\Controls\Templates\GuiControlTemplateStyles.h"
+#include "InstanceQuery\GuiInstanceQuery.h"
 
 namespace vl
 {
@@ -10,6 +11,7 @@ namespace vl
 		using namespace parsing;
 		using namespace parsing::xml;
 		using namespace templates;
+		using namespace stream;
 
 /***********************************************************************
 GuiTextRepr
@@ -478,6 +480,32 @@ GuiInstanceStyle
 			return style;
 		}
 
+		Ptr<parsing::xml::XmlElement> GuiInstanceStyle::SaveToXml()
+		{
+			auto xmlStyle = MakePtr<XmlElement>();
+			xmlStyle->name.value = L"Style";
+
+			auto attPath = MakePtr<XmlAttribute>();
+			attPath->name.value = L"ref.Path";
+			{
+				MemoryStream stream;
+				{
+					StreamWriter writer(stream);
+					GuiIqPrint(query, writer);
+				}
+				stream.SeekFromBegin(0);
+				{
+					StreamReader reader(stream);
+					attPath->value.value = reader.ReadToEnd();
+				}
+			}
+			xmlStyle->attributes.Add(attPath);
+
+			setter->FillXml(xmlStyle);
+
+			return xmlStyle;
+		}
+
 /***********************************************************************
 GuiInstanceStyleContext
 ***********************************************************************/
@@ -500,6 +528,21 @@ GuiInstanceStyleContext
 				}
 			}
 			return context;
+		}
+
+		Ptr<parsing::xml::XmlDocument> GuiInstanceStyleContext::SaveToXml()
+		{
+			auto xmlStyles = MakePtr<XmlElement>();
+			xmlStyles->name.value = L"Styles";
+
+			FOREACH(Ptr<GuiInstanceStyle>, style, styles)
+			{
+				xmlStyles->subNodes.Add(style->SaveToXml());
+			}
+
+			auto doc = MakePtr<XmlDocument>();
+			doc->rootElement = xmlStyles;
+			return doc;
 		}
 	}
 }
