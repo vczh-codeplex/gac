@@ -186,5 +186,59 @@ ApplyStyle
 		{
 			ApplyStyleInternal(style->setter->Clone().Cast<GuiAttSetterRepr>(), ctor);
 		}
+
+/***********************************************************************
+GuiIqPrint
+***********************************************************************/
+
+		class GuiIqPrintVisitor : public Object, public GuiIqQuery::IVisitor
+		{
+		public:
+			stream::StreamWriter&				writer;
+
+			GuiIqPrintVisitor(stream::StreamWriter& _writer)
+				:writer(_writer)
+			{
+			}
+
+			void Visit(GuiIqPrimaryQuery* node)override
+			{
+			}
+
+			void Visit(GuiIqCascadeQuery* node)override
+			{
+				node->parent->Accept(this);
+				node->child->Accept(this);
+			}
+
+			void Visit(GuiIqSetQuery* node)override
+			{
+				writer.WriteChar(L'(');
+				node->first->Accept(this);
+				switch (node->op)
+				{
+				case GuiIqBinaryOperator::ExclusiveOr:
+					writer.WriteString(L" ^ ");
+					break;
+				case GuiIqBinaryOperator::Intersect:
+					writer.WriteString(L" * ");
+					break;
+				case GuiIqBinaryOperator::Union:
+					writer.WriteString(L" + ");
+					break;
+				case GuiIqBinaryOperator::Substract:
+					writer.WriteString(L" - ");
+					break;
+				}
+				node->second->Accept(this);
+				writer.WriteChar(L')');
+			}
+		};
+
+		void GuiIqPrint(Ptr<GuiIqQuery> query, stream::StreamWriter& writer)
+		{
+			GuiIqPrintVisitor visitor(writer);
+			query->Accept(&visitor);
+		}
 	}
 }
