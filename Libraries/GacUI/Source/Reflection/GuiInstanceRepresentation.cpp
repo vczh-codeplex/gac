@@ -522,8 +522,65 @@ GuiInstanceContext
 			return context->instance?context:0;
 		}
 
-		Ptr<parsing::xml::XmlDocument> GuiInstanceContext::SaveToXml()
+		Ptr<parsing::xml::XmlDocument> GuiInstanceContext::SaveToXml(bool fillStyleValues)
 		{
+			auto xmlInstance = MakePtr<XmlElement>();
+			xmlInstance->name.value = L"Instance";
+			
+			if (className)
+			{
+				auto attClass = MakePtr<XmlAttribute>();
+				attClass->name.value = L"ref.Class";
+				attClass->value.value = className.Value();
+				xmlInstance->attributes.Add(attClass);
+			}
+
+			for (vint i = 0; i < namespaces.Count(); i++)
+			{
+				auto key = namespaces.Keys()[0];
+				auto value = namespaces.Values()[0];
+
+				auto xmlns = MakePtr<XmlAttribute>();
+				xmlns->name.value = L"xmlns";
+				if (key != L"")
+				{
+					xmlns->name.value += L":" + key;
+				}
+				xmlInstance->attributes.Add(xmlns);
+
+				for (vint j = 0; j < value->namespaces.Count(); j++)
+				{
+					auto ns = value->namespaces[j];
+					if (j != 0)
+					{
+						xmlns->value.value += L";";
+					}
+					xmlns->value.value += ns->prefix + L"*" + ns->postfix;
+				}
+			}
+
+			FOREACH(Ptr<GuiInstanceParameter>, parameter, parameters)
+			{
+				auto xmlParameter = MakePtr<XmlElement>();
+				xmlParameter->name.value = L"ref.Parameter";
+				xmlInstance->subNodes.Add(xmlParameter);
+
+				auto attName = MakePtr<XmlAttribute>();
+				attName->name.value = L"Name";
+				attName->value.value = parameter->name;
+				xmlParameter->attributes.Add(attName);
+
+				auto attClass = MakePtr<XmlAttribute>();
+				attClass->name.value = L"Class";
+				attClass->value.value = parameter->className;
+				xmlParameter->attributes.Add(attClass);
+			}
+
+			instance->FillXml(xmlInstance, fillStyleValues);
+
+			auto doc = MakePtr<XmlDocument>();
+			doc->rootElement = xmlInstance;
+			return doc;
 		}
 
 /***********************************************************************
