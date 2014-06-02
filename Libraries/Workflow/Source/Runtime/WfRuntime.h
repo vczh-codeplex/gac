@@ -235,7 +235,7 @@ Instruction
 				vint												lastInstruction = -1;
 			};
 
-			class WfAssembly : public Object
+			class WfAssembly : public Object, public Description<WfAssembly>
 			{
 			protected:
 				template<typename TIO>

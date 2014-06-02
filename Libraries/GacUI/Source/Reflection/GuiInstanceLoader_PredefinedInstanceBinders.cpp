@@ -154,6 +154,8 @@ GuiWorkflowGlobalContext
 		class GuiWorkflowGlobalContext : public Object, public IGuiInstanceBindingContext
 		{
 		public:
+			static const wchar_t*			ContextName;
+
 			List<WorkflowDataBinding>		dataBindings;
 			Ptr<WfRuntimeGlobalContext>		globalContext;
 
@@ -163,254 +165,260 @@ GuiWorkflowGlobalContext
 
 			WString GetContextName()override
 			{
-				return L"WORKFLOW-GLOBAL-CONTEXT";
+				return ContextName;
 			}
 
 			void Initialize(Ptr<GuiInstanceEnvironment> env)override
 			{
-				auto module = MakePtr<WfModule>();
-				CreateVariablesForReferenceValues(module, env);
-				CreateVariable(module, L"<this>", env->scope->rootInstance);
+				Ptr<WfAssembly> assembly;
+				vint cacheIndex = env->context->caches.Keys().IndexOf(GetContextName());
+				if (cacheIndex != -1)
 				{
-					auto func = MakePtr<WfFunctionDeclaration>();
-					func->anonymity = WfFunctionAnonymity::Named;
-					func->name.value = L"<initialize-data-binding>";
-					func->returnType = GetTypeFromTypeInfo(TypeInfoRetriver<void>::CreateTypeInfo().Obj());
-
-					auto block = MakePtr<WfBlockStatement>();
-					func->statement = block;
-					module->declarations.Add(func);
-
-					Dictionary<DescriptableObject*, WString> valueNames;
-					FOREACH_INDEXER(WString, name, index, env->scope->referenceValues.Keys())
+					assembly = env->context->caches.Values()[cacheIndex].Cast<WfAssembly>();
+				}
+				else
+				{
+					auto module = MakePtr<WfModule>();
+					CreateVariablesForReferenceValues(module, env);
+					CreateVariable(module, L"<this>", env->scope->rootInstance);
 					{
-						auto value = env->scope->referenceValues.Values()[index];
-						valueNames.Add(value.GetRawPtr(), name);
-					}
-					FOREACH(WorkflowDataBinding, dataBinding, dataBindings)
-					{
-						vint index = valueNames.Keys().IndexOf(dataBinding.instance.GetRawPtr());
-						WString subscribee;
-						if (index == -1)
-						{
-							subscribee = L"<temp>" + itow(valueNames.Count());
-							valueNames.Add(dataBinding.instance.GetRawPtr(), subscribee);
-							env->scope->referenceValues.Add(subscribee, dataBinding.instance);
-							CreateVariable(module, subscribee, dataBinding.instance);
-						}
-						else
-						{
-							subscribee = valueNames.Values()[index];
-						}
+						auto func = MakePtr<WfFunctionDeclaration>();
+						func->anonymity = WfFunctionAnonymity::Named;
+						func->name.value = L"<initialize-data-binding>";
+						func->returnType = GetTypeFromTypeInfo(TypeInfoRetriver<void>::CreateTypeInfo().Obj());
 
-						if (dataBinding.bindExpression.Cast<WfBindExpression>())
+						auto block = MakePtr<WfBlockStatement>();
+						func->statement = block;
+						module->declarations.Add(func);
+
+						Dictionary<DescriptableObject*, WString> valueNames;
+						FOREACH_INDEXER(WString, name, index, env->scope->referenceValues.Keys())
 						{
-							auto subBlock = MakePtr<WfBlockStatement>();
-							block->statements.Add(subBlock);
+							auto value = env->scope->referenceValues.Values()[index];
+							valueNames.Add(value.GetRawPtr(), name);
+						}
+						FOREACH(WorkflowDataBinding, dataBinding, dataBindings)
+						{
+							vint index = valueNames.Keys().IndexOf(dataBinding.instance.GetRawPtr());
+							WString subscribee;
+							if (index == -1)
 							{
-								auto refThis = MakePtr<WfReferenceExpression>();
-								refThis->name.value = L"<this>";
-
-								auto member = MakePtr<WfMemberExpression>();
-								member->parent = refThis;
-								member->name.value = L"AddSubscription";
-
-								auto call = MakePtr<WfCallExpression>();
-								call->function = member;
-								call->arguments.Add(dataBinding.bindExpression);
-
-								auto var = MakePtr<WfVariableDeclaration>();
-								var->name.value = L"<subscription>";
-								var->expression = call;
-
-								auto stat = MakePtr<WfVariableStatement>();
-								stat->variable = var;
-								subBlock->statements.Add(stat);
+								subscribee = L"<temp>" + itow(valueNames.Count());
+								valueNames.Add(dataBinding.instance.GetRawPtr(), subscribee);
+								env->scope->referenceValues.Add(subscribee, dataBinding.instance);
+								CreateVariable(module, subscribee, dataBinding.instance);
 							}
+							else
 							{
-								auto callback = MakePtr<WfFunctionDeclaration>();
-								callback->anonymity = WfFunctionAnonymity::Anonymous;
-								callback->returnType = GetTypeFromTypeInfo(TypeInfoRetriver<void>::CreateTypeInfo().Obj());;
+								subscribee = valueNames.Values()[index];
+							}
+
+							if (dataBinding.bindExpression.Cast<WfBindExpression>())
+							{
+								auto subBlock = MakePtr<WfBlockStatement>();
+								block->statements.Add(subBlock);
 								{
-									auto arg = MakePtr<WfFunctionArgument>();
-									arg->name.value = L"<value>";
-									arg->type = GetTypeFromTypeInfo(TypeInfoRetriver<Value>::CreateTypeInfo().Obj());
-									callback->arguments.Add(arg);
-								}
-								auto callbackBlock = MakePtr<WfBlockStatement>();
-								callback->statement = callbackBlock;
-								{
-									auto refSubscribee = MakePtr<WfReferenceExpression>();
-									refSubscribee->name.value = subscribee;
+									auto refThis = MakePtr<WfReferenceExpression>();
+									refThis->name.value = L"<this>";
 
 									auto member = MakePtr<WfMemberExpression>();
-									member->parent = refSubscribee;
-									member->name.value = dataBinding.propertyInfo->GetName();
+									member->parent = refThis;
+									member->name.value = L"AddSubscription";
+
+									auto call = MakePtr<WfCallExpression>();
+									call->function = member;
+									call->arguments.Add(dataBinding.bindExpression);
 
 									auto var = MakePtr<WfVariableDeclaration>();
-									var->name.value = L"<old>";
-									var->expression = member;
+									var->name.value = L"<subscription>";
+									var->expression = call;
 
 									auto stat = MakePtr<WfVariableStatement>();
 									stat->variable = var;
-									callbackBlock->statements.Add(stat);
+									subBlock->statements.Add(stat);
 								}
 								{
-									ITypeInfo* propertyType = dataBinding.propertyInfo->GetReturn();
-									if (dataBinding.propertyInfo->GetSetter() && dataBinding.propertyInfo->GetSetter()->GetParameterCount() == 1)
+									auto callback = MakePtr<WfFunctionDeclaration>();
+									callback->anonymity = WfFunctionAnonymity::Anonymous;
+									callback->returnType = GetTypeFromTypeInfo(TypeInfoRetriver<void>::CreateTypeInfo().Obj());;
 									{
-										propertyType = dataBinding.propertyInfo->GetSetter()->GetParameter(0)->GetType();
+										auto arg = MakePtr<WfFunctionArgument>();
+										arg->name.value = L"<value>";
+										arg->type = GetTypeFromTypeInfo(TypeInfoRetriver<Value>::CreateTypeInfo().Obj());
+										callback->arguments.Add(arg);
+									}
+									auto callbackBlock = MakePtr<WfBlockStatement>();
+									callback->statement = callbackBlock;
+									{
+										auto refSubscribee = MakePtr<WfReferenceExpression>();
+										refSubscribee->name.value = subscribee;
+
+										auto member = MakePtr<WfMemberExpression>();
+										member->parent = refSubscribee;
+										member->name.value = dataBinding.propertyInfo->GetName();
+
+										auto var = MakePtr<WfVariableDeclaration>();
+										var->name.value = L"<old>";
+										var->expression = member;
+
+										auto stat = MakePtr<WfVariableStatement>();
+										stat->variable = var;
+										callbackBlock->statements.Add(stat);
+									}
+									{
+										ITypeInfo* propertyType = dataBinding.propertyInfo->GetReturn();
+										if (dataBinding.propertyInfo->GetSetter() && dataBinding.propertyInfo->GetSetter()->GetParameterCount() == 1)
+										{
+											propertyType = dataBinding.propertyInfo->GetSetter()->GetParameter(0)->GetType();
+										}
+
+										auto refValue = MakePtr<WfReferenceExpression>();
+										refValue->name.value = L"<value>";
+
+										auto cast = MakePtr<WfTypeCastingExpression>();
+										cast->strategy = WfTypeCastingStrategy::Strong;
+										cast->expression = refValue;
+										cast->type = GetTypeFromTypeInfo(propertyType);
+
+										auto var = MakePtr<WfVariableDeclaration>();
+										var->name.value = L"<new>";
+										var->expression = cast;
+
+										auto stat = MakePtr<WfVariableStatement>();
+										stat->variable = var;
+										callbackBlock->statements.Add(stat);
+									}
+									{
+										auto refOld = MakePtr<WfReferenceExpression>();
+										refOld->name.value = L"<old>";
+
+										auto refNew = MakePtr<WfReferenceExpression>();
+										refNew->name.value = L"<new>";
+
+										auto compare = MakePtr<WfBinaryExpression>();
+										compare->op = WfBinaryOperator::EQ;
+										compare->first = refOld;
+										compare->second = refNew;
+
+										auto ifStat = MakePtr<WfIfStatement>();
+										ifStat->expression = compare;
+										callbackBlock->statements.Add(ifStat);
+
+										auto ifBlock = MakePtr<WfBlockStatement>();
+										ifStat->trueBranch = ifBlock;
+
+										auto returnStat = MakePtr<WfReturnStatement>();
+										ifBlock->statements.Add(returnStat);
+									}
+									{
+										auto refSubscribee = MakePtr<WfReferenceExpression>();
+										refSubscribee->name.value = subscribee;
+
+										auto member = MakePtr<WfMemberExpression>();
+										member->parent = refSubscribee;
+										member->name.value = dataBinding.propertyInfo->GetName();
+
+										auto refNew = MakePtr<WfReferenceExpression>();
+										refNew->name.value = L"<new>";
+
+										auto assign = MakePtr<WfBinaryExpression>();
+										assign->op = WfBinaryOperator::Assign;
+										assign->first = member;
+										assign->second = refNew;
+
+										auto stat = MakePtr<WfExpressionStatement>();
+										stat->expression = assign;
+										callbackBlock->statements.Add(stat);
 									}
 
-									auto refValue = MakePtr<WfReferenceExpression>();
-									refValue->name.value = L"<value>";
+									auto funcExpr = MakePtr<WfFunctionExpression>();
+									funcExpr->function = callback;
 
-									auto cast = MakePtr<WfTypeCastingExpression>();
-									cast->strategy = WfTypeCastingStrategy::Strong;
-									cast->expression = refValue;
-									cast->type = GetTypeFromTypeInfo(propertyType);
-
-									auto var = MakePtr<WfVariableDeclaration>();
-									var->name.value = L"<new>";
-									var->expression = cast;
-
-									auto stat = MakePtr<WfVariableStatement>();
-									stat->variable = var;
-									callbackBlock->statements.Add(stat);
-								}
-								{
-									auto refOld = MakePtr<WfReferenceExpression>();
-									refOld->name.value = L"<old>";
-
-									auto refNew = MakePtr<WfReferenceExpression>();
-									refNew->name.value = L"<new>";
-
-									auto compare = MakePtr<WfBinaryExpression>();
-									compare->op = WfBinaryOperator::EQ;
-									compare->first = refOld;
-									compare->second = refNew;
-
-									auto ifStat = MakePtr<WfIfStatement>();
-									ifStat->expression = compare;
-									callbackBlock->statements.Add(ifStat);
-
-									auto ifBlock = MakePtr<WfBlockStatement>();
-									ifStat->trueBranch = ifBlock;
-
-									auto returnStat = MakePtr<WfReturnStatement>();
-									ifBlock->statements.Add(returnStat);
-								}
-								{
-									auto refSubscribee = MakePtr<WfReferenceExpression>();
-									refSubscribee->name.value = subscribee;
+									auto refThis = MakePtr<WfReferenceExpression>();
+									refThis->name.value = L"<subscription>";
 
 									auto member = MakePtr<WfMemberExpression>();
-									member->parent = refSubscribee;
-									member->name.value = dataBinding.propertyInfo->GetName();
+									member->parent = refThis;
+									member->name.value = L"Subscribe";
 
-									auto refNew = MakePtr<WfReferenceExpression>();
-									refNew->name.value = L"<new>";
-
-									auto assign = MakePtr<WfBinaryExpression>();
-									assign->op = WfBinaryOperator::Assign;
-									assign->first = member;
-									assign->second = refNew;
+									auto call = MakePtr<WfCallExpression>();
+									call->function = member;
+									call->arguments.Add(funcExpr);
 
 									auto stat = MakePtr<WfExpressionStatement>();
-									stat->expression = assign;
-									callbackBlock->statements.Add(stat);
+									stat->expression = call;
+									subBlock->statements.Add(stat);
 								}
+								{
+									auto refThis = MakePtr<WfReferenceExpression>();
+									refThis->name.value = L"<subscription>";
 
-								auto funcExpr = MakePtr<WfFunctionExpression>();
-								funcExpr->function = callback;
+									auto member = MakePtr<WfMemberExpression>();
+									member->parent = refThis;
+									member->name.value = L"Update";
 
-								auto refThis = MakePtr<WfReferenceExpression>();
-								refThis->name.value = L"<subscription>";
+									auto call = MakePtr<WfCallExpression>();
+									call->function = member;
 
-								auto member = MakePtr<WfMemberExpression>();
-								member->parent = refThis;
-								member->name.value = L"Subscribe";
-
-								auto call = MakePtr<WfCallExpression>();
-								call->function = member;
-								call->arguments.Add(funcExpr);
-
-								auto stat = MakePtr<WfExpressionStatement>();
-								stat->expression = call;
-								subBlock->statements.Add(stat);
+									auto stat = MakePtr<WfExpressionStatement>();
+									stat->expression = call;
+									subBlock->statements.Add(stat);
+								}
 							}
+							else
 							{
-								auto refThis = MakePtr<WfReferenceExpression>();
-								refThis->name.value = L"<subscription>";
+								auto refSubscribee = MakePtr<WfReferenceExpression>();
+								refSubscribee->name.value = subscribee;
 
 								auto member = MakePtr<WfMemberExpression>();
-								member->parent = refThis;
-								member->name.value = L"Update";
+								member->parent = refSubscribee;
+								member->name.value = dataBinding.propertyInfo->GetName();
 
-								auto call = MakePtr<WfCallExpression>();
-								call->function = member;
+								auto assign = MakePtr<WfBinaryExpression>();
+								assign->op = WfBinaryOperator::Assign;
+								assign->first = member;
+								assign->second = dataBinding.bindExpression;
 
 								auto stat = MakePtr<WfExpressionStatement>();
-								stat->expression = call;
-								subBlock->statements.Add(stat);
+								stat->expression = assign;
+								block->statements.Add(stat);
 							}
 						}
-						else
-						{
-							auto refSubscribee = MakePtr<WfReferenceExpression>();
-							refSubscribee->name.value = subscribee;
-
-							auto member = MakePtr<WfMemberExpression>();
-							member->parent = refSubscribee;
-							member->name.value = dataBinding.propertyInfo->GetName();
-
-							auto assign = MakePtr<WfBinaryExpression>();
-							assign->op = WfBinaryOperator::Assign;
-							assign->first = member;
-							assign->second = dataBinding.bindExpression;
-
-							auto stat = MakePtr<WfExpressionStatement>();
-							stat->expression = assign;
-							block->statements.Add(stat);
-						}
 					}
-				}
 
-				GetSharedWorkflowManager()->Clear(true, true);
-				GetSharedWorkflowManager()->modules.Add(module);
-				GetSharedWorkflowManager()->Rebuild(true);
-				WString moduleCode = WorkflowModuleToString(module);
+					GetSharedWorkflowManager()->Clear(true, true);
+					GetSharedWorkflowManager()->modules.Add(module);
+					GetSharedWorkflowManager()->Rebuild(true);
+					WString moduleCode = WorkflowModuleToString(module);
 
-				if (GetSharedWorkflowManager()->errors.Count() > 0)
-				{
-					env->scope->errors.Add(ERROR_CODE_PREFIX L"Unexpected errors are encountered when initializing data binding.");
-					FOREACH(Ptr<parsing::ParsingError>, error, GetSharedWorkflowManager()->errors)
+					if (GetSharedWorkflowManager()->errors.Count() > 0)
 					{
-						env->scope->errors.Add(error->errorMessage);
+						env->scope->errors.Add(ERROR_CODE_PREFIX L"Unexpected errors are encountered when initializing data binding.");
+						FOREACH(Ptr<parsing::ParsingError>, error, GetSharedWorkflowManager()->errors)
+						{
+							env->scope->errors.Add(error->errorMessage);
+						}
+						env->scope->errors.Add(ERROR_CODE_PREFIX L"Print code for reference:");
+						env->scope->errors.Add(moduleCode);
+						env->context->caches.Add(GetContextName(), 0);
+						return;
 					}
-					env->scope->errors.Add(ERROR_CODE_PREFIX L"Print code for reference:");
-					env->scope->errors.Add(moduleCode);
-					return;
+					assembly = GenerateAssembly(GetSharedWorkflowManager());
+					env->context->caches.Add(GetContextName(), assembly);
 				}
-//#ifdef _DEBUG
-//				else
-//				{
-//					// for debug only, always show code in error
-//					env->scope->errors.Add(ERROR_CODE_PREFIX L"Print code for reference (debug mode only):");
-//					env->scope->errors.Add(moduleCode);
-//				}
-//#endif
 
-				auto assembly = GenerateAssembly(GetSharedWorkflowManager());
-				globalContext = new WfRuntimeGlobalContext(assembly);
-				
-				LoadFunction<void()>(globalContext, L"<initialize>")();
-				SetVariablesForReferenceValues(globalContext, env);
+				if (assembly)
 				{
-					vint index = assembly->variableNames.IndexOf(L"<this>");
-					globalContext->globalVariables->variables[index] = env->scope->rootInstance;
+					globalContext = new WfRuntimeGlobalContext(assembly);
+				
+					LoadFunction<void()>(globalContext, L"<initialize>")();
+					SetVariablesForReferenceValues(globalContext, env);
+					{
+						vint index = assembly->variableNames.IndexOf(L"<this>");
+						globalContext->globalVariables->variables[index] = env->scope->rootInstance;
+					}
+					LoadFunction<void()>(globalContext, L"<initialize-data-binding>")();
 				}
-				LoadFunction<void()>(globalContext, L"<initialize-data-binding>")();
 			}
 
 			static void CreateVariable(Ptr<WfModule> module, const WString& name, const Value& value)
@@ -453,6 +461,8 @@ GuiWorkflowGlobalContext
 			}
 		};
 
+		const wchar_t* GuiWorkflowGlobalContext::ContextName = L"WORKFLOW-GLOBAL-CONTEXT";
+
 /***********************************************************************
 GuiScriptInstanceBinder
 ***********************************************************************/
@@ -464,11 +474,15 @@ GuiScriptInstanceBinder
 
 			void GetRequiredContexts(collections::List<WString>& contextNames)override
 			{
-				contextNames.Add(L"WORKFLOW-GLOBAL-CONTEXT");
+				contextNames.Add(GuiWorkflowGlobalContext::ContextName);
 			}
 
 			bool SetPropertyValue(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, IGuiInstanceLoader::PropertyValue& propertyValue)override
 			{
+				if (env->context->caches.Keys().Contains(GuiWorkflowGlobalContext::ContextName))
+				{
+					return true;
+				}
 				if (propertyValue.propertyValue.GetValueType() == Value::Text)
 				{
 					WString expressionCode = TranslateExpression(propertyValue.propertyValue.GetText());
@@ -494,7 +508,7 @@ GuiScriptInstanceBinder
 						failed = true;
 					}
 
-					/*{
+					{
 						auto module = MakePtr<WfModule>();
 						GuiWorkflowGlobalContext::CreateVariablesForReferenceValues(module, env);
 						{
@@ -544,7 +558,7 @@ GuiScriptInstanceBinder
 								}
 							}
 						}
-					}*/
+					}
 
 					if (!failed)
 					{
@@ -565,7 +579,7 @@ GuiScriptInstanceBinder
 						dataBinding.propertyInfo = propertyInfo;
 						dataBinding.bindExpression = expression;
 
-						auto context = env->scope->bindingContexts[L"WORKFLOW-GLOBAL-CONTEXT"].Cast<GuiWorkflowGlobalContext>();
+						auto context = env->scope->bindingContexts[GuiWorkflowGlobalContext::ContextName].Cast<GuiWorkflowGlobalContext>();
 						context->dataBindings.Add(dataBinding);
 					}
 					return !failed;
@@ -595,64 +609,73 @@ GuiEvalInstanceBinder
 			{
 				if (propertyValue.GetValueType() == Value::Text)
 				{
+					Ptr<WfAssembly> assembly;
 					WString expressionCode = TranslateExpression(propertyValue.GetText());
-					auto parser = GetParserManager()->GetParser<WfExpression>(L"WORKFLOW-EXPRESSION");
-					auto expression = parser->TypedParse(expressionCode, env->scope->errors);
-					if (!expression)
+					WString cacheKey = L"<att.eval>" + expressionCode;
+					vint cacheIndex = env->context->caches.Keys().IndexOf(cacheKey);
+					if (cacheIndex != -1)
 					{
-						env->scope->errors.Add(ERROR_CODE_PREFIX L"Failed to parse the workflow expression \"" + expressionCode + L"\".");
-						return Value();
+						assembly = env->context->caches.Values()[cacheIndex].Cast<WfAssembly>();
 					}
-
-					auto module = MakePtr<WfModule>();
-					GuiWorkflowGlobalContext::CreateVariablesForReferenceValues(module, env);
+					else
 					{
-						auto lambda = MakePtr<WfOrderedLambdaExpression>();
-						lambda->body = expression;
-
-						auto var = MakePtr<WfVariableDeclaration>();
-						var->name.value = L"<initialize-data-binding>";
-						var->expression = lambda;
-
-						module->declarations.Add(var);
-					}
-
-					WString moduleCode = WorkflowModuleToString(module);
-					GetSharedWorkflowManager()->Clear(true, true);
-					GetSharedWorkflowManager()->modules.Add(module);
-					GetSharedWorkflowManager()->Rebuild(true);
-					if (GetSharedWorkflowManager()->errors.Count() > 0)
-					{
-						env->scope->errors.Add(ERROR_CODE_PREFIX L"Failed to analyze the workflow expression \"" + expressionCode + L"\".");
-						FOREACH(Ptr<parsing::ParsingError>, error, GetSharedWorkflowManager()->errors)
+						auto parser = GetParserManager()->GetParser<WfExpression>(L"WORKFLOW-EXPRESSION");
+						auto expression = parser->TypedParse(expressionCode, env->scope->errors);
+						if (!expression)
 						{
-							env->scope->errors.Add(error->errorMessage);
+							env->scope->errors.Add(ERROR_CODE_PREFIX L"Failed to parse the workflow expression \"" + expressionCode + L"\".");
+							env->context->caches.Add(cacheKey, 0);
+							return Value();
 						}
-						return Value();
+
+						auto module = MakePtr<WfModule>();
+						GuiWorkflowGlobalContext::CreateVariablesForReferenceValues(module, env);
+						{
+							auto lambda = MakePtr<WfOrderedLambdaExpression>();
+							lambda->body = expression;
+
+							auto var = MakePtr<WfVariableDeclaration>();
+							var->name.value = L"<initialize-data-binding>";
+							var->expression = lambda;
+
+							module->declarations.Add(var);
+						}
+
+						WString moduleCode = WorkflowModuleToString(module);
+						GetSharedWorkflowManager()->Clear(true, true);
+						GetSharedWorkflowManager()->modules.Add(module);
+						GetSharedWorkflowManager()->Rebuild(true);
+						if (GetSharedWorkflowManager()->errors.Count() > 0)
+						{
+							env->scope->errors.Add(ERROR_CODE_PREFIX L"Failed to analyze the workflow expression \"" + expressionCode + L"\".");
+							FOREACH(Ptr<parsing::ParsingError>, error, GetSharedWorkflowManager()->errors)
+							{
+								env->scope->errors.Add(error->errorMessage);
+							}
+							env->context->caches.Add(cacheKey, 0);
+							return Value();
+						}
+
+						assembly = GenerateAssembly(GetSharedWorkflowManager());
+						env->context->caches.Add(cacheKey, assembly);
 					}
-//#ifdef _DEBUG
-//					else
-//					{
-//						// for debug only, always show code in error
-//						env->scope->errors.Add(ERROR_CODE_PREFIX L"Print code for reference (debug mode only):");
-//						env->scope->errors.Add(moduleCode);
-//					}
-//#endif
 
-					auto assembly = GenerateAssembly(GetSharedWorkflowManager());
-					auto globalContext = MakePtr<WfRuntimeGlobalContext>(assembly);
+					if (assembly)
+					{
+						auto globalContext = MakePtr<WfRuntimeGlobalContext>(assembly);
 				
-					LoadFunction<void()>(globalContext, L"<initialize>")();
-					GuiWorkflowGlobalContext::SetVariablesForReferenceValues(globalContext, env);
-					vint variableIndex = assembly->variableNames.IndexOf(L"<initialize-data-binding>");
-					auto variable = globalContext->globalVariables->variables[variableIndex];
-					auto proxy = UnboxValue<Ptr<IValueFunctionProxy>>(variable);
-					auto translated = proxy->Invoke(IValueList::Create());
+						LoadFunction<void()>(globalContext, L"<initialize>")();
+						GuiWorkflowGlobalContext::SetVariablesForReferenceValues(globalContext, env);
+						vint variableIndex = assembly->variableNames.IndexOf(L"<initialize-data-binding>");
+						auto variable = globalContext->globalVariables->variables[variableIndex];
+						auto proxy = UnboxValue<Ptr<IValueFunctionProxy>>(variable);
+						auto translated = proxy->Invoke(IValueList::Create());
 
-					// the global context contains a closure variable <initialize-data-binding> which captured the context
-					// clear all variables to break the circle references
-					globalContext->globalVariables = 0;
-					return translated;
+						// the global context contains a closure variable <initialize-data-binding> which captured the context
+						// clear all variables to break the circle references
+						globalContext->globalVariables = 0;
+						return translated;
+					}
 				}
 				return Value();
 			}
@@ -684,77 +707,86 @@ GuiEvalInstanceEventBinder
 				auto handler = propertyValue.propertyValue;
 				if (handler.GetValueType() == Value::Text)
 				{
+					Ptr<WfAssembly> assembly;
 					WString statementCode = handler.GetText();
-					auto parser = GetParserManager()->GetParser<WfStatement>(L"WORKFLOW-STATEMENT");
-					auto statement = parser->TypedParse(statementCode, env->scope->errors);
-					if (!statement)
+					WString cacheKey = L"<ev.eval>" + statementCode;
+					vint cacheIndex = env->context->caches.Keys().IndexOf(cacheKey);
+					if (cacheIndex != -1)
 					{
-						env->scope->errors.Add(ERROR_CODE_PREFIX L"Failed to parse the workflow statement.");
-						return false;
+						assembly = env->context->caches.Values()[cacheIndex].Cast<WfAssembly>();
 					}
-
-					auto module = MakePtr<WfModule>();
-					GuiWorkflowGlobalContext::CreateVariablesForReferenceValues(module, env);
+					else
 					{
-						auto func = MakePtr<WfFunctionDeclaration>();
-						func->anonymity = WfFunctionAnonymity::Named;
-						func->name.value = L"<event-handler>";
-						func->returnType = GetTypeFromTypeInfo(TypeInfoRetriver<void>::CreateTypeInfo().Obj());
-
-						auto td = propertyValue.instanceValue.GetTypeDescriptor();
-						auto eventInfo = td->GetEventByName(propertyValue.propertyName, true);
-						if (eventInfo)
+						auto parser = GetParserManager()->GetParser<WfStatement>(L"WORKFLOW-STATEMENT");
+						auto statement = parser->TypedParse(statementCode, env->scope->errors);
+						if (!statement)
 						{
-							vint count = eventInfo->GetHandlerType()->GetElementType()->GetGenericArgumentCount() - 1;
-							auto type = TypeInfoRetriver<Value>::CreateTypeInfo();
-							for (vint i = 0; i < count; i++)
+							env->scope->errors.Add(ERROR_CODE_PREFIX L"Failed to parse the workflow statement.");
+							env->context->caches.Add(cacheKey, 0);
+							return false;
+						}
+
+						auto module = MakePtr<WfModule>();
+						GuiWorkflowGlobalContext::CreateVariablesForReferenceValues(module, env);
+						{
+							auto func = MakePtr<WfFunctionDeclaration>();
+							func->anonymity = WfFunctionAnonymity::Named;
+							func->name.value = L"<event-handler>";
+							func->returnType = GetTypeFromTypeInfo(TypeInfoRetriver<void>::CreateTypeInfo().Obj());
+
+							auto td = propertyValue.instanceValue.GetTypeDescriptor();
+							auto eventInfo = td->GetEventByName(propertyValue.propertyName, true);
+							if (eventInfo)
 							{
-								auto arg = MakePtr<WfFunctionArgument>();
-								arg->name.value = L"<argument>" + itow(i + 1);
-								arg->type = GetTypeFromTypeInfo(type.Obj());
-								func->arguments.Add(arg);
+								vint count = eventInfo->GetHandlerType()->GetElementType()->GetGenericArgumentCount() - 1;
+								auto type = TypeInfoRetriver<Value>::CreateTypeInfo();
+								for (vint i = 0; i < count; i++)
+								{
+									auto arg = MakePtr<WfFunctionArgument>();
+									arg->name.value = L"<argument>" + itow(i + 1);
+									arg->type = GetTypeFromTypeInfo(type.Obj());
+									func->arguments.Add(arg);
+								}
 							}
-						}
 						
-						auto block = MakePtr<WfBlockStatement>();
-						block->statements.Add(statement);
-						func->statement = block;
+							auto block = MakePtr<WfBlockStatement>();
+							block->statements.Add(statement);
+							func->statement = block;
 
-						module->declarations.Add(func);
-					}
-
-					WString moduleCode = WorkflowModuleToString(module);
-					GetSharedWorkflowManager()->Clear(true, true);
-					GetSharedWorkflowManager()->modules.Add(module);
-					GetSharedWorkflowManager()->Rebuild(true);
-					if (GetSharedWorkflowManager()->errors.Count() > 0)
-					{
-						env->scope->errors.Add(ERROR_CODE_PREFIX L"Failed to analyze the workflow statement \"" + statementCode + L"\".");
-						FOREACH(Ptr<parsing::ParsingError>, error, GetSharedWorkflowManager()->errors)
-						{
-							env->scope->errors.Add(error->errorMessage);
+							module->declarations.Add(func);
 						}
-						return false;
+
+						WString moduleCode = WorkflowModuleToString(module);
+						GetSharedWorkflowManager()->Clear(true, true);
+						GetSharedWorkflowManager()->modules.Add(module);
+						GetSharedWorkflowManager()->Rebuild(true);
+						if (GetSharedWorkflowManager()->errors.Count() > 0)
+						{
+							env->scope->errors.Add(ERROR_CODE_PREFIX L"Failed to analyze the workflow statement \"" + statementCode + L"\".");
+							FOREACH(Ptr<parsing::ParsingError>, error, GetSharedWorkflowManager()->errors)
+							{
+								env->scope->errors.Add(error->errorMessage);
+							}
+							env->context->caches.Add(cacheKey, 0);
+							return false;
+						}
+
+						assembly = GenerateAssembly(GetSharedWorkflowManager());
+						env->context->caches.Add(cacheKey, assembly);
 					}
-//#ifdef _DEBUG
-//					else
-//					{
-//						// for debug only, always show code in error
-//						env->scope->errors.Add(ERROR_CODE_PREFIX L"Print code for reference (debug mode only):");
-//						env->scope->errors.Add(moduleCode);
-//					}
-//#endif
 
-					auto assembly = GenerateAssembly(GetSharedWorkflowManager());
-					auto globalContext = MakePtr<WfRuntimeGlobalContext>(assembly);
+					if (assembly)
+					{
+						auto globalContext = MakePtr<WfRuntimeGlobalContext>(assembly);
 				
-					LoadFunction<void()>(globalContext, L"<initialize>")();
-					GuiWorkflowGlobalContext::SetVariablesForReferenceValues(globalContext, env);
-					auto eventHandler = LoadFunction(globalContext, L"<event-handler>");
-					handler = BoxValue(eventHandler);
+						LoadFunction<void()>(globalContext, L"<initialize>")();
+						GuiWorkflowGlobalContext::SetVariablesForReferenceValues(globalContext, env);
+						auto eventHandler = LoadFunction(globalContext, L"<event-handler>");
+						handler = BoxValue(eventHandler);
 
-					propertyValue.propertyValue = handler;
-					return loader->SetEventValue(propertyValue);
+						propertyValue.propertyValue = handler;
+						return loader->SetEventValue(propertyValue);
+					}
 				}
 				return false;
 			}
@@ -834,7 +866,7 @@ GuiPredefinedInstanceBindersPlugin
 				{
 					IGuiInstanceLoaderManager* manager=GetInstanceLoaderManager();
 
-					manager->AddInstanceBindingContextFactory(new GuiInstanceBindingContextFactory<GuiWorkflowGlobalContext>(L"WORKFLOW-GLOBAL-CONTEXT"));
+					manager->AddInstanceBindingContextFactory(new GuiInstanceBindingContextFactory<GuiWorkflowGlobalContext>(GuiWorkflowGlobalContext::ContextName));
 
 					manager->AddInstanceBinder(new GuiResourceInstanceBinder);
 					manager->AddInstanceBinder(new GuiReferenceInstanceBinder);

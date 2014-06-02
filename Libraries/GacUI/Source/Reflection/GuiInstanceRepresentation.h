@@ -125,6 +125,7 @@ Instance Context
 		{
 		public:
 			typedef collections::List<Ptr<GuiInstanceNamespace>>				NamespaceList;
+			typedef collections::Dictionary<WString, Ptr<DescriptableObject>>	CacheMap;
 
 			struct NamespaceInfo
 			{
@@ -155,9 +156,10 @@ Instance Context
 			NamespaceMap							namespaces;
 			Nullable<WString>						className;
 			ParameterList							parameters;
-
 			collections::List<WString>				stylePaths;
+
 			StyleContextList						styles;
+			CacheMap								caches;
 
 			static void								CollectDefaultAttributes(GuiAttSetterRepr::ValueList& values, Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
 			static void								CollectAttributes(GuiAttSetterRepr::SetteValuerMap& setters, Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
