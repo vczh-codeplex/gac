@@ -150,6 +150,11 @@ GuiImageData
 			return frameIndex;
 		}
 
+		collections::Array<vuint8_t>& GuiImageData::GetBinary()
+		{
+			return binary;
+		}
+
 /***********************************************************************
 GuiTextData
 ***********************************************************************/

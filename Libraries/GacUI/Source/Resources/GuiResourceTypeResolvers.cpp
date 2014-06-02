@@ -39,7 +39,7 @@ Image Type Resolver
 				if (auto obj = resource.Cast<GuiImageData>())
 				{
 					stream::MemoryStream stream;
-					obj->GetImage()->SaveToStream(stream);
+					stream.Write(&obj->GetBinary()[0], obj->GetBinary().Count());
 					stream.SeekFromBegin(0);
 
 					auto xmlContent = MakePtr<XmlText>();
@@ -61,15 +61,25 @@ Image Type Resolver
 				HexToBinary(stream, text);
 				stream.SeekFromBegin(0);
 				auto image = GetCurrentController()->ImageService()->CreateImageFromStream(stream);
-				return new GuiImageData(image, 0);
+
+				Ptr<GuiImageData> data = new GuiImageData(image, 0);
+				stream.SeekFromBegin(0);
+				data->GetBinary().Resize((vint)stream.Size());
+				stream.Read(&data->GetBinary()[0], data->GetBinary().Count());
+				return data;
 			}
 
 			Ptr<DescriptableObject> ResolveResource(const WString& path, collections::List<WString>& errors)override
 			{
-				Ptr<INativeImage> image = GetCurrentController()->ImageService()->CreateImageFromFile(path);
+				stream::FileStream stream(path, stream::FileStream::ReadOnly);
+				Ptr<INativeImage> image = GetCurrentController()->ImageService()->CreateImageFromStream(stream);
 				if(image)
 				{
-					return new GuiImageData(image, 0);
+					Ptr<GuiImageData> data = new GuiImageData(image, 0);
+					stream.SeekFromBegin(0);
+					data->GetBinary().Resize((vint)stream.Size());
+					stream.Read(&data->GetBinary()[0], data->GetBinary().Count());
+					return data;
 				}
 				else
 				{

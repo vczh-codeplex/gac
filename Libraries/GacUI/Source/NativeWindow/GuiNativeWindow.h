@@ -268,12 +268,6 @@ Image Object
 			/// <returns>The frame in this image by a specified frame index.</returns>
 			/// <param name="index">The specified frame index.</param>
 			virtual INativeImageFrame*			GetFrame(vint index)=0;
-			/// <summary>
-			/// Save the image to a stream.
-			/// </summary>
-			/// <returns>Returns true if this operation succeeded.</returns>
-			/// <param name="stream">The stream.</param>
-			virtual bool						SaveToStream(stream::IStream& stream)=0;
 		};
 		
 		/// <summary>
