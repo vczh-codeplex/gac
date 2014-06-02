@@ -84,7 +84,6 @@ Resource Image
 Resource String
 ***********************************************************************/
 
-
 		/// <summary>Represents a text resource.</summary>
 		class GuiTextData : public Object, public Description<GuiTextData>
 		{
@@ -135,18 +134,23 @@ Resource Structure
 			friend class GuiResourceFolder;
 		protected:
 			Ptr<DescriptableObject>					content;
+			WString									typeName;
 			
 		public:
 			/// <summary>Create a resource item.</summary>
 			GuiResourceItem();
 			~GuiResourceItem();
+
+			/// <summary>Get the type of this resource item.</summary>
+			/// <returns>The type name.</returns>
+			const WString&							GetTypeName();
 			
 			/// <summary>Get the contained object for this resource item.</summary>
 			/// <returns>The contained object.</returns>
 			Ptr<DescriptableObject>					GetContent();
 			/// <summary>Set the containd object for this resource item.</summary>
 			/// <param name="value">The contained object.</param>
-			void									SetContent(Ptr<DescriptableObject> value);
+			void									SetContent(const WString& _typeName, Ptr<DescriptableObject> value);
 
 			/// <summary>Get the contained object as an image.</summary>
 			/// <returns>The contained object.</returns>
@@ -348,32 +352,36 @@ Resource Type Resolver
 		public:
 			/// <summary>Get the type of the resource that load by this resolver.</summary>
 			/// <returns>The type.</returns>
-			virtual WString									GetType()=0;
+			virtual WString									GetType() = 0;
 			/// <summary>Get the preload type to load the resource before loading itself.</summary>
 			/// <returns>The preload type. Returns an empty string to indicate that there is no preload type for this resolver.</returns>
-			virtual WString									GetPreloadType()=0;
+			virtual WString									GetPreloadType() = 0;
 			/// <summary>Get the delay load feature for this resolver.</summary>
 			/// <returns>Returns true if this type need to delay load.</returns>
-			virtual bool									IsDelayLoad()=0;
+			virtual bool									IsDelayLoad() = 0;
+
+			/// <summary>Serialize a resource to an xml element.</summary>
+			/// <returns>The serialized xml element.</returns>
+			virtual Ptr<parsing::xml::XmlElement>			Serialize(Ptr<DescriptableObject> resource) = 0;
 
 			/// <summary>Load a resource for a type inside an xml element.</summary>
 			/// <returns>The resource.</returns>
 			/// <param name="element">The xml element.</param>
 			/// <param name="errors">All collected errors during loading a resource.</param>
-			virtual Ptr<DescriptableObject>					ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)=0;
+			virtual Ptr<DescriptableObject>					ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors) = 0;
 
 			/// <summary>Load a resource for a type from a file.</summary>
 			/// <returns>The resource.</returns>
 			/// <param name="path">The file path.</param>
 			/// <param name="errors">All collected errors during loading a resource.</param>
-			virtual Ptr<DescriptableObject>					ResolveResource(const WString& path, collections::List<WString>& errors)=0;
+			virtual Ptr<DescriptableObject>					ResolveResource(const WString& path, collections::List<WString>& errors) = 0;
 
 			/// <summary>Load a resource for a type from a resource loaded by the preload type resolver.</summary>
 			/// <returns>The resource.</returns>
 			/// <param name="resource">The resource.</param>
 			/// <param name="resolver">The path resolver. This is only for delay load resource.</param>
 			/// <param name="errors">All collected errors during loading a resource.</param>
-			virtual Ptr<DescriptableObject>					ResolveResource(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)=0;
+			virtual Ptr<DescriptableObject>					ResolveResource(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors) = 0;
 		};
 
 /***********************************************************************

@@ -156,14 +156,20 @@ GuiResourceItem
 		{
 		}
 
+		const WString& GuiResourceItem::GetTypeName()
+		{
+			return typeName;
+		}
+
 		Ptr<DescriptableObject> GuiResourceItem::GetContent()
 		{
 			return content;
 		}
 
-		void GuiResourceItem::SetContent(Ptr<DescriptableObject> value)
+		void GuiResourceItem::SetContent(const WString& _typeName, Ptr<DescriptableObject> value)
 		{
-			content=value;
+			typeName = _typeName;
+			content = value;
 		}
 
 		Ptr<GuiImageData> GuiResourceItem::AsImage()
@@ -315,7 +321,7 @@ GuiResourceFolder
 									resource = typeResolver->ResolveResource(resource, 0, errors);
 								}
 							}
-							item->SetContent(resource);
+							item->SetContent(preloadResolver->GetType(), resource);
 						}
 
 						if(!item->GetContent())
@@ -497,7 +503,7 @@ GuiResource
 					Ptr<DescriptableObject> resource = typeResolver->ResolveResource(item->GetContent(), pathResolver, errors);
 					if(resource)
 					{
-						item->SetContent(resource);
+						item->SetContent(typeResolver->GetType(), resource);
 					}
 				}
 			}
