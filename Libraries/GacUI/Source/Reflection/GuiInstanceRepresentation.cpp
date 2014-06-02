@@ -25,6 +25,20 @@ GuiTextRepr
 			return repr;
 		}
 
+		void GuiTextRepr::FillXml(Ptr<parsing::xml::XmlElement> xml, bool fillStyleValues)
+		{
+			if (!fromStyle || fillStyleValues)
+			{
+				auto xmlRepr = MakePtr<XmlElement>();
+				xmlRepr->name.value = L"String";
+				xml->subNodes.Add(xmlRepr);
+
+				auto xmlText = MakePtr<XmlText>();
+				xmlText->content.value = text;
+				xmlRepr->subNodes.Add(xmlText);
+			}
+		}
+
 /***********************************************************************
 GuiAttSetterRepr
 ***********************************************************************/
@@ -53,6 +67,65 @@ GuiAttSetterRepr
 			return repr;
 		}
 
+		void GuiAttSetterRepr::FillXml(Ptr<parsing::xml::XmlElement> xml, bool fillStyleValues)
+		{
+			if (!fromStyle || fillStyleValues)
+			{
+				for (vint i = 0; i < setters.Count(); i++)
+				{
+					auto key = setters.Keys()[0];
+					auto value = setters.Values()[0];
+					if (value->values.Count() == 1 && value->values[0].Cast<GuiTextRepr>())
+					{
+						if (!value->values[0]->fromStyle || fillStyleValues)
+						{
+							auto att = MakePtr<XmlAttribute>();
+							att->name.value = key;
+							if (value->binding != L"")
+							{
+								att->name.value += L"." + value->binding;
+							}
+							att->value.value = value->values[0].Cast<GuiTextRepr>()->text;
+							xml->attributes.Add(att);
+						}
+					}
+					else
+					{
+						auto xmlProp = MakePtr<XmlElement>();
+						xmlProp->name.value = L"att." + key;
+						if (value->binding != L"")
+						{
+							xmlProp->name.value += L"." + value->binding;
+						}
+
+						FOREACH(Ptr<GuiValueRepr>, repr, value->values)
+						{
+							repr->FillXml(xmlProp, fillStyleValues);
+						}
+						xml->subNodes.Add(xmlProp);
+					}
+				}
+
+				for (vint i = 0; i < eventHandlers.Count(); i++)
+				{
+					auto key = eventHandlers.Keys()[0];
+					auto value = eventHandlers.Values()[0];
+
+					auto xmlEvent = MakePtr<XmlElement>();
+					xmlEvent->name.value = L"ev." + key;
+					if (value->binding != L"")
+					{
+						xmlEvent->name.value += L"." + value->binding;
+					}
+					xml->subNodes.Add(xmlEvent);
+
+					auto xmlText = MakePtr<XmlText>();
+					xmlText->content.value = value->value;
+					xmlEvent->subNodes.Add(xmlText);
+				}
+			}
+		}
+
 /***********************************************************************
 GuiConstructorRepr
 ***********************************************************************/
@@ -67,6 +140,40 @@ GuiConstructorRepr
 			repr->styleName = styleName;
 			CloneBody(repr);
 			return repr;
+		}
+
+		void GuiConstructorRepr::FillXml(Ptr<parsing::xml::XmlElement> xml, bool fillStyleValues)
+		{
+			if (!fromStyle || fillStyleValues)
+			{
+				auto xmlCtor = MakePtr<XmlElement>();
+				if (typeNamespace == L"")
+				{
+					xmlCtor->name.value = typeName;
+				}
+				else
+				{
+					xmlCtor->name.value = typeNamespace + L":" + typeName;
+				}
+
+				if (instanceName)
+				{
+					auto attName = MakePtr<XmlAttribute>();
+					attName->name.value = L"ref.Name";
+					attName->value.value = instanceName.Value();
+					xmlCtor->attributes.Add(attName);
+				}
+				if (styleName)
+				{
+					auto attStyle = MakePtr<XmlAttribute>();
+					attStyle->name.value = L"ref.Style";
+					attStyle->value.value = styleName.Value();
+					xmlCtor->attributes.Add(attStyle);
+				}
+
+				GuiAttSetterRepr::FillXml(xmlCtor, fillStyleValues);
+				xml->subNodes.Add(xmlCtor);
+			}
 		}
 
 /***********************************************************************
@@ -415,6 +522,10 @@ GuiInstanceContext
 			return context->instance?context:0;
 		}
 
+		Ptr<parsing::xml::XmlDocument> GuiInstanceContext::SaveToXml()
+		{
+		}
+
 /***********************************************************************
 GuiInstanceStyle
 ***********************************************************************/
@@ -501,7 +612,7 @@ GuiInstanceStyle
 			}
 			xmlStyle->attributes.Add(attPath);
 
-			setter->FillXml(xmlStyle);
+			setter->FillXml(xmlStyle, true);
 
 			return xmlStyle;
 		}
