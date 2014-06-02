@@ -123,6 +123,66 @@ WindowsImageFrame
 				return frameBitmap.Obj();
 			}
 
+			bool SaveBitmapToStream(GUID formatGUID, Array<Ptr<WindowsImageFrame>>& frames, stream::IStream& stream)
+			{
+				IWICBitmapEncoder* encoder = 0;
+				::IStream* memoryStream = 0;
+
+				IWICImagingFactory* factory = GetWICImagingFactory();
+				HRESULT hr = factory->CreateEncoder(formatGUID, NULL, &encoder);
+				if (!SUCCEEDED(hr)) goto FAILURE;
+				
+				memoryStream = SHCreateMemStream(NULL, NULL);
+				if (!memoryStream) goto FAILURE;
+
+				hr = encoder->Initialize(memoryStream, WICBitmapEncoderNoCache);
+				if (!SUCCEEDED(hr)) goto FAILURE;
+
+				for (vint i = 0; i < frames.Count(); i++)
+				{
+					IWICBitmapFrameEncode* frameEncode = 0;
+					IWICBitmap* frameDecode = frames[i]->GetFrameBitmap();
+
+					hr = encoder->CreateNewFrame(&frameEncode, NULL);
+					if (!SUCCEEDED(hr)) goto FRAME_FAILURE;
+
+					hr = frameEncode->WriteSource(frameDecode, NULL);
+					if (!SUCCEEDED(hr)) goto FRAME_FAILURE;
+
+					hr = frameEncode->Commit();
+					if (!SUCCEEDED(hr)) goto FRAME_FAILURE;
+
+					frameEncode->Release();
+
+					continue;
+				FRAME_FAILURE:
+					if (frameEncode) frameEncode->Release();
+					if (frameDecode) frameDecode->Release();
+					goto FAILURE;
+				}
+
+				encoder->Commit();
+				memoryStream->Commit(STGC_DEFAULT);
+				{
+					ULARGE_INTEGER size;
+					LARGE_INTEGER pos;
+					pos.QuadPart = 0;
+					memoryStream->Seek(pos, STREAM_SEEK_END, &size);
+					memoryStream->Seek(pos, STREAM_SEEK_SET, NULL);
+
+					Array<vuint8_t> buffer((vint)size.QuadPart);
+					IStream_Read(memoryStream, &buffer[0], (ULONG)buffer.Count());
+					stream.Write(&buffer[0], buffer.Count());
+				}
+				encoder->Release();
+				memoryStream->Release();
+				return true;
+			FAILURE:
+				if (encoder) encoder->Release();
+				if (memoryStream) memoryStream->Release();
+				return false;
+			}
+
 /***********************************************************************
 WindowsImage
 ***********************************************************************/
@@ -211,9 +271,12 @@ WindowsImage
 				}
 			}
 
-			void WindowsImage::SaveToStream(stream::IStream& stream)
+			bool WindowsImage::SaveToStream(stream::IStream& stream)
 			{
-				throw 0;
+				GUID formatGUID;
+				HRESULT hr = bitmapDecoder->GetContainerFormat(&formatGUID);
+				if (!SUCCEEDED(hr)) return false;
+				return SaveBitmapToStream(formatGUID, frames, stream);
 			}
 
 /***********************************************************************
@@ -224,7 +287,7 @@ WindowsBitmapImage
 				:imageService(_imageService)
 				,formatType(_formatType)
 			{
-				frame=new WindowsImageFrame(this, sourceBitmap);
+				frame = new WindowsImageFrame(this, sourceBitmap);
 			}
 
 			WindowsBitmapImage::~WindowsBitmapImage()
@@ -251,9 +314,38 @@ WindowsBitmapImage
 				return index==0?frame.Obj():0;
 			}
 
-			void WindowsBitmapImage::SaveToStream(stream::IStream& stream)
+			bool WindowsBitmapImage::SaveToStream(stream::IStream& stream)
 			{
-				throw 0;
+				GUID formatGUID;
+				switch (formatType)
+				{
+				case INativeImage::Bmp:
+					formatGUID = GUID_ContainerFormatBmp;
+					break;
+				case INativeImage::Gif:
+					formatGUID = GUID_ContainerFormatGif;
+					break;
+				case INativeImage::Icon:
+					formatGUID = GUID_ContainerFormatTiff;
+					break;
+				case INativeImage::Jpeg:
+					formatGUID = GUID_ContainerFormatJpeg;
+					break;
+				case INativeImage::Png:
+					formatGUID = GUID_ContainerFormatPng;
+					break;
+				case INativeImage::Tiff:
+					formatGUID = GUID_ContainerFormatTiff;
+					break;
+				case INativeImage::Wmp:
+					formatGUID = GUID_ContainerFormatWmp;
+					break;
+				default:
+					return false;
+				}
+				Array<Ptr<WindowsImageFrame>> frames(1);
+				frames[0] = frame;
+				return SaveBitmapToStream(formatGUID, frames, stream);
 			}
 
 /***********************************************************************

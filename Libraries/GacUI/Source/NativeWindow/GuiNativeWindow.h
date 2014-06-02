@@ -271,8 +271,9 @@ Image Object
 			/// <summary>
 			/// Save the image to a stream.
 			/// </summary>
+			/// <returns>Returns true if this operation succeeded.</returns>
 			/// <param name="stream">The stream.</param>
-			virtual void						SaveToStream(stream::IStream& stream)=0;
+			virtual bool						SaveToStream(stream::IStream& stream)=0;
 		};
 		
 		/// <summary>

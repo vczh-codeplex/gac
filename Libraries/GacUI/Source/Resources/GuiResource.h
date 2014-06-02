@@ -50,6 +50,9 @@ Helper Functions
 		/// <param name="path">The extracted path.</param>
 		extern bool									IsResourceUrl(const WString& text, WString& protocol, WString& path);
 
+		extern void									HexToBinary(stream::IStream& stream, const WString& hexText);
+		extern WString								BinaryToHex(stream::IStream& stream);
+
 /***********************************************************************
 Resource Image
 ***********************************************************************/

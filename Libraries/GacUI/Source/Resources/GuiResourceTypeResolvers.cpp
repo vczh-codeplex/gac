@@ -36,7 +36,22 @@ Image Type Resolver
 
 			Ptr<parsing::xml::XmlElement> Serialize(Ptr<DescriptableObject> resource)override
 			{
-				throw 0;
+				if (auto obj = resource.Cast<GuiImageData>())
+				{
+					stream::MemoryStream stream;
+					obj->GetImage()->SaveToStream(stream);
+					stream.SeekFromBegin(0);
+
+					auto xmlContent = MakePtr<XmlText>();
+					xmlContent->content.value = BinaryToHex(stream);
+
+					auto xmlImage = MakePtr<XmlElement>();
+					xmlImage->name.value = L"Image";
+					xmlImage->subNodes.Add(xmlContent);
+
+					return xmlImage;
+				}
+				return 0;
 			}
 
 			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)override
@@ -90,7 +105,18 @@ Text Type Resolver
 
 			Ptr<parsing::xml::XmlElement> Serialize(Ptr<DescriptableObject> resource)override
 			{
-				throw 0;
+				if (auto obj = resource.Cast<GuiTextData>())
+				{
+					auto xmlContent = MakePtr<XmlText>();
+					xmlContent->content.value = obj->GetText();
+
+					auto xmlText = MakePtr<XmlElement>();
+					xmlText->name.value = L"Text";
+					xmlText->subNodes.Add(xmlContent);
+
+					return xmlText;
+				}
+				return 0;
 			}
 
 			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)override
@@ -143,7 +169,11 @@ Xml Type Resolver
 
 			Ptr<parsing::xml::XmlElement> Serialize(Ptr<DescriptableObject> resource)override
 			{
-				throw 0;
+				if (auto obj = resource.Cast<XmlDocument>())
+				{
+					return obj->rootElement;
+				}
+				return 0;
 			}
 
 			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)override
@@ -206,7 +236,12 @@ Doc Type Resolver
 
 			Ptr<parsing::xml::XmlElement> Serialize(Ptr<DescriptableObject> resource)override
 			{
-				throw 0;
+				if (auto obj = resource.Cast<DocumentModel>())
+				{
+					auto xml = obj->SaveToXml();
+					return xml->rootElement;
+				}
+				return 0;
 			}
 
 			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)override
