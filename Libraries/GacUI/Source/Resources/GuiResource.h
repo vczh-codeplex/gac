@@ -191,6 +191,7 @@ Resource Structure
 			FolderMap								folders;
 
 			void									LoadResourceFolderXml(DelayLoadingList& delayLoadings, const WString& containingFolder, Ptr<parsing::xml::XmlElement> folderXml, collections::List<WString>& errors);
+			void									SaveResourceToXml(Ptr<parsing::xml::XmlElement> xmlParent);
 		public:
 			/// <summary>Create a resource folder.</summary>
 			GuiResourceFolder();
@@ -274,6 +275,10 @@ Resource
 			/// <param name="filepath">The file path of the xml file.</param>
 			/// <param name="errors">All collected errors during loading a resource.</param>
 			static Ptr<GuiResource>					LoadFromXml(const WString& filePath, collections::List<WString>& errors);
+
+			/// <summary>Save the resource to xml.</summary>
+			/// <returns>The xml.</returns>
+			Ptr<parsing::xml::XmlDocument>			SaveToXml();
 			
 			/// <summary>Get a contained document model using a path like "Packages\Application\Name". If the path does not exists or the type does not match, an exception will be thrown.</summary>
 			/// <returns>The containd resource object.</returns>

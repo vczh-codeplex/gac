@@ -384,6 +384,34 @@ GuiResourceFolder
 			}
 		}
 
+		void GuiResourceFolder::SaveResourceToXml(Ptr<parsing::xml::XmlElement> xmlParent)
+		{
+			FOREACH(Ptr<GuiResourceFolder>, folder, folders.Values())
+			{
+				auto attName = MakePtr<XmlAttribute>();
+				attName->value.value = folder->GetName();
+
+				auto xmlFolder = MakePtr<XmlElement>();
+				xmlFolder->name.value = L"Folder";
+				xmlFolder->attributes.Add(attName);
+
+				xmlParent->subNodes.Add(xmlFolder);
+				folder->SaveResourceToXml(xmlFolder);
+			}
+
+			FOREACH(Ptr<GuiResourceItem>, item, items.Values())
+			{
+				auto attName = MakePtr<XmlAttribute>();
+				attName->value.value = item->GetName();
+
+				auto resolver = GetResourceResolverManager()->GetTypeResolver(item->GetTypeName());
+				auto xml = resolver->Serialize(item->GetContent());
+				xml->attributes.Add(attName);
+
+				xmlParent->subNodes.Add(attName);
+			}
+		}
+
 		GuiResourceFolder::GuiResourceFolder()
 		{
 		}
@@ -577,6 +605,17 @@ GuiResource
 				return LoadFromXml(xml, GetFolderPath(filePath), errors);
 			}
 			return 0;
+		}
+
+		Ptr<parsing::xml::XmlDocument> GuiResource::SaveToXml()
+		{
+			auto xmlRoot = MakePtr<XmlElement>();
+			xmlRoot->name.value = L"Resource";
+			SaveResourceToXml(xmlRoot);
+
+			auto doc = MakePtr<XmlDocument>();
+			doc->rootElement = xmlRoot;
+			return doc;
 		}
 
 		Ptr<DocumentModel> GuiResource::GetDocumentByPath(const WString& path)

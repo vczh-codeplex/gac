@@ -228,6 +228,10 @@ void GuiMain()
 
 	List<WString> errors;
 	auto resource = GuiResource::LoadFromXml(L"..\\GacUISrcCodepackedTest\\Resources\\XmlWindowResourceDataBinding.xml", errors);
+	{
+		auto xml = resource->SaveToXml();
+		resource = GuiResource::LoadFromXml(xml, L"..\\GacUISrcCodepackedTest\\Resources\\", errors);
+	}
 	GetInstanceLoaderManager()->SetResource(L"Demo", resource);
 	
 	DateTime begin = DateTime::LocalTime();
