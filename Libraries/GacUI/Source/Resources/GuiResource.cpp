@@ -74,6 +74,53 @@ namespace vl
 			}
 		}
 
+		vint HexToInt(wchar_t c)
+		{
+			if (L'0' <= c && c <= L'9')
+			{
+				return c - L'0';
+			}
+			else if (L'A' <= c && c <= L'F')
+			{
+				return c - L'A';
+			}
+			else
+			{
+				return 0;
+			}
+		}
+
+		void HexToBinary(stream::IStream& stream, const WString& hexText)
+		{
+			const wchar_t* buffer = hexText.Buffer();
+			vint count = hexText.Length() / 2;
+			for (vint i = 0; i < count; i++)
+			{
+				vuint8_t byte = (vuint8_t)(HexToInt(buffer[0]) * 16 + HexToInt(buffer[1]));
+				buffer += 2;
+				stream.Write(&byte, 1);
+			}
+		}
+
+		WString BinaryToHex(stream::IStream& stream)
+		{
+			stream::MemoryStream memoryStream;
+			{
+				stream::StreamWriter writer(memoryStream);
+				vuint8_t byte;
+				while (stream.Read(&byte, 1) == 1)
+				{
+					writer.WriteChar(L"0123456789ABCDEF"[byte / 16]);
+					writer.WriteChar(L"0123456789ABCDEF"[byte % 16]);
+				}
+			}
+			memoryStream.SeekFromBegin(0);
+			{
+				stream::StreamReader reader(memoryStream);
+				return reader.ReadToEnd();
+			}
+		}
+
 /***********************************************************************
 GuiImageData
 ***********************************************************************/
