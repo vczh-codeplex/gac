@@ -203,6 +203,37 @@ GuiIqPrint
 
 			void Visit(GuiIqPrimaryQuery* node)override
 			{
+				switch (node->childOption)
+				{
+				case GuiIqChildOption::Direct:
+					writer.WriteString(L"/");
+					break;
+				case GuiIqChildOption::Indirect:
+					writer.WriteString(L"//");
+					break;
+				}
+
+				if (node->attributeNameOption == GuiIqNameOption::Specified)
+				{
+					writer.WriteChar(L'@');
+					writer.WriteString(node->attributeName.value);
+					writer.WriteChar(L':');
+				}
+
+				if (node->typeNameOption == GuiIqNameOption::Specified)
+				{
+					writer.WriteString(node->typeName.value);
+				}
+				else
+				{
+					writer.WriteChar(L'*');
+				}
+
+				if (node->referenceName.value != L"")
+				{
+					writer.WriteChar(L'.');
+					writer.WriteString(node->referenceName.value);
+				}
 			}
 
 			void Visit(GuiIqCascadeQuery* node)override
