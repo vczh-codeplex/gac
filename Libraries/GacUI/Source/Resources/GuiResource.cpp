@@ -344,6 +344,7 @@ GuiResourceFolder
 						if(typeResolver && preloadResolver)
 						{
 							Ptr<DescriptableObject> resource;
+							WString typeName = preloadResolver->GetType();
 							if (filePath == L"")
 							{
 								resource = preloadResolver->ResolveResource(element, errors);
@@ -366,9 +367,10 @@ GuiResourceFolder
 								else if(resource)
 								{
 									resource = typeResolver->ResolveResource(resource, 0, errors);
+									typeName = typeResolver->GetType();
 								}
 							}
-							item->SetContent(preloadResolver->GetType(), resource);
+							item->SetContent(typeName, resource);
 						}
 
 						if(!item->GetContent())
@@ -386,6 +388,18 @@ GuiResourceFolder
 
 		void GuiResourceFolder::SaveResourceToXml(Ptr<parsing::xml::XmlElement> xmlParent)
 		{
+			FOREACH(Ptr<GuiResourceItem>, item, items.Values())
+			{
+				auto attName = MakePtr<XmlAttribute>();
+				attName->value.value = item->GetName();
+
+				auto resolver = GetResourceResolverManager()->GetTypeResolver(item->GetTypeName());
+				auto xmlElement = resolver->Serialize(item->GetContent());
+				xmlElement->attributes.Add(attName);
+
+				xmlParent->subNodes.Add(xmlElement);
+			}
+
 			FOREACH(Ptr<GuiResourceFolder>, folder, folders.Values())
 			{
 				auto attName = MakePtr<XmlAttribute>();
@@ -397,18 +411,6 @@ GuiResourceFolder
 
 				xmlParent->subNodes.Add(xmlFolder);
 				folder->SaveResourceToXml(xmlFolder);
-			}
-
-			FOREACH(Ptr<GuiResourceItem>, item, items.Values())
-			{
-				auto attName = MakePtr<XmlAttribute>();
-				attName->value.value = item->GetName();
-
-				auto resolver = GetResourceResolverManager()->GetTypeResolver(item->GetTypeName());
-				auto xml = resolver->Serialize(item->GetContent());
-				xml->attributes.Add(attName);
-
-				xmlParent->subNodes.Add(attName);
 			}
 		}
 

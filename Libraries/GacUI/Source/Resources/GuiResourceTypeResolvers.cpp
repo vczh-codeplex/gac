@@ -171,7 +171,10 @@ Xml Type Resolver
 			{
 				if (auto obj = resource.Cast<XmlDocument>())
 				{
-					return obj->rootElement;
+					auto xmlXml = MakePtr<XmlElement>();
+					xmlXml->name.value = L"Xml";
+					xmlXml->subNodes.Add(obj->rootElement);
+					return xmlXml;
 				}
 				return 0;
 			}
@@ -238,8 +241,10 @@ Doc Type Resolver
 			{
 				if (auto obj = resource.Cast<DocumentModel>())
 				{
-					auto xml = obj->SaveToXml();
-					return xml->rootElement;
+					auto xmlDoc = MakePtr<XmlElement>();
+					xmlDoc->name.value = L"Doc";
+					xmlDoc->subNodes.Add(obj->SaveToXml()->rootElement);
+					return xmlDoc;
 				}
 				return 0;
 			}
