@@ -211,6 +211,11 @@ WindowsImage
 				}
 			}
 
+			void WindowsImage::SaveToStream(stream::IStream& stream)
+			{
+				throw 0;
+			}
+
 /***********************************************************************
 WindowsBitmapImage
 ***********************************************************************/
@@ -244,6 +249,11 @@ WindowsBitmapImage
 			INativeImageFrame* WindowsBitmapImage::GetFrame(vint index)
 			{
 				return index==0?frame.Obj():0;
+			}
+
+			void WindowsBitmapImage::SaveToStream(stream::IStream& stream)
+			{
+				throw 0;
 			}
 
 /***********************************************************************
