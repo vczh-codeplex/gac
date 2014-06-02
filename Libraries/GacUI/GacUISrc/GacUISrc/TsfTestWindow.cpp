@@ -109,7 +109,7 @@ void UnitTestInGuiMain()
 				StreamReader reader(stream);
 				queryText = reader.ReadToEnd();
 			}
-			ASSERT(queryText == queryCode);
+			ASSERT(queryText == queryCode || queryText == L"(" + WString(queryCode) + L")");
 		}
 	}
 }

@@ -29,13 +29,9 @@ GuiTextRepr
 		{
 			if (!fromStyle || fillStyleValues)
 			{
-				auto xmlRepr = MakePtr<XmlElement>();
-				xmlRepr->name.value = L"String";
-				xml->subNodes.Add(xmlRepr);
-
 				auto xmlText = MakePtr<XmlText>();
 				xmlText->content.value = text;
-				xmlRepr->subNodes.Add(xmlText);
+				xml->subNodes.Add(xmlText);
 			}
 		}
 
@@ -73,9 +69,16 @@ GuiAttSetterRepr
 			{
 				for (vint i = 0; i < setters.Count(); i++)
 				{
-					auto key = setters.Keys()[0];
-					auto value = setters.Values()[0];
-					if (value->values.Count() == 1 && value->values[0].Cast<GuiTextRepr>())
+					auto key = setters.Keys()[i];
+					auto value = setters.Values()[i];
+					if (key == L"")
+					{
+						FOREACH(Ptr<GuiValueRepr>, repr, value->values)
+						{
+							repr->FillXml(xml, fillStyleValues);
+						}
+					}
+					else if (value->values.Count() == 1 && value->values[0].Cast<GuiTextRepr>())
 					{
 						if (!value->values[0]->fromStyle || fillStyleValues)
 						{
@@ -83,7 +86,7 @@ GuiAttSetterRepr
 							att->name.value = key;
 							if (value->binding != L"")
 							{
-								att->name.value += L"." + value->binding;
+								att->name.value += L"-" + value->binding;
 							}
 							att->value.value = value->values[0].Cast<GuiTextRepr>()->text;
 							xml->attributes.Add(att);
@@ -95,7 +98,7 @@ GuiAttSetterRepr
 						xmlProp->name.value = L"att." + key;
 						if (value->binding != L"")
 						{
-							xmlProp->name.value += L"." + value->binding;
+							xmlProp->name.value += L"-" + value->binding;
 						}
 
 						FOREACH(Ptr<GuiValueRepr>, repr, value->values)
@@ -108,14 +111,14 @@ GuiAttSetterRepr
 
 				for (vint i = 0; i < eventHandlers.Count(); i++)
 				{
-					auto key = eventHandlers.Keys()[0];
-					auto value = eventHandlers.Values()[0];
+					auto key = eventHandlers.Keys()[i];
+					auto value = eventHandlers.Values()[i];
 
 					auto xmlEvent = MakePtr<XmlElement>();
 					xmlEvent->name.value = L"ev." + key;
 					if (value->binding != L"")
 					{
-						xmlEvent->name.value += L"." + value->binding;
+						xmlEvent->name.value += L"-" + value->binding;
 					}
 					xml->subNodes.Add(xmlEvent);
 
@@ -537,8 +540,8 @@ GuiInstanceContext
 
 			for (vint i = 0; i < namespaces.Count(); i++)
 			{
-				auto key = namespaces.Keys()[0];
-				auto value = namespaces.Values()[0];
+				auto key = namespaces.Keys()[i];
+				auto value = namespaces.Values()[i];
 
 				auto xmlns = MakePtr<XmlAttribute>();
 				xmlns->name.value = L"xmlns";

@@ -391,7 +391,7 @@ GuiResourceFolder
 			FOREACH(Ptr<GuiResourceItem>, item, items.Values())
 			{
 				auto attName = MakePtr<XmlAttribute>();
-				attName->name.value = L"Name";
+				attName->name.value = L"name";
 				attName->value.value = item->GetName();
 
 				auto resolver = GetResourceResolverManager()->GetTypeResolver(item->GetTypeName());
@@ -404,7 +404,7 @@ GuiResourceFolder
 			FOREACH(Ptr<GuiResourceFolder>, folder, folders.Values())
 			{
 				auto attName = MakePtr<XmlAttribute>();
-				attName->name.value = L"Name";
+				attName->name.value = L"name";
 				attName->value.value = folder->GetName();
 
 				auto xmlFolder = MakePtr<XmlElement>();

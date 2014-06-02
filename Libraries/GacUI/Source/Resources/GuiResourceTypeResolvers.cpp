@@ -56,8 +56,12 @@ Image Type Resolver
 
 			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)override
 			{
-				errors.Add(L"Image resource should be an image file.");
-				return 0;
+				auto text = XmlGetValue(element);
+				stream::MemoryStream stream;
+				HexToBinary(stream, text);
+				stream.SeekFromBegin(0);
+				auto image = GetCurrentController()->ImageService()->CreateImageFromStream(stream);
+				return new GuiImageData(image, 0);
 			}
 
 			Ptr<DescriptableObject> ResolveResource(const WString& path, collections::List<WString>& errors)override
