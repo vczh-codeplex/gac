@@ -36,50 +36,21 @@ Image Type Resolver
 
 			Ptr<parsing::xml::XmlElement> Serialize(Ptr<DescriptableObject> resource)override
 			{
-				if (auto obj = resource.Cast<GuiImageData>())
-				{
-					stream::MemoryStream stream;
-					stream.Write(&obj->GetBinary()[0], obj->GetBinary().Count());
-					stream.SeekFromBegin(0);
-
-					auto xmlContent = MakePtr<XmlText>();
-					xmlContent->content.value = BinaryToHex(stream);
-
-					auto xmlImage = MakePtr<XmlElement>();
-					xmlImage->name.value = L"Image";
-					xmlImage->subNodes.Add(xmlContent);
-
-					return xmlImage;
-				}
 				return 0;
 			}
 
 			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)override
 			{
-				auto text = XmlGetValue(element);
-				stream::MemoryStream stream;
-				HexToBinary(stream, text);
-				stream.SeekFromBegin(0);
-				auto image = GetCurrentController()->ImageService()->CreateImageFromStream(stream);
-
-				Ptr<GuiImageData> data = new GuiImageData(image, 0);
-				stream.SeekFromBegin(0);
-				data->GetBinary().Resize((vint)stream.Size());
-				stream.Read(&data->GetBinary()[0], data->GetBinary().Count());
-				return data;
+				errors.Add(L"Image resource should be an image file.");
+				return 0;
 			}
 
 			Ptr<DescriptableObject> ResolveResource(const WString& path, collections::List<WString>& errors)override
 			{
-				stream::FileStream stream(path, stream::FileStream::ReadOnly);
-				Ptr<INativeImage> image = GetCurrentController()->ImageService()->CreateImageFromStream(stream);
+				Ptr<INativeImage> image = GetCurrentController()->ImageService()->CreateImageFromFile(path);
 				if(image)
 				{
-					Ptr<GuiImageData> data = new GuiImageData(image, 0);
-					stream.SeekFromBegin(0);
-					data->GetBinary().Resize((vint)stream.Size());
-					stream.Read(&data->GetBinary()[0], data->GetBinary().Count());
-					return data;
+					return new GuiImageData(image, 0);
 				}
 				else
 				{

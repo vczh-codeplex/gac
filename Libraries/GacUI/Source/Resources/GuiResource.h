@@ -63,7 +63,6 @@ Resource Image
 		class GuiImageData : public Object, public Description<GuiImageData>
 		{
 		protected:
-			collections::Array<vuint8_t>	binary;
 			Ptr<INativeImage>				image;
 			vint							frameIndex;
 
@@ -82,9 +81,6 @@ Resource Image
 			/// <summary>Get the specified frame index.</summary>
 			/// <returns>The specified frame index.</returns>
 			vint							GetFrameIndex();
-			/// <summary>Get the binary data.</summary>
-			/// <returns>The binary data.</returns>
-			collections::Array<vuint8_t>&	GetBinary();
 		};
 
 /***********************************************************************
@@ -120,6 +116,7 @@ Resource Structure
 		protected:
 			GuiResourceFolder*						parent;
 			WString									name;
+			WString									path;
 			
 		public:
 			GuiResourceNodeBase();
@@ -131,6 +128,12 @@ Resource Structure
 			/// <summary>Get the name of this resource node.</summary>
 			/// <returns>The name of this resource node .</returns>
 			const WString&							GetName();
+			/// <summary>Get the path of this resource node. When saving the resource, if the path is not empty, the path will be serialized instead of the content.</summary>
+			/// <returns>The path of this resource node .</returns>
+			const WString&							GetPath();
+			/// <summary>Set the path of this resource node.</summary>
+			/// <param name="value">The path of this resource node .</param>
+			void									SetPath(const WString& value);
 		};
 
 		class DocumentModel;
