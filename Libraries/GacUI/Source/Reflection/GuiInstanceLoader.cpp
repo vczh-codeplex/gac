@@ -232,34 +232,39 @@ Instance Type Resolver
 		class GuiResourceInstanceTypeResolver : public Object, public IGuiResourceTypeResolver
 		{
 		public:
-			WString GetType()
+			WString GetType()override
 			{
 				return L"Instance";
 			}
 
-			WString GetPreloadType()
+			WString GetPreloadType()override
 			{
 				return L"Xml";
 			}
 
-			bool IsDelayLoad()
+			bool IsDelayLoad()override
 			{
 				return false;
 			}
 
-			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)
+			Ptr<parsing::xml::XmlElement> Serialize(Ptr<DescriptableObject> resource)override
+			{
+				throw 0;
+			}
+
+			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)override
 			{
 				errors.Add(L"Internal error: Instance resource needs resource preloading.");
 				return 0;
 			}
 
-			Ptr<DescriptableObject> ResolveResource(const WString& path, collections::List<WString>& errors)
+			Ptr<DescriptableObject> ResolveResource(const WString& path, collections::List<WString>& errors)override
 			{
 				errors.Add(L"Internal error: Instance resource needs resource preloading.");
 				return 0;
 			}
 
-			Ptr<DescriptableObject> ResolveResource(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)
+			Ptr<DescriptableObject> ResolveResource(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)override
 			{
 				Ptr<XmlDocument> xml = resource.Cast<XmlDocument>();
 				if (xml)
@@ -278,34 +283,39 @@ Instance Style Resolver
 		class GuiResourceInstanceStyleResolver : public Object, public IGuiResourceTypeResolver
 		{
 		public:
-			WString GetType()
+			WString GetType()override
 			{
 				return L"InstanceStyle";
 			}
 
-			WString GetPreloadType()
+			WString GetPreloadType()override
 			{
 				return L"Xml";
 			}
 
-			bool IsDelayLoad()
+			bool IsDelayLoad()override
 			{
 				return false;
 			}
 
-			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)
+			Ptr<parsing::xml::XmlElement> Serialize(Ptr<DescriptableObject> resource)override
+			{
+				throw 0;
+			}
+
+			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)override
 			{
 				errors.Add(L"Internal error: Instance style resource needs resource preloading.");
 				return 0;
 			}
 
-			Ptr<DescriptableObject> ResolveResource(const WString& path, collections::List<WString>& errors)
+			Ptr<DescriptableObject> ResolveResource(const WString& path, collections::List<WString>& errors)override
 			{
 				errors.Add(L"Internal error: Instance style resource needs resource preloading.");
 				return 0;
 			}
 
-			Ptr<DescriptableObject> ResolveResource(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)
+			Ptr<DescriptableObject> ResolveResource(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)override
 			{
 				Ptr<XmlDocument> xml = resource.Cast<XmlDocument>();
 				if (xml)
@@ -324,34 +334,39 @@ Instance Schema Type Resolver
 		class GuiResourceInstanceSchemaTypeResolver : public Object, public IGuiResourceTypeResolver
 		{
 		public:
-			WString GetType()
+			WString GetType()override
 			{
 				return L"InstanceSchema";
 			}
 
-			WString GetPreloadType()
+			WString GetPreloadType()override
 			{
 				return L"Xml";
 			}
 
-			bool IsDelayLoad()
+			bool IsDelayLoad()override
 			{
 				return false;
 			}
 
-			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)
+			Ptr<parsing::xml::XmlElement> Serialize(Ptr<DescriptableObject> resource)override
+			{
+				throw 0;
+			}
+
+			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)override
 			{
 				errors.Add(L"Internal error: Instance schema resource needs resource preloading.");
 				return 0;
 			}
 
-			Ptr<DescriptableObject> ResolveResource(const WString& path, collections::List<WString>& errors)
+			Ptr<DescriptableObject> ResolveResource(const WString& path, collections::List<WString>& errors)override
 			{
 				errors.Add(L"Internal error: Instance schema resource needs resource preloading.");
 				return 0;
 			}
 
-			Ptr<DescriptableObject> ResolveResource(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)
+			Ptr<DescriptableObject> ResolveResource(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)override
 			{
 				Ptr<XmlDocument> xml = resource.Cast<XmlDocument>();
 				if (xml)

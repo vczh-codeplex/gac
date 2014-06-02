@@ -19,28 +19,33 @@ Image Type Resolver
 		class GuiResourceImageTypeResolver : public Object, public IGuiResourceTypeResolver
 		{
 		public:
-			WString GetType()
+			WString GetType()override
 			{
 				return L"Image";
 			}
 
-			WString GetPreloadType()
+			WString GetPreloadType()override
 			{
 				return L"";
 			}
 
-			bool IsDelayLoad()
+			bool IsDelayLoad()override
 			{
 				return false;
 			}
 
-			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)
+			Ptr<parsing::xml::XmlElement> Serialize(Ptr<DescriptableObject> resource)override
+			{
+				throw 0;
+			}
+
+			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)override
 			{
 				errors.Add(L"Image resource should be an image file.");
 				return 0;
 			}
 
-			Ptr<DescriptableObject> ResolveResource(const WString& path, collections::List<WString>& errors)
+			Ptr<DescriptableObject> ResolveResource(const WString& path, collections::List<WString>& errors)override
 			{
 				Ptr<INativeImage> image = GetCurrentController()->ImageService()->CreateImageFromFile(path);
 				if(image)
@@ -54,7 +59,7 @@ Image Type Resolver
 				}
 			}
 
-			Ptr<DescriptableObject> ResolveResource(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)
+			Ptr<DescriptableObject> ResolveResource(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)override
 			{
 				errors.Add(L"Internal error: Image resource doesn't need resource preloading.");
 				return 0;
@@ -68,27 +73,32 @@ Text Type Resolver
 		class GuiResourceTextTypeResolver : public Object, public IGuiResourceTypeResolver
 		{
 		public:
-			WString GetType()
+			WString GetType()override
 			{
 				return L"Text";
 			}
 
-			WString GetPreloadType()
+			WString GetPreloadType()override
 			{
 				return L"";
 			}
 
-			bool IsDelayLoad()
+			bool IsDelayLoad()override
 			{
 				return false;
 			}
 
-			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)
+			Ptr<parsing::xml::XmlElement> Serialize(Ptr<DescriptableObject> resource)override
+			{
+				throw 0;
+			}
+
+			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)override
 			{
 				return new GuiTextData(XmlGetValue(element));
 			}
 
-			Ptr<DescriptableObject> ResolveResource(const WString& path, collections::List<WString>& errors)
+			Ptr<DescriptableObject> ResolveResource(const WString& path, collections::List<WString>& errors)override
 			{
 				WString text;
 				if(LoadTextFile(path, text))
@@ -102,7 +112,7 @@ Text Type Resolver
 				}
 			}
 
-			Ptr<DescriptableObject> ResolveResource(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)
+			Ptr<DescriptableObject> ResolveResource(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)override
 			{
 				errors.Add(L"Internal error: Text resource doesn't need resource preloading.");
 				return 0;
@@ -116,22 +126,27 @@ Xml Type Resolver
 		class GuiResourceXmlTypeResolver : public Object, public IGuiResourceTypeResolver
 		{
 		public:
-			WString GetType()
+			WString GetType()override
 			{
 				return L"Xml";
 			}
 
-			WString GetPreloadType()
+			WString GetPreloadType()override
 			{
 				return L"";
 			}
 
-			bool IsDelayLoad()
+			bool IsDelayLoad()override
 			{
 				return false;
 			}
 
-			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)
+			Ptr<parsing::xml::XmlElement> Serialize(Ptr<DescriptableObject> resource)override
+			{
+				throw 0;
+			}
+
+			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)override
 			{
 				Ptr<XmlElement> root=XmlGetElements(element).First(0);
 				if(root)
@@ -143,7 +158,7 @@ Xml Type Resolver
 				return 0;
 			}
 
-			Ptr<DescriptableObject> ResolveResource(const WString& path, collections::List<WString>& errors)
+			Ptr<DescriptableObject> ResolveResource(const WString& path, collections::List<WString>& errors)override
 			{
 				if(auto parser=GetParserManager()->GetParser<XmlDocument>(L"XML"))
 				{
@@ -160,7 +175,7 @@ Xml Type Resolver
 				return 0;
 			}
 
-			Ptr<DescriptableObject> ResolveResource(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)
+			Ptr<DescriptableObject> ResolveResource(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)override
 			{
 				errors.Add(L"Internal error: Xml resource doesn't need resource preloading.");
 				return 0;
@@ -174,34 +189,39 @@ Doc Type Resolver
 		class GuiResourceDocTypeResolver : public Object, public IGuiResourceTypeResolver
 		{
 		public:
-			WString GetType()
+			WString GetType()override
 			{
 				return L"Doc";
 			}
 
-			WString GetPreloadType()
+			WString GetPreloadType()override
 			{
 				return L"Xml";
 			}
 
-			bool IsDelayLoad()
+			bool IsDelayLoad()override
 			{
 				return true;
 			}
 
-			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)
+			Ptr<parsing::xml::XmlElement> Serialize(Ptr<DescriptableObject> resource)override
+			{
+				throw 0;
+			}
+
+			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)override
 			{
 				errors.Add(L"Internal error: Doc resource needs resource preloading.");
 				return 0;
 			}
 
-			Ptr<DescriptableObject> ResolveResource(const WString& path, collections::List<WString>& errors)
+			Ptr<DescriptableObject> ResolveResource(const WString& path, collections::List<WString>& errors)override
 			{
 				errors.Add(L"Internal error: Doc resource needs resource preloading.");
 				return 0;
 			}
 
-			Ptr<DescriptableObject> ResolveResource(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)
+			Ptr<DescriptableObject> ResolveResource(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)override
 			{
 				Ptr<XmlDocument> xml = resource.Cast<XmlDocument>();
 				if(xml)
