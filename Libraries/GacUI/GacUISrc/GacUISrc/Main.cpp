@@ -18,6 +18,7 @@ using namespace vl::collections;
 using namespace vl::stream;
 using namespace vl::reflection::description;
 using namespace vl::parsing;
+using namespace vl::parsing::xml;
 using namespace vl::workflow;
 using namespace vl::workflow::analyzer;
 using namespace vl::workflow::runtime;
@@ -230,7 +231,18 @@ void GuiMain()
 	auto resource = GuiResource::LoadFromXml(L"..\\GacUISrcCodepackedTest\\Resources\\XmlWindowResourceDataBinding.xml", errors);
 	{
 		auto xml = resource->SaveToXml();
-		//resource = GuiResource::LoadFromXml(xml, L"..\\GacUISrcCodepackedTest\\Resources\\", errors);
+		MemoryStream stream;
+		WString xmlText;
+		{
+			StreamWriter writer(stream);
+			XmlPrint(xml, writer);
+		}
+		stream.SeekFromBegin(0);
+		{
+			StreamReader reader(stream);
+			xmlText = reader.ReadToEnd();
+		}
+		resource = GuiResource::LoadFromXml(xml, L"..\\GacUISrcCodepackedTest\\Resources\\", errors);
 	}
 	GetInstanceLoaderManager()->SetResource(L"Demo", resource);
 	

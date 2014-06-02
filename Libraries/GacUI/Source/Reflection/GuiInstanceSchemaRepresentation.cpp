@@ -41,6 +41,34 @@ GuiInstancePropertySchame
 			return schema;
 		}
 
+		Ptr<parsing::xml::XmlElement> GuiInstancePropertySchame::SaveToXml()
+		{
+			auto xmlProperty = MakePtr<XmlElement>();
+			xmlProperty->name.value = L"Property";
+			
+			auto attName = MakePtr<XmlAttribute>();
+			attName->name.value = L"Name";
+			attName->value.value = name;
+			xmlProperty->attributes.Add(attName);
+			
+			auto attType = MakePtr<XmlAttribute>();
+			attType->name.value = L"Type";
+			attType->value.value = typeName;
+			xmlProperty->attributes.Add(attType);
+			
+			auto attReadonly = MakePtr<XmlAttribute>();
+			attReadonly->name.value = L"Readonly";
+			attReadonly->value.value = readonly ? L"true" : L"false";
+			xmlProperty->attributes.Add(attReadonly);
+			
+			auto attObservable = MakePtr<XmlAttribute>();
+			attObservable->name.value = L"Observable";
+			attObservable->value.value = observable ? L"true" : L"false";
+			xmlProperty->attributes.Add(attObservable);
+
+			return xmlProperty;
+		}
+
 /***********************************************************************
 GuiInstanceTypeSchema
 ***********************************************************************/
@@ -64,6 +92,31 @@ GuiInstanceTypeSchema
 				auto prop = GuiInstancePropertySchame::LoadFromXml(memberElement, errors);
 				properties.Add(prop);
 			}
+		}
+
+		Ptr<parsing::xml::XmlElement> GuiInstanceTypeSchema::SaveToXml()
+		{
+			auto xmlType = MakePtr<XmlElement>();
+			
+			auto attClass = MakePtr<XmlAttribute>();
+			attClass->name.value = L"ref.Class";
+			attClass->value.value = typeName;
+			xmlType->attributes.Add(attClass);
+
+			if (parentType != L"")
+			{
+				auto attParent = MakePtr<XmlAttribute>();
+				attParent->name.value = L"Parent";
+				attParent->value.value = parentType;
+				xmlType->attributes.Add(attParent);
+			}
+
+			FOREACH(Ptr<GuiInstancePropertySchame>, prop, properties)
+			{
+				xmlType->subNodes.Add(prop->SaveToXml());
+			}
+
+			return xmlType;
 		}
 
 /***********************************************************************
@@ -109,6 +162,13 @@ GuiInstanceDataSchema
 			return schema;
 		}
 
+		Ptr<parsing::xml::XmlElement> GuiInstanceDataSchema::SaveToXml()
+		{
+			auto xmlType = GuiInstanceTypeSchema::SaveToXml();
+			xmlType->name.value = referenceType ? L"Class" : L"Struct";
+			return xmlType;
+		}
+
 /***********************************************************************
 GuiInstanceInterfaceSchema
 ***********************************************************************/
@@ -140,6 +200,29 @@ GuiInstanceInterfaceSchema
 			return schema;
 		}
 
+		Ptr<parsing::xml::XmlElement> GuiInstanceMethodSchema::SaveToXml()
+		{
+			auto xmlMethod = MakePtr<XmlElement>();
+			xmlMethod->name.value = L"Method";
+			
+			auto attName = MakePtr<XmlAttribute>();
+			attName->name.value = L"Name";
+			attName->value.value = name;
+			xmlMethod->attributes.Add(attName);
+			
+			auto attType = MakePtr<XmlAttribute>();
+			attType->name.value = L"Type";
+			attType->value.value = returnType;
+			xmlMethod->attributes.Add(attType);
+
+			FOREACH(Ptr<GuiInstancePropertySchame>, prop, arguments)
+			{
+				xmlMethod->subNodes.Add(prop->SaveToXml());
+			}
+
+			return xmlMethod;
+		}
+
 /***********************************************************************
 GuiInstanceInterfaceSchema
 ***********************************************************************/
@@ -154,6 +237,19 @@ GuiInstanceInterfaceSchema
 				schema->methods.Add(method);
 			}
 			return schema;
+		}
+
+		Ptr<parsing::xml::XmlElement> GuiInstanceInterfaceSchema::SaveToXml()
+		{
+			auto xmlType = GuiInstanceTypeSchema::SaveToXml();
+			xmlType->name.value = L"Interface";
+
+			FOREACH(Ptr<GuiInstanceMethodSchema>, method, methods)
+			{
+				xmlType->subNodes.Add(method->SaveToXml());
+			}
+
+			return xmlType;
 		}
 
 /***********************************************************************
@@ -179,6 +275,21 @@ GuiInstanceSchema
 				}
 			}
 			return schema;
+		}
+
+		Ptr<parsing::xml::XmlDocument> GuiInstanceSchema::SaveToXml()
+		{
+			auto xmlElement = MakePtr<XmlElement>();
+			xmlElement->name.value = L"InstanceSchema";
+
+			FOREACH(Ptr<GuiInstanceTypeSchema>, type, schemas)
+			{
+				xmlElement->subNodes.Add(type->SaveToXml());
+			}
+
+			auto doc = MakePtr<XmlDocument>();
+			doc->rootElement = xmlElement;
+			return doc;
 		}
 	}
 }

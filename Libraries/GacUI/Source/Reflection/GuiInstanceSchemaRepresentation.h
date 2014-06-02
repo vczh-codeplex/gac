@@ -24,6 +24,7 @@ namespace vl
 			bool										observable = false;
 
 			static Ptr<GuiInstancePropertySchame>		LoadFromXml(Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
+			Ptr<parsing::xml::XmlElement>				SaveToXml();
 		};
 
 		class GuiInstanceTypeSchema : public Object, public Description<GuiInstanceTypeSchema>
@@ -35,6 +36,7 @@ namespace vl
 			PropertyList								properties;
 
 			void										LoadFromXml(Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
+			virtual Ptr<parsing::xml::XmlElement>		SaveToXml() = 0;
 		};
 
 /***********************************************************************
@@ -47,6 +49,7 @@ Instance Struct/Class Schema
 			bool										referenceType = false;
 
 			static Ptr<GuiInstanceDataSchema>			LoadFromXml(Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
+			Ptr<parsing::xml::XmlElement>				SaveToXml()override;
 		};
 
 /***********************************************************************
@@ -62,6 +65,7 @@ Instance Interface Schema
 			PropertyList								arguments;
 
 			static Ptr<GuiInstanceMethodSchema>			LoadFromXml(Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
+			Ptr<parsing::xml::XmlElement>				SaveToXml();
 		};
 
 		class GuiInstanceInterfaceSchema : public GuiInstanceTypeSchema, public Description<GuiInstanceInterfaceSchema>
@@ -71,6 +75,7 @@ Instance Interface Schema
 			MethodList									methods;
 
 			static Ptr<GuiInstanceInterfaceSchema>		LoadFromXml(Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
+			Ptr<parsing::xml::XmlElement>				SaveToXml()override;
 		};
 
 /***********************************************************************
@@ -84,6 +89,7 @@ Instance Schema Representation
 			TypeSchemaList								schemas;
 
 			static Ptr<GuiInstanceSchema>				LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, collections::List<WString>& errors);
+			Ptr<parsing::xml::XmlDocument>				SaveToXml();
 		};
 	}
 }

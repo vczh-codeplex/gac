@@ -249,7 +249,14 @@ Instance Type Resolver
 
 			Ptr<parsing::xml::XmlElement> Serialize(Ptr<DescriptableObject> resource)override
 			{
-				throw 0;
+				if (auto obj = resource.Cast<GuiInstanceContext>())
+				{
+					auto xmlInstance = MakePtr<XmlElement>();
+					xmlInstance->name.value = L"Instance";
+					xmlInstance->subNodes.Add(obj->SaveToXml()->rootElement);
+					return xmlInstance;
+				}
+				return 0;
 			}
 
 			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)override
@@ -300,7 +307,14 @@ Instance Style Resolver
 
 			Ptr<parsing::xml::XmlElement> Serialize(Ptr<DescriptableObject> resource)override
 			{
-				throw 0;
+				if (auto obj = resource.Cast<GuiInstanceStyleContext>())
+				{
+					auto xmlInstanceStyle = MakePtr<XmlElement>();
+					xmlInstanceStyle->name.value = L"InstanceStyle";
+					xmlInstanceStyle->subNodes.Add(obj->SaveToXml()->rootElement);
+					return xmlInstanceStyle;
+				}
+				return 0;
 			}
 
 			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)override
@@ -351,7 +365,14 @@ Instance Schema Type Resolver
 
 			Ptr<parsing::xml::XmlElement> Serialize(Ptr<DescriptableObject> resource)override
 			{
-				throw 0;
+				if (auto obj = resource.Cast<GuiInstanceSchema>())
+				{
+					auto xmlInstanceSchema = MakePtr<XmlElement>();
+					xmlInstanceSchema->name.value = L"InstanceSchema";
+					xmlInstanceSchema->subNodes.Add(obj->SaveToXml()->rootElement);
+					return xmlInstanceSchema;
+				}
+				return 0;
 			}
 
 			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)override
