@@ -148,7 +148,10 @@ WindowsImageFrame
 					IWICBitmap* frameDecode = frames[i]->GetFrameBitmap();
 
 					hr = encoder->CreateNewFrame(&frameEncode, NULL);
-					if (!SUCCEEDED(hr)) goto FRAME_FAILURE;
+					if (!SUCCEEDED(hr))
+					{
+						break;
+					}
 
 					hr = frameEncode->Initialize(NULL);
 					if (!SUCCEEDED(hr)) goto FRAME_FAILURE;
