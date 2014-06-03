@@ -127,6 +127,62 @@ GuiReferenceInstanceBinder
 		};
 
 /***********************************************************************
+GuiWorkflowCache
+***********************************************************************/
+
+		class GuiWorkflowCache : public Object, public IGuiInstanceCache
+		{
+		public:
+			static const wchar_t*			CacheTypeName;
+
+			Ptr<WfAssembly>					assembly;
+
+			GuiWorkflowCache()
+			{
+			}
+
+			GuiWorkflowCache(Ptr<WfAssembly> _assembly)
+				:assembly(_assembly)
+			{
+			}
+
+			WString GetCacheTypeName()override
+			{
+				return CacheTypeName;
+			}
+		};
+
+		const wchar_t* GuiWorkflowCache::CacheTypeName = L"WORKFLOW-ASSEMBLY-CACHE";
+
+		class GuiWorkflowCacheResolver : public Object, public IGuiInstanceCacheResolver
+		{
+		public:
+			WString GetCacheTypeName()override
+			{
+				return GuiWorkflowCache::CacheTypeName;
+			}
+
+			bool Serialize(Ptr<IGuiInstanceCache> cache, stream::IStream& stream)override
+			{
+				if (auto obj = cache.Cast<GuiWorkflowCache>())
+				{
+					obj->assembly->Serialize(stream);
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+
+			Ptr<IGuiInstanceCache> Deserialize(stream::IStream& stream)override
+			{
+				auto assembly = new WfAssembly(stream);
+				return new GuiWorkflowCache(assembly);
+			}
+		};
+
+/***********************************************************************
 GuiWorkflowGlobalContext
 ***********************************************************************/
 
@@ -171,7 +227,7 @@ GuiWorkflowGlobalContext
 			void Initialize(Ptr<GuiInstanceEnvironment> env)override
 			{
 				Ptr<WfAssembly> assembly;
-				vint cacheIndex = env->context->caches.Keys().IndexOf(GetContextName());
+				vint cacheIndex = env->context->precompiledCaches.Keys().IndexOf(GetContextName());
 				if (cacheIndex != -1)
 				{
 					Dictionary<DescriptableObject*, WString> valueNames;
@@ -191,7 +247,7 @@ GuiWorkflowGlobalContext
 							env->scope->referenceValues.Add(subscribee, dataBinding.instance);
 						}
 					}
-					assembly = env->context->caches.Values()[cacheIndex].Cast<WfAssembly>();
+					assembly = env->context->precompiledCaches.Values()[cacheIndex].Cast<GuiWorkflowCache>()->assembly;
 				}
 				else
 				{
@@ -417,11 +473,11 @@ GuiWorkflowGlobalContext
 						}
 						env->scope->errors.Add(ERROR_CODE_PREFIX L"Print code for reference:");
 						env->scope->errors.Add(moduleCode);
-						env->context->caches.Add(GetContextName(), 0);
+						env->context->precompiledCaches.Add(GetContextName(), 0);
 						return;
 					}
 					assembly = GenerateAssembly(GetSharedWorkflowManager());
-					env->context->caches.Add(GetContextName(), assembly);
+					env->context->precompiledCaches.Add(GetContextName(), new GuiWorkflowCache(assembly));
 				}
 
 				if (assembly)
@@ -500,7 +556,7 @@ GuiScriptInstanceBinder
 				WorkflowDataBinding dataBinding;
 				dataBinding.instance = propertyValue.instanceValue;
 
-				if (env->context->caches.Keys().Contains(GuiWorkflowGlobalContext::ContextName))
+				if (env->context->precompiledCaches.Keys().Contains(GuiWorkflowGlobalContext::ContextName))
 				{
 					goto SUCCESS;
 				}
@@ -642,10 +698,10 @@ GuiEvalInstanceBinder
 					Ptr<WfAssembly> assembly;
 					WString expressionCode = TranslateExpression(propertyValue.GetText());
 					WString cacheKey = L"<att.eval>" + expressionCode;
-					vint cacheIndex = env->context->caches.Keys().IndexOf(cacheKey);
+					vint cacheIndex = env->context->precompiledCaches.Keys().IndexOf(cacheKey);
 					if (cacheIndex != -1)
 					{
-						assembly = env->context->caches.Values()[cacheIndex].Cast<WfAssembly>();
+						assembly = env->context->precompiledCaches.Values()[cacheIndex].Cast<GuiWorkflowCache>()->assembly;
 					}
 					else
 					{
@@ -654,7 +710,7 @@ GuiEvalInstanceBinder
 						if (!expression)
 						{
 							env->scope->errors.Add(ERROR_CODE_PREFIX L"Failed to parse the workflow expression \"" + expressionCode + L"\".");
-							env->context->caches.Add(cacheKey, 0);
+							env->context->precompiledCaches.Add(cacheKey, 0);
 							return Value();
 						}
 
@@ -682,12 +738,12 @@ GuiEvalInstanceBinder
 							{
 								env->scope->errors.Add(error->errorMessage);
 							}
-							env->context->caches.Add(cacheKey, 0);
+							env->context->precompiledCaches.Add(cacheKey, 0);
 							return Value();
 						}
 
 						assembly = GenerateAssembly(GetSharedWorkflowManager());
-						env->context->caches.Add(cacheKey, assembly);
+						env->context->precompiledCaches.Add(cacheKey, new GuiWorkflowCache(assembly));
 					}
 
 					if (assembly)
@@ -740,10 +796,10 @@ GuiEvalInstanceEventBinder
 					Ptr<WfAssembly> assembly;
 					WString statementCode = handler.GetText();
 					WString cacheKey = L"<ev.eval>" + statementCode;
-					vint cacheIndex = env->context->caches.Keys().IndexOf(cacheKey);
+					vint cacheIndex = env->context->precompiledCaches.Keys().IndexOf(cacheKey);
 					if (cacheIndex != -1)
 					{
-						assembly = env->context->caches.Values()[cacheIndex].Cast<WfAssembly>();
+						assembly = env->context->precompiledCaches.Values()[cacheIndex].Cast<GuiWorkflowCache>()->assembly;
 					}
 					else
 					{
@@ -752,7 +808,7 @@ GuiEvalInstanceEventBinder
 						if (!statement)
 						{
 							env->scope->errors.Add(ERROR_CODE_PREFIX L"Failed to parse the workflow statement.");
-							env->context->caches.Add(cacheKey, 0);
+							env->context->precompiledCaches.Add(cacheKey, 0);
 							return false;
 						}
 
@@ -797,12 +853,12 @@ GuiEvalInstanceEventBinder
 							{
 								env->scope->errors.Add(error->errorMessage);
 							}
-							env->context->caches.Add(cacheKey, 0);
+							env->context->precompiledCaches.Add(cacheKey, 0);
 							return false;
 						}
 
 						assembly = GenerateAssembly(GetSharedWorkflowManager());
-						env->context->caches.Add(cacheKey, assembly);
+						env->context->precompiledCaches.Add(cacheKey, new GuiWorkflowCache(assembly));
 					}
 
 					if (assembly)
@@ -897,6 +953,7 @@ GuiPredefinedInstanceBindersPlugin
 					IGuiInstanceLoaderManager* manager=GetInstanceLoaderManager();
 
 					manager->AddInstanceBindingContextFactory(new GuiInstanceBindingContextFactory<GuiWorkflowGlobalContext>(GuiWorkflowGlobalContext::ContextName));
+					manager->AddInstanceCacheResolver(new GuiWorkflowCacheResolver);
 
 					manager->AddInstanceBinder(new GuiResourceInstanceBinder);
 					manager->AddInstanceBinder(new GuiReferenceInstanceBinder);
