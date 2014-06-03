@@ -1891,13 +1891,21 @@ Instruction
 				vint												lastInstruction = -1;
 			};
 
-			class WfAssembly : public Object
+			class WfAssembly : public Object, public reflection::Description<WfAssembly>
 			{
+			protected:
+				template<typename TIO>
+				void IO(TIO& io);
 			public:
 				collections::List<WString>							variableNames;
 				collections::Group<WString, vint>					functionByName;
 				collections::List<Ptr<WfAssemblyFunction>>			functions;
 				collections::List<WfInstruction>					instructions;
+
+				WfAssembly();
+				WfAssembly(stream::IStream& input);
+
+				void												Serialize(stream::IStream& output);
 			};
 
 /***********************************************************************

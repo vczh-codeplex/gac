@@ -3283,7 +3283,7 @@ WindowsBitmapImage
 				:imageService(_imageService)
 				,formatType(_formatType)
 			{
-				frame=new WindowsImageFrame(this, sourceBitmap);
+				frame = new WindowsImageFrame(this, sourceBitmap);
 			}
 
 			WindowsBitmapImage::~WindowsBitmapImage()
