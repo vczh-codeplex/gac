@@ -137,6 +137,7 @@ Resource Structure
 		};
 
 		class DocumentModel;
+		class GuiResourcePathResolver;
 		
 		/// <summary>Resource item.</summary>
 		class GuiResourceItem : public GuiResourceNodeBase, public Description<GuiResourceItem>
@@ -198,7 +199,8 @@ Resource Structure
 			FolderMap								folders;
 
 			void									LoadResourceFolderXml(DelayLoadingList& delayLoadings, const WString& containingFolder, Ptr<parsing::xml::XmlElement> folderXml, collections::List<WString>& errors);
-			void									SaveResourceToXml(Ptr<parsing::xml::XmlElement> xmlParent);
+			void									SaveResourceFolderToXml(Ptr<parsing::xml::XmlElement> xmlParent, bool serializePrecompiledResource);
+			void									PrecompileResourceFolder(Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors);
 		public:
 			/// <summary>Create a resource folder.</summary>
 			GuiResourceFolder();
@@ -285,7 +287,10 @@ Resource
 
 			/// <summary>Save the resource to xml.</summary>
 			/// <returns>The xml.</returns>
-			Ptr<parsing::xml::XmlDocument>			SaveToXml();
+			Ptr<parsing::xml::XmlDocument>			SaveToXml(bool serializePrecompiledResource);
+
+			/// <summary>Precompile this resource to improve performance.</summary>
+			void									Precompile(collections::List<WString>& errors);
 			
 			/// <summary>Get a contained document model using a path like "Packages\Application\Name". If the path does not exists or the type does not match, an exception will be thrown.</summary>
 			/// <returns>The containd resource object.</returns>
@@ -374,10 +379,18 @@ Resource Type Resolver
 			/// <summary>Get the delay load feature for this resolver.</summary>
 			/// <returns>Returns true if this type need to delay load.</returns>
 			virtual bool									IsDelayLoad() = 0;
+			
+			/// <summary>Precompile the resource item.</summary>
+			/// <param name="resource">The resource.</param>
+			/// <param name="resolver">The path resolver. This is only for delay load resource.</param>
+			/// <param name="errors">All collected errors during loading a resource.</param>
+			virtual void									Precompile(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors) = 0;
 
 			/// <summary>Serialize a resource to an xml element.</summary>
 			/// <returns>The serialized xml element.</returns>
-			virtual Ptr<parsing::xml::XmlElement>			Serialize(Ptr<DescriptableObject> resource) = 0;
+			/// <param name="resource">The resource.</param>
+			/// <param name="serializePrecompiledResource">Set to true to serialize the precompiled version of the resource.</param>
+			virtual Ptr<parsing::xml::XmlElement>			Serialize(Ptr<DescriptableObject> resource, bool serializePrecompiledResource) = 0;
 
 			/// <summary>Load a resource for a type inside an xml element.</summary>
 			/// <returns>The resource.</returns>

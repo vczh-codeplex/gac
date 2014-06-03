@@ -34,7 +34,11 @@ Image Type Resolver
 				return false;
 			}
 
-			Ptr<parsing::xml::XmlElement> Serialize(Ptr<DescriptableObject> resource)override
+			void Precompile(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)override
+			{
+			}
+
+			Ptr<parsing::xml::XmlElement> Serialize(Ptr<DescriptableObject> resource, bool serializePrecompiledResource)override
 			{
 				return 0;
 			}
@@ -88,7 +92,11 @@ Text Type Resolver
 				return false;
 			}
 
-			Ptr<parsing::xml::XmlElement> Serialize(Ptr<DescriptableObject> resource)override
+			void Precompile(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)override
+			{
+			}
+
+			Ptr<parsing::xml::XmlElement> Serialize(Ptr<DescriptableObject> resource, bool serializePrecompiledResource)override
 			{
 				if (auto obj = resource.Cast<GuiTextData>())
 				{
@@ -152,7 +160,11 @@ Xml Type Resolver
 				return false;
 			}
 
-			Ptr<parsing::xml::XmlElement> Serialize(Ptr<DescriptableObject> resource)override
+			void Precompile(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)override
+			{
+			}
+
+			Ptr<parsing::xml::XmlElement> Serialize(Ptr<DescriptableObject> resource, bool serializePrecompiledResource)override
 			{
 				if (auto obj = resource.Cast<XmlDocument>())
 				{
@@ -222,7 +234,11 @@ Doc Type Resolver
 				return true;
 			}
 
-			Ptr<parsing::xml::XmlElement> Serialize(Ptr<DescriptableObject> resource)override
+			void Precompile(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)override
+			{
+			}
+
+			Ptr<parsing::xml::XmlElement> Serialize(Ptr<DescriptableObject> resource, bool serializePrecompiledResource)override
 			{
 				if (auto obj = resource.Cast<DocumentModel>())
 				{

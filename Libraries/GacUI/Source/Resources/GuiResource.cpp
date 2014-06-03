@@ -400,7 +400,7 @@ GuiResourceFolder
 			}
 		}
 
-		void GuiResourceFolder::SaveResourceToXml(Ptr<parsing::xml::XmlElement> xmlParent)
+		void GuiResourceFolder::SaveResourceFolderToXml(Ptr<parsing::xml::XmlElement> xmlParent, bool serializePrecompiledResource)
 		{
 			FOREACH(Ptr<GuiResourceItem>, item, items.Values())
 			{
@@ -411,9 +411,12 @@ GuiResourceFolder
 				if (item->GetPath() == L"")
 				{
 					auto resolver = GetResourceResolverManager()->GetTypeResolver(item->GetTypeName());
-					auto xmlElement = resolver->Serialize(item->GetContent());
-					xmlElement->attributes.Add(attName);
-					xmlParent->subNodes.Add(xmlElement);
+					auto xmlElement = resolver->Serialize(item->GetContent(), serializePrecompiledResource);
+					if (xmlElement)
+					{
+						xmlElement->attributes.Add(attName);
+						xmlParent->subNodes.Add(xmlElement);
+					}
 				}
 				else
 				{
@@ -446,7 +449,7 @@ GuiResourceFolder
 
 				if (folder->GetPath() == L"")
 				{
-					folder->SaveResourceToXml(xmlFolder);
+					folder->SaveResourceFolderToXml(xmlFolder, serializePrecompiledResource);
 				}
 				else
 				{
@@ -459,6 +462,20 @@ GuiResourceFolder
 					xmlText->content.value = folder->GetPath();
 					xmlFolder->subNodes.Add(xmlText);
 				}
+			}
+		}
+
+		void GuiResourceFolder::PrecompileResourceFolder(Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)
+		{
+			FOREACH(Ptr<GuiResourceItem>, item, items.Values())
+			{
+				auto typeResolver = GetResourceResolverManager()->GetTypeResolver(item->GetTypeName());
+				typeResolver->Precompile(item->GetContent(), resolver, errors);
+			}
+
+			FOREACH(Ptr<GuiResourceFolder>, folder, folders.Values())
+			{
+				folder->PrecompileResourceFolder(resolver, errors);
 			}
 		}
 
@@ -657,15 +674,21 @@ GuiResource
 			return 0;
 		}
 
-		Ptr<parsing::xml::XmlDocument> GuiResource::SaveToXml()
+		Ptr<parsing::xml::XmlDocument> GuiResource::SaveToXml(bool serializePrecompiledResource)
 		{
 			auto xmlRoot = MakePtr<XmlElement>();
 			xmlRoot->name.value = L"Resource";
-			SaveResourceToXml(xmlRoot);
+			SaveResourceFolderToXml(xmlRoot, serializePrecompiledResource);
 
 			auto doc = MakePtr<XmlDocument>();
 			doc->rootElement = xmlRoot;
 			return doc;
+		}
+
+		void GuiResource::Precompile(collections::List<WString>& errors)
+		{
+			Ptr<GuiResourcePathResolver> resolver = new GuiResourcePathResolver(this, workingDirectory);
+			PrecompileResourceFolder(resolver, errors);
 		}
 
 		Ptr<DocumentModel> GuiResource::GetDocumentByPath(const WString& path)

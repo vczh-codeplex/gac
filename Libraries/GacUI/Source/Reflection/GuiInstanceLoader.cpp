@@ -247,13 +247,21 @@ Instance Type Resolver
 				return false;
 			}
 
-			Ptr<parsing::xml::XmlElement> Serialize(Ptr<DescriptableObject> resource)override
+			void Precompile(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)override
+			{
+				if (auto obj = resource.Cast<GuiInstanceContext>())
+				{
+					obj->ApplyStyles(resolver, errors);
+				}
+			}
+
+			Ptr<parsing::xml::XmlElement> Serialize(Ptr<DescriptableObject> resource, bool serializePrecompiledResource)override
 			{
 				if (auto obj = resource.Cast<GuiInstanceContext>())
 				{
 					auto xmlInstance = MakePtr<XmlElement>();
 					xmlInstance->name.value = L"Instance";
-					xmlInstance->subNodes.Add(obj->SaveToXml()->rootElement);
+					xmlInstance->subNodes.Add(obj->SaveToXml(serializePrecompiledResource)->rootElement);
 					return xmlInstance;
 				}
 				return 0;
@@ -305,14 +313,21 @@ Instance Style Resolver
 				return false;
 			}
 
-			Ptr<parsing::xml::XmlElement> Serialize(Ptr<DescriptableObject> resource)override
+			void Precompile(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)override
 			{
-				if (auto obj = resource.Cast<GuiInstanceStyleContext>())
+			}
+
+			Ptr<parsing::xml::XmlElement> Serialize(Ptr<DescriptableObject> resource, bool serializePrecompiledResource)override
+			{
+				if (!serializePrecompiledResource)
 				{
-					auto xmlInstanceStyle = MakePtr<XmlElement>();
-					xmlInstanceStyle->name.value = L"InstanceStyle";
-					xmlInstanceStyle->subNodes.Add(obj->SaveToXml()->rootElement);
-					return xmlInstanceStyle;
+					if (auto obj = resource.Cast<GuiInstanceStyleContext>())
+					{
+						auto xmlInstanceStyle = MakePtr<XmlElement>();
+						xmlInstanceStyle->name.value = L"InstanceStyle";
+						xmlInstanceStyle->subNodes.Add(obj->SaveToXml()->rootElement);
+						return xmlInstanceStyle;
+					}
 				}
 				return 0;
 			}
@@ -363,14 +378,21 @@ Instance Schema Type Resolver
 				return false;
 			}
 
-			Ptr<parsing::xml::XmlElement> Serialize(Ptr<DescriptableObject> resource)override
+			void Precompile(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)override
 			{
-				if (auto obj = resource.Cast<GuiInstanceSchema>())
+			}
+
+			Ptr<parsing::xml::XmlElement> Serialize(Ptr<DescriptableObject> resource, bool serializePrecompiledResource)override
+			{
+				if (!serializePrecompiledResource)
 				{
-					auto xmlInstanceSchema = MakePtr<XmlElement>();
-					xmlInstanceSchema->name.value = L"InstanceSchema";
-					xmlInstanceSchema->subNodes.Add(obj->SaveToXml()->rootElement);
-					return xmlInstanceSchema;
+					if (auto obj = resource.Cast<GuiInstanceSchema>())
+					{
+						auto xmlInstanceSchema = MakePtr<XmlElement>();
+						xmlInstanceSchema->name.value = L"InstanceSchema";
+						xmlInstanceSchema->subNodes.Add(obj->SaveToXml()->rootElement);
+						return xmlInstanceSchema;
+					}
 				}
 				return 0;
 			}
@@ -784,40 +806,7 @@ GuiResourceInstanceLoader
 
 			void InitializeContext(Ptr<GuiResourcePathResolver> resolver, List<WString>& errors)
 			{
-				if (context->stylePaths.Count() > 0)
-				{
-					List<Ptr<GuiInstanceStyle>> styles;
-					FOREACH(WString, uri, context->stylePaths)
-					{
-						WString protocol, path;
-						if (IsResourceUrl(uri, protocol, path))
-						{
-							if (auto styleContext = resolver->ResolveResource(protocol, path).Cast<GuiInstanceStyleContext>())
-							{
-								CopyFrom(styles, styleContext->styles, true);
-							}
-							else
-							{
-								errors.Add(L"Failed to find the style referred in attribute \"ref.Styles\": \"" + uri + L"\".");
-							}
-						}
-						else
-						{
-							errors.Add(L"Invalid path in attribute \"ref.Styles\": \"" + uri + L"\".");
-						}
-					}
-					context->stylePaths.Clear();
-
-					FOREACH(Ptr<GuiInstanceStyle>, style, styles)
-					{
-						List<Ptr<GuiConstructorRepr>> output;
-						ExecuteQuery(style->query, context, output);
-						FOREACH(Ptr<GuiConstructorRepr>, ctor, output)
-						{
-							ApplyStyle(style, ctor);
-						}
-					}
-				}
+				context->ApplyStyles(resolver, errors);
 			}
 		public:
 			GuiResourceInstanceLoader(Ptr<GuiResource> _resource, Ptr<GuiInstanceContext> _context)

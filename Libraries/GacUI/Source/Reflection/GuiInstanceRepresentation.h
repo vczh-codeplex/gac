@@ -40,7 +40,7 @@ Instance Representation
 
 			virtual void							Accept(IVisitor* visitor) = 0;
 			virtual Ptr<GuiValueRepr>				Clone() = 0;
-			virtual void							FillXml(Ptr<parsing::xml::XmlElement> xml, bool fillStyleValues) = 0;
+			virtual void							FillXml(Ptr<parsing::xml::XmlElement> xml, bool serializePrecompiledResource) = 0;
 		};
 
 		class GuiTextRepr : public GuiValueRepr, public Description<GuiTextRepr>
@@ -50,7 +50,7 @@ Instance Representation
 
 			void									Accept(IVisitor* visitor)override{visitor->Visit(this);}
 			Ptr<GuiValueRepr>						Clone()override;
-			void									FillXml(Ptr<parsing::xml::XmlElement> xml, bool fillStyleValues)override;
+			void									FillXml(Ptr<parsing::xml::XmlElement> xml, bool serializePrecompiledResource)override;
 		};
 
 		class GuiAttSetterRepr : public GuiValueRepr, public Description<GuiAttSetterRepr>
@@ -80,7 +80,7 @@ Instance Representation
 			void									Accept(IVisitor* visitor)override{visitor->Visit(this);}
 			void									CloneBody(Ptr<GuiAttSetterRepr> repr);
 			Ptr<GuiValueRepr>						Clone()override;
-			void									FillXml(Ptr<parsing::xml::XmlElement> xml, bool fillStyleValues)override;
+			void									FillXml(Ptr<parsing::xml::XmlElement> xml, bool serializePrecompiledResource)override;
 		};
 
 		class GuiConstructorRepr : public GuiAttSetterRepr, public Description<GuiConstructorRepr>
@@ -94,7 +94,7 @@ Instance Representation
 
 			void									Accept(IVisitor* visitor)override{visitor->Visit(this);}
 			Ptr<GuiValueRepr>						Clone()override;
-			void									FillXml(Ptr<parsing::xml::XmlElement> xml, bool fillStyleValues)override;
+			void									FillXml(Ptr<parsing::xml::XmlElement> xml, bool serializePrecompiledResource)override;
 		};
 
 /***********************************************************************
@@ -158,6 +158,7 @@ Instance Context
 			ParameterList							parameters;
 			collections::List<WString>				stylePaths;
 
+			bool									appliedStyles = false;
 			StyleContextList						styles;
 			CacheMap								caches;
 
@@ -167,7 +168,8 @@ Instance Context
 			static void								FillAttSetter(Ptr<GuiAttSetterRepr> setter, Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
 			static Ptr<GuiConstructorRepr>			LoadCtor(Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
 			static Ptr<GuiInstanceContext>			LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, collections::List<WString>& errors);
-			Ptr<parsing::xml::XmlDocument>			SaveToXml(bool fillStyleValues = false);
+			Ptr<parsing::xml::XmlDocument>			SaveToXml(bool serializePrecompiledResource);
+			bool									ApplyStyles(Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors);
 		};
 
 /***********************************************************************
