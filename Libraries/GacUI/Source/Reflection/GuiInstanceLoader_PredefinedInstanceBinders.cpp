@@ -147,7 +147,7 @@ GuiWorkflowGlobalContext
 		struct WorkflowDataBinding
 		{
 			Value						instance;
-			IPropertyInfo*				propertyInfo;
+			IPropertyInfo*				propertyInfo = 0;
 			Ptr<WfExpression>			bindExpression; // WfBindExpression for bind, else for assign
 		};
 
@@ -174,6 +174,23 @@ GuiWorkflowGlobalContext
 				vint cacheIndex = env->context->caches.Keys().IndexOf(GetContextName());
 				if (cacheIndex != -1)
 				{
+					Dictionary<DescriptableObject*, WString> valueNames;
+					FOREACH_INDEXER(WString, name, index, env->scope->referenceValues.Keys())
+					{
+						auto value = env->scope->referenceValues.Values()[index];
+						valueNames.Add(value.GetRawPtr(), name);
+					}
+					FOREACH(WorkflowDataBinding, dataBinding, dataBindings)
+					{
+						vint index = valueNames.Keys().IndexOf(dataBinding.instance.GetRawPtr());
+						WString subscribee;
+						if (index == -1)
+						{
+							subscribee = L"<temp>" + itow(valueNames.Count());
+							valueNames.Add(dataBinding.instance.GetRawPtr(), subscribee);
+							env->scope->referenceValues.Add(subscribee, dataBinding.instance);
+						}
+					}
 					assembly = env->context->caches.Values()[cacheIndex].Cast<WfAssembly>();
 				}
 				else
@@ -365,7 +382,7 @@ GuiWorkflowGlobalContext
 									subBlock->statements.Add(stat);
 								}
 							}
-							else
+							else if (dataBinding.bindExpression)
 							{
 								auto refSubscribee = MakePtr<WfReferenceExpression>();
 								refSubscribee->name.value = subscribee;
@@ -479,9 +496,13 @@ GuiScriptInstanceBinder
 
 			bool SetPropertyValue(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, IGuiInstanceLoader::PropertyValue& propertyValue)override
 			{
+				auto context = env->scope->bindingContexts[GuiWorkflowGlobalContext::ContextName].Cast<GuiWorkflowGlobalContext>();
+				WorkflowDataBinding dataBinding;
+				dataBinding.instance = propertyValue.instanceValue;
+
 				if (env->context->caches.Keys().Contains(GuiWorkflowGlobalContext::ContextName))
 				{
-					return true;
+					goto SUCCESS;
 				}
 				if (propertyValue.propertyValue.GetValueType() == Value::Text)
 				{
@@ -491,7 +512,7 @@ GuiScriptInstanceBinder
 					if (!expression)
 					{
 						env->scope->errors.Add(ERROR_CODE_PREFIX L"Failed to parse the workflow expression.");
-						return false;
+						goto FAILED;
 					}
 
 					bool failed = false;
@@ -574,17 +595,26 @@ GuiScriptInstanceBinder
 								format->expandedExpression = 0;
 							}
 						}
-						WorkflowDataBinding dataBinding;
-						dataBinding.instance = propertyValue.instanceValue;
 						dataBinding.propertyInfo = propertyInfo;
 						dataBinding.bindExpression = expression;
-
-						auto context = env->scope->bindingContexts[GuiWorkflowGlobalContext::ContextName].Cast<GuiWorkflowGlobalContext>();
-						context->dataBindings.Add(dataBinding);
 					}
-					return !failed;
+
+					if (failed)
+					{
+						goto FAILED;
+					}
+					else
+					{
+						goto SUCCESS;
+					}
 				}
+
+			FAILED:
+				context->dataBindings.Add(dataBinding);
 				return false;
+			SUCCESS:
+				context->dataBindings.Add(dataBinding);
+				return true;
 			}
 		};
 
