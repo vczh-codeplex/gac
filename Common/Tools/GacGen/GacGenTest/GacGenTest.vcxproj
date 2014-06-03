@@ -82,6 +82,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <Xml Include="XmlWindowResource.precompiled.xml" />
     <Xml Include="XmlWindowResource.xml" />
   </ItemGroup>
   <ItemGroup>

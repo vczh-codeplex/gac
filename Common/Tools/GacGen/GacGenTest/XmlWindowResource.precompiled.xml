@@ -1,0 +1,157 @@
+﻿<Resource>
+  <Folder name="GacGenConfig">
+    <Text name="Include">..\..\..\..\Libraries\GacUI\Public\Source\GacUIReflection.h</Text>
+    <Text name="Name">HelloWorld</Text>
+    <Text name="PrecompiledOutput">XmlWindowResource.precompiled.xml</Text>
+    <Text name="Prefix"></Text>
+  </Folder>
+  <Folder name="MainWindow">
+    <Instance name="CalculatorControlResource">
+      <Instance ref.Class="demos::CalculatorControl" xmlns="presentation::controls::Gui*;presentation::elements::Gui*Element;presentation::compositions::Gui*Composition;presentation::compositions::Gui*;presentation::templates::Gui*;system::*;system::reflection::*;presentation::*;presentation::Gui*;presentation::controls::*;presentation::controls::list::*;presentation::controls::tree::*;presentation::elements::*;presentation::elements::Gui*;presentation::elements::text*;presentation::compositions::*presentation::templates::*">
+        <ref.Parameter Name="ViewModel" Class="demos::IControlViewModel"/>
+        <CustomControl Text="Scriptable GacUI!">
+          <Table AlignmentToParent="left:0 top:0 right:0 bottom:0" CellPadding="5">
+            <Cell Site="row:0 column:0">
+              <Label Text="A = ">
+                <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
+              </Label>
+            </Cell>
+            <Cell Site="row:0 column:1 columnSpan:2">
+              <SinglelineTextBox ref.Name="textBox1" Text-eval="3">
+                <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0" PreferredMinSize="x:0 y:24"/>
+              </SinglelineTextBox>
+            </Cell>
+            <Cell Site="row:1 column:0">
+              <Label Text="B = ">
+                <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
+              </Label>
+            </Cell>
+            <Cell Site="row:1 column:1 columnSpan:2">
+              <SinglelineTextBox ref.Name="textBox2" Text-eval="4">
+                <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0" PreferredMinSize="x:0 y:24"/>
+              </SinglelineTextBox>
+            </Cell>
+            <Cell Site="row:2 column:0">
+              <Label Text="A + B = ">
+                <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
+              </Label>
+            </Cell>
+            <Cell Site="row:2 column:1 columnSpan:2">
+              <SinglelineTextBox ref.Name="textBox3" Readonly="true" Text-bind="ViewModel.Sum">
+                <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0" PreferredMinSize="x:0 y:24"/>
+              </SinglelineTextBox>
+            </Cell>
+            <Cell Site="row:3 column:0">
+              <Label Text="A * B = ">
+                <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
+              </Label>
+            </Cell>
+            <Cell Site="row:3 column:1">
+              <SinglelineTextBox ref.Name="textBox4" Readonly="true">
+                <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0" PreferredMinSize="x:0 y:24"/>
+              </SinglelineTextBox>
+            </Cell>
+            <Cell Site="row:3 column:2">
+              <Button Text="Calculate in C++">
+                <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
+                <ev.Clicked>button_Clicked</ev.Clicked>
+              </Button>
+            </Cell>
+            <Cell Site="row:4 column:0">
+              <Label Text="A * B = ">
+                <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
+              </Label>
+            </Cell>
+            <Cell Site="row:4 column:1">
+              <SinglelineTextBox ref.Name="textBox5" Readonly="true">
+                <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0" PreferredMinSize="x:0 y:24"/>
+              </SinglelineTextBox>
+            </Cell>
+            <Cell Site="row:4 column:2">
+              <Button Text="Calculate in Script">
+                <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
+                <ev.Clicked-eval>textBox5.Text = ViewModel.Product;</ev.Clicked-eval>
+              </Button>
+            </Cell>
+            <att.Columns>
+              <CellOption>composeType:MinSize</CellOption>
+              <CellOption>composeType:Percentage percentage:1.0</CellOption>
+              <CellOption>composeType:MinSize</CellOption>
+            </att.Columns>
+            <att.Rows>
+              <CellOption>composeType:MinSize</CellOption>
+              <CellOption>composeType:MinSize</CellOption>
+              <CellOption>composeType:MinSize</CellOption>
+              <CellOption>composeType:MinSize</CellOption>
+              <CellOption>composeType:MinSize</CellOption>
+            </att.Rows>
+          </Table>
+          <att.BoundsComposition-set MinSizeLimitation="LimitToElementAndChildren"/>
+          <att.ViewModel-set First-bind="cast int textBox1.Text ?? 0" Second-bind="cast int textBox2.Text ?? 0"/>
+        </CustomControl>
+      </Instance>
+    </Instance>
+    <Instance name="CustomCompositionResource">
+      <Instance ref.Class="demos::MyComposition" xmlns="presentation::controls::Gui*;presentation::elements::Gui*Element;presentation::compositions::Gui*Composition;presentation::compositions::Gui*;presentation::templates::Gui*;system::*;system::reflection::*;presentation::*;presentation::Gui*;presentation::controls::*;presentation::controls::list::*;presentation::controls::tree::*;presentation::elements::*;presentation::elements::Gui*;presentation::elements::text*;presentation::compositions::*presentation::templates::*">
+        <Bounds/>
+      </Instance>
+    </Instance>
+    <Instance name="MainWindowResource">
+      <Instance ref.Class="demos::MainWindow" xmlns="presentation::controls::Gui*;presentation::elements::Gui*Element;presentation::compositions::Gui*Composition;presentation::compositions::Gui*;presentation::templates::Gui*;system::*;system::reflection::*;presentation::*;presentation::Gui*;presentation::controls::*;presentation::controls::list::*;presentation::controls::tree::*;presentation::elements::*;presentation::elements::Gui*;presentation::elements::text*;presentation::compositions::*presentation::templates::*" xmlns:my="demos::*">
+        <ref.Parameter Name="ViewModel" Class="demos::IWindowViewModel"/>
+        <Window ClientSize="x:480 y:320" Text="Scriptable GacUI!">
+          <Table AlignmentToParent="left:0 top:0 right:0 bottom:0" CellPadding="5">
+            <Cell Site="row:0 column:0">
+              <my:CalculatorControl ref.Name="calculator" ViewModel-eval="ViewModel.ControlViewModel">
+                <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
+              </my:CalculatorControl>
+            </Cell>
+            <Cell Site="row:1 column:0">
+              <MultilineTextBox ref.Name="textBoxError" HorizontalAlwaysVisible="false" Readonly="true" VerticalAlwaysVisible="false">
+                <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0" PreferredMinSize="x:0 y:24"/>
+              </MultilineTextBox>
+            </Cell>
+            <att.Columns>
+              <CellOption>composeType:Percentage percentage:1.0</CellOption>
+            </att.Columns>
+            <att.Rows>
+              <CellOption>composeType:MinSize</CellOption>
+              <CellOption>composeType:Percentage percentage:1.0</CellOption>
+            </att.Rows>
+          </Table>
+          <att.BoundsComposition-set PreferredMinSize="x:480 y:320"/>
+        </Window>
+      </Instance>
+    </Instance>
+    <InstanceSchema name="ViewModelResource">
+      <InstanceSchema>
+        <Interface ref.Class="demos::IControlViewModel">
+          <Property Name="First" Type="int" Readonly="false" Observable="false"/>
+          <Property Name="Second" Type="int" Readonly="false" Observable="false"/>
+          <Property Name="Sum" Type="int" Readonly="true" Observable="true"/>
+          <Property Name="Product" Type="int" Readonly="true" Observable="false"/>
+        </Interface>
+        <Interface ref.Class="demos::IWindowViewModel">
+          <Property Name="ControlViewModel" Type="demos::IControlViewModel^" Readonly="true" Observable="false"/>
+        </Interface>
+        <Interface ref.Class="demos::ISuperWindowViewModel" Parent="demos::IWindowViewModel">
+          <Method Name="DoSomething" Type="void">
+            <Property Name="first" Type="int" Readonly="false" Observable="false"/>
+            <Property Name="second" Type="int" Readonly="false" Observable="false"/>
+          </Method>
+        </Interface>
+        <Struct ref.Class="demos::MyStruct">
+          <Property Name="x" Type="int" Readonly="false" Observable="false"/>
+          <Property Name="y" Type="int" Readonly="false" Observable="false"/>
+        </Struct>
+        <Class ref.Class="demos::MyClass">
+          <Property Name="point" Type="demos::MyStruct" Readonly="false" Observable="false"/>
+          <Property Name="next" Type="demos::MyClass^" Readonly="false" Observable="false"/>
+        </Class>
+        <Class ref.Class="demos::MySuperClass" Parent="demos::MyClass">
+          <Property Name="speed" Type="demos::MyStruct" Readonly="false" Observable="false"/>
+        </Class>
+      </InstanceSchema>
+    </InstanceSchema>
+  </Folder>
+</Resource>
