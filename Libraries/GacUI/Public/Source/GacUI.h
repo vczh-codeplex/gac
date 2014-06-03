@@ -1806,6 +1806,9 @@ Helper Functions
 		extern bool									LoadTextFromStream(stream::IStream& stream, WString& text);
 		extern bool									IsResourceUrl(const WString& text, WString& protocol, WString& path);
 
+		extern void									HexToBinary(stream::IStream& stream, const WString& hexText);
+		extern WString								BinaryToHex(stream::IStream& stream);
+
 /***********************************************************************
 Resource Image
 ***********************************************************************/
@@ -1829,7 +1832,6 @@ Resource Image
 Resource String
 ***********************************************************************/
 
-
 		class GuiTextData : public Object, public Description<GuiTextData>
 		{
 		protected:
@@ -1852,6 +1854,7 @@ Resource Structure
 		protected:
 			GuiResourceFolder*						parent;
 			WString									name;
+			WString									path;
 			
 		public:
 			GuiResourceNodeBase();
@@ -1859,6 +1862,8 @@ Resource Structure
 
 			GuiResourceFolder*						GetParent();
 			const WString&							GetName();
+			const WString&							GetPath();
+			void									SetPath(const WString& value);
 		};
 
 		class DocumentModel;
@@ -1868,13 +1873,16 @@ Resource Structure
 			friend class GuiResourceFolder;
 		protected:
 			Ptr<DescriptableObject>					content;
+			WString									typeName;
 			
 		public:
 			GuiResourceItem();
 			~GuiResourceItem();
+
+			const WString&							GetTypeName();
 			
 			Ptr<DescriptableObject>					GetContent();
-			void									SetContent(Ptr<DescriptableObject> value);
+			void									SetContent(const WString& _typeName, Ptr<DescriptableObject> value);
 
 			Ptr<GuiImageData>						AsImage();
 			Ptr<parsing::xml::XmlDocument>			AsXml();
@@ -1903,6 +1911,7 @@ Resource Structure
 			FolderMap								folders;
 
 			void									LoadResourceFolderXml(DelayLoadingList& delayLoadings, const WString& containingFolder, Ptr<parsing::xml::XmlElement> folderXml, collections::List<WString>& errors);
+			void									SaveResourceToXml(Ptr<parsing::xml::XmlElement> xmlParent);
 		public:
 			GuiResourceFolder();
 			~GuiResourceFolder();
@@ -1940,6 +1949,8 @@ Resource
 			static Ptr<GuiResource>					LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, const WString& workingDirectory, collections::List<WString>& errors);
 
 			static Ptr<GuiResource>					LoadFromXml(const WString& filePath, collections::List<WString>& errors);
+
+			Ptr<parsing::xml::XmlDocument>			SaveToXml();
 			
 			Ptr<DocumentModel>						GetDocumentByPath(const WString& path);
 			Ptr<GuiImageData>						GetImageByPath(const WString& path);
@@ -1987,15 +1998,17 @@ Resource Type Resolver
 		class IGuiResourceTypeResolver : public IDescriptable, public Description<IGuiResourceTypeResolver>
 		{
 		public:
-			virtual WString									GetType()=0;
-			virtual WString									GetPreloadType()=0;
-			virtual bool									IsDelayLoad()=0;
+			virtual WString									GetType() = 0;
+			virtual WString									GetPreloadType() = 0;
+			virtual bool									IsDelayLoad() = 0;
 
-			virtual Ptr<DescriptableObject>					ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)=0;
+			virtual Ptr<parsing::xml::XmlElement>			Serialize(Ptr<DescriptableObject> resource) = 0;
 
-			virtual Ptr<DescriptableObject>					ResolveResource(const WString& path, collections::List<WString>& errors)=0;
+			virtual Ptr<DescriptableObject>					ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors) = 0;
 
-			virtual Ptr<DescriptableObject>					ResolveResource(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)=0;
+			virtual Ptr<DescriptableObject>					ResolveResource(const WString& path, collections::List<WString>& errors) = 0;
+
+			virtual Ptr<DescriptableObject>					ResolveResource(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors) = 0;
 		};
 
 /***********************************************************************
@@ -13945,6 +13958,19 @@ Control Template
 				GuiControlTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
 			};
 
+			class GuiLabelTemplate :public GuiControlTemplate, public Description<GuiLabelTemplate>
+			{
+			public:
+				GuiLabelTemplate();
+				~GuiLabelTemplate();
+
+#define GuiLabelTemplate_PROPERTIES(F)\
+				F(GuiLabelTemplate, Color, DefaultTextColor)\
+				F(GuiLabelTemplate, Color, TextColor)\
+
+				GuiLabelTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
+			};
+
 			class GuiWindowTemplate : public GuiControlTemplate, public Description<GuiWindowTemplate>
 			{
 			public:
@@ -14073,6 +14099,22 @@ Control Template
 				void												SetText(const WString& value)override;
 				void												SetFont(const FontProperties& value)override;
 				void												SetVisuallyEnabled(bool value)override;
+			};
+
+			class GuiLabelTemplate_StyleProvider
+				: public GuiControlTemplate_StyleProvider
+				, public controls::GuiLabel::IStyleController
+				, public Description<GuiLabelTemplate_StyleProvider>
+			{
+			protected:
+				GuiLabelTemplate*									controlTemplate;
+
+			public:
+				GuiLabelTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
+				~GuiLabelTemplate_StyleProvider();
+
+				Color												GetDefaultTextColor()override;
+				void												SetTextColor(Color value)override;
 			};
 
 			class GuiWindowTemplate_StyleProvider

@@ -527,7 +527,7 @@ namespace vl
 
 				INativeImageService*						GetImageService()override;
 				FormatType									GetFormat()override;
-				vint											GetFrameCount()override;
+				vint										GetFrameCount()override;
 				INativeImageFrame*							GetFrame(vint index)override;
 			};
 
@@ -543,7 +543,7 @@ namespace vl
 
 				INativeImageService*						GetImageService()override;
 				FormatType									GetFormat()override;
-				vint											GetFrameCount()override;
+				vint										GetFrameCount()override;
 				INativeImageFrame*							GetFrame(vint index)override;
 			};
 

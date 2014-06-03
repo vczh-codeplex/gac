@@ -302,6 +302,7 @@ Instance Representation
 
 			virtual void							Accept(IVisitor* visitor) = 0;
 			virtual Ptr<GuiValueRepr>				Clone() = 0;
+			virtual void							FillXml(Ptr<parsing::xml::XmlElement> xml, bool fillStyleValues) = 0;
 		};
 
 		class GuiTextRepr : public GuiValueRepr, public Description<GuiTextRepr>
@@ -311,6 +312,7 @@ Instance Representation
 
 			void									Accept(IVisitor* visitor)override{visitor->Visit(this);}
 			Ptr<GuiValueRepr>						Clone()override;
+			void									FillXml(Ptr<parsing::xml::XmlElement> xml, bool fillStyleValues)override;
 		};
 
 		class GuiAttSetterRepr : public GuiValueRepr, public Description<GuiAttSetterRepr>
@@ -340,6 +342,7 @@ Instance Representation
 			void									Accept(IVisitor* visitor)override{visitor->Visit(this);}
 			void									CloneBody(Ptr<GuiAttSetterRepr> repr);
 			Ptr<GuiValueRepr>						Clone()override;
+			void									FillXml(Ptr<parsing::xml::XmlElement> xml, bool fillStyleValues)override;
 		};
 
 		class GuiConstructorRepr : public GuiAttSetterRepr, public Description<GuiConstructorRepr>
@@ -353,6 +356,7 @@ Instance Representation
 
 			void									Accept(IVisitor* visitor)override{visitor->Visit(this);}
 			Ptr<GuiValueRepr>						Clone()override;
+			void									FillXml(Ptr<parsing::xml::XmlElement> xml, bool fillStyleValues)override;
 		};
 
 /***********************************************************************
@@ -383,6 +387,7 @@ Instance Context
 		{
 		public:
 			typedef collections::List<Ptr<GuiInstanceNamespace>>				NamespaceList;
+			typedef collections::Dictionary<WString, Ptr<DescriptableObject>>	CacheMap;
 
 			struct NamespaceInfo
 			{
@@ -413,9 +418,10 @@ Instance Context
 			NamespaceMap							namespaces;
 			Nullable<WString>						className;
 			ParameterList							parameters;
-
 			collections::List<WString>				stylePaths;
+
 			StyleContextList						styles;
+			CacheMap								caches;
 
 			static void								CollectDefaultAttributes(GuiAttSetterRepr::ValueList& values, Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
 			static void								CollectAttributes(GuiAttSetterRepr::SetteValuerMap& setters, Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
@@ -423,6 +429,7 @@ Instance Context
 			static void								FillAttSetter(Ptr<GuiAttSetterRepr> setter, Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
 			static Ptr<GuiConstructorRepr>			LoadCtor(Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
 			static Ptr<GuiInstanceContext>			LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, collections::List<WString>& errors);
+			Ptr<parsing::xml::XmlDocument>			SaveToXml(bool fillStyleValues = false);
 		};
 
 /***********************************************************************
@@ -436,6 +443,7 @@ Instance Style Context
 			Ptr<GuiAttSetterRepr>					setter;
 
 			static Ptr<GuiInstanceStyle>			LoadFromXml(Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
+			Ptr<parsing::xml::XmlElement>			SaveToXml();
 		};
 
 		class GuiInstanceStyleContext : public Object, public Description<GuiInstanceStyleContext>
@@ -445,6 +453,7 @@ Instance Style Context
 			StyleList								styles;
 
 			static Ptr<GuiInstanceStyleContext>		LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, collections::List<WString>& errors);
+			Ptr<parsing::xml::XmlDocument>			SaveToXml();
 		};
 	}
 }
@@ -3551,6 +3560,7 @@ namespace vl
 		extern void ExecuteQuery(Ptr<GuiIqQuery> query, Ptr<GuiInstanceContext> context, collections::List<Ptr<GuiConstructorRepr>>& input, collections::List<Ptr<GuiConstructorRepr>>& output);
 		extern void ExecuteQuery(Ptr<GuiIqQuery> query, Ptr<GuiInstanceContext> context, collections::List<Ptr<GuiConstructorRepr>>& output);
 		extern void ApplyStyle(Ptr<GuiInstanceStyle> style, Ptr<GuiConstructorRepr> ctor);
+		extern void GuiIqPrint(Ptr<GuiIqQuery> query, stream::StreamWriter& writer);
 	}
 }
 
@@ -3584,6 +3594,7 @@ namespace vl
 			bool										observable = false;
 
 			static Ptr<GuiInstancePropertySchame>		LoadFromXml(Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
+			Ptr<parsing::xml::XmlElement>				SaveToXml();
 		};
 
 		class GuiInstanceTypeSchema : public Object, public Description<GuiInstanceTypeSchema>
@@ -3595,6 +3606,7 @@ namespace vl
 			PropertyList								properties;
 
 			void										LoadFromXml(Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
+			virtual Ptr<parsing::xml::XmlElement>		SaveToXml() = 0;
 		};
 
 /***********************************************************************
@@ -3607,6 +3619,7 @@ Instance Struct/Class Schema
 			bool										referenceType = false;
 
 			static Ptr<GuiInstanceDataSchema>			LoadFromXml(Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
+			Ptr<parsing::xml::XmlElement>				SaveToXml()override;
 		};
 
 /***********************************************************************
@@ -3622,6 +3635,7 @@ Instance Interface Schema
 			PropertyList								arguments;
 
 			static Ptr<GuiInstanceMethodSchema>			LoadFromXml(Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
+			Ptr<parsing::xml::XmlElement>				SaveToXml();
 		};
 
 		class GuiInstanceInterfaceSchema : public GuiInstanceTypeSchema, public Description<GuiInstanceInterfaceSchema>
@@ -3631,6 +3645,7 @@ Instance Interface Schema
 			MethodList									methods;
 
 			static Ptr<GuiInstanceInterfaceSchema>		LoadFromXml(Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
+			Ptr<parsing::xml::XmlElement>				SaveToXml()override;
 		};
 
 /***********************************************************************
@@ -3644,6 +3659,7 @@ Instance Schema Representation
 			TypeSchemaList								schemas;
 
 			static Ptr<GuiInstanceSchema>				LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, collections::List<WString>& errors);
+			Ptr<parsing::xml::XmlDocument>				SaveToXml();
 		};
 	}
 }
@@ -3682,6 +3698,7 @@ Type List
 			F(presentation::templates::GuiTemplate)\
 			F(presentation::templates::GuiTemplate::IFactory)\
 			F(presentation::templates::GuiControlTemplate)\
+			F(presentation::templates::GuiLabelTemplate)\
 			F(presentation::templates::GuiWindowTemplate)\
 			F(presentation::templates::GuiButtonTemplate)\
 			F(presentation::templates::GuiSelectableButtonTemplate)\

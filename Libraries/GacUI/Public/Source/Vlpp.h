@@ -2539,9 +2539,9 @@ SORTED_LIST_INSERT:
 		class PushOnlyAllocator : public Object, private NotCopyable
 		{
 		protected:
-			vint				blockSize;
-			vint				allocatedSize;
-			List<T*>			blocks;
+			vint							blockSize;
+			vint							allocatedSize;
+			List<T*>						blocks;
 
 		public:
 			PushOnlyAllocator(vint _blockSize = 65536)
@@ -2582,56 +2582,47 @@ SORTED_LIST_INSERT:
 
 		namespace bom_helper
 		{
+			struct TreeNode
+			{
+				TreeNode*					nodes[4];
+			};
+
 			template<vint Index = 4>
 			struct Accessor
 			{
-				static __forceinline void Dispose(void** root)
-				{
-					if (!root) return;
-					for (vint i = 0; i < 4; i++)
-					{
-						Accessor<Index - 1>::Dispose((void**)root[i]);
-					}
-					delete[] root;
-				}
-
-				static __forceinline void* Get(void** root, vuint8_t index)
+				static __forceinline void* Get(TreeNode* root, vuint8_t index)
 				{
 					if (!root)
 					{
 						return 0;
 					}
 					vint fragmentIndex = (index >> (2 * (Index - 1))) % 4;
-					void**& fragmentRoot = ((void***)root)[fragmentIndex];
+					TreeNode* fragmentRoot = root->nodes[fragmentIndex];
 					return fragmentRoot ? Accessor<Index - 1>::Get(fragmentRoot, index) : 0;
 				}
 
-				static __forceinline void Set(void**& root, vuint8_t index, void* value)
+				static __forceinline void Set(TreeNode*& root, vuint8_t index, void* value, PushOnlyAllocator<TreeNode>& allocator)
 				{
 					if (!root)
 					{
-						root = new void*[4];
-						memset(root, 0, sizeof(void*)* 4);
+						root = allocator.Create();
+						memset(root->nodes, 0, sizeof(root->nodes));
 					}
 					vint fragmentIndex = (index >> (2 * (Index - 1))) % 4;
-					void**& fragmentRoot = ((void***)root)[fragmentIndex];
-					Accessor<Index - 1>::Set(fragmentRoot, index, value);
+					TreeNode*& fragmentRoot = root->nodes[fragmentIndex];
+					Accessor<Index - 1>::Set(fragmentRoot, index, value, allocator);
 				}
 			};
 
 			template<>
 			struct Accessor<0>
 			{
-				static __forceinline void Dispose(void** root)
-				{
-				}
-
-				static __forceinline void* Get(void** root, vuint8_t index)
+				static __forceinline void* Get(TreeNode* root, vuint8_t index)
 				{
 					return (void*)root;
 				}
 
-				static __forceinline void Set(void**& root, vuint8_t index, void* value)
+				static __forceinline void Set(TreeNode*& root, vuint8_t index, void* value, PushOnlyAllocator<TreeNode>& allocator)
 				{
 					((void*&)root) = value;
 				}
@@ -2641,8 +2632,10 @@ SORTED_LIST_INSERT:
 		template<typename T>
 		class ByteObjectMap : public Object, private NotCopyable
 		{
+		public:
+			typedef PushOnlyAllocator<bom_helper::TreeNode>			Allocator;
 		protected:
-			void**				root;
+			bom_helper::TreeNode*			root;
 
 		public:
 			ByteObjectMap()
@@ -2652,7 +2645,6 @@ SORTED_LIST_INSERT:
 
 			~ByteObjectMap()
 			{
-				bom_helper::Accessor<>::Dispose(root);
 			}
 
 			T* Get(vuint8_t index)
@@ -2660,9 +2652,9 @@ SORTED_LIST_INSERT:
 				return (T*)bom_helper::Accessor<>::Get(root, index);
 			}
 
-			void Set(vuint8_t index, T* value)
+			void Set(vuint8_t index, T* value, Allocator& allocator)
 			{
-				bom_helper::Accessor<>::Set(root, index, value);
+				bom_helper::Accessor<>::Set(root, index, value, allocator);
 			}
 		};
 
@@ -3733,6 +3725,325 @@ namespace vl
 			virtual	void					Close()=0;
 			virtual vint					Read(void* _buffer, vint _size)=0;
 		};
+
+		namespace internal
+		{
+			struct Reader
+			{
+				stream::IStream& input;
+
+				Reader(stream::IStream& _input)
+					:input(_input)
+				{
+				}
+			};
+				
+			struct Writer
+			{
+				stream::IStream& output;
+
+				Writer(stream::IStream& _output)
+					:output(_output)
+				{
+				}
+			};
+
+			template<typename T>
+			struct Serialization
+			{
+				template<typename TIO>
+				static void IO(TIO& io, T& value);
+			};
+
+			template<typename T>
+			Reader& operator<<(Reader& reader, T& value)
+			{
+				Serialization<T>::IO(reader, value);
+				return reader;
+			}
+
+			template<typename T>
+			Writer& operator<<(Writer& writer, T& value)
+			{
+				Serialization<T>::IO(writer, value);
+				return writer;
+			}
+
+			//---------------------------------------------
+
+			template<>
+			struct Serialization<vint32_t>
+			{
+				static void IO(Reader& reader, vint32_t& value)
+				{
+					if (reader.input.Read(&value, sizeof(value)) != sizeof(value))
+					{
+						CHECK_FAIL(L"Deserialization failed.");
+					}
+				}
+					
+				static void IO(Writer& writer, vint32_t& value)
+				{
+					if (writer.output.Write(&value, sizeof(value)) != sizeof(value))
+					{
+						CHECK_FAIL(L"Serialization failed.");
+					}
+				}
+			};
+
+			template<>
+			struct Serialization<vint64_t>
+			{
+				static void IO(Reader& reader, vint64_t& value)
+				{
+					vint32_t v = 0;
+					Serialization<vint32_t>::IO(reader, v);;
+					value = (vint64_t)v;
+				}
+					
+				static void IO(Writer& writer, vint64_t& value)
+				{
+					vint32_t v = (vint32_t)value;
+					Serialization<vint32_t>::IO(writer, v);
+				}
+			};
+
+			template<>
+			struct Serialization<bool>
+			{
+				static void IO(Reader& reader, bool& value)
+				{
+					vint8_t v = 0;
+					if (reader.input.Read(&v, sizeof(v)) != sizeof(v))
+					{
+						CHECK_FAIL(L"Deserialization failed.");
+					}
+					else
+					{
+						value = v == -1;
+					}
+				}
+					
+				static void IO(Writer& writer, bool& value)
+				{
+					vint8_t v = value ? -1 : 0;
+					if (writer.output.Write(&v, sizeof(v)) != sizeof(v))
+					{
+						CHECK_FAIL(L"Serialization failed.");
+					}
+				}
+			};
+
+			template<typename T>
+			struct Serialization<Ptr<T>>
+			{
+				static void IO(Reader& reader, Ptr<T>& value)
+				{
+					bool notNull = false;
+					reader << notNull;
+					if (notNull)
+					{
+						value = new T;
+						Serialization<T>::IO(reader, *value.Obj());
+					}
+					else
+					{
+						value = 0;
+					}
+				}
+					
+				static void IO(Writer& writer, Ptr<T>& value)
+				{
+					bool notNull = value;
+					writer << notNull;
+					if (notNull)
+					{
+						Serialization<T>::IO(writer, *value.Obj());
+					}
+				}
+			};
+
+			template<>
+			struct Serialization<WString>
+			{
+				static void IO(Reader& reader, WString& value)
+				{
+					vint32_t count = -1;
+					reader << count;
+
+					collections::Array<wchar_t> buffer(count + 1);
+					if (reader.input.Read((void*)&buffer[0], count*sizeof(wchar_t)) != count*sizeof(wchar_t))
+					{
+						CHECK_FAIL(L"Deserialization failed.");
+					}
+					buffer[count] = 0;
+
+					value = &buffer[0];
+				}
+					
+				static void IO(Writer& writer, WString& value)
+				{
+					vint32_t count = (vint32_t)value.Length();
+					writer << count;
+					if (writer.output.Write((void*)value.Buffer(), count*sizeof(wchar_t)) != count*sizeof(wchar_t))
+					{
+						CHECK_FAIL(L"Serialization failed.");
+					}
+				}
+			};
+
+			template<typename T>
+			struct Serialization<collections::List<T>>
+			{
+				static void IO(Reader& reader, collections::List<T>& value)
+				{
+					vint32_t count = -1;
+					reader << count;
+					value.Clear();
+					for (vint i = 0; i < count; i++)
+					{
+						T t;
+						reader << t;
+						value.Add(t);
+					}
+				}
+					
+				static void IO(Writer& writer, collections::List<T>& value)
+				{
+					vint32_t count = (vint32_t)value.Count();
+					writer << count;
+					for (vint i = 0; i < count; i++)
+					{
+						writer << value[i];
+					}
+				}
+			};
+
+			template<typename T>
+			struct Serialization<collections::Array<T>>
+			{
+				static void IO(Reader& reader, collections::Array<T>& value)
+				{
+					vint32_t count = -1;
+					reader << count;
+					value.Resize(count);
+					for (vint i = 0; i < count; i++)
+					{
+						reader << value[i];
+					}
+				}
+					
+				static void IO(Writer& writer, collections::Array<T>& value)
+				{
+					vint32_t count = (vint32_t)value.Count();
+					writer << count;
+					for (vint i = 0; i < count; i++)
+					{
+						writer << value[i];
+					}
+				}
+			};
+
+			template<typename K, typename V>
+			struct Serialization<collections::Dictionary<K, V>>
+			{
+				static void IO(Reader& reader, collections::Dictionary<K, V>& value)
+				{
+					vint32_t count = -1;
+					reader << count;
+					value.Clear();
+					for (vint i = 0; i < count; i++)
+					{
+						K k;
+						V v;
+						reader << k << ;
+						value.Add(k, v);
+					}
+				}
+					
+				static void IO(Writer& writer, collections::Dictionary<K, V>& value)
+				{
+					vint32_t count = (vint32_t)value.Count();
+					writer << count;
+					for (vint i = 0; i < count; i++)
+					{
+						K k = value.Keys()[i];
+						V v = value.Values()[i];
+						writer << k << v;
+					}
+				}
+			};
+
+			template<typename K, typename V>
+			struct Serialization<collections::Group<K, V>>
+			{
+				static void IO(Reader& reader, collections::Group<K, V>& value)
+				{
+					vint32_t count = -1;
+					reader << count;
+					value.Clear();
+					for (vint i = 0; i < count; i++)
+					{
+						K k;
+						collections::List<V> v;
+						reader << k << v;
+						for (vint j = 0; j < v.Count(); j++)
+						{
+							value.Add(k, v[j]);
+						}
+					}
+				}
+					
+				static void IO(Writer& writer, collections::Group<K, V>& value)
+				{
+					vint32_t count = (vint32_t)value.Count();
+					writer << count;
+					for (vint i = 0; i < count; i++)
+					{
+						K k = value.Keys()[i];
+						collections::List<V>& v = const_cast<collections::List<V>&>(value.GetByIndex(i));
+						writer << k << v;
+					}
+				}
+			};
+
+			//---------------------------------------------
+
+#define BEGIN_SERIALIZATION(TYPE)\
+				template<>\
+				struct Serialization<TYPE>\
+				{\
+					template<typename TIO>\
+					static void IO(TIO& op, TYPE& value)\
+					{\
+						op\
+
+#define SERIALIZE(FIELD)\
+						<< value.FIELD\
+
+#define END_SERIALIZATION\
+						;\
+					}\
+				};\
+
+#define SERIALIZE_ENUM(TYPE)\
+			template<>\
+			struct Serialization<TYPE>\
+			{\
+				static void IO(Reader& reader, TYPE& value)\
+				{\
+					vint32_t v = 0;\
+					Serialization<vint32_t>::IO(reader, v);\
+					value = (TYPE)v;\
+				}\
+				static void IO(Writer& writer, TYPE& value)\
+				{\
+					vint32_t v = (vint32_t)value;\
+					Serialization<vint32_t>::IO(writer, v);\
+				}\
+			};\
+
+		}
 	}
 }
 
@@ -3891,6 +4202,175 @@ namespace vl
 			vint							Read(void* _buffer, vint _size);
 			vint							Write(void* _buffer, vint _size);
 			vint							Peek(void* _buffer, vint _size);
+		};
+	}
+}
+
+#endif
+
+/***********************************************************************
+STREAM\COMPRESSIONSTREAM.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: Zihan Chen(vczh)
+Stream::CharFormat
+
+Classes:
+***********************************************************************/
+
+#ifndef VCZH_STREAM_COMPRESSIONSTREAM
+#define VCZH_STREAM_COMPRESSIONSTREAM
+
+
+namespace vl
+{
+	namespace stream
+	{
+
+/***********************************************************************
+Compression
+***********************************************************************/
+
+		namespace lzw
+		{
+			static const vint						BufferSize = 1024;
+			static const vint						MaxDictionarySize = 1 << 24;
+
+			struct Code
+			{
+				typedef collections::PushOnlyAllocator<Code>			CodeAllocator;
+				typedef collections::ByteObjectMap<Code>::Allocator		MapAllocator;
+
+				vuint8_t							byte = 0;
+				vint								code = -1;
+				Code*								parent = 0;
+				vint								size = 0;
+				collections::ByteObjectMap<Code>	children;
+			};
+		}
+
+		class LzwBase : public Object
+		{
+		protected:
+			lzw::Code::CodeAllocator				codeAllocator;
+			lzw::Code::MapAllocator					mapAllocator;
+			lzw::Code*								root;
+			vint									eofIndex = -1;
+			vint									nextIndex = 0;
+			vint									indexBits = 1;
+
+			void									UpdateIndexBits();
+			lzw::Code*								CreateCode(lzw::Code* parent, vuint8_t byte);
+
+			LzwBase();
+			LzwBase(bool (&existingBytes)[256]);
+			~LzwBase();
+		};
+
+		class LzwEncoder : public LzwBase, public IEncoder
+		{
+		protected:
+			IStream*								stream = 0;
+
+			vuint8_t								buffer[lzw::BufferSize];
+			vint									bufferUsedBits = 0;
+			lzw::Code*								prefix;
+
+			void									Flush();
+			void									WriteNumber(vint number, vint bitSize);
+		public:
+			LzwEncoder();
+			LzwEncoder(bool (&existingBytes)[256]);
+			~LzwEncoder();
+
+			void									Setup(IStream* _stream)override;
+			void									Close()override;
+			vint									Write(void* _buffer, vint _size)override;
+		};
+
+		class LzwDecoder :public LzwBase, public IDecoder
+		{
+		protected:
+			IStream*								stream = 0;
+			collections::List<lzw::Code*>			dictionary;
+			lzw::Code*								lastCode = 0;
+
+			vuint8_t								inputBuffer[lzw::BufferSize];
+			vint									inputBufferSize = 0;
+			vint									inputBufferUsedBits = 0;
+
+			collections::Array<vuint8_t>			outputBuffer;
+			vint									outputBufferSize = 0;
+			vint									outputBufferUsedBytes = 0;
+
+			bool									ReadNumber(vint& number, vint bitSize);
+			void									PrepareOutputBuffer(vint size);
+			void									ExpandCodeToOutputBuffer(lzw::Code* code);
+		public:
+			LzwDecoder();
+			LzwDecoder(bool (&existingBytes)[256]);
+			~LzwDecoder();
+
+			void									Setup(IStream* _stream)override;
+			void									Close()override;
+			vint									Read(void* _buffer, vint _size)override;
+		};
+	}
+}
+
+#endif
+
+/***********************************************************************
+STREAM\MEMORYSTREAM.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: Zihan Chen(vczh)
+Stream::MemoryStream
+
+Interfaces:
+	MemoryStream					：内存流
+***********************************************************************/
+
+#ifndef VCZH_STREAM_MEMORYSTREAM
+#define VCZH_STREAM_MEMORYSTREAM
+
+
+namespace vl
+{
+	namespace stream
+	{
+		class MemoryStream : public Object, public virtual IStream
+		{
+		protected:
+			vint					block;
+			char*					buffer;
+			vint					size;
+			vint					position;
+			vint					capacity;
+
+			void					PrepareSpace(vint totalSpace);
+		public:
+			MemoryStream(vint _block=65536);
+			~MemoryStream();
+
+			bool					CanRead()const;
+			bool					CanWrite()const;
+			bool					CanSeek()const;
+			bool					CanPeek()const;
+			bool					IsLimited()const;
+			bool					IsAvailable()const;
+			void					Close();
+			pos_t					Position()const;
+			pos_t					Size()const;
+			void					Seek(pos_t _size);
+			void					SeekFromBegin(pos_t _size);
+			void					SeekFromEnd(pos_t _size);
+			vint					Read(void* _buffer, vint _size);
+			vint					Write(void* _buffer, vint _size);
+			vint					Peek(void* _buffer, vint _size);
+			void*					GetInternalBuffer();
 		};
 	}
 }
@@ -12616,62 +13096,6 @@ namespace vl
 #endif
 
 /***********************************************************************
-STREAM\MEMORYSTREAM.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: Zihan Chen(vczh)
-Stream::MemoryStream
-
-Interfaces:
-	MemoryStream					：内存流
-***********************************************************************/
-
-#ifndef VCZH_STREAM_MEMORYSTREAM
-#define VCZH_STREAM_MEMORYSTREAM
-
-
-namespace vl
-{
-	namespace stream
-	{
-		class MemoryStream : public Object, public virtual IStream
-		{
-		protected:
-			vint					block;
-			char*					buffer;
-			vint					size;
-			vint					position;
-			vint					capacity;
-
-			void					PrepareSpace(vint totalSpace);
-		public:
-			MemoryStream(vint _block=65536);
-			~MemoryStream();
-
-			bool					CanRead()const;
-			bool					CanWrite()const;
-			bool					CanSeek()const;
-			bool					CanPeek()const;
-			bool					IsLimited()const;
-			bool					IsAvailable()const;
-			void					Close();
-			pos_t					Position()const;
-			pos_t					Size()const;
-			void					Seek(pos_t _size);
-			void					SeekFromBegin(pos_t _size);
-			void					SeekFromEnd(pos_t _size);
-			vint					Read(void* _buffer, vint _size);
-			vint					Write(void* _buffer, vint _size);
-			vint					Peek(void* _buffer, vint _size);
-			void*					GetInternalBuffer();
-		};
-	}
-}
-
-#endif
-
-/***********************************************************************
 REGEX\REGEXDATA.H
 ***********************************************************************/
 /***********************************************************************
@@ -14050,117 +14474,6 @@ Encoding Test
 ***********************************************************************/
 
 		extern void							TestEncoding(unsigned char* buffer, vint size, BomEncoder::Encoding& encoding, bool& containsBom);
-	}
-}
-
-#endif
-
-/***********************************************************************
-STREAM\COMPRESSIONSTREAM.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: Zihan Chen(vczh)
-Stream::CharFormat
-
-Classes:
-***********************************************************************/
-
-#ifndef VCZH_STREAM_COMPRESSIONSTREAM
-#define VCZH_STREAM_COMPRESSIONSTREAM
-
-
-namespace vl
-{
-	namespace stream
-	{
-
-/***********************************************************************
-Compression
-***********************************************************************/
-
-		namespace lzw
-		{
-			static const vint						BufferSize = 1024;
-			static const vint						MaxDictionarySize = 1 << 24;
-
-			struct Code
-			{
-				typedef collections::PushOnlyAllocator<Code>	Allocator;
-
-				vuint8_t							byte = 0;
-				vint								code = -1;
-				Code*								parent = 0;
-				vint								size = 0;
-				collections::ByteObjectMap<Code>	children;
-			};
-		}
-
-		class LzwBase : public Object
-		{
-		protected:
-			lzw::Code::Allocator					allocator;
-			lzw::Code*								root;
-			vint									eofIndex = -1;
-			vint									nextIndex = 0;
-			vint									indexBits = 1;
-
-			void									UpdateIndexBits();
-			lzw::Code*								CreateCode(lzw::Code* parent, vuint8_t byte);
-
-			LzwBase();
-			LzwBase(bool (&existingBytes)[256]);
-			~LzwBase();
-		};
-
-		class LzwEncoder : public LzwBase, public IEncoder
-		{
-		protected:
-			IStream*								stream = 0;
-
-			vuint8_t								buffer[lzw::BufferSize];
-			vint									bufferUsedBits = 0;
-			lzw::Code*								prefix;
-
-			void									Flush();
-			void									WriteNumber(vint number, vint bitSize);
-		public:
-			LzwEncoder();
-			LzwEncoder(bool (&existingBytes)[256]);
-			~LzwEncoder();
-
-			void									Setup(IStream* _stream)override;
-			void									Close()override;
-			vint									Write(void* _buffer, vint _size)override;
-		};
-
-		class LzwDecoder :public LzwBase, public IDecoder
-		{
-		protected:
-			IStream*								stream = 0;
-			collections::List<lzw::Code*>			dictionary;
-			lzw::Code*								lastCode = 0;
-
-			vuint8_t								inputBuffer[lzw::BufferSize];
-			vint									inputBufferSize = 0;
-			vint									inputBufferUsedBits = 0;
-
-			collections::Array<vuint8_t>			outputBuffer;
-			vint									outputBufferSize = 0;
-			vint									outputBufferUsedBytes = 0;
-
-			bool									ReadNumber(vint& number, vint bitSize);
-			void									PrepareOutputBuffer(vint size);
-			void									ExpandCodeToOutputBuffer(lzw::Code* code);
-		public:
-			LzwDecoder();
-			LzwDecoder(bool (&existingBytes)[256]);
-			~LzwDecoder();
-
-			void									Setup(IStream* _stream)override;
-			void									Close()override;
-			vint									Read(void* _buffer, vint _size)override;
-		};
 	}
 }
 
