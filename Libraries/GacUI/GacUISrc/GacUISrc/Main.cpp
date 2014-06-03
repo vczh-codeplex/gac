@@ -229,21 +229,23 @@ void GuiMain()
 
 	List<WString> errors;
 	auto resource = GuiResource::LoadFromXml(L"..\\GacUISrcCodepackedTest\\Resources\\XmlWindowResourceDataBinding.xml", errors);
-	//{
-	//	auto xml = resource->SaveToXml();
-	//	MemoryStream stream;
-	//	WString xmlText;
-	//	{
-	//		StreamWriter writer(stream);
-	//		XmlPrint(xml, writer);
-	//	}
-	//	stream.SeekFromBegin(0);
-	//	{
-	//		StreamReader reader(stream);
-	//		xmlText = reader.ReadToEnd();
-	//	}
-	//	resource = GuiResource::LoadFromXml(xml, L"..\\GacUISrcCodepackedTest\\Resources\\", errors);
-	//}
+	{
+		resource->Precompile(errors);
+		auto xml = resource->SaveToXml(true);
+
+		MemoryStream stream;
+		WString xmlText;
+		{
+			StreamWriter writer(stream);
+			XmlPrint(xml, writer);
+		}
+		stream.SeekFromBegin(0);
+		{
+			StreamReader reader(stream);
+			xmlText = reader.ReadToEnd();
+		}
+		resource = GuiResource::LoadFromXml(xml, L"..\\GacUISrcCodepackedTest\\Resources\\", errors);
+	}
 	GetInstanceLoaderManager()->SetResource(L"Demo", resource);
 	
 	DateTime begin = DateTime::LocalTime();

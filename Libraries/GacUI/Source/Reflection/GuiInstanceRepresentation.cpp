@@ -25,9 +25,9 @@ GuiTextRepr
 			return repr;
 		}
 
-		void GuiTextRepr::FillXml(Ptr<parsing::xml::XmlElement> xml, bool fillStyleValues)
+		void GuiTextRepr::FillXml(Ptr<parsing::xml::XmlElement> xml, bool serializePrecompiledResource)
 		{
-			if (!fromStyle || fillStyleValues)
+			if (!fromStyle || serializePrecompiledResource)
 			{
 				auto xmlText = MakePtr<XmlText>();
 				xmlText->content.value = text;
@@ -63,9 +63,9 @@ GuiAttSetterRepr
 			return repr;
 		}
 
-		void GuiAttSetterRepr::FillXml(Ptr<parsing::xml::XmlElement> xml, bool fillStyleValues)
+		void GuiAttSetterRepr::FillXml(Ptr<parsing::xml::XmlElement> xml, bool serializePrecompiledResource)
 		{
-			if (!fromStyle || fillStyleValues)
+			if (!fromStyle || serializePrecompiledResource)
 			{
 				for (vint i = 0; i < setters.Count(); i++)
 				{
@@ -75,12 +75,12 @@ GuiAttSetterRepr
 					{
 						FOREACH(Ptr<GuiValueRepr>, repr, value->values)
 						{
-							repr->FillXml(xml, fillStyleValues);
+							repr->FillXml(xml, serializePrecompiledResource);
 						}
 					}
 					else if (value->values.Count() == 1 && value->values[0].Cast<GuiTextRepr>())
 					{
-						if (!value->values[0]->fromStyle || fillStyleValues)
+						if (!value->values[0]->fromStyle || serializePrecompiledResource)
 						{
 							auto att = MakePtr<XmlAttribute>();
 							att->name.value = key;
@@ -103,7 +103,7 @@ GuiAttSetterRepr
 
 						FOREACH(Ptr<GuiValueRepr>, repr, value->values)
 						{
-							repr->FillXml(xmlProp, fillStyleValues);
+							repr->FillXml(xmlProp, serializePrecompiledResource);
 						}
 						xml->subNodes.Add(xmlProp);
 					}
@@ -145,9 +145,9 @@ GuiConstructorRepr
 			return repr;
 		}
 
-		void GuiConstructorRepr::FillXml(Ptr<parsing::xml::XmlElement> xml, bool fillStyleValues)
+		void GuiConstructorRepr::FillXml(Ptr<parsing::xml::XmlElement> xml, bool serializePrecompiledResource)
 		{
-			if (!fromStyle || fillStyleValues)
+			if (!fromStyle || serializePrecompiledResource)
 			{
 				auto xmlCtor = MakePtr<XmlElement>();
 				if (typeNamespace == L"")
@@ -174,7 +174,7 @@ GuiConstructorRepr
 					xmlCtor->attributes.Add(attStyle);
 				}
 
-				GuiAttSetterRepr::FillXml(xmlCtor, fillStyleValues);
+				GuiAttSetterRepr::FillXml(xmlCtor, serializePrecompiledResource);
 				xml->subNodes.Add(xmlCtor);
 			}
 		}
@@ -525,7 +525,7 @@ GuiInstanceContext
 			return context->instance?context:0;
 		}
 
-		Ptr<parsing::xml::XmlDocument> GuiInstanceContext::SaveToXml(bool fillStyleValues)
+		Ptr<parsing::xml::XmlDocument> GuiInstanceContext::SaveToXml(bool serializePrecompiledResource)
 		{
 			auto xmlInstance = MakePtr<XmlElement>();
 			xmlInstance->name.value = L"Instance";
@@ -579,7 +579,7 @@ GuiInstanceContext
 				xmlParameter->attributes.Add(attClass);
 			}
 
-			if (stylePaths.Count() > 0)
+			if (!serializePrecompiledResource && stylePaths.Count() > 0)
 			{
 				auto attStyles = MakePtr<XmlAttribute>();
 				attStyles->name.value = L"ref.Styles";
@@ -595,11 +595,56 @@ GuiInstanceContext
 				}
 			}
 
-			instance->FillXml(xmlInstance, fillStyleValues);
+			instance->FillXml(xmlInstance, serializePrecompiledResource);
 
 			auto doc = MakePtr<XmlDocument>();
 			doc->rootElement = xmlInstance;
 			return doc;
+		}
+
+		bool GuiInstanceContext::ApplyStyles(Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)
+		{
+			if (!appliedStyles)
+			{
+				appliedStyles = true;
+
+				List<Ptr<GuiInstanceStyle>> styles;
+				FOREACH(WString, uri, stylePaths)
+				{
+					WString protocol, path;
+					if (IsResourceUrl(uri, protocol, path))
+					{
+						if (auto styleContext = resolver->ResolveResource(protocol, path).Cast<GuiInstanceStyleContext>())
+						{
+							CopyFrom(styles, styleContext->styles, true);
+						}
+						else
+						{
+							errors.Add(L"Failed to find the style referred in attribute \"ref.Styles\": \"" + uri + L"\".");
+						}
+					}
+					else
+					{
+						errors.Add(L"Invalid path in attribute \"ref.Styles\": \"" + uri + L"\".");
+					}
+				}
+
+				FOREACH(Ptr<GuiInstanceStyle>, style, styles)
+				{
+					List<Ptr<GuiConstructorRepr>> output;
+					ExecuteQuery(style->query, this, output);
+					FOREACH(Ptr<GuiConstructorRepr>, ctor, output)
+					{
+						ApplyStyle(style, ctor);
+					}
+				}
+
+				return true;
+			}
+			else
+			{
+				return false;
+			}
 		}
 
 /***********************************************************************
