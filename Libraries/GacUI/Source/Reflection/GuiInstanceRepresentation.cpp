@@ -1,7 +1,8 @@
 #include "GuiInstanceRepresentation.h"
+#include "GuiInstanceLoader.h"
+#include "InstanceQuery\GuiInstanceQuery.h"
 #include "..\Resources\GuiParserManager.h"
 #include "..\Controls\Templates\GuiControlTemplateStyles.h"
-#include "InstanceQuery\GuiInstanceQuery.h"
 
 namespace vl
 {
@@ -515,6 +516,22 @@ GuiInstanceContext
 							context->parameters.Add(parameter);
 						}
 					}
+					else if (element->name.value == L"ref.Cache")
+					{
+						auto attName = XmlGetAttribute(element, L"Name");
+						auto attType = XmlGetAttribute(element, L"Type");
+						if (attName && attType)
+						{
+							auto resolver = GetInstanceLoaderManager()->GetInstanceCacheResolver(attType->value.value);
+
+							MemoryStream stream;
+							HexToBinary(stream, XmlGetValue(element));
+							stream.SeekFromBegin(0);
+
+							auto cache = resolver->Deserialize(stream);
+							context->precompiledCaches.Add(attName->value.value, cache);
+						}
+					}
 					else if (!context->instance)
 					{
 						context->instance=LoadCtor(element, errors);
@@ -592,6 +609,39 @@ GuiInstanceContext
 						attStyles->value.value += L";";
 					}
 					attStyles->value.value += stylePaths[j];
+				}
+			}
+
+			if (serializePrecompiledResource)
+			{
+				for (vint i = 0; i < precompiledCaches.Count(); i++)
+				{
+					auto key = precompiledCaches.Keys()[i];
+					auto value = precompiledCaches.Values()[i];
+					auto resolver = GetInstanceLoaderManager()->GetInstanceCacheResolver(value->GetCacheTypeName());
+
+					MemoryStream stream;
+					resolver->Serialize(value, stream);
+					stream.SeekFromBegin(0);
+					auto hex = BinaryToHex(stream);
+					
+					auto xmlCache = MakePtr<XmlElement>();
+					xmlCache->name.value = L"ref.Cache";
+					xmlInstance->subNodes.Add(xmlCache);
+
+					auto attName = MakePtr<XmlAttribute>();
+					attName->name.value = L"Name";
+					attName->value.value = key;
+					xmlCache->attributes.Add(attName);
+
+					auto attType = MakePtr<XmlAttribute>();
+					attType->name.value = L"Type";
+					attType->value.value = value->GetCacheTypeName();
+					xmlCache->attributes.Add(attType);
+
+					auto xmlContent = MakePtr<XmlCData>();
+					xmlContent->content.value = hex;
+					xmlCache->subNodes.Add(xmlContent);
 				}
 			}
 

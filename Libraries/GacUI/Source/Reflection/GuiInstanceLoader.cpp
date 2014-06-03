@@ -961,6 +961,7 @@ GuiInstanceLoaderManager
 			typedef Dictionary<WString, Ptr<IGuiInstanceBinder>>				BinderMap;
 			typedef Dictionary<WString, Ptr<IGuiInstanceEventBinder>>			EventBinderMap;
 			typedef Dictionary<WString, Ptr<IGuiInstanceBindingContextFactory>>	BindingContextFactoryMap;
+			typedef Dictionary<WString, Ptr<IGuiInstanceCacheResolver>>			CacheResolverMap;
 
 			struct VirtualTypeInfo
 			{
@@ -984,6 +985,7 @@ GuiInstanceLoaderManager
 			BinderMap								binders;
 			EventBinderMap							eventBinders;
 			BindingContextFactoryMap				bindingContextFactories;
+			CacheResolverMap						cacheResolvers;
 			VirtualTypeInfoMap						typeInfos;
 			ResourceMap								resources;
 
@@ -1150,6 +1152,19 @@ GuiInstanceLoaderManager
 			{
 				vint index = eventBinders.Keys().IndexOf(bindingName);
 				return index == -1 ? 0 : eventBinders.Values()[index].Obj();
+			}
+
+			bool AddInstanceCacheResolver(Ptr<IGuiInstanceCacheResolver> cacheResolver)override
+			{
+				if (cacheResolvers.Keys().Contains(cacheResolver->GetCacheTypeName())) return false;
+				cacheResolvers.Add(cacheResolver->GetCacheTypeName(), cacheResolver);
+				return true;
+			}
+
+			IGuiInstanceCacheResolver* GetInstanceCacheResolver(const WString& cacheTypeName)override
+			{
+				vint index = cacheResolvers.Keys().IndexOf(cacheTypeName);
+				return index == -1 ? 0 : cacheResolvers.Values()[index].Obj();
 			}
 
 			bool CreateVirtualType(const WString& parentType, Ptr<IGuiInstanceLoader> loader)override

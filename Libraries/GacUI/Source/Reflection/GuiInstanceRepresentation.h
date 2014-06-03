@@ -24,6 +24,7 @@ Instance Representation
 		class GuiTextRepr;
 		class GuiAttSetterRepr;
 		class GuiConstructorRepr;
+		class IGuiInstanceCache;
 
 		class GuiValueRepr : public Object, public Description<GuiValueRepr>
 		{
@@ -125,7 +126,7 @@ Instance Context
 		{
 		public:
 			typedef collections::List<Ptr<GuiInstanceNamespace>>				NamespaceList;
-			typedef collections::Dictionary<WString, Ptr<DescriptableObject>>	CacheMap;
+			typedef collections::Dictionary<WString, Ptr<IGuiInstanceCache>>	CacheMap;
 
 			struct NamespaceInfo
 			{
@@ -160,7 +161,7 @@ Instance Context
 
 			bool									appliedStyles = false;
 			StyleContextList						styles;
-			CacheMap								caches;
+			CacheMap								precompiledCaches;
 
 			static void								CollectDefaultAttributes(GuiAttSetterRepr::ValueList& values, Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
 			static void								CollectAttributes(GuiAttSetterRepr::SetteValuerMap& setters, Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);

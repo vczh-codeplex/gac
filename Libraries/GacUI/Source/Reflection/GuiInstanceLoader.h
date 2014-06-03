@@ -231,6 +231,24 @@ Instance Binder
 		};
 
 /***********************************************************************
+Instance Cache
+***********************************************************************/
+
+		class IGuiInstanceCache : public IDescriptable, public Description<IGuiInstanceCache>
+		{
+		public:
+			virtual WString							GetCacheTypeName() = 0;
+		};
+
+		class IGuiInstanceCacheResolver : public IDescriptable, public Description<IGuiInstanceCache>
+		{
+		public:
+			virtual WString							GetCacheTypeName() = 0;
+			virtual bool							Serialize(Ptr<IGuiInstanceCache> cache, stream::IStream& stream) = 0;
+			virtual Ptr<IGuiInstanceCache>			Deserialize(stream::IStream& stream) = 0;
+		};
+
+/***********************************************************************
 Instance Loader Manager
 ***********************************************************************/
 
@@ -243,6 +261,8 @@ Instance Loader Manager
 			virtual IGuiInstanceBinder*					GetInstanceBinder(const WString& bindingName) = 0;
 			virtual bool								AddInstanceEventBinder(Ptr<IGuiInstanceEventBinder> binder) = 0;
 			virtual IGuiInstanceEventBinder*			GetInstanceEventBinder(const WString& bindingName) = 0;
+			virtual bool								AddInstanceCacheResolver(Ptr<IGuiInstanceCacheResolver> cacheResolver) = 0;
+			virtual IGuiInstanceCacheResolver*			GetInstanceCacheResolver(const WString& cacheTypeName) = 0;
 			virtual bool								CreateVirtualType(const WString& parentType, Ptr<IGuiInstanceLoader> loader) = 0;
 			virtual bool								SetLoader(Ptr<IGuiInstanceLoader> loader) = 0;
 			virtual IGuiInstanceLoader*					GetLoader(const WString& typeName) = 0;
