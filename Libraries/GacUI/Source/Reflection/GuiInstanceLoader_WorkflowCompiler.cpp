@@ -284,6 +284,10 @@ Workflow_CompileDataBinding
 
 		Ptr<workflow::runtime::WfAssembly> Workflow_CompileDataBinding(Ptr<GuiInstanceEnvironment> env, collections::List<WorkflowDataBinding>& dataBindings)
 		{
+			Dictionary<DescriptableObject*, WString> valueNames;
+			Workflow_FillDataBindingContext(env, dataBindings);
+			Workflow_GetDataBindingContext(env, valueNames);
+
 			auto module = MakePtr<WfModule>();
 			Workflow_CreateVariablesForReferenceValues(module, env);
 			Workflow_CreateVariable(module, L"<this>", env->scope->rootInstance);
@@ -297,9 +301,6 @@ Workflow_CompileDataBinding
 			func->statement = block;
 			module->declarations.Add(func);
 			
-			Dictionary<DescriptableObject*, WString> valueNames;
-			Workflow_FillDataBindingContext(env, dataBindings);
-			Workflow_GetDataBindingContext(env, valueNames);
 
 			FOREACH(WorkflowDataBinding, dataBinding, dataBindings)
 			{
