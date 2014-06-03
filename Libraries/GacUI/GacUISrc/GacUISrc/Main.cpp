@@ -208,6 +208,20 @@ namespace vl
 
 #endif
 
+WString XmlToString(Ptr<XmlDocument> xml)
+{
+	MemoryStream stream;
+	{
+		StreamWriter writer(stream);
+		XmlPrint(xml, writer);
+	}
+	stream.SeekFromBegin(0);
+	{
+		StreamReader reader(stream);
+		return reader.ReadToEnd();
+	}
+}
+
 void GuiMain()
 {
 #ifndef VCZH_DEBUG_NO_REFLECTION
@@ -232,18 +246,7 @@ void GuiMain()
 	{
 		resource->Precompile(errors);
 		auto xml = resource->SaveToXml(true);
-
-		MemoryStream stream;
-		WString xmlText;
-		{
-			StreamWriter writer(stream);
-			XmlPrint(xml, writer);
-		}
-		stream.SeekFromBegin(0);
-		{
-			StreamReader reader(stream);
-			xmlText = reader.ReadToEnd();
-		}
+		WString xmlText = XmlToString(xml);
 		resource = GuiResource::LoadFromXml(xml, L"..\\GacUISrcCodepackedTest\\Resources\\", errors);
 	}
 	GetInstanceLoaderManager()->SetResource(L"Demo", resource);
@@ -255,6 +258,10 @@ void GuiMain()
 
 	auto scope = window.GetScope().Obj();
 	CopyFrom(errors, scope->errors, true);
+	{
+		auto xml = resource->SaveToXml(true);
+		WString xmlText = XmlToString(xml);
+	}
 
 	window.ForceCalculateSizeImmediately();
 	window.MoveToScreenCenter();
