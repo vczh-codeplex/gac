@@ -10,6 +10,7 @@ using namespace vl::stream;
 using namespace vl::reflection::description;
 using namespace vl::parsing;
 using namespace vl::parsing::tabling;
+using namespace vl::parsing::xml;
 using namespace vl::workflow;
 using namespace vl::workflow::analyzer;
 
@@ -53,11 +54,12 @@ public:
 	WString										include;
 	WString										name;
 	WString										prefix;
+	WString										precompiledOutput;
 
 	Ptr<ParsingTable>							workflowTable;
 	Ptr<WfLexicalScopeManager>					workflowManager;
 
-	static bool									LoadConfigString(Ptr<GuiResource> resource, const WString& name, WString& value);
+	static bool									LoadConfigString(Ptr<GuiResource> resource, const WString& name, WString& value, bool optional = false);
 	static Ptr<CodegenConfig>					LoadConfig(Ptr<GuiResource> resource);
 	WString										GetControlClassHeaderFileName(Ptr<Instance> instance);
 	WString										GetControlClassCppFileName(Ptr<Instance> instance);

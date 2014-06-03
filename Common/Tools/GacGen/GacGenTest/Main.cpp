@@ -73,7 +73,7 @@ public:
 void GuiMain()
 {
 	List<WString> errors;
-	auto resource = GuiResource::LoadFromXml(L"XmlWindowResource.xml", errors);
+	auto resource = GuiResource::LoadFromXml(L"XmlWindowResource.precompiled.xml", errors);
 	GetInstanceLoaderManager()->SetResource(L"HelloWorld", resource);
 
 	MainWindow window(new WindowViewModel);

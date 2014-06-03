@@ -32,17 +32,21 @@ WString InstanceSchema::GetFullName()
 CodegenConfig
 ***********************************************************************/
 
-bool CodegenConfig::LoadConfigString(Ptr<GuiResource> resource, const WString& name, WString& value)
+bool CodegenConfig::LoadConfigString(Ptr<GuiResource> resource, const WString& name, WString& value, bool optional)
 {
 	if (auto includeItem = resource->GetValueByPath(L"GacGenConfig/" + name).Cast<GuiTextData>())
 	{
 		value = includeItem->GetText();
 		return true;
 	}
-	else
+	else if (!optional)
 	{
 		PrintErrorMessage(L"error> Cannot find configuration in resource \"GacGenConfig/" + name + L"\".");
 		return false;
+	}
+	else
+	{
+		return true;
 	}
 }
 
@@ -53,6 +57,7 @@ Ptr<CodegenConfig> CodegenConfig::LoadConfig(Ptr<GuiResource> resource)
 	if (!LoadConfigString(resource, L"Include", config->include)) return false;
 	if (!LoadConfigString(resource, L"Name", config->name)) return false;
 	if (!LoadConfigString(resource, L"Prefix", config->prefix)) return false;
+	LoadConfigString(resource, L"PrecompiledOutput", config->precompiledOutput, true);
 	return config;
 }
 

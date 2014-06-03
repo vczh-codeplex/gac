@@ -19,6 +19,7 @@
   </ItemGroup>
   <ItemGroup>
     <Xml Include="XmlWindowResource.xml" />
+    <Xml Include="XmlWindowResource.precompiled.xml" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\Libraries\GacUI\Public\Source\GacUI.cpp">

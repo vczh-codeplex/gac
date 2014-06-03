@@ -66,4 +66,12 @@ void GuiMain()
 	WritePartialClassHeaderFile(config, typeSchemas, typeSchemaOrder, instances);
 	WritePartialClassCppFile(config, typeSchemas, typeSchemaOrder, instances);
 	WriteGlobalHeaderFile(config, instances);
+
+	if (config->precompiledOutput != L"")
+	{
+		auto xml = resource->SaveToXml();
+		WString fileName = config->precompiledOutput;
+		OPEN_FILE(L"Precompiled Resource Xml");
+		XmlPrint(xml, writer);
+	}
 }
