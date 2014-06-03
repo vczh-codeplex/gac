@@ -624,6 +624,9 @@
     <ClCompile Include="..\..\..\..\Common\Source\Stream\CompressionStream.cpp">
       <Filter>Common\Stream</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Reflection\GuiInstanceLoader_WorkflowCompiler.cpp">
+      <Filter>GacUI\Reflection</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Common\Source\Basic.h">
@@ -1123,6 +1126,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\Common\Source\Stream\CompressionStream.h">
       <Filter>Common\Stream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Reflection\GuiInstanceLoader_WorkflowCompiler.h">
+      <Filter>GacUI\Reflection</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -1,8 +1,6 @@
 #include "GuiInstanceLoader.h"
-#include "TypeDescriptors\GuiReflectionControls.h"
-#include "InstanceQuery\GuiInstanceQuery_Parser.h"
-#include "..\Resources\GuiParserManager.h"
-#include "..\..\..\Workflow\Source\Analyzer\WfAnalyzer.h"
+#include "GuiInstanceLoader_WorkflowCompiler.h"
+#include "..\Controls\GuiApplication.h"
 
 namespace vl
 {
@@ -13,6 +11,7 @@ namespace vl
 		using namespace workflow;
 		using namespace workflow::analyzer;
 		using namespace workflow::runtime;
+		using namespace controls;
 
 		extern WfLexicalScopeManager*			GetSharedWorkflowManager();
 
@@ -252,8 +251,8 @@ GuiWorkflowGlobalContext
 				else
 				{
 					auto module = MakePtr<WfModule>();
-					CreateVariablesForReferenceValues(module, env);
-					CreateVariable(module, L"<this>", env->scope->rootInstance);
+					Workflow_CreateVariablesForReferenceValues(module, env);
+					Workflow_CreateVariable(module, L"<this>", env->scope->rootInstance);
 					{
 						auto func = MakePtr<WfFunctionDeclaration>();
 						func->anonymity = WfFunctionAnonymity::Named;
@@ -279,7 +278,7 @@ GuiWorkflowGlobalContext
 								subscribee = L"<temp>" + itow(valueNames.Count());
 								valueNames.Add(dataBinding.instance.GetRawPtr(), subscribee);
 								env->scope->referenceValues.Add(subscribee, dataBinding.instance);
-								CreateVariable(module, subscribee, dataBinding.instance);
+								Workflow_CreateVariable(module, subscribee, dataBinding.instance);
 							}
 							else
 							{
@@ -485,51 +484,12 @@ GuiWorkflowGlobalContext
 					globalContext = new WfRuntimeGlobalContext(assembly);
 				
 					LoadFunction<void()>(globalContext, L"<initialize>")();
-					SetVariablesForReferenceValues(globalContext, env);
+					Workflow_SetVariablesForReferenceValues(globalContext, env);
 					{
 						vint index = assembly->variableNames.IndexOf(L"<this>");
 						globalContext->globalVariables->variables[index] = env->scope->rootInstance;
 					}
 					LoadFunction<void()>(globalContext, L"<initialize-data-binding>")();
-				}
-			}
-
-			static void CreateVariable(Ptr<WfModule> module, const WString& name, const Value& value)
-			{
-				auto var = MakePtr<WfVariableDeclaration>();
-				var->name.value = name;
-				{
-					Ptr<TypeInfoImpl> elementType = new TypeInfoImpl(ITypeInfo::TypeDescriptor);
-					elementType->SetTypeDescriptor(value.GetTypeDescriptor());
-
-					Ptr<TypeInfoImpl> pointerType = new TypeInfoImpl(ITypeInfo::RawPtr);
-					pointerType->SetElementType(elementType);
-
-					var->type = GetTypeFromTypeInfo(pointerType.Obj());
-				}
-
-				auto literal = MakePtr<WfLiteralExpression>();
-				literal->value = WfLiteralValue::Null;
-				var->expression = literal;
-
-				module->declarations.Add(var);
-			}
-
-			static void CreateVariablesForReferenceValues(Ptr<WfModule> module, Ptr<GuiInstanceEnvironment> env)
-			{
-				FOREACH_INDEXER(WString, name, index, env->scope->referenceValues.Keys())
-				{
-					auto value = env->scope->referenceValues.Values()[index];
-					CreateVariable(module, name, value);
-				}
-			}
-
-			static void SetVariablesForReferenceValues(Ptr<WfRuntimeGlobalContext> context, Ptr<GuiInstanceEnvironment> env)
-			{
-				FOREACH_INDEXER(WString, name, index, env->scope->referenceValues.Keys())
-				{
-					vint variableIndex = context->assembly->variableNames.IndexOf(name);
-					context->globalVariables->variables[variableIndex] = env->scope->referenceValues.Values()[index];
 				}
 			}
 		};
@@ -585,9 +545,9 @@ GuiScriptInstanceBinder
 						failed = true;
 					}
 
-					/*{
+					{
 						auto module = MakePtr<WfModule>();
-						GuiWorkflowGlobalContext::CreateVariablesForReferenceValues(module, env);
+						Workflow_CreateVariablesForReferenceValues(module, env);
 						{
 							auto func = MakePtr<WfFunctionDeclaration>();
 							func->anonymity = WfFunctionAnonymity::Named;
@@ -635,7 +595,7 @@ GuiScriptInstanceBinder
 								}
 							}
 						}
-					}*/
+					}
 
 					if (!failed)
 					{
@@ -715,7 +675,7 @@ GuiEvalInstanceBinder
 						}
 
 						auto module = MakePtr<WfModule>();
-						GuiWorkflowGlobalContext::CreateVariablesForReferenceValues(module, env);
+						Workflow_CreateVariablesForReferenceValues(module, env);
 						{
 							auto lambda = MakePtr<WfOrderedLambdaExpression>();
 							lambda->body = expression;
@@ -751,7 +711,7 @@ GuiEvalInstanceBinder
 						auto globalContext = MakePtr<WfRuntimeGlobalContext>(assembly);
 				
 						LoadFunction<void()>(globalContext, L"<initialize>")();
-						GuiWorkflowGlobalContext::SetVariablesForReferenceValues(globalContext, env);
+						Workflow_SetVariablesForReferenceValues(globalContext, env);
 						vint variableIndex = assembly->variableNames.IndexOf(L"<initialize-data-binding>");
 						auto variable = globalContext->globalVariables->variables[variableIndex];
 						auto proxy = UnboxValue<Ptr<IValueFunctionProxy>>(variable);
@@ -813,7 +773,7 @@ GuiEvalInstanceEventBinder
 						}
 
 						auto module = MakePtr<WfModule>();
-						GuiWorkflowGlobalContext::CreateVariablesForReferenceValues(module, env);
+						Workflow_CreateVariablesForReferenceValues(module, env);
 						{
 							auto func = MakePtr<WfFunctionDeclaration>();
 							func->anonymity = WfFunctionAnonymity::Named;
@@ -866,7 +826,7 @@ GuiEvalInstanceEventBinder
 						auto globalContext = MakePtr<WfRuntimeGlobalContext>(assembly);
 				
 						LoadFunction<void()>(globalContext, L"<initialize>")();
-						GuiWorkflowGlobalContext::SetVariablesForReferenceValues(globalContext, env);
+						Workflow_SetVariablesForReferenceValues(globalContext, env);
 						auto eventHandler = LoadFunction(globalContext, L"<event-handler>");
 						handler = BoxValue(eventHandler);
 
