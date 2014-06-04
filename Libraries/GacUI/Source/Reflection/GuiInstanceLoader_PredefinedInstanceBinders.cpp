@@ -135,8 +135,6 @@ GuiWorkflowGlobalContext
 		class GuiWorkflowGlobalContext : public Object, public IGuiInstanceBindingContext
 		{
 		public:
-			static const wchar_t*			ContextName;
-
 			List<WorkflowDataBinding>		dataBindings;
 			Ptr<WfRuntimeGlobalContext>		globalContext;
 
@@ -146,7 +144,7 @@ GuiWorkflowGlobalContext
 
 			WString GetContextName()override
 			{
-				return ContextName;
+				return GuiWorkflowCache::CacheContextName;
 			}
 
 			void Initialize(Ptr<GuiInstanceEnvironment> env)override
@@ -181,8 +179,6 @@ GuiWorkflowGlobalContext
 			}
 		};
 
-		const wchar_t* GuiWorkflowGlobalContext::ContextName = L"WORKFLOW-GLOBAL-CONTEXT";
-
 /***********************************************************************
 GuiScriptInstanceBinder
 ***********************************************************************/
@@ -199,16 +195,16 @@ GuiScriptInstanceBinder
 
 			void GetRequiredContexts(collections::List<WString>& contextNames)override
 			{
-				contextNames.Add(GuiWorkflowGlobalContext::ContextName);
+				contextNames.Add(GuiWorkflowCache::CacheContextName);
 			}
 
 			bool SetPropertyValue(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, Nullable<WString> instanceName, IGuiInstanceLoader::PropertyValue& propertyValue)override
 			{
-				auto context = env->scope->bindingContexts[GuiWorkflowGlobalContext::ContextName].Cast<GuiWorkflowGlobalContext>();
+				auto context = env->scope->bindingContexts[GuiWorkflowCache::CacheContextName].Cast<GuiWorkflowGlobalContext>();
 				WorkflowDataBinding dataBinding;
 				dataBinding.variableName = instanceName.Value();
 
-				if (env->context->precompiledCaches.Keys().Contains(GuiWorkflowGlobalContext::ContextName))
+				if (env->context->precompiledCaches.Keys().Contains(GuiWorkflowCache::CacheContextName))
 				{
 					goto SUCCESS;
 				}
@@ -440,7 +436,7 @@ GuiPredefinedInstanceBindersPlugin
 				{
 					IGuiInstanceLoaderManager* manager=GetInstanceLoaderManager();
 
-					manager->AddInstanceBindingContextFactory(new GuiInstanceBindingContextFactory<GuiWorkflowGlobalContext>(GuiWorkflowGlobalContext::ContextName));
+					manager->AddInstanceBindingContextFactory(new GuiInstanceBindingContextFactory<GuiWorkflowGlobalContext>(GuiWorkflowCache::CacheContextName));
 
 					manager->AddInstanceBinder(new GuiResourceInstanceBinder);
 					manager->AddInstanceBinder(new GuiReferenceInstanceBinder);

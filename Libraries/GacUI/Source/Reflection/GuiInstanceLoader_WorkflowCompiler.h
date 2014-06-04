@@ -59,6 +59,7 @@ GuiWorkflowCache
 		{
 		public:
 			static const wchar_t*							CacheTypeName;
+			static const wchar_t*							CacheContextName;
 
 			Ptr<workflow::runtime::WfAssembly>				assembly;
 
