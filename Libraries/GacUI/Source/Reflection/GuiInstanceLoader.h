@@ -227,8 +227,9 @@ Instance Binder
 		{
 		public:
 			virtual WString							GetBindingName() = 0;
+			virtual bool							RequireInstanceName() = 0;
 			virtual void							GetRequiredContexts(collections::List<WString>& contextNames) = 0;
-			virtual bool							AttachEvent(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, IGuiInstanceLoader::PropertyValue& propertyValue) = 0;
+			virtual bool							AttachEvent(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, Nullable<WString> instanceName, IGuiInstanceLoader::PropertyValue& propertyValue) = 0;
 		};
 
 /***********************************************************************
