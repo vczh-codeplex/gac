@@ -243,6 +243,13 @@ void GuiMain()
 	//}
 
 	List<WString> errors;
+	DateTime begin, end;
+	List<vint64_t> timeSpans;
+#define CLOCK\
+	end = DateTime::LocalTime(); \
+	timeSpans.Add(end.totalMilliseconds - begin.totalMilliseconds); \
+	begin = end;\
+
 	WString xmlText;
 	{
 		auto resource = GuiResource::LoadFromXml(L"..\\GacUISrcCodepackedTest\\Resources\\XmlWindowResourceDataBinding.xml", errors);
@@ -251,16 +258,28 @@ void GuiMain()
 		xmlText = XmlToString(xml);
 	}
 	
-	DateTime begin = DateTime::LocalTime();
+	begin = DateTime::LocalTime();
 	{
 		auto parser = GetParserManager()->GetParser<XmlDocument>(L"XML");
 		auto xml = parser->TypedParse(xmlText, errors);
+		CLOCK;
 		auto resource = GuiResource::LoadFromXml(xml, L"<Unknown>", errors);
+		CLOCK;
 		GetInstanceLoaderManager()->SetResource(L"Demo", resource);
+		CLOCK;
 	}
 	demos::MainWindow window;
-	DateTime end = DateTime::LocalTime();
-	window.SetText(window.GetText() + L" " + i64tow(end.totalMilliseconds - begin.totalMilliseconds) + L" milliseconds");
+	CLOCK;
+
+	WString timeString;
+	vint64_t totalTimeSpan = 0;
+	FOREACH_INDEXER(vint64_t, timeSpan, index, timeSpans)
+	{
+		totalTimeSpan += timeSpan;
+		if (index != 0) timeString += L", ";
+		timeString += i64tow(timeSpan);
+	}
+	window.SetText(window.GetText() + L" " + i64tow(totalTimeSpan) + L": " + timeString + L" milliseconds");
 
 	auto scope = window.GetScope().Obj();
 	CopyFrom(errors, scope->errors, true);
