@@ -3,6 +3,7 @@
 #include "..\Resources\GuiParserManager.h"
 #include "InstanceQuery\GuiInstanceQuery.h"
 #include "GuiInstanceSchemaRepresentation.h"
+#include "GuiInstanceLoader_WorkflowCompiler.h"
 
 namespace vl
 {
@@ -252,6 +253,7 @@ Instance Type Resolver
 				if (auto obj = resource.Cast<GuiInstanceContext>())
 				{
 					obj->ApplyStyles(resolver, errors);
+					Workflow_PrecompileInstanceContext(obj, errors);
 				}
 			}
 

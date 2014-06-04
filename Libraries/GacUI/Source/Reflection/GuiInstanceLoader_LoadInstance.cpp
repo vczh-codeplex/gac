@@ -209,14 +209,14 @@ FindInstanceLoadingSource
 ***********************************************************************/
 
 		InstanceLoadingSource FindInstanceLoadingSource(
-			Ptr<GuiInstanceEnvironment> env,
+			Ptr<GuiInstanceContext> context,
 			GuiConstructorRepr* ctor
 			)
 		{
-			vint index=env->context->namespaces.Keys().IndexOf(ctor->typeNamespace);
+			vint index=context->namespaces.Keys().IndexOf(ctor->typeNamespace);
 			if(index!=-1)
 			{
-				Ptr<GuiInstanceContext::NamespaceInfo> namespaceInfo=env->context->namespaces.Values()[index];
+				Ptr<GuiInstanceContext::NamespaceInfo> namespaceInfo=context->namespaces.Values()[index];
 				FOREACH(Ptr<GuiInstanceNamespace>, ns, namespaceInfo->namespaces)
 				{
 					WString fullName = ns->prefix + ctor->typeName + ns->postfix;
@@ -649,7 +649,7 @@ CreateInstance
 			)
 		{
 			// search for a correct loader
-			InstanceLoadingSource source=FindInstanceLoadingSource(env, ctor);
+			InstanceLoadingSource source=FindInstanceLoadingSource(env->context, ctor);
 			Value instance;
 			IGuiInstanceLoader* instanceLoader = 0;
 			bool deserialized = false;
@@ -1216,7 +1216,7 @@ InitializeInstance
 			// search for a correct loader
 			GuiConstructorRepr* ctor = context->instance.Obj();
 			Ptr<GuiInstanceEnvironment> env = new GuiInstanceEnvironment(context, resolver);
-			InstanceLoadingSource source = FindInstanceLoadingSource(env, ctor);
+			InstanceLoadingSource source = FindInstanceLoadingSource(env->context, ctor);
 
 			// initialize the instance
 			if(source.loader)
