@@ -68,6 +68,21 @@ GuiAttSetterRepr
 		{
 			if (!fromStyle || serializePrecompiledResource)
 			{
+				if (instanceName)
+				{
+					auto attName = MakePtr<XmlAttribute>();
+					attName->name.value = L"ref.Name";
+					attName->value.value = instanceName.Value();
+					xml->attributes.Add(attName);
+				}
+				if (styleName)
+				{
+					auto attStyle = MakePtr<XmlAttribute>();
+					attStyle->name.value = L"ref.Style";
+					attStyle->value.value = styleName.Value();
+					xml->attributes.Add(attStyle);
+				}
+
 				for (vint i = 0; i < setters.Count(); i++)
 				{
 					auto key = setters.Keys()[i];
@@ -158,21 +173,6 @@ GuiConstructorRepr
 				else
 				{
 					xmlCtor->name.value = typeNamespace + L":" + typeName;
-				}
-
-				if (instanceName)
-				{
-					auto attName = MakePtr<XmlAttribute>();
-					attName->name.value = L"ref.Name";
-					attName->value.value = instanceName.Value();
-					xmlCtor->attributes.Add(attName);
-				}
-				if (styleName)
-				{
-					auto attStyle = MakePtr<XmlAttribute>();
-					attStyle->name.value = L"ref.Style";
-					attStyle->value.value = styleName.Value();
-					xmlCtor->attributes.Add(attStyle);
 				}
 
 				GuiAttSetterRepr::FillXml(xmlCtor, serializePrecompiledResource);
@@ -326,6 +326,23 @@ GuiInstanceContext
 		{
 			if(auto parser=GetParserManager()->GetParser<ElementName>(L"INSTANCE-ELEMENT-NAME"))
 			{
+				// collect reference attributes
+				FOREACH(Ptr<XmlAttribute>, att, xml->attributes)
+				{
+					if(auto name=parser->TypedParse(att->name.value, errors))
+					if(name->IsReferenceAttributeName())
+					{
+						if (name->name == L"Name")
+						{
+							setter->instanceName = att->value.value;
+						}
+						else if (name->name == L"Style")
+						{
+							setter->styleName = att->value.value;
+						}
+					}
+				}
+
 				// collect attributes as setters
 				FOREACH(Ptr<XmlAttribute>, att, xml->attributes)
 				{
@@ -374,23 +391,6 @@ GuiInstanceContext
 				Ptr<GuiConstructorRepr> ctor=new GuiConstructorRepr;
 				ctor->typeNamespace=name->namespaceName;
 				ctor->typeName=name->name;
-				
-				// collect reference attributes
-				FOREACH(Ptr<XmlAttribute>, att, xml->attributes)
-				{
-					if(auto name=parser->TypedParse(att->name.value, errors))
-					if(name->IsReferenceAttributeName())
-					{
-						if (name->name == L"Name")
-						{
-							ctor->instanceName = att->value.value;
-						}
-						else if (name->name == L"Style")
-						{
-							ctor->styleName = att->value.value;
-						}
-					}
-				}
 				// collect attributes as setters
 				FillAttSetter(ctor, xml, errors);
 				return ctor;

@@ -35,15 +35,13 @@ namespace vl
 
 		struct WorkflowDataBinding
 		{
-			description::Value								instance;
+			WString											variableName;
 			description::IPropertyInfo*						propertyInfo = 0;
 			Ptr<workflow::WfExpression>						bindExpression; // WfBindExpression for bind, else for assign
 		};
 
-		extern void											Workflow_GetDataBindingContext(Ptr<GuiInstanceEnvironment> env, collections::Dictionary<DescriptableObject*, WString>& valueNames);
-		extern void											Workflow_FillDataBindingContext(Ptr<GuiInstanceEnvironment> env, collections::List<WorkflowDataBinding>& dataBindings);
 		extern WString										Workflow_ModuleToString(Ptr<workflow::WfModule> module);
-		extern Ptr<workflow::runtime::WfAssembly>			Workflow_CompileDataBinding(Ptr<GuiInstanceEnvironment> env, collections::List<WorkflowDataBinding>& dataBindings);
+		extern Ptr<workflow::runtime::WfAssembly>			Workflow_CompileDataBinding(types::VariableTypeMap& types, description::ITypeDescriptor* thisType, types::ErrorList& errors, collections::List<WorkflowDataBinding>& dataBindings);
 	}
 }
 

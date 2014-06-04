@@ -17,6 +17,7 @@ Helper Functions Declarations
 		{
 			IGuiInstanceBinder*					binder;
 			IGuiInstanceLoader*					loader;
+			Ptr<GuiAttSetterRepr>				bindingTarget;
 			IGuiInstanceLoader::PropertyValue	propertyValue;
 
 			FillInstanceBindingSetter()
@@ -970,7 +971,17 @@ ExecuteBindingSetters
 				bindingSetter.binder->GetRequiredContexts(contextNames);
 				bool success = PrepareBindingContext(env, contextNames, L"property binding", bindingSetter.binder->GetBindingName());
 
-				if (!success || !bindingSetter.binder->SetPropertyValue(env, bindingSetter.loader, bindingSetter.propertyValue))
+				if (bindingSetter.binder->RequireInstanceName())
+				{
+					if (!bindingSetter.bindingTarget->instanceName)
+					{
+						WString name = L"<temp>" + itow(env->scope->referenceValues.Count());
+						bindingSetter.bindingTarget->instanceName = name;
+						env->scope->referenceValues.Add(name, bindingSetter.propertyValue.instanceValue);
+					}
+				}
+
+				if (!success || !bindingSetter.binder->SetPropertyValue(env, bindingSetter.loader, bindingSetter.bindingTarget->instanceName, bindingSetter.propertyValue))
 				{
 					auto value = bindingSetter.propertyValue.propertyValue;
 					env->scope->errors.Add(

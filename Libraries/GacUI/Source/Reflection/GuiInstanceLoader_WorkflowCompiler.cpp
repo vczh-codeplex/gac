@@ -254,33 +254,6 @@ Workflow_CompileEventHandler
 Workflow_CompileDataBinding
 ***********************************************************************/
 
-		void Workflow_GetDataBindingContext(Ptr<GuiInstanceEnvironment> env, collections::Dictionary<DescriptableObject*, WString>& valueNames)
-		{
-			FOREACH_INDEXER(WString, name, index, env->scope->referenceValues.Keys())
-			{
-				auto value = env->scope->referenceValues.Values()[index];
-				valueNames.Add(value.GetRawPtr(), name);
-			}
-		}
-
-		void Workflow_FillDataBindingContext(Ptr<GuiInstanceEnvironment> env, collections::List<WorkflowDataBinding>& dataBindings)
-		{
-			Dictionary<DescriptableObject*, WString> valueNames;
-			Workflow_GetDataBindingContext(env, valueNames);
-
-			FOREACH(WorkflowDataBinding, dataBinding, dataBindings)
-			{
-				vint index = valueNames.Keys().IndexOf(dataBinding.instance.GetRawPtr());
-				WString subscribee;
-				if (index == -1)
-				{
-					subscribee = L"<temp>" + itow(valueNames.Count());
-					valueNames.Add(dataBinding.instance.GetRawPtr(), subscribee);
-					env->scope->referenceValues.Add(subscribee, dataBinding.instance);
-				}
-			}
-		}
-
 		WString Workflow_ModuleToString(Ptr<workflow::WfModule> module)
 		{
 			stream::MemoryStream stream;
@@ -293,17 +266,11 @@ Workflow_CompileDataBinding
 			return reader.ReadToEnd();
 		}
 
-		Ptr<workflow::runtime::WfAssembly> Workflow_CompileDataBinding(Ptr<GuiInstanceEnvironment> env, collections::List<WorkflowDataBinding>& dataBindings)
+		Ptr<workflow::runtime::WfAssembly> Workflow_CompileDataBinding(types::VariableTypeMap& types, description::ITypeDescriptor* thisType, types::ErrorList& errors, collections::List<WorkflowDataBinding>& dataBindings)
 		{
-			Dictionary<DescriptableObject*, WString> valueNames;
-			Workflow_FillDataBindingContext(env, dataBindings);
-			Workflow_GetDataBindingContext(env, valueNames);
-
 			auto module = MakePtr<WfModule>();
-			types::VariableTypeMap types;
-			Workflow_GetVariableTypes(env, types);
 			Workflow_CreateVariablesForReferenceValues(module, types);
-			Workflow_CreatePointerVariable(module, L"<this>", env->scope->rootInstance.GetTypeDescriptor());
+			Workflow_CreatePointerVariable(module, L"<this>", thisType);
 
 			auto func = MakePtr<WfFunctionDeclaration>();
 			func->anonymity = WfFunctionAnonymity::Named;
@@ -317,8 +284,6 @@ Workflow_CompileDataBinding
 
 			FOREACH(WorkflowDataBinding, dataBinding, dataBindings)
 			{
-				WString subscribee = valueNames[dataBinding.instance.GetRawPtr()];
-
 				if (dataBinding.bindExpression.Cast<WfBindExpression>())
 				{
 					auto subBlock = MakePtr<WfBlockStatement>();
@@ -357,7 +322,7 @@ Workflow_CompileDataBinding
 						callback->statement = callbackBlock;
 						{
 							auto refSubscribee = MakePtr<WfReferenceExpression>();
-							refSubscribee->name.value = subscribee;
+							refSubscribee->name.value = dataBinding.variableName;
 
 							auto member = MakePtr<WfMemberExpression>();
 							member->parent = refSubscribee;
@@ -418,7 +383,7 @@ Workflow_CompileDataBinding
 						}
 						{
 							auto refSubscribee = MakePtr<WfReferenceExpression>();
-							refSubscribee->name.value = subscribee;
+							refSubscribee->name.value = dataBinding.variableName;
 
 							auto member = MakePtr<WfMemberExpression>();
 							member->parent = refSubscribee;
@@ -474,7 +439,7 @@ Workflow_CompileDataBinding
 				else if (dataBinding.bindExpression)
 				{
 					auto refSubscribee = MakePtr<WfReferenceExpression>();
-					refSubscribee->name.value = subscribee;
+					refSubscribee->name.value = dataBinding.variableName;
 
 					auto member = MakePtr<WfMemberExpression>();
 					member->parent = refSubscribee;
@@ -498,13 +463,13 @@ Workflow_CompileDataBinding
 
 			if (Workflow_GetSharedManager()->errors.Count() > 0)
 			{
-				env->scope->errors.Add(ERROR_CODE_PREFIX L"Unexpected errors are encountered when initializing data binding.");
+				errors.Add(ERROR_CODE_PREFIX L"Unexpected errors are encountered when initializing data binding.");
 				FOREACH(Ptr<parsing::ParsingError>, error, Workflow_GetSharedManager()->errors)
 				{
-					env->scope->errors.Add(error->errorMessage);
+					errors.Add(error->errorMessage);
 				}
-				env->scope->errors.Add(ERROR_CODE_PREFIX L"Print code for reference:");
-				env->scope->errors.Add(moduleCode);
+				errors.Add(ERROR_CODE_PREFIX L"Print code for reference:");
+				errors.Add(moduleCode);
 				return 0;
 			}
 			return GenerateAssembly(Workflow_GetSharedManager());

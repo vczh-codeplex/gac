@@ -32,6 +32,11 @@ GuiTextInstanceBinderBase
 				return false;
 			}
 
+			bool RequireInstanceName()override
+			{
+				return false;
+			}
+
 			void GetRequiredContexts(collections::List<WString>& contextNames)override
 			{
 			}
@@ -59,7 +64,7 @@ GuiResourceInstanceBinder
 				return L"uri";
 			}
 
-			bool SetPropertyValue(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, IGuiInstanceLoader::PropertyValue& propertyValue)override
+			bool SetPropertyValue(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, Nullable<WString> instanceName, IGuiInstanceLoader::PropertyValue& propertyValue)override
 			{
 				if (propertyValue.propertyValue.GetValueType() == Value::Text)
 				{
@@ -103,7 +108,7 @@ GuiReferenceInstanceBinder
 				return L"ref";
 			}
 
-			bool SetPropertyValue(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, IGuiInstanceLoader::PropertyValue& propertyValue)override
+			bool SetPropertyValue(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, Nullable<WString> instanceName, IGuiInstanceLoader::PropertyValue& propertyValue)override
 			{
 				if (propertyValue.propertyValue.GetValueType() == Value::Text)
 				{
@@ -206,12 +211,13 @@ GuiWorkflowGlobalContext
 				vint cacheIndex = env->context->precompiledCaches.Keys().IndexOf(GetContextName());
 				if (cacheIndex != -1)
 				{
-					Workflow_FillDataBindingContext(env, dataBindings);
 					assembly = env->context->precompiledCaches.Values()[cacheIndex].Cast<GuiWorkflowCache>()->assembly;
 				}
 				else
 				{
-					assembly = Workflow_CompileDataBinding(env, dataBindings);
+					types::VariableTypeMap types;
+					ITypeDescriptor* thisType = env->scope->rootInstance.GetTypeDescriptor();
+					assembly = Workflow_CompileDataBinding(types, thisType, env->scope->errors, dataBindings);
 					env->context->precompiledCaches.Add(GetContextName(), new GuiWorkflowCache(assembly));
 				}
 
@@ -246,11 +252,11 @@ GuiScriptInstanceBinder
 				contextNames.Add(GuiWorkflowGlobalContext::ContextName);
 			}
 
-			bool SetPropertyValue(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, IGuiInstanceLoader::PropertyValue& propertyValue)override
+			bool SetPropertyValue(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, Nullable<WString> instanceName, IGuiInstanceLoader::PropertyValue& propertyValue)override
 			{
 				auto context = env->scope->bindingContexts[GuiWorkflowGlobalContext::ContextName].Cast<GuiWorkflowGlobalContext>();
 				WorkflowDataBinding dataBinding;
-				dataBinding.instance = propertyValue.instanceValue;
+				dataBinding.variableName = instanceName.Value();
 
 				if (env->context->precompiledCaches.Keys().Contains(GuiWorkflowGlobalContext::ContextName))
 				{
