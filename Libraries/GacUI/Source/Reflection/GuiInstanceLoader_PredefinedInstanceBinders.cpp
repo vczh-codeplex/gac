@@ -260,7 +260,9 @@ GuiScriptInstanceBinder
 				{
 					WString expressionCode = TranslateExpression(propertyValue.propertyValue.GetText());
 					Ptr<WfExpression> expression;
-					if (Workflow_ValidateExpression(env, propertyValue, expressionCode, expression))
+					types::VariableTypeMap types;
+					Workflow_GetVariableTypes(env, types);
+					if (Workflow_ValidateExpression(types, env->scope->errors, propertyValue, expressionCode, expression))
 					{
 						auto expr = expression;
 						if (auto bind = expr.Cast<WfBindExpression>())
@@ -325,7 +327,9 @@ GuiEvalInstanceBinder
 					}
 					else
 					{
-						assembly = Workflow_CompileExpression(env, expressionCode);
+						types::VariableTypeMap types;
+						Workflow_GetVariableTypes(env, types);
+						assembly = Workflow_CompileExpression(types, env->scope->errors, expressionCode);
 						env->context->precompiledCaches.Add(cacheKey, new GuiWorkflowCache(assembly));
 					}
 
@@ -386,7 +390,9 @@ GuiEvalInstanceEventBinder
 					}
 					else
 					{
-						assembly = Workflow_CompileEventHandler(env, propertyValue, statementCode);
+						types::VariableTypeMap types;
+						Workflow_GetVariableTypes(env, types);
+						assembly = Workflow_CompileEventHandler(types, env->scope->errors, propertyValue, statementCode);
 						env->context->precompiledCaches.Add(cacheKey, new GuiWorkflowCache(assembly));
 					}
 

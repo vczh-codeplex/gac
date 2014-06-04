@@ -11,19 +11,20 @@ namespace vl
 		using namespace reflection::description;
 		using namespace collections;
 
-#define ERROR_CODE_PREFIX L"========<" + env->scope->rootInstance.GetTypeDescriptor()->GetTypeName() + L">======== "
+//#define ERROR_CODE_PREFIX L"========<" + env->scope->rootInstance.GetTypeDescriptor()->GetTypeName() + L">======== "
+#define ERROR_CODE_PREFIX
 
 /***********************************************************************
 Variable
 ***********************************************************************/
 
-		void Workflow_CreateVariable(Ptr<workflow::WfModule> module, const WString& name, const description::Value& value)
+		void Workflow_CreatePointerVariable(Ptr<workflow::WfModule> module, const WString& name, description::ITypeDescriptor* type)
 		{
 			auto var = MakePtr<WfVariableDeclaration>();
 			var->name.value = name;
 			{
 				Ptr<TypeInfoImpl> elementType = new TypeInfoImpl(ITypeInfo::TypeDescriptor);
-				elementType->SetTypeDescriptor(value.GetTypeDescriptor());
+				elementType->SetTypeDescriptor(type);
 
 				Ptr<TypeInfoImpl> pointerType = new TypeInfoImpl(ITypeInfo::RawPtr);
 				pointerType->SetElementType(elementType);
@@ -37,13 +38,23 @@ Variable
 
 			module->declarations.Add(var);
 		}
-		
-		void Workflow_CreateVariablesForReferenceValues(Ptr<workflow::WfModule> module, Ptr<GuiInstanceEnvironment> env)
+
+		void Workflow_GetVariableTypes(Ptr<GuiInstanceEnvironment> env, types::VariableTypeMap& types)
 		{
 			FOREACH_INDEXER(WString, name, index, env->scope->referenceValues.Keys())
 			{
 				auto value = env->scope->referenceValues.Values()[index];
-				Workflow_CreateVariable(module, name, value);
+				types.Add(name, value.GetTypeDescriptor());
+			}
+		}
+		
+		void Workflow_CreateVariablesForReferenceValues(Ptr<workflow::WfModule> module, types::VariableTypeMap& types)
+		{
+			for (vint i = 0; i < types.Count(); i++)
+			{
+				auto key = types.Keys()[i];
+				auto value = types.Values()[i];
+				Workflow_CreatePointerVariable(module, key, value);
 			}
 		}
 
@@ -60,13 +71,13 @@ Variable
 Workflow_ValidateExpression
 ***********************************************************************/
 
-		bool Workflow_ValidateExpression(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader::PropertyInfo& bindingTarget, const WString& expressionCode, Ptr<workflow::WfExpression>& expression)
+		bool Workflow_ValidateExpression(types::VariableTypeMap& types, types::ErrorList& errors, IGuiInstanceLoader::PropertyInfo& bindingTarget, const WString& expressionCode, Ptr<workflow::WfExpression>& expression)
 		{
 			auto parser = GetParserManager()->GetParser<WfExpression>(L"WORKFLOW-EXPRESSION");
-			expression = parser->TypedParse(expressionCode, env->scope->errors);
+			expression = parser->TypedParse(expressionCode, errors);
 			if (!expression)
 			{
-				env->scope->errors.Add(ERROR_CODE_PREFIX L"Failed to parse the workflow expression.");
+				errors.Add(ERROR_CODE_PREFIX L"Failed to parse the workflow expression.");
 				return false;
 			}
 
@@ -75,17 +86,17 @@ Workflow_ValidateExpression
 			auto propertyInfo = td->GetPropertyByName(bindingTarget.propertyName, true);
 			if (!propertyInfo)
 			{
-				env->scope->errors.Add(ERROR_CODE_PREFIX L"Property \"" + bindingTarget.propertyName + L"\" does not exist in type \"" + td->GetTypeName() + L"\".");
+				errors.Add(ERROR_CODE_PREFIX L"Property \"" + bindingTarget.propertyName + L"\" does not exist in type \"" + td->GetTypeName() + L"\".");
 				failed = true;
 			}
 			else if (!propertyInfo->IsReadable() || !propertyInfo->IsWritable())
 			{
-				env->scope->errors.Add(ERROR_CODE_PREFIX L"Property \"" + bindingTarget.propertyName + L"\" of type \"" + td->GetTypeName() + L"\" should be both readable and writable.");
+				errors.Add(ERROR_CODE_PREFIX L"Property \"" + bindingTarget.propertyName + L"\" of type \"" + td->GetTypeName() + L"\" should be both readable and writable.");
 				failed = true;
 			}
 
 			auto module = MakePtr<WfModule>();
-			Workflow_CreateVariablesForReferenceValues(module, env);
+			Workflow_CreateVariablesForReferenceValues(module, types);
 			{
 				auto func = MakePtr<WfFunctionDeclaration>();
 				func->anonymity = WfFunctionAnonymity::Named;
@@ -104,10 +115,10 @@ Workflow_ValidateExpression
 			Workflow_GetSharedManager()->Rebuild(true);
 			if (Workflow_GetSharedManager()->errors.Count() > 0)
 			{
-				env->scope->errors.Add(ERROR_CODE_PREFIX L"Failed to analyze the workflow expression \"" + expressionCode + L"\".");
+				errors.Add(ERROR_CODE_PREFIX L"Failed to analyze the workflow expression \"" + expressionCode + L"\".");
 				FOREACH(Ptr<parsing::ParsingError>, error, Workflow_GetSharedManager()->errors)
 				{
-					env->scope->errors.Add(error->errorMessage);
+					errors.Add(error->errorMessage);
 				}
 				failed = true;
 			}
@@ -124,8 +135,8 @@ Workflow_ValidateExpression
 					}
 					if (!CanConvertToType(result.type.Obj(), propertyType, false))
 					{
-						env->scope->errors.Add(ERROR_CODE_PREFIX L"Failed to analyze the workflow expression \"" + expressionCode + L"\".");
-						env->scope->errors.Add(
+						errors.Add(ERROR_CODE_PREFIX L"Failed to analyze the workflow expression \"" + expressionCode + L"\".");
+						errors.Add(
 							WfErrors::ExpressionCannotImplicitlyConvertToType(expression.Obj(), result.type.Obj(), propertyType)
 							->errorMessage);
 						failed = true;
@@ -140,18 +151,18 @@ Workflow_ValidateExpression
 Workflow_CompileExpression
 ***********************************************************************/
 
-		Ptr<workflow::runtime::WfAssembly> Workflow_CompileExpression(Ptr<GuiInstanceEnvironment> env, const WString& expressionCode)
+		Ptr<workflow::runtime::WfAssembly> Workflow_CompileExpression(types::VariableTypeMap& types, types::ErrorList& errors, const WString& expressionCode)
 		{
 			auto parser = GetParserManager()->GetParser<WfExpression>(L"WORKFLOW-EXPRESSION");
-			auto expression = parser->TypedParse(expressionCode, env->scope->errors);
+			auto expression = parser->TypedParse(expressionCode, errors);
 			if (!expression)
 			{
-				env->scope->errors.Add(ERROR_CODE_PREFIX L"Failed to parse the workflow expression \"" + expressionCode + L"\".");
+				errors.Add(ERROR_CODE_PREFIX L"Failed to parse the workflow expression \"" + expressionCode + L"\".");
 				return 0;
 			}
 
 			auto module = MakePtr<WfModule>();
-			Workflow_CreateVariablesForReferenceValues(module, env);
+			Workflow_CreateVariablesForReferenceValues(module, types);
 			{
 				auto lambda = MakePtr<WfOrderedLambdaExpression>();
 				lambda->body = expression;
@@ -168,10 +179,10 @@ Workflow_CompileExpression
 			Workflow_GetSharedManager()->Rebuild(true);
 			if (Workflow_GetSharedManager()->errors.Count() > 0)
 			{
-				env->scope->errors.Add(ERROR_CODE_PREFIX L"Failed to analyze the workflow expression \"" + expressionCode + L"\".");
+				errors.Add(ERROR_CODE_PREFIX L"Failed to analyze the workflow expression \"" + expressionCode + L"\".");
 				FOREACH(Ptr<parsing::ParsingError>, error, Workflow_GetSharedManager()->errors)
 				{
-					env->scope->errors.Add(error->errorMessage);
+					errors.Add(error->errorMessage);
 				}
 				return 0;
 			}
@@ -183,18 +194,18 @@ Workflow_CompileExpression
 Workflow_CompileEventHandler
 ***********************************************************************/
 
-		Ptr<workflow::runtime::WfAssembly> Workflow_CompileEventHandler(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader::PropertyInfo& bindingTarget, const WString& statementCode)
+		Ptr<workflow::runtime::WfAssembly> Workflow_CompileEventHandler(types::VariableTypeMap& types, types::ErrorList& errors, IGuiInstanceLoader::PropertyInfo& bindingTarget, const WString& statementCode)
 		{
 			auto parser = GetParserManager()->GetParser<WfStatement>(L"WORKFLOW-STATEMENT");
-			auto statement = parser->TypedParse(statementCode, env->scope->errors);
+			auto statement = parser->TypedParse(statementCode, errors);
 			if (!statement)
 			{
-				env->scope->errors.Add(ERROR_CODE_PREFIX L"Failed to parse the workflow statement.");
+				errors.Add(ERROR_CODE_PREFIX L"Failed to parse the workflow statement.");
 				return 0;
 			}
 
 			auto module = MakePtr<WfModule>();
-			Workflow_CreateVariablesForReferenceValues(module, env);
+			Workflow_CreateVariablesForReferenceValues(module, types);
 			{
 				auto func = MakePtr<WfFunctionDeclaration>();
 				func->anonymity = WfFunctionAnonymity::Named;
@@ -228,10 +239,10 @@ Workflow_CompileEventHandler
 			Workflow_GetSharedManager()->Rebuild(true);
 			if (Workflow_GetSharedManager()->errors.Count() > 0)
 			{
-				env->scope->errors.Add(ERROR_CODE_PREFIX L"Failed to analyze the workflow statement \"" + statementCode + L"\".");
+				errors.Add(ERROR_CODE_PREFIX L"Failed to analyze the workflow statement \"" + statementCode + L"\".");
 				FOREACH(Ptr<parsing::ParsingError>, error, Workflow_GetSharedManager()->errors)
 				{
-					env->scope->errors.Add(error->errorMessage);
+					errors.Add(error->errorMessage);
 				}
 				return 0;
 			}
@@ -289,8 +300,10 @@ Workflow_CompileDataBinding
 			Workflow_GetDataBindingContext(env, valueNames);
 
 			auto module = MakePtr<WfModule>();
-			Workflow_CreateVariablesForReferenceValues(module, env);
-			Workflow_CreateVariable(module, L"<this>", env->scope->rootInstance);
+			types::VariableTypeMap types;
+			Workflow_GetVariableTypes(env, types);
+			Workflow_CreateVariablesForReferenceValues(module, types);
+			Workflow_CreatePointerVariable(module, L"<this>", env->scope->rootInstance.GetTypeDescriptor());
 
 			auto func = MakePtr<WfFunctionDeclaration>();
 			func->anonymity = WfFunctionAnonymity::Named;
