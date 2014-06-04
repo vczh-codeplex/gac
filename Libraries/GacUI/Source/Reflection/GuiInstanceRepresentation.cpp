@@ -54,6 +54,7 @@ GuiAttSetterRepr
 				}
 				repr->setters.Add(name, dst);
 			}
+			repr->instanceName = instanceName;
 		}
 
 		Ptr<GuiValueRepr> GuiAttSetterRepr::Clone()
@@ -74,13 +75,6 @@ GuiAttSetterRepr
 					attName->name.value = L"ref.Name";
 					attName->value.value = instanceName.Value();
 					xml->attributes.Add(attName);
-				}
-				if (styleName)
-				{
-					auto attStyle = MakePtr<XmlAttribute>();
-					attStyle->name.value = L"ref.Style";
-					attStyle->value.value = styleName.Value();
-					xml->attributes.Add(attStyle);
 				}
 
 				for (vint i = 0; i < setters.Count(); i++)
@@ -155,7 +149,6 @@ GuiConstructorRepr
 			repr->fromStyle = fromStyle;
 			repr->typeNamespace = typeNamespace;
 			repr->typeName = typeName;
-			repr->instanceName = instanceName;
 			repr->styleName = styleName;
 			CloneBody(repr);
 			return repr;
@@ -173,6 +166,14 @@ GuiConstructorRepr
 				else
 				{
 					xmlCtor->name.value = typeNamespace + L":" + typeName;
+				}
+
+				if (styleName)
+				{
+					auto attStyle = MakePtr<XmlAttribute>();
+					attStyle->name.value = L"ref.Style";
+					attStyle->value.value = styleName.Value();
+					xml->attributes.Add(attStyle);
 				}
 
 				GuiAttSetterRepr::FillXml(xmlCtor, serializePrecompiledResource);
@@ -326,29 +327,21 @@ GuiInstanceContext
 		{
 			if(auto parser=GetParserManager()->GetParser<ElementName>(L"INSTANCE-ELEMENT-NAME"))
 			{
-				// collect reference attributes
+				// collect attributes as setters
 				FOREACH(Ptr<XmlAttribute>, att, xml->attributes)
 				{
 					if(auto name=parser->TypedParse(att->name.value, errors))
 					if(name->IsReferenceAttributeName())
 					{
+						// collect reference attributes
 						if (name->name == L"Name")
 						{
 							setter->instanceName = att->value.value;
 						}
-						else if (name->name == L"Style")
-						{
-							setter->styleName = att->value.value;
-						}
 					}
-				}
-
-				// collect attributes as setters
-				FOREACH(Ptr<XmlAttribute>, att, xml->attributes)
-				{
-					if(auto name=parser->TypedParse(att->name.value, errors))
-					if(name->IsPropertyAttributeName())
+					else if(name->IsPropertyAttributeName())
 					{
+						// collect attributes setters
 						if (setter->setters.Keys().Contains(name->name))
 						{
 							errors.Add(L"Duplicated attribute name \"" + name->name + L"\".");
@@ -366,6 +359,7 @@ GuiInstanceContext
 					}
 					else if (name->IsEventAttributeName())
 					{
+						// collect event setters
 						if (!setter->eventHandlers.Keys().Contains(name->name))
 						{
 							auto value = MakePtr<GuiAttSetterRepr::EventValue>();
@@ -392,6 +386,17 @@ GuiInstanceContext
 				ctor->typeNamespace=name->namespaceName;
 				ctor->typeName=name->name;
 				// collect attributes as setters
+				FOREACH(Ptr<XmlAttribute>, att, xml->attributes)
+				{
+					if(auto name=parser->TypedParse(att->name.value, errors))
+					if(name->IsReferenceAttributeName())
+					{
+						if (name->name == L"Style")
+						{
+							ctor->styleName = att->value.value;
+						}
+					}
+				}
 				FillAttSetter(ctor, xml, errors);
 				return ctor;
 			}
