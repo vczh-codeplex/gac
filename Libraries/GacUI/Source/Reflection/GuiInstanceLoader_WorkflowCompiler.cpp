@@ -610,6 +610,7 @@ Workflow_GetSharedManager
 			types::ErrorList&					errors;
 			
 			types::VariableTypeMap				types;
+			List<WorkflowDataBinding>			dataBindings;
 
 			WorkflowCompileVisitor(Ptr<GuiInstanceContext> _context, types::VariableTypeInfoMap& _typeInfos, types::ErrorList& _errors)
 				:context(_context)
@@ -672,15 +673,50 @@ Workflow_GetSharedManager
 								expressionCode = obj->text;
 							}
 
-							if (setter->binding==L"bind")
+							if (setter->binding==L"bind" || setter->binding == L"format")
 							{
-							}
-							else if (setter->binding == L"format")
-							{
+								WorkflowDataBinding dataBinding;
+								dataBinding.variableName = repr->instanceName.Value();
+
+								if (setter->binding == L"bind")
+								{
+									expressionCode = L"bind(" + expressionCode + L")";
+								}
+								else if (setter->binding == L"format")
+								{
+									expressionCode = L"bind($\"" + expressionCode + L"\")";
+								}
+
+								Ptr<WfExpression> expression;
+								if (Workflow_ValidateExpression(types, errors, info, expressionCode, expression))
+								{
+									dataBinding.propertyInfo = reprTypeInfo.typeDescriptor->GetPropertyByName(propertyName, true);
+									dataBinding.bindExpression = expression;
+								}
+
+								dataBindings.Add(dataBinding);
 							}
 							else if (setter->binding == L"eval")
 							{
-								WString cacheKey = L"<att.eval>" + expressionCode;
+								if (propertyInfo->constructorParameter)
+								{
+									WString cacheKey = L"<att.eval>" + expressionCode;
+									auto assembly = Workflow_CompileExpression(types, errors, expressionCode);
+									context->precompiledCaches.Add(cacheKey, new GuiWorkflowCache(assembly));
+								}
+								else
+								{
+									WorkflowDataBinding dataBinding;
+									dataBinding.variableName = repr->instanceName.Value();
+									Ptr<WfExpression> expression;
+									if (Workflow_ValidateExpression(types, errors, info, expressionCode, expression))
+									{
+										dataBinding.propertyInfo = reprTypeInfo.typeDescriptor->GetPropertyByName(propertyName, true);
+										dataBinding.bindExpression = expression;
+									}
+
+									dataBindings.Add(dataBinding);
+								}
 							}
 						}
 					}
@@ -770,6 +806,10 @@ Workflow_GetSharedManager
 			{
 				WorkflowCompileVisitor visitor(context, typeInfos, errors);
 				context->instance->Accept(&visitor);
+
+				if (visitor.dataBindings.Count() > 0)
+				{
+				}
 			}
 		}
 
@@ -778,6 +818,7 @@ GuiWorkflowCache
 ***********************************************************************/
 
 		const wchar_t* GuiWorkflowCache::CacheTypeName = L"WORKFLOW-ASSEMBLY-CACHE";
+		const wchar_t* GuiWorkflowCache::CacheContextName = L"WORKFLOW-GLOBAL-CONTEXT";
 
 		GuiWorkflowCache::GuiWorkflowCache()
 		{
