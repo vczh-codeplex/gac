@@ -478,6 +478,98 @@ Workflow_CompileDataBinding
 Workflow_GetSharedManager
 ***********************************************************************/
 
+		class WorkflowReferenceNamesVisitor : public Object, public GuiValueRepr::IVisitor
+		{
+		public:
+			Ptr<GuiInstanceContext>				context;
+			types::VariableTypeMap&				types;
+			types::ErrorList&					errors;
+			ITypeDescriptor*					bindingTargetType;
+
+			WorkflowReferenceNamesVisitor(Ptr<GuiInstanceContext> _context, types::VariableTypeMap& _types, types::ErrorList& _errors)
+				:context(_context)
+				, types(_types)
+				, errors(_errors)
+				, bindingTargetType(0)
+			{
+			}
+
+			void Visit(GuiTextRepr* repr)override
+			{
+			}
+
+			void Visit(GuiAttSetterRepr* repr)override
+			{
+				if (repr->instanceName && bindingTargetType)
+				{
+					WString name = repr->instanceName.Value();
+					if (types.Keys().Contains(name))
+					{
+						errors.Add(L"Precompile: Parameter \"" + name + L"\" conflict with an existing named object.");
+					}
+					else
+					{
+						types.Add(name, bindingTargetType);
+					}
+				}
+
+				FOREACH(Ptr<GuiAttSetterRepr::SetterValue>, setter, repr->setters.Values())
+				{
+					FOREACH(Ptr<GuiValueRepr>, value, setter->values)
+					{
+						value->Accept(this);
+					}
+				}
+			}
+
+			void Visit(GuiConstructorRepr* repr)override
+			{
+				auto source = FindInstanceLoadingSource(context, repr);
+				bindingTargetType = GetInstanceLoaderManager()->GetTypeDescriptorForType(source.typeName);
+				if (!bindingTargetType)
+				{
+					errors.Add(
+						L"Precompile: Failed to find type \"" +
+						(repr->typeNamespace == L"" 
+							? repr->typeName
+							: repr->typeNamespace + L":" + repr->typeName
+							) +
+						L"\".");
+				}
+				Visit((GuiAttSetterRepr*)repr);
+			}
+		};
+
+		void Workflow_PrecompileInstanceContext(Ptr<GuiInstanceContext> context, types::ErrorList& errors)
+		{
+			types::VariableTypeMap types;
+			{
+				FOREACH(Ptr<GuiInstanceParameter>, parameter, context->parameters)
+				{
+					auto type = GetTypeDescriptor(parameter->className);
+					if (!type)
+					{
+						errors.Add(L"Precompile: Cannot find type \"" + parameter->className + L"\".");
+					}
+					else if (types.Keys().Contains(parameter->name))
+					{
+						errors.Add(L"Precompile: Parameter \"" + parameter->name + L"\" conflict with an existing named object.");
+					}
+					else
+					{
+						types.Add(parameter->name, type);
+					}
+				}
+
+				WorkflowReferenceNamesVisitor visitor(context, types, errors);
+				context->instance->Accept(&visitor);
+			}
+		}
+
+/***********************************************************************
+Workflow_GetSharedManager
+***********************************************************************/
+
 #undef ERROR_CODE_PREFIX
 
 		class GuiWorkflowSharedManagerPlugin;

@@ -294,7 +294,7 @@ Instance Loader Manager
 
 		extern IGuiInstanceLoaderManager*			GetInstanceLoaderManager();
 		extern InstanceLoadingSource				FindInstanceLoadingSource(
-			Ptr<GuiInstanceEnvironment> env,
+			Ptr<GuiInstanceContext> context,
 			GuiConstructorRepr* ctor
 			);
 		Ptr<GuiInstanceContextScope>				LoadInstanceFromContext(

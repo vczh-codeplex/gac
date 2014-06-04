@@ -42,6 +42,8 @@ namespace vl
 
 		extern WString										Workflow_ModuleToString(Ptr<workflow::WfModule> module);
 		extern Ptr<workflow::runtime::WfAssembly>			Workflow_CompileDataBinding(types::VariableTypeMap& types, description::ITypeDescriptor* thisType, types::ErrorList& errors, collections::List<WorkflowDataBinding>& dataBindings);
+
+		extern void											Workflow_PrecompileInstanceContext(Ptr<GuiInstanceContext> context, types::ErrorList& errors);
 	}
 }
 
