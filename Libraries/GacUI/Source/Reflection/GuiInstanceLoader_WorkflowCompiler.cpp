@@ -518,9 +518,10 @@ Workflow_GetSharedManager
 					}
 				}
 				
-
 				FOREACH_INDEXER(Ptr<GuiAttSetterRepr::SetterValue>, setter, index, repr->setters.Values())
 				{
+					IGuiInstanceLoader::TypeInfo propertyTypeInfo;
+
 					if (setter->binding != L"" && setter->binding != L"set")
 					{
 						auto binder = GetInstanceLoaderManager()->GetInstanceBinder(setter->binding);
@@ -530,7 +531,7 @@ Workflow_GetSharedManager
 						}
 						else if (binder->RequireInstanceName() && !repr->instanceName && reprTypeInfo.typeDescriptor)
 						{
-							WString name = L"<precompile>" + itow(generatedNameCount);
+							WString name = L"<precompile>" + itow(generatedNameCount++);
 							repr->instanceName = name;
 							types.Add(name, reprTypeInfo.typeDescriptor);
 						}
@@ -545,17 +546,23 @@ Workflow_GetSharedManager
 
 						while (currentLoader)
 						{
+							auto typeInfo = currentLoader->GetPropertyType(info);
+							if (typeInfo)
+							{
+								if (typeInfo->support != typeInfo->NotSupport)
+								{
+									propertyTypeInfo.typeDescriptor = typeInfo->acceptableTypes[0];
+									propertyTypeInfo.typeName = typeInfo->acceptableTypes[0]->GetTypeName();
+									break;
+								}
+							}
 							currentLoader = GetInstanceLoaderManager()->GetParentLoader(currentLoader);
 						}
-					}
-					else
-					{
-						bindingTargetTypeInfo.typeName = L"";
-						bindingTargetTypeInfo.typeDescriptor = 0;
 					}
 
 					FOREACH(Ptr<GuiValueRepr>, value, setter->values)
 					{
+						bindingTargetTypeInfo = propertyTypeInfo;
 						value->Accept(this);
 					}
 				}
@@ -571,7 +578,7 @@ Workflow_GetSharedManager
 						}
 						else if (binder->RequireInstanceName() && !repr->instanceName && reprTypeInfo.typeDescriptor)
 						{
-							WString name = L"<precompile>" + itow(generatedNameCount);
+							WString name = L"<precompile>" + itow(generatedNameCount++);
 							repr->instanceName = name;
 							types.Add(name, reprTypeInfo.typeDescriptor);
 						}
@@ -598,6 +605,62 @@ Workflow_GetSharedManager
 			}
 		};
 
+		class WorkflowCompileVisitor : public Object, public GuiValueRepr::IVisitor
+		{
+		public:
+			Ptr<GuiInstanceContext>				context;
+			types::VariableTypeMap&				types;
+			types::ErrorList&					errors;
+
+			WorkflowCompileVisitor(Ptr<GuiInstanceContext> _context, types::VariableTypeMap& _types, types::ErrorList& _errors)
+				:context(_context)
+				, types(_types)
+				, errors(_errors)
+			{
+			}
+
+			void Visit(GuiTextRepr* repr)override
+			{
+			}
+
+			void Visit(GuiAttSetterRepr* repr)override
+			{
+				FOREACH_INDEXER(Ptr<GuiAttSetterRepr::SetterValue>, setter, index, repr->setters.Values())
+				{
+					if (setter->binding==L"bind")
+					{
+					}
+					else if (setter->binding == L"format")
+					{
+					}
+					else if (setter->binding == L"eval")
+					{
+					}
+
+					FOREACH(Ptr<GuiValueRepr>, value, setter->values)
+					{
+						value->Accept(this);
+					}
+				}
+
+				FOREACH(Ptr<GuiAttSetterRepr::EventValue>, handler, repr->eventHandlers.Values())
+				{
+					if (handler->binding == L"eval")
+					{
+					}
+
+					if (handler->binding != L"")
+					{
+					}
+				}
+			}
+
+			void Visit(GuiConstructorRepr* repr)override
+			{
+				Visit((GuiAttSetterRepr*)repr);
+			}
+		};
+
 		void Workflow_PrecompileInstanceContext(Ptr<GuiInstanceContext> context, types::ErrorList& errors)
 		{
 			types::VariableTypeMap types;
@@ -619,6 +682,10 @@ Workflow_GetSharedManager
 					}
 				}
 
+				WorkflowReferenceNamesVisitor visitor(context, types, errors);
+				context->instance->Accept(&visitor);
+			}
+			{
 				WorkflowReferenceNamesVisitor visitor(context, types, errors);
 				context->instance->Accept(&visitor);
 			}
