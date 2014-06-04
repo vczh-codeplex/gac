@@ -32,13 +32,15 @@ Helper Functions Declarations
 		{
 			IGuiInstanceEventBinder*			binder;
 			IGuiInstanceLoader*					loader;
+			GuiAttSetterRepr*					bindingTarget;
 			Ptr<GuiInstanceEventInfo>			eventInfo;
 			IGuiInstanceLoader::PropertyValue	propertyValue;
 			WString								handlerName;
 
 			FillInstanceEventSetter()
 				:binder(0)
-				,loader(0)
+				, loader(0)
+				, bindingTarget(0)
 			{
 			}
 		};
@@ -608,6 +610,7 @@ FillInstance
 					FillInstanceEventSetter eventSetter;
 					eventSetter.binder = binder;
 					eventSetter.loader = eventLoader;
+					eventSetter.bindingTarget = attSetter;
 					eventSetter.eventInfo = eventInfo;
 					eventSetter.propertyValue.typeInfo = propertyInfo.typeInfo;
 					eventSetter.propertyValue.propertyName = propertyInfo.propertyName;
@@ -1035,7 +1038,17 @@ ExecuteBindingSetters
 					propertyValue.propertyValue = BoxValue(eventSetter.handlerName);
 					bool success = PrepareBindingContext(env, contextNames, L"event binding", eventSetter.binder->GetBindingName());
 
-					if (!success || !eventSetter.binder->AttachEvent(env, eventSetter.loader, propertyValue))
+					if (eventSetter.binder->RequireInstanceName())
+					{
+						if (!eventSetter.bindingTarget->instanceName)
+						{
+							WString name = L"<temp>" + itow(env->scope->referenceValues.Count());
+							eventSetter.bindingTarget->instanceName = name;
+							env->scope->referenceValues.Add(name, eventSetter.propertyValue.instanceValue);
+						}
+					}
+
+					if (!success || !eventSetter.binder->AttachEvent(env, eventSetter.loader, eventSetter.bindingTarget->instanceName, propertyValue))
 					{
 						env->scope->errors.Add(
 							L"Failed to attach event \"" +

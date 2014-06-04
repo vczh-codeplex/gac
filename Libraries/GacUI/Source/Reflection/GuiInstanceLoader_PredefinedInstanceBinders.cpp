@@ -383,18 +383,23 @@ GuiEvalInstanceEventBinder
 				return L"eval";
 			}
 
+			bool RequireInstanceName()override
+			{
+				return true;
+			}
+
 			void GetRequiredContexts(collections::List<WString>& contextNames)override
 			{
 			}
 
-			bool AttachEvent(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, IGuiInstanceLoader::PropertyValue& propertyValue)
+			bool AttachEvent(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, Nullable<WString> instanceName, IGuiInstanceLoader::PropertyValue& propertyValue)
 			{
 				auto handler = propertyValue.propertyValue;
 				if (handler.GetValueType() == Value::Text)
 				{
 					Ptr<WfAssembly> assembly;
 					WString statementCode = handler.GetText();
-					WString cacheKey = L"<ev.eval>" + statementCode;
+					WString cacheKey = L"<ev.eval><" + instanceName.Value() + L"><" + propertyValue.propertyName + L">" + statementCode;
 					vint cacheIndex = env->context->precompiledCaches.Keys().IndexOf(cacheKey);
 					if (cacheIndex != -1)
 					{
