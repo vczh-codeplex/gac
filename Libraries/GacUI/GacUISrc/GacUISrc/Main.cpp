@@ -8,6 +8,7 @@
 
 #include "..\..\Source\GacUI.h"
 #include "..\..\..\Workflow\Source\Analyzer\WfAnalyzer.h"
+#include "..\..\Source\Resources\GuiParserManager.h"
 #include "..\..\Source\Reflection\GuiInstanceLoader.h"
 #include "..\..\Source\Reflection\TypeDescriptors\GuiReflectionControls.h"
 #include "..\..\Source\Reflection\TypeDescriptors\GuiReflectionEvents.h"
@@ -242,16 +243,21 @@ void GuiMain()
 	//}
 
 	List<WString> errors;
-	auto resource = GuiResource::LoadFromXml(L"..\\GacUISrcCodepackedTest\\Resources\\XmlWindowResourceDataBinding.xml", errors);
+	WString xmlText;
 	{
+		auto resource = GuiResource::LoadFromXml(L"..\\GacUISrcCodepackedTest\\Resources\\XmlWindowResourceDataBinding.xml", errors);
 		resource->Precompile(errors);
 		auto xml = resource->SaveToXml(true);
-		WString xmlText = XmlToString(xml);
-		resource = GuiResource::LoadFromXml(xml, L"..\\GacUISrcCodepackedTest\\Resources\\", errors);
+		xmlText = XmlToString(xml);
 	}
-	GetInstanceLoaderManager()->SetResource(L"Demo", resource);
 	
 	DateTime begin = DateTime::LocalTime();
+	{
+		auto parser = GetParserManager()->GetParser<XmlDocument>(L"XML");
+		auto xml = parser->TypedParse(xmlText, errors);
+		auto resource = GuiResource::LoadFromXml(xml, L"<Unknown>", errors);
+		GetInstanceLoaderManager()->SetResource(L"Demo", resource);
+	}
 	demos::MainWindow window;
 	DateTime end = DateTime::LocalTime();
 	window.SetText(window.GetText() + L" " + i64tow(end.totalMilliseconds - begin.totalMilliseconds) + L" milliseconds");

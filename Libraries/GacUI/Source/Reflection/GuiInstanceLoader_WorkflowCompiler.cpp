@@ -487,12 +487,14 @@ Workflow_GetSharedManager
 
 			IGuiInstanceLoader::TypeInfo		bindingTargetTypeInfo;
 			vint								generatedNameCount;
+			ITypeDescriptor*					rootTypeDescriptor;
 
 			WorkflowReferenceNamesVisitor(Ptr<GuiInstanceContext> _context, types::VariableTypeInfoMap& _typeInfos, types::ErrorList& _errors)
 				:context(_context)
 				, typeInfos(_typeInfos)
 				, errors(_errors)
 				, generatedNameCount(0)
+				, rootTypeDescriptor(0)
 			{
 			}
 
@@ -597,6 +599,11 @@ Workflow_GetSharedManager
 							: repr->typeNamespace + L":" + repr->typeName
 							) +
 						L"\".");
+				}
+
+				if (context->instance.Obj() == repr)
+				{
+					rootTypeDescriptor = bindingTargetTypeInfo.typeDescriptor;
 				}
 				Visit((GuiAttSetterRepr*)repr);
 			}
@@ -778,6 +785,7 @@ Workflow_GetSharedManager
 
 		void Workflow_PrecompileInstanceContext(Ptr<GuiInstanceContext> context, types::ErrorList& errors)
 		{
+			ITypeDescriptor* rootTypeDescriptor = 0;
 			types::VariableTypeInfoMap typeInfos;
 			{
 				FOREACH(Ptr<GuiInstanceParameter>, parameter, context->parameters)
@@ -802,13 +810,16 @@ Workflow_GetSharedManager
 
 				WorkflowReferenceNamesVisitor visitor(context, typeInfos, errors);
 				context->instance->Accept(&visitor);
+				rootTypeDescriptor = visitor.rootTypeDescriptor;
 			}
 			{
 				WorkflowCompileVisitor visitor(context, typeInfos, errors);
 				context->instance->Accept(&visitor);
 
-				if (visitor.dataBindings.Count() > 0)
+				if (visitor.dataBindings.Count() > 0 && rootTypeDescriptor)
 				{
+					auto assembly = Workflow_CompileDataBinding(visitor.types, rootTypeDescriptor, errors, visitor.dataBindings);
+					context->precompiledCaches.Add(GuiWorkflowCache::CacheContextName, new GuiWorkflowCache(assembly));
 				}
 			}
 		}
