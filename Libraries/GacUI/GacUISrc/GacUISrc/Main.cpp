@@ -258,10 +258,6 @@ void GuiMain()
 
 	auto scope = window.GetScope().Obj();
 	CopyFrom(errors, scope->errors, true);
-	{
-		auto xml = resource->SaveToXml(true);
-		WString xmlText = XmlToString(xml);
-	}
 
 	window.ForceCalculateSizeImmediately();
 	window.MoveToScreenCenter();

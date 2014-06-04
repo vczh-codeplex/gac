@@ -82,7 +82,7 @@ namespace vl
 			}
 			else if (L'A' <= c && c <= L'F')
 			{
-				return c - L'A';
+				return c - L'A' + 10;
 			}
 			else
 			{
@@ -130,9 +130,10 @@ GuiImageData
 		{
 		}
 
-		GuiImageData::GuiImageData(Ptr<INativeImage> _image, vint _frameIndex)
+		GuiImageData::GuiImageData(Ptr<INativeImage> _image, vint _frameIndex, const WString& _filePath)
 			:image(_image)
-			,frameIndex(_frameIndex)
+			, frameIndex(_frameIndex)
+			, filePath(_filePath)
 		{
 		}
 
@@ -148,6 +149,11 @@ GuiImageData
 		vint GuiImageData::GetFrameIndex()
 		{
 			return frameIndex;
+		}
+
+		const WString& GuiImageData::GetFilePath()
+		{
+			return filePath;
 		}
 
 /***********************************************************************
@@ -408,7 +414,7 @@ GuiResourceFolder
 				attName->name.value = L"name";
 				attName->value.value = item->GetName();
 
-				if (item->GetPath() == L"")
+				if (serializePrecompiledResource || item->GetPath() == L"")
 				{
 					auto resolver = GetResourceResolverManager()->GetTypeResolver(item->GetTypeName());
 					auto xmlElement = resolver->Serialize(item->GetContent(), serializePrecompiledResource);
@@ -447,7 +453,7 @@ GuiResourceFolder
 				xmlParent->subNodes.Add(xmlFolder);
 				
 
-				if (folder->GetPath() == L"")
+				if (serializePrecompiledResource || folder->GetPath() == L"")
 				{
 					folder->SaveResourceFolderToXml(xmlFolder, serializePrecompiledResource);
 				}
