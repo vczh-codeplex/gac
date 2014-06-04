@@ -484,14 +484,14 @@ Workflow_GetSharedManager
 			Ptr<GuiInstanceContext>				context;
 			types::VariableTypeMap&				types;
 			types::ErrorList&					errors;
-			ITypeDescriptor*					bindingTargetType;
+
+			IGuiInstanceLoader::TypeInfo		bindingTargetTypeInfo;
 			vint								generatedNameCount;
 
 			WorkflowReferenceNamesVisitor(Ptr<GuiInstanceContext> _context, types::VariableTypeMap& _types, types::ErrorList& _errors)
 				:context(_context)
 				, types(_types)
 				, errors(_errors)
-				, bindingTargetType(0)
 				, generatedNameCount(0)
 			{
 			}
@@ -502,7 +502,10 @@ Workflow_GetSharedManager
 
 			void Visit(GuiAttSetterRepr* repr)override
 			{
-				if (repr->instanceName && bindingTargetType)
+				auto reprTypeInfo = bindingTargetTypeInfo;
+				auto loader = GetInstanceLoaderManager()->GetLoader(reprTypeInfo.typeName);
+
+				if (repr->instanceName && reprTypeInfo.typeDescriptor)
 				{
 					WString name = repr->instanceName.Value();
 					if (types.Keys().Contains(name))
@@ -511,14 +514,12 @@ Workflow_GetSharedManager
 					}
 					else
 					{
-						types.Add(name, bindingTargetType);
+						types.Add(name, reprTypeInfo.typeDescriptor);
 					}
 				}
 				
-				auto loader = GetInstanceLoaderManager()->GetLoader(bindingTargetType->GetTypeName());
-				auto reprType = bindingTargetType;
 
-				FOREACH(Ptr<GuiAttSetterRepr::SetterValue>, setter, repr->setters.Values())
+				FOREACH_INDEXER(Ptr<GuiAttSetterRepr::SetterValue>, setter, index, repr->setters.Values())
 				{
 					if (setter->binding != L"" && setter->binding != L"set")
 					{
@@ -527,12 +528,30 @@ Workflow_GetSharedManager
 						{
 							errors.Add(L"The appropriate IGuiInstanceBinder of binding \"" + setter->binding + L"\" cannot be found.");
 						}
-						else if (binder->RequireInstanceName() && !repr->instanceName && reprType)
+						else if (binder->RequireInstanceName() && !repr->instanceName && reprTypeInfo.typeDescriptor)
 						{
 							WString name = L"<precompile>" + itow(generatedNameCount);
 							repr->instanceName = name;
-							types.Add(name, reprType);
+							types.Add(name, reprTypeInfo.typeDescriptor);
 						}
+					}
+
+					if (setter->binding == L"set")
+					{
+						IGuiInstanceLoader::PropertyInfo info;
+						info.typeInfo = reprTypeInfo;
+						info.propertyName = repr->setters.Keys()[index];
+						auto currentLoader = loader;
+
+						while (currentLoader)
+						{
+							currentLoader = GetInstanceLoaderManager()->GetParentLoader(currentLoader);
+						}
+					}
+					else
+					{
+						bindingTargetTypeInfo.typeName = L"";
+						bindingTargetTypeInfo.typeDescriptor = 0;
 					}
 
 					FOREACH(Ptr<GuiValueRepr>, value, setter->values)
@@ -550,11 +569,11 @@ Workflow_GetSharedManager
 						{
 							errors.Add(L"The appropriate IGuiInstanceEventBinder of binding \"" + handler->binding + L"\" cannot be found.");
 						}
-						else if (binder->RequireInstanceName() && !repr->instanceName && reprType)
+						else if (binder->RequireInstanceName() && !repr->instanceName && reprTypeInfo.typeDescriptor)
 						{
 							WString name = L"<precompile>" + itow(generatedNameCount);
 							repr->instanceName = name;
-							types.Add(name, reprType);
+							types.Add(name, reprTypeInfo.typeDescriptor);
 						}
 					}
 				}
@@ -563,8 +582,9 @@ Workflow_GetSharedManager
 			void Visit(GuiConstructorRepr* repr)override
 			{
 				auto source = FindInstanceLoadingSource(context, repr);
-				bindingTargetType = GetInstanceLoaderManager()->GetTypeDescriptorForType(source.typeName);
-				if (!bindingTargetType)
+				bindingTargetTypeInfo.typeName = source.typeName;
+				bindingTargetTypeInfo.typeDescriptor = GetInstanceLoaderManager()->GetTypeDescriptorForType(source.typeName);
+				if (!bindingTargetTypeInfo.typeDescriptor)
 				{
 					errors.Add(
 						L"Precompile: Failed to find type \"" +
