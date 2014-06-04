@@ -17,15 +17,21 @@ namespace vl
 {
 	namespace presentation
 	{
+		namespace types
+		{
+			typedef collections::Dictionary<WString, description::ITypeDescriptor*>		VariableTypeMap;
+			typedef collections::List<WString>											ErrorList;
+		}
 		extern workflow::analyzer::WfLexicalScopeManager*	Workflow_GetSharedManager();
 
-		extern void											Workflow_CreateVariable(Ptr<workflow::WfModule> module, const WString& name, const description::Value& value);
-		extern void											Workflow_CreateVariablesForReferenceValues(Ptr<workflow::WfModule> module, Ptr<GuiInstanceEnvironment> env);
+		extern void											Workflow_CreatePointerVariable(Ptr<workflow::WfModule> module, const WString& name, description::ITypeDescriptor* type);
+		extern void											Workflow_GetVariableTypes(Ptr<GuiInstanceEnvironment> env, types::VariableTypeMap& types);
+		extern void											Workflow_CreateVariablesForReferenceValues(Ptr<workflow::WfModule> module, types::VariableTypeMap& types);
 		extern void											Workflow_SetVariablesForReferenceValues(Ptr<workflow::runtime::WfRuntimeGlobalContext> context, Ptr<GuiInstanceEnvironment> env);
 
-		extern bool											Workflow_ValidateExpression(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader::PropertyInfo& bindingTarget, const WString& expressionCode, Ptr<workflow::WfExpression>& expression);
-		extern Ptr<workflow::runtime::WfAssembly>			Workflow_CompileExpression(Ptr<GuiInstanceEnvironment> env, const WString& expressionCode);
-		extern Ptr<workflow::runtime::WfAssembly>			Workflow_CompileEventHandler(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader::PropertyInfo& bindingTarget, const WString& statementCode);
+		extern bool											Workflow_ValidateExpression(types::VariableTypeMap& types, types::ErrorList& errors, IGuiInstanceLoader::PropertyInfo& bindingTarget, const WString& expressionCode, Ptr<workflow::WfExpression>& expression);
+		extern Ptr<workflow::runtime::WfAssembly>			Workflow_CompileExpression(types::VariableTypeMap& types, types::ErrorList& errors, const WString& expressionCode);
+		extern Ptr<workflow::runtime::WfAssembly>			Workflow_CompileEventHandler(types::VariableTypeMap& types, types::ErrorList& errors, IGuiInstanceLoader::PropertyInfo& bindingTarget, const WString& statementCode);
 
 		struct WorkflowDataBinding
 		{
