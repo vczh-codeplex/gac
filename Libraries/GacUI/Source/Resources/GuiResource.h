@@ -65,6 +65,7 @@ Resource Image
 		protected:
 			Ptr<INativeImage>				image;
 			vint							frameIndex;
+			WString							filePath;
 
 		public:
 			/// <summary>Create an empty image data.</summary>
@@ -72,7 +73,7 @@ Resource Image
 			/// <summary>Create an image data with a specified image and a frame index.</summary>
 			/// <param name="_image">The specified image.</param>
 			/// <param name="_frameIndex">The specified frame index.</param>
-			GuiImageData(Ptr<INativeImage> _image, vint _frameIndex);
+			GuiImageData(Ptr<INativeImage> _image, vint _frameIndex, const WString& _filePath = L"");
 			~GuiImageData();
 
 			/// <summary>Get the specified image.</summary>
@@ -81,6 +82,9 @@ Resource Image
 			/// <summary>Get the specified frame index.</summary>
 			/// <returns>The specified frame index.</returns>
 			vint							GetFrameIndex();
+			/// <summary>Get the file path.</summary>
+			/// <returns>The file path.</returns>
+			const WString&					GetFilePath();
 		};
 
 /***********************************************************************

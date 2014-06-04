@@ -11,6 +11,7 @@ namespace vl
 		using namespace parsing;
 		using namespace parsing::tabling;
 		using namespace parsing::xml;
+		using namespace stream;
 
 /***********************************************************************
 Image Type Resolver
@@ -40,13 +41,35 @@ Image Type Resolver
 
 			Ptr<parsing::xml::XmlElement> Serialize(Ptr<DescriptableObject> resource, bool serializePrecompiledResource)override
 			{
+				if (auto obj = resource.Cast<GuiImageData>())
+				{
+					FileStream fileStream(obj->GetFilePath(), FileStream::ReadOnly);
+					auto xmlContent = MakePtr<XmlCData>();
+					xmlContent->content.value = BinaryToHex(fileStream);
+
+					auto xmlImage = MakePtr<XmlElement>();
+					xmlImage->name.value = L"Image";
+					xmlImage->subNodes.Add(xmlContent);
+					return xmlImage;
+				}
 				return 0;
 			}
 
 			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)override
 			{
-				errors.Add(L"Image resource should be an image file.");
-				return 0;
+				MemoryStream stream;
+				HexToBinary(stream, XmlGetValue(element));
+				stream.SeekFromBegin(0);
+				auto image = GetCurrentController()->ImageService()->CreateImageFromStream(stream);
+				if (image)
+				{
+					return new GuiImageData(image, 0);
+				}
+				else
+				{
+					errors.Add(L"Failed to load an image from binary data in xml.");
+					return 0;
+				}
 			}
 
 			Ptr<DescriptableObject> ResolveResource(const WString& path, collections::List<WString>& errors)override
@@ -54,7 +77,7 @@ Image Type Resolver
 				Ptr<INativeImage> image = GetCurrentController()->ImageService()->CreateImageFromFile(path);
 				if(image)
 				{
-					return new GuiImageData(image, 0);
+					return new GuiImageData(image, 0, path);
 				}
 				else
 				{
