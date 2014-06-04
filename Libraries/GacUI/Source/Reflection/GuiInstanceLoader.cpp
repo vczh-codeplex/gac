@@ -1289,7 +1289,7 @@ GuiInstanceLoaderManager
 					}
 
 					Ptr<GuiInstanceEnvironment> env = new GuiInstanceEnvironment(context, resolver);
-					auto loadingSource = FindInstanceLoadingSource(env, context->instance.Obj());
+					auto loadingSource = FindInstanceLoadingSource(env->context, context->instance.Obj());
 					if (loadingSource.loader)
 					{
 						parentTypes.Add(context->className.Value(), loadingSource.typeName);
