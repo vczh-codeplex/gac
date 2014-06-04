@@ -547,14 +547,11 @@ Workflow_GetSharedManager
 						while (currentLoader)
 						{
 							auto typeInfo = currentLoader->GetPropertyType(info);
-							if (typeInfo)
+							if (typeInfo && typeInfo->support != GuiInstancePropertyInfo::NotSupport)
 							{
-								if (typeInfo->support != typeInfo->NotSupport)
-								{
-									propertyTypeInfo.typeDescriptor = typeInfo->acceptableTypes[0];
-									propertyTypeInfo.typeName = typeInfo->acceptableTypes[0]->GetTypeName();
-									break;
-								}
+								propertyTypeInfo.typeDescriptor = typeInfo->acceptableTypes[0];
+								propertyTypeInfo.typeName = typeInfo->acceptableTypes[0]->GetTypeName();
+								break;
 							}
 							currentLoader = GetInstanceLoaderManager()->GetParentLoader(currentLoader);
 						}
@@ -633,16 +630,59 @@ Workflow_GetSharedManager
 
 			void Visit(GuiAttSetterRepr* repr)override
 			{
+				IGuiInstanceLoader::TypeInfo reprTypeInfo;
+				if (repr->instanceName)
+				{
+					reprTypeInfo = typeInfos[repr->instanceName.Value()];;
+				}
+
 				FOREACH_INDEXER(Ptr<GuiAttSetterRepr::SetterValue>, setter, index, repr->setters.Values())
 				{
-					if (setter->binding==L"bind")
+					if (reprTypeInfo.typeDescriptor)
 					{
-					}
-					else if (setter->binding == L"format")
-					{
-					}
-					else if (setter->binding == L"eval")
-					{
+						WString propertyName = repr->setters.Keys()[index];
+						Ptr<GuiInstancePropertyInfo> propertyInfo;
+						IGuiInstanceLoader::PropertyInfo info;
+						info.typeInfo = reprTypeInfo;
+						info.propertyName = propertyName;
+
+						{
+							auto currentLoader = GetInstanceLoaderManager()->GetLoader(info.typeInfo.typeName);
+
+							while (currentLoader && !propertyInfo)
+							{
+								propertyInfo = currentLoader->GetPropertyType(info);
+								if (propertyInfo && propertyInfo->support == GuiInstancePropertyInfo::NotSupport)
+								{
+									propertyInfo = 0;
+								}
+								currentLoader = GetInstanceLoaderManager()->GetParentLoader(currentLoader);
+							}
+						}
+
+						if (!propertyInfo)
+						{
+							errors.Add(L"Precompile: Cannot find property \"" + propertyName + L"\" in type \"" + reprTypeInfo.typeName + L"\".");
+						}
+						else
+						{
+							WString expressionCode;
+							if (auto obj = setter->values[0].Cast<GuiTextRepr>())
+							{
+								expressionCode = obj->text;
+							}
+
+							if (setter->binding==L"bind")
+							{
+							}
+							else if (setter->binding == L"format")
+							{
+							}
+							else if (setter->binding == L"eval")
+							{
+								WString cacheKey = L"<att.eval>" + expressionCode;
+							}
+						}
 					}
 
 					FOREACH(Ptr<GuiValueRepr>, value, setter->values)
@@ -651,10 +691,45 @@ Workflow_GetSharedManager
 					}
 				}
 
-				FOREACH(Ptr<GuiAttSetterRepr::EventValue>, handler, repr->eventHandlers.Values())
+				FOREACH_INDEXER(Ptr<GuiAttSetterRepr::EventValue>, handler, index, repr->eventHandlers.Values())
 				{
-					if (handler->binding == L"eval")
+					if (reprTypeInfo.typeDescriptor)
 					{
+						WString propertyName = repr->eventHandlers.Keys()[index];
+						Ptr<GuiInstanceEventInfo> eventInfo;
+						IGuiInstanceLoader::PropertyInfo info;
+						info.typeInfo = reprTypeInfo;
+						info.propertyName = propertyName;
+
+						{
+							auto currentLoader = GetInstanceLoaderManager()->GetLoader(info.typeInfo.typeName);
+
+							while (currentLoader && !eventInfo)
+							{
+								eventInfo = currentLoader->GetEventType(info);
+								if (eventInfo && eventInfo->support == GuiInstanceEventInfo::NotSupport)
+								{
+									eventInfo = 0;
+								}
+								currentLoader = GetInstanceLoaderManager()->GetParentLoader(currentLoader);
+							}
+						}
+
+						if (!eventInfo)
+						{
+							errors.Add(L"Precompile: Cannot find event \"" + propertyName + L"\" in type \"" + reprTypeInfo.typeName + L"\".");
+						}
+						else
+						{
+							WString statementCode = handler->value;
+
+							if (handler->binding == L"eval")
+							{
+								WString cacheKey = L"<ev.eval><" + repr->instanceName.Value() + L"><" + propertyName + L">" + statementCode;
+								auto assembly = Workflow_CompileEventHandler(types, errors, info, statementCode);
+								context->precompiledCaches.Add(cacheKey, new GuiWorkflowCache(assembly));
+							}
+						}
 					}
 				}
 			}
@@ -693,9 +768,57 @@ Workflow_GetSharedManager
 				context->instance->Accept(&visitor);
 			}
 			{
-				WorkflowReferenceNamesVisitor visitor(context, typeInfos, errors);
+				WorkflowCompileVisitor visitor(context, typeInfos, errors);
 				context->instance->Accept(&visitor);
 			}
+		}
+
+/***********************************************************************
+GuiWorkflowCache
+***********************************************************************/
+
+		const wchar_t* GuiWorkflowCache::CacheTypeName = L"WORKFLOW-ASSEMBLY-CACHE";
+
+		GuiWorkflowCache::GuiWorkflowCache()
+		{
+		}
+
+		GuiWorkflowCache::GuiWorkflowCache(Ptr<workflow::runtime::WfAssembly> _assembly)
+			:assembly(_assembly)
+		{
+		}
+
+		WString GuiWorkflowCache::GetCacheTypeName()
+		{
+			return CacheTypeName;
+		}
+
+/***********************************************************************
+GuiWorkflowCacheResolver
+***********************************************************************/
+
+		WString GuiWorkflowCacheResolver::GetCacheTypeName()
+		{
+			return GuiWorkflowCache::CacheTypeName;
+		}
+
+		bool GuiWorkflowCacheResolver::Serialize(Ptr<IGuiInstanceCache> cache, stream::IStream& stream)
+		{
+			if (auto obj = cache.Cast<GuiWorkflowCache>())
+			{
+				obj->assembly->Serialize(stream);
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+
+		Ptr<IGuiInstanceCache> GuiWorkflowCacheResolver::Deserialize(stream::IStream& stream)
+		{
+			auto assembly = new WfAssembly(stream);
+			return new GuiWorkflowCache(assembly);
 		}
 
 /***********************************************************************
@@ -724,6 +847,9 @@ Workflow_GetSharedManager
 			void AfterLoad()override
 			{
 				sharedManagerPlugin = this;
+
+				IGuiInstanceLoaderManager* manager=GetInstanceLoaderManager();
+				manager->AddInstanceCacheResolver(new GuiWorkflowCacheResolver);
 			}
 
 			void Unload()override
