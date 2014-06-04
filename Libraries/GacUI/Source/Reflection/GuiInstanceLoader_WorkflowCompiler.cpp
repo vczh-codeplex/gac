@@ -485,12 +485,14 @@ Workflow_GetSharedManager
 			types::VariableTypeMap&				types;
 			types::ErrorList&					errors;
 			ITypeDescriptor*					bindingTargetType;
+			vint								generatedNameCount;
 
 			WorkflowReferenceNamesVisitor(Ptr<GuiInstanceContext> _context, types::VariableTypeMap& _types, types::ErrorList& _errors)
 				:context(_context)
 				, types(_types)
 				, errors(_errors)
 				, bindingTargetType(0)
+				, generatedNameCount(0)
 			{
 			}
 
@@ -512,12 +514,48 @@ Workflow_GetSharedManager
 						types.Add(name, bindingTargetType);
 					}
 				}
+				
+				auto loader = GetInstanceLoaderManager()->GetLoader(bindingTargetType->GetTypeName());
+				auto reprType = bindingTargetType;
 
 				FOREACH(Ptr<GuiAttSetterRepr::SetterValue>, setter, repr->setters.Values())
 				{
+					if (setter->binding != L"" && setter->binding != L"set")
+					{
+						auto binder = GetInstanceLoaderManager()->GetInstanceBinder(setter->binding);
+						if (!binder)
+						{
+							errors.Add(L"The appropriate IGuiInstanceBinder of binding \"" + setter->binding + L"\" cannot be found.");
+						}
+						else if (binder->RequireInstanceName() && !repr->instanceName && reprType)
+						{
+							WString name = L"<precompile>" + itow(generatedNameCount);
+							repr->instanceName = name;
+							types.Add(name, reprType);
+						}
+					}
+
 					FOREACH(Ptr<GuiValueRepr>, value, setter->values)
 					{
 						value->Accept(this);
+					}
+				}
+
+				FOREACH(Ptr<GuiAttSetterRepr::EventValue>, handler, repr->eventHandlers.Values())
+				{
+					if (handler->binding != L"")
+					{
+						auto binder = GetInstanceLoaderManager()->GetInstanceEventBinder(handler->binding);
+						if (!binder)
+						{
+							errors.Add(L"The appropriate IGuiInstanceEventBinder of binding \"" + handler->binding + L"\" cannot be found.");
+						}
+						else if (binder->RequireInstanceName() && !repr->instanceName && reprType)
+						{
+							WString name = L"<precompile>" + itow(generatedNameCount);
+							repr->instanceName = name;
+							types.Add(name, reprType);
+						}
 					}
 				}
 			}
