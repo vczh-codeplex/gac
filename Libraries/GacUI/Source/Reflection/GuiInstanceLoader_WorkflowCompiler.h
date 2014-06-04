@@ -20,6 +20,7 @@ namespace vl
 		namespace types
 		{
 			typedef collections::Dictionary<WString, description::ITypeDescriptor*>		VariableTypeMap;
+			typedef collections::Dictionary<WString, IGuiInstanceLoader::TypeInfo>		VariableTypeInfoMap;
 			typedef collections::List<WString>											ErrorList;
 		}
 		extern workflow::analyzer::WfLexicalScopeManager*	Workflow_GetSharedManager();

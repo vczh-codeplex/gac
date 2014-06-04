@@ -482,15 +482,15 @@ Workflow_GetSharedManager
 		{
 		public:
 			Ptr<GuiInstanceContext>				context;
-			types::VariableTypeMap&				types;
+			types::VariableTypeInfoMap&			typeInfos;
 			types::ErrorList&					errors;
 
 			IGuiInstanceLoader::TypeInfo		bindingTargetTypeInfo;
 			vint								generatedNameCount;
 
-			WorkflowReferenceNamesVisitor(Ptr<GuiInstanceContext> _context, types::VariableTypeMap& _types, types::ErrorList& _errors)
+			WorkflowReferenceNamesVisitor(Ptr<GuiInstanceContext> _context, types::VariableTypeInfoMap& _typeInfos, types::ErrorList& _errors)
 				:context(_context)
-				, types(_types)
+				, typeInfos(_typeInfos)
 				, errors(_errors)
 				, generatedNameCount(0)
 			{
@@ -508,13 +508,13 @@ Workflow_GetSharedManager
 				if (repr->instanceName && reprTypeInfo.typeDescriptor)
 				{
 					WString name = repr->instanceName.Value();
-					if (types.Keys().Contains(name))
+					if (typeInfos.Keys().Contains(name))
 					{
 						errors.Add(L"Precompile: Parameter \"" + name + L"\" conflict with an existing named object.");
 					}
 					else
 					{
-						types.Add(name, reprTypeInfo.typeDescriptor);
+						typeInfos.Add(name, reprTypeInfo);
 					}
 				}
 				
@@ -533,7 +533,7 @@ Workflow_GetSharedManager
 						{
 							WString name = L"<precompile>" + itow(generatedNameCount++);
 							repr->instanceName = name;
-							types.Add(name, reprTypeInfo.typeDescriptor);
+							typeInfos.Add(name, reprTypeInfo);
 						}
 					}
 
@@ -580,7 +580,7 @@ Workflow_GetSharedManager
 						{
 							WString name = L"<precompile>" + itow(generatedNameCount++);
 							repr->instanceName = name;
-							types.Add(name, reprTypeInfo.typeDescriptor);
+							typeInfos.Add(name, reprTypeInfo);
 						}
 					}
 				}
@@ -609,14 +609,22 @@ Workflow_GetSharedManager
 		{
 		public:
 			Ptr<GuiInstanceContext>				context;
-			types::VariableTypeMap&				types;
+			types::VariableTypeInfoMap&			typeInfos;
 			types::ErrorList&					errors;
+			
+			types::VariableTypeMap				types;
 
-			WorkflowCompileVisitor(Ptr<GuiInstanceContext> _context, types::VariableTypeMap& _types, types::ErrorList& _errors)
+			WorkflowCompileVisitor(Ptr<GuiInstanceContext> _context, types::VariableTypeInfoMap& _typeInfos, types::ErrorList& _errors)
 				:context(_context)
-				, types(_types)
+				, typeInfos(_typeInfos)
 				, errors(_errors)
 			{
+				for (vint i = 0; i < typeInfos.Count(); i++)
+				{
+					auto key = typeInfos.Keys()[i];
+					auto value = typeInfos.Values()[i];
+					types.Add(key, value.typeDescriptor);
+				}
 			}
 
 			void Visit(GuiTextRepr* repr)override
@@ -648,10 +656,6 @@ Workflow_GetSharedManager
 					if (handler->binding == L"eval")
 					{
 					}
-
-					if (handler->binding != L"")
-					{
-					}
 				}
 			}
 
@@ -663,7 +667,7 @@ Workflow_GetSharedManager
 
 		void Workflow_PrecompileInstanceContext(Ptr<GuiInstanceContext> context, types::ErrorList& errors)
 		{
-			types::VariableTypeMap types;
+			types::VariableTypeInfoMap typeInfos;
 			{
 				FOREACH(Ptr<GuiInstanceParameter>, parameter, context->parameters)
 				{
@@ -672,21 +676,24 @@ Workflow_GetSharedManager
 					{
 						errors.Add(L"Precompile: Cannot find type \"" + parameter->className + L"\".");
 					}
-					else if (types.Keys().Contains(parameter->name))
+					else if (typeInfos.Keys().Contains(parameter->name))
 					{
 						errors.Add(L"Precompile: Parameter \"" + parameter->name + L"\" conflict with an existing named object.");
 					}
 					else
 					{
-						types.Add(parameter->name, type);
+						IGuiInstanceLoader::TypeInfo typeInfo;
+						typeInfo.typeDescriptor = type;
+						typeInfo.typeName = type->GetTypeName();
+						typeInfos.Add(parameter->name, typeInfo);
 					}
 				}
 
-				WorkflowReferenceNamesVisitor visitor(context, types, errors);
+				WorkflowReferenceNamesVisitor visitor(context, typeInfos, errors);
 				context->instance->Accept(&visitor);
 			}
 			{
-				WorkflowReferenceNamesVisitor visitor(context, types, errors);
+				WorkflowReferenceNamesVisitor visitor(context, typeInfos, errors);
 				context->instance->Accept(&visitor);
 			}
 		}
