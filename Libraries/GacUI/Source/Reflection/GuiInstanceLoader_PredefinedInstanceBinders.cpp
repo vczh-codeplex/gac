@@ -129,62 +129,6 @@ GuiReferenceInstanceBinder
 		};
 
 /***********************************************************************
-GuiWorkflowCache
-***********************************************************************/
-
-		class GuiWorkflowCache : public Object, public IGuiInstanceCache
-		{
-		public:
-			static const wchar_t*			CacheTypeName;
-
-			Ptr<WfAssembly>					assembly;
-
-			GuiWorkflowCache()
-			{
-			}
-
-			GuiWorkflowCache(Ptr<WfAssembly> _assembly)
-				:assembly(_assembly)
-			{
-			}
-
-			WString GetCacheTypeName()override
-			{
-				return CacheTypeName;
-			}
-		};
-
-		const wchar_t* GuiWorkflowCache::CacheTypeName = L"WORKFLOW-ASSEMBLY-CACHE";
-
-		class GuiWorkflowCacheResolver : public Object, public IGuiInstanceCacheResolver
-		{
-		public:
-			WString GetCacheTypeName()override
-			{
-				return GuiWorkflowCache::CacheTypeName;
-			}
-
-			bool Serialize(Ptr<IGuiInstanceCache> cache, stream::IStream& stream)override
-			{
-				if (auto obj = cache.Cast<GuiWorkflowCache>())
-				{
-					obj->assembly->Serialize(stream);
-					return true;
-				}
-				else
-				{
-					return false;
-				}
-			}
-
-			Ptr<IGuiInstanceCache> Deserialize(stream::IStream& stream)override
-			{
-				auto assembly = new WfAssembly(stream);
-				return new GuiWorkflowCache(assembly);
-			}
-		};
-
-/***********************************************************************
 GuiWorkflowGlobalContext
 ***********************************************************************/
 
@@ -497,7 +441,6 @@ GuiPredefinedInstanceBindersPlugin
 					IGuiInstanceLoaderManager* manager=GetInstanceLoaderManager();
 
 					manager->AddInstanceBindingContextFactory(new GuiInstanceBindingContextFactory<GuiWorkflowGlobalContext>(GuiWorkflowGlobalContext::ContextName));
-					manager->AddInstanceCacheResolver(new GuiWorkflowCacheResolver);
 
 					manager->AddInstanceBinder(new GuiResourceInstanceBinder);
 					manager->AddInstanceBinder(new GuiReferenceInstanceBinder);
