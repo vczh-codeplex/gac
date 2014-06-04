@@ -11,8 +11,7 @@ namespace vl
 		using namespace reflection::description;
 		using namespace collections;
 
-//#define ERROR_CODE_PREFIX L"========<" + env->scope->rootInstance.GetTypeDescriptor()->GetTypeName() + L">======== "
-#define ERROR_CODE_PREFIX
+#define ERROR_CODE_PREFIX L"================================================================"
 
 /***********************************************************************
 Variable

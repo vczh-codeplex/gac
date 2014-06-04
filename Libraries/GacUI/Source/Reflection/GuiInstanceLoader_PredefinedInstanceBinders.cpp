@@ -217,6 +217,7 @@ GuiWorkflowGlobalContext
 				{
 					types::VariableTypeMap types;
 					ITypeDescriptor* thisType = env->scope->rootInstance.GetTypeDescriptor();
+					Workflow_GetVariableTypes(env, types);
 					assembly = Workflow_CompileDataBinding(types, thisType, env->scope->errors, dataBindings);
 					env->context->precompiledCaches.Add(GetContextName(), new GuiWorkflowCache(assembly));
 				}
@@ -246,6 +247,11 @@ GuiScriptInstanceBinder
 		{
 		public:
 			virtual WString TranslateExpression(const WString& input) = 0;
+
+			bool RequireInstanceName()override
+			{
+				return true;
+			}
 
 			void GetRequiredContexts(collections::List<WString>& contextNames)override
 			{

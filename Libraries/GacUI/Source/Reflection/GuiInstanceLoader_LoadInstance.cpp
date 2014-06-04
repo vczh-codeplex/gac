@@ -17,12 +17,13 @@ Helper Functions Declarations
 		{
 			IGuiInstanceBinder*					binder;
 			IGuiInstanceLoader*					loader;
-			Ptr<GuiAttSetterRepr>				bindingTarget;
+			GuiAttSetterRepr*					bindingTarget;
 			IGuiInstanceLoader::PropertyValue	propertyValue;
 
 			FillInstanceBindingSetter()
 				:binder(0)
-				,loader(0)
+				, loader(0)
+				, bindingTarget(0)
 			{
 			}
 		};
@@ -44,6 +45,7 @@ Helper Functions Declarations
 
 		bool LoadInstancePropertyValue(
 			Ptr<GuiInstanceEnvironment> env,
+			GuiAttSetterRepr* attSetter,
 			const WString& binding,
 			IGuiInstanceLoader::PropertyValue propertyValue,
 			List<Ptr<GuiValueRepr>>& input,
@@ -232,6 +234,7 @@ LoadInstancePropertyValue
 
 		bool LoadInstancePropertyValue(
 			Ptr<GuiInstanceEnvironment> env,
+			GuiAttSetterRepr* attSetter,
 			const WString& binding,
 			IGuiInstanceLoader::PropertyValue propertyValue,
 			List<Ptr<GuiValueRepr>>& input,
@@ -421,6 +424,7 @@ LoadInstancePropertyValue
 													FillInstanceBindingSetter bindingSetter;
 													bindingSetter.binder = binder;
 													bindingSetter.loader = propertyLoader;
+													bindingSetter.bindingTarget = attSetter;
 													bindingSetter.propertyValue = propertyValue;
 													bindingSetters.Add(bindingSetter);
 												}
@@ -533,7 +537,7 @@ FillInstance
 
 				// extract all loaded property values
 				CopyFrom(input, propertyValue->values);
-				LoadInstancePropertyValue(env, propertyValue->binding, cachedPropertyValue, input, propertyLoader, false, output, bindingSetters, eventSetters);
+				LoadInstancePropertyValue(env, attSetter, propertyValue->binding, cachedPropertyValue, input, propertyLoader, false, output, bindingSetters, eventSetters);
 
 				// if there is no binding, set all values into the specified property
 				if (propertyValue->binding == L"")
@@ -777,7 +781,7 @@ CreateInstance
 										IGuiInstanceLoader::PropertyValue propertyValue(typeInfo, propertyName, Value());
 
 										CopyFrom(input, setterValue->values);
-										LoadInstancePropertyValue(env, setterValue->binding, propertyValue, input, loader, true, output, bindingSetters, eventSetters);
+										LoadInstancePropertyValue(env, ctor, setterValue->binding, propertyValue, input, loader, true, output, bindingSetters, eventSetters);
 
 										for (vint i = 0; i < output.Count(); i++)
 										{
