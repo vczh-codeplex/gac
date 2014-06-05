@@ -207,6 +207,43 @@ GuiToolstripButtonTemplate_StyleProvider
 			}
 
 /***********************************************************************
+GuiScrollTemplate_StyleProvider
+***********************************************************************/
+
+			GuiScrollTemplate_StyleProvider::GuiScrollTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory)
+				:GuiControlTemplate_StyleProvider(factory)
+			{
+				if (!(controlTemplate = dynamic_cast<GuiScrollTemplate*>(GetBoundsComposition())))
+				{
+					CHECK_FAIL(L"GuiButtonTemplate_StyleProvider::GuiButtonTemplate_StyleProvider()#An instance of GuiScrollTemplate is expected.");
+				}
+			}
+
+			GuiScrollTemplate_StyleProvider::~GuiScrollTemplate_StyleProvider()
+			{
+			}
+
+			void GuiScrollTemplate_StyleProvider::SetCommandExecutor(controls::GuiScroll::ICommandExecutor* value)
+			{
+				controlTemplate->SetCommands(value);
+			}
+
+			void GuiScrollTemplate_StyleProvider::SetTotalSize(vint value)
+			{
+				controlTemplate->SetTotalSize(value);
+			}
+
+			void GuiScrollTemplate_StyleProvider::SetPageSize(vint value)
+			{
+				controlTemplate->SetPageSize(value);
+			}
+
+			void GuiScrollTemplate_StyleProvider::SetPosition(vint value)
+			{
+				controlTemplate->SetPosition(value);
+			}
+
+/***********************************************************************
 GuiListItemTemplate_ItemStyleProvider
 ***********************************************************************/
 

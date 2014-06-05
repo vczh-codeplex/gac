@@ -149,6 +149,21 @@ Control Template
 				GuiToolstripButtonTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
 			};
 
+			class GuiScrollTemplate : public GuiControlTemplate, public Description<GuiScrollTemplate>
+			{
+			public:
+				GuiScrollTemplate();
+				~GuiScrollTemplate();
+
+#define GuiScrollTemplate_PROPERTIES(F)\
+				F(GuiScrollTemplate, controls::GuiScroll::ICommandExecutor*, Commands)\
+				F(GuiScrollTemplate, vint, TotalSize)\
+				F(GuiScrollTemplate, vint, PageSize)\
+				F(GuiScrollTemplate, vint, Position)\
+
+				GuiScrollTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
+			};
+
 /***********************************************************************
 Item Template
 ***********************************************************************/
