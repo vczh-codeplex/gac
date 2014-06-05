@@ -1532,11 +1532,11 @@ GuiPredefinedInstanceLoadersPlugin
 				ADD_VIRTUAL_CONTROL		(ToolstripSplitter,			GuiControl,				g::NewToolBarSplitter,			GuiControlTemplate);
 				ADD_VIRTUAL_CONTROL		(CheckBox,					GuiSelectableButton,	g::NewCheckBox,					GuiSelectableButtonTemplate);
 				ADD_VIRTUAL_CONTROL		(RadioButton,				GuiSelectableButton,	g::NewRadioButton,				GuiSelectableButtonTemplate);
-				ADD_VIRTUAL_CONTROL_X	(HScroll,					GuiScroll,				g::NewHScroll,					GuiControlTemplate);
-				ADD_VIRTUAL_CONTROL_X	(VScroll,					GuiScroll,				g::NewVScroll,					GuiControlTemplate);
-				ADD_VIRTUAL_CONTROL_X	(HTracker,					GuiScroll,				g::NewHTracker,					GuiControlTemplate);
-				ADD_VIRTUAL_CONTROL_X	(VTracker,					GuiScroll,				g::NewVTracker,					GuiControlTemplate);
-				ADD_VIRTUAL_CONTROL_X	(ProgressBar,				GuiScroll,				g::NewProgressBar,				GuiControlTemplate);
+				ADD_VIRTUAL_CONTROL		(HScroll,					GuiScroll,				g::NewHScroll,					GuiScrollTemplate);
+				ADD_VIRTUAL_CONTROL		(VScroll,					GuiScroll,				g::NewVScroll,					GuiScrollTemplate);
+				ADD_VIRTUAL_CONTROL		(HTracker,					GuiScroll,				g::NewHTracker,					GuiScrollTemplate);
+				ADD_VIRTUAL_CONTROL		(VTracker,					GuiScroll,				g::NewVTracker,					GuiScrollTemplate);
+				ADD_VIRTUAL_CONTROL		(ProgressBar,				GuiScroll,				g::NewProgressBar,				GuiScrollTemplate);
 				ADD_VIRTUAL_CONTROL_X	(CheckTextList,				GuiTextList,			g::NewCheckTextList,			GuiControlTemplate);
 				ADD_VIRTUAL_CONTROL_X	(RadioTextList,				GuiTextList,			g::NewRadioTextList,			GuiControlTemplate);
 

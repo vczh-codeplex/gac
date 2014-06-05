@@ -86,6 +86,13 @@ Type Declaration
 				GuiToolstripButtonTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_REFLECTION)
 			END_CLASS_MEMBER(GuiToolstripButtonTemplate)
 
+			BEGIN_CLASS_MEMBER(GuiScrollTemplate)
+				CLASS_MEMBER_BASE(GuiControlTemplate)
+				CLASS_MEMBER_CONSTRUCTOR(GuiScrollTemplate*(), NO_PARAMETER)
+
+				GuiScrollTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_REFLECTION)
+			END_CLASS_MEMBER(GuiScrollTemplate)
+
 			BEGIN_CLASS_MEMBER(GuiListItemTemplate)
 				CLASS_MEMBER_BASE(GuiTemplate)
 				CLASS_MEMBER_CONSTRUCTOR(GuiListItemTemplate*(), NO_PARAMETER)

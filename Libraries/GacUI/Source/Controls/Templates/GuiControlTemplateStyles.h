@@ -123,6 +123,24 @@ Control Template
 				compositions::GuiSubComponentMeasurer::IMeasuringSource*	GetMeasuringSource()override;
 			};
 
+			class GuiScrollTemplate_StyleProvider
+				: public GuiControlTemplate_StyleProvider
+				, public virtual controls::GuiScroll::IStyleController
+				, public Description<GuiScrollTemplate_StyleProvider>
+			{
+			protected:
+				GuiScrollTemplate*											controlTemplate;
+
+			public:
+				GuiScrollTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
+				~GuiScrollTemplate_StyleProvider();
+
+				void														SetCommandExecutor(controls::GuiScroll::ICommandExecutor* value)override;
+				void														SetTotalSize(vint value)override;
+				void														SetPageSize(vint value)override;
+				void														SetPosition(vint value)override;
+			};
+
 /***********************************************************************
 Item Template (GuiListItemTemplate)
 ***********************************************************************/
