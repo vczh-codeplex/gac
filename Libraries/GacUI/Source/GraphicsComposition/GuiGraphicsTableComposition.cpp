@@ -730,6 +730,7 @@ GuiCellComposition
 
 			Rect GuiCellComposition::GetBounds()
 			{
+				Rect result;
 				if(tableParent && row!=-1 && column!=-1)
 				{
 					Rect bounds1, bounds2;
@@ -752,12 +753,14 @@ GuiCellComposition
 							}
 						}
 					}
-					return Rect(bounds1.x1, bounds1.y1, bounds2.x2, bounds2.y2);
+					result = Rect(bounds1.x1, bounds1.y1, bounds2.x2, bounds2.y2);
 				}
 				else
 				{
-					return Rect();
+					result = Rect();
 				}
+				UpdatePreviousBounds(result);
+				return result;
 			}
 		}
 	}

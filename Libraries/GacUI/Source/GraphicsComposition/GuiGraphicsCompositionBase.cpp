@@ -514,8 +514,18 @@ GuiGraphicsSite
 				return Rect(expectedBounds.LeftTop(), minSize);
 			}
 
+			void GuiGraphicsSite::UpdatePreviousBounds(Rect bounds)
+			{
+				if(previousBounds!=bounds)
+				{
+					previousBounds=bounds;
+					BoundsChanged.Execute(GuiEventArgs(this));
+				}
+			}
+
 			GuiGraphicsSite::GuiGraphicsSite()
 			{
+				BoundsChanged.SetAssociatedComposition(this);
 			}
 
 			GuiGraphicsSite::~GuiGraphicsSite()

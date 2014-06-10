@@ -68,7 +68,7 @@ Type Declaration
 				CLASS_MEMBER_BASE(GuiGraphicsSite)
 				CLASS_MEMBER_CONSTRUCTOR(GuiStackItemComposition*(), NO_PARAMETER)
 
-				CLASS_MEMBER_PROPERTY_FAST(Bounds)
+				CLASS_MEMBER_PROPERTY_GUIEVENT_FAST(Bounds)
 				CLASS_MEMBER_PROPERTY_FAST(ExtraMargin)
 			END_CLASS_MEMBER(GuiStackItemComposition)
 

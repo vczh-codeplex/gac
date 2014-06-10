@@ -594,6 +594,8 @@ Type Declaration
 
 			BEGIN_CLASS_MEMBER(GuiGraphicsSite)
 				CLASS_MEMBER_BASE(GuiGraphicsComposition)
+
+				CLASS_MEMBER_PROPERTY_GUIEVENT_READONLY_FAST(Bounds)
 			END_CLASS_MEMBER(GuiGraphicsSite)
 
 			BEGIN_CLASS_MEMBER(GuiWindowComposition)

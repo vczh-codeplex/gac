@@ -297,6 +297,7 @@ void GuiMain()
 
 	auto scope = window.GetScope().Obj();
 	CopyFrom(errors, scope->errors, true);
+	CHECK_ERROR(errors.Count() == 0, L"");
 
 	window.ForceCalculateSizeImmediately();
 	window.MoveToScreenCenter();
