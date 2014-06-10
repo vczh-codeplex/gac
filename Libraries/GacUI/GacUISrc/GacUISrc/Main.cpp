@@ -142,8 +142,11 @@ namespace demos
 		
 		void OnHandleMouseDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 		{
-			draggingHandle = true;
-			draggingStartLocation = Point(arguments.x, arguments.y);
+			if (sender->GetRelatedControl()->GetVisuallyEnabled())
+			{
+				draggingHandle = true;
+				draggingStartLocation = Point(arguments.x, arguments.y);
+			}
 		}
 
 		void OnHandleMouseUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
@@ -200,8 +203,11 @@ namespace demos
 		
 		void OnHandleMouseDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 		{
-			draggingHandle = true;
-			draggingStartLocation = Point(arguments.x, arguments.y);
+			if (sender->GetRelatedControl()->GetVisuallyEnabled())
+			{
+				draggingHandle = true;
+				draggingStartLocation = Point(arguments.x, arguments.y);
+			}
 		}
 
 		void OnHandleMouseUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
