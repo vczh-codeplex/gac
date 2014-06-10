@@ -230,14 +230,20 @@ Basic Construction
 			class GuiGraphicsSite : public GuiGraphicsComposition, public Description<GuiGraphicsSite>
 			{
 			protected:
+				Rect								previousBounds;
 
 				/// <summary>Calculate the final bounds from an expected bounds.</summary>
 				/// <returns>The final bounds according to some configuration like margin, minimum size, etc..</returns>
 				/// <param name="expectedBounds">The expected bounds.</param>
 				virtual Rect						GetBoundsInternal(Rect expectedBounds);
+
+				void								UpdatePreviousBounds(Rect bounds);
 			public:
 				GuiGraphicsSite();
 				~GuiGraphicsSite();
+
+				/// <summary>Event that will be raised when the final bounds is changed.</summary>
+				compositions::GuiNotifyEvent		BoundsChanged;
 				
 				bool								IsSizeAffectParent()override;
 				Size								GetMinPreferredClientSize()override;

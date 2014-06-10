@@ -51,15 +51,11 @@ Basic Compositions
 			{
 			protected:
 				Rect								compositionBounds;
-				Rect								previousBounds;
 				Margin								alignmentToParent;
 				
 			public:
 				GuiBoundsComposition();
 				~GuiBoundsComposition();
-
-				/// <summary>Event that will be raised when the final bounds is changed.</summary>
-				compositions::GuiNotifyEvent		BoundsChanged;
 				
 				Rect								GetPreferredBounds()override;
 				Rect								GetBounds()override;

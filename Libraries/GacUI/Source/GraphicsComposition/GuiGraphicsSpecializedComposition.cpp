@@ -63,6 +63,7 @@ GuiSideAlignedComposition
 
 			Rect GuiSideAlignedComposition::GetBounds()
 			{
+				Rect result;
 				GuiGraphicsComposition* parent=GetParent();
 				if(parent)
 				{
@@ -94,9 +95,10 @@ GuiSideAlignedComposition
 						}
 						break;
 					}
-					return bounds;
+					result = bounds;
 				}
-				return Rect();
+				UpdatePreviousBounds(result);
+				return result;
 			}
 
 /***********************************************************************
@@ -162,6 +164,7 @@ GuiPartialViewComposition
 
 			Rect GuiPartialViewComposition::GetBounds()
 			{
+				Rect result;
 				GuiGraphicsComposition* parent=GetParent();
 				if(parent)
 				{
@@ -181,9 +184,10 @@ GuiPartialViewComposition
 					pw+=ow;
 					ph+=oh;
 
-					return Rect(Point((vint)(wRatio*w), (vint)(hRatio*h)), Size(pw, ph));
+					result = Rect(Point((vint)(wRatio*w), (vint)(hRatio*h)), Size(pw, ph));
 				}
-				return Rect();
+				UpdatePreviousBounds(result);
+				return result;
 			}
 		}
 	}

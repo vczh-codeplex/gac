@@ -334,6 +334,7 @@ GuiStackItemComposition
 				result.y1-=extraMargin.top;
 				result.x2+=extraMargin.right;
 				result.y2+=extraMargin.bottom;
+				UpdatePreviousBounds(result);
 				return result;
 			}
 

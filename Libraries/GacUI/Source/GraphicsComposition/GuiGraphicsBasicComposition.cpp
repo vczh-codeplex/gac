@@ -49,7 +49,6 @@ GuiBoundsComposition
 
 			GuiBoundsComposition::GuiBoundsComposition()
 			{
-				BoundsChanged.SetAssociatedComposition(this);
 				ClearAlignmentToParent();
 			}
 
@@ -128,11 +127,7 @@ GuiBoundsComposition
 						result.y1=result.y2-height;
 					}
 				}
-				if(previousBounds!=result)
-				{
-					previousBounds=result;
-					BoundsChanged.Execute(GuiEventArgs(this));
-				}
+				UpdatePreviousBounds(result);
 				return result;
 			}
 
