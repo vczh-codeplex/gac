@@ -123,6 +123,13 @@ namespace demos
 	F(RadioButtonTemplate, GuiSelectableButtonTemplate)\
 	F(DocumentLabelTemplate, GuiControlTemplate)\
 	F(LabelTemplate, GuiLabelTemplate)\
+	F(LeftScrollButtonTemplate, GuiButtonTemplate)\
+	F(RightScrollButtonTemplate, GuiButtonTemplate)\
+	F(TopScrollButtonTemplate, GuiButtonTemplate)\
+	F(BottomScrollButtonTemplate, GuiButtonTemplate)\
+	F(HScrollHandleTemplate, GuiButtonTemplate)\
+	F(VScrollHandleTemplate, GuiButtonTemplate)\
+	F(HScrollTemplate, GuiScrollTemplate)\
 
 	DEMO_TEMPLATES(CONTROL_TEMPLATE_DECL)
 
@@ -160,6 +167,13 @@ namespace vl
 			F(demos::RadioButtonTemplate)\
 			F(demos::DocumentLabelTemplate)\
 			F(demos::LabelTemplate)\
+			F(demos::LeftScrollButtonTemplate)\
+			F(demos::RightScrollButtonTemplate)\
+			F(demos::TopScrollButtonTemplate)\
+			F(demos::BottomScrollButtonTemplate)\
+			F(demos::HScrollHandleTemplate)\
+			F(demos::VScrollHandleTemplate)\
+			F(demos::HScrollTemplate)\
 
 			DEMO_TYPES(DECL_TYPE_INFO)
 			DEMO_TYPES(IMPL_TYPE_INFO)
