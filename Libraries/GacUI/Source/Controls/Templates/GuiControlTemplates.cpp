@@ -194,8 +194,8 @@ GuiScrollTemplate
 
 			GuiScrollTemplate::GuiScrollTemplate()
 				:Commands_(0)
-				, TotalSize_(0)
-				, PageSize_(0)
+				, TotalSize_(100)
+				, PageSize_(10)
 				, Position_(0)
 			{
 				GuiScrollTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_EVENT_INIT)
