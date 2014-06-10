@@ -36,6 +36,7 @@ TextItemStyleProvider::TextItemStyleController
 					textElement=GuiSolidLabelElement::Create();
 					textElement->SetAlignments(Alignment::Left, Alignment::Center);
 					textElement->SetFont(backgroundButton->GetFont());
+					textElement->SetColor(textItemStyleProvider->textItemStyleProvider->GetTextColor());
 
 					GuiBoundsComposition* textComposition=new GuiBoundsComposition;
 					textComposition->SetOwnedElement(textElement);

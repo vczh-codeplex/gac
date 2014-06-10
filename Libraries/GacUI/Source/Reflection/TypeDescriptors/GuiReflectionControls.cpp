@@ -606,6 +606,7 @@ Type Declaration
 
 				CLASS_MEMBER_METHOD(CreateBackgroundStyleController, NO_PARAMETER)
 				CLASS_MEMBER_METHOD(CreateBulletStyleController, NO_PARAMETER)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(TextColor)
 			END_CLASS_MEMBER(TextItemStyleProvider::ITextItemStyleProvider)
 
 			BEGIN_CLASS_MEMBER(TextItemStyleProvider::ITextItemView)
