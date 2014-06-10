@@ -861,6 +861,11 @@ Interface Proxy
 					{
 						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(CreateBulletStyleController);
 					}
+
+					Color GetTextColor()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetTextColor);
+					}
 				};
 
 				class TextItemStyleProvider_ITextItemView : public virtual GuiListControl_IItemPrimaryTextView, public virtual list::TextItemStyleProvider::ITextItemView

@@ -41,6 +41,9 @@ TextList Style Provider
 						/// <summary>Create the bullet style controller for an text item. The button selection state represents the text item check state.</summary>
 						/// <returns>The created bullet style controller.</returns>
 						virtual GuiSelectableButton::IStyleController*		CreateBulletStyleController()=0;
+						/// <summary>Get the text color.</summary>
+						/// <returns>The text color.</returns>
+						virtual Color										GetTextColor()=0;
 					};
 
 					/// <summary>The required <see cref="GuiListControl::IItemProvider"/> view for <see cref="TextItemStyleProvider"/>.</summary>
