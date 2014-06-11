@@ -11,6 +11,19 @@ namespace vl
 			using namespace reflection::description;
 			using namespace collections;
 
+#define INITIALIZE_FACTORY_FROM_TEMPLATE(VARIABLE, PROPERTY)\
+	controlTemplate->PROPERTY##Changed.AttachLambda([this](GuiGraphicsComposition*, GuiEventArgs&)\
+	{\
+		this->VARIABLE = 0;\
+	});\
+
+#define GET_FACTORY_FROM_TEMPLATE(TEMPLATE, VARIABLE, PROPERTY)\
+	if (!this->VARIABLE)\
+	{\
+		this->VARIABLE = CreateTemplateFactory(controlTemplate->Get##PROPERTY());\
+	}\
+	return new TEMPLATE##_StyleProvider(this->VARIABLE);\
+
 /***********************************************************************
 GuiControlTemplate_StyleProvider
 ***********************************************************************/
@@ -152,11 +165,6 @@ GuiSelectableButtonTemplate_StyleProvider
 GuiToolstripButtonTemplate_StyleProvider
 ***********************************************************************/
 
-			void GuiToolstripButtonTemplate_StyleProvider::controlTemplate_SubMenuTemplateChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
-			{
-				subMenuTemplateFactory = 0;
-			}
-
 			GuiToolstripButtonTemplate_StyleProvider::GuiToolstripButtonTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory)
 				:GuiSelectableButtonTemplate_StyleProvider(factory)
 			{
@@ -164,7 +172,7 @@ GuiToolstripButtonTemplate_StyleProvider
 				{
 					CHECK_FAIL(L"GuiButtonTemplate_StyleProvider::GuiButtonTemplate_StyleProvider()#An instance of GuiSelectableButtonTemplate is expected.");
 				}
-				controlTemplate->SubMenuTemplateChanged.AttachMethod(this, &GuiToolstripButtonTemplate_StyleProvider::controlTemplate_SubMenuTemplateChanged);
+				INITIALIZE_FACTORY_FROM_TEMPLATE(subMenuTemplateFactory, SubMenuTemplate);
 			}
 
 			GuiToolstripButtonTemplate_StyleProvider::~GuiToolstripButtonTemplate_StyleProvider()
@@ -173,11 +181,7 @@ GuiToolstripButtonTemplate_StyleProvider
 				
 			controls::GuiMenu::IStyleController* GuiToolstripButtonTemplate_StyleProvider::CreateSubMenuStyleController()
 			{
-				if (!subMenuTemplateFactory)
-				{
-					subMenuTemplateFactory = CreateTemplateFactory(controlTemplate->GetSubMenuTemplate());
-				}
-				return new GuiWindowTemplate_StyleProvider(subMenuTemplateFactory);
+				GET_FACTORY_FROM_TEMPLATE(GuiWindowTemplate, subMenuTemplateFactory, SubMenuTemplate);
 			}
 
 			void GuiToolstripButtonTemplate_StyleProvider::SetSubMenuExisting(bool value)
@@ -251,16 +255,6 @@ GuiScrollTemplate_StyleProvider
 GuiScrollViewTemplate_StyleProvider
 ***********************************************************************/
 
-			void GuiScrollViewTemplate_StyleProvider::controlTemplate_HScrollTemplateChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
-			{
-				hScrollTemplateFactory = 0;
-			}
-
-			void GuiScrollViewTemplate_StyleProvider::controlTemplate_VScrollTemplateChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
-			{
-				vScrollTemplateFactory = 0;
-			}
-
 			GuiScrollViewTemplate_StyleProvider::GuiScrollViewTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory)
 				:GuiControlTemplate_StyleProvider(factory)
 			{
@@ -268,6 +262,8 @@ GuiScrollViewTemplate_StyleProvider
 				{
 					CHECK_FAIL(L"GuiScrollViewTemplate_StyleProvider::GuiScrollViewTemplate_StyleProvider()#An instance of GuiScrollViewTemplate is expected.");
 				}
+				INITIALIZE_FACTORY_FROM_TEMPLATE(hScrollTemplateFactory, HScrollTemplate);
+				INITIALIZE_FACTORY_FROM_TEMPLATE(vScrollTemplateFactory, VScrollTemplate);
 			}
 
 			GuiScrollViewTemplate_StyleProvider::~GuiScrollViewTemplate_StyleProvider()
@@ -276,20 +272,12 @@ GuiScrollViewTemplate_StyleProvider
 				
 			controls::GuiScroll::IStyleController* GuiScrollViewTemplate_StyleProvider::CreateHorizontalScrollStyle()
 			{
-				if (!hScrollTemplateFactory)
-				{
-					hScrollTemplateFactory = CreateTemplateFactory(controlTemplate->GetHScrollTemplate());
-				}
-				return new GuiScrollTemplate_StyleProvider(hScrollTemplateFactory);
+				GET_FACTORY_FROM_TEMPLATE(GuiScrollTemplate, hScrollTemplateFactory, HScrollTemplate);
 			}
 
 			controls::GuiScroll::IStyleController* GuiScrollViewTemplate_StyleProvider::CreateVerticalScrollStyle()
 			{
-				if (!vScrollTemplateFactory)
-				{
-					vScrollTemplateFactory = CreateTemplateFactory(controlTemplate->GetVScrollTemplate());
-				}
-				return new GuiScrollTemplate_StyleProvider(vScrollTemplateFactory);
+				GET_FACTORY_FROM_TEMPLATE(GuiScrollTemplate, vScrollTemplateFactory, VScrollTemplate);
 			}
 
 			vint GuiScrollViewTemplate_StyleProvider::GetDefaultScrollSize()
@@ -302,6 +290,35 @@ GuiScrollViewTemplate_StyleProvider
 				controlTemplate->SetAlignmentToParent(Margin(0, 0, 0, 0));
 				boundsComposition->AddChild(controlTemplate);
 				return controlTemplate->GetContainerComposition();
+			}
+
+/***********************************************************************
+GuiTextListTemplate_StyleProvider
+***********************************************************************/
+
+			GuiTextListTemplate_StyleProvider::GuiTextListTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory)
+				:GuiScrollViewTemplate_StyleProvider(factory)
+			{
+				if (!(controlTemplate = dynamic_cast<GuiTextListTemplate*>(GetBoundsComposition())))
+				{
+					CHECK_FAIL(L"GuiTextListTemplate_StyleProvider::GuiTextListTemplate_StyleProvider()#An instance of GuiTextListTemplate is expected.");
+				}
+				INITIALIZE_FACTORY_FROM_TEMPLATE(backgroundTemplateFactory, BackgroundTemplate);
+				INITIALIZE_FACTORY_FROM_TEMPLATE(bulletTemplateFactory, BulletTemplate);
+			}
+
+			GuiTextListTemplate_StyleProvider::~GuiTextListTemplate_StyleProvider()
+			{
+			}
+
+			controls::GuiSelectableButton::IStyleController* GuiTextListTemplate_StyleProvider::CreateBackgroundStyle()
+			{
+				GET_FACTORY_FROM_TEMPLATE(GuiSelectableButtonTemplate, backgroundTemplateFactory, BackgroundTemplate);
+			}
+
+			controls::GuiSelectableButton::IStyleController* GuiTextListTemplate_StyleProvider::CreateBulletStyle()
+			{
+				GET_FACTORY_FROM_TEMPLATE(GuiSelectableButtonTemplate, bulletTemplateFactory, BulletTemplate);
 			}
 
 /***********************************************************************

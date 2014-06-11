@@ -111,7 +111,6 @@ Control Template
 				Ptr<GuiTemplate::IFactory>									subMenuTemplateFactory;
 				GuiToolstripButtonTemplate*									controlTemplate;
 
-				void														controlTemplate_SubMenuTemplateChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 			public:
 				GuiToolstripButtonTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
 				~GuiToolstripButtonTemplate_StyleProvider();
@@ -153,8 +152,6 @@ Control Template
 				Ptr<GuiTemplate::IFactory>									vScrollTemplateFactory;
 				GuiScrollViewTemplate*										controlTemplate;
 				
-				void														controlTemplate_HScrollTemplateChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
-				void														controlTemplate_VScrollTemplateChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 			public:
 				GuiScrollViewTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
 				~GuiScrollViewTemplate_StyleProvider();
@@ -163,6 +160,24 @@ Control Template
 				controls::GuiScroll::IStyleController*						CreateVerticalScrollStyle()override;
 				vint														GetDefaultScrollSize()override;
 				compositions::GuiGraphicsComposition*						InstallBackground(compositions::GuiBoundsComposition* boundsComposition)override;
+			};
+
+			class GuiTextListTemplate_StyleProvider
+				: public GuiScrollViewTemplate_StyleProvider
+				, public virtual controls::GuiScrollView::IStyleProvider
+				, public Description<GuiTextListTemplate_StyleProvider>
+			{
+			protected:
+				Ptr<GuiTemplate::IFactory>									backgroundTemplateFactory;
+				Ptr<GuiTemplate::IFactory>									bulletTemplateFactory;
+				GuiTextListTemplate*										controlTemplate;
+				
+			public:
+				GuiTextListTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
+				~GuiTextListTemplate_StyleProvider();
+				
+				controls::GuiSelectableButton::IStyleController*			CreateBackgroundStyle();
+				controls::GuiSelectableButton::IStyleController*			CreateBulletStyle();
 			};
 
 /***********************************************************************

@@ -178,6 +178,20 @@ Control Template
 				GuiScrollViewTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
 			};
 
+			class GuiTextListTemplate : public GuiScrollViewTemplate, public Description<GuiTextListTemplate>
+			{
+			public:
+				GuiTextListTemplate();
+				~GuiTextListTemplate();
+
+#define GuiTextListTemplate_PROPERTIES(F)\
+				F(GuiTextListTemplate, WString, BackgroundTemplate)\
+				F(GuiTextListTemplate, WString, BulletTemplate)\
+				F(GuiTextListTemplate, Color, TextColor)\
+
+				GuiTextListTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
+			};
+
 /***********************************************************************
 Item Template
 ***********************************************************************/
