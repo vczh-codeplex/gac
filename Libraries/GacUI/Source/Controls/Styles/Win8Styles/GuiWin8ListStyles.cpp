@@ -197,6 +197,11 @@ Win8TextListProvider
 				return 0;
 			}
 
+			Color Win8TextListProvider::GetTextColor()
+			{
+				return Win8GetSystemTextColor(true);
+			}
+
 /***********************************************************************
 Win8CheckTextListProvider
 ***********************************************************************/

@@ -88,6 +88,7 @@ List
 
 				controls::GuiSelectableButton::IStyleController*		CreateBackgroundStyleController()override;
 				controls::GuiSelectableButton::IStyleController*		CreateBulletStyleController()override;
+				Color													GetTextColor()override;
 			};
 			
 			/// <summary>Check box text list style (Windows 8).</summary>
