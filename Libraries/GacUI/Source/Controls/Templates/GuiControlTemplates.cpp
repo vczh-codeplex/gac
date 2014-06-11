@@ -222,6 +222,21 @@ GuiScrollViewTemplate
 			}
 
 /***********************************************************************
+GuiTextListTemplate
+***********************************************************************/
+
+			GuiTextListTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_IMPL)
+
+			GuiTextListTemplate::GuiTextListTemplate()
+			{
+				GuiTextListTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_EVENT_INIT)
+			}
+
+			GuiTextListTemplate::~GuiTextListTemplate()
+			{
+			}
+
+/***********************************************************************
 GuiListItemTemplate
 ***********************************************************************/
 

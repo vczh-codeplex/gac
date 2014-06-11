@@ -35,6 +35,7 @@ Type List
 			F(presentation::templates::GuiToolstripButtonTemplate)\
 			F(presentation::templates::GuiScrollTemplate)\
 			F(presentation::templates::GuiScrollViewTemplate)\
+			F(presentation::templates::GuiTextListTemplate)\
 			F(presentation::templates::GuiListItemTemplate)\
 			F(presentation::templates::GuiTreeItemTemplate)\
 
