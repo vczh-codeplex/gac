@@ -131,6 +131,7 @@ namespace demos
 	F(VScrollHandleTemplate, GuiButtonTemplate)\
 	F(ScrollViewTemplate, GuiScrollViewTemplate)\
 	F(ItemBackgroundTemplate, GuiSelectableButtonTemplate)\
+	F(CheckItemBackgroundTemplate, GuiSelectableButtonTemplate)\
 	F(TextListTemplate, GuiTextListTemplate)\
 	F(CheckTextListTemplate, GuiTextListTemplate)\
 	F(RadioTextListTemplate, GuiTextListTemplate)\
@@ -303,6 +304,7 @@ namespace vl
 			F(demos::VScrollTemplate)\
 			F(demos::ScrollViewTemplate)\
 			F(demos::ItemBackgroundTemplate)\
+			F(demos::CheckItemBackgroundTemplate)\
 			F(demos::TextListTemplate)\
 			F(demos::CheckTextListTemplate)\
 			F(demos::RadioTextListTemplate)\
