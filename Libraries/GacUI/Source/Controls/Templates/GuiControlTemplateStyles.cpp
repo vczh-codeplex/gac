@@ -40,6 +40,10 @@ GuiControlTemplate_StyleProvider
 				return controlTemplate->GetContainerComposition();
 			}
 
+			void GuiControlTemplate_StyleProvider::AssociateStyleController(IStyleController* controller)
+			{
+			}
+
 			void GuiControlTemplate_StyleProvider::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
 			{
 				controlTemplate->SetFocusableComposition(value);
@@ -241,6 +245,62 @@ GuiScrollTemplate_StyleProvider
 			void GuiScrollTemplate_StyleProvider::SetPosition(vint value)
 			{
 				controlTemplate->SetPosition(value);
+			}
+
+/***********************************************************************
+GuiScrollViewTemplate_StyleProvider
+***********************************************************************/
+
+			void GuiScrollViewTemplate_StyleProvider::controlTemplate_HScrollTemplateChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				hScrollTemplateFactory = 0;
+			}
+
+			void GuiScrollViewTemplate_StyleProvider::controlTemplate_VScrollTemplateChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				vScrollTemplateFactory = 0;
+			}
+
+			GuiScrollViewTemplate_StyleProvider::GuiScrollViewTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory)
+				:GuiControlTemplate_StyleProvider(factory)
+			{
+				if (!(controlTemplate = dynamic_cast<GuiScrollViewTemplate*>(GetBoundsComposition())))
+				{
+					CHECK_FAIL(L"GuiScrollViewTemplate_StyleProvider::GuiScrollViewTemplate_StyleProvider()#An instance of GuiScrollViewTemplate is expected.");
+				}
+			}
+
+			GuiScrollViewTemplate_StyleProvider::~GuiScrollViewTemplate_StyleProvider()
+			{
+			}
+				
+			controls::GuiScroll::IStyleController* GuiScrollViewTemplate_StyleProvider::CreateHorizontalScrollStyle()
+			{
+				if (!hScrollTemplateFactory)
+				{
+					hScrollTemplateFactory = CreateTemplateFactory(controlTemplate->GetHScrollTemplate());
+				}
+				return new GuiScrollTemplate_StyleProvider(hScrollTemplateFactory);
+			}
+
+			controls::GuiScroll::IStyleController* GuiScrollViewTemplate_StyleProvider::CreateVerticalScrollStyle()
+			{
+				if (!vScrollTemplateFactory)
+				{
+					vScrollTemplateFactory = CreateTemplateFactory(controlTemplate->GetVScrollTemplate());
+				}
+				return new GuiScrollTemplate_StyleProvider(vScrollTemplateFactory);
+			}
+
+			vint GuiScrollViewTemplate_StyleProvider::GetDefaultScrollSize()
+			{
+				return controlTemplate->GetDefaultScrollSize();
+			}
+
+			compositions::GuiGraphicsComposition* GuiScrollViewTemplate_StyleProvider::InstallBackground(compositions::GuiBoundsComposition* boundsComposition)
+			{
+				boundsComposition->AddChild(controlTemplate);
+				return controlTemplate->GetContainerComposition();
 			}
 
 /***********************************************************************

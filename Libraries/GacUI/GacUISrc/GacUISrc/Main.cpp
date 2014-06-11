@@ -129,6 +129,7 @@ namespace demos
 	F(BottomScrollButtonTemplate, GuiButtonTemplate)\
 	F(HScrollHandleTemplate, GuiButtonTemplate)\
 	F(VScrollHandleTemplate, GuiButtonTemplate)\
+	F(ScrollViewTemplate, GuiScrollViewTemplate)\
 
 	DEMO_TEMPLATES(CONTROL_TEMPLATE_DECL)
 
@@ -296,6 +297,7 @@ namespace vl
 			F(demos::VScrollHandleTemplate)\
 			F(demos::HScrollTemplate)\
 			F(demos::VScrollTemplate)\
+			F(demos::ScrollViewTemplate)\
 
 			DEMO_TYPES(DECL_TYPE_INFO)
 			DEMO_TYPES(IMPL_TYPE_INFO)
