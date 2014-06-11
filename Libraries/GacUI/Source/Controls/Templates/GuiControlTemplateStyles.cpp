@@ -299,6 +299,7 @@ GuiScrollViewTemplate_StyleProvider
 
 			compositions::GuiGraphicsComposition* GuiScrollViewTemplate_StyleProvider::InstallBackground(compositions::GuiBoundsComposition* boundsComposition)
 			{
+				controlTemplate->SetAlignmentToParent(Margin(0, 0, 0, 0));
 				boundsComposition->AddChild(controlTemplate);
 				return controlTemplate->GetContainerComposition();
 			}
