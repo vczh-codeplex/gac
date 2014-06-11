@@ -206,6 +206,22 @@ GuiScrollTemplate
 			}
 
 /***********************************************************************
+GuiScrollViewTemplate
+***********************************************************************/
+
+			GuiScrollViewTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_IMPL)
+
+			GuiScrollViewTemplate::GuiScrollViewTemplate()
+				:DefaultScrollSize_(0)
+			{
+				GuiScrollViewTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_EVENT_INIT)
+			}
+
+			GuiScrollViewTemplate::~GuiScrollViewTemplate()
+			{
+			}
+
+/***********************************************************************
 GuiListItemTemplate
 ***********************************************************************/
 

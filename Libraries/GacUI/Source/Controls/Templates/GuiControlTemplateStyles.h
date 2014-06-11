@@ -27,6 +27,7 @@ Control Template
 			class GuiControlTemplate_StyleProvider
 				: public Object
 				, public virtual controls::GuiControl::IStyleController
+				, public virtual controls::GuiControl::IStyleProvider
 				, public Description<GuiControlTemplate_StyleProvider>
 			{
 			protected:
@@ -38,6 +39,7 @@ Control Template
 
 				compositions::GuiBoundsComposition*					GetBoundsComposition()override;
 				compositions::GuiGraphicsComposition*				GetContainerComposition()override;
+				void												AssociateStyleController(IStyleController* controller)override;
 				void												SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
 				void												SetText(const WString& value)override;
 				void												SetFont(const FontProperties& value)override;
@@ -139,6 +141,28 @@ Control Template
 				void														SetTotalSize(vint value)override;
 				void														SetPageSize(vint value)override;
 				void														SetPosition(vint value)override;
+			};
+
+			class GuiScrollViewTemplate_StyleProvider
+				: public GuiControlTemplate_StyleProvider
+				, public virtual controls::GuiScrollView::IStyleProvider
+				, public Description<GuiScrollViewTemplate_StyleProvider>
+			{
+			protected:
+				Ptr<GuiTemplate::IFactory>									hScrollTemplateFactory;
+				Ptr<GuiTemplate::IFactory>									vScrollTemplateFactory;
+				GuiScrollViewTemplate*										controlTemplate;
+				
+				void														controlTemplate_HScrollTemplateChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void														controlTemplate_VScrollTemplateChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+			public:
+				GuiScrollViewTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
+				~GuiScrollViewTemplate_StyleProvider();
+				
+				controls::GuiScroll::IStyleController*						CreateHorizontalScrollStyle()override;
+				controls::GuiScroll::IStyleController*						CreateVerticalScrollStyle()override;
+				vint														GetDefaultScrollSize()override;
+				compositions::GuiGraphicsComposition*						InstallBackground(compositions::GuiBoundsComposition* boundsComposition)override;
 			};
 
 /***********************************************************************

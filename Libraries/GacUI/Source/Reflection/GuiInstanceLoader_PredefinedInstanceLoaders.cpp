@@ -1454,6 +1454,15 @@ GuiPredefinedInstanceLoadersPlugin
 			)\
 		)
 
+#define ADD_TEMPLATE_CONTROL_2(TYPENAME, CONSTRUCTOR, TEMPLATE, ARGUMENT)\
+	manager->SetLoader(\
+		new GuiTemplateControlInstanceLoader(\
+			L"presentation::controls::" L#TYPENAME,\
+			[](){return Value::From(CONSTRUCTOR());},\
+			[](Ptr<GuiTemplate::IFactory> factory){return Value::From(new TYPENAME(new TEMPLATE##_StyleProvider(factory), ARGUMENT)); }\
+			)\
+		)
+
 #define ADD_VIRTUAL_CONTROL(VIRTUALTYPENAME, TYPENAME, CONSTRUCTOR, TEMPLATE)\
 	manager->CreateVirtualType(\
 		description::GetTypeDescriptor<TYPENAME>()->GetTypeName(),\
@@ -1461,6 +1470,16 @@ GuiPredefinedInstanceLoadersPlugin
 			L"presentation::controls::Gui" L#VIRTUALTYPENAME,\
 			[](){return Value::From(CONSTRUCTOR());},\
 			[](Ptr<GuiTemplate::IFactory> factory){return Value::From(new TYPENAME(new TEMPLATE##_StyleProvider(factory))); }\
+			)\
+		)
+
+#define ADD_VIRTUAL_CONTROL_2(VIRTUALTYPENAME, TYPENAME, CONSTRUCTOR, TEMPLATE, ARGUMENT)\
+	manager->CreateVirtualType(\
+		description::GetTypeDescriptor<TYPENAME>()->GetTypeName(),\
+		new GuiTemplateControlInstanceLoader(\
+			L"presentation::controls::Gui" L#VIRTUALTYPENAME,\
+			[](){return Value::From(CONSTRUCTOR());},\
+			[](Ptr<GuiTemplate::IFactory> factory){return Value::From(new TYPENAME(new TEMPLATE##_StyleProvider(factory), ARGUMENT)); }\
 			)\
 		)
 
@@ -1509,19 +1528,19 @@ GuiPredefinedInstanceLoadersPlugin
 				ADD_VIRTUAL_TYPE_LOADER(GuiComboBoxListControl,						GuiComboBoxInstanceLoader);
 				ADD_VIRTUAL_TYPE_LOADER(tree::MemoryNodeProvider,					GuiTreeNodeInstanceLoader);
 
-				ADD_TEMPLATE_CONTROL	(GuiCustomControl,			g::NewCustomControl,	GuiControlTemplate);
-				ADD_TEMPLATE_CONTROL	(GuiLabel,					g::NewLabel,			GuiLabelTemplate);
-				ADD_TEMPLATE_CONTROL	(GuiButton,					g::NewButton,			GuiButtonTemplate);
-				ADD_TEMPLATE_CONTROL_X	(GuiScrollContainer,		g::NewScrollContainer,	GuiControlTemplate);
-				ADD_TEMPLATE_CONTROL	(GuiWindow,					g::NewWindow,			GuiWindowTemplate);
-				ADD_TEMPLATE_CONTROL_X	(GuiTextList,				g::NewTextList,			GuiControlTemplate);
-				ADD_TEMPLATE_CONTROL_X	(GuiDocumentViewer,			g::NewDocumentViewer,	GuiControlTemplate);
-				ADD_TEMPLATE_CONTROL	(GuiDocumentLabel,			g::NewDocumentLabel,	GuiControlTemplate);
-				ADD_TEMPLATE_CONTROL_X	(GuiMultilineTextBox,		g::NewMultilineTextBox,	GuiControlTemplate);
-				ADD_TEMPLATE_CONTROL_X	(GuiSinglelineTextBox,		g::NewTextBox,			GuiControlTemplate);
-				ADD_TEMPLATE_CONTROL_X	(GuiDatePicker,				g::NewDatePicker,		GuiControlTemplate);
-				ADD_TEMPLATE_CONTROL_X	(GuiDateComboBox,			g::NewDateComboBox,		GuiControlTemplate);
-				ADD_TEMPLATE_CONTROL_X	(GuiStringGrid,				g::NewStringGrid,		GuiControlTemplate);
+				ADD_TEMPLATE_CONTROL	(							GuiCustomControl,		g::NewCustomControl,			GuiControlTemplate);
+				ADD_TEMPLATE_CONTROL	(							GuiLabel,				g::NewLabel,					GuiLabelTemplate);
+				ADD_TEMPLATE_CONTROL	(							GuiButton,				g::NewButton,					GuiButtonTemplate);
+				ADD_TEMPLATE_CONTROL	(							GuiScrollContainer,		g::NewScrollContainer,			GuiScrollViewTemplate);
+				ADD_TEMPLATE_CONTROL	(							GuiWindow,				g::NewWindow,					GuiWindowTemplate);
+				ADD_TEMPLATE_CONTROL_2	(							GuiTextList,			g::NewTextList,					GuiScrollViewTemplate, GetCurrentTheme()->CreateTextListItemStyle());
+				ADD_TEMPLATE_CONTROL	(							GuiDocumentViewer,		g::NewDocumentViewer,			GuiScrollViewTemplate);
+				ADD_TEMPLATE_CONTROL	(							GuiDocumentLabel,		g::NewDocumentLabel,			GuiControlTemplate);
+				ADD_TEMPLATE_CONTROL	(							GuiMultilineTextBox,	g::NewMultilineTextBox,			GuiScrollViewTemplate);
+				ADD_TEMPLATE_CONTROL_X	(							GuiSinglelineTextBox,	g::NewTextBox,					GuiControlTemplate);
+				ADD_TEMPLATE_CONTROL_X	(							GuiDatePicker,			g::NewDatePicker,				GuiControlTemplate);
+				ADD_TEMPLATE_CONTROL_X	(							GuiDateComboBox,		g::NewDateComboBox,				GuiControlTemplate);
+				ADD_TEMPLATE_CONTROL_X	(							GuiStringGrid,			g::NewStringGrid,				GuiControlTemplate);
 
 				ADD_VIRTUAL_CONTROL		(GroupBox,					GuiControl,				g::NewGroupBox,					GuiControlTemplate);
 				ADD_VIRTUAL_CONTROL		(MenuSplitter,				GuiControl,				g::NewMenuSplitter,				GuiControlTemplate);
@@ -1537,8 +1556,8 @@ GuiPredefinedInstanceLoadersPlugin
 				ADD_VIRTUAL_CONTROL		(HTracker,					GuiScroll,				g::NewHTracker,					GuiScrollTemplate);
 				ADD_VIRTUAL_CONTROL		(VTracker,					GuiScroll,				g::NewVTracker,					GuiScrollTemplate);
 				ADD_VIRTUAL_CONTROL		(ProgressBar,				GuiScroll,				g::NewProgressBar,				GuiScrollTemplate);
-				ADD_VIRTUAL_CONTROL_X	(CheckTextList,				GuiTextList,			g::NewCheckTextList,			GuiControlTemplate);
-				ADD_VIRTUAL_CONTROL_X	(RadioTextList,				GuiTextList,			g::NewRadioTextList,			GuiControlTemplate);
+				ADD_VIRTUAL_CONTROL_2	(CheckTextList,				GuiTextList,			g::NewCheckTextList,			GuiScrollViewTemplate, GetCurrentTheme()->CreateCheckTextListItemStyle());
+				ADD_VIRTUAL_CONTROL_2	(RadioTextList,				GuiTextList,			g::NewRadioTextList,			GuiScrollViewTemplate, GetCurrentTheme()->CreateRadioTextListItemStyle());
 
 				auto bindableTextListName = description::GetTypeDescriptor<GuiBindableTextList>()->GetTypeName();
 				manager->CreateVirtualType(bindableTextListName, new GuiBindableTextListInstanceLoader(L"Check", [](){return GetCurrentTheme()->CreateCheckTextListItemStyle(); }));

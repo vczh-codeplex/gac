@@ -93,6 +93,13 @@ Type Declaration
 				GuiScrollTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_REFLECTION)
 			END_CLASS_MEMBER(GuiScrollTemplate)
 
+			BEGIN_CLASS_MEMBER(GuiScrollViewTemplate)
+				CLASS_MEMBER_BASE(GuiControlTemplate)
+				CLASS_MEMBER_CONSTRUCTOR(GuiScrollViewTemplate*(), NO_PARAMETER)
+
+				GuiScrollViewTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_REFLECTION)
+			END_CLASS_MEMBER(GuiScrollViewTemplate)
+
 			BEGIN_CLASS_MEMBER(GuiListItemTemplate)
 				CLASS_MEMBER_BASE(GuiTemplate)
 				CLASS_MEMBER_CONSTRUCTOR(GuiListItemTemplate*(), NO_PARAMETER)

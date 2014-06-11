@@ -164,6 +164,20 @@ Control Template
 				GuiScrollTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
 			};
 
+			class GuiScrollViewTemplate : public GuiControlTemplate, public Description<GuiScrollViewTemplate>
+			{
+			public:
+				GuiScrollViewTemplate();
+				~GuiScrollViewTemplate();
+
+#define GuiScrollViewTemplate_PROPERTIES(F)\
+				F(GuiScrollViewTemplate, WString, HScrollTemplate)\
+				F(GuiScrollViewTemplate, WString, VScrollTemplate)\
+				F(GuiScrollViewTemplate, vint, DefaultScrollSize)\
+
+				GuiScrollViewTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
+			};
+
 /***********************************************************************
 Item Template
 ***********************************************************************/
