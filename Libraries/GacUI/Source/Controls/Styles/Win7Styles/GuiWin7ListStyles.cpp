@@ -656,6 +656,11 @@ Win7TextListProvider
 				return 0;
 			}
 
+			Color Win7TextListProvider::GetTextColor()
+			{
+				return Win7GetSystemTextColor(true);
+			}
+
 /***********************************************************************
 Win7CheckTextListProvider
 ***********************************************************************/
