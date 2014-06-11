@@ -24,6 +24,13 @@ namespace vl
 	}\
 	return new TEMPLATE##_StyleProvider(this->VARIABLE);\
 
+#define GET_FACTORY_FROM_TEMPLATE_OPT(TEMPLATE, VARIABLE, PROPERTY)\
+	if (controlTemplate->Get##PROPERTY() == L"")\
+	{\
+		return 0;\
+	}\
+	GET_FACTORY_FROM_TEMPLATE(TEMPLATE, VARIABLE, PROPERTY)\
+
 /***********************************************************************
 GuiControlTemplate_StyleProvider
 ***********************************************************************/
@@ -351,7 +358,7 @@ GuiTextListTemplate_StyleProvider
 
 			controls::GuiSelectableButton::IStyleController* GuiTextListTemplate_StyleProvider::CreateBulletStyle()
 			{
-				GET_FACTORY_FROM_TEMPLATE(GuiSelectableButtonTemplate, bulletTemplateFactory, BulletTemplate);
+				GET_FACTORY_FROM_TEMPLATE_OPT(GuiSelectableButtonTemplate, bulletTemplateFactory, BulletTemplate);
 			}
 
 /***********************************************************************
