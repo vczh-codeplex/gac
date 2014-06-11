@@ -80,9 +80,9 @@ Scroll
 			class Win7ProgressBarStyle : public Object, public virtual controls::GuiScroll::IStyleController, public Description<Win7ProgressBarStyle>
 			{
 			protected:
-				vint											totalSize;
-				vint											pageSize;
-				vint											position;
+				vint										totalSize;
+				vint										pageSize;
+				vint										position;
 				compositions::GuiBoundsComposition*			boundsComposition;
 				compositions::GuiBoundsComposition*			containerComposition;
 				compositions::GuiPartialViewComposition*	progressComposition;
