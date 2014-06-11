@@ -31,19 +31,19 @@ Control Template
 				, public Description<GuiControlTemplate_StyleProvider>
 			{
 			protected:
-				GuiControlTemplate*									controlTemplate;
+				GuiControlTemplate*												controlTemplate;
 
 			public:
 				GuiControlTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
 				~GuiControlTemplate_StyleProvider();
 
-				compositions::GuiBoundsComposition*					GetBoundsComposition()override;
-				compositions::GuiGraphicsComposition*				GetContainerComposition()override;
-				void												AssociateStyleController(IStyleController* controller)override;
-				void												SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
-				void												SetText(const WString& value)override;
-				void												SetFont(const FontProperties& value)override;
-				void												SetVisuallyEnabled(bool value)override;
+				compositions::GuiBoundsComposition*								GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*							GetContainerComposition()override;
+				void															AssociateStyleController(IStyleController* controller)override;
+				void															SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+				void															SetText(const WString& value)override;
+				void															SetFont(const FontProperties& value)override;
+				void															SetVisuallyEnabled(bool value)override;
 			};
 
 			class GuiLabelTemplate_StyleProvider
@@ -52,14 +52,14 @@ Control Template
 				, public Description<GuiLabelTemplate_StyleProvider>
 			{
 			protected:
-				GuiLabelTemplate*									controlTemplate;
+				GuiLabelTemplate*												controlTemplate;
 
 			public:
 				GuiLabelTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
 				~GuiLabelTemplate_StyleProvider();
 
-				Color												GetDefaultTextColor()override;
-				void												SetTextColor(Color value)override;
+				Color															GetDefaultTextColor()override;
+				void															SetTextColor(Color value)override;
 			};
 
 			class GuiWindowTemplate_StyleProvider
@@ -78,13 +78,13 @@ Control Template
 				, public Description<GuiButtonTemplate_StyleProvider>
 			{
 			protected:
-				GuiButtonTemplate*									controlTemplate;
+				GuiButtonTemplate*												controlTemplate;
 
 			public:
 				GuiButtonTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
 				~GuiButtonTemplate_StyleProvider();
 
-				void												Transfer(controls::GuiButton::ControlState value)override;
+				void															Transfer(controls::GuiButton::ControlState value)override;
 			};
 
 			class GuiSelectableButtonTemplate_StyleProvider
@@ -93,13 +93,13 @@ Control Template
 				, public Description<GuiSelectableButtonTemplate_StyleProvider>
 			{
 			protected:
-				GuiSelectableButtonTemplate*						controlTemplate;
+				GuiSelectableButtonTemplate*									controlTemplate;
 
 			public:
 				GuiSelectableButtonTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
 				~GuiSelectableButtonTemplate_StyleProvider();
 
-				void												SetSelected(bool value)override;
+				void															SetSelected(bool value)override;
 			};
 
 			class GuiToolstripButtonTemplate_StyleProvider
@@ -108,20 +108,20 @@ Control Template
 				, public Description<GuiToolstripButtonTemplate_StyleProvider>
 			{
 			protected:
-				Ptr<GuiTemplate::IFactory>									subMenuTemplateFactory;
-				GuiToolstripButtonTemplate*									controlTemplate;
+				Ptr<GuiTemplate::IFactory>										subMenuTemplateFactory;
+				GuiToolstripButtonTemplate*										controlTemplate;
 
 			public:
 				GuiToolstripButtonTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
 				~GuiToolstripButtonTemplate_StyleProvider();
 				
-				controls::GuiMenu::IStyleController*						CreateSubMenuStyleController()override;
-				void														SetSubMenuExisting(bool value)override;
-				void														SetSubMenuOpening(bool value)override;
-				controls::GuiButton*										GetSubMenuHost()override;
-				void														SetImage(Ptr<GuiImageData> value)override;
-				void														SetShortcutText(const WString& value)override;
-				compositions::GuiSubComponentMeasurer::IMeasuringSource*	GetMeasuringSource()override;
+				controls::GuiMenu::IStyleController*							CreateSubMenuStyleController()override;
+				void															SetSubMenuExisting(bool value)override;
+				void															SetSubMenuOpening(bool value)override;
+				controls::GuiButton*											GetSubMenuHost()override;
+				void															SetImage(Ptr<GuiImageData> value)override;
+				void															SetShortcutText(const WString& value)override;
+				compositions::GuiSubComponentMeasurer::IMeasuringSource*		GetMeasuringSource()override;
 			};
 
 			class GuiScrollTemplate_StyleProvider
@@ -130,16 +130,16 @@ Control Template
 				, public Description<GuiScrollTemplate_StyleProvider>
 			{
 			protected:
-				GuiScrollTemplate*											controlTemplate;
+				GuiScrollTemplate*												controlTemplate;
 
 			public:
 				GuiScrollTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
 				~GuiScrollTemplate_StyleProvider();
 
-				void														SetCommandExecutor(controls::GuiScroll::ICommandExecutor* value)override;
-				void														SetTotalSize(vint value)override;
-				void														SetPageSize(vint value)override;
-				void														SetPosition(vint value)override;
+				void															SetCommandExecutor(controls::GuiScroll::ICommandExecutor* value)override;
+				void															SetTotalSize(vint value)override;
+				void															SetPageSize(vint value)override;
+				void															SetPosition(vint value)override;
 			};
 
 			class GuiScrollViewTemplate_StyleProvider
@@ -148,18 +148,18 @@ Control Template
 				, public Description<GuiScrollViewTemplate_StyleProvider>
 			{
 			protected:
-				Ptr<GuiTemplate::IFactory>									hScrollTemplateFactory;
-				Ptr<GuiTemplate::IFactory>									vScrollTemplateFactory;
-				GuiScrollViewTemplate*										controlTemplate;
+				Ptr<GuiTemplate::IFactory>										hScrollTemplateFactory;
+				Ptr<GuiTemplate::IFactory>										vScrollTemplateFactory;
+				GuiScrollViewTemplate*											controlTemplate;
 				
 			public:
 				GuiScrollViewTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
 				~GuiScrollViewTemplate_StyleProvider();
 				
-				controls::GuiScroll::IStyleController*						CreateHorizontalScrollStyle()override;
-				controls::GuiScroll::IStyleController*						CreateVerticalScrollStyle()override;
-				vint														GetDefaultScrollSize()override;
-				compositions::GuiGraphicsComposition*						InstallBackground(compositions::GuiBoundsComposition* boundsComposition)override;
+				controls::GuiScroll::IStyleController*							CreateHorizontalScrollStyle()override;
+				controls::GuiScroll::IStyleController*							CreateVerticalScrollStyle()override;
+				vint															GetDefaultScrollSize()override;
+				compositions::GuiGraphicsComposition*							InstallBackground(compositions::GuiBoundsComposition* boundsComposition)override;
 			};
 
 			class GuiTextListTemplate_StyleProvider
@@ -168,16 +168,32 @@ Control Template
 				, public Description<GuiTextListTemplate_StyleProvider>
 			{
 			protected:
-				Ptr<GuiTemplate::IFactory>									backgroundTemplateFactory;
-				Ptr<GuiTemplate::IFactory>									bulletTemplateFactory;
-				GuiTextListTemplate*										controlTemplate;
+				Ptr<GuiTemplate::IFactory>										backgroundTemplateFactory;
+				Ptr<GuiTemplate::IFactory>										bulletTemplateFactory;
+				GuiTextListTemplate*											controlTemplate;
 				
+				class ItemStyleProvider
+					: public Object
+					, public virtual controls::list::TextItemStyleProvider::ITextItemStyleProvider
+				{
+				protected:
+					GuiTextListTemplate_StyleProvider*							styleProvider;
+
+				public:
+					ItemStyleProvider(GuiTextListTemplate_StyleProvider* _styleProvider);
+					~ItemStyleProvider();
+
+					controls::GuiSelectableButton::IStyleController*			CreateBackgroundStyleController()override;
+					controls::GuiSelectableButton::IStyleController*			CreateBulletStyleController()override;
+					Color														GetTextColor()override;
+				};
 			public:
 				GuiTextListTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
 				~GuiTextListTemplate_StyleProvider();
 				
-				controls::GuiSelectableButton::IStyleController*			CreateBackgroundStyle();
-				controls::GuiSelectableButton::IStyleController*			CreateBulletStyle();
+				controls::list::TextItemStyleProvider::ITextItemStyleProvider*	CreateArgument();
+				controls::GuiSelectableButton::IStyleController*				CreateBackgroundStyle();
+				controls::GuiSelectableButton::IStyleController*				CreateBulletStyle();
 			};
 
 /***********************************************************************

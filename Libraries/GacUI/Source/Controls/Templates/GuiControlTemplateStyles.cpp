@@ -293,6 +293,34 @@ GuiScrollViewTemplate_StyleProvider
 			}
 
 /***********************************************************************
+GuiTextListTemplate_StyleProvider::ItemStyleProvider
+***********************************************************************/
+
+			GuiTextListTemplate_StyleProvider::ItemStyleProvider::ItemStyleProvider(GuiTextListTemplate_StyleProvider* _styleProvider)
+				:styleProvider(_styleProvider)
+			{
+			}
+
+			GuiTextListTemplate_StyleProvider::ItemStyleProvider::~ItemStyleProvider()
+			{
+			}
+
+			controls::GuiSelectableButton::IStyleController* GuiTextListTemplate_StyleProvider::ItemStyleProvider::CreateBackgroundStyleController()
+			{
+				return styleProvider->CreateBackgroundStyle();
+			}
+
+			controls::GuiSelectableButton::IStyleController* GuiTextListTemplate_StyleProvider::ItemStyleProvider::CreateBulletStyleController()
+			{
+				return styleProvider->CreateBulletStyle();
+			}
+
+			Color GuiTextListTemplate_StyleProvider::ItemStyleProvider::GetTextColor()
+			{
+				return styleProvider->controlTemplate->GetTextColor();
+			}
+
+/***********************************************************************
 GuiTextListTemplate_StyleProvider
 ***********************************************************************/
 
@@ -309,6 +337,11 @@ GuiTextListTemplate_StyleProvider
 
 			GuiTextListTemplate_StyleProvider::~GuiTextListTemplate_StyleProvider()
 			{
+			}
+
+			controls::list::TextItemStyleProvider::ITextItemStyleProvider* GuiTextListTemplate_StyleProvider::CreateArgument()
+			{
+				return new ItemStyleProvider(this);
 			}
 
 			controls::GuiSelectableButton::IStyleController* GuiTextListTemplate_StyleProvider::CreateBackgroundStyle()
