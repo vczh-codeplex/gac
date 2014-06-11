@@ -212,6 +212,9 @@
     <Xml Include="Resources\XmlWindowResourceDataBinding.xml">
       <Filter>Resource Files</Filter>
     </Xml>
+    <Xml Include="Resources\XmlWindowResourceControlTemplates.xml">
+      <Filter>Resource Files</Filter>
+    </Xml>
   </ItemGroup>
   <ItemGroup>
     <Font Include="Resources\aldhabi.ttf">
