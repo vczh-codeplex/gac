@@ -1454,12 +1454,17 @@ GuiPredefinedInstanceLoadersPlugin
 			)\
 		)
 
-#define ADD_TEMPLATE_CONTROL_2(TYPENAME, CONSTRUCTOR, TEMPLATE, ARGUMENT)\
+#define ADD_TEMPLATE_CONTROL_2(TYPENAME, CONSTRUCTOR, TEMPLATE)\
 	manager->SetLoader(\
 		new GuiTemplateControlInstanceLoader(\
 			L"presentation::controls::" L#TYPENAME,\
 			[](){return Value::From(CONSTRUCTOR());},\
-			[](Ptr<GuiTemplate::IFactory> factory){return Value::From(new TYPENAME(new TEMPLATE##_StyleProvider(factory), ARGUMENT)); }\
+			[](Ptr<GuiTemplate::IFactory> factory)\
+			{\
+				auto style = new TEMPLATE##_StyleProvider(factory);\
+				auto argument = style->CreateArgument();\
+				return Value::From(new TYPENAME(style, argument));\
+			}\
 			)\
 		)
 
@@ -1473,13 +1478,18 @@ GuiPredefinedInstanceLoadersPlugin
 			)\
 		)
 
-#define ADD_VIRTUAL_CONTROL_2(VIRTUALTYPENAME, TYPENAME, CONSTRUCTOR, TEMPLATE, ARGUMENT)\
+#define ADD_VIRTUAL_CONTROL_2(VIRTUALTYPENAME, TYPENAME, CONSTRUCTOR, TEMPLATE)\
 	manager->CreateVirtualType(\
 		description::GetTypeDescriptor<TYPENAME>()->GetTypeName(),\
 		new GuiTemplateControlInstanceLoader(\
 			L"presentation::controls::Gui" L#VIRTUALTYPENAME,\
 			[](){return Value::From(CONSTRUCTOR());},\
-			[](Ptr<GuiTemplate::IFactory> factory){return Value::From(new TYPENAME(new TEMPLATE##_StyleProvider(factory), ARGUMENT)); }\
+			[](Ptr<GuiTemplate::IFactory> factory)\
+			{\
+				auto style = new TEMPLATE##_StyleProvider(factory);\
+				auto argument = style->CreateArgument();\
+				return Value::From(new TYPENAME(style, argument));\
+			}\
 			)\
 		)
 
@@ -1487,16 +1497,6 @@ GuiPredefinedInstanceLoadersPlugin
 	manager->SetLoader(\
 		new GuiTemplateControlInstanceLoader(\
 			L"presentation::controls::" L#TYPENAME,\
-			[](){return Value::From(CONSTRUCTOR());},\
-			[](Ptr<GuiTemplate::IFactory> factory)->Value{throw 0; }\
-			)\
-		)
-
-#define ADD_VIRTUAL_CONTROL_X(VIRTUALTYPENAME, TYPENAME, CONSTRUCTOR, TEMPLATE)\
-	manager->CreateVirtualType(\
-		description::GetTypeDescriptor<TYPENAME>()->GetTypeName(),\
-		new GuiTemplateControlInstanceLoader(\
-			L"presentation::controls::Gui" L#VIRTUALTYPENAME,\
 			[](){return Value::From(CONSTRUCTOR());},\
 			[](Ptr<GuiTemplate::IFactory> factory)->Value{throw 0; }\
 			)\
@@ -1533,7 +1533,7 @@ GuiPredefinedInstanceLoadersPlugin
 				ADD_TEMPLATE_CONTROL	(							GuiButton,				g::NewButton,					GuiButtonTemplate);
 				ADD_TEMPLATE_CONTROL	(							GuiScrollContainer,		g::NewScrollContainer,			GuiScrollViewTemplate);
 				ADD_TEMPLATE_CONTROL	(							GuiWindow,				g::NewWindow,					GuiWindowTemplate);
-				ADD_TEMPLATE_CONTROL_2	(							GuiTextList,			g::NewTextList,					GuiTextListTemplate, GetCurrentTheme()->CreateTextListItemStyle());
+				ADD_TEMPLATE_CONTROL_2	(							GuiTextList,			g::NewTextList,					GuiTextListTemplate);
 				ADD_TEMPLATE_CONTROL	(							GuiDocumentViewer,		g::NewDocumentViewer,			GuiScrollViewTemplate);
 				ADD_TEMPLATE_CONTROL	(							GuiDocumentLabel,		g::NewDocumentLabel,			GuiControlTemplate);
 				ADD_TEMPLATE_CONTROL	(							GuiMultilineTextBox,	g::NewMultilineTextBox,			GuiScrollViewTemplate);
@@ -1556,8 +1556,8 @@ GuiPredefinedInstanceLoadersPlugin
 				ADD_VIRTUAL_CONTROL		(HTracker,					GuiScroll,				g::NewHTracker,					GuiScrollTemplate);
 				ADD_VIRTUAL_CONTROL		(VTracker,					GuiScroll,				g::NewVTracker,					GuiScrollTemplate);
 				ADD_VIRTUAL_CONTROL		(ProgressBar,				GuiScroll,				g::NewProgressBar,				GuiScrollTemplate);
-				ADD_VIRTUAL_CONTROL_2	(CheckTextList,				GuiTextList,			g::NewCheckTextList,			GuiTextListTemplate, GetCurrentTheme()->CreateCheckTextListItemStyle());
-				ADD_VIRTUAL_CONTROL_2	(RadioTextList,				GuiTextList,			g::NewRadioTextList,			GuiTextListTemplate, GetCurrentTheme()->CreateRadioTextListItemStyle());
+				ADD_VIRTUAL_CONTROL_2	(CheckTextList,				GuiTextList,			g::NewCheckTextList,			GuiTextListTemplate);
+				ADD_VIRTUAL_CONTROL_2	(RadioTextList,				GuiTextList,			g::NewRadioTextList,			GuiTextListTemplate);
 
 				auto bindableTextListName = description::GetTypeDescriptor<GuiBindableTextList>()->GetTypeName();
 				manager->CreateVirtualType(bindableTextListName, new GuiBindableTextListInstanceLoader(L"Check", [](){return GetCurrentTheme()->CreateCheckTextListItemStyle(); }));
