@@ -116,6 +116,7 @@ namespace demos
 #define DEMO_TEMPLATES(F)\
 	F(GroupBoxTemplate, GuiControlTemplate)\
 	F(ToolstripTemplate, GuiControlTemplate)\
+	F(ToolstripMenuTemplate, GuiWindowTemplate)\
 	F(ToolstripSplitterTemplate, GuiControlTemplate)\
 	F(MenuSplitterTemplate, GuiControlTemplate)\
 	F(ButtonTemplate, GuiButtonTemplate)\
@@ -136,6 +137,7 @@ namespace demos
 	F(CheckTextListTemplate, GuiTextListTemplate)\
 	F(RadioTextListTemplate, GuiTextListTemplate)\
 	F(ToolstripButtonTemplate, GuiToolstripButtonTemplate)\
+	F(ToolstripSplitButtonTemplate, GuiToolstripButtonTemplate)\
 
 	DEMO_TEMPLATES(CONTROL_TEMPLATE_DECL)
 
@@ -288,6 +290,7 @@ namespace vl
 			F(demos::MainWindow)\
 			F(demos::GroupBoxTemplate)\
 			F(demos::ToolstripTemplate)\
+			F(demos::ToolstripMenuTemplate)\
 			F(demos::ToolstripSplitterTemplate)\
 			F(demos::MenuSplitterTemplate)\
 			F(demos::ButtonTemplate)\
@@ -310,6 +313,7 @@ namespace vl
 			F(demos::CheckTextListTemplate)\
 			F(demos::RadioTextListTemplate)\
 			F(demos::ToolstripButtonTemplate)\
+			F(demos::ToolstripSplitButtonTemplate)\
 
 			DEMO_TYPES(DECL_TYPE_INFO)
 			DEMO_TYPES(IMPL_TYPE_INFO)
