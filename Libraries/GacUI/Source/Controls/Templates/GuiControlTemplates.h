@@ -106,6 +106,12 @@ Control Template
 			public:
 				GuiSinglelineTextBoxTemplate();
 				~GuiSinglelineTextBoxTemplate();
+
+#define GuiSinglelineTextBoxTemplate_PROPERTIES(F)\
+				F(GuiSinglelineTextBoxTemplate, elements::text::ColorEntry, TextColor)\
+				F(GuiSinglelineTextBoxTemplate, Color, CaretColor)\
+
+				GuiSinglelineTextBoxTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
 			};
 
 			class GuiWindowTemplate : public GuiControlTemplate, public Description<GuiWindowTemplate>
@@ -183,6 +189,19 @@ Control Template
 				F(GuiScrollViewTemplate, vint, DefaultScrollSize)\
 
 				GuiScrollViewTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
+			};
+
+			class GuiMultilineTextBoxTemplate : public GuiScrollViewTemplate, public Description<GuiMultilineTextBoxTemplate>
+			{
+			public:
+				GuiMultilineTextBoxTemplate();
+				~GuiMultilineTextBoxTemplate();
+
+#define GuiMultilineTextBoxTemplate_PROPERTIES(F)\
+				F(GuiMultilineTextBoxTemplate, elements::text::ColorEntry, TextColor)\
+				F(GuiMultilineTextBoxTemplate, Color, CaretColor)\
+
+				GuiMultilineTextBoxTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
 			};
 
 			class GuiTextListTemplate : public GuiScrollViewTemplate, public Description<GuiTextListTemplate>

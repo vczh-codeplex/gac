@@ -7,6 +7,7 @@ namespace vl
 		namespace templates
 		{
 			using namespace compositions;
+			using namespace elements;
 			using namespace controls;
 			using namespace reflection::description;
 			using namespace collections;
@@ -126,6 +127,19 @@ GuiSinglelineTextBoxTemplate_StyleProvider
 
 			GuiSinglelineTextBoxTemplate_StyleProvider::~GuiSinglelineTextBoxTemplate_StyleProvider()
 			{
+			}
+			
+			void GuiSinglelineTextBoxTemplate_StyleProvider::AssociateStyleController(IStyleController* controller)
+			{
+				GuiControlTemplate_StyleProvider::AssociateStyleController(controller);
+				if (auto style = dynamic_cast<GuiSinglelineTextBox::StyleController*>(controller))
+				{
+					auto element = style->GetTextElement();
+					Array<text::ColorEntry> colors(1);
+					colors[0] = controlTemplate->GetTextColor();
+					element->SetColors(colors);
+					element->SetCaretColor(controlTemplate->GetCaretColor());
+				}
 			}
 
 			compositions::GuiGraphicsComposition* GuiSinglelineTextBoxTemplate_StyleProvider::InstallBackground(compositions::GuiBoundsComposition* boundsComposition)
@@ -321,6 +335,36 @@ GuiScrollViewTemplate_StyleProvider
 				controlTemplate->SetAlignmentToParent(Margin(0, 0, 0, 0));
 				boundsComposition->AddChild(controlTemplate);
 				return controlTemplate->GetContainerComposition();
+			}
+
+/***********************************************************************
+GuiSinglelineTextBoxTemplate_StyleProvider
+***********************************************************************/
+
+			GuiMultilineTextBoxTemplate_StyleProvider::GuiMultilineTextBoxTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory)
+				:GuiScrollViewTemplate_StyleProvider(factory)
+			{
+				if (!(controlTemplate = dynamic_cast<GuiMultilineTextBoxTemplate*>(GetBoundsComposition())))
+				{
+					CHECK_FAIL(L"GuiMultilineTextBoxTemplate_StyleProvider::GuiMultilineTextBoxTemplate_StyleProvider()#An instance of GuiMultilineTextBoxTemplate is expected.");
+				}
+			}
+
+			GuiMultilineTextBoxTemplate_StyleProvider::~GuiMultilineTextBoxTemplate_StyleProvider()
+			{
+			}
+			
+			void GuiMultilineTextBoxTemplate_StyleProvider::AssociateStyleController(IStyleController* controller)
+			{
+				GuiScrollViewTemplate_StyleProvider::AssociateStyleController(controller);
+				if (auto style = dynamic_cast<GuiSinglelineTextBox::StyleController*>(controller))
+				{
+					auto element = style->GetTextElement();
+					Array<text::ColorEntry> colors(1);
+					colors[0] = controlTemplate->GetTextColor();
+					element->SetColors(colors);
+					element->SetCaretColor(controlTemplate->GetCaretColor());
+				}
 			}
 
 /***********************************************************************

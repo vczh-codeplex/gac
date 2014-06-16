@@ -73,7 +73,8 @@ Control Template
 			public:
 				GuiSinglelineTextBoxTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
 				~GuiSinglelineTextBoxTemplate_StyleProvider();
-
+				
+				void															AssociateStyleController(IStyleController* controller)override;
 				compositions::GuiGraphicsComposition*							InstallBackground(compositions::GuiBoundsComposition* boundsComposition)override;
 			};
 
@@ -175,6 +176,21 @@ Control Template
 				controls::GuiScroll::IStyleController*							CreateVerticalScrollStyle()override;
 				vint															GetDefaultScrollSize()override;
 				compositions::GuiGraphicsComposition*							InstallBackground(compositions::GuiBoundsComposition* boundsComposition)override;
+			};
+
+			class GuiMultilineTextBoxTemplate_StyleProvider
+				: public GuiScrollViewTemplate_StyleProvider
+				, public virtual controls::GuiSinglelineTextBox::IStyleProvider
+				, public Description<GuiMultilineTextBoxTemplate_StyleProvider>
+			{
+			protected:
+				GuiMultilineTextBoxTemplate*									controlTemplate;
+				
+			public:
+				GuiMultilineTextBoxTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
+				~GuiMultilineTextBoxTemplate_StyleProvider();
+				
+				void															AssociateStyleController(IStyleController* controller)override;
 			};
 
 			class GuiTextListTemplate_StyleProvider
