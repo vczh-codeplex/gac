@@ -217,7 +217,7 @@ GuiToolstripButtonTemplate_StyleProvider
 			{
 				if (!(controlTemplate = dynamic_cast<GuiToolstripButtonTemplate*>(GetBoundsComposition())))
 				{
-					CHECK_FAIL(L"GuiButtonTemplate_StyleProvider::GuiButtonTemplate_StyleProvider()#An instance of GuiSelectableButtonTemplate is expected.");
+					CHECK_FAIL(L"GuiButtonTemplate_StyleProvider::GuiButtonTemplate_StyleProvider()#An instance of GuiToolstripButtonTemplate is expected.");
 				}
 				INITIALIZE_FACTORY_FROM_TEMPLATE(subMenuTemplateFactory, SubMenuTemplate);
 			}
@@ -259,6 +259,33 @@ GuiToolstripButtonTemplate_StyleProvider
 			compositions::GuiSubComponentMeasurer::IMeasuringSource* GuiToolstripButtonTemplate_StyleProvider::GetMeasuringSource()
 			{
 				return 0;
+			}
+
+/***********************************************************************
+GuiComboBoxTemplate_StyleProvider
+***********************************************************************/
+
+			GuiComboBoxTemplate_StyleProvider::GuiComboBoxTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory)
+				:GuiToolstripButtonTemplate_StyleProvider(factory)
+			{
+				if (!(controlTemplate = dynamic_cast<GuiComboBoxTemplate*>(GetBoundsComposition())))
+				{
+					CHECK_FAIL(L"GuiComboBoxTemplate_StyleProvider::GuiComboBoxTemplate_StyleProvider()#An instance of GuiComboBoxTemplate is expected.");
+				}
+				INITIALIZE_FACTORY_FROM_TEMPLATE(subMenuTemplateFactory, SubMenuTemplate);
+			}
+
+			GuiComboBoxTemplate_StyleProvider::~GuiComboBoxTemplate_StyleProvider()
+			{
+			}
+
+			void GuiComboBoxTemplate_StyleProvider::SetCommandExecutor(controls::GuiComboBoxBase::ICommandExecutor* value)
+			{
+				controlTemplate->SetCommands(value);
+			}
+
+			void GuiComboBoxTemplate_StyleProvider::OnItemSelected()
+			{
 			}
 
 /***********************************************************************

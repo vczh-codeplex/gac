@@ -98,6 +98,27 @@ Type Declaration
 				GuiToolstripButtonTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_REFLECTION)
 			END_CLASS_MEMBER(GuiToolstripButtonTemplate)
 
+			BEGIN_CLASS_MEMBER(GuiComboBoxTemplate)
+				CLASS_MEMBER_BASE(GuiToolstripButtonTemplate)
+				CLASS_MEMBER_CONSTRUCTOR(GuiComboBoxTemplate*(), NO_PARAMETER)
+
+				GuiComboBoxTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_REFLECTION)
+			END_CLASS_MEMBER(GuiComboBoxTemplate)
+
+			BEGIN_CLASS_MEMBER(GuiDatePickerTemplate)
+				CLASS_MEMBER_BASE(GuiControlTemplate)
+				CLASS_MEMBER_CONSTRUCTOR(GuiDatePickerTemplate*(), NO_PARAMETER)
+
+				GuiDatePickerTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_REFLECTION)
+			END_CLASS_MEMBER(GuiDatePickerTemplate)
+
+			BEGIN_CLASS_MEMBER(GuiDateComboBoxTemplate)
+				CLASS_MEMBER_BASE(GuiComboBoxTemplate)
+				CLASS_MEMBER_CONSTRUCTOR(GuiDateComboBoxTemplate*(), NO_PARAMETER)
+
+				GuiDateComboBoxTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_REFLECTION)
+			END_CLASS_MEMBER(GuiDateComboBoxTemplate)
+
 			BEGIN_CLASS_MEMBER(GuiScrollTemplate)
 				CLASS_MEMBER_BASE(GuiControlTemplate)
 				CLASS_MEMBER_CONSTRUCTOR(GuiScrollTemplate*(), NO_PARAMETER)

@@ -141,6 +141,22 @@ Control Template
 				compositions::GuiSubComponentMeasurer::IMeasuringSource*		GetMeasuringSource()override;
 			};
 
+			class GuiComboBoxTemplate_StyleProvider
+				: public GuiToolstripButtonTemplate_StyleProvider
+				, public virtual controls::GuiComboBoxBase::IStyleController
+				, public Description<GuiComboBoxTemplate_StyleProvider>
+			{
+			protected:
+				GuiComboBoxTemplate*											controlTemplate;
+
+			public:
+				GuiComboBoxTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
+				~GuiComboBoxTemplate_StyleProvider();
+				
+				void															SetCommandExecutor(controls::GuiComboBoxBase::ICommandExecutor* value)override;
+				void															OnItemSelected()override;
+			};
+
 			class GuiScrollTemplate_StyleProvider
 				: public GuiControlTemplate_StyleProvider
 				, public virtual controls::GuiScroll::IStyleController
