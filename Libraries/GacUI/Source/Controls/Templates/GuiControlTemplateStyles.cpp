@@ -62,7 +62,7 @@ GuiControlTemplate_StyleProvider
 				return controlTemplate->GetContainerComposition();
 			}
 
-			void GuiControlTemplate_StyleProvider::AssociateStyleController(IStyleController* controller)
+			void GuiControlTemplate_StyleProvider::AssociateStyleController(controls::GuiControl::IStyleController* controller)
 			{
 				associatedStyleController = controller;
 			}
