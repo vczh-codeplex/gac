@@ -488,7 +488,16 @@ GuiToolstripButtonInstanceLoader
 			{
 				if (typeInfo.typeName == GetTypeName())
 				{
-					return Value::From(g::NewToolBarButton());
+					vint indexControlTemplate = constructorArguments.Keys().IndexOf(L"ControlTemplate");
+					if (indexControlTemplate == -1)
+					{
+						return Value::From(g::NewToolBarButton());
+					}
+					else
+					{
+						auto factory = CreateTemplateFactory(constructorArguments.GetByIndex(indexControlTemplate)[0].GetText());
+						return Value::From(new GuiToolstripButton(new GuiToolstripButtonTemplate_StyleProvider(factory)));
+					}
 				}
 				return Value();
 			}
@@ -498,9 +507,20 @@ GuiToolstripButtonInstanceLoader
 				propertyNames.Add(L"SubMenu");
 			}
 
+			void GetConstructorParameters(const TypeInfo& typeInfo, collections::List<WString>& propertyNames)override
+			{
+				propertyNames.Add(L"ControlTemplate");
+			}
+
 			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
 			{
-				if (propertyInfo.propertyName == L"SubMenu")
+				if (propertyInfo.propertyName == L"ControlTemplate")
+				{
+					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<WString>());
+					info->constructorParameter = true;
+					return info;
+				}
+				else if (propertyInfo.propertyName == L"SubMenu")
 				{
 					return GuiInstancePropertyInfo::Set(description::GetTypeDescriptor<GuiToolstripMenu>());
 				}
