@@ -1034,10 +1034,27 @@ GuiComboBoxInstanceLoader
 				if (typeInfo.typeName == GetTypeName())
 				{
 					vint indexListControl = constructorArguments.Keys().IndexOf(L"ListControl");
+					vint indexControlTemplate = constructorArguments.Keys().IndexOf(L"ControlTemplate");
 					if (indexListControl != -1)
 					{
+						Ptr<GuiTemplate::IFactory> factory;
+						if (indexControlTemplate != -1)
+						{
+							factory = CreateTemplateFactory(constructorArguments.GetByIndex(indexControlTemplate)[0].GetText());
+						}
+
+						GuiComboBoxBase::IStyleController* styleController = 0;
+						if (factory)
+						{
+							styleController = new GuiComboBoxTemplate_StyleProvider(factory);
+						}
+						else
+						{
+							styleController = GetCurrentTheme()->CreateComboBoxStyle();
+						}
+
 						auto listControl = UnboxValue<GuiSelectableListControl*>(constructorArguments.GetByIndex(indexListControl)[0]);
-						auto comboBox = new GuiComboBoxListControl(GetCurrentTheme()->CreateComboBoxStyle(), listControl);
+						auto comboBox = new GuiComboBoxListControl(styleController, listControl);
 						return Value::From(comboBox);
 					}
 				}
@@ -1056,17 +1073,24 @@ GuiComboBoxInstanceLoader
 			{
 				if (typeInfo.typeName == GetTypeName())
 				{
+					propertyNames.Add(L"ControlTemplate");
 					propertyNames.Add(L"ListControl");
 				}
 			}
 
 			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
 			{
-				 if (propertyInfo.propertyName == L"ListControl")
+				if (propertyInfo.propertyName == L"ListControl")
 				{
 					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<GuiSelectableListControl>());
 					info->constructorParameter = true;
 					info->required = true;
+					return info;
+				}
+				else if (propertyInfo.propertyName == L"ControlTemplate")
+				{
+					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<WString>());
+					info->constructorParameter = true;
 					return info;
 				}
 				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
@@ -1579,7 +1603,7 @@ GuiPredefinedInstanceLoadersPlugin
 
 				manager->SetLoader(new GuiTextItemInstanceLoader);
 				
-				ADD_VIRTUAL_TYPE_LOADER(GuiComboBoxListControl,						GuiComboBoxInstanceLoader);
+				ADD_VIRTUAL_TYPE_LOADER(GuiComboBoxListControl,						GuiComboBoxInstanceLoader);				// ControlTemplate
 				ADD_VIRTUAL_TYPE_LOADER(tree::MemoryNodeProvider,					GuiTreeNodeInstanceLoader);
 
 				ADD_TEMPLATE_CONTROL	(							GuiCustomControl,		g::NewCustomControl,			GuiControlTemplate);
@@ -1592,8 +1616,8 @@ GuiPredefinedInstanceLoadersPlugin
 				ADD_TEMPLATE_CONTROL	(							GuiDocumentLabel,		g::NewDocumentLabel,			GuiControlTemplate);
 				ADD_TEMPLATE_CONTROL	(							GuiMultilineTextBox,	g::NewMultilineTextBox,			GuiMultilineTextBoxTemplate);
 				ADD_TEMPLATE_CONTROL	(							GuiSinglelineTextBox,	g::NewTextBox,					GuiSinglelineTextBoxTemplate);
-				ADD_TEMPLATE_CONTROL_X	(							GuiDatePicker,			g::NewDatePicker,				GuiControlTemplate);
-				ADD_TEMPLATE_CONTROL_X	(							GuiDateComboBox,		g::NewDateComboBox,				GuiControlTemplate);
+				ADD_TEMPLATE_CONTROL	(							GuiDatePicker,			g::NewDatePicker,				GuiDatePickerTemplate);
+				ADD_TEMPLATE_CONTROL_2	(							GuiDateComboBox,		g::NewDateComboBox,				GuiDateComboBoxTemplate);
 				ADD_TEMPLATE_CONTROL_X	(							GuiStringGrid,			g::NewStringGrid,				GuiControlTemplate);
 
 				ADD_VIRTUAL_CONTROL		(GroupBox,					GuiControl,				g::NewGroupBox,					GuiControlTemplate);

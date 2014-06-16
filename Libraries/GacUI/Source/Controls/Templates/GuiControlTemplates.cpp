@@ -202,6 +202,52 @@ GuiToolstripButtonTemplate
 			}
 
 /***********************************************************************
+GuiComboBoxTemplate
+***********************************************************************/
+
+			GuiComboBoxTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_IMPL)
+
+			GuiComboBoxTemplate::GuiComboBoxTemplate()
+				:Commands_(0)
+			{
+				GuiComboBoxTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_EVENT_INIT)
+			}
+
+			GuiComboBoxTemplate::~GuiComboBoxTemplate()
+			{
+			}
+
+/***********************************************************************
+GuiDatePickerTemplate
+***********************************************************************/
+
+			GuiDatePickerTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_IMPL)
+
+			GuiDatePickerTemplate::GuiDatePickerTemplate()
+			{
+				GuiDatePickerTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_EVENT_INIT)
+			}
+
+			GuiDatePickerTemplate::~GuiDatePickerTemplate()
+			{
+			}
+
+/***********************************************************************
+GuiDateComboBoxTemplate
+***********************************************************************/
+
+			GuiDateComboBoxTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_IMPL)
+
+			GuiDateComboBoxTemplate::GuiDateComboBoxTemplate()
+			{
+				GuiDateComboBoxTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_EVENT_INIT)
+			}
+
+			GuiDateComboBoxTemplate::~GuiDateComboBoxTemplate()
+			{
+			}
+
+/***********************************************************************
 GuiScrollTemplate
 ***********************************************************************/
 
