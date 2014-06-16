@@ -282,9 +282,37 @@ GuiToolstripMenuInstanceLoader
 				return description::GetTypeDescriptor<GuiToolstripMenu>()->GetTypeName();
 			}
 
+			bool IsCreatable(const TypeInfo& typeInfo)override
+			{
+				return GetTypeName() == typeInfo.typeName;
+			}
+
+			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
+			{
+				if(GetTypeName() == typeInfo.typeName)
+				{
+					vint indexControlTemplate = constructorArguments.Keys().IndexOf(L"ControlTemplate");
+					if (indexControlTemplate == -1)
+					{
+						return Value::From(g::NewMenu(0));
+					}
+					else
+					{
+						auto factory = CreateTemplateFactory(constructorArguments.GetByIndex(indexControlTemplate)[0].GetText());
+						return Value::From(new GuiToolstripMenu(new GuiWindowTemplate_StyleProvider(factory), 0));
+					}
+				}
+				return Value();
+			}
+
 			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
 			{
 				propertyNames.Add(L"");
+			}
+
+			void GetConstructorParameters(const TypeInfo& typeInfo, collections::List<WString>& propertyNames)override
+			{
+				propertyNames.Add(L"ControlTemplate");
 			}
 
 			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
@@ -292,6 +320,12 @@ GuiToolstripMenuInstanceLoader
 				if (propertyInfo.propertyName == L"")
 				{
 					return GuiInstancePropertyInfo::CollectionWithParent(description::GetTypeDescriptor<GuiControl>());
+				}
+				else if (propertyInfo.propertyName == L"ControlTemplate")
+				{
+					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<WString>());
+					info->constructorParameter = true;
+					return info;
 				}
 				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
 			}
@@ -1526,18 +1560,18 @@ GuiPredefinedInstanceLoadersPlugin
 				manager->SetLoader(new GuiControlHostInstanceLoader);
 				manager->SetLoader(new GuiTabInstanceLoader);
 				manager->SetLoader(new GuiTabPageInstanceLoader);
-				manager->SetLoader(new GuiToolstripMenuInstanceLoader);
-				manager->SetLoader(new GuiToolstripMenuBarInstanceLoader);
-				manager->SetLoader(new GuiToolstripToolBarInstanceLoader);
-				manager->SetLoader(new GuiToolstripButtonInstanceLoader);
-				manager->SetLoader(new GuiSelectableListControlInstanceLoader);
-				manager->SetLoader(new GuiVirtualTreeViewInstanceLoader);
-				manager->SetLoader(new GuiVirtualDataGridInstanceLoader);
+				manager->SetLoader(new GuiToolstripMenuInstanceLoader);				// ControlTemplate
+				manager->SetLoader(new GuiToolstripMenuBarInstanceLoader);			// ControlTemplate
+				manager->SetLoader(new GuiToolstripToolBarInstanceLoader);			// ControlTemplate
+				manager->SetLoader(new GuiToolstripButtonInstanceLoader);			// ControlTemplate
+				manager->SetLoader(new GuiSelectableListControlInstanceLoader);		// ItemTemplate
+				manager->SetLoader(new GuiVirtualTreeViewInstanceLoader);			// ItemTemplate
+				manager->SetLoader(new GuiVirtualDataGridInstanceLoader);			// ItemTemplate
 				manager->SetLoader(new GuiListViewInstanceLoader(false));
 				manager->SetLoader(new GuiTreeViewInstanceLoader(false));
 				manager->SetLoader(new GuiBindableTextListInstanceLoader(L"", [](){return GetCurrentTheme()->CreateTextListItemStyle(); }));
-				manager->SetLoader(new GuiListViewInstanceLoader(true));
-				manager->SetLoader(new GuiTreeViewInstanceLoader(true));
+				manager->SetLoader(new GuiListViewInstanceLoader(true));			// ItemSource
+				manager->SetLoader(new GuiTreeViewInstanceLoader(true));			// ItemSource
 
 				manager->SetLoader(new GuiCompositionInstanceLoader);
 				manager->SetLoader(new GuiTableCompositionInstanceLoader);
