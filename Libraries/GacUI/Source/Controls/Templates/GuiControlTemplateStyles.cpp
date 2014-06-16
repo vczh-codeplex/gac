@@ -291,6 +291,58 @@ GuiComboBoxTemplate_StyleProvider
 GuiDatePickerTemplate_StyleProvider
 ***********************************************************************/
 
+			GuiDatePickerTemplate_StyleProvider::GuiDatePickerTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory)
+				:GuiControlTemplate_StyleProvider(factory)
+			{
+				if (!(controlTemplate = dynamic_cast<GuiDatePickerTemplate*>(GetBoundsComposition())))
+				{
+					CHECK_FAIL(L"GuiDatePickerTemplate_StyleProvider::GuiDatePickerTemplate_StyleProvider()#An instance of GuiDatePickerTemplate is expected.");
+				}
+				INITIALIZE_FACTORY_FROM_TEMPLATE(dateButtonTemplateFactory, DateButtonTemplate);
+				INITIALIZE_FACTORY_FROM_TEMPLATE(dateTextListTemplateFactory, DateTextListTemplate);
+				INITIALIZE_FACTORY_FROM_TEMPLATE(dateComboBoxTemplateFactory, DateComboBoxTemplate);
+			}
+
+			GuiDatePickerTemplate_StyleProvider::~GuiDatePickerTemplate_StyleProvider()
+			{
+			}
+
+			controls::GuiSelectableButton::IStyleController* GuiDatePickerTemplate_StyleProvider::CreateDateButtonStyle()
+			{
+				GET_FACTORY_FROM_TEMPLATE(GuiSelectableButtonTemplate, dateButtonTemplateFactory, DateButtonTemplate);
+			}
+
+			GuiTextListTemplate_StyleProvider* GuiDatePickerTemplate_StyleProvider::CreateTextListStyle()
+			{
+				GET_FACTORY_FROM_TEMPLATE(GuiTextListTemplate, dateTextListTemplateFactory, DateTextListTemplate);
+			}
+
+			controls::GuiTextList* GuiDatePickerTemplate_StyleProvider::CreateTextList()
+			{
+				auto style = CreateTextListStyle();
+				return new GuiTextList(style, style->CreateArgument());
+			}
+
+			controls::GuiComboBoxListControl::IStyleController* GuiDatePickerTemplate_StyleProvider::CreateComboBoxStyle()
+			{
+				GET_FACTORY_FROM_TEMPLATE(GuiComboBoxTemplate, dateComboBoxTemplateFactory, DateComboBoxTemplate);
+			}
+
+			Color GuiDatePickerTemplate_StyleProvider::GetBackgroundColor()
+			{
+				return controlTemplate->GetBackgroundColor();
+			}
+
+			Color GuiDatePickerTemplate_StyleProvider::GetPrimaryTextColor()
+			{
+				return controlTemplate->GetPrimaryTextColor();
+			}
+
+			Color GuiDatePickerTemplate_StyleProvider::GetSecondaryTextColor()
+			{
+				return controlTemplate->GetSecondaryTextColor();
+			}
+
 /***********************************************************************
 GuiDateComboBoxTemplate_StyleProvider
 ***********************************************************************/
