@@ -157,6 +157,44 @@ Control Template
 				void															OnItemSelected()override;
 			};
 
+			class GuiDatePickerTemplate_StyleProvider
+				: public GuiControlTemplate_StyleProvider
+				, public virtual controls::GuiDatePicker::IStyleProvider
+				, public Description<GuiDatePickerTemplate_StyleProvider>
+			{
+			protected:
+				Ptr<GuiTemplate::IFactory>										dateButtonTemplateFactory;
+				Ptr<GuiTemplate::IFactory>										dateTextListTemplateFactory;
+				Ptr<GuiTemplate::IFactory>										dateComboBoxTemplateFactory;
+				GuiDatePickerTemplate*											controlTemplate;
+
+			public:
+				GuiDatePickerTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
+				~GuiDatePickerTemplate_StyleProvider();
+
+				controls::GuiSelectableButton::IStyleController*				CreateDateButtonStyle()override;
+				controls::GuiTextList*											CreateTextList()override;
+				controls::GuiComboBoxListControl::IStyleController*				CreateComboBoxStyle()override;
+				Color															GetBackgroundColor()override;
+				Color															GetPrimaryTextColor()override;
+				Color															GetSecondaryTextColor()override;
+			};
+
+			class GuiDateComboBoxTemplate_StyleProvider
+				: public GuiComboBoxTemplate_StyleProvider
+				, public Description<GuiDateComboBoxTemplate_StyleProvider>
+			{
+			protected:
+				Ptr<GuiTemplate::IFactory>										datePickerTemplateFactory;
+				GuiDateComboBoxTemplate*										controlTemplate;
+
+			public:
+				GuiDateComboBoxTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
+				~GuiDateComboBoxTemplate_StyleProvider();
+
+				controls::GuiDatePicker*										CreateArgument();
+			};
+
 			class GuiScrollTemplate_StyleProvider
 				: public GuiControlTemplate_StyleProvider
 				, public virtual controls::GuiScroll::IStyleController
