@@ -125,6 +125,18 @@ GuiLabelTemplate
 			}
 
 /***********************************************************************
+GuiSinglelineTextBoxTemplate
+***********************************************************************/
+
+			GuiSinglelineTextBoxTemplate::GuiSinglelineTextBoxTemplate()
+			{
+			}
+
+			GuiSinglelineTextBoxTemplate::~GuiSinglelineTextBoxTemplate()
+			{
+			}
+
+/***********************************************************************
 GuiWindowTemplate
 ***********************************************************************/
 

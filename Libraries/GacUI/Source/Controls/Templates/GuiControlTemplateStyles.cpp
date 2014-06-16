@@ -112,6 +112,30 @@ GuiLabelTemplate_StyleProvider
 			}
 
 /***********************************************************************
+GuiSinglelineTextBoxTemplate_StyleProvider
+***********************************************************************/
+
+			GuiSinglelineTextBoxTemplate_StyleProvider::GuiSinglelineTextBoxTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory)
+				:GuiControlTemplate_StyleProvider(factory)
+			{
+				if (!(controlTemplate = dynamic_cast<GuiSinglelineTextBoxTemplate*>(GetBoundsComposition())))
+				{
+					CHECK_FAIL(L"GuiSinglelineTextBoxTemplate_StyleProvider::GuiSinglelineTextBoxTemplate_StyleProvider()#An instance of GuiSinglelineTextBoxTemplate is expected.");
+				}
+			}
+
+			GuiSinglelineTextBoxTemplate_StyleProvider::~GuiSinglelineTextBoxTemplate_StyleProvider()
+			{
+			}
+
+			compositions::GuiGraphicsComposition* GuiSinglelineTextBoxTemplate_StyleProvider::InstallBackground(compositions::GuiBoundsComposition* boundsComposition)
+			{
+				controlTemplate->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				boundsComposition->AddChild(controlTemplate);
+				return controlTemplate->GetContainerComposition();
+			}
+
+/***********************************************************************
 GuiWindowTemplate_StyleProvider
 ***********************************************************************/
 
