@@ -157,6 +157,8 @@ Control Template
 				void															OnItemSelected()override;
 			};
 
+			class GuiTextListTemplate_StyleProvider;
+
 			class GuiDatePickerTemplate_StyleProvider
 				: public GuiControlTemplate_StyleProvider
 				, public virtual controls::GuiDatePicker::IStyleProvider
@@ -173,6 +175,7 @@ Control Template
 				~GuiDatePickerTemplate_StyleProvider();
 
 				controls::GuiSelectableButton::IStyleController*				CreateDateButtonStyle()override;
+				GuiTextListTemplate_StyleProvider*								CreateTextListStyle();
 				controls::GuiTextList*											CreateTextList()override;
 				controls::GuiComboBoxListControl::IStyleController*				CreateComboBoxStyle()override;
 				Color															GetBackgroundColor()override;

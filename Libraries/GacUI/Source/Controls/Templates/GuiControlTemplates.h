@@ -186,7 +186,7 @@ Control Template
 				F(GuiDatePickerTemplate, WString, DateComboBoxTemplate)\
 				F(GuiDatePickerTemplate, Color, BackgroundColor)\
 				F(GuiDatePickerTemplate, Color, PrimaryTextColor)\
-				F(GuiDatePickerTemplate, Color, SecondayTextColor)\
+				F(GuiDatePickerTemplate, Color, SecondaryTextColor)\
 
 				GuiDatePickerTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
 			};
