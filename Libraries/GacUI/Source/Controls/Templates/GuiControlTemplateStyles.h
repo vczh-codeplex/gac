@@ -31,6 +31,7 @@ Control Template
 				, public Description<GuiControlTemplate_StyleProvider>
 			{
 			protected:
+				controls::GuiControl::IStyleController*							associatedStyleController;
 				GuiControlTemplate*												controlTemplate;
 
 			public:
@@ -39,7 +40,7 @@ Control Template
 
 				compositions::GuiBoundsComposition*								GetBoundsComposition()override;
 				compositions::GuiGraphicsComposition*							GetContainerComposition()override;
-				void															AssociateStyleController(IStyleController* controller)override;
+				void															AssociateStyleController(controls::GuiControl::IStyleController* controller)override;
 				void															SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
 				void															SetText(const WString& value)override;
 				void															SetFont(const FontProperties& value)override;
@@ -74,7 +75,7 @@ Control Template
 				GuiSinglelineTextBoxTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
 				~GuiSinglelineTextBoxTemplate_StyleProvider();
 				
-				void															AssociateStyleController(IStyleController* controller)override;
+				void															SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
 				compositions::GuiGraphicsComposition*							InstallBackground(compositions::GuiBoundsComposition* boundsComposition)override;
 			};
 
@@ -190,7 +191,7 @@ Control Template
 				GuiMultilineTextBoxTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
 				~GuiMultilineTextBoxTemplate_StyleProvider();
 				
-				void															AssociateStyleController(IStyleController* controller)override;
+				void															SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
 			};
 
 			class GuiTextListTemplate_StyleProvider

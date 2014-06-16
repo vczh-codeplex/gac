@@ -37,7 +37,8 @@ GuiControlTemplate_StyleProvider
 ***********************************************************************/
 
 			GuiControlTemplate_StyleProvider::GuiControlTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory)
-				:controlTemplate(0)
+				:associatedStyleController(0)
+				, controlTemplate(0)
 			{
 				GuiTemplate* itemTemplate = factory->CreateTemplate(Value());
 				if (!(controlTemplate = dynamic_cast<GuiControlTemplate*>(itemTemplate)))
@@ -63,6 +64,7 @@ GuiControlTemplate_StyleProvider
 
 			void GuiControlTemplate_StyleProvider::AssociateStyleController(IStyleController* controller)
 			{
+				associatedStyleController = controller;
 			}
 
 			void GuiControlTemplate_StyleProvider::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
@@ -129,10 +131,10 @@ GuiSinglelineTextBoxTemplate_StyleProvider
 			{
 			}
 			
-			void GuiSinglelineTextBoxTemplate_StyleProvider::AssociateStyleController(IStyleController* controller)
+			void GuiSinglelineTextBoxTemplate_StyleProvider::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
 			{
-				GuiControlTemplate_StyleProvider::AssociateStyleController(controller);
-				if (auto style = dynamic_cast<GuiSinglelineTextBox::StyleController*>(controller))
+				GuiControlTemplate_StyleProvider::SetFocusableComposition(value);
+				if (auto style = dynamic_cast<GuiSinglelineTextBox::StyleController*>(associatedStyleController))
 				{
 					auto element = style->GetTextElement();
 					Array<text::ColorEntry> colors(1);
@@ -354,10 +356,10 @@ GuiSinglelineTextBoxTemplate_StyleProvider
 			{
 			}
 			
-			void GuiMultilineTextBoxTemplate_StyleProvider::AssociateStyleController(IStyleController* controller)
+			void GuiMultilineTextBoxTemplate_StyleProvider::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
 			{
-				GuiScrollViewTemplate_StyleProvider::AssociateStyleController(controller);
-				if (auto style = dynamic_cast<GuiSinglelineTextBox::StyleController*>(controller))
+				GuiScrollViewTemplate_StyleProvider::SetFocusableComposition(value);
+				if (auto style = dynamic_cast<GuiMultilineTextBox::StyleController*>(associatedStyleController))
 				{
 					auto element = style->GetTextElement();
 					Array<text::ColorEntry> colors(1);
