@@ -125,6 +125,7 @@ namespace demos
 	F(DocumentLabelTemplate, GuiControlTemplate)\
 	F(LabelTemplate, GuiLabelTemplate)\
 	F(SinglelineTextBoxTemplate, GuiSinglelineTextBoxTemplate)\
+	F(MultilineTextBoxTemplate, GuiMultilineTextBoxTemplate)\
 	F(LeftScrollButtonTemplate, GuiButtonTemplate)\
 	F(RightScrollButtonTemplate, GuiButtonTemplate)\
 	F(TopScrollButtonTemplate, GuiButtonTemplate)\
@@ -303,6 +304,7 @@ namespace vl
 			F(demos::DocumentLabelTemplate)\
 			F(demos::LabelTemplate)\
 			F(demos::SinglelineTextBoxTemplate)\
+			F(demos::MultilineTextBoxTemplate)\
 			F(demos::LeftScrollButtonTemplate)\
 			F(demos::RightScrollButtonTemplate)\
 			F(demos::TopScrollButtonTemplate)\

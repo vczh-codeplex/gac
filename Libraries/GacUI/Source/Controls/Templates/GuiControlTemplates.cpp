@@ -128,8 +128,11 @@ GuiLabelTemplate
 GuiSinglelineTextBoxTemplate
 ***********************************************************************/
 
+			GuiSinglelineTextBoxTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_IMPL)
+
 			GuiSinglelineTextBoxTemplate::GuiSinglelineTextBoxTemplate()
 			{
+				GuiSinglelineTextBoxTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_EVENT_INIT)
 			}
 
 			GuiSinglelineTextBoxTemplate::~GuiSinglelineTextBoxTemplate()
@@ -230,6 +233,21 @@ GuiScrollViewTemplate
 			}
 
 			GuiScrollViewTemplate::~GuiScrollViewTemplate()
+			{
+			}
+
+/***********************************************************************
+GuiMultilineTextBoxTemplate
+***********************************************************************/
+
+			GuiMultilineTextBoxTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_IMPL)
+
+			GuiMultilineTextBoxTemplate::GuiMultilineTextBoxTemplate()
+			{
+				GuiMultilineTextBoxTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_EVENT_INIT)
+			}
+
+			GuiMultilineTextBoxTemplate::~GuiMultilineTextBoxTemplate()
 			{
 			}
 

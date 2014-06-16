@@ -61,7 +61,16 @@ Type Declaration
 			BEGIN_CLASS_MEMBER(GuiSinglelineTextBoxTemplate)
 				CLASS_MEMBER_BASE(GuiControlTemplate)
 				CLASS_MEMBER_CONSTRUCTOR(GuiSinglelineTextBoxTemplate*(), NO_PARAMETER)
+
+				GuiSinglelineTextBoxTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_REFLECTION)
 			END_CLASS_MEMBER(GuiSinglelineTextBoxTemplate)
+
+			BEGIN_CLASS_MEMBER(GuiMultilineTextBoxTemplate)
+				CLASS_MEMBER_BASE(GuiScrollViewTemplate)
+				CLASS_MEMBER_CONSTRUCTOR(GuiMultilineTextBoxTemplate*(), NO_PARAMETER)
+
+				GuiMultilineTextBoxTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_REFLECTION)
+			END_CLASS_MEMBER(GuiMultilineTextBoxTemplate)
 
 			BEGIN_CLASS_MEMBER(GuiWindowTemplate)
 				CLASS_MEMBER_BASE(GuiControlTemplate)

@@ -30,6 +30,7 @@ Type List
 			F(presentation::templates::GuiControlTemplate)\
 			F(presentation::templates::GuiLabelTemplate)\
 			F(presentation::templates::GuiSinglelineTextBoxTemplate)\
+			F(presentation::templates::GuiMultilineTextBoxTemplate)\
 			F(presentation::templates::GuiWindowTemplate)\
 			F(presentation::templates::GuiButtonTemplate)\
 			F(presentation::templates::GuiSelectableButtonTemplate)\
