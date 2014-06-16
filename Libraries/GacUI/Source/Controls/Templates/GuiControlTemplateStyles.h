@@ -181,7 +181,6 @@ Control Template
 
 			class GuiMultilineTextBoxTemplate_StyleProvider
 				: public GuiScrollViewTemplate_StyleProvider
-				, public virtual controls::GuiSinglelineTextBox::IStyleProvider
 				, public Description<GuiMultilineTextBoxTemplate_StyleProvider>
 			{
 			protected:

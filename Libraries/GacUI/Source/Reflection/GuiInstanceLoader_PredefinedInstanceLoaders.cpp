@@ -1590,7 +1590,7 @@ GuiPredefinedInstanceLoadersPlugin
 				ADD_TEMPLATE_CONTROL_2	(							GuiTextList,			g::NewTextList,					GuiTextListTemplate);
 				ADD_TEMPLATE_CONTROL	(							GuiDocumentViewer,		g::NewDocumentViewer,			GuiScrollViewTemplate);
 				ADD_TEMPLATE_CONTROL	(							GuiDocumentLabel,		g::NewDocumentLabel,			GuiControlTemplate);
-				ADD_TEMPLATE_CONTROL	(							GuiMultilineTextBox,	g::NewMultilineTextBox,			GuiScrollViewTemplate);
+				ADD_TEMPLATE_CONTROL	(							GuiMultilineTextBox,	g::NewMultilineTextBox,			GuiMultilineTextBoxTemplate);
 				ADD_TEMPLATE_CONTROL	(							GuiSinglelineTextBox,	g::NewTextBox,					GuiSinglelineTextBoxTemplate);
 				ADD_TEMPLATE_CONTROL_X	(							GuiDatePicker,			g::NewDatePicker,				GuiControlTemplate);
 				ADD_TEMPLATE_CONTROL_X	(							GuiDateComboBox,		g::NewDateComboBox,				GuiControlTemplate);
