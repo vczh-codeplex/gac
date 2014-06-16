@@ -140,6 +140,7 @@ namespace demos
 	F(ToolstripDropdownButtonTemplate, GuiToolstripButtonTemplate)\
 	F(ToolstripSplitArrowTemplate, GuiSelectableButtonTemplate)\
 	F(ToolstripSplitButtonTemplate, GuiToolstripButtonTemplate)\
+	F(MenuBarButtonTemplate, GuiToolstripButtonTemplate)\
 
 	DEMO_TEMPLATES(CONTROL_TEMPLATE_DECL)
 
@@ -318,6 +319,7 @@ namespace vl
 			F(demos::ToolstripDropdownButtonTemplate)\
 			F(demos::ToolstripSplitArrowTemplate)\
 			F(demos::ToolstripSplitButtonTemplate)\
+			F(demos::MenuBarButtonTemplate)\
 
 			DEMO_TYPES(DECL_TYPE_INFO)
 			DEMO_TYPES(IMPL_TYPE_INFO)
