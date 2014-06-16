@@ -135,6 +135,7 @@ namespace demos
 	F(TextListTemplate, GuiTextListTemplate)\
 	F(CheckTextListTemplate, GuiTextListTemplate)\
 	F(RadioTextListTemplate, GuiTextListTemplate)\
+	F(ToolstripButtonTemplate, GuiToolstripButtonTemplate)\
 
 	DEMO_TEMPLATES(CONTROL_TEMPLATE_DECL)
 
@@ -308,6 +309,7 @@ namespace vl
 			F(demos::TextListTemplate)\
 			F(demos::CheckTextListTemplate)\
 			F(demos::RadioTextListTemplate)\
+			F(demos::ToolstripButtonTemplate)\
 
 			DEMO_TYPES(DECL_TYPE_INFO)
 			DEMO_TYPES(IMPL_TYPE_INFO)
