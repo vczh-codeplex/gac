@@ -272,7 +272,6 @@ GuiComboBoxTemplate_StyleProvider
 				{
 					CHECK_FAIL(L"GuiComboBoxTemplate_StyleProvider::GuiComboBoxTemplate_StyleProvider()#An instance of GuiComboBoxTemplate is expected.");
 				}
-				INITIALIZE_FACTORY_FROM_TEMPLATE(subMenuTemplateFactory, SubMenuTemplate);
 			}
 
 			GuiComboBoxTemplate_StyleProvider::~GuiComboBoxTemplate_StyleProvider()
@@ -286,6 +285,38 @@ GuiComboBoxTemplate_StyleProvider
 
 			void GuiComboBoxTemplate_StyleProvider::OnItemSelected()
 			{
+			}
+
+/***********************************************************************
+GuiDatePickerTemplate_StyleProvider
+***********************************************************************/
+
+/***********************************************************************
+GuiDateComboBoxTemplate_StyleProvider
+***********************************************************************/
+
+			GuiDateComboBoxTemplate_StyleProvider::GuiDateComboBoxTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory)
+				:GuiComboBoxTemplate_StyleProvider(factory)
+			{
+				if (!(controlTemplate = dynamic_cast<GuiDateComboBoxTemplate*>(GetBoundsComposition())))
+				{
+					CHECK_FAIL(L"GuiDateComboBoxTemplate_StyleProvider::GuiDateComboBoxTemplate_StyleProvider()#An instance of GuiDateComboBoxTemplate is expected.");
+				}
+				INITIALIZE_FACTORY_FROM_TEMPLATE(datePickerTemplateFactory, DatePickerTemplate);
+			}
+
+			GuiDateComboBoxTemplate_StyleProvider::~GuiDateComboBoxTemplate_StyleProvider()
+			{
+			}
+
+			controls::GuiDatePicker* GuiDateComboBoxTemplate_StyleProvider::CreateArgument()
+			{
+				return new GuiDatePicker(CreateDatePickerStyle());
+			}
+
+			controls::GuiDatePicker::IStyleProvider* GuiDateComboBoxTemplate_StyleProvider::CreateDatePickerStyle()
+			{
+				GET_FACTORY_FROM_TEMPLATE(GuiDatePickerTemplate, datePickerTemplateFactory, DatePickerTemplate);
 			}
 
 /***********************************************************************

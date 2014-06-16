@@ -193,6 +193,7 @@ Control Template
 				~GuiDateComboBoxTemplate_StyleProvider();
 
 				controls::GuiDatePicker*										CreateArgument();
+				controls::GuiDatePicker::IStyleProvider*						CreateDatePickerStyle();
 			};
 
 			class GuiScrollTemplate_StyleProvider
