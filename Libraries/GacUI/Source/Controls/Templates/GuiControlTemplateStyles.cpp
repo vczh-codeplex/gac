@@ -305,6 +305,7 @@ GuiDatePickerTemplate_StyleProvider
 
 			GuiDatePickerTemplate_StyleProvider::~GuiDatePickerTemplate_StyleProvider()
 			{
+				delete controlTemplate;
 			}
 
 			controls::GuiSelectableButton::IStyleController* GuiDatePickerTemplate_StyleProvider::CreateDateButtonStyle()
