@@ -243,6 +243,7 @@ GuiDatePicker::StyleController
 
 						GuiSolidLabelElement* element=GuiSolidLabelElement::Create();
 						element->SetAlignments(Alignment::Center, Alignment::Center);
+						element->SetColor(styleProvider->GetPrimaryTextColor());
 						labelDaysOfWeek[i]=element;
 						cell->SetOwnedElement(element);
 					}
@@ -274,6 +275,7 @@ GuiDatePicker::StyleController
 							GuiBoundsComposition* elementBounds=new GuiBoundsComposition;
 							elementBounds->SetOwnedElement(element);
 							elementBounds->SetAlignmentToParent(Margin(0, 0, 0, 0));
+							elementBounds->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElement);
 							button->GetContainerComposition()->AddChild(elementBounds);
 						}
 					}
