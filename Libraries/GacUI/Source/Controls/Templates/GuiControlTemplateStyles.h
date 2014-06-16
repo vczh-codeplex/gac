@@ -62,6 +62,21 @@ Control Template
 				void															SetTextColor(Color value)override;
 			};
 
+			class GuiSinglelineTextBoxTemplate_StyleProvider
+				: public GuiControlTemplate_StyleProvider
+				, public virtual controls::GuiSinglelineTextBox::IStyleProvider
+				, public Description<GuiSinglelineTextBoxTemplate_StyleProvider>
+			{
+			protected:
+				GuiSinglelineTextBoxTemplate*									controlTemplate;
+				
+			public:
+				GuiSinglelineTextBoxTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
+				~GuiSinglelineTextBoxTemplate_StyleProvider();
+
+				compositions::GuiGraphicsComposition*							InstallBackground(compositions::GuiBoundsComposition* boundsComposition)override;
+			};
+
 			class GuiWindowTemplate_StyleProvider
 				: public GuiControlTemplate_StyleProvider
 				, public controls::GuiWindow::DefaultBehaviorStyleController

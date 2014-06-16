@@ -29,6 +29,7 @@ Type List
 			F(presentation::templates::GuiTemplate::IFactory)\
 			F(presentation::templates::GuiControlTemplate)\
 			F(presentation::templates::GuiLabelTemplate)\
+			F(presentation::templates::GuiSinglelineTextBoxTemplate)\
 			F(presentation::templates::GuiWindowTemplate)\
 			F(presentation::templates::GuiButtonTemplate)\
 			F(presentation::templates::GuiSelectableButtonTemplate)\

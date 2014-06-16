@@ -58,11 +58,14 @@ Type Declaration
 				GuiLabelTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_REFLECTION)
 			END_CLASS_MEMBER(GuiLabelTemplate)
 
+			BEGIN_CLASS_MEMBER(GuiSinglelineTextBoxTemplate)
+				CLASS_MEMBER_BASE(GuiControlTemplate)
+				CLASS_MEMBER_CONSTRUCTOR(GuiSinglelineTextBoxTemplate*(), NO_PARAMETER)
+			END_CLASS_MEMBER(GuiSinglelineTextBoxTemplate)
+
 			BEGIN_CLASS_MEMBER(GuiWindowTemplate)
 				CLASS_MEMBER_BASE(GuiControlTemplate)
 				CLASS_MEMBER_CONSTRUCTOR(GuiWindowTemplate*(), NO_PARAMETER)
-
-				GuiControlTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_REFLECTION)
 			END_CLASS_MEMBER(GuiWindowTemplate)
 
 			BEGIN_CLASS_MEMBER(GuiButtonTemplate)

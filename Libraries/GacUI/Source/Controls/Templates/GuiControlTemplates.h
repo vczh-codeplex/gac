@@ -101,6 +101,13 @@ Control Template
 				GuiLabelTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
 			};
 
+			class GuiSinglelineTextBoxTemplate : public GuiControlTemplate, public Description<GuiSinglelineTextBoxTemplate>
+			{
+			public:
+				GuiSinglelineTextBoxTemplate();
+				~GuiSinglelineTextBoxTemplate();
+			};
+
 			class GuiWindowTemplate : public GuiControlTemplate, public Description<GuiWindowTemplate>
 			{
 			public:
