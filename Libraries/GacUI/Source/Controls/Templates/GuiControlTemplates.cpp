@@ -202,6 +202,22 @@ GuiToolstripButtonTemplate
 			}
 
 /***********************************************************************
+GuiListViewColumnHeaderTemplate
+***********************************************************************/
+
+			GuiListViewColumnHeaderTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_IMPL)
+
+			GuiListViewColumnHeaderTemplate::GuiListViewColumnHeaderTemplate()
+				:SortingState_(GuiListViewColumnHeader::NotSorted)
+			{
+				GuiListViewColumnHeaderTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_EVENT_INIT)
+			}
+
+			GuiListViewColumnHeaderTemplate::~GuiListViewColumnHeaderTemplate()
+			{
+			}
+
+/***********************************************************************
 GuiComboBoxTemplate
 ***********************************************************************/
 
@@ -309,6 +325,36 @@ GuiTextListTemplate
 			}
 
 			GuiTextListTemplate::~GuiTextListTemplate()
+			{
+			}
+
+/***********************************************************************
+GuiListViewTemplate
+***********************************************************************/
+
+			GuiListViewTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_IMPL)
+
+			GuiListViewTemplate::GuiListViewTemplate()
+			{
+				GuiListViewTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_EVENT_INIT)
+			}
+
+			GuiListViewTemplate::~GuiListViewTemplate()
+			{
+			}
+
+/***********************************************************************
+GuiTreeViewTemplate
+***********************************************************************/
+
+			GuiTreeViewTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_IMPL)
+
+			GuiTreeViewTemplate::GuiTreeViewTemplate()
+			{
+				GuiTreeViewTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_EVENT_INIT)
+			}
+
+			GuiTreeViewTemplate::~GuiTreeViewTemplate()
 			{
 			}
 

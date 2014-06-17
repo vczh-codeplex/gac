@@ -262,6 +262,28 @@ GuiToolstripButtonTemplate_StyleProvider
 			}
 
 /***********************************************************************
+GuiListViewColumnHeaderTemplate_StyleProvider
+***********************************************************************/
+
+			GuiListViewColumnHeaderTemplate_StyleProvider::GuiListViewColumnHeaderTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory)
+				:GuiToolstripButtonTemplate_StyleProvider(factory)
+			{
+				if (!(controlTemplate = dynamic_cast<GuiListViewColumnHeaderTemplate*>(GetBoundsComposition())))
+				{
+					CHECK_FAIL(L"GuiListViewColumnHeaderTemplate_StyleProvider::GuiListViewColumnHeaderTemplate_StyleProvider()#An instance of GuiListViewColumnHeaderTemplate is expected.");
+				}
+			}
+
+			GuiListViewColumnHeaderTemplate_StyleProvider::~GuiListViewColumnHeaderTemplate_StyleProvider()
+			{
+			}
+
+			void GuiListViewColumnHeaderTemplate_StyleProvider::SetColumnSortingState(controls::GuiListViewColumnHeader::ColumnSortingState value)
+			{
+				controlTemplate->SetSortingState(value);
+			}
+
+/***********************************************************************
 GuiComboBoxTemplate_StyleProvider
 ***********************************************************************/
 
@@ -540,6 +562,84 @@ GuiTextListTemplate_StyleProvider
 			controls::GuiSelectableButton::IStyleController* GuiTextListTemplate_StyleProvider::CreateBulletStyle()
 			{
 				GET_FACTORY_FROM_TEMPLATE_OPT(GuiSelectableButtonTemplate, bulletTemplateFactory, BulletTemplate);
+			}
+
+/***********************************************************************
+GuiListViewTemplate_StyleProvider
+***********************************************************************/
+
+			GuiListViewTemplate_StyleProvider::GuiListViewTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory)
+				:GuiScrollViewTemplate_StyleProvider(factory)
+			{
+				if (!(controlTemplate = dynamic_cast<GuiListViewTemplate*>(GetBoundsComposition())))
+				{
+					CHECK_FAIL(L"GuiListViewTemplate_StyleProvider::GuiListViewTemplate_StyleProvider()#An instance of GuiListViewTemplate is expected.");
+				}
+				INITIALIZE_FACTORY_FROM_TEMPLATE(backgroundTemplateFactory, BackgroundTemplate);
+				INITIALIZE_FACTORY_FROM_TEMPLATE(columnHeaderTemplateFactory, ColumnHeaderTemplate);
+			}
+
+			GuiListViewTemplate_StyleProvider::~GuiListViewTemplate_StyleProvider()
+			{
+			}
+				
+			controls::GuiSelectableButton::IStyleController* GuiListViewTemplate_StyleProvider::CreateItemBackground()
+			{
+				GET_FACTORY_FROM_TEMPLATE(GuiSelectableButtonTemplate, backgroundTemplateFactory, BackgroundTemplate);
+			}
+
+			controls::GuiListViewColumnHeader::IStyleController* GuiListViewTemplate_StyleProvider::CreateColumnStyle()
+			{
+				GET_FACTORY_FROM_TEMPLATE(GuiListViewColumnHeaderTemplate, columnHeaderTemplateFactory, ColumnHeaderTemplate);
+			}
+
+			Color GuiListViewTemplate_StyleProvider::GetPrimaryTextColor()
+			{
+				return controlTemplate->GetPrimaryTextColor();
+			}
+
+			Color GuiListViewTemplate_StyleProvider::GetSecondaryTextColor()
+			{
+				return controlTemplate->GetSecondaryTextColor();
+			}
+
+			Color GuiListViewTemplate_StyleProvider::GetItemSeparatorColor()
+			{
+				return controlTemplate->GetItemSeparatorColor();
+			}
+
+/***********************************************************************
+GuiTreeViewTemplate_StyleProvider
+***********************************************************************/
+
+			GuiTreeViewTemplate_StyleProvider::GuiTreeViewTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory)
+				:GuiScrollViewTemplate_StyleProvider(factory)
+			{
+				if (!(controlTemplate = dynamic_cast<GuiTreeViewTemplate*>(GetBoundsComposition())))
+				{
+					CHECK_FAIL(L"GuiTreeViewTemplate_StyleProvider::GuiTreeViewTemplate_StyleProvider()#An instance of GuiTreeViewTemplate is expected.");
+				}
+				INITIALIZE_FACTORY_FROM_TEMPLATE(backgroundTemplateFactory, BackgroundTemplate);
+				INITIALIZE_FACTORY_FROM_TEMPLATE(expandingDecoratorTemplateFactory, ExpandingDecoratorTemplate);
+			}
+
+			GuiTreeViewTemplate_StyleProvider::~GuiTreeViewTemplate_StyleProvider()
+			{
+			}
+				
+			controls::GuiSelectableButton::IStyleController* GuiTreeViewTemplate_StyleProvider::CreateItemBackground()
+			{
+				GET_FACTORY_FROM_TEMPLATE(GuiSelectableButtonTemplate, backgroundTemplateFactory, BackgroundTemplate);
+			}
+
+			controls::GuiSelectableButton::IStyleController* GuiTreeViewTemplate_StyleProvider::CreateItemExpandingDecorator()
+			{
+				GET_FACTORY_FROM_TEMPLATE(GuiSelectableButtonTemplate, expandingDecoratorTemplateFactory, ExpandingDecoratorTemplate);
+			}
+
+			Color GuiTreeViewTemplate_StyleProvider::GetTextColor()
+			{
+				return controlTemplate->GetTextColor();
 			}
 
 /***********************************************************************

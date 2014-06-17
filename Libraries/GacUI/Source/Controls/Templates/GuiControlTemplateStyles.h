@@ -141,6 +141,21 @@ Control Template
 				compositions::GuiSubComponentMeasurer::IMeasuringSource*		GetMeasuringSource()override;
 			};
 
+			class GuiListViewColumnHeaderTemplate_StyleProvider
+				: public GuiToolstripButtonTemplate_StyleProvider
+				, public virtual controls::GuiListViewColumnHeader::IStyleController
+				, public Description<GuiListViewColumnHeaderTemplate_StyleProvider>
+			{
+			protected:
+				GuiListViewColumnHeaderTemplate*								controlTemplate;
+
+			public:
+				GuiListViewColumnHeaderTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
+				~GuiListViewColumnHeaderTemplate_StyleProvider();
+
+				void															SetColumnSortingState(controls::GuiListViewColumnHeader::ColumnSortingState value)override;
+			};
+
 			class GuiComboBoxTemplate_StyleProvider
 				: public GuiToolstripButtonTemplate_StyleProvider
 				, public virtual controls::GuiComboBoxBase::IStyleController
@@ -283,6 +298,46 @@ Control Template
 				controls::list::TextItemStyleProvider::ITextItemStyleProvider*	CreateArgument();
 				controls::GuiSelectableButton::IStyleController*				CreateBackgroundStyle();
 				controls::GuiSelectableButton::IStyleController*				CreateBulletStyle();
+			};
+
+			class GuiListViewTemplate_StyleProvider
+				: public GuiScrollViewTemplate_StyleProvider
+				, public virtual controls::GuiListViewBase::IStyleProvider
+				, public Description<GuiListViewTemplate_StyleProvider>
+			{
+			protected:
+				Ptr<GuiTemplate::IFactory>										backgroundTemplateFactory;
+				Ptr<GuiTemplate::IFactory>										columnHeaderTemplateFactory;
+				GuiListViewTemplate*											controlTemplate;
+				
+			public:
+				GuiListViewTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
+				~GuiListViewTemplate_StyleProvider();
+				
+				controls::GuiSelectableButton::IStyleController*				CreateItemBackground()override;
+				controls::GuiListViewColumnHeader::IStyleController*			CreateColumnStyle()override;
+				Color															GetPrimaryTextColor()override;
+				Color															GetSecondaryTextColor()override;
+				Color															GetItemSeparatorColor()override;
+			};
+
+			class GuiTreeViewTemplate_StyleProvider
+				: public GuiScrollViewTemplate_StyleProvider
+				, public virtual controls::GuiVirtualTreeView::IStyleProvider
+				, public Description<GuiTreeViewTemplate_StyleProvider>
+			{
+			protected:
+				Ptr<GuiTemplate::IFactory>										backgroundTemplateFactory;
+				Ptr<GuiTemplate::IFactory>										expandingDecoratorTemplateFactory;
+				GuiTreeViewTemplate*											controlTemplate;
+				
+			public:
+				GuiTreeViewTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
+				~GuiTreeViewTemplate_StyleProvider();
+				
+				controls::GuiSelectableButton::IStyleController*				CreateItemBackground()override;
+				controls::GuiSelectableButton::IStyleController*				CreateItemExpandingDecorator()override;
+				Color															GetTextColor()override;
 			};
 
 /***********************************************************************
