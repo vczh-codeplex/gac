@@ -278,6 +278,8 @@ Basic Construction
 				SubscriptionList								subscriptions;
 
 				void											ClearSubscriptions();
+				void											ClearComponents();
+				void											FinalizeInstance();
 			public:
 				GuiInstanceRootObject();
 				~GuiInstanceRootObject();
