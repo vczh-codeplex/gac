@@ -149,6 +149,10 @@ Type Declaration
 				CLASS_MEMBER_METHOD(AddSubscription, {L"subscription"})
 				CLASS_MEMBER_METHOD(RemoveSubscription, {L"subscription"})
 				CLASS_MEMBER_METHOD(ContainsSubscription, {L"subscription"})
+
+				CLASS_MEMBER_METHOD(AddComponent, {L"component"})
+				CLASS_MEMBER_METHOD(RemoveComponent, {L"component"})
+				CLASS_MEMBER_METHOD(ContainsComponent, {L"component"})
 			END_CLASS_MEMBER(GuiInstanceRootObject)
 
 			BEGIN_CLASS_MEMBER(GuiCustomControl)

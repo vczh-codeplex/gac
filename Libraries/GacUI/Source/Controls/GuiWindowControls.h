@@ -29,7 +29,6 @@ Control Host
 			{
 			protected:
 				compositions::GuiGraphicsHost*					host;
-				collections::SortedList<GuiComponent*>			components;
 
 				virtual void									OnNativeWindowChanged();
 				virtual void									OnVisualStatusChanged();
@@ -135,19 +134,6 @@ Control Host
 				/// </summary>
 				/// <param name="topmost">True to make the window always  on top of the desktop.</param>
 				void											SetTopMost(bool topmost);
-
-				/// <summary>Add a component. When this control host is disposing, all attached components will be deleted.</summary>
-				/// <returns>Returns true if this operation succeeded.</returns>
-				/// <param name="component">The component to add.</param>
-				bool											AddComponent(GuiComponent* component);
-				/// <summary>Remove a component.</summary>
-				/// <returns>Returns true if this operation succeeded.</returns>
-				/// <param name="component">The component to remove.</param>
-				bool											RemoveComponent(GuiComponent* component);
-				/// <summary>Test does the window contain the component.</summary>
-				/// <returns>Returns true if the window contains the component.</returns>
-				/// <param name="component">The component to test.</param>
-				bool											ContainsComponent(GuiComponent* component);
 
 				/// <summary>Get the <see cref="compositions::IGuiShortcutKeyManager"/> attached with this control host.</summary>
 				/// <returns>The shortcut key manager.</returns>

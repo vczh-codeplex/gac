@@ -106,6 +106,10 @@ GuiControlInstanceLoader
 					auto info = GuiInstancePropertyInfo::Collection();
 					info->acceptableTypes.Add(description::GetTypeDescriptor<GuiControl>());
 					info->acceptableTypes.Add(description::GetTypeDescriptor<GuiGraphicsComposition>());
+					if (propertyInfo.typeInfo.typeDescriptor->CanConvertTo(description::GetTypeDescriptor<GuiInstanceRootObject>()))
+					{
+						info->acceptableTypes.Add(description::GetTypeDescriptor<GuiComponent>());
+					}
 					return info;
 				}
 				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
@@ -113,7 +117,23 @@ GuiControlInstanceLoader
 
 			bool SetPropertyValue(PropertyValue& propertyValue)override
 			{
-				if (GuiControl* container = dynamic_cast<GuiControl*>(propertyValue.instanceValue.GetRawPtr()))
+				if (auto container = dynamic_cast<GuiInstanceRootObject*>(propertyValue.instanceValue.GetRawPtr()))
+				{
+					if (propertyValue.propertyName == L"")
+					{
+						if (auto component = dynamic_cast<GuiComponent*>(propertyValue.propertyValue.GetRawPtr()))
+						{
+							container->AddComponent(component);
+							return true;
+						}
+						else if (auto controlHost = dynamic_cast<GuiControlHost*>(propertyValue.propertyValue.GetRawPtr()))
+						{
+							container->AddComponent(new GuiObjectComponent<GuiControlHost>(controlHost));
+							return true;
+						}
+					}
+				}
+				if (auto container = dynamic_cast<GuiControl*>(propertyValue.instanceValue.GetRawPtr()))
 				{
 					if (propertyValue.propertyName == L"")
 					{
@@ -125,49 +145,6 @@ GuiControlInstanceLoader
 						else if (auto composition = dynamic_cast<GuiGraphicsComposition*>(propertyValue.propertyValue.GetRawPtr()))
 						{
 							container->GetContainerComposition()->AddChild(composition);
-							return true;
-						}
-					}
-				}
-				return false;
-			}
-		};
-
-/***********************************************************************
-GuiControlHostInstanceLoader
-***********************************************************************/
-
-		class GuiControlHostInstanceLoader : public Object, public IGuiInstanceLoader
-		{
-		public:
-			WString GetTypeName()override
-			{
-				return description::GetTypeDescriptor<GuiControlHost>()->GetTypeName();
-			}
-
-			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
-			{
-				propertyNames.Add(L"");
-			}
-
-			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
-			{
-				if (propertyInfo.propertyName == L"")
-				{
-					return GuiInstancePropertyInfo::CollectionWithParent(description::GetTypeDescriptor<GuiComponent>());
-				}
-				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
-			}
-
-			bool SetPropertyValue(PropertyValue& propertyValue)override
-			{
-				if (GuiControlHost* container = dynamic_cast<GuiControlHost*>(propertyValue.instanceValue.GetRawPtr()))
-				{
-					if (propertyValue.propertyName == L"")
-					{
-						if (auto component = dynamic_cast<GuiComponent*>(propertyValue.propertyValue.GetRawPtr()))
-						{
-							container->AddComponent(component);
 							return true;
 						}
 					}
@@ -1581,7 +1558,6 @@ GuiPredefinedInstanceLoadersPlugin
 		)
 
 				manager->SetLoader(new GuiControlInstanceLoader);
-				manager->SetLoader(new GuiControlHostInstanceLoader);
 				manager->SetLoader(new GuiTabInstanceLoader);
 				manager->SetLoader(new GuiTabPageInstanceLoader);
 				manager->SetLoader(new GuiToolstripMenuInstanceLoader);				// ControlTemplate

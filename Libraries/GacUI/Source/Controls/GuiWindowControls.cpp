@@ -209,11 +209,6 @@ GuiControlHost
 			{
 				OnBeforeReleaseGraphicsHost();
 				styleController=0;
-				for(vint i=0;i<components.Count();i++)
-				{
-					components[i]->Detach(this);
-					delete components[i];
-				}
 				delete host;
 			}
 
@@ -396,38 +391,6 @@ GuiControlHost
 				{
 					host->GetNativeWindow()->SetTopMost(topmost);
 				}
-			}
-
-			bool GuiControlHost::AddComponent(GuiComponent* component)
-			{
-				if(components.Contains(component))
-				{
-					return false;
-				}
-				else
-				{
-					components.Add(component);
-					component->Attach(this);
-					return true;
-				}
-			}
-
-			bool GuiControlHost::RemoveComponent(GuiComponent* component)
-			{
-				vint index = components.IndexOf(component);
-				if (index == -1)
-				{
-					return false;
-				}
-				{
-					component->Detach(this);
-					return components.RemoveAt(index);
-				}
-			}
-
-			bool GuiControlHost::ContainsComponent(GuiComponent* component)
-			{
-				return components.Contains(component);
 			}
 
 			compositions::IGuiShortcutKeyManager* GuiControlHost::GetShortcutKeyManager()

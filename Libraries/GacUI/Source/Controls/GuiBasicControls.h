@@ -253,16 +253,35 @@ Basic Construction
 					return dynamic_cast<T*>(QueryService(T::Identifier));
 				}
 			};
+
+			class GuiInstanceRootObject;
+
+			/// <summary>
+			/// Represnets a component.
+			/// </summary>
+			class GuiComponent : public Object, public Description<GuiComponent>
+			{
+			public:
+				GuiComponent();
+				~GuiComponent();
+
+				virtual void							Attach(GuiInstanceRootObject* rootObject);
+				virtual void							Detach(GuiInstanceRootObject* rootObject);
+			};
 			
 			/// <summary>Represnets a root GUI object.</summary>
 			class GuiInstanceRootObject abstract : public Description<GuiInstanceRootObject>
 			{
 				typedef collections::List<Ptr<description::IValueSubscription>>		SubscriptionList;
 			protected:
+				collections::SortedList<GuiComponent*>			components;
 				SubscriptionList								subscriptions;
 
 				void											ClearSubscriptions();
 			public:
+				GuiInstanceRootObject();
+				~GuiInstanceRootObject();
+
 				/// <summary>Add a subscription. When this control host is disposing, all attached subscriptions will be deleted.</summary>
 				/// <returns>Returns null if this operation failed.</returns>
 				/// <param name="subscription">The subscription to test.</param>
@@ -275,6 +294,19 @@ Basic Construction
 				/// <returns>Returns true if the window contains the subscription.</returns>
 				/// <param name="subscription">The subscription to test.</param>
 				bool											ContainsSubscription(Ptr<description::IValueSubscription> subscription);
+
+				/// <summary>Add a component. When this control host is disposing, all attached components will be deleted.</summary>
+				/// <returns>Returns true if this operation succeeded.</returns>
+				/// <param name="component">The component to add.</param>
+				bool											AddComponent(GuiComponent* component);
+				/// <summary>Remove a component.</summary>
+				/// <returns>Returns true if this operation succeeded.</returns>
+				/// <param name="component">The component to remove.</param>
+				bool											RemoveComponent(GuiComponent* component);
+				/// <summary>Test does the window contain the component.</summary>
+				/// <returns>Returns true if the window contains the component.</returns>
+				/// <param name="component">The component to test.</param>
+				bool											ContainsComponent(GuiComponent* component);
 			};
 
 			/// <summary>Represnets a user customizable control.</summary>
@@ -285,19 +317,6 @@ Basic Construction
 				/// <param name="_styleController">The style controller.</param>
 				GuiCustomControl(IStyleController* _styleController);
 				~GuiCustomControl();
-			};
-
-			/// <summary>
-			/// Represnets a component.
-			/// </summary>
-			class GuiComponent : public Object, public Description<GuiComponent>
-			{
-			public:
-				GuiComponent();
-				~GuiComponent();
-
-				virtual void							Attach(GuiControlHost* controlHost);
-				virtual void							Detach(GuiControlHost* controlHost);
 			};
 
 			template<typename T>
