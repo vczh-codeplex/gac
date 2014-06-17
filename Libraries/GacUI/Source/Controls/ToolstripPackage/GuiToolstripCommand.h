@@ -49,8 +49,8 @@ namespace vl
 				GuiToolstripCommand();
 				~GuiToolstripCommand();
 
-				void										Attach(GuiControlHost* controlHost)override;
-				void										Detach(GuiControlHost* controlHost)override;
+				void										Attach(GuiInstanceRootObject* rootObject)override;
+				void										Detach(GuiInstanceRootObject* rootObject)override;
 
 				/// <summary>Executed event.</summary>
 				compositions::GuiNotifyEvent				Executed;

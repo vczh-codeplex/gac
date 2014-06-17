@@ -99,16 +99,16 @@ GuiToolstripCommand
 			{
 			}
 
-			void GuiToolstripCommand::Attach(GuiControlHost* controlHost)
+			void GuiToolstripCommand::Attach(GuiInstanceRootObject* rootObject)
 			{
-				shortcutOwner = controlHost;
+				shortcutOwner = dynamic_cast<GuiControlHost*>(rootObject);
 				if (shortcutBuilder && !shortcutKeyItem)
 				{
 					BuildShortcut(shortcutBuilder->text);
 				}
 			}
 
-			void GuiToolstripCommand::Detach(GuiControlHost* controlHost)
+			void GuiToolstripCommand::Detach(GuiInstanceRootObject* rootObject)
 			{
 				ReplaceShortcut(0, false);
 				shortcutOwner = 0;

@@ -387,6 +387,26 @@ GuiControl
 			}
 
 /***********************************************************************
+GuiComponent
+***********************************************************************/
+			
+			GuiComponent::GuiComponent()
+			{
+			}
+
+			GuiComponent::~GuiComponent()
+			{
+			}
+
+			void GuiComponent::Attach(GuiInstanceRootObject* rootObject)
+			{
+			}
+
+			void GuiComponent::Detach(GuiInstanceRootObject* rootObject)
+			{
+			}
+
+/***********************************************************************
 GuiInstanceRootObject
 ***********************************************************************/
 
@@ -397,6 +417,19 @@ GuiInstanceRootObject
 					subscription->Close();
 				}
 				subscriptions.Clear();
+			}
+
+			GuiInstanceRootObject::GuiInstanceRootObject()
+			{
+			}
+
+			GuiInstanceRootObject::~GuiInstanceRootObject()
+			{
+				for(vint i=0;i<components.Count();i++)
+				{
+					components[i]->Detach(this);
+					delete components[i];
+				}
 			}
 
 			Ptr<description::IValueSubscription> GuiInstanceRootObject::AddSubscription(Ptr<description::IValueSubscription> subscription)
@@ -422,6 +455,38 @@ GuiInstanceRootObject
 				return subscriptions.Contains(subscription.Obj());
 			}
 
+			bool GuiInstanceRootObject::AddComponent(GuiComponent* component)
+			{
+				if(components.Contains(component))
+				{
+					return false;
+				}
+				else
+				{
+					components.Add(component);
+					component->Attach(this);
+					return true;
+				}
+			}
+
+			bool GuiInstanceRootObject::RemoveComponent(GuiComponent* component)
+			{
+				vint index = components.IndexOf(component);
+				if (index == -1)
+				{
+					return false;
+				}
+				{
+					component->Detach(this);
+					return components.RemoveAt(index);
+				}
+			}
+
+			bool GuiInstanceRootObject::ContainsComponent(GuiComponent* component)
+			{
+				return components.Contains(component);
+			}
+
 /***********************************************************************
 GuiCustomControl
 ***********************************************************************/
@@ -434,26 +499,6 @@ GuiCustomControl
 			GuiCustomControl::~GuiCustomControl()
 			{
 				ClearSubscriptions();
-			}
-
-/***********************************************************************
-GuiComponent
-***********************************************************************/
-			
-			GuiComponent::GuiComponent()
-			{
-			}
-
-			GuiComponent::~GuiComponent()
-			{
-			}
-
-			void GuiComponent::Attach(GuiControlHost* controlHost)
-			{
-			}
-
-			void GuiComponent::Detach(GuiControlHost* controlHost)
-			{
 			}
 
 /***********************************************************************
