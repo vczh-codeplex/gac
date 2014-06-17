@@ -207,6 +207,7 @@ GuiControlHost
 
 			GuiControlHost::~GuiControlHost()
 			{
+				FinalizeInstance();
 				OnBeforeReleaseGraphicsHost();
 				styleController=0;
 				delete host;

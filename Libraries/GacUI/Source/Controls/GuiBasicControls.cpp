@@ -419,17 +419,29 @@ GuiInstanceRootObject
 				subscriptions.Clear();
 			}
 
-			GuiInstanceRootObject::GuiInstanceRootObject()
-			{
-			}
-
-			GuiInstanceRootObject::~GuiInstanceRootObject()
+			void GuiInstanceRootObject::ClearComponents()
 			{
 				for(vint i=0;i<components.Count();i++)
 				{
 					components[i]->Detach(this);
 					delete components[i];
 				}
+				components.Clear();
+			}
+
+			void GuiInstanceRootObject::FinalizeInstance()
+			{
+				ClearSubscriptions();
+				ClearComponents();
+			}
+
+			GuiInstanceRootObject::GuiInstanceRootObject()
+			{
+			}
+
+			GuiInstanceRootObject::~GuiInstanceRootObject()
+			{
+				FinalizeInstance();
 			}
 
 			Ptr<description::IValueSubscription> GuiInstanceRootObject::AddSubscription(Ptr<description::IValueSubscription> subscription)
@@ -498,7 +510,7 @@ GuiCustomControl
 
 			GuiCustomControl::~GuiCustomControl()
 			{
-				ClearSubscriptions();
+				FinalizeInstance();
 			}
 
 /***********************************************************************
