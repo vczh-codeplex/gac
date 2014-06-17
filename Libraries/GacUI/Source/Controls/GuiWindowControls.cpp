@@ -176,7 +176,7 @@ GuiControlHost
 
 			void GuiControlHost::Closed()
 			{
-				ClearSubscriptions();
+				FinalizeInstance();
 				WindowClosed.Execute(GetNotifyEventArguments());
 			}
 
@@ -207,7 +207,6 @@ GuiControlHost
 
 			GuiControlHost::~GuiControlHost()
 			{
-				FinalizeInstance();
 				OnBeforeReleaseGraphicsHost();
 				styleController=0;
 				delete host;
