@@ -259,13 +259,13 @@ GuiMenuButton
 
 			void GuiMenuButton::OnClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
-				if(GetSubMenu())
+				if(GetVisuallyEnabled())
 				{
-					OpenSubMenuInternal();
-				}
-				else if(GetVisuallyEnabled())
-				{
-					if(ownerMenuService)
+					if(GetSubMenu())
+					{
+						OpenSubMenuInternal();
+					}
+					else if(ownerMenuService)
 					{
 						ownerMenuService->MenuItemExecuted();
 					}
