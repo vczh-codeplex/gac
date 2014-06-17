@@ -424,6 +424,9 @@ GuiInstanceRootObject
 				for(vint i=0;i<components.Count();i++)
 				{
 					components[i]->Detach(this);
+				}
+				for(vint i=0;i<components.Count();i++)
+				{
 					delete components[i];
 				}
 				components.Clear();
@@ -441,7 +444,6 @@ GuiInstanceRootObject
 
 			GuiInstanceRootObject::~GuiInstanceRootObject()
 			{
-				FinalizeInstance();
 			}
 
 			Ptr<description::IValueSubscription> GuiInstanceRootObject::AddSubscription(Ptr<description::IValueSubscription> subscription)

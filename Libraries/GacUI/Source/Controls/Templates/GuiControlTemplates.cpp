@@ -90,7 +90,6 @@ GuiTemplate
 
 			GuiTemplate::~GuiTemplate()
 			{
-				FinalizeInstance();
 			}
 
 /***********************************************************************
