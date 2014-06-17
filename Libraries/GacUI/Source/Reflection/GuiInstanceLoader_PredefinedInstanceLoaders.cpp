@@ -723,6 +723,7 @@ GuiListViewInstanceLoader
 				{
 					Ptr<IValueEnumerable> itemSource;
 					ListViewViewType viewType = ListViewViewType::Detail;
+					GuiListViewBase::IStyleProvider* styleProvider = 0;
 					Size iconSize;
 					{
 						vint itemSourceIndex = constructorArguments.Keys().IndexOf(L"ItemSource");
@@ -746,16 +747,27 @@ GuiListViewInstanceLoader
 						{
 							iconSize = UnboxValue<Size>(constructorArguments.GetByIndex(indexIconSize)[0]);
 						}
+
+						vint indexControlTemplate = constructorArguments.Keys().IndexOf(L"ControlTemplate");
+						if (indexControlTemplate == -1)
+						{
+							auto factory = CreateTemplateFactory(constructorArguments.GetByIndex(indexControlTemplate)[0].GetText());
+							styleProvider = new GuiListViewTemplate_StyleProvider(factory);
+						}
+						else
+						{
+							styleProvider = GetCurrentTheme()->CreateListViewStyle();
+						}
 					}
 
 					GuiVirtualListView* listView = 0;
 					if (bindable)
 					{
-						listView = new GuiBindableListView(GetCurrentTheme()->CreateListViewStyle(), itemSource);
+						listView = new GuiBindableListView(styleProvider, itemSource);
 					}
 					else
 					{
-						listView = new GuiListView(GetCurrentTheme()->CreateListViewStyle());
+						listView = new GuiListView(styleProvider);
 					}
 					switch (viewType)
 					{
@@ -788,21 +800,13 @@ GuiListViewInstanceLoader
 
 			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
 			{
-				if (typeInfo.typeName == GetTypeName())
-				{
-					propertyNames.Add(L"View");
-					propertyNames.Add(L"IconSize");
-					if (bindable)
-					{
-						propertyNames.Add(L"ItemSource");
-					}
-				}
 			}
 
 			void GetConstructorParameters(const TypeInfo& typeInfo, List<WString>& propertyNames)override
 			{
 				if (typeInfo.typeName == GetTypeName())
 				{
+					propertyNames.Add(L"ControlTemplate");
 					propertyNames.Add(L"View");
 					propertyNames.Add(L"IconSize");
 					if (bindable)
@@ -814,6 +818,12 @@ GuiListViewInstanceLoader
 
 			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
 			{
+				if (propertyInfo.propertyName == L"ControlTemplate")
+				{
+					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<WString>());
+					info->constructorParameter = true;
+					return info;
+				}
 				if (propertyInfo.propertyName == L"View")
 				{
 					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<ListViewViewType>());
@@ -882,6 +892,19 @@ GuiTreeViewInstanceLoader
 				if (typeInfo.typeName == GetTypeName())
 				{
 					vint indexItemSource = constructorArguments.Keys().IndexOf(L"ItemSource");
+					GuiVirtualTreeView::IStyleProvider* styleProvider = 0;
+					{
+						vint indexControlTemplate = constructorArguments.Keys().IndexOf(L"ControlTemplate");
+						if (indexControlTemplate == -1)
+						{
+							auto factory = CreateTemplateFactory(constructorArguments.GetByIndex(indexControlTemplate)[0].GetText());
+							styleProvider = new GuiTreeViewTemplate_StyleProvider(factory);
+						}
+						else
+						{
+							styleProvider = GetCurrentTheme()->CreateTreeViewStyle();
+						}
+					}
 
 					GuiVirtualTreeView* treeView = 0;
 					if (bindable)
@@ -892,11 +915,11 @@ GuiTreeViewInstanceLoader
 						}
 
 						auto itemSource = constructorArguments.GetByIndex(indexItemSource)[0];
-						treeView = new GuiBindableTreeView(GetCurrentTheme()->CreateTreeViewStyle(), itemSource);
+						treeView = new GuiBindableTreeView(styleProvider, itemSource);
 					}
 					else
 					{
-						treeView = new GuiTreeView(GetCurrentTheme()->CreateTreeViewStyle());
+						treeView = new GuiTreeView(styleProvider);
 					}
 
 					vint indexIconSize = constructorArguments.Keys().IndexOf(L"IconSize");
@@ -913,14 +936,6 @@ GuiTreeViewInstanceLoader
 
 			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
 			{
-				if (typeInfo.typeName == GetTypeName())
-				{
-					propertyNames.Add(L"IconSize");
-					if (bindable)
-					{
-						propertyNames.Add(L"ItemSource");
-					}
-				}
 				if (!bindable)
 				{
 					propertyNames.Add(L"Nodes");
@@ -931,6 +946,7 @@ GuiTreeViewInstanceLoader
 			{
 				if (typeInfo.typeName == GetTypeName())
 				{
+					propertyNames.Add(L"ControlTemplate");
 					propertyNames.Add(L"IconSize");
 					if (bindable)
 					{
@@ -1109,8 +1125,26 @@ GuiBindableTextListInstanceLoader
 					vint indexItemSource = constructorArguments.Keys().IndexOf(L"ItemSource");
 					if (indexItemSource != -1)
 					{
+						GuiTextListTemplate_StyleProvider* styleProvider = 0;
+						{
+							vint indexControlTemplate = constructorArguments.Keys().IndexOf(L"ControlTemplate");
+							if (indexControlTemplate == -1)
+							{
+								auto factory = CreateTemplateFactory(constructorArguments.GetByIndex(indexControlTemplate)[0].GetText());
+								styleProvider = new GuiTextListTemplate_StyleProvider(factory);
+							}
+						}
+
 						auto itemSource = UnboxValue<Ptr<IValueEnumerable>>(constructorArguments.GetByIndex(indexItemSource)[0]);
-						auto control = new GuiBindableTextList(GetCurrentTheme()->CreateTextListStyle(), itemStyleProviderFactory(), itemSource);
+						GuiBindableTextList* control = 0;
+						if (styleProvider)
+						{
+							control = new GuiBindableTextList(styleProvider, styleProvider->CreateArgument(), itemSource);
+						}
+						else
+						{
+							control = new GuiBindableTextList(GetCurrentTheme()->CreateTextListStyle(), itemStyleProviderFactory(), itemSource);
+						}
 						return Value::From(control);
 					}
 				}
@@ -1121,13 +1155,20 @@ GuiBindableTextListInstanceLoader
 			{
 				if (typeInfo.typeName == GetTypeName())
 				{
+					propertyNames.Add(L"ControlTemplate");
 					propertyNames.Add(L"ItemSource");
 				}
 			}
 
 			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
 			{
-				 if (propertyInfo.propertyName == L"ItemSource")
+				if (propertyInfo.propertyName == L"ControlTemplate")
+				{
+					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<WString>());
+					info->constructorParameter = true;
+					return info;
+				}
+				if (propertyInfo.propertyName == L"ItemSource")
 				{
 					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<IValueEnumerable>());
 					info->constructorParameter = true;
@@ -1567,11 +1608,11 @@ GuiPredefinedInstanceLoadersPlugin
 				manager->SetLoader(new GuiSelectableListControlInstanceLoader);		// ItemTemplate
 				manager->SetLoader(new GuiVirtualTreeViewInstanceLoader);			// ItemTemplate
 				manager->SetLoader(new GuiVirtualDataGridInstanceLoader);			// ItemTemplate
-				manager->SetLoader(new GuiListViewInstanceLoader(false));
-				manager->SetLoader(new GuiTreeViewInstanceLoader(false));
-				manager->SetLoader(new GuiBindableTextListInstanceLoader(L"", [](){return GetCurrentTheme()->CreateTextListItemStyle(); }));
-				manager->SetLoader(new GuiListViewInstanceLoader(true));			// ItemSource
-				manager->SetLoader(new GuiTreeViewInstanceLoader(true));			// ItemSource
+				manager->SetLoader(new GuiListViewInstanceLoader(false));			// ControlTemplate
+				manager->SetLoader(new GuiTreeViewInstanceLoader(false));			// ControlTemplate
+				manager->SetLoader(new GuiBindableTextListInstanceLoader(L"", [](){return GetCurrentTheme()->CreateTextListItemStyle(); }));	// ControlTemplate, ItemSource
+				manager->SetLoader(new GuiListViewInstanceLoader(true));			// ControlTemplate, ItemSource
+				manager->SetLoader(new GuiTreeViewInstanceLoader(true));			// ControlTemplate, ItemSource
 
 				manager->SetLoader(new GuiCompositionInstanceLoader);
 				manager->SetLoader(new GuiTableCompositionInstanceLoader);
@@ -1582,38 +1623,38 @@ GuiPredefinedInstanceLoadersPlugin
 				ADD_VIRTUAL_TYPE_LOADER(GuiComboBoxListControl,						GuiComboBoxInstanceLoader);				// ControlTemplate
 				ADD_VIRTUAL_TYPE_LOADER(tree::MemoryNodeProvider,					GuiTreeNodeInstanceLoader);
 
-				ADD_TEMPLATE_CONTROL	(							GuiCustomControl,		g::NewCustomControl,			GuiControlTemplate);
-				ADD_TEMPLATE_CONTROL	(							GuiLabel,				g::NewLabel,					GuiLabelTemplate);
-				ADD_TEMPLATE_CONTROL	(							GuiButton,				g::NewButton,					GuiButtonTemplate);
-				ADD_TEMPLATE_CONTROL	(							GuiScrollContainer,		g::NewScrollContainer,			GuiScrollViewTemplate);
-				ADD_TEMPLATE_CONTROL	(							GuiWindow,				g::NewWindow,					GuiWindowTemplate);
-				ADD_TEMPLATE_CONTROL_2	(							GuiTextList,			g::NewTextList,					GuiTextListTemplate);
-				ADD_TEMPLATE_CONTROL	(							GuiDocumentViewer,		g::NewDocumentViewer,			GuiScrollViewTemplate);
-				ADD_TEMPLATE_CONTROL	(							GuiDocumentLabel,		g::NewDocumentLabel,			GuiControlTemplate);
-				ADD_TEMPLATE_CONTROL	(							GuiMultilineTextBox,	g::NewMultilineTextBox,			GuiMultilineTextBoxTemplate);
-				ADD_TEMPLATE_CONTROL	(							GuiSinglelineTextBox,	g::NewTextBox,					GuiSinglelineTextBoxTemplate);
-				ADD_TEMPLATE_CONTROL	(							GuiDatePicker,			g::NewDatePicker,				GuiDatePickerTemplate);
-				ADD_TEMPLATE_CONTROL_2	(							GuiDateComboBox,		g::NewDateComboBox,				GuiDateComboBoxTemplate);
-				ADD_TEMPLATE_CONTROL_X	(							GuiStringGrid,			g::NewStringGrid,				GuiControlTemplate);
+				ADD_TEMPLATE_CONTROL	(							GuiCustomControl,		g::NewCustomControl,			GuiControlTemplate);			// ControlTemplate
+				ADD_TEMPLATE_CONTROL	(							GuiLabel,				g::NewLabel,					GuiLabelTemplate);				// ControlTemplate
+				ADD_TEMPLATE_CONTROL	(							GuiButton,				g::NewButton,					GuiButtonTemplate);				// ControlTemplate
+				ADD_TEMPLATE_CONTROL	(							GuiScrollContainer,		g::NewScrollContainer,			GuiScrollViewTemplate);			// ControlTemplate
+				ADD_TEMPLATE_CONTROL	(							GuiWindow,				g::NewWindow,					GuiWindowTemplate);				// ControlTemplate
+				ADD_TEMPLATE_CONTROL_2	(							GuiTextList,			g::NewTextList,					GuiTextListTemplate);			// ControlTemplate
+				ADD_TEMPLATE_CONTROL	(							GuiDocumentViewer,		g::NewDocumentViewer,			GuiScrollViewTemplate);			// ControlTemplate
+				ADD_TEMPLATE_CONTROL	(							GuiDocumentLabel,		g::NewDocumentLabel,			GuiControlTemplate);			// ControlTemplate
+				ADD_TEMPLATE_CONTROL	(							GuiMultilineTextBox,	g::NewMultilineTextBox,			GuiMultilineTextBoxTemplate);	// ControlTemplate
+				ADD_TEMPLATE_CONTROL	(							GuiSinglelineTextBox,	g::NewTextBox,					GuiSinglelineTextBoxTemplate);	// ControlTemplate
+				ADD_TEMPLATE_CONTROL	(							GuiDatePicker,			g::NewDatePicker,				GuiDatePickerTemplate);			// ControlTemplate
+				ADD_TEMPLATE_CONTROL_2	(							GuiDateComboBox,		g::NewDateComboBox,				GuiDateComboBoxTemplate);		// ControlTemplate
+				ADD_TEMPLATE_CONTROL_X	(							GuiStringGrid,			g::NewStringGrid,				GuiControlTemplate);			// ControlTemplate
+																																							// ControlTemplate
+				ADD_VIRTUAL_CONTROL		(GroupBox,					GuiControl,				g::NewGroupBox,					GuiControlTemplate);			// ControlTemplate
+				ADD_VIRTUAL_CONTROL		(MenuSplitter,				GuiControl,				g::NewMenuSplitter,				GuiControlTemplate);			// ControlTemplate
+				ADD_VIRTUAL_CONTROL		(MenuBarButton,				GuiToolstripButton,		g::NewMenuBarButton,			GuiToolstripButtonTemplate);	// ControlTemplate
+				ADD_VIRTUAL_CONTROL		(MenuItemButton,			GuiToolstripButton,		g::NewMenuItemButton,			GuiToolstripButtonTemplate);	// ControlTemplate
+				ADD_VIRTUAL_CONTROL		(ToolstripDropdownButton,	GuiToolstripButton,		g::NewToolBarDropdownButton,	GuiToolstripButtonTemplate);	// ControlTemplate
+				ADD_VIRTUAL_CONTROL		(ToolstripSplitButton,		GuiToolstripButton,		g::NewToolBarSplitButton,		GuiToolstripButtonTemplate);	// ControlTemplate
+				ADD_VIRTUAL_CONTROL		(ToolstripSplitter,			GuiControl,				g::NewToolBarSplitter,			GuiControlTemplate);			// ControlTemplate
+				ADD_VIRTUAL_CONTROL		(CheckBox,					GuiSelectableButton,	g::NewCheckBox,					GuiSelectableButtonTemplate);	// ControlTemplate
+				ADD_VIRTUAL_CONTROL		(RadioButton,				GuiSelectableButton,	g::NewRadioButton,				GuiSelectableButtonTemplate);	// ControlTemplate
+				ADD_VIRTUAL_CONTROL		(HScroll,					GuiScroll,				g::NewHScroll,					GuiScrollTemplate);				// ControlTemplate
+				ADD_VIRTUAL_CONTROL		(VScroll,					GuiScroll,				g::NewVScroll,					GuiScrollTemplate);				// ControlTemplate
+				ADD_VIRTUAL_CONTROL		(HTracker,					GuiScroll,				g::NewHTracker,					GuiScrollTemplate);				// ControlTemplate
+				ADD_VIRTUAL_CONTROL		(VTracker,					GuiScroll,				g::NewVTracker,					GuiScrollTemplate);				// ControlTemplate
+				ADD_VIRTUAL_CONTROL		(ProgressBar,				GuiScroll,				g::NewProgressBar,				GuiScrollTemplate);				// ControlTemplate
+				ADD_VIRTUAL_CONTROL_2	(CheckTextList,				GuiTextList,			g::NewCheckTextList,			GuiTextListTemplate);			// ControlTemplate
+				ADD_VIRTUAL_CONTROL_2	(RadioTextList,				GuiTextList,			g::NewRadioTextList,			GuiTextListTemplate);			// ControlTemplate
 
-				ADD_VIRTUAL_CONTROL		(GroupBox,					GuiControl,				g::NewGroupBox,					GuiControlTemplate);
-				ADD_VIRTUAL_CONTROL		(MenuSplitter,				GuiControl,				g::NewMenuSplitter,				GuiControlTemplate);
-				ADD_VIRTUAL_CONTROL		(MenuBarButton,				GuiToolstripButton,		g::NewMenuBarButton,			GuiToolstripButtonTemplate);
-				ADD_VIRTUAL_CONTROL		(MenuItemButton,			GuiToolstripButton,		g::NewMenuItemButton,			GuiToolstripButtonTemplate);
-				ADD_VIRTUAL_CONTROL		(ToolstripDropdownButton,	GuiToolstripButton,		g::NewToolBarDropdownButton,	GuiToolstripButtonTemplate);
-				ADD_VIRTUAL_CONTROL		(ToolstripSplitButton,		GuiToolstripButton,		g::NewToolBarSplitButton,		GuiToolstripButtonTemplate);
-				ADD_VIRTUAL_CONTROL		(ToolstripSplitter,			GuiControl,				g::NewToolBarSplitter,			GuiControlTemplate);
-				ADD_VIRTUAL_CONTROL		(CheckBox,					GuiSelectableButton,	g::NewCheckBox,					GuiSelectableButtonTemplate);
-				ADD_VIRTUAL_CONTROL		(RadioButton,				GuiSelectableButton,	g::NewRadioButton,				GuiSelectableButtonTemplate);
-				ADD_VIRTUAL_CONTROL		(HScroll,					GuiScroll,				g::NewHScroll,					GuiScrollTemplate);
-				ADD_VIRTUAL_CONTROL		(VScroll,					GuiScroll,				g::NewVScroll,					GuiScrollTemplate);
-				ADD_VIRTUAL_CONTROL		(HTracker,					GuiScroll,				g::NewHTracker,					GuiScrollTemplate);
-				ADD_VIRTUAL_CONTROL		(VTracker,					GuiScroll,				g::NewVTracker,					GuiScrollTemplate);
-				ADD_VIRTUAL_CONTROL		(ProgressBar,				GuiScroll,				g::NewProgressBar,				GuiScrollTemplate);
-				ADD_VIRTUAL_CONTROL_2	(CheckTextList,				GuiTextList,			g::NewCheckTextList,			GuiTextListTemplate);
-				ADD_VIRTUAL_CONTROL_2	(RadioTextList,				GuiTextList,			g::NewRadioTextList,			GuiTextListTemplate);
-
-				auto bindableTextListName = description::GetTypeDescriptor<GuiBindableTextList>()->GetTypeName();
+				auto bindableTextListName = description::GetTypeDescriptor<GuiBindableTextList>()->GetTypeName();			// ControlTemplate, ItemSource
 				manager->CreateVirtualType(bindableTextListName, new GuiBindableTextListInstanceLoader(L"Check", [](){return GetCurrentTheme()->CreateCheckTextListItemStyle(); }));
 				manager->CreateVirtualType(bindableTextListName, new GuiBindableTextListInstanceLoader(L"Radio", [](){return GetCurrentTheme()->CreateRadioTextListItemStyle(); }));
 

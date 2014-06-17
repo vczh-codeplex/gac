@@ -98,6 +98,13 @@ Type Declaration
 				GuiToolstripButtonTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_REFLECTION)
 			END_CLASS_MEMBER(GuiToolstripButtonTemplate)
 
+			BEGIN_CLASS_MEMBER(GuiListViewColumnHeaderTemplate)
+				CLASS_MEMBER_BASE(GuiToolstripButtonTemplate)
+				CLASS_MEMBER_CONSTRUCTOR(GuiListViewColumnHeaderTemplate*(), NO_PARAMETER)
+
+				GuiListViewColumnHeaderTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_REFLECTION)
+			END_CLASS_MEMBER(GuiListViewColumnHeaderTemplate)
+
 			BEGIN_CLASS_MEMBER(GuiComboBoxTemplate)
 				CLASS_MEMBER_BASE(GuiToolstripButtonTemplate)
 				CLASS_MEMBER_CONSTRUCTOR(GuiComboBoxTemplate*(), NO_PARAMETER)
@@ -139,6 +146,20 @@ Type Declaration
 
 				GuiTextListTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_REFLECTION)
 			END_CLASS_MEMBER(GuiTextListTemplate)
+
+			BEGIN_CLASS_MEMBER(GuiListViewTemplate)
+				CLASS_MEMBER_BASE(GuiScrollViewTemplate)
+				CLASS_MEMBER_CONSTRUCTOR(GuiListViewTemplate*(), NO_PARAMETER)
+
+				GuiListViewTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_REFLECTION)
+			END_CLASS_MEMBER(GuiListViewTemplate)
+
+			BEGIN_CLASS_MEMBER(GuiTreeViewTemplate)
+				CLASS_MEMBER_BASE(GuiScrollViewTemplate)
+				CLASS_MEMBER_CONSTRUCTOR(GuiTreeViewTemplate*(), NO_PARAMETER)
+
+				GuiTreeViewTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_REFLECTION)
+			END_CLASS_MEMBER(GuiTreeViewTemplate)
 
 			BEGIN_CLASS_MEMBER(GuiListItemTemplate)
 				CLASS_MEMBER_BASE(GuiTemplate)

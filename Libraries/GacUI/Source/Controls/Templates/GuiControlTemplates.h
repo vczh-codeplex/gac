@@ -162,6 +162,18 @@ Control Template
 				GuiToolstripButtonTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
 			};
 
+			class GuiListViewColumnHeaderTemplate :public GuiToolstripButtonTemplate, public Description<GuiListViewColumnHeaderTemplate>
+			{
+			public:
+				GuiListViewColumnHeaderTemplate();
+				~GuiListViewColumnHeaderTemplate();
+
+#define GuiListViewColumnHeaderTemplate_PROPERTIES(F)\
+				F(GuiListViewColumnHeaderTemplate, controls::GuiListViewColumnHeader::ColumnSortingState, SortingState)\
+
+				GuiListViewColumnHeaderTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
+			};
+
 			class GuiComboBoxTemplate : public GuiToolstripButtonTemplate, public Description<GuiComboBoxTemplate>
 			{
 			public:
@@ -257,6 +269,36 @@ Control Template
 				F(GuiTextListTemplate, Color, TextColor)\
 
 				GuiTextListTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
+			};
+
+			class GuiListViewTemplate : public GuiScrollViewTemplate, public Description<GuiListViewTemplate>
+			{
+			public:
+				GuiListViewTemplate();
+				~GuiListViewTemplate();
+
+#define GuiListViewTemplate_PROPERTIES(F)\
+				F(GuiListViewTemplate, WString, BackgroundTemplate)\
+				F(GuiListViewTemplate, WString, ColumnHeaderTemplate)\
+				F(GuiListViewTemplate, Color, PrimaryTextColor)\
+				F(GuiListViewTemplate, Color, SecondaryTextColor)\
+				F(GuiListViewTemplate, Color, ItemSeparatorColor)\
+
+				GuiListViewTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
+			};
+
+			class GuiTreeViewTemplate : public GuiScrollViewTemplate, public Description<GuiListViewTemplate>
+			{
+			public:
+				GuiTreeViewTemplate();
+				~GuiTreeViewTemplate();
+
+#define GuiTreeViewTemplate_PROPERTIES(F)\
+				F(GuiTreeViewTemplate, WString, BackgroundTemplate)\
+				F(GuiTreeViewTemplate, WString, ExpandingDecoratorTemplate)\
+				F(GuiTreeViewTemplate, Color, TextColor)\
+
+				GuiTreeViewTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
 			};
 
 /***********************************************************************
