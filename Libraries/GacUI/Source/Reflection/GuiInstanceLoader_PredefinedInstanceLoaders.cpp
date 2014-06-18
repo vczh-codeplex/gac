@@ -751,12 +751,12 @@ GuiListViewInstanceLoader
 						vint indexControlTemplate = constructorArguments.Keys().IndexOf(L"ControlTemplate");
 						if (indexControlTemplate == -1)
 						{
-							auto factory = CreateTemplateFactory(constructorArguments.GetByIndex(indexControlTemplate)[0].GetText());
-							styleProvider = new GuiListViewTemplate_StyleProvider(factory);
+							styleProvider = GetCurrentTheme()->CreateListViewStyle();
 						}
 						else
 						{
-							styleProvider = GetCurrentTheme()->CreateListViewStyle();
+							auto factory = CreateTemplateFactory(constructorArguments.GetByIndex(indexControlTemplate)[0].GetText());
+							styleProvider = new GuiListViewTemplate_StyleProvider(factory);
 						}
 					}
 
@@ -824,7 +824,7 @@ GuiListViewInstanceLoader
 					info->constructorParameter = true;
 					return info;
 				}
-				if (propertyInfo.propertyName == L"View")
+				else if (propertyInfo.propertyName == L"View")
 				{
 					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<ListViewViewType>());
 					info->constructorParameter = true;
@@ -897,12 +897,12 @@ GuiTreeViewInstanceLoader
 						vint indexControlTemplate = constructorArguments.Keys().IndexOf(L"ControlTemplate");
 						if (indexControlTemplate == -1)
 						{
-							auto factory = CreateTemplateFactory(constructorArguments.GetByIndex(indexControlTemplate)[0].GetText());
-							styleProvider = new GuiTreeViewTemplate_StyleProvider(factory);
+							styleProvider = GetCurrentTheme()->CreateTreeViewStyle();
 						}
 						else
 						{
-							styleProvider = GetCurrentTheme()->CreateTreeViewStyle();
+							auto factory = CreateTemplateFactory(constructorArguments.GetByIndex(indexControlTemplate)[0].GetText());
+							styleProvider = new GuiTreeViewTemplate_StyleProvider(factory);
 						}
 					}
 
@@ -963,6 +963,12 @@ GuiTreeViewInstanceLoader
 					{
 						return GuiInstancePropertyInfo::Collection(description::GetTypeDescriptor<tree::MemoryNodeProvider>());
 					}
+				}
+				else if (propertyInfo.propertyName == L"ControlTemplate")
+				{
+					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<WString>());
+					info->constructorParameter = true;
+					return info;
 				}
 				else if (propertyInfo.propertyName == L"ItemSource")
 				{
@@ -1128,7 +1134,7 @@ GuiBindableTextListInstanceLoader
 						GuiTextListTemplate_StyleProvider* styleProvider = 0;
 						{
 							vint indexControlTemplate = constructorArguments.Keys().IndexOf(L"ControlTemplate");
-							if (indexControlTemplate == -1)
+							if (indexControlTemplate != -1)
 							{
 								auto factory = CreateTemplateFactory(constructorArguments.GetByIndex(indexControlTemplate)[0].GetText());
 								styleProvider = new GuiTextListTemplate_StyleProvider(factory);
@@ -1635,7 +1641,7 @@ GuiPredefinedInstanceLoadersPlugin
 				ADD_TEMPLATE_CONTROL	(							GuiSinglelineTextBox,	g::NewTextBox,					GuiSinglelineTextBoxTemplate);	// ControlTemplate
 				ADD_TEMPLATE_CONTROL	(							GuiDatePicker,			g::NewDatePicker,				GuiDatePickerTemplate);			// ControlTemplate
 				ADD_TEMPLATE_CONTROL_2	(							GuiDateComboBox,		g::NewDateComboBox,				GuiDateComboBoxTemplate);		// ControlTemplate
-				ADD_TEMPLATE_CONTROL_X	(							GuiStringGrid,			g::NewStringGrid,				GuiControlTemplate);			// ControlTemplate
+				ADD_TEMPLATE_CONTROL	(							GuiStringGrid,			g::NewStringGrid,				GuiListViewTemplate);			// ControlTemplate
 																																							// ControlTemplate
 				ADD_VIRTUAL_CONTROL		(GroupBox,					GuiControl,				g::NewGroupBox,					GuiControlTemplate);			// ControlTemplate
 				ADD_VIRTUAL_CONTROL		(MenuSplitter,				GuiControl,				g::NewMenuSplitter,				GuiControlTemplate);			// ControlTemplate
