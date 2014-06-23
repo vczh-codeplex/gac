@@ -596,10 +596,6 @@ Type Declaration
 				CLASS_MEMBER_BASE(GuiListControl::IItemStyleController)
 			END_CLASS_MEMBER(ItemStyleControllerBase)
 
-			BEGIN_CLASS_MEMBER(ItemProviderBase)
-				CLASS_MEMBER_BASE(GuiListControl::IItemProvider)
-			END_CLASS_MEMBER(ItemProviderBase)
-
 			BEGIN_CLASS_MEMBER(TextItemStyleProvider)
 				CLASS_MEMBER_BASE(GuiSelectableListControl::IItemStyleProvider)
 				CLASS_MEMBER_CONSTRUCTOR(Ptr<TextItemStyleProvider>(TextItemStyleProvider::ITextItemStyleProvider*), {L"textItemStyleProvider"})
@@ -637,16 +633,9 @@ Type Declaration
 				CLASS_MEMBER_CONSTRUCTOR(Ptr<TextItem>(const WString&), {L"text"})
 				CLASS_MEMBER_CONSTRUCTOR(Ptr<TextItem>(const WString&, bool), {L"text" _ L"checked"})
 
-				CLASS_MEMBER_PROPERTY_READONLY_FAST(Text)
-				CLASS_MEMBER_PROPERTY_READONLY_FAST(Checked)
+				CLASS_MEMBER_PROPERTY_FAST(Text)
+				CLASS_MEMBER_PROPERTY_FAST(Checked)
 			END_CLASS_MEMBER(TextItem)
-
-			BEGIN_CLASS_MEMBER(TextItemProvider)
-				CLASS_MEMBER_BASE(ItemProviderBase)
-
-				CLASS_MEMBER_METHOD(SetText, {L"itemIndex" _ L"value"})
-				CLASS_MEMBER_METHOD(SetChecked, {L"itemIndex" _ L"value"})
-			END_CLASS_MEMBER(TextItemProvider)
 
 			BEGIN_CLASS_MEMBER(GuiVirtualTextList)
 				CLASS_MEMBER_BASE(GuiSelectableListControl)
@@ -1001,13 +990,6 @@ Type Declaration
 
 				CLASS_MEMBER_METHOD(GetBindingValue, {L"node"})
 			END_CLASS_MEMBER(INodeItemBindingView)
-
-			BEGIN_CLASS_MEMBER(NodeItemProvider)
-				CLASS_MEMBER_BASE(ItemProviderBase)
-				CLASS_MEMBER_CONSTRUCTOR(Ptr<NodeItemProvider>(Ptr<INodeRootProvider>), {L"root"})
-
-				CLASS_MEMBER_PROPERTY_READONLY_FAST(Root)
-			END_CLASS_MEMBER(NodeItemProvider)
 
 			BEGIN_CLASS_MEMBER(INodeItemStyleController)
 				CLASS_MEMBER_BASE(GuiListControl::IItemStyleController)

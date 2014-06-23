@@ -164,6 +164,7 @@ Resource Structure
 			/// <returns>The contained object.</returns>
 			Ptr<DescriptableObject>					GetContent();
 			/// <summary>Set the containd object for this resource item.</summary>
+			/// <param name="_typeName">The type name of this contained object.</param>
 			/// <param name="value">The contained object.</param>
 			void									SetContent(const WString& _typeName, Ptr<DescriptableObject> value);
 

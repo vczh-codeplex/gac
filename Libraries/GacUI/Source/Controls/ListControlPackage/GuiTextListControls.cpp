@@ -193,13 +193,15 @@ TextItem
 ***********************************************************************/
 
 				TextItem::TextItem()
-					:checked(false)
+					:owner(0)
+					, checked(false)
 				{
 				}
 
 				TextItem::TextItem(const WString& _text, bool _checked)
-					:text(_text)
-					,checked(_checked)
+					:owner(0)
+					, text(_text)
+					, checked(_checked)
 				{
 				}
 
@@ -222,14 +224,50 @@ TextItem
 					return text;
 				}
 
+				void TextItem::SetText(const WString& value)
+				{
+					text = value;
+					if (owner)
+					{
+						vint index = owner->IndexOf(this);
+						owner->InvokeOnItemModified(index, 1, 1);
+					}
+				}
+
 				bool TextItem::GetChecked()
 				{
 					return checked;
 				}
 
+				void TextItem::SetChecked(bool value)
+				{
+					checked = value;
+					if (owner)
+					{
+						vint index = owner->IndexOf(this);
+						owner->InvokeOnItemModified(index, 1, 1);
+
+						GuiItemEventArgs arguments;
+						arguments.itemIndex=index;
+						owner->listControl->ItemChecked.Execute(arguments);
+					}
+				}
+
 /***********************************************************************
 TextItemProvider
 ***********************************************************************/
+
+				void TextItemProvider::AfterInsert(vint item, const Ptr<TextItem>& value)
+				{
+					ListProvider<Ptr<TextItem>>::AfterInsert(item, value);
+					value->owner = this;
+				}
+
+				void TextItemProvider::BeforeRemove(vint item, const Ptr<TextItem>& value)
+				{
+					value->owner = 0;
+					ListProvider<Ptr<TextItem>>::BeforeRemove(item, value);
+				}
 
 				bool TextItemProvider::ContainsPrimaryText(vint itemIndex)
 				{
@@ -268,22 +306,6 @@ TextItemProvider
 
 				TextItemProvider::~TextItemProvider()
 				{
-				}
-					
-				void TextItemProvider::SetText(vint itemIndex, const WString& value)
-				{
-					items[itemIndex]->text=value;
-					InvokeOnItemModified(itemIndex, 1, 1);
-				}
-
-				void TextItemProvider::SetChecked(vint itemIndex, bool value)
-				{
-					SetCheckedSilently(itemIndex, value);
-					InvokeOnItemModified(itemIndex, 1, 1);
-
-					GuiItemEventArgs arguments;
-					arguments.itemIndex=itemIndex;
-					listControl->ItemChecked.Execute(arguments);
 				}
 
 				IDescriptable* TextItemProvider::RequestView(const WString& identifier)
