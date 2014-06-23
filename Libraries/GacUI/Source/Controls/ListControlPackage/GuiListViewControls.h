@@ -672,41 +672,76 @@ ListView
 
 			namespace list
 			{
+				class ListViewSubItems : public ItemsBase<WString>
+				{
+					friend class ListViewItem;
+				protected:
+					ListViewItem*									owner;
+					
+					void											NotifyUpdateInternal(vint start, vint count, vint newCount)override;
+				public:
+				};
+
 				/// <summary>List view item.</summary>
 				class ListViewItem : public Object, public Description<ListViewItem>
 				{
-				public:
-					/// <summary>Small image.</summary>
+					friend class ListViewSubItems;
+					friend class ListViewItemProvider;
+				protected:
+					ListViewItemProvider*							owner;
+					ListViewSubItems								subItems;
 					Ptr<GuiImageData>								smallImage;
-					/// <summary>Large image.</summary>
 					Ptr<GuiImageData>								largeImage;
-					/// <summary>Item text.</summary>
 					WString											text;
-					/// <summary>Sub items.</summary>
-					collections::List<WString>						subItems;
-					/// <summary>Tag object.</summary>
 					description::Value								tag;
+					
+					void											NotifyUpdate();
+				public:
+					/// <summary>Create a list view item.</summary>
+					/// <param name="_text">The specified text.</param>
+					/// <param name="_size">The specified size.</param>
+					ListViewItem();
+
+					ListViewSubItems&								GetSubItems();
+					Ptr<GuiImageData>								GetSmallImage();
+					void											SetSmallImage(Ptr<GuiImageData> value);
+					Ptr<GuiImageData>								GetLargeImage();
+					void											SetLargeImage(Ptr<GuiImageData> value);
+					const WString&									GetText();
+					void											SetText(const WString& value);
+					description::Value								GetTag();
+					void											SetTag(const description::Value& value);
 				};
 				
 				/// <summary>List view column.</summary>
 				class ListViewColumn : public Object, public Description<ListViewColumn>
 				{
-				public:
-					/// <summary>Column text.</summary>
+					friend class ListViewColumns;
+				protected:
+					ListViewColumns*								owner;
 					WString											text;
-					/// <summary>sub item text property name.</summary>
 					WString											textProperty;
-					/// <summary>Column size.</summary>
 					vint											size;
-					/// <summary>Column dropdown popup.</summary>
 					GuiMenu*										dropdownPopup;
-					/// <summary>Column sorting state.</summary>
 					GuiListViewColumnHeader::ColumnSortingState		sortingState;
-
+					
+					void											NotifyUpdate();
+				public:
 					/// <summary>Create a column with the specified text and size.</summary>
 					/// <param name="_text">The specified text.</param>
 					/// <param name="_size">The specified size.</param>
 					ListViewColumn(const WString& _text=L"", vint _size=160);
+
+					const WString&									GetText();
+					void											SetText(const WString& value);
+					const WString&									GetTextProperty();
+					void											SetTextProperty(const WString& value);
+					vint											GetSize();
+					void											SetSize(vint value);
+					GuiMenu*										GetDropdownPopup();
+					void											SetDropdownPopup(GuiMenu* value);
+					GuiListViewColumnHeader::ColumnSortingState		GetSortingState();
+					void											SetSortingState(GuiListViewColumnHeader::ColumnSortingState value);
 				};
 
 				/// <summary>List view data column container.</summary>
@@ -714,9 +749,9 @@ ListView
 				{
 					friend class ListViewItemProvider;
 				protected:
-					ListViewItemProvider*						itemProvider;
+					ListViewItemProvider*							itemProvider;
 
-					void NotifyUpdateInternal(vint start, vint count, vint newCount)override;
+					void											NotifyUpdateInternal(vint start, vint count, vint newCount)override;
 				public:
 					/// <summary>Create a container.</summary>
 					ListViewDataColumns();
@@ -726,11 +761,14 @@ ListView
 				/// <summary>List view column container.</summary>
 				class ListViewColumns : public ItemsBase<Ptr<ListViewColumn>>
 				{
+					friend class ListViewColumn;
 					friend class ListViewItemProvider;
 				protected:
-					ListViewItemProvider*						itemProvider;
+					ListViewItemProvider*							itemProvider;
 
-					void NotifyUpdateInternal(vint start, vint count, vint newCount)override;
+					void											AfterInsert(vint index, const Ptr<ListViewColumn>& value)override;
+					void											BeforeRemove(vint index, const Ptr<ListViewColumn>& value)override;
+					void											NotifyUpdateInternal(vint start, vint count, vint newCount)override;
 				public:
 					/// <summary>Create a container.</summary>
 					ListViewColumns();
@@ -745,6 +783,7 @@ ListView
 					, protected GuiListControl::IItemBindingView
 					, public Description<ListViewItemProvider>
 				{
+					friend class ListViewItem;
 					friend class ListViewColumns;
 					friend class ListViewDataColumns;
 					typedef collections::List<ListViewColumnItemArranger::IColumnItemViewCallback*>		ColumnItemViewCallbackList;
@@ -752,6 +791,9 @@ ListView
 					ListViewDataColumns									dataColumns;
 					ListViewColumns										columns;
 					ColumnItemViewCallbackList							columnItemViewCallbacks;
+
+					void												AfterInsert(vint index, const Ptr<ListViewItem>& value)override;
+					void												BeforeRemove(vint index, const Ptr<ListViewItem>& value)override;
 
 					bool												ContainsPrimaryText(vint itemIndex)override;
 					WString												GetPrimaryTextViewText(vint itemIndex)override;
