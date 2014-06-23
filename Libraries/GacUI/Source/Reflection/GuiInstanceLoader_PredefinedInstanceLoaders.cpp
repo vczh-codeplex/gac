@@ -1343,82 +1343,6 @@ GuiCellCompositionInstanceLoader
 		};
 
 /***********************************************************************
-GuiTextItemInstanceLoader
-***********************************************************************/
-
-		class GuiTextItemInstanceLoader : public Object, public IGuiInstanceLoader
-		{
-		public:
-
-			WString GetTypeName()override
-			{
-				return description::GetTypeDescriptor<list::TextItem>()->GetTypeName();
-			}
-
-			bool IsCreatable(const TypeInfo& typeInfo)override
-			{
-				return typeInfo.typeName == GetTypeName();
-			}
-
-			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
-			{
-				if (typeInfo.typeName == GetTypeName())
-				{
-					vint indexText = constructorArguments.Keys().IndexOf(L"Text");
-					vint indexChecked = constructorArguments.Keys().IndexOf(L"Checked");
-
-					if (indexText != -1)
-					{
-						WString text = UnboxValue<WString>(constructorArguments.GetByIndex(indexText)[0]);
-						bool checked = false;
-						if (indexChecked != -1)
-						{
-							checked=UnboxValue<bool>(constructorArguments.GetByIndex(indexChecked)[0]);
-						}
-						return Value::From(Ptr<list::TextItem>(new list::TextItem(text, checked)));
-					}
-				}
-				return Value();
-			}
-
-			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
-			{
-				if (typeInfo.typeName == GetTypeName())
-				{
-					propertyNames.Add(L"Text");
-					propertyNames.Add(L"Checked");
-				}
-			}
-
-			void GetConstructorParameters(const TypeInfo& typeInfo, List<WString>& propertyNames)override
-			{
-				if (typeInfo.typeName == GetTypeName())
-				{
-					propertyNames.Add(L"Text");
-					propertyNames.Add(L"Checked");
-				}
-			}
-
-			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
-			{
-				if (propertyInfo.propertyName == L"Text")
-				{
-					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<WString>());
-					info->constructorParameter = true;
-					info->required = true;
-					return info;
-				}
-				else if (propertyInfo.propertyName == L"Checked")
-				{
-					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<bool>());
-					info->constructorParameter = true;
-					return info;
-				}
-				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
-			}
-		};
-
-/***********************************************************************
 GuiTreeNodeInstanceLoader
 ***********************************************************************/
 
@@ -1623,8 +1547,6 @@ GuiPredefinedInstanceLoadersPlugin
 				manager->SetLoader(new GuiCompositionInstanceLoader);
 				manager->SetLoader(new GuiTableCompositionInstanceLoader);
 				manager->SetLoader(new GuiCellCompositionInstanceLoader);
-
-				manager->SetLoader(new GuiTextItemInstanceLoader);
 				
 				ADD_VIRTUAL_TYPE_LOADER(GuiComboBoxListControl,						GuiComboBoxInstanceLoader);				// ControlTemplate
 				ADD_VIRTUAL_TYPE_LOADER(tree::MemoryNodeProvider,					GuiTreeNodeInstanceLoader);

@@ -418,20 +418,20 @@ void GuiMain()
 {
 #ifndef VCZH_DEBUG_NO_REFLECTION
 	UnitTestInGuiMain();
-	//{
-	//	FileStream fileStream(L"Reflection.txt", FileStream::WriteOnly);
-	//	BomEncoder encoder(BomEncoder::Utf16);
-	//	EncoderStream encoderStream(fileStream, encoder);
-	//	StreamWriter writer(encoderStream);
-	//	LogTypeManager(writer);
-	//}
-	//{
-	//	FileStream fileStream(L"Instance.txt", FileStream::WriteOnly);
-	//	BomEncoder encoder(BomEncoder::Utf16);
-	//	EncoderStream encoderStream(fileStream, encoder);
-	//	StreamWriter writer(encoderStream);
-	//	LogInstanceLoaderManager(writer);
-	//}
+	{
+		FileStream fileStream(L"Reflection.txt", FileStream::WriteOnly);
+		BomEncoder encoder(BomEncoder::Utf16);
+		EncoderStream encoderStream(fileStream, encoder);
+		StreamWriter writer(encoderStream);
+		LogTypeManager(writer);
+	}
+	{
+		FileStream fileStream(L"Instance.txt", FileStream::WriteOnly);
+		BomEncoder encoder(BomEncoder::Utf16);
+		EncoderStream encoderStream(fileStream, encoder);
+		StreamWriter writer(encoderStream);
+		LogInstanceLoaderManager(writer);
+	}
 
 	List<WString> errors;
 	DateTime begin, end;

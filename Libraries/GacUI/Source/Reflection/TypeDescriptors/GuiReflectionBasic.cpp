@@ -462,8 +462,9 @@ Type Declaration
 
 			BEGIN_CLASS_MEMBER(GuiResourceItem)
 				CLASS_MEMBER_BASE(GuiResourceNodeBase)
-
-				CLASS_MEMBER_PROPERTY_FAST(Content)
+				
+				CLASS_MEMBER_METHOD(GetContent, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(SetContent, {L"typeName" _ L"value"})
 
 				CLASS_MEMBER_METHOD(AsImage, NO_PARAMETER)
 				CLASS_MEMBER_METHOD(AsXml, NO_PARAMETER)

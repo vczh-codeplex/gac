@@ -134,8 +134,10 @@ TextList Data Source
 				{
 					friend class TextItemProvider;
 				protected:
+					TextItemProvider*							owner;
 					WString										text;
 					bool										checked;
+
 				public:
 					/// <summary>Create an empty text item.</summary>
 					TextItem();
@@ -151,9 +153,16 @@ TextList Data Source
 					/// <summary>Get the text of this item.</summary>
 					/// <returns>The text of this item.</returns>
 					const WString&								GetText();
+					/// <summary>Set the text of this item.</summary>
+					/// <param name="value">The text of this item.</param>
+					void										SetText(const WString& value);
+
 					/// <summary>Get the check state of this item.</summary>
 					/// <returns>The check state of this item.</returns>
 					bool										GetChecked();
+					/// <summary>Set the check state of this item.</summary>
+					/// <param name="value">The check state of this item.</param>
+					void										SetChecked(bool value);
 				};
 
 				/// <summary>Item provider for <see cref="GuiVirtualTextList"/> or <see cref="GuiSelectableListControl"/>.</summary>
@@ -163,9 +172,13 @@ TextList Data Source
 					, protected GuiListControl::IItemBindingView
 					, public Description<TextItemProvider>
 				{
+					friend class TextItem;
 					friend class GuiTextList;
 				protected:
 					GuiTextList*								listControl;
+
+					void										AfterInsert(vint item, const Ptr<TextItem>& value)override;
+					void										BeforeRemove(vint item, const Ptr<TextItem>& value)override;
 
 					bool										ContainsPrimaryText(vint itemIndex)override;
 					WString										GetPrimaryTextViewText(vint itemIndex)override;
@@ -176,15 +189,6 @@ TextList Data Source
 				public:
 					TextItemProvider();
 					~TextItemProvider();
-					
-					/// <summary>Set the text of an item.</summary>
-					/// <param name="itemIndex">The index of an item.</param>
-					/// <param name="value">The text of an item.</param>
-					void										SetText(vint itemIndex, const WString& value);
-					/// <summary>Set the check state of an item.</summary>
-					/// <param name="itemIndex">The index of an item.</param>
-					/// <param name="value">The check state of an item.</param>
-					void										SetChecked(vint itemIndex, bool value);
 
 					IDescriptable*								RequestView(const WString& identifier)override;
 					void										ReleaseView(IDescriptable* view)override;

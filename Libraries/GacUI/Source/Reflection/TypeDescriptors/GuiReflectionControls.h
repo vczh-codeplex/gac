@@ -74,13 +74,11 @@ Type List
 			F(presentation::controls::list::FixedSizeMultiColumnItemArranger)\
 			F(presentation::controls::list::FixedHeightMultiColumnItemArranger)\
 			F(presentation::controls::list::ItemStyleControllerBase)\
-			F(presentation::controls::list::ItemProviderBase)\
 			F(presentation::controls::list::TextItemStyleProvider)\
 			F(presentation::controls::list::TextItemStyleProvider::ITextItemStyleProvider)\
 			F(presentation::controls::list::TextItemStyleProvider::ITextItemView)\
 			F(presentation::controls::list::TextItemStyleProvider::TextItemStyleController)\
 			F(presentation::controls::list::TextItem)\
-			F(presentation::controls::list::TextItemProvider)\
 			F(presentation::controls::GuiVirtualTextList)\
 			F(presentation::controls::GuiTextList)\
 			F(presentation::controls::list::ListViewItemStyleProviderBase)\
@@ -120,7 +118,6 @@ Type List
 			F(presentation::controls::tree::INodeItemView)\
 			F(presentation::controls::tree::INodeItemPrimaryTextView)\
 			F(presentation::controls::tree::INodeItemBindingView)\
-			F(presentation::controls::tree::NodeItemProvider)\
 			F(presentation::controls::tree::INodeItemStyleController)\
 			F(presentation::controls::tree::INodeItemStyleProvider)\
 			F(presentation::controls::tree::NodeItemStyleProvider)\
