@@ -1432,15 +1432,157 @@ ListViewDetailContentProvider
 				}
 
 /***********************************************************************
+ListViewSubItems
+***********************************************************************/
+
+				void ListViewSubItems::NotifyUpdateInternal(vint start, vint count, vint newCount)
+				{
+					owner->NotifyUpdate();
+				}
+
+/***********************************************************************
+ListViewItem
+***********************************************************************/
+
+				void ListViewItem::NotifyUpdate()
+				{
+					if (owner)
+					{
+						vint index = owner->IndexOf(this);
+						owner->NotifyUpdateInternal(index, 1, 1);
+					}
+				}
+
+				ListViewItem::ListViewItem()
+					:owner(0)
+				{
+					subItems.owner = this;
+				}
+
+				ListViewSubItems& ListViewItem::GetSubItems()
+				{
+					return subItems;
+				}
+
+				Ptr<GuiImageData> ListViewItem::GetSmallImage()
+				{
+					return smallImage;
+				}
+
+				void ListViewItem::SetSmallImage(Ptr<GuiImageData> value)
+				{
+					smallImage = value;
+					NotifyUpdate();
+				}
+
+				Ptr<GuiImageData> ListViewItem::GetLargeImage()
+				{
+					return largeImage;
+				}
+				
+				void ListViewItem::SetLargeImage(Ptr<GuiImageData> value)
+				{
+					largeImage = value;
+					NotifyUpdate();
+				}
+
+				const WString& ListViewItem::GetText()
+				{
+					return text;
+				}
+
+				void ListViewItem::SetText(const WString& value)
+				{
+					text = value;
+					NotifyUpdate();
+				}
+
+				description::Value ListViewItem::GetTag()
+				{
+					return tag;
+				}
+
+				void ListViewItem::SetTag(const description::Value& value)
+				{
+					tag = value;
+					NotifyUpdate();
+				}
+
+/***********************************************************************
 ListViewColumn
 ***********************************************************************/
 
+				void ListViewColumn::NotifyUpdate()
+				{
+					if (owner)
+					{
+						vint index = owner->IndexOf(this);
+						owner->NotifyUpdateInternal(index, 1, 1);
+					}
+				}
+
 				ListViewColumn::ListViewColumn(const WString& _text, vint _size)
-					:text(_text)
+					:owner(0)
+					,text(_text)
 					,size(_size)
 					,dropdownPopup(0)
 					,sortingState(GuiListViewColumnHeader::NotSorted)
 				{
+				}
+
+				const WString& ListViewColumn::GetText()
+				{
+					return text;
+				}
+
+				void ListViewColumn::SetText(const WString& value)
+				{
+					text = value;
+					NotifyUpdate();
+				}
+
+				const WString& ListViewColumn::GetTextProperty()
+				{
+					return textProperty;
+				}
+
+				void ListViewColumn::SetTextProperty(const WString& value)
+				{
+					textProperty = value;
+					NotifyUpdate();
+				}
+
+				vint ListViewColumn::GetSize()
+				{
+					return size;
+				}
+
+				void ListViewColumn::SetSize(vint value)
+				{
+					size = value;
+					NotifyUpdate();
+				}
+
+				GuiMenu* ListViewColumn::GetDropdownPopup()
+				{
+					return dropdownPopup;
+				}
+
+				void ListViewColumn::SetDropdownPopup(GuiMenu* value)
+				{
+					dropdownPopup = value;
+					NotifyUpdate();
+				}
+
+				GuiListViewColumnHeader::ColumnSortingState ListViewColumn::GetSortingState()
+				{
+					return sortingState;
+				}
+
+				void ListViewColumn::SetSortingState(GuiListViewColumnHeader::ColumnSortingState value)
+				{
+					sortingState = value;
+					NotifyUpdate();
 				}
 
 /***********************************************************************
@@ -1465,6 +1607,18 @@ ListViewDataColumns
 ListViewColumns
 ***********************************************************************/
 
+				void ListViewColumns::AfterInsert(vint index, const Ptr<ListViewColumn>& value)
+				{
+					ItemsBase<Ptr<ListViewColumn>>::AfterInsert(index, value);
+					value->owner = this;
+				}
+
+				void ListViewColumns::BeforeRemove(vint index, const Ptr<ListViewColumn>& value)
+				{
+					value->owner = 0;
+					ItemsBase<Ptr<ListViewColumn>>::BeforeRemove(index, value);
+				}
+
 				void ListViewColumns::NotifyUpdateInternal(vint start, vint count, vint newCount)
 				{
 					for(vint i=0;i<itemProvider->columnItemViewCallbacks.Count();i++)
@@ -1486,6 +1640,18 @@ ListViewColumns
 /***********************************************************************
 ListViewItemProvider
 ***********************************************************************/
+
+				void ListViewItemProvider::AfterInsert(vint index, const Ptr<ListViewItem>& value)
+				{
+					ListProvider<Ptr<ListViewItem>>::AfterInsert(index, value);
+					value->owner = this;
+				}
+
+				void ListViewItemProvider::BeforeRemove(vint index, const Ptr<ListViewItem>& value)
+				{
+					value->owner = 0;
+					ListProvider<Ptr<ListViewItem>>::AfterInsert(index, value);
+				}
 
 				bool ListViewItemProvider::ContainsPrimaryText(vint itemIndex)
 				{
@@ -1515,13 +1681,13 @@ ListViewItemProvider
 				WString ListViewItemProvider::GetSubItem(vint itemIndex, vint index)
 				{
 					Ptr<ListViewItem> item=Get(itemIndex);
-					if(index<0 || index>=item->subItems.Count())
+					if(index<0 || index>=item->GetSubItems().Count())
 					{
 						return L"";
 					}
 					else
 					{
-						return item->subItems[index];
+						return item->GetSubItems()[index];
 					}
 				}
 
@@ -1575,7 +1741,7 @@ ListViewItemProvider
 					}
 					else
 					{
-						return columns[index]->text;
+						return columns[index]->GetText();
 					}
 				}
 
@@ -1587,7 +1753,7 @@ ListViewItemProvider
 					}
 					else
 					{
-						return columns[index]->size;
+						return columns[index]->GetSize();
 					}
 				}
 
@@ -1595,11 +1761,7 @@ ListViewItemProvider
 				{
 					if(index>=0 && index<columns.Count())
 					{
-						columns[index]->size=value;
-						for(vint i=0;i<columnItemViewCallbacks.Count();i++)
-						{
-							columnItemViewCallbacks[i]->OnColumnChanged();
-						}
+						columns[index]->SetSize(value);
 					}
 				}
 
@@ -1611,7 +1773,7 @@ ListViewItemProvider
 					}
 					else
 					{
-						return columns[index]->dropdownPopup;
+						return columns[index]->GetDropdownPopup();
 					}
 				}
 
@@ -1623,7 +1785,7 @@ ListViewItemProvider
 					}
 					else
 					{
-						return columns[index]->sortingState;
+						return columns[index]->GetSortingState();
 					}
 				}
 

@@ -418,7 +418,7 @@ GuiBindableListView::ItemSource
 			{
 				if (0 <= itemIndex && itemIndex < itemSource->GetCount() && columns.Count()>0)
 				{
-					return ReadProperty(itemSource->Get(itemIndex), columns[0]->textProperty).GetText();
+					return ReadProperty(itemSource->Get(itemIndex), columns[0]->GetTextProperty()).GetText();
 				}
 				return L"";
 			}
@@ -427,7 +427,7 @@ GuiBindableListView::ItemSource
 			{
 				if (0 <= itemIndex && itemIndex < itemSource->GetCount() && 0 <= index && index < columns.Count() - 1)
 				{
-					return ReadProperty(itemSource->Get(itemIndex), columns[index + 1]->textProperty).GetText();
+					return ReadProperty(itemSource->Get(itemIndex), columns[index + 1]->GetTextProperty()).GetText();
 				}
 				return L"";
 			}
@@ -484,7 +484,7 @@ GuiBindableListView::ItemSource
 				}
 				else
 				{
-					return columns[index]->text;
+					return columns[index]->GetText();
 				}
 			}
 
@@ -496,7 +496,7 @@ GuiBindableListView::ItemSource
 				}
 				else
 				{
-					return columns[index]->size;
+					return columns[index]->GetSize();
 				}
 			}
 
@@ -504,11 +504,7 @@ GuiBindableListView::ItemSource
 			{
 				if(index>=0 && index<columns.Count())
 				{
-					columns[index]->size=value;
-					for(vint i=0;i<columnItemViewCallbacks.Count();i++)
-					{
-						columnItemViewCallbacks[i]->OnColumnChanged();
-					}
+					columns[index]->SetSize(value);
 				}
 			}
 
@@ -520,7 +516,7 @@ GuiBindableListView::ItemSource
 				}
 				else
 				{
-					return columns[index]->dropdownPopup;
+					return columns[index]->GetDropdownPopup();
 				}
 			}
 
@@ -532,7 +528,7 @@ GuiBindableListView::ItemSource
 				}
 				else
 				{
-					return columns[index]->sortingState;
+					return columns[index]->GetSortingState();
 				}
 			}
 

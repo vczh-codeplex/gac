@@ -829,11 +829,11 @@ Type Declaration
 			BEGIN_CLASS_MEMBER(ListViewItem)
 				CLASS_MEMBER_CONSTRUCTOR(Ptr<ListViewItem>(), NO_PARAMETER)
 
-				CLASS_MEMBER_FIELD(smallImage)
-				CLASS_MEMBER_FIELD(largeImage)
-				CLASS_MEMBER_FIELD(text)
-				CLASS_MEMBER_FIELD(subItems)
-				CLASS_MEMBER_FIELD(tag)
+				CLASS_MEMBER_PROPERTY_FAST(SmallImage)
+				CLASS_MEMBER_PROPERTY_FAST(LargeImage)
+				CLASS_MEMBER_PROPERTY_FAST(Text)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(SubItems)
+				CLASS_MEMBER_PROPERTY_FAST(Tag)
 			END_CLASS_MEMBER(ListViewItem)
 
 			BEGIN_CLASS_MEMBER(ListViewColumn)
@@ -841,11 +841,11 @@ Type Declaration
 				CLASS_MEMBER_CONSTRUCTOR(Ptr<ListViewColumn>(const WString&), {L"text"})
 				CLASS_MEMBER_CONSTRUCTOR(Ptr<ListViewColumn>(const WString&, vint), {L"text" _ L"size"})
 
-				CLASS_MEMBER_FIELD(text)
-				CLASS_MEMBER_FIELD(textProperty)
-				CLASS_MEMBER_FIELD(size)
-				CLASS_MEMBER_FIELD(dropdownPopup)
-				CLASS_MEMBER_FIELD(sortingState)
+				CLASS_MEMBER_PROPERTY_FAST(Text)
+				CLASS_MEMBER_PROPERTY_FAST(TextProperty)
+				CLASS_MEMBER_PROPERTY_FAST(Size)
+				CLASS_MEMBER_PROPERTY_FAST(DropdownPopup)
+				CLASS_MEMBER_PROPERTY_FAST(SortingState)
 			END_CLASS_MEMBER(ListViewColumn)
 
 			BEGIN_CLASS_MEMBER(GuiVirtualListView)
