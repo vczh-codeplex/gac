@@ -147,6 +147,8 @@ namespace demos
 	F(DatePickerTemplate, GuiDatePickerTemplate)\
 	F(ListViewColumnHeaderTemplate, GuiListViewColumnHeaderTemplate)\
 	F(ListViewTemplate, GuiListViewTemplate)\
+	F(ExpandingDecoratorTemplate, GuiSelectableButtonTemplate)\
+	F(TreeViewTemplate, GuiTreeViewTemplate)\
 
 	DEMO_TEMPLATES(CONTROL_TEMPLATE_DECL)
 
@@ -332,6 +334,8 @@ namespace vl
 			F(demos::DatePickerTemplate)\
 			F(demos::ListViewColumnHeaderTemplate)\
 			F(demos::ListViewTemplate)\
+			F(demos::ExpandingDecoratorTemplate)\
+			F(demos::TreeViewTemplate)\
 
 			DEMO_TYPES(DECL_TYPE_INFO)
 			DEMO_TYPES(IMPL_TYPE_INFO)

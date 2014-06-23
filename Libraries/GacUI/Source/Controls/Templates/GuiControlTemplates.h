@@ -287,7 +287,7 @@ Control Template
 				GuiListViewTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
 			};
 
-			class GuiTreeViewTemplate : public GuiScrollViewTemplate, public Description<GuiListViewTemplate>
+			class GuiTreeViewTemplate : public GuiScrollViewTemplate, public Description<GuiTreeViewTemplate>
 			{
 			public:
 				GuiTreeViewTemplate();
