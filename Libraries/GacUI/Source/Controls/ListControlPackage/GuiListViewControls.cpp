@@ -1625,7 +1625,10 @@ ListViewColumns
 					{
 						itemProvider->columnItemViewCallbacks[i]->OnColumnChanged();
 					}
-					itemProvider->NotifyUpdate(0, itemProvider->Count());
+					if (count != newCount)
+					{
+						itemProvider->NotifyUpdate(0, itemProvider->Count());
+					}
 				}
 
 				ListViewColumns::ListViewColumns()
