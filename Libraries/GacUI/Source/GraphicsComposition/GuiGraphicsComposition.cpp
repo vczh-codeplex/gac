@@ -138,6 +138,8 @@ GuiSharedSizeRootComposition
 				FOREACH(GuiSharedSizeItemComposition*, item, childItems)
 				{
 					auto group = item->GetGroup();
+					auto minSize = item->GetPreferredMinSize();
+					item->SetPreferredMinSize(Size(0, 0));
 					auto size = item->GetPreferredBounds().GetSize();
 
 					if (item->GetSharedWidth())
@@ -146,8 +148,10 @@ GuiSharedSizeRootComposition
 					}
 					if (item->GetSharedHeight())
 					{
-						AddSizeComponent(widths, group, size.y);
+						AddSizeComponent(heights, group, size.y);
 					}
+
+					item->SetPreferredMinSize(minSize);
 				}
 
 				FOREACH(GuiSharedSizeItemComposition*, item, childItems)
