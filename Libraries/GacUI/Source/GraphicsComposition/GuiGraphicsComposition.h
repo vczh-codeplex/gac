@@ -25,7 +25,7 @@ namespace vl
 			class GuiSharedSizeRootComposition;
 
 			/// <summary>A shared size composition that shares the same size with all other <see cref="GuiSharedSizeItemComposition"/> that has a same group name.</summary>
-			class GuiSharedSizeItemComposition : public GuiBoundsComposition
+			class GuiSharedSizeItemComposition : public GuiBoundsComposition, public Description<GuiSharedSizeItemComposition>
 			{
 			protected:
 				GuiSharedSizeRootComposition*						parentRoot;
@@ -60,7 +60,7 @@ namespace vl
 			};
 
 			/// <summary>A root composition that takes care of all direct or indirect <see cref="GuiSharedSizeItemComposition"/> to enable size sharing.</summary>
-			class GuiSharedSizeRootComposition :public GuiBoundsComposition
+			class GuiSharedSizeRootComposition :public GuiBoundsComposition, public Description<GuiSharedSizeRootComposition>
 			{
 				friend class GuiSharedSizeItemComposition;
 			protected:

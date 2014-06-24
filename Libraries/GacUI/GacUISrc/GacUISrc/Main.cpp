@@ -143,6 +143,7 @@ namespace demos
 	F(ToolstripSplitArrowTemplate, GuiSelectableButtonTemplate)\
 	F(ToolstripSplitButtonTemplate, GuiToolstripButtonTemplate)\
 	F(MenuBarButtonTemplate, GuiToolstripButtonTemplate)\
+	F(MenuItemButtonTemplate, GuiToolstripButtonTemplate)\
 	F(ComboBoxTemplate, GuiDateComboBoxTemplate)\
 	F(DatePickerTemplate, GuiDatePickerTemplate)\
 	F(ListViewColumnHeaderTemplate, GuiListViewColumnHeaderTemplate)\
@@ -330,6 +331,7 @@ namespace vl
 			F(demos::ToolstripSplitArrowTemplate)\
 			F(demos::ToolstripSplitButtonTemplate)\
 			F(demos::MenuBarButtonTemplate)\
+			F(demos::MenuItemButtonTemplate)\
 			F(demos::ComboBoxTemplate)\
 			F(demos::DatePickerTemplate)\
 			F(demos::ListViewColumnHeaderTemplate)\
