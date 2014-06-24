@@ -21,48 +21,69 @@ namespace vl
 	{
 		namespace compositions
 		{
+			/// <summary>Measuring source for <see cref="GuiSubComponentMeasurer"/>.</summary>
+			class GuiSubComponentMeasurerSource : public Object, public Description<GuiSubComponentMeasurerSource>
+			{
+				friend class GuiSubComponentMeasurer;
+			public:
+				/// <summary>The measure direction.</summary>
+				enum Direction
+				{
+					/// <summary>[T:vl.presentation.compositions.GuiSubComponentMeasurerSource.Direction]Measuring width.</summary>
+					Horizontal,
+					/// <summary>[T:vl.presentation.compositions.GuiSubComponentMeasurerSource.Direction]Measuring height.</summary>
+					Vertical,
+				};
+			protected:
+				struct SubComponent
+				{
+					WString							name;
+					GuiGraphicsComposition*			composition;
+					Direction						direction;
+				};
+
+				GuiSubComponentMeasurer*			measurer;
+				GuiGraphicsComposition*				containerComposition;
+				collections::List<SubComponent>		subComponents;
+
+			public:
+				/// <summary>Create a measuring source.</summary>
+				GuiSubComponentMeasurerSource(GuiGraphicsComposition* _containerComposition);
+				~GuiSubComponentMeasurerSource();
+
+				/// <summary>Get the container composition.</summary>
+				/// <returns>The container composition.</returns>
+				GuiGraphicsComposition*				GetContainerComposition();
+
+				/// <summary>Add a sub component to the measuring source.</summary>
+				/// <param name="name">The name of the sub component.</param>
+				/// <param name="composition">The composition of the sub component.</param>
+				/// <param name="direction">The direction of the sub component.</param>
+				void								AddSubComponent(const WString& name, GuiGraphicsComposition* composition, Direction direction);
+				/// <summary>Get the <see cref="GuiSubComponentMeasurer"/> that this measuring source attached to.</summary>
+				/// <returns>The attached measurer.</returns>
+				GuiSubComponentMeasurer*			GetAttachedMeasurer();
+				/// <summary>Get the sub component count.</summary>
+				/// <returns>The sub component count.</returns>
+				vint								GetSubComponentCount();
+				/// <summary>Get the name of the specified sub component.</summary>
+				/// <returns>The name of the specified sub component.</returns>
+				/// <param name="index">The index of the specified sub component.</param>
+				WString								GetSubComponentName(vint index);
+				/// <summary>Get the composition of the specified sub component.</summary>
+				/// <returns>The composition of the specified sub component.</returns>
+				/// <param name="index">The index of the specified sub component.</param>
+				GuiGraphicsComposition*				GetSubComponentComposition(vint index);
+				/// <summary>Get the direction of the specified sub component.</summary>
+				/// <returns>The direction of the specified sub component.</returns>
+				/// <param name="index">The index of the specified sub component.</param>
+				Direction							GetSubComponentDirection(vint index);
+			};
+
 			/// <summary>Sub component measurer. This class is used to measure and update sub components of a group of controls.</summary>
 			class GuiSubComponentMeasurer : public Object, public Description<GuiSubComponentMeasurer>
 			{
 			public:
-				/// <summary>Measuring source for <see cref="GuiSubComponentMeasurer"/>.</summary>
-				class IMeasuringSource : public virtual IDescriptable, public Description<IMeasuringSource>
-				{
-				public:
-					/// <summary>Called when a this measuring source is attached to a <see cref="GuiSubComponentMeasurer"/>.</summary>
-					/// <param name="value">The measurer to attach to.</param>
-					virtual void						AttachMeasurer(GuiSubComponentMeasurer* value)=0;
-					/// <summary>Called when a this measuring source is detached from a <see cref="GuiSubComponentMeasurer"/>.</summary>
-					/// <param name="value">The measurer to detach from.</param>
-					virtual void						DetachMeasurer(GuiSubComponentMeasurer* value)=0;
-					/// <summary>Get the <see cref="GuiSubComponentMeasurer"/> that this measuring source attached to.</summary>
-					/// <returns>The attached measurer.</returns>
-					virtual GuiSubComponentMeasurer*	GetAttachedMeasurer()=0;
-					/// <summary>Get the measuring category for this measuring source. Only measuring sources that has the same category will be put together for measuring.</summary>
-					/// <returns>The measuring category for this measuring source.</returns>
-					virtual WString						GetMeasuringCategory()=0;
-					/// <summary>Get the sub component count.</summary>
-					/// <returns>The sub component count.</returns>
-					virtual vint						GetSubComponentCount()=0;
-					/// <summary>Get the name of the specified sub component.</summary>
-					/// <returns>The name of the specified sub component.</returns>
-					/// <param name="index">The index of the specified sub component.</param>
-					virtual WString						GetSubComponentName(vint index)=0;
-					/// <summary>Get the composition of the specified sub component.</summary>
-					/// <returns>The composition of the specified sub component.</returns>
-					/// <param name="index">The index of the specified sub component.</param>
-					virtual GuiGraphicsComposition*		GetSubComponentComposition(vint index)=0;
-					/// <summary>Get the composition of the specified sub component.</summary>
-					/// <returns>The composition of the specified sub component.</returns>
-					/// <param name="name">The name of the specified sub component.</param>
-					virtual GuiGraphicsComposition*		GetSubComponentComposition(const WString& name)=0;
-					/// <summary>The composition for the control.</summary>
-					/// <returns>The composition for the control.</returns>
-					virtual GuiGraphicsComposition*		GetMainComposition()=0;
-					/// <summary>Called when all preferred min sizes of all sub components is modified via a call to <see cref="GuiGraphicsComposition::SetPreferredMinSize"/>.</summary>
-					virtual void						SubComponentPreferredMinSizeUpdated()=0;
-				};
-				
 				/// <summary>The measure direction.</summary>
 				enum Direction
 				{
@@ -72,41 +93,8 @@ namespace vl
 					Vertical,
 				};
 
-				/// <summary>The default implementation for <see cref="IMeasuringSource"/>.</summary>
-				class MeasuringSource : public Object, public IMeasuringSource, public Description<MeasuringSource>
-				{
-					typedef collections::Dictionary<WString, GuiGraphicsComposition*>	SubComponentMap;
-				protected:
-					GuiSubComponentMeasurer*			measurer;
-					WString								measuringCategory;
-					GuiGraphicsComposition*				mainComposition;
-					SubComponentMap						subComponents;
-
-				public:
-					/// <summary>Create a measuring source.</summary>
-					/// <param name="_measuringCategory">The measuring category.</param>
-					/// <param name="_mainComposition">The main composition.</param>
-					MeasuringSource(const WString& _measuringCategory, GuiGraphicsComposition* _mainComposition);
-					~MeasuringSource();
-
-					/// <summary>Add a sub component to the measuring source.</summary>
-					/// <returns>Returns true if this operation succeeded.</returns>
-					/// <param name="name">The name of the sub component.</param>
-					/// <param name="composition">The composition of the sub component.</param>
-					bool								AddSubComponent(const WString& name, GuiGraphicsComposition* composition);
-					void								AttachMeasurer(GuiSubComponentMeasurer* value)override;
-					void								DetachMeasurer(GuiSubComponentMeasurer* value)override;
-					GuiSubComponentMeasurer*			GetAttachedMeasurer()override;
-					WString								GetMeasuringCategory()override;
-					vint								GetSubComponentCount()override;
-					WString								GetSubComponentName(vint index)override;
-					GuiGraphicsComposition*				GetSubComponentComposition(vint index)override;
-					GuiGraphicsComposition*				GetSubComponentComposition(const WString& name)override;
-					GuiGraphicsComposition*				GetMainComposition()override;
-					void								SubComponentPreferredMinSizeUpdated()override;
-				};
 			protected:
-				typedef collections::List<IMeasuringSource*>	MeasuringSourceList;
+				typedef collections::List<GuiSubComponentMeasurerSource*>	MeasuringSourceList;
 
 				MeasuringSourceList						measuringSources;
 			public:
@@ -117,15 +105,15 @@ namespace vl
 				/// <summary>Attach a measuring source.</summary>
 				/// <returns>Returns true if this operation succeeded.</returns>
 				/// <param name="value">The measuring source.</param>
-				bool									AttachMeasuringSource(IMeasuringSource* value);
+				bool									AttachMeasuringSource(GuiSubComponentMeasurerSource* value);
 				/// <summary>Detach a measuring source.</summary>
 				/// <returns>Returns true if this operation succeeded.</returns>
 				/// <param name="value">The measuring source.</param>
-				bool									DetachMeasuringSource(IMeasuringSource* value);
+				bool									DetachMeasuringSource(GuiSubComponentMeasurerSource* value);
 				/// <summary>Measure and update all sub components under the specified measuring category.</summary>
 				/// <param name="measuringCategory">The measuring category.</param>
 				/// <param name="direction">The measuring direction.</param>
-				void									MeasureAndUpdate(const WString& measuringCategory, Direction direction);
+				void									MeasureAndUpdate();
 			};
 		}
 	}

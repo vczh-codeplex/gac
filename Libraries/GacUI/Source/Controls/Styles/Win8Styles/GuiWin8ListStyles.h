@@ -68,7 +68,7 @@ ComboBox
 				controls::GuiButton*										GetSubMenuHost()override;
 				void														SetImage(Ptr<GuiImageData> value)override;
 				void														SetShortcutText(const WString& value)override;
-				compositions::GuiSubComponentMeasurer::IMeasuringSource*	GetMeasuringSource()override;
+				compositions::GuiSubComponentMeasurerSource*				GetMeasuringSource()override;
 				void														SetCommandExecutor(controls::GuiComboBoxBase::ICommandExecutor* value)override;
 				void														OnItemSelected()override;
 			};

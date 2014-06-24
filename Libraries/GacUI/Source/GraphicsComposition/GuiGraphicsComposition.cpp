@@ -11,80 +11,56 @@ namespace vl
 			using namespace elements;
 
 /***********************************************************************
-GuiSubComponentMeasurer::MeasuringSource
+GuiSubComponentMeasurerSource
 ***********************************************************************/
 
-			GuiSubComponentMeasurer::MeasuringSource::MeasuringSource(const WString& _measuringCategory, GuiGraphicsComposition* _mainComposition)
+			GuiSubComponentMeasurerSource::GuiSubComponentMeasurerSource(GuiGraphicsComposition* _containerComposition)
 				:measurer(0)
-				,measuringCategory(_measuringCategory)
-				,mainComposition(_mainComposition)
+				, containerComposition(_containerComposition)
 			{
 			}
 
-			GuiSubComponentMeasurer::MeasuringSource::~MeasuringSource()
+			GuiSubComponentMeasurerSource::~GuiSubComponentMeasurerSource()
 			{
 			}
 
-			bool GuiSubComponentMeasurer::MeasuringSource::AddSubComponent(const WString& name, GuiGraphicsComposition* composition)
+			GuiGraphicsComposition* GuiSubComponentMeasurerSource::GetContainerComposition()
 			{
-				if(subComponents.Keys().Contains(name))
-				{
-					return false;
-				}
-				else
-				{
-					subComponents.Add(name, composition);
-					return true;
-				}
+				return containerComposition;
 			}
 
-			void GuiSubComponentMeasurer::MeasuringSource::AttachMeasurer(GuiSubComponentMeasurer* value)
+			void GuiSubComponentMeasurerSource::AddSubComponent(const WString& name, GuiGraphicsComposition* composition, Direction direction)
 			{
-				measurer=value;
+				SubComponent sc;
+				sc.name = name;
+				sc.composition = composition;
+				sc.direction = direction;
+				subComponents.Add(sc);
 			}
 
-			void GuiSubComponentMeasurer::MeasuringSource::DetachMeasurer(GuiSubComponentMeasurer* value)
-			{
-				measurer=0;
-			}
-
-			GuiSubComponentMeasurer* GuiSubComponentMeasurer::MeasuringSource::GetAttachedMeasurer()
+			GuiSubComponentMeasurer* GuiSubComponentMeasurerSource::GetAttachedMeasurer()
 			{
 				return measurer;
 			}
 
-			WString GuiSubComponentMeasurer::MeasuringSource::GetMeasuringCategory()
-			{
-				return measuringCategory;
-			}
-
-			vint GuiSubComponentMeasurer::MeasuringSource::GetSubComponentCount()
+			vint GuiSubComponentMeasurerSource::GetSubComponentCount()
 			{
 				return subComponents.Count();
 			}
 
-			WString GuiSubComponentMeasurer::MeasuringSource::GetSubComponentName(vint index)
+			WString GuiSubComponentMeasurerSource::GetSubComponentName(vint index)
 			{
-				return subComponents.Keys()[index];
+				return subComponents[index].name;
 			}
 
-			GuiGraphicsComposition* GuiSubComponentMeasurer::MeasuringSource::GetSubComponentComposition(vint index)
+			GuiGraphicsComposition* GuiSubComponentMeasurerSource::GetSubComponentComposition(vint index)
 			{
-				return subComponents.Values().Get(index);
+				return subComponents[index].composition;
 			}
 
-			GuiGraphicsComposition* GuiSubComponentMeasurer::MeasuringSource::GetSubComponentComposition(const WString& name)
+			GuiSubComponentMeasurerSource::Direction GuiSubComponentMeasurerSource::GetSubComponentDirection(vint index)
 			{
-				return subComponents[name];
-			}
-
-			GuiGraphicsComposition* GuiSubComponentMeasurer::MeasuringSource::GetMainComposition()
-			{
-				return mainComposition;
-			}
-
-			void GuiSubComponentMeasurer::MeasuringSource::SubComponentPreferredMinSizeUpdated()
-			{
+				return subComponents[index].direction;
 			}
 
 /***********************************************************************
@@ -99,12 +75,12 @@ GuiSubComponentMeasurer
 			{
 			}
 
-			bool GuiSubComponentMeasurer::AttachMeasuringSource(IMeasuringSource* value)
+			bool GuiSubComponentMeasurer::AttachMeasuringSource(GuiSubComponentMeasurerSource* value)
 			{
 				if(!value->GetAttachedMeasurer())
 				{
 					measuringSources.Add(value);
-					value->AttachMeasurer(this);
+					value->measurer = this;
 					return true;
 				}
 				else
@@ -113,11 +89,11 @@ GuiSubComponentMeasurer
 				}
 			}
 
-			bool GuiSubComponentMeasurer::DetachMeasuringSource(IMeasuringSource* value)
+			bool GuiSubComponentMeasurer::DetachMeasuringSource(GuiSubComponentMeasurerSource* value)
 			{
 				if(value->GetAttachedMeasurer()==this)
 				{
-					value->DetachMeasurer(this);
+					value->measurer = 0;
 					measuringSources.Remove(value);
 					return true;
 				}
@@ -127,52 +103,47 @@ GuiSubComponentMeasurer
 				}
 			}
 
-			void GuiSubComponentMeasurer::MeasureAndUpdate(const WString& measuringCategory, Direction direction)
+			void GuiSubComponentMeasurer::MeasureAndUpdate()
 			{
-				List<IMeasuringSource*> sources;
-				FOREACH(IMeasuringSource*, source, measuringSources)
-				{
-					if(source->GetMeasuringCategory()==measuringCategory)
-					{
-						sources.Add(source);
-					}
-				}
-
 				Dictionary<WString, vint> sizes;
-				FOREACH(IMeasuringSource*, source, sources)
+				FOREACH(GuiSubComponentMeasurerSource*, source, measuringSources)
 				{
-					vint count=source->GetSubComponentCount();
-					for(vint i=0;i<count;i++)
+					vint count = source->GetSubComponentCount();
+					for (vint i = 0; i < count; i++)
 					{
-						WString name=source->GetSubComponentName(i);
-						GuiGraphicsComposition* composition=source->GetSubComponentComposition(i);
-						composition->SetPreferredMinSize(Size(0, 0));
-						Size size=composition->GetPreferredBounds().GetSize();
-						vint sizeComponent=direction==Horizontal?size.x:size.y;
+						auto name = source->GetSubComponentName(i);
+						auto composition = source->GetSubComponentComposition(i);
+						auto direction = source->GetSubComponentDirection(i);
 
-						vint index=sizes.Keys().IndexOf(name);
-						if(index==-1)
+						composition->SetPreferredMinSize(Size(0, 0));
+						Size size = composition->GetPreferredBounds().GetSize();
+						vint sizeComponent = direction == Horizontal ? size.x : size.y;
+
+						vint index = sizes.Keys().IndexOf(name);
+						if (index == -1)
 						{
 							sizes.Add(name, sizeComponent);
 						}
-						else if(sizes.Values().Get(index)<sizeComponent)
+						else if (sizes.Values().Get(index) < sizeComponent)
 						{
 							sizes.Set(name, sizeComponent);
 						}
 					}
 				}
-				FOREACH(IMeasuringSource*, source, sources)
+
+				FOREACH(GuiSubComponentMeasurerSource*, source, measuringSources)
 				{
-					vint count=source->GetSubComponentCount();
-					for(vint i=0;i<count;i++)
+					vint count = source->GetSubComponentCount();
+					for (vint i = 0; i < count; i++)
 					{
-						WString name=source->GetSubComponentName(i);
-						GuiGraphicsComposition* composition=source->GetSubComponentComposition(i);
-						Size size=composition->GetPreferredMinSize();
-						(direction==Horizontal?size.x:size.y)=sizes[name];
+						auto name = source->GetSubComponentName(i);
+						auto composition = source->GetSubComponentComposition(i);
+						auto direction = source->GetSubComponentDirection(i);
+						Size size = composition->GetPreferredMinSize();
+						(direction == Horizontal ? size.x : size.y) = sizes[name];
 						composition->SetPreferredMinSize(size);
-						source->SubComponentPreferredMinSizeUpdated();
 					}
+					source->GetContainerComposition()->ForceCalculateSizeImmediately();
 				}
 			}
 		}

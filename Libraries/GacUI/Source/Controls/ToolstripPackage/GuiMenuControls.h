@@ -128,7 +128,6 @@ MenuButton
 			class GuiMenuButton : public GuiSelectableButton, public Description<GuiMenuButton>
 			{
 			public:
-				static const wchar_t* const				MenuItemSubComponentMeasuringCategoryName;
 				/// <summary>Style controller interface for <see cref="GuiMenuButton"/>.</summary>
 				class IStyleController : public virtual GuiSelectableButton::IStyleController, public Description<IStyleController>
 				{
@@ -151,9 +150,9 @@ MenuButton
 					/// <summary>Notify that the shortcut key text for the menu button is changed.</summary>
 					/// <param name="value">The shortcut key text for the menu button.</param>
 					virtual void						SetShortcutText(const WString& value)=0;
-					/// <summary>Get the <see cref="compositions::GuiSubComponentMeasurer::IMeasuringSource"/> object that is attached to the menu button.</summary>
+					/// <summary>Get the <see cref="compositions::GuiSubComponentMeasurerSource"/> object that is attached to the menu button.</summary>
 					/// <returns>The attached measuring source.</returns>
-					virtual compositions::GuiSubComponentMeasurer::IMeasuringSource*	GetMeasuringSource()=0;
+					virtual compositions::GuiSubComponentMeasurerSource*	GetMeasuringSource()=0;
 				};
 			protected:
 				IStyleController*						styleController;

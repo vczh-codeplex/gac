@@ -92,7 +92,7 @@ Menu Button
 				controls::GuiButton*										GetSubMenuHost()override;
 				void														SetImage(Ptr<GuiImageData> value)override;
 				void														SetShortcutText(const WString& value)override;
-				compositions::GuiSubComponentMeasurer::IMeasuringSource*	GetMeasuringSource()override;
+				compositions::GuiSubComponentMeasurerSource*				GetMeasuringSource()override;
 				void														Transfer(controls::GuiButton::ControlState value)override;
 			};
 			
@@ -100,25 +100,14 @@ Menu Button
 			class Win8MenuItemButtonStyle : public Object, public virtual controls::GuiMenuButton::IStyleController, public Description<Win8MenuItemButtonStyle>
 			{
 			protected:
-				class MeasuringSource : public compositions::GuiSubComponentMeasurer::MeasuringSource
-				{
-				protected:
-					Win8MenuItemButtonStyle*				style;
-				public:
-					MeasuringSource(Win8MenuItemButtonStyle* _style);
-					~MeasuringSource();
+				Win8MenuItemButtonElements									elements;
+				Ptr<compositions::GuiSubComponentMeasurerSource>			measuringSource;
+				controls::GuiButton::ControlState							controlStyle;
+				bool														isVisuallyEnabled;
+				bool														isSelected;
+				bool														isOpening;
 
-					void									SubComponentPreferredMinSizeUpdated()override;
-				};
-
-				Win8MenuItemButtonElements					elements;
-				Ptr<MeasuringSource>						measuringSource;
-				controls::GuiButton::ControlState			controlStyle;
-				bool										isVisuallyEnabled;
-				bool										isSelected;
-				bool										isOpening;
-
-				void										TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool selected, bool opening);
+				void														TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool selected, bool opening);
 			public:
 				/// <summary>Create the style.</summary>
 				Win8MenuItemButtonStyle();
@@ -137,7 +126,7 @@ Menu Button
 				controls::GuiButton*										GetSubMenuHost()override;
 				void														SetImage(Ptr<GuiImageData> value)override;
 				void														SetShortcutText(const WString& value)override;
-				compositions::GuiSubComponentMeasurer::IMeasuringSource*	GetMeasuringSource()override;
+				compositions::GuiSubComponentMeasurerSource*				GetMeasuringSource()override;
 				void														Transfer(controls::GuiButton::ControlState value)override;
 			};
 			
