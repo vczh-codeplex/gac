@@ -268,11 +268,6 @@ Win7MenuBarButtonStyle
 			{
 			}
 
-			compositions::GuiSubComponentMeasurerSource* Win7MenuBarButtonStyle::GetMeasuringSource()
-			{
-				return 0;
-			}
-
 			void Win7MenuBarButtonStyle::Transfer(GuiButton::ControlState value)
 			{
 				if(controlStyle!=value)
@@ -338,10 +333,6 @@ Win7MenuItemButtonStyle
 			{
 				elements=Win7MenuItemButtonElements::Create();
 				elements.Apply(Win7ButtonColors::MenuItemButtonNormal());
-
-				measuringSource = new GuiSubComponentMeasurerSource(elements.mainComposition);
-				measuringSource->AddSubComponent(L"MenuItem-Text", elements.textComposition, GuiSubComponentMeasurerSource::Horizontal);
-				measuringSource->AddSubComponent(L"MenuItem-ShortcutText", elements.shortcutComposition, GuiSubComponentMeasurerSource::Horizontal);
 			}
 
 			Win7MenuItemButtonStyle::~Win7MenuItemButtonStyle()
@@ -431,11 +422,6 @@ Win7MenuItemButtonStyle
 			void Win7MenuItemButtonStyle::SetShortcutText(const WString& value)
 			{
 				elements.shortcutElement->SetText(value);
-			}
-
-			compositions::GuiSubComponentMeasurerSource* Win7MenuItemButtonStyle::GetMeasuringSource()
-			{
-				return measuringSource.Obj();
 			}
 
 			void Win7MenuItemButtonStyle::Transfer(GuiButton::ControlState value)

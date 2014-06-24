@@ -924,7 +924,6 @@ Type Declaration
 				CLASS_MEMBER_METHOD(GetSubMenuHost, NO_PARAMETER)
 				CLASS_MEMBER_METHOD(SetImage, {L"value"})
 				CLASS_MEMBER_METHOD(SetShortcutText, {L"value"})
-				CLASS_MEMBER_METHOD(GetMeasuringSource, NO_PARAMETER)
 			END_CLASS_MEMBER(GuiMenuButton::IStyleController)
 
 			BEGIN_CLASS_MEMBER(INodeProviderCallback)

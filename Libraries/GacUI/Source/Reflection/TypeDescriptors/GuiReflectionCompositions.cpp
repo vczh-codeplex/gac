@@ -148,33 +148,19 @@ Type Declaration
 				CLASS_MEMBER_PROPERTY_FAST(HeightPageSize)
 			END_CLASS_MEMBER(GuiPartialViewComposition)
 
-			BEGIN_CLASS_MEMBER(GuiSubComponentMeasurer)
-				CLASS_MEMBER_CONSTRUCTOR(Ptr<GuiSubComponentMeasurer>(), NO_PARAMETER)
+			BEGIN_CLASS_MEMBER(GuiSharedSizeItemComposition)
+				CLASS_MEMBER_BASE(GuiBoundsComposition)
+				CLASS_MEMBER_CONSTRUCTOR(GuiSharedSizeItemComposition*(), NO_PARAMETER)
 
-				CLASS_MEMBER_METHOD(AttachMeasuringSource, {L"value"})
-				CLASS_MEMBER_METHOD(DetachMeasuringSource, {L"value"})
-				CLASS_MEMBER_METHOD(MeasureAndUpdate, NO_PARAMETER)
+				CLASS_MEMBER_PROPERTY_FAST(Group)
+				CLASS_MEMBER_PROPERTY_FAST(SharedWidth)
+				CLASS_MEMBER_PROPERTY_FAST(SharedHeight)
 			END_CLASS_MEMBER(GuiSubComponentMeasurer)
 
-			BEGIN_CLASS_MEMBER(GuiSubComponentMeasurerSource)
-				CLASS_MEMBER_BASE(IDescriptable)
-				CLASS_MEMBER_CONSTRUCTOR(Ptr<GuiSubComponentMeasurerSource>(GuiGraphicsComposition*), {L"containerComposition"})
-
-				CLASS_MEMBER_PROPERTY_READONLY_FAST(AttachedMeasurer)
-				CLASS_MEMBER_PROPERTY_READONLY_FAST(ContainerComposition)
-				CLASS_MEMBER_PROPERTY_READONLY_FAST(SubComponentCount)
-				
-				CLASS_MEMBER_METHOD(AddSubComponent, {L"name" _ L"composition" _ L"direction"})
-				CLASS_MEMBER_METHOD(GetSubComponentName, {L"index"})
-				CLASS_MEMBER_METHOD(GetSubComponentComposition, {L"index"})
-				CLASS_MEMBER_METHOD(GetSubComponentDirection, {L"index"})
+			BEGIN_CLASS_MEMBER(GuiSharedSizeRootComposition)
+				CLASS_MEMBER_BASE(GuiBoundsComposition)
+				CLASS_MEMBER_CONSTRUCTOR(GuiSharedSizeRootComposition*(), NO_PARAMETER)
 			END_CLASS_MEMBER(GuiSubComponentMeasurerSource)
-
-			BEGIN_ENUM_ITEM(GuiSubComponentMeasurerSource::Direction)
-				ENUM_ITEM_NAMESPACE(GuiSubComponentMeasurerSource)
-				ENUM_NAMESPACE_ITEM(Horizontal)
-				ENUM_NAMESPACE_ITEM(Vertical)
-			END_ENUM_ITEM(GuiSubComponentMeasurerSource::Direction)
 
 			BEGIN_CLASS_MEMBER(IGuiGraphicsAnimation)
 				CLASS_MEMBER_BASE(IDescriptable)

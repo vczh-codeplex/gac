@@ -898,7 +898,7 @@ Win7MenuItemButtonElements
 						table->AddChild(cell);
 						cell->SetSite(0, 2, 1, 1);
 
-						Win7CreateSolidLabelElement(button.textElement, button.textComposition, Alignment::Left, Alignment::Center);
+						Win7CreateSolidLabelElement(button.textElement, button.textComposition, L"MenuItem-Text", Alignment::Left, Alignment::Center);
 						cell->AddChild(button.textComposition);
 					}
 					{
@@ -906,7 +906,7 @@ Win7MenuItemButtonElements
 						table->AddChild(cell);
 						cell->SetSite(0, 3, 1, 1);
 
-						Win7CreateSolidLabelElement(button.shortcutElement, button.shortcutComposition, Alignment::Right, Alignment::Center);
+						Win7CreateSolidLabelElement(button.shortcutElement, button.shortcutComposition, L"MenuItem-Shortcut", Alignment::Right, Alignment::Center);
 						cell->AddChild(button.shortcutComposition);
 					}
 					{
@@ -1055,6 +1055,20 @@ Helpers
 				element->SetAlignments(horizontal, vertical);
 
 				composition=new GuiBoundsComposition;
+				composition->SetOwnedElement(element);
+				composition->SetMargin(Margin(0, 0, 0, 0));
+				composition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElement);
+				composition->SetAlignmentToParent(Margin(0, 0, 0, 0));
+			}
+
+			void Win7CreateSolidLabelElement(elements::GuiSolidLabelElement*& element, compositions::GuiSharedSizeItemComposition*& composition, const WString& group, Alignment horizontal, Alignment vertical)
+			{
+				element=GuiSolidLabelElement::Create();
+				element->SetAlignments(horizontal, vertical);
+
+				composition=new GuiSharedSizeItemComposition;
+				composition->SetGroup(group);
+				composition->SetSharedWidth(true);
 				composition->SetOwnedElement(element);
 				composition->SetMargin(Margin(0, 0, 0, 0));
 				composition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElement);

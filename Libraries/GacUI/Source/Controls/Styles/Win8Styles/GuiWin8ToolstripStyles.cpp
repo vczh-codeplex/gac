@@ -347,11 +347,6 @@ Win8ToolstripButtonStyle
 			{
 			}
 
-			compositions::GuiSubComponentMeasurerSource* Win8ToolstripButtonStyle::GetMeasuringSource()
-			{
-				return 0;
-			}
-
 			void Win8ToolstripButtonStyle::Transfer(controls::GuiButton::ControlState value)
 			{
 				if(controlStyle!=value)

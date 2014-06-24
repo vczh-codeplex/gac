@@ -92,7 +92,6 @@ Menu Button
 				controls::GuiButton*										GetSubMenuHost()override;
 				void														SetImage(Ptr<GuiImageData> value)override;
 				void														SetShortcutText(const WString& value)override;
-				compositions::GuiSubComponentMeasurerSource*				GetMeasuringSource()override;
 				void														Transfer(controls::GuiButton::ControlState value)override;
 			};
 			
@@ -101,7 +100,6 @@ Menu Button
 			{
 			protected:
 				Win8MenuItemButtonElements									elements;
-				Ptr<compositions::GuiSubComponentMeasurerSource>			measuringSource;
 				controls::GuiButton::ControlState							controlStyle;
 				bool														isVisuallyEnabled;
 				bool														isSelected;
@@ -126,7 +124,6 @@ Menu Button
 				controls::GuiButton*										GetSubMenuHost()override;
 				void														SetImage(Ptr<GuiImageData> value)override;
 				void														SetShortcutText(const WString& value)override;
-				compositions::GuiSubComponentMeasurerSource*				GetMeasuringSource()override;
 				void														Transfer(controls::GuiButton::ControlState value)override;
 			};
 			

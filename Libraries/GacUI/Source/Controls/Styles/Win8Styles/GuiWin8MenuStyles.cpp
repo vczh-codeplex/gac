@@ -257,11 +257,6 @@ Win8MenuBarButtonStyle
 			{
 			}
 
-			compositions::GuiSubComponentMeasurerSource* Win8MenuBarButtonStyle::GetMeasuringSource()
-			{
-				return 0;
-			}
-
 			void Win8MenuBarButtonStyle::Transfer(GuiButton::ControlState value)
 			{
 				if(controlStyle!=value)
@@ -327,10 +322,6 @@ Win8MenuItemButtonStyle
 			{
 				elements=Win8MenuItemButtonElements::Create();
 				elements.Apply(Win8ButtonColors::MenuItemButtonNormal());
-
-				measuringSource = new GuiSubComponentMeasurerSource(elements.mainComposition);
-				measuringSource->AddSubComponent(L"MenuItem-Text", elements.textComposition, GuiSubComponentMeasurerSource::Horizontal);
-				measuringSource->AddSubComponent(L"MenuItem-ShortcutText", elements.shortcutComposition, GuiSubComponentMeasurerSource::Horizontal);
 			}
 
 			Win8MenuItemButtonStyle::~Win8MenuItemButtonStyle()
@@ -420,11 +411,6 @@ Win8MenuItemButtonStyle
 			void Win8MenuItemButtonStyle::SetShortcutText(const WString& value)
 			{
 				elements.shortcutElement->SetText(value);
-			}
-
-			compositions::GuiSubComponentMeasurerSource* Win8MenuItemButtonStyle::GetMeasuringSource()
-			{
-				return measuringSource.Obj();
 			}
 
 			void Win8MenuItemButtonStyle::Transfer(GuiButton::ControlState value)
