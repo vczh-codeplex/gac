@@ -161,11 +161,6 @@ Win8DropDownComboBoxStyle
 			{
 			}
 
-			compositions::GuiSubComponentMeasurerSource* Win8DropDownComboBoxStyle::GetMeasuringSource()
-			{
-				return 0;
-			}
-
 			void Win8DropDownComboBoxStyle::SetCommandExecutor(controls::GuiComboBoxBase::ICommandExecutor* value)
 			{
 				commandExecutor=value;

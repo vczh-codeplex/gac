@@ -1159,11 +1159,6 @@ Interface Proxy
 					{
 						INVOKE_INTERFACE_PROXY(SetShortcutText, value);
 					}
-
-					compositions::GuiSubComponentMeasurerSource* GetMeasuringSource()override
-					{
-						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetMeasuringSource);
-					}
 				};
 
 				class GuiListViewColumnHeader_IStyleController : public virtual GuiMenuButton_IStyleController, public virtual GuiListViewColumnHeader::IStyleController

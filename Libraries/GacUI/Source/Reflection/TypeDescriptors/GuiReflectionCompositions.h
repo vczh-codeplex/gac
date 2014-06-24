@@ -35,9 +35,8 @@ Type List
 			F(presentation::compositions::GuiSideAlignedComposition)\
 			F(presentation::compositions::GuiSideAlignedComposition::Direction)\
 			F(presentation::compositions::GuiPartialViewComposition)\
-			F(presentation::compositions::GuiSubComponentMeasurer)\
-			F(presentation::compositions::GuiSubComponentMeasurerSource)\
-			F(presentation::compositions::GuiSubComponentMeasurerSource::Direction)\
+			F(presentation::compositions::GuiSharedSizeItemComposition)\
+			F(presentation::compositions::GuiSharedSizeRootComposition)\
 			F(presentation::compositions::IGuiGraphicsAnimation)\
 			F(presentation::compositions::GuiGraphicsAnimationManager)\
 			F(presentation::compositions::IGuiShortcutKeyItem)\

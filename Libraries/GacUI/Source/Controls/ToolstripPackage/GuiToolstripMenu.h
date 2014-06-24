@@ -40,7 +40,6 @@ Toolstrip Item Collection
 			protected:
 				IContentCallback*							contentCallback;
 				compositions::GuiStackComposition*			stackComposition;
-				Ptr<compositions::GuiSubComponentMeasurer>	subComponentMeasurer;
 
 				void										InvokeUpdateLayout();
 				void										OnInterestingMenuButtonPropertyChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
@@ -51,7 +50,7 @@ Toolstrip Item Collection
 				void										AfterInsert(vint index, GuiControl* const& child)override;
 				void										AfterRemove(vint index, vint count)override;
 			public:
-				GuiToolstripCollection(IContentCallback* _contentCallback, compositions::GuiStackComposition* _stackComposition, Ptr<compositions::GuiSubComponentMeasurer> _subComponentMeasurer);
+				GuiToolstripCollection(IContentCallback* _contentCallback, compositions::GuiStackComposition* _stackComposition);
 				~GuiToolstripCollection();
 			};
 
@@ -134,9 +133,9 @@ Toolstrip Container
 			class GuiToolstripMenu : public GuiMenu, protected GuiToolstripCollection::IContentCallback,  Description<GuiToolstripMenu>
 			{
 			protected:
+				compositions::GuiSharedSizeRootComposition*	sharedSizeRootComposition;
 				compositions::GuiStackComposition*			stackComposition;
 				Ptr<GuiToolstripCollection>					toolstripItems;
-				Ptr<compositions::GuiSubComponentMeasurer>	subComponentMeasurer;
 				Ptr<GuiToolstripBuilder>					builder;
 
 				void										UpdateLayout()override;

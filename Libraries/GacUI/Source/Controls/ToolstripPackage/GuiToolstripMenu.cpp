@@ -43,26 +43,12 @@ GuiToolstripCollection
 
 			void GuiToolstripCollection::BeforeRemove(vint index, GuiControl* const& child)
 			{
-				GuiStackItemComposition* stackItem=stackComposition->GetStackItems().Get(index);
-
+				GuiStackItemComposition* stackItem = stackComposition->GetStackItems().Get(index);
 				stackComposition->RemoveChild(stackItem);
 				stackItem->RemoveChild(child->GetBoundsComposition());
 				delete stackItem;
-
-				if(subComponentMeasurer)
-				{
-					GuiMenuButton* menuButton=dynamic_cast<GuiMenuButton*>(child);
-					if(menuButton)
-					{
-						auto style = dynamic_cast<GuiMenuButton::IStyleController*>(menuButton->GetStyleController());
-						auto measuringSource = style->GetMeasuringSource();
-						if(measuringSource)
-						{
-							subComponentMeasurer->DetachMeasuringSource(measuringSource);
-						}
-					}
-				}
 				delete child;
+				InvokeUpdateLayout();
 			}
 
 			void GuiToolstripCollection::AfterInsert(vint index, GuiControl* const& child)
@@ -72,20 +58,11 @@ GuiToolstripCollection
 				stackItem->AddChild(child->GetBoundsComposition());
 				stackComposition->InsertChild(index, stackItem);
 
-				if(subComponentMeasurer)
+				GuiMenuButton* menuButton=dynamic_cast<GuiMenuButton*>(child);
+				if(menuButton)
 				{
-					GuiMenuButton* menuButton=dynamic_cast<GuiMenuButton*>(child);
-					if(menuButton)
-					{
-						auto style = dynamic_cast<GuiMenuButton::IStyleController*>(menuButton->GetStyleController());
-						auto measuringSource = style->GetMeasuringSource();
-						if(measuringSource)
-						{
-							subComponentMeasurer->AttachMeasuringSource(measuringSource);
-						}
-						menuButton->TextChanged.AttachMethod(this, &GuiToolstripCollection::OnInterestingMenuButtonPropertyChanged);
-						menuButton->ShortcutTextChanged.AttachMethod(this, &GuiToolstripCollection::OnInterestingMenuButtonPropertyChanged);
-					}
+					menuButton->TextChanged.AttachMethod(this, &GuiToolstripCollection::OnInterestingMenuButtonPropertyChanged);
+					menuButton->ShortcutTextChanged.AttachMethod(this, &GuiToolstripCollection::OnInterestingMenuButtonPropertyChanged);
 				}
 				InvokeUpdateLayout();
 			}
@@ -95,10 +72,9 @@ GuiToolstripCollection
 				InvokeUpdateLayout();
 			}
 
-			GuiToolstripCollection::GuiToolstripCollection(IContentCallback* _contentCallback, compositions::GuiStackComposition* _stackComposition, Ptr<compositions::GuiSubComponentMeasurer> _subComponentMeasurer)
+			GuiToolstripCollection::GuiToolstripCollection(IContentCallback* _contentCallback, compositions::GuiStackComposition* _stackComposition)
 				:contentCallback(_contentCallback)
 				,stackComposition(_stackComposition)
-				,subComponentMeasurer(_subComponentMeasurer)
 			{
 			}
 
@@ -311,21 +287,25 @@ GuiToolstripMenu
 
 			void GuiToolstripMenu::UpdateLayout()
 			{
-				subComponentMeasurer->MeasureAndUpdate();
+				sharedSizeRootComposition->ForceCalculateSizeImmediately();
 			}
 
 			GuiToolstripMenu::GuiToolstripMenu(IStyleController* _styleController, GuiControl* _owner)
 				:GuiMenu(_styleController, _owner)
 			{
+				sharedSizeRootComposition = new GuiSharedSizeRootComposition();
+				sharedSizeRootComposition->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				sharedSizeRootComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+				GetContainerComposition()->AddChild(sharedSizeRootComposition);
+
 				stackComposition=new GuiStackComposition;
 				stackComposition->SetDirection(GuiStackComposition::Vertical);
 				stackComposition->SetAlignmentToParent(Margin(0, 0, 0, 0));
 				stackComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
-				GetContainerComposition()->AddChild(stackComposition);
-
-				subComponentMeasurer=new GuiSubComponentMeasurer;
-				toolstripItems=new GuiToolstripCollection(this, stackComposition, subComponentMeasurer);
-				builder=new GuiToolstripBuilder(GuiToolstripBuilder::Menu, toolstripItems.Obj());
+				sharedSizeRootComposition->AddChild(stackComposition);
+				
+				toolstripItems = new GuiToolstripCollection(this, stackComposition);
+				builder = new GuiToolstripBuilder(GuiToolstripBuilder::Menu, toolstripItems.Obj());
 			}
 
 			GuiToolstripMenu::~GuiToolstripMenu()
@@ -356,7 +336,7 @@ GuiToolstripMenuBar
 				stackComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 				GetContainerComposition()->AddChild(stackComposition);
 
-				toolstripItems=new GuiToolstripCollection(0, stackComposition, 0);
+				toolstripItems=new GuiToolstripCollection(0, stackComposition);
 				builder=new GuiToolstripBuilder(GuiToolstripBuilder::MenuBar, toolstripItems.Obj());
 			}
 
@@ -388,7 +368,7 @@ GuiToolstripToolBar
 				stackComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 				GetContainerComposition()->AddChild(stackComposition);
 
-				toolstripItems=new GuiToolstripCollection(0, stackComposition, 0);
+				toolstripItems=new GuiToolstripCollection(0, stackComposition);
 				builder=new GuiToolstripBuilder(GuiToolstripBuilder::ToolBar, toolstripItems.Obj());
 			}
 

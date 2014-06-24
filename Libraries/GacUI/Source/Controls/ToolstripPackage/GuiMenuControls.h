@@ -150,9 +150,6 @@ MenuButton
 					/// <summary>Notify that the shortcut key text for the menu button is changed.</summary>
 					/// <param name="value">The shortcut key text for the menu button.</param>
 					virtual void						SetShortcutText(const WString& value)=0;
-					/// <summary>Get the <see cref="compositions::GuiSubComponentMeasurerSource"/> object that is attached to the menu button.</summary>
-					/// <returns>The attached measuring source.</returns>
-					virtual compositions::GuiSubComponentMeasurerSource*	GetMeasuringSource()=0;
 				};
 			protected:
 				IStyleController*						styleController;

@@ -299,11 +299,6 @@ Win7ToolstripButtonStyle
 			{
 			}
 
-			compositions::GuiSubComponentMeasurerSource* Win7ToolstripButtonStyle::GetMeasuringSource()
-			{
-				return 0;
-			}
-
 			void Win7ToolstripButtonStyle::Transfer(controls::GuiButton::ControlState value)
 			{
 				if(controlStyle!=value)

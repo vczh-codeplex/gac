@@ -137,9 +137,9 @@ Button Configuration
 				compositions::GuiCellComposition*			splitterComposition;
 				elements::GuiImageFrameElement*				imageElement;
 				elements::GuiSolidLabelElement*				textElement;
-				compositions::GuiBoundsComposition*			textComposition;
+				compositions::GuiSharedSizeItemComposition*	textComposition;
 				elements::GuiSolidLabelElement*				shortcutElement;
-				compositions::GuiBoundsComposition*			shortcutComposition;
+				compositions::GuiSharedSizeItemComposition*	shortcutComposition;
 				elements::GuiPolygonElement*				subMenuArrowElement;
 				compositions::GuiGraphicsComposition*		subMenuArrowComposition;
 				compositions::GuiBoundsComposition*			mainComposition;
@@ -187,6 +187,7 @@ Helper Functions
 			extern Color									Win7GetSystemTextColor(bool enabled);
 			extern void										Win7SetFont(elements::GuiSolidLabelElement* element, compositions::GuiBoundsComposition* composition, const FontProperties& fontProperties);
 			extern void										Win7CreateSolidLabelElement(elements::GuiSolidLabelElement*& element, compositions::GuiBoundsComposition*& composition, Alignment horizontal, Alignment vertical);
+			extern void										Win7CreateSolidLabelElement(elements::GuiSolidLabelElement*& element, compositions::GuiSharedSizeItemComposition*& composition, const WString& group, Alignment horizontal, Alignment vertical);
 			extern elements::text::ColorEntry				Win7GetTextBoxTextColor();
 		}
 	}

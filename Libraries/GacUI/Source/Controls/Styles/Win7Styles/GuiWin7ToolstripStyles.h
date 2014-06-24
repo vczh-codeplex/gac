@@ -105,7 +105,6 @@ Toolstrip Button
 				controls::GuiButton*										GetSubMenuHost()override;
 				void														SetImage(Ptr<GuiImageData> value)override;
 				void														SetShortcutText(const WString& value)override;
-				compositions::GuiSubComponentMeasurerSource*				GetMeasuringSource()override;
 				void														Transfer(controls::GuiButton::ControlState value)override;
 			};
 

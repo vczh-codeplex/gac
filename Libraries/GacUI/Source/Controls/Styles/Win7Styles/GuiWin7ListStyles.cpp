@@ -375,11 +375,6 @@ Win7ListViewColumnHeaderStyle
 			{
 			}
 
-			compositions::GuiSubComponentMeasurerSource* Win7ListViewColumnHeaderStyle::GetMeasuringSource()
-			{
-				return 0;
-			}
-
 			void Win7ListViewColumnHeaderStyle::SetColumnSortingState(controls::GuiListViewColumnHeader::ColumnSortingState value)
 			{
 				Margin margin=arrowComposition->GetAlignmentToParent();
@@ -618,11 +613,6 @@ Win7DropDownComboBoxStyle
 
 			void Win7DropDownComboBoxStyle::SetShortcutText(const WString& value)
 			{
-			}
-
-			compositions::GuiSubComponentMeasurerSource* Win7DropDownComboBoxStyle::GetMeasuringSource()
-			{
-				return 0;
 			}
 
 			void Win7DropDownComboBoxStyle::SetCommandExecutor(controls::GuiComboBoxBase::ICommandExecutor* value)

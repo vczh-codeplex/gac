@@ -256,11 +256,6 @@ GuiToolstripButtonTemplate_StyleProvider
 				controlTemplate->SetShortcutText(value);
 			}
 
-			compositions::GuiSubComponentMeasurerSource* GuiToolstripButtonTemplate_StyleProvider::GetMeasuringSource()
-			{
-				return 0;
-			}
-
 /***********************************************************************
 GuiListViewColumnHeaderTemplate_StyleProvider
 ***********************************************************************/
