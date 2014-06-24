@@ -161,7 +161,7 @@ Win8DropDownComboBoxStyle
 			{
 			}
 
-			compositions::GuiSubComponentMeasurer::IMeasuringSource* Win8DropDownComboBoxStyle::GetMeasuringSource()
+			compositions::GuiSubComponentMeasurerSource* Win8DropDownComboBoxStyle::GetMeasuringSource()
 			{
 				return 0;
 			}

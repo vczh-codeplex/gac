@@ -1160,7 +1160,7 @@ Interface Proxy
 						INVOKE_INTERFACE_PROXY(SetShortcutText, value);
 					}
 
-					compositions::GuiSubComponentMeasurer::IMeasuringSource* GetMeasuringSource()override
+					compositions::GuiSubComponentMeasurerSource* GetMeasuringSource()override
 					{
 						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetMeasuringSource);
 					}

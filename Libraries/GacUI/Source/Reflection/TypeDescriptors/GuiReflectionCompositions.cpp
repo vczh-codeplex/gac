@@ -153,38 +153,28 @@ Type Declaration
 
 				CLASS_MEMBER_METHOD(AttachMeasuringSource, {L"value"})
 				CLASS_MEMBER_METHOD(DetachMeasuringSource, {L"value"})
-				CLASS_MEMBER_METHOD(MeasureAndUpdate, {L"measuringCategory" _ L"direction"})
+				CLASS_MEMBER_METHOD(MeasureAndUpdate, NO_PARAMETER)
 			END_CLASS_MEMBER(GuiSubComponentMeasurer)
 
-			BEGIN_ENUM_ITEM(GuiSubComponentMeasurer::Direction)
-				ENUM_ITEM_NAMESPACE(GuiSubComponentMeasurer)
-				ENUM_NAMESPACE_ITEM(Horizontal)
-				ENUM_NAMESPACE_ITEM(Vertical)
-			END_ENUM_ITEM(GuiSubComponentMeasurer::Direction)
-
-			BEGIN_CLASS_MEMBER(GuiSubComponentMeasurer::IMeasuringSource)
+			BEGIN_CLASS_MEMBER(GuiSubComponentMeasurerSource)
 				CLASS_MEMBER_BASE(IDescriptable)
-				INTERFACE_EXTERNALCTOR(GuiSubComponentMeasurer, IMeasuringSource)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<GuiSubComponentMeasurerSource>(GuiGraphicsComposition*), {L"containerComposition"})
 
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(AttachedMeasurer)
-				CLASS_MEMBER_PROPERTY_READONLY_FAST(MeasuringCategory)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ContainerComposition)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(SubComponentCount)
-				CLASS_MEMBER_PROPERTY_READONLY_FAST(MainComposition)
-
-				CLASS_MEMBER_METHOD(AttachMeasurer, {L"value"})
-				CLASS_MEMBER_METHOD(DetachMeasurer, {L"value"})
+				
+				CLASS_MEMBER_METHOD(AddSubComponent, {L"name" _ L"composition" _ L"direction"})
 				CLASS_MEMBER_METHOD(GetSubComponentName, {L"index"})
-				CLASS_MEMBER_METHOD_OVERLOAD(GetSubComponentComposition, {L"index"}, GuiGraphicsComposition*(GuiSubComponentMeasurer::IMeasuringSource::*)(vint))
-				CLASS_MEMBER_METHOD_OVERLOAD(GetSubComponentComposition, {L"name"}, GuiGraphicsComposition*(GuiSubComponentMeasurer::IMeasuringSource::*)(const WString&))
-				CLASS_MEMBER_METHOD(SubComponentPreferredMinSizeUpdated, NO_PARAMETER)
-			END_CLASS_MEMBER(GuiSubComponentMeasurer::IMeasuringSource)
+				CLASS_MEMBER_METHOD(GetSubComponentComposition, {L"index"})
+				CLASS_MEMBER_METHOD(GetSubComponentDirection, {L"index"})
+			END_CLASS_MEMBER(GuiSubComponentMeasurerSource)
 
-			BEGIN_CLASS_MEMBER(GuiSubComponentMeasurer::MeasuringSource)
-				CLASS_MEMBER_BASE(GuiSubComponentMeasurer::IMeasuringSource)
-				CLASS_MEMBER_CONSTRUCTOR(Ptr<GuiSubComponentMeasurer::MeasuringSource>(const WString& _ GuiGraphicsComposition*), {L"measuringCategory" _ L"mainComposition"})
-
-				CLASS_MEMBER_METHOD(AddSubComponent, {L"name" _ L"composition"})
-			END_CLASS_MEMBER(GuiSubComponentMeasurer::MeasuringSource)
+			BEGIN_ENUM_ITEM(GuiSubComponentMeasurerSource::Direction)
+				ENUM_ITEM_NAMESPACE(GuiSubComponentMeasurerSource)
+				ENUM_NAMESPACE_ITEM(Horizontal)
+				ENUM_NAMESPACE_ITEM(Vertical)
+			END_ENUM_ITEM(GuiSubComponentMeasurerSource::Direction)
 
 			BEGIN_CLASS_MEMBER(IGuiGraphicsAnimation)
 				CLASS_MEMBER_BASE(IDescriptable)

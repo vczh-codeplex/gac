@@ -299,7 +299,7 @@ Win7ToolstripButtonStyle
 			{
 			}
 
-			compositions::GuiSubComponentMeasurer::IMeasuringSource* Win7ToolstripButtonStyle::GetMeasuringSource()
+			compositions::GuiSubComponentMeasurerSource* Win7ToolstripButtonStyle::GetMeasuringSource()
 			{
 				return 0;
 			}

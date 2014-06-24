@@ -54,10 +54,8 @@ GuiToolstripCollection
 					GuiMenuButton* menuButton=dynamic_cast<GuiMenuButton*>(child);
 					if(menuButton)
 					{
-						GuiSubComponentMeasurer::IMeasuringSource* measuringSource=
-							dynamic_cast<GuiMenuButton::IStyleController*>(
-								menuButton->GetStyleController()
-								)->GetMeasuringSource();
+						auto style = dynamic_cast<GuiMenuButton::IStyleController*>(menuButton->GetStyleController());
+						auto measuringSource = style->GetMeasuringSource();
 						if(measuringSource)
 						{
 							subComponentMeasurer->DetachMeasuringSource(measuringSource);
@@ -79,10 +77,8 @@ GuiToolstripCollection
 					GuiMenuButton* menuButton=dynamic_cast<GuiMenuButton*>(child);
 					if(menuButton)
 					{
-						GuiSubComponentMeasurer::IMeasuringSource* measuringSource=
-							dynamic_cast<GuiMenuButton::IStyleController*>(
-								menuButton->GetStyleController()
-								)->GetMeasuringSource();
+						auto style = dynamic_cast<GuiMenuButton::IStyleController*>(menuButton->GetStyleController());
+						auto measuringSource = style->GetMeasuringSource();
 						if(measuringSource)
 						{
 							subComponentMeasurer->AttachMeasuringSource(measuringSource);
@@ -315,7 +311,7 @@ GuiToolstripMenu
 
 			void GuiToolstripMenu::UpdateLayout()
 			{
-				subComponentMeasurer->MeasureAndUpdate(GuiMenuButton::MenuItemSubComponentMeasuringCategoryName, GuiSubComponentMeasurer::Horizontal);
+				subComponentMeasurer->MeasureAndUpdate();
 			}
 
 			GuiToolstripMenu::GuiToolstripMenu(IStyleController* _styleController, GuiControl* _owner)

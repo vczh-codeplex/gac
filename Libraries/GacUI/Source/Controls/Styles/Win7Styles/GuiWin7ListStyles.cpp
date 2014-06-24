@@ -375,7 +375,7 @@ Win7ListViewColumnHeaderStyle
 			{
 			}
 
-			compositions::GuiSubComponentMeasurer::IMeasuringSource* Win7ListViewColumnHeaderStyle::GetMeasuringSource()
+			compositions::GuiSubComponentMeasurerSource* Win7ListViewColumnHeaderStyle::GetMeasuringSource()
 			{
 				return 0;
 			}
@@ -620,7 +620,7 @@ Win7DropDownComboBoxStyle
 			{
 			}
 
-			compositions::GuiSubComponentMeasurer::IMeasuringSource* Win7DropDownComboBoxStyle::GetMeasuringSource()
+			compositions::GuiSubComponentMeasurerSource* Win7DropDownComboBoxStyle::GetMeasuringSource()
 			{
 				return 0;
 			}

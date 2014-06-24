@@ -256,7 +256,7 @@ GuiToolstripButtonTemplate_StyleProvider
 				controlTemplate->SetShortcutText(value);
 			}
 
-			compositions::GuiSubComponentMeasurer::IMeasuringSource* GuiToolstripButtonTemplate_StyleProvider::GetMeasuringSource()
+			compositions::GuiSubComponentMeasurerSource* GuiToolstripButtonTemplate_StyleProvider::GetMeasuringSource()
 			{
 				return 0;
 			}

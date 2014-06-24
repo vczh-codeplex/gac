@@ -257,7 +257,7 @@ Win8MenuBarButtonStyle
 			{
 			}
 
-			compositions::GuiSubComponentMeasurer::IMeasuringSource* Win8MenuBarButtonStyle::GetMeasuringSource()
+			compositions::GuiSubComponentMeasurerSource* Win8MenuBarButtonStyle::GetMeasuringSource()
 			{
 				return 0;
 			}
@@ -269,27 +269,6 @@ Win8MenuBarButtonStyle
 					controlStyle=value;
 					TransferInternal(controlStyle, isVisuallyEnabled, isOpening);
 				}
-			}
-
-/***********************************************************************
-Win8MenuItemButtonStyle::MeasuringSource
-***********************************************************************/
-
-			Win8MenuItemButtonStyle::MeasuringSource::MeasuringSource(Win8MenuItemButtonStyle* _style)
-				:GuiSubComponentMeasurer::MeasuringSource(GuiMenuButton::MenuItemSubComponentMeasuringCategoryName, _style->elements.mainComposition)
-				,style(_style)
-			{
-				AddSubComponent(L"text", style->elements.textComposition);
-				AddSubComponent(L"shortcut", style->elements.shortcutComposition);
-			}
-
-			Win8MenuItemButtonStyle::MeasuringSource::~MeasuringSource()
-			{
-			}
-
-			void Win8MenuItemButtonStyle::MeasuringSource::SubComponentPreferredMinSizeUpdated()
-			{
-				GetMainComposition()->ForceCalculateSizeImmediately();
 			}
 
 /***********************************************************************
@@ -348,7 +327,10 @@ Win8MenuItemButtonStyle
 			{
 				elements=Win8MenuItemButtonElements::Create();
 				elements.Apply(Win8ButtonColors::MenuItemButtonNormal());
-				measuringSource=new MeasuringSource(this);
+
+				measuringSource = new GuiSubComponentMeasurerSource(elements.mainComposition);
+				measuringSource->AddSubComponent(L"MenuItem-Text", elements.textComposition, GuiSubComponentMeasurerSource::Horizontal);
+				measuringSource->AddSubComponent(L"MenuItem-ShortcutText", elements.shortcutComposition, GuiSubComponentMeasurerSource::Horizontal);
 			}
 
 			Win8MenuItemButtonStyle::~Win8MenuItemButtonStyle()
@@ -440,7 +422,7 @@ Win8MenuItemButtonStyle
 				elements.shortcutElement->SetText(value);
 			}
 
-			compositions::GuiSubComponentMeasurer::IMeasuringSource* Win8MenuItemButtonStyle::GetMeasuringSource()
+			compositions::GuiSubComponentMeasurerSource* Win8MenuItemButtonStyle::GetMeasuringSource()
 			{
 				return measuringSource.Obj();
 			}

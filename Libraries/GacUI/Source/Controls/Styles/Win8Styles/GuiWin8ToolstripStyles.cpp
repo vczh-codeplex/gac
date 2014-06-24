@@ -347,7 +347,7 @@ Win8ToolstripButtonStyle
 			{
 			}
 
-			compositions::GuiSubComponentMeasurer::IMeasuringSource* Win8ToolstripButtonStyle::GetMeasuringSource()
+			compositions::GuiSubComponentMeasurerSource* Win8ToolstripButtonStyle::GetMeasuringSource()
 			{
 				return 0;
 			}
