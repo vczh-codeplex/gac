@@ -701,15 +701,33 @@ ListView
 					/// <param name="_text">The specified text.</param>
 					/// <param name="_size">The specified size.</param>
 					ListViewItem();
-
+					
+					/// <summary>Get all sub items of this item.</summary>
+					/// <returns>All sub items of this item.</returns>
 					ListViewSubItems&								GetSubItems();
+					/// <summary>Get the small image of this item.</summary>
+					/// <returns>The small image of this item.</returns>
 					Ptr<GuiImageData>								GetSmallImage();
+					/// <summary>Set the small image of this item.</summary>
+					/// <param name="value">The small image of this item.</param>
 					void											SetSmallImage(Ptr<GuiImageData> value);
+					/// <summary>Get the large image of this item.</summary>
+					/// <returns>The large image of this item.</returns>
 					Ptr<GuiImageData>								GetLargeImage();
+					/// <summary>Set the large image of this item.</summary>
+					/// <param name="value">The large image of this item.</param>
 					void											SetLargeImage(Ptr<GuiImageData> value);
+					/// <summary>Get the text of this item.</summary>
+					/// <returns>The text of this item.</returns>
 					const WString&									GetText();
+					/// <summary>Set the text of this item.</summary>
+					/// <param name="value">The text of this item.</param>
 					void											SetText(const WString& value);
+					/// <summary>Get the tag of this item.</summary>
+					/// <returns>The tag of this item.</returns>
 					description::Value								GetTag();
+					/// <summary>Set the tag of this item.</summary>
+					/// <param name="value">The tag of this item.</param>
 					void											SetTag(const description::Value& value);
 				};
 				
@@ -731,16 +749,36 @@ ListView
 					/// <param name="_text">The specified text.</param>
 					/// <param name="_size">The specified size.</param>
 					ListViewColumn(const WString& _text=L"", vint _size=160);
-
+					
+					/// <summary>Get the text of this item.</summary>
+					/// <returns>The text of this item.</returns>
 					const WString&									GetText();
+					/// <summary>Set the text of this item.</summary>
+					/// <param name="value">The text of this item.</param>
 					void											SetText(const WString& value);
+					/// <summary>Get the text property of this item.</summary>
+					/// <returns>The text property of this item.</returns>
 					const WString&									GetTextProperty();
+					/// <summary>Set the text property of this item.</summary>
+					/// <param name="value">The text property of this item.</param>
 					void											SetTextProperty(const WString& value);
+					/// <summary>Get the size of this item.</summary>
+					/// <returns>The size of this item.</returns>
 					vint											GetSize();
+					/// <summary>Set the size of this item.</summary>
+					/// <param name="value">The size of this item.</param>
 					void											SetSize(vint value);
+					/// <summary>Get the dropdown context menu of this item.</summary>
+					/// <returns>The dropdown context menu of this item.</returns>
 					GuiMenu*										GetDropdownPopup();
+					/// <summary>Set the dropdown context menu of this item.</summary>
+					/// <param name="value">The dropdown context menu of this item.</param>
 					void											SetDropdownPopup(GuiMenu* value);
+					/// <summary>Get the sorting state of this item.</summary>
+					/// <returns>The sorting state of this item.</returns>
 					GuiListViewColumnHeader::ColumnSortingState		GetSortingState();
+					/// <summary>Set the sorting state of this item.</summary>
+					/// <param name="value">The sorting state of this item.</param>
 					void											SetSortingState(GuiListViewColumnHeader::ColumnSortingState value);
 				};
 
