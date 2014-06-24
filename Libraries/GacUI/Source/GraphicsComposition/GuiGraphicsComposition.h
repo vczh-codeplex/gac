@@ -115,6 +115,44 @@ namespace vl
 				/// <param name="direction">The measuring direction.</param>
 				void									MeasureAndUpdate();
 			};
+
+			class GuiSharedSizeItemComposition;
+			class GuiSharedSizeRootComposition;
+
+			class GuiSharedSizeItemComposition : public GuiBoundsComposition
+			{
+			protected:
+				GuiSharedSizeRootComposition*						parentRoot;
+				WString												group;
+				bool												sharedWidth;
+				bool												sharedHeight;
+
+				void												Update();
+				void												OnParentLineChanged()override;
+			public:
+				GuiSharedSizeItemComposition();
+				~GuiSharedSizeItemComposition();
+
+				const WString&										GetGroup();
+				void												SetGroup(const WString& value);
+				bool												GetSharedWidth();
+				void												SetSharedWidth(bool value);
+				bool												GetSharedHeight();
+				void												SetSharedHeight(bool value);
+			};
+
+			class GuiSharedSizeRootComposition :public GuiBoundsComposition
+			{
+				friend class GuiSharedSizeItemComposition;
+			protected:
+				collections::List<GuiSharedSizeItemComposition*>	childItems;
+
+			public:
+				GuiSharedSizeRootComposition();
+				~GuiSharedSizeRootComposition();
+
+				void												ForceCalculateSizeImmediately()override;
+			};
 		}
 	}
 }

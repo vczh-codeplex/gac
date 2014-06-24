@@ -77,6 +77,7 @@ Basic Construction
 				virtual void								OnChildInserted(GuiGraphicsComposition* child);
 				virtual void								OnChildRemoved(GuiGraphicsComposition* child);
 				virtual void								OnParentChanged(GuiGraphicsComposition* oldParent, GuiGraphicsComposition* newParent);
+				virtual void								OnParentLineChanged();
 				virtual void								OnRenderTargetChanged();
 				
 				virtual void								SetAssociatedControl(controls::GuiControl* control);

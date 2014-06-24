@@ -646,6 +646,7 @@ GuiCellComposition
 
 			void GuiCellComposition::OnParentChanged(GuiGraphicsComposition* oldParent, GuiGraphicsComposition* newParent)
 			{
+				GuiGraphicsSite::OnParentChanged(oldParent, newParent);
 				if(tableParent)
 				{
 					ClearSitedCells(tableParent);

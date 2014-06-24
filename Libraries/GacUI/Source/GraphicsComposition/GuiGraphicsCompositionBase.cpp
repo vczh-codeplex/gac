@@ -49,6 +49,15 @@ GuiGraphicsComposition
 
 			void GuiGraphicsComposition::OnParentChanged(GuiGraphicsComposition* oldParent, GuiGraphicsComposition* newParent)
 			{
+				OnParentLineChanged();
+			}
+
+			void GuiGraphicsComposition::OnParentLineChanged()
+			{
+				for (vint i = 0; i < children.Count(); i++)
+				{
+					children[i]->OnParentLineChanged();
+				}
 			}
 
 			void GuiGraphicsComposition::OnRenderTargetChanged()
