@@ -132,6 +132,7 @@ namespace demos
 	F(BottomScrollButtonTemplate, GuiButtonTemplate)\
 	F(HScrollHandleTemplate, GuiButtonTemplate)\
 	F(VScrollHandleTemplate, GuiButtonTemplate)\
+	F(ProgressBarTemplate, GuiScrollTemplate)\
 	F(ScrollViewTemplate, GuiScrollViewTemplate)\
 	F(ItemBackgroundTemplate, GuiSelectableButtonTemplate)\
 	F(CheckItemBackgroundTemplate, GuiSelectableButtonTemplate)\
@@ -320,6 +321,7 @@ namespace vl
 			F(demos::VScrollHandleTemplate)\
 			F(demos::HScrollTemplate)\
 			F(demos::VScrollTemplate)\
+			F(demos::ProgressBarTemplate)\
 			F(demos::ScrollViewTemplate)\
 			F(demos::ItemBackgroundTemplate)\
 			F(demos::CheckItemBackgroundTemplate)\

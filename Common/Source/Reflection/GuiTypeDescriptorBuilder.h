@@ -689,10 +689,25 @@ StructValueSerializer
 					}
 				}
 
+				bool IsSpace(wchar_t c)
+				{
+					return c == L' ' || c == L'\t' || c == L'\r' || c == L'\n';
+				}
+
+				const wchar_t* FindSpace(const wchar_t* text)
+				{
+					while (*text)
+					{
+						if (IsSpace(*text)) return text;
+						text++;
+					}
+					return 0;
+				}
+
 				WString Escape(const WString& text)
 				{
 					const wchar_t* reading=text.Buffer();
-					if(wcschr(reading, L' ')==0 && wcschr(reading, L'{')==0 && wcschr(reading, L'}')==0)
+					if(FindSpace(reading)==0 && wcschr(reading, L'{')==0 && wcschr(reading, L'}')==0)
 					{
 						return text;
 					}
@@ -752,7 +767,7 @@ StructValueSerializer
 					}
 					else
 					{
-						const wchar_t* space=wcschr(reading, L' ');
+						const wchar_t* space=FindSpace(reading);
 						if(space)
 						{
 							field=WString(reading, space-reading);
@@ -795,7 +810,7 @@ StructValueSerializer
 					const wchar_t* reading=input.Buffer();
 					while(true)
 					{
-						while(*reading==L' ') reading++;
+						while(IsSpace(*reading)) reading++;
 						if(*reading==0) break;
 						const wchar_t* comma=wcschr(reading, L':');
 						if(!comma) return false;

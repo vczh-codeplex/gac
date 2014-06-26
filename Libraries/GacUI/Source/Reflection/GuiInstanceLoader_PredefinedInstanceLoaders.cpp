@@ -1453,6 +1453,11 @@ GuiTreeNodeInstanceLoader
 GuiPredefinedInstanceLoadersPlugin
 ***********************************************************************/
 
+		void InitializeTrackerProgressBar(GuiScroll* control)
+		{
+			control->SetPageSize(0);
+		}
+
 		class GuiPredefinedInstanceLoadersPlugin : public Object, public IGuiPlugin
 		{
 		public:
@@ -1519,6 +1524,21 @@ GuiPredefinedInstanceLoadersPlugin
 			)\
 		)
 
+#define ADD_VIRTUAL_CONTROL_F(VIRTUALTYPENAME, TYPENAME, CONSTRUCTOR, TEMPLATE, FUNCTION)\
+	manager->CreateVirtualType(\
+		description::GetTypeDescriptor<TYPENAME>()->GetTypeName(),\
+		new GuiTemplateControlInstanceLoader(\
+			L"presentation::controls::Gui" L#VIRTUALTYPENAME,\
+			[](){return Value::From(CONSTRUCTOR());},\
+			[](Ptr<GuiTemplate::IFactory> factory)\
+			{\
+				auto control = new TYPENAME(new TEMPLATE##_StyleProvider(factory));\
+				FUNCTION(control);\
+				return Value::From(control);\
+			}\
+			)\
+		)
+
 #define ADD_TEMPLATE_CONTROL_X(TYPENAME, CONSTRUCTOR, TEMPLATE)\
 	manager->SetLoader(\
 		new GuiTemplateControlInstanceLoader(\
@@ -1576,9 +1596,9 @@ GuiPredefinedInstanceLoadersPlugin
 				ADD_VIRTUAL_CONTROL		(RadioButton,				GuiSelectableButton,	g::NewRadioButton,				GuiSelectableButtonTemplate);	// ControlTemplate
 				ADD_VIRTUAL_CONTROL		(HScroll,					GuiScroll,				g::NewHScroll,					GuiScrollTemplate);				// ControlTemplate
 				ADD_VIRTUAL_CONTROL		(VScroll,					GuiScroll,				g::NewVScroll,					GuiScrollTemplate);				// ControlTemplate
-				ADD_VIRTUAL_CONTROL		(HTracker,					GuiScroll,				g::NewHTracker,					GuiScrollTemplate);				// ControlTemplate
-				ADD_VIRTUAL_CONTROL		(VTracker,					GuiScroll,				g::NewVTracker,					GuiScrollTemplate);				// ControlTemplate
-				ADD_VIRTUAL_CONTROL		(ProgressBar,				GuiScroll,				g::NewProgressBar,				GuiScrollTemplate);				// ControlTemplate
+				ADD_VIRTUAL_CONTROL_F	(HTracker,					GuiScroll,				g::NewHTracker,					GuiScrollTemplate,				InitializeTrackerProgressBar);	// ControlTemplate
+				ADD_VIRTUAL_CONTROL_F	(VTracker,					GuiScroll,				g::NewVTracker,					GuiScrollTemplate,				InitializeTrackerProgressBar);	// ControlTemplate
+				ADD_VIRTUAL_CONTROL_F	(ProgressBar,				GuiScroll,				g::NewProgressBar,				GuiScrollTemplate,				InitializeTrackerProgressBar);	// ControlTemplate
 				ADD_VIRTUAL_CONTROL_2	(CheckTextList,				GuiTextList,			g::NewCheckTextList,			GuiTextListTemplate);			// ControlTemplate
 				ADD_VIRTUAL_CONTROL_2	(RadioTextList,				GuiTextList,			g::NewRadioTextList,			GuiTextListTemplate);			// ControlTemplate
 
