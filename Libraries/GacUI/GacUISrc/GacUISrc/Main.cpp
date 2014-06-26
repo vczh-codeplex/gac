@@ -154,14 +154,15 @@ namespace demos
 
 	DEMO_TEMPLATES(CONTROL_TEMPLATE_DECL)
 
-	class HScrollTemplate : public GuiScrollTemplate, public GuiInstancePartialClass<GuiScrollTemplate>, public Description<HScrollTemplate>
+	template<int Point::* FComponent, int NativeWindowMouseInfo::* FArgsComponent>
+	class ScrollTrackerTemplate : public GuiScrollTemplate, public GuiInstancePartialClass<GuiScrollTemplate>
 	{
-		friend struct CustomTypeDescriptorSelector<HScrollTemplate>;
 	protected:
-		GuiPartialViewComposition*			handle;
+		GuiGraphicsComposition*				handle;
 		Point								draggingStartLocation;
 		bool								draggingHandle;
-		
+	
+	public:
 		void OnHandleMouseDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 		{
 			if (sender->GetRelatedControl()->GetVisuallyEnabled())
@@ -182,7 +183,7 @@ namespace demos
 			{
 				vint totalPixels = handle->GetParent()->GetBounds().Width();
 				vint currentOffset = handle->GetBounds().Left();
-				vint newOffset = currentOffset + (arguments.x - draggingStartLocation.x);
+				vint newOffset = currentOffset + (arguments.*FArgsComponent - draggingStartLocation.*FComponent);
 				vint totalSize = GetTotalSize();
 				double ratio = (double)newOffset / totalPixels;
 				vint newPosition = (vint)(ratio * totalSize);
@@ -192,7 +193,7 @@ namespace demos
 				vint delta1 = abs((int)(offset1 - newOffset));
 				vint delta2 = abs((int)(offset2 - newOffset));
 
-				if(delta1<delta2)
+				if(delta1 < delta2)
 				{
 					GetCommands()->SetPosition(newPosition);
 				}
@@ -203,8 +204,8 @@ namespace demos
 			}
 		}
 	public:
-		HScrollTemplate()
-			:GuiInstancePartialClass<GuiScrollTemplate>(L"demos::HScrollTemplate")
+		ScrollTrackerTemplate(const WString& typeName)
+			:GuiInstancePartialClass<GuiScrollTemplate>(typeName)
 			, handle(0)
 			, draggingHandle(false)
 		{
@@ -215,64 +216,39 @@ namespace demos
 		}
 	};
 
-	class VScrollTemplate : public GuiScrollTemplate, public GuiInstancePartialClass<GuiScrollTemplate>, public Description<VScrollTemplate>
+	class HScrollTemplate : public ScrollTrackerTemplate<&Point::x, &compositions::GuiMouseEventArgs::x>, public Description<HScrollTemplate>
 	{
-		friend struct CustomTypeDescriptorSelector<VScrollTemplate>;
-	protected:
-		GuiPartialViewComposition*			handle;
-		Point								draggingStartLocation;
-		bool								draggingHandle;
-		
-		void OnHandleMouseDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
+	public:
+		HScrollTemplate()
+			:ScrollTrackerTemplate<&Point::x, &compositions::GuiMouseEventArgs::x>(L"demos::HScrollTemplate")
 		{
-			if (sender->GetRelatedControl()->GetVisuallyEnabled())
-			{
-				draggingHandle = true;
-				draggingStartLocation = Point(arguments.x, arguments.y);
-			}
 		}
+	};
 
-		void OnHandleMouseUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
-		{
-			draggingHandle = false;
-		}
-
-		void OnHandleMouseMove(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
-		{
-			if (draggingHandle)
-			{
-				vint totalPixels = handle->GetParent()->GetBounds().Height();
-				vint currentOffset = handle->GetBounds().Top();
-				vint newOffset = currentOffset + (arguments.y - draggingStartLocation.y);
-				vint totalSize = GetTotalSize();
-				double ratio = (double)newOffset / totalPixels;
-				vint newPosition = (vint)(ratio * totalSize);
-
-				vint offset1 = (vint)(((double)newPosition / totalSize) * totalPixels);
-				vint offset2 = vint(((double)(newPosition + 1) / totalSize) * totalPixels);
-				vint delta1 = abs((int)(offset1 - newOffset));
-				vint delta2 = abs((int)(offset2 - newOffset));
-
-				if(delta1<delta2)
-				{
-					GetCommands()->SetPosition(newPosition);
-				}
-				else
-				{
-					GetCommands()->SetPosition(newPosition + 1);
-				}
-			}
-		}
+	class VScrollTemplate : public ScrollTrackerTemplate<&Point::y, &compositions::GuiMouseEventArgs::y>, public Description<VScrollTemplate>
+	{
 	public:
 		VScrollTemplate()
-			:GuiInstancePartialClass<GuiScrollTemplate>(L"demos::VScrollTemplate")
-			, handle(0)
-			, draggingHandle(false)
+			:ScrollTrackerTemplate<&Point::y, &compositions::GuiMouseEventArgs::y>(L"demos::VScrollTemplate")
 		{
-			if (InitializeFromResource())
-			{
-				GUI_INSTANCE_REFERENCE(handle);
-			}
+		}
+	};
+
+	class HTrackerTemplate : public ScrollTrackerTemplate<&Point::x, &compositions::GuiMouseEventArgs::x>, public Description<HTrackerTemplate>
+	{
+	public:
+		HTrackerTemplate()
+			:ScrollTrackerTemplate<&Point::x, &compositions::GuiMouseEventArgs::x>(L"demos::HTrackerTemplate")
+		{
+		}
+	};
+
+	class VTrackerTemplate : public ScrollTrackerTemplate<&Point::y, &compositions::GuiMouseEventArgs::y>, public Description<VTrackerTemplate>
+	{
+	public:
+		VTrackerTemplate()
+			:ScrollTrackerTemplate<&Point::y, &compositions::GuiMouseEventArgs::y>(L"demos::VTrackerTemplate")
+		{
 		}
 	};
 
@@ -321,6 +297,8 @@ namespace vl
 			F(demos::VScrollHandleTemplate)\
 			F(demos::HScrollTemplate)\
 			F(demos::VScrollTemplate)\
+			F(demos::HTrackerTemplate)\
+			F(demos::VTrackerTemplate)\
 			F(demos::ProgressBarTemplate)\
 			F(demos::ScrollViewTemplate)\
 			F(demos::ItemBackgroundTemplate)\
@@ -341,6 +319,15 @@ namespace vl
 			F(demos::ExpandingDecoratorTemplate)\
 			F(demos::TreeViewTemplate)\
 
+#define DEFINE_SCROLL_TRACKER_TEMPLATE(CLASSNAME)\
+			BEGIN_CLASS_MEMBER(demos::CLASSNAME)\
+				CLASS_MEMBER_BASE(GuiScrollTemplate)\
+				CLASS_MEMBER_CONSTRUCTOR(demos::CLASSNAME*(), NO_PARAMETER)\
+				CLASS_MEMBER_GUIEVENT_HANDLER(OnHandleMouseDown, GuiMouseEventArgs)\
+				CLASS_MEMBER_GUIEVENT_HANDLER(OnHandleMouseUp, GuiMouseEventArgs)\
+				CLASS_MEMBER_GUIEVENT_HANDLER(OnHandleMouseMove, GuiMouseEventArgs)\
+			END_CLASS_MEMBER(demos::CLASSNAME)\
+
 			DEMO_TYPES(DECL_TYPE_INFO)
 			DEMO_TYPES(IMPL_TYPE_INFO)
 
@@ -348,24 +335,11 @@ namespace vl
 				CLASS_MEMBER_BASE(GuiWindow)
 				CLASS_MEMBER_CONSTRUCTOR(demos::MainWindow*(), NO_PARAMETER)
 			END_CLASS_MEMBER(demos::MainWindow)
-			
-			BEGIN_CLASS_MEMBER(demos::HScrollTemplate)
-				CLASS_MEMBER_BASE(GuiScrollTemplate)
-				CLASS_MEMBER_CONSTRUCTOR(demos::HScrollTemplate*(), NO_PARAMETER)
 
-				CLASS_MEMBER_GUIEVENT_HANDLER(OnHandleMouseDown, GuiMouseEventArgs)
-				CLASS_MEMBER_GUIEVENT_HANDLER(OnHandleMouseUp, GuiMouseEventArgs)
-				CLASS_MEMBER_GUIEVENT_HANDLER(OnHandleMouseMove, GuiMouseEventArgs)
-			END_CLASS_MEMBER(demos::HScrollTemplate)
-			
-			BEGIN_CLASS_MEMBER(demos::VScrollTemplate)
-				CLASS_MEMBER_BASE(GuiScrollTemplate)
-				CLASS_MEMBER_CONSTRUCTOR(demos::VScrollTemplate*(), NO_PARAMETER)
-
-				CLASS_MEMBER_GUIEVENT_HANDLER(OnHandleMouseDown, GuiMouseEventArgs)
-				CLASS_MEMBER_GUIEVENT_HANDLER(OnHandleMouseUp, GuiMouseEventArgs)
-				CLASS_MEMBER_GUIEVENT_HANDLER(OnHandleMouseMove, GuiMouseEventArgs)
-			END_CLASS_MEMBER(demos::VScrollTemplate)
+			DEFINE_SCROLL_TRACKER_TEMPLATE(HScrollTemplate)
+			DEFINE_SCROLL_TRACKER_TEMPLATE(VScrollTemplate)
+			DEFINE_SCROLL_TRACKER_TEMPLATE(HTrackerTemplate)
+			DEFINE_SCROLL_TRACKER_TEMPLATE(VTrackerTemplate)
 
 			DEMO_TEMPLATES(CONTROL_TEMPLATE_IMPL)
 
