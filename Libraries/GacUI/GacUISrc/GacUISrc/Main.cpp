@@ -154,7 +154,6 @@ namespace demos
 
 	DEMO_TEMPLATES(CONTROL_TEMPLATE_DECL)
 
-	template<int Point::* FComponent, int NativeWindowMouseInfo::* FArgsComponent>
 	class ScrollTrackerTemplate : public GuiScrollTemplate, public GuiInstancePartialClass<GuiScrollTemplate>
 	{
 	protected:
@@ -162,6 +161,10 @@ namespace demos
 		Point								draggingStartLocation;
 		bool								draggingHandle;
 	
+		virtual vint						Size(const Rect& value) = 0;
+		virtual vint						Component(const Rect& value) = 0;
+		virtual vint						Component(const Point& value) = 0;
+		virtual vint						Component(const GuiMouseEventArgs& value) = 0;
 	public:
 		void OnHandleMouseDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 		{
@@ -181,9 +184,9 @@ namespace demos
 		{
 			if (draggingHandle)
 			{
-				vint totalPixels = handle->GetParent()->GetBounds().Width();
-				vint currentOffset = handle->GetBounds().Left();
-				vint newOffset = currentOffset + (arguments.*FArgsComponent - draggingStartLocation.*FComponent);
+				vint totalPixels = Size(handle->GetParent()->GetBounds());
+				vint currentOffset = Component(handle->GetBounds());
+				vint newOffset = currentOffset + (Component(arguments) - Component(draggingStartLocation));
 				vint totalSize = GetTotalSize();
 				double ratio = (double)newOffset / totalPixels;
 				vint newPosition = (vint)(ratio * totalSize);
@@ -212,11 +215,31 @@ namespace demos
 		}
 	};
 
-	class HScrollTemplate : public ScrollTrackerTemplate<&Point::x, &compositions::GuiMouseEventArgs::x>, public Description<HScrollTemplate>
+	class HScrollTemplate : public ScrollTrackerTemplate, public Description<HScrollTemplate>
 	{
+	protected:
+		vint Size(const Rect& value)override
+		{
+			return value.Width();
+		}
+
+		vint Component(const Rect& value)override
+		{
+			return value.Left();
+		}
+
+		vint Component(const Point& value)override
+		{
+			return value.x;
+		}
+
+		vint Component(const GuiMouseEventArgs& value)override
+		{
+			return value.x;
+		}
 	public:
 		HScrollTemplate()
-			:ScrollTrackerTemplate<&Point::x, &compositions::GuiMouseEventArgs::x>(L"demos::HScrollTemplate")
+			:ScrollTrackerTemplate(L"demos::HScrollTemplate")
 		{
 			if (InitializeFromResource())
 			{
@@ -225,11 +248,31 @@ namespace demos
 		}
 	};
 
-	class VScrollTemplate : public ScrollTrackerTemplate<&Point::y, &compositions::GuiMouseEventArgs::y>, public Description<VScrollTemplate>
+	class VScrollTemplate : public ScrollTrackerTemplate, public Description<VScrollTemplate>
 	{
+	protected:
+		vint Size(const Rect& value)override
+		{
+			return value.Height();
+		}
+
+		vint Component(const Rect& value)override
+		{
+			return value.Top();
+		}
+
+		vint Component(const Point& value)override
+		{
+			return value.y;
+		}
+
+		vint Component(const GuiMouseEventArgs& value)override
+		{
+			return value.y;
+		}
 	public:
 		VScrollTemplate()
-			:ScrollTrackerTemplate<&Point::y, &compositions::GuiMouseEventArgs::y>(L"demos::VScrollTemplate")
+			:ScrollTrackerTemplate(L"demos::VScrollTemplate")
 		{
 			if (InitializeFromResource())
 			{
@@ -238,11 +281,31 @@ namespace demos
 		}
 	};
 
-	class HTrackerTemplate : public ScrollTrackerTemplate<&Point::x, &compositions::GuiMouseEventArgs::x>, public Description<HTrackerTemplate>
+	class HTrackerTemplate : public ScrollTrackerTemplate, public Description<HTrackerTemplate>
 	{
+	protected:
+		vint Size(const Rect& value)override
+		{
+			return value.Width();
+		}
+
+		vint Component(const Rect& value)override
+		{
+			return value.Left();
+		}
+
+		vint Component(const Point& value)override
+		{
+			return value.x;
+		}
+
+		vint Component(const GuiMouseEventArgs& value)override
+		{
+			return value.x;
+		}
 	public:
 		HTrackerTemplate()
-			:ScrollTrackerTemplate<&Point::x, &compositions::GuiMouseEventArgs::x>(L"demos::HTrackerTemplate")
+			:ScrollTrackerTemplate(L"demos::HTrackerTemplate")
 		{
 			if (InitializeFromResource())
 			{
@@ -251,11 +314,31 @@ namespace demos
 		}
 	};
 
-	class VTrackerTemplate : public ScrollTrackerTemplate<&Point::y, &compositions::GuiMouseEventArgs::y>, public Description<VTrackerTemplate>
+	class VTrackerTemplate : public ScrollTrackerTemplate, public Description<VTrackerTemplate>
 	{
+	protected:
+		vint Size(const Rect& value)override
+		{
+			return value.Height();
+		}
+
+		vint Component(const Rect& value)override
+		{
+			return value.Top();
+		}
+
+		vint Component(const Point& value)override
+		{
+			return value.y;
+		}
+
+		vint Component(const GuiMouseEventArgs& value)override
+		{
+			return value.y;
+		}
 	public:
 		VTrackerTemplate()
-			:ScrollTrackerTemplate<&Point::y, &compositions::GuiMouseEventArgs::y>(L"demos::VTrackerTemplate")
+			:ScrollTrackerTemplate(L"demos::VTrackerTemplate")
 		{
 			if (InitializeFromResource())
 			{
