@@ -209,10 +209,6 @@ namespace demos
 			, handle(0)
 			, draggingHandle(false)
 		{
-			if (InitializeFromResource())
-			{
-				GUI_INSTANCE_REFERENCE(handle);
-			}
 		}
 	};
 
@@ -222,6 +218,10 @@ namespace demos
 		HScrollTemplate()
 			:ScrollTrackerTemplate<&Point::x, &compositions::GuiMouseEventArgs::x>(L"demos::HScrollTemplate")
 		{
+			if (InitializeFromResource())
+			{
+				GUI_INSTANCE_REFERENCE(handle);
+			}
 		}
 	};
 
@@ -231,6 +231,10 @@ namespace demos
 		VScrollTemplate()
 			:ScrollTrackerTemplate<&Point::y, &compositions::GuiMouseEventArgs::y>(L"demos::VScrollTemplate")
 		{
+			if (InitializeFromResource())
+			{
+				GUI_INSTANCE_REFERENCE(handle);
+			}
 		}
 	};
 
@@ -240,6 +244,10 @@ namespace demos
 		HTrackerTemplate()
 			:ScrollTrackerTemplate<&Point::x, &compositions::GuiMouseEventArgs::x>(L"demos::HTrackerTemplate")
 		{
+			if (InitializeFromResource())
+			{
+				GUI_INSTANCE_REFERENCE(handle);
+			}
 		}
 	};
 
@@ -249,6 +257,10 @@ namespace demos
 		VTrackerTemplate()
 			:ScrollTrackerTemplate<&Point::y, &compositions::GuiMouseEventArgs::y>(L"demos::VTrackerTemplate")
 		{
+			if (InitializeFromResource())
+			{
+				GUI_INSTANCE_REFERENCE(handle);
+			}
 		}
 	};
 
@@ -320,13 +332,13 @@ namespace vl
 			F(demos::TreeViewTemplate)\
 
 #define DEFINE_SCROLL_TRACKER_TEMPLATE(CLASSNAME)\
-			BEGIN_CLASS_MEMBER(demos::CLASSNAME)\
+			BEGIN_CLASS_MEMBER(CLASSNAME)\
 				CLASS_MEMBER_BASE(GuiScrollTemplate)\
-				CLASS_MEMBER_CONSTRUCTOR(demos::CLASSNAME*(), NO_PARAMETER)\
+				CLASS_MEMBER_CONSTRUCTOR(CLASSNAME*(), NO_PARAMETER)\
 				CLASS_MEMBER_GUIEVENT_HANDLER(OnHandleMouseDown, GuiMouseEventArgs)\
 				CLASS_MEMBER_GUIEVENT_HANDLER(OnHandleMouseUp, GuiMouseEventArgs)\
 				CLASS_MEMBER_GUIEVENT_HANDLER(OnHandleMouseMove, GuiMouseEventArgs)\
-			END_CLASS_MEMBER(demos::CLASSNAME)\
+			END_CLASS_MEMBER(CLASSNAME)\
 
 			DEMO_TYPES(DECL_TYPE_INFO)
 			DEMO_TYPES(IMPL_TYPE_INFO)
@@ -336,10 +348,10 @@ namespace vl
 				CLASS_MEMBER_CONSTRUCTOR(demos::MainWindow*(), NO_PARAMETER)
 			END_CLASS_MEMBER(demos::MainWindow)
 
-			DEFINE_SCROLL_TRACKER_TEMPLATE(HScrollTemplate)
-			DEFINE_SCROLL_TRACKER_TEMPLATE(VScrollTemplate)
-			DEFINE_SCROLL_TRACKER_TEMPLATE(HTrackerTemplate)
-			DEFINE_SCROLL_TRACKER_TEMPLATE(VTrackerTemplate)
+			DEFINE_SCROLL_TRACKER_TEMPLATE(demos::HScrollTemplate)
+			DEFINE_SCROLL_TRACKER_TEMPLATE(demos::VScrollTemplate)
+			DEFINE_SCROLL_TRACKER_TEMPLATE(demos::HTrackerTemplate)
+			DEFINE_SCROLL_TRACKER_TEMPLATE(demos::VTrackerTemplate)
 
 			DEMO_TEMPLATES(CONTROL_TEMPLATE_IMPL)
 
