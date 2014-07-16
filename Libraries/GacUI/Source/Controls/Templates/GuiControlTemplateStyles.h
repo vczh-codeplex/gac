@@ -79,14 +79,14 @@ Control Template
 				compositions::GuiGraphicsComposition*							InstallBackground(compositions::GuiBoundsComposition* boundsComposition)override;
 			};
 
-			class GuiWindowTemplate_StyleProvider
+			class GuiMenuTemplate_StyleProvider
 				: public GuiControlTemplate_StyleProvider
 				, public controls::GuiWindow::DefaultBehaviorStyleController
-				, public Description<GuiWindowTemplate_StyleProvider>
+				, public Description<GuiMenuTemplate_StyleProvider>
 			{
 			public:
-				GuiWindowTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
-				~GuiWindowTemplate_StyleProvider();
+				GuiMenuTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
+				~GuiMenuTemplate_StyleProvider();
 			};
 
 			class GuiButtonTemplate_StyleProvider

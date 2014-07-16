@@ -152,15 +152,15 @@ GuiSinglelineTextBoxTemplate_StyleProvider
 			}
 
 /***********************************************************************
-GuiWindowTemplate_StyleProvider
+GuiMenuTemplate_StyleProvider
 ***********************************************************************/
 
-			GuiWindowTemplate_StyleProvider::GuiWindowTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory)
+			GuiMenuTemplate_StyleProvider::GuiMenuTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory)
 				:GuiControlTemplate_StyleProvider(factory)
 			{
 			}
 
-			GuiWindowTemplate_StyleProvider::~GuiWindowTemplate_StyleProvider()
+			GuiMenuTemplate_StyleProvider::~GuiMenuTemplate_StyleProvider()
 			{
 			}
 
@@ -228,7 +228,7 @@ GuiToolstripButtonTemplate_StyleProvider
 				
 			controls::GuiMenu::IStyleController* GuiToolstripButtonTemplate_StyleProvider::CreateSubMenuStyleController()
 			{
-				GET_FACTORY_FROM_TEMPLATE(GuiWindowTemplate, subMenuTemplateFactory, SubMenuTemplate);
+				GET_FACTORY_FROM_TEMPLATE(GuiMenuTemplate, subMenuTemplateFactory, SubMenuTemplate);
 			}
 
 			void GuiToolstripButtonTemplate_StyleProvider::SetSubMenuExisting(bool value)

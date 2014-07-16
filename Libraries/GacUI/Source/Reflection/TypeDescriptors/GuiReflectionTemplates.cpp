@@ -72,10 +72,10 @@ Type Declaration
 				GuiMultilineTextBoxTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_REFLECTION)
 			END_CLASS_MEMBER(GuiMultilineTextBoxTemplate)
 
-			BEGIN_CLASS_MEMBER(GuiWindowTemplate)
+			BEGIN_CLASS_MEMBER(GuiMenuTemplate)
 				CLASS_MEMBER_BASE(GuiControlTemplate)
-				CLASS_MEMBER_CONSTRUCTOR(GuiWindowTemplate*(), NO_PARAMETER)
-			END_CLASS_MEMBER(GuiWindowTemplate)
+				CLASS_MEMBER_CONSTRUCTOR(GuiMenuTemplate*(), NO_PARAMETER)
+			END_CLASS_MEMBER(GuiMenuTemplate)
 
 			BEGIN_CLASS_MEMBER(GuiButtonTemplate)
 				CLASS_MEMBER_BASE(GuiControlTemplate)

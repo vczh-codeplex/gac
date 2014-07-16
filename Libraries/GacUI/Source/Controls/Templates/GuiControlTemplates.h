@@ -114,11 +114,11 @@ Control Template
 				GuiSinglelineTextBoxTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
 			};
 
-			class GuiWindowTemplate : public GuiControlTemplate, public Description<GuiWindowTemplate>
+			class GuiMenuTemplate : public GuiControlTemplate, public Description<GuiMenuTemplate>
 			{
 			public:
-				GuiWindowTemplate();
-				~GuiWindowTemplate();
+				GuiMenuTemplate();
+				~GuiMenuTemplate();
 			};
 
 			class GuiButtonTemplate : public GuiControlTemplate, public Description<GuiButtonTemplate>
