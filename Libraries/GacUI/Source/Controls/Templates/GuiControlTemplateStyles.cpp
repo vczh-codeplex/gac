@@ -165,6 +165,19 @@ GuiMenuTemplate_StyleProvider
 			}
 
 /***********************************************************************
+GuiWindowTemplate_StyleProvider
+***********************************************************************/
+
+			GuiWindowTemplate_StyleProvider::GuiWindowTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory)
+				:GuiControlTemplate_StyleProvider(factory)
+			{
+			}
+
+			GuiWindowTemplate_StyleProvider::~GuiWindowTemplate_StyleProvider()
+			{
+			}
+
+/***********************************************************************
 GuiButtonTemplate_StyleProvider
 ***********************************************************************/
 
