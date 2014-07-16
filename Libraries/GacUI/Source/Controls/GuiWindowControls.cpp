@@ -713,6 +713,12 @@ GuiWindow::DefaultBehaviorStyleController
 GuiWindow
 ***********************************************************************/
 
+			void GuiWindow::Moved()
+			{
+				GuiControlHost::Moved();
+				styleController->SetSizeState(GetNativeWindow()->GetSizeState());
+			}
+
 			void GuiWindow::OnNativeWindowChanged()
 			{
 				styleController->InitializeNativeWindowProperties();
