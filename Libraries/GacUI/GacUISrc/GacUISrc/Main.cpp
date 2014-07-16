@@ -116,7 +116,7 @@ namespace demos
 #define DEMO_TEMPLATES(F)\
 	F(GroupBoxTemplate, GuiControlTemplate)\
 	F(ToolstripTemplate, GuiControlTemplate)\
-	F(ToolstripMenuTemplate, GuiWindowTemplate)\
+	F(ToolstripMenuTemplate, GuiMenuTemplate)\
 	F(ToolstripSplitterTemplate, GuiControlTemplate)\
 	F(MenuSplitterTemplate, GuiControlTemplate)\
 	F(ButtonTemplate, GuiButtonTemplate)\

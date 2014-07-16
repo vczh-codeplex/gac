@@ -140,14 +140,14 @@ GuiSinglelineTextBoxTemplate
 			}
 
 /***********************************************************************
-GuiWindowTemplate
+GuiMenuTemplate
 ***********************************************************************/
 
-			GuiWindowTemplate::GuiWindowTemplate()
+			GuiMenuTemplate::GuiMenuTemplate()
 			{
 			}
 
-			GuiWindowTemplate::~GuiWindowTemplate()
+			GuiMenuTemplate::~GuiMenuTemplate()
 			{
 			}
 

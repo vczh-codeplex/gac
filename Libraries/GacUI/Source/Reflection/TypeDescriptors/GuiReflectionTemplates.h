@@ -31,7 +31,7 @@ Type List
 			F(presentation::templates::GuiLabelTemplate)\
 			F(presentation::templates::GuiSinglelineTextBoxTemplate)\
 			F(presentation::templates::GuiMultilineTextBoxTemplate)\
-			F(presentation::templates::GuiWindowTemplate)\
+			F(presentation::templates::GuiMenuTemplate)\
 			F(presentation::templates::GuiButtonTemplate)\
 			F(presentation::templates::GuiSelectableButtonTemplate)\
 			F(presentation::templates::GuiToolstripButtonTemplate)\

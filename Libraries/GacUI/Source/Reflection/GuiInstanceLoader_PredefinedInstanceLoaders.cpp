@@ -276,7 +276,7 @@ GuiToolstripMenuInstanceLoader
 					else
 					{
 						auto factory = CreateTemplateFactory(constructorArguments.GetByIndex(indexControlTemplate)[0].GetText());
-						return Value::From(new GuiToolstripMenu(new GuiWindowTemplate_StyleProvider(factory), 0));
+						return Value::From(new GuiToolstripMenu(new GuiMenuTemplate_StyleProvider(factory), 0));
 					}
 				}
 				return Value();
@@ -1575,7 +1575,7 @@ GuiPredefinedInstanceLoadersPlugin
 				ADD_TEMPLATE_CONTROL	(							GuiLabel,				g::NewLabel,					GuiLabelTemplate);				// ControlTemplate
 				ADD_TEMPLATE_CONTROL	(							GuiButton,				g::NewButton,					GuiButtonTemplate);				// ControlTemplate
 				ADD_TEMPLATE_CONTROL	(							GuiScrollContainer,		g::NewScrollContainer,			GuiScrollViewTemplate);			// ControlTemplate
-				ADD_TEMPLATE_CONTROL	(							GuiWindow,				g::NewWindow,					GuiWindowTemplate);				// ControlTemplate
+				ADD_TEMPLATE_CONTROL_X	(							GuiWindow,				g::NewWindow,					GuiControlTemplate);			// ControlTemplate
 				ADD_TEMPLATE_CONTROL_2	(							GuiTextList,			g::NewTextList,					GuiTextListTemplate);			// ControlTemplate
 				ADD_TEMPLATE_CONTROL	(							GuiDocumentViewer,		g::NewDocumentViewer,			GuiScrollViewTemplate);			// ControlTemplate
 				ADD_TEMPLATE_CONTROL	(							GuiDocumentLabel,		g::NewDocumentLabel,			GuiControlTemplate);			// ControlTemplate
