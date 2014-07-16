@@ -170,12 +170,112 @@ GuiWindowTemplate_StyleProvider
 
 			GuiWindowTemplate_StyleProvider::GuiWindowTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory)
 				:GuiControlTemplate_StyleProvider(factory)
+				, window(0)
 			{
+				if (!(controlTemplate = dynamic_cast<GuiWindowTemplate*>(GetBoundsComposition())))
+				{
+					CHECK_FAIL(L"GuiWindowTemplate_StyleProvider::GuiWindowTemplate_StyleProvider()#An instance of GuiWindowTemplate is expected.");
+				}
 			}
 
 			GuiWindowTemplate_StyleProvider::~GuiWindowTemplate_StyleProvider()
 			{
 			}
+
+			void GuiWindowTemplate_StyleProvider::AttachWindow(GuiWindow* _window)
+			{
+				window = _window;
+			}
+
+			void GuiWindowTemplate_StyleProvider::InitializeNativeWindowProperties()
+			{
+				if (window && window->GetNativeWindow())
+				{
+					window->GetNativeWindow()->EnableCustomFrameMode();
+					window->GetNativeWindow()->SetBorder(false);
+				}
+			}
+
+#define WINDOW_TEMPLATE_GET(PROPERTY)\
+				switch (controlTemplate->Get##PROPERTY##Option())\
+				{\
+					case BoolOption::AlwaysTrue: return true;\
+					case BoolOption::AlwaysFalse: return false;\
+					default: return controlTemplate->Get##PROPERTY##();\
+				}\
+
+#define WINDOW_TEMPLATE_SET(PROPERTY)\
+				if (controlTemplate->Get##PROPERTY##Option() == BoolOption::Customizable)\
+				{\
+					controlTemplate->Set##PROPERTY(visible);\
+					if (!controlTemplate->GetCustomizedBorder() && window && window->GetNativeWindow())\
+					{\
+						window->GetNativeWindow()->Set##PROPERTY(visible);\
+					}\
+				}\
+
+			bool GuiWindowTemplate_StyleProvider::GetMaximizedBox()
+			{
+				WINDOW_TEMPLATE_GET(MaximizedBox);
+			}
+
+			void GuiWindowTemplate_StyleProvider::SetMaximizedBox(bool visible)
+			{
+				WINDOW_TEMPLATE_SET(MaximizedBox);
+			}
+
+			bool GuiWindowTemplate_StyleProvider::GetMinimizedBox()
+			{
+				WINDOW_TEMPLATE_GET(MinimizedBox);
+			}
+
+			void GuiWindowTemplate_StyleProvider::SetMinimizedBox(bool visible)
+			{
+				WINDOW_TEMPLATE_SET(MinimizedBox);
+			}
+
+			bool GuiWindowTemplate_StyleProvider::GetBorder()
+			{
+				WINDOW_TEMPLATE_GET(Border);
+			}
+
+			void GuiWindowTemplate_StyleProvider::SetBorder(bool visible)
+			{
+				WINDOW_TEMPLATE_SET(Border);
+			}
+
+			bool GuiWindowTemplate_StyleProvider::GetSizeBox()
+			{
+				WINDOW_TEMPLATE_GET(SizeBox);
+			}
+
+			void GuiWindowTemplate_StyleProvider::SetSizeBox(bool visible)
+			{
+				WINDOW_TEMPLATE_SET(SizeBox);
+			}
+
+			bool GuiWindowTemplate_StyleProvider::GetIconVisible()
+			{
+				WINDOW_TEMPLATE_GET(IconVisible);
+			}
+
+			void GuiWindowTemplate_StyleProvider::SetIconVisible(bool visible)
+			{
+				WINDOW_TEMPLATE_SET(IconVisible);
+			}
+
+			bool GuiWindowTemplate_StyleProvider::GetTitleBar()
+			{
+				WINDOW_TEMPLATE_GET(TitleBar);
+			}
+
+			void GuiWindowTemplate_StyleProvider::SetTitleBar(bool visible)
+			{
+				WINDOW_TEMPLATE_SET(TitleBar);
+			}
+
+#undef WINDOW_TEMPLATE_GET
+#undef WINDOW_TEMPLATE_SET
 
 /***********************************************************************
 GuiButtonTemplate_StyleProvider

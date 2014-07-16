@@ -29,6 +29,12 @@ Type Declaration
 #define GUI_TEMPLATE_PROPERTY_REFLECTION(CLASS, TYPE, NAME)\
 	CLASS_MEMBER_PROPERTY_GUIEVENT_FAST(NAME)
 
+			BEGIN_ENUM_ITEM(BoolOption)
+				ENUM_CLASS_ITEM(AlwaysTrue)
+				ENUM_CLASS_ITEM(AlwaysFalse)
+				ENUM_CLASS_ITEM(Customizable)
+			END_ENUM_ITEM(BoolOption)
+
 			BEGIN_CLASS_MEMBER(GuiTemplate)
 				CLASS_MEMBER_BASE(GuiBoundsComposition)
 				CLASS_MEMBER_BASE(GuiInstanceRootObject)

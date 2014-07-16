@@ -158,6 +158,19 @@ GuiWindowTemplate
 			GuiWindowTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_IMPL)
 
 			GuiWindowTemplate::GuiWindowTemplate()
+				:MaximizedBoxOption_(BoolOption::Customizable)
+				, MinimizedBoxOption_(BoolOption::Customizable)
+				, BorderOption_(BoolOption::Customizable)
+				, SizeBoxOption_(BoolOption::Customizable)
+				, IconVisibleOption_(BoolOption::Customizable)
+				, TitleBarOption_(BoolOption::Customizable)
+				, MaximizedBox_(true)
+				, MinimizedBox_(true)
+				, Border_(true)
+				, SizeBox_(true)
+				, IconVisible_(true)
+				, TitleBar_(true)
+				, CustomizedBorder_(false)
 			{
 				GuiWindowTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_EVENT_INIT)
 			}
