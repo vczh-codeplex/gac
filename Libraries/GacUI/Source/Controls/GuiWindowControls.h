@@ -25,14 +25,14 @@ Control Host
 			/// <summary>
 			/// Represents a control that host by a <see cref="INativeWindow"/>.
 			/// </summary>
-			class GuiControlHost : public GuiControl, public GuiInstanceRootObject, private INativeWindowListener, public Description<GuiControlHost>
+			class GuiControlHost : public GuiControl, public GuiInstanceRootObject, protected INativeWindowListener, public Description<GuiControlHost>
 			{
 			protected:
 				compositions::GuiGraphicsHost*					host;
 
 				virtual void									OnNativeWindowChanged();
 				virtual void									OnVisualStatusChanged();
-			private:
+			protected:
 				static const vint								TooltipDelayOpenTime=500;
 				static const vint								TooltipDelayCloseTime=500;
 				static const vint								TooltipDelayLifeTime=5000;
@@ -311,7 +311,8 @@ Window
 				};
 			protected:
 				IStyleController*						styleController;
-
+				
+				void									Moved()override;
 				void									OnNativeWindowChanged()override;
 				void									OnVisualStatusChanged()override;
 				virtual void							MouseClickedOnOtherWindow(GuiWindow* window);
