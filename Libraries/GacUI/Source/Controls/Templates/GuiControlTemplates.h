@@ -121,6 +121,13 @@ Control Template
 				~GuiMenuTemplate();
 			};
 
+			enum class BoolOption
+			{
+				AlwaysTrue,
+				AlwaysFalse,
+				Customizable,
+			};
+
 			class GuiWindowTemplate : public GuiControlTemplate, public Description<GuiWindowTemplate>
 			{
 			public:
@@ -128,6 +135,19 @@ Control Template
 				~GuiWindowTemplate();
 
 #define GuiWindowTemplate_PROPERTIES(F)\
+				F(GuiWindowTemplate, BoolOption, MaximizedBoxOption)\
+				F(GuiWindowTemplate, BoolOption, MinimizedBoxOption)\
+				F(GuiWindowTemplate, BoolOption, BorderOption)\
+				F(GuiWindowTemplate, BoolOption, SizeBoxOption)\
+				F(GuiWindowTemplate, BoolOption, IconVisibleOption)\
+				F(GuiWindowTemplate, BoolOption, TitleBarOption)\
+				F(GuiWindowTemplate, bool, MaximizedBox)\
+				F(GuiWindowTemplate, bool, MinimizedBox)\
+				F(GuiWindowTemplate, bool, Border)\
+				F(GuiWindowTemplate, bool, SizeBox)\
+				F(GuiWindowTemplate, bool, IconVisible)\
+				F(GuiWindowTemplate, bool, TitleBar)\
+				F(GuiWindowTemplate, bool, CustomizedBorder)\
 
 				GuiWindowTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
 			};

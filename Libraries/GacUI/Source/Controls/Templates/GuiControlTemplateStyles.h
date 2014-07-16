@@ -91,12 +91,31 @@ Control Template
 
 			class GuiWindowTemplate_StyleProvider
 				: public GuiControlTemplate_StyleProvider
-				, public controls::GuiWindow::DefaultBehaviorStyleController
+				, public controls::GuiWindow::IStyleController
 				, public Description<GuiWindowTemplate_StyleProvider>
 			{
+			protected:
+				GuiWindowTemplate*												controlTemplate;
+				controls::GuiWindow*											window;
+
 			public:
 				GuiWindowTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
 				~GuiWindowTemplate_StyleProvider();
+
+				void															AttachWindow(controls::GuiWindow* _window)override;
+				void															InitializeNativeWindowProperties()override;
+				bool															GetMaximizedBox()override;
+				void															SetMaximizedBox(bool visible)override;
+				bool															GetMinimizedBox()override;
+				void															SetMinimizedBox(bool visible)override;
+				bool															GetBorder()override;
+				void															SetBorder(bool visible)override;
+				bool															GetSizeBox()override;
+				void															SetSizeBox(bool visible)override;
+				bool															GetIconVisible()override;
+				void															SetIconVisible(bool visible)override;
+				bool															GetTitleBar()override;
+				void															SetTitleBar(bool visible)override;
 			};
 
 			class GuiButtonTemplate_StyleProvider

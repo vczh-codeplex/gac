@@ -25,6 +25,7 @@ Type List
 ***********************************************************************/
 
 #define GUIREFLECTIONTEMPLATES_TYPELIST(F)\
+			F(presentation::templates::BoolOption)\
 			F(presentation::templates::GuiTemplate)\
 			F(presentation::templates::GuiTemplate::IFactory)\
 			F(presentation::templates::GuiControlTemplate)\
