@@ -121,6 +121,17 @@ Control Template
 				~GuiMenuTemplate();
 			};
 
+			class GuiWindowTemplate : public GuiControlTemplate, public Description<GuiWindowTemplate>
+			{
+			public:
+				GuiWindowTemplate();
+				~GuiWindowTemplate();
+
+#define GuiWindowTemplate_PROPERTIES(F)\
+
+				GuiWindowTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
+			};
+
 			class GuiButtonTemplate : public GuiControlTemplate, public Description<GuiButtonTemplate>
 			{
 			public:

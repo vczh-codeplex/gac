@@ -1539,15 +1539,6 @@ GuiPredefinedInstanceLoadersPlugin
 			)\
 		)
 
-#define ADD_TEMPLATE_CONTROL_X(TYPENAME, CONSTRUCTOR, TEMPLATE)\
-	manager->SetLoader(\
-		new GuiTemplateControlInstanceLoader(\
-			L"presentation::controls::" L#TYPENAME,\
-			[](){return Value::From(CONSTRUCTOR());},\
-			[](Ptr<GuiTemplate::IFactory> factory)->Value{throw 0; }\
-			)\
-		)
-
 				manager->SetLoader(new GuiControlInstanceLoader);
 				manager->SetLoader(new GuiTabInstanceLoader);
 				manager->SetLoader(new GuiTabPageInstanceLoader);
@@ -1575,7 +1566,7 @@ GuiPredefinedInstanceLoadersPlugin
 				ADD_TEMPLATE_CONTROL	(							GuiLabel,				g::NewLabel,					GuiLabelTemplate);				// ControlTemplate
 				ADD_TEMPLATE_CONTROL	(							GuiButton,				g::NewButton,					GuiButtonTemplate);				// ControlTemplate
 				ADD_TEMPLATE_CONTROL	(							GuiScrollContainer,		g::NewScrollContainer,			GuiScrollViewTemplate);			// ControlTemplate
-				ADD_TEMPLATE_CONTROL_X	(							GuiWindow,				g::NewWindow,					GuiControlTemplate);			// ControlTemplate
+				ADD_TEMPLATE_CONTROL	(							GuiWindow,				g::NewWindow,					GuiWindowTemplate);				// ControlTemplate
 				ADD_TEMPLATE_CONTROL_2	(							GuiTextList,			g::NewTextList,					GuiTextListTemplate);			// ControlTemplate
 				ADD_TEMPLATE_CONTROL	(							GuiDocumentViewer,		g::NewDocumentViewer,			GuiScrollViewTemplate);			// ControlTemplate
 				ADD_TEMPLATE_CONTROL	(							GuiDocumentLabel,		g::NewDocumentLabel,			GuiControlTemplate);			// ControlTemplate

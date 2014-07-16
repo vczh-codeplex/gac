@@ -89,6 +89,16 @@ Control Template
 				~GuiMenuTemplate_StyleProvider();
 			};
 
+			class GuiWindowTemplate_StyleProvider
+				: public GuiControlTemplate_StyleProvider
+				, public controls::GuiWindow::DefaultBehaviorStyleController
+				, public Description<GuiWindowTemplate_StyleProvider>
+			{
+			public:
+				GuiWindowTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
+				~GuiWindowTemplate_StyleProvider();
+			};
+
 			class GuiButtonTemplate_StyleProvider
 				: public GuiControlTemplate_StyleProvider
 				, public virtual controls::GuiButton::IStyleController

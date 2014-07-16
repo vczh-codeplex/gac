@@ -152,6 +152,21 @@ GuiMenuTemplate
 			}
 
 /***********************************************************************
+GuiWindowTemplate
+***********************************************************************/
+
+			GuiWindowTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_IMPL)
+
+			GuiWindowTemplate::GuiWindowTemplate()
+			{
+				GuiWindowTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_EVENT_INIT)
+			}
+
+			GuiWindowTemplate::~GuiWindowTemplate()
+			{
+			}
+
+/***********************************************************************
 GuiButtonTemplate
 ***********************************************************************/
 
