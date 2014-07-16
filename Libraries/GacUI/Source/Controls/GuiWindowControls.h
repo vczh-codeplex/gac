@@ -218,6 +218,11 @@ Window
 					/// <summary>Initialize visual properties of the window. This callback is for some window template that don't need the standard window border.</summary>
 					virtual void						InitializeNativeWindowProperties()=0;
 					/// <summary>
+					/// Update the size state.
+					/// </summary>
+					/// <param name="value">The new border size.</param>
+					virtual void						SetSizeState(INativeWindow::WindowSizeState value)=0;
+					/// <summary>
 					/// Test is the maximize box visible.
 					/// </summary>
 					/// <returns>Returns true if the maximize box is visible.</returns>
@@ -290,6 +295,7 @@ Window
 
 					void								AttachWindow(GuiWindow* _window)override;
 					void								InitializeNativeWindowProperties()override;
+					void								SetSizeState(INativeWindow::WindowSizeState value)override;
 					bool								GetMaximizedBox()override;
 					void								SetMaximizedBox(bool visible)override;
 					bool								GetMinimizedBox()override;

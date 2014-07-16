@@ -196,6 +196,11 @@ GuiWindowTemplate_StyleProvider
 				}
 			}
 
+			void GuiWindowTemplate_StyleProvider::SetSizeState(INativeWindow::WindowSizeState value)
+			{
+				controlTemplate->SetMaximized(value == INativeWindow::Maximized);
+			}
+
 #define WINDOW_TEMPLATE_GET(PROPERTY)\
 				switch (controlTemplate->Get##PROPERTY##Option())\
 				{\
