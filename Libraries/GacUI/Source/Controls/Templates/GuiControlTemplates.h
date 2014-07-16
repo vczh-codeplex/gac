@@ -148,6 +148,7 @@ Control Template
 				F(GuiWindowTemplate, bool, IconVisible)\
 				F(GuiWindowTemplate, bool, TitleBar)\
 				F(GuiWindowTemplate, bool, CustomizedBorder)\
+				F(GuiWindowTemplate, bool, Maximized)\
 
 				GuiWindowTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
 			};

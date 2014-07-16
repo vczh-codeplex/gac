@@ -171,6 +171,7 @@ GuiWindowTemplate
 				, IconVisible_(true)
 				, TitleBar_(true)
 				, CustomizedBorder_(false)
+				, Maximized_(false)
 			{
 				GuiWindowTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_EVENT_INIT)
 			}

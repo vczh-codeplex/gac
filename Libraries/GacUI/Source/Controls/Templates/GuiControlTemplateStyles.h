@@ -104,6 +104,7 @@ Control Template
 
 				void															AttachWindow(controls::GuiWindow* _window)override;
 				void															InitializeNativeWindowProperties()override;
+				void															SetSizeState(INativeWindow::WindowSizeState value)override;
 				bool															GetMaximizedBox()override;
 				void															SetMaximizedBox(bool visible)override;
 				bool															GetMinimizedBox()override;

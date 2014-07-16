@@ -353,6 +353,10 @@ Type Declaration
 				CLASS_MEMBER_BASE(GuiControl::IStyleController)
 				INTERFACE_EXTERNALCTOR(GuiWindow, IStyleController)
 
+				CLASS_MEMBER_METHOD(AttachWindow, {L"window"})
+				CLASS_MEMBER_METHOD(InitializeNativeWindowProperties, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(SetSizeState, {L"value"})
+
 				CLASS_MEMBER_PROPERTY_FAST(MaximizedBox)
 				CLASS_MEMBER_PROPERTY_FAST(MinimizedBox)
 				CLASS_MEMBER_PROPERTY_FAST(Border)

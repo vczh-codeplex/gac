@@ -429,6 +429,11 @@ Interface Proxy
 						INVOKE_INTERFACE_PROXY_NOPARAM(InitializeNativeWindowProperties);
 					}
 
+					void SetSizeState(INativeWindow::WindowSizeState value)
+					{
+						INVOKE_INTERFACE_PROXY(SetSizeState, value);
+					}
+
 					bool GetMaximizedBox()override
 					{
 						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetMaximizedBox);

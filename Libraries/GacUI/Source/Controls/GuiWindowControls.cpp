@@ -585,6 +585,10 @@ GuiWindow::DefaultBehaviorStyleController
 			{
 			}
 
+			void GuiWindow::DefaultBehaviorStyleController::SetSizeState(INativeWindow::WindowSizeState value)
+			{
+			}
+
 			bool GuiWindow::DefaultBehaviorStyleController::GetMaximizedBox()
 			{
 				if(window->GetNativeWindow())
