@@ -71,6 +71,7 @@ Type Declaration
 				CLASS_MEMBER_FIELD(x)
 				CLASS_MEMBER_FIELD(y)
 				CLASS_MEMBER_FIELD(wheel)
+				CLASS_MEMBER_FIELD(nonClient)
 			END_CLASS_MEMBER(GuiMouseEventArgs)
 
 			BEGIN_CLASS_MEMBER(GuiItemEventArgs)

@@ -132,9 +132,10 @@ WindowsForm
 					SetWindowPos(handle,0,0,0,0,0,SWP_NOSIZE | SWP_NOMOVE | SWP_NOZORDER | SWP_FRAMECHANGED);
 				}
 
-				NativeWindowMouseInfo ConvertMouse(WPARAM wParam, LPARAM lParam, bool wheelMessage)
+				NativeWindowMouseInfo ConvertMouse(WPARAM wParam, LPARAM lParam, bool wheelMessage, bool nonClient)
 				{
 					NativeWindowMouseInfo info;
+					info.nonClient = nonClient;
 					if(wheelMessage)
 					{
 						info.wheel=GET_WHEEL_DELTA_WPARAM(wParam);
@@ -144,14 +145,32 @@ WindowsForm
 					{
 						info.wheel=0;
 					}
-					info.ctrl=(wParam & MK_CONTROL)!=0;
-					info.shift=(wParam & MK_SHIFT)!=0;
-					info.left=(wParam & MK_LBUTTON)!=0;
-					info.middle=(wParam & MK_MBUTTON)!=0;
-					info.right=(wParam & MK_RBUTTON)!=0;
-					POINTS Point=MAKEPOINTS(lParam);
-					info.x=Point.x;
-					info.y=Point.y;
+
+					if (nonClient)
+					{
+						info.ctrl = WinIsKeyPressing(VK_CONTROL);
+						info.shift = WinIsKeyPressing(VK_SHIFT);
+						info.left= WinIsKeyPressing(MK_LBUTTON);
+						info.middle= WinIsKeyPressing(MK_MBUTTON);
+						info.right = WinIsKeyPressing(MK_RBUTTON);
+						
+						POINTS point = MAKEPOINTS(lParam);
+						Point offset = this->GetBounds().LeftTop();
+						info.x = point.x - offset.x;
+						info.y = point.y - offset.y;
+					}
+					else
+					{
+						info.ctrl=(wParam & MK_CONTROL)!=0;
+						info.shift=(wParam & MK_SHIFT)!=0;
+						info.left=(wParam & MK_LBUTTON)!=0;
+						info.middle=(wParam & MK_MBUTTON)!=0;
+						info.right=(wParam & MK_RBUTTON)!=0;
+
+						POINTS point = MAKEPOINTS(lParam);
+						info.x = point.x;
+						info.y = point.y;
+					}
 					return info;
 				}
 
@@ -200,7 +219,9 @@ WindowsForm
 
 				bool HandleMessageInternal(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam, LRESULT& result)
 				{
-					bool transferFocusEvent=false;
+					bool transferFocusEvent = false;
+					bool nonClient = false;
+
 					switch(uMsg)
 					{
 					case WM_LBUTTONDOWN:
@@ -216,6 +237,7 @@ WindowsForm
 					}
 					switch(uMsg)
 					{
+					// ************************************** moving and sizing
 					case WM_MOVING:case WM_SIZING:
 						{
 							LPRECT rawBounds=(LPRECT)lParam;
@@ -245,6 +267,7 @@ WindowsForm
 							}
 						}
 						break;
+					// ************************************** state
 					case WM_ENABLE:
 						{
 							for(vint i=0;i<listeners.Count();i++)
@@ -319,108 +342,121 @@ WindowsForm
 							return cancel;
 						}
 						break;
+					// ************************************** mouse
+					case WM_NCLBUTTONDOWN:
+						if (!customFrameMode) break;
+						nonClient = true;
 					case WM_LBUTTONDOWN:
 						{
-							NativeWindowMouseInfo info=ConvertMouse(wParam, lParam, false);
+							NativeWindowMouseInfo info=ConvertMouse(wParam, lParam, false, nonClient);
 							for(vint i=0;i<listeners.Count();i++)
 							{
 								listeners[i]->LeftButtonDown(info);
 							}
 						}
 						break;
+					case WM_NCLBUTTONUP:
+						if (!customFrameMode) break;
+						nonClient = true;
 					case WM_LBUTTONUP:
 						{
-							NativeWindowMouseInfo info=ConvertMouse(wParam, lParam, false);
+							NativeWindowMouseInfo info=ConvertMouse(wParam, lParam, false, nonClient);
 							for(vint i=0;i<listeners.Count();i++)
 							{
 								listeners[i]->LeftButtonUp(info);
 							}
 						}
 						break;
+					case WM_NCLBUTTONDBLCLK:
+						if (!customFrameMode) break;
+						nonClient = true;
 					case WM_LBUTTONDBLCLK:
 						{
-							NativeWindowMouseInfo info=ConvertMouse(wParam, lParam, false);
+							NativeWindowMouseInfo info=ConvertMouse(wParam, lParam, false, nonClient);
 							for(vint i=0;i<listeners.Count();i++)
 							{
 								listeners[i]->LeftButtonDoubleClick(info);
 							}
 						}
 						break;
+					case WM_NCRBUTTONDOWN:
+						if (!customFrameMode) break;
+						nonClient = true;
 					case WM_RBUTTONDOWN:
 						{
-							NativeWindowMouseInfo info=ConvertMouse(wParam, lParam, false);
+							NativeWindowMouseInfo info=ConvertMouse(wParam, lParam, false, nonClient);
 							for(vint i=0;i<listeners.Count();i++)
 							{
 								listeners[i]->RightButtonDown(info);
 							}
 						}
 						break;
+					case WM_NCRBUTTONUP:
+						if (!customFrameMode) break;
+						nonClient = true;
 					case WM_RBUTTONUP:
 						{
-							NativeWindowMouseInfo info=ConvertMouse(wParam, lParam, false);
+							NativeWindowMouseInfo info=ConvertMouse(wParam, lParam, false, nonClient);
 							for(vint i=0;i<listeners.Count();i++)
 							{
 								listeners[i]->RightButtonUp(info);
 							}
 						}
 						break;
+					case WM_NCRBUTTONDBLCLK:
+						if (!customFrameMode) break;
+						nonClient = true;
 					case WM_RBUTTONDBLCLK:
 						{
-							NativeWindowMouseInfo info=ConvertMouse(wParam, lParam, false);
+							NativeWindowMouseInfo info=ConvertMouse(wParam, lParam, false, nonClient);
 							for(vint i=0;i<listeners.Count();i++)
 							{
 								listeners[i]->RightButtonDoubleClick(info);
 							}
 						}
 						break;
+					case WM_NCMBUTTONDOWN:
+						if (!customFrameMode) break;
+						nonClient = true;
 					case WM_MBUTTONDOWN:
 						{
-							NativeWindowMouseInfo info=ConvertMouse(wParam, lParam, false);
+							NativeWindowMouseInfo info=ConvertMouse(wParam, lParam, false, nonClient);
 							for(vint i=0;i<listeners.Count();i++)
 							{
 								listeners[i]->MiddleButtonDown(info);
 							}
 						}
 						break;
+					case WM_NCMBUTTONUP:
+						if (!customFrameMode) break;
+						nonClient = true;
 					case WM_MBUTTONUP:
 						{
-							NativeWindowMouseInfo info=ConvertMouse(wParam, lParam, false);
+							NativeWindowMouseInfo info=ConvertMouse(wParam, lParam, false, nonClient);
 							for(vint i=0;i<listeners.Count();i++)
 							{
 								listeners[i]->MiddleButtonUp(info);
 							}
 						}
 						break;
+					case WM_NCMBUTTONDBLCLK:
+						if (!customFrameMode) break;
+						nonClient = true;
 					case WM_MBUTTONDBLCLK:
 						{
-							NativeWindowMouseInfo info=ConvertMouse(wParam, lParam, false);
+							NativeWindowMouseInfo info=ConvertMouse(wParam, lParam, false, nonClient);
 							for(vint i=0;i<listeners.Count();i++)
 							{
 								listeners[i]->MiddleButtonDoubleClick(info);
 							}
 						}
 						break;
-					case WM_MOUSEHWHEEL:
-						{
-							NativeWindowMouseInfo info=ConvertMouse(wParam, lParam, true);
-							for(vint i=0;i<listeners.Count();i++)
-							{
-								listeners[i]->HorizontalWheel(info);
-							}
-						}
-						break;
-					case WM_MOUSEWHEEL:
-						{
-							NativeWindowMouseInfo info=ConvertMouse(wParam, lParam, true);
-							for(vint i=0;i<listeners.Count();i++)
-							{
-								listeners[i]->VerticalWheel(info);
-							}
-						}
-						break;
+					case WM_NCMOUSEMOVE:
+						if (!customFrameMode) break;
+						nonClient = true;
 					case WM_MOUSEMOVE:
 						{
-							NativeWindowMouseInfo info=ConvertMouse(wParam, lParam, false);
+							NativeWindowMouseInfo info=ConvertMouse(wParam, lParam, false, nonClient);
 							if(info.x!=mouseLastX || info.y!=mouseLastY)
 							{
 								if(!mouseHoving)
@@ -439,7 +475,30 @@ WindowsForm
 							}
 						}
 						break;
+					// ************************************** wheel
+					case WM_MOUSEHWHEEL:
+						{
+							NativeWindowMouseInfo info=ConvertMouse(wParam, lParam, true, false);
+							for(vint i=0;i<listeners.Count();i++)
+							{
+								listeners[i]->HorizontalWheel(info);
+							}
+						}
+						break;
+					case WM_MOUSEWHEEL:
+						{
+							NativeWindowMouseInfo info=ConvertMouse(wParam, lParam, true, false);
+							for(vint i=0;i<listeners.Count();i++)
+							{
+								listeners[i]->VerticalWheel(info);
+							}
+						}
+						break;
+					// ************************************** mouse state
+					case WM_NCMOUSELEAVE:
+						nonClient = true;
 					case WM_MOUSELEAVE:
+						if (customFrameMode == nonClient)
 						{
 							mouseLastX=-1;
 							mouseLastY=-1;
@@ -450,11 +509,13 @@ WindowsForm
 							}
 						}
 						break;
+					case WM_NCMOUSEHOVER:
 					case WM_MOUSEHOVER:
 						{
 							TrackMouse(true);
 						}
 						break;
+					// ************************************** key
 					case WM_KEYUP:
 						{
 							NativeWindowKeyInfo info=ConvertKey(wParam, lParam);
@@ -500,6 +561,7 @@ WindowsForm
 							}
 						}
 						break;
+					// ************************************** painting
 					case WM_PAINT:
 						{
 							for(vint i=0;i<listeners.Count();i++)
@@ -510,6 +572,15 @@ WindowsForm
 						break;
 					case WM_ERASEBKGND:
 						return true;
+					case WM_NCPAINT:
+					case WM_SYNCPAINT:
+						if(customFrameMode)
+						{
+							result=0;
+							return true;
+						}
+						break;
+					// ************************************** IME
 					case WM_IME_SETCONTEXT:
 						if(wParam==TRUE)
 						{
@@ -521,6 +592,7 @@ WindowsForm
 					case WM_IME_STARTCOMPOSITION:
 						UpdateCompositionForContent();
 						break;
+					// ************************************** hit test
 					case WM_NCHITTEST:
 						{
 							POINTS location=MAKEPOINTS(lParam);
@@ -580,6 +652,7 @@ WindowsForm
 							}
 						}
 						break;
+					// ************************************** MISC
 					case WM_SETCURSOR:
 						{
 							DWORD hitTestResult=LOWORD(lParam);
@@ -616,15 +689,8 @@ WindowsForm
 							return true;
 						}
 						break;
-					case WM_NCPAINT:
-					case WM_SYNCPAINT:
-						if(customFrameMode)
-						{
-							result=0;
-							return true;
-						}
-						break;
 					}
+
 					if(IsWindow(hwnd)!=0)
 					{
 						if(transferFocusEvent && IsFocused())
@@ -639,6 +705,11 @@ WindowsForm
 								window->SetFocus();
 							}
 						}
+					}
+
+					if (nonClient)
+					{
+						return true;
 					}
 					return false;
 				}

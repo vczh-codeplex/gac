@@ -634,6 +634,8 @@ Native Window
 			vint						y;
 			/// <summary>The delta of the wheel.</summary>
 			vint						wheel;
+			/// <summary>True if the mouse is in the non-client area.</summary>
+			bool						nonClient;
 		};
 		
 		/// <summary>
