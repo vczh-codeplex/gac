@@ -135,7 +135,22 @@ WindowsForm
 				NativeWindowMouseInfo ConvertMouse(WPARAM wParam, LPARAM lParam, bool wheelMessage, bool nonClient)
 				{
 					NativeWindowMouseInfo info;
-					info.nonClient = nonClient;
+
+					info.nonClient = false;
+					if (nonClient)
+					{
+						switch (wParam)
+						{
+						case HTMINBUTTON:
+						case HTMAXBUTTON:
+						case HTCLOSE:
+							break;
+						default:
+							info.nonClient = true;
+							break;
+						}
+					}
+
 					if(wheelMessage)
 					{
 						info.wheel=GET_WHEEL_DELTA_WPARAM(wParam);
@@ -707,9 +722,45 @@ WindowsForm
 						}
 					}
 
-					if (nonClient)
+					switch (uMsg)
 					{
-						return true;
+					case WM_NCLBUTTONDOWN:
+						switch (wParam)
+						{
+						case HTMINBUTTON:
+						case HTMAXBUTTON:
+						case HTCLOSE:
+							result = 0;
+							return true;
+						}
+						break;
+					case WM_LBUTTONUP:
+						{
+							POINTS location = MAKEPOINTS(lParam);
+							for(vint i=0;i<listeners.Count();i++)
+							{
+								switch(listeners[i]->HitTest(Point(location.x, location.y)))
+								{
+								case INativeWindowListener::ButtonMinimum:
+									ShowMinimized();
+									return false;
+								case INativeWindowListener::ButtonMaximum:
+									if (GetSizeState() == INativeWindow::Maximized)
+									{
+										ShowRestored();
+									}
+									else
+									{
+										ShowMaximized();
+									}
+									return false;
+								case INativeWindowListener::ButtonClose:
+									Hide();
+									return false;
+								}
+							}
+						}
+						break;
 					}
 					return false;
 				}
