@@ -77,7 +77,7 @@ GuiGraphicsHost
 			{
 				if(nativeWindow && (info.left || info.middle || info.right))
 				{
-					if(!nativeWindow->IsCapturing())
+					if(!nativeWindow->IsCapturing() && !info.nonClient)
 					{
 						nativeWindow->RequireCapture();
 						mouseCaptureComposition=windowComposition->FindComposition(Point(info.x, info.y));
