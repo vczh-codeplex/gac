@@ -170,9 +170,6 @@ WindowsForm
 						info.right = WinIsKeyPressing(MK_RBUTTON);
 						
 						POINTS point = MAKEPOINTS(lParam);
-						Point offset = this->GetBounds().LeftTop();
-						info.x = point.x - offset.x;
-						info.y = point.y - offset.y;
 					}
 					else
 					{
@@ -183,8 +180,18 @@ WindowsForm
 						info.right=(wParam & MK_RBUTTON)!=0;
 
 						POINTS point = MAKEPOINTS(lParam);
-						info.x = point.x;
-						info.y = point.y;
+
+						if (wheelMessage)
+						{
+							Point offset = GetClientBoundsInScreen().LeftTop();
+							info.x = point.x - offset.x;
+							info.y = point.y - offset.y;
+						}
+						else
+						{
+							info.x = point.x;
+							info.y = point.y;
+						}
 					}
 					return info;
 				}
