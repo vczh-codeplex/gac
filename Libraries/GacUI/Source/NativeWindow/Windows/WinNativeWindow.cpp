@@ -170,6 +170,9 @@ WindowsForm
 						info.right = WinIsKeyPressing(MK_RBUTTON);
 						
 						POINTS point = MAKEPOINTS(lParam);
+						Point offset = GetClientBoundsInScreen().LeftTop();
+						info.x = point.x - offset.x;
+						info.y = point.y - offset.y;
 					}
 					else
 					{
