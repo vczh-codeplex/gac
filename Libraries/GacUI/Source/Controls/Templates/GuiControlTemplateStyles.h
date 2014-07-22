@@ -369,6 +369,30 @@ Control Template
 				Color															GetTextColor()override;
 			};
 
+			class GuiTabTemplate_StyleProvider
+				: public GuiControlTemplate_StyleProvider
+				, public virtual controls::GuiTab::IStyleController
+				, public Description<GuiTabTemplate_StyleProvider>
+			{
+			protected:
+				Ptr<GuiTemplate::IFactory>										headerTemplateFactory;
+				Ptr<GuiTemplate::IFactory>										dropdownTemplateFactory;
+				Ptr<GuiTemplate::IFactory>										menuTemplateFactory;
+				Ptr<GuiTemplate::IFactory>										menuItemTemplateFactory;
+				GuiTabTemplate*													controlTemplate;
+
+			public:
+				GuiTabTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
+				~GuiTabTemplate_StyleProvider();
+
+				void															SetCommandExecutor(controls::GuiTab::ICommandExecutor* value)override;
+				void															InsertTab(vint index)override;
+				void															SetTabText(vint index, const WString& value)override;
+				void															RemoveTab(vint index)override;
+				void															MoveTab(vint oldIndex, vint newIndex)override;
+				void															SetSelectedTab(vint index)override;
+			};
+
 /***********************************************************************
 Item Template (GuiListItemTemplate)
 ***********************************************************************/

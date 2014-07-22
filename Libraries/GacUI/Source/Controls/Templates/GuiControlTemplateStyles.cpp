@@ -756,6 +756,47 @@ GuiTreeViewTemplate_StyleProvider
 			}
 
 /***********************************************************************
+GuiTabTemplate_StyleProvider
+***********************************************************************/
+
+			GuiTabTemplate_StyleProvider::GuiTabTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory)
+				:GuiControlTemplate_StyleProvider(factory)
+			{
+				if (!(controlTemplate = dynamic_cast<GuiTabTemplate*>(GetBoundsComposition())))
+				{
+					CHECK_FAIL(L"GuiTabTemplate_StyleProvider::GuiTabTemplate_StyleProvider()#An instance of GuiTabTemplate is expected.");
+				}
+			}
+
+			GuiTabTemplate_StyleProvider::~GuiTabTemplate_StyleProvider()
+			{
+			}
+
+			void GuiTabTemplate_StyleProvider::SetCommandExecutor(controls::GuiTab::ICommandExecutor* value)
+			{
+			}
+
+			void GuiTabTemplate_StyleProvider::InsertTab(vint index)
+			{
+			}
+
+			void GuiTabTemplate_StyleProvider::SetTabText(vint index, const WString& value)
+			{
+			}
+
+			void GuiTabTemplate_StyleProvider::RemoveTab(vint index)
+			{
+			}
+
+			void GuiTabTemplate_StyleProvider::MoveTab(vint oldIndex, vint newIndex)
+			{
+			}
+
+			void GuiTabTemplate_StyleProvider::SetSelectedTab(vint index)
+			{
+			}
+
+/***********************************************************************
 GuiListItemTemplate_ItemStyleProvider
 ***********************************************************************/
 

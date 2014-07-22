@@ -333,6 +333,22 @@ Control Template
 				GuiTreeViewTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
 			};
 
+			class GuiTabTemplate : public GuiControlTemplate, public Description<GuiTabTemplate>
+			{
+			public:
+				GuiTabTemplate();
+				~GuiTabTemplate();
+
+#define GuiTabTemplate_PROPERTIES(F)\
+				F(GuiTabTemplate, WString, HeaderTemplate)\
+				F(GuiTabTemplate, WString, DropdownTemplate)\
+				F(GuiTabTemplate, WString, MenuTemplate)\
+				F(GuiTabTemplate, WString, MenuItemTemplate)\
+				F(GuiTabTemplate, compositions::GuiGraphicsComposition*, HeaderComposition)\
+
+				GuiTabTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
+			};
+
 /***********************************************************************
 Item Template
 ***********************************************************************/

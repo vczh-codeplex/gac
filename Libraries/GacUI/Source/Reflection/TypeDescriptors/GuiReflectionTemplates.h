@@ -46,6 +46,7 @@ Type List
 			F(presentation::templates::GuiTextListTemplate)\
 			F(presentation::templates::GuiListViewTemplate)\
 			F(presentation::templates::GuiTreeViewTemplate)\
+			F(presentation::templates::GuiTabTemplate)\
 			F(presentation::templates::GuiListItemTemplate)\
 			F(presentation::templates::GuiTreeItemTemplate)\
 
