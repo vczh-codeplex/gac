@@ -98,6 +98,7 @@ namespace demos
 
 #define DEMO_TEMPLATES(F)\
 	F(WindowTemplate, GuiWindowTemplate)\
+	F(TabTemplate, GuiTabTemplate)\
 	F(GroupBoxTemplate, GuiControlTemplate)\
 	F(ToolstripTemplate, GuiControlTemplate)\
 	F(ToolstripMenuTemplate, GuiMenuTemplate)\
@@ -382,6 +383,7 @@ namespace vl
 #define DEMO_TYPES(F)\
 			F(demos::MainWindow)\
 			F(demos::WindowTemplate)\
+			F(demos::TabTemplate)\
 			F(demos::GroupBoxTemplate)\
 			F(demos::ToolstripTemplate)\
 			F(demos::ToolstripMenuTemplate)\
