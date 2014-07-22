@@ -814,7 +814,8 @@ GuiTabTemplate_StyleProvider
 					if(headerButtons[i]->GetSelected())
 					{
 						tabHeaderComposition->MoveChild(item, childCount-1);
-						item->SetExtraMargin(Margin(2, 2, 2, 0));
+						vint padding = controlTemplate->GetHeaderPadding();
+						item->SetExtraMargin(Margin(padding, padding, padding, 0));
 					}
 					else
 					{
@@ -867,9 +868,10 @@ GuiTabTemplate_StyleProvider
 					GuiCellComposition* cell=new GuiCellComposition;
 					tabBoundsComposition->AddChild(cell);
 					cell->SetSite(0, 0, 1, 1);
-
+					
+					vint padding = controlTemplate->GetHeaderPadding();
 					tabHeaderComposition=new GuiStackComposition;
-					tabHeaderComposition->SetExtraMargin(Margin(2, 2, 2, 0));
+					tabHeaderComposition->SetExtraMargin(Margin(padding, padding, padding, 0));
 					tabHeaderComposition->SetAlignmentToParent(Margin(0, 0, 0, 0));
 					tabHeaderComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 					tabHeaderComposition->BoundsChanged.AttachMethod(this, &GuiTabTemplate_StyleProvider::OnTabHeaderBoundsChanged);

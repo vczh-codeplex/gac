@@ -344,6 +344,7 @@ Control Template
 				F(GuiTabTemplate, WString, DropdownTemplate)\
 				F(GuiTabTemplate, WString, MenuTemplate)\
 				F(GuiTabTemplate, WString, MenuItemTemplate)\
+				F(GuiTabTemplate, vint, HeaderPadding)\
 				F(GuiTabTemplate, compositions::GuiGraphicsComposition*, HeaderComposition)\
 
 				GuiTabTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
