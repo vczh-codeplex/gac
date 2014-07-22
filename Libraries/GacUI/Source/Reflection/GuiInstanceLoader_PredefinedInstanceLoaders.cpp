@@ -165,9 +165,37 @@ GuiTabInstanceLoader
 				return description::GetTypeDescriptor<GuiTab>()->GetTypeName();
 			}
 
+			bool IsCreatable(const TypeInfo& typeInfo)override
+			{
+				return GetTypeName() == typeInfo.typeName;
+			}
+
+			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
+			{
+				if(GetTypeName() == typeInfo.typeName)
+				{
+					vint indexControlTemplate = constructorArguments.Keys().IndexOf(L"ControlTemplate");
+					if (indexControlTemplate == -1)
+					{
+						return Value::From(g::NewTab());
+					}
+					else
+					{
+						auto factory = CreateTemplateFactory(constructorArguments.GetByIndex(indexControlTemplate)[0].GetText());
+						return Value::From(new GuiTab(new GuiTabTemplate_StyleProvider(factory)));
+					}
+				}
+				return Value();
+			}
+
 			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
 			{
 				propertyNames.Add(L"");
+			}
+
+			void GetConstructorParameters(const TypeInfo& typeInfo, collections::List<WString>& propertyNames)override
+			{
+				propertyNames.Add(L"ControlTemplate");
 			}
 
 			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
@@ -175,6 +203,12 @@ GuiTabInstanceLoader
 				if (propertyInfo.propertyName == L"")
 				{
 					return GuiInstancePropertyInfo::CollectionWithParent(description::GetTypeDescriptor<GuiTabPage>());
+				}
+				else if (propertyInfo.propertyName == L"ControlTemplate")
+				{
+					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<WString>());
+					info->constructorParameter = true;
+					return info;
 				}
 				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
 			}
@@ -1540,7 +1574,7 @@ GuiPredefinedInstanceLoadersPlugin
 		)
 
 				manager->SetLoader(new GuiControlInstanceLoader);
-				manager->SetLoader(new GuiTabInstanceLoader);
+				manager->SetLoader(new GuiTabInstanceLoader);						// ControlTemplate
 				manager->SetLoader(new GuiTabPageInstanceLoader);
 				manager->SetLoader(new GuiToolstripMenuInstanceLoader);				// ControlTemplate
 				manager->SetLoader(new GuiToolstripMenuBarInstanceLoader);			// ControlTemplate

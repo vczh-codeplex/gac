@@ -388,6 +388,22 @@ GuiTreeViewTemplate
 			}
 
 /***********************************************************************
+GuiTabTemplate
+***********************************************************************/
+
+			GuiTabTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_IMPL)
+
+			GuiTabTemplate::GuiTabTemplate()
+				:HeaderComposition_(0)
+			{
+				GuiTabTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_EVENT_INIT)
+			}
+
+			GuiTabTemplate::~GuiTabTemplate()
+			{
+			}
+
+/***********************************************************************
 GuiListItemTemplate
 ***********************************************************************/
 
