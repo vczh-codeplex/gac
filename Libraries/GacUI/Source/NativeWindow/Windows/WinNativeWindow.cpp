@@ -732,45 +732,48 @@ WindowsForm
 						}
 					}
 
-					switch (uMsg)
+					if (customFrameMode)
 					{
-					case WM_NCLBUTTONDOWN:
-						switch (wParam)
+						switch (uMsg)
 						{
-						case HTMINBUTTON:
-						case HTMAXBUTTON:
-						case HTCLOSE:
-							result = 0;
-							return true;
-						}
-						break;
-					case WM_LBUTTONUP:
-						{
-							POINTS location = MAKEPOINTS(lParam);
-							for(vint i=0;i<listeners.Count();i++)
+						case WM_NCLBUTTONDOWN:
+							switch (wParam)
 							{
-								switch(listeners[i]->HitTest(Point(location.x, location.y)))
+							case HTMINBUTTON:
+							case HTMAXBUTTON:
+							case HTCLOSE:
+								result = 0;
+								return true;
+							}
+							break;
+						case WM_LBUTTONUP:
+							{
+								POINTS location = MAKEPOINTS(lParam);
+								for(vint i=0;i<listeners.Count();i++)
 								{
-								case INativeWindowListener::ButtonMinimum:
-									ShowMinimized();
-									return false;
-								case INativeWindowListener::ButtonMaximum:
-									if (GetSizeState() == INativeWindow::Maximized)
+									switch(listeners[i]->HitTest(Point(location.x, location.y)))
 									{
-										ShowRestored();
+									case INativeWindowListener::ButtonMinimum:
+										ShowMinimized();
+										return false;
+									case INativeWindowListener::ButtonMaximum:
+										if (GetSizeState() == INativeWindow::Maximized)
+										{
+											ShowRestored();
+										}
+										else
+										{
+											ShowMaximized();
+										}
+										return false;
+									case INativeWindowListener::ButtonClose:
+										Hide();
+										return false;
 									}
-									else
-									{
-										ShowMaximized();
-									}
-									return false;
-								case INativeWindowListener::ButtonClose:
-									Hide();
-									return false;
 								}
 							}
+							break;
 						}
-						break;
 					}
 					return false;
 				}
