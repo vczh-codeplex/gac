@@ -863,7 +863,8 @@ GuiTabTemplate_StyleProvider
 				tabBoundsComposition->SetColumnOption(0, GuiCellOption::PercentageOption(1.0));
 				tabBoundsComposition->SetColumnOption(1, GuiCellOption::AbsoluteOption(0));
 				controlTemplate->GetHeaderComposition()->AddChild(tabBoundsComposition);
-
+				
+				vint padding = controlTemplate->GetHeaderPadding();
 				{
 					GuiCellComposition* cell=new GuiCellComposition;
 					tabBoundsComposition->AddChild(cell);
@@ -872,7 +873,7 @@ GuiTabTemplate_StyleProvider
 					vint padding = controlTemplate->GetHeaderPadding();
 					tabHeaderComposition=new GuiStackComposition;
 					tabHeaderComposition->SetExtraMargin(Margin(padding, padding, padding, 0));
-					tabHeaderComposition->SetAlignmentToParent(Margin(0, 0, 0, 0));
+					tabHeaderComposition->SetAlignmentToParent(Margin(0, 0, 1, 0));
 					tabHeaderComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 					tabHeaderComposition->BoundsChanged.AttachMethod(this, &GuiTabTemplate_StyleProvider::OnTabHeaderBoundsChanged);
 					cell->AddChild(tabHeaderComposition);
@@ -883,7 +884,7 @@ GuiTabTemplate_StyleProvider
 					cell->SetSite(0, 1, 1, 1);
 
 					headerOverflowButton=new GuiButton(CreateDropdownTemplate());
-					headerOverflowButton->GetBoundsComposition()->SetAlignmentToParent(Margin(-1, 0, 0, 0));
+					headerOverflowButton->GetBoundsComposition()->SetAlignmentToParent(Margin(-1, padding, 0, 0));
 					headerOverflowButton->Clicked.AttachMethod(this, &GuiTabTemplate_StyleProvider::OnHeaderOverflowButtonClicked);
 					cell->AddChild(headerOverflowButton->GetBoundsComposition());
 				}
