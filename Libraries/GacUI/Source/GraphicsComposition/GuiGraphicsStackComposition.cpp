@@ -212,8 +212,14 @@ GuiStackComposition
 				UpdateStackItemBounds();
 				if(GetMinSizeLimitation()==GuiGraphicsComposition::LimitToElementAndChildren)
 				{
-					if(minSize.x<stackItemTotalSize.x) minSize.x=stackItemTotalSize.x;
-					if(minSize.y<stackItemTotalSize.y) minSize.y=stackItemTotalSize.y;
+					if (!ensuringVisibleStackItem || direction == Vertical)
+					{
+						if(minSize.x<stackItemTotalSize.x) minSize.x=stackItemTotalSize.x;
+					}
+					if (!ensuringVisibleStackItem || direction == Horizontal)
+					{
+						if(minSize.y<stackItemTotalSize.y) minSize.y=stackItemTotalSize.y;
+					}
 				}
 				vint x=0;
 				vint y=0;
@@ -275,14 +281,14 @@ GuiStackComposition
 			{
 				if(0<=index && index<stackItems.Count())
 				{
-					ensuringVisibleStackItem=stackItems[index];
-					UpdateStackItemBounds();
-					return true;
+					ensuringVisibleStackItem = stackItems[index];
 				}
 				else
 				{
-					return false;
+					ensuringVisibleStackItem = 0;
 				}
+				UpdateStackItemBounds();
+				return ensuringVisibleStackItem != 0;
 			}
 
 /***********************************************************************
