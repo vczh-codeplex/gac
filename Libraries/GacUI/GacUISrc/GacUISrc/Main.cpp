@@ -352,7 +352,8 @@ namespace demos
 		}
 	public:
 		MainWindow_()
-			:GuiWindow(CreateStyle())
+			//:GuiWindow(CreateStyle())
+			:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
 			,GuiInstancePartialClass<GuiWindow>(L"demos::MainWindow")
 		{
 		}
