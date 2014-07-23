@@ -339,7 +339,7 @@ namespace demos
 	protected:
 		static GuiWindow::IStyleController* CreateStyle()
 		{
-			List<description::ITypeDescriptor* > types;
+			List<description::ITypeDescriptor*> types;
 			types.Add(description::GetTypeDescriptor<demos::WindowTemplate>());
 			auto factory = GuiTemplate::IFactory::CreateTemplateFactory(types);
 			auto style = new GuiWindowTemplate_StyleProvider(factory);
@@ -352,8 +352,8 @@ namespace demos
 		}
 	public:
 		MainWindow_()
-			//:GuiWindow(CreateStyle())
-			:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
+			:GuiWindow(CreateStyle())
+			//:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
 			,GuiInstancePartialClass<GuiWindow>(L"demos::MainWindow")
 		{
 		}

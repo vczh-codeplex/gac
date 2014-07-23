@@ -88,9 +88,37 @@ GuiAttSetterRepr
 							repr->FillXml(xml, serializePrecompiledResource);
 						}
 					}
-					else if (value->values.Count() == 1 && value->values[0].Cast<GuiTextRepr>())
+					else
 					{
-						if (!value->values[0]->fromStyle || serializePrecompiledResource)
+						bool containsElement = false;
+						FOREACH(Ptr<GuiValueRepr>, repr, value->values)
+						{
+							if (!repr.Cast<GuiTextRepr>())
+							{
+								containsElement = true;
+								break;
+							}
+						}
+
+						if (containsElement)
+						{
+							auto xmlProp = MakePtr<XmlElement>();
+							xmlProp->name.value = L"att." + key;
+							if (value->binding != L"")
+							{
+								xmlProp->name.value += L"-" + value->binding;
+							}
+
+							FOREACH(Ptr<GuiValueRepr>, repr, value->values)
+							{
+								if (!repr.Cast<GuiTextRepr>())
+								{
+									repr->FillXml(xmlProp, serializePrecompiledResource);
+								}
+							}
+							xml->subNodes.Add(xmlProp);
+						}
+						else if (value->values.Count() > 0)
 						{
 							auto att = MakePtr<XmlAttribute>();
 							att->name.value = key;
@@ -101,21 +129,6 @@ GuiAttSetterRepr
 							att->value.value = value->values[0].Cast<GuiTextRepr>()->text;
 							xml->attributes.Add(att);
 						}
-					}
-					else
-					{
-						auto xmlProp = MakePtr<XmlElement>();
-						xmlProp->name.value = L"att." + key;
-						if (value->binding != L"")
-						{
-							xmlProp->name.value += L"-" + value->binding;
-						}
-
-						FOREACH(Ptr<GuiValueRepr>, repr, value->values)
-						{
-							repr->FillXml(xmlProp, serializePrecompiledResource);
-						}
-						xml->subNodes.Add(xmlProp);
 					}
 				}
 
