@@ -13,9 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="GeneratedCode">
-      <UniqueIdentifier>{03e01296-b2ba-4ebd-b177-dd5efb88b776}</UniqueIdentifier>
-    </Filter>
     <Filter Include="CodeBehind">
       <UniqueIdentifier>{d7a59e69-9350-4a58-916a-dc00c2231b3f}</UniqueIdentifier>
     </Filter>
