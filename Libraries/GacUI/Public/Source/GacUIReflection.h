@@ -286,6 +286,7 @@ Instance Representation
 		class GuiTextRepr;
 		class GuiAttSetterRepr;
 		class GuiConstructorRepr;
+		class IGuiInstanceCache;
 
 		class GuiValueRepr : public Object, public Description<GuiValueRepr>
 		{
@@ -302,7 +303,7 @@ Instance Representation
 
 			virtual void							Accept(IVisitor* visitor) = 0;
 			virtual Ptr<GuiValueRepr>				Clone() = 0;
-			virtual void							FillXml(Ptr<parsing::xml::XmlElement> xml, bool fillStyleValues) = 0;
+			virtual void							FillXml(Ptr<parsing::xml::XmlElement> xml, bool serializePrecompiledResource) = 0;
 		};
 
 		class GuiTextRepr : public GuiValueRepr, public Description<GuiTextRepr>
@@ -312,7 +313,7 @@ Instance Representation
 
 			void									Accept(IVisitor* visitor)override{visitor->Visit(this);}
 			Ptr<GuiValueRepr>						Clone()override;
-			void									FillXml(Ptr<parsing::xml::XmlElement> xml, bool fillStyleValues)override;
+			void									FillXml(Ptr<parsing::xml::XmlElement> xml, bool serializePrecompiledResource)override;
 		};
 
 		class GuiAttSetterRepr : public GuiValueRepr, public Description<GuiAttSetterRepr>
@@ -338,11 +339,12 @@ Instance Representation
 		public:
 			SetteValuerMap							setters;					// empty key means default property
 			EventHandlerMap							eventHandlers;
+			Nullable<WString>						instanceName;
 
 			void									Accept(IVisitor* visitor)override{visitor->Visit(this);}
 			void									CloneBody(Ptr<GuiAttSetterRepr> repr);
 			Ptr<GuiValueRepr>						Clone()override;
-			void									FillXml(Ptr<parsing::xml::XmlElement> xml, bool fillStyleValues)override;
+			void									FillXml(Ptr<parsing::xml::XmlElement> xml, bool serializePrecompiledResource)override;
 		};
 
 		class GuiConstructorRepr : public GuiAttSetterRepr, public Description<GuiConstructorRepr>
@@ -351,12 +353,11 @@ Instance Representation
 		public:
 			WString									typeNamespace;
 			WString									typeName;
-			Nullable<WString>						instanceName;
 			Nullable<WString>						styleName;
 
 			void									Accept(IVisitor* visitor)override{visitor->Visit(this);}
 			Ptr<GuiValueRepr>						Clone()override;
-			void									FillXml(Ptr<parsing::xml::XmlElement> xml, bool fillStyleValues)override;
+			void									FillXml(Ptr<parsing::xml::XmlElement> xml, bool serializePrecompiledResource)override;
 		};
 
 /***********************************************************************
@@ -387,7 +388,7 @@ Instance Context
 		{
 		public:
 			typedef collections::List<Ptr<GuiInstanceNamespace>>				NamespaceList;
-			typedef collections::Dictionary<WString, Ptr<DescriptableObject>>	CacheMap;
+			typedef collections::Dictionary<WString, Ptr<IGuiInstanceCache>>	CacheMap;
 
 			struct NamespaceInfo
 			{
@@ -420,8 +421,9 @@ Instance Context
 			ParameterList							parameters;
 			collections::List<WString>				stylePaths;
 
+			bool									appliedStyles = false;
 			StyleContextList						styles;
-			CacheMap								caches;
+			CacheMap								precompiledCaches;
 
 			static void								CollectDefaultAttributes(GuiAttSetterRepr::ValueList& values, Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
 			static void								CollectAttributes(GuiAttSetterRepr::SetteValuerMap& setters, Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
@@ -429,7 +431,8 @@ Instance Context
 			static void								FillAttSetter(Ptr<GuiAttSetterRepr> setter, Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
 			static Ptr<GuiConstructorRepr>			LoadCtor(Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
 			static Ptr<GuiInstanceContext>			LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, collections::List<WString>& errors);
-			Ptr<parsing::xml::XmlDocument>			SaveToXml(bool fillStyleValues = false);
+			Ptr<parsing::xml::XmlDocument>			SaveToXml(bool serializePrecompiledResource);
+			bool									ApplyStyles(Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors);
 		};
 
 /***********************************************************************
@@ -678,18 +681,38 @@ Instance Binder
 		public:
 			virtual WString							GetBindingName() = 0;
 			virtual bool							ApplicableToConstructorArgument() = 0;
+			virtual bool							RequireInstanceName() = 0;
 			virtual void							GetRequiredContexts(collections::List<WString>& contextNames) = 0;
 			virtual void							GetExpectedValueTypes(collections::List<description::ITypeDescriptor*>& expectedTypes) = 0;
 			virtual description::Value				GetValue(Ptr<GuiInstanceEnvironment> env, const description::Value& propertyValue) = 0;
-			virtual bool							SetPropertyValue(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, IGuiInstanceLoader::PropertyValue& propertyValue) = 0;
+			virtual bool							SetPropertyValue(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, Nullable<WString> instanceName, IGuiInstanceLoader::PropertyValue& propertyValue) = 0;
 		};
 
 		class IGuiInstanceEventBinder : public IDescriptable, public Description<IGuiInstanceEventBinder>
 		{
 		public:
 			virtual WString							GetBindingName() = 0;
+			virtual bool							RequireInstanceName() = 0;
 			virtual void							GetRequiredContexts(collections::List<WString>& contextNames) = 0;
-			virtual bool							AttachEvent(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, IGuiInstanceLoader::PropertyValue& propertyValue) = 0;
+			virtual bool							AttachEvent(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, Nullable<WString> instanceName, IGuiInstanceLoader::PropertyValue& propertyValue) = 0;
+		};
+
+/***********************************************************************
+Instance Cache
+***********************************************************************/
+
+		class IGuiInstanceCache : public IDescriptable, public Description<IGuiInstanceCache>
+		{
+		public:
+			virtual WString							GetCacheTypeName() = 0;
+		};
+
+		class IGuiInstanceCacheResolver : public IDescriptable, public Description<IGuiInstanceCache>
+		{
+		public:
+			virtual WString							GetCacheTypeName() = 0;
+			virtual bool							Serialize(Ptr<IGuiInstanceCache> cache, stream::IStream& stream) = 0;
+			virtual Ptr<IGuiInstanceCache>			Deserialize(stream::IStream& stream) = 0;
 		};
 
 /***********************************************************************
@@ -705,6 +728,8 @@ Instance Loader Manager
 			virtual IGuiInstanceBinder*					GetInstanceBinder(const WString& bindingName) = 0;
 			virtual bool								AddInstanceEventBinder(Ptr<IGuiInstanceEventBinder> binder) = 0;
 			virtual IGuiInstanceEventBinder*			GetInstanceEventBinder(const WString& bindingName) = 0;
+			virtual bool								AddInstanceCacheResolver(Ptr<IGuiInstanceCacheResolver> cacheResolver) = 0;
+			virtual IGuiInstanceCacheResolver*			GetInstanceCacheResolver(const WString& cacheTypeName) = 0;
 			virtual bool								CreateVirtualType(const WString& parentType, Ptr<IGuiInstanceLoader> loader) = 0;
 			virtual bool								SetLoader(Ptr<IGuiInstanceLoader> loader) = 0;
 			virtual IGuiInstanceLoader*					GetLoader(const WString& typeName) = 0;
@@ -734,7 +759,7 @@ Instance Loader Manager
 
 		extern IGuiInstanceLoaderManager*			GetInstanceLoaderManager();
 		extern InstanceLoadingSource				FindInstanceLoadingSource(
-			Ptr<GuiInstanceEnvironment> env,
+			Ptr<GuiInstanceContext> context,
 			GuiConstructorRepr* ctor
 			);
 		Ptr<GuiInstanceContextScope>				LoadInstanceFromContext(
@@ -1162,10 +1187,8 @@ Type List
 			F(presentation::compositions::GuiSideAlignedComposition)\
 			F(presentation::compositions::GuiSideAlignedComposition::Direction)\
 			F(presentation::compositions::GuiPartialViewComposition)\
-			F(presentation::compositions::GuiSubComponentMeasurer)\
-			F(presentation::compositions::GuiSubComponentMeasurer::Direction)\
-			F(presentation::compositions::GuiSubComponentMeasurer::IMeasuringSource)\
-			F(presentation::compositions::GuiSubComponentMeasurer::MeasuringSource)\
+			F(presentation::compositions::GuiSharedSizeItemComposition)\
+			F(presentation::compositions::GuiSharedSizeRootComposition)\
 			F(presentation::compositions::IGuiGraphicsAnimation)\
 			F(presentation::compositions::GuiGraphicsAnimationManager)\
 			F(presentation::compositions::IGuiShortcutKeyItem)\
@@ -1182,70 +1205,6 @@ Interface Proxy
 #pragma warning(disable:4250)
 			namespace interface_proxy
 			{
-				class GuiSubComponentMeasurer_IMeasuringSource : public ValueInterfaceRoot, public virtual GuiSubComponentMeasurer::IMeasuringSource
-				{
-				public:
-					GuiSubComponentMeasurer_IMeasuringSource(Ptr<IValueInterfaceProxy> _proxy)
-						:ValueInterfaceRoot(_proxy)
-					{
-					}
-
-					static Ptr<GuiSubComponentMeasurer::IMeasuringSource> Create(Ptr<IValueInterfaceProxy> proxy)
-					{
-						return new GuiSubComponentMeasurer_IMeasuringSource(proxy);
-					}
-
-					void AttachMeasurer(GuiSubComponentMeasurer* value)override
-					{
-						INVOKE_INTERFACE_PROXY(AttachMeasurer, value);
-					}
-
-					void DetachMeasurer(GuiSubComponentMeasurer* value)override
-					{
-						INVOKE_INTERFACE_PROXY(DetachMeasurer, value);
-					}
-
-					GuiSubComponentMeasurer* GetAttachedMeasurer()override
-					{
-						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetAttachedMeasurer);
-					}
-
-					WString GetMeasuringCategory()override
-					{
-						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetMeasuringCategory);
-					}
-
-					vint GetSubComponentCount()override
-					{
-						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetSubComponentCount);
-					}
-
-					WString GetSubComponentName(vint index)override
-					{
-						return INVOKEGET_INTERFACE_PROXY(GetSubComponentName, index);
-					}
-
-					GuiGraphicsComposition* GetSubComponentComposition(vint index)override
-					{
-						return INVOKEGET_INTERFACE_PROXY(GetSubComponentComposition, index);
-					}
-
-					GuiGraphicsComposition* GetSubComponentComposition(const WString& name)override
-					{
-						return INVOKEGET_INTERFACE_PROXY(GetSubComponentComposition, name);
-					}
-
-					GuiGraphicsComposition* GetMainComposition()override
-					{
-						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetMainComposition);
-					}
-
-					void SubComponentPreferredMinSizeUpdated()override
-					{
-						INVOKE_INTERFACE_PROXY_NOPARAM(SubComponentPreferredMinSizeUpdated);
-					}
-				};
-
 				class composition_IGuiGraphicsAnimation : public ValueInterfaceRoot, public virtual IGuiGraphicsAnimation
 				{
 				public:
@@ -1372,13 +1331,11 @@ Type List
 			F(presentation::controls::list::FixedSizeMultiColumnItemArranger)\
 			F(presentation::controls::list::FixedHeightMultiColumnItemArranger)\
 			F(presentation::controls::list::ItemStyleControllerBase)\
-			F(presentation::controls::list::ItemProviderBase)\
 			F(presentation::controls::list::TextItemStyleProvider)\
 			F(presentation::controls::list::TextItemStyleProvider::ITextItemStyleProvider)\
 			F(presentation::controls::list::TextItemStyleProvider::ITextItemView)\
 			F(presentation::controls::list::TextItemStyleProvider::TextItemStyleController)\
 			F(presentation::controls::list::TextItem)\
-			F(presentation::controls::list::TextItemProvider)\
 			F(presentation::controls::GuiVirtualTextList)\
 			F(presentation::controls::GuiTextList)\
 			F(presentation::controls::list::ListViewItemStyleProviderBase)\
@@ -1418,7 +1375,6 @@ Type List
 			F(presentation::controls::tree::INodeItemView)\
 			F(presentation::controls::tree::INodeItemPrimaryTextView)\
 			F(presentation::controls::tree::INodeItemBindingView)\
-			F(presentation::controls::tree::NodeItemProvider)\
 			F(presentation::controls::tree::INodeItemStyleController)\
 			F(presentation::controls::tree::INodeItemStyleProvider)\
 			F(presentation::controls::tree::NodeItemStyleProvider)\
@@ -1728,6 +1684,11 @@ Interface Proxy
 					void InitializeNativeWindowProperties()override
 					{
 						INVOKE_INTERFACE_PROXY_NOPARAM(InitializeNativeWindowProperties);
+					}
+
+					void SetSizeState(INativeWindow::WindowSizeState value)
+					{
+						INVOKE_INTERFACE_PROXY(SetSizeState, value);
 					}
 
 					bool GetMaximizedBox()override
@@ -2159,6 +2120,11 @@ Interface Proxy
 					{
 						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(CreateBulletStyleController);
 					}
+
+					Color GetTextColor()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetTextColor);
+					}
 				};
 
 				class TextItemStyleProvider_ITextItemView : public virtual GuiListControl_IItemPrimaryTextView, public virtual list::TextItemStyleProvider::ITextItemView
@@ -2454,11 +2420,6 @@ Interface Proxy
 					void SetShortcutText(const WString& value)override
 					{
 						INVOKE_INTERFACE_PROXY(SetShortcutText, value);
-					}
-
-					compositions::GuiSubComponentMeasurer::IMeasuringSource* GetMeasuringSource()override
-					{
-						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetMeasuringSource);
 					}
 				};
 
@@ -3667,6 +3628,89 @@ Instance Schema Representation
 #endif
 
 /***********************************************************************
+GUIINSTANCELOADER_WORKFLOWCOMPILER.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: Zihan Chen(vczh)
+GacUI Reflection: Instance Schema Representation
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_REFLECTION_GUIINSTANCESCHE_WORKFLOWCOMPILER
+#define VCZH_PRESENTATION_REFLECTION_GUIINSTANCESCHE_WORKFLOWCOMPILER
+
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace types
+		{
+			typedef collections::Dictionary<WString, description::ITypeDescriptor*>		VariableTypeMap;
+			typedef collections::Dictionary<WString, IGuiInstanceLoader::TypeInfo>		VariableTypeInfoMap;
+			typedef collections::List<WString>											ErrorList;
+		}
+		extern workflow::analyzer::WfLexicalScopeManager*	Workflow_GetSharedManager();
+		
+
+/***********************************************************************
+WorkflowCompiler
+***********************************************************************/
+
+		extern void											Workflow_CreatePointerVariable(Ptr<workflow::WfModule> module, const WString& name, description::ITypeDescriptor* type);
+		extern void											Workflow_GetVariableTypes(Ptr<GuiInstanceEnvironment> env, types::VariableTypeMap& types);
+		extern void											Workflow_CreateVariablesForReferenceValues(Ptr<workflow::WfModule> module, types::VariableTypeMap& types);
+		extern void											Workflow_SetVariablesForReferenceValues(Ptr<workflow::runtime::WfRuntimeGlobalContext> context, Ptr<GuiInstanceEnvironment> env);
+
+		extern bool											Workflow_ValidateExpression(types::VariableTypeMap& types, types::ErrorList& errors, IGuiInstanceLoader::PropertyInfo& bindingTarget, const WString& expressionCode, Ptr<workflow::WfExpression>& expression);
+		extern Ptr<workflow::runtime::WfAssembly>			Workflow_CompileExpression(types::VariableTypeMap& types, types::ErrorList& errors, const WString& expressionCode);
+		extern Ptr<workflow::runtime::WfAssembly>			Workflow_CompileEventHandler(types::VariableTypeMap& types, types::ErrorList& errors, IGuiInstanceLoader::PropertyInfo& bindingTarget, const WString& statementCode);
+
+		struct WorkflowDataBinding
+		{
+			WString											variableName;
+			description::IPropertyInfo*						propertyInfo = 0;
+			Ptr<workflow::WfExpression>						bindExpression; // WfBindExpression for bind, else for assign
+		};
+
+		extern WString										Workflow_ModuleToString(Ptr<workflow::WfModule> module);
+		extern Ptr<workflow::runtime::WfAssembly>			Workflow_CompileDataBinding(types::VariableTypeMap& types, description::ITypeDescriptor* thisType, types::ErrorList& errors, collections::List<WorkflowDataBinding>& dataBindings);
+
+		extern void											Workflow_PrecompileInstanceContext(Ptr<GuiInstanceContext> context, types::ErrorList& errors);
+
+/***********************************************************************
+GuiWorkflowCache
+***********************************************************************/
+
+		class GuiWorkflowCache : public Object, public IGuiInstanceCache
+		{
+		public:
+			static const wchar_t*							CacheTypeName;
+			static const wchar_t*							CacheContextName;
+
+			Ptr<workflow::runtime::WfAssembly>				assembly;
+
+			GuiWorkflowCache();
+			GuiWorkflowCache(Ptr<workflow::runtime::WfAssembly> _assembly);
+
+			WString											GetCacheTypeName()override;
+		};
+
+		class GuiWorkflowCacheResolver : public Object, public IGuiInstanceCacheResolver
+		{
+		public:
+			WString											GetCacheTypeName()override;
+			bool											Serialize(Ptr<IGuiInstanceCache> cache, stream::IStream& stream)override;
+			Ptr<IGuiInstanceCache>							Deserialize(stream::IStream& stream)override;
+		};
+	}
+}
+
+#endif
+
+/***********************************************************************
 TYPEDESCRIPTORS\GUIREFLECTIONTEMPLATES.H
 ***********************************************************************/
 /***********************************************************************
@@ -3695,14 +3739,28 @@ Type List
 ***********************************************************************/
 
 #define GUIREFLECTIONTEMPLATES_TYPELIST(F)\
+			F(presentation::templates::BoolOption)\
 			F(presentation::templates::GuiTemplate)\
 			F(presentation::templates::GuiTemplate::IFactory)\
 			F(presentation::templates::GuiControlTemplate)\
 			F(presentation::templates::GuiLabelTemplate)\
+			F(presentation::templates::GuiSinglelineTextBoxTemplate)\
+			F(presentation::templates::GuiMultilineTextBoxTemplate)\
+			F(presentation::templates::GuiMenuTemplate)\
 			F(presentation::templates::GuiWindowTemplate)\
 			F(presentation::templates::GuiButtonTemplate)\
 			F(presentation::templates::GuiSelectableButtonTemplate)\
 			F(presentation::templates::GuiToolstripButtonTemplate)\
+			F(presentation::templates::GuiListViewColumnHeaderTemplate)\
+			F(presentation::templates::GuiComboBoxTemplate)\
+			F(presentation::templates::GuiDatePickerTemplate)\
+			F(presentation::templates::GuiDateComboBoxTemplate)\
+			F(presentation::templates::GuiScrollTemplate)\
+			F(presentation::templates::GuiScrollViewTemplate)\
+			F(presentation::templates::GuiTextListTemplate)\
+			F(presentation::templates::GuiListViewTemplate)\
+			F(presentation::templates::GuiTreeViewTemplate)\
+			F(presentation::templates::GuiTabTemplate)\
 			F(presentation::templates::GuiListItemTemplate)\
 			F(presentation::templates::GuiTreeItemTemplate)\
 

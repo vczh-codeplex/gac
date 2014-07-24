@@ -69,7 +69,7 @@ void GuiMain()
 
 	if (config->precompiledOutput != L"")
 	{
-		auto xml = resource->SaveToXml();
+		auto xml = resource->SaveToXml(false);
 		WString fileName = config->precompiledOutput;
 		OPEN_FILE(L"Precompiled Resource Xml");
 		XmlPrint(xml, writer);

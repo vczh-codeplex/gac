@@ -15,7 +15,7 @@ void SetupListControlWindow(GuiControlHost* controlHost, GuiGraphicsComposition*
 		for(int i=0;i<30;i++)
 		{
 			listControl->GetItems().Add(new list::TextItem(L"Text Item "+itow(i+1)));
-			listControl->GetItems().SetChecked(i, i%2==0);
+			listControl->GetItems().Get(i)->SetChecked(i % 2 == 0);
 		}
 	}
 	{
