@@ -275,10 +275,10 @@
     <Content Include="Content\Demos\Persistant.LoadFromXml.ControlTemplate\%28Generated, Modifiable%29HTrackerTemplate.h" />
     <Content Include="Content\Demos\Persistant.LoadFromXml.ControlTemplate\Main.cpp" />
     <Content Include="Content\Demos\Persistant.LoadFromXml.ControlTemplate\MainWindow.cpp" />
-    <Content Include="Content\Demos\Persistant.LoadFromXml.ControlTemplate\VScrollTemplate.cpp" />
-    <Content Include="Content\Demos\Persistant.LoadFromXml.ControlTemplate\VScrollTemplate.h" />
-    <Content Include="Content\Demos\Persistant.LoadFromXml.ControlTemplate\VTrackerTemplate.cpp" />
-    <Content Include="Content\Demos\Persistant.LoadFromXml.ControlTemplate\VTrackerTemplate.h" />
+    <Content Include="Content\Demos\Persistant.LoadFromXml.ControlTemplate\%28Generated, Modifiable%29VScrollTemplate.cpp" />
+    <Content Include="Content\Demos\Persistant.LoadFromXml.ControlTemplate\%28Generated, Modifiable%29VScrollTemplate.h" />
+    <Content Include="Content\Demos\Persistant.LoadFromXml.ControlTemplate\%28Generated, Modifiable%29VTrackerTemplate.cpp" />
+    <Content Include="Content\Demos\Persistant.LoadFromXml.ControlTemplate\%28Generated, Modifiable%29VTrackerTemplate.h" />
     <Content Include="Content\Demos\Persistant.LoadFromXml.ControlTemplate\XmlWindowResourceControlTemplate.xml" />
     <Content Include="Content\Demos\Persistant.LoadFromXml.ControlTemplate\XmlWindowResourceControlTemplates.xml" />
     <Content Include="Content\Demos\Persistant.LoadFromXml.DataBinding\%28Generated%29Demo.h" />
