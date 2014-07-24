@@ -309,5 +309,23 @@
       <cpp src="(Generated)DemoPartialClasses.cpp" />
       <description>This demo shows how to apply a customized item template (skin) to a list control using XML.</description>
     </demo>
+    <demo name="LoadFromXml.ControlTemplate">
+      <date>2014/7/24</date>
+      <image src="DXGUI_96.jpg"/>
+      <image src="DXGUI_97.jpg"/>
+      <cpp src="Main.cpp" />
+      <cpp src="Codegen.bat" />
+      <cpp src="XmlWindowResourceControlTemplate.xml" />
+      <cpp src="XmlWindowResourceControlTemplates.xml" />
+      <cpp src="(Generated, Modifiable)HScrollTemplate.h" />
+      <cpp src="(Generated, Modifiable)HScrollTemplate.cpp" />
+      <cpp src="(Generated, Modifiable)VScrollTemplate.h" />
+      <cpp src="(Generated, Modifiable)VScrollTemplate.cpp" />
+      <cpp src="(Generated, Modifiable)HTrackerTemplate.h" />
+      <cpp src="(Generated, Modifiable)HTrackerTemplate.cpp" />
+      <cpp src="(Generated, Modifiable)VTrackerTemplate.h" />
+      <cpp src="(Generated, Modifiable)VTrackerTemplate.cpp" />
+      <description>This demo shows how to apply a customized control template (skin) to all controls using XML, including a customized border window.</description>
+    </demo>
   </category>
 </demos>
