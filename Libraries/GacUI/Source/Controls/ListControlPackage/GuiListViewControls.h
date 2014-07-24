@@ -698,8 +698,6 @@ ListView
 					void											NotifyUpdate();
 				public:
 					/// <summary>Create a list view item.</summary>
-					/// <param name="_text">The specified text.</param>
-					/// <param name="_size">The specified size.</param>
 					ListViewItem();
 					
 					/// <summary>Get all sub items of this item.</summary>

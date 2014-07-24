@@ -189,6 +189,7 @@
     <Content Include="Content\Demos\Demos.Editor.Toolstrip.Document.jpg" />
     <Content Include="Content\Demos\Demos.Persistant.DirectCode.Scripting.jpg" />
     <Content Include="Content\Demos\Demos.Persistant.LoadFromXml.Controls.jpg" />
+    <Content Include="Content\Demos\Demos.Persistant.LoadFromXml.ControlTemplate.jpg" />
     <Content Include="Content\Demos\Demos.Persistant.LoadFromXml.DataBinding.jpg" />
     <Content Include="Content\Demos\Demos.Persistant.LoadFromXml.ItemTemplate.jpg" />
     <Content Include="Content\Demos\Demos.Persistant.LoadFromXml.ListViewModel.jpg" />
@@ -266,6 +267,20 @@
     <Content Include="Content\Demos\Persistant.LoadFromXml.Controls\DXGUI_88.jpg" />
     <Content Include="Content\Demos\Persistant.LoadFromXml.Controls\Main.cpp" />
     <Content Include="Content\Demos\Persistant.LoadFromXml.Controls\XmlWindowResource.xml" />
+    <Content Include="Content\Demos\Persistant.LoadFromXml.ControlTemplate\DXGUI_96.jpg" />
+    <Content Include="Content\Demos\Persistant.LoadFromXml.ControlTemplate\DXGUI_97.jpg" />
+    <Content Include="Content\Demos\Persistant.LoadFromXml.ControlTemplate\HScrollTemplate.cpp" />
+    <Content Include="Content\Demos\Persistant.LoadFromXml.ControlTemplate\HScrollTemplate.h" />
+    <Content Include="Content\Demos\Persistant.LoadFromXml.ControlTemplate\HTrackerTemplate.cpp" />
+    <Content Include="Content\Demos\Persistant.LoadFromXml.ControlTemplate\HTrackerTemplate.h" />
+    <Content Include="Content\Demos\Persistant.LoadFromXml.ControlTemplate\Main.cpp" />
+    <Content Include="Content\Demos\Persistant.LoadFromXml.ControlTemplate\MainWindow.cpp" />
+    <Content Include="Content\Demos\Persistant.LoadFromXml.ControlTemplate\TopScrollButtonTemplate.cpp" />
+    <Content Include="Content\Demos\Persistant.LoadFromXml.ControlTemplate\TopScrollButtonTemplate.h" />
+    <Content Include="Content\Demos\Persistant.LoadFromXml.ControlTemplate\TreeViewTemplate.cpp" />
+    <Content Include="Content\Demos\Persistant.LoadFromXml.ControlTemplate\TreeViewTemplate.h" />
+    <Content Include="Content\Demos\Persistant.LoadFromXml.ControlTemplate\XmlWindowResourceControlTemplate.xml" />
+    <Content Include="Content\Demos\Persistant.LoadFromXml.ControlTemplate\XmlWindowResourceControlTemplates.xml" />
     <Content Include="Content\Demos\Persistant.LoadFromXml.DataBinding\%28Generated%29Demo.h" />
     <Content Include="Content\Demos\Persistant.LoadFromXml.DataBinding\%28Generated%29DemoPartialClasses.cpp" />
     <Content Include="Content\Demos\Persistant.LoadFromXml.DataBinding\%28Generated%29DemoPartialClasses.h" />
@@ -434,6 +449,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\Demos\Persistant.LoadFromXml.ListViewModel\Codegen.bat" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Content\Demos\Persistant.LoadFromXml.ControlTemplate\Codegen.bat" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
