@@ -508,9 +508,12 @@ WString XmlToString(Ptr<XmlDocument> xml)
 	}
 }
 
+#define RUN_PERFORMANCE_WIZARD
+
 void GuiMain()
 {
 #ifndef VCZH_DEBUG_NO_REFLECTION
+#ifndef RUN_PERFORMANCE_WIZARD
 	UnitTestInGuiMain();
 	{
 		FileStream fileStream(L"Reflection.txt", FileStream::WriteOnly);
@@ -526,44 +529,41 @@ void GuiMain()
 		StreamWriter writer(encoderStream);
 		LogInstanceLoaderManager(writer);
 	}
+#endif
 
 	List<WString> errors;
-	DateTime begin, end;
-	List<vint64_t> timeSpans;
-#define CLOCK\
-	end = DateTime::LocalTime(); \
-	timeSpans.Add(end.totalMilliseconds - begin.totalMilliseconds); \
-	begin = end;\
 
+#ifdef RUN_PERFORMANCE_WIZARD
+	auto resource = GuiResource::LoadFromXml(L"Precompiled.xml", errors);
+	GetInstanceLoaderManager()->SetResource(L"Demo", resource);
+#else
 	WString xmlText;
 	{
 		auto resource = GuiResource::LoadFromXml(L"..\\GacUISrcCodepackedTest\\Resources\\XmlWindowResourceDataBinding.xml", errors);
 		resource->Precompile(errors);
 		auto xml = resource->SaveToXml(true);
 		xmlText = XmlToString(xml);
+
+		FileStream fileStream(L"Precompiled.xml", FileStream::WriteOnly);
+		BomEncoder encoder(BomEncoder::Utf8);
+		EncoderStream stream(fileStream, encoder);
+		StreamWriter writer(stream);
+		writer.WriteString(xmlText);
 	}
 	
-	begin = DateTime::LocalTime();
 	{
 		auto parser = GetParserManager()->GetParser<XmlDocument>(L"XML");
 		auto xml = parser->TypedParse(xmlText, errors);
-		CLOCK;
 		auto resource = GuiResource::LoadFromXml(xml, L"<Unknown>", errors);
-		CLOCK;
 		GetInstanceLoaderManager()->SetResource(L"Demo", resource);
-		CLOCK;
 	}
+#endif
+	DateTime begin = DateTime::LocalTime();
 	demos::MainWindow window;
-	CLOCK;
+	DateTime end = DateTime::LocalTime();
 
 	WString timeString;
-	vint64_t totalTimeSpan = 0;
-	FOREACH_INDEXER(vint64_t, timeSpan, index, timeSpans)
-	{
-		totalTimeSpan += timeSpan;
-		if (index != 0) timeString += L", ";
-		timeString += i64tow(timeSpan);
-	}
+	vint64_t totalTimeSpan = end.totalMilliseconds - begin.totalMilliseconds;
 	window.SetText(window.GetText() + L" " + i64tow(totalTimeSpan) + L": " + timeString + L" milliseconds");
 
 	auto scope = window.GetScope().Obj();
@@ -572,6 +572,8 @@ void GuiMain()
 
 	window.ForceCalculateSizeImmediately();
 	window.MoveToScreenCenter();
+#ifndef RUN_PERFORMANCE_WIZARD
 	GetApplication()->Run(&window);
+#endif
 #endif
 }
