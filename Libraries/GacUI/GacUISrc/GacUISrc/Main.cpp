@@ -532,10 +532,16 @@ void GuiMain()
 #endif
 
 	List<WString> errors;
+	vint64_t loadTime = 0, desTime = 0;
 
 #ifdef RUN_PERFORMANCE_WIZARD
-	auto resource = GuiResource::LoadFromXml(L"Precompiled.xml", errors);
-	GetInstanceLoaderManager()->SetResource(L"Demo", resource);
+	{
+		DateTime begin = DateTime::LocalTime();
+		auto resource = GuiResource::LoadFromXml(L"Precompiled.xml", errors);
+		GetInstanceLoaderManager()->SetResource(L"Demo", resource);
+		DateTime end = DateTime::LocalTime();
+		loadTime = end.totalMilliseconds - begin.totalMilliseconds;
+	}
 #else
 	WString xmlText;
 	{
@@ -562,9 +568,8 @@ void GuiMain()
 	demos::MainWindow window;
 	DateTime end = DateTime::LocalTime();
 
-	WString timeString;
-	vint64_t totalTimeSpan = end.totalMilliseconds - begin.totalMilliseconds;
-	window.SetText(window.GetText() + L" " + i64tow(totalTimeSpan) + L": " + timeString + L" milliseconds");
+	desTime = end.totalMilliseconds - begin.totalMilliseconds;
+	window.SetText(window.GetText() + L" " + i64tow(loadTime) + L", " + i64tow(desTime) + L" milliseconds");
 
 	auto scope = window.GetScope().Obj();
 	CopyFrom(errors, scope->errors, true);
@@ -572,8 +577,8 @@ void GuiMain()
 
 	window.ForceCalculateSizeImmediately();
 	window.MoveToScreenCenter();
-#ifndef RUN_PERFORMANCE_WIZARD
+//#ifndef RUN_PERFORMANCE_WIZARD
 	GetApplication()->Run(&window);
-#endif
+//#endif
 #endif
 }
