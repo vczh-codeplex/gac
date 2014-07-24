@@ -27,6 +27,9 @@
     <Xml Include="XmlWindowResourceControlTemplates.xml">
       <Filter>Resource Files</Filter>
     </Xml>
+    <Xml Include="XmlDocDemo.xml">
+      <Filter>Resource Files</Filter>
+    </Xml>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\Libraries\GacUI\Public\Source\GacUI.cpp">
