@@ -37,7 +37,7 @@ public:
 	{
 		if (repr->instanceName && !fields.Keys().Contains(repr->instanceName.Value()))
 		{
-			auto loadingSource = FindInstanceLoadingSource(env, repr);
+			auto loadingSource = FindInstanceLoadingSource(env->context, repr);
 			fields.Add(repr->instanceName.Value(), repr);
 		}
 		Visit((GuiAttSetterRepr*)repr);
@@ -115,7 +115,7 @@ void SearchAllInstances(const Regex& regexClassName, Ptr<GuiResourcePathResolver
 		}
 
 		Ptr<GuiInstanceEnvironment> env = new GuiInstanceEnvironment(context, resolver);
-		auto loadingSource = FindInstanceLoadingSource(env, context->instance.Obj());
+		auto loadingSource = FindInstanceLoadingSource(env->context, context->instance.Obj());
 		if (!loadingSource.loader) continue;
 		auto typeDescriptor = GetGlobalTypeManager()->GetTypeDescriptor(loadingSource.typeName);
 		if (!typeDescriptor) continue;

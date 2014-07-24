@@ -225,7 +225,7 @@ void SetupMainPanel(GuiControlHost* controlHost, GuiGraphicsComposition* contain
 				for(int i=0;i<30;i++)
 				{
 					listControl->GetItems().Add(new list::TextItem(L"Text Item "+itow(i+1)));
-					listControl->GetItems().SetChecked(i, i%2==0);
+					listControl->GetItems().Get(i)->SetChecked(i % 2 == 0);
 				}
 			}
 			GuiComboBoxListControl* comboBox=g::NewComboBox(listControl);
@@ -250,8 +250,8 @@ void SetupMainPanel(GuiControlHost* controlHost, GuiGraphicsComposition* contain
 				for(int i=0;i<100;i++)
 				{
 					Ptr<list::ListViewItem> item=new list::ListViewItem;
-					item->text=L"List View Item "+itow(i+1);
-					item->largeImage=largeImageData;
+					item->SetText(L"List View Item " + itow(i + 1));
+					item->SetLargeImage(largeImageData);
 					listControl->GetItems().Add(item);
 				}
 			}

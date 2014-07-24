@@ -987,6 +987,7 @@ Native Window
 			vint						x;
 			vint						y;
 			vint						wheel;
+			bool						nonClient;
 		};
 		
 		struct NativeWindowKeyInfo
@@ -1818,14 +1819,16 @@ Resource Image
 		protected:
 			Ptr<INativeImage>				image;
 			vint							frameIndex;
+			WString							filePath;
 
 		public:
 			GuiImageData();
-			GuiImageData(Ptr<INativeImage> _image, vint _frameIndex);
+			GuiImageData(Ptr<INativeImage> _image, vint _frameIndex, const WString& _filePath = L"");
 			~GuiImageData();
 
 			Ptr<INativeImage>				GetImage();
 			vint							GetFrameIndex();
+			const WString&					GetFilePath();
 		};
 
 /***********************************************************************
@@ -1867,6 +1870,7 @@ Resource Structure
 		};
 
 		class DocumentModel;
+		class GuiResourcePathResolver;
 		
 		class GuiResourceItem : public GuiResourceNodeBase, public Description<GuiResourceItem>
 		{
@@ -1911,7 +1915,8 @@ Resource Structure
 			FolderMap								folders;
 
 			void									LoadResourceFolderXml(DelayLoadingList& delayLoadings, const WString& containingFolder, Ptr<parsing::xml::XmlElement> folderXml, collections::List<WString>& errors);
-			void									SaveResourceToXml(Ptr<parsing::xml::XmlElement> xmlParent);
+			void									SaveResourceFolderToXml(Ptr<parsing::xml::XmlElement> xmlParent, bool serializePrecompiledResource);
+			void									PrecompileResourceFolder(Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors);
 		public:
 			GuiResourceFolder();
 			~GuiResourceFolder();
@@ -1950,7 +1955,9 @@ Resource
 
 			static Ptr<GuiResource>					LoadFromXml(const WString& filePath, collections::List<WString>& errors);
 
-			Ptr<parsing::xml::XmlDocument>			SaveToXml();
+			Ptr<parsing::xml::XmlDocument>			SaveToXml(bool serializePrecompiledResource);
+
+			void									Precompile(collections::List<WString>& errors);
 			
 			Ptr<DocumentModel>						GetDocumentByPath(const WString& path);
 			Ptr<GuiImageData>						GetImageByPath(const WString& path);
@@ -2001,8 +2008,10 @@ Resource Type Resolver
 			virtual WString									GetType() = 0;
 			virtual WString									GetPreloadType() = 0;
 			virtual bool									IsDelayLoad() = 0;
+			
+			virtual void									Precompile(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors) = 0;
 
-			virtual Ptr<parsing::xml::XmlElement>			Serialize(Ptr<DescriptableObject> resource) = 0;
+			virtual Ptr<parsing::xml::XmlElement>			Serialize(Ptr<DescriptableObject> resource, bool serializePrecompiledResource) = 0;
 
 			virtual Ptr<DescriptableObject>					ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors) = 0;
 
@@ -3394,6 +3403,7 @@ Basic Construction
 				virtual void								OnChildInserted(GuiGraphicsComposition* child);
 				virtual void								OnChildRemoved(GuiGraphicsComposition* child);
 				virtual void								OnParentChanged(GuiGraphicsComposition* oldParent, GuiGraphicsComposition* newParent);
+				virtual void								OnParentLineChanged();
 				virtual void								OnRenderTargetChanged();
 				
 				virtual void								SetAssociatedControl(controls::GuiControl* control);
@@ -3456,11 +3466,16 @@ Basic Construction
 			class GuiGraphicsSite : public GuiGraphicsComposition, public Description<GuiGraphicsSite>
 			{
 			protected:
+				Rect								previousBounds;
 
 				virtual Rect						GetBoundsInternal(Rect expectedBounds);
+
+				void								UpdatePreviousBounds(Rect bounds);
 			public:
 				GuiGraphicsSite();
 				~GuiGraphicsSite();
+
+				compositions::GuiNotifyEvent		BoundsChanged;
 				
 				bool								IsSizeAffectParent()override;
 				Size								GetMinPreferredClientSize()override;
@@ -3525,14 +3540,11 @@ Basic Compositions
 			{
 			protected:
 				Rect								compositionBounds;
-				Rect								previousBounds;
 				Margin								alignmentToParent;
 				
 			public:
 				GuiBoundsComposition();
 				~GuiBoundsComposition();
-
-				compositions::GuiNotifyEvent		BoundsChanged;
 				
 				Rect								GetPreferredBounds()override;
 				Rect								GetBounds()override;
@@ -3945,66 +3957,42 @@ namespace vl
 	{
 		namespace compositions
 		{
-			class GuiSubComponentMeasurer : public Object, public Description<GuiSubComponentMeasurer>
+			class GuiSharedSizeItemComposition;
+			class GuiSharedSizeRootComposition;
+
+			class GuiSharedSizeItemComposition : public GuiBoundsComposition, public Description<GuiSharedSizeItemComposition>
 			{
-			public:
-				class IMeasuringSource : public virtual IDescriptable, public Description<IMeasuringSource>
-				{
-				public:
-					virtual void						AttachMeasurer(GuiSubComponentMeasurer* value)=0;
-					virtual void						DetachMeasurer(GuiSubComponentMeasurer* value)=0;
-					virtual GuiSubComponentMeasurer*	GetAttachedMeasurer()=0;
-					virtual WString						GetMeasuringCategory()=0;
-					virtual vint						GetSubComponentCount()=0;
-					virtual WString						GetSubComponentName(vint index)=0;
-					virtual GuiGraphicsComposition*		GetSubComponentComposition(vint index)=0;
-					virtual GuiGraphicsComposition*		GetSubComponentComposition(const WString& name)=0;
-					virtual GuiGraphicsComposition*		GetMainComposition()=0;
-					virtual void						SubComponentPreferredMinSizeUpdated()=0;
-				};
-				
-				enum Direction
-				{
-					Horizontal,
-					Vertical,
-				};
-
-				class MeasuringSource : public Object, public IMeasuringSource, public Description<MeasuringSource>
-				{
-					typedef collections::Dictionary<WString, GuiGraphicsComposition*>	SubComponentMap;
-				protected:
-					GuiSubComponentMeasurer*			measurer;
-					WString								measuringCategory;
-					GuiGraphicsComposition*				mainComposition;
-					SubComponentMap						subComponents;
-
-				public:
-					MeasuringSource(const WString& _measuringCategory, GuiGraphicsComposition* _mainComposition);
-					~MeasuringSource();
-
-					bool								AddSubComponent(const WString& name, GuiGraphicsComposition* composition);
-					void								AttachMeasurer(GuiSubComponentMeasurer* value)override;
-					void								DetachMeasurer(GuiSubComponentMeasurer* value)override;
-					GuiSubComponentMeasurer*			GetAttachedMeasurer()override;
-					WString								GetMeasuringCategory()override;
-					vint								GetSubComponentCount()override;
-					WString								GetSubComponentName(vint index)override;
-					GuiGraphicsComposition*				GetSubComponentComposition(vint index)override;
-					GuiGraphicsComposition*				GetSubComponentComposition(const WString& name)override;
-					GuiGraphicsComposition*				GetMainComposition()override;
-					void								SubComponentPreferredMinSizeUpdated()override;
-				};
 			protected:
-				typedef collections::List<IMeasuringSource*>	MeasuringSourceList;
+				GuiSharedSizeRootComposition*						parentRoot;
+				WString												group;
+				bool												sharedWidth;
+				bool												sharedHeight;
 
-				MeasuringSourceList						measuringSources;
+				void												Update();
+				void												OnParentLineChanged()override;
 			public:
-				GuiSubComponentMeasurer();
-				~GuiSubComponentMeasurer();
+				GuiSharedSizeItemComposition();
+				~GuiSharedSizeItemComposition();
+				
+				const WString&										GetGroup();
+				void												SetGroup(const WString& value);
+				bool												GetSharedWidth();
+				void												SetSharedWidth(bool value);
+				bool												GetSharedHeight();
+				void												SetSharedHeight(bool value);
+			};
 
-				bool									AttachMeasuringSource(IMeasuringSource* value);
-				bool									DetachMeasuringSource(IMeasuringSource* value);
-				void									MeasureAndUpdate(const WString& measuringCategory, Direction direction);
+			class GuiSharedSizeRootComposition :public GuiBoundsComposition, public Description<GuiSharedSizeRootComposition>
+			{
+				friend class GuiSharedSizeItemComposition;
+			protected:
+				collections::List<GuiSharedSizeItemComposition*>	childItems;
+
+			public:
+				GuiSharedSizeRootComposition();
+				~GuiSharedSizeRootComposition();
+
+				void												ForceCalculateSizeImmediately()override;
 			};
 		}
 	}
@@ -4378,26 +4366,8 @@ Basic Construction
 					return dynamic_cast<T*>(QueryService(T::Identifier));
 				}
 			};
-			
-			class GuiInstanceRootObject abstract : public Description<GuiInstanceRootObject>
-			{
-				typedef collections::List<Ptr<description::IValueSubscription>>		SubscriptionList;
-			protected:
-				SubscriptionList								subscriptions;
 
-				void											ClearSubscriptions();
-			public:
-				Ptr<description::IValueSubscription>			AddSubscription(Ptr<description::IValueSubscription> subscription);
-				bool											RemoveSubscription(Ptr<description::IValueSubscription> subscription);
-				bool											ContainsSubscription(Ptr<description::IValueSubscription> subscription);
-			};
-
-			class GuiCustomControl : public GuiControl, public GuiInstanceRootObject, public Description<GuiCustomControl>
-			{
-			public:
-				GuiCustomControl(IStyleController* _styleController);
-				~GuiCustomControl();
-			};
+			class GuiInstanceRootObject;
 
 			class GuiComponent : public Object, public Description<GuiComponent>
 			{
@@ -4405,8 +4375,38 @@ Basic Construction
 				GuiComponent();
 				~GuiComponent();
 
-				virtual void							Attach(GuiControlHost* controlHost);
-				virtual void							Detach(GuiControlHost* controlHost);
+				virtual void							Attach(GuiInstanceRootObject* rootObject);
+				virtual void							Detach(GuiInstanceRootObject* rootObject);
+			};
+			
+			class GuiInstanceRootObject abstract : public Description<GuiInstanceRootObject>
+			{
+				typedef collections::List<Ptr<description::IValueSubscription>>		SubscriptionList;
+			protected:
+				collections::SortedList<GuiComponent*>			components;
+				SubscriptionList								subscriptions;
+
+				void											ClearSubscriptions();
+				void											ClearComponents();
+				void											FinalizeInstance();
+			public:
+				GuiInstanceRootObject();
+				~GuiInstanceRootObject();
+
+				Ptr<description::IValueSubscription>			AddSubscription(Ptr<description::IValueSubscription> subscription);
+				bool											RemoveSubscription(Ptr<description::IValueSubscription> subscription);
+				bool											ContainsSubscription(Ptr<description::IValueSubscription> subscription);
+
+				bool											AddComponent(GuiComponent* component);
+				bool											RemoveComponent(GuiComponent* component);
+				bool											ContainsComponent(GuiComponent* component);
+			};
+
+			class GuiCustomControl : public GuiControl, public GuiInstanceRootObject, public Description<GuiCustomControl>
+			{
+			public:
+				GuiCustomControl(IStyleController* _styleController);
+				~GuiCustomControl();
 			};
 
 			template<typename T>
@@ -4899,15 +4899,14 @@ namespace vl
 Control Host
 ***********************************************************************/
 
-			class GuiControlHost : public GuiControl, public GuiInstanceRootObject, private INativeWindowListener, public Description<GuiControlHost>
+			class GuiControlHost : public GuiControl, public GuiInstanceRootObject, protected INativeWindowListener, public Description<GuiControlHost>
 			{
 			protected:
 				compositions::GuiGraphicsHost*					host;
-				collections::SortedList<GuiComponent*>			components;
 
 				virtual void									OnNativeWindowChanged();
 				virtual void									OnVisualStatusChanged();
-			private:
+			protected:
 				static const vint								TooltipDelayOpenTime=500;
 				static const vint								TooltipDelayCloseTime=500;
 				static const vint								TooltipDelayLifeTime=5000;
@@ -4964,10 +4963,6 @@ Control Host
 				bool											GetTopMost();
 				void											SetTopMost(bool topmost);
 
-				bool											AddComponent(GuiComponent* component);
-				bool											RemoveComponent(GuiComponent* component);
-				bool											ContainsComponent(GuiComponent* component);
-
 				compositions::IGuiShortcutKeyManager*			GetShortcutKeyManager();
 				void											SetShortcutKeyManager(compositions::IGuiShortcutKeyManager* value);
 				compositions::GuiGraphicsAnimationManager*		GetAnimationManager();
@@ -5004,6 +4999,7 @@ Window
 				public:
 					virtual void						AttachWindow(GuiWindow* _window)=0;
 					virtual void						InitializeNativeWindowProperties()=0;
+					virtual void						SetSizeState(INativeWindow::WindowSizeState value)=0;
 					virtual bool						GetMaximizedBox()=0;
 					virtual void						SetMaximizedBox(bool visible)=0;
 					virtual bool						GetMinimizedBox()=0;
@@ -5028,6 +5024,7 @@ Window
 
 					void								AttachWindow(GuiWindow* _window)override;
 					void								InitializeNativeWindowProperties()override;
+					void								SetSizeState(INativeWindow::WindowSizeState value)override;
 					bool								GetMaximizedBox()override;
 					void								SetMaximizedBox(bool visible)override;
 					bool								GetMinimizedBox()override;
@@ -5043,7 +5040,8 @@ Window
 				};
 			protected:
 				IStyleController*						styleController;
-
+				
+				void									Moved()override;
 				void									OnNativeWindowChanged()override;
 				void									OnVisualStatusChanged()override;
 				virtual void							MouseClickedOnOtherWindow(GuiWindow* window);
@@ -6089,6 +6087,7 @@ TextList Style Provider
 					public:
 						virtual GuiSelectableButton::IStyleController*		CreateBackgroundStyleController()=0;
 						virtual GuiSelectableButton::IStyleController*		CreateBulletStyleController()=0;
+						virtual Color										GetTextColor()=0;
 					};
 
 					class ITextItemView : public virtual GuiListControl::IItemPrimaryTextView, public Description<ITextItemView>
@@ -6150,8 +6149,10 @@ TextList Data Source
 				{
 					friend class TextItemProvider;
 				protected:
+					TextItemProvider*							owner;
 					WString										text;
 					bool										checked;
+
 				public:
 					TextItem();
 					TextItem(const WString& _text, bool _checked=false);
@@ -6161,7 +6162,10 @@ TextList Data Source
 					bool										operator!=(const TextItem& value)const;
 					
 					const WString&								GetText();
+					void										SetText(const WString& value);
+
 					bool										GetChecked();
+					void										SetChecked(bool value);
 				};
 
 				class TextItemProvider
@@ -6170,9 +6174,13 @@ TextList Data Source
 					, protected GuiListControl::IItemBindingView
 					, public Description<TextItemProvider>
 				{
+					friend class TextItem;
 					friend class GuiTextList;
 				protected:
 					GuiTextList*								listControl;
+
+					void										AfterInsert(vint item, const Ptr<TextItem>& value)override;
+					void										BeforeRemove(vint item, const Ptr<TextItem>& value)override;
 
 					bool										ContainsPrimaryText(vint itemIndex)override;
 					WString										GetPrimaryTextViewText(vint itemIndex)override;
@@ -6183,9 +6191,6 @@ TextList Data Source
 				public:
 					TextItemProvider();
 					~TextItemProvider();
-					
-					void										SetText(vint itemIndex, const WString& value);
-					void										SetChecked(vint itemIndex, bool value);
 
 					IDescriptable*								RequestView(const WString& identifier)override;
 					void										ReleaseView(IDescriptable* view)override;
@@ -6328,7 +6333,6 @@ MenuButton
 			class GuiMenuButton : public GuiSelectableButton, public Description<GuiMenuButton>
 			{
 			public:
-				static const wchar_t* const				MenuItemSubComponentMeasuringCategoryName;
 				class IStyleController : public virtual GuiSelectableButton::IStyleController, public Description<IStyleController>
 				{
 				public:
@@ -6338,7 +6342,6 @@ MenuButton
 					virtual GuiButton*					GetSubMenuHost()=0;
 					virtual void						SetImage(Ptr<GuiImageData> value)=0;
 					virtual void						SetShortcutText(const WString& value)=0;
-					virtual compositions::GuiSubComponentMeasurer::IMeasuringSource*	GetMeasuringSource()=0;
 				};
 			protected:
 				IStyleController*						styleController;
@@ -6916,35 +6919,77 @@ ListView
 
 			namespace list
 			{
+				class ListViewSubItems : public ItemsBase<WString>
+				{
+					friend class ListViewItem;
+				protected:
+					ListViewItem*									owner;
+					
+					void											NotifyUpdateInternal(vint start, vint count, vint newCount)override;
+				public:
+				};
+
 				class ListViewItem : public Object, public Description<ListViewItem>
 				{
-				public:
+					friend class ListViewSubItems;
+					friend class ListViewItemProvider;
+				protected:
+					ListViewItemProvider*							owner;
+					ListViewSubItems								subItems;
 					Ptr<GuiImageData>								smallImage;
 					Ptr<GuiImageData>								largeImage;
 					WString											text;
-					collections::List<WString>						subItems;
 					description::Value								tag;
+					
+					void											NotifyUpdate();
+				public:
+					ListViewItem();
+					
+					ListViewSubItems&								GetSubItems();
+					Ptr<GuiImageData>								GetSmallImage();
+					void											SetSmallImage(Ptr<GuiImageData> value);
+					Ptr<GuiImageData>								GetLargeImage();
+					void											SetLargeImage(Ptr<GuiImageData> value);
+					const WString&									GetText();
+					void											SetText(const WString& value);
+					description::Value								GetTag();
+					void											SetTag(const description::Value& value);
 				};
 				
 				class ListViewColumn : public Object, public Description<ListViewColumn>
 				{
-				public:
+					friend class ListViewColumns;
+				protected:
+					ListViewColumns*								owner;
 					WString											text;
 					WString											textProperty;
 					vint											size;
 					GuiMenu*										dropdownPopup;
 					GuiListViewColumnHeader::ColumnSortingState		sortingState;
-
+					
+					void											NotifyUpdate();
+				public:
 					ListViewColumn(const WString& _text=L"", vint _size=160);
+					
+					const WString&									GetText();
+					void											SetText(const WString& value);
+					const WString&									GetTextProperty();
+					void											SetTextProperty(const WString& value);
+					vint											GetSize();
+					void											SetSize(vint value);
+					GuiMenu*										GetDropdownPopup();
+					void											SetDropdownPopup(GuiMenu* value);
+					GuiListViewColumnHeader::ColumnSortingState		GetSortingState();
+					void											SetSortingState(GuiListViewColumnHeader::ColumnSortingState value);
 				};
 
 				class ListViewDataColumns : public ItemsBase<vint>
 				{
 					friend class ListViewItemProvider;
 				protected:
-					ListViewItemProvider*						itemProvider;
+					ListViewItemProvider*							itemProvider;
 
-					void NotifyUpdateInternal(vint start, vint count, vint newCount)override;
+					void											NotifyUpdateInternal(vint start, vint count, vint newCount)override;
 				public:
 					ListViewDataColumns();
 					~ListViewDataColumns();
@@ -6952,11 +6997,14 @@ ListView
 				
 				class ListViewColumns : public ItemsBase<Ptr<ListViewColumn>>
 				{
+					friend class ListViewColumn;
 					friend class ListViewItemProvider;
 				protected:
-					ListViewItemProvider*						itemProvider;
+					ListViewItemProvider*							itemProvider;
 
-					void NotifyUpdateInternal(vint start, vint count, vint newCount)override;
+					void											AfterInsert(vint index, const Ptr<ListViewColumn>& value)override;
+					void											BeforeRemove(vint index, const Ptr<ListViewColumn>& value)override;
+					void											NotifyUpdateInternal(vint start, vint count, vint newCount)override;
 				public:
 					ListViewColumns();
 					~ListViewColumns();
@@ -6969,6 +7017,7 @@ ListView
 					, protected GuiListControl::IItemBindingView
 					, public Description<ListViewItemProvider>
 				{
+					friend class ListViewItem;
 					friend class ListViewColumns;
 					friend class ListViewDataColumns;
 					typedef collections::List<ListViewColumnItemArranger::IColumnItemViewCallback*>		ColumnItemViewCallbackList;
@@ -6976,6 +7025,9 @@ ListView
 					ListViewDataColumns									dataColumns;
 					ListViewColumns										columns;
 					ColumnItemViewCallbackList							columnItemViewCallbacks;
+
+					void												AfterInsert(vint index, const Ptr<ListViewItem>& value)override;
+					void												BeforeRemove(vint index, const Ptr<ListViewItem>& value)override;
 
 					bool												ContainsPrimaryText(vint itemIndex)override;
 					WString												GetPrimaryTextViewText(vint itemIndex)override;
@@ -10697,8 +10749,8 @@ namespace vl
 				GuiToolstripCommand();
 				~GuiToolstripCommand();
 
-				void										Attach(GuiControlHost* controlHost)override;
-				void										Detach(GuiControlHost* controlHost)override;
+				void										Attach(GuiInstanceRootObject* rootObject)override;
+				void										Detach(GuiInstanceRootObject* rootObject)override;
 
 				compositions::GuiNotifyEvent				Executed;
 
@@ -10765,7 +10817,6 @@ Toolstrip Item Collection
 			protected:
 				IContentCallback*							contentCallback;
 				compositions::GuiStackComposition*			stackComposition;
-				Ptr<compositions::GuiSubComponentMeasurer>	subComponentMeasurer;
 
 				void										InvokeUpdateLayout();
 				void										OnInterestingMenuButtonPropertyChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
@@ -10776,7 +10827,7 @@ Toolstrip Item Collection
 				void										AfterInsert(vint index, GuiControl* const& child)override;
 				void										AfterRemove(vint index, vint count)override;
 			public:
-				GuiToolstripCollection(IContentCallback* _contentCallback, compositions::GuiStackComposition* _stackComposition, Ptr<compositions::GuiSubComponentMeasurer> _subComponentMeasurer);
+				GuiToolstripCollection(IContentCallback* _contentCallback, compositions::GuiStackComposition* _stackComposition);
 				~GuiToolstripCollection();
 			};
 
@@ -10828,9 +10879,9 @@ Toolstrip Container
 			class GuiToolstripMenu : public GuiMenu, protected GuiToolstripCollection::IContentCallback,  Description<GuiToolstripMenu>
 			{
 			protected:
+				compositions::GuiSharedSizeRootComposition*	sharedSizeRootComposition;
 				compositions::GuiStackComposition*			stackComposition;
 				Ptr<GuiToolstripCollection>					toolstripItems;
-				Ptr<compositions::GuiSubComponentMeasurer>	subComponentMeasurer;
 				Ptr<GuiToolstripBuilder>					builder;
 
 				void										UpdateLayout()override;
@@ -11623,9 +11674,9 @@ Button Configuration
 				compositions::GuiCellComposition*			splitterComposition;
 				elements::GuiImageFrameElement*				imageElement;
 				elements::GuiSolidLabelElement*				textElement;
-				compositions::GuiBoundsComposition*			textComposition;
+				compositions::GuiSharedSizeItemComposition*	textComposition;
 				elements::GuiSolidLabelElement*				shortcutElement;
-				compositions::GuiBoundsComposition*			shortcutComposition;
+				compositions::GuiSharedSizeItemComposition*	shortcutComposition;
 				elements::GuiPolygonElement*				subMenuArrowElement;
 				compositions::GuiGraphicsComposition*		subMenuArrowComposition;
 				compositions::GuiBoundsComposition*			mainComposition;
@@ -11673,6 +11724,7 @@ Helper Functions
 			extern Color									Win7GetSystemTextColor(bool enabled);
 			extern void										Win7SetFont(elements::GuiSolidLabelElement* element, compositions::GuiBoundsComposition* composition, const FontProperties& fontProperties);
 			extern void										Win7CreateSolidLabelElement(elements::GuiSolidLabelElement*& element, compositions::GuiBoundsComposition*& composition, Alignment horizontal, Alignment vertical);
+			extern void										Win7CreateSolidLabelElement(elements::GuiSolidLabelElement*& element, compositions::GuiSharedSizeItemComposition*& composition, const WString& group, Alignment horizontal, Alignment vertical);
 			extern elements::text::ColorEntry				Win7GetTextBoxTextColor();
 		}
 	}
@@ -12024,32 +12076,19 @@ Menu Button
 				controls::GuiButton*										GetSubMenuHost()override;
 				void														SetImage(Ptr<GuiImageData> value)override;
 				void														SetShortcutText(const WString& value)override;
-				compositions::GuiSubComponentMeasurer::IMeasuringSource*	GetMeasuringSource()override;
 				void														Transfer(controls::GuiButton::ControlState value)override;
 			};
 			
 			class Win7MenuItemButtonStyle : public Object, public virtual controls::GuiMenuButton::IStyleController, public Description<Win7MenuItemButtonStyle>
 			{
 			protected:
-				class MeasuringSource : public compositions::GuiSubComponentMeasurer::MeasuringSource
-				{
-				protected:
-					Win7MenuItemButtonStyle*				style;
-				public:
-					MeasuringSource(Win7MenuItemButtonStyle* _style);
-					~MeasuringSource();
+				Win7MenuItemButtonElements									elements;
+				controls::GuiButton::ControlState							controlStyle;
+				bool														isVisuallyEnabled;
+				bool														isSelected;
+				bool														isOpening;
 
-					void									SubComponentPreferredMinSizeUpdated()override;
-				};
-
-				Win7MenuItemButtonElements					elements;
-				Ptr<MeasuringSource>						measuringSource;
-				controls::GuiButton::ControlState			controlStyle;
-				bool										isVisuallyEnabled;
-				bool										isSelected;
-				bool										isOpening;
-
-				void										TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool selected, bool opening);
+				void														TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool selected, bool opening);
 			public:
 				Win7MenuItemButtonStyle();
 				~Win7MenuItemButtonStyle();
@@ -12067,7 +12106,6 @@ Menu Button
 				controls::GuiButton*										GetSubMenuHost()override;
 				void														SetImage(Ptr<GuiImageData> value)override;
 				void														SetShortcutText(const WString& value)override;
-				compositions::GuiSubComponentMeasurer::IMeasuringSource*	GetMeasuringSource()override;
 				void														Transfer(controls::GuiButton::ControlState value)override;
 			};
 			
@@ -12285,7 +12323,6 @@ Toolstrip Button
 				controls::GuiButton*										GetSubMenuHost()override;
 				void														SetImage(Ptr<GuiImageData> value)override;
 				void														SetShortcutText(const WString& value)override;
-				compositions::GuiSubComponentMeasurer::IMeasuringSource*	GetMeasuringSource()override;
 				void														Transfer(controls::GuiButton::ControlState value)override;
 			};
 
@@ -12383,9 +12420,9 @@ Scroll
 			class Win7ProgressBarStyle : public Object, public virtual controls::GuiScroll::IStyleController, public Description<Win7ProgressBarStyle>
 			{
 			protected:
-				vint											totalSize;
-				vint											pageSize;
-				vint											position;
+				vint										totalSize;
+				vint										pageSize;
+				vint										position;
 				compositions::GuiBoundsComposition*			boundsComposition;
 				compositions::GuiBoundsComposition*			containerComposition;
 				compositions::GuiPartialViewComposition*	progressComposition;
@@ -12615,7 +12652,6 @@ List Control Buttons
 				controls::GuiButton*										GetSubMenuHost()override;
 				void														SetImage(Ptr<GuiImageData> value)override;
 				void														SetShortcutText(const WString& value)override;
-				compositions::GuiSubComponentMeasurer::IMeasuringSource*	GetMeasuringSource()override;
 				void														SetColumnSortingState(controls::GuiListViewColumnHeader::ColumnSortingState value)override;
 			};
 			
@@ -12673,7 +12709,6 @@ ComboBox
 				controls::GuiButton*										GetSubMenuHost()override;
 				void														SetImage(Ptr<GuiImageData> value)override;
 				void														SetShortcutText(const WString& value)override;
-				compositions::GuiSubComponentMeasurer::IMeasuringSource*	GetMeasuringSource()override;
 				void														SetCommandExecutor(controls::GuiComboBoxBase::ICommandExecutor* value)override;
 				void														OnItemSelected()override;
 			};
@@ -12691,6 +12726,7 @@ List
 
 				controls::GuiSelectableButton::IStyleController*		CreateBackgroundStyleController()override;
 				controls::GuiSelectableButton::IStyleController*		CreateBulletStyleController()override;
+				Color													GetTextColor()override;
 			};
 			
 			class Win7CheckTextListProvider : public Win7TextListProvider, public Description<Win7CheckTextListProvider>
@@ -12878,9 +12914,9 @@ Button Configuration
 				compositions::GuiCellComposition*			splitterComposition;
 				elements::GuiImageFrameElement*				imageElement;
 				elements::GuiSolidLabelElement*				textElement;
-				compositions::GuiBoundsComposition*			textComposition;
+				compositions::GuiSharedSizeItemComposition*	textComposition;
 				elements::GuiSolidLabelElement*				shortcutElement;
-				compositions::GuiBoundsComposition*			shortcutComposition;
+				compositions::GuiSharedSizeItemComposition*	shortcutComposition;
 				elements::GuiPolygonElement*				subMenuArrowElement;
 				compositions::GuiGraphicsComposition*		subMenuArrowComposition;
 				compositions::GuiBoundsComposition*			mainComposition;
@@ -12928,6 +12964,7 @@ Helper Functions
 			extern Color									Win8GetMenuSplitterColor();
 			extern void										Win8SetFont(elements::GuiSolidLabelElement* element, compositions::GuiBoundsComposition* composition, const FontProperties& fontProperties);
 			extern void										Win8CreateSolidLabelElement(elements::GuiSolidLabelElement*& element, compositions::GuiBoundsComposition*& composition, Alignment horizontal, Alignment vertical);
+			extern void										Win8CreateSolidLabelElement(elements::GuiSolidLabelElement*& element, compositions::GuiSharedSizeItemComposition*& composition, const WString& group, Alignment horizontal, Alignment vertical);
 			extern elements::text::ColorEntry				Win8GetTextBoxTextColor();
 		}
 	}
@@ -13279,32 +13316,19 @@ Menu Button
 				controls::GuiButton*										GetSubMenuHost()override;
 				void														SetImage(Ptr<GuiImageData> value)override;
 				void														SetShortcutText(const WString& value)override;
-				compositions::GuiSubComponentMeasurer::IMeasuringSource*	GetMeasuringSource()override;
 				void														Transfer(controls::GuiButton::ControlState value)override;
 			};
 			
 			class Win8MenuItemButtonStyle : public Object, public virtual controls::GuiMenuButton::IStyleController, public Description<Win8MenuItemButtonStyle>
 			{
 			protected:
-				class MeasuringSource : public compositions::GuiSubComponentMeasurer::MeasuringSource
-				{
-				protected:
-					Win8MenuItemButtonStyle*				style;
-				public:
-					MeasuringSource(Win8MenuItemButtonStyle* _style);
-					~MeasuringSource();
+				Win8MenuItemButtonElements									elements;
+				controls::GuiButton::ControlState							controlStyle;
+				bool														isVisuallyEnabled;
+				bool														isSelected;
+				bool														isOpening;
 
-					void									SubComponentPreferredMinSizeUpdated()override;
-				};
-
-				Win8MenuItemButtonElements					elements;
-				Ptr<MeasuringSource>						measuringSource;
-				controls::GuiButton::ControlState			controlStyle;
-				bool										isVisuallyEnabled;
-				bool										isSelected;
-				bool										isOpening;
-
-				void										TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool selected, bool opening);
+				void														TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool selected, bool opening);
 			public:
 				Win8MenuItemButtonStyle();
 				~Win8MenuItemButtonStyle();
@@ -13322,7 +13346,6 @@ Menu Button
 				controls::GuiButton*										GetSubMenuHost()override;
 				void														SetImage(Ptr<GuiImageData> value)override;
 				void														SetShortcutText(const WString& value)override;
-				compositions::GuiSubComponentMeasurer::IMeasuringSource*	GetMeasuringSource()override;
 				void														Transfer(controls::GuiButton::ControlState value)override;
 			};
 			
@@ -13511,7 +13534,6 @@ Toolstrip Button
 				controls::GuiButton*										GetSubMenuHost()override;
 				void														SetImage(Ptr<GuiImageData> value)override;
 				void														SetShortcutText(const WString& value)override;
-				compositions::GuiSubComponentMeasurer::IMeasuringSource*	GetMeasuringSource()override;
 				void														Transfer(controls::GuiButton::ControlState value)override;
 			};
 
@@ -13660,7 +13682,7 @@ ScrollView
 
 				controls::GuiScroll::IStyleController*		CreateHorizontalScrollStyle()override;
 				controls::GuiScroll::IStyleController*		CreateVerticalScrollStyle()override;
-				vint											GetDefaultScrollSize()override;
+				vint										GetDefaultScrollSize()override;
 				compositions::GuiGraphicsComposition*		InstallBackground(compositions::GuiBoundsComposition* boundsComposition)override;
 			};
 
@@ -13802,7 +13824,6 @@ ComboBox
 				controls::GuiButton*										GetSubMenuHost()override;
 				void														SetImage(Ptr<GuiImageData> value)override;
 				void														SetShortcutText(const WString& value)override;
-				compositions::GuiSubComponentMeasurer::IMeasuringSource*	GetMeasuringSource()override;
 				void														SetCommandExecutor(controls::GuiComboBoxBase::ICommandExecutor* value)override;
 				void														OnItemSelected()override;
 			};
@@ -13820,6 +13841,7 @@ List
 
 				controls::GuiSelectableButton::IStyleController*		CreateBackgroundStyleController()override;
 				controls::GuiSelectableButton::IStyleController*		CreateBulletStyleController()override;
+				Color													GetTextColor()override;
 			};
 			
 			class Win8CheckTextListProvider : public Win8TextListProvider, public Description<Win8CheckTextListProvider>
@@ -13971,11 +13993,56 @@ Control Template
 				GuiLabelTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
 			};
 
+			class GuiSinglelineTextBoxTemplate : public GuiControlTemplate, public Description<GuiSinglelineTextBoxTemplate>
+			{
+			public:
+				GuiSinglelineTextBoxTemplate();
+				~GuiSinglelineTextBoxTemplate();
+
+#define GuiSinglelineTextBoxTemplate_PROPERTIES(F)\
+				F(GuiSinglelineTextBoxTemplate, elements::text::ColorEntry, TextColor)\
+				F(GuiSinglelineTextBoxTemplate, Color, CaretColor)\
+
+				GuiSinglelineTextBoxTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
+			};
+
+			class GuiMenuTemplate : public GuiControlTemplate, public Description<GuiMenuTemplate>
+			{
+			public:
+				GuiMenuTemplate();
+				~GuiMenuTemplate();
+			};
+
+			enum class BoolOption
+			{
+				AlwaysTrue,
+				AlwaysFalse,
+				Customizable,
+			};
+
 			class GuiWindowTemplate : public GuiControlTemplate, public Description<GuiWindowTemplate>
 			{
 			public:
 				GuiWindowTemplate();
 				~GuiWindowTemplate();
+
+#define GuiWindowTemplate_PROPERTIES(F)\
+				F(GuiWindowTemplate, BoolOption, MaximizedBoxOption)\
+				F(GuiWindowTemplate, BoolOption, MinimizedBoxOption)\
+				F(GuiWindowTemplate, BoolOption, BorderOption)\
+				F(GuiWindowTemplate, BoolOption, SizeBoxOption)\
+				F(GuiWindowTemplate, BoolOption, IconVisibleOption)\
+				F(GuiWindowTemplate, BoolOption, TitleBarOption)\
+				F(GuiWindowTemplate, bool, MaximizedBox)\
+				F(GuiWindowTemplate, bool, MinimizedBox)\
+				F(GuiWindowTemplate, bool, Border)\
+				F(GuiWindowTemplate, bool, SizeBox)\
+				F(GuiWindowTemplate, bool, IconVisible)\
+				F(GuiWindowTemplate, bool, TitleBar)\
+				F(GuiWindowTemplate, bool, CustomizedBorder)\
+				F(GuiWindowTemplate, bool, Maximized)\
+
+				GuiWindowTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
 			};
 
 			class GuiButtonTemplate : public GuiControlTemplate, public Description<GuiButtonTemplate>
@@ -14017,6 +14084,162 @@ Control Template
 				F(GuiToolstripButtonTemplate, WString, ShortcutText)\
 
 				GuiToolstripButtonTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
+			};
+
+			class GuiListViewColumnHeaderTemplate :public GuiToolstripButtonTemplate, public Description<GuiListViewColumnHeaderTemplate>
+			{
+			public:
+				GuiListViewColumnHeaderTemplate();
+				~GuiListViewColumnHeaderTemplate();
+
+#define GuiListViewColumnHeaderTemplate_PROPERTIES(F)\
+				F(GuiListViewColumnHeaderTemplate, controls::GuiListViewColumnHeader::ColumnSortingState, SortingState)\
+
+				GuiListViewColumnHeaderTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
+			};
+
+			class GuiComboBoxTemplate : public GuiToolstripButtonTemplate, public Description<GuiComboBoxTemplate>
+			{
+			public:
+				GuiComboBoxTemplate();
+				~GuiComboBoxTemplate();
+
+#define GuiComboBoxTemplate_PROPERTIES(F)\
+				F(GuiComboBoxTemplate, controls::GuiComboBoxBase::ICommandExecutor*, Commands)\
+
+				GuiComboBoxTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
+			};
+
+			class GuiDatePickerTemplate : public GuiControlTemplate, public Description<GuiDatePickerTemplate>
+			{
+			public:
+				GuiDatePickerTemplate();
+				~GuiDatePickerTemplate();
+
+#define GuiDatePickerTemplate_PROPERTIES(F)\
+				F(GuiDatePickerTemplate, WString, DateButtonTemplate)\
+				F(GuiDatePickerTemplate, WString, DateTextListTemplate)\
+				F(GuiDatePickerTemplate, WString, DateComboBoxTemplate)\
+				F(GuiDatePickerTemplate, Color, BackgroundColor)\
+				F(GuiDatePickerTemplate, Color, PrimaryTextColor)\
+				F(GuiDatePickerTemplate, Color, SecondaryTextColor)\
+
+				GuiDatePickerTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
+			};
+
+			class GuiDateComboBoxTemplate : public GuiComboBoxTemplate, public Description<GuiDateComboBoxTemplate>
+			{
+			public:
+				GuiDateComboBoxTemplate();
+				~GuiDateComboBoxTemplate();
+
+#define GuiDateComboBoxTemplate_PROPERTIES(F)\
+				F(GuiDateComboBoxTemplate, WString, DatePickerTemplate)\
+
+				GuiDateComboBoxTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
+			};
+
+			class GuiScrollTemplate : public GuiControlTemplate, public Description<GuiScrollTemplate>
+			{
+			public:
+				GuiScrollTemplate();
+				~GuiScrollTemplate();
+
+#define GuiScrollTemplate_PROPERTIES(F)\
+				F(GuiScrollTemplate, controls::GuiScroll::ICommandExecutor*, Commands)\
+				F(GuiScrollTemplate, vint, TotalSize)\
+				F(GuiScrollTemplate, vint, PageSize)\
+				F(GuiScrollTemplate, vint, Position)\
+
+				GuiScrollTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
+			};
+
+			class GuiScrollViewTemplate : public GuiControlTemplate, public Description<GuiScrollViewTemplate>
+			{
+			public:
+				GuiScrollViewTemplate();
+				~GuiScrollViewTemplate();
+
+#define GuiScrollViewTemplate_PROPERTIES(F)\
+				F(GuiScrollViewTemplate, WString, HScrollTemplate)\
+				F(GuiScrollViewTemplate, WString, VScrollTemplate)\
+				F(GuiScrollViewTemplate, vint, DefaultScrollSize)\
+
+				GuiScrollViewTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
+			};
+
+			class GuiMultilineTextBoxTemplate : public GuiScrollViewTemplate, public Description<GuiMultilineTextBoxTemplate>
+			{
+			public:
+				GuiMultilineTextBoxTemplate();
+				~GuiMultilineTextBoxTemplate();
+
+#define GuiMultilineTextBoxTemplate_PROPERTIES(F)\
+				F(GuiMultilineTextBoxTemplate, elements::text::ColorEntry, TextColor)\
+				F(GuiMultilineTextBoxTemplate, Color, CaretColor)\
+
+				GuiMultilineTextBoxTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
+			};
+
+			class GuiTextListTemplate : public GuiScrollViewTemplate, public Description<GuiTextListTemplate>
+			{
+			public:
+				GuiTextListTemplate();
+				~GuiTextListTemplate();
+
+#define GuiTextListTemplate_PROPERTIES(F)\
+				F(GuiTextListTemplate, WString, BackgroundTemplate)\
+				F(GuiTextListTemplate, WString, BulletTemplate)\
+				F(GuiTextListTemplate, Color, TextColor)\
+
+				GuiTextListTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
+			};
+
+			class GuiListViewTemplate : public GuiScrollViewTemplate, public Description<GuiListViewTemplate>
+			{
+			public:
+				GuiListViewTemplate();
+				~GuiListViewTemplate();
+
+#define GuiListViewTemplate_PROPERTIES(F)\
+				F(GuiListViewTemplate, WString, BackgroundTemplate)\
+				F(GuiListViewTemplate, WString, ColumnHeaderTemplate)\
+				F(GuiListViewTemplate, Color, PrimaryTextColor)\
+				F(GuiListViewTemplate, Color, SecondaryTextColor)\
+				F(GuiListViewTemplate, Color, ItemSeparatorColor)\
+
+				GuiListViewTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
+			};
+
+			class GuiTreeViewTemplate : public GuiScrollViewTemplate, public Description<GuiTreeViewTemplate>
+			{
+			public:
+				GuiTreeViewTemplate();
+				~GuiTreeViewTemplate();
+
+#define GuiTreeViewTemplate_PROPERTIES(F)\
+				F(GuiTreeViewTemplate, WString, BackgroundTemplate)\
+				F(GuiTreeViewTemplate, WString, ExpandingDecoratorTemplate)\
+				F(GuiTreeViewTemplate, Color, TextColor)\
+
+				GuiTreeViewTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
+			};
+
+			class GuiTabTemplate : public GuiControlTemplate, public Description<GuiTabTemplate>
+			{
+			public:
+				GuiTabTemplate();
+				~GuiTabTemplate();
+
+#define GuiTabTemplate_PROPERTIES(F)\
+				F(GuiTabTemplate, WString, HeaderTemplate)\
+				F(GuiTabTemplate, WString, DropdownTemplate)\
+				F(GuiTabTemplate, WString, MenuTemplate)\
+				F(GuiTabTemplate, WString, MenuItemTemplate)\
+				F(GuiTabTemplate, vint, HeaderPadding)\
+				F(GuiTabTemplate, compositions::GuiGraphicsComposition*, HeaderComposition)\
+
+				GuiTabTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
 			};
 
 /***********************************************************************
@@ -14084,21 +14307,24 @@ Control Template
 			class GuiControlTemplate_StyleProvider
 				: public Object
 				, public virtual controls::GuiControl::IStyleController
+				, public virtual controls::GuiControl::IStyleProvider
 				, public Description<GuiControlTemplate_StyleProvider>
 			{
 			protected:
-				GuiControlTemplate*									controlTemplate;
+				controls::GuiControl::IStyleController*							associatedStyleController;
+				GuiControlTemplate*												controlTemplate;
 
 			public:
 				GuiControlTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
 				~GuiControlTemplate_StyleProvider();
 
-				compositions::GuiBoundsComposition*					GetBoundsComposition()override;
-				compositions::GuiGraphicsComposition*				GetContainerComposition()override;
-				void												SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
-				void												SetText(const WString& value)override;
-				void												SetFont(const FontProperties& value)override;
-				void												SetVisuallyEnabled(bool value)override;
+				compositions::GuiBoundsComposition*								GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*							GetContainerComposition()override;
+				void															AssociateStyleController(controls::GuiControl::IStyleController* controller)override;
+				void															SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+				void															SetText(const WString& value)override;
+				void															SetFont(const FontProperties& value)override;
+				void															SetVisuallyEnabled(bool value)override;
 			};
 
 			class GuiLabelTemplate_StyleProvider
@@ -14107,24 +14333,70 @@ Control Template
 				, public Description<GuiLabelTemplate_StyleProvider>
 			{
 			protected:
-				GuiLabelTemplate*									controlTemplate;
+				GuiLabelTemplate*												controlTemplate;
 
 			public:
 				GuiLabelTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
 				~GuiLabelTemplate_StyleProvider();
 
-				Color												GetDefaultTextColor()override;
-				void												SetTextColor(Color value)override;
+				Color															GetDefaultTextColor()override;
+				void															SetTextColor(Color value)override;
+			};
+
+			class GuiSinglelineTextBoxTemplate_StyleProvider
+				: public GuiControlTemplate_StyleProvider
+				, public virtual controls::GuiSinglelineTextBox::IStyleProvider
+				, public Description<GuiSinglelineTextBoxTemplate_StyleProvider>
+			{
+			protected:
+				GuiSinglelineTextBoxTemplate*									controlTemplate;
+				
+			public:
+				GuiSinglelineTextBoxTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
+				~GuiSinglelineTextBoxTemplate_StyleProvider();
+				
+				void															SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+				compositions::GuiGraphicsComposition*							InstallBackground(compositions::GuiBoundsComposition* boundsComposition)override;
+			};
+
+			class GuiMenuTemplate_StyleProvider
+				: public GuiControlTemplate_StyleProvider
+				, public controls::GuiWindow::DefaultBehaviorStyleController
+				, public Description<GuiMenuTemplate_StyleProvider>
+			{
+			public:
+				GuiMenuTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
+				~GuiMenuTemplate_StyleProvider();
 			};
 
 			class GuiWindowTemplate_StyleProvider
 				: public GuiControlTemplate_StyleProvider
-				, public controls::GuiWindow::DefaultBehaviorStyleController
+				, public controls::GuiWindow::IStyleController
 				, public Description<GuiWindowTemplate_StyleProvider>
 			{
+			protected:
+				GuiWindowTemplate*												controlTemplate;
+				controls::GuiWindow*											window;
+
 			public:
 				GuiWindowTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
 				~GuiWindowTemplate_StyleProvider();
+
+				void															AttachWindow(controls::GuiWindow* _window)override;
+				void															InitializeNativeWindowProperties()override;
+				void															SetSizeState(INativeWindow::WindowSizeState value)override;
+				bool															GetMaximizedBox()override;
+				void															SetMaximizedBox(bool visible)override;
+				bool															GetMinimizedBox()override;
+				void															SetMinimizedBox(bool visible)override;
+				bool															GetBorder()override;
+				void															SetBorder(bool visible)override;
+				bool															GetSizeBox()override;
+				void															SetSizeBox(bool visible)override;
+				bool															GetIconVisible()override;
+				void															SetIconVisible(bool visible)override;
+				bool															GetTitleBar()override;
+				void															SetTitleBar(bool visible)override;
 			};
 
 			class GuiButtonTemplate_StyleProvider
@@ -14133,13 +14405,13 @@ Control Template
 				, public Description<GuiButtonTemplate_StyleProvider>
 			{
 			protected:
-				GuiButtonTemplate*									controlTemplate;
+				GuiButtonTemplate*												controlTemplate;
 
 			public:
 				GuiButtonTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
 				~GuiButtonTemplate_StyleProvider();
 
-				void												Transfer(controls::GuiButton::ControlState value)override;
+				void															Transfer(controls::GuiButton::ControlState value)override;
 			};
 
 			class GuiSelectableButtonTemplate_StyleProvider
@@ -14148,13 +14420,13 @@ Control Template
 				, public Description<GuiSelectableButtonTemplate_StyleProvider>
 			{
 			protected:
-				GuiSelectableButtonTemplate*						controlTemplate;
+				GuiSelectableButtonTemplate*									controlTemplate;
 
 			public:
 				GuiSelectableButtonTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
 				~GuiSelectableButtonTemplate_StyleProvider();
 
-				void												SetSelected(bool value)override;
+				void															SetSelected(bool value)override;
 			};
 
 			class GuiToolstripButtonTemplate_StyleProvider
@@ -14163,21 +14435,268 @@ Control Template
 				, public Description<GuiToolstripButtonTemplate_StyleProvider>
 			{
 			protected:
-				Ptr<GuiTemplate::IFactory>									subMenuTemplateFactory;
-				GuiToolstripButtonTemplate*									controlTemplate;
+				Ptr<GuiTemplate::IFactory>										subMenuTemplateFactory;
+				GuiToolstripButtonTemplate*										controlTemplate;
 
-				void														controlTemplate_SubMenuTemplateChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 			public:
 				GuiToolstripButtonTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
 				~GuiToolstripButtonTemplate_StyleProvider();
 				
-				controls::GuiMenu::IStyleController*						CreateSubMenuStyleController()override;
-				void														SetSubMenuExisting(bool value)override;
-				void														SetSubMenuOpening(bool value)override;
-				controls::GuiButton*										GetSubMenuHost()override;
-				void														SetImage(Ptr<GuiImageData> value)override;
-				void														SetShortcutText(const WString& value)override;
-				compositions::GuiSubComponentMeasurer::IMeasuringSource*	GetMeasuringSource()override;
+				controls::GuiMenu::IStyleController*							CreateSubMenuStyleController()override;
+				void															SetSubMenuExisting(bool value)override;
+				void															SetSubMenuOpening(bool value)override;
+				controls::GuiButton*											GetSubMenuHost()override;
+				void															SetImage(Ptr<GuiImageData> value)override;
+				void															SetShortcutText(const WString& value)override;
+			};
+
+			class GuiListViewColumnHeaderTemplate_StyleProvider
+				: public GuiToolstripButtonTemplate_StyleProvider
+				, public virtual controls::GuiListViewColumnHeader::IStyleController
+				, public Description<GuiListViewColumnHeaderTemplate_StyleProvider>
+			{
+			protected:
+				GuiListViewColumnHeaderTemplate*								controlTemplate;
+
+			public:
+				GuiListViewColumnHeaderTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
+				~GuiListViewColumnHeaderTemplate_StyleProvider();
+
+				void															SetColumnSortingState(controls::GuiListViewColumnHeader::ColumnSortingState value)override;
+			};
+
+			class GuiComboBoxTemplate_StyleProvider
+				: public GuiToolstripButtonTemplate_StyleProvider
+				, public virtual controls::GuiComboBoxBase::IStyleController
+				, public Description<GuiComboBoxTemplate_StyleProvider>
+			{
+			protected:
+				GuiComboBoxTemplate*											controlTemplate;
+
+			public:
+				GuiComboBoxTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
+				~GuiComboBoxTemplate_StyleProvider();
+				
+				void															SetCommandExecutor(controls::GuiComboBoxBase::ICommandExecutor* value)override;
+				void															OnItemSelected()override;
+			};
+
+			class GuiTextListTemplate_StyleProvider;
+
+			class GuiDatePickerTemplate_StyleProvider
+				: public GuiControlTemplate_StyleProvider
+				, public virtual controls::GuiDatePicker::IStyleProvider
+				, public Description<GuiDatePickerTemplate_StyleProvider>
+			{
+			protected:
+				Ptr<GuiTemplate::IFactory>										dateButtonTemplateFactory;
+				Ptr<GuiTemplate::IFactory>										dateTextListTemplateFactory;
+				Ptr<GuiTemplate::IFactory>										dateComboBoxTemplateFactory;
+				GuiDatePickerTemplate*											controlTemplate;
+
+			public:
+				GuiDatePickerTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
+				~GuiDatePickerTemplate_StyleProvider();
+
+				controls::GuiSelectableButton::IStyleController*				CreateDateButtonStyle()override;
+				GuiTextListTemplate_StyleProvider*								CreateTextListStyle();
+				controls::GuiTextList*											CreateTextList()override;
+				controls::GuiComboBoxListControl::IStyleController*				CreateComboBoxStyle()override;
+				Color															GetBackgroundColor()override;
+				Color															GetPrimaryTextColor()override;
+				Color															GetSecondaryTextColor()override;
+			};
+
+			class GuiDateComboBoxTemplate_StyleProvider
+				: public GuiComboBoxTemplate_StyleProvider
+				, public Description<GuiDateComboBoxTemplate_StyleProvider>
+			{
+			protected:
+				Ptr<GuiTemplate::IFactory>										datePickerTemplateFactory;
+				GuiDateComboBoxTemplate*										controlTemplate;
+
+			public:
+				GuiDateComboBoxTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
+				~GuiDateComboBoxTemplate_StyleProvider();
+
+				controls::GuiDatePicker*										CreateArgument();
+				controls::GuiDatePicker::IStyleProvider*						CreateDatePickerStyle();
+			};
+
+			class GuiScrollTemplate_StyleProvider
+				: public GuiControlTemplate_StyleProvider
+				, public virtual controls::GuiScroll::IStyleController
+				, public Description<GuiScrollTemplate_StyleProvider>
+			{
+			protected:
+				GuiScrollTemplate*												controlTemplate;
+
+			public:
+				GuiScrollTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
+				~GuiScrollTemplate_StyleProvider();
+
+				void															SetCommandExecutor(controls::GuiScroll::ICommandExecutor* value)override;
+				void															SetTotalSize(vint value)override;
+				void															SetPageSize(vint value)override;
+				void															SetPosition(vint value)override;
+			};
+
+			class GuiScrollViewTemplate_StyleProvider
+				: public GuiControlTemplate_StyleProvider
+				, public virtual controls::GuiScrollView::IStyleProvider
+				, public Description<GuiScrollViewTemplate_StyleProvider>
+			{
+			protected:
+				Ptr<GuiTemplate::IFactory>										hScrollTemplateFactory;
+				Ptr<GuiTemplate::IFactory>										vScrollTemplateFactory;
+				GuiScrollViewTemplate*											controlTemplate;
+				
+			public:
+				GuiScrollViewTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
+				~GuiScrollViewTemplate_StyleProvider();
+				
+				controls::GuiScroll::IStyleController*							CreateHorizontalScrollStyle()override;
+				controls::GuiScroll::IStyleController*							CreateVerticalScrollStyle()override;
+				vint															GetDefaultScrollSize()override;
+				compositions::GuiGraphicsComposition*							InstallBackground(compositions::GuiBoundsComposition* boundsComposition)override;
+			};
+
+			class GuiMultilineTextBoxTemplate_StyleProvider
+				: public GuiScrollViewTemplate_StyleProvider
+				, public Description<GuiMultilineTextBoxTemplate_StyleProvider>
+			{
+			protected:
+				GuiMultilineTextBoxTemplate*									controlTemplate;
+				
+			public:
+				GuiMultilineTextBoxTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
+				~GuiMultilineTextBoxTemplate_StyleProvider();
+				
+				void															SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+			};
+
+			class GuiTextListTemplate_StyleProvider
+				: public GuiScrollViewTemplate_StyleProvider
+				, public virtual controls::GuiScrollView::IStyleProvider
+				, public Description<GuiTextListTemplate_StyleProvider>
+			{
+			protected:
+				Ptr<GuiTemplate::IFactory>										backgroundTemplateFactory;
+				Ptr<GuiTemplate::IFactory>										bulletTemplateFactory;
+				GuiTextListTemplate*											controlTemplate;
+				
+				class ItemStyleProvider
+					: public Object
+					, public virtual controls::list::TextItemStyleProvider::ITextItemStyleProvider
+				{
+				protected:
+					GuiTextListTemplate_StyleProvider*							styleProvider;
+
+				public:
+					ItemStyleProvider(GuiTextListTemplate_StyleProvider* _styleProvider);
+					~ItemStyleProvider();
+
+					controls::GuiSelectableButton::IStyleController*			CreateBackgroundStyleController()override;
+					controls::GuiSelectableButton::IStyleController*			CreateBulletStyleController()override;
+					Color														GetTextColor()override;
+				};
+			public:
+				GuiTextListTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
+				~GuiTextListTemplate_StyleProvider();
+				
+				controls::list::TextItemStyleProvider::ITextItemStyleProvider*	CreateArgument();
+				controls::GuiSelectableButton::IStyleController*				CreateBackgroundStyle();
+				controls::GuiSelectableButton::IStyleController*				CreateBulletStyle();
+			};
+
+			class GuiListViewTemplate_StyleProvider
+				: public GuiScrollViewTemplate_StyleProvider
+				, public virtual controls::GuiListViewBase::IStyleProvider
+				, public Description<GuiListViewTemplate_StyleProvider>
+			{
+			protected:
+				Ptr<GuiTemplate::IFactory>										backgroundTemplateFactory;
+				Ptr<GuiTemplate::IFactory>										columnHeaderTemplateFactory;
+				GuiListViewTemplate*											controlTemplate;
+				
+			public:
+				GuiListViewTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
+				~GuiListViewTemplate_StyleProvider();
+				
+				controls::GuiSelectableButton::IStyleController*				CreateItemBackground()override;
+				controls::GuiListViewColumnHeader::IStyleController*			CreateColumnStyle()override;
+				Color															GetPrimaryTextColor()override;
+				Color															GetSecondaryTextColor()override;
+				Color															GetItemSeparatorColor()override;
+			};
+
+			class GuiTreeViewTemplate_StyleProvider
+				: public GuiScrollViewTemplate_StyleProvider
+				, public virtual controls::GuiVirtualTreeView::IStyleProvider
+				, public Description<GuiTreeViewTemplate_StyleProvider>
+			{
+			protected:
+				Ptr<GuiTemplate::IFactory>										backgroundTemplateFactory;
+				Ptr<GuiTemplate::IFactory>										expandingDecoratorTemplateFactory;
+				GuiTreeViewTemplate*											controlTemplate;
+				
+			public:
+				GuiTreeViewTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
+				~GuiTreeViewTemplate_StyleProvider();
+				
+				controls::GuiSelectableButton::IStyleController*				CreateItemBackground()override;
+				controls::GuiSelectableButton::IStyleController*				CreateItemExpandingDecorator()override;
+				Color															GetTextColor()override;
+			};
+
+			class GuiTabTemplate_StyleProvider
+				: public GuiControlTemplate_StyleProvider
+				, public virtual controls::GuiTab::IStyleController
+				, public Description<GuiTabTemplate_StyleProvider>
+			{
+			protected:
+				Ptr<GuiTemplate::IFactory>										headerTemplateFactory;
+				Ptr<GuiTemplate::IFactory>										dropdownTemplateFactory;
+				Ptr<GuiTemplate::IFactory>										menuTemplateFactory;
+				Ptr<GuiTemplate::IFactory>										menuItemTemplateFactory;
+				GuiTabTemplate*													controlTemplate;
+				
+				compositions::GuiTableComposition*								tabBoundsComposition;
+				compositions::GuiStackComposition*								tabHeaderComposition;
+				compositions::GuiBoundsComposition*								tabContentTopLineComposition;
+				controls::GuiTab::ICommandExecutor*								commandExecutor;
+
+				Ptr<controls::GuiSelectableButton::MutexGroupController>		headerController;
+				collections::List<controls::GuiSelectableButton*>				headerButtons;
+				controls::GuiButton*											headerOverflowButton;
+				controls::GuiToolstripMenu*										headerOverflowMenu;
+				
+				controls::GuiSelectableButton::IStyleController*				CreateHeaderTemplate();
+				controls::GuiButton::IStyleController*							CreateDropdownTemplate();
+				controls::GuiMenu::IStyleController*							CreateMenuTemplate();
+				controls::GuiToolstripButton::IStyleController*					CreateMenuItemTemplate();
+
+				void															OnHeaderButtonClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void															OnTabHeaderBoundsChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void															OnHeaderOverflowButtonClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void															OnHeaderOverflowMenuButtonClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+
+				void															UpdateHeaderOverflowButtonVisibility();
+				void															UpdateHeaderZOrder();
+				void															UpdateHeaderVisibilityIndex();
+				void															UpdateHeaderLayout();
+
+				void															Initialize();
+			public:
+				GuiTabTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
+				~GuiTabTemplate_StyleProvider();
+
+				void															SetCommandExecutor(controls::GuiTab::ICommandExecutor* value)override;
+				void															InsertTab(vint index)override;
+				void															SetTabText(vint index, const WString& value)override;
+				void															RemoveTab(vint index)override;
+				void															MoveTab(vint oldIndex, vint newIndex)override;
+				void															SetSelectedTab(vint index)override;
 			};
 
 /***********************************************************************

@@ -810,6 +810,26 @@ GuiControl
 			}
 
 /***********************************************************************
+GuiComponent
+***********************************************************************/
+			
+			GuiComponent::GuiComponent()
+			{
+			}
+
+			GuiComponent::~GuiComponent()
+			{
+			}
+
+			void GuiComponent::Attach(GuiInstanceRootObject* rootObject)
+			{
+			}
+
+			void GuiComponent::Detach(GuiInstanceRootObject* rootObject)
+			{
+			}
+
+/***********************************************************************
 GuiInstanceRootObject
 ***********************************************************************/
 
@@ -820,6 +840,33 @@ GuiInstanceRootObject
 					subscription->Close();
 				}
 				subscriptions.Clear();
+			}
+
+			void GuiInstanceRootObject::ClearComponents()
+			{
+				for(vint i=0;i<components.Count();i++)
+				{
+					components[i]->Detach(this);
+				}
+				for(vint i=0;i<components.Count();i++)
+				{
+					delete components[i];
+				}
+				components.Clear();
+			}
+
+			void GuiInstanceRootObject::FinalizeInstance()
+			{
+				ClearSubscriptions();
+				ClearComponents();
+			}
+
+			GuiInstanceRootObject::GuiInstanceRootObject()
+			{
+			}
+
+			GuiInstanceRootObject::~GuiInstanceRootObject()
+			{
 			}
 
 			Ptr<description::IValueSubscription> GuiInstanceRootObject::AddSubscription(Ptr<description::IValueSubscription> subscription)
@@ -845,6 +892,38 @@ GuiInstanceRootObject
 				return subscriptions.Contains(subscription.Obj());
 			}
 
+			bool GuiInstanceRootObject::AddComponent(GuiComponent* component)
+			{
+				if(components.Contains(component))
+				{
+					return false;
+				}
+				else
+				{
+					components.Add(component);
+					component->Attach(this);
+					return true;
+				}
+			}
+
+			bool GuiInstanceRootObject::RemoveComponent(GuiComponent* component)
+			{
+				vint index = components.IndexOf(component);
+				if (index == -1)
+				{
+					return false;
+				}
+				{
+					component->Detach(this);
+					return components.RemoveAt(index);
+				}
+			}
+
+			bool GuiInstanceRootObject::ContainsComponent(GuiComponent* component)
+			{
+				return components.Contains(component);
+			}
+
 /***********************************************************************
 GuiCustomControl
 ***********************************************************************/
@@ -856,27 +935,7 @@ GuiCustomControl
 
 			GuiCustomControl::~GuiCustomControl()
 			{
-				ClearSubscriptions();
-			}
-
-/***********************************************************************
-GuiComponent
-***********************************************************************/
-			
-			GuiComponent::GuiComponent()
-			{
-			}
-
-			GuiComponent::~GuiComponent()
-			{
-			}
-
-			void GuiComponent::Attach(GuiControlHost* controlHost)
-			{
-			}
-
-			void GuiComponent::Detach(GuiControlHost* controlHost)
-			{
+				FinalizeInstance();
 			}
 
 /***********************************************************************
@@ -2282,6 +2341,7 @@ GuiDatePicker::StyleController
 
 						GuiSolidLabelElement* element=GuiSolidLabelElement::Create();
 						element->SetAlignments(Alignment::Center, Alignment::Center);
+						element->SetColor(styleProvider->GetPrimaryTextColor());
 						labelDaysOfWeek[i]=element;
 						cell->SetOwnedElement(element);
 					}
@@ -2313,6 +2373,7 @@ GuiDatePicker::StyleController
 							GuiBoundsComposition* elementBounds=new GuiBoundsComposition;
 							elementBounds->SetOwnedElement(element);
 							elementBounds->SetAlignmentToParent(Margin(0, 0, 0, 0));
+							elementBounds->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElement);
 							button->GetContainerComposition()->AddChild(elementBounds);
 						}
 					}
@@ -2750,7 +2811,6 @@ GuiControlHost
 
 			void GuiControlHost::Closed()
 			{
-				ClearSubscriptions();
 				WindowClosed.Execute(GetNotifyEventArguments());
 			}
 
@@ -2782,12 +2842,8 @@ GuiControlHost
 			GuiControlHost::~GuiControlHost()
 			{
 				OnBeforeReleaseGraphicsHost();
+				FinalizeInstance();
 				styleController=0;
-				for(vint i=0;i<components.Count();i++)
-				{
-					components[i]->Detach(this);
-					delete components[i];
-				}
 				delete host;
 			}
 
@@ -2970,38 +3026,6 @@ GuiControlHost
 				{
 					host->GetNativeWindow()->SetTopMost(topmost);
 				}
-			}
-
-			bool GuiControlHost::AddComponent(GuiComponent* component)
-			{
-				if(components.Contains(component))
-				{
-					return false;
-				}
-				else
-				{
-					components.Add(component);
-					component->Attach(this);
-					return true;
-				}
-			}
-
-			bool GuiControlHost::RemoveComponent(GuiComponent* component)
-			{
-				vint index = components.IndexOf(component);
-				if (index == -1)
-				{
-					return false;
-				}
-				{
-					component->Detach(this);
-					return components.RemoveAt(index);
-				}
-			}
-
-			bool GuiControlHost::ContainsComponent(GuiComponent* component)
-			{
-				return components.Contains(component);
 			}
 
 			compositions::IGuiShortcutKeyManager* GuiControlHost::GetShortcutKeyManager()
@@ -3196,6 +3220,10 @@ GuiWindow::DefaultBehaviorStyleController
 			{
 			}
 
+			void GuiWindow::DefaultBehaviorStyleController::SetSizeState(INativeWindow::WindowSizeState value)
+			{
+			}
+
 			bool GuiWindow::DefaultBehaviorStyleController::GetMaximizedBox()
 			{
 				if(window->GetNativeWindow())
@@ -3319,6 +3347,12 @@ GuiWindow::DefaultBehaviorStyleController
 /***********************************************************************
 GuiWindow
 ***********************************************************************/
+
+			void GuiWindow::Moved()
+			{
+				GuiControlHost::Moved();
+				styleController->SetSizeState(GetNativeWindow()->GetSizeState());
+			}
 
 			void GuiWindow::OnNativeWindowChanged()
 			{
@@ -4145,7 +4179,7 @@ GuiBindableListView::ItemSource
 			{
 				if (0 <= itemIndex && itemIndex < itemSource->GetCount() && columns.Count()>0)
 				{
-					return ReadProperty(itemSource->Get(itemIndex), columns[0]->textProperty).GetText();
+					return ReadProperty(itemSource->Get(itemIndex), columns[0]->GetTextProperty()).GetText();
 				}
 				return L"";
 			}
@@ -4154,7 +4188,7 @@ GuiBindableListView::ItemSource
 			{
 				if (0 <= itemIndex && itemIndex < itemSource->GetCount() && 0 <= index && index < columns.Count() - 1)
 				{
-					return ReadProperty(itemSource->Get(itemIndex), columns[index + 1]->textProperty).GetText();
+					return ReadProperty(itemSource->Get(itemIndex), columns[index + 1]->GetTextProperty()).GetText();
 				}
 				return L"";
 			}
@@ -4211,7 +4245,7 @@ GuiBindableListView::ItemSource
 				}
 				else
 				{
-					return columns[index]->text;
+					return columns[index]->GetText();
 				}
 			}
 
@@ -4223,7 +4257,7 @@ GuiBindableListView::ItemSource
 				}
 				else
 				{
-					return columns[index]->size;
+					return columns[index]->GetSize();
 				}
 			}
 
@@ -4231,11 +4265,7 @@ GuiBindableListView::ItemSource
 			{
 				if(index>=0 && index<columns.Count())
 				{
-					columns[index]->size=value;
-					for(vint i=0;i<columnItemViewCallbacks.Count();i++)
-					{
-						columnItemViewCallbacks[i]->OnColumnChanged();
-					}
+					columns[index]->SetSize(value);
 				}
 			}
 
@@ -4247,7 +4277,7 @@ GuiBindableListView::ItemSource
 				}
 				else
 				{
-					return columns[index]->dropdownPopup;
+					return columns[index]->GetDropdownPopup();
 				}
 			}
 
@@ -4259,7 +4289,7 @@ GuiBindableListView::ItemSource
 				}
 				else
 				{
-					return columns[index]->sortingState;
+					return columns[index]->GetSortingState();
 				}
 			}
 
@@ -10964,15 +10994,157 @@ ListViewDetailContentProvider
 				}
 
 /***********************************************************************
+ListViewSubItems
+***********************************************************************/
+
+				void ListViewSubItems::NotifyUpdateInternal(vint start, vint count, vint newCount)
+				{
+					owner->NotifyUpdate();
+				}
+
+/***********************************************************************
+ListViewItem
+***********************************************************************/
+
+				void ListViewItem::NotifyUpdate()
+				{
+					if (owner)
+					{
+						vint index = owner->IndexOf(this);
+						owner->NotifyUpdateInternal(index, 1, 1);
+					}
+				}
+
+				ListViewItem::ListViewItem()
+					:owner(0)
+				{
+					subItems.owner = this;
+				}
+
+				ListViewSubItems& ListViewItem::GetSubItems()
+				{
+					return subItems;
+				}
+
+				Ptr<GuiImageData> ListViewItem::GetSmallImage()
+				{
+					return smallImage;
+				}
+
+				void ListViewItem::SetSmallImage(Ptr<GuiImageData> value)
+				{
+					smallImage = value;
+					NotifyUpdate();
+				}
+
+				Ptr<GuiImageData> ListViewItem::GetLargeImage()
+				{
+					return largeImage;
+				}
+				
+				void ListViewItem::SetLargeImage(Ptr<GuiImageData> value)
+				{
+					largeImage = value;
+					NotifyUpdate();
+				}
+
+				const WString& ListViewItem::GetText()
+				{
+					return text;
+				}
+
+				void ListViewItem::SetText(const WString& value)
+				{
+					text = value;
+					NotifyUpdate();
+				}
+
+				description::Value ListViewItem::GetTag()
+				{
+					return tag;
+				}
+
+				void ListViewItem::SetTag(const description::Value& value)
+				{
+					tag = value;
+					NotifyUpdate();
+				}
+
+/***********************************************************************
 ListViewColumn
 ***********************************************************************/
 
+				void ListViewColumn::NotifyUpdate()
+				{
+					if (owner)
+					{
+						vint index = owner->IndexOf(this);
+						owner->NotifyUpdateInternal(index, 1, 1);
+					}
+				}
+
 				ListViewColumn::ListViewColumn(const WString& _text, vint _size)
-					:text(_text)
+					:owner(0)
+					,text(_text)
 					,size(_size)
 					,dropdownPopup(0)
 					,sortingState(GuiListViewColumnHeader::NotSorted)
 				{
+				}
+
+				const WString& ListViewColumn::GetText()
+				{
+					return text;
+				}
+
+				void ListViewColumn::SetText(const WString& value)
+				{
+					text = value;
+					NotifyUpdate();
+				}
+
+				const WString& ListViewColumn::GetTextProperty()
+				{
+					return textProperty;
+				}
+
+				void ListViewColumn::SetTextProperty(const WString& value)
+				{
+					textProperty = value;
+					NotifyUpdate();
+				}
+
+				vint ListViewColumn::GetSize()
+				{
+					return size;
+				}
+
+				void ListViewColumn::SetSize(vint value)
+				{
+					size = value;
+					NotifyUpdate();
+				}
+
+				GuiMenu* ListViewColumn::GetDropdownPopup()
+				{
+					return dropdownPopup;
+				}
+
+				void ListViewColumn::SetDropdownPopup(GuiMenu* value)
+				{
+					dropdownPopup = value;
+					NotifyUpdate();
+				}
+
+				GuiListViewColumnHeader::ColumnSortingState ListViewColumn::GetSortingState()
+				{
+					return sortingState;
+				}
+
+				void ListViewColumn::SetSortingState(GuiListViewColumnHeader::ColumnSortingState value)
+				{
+					sortingState = value;
+					NotifyUpdate();
 				}
 
 /***********************************************************************
@@ -10997,13 +11169,28 @@ ListViewDataColumns
 ListViewColumns
 ***********************************************************************/
 
+				void ListViewColumns::AfterInsert(vint index, const Ptr<ListViewColumn>& value)
+				{
+					ItemsBase<Ptr<ListViewColumn>>::AfterInsert(index, value);
+					value->owner = this;
+				}
+
+				void ListViewColumns::BeforeRemove(vint index, const Ptr<ListViewColumn>& value)
+				{
+					value->owner = 0;
+					ItemsBase<Ptr<ListViewColumn>>::BeforeRemove(index, value);
+				}
+
 				void ListViewColumns::NotifyUpdateInternal(vint start, vint count, vint newCount)
 				{
 					for(vint i=0;i<itemProvider->columnItemViewCallbacks.Count();i++)
 					{
 						itemProvider->columnItemViewCallbacks[i]->OnColumnChanged();
 					}
-					itemProvider->NotifyUpdate(0, itemProvider->Count());
+					if (count != newCount)
+					{
+						itemProvider->NotifyUpdate(0, itemProvider->Count());
+					}
 				}
 
 				ListViewColumns::ListViewColumns()
@@ -11018,6 +11205,18 @@ ListViewColumns
 /***********************************************************************
 ListViewItemProvider
 ***********************************************************************/
+
+				void ListViewItemProvider::AfterInsert(vint index, const Ptr<ListViewItem>& value)
+				{
+					ListProvider<Ptr<ListViewItem>>::AfterInsert(index, value);
+					value->owner = this;
+				}
+
+				void ListViewItemProvider::BeforeRemove(vint index, const Ptr<ListViewItem>& value)
+				{
+					value->owner = 0;
+					ListProvider<Ptr<ListViewItem>>::AfterInsert(index, value);
+				}
 
 				bool ListViewItemProvider::ContainsPrimaryText(vint itemIndex)
 				{
@@ -11047,13 +11246,13 @@ ListViewItemProvider
 				WString ListViewItemProvider::GetSubItem(vint itemIndex, vint index)
 				{
 					Ptr<ListViewItem> item=Get(itemIndex);
-					if(index<0 || index>=item->subItems.Count())
+					if(index<0 || index>=item->GetSubItems().Count())
 					{
 						return L"";
 					}
 					else
 					{
-						return item->subItems[index];
+						return item->GetSubItems()[index];
 					}
 				}
 
@@ -11107,7 +11306,7 @@ ListViewItemProvider
 					}
 					else
 					{
-						return columns[index]->text;
+						return columns[index]->GetText();
 					}
 				}
 
@@ -11119,7 +11318,7 @@ ListViewItemProvider
 					}
 					else
 					{
-						return columns[index]->size;
+						return columns[index]->GetSize();
 					}
 				}
 
@@ -11127,11 +11326,7 @@ ListViewItemProvider
 				{
 					if(index>=0 && index<columns.Count())
 					{
-						columns[index]->size=value;
-						for(vint i=0;i<columnItemViewCallbacks.Count();i++)
-						{
-							columnItemViewCallbacks[i]->OnColumnChanged();
-						}
+						columns[index]->SetSize(value);
 					}
 				}
 
@@ -11143,7 +11338,7 @@ ListViewItemProvider
 					}
 					else
 					{
-						return columns[index]->dropdownPopup;
+						return columns[index]->GetDropdownPopup();
 					}
 				}
 
@@ -11155,7 +11350,7 @@ ListViewItemProvider
 					}
 					else
 					{
-						return columns[index]->sortingState;
+						return columns[index]->GetSortingState();
 					}
 				}
 
@@ -11316,6 +11511,7 @@ TextItemStyleProvider::TextItemStyleController
 					textElement=GuiSolidLabelElement::Create();
 					textElement->SetAlignments(Alignment::Left, Alignment::Center);
 					textElement->SetFont(backgroundButton->GetFont());
+					textElement->SetColor(textItemStyleProvider->textItemStyleProvider->GetTextColor());
 
 					GuiBoundsComposition* textComposition=new GuiBoundsComposition;
 					textComposition->SetOwnedElement(textElement);
@@ -11472,13 +11668,15 @@ TextItem
 ***********************************************************************/
 
 				TextItem::TextItem()
-					:checked(false)
+					:owner(0)
+					, checked(false)
 				{
 				}
 
 				TextItem::TextItem(const WString& _text, bool _checked)
-					:text(_text)
-					,checked(_checked)
+					:owner(0)
+					, text(_text)
+					, checked(_checked)
 				{
 				}
 
@@ -11501,14 +11699,50 @@ TextItem
 					return text;
 				}
 
+				void TextItem::SetText(const WString& value)
+				{
+					text = value;
+					if (owner)
+					{
+						vint index = owner->IndexOf(this);
+						owner->InvokeOnItemModified(index, 1, 1);
+					}
+				}
+
 				bool TextItem::GetChecked()
 				{
 					return checked;
 				}
 
+				void TextItem::SetChecked(bool value)
+				{
+					checked = value;
+					if (owner)
+					{
+						vint index = owner->IndexOf(this);
+						owner->InvokeOnItemModified(index, 1, 1);
+
+						GuiItemEventArgs arguments;
+						arguments.itemIndex=index;
+						owner->listControl->ItemChecked.Execute(arguments);
+					}
+				}
+
 /***********************************************************************
 TextItemProvider
 ***********************************************************************/
+
+				void TextItemProvider::AfterInsert(vint item, const Ptr<TextItem>& value)
+				{
+					ListProvider<Ptr<TextItem>>::AfterInsert(item, value);
+					value->owner = this;
+				}
+
+				void TextItemProvider::BeforeRemove(vint item, const Ptr<TextItem>& value)
+				{
+					value->owner = 0;
+					ListProvider<Ptr<TextItem>>::BeforeRemove(item, value);
+				}
 
 				bool TextItemProvider::ContainsPrimaryText(vint itemIndex)
 				{
@@ -11547,22 +11781,6 @@ TextItemProvider
 
 				TextItemProvider::~TextItemProvider()
 				{
-				}
-					
-				void TextItemProvider::SetText(vint itemIndex, const WString& value)
-				{
-					items[itemIndex]->text=value;
-					InvokeOnItemModified(itemIndex, 1, 1);
-				}
-
-				void TextItemProvider::SetChecked(vint itemIndex, bool value)
-				{
-					SetCheckedSilently(itemIndex, value);
-					InvokeOnItemModified(itemIndex, 1, 1);
-
-					GuiItemEventArgs arguments;
-					arguments.itemIndex=itemIndex;
-					listControl->ItemChecked.Execute(arguments);
 				}
 
 				IDescriptable* TextItemProvider::RequestView(const WString& identifier)
@@ -15469,11 +15687,6 @@ Win7ListViewColumnHeaderStyle
 			{
 			}
 
-			compositions::GuiSubComponentMeasurer::IMeasuringSource* Win7ListViewColumnHeaderStyle::GetMeasuringSource()
-			{
-				return 0;
-			}
-
 			void Win7ListViewColumnHeaderStyle::SetColumnSortingState(controls::GuiListViewColumnHeader::ColumnSortingState value)
 			{
 				Margin margin=arrowComposition->GetAlignmentToParent();
@@ -15714,11 +15927,6 @@ Win7DropDownComboBoxStyle
 			{
 			}
 
-			compositions::GuiSubComponentMeasurer::IMeasuringSource* Win7DropDownComboBoxStyle::GetMeasuringSource()
-			{
-				return 0;
-			}
-
 			void Win7DropDownComboBoxStyle::SetCommandExecutor(controls::GuiComboBoxBase::ICommandExecutor* value)
 			{
 				commandExecutor=value;
@@ -15748,6 +15956,11 @@ Win7TextListProvider
 			controls::GuiSelectableButton::IStyleController* Win7TextListProvider::CreateBulletStyleController()
 			{
 				return 0;
+			}
+
+			Color Win7TextListProvider::GetTextColor()
+			{
+				return Win7GetSystemTextColor(true);
 			}
 
 /***********************************************************************
@@ -16123,11 +16336,6 @@ Win7MenuBarButtonStyle
 			{
 			}
 
-			compositions::GuiSubComponentMeasurer::IMeasuringSource* Win7MenuBarButtonStyle::GetMeasuringSource()
-			{
-				return 0;
-			}
-
 			void Win7MenuBarButtonStyle::Transfer(GuiButton::ControlState value)
 			{
 				if(controlStyle!=value)
@@ -16135,27 +16343,6 @@ Win7MenuBarButtonStyle
 					controlStyle=value;
 					TransferInternal(controlStyle, isVisuallyEnabled, isOpening);
 				}
-			}
-
-/***********************************************************************
-Win7MenuItemButtonStyle::MeasuringSource
-***********************************************************************/
-
-			Win7MenuItemButtonStyle::MeasuringSource::MeasuringSource(Win7MenuItemButtonStyle* _style)
-				:GuiSubComponentMeasurer::MeasuringSource(GuiMenuButton::MenuItemSubComponentMeasuringCategoryName, _style->elements.mainComposition)
-				,style(_style)
-			{
-				AddSubComponent(L"text", style->elements.textComposition);
-				AddSubComponent(L"shortcut", style->elements.shortcutComposition);
-			}
-
-			Win7MenuItemButtonStyle::MeasuringSource::~MeasuringSource()
-			{
-			}
-
-			void Win7MenuItemButtonStyle::MeasuringSource::SubComponentPreferredMinSizeUpdated()
-			{
-				GetMainComposition()->ForceCalculateSizeImmediately();
 			}
 
 /***********************************************************************
@@ -16214,7 +16401,6 @@ Win7MenuItemButtonStyle
 			{
 				elements=Win7MenuItemButtonElements::Create();
 				elements.Apply(Win7ButtonColors::MenuItemButtonNormal());
-				measuringSource=new MeasuringSource(this);
 			}
 
 			Win7MenuItemButtonStyle::~Win7MenuItemButtonStyle()
@@ -16304,11 +16490,6 @@ Win7MenuItemButtonStyle
 			void Win7MenuItemButtonStyle::SetShortcutText(const WString& value)
 			{
 				elements.shortcutElement->SetText(value);
-			}
-
-			compositions::GuiSubComponentMeasurer::IMeasuringSource* Win7MenuItemButtonStyle::GetMeasuringSource()
-			{
-				return measuringSource.Obj();
 			}
 
 			void Win7MenuItemButtonStyle::Transfer(GuiButton::ControlState value)
@@ -17953,7 +18134,7 @@ Win7MenuItemButtonElements
 						table->AddChild(cell);
 						cell->SetSite(0, 2, 1, 1);
 
-						Win7CreateSolidLabelElement(button.textElement, button.textComposition, Alignment::Left, Alignment::Center);
+						Win7CreateSolidLabelElement(button.textElement, button.textComposition, L"MenuItem-Text", Alignment::Left, Alignment::Center);
 						cell->AddChild(button.textComposition);
 					}
 					{
@@ -17961,7 +18142,7 @@ Win7MenuItemButtonElements
 						table->AddChild(cell);
 						cell->SetSite(0, 3, 1, 1);
 
-						Win7CreateSolidLabelElement(button.shortcutElement, button.shortcutComposition, Alignment::Right, Alignment::Center);
+						Win7CreateSolidLabelElement(button.shortcutElement, button.shortcutComposition, L"MenuItem-Shortcut", Alignment::Right, Alignment::Center);
 						cell->AddChild(button.shortcutComposition);
 					}
 					{
@@ -18110,6 +18291,20 @@ Helpers
 				element->SetAlignments(horizontal, vertical);
 
 				composition=new GuiBoundsComposition;
+				composition->SetOwnedElement(element);
+				composition->SetMargin(Margin(0, 0, 0, 0));
+				composition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElement);
+				composition->SetAlignmentToParent(Margin(0, 0, 0, 0));
+			}
+
+			void Win7CreateSolidLabelElement(elements::GuiSolidLabelElement*& element, compositions::GuiSharedSizeItemComposition*& composition, const WString& group, Alignment horizontal, Alignment vertical)
+			{
+				element=GuiSolidLabelElement::Create();
+				element->SetAlignments(horizontal, vertical);
+
+				composition=new GuiSharedSizeItemComposition;
+				composition->SetGroup(group);
+				composition->SetSharedWidth(true);
 				composition->SetOwnedElement(element);
 				composition->SetMargin(Margin(0, 0, 0, 0));
 				composition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElement);
@@ -18820,11 +19015,6 @@ Win7ToolstripButtonStyle
 
 			void Win7ToolstripButtonStyle::SetShortcutText(const WString& value)
 			{
-			}
-
-			compositions::GuiSubComponentMeasurer::IMeasuringSource* Win7ToolstripButtonStyle::GetMeasuringSource()
-			{
-				return 0;
 			}
 
 			void Win7ToolstripButtonStyle::Transfer(controls::GuiButton::ControlState value)
@@ -19736,11 +19926,6 @@ Win8DropDownComboBoxStyle
 			{
 			}
 
-			compositions::GuiSubComponentMeasurer::IMeasuringSource* Win8DropDownComboBoxStyle::GetMeasuringSource()
-			{
-				return 0;
-			}
-
 			void Win8DropDownComboBoxStyle::SetCommandExecutor(controls::GuiComboBoxBase::ICommandExecutor* value)
 			{
 				commandExecutor=value;
@@ -19770,6 +19955,11 @@ Win8TextListProvider
 			controls::GuiSelectableButton::IStyleController* Win8TextListProvider::CreateBulletStyleController()
 			{
 				return 0;
+			}
+
+			Color Win8TextListProvider::GetTextColor()
+			{
+				return Win8GetSystemTextColor(true);
 			}
 
 /***********************************************************************
@@ -20134,11 +20324,6 @@ Win8MenuBarButtonStyle
 			{
 			}
 
-			compositions::GuiSubComponentMeasurer::IMeasuringSource* Win8MenuBarButtonStyle::GetMeasuringSource()
-			{
-				return 0;
-			}
-
 			void Win8MenuBarButtonStyle::Transfer(GuiButton::ControlState value)
 			{
 				if(controlStyle!=value)
@@ -20146,27 +20331,6 @@ Win8MenuBarButtonStyle
 					controlStyle=value;
 					TransferInternal(controlStyle, isVisuallyEnabled, isOpening);
 				}
-			}
-
-/***********************************************************************
-Win8MenuItemButtonStyle::MeasuringSource
-***********************************************************************/
-
-			Win8MenuItemButtonStyle::MeasuringSource::MeasuringSource(Win8MenuItemButtonStyle* _style)
-				:GuiSubComponentMeasurer::MeasuringSource(GuiMenuButton::MenuItemSubComponentMeasuringCategoryName, _style->elements.mainComposition)
-				,style(_style)
-			{
-				AddSubComponent(L"text", style->elements.textComposition);
-				AddSubComponent(L"shortcut", style->elements.shortcutComposition);
-			}
-
-			Win8MenuItemButtonStyle::MeasuringSource::~MeasuringSource()
-			{
-			}
-
-			void Win8MenuItemButtonStyle::MeasuringSource::SubComponentPreferredMinSizeUpdated()
-			{
-				GetMainComposition()->ForceCalculateSizeImmediately();
 			}
 
 /***********************************************************************
@@ -20225,7 +20389,6 @@ Win8MenuItemButtonStyle
 			{
 				elements=Win8MenuItemButtonElements::Create();
 				elements.Apply(Win8ButtonColors::MenuItemButtonNormal());
-				measuringSource=new MeasuringSource(this);
 			}
 
 			Win8MenuItemButtonStyle::~Win8MenuItemButtonStyle()
@@ -20315,11 +20478,6 @@ Win8MenuItemButtonStyle
 			void Win8MenuItemButtonStyle::SetShortcutText(const WString& value)
 			{
 				elements.shortcutElement->SetText(value);
-			}
-
-			compositions::GuiSubComponentMeasurer::IMeasuringSource* Win8MenuItemButtonStyle::GetMeasuringSource()
-			{
-				return measuringSource.Obj();
 			}
 
 			void Win8MenuItemButtonStyle::Transfer(GuiButton::ControlState value)
@@ -21808,7 +21966,7 @@ Win8MenuItemButtonElements
 						table->AddChild(cell);
 						cell->SetSite(0, 2, 1, 1);
 
-						Win8CreateSolidLabelElement(button.textElement, button.textComposition, Alignment::Left, Alignment::Center);
+						Win8CreateSolidLabelElement(button.textElement, button.textComposition, L"MenuItem-Text", Alignment::Left, Alignment::Center);
 						cell->AddChild(button.textComposition);
 					}
 					{
@@ -21816,7 +21974,7 @@ Win8MenuItemButtonElements
 						table->AddChild(cell);
 						cell->SetSite(0, 3, 1, 1);
 
-						Win8CreateSolidLabelElement(button.shortcutElement, button.shortcutComposition, Alignment::Right, Alignment::Center);
+						Win8CreateSolidLabelElement(button.shortcutElement, button.shortcutComposition, L"MenuItem-Shortcut", Alignment::Right, Alignment::Center);
 						cell->AddChild(button.shortcutComposition);
 					}
 					{
@@ -21964,6 +22122,20 @@ Helpers
 				element->SetAlignments(horizontal, vertical);
 
 				composition=new GuiBoundsComposition;
+				composition->SetOwnedElement(element);
+				composition->SetMargin(Margin(0, 0, 0, 0));
+				composition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElement);
+				composition->SetAlignmentToParent(Margin(0, 0, 0, 0));
+			}
+
+			void Win8CreateSolidLabelElement(elements::GuiSolidLabelElement*& element, compositions::GuiSharedSizeItemComposition*& composition, const WString& group, Alignment horizontal, Alignment vertical)
+			{
+				element=GuiSolidLabelElement::Create();
+				element->SetAlignments(horizontal, vertical);
+
+				composition=new GuiSharedSizeItemComposition;
+				composition->SetGroup(group);
+				composition->SetSharedWidth(true);
 				composition->SetOwnedElement(element);
 				composition->SetMargin(Margin(0, 0, 0, 0));
 				composition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElement);
@@ -22444,11 +22616,6 @@ Win8ToolstripButtonStyle
 			{
 			}
 
-			compositions::GuiSubComponentMeasurer::IMeasuringSource* Win8ToolstripButtonStyle::GetMeasuringSource()
-			{
-				return 0;
-			}
-
 			void Win8ToolstripButtonStyle::Transfer(controls::GuiButton::ControlState value)
 			{
 				if(controlStyle!=value)
@@ -22644,11 +22811,55 @@ GuiLabelTemplate
 			}
 
 /***********************************************************************
+GuiSinglelineTextBoxTemplate
+***********************************************************************/
+
+			GuiSinglelineTextBoxTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_IMPL)
+
+			GuiSinglelineTextBoxTemplate::GuiSinglelineTextBoxTemplate()
+			{
+				GuiSinglelineTextBoxTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_EVENT_INIT)
+			}
+
+			GuiSinglelineTextBoxTemplate::~GuiSinglelineTextBoxTemplate()
+			{
+			}
+
+/***********************************************************************
+GuiMenuTemplate
+***********************************************************************/
+
+			GuiMenuTemplate::GuiMenuTemplate()
+			{
+			}
+
+			GuiMenuTemplate::~GuiMenuTemplate()
+			{
+			}
+
+/***********************************************************************
 GuiWindowTemplate
 ***********************************************************************/
 
+			GuiWindowTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_IMPL)
+
 			GuiWindowTemplate::GuiWindowTemplate()
+				:MaximizedBoxOption_(BoolOption::Customizable)
+				, MinimizedBoxOption_(BoolOption::Customizable)
+				, BorderOption_(BoolOption::Customizable)
+				, SizeBoxOption_(BoolOption::Customizable)
+				, IconVisibleOption_(BoolOption::Customizable)
+				, TitleBarOption_(BoolOption::Customizable)
+				, MaximizedBox_(true)
+				, MinimizedBox_(true)
+				, Border_(true)
+				, SizeBox_(true)
+				, IconVisible_(true)
+				, TitleBar_(true)
+				, CustomizedBorder_(false)
+				, Maximized_(false)
 			{
+				GuiWindowTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_EVENT_INIT)
 			}
 
 			GuiWindowTemplate::~GuiWindowTemplate()
@@ -22706,6 +22917,180 @@ GuiToolstripButtonTemplate
 			}
 
 /***********************************************************************
+GuiListViewColumnHeaderTemplate
+***********************************************************************/
+
+			GuiListViewColumnHeaderTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_IMPL)
+
+			GuiListViewColumnHeaderTemplate::GuiListViewColumnHeaderTemplate()
+				:SortingState_(GuiListViewColumnHeader::NotSorted)
+			{
+				GuiListViewColumnHeaderTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_EVENT_INIT)
+			}
+
+			GuiListViewColumnHeaderTemplate::~GuiListViewColumnHeaderTemplate()
+			{
+			}
+
+/***********************************************************************
+GuiComboBoxTemplate
+***********************************************************************/
+
+			GuiComboBoxTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_IMPL)
+
+			GuiComboBoxTemplate::GuiComboBoxTemplate()
+				:Commands_(0)
+			{
+				GuiComboBoxTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_EVENT_INIT)
+			}
+
+			GuiComboBoxTemplate::~GuiComboBoxTemplate()
+			{
+			}
+
+/***********************************************************************
+GuiDatePickerTemplate
+***********************************************************************/
+
+			GuiDatePickerTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_IMPL)
+
+			GuiDatePickerTemplate::GuiDatePickerTemplate()
+			{
+				GuiDatePickerTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_EVENT_INIT)
+			}
+
+			GuiDatePickerTemplate::~GuiDatePickerTemplate()
+			{
+			}
+
+/***********************************************************************
+GuiDateComboBoxTemplate
+***********************************************************************/
+
+			GuiDateComboBoxTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_IMPL)
+
+			GuiDateComboBoxTemplate::GuiDateComboBoxTemplate()
+			{
+				GuiDateComboBoxTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_EVENT_INIT)
+			}
+
+			GuiDateComboBoxTemplate::~GuiDateComboBoxTemplate()
+			{
+			}
+
+/***********************************************************************
+GuiScrollTemplate
+***********************************************************************/
+
+			GuiScrollTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_IMPL)
+
+			GuiScrollTemplate::GuiScrollTemplate()
+				:Commands_(0)
+				, TotalSize_(100)
+				, PageSize_(10)
+				, Position_(0)
+			{
+				GuiScrollTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_EVENT_INIT)
+			}
+
+			GuiScrollTemplate::~GuiScrollTemplate()
+			{
+			}
+
+/***********************************************************************
+GuiScrollViewTemplate
+***********************************************************************/
+
+			GuiScrollViewTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_IMPL)
+
+			GuiScrollViewTemplate::GuiScrollViewTemplate()
+				:DefaultScrollSize_(0)
+			{
+				GuiScrollViewTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_EVENT_INIT)
+			}
+
+			GuiScrollViewTemplate::~GuiScrollViewTemplate()
+			{
+			}
+
+/***********************************************************************
+GuiMultilineTextBoxTemplate
+***********************************************************************/
+
+			GuiMultilineTextBoxTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_IMPL)
+
+			GuiMultilineTextBoxTemplate::GuiMultilineTextBoxTemplate()
+			{
+				GuiMultilineTextBoxTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_EVENT_INIT)
+			}
+
+			GuiMultilineTextBoxTemplate::~GuiMultilineTextBoxTemplate()
+			{
+			}
+
+/***********************************************************************
+GuiTextListTemplate
+***********************************************************************/
+
+			GuiTextListTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_IMPL)
+
+			GuiTextListTemplate::GuiTextListTemplate()
+			{
+				GuiTextListTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_EVENT_INIT)
+			}
+
+			GuiTextListTemplate::~GuiTextListTemplate()
+			{
+			}
+
+/***********************************************************************
+GuiListViewTemplate
+***********************************************************************/
+
+			GuiListViewTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_IMPL)
+
+			GuiListViewTemplate::GuiListViewTemplate()
+			{
+				GuiListViewTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_EVENT_INIT)
+			}
+
+			GuiListViewTemplate::~GuiListViewTemplate()
+			{
+			}
+
+/***********************************************************************
+GuiTreeViewTemplate
+***********************************************************************/
+
+			GuiTreeViewTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_IMPL)
+
+			GuiTreeViewTemplate::GuiTreeViewTemplate()
+			{
+				GuiTreeViewTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_EVENT_INIT)
+			}
+
+			GuiTreeViewTemplate::~GuiTreeViewTemplate()
+			{
+			}
+
+/***********************************************************************
+GuiTabTemplate
+***********************************************************************/
+
+			GuiTabTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_IMPL)
+
+			GuiTabTemplate::GuiTabTemplate()
+				:HeaderPadding_(0)
+				, HeaderComposition_(0)
+			{
+				GuiTabTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_EVENT_INIT)
+			}
+
+			GuiTabTemplate::~GuiTabTemplate()
+			{
+			}
+
+/***********************************************************************
 GuiListItemTemplate
 ***********************************************************************/
 
@@ -22752,16 +23137,38 @@ namespace vl
 		namespace templates
 		{
 			using namespace compositions;
+			using namespace elements;
 			using namespace controls;
 			using namespace reflection::description;
 			using namespace collections;
+
+#define INITIALIZE_FACTORY_FROM_TEMPLATE(VARIABLE, PROPERTY)\
+	controlTemplate->PROPERTY##Changed.AttachLambda([this](GuiGraphicsComposition*, GuiEventArgs&)\
+	{\
+		this->VARIABLE = 0;\
+	});\
+
+#define GET_FACTORY_FROM_TEMPLATE(TEMPLATE, VARIABLE, PROPERTY)\
+	if (!this->VARIABLE)\
+	{\
+		this->VARIABLE = CreateTemplateFactory(controlTemplate->Get##PROPERTY());\
+	}\
+	return new TEMPLATE##_StyleProvider(this->VARIABLE);\
+
+#define GET_FACTORY_FROM_TEMPLATE_OPT(TEMPLATE, VARIABLE, PROPERTY)\
+	if (controlTemplate->Get##PROPERTY() == L"")\
+	{\
+		return 0;\
+	}\
+	GET_FACTORY_FROM_TEMPLATE(TEMPLATE, VARIABLE, PROPERTY)\
 
 /***********************************************************************
 GuiControlTemplate_StyleProvider
 ***********************************************************************/
 
 			GuiControlTemplate_StyleProvider::GuiControlTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory)
-				:controlTemplate(0)
+				:associatedStyleController(0)
+				, controlTemplate(0)
 			{
 				GuiTemplate* itemTemplate = factory->CreateTemplate(Value());
 				if (!(controlTemplate = dynamic_cast<GuiControlTemplate*>(itemTemplate)))
@@ -22783,6 +23190,11 @@ GuiControlTemplate_StyleProvider
 			compositions::GuiGraphicsComposition* GuiControlTemplate_StyleProvider::GetContainerComposition()
 			{
 				return controlTemplate->GetContainerComposition();
+			}
+
+			void GuiControlTemplate_StyleProvider::AssociateStyleController(controls::GuiControl::IStyleController* controller)
+			{
+				associatedStyleController = controller;
 			}
 
 			void GuiControlTemplate_StyleProvider::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
@@ -22833,17 +23245,172 @@ GuiLabelTemplate_StyleProvider
 			}
 
 /***********************************************************************
+GuiSinglelineTextBoxTemplate_StyleProvider
+***********************************************************************/
+
+			GuiSinglelineTextBoxTemplate_StyleProvider::GuiSinglelineTextBoxTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory)
+				:GuiControlTemplate_StyleProvider(factory)
+			{
+				if (!(controlTemplate = dynamic_cast<GuiSinglelineTextBoxTemplate*>(GetBoundsComposition())))
+				{
+					CHECK_FAIL(L"GuiSinglelineTextBoxTemplate_StyleProvider::GuiSinglelineTextBoxTemplate_StyleProvider()#An instance of GuiSinglelineTextBoxTemplate is expected.");
+				}
+			}
+
+			GuiSinglelineTextBoxTemplate_StyleProvider::~GuiSinglelineTextBoxTemplate_StyleProvider()
+			{
+			}
+			
+			void GuiSinglelineTextBoxTemplate_StyleProvider::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
+			{
+				GuiControlTemplate_StyleProvider::SetFocusableComposition(value);
+				if (auto style = dynamic_cast<GuiSinglelineTextBox::StyleController*>(associatedStyleController))
+				{
+					auto element = style->GetTextElement();
+					Array<text::ColorEntry> colors(1);
+					colors[0] = controlTemplate->GetTextColor();
+					element->SetColors(colors);
+					element->SetCaretColor(controlTemplate->GetCaretColor());
+				}
+			}
+
+			compositions::GuiGraphicsComposition* GuiSinglelineTextBoxTemplate_StyleProvider::InstallBackground(compositions::GuiBoundsComposition* boundsComposition)
+			{
+				controlTemplate->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				boundsComposition->AddChild(controlTemplate);
+				return controlTemplate->GetContainerComposition();
+			}
+
+/***********************************************************************
+GuiMenuTemplate_StyleProvider
+***********************************************************************/
+
+			GuiMenuTemplate_StyleProvider::GuiMenuTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory)
+				:GuiControlTemplate_StyleProvider(factory)
+			{
+			}
+
+			GuiMenuTemplate_StyleProvider::~GuiMenuTemplate_StyleProvider()
+			{
+			}
+
+/***********************************************************************
 GuiWindowTemplate_StyleProvider
 ***********************************************************************/
 
 			GuiWindowTemplate_StyleProvider::GuiWindowTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory)
 				:GuiControlTemplate_StyleProvider(factory)
+				, window(0)
 			{
+				if (!(controlTemplate = dynamic_cast<GuiWindowTemplate*>(GetBoundsComposition())))
+				{
+					CHECK_FAIL(L"GuiWindowTemplate_StyleProvider::GuiWindowTemplate_StyleProvider()#An instance of GuiWindowTemplate is expected.");
+				}
 			}
 
 			GuiWindowTemplate_StyleProvider::~GuiWindowTemplate_StyleProvider()
 			{
 			}
+
+			void GuiWindowTemplate_StyleProvider::AttachWindow(GuiWindow* _window)
+			{
+				window = _window;
+			}
+
+			void GuiWindowTemplate_StyleProvider::InitializeNativeWindowProperties()
+			{
+				if (window && window->GetNativeWindow())
+				{
+					window->GetNativeWindow()->EnableCustomFrameMode();
+					window->GetNativeWindow()->SetBorder(false);
+				}
+			}
+
+			void GuiWindowTemplate_StyleProvider::SetSizeState(INativeWindow::WindowSizeState value)
+			{
+				controlTemplate->SetMaximized(value == INativeWindow::Maximized);
+			}
+
+#define WINDOW_TEMPLATE_GET(PROPERTY)\
+				switch (controlTemplate->Get##PROPERTY##Option())\
+				{\
+					case BoolOption::AlwaysTrue: return true;\
+					case BoolOption::AlwaysFalse: return false;\
+					default: return controlTemplate->Get##PROPERTY##();\
+				}\
+
+#define WINDOW_TEMPLATE_SET(PROPERTY)\
+				if (controlTemplate->Get##PROPERTY##Option() == BoolOption::Customizable)\
+				{\
+					controlTemplate->Set##PROPERTY(visible);\
+					if (!controlTemplate->GetCustomizedBorder() && window && window->GetNativeWindow())\
+					{\
+						window->GetNativeWindow()->Set##PROPERTY(visible);\
+					}\
+				}\
+
+			bool GuiWindowTemplate_StyleProvider::GetMaximizedBox()
+			{
+				WINDOW_TEMPLATE_GET(MaximizedBox);
+			}
+
+			void GuiWindowTemplate_StyleProvider::SetMaximizedBox(bool visible)
+			{
+				WINDOW_TEMPLATE_SET(MaximizedBox);
+			}
+
+			bool GuiWindowTemplate_StyleProvider::GetMinimizedBox()
+			{
+				WINDOW_TEMPLATE_GET(MinimizedBox);
+			}
+
+			void GuiWindowTemplate_StyleProvider::SetMinimizedBox(bool visible)
+			{
+				WINDOW_TEMPLATE_SET(MinimizedBox);
+			}
+
+			bool GuiWindowTemplate_StyleProvider::GetBorder()
+			{
+				WINDOW_TEMPLATE_GET(Border);
+			}
+
+			void GuiWindowTemplate_StyleProvider::SetBorder(bool visible)
+			{
+				WINDOW_TEMPLATE_SET(Border);
+			}
+
+			bool GuiWindowTemplate_StyleProvider::GetSizeBox()
+			{
+				WINDOW_TEMPLATE_GET(SizeBox);
+			}
+
+			void GuiWindowTemplate_StyleProvider::SetSizeBox(bool visible)
+			{
+				WINDOW_TEMPLATE_SET(SizeBox);
+			}
+
+			bool GuiWindowTemplate_StyleProvider::GetIconVisible()
+			{
+				WINDOW_TEMPLATE_GET(IconVisible);
+			}
+
+			void GuiWindowTemplate_StyleProvider::SetIconVisible(bool visible)
+			{
+				WINDOW_TEMPLATE_SET(IconVisible);
+			}
+
+			bool GuiWindowTemplate_StyleProvider::GetTitleBar()
+			{
+				WINDOW_TEMPLATE_GET(TitleBar);
+			}
+
+			void GuiWindowTemplate_StyleProvider::SetTitleBar(bool visible)
+			{
+				WINDOW_TEMPLATE_SET(TitleBar);
+			}
+
+#undef WINDOW_TEMPLATE_GET
+#undef WINDOW_TEMPLATE_SET
 
 /***********************************************************************
 GuiButtonTemplate_StyleProvider
@@ -22893,19 +23460,14 @@ GuiSelectableButtonTemplate_StyleProvider
 GuiToolstripButtonTemplate_StyleProvider
 ***********************************************************************/
 
-			void GuiToolstripButtonTemplate_StyleProvider::controlTemplate_SubMenuTemplateChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
-			{
-				subMenuTemplateFactory = 0;
-			}
-
 			GuiToolstripButtonTemplate_StyleProvider::GuiToolstripButtonTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory)
 				:GuiSelectableButtonTemplate_StyleProvider(factory)
 			{
 				if (!(controlTemplate = dynamic_cast<GuiToolstripButtonTemplate*>(GetBoundsComposition())))
 				{
-					CHECK_FAIL(L"GuiButtonTemplate_StyleProvider::GuiButtonTemplate_StyleProvider()#An instance of GuiSelectableButtonTemplate is expected.");
+					CHECK_FAIL(L"GuiButtonTemplate_StyleProvider::GuiButtonTemplate_StyleProvider()#An instance of GuiToolstripButtonTemplate is expected.");
 				}
-				controlTemplate->SubMenuTemplateChanged.AttachMethod(this, &GuiToolstripButtonTemplate_StyleProvider::controlTemplate_SubMenuTemplateChanged);
+				INITIALIZE_FACTORY_FROM_TEMPLATE(subMenuTemplateFactory, SubMenuTemplate);
 			}
 
 			GuiToolstripButtonTemplate_StyleProvider::~GuiToolstripButtonTemplate_StyleProvider()
@@ -22914,11 +23476,7 @@ GuiToolstripButtonTemplate_StyleProvider
 				
 			controls::GuiMenu::IStyleController* GuiToolstripButtonTemplate_StyleProvider::CreateSubMenuStyleController()
 			{
-				if (!subMenuTemplateFactory)
-				{
-					subMenuTemplateFactory = CreateTemplateFactory(controlTemplate->GetSubMenuTemplate());
-				}
-				return new GuiWindowTemplate_StyleProvider(subMenuTemplateFactory);
+				GET_FACTORY_FROM_TEMPLATE(GuiMenuTemplate, subMenuTemplateFactory, SubMenuTemplate);
 			}
 
 			void GuiToolstripButtonTemplate_StyleProvider::SetSubMenuExisting(bool value)
@@ -22946,9 +23504,631 @@ GuiToolstripButtonTemplate_StyleProvider
 				controlTemplate->SetShortcutText(value);
 			}
 
-			compositions::GuiSubComponentMeasurer::IMeasuringSource* GuiToolstripButtonTemplate_StyleProvider::GetMeasuringSource()
+/***********************************************************************
+GuiListViewColumnHeaderTemplate_StyleProvider
+***********************************************************************/
+
+			GuiListViewColumnHeaderTemplate_StyleProvider::GuiListViewColumnHeaderTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory)
+				:GuiToolstripButtonTemplate_StyleProvider(factory)
 			{
-				return 0;
+				if (!(controlTemplate = dynamic_cast<GuiListViewColumnHeaderTemplate*>(GetBoundsComposition())))
+				{
+					CHECK_FAIL(L"GuiListViewColumnHeaderTemplate_StyleProvider::GuiListViewColumnHeaderTemplate_StyleProvider()#An instance of GuiListViewColumnHeaderTemplate is expected.");
+				}
+			}
+
+			GuiListViewColumnHeaderTemplate_StyleProvider::~GuiListViewColumnHeaderTemplate_StyleProvider()
+			{
+			}
+
+			void GuiListViewColumnHeaderTemplate_StyleProvider::SetColumnSortingState(controls::GuiListViewColumnHeader::ColumnSortingState value)
+			{
+				controlTemplate->SetSortingState(value);
+			}
+
+/***********************************************************************
+GuiComboBoxTemplate_StyleProvider
+***********************************************************************/
+
+			GuiComboBoxTemplate_StyleProvider::GuiComboBoxTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory)
+				:GuiToolstripButtonTemplate_StyleProvider(factory)
+			{
+				if (!(controlTemplate = dynamic_cast<GuiComboBoxTemplate*>(GetBoundsComposition())))
+				{
+					CHECK_FAIL(L"GuiComboBoxTemplate_StyleProvider::GuiComboBoxTemplate_StyleProvider()#An instance of GuiComboBoxTemplate is expected.");
+				}
+			}
+
+			GuiComboBoxTemplate_StyleProvider::~GuiComboBoxTemplate_StyleProvider()
+			{
+			}
+
+			void GuiComboBoxTemplate_StyleProvider::SetCommandExecutor(controls::GuiComboBoxBase::ICommandExecutor* value)
+			{
+				controlTemplate->SetCommands(value);
+			}
+
+			void GuiComboBoxTemplate_StyleProvider::OnItemSelected()
+			{
+			}
+
+/***********************************************************************
+GuiDatePickerTemplate_StyleProvider
+***********************************************************************/
+
+			GuiDatePickerTemplate_StyleProvider::GuiDatePickerTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory)
+				:GuiControlTemplate_StyleProvider(factory)
+			{
+				if (!(controlTemplate = dynamic_cast<GuiDatePickerTemplate*>(GetBoundsComposition())))
+				{
+					CHECK_FAIL(L"GuiDatePickerTemplate_StyleProvider::GuiDatePickerTemplate_StyleProvider()#An instance of GuiDatePickerTemplate is expected.");
+				}
+				INITIALIZE_FACTORY_FROM_TEMPLATE(dateButtonTemplateFactory, DateButtonTemplate);
+				INITIALIZE_FACTORY_FROM_TEMPLATE(dateTextListTemplateFactory, DateTextListTemplate);
+				INITIALIZE_FACTORY_FROM_TEMPLATE(dateComboBoxTemplateFactory, DateComboBoxTemplate);
+			}
+
+			GuiDatePickerTemplate_StyleProvider::~GuiDatePickerTemplate_StyleProvider()
+			{
+				delete controlTemplate;
+			}
+
+			controls::GuiSelectableButton::IStyleController* GuiDatePickerTemplate_StyleProvider::CreateDateButtonStyle()
+			{
+				GET_FACTORY_FROM_TEMPLATE(GuiSelectableButtonTemplate, dateButtonTemplateFactory, DateButtonTemplate);
+			}
+
+			GuiTextListTemplate_StyleProvider* GuiDatePickerTemplate_StyleProvider::CreateTextListStyle()
+			{
+				GET_FACTORY_FROM_TEMPLATE(GuiTextListTemplate, dateTextListTemplateFactory, DateTextListTemplate);
+			}
+
+			controls::GuiTextList* GuiDatePickerTemplate_StyleProvider::CreateTextList()
+			{
+				auto style = CreateTextListStyle();
+				return new GuiTextList(style, style->CreateArgument());
+			}
+
+			controls::GuiComboBoxListControl::IStyleController* GuiDatePickerTemplate_StyleProvider::CreateComboBoxStyle()
+			{
+				GET_FACTORY_FROM_TEMPLATE(GuiComboBoxTemplate, dateComboBoxTemplateFactory, DateComboBoxTemplate);
+			}
+
+			Color GuiDatePickerTemplate_StyleProvider::GetBackgroundColor()
+			{
+				return controlTemplate->GetBackgroundColor();
+			}
+
+			Color GuiDatePickerTemplate_StyleProvider::GetPrimaryTextColor()
+			{
+				return controlTemplate->GetPrimaryTextColor();
+			}
+
+			Color GuiDatePickerTemplate_StyleProvider::GetSecondaryTextColor()
+			{
+				return controlTemplate->GetSecondaryTextColor();
+			}
+
+/***********************************************************************
+GuiDateComboBoxTemplate_StyleProvider
+***********************************************************************/
+
+			GuiDateComboBoxTemplate_StyleProvider::GuiDateComboBoxTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory)
+				:GuiComboBoxTemplate_StyleProvider(factory)
+			{
+				if (!(controlTemplate = dynamic_cast<GuiDateComboBoxTemplate*>(GetBoundsComposition())))
+				{
+					CHECK_FAIL(L"GuiDateComboBoxTemplate_StyleProvider::GuiDateComboBoxTemplate_StyleProvider()#An instance of GuiDateComboBoxTemplate is expected.");
+				}
+				INITIALIZE_FACTORY_FROM_TEMPLATE(datePickerTemplateFactory, DatePickerTemplate);
+			}
+
+			GuiDateComboBoxTemplate_StyleProvider::~GuiDateComboBoxTemplate_StyleProvider()
+			{
+			}
+
+			controls::GuiDatePicker* GuiDateComboBoxTemplate_StyleProvider::CreateArgument()
+			{
+				return new GuiDatePicker(CreateDatePickerStyle());
+			}
+
+			controls::GuiDatePicker::IStyleProvider* GuiDateComboBoxTemplate_StyleProvider::CreateDatePickerStyle()
+			{
+				GET_FACTORY_FROM_TEMPLATE(GuiDatePickerTemplate, datePickerTemplateFactory, DatePickerTemplate);
+			}
+
+/***********************************************************************
+GuiScrollTemplate_StyleProvider
+***********************************************************************/
+
+			GuiScrollTemplate_StyleProvider::GuiScrollTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory)
+				:GuiControlTemplate_StyleProvider(factory)
+			{
+				if (!(controlTemplate = dynamic_cast<GuiScrollTemplate*>(GetBoundsComposition())))
+				{
+					CHECK_FAIL(L"GuiButtonTemplate_StyleProvider::GuiButtonTemplate_StyleProvider()#An instance of GuiScrollTemplate is expected.");
+				}
+			}
+
+			GuiScrollTemplate_StyleProvider::~GuiScrollTemplate_StyleProvider()
+			{
+			}
+
+			void GuiScrollTemplate_StyleProvider::SetCommandExecutor(controls::GuiScroll::ICommandExecutor* value)
+			{
+				controlTemplate->SetCommands(value);
+			}
+
+			void GuiScrollTemplate_StyleProvider::SetTotalSize(vint value)
+			{
+				controlTemplate->SetTotalSize(value);
+			}
+
+			void GuiScrollTemplate_StyleProvider::SetPageSize(vint value)
+			{
+				controlTemplate->SetPageSize(value);
+			}
+
+			void GuiScrollTemplate_StyleProvider::SetPosition(vint value)
+			{
+				controlTemplate->SetPosition(value);
+			}
+
+/***********************************************************************
+GuiScrollViewTemplate_StyleProvider
+***********************************************************************/
+
+			GuiScrollViewTemplate_StyleProvider::GuiScrollViewTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory)
+				:GuiControlTemplate_StyleProvider(factory)
+			{
+				if (!(controlTemplate = dynamic_cast<GuiScrollViewTemplate*>(GetBoundsComposition())))
+				{
+					CHECK_FAIL(L"GuiScrollViewTemplate_StyleProvider::GuiScrollViewTemplate_StyleProvider()#An instance of GuiScrollViewTemplate is expected.");
+				}
+				INITIALIZE_FACTORY_FROM_TEMPLATE(hScrollTemplateFactory, HScrollTemplate);
+				INITIALIZE_FACTORY_FROM_TEMPLATE(vScrollTemplateFactory, VScrollTemplate);
+			}
+
+			GuiScrollViewTemplate_StyleProvider::~GuiScrollViewTemplate_StyleProvider()
+			{
+			}
+				
+			controls::GuiScroll::IStyleController* GuiScrollViewTemplate_StyleProvider::CreateHorizontalScrollStyle()
+			{
+				GET_FACTORY_FROM_TEMPLATE(GuiScrollTemplate, hScrollTemplateFactory, HScrollTemplate);
+			}
+
+			controls::GuiScroll::IStyleController* GuiScrollViewTemplate_StyleProvider::CreateVerticalScrollStyle()
+			{
+				GET_FACTORY_FROM_TEMPLATE(GuiScrollTemplate, vScrollTemplateFactory, VScrollTemplate);
+			}
+
+			vint GuiScrollViewTemplate_StyleProvider::GetDefaultScrollSize()
+			{
+				return controlTemplate->GetDefaultScrollSize();
+			}
+
+			compositions::GuiGraphicsComposition* GuiScrollViewTemplate_StyleProvider::InstallBackground(compositions::GuiBoundsComposition* boundsComposition)
+			{
+				controlTemplate->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				boundsComposition->AddChild(controlTemplate);
+				return controlTemplate->GetContainerComposition();
+			}
+
+/***********************************************************************
+GuiSinglelineTextBoxTemplate_StyleProvider
+***********************************************************************/
+
+			GuiMultilineTextBoxTemplate_StyleProvider::GuiMultilineTextBoxTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory)
+				:GuiScrollViewTemplate_StyleProvider(factory)
+			{
+				if (!(controlTemplate = dynamic_cast<GuiMultilineTextBoxTemplate*>(GetBoundsComposition())))
+				{
+					CHECK_FAIL(L"GuiMultilineTextBoxTemplate_StyleProvider::GuiMultilineTextBoxTemplate_StyleProvider()#An instance of GuiMultilineTextBoxTemplate is expected.");
+				}
+			}
+
+			GuiMultilineTextBoxTemplate_StyleProvider::~GuiMultilineTextBoxTemplate_StyleProvider()
+			{
+			}
+			
+			void GuiMultilineTextBoxTemplate_StyleProvider::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
+			{
+				GuiScrollViewTemplate_StyleProvider::SetFocusableComposition(value);
+				if (auto style = dynamic_cast<GuiMultilineTextBox::StyleController*>(associatedStyleController))
+				{
+					auto element = style->GetTextElement();
+					Array<text::ColorEntry> colors(1);
+					colors[0] = controlTemplate->GetTextColor();
+					element->SetColors(colors);
+					element->SetCaretColor(controlTemplate->GetCaretColor());
+				}
+			}
+
+/***********************************************************************
+GuiTextListTemplate_StyleProvider::ItemStyleProvider
+***********************************************************************/
+
+			GuiTextListTemplate_StyleProvider::ItemStyleProvider::ItemStyleProvider(GuiTextListTemplate_StyleProvider* _styleProvider)
+				:styleProvider(_styleProvider)
+			{
+			}
+
+			GuiTextListTemplate_StyleProvider::ItemStyleProvider::~ItemStyleProvider()
+			{
+			}
+
+			controls::GuiSelectableButton::IStyleController* GuiTextListTemplate_StyleProvider::ItemStyleProvider::CreateBackgroundStyleController()
+			{
+				return styleProvider->CreateBackgroundStyle();
+			}
+
+			controls::GuiSelectableButton::IStyleController* GuiTextListTemplate_StyleProvider::ItemStyleProvider::CreateBulletStyleController()
+			{
+				return styleProvider->CreateBulletStyle();
+			}
+
+			Color GuiTextListTemplate_StyleProvider::ItemStyleProvider::GetTextColor()
+			{
+				return styleProvider->controlTemplate->GetTextColor();
+			}
+
+/***********************************************************************
+GuiTextListTemplate_StyleProvider
+***********************************************************************/
+
+			GuiTextListTemplate_StyleProvider::GuiTextListTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory)
+				:GuiScrollViewTemplate_StyleProvider(factory)
+			{
+				if (!(controlTemplate = dynamic_cast<GuiTextListTemplate*>(GetBoundsComposition())))
+				{
+					CHECK_FAIL(L"GuiTextListTemplate_StyleProvider::GuiTextListTemplate_StyleProvider()#An instance of GuiTextListTemplate is expected.");
+				}
+				INITIALIZE_FACTORY_FROM_TEMPLATE(backgroundTemplateFactory, BackgroundTemplate);
+				INITIALIZE_FACTORY_FROM_TEMPLATE(bulletTemplateFactory, BulletTemplate);
+			}
+
+			GuiTextListTemplate_StyleProvider::~GuiTextListTemplate_StyleProvider()
+			{
+			}
+
+			controls::list::TextItemStyleProvider::ITextItemStyleProvider* GuiTextListTemplate_StyleProvider::CreateArgument()
+			{
+				return new ItemStyleProvider(this);
+			}
+
+			controls::GuiSelectableButton::IStyleController* GuiTextListTemplate_StyleProvider::CreateBackgroundStyle()
+			{
+				GET_FACTORY_FROM_TEMPLATE(GuiSelectableButtonTemplate, backgroundTemplateFactory, BackgroundTemplate);
+			}
+
+			controls::GuiSelectableButton::IStyleController* GuiTextListTemplate_StyleProvider::CreateBulletStyle()
+			{
+				GET_FACTORY_FROM_TEMPLATE_OPT(GuiSelectableButtonTemplate, bulletTemplateFactory, BulletTemplate);
+			}
+
+/***********************************************************************
+GuiListViewTemplate_StyleProvider
+***********************************************************************/
+
+			GuiListViewTemplate_StyleProvider::GuiListViewTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory)
+				:GuiScrollViewTemplate_StyleProvider(factory)
+			{
+				if (!(controlTemplate = dynamic_cast<GuiListViewTemplate*>(GetBoundsComposition())))
+				{
+					CHECK_FAIL(L"GuiListViewTemplate_StyleProvider::GuiListViewTemplate_StyleProvider()#An instance of GuiListViewTemplate is expected.");
+				}
+				INITIALIZE_FACTORY_FROM_TEMPLATE(backgroundTemplateFactory, BackgroundTemplate);
+				INITIALIZE_FACTORY_FROM_TEMPLATE(columnHeaderTemplateFactory, ColumnHeaderTemplate);
+			}
+
+			GuiListViewTemplate_StyleProvider::~GuiListViewTemplate_StyleProvider()
+			{
+			}
+				
+			controls::GuiSelectableButton::IStyleController* GuiListViewTemplate_StyleProvider::CreateItemBackground()
+			{
+				GET_FACTORY_FROM_TEMPLATE(GuiSelectableButtonTemplate, backgroundTemplateFactory, BackgroundTemplate);
+			}
+
+			controls::GuiListViewColumnHeader::IStyleController* GuiListViewTemplate_StyleProvider::CreateColumnStyle()
+			{
+				GET_FACTORY_FROM_TEMPLATE(GuiListViewColumnHeaderTemplate, columnHeaderTemplateFactory, ColumnHeaderTemplate);
+			}
+
+			Color GuiListViewTemplate_StyleProvider::GetPrimaryTextColor()
+			{
+				return controlTemplate->GetPrimaryTextColor();
+			}
+
+			Color GuiListViewTemplate_StyleProvider::GetSecondaryTextColor()
+			{
+				return controlTemplate->GetSecondaryTextColor();
+			}
+
+			Color GuiListViewTemplate_StyleProvider::GetItemSeparatorColor()
+			{
+				return controlTemplate->GetItemSeparatorColor();
+			}
+
+/***********************************************************************
+GuiTreeViewTemplate_StyleProvider
+***********************************************************************/
+
+			GuiTreeViewTemplate_StyleProvider::GuiTreeViewTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory)
+				:GuiScrollViewTemplate_StyleProvider(factory)
+			{
+				if (!(controlTemplate = dynamic_cast<GuiTreeViewTemplate*>(GetBoundsComposition())))
+				{
+					CHECK_FAIL(L"GuiTreeViewTemplate_StyleProvider::GuiTreeViewTemplate_StyleProvider()#An instance of GuiTreeViewTemplate is expected.");
+				}
+				INITIALIZE_FACTORY_FROM_TEMPLATE(backgroundTemplateFactory, BackgroundTemplate);
+				INITIALIZE_FACTORY_FROM_TEMPLATE(expandingDecoratorTemplateFactory, ExpandingDecoratorTemplate);
+			}
+
+			GuiTreeViewTemplate_StyleProvider::~GuiTreeViewTemplate_StyleProvider()
+			{
+			}
+				
+			controls::GuiSelectableButton::IStyleController* GuiTreeViewTemplate_StyleProvider::CreateItemBackground()
+			{
+				GET_FACTORY_FROM_TEMPLATE(GuiSelectableButtonTemplate, backgroundTemplateFactory, BackgroundTemplate);
+			}
+
+			controls::GuiSelectableButton::IStyleController* GuiTreeViewTemplate_StyleProvider::CreateItemExpandingDecorator()
+			{
+				GET_FACTORY_FROM_TEMPLATE(GuiSelectableButtonTemplate, expandingDecoratorTemplateFactory, ExpandingDecoratorTemplate);
+			}
+
+			Color GuiTreeViewTemplate_StyleProvider::GetTextColor()
+			{
+				return controlTemplate->GetTextColor();
+			}
+
+/***********************************************************************
+GuiTabTemplate_StyleProvider
+***********************************************************************/
+
+			void GuiTabTemplate_StyleProvider::OnHeaderButtonClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				if(commandExecutor)
+				{
+					vint index=headerButtons.IndexOf(dynamic_cast<GuiSelectableButton*>(sender->GetAssociatedControl()));
+					if(index!=-1)
+					{
+						commandExecutor->ShowTab(index);
+					}
+				}
+			}
+
+			void GuiTabTemplate_StyleProvider::OnTabHeaderBoundsChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				vint height=headerOverflowButton->GetBoundsComposition()->GetBounds().Height();
+				headerOverflowButton->GetBoundsComposition()->SetBounds(Rect(Point(0, 0), Size(height, 0)));
+
+				UpdateHeaderLayout();
+			}
+
+			void GuiTabTemplate_StyleProvider::OnHeaderOverflowButtonClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				headerOverflowMenu->SetClientSize(Size(0, 0));
+				headerOverflowMenu->ShowPopup(headerOverflowButton, true);
+			}
+
+			void GuiTabTemplate_StyleProvider::OnHeaderOverflowMenuButtonClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				vint index=headerOverflowMenu->GetToolstripItems().IndexOf(sender->GetRelatedControl());
+				commandExecutor->ShowTab(index);
+			}
+
+			void GuiTabTemplate_StyleProvider::UpdateHeaderOverflowButtonVisibility()
+			{
+				if(tabHeaderComposition->IsStackItemClipped())
+				{
+					tabBoundsComposition->SetColumnOption(1, GuiCellOption::MinSizeOption());
+				}
+				else
+				{
+					tabBoundsComposition->SetColumnOption(1, GuiCellOption::AbsoluteOption(0));
+				}
+				tabBoundsComposition->ForceCalculateSizeImmediately();
+			}
+
+			void GuiTabTemplate_StyleProvider::UpdateHeaderZOrder()
+			{
+				vint itemCount=tabHeaderComposition->GetStackItems().Count();
+				vint childCount=tabHeaderComposition->Children().Count();
+				for(vint i=0;i<itemCount;i++)
+				{
+					GuiStackItemComposition* item=tabHeaderComposition->GetStackItems().Get(i);
+					if(headerButtons[i]->GetSelected())
+					{
+						tabHeaderComposition->MoveChild(item, childCount-1);
+						vint padding = controlTemplate->GetHeaderPadding();
+						item->SetExtraMargin(Margin(padding, padding, padding, 0));
+					}
+					else
+					{
+						item->SetExtraMargin(Margin(0, 0, 0, 0));
+					}
+				}
+				if(childCount>1)
+				{
+					tabHeaderComposition->MoveChild(tabContentTopLineComposition, childCount-2);
+				}
+			}
+
+			void GuiTabTemplate_StyleProvider::UpdateHeaderVisibilityIndex()
+			{
+				vint itemCount=tabHeaderComposition->GetStackItems().Count();
+				vint selectedItem=-1;
+				for(vint i=0;i<itemCount;i++)
+				{
+					if(headerButtons[i]->GetSelected())
+					{
+						selectedItem=i;
+					}
+				}
+
+				if(selectedItem!=-1)
+				{
+					tabHeaderComposition->EnsureVisible(selectedItem);
+				}
+			}
+
+			void GuiTabTemplate_StyleProvider::UpdateHeaderLayout()
+			{
+				UpdateHeaderZOrder();
+				UpdateHeaderVisibilityIndex();
+				UpdateHeaderOverflowButtonVisibility();
+			}
+
+			void GuiTabTemplate_StyleProvider::Initialize()
+			{
+				tabBoundsComposition=new GuiTableComposition;
+				tabBoundsComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElement);
+				tabBoundsComposition->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				tabBoundsComposition->SetRowsAndColumns(1, 2);
+				tabBoundsComposition->SetRowOption(0, GuiCellOption::MinSizeOption());
+				tabBoundsComposition->SetColumnOption(0, GuiCellOption::PercentageOption(1.0));
+				tabBoundsComposition->SetColumnOption(1, GuiCellOption::AbsoluteOption(0));
+				controlTemplate->GetHeaderComposition()->AddChild(tabBoundsComposition);
+				
+				vint padding = controlTemplate->GetHeaderPadding();
+				{
+					GuiCellComposition* cell=new GuiCellComposition;
+					tabBoundsComposition->AddChild(cell);
+					cell->SetSite(0, 0, 1, 1);
+					
+					vint padding = controlTemplate->GetHeaderPadding();
+					tabHeaderComposition=new GuiStackComposition;
+					tabHeaderComposition->SetExtraMargin(Margin(padding, padding, padding, 0));
+					tabHeaderComposition->SetAlignmentToParent(Margin(0, 0, 1, 0));
+					tabHeaderComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+					tabHeaderComposition->BoundsChanged.AttachMethod(this, &GuiTabTemplate_StyleProvider::OnTabHeaderBoundsChanged);
+					cell->AddChild(tabHeaderComposition);
+				}
+				{
+					GuiCellComposition* cell=new GuiCellComposition;
+					tabBoundsComposition->AddChild(cell);
+					cell->SetSite(0, 1, 1, 1);
+
+					headerOverflowButton=new GuiButton(CreateDropdownTemplate());
+					headerOverflowButton->GetBoundsComposition()->SetAlignmentToParent(Margin(-1, padding, 0, 0));
+					headerOverflowButton->Clicked.AttachMethod(this, &GuiTabTemplate_StyleProvider::OnHeaderOverflowButtonClicked);
+					cell->AddChild(headerOverflowButton->GetBoundsComposition());
+				}
+
+				headerOverflowMenu=new GuiToolstripMenu(CreateMenuTemplate(), 0);
+				headerController=new GuiSelectableButton::MutexGroupController;
+			}
+
+			controls::GuiSelectableButton::IStyleController* GuiTabTemplate_StyleProvider::CreateHeaderTemplate()
+			{
+				GET_FACTORY_FROM_TEMPLATE(GuiSelectableButtonTemplate, headerTemplateFactory, HeaderTemplate);
+			}
+
+			controls::GuiButton::IStyleController* GuiTabTemplate_StyleProvider::CreateDropdownTemplate()
+			{
+				GET_FACTORY_FROM_TEMPLATE(GuiButtonTemplate, dropdownTemplateFactory, DropdownTemplate);
+			}
+
+			controls::GuiMenu::IStyleController* GuiTabTemplate_StyleProvider::CreateMenuTemplate()
+			{
+				GET_FACTORY_FROM_TEMPLATE(GuiMenuTemplate, menuTemplateFactory, MenuTemplate);
+			}
+
+			controls::GuiToolstripButton::IStyleController* GuiTabTemplate_StyleProvider::CreateMenuItemTemplate()
+			{
+				GET_FACTORY_FROM_TEMPLATE(GuiToolstripButtonTemplate, menuItemTemplateFactory, MenuItemTemplate);
+			}
+
+			GuiTabTemplate_StyleProvider::GuiTabTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory)
+				:GuiControlTemplate_StyleProvider(factory)
+			{
+				if (!(controlTemplate = dynamic_cast<GuiTabTemplate*>(GetBoundsComposition())))
+				{
+					CHECK_FAIL(L"GuiTabTemplate_StyleProvider::GuiTabTemplate_StyleProvider()#An instance of GuiTabTemplate is expected.");
+				}
+				INITIALIZE_FACTORY_FROM_TEMPLATE(headerTemplateFactory, HeaderTemplate);
+				INITIALIZE_FACTORY_FROM_TEMPLATE(dropdownTemplateFactory, DropdownTemplate);
+				INITIALIZE_FACTORY_FROM_TEMPLATE(menuTemplateFactory, MenuTemplate);
+				INITIALIZE_FACTORY_FROM_TEMPLATE(menuItemTemplateFactory, MenuItemTemplate);
+				Initialize();
+			}
+
+			GuiTabTemplate_StyleProvider::~GuiTabTemplate_StyleProvider()
+			{
+				delete headerOverflowMenu;
+			}
+
+			void GuiTabTemplate_StyleProvider::SetCommandExecutor(controls::GuiTab::ICommandExecutor* value)
+			{
+				commandExecutor=value;
+			}
+
+			void GuiTabTemplate_StyleProvider::InsertTab(vint index)
+			{
+				GuiSelectableButton* button=new GuiSelectableButton(CreateHeaderTemplate());
+				button->SetAutoSelection(false);
+				button->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				button->SetGroupController(headerController.Obj());
+				button->Clicked.AttachMethod(this, &GuiTabTemplate_StyleProvider::OnHeaderButtonClicked);
+
+				GuiStackItemComposition* item=new GuiStackItemComposition;
+				item->AddChild(button->GetBoundsComposition());
+				tabHeaderComposition->InsertStackItem(index, item);
+				headerButtons.Insert(index, button);
+
+				GuiToolstripButton* menuItem=new GuiToolstripButton(CreateMenuItemTemplate());
+				menuItem->Clicked.AttachMethod(this, &GuiTabTemplate_StyleProvider::OnHeaderOverflowMenuButtonClicked);
+				headerOverflowMenu->GetToolstripItems().Insert(index, menuItem);
+
+				UpdateHeaderLayout();
+			}
+
+			void GuiTabTemplate_StyleProvider::SetTabText(vint index, const WString& value)
+			{
+				headerButtons[index]->SetText(value);
+				headerOverflowMenu->GetToolstripItems().Get(index)->SetText(value);
+				
+				UpdateHeaderLayout();
+			}
+
+			void GuiTabTemplate_StyleProvider::RemoveTab(vint index)
+			{
+				GuiStackItemComposition* item=tabHeaderComposition->GetStackItems().Get(index);
+				GuiSelectableButton* button=headerButtons[index];
+
+				tabHeaderComposition->RemoveChild(item);
+				item->RemoveChild(button->GetBoundsComposition());
+				headerButtons.RemoveAt(index);
+
+				headerOverflowMenu->GetToolstripItems().RemoveAt(index);
+				delete item;
+				delete button;
+				
+				UpdateHeaderLayout();
+			}
+
+			void GuiTabTemplate_StyleProvider::MoveTab(vint oldIndex, vint newIndex)
+			{
+				GuiStackItemComposition* item=tabHeaderComposition->GetStackItems().Get(oldIndex);
+				tabHeaderComposition->RemoveChild(item);
+				tabHeaderComposition->InsertStackItem(newIndex, item);
+
+				GuiSelectableButton* button=headerButtons[oldIndex];
+				headerButtons.RemoveAt(oldIndex);
+				headerButtons.Insert(newIndex, button);
+				
+				UpdateHeaderLayout();
+			}
+
+			void GuiTabTemplate_StyleProvider::SetSelectedTab(vint index)
+			{
+				headerButtons[index]->SetSelected(true);
+				
+				UpdateHeaderLayout();
 			}
 
 /***********************************************************************
@@ -28567,8 +29747,6 @@ GuiMenuBar
 GuiMenuButton
 ***********************************************************************/
 
-			const wchar_t* const GuiMenuButton::MenuItemSubComponentMeasuringCategoryName=L"MenuItem";
-
 			GuiButton* GuiMenuButton::GetSubMenuHost()
 			{
 				GuiButton* button=styleController->GetSubMenuHost();
@@ -28630,13 +29808,13 @@ GuiMenuButton
 
 			void GuiMenuButton::OnClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
-				if(GetSubMenu())
+				if(GetVisuallyEnabled())
 				{
-					OpenSubMenuInternal();
-				}
-				else if(GetVisuallyEnabled())
-				{
-					if(ownerMenuService)
+					if(GetSubMenu())
+					{
+						OpenSubMenuInternal();
+					}
+					else if(ownerMenuService)
 					{
 						ownerMenuService->MenuItemExecuted();
 					}
@@ -28912,16 +30090,16 @@ GuiToolstripCommand
 			{
 			}
 
-			void GuiToolstripCommand::Attach(GuiControlHost* controlHost)
+			void GuiToolstripCommand::Attach(GuiInstanceRootObject* rootObject)
 			{
-				shortcutOwner = controlHost;
+				shortcutOwner = dynamic_cast<GuiControlHost*>(rootObject);
 				if (shortcutBuilder && !shortcutKeyItem)
 				{
 					BuildShortcut(shortcutBuilder->text);
 				}
 			}
 
-			void GuiToolstripCommand::Detach(GuiControlHost* controlHost)
+			void GuiToolstripCommand::Detach(GuiInstanceRootObject* rootObject)
 			{
 				ReplaceShortcut(0, false);
 				shortcutOwner = 0;
@@ -29116,28 +30294,12 @@ GuiToolstripCollection
 
 			void GuiToolstripCollection::BeforeRemove(vint index, GuiControl* const& child)
 			{
-				GuiStackItemComposition* stackItem=stackComposition->GetStackItems().Get(index);
-
+				GuiStackItemComposition* stackItem = stackComposition->GetStackItems().Get(index);
 				stackComposition->RemoveChild(stackItem);
 				stackItem->RemoveChild(child->GetBoundsComposition());
 				delete stackItem;
-
-				if(subComponentMeasurer)
-				{
-					GuiMenuButton* menuButton=dynamic_cast<GuiMenuButton*>(child);
-					if(menuButton)
-					{
-						GuiSubComponentMeasurer::IMeasuringSource* measuringSource=
-							dynamic_cast<GuiMenuButton::IStyleController*>(
-								menuButton->GetStyleController()
-								)->GetMeasuringSource();
-						if(measuringSource)
-						{
-							subComponentMeasurer->DetachMeasuringSource(measuringSource);
-						}
-					}
-				}
 				delete child;
+				InvokeUpdateLayout();
 			}
 
 			void GuiToolstripCollection::AfterInsert(vint index, GuiControl* const& child)
@@ -29147,22 +30309,11 @@ GuiToolstripCollection
 				stackItem->AddChild(child->GetBoundsComposition());
 				stackComposition->InsertChild(index, stackItem);
 
-				if(subComponentMeasurer)
+				GuiMenuButton* menuButton=dynamic_cast<GuiMenuButton*>(child);
+				if(menuButton)
 				{
-					GuiMenuButton* menuButton=dynamic_cast<GuiMenuButton*>(child);
-					if(menuButton)
-					{
-						GuiSubComponentMeasurer::IMeasuringSource* measuringSource=
-							dynamic_cast<GuiMenuButton::IStyleController*>(
-								menuButton->GetStyleController()
-								)->GetMeasuringSource();
-						if(measuringSource)
-						{
-							subComponentMeasurer->AttachMeasuringSource(measuringSource);
-						}
-						menuButton->TextChanged.AttachMethod(this, &GuiToolstripCollection::OnInterestingMenuButtonPropertyChanged);
-						menuButton->ShortcutTextChanged.AttachMethod(this, &GuiToolstripCollection::OnInterestingMenuButtonPropertyChanged);
-					}
+					menuButton->TextChanged.AttachMethod(this, &GuiToolstripCollection::OnInterestingMenuButtonPropertyChanged);
+					menuButton->ShortcutTextChanged.AttachMethod(this, &GuiToolstripCollection::OnInterestingMenuButtonPropertyChanged);
 				}
 				InvokeUpdateLayout();
 			}
@@ -29172,10 +30323,9 @@ GuiToolstripCollection
 				InvokeUpdateLayout();
 			}
 
-			GuiToolstripCollection::GuiToolstripCollection(IContentCallback* _contentCallback, compositions::GuiStackComposition* _stackComposition, Ptr<compositions::GuiSubComponentMeasurer> _subComponentMeasurer)
+			GuiToolstripCollection::GuiToolstripCollection(IContentCallback* _contentCallback, compositions::GuiStackComposition* _stackComposition)
 				:contentCallback(_contentCallback)
 				,stackComposition(_stackComposition)
-				,subComponentMeasurer(_subComponentMeasurer)
 			{
 			}
 
@@ -29388,21 +30538,25 @@ GuiToolstripMenu
 
 			void GuiToolstripMenu::UpdateLayout()
 			{
-				subComponentMeasurer->MeasureAndUpdate(GuiMenuButton::MenuItemSubComponentMeasuringCategoryName, GuiSubComponentMeasurer::Horizontal);
+				sharedSizeRootComposition->ForceCalculateSizeImmediately();
 			}
 
 			GuiToolstripMenu::GuiToolstripMenu(IStyleController* _styleController, GuiControl* _owner)
 				:GuiMenu(_styleController, _owner)
 			{
+				sharedSizeRootComposition = new GuiSharedSizeRootComposition();
+				sharedSizeRootComposition->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				sharedSizeRootComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+				GetContainerComposition()->AddChild(sharedSizeRootComposition);
+
 				stackComposition=new GuiStackComposition;
 				stackComposition->SetDirection(GuiStackComposition::Vertical);
 				stackComposition->SetAlignmentToParent(Margin(0, 0, 0, 0));
 				stackComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
-				GetContainerComposition()->AddChild(stackComposition);
-
-				subComponentMeasurer=new GuiSubComponentMeasurer;
-				toolstripItems=new GuiToolstripCollection(this, stackComposition, subComponentMeasurer);
-				builder=new GuiToolstripBuilder(GuiToolstripBuilder::Menu, toolstripItems.Obj());
+				sharedSizeRootComposition->AddChild(stackComposition);
+				
+				toolstripItems = new GuiToolstripCollection(this, stackComposition);
+				builder = new GuiToolstripBuilder(GuiToolstripBuilder::Menu, toolstripItems.Obj());
 			}
 
 			GuiToolstripMenu::~GuiToolstripMenu()
@@ -29433,7 +30587,7 @@ GuiToolstripMenuBar
 				stackComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 				GetContainerComposition()->AddChild(stackComposition);
 
-				toolstripItems=new GuiToolstripCollection(0, stackComposition, 0);
+				toolstripItems=new GuiToolstripCollection(0, stackComposition);
 				builder=new GuiToolstripBuilder(GuiToolstripBuilder::MenuBar, toolstripItems.Obj());
 			}
 
@@ -29465,7 +30619,7 @@ GuiToolstripToolBar
 				stackComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 				GetContainerComposition()->AddChild(stackComposition);
 
-				toolstripItems=new GuiToolstripCollection(0, stackComposition, 0);
+				toolstripItems=new GuiToolstripCollection(0, stackComposition);
 				builder=new GuiToolstripBuilder(GuiToolstripBuilder::ToolBar, toolstripItems.Obj());
 			}
 
@@ -29633,7 +30787,6 @@ GuiBoundsComposition
 
 			GuiBoundsComposition::GuiBoundsComposition()
 			{
-				BoundsChanged.SetAssociatedComposition(this);
 				ClearAlignmentToParent();
 			}
 
@@ -29712,11 +30865,7 @@ GuiBoundsComposition
 						result.y1=result.y2-height;
 					}
 				}
-				if(previousBounds!=result)
-				{
-					previousBounds=result;
-					BoundsChanged.Execute(GuiEventArgs(this));
-				}
+				UpdatePreviousBounds(result);
 				return result;
 			}
 
@@ -29763,169 +30912,167 @@ namespace vl
 			using namespace elements;
 
 /***********************************************************************
-GuiSubComponentMeasurer::MeasuringSource
+GuiSharedSizeItemComposition
 ***********************************************************************/
 
-			GuiSubComponentMeasurer::MeasuringSource::MeasuringSource(const WString& _measuringCategory, GuiGraphicsComposition* _mainComposition)
-				:measurer(0)
-				,measuringCategory(_measuringCategory)
-				,mainComposition(_mainComposition)
+			void GuiSharedSizeItemComposition::Update()
 			{
-			}
-
-			GuiSubComponentMeasurer::MeasuringSource::~MeasuringSource()
-			{
-			}
-
-			bool GuiSubComponentMeasurer::MeasuringSource::AddSubComponent(const WString& name, GuiGraphicsComposition* composition)
-			{
-				if(subComponents.Keys().Contains(name))
+				if (parentRoot)
 				{
-					return false;
-				}
-				else
-				{
-					subComponents.Add(name, composition);
-					return true;
+					parentRoot->ForceCalculateSizeImmediately();
 				}
 			}
 
-			void GuiSubComponentMeasurer::MeasuringSource::AttachMeasurer(GuiSubComponentMeasurer* value)
+			void GuiSharedSizeItemComposition::OnParentLineChanged()
 			{
-				measurer=value;
+				GuiBoundsComposition::OnParentLineChanged();
+				if (parentRoot)
+				{
+					parentRoot->childItems.Remove(this);
+					parentRoot = 0;
+				}
+
+				auto current = GetParent();
+				while (current)
+				{
+					if (auto item = dynamic_cast<GuiSharedSizeItemComposition*>(current))
+					{
+						break;
+					}
+					else if (auto root = dynamic_cast<GuiSharedSizeRootComposition*>(current))
+					{
+						parentRoot = root;
+						break;
+					}
+					current = current->GetParent();
+				}
+
+				if (parentRoot)
+				{
+					parentRoot->childItems.Add(this);
+				}
 			}
 
-			void GuiSubComponentMeasurer::MeasuringSource::DetachMeasurer(GuiSubComponentMeasurer* value)
+			GuiSharedSizeItemComposition::GuiSharedSizeItemComposition()
+				:parentRoot(0)
+				, sharedWidth(false)
+				, sharedHeight(false)
 			{
-				measurer=0;
+				SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 			}
 
-			GuiSubComponentMeasurer* GuiSubComponentMeasurer::MeasuringSource::GetAttachedMeasurer()
+			GuiSharedSizeItemComposition::~GuiSharedSizeItemComposition()
 			{
-				return measurer;
 			}
 
-			WString GuiSubComponentMeasurer::MeasuringSource::GetMeasuringCategory()
+			const WString& GuiSharedSizeItemComposition::GetGroup()
 			{
-				return measuringCategory;
+				return group;
 			}
 
-			vint GuiSubComponentMeasurer::MeasuringSource::GetSubComponentCount()
+			void GuiSharedSizeItemComposition::SetGroup(const WString& value)
 			{
-				return subComponents.Count();
+				if (group != value)
+				{
+					group = value;
+					Update();
+				}
 			}
 
-			WString GuiSubComponentMeasurer::MeasuringSource::GetSubComponentName(vint index)
+			bool GuiSharedSizeItemComposition::GetSharedWidth()
 			{
-				return subComponents.Keys()[index];
+				return sharedWidth;
 			}
 
-			GuiGraphicsComposition* GuiSubComponentMeasurer::MeasuringSource::GetSubComponentComposition(vint index)
+			void GuiSharedSizeItemComposition::SetSharedWidth(bool value)
 			{
-				return subComponents.Values().Get(index);
+				if (sharedWidth != value)
+				{
+					sharedWidth = value;
+					Update();
+				}
 			}
 
-			GuiGraphicsComposition* GuiSubComponentMeasurer::MeasuringSource::GetSubComponentComposition(const WString& name)
+			bool GuiSharedSizeItemComposition::GetSharedHeight()
 			{
-				return subComponents[name];
+				return sharedHeight;
 			}
 
-			GuiGraphicsComposition* GuiSubComponentMeasurer::MeasuringSource::GetMainComposition()
+			void GuiSharedSizeItemComposition::SetSharedHeight(bool value)
 			{
-				return mainComposition;
-			}
-
-			void GuiSubComponentMeasurer::MeasuringSource::SubComponentPreferredMinSizeUpdated()
-			{
+				if (sharedHeight != value)
+				{
+					sharedHeight = value;
+					Update();
+				}
 			}
 
 /***********************************************************************
-GuiSubComponentMeasurer
+GuiSharedSizeRootComposition
 ***********************************************************************/
 
-			GuiSubComponentMeasurer::GuiSubComponentMeasurer()
+			GuiSharedSizeRootComposition::GuiSharedSizeRootComposition()
 			{
 			}
 
-			GuiSubComponentMeasurer::~GuiSubComponentMeasurer()
+			GuiSharedSizeRootComposition::~GuiSharedSizeRootComposition()
 			{
 			}
 
-			bool GuiSubComponentMeasurer::AttachMeasuringSource(IMeasuringSource* value)
+			void AddSizeComponent(Dictionary<WString, vint>& sizes, const WString& group, vint sizeComponent)
 			{
-				if(!value->GetAttachedMeasurer())
+				vint index = sizes.Keys().IndexOf(group);
+				if (index == -1)
 				{
-					measuringSources.Add(value);
-					value->AttachMeasurer(this);
-					return true;
+					sizes.Add(group, sizeComponent);
 				}
-				else
+				else if (sizes.Values().Get(index) < sizeComponent)
 				{
-					return false;
+					sizes.Set(group, sizeComponent);
 				}
 			}
 
-			bool GuiSubComponentMeasurer::DetachMeasuringSource(IMeasuringSource* value)
+			void GuiSharedSizeRootComposition::ForceCalculateSizeImmediately()
 			{
-				if(value->GetAttachedMeasurer()==this)
-				{
-					value->DetachMeasurer(this);
-					measuringSources.Remove(value);
-					return true;
-				}
-				else
-				{
-					return false;
-				}
-			}
+				Dictionary<WString, vint> widths, heights;
 
-			void GuiSubComponentMeasurer::MeasureAndUpdate(const WString& measuringCategory, Direction direction)
-			{
-				List<IMeasuringSource*> sources;
-				FOREACH(IMeasuringSource*, source, measuringSources)
+				FOREACH(GuiSharedSizeItemComposition*, item, childItems)
 				{
-					if(source->GetMeasuringCategory()==measuringCategory)
+					auto group = item->GetGroup();
+					auto minSize = item->GetPreferredMinSize();
+					item->SetPreferredMinSize(Size(0, 0));
+					auto size = item->GetPreferredBounds().GetSize();
+
+					if (item->GetSharedWidth())
 					{
-						sources.Add(source);
+						AddSizeComponent(widths, group, size.x);
 					}
+					if (item->GetSharedHeight())
+					{
+						AddSizeComponent(heights, group, size.y);
+					}
+
+					item->SetPreferredMinSize(minSize);
 				}
 
-				Dictionary<WString, vint> sizes;
-				FOREACH(IMeasuringSource*, source, sources)
+				FOREACH(GuiSharedSizeItemComposition*, item, childItems)
 				{
-					vint count=source->GetSubComponentCount();
-					for(vint i=0;i<count;i++)
-					{
-						WString name=source->GetSubComponentName(i);
-						GuiGraphicsComposition* composition=source->GetSubComponentComposition(i);
-						composition->SetPreferredMinSize(Size(0, 0));
-						Size size=composition->GetPreferredBounds().GetSize();
-						vint sizeComponent=direction==Horizontal?size.x:size.y;
+					auto group = item->GetGroup();
+					auto size = item->GetPreferredMinSize();
 
-						vint index=sizes.Keys().IndexOf(name);
-						if(index==-1)
-						{
-							sizes.Add(name, sizeComponent);
-						}
-						else if(sizes.Values().Get(index)<sizeComponent)
-						{
-							sizes.Set(name, sizeComponent);
-						}
-					}
-				}
-				FOREACH(IMeasuringSource*, source, sources)
-				{
-					vint count=source->GetSubComponentCount();
-					for(vint i=0;i<count;i++)
+					if (item->GetSharedWidth())
 					{
-						WString name=source->GetSubComponentName(i);
-						GuiGraphicsComposition* composition=source->GetSubComponentComposition(i);
-						Size size=composition->GetPreferredMinSize();
-						(direction==Horizontal?size.x:size.y)=sizes[name];
-						composition->SetPreferredMinSize(size);
-						source->SubComponentPreferredMinSizeUpdated();
+						size.x = widths[group];
 					}
+					if (item->GetSharedHeight())
+					{
+						size.y = heights[group];
+					}
+
+					item->SetPreferredMinSize(size);
 				}
+
+				GuiBoundsComposition::ForceCalculateSizeImmediately();
 			}
 		}
 	}
@@ -29983,6 +31130,15 @@ GuiGraphicsComposition
 
 			void GuiGraphicsComposition::OnParentChanged(GuiGraphicsComposition* oldParent, GuiGraphicsComposition* newParent)
 			{
+				OnParentLineChanged();
+			}
+
+			void GuiGraphicsComposition::OnParentLineChanged()
+			{
+				for (vint i = 0; i < children.Count(); i++)
+				{
+					children[i]->OnParentLineChanged();
+				}
 			}
 
 			void GuiGraphicsComposition::OnRenderTargetChanged()
@@ -30448,8 +31604,18 @@ GuiGraphicsSite
 				return Rect(expectedBounds.LeftTop(), minSize);
 			}
 
+			void GuiGraphicsSite::UpdatePreviousBounds(Rect bounds)
+			{
+				if(previousBounds!=bounds)
+				{
+					previousBounds=bounds;
+					BoundsChanged.Execute(GuiEventArgs(this));
+				}
+			}
+
 			GuiGraphicsSite::GuiGraphicsSite()
 			{
+				BoundsChanged.SetAssociatedComposition(this);
 			}
 
 			GuiGraphicsSite::~GuiGraphicsSite()
@@ -30665,6 +31831,7 @@ GuiSideAlignedComposition
 
 			Rect GuiSideAlignedComposition::GetBounds()
 			{
+				Rect result;
 				GuiGraphicsComposition* parent=GetParent();
 				if(parent)
 				{
@@ -30696,9 +31863,10 @@ GuiSideAlignedComposition
 						}
 						break;
 					}
-					return bounds;
+					result = bounds;
 				}
-				return Rect();
+				UpdatePreviousBounds(result);
+				return result;
 			}
 
 /***********************************************************************
@@ -30764,6 +31932,7 @@ GuiPartialViewComposition
 
 			Rect GuiPartialViewComposition::GetBounds()
 			{
+				Rect result;
 				GuiGraphicsComposition* parent=GetParent();
 				if(parent)
 				{
@@ -30783,9 +31952,10 @@ GuiPartialViewComposition
 					pw+=ow;
 					ph+=oh;
 
-					return Rect(Point((vint)(wRatio*w), (vint)(hRatio*h)), Size(pw, ph));
+					result = Rect(Point((vint)(wRatio*w), (vint)(hRatio*h)), Size(pw, ph));
 				}
-				return Rect();
+				UpdatePreviousBounds(result);
+				return result;
 			}
 		}
 	}
@@ -31007,8 +32177,14 @@ GuiStackComposition
 				UpdateStackItemBounds();
 				if(GetMinSizeLimitation()==GuiGraphicsComposition::LimitToElementAndChildren)
 				{
-					if(minSize.x<stackItemTotalSize.x) minSize.x=stackItemTotalSize.x;
-					if(minSize.y<stackItemTotalSize.y) minSize.y=stackItemTotalSize.y;
+					if (!ensuringVisibleStackItem || direction == Vertical)
+					{
+						if(minSize.x<stackItemTotalSize.x) minSize.x=stackItemTotalSize.x;
+					}
+					if (!ensuringVisibleStackItem || direction == Horizontal)
+					{
+						if(minSize.y<stackItemTotalSize.y) minSize.y=stackItemTotalSize.y;
+					}
 				}
 				vint x=0;
 				vint y=0;
@@ -31070,14 +32246,14 @@ GuiStackComposition
 			{
 				if(0<=index && index<stackItems.Count())
 				{
-					ensuringVisibleStackItem=stackItems[index];
-					UpdateStackItemBounds();
-					return true;
+					ensuringVisibleStackItem = stackItems[index];
 				}
 				else
 				{
-					return false;
+					ensuringVisibleStackItem = 0;
 				}
+				UpdateStackItemBounds();
+				return ensuringVisibleStackItem != 0;
 			}
 
 /***********************************************************************
@@ -31129,6 +32305,7 @@ GuiStackItemComposition
 				result.y1-=extraMargin.top;
 				result.x2+=extraMargin.right;
 				result.y2+=extraMargin.bottom;
+				UpdatePreviousBounds(result);
 				return result;
 			}
 
@@ -31799,6 +32976,7 @@ GuiCellComposition
 
 			void GuiCellComposition::OnParentChanged(GuiGraphicsComposition* oldParent, GuiGraphicsComposition* newParent)
 			{
+				GuiGraphicsSite::OnParentChanged(oldParent, newParent);
 				if(tableParent)
 				{
 					ClearSitedCells(tableParent);
@@ -31883,6 +33061,7 @@ GuiCellComposition
 
 			Rect GuiCellComposition::GetBounds()
 			{
+				Rect result;
 				if(tableParent && row!=-1 && column!=-1)
 				{
 					Rect bounds1, bounds2;
@@ -31905,12 +33084,14 @@ GuiCellComposition
 							}
 						}
 					}
-					return Rect(bounds1.x1, bounds1.y1, bounds2.x2, bounds2.y2);
+					result = Rect(bounds1.x1, bounds1.y1, bounds2.x2, bounds2.y2);
 				}
 				else
 				{
-					return Rect();
+					result = Rect();
 				}
+				UpdatePreviousBounds(result);
+				return result;
 			}
 		}
 	}
@@ -33740,7 +34921,7 @@ GuiGraphicsHost
 			{
 				if(nativeWindow && (info.left || info.middle || info.right))
 				{
-					if(!nativeWindow->IsCapturing())
+					if(!nativeWindow->IsCapturing() && !info.nonClient)
 					{
 						nativeWindow->RequireCapture();
 						mouseCaptureComposition=windowComposition->FindComposition(Point(info.x, info.y));
@@ -38832,7 +40013,7 @@ namespace vl
 			}
 			else if (L'A' <= c && c <= L'F')
 			{
-				return c - L'A';
+				return c - L'A' + 10;
 			}
 			else
 			{
@@ -38880,9 +40061,10 @@ GuiImageData
 		{
 		}
 
-		GuiImageData::GuiImageData(Ptr<INativeImage> _image, vint _frameIndex)
+		GuiImageData::GuiImageData(Ptr<INativeImage> _image, vint _frameIndex, const WString& _filePath)
 			:image(_image)
-			,frameIndex(_frameIndex)
+			, frameIndex(_frameIndex)
+			, filePath(_filePath)
 		{
 		}
 
@@ -38898,6 +40080,11 @@ GuiImageData
 		vint GuiImageData::GetFrameIndex()
 		{
 			return frameIndex;
+		}
+
+		const WString& GuiImageData::GetFilePath()
+		{
+			return filePath;
 		}
 
 /***********************************************************************
@@ -39150,7 +40337,7 @@ GuiResourceFolder
 			}
 		}
 
-		void GuiResourceFolder::SaveResourceToXml(Ptr<parsing::xml::XmlElement> xmlParent)
+		void GuiResourceFolder::SaveResourceFolderToXml(Ptr<parsing::xml::XmlElement> xmlParent, bool serializePrecompiledResource)
 		{
 			FOREACH(Ptr<GuiResourceItem>, item, items.Values())
 			{
@@ -39158,12 +40345,15 @@ GuiResourceFolder
 				attName->name.value = L"name";
 				attName->value.value = item->GetName();
 
-				if (item->GetPath() == L"")
+				if (serializePrecompiledResource || item->GetPath() == L"")
 				{
 					auto resolver = GetResourceResolverManager()->GetTypeResolver(item->GetTypeName());
-					auto xmlElement = resolver->Serialize(item->GetContent());
-					xmlElement->attributes.Add(attName);
-					xmlParent->subNodes.Add(xmlElement);
+					auto xmlElement = resolver->Serialize(item->GetContent(), serializePrecompiledResource);
+					if (xmlElement)
+					{
+						xmlElement->attributes.Add(attName);
+						xmlParent->subNodes.Add(xmlElement);
+					}
 				}
 				else
 				{
@@ -39194,9 +40384,9 @@ GuiResourceFolder
 				xmlParent->subNodes.Add(xmlFolder);
 				
 
-				if (folder->GetPath() == L"")
+				if (serializePrecompiledResource || folder->GetPath() == L"")
 				{
-					folder->SaveResourceToXml(xmlFolder);
+					folder->SaveResourceFolderToXml(xmlFolder, serializePrecompiledResource);
 				}
 				else
 				{
@@ -39209,6 +40399,20 @@ GuiResourceFolder
 					xmlText->content.value = folder->GetPath();
 					xmlFolder->subNodes.Add(xmlText);
 				}
+			}
+		}
+
+		void GuiResourceFolder::PrecompileResourceFolder(Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)
+		{
+			FOREACH(Ptr<GuiResourceItem>, item, items.Values())
+			{
+				auto typeResolver = GetResourceResolverManager()->GetTypeResolver(item->GetTypeName());
+				typeResolver->Precompile(item->GetContent(), resolver, errors);
+			}
+
+			FOREACH(Ptr<GuiResourceFolder>, folder, folders.Values())
+			{
+				folder->PrecompileResourceFolder(resolver, errors);
 			}
 		}
 
@@ -39407,15 +40611,21 @@ GuiResource
 			return 0;
 		}
 
-		Ptr<parsing::xml::XmlDocument> GuiResource::SaveToXml()
+		Ptr<parsing::xml::XmlDocument> GuiResource::SaveToXml(bool serializePrecompiledResource)
 		{
 			auto xmlRoot = MakePtr<XmlElement>();
 			xmlRoot->name.value = L"Resource";
-			SaveResourceToXml(xmlRoot);
+			SaveResourceFolderToXml(xmlRoot, serializePrecompiledResource);
 
 			auto doc = MakePtr<XmlDocument>();
 			doc->rootElement = xmlRoot;
 			return doc;
+		}
+
+		void GuiResource::Precompile(collections::List<WString>& errors)
+		{
+			Ptr<GuiResourcePathResolver> resolver = new GuiResourcePathResolver(this, workingDirectory);
+			PrecompileResourceFolder(resolver, errors);
 		}
 
 		Ptr<DocumentModel> GuiResource::GetDocumentByPath(const WString& path)
@@ -39661,6 +40871,7 @@ namespace vl
 		using namespace parsing;
 		using namespace parsing::tabling;
 		using namespace parsing::xml;
+		using namespace stream;
 
 /***********************************************************************
 Image Type Resolver
@@ -39684,15 +40895,41 @@ Image Type Resolver
 				return false;
 			}
 
-			Ptr<parsing::xml::XmlElement> Serialize(Ptr<DescriptableObject> resource)override
+			void Precompile(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)override
 			{
+			}
+
+			Ptr<parsing::xml::XmlElement> Serialize(Ptr<DescriptableObject> resource, bool serializePrecompiledResource)override
+			{
+				if (auto obj = resource.Cast<GuiImageData>())
+				{
+					FileStream fileStream(obj->GetFilePath(), FileStream::ReadOnly);
+					auto xmlContent = MakePtr<XmlCData>();
+					xmlContent->content.value = BinaryToHex(fileStream);
+
+					auto xmlImage = MakePtr<XmlElement>();
+					xmlImage->name.value = L"Image";
+					xmlImage->subNodes.Add(xmlContent);
+					return xmlImage;
+				}
 				return 0;
 			}
 
 			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)override
 			{
-				errors.Add(L"Image resource should be an image file.");
-				return 0;
+				MemoryStream stream;
+				HexToBinary(stream, XmlGetValue(element));
+				stream.SeekFromBegin(0);
+				auto image = GetCurrentController()->ImageService()->CreateImageFromStream(stream);
+				if (image)
+				{
+					return new GuiImageData(image, 0);
+				}
+				else
+				{
+					errors.Add(L"Failed to load an image from binary data in xml.");
+					return 0;
+				}
 			}
 
 			Ptr<DescriptableObject> ResolveResource(const WString& path, collections::List<WString>& errors)override
@@ -39700,7 +40937,7 @@ Image Type Resolver
 				Ptr<INativeImage> image = GetCurrentController()->ImageService()->CreateImageFromFile(path);
 				if(image)
 				{
-					return new GuiImageData(image, 0);
+					return new GuiImageData(image, 0, path);
 				}
 				else
 				{
@@ -39738,7 +40975,11 @@ Text Type Resolver
 				return false;
 			}
 
-			Ptr<parsing::xml::XmlElement> Serialize(Ptr<DescriptableObject> resource)override
+			void Precompile(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)override
+			{
+			}
+
+			Ptr<parsing::xml::XmlElement> Serialize(Ptr<DescriptableObject> resource, bool serializePrecompiledResource)override
 			{
 				if (auto obj = resource.Cast<GuiTextData>())
 				{
@@ -39802,7 +41043,11 @@ Xml Type Resolver
 				return false;
 			}
 
-			Ptr<parsing::xml::XmlElement> Serialize(Ptr<DescriptableObject> resource)override
+			void Precompile(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)override
+			{
+			}
+
+			Ptr<parsing::xml::XmlElement> Serialize(Ptr<DescriptableObject> resource, bool serializePrecompiledResource)override
 			{
 				if (auto obj = resource.Cast<XmlDocument>())
 				{
@@ -39872,7 +41117,11 @@ Doc Type Resolver
 				return true;
 			}
 
-			Ptr<parsing::xml::XmlElement> Serialize(Ptr<DescriptableObject> resource)override
+			void Precompile(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)override
+			{
+			}
+
+			Ptr<parsing::xml::XmlElement> Serialize(Ptr<DescriptableObject> resource, bool serializePrecompiledResource)override
 			{
 				if (auto obj = resource.Cast<DocumentModel>())
 				{

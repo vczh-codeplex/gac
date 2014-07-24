@@ -24,17 +24,17 @@ void SetupListviewWindow(GuiControlHost* controlHost, GuiGraphicsComposition* co
 			Ptr<list::ListViewItem> item=new list::ListViewItem;
 			if(i<10)
 			{
-				item->text=L"This is a very long List View Item "+itow(i+1);
+				item->SetText(L"This is a very long List View Item " + itow(i + 1));
 			}
 			else
 			{
-				item->text=L"List View Item "+itow(i+1);
+				item->SetText(L"List View Item " + itow(i + 1));
 			}
-			item->largeImage=largeImageData;
-			item->smallImage=smallImageData;
-			item->subItems.Add(L"Description of "+item->text);
-			item->subItems.Add(itow(i+1));
-			item->subItems.Add(i<10?L"Long":L"Short");
+			item->SetLargeImage(largeImageData);
+			item->SetSmallImage(smallImageData);
+			item->GetSubItems().Add(L"Description of " + item->GetText());
+			item->GetSubItems().Add(itow(i + 1));
+			item->GetSubItems().Add(i < 10 ? L"Long" : L"Short");
 			listControl->GetItems().Add(item);
 		}
 		listControl->GetItems().GetColumns().Add(new list::ListViewColumn(L"Name"));
