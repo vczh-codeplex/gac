@@ -23,7 +23,7 @@ void GuiMain()
 	}
 
 	WString inputPath = arguments->Get(0);
-	PrintSuccessMessage(L"gacgen>Making : " + inputPath);
+	PrintSuccessMessage(L"gacgen> Making : " + inputPath);
 	List<WString> errors;
 	auto resource = GuiResource::LoadFromXml(arguments->Get(0), errors);
 	if (!resource)
@@ -69,8 +69,15 @@ void GuiMain()
 
 	if (config->precompiledOutput != L"")
 	{
-		auto xml = resource->SaveToXml(false);
 		WString fileName = config->precompiledOutput;
+		PrintSuccessMessage(L"gacgen> Compiling : " + fileName);
+		resource->Precompile(errors);
+		FOREACH(WString, error, errors)
+		{
+			PrintInformationMessage(error);
+		}
+
+		auto xml = resource->SaveToXml(true);
 		OPEN_FILE(L"Precompiled Resource Xml");
 		XmlPrint(xml, writer);
 	}
