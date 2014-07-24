@@ -38,7 +38,12 @@ public:
 		if (repr->instanceName && !fields.Keys().Contains(repr->instanceName.Value()))
 		{
 			auto loadingSource = FindInstanceLoadingSource(env->context, repr);
-			fields.Add(repr->instanceName.Value(), repr);
+			
+			auto name = repr->instanceName.Value();
+			if (name.Length() > 0 && name[0] != L'<')
+			{
+				fields.Add(repr->instanceName.Value(), repr);
+			}
 		}
 		Visit((GuiAttSetterRepr*)repr);
 	}

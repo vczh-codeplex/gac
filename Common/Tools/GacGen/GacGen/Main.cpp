@@ -31,6 +31,11 @@ void GuiMain()
 		PrintErrorMessage(L"error> Failed to load resource.");
 		return;
 	}
+	else
+	{
+		PrintSuccessMessage(L"gacgen> Compiling...");
+		resource->Precompile(errors);
+	}
 	FOREACH(WString, error, errors)
 	{
 		PrintInformationMessage(error);
@@ -70,13 +75,6 @@ void GuiMain()
 	if (config->precompiledOutput != L"")
 	{
 		WString fileName = config->precompiledOutput;
-		PrintSuccessMessage(L"gacgen> Compiling : " + fileName);
-		resource->Precompile(errors);
-		FOREACH(WString, error, errors)
-		{
-			PrintInformationMessage(error);
-		}
-
 		auto xml = resource->SaveToXml(true);
 		OPEN_FILE(L"Precompiled Resource Xml");
 		XmlPrint(xml, writer);

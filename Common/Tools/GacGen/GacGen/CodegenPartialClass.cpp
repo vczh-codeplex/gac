@@ -149,7 +149,36 @@ void WritePartialClassHeaderFile(Ptr<CodegenConfig> config, Dictionary<WString, 
 		writer.WriteLine(prefix + L"\t\t:vl::presentation::GuiInstancePartialClass<" + GetCppTypeName(instance->baseType) + L">(L\"" + instance->GetFullName() + L"\")");
 		if (instance->baseType == GetTypeDescriptor<GuiWindow>())
 		{
-			writer.WriteLine(prefix + L"\t\t," + GetCppTypeName(instance->baseType) + L"(vl::presentation::theme::GetCurrentTheme()->CreateWindowStyle())");
+			auto& atts = instance->context->instance->setters;
+			vint index = atts.Keys().IndexOf(L"ControlTemplate");
+			WString controlTemplate;
+			if (index != -1)
+			{
+				auto value = atts.Values()[index];
+				if (value->binding == L"" && value->values.Count() == 1)
+				{
+					if (auto text = value->values[0].Cast<GuiTextRepr>())
+					{
+						controlTemplate = text->text;
+					}
+				}
+			}
+
+			if (controlTemplate == L"")
+			{
+				writer.WriteLine(prefix + L"\t\t," + GetCppTypeName(instance->baseType) + L"(vl::presentation::theme::GetCurrentTheme()->CreateWindowStyle())");
+			}
+			else
+			{
+				WString lambda =
+					L"\r\n"
+					L"vl::collections::List<vl::reflection::description::ITypeDescriptor*> types;" L"\r\n"
+					L"types.Add(vl::reflection::description::GetTypeDescriptor<" + controlTemplate + L">());" L"\r\n"
+					L"auto factory = vl::presentation::templates::GuiTemplate::IFactory::CreateTemplateFactory(types);" L"\r\n"
+					L"auto style = vl::presentation::templates::new GuiWindowTemplate_StyleProvider(factory);" L"\r\n"
+					L"return style;" L"\r\n";
+				writer.WriteLine(prefix + L"\t\t," + GetCppTypeName(instance->baseType) + L"([](){" + lambda + L"}())");
+			}
 		}
 		else if (instance->baseType == GetTypeDescriptor<GuiCustomControl>())
 		{
