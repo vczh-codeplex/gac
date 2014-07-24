@@ -136,7 +136,6 @@ Type Declaration
 				CLASS_MEMBER_METHOD(CreateVTrackerStyle, NO_PARAMETER)
 				CLASS_MEMBER_METHOD(CreateProgressBarStyle, NO_PARAMETER)
 				CLASS_MEMBER_METHOD(GetScrollDefaultSize, NO_PARAMETER)
-				CLASS_MEMBER_METHOD(CreateWindowStyle, NO_PARAMETER)
 				CLASS_MEMBER_METHOD(GetTrackerDefaultSize, NO_PARAMETER)
 
 				CLASS_MEMBER_METHOD(CreateTextListStyle, NO_PARAMETER)
