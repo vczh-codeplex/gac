@@ -11,7 +11,7 @@ DO NOT MODIFY
 #ifndef VCZH_GACUI_RESOURCE_CODE_GENERATOR_HelloWorld_PARTIAL_CLASSES
 #define VCZH_GACUI_RESOURCE_CODE_GENERATOR_HelloWorld_PARTIAL_CLASSES
 
-#include "..\..\..\..\Libraries\GacUI\Public\Source\GacUIReflection.h"
+#include "..\..\..\Public\Source\GacUIReflection.h"
 
 namespace demos
 {
