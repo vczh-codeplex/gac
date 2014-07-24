@@ -62,7 +62,10 @@ Variable
 			FOREACH_INDEXER(WString, name, index, env->scope->referenceValues.Keys())
 			{
 				vint variableIndex = context->assembly->variableNames.IndexOf(name);
-				context->globalVariables->variables[variableIndex] = env->scope->referenceValues.Values()[index];
+				if (variableIndex != -1)
+				{
+					context->globalVariables->variables[variableIndex] = env->scope->referenceValues.Values()[index];
+				}
 			}
 		}
 
