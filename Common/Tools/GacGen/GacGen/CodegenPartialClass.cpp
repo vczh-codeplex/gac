@@ -175,7 +175,7 @@ void WritePartialClassHeaderFile(Ptr<CodegenConfig> config, Dictionary<WString, 
 					L"vl::collections::List<vl::reflection::description::ITypeDescriptor*> types;" L"\r\n"
 					L"types.Add(vl::reflection::description::GetTypeDescriptor<" + controlTemplate + L">());" L"\r\n"
 					L"auto factory = vl::presentation::templates::GuiTemplate::IFactory::CreateTemplateFactory(types);" L"\r\n"
-					L"auto style = vl::presentation::templates::new GuiWindowTemplate_StyleProvider(factory);" L"\r\n"
+					L"auto style = new vl::presentation::templates::GuiWindowTemplate_StyleProvider(factory);" L"\r\n"
 					L"return style;" L"\r\n";
 				writer.WriteLine(prefix + L"\t\t," + GetCppTypeName(instance->baseType) + L"([](){" + lambda + L"}())");
 			}
