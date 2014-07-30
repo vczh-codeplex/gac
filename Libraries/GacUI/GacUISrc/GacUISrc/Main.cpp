@@ -45,23 +45,97 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 extern void UnitTestInGuiMain();
 
-/*
-Data Binding: IValueObservableList/ItemTemplate
-	GuiSelectableListControl
-	GuiVirtualTextList
-	GuiVirtualListView
-	GuiVirtualTreeView
-	GuiVirtualDataGrid
-	GuiTab
-	GuiComboBoxListControl
+/*namespace demos
+{
+	template<typename TImpl>
+	class MainWindow_ : public GuiWindow, public GuiInstancePartialClass<GuiWindow>, public Description<TImpl>
+	{
+	protected:
+		void InitializeComponents()
+		{
+			InitializeFromResource();
+		}
+	public:
+		MainWindow_()
+			:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
+			,GuiInstancePartialClass<GuiWindow>(L"demos::MainWindow")
+		{
+		}
+	};
 
-Features:
-	View Model				: View model interface declaration
-	Data Binding			: Data structure declaration
-	Control Template		: Interface methods to events, or prepare predefined classes
-	Workflow as Code Behind
-	Data Service and Query
-*/
+	class MainWindow : public MainWindow_<MainWindow>
+	{
+	public:
+		MainWindow()
+		{
+			InitializeComponents();
+		}
+	};
+}
+
+namespace vl
+{
+	namespace reflection
+	{
+		namespace description
+		{
+#define DEMO_TYPES(F)\
+			F(demos::MainWindow)
+
+			DEMO_TYPES(DECL_TYPE_INFO)
+			DEMO_TYPES(IMPL_TYPE_INFO)
+
+			BEGIN_CLASS_MEMBER(demos::MainWindow)
+				CLASS_MEMBER_BASE(GuiWindow)
+				CLASS_MEMBER_CONSTRUCTOR(demos::MainWindow*(), NO_PARAMETER)
+			END_CLASS_MEMBER(demos::MainWindow)
+
+			class DemoResourceLoader : public Object, public ITypeLoader
+			{
+			public:
+				void Load(ITypeManager* manager)
+				{
+					DEMO_TYPES(ADD_TYPE_INFO)
+				}
+
+				void Unload(ITypeManager* manager)
+				{
+				}
+			};
+
+			class DemoResourcePlugin : public Object, public IGuiPlugin
+			{
+			public:
+				void Load()override
+				{
+					GetGlobalTypeManager()->AddTypeLoader(new DemoResourceLoader);
+				}
+
+				void AfterLoad()override
+				{
+				}
+
+				void Unload()override
+				{
+				}
+			};
+			GUI_REGISTER_PLUGIN(DemoResourcePlugin)
+		}
+	}
+}
+
+void GuiMain()
+{
+	{
+		List<WString> errors;
+		auto resource = GuiResource::LoadFromXml(L"..\\GacUISrcCodepackedTest\\Resources\\XmlWindowResource.xml", errors);
+		GetInstanceLoaderManager()->SetResource(L"Demo", resource);
+	}
+	demos::MainWindow window;
+	window.ForceCalculateSizeImmediately();
+	window.MoveToScreenCenter();
+	GetApplication()->Run(&window);
+}*/
 
 #ifndef VCZH_DEBUG_NO_REFLECTION
 
@@ -508,12 +582,14 @@ WString XmlToString(Ptr<XmlDocument> xml)
 	}
 }
 
-#define RUN_PERFORMANCE_WIZARD
+//#define RUN_GENERATE_METADATA
+//#define RUN_GENERATE_PRECOMPILED_RESOURCE
+#define RUN_SHOW_WINDOW
 
 void GuiMain()
 {
 #ifndef VCZH_DEBUG_NO_REFLECTION
-#ifndef RUN_PERFORMANCE_WIZARD
+#ifdef RUN_GENERATE_METADATA
 	UnitTestInGuiMain();
 	{
 		FileStream fileStream(L"Reflection.txt", FileStream::WriteOnly);
@@ -534,15 +610,7 @@ void GuiMain()
 	List<WString> errors;
 	vint64_t loadTime = 0, desTime = 0;
 
-#ifdef RUN_PERFORMANCE_WIZARD
-	{
-		DateTime begin = DateTime::LocalTime();
-		auto resource = GuiResource::LoadFromXml(L"Precompiled.xml", errors);
-		GetInstanceLoaderManager()->SetResource(L"Demo", resource);
-		DateTime end = DateTime::LocalTime();
-		loadTime = end.totalMilliseconds - begin.totalMilliseconds;
-	}
-#else
+#ifdef RUN_GENERATE_PRECOMPILED_RESOURCE
 	WString xmlText;
 	{
 		auto resource = GuiResource::LoadFromXml(L"..\\GacUISrcCodepackedTest\\Resources\\XmlWindowResourceDataBinding.xml", errors);
@@ -558,10 +626,21 @@ void GuiMain()
 	}
 	
 	{
+		DateTime begin = DateTime::LocalTime();
 		auto parser = GetParserManager()->GetParser<XmlDocument>(L"XML");
 		auto xml = parser->TypedParse(xmlText, errors);
 		auto resource = GuiResource::LoadFromXml(xml, L"<Unknown>", errors);
 		GetInstanceLoaderManager()->SetResource(L"Demo", resource);
+		DateTime end = DateTime::LocalTime();
+		loadTime = end.totalMilliseconds - begin.totalMilliseconds;
+	}
+#else
+	{
+		DateTime begin = DateTime::LocalTime();
+		auto resource = GuiResource::LoadFromXml(L"Precompiled.xml", errors);
+		GetInstanceLoaderManager()->SetResource(L"Demo", resource);
+		DateTime end = DateTime::LocalTime();
+		loadTime = end.totalMilliseconds - begin.totalMilliseconds;
 	}
 #endif
 	DateTime begin = DateTime::LocalTime();
@@ -577,8 +656,8 @@ void GuiMain()
 
 	window.ForceCalculateSizeImmediately();
 	window.MoveToScreenCenter();
-//#ifndef RUN_PERFORMANCE_WIZARD
+#ifdef RUN_SHOW_WINDOW
 	GetApplication()->Run(&window);
-//#endif
+#endif
 #endif
 }
