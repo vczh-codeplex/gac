@@ -5081,7 +5081,7 @@ Window
 				~GuiPopup();
 
 				bool									IsClippedByScreen(Point location);
-				void									ShowPopup(Point location);
+				void									ShowPopup(Point location, INativeScreen* screen = 0);
 				void									ShowPopup(GuiControl* control, Rect bounds, bool preferredTopBottomSide);
 				void									ShowPopup(GuiControl* control, Point location);
 				void									ShowPopup(GuiControl* control, bool preferredTopBottomSide);
