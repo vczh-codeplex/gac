@@ -50,7 +50,7 @@ namespace vl
 
 				static BOOL CALLBACK							MonitorEnumProc(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData);
 				void											RefreshScreenInformation();
-				vint												GetScreenCount()override;
+				vint											GetScreenCount()override;
 				INativeScreen*									GetScreen(vint index)override;
 				INativeScreen*									GetScreen(INativeWindow* window)override;
 			};
