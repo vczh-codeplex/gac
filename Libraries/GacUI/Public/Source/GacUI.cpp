@@ -3567,12 +3567,17 @@ GuiPopup
 				return true;
 			}
 
-			void GuiPopup::ShowPopup(Point location)
+			void GuiPopup::ShowPopup(Point location, INativeScreen* screen)
 			{
 				INativeWindow* window=GetNativeWindow();
 				if(window)
 				{
-					INativeScreen* screen=GetCurrentController()->ScreenService()->GetScreen(window);
+					if (!screen)
+					{
+						SetBounds(Rect(location, GetBounds().GetSize()));
+						screen = GetCurrentController()->ScreenService()->GetScreen(window);
+					}
+
 					if(screen)
 					{
 						Rect screenBounds=screen->GetClientBounds();
@@ -3647,7 +3652,7 @@ GuiPopup
 									return;
 								}
 							}
-							ShowPopup(locations[0]);
+							ShowPopup(locations[0], GetCurrentController()->ScreenService()->GetScreen(controlWindow));
 						}
 					}
 				}
@@ -3672,7 +3677,7 @@ GuiPopup
 							vint x=controlBounds.x1+controlClientOffset.x+location.x;
 							vint y=controlBounds.y1+controlClientOffset.y+location.y;
 							window->SetParent(controlWindow);
-							ShowPopup(Point(x, y));
+							ShowPopup(Point(x, y), GetCurrentController()->ScreenService()->GetScreen(controlWindow));
 						}
 					}
 				}

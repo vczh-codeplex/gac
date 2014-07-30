@@ -369,7 +369,7 @@ Type Declaration
 				CONTROL_CONSTRUCTOR_CONTROLLER(GuiPopup)
 
 				CLASS_MEMBER_METHOD(IsClippedByScreen, {L"location"})
-				CLASS_MEMBER_METHOD_OVERLOAD(ShowPopup, {L"location"}, void(GuiPopup::*)(Point))
+				CLASS_MEMBER_METHOD_OVERLOAD(ShowPopup, {L"location" _ L"screen"}, void(GuiPopup::*)(Point _ INativeScreen*))
 				CLASS_MEMBER_METHOD_OVERLOAD(ShowPopup, {L"control" _ L"location"}, void(GuiPopup::*)(GuiControl* _ Point))
 				CLASS_MEMBER_METHOD_OVERLOAD(ShowPopup, {L"control" _ L"preferredTopBottomSide"}, void(GuiPopup::*)(GuiControl* _ bool))
 			END_CLASS_MEMBER(GuiPopup)
