@@ -478,7 +478,7 @@ GuiScrollView
 					auto scroll = styleController->GetHorizontalScroll();
 					vint position = scroll->GetPosition();
 					vint move = scroll->GetSmallMove();
-					position -= move*arguments.wheel / 120;
+					position -= move*arguments.wheel / 60;
 					scroll->SetPosition(position);
 				}
 			}
@@ -490,7 +490,7 @@ GuiScrollView
 					auto scroll = styleController->GetVerticalScroll();
 					vint position = scroll->GetPosition();
 					vint move = scroll->GetSmallMove();
-					position -= move*arguments.wheel / 120;
+					position -= move*arguments.wheel / 60;
 					scroll->SetPosition(position);
 				}
 			}
