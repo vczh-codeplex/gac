@@ -500,27 +500,49 @@ GuiScrollView
 			{
 				Initialize();
 			}
+
+			vint GuiScrollView::GetSmallMove()
+			{
+				return GetFont().size * 2;
+			}
+
+			Size GuiScrollView::GetBigMove()
+			{
+				return GetViewSize();
+			}
 			
 			GuiScrollView::~GuiScrollView()
 			{
+			}
+
+			void GuiScrollView::SetFont(const FontProperties& value)
+			{
+				GuiControl::SetFont(value);
+				CalculateView();
 			}
 
 			void GuiScrollView::CalculateView()
 			{
 				if(!supressScrolling)
 				{
-					Size fullSize=QueryFullSize();
+					Size fullSize = QueryFullSize();
 					while(true)
 					{
 						styleController->AdjustView(fullSize);
 						styleController->AdjustView(fullSize);
-						supressScrolling=true;
+						supressScrolling = true;
 						CallUpdateView();
-						supressScrolling=false;
+						supressScrolling = false;
 
 						Size newSize=QueryFullSize();
-						if(fullSize==newSize)
+						if (fullSize == newSize)
 						{
+							vint smallMove = GetSmallMove();
+							styleController->GetHorizontalScroll()->SetSmallMove(smallMove);
+							styleController->GetVerticalScroll()->SetSmallMove(smallMove);
+							Size bigMove = GetBigMove();
+							styleController->GetHorizontalScroll()->SetBigMove(bigMove.x);
+							styleController->GetVerticalScroll()->SetBigMove(bigMove.y);
 							break;
 						}
 						else

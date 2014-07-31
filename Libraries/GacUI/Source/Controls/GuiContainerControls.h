@@ -224,6 +224,7 @@ Scroll View
 					/// <summary>Get the vertical scroll control.</summary>
 					/// <returns>The vertical scroll control.</returns>
 					GuiScroll*								GetVerticalScroll();
+
 					compositions::GuiTableComposition*		GetInternalTableComposition();
 					compositions::GuiBoundsComposition*		GetInternalContainerComposition();
 
@@ -264,6 +265,12 @@ Scroll View
 				/// <summary>Update the visible content using a view bounds. The view bounds is in the space from (0,0) to full size.</summary>
 				/// <param name="viewBounds">The view bounds.</param>
 				virtual void							UpdateView(Rect viewBounds)=0;
+				/// <summary>Calculate the small move of the scroll bar.</summary>
+				/// <returns>The small move of the scroll bar.</returns>
+				virtual vint							GetSmallMove();
+				/// <summary>Calculate the big move of the scroll bar.</summary>
+				/// <returns>The big move of the scroll bar.</returns>
+				virtual Size							GetBigMove();
 				
 				/// <summary>Create a control with a specified style controller.</summary>
 				/// <param name="_styleController">The style controller.</param>
@@ -273,6 +280,8 @@ Scroll View
 				/// <param name="styleProvider">The style provider.</param>
 				GuiScrollView(IStyleProvider* styleProvider);
 				~GuiScrollView();
+
+				virtual void							SetFont(const FontProperties& value);
 
 				/// <summary>Force to update contents and scroll bars.</summary>
 				void									CalculateView();
