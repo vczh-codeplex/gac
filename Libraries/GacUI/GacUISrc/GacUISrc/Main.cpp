@@ -45,7 +45,11 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 extern void UnitTestInGuiMain();
 
-/*namespace demos
+//#define PROJECT_CONTROLTEMPLATE
+
+#ifndef PROJECT_CONTROLTEMPLATE
+
+namespace demos
 {
 	template<typename TImpl>
 	class MainWindow_ : public GuiWindow, public GuiInstancePartialClass<GuiWindow>, public Description<TImpl>
@@ -135,7 +139,9 @@ void GuiMain()
 	window.ForceCalculateSizeImmediately();
 	window.MoveToScreenCenter();
 	GetApplication()->Run(&window);
-}*/
+}
+
+#else
 
 #ifndef VCZH_DEBUG_NO_REFLECTION
 
@@ -661,3 +667,5 @@ void GuiMain()
 #endif
 #endif
 }
+
+#endif
