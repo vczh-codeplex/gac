@@ -471,6 +471,30 @@ GuiScrollView
 				}
 			}
 
+			void GuiScrollView::OnHorizontalWheel(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
+			{
+				if(!supressScrolling)
+				{
+					auto scroll = styleController->GetHorizontalScroll();
+					vint position = scroll->GetPosition();
+					vint move = scroll->GetSmallMove();
+					position += move*arguments.wheel / 120;
+					scroll->SetPosition(position);
+				}
+			}
+
+			void GuiScrollView::OnVerticalWheel(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
+			{
+				if(!supressScrolling && GetVisuallyEnabled())
+				{
+					auto scroll = styleController->GetVerticalScroll();
+					vint position = scroll->GetPosition();
+					vint move = scroll->GetSmallMove();
+					position += move*arguments.wheel / 120;
+					scroll->SetPosition(position);
+				}
+			}
+
 			void GuiScrollView::CallUpdateView()
 			{
 				Rect viewBounds=GetViewBounds();
@@ -485,6 +509,8 @@ GuiScrollView
 				styleController->GetInternalContainerComposition()->BoundsChanged.AttachMethod(this, &GuiScrollView::OnContainerBoundsChanged);
 				styleController->GetHorizontalScroll()->PositionChanged.AttachMethod(this, &GuiScrollView::OnHorizontalScroll);
 				styleController->GetVerticalScroll()->PositionChanged.AttachMethod(this, &GuiScrollView::OnVerticalScroll);
+				styleController->GetBoundsComposition()->GetEventReceiver()->horizontalWheel.AttachMethod(this, &GuiScrollView::OnHorizontalWheel);
+				styleController->GetBoundsComposition()->GetEventReceiver()->verticalWheel.AttachMethod(this, &GuiScrollView::OnVerticalWheel);
 			}
 
 			GuiScrollView::GuiScrollView(StyleController* _styleController)
