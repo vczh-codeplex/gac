@@ -12,7 +12,7 @@ Classes:
 #include "../Regex/Regex.h"
 #include "../Stream/Accessor.h"
 #include "../Stream/CompressionStream.h"
-#include "../Stream/MemoryStream.h"
+#include "../Stream/CharFormat.h"
 #include "../Collections/OperationCopyFrom.h"
 #include "../Reflection/GuiTypeDescriptor.h"
 
