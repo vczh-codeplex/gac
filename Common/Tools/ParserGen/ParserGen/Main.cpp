@@ -155,7 +155,7 @@ int wmain(int argc, wchar_t* argv[])
 					Console::SetColor(false, true, false, true);
 					goto STOP_PARSING;
 				}
-				BomEncoder encoder(BomEncoder::Utf8);
+				BomEncoder encoder(BomEncoder::Mbcs);
 				EncoderStream encoderStream(fileStream, encoder);
 				StreamWriter writer(encoderStream);
 				WriteHeaderFile(name, definition, table, config, writer);
@@ -169,7 +169,7 @@ int wmain(int argc, wchar_t* argv[])
 					Console::SetColor(false, true, false, true);
 					goto STOP_PARSING;
 				}
-				BomEncoder encoder(BomEncoder::Utf8);
+				BomEncoder encoder(BomEncoder::Mbcs);
 				EncoderStream encoderStream(fileStream, encoder);
 				StreamWriter writer(encoderStream);
 				
