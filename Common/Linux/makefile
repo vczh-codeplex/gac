@@ -6,7 +6,7 @@ BIN = ./exe/
 VLPP = ../Source/
 UNITTEST = ../UnitTest/UnitTest/
 
-VLPP_STREAM_OBJS = $(OBJ)Accessor.o $(OBJ)BroadcastStream.o $(OBJ)CacheStream.o $(OBJ)CharFormat.o $(OBJ)FileStream.o $(OBJ)MemoryStream.o $(OBJ)MemoryWrapperStream.o $(OBJ)RecorderStream.o
+VLPP_STREAM_OBJS = $(OBJ)Accessor.o $(OBJ)BroadcastStream.o $(OBJ)CacheStream.o $(OBJ)CharFormat.o $(OBJ)FileStream.o $(OBJ)MemoryStream.o $(OBJ)MemoryWrapperStream.o $(OBJ)RecorderStream.o $(OBJ)CompressionStream.o
 
 VLPP_REGEX_OBJS = $(OBJ)Regex.o $(OBJ)RegexAutomaton.o $(OBJ)RegexData.o $(OBJ)RegexExpression.o $(OBJ)RegexParser.o $(OBJ)RegexPure.o $(OBJ)RegexRich.o $(OBJ)RegexWriter.o
 
@@ -40,6 +40,7 @@ all:
 	$(CPP)		-o $(OBJ)MemoryStream.o			-c $(VLPP)Stream/MemoryStream.cpp
 	$(CPP)		-o $(OBJ)MemoryWrapperStream.o		-c $(VLPP)Stream/MemoryWrapperStream.cpp
 	$(CPP)		-o $(OBJ)RecorderStream.o		-c $(VLPP)Stream/RecorderStream.cpp
+	$(CPP)		-o $(OBJ)CompressionStream.o		-c $(VLPP)Stream/CompressionStream.cpp
 	$(CPP)		-o $(OBJ)Regex.o			-c $(VLPP)Regex/Regex.cpp
 	$(CPP)		-o $(OBJ)RegexAutomaton.o		-c $(VLPP)Regex/RegexAutomaton.cpp
 	$(CPP)		-o $(OBJ)RegexData.o			-c $(VLPP)Regex/RegexData.cpp
