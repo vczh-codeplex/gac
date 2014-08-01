@@ -382,7 +382,7 @@ Serialization
 					buffer[count] = 0;
 
 					value = &buffer[0];
-#else defined VCZH_GCC
+#elif defined VCZH_GCC
 					vint32_t count = -1;
 					reader << count;
 					if (count == 0)
@@ -419,7 +419,7 @@ Serialization
 					{
 						CHECK_FAIL(L"Serialization failed.");
 					}
-#else defined VCZH_GCC
+#elif defined VCZH_GCC
 					if (value == L"")
 					{
 						vint32_t count = 0;
