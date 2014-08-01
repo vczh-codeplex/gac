@@ -5409,6 +5409,7 @@ Scroll View
 
 					GuiScroll*								GetHorizontalScroll();
 					GuiScroll*								GetVerticalScroll();
+
 					compositions::GuiTableComposition*		GetInternalTableComposition();
 					compositions::GuiBoundsComposition*		GetInternalContainerComposition();
 
@@ -5432,16 +5433,22 @@ Scroll View
 				void									OnContainerBoundsChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 				void									OnHorizontalScroll(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 				void									OnVerticalScroll(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void									OnHorizontalWheel(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
+				void									OnVerticalWheel(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
 				void									CallUpdateView();
 				void									Initialize();
 
 				virtual Size							QueryFullSize()=0;
 				virtual void							UpdateView(Rect viewBounds)=0;
+				virtual vint							GetSmallMove();
+				virtual Size							GetBigMove();
 				
 				GuiScrollView(StyleController* _styleController);
 			public:
 				GuiScrollView(IStyleProvider* styleProvider);
 				~GuiScrollView();
+
+				virtual void							SetFont(const FontProperties& value);
 
 				void									CalculateView();
 				Size									GetViewSize();
