@@ -88,8 +88,8 @@ Instance Representation
 		class GuiConstructorRepr : public GuiAttSetterRepr, public Description<GuiConstructorRepr>
 		{
 		public:
-			WString									typeNamespace;
-			WString									typeName;
+			GlobalStringKey							typeNamespace;
+			GlobalStringKey							typeName;
 			Nullable<WString>						styleName;
 
 			void									Accept(IVisitor* visitor)override{visitor->Visit(this);}
@@ -124,17 +124,17 @@ Instance Context
 		class GuiInstanceContext : public Object, public Description<GuiInstanceContext>
 		{
 		public:
-			typedef collections::List<Ptr<GuiInstanceNamespace>>				NamespaceList;
-			typedef collections::Dictionary<WString, Ptr<IGuiInstanceCache>>	CacheMap;
+			typedef collections::List<Ptr<GuiInstanceNamespace>>						NamespaceList;
+			typedef collections::Dictionary<GlobalStringKey, Ptr<IGuiInstanceCache>>	CacheMap;
 
 			struct NamespaceInfo
 			{
-				WString								name;
+				GlobalStringKey						name;
 				NamespaceList						namespaces;
 			};
-			typedef collections::Dictionary<WString, Ptr<NamespaceInfo>>		NamespaceMap;
-			typedef collections::List<Ptr<GuiInstanceParameter>>				ParameterList;
-			typedef collections::List<Ptr<GuiInstanceStyleContext>>				StyleContextList;
+			typedef collections::Dictionary<GlobalStringKey, Ptr<NamespaceInfo>>		NamespaceMap;
+			typedef collections::List<Ptr<GuiInstanceParameter>>						ParameterList;
+			typedef collections::List<Ptr<GuiInstanceStyleContext>>						StyleContextList;
 
 			class ElementName : public Object
 			{

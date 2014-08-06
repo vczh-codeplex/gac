@@ -58,21 +58,21 @@ GuiWorkflowCache
 		class GuiWorkflowCache : public Object, public IGuiInstanceCache
 		{
 		public:
-			static const wchar_t*							CacheTypeName;
-			static const wchar_t*							CacheContextName;
+			static const GlobalStringKey&					CacheTypeName;
+			static const GlobalStringKey&					CacheContextName;
 
 			Ptr<workflow::runtime::WfAssembly>				assembly;
 
 			GuiWorkflowCache();
 			GuiWorkflowCache(Ptr<workflow::runtime::WfAssembly> _assembly);
 
-			WString											GetCacheTypeName()override;
+			GlobalStringKey									GetCacheTypeName()override;
 		};
 
 		class GuiWorkflowCacheResolver : public Object, public IGuiInstanceCacheResolver
 		{
 		public:
-			WString											GetCacheTypeName()override;
+			GlobalStringKey									GetCacheTypeName()override;
 			bool											Serialize(Ptr<IGuiInstanceCache> cache, stream::IStream& stream)override;
 			Ptr<IGuiInstanceCache>							Deserialize(stream::IStream& stream)override;
 		};

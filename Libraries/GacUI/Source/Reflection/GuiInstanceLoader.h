@@ -27,11 +27,11 @@ Instance Environment
 
 		class GuiInstanceContextScope : public Object, public Description<GuiInstanceContextScope>
 		{
-			typedef collections::Dictionary<WString, description::Value>					ValueMap;
-			typedef collections::List<WString>												ErrorList;
-			typedef collections::Dictionary<WString, Ptr<IGuiInstanceBindingContext>>		BindingContextMap;
+			typedef collections::Dictionary<WString, description::Value>						ValueMap;
+			typedef collections::List<WString>													ErrorList;
+			typedef collections::Dictionary<GlobalStringKey, Ptr<IGuiInstanceBindingContext>>	BindingContextMap;
 		public:
-			WString									typeName;
+			GlobalStringKey							typeName;
 			description::Value						rootInstance;
 			ValueMap								referenceValues;
 			BindingContextMap						bindingContexts;
@@ -113,11 +113,11 @@ Instance Loader
 		public:
 			struct TypeInfo
 			{
-				WString								typeName;
+				GlobalStringKey						typeName;
 				description::ITypeDescriptor*		typeDescriptor;
 
 				TypeInfo() :typeDescriptor(0){}
-				TypeInfo(const WString& _typeName, description::ITypeDescriptor* _typeDescriptor)
+				TypeInfo(GlobalStringKey _typeName, description::ITypeDescriptor* _typeDescriptor)
 					:typeName(_typeName)
 					, typeDescriptor(_typeDescriptor)
 				{
@@ -127,10 +127,10 @@ Instance Loader
 			struct PropertyInfo
 			{
 				TypeInfo							typeInfo;
-				WString								propertyName;
+				GlobalStringKey						propertyName;
 
 				PropertyInfo(){}
-				PropertyInfo(const TypeInfo& _typeInfo, const WString& _propertyName)
+				PropertyInfo(const TypeInfo& _typeInfo, GlobalStringKey _propertyName)
 					:typeInfo(_typeInfo)
 					, propertyName(_propertyName)
 				{
@@ -143,7 +143,7 @@ Instance Loader
 				description::Value					propertyValue;
 
 				PropertyValue(){}
-				PropertyValue(const TypeInfo& _typeInfo, const WString& _propertyName, description::Value _instanceValue, description::Value _propertyValue = description::Value())
+				PropertyValue(const TypeInfo& _typeInfo, GlobalStringKey _propertyName, description::Value _instanceValue, description::Value _propertyValue = description::Value())
 					:PropertyInfo(_typeInfo, _propertyName)
 					, instanceValue(_instanceValue)
 					, propertyValue(_propertyValue)
@@ -151,22 +151,22 @@ Instance Loader
 				}
 			};
 
-			virtual WString							GetTypeName() = 0;
+			virtual GlobalStringKey					GetTypeName() = 0;
 
 			virtual bool							IsDeserializable(const TypeInfo& typeInfo);
 			virtual description::Value				Deserialize(const TypeInfo& typeInfo, const WString& text);
 			virtual bool							IsCreatable(const TypeInfo& typeInfo);
-			virtual description::Value				CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments);
+			virtual description::Value				CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<GlobalStringKey, description::Value>& constructorArguments);
 			virtual bool							IsInitializable(const TypeInfo& typeInfo);
 			virtual Ptr<GuiInstanceContextScope>	InitializeInstance(const TypeInfo& typeInfo, description::Value instance);
 
-			virtual void							GetPropertyNames(const TypeInfo& typeInfo, collections::List<WString>& propertyNames);
-			virtual void							GetConstructorParameters(const TypeInfo& typeInfo, collections::List<WString>& propertyNames);
+			virtual void							GetPropertyNames(const TypeInfo& typeInfo, collections::List<GlobalStringKey>& propertyNames);
+			virtual void							GetConstructorParameters(const TypeInfo& typeInfo, collections::List<GlobalStringKey>& propertyNames);
 			virtual Ptr<GuiInstancePropertyInfo>	GetPropertyType(const PropertyInfo& propertyInfo);
 			virtual bool							GetPropertyValue(PropertyValue& propertyValue);
 			virtual bool							SetPropertyValue(PropertyValue& propertyValue);
 
-			virtual void							GetEventNames(const TypeInfo& typeInfo, collections::List<WString>& eventNames);
+			virtual void							GetEventNames(const TypeInfo& typeInfo, collections::List<GlobalStringKey>& eventNames);
 			virtual Ptr<GuiInstanceEventInfo>		GetEventType(const PropertyInfo& eventInfo);
 			virtual bool							SetEventValue(PropertyValue& propertyValue);
 		};
@@ -178,14 +178,14 @@ Instance Binder
 		class IGuiInstanceBindingContext : public IDescriptable, public Description<IGuiInstanceBindingContext>
 		{
 		public:
-			virtual WString							GetContextName() = 0;
+			virtual GlobalStringKey					GetContextName() = 0;
 			virtual void							Initialize(Ptr<GuiInstanceEnvironment> env) = 0;
 		};
 
 		class IGuiInstanceBindingContextFactory : public IDescriptable, public Description<IGuiInstanceBindingContextFactory>
 		{
 		public:
-			virtual WString							GetContextName() = 0;
+			virtual GlobalStringKey					GetContextName() = 0;
 			virtual Ptr<IGuiInstanceBindingContext>	CreateContext() = 0;
 		};
 
@@ -193,14 +193,14 @@ Instance Binder
 		class GuiInstanceBindingContextFactory : public IGuiInstanceBindingContextFactory
 		{
 		protected:
-			WString									contextName;
+			GlobalStringKey							contextName;
 		public:
-			GuiInstanceBindingContextFactory(const WString& _contextName)
+			GuiInstanceBindingContextFactory(GlobalStringKey _contextName)
 				:contextName(_contextName)
 			{
 			}
 
-			WString GetContextName()override
+			GlobalStringKey GetContextName()override
 			{
 				return contextName;
 			}
@@ -214,10 +214,10 @@ Instance Binder
 		class IGuiInstanceBinder : public IDescriptable, public Description<IGuiInstanceBinder>
 		{
 		public:
-			virtual WString							GetBindingName() = 0;
+			virtual GlobalStringKey					GetBindingName() = 0;
 			virtual bool							ApplicableToConstructorArgument() = 0;
 			virtual bool							RequireInstanceName() = 0;
-			virtual void							GetRequiredContexts(collections::List<WString>& contextNames) = 0;
+			virtual void							GetRequiredContexts(collections::List<GlobalStringKey>& contextNames) = 0;
 			virtual void							GetExpectedValueTypes(collections::List<description::ITypeDescriptor*>& expectedTypes) = 0;
 			virtual description::Value				GetValue(Ptr<GuiInstanceEnvironment> env, const description::Value& propertyValue) = 0;
 			virtual bool							SetPropertyValue(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, Nullable<WString> instanceName, IGuiInstanceLoader::PropertyValue& propertyValue) = 0;
@@ -226,9 +226,9 @@ Instance Binder
 		class IGuiInstanceEventBinder : public IDescriptable, public Description<IGuiInstanceEventBinder>
 		{
 		public:
-			virtual WString							GetBindingName() = 0;
+			virtual GlobalStringKey					GetBindingName() = 0;
 			virtual bool							RequireInstanceName() = 0;
-			virtual void							GetRequiredContexts(collections::List<WString>& contextNames) = 0;
+			virtual void							GetRequiredContexts(collections::List<GlobalStringKey>& contextNames) = 0;
 			virtual bool							AttachEvent(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, Nullable<WString> instanceName, IGuiInstanceLoader::PropertyValue& propertyValue) = 0;
 		};
 
@@ -239,13 +239,13 @@ Instance Cache
 		class IGuiInstanceCache : public IDescriptable, public Description<IGuiInstanceCache>
 		{
 		public:
-			virtual WString							GetCacheTypeName() = 0;
+			virtual GlobalStringKey					GetCacheTypeName() = 0;
 		};
 
 		class IGuiInstanceCacheResolver : public IDescriptable, public Description<IGuiInstanceCache>
 		{
 		public:
-			virtual WString							GetCacheTypeName() = 0;
+			virtual GlobalStringKey					GetCacheTypeName() = 0;
 			virtual bool							Serialize(Ptr<IGuiInstanceCache> cache, stream::IStream& stream) = 0;
 			virtual Ptr<IGuiInstanceCache>			Deserialize(stream::IStream& stream) = 0;
 		};
@@ -258,20 +258,20 @@ Instance Loader Manager
 		{
 		public:
 			virtual bool								AddInstanceBindingContextFactory(Ptr<IGuiInstanceBindingContextFactory> factory) = 0;
-			virtual IGuiInstanceBindingContextFactory*	GetInstanceBindingContextFactory(const WString& contextName) = 0;
+			virtual IGuiInstanceBindingContextFactory*	GetInstanceBindingContextFactory(GlobalStringKey contextName) = 0;
 			virtual bool								AddInstanceBinder(Ptr<IGuiInstanceBinder> binder) = 0;
-			virtual IGuiInstanceBinder*					GetInstanceBinder(const WString& bindingName) = 0;
+			virtual IGuiInstanceBinder*					GetInstanceBinder(GlobalStringKey bindingName) = 0;
 			virtual bool								AddInstanceEventBinder(Ptr<IGuiInstanceEventBinder> binder) = 0;
-			virtual IGuiInstanceEventBinder*			GetInstanceEventBinder(const WString& bindingName) = 0;
+			virtual IGuiInstanceEventBinder*			GetInstanceEventBinder(GlobalStringKey bindingName) = 0;
 			virtual bool								AddInstanceCacheResolver(Ptr<IGuiInstanceCacheResolver> cacheResolver) = 0;
-			virtual IGuiInstanceCacheResolver*			GetInstanceCacheResolver(const WString& cacheTypeName) = 0;
+			virtual IGuiInstanceCacheResolver*			GetInstanceCacheResolver(GlobalStringKey cacheTypeName) = 0;
 			virtual bool								CreateVirtualType(const WString& parentType, Ptr<IGuiInstanceLoader> loader) = 0;
 			virtual bool								SetLoader(Ptr<IGuiInstanceLoader> loader) = 0;
-			virtual IGuiInstanceLoader*					GetLoader(const WString& typeName) = 0;
+			virtual IGuiInstanceLoader*					GetLoader(GlobalStringKey typeName) = 0;
 			virtual IGuiInstanceLoader*					GetParentLoader(IGuiInstanceLoader* loader) = 0;
-			virtual description::ITypeDescriptor*		GetTypeDescriptorForType(const WString& typeName) = 0;
-			virtual void								GetVirtualTypes(collections::List<WString>& typeNames) = 0;
-			virtual WString								GetParentTypeForVirtualType(const WString& virtualType) = 0;
+			virtual description::ITypeDescriptor*		GetTypeDescriptorForType(GlobalStringKey typeName) = 0;
+			virtual void								GetVirtualTypes(collections::List<GlobalStringKey>& typeNames) = 0;
+			virtual GlobalStringKey						GetParentTypeForVirtualType(GlobalStringKey virtualType) = 0;
 			virtual bool								SetResource(const WString& name, Ptr<GuiResource> resource) = 0;
 			virtual Ptr<GuiResource>					GetResource(const WString& name) = 0;
 		};
@@ -279,11 +279,11 @@ Instance Loader Manager
 		struct InstanceLoadingSource
 		{
 			IGuiInstanceLoader*						loader;
-			WString									typeName;
+			GlobalStringKey							typeName;
 			Ptr<GuiInstanceContext>					context;
 
 			InstanceLoadingSource() :loader(0){}
-			InstanceLoadingSource(IGuiInstanceLoader* _loader, const WString& _typeName) :loader(_loader), typeName(_typeName){}
+			InstanceLoadingSource(IGuiInstanceLoader* _loader, GlobalStringKey _typeName) :loader(_loader), typeName(_typeName){}
 			InstanceLoadingSource(Ptr<GuiInstanceContext> _context) :loader(0), context(_context){}
 
 			operator bool()const

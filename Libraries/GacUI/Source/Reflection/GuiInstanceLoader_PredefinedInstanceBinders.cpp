@@ -37,7 +37,7 @@ GuiTextInstanceBinderBase
 				return false;
 			}
 
-			void GetRequiredContexts(collections::List<WString>& contextNames)override
+			void GetRequiredContexts(collections::List<GlobalStringKey>& contextNames)override
 			{
 			}
 
@@ -59,9 +59,9 @@ GuiResourceInstanceBinder
 		class GuiResourceInstanceBinder : public GuiTextInstanceBinderBase
 		{
 		public:
-			WString GetBindingName()override
+			GlobalStringKey GetBindingName()override
 			{
-				return L"uri";
+				return GlobalStringKey::_Uri;
 			}
 
 			bool SetPropertyValue(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, Nullable<WString> instanceName, IGuiInstanceLoader::PropertyValue& propertyValue)override
@@ -103,9 +103,9 @@ GuiReferenceInstanceBinder
 		class GuiReferenceInstanceBinder : public GuiTextInstanceBinderBase
 		{
 		public:
-			WString GetBindingName()override
+			GlobalStringKey GetBindingName()override
 			{
-				return L"ref";
+				return GlobalStringKey::_Ref;
 			}
 
 			bool SetPropertyValue(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, Nullable<WString> instanceName, IGuiInstanceLoader::PropertyValue& propertyValue)override
@@ -142,7 +142,7 @@ GuiWorkflowGlobalContext
 			{
 			}
 
-			WString GetContextName()override
+			GlobalStringKey GetContextName()override
 			{
 				return GuiWorkflowCache::CacheContextName;
 			}
@@ -193,7 +193,7 @@ GuiScriptInstanceBinder
 				return true;
 			}
 
-			void GetRequiredContexts(collections::List<WString>& contextNames)override
+			void GetRequiredContexts(collections::List<GlobalStringKey>& contextNames)override
 			{
 				contextNames.Add(GuiWorkflowCache::CacheContextName);
 			}
@@ -228,7 +228,7 @@ GuiScriptInstanceBinder
 						}
 						
 						auto td = propertyValue.typeInfo.typeDescriptor;
-						auto propertyInfo = td->GetPropertyByName(propertyValue.propertyName, true);
+						auto propertyInfo = td->GetPropertyByName(propertyValue.propertyName.ToString(), true);
 						dataBinding.propertyInfo = propertyInfo;
 						dataBinding.bindExpression = expression;
 						goto SUCCESS;
@@ -255,9 +255,9 @@ GuiEvalInstanceBinder
 		class GuiEvalInstanceBinder : public GuiScriptInstanceBinder
 		{
 		public:
-			WString GetBindingName()override
+			GlobalStringKey GetBindingName()override
 			{
-				return L"eval";
+				return GlobalStringKey::_Eval;
 			}
 
 			bool ApplicableToConstructorArgument()override
@@ -271,7 +271,7 @@ GuiEvalInstanceBinder
 				{
 					Ptr<WfAssembly> assembly;
 					WString expressionCode = TranslateExpression(propertyValue.GetText());
-					WString cacheKey = L"<att.eval>" + expressionCode;
+					GlobalStringKey cacheKey = GlobalStringKey::Get(L"<att.eval>" + expressionCode);
 					vint cacheIndex = env->context->precompiledCaches.Keys().IndexOf(cacheKey);
 					if (cacheIndex != -1)
 					{
@@ -318,9 +318,9 @@ GuiEvalInstanceEventBinder
 		class GuiEvalInstanceEventBinder : public Object, public IGuiInstanceEventBinder
 		{
 		public:
-			WString GetBindingName()override
+			GlobalStringKey GetBindingName()override
 			{
-				return L"eval";
+				return GlobalStringKey::_Eval;
 			}
 
 			bool RequireInstanceName()override
@@ -328,7 +328,7 @@ GuiEvalInstanceEventBinder
 				return true;
 			}
 
-			void GetRequiredContexts(collections::List<WString>& contextNames)override
+			void GetRequiredContexts(collections::List<GlobalStringKey>& contextNames)override
 			{
 			}
 
@@ -339,7 +339,7 @@ GuiEvalInstanceEventBinder
 				{
 					Ptr<WfAssembly> assembly;
 					WString statementCode = handler.GetText();
-					WString cacheKey = L"<ev.eval><" + instanceName.Value() + L"><" + propertyValue.propertyName + L">" + statementCode;
+					GlobalStringKey cacheKey = GlobalStringKey::Get(L"<ev.eval><" + instanceName.Value() + L"><" + propertyValue.propertyName.ToString() + L">" + statementCode);
 					vint cacheIndex = env->context->precompiledCaches.Keys().IndexOf(cacheKey);
 					if (cacheIndex != -1)
 					{
@@ -377,9 +377,9 @@ GuiBindInstanceBinder
 		class GuiBindInstanceBinder : public GuiScriptInstanceBinder
 		{
 		public:
-			WString GetBindingName()override
+			GlobalStringKey GetBindingName()override
 			{
-				return L"bind";
+				return GlobalStringKey::_Bind;
 			}
 
 			WString TranslateExpression(const WString& input)override
@@ -395,9 +395,9 @@ GuiFormatInstanceBinder
 		class GuiFormatInstanceBinder : public GuiScriptInstanceBinder
 		{
 		public:
-			WString GetBindingName()override
+			GlobalStringKey GetBindingName()override
 			{
-				return L"format";
+				return GlobalStringKey::_Format;
 			}
 
 			WString TranslateExpression(const WString& input)override

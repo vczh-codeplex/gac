@@ -24,7 +24,7 @@ LogInstanceLoaderManager_GetParentTypes
 			}
 			else
 			{
-				parentTypes.Add(GetInstanceLoaderManager()->GetParentTypeForVirtualType(typeName));
+				parentTypes.Add(GetInstanceLoaderManager()->GetParentTypeForVirtualType(GlobalStringKey::Get(typeName)).ToString());
 			}
 		}
 
@@ -64,7 +64,7 @@ LogInstanceLoaderManager_PrintProperties
 		{
 			List<IGuiInstanceLoader*> loaders;
 			{
-				IGuiInstanceLoader* loader = GetInstanceLoaderManager()->GetLoader(typeName);
+				IGuiInstanceLoader* loader = GetInstanceLoaderManager()->GetLoader(GlobalStringKey::Get(typeName));
 				while (loader)
 				{
 					loaders.Add(loader);
@@ -72,14 +72,14 @@ LogInstanceLoaderManager_PrintProperties
 				}
 			}
 			
-			IGuiInstanceLoader::TypeInfo typeInfo(typeName, GetInstanceLoaderManager()->GetTypeDescriptorForType(typeName));
-			Dictionary<WString, IGuiInstanceLoader*> propertyLoaders;
+			IGuiInstanceLoader::TypeInfo typeInfo(GlobalStringKey::Get(typeName), GetInstanceLoaderManager()->GetTypeDescriptorForType(GlobalStringKey::Get(typeName)));
+			Dictionary<GlobalStringKey, IGuiInstanceLoader*> propertyLoaders;
 			FOREACH(IGuiInstanceLoader*, loader, loaders)
 			{
-				List<WString> propertyNames;
+				List<GlobalStringKey> propertyNames;
 				loader->GetPropertyNames(typeInfo, propertyNames);
 
-				FOREACH(WString, propertyName, propertyNames)
+				FOREACH(GlobalStringKey, propertyName, propertyNames)
 				{
 					if (!propertyLoaders.Keys().Contains(propertyName))
 					{
@@ -88,7 +88,7 @@ LogInstanceLoaderManager_PrintProperties
 				}
 			}
 
-			FOREACH_INDEXER(WString, propertyName, index, propertyLoaders.Keys())
+			FOREACH_INDEXER(GlobalStringKey, propertyName, index, propertyLoaders.Keys())
 			{
 				SortedList<WString> acceptableTypes;
 				Ptr<GuiInstancePropertyInfo> firstInfo;
@@ -141,7 +141,7 @@ LogInstanceLoaderManager_PrintProperties
 					continue;
 				}
 
-				LogInstanceLoaderManager_PrintFieldName(writer, (propertyName == L"" ? L"<DEFAULT-PROPERTY>" : propertyName));
+				LogInstanceLoaderManager_PrintFieldName(writer, (propertyName == GlobalStringKey::Empty? L"<DEFAULT-PROPERTY>" : propertyName.ToString()));
 				if (firstInfo->constructorParameter)
 				{
 					writer.WriteString(firstInfo->required ? L"+" : L"*");
@@ -193,7 +193,7 @@ LogInstanceLoaderManager_PrintProperties
 		{
 			List<IGuiInstanceLoader*> loaders;
 			{
-				IGuiInstanceLoader* loader = GetInstanceLoaderManager()->GetLoader(typeName);
+				IGuiInstanceLoader* loader = GetInstanceLoaderManager()->GetLoader(GlobalStringKey::Get(typeName));
 				while (loader)
 				{
 					loaders.Add(loader);
@@ -201,14 +201,14 @@ LogInstanceLoaderManager_PrintProperties
 				}
 			}
 			
-			IGuiInstanceLoader::TypeInfo typeInfo(typeName, GetInstanceLoaderManager()->GetTypeDescriptorForType(typeName));
-			Dictionary<WString, IGuiInstanceLoader*> eventLoaders;
+			IGuiInstanceLoader::TypeInfo typeInfo(GlobalStringKey::Get(typeName), GetInstanceLoaderManager()->GetTypeDescriptorForType(GlobalStringKey::Get(typeName)));
+			Dictionary<GlobalStringKey, IGuiInstanceLoader*> eventLoaders;
 			FOREACH(IGuiInstanceLoader*, loader, loaders)
 			{
-				List<WString> eventNames;
+				List<GlobalStringKey> eventNames;
 				loader->GetEventNames(typeInfo, eventNames);
 
-				FOREACH(WString, eventName, eventNames)
+				FOREACH(GlobalStringKey, eventName, eventNames)
 				{
 					if (!eventLoaders.Keys().Contains(eventName))
 					{
@@ -217,7 +217,7 @@ LogInstanceLoaderManager_PrintProperties
 				}
 			}
 
-			FOREACH_INDEXER(WString, eventName, index, eventLoaders.Keys())
+			FOREACH_INDEXER(GlobalStringKey, eventName, index, eventLoaders.Keys())
 			{
 				IGuiInstanceLoader* loader = eventLoaders.Values()[index];
 				IGuiInstanceLoader::PropertyInfo propertyInfo(typeInfo, eventName);
@@ -227,7 +227,7 @@ LogInstanceLoaderManager_PrintProperties
 					continue;
 				}
 
-				LogInstanceLoaderManager_PrintFieldName(writer, eventName);
+				LogInstanceLoaderManager_PrintFieldName(writer, eventName.ToString());
 				writer.WriteString(L" [event]      ");
 				writer.WriteLine(info->argumentType->GetTypeName());
 			}
@@ -363,18 +363,18 @@ LogInstanceLoaderManager
 					}
 				}
 
-				List<WString> virtualTypes;
+				List<GlobalStringKey> virtualTypes;
 				GetInstanceLoaderManager()->GetVirtualTypes(virtualTypes);
-				FOREACH(WString, typeName, virtualTypes)
+				FOREACH(GlobalStringKey, typeName, virtualTypes)
 				{
-					WString parentType = GetInstanceLoaderManager()->GetParentTypeForVirtualType(typeName);
-					if (description::GetTypeDescriptor(parentType) && !virtualizedTypes.Contains(parentType))
+					GlobalStringKey parentType = GetInstanceLoaderManager()->GetParentTypeForVirtualType(typeName);
+					if (description::GetTypeDescriptor(parentType.ToString()) && !virtualizedTypes.Contains(parentType.ToString()))
 					{
-						virtualizedTypes.Add(parentType);
+						virtualizedTypes.Add(parentType.ToString());
 					}
-					allTypes.Add(typeName);
-					typeParents.Add(typeName, parentType);
-					typeChildren.Add(parentType, typeName);
+					allTypes.Add(typeName.ToString());
+					typeParents.Add(typeName.ToString(), parentType.ToString());
+					typeChildren.Add(parentType.ToString(), typeName.ToString());
 				}
 			}
 
@@ -418,10 +418,11 @@ LogInstanceLoaderManager
 			{
 				FOREACH(WString, typeName, sortedTypes)
 				{
-					auto typeDescriptor = GetInstanceLoaderManager()->GetTypeDescriptorForType(typeName);
-					IGuiInstanceLoader::TypeInfo typeInfo(typeName, typeDescriptor);
+					auto typeKey = GlobalStringKey::Get(typeName);
+					auto typeDescriptor = GetInstanceLoaderManager()->GetTypeDescriptorForType(typeKey);
+					IGuiInstanceLoader::TypeInfo typeInfo(typeKey, typeDescriptor);
 					
-					auto loader = GetInstanceLoaderManager()->GetLoader(typeName);
+					auto loader = GetInstanceLoaderManager()->GetLoader(typeKey);
 					while (loader)
 					{
 						if (loader->IsDeserializable(typeInfo))

@@ -131,6 +131,9 @@ GlobalStringKey
 		GlobalStringKey GlobalStringKey::_Bind;
 		GlobalStringKey GlobalStringKey::_Format;
 		GlobalStringKey GlobalStringKey::_Eval;
+		GlobalStringKey GlobalStringKey::_Uri;
+		GlobalStringKey GlobalStringKey::_Workflow_Assembly_Cache;
+		GlobalStringKey GlobalStringKey::_Workflow_Global_Context;
 
 		class GlobalStringKeyManager
 		{
@@ -145,6 +148,9 @@ GlobalStringKey
 				GlobalStringKey::_Bind = GlobalStringKey::Get(L"bind");
 				GlobalStringKey::_Format = GlobalStringKey::Get(L"format");
 				GlobalStringKey::_Eval = GlobalStringKey::Get(L"eval");
+				GlobalStringKey::_Uri = GlobalStringKey::Get(L"uri");
+				GlobalStringKey::_Workflow_Assembly_Cache = GlobalStringKey::Get(L"WORKFLOW-ASSEMBLY-CACHE");
+				GlobalStringKey::_Workflow_Global_Context = GlobalStringKey::Get(L"WORKFLOW-GLOBAL-CONTEXT");
 			}
 		}* globalStringKeyManager = 0;
 
