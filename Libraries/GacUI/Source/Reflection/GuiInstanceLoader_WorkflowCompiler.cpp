@@ -17,10 +17,10 @@ namespace vl
 Variable
 ***********************************************************************/
 
-		void Workflow_CreatePointerVariable(Ptr<workflow::WfModule> module, const WString& name, description::ITypeDescriptor* type)
+		void Workflow_CreatePointerVariable(Ptr<workflow::WfModule> module, GlobalStringKey name, description::ITypeDescriptor* type)
 		{
 			auto var = MakePtr<WfVariableDeclaration>();
-			var->name.value = name;
+			var->name.value = name.ToString();
 			{
 				Ptr<TypeInfoImpl> elementType = new TypeInfoImpl(ITypeInfo::TypeDescriptor);
 				elementType->SetTypeDescriptor(type);
@@ -40,7 +40,7 @@ Variable
 
 		void Workflow_GetVariableTypes(Ptr<GuiInstanceEnvironment> env, types::VariableTypeMap& types)
 		{
-			FOREACH_INDEXER(WString, name, index, env->scope->referenceValues.Keys())
+			FOREACH_INDEXER(GlobalStringKey, name, index, env->scope->referenceValues.Keys())
 			{
 				auto value = env->scope->referenceValues.Values()[index];
 				types.Add(name, value.GetTypeDescriptor());
@@ -59,9 +59,9 @@ Variable
 
 		void Workflow_SetVariablesForReferenceValues(Ptr<workflow::runtime::WfRuntimeGlobalContext> context, Ptr<GuiInstanceEnvironment> env)
 		{
-			FOREACH_INDEXER(WString, name, index, env->scope->referenceValues.Keys())
+			FOREACH_INDEXER(GlobalStringKey, name, index, env->scope->referenceValues.Keys())
 			{
-				vint variableIndex = context->assembly->variableNames.IndexOf(name);
+				vint variableIndex = context->assembly->variableNames.IndexOf(name.ToString());
 				if (variableIndex != -1)
 				{
 					context->globalVariables->variables[variableIndex] = env->scope->referenceValues.Values()[index];
@@ -272,7 +272,7 @@ Workflow_CompileDataBinding
 		{
 			auto module = MakePtr<WfModule>();
 			Workflow_CreateVariablesForReferenceValues(module, types);
-			Workflow_CreatePointerVariable(module, L"<this>", thisType);
+			Workflow_CreatePointerVariable(module, GlobalStringKey::Get(L"<this>"), thisType);
 
 			auto func = MakePtr<WfFunctionDeclaration>();
 			func->anonymity = WfFunctionAnonymity::Named;
@@ -324,7 +324,7 @@ Workflow_CompileDataBinding
 						callback->statement = callbackBlock;
 						{
 							auto refSubscribee = MakePtr<WfReferenceExpression>();
-							refSubscribee->name.value = dataBinding.variableName;
+							refSubscribee->name.value = dataBinding.variableName.ToString();
 
 							auto member = MakePtr<WfMemberExpression>();
 							member->parent = refSubscribee;
@@ -385,7 +385,7 @@ Workflow_CompileDataBinding
 						}
 						{
 							auto refSubscribee = MakePtr<WfReferenceExpression>();
-							refSubscribee->name.value = dataBinding.variableName;
+							refSubscribee->name.value = dataBinding.variableName.ToString();
 
 							auto member = MakePtr<WfMemberExpression>();
 							member->parent = refSubscribee;
@@ -441,7 +441,7 @@ Workflow_CompileDataBinding
 				else if (dataBinding.bindExpression)
 				{
 					auto refSubscribee = MakePtr<WfReferenceExpression>();
-					refSubscribee->name.value = dataBinding.variableName;
+					refSubscribee->name.value = dataBinding.variableName.ToString();
 
 					auto member = MakePtr<WfMemberExpression>();
 					member->parent = refSubscribee;
@@ -510,16 +510,15 @@ Workflow_GetSharedManager
 				auto reprTypeInfo = bindingTargetTypeInfo;
 				auto loader = GetInstanceLoaderManager()->GetLoader(reprTypeInfo.typeName);
 
-				if (repr->instanceName && reprTypeInfo.typeDescriptor)
+				if (repr->instanceName != GlobalStringKey::Empty && reprTypeInfo.typeDescriptor)
 				{
-					WString name = repr->instanceName.Value();
-					if (typeInfos.Keys().Contains(name))
+					if (typeInfos.Keys().Contains(repr->instanceName))
 					{
-						errors.Add(L"Precompile: Parameter \"" + name + L"\" conflict with an existing named object.");
+						errors.Add(L"Precompile: Parameter \"" + repr->instanceName.ToString() + L"\" conflict with an existing named object.");
 					}
 					else
 					{
-						typeInfos.Add(name, reprTypeInfo);
+						typeInfos.Add(repr->instanceName, reprTypeInfo);
 					}
 				}
 				
@@ -534,9 +533,9 @@ Workflow_GetSharedManager
 						{
 							errors.Add(L"The appropriate IGuiInstanceBinder of binding \"" + setter->binding.ToString() + L"\" cannot be found.");
 						}
-						else if (binder->RequireInstanceName() && !repr->instanceName && reprTypeInfo.typeDescriptor)
+						else if (binder->RequireInstanceName() && repr->instanceName == GlobalStringKey::Empty && reprTypeInfo.typeDescriptor)
 						{
-							WString name = L"<precompile>" + itow(generatedNameCount++);
+							auto name = GlobalStringKey::Get(L"<precompile>" + itow(generatedNameCount++));
 							repr->instanceName = name;
 							typeInfos.Add(name, reprTypeInfo);
 						}
@@ -578,9 +577,9 @@ Workflow_GetSharedManager
 						{
 							errors.Add(L"The appropriate IGuiInstanceEventBinder of binding \"" + handler->binding.ToString() + L"\" cannot be found.");
 						}
-						else if (binder->RequireInstanceName() && !repr->instanceName && reprTypeInfo.typeDescriptor)
+						else if (binder->RequireInstanceName() && repr->instanceName == GlobalStringKey::Empty && reprTypeInfo.typeDescriptor)
 						{
-							WString name = L"<precompile>" + itow(generatedNameCount++);
+							auto name = GlobalStringKey::Get(L"<precompile>" + itow(generatedNameCount++));
 							repr->instanceName = name;
 							typeInfos.Add(name, reprTypeInfo);
 						}
@@ -642,9 +641,9 @@ Workflow_GetSharedManager
 			void Visit(GuiAttSetterRepr* repr)override
 			{
 				IGuiInstanceLoader::TypeInfo reprTypeInfo;
-				if (repr->instanceName)
+				if (repr->instanceName != GlobalStringKey::Empty)
 				{
-					reprTypeInfo = typeInfos[repr->instanceName.Value()];;
+					reprTypeInfo = typeInfos[repr->instanceName];
 				}
 
 				FOREACH_INDEXER(Ptr<GuiAttSetterRepr::SetterValue>, setter, index, repr->setters.Values())
@@ -686,7 +685,7 @@ Workflow_GetSharedManager
 							if (setter->binding == GlobalStringKey::_Bind || setter->binding == GlobalStringKey::_Format)
 							{
 								WorkflowDataBinding dataBinding;
-								dataBinding.variableName = repr->instanceName.Value();
+								dataBinding.variableName = repr->instanceName;
 
 								if (setter->binding == GlobalStringKey::_Bind)
 								{
@@ -717,7 +716,7 @@ Workflow_GetSharedManager
 								else
 								{
 									WorkflowDataBinding dataBinding;
-									dataBinding.variableName = repr->instanceName.Value();
+									dataBinding.variableName = repr->instanceName;
 									Ptr<WfExpression> expression;
 									if (Workflow_ValidateExpression(types, errors, info, expressionCode, expression))
 									{
@@ -771,7 +770,7 @@ Workflow_GetSharedManager
 
 							if (handler->binding == GlobalStringKey::_Eval)
 							{
-								WString cacheKey = L"<ev.eval><" + repr->instanceName.Value() + L"><" + propertyName.ToString() + L">" + statementCode;
+								WString cacheKey = L"<ev.eval><" + repr->instanceName.ToString() + L"><" + propertyName.ToString() + L">" + statementCode;
 								auto assembly = Workflow_CompileEventHandler(types, errors, info, statementCode);
 								context->precompiledCaches.Add(GlobalStringKey::Get(cacheKey), new GuiWorkflowCache(assembly));
 							}
@@ -793,14 +792,14 @@ Workflow_GetSharedManager
 			{
 				FOREACH(Ptr<GuiInstanceParameter>, parameter, context->parameters)
 				{
-					auto type = GetTypeDescriptor(parameter->className);
+					auto type = GetTypeDescriptor(parameter->className.ToString());
 					if (!type)
 					{
-						errors.Add(L"Precompile: Cannot find type \"" + parameter->className + L"\".");
+						errors.Add(L"Precompile: Cannot find type \"" + parameter->className.ToString() + L"\".");
 					}
 					else if (typeInfos.Keys().Contains(parameter->name))
 					{
-						errors.Add(L"Precompile: Parameter \"" + parameter->name + L"\" conflict with an existing named object.");
+						errors.Add(L"Precompile: Parameter \"" + parameter->name.ToString() + L"\" conflict with an existing named object.");
 					}
 					else
 					{

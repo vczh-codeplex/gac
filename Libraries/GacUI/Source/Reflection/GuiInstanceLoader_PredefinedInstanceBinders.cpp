@@ -202,7 +202,7 @@ GuiScriptInstanceBinder
 			{
 				auto context = env->scope->bindingContexts[GuiWorkflowCache::CacheContextName].Cast<GuiWorkflowGlobalContext>();
 				WorkflowDataBinding dataBinding;
-				dataBinding.variableName = instanceName.Value();
+				dataBinding.variableName = instanceName;
 
 				if (env->context->precompiledCaches.Keys().Contains(GuiWorkflowCache::CacheContextName))
 				{

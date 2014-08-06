@@ -69,11 +69,11 @@ GuiAttSetterRepr
 		{
 			if (!fromStyle || serializePrecompiledResource)
 			{
-				if (instanceName)
+				if (instanceName != GlobalStringKey::Empty)
 				{
 					auto attName = MakePtr<XmlAttribute>();
 					attName->name.value = L"ref.Name";
-					attName->value.value = instanceName.Value();
+					attName->value.value = instanceName.ToString();
 					xml->attributes.Add(attName);
 				}
 
@@ -349,7 +349,7 @@ GuiInstanceContext
 						// collect reference attributes
 						if (name->name == L"Name")
 						{
-							setter->instanceName = att->value.value;
+							setter->instanceName = GlobalStringKey::Get(att->value.value);
 						}
 					}
 					else if(name->IsPropertyAttributeName())

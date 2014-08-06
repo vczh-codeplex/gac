@@ -19,9 +19,9 @@ namespace vl
 	{
 		namespace types
 		{
-			typedef collections::Dictionary<WString, description::ITypeDescriptor*>		VariableTypeMap;
-			typedef collections::Dictionary<WString, IGuiInstanceLoader::TypeInfo>		VariableTypeInfoMap;
-			typedef collections::List<WString>											ErrorList;
+			typedef collections::Dictionary<GlobalStringKey, description::ITypeDescriptor*>		VariableTypeMap;
+			typedef collections::Dictionary<GlobalStringKey, IGuiInstanceLoader::TypeInfo>		VariableTypeInfoMap;
+			typedef collections::List<WString>													ErrorList;
 		}
 		extern workflow::analyzer::WfLexicalScopeManager*	Workflow_GetSharedManager();
 		
@@ -30,7 +30,7 @@ namespace vl
 WorkflowCompiler
 ***********************************************************************/
 
-		extern void											Workflow_CreatePointerVariable(Ptr<workflow::WfModule> module, const WString& name, description::ITypeDescriptor* type);
+		extern void											Workflow_CreatePointerVariable(Ptr<workflow::WfModule> module, GlobalStringKey name, description::ITypeDescriptor* type);
 		extern void											Workflow_GetVariableTypes(Ptr<GuiInstanceEnvironment> env, types::VariableTypeMap& types);
 		extern void											Workflow_CreateVariablesForReferenceValues(Ptr<workflow::WfModule> module, types::VariableTypeMap& types);
 		extern void											Workflow_SetVariablesForReferenceValues(Ptr<workflow::runtime::WfRuntimeGlobalContext> context, Ptr<GuiInstanceEnvironment> env);
@@ -41,7 +41,7 @@ WorkflowCompiler
 
 		struct WorkflowDataBinding
 		{
-			WString											variableName;
+			GlobalStringKey									variableName;
 			description::IPropertyInfo*						propertyInfo = 0;
 			Ptr<workflow::WfExpression>						bindExpression; // WfBindExpression for bind, else for assign
 		};
