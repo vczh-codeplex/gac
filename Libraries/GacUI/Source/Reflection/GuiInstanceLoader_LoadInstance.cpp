@@ -64,7 +64,7 @@ Helper Functions Declarations
 			GuiAttSetterRepr* attSetter,
 			IGuiInstanceLoader* loader,
 			bool skipDefaultProperty,
-			const WString& typeName,
+			GlobalStringKey typeName,
 			List<FillInstanceBindingSetter>& bindingSetters,
 			List<FillInstanceEventSetter>& eventSetters
 			);
@@ -73,7 +73,7 @@ Helper Functions Declarations
 			Ptr<GuiInstanceEnvironment> env,
 			GuiConstructorRepr* ctor,
 			description::ITypeDescriptor* expectedType,
-			WString& typeName,
+			GlobalStringKey& typeName,
 			List<FillInstanceBindingSetter>& bindingSetters,
 			List<FillInstanceEventSetter>& eventSetters,
 			bool isRootInstance
@@ -85,9 +85,9 @@ Helper Functions Declarations
 
 		bool PrepareBindingContext(
 			Ptr<GuiInstanceEnvironment> env,
-			collections::List<WString>& contextNames,
+			collections::List<GlobalStringKey>& contextNames,
 			const WString& dependerType,
-			const WString& dependerName
+			const GlobalStringKey& dependerName
 			);
 
 		void ExecuteBindingSetters(
@@ -105,7 +105,7 @@ Helper Functions Declarations
 			Ptr<GuiInstanceEnvironment> env,
 			GuiConstructorRepr* ctor,
 			IGuiInstanceLoader* instanceLoader,
-			const WString& typeName,
+			GlobalStringKey typeName,
 			description::Value instance,
 			bool deserialized,
 			List<FillInstanceBindingSetter>& bindingSetters,
@@ -172,7 +172,7 @@ LoadValueVisitor
 					vint errorCount = env->scope->errors.Count();
 					FOREACH(ITypeDescriptor*, typeDescriptor, acceptableTypes)
 					{
-						WString _typeName;
+						GlobalStringKey _typeName;
 						loadedValue = CreateInstance(env, repr, typeDescriptor, _typeName, bindingSetters, eventSetters, false);
 						if (!loadedValue.IsNull())
 						{
@@ -219,7 +219,7 @@ FindInstanceLoadingSource
 				Ptr<GuiInstanceContext::NamespaceInfo> namespaceInfo=context->namespaces.Values()[index];
 				FOREACH(Ptr<GuiInstanceNamespace>, ns, namespaceInfo->namespaces)
 				{
-					WString fullName = ns->prefix + ctor->typeName + ns->postfix;
+					auto fullName = GlobalStringKey::Get(ns->prefix + ctor->typeName.ToString() + ns->postfix);
 					IGuiInstanceLoader* loader = GetInstanceLoaderManager()->GetLoader(fullName);
 					if(loader)
 					{
@@ -247,15 +247,16 @@ LoadInstancePropertyValue
 			List<FillInstanceEventSetter>& eventSetters
 			)
 		{
-			WString instanceType;
+			GlobalStringKey instanceType;
 			if (propertyValue.instanceValue.IsNull())
 			{
 				instanceType = propertyLoader->GetTypeName();
 			}
 			else
 			{
-				instanceType = propertyValue.instanceValue.GetTypeDescriptor()->GetTypeName();
+				instanceType = GlobalStringKey::Get(propertyValue.instanceValue.GetTypeDescriptor()->GetTypeName());
 			}
+
 			vint loadedValueCount = 0;
 			// try to look for a loader to handle this property
 			while (propertyLoader && loadedValueCount < input.Count())
@@ -270,7 +271,7 @@ LoadInstancePropertyValue
 					{
 						env->scope->errors.Add(
 							L"Property \"" +
-							propertyValue.propertyName +
+							propertyValue.propertyName.ToString() +
 							L"\" of type \"" +
 							propertyValue.instanceValue.GetTypeDescriptor()->GetTypeName() +
 							L"\" is not supported.");
@@ -284,9 +285,9 @@ LoadInstancePropertyValue
 						{
 							env->scope->errors.Add(
 								L"Collection property \"" +
-								propertyValue.propertyName +
+								propertyValue.propertyName.ToString() +
 								L"\" of type \"" +
-								instanceType +
+								instanceType.ToString() +
 								L"\" can only be assigned with a single value.");
 							return false;
 						}
@@ -295,9 +296,9 @@ LoadInstancePropertyValue
 						{
 							env->scope->errors.Add(
 								L"Collection property \"" +
-								propertyValue.propertyName +
+								propertyValue.propertyName.ToString() +
 								L"\" of type \"" +
-								instanceType +
+								instanceType.ToString() +
 								L"\" can only be retrived using binding \"set\".");
 							return false;
 						}
@@ -311,10 +312,11 @@ LoadInstancePropertyValue
 									loadedValueCount++;
 
 									ITypeDescriptor* propertyTypeDescriptor=propertyValue.propertyValue.GetRawPtr()->GetTypeDescriptor();
-									IGuiInstanceLoader* propertyInstanceLoader=GetInstanceLoaderManager()->GetLoader(propertyTypeDescriptor->GetTypeName());
+									auto propertyTypeKey = GlobalStringKey::Get(propertyTypeDescriptor->GetTypeName());
+									IGuiInstanceLoader* propertyInstanceLoader=GetInstanceLoaderManager()->GetLoader(propertyTypeKey);
 									if(propertyInstanceLoader)
 									{
-										FillInstance(propertyValue.propertyValue, env, propertyAttSetter.Obj(), propertyInstanceLoader, false, propertyTypeDescriptor->GetTypeName(), bindingSetters, eventSetters);
+										FillInstance(propertyValue.propertyValue, env, propertyAttSetter.Obj(), propertyInstanceLoader, false, propertyTypeKey, bindingSetters, eventSetters);
 									}
 								}
 							}
@@ -325,9 +327,9 @@ LoadInstancePropertyValue
 						{
 							env->scope->errors.Add(
 								L"Collection property \"" +
-								propertyValue.propertyName +
+								propertyValue.propertyName.ToString() +
 								L"\" of type \"" +
-								instanceType +
+								instanceType.ToString() +
 								L"\" cannot be assigned using binding.");
 							return false;
 						}
@@ -357,9 +359,9 @@ LoadInstancePropertyValue
 						{
 							env->scope->errors.Add(
 								L"Assignable property \"" +
-								propertyValue.propertyName +
+								propertyValue.propertyName.ToString() +
 								L"\" of type \"" +
-								instanceType +
+								instanceType.ToString() +
 								L"\" cannot be assigned using multiple values.");
 							return false;
 						}
@@ -367,9 +369,9 @@ LoadInstancePropertyValue
 						{
 							env->scope->errors.Add(
 								L"Assignable property \"" +
-								propertyValue.propertyName +
+								propertyValue.propertyName.ToString() +
 								L"\" of type \"" +
-								instanceType +
+								instanceType.ToString() +
 								L"\" cannot be retrived using binding \"set\".");
 							return false;
 						}
@@ -388,9 +390,9 @@ LoadInstancePropertyValue
 											output.Add(Pair<Value, IGuiInstanceLoader*>(propertyValue.propertyValue, propertyLoader));
 										}
 									}
-									else if (IGuiInstanceBinder* binder=GetInstanceLoaderManager()->GetInstanceBinder(binding.ToString()))
+									else if (IGuiInstanceBinder* binder=GetInstanceLoaderManager()->GetInstanceBinder(binding))
 									{
-										List<WString> contextNames;
+										List<GlobalStringKey> contextNames;
 										binder->GetRequiredContexts(contextNames);
 										bool success = PrepareBindingContext(env, contextNames, L"property binding", binder->GetBindingName());
 
@@ -409,9 +411,9 @@ LoadInstancePropertyValue
 													{
 														env->scope->errors.Add(
 															L"Assignable property \"" +
-															propertyValue.propertyName +
+															propertyValue.propertyName.ToString() +
 															L"\" of type \"" +
-															instanceType +
+															instanceType.ToString() +
 															L"\" cannot be assigned using binding \"" +
 															binding.ToString() +
 															L"\" because the value translation failed.");
@@ -437,9 +439,9 @@ LoadInstancePropertyValue
 									{
 										env->scope->errors.Add(
 											L"Assignable property \"" +
-											propertyValue.propertyName +
+											propertyValue.propertyName.ToString() +
 											L"\" of type \"" +
-											instanceType +
+											instanceType.ToString() +
 											L"\" cannot be assigned using binding \"" +
 											binding.ToString() +
 											L"\" because the appropriate IGuiInstanceBinder for this binding cannot be found.");
@@ -459,9 +461,9 @@ LoadInstancePropertyValue
 						{
 							env->scope->errors.Add(
 								L"Array property \"" +
-								propertyValue.propertyName +
+								propertyValue.propertyName.ToString() +
 								L"\" of type \"" +
-								instanceType +
+								instanceType.ToString() +
 								L"\" cannot be assigned using binding.");
 							return false;
 						}
@@ -512,7 +514,7 @@ FillInstance
 			GuiAttSetterRepr* attSetter,
 			IGuiInstanceLoader* loader,
 			bool skipDefaultProperty,
-			const WString& typeName,
+			GlobalStringKey typeName,
 			List<FillInstanceBindingSetter>& bindingSetters,
 			List<FillInstanceEventSetter>& eventSetters
 			)
@@ -521,8 +523,8 @@ FillInstance
 			// reverse loop to set the default property (name == L"") after all other properties
 			for (vint i = attSetter->setters.Count() - 1; i >= 0; i--)
 			{
-				WString propertyName = attSetter->setters.Keys()[i].ToString();
-				if (propertyName == L"" && skipDefaultProperty)
+				GlobalStringKey propertyName = attSetter->setters.Keys()[i];
+				if (propertyName == GlobalStringKey::Empty && skipDefaultProperty)
 				{
 					continue;
 				}
@@ -564,7 +566,7 @@ FillInstance
 
 				IGuiInstanceLoader::PropertyInfo propertyInfo(
 					typeInfo,
-					eventName.ToString()
+					eventName
 					);
 
 				// get the loader to attach the event
@@ -588,14 +590,14 @@ FillInstance
 				IGuiInstanceEventBinder* binder = 0;
 				if (handler->binding != GlobalStringKey::Empty)
 				{
-					binder = GetInstanceLoaderManager()->GetInstanceEventBinder(handler->binding.ToString());
+					binder = GetInstanceLoaderManager()->GetInstanceEventBinder(handler->binding);
 					if (!binder)
 					{
 						env->scope->errors.Add(
 							L"Failed to attach event \"" +
 							eventName.ToString() +
 							L"\" of type \"" +
-							typeName +
+							typeName.ToString() +
 							L"\" with the handler \"" +
 							handler->value +
 							L"\" using event binding \"" +
@@ -624,7 +626,7 @@ FillInstance
 						L"Failed to attach event \"" +
 						eventName.ToString() +
 						L"\" of type \"" +
-						typeName +
+						typeName.ToString() +
 						L"\" with the handler \"" +
 						handler->value +
 						L"\" using event binding \"" +
@@ -642,7 +644,7 @@ CreateInstance
 			Ptr<GuiInstanceEnvironment> env,
 			GuiConstructorRepr* ctor,
 			description::ITypeDescriptor* expectedType,
-			WString& typeName,
+			GlobalStringKey& typeName,
 			List<FillInstanceBindingSetter>& bindingSetters,
 			List<FillInstanceEventSetter>& eventSetters,
 			bool isRootInstance
@@ -703,7 +705,7 @@ CreateInstance
 							{
 								env->scope->errors.Add(
 									L"Failed to deserialize object of type \"" +
-									source.typeName +
+									source.typeName.ToString() +
 									L"\" from string \"" +
 									singleTextValue->text +
 									L"\".");
@@ -713,17 +715,17 @@ CreateInstance
 						{
 							foundLoader = true;
 							// find all constructor parameters
-							List<WString> constructorParameters;
-							List<WString> requiredParameters;
+							List<GlobalStringKey> constructorParameters;
+							List<GlobalStringKey> requiredParameters;
 							loader->GetConstructorParameters(typeInfo, constructorParameters);
 							
 							// see if all parameters exists
-							Group<WString, Value> constructorArguments;
-							FOREACH(WString, propertyName, constructorParameters)
+							Group<GlobalStringKey, Value> constructorArguments;
+							FOREACH(GlobalStringKey, propertyName, constructorParameters)
 							{
 								IGuiInstanceLoader::PropertyInfo propertyInfo(typeInfo, propertyName);
 								auto info = loader->GetPropertyType(propertyInfo);
-								vint index = ctor->setters.Keys().IndexOf(GlobalStringKey::Get(propertyName));
+								vint index = ctor->setters.Keys().IndexOf(propertyName);
 
 								if (info->constructorParameter)
 								{
@@ -734,9 +736,9 @@ CreateInstance
 											// if a required parameter doesn't exist, fail
 											env->scope->errors.Add(
 												L"Failed to create object of type \"" +
-												source.typeName +
+												source.typeName.ToString() +
 												L"\" because the required constructor parameter \"" +
-												propertyName +
+												propertyName.ToString() +
 												L"\" is missing.");
 											goto SKIP_CREATE_INSTANCE;
 										}
@@ -748,16 +750,16 @@ CreateInstance
 										auto setterValue = ctor->setters.Values()[index];
 										if (setterValue->binding != GlobalStringKey::Empty)
 										{
-											if (IGuiInstanceBinder* binder = GetInstanceLoaderManager()->GetInstanceBinder(setterValue->binding.ToString()))
+											if (IGuiInstanceBinder* binder = GetInstanceLoaderManager()->GetInstanceBinder(setterValue->binding))
 											{
 												if (!binder->ApplicableToConstructorArgument())
 												{
 													// if the constructor argument uses binding, fail
 													env->scope->errors.Add(
 														L"Failed to create object of type \"" +
-														source.typeName +
+														source.typeName.ToString() +
 														L"\" because the required constructor parameter \"" +
-														propertyName +
+														propertyName.ToString() +
 														L"\" is not allowed to use binding \"" +
 														setterValue->binding.ToString() +
 														L"\" which does not applicable to constructor parameters.");
@@ -768,9 +770,9 @@ CreateInstance
 											{
 												env->scope->errors.Add(
 													L"Failed to create object of type \"" +
-													source.typeName +
+													source.typeName.ToString() +
 													L"\" because the required constructor parameter \"" +
-													propertyName +
+													propertyName.ToString() +
 													L"\" is not allowed to use binding \"" +
 													setterValue->binding.ToString() +
 													L"\" because the appropriate IGuiInstanceBinder for this binding cannot be found.");
@@ -795,15 +797,15 @@ CreateInstance
 							}
 							
 							// check if all required parameters exist
-							FOREACH(WString, propertyName, requiredParameters)
+							FOREACH(GlobalStringKey, propertyName, requiredParameters)
 							{
 								if (!constructorArguments.Contains(propertyName))
 								{
 									env->scope->errors.Add(
 										L"Failed to create object of type \"" +
-										source.typeName +
+										source.typeName.ToString() +
 										L"\" because the required constructor parameter \"" +
-										propertyName +
+										propertyName.ToString() +
 										L"\" is missing.");
 									goto SKIP_CREATE_INSTANCE;
 								}
@@ -831,7 +833,7 @@ CreateInstance
 					{
 						env->scope->errors.Add(
 							L"Failed to create object of type \"" +
-							source.typeName +
+							source.typeName.ToString() +
 							L"\".");
 					}
 				}
@@ -839,7 +841,7 @@ CreateInstance
 				{
 					env->scope->errors.Add(
 						L"Failed to create object of type \"" +
-						source.typeName +
+						source.typeName.ToString() +
 						L"\" because the expected type is \"" +
 						expectedType->GetTypeName() +
 						L"\".");
@@ -859,9 +861,9 @@ CreateInstance
 					auto contextCtor = source.context->instance;
 					env->scope->errors.Add(
 						L"Failed to find type \"" +
-						(contextCtor->typeNamespace == L"" 
-							? contextCtor->typeName
-							: contextCtor->typeNamespace + L":" + contextCtor->typeName
+						(contextCtor->typeNamespace == GlobalStringKey::Empty
+							? contextCtor->typeName.ToString()
+							: contextCtor->typeNamespace.ToString() + L":" + contextCtor->typeName.ToString()
 							) +
 						L"\".");
 				}
@@ -870,9 +872,9 @@ CreateInstance
 			{
 				env->scope->errors.Add(
 					L"Failed to find type \"" +
-					(ctor->typeNamespace == L"" 
-						? ctor->typeName
-						: ctor->typeNamespace + L":" + ctor->typeName
+					(ctor->typeNamespace == GlobalStringKey::Empty
+						? ctor->typeName.ToString()
+						: ctor->typeNamespace.ToString() + L":" + ctor->typeName.ToString()
 						) +
 					L"\".");
 			}
@@ -898,28 +900,28 @@ ExecuteBindingSetters
 			auto td = env->scope->rootInstance.GetTypeDescriptor();
 			FOREACH(Ptr<GuiInstanceParameter>, parameter, env->context->parameters)
 			{
-				auto info = td->GetPropertyByName(parameter->name, true);
+				auto info = td->GetPropertyByName(parameter->name.ToString(), true);
 				if (!info)
 				{
-					env->scope->errors.Add(L"Cannot find parameter \"" + parameter->name + L"\" in properties of \"" + td->GetTypeName() + L"\".");
+					env->scope->errors.Add(L"Cannot find parameter \"" + parameter->name.ToString() + L"\" in properties of \"" + td->GetTypeName() + L"\".");
 					continue;
 				}
 
-				auto parameterTd = GetTypeDescriptor(parameter->className);
+				auto parameterTd = GetTypeDescriptor(parameter->className.ToString());
 				if (!parameterTd)
 				{
-					env->scope->errors.Add(L"Cannot find type \"" + parameter->className + L"\" of parameter \"" + parameter->name + L"\".");
+					env->scope->errors.Add(L"Cannot find type \"" + parameter->className.ToString() + L"\" of parameter \"" + parameter->name.ToString() + L"\".");
 				}
 
 				auto value = info->GetValue(env->scope->rootInstance);
 				if (parameterTd && !value.GetTypeDescriptor()->CanConvertTo(parameterTd))
 				{
-					env->scope->errors.Add(L"Value of parameter \"" + parameter->name + L"\" is not \"" + parameterTd->GetTypeName() + L"\" which is required.");
+					env->scope->errors.Add(L"Value of parameter \"" + parameter->name.ToString() + L"\" is not \"" + parameterTd->GetTypeName() + L"\" which is required.");
 				}
 
 				if (env->scope->referenceValues.Keys().Contains(parameter->name))
 				{
-					env->scope->errors.Add(L"Parameter \"" + parameter->name + L"\" conflict with an existing named object.");
+					env->scope->errors.Add(L"Parameter \"" + parameter->name.ToString() + L"\" conflict with an existing named object.");
 				}
 				else
 				{
@@ -934,13 +936,13 @@ ExecuteBindingSetters
 
 		bool PrepareBindingContext(
 			Ptr<GuiInstanceEnvironment> env,
-			collections::List<WString>& contextNames,
+			collections::List<GlobalStringKey>& contextNames,
 			const WString& dependerType,
-			const WString& dependerName
+			const GlobalStringKey& dependerName
 			)
 		{
 			bool success = true;
-			FOREACH(WString, contextName, contextNames)
+			FOREACH(GlobalStringKey, contextName, contextNames)
 			{
 				if (!env->scope->bindingContexts.Keys().Contains(contextName))
 				{
@@ -953,11 +955,11 @@ ExecuteBindingSetters
 					{
 						env->scope->errors.Add(
 							L"Failed to create binding context \"" +
-							contextName +
+							contextName.ToString() +
 							L"\" which is required by " +
 							dependerType +
 							L" \"" +
-							dependerName +
+							dependerName.ToString() +
 							L"\".");
 						success = false;
 					}
@@ -974,15 +976,15 @@ ExecuteBindingSetters
 			// set all binding attributes
 			FOREACH(FillInstanceBindingSetter, bindingSetter, bindingSetters)
 			{
-				List<WString> contextNames;
+				List<GlobalStringKey> contextNames;
 				bindingSetter.binder->GetRequiredContexts(contextNames);
 				bool success = PrepareBindingContext(env, contextNames, L"property binding", bindingSetter.binder->GetBindingName());
 
 				if (bindingSetter.binder->RequireInstanceName())
 				{
-					if (!bindingSetter.bindingTarget->instanceName)
+					if (bindingSetter.bindingTarget->instanceName == GlobalStringKey::Empty)
 					{
-						WString name = L"<temp>" + itow(env->scope->referenceValues.Count());
+						auto name = GlobalStringKey::Get(L"<temp>" + itow(env->scope->referenceValues.Count()));
 						bindingSetter.bindingTarget->instanceName = name;
 						env->scope->referenceValues.Add(name, bindingSetter.propertyValue.instanceValue);
 					}
@@ -993,11 +995,11 @@ ExecuteBindingSetters
 					auto value = bindingSetter.propertyValue.propertyValue;
 					env->scope->errors.Add(
 						L"Failed to set property \"" +
-						bindingSetter.propertyValue.propertyName +
+						bindingSetter.propertyValue.propertyName.ToString() +
 						L"\" of \"" +
 						bindingSetter.propertyValue.instanceValue.GetTypeDescriptor()->GetTypeName() +
 						L"\" using binding \"" +
-						bindingSetter.binder->GetBindingName() +
+						bindingSetter.binder->GetBindingName().ToString() +
 						L"\" and value \"" +
 						(
 							value.GetValueType() == Value::Null ? WString(L"null") :
@@ -1032,7 +1034,7 @@ ExecuteBindingSetters
 			{
 				if (eventSetter.binder)
 				{
-					List<WString> contextNames;
+					List<GlobalStringKey> contextNames;
 					eventSetter.binder->GetRequiredContexts(contextNames);
 					auto propertyValue = eventSetter.propertyValue;
 					propertyValue.propertyValue = BoxValue(eventSetter.handlerName);
@@ -1040,9 +1042,9 @@ ExecuteBindingSetters
 
 					if (eventSetter.binder->RequireInstanceName())
 					{
-						if (!eventSetter.bindingTarget->instanceName)
+						if (eventSetter.bindingTarget->instanceName == GlobalStringKey::Empty)
 						{
-							WString name = L"<temp>" + itow(env->scope->referenceValues.Count());
+							auto name = GlobalStringKey::Get(L"<temp>" + itow(env->scope->referenceValues.Count()));
 							eventSetter.bindingTarget->instanceName = name;
 							env->scope->referenceValues.Add(name, eventSetter.propertyValue.instanceValue);
 						}
@@ -1052,13 +1054,13 @@ ExecuteBindingSetters
 					{
 						env->scope->errors.Add(
 							L"Failed to attach event \"" +
-							propertyValue.propertyName +
+							propertyValue.propertyName.ToString() +
 							L"\" of type \"" +
 							propertyValue.instanceValue.GetTypeDescriptor()->GetTypeName() +
 							L"\" with the handler \"" +
 							propertyValue.propertyValue.GetText() +
 							L"\" using event binding \"" +
-							eventSetter.binder->GetBindingName() +
+							eventSetter.binder->GetBindingName().ToString() +
 							L"\".");
 					}
 				}
@@ -1112,9 +1114,9 @@ ExecuteBindingSetters
 							L"Event handler \"" +
 							eventSetter.handlerName +
 							L"\" exists but the type does not match the event \"" +
-							eventSetter.propertyValue.propertyName +
+							eventSetter.propertyValue.propertyName.ToString() +
 							L"\" of \"" +
-							env->context->instance->typeName +
+							env->context->instance->typeName.ToString() +
 							L"\".");
 					}
 				}
@@ -1124,9 +1126,9 @@ ExecuteBindingSetters
 						L"Failed to find event handler \"" +
 						eventSetter.handlerName +
 						L"\" when setting event \"" +
-						eventSetter.propertyValue.propertyName +
+						eventSetter.propertyValue.propertyName.ToString() +
 						L"\" of \"" +
-						env->context->instance->typeName +
+						env->context->instance->typeName.ToString() +
 						L"\".");
 				}
 			}
@@ -1180,7 +1182,7 @@ InitializeInstance
 			Ptr<GuiInstanceEnvironment> env,
 			GuiConstructorRepr* ctor,
 			IGuiInstanceLoader* instanceLoader,
-			const WString& typeName,
+			GlobalStringKey typeName,
 			description::Value instance,
 			bool deserialized,
 			List<FillInstanceBindingSetter>& bindingSetters,
@@ -1190,16 +1192,15 @@ InitializeInstance
 			// fill all attributes
 			FillInstance(instance, env, ctor, instanceLoader, deserialized, typeName, bindingSetters, eventSetters);
 
-			if (ctor->instanceName)
+			if (ctor->instanceName != GlobalStringKey::Empty)
 			{
-				WString name = ctor->instanceName.Value();
-				if (env->scope->referenceValues.Keys().Contains(name))
+				if (env->scope->referenceValues.Keys().Contains(ctor->instanceName))
 				{
-					env->scope->errors.Add(L"Parameter \"" + name + L"\" conflict with an existing named object.");
+					env->scope->errors.Add(L"Parameter \"" + ctor->instanceName.ToString() + L"\" conflict with an existing named object.");
 				}
 				else
 				{
-					env->scope->referenceValues.Add(name, instance);
+					env->scope->referenceValues.Add(ctor->instanceName, instance);
 				}
 			}
 		}

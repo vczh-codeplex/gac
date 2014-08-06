@@ -34,7 +34,7 @@ ExecuteQueryVisitor
 				}
 				if (node->referenceName.value != L"")
 				{
-					bool instanceName = ctor->instanceName && node->referenceName.value == ctor->instanceName.Value().ToString();
+					bool instanceName = ctor->instanceName != GlobalStringKey::Empty && node->referenceName.value == ctor->instanceName.ToString();
 					bool styleName = ctor->styleName && node->referenceName.value == ctor->styleName.Value();
 					return instanceName || styleName;
 				}
