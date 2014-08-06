@@ -22,9 +22,9 @@ ExecuteQueryVisitor
 			{
 			}
 
-			static bool TestCtor(GuiIqPrimaryQuery* node, const WString& attribute, Ptr<GuiConstructorRepr> ctor)
+			static bool TestCtor(GuiIqPrimaryQuery* node, GlobalStringKey attribute, Ptr<GuiConstructorRepr> ctor)
 			{
-				if (node->attributeNameOption == GuiIqNameOption::Specified && node->attributeName.value != attribute)
+				if (node->attributeNameOption == GuiIqNameOption::Specified && node->attributeName.value != attribute.ToString())
 				{
 					return false;
 				}
@@ -45,7 +45,7 @@ ExecuteQueryVisitor
 			{
 				if (setter)
 				{
-					FOREACH_INDEXER(WString, attribute, index, setter->setters.Keys())
+					FOREACH_INDEXER(GlobalStringKey, attribute, index, setter->setters.Keys())
 					{
 						auto setterValue = setter->setters.Values()[index];
 						FOREACH(Ptr<GuiValueRepr>, value, setterValue->values)
@@ -69,7 +69,7 @@ ExecuteQueryVisitor
 				}
 				else
 				{
-					if (TestCtor(node, L"", context->instance))
+					if (TestCtor(node, GlobalStringKey::Empty, context->instance))
 					{
 						output.Add(context->instance);
 					}
@@ -147,7 +147,7 @@ ApplyStyle
 
 		void ApplyStyleInternal(Ptr<GuiAttSetterRepr> src, Ptr<GuiAttSetterRepr> dst)
 		{
-			FOREACH_INDEXER(WString, attribute, srcIndex, src->setters.Keys())
+			FOREACH_INDEXER(GlobalStringKey, attribute, srcIndex, src->setters.Keys())
 			{
 				auto srcValue = src->setters.Values()[srcIndex];
 				vint dstIndex = dst->setters.Keys().IndexOf(attribute);
@@ -160,7 +160,7 @@ ApplyStyle
 					auto dstValue = dst->setters.Values()[dstIndex];
 					if (srcValue->binding == dstValue->binding)
 					{
-						if (srcValue->binding == L"set")
+						if (srcValue->binding == GlobalStringKey::_Set)
 						{
 							ApplyStyleInternal(srcValue->values[0].Cast<GuiAttSetterRepr>(), dstValue->values[0].Cast<GuiAttSetterRepr>());
 						}
@@ -172,7 +172,7 @@ ApplyStyle
 				}
 			}
 
-			FOREACH_INDEXER(WString, eventName, srcIndex, src->eventHandlers.Keys())
+			FOREACH_INDEXER(GlobalStringKey, eventName, srcIndex, src->eventHandlers.Keys())
 			{
 				if (!dst->eventHandlers.Keys().Contains(eventName))
 				{

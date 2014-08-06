@@ -43,9 +43,9 @@ GuiAttSetterRepr
 		void GuiAttSetterRepr::CloneBody(Ptr<GuiAttSetterRepr> repr)
 		{
 			CopyFrom(repr->eventHandlers, eventHandlers);
-			FOREACH(WString, name, setters.Keys())
+			FOREACH_INDEXER(GlobalStringKey, name, index, setters.Keys())
 			{
-				Ptr<SetterValue> src = setters[name];
+				Ptr<SetterValue> src = setters.Values()[index];
 				Ptr<SetterValue> dst = new SetterValue;
 				dst->binding = src->binding;
 				FOREACH(Ptr<GuiValueRepr>, value, src->values)
@@ -81,7 +81,7 @@ GuiAttSetterRepr
 				{
 					auto key = setters.Keys()[i];
 					auto value = setters.Values()[i];
-					if (key == L"")
+					if (!key)
 					{
 						FOREACH(Ptr<GuiValueRepr>, repr, value->values)
 						{
@@ -104,9 +104,9 @@ GuiAttSetterRepr
 						{
 							auto xmlProp = MakePtr<XmlElement>();
 							xmlProp->name.value = L"att." + key;
-							if (value->binding != L"")
+							if (value->binding)
 							{
-								xmlProp->name.value += L"-" + value->binding;
+								xmlProp->name.value += L"-" + value->binding.ToString();
 							}
 
 							FOREACH(Ptr<GuiValueRepr>, repr, value->values)
@@ -121,10 +121,10 @@ GuiAttSetterRepr
 						else if (value->values.Count() > 0)
 						{
 							auto att = MakePtr<XmlAttribute>();
-							att->name.value = key;
-							if (value->binding != L"")
+							att->name.value = key.ToString();
+							if (value->binding)
 							{
-								att->name.value += L"-" + value->binding;
+								att->name.value += L"-" + value->binding.ToString();
 							}
 							att->value.value = value->values[0].Cast<GuiTextRepr>()->text;
 							xml->attributes.Add(att);
@@ -139,9 +139,9 @@ GuiAttSetterRepr
 
 					auto xmlEvent = MakePtr<XmlElement>();
 					xmlEvent->name.value = L"ev." + key;
-					if (value->binding != L"")
+					if (value->binding)
 					{
-						xmlEvent->name.value += L"-" + value->binding;
+						xmlEvent->name.value += L"-" + value->binding.ToString();
 					}
 					xml->subNodes.Add(xmlEvent);
 
@@ -248,25 +248,25 @@ GuiInstanceContext
 				CollectDefaultAttributes(defaultValue->values, xml, errors);
 				if(defaultValue->values.Count()>0)
 				{
-					setters.Add(L"", defaultValue);
+					setters.Add(GlobalStringKey::Empty, defaultValue);
 				}
 
 				// collect values
 				FOREACH(Ptr<XmlElement>, element, XmlGetElements(xml))
 				{
-					if(auto name=parser->TypedParse(element->name.value, errors))
+					if (auto name = parser->TypedParse(element->name.value, errors))
 					{
 						if(name->IsPropertyElementName())
 						{
 							// collect a value as a new attribute setter
-							if (setters.Keys().Contains(name->name))
+							if (setters.Keys().Contains(GlobalStringKey::Get(name->name)))
 							{
 								errors.Add(L"Duplicated attribute name \"" + name->name + L"\".");
 							}
 							else
 							{
 								Ptr<GuiAttSetterRepr::SetterValue> sv=new GuiAttSetterRepr::SetterValue;
-								sv->binding=name->binding;
+								sv->binding = GlobalStringKey::Get(name->binding);
 
 								if(name->binding==L"set")
 								{
@@ -284,7 +284,7 @@ GuiInstanceContext
 
 								if(sv->values.Count()>0)
 								{
-									setters.Add(name->name, sv);
+									setters.Add(GlobalStringKey::Get(name->name), sv);
 								}
 							}
 						}
@@ -305,7 +305,7 @@ GuiInstanceContext
 						if(name->IsEventElementName())
 						{
 							// collect a value as a new attribute setter
-							if (eventHandlers.Keys().Contains(name->name))
+							if (eventHandlers.Keys().Contains(GlobalStringKey::Get(name->name)))
 							{
 								errors.Add(L"Duplicated event name \"" + name->name + L"\".");
 							}
@@ -317,16 +317,16 @@ GuiInstanceContext
 									if(Ptr<XmlText> text=element->subNodes[0].Cast<XmlText>())
 									{
 										auto value = MakePtr<GuiAttSetterRepr::EventValue>();
-										value->binding = name->binding;
+										value->binding = GlobalStringKey::Get(name->binding);
 										value->value = text->content.value;
-										eventHandlers.Add(name->name, value);
+										eventHandlers.Add(GlobalStringKey::Get(name->name), value);
 									}
 									else if(Ptr<XmlCData> text=element->subNodes[0].Cast<XmlCData>())
 									{
 										auto value = MakePtr<GuiAttSetterRepr::EventValue>();
-										value->binding = name->binding;
+										value->binding = GlobalStringKey::Get(name->binding);
 										value->value = text->content.value;
-										eventHandlers.Add(name->name, value);
+										eventHandlers.Add(GlobalStringKey::Get(name->name), value);
 									}
 								}
 							}
@@ -355,15 +355,15 @@ GuiInstanceContext
 					else if(name->IsPropertyAttributeName())
 					{
 						// collect attributes setters
-						if (setter->setters.Keys().Contains(name->name))
+						if (setter->setters.Keys().Contains(GlobalStringKey::Get(name->name)))
 						{
 							errors.Add(L"Duplicated attribute name \"" + name->name + L"\".");
 						}
 						else
 						{
 							Ptr<GuiAttSetterRepr::SetterValue> sv=new GuiAttSetterRepr::SetterValue;
-							sv->binding=name->binding;
-							setter->setters.Add(name->name, sv);
+							sv->binding=GlobalStringKey::Get(name->binding);
+							setter->setters.Add(GlobalStringKey::Get(name->name), sv);
 
 							Ptr<GuiTextRepr> value=new GuiTextRepr;
 							value->text=att->value.value;
@@ -373,12 +373,12 @@ GuiInstanceContext
 					else if (name->IsEventAttributeName())
 					{
 						// collect event setters
-						if (!setter->eventHandlers.Keys().Contains(name->name))
+						if (!setter->eventHandlers.Keys().Contains(GlobalStringKey::Get(name->name)))
 						{
 							auto value = MakePtr<GuiAttSetterRepr::EventValue>();
-							value->binding = name->binding;
+							value->binding = GlobalStringKey::Get(name->binding);
 							value->value = att->value.value;
-							setter->eventHandlers.Add(name->name, value);
+							setter->eventHandlers.Add(GlobalStringKey::Get(name->name), value);
 						}
 					}
 				}

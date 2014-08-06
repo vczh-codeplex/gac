@@ -125,11 +125,27 @@ namespace vl
 GlobalStringKey
 ***********************************************************************/
 
+		GlobalStringKey GlobalStringKey::Empty;
+		GlobalStringKey GlobalStringKey::_Set;
+		GlobalStringKey GlobalStringKey::_Ref;
+		GlobalStringKey GlobalStringKey::_Bind;
+		GlobalStringKey GlobalStringKey::_Format;
+		GlobalStringKey GlobalStringKey::_Eval;
+
 		class GlobalStringKeyManager
 		{
 		public:
 			Dictionary<WString, vint>		stoi;
 			List<WString>					itos;
+
+			void InitializeConstants()
+			{
+				GlobalStringKey::_Set = GlobalStringKey::Get(L"set");
+				GlobalStringKey::_Ref = GlobalStringKey::Get(L"ref");
+				GlobalStringKey::_Bind = GlobalStringKey::Get(L"bind");
+				GlobalStringKey::_Format = GlobalStringKey::Get(L"format");
+				GlobalStringKey::_Eval = GlobalStringKey::Get(L"eval");
+			}
 		}* globalStringKeyManager = 0;
 
 		GlobalStringKey GlobalStringKey::Get(const WString& string)
@@ -151,7 +167,7 @@ GlobalStringKey
 			return key;
 		}
 
-		WString GlobalStringKey::ToString()
+		WString GlobalStringKey::ToString()const
 		{
 			return *this ? globalStringKeyManager->itos[key] : L"";
 		}
@@ -920,6 +936,8 @@ IGuiResourceResolverManager
 			void Load()override
 			{
 				globalStringKeyManager = new GlobalStringKeyManager();
+				globalStringKeyManager->InitializeConstants();
+
 				resourceResolverManager = this;
 				SetPathResolverFactory(new GuiResourcePathFileResolver::Factory);
 				SetPathResolverFactory(new GuiResourcePathResResolver::Factory);

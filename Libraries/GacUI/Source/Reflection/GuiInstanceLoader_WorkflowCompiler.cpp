@@ -527,12 +527,12 @@ Workflow_GetSharedManager
 				{
 					IGuiInstanceLoader::TypeInfo propertyTypeInfo;
 
-					if (setter->binding != L"" && setter->binding != L"set")
+					if (setter->binding && setter->binding != GlobalStringKey::_Set)
 					{
-						auto binder = GetInstanceLoaderManager()->GetInstanceBinder(setter->binding);
+						auto binder = GetInstanceLoaderManager()->GetInstanceBinder(setter->binding.ToString());
 						if (!binder)
 						{
-							errors.Add(L"The appropriate IGuiInstanceBinder of binding \"" + setter->binding + L"\" cannot be found.");
+							errors.Add(L"The appropriate IGuiInstanceBinder of binding \"" + setter->binding.ToString() + L"\" cannot be found.");
 						}
 						else if (binder->RequireInstanceName() && !repr->instanceName && reprTypeInfo.typeDescriptor)
 						{
@@ -542,11 +542,11 @@ Workflow_GetSharedManager
 						}
 					}
 
-					if (setter->binding == L"set")
+					if (setter->binding == GlobalStringKey::_Set)
 					{
 						IGuiInstanceLoader::PropertyInfo info;
 						info.typeInfo = reprTypeInfo;
-						info.propertyName = repr->setters.Keys()[index];
+						info.propertyName = repr->setters.Keys()[index].ToString();
 						auto currentLoader = loader;
 
 						while (currentLoader)
@@ -571,12 +571,12 @@ Workflow_GetSharedManager
 
 				FOREACH(Ptr<GuiAttSetterRepr::EventValue>, handler, repr->eventHandlers.Values())
 				{
-					if (handler->binding != L"")
+					if (handler->binding)
 					{
-						auto binder = GetInstanceLoaderManager()->GetInstanceEventBinder(handler->binding);
+						auto binder = GetInstanceLoaderManager()->GetInstanceEventBinder(handler->binding.ToString());
 						if (!binder)
 						{
-							errors.Add(L"The appropriate IGuiInstanceEventBinder of binding \"" + handler->binding + L"\" cannot be found.");
+							errors.Add(L"The appropriate IGuiInstanceEventBinder of binding \"" + handler->binding.ToString() + L"\" cannot be found.");
 						}
 						else if (binder->RequireInstanceName() && !repr->instanceName && reprTypeInfo.typeDescriptor)
 						{
@@ -683,16 +683,16 @@ Workflow_GetSharedManager
 								expressionCode = obj->text;
 							}
 
-							if (setter->binding==L"bind" || setter->binding == L"format")
+							if (setter->binding == GlobalStringKey::_Bind || setter->binding == GlobalStringKey::_Format)
 							{
 								WorkflowDataBinding dataBinding;
 								dataBinding.variableName = repr->instanceName.Value();
 
-								if (setter->binding == L"bind")
+								if (setter->binding == GlobalStringKey::_Bind)
 								{
 									expressionCode = L"bind(" + expressionCode + L")";
 								}
-								else if (setter->binding == L"format")
+								else if (setter->binding == GlobalStringKey::_Format)
 								{
 									expressionCode = L"bind($\"" + expressionCode + L"\")";
 								}
@@ -706,7 +706,7 @@ Workflow_GetSharedManager
 
 								dataBindings.Add(dataBinding);
 							}
-							else if (setter->binding == L"eval")
+							else if (setter->binding == GlobalStringKey::_Eval)
 							{
 								if (propertyInfo->constructorParameter)
 								{
@@ -769,7 +769,7 @@ Workflow_GetSharedManager
 						{
 							WString statementCode = handler->value;
 
-							if (handler->binding == L"eval")
+							if (handler->binding == GlobalStringKey::_Eval)
 							{
 								WString cacheKey = L"<ev.eval><" + repr->instanceName.Value() + L"><" + propertyName + L">" + statementCode;
 								auto assembly = Workflow_CompileEventHandler(types, errors, info, statementCode);
