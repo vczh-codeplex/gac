@@ -220,7 +220,7 @@ Instance Binder
 			virtual void							GetRequiredContexts(collections::List<GlobalStringKey>& contextNames) = 0;
 			virtual void							GetExpectedValueTypes(collections::List<description::ITypeDescriptor*>& expectedTypes) = 0;
 			virtual description::Value				GetValue(Ptr<GuiInstanceEnvironment> env, const description::Value& propertyValue) = 0;
-			virtual bool							SetPropertyValue(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, Nullable<WString> instanceName, IGuiInstanceLoader::PropertyValue& propertyValue) = 0;
+			virtual bool							SetPropertyValue(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, GlobalStringKey instanceName, IGuiInstanceLoader::PropertyValue& propertyValue) = 0;
 		};
 
 		class IGuiInstanceEventBinder : public IDescriptable, public Description<IGuiInstanceEventBinder>
@@ -229,7 +229,7 @@ Instance Binder
 			virtual GlobalStringKey					GetBindingName() = 0;
 			virtual bool							RequireInstanceName() = 0;
 			virtual void							GetRequiredContexts(collections::List<GlobalStringKey>& contextNames) = 0;
-			virtual bool							AttachEvent(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, Nullable<WString> instanceName, IGuiInstanceLoader::PropertyValue& propertyValue) = 0;
+			virtual bool							AttachEvent(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, GlobalStringKey instanceName, IGuiInstanceLoader::PropertyValue& propertyValue) = 0;
 		};
 
 /***********************************************************************
@@ -332,9 +332,8 @@ Instance Scope Wrapper
 		template<typename T>
 		class GuiInstancePartialClass : public IGuiInstancePartialClass
 		{
-			typedef collections::Dictionary<WString, description::Value>	ValueMap;
 		private:
-			WString									className;
+			GlobalStringKey							className;
 			Ptr<GuiInstanceContextScope>			scope;
 
 		protected:
@@ -369,7 +368,7 @@ Instance Scope Wrapper
 			void LoadInstanceReference(const WString& name, TControl*& reference)
 			{
 				reference = 0;
-				vint index = scope->referenceValues.Keys().IndexOf(name);
+				vint index = scope->referenceValues.Keys().IndexOf(GlobalStringKey::Get(name));
 				if (index == -1)
 				{
 					scope->errors.Add(L"Failed to find instance reference \"" + name + L"\".");
@@ -388,7 +387,7 @@ Instance Scope Wrapper
 			}
 		public:
 			GuiInstancePartialClass(const WString& _className)
-				:className(_className)
+				:className(GlobalStringKey::Get(_className))
 			{
 			}
 
