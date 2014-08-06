@@ -122,6 +122,41 @@ namespace vl
 		}
 
 /***********************************************************************
+GlobalStringKey
+***********************************************************************/
+
+		class GlobalStringKeyManager
+		{
+		public:
+			Dictionary<WString, vint>		stoi;
+			List<WString>					itos;
+		}* globalStringKeyManager = 0;
+
+		GlobalStringKey GlobalStringKey::Get(const WString& string)
+		{
+			GlobalStringKey key;
+			if (string != L"")
+			{
+				vint index = globalStringKeyManager->stoi.Keys().IndexOf(string);
+				if (index == -1)
+				{
+					key.key = globalStringKeyManager->itos.Add(string);
+					globalStringKeyManager->stoi.Add(string, key.key);
+				}
+				else
+				{
+					key.key = globalStringKeyManager->stoi.Values()[index];
+				}
+			}
+			return key;
+		}
+
+		WString GlobalStringKey::ToString()
+		{
+			return *this ? globalStringKeyManager->itos[key] : L"";
+		}
+
+/***********************************************************************
 GuiImageData
 ***********************************************************************/
 
@@ -884,7 +919,8 @@ IGuiResourceResolverManager
 
 			void Load()override
 			{
-				resourceResolverManager=this;
+				globalStringKeyManager = new GlobalStringKeyManager();
+				resourceResolverManager = this;
 				SetPathResolverFactory(new GuiResourcePathFileResolver::Factory);
 				SetPathResolverFactory(new GuiResourcePathResResolver::Factory);
 			}
@@ -895,7 +931,9 @@ IGuiResourceResolverManager
 
 			void Unload()override
 			{
-				resourceResolverManager=0;
+				delete globalStringKeyManager;
+				globalStringKeyManager = 0;
+				resourceResolverManager = 0;
 			}
 
 			IGuiResourcePathResolverFactory* GetPathResolverFactory(const WString& protocol)override
