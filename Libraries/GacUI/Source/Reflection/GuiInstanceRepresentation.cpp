@@ -529,8 +529,8 @@ GuiInstanceContext
 						if (attName && attClass)
 						{
 							auto parameter = MakePtr<GuiInstanceParameter>();
-							parameter->name = attName->value.value;
-							parameter->className = attClass->value.value;
+							parameter->name = GlobalStringKey::Get(attName->value.value);
+							parameter->className = GlobalStringKey::Get(attClass->value.value);
 							context->parameters.Add(parameter);
 						}
 					}
@@ -605,12 +605,12 @@ GuiInstanceContext
 
 				auto attName = MakePtr<XmlAttribute>();
 				attName->name.value = L"Name";
-				attName->value.value = parameter->name;
+				attName->value.value = parameter->name.ToString();
 				xmlParameter->attributes.Add(attName);
 
 				auto attClass = MakePtr<XmlAttribute>();
 				attClass->name.value = L"Class";
-				attClass->value.value = parameter->className;
+				attClass->value.value = parameter->className.ToString();
 				xmlParameter->attributes.Add(attClass);
 			}
 

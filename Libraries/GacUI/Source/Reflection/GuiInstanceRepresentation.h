@@ -111,8 +111,8 @@ Instance Namespace
 		class GuiInstanceParameter : public Object, public Description<GuiInstanceParameter>
 		{
 		public:
-			WString									name;
-			WString									className;
+			GlobalStringKey							name;
+			GlobalStringKey							className;
 		};
 
 /***********************************************************************
