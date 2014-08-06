@@ -61,19 +61,19 @@ Instance Representation
 
 			struct SetterValue
 			{
-				WString								binding;
+				GlobalStringKey						binding;
 				ValueList							values;
 			};
 
 			struct EventValue
 			{
-				WString								binding;
+				GlobalStringKey						binding;
 				WString								value;
 				bool								fromStyle = false;
 			};
 			
-			typedef collections::Dictionary<WString, Ptr<SetterValue>>			SetteValuerMap;
-			typedef collections::Dictionary<WString, Ptr<EventValue>>			EventHandlerMap;
+			typedef collections::Dictionary<GlobalStringKey, Ptr<SetterValue>>			SetteValuerMap;
+			typedef collections::Dictionary<GlobalStringKey, Ptr<EventValue>>			EventHandlerMap;
 		public:
 			SetteValuerMap							setters;					// empty key means default property
 			EventHandlerMap							eventHandlers;
@@ -87,7 +87,6 @@ Instance Representation
 
 		class GuiConstructorRepr : public GuiAttSetterRepr, public Description<GuiConstructorRepr>
 		{
-			typedef collections::Dictionary<WString, WString>					ReferenceAttrubuteMap;
 		public:
 			WString									typeNamespace;
 			WString									typeName;

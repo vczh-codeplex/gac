@@ -48,7 +48,7 @@ Helper Functions Declarations
 		bool LoadInstancePropertyValue(
 			Ptr<GuiInstanceEnvironment> env,
 			GuiAttSetterRepr* attSetter,
-			const WString& binding,
+			GlobalStringKey binding,
 			IGuiInstanceLoader::PropertyValue propertyValue,
 			List<Ptr<GuiValueRepr>>& input,
 			IGuiInstanceLoader* propertyLoader,
@@ -237,7 +237,7 @@ LoadInstancePropertyValue
 		bool LoadInstancePropertyValue(
 			Ptr<GuiInstanceEnvironment> env,
 			GuiAttSetterRepr* attSetter,
-			const WString& binding,
+			GlobalStringKey binding,
 			IGuiInstanceLoader::PropertyValue propertyValue,
 			List<Ptr<GuiValueRepr>>& input,
 			IGuiInstanceLoader* propertyLoader,
@@ -291,7 +291,7 @@ LoadInstancePropertyValue
 							return false;
 						}
 						if (constructorArgument) return false;
-						if (binding != L"set")
+						if (binding != GlobalStringKey::_Set)
 						{
 							env->scope->errors.Add(
 								L"Collection property \"" +
@@ -321,7 +321,7 @@ LoadInstancePropertyValue
 						}
 						break;
 					case GuiInstancePropertyInfo::SupportCollection:
-						if (binding != L"")
+						if (binding)
 						{
 							env->scope->errors.Add(
 								L"Collection property \"" +
@@ -363,7 +363,7 @@ LoadInstancePropertyValue
 								L"\" cannot be assigned using multiple values.");
 							return false;
 						}
-						if (binding == L"set")
+						if (binding == GlobalStringKey::_Set)
 						{
 							env->scope->errors.Add(
 								L"Assignable property \"" +
@@ -379,7 +379,7 @@ LoadInstancePropertyValue
 								if (valueRepr)
 								{
 									bool canRemoveLoadedValue = false;
-									if (binding == L"")
+									if (!binding)
 									{
 										// default binding: set the value directly
 										if (LoadValueVisitor::LoadValue(valueRepr, env, propertyInfo->acceptableTypes, bindingSetters, eventSetters, propertyValue.propertyValue))
@@ -388,7 +388,7 @@ LoadInstancePropertyValue
 											output.Add(Pair<Value, IGuiInstanceLoader*>(propertyValue.propertyValue, propertyLoader));
 										}
 									}
-									else if (IGuiInstanceBinder* binder=GetInstanceLoaderManager()->GetInstanceBinder(binding))
+									else if (IGuiInstanceBinder* binder=GetInstanceLoaderManager()->GetInstanceBinder(binding.ToString()))
 									{
 										List<WString> contextNames;
 										binder->GetRequiredContexts(contextNames);
@@ -413,7 +413,7 @@ LoadInstancePropertyValue
 															L"\" of type \"" +
 															instanceType +
 															L"\" cannot be assigned using binding \"" +
-															binding +
+															binding.ToString() +
 															L"\" because the value translation failed.");
 													}
 													else
@@ -441,7 +441,7 @@ LoadInstancePropertyValue
 											L"\" of type \"" +
 											instanceType +
 											L"\" cannot be assigned using binding \"" +
-											binding +
+											binding.ToString() +
 											L"\" because the appropriate IGuiInstanceBinder for this binding cannot be found.");
 									}
 
@@ -455,7 +455,7 @@ LoadInstancePropertyValue
 						}
 						break;
 					case GuiInstancePropertyInfo::SupportArray:
-						if (binding != L"")
+						if (binding)
 						{
 							env->scope->errors.Add(
 								L"Array property \"" +
@@ -521,7 +521,7 @@ FillInstance
 			// reverse loop to set the default property (name == L"") after all other properties
 			for (vint i = attSetter->setters.Count() - 1; i >= 0; i--)
 			{
-				WString propertyName=attSetter->setters.Keys()[i];
+				WString propertyName = attSetter->setters.Keys()[i].ToString();
 				if (propertyName == L"" && skipDefaultProperty)
 				{
 					continue;
@@ -542,7 +542,7 @@ FillInstance
 				LoadInstancePropertyValue(env, attSetter, propertyValue->binding, cachedPropertyValue, input, propertyLoader, false, output, bindingSetters, eventSetters);
 
 				// if there is no binding, set all values into the specified property
-				if (propertyValue->binding == L"")
+				if (!propertyValue->binding)
 				{
 					for (vint i = 0; i < output.Count(); i++)
 					{
@@ -558,13 +558,13 @@ FillInstance
 			}
 
 			// attach events
-			FOREACH_INDEXER(WString, eventName, index, attSetter->eventHandlers.Keys())
+			FOREACH_INDEXER(GlobalStringKey, eventName, index, attSetter->eventHandlers.Keys())
 			{
 				auto handler = attSetter->eventHandlers.Values()[index];
 
 				IGuiInstanceLoader::PropertyInfo propertyInfo(
 					typeInfo,
-					eventName
+					eventName.ToString()
 					);
 
 				// get the loader to attach the event
@@ -586,20 +586,20 @@ FillInstance
 				}
 
 				IGuiInstanceEventBinder* binder = 0;
-				if (handler->binding != L"")
+				if (handler->binding)
 				{
-					binder = GetInstanceLoaderManager()->GetInstanceEventBinder(handler->binding);
+					binder = GetInstanceLoaderManager()->GetInstanceEventBinder(handler->binding.ToString());
 					if (!binder)
 					{
 						env->scope->errors.Add(
 							L"Failed to attach event \"" +
-							eventName +
+							eventName.ToString() +
 							L"\" of type \"" +
 							typeName +
 							L"\" with the handler \"" +
 							handler->value +
 							L"\" using event binding \"" +
-							handler->binding +
+							handler->binding.ToString() +
 							L"\" because the appropriate IGuiInstanceEventBinder for this binding cannot be found.");
 						continue;
 					}
@@ -622,13 +622,13 @@ FillInstance
 				{
 					env->scope->errors.Add(
 						L"Failed to attach event \"" +
-						eventName +
+						eventName.ToString() +
 						L"\" of type \"" +
 						typeName +
 						L"\" with the handler \"" +
 						handler->value +
 						L"\" using event binding \"" +
-						handler->binding +
+						handler->binding.ToString() +
 						L"\" because no IGuiInstanceLoader supports this event.");
 				}
 			}
@@ -665,7 +665,7 @@ CreateInstance
 				// see if the constructor contains only a single text value
 				Ptr<GuiTextRepr> singleTextValue;
 				{
-					vint index = ctor->setters.Keys().IndexOf(L"");
+					vint index = ctor->setters.Keys().IndexOf(GlobalStringKey::Empty);
 					if (index != -1)
 					{
 						auto setterValue = ctor->setters.Values()[index];
@@ -723,7 +723,7 @@ CreateInstance
 							{
 								IGuiInstanceLoader::PropertyInfo propertyInfo(typeInfo, propertyName);
 								auto info = loader->GetPropertyType(propertyInfo);
-								vint index = ctor->setters.Keys().IndexOf(propertyName);
+								vint index = ctor->setters.Keys().IndexOf(GlobalStringKey::Get(propertyName));
 
 								if (info->constructorParameter)
 								{
@@ -746,9 +746,9 @@ CreateInstance
 									if (index != -1)
 									{
 										auto setterValue = ctor->setters.Values()[index];
-										if (setterValue->binding != L"")
+										if (setterValue->binding)
 										{
-											if (IGuiInstanceBinder* binder = GetInstanceLoaderManager()->GetInstanceBinder(setterValue->binding))
+											if (IGuiInstanceBinder* binder = GetInstanceLoaderManager()->GetInstanceBinder(setterValue->binding.ToString()))
 											{
 												if (!binder->ApplicableToConstructorArgument())
 												{
@@ -759,7 +759,7 @@ CreateInstance
 														L"\" because the required constructor parameter \"" +
 														propertyName +
 														L"\" is not allowed to use binding \"" +
-														setterValue->binding +
+														setterValue->binding.ToString() +
 														L"\" which does not applicable to constructor parameters.");
 													goto SKIP_CREATE_INSTANCE;
 												}
@@ -772,7 +772,7 @@ CreateInstance
 													L"\" because the required constructor parameter \"" +
 													propertyName +
 													L"\" is not allowed to use binding \"" +
-													setterValue->binding +
+													setterValue->binding.ToString() +
 													L"\" because the appropriate IGuiInstanceBinder for this binding cannot be found.");
 												goto SKIP_CREATE_INSTANCE;
 											}

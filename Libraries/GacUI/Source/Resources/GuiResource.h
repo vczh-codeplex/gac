@@ -59,11 +59,19 @@ Global String Key
 
 		struct GlobalStringKey
 		{
+		public:
+			static GlobalStringKey					Empty;
+			static GlobalStringKey					_Set;
+			static GlobalStringKey					_Ref;
+			static GlobalStringKey					_Bind;
+			static GlobalStringKey					_Format;
+			static GlobalStringKey					_Eval;
+
 		private:
 			vint									key = -1;
 
 		public:
-			operator bool()const{ return key != 1; }
+			operator bool()const{ return key != -1; }
 			bool operator==(GlobalStringKey g)const{ return key == g.key; }
 			bool operator!=(GlobalStringKey g)const{ return key != g.key; }
 			bool operator<(GlobalStringKey g)const{ return key < g.key; }
@@ -72,7 +80,7 @@ Global String Key
 			bool operator>=(GlobalStringKey g)const{ return key >= g.key; }
 
 			static GlobalStringKey					Get(const WString& string);
-			WString									ToString();
+			WString									ToString()const;
 		};
 
 /***********************************************************************

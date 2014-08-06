@@ -45,7 +45,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 extern void UnitTestInGuiMain();
 
-//#define PROJECT_CONTROLTEMPLATE
+#define PROJECT_CONTROLTEMPLATE
 
 #ifndef PROJECT_CONTROLTEMPLATE
 
