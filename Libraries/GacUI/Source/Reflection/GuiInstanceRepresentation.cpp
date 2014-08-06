@@ -81,7 +81,7 @@ GuiAttSetterRepr
 				{
 					auto key = setters.Keys()[i];
 					auto value = setters.Values()[i];
-					if (!key)
+					if (key == GlobalStringKey::Empty)
 					{
 						FOREACH(Ptr<GuiValueRepr>, repr, value->values)
 						{
@@ -103,8 +103,8 @@ GuiAttSetterRepr
 						if (containsElement)
 						{
 							auto xmlProp = MakePtr<XmlElement>();
-							xmlProp->name.value = L"att." + key;
-							if (value->binding)
+							xmlProp->name.value = L"att." + key.ToString();
+							if (value->binding != GlobalStringKey::Empty)
 							{
 								xmlProp->name.value += L"-" + value->binding.ToString();
 							}
@@ -122,7 +122,7 @@ GuiAttSetterRepr
 						{
 							auto att = MakePtr<XmlAttribute>();
 							att->name.value = key.ToString();
-							if (value->binding)
+							if (value->binding != GlobalStringKey::Empty)
 							{
 								att->name.value += L"-" + value->binding.ToString();
 							}
@@ -138,8 +138,8 @@ GuiAttSetterRepr
 					auto value = eventHandlers.Values()[i];
 
 					auto xmlEvent = MakePtr<XmlElement>();
-					xmlEvent->name.value = L"ev." + key;
-					if (value->binding)
+					xmlEvent->name.value = L"ev." + key.ToString();
+					if (value->binding != GlobalStringKey::Empty)
 					{
 						xmlEvent->name.value += L"-" + value->binding.ToString();
 					}

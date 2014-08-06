@@ -169,7 +169,9 @@ GlobalStringKey
 
 		WString GlobalStringKey::ToString()const
 		{
-			return *this ? globalStringKeyManager->itos[key] : L"";
+			return *this == GlobalStringKey::Empty
+				? L""
+				: globalStringKeyManager->itos[key];
 		}
 
 /***********************************************************************
