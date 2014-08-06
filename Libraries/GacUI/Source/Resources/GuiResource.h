@@ -66,6 +66,9 @@ Global String Key
 			static GlobalStringKey					_Bind;
 			static GlobalStringKey					_Format;
 			static GlobalStringKey					_Eval;
+			static GlobalStringKey					_Uri;
+			static GlobalStringKey					_Workflow_Assembly_Cache;
+			static GlobalStringKey					_Workflow_Global_Context;
 
 		private:
 			vint									key = -1;

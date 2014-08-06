@@ -172,13 +172,13 @@ GuiConstructorRepr
 			if (!fromStyle || serializePrecompiledResource)
 			{
 				auto xmlCtor = MakePtr<XmlElement>();
-				if (typeNamespace == L"")
+				if (typeNamespace == GlobalStringKey::Empty)
 				{
-					xmlCtor->name.value = typeName;
+					xmlCtor->name.value = typeName.ToString();
 				}
 				else
 				{
-					xmlCtor->name.value = typeNamespace + L":" + typeName;
+					xmlCtor->name.value = typeNamespace.ToString() + L":" + typeName.ToString();
 				}
 
 				if (styleName)
@@ -396,8 +396,8 @@ GuiInstanceContext
 			if(name->IsCtorName())
 			{
 				Ptr<GuiConstructorRepr> ctor=new GuiConstructorRepr;
-				ctor->typeNamespace=name->namespaceName;
-				ctor->typeName=name->name;
+				ctor->typeNamespace = GlobalStringKey::Get(name->namespaceName);
+				ctor->typeName = GlobalStringKey::Get(name->name);
 				// collect attributes as setters
 				FOREACH(Ptr<XmlAttribute>, att, xml->attributes)
 				{
@@ -470,12 +470,12 @@ GuiInstanceContext
 					WString attName=att->name.value;
 					if(attName.Length()>=5 && attName.Left(5)==L"xmlns")
 					{
-						WString ns;
+						GlobalStringKey ns;
 						if(attName.Length()>6)
 						{
 							if(attName.Left(6)==L"xmlns:")
 							{
-								ns=attName.Sub(6, attName.Length()-6);
+								ns = GlobalStringKey::Get(attName.Sub(6, attName.Length() - 6));
 							}
 							else
 							{
@@ -540,14 +540,14 @@ GuiInstanceContext
 						auto attType = XmlGetAttribute(element, L"Type");
 						if (attName && attType)
 						{
-							auto resolver = GetInstanceLoaderManager()->GetInstanceCacheResolver(attType->value.value);
+							auto resolver = GetInstanceLoaderManager()->GetInstanceCacheResolver(GlobalStringKey::Get(attType->value.value));
 
 							MemoryStream stream;
 							HexToBinary(stream, XmlGetValue(element));
 							stream.SeekFromBegin(0);
 
 							auto cache = resolver->Deserialize(stream);
-							context->precompiledCaches.Add(attName->value.value, cache);
+							context->precompiledCaches.Add(GlobalStringKey::Get(attName->value.value), cache);
 						}
 					}
 					else if (!context->instance)
@@ -580,9 +580,9 @@ GuiInstanceContext
 
 				auto xmlns = MakePtr<XmlAttribute>();
 				xmlns->name.value = L"xmlns";
-				if (key != L"")
+				if (key != GlobalStringKey::Empty)
 				{
-					xmlns->name.value += L":" + key;
+					xmlns->name.value += L":" + key.ToString();
 				}
 				xmlInstance->attributes.Add(xmlns);
 
@@ -649,12 +649,12 @@ GuiInstanceContext
 
 					auto attName = MakePtr<XmlAttribute>();
 					attName->name.value = L"Name";
-					attName->value.value = key;
+					attName->value.value = key.ToString();
 					xmlCache->attributes.Add(attName);
 
 					auto attType = MakePtr<XmlAttribute>();
 					attType->name.value = L"Type";
-					attType->value.value = value->GetCacheTypeName();
+					attType->value.value = value->GetCacheTypeName().ToString();
 					xmlCache->attributes.Add(attType);
 
 					auto xmlContent = MakePtr<XmlCData>();

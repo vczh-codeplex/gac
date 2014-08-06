@@ -85,15 +85,15 @@ Workflow_ValidateExpression
 
 			bool failed = false;
 			auto td = bindingTarget.typeInfo.typeDescriptor;
-			auto propertyInfo = td->GetPropertyByName(bindingTarget.propertyName, true);
+			auto propertyInfo = td->GetPropertyByName(bindingTarget.propertyName.ToString(), true);
 			if (!propertyInfo)
 			{
-				errors.Add(ERROR_CODE_PREFIX L"Property \"" + bindingTarget.propertyName + L"\" does not exist in type \"" + td->GetTypeName() + L"\".");
+				errors.Add(ERROR_CODE_PREFIX L"Property \"" + bindingTarget.propertyName.ToString() + L"\" does not exist in type \"" + td->GetTypeName() + L"\".");
 				failed = true;
 			}
 			else if (!propertyInfo->IsReadable() || !propertyInfo->IsWritable())
 			{
-				errors.Add(ERROR_CODE_PREFIX L"Property \"" + bindingTarget.propertyName + L"\" of type \"" + td->GetTypeName() + L"\" should be both readable and writable.");
+				errors.Add(ERROR_CODE_PREFIX L"Property \"" + bindingTarget.propertyName.ToString() + L"\" of type \"" + td->GetTypeName() + L"\" should be both readable and writable.");
 				failed = true;
 			}
 
@@ -215,7 +215,7 @@ Workflow_CompileEventHandler
 				func->returnType = GetTypeFromTypeInfo(TypeInfoRetriver<void>::CreateTypeInfo().Obj());
 
 				auto td = bindingTarget.typeInfo.typeDescriptor;
-				auto eventInfo = td->GetEventByName(bindingTarget.propertyName, true);
+				auto eventInfo = td->GetEventByName(bindingTarget.propertyName.ToString(), true);
 				if (eventInfo)
 				{
 					vint count = eventInfo->GetHandlerType()->GetElementType()->GetGenericArgumentCount() - 1;
@@ -529,7 +529,7 @@ Workflow_GetSharedManager
 
 					if (setter->binding != GlobalStringKey::Empty && setter->binding != GlobalStringKey::_Set)
 					{
-						auto binder = GetInstanceLoaderManager()->GetInstanceBinder(setter->binding.ToString());
+						auto binder = GetInstanceLoaderManager()->GetInstanceBinder(setter->binding);
 						if (!binder)
 						{
 							errors.Add(L"The appropriate IGuiInstanceBinder of binding \"" + setter->binding.ToString() + L"\" cannot be found.");
@@ -546,7 +546,7 @@ Workflow_GetSharedManager
 					{
 						IGuiInstanceLoader::PropertyInfo info;
 						info.typeInfo = reprTypeInfo;
-						info.propertyName = repr->setters.Keys()[index].ToString();
+						info.propertyName = repr->setters.Keys()[index];
 						auto currentLoader = loader;
 
 						while (currentLoader)
@@ -555,7 +555,7 @@ Workflow_GetSharedManager
 							if (typeInfo && typeInfo->support != GuiInstancePropertyInfo::NotSupport)
 							{
 								propertyTypeInfo.typeDescriptor = typeInfo->acceptableTypes[0];
-								propertyTypeInfo.typeName = typeInfo->acceptableTypes[0]->GetTypeName();
+								propertyTypeInfo.typeName = GlobalStringKey::Get(typeInfo->acceptableTypes[0]->GetTypeName());
 								break;
 							}
 							currentLoader = GetInstanceLoaderManager()->GetParentLoader(currentLoader);
@@ -573,7 +573,7 @@ Workflow_GetSharedManager
 				{
 					if (handler->binding != GlobalStringKey::Empty)
 					{
-						auto binder = GetInstanceLoaderManager()->GetInstanceEventBinder(handler->binding.ToString());
+						auto binder = GetInstanceLoaderManager()->GetInstanceEventBinder(handler->binding);
 						if (!binder)
 						{
 							errors.Add(L"The appropriate IGuiInstanceEventBinder of binding \"" + handler->binding.ToString() + L"\" cannot be found.");
@@ -597,9 +597,9 @@ Workflow_GetSharedManager
 				{
 					errors.Add(
 						L"Precompile: Failed to find type \"" +
-						(repr->typeNamespace == L"" 
-							? repr->typeName
-							: repr->typeNamespace + L":" + repr->typeName
+						(repr->typeNamespace == GlobalStringKey::Empty
+							? repr->typeName.ToString()
+							: repr->typeNamespace.ToString() + L":" + repr->typeName.ToString()
 							) +
 						L"\".");
 				}
@@ -651,7 +651,7 @@ Workflow_GetSharedManager
 				{
 					if (reprTypeInfo.typeDescriptor)
 					{
-						WString propertyName = repr->setters.Keys()[index].ToString();
+						GlobalStringKey propertyName = repr->setters.Keys()[index];
 						Ptr<GuiInstancePropertyInfo> propertyInfo;
 						IGuiInstanceLoader::PropertyInfo info;
 						info.typeInfo = reprTypeInfo;
@@ -673,7 +673,7 @@ Workflow_GetSharedManager
 
 						if (!propertyInfo)
 						{
-							errors.Add(L"Precompile: Cannot find property \"" + propertyName + L"\" in type \"" + reprTypeInfo.typeName + L"\".");
+							errors.Add(L"Precompile: Cannot find property \"" + propertyName.ToString() + L"\" in type \"" + reprTypeInfo.typeName.ToString() + L"\".");
 						}
 						else
 						{
@@ -700,7 +700,7 @@ Workflow_GetSharedManager
 								Ptr<WfExpression> expression;
 								if (Workflow_ValidateExpression(types, errors, info, expressionCode, expression))
 								{
-									dataBinding.propertyInfo = reprTypeInfo.typeDescriptor->GetPropertyByName(propertyName, true);
+									dataBinding.propertyInfo = reprTypeInfo.typeDescriptor->GetPropertyByName(propertyName.ToString(), true);
 									dataBinding.bindExpression = expression;
 								}
 
@@ -712,7 +712,7 @@ Workflow_GetSharedManager
 								{
 									WString cacheKey = L"<att.eval>" + expressionCode;
 									auto assembly = Workflow_CompileExpression(types, errors, expressionCode);
-									context->precompiledCaches.Add(cacheKey, new GuiWorkflowCache(assembly));
+									context->precompiledCaches.Add(GlobalStringKey::Get(cacheKey), new GuiWorkflowCache(assembly));
 								}
 								else
 								{
@@ -721,7 +721,7 @@ Workflow_GetSharedManager
 									Ptr<WfExpression> expression;
 									if (Workflow_ValidateExpression(types, errors, info, expressionCode, expression))
 									{
-										dataBinding.propertyInfo = reprTypeInfo.typeDescriptor->GetPropertyByName(propertyName, true);
+										dataBinding.propertyInfo = reprTypeInfo.typeDescriptor->GetPropertyByName(propertyName.ToString(), true);
 										dataBinding.bindExpression = expression;
 									}
 
@@ -741,7 +741,7 @@ Workflow_GetSharedManager
 				{
 					if (reprTypeInfo.typeDescriptor)
 					{
-						WString propertyName = repr->eventHandlers.Keys()[index].ToString();
+						GlobalStringKey propertyName = repr->eventHandlers.Keys()[index];
 						Ptr<GuiInstanceEventInfo> eventInfo;
 						IGuiInstanceLoader::PropertyInfo info;
 						info.typeInfo = reprTypeInfo;
@@ -763,7 +763,7 @@ Workflow_GetSharedManager
 
 						if (!eventInfo)
 						{
-							errors.Add(L"Precompile: Cannot find event \"" + propertyName + L"\" in type \"" + reprTypeInfo.typeName + L"\".");
+							errors.Add(L"Precompile: Cannot find event \"" + propertyName.ToString() + L"\" in type \"" + reprTypeInfo.typeName.ToString() + L"\".");
 						}
 						else
 						{
@@ -771,9 +771,9 @@ Workflow_GetSharedManager
 
 							if (handler->binding == GlobalStringKey::_Eval)
 							{
-								WString cacheKey = L"<ev.eval><" + repr->instanceName.Value() + L"><" + propertyName + L">" + statementCode;
+								WString cacheKey = L"<ev.eval><" + repr->instanceName.Value() + L"><" + propertyName.ToString() + L">" + statementCode;
 								auto assembly = Workflow_CompileEventHandler(types, errors, info, statementCode);
-								context->precompiledCaches.Add(cacheKey, new GuiWorkflowCache(assembly));
+								context->precompiledCaches.Add(GlobalStringKey::Get(cacheKey), new GuiWorkflowCache(assembly));
 							}
 						}
 					}
@@ -806,7 +806,7 @@ Workflow_GetSharedManager
 					{
 						IGuiInstanceLoader::TypeInfo typeInfo;
 						typeInfo.typeDescriptor = type;
-						typeInfo.typeName = type->GetTypeName();
+						typeInfo.typeName = GlobalStringKey::Get(type->GetTypeName());
 						typeInfos.Add(parameter->name, typeInfo);
 					}
 				}
@@ -831,8 +831,8 @@ Workflow_GetSharedManager
 GuiWorkflowCache
 ***********************************************************************/
 
-		const wchar_t* GuiWorkflowCache::CacheTypeName = L"WORKFLOW-ASSEMBLY-CACHE";
-		const wchar_t* GuiWorkflowCache::CacheContextName = L"WORKFLOW-GLOBAL-CONTEXT";
+		const GlobalStringKey& GuiWorkflowCache::CacheTypeName = GlobalStringKey::_Workflow_Assembly_Cache;
+		const GlobalStringKey& GuiWorkflowCache::CacheContextName = GlobalStringKey::_Workflow_Global_Context;
 
 		GuiWorkflowCache::GuiWorkflowCache()
 		{
@@ -843,7 +843,7 @@ GuiWorkflowCache
 		{
 		}
 
-		WString GuiWorkflowCache::GetCacheTypeName()
+		GlobalStringKey GuiWorkflowCache::GetCacheTypeName()
 		{
 			return CacheTypeName;
 		}
@@ -852,7 +852,7 @@ GuiWorkflowCache
 GuiWorkflowCacheResolver
 ***********************************************************************/
 
-		WString GuiWorkflowCacheResolver::GetCacheTypeName()
+		GlobalStringKey GuiWorkflowCacheResolver::GetCacheTypeName()
 		{
 			return GuiWorkflowCache::CacheTypeName;
 		}
