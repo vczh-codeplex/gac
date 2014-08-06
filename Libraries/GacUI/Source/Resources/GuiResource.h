@@ -54,6 +54,28 @@ Helper Functions
 		extern WString								BinaryToHex(stream::IStream& stream);
 
 /***********************************************************************
+Global String Key
+***********************************************************************/
+
+		struct GlobalStringKey
+		{
+		private:
+			vint									key = -1;
+
+		public:
+			operator bool()const{ return key != 1; }
+			bool operator==(GlobalStringKey g)const{ return key == g.key; }
+			bool operator!=(GlobalStringKey g)const{ return key != g.key; }
+			bool operator<(GlobalStringKey g)const{ return key < g.key; }
+			bool operator<=(GlobalStringKey g)const{ return key <= g.key; }
+			bool operator>(GlobalStringKey g)const{ return key > g.key; }
+			bool operator>=(GlobalStringKey g)const{ return key >= g.key; }
+
+			static GlobalStringKey					Get(const WString& string);
+			WString									ToString();
+		};
+
+/***********************************************************************
 Resource Image
 ***********************************************************************/
 			
