@@ -527,7 +527,7 @@ Workflow_GetSharedManager
 				{
 					IGuiInstanceLoader::TypeInfo propertyTypeInfo;
 
-					if (setter->binding && setter->binding != GlobalStringKey::_Set)
+					if (setter->binding != GlobalStringKey::Empty && setter->binding != GlobalStringKey::_Set)
 					{
 						auto binder = GetInstanceLoaderManager()->GetInstanceBinder(setter->binding.ToString());
 						if (!binder)
@@ -571,7 +571,7 @@ Workflow_GetSharedManager
 
 				FOREACH(Ptr<GuiAttSetterRepr::EventValue>, handler, repr->eventHandlers.Values())
 				{
-					if (handler->binding)
+					if (handler->binding != GlobalStringKey::Empty)
 					{
 						auto binder = GetInstanceLoaderManager()->GetInstanceEventBinder(handler->binding.ToString());
 						if (!binder)
@@ -651,7 +651,7 @@ Workflow_GetSharedManager
 				{
 					if (reprTypeInfo.typeDescriptor)
 					{
-						WString propertyName = repr->setters.Keys()[index];
+						WString propertyName = repr->setters.Keys()[index].ToString();
 						Ptr<GuiInstancePropertyInfo> propertyInfo;
 						IGuiInstanceLoader::PropertyInfo info;
 						info.typeInfo = reprTypeInfo;
@@ -741,7 +741,7 @@ Workflow_GetSharedManager
 				{
 					if (reprTypeInfo.typeDescriptor)
 					{
-						WString propertyName = repr->eventHandlers.Keys()[index];
+						WString propertyName = repr->eventHandlers.Keys()[index].ToString();
 						Ptr<GuiInstanceEventInfo> eventInfo;
 						IGuiInstanceLoader::PropertyInfo info;
 						info.typeInfo = reprTypeInfo;

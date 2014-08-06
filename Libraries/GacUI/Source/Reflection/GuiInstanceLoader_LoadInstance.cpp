@@ -321,7 +321,7 @@ LoadInstancePropertyValue
 						}
 						break;
 					case GuiInstancePropertyInfo::SupportCollection:
-						if (binding)
+						if (binding != GlobalStringKey::Empty)
 						{
 							env->scope->errors.Add(
 								L"Collection property \"" +
@@ -379,7 +379,7 @@ LoadInstancePropertyValue
 								if (valueRepr)
 								{
 									bool canRemoveLoadedValue = false;
-									if (!binding)
+									if (binding == GlobalStringKey::Empty)
 									{
 										// default binding: set the value directly
 										if (LoadValueVisitor::LoadValue(valueRepr, env, propertyInfo->acceptableTypes, bindingSetters, eventSetters, propertyValue.propertyValue))
@@ -455,7 +455,7 @@ LoadInstancePropertyValue
 						}
 						break;
 					case GuiInstancePropertyInfo::SupportArray:
-						if (binding)
+						if (binding != GlobalStringKey::Empty)
 						{
 							env->scope->errors.Add(
 								L"Array property \"" +
@@ -542,7 +542,7 @@ FillInstance
 				LoadInstancePropertyValue(env, attSetter, propertyValue->binding, cachedPropertyValue, input, propertyLoader, false, output, bindingSetters, eventSetters);
 
 				// if there is no binding, set all values into the specified property
-				if (!propertyValue->binding)
+				if (propertyValue->binding == GlobalStringKey::Empty)
 				{
 					for (vint i = 0; i < output.Count(); i++)
 					{
@@ -586,7 +586,7 @@ FillInstance
 				}
 
 				IGuiInstanceEventBinder* binder = 0;
-				if (handler->binding)
+				if (handler->binding != GlobalStringKey::Empty)
 				{
 					binder = GetInstanceLoaderManager()->GetInstanceEventBinder(handler->binding.ToString());
 					if (!binder)
@@ -746,7 +746,7 @@ CreateInstance
 									if (index != -1)
 									{
 										auto setterValue = ctor->setters.Values()[index];
-										if (setterValue->binding)
+										if (setterValue->binding != GlobalStringKey::Empty)
 										{
 											if (IGuiInstanceBinder* binder = GetInstanceLoaderManager()->GetInstanceBinder(setterValue->binding.ToString()))
 											{

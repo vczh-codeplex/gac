@@ -71,7 +71,6 @@ Global String Key
 			vint									key = -1;
 
 		public:
-			operator bool()const{ return key != -1; }
 			bool operator==(GlobalStringKey g)const{ return key == g.key; }
 			bool operator!=(GlobalStringKey g)const{ return key != g.key; }
 			bool operator<(GlobalStringKey g)const{ return key < g.key; }
