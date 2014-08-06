@@ -77,7 +77,7 @@ Instance Representation
 		public:
 			SetteValuerMap							setters;					// empty key means default property
 			EventHandlerMap							eventHandlers;
-			Nullable<WString>						instanceName;
+			GlobalStringKey							instanceName;
 
 			void									Accept(IVisitor* visitor)override{visitor->Visit(this);}
 			void									CloneBody(Ptr<GuiAttSetterRepr> repr);

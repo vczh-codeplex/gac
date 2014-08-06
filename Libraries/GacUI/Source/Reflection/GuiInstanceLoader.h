@@ -27,7 +27,7 @@ Instance Environment
 
 		class GuiInstanceContextScope : public Object, public Description<GuiInstanceContextScope>
 		{
-			typedef collections::Dictionary<WString, description::Value>						ValueMap;
+			typedef collections::Dictionary<GlobalStringKey, description::Value>				ValueMap;
 			typedef collections::List<WString>													ErrorList;
 			typedef collections::Dictionary<GlobalStringKey, Ptr<IGuiInstanceBindingContext>>	BindingContextMap;
 		public:

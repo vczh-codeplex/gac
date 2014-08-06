@@ -28,13 +28,13 @@ ExecuteQueryVisitor
 				{
 					return false;
 				}
-				if (node->typeNameOption == GuiIqNameOption::Specified && node->typeName.value != ctor->typeName)
+				if (node->typeNameOption == GuiIqNameOption::Specified && node->typeName.value != ctor->typeName.ToString())
 				{
 					return false;
 				}
 				if (node->referenceName.value != L"")
 				{
-					bool instanceName = ctor->instanceName && node->referenceName.value == ctor->instanceName.Value();
+					bool instanceName = ctor->instanceName && node->referenceName.value == ctor->instanceName.Value().ToString();
 					bool styleName = ctor->styleName && node->referenceName.value == ctor->styleName.Value();
 					return instanceName || styleName;
 				}
