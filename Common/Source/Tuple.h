@@ -35,15 +35,18 @@ vl::Tuple<T0>
 		{
 		}
  
-		bool operator==(const Tuple<T0>& value)
+		static int Compare(const Tuple<T0>& a, const Tuple<T0>& b)
 		{
-			return f0==value.f0;
+			if (a.f0 < b.f0) return -1; else if (a.f0 > b.f0) return 1;
+			return 0;
 		}
  
-		bool operator!=(const Tuple<T0>& value)
-		{
-			return !(f0==value.f0);
-		}
+		bool operator==(const Tuple<T0>& value)const{ return Compare(*this, value) == 0; }
+		bool operator!=(const Tuple<T0>& value)const{ return Compare(*this, value) != 0; }
+		bool operator< (const Tuple<T0>& value)const{ return Compare(*this, value) < 0; }
+		bool operator<=(const Tuple<T0>& value)const{ return Compare(*this, value) <= 0; }
+		bool operator> (const Tuple<T0>& value)const{ return Compare(*this, value) > 0; }
+		bool operator>=(const Tuple<T0>& value)const{ return Compare(*this, value) >= 0; }
 	};
   
 /***********************************************************************
@@ -64,15 +67,18 @@ vl::Tuple<T0,T1>
 		{
 		}
  
-		bool operator==(const Tuple<T0,T1>& value)
+		static int Compare(const Tuple<T0,T1>& a, const Tuple<T0,T1>& b)
 		{
-			return f0==value.f0 && f1==value.f1;
+			if (a.f0 < b.f0) return -1; else if (a.f0 > b.f0) return 1;if (a.f1 < b.f1) return -1; else if (a.f1 > b.f1) return 1;
+			return 0;
 		}
  
-		bool operator!=(const Tuple<T0,T1>& value)
-		{
-			return !(f0==value.f0 && f1==value.f1);
-		}
+		bool operator==(const Tuple<T0,T1>& value)const{ return Compare(*this, value) == 0; }
+		bool operator!=(const Tuple<T0,T1>& value)const{ return Compare(*this, value) != 0; }
+		bool operator< (const Tuple<T0,T1>& value)const{ return Compare(*this, value) < 0; }
+		bool operator<=(const Tuple<T0,T1>& value)const{ return Compare(*this, value) <= 0; }
+		bool operator> (const Tuple<T0,T1>& value)const{ return Compare(*this, value) > 0; }
+		bool operator>=(const Tuple<T0,T1>& value)const{ return Compare(*this, value) >= 0; }
 	};
   
 /***********************************************************************
@@ -93,15 +99,18 @@ vl::Tuple<T0,T1,T2>
 		{
 		}
  
-		bool operator==(const Tuple<T0,T1,T2>& value)
+		static int Compare(const Tuple<T0,T1,T2>& a, const Tuple<T0,T1,T2>& b)
 		{
-			return f0==value.f0 && f1==value.f1 && f2==value.f2;
+			if (a.f0 < b.f0) return -1; else if (a.f0 > b.f0) return 1;if (a.f1 < b.f1) return -1; else if (a.f1 > b.f1) return 1;if (a.f2 < b.f2) return -1; else if (a.f2 > b.f2) return 1;
+			return 0;
 		}
  
-		bool operator!=(const Tuple<T0,T1,T2>& value)
-		{
-			return !(f0==value.f0 && f1==value.f1 && f2==value.f2);
-		}
+		bool operator==(const Tuple<T0,T1,T2>& value)const{ return Compare(*this, value) == 0; }
+		bool operator!=(const Tuple<T0,T1,T2>& value)const{ return Compare(*this, value) != 0; }
+		bool operator< (const Tuple<T0,T1,T2>& value)const{ return Compare(*this, value) < 0; }
+		bool operator<=(const Tuple<T0,T1,T2>& value)const{ return Compare(*this, value) <= 0; }
+		bool operator> (const Tuple<T0,T1,T2>& value)const{ return Compare(*this, value) > 0; }
+		bool operator>=(const Tuple<T0,T1,T2>& value)const{ return Compare(*this, value) >= 0; }
 	};
   
 /***********************************************************************
@@ -122,15 +131,18 @@ vl::Tuple<T0,T1,T2,T3>
 		{
 		}
  
-		bool operator==(const Tuple<T0,T1,T2,T3>& value)
+		static int Compare(const Tuple<T0,T1,T2,T3>& a, const Tuple<T0,T1,T2,T3>& b)
 		{
-			return f0==value.f0 && f1==value.f1 && f2==value.f2 && f3==value.f3;
+			if (a.f0 < b.f0) return -1; else if (a.f0 > b.f0) return 1;if (a.f1 < b.f1) return -1; else if (a.f1 > b.f1) return 1;if (a.f2 < b.f2) return -1; else if (a.f2 > b.f2) return 1;if (a.f3 < b.f3) return -1; else if (a.f3 > b.f3) return 1;
+			return 0;
 		}
  
-		bool operator!=(const Tuple<T0,T1,T2,T3>& value)
-		{
-			return !(f0==value.f0 && f1==value.f1 && f2==value.f2 && f3==value.f3);
-		}
+		bool operator==(const Tuple<T0,T1,T2,T3>& value)const{ return Compare(*this, value) == 0; }
+		bool operator!=(const Tuple<T0,T1,T2,T3>& value)const{ return Compare(*this, value) != 0; }
+		bool operator< (const Tuple<T0,T1,T2,T3>& value)const{ return Compare(*this, value) < 0; }
+		bool operator<=(const Tuple<T0,T1,T2,T3>& value)const{ return Compare(*this, value) <= 0; }
+		bool operator> (const Tuple<T0,T1,T2,T3>& value)const{ return Compare(*this, value) > 0; }
+		bool operator>=(const Tuple<T0,T1,T2,T3>& value)const{ return Compare(*this, value) >= 0; }
 	};
   
 /***********************************************************************
@@ -151,15 +163,18 @@ vl::Tuple<T0,T1,T2,T3,T4>
 		{
 		}
  
-		bool operator==(const Tuple<T0,T1,T2,T3,T4>& value)
+		static int Compare(const Tuple<T0,T1,T2,T3,T4>& a, const Tuple<T0,T1,T2,T3,T4>& b)
 		{
-			return f0==value.f0 && f1==value.f1 && f2==value.f2 && f3==value.f3 && f4==value.f4;
+			if (a.f0 < b.f0) return -1; else if (a.f0 > b.f0) return 1;if (a.f1 < b.f1) return -1; else if (a.f1 > b.f1) return 1;if (a.f2 < b.f2) return -1; else if (a.f2 > b.f2) return 1;if (a.f3 < b.f3) return -1; else if (a.f3 > b.f3) return 1;if (a.f4 < b.f4) return -1; else if (a.f4 > b.f4) return 1;
+			return 0;
 		}
  
-		bool operator!=(const Tuple<T0,T1,T2,T3,T4>& value)
-		{
-			return !(f0==value.f0 && f1==value.f1 && f2==value.f2 && f3==value.f3 && f4==value.f4);
-		}
+		bool operator==(const Tuple<T0,T1,T2,T3,T4>& value)const{ return Compare(*this, value) == 0; }
+		bool operator!=(const Tuple<T0,T1,T2,T3,T4>& value)const{ return Compare(*this, value) != 0; }
+		bool operator< (const Tuple<T0,T1,T2,T3,T4>& value)const{ return Compare(*this, value) < 0; }
+		bool operator<=(const Tuple<T0,T1,T2,T3,T4>& value)const{ return Compare(*this, value) <= 0; }
+		bool operator> (const Tuple<T0,T1,T2,T3,T4>& value)const{ return Compare(*this, value) > 0; }
+		bool operator>=(const Tuple<T0,T1,T2,T3,T4>& value)const{ return Compare(*this, value) >= 0; }
 	};
   
 /***********************************************************************
@@ -180,15 +195,18 @@ vl::Tuple<T0,T1,T2,T3,T4,T5>
 		{
 		}
  
-		bool operator==(const Tuple<T0,T1,T2,T3,T4,T5>& value)
+		static int Compare(const Tuple<T0,T1,T2,T3,T4,T5>& a, const Tuple<T0,T1,T2,T3,T4,T5>& b)
 		{
-			return f0==value.f0 && f1==value.f1 && f2==value.f2 && f3==value.f3 && f4==value.f4 && f5==value.f5;
+			if (a.f0 < b.f0) return -1; else if (a.f0 > b.f0) return 1;if (a.f1 < b.f1) return -1; else if (a.f1 > b.f1) return 1;if (a.f2 < b.f2) return -1; else if (a.f2 > b.f2) return 1;if (a.f3 < b.f3) return -1; else if (a.f3 > b.f3) return 1;if (a.f4 < b.f4) return -1; else if (a.f4 > b.f4) return 1;if (a.f5 < b.f5) return -1; else if (a.f5 > b.f5) return 1;
+			return 0;
 		}
  
-		bool operator!=(const Tuple<T0,T1,T2,T3,T4,T5>& value)
-		{
-			return !(f0==value.f0 && f1==value.f1 && f2==value.f2 && f3==value.f3 && f4==value.f4 && f5==value.f5);
-		}
+		bool operator==(const Tuple<T0,T1,T2,T3,T4,T5>& value)const{ return Compare(*this, value) == 0; }
+		bool operator!=(const Tuple<T0,T1,T2,T3,T4,T5>& value)const{ return Compare(*this, value) != 0; }
+		bool operator< (const Tuple<T0,T1,T2,T3,T4,T5>& value)const{ return Compare(*this, value) < 0; }
+		bool operator<=(const Tuple<T0,T1,T2,T3,T4,T5>& value)const{ return Compare(*this, value) <= 0; }
+		bool operator> (const Tuple<T0,T1,T2,T3,T4,T5>& value)const{ return Compare(*this, value) > 0; }
+		bool operator>=(const Tuple<T0,T1,T2,T3,T4,T5>& value)const{ return Compare(*this, value) >= 0; }
 	};
   
 /***********************************************************************
@@ -209,15 +227,18 @@ vl::Tuple<T0,T1,T2,T3,T4,T5,T6>
 		{
 		}
  
-		bool operator==(const Tuple<T0,T1,T2,T3,T4,T5,T6>& value)
+		static int Compare(const Tuple<T0,T1,T2,T3,T4,T5,T6>& a, const Tuple<T0,T1,T2,T3,T4,T5,T6>& b)
 		{
-			return f0==value.f0 && f1==value.f1 && f2==value.f2 && f3==value.f3 && f4==value.f4 && f5==value.f5 && f6==value.f6;
+			if (a.f0 < b.f0) return -1; else if (a.f0 > b.f0) return 1;if (a.f1 < b.f1) return -1; else if (a.f1 > b.f1) return 1;if (a.f2 < b.f2) return -1; else if (a.f2 > b.f2) return 1;if (a.f3 < b.f3) return -1; else if (a.f3 > b.f3) return 1;if (a.f4 < b.f4) return -1; else if (a.f4 > b.f4) return 1;if (a.f5 < b.f5) return -1; else if (a.f5 > b.f5) return 1;if (a.f6 < b.f6) return -1; else if (a.f6 > b.f6) return 1;
+			return 0;
 		}
  
-		bool operator!=(const Tuple<T0,T1,T2,T3,T4,T5,T6>& value)
-		{
-			return !(f0==value.f0 && f1==value.f1 && f2==value.f2 && f3==value.f3 && f4==value.f4 && f5==value.f5 && f6==value.f6);
-		}
+		bool operator==(const Tuple<T0,T1,T2,T3,T4,T5,T6>& value)const{ return Compare(*this, value) == 0; }
+		bool operator!=(const Tuple<T0,T1,T2,T3,T4,T5,T6>& value)const{ return Compare(*this, value) != 0; }
+		bool operator< (const Tuple<T0,T1,T2,T3,T4,T5,T6>& value)const{ return Compare(*this, value) < 0; }
+		bool operator<=(const Tuple<T0,T1,T2,T3,T4,T5,T6>& value)const{ return Compare(*this, value) <= 0; }
+		bool operator> (const Tuple<T0,T1,T2,T3,T4,T5,T6>& value)const{ return Compare(*this, value) > 0; }
+		bool operator>=(const Tuple<T0,T1,T2,T3,T4,T5,T6>& value)const{ return Compare(*this, value) >= 0; }
 	};
   
 /***********************************************************************
@@ -238,15 +259,18 @@ vl::Tuple<T0,T1,T2,T3,T4,T5,T6,T7>
 		{
 		}
  
-		bool operator==(const Tuple<T0,T1,T2,T3,T4,T5,T6,T7>& value)
+		static int Compare(const Tuple<T0,T1,T2,T3,T4,T5,T6,T7>& a, const Tuple<T0,T1,T2,T3,T4,T5,T6,T7>& b)
 		{
-			return f0==value.f0 && f1==value.f1 && f2==value.f2 && f3==value.f3 && f4==value.f4 && f5==value.f5 && f6==value.f6 && f7==value.f7;
+			if (a.f0 < b.f0) return -1; else if (a.f0 > b.f0) return 1;if (a.f1 < b.f1) return -1; else if (a.f1 > b.f1) return 1;if (a.f2 < b.f2) return -1; else if (a.f2 > b.f2) return 1;if (a.f3 < b.f3) return -1; else if (a.f3 > b.f3) return 1;if (a.f4 < b.f4) return -1; else if (a.f4 > b.f4) return 1;if (a.f5 < b.f5) return -1; else if (a.f5 > b.f5) return 1;if (a.f6 < b.f6) return -1; else if (a.f6 > b.f6) return 1;if (a.f7 < b.f7) return -1; else if (a.f7 > b.f7) return 1;
+			return 0;
 		}
  
-		bool operator!=(const Tuple<T0,T1,T2,T3,T4,T5,T6,T7>& value)
-		{
-			return !(f0==value.f0 && f1==value.f1 && f2==value.f2 && f3==value.f3 && f4==value.f4 && f5==value.f5 && f6==value.f6 && f7==value.f7);
-		}
+		bool operator==(const Tuple<T0,T1,T2,T3,T4,T5,T6,T7>& value)const{ return Compare(*this, value) == 0; }
+		bool operator!=(const Tuple<T0,T1,T2,T3,T4,T5,T6,T7>& value)const{ return Compare(*this, value) != 0; }
+		bool operator< (const Tuple<T0,T1,T2,T3,T4,T5,T6,T7>& value)const{ return Compare(*this, value) < 0; }
+		bool operator<=(const Tuple<T0,T1,T2,T3,T4,T5,T6,T7>& value)const{ return Compare(*this, value) <= 0; }
+		bool operator> (const Tuple<T0,T1,T2,T3,T4,T5,T6,T7>& value)const{ return Compare(*this, value) > 0; }
+		bool operator>=(const Tuple<T0,T1,T2,T3,T4,T5,T6,T7>& value)const{ return Compare(*this, value) >= 0; }
 	};
   
 /***********************************************************************
@@ -267,15 +291,18 @@ vl::Tuple<T0,T1,T2,T3,T4,T5,T6,T7,T8>
 		{
 		}
  
-		bool operator==(const Tuple<T0,T1,T2,T3,T4,T5,T6,T7,T8>& value)
+		static int Compare(const Tuple<T0,T1,T2,T3,T4,T5,T6,T7,T8>& a, const Tuple<T0,T1,T2,T3,T4,T5,T6,T7,T8>& b)
 		{
-			return f0==value.f0 && f1==value.f1 && f2==value.f2 && f3==value.f3 && f4==value.f4 && f5==value.f5 && f6==value.f6 && f7==value.f7 && f8==value.f8;
+			if (a.f0 < b.f0) return -1; else if (a.f0 > b.f0) return 1;if (a.f1 < b.f1) return -1; else if (a.f1 > b.f1) return 1;if (a.f2 < b.f2) return -1; else if (a.f2 > b.f2) return 1;if (a.f3 < b.f3) return -1; else if (a.f3 > b.f3) return 1;if (a.f4 < b.f4) return -1; else if (a.f4 > b.f4) return 1;if (a.f5 < b.f5) return -1; else if (a.f5 > b.f5) return 1;if (a.f6 < b.f6) return -1; else if (a.f6 > b.f6) return 1;if (a.f7 < b.f7) return -1; else if (a.f7 > b.f7) return 1;if (a.f8 < b.f8) return -1; else if (a.f8 > b.f8) return 1;
+			return 0;
 		}
  
-		bool operator!=(const Tuple<T0,T1,T2,T3,T4,T5,T6,T7,T8>& value)
-		{
-			return !(f0==value.f0 && f1==value.f1 && f2==value.f2 && f3==value.f3 && f4==value.f4 && f5==value.f5 && f6==value.f6 && f7==value.f7 && f8==value.f8);
-		}
+		bool operator==(const Tuple<T0,T1,T2,T3,T4,T5,T6,T7,T8>& value)const{ return Compare(*this, value) == 0; }
+		bool operator!=(const Tuple<T0,T1,T2,T3,T4,T5,T6,T7,T8>& value)const{ return Compare(*this, value) != 0; }
+		bool operator< (const Tuple<T0,T1,T2,T3,T4,T5,T6,T7,T8>& value)const{ return Compare(*this, value) < 0; }
+		bool operator<=(const Tuple<T0,T1,T2,T3,T4,T5,T6,T7,T8>& value)const{ return Compare(*this, value) <= 0; }
+		bool operator> (const Tuple<T0,T1,T2,T3,T4,T5,T6,T7,T8>& value)const{ return Compare(*this, value) > 0; }
+		bool operator>=(const Tuple<T0,T1,T2,T3,T4,T5,T6,T7,T8>& value)const{ return Compare(*this, value) >= 0; }
 	};
   
 /***********************************************************************
@@ -296,15 +323,18 @@ vl::Tuple<T0,T1,T2,T3,T4,T5,T6,T7,T8,T9>
 		{
 		}
  
-		bool operator==(const Tuple<T0,T1,T2,T3,T4,T5,T6,T7,T8,T9>& value)
+		static int Compare(const Tuple<T0,T1,T2,T3,T4,T5,T6,T7,T8,T9>& a, const Tuple<T0,T1,T2,T3,T4,T5,T6,T7,T8,T9>& b)
 		{
-			return f0==value.f0 && f1==value.f1 && f2==value.f2 && f3==value.f3 && f4==value.f4 && f5==value.f5 && f6==value.f6 && f7==value.f7 && f8==value.f8 && f9==value.f9;
+			if (a.f0 < b.f0) return -1; else if (a.f0 > b.f0) return 1;if (a.f1 < b.f1) return -1; else if (a.f1 > b.f1) return 1;if (a.f2 < b.f2) return -1; else if (a.f2 > b.f2) return 1;if (a.f3 < b.f3) return -1; else if (a.f3 > b.f3) return 1;if (a.f4 < b.f4) return -1; else if (a.f4 > b.f4) return 1;if (a.f5 < b.f5) return -1; else if (a.f5 > b.f5) return 1;if (a.f6 < b.f6) return -1; else if (a.f6 > b.f6) return 1;if (a.f7 < b.f7) return -1; else if (a.f7 > b.f7) return 1;if (a.f8 < b.f8) return -1; else if (a.f8 > b.f8) return 1;if (a.f9 < b.f9) return -1; else if (a.f9 > b.f9) return 1;
+			return 0;
 		}
  
-		bool operator!=(const Tuple<T0,T1,T2,T3,T4,T5,T6,T7,T8,T9>& value)
-		{
-			return !(f0==value.f0 && f1==value.f1 && f2==value.f2 && f3==value.f3 && f4==value.f4 && f5==value.f5 && f6==value.f6 && f7==value.f7 && f8==value.f8 && f9==value.f9);
-		}
+		bool operator==(const Tuple<T0,T1,T2,T3,T4,T5,T6,T7,T8,T9>& value)const{ return Compare(*this, value) == 0; }
+		bool operator!=(const Tuple<T0,T1,T2,T3,T4,T5,T6,T7,T8,T9>& value)const{ return Compare(*this, value) != 0; }
+		bool operator< (const Tuple<T0,T1,T2,T3,T4,T5,T6,T7,T8,T9>& value)const{ return Compare(*this, value) < 0; }
+		bool operator<=(const Tuple<T0,T1,T2,T3,T4,T5,T6,T7,T8,T9>& value)const{ return Compare(*this, value) <= 0; }
+		bool operator> (const Tuple<T0,T1,T2,T3,T4,T5,T6,T7,T8,T9>& value)const{ return Compare(*this, value) > 0; }
+		bool operator>=(const Tuple<T0,T1,T2,T3,T4,T5,T6,T7,T8,T9>& value)const{ return Compare(*this, value) >= 0; }
 	};
  
 }
