@@ -429,6 +429,14 @@ GuiDefaultInstanceLoader
 
 		class GuiDefaultInstanceLoader : public Object, public IGuiInstanceLoader
 		{
+		protected:
+			typedef Tuple<ITypeDescriptor*, GlobalStringKey>				FieldKey;
+			typedef Tuple<Ptr<GuiInstancePropertyInfo>, IPropertyInfo*>		PropertyType;
+			typedef Tuple<Ptr<GuiInstanceEventInfo>, IEventInfo*>			EventType;
+
+			Dictionary<FieldKey, PropertyType>								propertyTypes;
+			Dictionary<FieldKey, EventType>									eventTypes;
+
 		public:
 			static IMethodInfo* GetDefaultConstructor(ITypeDescriptor* typeDescriptor)
 			{
@@ -655,25 +663,45 @@ GuiDefaultInstanceLoader
 			{
 			}
 
+			PropertyType GetPropertyTypeCached(const PropertyInfo& propertyInfo)
+			{
+				FieldKey key(propertyInfo.typeInfo.typeDescriptor, propertyInfo.propertyName);
+				vint index = propertyTypes.Keys().IndexOf(key);
+				if (index == -1)
+				{
+					GuiInstancePropertyInfo::Support support = GuiInstancePropertyInfo::NotSupport;
+					if (ITypeInfo* propType = GetPropertyReflectionTypeInfo(propertyInfo, support))
+					{
+						Ptr<GuiInstancePropertyInfo> result = new GuiInstancePropertyInfo;
+						result->support = support;
+
+						if (FillPropertyInfo(result, propType))
+						{
+							IPropertyInfo* prop = propertyInfo.typeInfo.typeDescriptor->GetPropertyByName(propertyInfo.propertyName.ToString(), true);
+							PropertyType value(result, prop);
+							propertyTypes.Add(key, value);
+							return value;
+						}
+					}
+					
+					PropertyType value(GuiInstancePropertyInfo::Unsupported(), 0);
+					propertyTypes.Add(key, value);
+					return value;
+				}
+				else
+				{
+					return propertyTypes.Values()[index];
+				}
+			}
+
 			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
 			{
-				GuiInstancePropertyInfo::Support support = GuiInstancePropertyInfo::NotSupport;
-				if (ITypeInfo* propType = GetPropertyReflectionTypeInfo(propertyInfo, support))
-				{
-					Ptr<GuiInstancePropertyInfo> propertyInfo = new GuiInstancePropertyInfo;
-					propertyInfo->support = support;
-
-					if (FillPropertyInfo(propertyInfo, propType))
-					{
-						return propertyInfo;
-					}
-				}
-				return GuiInstancePropertyInfo::Unsupported();
+				return GetPropertyTypeCached(propertyInfo).f0;
 			}
 
 			bool GetPropertyValue(PropertyValue& propertyValue)override
 			{
-				if (IPropertyInfo* prop = propertyValue.typeInfo.typeDescriptor->GetPropertyByName(propertyValue.propertyName.ToString(), true))
+				if (IPropertyInfo* prop = GetPropertyTypeCached(propertyValue).f1)
 				{
 					if (prop->IsReadable())
 					{
@@ -686,14 +714,14 @@ GuiDefaultInstanceLoader
 
 			bool SetPropertyValue(PropertyValue& propertyValue)override
 			{
-				GuiInstancePropertyInfo::Support support = GuiInstancePropertyInfo::NotSupport;
-				if (GetPropertyReflectionTypeInfo(propertyValue, support))
+				PropertyType propertyType = GetPropertyTypeCached(propertyValue);
+				if (propertyType.f1)
 				{
-					switch (support)
+					switch (propertyType.f0->support)
 					{
 					case GuiInstancePropertyInfo::SupportCollection:
 						{
-							Value value = propertyValue.instanceValue.GetProperty(propertyValue.propertyName.ToString());
+							Value value = propertyType.f1->GetValue(propertyValue.instanceValue);
 							if (auto list = dynamic_cast<IValueList*>(value.GetRawPtr()))
 							{
 								list->Add(propertyValue.propertyValue);
@@ -704,6 +732,7 @@ GuiDefaultInstanceLoader
 					case GuiInstancePropertyInfo::SupportAssign:
 					case GuiInstancePropertyInfo::SupportArray:
 						propertyValue.instanceValue.SetProperty(propertyValue.propertyName.ToString(), propertyValue.propertyValue);
+						propertyType.f1->SetValue(propertyValue.instanceValue, propertyValue.propertyValue);
 						return true;
 					}
 				}
@@ -742,54 +771,81 @@ GuiDefaultInstanceLoader
 				CollectEventNames(typeInfo, typeInfo.typeDescriptor, eventNames);
 			}
 
+			EventType GetEventTypeCached(const PropertyInfo& eventInfo)
+			{
+				FieldKey key(eventInfo.typeInfo.typeDescriptor, eventInfo.propertyName);
+				vint index = eventTypes.Keys().IndexOf(key);
+				if (index == -1)
+				{
+					if (IEventInfo* ev = eventInfo.typeInfo.typeDescriptor->GetEventByName(eventInfo.propertyName.ToString(), true))
+					{
+#ifndef VCZH_DEBUG_NO_REFLECTION
+						auto handlerType = ev->GetHandlerType();
+						if (handlerType->GetDecorator() != ITypeInfo::SharedPtr) goto UNSUPPORTED;
+
+						auto genericType = handlerType->GetElementType();
+						if (genericType->GetDecorator() != ITypeInfo::Generic) goto UNSUPPORTED;
+
+						auto functionType = genericType->GetElementType();
+						if (functionType->GetDecorator() != ITypeInfo::TypeDescriptor) goto UNSUPPORTED;
+						if (functionType->GetTypeDescriptor() != description::GetTypeDescriptor<IValueFunctionProxy>()) goto UNSUPPORTED;
+
+						if (genericType->GetGenericArgumentCount() != 3) goto UNSUPPORTED;
+						auto returnType = genericType->GetGenericArgument(0);
+						auto senderType = genericType->GetGenericArgument(1);
+						auto argumentType = genericType->GetGenericArgument(2);
+					
+						if (returnType->GetDecorator() != ITypeInfo::TypeDescriptor) goto UNSUPPORTED;
+						if (returnType->GetTypeDescriptor() != description::GetTypeDescriptor<VoidValue>()) goto UNSUPPORTED;
+					
+						if (senderType->GetDecorator() != ITypeInfo::RawPtr) goto UNSUPPORTED;
+						senderType = senderType->GetElementType();
+						if (senderType->GetDecorator() != ITypeInfo::TypeDescriptor) goto UNSUPPORTED;
+						if (senderType->GetTypeDescriptor() != description::GetTypeDescriptor<compositions::GuiGraphicsComposition>()) goto UNSUPPORTED;
+					
+						if (argumentType->GetDecorator() != ITypeInfo::RawPtr) goto UNSUPPORTED;
+						argumentType = argumentType->GetElementType();
+						if (argumentType->GetDecorator() != ITypeInfo::TypeDescriptor) goto UNSUPPORTED;
+						if (!argumentType->GetTypeDescriptor()->CanConvertTo(description::GetTypeDescriptor<compositions::GuiEventArgs>())) goto UNSUPPORTED;
+
+						{
+							auto result = GuiInstanceEventInfo::Assign(argumentType->GetTypeDescriptor());
+							EventType value(result, ev);
+							eventTypes.Add(key, value);
+							return value;
+						}
+					UNSUPPORTED:
+						{
+							auto result = GuiInstanceEventInfo::Unsupported();
+							EventType value(result, ev);
+							eventTypes.Add(key, value);
+							return value;
+						}
+#endif
+					}
+
+					EventType value(0, 0);
+					eventTypes.Add(key, value);
+					return value;
+				}
+				else
+				{
+					return eventTypes.Values()[index];
+				}
+			}
+
 			Ptr<GuiInstanceEventInfo> GetEventType(const PropertyInfo& eventInfo)override
 			{
-				if (IEventInfo* ev = eventInfo.typeInfo.typeDescriptor->GetEventByName(eventInfo.propertyName.ToString(), true))
-				{
-#ifndef VCZH_DEBUG_NO_REFLECTION
-					auto handlerType = ev->GetHandlerType();
-					if (handlerType->GetDecorator() != ITypeInfo::SharedPtr) goto UNSUPPORTED;
-
-					auto genericType = handlerType->GetElementType();
-					if (genericType->GetDecorator() != ITypeInfo::Generic) goto UNSUPPORTED;
-
-					auto functionType = genericType->GetElementType();
-					if (functionType->GetDecorator() != ITypeInfo::TypeDescriptor) goto UNSUPPORTED;
-					if (functionType->GetTypeDescriptor() != description::GetTypeDescriptor<IValueFunctionProxy>()) goto UNSUPPORTED;
-
-					if (genericType->GetGenericArgumentCount() != 3) goto UNSUPPORTED;
-					auto returnType = genericType->GetGenericArgument(0);
-					auto senderType = genericType->GetGenericArgument(1);
-					auto argumentType = genericType->GetGenericArgument(2);
-					
-					if (returnType->GetDecorator() != ITypeInfo::TypeDescriptor) goto UNSUPPORTED;
-					if (returnType->GetTypeDescriptor() != description::GetTypeDescriptor<VoidValue>()) goto UNSUPPORTED;
-					
-					if (senderType->GetDecorator() != ITypeInfo::RawPtr) goto UNSUPPORTED;
-					senderType = senderType->GetElementType();
-					if (senderType->GetDecorator() != ITypeInfo::TypeDescriptor) goto UNSUPPORTED;
-					if (senderType->GetTypeDescriptor() != description::GetTypeDescriptor<compositions::GuiGraphicsComposition>()) goto UNSUPPORTED;
-					
-					if (argumentType->GetDecorator() != ITypeInfo::RawPtr) goto UNSUPPORTED;
-					argumentType = argumentType->GetElementType();
-					if (argumentType->GetDecorator() != ITypeInfo::TypeDescriptor) goto UNSUPPORTED;
-					if (!argumentType->GetTypeDescriptor()->CanConvertTo(description::GetTypeDescriptor<compositions::GuiEventArgs>())) goto UNSUPPORTED;
-
-					return GuiInstanceEventInfo::Assign(argumentType->GetTypeDescriptor());
-
-				UNSUPPORTED:
-#endif
-					return GuiInstanceEventInfo::Unsupported();
-				}
-				return 0;
+				return GetEventTypeCached(eventInfo).f0;
 			}
 
 			bool SetEventValue(PropertyValue& propertyValue)override
 			{
-				auto eventInfo = GetEventType(propertyValue);
-				if (eventInfo && eventInfo->support == GuiInstanceEventInfo::SupportAssign)
+				EventType eventType = GetEventTypeCached(propertyValue);
+				if (eventType.f0 && eventType.f0->support == GuiInstanceEventInfo::SupportAssign)
 				{
-					propertyValue.instanceValue.AttachEvent(propertyValue.propertyName.ToString(), propertyValue.propertyValue);
+					Ptr<IValueFunctionProxy> proxy=UnboxValue<Ptr<IValueFunctionProxy>>(propertyValue.propertyValue, Description<IValueFunctionProxy>::GetAssociatedTypeDescriptor(), L"function");
+					eventType.f1->Attach(propertyValue.instanceValue, proxy);
 					return true;
 				}
 				return false;
