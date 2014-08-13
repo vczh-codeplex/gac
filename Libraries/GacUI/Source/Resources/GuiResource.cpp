@@ -322,7 +322,7 @@ GuiResourceItem
 GuiResourceFolder
 ***********************************************************************/
 
-		void GuiResourceFolder::LoadResourceFolderXml(DelayLoadingList& delayLoadings, const WString& containingFolder, Ptr<parsing::xml::XmlElement> folderXml, collections::List<WString>& errors)
+		void GuiResourceFolder::LoadResourceFolderFromXml(DelayLoadingList& delayLoadings, const WString& containingFolder, Ptr<parsing::xml::XmlElement> folderXml, collections::List<WString>& errors)
 		{
 			ClearItems();
 			ClearFolders();
@@ -374,7 +374,7 @@ GuiResourceFolder
 									}
 								}
 							}
-							folder->LoadResourceFolderXml(delayLoadings, newContainingFolder, newFolderXml, errors);
+							folder->LoadResourceFolderFromXml(delayLoadings, newContainingFolder, newFolderXml, errors);
 						}
 						else
 						{
@@ -549,6 +549,50 @@ GuiResourceFolder
 			}
 		}
 
+		void GuiResourceFolder::LoadResourceFolderFromBinary(stream::internal::Reader& reader, collections::List<WString>& typeNames, collections::List<WString>& errors)
+		{
+			vint count = 0;
+			reader << count;
+			for (vint i = 0; i < count; i++)
+			{
+				vint typeName = 0;
+				WString name;
+				reader << typeName << name;
+			}
+
+			reader << count;
+			for (vint i = 0; i < count; i++)
+			{
+				WString name;
+				reader << name;
+
+				auto folder = MakePtr<GuiResourceFolder>();
+				folder->LoadResourceFolderFromBinary(reader, typeNames, errors);
+				AddFolder(name, folder);
+			}
+		}
+
+		void GuiResourceFolder::SaveResourceFolderToBinary(stream::internal::Writer& writer, collections::List<WString>& typeNames, collections::List<WString>& errors)
+		{
+			vint count = items.Count();
+			writer << count;
+			FOREACH(Ptr<GuiResourceItem>, item, items.Values())
+			{
+				vint typeName = typeNames.IndexOf(item->GetTypeName());
+				WString name = item->GetName();
+				writer << typeName << name;
+			}
+
+			count = folders.Count();
+			writer << count;
+			FOREACH(Ptr<GuiResourceFolder>, folder, folders.Values())
+			{
+				WString name = folder->GetName();
+				writer << name;
+				folder->SaveResourceFolderToBinary(writer, typeNames, errors);
+			}
+		}
+
 		void GuiResourceFolder::PrecompileResourceFolder(Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)
 		{
 			FOREACH(Ptr<GuiResourceItem>, item, items.Values())
@@ -710,7 +754,7 @@ GuiResource
 			Ptr<GuiResource> resource = new GuiResource;
 			resource->workingDirectory = workingDirectory;
 			DelayLoadingList delayLoadings;
-			resource->LoadResourceFolderXml(delayLoadings, resource->workingDirectory, xml->rootElement, errors);
+			resource->LoadResourceFolderFromXml(delayLoadings, resource->workingDirectory, xml->rootElement, errors);
 
 			FOREACH(DelayLoading, delay, delayLoadings)
 			{
@@ -776,17 +820,19 @@ GuiResource
 
 			List<WString> typeNames;
 			reader << typeNames;
+			resource->LoadResourceFolderFromBinary(reader, typeNames, errors);
 
 			return resource;
 		}
 
-		void GuiResource::SavePrecompiledBinary(stream::IStream& stream)
+		void GuiResource::SavePrecompiledBinary(stream::IStream& stream, collections::List<WString>& errors)
 		{
 			stream::internal::Writer writer(stream);
 
 			List<WString> typeNames;
 			CollectTypeNames(typeNames);
 			writer << typeNames;
+			SaveResourceFolderToBinary(writer, typeNames, errors);
 		}
 
 		void GuiResource::Precompile(collections::List<WString>& errors)
