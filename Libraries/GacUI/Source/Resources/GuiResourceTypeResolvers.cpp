@@ -55,6 +55,11 @@ Image Type Resolver
 				return 0;
 			}
 
+			void Serialize(Ptr<DescriptableObject> resource, stream::IStream& stream)override
+			{
+				throw 0;
+			}
+
 			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)override
 			{
 				MemoryStream stream;
@@ -90,6 +95,11 @@ Image Type Resolver
 			{
 				errors.Add(L"Internal error: Image resource doesn't need resource preloading.");
 				return 0;
+			}
+
+			Ptr<DescriptableObject> ResolveResource(stream::IStream& stream, collections::List<WString>& errors)
+			{
+				throw 0;
 			}
 		};
 
@@ -135,6 +145,11 @@ Text Type Resolver
 				return 0;
 			}
 
+			void Serialize(Ptr<DescriptableObject> resource, stream::IStream& stream)override
+			{
+				throw 0;
+			}
+
 			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)override
 			{
 				return new GuiTextData(XmlGetValue(element));
@@ -158,6 +173,11 @@ Text Type Resolver
 			{
 				errors.Add(L"Internal error: Text resource doesn't need resource preloading.");
 				return 0;
+			}
+
+			Ptr<DescriptableObject> ResolveResource(stream::IStream& stream, collections::List<WString>& errors)
+			{
+				throw 0;
 			}
 		};
 
@@ -199,6 +219,11 @@ Xml Type Resolver
 				return 0;
 			}
 
+			void Serialize(Ptr<DescriptableObject> resource, stream::IStream& stream)override
+			{
+				throw 0;
+			}
+
 			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)override
 			{
 				Ptr<XmlElement> root=XmlGetElements(element).First(0);
@@ -232,6 +257,11 @@ Xml Type Resolver
 			{
 				errors.Add(L"Internal error: Xml resource doesn't need resource preloading.");
 				return 0;
+			}
+
+			Ptr<DescriptableObject> ResolveResource(stream::IStream& stream, collections::List<WString>& errors)
+			{
+				throw 0;
 			}
 		};
 
@@ -273,6 +303,11 @@ Doc Type Resolver
 				return 0;
 			}
 
+			void Serialize(Ptr<DescriptableObject> resource, stream::IStream& stream)override
+			{
+				throw 0;
+			}
+
 			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)override
 			{
 				errors.Add(L"Internal error: Doc resource needs resource preloading.");
@@ -294,6 +329,11 @@ Doc Type Resolver
 					return model;
 				}
 				return 0;
+			}
+
+			Ptr<DescriptableObject> ResolveResource(stream::IStream& stream, collections::List<WString>& errors)
+			{
+				throw 0;
 			}
 		};
 
