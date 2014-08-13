@@ -534,6 +534,21 @@ GuiResourceFolder
 			}
 		}
 
+		void GuiResourceFolder::CollectTypeNames(collections::SortedList<WString>& typeNames)
+		{
+			FOREACH(Ptr<GuiResourceItem>, item, items.Values())
+			{
+				if (!typeNames.Contains(item->GetTypeName()))
+				{
+					typeNames.Add(item->GetTypeName());
+				}
+			}
+			FOREACH(Ptr<GuiResourceFolder>, folder, folders.Values())
+			{
+				folder->CollectTypeNames(typeNames);
+			}
+		}
+
 		void GuiResourceFolder::PrecompileResourceFolder(Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)
 		{
 			FOREACH(Ptr<GuiResourceItem>, item, items.Values())
@@ -752,6 +767,26 @@ GuiResource
 			auto doc = MakePtr<XmlDocument>();
 			doc->rootElement = xmlRoot;
 			return doc;
+		}
+
+		Ptr<GuiResource> GuiResource::LoadPrecompiledBinary(stream::IStream& stream, collections::List<WString>& errors)
+		{
+			stream::internal::Reader reader(stream);
+			auto resource = MakePtr<GuiResource>();
+
+			SortedList<WString> typeNames;
+			reader << typeNames;
+
+			return resource;
+		}
+
+		void GuiResource::SavePrecompiledBinary(stream::IStream& stream)
+		{
+			stream::internal::Writer writer(stream);
+
+			SortedList<WString> typeNames;
+			CollectTypeNames(typeNames);
+			writer << typeNames;
 		}
 
 		void GuiResource::Precompile(collections::List<WString>& errors)

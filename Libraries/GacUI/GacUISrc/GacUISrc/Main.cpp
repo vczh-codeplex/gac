@@ -617,33 +617,26 @@ void GuiMain()
 	vint64_t loadTime = 0, desTime = 0;
 
 #ifdef RUN_GENERATE_PRECOMPILED_RESOURCE
-	WString xmlText;
-	{
-		auto resource = GuiResource::LoadFromXml(L"..\\GacUISrcCodepackedTest\\Resources\\XmlWindowResourceDataBinding.xml", errors);
-		resource->Precompile(errors);
-		auto xml = resource->SaveToXml(true);
-		xmlText = XmlToString(xml);
-
-		FileStream fileStream(L"Precompiled.xml", FileStream::WriteOnly);
-		BomEncoder encoder(BomEncoder::Utf8);
-		EncoderStream stream(fileStream, encoder);
-		StreamWriter writer(stream);
-		writer.WriteString(xmlText);
-	}
-	
 	{
 		DateTime begin = DateTime::LocalTime();
-		auto parser = GetParserManager()->GetParser<XmlDocument>(L"XML");
-		auto xml = parser->TypedParse(xmlText, errors);
-		auto resource = GuiResource::LoadFromXml(xml, L"<Unknown>", errors);
+		auto resource = GuiResource::LoadFromXml(L"..\\GacUISrcCodepackedTest\\Resources\\XmlWindowResourceDataBinding.xml", errors);
+		resource->Precompile(errors);
 		GetInstanceLoaderManager()->SetResource(L"Demo", resource);
 		DateTime end = DateTime::LocalTime();
 		loadTime = end.totalMilliseconds - begin.totalMilliseconds;
+
+		FileStream fileStream(L"Precompiled.binary", FileStream::WriteOnly);
+		LzwEncoder encoder;
+		EncoderStream stream(fileStream, encoder);
+		resource->SavePrecompiledBinary(stream);
 	}
 #else
 	{
 		DateTime begin = DateTime::LocalTime();
-		auto resource = GuiResource::LoadFromXml(L"Precompiled.xml", errors);
+		FileStream fileStream(L"Precompiled.binary", FileStream::ReadOnly);
+		LzwDecoder decoder;
+		DecoderStream stream(fileStream, decoder);
+		auto resource = GuiResource::LoadPrecompiledBinary(stream, errors);
 		GetInstanceLoaderManager()->SetResource(L"Demo", resource);
 		DateTime end = DateTime::LocalTime();
 		loadTime = end.totalMilliseconds - begin.totalMilliseconds;

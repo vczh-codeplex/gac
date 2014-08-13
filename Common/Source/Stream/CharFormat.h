@@ -300,7 +300,7 @@ Serialization
 				static void IO(Reader& reader, vint64_t& value)
 				{
 					vint32_t v = 0;
-					Serialization<vint32_t>::IO(reader, v);;
+					Serialization<vint32_t>::IO(reader, v);
 					value = (vint64_t)v;
 				}
 					
