@@ -240,7 +240,7 @@ Resource Structure
 
 			void									LoadResourceFolderXml(DelayLoadingList& delayLoadings, const WString& containingFolder, Ptr<parsing::xml::XmlElement> folderXml, collections::List<WString>& errors);
 			void									SaveResourceFolderToXml(Ptr<parsing::xml::XmlElement> xmlParent, bool serializePrecompiledResource);
-			void									CollectTypeNames(collections::SortedList<WString>& typeNames);
+			void									CollectTypeNames(collections::List<WString>& typeNames);
 			void									PrecompileResourceFolder(Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors);
 		public:
 			/// <summary>Create a resource folder.</summary>

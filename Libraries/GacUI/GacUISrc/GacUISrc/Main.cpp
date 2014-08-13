@@ -26,6 +26,7 @@ using namespace vl::workflow::runtime;
 using namespace vl::presentation::controls::list;
 using namespace vl::presentation::templates;
 
+//#define GUI_GRAPHICS_RENDERER_GDI
 #define GUI_GRAPHICS_RENDERER_DIRECT2D
 
 int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int CmdShow)
