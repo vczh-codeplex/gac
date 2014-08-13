@@ -240,6 +240,7 @@ Resource Structure
 
 			void									LoadResourceFolderXml(DelayLoadingList& delayLoadings, const WString& containingFolder, Ptr<parsing::xml::XmlElement> folderXml, collections::List<WString>& errors);
 			void									SaveResourceFolderToXml(Ptr<parsing::xml::XmlElement> xmlParent, bool serializePrecompiledResource);
+			void									CollectTypeNames(collections::SortedList<WString>& typeNames);
 			void									PrecompileResourceFolder(Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors);
 		public:
 			/// <summary>Create a resource folder.</summary>
@@ -328,6 +329,16 @@ Resource
 			/// <summary>Save the resource to xml.</summary>
 			/// <returns>The xml.</returns>
 			Ptr<parsing::xml::XmlDocument>			SaveToXml(bool serializePrecompiledResource);
+			
+			/// <summary>Load a precompiled resource from a stream.</summary>
+			/// <returns>The loaded resource.</returns>
+			/// <param name="stream">The stream.</param>
+			/// <param name="errors">All collected errors during loading a resource.</param>
+			static Ptr<GuiResource>					LoadPrecompiledBinary(stream::IStream& stream, collections::List<WString>& errors);
+			
+			/// <summary>Save the precompiled resource to a stream.</summary>
+			/// <param name="stream">The stream.</param>
+			void									SavePrecompiledBinary(stream::IStream& stream);
 
 			/// <summary>Precompile this resource to improve performance.</summary>
 			void									Precompile(collections::List<WString>& errors);
