@@ -238,9 +238,11 @@ Resource Structure
 			ItemMap									items;
 			FolderMap								folders;
 
-			void									LoadResourceFolderXml(DelayLoadingList& delayLoadings, const WString& containingFolder, Ptr<parsing::xml::XmlElement> folderXml, collections::List<WString>& errors);
+			void									LoadResourceFolderFromXml(DelayLoadingList& delayLoadings, const WString& containingFolder, Ptr<parsing::xml::XmlElement> folderXml, collections::List<WString>& errors);
 			void									SaveResourceFolderToXml(Ptr<parsing::xml::XmlElement> xmlParent, bool serializePrecompiledResource);
 			void									CollectTypeNames(collections::List<WString>& typeNames);
+			void									LoadResourceFolderFromBinary(stream::internal::Reader& reader, collections::List<WString>& typeNames, collections::List<WString>& errors);
+			void									SaveResourceFolderToBinary(stream::internal::Writer& writer, collections::List<WString>& typeNames, collections::List<WString>& errors);
 			void									PrecompileResourceFolder(Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors);
 		public:
 			/// <summary>Create a resource folder.</summary>
@@ -338,7 +340,7 @@ Resource
 			
 			/// <summary>Save the precompiled resource to a stream.</summary>
 			/// <param name="stream">The stream.</param>
-			void									SavePrecompiledBinary(stream::IStream& stream);
+			void									SavePrecompiledBinary(stream::IStream& stream, collections::List<WString>& errors);
 
 			/// <summary>Precompile this resource to improve performance.</summary>
 			void									Precompile(collections::List<WString>& errors);

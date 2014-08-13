@@ -629,7 +629,7 @@ void GuiMain()
 		FileStream fileStream(L"Precompiled.binary", FileStream::WriteOnly);
 		LzwEncoder encoder;
 		EncoderStream stream(fileStream, encoder);
-		resource->SavePrecompiledBinary(stream);
+		resource->SavePrecompiledBinary(stream, errors);
 	}
 #else
 	{
