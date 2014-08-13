@@ -445,10 +445,10 @@ Resource Type Resolver
 			/// <param name="serializePrecompiledResource">Set to true to serialize the precompiled version of the resource.</param>
 			virtual Ptr<parsing::xml::XmlElement>			Serialize(Ptr<DescriptableObject> resource, bool serializePrecompiledResource) = 0;
 
-			/// <summary>Serialize a resource to a stream.</summary>
+			/// <summary>Serialize a precompiled resource to a stream.</summary>
 			/// <param name="resource">The resource.</param>
 			/// <param name="stream">The stream.</param>
-			virtual void									Serialize(Ptr<DescriptableObject> resource, stream::IStream& stream) = 0;
+			virtual void									SerializePrecompiled(Ptr<DescriptableObject> resource, stream::IStream& stream) = 0;
 
 			/// <summary>Load a resource for a type inside an xml element.</summary>
 			/// <returns>The resource.</returns>
@@ -469,11 +469,11 @@ Resource Type Resolver
 			/// <param name="errors">All collected errors during loading a resource.</param>
 			virtual Ptr<DescriptableObject>					ResolveResource(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors) = 0;
 
-			/// <summary>Load a resource from a stream.</summary>
+			/// <summary>Load a precompiled resource from a stream.</summary>
 			/// <returns>The resource.</returns>
 			/// <param name="stream">The stream.</param>
 			/// <param name="errors">All collected errors during loading a resource.</param>
-			virtual Ptr<DescriptableObject>					ResolveResource(stream::IStream& stream, collections::List<WString>& errors) = 0;
+			virtual Ptr<DescriptableObject>					ResolveResourcePrecompiled(stream::IStream& stream, collections::List<WString>& errors) = 0;
 		};
 
 /***********************************************************************

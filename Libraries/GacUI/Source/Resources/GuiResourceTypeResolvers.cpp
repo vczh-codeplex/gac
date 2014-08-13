@@ -7,6 +7,7 @@ namespace vl
 {
 	namespace presentation
 	{
+		using namespace collections;
 		using namespace controls;
 		using namespace parsing;
 		using namespace parsing::tabling;
@@ -55,9 +56,12 @@ Image Type Resolver
 				return 0;
 			}
 
-			void Serialize(Ptr<DescriptableObject> resource, stream::IStream& stream)override
+			void SerializePrecompiled(Ptr<DescriptableObject> resource, stream::IStream& stream)override
 			{
-				throw 0;
+				auto obj = resource.Cast<GuiImageData>();
+				stream::internal::Writer writer(stream);
+				FileStream fileStream(obj->GetFilePath(), FileStream::ReadOnly);
+				writer << (stream::IStream&)fileStream;
 			}
 
 			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)override
@@ -97,9 +101,22 @@ Image Type Resolver
 				return 0;
 			}
 
-			Ptr<DescriptableObject> ResolveResource(stream::IStream& stream, collections::List<WString>& errors)
+			Ptr<DescriptableObject> ResolveResourcePrecompiled(stream::IStream& stream, collections::List<WString>& errors)
 			{
-				throw 0;
+				stream::internal::Reader reader(stream);
+				MemoryStream memoryStream;
+				reader << (stream::IStream&)memoryStream;
+
+				auto image = GetCurrentController()->ImageService()->CreateImageFromStream(memoryStream);
+				if (image)
+				{
+					return new GuiImageData(image, 0);
+				}
+				else
+				{
+					errors.Add(L"Failed to load an image from binary data in a stream.");
+					return 0;
+				}
 			}
 		};
 
@@ -145,9 +162,12 @@ Text Type Resolver
 				return 0;
 			}
 
-			void Serialize(Ptr<DescriptableObject> resource, stream::IStream& stream)override
+			void SerializePrecompiled(Ptr<DescriptableObject> resource, stream::IStream& stream)override
 			{
-				throw 0;
+				auto obj = resource.Cast<GuiTextData>();
+				stream::internal::Writer writer(stream);
+				WString text = obj->GetText();
+				writer << text;
 			}
 
 			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)override
@@ -175,9 +195,12 @@ Text Type Resolver
 				return 0;
 			}
 
-			Ptr<DescriptableObject> ResolveResource(stream::IStream& stream, collections::List<WString>& errors)
+			Ptr<DescriptableObject> ResolveResourcePrecompiled(stream::IStream& stream, collections::List<WString>& errors)
 			{
-				throw 0;
+				stream::internal::Reader reader(stream);
+				WString text;
+				reader << text;
+				return new GuiTextData(text);
 			}
 		};
 
@@ -219,14 +242,27 @@ Xml Type Resolver
 				return 0;
 			}
 
-			void Serialize(Ptr<DescriptableObject> resource, stream::IStream& stream)override
+			void SerializePrecompiled(Ptr<DescriptableObject> resource, stream::IStream& stream)override
 			{
-				throw 0;
+				auto obj = resource.Cast<XmlDocument>();
+				MemoryStream buffer;
+				{
+					StreamWriter writer(buffer);
+					XmlPrint(obj, writer);
+				}
+				{
+					buffer.SeekFromBegin(0);
+					StreamReader reader(buffer);
+					WString text = reader.ReadToEnd();
+
+					stream::internal::Writer writer(stream);
+					writer << text;
+				}
 			}
 
 			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)override
 			{
-				Ptr<XmlElement> root=XmlGetElements(element).First(0);
+				Ptr<XmlElement> root = XmlGetElements(element).First(0);
 				if(root)
 				{
 					Ptr<XmlDocument> xml=new XmlDocument;
@@ -259,9 +295,14 @@ Xml Type Resolver
 				return 0;
 			}
 
-			Ptr<DescriptableObject> ResolveResource(stream::IStream& stream, collections::List<WString>& errors)
+			Ptr<DescriptableObject> ResolveResourcePrecompiled(stream::IStream& stream, collections::List<WString>& errors)
 			{
-				throw 0;
+				stream::internal::Reader reader(stream);
+				WString text;
+				reader << text;
+
+				auto parser = GetParserManager()->GetParser<XmlDocument>(L"XML");
+				return parser->TypedParse(text, errors);
 			}
 		};
 
@@ -303,9 +344,23 @@ Doc Type Resolver
 				return 0;
 			}
 
-			void Serialize(Ptr<DescriptableObject> resource, stream::IStream& stream)override
+			void SerializePrecompiled(Ptr<DescriptableObject> resource, stream::IStream& stream)override
 			{
-				throw 0;
+				auto obj = resource.Cast<DocumentModel>();
+				MemoryStream buffer;
+				{
+					auto xmlDoc = obj->SaveToXml();
+					StreamWriter writer(buffer);
+					XmlPrint(xmlDoc, writer);
+				}
+				{
+					buffer.SeekFromBegin(0);
+					StreamReader reader(buffer);
+					WString text = reader.ReadToEnd();
+
+					stream::internal::Writer writer(stream);
+					writer << text;
+				}
 			}
 
 			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)override
@@ -331,9 +386,10 @@ Doc Type Resolver
 				return 0;
 			}
 
-			Ptr<DescriptableObject> ResolveResource(stream::IStream& stream, collections::List<WString>& errors)
+			Ptr<DescriptableObject> ResolveResourcePrecompiled(stream::IStream& stream, collections::List<WString>& errors)
 			{
-				throw 0;
+				errors.Add(L"Internal error: Doc resource needs resource preloading.");
+				return 0;
 			}
 		};
 

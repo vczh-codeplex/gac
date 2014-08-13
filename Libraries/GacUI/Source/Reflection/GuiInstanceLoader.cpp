@@ -269,9 +269,8 @@ Instance Type Resolver
 				return 0;
 			}
 
-			void Serialize(Ptr<DescriptableObject> resource, stream::IStream& stream)override
+			void SerializePrecompiled(Ptr<DescriptableObject> resource, stream::IStream& stream)override
 			{
-				throw 0;
 			}
 
 			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)override
@@ -297,9 +296,9 @@ Instance Type Resolver
 				return 0;
 			}
 
-			Ptr<DescriptableObject> ResolveResource(stream::IStream& stream, collections::List<WString>& errors)
+			Ptr<DescriptableObject> ResolveResourcePrecompiled(stream::IStream& stream, collections::List<WString>& errors)
 			{
-				throw 0;
+				return 0;
 			}
 		};
 
@@ -344,9 +343,8 @@ Instance Style Resolver
 				return 0;
 			}
 
-			void Serialize(Ptr<DescriptableObject> resource, stream::IStream& stream)override
+			void SerializePrecompiled(Ptr<DescriptableObject> resource, stream::IStream& stream)override
 			{
-				throw 0;
 			}
 
 			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)override
@@ -372,9 +370,10 @@ Instance Style Resolver
 				return 0;
 			}
 
-			Ptr<DescriptableObject> ResolveResource(stream::IStream& stream, collections::List<WString>& errors)
+			Ptr<DescriptableObject> ResolveResourcePrecompiled(stream::IStream& stream, collections::List<WString>& errors)
 			{
-				throw 0;
+				errors.Add(L"Internal error: Instance style resource needs resource preloading.");
+				return 0;
 			}
 		};
 
@@ -419,7 +418,7 @@ Instance Schema Type Resolver
 				return 0;
 			}
 
-			void Serialize(Ptr<DescriptableObject> resource, stream::IStream& stream)override
+			void SerializePrecompiled(Ptr<DescriptableObject> resource, stream::IStream& stream)override
 			{
 				throw 0;
 			}
@@ -447,9 +446,10 @@ Instance Schema Type Resolver
 				return 0;
 			}
 
-			Ptr<DescriptableObject> ResolveResource(stream::IStream& stream, collections::List<WString>& errors)
+			Ptr<DescriptableObject> ResolveResourcePrecompiled(stream::IStream& stream, collections::List<WString>& errors)
 			{
-				throw 0;
+				errors.Add(L"Internal error: Instance schema resource needs resource preloading.");
+				return 0;
 			}
 		};
 

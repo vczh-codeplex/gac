@@ -635,7 +635,7 @@ void GuiMain()
 		FileStream fileStream(L"Precompiled.binary", FileStream::ReadOnly);
 		LzwDecoder decoder;
 		DecoderStream stream(fileStream, decoder);
-		auto testResource= GuiResource::LoadPrecompiledBinary(stream, errors);
+		auto testResource = GuiResource::LoadPrecompiledBinary(stream, errors);
 	}
 #else
 	{
