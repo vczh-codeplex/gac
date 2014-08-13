@@ -560,10 +560,13 @@ GuiResourceFolder
 				reader << typeName << name;
 
 				auto resolver = GetResourceResolverManager()->GetTypeResolver(typeNames[typeName]);
-				auto content = resolver->ResolveResource(reader.input, errors);
-				auto item = MakePtr<GuiResourceItem>();
-				item->SetContent(typeNames[typeName], content);
-				AddItem(name, item);
+				auto content = resolver->ResolveResourcePrecompiled(reader.input, errors);
+				if (content)
+				{
+					auto item = MakePtr<GuiResourceItem>();
+					item->SetContent(typeNames[typeName], content);
+					AddItem(name, item);
+				}
 			}
 
 			reader << count;
@@ -589,7 +592,7 @@ GuiResourceFolder
 				writer << typeName << name;
 
 				auto resolver = GetResourceResolverManager()->GetTypeResolver(item->GetTypeName());
-				resolver->Serialize(item->GetContent(), writer.output);
+				resolver->SerializePrecompiled(item->GetContent(), writer.output);
 			}
 
 			count = folders.Count();

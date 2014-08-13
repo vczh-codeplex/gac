@@ -560,6 +560,56 @@ Serialization
 				}
 			};
 
+			template<>
+			struct Serialization<stream::IStream>
+			{
+				static void IO(Reader& reader, stream::IStream& value)
+				{
+					vint32_t count = 0;
+					reader.input.Read(&count, sizeof(count));
+
+					if (count > 0)
+					{
+						vint length = 0;
+						collections::Array<vuint8_t> buffer(count);
+						value.SeekFromBegin(0);
+						length = reader.input.Read(&buffer[0], count);
+						if (length != count)
+						{
+							CHECK_FAIL(L"Deserialization failed.");
+						}
+						length = value.Write(&buffer[0], count);
+						if (length != count)
+						{
+							CHECK_FAIL(L"Deserialization failed.");
+						}
+					}
+				}
+					
+				static void IO(Writer& writer, stream::IStream& value)
+				{
+					vint32_t count = (vint32_t)value.Size();
+					writer.output.Write(&count, sizeof(count));
+
+					if (count > 0)
+					{
+						vint length = 0;
+						collections::Array<vuint8_t> buffer(count);
+						value.SeekFromBegin(0);
+						length = value.Read(&buffer[0], count);
+						if (length != count)
+						{
+							CHECK_FAIL(L"Serialization failed.");
+						}
+						length = writer.output.Write(&buffer[0], count);
+						if (length != count)
+						{
+							CHECK_FAIL(L"Serialization failed.");
+						}
+					}
+				}
+			};
+
 			//---------------------------------------------
 
 #define BEGIN_SERIALIZATION(TYPE)\
