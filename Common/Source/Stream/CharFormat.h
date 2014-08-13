@@ -583,6 +583,7 @@ Serialization
 						{
 							CHECK_FAIL(L"Deserialization failed.");
 						}
+						value.SeekFromBegin(0);
 					}
 				}
 					
@@ -606,6 +607,7 @@ Serialization
 						{
 							CHECK_FAIL(L"Serialization failed.");
 						}
+						value.SeekFromBegin(0);
 					}
 				}
 			};
