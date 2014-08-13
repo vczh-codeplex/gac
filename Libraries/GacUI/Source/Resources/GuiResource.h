@@ -242,7 +242,7 @@ Resource Structure
 			void									SaveResourceFolderToXml(Ptr<parsing::xml::XmlElement> xmlParent, bool serializePrecompiledResource);
 			void									CollectTypeNames(collections::List<WString>& typeNames);
 			void									LoadResourceFolderFromBinary(stream::internal::Reader& reader, collections::List<WString>& typeNames, collections::List<WString>& errors);
-			void									SaveResourceFolderToBinary(stream::internal::Writer& writer, collections::List<WString>& typeNames, collections::List<WString>& errors);
+			void									SaveResourceFolderToBinary(stream::internal::Writer& writer, collections::List<WString>& typeNames);
 			void									PrecompileResourceFolder(Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors);
 		public:
 			/// <summary>Create a resource folder.</summary>
@@ -340,7 +340,7 @@ Resource
 			
 			/// <summary>Save the precompiled resource to a stream.</summary>
 			/// <param name="stream">The stream.</param>
-			void									SavePrecompiledBinary(stream::IStream& stream, collections::List<WString>& errors);
+			void									SavePrecompiledBinary(stream::IStream& stream);
 
 			/// <summary>Precompile this resource to improve performance.</summary>
 			void									Precompile(collections::List<WString>& errors);
@@ -445,6 +445,11 @@ Resource Type Resolver
 			/// <param name="serializePrecompiledResource">Set to true to serialize the precompiled version of the resource.</param>
 			virtual Ptr<parsing::xml::XmlElement>			Serialize(Ptr<DescriptableObject> resource, bool serializePrecompiledResource) = 0;
 
+			/// <summary>Serialize a resource to a stream.</summary>
+			/// <param name="resource">The resource.</param>
+			/// <param name="stream">The stream.</param>
+			virtual void									Serialize(Ptr<DescriptableObject> resource, stream::IStream& stream) = 0;
+
 			/// <summary>Load a resource for a type inside an xml element.</summary>
 			/// <returns>The resource.</returns>
 			/// <param name="element">The xml element.</param>
@@ -463,6 +468,12 @@ Resource Type Resolver
 			/// <param name="resolver">The path resolver. This is only for delay load resource.</param>
 			/// <param name="errors">All collected errors during loading a resource.</param>
 			virtual Ptr<DescriptableObject>					ResolveResource(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors) = 0;
+
+			/// <summary>Load a resource from a stream.</summary>
+			/// <returns>The resource.</returns>
+			/// <param name="stream">The stream.</param>
+			/// <param name="errors">All collected errors during loading a resource.</param>
+			virtual Ptr<DescriptableObject>					ResolveResource(stream::IStream& stream, collections::List<WString>& errors) = 0;
 		};
 
 /***********************************************************************

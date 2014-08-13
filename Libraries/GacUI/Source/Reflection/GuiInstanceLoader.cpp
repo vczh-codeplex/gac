@@ -269,6 +269,11 @@ Instance Type Resolver
 				return 0;
 			}
 
+			void Serialize(Ptr<DescriptableObject> resource, stream::IStream& stream)override
+			{
+				throw 0;
+			}
+
 			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)override
 			{
 				errors.Add(L"Internal error: Instance resource needs resource preloading.");
@@ -290,6 +295,11 @@ Instance Type Resolver
 					return context;
 				}
 				return 0;
+			}
+
+			Ptr<DescriptableObject> ResolveResource(stream::IStream& stream, collections::List<WString>& errors)
+			{
+				throw 0;
 			}
 		};
 
@@ -334,6 +344,11 @@ Instance Style Resolver
 				return 0;
 			}
 
+			void Serialize(Ptr<DescriptableObject> resource, stream::IStream& stream)override
+			{
+				throw 0;
+			}
+
 			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)override
 			{
 				errors.Add(L"Internal error: Instance style resource needs resource preloading.");
@@ -355,6 +370,11 @@ Instance Style Resolver
 					return context;
 				}
 				return 0;
+			}
+
+			Ptr<DescriptableObject> ResolveResource(stream::IStream& stream, collections::List<WString>& errors)
+			{
+				throw 0;
 			}
 		};
 
@@ -399,6 +419,11 @@ Instance Schema Type Resolver
 				return 0;
 			}
 
+			void Serialize(Ptr<DescriptableObject> resource, stream::IStream& stream)override
+			{
+				throw 0;
+			}
+
 			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)override
 			{
 				errors.Add(L"Internal error: Instance schema resource needs resource preloading.");
@@ -420,6 +445,11 @@ Instance Schema Type Resolver
 					return schema;
 				}
 				return 0;
+			}
+
+			Ptr<DescriptableObject> ResolveResource(stream::IStream& stream, collections::List<WString>& errors)
+			{
+				throw 0;
 			}
 		};
 

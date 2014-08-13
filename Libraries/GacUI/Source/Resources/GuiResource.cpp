@@ -558,6 +558,12 @@ GuiResourceFolder
 				vint typeName = 0;
 				WString name;
 				reader << typeName << name;
+
+				auto resolver = GetResourceResolverManager()->GetTypeResolver(typeNames[typeName]);
+				auto content = resolver->ResolveResource(reader.input, errors);
+				auto item = MakePtr<GuiResourceItem>();
+				item->SetContent(typeNames[typeName], content);
+				AddItem(name, item);
 			}
 
 			reader << count;
@@ -572,7 +578,7 @@ GuiResourceFolder
 			}
 		}
 
-		void GuiResourceFolder::SaveResourceFolderToBinary(stream::internal::Writer& writer, collections::List<WString>& typeNames, collections::List<WString>& errors)
+		void GuiResourceFolder::SaveResourceFolderToBinary(stream::internal::Writer& writer, collections::List<WString>& typeNames)
 		{
 			vint count = items.Count();
 			writer << count;
@@ -581,6 +587,9 @@ GuiResourceFolder
 				vint typeName = typeNames.IndexOf(item->GetTypeName());
 				WString name = item->GetName();
 				writer << typeName << name;
+
+				auto resolver = GetResourceResolverManager()->GetTypeResolver(item->GetTypeName());
+				resolver->Serialize(item->GetContent(), writer.output);
 			}
 
 			count = folders.Count();
@@ -589,7 +598,7 @@ GuiResourceFolder
 			{
 				WString name = folder->GetName();
 				writer << name;
-				folder->SaveResourceFolderToBinary(writer, typeNames, errors);
+				folder->SaveResourceFolderToBinary(writer, typeNames);
 			}
 		}
 
@@ -825,14 +834,14 @@ GuiResource
 			return resource;
 		}
 
-		void GuiResource::SavePrecompiledBinary(stream::IStream& stream, collections::List<WString>& errors)
+		void GuiResource::SavePrecompiledBinary(stream::IStream& stream)
 		{
 			stream::internal::Writer writer(stream);
 
 			List<WString> typeNames;
 			CollectTypeNames(typeNames);
 			writer << typeNames;
-			SaveResourceFolderToBinary(writer, typeNames, errors);
+			SaveResourceFolderToBinary(writer, typeNames);
 		}
 
 		void GuiResource::Precompile(collections::List<WString>& errors)
