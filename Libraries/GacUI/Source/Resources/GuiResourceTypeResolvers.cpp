@@ -388,6 +388,9 @@ Doc Type Resolver
 
 			Ptr<DescriptableObject> ResolveResourcePrecompiled(stream::IStream& stream, collections::List<WString>& errors)
 			{
+				stream::internal::Reader reader(stream);
+				WString text;
+				reader << text;
 				errors.Add(L"Internal error: Doc resource needs resource preloading.");
 				return 0;
 			}

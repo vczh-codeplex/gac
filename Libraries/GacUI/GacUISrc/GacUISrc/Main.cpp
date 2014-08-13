@@ -635,7 +635,10 @@ void GuiMain()
 		FileStream fileStream(L"Precompiled.binary", FileStream::ReadOnly);
 		LzwDecoder decoder;
 		DecoderStream stream(fileStream, decoder);
+
+		vint index = errors.Count();
 		auto testResource = GuiResource::LoadPrecompiledBinary(stream, errors);
+		errors.RemoveRange(index, errors.Count() - index);
 	}
 #else
 	{

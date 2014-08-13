@@ -16,6 +16,7 @@ namespace vl
 		using namespace controls;
 		using namespace regex;
 		using namespace reflection::description;
+		using namespace stream;
 
 /***********************************************************************
 GuiInstancePropertyInfo
@@ -298,6 +299,7 @@ Instance Type Resolver
 
 			Ptr<DescriptableObject> ResolveResourcePrecompiled(stream::IStream& stream, collections::List<WString>& errors)
 			{
+				errors.Add(L"Internal error: Instance resource needs resource preloading.");
 				return 0;
 			}
 		};
@@ -372,7 +374,6 @@ Instance Style Resolver
 
 			Ptr<DescriptableObject> ResolveResourcePrecompiled(stream::IStream& stream, collections::List<WString>& errors)
 			{
-				errors.Add(L"Internal error: Instance style resource needs resource preloading.");
 				return 0;
 			}
 		};
@@ -420,7 +421,6 @@ Instance Schema Type Resolver
 
 			void SerializePrecompiled(Ptr<DescriptableObject> resource, stream::IStream& stream)override
 			{
-				throw 0;
 			}
 
 			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)override
@@ -448,7 +448,6 @@ Instance Schema Type Resolver
 
 			Ptr<DescriptableObject> ResolveResourcePrecompiled(stream::IStream& stream, collections::List<WString>& errors)
 			{
-				errors.Add(L"Internal error: Instance schema resource needs resource preloading.");
 				return 0;
 			}
 		};
