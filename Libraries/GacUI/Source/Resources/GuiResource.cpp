@@ -534,7 +534,7 @@ GuiResourceFolder
 			}
 		}
 
-		void GuiResourceFolder::CollectTypeNames(collections::SortedList<WString>& typeNames)
+		void GuiResourceFolder::CollectTypeNames(collections::List<WString>& typeNames)
 		{
 			FOREACH(Ptr<GuiResourceItem>, item, items.Values())
 			{
@@ -774,7 +774,7 @@ GuiResource
 			stream::internal::Reader reader(stream);
 			auto resource = MakePtr<GuiResource>();
 
-			SortedList<WString> typeNames;
+			List<WString> typeNames;
 			reader << typeNames;
 
 			return resource;
@@ -784,7 +784,7 @@ GuiResource
 		{
 			stream::internal::Writer writer(stream);
 
-			SortedList<WString> typeNames;
+			List<WString> typeNames;
 			CollectTypeNames(typeNames);
 			writer << typeNames;
 		}
