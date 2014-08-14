@@ -18,22 +18,12 @@ namespace vl
 Image Type Resolver
 ***********************************************************************/
 
-		class GuiResourceImageTypeResolver : public Object, public IGuiResourceTypeResolver
+		class GuiResourceImageTypeResolver : public Object, public IGuiResourceTypeResolver_DirectLoad
 		{
 		public:
 			WString GetType()override
 			{
 				return L"Image";
-			}
-
-			WString GetPreloadType()override
-			{
-				return L"";
-			}
-
-			bool IsDelayLoad()override
-			{
-				return false;
 			}
 
 			void Precompile(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)override
@@ -95,12 +85,6 @@ Image Type Resolver
 				}
 			}
 
-			Ptr<DescriptableObject> ResolveResource(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)override
-			{
-				errors.Add(L"Internal error: Image resource doesn't need resource preloading.");
-				return 0;
-			}
-
 			Ptr<DescriptableObject> ResolveResourcePrecompiled(stream::IStream& stream, collections::List<WString>& errors)
 			{
 				stream::internal::Reader reader(stream);
@@ -124,22 +108,12 @@ Image Type Resolver
 Text Type Resolver
 ***********************************************************************/
 
-		class GuiResourceTextTypeResolver : public Object, public IGuiResourceTypeResolver
+		class GuiResourceTextTypeResolver : public Object, public IGuiResourceTypeResolver_DirectLoad
 		{
 		public:
 			WString GetType()override
 			{
 				return L"Text";
-			}
-
-			WString GetPreloadType()override
-			{
-				return L"";
-			}
-
-			bool IsDelayLoad()override
-			{
-				return false;
 			}
 
 			void Precompile(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)override
@@ -189,12 +163,6 @@ Text Type Resolver
 				}
 			}
 
-			Ptr<DescriptableObject> ResolveResource(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)override
-			{
-				errors.Add(L"Internal error: Text resource doesn't need resource preloading.");
-				return 0;
-			}
-
 			Ptr<DescriptableObject> ResolveResourcePrecompiled(stream::IStream& stream, collections::List<WString>& errors)
 			{
 				stream::internal::Reader reader(stream);
@@ -208,22 +176,12 @@ Text Type Resolver
 Xml Type Resolver
 ***********************************************************************/
 
-		class GuiResourceXmlTypeResolver : public Object, public IGuiResourceTypeResolver
+		class GuiResourceXmlTypeResolver : public Object, public IGuiResourceTypeResolver_DirectLoad
 		{
 		public:
 			WString GetType()override
 			{
 				return L"Xml";
-			}
-
-			WString GetPreloadType()override
-			{
-				return L"";
-			}
-
-			bool IsDelayLoad()override
-			{
-				return false;
 			}
 
 			void Precompile(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)override
@@ -289,12 +247,6 @@ Xml Type Resolver
 				return 0;
 			}
 
-			Ptr<DescriptableObject> ResolveResource(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)override
-			{
-				errors.Add(L"Internal error: Xml resource doesn't need resource preloading.");
-				return 0;
-			}
-
 			Ptr<DescriptableObject> ResolveResourcePrecompiled(stream::IStream& stream, collections::List<WString>& errors)
 			{
 				stream::internal::Reader reader(stream);
@@ -310,7 +262,7 @@ Xml Type Resolver
 Doc Type Resolver
 ***********************************************************************/
 
-		class GuiResourceDocTypeResolver : public Object, public IGuiResourceTypeResolver
+		class GuiResourceDocTypeResolver : public Object, public IGuiResourceTypeResolver_IndirectLoad
 		{
 		public:
 			WString GetType()override
@@ -332,46 +284,12 @@ Doc Type Resolver
 			{
 			}
 
-			Ptr<parsing::xml::XmlElement> Serialize(Ptr<DescriptableObject> resource, bool serializePrecompiledResource)override
+			Ptr<DescriptableObject> Serialize(Ptr<DescriptableObject> resource, bool serializePrecompiledResource)override
 			{
 				if (auto obj = resource.Cast<DocumentModel>())
 				{
-					auto xmlDoc = MakePtr<XmlElement>();
-					xmlDoc->name.value = L"Doc";
-					xmlDoc->subNodes.Add(obj->SaveToXml()->rootElement);
-					return xmlDoc;
+					return obj->SaveToXml();
 				}
-				return 0;
-			}
-
-			void SerializePrecompiled(Ptr<DescriptableObject> resource, stream::IStream& stream)override
-			{
-				auto obj = resource.Cast<DocumentModel>();
-				MemoryStream buffer;
-				{
-					auto xmlDoc = obj->SaveToXml();
-					StreamWriter writer(buffer);
-					XmlPrint(xmlDoc, writer);
-				}
-				{
-					buffer.SeekFromBegin(0);
-					StreamReader reader(buffer);
-					WString text = reader.ReadToEnd();
-
-					stream::internal::Writer writer(stream);
-					writer << text;
-				}
-			}
-
-			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)override
-			{
-				errors.Add(L"Internal error: Doc resource needs resource preloading.");
-				return 0;
-			}
-
-			Ptr<DescriptableObject> ResolveResource(const WString& path, collections::List<WString>& errors)override
-			{
-				errors.Add(L"Internal error: Doc resource needs resource preloading.");
 				return 0;
 			}
 
@@ -383,15 +301,6 @@ Doc Type Resolver
 					Ptr<DocumentModel> model=DocumentModel::LoadFromXml(xml, resolver, errors);
 					return model;
 				}
-				return 0;
-			}
-
-			Ptr<DescriptableObject> ResolveResourcePrecompiled(stream::IStream& stream, collections::List<WString>& errors)
-			{
-				stream::internal::Reader reader(stream);
-				WString text;
-				reader << text;
-				errors.Add(L"Internal error: Doc resource needs resource preloading.");
 				return 0;
 			}
 		};

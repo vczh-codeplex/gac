@@ -231,7 +231,7 @@ GuiInstanceContext::ElementName Parser
 Instance Type Resolver
 ***********************************************************************/
 
-		class GuiResourceInstanceTypeResolver : public Object, public IGuiResourceTypeResolver
+		class GuiResourceInstanceTypeResolver : public Object, public IGuiResourceTypeResolver_IndirectLoad
 		{
 		public:
 			WString GetType()override
@@ -258,31 +258,12 @@ Instance Type Resolver
 				}
 			}
 
-			Ptr<parsing::xml::XmlElement> Serialize(Ptr<DescriptableObject> resource, bool serializePrecompiledResource)override
+			Ptr<DescriptableObject> Serialize(Ptr<DescriptableObject> resource, bool serializePrecompiledResource)override
 			{
 				if (auto obj = resource.Cast<GuiInstanceContext>())
 				{
-					auto xmlInstance = MakePtr<XmlElement>();
-					xmlInstance->name.value = L"Instance";
-					xmlInstance->subNodes.Add(obj->SaveToXml(serializePrecompiledResource)->rootElement);
-					return xmlInstance;
+					return obj->SaveToXml(serializePrecompiledResource);
 				}
-				return 0;
-			}
-
-			void SerializePrecompiled(Ptr<DescriptableObject> resource, stream::IStream& stream)override
-			{
-			}
-
-			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)override
-			{
-				errors.Add(L"Internal error: Instance resource needs resource preloading.");
-				return 0;
-			}
-
-			Ptr<DescriptableObject> ResolveResource(const WString& path, collections::List<WString>& errors)override
-			{
-				errors.Add(L"Internal error: Instance resource needs resource preloading.");
 				return 0;
 			}
 
@@ -296,19 +277,13 @@ Instance Type Resolver
 				}
 				return 0;
 			}
-
-			Ptr<DescriptableObject> ResolveResourcePrecompiled(stream::IStream& stream, collections::List<WString>& errors)
-			{
-				errors.Add(L"Internal error: Instance resource needs resource preloading.");
-				return 0;
-			}
 		};
 
 /***********************************************************************
 Instance Style Resolver
 ***********************************************************************/
 
-		class GuiResourceInstanceStyleResolver : public Object, public IGuiResourceTypeResolver
+		class GuiResourceInstanceStyleResolver : public Object, public IGuiResourceTypeResolver_IndirectLoad
 		{
 		public:
 			WString GetType()override
@@ -330,34 +305,15 @@ Instance Style Resolver
 			{
 			}
 
-			Ptr<parsing::xml::XmlElement> Serialize(Ptr<DescriptableObject> resource, bool serializePrecompiledResource)override
+			Ptr<DescriptableObject> Serialize(Ptr<DescriptableObject> resource, bool serializePrecompiledResource)override
 			{
 				if (!serializePrecompiledResource)
 				{
 					if (auto obj = resource.Cast<GuiInstanceStyleContext>())
 					{
-						auto xmlInstanceStyle = MakePtr<XmlElement>();
-						xmlInstanceStyle->name.value = L"InstanceStyle";
-						xmlInstanceStyle->subNodes.Add(obj->SaveToXml()->rootElement);
-						return xmlInstanceStyle;
+						return obj->SaveToXml();
 					}
 				}
-				return 0;
-			}
-
-			void SerializePrecompiled(Ptr<DescriptableObject> resource, stream::IStream& stream)override
-			{
-			}
-
-			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)override
-			{
-				errors.Add(L"Internal error: Instance style resource needs resource preloading.");
-				return 0;
-			}
-
-			Ptr<DescriptableObject> ResolveResource(const WString& path, collections::List<WString>& errors)override
-			{
-				errors.Add(L"Internal error: Instance style resource needs resource preloading.");
 				return 0;
 			}
 
@@ -371,18 +327,13 @@ Instance Style Resolver
 				}
 				return 0;
 			}
-
-			Ptr<DescriptableObject> ResolveResourcePrecompiled(stream::IStream& stream, collections::List<WString>& errors)
-			{
-				return 0;
-			}
 		};
 
 /***********************************************************************
 Instance Schema Type Resolver
 ***********************************************************************/
 
-		class GuiResourceInstanceSchemaTypeResolver : public Object, public IGuiResourceTypeResolver
+		class GuiResourceInstanceSchemaTypeResolver : public Object, public IGuiResourceTypeResolver_IndirectLoad
 		{
 		public:
 			WString GetType()override
@@ -404,34 +355,15 @@ Instance Schema Type Resolver
 			{
 			}
 
-			Ptr<parsing::xml::XmlElement> Serialize(Ptr<DescriptableObject> resource, bool serializePrecompiledResource)override
+			Ptr<DescriptableObject> Serialize(Ptr<DescriptableObject> resource, bool serializePrecompiledResource)override
 			{
 				if (!serializePrecompiledResource)
 				{
 					if (auto obj = resource.Cast<GuiInstanceSchema>())
 					{
-						auto xmlInstanceSchema = MakePtr<XmlElement>();
-						xmlInstanceSchema->name.value = L"InstanceSchema";
-						xmlInstanceSchema->subNodes.Add(obj->SaveToXml()->rootElement);
-						return xmlInstanceSchema;
+						return obj->SaveToXml();
 					}
 				}
-				return 0;
-			}
-
-			void SerializePrecompiled(Ptr<DescriptableObject> resource, stream::IStream& stream)override
-			{
-			}
-
-			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)override
-			{
-				errors.Add(L"Internal error: Instance schema resource needs resource preloading.");
-				return 0;
-			}
-
-			Ptr<DescriptableObject> ResolveResource(const WString& path, collections::List<WString>& errors)override
-			{
-				errors.Add(L"Internal error: Instance schema resource needs resource preloading.");
 				return 0;
 			}
 
@@ -443,11 +375,6 @@ Instance Schema Type Resolver
 					Ptr<GuiInstanceSchema> schema = GuiInstanceSchema::LoadFromXml(xml, errors);
 					return schema;
 				}
-				return 0;
-			}
-
-			Ptr<DescriptableObject> ResolveResourcePrecompiled(stream::IStream& stream, collections::List<WString>& errors)
-			{
 				return 0;
 			}
 		};

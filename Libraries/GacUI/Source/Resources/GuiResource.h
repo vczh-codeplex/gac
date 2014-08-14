@@ -241,7 +241,7 @@ Resource Structure
 			void									LoadResourceFolderFromXml(DelayLoadingList& delayLoadings, const WString& containingFolder, Ptr<parsing::xml::XmlElement> folderXml, collections::List<WString>& errors);
 			void									SaveResourceFolderToXml(Ptr<parsing::xml::XmlElement> xmlParent, bool serializePrecompiledResource);
 			void									CollectTypeNames(collections::List<WString>& typeNames);
-			void									LoadResourceFolderFromBinary(stream::internal::Reader& reader, collections::List<WString>& typeNames, collections::List<WString>& errors);
+			void									LoadResourceFolderFromBinary(DelayLoadingList& delayLoadings, stream::internal::Reader& reader, collections::List<WString>& typeNames, collections::List<WString>& errors);
 			void									SaveResourceFolderToBinary(stream::internal::Writer& writer, collections::List<WString>& typeNames);
 			void									PrecompileResourceFolder(Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors);
 		public:
@@ -306,6 +306,8 @@ Resource
 		{
 		protected:
 			WString									workingDirectory;
+
+			static void								ProcessDelayLoading(Ptr<GuiResource> resource, DelayLoadingList& delayLoadings, collections::List<WString>& errors);
 		public:
 			/// <summary>Create a resource.</summary>
 			GuiResource();
@@ -438,17 +440,27 @@ Resource Type Resolver
 			/// <param name="resolver">The path resolver. This is only for delay load resource.</param>
 			/// <param name="errors">All collected errors during loading a resource.</param>
 			virtual void									Precompile(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors) = 0;
+		};
 
-			/// <summary>Serialize a resource to an xml element.</summary>
+		/// <summary>Represents a symbol type for loading a resource without a preload type.</summary>
+		class IGuiResourceTypeResolver_DirectLoad : public IGuiResourceTypeResolver, public Description<IGuiResourceTypeResolver_DirectLoad>
+		{
+		public:
+			WString GetPreloadType()override
+			{
+				return L"";
+			}
+
+			bool IsDelayLoad()override
+			{
+				return false;
+			}
+
+			/// <summary>Serialize a resource to an xml element. This function is called if this type resolver does not have a preload type.</summary>
 			/// <returns>The serialized xml element.</returns>
 			/// <param name="resource">The resource.</param>
 			/// <param name="serializePrecompiledResource">Set to true to serialize the precompiled version of the resource.</param>
 			virtual Ptr<parsing::xml::XmlElement>			Serialize(Ptr<DescriptableObject> resource, bool serializePrecompiledResource) = 0;
-
-			/// <summary>Serialize a precompiled resource to a stream.</summary>
-			/// <param name="resource">The resource.</param>
-			/// <param name="stream">The stream.</param>
-			virtual void									SerializePrecompiled(Ptr<DescriptableObject> resource, stream::IStream& stream) = 0;
 
 			/// <summary>Load a resource for a type inside an xml element.</summary>
 			/// <returns>The resource.</returns>
@@ -462,18 +474,34 @@ Resource Type Resolver
 			/// <param name="errors">All collected errors during loading a resource.</param>
 			virtual Ptr<DescriptableObject>					ResolveResource(const WString& path, collections::List<WString>& errors) = 0;
 
-			/// <summary>Load a resource for a type from a resource loaded by the preload type resolver.</summary>
-			/// <returns>The resource.</returns>
+			/// <summary>Serialize a precompiled resource to a stream.</summary>
 			/// <param name="resource">The resource.</param>
-			/// <param name="resolver">The path resolver. This is only for delay load resource.</param>
-			/// <param name="errors">All collected errors during loading a resource.</param>
-			virtual Ptr<DescriptableObject>					ResolveResource(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors) = 0;
+			/// <param name="stream">The stream.</param>
+			virtual void									SerializePrecompiled(Ptr<DescriptableObject> resource, stream::IStream& stream) = 0;
 
 			/// <summary>Load a precompiled resource from a stream.</summary>
 			/// <returns>The resource.</returns>
 			/// <param name="stream">The stream.</param>
 			/// <param name="errors">All collected errors during loading a resource.</param>
 			virtual Ptr<DescriptableObject>					ResolveResourcePrecompiled(stream::IStream& stream, collections::List<WString>& errors) = 0;
+		};
+
+		/// <summary>Represents a symbol type for loading a resource with a preload type.</summary>
+		class IGuiResourceTypeResolver_IndirectLoad : public IGuiResourceTypeResolver, public Description<IGuiResourceTypeResolver_IndirectLoad>
+		{
+		public:
+			/// <summary>Serialize a resource to a resource in preload type.</summary>
+			/// <returns>The serialized resource.</returns>
+			/// <param name="resource">The resource.</param>
+			/// <param name="serializePrecompiledResource">Set to true to serialize the precompiled version of the resource.</param>
+			virtual Ptr<DescriptableObject>					Serialize(Ptr<DescriptableObject> resource, bool serializePrecompiledResource) = 0;
+
+			/// <summary>Load a resource for a type from a resource loaded by the preload type resolver.</summary>
+			/// <returns>The resource.</returns>
+			/// <param name="resource">The resource.</param>
+			/// <param name="resolver">The path resolver. This is only for delay load resource.</param>
+			/// <param name="errors">All collected errors during loading a resource.</param>
+			virtual Ptr<DescriptableObject>					ResolveResource(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors) = 0;
 		};
 
 /***********************************************************************

@@ -625,20 +625,35 @@ void GuiMain()
 		GetInstanceLoaderManager()->SetResource(L"Demo", resource);
 		DateTime end = DateTime::LocalTime();
 		loadTime = end.totalMilliseconds - begin.totalMilliseconds;
+		CHECK_ERROR(errors.Count() == 0, L"");
+		
+		{
+			FileStream fileStream(L"Precompiled.xml", FileStream::WriteOnly);
+			BomEncoder encoder(BomEncoder::Utf8);
+			EncoderStream stream(fileStream, encoder);
+			StreamWriter writer(stream);
+			
+			auto xml = resource->SaveToXml(true);
+			XmlPrint(xml, writer);
+		}
+		{
+			FileStream fileStream(L"Precompiled.binary", FileStream::WriteOnly);
+			LzwEncoder encoder;
+			EncoderStream stream(fileStream, encoder);
+			resource->SavePrecompiledBinary(stream);
+		}
+		{
+			auto testResource = GuiResource::LoadFromXml(L"Precompiled.xml", errors);
+			CHECK_ERROR(errors.Count() == 0, L"");
+		}
+		{
+			FileStream fileStream(L"Precompiled.binary", FileStream::ReadOnly);
+			LzwDecoder decoder;
+			DecoderStream stream(fileStream, decoder);
 
-		FileStream fileStream(L"Precompiled.binary", FileStream::WriteOnly);
-		LzwEncoder encoder;
-		EncoderStream stream(fileStream, encoder);
-		resource->SavePrecompiledBinary(stream);
-	}
-	{
-		FileStream fileStream(L"Precompiled.binary", FileStream::ReadOnly);
-		LzwDecoder decoder;
-		DecoderStream stream(fileStream, decoder);
-
-		vint index = errors.Count();
-		auto testResource = GuiResource::LoadPrecompiledBinary(stream, errors);
-		errors.RemoveRange(index, errors.Count() - index);
+			auto testResource = GuiResource::LoadPrecompiledBinary(stream, errors);
+			CHECK_ERROR(errors.Count() == 0, L"");
+		}
 	}
 #else
 	{
