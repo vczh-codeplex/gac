@@ -4,6 +4,7 @@
 #include "..\..\..\..\Common\Source\Stream\FileStream.h"
 #include "..\..\..\..\Common\Source\Stream\Accessor.h"
 #include "..\..\..\..\Common\Source\Stream\CharFormat.h"
+#include "..\..\..\..\Common\Source\Tuple.h"
 
 namespace vl
 {
@@ -507,7 +508,7 @@ GuiResourceFolder
 						{
 							if (auto resource = indirectLoad->Serialize(item->GetContent(), serializePrecompiledResource))
 							{
-								xmlElement = directLoad->Serialize(item->GetContent(), serializePrecompiledResource);
+								xmlElement = directLoad->Serialize(resource, serializePrecompiledResource);
 							}
 						}
 					}
@@ -678,18 +679,18 @@ GuiResourceFolder
 
 		void GuiResourceFolder::SaveResourceFolderToBinary(stream::internal::Writer& writer, collections::List<WString>& typeNames)
 		{
-			vint count = items.Count();
-			writer << count;
+			typedef Tuple<vint, WString, IGuiResourceTypeResolver_DirectLoad*, Ptr<DescriptableObject>> ItemTuple;
+			List<ItemTuple> itemTuples;
+
 			FOREACH(Ptr<GuiResourceItem>, item, items.Values())
 			{
 				vint typeName = typeNames.IndexOf(item->GetTypeName());
 				WString name = item->GetName();
-				writer << typeName << name;
 
 				auto resolver = GetResourceResolverManager()->GetTypeResolver(item->GetTypeName());
 				if (auto directLoad = dynamic_cast<IGuiResourceTypeResolver_DirectLoad*>(resolver))
 				{
-					directLoad->SerializePrecompiled(item->GetContent(), writer.output);
+					itemTuples.Add(ItemTuple(typeName, name, directLoad, item->GetContent()));
 				}
 				else if (auto indirectLoad = dynamic_cast<IGuiResourceTypeResolver_IndirectLoad*>(resolver))
 				{
@@ -697,10 +698,23 @@ GuiResourceFolder
 					{
 						if (auto resource = indirectLoad->Serialize(item->GetContent(), true))
 						{
-							directLoad->SerializePrecompiled(item->GetContent(), writer.output);
+							itemTuples.Add(ItemTuple(typeName, name, directLoad, resource));
 						}
 					}
 				}
+			}
+
+			vint count = itemTuples.Count();
+			writer << count;
+			FOREACH(ItemTuple, item, itemTuples)
+			{
+				vint typeName = item.f0;
+				WString name = item.f1;
+				writer << typeName << name;
+
+				auto directLoad = item.f2;
+				auto resource = item.f3;
+				directLoad->SerializePrecompiled(resource, writer.output);
 			}
 
 			count = folders.Count();
