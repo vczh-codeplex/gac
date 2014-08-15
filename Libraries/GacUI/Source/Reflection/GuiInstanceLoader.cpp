@@ -231,7 +231,10 @@ GuiInstanceContext::ElementName Parser
 Instance Type Resolver
 ***********************************************************************/
 
-		class GuiResourceInstanceTypeResolver : public Object, public IGuiResourceTypeResolver_IndirectLoad
+		class GuiResourceInstanceTypeResolver
+			: public Object
+			, public IGuiResourceTypeResolver
+			, private IGuiResourceTypeResolver_IndirectLoad
 		{
 		public:
 			WString GetType()override
@@ -256,6 +259,11 @@ Instance Type Resolver
 					obj->ApplyStyles(resolver, errors);
 					Workflow_PrecompileInstanceContext(obj, errors);
 				}
+			}
+
+			IGuiResourceTypeResolver_IndirectLoad* IndirectLoad()override
+			{
+				return this;
 			}
 
 			Ptr<DescriptableObject> Serialize(Ptr<DescriptableObject> resource, bool serializePrecompiledResource)override
@@ -283,7 +291,10 @@ Instance Type Resolver
 Instance Style Resolver
 ***********************************************************************/
 
-		class GuiResourceInstanceStyleResolver : public Object, public IGuiResourceTypeResolver_IndirectLoad
+		class GuiResourceInstanceStyleResolver
+			: public Object
+			, public IGuiResourceTypeResolver
+			, private IGuiResourceTypeResolver_IndirectLoad
 		{
 		public:
 			WString GetType()override
@@ -303,6 +314,11 @@ Instance Style Resolver
 
 			void Precompile(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)override
 			{
+			}
+
+			IGuiResourceTypeResolver_IndirectLoad* IndirectLoad()override
+			{
+				return this;
 			}
 
 			Ptr<DescriptableObject> Serialize(Ptr<DescriptableObject> resource, bool serializePrecompiledResource)override
@@ -333,7 +349,10 @@ Instance Style Resolver
 Instance Schema Type Resolver
 ***********************************************************************/
 
-		class GuiResourceInstanceSchemaTypeResolver : public Object, public IGuiResourceTypeResolver_IndirectLoad
+		class GuiResourceInstanceSchemaTypeResolver
+			: public Object
+			, public IGuiResourceTypeResolver
+			, private IGuiResourceTypeResolver_IndirectLoad
 		{
 		public:
 			WString GetType()override
@@ -353,6 +372,11 @@ Instance Schema Type Resolver
 
 			void Precompile(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)override
 			{
+			}
+
+			IGuiResourceTypeResolver_IndirectLoad* IndirectLoad()override
+			{
+				return this;
 			}
 
 			Ptr<DescriptableObject> Serialize(Ptr<DescriptableObject> resource, bool serializePrecompiledResource)override

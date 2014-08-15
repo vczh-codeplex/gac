@@ -18,7 +18,11 @@ namespace vl
 Image Type Resolver
 ***********************************************************************/
 
-		class GuiResourceImageTypeResolver : public Object, public IGuiResourceTypeResolver_DirectLoad
+		class GuiResourceImageTypeResolver
+			: public Object
+			, public IGuiResourceTypeResolver
+			, private IGuiResourceTypeResolver_DirectLoadXml
+			, private IGuiResourceTypeResolver_DirectLoadStream
 		{
 		public:
 			WString GetType()override
@@ -28,6 +32,16 @@ Image Type Resolver
 
 			void Precompile(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)override
 			{
+			}
+
+			IGuiResourceTypeResolver_DirectLoadXml* DirectLoadXml()override
+			{
+				return this;
+			}
+
+			IGuiResourceTypeResolver_DirectLoadStream* DirectLoadStream()override
+			{
+				return this;
 			}
 
 			Ptr<parsing::xml::XmlElement> Serialize(Ptr<DescriptableObject> resource, bool serializePrecompiledResource)override
@@ -108,7 +122,11 @@ Image Type Resolver
 Text Type Resolver
 ***********************************************************************/
 
-		class GuiResourceTextTypeResolver : public Object, public IGuiResourceTypeResolver_DirectLoad
+		class GuiResourceTextTypeResolver
+			: public Object
+			, public IGuiResourceTypeResolver
+			, private IGuiResourceTypeResolver_DirectLoadXml
+			, private IGuiResourceTypeResolver_DirectLoadStream
 		{
 		public:
 			WString GetType()override
@@ -118,6 +136,16 @@ Text Type Resolver
 
 			void Precompile(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)override
 			{
+			}
+
+			IGuiResourceTypeResolver_DirectLoadXml* DirectLoadXml()override
+			{
+				return this;
+			}
+
+			IGuiResourceTypeResolver_DirectLoadStream* DirectLoadStream()override
+			{
+				return this;
 			}
 
 			Ptr<parsing::xml::XmlElement> Serialize(Ptr<DescriptableObject> resource, bool serializePrecompiledResource)override
@@ -176,7 +204,11 @@ Text Type Resolver
 Xml Type Resolver
 ***********************************************************************/
 
-		class GuiResourceXmlTypeResolver : public Object, public IGuiResourceTypeResolver_DirectLoad
+		class GuiResourceXmlTypeResolver
+			: public Object
+			, public IGuiResourceTypeResolver
+			, private IGuiResourceTypeResolver_DirectLoadXml
+			, private IGuiResourceTypeResolver_DirectLoadStream
 		{
 		public:
 			WString GetType()override
@@ -186,6 +218,16 @@ Xml Type Resolver
 
 			void Precompile(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)override
 			{
+			}
+
+			IGuiResourceTypeResolver_DirectLoadXml* DirectLoadXml()override
+			{
+				return this;
+			}
+
+			IGuiResourceTypeResolver_DirectLoadStream* DirectLoadStream()override
+			{
+				return this;
 			}
 
 			Ptr<parsing::xml::XmlElement> Serialize(Ptr<DescriptableObject> resource, bool serializePrecompiledResource)override
@@ -262,7 +304,10 @@ Xml Type Resolver
 Doc Type Resolver
 ***********************************************************************/
 
-		class GuiResourceDocTypeResolver : public Object, public IGuiResourceTypeResolver_IndirectLoad
+		class GuiResourceDocTypeResolver
+			: public Object
+			, public IGuiResourceTypeResolver
+			, private IGuiResourceTypeResolver_IndirectLoad
 		{
 		public:
 			WString GetType()override
@@ -282,6 +327,11 @@ Doc Type Resolver
 
 			void Precompile(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)override
 			{
+			}
+
+			IGuiResourceTypeResolver_IndirectLoad* IndirectLoad()override
+			{
+				return this;
 			}
 
 			Ptr<DescriptableObject> Serialize(Ptr<DescriptableObject> resource, bool serializePrecompiledResource)override

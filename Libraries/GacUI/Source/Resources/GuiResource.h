@@ -421,87 +421,97 @@ Resource Path Resolver
 Resource Type Resolver
 ***********************************************************************/
 
+		class IGuiResourceTypeResolver_DirectLoadXml;
+		class IGuiResourceTypeResolver_DirectLoadStream;
+		class IGuiResourceTypeResolver_IndirectLoad;
+
 		/// <summary>Represents a symbol type for loading a resource.</summary>
-		class IGuiResourceTypeResolver : public IDescriptable, public Description<IGuiResourceTypeResolver>
+		class IGuiResourceTypeResolver : public virtual IDescriptable, public Description<IGuiResourceTypeResolver>
 		{
 		public:
 			/// <summary>Get the type of the resource that load by this resolver.</summary>
 			/// <returns>The type.</returns>
-			virtual WString									GetType() = 0;
-			/// <summary>Get the preload type to load the resource before loading itself.</summary>
-			/// <returns>The preload type. Returns an empty string to indicate that there is no preload type for this resolver.</returns>
-			virtual WString									GetPreloadType() = 0;
-			/// <summary>Get the delay load feature for this resolver.</summary>
-			/// <returns>Returns true if this type need to delay load.</returns>
-			virtual bool									IsDelayLoad() = 0;
+			virtual WString										GetType() = 0;
 			
 			/// <summary>Precompile the resource item.</summary>
 			/// <param name="resource">The resource.</param>
 			/// <param name="resolver">The path resolver. This is only for delay load resource.</param>
 			/// <param name="errors">All collected errors during loading a resource.</param>
-			virtual void									Precompile(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors) = 0;
+			virtual void										Precompile(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors) = 0;
+			
+			/// <summary>Get the object for convert the resource between xml and object.</summary>
+			/// <returns>Returns null if the type resolver does not have this ability.</returns>
+			virtual IGuiResourceTypeResolver_DirectLoadXml*		DirectLoadXml(){ return 0; }
+			/// <summary>Get the object for convert the resource between stream and object.</summary>
+			/// <returns>Returns null if the type resolver does not have this ability.</returns>
+			virtual IGuiResourceTypeResolver_DirectLoadStream*	DirectLoadStream(){ return 0; }
+			/// <summary>Get the object for convert the resource between the preload type and the current type.</summary>
+			/// <returns>Returns null if the type resolver does not have this ability.</returns>
+			virtual IGuiResourceTypeResolver_IndirectLoad*		IndirectLoad(){ return 0; }
 		};
 
 		/// <summary>Represents a symbol type for loading a resource without a preload type.</summary>
-		class IGuiResourceTypeResolver_DirectLoad : public IGuiResourceTypeResolver, public Description<IGuiResourceTypeResolver_DirectLoad>
+		class IGuiResourceTypeResolver_DirectLoadXml : public virtual IDescriptable, public Description<IGuiResourceTypeResolver_DirectLoadXml>
 		{
 		public:
-			WString GetPreloadType()override
-			{
-				return L"";
-			}
-
-			bool IsDelayLoad()override
-			{
-				return false;
-			}
-
 			/// <summary>Serialize a resource to an xml element. This function is called if this type resolver does not have a preload type.</summary>
 			/// <returns>The serialized xml element.</returns>
 			/// <param name="resource">The resource.</param>
 			/// <param name="serializePrecompiledResource">Set to true to serialize the precompiled version of the resource.</param>
-			virtual Ptr<parsing::xml::XmlElement>			Serialize(Ptr<DescriptableObject> resource, bool serializePrecompiledResource) = 0;
+			virtual Ptr<parsing::xml::XmlElement>				Serialize(Ptr<DescriptableObject> resource, bool serializePrecompiledResource) = 0;
 
 			/// <summary>Load a resource for a type inside an xml element.</summary>
 			/// <returns>The resource.</returns>
 			/// <param name="element">The xml element.</param>
 			/// <param name="errors">All collected errors during loading a resource.</param>
-			virtual Ptr<DescriptableObject>					ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors) = 0;
+			virtual Ptr<DescriptableObject>						ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors) = 0;
 
 			/// <summary>Load a resource for a type from a file.</summary>
 			/// <returns>The resource.</returns>
 			/// <param name="path">The file path.</param>
 			/// <param name="errors">All collected errors during loading a resource.</param>
-			virtual Ptr<DescriptableObject>					ResolveResource(const WString& path, collections::List<WString>& errors) = 0;
+			virtual Ptr<DescriptableObject>						ResolveResource(const WString& path, collections::List<WString>& errors) = 0;
+		};
 
+		/// <summary>Represents a symbol type for loading a resource without a preload type.</summary>
+		class IGuiResourceTypeResolver_DirectLoadStream : public virtual IDescriptable, public Description<IGuiResourceTypeResolver_DirectLoadStream>
+		{
+		public:
 			/// <summary>Serialize a precompiled resource to a stream.</summary>
 			/// <param name="resource">The resource.</param>
 			/// <param name="stream">The stream.</param>
-			virtual void									SerializePrecompiled(Ptr<DescriptableObject> resource, stream::IStream& stream) = 0;
+			virtual void										SerializePrecompiled(Ptr<DescriptableObject> resource, stream::IStream& stream) = 0;
 
 			/// <summary>Load a precompiled resource from a stream.</summary>
 			/// <returns>The resource.</returns>
 			/// <param name="stream">The stream.</param>
 			/// <param name="errors">All collected errors during loading a resource.</param>
-			virtual Ptr<DescriptableObject>					ResolveResourcePrecompiled(stream::IStream& stream, collections::List<WString>& errors) = 0;
+			virtual Ptr<DescriptableObject>						ResolveResourcePrecompiled(stream::IStream& stream, collections::List<WString>& errors) = 0;
 		};
 
 		/// <summary>Represents a symbol type for loading a resource with a preload type.</summary>
-		class IGuiResourceTypeResolver_IndirectLoad : public IGuiResourceTypeResolver, public Description<IGuiResourceTypeResolver_IndirectLoad>
+		class IGuiResourceTypeResolver_IndirectLoad : public virtual IDescriptable, public Description<IGuiResourceTypeResolver_IndirectLoad>
 		{
 		public:
+			/// <summary>Get the preload type to load the resource before loading itself.</summary>
+			/// <returns>The preload type. Returns an empty string to indicate that there is no preload type for this resolver.</returns>
+			virtual WString										GetPreloadType() = 0;
+			/// <summary>Get the delay load feature for this resolver.</summary>
+			/// <returns>Returns true if this type need to delay load.</returns>
+			virtual bool										IsDelayLoad() = 0;
+
 			/// <summary>Serialize a resource to a resource in preload type.</summary>
 			/// <returns>The serialized resource.</returns>
 			/// <param name="resource">The resource.</param>
 			/// <param name="serializePrecompiledResource">Set to true to serialize the precompiled version of the resource.</param>
-			virtual Ptr<DescriptableObject>					Serialize(Ptr<DescriptableObject> resource, bool serializePrecompiledResource) = 0;
+			virtual Ptr<DescriptableObject>						Serialize(Ptr<DescriptableObject> resource, bool serializePrecompiledResource) = 0;
 
 			/// <summary>Load a resource for a type from a resource loaded by the preload type resolver.</summary>
 			/// <returns>The resource.</returns>
 			/// <param name="resource">The resource.</param>
 			/// <param name="resolver">The path resolver. This is only for delay load resource.</param>
 			/// <param name="errors">All collected errors during loading a resource.</param>
-			virtual Ptr<DescriptableObject>					ResolveResource(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors) = 0;
+			virtual Ptr<DescriptableObject>						ResolveResource(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors) = 0;
 		};
 
 /***********************************************************************
@@ -515,22 +525,22 @@ Resource Resolver Manager
 			/// <summary>Get the <see cref="IGuiResourcePathResolverFactory"/> for a protocol.</summary>
 			/// <returns>The factory.</returns>
 			/// <param name="protocol">The protocol.</param>
-			virtual IGuiResourcePathResolverFactory*		GetPathResolverFactory(const WString& protocol)=0;
+			virtual IGuiResourcePathResolverFactory*			GetPathResolverFactory(const WString& protocol)=0;
 			/// <summary>Set the <see cref="IGuiResourcePathResolverFactory"/> for a protocol.</summary>
 			/// <returns>Returns true if this operation succeeded.</returns>
 			/// <param name="factory">The factory.</param>
-			virtual bool									SetPathResolverFactory(Ptr<IGuiResourcePathResolverFactory> factory)=0;
+			virtual bool										SetPathResolverFactory(Ptr<IGuiResourcePathResolverFactory> factory)=0;
 			/// <summary>Get the <see cref="IGuiResourceTypeResolver"/> for a resource type.</summary>
 			/// <returns>The resolver.</returns>
 			/// <param name="type">The resource type.</param>
-			virtual IGuiResourceTypeResolver*				GetTypeResolver(const WString& type)=0;
+			virtual IGuiResourceTypeResolver*					GetTypeResolver(const WString& type)=0;
 			/// <summary>Set the <see cref="IGuiResourceTypeResolver"/> for a resource type.</summary>
 			/// <returns>Returns true if this operation succeeded.</returns>
 			/// <param name="resolver">The resolver.</param>
-			virtual bool									SetTypeResolver(Ptr<IGuiResourceTypeResolver> resolver)=0;
+			virtual bool										SetTypeResolver(Ptr<IGuiResourceTypeResolver> resolver)=0;
 		};
 		
-		extern IGuiResourceResolverManager*					GetResourceResolverManager();
+		extern IGuiResourceResolverManager*						GetResourceResolverManager();
 	}
 }
 
