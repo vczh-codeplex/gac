@@ -407,15 +407,18 @@ GuiResourceFolder
 						IGuiResourceTypeResolver* typeResolver = GetResourceResolverManager()->GetTypeResolver(type);
 						IGuiResourceTypeResolver* preloadResolver = typeResolver;
 
-						if(typeResolver && !typeResolver->DirectLoadXml())
+						if(typeResolver)
 						{
-							WString preloadType = typeResolver->IndirectLoad()->GetPreloadType();
-							if (preloadType != L"")
+							if (!typeResolver->DirectLoadXml())
 							{
-								preloadResolver = GetResourceResolverManager()->GetTypeResolver(preloadType);
-								if (!preloadResolver)
+								WString preloadType = typeResolver->IndirectLoad()->GetPreloadType();
+								if (preloadType != L"")
 								{
-									errors.Add(L"Unknown resource resolver \"" + preloadType + L"\" of resource type \"" + type + L"\".");
+									preloadResolver = GetResourceResolverManager()->GetTypeResolver(preloadType);
+									if (!preloadResolver)
+									{
+										errors.Add(L"Unknown resource resolver \"" + preloadType + L"\" of resource type \"" + type + L"\".");
+									}
 								}
 							}
 						}
@@ -602,15 +605,18 @@ GuiResourceFolder
 					IGuiResourceTypeResolver* typeResolver = GetResourceResolverManager()->GetTypeResolver(type);
 					IGuiResourceTypeResolver* preloadResolver = typeResolver;
 
-					if(typeResolver && !typeResolver->DirectLoadStream())
+					if(typeResolver)
 					{
-						WString preloadType = typeResolver->IndirectLoad()->GetPreloadType();
-						if (preloadType != L"")
+						if (!typeResolver->DirectLoadStream())
 						{
-							preloadResolver = GetResourceResolverManager()->GetTypeResolver(preloadType);
-							if (!preloadResolver)
+							WString preloadType = typeResolver->IndirectLoad()->GetPreloadType();
+							if (preloadType != L"")
 							{
-								errors.Add(L"Unknown resource resolver \"" + preloadType + L"\" of resource type \"" + type + L"\".");
+								preloadResolver = GetResourceResolverManager()->GetTypeResolver(preloadType);
+								if (!preloadResolver)
+								{
+									errors.Add(L"Unknown resource resolver \"" + preloadType + L"\" of resource type \"" + type + L"\".");
+								}
 							}
 						}
 					}
