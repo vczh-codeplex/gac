@@ -178,6 +178,11 @@ GlobalStringKey
 			return key;
 		}
 
+		vint GlobalStringKey::ToKey()const
+		{
+			return key;
+		}
+
 		WString GlobalStringKey::ToString()const
 		{
 			return *this == GlobalStringKey::Empty

@@ -234,6 +234,7 @@ Instance Type Resolver
 		class GuiResourceInstanceTypeResolver
 			: public Object
 			, public IGuiResourceTypeResolver
+			, private IGuiResourceTypeResolver_DirectLoadStream
 			, private IGuiResourceTypeResolver_IndirectLoad
 		{
 		public:
@@ -261,9 +262,25 @@ Instance Type Resolver
 				}
 			}
 
+			IGuiResourceTypeResolver_DirectLoadStream* DirectLoadStream()override
+			{
+				return this;
+			}
+
 			IGuiResourceTypeResolver_IndirectLoad* IndirectLoad()override
 			{
 				return this;
+			}
+
+			void SerializePrecompiled(Ptr<DescriptableObject> resource, stream::IStream& stream)override
+			{
+				auto obj = resource.Cast<GuiInstanceContext>();
+				obj->SavePrecompiledBinary(stream);
+			}
+
+			Ptr<DescriptableObject> ResolveResourcePrecompiled(stream::IStream& stream, collections::List<WString>& errors)override
+			{
+				return GuiInstanceContext::LoadPrecompiledBinary(stream, errors);
 			}
 
 			Ptr<DescriptableObject> Serialize(Ptr<DescriptableObject> resource, bool serializePrecompiledResource)override
