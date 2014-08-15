@@ -407,9 +407,9 @@ GuiResourceFolder
 						IGuiResourceTypeResolver* typeResolver = GetResourceResolverManager()->GetTypeResolver(type);
 						IGuiResourceTypeResolver* preloadResolver = typeResolver;
 
-						if(typeResolver)
+						if(typeResolver && !typeResolver->DirectLoadXml())
 						{
-							WString preloadType = typeResolver->GetPreloadType();
+							WString preloadType = typeResolver->IndirectLoad()->GetPreloadType();
 							if (preloadType != L"")
 							{
 								preloadResolver = GetResourceResolverManager()->GetTypeResolver(preloadType);
@@ -426,7 +426,7 @@ GuiResourceFolder
 
 						if(typeResolver && preloadResolver)
 						{
-							if (auto directLoad = dynamic_cast<IGuiResourceTypeResolver_DirectLoad*>(preloadResolver))
+							if (auto directLoad = preloadResolver->DirectLoadXml())
 							{
 								Ptr<DescriptableObject> resource;
 								WString itemType = preloadResolver->GetType();
@@ -442,9 +442,9 @@ GuiResourceFolder
 
 								if (typeResolver != preloadResolver)
 								{
-									if (auto indirectLoad = dynamic_cast<IGuiResourceTypeResolver_IndirectLoad*>(typeResolver))
+									if (auto indirectLoad = typeResolver->IndirectLoad())
 									{
-										if(typeResolver->IsDelayLoad())
+										if(indirectLoad->IsDelayLoad())
 										{
 											DelayLoading delayLoading;
 											delayLoading.type = type;
@@ -498,17 +498,20 @@ GuiResourceFolder
 					auto resolver = GetResourceResolverManager()->GetTypeResolver(item->GetTypeName());
 					Ptr<XmlElement> xmlElement;
 
-					if (auto directLoad = dynamic_cast<IGuiResourceTypeResolver_DirectLoad*>(resolver))
+					if (auto directLoad = resolver->DirectLoadXml())
 					{
 						xmlElement = directLoad->Serialize(item->GetContent(), serializePrecompiledResource);
 					}
-					else if (auto indirectLoad = dynamic_cast<IGuiResourceTypeResolver_IndirectLoad*>(resolver))
+					else if (auto indirectLoad = resolver->IndirectLoad())
 					{
-						if (auto directLoad = dynamic_cast<IGuiResourceTypeResolver_DirectLoad*>(GetResourceResolverManager()->GetTypeResolver(resolver->GetPreloadType())))
+						if (auto preloadResolver = GetResourceResolverManager()->GetTypeResolver(indirectLoad->GetPreloadType()))
 						{
-							if (auto resource = indirectLoad->Serialize(item->GetContent(), serializePrecompiledResource))
+							if (auto directLoad = preloadResolver->DirectLoadXml())
 							{
-								xmlElement = directLoad->Serialize(resource, serializePrecompiledResource);
+								if (auto resource = indirectLoad->Serialize(item->GetContent(), serializePrecompiledResource))
+								{
+									xmlElement = directLoad->Serialize(resource, serializePrecompiledResource);
+								}
 							}
 						}
 					}
@@ -599,9 +602,9 @@ GuiResourceFolder
 					IGuiResourceTypeResolver* typeResolver = GetResourceResolverManager()->GetTypeResolver(type);
 					IGuiResourceTypeResolver* preloadResolver = typeResolver;
 
-					if(typeResolver)
+					if(typeResolver && !typeResolver->DirectLoadStream())
 					{
-						WString preloadType = typeResolver->GetPreloadType();
+						WString preloadType = typeResolver->IndirectLoad()->GetPreloadType();
 						if (preloadType != L"")
 						{
 							preloadResolver = GetResourceResolverManager()->GetTypeResolver(preloadType);
@@ -618,16 +621,16 @@ GuiResourceFolder
 
 					if(typeResolver && preloadResolver)
 					{
-						if (auto directLoad = dynamic_cast<IGuiResourceTypeResolver_DirectLoad*>(preloadResolver))
+						if (auto directLoad = preloadResolver->DirectLoadStream())
 						{
 							WString itemType = preloadResolver->GetType();
 							auto resource = directLoad->ResolveResourcePrecompiled(reader.input, errors);
 
 							if (typeResolver != preloadResolver)
 							{
-								if (auto indirectLoad = dynamic_cast<IGuiResourceTypeResolver_IndirectLoad*>(typeResolver))
+								if (auto indirectLoad = typeResolver->IndirectLoad())
 								{
-									if(typeResolver->IsDelayLoad())
+									if(indirectLoad->IsDelayLoad())
 									{
 										DelayLoading delayLoading;
 										delayLoading.type = type;
@@ -679,7 +682,7 @@ GuiResourceFolder
 
 		void GuiResourceFolder::SaveResourceFolderToBinary(stream::internal::Writer& writer, collections::List<WString>& typeNames)
 		{
-			typedef Tuple<vint, WString, IGuiResourceTypeResolver_DirectLoad*, Ptr<DescriptableObject>> ItemTuple;
+			typedef Tuple<vint, WString, IGuiResourceTypeResolver_DirectLoadStream*, Ptr<DescriptableObject>> ItemTuple;
 			List<ItemTuple> itemTuples;
 
 			FOREACH(Ptr<GuiResourceItem>, item, items.Values())
@@ -688,17 +691,20 @@ GuiResourceFolder
 				WString name = item->GetName();
 
 				auto resolver = GetResourceResolverManager()->GetTypeResolver(item->GetTypeName());
-				if (auto directLoad = dynamic_cast<IGuiResourceTypeResolver_DirectLoad*>(resolver))
+				if (auto directLoad = resolver->DirectLoadStream())
 				{
 					itemTuples.Add(ItemTuple(typeName, name, directLoad, item->GetContent()));
 				}
-				else if (auto indirectLoad = dynamic_cast<IGuiResourceTypeResolver_IndirectLoad*>(resolver))
+				else if (auto indirectLoad = resolver->IndirectLoad())
 				{
-					if (auto directLoad = dynamic_cast<IGuiResourceTypeResolver_DirectLoad*>(GetResourceResolverManager()->GetTypeResolver(resolver->GetPreloadType())))
+					if (auto preloadResolver = GetResourceResolverManager()->GetTypeResolver(indirectLoad->GetPreloadType()))
 					{
-						if (auto resource = indirectLoad->Serialize(item->GetContent(), true))
+						if (auto directLoad = preloadResolver->DirectLoadStream())
 						{
-							itemTuples.Add(ItemTuple(typeName, name, directLoad, resource));
+							if (auto resource = indirectLoad->Serialize(item->GetContent(), true))
+							{
+								itemTuples.Add(ItemTuple(typeName, name, directLoad, resource));
+							}
 						}
 					}
 				}
@@ -878,7 +884,8 @@ GuiResource
 				WString folder = delay.workingDirectory;
 				Ptr<GuiResourceItem> item = delay.preloadResource;
 
-				auto indirectLoad = dynamic_cast<IGuiResourceTypeResolver_IndirectLoad*>(GetResourceResolverManager()->GetTypeResolver(type));
+				auto typeResolver = GetResourceResolverManager()->GetTypeResolver(type);
+				auto indirectLoad = typeResolver->IndirectLoad();
 				if (!indirectLoad)
 				{
 					errors.Add(L"Unknown resource type \"" + type + L"\".");
@@ -889,7 +896,7 @@ GuiResource
 					Ptr<DescriptableObject> resource = indirectLoad->ResolveResource(item->GetContent(), pathResolver, errors);
 					if(resource)
 					{
-						item->SetContent(indirectLoad->GetType(), resource);
+						item->SetContent(typeResolver->GetType(), resource);
 					}
 				}
 			}
