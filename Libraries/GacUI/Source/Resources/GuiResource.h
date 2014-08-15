@@ -85,6 +85,7 @@ Global String Key
 			bool operator>=(GlobalStringKey g)const{ return key >= g.key; }
 
 			static GlobalStringKey					Get(const WString& string);
+			vint									ToKey()const;
 			WString									ToString()const;
 		};
 

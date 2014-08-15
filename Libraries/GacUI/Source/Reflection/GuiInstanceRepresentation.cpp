@@ -36,6 +36,10 @@ GuiTextRepr
 			}
 		}
 
+		void GuiTextRepr::CollectUsedKey(collections::List<GlobalStringKey>& keys)
+		{
+		}
+
 /***********************************************************************
 GuiAttSetterRepr
 ***********************************************************************/
@@ -152,6 +156,28 @@ GuiAttSetterRepr
 			}
 		}
 
+		void GuiAttSetterRepr::CollectUsedKey(collections::List<GlobalStringKey>& keys)
+		{
+			keys.Add(instanceName);
+
+			for (vint i = 0; i < setters.Count(); i++)
+			{
+				keys.Add(setters.Keys()[i]);
+				auto value = setters.Values()[i];
+				keys.Add(value->binding);
+				for (vint j = 0; j < value->values.Count(); j++)
+				{
+					value->values[j]->CollectUsedKey(keys);
+				}
+			}
+			
+			for (vint i = 0; i < eventHandlers.Count(); i++)
+			{
+				keys.Add(eventHandlers.Keys()[i]);
+				keys.Add(eventHandlers.Values()[i]->binding);
+			}
+		}
+
 /***********************************************************************
 GuiConstructorRepr
 ***********************************************************************/
@@ -192,6 +218,13 @@ GuiConstructorRepr
 				GuiAttSetterRepr::FillXml(xmlCtor, serializePrecompiledResource);
 				xml->subNodes.Add(xmlCtor);
 			}
+		}
+
+		void GuiConstructorRepr::CollectUsedKey(collections::List<GlobalStringKey>& keys)
+		{
+			GuiAttSetterRepr::CollectUsedKey(keys);
+			keys.Add(typeNamespace);
+			keys.Add(typeName);
 		}
 
 /***********************************************************************
@@ -668,6 +701,61 @@ GuiInstanceContext
 			auto doc = MakePtr<XmlDocument>();
 			doc->rootElement = xmlInstance;
 			return doc;
+		}
+
+		Ptr<GuiInstanceContext> GuiInstanceContext::LoadPrecompiledBinary(stream::IStream& stream, collections::List<WString>& errors)
+		{
+			stream::internal::Reader reader(stream);
+			List<GlobalStringKey> sortedKeys;
+			{
+				vint count = 0;
+				reader << count;
+
+				for (vint i = 0; i < count; i++)
+				{
+					WString keyString;
+					reader << keyString;
+					sortedKeys.Add(GlobalStringKey::Get(keyString));
+				}
+			}
+
+			return 0;
+		}
+
+		void GuiInstanceContext::SavePrecompiledBinary(stream::IStream& stream)
+		{
+			stream::internal::Writer writer(stream);
+			SortedList<GlobalStringKey> sortedKeys;
+			{
+				List<GlobalStringKey> keys;
+				CollectUsedKey(keys);
+				CopyFrom(sortedKeys, From(keys).Distinct());
+
+				vint count = sortedKeys.Count();
+				writer << count;
+				FOREACH(GlobalStringKey, key, sortedKeys)
+				{
+					WString keyString = key.ToString();
+					writer << keyString;
+				}
+			}
+		}
+
+		void GuiInstanceContext::CollectUsedKey(collections::List<GlobalStringKey>& keys)
+		{
+			instance->CollectUsedKey(keys);
+			
+			for (vint i = 0; i < namespaces.Count(); i++)
+			{
+				keys.Add(namespaces.Keys()[i]);
+				keys.Add(namespaces.Values()[i]->name);
+			}
+
+			for (vint i = 0; i < parameters.Count(); i++)
+			{
+				keys.Add(parameters[i]->name);
+				keys.Add(parameters[i]->className);
+			}
 		}
 
 		bool GuiInstanceContext::ApplyStyles(Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)
