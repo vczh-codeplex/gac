@@ -719,7 +719,72 @@ GuiInstanceContext
 				}
 			}
 
-			return 0;
+			auto context = MakePtr<GuiInstanceContext>();
+			context->appliedStyles = true;
+			{
+				vint count = -1;
+				reader << count;
+				for (vint i = 0; i < count; i++)
+				{
+					vint keyIndex = -1;
+					vint valueNameIndex = -1;
+					reader << keyIndex << valueNameIndex;
+
+					auto key = sortedKeys[keyIndex];
+					auto ni = MakePtr<NamespaceInfo>();
+					ni->name = sortedKeys[valueNameIndex];
+					context->namespaces.Add(key, ni);
+
+					vint valueCount = -1;
+					reader << valueCount;
+					for (vint j = 0; j < valueCount; j++)
+					{
+						auto ns = MakePtr<GuiInstanceNamespace>();
+						reader << ns->prefix << ns->postfix;
+						ni->namespaces.Add(ns);
+					}
+				}
+			}
+			{
+				reader << context->className;
+			}
+			{
+				vint count = -1;
+				reader << count;
+				for (vint i = 0; i < count; i++)
+				{
+					vint nameIndex = -1;
+					vint classNameIndex = -1;
+					reader << nameIndex << classNameIndex;
+
+					auto parameter = MakePtr<GuiInstanceParameter>();
+					parameter->name = sortedKeys[nameIndex];
+					parameter->className = sortedKeys[classNameIndex];
+					context->parameters.Add(parameter);
+				}
+			}
+			{
+				vint count = 0;
+				reader << count;
+
+				for (vint i = 0; i < count; i++)
+				{
+					vint nameIndex = -1;
+					stream::MemoryStream stream;
+					reader << nameIndex << (stream::IStream&)stream;
+
+					auto name = sortedKeys[nameIndex];
+					if (auto resolver = GetInstanceLoaderManager()->GetInstanceCacheResolver(name))
+					{
+						if (auto cache = resolver->Deserialize(stream))
+						{
+							context->precompiledCaches.Add(name, cache);
+						}
+					}
+				}
+			}
+
+			return context;
 		}
 
 		void GuiInstanceContext::SavePrecompiledBinary(stream::IStream& stream)
@@ -737,6 +802,57 @@ GuiInstanceContext
 				{
 					WString keyString = key.ToString();
 					writer << keyString;
+				}
+			}
+			{
+				vint count = namespaces.Count();
+				writer << count;
+				for (vint i = 0; i < count; i++)
+				{
+					auto keyIndex = sortedKeys.IndexOf(namespaces.Keys()[i]);
+					auto value = namespaces.Values()[i];
+					auto valueNameIndex = sortedKeys.IndexOf(value->name);
+					CHECK_ERROR(keyIndex != -1 && valueNameIndex != -1, L"GuiInstanceContext::SavePrecompiledBinary(stream::IStream&)#Internal Error.");
+					writer << keyIndex << valueNameIndex;
+
+					vint valueCount = value->namespaces.Count();
+					writer << valueCount;
+					FOREACH(Ptr<GuiInstanceNamespace>, ns, value->namespaces)
+					{
+						writer << ns->prefix << ns->postfix;
+					}
+				}
+			}
+			{
+				writer << className;
+			}
+			{
+				vint count = parameters.Count();
+				writer << count;
+				FOREACH(Ptr<GuiInstanceParameter>, parameter, parameters)
+				{
+					vint nameIndex = sortedKeys.IndexOf(parameter->name);
+					vint classNameIndex = sortedKeys.IndexOf(parameter->className);
+					CHECK_ERROR(nameIndex != -1 && classNameIndex != -1, L"GuiInstanceContext::SavePrecompiledBinary(stream::IStream&)#Internal Error.");
+					writer << nameIndex << classNameIndex;
+				}
+			}
+			{
+				vint count = precompiledCaches.Count();
+				writer << count;
+				FOREACH(Ptr<IGuiInstanceCache>, cache, precompiledCaches.Values())
+				{
+					auto name = cache->GetCacheTypeName();
+					vint nameIndex = sortedKeys.IndexOf(name);
+					CHECK_ERROR(nameIndex != -1, L"GuiInstanceContext::SavePrecompiledBinary(stream::IStream&)#Internal Error.");
+
+					stream::MemoryStream stream;
+
+					if (auto resolver = GetInstanceLoaderManager()->GetInstanceCacheResolver(name))
+					{
+						resolver->Serialize(cache, stream);
+					}
+					writer << nameIndex << (stream::IStream&)stream;
 				}
 			}
 		}

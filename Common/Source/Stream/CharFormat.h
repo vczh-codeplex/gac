@@ -366,6 +366,37 @@ Serialization
 				}
 			};
 
+			template<typename T>
+			struct Serialization<Nullable<T>>
+			{
+				static void IO(Reader& reader, Nullable<T>& value)
+				{
+					bool notNull = false;
+					reader << notNull;
+					if (notNull)
+					{
+						T data;
+						Serialization<T>::IO(reader, data);
+						value = Nullable<T>(data);
+					}
+					else
+					{
+						value = Nullable<T>();
+					}
+				}
+					
+				static void IO(Writer& writer, Nullable<T>& value)
+				{
+					bool notNull = value;
+					writer << notNull;
+					if (notNull)
+					{
+						T data = value.Value();
+						Serialization<T>::IO(writer, data);
+					}
+				}
+			};
+
 			template<>
 			struct Serialization<WString>
 			{
