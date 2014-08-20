@@ -234,11 +234,20 @@ GuiAttSetterRepr
 
 			}
 			{
-
+				vint count = eventHandlers.Count();
+				writer << count;
+				for (vint i = 0; i < count; i++)
+				{
+					auto keyIndex = keys.IndexOf[eventHandlers.Keys()[i]];
+					auto value = eventHandlers.Values()[i];
+					auto bindingIndex = keys.IndexOf[value->binding];
+					CHECK_ERROR(keyIndex != -1 && bindingIndex != -1, L"GuiAttSetterRepr::SavePrecompiledBinary(stream::IStream&, collections::SortedList<presentation::GlobalStringKey>&)#Internal Error.");
+					writer << keyIndex << bindingIndex << value->value;
+				}
 			}
 			{
 				vint instanceNameIndex = keys.IndexOf[instanceName];
-				CHECK_ERROR(instanceNameIndex != -1, L"GuiConstructorRepr::SavePrecompiledBinary(stream::IStream&, collections::SortedList<presentation::GlobalStringKey>&)#Internal Error.");
+				CHECK_ERROR(instanceNameIndex != -1, L"GuiAttSetterRepr::SavePrecompiledBinary(stream::IStream&, collections::SortedList<presentation::GlobalStringKey>&)#Internal Error.");
 				writer << instanceNameIndex;
 			}
 		}
@@ -254,10 +263,23 @@ GuiAttSetterRepr
 
 			}
 			{
-
+				vint count = -1;
+				reader << count;
+				for (vint i = 0; i < count; i++)
+				{
+					vint keyIndex = -1;
+					vint bindingIndex = -1;
+					auto value = MakePtr<EventValue>();
+					reader << keyIndex << bindingIndex << value->value;
+					auto key = keys[keyIndex];
+					value->binding = keys[bindingIndex];
+					repr->eventHandlers.Add(key, value);
+				}
 			}
 			{
-
+				vint instanceNameIndex = -1;
+				reader << instanceNameIndex;
+				repr->instanceName = keys[instanceNameIndex];
 			}
 			return repr;
 		}
