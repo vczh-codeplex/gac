@@ -231,22 +231,38 @@ GuiAttSetterRepr
 				writer << key;
 			}
 			{
+				vint count = setters.Count();
+				writer << count;
+				for (vint i = 0; i < count; i++)
+				{
+					auto keyIndex = keys.IndexOf(setters.Keys()[i]);
+					auto value = setters.Values()[i];
+					auto bindingIndex = keys.IndexOf(value->binding);
+					CHECK_ERROR(keyIndex != -1 && bindingIndex != -1, L"GuiAttSetterRepr::SavePrecompiledBinary(stream::IStream&, collections::SortedList<presentation::GlobalStringKey>&)#Internal Error.");
+					writer << keyIndex << bindingIndex;
 
+					vint valueCount = value->values.Count();
+					writer << valueCount;
+					for (vint j = 0; j < valueCount; j++)
+					{
+						value->values[j]->SavePrecompiledBinary(stream, keys, true);
+					}
+				}
 			}
 			{
 				vint count = eventHandlers.Count();
 				writer << count;
 				for (vint i = 0; i < count; i++)
 				{
-					auto keyIndex = keys.IndexOf[eventHandlers.Keys()[i]];
+					auto keyIndex = keys.IndexOf(eventHandlers.Keys()[i]);
 					auto value = eventHandlers.Values()[i];
-					auto bindingIndex = keys.IndexOf[value->binding];
+					auto bindingIndex = keys.IndexOf(value->binding);
 					CHECK_ERROR(keyIndex != -1 && bindingIndex != -1, L"GuiAttSetterRepr::SavePrecompiledBinary(stream::IStream&, collections::SortedList<presentation::GlobalStringKey>&)#Internal Error.");
 					writer << keyIndex << bindingIndex << value->value;
 				}
 			}
 			{
-				vint instanceNameIndex = keys.IndexOf[instanceName];
+				vint instanceNameIndex = keys.IndexOf(instanceName);
 				CHECK_ERROR(instanceNameIndex != -1, L"GuiAttSetterRepr::SavePrecompiledBinary(stream::IStream&, collections::SortedList<presentation::GlobalStringKey>&)#Internal Error.");
 				writer << instanceNameIndex;
 			}
@@ -260,7 +276,26 @@ GuiAttSetterRepr
 				repr = MakePtr<GuiAttSetterRepr>();
 			}
 			{
+				vint count = -1;
+				reader << count;
+				for (vint i = 0; i < count; i++)
+				{
+					vint keyIndex = -1;
+					vint bindingIndex = -1;
+					auto value = MakePtr<SetterValue>();
+					reader << keyIndex << bindingIndex;
+					auto key = keys[keyIndex];
+					value->binding = keys[bindingIndex];
+					repr->setters.Add(key, value);
 
+					vint valueCount = -1;
+					reader << valueCount;
+					for (vint j = 0; j < valueCount; j++)
+					{
+						auto repr = GuiValueRepr::LoadPrecompiledBinary(stream, keys);
+						value->values.Add(repr);
+					}
+				}
 			}
 			{
 				vint count = -1;
