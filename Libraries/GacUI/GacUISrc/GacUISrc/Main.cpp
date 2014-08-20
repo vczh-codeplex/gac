@@ -589,7 +589,7 @@ WString XmlToString(Ptr<XmlDocument> xml)
 	}
 }
 
-#define RUN_GENERATE_METADATA
+//#define RUN_GENERATE_METADATA
 #define RUN_GENERATE_PRECOMPILED_RESOURCE
 #define RUN_SHOW_WINDOW
 
@@ -641,6 +641,10 @@ void GuiMain()
 			LzwEncoder encoder;
 			EncoderStream stream(fileStream, encoder);
 			resource->SavePrecompiledBinary(stream);
+		}
+		{
+			FileStream fileStream(L"Precompiled.binary.uncompressed", FileStream::WriteOnly);
+			resource->SavePrecompiledBinary(fileStream);
 		}
 		{
 			auto testResource = GuiResource::LoadFromXml(L"Precompiled.xml", errors);
