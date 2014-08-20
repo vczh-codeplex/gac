@@ -662,10 +662,10 @@ void GuiMain()
 #else
 	{
 		DateTime begin = DateTime::LocalTime();
-		FileStream fileStream(L"Precompiled.binary", FileStream::ReadOnly);
-		LzwDecoder decoder;
-		DecoderStream stream(fileStream, decoder);
-		auto resource = GuiResource::LoadPrecompiledBinary(stream, errors);
+		FileStream fileStream(L"Precompiled.binary.uncompressed", FileStream::ReadOnly);
+		//LzwDecoder decoder;
+		//DecoderStream stream(fileStream, decoder);
+		auto resource = GuiResource::LoadPrecompiledBinary(fileStream, errors);
 		GetInstanceLoaderManager()->SetResource(L"Demo", resource);
 		DateTime end = DateTime::LocalTime();
 		loadTime = end.totalMilliseconds - begin.totalMilliseconds;
