@@ -43,23 +43,30 @@ Instance Representation
 			virtual Ptr<GuiValueRepr>				Clone() = 0;
 			virtual void							FillXml(Ptr<parsing::xml::XmlElement> xml, bool serializePrecompiledResource) = 0;
 			virtual void							CollectUsedKey(collections::List<GlobalStringKey>& keys) = 0;
+			virtual void							SavePrecompiledBinary(stream::IStream& stream, collections::SortedList<GlobalStringKey>& keys, bool saveKey) = 0;
+			static Ptr<GuiValueRepr>				LoadPrecompiledBinary(stream::IStream& stream, collections::List<GlobalStringKey>& keys);
 		};
 
 		class GuiTextRepr : public GuiValueRepr, public Description<GuiTextRepr>
 		{
 		public:
+			static const vint						BinaryKey = 1;
+
 			WString									text;
 
 			void									Accept(IVisitor* visitor)override{visitor->Visit(this);}
 			Ptr<GuiValueRepr>						Clone()override;
 			void									FillXml(Ptr<parsing::xml::XmlElement> xml, bool serializePrecompiledResource)override;
 			void									CollectUsedKey(collections::List<GlobalStringKey>& keys)override;
+			void									SavePrecompiledBinary(stream::IStream& stream, collections::SortedList<GlobalStringKey>& keys, bool saveKey)override;
+			static Ptr<GuiTextRepr>					LoadPrecompiledBinary(stream::IStream& stream, collections::List<GlobalStringKey>& keys, Ptr<GuiTextRepr> repr = 0);
 		};
 
 		class GuiAttSetterRepr : public GuiValueRepr, public Description<GuiAttSetterRepr>
 		{
 		public:
 			typedef collections::List<Ptr<GuiValueRepr>>						ValueList;
+			static const vint						BinaryKey = 2;
 
 			struct SetterValue
 			{
@@ -86,11 +93,15 @@ Instance Representation
 			Ptr<GuiValueRepr>						Clone()override;
 			void									FillXml(Ptr<parsing::xml::XmlElement> xml, bool serializePrecompiledResource)override;
 			void									CollectUsedKey(collections::List<GlobalStringKey>& keys)override;
+			void									SavePrecompiledBinary(stream::IStream& stream, collections::SortedList<GlobalStringKey>& keys, bool saveKey)override;
+			static Ptr<GuiAttSetterRepr>			LoadPrecompiledBinary(stream::IStream& stream, collections::List<GlobalStringKey>& keys, Ptr<GuiAttSetterRepr> repr = 0);
 		};
 
 		class GuiConstructorRepr : public GuiAttSetterRepr, public Description<GuiConstructorRepr>
 		{
 		public:
+			static const vint						BinaryKey = 3;
+
 			GlobalStringKey							typeNamespace;
 			GlobalStringKey							typeName;
 			Nullable<WString>						styleName;
@@ -99,6 +110,8 @@ Instance Representation
 			Ptr<GuiValueRepr>						Clone()override;
 			void									FillXml(Ptr<parsing::xml::XmlElement> xml, bool serializePrecompiledResource)override;
 			void									CollectUsedKey(collections::List<GlobalStringKey>& keys)override;
+			void									SavePrecompiledBinary(stream::IStream& stream, collections::SortedList<GlobalStringKey>& keys, bool saveKey)override;
+			static Ptr<GuiConstructorRepr>			LoadPrecompiledBinary(stream::IStream& stream, collections::List<GlobalStringKey>& keys, Ptr<GuiConstructorRepr> repr = 0);
 		};
 
 /***********************************************************************
