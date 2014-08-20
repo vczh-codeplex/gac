@@ -15,6 +15,28 @@ namespace vl
 		using namespace stream;
 
 /***********************************************************************
+GuiValueRepr
+***********************************************************************/
+
+		Ptr<GuiValueRepr> GuiValueRepr::LoadPrecompiledBinary(stream::IStream& stream, collections::List<GlobalStringKey>& keys)
+		{
+			stream::internal::Reader reader(stream);
+			vint key = -1;
+			reader << key;
+			switch (key)
+			{
+			case GuiTextRepr::BinaryKey:
+				return GuiTextRepr::LoadPrecompiledBinary(stream, keys);
+			case GuiAttSetterRepr::BinaryKey:
+				return GuiAttSetterRepr::LoadPrecompiledBinary(stream, keys);
+			case GuiConstructorRepr::BinaryKey:
+				return GuiConstructorRepr::LoadPrecompiledBinary(stream, keys);
+			default:
+				CHECK_FAIL(L"GuiValueRepr::LoadPrecompiledBinary(stream::IStream&, collections::List<presentation::GlobalStringKey>&)#Internal Error.");
+			}
+		}
+
+/***********************************************************************
 GuiTextRepr
 ***********************************************************************/
 
@@ -38,6 +60,28 @@ GuiTextRepr
 
 		void GuiTextRepr::CollectUsedKey(collections::List<GlobalStringKey>& keys)
 		{
+		}
+
+		void GuiTextRepr::SavePrecompiledBinary(stream::IStream& stream, collections::SortedList<GlobalStringKey>& keys, bool saveKey)
+		{
+			stream::internal::Writer writer(stream);
+			if (saveKey)
+			{
+				vint key = BinaryKey;
+				writer << key;
+			}
+			writer << text;
+		}
+
+		Ptr<GuiTextRepr> GuiTextRepr::LoadPrecompiledBinary(stream::IStream& stream, collections::List<GlobalStringKey>& keys, Ptr<GuiTextRepr> repr)
+		{
+			stream::internal::Reader reader(stream);
+			if (!repr)
+			{
+				repr = MakePtr<GuiTextRepr>();
+			}
+			reader << repr->text;
+			return repr;
 		}
 
 /***********************************************************************
@@ -178,6 +222,46 @@ GuiAttSetterRepr
 			}
 		}
 
+		void GuiAttSetterRepr::SavePrecompiledBinary(stream::IStream& stream, collections::SortedList<GlobalStringKey>& keys, bool saveKey)
+		{
+			stream::internal::Writer writer(stream);
+			if (saveKey)
+			{
+				vint key = BinaryKey;
+				writer << key;
+			}
+			{
+
+			}
+			{
+
+			}
+			{
+				vint instanceNameIndex = keys.IndexOf[instanceName];
+				CHECK_ERROR(instanceNameIndex != -1, L"GuiConstructorRepr::SavePrecompiledBinary(stream::IStream&, collections::SortedList<presentation::GlobalStringKey>&)#Internal Error.");
+				writer << instanceNameIndex;
+			}
+		}
+
+		Ptr<GuiAttSetterRepr> GuiAttSetterRepr::LoadPrecompiledBinary(stream::IStream& stream, collections::List<GlobalStringKey>& keys, Ptr<GuiAttSetterRepr> repr)
+		{
+			stream::internal::Reader reader(stream);
+			if (!repr)
+			{
+				repr = MakePtr<GuiAttSetterRepr>();
+			}
+			{
+
+			}
+			{
+
+			}
+			{
+
+			}
+			return repr;
+		}
+
 /***********************************************************************
 GuiConstructorRepr
 ***********************************************************************/
@@ -225,6 +309,37 @@ GuiConstructorRepr
 			GuiAttSetterRepr::CollectUsedKey(keys);
 			keys.Add(typeNamespace);
 			keys.Add(typeName);
+		}
+
+		void GuiConstructorRepr::SavePrecompiledBinary(stream::IStream& stream, collections::SortedList<GlobalStringKey>& keys, bool saveKey)
+		{
+			stream::internal::Writer writer(stream);
+			if (saveKey)
+			{
+				vint key = BinaryKey;
+				writer << key;
+			}
+			vint typeNamespaceIndex = keys.IndexOf(typeNamespace);
+			vint typeNameIndex = keys.IndexOf(typeName);
+			CHECK_ERROR(typeNamespaceIndex != -1 && typeNameIndex != -1, L"GuiConstructorRepr::SavePrecompiledBinary(stream::IStream&, collections::SortedList<presentation::GlobalStringKey>&)#Internal Error.");
+			writer << typeNamespaceIndex << typeNameIndex << styleName;
+			GuiAttSetterRepr::SavePrecompiledBinary(stream, keys, false);
+		}
+
+		Ptr<GuiConstructorRepr> GuiConstructorRepr::LoadPrecompiledBinary(stream::IStream& stream, collections::List<GlobalStringKey>& keys, Ptr<GuiConstructorRepr> repr)
+		{
+			stream::internal::Reader reader(stream);
+			if (!repr)
+			{
+				repr = MakePtr<GuiConstructorRepr>();
+			}
+			vint typeNamespaceIndex = -1;
+			vint typeNameIndex = -1;
+			reader << typeNamespaceIndex << typeNameIndex << repr->styleName;
+			repr->typeNamespace = keys[typeNamespaceIndex];
+			repr->typeName = keys[typeNameIndex];
+			GuiAttSetterRepr::LoadPrecompiledBinary(stream, keys, repr);
+			return repr;
 		}
 
 /***********************************************************************
@@ -722,6 +837,9 @@ GuiInstanceContext
 			auto context = MakePtr<GuiInstanceContext>();
 			context->appliedStyles = true;
 			{
+				context->instance = GuiConstructorRepr::LoadPrecompiledBinary(stream, sortedKeys);
+			}
+			{
 				vint count = -1;
 				reader << count;
 				for (vint i = 0; i < count; i++)
@@ -805,6 +923,9 @@ GuiInstanceContext
 					WString keyString = key.ToString();
 					writer << keyString;
 				}
+			}
+			{
+				instance->SavePrecompiledBinary(stream, sortedKeys, false);
 			}
 			{
 				vint count = namespaces.Count();
