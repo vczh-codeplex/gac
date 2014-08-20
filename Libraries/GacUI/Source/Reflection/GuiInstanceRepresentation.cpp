@@ -769,16 +769,18 @@ GuiInstanceContext
 
 				for (vint i = 0; i < count; i++)
 				{
+					vint keyIndex = -1;
 					vint nameIndex = -1;
 					stream::MemoryStream stream;
-					reader << nameIndex << (stream::IStream&)stream;
+					reader << keyIndex << nameIndex << (stream::IStream&)stream;
 
+					auto key = sortedKeys[keyIndex];
 					auto name = sortedKeys[nameIndex];
 					if (auto resolver = GetInstanceLoaderManager()->GetInstanceCacheResolver(name))
 					{
 						if (auto cache = resolver->Deserialize(stream))
 						{
-							context->precompiledCaches.Add(name, cache);
+							context->precompiledCaches.Add(key, cache);
 						}
 					}
 				}
@@ -840,11 +842,13 @@ GuiInstanceContext
 			{
 				vint count = precompiledCaches.Count();
 				writer << count;
-				FOREACH(Ptr<IGuiInstanceCache>, cache, precompiledCaches.Values())
+				for (vint i = 0; i < count; i++)
 				{
+					auto keyIndex = sortedKeys.IndexOf(precompiledCaches.Keys()[i]);
+					auto cache = precompiledCaches.Values()[i];
 					auto name = cache->GetCacheTypeName();
 					vint nameIndex = sortedKeys.IndexOf(name);
-					CHECK_ERROR(nameIndex != -1, L"GuiInstanceContext::SavePrecompiledBinary(stream::IStream&)#Internal Error.");
+					CHECK_ERROR(keyIndex != -1 && nameIndex != -1, L"GuiInstanceContext::SavePrecompiledBinary(stream::IStream&)#Internal Error.");
 
 					stream::MemoryStream stream;
 
@@ -852,7 +856,7 @@ GuiInstanceContext
 					{
 						resolver->Serialize(cache, stream);
 					}
-					writer << nameIndex << (stream::IStream&)stream;
+					writer << keyIndex << nameIndex << (stream::IStream&)stream;
 				}
 			}
 		}
@@ -871,6 +875,12 @@ GuiInstanceContext
 			{
 				keys.Add(parameters[i]->name);
 				keys.Add(parameters[i]->className);
+			}
+
+			for (vint i = 0; i < precompiledCaches.Count(); i++)
+			{
+				keys.Add(precompiledCaches.Keys()[i]);
+				keys.Add(precompiledCaches.Values()[i]->GetCacheTypeName());
 			}
 		}
 
