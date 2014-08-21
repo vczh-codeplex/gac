@@ -15,7 +15,7 @@ Macros:
 #ifndef VCZH_BASIC
 #define VCZH_BASIC
 
-#if defined _WIN64 || __x86_64_
+#if defined _WIN64 || __x86_64 || __LP64__
 #define VCZH_64
 #endif
 
