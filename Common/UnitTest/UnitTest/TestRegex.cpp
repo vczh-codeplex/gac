@@ -349,9 +349,9 @@ void RunPureInterpretor(const wchar_t* code, const wchar_t* input, vint start, v
 	Automaton::Ref nfa=EpsilonNfaToNfa(eNfa, PureEpsilonChecker, nfaStateMap);
 	Automaton::Ref dfa=NfaToDfa(nfa, dfaStateMap);
 
-	PureInterpretor interpretor(dfa, subsets);
+	Ptr<PureInterpretor> interpretor = new PureInterpretor(dfa, subsets);
 	bool expectedSuccessful=start!=-1;
-	TEST_ASSERT(interpretor.Match(input, input, matchResult)==expectedSuccessful);
+	TEST_ASSERT(interpretor->Match(input, input, matchResult)==expectedSuccessful);
 	if(expectedSuccessful)
 	{
 		TEST_ASSERT(start==matchResult.start);
