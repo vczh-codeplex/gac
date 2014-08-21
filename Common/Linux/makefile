@@ -1,5 +1,5 @@
-CPP = g++ -std=c++11 -finput-charset=gbk
-CPPBOM = g++ -std=c++11
+CPP = g++ -std=c++11 -finput-charset=gbk -g
+CPPBOM = g++ -std=c++11 -g
 
 OBJ = ./obj/
 BIN = ./exe/

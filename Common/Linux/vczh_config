@@ -14,3 +14,29 @@ set fileencodings=utf-8,ucs-bom,cp936
 make 2>&1 | tee make_log
 gedit make_log &
 nautilus .
+
+(gdb)
+gdb <executable>
+q:	quit
+r:	run
+c:	continue
+s:	step
+n:	next
+si:	stepi
+ni:	nexti
+f:	frame
+bt:	backtrace
+u:	up
+d:	down
+
+info line
+info register
+info breakpoints
+info threads
+
+p $rip
+disassemble 0xstart 0xend
+
+break filename:function
+clear function
+delete breakpoint-number
