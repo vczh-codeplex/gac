@@ -17,6 +17,7 @@ nautilus .
 
 (gdb)
 gdb <executable>
+set disassembly-flavor intel
 q:	quit
 r:	run
 c:	continue
