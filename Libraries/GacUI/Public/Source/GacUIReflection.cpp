@@ -121,6 +121,7 @@ namespace vl
 		using namespace controls;
 		using namespace regex;
 		using namespace reflection::description;
+		using namespace stream;
 
 /***********************************************************************
 GuiInstancePropertyInfo
@@ -234,7 +235,7 @@ IGuiInstanceLoader
 			return false;
 		}
 
-		description::Value IGuiInstanceLoader::CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)
+		description::Value IGuiInstanceLoader::CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<GlobalStringKey, description::Value>& constructorArguments)
 		{
 			return Value();
 		}
@@ -249,11 +250,11 @@ IGuiInstanceLoader
 			return 0;
 		}
 
-		void IGuiInstanceLoader::GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)
+		void IGuiInstanceLoader::GetPropertyNames(const TypeInfo& typeInfo, List<GlobalStringKey>& propertyNames)
 		{
 		}
 
-		void IGuiInstanceLoader::GetConstructorParameters(const TypeInfo& typeInfo, collections::List<WString>& propertyNames)
+		void IGuiInstanceLoader::GetConstructorParameters(const TypeInfo& typeInfo, collections::List<GlobalStringKey>& propertyNames)
 		{
 		}
 
@@ -272,7 +273,7 @@ IGuiInstanceLoader
 			return false;
 		}
 
-		void IGuiInstanceLoader::GetEventNames(const TypeInfo& typeInfo, collections::List<WString>& eventNames)
+		void IGuiInstanceLoader::GetEventNames(const TypeInfo& typeInfo, collections::List<GlobalStringKey>& eventNames)
 		{
 		}
 
@@ -335,7 +336,11 @@ GuiInstanceContext::ElementName Parser
 Instance Type Resolver
 ***********************************************************************/
 
-		class GuiResourceInstanceTypeResolver : public Object, public IGuiResourceTypeResolver
+		class GuiResourceInstanceTypeResolver
+			: public Object
+			, public IGuiResourceTypeResolver
+			, private IGuiResourceTypeResolver_DirectLoadStream
+			, private IGuiResourceTypeResolver_IndirectLoad
 		{
 		public:
 			WString GetType()override
@@ -362,27 +367,33 @@ Instance Type Resolver
 				}
 			}
 
-			Ptr<parsing::xml::XmlElement> Serialize(Ptr<DescriptableObject> resource, bool serializePrecompiledResource)override
+			IGuiResourceTypeResolver_DirectLoadStream* DirectLoadStream()override
+			{
+				return this;
+			}
+
+			IGuiResourceTypeResolver_IndirectLoad* IndirectLoad()override
+			{
+				return this;
+			}
+
+			void SerializePrecompiled(Ptr<DescriptableObject> resource, stream::IStream& stream)override
+			{
+				auto obj = resource.Cast<GuiInstanceContext>();
+				obj->SavePrecompiledBinary(stream);
+			}
+
+			Ptr<DescriptableObject> ResolveResourcePrecompiled(stream::IStream& stream, collections::List<WString>& errors)override
+			{
+				return GuiInstanceContext::LoadPrecompiledBinary(stream, errors);
+			}
+
+			Ptr<DescriptableObject> Serialize(Ptr<DescriptableObject> resource, bool serializePrecompiledResource)override
 			{
 				if (auto obj = resource.Cast<GuiInstanceContext>())
 				{
-					auto xmlInstance = MakePtr<XmlElement>();
-					xmlInstance->name.value = L"Instance";
-					xmlInstance->subNodes.Add(obj->SaveToXml(serializePrecompiledResource)->rootElement);
-					return xmlInstance;
+					return obj->SaveToXml(serializePrecompiledResource);
 				}
-				return 0;
-			}
-
-			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)override
-			{
-				errors.Add(L"Internal error: Instance resource needs resource preloading.");
-				return 0;
-			}
-
-			Ptr<DescriptableObject> ResolveResource(const WString& path, collections::List<WString>& errors)override
-			{
-				errors.Add(L"Internal error: Instance resource needs resource preloading.");
 				return 0;
 			}
 
@@ -402,7 +413,10 @@ Instance Type Resolver
 Instance Style Resolver
 ***********************************************************************/
 
-		class GuiResourceInstanceStyleResolver : public Object, public IGuiResourceTypeResolver
+		class GuiResourceInstanceStyleResolver
+			: public Object
+			, public IGuiResourceTypeResolver
+			, private IGuiResourceTypeResolver_IndirectLoad
 		{
 		public:
 			WString GetType()override
@@ -424,30 +438,20 @@ Instance Style Resolver
 			{
 			}
 
-			Ptr<parsing::xml::XmlElement> Serialize(Ptr<DescriptableObject> resource, bool serializePrecompiledResource)override
+			IGuiResourceTypeResolver_IndirectLoad* IndirectLoad()override
+			{
+				return this;
+			}
+
+			Ptr<DescriptableObject> Serialize(Ptr<DescriptableObject> resource, bool serializePrecompiledResource)override
 			{
 				if (!serializePrecompiledResource)
 				{
 					if (auto obj = resource.Cast<GuiInstanceStyleContext>())
 					{
-						auto xmlInstanceStyle = MakePtr<XmlElement>();
-						xmlInstanceStyle->name.value = L"InstanceStyle";
-						xmlInstanceStyle->subNodes.Add(obj->SaveToXml()->rootElement);
-						return xmlInstanceStyle;
+						return obj->SaveToXml();
 					}
 				}
-				return 0;
-			}
-
-			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)override
-			{
-				errors.Add(L"Internal error: Instance style resource needs resource preloading.");
-				return 0;
-			}
-
-			Ptr<DescriptableObject> ResolveResource(const WString& path, collections::List<WString>& errors)override
-			{
-				errors.Add(L"Internal error: Instance style resource needs resource preloading.");
 				return 0;
 			}
 
@@ -467,7 +471,10 @@ Instance Style Resolver
 Instance Schema Type Resolver
 ***********************************************************************/
 
-		class GuiResourceInstanceSchemaTypeResolver : public Object, public IGuiResourceTypeResolver
+		class GuiResourceInstanceSchemaTypeResolver
+			: public Object
+			, public IGuiResourceTypeResolver
+			, private IGuiResourceTypeResolver_IndirectLoad
 		{
 		public:
 			WString GetType()override
@@ -489,30 +496,20 @@ Instance Schema Type Resolver
 			{
 			}
 
-			Ptr<parsing::xml::XmlElement> Serialize(Ptr<DescriptableObject> resource, bool serializePrecompiledResource)override
+			IGuiResourceTypeResolver_IndirectLoad* IndirectLoad()override
+			{
+				return this;
+			}
+
+			Ptr<DescriptableObject> Serialize(Ptr<DescriptableObject> resource, bool serializePrecompiledResource)override
 			{
 				if (!serializePrecompiledResource)
 				{
 					if (auto obj = resource.Cast<GuiInstanceSchema>())
 					{
-						auto xmlInstanceSchema = MakePtr<XmlElement>();
-						xmlInstanceSchema->name.value = L"InstanceSchema";
-						xmlInstanceSchema->subNodes.Add(obj->SaveToXml()->rootElement);
-						return xmlInstanceSchema;
+						return obj->SaveToXml();
 					}
 				}
-				return 0;
-			}
-
-			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)override
-			{
-				errors.Add(L"Internal error: Instance schema resource needs resource preloading.");
-				return 0;
-			}
-
-			Ptr<DescriptableObject> ResolveResource(const WString& path, collections::List<WString>& errors)override
-			{
-				errors.Add(L"Internal error: Instance schema resource needs resource preloading.");
 				return 0;
 			}
 
@@ -534,6 +531,14 @@ GuiDefaultInstanceLoader
 
 		class GuiDefaultInstanceLoader : public Object, public IGuiInstanceLoader
 		{
+		protected:
+			typedef Tuple<ITypeDescriptor*, GlobalStringKey>				FieldKey;
+			typedef Tuple<Ptr<GuiInstancePropertyInfo>, IPropertyInfo*>		PropertyType;
+			typedef Tuple<Ptr<GuiInstanceEventInfo>, IEventInfo*>			EventType;
+
+			Dictionary<FieldKey, PropertyType>								propertyTypes;
+			Dictionary<FieldKey, EventType>									eventTypes;
+
 		public:
 			static IMethodInfo* GetDefaultConstructor(ITypeDescriptor* typeDescriptor)
 			{
@@ -552,9 +557,9 @@ GuiDefaultInstanceLoader
 				return 0;
 			}
 
-			WString GetTypeName()override
+			GlobalStringKey GetTypeName()override
 			{
-				return L"";
+				return GlobalStringKey::Empty;
 			}
 
 			//***********************************************************************************
@@ -582,7 +587,7 @@ GuiDefaultInstanceLoader
 				return GetDefaultConstructor(typeInfo.typeDescriptor) != 0;
 			}
 
-			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
+			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<GlobalStringKey, description::Value>& constructorArguments)override
 			{
 				if (IMethodInfo* method = GetDefaultConstructor(typeInfo.typeDescriptor))
 				{
@@ -590,7 +595,7 @@ GuiDefaultInstanceLoader
 				}
 				else
 				{
-					env->scope->errors.Add(L"Failed to create \"" + typeInfo.typeName + L"\" because no there is no default constructor.");
+					env->scope->errors.Add(L"Failed to create \"" + typeInfo.typeName.ToString() + L"\" because no there is no default constructor.");
 					return Value();
 				}
 			}
@@ -655,7 +660,7 @@ GuiDefaultInstanceLoader
 			ITypeInfo* GetPropertyReflectionTypeInfo(const PropertyInfo& propertyInfo, GuiInstancePropertyInfo::Support& support)
 			{
 				support = GuiInstancePropertyInfo::NotSupport;
-				IPropertyInfo* prop = propertyInfo.typeInfo.typeDescriptor->GetPropertyByName(propertyInfo.propertyName, true);
+				IPropertyInfo* prop = propertyInfo.typeInfo.typeDescriptor->GetPropertyByName(propertyInfo.propertyName.ToString(), true);
 				if (prop)
 				{
 					ITypeInfo* propType = prop->GetReturn();
@@ -726,12 +731,12 @@ GuiDefaultInstanceLoader
 				return false;
 			}
 
-			void CollectPropertyNames(const TypeInfo& typeInfo, ITypeDescriptor* typeDescriptor, collections::List<WString>& propertyNames)
+			void CollectPropertyNames(const TypeInfo& typeInfo, ITypeDescriptor* typeDescriptor, collections::List<GlobalStringKey>& propertyNames)
 			{
 				vint propertyCount = typeDescriptor->GetPropertyCount();
 				for (vint i = 0; i < propertyCount; i++)
 				{
-					WString propertyName = typeDescriptor->GetProperty(i)->GetName();
+					GlobalStringKey propertyName = GlobalStringKey::Get(typeDescriptor->GetProperty(i)->GetName());
 					if (!propertyNames.Contains(propertyName))
 					{
 						auto info = GetPropertyType(PropertyInfo(typeInfo, propertyName));
@@ -751,34 +756,54 @@ GuiDefaultInstanceLoader
 
 			//***********************************************************************************
 
-			void GetPropertyNames(const TypeInfo& typeInfo, collections::List<WString>& propertyNames)override
+			void GetPropertyNames(const TypeInfo& typeInfo, collections::List<GlobalStringKey>& propertyNames)override
 			{
 				CollectPropertyNames(typeInfo, typeInfo.typeDescriptor, propertyNames);
 			}
 
-			void GetConstructorParameters(const TypeInfo& typeInfo, collections::List<WString>& propertyNames)override
+			void GetConstructorParameters(const TypeInfo& typeInfo, collections::List<GlobalStringKey>& propertyNames)override
 			{
+			}
+
+			PropertyType GetPropertyTypeCached(const PropertyInfo& propertyInfo)
+			{
+				FieldKey key(propertyInfo.typeInfo.typeDescriptor, propertyInfo.propertyName);
+				vint index = propertyTypes.Keys().IndexOf(key);
+				if (index == -1)
+				{
+					GuiInstancePropertyInfo::Support support = GuiInstancePropertyInfo::NotSupport;
+					if (ITypeInfo* propType = GetPropertyReflectionTypeInfo(propertyInfo, support))
+					{
+						Ptr<GuiInstancePropertyInfo> result = new GuiInstancePropertyInfo;
+						result->support = support;
+
+						if (FillPropertyInfo(result, propType))
+						{
+							IPropertyInfo* prop = propertyInfo.typeInfo.typeDescriptor->GetPropertyByName(propertyInfo.propertyName.ToString(), true);
+							PropertyType value(result, prop);
+							propertyTypes.Add(key, value);
+							return value;
+						}
+					}
+					
+					PropertyType value(GuiInstancePropertyInfo::Unsupported(), 0);
+					propertyTypes.Add(key, value);
+					return value;
+				}
+				else
+				{
+					return propertyTypes.Values()[index];
+				}
 			}
 
 			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
 			{
-				GuiInstancePropertyInfo::Support support = GuiInstancePropertyInfo::NotSupport;
-				if (ITypeInfo* propType = GetPropertyReflectionTypeInfo(propertyInfo, support))
-				{
-					Ptr<GuiInstancePropertyInfo> propertyInfo = new GuiInstancePropertyInfo;
-					propertyInfo->support = support;
-
-					if (FillPropertyInfo(propertyInfo, propType))
-					{
-						return propertyInfo;
-					}
-				}
-				return GuiInstancePropertyInfo::Unsupported();
+				return GetPropertyTypeCached(propertyInfo).f0;
 			}
 
 			bool GetPropertyValue(PropertyValue& propertyValue)override
 			{
-				if (IPropertyInfo* prop = propertyValue.typeInfo.typeDescriptor->GetPropertyByName(propertyValue.propertyName, true))
+				if (IPropertyInfo* prop = GetPropertyTypeCached(propertyValue).f1)
 				{
 					if (prop->IsReadable())
 					{
@@ -791,14 +816,14 @@ GuiDefaultInstanceLoader
 
 			bool SetPropertyValue(PropertyValue& propertyValue)override
 			{
-				GuiInstancePropertyInfo::Support support = GuiInstancePropertyInfo::NotSupport;
-				if (GetPropertyReflectionTypeInfo(propertyValue, support))
+				PropertyType propertyType = GetPropertyTypeCached(propertyValue);
+				if (propertyType.f1)
 				{
-					switch (support)
+					switch (propertyType.f0->support)
 					{
 					case GuiInstancePropertyInfo::SupportCollection:
 						{
-							Value value = propertyValue.instanceValue.GetProperty(propertyValue.propertyName);
+							Value value = propertyType.f1->GetValue(propertyValue.instanceValue);
 							if (auto list = dynamic_cast<IValueList*>(value.GetRawPtr()))
 							{
 								list->Add(propertyValue.propertyValue);
@@ -808,7 +833,8 @@ GuiDefaultInstanceLoader
 						break;
 					case GuiInstancePropertyInfo::SupportAssign:
 					case GuiInstancePropertyInfo::SupportArray:
-						propertyValue.instanceValue.SetProperty(propertyValue.propertyName, propertyValue.propertyValue);
+						propertyValue.instanceValue.SetProperty(propertyValue.propertyName.ToString(), propertyValue.propertyValue);
+						propertyType.f1->SetValue(propertyValue.instanceValue, propertyValue.propertyValue);
 						return true;
 					}
 				}
@@ -817,12 +843,12 @@ GuiDefaultInstanceLoader
 
 			//***********************************************************************************
 
-			void CollectEventNames(const TypeInfo& typeInfo, ITypeDescriptor* typeDescriptor, collections::List<WString>& eventNames)
+			void CollectEventNames(const TypeInfo& typeInfo, ITypeDescriptor* typeDescriptor, collections::List<GlobalStringKey>& eventNames)
 			{
 				vint eventCount = typeDescriptor->GetEventCount();
 				for (vint i = 0; i < eventCount; i++)
 				{
-					WString eventName = typeDescriptor->GetEvent(i)->GetName();
+					GlobalStringKey eventName = GlobalStringKey::Get(typeDescriptor->GetEvent(i)->GetName());
 					if (!eventNames.Contains(eventName))
 					{
 						auto info = GetEventType(PropertyInfo(typeInfo, eventName));
@@ -842,59 +868,86 @@ GuiDefaultInstanceLoader
 
 			//***********************************************************************************
 
-			void GetEventNames(const TypeInfo& typeInfo, collections::List<WString>& eventNames)override
+			void GetEventNames(const TypeInfo& typeInfo, collections::List<GlobalStringKey>& eventNames)override
 			{
 				CollectEventNames(typeInfo, typeInfo.typeDescriptor, eventNames);
 			}
 
+			EventType GetEventTypeCached(const PropertyInfo& eventInfo)
+			{
+				FieldKey key(eventInfo.typeInfo.typeDescriptor, eventInfo.propertyName);
+				vint index = eventTypes.Keys().IndexOf(key);
+				if (index == -1)
+				{
+					if (IEventInfo* ev = eventInfo.typeInfo.typeDescriptor->GetEventByName(eventInfo.propertyName.ToString(), true))
+					{
+#ifndef VCZH_DEBUG_NO_REFLECTION
+						auto handlerType = ev->GetHandlerType();
+						if (handlerType->GetDecorator() != ITypeInfo::SharedPtr) goto UNSUPPORTED;
+
+						auto genericType = handlerType->GetElementType();
+						if (genericType->GetDecorator() != ITypeInfo::Generic) goto UNSUPPORTED;
+
+						auto functionType = genericType->GetElementType();
+						if (functionType->GetDecorator() != ITypeInfo::TypeDescriptor) goto UNSUPPORTED;
+						if (functionType->GetTypeDescriptor() != description::GetTypeDescriptor<IValueFunctionProxy>()) goto UNSUPPORTED;
+
+						if (genericType->GetGenericArgumentCount() != 3) goto UNSUPPORTED;
+						auto returnType = genericType->GetGenericArgument(0);
+						auto senderType = genericType->GetGenericArgument(1);
+						auto argumentType = genericType->GetGenericArgument(2);
+					
+						if (returnType->GetDecorator() != ITypeInfo::TypeDescriptor) goto UNSUPPORTED;
+						if (returnType->GetTypeDescriptor() != description::GetTypeDescriptor<VoidValue>()) goto UNSUPPORTED;
+					
+						if (senderType->GetDecorator() != ITypeInfo::RawPtr) goto UNSUPPORTED;
+						senderType = senderType->GetElementType();
+						if (senderType->GetDecorator() != ITypeInfo::TypeDescriptor) goto UNSUPPORTED;
+						if (senderType->GetTypeDescriptor() != description::GetTypeDescriptor<compositions::GuiGraphicsComposition>()) goto UNSUPPORTED;
+					
+						if (argumentType->GetDecorator() != ITypeInfo::RawPtr) goto UNSUPPORTED;
+						argumentType = argumentType->GetElementType();
+						if (argumentType->GetDecorator() != ITypeInfo::TypeDescriptor) goto UNSUPPORTED;
+						if (!argumentType->GetTypeDescriptor()->CanConvertTo(description::GetTypeDescriptor<compositions::GuiEventArgs>())) goto UNSUPPORTED;
+
+						{
+							auto result = GuiInstanceEventInfo::Assign(argumentType->GetTypeDescriptor());
+							EventType value(result, ev);
+							eventTypes.Add(key, value);
+							return value;
+						}
+					UNSUPPORTED:
+						{
+							auto result = GuiInstanceEventInfo::Unsupported();
+							EventType value(result, ev);
+							eventTypes.Add(key, value);
+							return value;
+						}
+#endif
+					}
+
+					EventType value(0, 0);
+					eventTypes.Add(key, value);
+					return value;
+				}
+				else
+				{
+					return eventTypes.Values()[index];
+				}
+			}
+
 			Ptr<GuiInstanceEventInfo> GetEventType(const PropertyInfo& eventInfo)override
 			{
-				if (IEventInfo* ev = eventInfo.typeInfo.typeDescriptor->GetEventByName(eventInfo.propertyName, true))
-				{
-#ifndef VCZH_DEBUG_NO_REFLECTION
-					auto handlerType = ev->GetHandlerType();
-					if (handlerType->GetDecorator() != ITypeInfo::SharedPtr) goto UNSUPPORTED;
-
-					auto genericType = handlerType->GetElementType();
-					if (genericType->GetDecorator() != ITypeInfo::Generic) goto UNSUPPORTED;
-
-					auto functionType = genericType->GetElementType();
-					if (functionType->GetDecorator() != ITypeInfo::TypeDescriptor) goto UNSUPPORTED;
-					if (functionType->GetTypeDescriptor() != description::GetTypeDescriptor<IValueFunctionProxy>()) goto UNSUPPORTED;
-
-					if (genericType->GetGenericArgumentCount() != 3) goto UNSUPPORTED;
-					auto returnType = genericType->GetGenericArgument(0);
-					auto senderType = genericType->GetGenericArgument(1);
-					auto argumentType = genericType->GetGenericArgument(2);
-					
-					if (returnType->GetDecorator() != ITypeInfo::TypeDescriptor) goto UNSUPPORTED;
-					if (returnType->GetTypeDescriptor() != description::GetTypeDescriptor<VoidValue>()) goto UNSUPPORTED;
-					
-					if (senderType->GetDecorator() != ITypeInfo::RawPtr) goto UNSUPPORTED;
-					senderType = senderType->GetElementType();
-					if (senderType->GetDecorator() != ITypeInfo::TypeDescriptor) goto UNSUPPORTED;
-					if (senderType->GetTypeDescriptor() != description::GetTypeDescriptor<compositions::GuiGraphicsComposition>()) goto UNSUPPORTED;
-					
-					if (argumentType->GetDecorator() != ITypeInfo::RawPtr) goto UNSUPPORTED;
-					argumentType = argumentType->GetElementType();
-					if (argumentType->GetDecorator() != ITypeInfo::TypeDescriptor) goto UNSUPPORTED;
-					if (!argumentType->GetTypeDescriptor()->CanConvertTo(description::GetTypeDescriptor<compositions::GuiEventArgs>())) goto UNSUPPORTED;
-
-					return GuiInstanceEventInfo::Assign(argumentType->GetTypeDescriptor());
-
-				UNSUPPORTED:
-#endif
-					return GuiInstanceEventInfo::Unsupported();
-				}
-				return 0;
+				return GetEventTypeCached(eventInfo).f0;
 			}
 
 			bool SetEventValue(PropertyValue& propertyValue)override
 			{
-				auto eventInfo = GetEventType(propertyValue);
-				if (eventInfo && eventInfo->support == GuiInstanceEventInfo::SupportAssign)
+				EventType eventType = GetEventTypeCached(propertyValue);
+				if (eventType.f0 && eventType.f0->support == GuiInstanceEventInfo::SupportAssign)
 				{
-					propertyValue.instanceValue.AttachEvent(propertyValue.propertyName, propertyValue.propertyValue);
+					Ptr<IValueFunctionProxy> proxy=UnboxValue<Ptr<IValueFunctionProxy>>(propertyValue.propertyValue, Description<IValueFunctionProxy>::GetAssociatedTypeDescriptor(), L"function");
+					eventType.f1->Attach(propertyValue.instanceValue, proxy);
 					return true;
 				}
 				return false;
@@ -910,6 +963,7 @@ GuiResourceInstanceLoader
 		protected:
 			Ptr<GuiResource>						resource;
 			Ptr<GuiInstanceContext>					context;
+			GlobalStringKey							contextClassName;
 
 			void InitializeContext(Ptr<GuiResourcePathResolver> resolver, List<WString>& errors)
 			{
@@ -920,28 +974,32 @@ GuiResourceInstanceLoader
 				:resource(_resource)
 				, context(_context)
 			{
+				if (context->className)
+				{
+					contextClassName = GlobalStringKey::Get(context->className.Value());
+				}
 			}
 
-			WString GetTypeName()override
+			GlobalStringKey GetTypeName()override
 			{
-				return context->className.Value();
+				return contextClassName;
 			}
 
 			bool IsCreatable(const TypeInfo& typeInfo)override
 			{
-				return typeInfo.typeName == context->className.Value();
+				return typeInfo.typeName == contextClassName;
 			}
 
-			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
+			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<GlobalStringKey, description::Value>& constructorArguments)override
 			{
-				if (typeInfo.typeName == context->className.Value())
+				if (typeInfo.typeName == contextClassName)
 				{
-					if (auto typeDescriptor = GetGlobalTypeManager()->GetTypeDescriptor(typeInfo.typeName))
+					if (auto typeDescriptor = GetGlobalTypeManager()->GetTypeDescriptor(typeInfo.typeName.ToString()))
 					{
 						InitializeContext(env->resolver, env->scope->errors);
-						SortedList<WString> argumentNames;
+						SortedList<GlobalStringKey> argumentNames;
 						{
-							List<WString> names;
+							List<GlobalStringKey> names;
 							GetConstructorParameters(typeInfo, names);
 							CopyFrom(argumentNames, names);
 						}
@@ -949,13 +1007,13 @@ GuiResourceInstanceLoader
 						for (vint i = 0; i < group->GetMethodCount(); i++)
 						{
 							auto method = group->GetMethod(i);
-							List<WString> parameterNames;
+							List<GlobalStringKey> parameterNames;
 							for (vint j = 0; j < method->GetParameterCount(); j++)
 							{
-								parameterNames.Add(method->GetParameter(j)->GetName());
+								parameterNames.Add(GlobalStringKey::Get(method->GetParameter(j)->GetName()));
 							}
 
-							auto f = [](const WString& a, const WString& b){return WString::Compare(a, b); };
+							auto f = [](GlobalStringKey a, GlobalStringKey b){return GlobalStringKey::Compare(a, b); };
 							if (CompareEnumerable(argumentNames, From(parameterNames).OrderBy(f)) == 0)
 							{
 								Array<Value> arguments(constructorArguments.Count());
@@ -991,12 +1049,12 @@ GuiResourceInstanceLoader
 
 			bool IsInitializable(const TypeInfo& typeInfo)override
 			{
-				return typeInfo.typeName == context->className.Value();
+				return typeInfo.typeName == contextClassName;
 			}
 
 			Ptr<GuiInstanceContextScope> InitializeInstance(const TypeInfo& typeInfo, description::Value instance)override
 			{
-				if (typeInfo.typeName == context->className.Value())
+				if (typeInfo.typeName == contextClassName)
 				{
 					Ptr<GuiResourcePathResolver> resolver = new GuiResourcePathResolver(resource, resource->GetWorkingDirectory());
 					List<WString> errors;
@@ -1015,13 +1073,13 @@ GuiResourceInstanceLoader
 				return 0;
 			}
 
-			void GetConstructorParameters(const TypeInfo& typeInfo, collections::List<WString>& propertyNames)
+			void GetConstructorParameters(const TypeInfo& typeInfo, collections::List<GlobalStringKey>& propertyNames)
 			{
-				if (typeInfo.typeName == context->className.Value())
+				if (typeInfo.typeName == contextClassName)
 				{
 					FOREACH(Ptr<GuiInstanceParameter>, parameter, context->parameters)
 					{
-						if (description::GetTypeDescriptor(parameter->className))
+						if (description::GetTypeDescriptor(parameter->className.ToString()))
 						{
 							propertyNames.Add(parameter->name);
 						}
@@ -1031,13 +1089,13 @@ GuiResourceInstanceLoader
 
 			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)
 			{
-				if (propertyInfo.typeInfo.typeName == context->className.Value())
+				if (propertyInfo.typeInfo.typeName == contextClassName)
 				{
 					FOREACH(Ptr<GuiInstanceParameter>, parameter, context->parameters)
 					{
 						if (parameter->name == propertyInfo.propertyName)
 						{
-							if (auto td = description::GetTypeDescriptor(parameter->className))
+							if (auto td = description::GetTypeDescriptor(parameter->className.ToString()))
 							{
 								auto info = GuiInstancePropertyInfo::Assign(td);
 								info->required = true;
@@ -1065,16 +1123,16 @@ GuiInstanceLoaderManager
 		class GuiInstanceLoaderManager : public Object, public IGuiInstanceLoaderManager, public IGuiPlugin
 		{
 		protected:
-			typedef Dictionary<WString, Ptr<IGuiInstanceBinder>>				BinderMap;
-			typedef Dictionary<WString, Ptr<IGuiInstanceEventBinder>>			EventBinderMap;
-			typedef Dictionary<WString, Ptr<IGuiInstanceBindingContextFactory>>	BindingContextFactoryMap;
-			typedef Dictionary<WString, Ptr<IGuiInstanceCacheResolver>>			CacheResolverMap;
+			typedef Dictionary<GlobalStringKey, Ptr<IGuiInstanceBinder>>				BinderMap;
+			typedef Dictionary<GlobalStringKey, Ptr<IGuiInstanceEventBinder>>			EventBinderMap;
+			typedef Dictionary<GlobalStringKey, Ptr<IGuiInstanceBindingContextFactory>>	BindingContextFactoryMap;
+			typedef Dictionary<GlobalStringKey, Ptr<IGuiInstanceCacheResolver>>			CacheResolverMap;
 
 			struct VirtualTypeInfo
 			{
-				WString								typeName;
+				GlobalStringKey						typeName;
 				ITypeDescriptor*					typeDescriptor;
-				WString								parentTypeName;				// for virtual type only
+				GlobalStringKey						parentTypeName;				// for virtual type only
 				Ptr<IGuiInstanceLoader>				loader;
 
 				List<ITypeDescriptor*>				parentTypes;				// all direct or indirect base types that does not has a type info
@@ -1085,8 +1143,8 @@ GuiInstanceLoaderManager
 				{
 				}
 			};
-			typedef Dictionary<WString, Ptr<VirtualTypeInfo>>					VirtualTypeInfoMap;
-			typedef Dictionary<WString, Ptr<GuiResource>>						ResourceMap;
+			typedef Dictionary<GlobalStringKey, Ptr<VirtualTypeInfo>>					VirtualTypeInfoMap;
+			typedef Dictionary<WString, Ptr<GuiResource>>								ResourceMap;
 
 			Ptr<IGuiInstanceLoader>					rootLoader;
 			BinderMap								binders;
@@ -1096,16 +1154,16 @@ GuiInstanceLoaderManager
 			VirtualTypeInfoMap						typeInfos;
 			ResourceMap								resources;
 
-			bool IsTypeExists(const WString& name)
+			bool IsTypeExists(GlobalStringKey name)
 			{
-				return GetGlobalTypeManager()->GetTypeDescriptor(name) != 0 || typeInfos.Keys().Contains(name);
+				return GetGlobalTypeManager()->GetTypeDescriptor(name.ToString()) != 0 || typeInfos.Keys().Contains(name);
 			}
 
 			void FindParentTypeInfos(Ptr<VirtualTypeInfo> typeInfo, ITypeDescriptor* searchType)
 			{
 				if (searchType != typeInfo->typeDescriptor)
 				{
-					vint index = typeInfos.Keys().IndexOf(searchType->GetTypeName());
+					vint index = typeInfos.Keys().IndexOf(GlobalStringKey::Get(searchType->GetTypeName()));
 					if (index == -1)
 					{
 						typeInfo->parentTypes.Add(searchType);
@@ -1136,7 +1194,7 @@ GuiInstanceLoaderManager
 					vint index = typeInfos.Keys().IndexOf(typeInfo->parentTypeName);
 					if (index == -1)
 					{
-						searchType = GetGlobalTypeManager()->GetTypeDescriptor(typeInfo->parentTypeName);
+						searchType = GetGlobalTypeManager()->GetTypeDescriptor(typeInfo->parentTypeName.ToString());
 						typeInfo->typeDescriptor = searchType;
 						typeInfo->parentTypes.Add(searchType);
 					}
@@ -1157,7 +1215,7 @@ GuiInstanceLoaderManager
 
 			IGuiInstanceLoader* GetLoaderFromType(ITypeDescriptor* typeDescriptor)
 			{
-				vint index = typeInfos.Keys().IndexOf(typeDescriptor->GetTypeName());
+				vint index = typeInfos.Keys().IndexOf(GlobalStringKey::Get(typeDescriptor->GetTypeName()));
 				if (index == -1)
 				{
 					vint count = typeDescriptor->GetBaseTypeDescriptorCount();
@@ -1175,15 +1233,19 @@ GuiInstanceLoaderManager
 				}
 			}
 
-			void GetClassesInResource(Ptr<GuiResourceFolder> folder, Dictionary<WString, Ptr<GuiInstanceContext>>& classes)
+			void GetClassesInResource(Ptr<GuiResourceFolder> folder, Dictionary<GlobalStringKey, Ptr<GuiInstanceContext>>& classes)
 			{
 				FOREACH(Ptr<GuiResourceItem>, item, folder->GetItems())
 				{
 					if (auto context = item->GetContent().Cast<GuiInstanceContext>())
 					{
-						if (context->className && !classes.Keys().Contains(context->className.Value()))
+						if (context->className)
 						{
-							classes.Add(context->className.Value(), context);
+							auto contextClassName = GlobalStringKey::Get(context->className.Value());
+							if (!classes.Keys().Contains(contextClassName))
+							{
+								classes.Add(contextClassName, context);
+							}
 						}
 					}
 				}
@@ -1229,7 +1291,7 @@ GuiInstanceLoaderManager
 				return true;
 			}
 
-			IGuiInstanceBindingContextFactory* GetInstanceBindingContextFactory(const WString& contextName)override
+			IGuiInstanceBindingContextFactory* GetInstanceBindingContextFactory(GlobalStringKey contextName)override
 			{
 				vint index = bindingContextFactories.Keys().IndexOf(contextName);
 				return index == -1 ? 0 : bindingContextFactories.Values()[index].Obj();
@@ -1242,7 +1304,7 @@ GuiInstanceLoaderManager
 				return true;
 			}
 
-			IGuiInstanceBinder* GetInstanceBinder(const WString& bindingName)override
+			IGuiInstanceBinder* GetInstanceBinder(GlobalStringKey bindingName)override
 			{
 				vint index = binders.Keys().IndexOf(bindingName);
 				return index == -1 ? 0 : binders.Values()[index].Obj();
@@ -1255,7 +1317,7 @@ GuiInstanceLoaderManager
 				return true;
 			}
 
-			IGuiInstanceEventBinder* GetInstanceEventBinder(const WString& bindingName)override
+			IGuiInstanceEventBinder* GetInstanceEventBinder(GlobalStringKey bindingName)override
 			{
 				vint index = eventBinders.Keys().IndexOf(bindingName);
 				return index == -1 ? 0 : eventBinders.Values()[index].Obj();
@@ -1268,13 +1330,13 @@ GuiInstanceLoaderManager
 				return true;
 			}
 
-			IGuiInstanceCacheResolver* GetInstanceCacheResolver(const WString& cacheTypeName)override
+			IGuiInstanceCacheResolver* GetInstanceCacheResolver(GlobalStringKey cacheTypeName)override
 			{
 				vint index = cacheResolvers.Keys().IndexOf(cacheTypeName);
 				return index == -1 ? 0 : cacheResolvers.Values()[index].Obj();
 			}
 
-			bool CreateVirtualType(const WString& parentType, Ptr<IGuiInstanceLoader> loader)override
+			bool CreateVirtualType(GlobalStringKey parentType, Ptr<IGuiInstanceLoader> loader)override
 			{
 				if (IsTypeExists(loader->GetTypeName()) || !IsTypeExists(parentType)) return false;
 
@@ -1293,7 +1355,7 @@ GuiInstanceLoaderManager
 				vint index = typeInfos.Keys().IndexOf(loader->GetTypeName());
 				if (index != -1) return false;
 
-				ITypeDescriptor* typeDescriptor = GetGlobalTypeManager()->GetTypeDescriptor(loader->GetTypeName());
+				ITypeDescriptor* typeDescriptor = GetGlobalTypeManager()->GetTypeDescriptor(loader->GetTypeName().ToString());
 				if (typeDescriptor == 0) return false;
 
 				Ptr<VirtualTypeInfo> typeInfo = new VirtualTypeInfo;
@@ -1314,7 +1376,7 @@ GuiInstanceLoaderManager
 				return true;
 			}
 
-			IGuiInstanceLoader* GetLoader(const WString& typeName)override
+			IGuiInstanceLoader* GetLoader(GlobalStringKey typeName)override
 			{
 				vint index = typeInfos.Keys().IndexOf(typeName);
 				if (index != -1)
@@ -1322,7 +1384,7 @@ GuiInstanceLoaderManager
 					return typeInfos.Values()[index]->loader.Obj();
 				}
 
-				ITypeDescriptor* typeDescriptor = GetGlobalTypeManager()->GetTypeDescriptor(typeName);
+				ITypeDescriptor* typeDescriptor = GetGlobalTypeManager()->GetTypeDescriptor(typeName.ToString());
 				if (typeDescriptor)
 				{
 					IGuiInstanceLoader* loader = GetLoaderFromType(typeDescriptor);
@@ -1346,26 +1408,26 @@ GuiInstanceLoaderManager
 				return 0;
 			}
 
-			description::ITypeDescriptor* GetTypeDescriptorForType(const WString& typeName)override
+			description::ITypeDescriptor* GetTypeDescriptorForType(GlobalStringKey typeName)override
 			{
 				vint index = typeInfos.Keys().IndexOf(typeName);
 				return index == -1
-					? GetGlobalTypeManager()->GetTypeDescriptor(typeName)
+					? GetGlobalTypeManager()->GetTypeDescriptor(typeName.ToString())
 					: typeInfos.Values()[index]->typeDescriptor;
 			}
 
-			void GetVirtualTypes(collections::List<WString>& typeNames)override
+			void GetVirtualTypes(collections::List<GlobalStringKey>& typeNames)override
 			{
 				for (vint i = 0; i < typeInfos.Count(); i++)
 				{
-					if (typeInfos.Values()[i]->parentTypeName != L"")
+					if (typeInfos.Values()[i]->parentTypeName != GlobalStringKey::Empty)
 					{
 						typeNames.Add(typeInfos.Keys()[i]);
 					}
 				}
 			}
 
-			WString GetParentTypeForVirtualType(const WString& virtualType)override
+			GlobalStringKey GetParentTypeForVirtualType(GlobalStringKey virtualType)override
 			{
 				vint index = typeInfos.Keys().IndexOf(virtualType);
 				if (index != -1)
@@ -1373,7 +1435,7 @@ GuiInstanceLoaderManager
 					auto typeInfo = typeInfos.Values()[index];
 					return typeInfo->parentTypeName;
 				}
-				return L"";
+				return GlobalStringKey::Empty;
 			}
 
 			bool SetResource(const WString& name, Ptr<GuiResource> resource)override
@@ -1382,13 +1444,14 @@ GuiInstanceLoaderManager
 				if (index != -1) return false;
 
 				Ptr<GuiResourcePathResolver> resolver = new GuiResourcePathResolver(resource, resource->GetWorkingDirectory());
-				Dictionary<WString, Ptr<GuiInstanceContext>> classes;
-				Dictionary<WString, WString> parentTypes;
+				Dictionary<GlobalStringKey, Ptr<GuiInstanceContext>> classes;
+				Dictionary<GlobalStringKey, GlobalStringKey> parentTypes;
 				GetClassesInResource(resource, classes);
 
 				FOREACH(Ptr<GuiInstanceContext>, context, classes.Values())
 				{
-					if (typeInfos.Keys().Contains(context->className.Value()))
+					auto contextClassName = GlobalStringKey::Get(context->className.Value());
+					if (typeInfos.Keys().Contains(contextClassName))
 					{
 						return false;
 					}
@@ -1397,11 +1460,11 @@ GuiInstanceLoaderManager
 					auto loadingSource = FindInstanceLoadingSource(env->context, context->instance.Obj());
 					if (loadingSource.loader)
 					{
-						parentTypes.Add(context->className.Value(), loadingSource.typeName);
+						parentTypes.Add(contextClassName, loadingSource.typeName);
 					}
 				}
 				
-				FOREACH(WString, className, classes.Keys())
+				FOREACH(GlobalStringKey, className, classes.Keys())
 				{
 					auto context = classes[className];
 					vint index = parentTypes.Keys().IndexOf(className);
@@ -1483,7 +1546,7 @@ Helper Functions Declarations
 		bool LoadInstancePropertyValue(
 			Ptr<GuiInstanceEnvironment> env,
 			GuiAttSetterRepr* attSetter,
-			const WString& binding,
+			GlobalStringKey binding,
 			IGuiInstanceLoader::PropertyValue propertyValue,
 			List<Ptr<GuiValueRepr>>& input,
 			IGuiInstanceLoader* propertyLoader,
@@ -1499,7 +1562,7 @@ Helper Functions Declarations
 			GuiAttSetterRepr* attSetter,
 			IGuiInstanceLoader* loader,
 			bool skipDefaultProperty,
-			const WString& typeName,
+			GlobalStringKey typeName,
 			List<FillInstanceBindingSetter>& bindingSetters,
 			List<FillInstanceEventSetter>& eventSetters
 			);
@@ -1508,7 +1571,7 @@ Helper Functions Declarations
 			Ptr<GuiInstanceEnvironment> env,
 			GuiConstructorRepr* ctor,
 			description::ITypeDescriptor* expectedType,
-			WString& typeName,
+			GlobalStringKey& typeName,
 			List<FillInstanceBindingSetter>& bindingSetters,
 			List<FillInstanceEventSetter>& eventSetters,
 			bool isRootInstance
@@ -1520,9 +1583,9 @@ Helper Functions Declarations
 
 		bool PrepareBindingContext(
 			Ptr<GuiInstanceEnvironment> env,
-			collections::List<WString>& contextNames,
+			collections::List<GlobalStringKey>& contextNames,
 			const WString& dependerType,
-			const WString& dependerName
+			const GlobalStringKey& dependerName
 			);
 
 		void ExecuteBindingSetters(
@@ -1540,7 +1603,7 @@ Helper Functions Declarations
 			Ptr<GuiInstanceEnvironment> env,
 			GuiConstructorRepr* ctor,
 			IGuiInstanceLoader* instanceLoader,
-			const WString& typeName,
+			GlobalStringKey typeName,
 			description::Value instance,
 			bool deserialized,
 			List<FillInstanceBindingSetter>& bindingSetters,
@@ -1607,7 +1670,7 @@ LoadValueVisitor
 					vint errorCount = env->scope->errors.Count();
 					FOREACH(ITypeDescriptor*, typeDescriptor, acceptableTypes)
 					{
-						WString _typeName;
+						GlobalStringKey _typeName;
 						loadedValue = CreateInstance(env, repr, typeDescriptor, _typeName, bindingSetters, eventSetters, false);
 						if (!loadedValue.IsNull())
 						{
@@ -1654,7 +1717,7 @@ FindInstanceLoadingSource
 				Ptr<GuiInstanceContext::NamespaceInfo> namespaceInfo=context->namespaces.Values()[index];
 				FOREACH(Ptr<GuiInstanceNamespace>, ns, namespaceInfo->namespaces)
 				{
-					WString fullName = ns->prefix + ctor->typeName + ns->postfix;
+					auto fullName = GlobalStringKey::Get(ns->prefix + ctor->typeName.ToString() + ns->postfix);
 					IGuiInstanceLoader* loader = GetInstanceLoaderManager()->GetLoader(fullName);
 					if(loader)
 					{
@@ -1672,7 +1735,7 @@ LoadInstancePropertyValue
 		bool LoadInstancePropertyValue(
 			Ptr<GuiInstanceEnvironment> env,
 			GuiAttSetterRepr* attSetter,
-			const WString& binding,
+			GlobalStringKey binding,
 			IGuiInstanceLoader::PropertyValue propertyValue,
 			List<Ptr<GuiValueRepr>>& input,
 			IGuiInstanceLoader* propertyLoader,
@@ -1682,15 +1745,16 @@ LoadInstancePropertyValue
 			List<FillInstanceEventSetter>& eventSetters
 			)
 		{
-			WString instanceType;
+			GlobalStringKey instanceType;
 			if (propertyValue.instanceValue.IsNull())
 			{
 				instanceType = propertyLoader->GetTypeName();
 			}
 			else
 			{
-				instanceType = propertyValue.instanceValue.GetTypeDescriptor()->GetTypeName();
+				instanceType = GlobalStringKey::Get(propertyValue.instanceValue.GetTypeDescriptor()->GetTypeName());
 			}
+
 			vint loadedValueCount = 0;
 			// try to look for a loader to handle this property
 			while (propertyLoader && loadedValueCount < input.Count())
@@ -1705,7 +1769,7 @@ LoadInstancePropertyValue
 					{
 						env->scope->errors.Add(
 							L"Property \"" +
-							propertyValue.propertyName +
+							propertyValue.propertyName.ToString() +
 							L"\" of type \"" +
 							propertyValue.instanceValue.GetTypeDescriptor()->GetTypeName() +
 							L"\" is not supported.");
@@ -1719,20 +1783,20 @@ LoadInstancePropertyValue
 						{
 							env->scope->errors.Add(
 								L"Collection property \"" +
-								propertyValue.propertyName +
+								propertyValue.propertyName.ToString() +
 								L"\" of type \"" +
-								instanceType +
+								instanceType.ToString() +
 								L"\" can only be assigned with a single value.");
 							return false;
 						}
 						if (constructorArgument) return false;
-						if (binding != L"set")
+						if (binding != GlobalStringKey::_Set)
 						{
 							env->scope->errors.Add(
 								L"Collection property \"" +
-								propertyValue.propertyName +
+								propertyValue.propertyName.ToString() +
 								L"\" of type \"" +
-								instanceType +
+								instanceType.ToString() +
 								L"\" can only be retrived using binding \"set\".");
 							return false;
 						}
@@ -1746,23 +1810,24 @@ LoadInstancePropertyValue
 									loadedValueCount++;
 
 									ITypeDescriptor* propertyTypeDescriptor=propertyValue.propertyValue.GetRawPtr()->GetTypeDescriptor();
-									IGuiInstanceLoader* propertyInstanceLoader=GetInstanceLoaderManager()->GetLoader(propertyTypeDescriptor->GetTypeName());
+									auto propertyTypeKey = GlobalStringKey::Get(propertyTypeDescriptor->GetTypeName());
+									IGuiInstanceLoader* propertyInstanceLoader=GetInstanceLoaderManager()->GetLoader(propertyTypeKey);
 									if(propertyInstanceLoader)
 									{
-										FillInstance(propertyValue.propertyValue, env, propertyAttSetter.Obj(), propertyInstanceLoader, false, propertyTypeDescriptor->GetTypeName(), bindingSetters, eventSetters);
+										FillInstance(propertyValue.propertyValue, env, propertyAttSetter.Obj(), propertyInstanceLoader, false, propertyTypeKey, bindingSetters, eventSetters);
 									}
 								}
 							}
 						}
 						break;
 					case GuiInstancePropertyInfo::SupportCollection:
-						if (binding != L"")
+						if (binding != GlobalStringKey::Empty)
 						{
 							env->scope->errors.Add(
 								L"Collection property \"" +
-								propertyValue.propertyName +
+								propertyValue.propertyName.ToString() +
 								L"\" of type \"" +
-								instanceType +
+								instanceType.ToString() +
 								L"\" cannot be assigned using binding.");
 							return false;
 						}
@@ -1792,19 +1857,19 @@ LoadInstancePropertyValue
 						{
 							env->scope->errors.Add(
 								L"Assignable property \"" +
-								propertyValue.propertyName +
+								propertyValue.propertyName.ToString() +
 								L"\" of type \"" +
-								instanceType +
+								instanceType.ToString() +
 								L"\" cannot be assigned using multiple values.");
 							return false;
 						}
-						if (binding == L"set")
+						if (binding == GlobalStringKey::_Set)
 						{
 							env->scope->errors.Add(
 								L"Assignable property \"" +
-								propertyValue.propertyName +
+								propertyValue.propertyName.ToString() +
 								L"\" of type \"" +
-								instanceType +
+								instanceType.ToString() +
 								L"\" cannot be retrived using binding \"set\".");
 							return false;
 						}
@@ -1814,7 +1879,7 @@ LoadInstancePropertyValue
 								if (valueRepr)
 								{
 									bool canRemoveLoadedValue = false;
-									if (binding == L"")
+									if (binding == GlobalStringKey::Empty)
 									{
 										// default binding: set the value directly
 										if (LoadValueVisitor::LoadValue(valueRepr, env, propertyInfo->acceptableTypes, bindingSetters, eventSetters, propertyValue.propertyValue))
@@ -1825,7 +1890,7 @@ LoadInstancePropertyValue
 									}
 									else if (IGuiInstanceBinder* binder=GetInstanceLoaderManager()->GetInstanceBinder(binding))
 									{
-										List<WString> contextNames;
+										List<GlobalStringKey> contextNames;
 										binder->GetRequiredContexts(contextNames);
 										bool success = PrepareBindingContext(env, contextNames, L"property binding", binder->GetBindingName());
 
@@ -1844,11 +1909,11 @@ LoadInstancePropertyValue
 													{
 														env->scope->errors.Add(
 															L"Assignable property \"" +
-															propertyValue.propertyName +
+															propertyValue.propertyName.ToString() +
 															L"\" of type \"" +
-															instanceType +
+															instanceType.ToString() +
 															L"\" cannot be assigned using binding \"" +
-															binding +
+															binding.ToString() +
 															L"\" because the value translation failed.");
 													}
 													else
@@ -1872,11 +1937,11 @@ LoadInstancePropertyValue
 									{
 										env->scope->errors.Add(
 											L"Assignable property \"" +
-											propertyValue.propertyName +
+											propertyValue.propertyName.ToString() +
 											L"\" of type \"" +
-											instanceType +
+											instanceType.ToString() +
 											L"\" cannot be assigned using binding \"" +
-											binding +
+											binding.ToString() +
 											L"\" because the appropriate IGuiInstanceBinder for this binding cannot be found.");
 									}
 
@@ -1890,13 +1955,13 @@ LoadInstancePropertyValue
 						}
 						break;
 					case GuiInstancePropertyInfo::SupportArray:
-						if (binding != L"")
+						if (binding != GlobalStringKey::Empty)
 						{
 							env->scope->errors.Add(
 								L"Array property \"" +
-								propertyValue.propertyName +
+								propertyValue.propertyName.ToString() +
 								L"\" of type \"" +
-								instanceType +
+								instanceType.ToString() +
 								L"\" cannot be assigned using binding.");
 							return false;
 						}
@@ -1947,7 +2012,7 @@ FillInstance
 			GuiAttSetterRepr* attSetter,
 			IGuiInstanceLoader* loader,
 			bool skipDefaultProperty,
-			const WString& typeName,
+			GlobalStringKey typeName,
 			List<FillInstanceBindingSetter>& bindingSetters,
 			List<FillInstanceEventSetter>& eventSetters
 			)
@@ -1956,8 +2021,8 @@ FillInstance
 			// reverse loop to set the default property (name == L"") after all other properties
 			for (vint i = attSetter->setters.Count() - 1; i >= 0; i--)
 			{
-				WString propertyName=attSetter->setters.Keys()[i];
-				if (propertyName == L"" && skipDefaultProperty)
+				GlobalStringKey propertyName = attSetter->setters.Keys()[i];
+				if (propertyName == GlobalStringKey::Empty && skipDefaultProperty)
 				{
 					continue;
 				}
@@ -1977,7 +2042,7 @@ FillInstance
 				LoadInstancePropertyValue(env, attSetter, propertyValue->binding, cachedPropertyValue, input, propertyLoader, false, output, bindingSetters, eventSetters);
 
 				// if there is no binding, set all values into the specified property
-				if (propertyValue->binding == L"")
+				if (propertyValue->binding == GlobalStringKey::Empty)
 				{
 					for (vint i = 0; i < output.Count(); i++)
 					{
@@ -1993,7 +2058,7 @@ FillInstance
 			}
 
 			// attach events
-			FOREACH_INDEXER(WString, eventName, index, attSetter->eventHandlers.Keys())
+			FOREACH_INDEXER(GlobalStringKey, eventName, index, attSetter->eventHandlers.Keys())
 			{
 				auto handler = attSetter->eventHandlers.Values()[index];
 
@@ -2021,20 +2086,20 @@ FillInstance
 				}
 
 				IGuiInstanceEventBinder* binder = 0;
-				if (handler->binding != L"")
+				if (handler->binding != GlobalStringKey::Empty)
 				{
 					binder = GetInstanceLoaderManager()->GetInstanceEventBinder(handler->binding);
 					if (!binder)
 					{
 						env->scope->errors.Add(
 							L"Failed to attach event \"" +
-							eventName +
+							eventName.ToString() +
 							L"\" of type \"" +
-							typeName +
+							typeName.ToString() +
 							L"\" with the handler \"" +
 							handler->value +
 							L"\" using event binding \"" +
-							handler->binding +
+							handler->binding.ToString() +
 							L"\" because the appropriate IGuiInstanceEventBinder for this binding cannot be found.");
 						continue;
 					}
@@ -2057,13 +2122,13 @@ FillInstance
 				{
 					env->scope->errors.Add(
 						L"Failed to attach event \"" +
-						eventName +
+						eventName.ToString() +
 						L"\" of type \"" +
-						typeName +
+						typeName.ToString() +
 						L"\" with the handler \"" +
 						handler->value +
 						L"\" using event binding \"" +
-						handler->binding +
+						handler->binding.ToString() +
 						L"\" because no IGuiInstanceLoader supports this event.");
 				}
 			}
@@ -2077,7 +2142,7 @@ CreateInstance
 			Ptr<GuiInstanceEnvironment> env,
 			GuiConstructorRepr* ctor,
 			description::ITypeDescriptor* expectedType,
-			WString& typeName,
+			GlobalStringKey& typeName,
 			List<FillInstanceBindingSetter>& bindingSetters,
 			List<FillInstanceEventSetter>& eventSetters,
 			bool isRootInstance
@@ -2100,7 +2165,7 @@ CreateInstance
 				// see if the constructor contains only a single text value
 				Ptr<GuiTextRepr> singleTextValue;
 				{
-					vint index = ctor->setters.Keys().IndexOf(L"");
+					vint index = ctor->setters.Keys().IndexOf(GlobalStringKey::Empty);
 					if (index != -1)
 					{
 						auto setterValue = ctor->setters.Values()[index];
@@ -2138,7 +2203,7 @@ CreateInstance
 							{
 								env->scope->errors.Add(
 									L"Failed to deserialize object of type \"" +
-									source.typeName +
+									source.typeName.ToString() +
 									L"\" from string \"" +
 									singleTextValue->text +
 									L"\".");
@@ -2148,13 +2213,13 @@ CreateInstance
 						{
 							foundLoader = true;
 							// find all constructor parameters
-							List<WString> constructorParameters;
-							List<WString> requiredParameters;
+							List<GlobalStringKey> constructorParameters;
+							List<GlobalStringKey> requiredParameters;
 							loader->GetConstructorParameters(typeInfo, constructorParameters);
 							
 							// see if all parameters exists
-							Group<WString, Value> constructorArguments;
-							FOREACH(WString, propertyName, constructorParameters)
+							Group<GlobalStringKey, Value> constructorArguments;
+							FOREACH(GlobalStringKey, propertyName, constructorParameters)
 							{
 								IGuiInstanceLoader::PropertyInfo propertyInfo(typeInfo, propertyName);
 								auto info = loader->GetPropertyType(propertyInfo);
@@ -2169,9 +2234,9 @@ CreateInstance
 											// if a required parameter doesn't exist, fail
 											env->scope->errors.Add(
 												L"Failed to create object of type \"" +
-												source.typeName +
+												source.typeName.ToString() +
 												L"\" because the required constructor parameter \"" +
-												propertyName +
+												propertyName.ToString() +
 												L"\" is missing.");
 											goto SKIP_CREATE_INSTANCE;
 										}
@@ -2181,7 +2246,7 @@ CreateInstance
 									if (index != -1)
 									{
 										auto setterValue = ctor->setters.Values()[index];
-										if (setterValue->binding != L"")
+										if (setterValue->binding != GlobalStringKey::Empty)
 										{
 											if (IGuiInstanceBinder* binder = GetInstanceLoaderManager()->GetInstanceBinder(setterValue->binding))
 											{
@@ -2190,11 +2255,11 @@ CreateInstance
 													// if the constructor argument uses binding, fail
 													env->scope->errors.Add(
 														L"Failed to create object of type \"" +
-														source.typeName +
+														source.typeName.ToString() +
 														L"\" because the required constructor parameter \"" +
-														propertyName +
+														propertyName.ToString() +
 														L"\" is not allowed to use binding \"" +
-														setterValue->binding +
+														setterValue->binding.ToString() +
 														L"\" which does not applicable to constructor parameters.");
 													goto SKIP_CREATE_INSTANCE;
 												}
@@ -2203,11 +2268,11 @@ CreateInstance
 											{
 												env->scope->errors.Add(
 													L"Failed to create object of type \"" +
-													source.typeName +
+													source.typeName.ToString() +
 													L"\" because the required constructor parameter \"" +
-													propertyName +
+													propertyName.ToString() +
 													L"\" is not allowed to use binding \"" +
-													setterValue->binding +
+													setterValue->binding.ToString() +
 													L"\" because the appropriate IGuiInstanceBinder for this binding cannot be found.");
 												goto SKIP_CREATE_INSTANCE;
 											}
@@ -2230,15 +2295,15 @@ CreateInstance
 							}
 							
 							// check if all required parameters exist
-							FOREACH(WString, propertyName, requiredParameters)
+							FOREACH(GlobalStringKey, propertyName, requiredParameters)
 							{
 								if (!constructorArguments.Contains(propertyName))
 								{
 									env->scope->errors.Add(
 										L"Failed to create object of type \"" +
-										source.typeName +
+										source.typeName.ToString() +
 										L"\" because the required constructor parameter \"" +
-										propertyName +
+										propertyName.ToString() +
 										L"\" is missing.");
 									goto SKIP_CREATE_INSTANCE;
 								}
@@ -2266,7 +2331,7 @@ CreateInstance
 					{
 						env->scope->errors.Add(
 							L"Failed to create object of type \"" +
-							source.typeName +
+							source.typeName.ToString() +
 							L"\".");
 					}
 				}
@@ -2274,7 +2339,7 @@ CreateInstance
 				{
 					env->scope->errors.Add(
 						L"Failed to create object of type \"" +
-						source.typeName +
+						source.typeName.ToString() +
 						L"\" because the expected type is \"" +
 						expectedType->GetTypeName() +
 						L"\".");
@@ -2294,9 +2359,9 @@ CreateInstance
 					auto contextCtor = source.context->instance;
 					env->scope->errors.Add(
 						L"Failed to find type \"" +
-						(contextCtor->typeNamespace == L"" 
-							? contextCtor->typeName
-							: contextCtor->typeNamespace + L":" + contextCtor->typeName
+						(contextCtor->typeNamespace == GlobalStringKey::Empty
+							? contextCtor->typeName.ToString()
+							: contextCtor->typeNamespace.ToString() + L":" + contextCtor->typeName.ToString()
 							) +
 						L"\".");
 				}
@@ -2305,9 +2370,9 @@ CreateInstance
 			{
 				env->scope->errors.Add(
 					L"Failed to find type \"" +
-					(ctor->typeNamespace == L"" 
-						? ctor->typeName
-						: ctor->typeNamespace + L":" + ctor->typeName
+					(ctor->typeNamespace == GlobalStringKey::Empty
+						? ctor->typeName.ToString()
+						: ctor->typeNamespace.ToString() + L":" + ctor->typeName.ToString()
 						) +
 					L"\".");
 			}
@@ -2333,28 +2398,28 @@ ExecuteBindingSetters
 			auto td = env->scope->rootInstance.GetTypeDescriptor();
 			FOREACH(Ptr<GuiInstanceParameter>, parameter, env->context->parameters)
 			{
-				auto info = td->GetPropertyByName(parameter->name, true);
+				auto info = td->GetPropertyByName(parameter->name.ToString(), true);
 				if (!info)
 				{
-					env->scope->errors.Add(L"Cannot find parameter \"" + parameter->name + L"\" in properties of \"" + td->GetTypeName() + L"\".");
+					env->scope->errors.Add(L"Cannot find parameter \"" + parameter->name.ToString() + L"\" in properties of \"" + td->GetTypeName() + L"\".");
 					continue;
 				}
 
-				auto parameterTd = GetTypeDescriptor(parameter->className);
+				auto parameterTd = GetTypeDescriptor(parameter->className.ToString());
 				if (!parameterTd)
 				{
-					env->scope->errors.Add(L"Cannot find type \"" + parameter->className + L"\" of parameter \"" + parameter->name + L"\".");
+					env->scope->errors.Add(L"Cannot find type \"" + parameter->className.ToString() + L"\" of parameter \"" + parameter->name.ToString() + L"\".");
 				}
 
 				auto value = info->GetValue(env->scope->rootInstance);
 				if (parameterTd && !value.GetTypeDescriptor()->CanConvertTo(parameterTd))
 				{
-					env->scope->errors.Add(L"Value of parameter \"" + parameter->name + L"\" is not \"" + parameterTd->GetTypeName() + L"\" which is required.");
+					env->scope->errors.Add(L"Value of parameter \"" + parameter->name.ToString() + L"\" is not \"" + parameterTd->GetTypeName() + L"\" which is required.");
 				}
 
 				if (env->scope->referenceValues.Keys().Contains(parameter->name))
 				{
-					env->scope->errors.Add(L"Parameter \"" + parameter->name + L"\" conflict with an existing named object.");
+					env->scope->errors.Add(L"Parameter \"" + parameter->name.ToString() + L"\" conflict with an existing named object.");
 				}
 				else
 				{
@@ -2369,13 +2434,13 @@ ExecuteBindingSetters
 
 		bool PrepareBindingContext(
 			Ptr<GuiInstanceEnvironment> env,
-			collections::List<WString>& contextNames,
+			collections::List<GlobalStringKey>& contextNames,
 			const WString& dependerType,
-			const WString& dependerName
+			const GlobalStringKey& dependerName
 			)
 		{
 			bool success = true;
-			FOREACH(WString, contextName, contextNames)
+			FOREACH(GlobalStringKey, contextName, contextNames)
 			{
 				if (!env->scope->bindingContexts.Keys().Contains(contextName))
 				{
@@ -2388,11 +2453,11 @@ ExecuteBindingSetters
 					{
 						env->scope->errors.Add(
 							L"Failed to create binding context \"" +
-							contextName +
+							contextName.ToString() +
 							L"\" which is required by " +
 							dependerType +
 							L" \"" +
-							dependerName +
+							dependerName.ToString() +
 							L"\".");
 						success = false;
 					}
@@ -2409,15 +2474,15 @@ ExecuteBindingSetters
 			// set all binding attributes
 			FOREACH(FillInstanceBindingSetter, bindingSetter, bindingSetters)
 			{
-				List<WString> contextNames;
+				List<GlobalStringKey> contextNames;
 				bindingSetter.binder->GetRequiredContexts(contextNames);
 				bool success = PrepareBindingContext(env, contextNames, L"property binding", bindingSetter.binder->GetBindingName());
 
 				if (bindingSetter.binder->RequireInstanceName())
 				{
-					if (!bindingSetter.bindingTarget->instanceName)
+					if (bindingSetter.bindingTarget->instanceName == GlobalStringKey::Empty)
 					{
-						WString name = L"<temp>" + itow(env->scope->referenceValues.Count());
+						auto name = GlobalStringKey::Get(L"<temp>" + itow(env->scope->referenceValues.Count()));
 						bindingSetter.bindingTarget->instanceName = name;
 						env->scope->referenceValues.Add(name, bindingSetter.propertyValue.instanceValue);
 					}
@@ -2428,11 +2493,11 @@ ExecuteBindingSetters
 					auto value = bindingSetter.propertyValue.propertyValue;
 					env->scope->errors.Add(
 						L"Failed to set property \"" +
-						bindingSetter.propertyValue.propertyName +
+						bindingSetter.propertyValue.propertyName.ToString() +
 						L"\" of \"" +
 						bindingSetter.propertyValue.instanceValue.GetTypeDescriptor()->GetTypeName() +
 						L"\" using binding \"" +
-						bindingSetter.binder->GetBindingName() +
+						bindingSetter.binder->GetBindingName().ToString() +
 						L"\" and value \"" +
 						(
 							value.GetValueType() == Value::Null ? WString(L"null") :
@@ -2467,7 +2532,7 @@ ExecuteBindingSetters
 			{
 				if (eventSetter.binder)
 				{
-					List<WString> contextNames;
+					List<GlobalStringKey> contextNames;
 					eventSetter.binder->GetRequiredContexts(contextNames);
 					auto propertyValue = eventSetter.propertyValue;
 					propertyValue.propertyValue = BoxValue(eventSetter.handlerName);
@@ -2475,9 +2540,9 @@ ExecuteBindingSetters
 
 					if (eventSetter.binder->RequireInstanceName())
 					{
-						if (!eventSetter.bindingTarget->instanceName)
+						if (eventSetter.bindingTarget->instanceName == GlobalStringKey::Empty)
 						{
-							WString name = L"<temp>" + itow(env->scope->referenceValues.Count());
+							auto name = GlobalStringKey::Get(L"<temp>" + itow(env->scope->referenceValues.Count()));
 							eventSetter.bindingTarget->instanceName = name;
 							env->scope->referenceValues.Add(name, eventSetter.propertyValue.instanceValue);
 						}
@@ -2487,13 +2552,13 @@ ExecuteBindingSetters
 					{
 						env->scope->errors.Add(
 							L"Failed to attach event \"" +
-							propertyValue.propertyName +
+							propertyValue.propertyName.ToString() +
 							L"\" of type \"" +
 							propertyValue.instanceValue.GetTypeDescriptor()->GetTypeName() +
 							L"\" with the handler \"" +
 							propertyValue.propertyValue.GetText() +
 							L"\" using event binding \"" +
-							eventSetter.binder->GetBindingName() +
+							eventSetter.binder->GetBindingName().ToString() +
 							L"\".");
 					}
 				}
@@ -2547,9 +2612,9 @@ ExecuteBindingSetters
 							L"Event handler \"" +
 							eventSetter.handlerName +
 							L"\" exists but the type does not match the event \"" +
-							eventSetter.propertyValue.propertyName +
+							eventSetter.propertyValue.propertyName.ToString() +
 							L"\" of \"" +
-							env->context->instance->typeName +
+							env->context->instance->typeName.ToString() +
 							L"\".");
 					}
 				}
@@ -2559,9 +2624,9 @@ ExecuteBindingSetters
 						L"Failed to find event handler \"" +
 						eventSetter.handlerName +
 						L"\" when setting event \"" +
-						eventSetter.propertyValue.propertyName +
+						eventSetter.propertyValue.propertyName.ToString() +
 						L"\" of \"" +
-						env->context->instance->typeName +
+						env->context->instance->typeName.ToString() +
 						L"\".");
 				}
 			}
@@ -2615,7 +2680,7 @@ InitializeInstance
 			Ptr<GuiInstanceEnvironment> env,
 			GuiConstructorRepr* ctor,
 			IGuiInstanceLoader* instanceLoader,
-			const WString& typeName,
+			GlobalStringKey typeName,
 			description::Value instance,
 			bool deserialized,
 			List<FillInstanceBindingSetter>& bindingSetters,
@@ -2625,16 +2690,15 @@ InitializeInstance
 			// fill all attributes
 			FillInstance(instance, env, ctor, instanceLoader, deserialized, typeName, bindingSetters, eventSetters);
 
-			if (ctor->instanceName)
+			if (ctor->instanceName != GlobalStringKey::Empty)
 			{
-				WString name = ctor->instanceName.Value();
-				if (env->scope->referenceValues.Keys().Contains(name))
+				if (env->scope->referenceValues.Keys().Contains(ctor->instanceName))
 				{
-					env->scope->errors.Add(L"Parameter \"" + name + L"\" conflict with an existing named object.");
+					env->scope->errors.Add(L"Parameter \"" + ctor->instanceName.ToString() + L"\" conflict with an existing named object.");
 				}
 				else
 				{
-					env->scope->referenceValues.Add(name, instance);
+					env->scope->referenceValues.Add(ctor->instanceName, instance);
 				}
 			}
 		}
@@ -2714,7 +2778,7 @@ LogInstanceLoaderManager_GetParentTypes
 			}
 			else
 			{
-				parentTypes.Add(GetInstanceLoaderManager()->GetParentTypeForVirtualType(typeName));
+				parentTypes.Add(GetInstanceLoaderManager()->GetParentTypeForVirtualType(GlobalStringKey::Get(typeName)).ToString());
 			}
 		}
 
@@ -2754,7 +2818,7 @@ LogInstanceLoaderManager_PrintProperties
 		{
 			List<IGuiInstanceLoader*> loaders;
 			{
-				IGuiInstanceLoader* loader = GetInstanceLoaderManager()->GetLoader(typeName);
+				IGuiInstanceLoader* loader = GetInstanceLoaderManager()->GetLoader(GlobalStringKey::Get(typeName));
 				while (loader)
 				{
 					loaders.Add(loader);
@@ -2762,14 +2826,14 @@ LogInstanceLoaderManager_PrintProperties
 				}
 			}
 			
-			IGuiInstanceLoader::TypeInfo typeInfo(typeName, GetInstanceLoaderManager()->GetTypeDescriptorForType(typeName));
-			Dictionary<WString, IGuiInstanceLoader*> propertyLoaders;
+			IGuiInstanceLoader::TypeInfo typeInfo(GlobalStringKey::Get(typeName), GetInstanceLoaderManager()->GetTypeDescriptorForType(GlobalStringKey::Get(typeName)));
+			Dictionary<GlobalStringKey, IGuiInstanceLoader*> propertyLoaders;
 			FOREACH(IGuiInstanceLoader*, loader, loaders)
 			{
-				List<WString> propertyNames;
+				List<GlobalStringKey> propertyNames;
 				loader->GetPropertyNames(typeInfo, propertyNames);
 
-				FOREACH(WString, propertyName, propertyNames)
+				FOREACH(GlobalStringKey, propertyName, propertyNames)
 				{
 					if (!propertyLoaders.Keys().Contains(propertyName))
 					{
@@ -2778,7 +2842,7 @@ LogInstanceLoaderManager_PrintProperties
 				}
 			}
 
-			FOREACH_INDEXER(WString, propertyName, index, propertyLoaders.Keys())
+			FOREACH_INDEXER(GlobalStringKey, propertyName, index, propertyLoaders.Keys())
 			{
 				SortedList<WString> acceptableTypes;
 				Ptr<GuiInstancePropertyInfo> firstInfo;
@@ -2831,7 +2895,7 @@ LogInstanceLoaderManager_PrintProperties
 					continue;
 				}
 
-				LogInstanceLoaderManager_PrintFieldName(writer, (propertyName == L"" ? L"<DEFAULT-PROPERTY>" : propertyName));
+				LogInstanceLoaderManager_PrintFieldName(writer, (propertyName == GlobalStringKey::Empty? L"<DEFAULT-PROPERTY>" : propertyName.ToString()));
 				if (firstInfo->constructorParameter)
 				{
 					writer.WriteString(firstInfo->required ? L"+" : L"*");
@@ -2883,7 +2947,7 @@ LogInstanceLoaderManager_PrintProperties
 		{
 			List<IGuiInstanceLoader*> loaders;
 			{
-				IGuiInstanceLoader* loader = GetInstanceLoaderManager()->GetLoader(typeName);
+				IGuiInstanceLoader* loader = GetInstanceLoaderManager()->GetLoader(GlobalStringKey::Get(typeName));
 				while (loader)
 				{
 					loaders.Add(loader);
@@ -2891,14 +2955,14 @@ LogInstanceLoaderManager_PrintProperties
 				}
 			}
 			
-			IGuiInstanceLoader::TypeInfo typeInfo(typeName, GetInstanceLoaderManager()->GetTypeDescriptorForType(typeName));
-			Dictionary<WString, IGuiInstanceLoader*> eventLoaders;
+			IGuiInstanceLoader::TypeInfo typeInfo(GlobalStringKey::Get(typeName), GetInstanceLoaderManager()->GetTypeDescriptorForType(GlobalStringKey::Get(typeName)));
+			Dictionary<GlobalStringKey, IGuiInstanceLoader*> eventLoaders;
 			FOREACH(IGuiInstanceLoader*, loader, loaders)
 			{
-				List<WString> eventNames;
+				List<GlobalStringKey> eventNames;
 				loader->GetEventNames(typeInfo, eventNames);
 
-				FOREACH(WString, eventName, eventNames)
+				FOREACH(GlobalStringKey, eventName, eventNames)
 				{
 					if (!eventLoaders.Keys().Contains(eventName))
 					{
@@ -2907,7 +2971,7 @@ LogInstanceLoaderManager_PrintProperties
 				}
 			}
 
-			FOREACH_INDEXER(WString, eventName, index, eventLoaders.Keys())
+			FOREACH_INDEXER(GlobalStringKey, eventName, index, eventLoaders.Keys())
 			{
 				IGuiInstanceLoader* loader = eventLoaders.Values()[index];
 				IGuiInstanceLoader::PropertyInfo propertyInfo(typeInfo, eventName);
@@ -2917,7 +2981,7 @@ LogInstanceLoaderManager_PrintProperties
 					continue;
 				}
 
-				LogInstanceLoaderManager_PrintFieldName(writer, eventName);
+				LogInstanceLoaderManager_PrintFieldName(writer, eventName.ToString());
 				writer.WriteString(L" [event]      ");
 				writer.WriteLine(info->argumentType->GetTypeName());
 			}
@@ -3053,18 +3117,18 @@ LogInstanceLoaderManager
 					}
 				}
 
-				List<WString> virtualTypes;
+				List<GlobalStringKey> virtualTypes;
 				GetInstanceLoaderManager()->GetVirtualTypes(virtualTypes);
-				FOREACH(WString, typeName, virtualTypes)
+				FOREACH(GlobalStringKey, typeName, virtualTypes)
 				{
-					WString parentType = GetInstanceLoaderManager()->GetParentTypeForVirtualType(typeName);
-					if (description::GetTypeDescriptor(parentType) && !virtualizedTypes.Contains(parentType))
+					GlobalStringKey parentType = GetInstanceLoaderManager()->GetParentTypeForVirtualType(typeName);
+					if (description::GetTypeDescriptor(parentType.ToString()) && !virtualizedTypes.Contains(parentType.ToString()))
 					{
-						virtualizedTypes.Add(parentType);
+						virtualizedTypes.Add(parentType.ToString());
 					}
-					allTypes.Add(typeName);
-					typeParents.Add(typeName, parentType);
-					typeChildren.Add(parentType, typeName);
+					allTypes.Add(typeName.ToString());
+					typeParents.Add(typeName.ToString(), parentType.ToString());
+					typeChildren.Add(parentType.ToString(), typeName.ToString());
 				}
 			}
 
@@ -3108,10 +3172,11 @@ LogInstanceLoaderManager
 			{
 				FOREACH(WString, typeName, sortedTypes)
 				{
-					auto typeDescriptor = GetInstanceLoaderManager()->GetTypeDescriptorForType(typeName);
-					IGuiInstanceLoader::TypeInfo typeInfo(typeName, typeDescriptor);
+					auto typeKey = GlobalStringKey::Get(typeName);
+					auto typeDescriptor = GetInstanceLoaderManager()->GetTypeDescriptorForType(typeKey);
+					IGuiInstanceLoader::TypeInfo typeInfo(typeKey, typeDescriptor);
 					
-					auto loader = GetInstanceLoaderManager()->GetLoader(typeName);
+					auto loader = GetInstanceLoaderManager()->GetLoader(typeKey);
 					while (loader)
 					{
 						if (loader->IsDeserializable(typeInfo))
@@ -3283,7 +3348,7 @@ GuiTextInstanceBinderBase
 				return false;
 			}
 
-			void GetRequiredContexts(collections::List<WString>& contextNames)override
+			void GetRequiredContexts(collections::List<GlobalStringKey>& contextNames)override
 			{
 			}
 
@@ -3305,12 +3370,12 @@ GuiResourceInstanceBinder
 		class GuiResourceInstanceBinder : public GuiTextInstanceBinderBase
 		{
 		public:
-			WString GetBindingName()override
+			GlobalStringKey GetBindingName()override
 			{
-				return L"uri";
+				return GlobalStringKey::_Uri;
 			}
 
-			bool SetPropertyValue(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, Nullable<WString> instanceName, IGuiInstanceLoader::PropertyValue& propertyValue)override
+			bool SetPropertyValue(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, GlobalStringKey instanceName, IGuiInstanceLoader::PropertyValue& propertyValue)override
 			{
 				if (propertyValue.propertyValue.GetValueType() == Value::Text)
 				{
@@ -3349,16 +3414,16 @@ GuiReferenceInstanceBinder
 		class GuiReferenceInstanceBinder : public GuiTextInstanceBinderBase
 		{
 		public:
-			WString GetBindingName()override
+			GlobalStringKey GetBindingName()override
 			{
-				return L"ref";
+				return GlobalStringKey::_Ref;
 			}
 
-			bool SetPropertyValue(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, Nullable<WString> instanceName, IGuiInstanceLoader::PropertyValue& propertyValue)override
+			bool SetPropertyValue(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, GlobalStringKey instanceName, IGuiInstanceLoader::PropertyValue& propertyValue)override
 			{
 				if (propertyValue.propertyValue.GetValueType() == Value::Text)
 				{
-					WString name = propertyValue.propertyValue.GetText();
+					GlobalStringKey name = GlobalStringKey::Get(propertyValue.propertyValue.GetText());
 					vint index = env->scope->referenceValues.Keys().IndexOf(name);
 					if (index != -1)
 					{
@@ -3388,7 +3453,7 @@ GuiWorkflowGlobalContext
 			{
 			}
 
-			WString GetContextName()override
+			GlobalStringKey GetContextName()override
 			{
 				return GuiWorkflowCache::CacheContextName;
 			}
@@ -3439,16 +3504,16 @@ GuiScriptInstanceBinder
 				return true;
 			}
 
-			void GetRequiredContexts(collections::List<WString>& contextNames)override
+			void GetRequiredContexts(collections::List<GlobalStringKey>& contextNames)override
 			{
 				contextNames.Add(GuiWorkflowCache::CacheContextName);
 			}
 
-			bool SetPropertyValue(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, Nullable<WString> instanceName, IGuiInstanceLoader::PropertyValue& propertyValue)override
+			bool SetPropertyValue(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, GlobalStringKey instanceName, IGuiInstanceLoader::PropertyValue& propertyValue)override
 			{
 				auto context = env->scope->bindingContexts[GuiWorkflowCache::CacheContextName].Cast<GuiWorkflowGlobalContext>();
 				WorkflowDataBinding dataBinding;
-				dataBinding.variableName = instanceName.Value();
+				dataBinding.variableName = instanceName;
 
 				if (env->context->precompiledCaches.Keys().Contains(GuiWorkflowCache::CacheContextName))
 				{
@@ -3474,7 +3539,7 @@ GuiScriptInstanceBinder
 						}
 						
 						auto td = propertyValue.typeInfo.typeDescriptor;
-						auto propertyInfo = td->GetPropertyByName(propertyValue.propertyName, true);
+						auto propertyInfo = td->GetPropertyByName(propertyValue.propertyName.ToString(), true);
 						dataBinding.propertyInfo = propertyInfo;
 						dataBinding.bindExpression = expression;
 						goto SUCCESS;
@@ -3501,9 +3566,9 @@ GuiEvalInstanceBinder
 		class GuiEvalInstanceBinder : public GuiScriptInstanceBinder
 		{
 		public:
-			WString GetBindingName()override
+			GlobalStringKey GetBindingName()override
 			{
-				return L"eval";
+				return GlobalStringKey::_Eval;
 			}
 
 			bool ApplicableToConstructorArgument()override
@@ -3517,7 +3582,7 @@ GuiEvalInstanceBinder
 				{
 					Ptr<WfAssembly> assembly;
 					WString expressionCode = TranslateExpression(propertyValue.GetText());
-					WString cacheKey = L"<att.eval>" + expressionCode;
+					GlobalStringKey cacheKey = GlobalStringKey::Get(L"<att.eval>" + expressionCode);
 					vint cacheIndex = env->context->precompiledCaches.Keys().IndexOf(cacheKey);
 					if (cacheIndex != -1)
 					{
@@ -3564,9 +3629,9 @@ GuiEvalInstanceEventBinder
 		class GuiEvalInstanceEventBinder : public Object, public IGuiInstanceEventBinder
 		{
 		public:
-			WString GetBindingName()override
+			GlobalStringKey GetBindingName()override
 			{
-				return L"eval";
+				return GlobalStringKey::_Eval;
 			}
 
 			bool RequireInstanceName()override
@@ -3574,18 +3639,18 @@ GuiEvalInstanceEventBinder
 				return true;
 			}
 
-			void GetRequiredContexts(collections::List<WString>& contextNames)override
+			void GetRequiredContexts(collections::List<GlobalStringKey>& contextNames)override
 			{
 			}
 
-			bool AttachEvent(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, Nullable<WString> instanceName, IGuiInstanceLoader::PropertyValue& propertyValue)
+			bool AttachEvent(Ptr<GuiInstanceEnvironment> env, IGuiInstanceLoader* loader, GlobalStringKey instanceName, IGuiInstanceLoader::PropertyValue& propertyValue)
 			{
 				auto handler = propertyValue.propertyValue;
 				if (handler.GetValueType() == Value::Text)
 				{
 					Ptr<WfAssembly> assembly;
 					WString statementCode = handler.GetText();
-					WString cacheKey = L"<ev.eval><" + instanceName.Value() + L"><" + propertyValue.propertyName + L">" + statementCode;
+					GlobalStringKey cacheKey = GlobalStringKey::Get(L"<ev.eval><" + instanceName.ToString() + L"><" + propertyValue.propertyName.ToString() + L">" + statementCode);
 					vint cacheIndex = env->context->precompiledCaches.Keys().IndexOf(cacheKey);
 					if (cacheIndex != -1)
 					{
@@ -3623,9 +3688,9 @@ GuiBindInstanceBinder
 		class GuiBindInstanceBinder : public GuiScriptInstanceBinder
 		{
 		public:
-			WString GetBindingName()override
+			GlobalStringKey GetBindingName()override
 			{
-				return L"bind";
+				return GlobalStringKey::_Bind;
 			}
 
 			WString TranslateExpression(const WString& input)override
@@ -3641,9 +3706,9 @@ GuiFormatInstanceBinder
 		class GuiFormatInstanceBinder : public GuiScriptInstanceBinder
 		{
 		public:
-			WString GetBindingName()override
+			GlobalStringKey GetBindingName()override
 			{
-				return L"format";
+				return GlobalStringKey::_Format;
 			}
 
 			WString TranslateExpression(const WString& input)override
@@ -3725,22 +3790,18 @@ GuiVrtualTypeInstanceLoader
 		class GuiTemplateControlInstanceLoader : public Object, public IGuiInstanceLoader
 		{
 		protected:
-			WString										typeName;
+			GlobalStringKey								typeName;
 			Func<Value()>								defaultConstructor;
 			Func<Value(Ptr<GuiTemplate::IFactory>)>		templateConstructor;
 		public:
 			GuiTemplateControlInstanceLoader(const WString& _typeName, const Func<Value()>& _defaultConstructor, const Func<Value(Ptr<GuiTemplate::IFactory>)>& _templateConstructor)
-				:typeName(_typeName)
+				:typeName(GlobalStringKey::Get(_typeName))
 				, defaultConstructor(_defaultConstructor)
 				, templateConstructor(_templateConstructor)
 			{
-				if (typeName == L"")
-				{
-
-				}
 			}
 
-			WString GetTypeName()override
+			GlobalStringKey GetTypeName()override
 			{
 				return typeName;
 			}
@@ -3750,11 +3811,11 @@ GuiVrtualTypeInstanceLoader
 				return typeName == typeInfo.typeName;
 			}
 
-			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
+			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<GlobalStringKey, description::Value>& constructorArguments)override
 			{
 				if(typeName==typeInfo.typeName)
 				{
-					vint indexControlTemplate = constructorArguments.Keys().IndexOf(L"ControlTemplate");
+					vint indexControlTemplate = constructorArguments.Keys().IndexOf(GlobalStringKey::_ControlTemplate);
 					if (indexControlTemplate == -1)
 					{
 						return defaultConstructor();
@@ -3768,14 +3829,14 @@ GuiVrtualTypeInstanceLoader
 				return Value();
 			}
 
-			void GetConstructorParameters(const TypeInfo& typeInfo, collections::List<WString>& propertyNames)override
+			void GetConstructorParameters(const TypeInfo& typeInfo, collections::List<GlobalStringKey>& propertyNames)override
 			{
-				propertyNames.Add(L"ControlTemplate");
+				propertyNames.Add(GlobalStringKey::_ControlTemplate);
 			}
 
 			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
 			{
-				if (propertyInfo.propertyName == L"ControlTemplate")
+				if (propertyInfo.propertyName == GlobalStringKey::_ControlTemplate)
 				{
 					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<WString>());
 					info->constructorParameter = true;
@@ -3791,20 +3852,28 @@ GuiControlInstanceLoader
 
 		class GuiControlInstanceLoader : public Object, public IGuiInstanceLoader
 		{
+		protected:
+			GlobalStringKey					typeName;
+
 		public:
-			WString GetTypeName()override
+			GuiControlInstanceLoader()
 			{
-				return description::GetTypeDescriptor<GuiControl>()->GetTypeName();
+				typeName = GlobalStringKey::Get(description::GetTypeDescriptor<GuiControl>()->GetTypeName());
 			}
 
-			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			GlobalStringKey GetTypeName()override
 			{
-				propertyNames.Add(L"");
+				return typeName;
+			}
+
+			void GetPropertyNames(const TypeInfo& typeInfo, collections::List<GlobalStringKey>& propertyNames)override
+			{
+				propertyNames.Add(GlobalStringKey::Empty);
 			}
 
 			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
 			{
-				if (propertyInfo.propertyName == L"")
+				if (propertyInfo.propertyName == GlobalStringKey::Empty)
 				{
 					auto info = GuiInstancePropertyInfo::Collection();
 					info->acceptableTypes.Add(description::GetTypeDescriptor<GuiControl>());
@@ -3822,7 +3891,7 @@ GuiControlInstanceLoader
 			{
 				if (auto container = dynamic_cast<GuiInstanceRootObject*>(propertyValue.instanceValue.GetRawPtr()))
 				{
-					if (propertyValue.propertyName == L"")
+					if (propertyValue.propertyName == GlobalStringKey::Empty)
 					{
 						if (auto component = dynamic_cast<GuiComponent*>(propertyValue.propertyValue.GetRawPtr()))
 						{
@@ -3838,7 +3907,7 @@ GuiControlInstanceLoader
 				}
 				if (auto container = dynamic_cast<GuiControl*>(propertyValue.instanceValue.GetRawPtr()))
 				{
-					if (propertyValue.propertyName == L"")
+					if (propertyValue.propertyName == GlobalStringKey::Empty)
 					{
 						if (auto control = dynamic_cast<GuiControl*>(propertyValue.propertyValue.GetRawPtr()))
 						{
@@ -3862,10 +3931,18 @@ GuiTabInstanceLoader
 
 		class GuiTabInstanceLoader : public Object, public IGuiInstanceLoader
 		{
+		protected:
+			GlobalStringKey					typeName;
+
 		public:
-			WString GetTypeName()override
+			GuiTabInstanceLoader()
 			{
-				return description::GetTypeDescriptor<GuiTab>()->GetTypeName();
+				typeName = GlobalStringKey::Get(description::GetTypeDescriptor<GuiTab>()->GetTypeName());
+			}
+
+			GlobalStringKey GetTypeName()override
+			{
+				return typeName;
 			}
 
 			bool IsCreatable(const TypeInfo& typeInfo)override
@@ -3873,11 +3950,11 @@ GuiTabInstanceLoader
 				return GetTypeName() == typeInfo.typeName;
 			}
 
-			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
+			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<GlobalStringKey, description::Value>& constructorArguments)override
 			{
 				if(GetTypeName() == typeInfo.typeName)
 				{
-					vint indexControlTemplate = constructorArguments.Keys().IndexOf(L"ControlTemplate");
+					vint indexControlTemplate = constructorArguments.Keys().IndexOf(GlobalStringKey::_ControlTemplate);
 					if (indexControlTemplate == -1)
 					{
 						return Value::From(g::NewTab());
@@ -3891,23 +3968,23 @@ GuiTabInstanceLoader
 				return Value();
 			}
 
-			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			void GetPropertyNames(const TypeInfo& typeInfo, collections::List<GlobalStringKey>& propertyNames)override
 			{
-				propertyNames.Add(L"");
+				propertyNames.Add(GlobalStringKey::Empty);
 			}
 
-			void GetConstructorParameters(const TypeInfo& typeInfo, collections::List<WString>& propertyNames)override
+			void GetConstructorParameters(const TypeInfo& typeInfo, collections::List<GlobalStringKey>& propertyNames)override
 			{
-				propertyNames.Add(L"ControlTemplate");
+				propertyNames.Add(GlobalStringKey::_ControlTemplate);
 			}
 
 			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
 			{
-				if (propertyInfo.propertyName == L"")
+				if (propertyInfo.propertyName == GlobalStringKey::Empty)
 				{
 					return GuiInstancePropertyInfo::CollectionWithParent(description::GetTypeDescriptor<GuiTabPage>());
 				}
-				else if (propertyInfo.propertyName == L"ControlTemplate")
+				else if (propertyInfo.propertyName == GlobalStringKey::_ControlTemplate)
 				{
 					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<WString>());
 					info->constructorParameter = true;
@@ -3920,7 +3997,7 @@ GuiTabInstanceLoader
 			{
 				if (GuiTab* container = dynamic_cast<GuiTab*>(propertyValue.instanceValue.GetRawPtr()))
 				{
-					if (propertyValue.propertyName == L"")
+					if (propertyValue.propertyName == GlobalStringKey::Empty)
 					{
 						if (auto tabPage = dynamic_cast<GuiTabPage*>(propertyValue.propertyValue.GetRawPtr()))
 						{
@@ -3939,20 +4016,28 @@ GuiTabPageInstanceLoader
 
 		class GuiTabPageInstanceLoader : public Object, public IGuiInstanceLoader
 		{
+		protected:
+			GlobalStringKey					typeName;
+
 		public:
-			WString GetTypeName()override
+			GuiTabPageInstanceLoader()
 			{
-				return description::GetTypeDescriptor<GuiTabPage>()->GetTypeName();
+				typeName = GlobalStringKey::Get(description::GetTypeDescriptor<GuiTabPage>()->GetTypeName());
 			}
 
-			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			GlobalStringKey GetTypeName()override
 			{
-				propertyNames.Add(L"");
+				return typeName;
+			}
+
+			void GetPropertyNames(const TypeInfo& typeInfo, collections::List<GlobalStringKey>& propertyNames)override
+			{
+				propertyNames.Add(GlobalStringKey::Empty);
 			}
 
 			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
 			{
-				if (propertyInfo.propertyName == L"")
+				if (propertyInfo.propertyName == GlobalStringKey::Empty)
 				{
 					auto info = GuiInstancePropertyInfo::Collection();
 					info->acceptableTypes.Add(description::GetTypeDescriptor<GuiControl>());
@@ -3966,7 +4051,7 @@ GuiTabPageInstanceLoader
 			{
 				if (GuiTabPage* container = dynamic_cast<GuiTabPage*>(propertyValue.instanceValue.GetRawPtr()))
 				{
-					if (propertyValue.propertyName == L"")
+					if (propertyValue.propertyName == GlobalStringKey::Empty)
 					{
 						if (auto control = dynamic_cast<GuiControl*>(propertyValue.propertyValue.GetRawPtr()))
 						{
@@ -3990,10 +4075,18 @@ GuiToolstripMenuInstanceLoader
 
 		class GuiToolstripMenuInstanceLoader : public Object, public IGuiInstanceLoader
 		{
+		protected:
+			GlobalStringKey					typeName;
+
 		public:
-			WString GetTypeName()override
+			GuiToolstripMenuInstanceLoader()
 			{
-				return description::GetTypeDescriptor<GuiToolstripMenu>()->GetTypeName();
+				typeName = GlobalStringKey::Get(description::GetTypeDescriptor<GuiToolstripMenu>()->GetTypeName());
+			}
+
+			GlobalStringKey GetTypeName()override
+			{
+				return typeName;
 			}
 
 			bool IsCreatable(const TypeInfo& typeInfo)override
@@ -4001,11 +4094,11 @@ GuiToolstripMenuInstanceLoader
 				return GetTypeName() == typeInfo.typeName;
 			}
 
-			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
+			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<GlobalStringKey, description::Value>& constructorArguments)override
 			{
 				if(GetTypeName() == typeInfo.typeName)
 				{
-					vint indexControlTemplate = constructorArguments.Keys().IndexOf(L"ControlTemplate");
+					vint indexControlTemplate = constructorArguments.Keys().IndexOf(GlobalStringKey::_ControlTemplate);
 					if (indexControlTemplate == -1)
 					{
 						return Value::From(g::NewMenu(0));
@@ -4019,23 +4112,23 @@ GuiToolstripMenuInstanceLoader
 				return Value();
 			}
 
-			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			void GetPropertyNames(const TypeInfo& typeInfo, collections::List<GlobalStringKey>& propertyNames)override
 			{
-				propertyNames.Add(L"");
+				propertyNames.Add(GlobalStringKey::Empty);
 			}
 
-			void GetConstructorParameters(const TypeInfo& typeInfo, collections::List<WString>& propertyNames)override
+			void GetConstructorParameters(const TypeInfo& typeInfo, collections::List<GlobalStringKey>& propertyNames)override
 			{
-				propertyNames.Add(L"ControlTemplate");
+				propertyNames.Add(GlobalStringKey::_ControlTemplate);
 			}
 
 			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
 			{
-				if (propertyInfo.propertyName == L"")
+				if (propertyInfo.propertyName == GlobalStringKey::Empty)
 				{
 					return GuiInstancePropertyInfo::CollectionWithParent(description::GetTypeDescriptor<GuiControl>());
 				}
-				else if (propertyInfo.propertyName == L"ControlTemplate")
+				else if (propertyInfo.propertyName == GlobalStringKey::_ControlTemplate)
 				{
 					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<WString>());
 					info->constructorParameter = true;
@@ -4048,7 +4141,7 @@ GuiToolstripMenuInstanceLoader
 			{
 				if (GuiToolstripMenu* container = dynamic_cast<GuiToolstripMenu*>(propertyValue.instanceValue.GetRawPtr()))
 				{
-					if (propertyValue.propertyName == L"")
+					if (propertyValue.propertyName == GlobalStringKey::Empty)
 					{
 						if (auto control = dynamic_cast<GuiControl*>(propertyValue.propertyValue.GetRawPtr()))
 						{
@@ -4067,10 +4160,18 @@ GuiToolstripMenuBarInstanceLoader
 
 		class GuiToolstripMenuBarInstanceLoader : public Object, public IGuiInstanceLoader
 		{
+		protected:
+			GlobalStringKey					typeName;
+
 		public:
-			WString GetTypeName()override
+			GuiToolstripMenuBarInstanceLoader()
 			{
-				return description::GetTypeDescriptor<GuiToolstripMenuBar>()->GetTypeName();
+				typeName = GlobalStringKey::Get(description::GetTypeDescriptor<GuiToolstripMenuBar>()->GetTypeName());
+			}
+
+			GlobalStringKey GetTypeName()override
+			{
+				return typeName;
 			}
 
 			bool IsCreatable(const TypeInfo& typeInfo)override
@@ -4078,11 +4179,11 @@ GuiToolstripMenuBarInstanceLoader
 				return GetTypeName() == typeInfo.typeName;
 			}
 
-			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
+			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<GlobalStringKey, description::Value>& constructorArguments)override
 			{
 				if(GetTypeName() == typeInfo.typeName)
 				{
-					vint indexControlTemplate = constructorArguments.Keys().IndexOf(L"ControlTemplate");
+					vint indexControlTemplate = constructorArguments.Keys().IndexOf(GlobalStringKey::_ControlTemplate);
 					if (indexControlTemplate == -1)
 					{
 						return Value::From(new GuiToolstripMenuBar(GetCurrentTheme()->CreateMenuBarStyle()));
@@ -4096,23 +4197,23 @@ GuiToolstripMenuBarInstanceLoader
 				return Value();
 			}
 
-			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			void GetPropertyNames(const TypeInfo& typeInfo, collections::List<GlobalStringKey>& propertyNames)override
 			{
-				propertyNames.Add(L"");
+				propertyNames.Add(GlobalStringKey::Empty);
 			}
 
-			void GetConstructorParameters(const TypeInfo& typeInfo, collections::List<WString>& propertyNames)override
+			void GetConstructorParameters(const TypeInfo& typeInfo, collections::List<GlobalStringKey>& propertyNames)override
 			{
-				propertyNames.Add(L"ControlTemplate");
+				propertyNames.Add(GlobalStringKey::_ControlTemplate);
 			}
 
 			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
 			{
-				if (propertyInfo.propertyName == L"")
+				if (propertyInfo.propertyName == GlobalStringKey::Empty)
 				{
 					return GuiInstancePropertyInfo::CollectionWithParent(description::GetTypeDescriptor<GuiControl>());
 				}
-				else if (propertyInfo.propertyName == L"ControlTemplate")
+				else if (propertyInfo.propertyName == GlobalStringKey::_ControlTemplate)
 				{
 					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<WString>());
 					info->constructorParameter = true;
@@ -4125,7 +4226,7 @@ GuiToolstripMenuBarInstanceLoader
 			{
 				if (GuiToolstripMenuBar* container = dynamic_cast<GuiToolstripMenuBar*>(propertyValue.instanceValue.GetRawPtr()))
 				{
-					if (propertyValue.propertyName == L"")
+					if (propertyValue.propertyName == GlobalStringKey::Empty)
 					{
 						if (auto control = dynamic_cast<GuiControl*>(propertyValue.propertyValue.GetRawPtr()))
 						{
@@ -4144,10 +4245,18 @@ GuiToolstripToolBarInstanceLoader
 
 		class GuiToolstripToolBarInstanceLoader : public Object, public IGuiInstanceLoader
 		{
+		protected:
+			GlobalStringKey					typeName;
+
 		public:
-			WString GetTypeName()override
+			GuiToolstripToolBarInstanceLoader()
 			{
-				return description::GetTypeDescriptor<GuiToolstripToolBar>()->GetTypeName();
+				typeName = GlobalStringKey::Get(description::GetTypeDescriptor<GuiToolstripToolBar>()->GetTypeName());
+			}
+
+			GlobalStringKey GetTypeName()override
+			{
+				return typeName;
 			}
 
 			bool IsCreatable(const TypeInfo& typeInfo)override
@@ -4155,11 +4264,11 @@ GuiToolstripToolBarInstanceLoader
 				return GetTypeName() == typeInfo.typeName;
 			}
 
-			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
+			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<GlobalStringKey, description::Value>& constructorArguments)override
 			{
 				if(GetTypeName() == typeInfo.typeName)
 				{
-					vint indexControlTemplate = constructorArguments.Keys().IndexOf(L"ControlTemplate");
+					vint indexControlTemplate = constructorArguments.Keys().IndexOf(GlobalStringKey::_ControlTemplate);
 					if (indexControlTemplate == -1)
 					{
 						return Value::From(new GuiToolstripToolBar(GetCurrentTheme()->CreateToolBarStyle()));
@@ -4173,23 +4282,23 @@ GuiToolstripToolBarInstanceLoader
 				return Value();
 			}
 
-			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			void GetPropertyNames(const TypeInfo& typeInfo, collections::List<GlobalStringKey>& propertyNames)override
 			{
-				propertyNames.Add(L"");
+				propertyNames.Add(GlobalStringKey::Empty);
 			}
 
-			void GetConstructorParameters(const TypeInfo& typeInfo, collections::List<WString>& propertyNames)override
+			void GetConstructorParameters(const TypeInfo& typeInfo, collections::List<GlobalStringKey>& propertyNames)override
 			{
-				propertyNames.Add(L"ControlTemplate");
+				propertyNames.Add(GlobalStringKey::_ControlTemplate);
 			}
 
 			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
 			{
-				if (propertyInfo.propertyName == L"")
+				if (propertyInfo.propertyName == GlobalStringKey::Empty)
 				{
 					return GuiInstancePropertyInfo::CollectionWithParent(description::GetTypeDescriptor<GuiControl>());
 				}
-				else if (propertyInfo.propertyName == L"ControlTemplate")
+				else if (propertyInfo.propertyName == GlobalStringKey::_ControlTemplate)
 				{
 					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<WString>());
 					info->constructorParameter = true;
@@ -4202,7 +4311,7 @@ GuiToolstripToolBarInstanceLoader
 			{
 				if (GuiToolstripToolBar* container = dynamic_cast<GuiToolstripToolBar*>(propertyValue.instanceValue.GetRawPtr()))
 				{
-					if (propertyValue.propertyName == L"")
+					if (propertyValue.propertyName == GlobalStringKey::Empty)
 					{
 						if (auto control = dynamic_cast<GuiControl*>(propertyValue.propertyValue.GetRawPtr()))
 						{
@@ -4221,10 +4330,20 @@ GuiToolstripButtonInstanceLoader
 
 		class GuiToolstripButtonInstanceLoader : public Object, public IGuiInstanceLoader
 		{
+		protected:
+			GlobalStringKey					typeName;
+			GlobalStringKey					_SubMenu;
+
 		public:
-			WString GetTypeName()override
+			GuiToolstripButtonInstanceLoader()
 			{
-				return description::GetTypeDescriptor<GuiToolstripButton>()->GetTypeName();
+				typeName = GlobalStringKey::Get(description::GetTypeDescriptor<GuiToolstripButton>()->GetTypeName());
+				_SubMenu = GlobalStringKey::Get(L"SubMenu");
+			}
+
+			GlobalStringKey GetTypeName()override
+			{
+				return typeName;
 			}
 
 			bool IsCreatable(const TypeInfo& typeInfo)override
@@ -4232,11 +4351,11 @@ GuiToolstripButtonInstanceLoader
 				return typeInfo.typeName == GetTypeName();
 			}
 
-			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
+			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<GlobalStringKey, description::Value>& constructorArguments)override
 			{
 				if (typeInfo.typeName == GetTypeName())
 				{
-					vint indexControlTemplate = constructorArguments.Keys().IndexOf(L"ControlTemplate");
+					vint indexControlTemplate = constructorArguments.Keys().IndexOf(GlobalStringKey::_ControlTemplate);
 					if (indexControlTemplate == -1)
 					{
 						return Value::From(g::NewToolBarButton());
@@ -4250,25 +4369,25 @@ GuiToolstripButtonInstanceLoader
 				return Value();
 			}
 
-			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			void GetPropertyNames(const TypeInfo& typeInfo, collections::List<GlobalStringKey>& propertyNames)override
 			{
-				propertyNames.Add(L"SubMenu");
+				propertyNames.Add(_SubMenu);
 			}
 
-			void GetConstructorParameters(const TypeInfo& typeInfo, collections::List<WString>& propertyNames)override
+			void GetConstructorParameters(const TypeInfo& typeInfo, collections::List<GlobalStringKey>& propertyNames)override
 			{
-				propertyNames.Add(L"ControlTemplate");
+				propertyNames.Add(GlobalStringKey::_ControlTemplate);
 			}
 
 			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
 			{
-				if (propertyInfo.propertyName == L"ControlTemplate")
+				if (propertyInfo.propertyName == GlobalStringKey::_ControlTemplate)
 				{
 					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<WString>());
 					info->constructorParameter = true;
 					return info;
 				}
-				else if (propertyInfo.propertyName == L"SubMenu")
+				else if (propertyInfo.propertyName == _SubMenu)
 				{
 					return GuiInstancePropertyInfo::Set(description::GetTypeDescriptor<GuiToolstripMenu>());
 				}
@@ -4279,7 +4398,7 @@ GuiToolstripButtonInstanceLoader
 			{
 				if (GuiToolstripButton* container = dynamic_cast<GuiToolstripButton*>(propertyValue.instanceValue.GetRawPtr()))
 				{
-					if (propertyValue.propertyName == L"SubMenu")
+					if (propertyValue.propertyName == _SubMenu)
 					{
 						if (!container->GetToolstripSubMenu())
 						{
@@ -4299,24 +4418,28 @@ GuiSelectableListControlInstanceLoader
 
 		class GuiSelectableListControlInstanceLoader : public Object, public IGuiInstanceLoader
 		{
+		protected:
+			GlobalStringKey					typeName;
+
 		public:
 			GuiSelectableListControlInstanceLoader()
 			{
+				typeName = GlobalStringKey::Get(description::GetTypeDescriptor<GuiSelectableListControl>()->GetTypeName());
 			}
 
-			WString GetTypeName()override
+			GlobalStringKey GetTypeName()override
 			{
-				return description::GetTypeDescriptor<GuiSelectableListControl>()->GetTypeName();
+				return typeName;
 			}
 
-			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			void GetPropertyNames(const TypeInfo& typeInfo, collections::List<GlobalStringKey>& propertyNames)override
 			{
-				propertyNames.Add(L"ItemTemplate");
+				propertyNames.Add(GlobalStringKey::_ItemTemplate);
 			}
 
 			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
 			{
-				if (propertyInfo.propertyName == L"ItemTemplate")
+				if (propertyInfo.propertyName == GlobalStringKey::_ItemTemplate)
 				{
 					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<WString>());
 					return info;
@@ -4328,7 +4451,7 @@ GuiSelectableListControlInstanceLoader
 			{
 				if (GuiSelectableListControl* container = dynamic_cast<GuiSelectableListControl*>(propertyValue.instanceValue.GetRawPtr()))
 				{
-					if (propertyValue.propertyName == L"ItemTemplate")
+					if (propertyValue.propertyName == GlobalStringKey::_ItemTemplate)
 					{
 						auto factory = CreateTemplateFactory(propertyValue.propertyValue.GetText());
 						auto styleProvider = new GuiListItemTemplate_ItemStyleProvider(factory);
@@ -4346,24 +4469,28 @@ GuiVirtualTreeViewInstanceLoader
 
 		class GuiVirtualTreeViewInstanceLoader : public Object, public IGuiInstanceLoader
 		{
+		protected:
+			GlobalStringKey					typeName;
+
 		public:
 			GuiVirtualTreeViewInstanceLoader()
 			{
+				typeName = GlobalStringKey::Get(description::GetTypeDescriptor<GuiVirtualTreeView>()->GetTypeName());
 			}
 
-			WString GetTypeName()override
+			GlobalStringKey GetTypeName()override
 			{
-				return description::GetTypeDescriptor<GuiVirtualTreeView>()->GetTypeName();
+				return typeName;
 			}
 
-			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			void GetPropertyNames(const TypeInfo& typeInfo, collections::List<GlobalStringKey>& propertyNames)override
 			{
-				propertyNames.Add(L"ItemTemplate");
+				propertyNames.Add(GlobalStringKey::_ItemTemplate);
 			}
 
 			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
 			{
-				if (propertyInfo.propertyName == L"ItemTemplate")
+				if (propertyInfo.propertyName == GlobalStringKey::_ItemTemplate)
 				{
 					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<WString>());
 					return info;
@@ -4373,7 +4500,7 @@ GuiVirtualTreeViewInstanceLoader
 
 			bool SetPropertyValue(PropertyValue& propertyValue)override
 			{
-				if (propertyValue.propertyName == L"ItemTemplate")
+				if (propertyValue.propertyName == GlobalStringKey::_ItemTemplate)
 				{
 					return true;
 				}
@@ -4387,24 +4514,28 @@ GuiVirtualDataGridInstanceLoader
 
 		class GuiVirtualDataGridInstanceLoader : public Object, public IGuiInstanceLoader
 		{
+		protected:
+			GlobalStringKey					typeName;
+
 		public:
 			GuiVirtualDataGridInstanceLoader()
 			{
+				typeName = GlobalStringKey::Get(description::GetTypeDescriptor<GuiVirtualDataGrid>()->GetTypeName());
 			}
 
-			WString GetTypeName()override
+			GlobalStringKey GetTypeName()override
 			{
-				return description::GetTypeDescriptor<GuiVirtualDataGrid>()->GetTypeName();
+				return typeName;
 			}
 
-			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			void GetPropertyNames(const TypeInfo& typeInfo, collections::List<GlobalStringKey>& propertyNames)override
 			{
-				propertyNames.Add(L"ItemTemplate");
+				propertyNames.Add(GlobalStringKey::_ItemTemplate);
 			}
 
 			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
 			{
-				if (propertyInfo.propertyName == L"ItemTemplate")
+				if (propertyInfo.propertyName == GlobalStringKey::_ItemTemplate)
 				{
 					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<WString>());
 					return info;
@@ -4414,7 +4545,7 @@ GuiVirtualDataGridInstanceLoader
 
 			bool SetPropertyValue(PropertyValue& propertyValue)override
 			{
-				if (propertyValue.propertyName == L"ItemTemplate")
+				if (propertyValue.propertyName == GlobalStringKey::_ItemTemplate)
 				{
 					return true;
 				}
@@ -4430,23 +4561,29 @@ GuiListViewInstanceLoader
 		{
 		protected:
 			bool				bindable;
+			GlobalStringKey		typeName;
+			GlobalStringKey		_View, _IconSize, _ItemSource;
 
 		public:
 			GuiListViewInstanceLoader(bool _bindable)
 				:bindable(_bindable)
 			{
-			}
-
-			WString GetTypeName()override
-			{
 				if (bindable)
 				{
-					return description::GetTypeDescriptor<GuiBindableListView>()->GetTypeName();
+					typeName = GlobalStringKey::Get(description::GetTypeDescriptor<GuiBindableListView>()->GetTypeName());
 				}
 				else
 				{
-					return description::GetTypeDescriptor<GuiListView>()->GetTypeName();
+					typeName = GlobalStringKey::Get(description::GetTypeDescriptor<GuiListView>()->GetTypeName());
 				}
+				_View = GlobalStringKey::Get(L"View");
+				_IconSize = GlobalStringKey::Get(L"IconSize");
+				_ItemSource = GlobalStringKey::Get(L"ItemSource");
+			}
+
+			GlobalStringKey GetTypeName()override
+			{
+				return typeName;
 			}
 
 			bool IsCreatable(const TypeInfo& typeInfo)override
@@ -4454,7 +4591,7 @@ GuiListViewInstanceLoader
 				return typeInfo.typeName == GetTypeName();
 			}
 
-			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
+			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<GlobalStringKey, description::Value>& constructorArguments)override
 			{
 				if (typeInfo.typeName == GetTypeName())
 				{
@@ -4463,7 +4600,7 @@ GuiListViewInstanceLoader
 					GuiListViewBase::IStyleProvider* styleProvider = 0;
 					Size iconSize;
 					{
-						vint itemSourceIndex = constructorArguments.Keys().IndexOf(L"ItemSource");
+						vint itemSourceIndex = constructorArguments.Keys().IndexOf(_ItemSource);
 						if (itemSourceIndex != -1)
 						{
 							itemSource = UnboxValue<Ptr<IValueEnumerable>>(constructorArguments.GetByIndex(itemSourceIndex)[0]);
@@ -4473,19 +4610,19 @@ GuiListViewInstanceLoader
 							return Value();
 						}
 
-						vint indexView = constructorArguments.Keys().IndexOf(L"View");
+						vint indexView = constructorArguments.Keys().IndexOf(_View);
 						if (indexView != -1)
 						{
 							viewType = UnboxValue<ListViewViewType>(constructorArguments.GetByIndex(indexView)[0]);
 						}
 
-						vint indexIconSize = constructorArguments.Keys().IndexOf(L"IconSize");
+						vint indexIconSize = constructorArguments.Keys().IndexOf(_IconSize);
 						if (indexIconSize != -1)
 						{
 							iconSize = UnboxValue<Size>(constructorArguments.GetByIndex(indexIconSize)[0]);
 						}
 
-						vint indexControlTemplate = constructorArguments.Keys().IndexOf(L"ControlTemplate");
+						vint indexControlTemplate = constructorArguments.Keys().IndexOf(GlobalStringKey::_ControlTemplate);
 						if (indexControlTemplate == -1)
 						{
 							styleProvider = GetCurrentTheme()->CreateListViewStyle();
@@ -4535,45 +4672,45 @@ GuiListViewInstanceLoader
 				return Value();
 			}
 
-			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			void GetPropertyNames(const TypeInfo& typeInfo, collections::List<GlobalStringKey>& propertyNames)override
 			{
 			}
 
-			void GetConstructorParameters(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			void GetConstructorParameters(const TypeInfo& typeInfo, collections::List<GlobalStringKey>& propertyNames)override
 			{
 				if (typeInfo.typeName == GetTypeName())
 				{
-					propertyNames.Add(L"ControlTemplate");
-					propertyNames.Add(L"View");
-					propertyNames.Add(L"IconSize");
+					propertyNames.Add(GlobalStringKey::_ControlTemplate);
+					propertyNames.Add(_View);
+					propertyNames.Add(_IconSize);
 					if (bindable)
 					{
-						propertyNames.Add(L"ItemSource");
+						propertyNames.Add(_ItemSource);
 					}
 				}
 			}
 
 			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
 			{
-				if (propertyInfo.propertyName == L"ControlTemplate")
+				if (propertyInfo.propertyName == GlobalStringKey::_ControlTemplate)
 				{
 					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<WString>());
 					info->constructorParameter = true;
 					return info;
 				}
-				else if (propertyInfo.propertyName == L"View")
+				else if (propertyInfo.propertyName == _View)
 				{
 					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<ListViewViewType>());
 					info->constructorParameter = true;
 					return info;
 				}
-				else if (propertyInfo.propertyName == L"IconSize")
+				else if (propertyInfo.propertyName == _IconSize)
 				{
 					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<Size>());
 					info->constructorParameter = true;
 					return info;
 				}
-				else if (propertyInfo.propertyName == L"ItemSource")
+				else if (propertyInfo.propertyName == _ItemSource)
 				{
 					if (bindable)
 					{
@@ -4600,23 +4737,29 @@ GuiTreeViewInstanceLoader
 		{
 		protected:
 			bool				bindable;
+			GlobalStringKey		typeName;
+			GlobalStringKey		_IconSize, _ItemSource, _Nodes;
 
 		public:
 			GuiTreeViewInstanceLoader(bool _bindable)
 				:bindable(_bindable)
 			{
-			}
-
-			WString GetTypeName()override
-			{
 				if (bindable)
 				{
-					return description::GetTypeDescriptor<GuiBindableTreeView>()->GetTypeName();
+					typeName = GlobalStringKey::Get(description::GetTypeDescriptor<GuiBindableTreeView>()->GetTypeName());
 				}
 				else
 				{
-					return description::GetTypeDescriptor<GuiTreeView>()->GetTypeName();
+					typeName = GlobalStringKey::Get(description::GetTypeDescriptor<GuiTreeView>()->GetTypeName());
 				}
+				_IconSize = GlobalStringKey::Get(L"IconSize");
+				_ItemSource = GlobalStringKey::Get(L"ItemSource");
+				_Nodes = GlobalStringKey::Get(L"Nodes");
+			}
+
+			GlobalStringKey GetTypeName()override
+			{
+				return typeName;
 			}
 
 			bool IsCreatable(const TypeInfo& typeInfo)override
@@ -4624,14 +4767,14 @@ GuiTreeViewInstanceLoader
 				return typeInfo.typeName == GetTypeName();
 			}
 
-			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
+			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<GlobalStringKey, description::Value>& constructorArguments)override
 			{
 				if (typeInfo.typeName == GetTypeName())
 				{
-					vint indexItemSource = constructorArguments.Keys().IndexOf(L"ItemSource");
+					vint indexItemSource = constructorArguments.Keys().IndexOf(_ItemSource);
 					GuiVirtualTreeView::IStyleProvider* styleProvider = 0;
 					{
-						vint indexControlTemplate = constructorArguments.Keys().IndexOf(L"ControlTemplate");
+						vint indexControlTemplate = constructorArguments.Keys().IndexOf(GlobalStringKey::_ControlTemplate);
 						if (indexControlTemplate == -1)
 						{
 							styleProvider = GetCurrentTheme()->CreateTreeViewStyle();
@@ -4659,7 +4802,7 @@ GuiTreeViewInstanceLoader
 						treeView = new GuiTreeView(styleProvider);
 					}
 
-					vint indexIconSize = constructorArguments.Keys().IndexOf(L"IconSize");
+					vint indexIconSize = constructorArguments.Keys().IndexOf(_IconSize);
 					if (indexIconSize != -1)
 					{
 						auto iconSize = UnboxValue<Size>(constructorArguments.GetByIndex(indexIconSize)[0]);
@@ -4671,43 +4814,43 @@ GuiTreeViewInstanceLoader
 				return Value();
 			}
 
-			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			void GetPropertyNames(const TypeInfo& typeInfo, collections::List<GlobalStringKey>& propertyNames)override
 			{
 				if (!bindable)
 				{
-					propertyNames.Add(L"Nodes");
+					propertyNames.Add(_Nodes);
 				}
 			}
 
-			void GetConstructorParameters(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			void GetConstructorParameters(const TypeInfo& typeInfo, collections::List<GlobalStringKey>& propertyNames)override
 			{
 				if (typeInfo.typeName == GetTypeName())
 				{
-					propertyNames.Add(L"ControlTemplate");
-					propertyNames.Add(L"IconSize");
+					propertyNames.Add(GlobalStringKey::_ControlTemplate);
+					propertyNames.Add(_IconSize);
 					if (bindable)
 					{
-						propertyNames.Add(L"ItemSource");
+						propertyNames.Add(_ItemSource);
 					}
 				}
 			}
 
 			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
 			{
-				if (propertyInfo.propertyName == L"Nodes")
+				if (propertyInfo.propertyName == _Nodes)
 				{
 					if (!bindable)
 					{
 						return GuiInstancePropertyInfo::Collection(description::GetTypeDescriptor<tree::MemoryNodeProvider>());
 					}
 				}
-				else if (propertyInfo.propertyName == L"ControlTemplate")
+				else if (propertyInfo.propertyName == GlobalStringKey::_ControlTemplate)
 				{
 					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<WString>());
 					info->constructorParameter = true;
 					return info;
 				}
-				else if (propertyInfo.propertyName == L"ItemSource")
+				else if (propertyInfo.propertyName == _ItemSource)
 				{
 					if (bindable)
 					{
@@ -4717,7 +4860,7 @@ GuiTreeViewInstanceLoader
 						return info;
 					}
 				}
-				else if (propertyInfo.propertyName == L"IconSize")
+				else if (propertyInfo.propertyName == _IconSize)
 				{
 					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<Size>());
 					info->constructorParameter = true;
@@ -4730,7 +4873,7 @@ GuiTreeViewInstanceLoader
 			{
 				if (GuiTreeView* container = dynamic_cast<GuiTreeView*>(propertyValue.instanceValue.GetRawPtr()))
 				{
-					if (propertyValue.propertyName == L"Nodes")
+					if (propertyValue.propertyName == _Nodes)
 					{
 						auto item = UnboxValue<Ptr<tree::MemoryNodeProvider>>(propertyValue.propertyValue);
 						container->Nodes()->Children().Add(item);
@@ -4748,14 +4891,17 @@ GuiComboBoxInstanceLoader
 		class GuiComboBoxInstanceLoader : public Object, public IGuiInstanceLoader
 		{
 		protected:
-			WString							typeName;
+			GlobalStringKey						typeName;
+			GlobalStringKey						_ListControl;
+
 		public:
 			GuiComboBoxInstanceLoader()
-				:typeName(L"presentation::controls::GuiComboBox")
+				:typeName(GlobalStringKey::Get(L"presentation::controls::GuiComboBox"))
 			{
+				_ListControl = GlobalStringKey::Get(L"ListControl");
 			}
 
-			WString GetTypeName()override
+			GlobalStringKey GetTypeName()override
 			{
 				return typeName;
 			}
@@ -4765,12 +4911,12 @@ GuiComboBoxInstanceLoader
 				return typeInfo.typeName == GetTypeName();
 			}
 
-			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
+			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<GlobalStringKey, description::Value>& constructorArguments)override
 			{
 				if (typeInfo.typeName == GetTypeName())
 				{
-					vint indexListControl = constructorArguments.Keys().IndexOf(L"ListControl");
-					vint indexControlTemplate = constructorArguments.Keys().IndexOf(L"ControlTemplate");
+					vint indexListControl = constructorArguments.Keys().IndexOf(_ListControl);
+					vint indexControlTemplate = constructorArguments.Keys().IndexOf(GlobalStringKey::_ControlTemplate);
 					if (indexListControl != -1)
 					{
 						Ptr<GuiTemplate::IFactory> factory;
@@ -4797,33 +4943,33 @@ GuiComboBoxInstanceLoader
 				return Value();
 			}
 
-			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			void GetPropertyNames(const TypeInfo& typeInfo, collections::List<GlobalStringKey>& propertyNames)override
 			{
 				if (typeInfo.typeName == GetTypeName())
 				{
-					propertyNames.Add(L"ListControl");
+					propertyNames.Add(_ListControl);
 				}
 			}
 
-			void GetConstructorParameters(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			void GetConstructorParameters(const TypeInfo& typeInfo, collections::List<GlobalStringKey>& propertyNames)override
 			{
 				if (typeInfo.typeName == GetTypeName())
 				{
-					propertyNames.Add(L"ControlTemplate");
-					propertyNames.Add(L"ListControl");
+					propertyNames.Add(GlobalStringKey::_ControlTemplate);
+					propertyNames.Add(_ListControl);
 				}
 			}
 
 			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
 			{
-				if (propertyInfo.propertyName == L"ListControl")
+				if (propertyInfo.propertyName == _ListControl)
 				{
 					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<GuiSelectableListControl>());
 					info->constructorParameter = true;
 					info->required = true;
 					return info;
 				}
-				else if (propertyInfo.propertyName == L"ControlTemplate")
+				else if (propertyInfo.propertyName == GlobalStringKey::_ControlTemplate)
 				{
 					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<WString>());
 					info->constructorParameter = true;
@@ -4841,17 +4987,19 @@ GuiBindableTextListInstanceLoader
 		{
 			typedef Func<list::TextItemStyleProvider::ITextItemStyleProvider*()>		ItemStyleProviderFactory;
 		protected:
-			WString							typeName;
+			GlobalStringKey					typeName;
 			ItemStyleProviderFactory		itemStyleProviderFactory;
+			GlobalStringKey					_ItemSource;
 
 		public:
 			GuiBindableTextListInstanceLoader(const WString& type, const ItemStyleProviderFactory& factory)
-				:typeName(L"presentation::controls::GuiBindable" + type + L"TextList")
+				:typeName(GlobalStringKey::Get(L"presentation::controls::GuiBindable" + type + L"TextList"))
 				, itemStyleProviderFactory(factory)
 			{
+				_ItemSource = GlobalStringKey::Get(L"ItemSource");
 			}
 
-			WString GetTypeName()override
+			GlobalStringKey GetTypeName()override
 			{
 				return typeName;
 			}
@@ -4861,16 +5009,16 @@ GuiBindableTextListInstanceLoader
 				return typeInfo.typeName == GetTypeName();
 			}
 
-			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
+			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<GlobalStringKey, description::Value>& constructorArguments)override
 			{
 				if (typeInfo.typeName == GetTypeName())
 				{
-					vint indexItemSource = constructorArguments.Keys().IndexOf(L"ItemSource");
+					vint indexItemSource = constructorArguments.Keys().IndexOf(_ItemSource);
 					if (indexItemSource != -1)
 					{
 						GuiTextListTemplate_StyleProvider* styleProvider = 0;
 						{
-							vint indexControlTemplate = constructorArguments.Keys().IndexOf(L"ControlTemplate");
+							vint indexControlTemplate = constructorArguments.Keys().IndexOf(GlobalStringKey::_ControlTemplate);
 							if (indexControlTemplate != -1)
 							{
 								auto factory = CreateTemplateFactory(constructorArguments.GetByIndex(indexControlTemplate)[0].GetText());
@@ -4894,24 +5042,24 @@ GuiBindableTextListInstanceLoader
 				return Value();
 			}
 
-			void GetConstructorParameters(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			void GetConstructorParameters(const TypeInfo& typeInfo, collections::List<GlobalStringKey>& propertyNames)override
 			{
 				if (typeInfo.typeName == GetTypeName())
 				{
-					propertyNames.Add(L"ControlTemplate");
-					propertyNames.Add(L"ItemSource");
+					propertyNames.Add(GlobalStringKey::_ControlTemplate);
+					propertyNames.Add(_ItemSource);
 				}
 			}
 
 			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
 			{
-				if (propertyInfo.propertyName == L"ControlTemplate")
+				if (propertyInfo.propertyName == GlobalStringKey::_ControlTemplate)
 				{
 					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<WString>());
 					info->constructorParameter = true;
 					return info;
 				}
-				if (propertyInfo.propertyName == L"ItemSource")
+				if (propertyInfo.propertyName == _ItemSource)
 				{
 					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<IValueEnumerable>());
 					info->constructorParameter = true;
@@ -4928,20 +5076,28 @@ GuiCompositionInstanceLoader
 
 		class GuiCompositionInstanceLoader : public Object, public IGuiInstanceLoader
 		{
+		protected:
+			GlobalStringKey					typeName;
+
 		public:
-			WString GetTypeName()override
+			GuiCompositionInstanceLoader()
 			{
-				return description::GetTypeDescriptor<GuiGraphicsComposition>()->GetTypeName();
+				typeName = GlobalStringKey::Get(description::GetTypeDescriptor<GuiGraphicsComposition>()->GetTypeName());
 			}
 
-			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			GlobalStringKey GetTypeName()override
 			{
-				propertyNames.Add(L"");
+				return typeName;
+			}
+
+			void GetPropertyNames(const TypeInfo& typeInfo, collections::List<GlobalStringKey>& propertyNames)override
+			{
+				propertyNames.Add(GlobalStringKey::Empty);
 			}
 
 			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
 			{
-				if (propertyInfo.propertyName == L"")
+				if (propertyInfo.propertyName == GlobalStringKey::Empty)
 				{
 					auto info = GuiInstancePropertyInfo::Collection();
 					info->acceptableTypes.Add(description::GetTypeDescriptor<GuiControl>());
@@ -4956,7 +5112,7 @@ GuiCompositionInstanceLoader
 			{
 				if (GuiGraphicsComposition* container = dynamic_cast<GuiGraphicsComposition*>(propertyValue.instanceValue.GetRawPtr()))
 				{
-					if (propertyValue.propertyName == L"")
+					if (propertyValue.propertyName == GlobalStringKey::Empty)
 					{
 						if (auto control = dynamic_cast<GuiControl*>(propertyValue.propertyValue.GetRawPtr()))
 						{
@@ -4985,21 +5141,32 @@ GuiTableCompositionInstanceLoader
 
 		class GuiTableCompositionInstanceLoader : public Object, public IGuiInstanceLoader
 		{
+		protected:
+			GlobalStringKey					typeName;
+			GlobalStringKey					_Rows, _Columns;
+
 		public:
-			WString GetTypeName()override
+			GuiTableCompositionInstanceLoader()
 			{
-				return description::GetTypeDescriptor<GuiTableComposition>()->GetTypeName();
+				typeName = GlobalStringKey::Get(description::GetTypeDescriptor<GuiTableComposition>()->GetTypeName());
+				_Rows = GlobalStringKey::Get(L"Rows");
+				_Columns = GlobalStringKey::Get(L"Columns");
 			}
 
-			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			GlobalStringKey GetTypeName()override
 			{
-				propertyNames.Add(L"Rows");
-				propertyNames.Add(L"Columns");
+				return typeName;
+			}
+
+			void GetPropertyNames(const TypeInfo& typeInfo, collections::List<GlobalStringKey>& propertyNames)override
+			{
+				propertyNames.Add(_Rows);
+				propertyNames.Add(_Columns);
 			}
 
 			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
 			{
-				if (propertyInfo.propertyName == L"Rows" || propertyInfo.propertyName==L"Columns")
+				if (propertyInfo.propertyName == _Rows || propertyInfo.propertyName == _Columns)
 				{
 					return GuiInstancePropertyInfo::Array(description::GetTypeDescriptor<GuiCellOption>());
 				}
@@ -5010,7 +5177,7 @@ GuiTableCompositionInstanceLoader
 			{
 				if (GuiTableComposition* container = dynamic_cast<GuiTableComposition*>(propertyValue.instanceValue.GetRawPtr()))
 				{
-					if (propertyValue.propertyName == L"Rows")
+					if (propertyValue.propertyName == _Rows)
 					{
 						List<GuiCellOption> options;
 						CopyFrom(options, GetLazyList<GuiCellOption>(UnboxValue<Ptr<IValueList>>(propertyValue.propertyValue)));
@@ -5021,7 +5188,7 @@ GuiTableCompositionInstanceLoader
 						}
 						return true;
 					}
-					else if (propertyValue.propertyName == L"Columns")
+					else if (propertyValue.propertyName == _Columns)
 					{
 						List<GuiCellOption> options;
 						CopyFrom(options, GetLazyList<GuiCellOption>(UnboxValue<Ptr<IValueList>>(propertyValue.propertyValue)));
@@ -5043,21 +5210,30 @@ GuiCellCompositionInstanceLoader
 
 		class GuiCellCompositionInstanceLoader : public Object, public IGuiInstanceLoader
 		{
-		public:
+		protected:
+			GlobalStringKey					typeName;
+			GlobalStringKey					_Site;
 
-			WString GetTypeName()override
+		public:
+			GuiCellCompositionInstanceLoader()
 			{
-				return description::GetTypeDescriptor<GuiCellComposition>()->GetTypeName();
+				typeName = GlobalStringKey::Get(description::GetTypeDescriptor<GuiCellComposition>()->GetTypeName());
+				_Site = GlobalStringKey::Get(L"Site");
 			}
 
-			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			GlobalStringKey GetTypeName()override
 			{
-				propertyNames.Add(L"Site");
+				return typeName;
+			}
+
+			void GetPropertyNames(const TypeInfo& typeInfo, collections::List<GlobalStringKey>& propertyNames)override
+			{
+				propertyNames.Add(_Site);
 			}
 
 			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
 			{
-				if (propertyInfo.propertyName == L"Site")
+				if (propertyInfo.propertyName == _Site)
 				{
 					return GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<SiteValue>());
 				}
@@ -5068,7 +5244,7 @@ GuiCellCompositionInstanceLoader
 			{
 				if (GuiCellComposition* container = dynamic_cast<GuiCellComposition*>(propertyValue.instanceValue.GetRawPtr()))
 				{
-					if (propertyValue.propertyName == L"Site")
+					if (propertyValue.propertyName == _Site)
 					{
 						SiteValue site = UnboxValue<SiteValue>(propertyValue.propertyValue);
 						container->SetSite(site.row, site.column, site.rowSpan, site.columnSpan);
@@ -5086,14 +5262,19 @@ GuiTreeNodeInstanceLoader
 		class GuiTreeNodeInstanceLoader : public Object, public IGuiInstanceLoader
 		{
 		protected:
-			WString							typeName;
+			GlobalStringKey							typeName;
+			GlobalStringKey							_Text, _Image, _Tag;
+
 		public:
 			GuiTreeNodeInstanceLoader()
-				:typeName(L"presentation::controls::tree::TreeNode")
+				:typeName(GlobalStringKey::Get(L"presentation::controls::tree::TreeNode"))
 			{
+				_Text = GlobalStringKey::Get(L"Text");
+				_Image = GlobalStringKey::Get(L"Image");
+				_Tag = GlobalStringKey::Get(L"Tag");
 			}
 
-			WString GetTypeName()override
+			GlobalStringKey GetTypeName()override
 			{
 				return typeName;
 			}
@@ -5103,7 +5284,7 @@ GuiTreeNodeInstanceLoader
 				return typeInfo.typeName == GetTypeName();
 			}
 
-			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<WString, description::Value>& constructorArguments)override
+			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<GlobalStringKey, description::Value>& constructorArguments)override
 			{
 				if (typeInfo.typeName == GetTypeName())
 				{
@@ -5114,29 +5295,29 @@ GuiTreeNodeInstanceLoader
 				return Value();
 			}
 
-			void GetPropertyNames(const TypeInfo& typeInfo, List<WString>& propertyNames)override
+			void GetPropertyNames(const TypeInfo& typeInfo, collections::List<GlobalStringKey>& propertyNames)override
 			{
-				propertyNames.Add(L"Text");
-				propertyNames.Add(L"Image");
-				propertyNames.Add(L"Tag");
-				propertyNames.Add(L"");
+				propertyNames.Add(_Text);
+				propertyNames.Add(_Image);
+				propertyNames.Add(_Tag);
+				propertyNames.Add(GlobalStringKey::Empty);
 			}
 
 			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
 			{
-				if (propertyInfo.propertyName == L"Text")
+				if (propertyInfo.propertyName == _Text)
 				{
 					return GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<WString>());
 				}
-				else if (propertyInfo.propertyName == L"Image")
+				else if (propertyInfo.propertyName == _Image)
 				{
 					return GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<GuiImageData>());
 				}
-				else if (propertyInfo.propertyName == L"Tag")
+				else if (propertyInfo.propertyName == _Tag)
 				{
 					return GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<Value>());
 				}
-				else if (propertyInfo.propertyName == L"")
+				else if (propertyInfo.propertyName == GlobalStringKey::Empty)
 				{
 					return GuiInstancePropertyInfo::Collection(description::GetTypeDescriptor<tree::MemoryNodeProvider>());
 				}
@@ -5147,7 +5328,7 @@ GuiTreeNodeInstanceLoader
 			{
 				if (tree::MemoryNodeProvider* container = dynamic_cast<tree::MemoryNodeProvider*>(propertyValue.instanceValue.GetRawPtr()))
 				{
-					if (propertyValue.propertyName == L"Text")
+					if (propertyValue.propertyName == _Text)
 					{
 						if (auto item = container->GetData().Cast<tree::TreeViewItem>())
 						{
@@ -5156,7 +5337,7 @@ GuiTreeNodeInstanceLoader
 							return true;
 						}
 					}
-					else if (propertyValue.propertyName == L"Image")
+					else if (propertyValue.propertyName == _Image)
 					{
 						if (auto item = container->GetData().Cast<tree::TreeViewItem>())
 						{
@@ -5165,7 +5346,7 @@ GuiTreeNodeInstanceLoader
 							return true;
 						}
 					}
-					else if (propertyValue.propertyName == L"Tag")
+					else if (propertyValue.propertyName == _Tag)
 					{
 						if (auto item = container->GetData().Cast<tree::TreeViewItem>())
 						{
@@ -5173,7 +5354,7 @@ GuiTreeNodeInstanceLoader
 							return true;
 						}
 					}
-					else if (propertyValue.propertyName == L"")
+					else if (propertyValue.propertyName == GlobalStringKey::Empty)
 					{
 						auto item = UnboxValue<Ptr<tree::MemoryNodeProvider>>(propertyValue.propertyValue);
 						container->Children().Add(item);
@@ -5209,7 +5390,7 @@ GuiPredefinedInstanceLoadersPlugin
 
 #define ADD_VIRTUAL_TYPE_LOADER(TYPENAME, LOADER)\
 	manager->CreateVirtualType(\
-		description::GetTypeDescriptor<TYPENAME>()->GetTypeName(),\
+		GlobalStringKey::Get(description::GetTypeDescriptor<TYPENAME>()->GetTypeName()),\
 		new LOADER\
 		)
 
@@ -5238,7 +5419,7 @@ GuiPredefinedInstanceLoadersPlugin
 
 #define ADD_VIRTUAL_CONTROL(VIRTUALTYPENAME, TYPENAME, CONSTRUCTOR, TEMPLATE)\
 	manager->CreateVirtualType(\
-		description::GetTypeDescriptor<TYPENAME>()->GetTypeName(),\
+		GlobalStringKey::Get(description::GetTypeDescriptor<TYPENAME>()->GetTypeName()),\
 		new GuiTemplateControlInstanceLoader(\
 			L"presentation::controls::Gui" L#VIRTUALTYPENAME,\
 			[](){return Value::From(CONSTRUCTOR());},\
@@ -5248,7 +5429,7 @@ GuiPredefinedInstanceLoadersPlugin
 
 #define ADD_VIRTUAL_CONTROL_2(VIRTUALTYPENAME, TYPENAME, CONSTRUCTOR, TEMPLATE)\
 	manager->CreateVirtualType(\
-		description::GetTypeDescriptor<TYPENAME>()->GetTypeName(),\
+		GlobalStringKey::Get(description::GetTypeDescriptor<TYPENAME>()->GetTypeName()),\
 		new GuiTemplateControlInstanceLoader(\
 			L"presentation::controls::Gui" L#VIRTUALTYPENAME,\
 			[](){return Value::From(CONSTRUCTOR());},\
@@ -5263,7 +5444,7 @@ GuiPredefinedInstanceLoadersPlugin
 
 #define ADD_VIRTUAL_CONTROL_F(VIRTUALTYPENAME, TYPENAME, CONSTRUCTOR, TEMPLATE, FUNCTION)\
 	manager->CreateVirtualType(\
-		description::GetTypeDescriptor<TYPENAME>()->GetTypeName(),\
+		GlobalStringKey::Get(description::GetTypeDescriptor<TYPENAME>()->GetTypeName()),\
 		new GuiTemplateControlInstanceLoader(\
 			L"presentation::controls::Gui" L#VIRTUALTYPENAME,\
 			[](){return Value::From(CONSTRUCTOR());},\
@@ -5330,7 +5511,7 @@ GuiPredefinedInstanceLoadersPlugin
 				ADD_VIRTUAL_CONTROL_2	(CheckTextList,				GuiTextList,			g::NewCheckTextList,			GuiTextListTemplate);			// ControlTemplate
 				ADD_VIRTUAL_CONTROL_2	(RadioTextList,				GuiTextList,			g::NewRadioTextList,			GuiTextListTemplate);			// ControlTemplate
 
-				auto bindableTextListName = description::GetTypeDescriptor<GuiBindableTextList>()->GetTypeName();			// ControlTemplate, ItemSource
+				auto bindableTextListName = GlobalStringKey::Get(description::GetTypeDescriptor<GuiBindableTextList>()->GetTypeName());						// ControlTemplate, ItemSource
 				manager->CreateVirtualType(bindableTextListName, new GuiBindableTextListInstanceLoader(L"Check", [](){return GetCurrentTheme()->CreateCheckTextListItemStyle(); }));
 				manager->CreateVirtualType(bindableTextListName, new GuiBindableTextListInstanceLoader(L"Radio", [](){return GetCurrentTheme()->CreateRadioTextListItemStyle(); }));
 
@@ -5367,10 +5548,10 @@ namespace vl
 Variable
 ***********************************************************************/
 
-		void Workflow_CreatePointerVariable(Ptr<workflow::WfModule> module, const WString& name, description::ITypeDescriptor* type)
+		void Workflow_CreatePointerVariable(Ptr<workflow::WfModule> module, GlobalStringKey name, description::ITypeDescriptor* type)
 		{
 			auto var = MakePtr<WfVariableDeclaration>();
-			var->name.value = name;
+			var->name.value = name.ToString();
 			{
 				Ptr<TypeInfoImpl> elementType = new TypeInfoImpl(ITypeInfo::TypeDescriptor);
 				elementType->SetTypeDescriptor(type);
@@ -5390,7 +5571,7 @@ Variable
 
 		void Workflow_GetVariableTypes(Ptr<GuiInstanceEnvironment> env, types::VariableTypeMap& types)
 		{
-			FOREACH_INDEXER(WString, name, index, env->scope->referenceValues.Keys())
+			FOREACH_INDEXER(GlobalStringKey, name, index, env->scope->referenceValues.Keys())
 			{
 				auto value = env->scope->referenceValues.Values()[index];
 				types.Add(name, value.GetTypeDescriptor());
@@ -5409,9 +5590,9 @@ Variable
 
 		void Workflow_SetVariablesForReferenceValues(Ptr<workflow::runtime::WfRuntimeGlobalContext> context, Ptr<GuiInstanceEnvironment> env)
 		{
-			FOREACH_INDEXER(WString, name, index, env->scope->referenceValues.Keys())
+			FOREACH_INDEXER(GlobalStringKey, name, index, env->scope->referenceValues.Keys())
 			{
-				vint variableIndex = context->assembly->variableNames.IndexOf(name);
+				vint variableIndex = context->assembly->variableNames.IndexOf(name.ToString());
 				if (variableIndex != -1)
 				{
 					context->globalVariables->variables[variableIndex] = env->scope->referenceValues.Values()[index];
@@ -5435,15 +5616,15 @@ Workflow_ValidateExpression
 
 			bool failed = false;
 			auto td = bindingTarget.typeInfo.typeDescriptor;
-			auto propertyInfo = td->GetPropertyByName(bindingTarget.propertyName, true);
+			auto propertyInfo = td->GetPropertyByName(bindingTarget.propertyName.ToString(), true);
 			if (!propertyInfo)
 			{
-				errors.Add(ERROR_CODE_PREFIX L"Property \"" + bindingTarget.propertyName + L"\" does not exist in type \"" + td->GetTypeName() + L"\".");
+				errors.Add(ERROR_CODE_PREFIX L"Property \"" + bindingTarget.propertyName.ToString() + L"\" does not exist in type \"" + td->GetTypeName() + L"\".");
 				failed = true;
 			}
 			else if (!propertyInfo->IsReadable() || !propertyInfo->IsWritable())
 			{
-				errors.Add(ERROR_CODE_PREFIX L"Property \"" + bindingTarget.propertyName + L"\" of type \"" + td->GetTypeName() + L"\" should be both readable and writable.");
+				errors.Add(ERROR_CODE_PREFIX L"Property \"" + bindingTarget.propertyName.ToString() + L"\" of type \"" + td->GetTypeName() + L"\" should be both readable and writable.");
 				failed = true;
 			}
 
@@ -5565,7 +5746,7 @@ Workflow_CompileEventHandler
 				func->returnType = GetTypeFromTypeInfo(TypeInfoRetriver<void>::CreateTypeInfo().Obj());
 
 				auto td = bindingTarget.typeInfo.typeDescriptor;
-				auto eventInfo = td->GetEventByName(bindingTarget.propertyName, true);
+				auto eventInfo = td->GetEventByName(bindingTarget.propertyName.ToString(), true);
 				if (eventInfo)
 				{
 					vint count = eventInfo->GetHandlerType()->GetElementType()->GetGenericArgumentCount() - 1;
@@ -5622,7 +5803,7 @@ Workflow_CompileDataBinding
 		{
 			auto module = MakePtr<WfModule>();
 			Workflow_CreateVariablesForReferenceValues(module, types);
-			Workflow_CreatePointerVariable(module, L"<this>", thisType);
+			Workflow_CreatePointerVariable(module, GlobalStringKey::Get(L"<this>"), thisType);
 
 			auto func = MakePtr<WfFunctionDeclaration>();
 			func->anonymity = WfFunctionAnonymity::Named;
@@ -5674,7 +5855,7 @@ Workflow_CompileDataBinding
 						callback->statement = callbackBlock;
 						{
 							auto refSubscribee = MakePtr<WfReferenceExpression>();
-							refSubscribee->name.value = dataBinding.variableName;
+							refSubscribee->name.value = dataBinding.variableName.ToString();
 
 							auto member = MakePtr<WfMemberExpression>();
 							member->parent = refSubscribee;
@@ -5735,7 +5916,7 @@ Workflow_CompileDataBinding
 						}
 						{
 							auto refSubscribee = MakePtr<WfReferenceExpression>();
-							refSubscribee->name.value = dataBinding.variableName;
+							refSubscribee->name.value = dataBinding.variableName.ToString();
 
 							auto member = MakePtr<WfMemberExpression>();
 							member->parent = refSubscribee;
@@ -5791,7 +5972,7 @@ Workflow_CompileDataBinding
 				else if (dataBinding.bindExpression)
 				{
 					auto refSubscribee = MakePtr<WfReferenceExpression>();
-					refSubscribee->name.value = dataBinding.variableName;
+					refSubscribee->name.value = dataBinding.variableName.ToString();
 
 					auto member = MakePtr<WfMemberExpression>();
 					member->parent = refSubscribee;
@@ -5860,16 +6041,15 @@ Workflow_GetSharedManager
 				auto reprTypeInfo = bindingTargetTypeInfo;
 				auto loader = GetInstanceLoaderManager()->GetLoader(reprTypeInfo.typeName);
 
-				if (repr->instanceName && reprTypeInfo.typeDescriptor)
+				if (repr->instanceName != GlobalStringKey::Empty && reprTypeInfo.typeDescriptor)
 				{
-					WString name = repr->instanceName.Value();
-					if (typeInfos.Keys().Contains(name))
+					if (typeInfos.Keys().Contains(repr->instanceName))
 					{
-						errors.Add(L"Precompile: Parameter \"" + name + L"\" conflict with an existing named object.");
+						errors.Add(L"Precompile: Parameter \"" + repr->instanceName.ToString() + L"\" conflict with an existing named object.");
 					}
 					else
 					{
-						typeInfos.Add(name, reprTypeInfo);
+						typeInfos.Add(repr->instanceName, reprTypeInfo);
 					}
 				}
 				
@@ -5877,22 +6057,22 @@ Workflow_GetSharedManager
 				{
 					IGuiInstanceLoader::TypeInfo propertyTypeInfo;
 
-					if (setter->binding != L"" && setter->binding != L"set")
+					if (setter->binding != GlobalStringKey::Empty && setter->binding != GlobalStringKey::_Set)
 					{
 						auto binder = GetInstanceLoaderManager()->GetInstanceBinder(setter->binding);
 						if (!binder)
 						{
-							errors.Add(L"The appropriate IGuiInstanceBinder of binding \"" + setter->binding + L"\" cannot be found.");
+							errors.Add(L"The appropriate IGuiInstanceBinder of binding \"" + setter->binding.ToString() + L"\" cannot be found.");
 						}
-						else if (binder->RequireInstanceName() && !repr->instanceName && reprTypeInfo.typeDescriptor)
+						else if (binder->RequireInstanceName() && repr->instanceName == GlobalStringKey::Empty && reprTypeInfo.typeDescriptor)
 						{
-							WString name = L"<precompile>" + itow(generatedNameCount++);
+							auto name = GlobalStringKey::Get(L"<precompile>" + itow(generatedNameCount++));
 							repr->instanceName = name;
 							typeInfos.Add(name, reprTypeInfo);
 						}
 					}
 
-					if (setter->binding == L"set")
+					if (setter->binding == GlobalStringKey::_Set)
 					{
 						IGuiInstanceLoader::PropertyInfo info;
 						info.typeInfo = reprTypeInfo;
@@ -5905,7 +6085,7 @@ Workflow_GetSharedManager
 							if (typeInfo && typeInfo->support != GuiInstancePropertyInfo::NotSupport)
 							{
 								propertyTypeInfo.typeDescriptor = typeInfo->acceptableTypes[0];
-								propertyTypeInfo.typeName = typeInfo->acceptableTypes[0]->GetTypeName();
+								propertyTypeInfo.typeName = GlobalStringKey::Get(typeInfo->acceptableTypes[0]->GetTypeName());
 								break;
 							}
 							currentLoader = GetInstanceLoaderManager()->GetParentLoader(currentLoader);
@@ -5921,16 +6101,16 @@ Workflow_GetSharedManager
 
 				FOREACH(Ptr<GuiAttSetterRepr::EventValue>, handler, repr->eventHandlers.Values())
 				{
-					if (handler->binding != L"")
+					if (handler->binding != GlobalStringKey::Empty)
 					{
 						auto binder = GetInstanceLoaderManager()->GetInstanceEventBinder(handler->binding);
 						if (!binder)
 						{
-							errors.Add(L"The appropriate IGuiInstanceEventBinder of binding \"" + handler->binding + L"\" cannot be found.");
+							errors.Add(L"The appropriate IGuiInstanceEventBinder of binding \"" + handler->binding.ToString() + L"\" cannot be found.");
 						}
-						else if (binder->RequireInstanceName() && !repr->instanceName && reprTypeInfo.typeDescriptor)
+						else if (binder->RequireInstanceName() && repr->instanceName == GlobalStringKey::Empty && reprTypeInfo.typeDescriptor)
 						{
-							WString name = L"<precompile>" + itow(generatedNameCount++);
+							auto name = GlobalStringKey::Get(L"<precompile>" + itow(generatedNameCount++));
 							repr->instanceName = name;
 							typeInfos.Add(name, reprTypeInfo);
 						}
@@ -5947,9 +6127,9 @@ Workflow_GetSharedManager
 				{
 					errors.Add(
 						L"Precompile: Failed to find type \"" +
-						(repr->typeNamespace == L"" 
-							? repr->typeName
-							: repr->typeNamespace + L":" + repr->typeName
+						(repr->typeNamespace == GlobalStringKey::Empty
+							? repr->typeName.ToString()
+							: repr->typeNamespace.ToString() + L":" + repr->typeName.ToString()
 							) +
 						L"\".");
 				}
@@ -5992,16 +6172,16 @@ Workflow_GetSharedManager
 			void Visit(GuiAttSetterRepr* repr)override
 			{
 				IGuiInstanceLoader::TypeInfo reprTypeInfo;
-				if (repr->instanceName)
+				if (repr->instanceName != GlobalStringKey::Empty)
 				{
-					reprTypeInfo = typeInfos[repr->instanceName.Value()];;
+					reprTypeInfo = typeInfos[repr->instanceName];
 				}
 
 				FOREACH_INDEXER(Ptr<GuiAttSetterRepr::SetterValue>, setter, index, repr->setters.Values())
 				{
 					if (reprTypeInfo.typeDescriptor)
 					{
-						WString propertyName = repr->setters.Keys()[index];
+						GlobalStringKey propertyName = repr->setters.Keys()[index];
 						Ptr<GuiInstancePropertyInfo> propertyInfo;
 						IGuiInstanceLoader::PropertyInfo info;
 						info.typeInfo = reprTypeInfo;
@@ -6023,7 +6203,7 @@ Workflow_GetSharedManager
 
 						if (!propertyInfo)
 						{
-							errors.Add(L"Precompile: Cannot find property \"" + propertyName + L"\" in type \"" + reprTypeInfo.typeName + L"\".");
+							errors.Add(L"Precompile: Cannot find property \"" + propertyName.ToString() + L"\" in type \"" + reprTypeInfo.typeName.ToString() + L"\".");
 						}
 						else
 						{
@@ -6033,16 +6213,16 @@ Workflow_GetSharedManager
 								expressionCode = obj->text;
 							}
 
-							if (setter->binding==L"bind" || setter->binding == L"format")
+							if (setter->binding == GlobalStringKey::_Bind || setter->binding == GlobalStringKey::_Format)
 							{
 								WorkflowDataBinding dataBinding;
-								dataBinding.variableName = repr->instanceName.Value();
+								dataBinding.variableName = repr->instanceName;
 
-								if (setter->binding == L"bind")
+								if (setter->binding == GlobalStringKey::_Bind)
 								{
 									expressionCode = L"bind(" + expressionCode + L")";
 								}
-								else if (setter->binding == L"format")
+								else if (setter->binding == GlobalStringKey::_Format)
 								{
 									expressionCode = L"bind($\"" + expressionCode + L"\")";
 								}
@@ -6050,28 +6230,28 @@ Workflow_GetSharedManager
 								Ptr<WfExpression> expression;
 								if (Workflow_ValidateExpression(types, errors, info, expressionCode, expression))
 								{
-									dataBinding.propertyInfo = reprTypeInfo.typeDescriptor->GetPropertyByName(propertyName, true);
+									dataBinding.propertyInfo = reprTypeInfo.typeDescriptor->GetPropertyByName(propertyName.ToString(), true);
 									dataBinding.bindExpression = expression;
 								}
 
 								dataBindings.Add(dataBinding);
 							}
-							else if (setter->binding == L"eval")
+							else if (setter->binding == GlobalStringKey::_Eval)
 							{
 								if (propertyInfo->constructorParameter)
 								{
 									WString cacheKey = L"<att.eval>" + expressionCode;
 									auto assembly = Workflow_CompileExpression(types, errors, expressionCode);
-									context->precompiledCaches.Add(cacheKey, new GuiWorkflowCache(assembly));
+									context->precompiledCaches.Add(GlobalStringKey::Get(cacheKey), new GuiWorkflowCache(assembly));
 								}
 								else
 								{
 									WorkflowDataBinding dataBinding;
-									dataBinding.variableName = repr->instanceName.Value();
+									dataBinding.variableName = repr->instanceName;
 									Ptr<WfExpression> expression;
 									if (Workflow_ValidateExpression(types, errors, info, expressionCode, expression))
 									{
-										dataBinding.propertyInfo = reprTypeInfo.typeDescriptor->GetPropertyByName(propertyName, true);
+										dataBinding.propertyInfo = reprTypeInfo.typeDescriptor->GetPropertyByName(propertyName.ToString(), true);
 										dataBinding.bindExpression = expression;
 									}
 
@@ -6091,7 +6271,7 @@ Workflow_GetSharedManager
 				{
 					if (reprTypeInfo.typeDescriptor)
 					{
-						WString propertyName = repr->eventHandlers.Keys()[index];
+						GlobalStringKey propertyName = repr->eventHandlers.Keys()[index];
 						Ptr<GuiInstanceEventInfo> eventInfo;
 						IGuiInstanceLoader::PropertyInfo info;
 						info.typeInfo = reprTypeInfo;
@@ -6113,17 +6293,17 @@ Workflow_GetSharedManager
 
 						if (!eventInfo)
 						{
-							errors.Add(L"Precompile: Cannot find event \"" + propertyName + L"\" in type \"" + reprTypeInfo.typeName + L"\".");
+							errors.Add(L"Precompile: Cannot find event \"" + propertyName.ToString() + L"\" in type \"" + reprTypeInfo.typeName.ToString() + L"\".");
 						}
 						else
 						{
 							WString statementCode = handler->value;
 
-							if (handler->binding == L"eval")
+							if (handler->binding == GlobalStringKey::_Eval)
 							{
-								WString cacheKey = L"<ev.eval><" + repr->instanceName.Value() + L"><" + propertyName + L">" + statementCode;
+								WString cacheKey = L"<ev.eval><" + repr->instanceName.ToString() + L"><" + propertyName.ToString() + L">" + statementCode;
 								auto assembly = Workflow_CompileEventHandler(types, errors, info, statementCode);
-								context->precompiledCaches.Add(cacheKey, new GuiWorkflowCache(assembly));
+								context->precompiledCaches.Add(GlobalStringKey::Get(cacheKey), new GuiWorkflowCache(assembly));
 							}
 						}
 					}
@@ -6143,20 +6323,20 @@ Workflow_GetSharedManager
 			{
 				FOREACH(Ptr<GuiInstanceParameter>, parameter, context->parameters)
 				{
-					auto type = GetTypeDescriptor(parameter->className);
+					auto type = GetTypeDescriptor(parameter->className.ToString());
 					if (!type)
 					{
-						errors.Add(L"Precompile: Cannot find type \"" + parameter->className + L"\".");
+						errors.Add(L"Precompile: Cannot find type \"" + parameter->className.ToString() + L"\".");
 					}
 					else if (typeInfos.Keys().Contains(parameter->name))
 					{
-						errors.Add(L"Precompile: Parameter \"" + parameter->name + L"\" conflict with an existing named object.");
+						errors.Add(L"Precompile: Parameter \"" + parameter->name.ToString() + L"\" conflict with an existing named object.");
 					}
 					else
 					{
 						IGuiInstanceLoader::TypeInfo typeInfo;
 						typeInfo.typeDescriptor = type;
-						typeInfo.typeName = type->GetTypeName();
+						typeInfo.typeName = GlobalStringKey::Get(type->GetTypeName());
 						typeInfos.Add(parameter->name, typeInfo);
 					}
 				}
@@ -6181,8 +6361,8 @@ Workflow_GetSharedManager
 GuiWorkflowCache
 ***********************************************************************/
 
-		const wchar_t* GuiWorkflowCache::CacheTypeName = L"WORKFLOW-ASSEMBLY-CACHE";
-		const wchar_t* GuiWorkflowCache::CacheContextName = L"WORKFLOW-GLOBAL-CONTEXT";
+		const GlobalStringKey& GuiWorkflowCache::CacheTypeName = GlobalStringKey::_Workflow_Assembly_Cache;
+		const GlobalStringKey& GuiWorkflowCache::CacheContextName = GlobalStringKey::_Workflow_Global_Context;
 
 		GuiWorkflowCache::GuiWorkflowCache()
 		{
@@ -6193,7 +6373,7 @@ GuiWorkflowCache
 		{
 		}
 
-		WString GuiWorkflowCache::GetCacheTypeName()
+		GlobalStringKey GuiWorkflowCache::GetCacheTypeName()
 		{
 			return CacheTypeName;
 		}
@@ -6202,7 +6382,7 @@ GuiWorkflowCache
 GuiWorkflowCacheResolver
 ***********************************************************************/
 
-		WString GuiWorkflowCacheResolver::GetCacheTypeName()
+		GlobalStringKey GuiWorkflowCacheResolver::GetCacheTypeName()
 		{
 			return GuiWorkflowCache::CacheTypeName;
 		}
@@ -6295,6 +6475,28 @@ namespace vl
 		using namespace stream;
 
 /***********************************************************************
+GuiValueRepr
+***********************************************************************/
+
+		Ptr<GuiValueRepr> GuiValueRepr::LoadPrecompiledBinary(stream::IStream& stream, collections::List<GlobalStringKey>& keys)
+		{
+			stream::internal::Reader reader(stream);
+			vint key = -1;
+			reader << key;
+			switch (key)
+			{
+			case GuiTextRepr::BinaryKey:
+				return GuiTextRepr::LoadPrecompiledBinary(stream, keys);
+			case GuiAttSetterRepr::BinaryKey:
+				return GuiAttSetterRepr::LoadPrecompiledBinary(stream, keys);
+			case GuiConstructorRepr::BinaryKey:
+				return GuiConstructorRepr::LoadPrecompiledBinary(stream, keys);
+			default:
+				CHECK_FAIL(L"GuiValueRepr::LoadPrecompiledBinary(stream::IStream&, collections::List<presentation::GlobalStringKey>&)#Internal Error.");
+			}
+		}
+
+/***********************************************************************
 GuiTextRepr
 ***********************************************************************/
 
@@ -6316,6 +6518,32 @@ GuiTextRepr
 			}
 		}
 
+		void GuiTextRepr::CollectUsedKey(collections::List<GlobalStringKey>& keys)
+		{
+		}
+
+		void GuiTextRepr::SavePrecompiledBinary(stream::IStream& stream, collections::SortedList<GlobalStringKey>& keys, bool saveKey)
+		{
+			stream::internal::Writer writer(stream);
+			if (saveKey)
+			{
+				vint key = BinaryKey;
+				writer << key;
+			}
+			writer << text;
+		}
+
+		Ptr<GuiTextRepr> GuiTextRepr::LoadPrecompiledBinary(stream::IStream& stream, collections::List<GlobalStringKey>& keys, Ptr<GuiTextRepr> repr)
+		{
+			stream::internal::Reader reader(stream);
+			if (!repr)
+			{
+				repr = MakePtr<GuiTextRepr>();
+			}
+			reader << repr->text;
+			return repr;
+		}
+
 /***********************************************************************
 GuiAttSetterRepr
 ***********************************************************************/
@@ -6323,9 +6551,9 @@ GuiAttSetterRepr
 		void GuiAttSetterRepr::CloneBody(Ptr<GuiAttSetterRepr> repr)
 		{
 			CopyFrom(repr->eventHandlers, eventHandlers);
-			FOREACH(WString, name, setters.Keys())
+			FOREACH_INDEXER(GlobalStringKey, name, index, setters.Keys())
 			{
-				Ptr<SetterValue> src = setters[name];
+				Ptr<SetterValue> src = setters.Values()[index];
 				Ptr<SetterValue> dst = new SetterValue;
 				dst->binding = src->binding;
 				FOREACH(Ptr<GuiValueRepr>, value, src->values)
@@ -6349,11 +6577,11 @@ GuiAttSetterRepr
 		{
 			if (!fromStyle || serializePrecompiledResource)
 			{
-				if (instanceName)
+				if (instanceName != GlobalStringKey::Empty)
 				{
 					auto attName = MakePtr<XmlAttribute>();
 					attName->name.value = L"ref.Name";
-					attName->value.value = instanceName.Value();
+					attName->value.value = instanceName.ToString();
 					xml->attributes.Add(attName);
 				}
 
@@ -6361,7 +6589,7 @@ GuiAttSetterRepr
 				{
 					auto key = setters.Keys()[i];
 					auto value = setters.Values()[i];
-					if (key == L"")
+					if (key == GlobalStringKey::Empty)
 					{
 						FOREACH(Ptr<GuiValueRepr>, repr, value->values)
 						{
@@ -6383,10 +6611,10 @@ GuiAttSetterRepr
 						if (containsElement)
 						{
 							auto xmlProp = MakePtr<XmlElement>();
-							xmlProp->name.value = L"att." + key;
-							if (value->binding != L"")
+							xmlProp->name.value = L"att." + key.ToString();
+							if (value->binding != GlobalStringKey::Empty)
 							{
-								xmlProp->name.value += L"-" + value->binding;
+								xmlProp->name.value += L"-" + value->binding.ToString();
 							}
 
 							FOREACH(Ptr<GuiValueRepr>, repr, value->values)
@@ -6401,10 +6629,10 @@ GuiAttSetterRepr
 						else if (value->values.Count() > 0)
 						{
 							auto att = MakePtr<XmlAttribute>();
-							att->name.value = key;
-							if (value->binding != L"")
+							att->name.value = key.ToString();
+							if (value->binding != GlobalStringKey::Empty)
 							{
-								att->name.value += L"-" + value->binding;
+								att->name.value += L"-" + value->binding.ToString();
 							}
 							att->value.value = value->values[0].Cast<GuiTextRepr>()->text;
 							xml->attributes.Add(att);
@@ -6418,10 +6646,10 @@ GuiAttSetterRepr
 					auto value = eventHandlers.Values()[i];
 
 					auto xmlEvent = MakePtr<XmlElement>();
-					xmlEvent->name.value = L"ev." + key;
-					if (value->binding != L"")
+					xmlEvent->name.value = L"ev." + key.ToString();
+					if (value->binding != GlobalStringKey::Empty)
 					{
-						xmlEvent->name.value += L"-" + value->binding;
+						xmlEvent->name.value += L"-" + value->binding.ToString();
 					}
 					xml->subNodes.Add(xmlEvent);
 
@@ -6430,6 +6658,125 @@ GuiAttSetterRepr
 					xmlEvent->subNodes.Add(xmlText);
 				}
 			}
+		}
+
+		void GuiAttSetterRepr::CollectUsedKey(collections::List<GlobalStringKey>& keys)
+		{
+			keys.Add(instanceName);
+
+			for (vint i = 0; i < setters.Count(); i++)
+			{
+				keys.Add(setters.Keys()[i]);
+				auto value = setters.Values()[i];
+				keys.Add(value->binding);
+				for (vint j = 0; j < value->values.Count(); j++)
+				{
+					value->values[j]->CollectUsedKey(keys);
+				}
+			}
+			
+			for (vint i = 0; i < eventHandlers.Count(); i++)
+			{
+				keys.Add(eventHandlers.Keys()[i]);
+				keys.Add(eventHandlers.Values()[i]->binding);
+			}
+		}
+
+		void GuiAttSetterRepr::SavePrecompiledBinary(stream::IStream& stream, collections::SortedList<GlobalStringKey>& keys, bool saveKey)
+		{
+			stream::internal::Writer writer(stream);
+			if (saveKey)
+			{
+				vint key = BinaryKey;
+				writer << key;
+			}
+			{
+				vint count = setters.Count();
+				writer << count;
+				for (vint i = 0; i < count; i++)
+				{
+					auto keyIndex = keys.IndexOf(setters.Keys()[i]);
+					auto value = setters.Values()[i];
+					auto bindingIndex = keys.IndexOf(value->binding);
+					CHECK_ERROR(keyIndex != -1 && bindingIndex != -1, L"GuiAttSetterRepr::SavePrecompiledBinary(stream::IStream&, collections::SortedList<presentation::GlobalStringKey>&)#Internal Error.");
+					writer << keyIndex << bindingIndex;
+
+					vint valueCount = value->values.Count();
+					writer << valueCount;
+					for (vint j = 0; j < valueCount; j++)
+					{
+						value->values[j]->SavePrecompiledBinary(stream, keys, true);
+					}
+				}
+			}
+			{
+				vint count = eventHandlers.Count();
+				writer << count;
+				for (vint i = 0; i < count; i++)
+				{
+					auto keyIndex = keys.IndexOf(eventHandlers.Keys()[i]);
+					auto value = eventHandlers.Values()[i];
+					auto bindingIndex = keys.IndexOf(value->binding);
+					CHECK_ERROR(keyIndex != -1 && bindingIndex != -1, L"GuiAttSetterRepr::SavePrecompiledBinary(stream::IStream&, collections::SortedList<presentation::GlobalStringKey>&)#Internal Error.");
+					writer << keyIndex << bindingIndex << value->value;
+				}
+			}
+			{
+				vint instanceNameIndex = keys.IndexOf(instanceName);
+				CHECK_ERROR(instanceNameIndex != -1, L"GuiAttSetterRepr::SavePrecompiledBinary(stream::IStream&, collections::SortedList<presentation::GlobalStringKey>&)#Internal Error.");
+				writer << instanceNameIndex;
+			}
+		}
+
+		Ptr<GuiAttSetterRepr> GuiAttSetterRepr::LoadPrecompiledBinary(stream::IStream& stream, collections::List<GlobalStringKey>& keys, Ptr<GuiAttSetterRepr> repr)
+		{
+			stream::internal::Reader reader(stream);
+			if (!repr)
+			{
+				repr = MakePtr<GuiAttSetterRepr>();
+			}
+			{
+				vint count = -1;
+				reader << count;
+				for (vint i = 0; i < count; i++)
+				{
+					vint keyIndex = -1;
+					vint bindingIndex = -1;
+					auto value = MakePtr<SetterValue>();
+					reader << keyIndex << bindingIndex;
+					auto key = keys[keyIndex];
+					value->binding = keys[bindingIndex];
+					repr->setters.Add(key, value);
+
+					vint valueCount = -1;
+					reader << valueCount;
+					for (vint j = 0; j < valueCount; j++)
+					{
+						auto repr = GuiValueRepr::LoadPrecompiledBinary(stream, keys);
+						value->values.Add(repr);
+					}
+				}
+			}
+			{
+				vint count = -1;
+				reader << count;
+				for (vint i = 0; i < count; i++)
+				{
+					vint keyIndex = -1;
+					vint bindingIndex = -1;
+					auto value = MakePtr<EventValue>();
+					reader << keyIndex << bindingIndex << value->value;
+					auto key = keys[keyIndex];
+					value->binding = keys[bindingIndex];
+					repr->eventHandlers.Add(key, value);
+				}
+			}
+			{
+				vint instanceNameIndex = -1;
+				reader << instanceNameIndex;
+				repr->instanceName = keys[instanceNameIndex];
+			}
+			return repr;
 		}
 
 /***********************************************************************
@@ -6452,13 +6799,13 @@ GuiConstructorRepr
 			if (!fromStyle || serializePrecompiledResource)
 			{
 				auto xmlCtor = MakePtr<XmlElement>();
-				if (typeNamespace == L"")
+				if (typeNamespace == GlobalStringKey::Empty)
 				{
-					xmlCtor->name.value = typeName;
+					xmlCtor->name.value = typeName.ToString();
 				}
 				else
 				{
-					xmlCtor->name.value = typeNamespace + L":" + typeName;
+					xmlCtor->name.value = typeNamespace.ToString() + L":" + typeName.ToString();
 				}
 
 				if (styleName)
@@ -6472,6 +6819,44 @@ GuiConstructorRepr
 				GuiAttSetterRepr::FillXml(xmlCtor, serializePrecompiledResource);
 				xml->subNodes.Add(xmlCtor);
 			}
+		}
+
+		void GuiConstructorRepr::CollectUsedKey(collections::List<GlobalStringKey>& keys)
+		{
+			GuiAttSetterRepr::CollectUsedKey(keys);
+			keys.Add(typeNamespace);
+			keys.Add(typeName);
+		}
+
+		void GuiConstructorRepr::SavePrecompiledBinary(stream::IStream& stream, collections::SortedList<GlobalStringKey>& keys, bool saveKey)
+		{
+			stream::internal::Writer writer(stream);
+			if (saveKey)
+			{
+				vint key = BinaryKey;
+				writer << key;
+			}
+			vint typeNamespaceIndex = keys.IndexOf(typeNamespace);
+			vint typeNameIndex = keys.IndexOf(typeName);
+			CHECK_ERROR(typeNamespaceIndex != -1 && typeNameIndex != -1, L"GuiConstructorRepr::SavePrecompiledBinary(stream::IStream&, collections::SortedList<presentation::GlobalStringKey>&)#Internal Error.");
+			writer << typeNamespaceIndex << typeNameIndex << styleName;
+			GuiAttSetterRepr::SavePrecompiledBinary(stream, keys, false);
+		}
+
+		Ptr<GuiConstructorRepr> GuiConstructorRepr::LoadPrecompiledBinary(stream::IStream& stream, collections::List<GlobalStringKey>& keys, Ptr<GuiConstructorRepr> repr)
+		{
+			stream::internal::Reader reader(stream);
+			if (!repr)
+			{
+				repr = MakePtr<GuiConstructorRepr>();
+			}
+			vint typeNamespaceIndex = -1;
+			vint typeNameIndex = -1;
+			reader << typeNamespaceIndex << typeNameIndex << repr->styleName;
+			repr->typeNamespace = keys[typeNamespaceIndex];
+			repr->typeName = keys[typeNameIndex];
+			GuiAttSetterRepr::LoadPrecompiledBinary(stream, keys, repr);
+			return repr;
 		}
 
 /***********************************************************************
@@ -6528,25 +6913,25 @@ GuiInstanceContext
 				CollectDefaultAttributes(defaultValue->values, xml, errors);
 				if(defaultValue->values.Count()>0)
 				{
-					setters.Add(L"", defaultValue);
+					setters.Add(GlobalStringKey::Empty, defaultValue);
 				}
 
 				// collect values
 				FOREACH(Ptr<XmlElement>, element, XmlGetElements(xml))
 				{
-					if(auto name=parser->TypedParse(element->name.value, errors))
+					if (auto name = parser->TypedParse(element->name.value, errors))
 					{
 						if(name->IsPropertyElementName())
 						{
 							// collect a value as a new attribute setter
-							if (setters.Keys().Contains(name->name))
+							if (setters.Keys().Contains(GlobalStringKey::Get(name->name)))
 							{
 								errors.Add(L"Duplicated attribute name \"" + name->name + L"\".");
 							}
 							else
 							{
 								Ptr<GuiAttSetterRepr::SetterValue> sv=new GuiAttSetterRepr::SetterValue;
-								sv->binding=name->binding;
+								sv->binding = GlobalStringKey::Get(name->binding);
 
 								if(name->binding==L"set")
 								{
@@ -6564,7 +6949,7 @@ GuiInstanceContext
 
 								if(sv->values.Count()>0)
 								{
-									setters.Add(name->name, sv);
+									setters.Add(GlobalStringKey::Get(name->name), sv);
 								}
 							}
 						}
@@ -6585,7 +6970,7 @@ GuiInstanceContext
 						if(name->IsEventElementName())
 						{
 							// collect a value as a new attribute setter
-							if (eventHandlers.Keys().Contains(name->name))
+							if (eventHandlers.Keys().Contains(GlobalStringKey::Get(name->name)))
 							{
 								errors.Add(L"Duplicated event name \"" + name->name + L"\".");
 							}
@@ -6597,16 +6982,16 @@ GuiInstanceContext
 									if(Ptr<XmlText> text=element->subNodes[0].Cast<XmlText>())
 									{
 										auto value = MakePtr<GuiAttSetterRepr::EventValue>();
-										value->binding = name->binding;
+										value->binding = GlobalStringKey::Get(name->binding);
 										value->value = text->content.value;
-										eventHandlers.Add(name->name, value);
+										eventHandlers.Add(GlobalStringKey::Get(name->name), value);
 									}
 									else if(Ptr<XmlCData> text=element->subNodes[0].Cast<XmlCData>())
 									{
 										auto value = MakePtr<GuiAttSetterRepr::EventValue>();
-										value->binding = name->binding;
+										value->binding = GlobalStringKey::Get(name->binding);
 										value->value = text->content.value;
-										eventHandlers.Add(name->name, value);
+										eventHandlers.Add(GlobalStringKey::Get(name->name), value);
 									}
 								}
 							}
@@ -6629,21 +7014,21 @@ GuiInstanceContext
 						// collect reference attributes
 						if (name->name == L"Name")
 						{
-							setter->instanceName = att->value.value;
+							setter->instanceName = GlobalStringKey::Get(att->value.value);
 						}
 					}
 					else if(name->IsPropertyAttributeName())
 					{
 						// collect attributes setters
-						if (setter->setters.Keys().Contains(name->name))
+						if (setter->setters.Keys().Contains(GlobalStringKey::Get(name->name)))
 						{
 							errors.Add(L"Duplicated attribute name \"" + name->name + L"\".");
 						}
 						else
 						{
 							Ptr<GuiAttSetterRepr::SetterValue> sv=new GuiAttSetterRepr::SetterValue;
-							sv->binding=name->binding;
-							setter->setters.Add(name->name, sv);
+							sv->binding=GlobalStringKey::Get(name->binding);
+							setter->setters.Add(GlobalStringKey::Get(name->name), sv);
 
 							Ptr<GuiTextRepr> value=new GuiTextRepr;
 							value->text=att->value.value;
@@ -6653,12 +7038,12 @@ GuiInstanceContext
 					else if (name->IsEventAttributeName())
 					{
 						// collect event setters
-						if (!setter->eventHandlers.Keys().Contains(name->name))
+						if (!setter->eventHandlers.Keys().Contains(GlobalStringKey::Get(name->name)))
 						{
 							auto value = MakePtr<GuiAttSetterRepr::EventValue>();
-							value->binding = name->binding;
+							value->binding = GlobalStringKey::Get(name->binding);
 							value->value = att->value.value;
-							setter->eventHandlers.Add(name->name, value);
+							setter->eventHandlers.Add(GlobalStringKey::Get(name->name), value);
 						}
 					}
 				}
@@ -6676,8 +7061,8 @@ GuiInstanceContext
 			if(name->IsCtorName())
 			{
 				Ptr<GuiConstructorRepr> ctor=new GuiConstructorRepr;
-				ctor->typeNamespace=name->namespaceName;
-				ctor->typeName=name->name;
+				ctor->typeNamespace = GlobalStringKey::Get(name->namespaceName);
+				ctor->typeName = GlobalStringKey::Get(name->name);
 				// collect attributes as setters
 				FOREACH(Ptr<XmlAttribute>, att, xml->attributes)
 				{
@@ -6750,12 +7135,12 @@ GuiInstanceContext
 					WString attName=att->name.value;
 					if(attName.Length()>=5 && attName.Left(5)==L"xmlns")
 					{
-						WString ns;
+						GlobalStringKey ns;
 						if(attName.Length()>6)
 						{
 							if(attName.Left(6)==L"xmlns:")
 							{
-								ns=attName.Sub(6, attName.Length()-6);
+								ns = GlobalStringKey::Get(attName.Sub(6, attName.Length() - 6));
 							}
 							else
 							{
@@ -6809,8 +7194,8 @@ GuiInstanceContext
 						if (attName && attClass)
 						{
 							auto parameter = MakePtr<GuiInstanceParameter>();
-							parameter->name = attName->value.value;
-							parameter->className = attClass->value.value;
+							parameter->name = GlobalStringKey::Get(attName->value.value);
+							parameter->className = GlobalStringKey::Get(attClass->value.value);
 							context->parameters.Add(parameter);
 						}
 					}
@@ -6820,14 +7205,14 @@ GuiInstanceContext
 						auto attType = XmlGetAttribute(element, L"Type");
 						if (attName && attType)
 						{
-							auto resolver = GetInstanceLoaderManager()->GetInstanceCacheResolver(attType->value.value);
+							auto resolver = GetInstanceLoaderManager()->GetInstanceCacheResolver(GlobalStringKey::Get(attType->value.value));
 
 							MemoryStream stream;
 							HexToBinary(stream, XmlGetValue(element));
 							stream.SeekFromBegin(0);
 
 							auto cache = resolver->Deserialize(stream);
-							context->precompiledCaches.Add(attName->value.value, cache);
+							context->precompiledCaches.Add(GlobalStringKey::Get(attName->value.value), cache);
 						}
 					}
 					else if (!context->instance)
@@ -6860,9 +7245,9 @@ GuiInstanceContext
 
 				auto xmlns = MakePtr<XmlAttribute>();
 				xmlns->name.value = L"xmlns";
-				if (key != L"")
+				if (key != GlobalStringKey::Empty)
 				{
-					xmlns->name.value += L":" + key;
+					xmlns->name.value += L":" + key.ToString();
 				}
 				xmlInstance->attributes.Add(xmlns);
 
@@ -6885,12 +7270,12 @@ GuiInstanceContext
 
 				auto attName = MakePtr<XmlAttribute>();
 				attName->name.value = L"Name";
-				attName->value.value = parameter->name;
+				attName->value.value = parameter->name.ToString();
 				xmlParameter->attributes.Add(attName);
 
 				auto attClass = MakePtr<XmlAttribute>();
 				attClass->name.value = L"Class";
-				attClass->value.value = parameter->className;
+				attClass->value.value = parameter->className.ToString();
 				xmlParameter->attributes.Add(attClass);
 			}
 
@@ -6929,12 +7314,12 @@ GuiInstanceContext
 
 					auto attName = MakePtr<XmlAttribute>();
 					attName->name.value = L"Name";
-					attName->value.value = key;
+					attName->value.value = key.ToString();
 					xmlCache->attributes.Add(attName);
 
 					auto attType = MakePtr<XmlAttribute>();
 					attType->name.value = L"Type";
-					attType->value.value = value->GetCacheTypeName();
+					attType->value.value = value->GetCacheTypeName().ToString();
 					xmlCache->attributes.Add(attType);
 
 					auto xmlContent = MakePtr<XmlCData>();
@@ -6948,6 +7333,193 @@ GuiInstanceContext
 			auto doc = MakePtr<XmlDocument>();
 			doc->rootElement = xmlInstance;
 			return doc;
+		}
+
+		Ptr<GuiInstanceContext> GuiInstanceContext::LoadPrecompiledBinary(stream::IStream& stream, collections::List<WString>& errors)
+		{
+			stream::internal::Reader reader(stream);
+			List<GlobalStringKey> sortedKeys;
+			{
+				vint count = 0;
+				reader << count;
+
+				for (vint i = 0; i < count; i++)
+				{
+					WString keyString;
+					reader << keyString;
+					sortedKeys.Add(GlobalStringKey::Get(keyString));
+				}
+			}
+
+			auto context = MakePtr<GuiInstanceContext>();
+			context->appliedStyles = true;
+			{
+				context->instance = GuiConstructorRepr::LoadPrecompiledBinary(stream, sortedKeys);
+			}
+			{
+				vint count = -1;
+				reader << count;
+				for (vint i = 0; i < count; i++)
+				{
+					vint keyIndex = -1;
+					vint valueNameIndex = -1;
+					reader << keyIndex << valueNameIndex;
+
+					auto key = sortedKeys[keyIndex];
+					auto ni = MakePtr<NamespaceInfo>();
+					ni->name = sortedKeys[valueNameIndex];
+					context->namespaces.Add(key, ni);
+
+					vint valueCount = -1;
+					reader << valueCount;
+					for (vint j = 0; j < valueCount; j++)
+					{
+						auto ns = MakePtr<GuiInstanceNamespace>();
+						reader << ns->prefix << ns->postfix;
+						ni->namespaces.Add(ns);
+					}
+				}
+			}
+			{
+				reader << context->className;
+			}
+			{
+				vint count = -1;
+				reader << count;
+				for (vint i = 0; i < count; i++)
+				{
+					vint nameIndex = -1;
+					vint classNameIndex = -1;
+					reader << nameIndex << classNameIndex;
+
+					auto parameter = MakePtr<GuiInstanceParameter>();
+					parameter->name = sortedKeys[nameIndex];
+					parameter->className = sortedKeys[classNameIndex];
+					context->parameters.Add(parameter);
+				}
+			}
+			{
+				vint count = 0;
+				reader << count;
+
+				for (vint i = 0; i < count; i++)
+				{
+					vint keyIndex = -1;
+					vint nameIndex = -1;
+					stream::MemoryStream stream;
+					reader << keyIndex << nameIndex << (stream::IStream&)stream;
+
+					auto key = sortedKeys[keyIndex];
+					auto name = sortedKeys[nameIndex];
+					if (auto resolver = GetInstanceLoaderManager()->GetInstanceCacheResolver(name))
+					{
+						if (auto cache = resolver->Deserialize(stream))
+						{
+							context->precompiledCaches.Add(key, cache);
+						}
+					}
+				}
+			}
+
+			return context;
+		}
+
+		void GuiInstanceContext::SavePrecompiledBinary(stream::IStream& stream)
+		{
+			stream::internal::Writer writer(stream);
+			SortedList<GlobalStringKey> sortedKeys;
+			{
+				List<GlobalStringKey> keys;
+				CollectUsedKey(keys);
+				CopyFrom(sortedKeys, From(keys).Distinct());
+
+				vint count = sortedKeys.Count();
+				writer << count;
+				FOREACH(GlobalStringKey, key, sortedKeys)
+				{
+					WString keyString = key.ToString();
+					writer << keyString;
+				}
+			}
+			{
+				instance->SavePrecompiledBinary(stream, sortedKeys, false);
+			}
+			{
+				vint count = namespaces.Count();
+				writer << count;
+				for (vint i = 0; i < count; i++)
+				{
+					auto keyIndex = sortedKeys.IndexOf(namespaces.Keys()[i]);
+					auto value = namespaces.Values()[i];
+					auto valueNameIndex = sortedKeys.IndexOf(value->name);
+					CHECK_ERROR(keyIndex != -1 && valueNameIndex != -1, L"GuiInstanceContext::SavePrecompiledBinary(stream::IStream&)#Internal Error.");
+					writer << keyIndex << valueNameIndex;
+
+					vint valueCount = value->namespaces.Count();
+					writer << valueCount;
+					FOREACH(Ptr<GuiInstanceNamespace>, ns, value->namespaces)
+					{
+						writer << ns->prefix << ns->postfix;
+					}
+				}
+			}
+			{
+				writer << className;
+			}
+			{
+				vint count = parameters.Count();
+				writer << count;
+				FOREACH(Ptr<GuiInstanceParameter>, parameter, parameters)
+				{
+					vint nameIndex = sortedKeys.IndexOf(parameter->name);
+					vint classNameIndex = sortedKeys.IndexOf(parameter->className);
+					CHECK_ERROR(nameIndex != -1 && classNameIndex != -1, L"GuiInstanceContext::SavePrecompiledBinary(stream::IStream&)#Internal Error.");
+					writer << nameIndex << classNameIndex;
+				}
+			}
+			{
+				vint count = precompiledCaches.Count();
+				writer << count;
+				for (vint i = 0; i < count; i++)
+				{
+					auto keyIndex = sortedKeys.IndexOf(precompiledCaches.Keys()[i]);
+					auto cache = precompiledCaches.Values()[i];
+					auto name = cache->GetCacheTypeName();
+					vint nameIndex = sortedKeys.IndexOf(name);
+					CHECK_ERROR(keyIndex != -1 && nameIndex != -1, L"GuiInstanceContext::SavePrecompiledBinary(stream::IStream&)#Internal Error.");
+
+					stream::MemoryStream stream;
+
+					if (auto resolver = GetInstanceLoaderManager()->GetInstanceCacheResolver(name))
+					{
+						resolver->Serialize(cache, stream);
+					}
+					writer << keyIndex << nameIndex << (stream::IStream&)stream;
+				}
+			}
+		}
+
+		void GuiInstanceContext::CollectUsedKey(collections::List<GlobalStringKey>& keys)
+		{
+			instance->CollectUsedKey(keys);
+			
+			for (vint i = 0; i < namespaces.Count(); i++)
+			{
+				keys.Add(namespaces.Keys()[i]);
+				keys.Add(namespaces.Values()[i]->name);
+			}
+
+			for (vint i = 0; i < parameters.Count(); i++)
+			{
+				keys.Add(parameters[i]->name);
+				keys.Add(parameters[i]->className);
+			}
+
+			for (vint i = 0; i < precompiledCaches.Count(); i++)
+			{
+				keys.Add(precompiledCaches.Keys()[i]);
+				keys.Add(precompiledCaches.Values()[i]->GetCacheTypeName());
+			}
 		}
 
 		bool GuiInstanceContext::ApplyStyles(Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)
@@ -7451,19 +8023,19 @@ ExecuteQueryVisitor
 			{
 			}
 
-			static bool TestCtor(GuiIqPrimaryQuery* node, const WString& attribute, Ptr<GuiConstructorRepr> ctor)
+			static bool TestCtor(GuiIqPrimaryQuery* node, GlobalStringKey attribute, Ptr<GuiConstructorRepr> ctor)
 			{
-				if (node->attributeNameOption == GuiIqNameOption::Specified && node->attributeName.value != attribute)
+				if (node->attributeNameOption == GuiIqNameOption::Specified && node->attributeName.value != attribute.ToString())
 				{
 					return false;
 				}
-				if (node->typeNameOption == GuiIqNameOption::Specified && node->typeName.value != ctor->typeName)
+				if (node->typeNameOption == GuiIqNameOption::Specified && node->typeName.value != ctor->typeName.ToString())
 				{
 					return false;
 				}
 				if (node->referenceName.value != L"")
 				{
-					bool instanceName = ctor->instanceName && node->referenceName.value == ctor->instanceName.Value();
+					bool instanceName = ctor->instanceName != GlobalStringKey::Empty && node->referenceName.value == ctor->instanceName.ToString();
 					bool styleName = ctor->styleName && node->referenceName.value == ctor->styleName.Value();
 					return instanceName || styleName;
 				}
@@ -7474,7 +8046,7 @@ ExecuteQueryVisitor
 			{
 				if (setter)
 				{
-					FOREACH_INDEXER(WString, attribute, index, setter->setters.Keys())
+					FOREACH_INDEXER(GlobalStringKey, attribute, index, setter->setters.Keys())
 					{
 						auto setterValue = setter->setters.Values()[index];
 						FOREACH(Ptr<GuiValueRepr>, value, setterValue->values)
@@ -7498,7 +8070,7 @@ ExecuteQueryVisitor
 				}
 				else
 				{
-					if (TestCtor(node, L"", context->instance))
+					if (TestCtor(node, GlobalStringKey::Empty, context->instance))
 					{
 						output.Add(context->instance);
 					}
@@ -7576,7 +8148,7 @@ ApplyStyle
 
 		void ApplyStyleInternal(Ptr<GuiAttSetterRepr> src, Ptr<GuiAttSetterRepr> dst)
 		{
-			FOREACH_INDEXER(WString, attribute, srcIndex, src->setters.Keys())
+			FOREACH_INDEXER(GlobalStringKey, attribute, srcIndex, src->setters.Keys())
 			{
 				auto srcValue = src->setters.Values()[srcIndex];
 				vint dstIndex = dst->setters.Keys().IndexOf(attribute);
@@ -7589,7 +8161,7 @@ ApplyStyle
 					auto dstValue = dst->setters.Values()[dstIndex];
 					if (srcValue->binding == dstValue->binding)
 					{
-						if (srcValue->binding == L"set")
+						if (srcValue->binding == GlobalStringKey::_Set)
 						{
 							ApplyStyleInternal(srcValue->values[0].Cast<GuiAttSetterRepr>(), dstValue->values[0].Cast<GuiAttSetterRepr>());
 						}
@@ -7601,7 +8173,7 @@ ApplyStyle
 				}
 			}
 
-			FOREACH_INDEXER(WString, eventName, srcIndex, src->eventHandlers.Keys())
+			FOREACH_INDEXER(GlobalStringKey, eventName, srcIndex, src->eventHandlers.Keys())
 			{
 				if (!dst->eventHandlers.Keys().Contains(eventName))
 				{
