@@ -1811,6 +1811,42 @@ Helper Functions
 		extern WString								BinaryToHex(stream::IStream& stream);
 
 /***********************************************************************
+Global String Key
+***********************************************************************/
+
+		struct GlobalStringKey
+		{
+		public:
+			static GlobalStringKey					Empty;
+			static GlobalStringKey					_Set;
+			static GlobalStringKey					_Ref;
+			static GlobalStringKey					_Bind;
+			static GlobalStringKey					_Format;
+			static GlobalStringKey					_Eval;
+			static GlobalStringKey					_Uri;
+			static GlobalStringKey					_Workflow_Assembly_Cache;
+			static GlobalStringKey					_Workflow_Global_Context;
+			static GlobalStringKey					_ControlTemplate;
+			static GlobalStringKey					_ItemTemplate;
+
+		private:
+			vint									key = -1;
+
+		public:
+			static vint Compare(GlobalStringKey a, GlobalStringKey b){ return a.key - b.key; }
+			bool operator==(GlobalStringKey g)const{ return key == g.key; }
+			bool operator!=(GlobalStringKey g)const{ return key != g.key; }
+			bool operator<(GlobalStringKey g)const{ return key < g.key; }
+			bool operator<=(GlobalStringKey g)const{ return key <= g.key; }
+			bool operator>(GlobalStringKey g)const{ return key > g.key; }
+			bool operator>=(GlobalStringKey g)const{ return key >= g.key; }
+
+			static GlobalStringKey					Get(const WString& string);
+			vint									ToKey()const;
+			WString									ToString()const;
+		};
+
+/***********************************************************************
 Resource Image
 ***********************************************************************/
 			
@@ -1914,8 +1950,11 @@ Resource Structure
 			ItemMap									items;
 			FolderMap								folders;
 
-			void									LoadResourceFolderXml(DelayLoadingList& delayLoadings, const WString& containingFolder, Ptr<parsing::xml::XmlElement> folderXml, collections::List<WString>& errors);
+			void									LoadResourceFolderFromXml(DelayLoadingList& delayLoadings, const WString& containingFolder, Ptr<parsing::xml::XmlElement> folderXml, collections::List<WString>& errors);
 			void									SaveResourceFolderToXml(Ptr<parsing::xml::XmlElement> xmlParent, bool serializePrecompiledResource);
+			void									CollectTypeNames(collections::List<WString>& typeNames);
+			void									LoadResourceFolderFromBinary(DelayLoadingList& delayLoadings, stream::internal::Reader& reader, collections::List<WString>& typeNames, collections::List<WString>& errors);
+			void									SaveResourceFolderToBinary(stream::internal::Writer& writer, collections::List<WString>& typeNames);
 			void									PrecompileResourceFolder(Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors);
 		public:
 			GuiResourceFolder();
@@ -1945,6 +1984,8 @@ Resource
 		{
 		protected:
 			WString									workingDirectory;
+
+			static void								ProcessDelayLoading(Ptr<GuiResource> resource, DelayLoadingList& delayLoadings, collections::List<WString>& errors);
 		public:
 			GuiResource();
 			~GuiResource();
@@ -1956,6 +1997,10 @@ Resource
 			static Ptr<GuiResource>					LoadFromXml(const WString& filePath, collections::List<WString>& errors);
 
 			Ptr<parsing::xml::XmlDocument>			SaveToXml(bool serializePrecompiledResource);
+			
+			static Ptr<GuiResource>					LoadPrecompiledBinary(stream::IStream& stream, collections::List<WString>& errors);
+			
+			void									SavePrecompiledBinary(stream::IStream& stream);
 
 			void									Precompile(collections::List<WString>& errors);
 			
@@ -2002,22 +2047,49 @@ Resource Path Resolver
 Resource Type Resolver
 ***********************************************************************/
 
-		class IGuiResourceTypeResolver : public IDescriptable, public Description<IGuiResourceTypeResolver>
+		class IGuiResourceTypeResolver_DirectLoadXml;
+		class IGuiResourceTypeResolver_DirectLoadStream;
+		class IGuiResourceTypeResolver_IndirectLoad;
+
+		class IGuiResourceTypeResolver : public virtual IDescriptable, public Description<IGuiResourceTypeResolver>
 		{
 		public:
-			virtual WString									GetType() = 0;
-			virtual WString									GetPreloadType() = 0;
-			virtual bool									IsDelayLoad() = 0;
+			virtual WString										GetType() = 0;
 			
-			virtual void									Precompile(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors) = 0;
+			virtual void										Precompile(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors) = 0;
+			
+			virtual IGuiResourceTypeResolver_DirectLoadXml*		DirectLoadXml(){ return 0; }
+			virtual IGuiResourceTypeResolver_DirectLoadStream*	DirectLoadStream(){ return 0; }
+			virtual IGuiResourceTypeResolver_IndirectLoad*		IndirectLoad(){ return 0; }
+		};
 
-			virtual Ptr<parsing::xml::XmlElement>			Serialize(Ptr<DescriptableObject> resource, bool serializePrecompiledResource) = 0;
+		class IGuiResourceTypeResolver_DirectLoadXml : public virtual IDescriptable, public Description<IGuiResourceTypeResolver_DirectLoadXml>
+		{
+		public:
+			virtual Ptr<parsing::xml::XmlElement>				Serialize(Ptr<DescriptableObject> resource, bool serializePrecompiledResource) = 0;
 
-			virtual Ptr<DescriptableObject>					ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors) = 0;
+			virtual Ptr<DescriptableObject>						ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors) = 0;
 
-			virtual Ptr<DescriptableObject>					ResolveResource(const WString& path, collections::List<WString>& errors) = 0;
+			virtual Ptr<DescriptableObject>						ResolveResource(const WString& path, collections::List<WString>& errors) = 0;
+		};
 
-			virtual Ptr<DescriptableObject>					ResolveResource(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors) = 0;
+		class IGuiResourceTypeResolver_DirectLoadStream : public virtual IDescriptable, public Description<IGuiResourceTypeResolver_DirectLoadStream>
+		{
+		public:
+			virtual void										SerializePrecompiled(Ptr<DescriptableObject> resource, stream::IStream& stream) = 0;
+
+			virtual Ptr<DescriptableObject>						ResolveResourcePrecompiled(stream::IStream& stream, collections::List<WString>& errors) = 0;
+		};
+
+		class IGuiResourceTypeResolver_IndirectLoad : public virtual IDescriptable, public Description<IGuiResourceTypeResolver_IndirectLoad>
+		{
+		public:
+			virtual WString										GetPreloadType() = 0;
+			virtual bool										IsDelayLoad() = 0;
+
+			virtual Ptr<DescriptableObject>						Serialize(Ptr<DescriptableObject> resource, bool serializePrecompiledResource) = 0;
+
+			virtual Ptr<DescriptableObject>						ResolveResource(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors) = 0;
 		};
 
 /***********************************************************************
@@ -2027,13 +2099,13 @@ Resource Resolver Manager
 		class IGuiResourceResolverManager : public IDescriptable, public Description<IGuiResourceResolverManager>
 		{
 		public:
-			virtual IGuiResourcePathResolverFactory*		GetPathResolverFactory(const WString& protocol)=0;
-			virtual bool									SetPathResolverFactory(Ptr<IGuiResourcePathResolverFactory> factory)=0;
-			virtual IGuiResourceTypeResolver*				GetTypeResolver(const WString& type)=0;
-			virtual bool									SetTypeResolver(Ptr<IGuiResourceTypeResolver> resolver)=0;
+			virtual IGuiResourcePathResolverFactory*			GetPathResolverFactory(const WString& protocol)=0;
+			virtual bool										SetPathResolverFactory(Ptr<IGuiResourcePathResolverFactory> factory)=0;
+			virtual IGuiResourceTypeResolver*					GetTypeResolver(const WString& type)=0;
+			virtual bool										SetTypeResolver(Ptr<IGuiResourceTypeResolver> resolver)=0;
 		};
 		
-		extern IGuiResourceResolverManager*					GetResourceResolverManager();
+		extern IGuiResourceResolverManager*						GetResourceResolverManager();
 	}
 }
 

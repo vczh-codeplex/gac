@@ -40106,6 +40106,74 @@ namespace vl
 		}
 
 /***********************************************************************
+GlobalStringKey
+***********************************************************************/
+
+		GlobalStringKey GlobalStringKey::Empty;
+		GlobalStringKey GlobalStringKey::_Set;
+		GlobalStringKey GlobalStringKey::_Ref;
+		GlobalStringKey GlobalStringKey::_Bind;
+		GlobalStringKey GlobalStringKey::_Format;
+		GlobalStringKey GlobalStringKey::_Eval;
+		GlobalStringKey GlobalStringKey::_Uri;
+		GlobalStringKey GlobalStringKey::_Workflow_Assembly_Cache;
+		GlobalStringKey GlobalStringKey::_Workflow_Global_Context;
+		GlobalStringKey GlobalStringKey::_ControlTemplate;
+		GlobalStringKey GlobalStringKey::_ItemTemplate;
+
+		class GlobalStringKeyManager
+		{
+		public:
+			Dictionary<WString, vint>		stoi;
+			List<WString>					itos;
+
+			void InitializeConstants()
+			{
+				GlobalStringKey::_Set = GlobalStringKey::Get(L"set");
+				GlobalStringKey::_Ref = GlobalStringKey::Get(L"ref");
+				GlobalStringKey::_Bind = GlobalStringKey::Get(L"bind");
+				GlobalStringKey::_Format = GlobalStringKey::Get(L"format");
+				GlobalStringKey::_Eval = GlobalStringKey::Get(L"eval");
+				GlobalStringKey::_Uri = GlobalStringKey::Get(L"uri");
+				GlobalStringKey::_Workflow_Assembly_Cache = GlobalStringKey::Get(L"WORKFLOW-ASSEMBLY-CACHE");
+				GlobalStringKey::_Workflow_Global_Context = GlobalStringKey::Get(L"WORKFLOW-GLOBAL-CONTEXT");
+				GlobalStringKey::_ControlTemplate = GlobalStringKey::Get(L"ControlTemplate");
+				GlobalStringKey::_ItemTemplate = GlobalStringKey::Get(L"ItemTemplate");
+			}
+		}* globalStringKeyManager = 0;
+
+		GlobalStringKey GlobalStringKey::Get(const WString& string)
+		{
+			GlobalStringKey key;
+			if (string != L"")
+			{
+				vint index = globalStringKeyManager->stoi.Keys().IndexOf(string);
+				if (index == -1)
+				{
+					key.key = globalStringKeyManager->itos.Add(string);
+					globalStringKeyManager->stoi.Add(string, key.key);
+				}
+				else
+				{
+					key.key = globalStringKeyManager->stoi.Values()[index];
+				}
+			}
+			return key;
+		}
+
+		vint GlobalStringKey::ToKey()const
+		{
+			return key;
+		}
+
+		WString GlobalStringKey::ToString()const
+		{
+			return *this == GlobalStringKey::Empty
+				? L""
+				: globalStringKeyManager->itos[key];
+		}
+
+/***********************************************************************
 GuiImageData
 ***********************************************************************/
 
@@ -40243,7 +40311,7 @@ GuiResourceItem
 GuiResourceFolder
 ***********************************************************************/
 
-		void GuiResourceFolder::LoadResourceFolderXml(DelayLoadingList& delayLoadings, const WString& containingFolder, Ptr<parsing::xml::XmlElement> folderXml, collections::List<WString>& errors)
+		void GuiResourceFolder::LoadResourceFolderFromXml(DelayLoadingList& delayLoadings, const WString& containingFolder, Ptr<parsing::xml::XmlElement> folderXml, collections::List<WString>& errors)
 		{
 			ClearItems();
 			ClearFolders();
@@ -40295,7 +40363,7 @@ GuiResourceFolder
 									}
 								}
 							}
-							folder->LoadResourceFolderXml(delayLoadings, newContainingFolder, newFolderXml, errors);
+							folder->LoadResourceFolderFromXml(delayLoadings, newContainingFolder, newFolderXml, errors);
 						}
 						else
 						{
@@ -40320,22 +40388,25 @@ GuiResourceFolder
 						}
 					}
 
-					Ptr<GuiResourceItem> item=new GuiResourceItem;
+					Ptr<GuiResourceItem> item = new GuiResourceItem;
 					if(AddItem(name, item))
 					{
-						WString type=element->name.value;
-						IGuiResourceTypeResolver* typeResolver=GetResourceResolverManager()->GetTypeResolver(type);
-						IGuiResourceTypeResolver* preloadResolver=typeResolver;
+						WString type = element->name.value;
+						IGuiResourceTypeResolver* typeResolver = GetResourceResolverManager()->GetTypeResolver(type);
+						IGuiResourceTypeResolver* preloadResolver = typeResolver;
 
 						if(typeResolver)
 						{
-							WString preloadType = typeResolver->GetPreloadType();
-							if (preloadType != L"")
+							if (!typeResolver->DirectLoadXml())
 							{
-								preloadResolver = GetResourceResolverManager()->GetTypeResolver(preloadType);
-								if (!preloadResolver)
+								WString preloadType = typeResolver->IndirectLoad()->GetPreloadType();
+								if (preloadType != L"")
 								{
-									errors.Add(L"Unknown resource resolver \"" + preloadType + L"\" of resource type \"" + type + L"\".");
+									preloadResolver = GetResourceResolverManager()->GetTypeResolver(preloadType);
+									if (!preloadResolver)
+									{
+										errors.Add(L"Unknown resource resolver \"" + preloadType + L"\" of resource type \"" + type + L"\".");
+									}
 								}
 							}
 						}
@@ -40346,35 +40417,50 @@ GuiResourceFolder
 
 						if(typeResolver && preloadResolver)
 						{
-							Ptr<DescriptableObject> resource;
-							WString typeName = preloadResolver->GetType();
-							if (filePath == L"")
+							if (auto directLoad = preloadResolver->DirectLoadXml())
 							{
-								resource = preloadResolver->ResolveResource(element, errors);
+								Ptr<DescriptableObject> resource;
+								WString itemType = preloadResolver->GetType();
+								if (filePath == L"")
+								{
+									resource = directLoad->ResolveResource(element, errors);
+								}
+								else
+								{
+									item->SetPath(relativeFilePath);
+									resource = directLoad->ResolveResource(filePath, errors);
+								}
+
+								if (typeResolver != preloadResolver)
+								{
+									if (auto indirectLoad = typeResolver->IndirectLoad())
+									{
+										if(indirectLoad->IsDelayLoad())
+										{
+											DelayLoading delayLoading;
+											delayLoading.type = type;
+											delayLoading.workingDirectory = containingFolder;
+											delayLoading.preloadResource = item;
+											delayLoadings.Add(delayLoading);
+										}
+										else if(resource)
+										{
+											resource = indirectLoad->ResolveResource(resource, 0, errors);
+											itemType = typeResolver->GetType();
+										}
+									}
+									else
+									{
+										resource = 0;
+										errors.Add(L"Resource type \"" + typeResolver->GetType() + L"\" is not a indirect load resource type.");
+									}
+								}
+								item->SetContent(itemType, resource);
 							}
 							else
 							{
-								item->SetPath(relativeFilePath);
-								resource = preloadResolver->ResolveResource(filePath, errors);
+								errors.Add(L"Resource type \"" + preloadResolver->GetType() + L"\" is not a direct load resource type.");
 							}
-
-							if (typeResolver != preloadResolver)
-							{
-								if(typeResolver->IsDelayLoad())
-								{
-									DelayLoading delayLoading;
-									delayLoading.type=type;
-									delayLoading.workingDirectory=containingFolder;
-									delayLoading.preloadResource=item;
-									delayLoadings.Add(delayLoading);
-								}
-								else if(resource)
-								{
-									resource = typeResolver->ResolveResource(resource, 0, errors);
-									typeName = typeResolver->GetType();
-								}
-							}
-							item->SetContent(typeName, resource);
 						}
 
 						if(!item->GetContent())
@@ -40401,7 +40487,26 @@ GuiResourceFolder
 				if (serializePrecompiledResource || item->GetPath() == L"")
 				{
 					auto resolver = GetResourceResolverManager()->GetTypeResolver(item->GetTypeName());
-					auto xmlElement = resolver->Serialize(item->GetContent(), serializePrecompiledResource);
+					Ptr<XmlElement> xmlElement;
+
+					if (auto directLoad = resolver->DirectLoadXml())
+					{
+						xmlElement = directLoad->Serialize(item->GetContent(), serializePrecompiledResource);
+					}
+					else if (auto indirectLoad = resolver->IndirectLoad())
+					{
+						if (auto preloadResolver = GetResourceResolverManager()->GetTypeResolver(indirectLoad->GetPreloadType()))
+						{
+							if (auto directLoad = preloadResolver->DirectLoadXml())
+							{
+								if (auto resource = indirectLoad->Serialize(item->GetContent(), serializePrecompiledResource))
+								{
+									xmlElement = directLoad->Serialize(resource, serializePrecompiledResource);
+								}
+							}
+						}
+					}
+
 					if (xmlElement)
 					{
 						xmlElement->attributes.Add(attName);
@@ -40452,6 +40557,173 @@ GuiResourceFolder
 					xmlText->content.value = folder->GetPath();
 					xmlFolder->subNodes.Add(xmlText);
 				}
+			}
+		}
+
+		void GuiResourceFolder::CollectTypeNames(collections::List<WString>& typeNames)
+		{
+			FOREACH(Ptr<GuiResourceItem>, item, items.Values())
+			{
+				if (!typeNames.Contains(item->GetTypeName()))
+				{
+					typeNames.Add(item->GetTypeName());
+				}
+			}
+			FOREACH(Ptr<GuiResourceFolder>, folder, folders.Values())
+			{
+				folder->CollectTypeNames(typeNames);
+			}
+		}
+
+		void GuiResourceFolder::LoadResourceFolderFromBinary(DelayLoadingList& delayLoadings, stream::internal::Reader& reader, collections::List<WString>& typeNames, collections::List<WString>& errors)
+		{
+			vint count = 0;
+			reader << count;
+			for (vint i = 0; i < count; i++)
+			{
+				vint typeName = 0;
+				WString name;
+				reader << typeName << name;
+
+				auto resolver = GetResourceResolverManager()->GetTypeResolver(typeNames[typeName]);
+				Ptr<GuiResourceItem> item = new GuiResourceItem;
+				if(AddItem(name, item))
+				{
+					WString type = typeNames[typeName];
+					IGuiResourceTypeResolver* typeResolver = GetResourceResolverManager()->GetTypeResolver(type);
+					IGuiResourceTypeResolver* preloadResolver = typeResolver;
+
+					if(typeResolver)
+					{
+						if (!typeResolver->DirectLoadStream())
+						{
+							WString preloadType = typeResolver->IndirectLoad()->GetPreloadType();
+							if (preloadType != L"")
+							{
+								preloadResolver = GetResourceResolverManager()->GetTypeResolver(preloadType);
+								if (!preloadResolver)
+								{
+									errors.Add(L"Unknown resource resolver \"" + preloadType + L"\" of resource type \"" + type + L"\".");
+								}
+							}
+						}
+					}
+					else
+					{
+						errors.Add(L"Unknown resource type \"" + type + L"\".");
+					}
+
+					if(typeResolver && preloadResolver)
+					{
+						if (auto directLoad = preloadResolver->DirectLoadStream())
+						{
+							WString itemType = preloadResolver->GetType();
+							auto resource = directLoad->ResolveResourcePrecompiled(reader.input, errors);
+
+							if (typeResolver != preloadResolver)
+							{
+								if (auto indirectLoad = typeResolver->IndirectLoad())
+								{
+									if(indirectLoad->IsDelayLoad())
+									{
+										DelayLoading delayLoading;
+										delayLoading.type = type;
+										delayLoading.preloadResource = item;
+										delayLoadings.Add(delayLoading);
+									}
+									else if(resource)
+									{
+										resource = indirectLoad->ResolveResource(resource, 0, errors);
+										itemType = typeResolver->GetType();
+									}
+								}
+								else
+								{
+									resource = 0;
+									errors.Add(L"Resource type \"" + typeResolver->GetType() + L"\" is not a indirect load resource type.");
+								}
+							}
+							item->SetContent(itemType, resource);
+						}
+						else
+						{
+							errors.Add(L"Resource type \"" + preloadResolver->GetType() + L"\" is not a direct load resource type.");
+						}
+					}
+
+					if(!item->GetContent())
+					{
+						RemoveItem(name);
+					}
+				}
+				else
+				{
+					errors.Add(L"Duplicated resource item name \"" + name + L"\".");
+				}
+			}
+
+			reader << count;
+			for (vint i = 0; i < count; i++)
+			{
+				WString name;
+				reader << name;
+
+				auto folder = MakePtr<GuiResourceFolder>();
+				folder->LoadResourceFolderFromBinary(delayLoadings, reader, typeNames, errors);
+				AddFolder(name, folder);
+			}
+		}
+
+		void GuiResourceFolder::SaveResourceFolderToBinary(stream::internal::Writer& writer, collections::List<WString>& typeNames)
+		{
+			typedef Tuple<vint, WString, IGuiResourceTypeResolver_DirectLoadStream*, Ptr<DescriptableObject>> ItemTuple;
+			List<ItemTuple> itemTuples;
+
+			FOREACH(Ptr<GuiResourceItem>, item, items.Values())
+			{
+				vint typeName = typeNames.IndexOf(item->GetTypeName());
+				WString name = item->GetName();
+
+				auto resolver = GetResourceResolverManager()->GetTypeResolver(item->GetTypeName());
+				if (auto directLoad = resolver->DirectLoadStream())
+				{
+					itemTuples.Add(ItemTuple(typeName, name, directLoad, item->GetContent()));
+				}
+				else if (auto indirectLoad = resolver->IndirectLoad())
+				{
+					if (auto preloadResolver = GetResourceResolverManager()->GetTypeResolver(indirectLoad->GetPreloadType()))
+					{
+						if (auto directLoad = preloadResolver->DirectLoadStream())
+						{
+							if (auto resource = indirectLoad->Serialize(item->GetContent(), true))
+							{
+								itemTuples.Add(ItemTuple(typeName, name, directLoad, resource));
+							}
+						}
+					}
+				}
+			}
+
+			vint count = itemTuples.Count();
+			writer << count;
+			FOREACH(ItemTuple, item, itemTuples)
+			{
+				vint typeName = item.f0;
+				WString name = item.f1;
+				writer << typeName << name;
+
+				auto directLoad = item.f2;
+				auto resource = item.f3;
+				directLoad->SerializePrecompiled(resource, writer.output);
+			}
+
+			count = folders.Count();
+			writer << count;
+			FOREACH(Ptr<GuiResourceFolder>, folder, folders.Values())
+			{
+				WString name = folder->GetName();
+				writer << name;
+				folder->SaveResourceFolderToBinary(writer, typeNames);
 			}
 		}
 
@@ -40598,6 +40870,32 @@ GuiResourceFolder
 GuiResource
 ***********************************************************************/
 
+		void GuiResource::ProcessDelayLoading(Ptr<GuiResource> resource, DelayLoadingList& delayLoadings, collections::List<WString>& errors)
+		{
+			FOREACH(DelayLoading, delay, delayLoadings)
+			{
+				WString type = delay.type;
+				WString folder = delay.workingDirectory;
+				Ptr<GuiResourceItem> item = delay.preloadResource;
+
+				auto typeResolver = GetResourceResolverManager()->GetTypeResolver(type);
+				auto indirectLoad = typeResolver->IndirectLoad();
+				if (!indirectLoad)
+				{
+					errors.Add(L"Unknown resource type \"" + type + L"\".");
+				}
+				else if (item->GetContent())
+				{
+					Ptr<GuiResourcePathResolver> pathResolver = new GuiResourcePathResolver(resource, folder);
+					Ptr<DescriptableObject> resource = indirectLoad->ResolveResource(item->GetContent(), pathResolver, errors);
+					if(resource)
+					{
+						item->SetContent(typeResolver->GetType(), resource);
+					}
+				}
+			}
+		}
+
 		GuiResource::GuiResource()
 		{
 		}
@@ -40616,29 +40914,9 @@ GuiResource
 			Ptr<GuiResource> resource = new GuiResource;
 			resource->workingDirectory = workingDirectory;
 			DelayLoadingList delayLoadings;
-			resource->LoadResourceFolderXml(delayLoadings, resource->workingDirectory, xml->rootElement, errors);
+			resource->LoadResourceFolderFromXml(delayLoadings, resource->workingDirectory, xml->rootElement, errors);
 
-			FOREACH(DelayLoading, delay, delayLoadings)
-			{
-				WString type = delay.type;
-				WString folder = delay.workingDirectory;
-				Ptr<GuiResourceItem> item = delay.preloadResource;
-
-				IGuiResourceTypeResolver* typeResolver = GetResourceResolverManager()->GetTypeResolver(type);
-				if (!typeResolver)
-				{
-					errors.Add(L"Unknown resource type \"" + type + L"\".");
-				}
-				else if (item->GetContent())
-				{
-					Ptr<GuiResourcePathResolver> pathResolver = new GuiResourcePathResolver(resource, folder);
-					Ptr<DescriptableObject> resource = typeResolver->ResolveResource(item->GetContent(), pathResolver, errors);
-					if(resource)
-					{
-						item->SetContent(typeResolver->GetType(), resource);
-					}
-				}
-			}
+			ProcessDelayLoading(resource, delayLoadings, errors);
 			return resource;
 		}
 
@@ -40673,6 +40951,31 @@ GuiResource
 			auto doc = MakePtr<XmlDocument>();
 			doc->rootElement = xmlRoot;
 			return doc;
+		}
+
+		Ptr<GuiResource> GuiResource::LoadPrecompiledBinary(stream::IStream& stream, collections::List<WString>& errors)
+		{
+			stream::internal::Reader reader(stream);
+			auto resource = MakePtr<GuiResource>();
+
+			List<WString> typeNames;
+			reader << typeNames;
+			
+			DelayLoadingList delayLoadings;
+			resource->LoadResourceFolderFromBinary(delayLoadings, reader, typeNames, errors);
+			
+			ProcessDelayLoading(resource, delayLoadings, errors);
+			return resource;
+		}
+
+		void GuiResource::SavePrecompiledBinary(stream::IStream& stream)
+		{
+			stream::internal::Writer writer(stream);
+
+			List<WString> typeNames;
+			CollectTypeNames(typeNames);
+			writer << typeNames;
+			SaveResourceFolderToBinary(writer, typeNames);
 		}
 
 		void GuiResource::Precompile(collections::List<WString>& errors)
@@ -40868,7 +41171,10 @@ IGuiResourceResolverManager
 
 			void Load()override
 			{
-				resourceResolverManager=this;
+				globalStringKeyManager = new GlobalStringKeyManager();
+				globalStringKeyManager->InitializeConstants();
+
+				resourceResolverManager = this;
 				SetPathResolverFactory(new GuiResourcePathFileResolver::Factory);
 				SetPathResolverFactory(new GuiResourcePathResResolver::Factory);
 			}
@@ -40879,7 +41185,9 @@ IGuiResourceResolverManager
 
 			void Unload()override
 			{
-				resourceResolverManager=0;
+				delete globalStringKeyManager;
+				globalStringKeyManager = 0;
+				resourceResolverManager = 0;
 			}
 
 			IGuiResourcePathResolverFactory* GetPathResolverFactory(const WString& protocol)override
@@ -40920,6 +41228,7 @@ namespace vl
 {
 	namespace presentation
 	{
+		using namespace collections;
 		using namespace controls;
 		using namespace parsing;
 		using namespace parsing::tabling;
@@ -40930,7 +41239,11 @@ namespace vl
 Image Type Resolver
 ***********************************************************************/
 
-		class GuiResourceImageTypeResolver : public Object, public IGuiResourceTypeResolver
+		class GuiResourceImageTypeResolver
+			: public Object
+			, public IGuiResourceTypeResolver
+			, private IGuiResourceTypeResolver_DirectLoadXml
+			, private IGuiResourceTypeResolver_DirectLoadStream
 		{
 		public:
 			WString GetType()override
@@ -40938,18 +41251,18 @@ Image Type Resolver
 				return L"Image";
 			}
 
-			WString GetPreloadType()override
-			{
-				return L"";
-			}
-
-			bool IsDelayLoad()override
-			{
-				return false;
-			}
-
 			void Precompile(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)override
 			{
+			}
+
+			IGuiResourceTypeResolver_DirectLoadXml* DirectLoadXml()override
+			{
+				return this;
+			}
+
+			IGuiResourceTypeResolver_DirectLoadStream* DirectLoadStream()override
+			{
+				return this;
 			}
 
 			Ptr<parsing::xml::XmlElement> Serialize(Ptr<DescriptableObject> resource, bool serializePrecompiledResource)override
@@ -40966,6 +41279,14 @@ Image Type Resolver
 					return xmlImage;
 				}
 				return 0;
+			}
+
+			void SerializePrecompiled(Ptr<DescriptableObject> resource, stream::IStream& stream)override
+			{
+				auto obj = resource.Cast<GuiImageData>();
+				stream::internal::Writer writer(stream);
+				FileStream fileStream(obj->GetFilePath(), FileStream::ReadOnly);
+				writer << (stream::IStream&)fileStream;
 			}
 
 			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)override
@@ -40999,10 +41320,22 @@ Image Type Resolver
 				}
 			}
 
-			Ptr<DescriptableObject> ResolveResource(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)override
+			Ptr<DescriptableObject> ResolveResourcePrecompiled(stream::IStream& stream, collections::List<WString>& errors)
 			{
-				errors.Add(L"Internal error: Image resource doesn't need resource preloading.");
-				return 0;
+				stream::internal::Reader reader(stream);
+				MemoryStream memoryStream;
+				reader << (stream::IStream&)memoryStream;
+
+				auto image = GetCurrentController()->ImageService()->CreateImageFromStream(memoryStream);
+				if (image)
+				{
+					return new GuiImageData(image, 0);
+				}
+				else
+				{
+					errors.Add(L"Failed to load an image from binary data in a stream.");
+					return 0;
+				}
 			}
 		};
 
@@ -41010,7 +41343,11 @@ Image Type Resolver
 Text Type Resolver
 ***********************************************************************/
 
-		class GuiResourceTextTypeResolver : public Object, public IGuiResourceTypeResolver
+		class GuiResourceTextTypeResolver
+			: public Object
+			, public IGuiResourceTypeResolver
+			, private IGuiResourceTypeResolver_DirectLoadXml
+			, private IGuiResourceTypeResolver_DirectLoadStream
 		{
 		public:
 			WString GetType()override
@@ -41018,18 +41355,18 @@ Text Type Resolver
 				return L"Text";
 			}
 
-			WString GetPreloadType()override
-			{
-				return L"";
-			}
-
-			bool IsDelayLoad()override
-			{
-				return false;
-			}
-
 			void Precompile(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)override
 			{
+			}
+
+			IGuiResourceTypeResolver_DirectLoadXml* DirectLoadXml()override
+			{
+				return this;
+			}
+
+			IGuiResourceTypeResolver_DirectLoadStream* DirectLoadStream()override
+			{
+				return this;
 			}
 
 			Ptr<parsing::xml::XmlElement> Serialize(Ptr<DescriptableObject> resource, bool serializePrecompiledResource)override
@@ -41046,6 +41383,14 @@ Text Type Resolver
 					return xmlText;
 				}
 				return 0;
+			}
+
+			void SerializePrecompiled(Ptr<DescriptableObject> resource, stream::IStream& stream)override
+			{
+				auto obj = resource.Cast<GuiTextData>();
+				stream::internal::Writer writer(stream);
+				WString text = obj->GetText();
+				writer << text;
 			}
 
 			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)override
@@ -41067,10 +41412,12 @@ Text Type Resolver
 				}
 			}
 
-			Ptr<DescriptableObject> ResolveResource(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)override
+			Ptr<DescriptableObject> ResolveResourcePrecompiled(stream::IStream& stream, collections::List<WString>& errors)
 			{
-				errors.Add(L"Internal error: Text resource doesn't need resource preloading.");
-				return 0;
+				stream::internal::Reader reader(stream);
+				WString text;
+				reader << text;
+				return new GuiTextData(text);
 			}
 		};
 
@@ -41078,7 +41425,11 @@ Text Type Resolver
 Xml Type Resolver
 ***********************************************************************/
 
-		class GuiResourceXmlTypeResolver : public Object, public IGuiResourceTypeResolver
+		class GuiResourceXmlTypeResolver
+			: public Object
+			, public IGuiResourceTypeResolver
+			, private IGuiResourceTypeResolver_DirectLoadXml
+			, private IGuiResourceTypeResolver_DirectLoadStream
 		{
 		public:
 			WString GetType()override
@@ -41086,18 +41437,18 @@ Xml Type Resolver
 				return L"Xml";
 			}
 
-			WString GetPreloadType()override
-			{
-				return L"";
-			}
-
-			bool IsDelayLoad()override
-			{
-				return false;
-			}
-
 			void Precompile(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)override
 			{
+			}
+
+			IGuiResourceTypeResolver_DirectLoadXml* DirectLoadXml()override
+			{
+				return this;
+			}
+
+			IGuiResourceTypeResolver_DirectLoadStream* DirectLoadStream()override
+			{
+				return this;
 			}
 
 			Ptr<parsing::xml::XmlElement> Serialize(Ptr<DescriptableObject> resource, bool serializePrecompiledResource)override
@@ -41112,9 +41463,27 @@ Xml Type Resolver
 				return 0;
 			}
 
+			void SerializePrecompiled(Ptr<DescriptableObject> resource, stream::IStream& stream)override
+			{
+				auto obj = resource.Cast<XmlDocument>();
+				MemoryStream buffer;
+				{
+					StreamWriter writer(buffer);
+					XmlPrint(obj, writer);
+				}
+				{
+					buffer.SeekFromBegin(0);
+					StreamReader reader(buffer);
+					WString text = reader.ReadToEnd();
+
+					stream::internal::Writer writer(stream);
+					writer << text;
+				}
+			}
+
 			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)override
 			{
-				Ptr<XmlElement> root=XmlGetElements(element).First(0);
+				Ptr<XmlElement> root = XmlGetElements(element).First(0);
 				if(root)
 				{
 					Ptr<XmlDocument> xml=new XmlDocument;
@@ -41141,10 +41510,14 @@ Xml Type Resolver
 				return 0;
 			}
 
-			Ptr<DescriptableObject> ResolveResource(Ptr<DescriptableObject> resource, Ptr<GuiResourcePathResolver> resolver, collections::List<WString>& errors)override
+			Ptr<DescriptableObject> ResolveResourcePrecompiled(stream::IStream& stream, collections::List<WString>& errors)
 			{
-				errors.Add(L"Internal error: Xml resource doesn't need resource preloading.");
-				return 0;
+				stream::internal::Reader reader(stream);
+				WString text;
+				reader << text;
+
+				auto parser = GetParserManager()->GetParser<XmlDocument>(L"XML");
+				return parser->TypedParse(text, errors);
 			}
 		};
 
@@ -41152,7 +41525,10 @@ Xml Type Resolver
 Doc Type Resolver
 ***********************************************************************/
 
-		class GuiResourceDocTypeResolver : public Object, public IGuiResourceTypeResolver
+		class GuiResourceDocTypeResolver
+			: public Object
+			, public IGuiResourceTypeResolver
+			, private IGuiResourceTypeResolver_IndirectLoad
 		{
 		public:
 			WString GetType()override
@@ -41174,27 +41550,17 @@ Doc Type Resolver
 			{
 			}
 
-			Ptr<parsing::xml::XmlElement> Serialize(Ptr<DescriptableObject> resource, bool serializePrecompiledResource)override
+			IGuiResourceTypeResolver_IndirectLoad* IndirectLoad()override
+			{
+				return this;
+			}
+
+			Ptr<DescriptableObject> Serialize(Ptr<DescriptableObject> resource, bool serializePrecompiledResource)override
 			{
 				if (auto obj = resource.Cast<DocumentModel>())
 				{
-					auto xmlDoc = MakePtr<XmlElement>();
-					xmlDoc->name.value = L"Doc";
-					xmlDoc->subNodes.Add(obj->SaveToXml()->rootElement);
-					return xmlDoc;
+					return obj->SaveToXml();
 				}
-				return 0;
-			}
-
-			Ptr<DescriptableObject> ResolveResource(Ptr<parsing::xml::XmlElement> element, collections::List<WString>& errors)override
-			{
-				errors.Add(L"Internal error: Doc resource needs resource preloading.");
-				return 0;
-			}
-
-			Ptr<DescriptableObject> ResolveResource(const WString& path, collections::List<WString>& errors)override
-			{
-				errors.Add(L"Internal error: Doc resource needs resource preloading.");
 				return 0;
 			}
 
