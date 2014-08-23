@@ -1,4 +1,7 @@
 #include "ParserGen.h"
+#if defined VCZH_GCC
+#include <unistd.h>
+#endif
 
 /***********************************************************************
 include:xxxx
@@ -11,12 +14,18 @@ parser:ParseType(Rule)
 grammar:
 ***********************************************************************/
 
+#if defined VCZH_MSVC
+const wchar_t PATH_DELIMITER = L'\\';
+#elif defined VCZH_GCC
+const wchar_t PATH_DELIMITER = L'/';
+#endif
+
 WString GetDirectory(const WString& fileName)
 {
 	int index=0;
 	for(int i=0;i<fileName.Length();i++)
 	{
-		if(fileName[i]==L'\\')
+		if(fileName[i]==PATH_DELIMITER)
 		{
 			index=i;
 		}
@@ -24,16 +33,26 @@ WString GetDirectory(const WString& fileName)
 	return fileName.Left(index+1);
 }
 
+#if defined VCZH_MSVC
 int wmain(int argc, wchar_t* argv[])
+#elif defined VCZH_GCC
+int main(int argc, char* argv[])
+#endif
 {
 	WString baseDirectory;
 	{
+#if defined VCZH_MSVC
 		wchar_t currentDirectory[MAX_PATH]={0};
 		GetCurrentDirectory(MAX_PATH, currentDirectory);
 		baseDirectory=currentDirectory;
-		if(baseDirectory[baseDirectory.Length()-1]!=L'\\')
+#elif defined VCZHGCC
+		char currentDirectory[1024]={0};
+		getcwd(currentDirectory, 1024);
+		baseDirectory=atow(currentDirectory);
+#endif
+		if(baseDirectory[baseDirectory.Length()-1]!=PATH_DELIMITER)
 		{
-			baseDirectory+=L'\\';
+			baseDirectory+=PATH_DELIMITER;
 		}
 	}
 
@@ -47,7 +66,11 @@ int wmain(int argc, wchar_t* argv[])
 	for(int i=1;i<argc;i++)
 	{
 		Console::WriteLine(L"------------------------------------------------------------");
+#if defined VCZH_MSVC
 		WString inputPath=argv[i];
+#elif defined VCZH_GCC
+		WString inputPath=atow(argv[i]);
+#endif
 		if(inputPath.Length()<2 || inputPath[1]!=L':')
 		{
 			inputPath=baseDirectory+inputPath;
