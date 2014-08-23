@@ -1,0 +1,28 @@
+#include
+#	../Source/vlpp.makegen
+
+folder VLPP = ../../../Libraries/GacUI/Public/Source
+	h = Vlpp.h
+	cpp = Vlpp.cpp
+
+folder MAKEGEN = .
+	h = *.h
+	cpp = *.cpp
+
+dependency
+	VLPP:cpp < VLPP:h
+	MAKEGEN:h < VLPP:h
+	MAKEGEN:cpp < MAKEGEN:h
+#	MAKAEGEN:cpp < MAKEGEN:h VLPP:h
+
+rule cpp o > ./Bin/*.o
+	g++ -std=c++11 -g -o $(OUT) -c $(IN)
+
+pretasks
+	mkdir Obj
+	mkdir Bin
+	
+posttasks o
+	g++ -std=c++11 -g -o ./Bin/MakeGen $(IN)
+
+#	MakeGen sample : read makefile.sample.makegen write makefile
