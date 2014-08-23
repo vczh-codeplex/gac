@@ -1,8 +1,10 @@
 #ifndef VCZH_PARSERGEN
 #define VCZH_PARSERGEN
 
-#include "..\..\..\..\Libraries\GacUI\Public\Source\Vlpp.h"
+#include "../../../../Libraries/GacUI/Public/Source/Vlpp.h"
+#ifdef VCZH_MSVC
 #include <windows.h>
+#endif
 
 using namespace vl;
 using namespace vl::console;
