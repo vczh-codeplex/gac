@@ -1,6 +1,12 @@
 #include
 #	../Source/vlpp.makegen
 
+# name each temporary folders
+targets
+	obj = ./Obj/
+	bin = ./Bin/
+
+# categorize each file
 folder VLPP = ../../../Libraries/GacUI/Public/Source
 	h = Vlpp.h
 	cpp = Vlpp.cpp
@@ -15,14 +21,16 @@ dependency
 	MAKEGEN:cpp < MAKEGEN:h
 #	MAKAEGEN:cpp < MAKEGEN:h VLPP:h
 
-map cpp o > ./Bin/*.o
+# map each cpp file to o file
+# from or to categories can be multiple
+map cpp : *.cpp
+	> o : obj *.o
 	g++ -std=c++11 -g -o $(OUT) -c $(IN)
 
-pretasks
-	mkdir Obj
-	mkdir Bin
-	
-link o exe > ./Bin/MakeGen
+# aggregate all o files to exe file
+# from or to categories can be multiple
+link o :
+	> exe : bin MakeGen
 	g++ -std=c++11 -g -o $(OUT) $(IN)
 
 #	MakeGen sample : read makefile.sample.makegen write makefile
