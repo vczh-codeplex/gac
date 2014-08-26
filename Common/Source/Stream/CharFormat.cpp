@@ -116,7 +116,7 @@ CharDecoder
 				{
 					cacheSize=sizeof(wchar_t)-_size;
 					memcpy(unicode, &c, _size);
-					memcpy(cacheBuffer, (vuint8_t*)c+_size, cacheSize);
+					memcpy(cacheBuffer, (vuint8_t*)&c+_size, cacheSize);
 					result+=_size;
 				}
 			}

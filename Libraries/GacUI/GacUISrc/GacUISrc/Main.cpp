@@ -590,8 +590,8 @@ WString XmlToString(Ptr<XmlDocument> xml)
 }
 
 //#define RUN_GENERATE_METADATA
-#define RUN_GENERATE_PRECOMPILED_RESOURCE
-#define RUN_SHOW_WINDOW
+//#define RUN_GENERATE_PRECOMPILED_RESOURCE
+//#define RUN_SHOW_WINDOW
 
 void GuiMain()
 {
