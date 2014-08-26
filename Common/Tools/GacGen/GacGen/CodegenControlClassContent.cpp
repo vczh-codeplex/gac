@@ -23,9 +23,9 @@ void WriteControlClassHeaderFileContent(Ptr<CodegenConfig> config, Ptr<Instance>
 			writer.WriteString(L", ");
 		}
 		writer.WriteString(L"Ptr<");
-		writer.WriteString(parameter->className);
+		writer.WriteString(parameter->className.ToString());
 		writer.WriteString(L"> ");
-		writer.WriteString(parameter->name);
+		writer.WriteString(parameter->name.ToString());
 	}
 	writer.WriteLine(L");");
 	writer.WriteLine(prefix + L"};");
@@ -48,9 +48,9 @@ void WriteControlClassCppFileContent(Ptr<CodegenConfig> config, Ptr<Instance> in
 			writer.WriteString(L", ");
 		}
 		writer.WriteString(L"Ptr<");
-		writer.WriteString(parameter->className);
+		writer.WriteString(parameter->className.ToString());
 		writer.WriteString(L"> ");
-		writer.WriteString(parameter->name);
+		writer.WriteString(parameter->name.ToString());
 	}
 	writer.WriteLine(L")");
 	writer.WriteLine(prefix + L"{");
@@ -61,7 +61,7 @@ void WriteControlClassCppFileContent(Ptr<CodegenConfig> config, Ptr<Instance> in
 		{
 			writer.WriteString(L", ");
 		}
-		writer.WriteString(parameter->name);
+		writer.WriteString(parameter->name.ToString());
 	}
 	writer.WriteLine(L");");
 	writer.WriteLine(prefix + L"}");

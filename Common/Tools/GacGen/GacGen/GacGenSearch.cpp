@@ -35,14 +35,14 @@ public:
 
 	void Visit(GuiConstructorRepr* repr)
 	{
-		if (repr->instanceName && !fields.Keys().Contains(repr->instanceName.Value()))
+		if (repr->instanceName != GlobalStringKey::Empty && !fields.Keys().Contains(repr->instanceName.ToString()))
 		{
 			auto loadingSource = FindInstanceLoadingSource(env->context, repr);
 			
-			auto name = repr->instanceName.Value();
+			auto name = repr->instanceName.ToString();
 			if (name.Length() > 0 && name[0] != L'<')
 			{
-				fields.Add(repr->instanceName.Value(), repr);
+				fields.Add(repr->instanceName.ToString(), repr);
 			}
 		}
 		Visit((GuiAttSetterRepr*)repr);
@@ -122,7 +122,7 @@ void SearchAllInstances(const Regex& regexClassName, Ptr<GuiResourcePathResolver
 		Ptr<GuiInstanceEnvironment> env = new GuiInstanceEnvironment(context, resolver);
 		auto loadingSource = FindInstanceLoadingSource(env->context, context->instance.Obj());
 		if (!loadingSource.loader) continue;
-		auto typeDescriptor = GetGlobalTypeManager()->GetTypeDescriptor(loadingSource.typeName);
+		auto typeDescriptor = GetGlobalTypeManager()->GetTypeDescriptor(loadingSource.typeName.ToString());
 		if (!typeDescriptor) continue;
 
 		Ptr<Instance> instance = new Instance;
@@ -174,7 +174,7 @@ public:
 	{
 	}
 
-	static Ptr<GuiInstancePropertyInfo> GetPropertyInfo(const IGuiInstanceLoader::TypeInfo& typeInfo, const WString& name, IGuiInstanceLoader*& loader)
+	static Ptr<GuiInstancePropertyInfo> GetPropertyInfo(const IGuiInstanceLoader::TypeInfo& typeInfo, GlobalStringKey name, IGuiInstanceLoader*& loader)
 	{
 		loader = GetInstanceLoaderManager()->GetLoader(typeInfo.typeName);
 		auto propertyInfo = IGuiInstanceLoader::PropertyInfo(typeInfo, name);
@@ -196,7 +196,7 @@ public:
 		return 0;
 	}
 
-	static Ptr<GuiInstanceEventInfo> GetEventInfo(const IGuiInstanceLoader::TypeInfo& typeInfo, const WString& name, IGuiInstanceLoader*& loader)
+	static Ptr<GuiInstanceEventInfo> GetEventInfo(const IGuiInstanceLoader::TypeInfo& typeInfo, GlobalStringKey name, IGuiInstanceLoader*& loader)
 	{
 		loader = GetInstanceLoaderManager()->GetLoader(typeInfo.typeName);
 		auto propertyInfo = IGuiInstanceLoader::PropertyInfo(typeInfo, name);
@@ -224,12 +224,12 @@ public:
 
 	void Visit(GuiAttSetterRepr* repr)
 	{
-		FOREACH_INDEXER(WString, eventName, index, repr->eventHandlers.Keys())
+		FOREACH_INDEXER(GlobalStringKey, eventName, index, repr->eventHandlers.Keys())
 		{
 			auto handler = repr->eventHandlers.Values()[index];
-			if (handler->binding == L"")
+			if (handler->binding == GlobalStringKey::Empty)
 			{
-				if (!eventHandlers.Keys().Contains(eventName))
+				if (!eventHandlers.Keys().Contains(eventName.ToString()))
 				{
 					IGuiInstanceLoader* loader = 0;
 					if (auto info = GetEventInfo(typeInfo, eventName, loader))
@@ -241,17 +241,17 @@ public:
 		}
 
 		auto oldTypeInfo = typeInfo;
-		FOREACH(WString, propertyName, repr->setters.Keys())
+		FOREACH(GlobalStringKey, propertyName, repr->setters.Keys())
 		{
 			auto setterValue = repr->setters[propertyName];
-			if (setterValue->binding == L"set")
+			if (setterValue->binding == GlobalStringKey::_Set)
 			{
 				int a = 0;
 			}
 			IGuiInstanceLoader* loader = 0;
 			if (auto info = GetPropertyInfo(typeInfo, propertyName, loader))
 			{
-				typeInfo = IGuiInstanceLoader::TypeInfo(info->acceptableTypes[0]->GetTypeName(), info->acceptableTypes[0]);
+				typeInfo = IGuiInstanceLoader::TypeInfo(GlobalStringKey::Get(info->acceptableTypes[0]->GetTypeName()), info->acceptableTypes[0]);
 				FOREACH(Ptr<GuiValueRepr>, value, setterValue->values)
 				{
 					value->Accept(this);
